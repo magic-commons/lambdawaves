@@ -7,7 +7,7 @@ classes carry PLAN §9's default (five take the kit's, two keep λWAVES' disconn
 `C0-GLASS-RULINGS.md` with its screenshots. `new-project` is regenerated (bpm 60 → 30). R5-W1: 114 kit modules no root reaches are reported,
 not precached and not failed. The keyboard editor's stacking (two rules 1.5 dropped from `base.css`) is λWAVES' own in `lab.css`;
 `mir-controls` is re-aimed to 1.5's ONE KNOB LAW. Node **85/85**, browser **27/27** (25 in the canary + the two fixed, re-run).
-`lab/*.js` **36,288 → 36,361 (+73, all generated `sw.js`)**; no app JS changed and no `__LW` member is touched. The ms/s pair: see §ms/s.
+`lab/*.js` **36,288 → 36,361 (+73, all generated `sw.js`)**; no app JS changed and no `__LW` member is touched. The ms/s pair: |Δ median| 2.289 ≤ 3.536 (PASS); C0's 41.634 is +4.299 over the stored 37.335, of which the same-session base explains +2.010.
 
 | | |
 |---|---|
@@ -126,7 +126,36 @@ None goes into an `app.*` layer either, because a layered `!important` would out
 
 ## ms/s
 
-THE PAIR: pending, step 5 (filled in below when it is run).
+`.tmp/msps.mjs 3` runs `tools/perf/main-thread.mjs --runs 1` interleaved: the base copy (`7044f37`, 8787), then this tree (8783), × 3.
+- It is the notice-dismissed footing (MEASURE §2), 30 s of play, 4 s between sessions, one browser at a time.
+- C7's `tools/perf/wait-gpu.mjs` (copied to `.tmp/`, not on this branch) waited first: load < 4, no other gate Firefox.
+- Every row reads `field ok · NVIDIA GeForce RTX 3070 · notice dismissed`, with 0 held.
+- The JSON `sha` field reads this tree's HEAD for both trees, because it is the cwd's HEAD. The base was served from `.tmp/base`.
+
+**Attempt 1 (22:19), discarded for load.** Three of the six runs started above 4, because sibling agents shared the machine.
+
+| tree | runs (ms/s) | load |
+|---|---|---|
+| base | 42.261 · 40.227 · 39.636 | 2.8→3.32 · 5.71→4.57 · 4.4→3.48 |
+| C0 | 42.276 · 42.065 · 41.078 | 3.85→6.01 · 4.53→4.78 · 3.48→3.89 |
+
+The medians are 40.227 and 42.065, so |Δ| = 1.838.
+
+**Attempt 2 (22:31), the result.** Every run started under 4; the loads ran 1.15–3.87.
+
+| tree | runs (ms/s) | Script | load (1 min) | median · spread |
+|---|---|---|---|---|
+| base `7044f37` | 38.827 · 39.345 · 39.968 | 14.79 · 14.97 · 15.65 | 1.15→2.04 · 1.72→2.14 · 2.46→2.90 | **39.345** · 1.141 |
+| C0 | 39.382 · 41.634 · 41.959 | 15.34 · 15.85 · 15.70 | 2.19→1.87 · 2.41→2.59 · 2.84→3.87 | **41.634** · 2.577 |
+
+- **The pair: |Δ median| = 2.289 ms/s ≤ 3.536, a PASS.** Attempt 1 agrees, at 1.838.
+- **Against the stored pre-C baseline (37.335, `fbde0b6`, on the integrator's 8721) it is over.** C0's 41.634 is +4.299, above 3.536.
+  - The base copy, measured in the same session, reads 39.345, which is +2.010 over that baseline with no C0 change at all.
+  - So the absolute reading carries about 2 ms/s of session drift: a different server, a different day load, and siblings on the GPU.
+- **Reading.** C0 costs about +2 ms/s of main-thread time, roughly +5–6 %. That is consistent across both attempts, and Script accounts for about +0.6–0.9 of it. It is inside the pair gate.
+  - The integrator decides which reading the gate means.
+  - C-V's interleaved pairs on the merged tree are the place to see whether the +2 persists and where it lives.
+- Raw: `.tmp/msps-attempt{1,2}.txt` and `.tmp/canary/msps-{base,c0}-*.json` (not committed).
 
 ## Lines and the `__LW` law
 
@@ -155,6 +184,7 @@ None.
 - The twelve `!important` drops wait for a probe with the popover open (above).
 - C3 makes the KEYBOARD skin λWAVES' under R5-S3. Its inputs are the LED dot, the scrollbar and the legend hairline.
 - Every knob now drags vertically (the ONE KNOB LAW). Josh will feel this the first time he turns a dial sideways.
+- The ms/s: C0 is about +2 ms/s over its base, inside the pair gate but over it against the stored 37.335. C-V should look at where it lives (Script ≈ +0.6–0.9).
 
 ## Exact next step
 

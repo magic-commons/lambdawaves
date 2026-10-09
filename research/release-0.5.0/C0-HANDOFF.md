@@ -1,4 +1,4 @@
-# C0 · THE BARE ADOPTION — HAND-OFF (live)
+# C0 · THE BARE ADOPTION — HAND-OFF (FINAL: every step of the brief done)
 
 The brief is the integrator's relaunch prompt (Claude Yan, 2026-10-08); PLAN §2 C row C0 is the spec. This file is rewritten after every
 step so a kill loses only uncommitted work.
@@ -21,7 +21,8 @@ step so a kill loses only uncommitted work.
 | 1 | `e99375b` | THE KEYMAP RULES: MIR 1.4.3 `base.css`'s two `#keymap` rules (stacking at `--z-veil`, `[hidden]` → none) move into `lab/lab.css` as λWAVES' own; `--z-veil` is still declared on 1.5 (`mir/css/base.css:65`, 40). `pwa --write`. `keyboard-window` GREEN alone. The `.km-*` judgement below. `c0-glass/keyboard-{before,after}.png`. |
 | 2 | `ad0b4dc` | MIR-CONTROLS re-aimed to MIR 1.5's ONE KNOB LAW (`kit.js` `setKnobLaw`, alpha.13): vertical drag (220 px rise, 320 under a finger, sideways ignored), the ⅛ gear on a knob drag, a fader drag and a Shift arrow. Old test green on the base copy; new test green here and red on the base copy at the sideways line (`0.5 != 0.25`), so it pins the 1.5 law. The test alone in its commit. |
 | 3 | `88fedce`, `1dc3a08` | hand-offs; step 3's suites (below) |
-| 4 | (this commit) | `C0-BUILD.md` and REPORT.md wave 196 (under a NEW `## 2026-10-08 · 0.5.0 C — THE ADOPTION` at the end: this tree had no C heading); the ms/s pair marked PENDING in both |
+| 4 | `8bcb77c` | `C0-BUILD.md` and REPORT.md wave 196 (under a NEW `## 2026-10-08 · 0.5.0 C — THE ADOPTION` at the end: this tree had no C heading); the ms/s pair marked PENDING in both |
+| 5 | (this commit) | THE MS/S PAIR into `C0-BUILD.md` §ms/s and wave 196; this final hand-off. Attempt 2 (all loads < 4): base median 39.345, C0 41.634, **|Δ| 2.289 ≤ 3.536 PASS** (attempt 1, discarded for load > 4 on three runs: 1.838). Against the stored 37.335 C0 is +4.299 (over); the same-session base is +2.010. |
 
 ## Step 1 · the `.km-*` judgement (the kit's `keyboard/keyboard.css` on λWAVES' own pane)
 Measured three ways: `kmdiff.mjs` (gate Firefox, every pane element, light first-run), `kmshot.mjs` (gate Firefox: pane PNG, clip test,
@@ -51,8 +52,10 @@ real-pointer hover on a badge) and a stylehash pair with the keymap open (`cap.m
 - adopt `--check` (`node ~/Documents/MIR/.claude/worktrees/mir-1.5/tools/adopt.mjs <this worktree> --check`): "in step with MIR 1.5.0-alpha.24", exit 0. `node tools/new-project.mjs --check`: in step (16,889 B).
 - `cat lab/*.js | wc -l` = **36,361** (base 36,288, +73, all `sw.js`; this continuation changed no app JS). Precache 263 entries, 5,900,325 B (base 191 / 4,874,333 B); `wiring --unreached-kit` = 114.
 
+- **Step 5**: `.tmp/wait-gpu.mjs` (C7's tool, copied) → free at load 1.96 and 1.16; `.tmp/msps.mjs 3` twice; numbers above and in C0-BUILD.md §ms/s. Servers 8783/8787 stopped by pid; ports 8783/8787/5253/5257 free; no browser of mine left.
+
 ## Blockers
 None.
 
 ## Exact next step
-Step 5: `node .tmp/wait-gpu.mjs 900` (C7's `tools/perf/wait-gpu.mjs`, copied: it is not on this branch), then `node .tmp/msps.mjs 3` with both gate servers up (8787 base, 8783 this tree). Gate |Δ median| ≤ 3.536 ms/s (MEASURE §2: pre-C 37.335, notice dismissed). If the load does not drop under 4 within 15 minutes: "ms/s pair deferred to C-V" in C0-BUILD.md §ms/s and wave 196. Then replace the two PENDING lines, stop the servers by pid, final hand-off.
+The integrator (Claude Yan) merges `worktree-agent-ae28efe993cf25783` onto `yan-c`, then `node tests/pwa.test.mjs --write`, `bash test.sh node`, `keyboard-window`, `mir-controls`, `frame-occlusion`; relays the seven rulings (+ the keyboard pair) to Josh; decides which reading the ms/s gate means (pair 2.289 PASS vs stored-baseline +4.299).

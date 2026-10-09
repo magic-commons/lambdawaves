@@ -4623,5 +4623,9 @@ the base copy at its own sideways line, so it guards the law.
 
 **Measured.** `bash test.sh node` exit 0, **85/85**. Browser **27/27**: the second canary's 25 (one at a time, 4 s apart) and, on the final
 tree, `keyboard-window` 1/1, `mir-controls` 2/2, `frame-occlusion` 7/7, `menubar` green. `node tools/new-project.mjs --check` in step.
-`cat lab/*.js | wc -l` **36,288 → 36,361 (+73**, the generated `sw.js` alone; no app JS changed, no `__LW` member touched). The ms/s pair:
-PENDING (step 5). Hand-off: `research/release-0.5.0/C0-BUILD.md`.
+`cat lab/*.js | wc -l` **36,288 → 36,361 (+73**, the generated `sw.js` alone; no app JS changed, no `__LW` member touched). The ms/s pair
+(`main-thread.mjs --runs 1` interleaved base `7044f37` / C0 × 3, notice dismissed, every row `field ok`, 0 held; a first attempt was
+discarded because three runs started above load 4): base 38.827 · 39.345 · 39.968 (median **39.345**), C0 39.382 · 41.634 · 41.959
+(median **41.634**), loads 1.15–3.87 — **|Δ median| 2.289 ≤ 3.536 ms/s, PASS** (the discarded attempt read 1.838). Against the stored
+pre-C baseline 37.335 C0 reads +4.299, over the gate; the same-session base reads +2.010 with nothing changed, so about 2 ms/s of it is
+the session. C0's own cost is ≈ +2 ms/s (Script ≈ +0.6–0.9); C-V is where it is located. Hand-off: `research/release-0.5.0/C0-BUILD.md`.
