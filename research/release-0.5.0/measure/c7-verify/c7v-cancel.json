@@ -1,0 +1,154 @@
+{
+ "scenario": "cancel",
+ "setup": {
+  "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+  "hasUA": true,
+  "share": "undefined",
+  "canShare": "undefined",
+  "canvas": [
+   1400,
+   814
+  ]
+ },
+ "show": {
+  "rec": "RECORD",
+  "cancelAttr": true,
+  "pic": true
+ },
+ "opfs0": {
+  "none": true
+ },
+ "tapRecordA": {
+  "ok": 1
+ },
+ "progressA": {
+  "v": [
+   15,
+   180
+  ],
+  "ms": 2670
+ },
+ "labelA": "STOP",
+ "tapStopA": {
+  "ok": 1
+ },
+ "idleA": {
+  "v": true,
+  "ms": 210
+ },
+ "readoutA": [],
+ "opfsA": [
+  {
+   "id": "render-mv0efe59-zpt0a",
+   "kind": "directory",
+   "files": [
+    [
+     "payload.bin",
+     0
+    ],
+    [
+     "job.json",
+     10226
+    ]
+   ],
+   "job": {
+    "state": "rendering",
+    "files": [],
+    "checkpoint": null,
+    "token": "lw-1-2294"
+   }
+  }
+ ],
+ "tapRecordB": {
+  "ok": 1
+ },
+ "progressB": {
+  "v": [
+   75,
+   180
+  ],
+  "ms": 15058
+ },
+ "idleB": {
+  "v": true,
+  "ms": 207
+ },
+ "readoutB": [],
+ "opfsB": [
+  {
+   "id": "render-mv0efe59-zpt0a",
+   "kind": "directory",
+   "files": [
+    [
+     "payload.bin",
+     0
+    ],
+    [
+     "job.json",
+     10226
+    ]
+   ],
+   "job": {
+    "state": "rendering",
+    "files": [],
+    "checkpoint": null,
+    "token": "lw-1-2294"
+   }
+  }
+ ],
+ "tapRecordC": {
+  "ok": 1
+ },
+ "savedC": {
+  "v": true,
+  "ms": 37325
+ },
+ "opfsC": [
+  {
+   "id": "render-mv0efe59-zpt0a",
+   "kind": "directory",
+   "files": [
+    [
+     "payload.bin",
+     0
+    ],
+    [
+     "job.json",
+     10226
+    ]
+   ],
+   "job": {
+    "state": "rendering",
+    "files": [],
+    "checkpoint": null,
+    "token": "lw-1-2294"
+   }
+  },
+  {
+   "id": "render-mv0efzd6-uti8x",
+   "kind": "directory",
+   "files": [
+    [
+     "job.json",
+     19783
+    ],
+    [
+     "lambdawaves-render.mp4",
+     742908
+    ]
+   ],
+   "job": {
+    "state": "ready",
+    "files": [
+     "lambdawaves-render.mp4"
+    ],
+    "checkpoint": {
+     "frames": null,
+     "samples": 180
+    },
+    "token": "lw-3-29796"
+   }
+  }
+ ],
+ "errors": []
+}

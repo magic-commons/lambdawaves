@@ -1,0 +1,83 @@
+{
+ "scenario": "persist",
+ "setup": {
+  "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+  "hasUA": true,
+  "share": "undefined",
+  "canShare": "undefined",
+  "canvas": [
+   1400,
+   814
+  ]
+ },
+ "show": {
+  "rec": "RECORD",
+  "cancelAttr": true,
+  "pic": true
+ },
+ "tapRecord": {
+  "ok": 1
+ },
+ "saved": {
+  "v": true,
+  "ms": 37265
+ },
+ "opfsSaved": [
+  {
+   "id": "render-mv0ej1yx-h8med",
+   "kind": "directory",
+   "files": [
+    [
+     "job.json",
+     19782
+    ],
+    [
+     "lambdawaves-render.mp4",
+     742908
+    ]
+   ],
+   "job": {
+    "state": "ready",
+    "files": [
+     "lambdawaves-render.mp4"
+    ],
+    "checkpoint": {
+     "frames": null,
+     "samples": 180
+    },
+    "token": "lw-1-1473"
+   }
+  }
+ ],
+ "opfsAfterReload": [
+  {
+   "id": "render-mv0ej1yx-h8med",
+   "files": [
+    [
+     "job.json",
+     19782
+    ],
+    [
+     "lambdawaves-render.mp4",
+     742908
+    ]
+   ]
+  }
+ ],
+ "opfsReload130s": [
+  {
+   "id": "render-mv0ej1yx-h8med",
+   "files": [
+    [
+     "job.json",
+     19782
+    ],
+    [
+     "lambdawaves-render.mp4",
+     742908
+    ]
+   ]
+  }
+ ],
+ "errors": []
+}

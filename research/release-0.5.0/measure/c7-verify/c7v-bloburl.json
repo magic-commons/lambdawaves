@@ -1,0 +1,17 @@
+{
+ "ok": true,
+ "message": "24 frames · 320×186 · LOOP · MP4 · 28 kB · rendered in 3.8 s. Exact: frame k is t0 + off(k), whatever the machine's speed.",
+ "bytes": 28279,
+ "file": "lambdawaves-render.mp4",
+ "blobType": "File",
+ "beforeDiscard": {
+  "ok": true,
+  "bytes": 28279
+ },
+ "fileBefore": 28279,
+ "afterDiscard": {
+  "ok": false,
+  "E": "TypeError: NetworkError when attempting to fetch resource."
+ },
+ "fileAfter": "AbortError: The operation was aborted. "
+}
