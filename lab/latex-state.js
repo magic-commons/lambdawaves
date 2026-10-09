@@ -115,3 +115,24 @@ export function moleculeLatex({ molecule, basis, charge, ground } = {}) {
   const N = ground.names, cfg = N && N.reliable ? ` Configuration in ${N.group}: $${N.config.replace(/\(([^)]+)\)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (_, l, e) => '(' + forms(l).latex.slice(1, -1) + ')^{' + [...e].map((c) => '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c)).join('') + '}')}$.` : '';
   return head + cfg + '\n$' + ladder.join(',\\ ') + '$';
 }
+
+/* ── THE MOLECULE'S HEAD (0.5.1 D2): a HAND pick shows it in THE FADE's seat (rack.js headLand).  Four lines — formula and name;
+ * RHF/basis and E; nocc of nAO and the point group ("—" where the record has none: C₆₀); the HOMO's name and the gap — and EVERY
+ * number the record's (its `stem`; E, nocc, nAO from its ground) or the live solve's through `stemOf`, the composition
+ * tools/orbital-library.mjs writes into each stem; never the blurb, never CURATED_IE (R6-B, E6).  tests/molecule-head.test.mjs. */
+export const EV = 27.211386245988;                                   // eV per E_h (CODATA 2018), the generator's
+/** the stem's members a solve decides, as the generator writes them: { pointGroup, gapEh, gapEv, homo } */
+export function stemOf({ eps, nocc, names }) {
+  const gap = eps[nocc] - eps[nocc - 1], homo = names && names.reliable ? names.mos[nocc - 1] : null;
+  return { pointGroup: (names && names.group) || null, gapEh: gap, gapEv: +(gap * EV).toFixed(4), homo: homo ? homo.label + ' · ' + homo.frontier : 'HOMO' };
+}
+/** markdown's specials escaped: a name or a label read as text */
+export const mdText = (s) => String(s).replace(/[\\`*_{}[\]()#+\-.!|$<>~]/g, '\\$&');
+export function moleculeHead({ molecule, basis, ground, stem } = {}) {
+  if (!molecule || !ground || !Number.isFinite(ground.energy)) return '';
+  const s = stem || stemOf(ground), g = s.pointGroup, h = /^(.+) · HOMO$/.exec(s.homo);
+  return '**$' + formulaLatex(molecule.formula) + '$' + (molecule.name ? ' · ' + mdText(molecule.name) : '') + '**'
+    + '\nRHF/' + (BASIS_LABEL[basis] || String(basis || '').toUpperCase()) + ' · $E = ' + ground.energy.toFixed(6) + '\\,E_h$'
+    + '\n' + ground.nocc + ' occupied of ' + ground.nAO + ' AO · ' + (g ? '$' + g[0] + '_{' + g.slice(1).replace(/^inf/, '\\infty ') + '}$' : '—')
+    + '\n' + (h ? 'HOMO ' + forms(h[1]).latex : mdText(s.homo)) + ' · gap $' + s.gapEh.toFixed(4) + '\\,E_h$ = ' + s.gapEv.toFixed(2) + ' eV';
+}

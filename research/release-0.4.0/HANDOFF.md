@@ -633,6 +633,11 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > PREFERENCE record `lambdawaves.q0.curves`, FORGET removes it; presents/s neutral 15.03 → S-curve 12.18 on the headless rig, neutral free; the lock 0/0;
 > +19 → **27,577**; REPORT wave 213; CLAUDE.md paragraph; CHANGES line). FOUND for Josh: a returning browser sees any card newer than its saved blob open once
 > (a general gap of `applySettings`' exact `closed[]`); only `#field` is graded. **The first wave is IN (4/4).** Running: D2+D8. Then D-V.
+> **18:20 — D2+D8 MERGED** (Opus `7e38b12`: THE MOLECULE'S HEAD on a hand pick — `moleculeHead` beside `moleculeLatex`, `stemOf` shared with the record
+> generator (nine records `--check` byte-exact), held in THE FADE's seat until Escape / a press after 2.5 s / the next pick, never on a handless road, a
+> node test over 38 records + H₂O/N₂ live with every numeral traced; `lw:` LINKS in the notebook view over preset/molecule/view/orbital, one ring row + one
+> fade a press, no tab, no whole-state link; +80 → **27,657**; REPORT wave 214; CLAUDE.md THE HEAD sentence + the `lw:` LINKS paragraph; CHANGES lines).
+> **GROUP I IS COMPLETE: D1 · D2 · D8 · D10-19 · D10-24 · D10-F.** Next: **D-V** (`BRIEF-D-V.md`, fresh Opus, from this tip, base `v0.5.0-alpha`).
 
 ## 3 · What happens next, in order
 

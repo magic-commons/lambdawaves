@@ -99,7 +99,14 @@ undocked transport and an open TIMELINE (`avoid`); under every window (`.mir-inf
 never a pointer target, never in the occlusion mask. THE FADE: a HAND's preset (STATE's PRESET and RELOAD, MO-REGISTRY's WINDING
 / HOMO + LUMO and STATES presets) is announced as the block (`data-fade`, the heading size) for 2.4 s — the formula leaves and
 returns, and the kit's exit is the fade — `WINDING · $1e_{1g}$ (a) + (b)`, the names from `lab/names.js`; the press threads
-`{ hand: true }`, so a restore, an undo, a project or link open never announces (`tests/stage-text.browser-test.mjs`). HOLD (I,
+`{ hand: true }`, so a restore, an undo, a project or link open never announces (`tests/stage-text.browser-test.mjs`). THE HEAD (0.5.1 D2): a HAND pick of a molecule — the MOLECULE dropdown,
+MOLECULES ON, a notebook `lw:molecule=` link (chemview's `hand`) — shows its head in THE FADE's seat once that molecule's solve
+lands: four lines from `latex-state.js` `moleculeHead` (formula and name; RHF/basis and E; nocc of nAO and the point group, "—"
+where the record has none; the HOMO's name and the HOMO–LUMO gap), every number the record's `stem` or the live solve's through
+`stemOf`, the composition `tools/orbital-library.mjs` writes into every stem — never the blurb, never CURATED_IE
+(`tests/molecule-head.test.mjs`). It is held (`announce(md, 0)`) until Escape, a press on the picture after 2.5 s, or the next
+pick, and a restore, an undo, a project, link or demo open never shows it (`__LW.head.shown`;
+`tests/molecule-head.browser-test.mjs`). HOLD (I,
 the kit's `infoActions` row; `lab/key-table.js` carries a row's `up`) holds the words still while the key is down. The same
 switch and SIZE govern the ATOM LABELS, λWAVES' own letters (R6-L; kit labels are D1b, Group II): each MOLECULES nucleus marked
 with its element symbol at its projected position (`toScreen`, written only when the camera, molecule, size or canvas changed),
@@ -202,6 +209,11 @@ history: true }); no hand-kept key list beside it. (0.5.0 C6)
 An open never closes the notebook; it opens it only for non-blank text. Run
 `tests/history.browser-test.mjs`, `tests/new-project.browser-test.mjs` and
 `node tests/new-project.test.mjs` when touching any of this.
+`lw:` LINKS (0.5.1 D8, R6-K): in the notebook's VIEW a link `lw:key=value[&…]` runs a WHITELIST of hand verbs — `preset` (STATE's
+PRESET), `molecule` (the MOLECULE dropdown's pick, and MOLECULES on; its head is the fade), `view` (the V key's observable), `orbital`
+(the ORBITAL dial by name or number, VIEW orbital) — one history row (`LINK · <text>`) and one fade a press, the ring never cleared; any
+other key is ignored and said on the notebook's foot, and a whole state (`lw:s=`) is never a verb. A capture-phase click on `.nb-view`
+stops the sanitiser's `target=_blank`; nothing on the stage takes a link (D8′, Group II). Run `tests/lw-links.browser-test.mjs`.
 
 Every read and write of `lambdawaves.q0.settings` goes through
 `lab/settings-store.js` (`createSettingsStore`; `WORKSPACE` and `FAMILIES` are

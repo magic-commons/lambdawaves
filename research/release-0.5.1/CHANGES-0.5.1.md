@@ -23,3 +23,12 @@ per feature, no code names; the row that brought it in brackets.
   an AMOUNT) that grade what you see on the screen at once. Pictures, films and frame exports are untouched, and the card says so. The grade is
   remembered on this device across reloads and project opens, and FORGET clears it. A graded screen costs some frame rate; the neutral curve costs
   nothing. (D10-24)
+
+- Pick a molecule and its head appears on the stage for a moment: its formula and name, the method and basis with the total energy, how many
+  orbitals are filled out of how many, its point group, the name of its highest filled orbital and the gap to the lowest empty one — every
+  number from the molecule's own library record or from the solve you just ran, never typed in by hand. Escape, or a click on the picture
+  after a couple of seconds, puts it away; opening a project, a link or a demo, or undoing, never shows it. (D2)
+
+- Links in your notes can drive the lab: in the notebook's preview a link written `lw:molecule=h2o`, `lw:view=density`, `lw:preset=…` or
+  `lw:orbital=homo` picks that molecule, view, preset or orbital as if you had pressed it — one undo step and one announcement each. A link can
+  never replace your whole state, an unknown one is named on the notebook's foot, and every other link still opens in a new tab. (D8)
