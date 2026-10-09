@@ -1,4 +1,4 @@
-/* tests/render-exact.test.mjs — the node proof of THE DETERMINISTIC RENDERER.
+/* tests/render-exact.test.mjs — the node proof of THE FILM'S FRAME AND ITS SCHEDULE (re-aimed at 0.5.0 C7's seam).
  *   node tests/render-exact.test.mjs
  *
  * What is proved here, and what is not:
@@ -7,30 +7,31 @@
  *   the real density of a real two-mode hydrogen state (the endpoint frame is frame 0 again, to a part in 10^15
  *   of one frame's own step), and the span's against the same density (t1 is a different state, and dropping it
  *   loses a real gap of motion).  The arithmetic of the offset, re-measured against exact rational arithmetic in
- *   BigInt rather than inherited from capture.js — including the fact that capture.js' quoted counterexample does
- *   not reproduce and a real one does.  The fold of the origin, and how much precision it buys.  The cost model.
- *   The digest.  The stored zip, round-tripped through a reader written independently in this file.
+ *   BigInt.  The fold of the origin, and how much precision it buys.  The cost (the kit's estimate on λWAVES' seed).
+ *   The digest.
  *
- *   AND THE DRIVER, against a FAKE LAB that REPRODUCES EVERY HAZARD: its fake shader reads the jitter counter,
- *   its fake governor drops the grid when frames run long, its fake AUTO SCALE moves the canvas, its fake rack
- *   loop interlopes, its fake H2 needs update(t) first, and its fake modulation runs on the fake wall clock.  So
- *   "the same schedule twice is byte-identical" and "a slow machine gives the same bytes as a fast one" are real
- *   tests and not tautologies, and EVERY PIN IS REMOVED IN TURN (`unpin`) to show the test that guards it goes
- *   RED without it.  A pin nobody can break is a pin nobody has checked.
+ *   AND THE SEAM THAT REMAINS: since 0.5.0 C7 a film is MIR's `createRecorder` handed λWAVES' `frame(i, ctx)`.  Here
+ *   the KIT'S OWN RECORDER (lab/mir/render/recorder.js, unchanged, in node with a canvas stand-in that encodes PNG
+ *   frames through capture.js' encoder and no file system, so the run keeps its frames in memory) drives λWAVES'
+ *   frame against a FAKE LAB that REPRODUCES EVERY HAZARD: its fake shader reads the jitter counter, its fake governor
+ *   drops the grid when frames run long, its fake AUTO SCALE moves the canvas, its fake rack loop interlopes, its fake
+ *   H2 needs update(t) first.  The DRIVEN modulation is the kit's real host and record clock.  So "the same schedule
+ *   twice is byte-identical" and "a slow machine gives the same pixels as a fast one" are real tests, and EVERY PIN
+ *   IS REMOVED IN TURN (`unpin`) to show the test that guards it goes RED without it.
  *
- *   NOT PROVED HERE — anything that needs a GPU.  Whether the real ray-march is a pure function of the pinned
- *   inputs is a question for a browser; §12 lists the probe to run.  See the note at the end of this file.
+ *   NOT PROVED HERE — anything that needs a GPU, a WebCodecs encoder or a real canvas.  §12 lists the browser's half.
  */
 import zlib from 'node:zlib';
 import {
-  ENDPOINT, MODES, DEFAULTS, PATH_DEPENDENT_LAYERS, HAZARDS, HAZARD_IDS, COST_TABLE,
+  ENDPOINT, MODES, DEFAULTS, HAZARDS, HAZARD_IDS, MS_FLOOR, MS_PER_MPX,
   offsetOf, ulpsBetween, ulpOf, arithmeticLaw, foldOrigin,
-  exactSchedule, endpointLaw, planExact, estimate, humanMs, humanBytes,
-  digest, manifest, zipStored, createExactRenderer,
+  exactSchedule, endpointLaw, planExact, estimate,
+  digest, manifest, createFilm, FILM_FPS,
 } from '../lab/render-exact.js';
 import * as CAP from '../lab/capture.js';
 import { densityPeriod } from '../lab/period.js';
 import { BASIS, psiAt } from '../lab/hydrogen.js';
+import { createModHost, model as MODEL } from '../lab/mir/modulation/host.js';
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {
@@ -222,20 +223,19 @@ const D12 = densityPeriod(E12);          // T_rho = 2 pi / |E2 − E1| = 16.7551
 }
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
-   §5 — THE COST, THE DIGEST AND THE ZIP
+   §5 — THE COST AND THE DIGEST
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 {
   const big = estimate({ w: 8192, h: 8192, frames: 600 });
   const hd = estimate({ w: 1920, h: 1080, frames: 600 });
   const meas = estimate({ w: 1920, h: 1080, frames: 600, msPerFrame: 812 });
-  let monotone = true, prev = -1;
-  for (const p of COST_TABLE.points) { if (p.ms <= prev) monotone = false; prev = p.ms; }
-  judge('NOBODY SHOULD START A 600-FRAME 8192² RENDER WITHOUT BEING TOLD IT IS ' + big.human.split(' · ').slice(2).join(' and ') + '. The model is capture.js\' own six measured points, piecewise-linear in megapixels (131 ms per Mpx over a 181 ms floor, holding across a 73x range), and it says when the number is an extrapolation, when it is this machine\'s own median instead, and that a long render can be stopped and not resumed',
-    monotone && big.totalMs > 80 * 60 * 1000 && big.totalMs < 100 * 60 * 1000
-    && /1 h/.test(big.human) && /GB/.test(big.human) && /90/.test(String(Math.round(big.totalMs / 60000)))
-    && hd.totalMs < big.totalMs / 15 && /THIS IS A/.test(big.warning)
-    && meas.measured === true && /measured in this run/.test(meas.basis) && meas.totalMs === 812 * 600,
-    { at8192: big.human, at1080p: hd.human, warning: big.warning.slice(0, 90), measured: meas.human });
+  const mp4 = estimate({ w: 1920, h: 1080, frames: 600, fps: 30, format: 'mp4' });
+  judge('NOBODY SHOULD START A 600-FRAME 8192² FILM WITHOUT BEING TOLD IT IS ' + big.human.split(' · ').slice(2).join(' and ') + '. The estimate is the KIT\'S (render/plan.js estimateFilm, its run ceiling) on λWAVES\' own seed — ' + MS_FLOOR + ' ms + ' + MS_PER_MPX + ' ms per Mpx, capture.js\' six measured points — until this device has measured its own; it says which, and an MP4\'s size is the kit\'s bitrate law while PNG frames are lossless and unknowable before',
+    big.measured === false && /seed/.test(big.basis) && big.totalMs > 80 * 60 * 1000 && big.totalMs < 100 * 60 * 1000
+    && /LONGER/.test(big.warning) && hd.totalMs < big.totalMs / 15 && hd.warning === ''
+    && meas.measured === true && /measured/.test(meas.basis) && meas.totalMs === 812 * 600
+    && mp4.bytes > 0 && big.bytes === null,
+    { at8192: big.human, at1080p: hd.human, warning: big.warning.slice(0, 80), measured: meas.human, mp4: mp4.human });
 
   const a = new Uint8Array(4096), b = new Uint8Array(4096);
   for (let i = 0; i < 4096; i++) { a[i] = (i * 37) & 255; b[i] = (i * 37) & 255; }
@@ -243,25 +243,9 @@ const D12 = densityPeriod(E12);          // T_rho = 2 pi / |E2 − E1| = 16.7551
   b[2048] ^= 1;
   const d3 = digest(b);
   const swapped = Uint8Array.from(a); const t0 = swapped[10]; swapped[10] = swapped[11]; swapped[11] = t0;
-  judge('THE DIGEST IS 64 BITS OVER THE FILTERED SCANLINES — OURS, NOT THE BROWSER\'S DEFLATE — so two runs are compared without keeping a gigabyte of pixels. Identical input gives an identical digest; one flipped BIT in four kilobytes changes it; so does transposing two adjacent bytes, which a checksum would miss',
+  judge('THE DIGEST IS 64 BITS OVER A FRAME\'S PIXELS — OURS, NOT THE KIT\'S CONTAINER — so two films are compared without keeping a gigabyte of pixels. Identical input gives an identical digest; one flipped BIT in four kilobytes changes it; so does transposing two adjacent bytes, which a checksum would miss',
     d1 === d2 && d1 !== d3 && d1 !== digest(swapped) && d1.length === 16,
     { same: d1, oneBitFlipped: d3, twoBytesSwapped: digest(swapped) });
-
-  /* the zip, read back by a reader written here from the spec rather than from the writer */
-  const enc = new TextEncoder();
-  const files = [];
-  for (let i = 0; i < 5; i++) files.push({ name: 'frame-' + String(i).padStart(5, '0') + '.png', bytes: enc.encode('PNG-payload-' + i + '-'.repeat(i * 7)) });
-  const z1 = zipStored(files), z2 = zipStored(files);
-  const read = readZip(z1);
-  const same = read.length === files.length && read.every((r, i) => r.name === files[i].name && Buffer.compare(Buffer.from(r.bytes), Buffer.from(files[i].bytes)) === 0 && r.crcOk);
-  judge('ONE DOWNLOAD FOR A SEQUENCE: a STORED zip (a PNG is already deflated, so a second pass would cost minutes and save nothing) with a FIXED 1980 timestamp, so two renders of the same schedule give byte-identical ARCHIVES and not archives that differ only in when they were made. Read back here by a reader written from the spec, every CRC checked',
-    same && Buffer.compare(Buffer.from(z1), Buffer.from(z2)) === 0,
-    { entries: read.length, bytes: z1.length, identicalArchives: Buffer.compare(Buffer.from(z1), Buffer.from(z2)) === 0, names: read.map((r) => r.name).slice(0, 2) });
-
-  let refused = null;
-  try { zipStored(Array.from({ length: 70000 }, (_, i) => ({ name: 'f' + i, bytes: new Uint8Array(0) }))); } catch (e) { refused = String(e.message); }
-  judge('AND IT REFUSES ZIP64 TERRITORY RATHER THAN WRITE A MALFORMED ARCHIVE: above 65535 entries (or 4 GB) it says so and points at the streaming road instead',
-    refused !== null && /ZIP64/.test(refused) && /onFrame/.test(refused), { refusal: refused });
 }
 function readZip(z) {
   const dv = new DataView(z.buffer, z.byteOffset, z.byteLength);
@@ -283,8 +267,28 @@ function readZip(z) {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
-   §6 — THE FAKE LAB.  It reproduces every hazard, so the driver's pins are tested and not merely written.
+   §6 — THE FAKE LAB, AND THE KIT'S RECORDER IN NODE.  The lab reproduces every hazard, so the frame's pins are tested
+   and not merely written; the recorder is MIR's own, unchanged, on a canvas stand-in.
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* THE CANVAS STAND-IN the kit's recorder draws on in node: a frame handed back as RGBA reaches it only through the PNG
+   road (putImageData, then toBlob), and toBlob encodes it through capture.js' own encoder with STORED deflate — so a
+   frame's file is a pure function of its pixels.  No file system is handed over (`storage: {}`): the run keeps its
+   frames in memory, which is the kit's own fallback. */
+globalThis.ImageData = globalThis.ImageData || class ImageData { constructor(data, width, height) { this.data = data; this.width = width; this.height = height; } };
+function standInCanvas() {
+  const c = { width: 0, height: 0, img: null,
+    getContext: () => ({ globalCompositeOperation: 'source-over', fillStyle: '#000', fillRect() {}, drawImage() {}, putImageData(img) { c.img = img; },
+      getImageData: (x, y, w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }) }),
+    toBlob(cb, type) {
+      const im = c.img;
+      CAP.encodePNG(new Uint8Array(im.data.buffer, im.data.byteOffset, im.data.length), im.width, im.height, { deflate: CAP.zlibStored })
+        .then((png) => cb(new Blob([png], { type: type || 'image/png' })));
+    } };
+  return c;
+}
+if (!globalThis.document) globalThis.document = { createElement: () => standInCanvas(), addEventListener() {}, removeEventListener() {}, hidden: false };
+const NOCALIB = { read: () => null, write() {} };
 
 /**
  * A lab whose "shader" reads exactly what the real one does — the mode coefficients at t, the observer, the
@@ -299,7 +303,7 @@ function readZip(z) {
 function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, h2 = false, modulation = false, camera = null, presents = 0 } = {}) {
   const RES_LADDER = [64, 96, 128];
   const stats = { presents, generation: 0 };
-  let wall = 0;                                   // the FAKE machine's clock. The driver must never read it.
+  let wall = 0;                                   // the FAKE machine's clock. The frame must never read it.
   const clock = { t: 0, rate: 4, playing: false, pause() { this.playing = false; }, play() { this.playing = true; }, scrub(t) { this.t = t; } };
   const quality = { res: 96, steps: 160, scale: 1, auto: autoScale, autoScale: 1, minScale: 0.35 };
   const gov = { on: governor, drop: 0 };
@@ -310,7 +314,6 @@ function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, h2 = false
   const h2state = { on: h2, R: 6, update(t) { this.R = 6 + 2 * Math.sin(0.3 * t); } };
   const mod = { _running: modulation, _phase: 0, get running() { return this._running; }, get playing() { return this._running; },
     host: {}, stop() { this._running = false; }, play() { this._running = true; },
-    step(dt) { this._phase += dt; mat.exposure = 1 + 0.5 * Math.sin(2 * Math.PI * this._phase); return dt; },
     _wallTick(dw) { if (this._running) { this._phase += dw; mat.exposure = 1 + 0.5 * Math.sin(2 * Math.PI * this._phase); } } };
   const canvas = { width: 320, height: 200, getContext() { return null; } };
   /* rack.js' effectiveRes, to the line: the ladder entry `drop` notches below the one the user set */
@@ -323,7 +326,7 @@ function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, h2 = false
     present() { stats.presents++; },                   // a PRESENT with no reconstruct: the capped field clock
   };
   /* THE RACK LOOP, exactly as rack.js' is: it reads the WALL clock, judges the machine, and moves the picture's
-     inputs while it does.  Everything it touches is something the driver has to pin. */
+     inputs while it does.  Everything it touches is something the frame has to pin. */
   function rackFrame() {
     wall += msPerFrame;
     mod._wallTick(msPerFrame / 1000);
@@ -351,7 +354,6 @@ function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, h2 = false
       return h2state.on ? c.concat([{ re: h2state.R, im: 0 }]) : c;
     },
     play() { clock.playing = true; },
-    _fake: { rackFrame, get wall() { return wall; }, set wall(v) { wall = v; }, gov, quality, canvas, mod, h2: h2state },
   };
   return { LW, canvas, field, stats, gov, quality, mod, h2: h2state, rackFrame,
     get wall() { return wall; }, tick(ms) { wall += ms === undefined ? msPerFrame : ms; }, get msPerFrame() { return msPerFrame; } };
@@ -359,12 +361,10 @@ function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, h2 = false
 
 /**
  * THE FAKE READBACK: a picture that is a function of EXACTLY the real closure, and of nothing else.
- *   `interlopeAt`       a rack frame lands mid-render — ONCE, as a real one would (H9)
+ *   `interlopeAt`       a rack frame lands mid-film — ONCE, as a real one would (H9)
  *   `skipReconstructAt` the capped field clock: a PRESENT with no reconstruct, so the picture is the previous
  *                       frame's — a DUPLICATE FRAME, which is the failure the generation witness exists for (H4)
- *   `resizeAt`          the canvas is resized between the render and the readback WITHOUT a present — a window
- *                       resize, a DPR change on a monitor switch, AUTO SCALE's own field.resize. The jitter
- *                       witness cannot see this one (nothing presented), so only the SIZE witness can (H3)
+ *   `resizeAt`          the canvas is resized between the render and the readback WITHOUT a present (H3)
  */
 function fakeGrabFor(lab, { interlopeAt = null, skipReconstructAt = null, resizeAt = null } = {}) {
   let interloped = false, skipped = false, resized = false, lastModes = null;
@@ -382,10 +382,7 @@ function fakeGrabFor(lab, { interlopeAt = null, skipReconstructAt = null, resize
     } else {
       modes = LW.modesAt(t); lastModes = modes.map((m) => ({ re: m.re, im: m.im })); field.frame();
     }
-    /* the "pixels": every input in the closure, quantised into bytes.  Change any of them and the bytes change. */
     const px = new Uint8Array(w * h * 4);
-    /* the CANVAS SIZE AT READBACK is an input too: a real copy takes the swapchain, whose size is whatever the
-       canvas is at that moment, so a rack frame that resized it renders a different picture (H3) */
     const res = field.resolution, half = LW.domain.half, ex = LW.mat.exposure, yaw = LW.obs.yaw, cw = lab.canvas.width;
     let acc = 0; for (const m of modes) acc += m.re * 1e6 + m.im * 1e3;
     for (let i = 0; i < w * h; i++) {
@@ -398,64 +395,78 @@ function fakeGrabFor(lab, { interlopeAt = null, skipReconstructAt = null, resize
   };
 }
 
+/** the film over a fake lab: the kit's recorder, no file system, no input guard, no device calibration */
+const filmFor = (lab, o = {}, extra = {}) => createFilm(lab.LW, Object.assign({ canvas: lab.canvas, grab: fakeGrabFor(lab, o), now: () => lab.wall, energies: () => E12,
+  jitterSeed: o.jitterSeed, storage: {}, calib: NOCALIB, guard: false, pauseWhileHidden: false, host: o.host ? () => o.host : undefined }, extra));
 async function runFake(lab, o = {}) {
-  const ex = createExactRenderer(lab.LW, { canvas: lab.canvas, grab: fakeGrabFor(lab, o), now: () => lab.wall, energies: () => E12, jitterSeed: o.jitterSeed });
   const sched = exactSchedule({ mode: 'loop', T: D12.T, t0: 0, fps: 30, frames: o.frames || 8 });
-  return ex.render(Object.assign({ schedule: sched, width: 16, height: 12, deflate: 'stored', digestFrames: true }, o)).done;
+  return filmFor(lab, o).render(Object.assign({ schedule: sched, width: 16, height: 16, format: 'png' }, o)).done;
 }
 const digestsOf = (r) => (r.manifest ? r.manifest.frames.map((f) => f.digest) : []);
-const bytesOf = (r) => r.files.map((f) => Buffer.from(f.bytes).toString('base64'));
+const pix = (r) => digestsOf(r).join();
+const archive = async (r) => (r.files && r.files[0] ? new Uint8Array(await r.files[0].blob.arrayBuffer()) : new Uint8Array(22));   // a failed film has no archive: an empty one, so the judgement says RED
 
-// Final II: a retry must not advance modulation a second time, and frame zero is time zero.
-{
-  const lab = fakeLab({}), plain = fakeLab({});
-  let steps = 0; const step = lab.LW.mod.step;
-  lab.LW.mod.step = (dt) => { steps++; return step.call(lab.LW.mod, dt); };
-  const a = await runFake(lab, {frames:5,modulation:'drive',interlopeAt:2});
-  const b = await runFake(plain, {frames:5,modulation:'drive'});
-  judge('Final II: modulation begins at zero, advances once per frame interval, and survives a GPU retry without changing the output',
-    a.ok && b.ok && steps === 4 && a.manifest.frames[0].t === 0 && bytesOf(a).join() === bytesOf(b).join(),
-    {error:a.error, aborted:a.aborted, steps,retries:a.contended,firstTime:a.manifest?.frames[0].t,same:bytesOf(a).join() === bytesOf(b).join()});
+/** the KIT'S modulation host with one LFO routed to the fake lab's exposure (MIR's own rig, tests/render.node.mjs) */
+function rigFor(lab, route = true) {
+  const host = createModHost({ wall: 1000, roots: ['look'] });
+  host.install([{ id: 'look.exposure', label: 'EXPOSURE', map: 'linear', min: 0, max: 2, get: () => lab.LW.mat.exposure, set: (v) => { lab.LW.mat.exposure = v; } }]);
+  MODEL.modReset(); MODEL.setTransport({ bpm: 120, sync: 'wall', playing: false });
+  if (route) {
+    const src = MODEL.addSource('lfo', { label: 'LFO', on: true, wave: 'sine', sync: true, mult: MODEL.LFO_MULT_DEFAULT, phaseOff: 0, smooth: 0 });
+    const macro = MODEL.macroList()[0];
+    MODEL.setMacro(macro.id, { name: 'LFO', sourceId: src.id });
+    MODEL.addRoute(macro.id, 'look.exposure', 0, 0.4);
+  }
+  host.targets.sync();
+  return host;
 }
 
-
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
-   §7 — THE SAME SCHEDULE TWICE IS BYTE-IDENTICAL
+   §7 — THE SAME SCHEDULE TWICE IS BYTE-IDENTICAL, THROUGH THE KIT'S RECORDER
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 {
   const a = await runFake(fakeLab({}), { frames: 8 });
   const b = await runFake(fakeLab({}), { frames: 8 });
   const c = await runFake(fakeLab({ msPerFrame: 5 }), { frames: 8, interlopeAt: 3 });
-  judge('THE SAME SCHEDULE RENDERED TWICE IS BYTE-IDENTICAL — the PNG files themselves, not just the digests, because deflate: "stored" puts the container in our hands too. And a RACK FRAME LANDING MID-RENDER does not change a single byte: its witness catches it (the jitter counter reads wrong), the frame is re-rendered, and the run reports how many times that happened',
-    a.ok && b.ok && c.ok && a.frames === 8
-    && digestsOf(a).join() === digestsOf(b).join()
-    && bytesOf(a).join() === bytesOf(b).join()
-    && bytesOf(c).join() === bytesOf(a).join() && c.contended === 1,
-    { frames: a.frames, firstDigest: digestsOf(a)[0], lastDigest: digestsOf(a)[7], identical: bytesOf(a).join() === bytesOf(b).join(), contendedRetries: c.contended });
+  const za = await archive(a), zb = await archive(b), entries = (() => { try { return readZip(za); } catch (_) { return []; } })();
+  const pngs = entries.filter((e) => /^frame_\d{6}\.png$/.test(e.name)), rec = entries.find((e) => e.name === 'recording.json');
+  const rj = rec ? JSON.parse(new TextDecoder().decode(rec.bytes)) : {};
+  const ihdr = pngs.length ? new DataView(pngs[0].bytes.buffer, pngs[0].bytes.byteOffset + 16, 8) : null;
+  judge('THE SAME SCHEDULE FILMED TWICE IS BYTE-IDENTICAL — THE KIT\'S ARCHIVES THEMSELVES, not just the digests: eight frames through MIR\'s own recorder land as frame_000000.png … in its stored ZIP part beside its recording.json, every CRC good, and the film\'s schedule rides in that sidecar. And a RACK FRAME LANDING MID-FILM does not change a single pixel: its witness catches it (the jitter counter reads wrong), the frame is rendered again, and the film reports how many times that happened',
+    a.ok && b.ok && c.ok && a.frames === 8 && a.files.length === 1
+    && Buffer.compare(Buffer.from(za), Buffer.from(zb)) === 0
+    && pngs.length === 8 && entries.every((e) => e.crcOk) && ihdr && ihdr.getUint32(0) === 16 && ihdr.getUint32(4) === 16
+    && rj.kind === 'lambdawaves-deterministic-png' && rj.frames === 8 && rj.app && rj.app.film && rj.app.film.schedule.mode === 'loop'
+    && pix(a) === pix(b) && pix(c) === pix(a) && c.contended === 1,
+    { frames: a.frames, archiveBytes: za.length, identicalArchives: Buffer.compare(Buffer.from(za), Buffer.from(zb)) === 0, entries: entries.map((e) => e.name).slice(0, 2).concat(['…', entries[entries.length - 1] && entries[entries.length - 1].name]),
+      sidecar: { kind: rj.kind, frames: rj.frames, schedule: rj.app && rj.app.film && rj.app.film.schedule.mode }, contendedRetries: c.contended });
 
   judge('AND EVERY FRAME IS A DIFFERENT PICTURE: eight scheduled times, eight distinct digests. A schedule that silently rendered the same state twice — the capped field clock, which is what hazard H4 is — would show up here as a repeat',
     new Set(digestsOf(a)).size === 8, { digests: digestsOf(a) });
+
+  const refused = await runFake(fakeLab({}), { frames: 8, schedule: exactSchedule({ mode: 'loop', T: D12.T, fps: 15, frames: 8 }) });
+  judge('A FILM RUNS AT THE KIT\'S FRAME RATES, AND A RATE IT DOES NOT TAKE IS REFUSED BY NAME BEFORE ANYTHING RUNS: ' + FILM_FPS.join(', ') + ' fps',
+    refused.ok === false && refused.refused === true && /24, 30, 48, 60/.test(refused.error) && FILM_FPS.join() === '24,30,48,60',
+    { error: refused.error });
 }
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
-   §8 — A SLOW MACHINE PRODUCES THE SAME BYTES AS A FAST ONE
+   §8 — A SLOW MACHINE PRODUCES THE SAME PIXELS AS A FAST ONE
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 {
   const fast = await runFake(fakeLab({ msPerFrame: 4 }), { frames: 8 });
-  const slow = await runFake(fakeLab({ msPerFrame: 90 }), { frames: 8 });
+  const slowLab = fakeLab({ msPerFrame: 90 }), slowFilm = filmFor(slowLab, {});
+  const slow = await slowFilm.render({ schedule: exactSchedule({ mode: 'loop', T: D12.T, t0: 0, fps: 30, frames: 8 }), width: 16, height: 16, format: 'png' }).done;
   const crawl = await runFake(fakeLab({ msPerFrame: 400 }), { frames: 8, interlopeAt: 2 });
-  judge('A MACHINE A HUNDRED TIMES SLOWER PRODUCES THE SAME BYTES. On the fake slow machine the rack\'s GOVERNOR would step the field grid down the ladder and AUTO SCALE would shrink the canvas — both of which change the picture, and both of which are what makes the free-running lab machine-dependent. Paused-and-off, they do neither, and the schedule is identical because it never read a clock at all',
-    fast.ok && slow.ok && crawl.ok
-    && bytesOf(fast).join() === bytesOf(slow).join()
-    && bytesOf(crawl).join() === bytesOf(fast).join()
+  judge('A MACHINE A HUNDRED TIMES SLOWER PRODUCES THE SAME PIXELS. On the fake slow machine the rack\'s GOVERNOR would step the field grid down the ladder and AUTO SCALE would shrink the canvas — both of which change the picture. Paused-and-off, they do neither, and the schedule is identical because it never read a clock at all',
+    fast.ok && slow.ok && crawl.ok && pix(fast) === pix(slow) && pix(crawl) === pix(fast)
     && fast.schedule.times.join() === slow.schedule.times.join(),
-    { fastMs: fast.report.msPerFrame, slowMs: slow.report.msPerFrame, sameBytes: bytesOf(fast).join() === bytesOf(slow).join(), sameTimes: fast.schedule.times.join() === slow.schedule.times.join() });
+    { sameDigests: pix(fast) === pix(slow), sameTimes: fast.schedule.times.join() === slow.schedule.times.join() });
 
-  /* the elapsed time IS reported, and it is the only place wall time appears */
-  judge('THE TIME IT TOOK IS REPORTED AND WAS NEVER AN INPUT: the slow run says it took ' + humanMs(slow.report.elapsedMs) + ' against the fast one\'s ' + humanMs(fast.report.elapsedMs) + ', the ETA comes from this run\'s own median rather than the table once three frames are in, and the two runs\' pictures are the same anyway',
-    slow.report.elapsedMs > 10 * fast.report.elapsedMs && slow.cost.measured === true
-    && /REPORT/.test(slow.report.note) && bytesOf(fast).join() === bytesOf(slow).join(),
-    { fast: fast.report.human, slow: slow.report.human, costBasis: slow.cost.basis });
+  const after = slowFilm.plan({ fps: 30, frames: 8, width: 16, height: 16 });
+  judge('THE TIME IT TOOK IS REPORTED AND WAS NEVER AN INPUT: the slow film says it took ' + slow.report.human + ' against the fast one\'s ' + fast.report.human + ', the next plan on that device costs its own measured milliseconds a frame instead of the seed, and the two films\' pictures are the same anyway',
+    slow.report.elapsedMs > 10 * fast.report.elapsedMs && /REPORT/.test(slow.report.note) && after.cost.measured === true && pix(fast) === pix(slow),
+    { fast: fast.report.human, slow: slow.report.human, nextCost: after.cost.basis });
 }
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -463,156 +474,127 @@ const bytesOf = (r) => r.files.map((f) => Buffer.from(f.bytes).toString('base64'
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 {
   const ref = await runFake(fakeLab({}), { frames: 8 });
-  const REF = bytesOf(ref).join();
+  const REF = pix(ref), refD = digestsOf(ref);
 
-  /* H1 — THE JITTER.  The sharp test is not "the bytes changed" but "the render depends on the SESSION": two
-     labs whose counters happen to stand at different places give different pictures of the same state. */
+  /* H1 — THE JITTER.  The sharp test is not "the pixels changed" but "the film depends on the SESSION". */
   const noJitA = await runFake(fakeLab({ presents: 0 }), { frames: 8, unpin: ['jitter'] });
   const noJitB = await runFake(fakeLab({ presents: 41 }), { frames: 8, unpin: ['jitter'] });
   const pinA = await runFake(fakeLab({ presents: 0 }), { frames: 8 });
   const pinB = await runFake(fakeLab({ presents: 41 }), { frames: 8 });
-  judge('PIN REMOVED · H1 THE RAY-MARCH JITTER. field.js seeds the march offset AND the GRAIN style\'s voxel-keep cell with (presents % 97)/97, so the picture depends on WHERE IN THE SESSION it was taken. Unpinned, two labs whose counters stand 41 frames apart render the same state as different pictures from the FIRST frame; pinned, they are byte-identical to each other and to the reference',
-    noJitA.ok && noJitB.ok && pinA.ok && pinB.ok
-    && bytesOf(noJitA).join() !== bytesOf(noJitB).join()
-    && bytesOf(noJitA)[0] !== bytesOf(noJitB)[0]
-    && bytesOf(pinA).join() === bytesOf(pinB).join() && bytesOf(pinA).join() === REF,
-    { unpinnedDiffer: bytesOf(noJitA).join() !== bytesOf(noJitB).join(), pinnedAgree: bytesOf(pinA).join() === bytesOf(pinB).join(), matchesReference: bytesOf(pinA).join() === REF });
+  judge('PIN REMOVED · H1 THE RAY-MARCH JITTER, SEED 13. field.js seeds the march offset AND the GRAIN style\'s voxel-keep cell with (presents % 97)/97, so the picture depends on WHERE IN THE SESSION it was taken. Unpinned, two labs whose counters stand 41 frames apart film the same state as different pictures from the FIRST frame; pinned per frame, they are identical to each other and to the reference',
+    noJitA.ok && noJitB.ok && pinA.ok && pinB.ok && pix(noJitA) !== pix(noJitB) && digestsOf(noJitA)[0] !== digestsOf(noJitB)[0]
+    && pix(pinA) === pix(pinB) && pix(pinA) === REF && DEFAULTS.jitterSeed === 13,
+    { unpinnedDiffer: pix(noJitA) !== pix(noJitB), pinnedAgree: pix(pinA) === pix(pinB), matchesReference: pix(pinA) === REF });
 
-  /* H2 — THE GOVERNOR.  Unpin it (the clock stays playing, the governor stays on) on a slow machine and the
-     field grid steps down mid-render: a coarser volume, a different picture. */
+  /* H2 — THE GOVERNOR. */
   const govLab = fakeLab({ msPerFrame: 90, governor: true, autoScale: false });
   govLab.LW.clock.playing = true;                                    // as the lab is when the button is pressed
   const noGov = await runFake(govLab, { frames: 8, interlopeAt: 2, unpin: ['governor'] });
-  judge('PIN REMOVED · H2 THE GOVERNOR — THE HEADLINE MACHINE-SPEED DEPENDENCE IN THE LAB. A median over 28 ms steps the FIELD GRID down the ladder, so a SLOW MACHINE RENDERS A COARSER VOLUME. With the clock left playing and the governor left armed, one interloping frame on the slow machine drops the grid from 96³ to 64³ and every frame after it is a picture of a different grid — and NOTHING SAYS SO: the run reports success and hands back a sequence that changes resolution in the middle',
+  const ng = digestsOf(noGov);
+  judge('PIN REMOVED · H2 THE GOVERNOR — THE HEADLINE MACHINE-SPEED DEPENDENCE IN THE LAB. A median over 28 ms steps the FIELD GRID down the ladder, so a SLOW MACHINE RENDERS A COARSER VOLUME. With the clock left playing and the governor left armed, one interloping frame on the slow machine drops the grid from 96³ to 64³ and every frame after it is a picture of a different grid — and NOTHING SAYS SO',
     noGov.ok === true && govLab.gov.drop > 0 && govLab.field.resolution === 64
-    && bytesOf(noGov).join() !== REF
-    && bytesOf(noGov).slice(0, 2).join() === bytesOf(ref).slice(0, 2).join()
-    && bytesOf(noGov).slice(2).join() !== bytesOf(ref).slice(2).join(),
-    { reportedOk: noGov.ok, drop: govLab.gov.drop, resolution: govLab.field.resolution, divergesAtFrame: bytesOf(noGov).findIndex((b, i) => b !== bytesOf(ref)[i]) });
+    && ng.slice(0, 2).join() === refD.slice(0, 2).join() && ng.slice(2).join() !== refD.slice(2).join(),
+    { reportedOk: noGov.ok, drop: govLab.gov.drop, resolution: govLab.field.resolution, divergesAtFrame: ng.findIndex((d, i) => d !== refD[i]) });
 
-  /* and the SAME lab with the pin in place renders all eight frames at the grid it started on */
   const govLab2 = fakeLab({ msPerFrame: 90, governor: true, autoScale: false });
   govLab2.LW.clock.playing = true;
   const withGov = await runFake(govLab2, { frames: 8, interlopeAt: 2 });
-  judge('AND WITH THE PIN IN PLACE the same slow, contended machine renders all eight frames at the grid it started on, byte-identical to the fast machine\'s: pausing the clock is what disarms the governor (the real rack only judges while playing, and pausing resets its drop), and turning it off is the belt',
-    withGov.ok && withGov.frames === 8 && govLab2.gov.drop === 0 && bytesOf(withGov).join() === REF,
-    { drop: govLab2.gov.drop, resolution: govLab2.field.resolution, matchesFastMachine: bytesOf(withGov).join() === REF });
+  judge('AND WITH THE PIN IN PLACE the same slow, contended machine films all eight frames at the grid it started on, identical to the fast machine\'s: pausing the clock is what disarms the governor, and turning it off is the belt',
+    withGov.ok && withGov.frames === 8 && govLab2.gov.drop === 0 && pix(withGov) === REF,
+    { drop: govLab2.gov.drop, resolution: govLab2.field.resolution, matchesFastMachine: pix(withGov) === REF });
 
-  /* H3 — AUTO SCALE.  Unpin it on a slow machine and the canvas shrinks under the render. */
-  const asLab = fakeLab({ msPerFrame: 90, autoScale: true });
-  const noAS = await runFake(asLab, { frames: 8, resizeAt: 2, unpin: ['autoscale'] });
+  /* H3 — AUTO SCALE. */
+  const noAS = await runFake(fakeLab({ msPerFrame: 90, autoScale: true }), { frames: 8, resizeAt: 2, unpin: ['autoscale'] });
   const withAS = await runFake(fakeLab({ msPerFrame: 90, autoScale: true }), { frames: 8, resizeAt: 2 });
-  judge('PIN REMOVED · H3 THE CANVAS RESIZED UNDER THE READBACK. quality.autoScale is moved by a wall-clock EMA and multiplies the size the rack asks field.resize for; a window resize and a DPR change on a monitor switch do the same. NOTHING PRESENTS when that happens, so the jitter witness is blind to it and only the SIZE witness — read at the readback, not before it — can see the swapchain come back at a size the file will not claim. Removed, frame 2 onward is a different picture and the run reports success; kept, the same interference costs one re-render and not one byte',
-    noAS.ok === true && bytesOf(noAS).join() !== REF
-    && bytesOf(noAS).slice(0, 2).join() === bytesOf(ref).slice(0, 2).join()
-    && withAS.ok === true && withAS.contended === 1 && bytesOf(withAS).join() === REF,
-    { unpinnedReportedOk: noAS.ok, divergesAtFrame: bytesOf(noAS).findIndex((b, i) => b !== bytesOf(ref)[i]),
-      pinnedRetries: withAS.contended, pinnedMatches: bytesOf(withAS).join() === REF });
+  const na = digestsOf(noAS);
+  judge('PIN REMOVED · H3 THE CANVAS RESIZED UNDER THE READBACK. NOTHING PRESENTS when AUTO SCALE, a window resize or a DPR change moves the canvas, so the jitter witness is blind to it and only the SIZE witness — read at the readback — can see the swapchain come back at a size the file will not claim. Removed, frame 2 onward is a different picture and the film reports success; kept, the same interference costs one re-render and not one pixel',
+    noAS.ok === true && pix(noAS) !== REF && na.slice(0, 2).join() === refD.slice(0, 2).join()
+    && withAS.ok === true && withAS.contended === 1 && pix(withAS) === REF,
+    { unpinnedReportedOk: noAS.ok, divergesAtFrame: na.findIndex((d, i) => d !== refD[i]), pinnedRetries: withAS.contended, pinnedMatches: pix(withAS) === REF });
 
-  /* H4 — THE FIELD CLOCK, AND THE DUPLICATED FRAME.  The fake presents frame 4 WITHOUT reconstructing, which is
-     exactly what a capped field clock does: the picture is frame 3's again.  The jitter witness cannot see it —
-     one present did happen, with the pinned seed — so only the GENERATION witness can. */
+  /* H4 — THE FIELD CLOCK, AND THE DUPLICATED FRAME. */
   const noFC = await runFake(fakeLab({}), { frames: 8, skipReconstructAt: 4, unpin: ['fieldclock'] });
   const withFC = await runFake(fakeLab({}), { frames: 8, skipReconstructAt: 4 });
   const dNo = digestsOf(noFC);
-  judge('PIN REMOVED · H4 THE FIELD CLOCK, AND THIS IS THE DUPLICATED FRAME ITSELF. The rack reconstructs psi on an EVOLVE tier only when the field clock is due, so a capped field clock PRESENTS THE SAME PICTURE TWICE — and the jitter witness cannot see it, because one present really did happen with the pinned seed. Only the GENERATION witness can. Removed, frame 4 comes back as a byte-for-byte copy of frame 3 and the run reports success; kept, the frame is re-rendered and the eight frames are eight pictures',
-    noFC.ok && withFC.ok
-    && dNo[4] === dNo[3] && noFC.contended === 0
-    && new Set(digestsOf(withFC)).size === 8 && withFC.contended === 1
-    && bytesOf(withFC).join() === REF,
-    { unpinnedDigests: [dNo[3], dNo[4]], duplicated: dNo[4] === dNo[3], pinnedDistinct: new Set(digestsOf(withFC)).size, pinnedRetries: withFC.contended, pinnedMatches: bytesOf(withFC).join() === REF });
+  judge('PIN REMOVED · H4 THE FIELD CLOCK, AND THIS IS THE DUPLICATED FRAME ITSELF. A capped field clock PRESENTS THE SAME PICTURE TWICE and the jitter witness cannot see it. Only the GENERATION witness can. Removed, frame 4 comes back as a copy of frame 3 and the film reports success; kept, the frame is rendered again and the eight frames are eight pictures',
+    noFC.ok && withFC.ok && dNo[4] === dNo[3] && noFC.contended === 0
+    && new Set(digestsOf(withFC)).size === 8 && withFC.contended === 1 && pix(withFC) === REF,
+    { unpinnedDigests: [dNo[3], dNo[4]], pinnedDistinct: new Set(digestsOf(withFC)).size, pinnedRetries: withFC.contended });
 
-  /* H5 — THE CAMERA.  A moving camera is refused, and 'still' brings it to rest and says so. */
-  const camLab = fakeLab({ camera: { autoRotate: true } });
-  const camRefused = await runFake(camLab, { frames: 4, camera: 'refuse' });
+  /* H5 — THE CAMERA. */
+  const camRefused = await runFake(fakeLab({ camera: { autoRotate: true } }), { frames: 4, camera: 'refuse' });
   const camLab2 = fakeLab({ camera: { autoRotate: true } });
   const camStilled = await runFake(camLab2, { frames: 4, camera: 'still' });
-  judge('PIN APPLIED · H5 THE CAMERA CLOCK. The pose is an INTEGRATOR — omega decays as exp(-mu dt) and AUTO-ROTATE drifts at rad per WALL second — so there is no pose(t) to evaluate and a coasting camera makes the render depend on machine speed. A moving camera is REFUSED by name, with the three ways out in the message; camera: "still" brings it to rest, records that it did, and puts it back afterwards',
+  judge('PIN APPLIED · H5 THE CAMERA CLOCK. The pose is an INTEGRATOR on the wall clock, so a coasting camera makes a film depend on machine speed. A moving camera is REFUSED by name, before the kit\'s recorder is even asked, with the three ways out; camera: "still" brings it to rest, records that it did, and puts it back afterwards',
     camRefused.ok === false && camRefused.refused === true && camRefused.hazard === 'camera'
     && /poseAt/.test(camRefused.error) && /integrator/.test(camRefused.error)
     && camStilled.ok && /stilled/.test(camStilled.pins.camera) && camLab2.LW.camera.autoRotate === true,
     { refusal: camRefused.error.slice(0, 110), stilledPin: camStilled.pins.camera, restored: camLab2.LW.camera.autoRotate });
 
-  /* and a POSE PATH is the deterministic way to have a camera move at all */
   const poseAt = (k, N) => ({ yaw: 0.65 + 2 * Math.PI * k / N });
   const p1 = await runFake(fakeLab({}), { frames: 8, poseAt });
   const p2 = await runFake(fakeLab({ msPerFrame: 300 }), { frames: 8, poseAt });
-  judge('AND A CAMERA MOVE THAT IS A FUNCTION OF THE FRAME INDEX IS EXACT: poseAt(k, N) turns the yaw a whole revolution over eight frames, the pictures all differ from the still ones, and a machine seventy-five times slower renders the same bytes. That is what a rendered camera move should have been all along — a schedule, not an integrator',
-    p1.ok && p2.ok && bytesOf(p1).join() === bytesOf(p2).join() && bytesOf(p1).join() !== REF
-    && new Set(digestsOf(p1)).size === 8,
-    { sameAcrossSpeeds: bytesOf(p1).join() === bytesOf(p2).join(), differsFromStill: bytesOf(p1).join() !== REF });
+  judge('AND A CAMERA MOVE THAT IS A FUNCTION OF THE FRAME INDEX IS EXACT: poseAt(k, N) turns the yaw a whole revolution over eight frames, the pictures all differ from the still ones, and a machine seventy-five times slower films the same pixels (RECORD carries AUTO-ROTATE this way)',
+    p1.ok && p2.ok && pix(p1) === pix(p2) && pix(p1) !== REF && new Set(digestsOf(p1)).size === 8,
+    { sameAcrossSpeeds: pix(p1) === pix(p2), differsFromStill: pix(p1) !== REF });
 
-  /* H6 — THE MODULATION CLOCK, in both honest modes */
+  /* H6 — THE MODULATION CLOCK, now the KIT'S: frozen by λWAVES with no host handed over, or driven by the kit's record clock */
   const mLab = fakeLab({ modulation: true });
   const frozen = await runFake(mLab, { frames: 8, modulation: 'freeze' });
-  const dLab1 = fakeLab({ modulation: true }), dLab2 = fakeLab({ modulation: true, msPerFrame: 300 });
-  const drivenA = await runFake(dLab1, { frames: 8, modulation: 'drive' });
-  const drivenB = await runFake(dLab2, { frames: 8, modulation: 'drive' });
-  const leftLab = fakeLab({ modulation: true });
-  const left = await runFake(leftLab, { frames: 8, modulation: 'leave', interlopeAt: 3 });
-  judge('PIN APPLIED · H6 THE MODULATION CLOCK. It is an integrator too, and irreducibly so: even under WALL sync its one-pole SMOOTH filters and its envelopes accumulate dt, so there is no modulated(t). FREEZE stops it and every target goes back to its knob; DRIVE steps it 1/fps per frame through mir\'s own deterministic door and renders the movement — and two machines seventy-five times apart in speed agree byte for byte, because the nominal second is defined by the OUTPUT frame rate and never measured',
-    frozen.ok && /frozen/.test(frozen.pins.modulation) && bytesOf(frozen).join() === REF
-    && mLab.LW.mod.running === true                                   // stopped for the run, restarted after
-    && drivenA.ok && drivenB.ok && bytesOf(drivenA).join() === bytesOf(drivenB).join()
-    && bytesOf(drivenA).join() !== bytesOf(frozen).join()
-    && new Set(digestsOf(drivenA)).size === 8,
-    { frozenPin: frozen.pins.modulation, frozenMatchesUnmodulated: bytesOf(frozen).join() === REF, restarted: mLab.LW.mod.running,
-      drivenPin: drivenA.pins.modulation, driveSameAcrossSpeeds: bytesOf(drivenA).join() === bytesOf(drivenB).join(), differsFromFrozen: bytesOf(drivenA).join() !== bytesOf(frozen).join() });
-
-  judge('AND THE ONE ESCAPE HATCH SAYS WHAT IT IS. modulation: "leave" exists only for a caller who knows what they are doing, and the pin reading says "this render is NOT deterministic" rather than pretending; with the wall clock still writing into `mat`, an interloping frame moves the exposure mid-render and the picture changes from that frame on',
-    left.ok && /NOT deterministic/.test(left.pins.modulation)
-    && bytesOf(left).slice(0, 3).join() === bytesOf(frozen).slice(0, 3).join()
-    && bytesOf(left).slice(3).join() !== bytesOf(frozen).slice(3).join(),
-    { pin: left.pins.modulation, divergesAt: bytesOf(left).findIndex((b, i) => b !== bytesOf(frozen)[i]) });
+  const dLabA = fakeLab({}), dLabB = fakeLab({ msPerFrame: 300 }), dLabC = fakeLab({}), dLabN = fakeLab({});
+  const drivenA = await runFake(dLabA, { frames: 8, modulation: 'drive', host: rigFor(dLabA) });
+  const exposureBack = dLabA.LW.mat.exposure;
+  const drivenB = await runFake(dLabB, { frames: 8, modulation: 'drive', host: rigFor(dLabB) });
+  const drivenC = await runFake(dLabC, { frames: 8, modulation: 'drive', host: rigFor(dLabC), interlopeAt: 2 });
+  const unrouted = await runFake(dLabN, { frames: 8, modulation: 'drive', host: rigFor(dLabN, false) });
+  judge('PIN APPLIED · H6 THE MODULATION CLOCK IS THE KIT\'S. FREEZE stops the rack (every target back to its knob) and hands the recorder no host, so nothing is stepped; DRIVE hands it the host and the KIT\'S RECORD CLOCK replays the rack from the first Space at exactly 1/fps a frame — a routed LFO moves the picture (it differs from the same drive with no route), two machines seventy-five times apart agree pixel for pixel, a GPU retry does not step the clock twice, frame zero is time zero, and the parameter is back where it was afterwards',
+    frozen.ok && /frozen/.test(frozen.pins.modulation) && pix(frozen) === REF && mLab.LW.mod.running === true
+    && drivenA.ok && drivenB.ok && drivenC.ok && unrouted.ok && /kit/.test(drivenA.pins.modulation)
+    && pix(drivenA) === pix(drivenB) && pix(drivenC) === pix(drivenA) && drivenC.contended === 1
+    && pix(drivenA) !== pix(unrouted) && drivenA.manifest.frames[0].t === 0 && Math.abs(exposureBack - 1) < 1e-12
+    && drivenA.manifest.modulationClock && /record clock/.test(drivenA.manifest.modulationClock.clock),
+    { frozenPin: frozen.pins.modulation, frozenMatchesUnmodulated: pix(frozen) === REF, restarted: mLab.LW.mod.running, drivenPin: drivenA.pins.modulation,
+      driveSameAcrossSpeeds: pix(drivenA) === pix(drivenB), retryStepsOnce: pix(drivenC) === pix(drivenA), routeReachesPicture: pix(drivenA) !== pix(unrouted), exposureBack });
 
   /* H7 — H2's impure field modes */
-  const h2Lab = fakeLab({ h2: true });
+  const h2Lab = fakeLab({ h2: true }), h2Lab2 = fakeLab({ h2: true });
   const h2On = await runFake(h2Lab, { frames: 8 });
-  const h2Lab2 = fakeLab({ h2: true });
   const h2Off = await runFake(h2Lab2, { frames: 8, unpin: ['h2'] });
-  judge('PIN REMOVED · H7 H2 IS THE ONE IMPURE FIELD SOURCE. h2.fieldModes() takes no t: it reads the current R, which h2.update(t) sets from a pre-computed trajectory — and in the rack loop that call sits AFTER the frame and inside the cpuTick cadence, so the free-running lab\'s H2 field is one frame stale and four in 120 Hz mode. The driver calls update(t) itself before every frame; without it, R never moves and every frame carries the same molecule',
-    h2On.ok && h2Off.ok && bytesOf(h2On).join() !== bytesOf(h2Off).join()
-    && new Set(digestsOf(h2On)).size === 8 && Math.abs(h2Lab2.h2.R - 6) < 1e-12 && Math.abs(h2Lab.h2.R - 6) > 1e-6,
-    { pinnedR: h2Lab.h2.R, unpinnedR: h2Lab2.h2.R, differ: bytesOf(h2On).join() !== bytesOf(h2Off).join() });
+  judge('PIN REMOVED · H7 H2 IS THE ONE IMPURE FIELD SOURCE. h2.fieldModes() reads the current R, which only h2.update(t) sets — and the rack sets it AFTER the frame. The film\'s frame calls update(t) itself; without it, R never moves and every frame carries the same molecule',
+    h2On.ok && h2Off.ok && pix(h2On) !== pix(h2Off) && new Set(digestsOf(h2On)).size === 8 && Math.abs(h2Lab2.h2.R - 6) < 1e-12 && Math.abs(h2Lab.h2.R - 6) > 1e-6,
+    { pinnedR: h2Lab.h2.R, unpinnedR: h2Lab2.h2.R });
 
-  /* H9 — the interloper witness itself: three failures abort by name rather than emit a doubtful frame */
+  /* H9 — the interloper witness itself: three failures abort by name, through the kit's failure road */
   const stubborn = fakeLab({});
-  const alwaysGrab = fakeGrabFor(stubborn, {});
-  const exr = createExactRenderer(stubborn.LW, {
-    canvas: stubborn.canvas, now: () => stubborn.wall, energies: () => E12,
-    grab: async (a) => { stubborn.rackFrame(); return alwaysGrab(a); },   // an interloper on EVERY attempt
-  });
-  const doomed = await exr.render({ schedule: exactSchedule({ mode: 'loop', T: D12.T, fps: 30, frames: 8 }), width: 16, height: 12, deflate: 'stored', retries: 3 }).done;
-  judge('PIN VERIFIED · H9 A FRAME IS EMITTED ONLY WHEN ITS WITNESSES AGREE. A contended frame is re-rendered — the retry is free of consequence, because the same t with the same pinned seed is the same picture — and a frame that will not settle after three attempts ABORTS THE RUN BY NAME, handing back the exact frames before it. That is what "no dropped or duplicated frame" means when you cannot stop the interference: never emit one you cannot vouch for',
+  const always = fakeGrabFor(stubborn, {});
+  const exr = filmFor(stubborn, {}, { grab: async (a) => { stubborn.rackFrame(); return always(a); } });   // an interloper on EVERY attempt
+  const doomed = await exr.render({ schedule: exactSchedule({ mode: 'loop', T: D12.T, fps: 30, frames: 8 }), width: 16, height: 16, retries: 3 }).done;
+  judge('PIN VERIFIED · H9 A FRAME IS EMITTED ONLY WHEN ITS WITNESSES AGREE. A contended frame is rendered again — free of consequence, because the same t with the same seed is the same picture — and a frame that will not settle after three attempts ABORTS THE FILM BY NAME, through the kit\'s own failure road (its store keeps what was finished; nothing it cannot vouch for is emitted)',
     doomed.ok === false && doomed.aborted !== null && doomed.aborted.k === 0 && doomed.aborted.tries === 4
-    && /ABORTED at frame 0/.test(doomed.message) && doomed.frames === 0,
+    && /ABORTED at frame 0/.test(doomed.message) && doomed.frames === 0 && doomed.files.length === 0,
     { aborted: doomed.aborted && { k: doomed.aborted.k, tries: doomed.aborted.tries, why: doomed.aborted.why }, message: doomed.message.slice(0, 130) });
 
-  /* and STOP: a ninety-minute render needs a door, and the door must not lie about what came out of it */
+  /* and STOP is the kit's cancel */
   const full40 = await runFake(fakeLab({}), { frames: 40 });
-  const stopLab = fakeLab({});
-  const stopEx = createExactRenderer(stopLab.LW, { canvas: stopLab.canvas, grab: fakeGrabFor(stopLab, {}), now: () => stopLab.wall, energies: () => E12 });
-  const running = stopEx.render({ schedule: exactSchedule({ mode: 'loop', T: D12.T, fps: 30, frames: 40 }), width: 16, height: 12, deflate: 'stored', onProgress: (p) => { if (p.done === 5) running.stop(); } });
+  const stopLab = fakeLab({}), stopFilm = filmFor(stopLab, {});
+  const running = stopFilm.render({ schedule: exactSchedule({ mode: 'loop', T: D12.T, fps: 30, frames: 40 }), width: 16, height: 16, onProgress: (p) => { if (p.done === 5) running.stop(); } });
   const stoppedR = await running.done;
-  judge('AND A NINETY-MINUTE RENDER HAS A DOOR. stop() ends the run at the frame boundary, returns exactly the frames that were finished — byte-identical to the first five of the full run — and says plainly that a deterministic render cannot be resumed, because the schedule is a whole: re-run it with the same options for the same bytes',
+  judge('AND A NINETY-MINUTE FILM HAS A DOOR, AND IT IS THE KIT\'S: stop() is the recorder\'s cancel (Escape and a [data-render-cancel] button are the same door), the film ends at a frame boundary, the frames it finished are the full film\'s first five to the digest, and it says plainly that a film is a whole schedule',
     stoppedR.stopped === true && stoppedR.frames === 5 && stoppedR.ok === false
-    && /STOPPED at 5 of 40/.test(stoppedR.message) && /cannot be resumed/.test(stoppedR.message)
-    && bytesOf(stoppedR).join() === bytesOf(full40).slice(0, 5).join(),
-    { frames: stoppedR.frames, matchesPrefix: bytesOf(stoppedR).join() === bytesOf(full40).slice(0, 5).join(), message: stoppedR.message.slice(0, 100) });
-  /* verify() is the API a rack wave puts behind a button, and an untested API is a liability */
+    && /STOPPED at 5 of 40/.test(stoppedR.message) && /whole schedule/.test(stoppedR.message)
+    && digestsOf(stoppedR).join() === digestsOf(full40).slice(0, 5).join() && stopLab.LW.clock.t === 0,
+    { frames: stoppedR.frames, matchesPrefix: digestsOf(stoppedR).join() === digestsOf(full40).slice(0, 5).join(), message: stoppedR.message.slice(0, 100) });
+
+  /* verify() */
   const vLab = fakeLab({});
-  const vex = createExactRenderer(vLab.LW, { canvas: vLab.canvas, grab: fakeGrabFor(vLab, {}), now: () => vLab.wall, energies: () => E12 });
-  const v = await vex.verify({ frames: 6, width: 16, height: 12, deflate: 'stored' });
+  const v = await filmFor(vLab, {}).verify({ frames: 6, width: 16, height: 16 });
   const badLab = fakeLab({});
   let flip = 0;
   const badGrab = fakeGrabFor(badLab, {});
-  const bex = createExactRenderer(badLab.LW, { canvas: badLab.canvas, now: () => badLab.wall, energies: () => E12,
-    grab: async (a) => { const r = await badGrab(a); if (a.k === 2) r.rgba[0] = (r.rgba[0] + (flip++)) & 255; return r; } });
-  const bad = await bex.verify({ frames: 6, width: 16, height: 12, deflate: 'stored' });
-  judge('AND verify() IS THE CLAIM CHECKED IN THE BROWSER IN ABOUT A SECOND: the same short schedule rendered twice, digest against digest, at a size nobody has to wait for. It comes back GREEN on an honest lab and, on one whose picture is not a function of the pinned inputs, it NAMES THE FRAME and hands back both digests rather than saying "something is wrong"',
+  const bad = await filmFor(badLab, {}, { grab: async (a) => { const r = await badGrab(a); if (a.k === 2) r.rgba[0] = (r.rgba[0] + (flip++)) & 255; return r; } }).verify({ frames: 6, width: 16, height: 16 });
+  judge('AND verify() IS THE CLAIM CHECKED IN THE BROWSER IN ABOUT A SECOND: the same short schedule filmed twice through the kit\'s recorder, digest against digest. It comes back GREEN on an honest lab and, on one whose picture is not a function of the pinned inputs, it NAMES THE FRAME and hands back both digests',
     v.ok === true && v.frames === 6 && /DETERMINISTIC/.test(v.message)
-    && bad.ok === false && bad.mismatches.length === 1 && bad.mismatches[0].k === 2
-    && bad.mismatches[0].a !== bad.mismatches[0].b && /1 of 6 frames differ/.test(bad.message),
+    && bad.ok === false && bad.mismatches.length === 1 && bad.mismatches[0].k === 2 && bad.mismatches[0].a !== bad.mismatches[0].b && /1 of 6 frames differ/.test(bad.message),
     { good: v.message, badMismatch: bad.mismatches[0], badMessage: bad.message.slice(0, 96) });
 }
 
@@ -623,40 +605,42 @@ const bytesOf = (r) => r.files.map((f) => Buffer.from(f.bytes).toString('base64'
   const lab = fakeLab({ modulation: true, camera: { autoRotate: true } });
   lab.LW.clock.playing = true; lab.LW.clock.t = 4.125;
   const before = { t: lab.LW.clock.t, playing: lab.LW.clock.playing, auto: lab.quality.auto, gov: lab.gov.on, presents: lab.stats.presents, autoRotate: lab.LW.camera.autoRotate, modRunning: lab.mod.running };
-  const r = await runFake(lab, { frames: 6, camera: 'still', modulation: 'freeze' });
+  let held = 0;
+  const film = filmFor(lab, {}, { hold: (on) => { held += on ? 1 : -1; } });
+  const r = await film.render({ schedule: exactSchedule({ mode: 'loop', T: D12.T, t0: 0, fps: 30, frames: 6 }), width: 16, height: 16, camera: 'still', modulation: 'freeze' }).done;
   const after = { t: lab.LW.clock.t, playing: lab.LW.clock.playing, auto: lab.quality.auto, gov: lab.gov.on, presents: lab.stats.presents, autoRotate: lab.LW.camera.autoRotate, modRunning: lab.mod.running };
-  judge('THE LAB IS PUT BACK EXACTLY AS IT WAS: the clock returns to t = 4.125 and to PLAYING, AUTO SCALE and the GOVERNOR come back on, AUTO-ROTATE comes back, the modulation transport is restarted — and the jitter counter is advanced by the number of frames that really were presented rather than reset, which is the same honesty capture.js keeps',
+  judge('THE LAB IS PUT BACK EXACTLY AS IT WAS when the kit hands the page back: the clock returns to t = 4.125 and to PLAYING, AUTO SCALE and the GOVERNOR come back on, AUTO-ROTATE comes back, the modulation transport is restarted, the host\'s own hold is taken and released once — and the jitter counter is advanced by the number of frames that really were presented rather than reset',
     r.ok && after.t === before.t && after.playing === true && after.auto === before.auto
     && after.gov === before.gov && after.autoRotate === true && after.modRunning === true
-    && after.presents === before.presents + 6,
-    { before, after });
+    && after.presents === before.presents + 6 && held === 0,
+    { before, after, held });
 
   const m = r.manifest;
-  judge('THE MANIFEST IS THE AUDIT: it carries every scheduled t and offset, every frame\'s digest, the schedule\'s own exactness (endpoint, ulps, worst gap), the picture\'s size, grid, format, gamut and DEFLATE, the pin readings, the witness count and the ffmpeg line — so two runs are compared by diffing two small JSON files instead of a gigabyte of pixels, and a render that cannot be compared says why',
-    m.format === 'lambdawaves/render-exact@1'
+  judge('THE MANIFEST IS THE AUDIT: every scheduled t, offset and digest, the schedule\'s own exactness (endpoint, ulps, worst gap), the picture\'s size, grid, format, gamut and container, the jitter seed, the pin readings, the witness count and the ffmpeg line for the PNG frames — so two films are compared by diffing two small JSON files',
+    m.format === 'lambdawaves/film@2'
     && m.frames.length === 6 && m.frames.every((f) => typeof f.digest === 'string' && typeof f.t === 'number' && typeof f.off === 'number')
     && m.schedule.endpointExact === true && m.schedule.endpoint === 'exclusive' && typeof m.schedule.worstGapUlps === 'number'
-    && m.picture.deflate === 'stored' && m.picture.deflateReproducible === true && m.picture.jitterSeed === DEFAULTS.jitterSeed
-    && m.pins && m.pins.governor && m.pins.jitter && typeof m.witnesses.contended === 'number'
+    && m.picture.jitterSeed === DEFAULTS.jitterSeed && /png/.test(m.picture.container)
+    && m.pins && m.pins.governor && m.pins.jitter && m.pins.autoscale && typeof m.witnesses.contended === 'number'
     && /ffmpeg -framerate 30/.test(m.ffmpeg) && m.caveats.length >= 3,
-    { format: m.format, frames: m.frames.length, endpoint: m.schedule.endpoint, deflate: m.picture.deflate, ffmpeg: m.ffmpeg.slice(0, 70) });
+    { format: m.format, frames: m.frames.length, endpoint: m.schedule.endpoint, container: m.picture.container, ffmpeg: m.ffmpeg.slice(0, 50) });
 
-  const H = createExactRenderer(lab.LW, { canvas: lab.canvas, grab: fakeGrabFor(lab, {}), energies: () => E12 }).hazards();
-  const covered = ['jitter', 'governor', 'autoscale', 'fieldclock', 'camera', 'modulation', 'h2', 'interloper'];
-  judge('EVERY HAZARD IN THE REGISTER IS THE SAME LIST THE DRIVER PINS, THE REPORT SHOWS AND THIS FILE TESTS — one register, so they cannot drift apart. Thirteen found, eight of them with a test above that goes RED when the pin is removed, and each carries what it is, where it lives, the pin and the witness',
+  const H = film.hazards();
+  const KIT = ['modulation', 'dpr', 'overlays', 'deflate', 'gamut'];
+  const tested = ['jitter', 'governor', 'autoscale', 'fieldclock', 'camera', 'modulation', 'h2', 'interloper'];
+  judge('EVERY HAZARD IN THE REGISTER IS THE SAME LIST THE FRAME PINS, THE REPORT SHOWS AND THIS FILE TESTS, AND EACH SAYS WHOSE IT IS NOW: thirteen found; H1–H5, H7–H9 are λWAVES\' (the jitter seed 13, the governor and AUTO SCALE named among them), the modulation clock, the DPR, the overlays, the container and the gamut are the KIT\'S; eight have a test above that goes RED when the pin is removed',
     HAZARDS.length === 13 && HAZARD_IDS.length === 13
-    && HAZARDS.every((h) => h.id && h.what && h.where && h.pin && h.witness)
-    && covered.every((id) => HAZARD_IDS.includes(id))
-    && H.readings.length === 13 && H.readings.every((r2) => typeof r2.note === 'string' && r2.state)
-    && PATH_DEPENDENT_LAYERS.includes('particles'),
-    { hazards: HAZARD_IDS, pinRemovalTests: covered.length, blockingNow: H.blocking });
+    && HAZARDS.every((h) => h.id && h.what && h.where && h.pin && h.witness && (h.owner === 'app' || h.owner === 'kit'))
+    && HAZARDS.filter((h) => h.owner === 'kit').map((h) => h.id).join() === KIT.join()
+    && ['jitter', 'governor', 'autoscale'].every((id) => HAZARDS.find((h) => h.id === id).owner === 'app')
+    && tested.every((id) => HAZARD_IDS.includes(id))
+    && H.readings.length === 13 && H.readings.every((x) => typeof x.note === 'string' && x.state),
+    { app: HAZARDS.filter((h) => h.owner === 'app').map((h) => h.id), kit: HAZARDS.filter((h) => h.owner === 'kit').map((h) => h.id), blockingNow: H.blocking });
 
-  /* the plan warns BEFORE anything runs */
   const warnLab = fakeLab({ camera: { autoRotate: true }, modulation: true });
-  const wex = createExactRenderer(warnLab.LW, { canvas: warnLab.canvas, grab: fakeGrabFor(warnLab, {}), energies: () => E12 });
-  const p = wex.plan({ fps: 30, seconds: 6, observable: 'density' });
-  judge('AND THE PLAN SAYS ALL OF IT BEFORE THE BUTTON COMMITS TO ANYTHING: the schedule, the cost in time and bytes, and the live warnings — a moving camera, a running modulation, and a size that came from THIS machine\'s device pixel ratio rather than from the caller',
-    p.ok && p.N === 180 && p.warnings.length >= 3
+  const p = filmFor(warnLab, {}).plan({ fps: 30, seconds: 6, observable: 'density' });
+  judge('AND THE PLAN SAYS ALL OF IT BEFORE THE BUTTON COMMITS TO ANYTHING: the schedule, the cost (the kit\'s estimate), and the live warnings — a moving camera, a running modulation, and a size that came from THIS machine\'s device pixel ratio rather than from the caller',
+    p.ok && p.N === 180 && p.warnings.length >= 3 && /frames/.test(p.cost.human)
     && p.warnings.some((w) => /CAMERA IS MOVING/.test(w)) && p.warnings.some((w) => /MODULATION RACK IS RUNNING/.test(w))
     && p.warnings.some((w) => /SIZE CAME FROM THIS MACHINE/.test(w))
     && p.hazards.blocking.includes('camera') && p.hazards.blocking.includes('modulation'),
@@ -665,29 +649,24 @@ const bytesOf = (r) => r.files.map((f) => Buffer.from(f.bytes).toString('base64'
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
    §11 — THE CONTRACT WITH capture.js.  This file imports its primitives; a rename must go RED here, not in a
-   browser at frame 300 of a ninety-minute render.
+   browser at frame 300 of a ninety-minute film.
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 {
   const needed = ['AU_FS', 'VIEW_NAMES', 'viewCarriesGlobalPhase', 'wavePeriod', 'seamError', 'planPeriodRecording',
-    'alignedBytesPerRow', 'planBands', 'maxPictureSize', 'fitPicture', 'slug', 'stamp', 'uniqueName',
-    'toRGBA', 'crc32', 'zlibStored', 'pngFilter', 'buildPNG'];
+    'maxPictureSize', 'fitPicture', 'slug', 'stamp', 'uniqueName', 'captureName', 'readback', 'configureCopy', 'captionOver'];
   const missing = needed.filter((n) => CAP[n] === undefined);
-  /* and the two files must agree about the loop's endpoint, or a still and a rendered frame are two schedules */
   const mine = exactSchedule({ mode: 'loop', T: D12.T, t0: 3.25, fps: 30, frames: 180 });
   const theirs = CAP.loopSchedule({ T: D12.T, N: 180, t0: 3.25 });
   let sameTimes = true;
   for (let k = 0; k < 180; k++) if (mine.at(k) !== theirs.at(k)) sameTimes = false;
-  /* AND THE MERGE ORDER, WHICH COST A BUG: capture.js' plan carries a `schedule` of its own, so planExact must
-     assign OURS over it — otherwise a caller renders THIS file's endpoint rule against THAT file's times, and
-     for a loop the two agree, so nothing would ever have said. */
   const merged = planExact(D12, { mode: 'loop', fps: 30, seconds: 6, observable: 'density', energies: E12, t0: 45238.93, foldT0: true });
-  judge('AND planExact HANDS BACK ITS OWN SCHEDULE, NOT THE ONE IT WRAPPED. capture.js\' plan carries a `schedule` key of its own, so the merge assigns ours OVER it; getting that backwards silently returned the sibling\'s times, which agree with ours for a loop at an ordinary origin and disagree for a SPAN, and for a loop whose origin was folded — which is how it was caught',
+  judge('AND planExact HANDS BACK ITS OWN SCHEDULE, NOT THE ONE IT WRAPPED. capture.js\' plan carries a `schedule` key of its own, so the merge assigns ours OVER it; getting that backwards silently returned the sibling\'s times, which agree with ours for a loop at an ordinary origin and disagree for a SPAN, and for a loop whose origin was folded',
     merged.schedule.mode === 'loop' && merged.schedule.folded === true && merged.schedule.t0 !== 45238.93
     && typeof merged.schedule.worstGapUlps === 'number' && merged.schedule.endpoint === 'exclusive'
     && spanHasOwnSchedule(),
     { t0: merged.schedule.t0, folded: merged.schedule.folded, hasOurKeys: typeof merged.schedule.worstGapUlps === 'number' });
 
-  judge('THE CONTRACT WITH capture.js IS PINNED HERE. This file imports eighteen of its primitives — the PNG parts, the readback arithmetic, the period reader and the names — so a rename in the sibling goes RED in this suite rather than at frame 300 of a ninety-minute render. And the two files agree bit for bit about a loop\'s times, so a still taken by the camera and a frame taken by the renderer are the same schedule',
+  judge('THE CONTRACT WITH capture.js IS PINNED HERE. This file imports its primitives — the period reader, the names, the readback both roads share and the caption — so a rename in the sibling goes RED in this suite. And the two files agree bit for bit about a loop\'s times, so ONE PERIOD (capture.js\' plan) and the film the kit encodes from it (this file\'s schedule) are the same schedule',
     missing.length === 0 && sameTimes && CAP.ENDPOINT === ENDPOINT.loop && MODES.length === 2,
     { imported: needed.length, missing, sameTimesAsCapture: sameTimes, captureEndpoint: CAP.ENDPOINT, ourLoopEndpoint: ENDPOINT.loop });
 }
@@ -699,18 +678,13 @@ function spanHasOwnSchedule() {
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
    §12 — WHAT ONLY A BROWSER CAN ANSWER
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
-console.log('\n      NOT PROVED HERE — a browser must answer these, and createExactRenderer(LW).verify() asks the\n'
-  + '      first one in about a second at 160px:\n'
-  + '        1  IS THE REAL RAY-MARCH A PURE FUNCTION OF THE PINNED INPUTS?  The fake shader in §6 is a model of\n'
-  + '           field.js\' closure, not field.js.  verify() renders the same short schedule twice on the real GPU\n'
-  + '           and compares the digests; a mismatch means something in the closure was missed.\n'
-  + '        2  DOES THE GPU ITSELF ROUND THE SAME WAY TWICE?  WGSL arithmetic is deterministic per device, but\n'
-  + '           two DIFFERENT GPUs may not agree bit for bit on a 300-step ray-march of transcendental functions.\n'
-  + '           The claim this file makes is "the same schedule on the same device gives the same bytes at any\n'
-  + '           speed"; "the same bytes on a different GPU" is a stronger claim and it is NOT made.\n'
-  + '        3  DOES getCurrentTexture() OUTSIDE A rAF CALLBACK STILL COPY?  capture.js measured that it does at\n'
-  + '           8192², and this file inherits the rule that the render and the copy sit in one synchronous block.\n'
-  + '        4  DOES CompressionStream(\'deflate\') GIVE THE SAME BYTES ACROSS BROWSER BUILDS?  Assume not — that\n'
-  + '           is hazard H12, and deflate: "stored" is the road that does not need the answer.\n');
+console.log('\n      NOT PROVED HERE — a browser must answer these (the film verifier\'s brief, research/release-0.5.0/BRIEF-C7-VERIFY.md):\n'
+  + '        1  IS THE REAL RAY-MARCH A PURE FUNCTION OF THE PINNED INPUTS?  The fake shader in §6 is a model of field.js\'\n'
+  + '           closure.  createFilm(LW).verify() films the same short schedule twice on the real GPU and compares digests.\n'
+  + '        2  DOES THE GPU ITSELF ROUND THE SAME WAY TWICE?  "The same schedule on the same device gives the same pixels at\n'
+  + '           any speed" is the claim; "the same pixels on a different GPU" is NOT made.\n'
+  + '        3  THE KIT\'S ENCODER: WebCodecs H.264 and the canvas PNG writer are the browser\'s.  An MP4 is lossy and its bytes\n'
+  + '           are not claimed; the PNG frames are lossless and are compared by their decoded pixels.\n'
+  + '        4  THE FILM ROAD BEFORE AND AFTER C7 AGREES: EXPORT FRAMES\' decoded pixels on the pre-C7 tree and on this one.\n');
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'render-exact.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);

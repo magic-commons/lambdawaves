@@ -9,11 +9,11 @@
  * gamut map, with HUE and INVERT; the camera is writeView's pose.  1 unit = 1 bohr (1 ħ/bohr on a momentum grid, and
  * the files say so).  The work — decode, march, write — is ONE maths-worker op (mathworker.js `export`), so a 128³
  * cube's two million formatted numbers never sit on the frame thread: the page reads, posts, and downloads through
- * capture.js's save().  The stored ZIP is render-exact.js's (EXPORT FRAMES'), not a copy.
+ * capture.js's save().  The stored ZIP is the kit's (lab/mir/core/zip.js StoredZip, the recorder's frame parts' own), not a copy.
  *
  * STATUS: EXACT file formats (proved by tests/export3d.test.mjs in node: an analytic sphere, every byte layout read
  * back); the surface is NUMERICAL — marching cubes on the grid, so a shape is exact up to the grid spacing. */
-import { zipStored } from './render-exact.js';
+import { StoredZip } from './mir/core/zip.js';
 import { slug, stamp, uniqueName } from './capture.js';
 
 /** the five FILE rows (R6: no dialog; each row is one file and its tooltip names what opens it) */
@@ -249,15 +249,17 @@ export function npy(descr, shape, data) {
 const axisOf = (N, half) => Float32Array.from({ length: N }, (_, i) => (i + 0.5) / N * 2 * half - half);
 
 /** NPZ: psi.npy (<c8, shape (N, N, N), psi[i, j, k] = ψ(x_i, y_j, z_k) — the cube's order), axis.npy (<f4, N) and
- *  meta.json, in render-exact.js's stored ZIP */
+ *  meta.json, in the kit's stored ZIP — a Blob (StoredZip.finish) */
 export function npz({ re, im, N, half, space = 'r', t = 0, label = '', build = '', names = null }) {
   const n = N, psi = new Float32Array(2 * n * n * n);
   for (let i = 0, o = 0; i < n; i++) for (let j = 0; j < n; j++) for (let k = 0; k < n; k++, o += 2) { const s = i + n * j + n * n * k; psi[o] = re[s]; psi[o + 1] = im[s]; }
   const meta = { label, t, half, N: n, spacing: 2 * half / n, space, units: space === 'p' ? 'hbar/bohr (momentum space)' : 'bohr',
     index: 'psi[i, j, k] = psi(axis[i], axis[j], axis[k]) — x, y, z (the cube file\'s order); axis = voxel centres', build, generator: 'lambdawaves',
     ...(names ? { names } : {}) };
-  return zipStored([{ name: 'psi.npy', bytes: npy('<c8', [n, n, n], psi) }, { name: 'axis.npy', bytes: npy('<f4', [n], axisOf(n, half)) },
-    { name: 'meta.json', bytes: enc(JSON.stringify(meta, null, 1) + '\n') }]);
+  const zip = new StoredZip();
+  zip.add('psi.npy', npy('<c8', [n, n, n], psi)); zip.add('axis.npy', npy('<f4', [n], axisOf(n, half)));
+  zip.add('meta.json', enc(JSON.stringify(meta, null, 1) + '\n'));
+  return zip.finish();
 }
 
 /** %13.5E, as Gaussian writes a cube value */
@@ -352,7 +354,7 @@ export function createExporter(env) {
       const name = uniqueName(`lambdawaves-${slug(scene.label) || 'state'}-${stamp().slice(0, 13)}.${fmt}`, taken);
       env.save({ blob: new Blob([r.bytes], { type: spec.mime }), name });
       const totalMs = nowMs() - t0;
-      last = { ok: true, fmt, kind: spec.kind, name, bytes: r.bytes.byteLength, triangles: r.triangles || 0, vertices: r.vertices || 0, iso: r.iso, isoFrac: r.isoFrac,
+      last = { ok: true, fmt, kind: spec.kind, name, bytes: r.bytes.byteLength ?? r.bytes.size, triangles: r.triangles || 0, vertices: r.vertices || 0, iso: r.iso, isoFrac: r.isoFrac,
         N: g.N, half: g.half, space: scene.space, rhoMax: g.rhoMax, nan: r.nan, readMs, workerMs: r.ms, marchMs: r.marchMs, roundTripMs, totalMs };
       env.status(`EXPORTED ${spec.kind}.${fmt} · ${spec.kind === 'shape' ? (r.triangles >= 1000 ? Math.round(r.triangles / 1000) + ' k' : r.triangles) + ' triangles' : g.N + '³ grid'} · ${sizeOf(last.bytes)} · ${(totalMs / 1000).toFixed(2)} s`, 'live');
       return last;

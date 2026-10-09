@@ -136,7 +136,7 @@ function work(m) {
     else if (m.op === 'ladder') { out = { result: solveLadder(m.params || {}) }; }
     else if (m.op === 'h2curve') { out = { result: h2CurveTable(m.Rmin, m.Rmax, m.count) }; }
     else if (m.op === 'gas.stats') { out = gasStats(m); }
-    else if (m.op === 'export') { out = buildFile(m); transfer = out.bytes ? [out.bytes.buffer] : []; }
+    else if (m.op === 'export') { out = buildFile(m); transfer = out.bytes && out.bytes.buffer ? [out.bytes.buffer] : []; }   // an NPZ is a Blob (the kit's StoredZip): cloned, not transferred
     else if (m.op === 'chem.solve') { out = chemSolve(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.ground') { out = chemGround(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.open') { out = chemOpen(m); transfer = chemTransfer(out); }

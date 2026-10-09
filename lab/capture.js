@@ -95,7 +95,7 @@
  *   const cap = createCapture(LW, { canvas: dom.canvas, energies, caption });   // once, after boot; LW is window.__LW
  *   THE CAMERA BUTTON        await cap.picture({ scale: 2 }) or ({ width: 3840 }) → { blob, name, w, h, bytes, ms, clipped }
  *   THE LOOP BUTTON'S PLAN   cap.planLoop({ fps: 30, seconds: 6 }) → plan.ok, plan.message, plan.schedule (the film
- *                            itself is render-exact.js': createExactRenderer(LW).render({ schedule, format: 'mp4' }))
+ *                            itself is render-exact.js': createFilm(LW).render({ schedule, format: 'mp4' }))
  *   cap.save(r) hands a file over (the kit's saveBlob); cap.limits() is the ceiling; every returned object carries `name`.
  *   `createCapture(LW, { energies })` — HAND IT THE HOST'S OWN ENERGY EXPRESSION.  Without it this file falls back to
  *   LW.reg.Ediag, which under a PROPAGATOR (the STURMIAN switch) is the label's <a|H|a>/<a|S|a> and not an eigenvalue;

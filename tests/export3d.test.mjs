@@ -160,7 +160,10 @@ function readGLB(bytes) {
 }
 
 /* ── 6 · NPZ, read back through its own ZIP headers ── */
+const blobBytes = new WeakMap();
+const read = async (b) => { if (b instanceof Blob) blobBytes.set(b, new Uint8Array(await b.arrayBuffer())); return b; };
 function unzip(z) {
+  if (z instanceof Blob) z = blobBytes.get(z);                 // 0.5.0 C7: an NPZ is the kit's StoredZip Blob, read once below
   const dv = new DataView(z.buffer, z.byteOffset, z.byteLength), out = {}; let p = 0;
   while (dv.getUint32(p, true) === 0x04034b50) {
     const method = dv.getUint16(p + 8, true), size = dv.getUint32(p + 18, true), nl = dv.getUint16(p + 26, true), xl = dv.getUint16(p + 28, true);
@@ -177,7 +180,7 @@ function readNpy(b) {
 }
 {
   const n = 12, half = 3, g = grid(n, half, (x, y, z) => [x + 0.1 * y, z - 0.2 * x]);
-  const f = unzip(npz({ re: g.re, im: g.im, N: n, half, space: 'r', t: 1.5, label: '1s₊0', build: 'test' }));
+  const f = unzip(await read(npz({ re: g.re, im: g.im, N: n, half, space: 'r', t: 1.5, label: '1s₊0', build: 'test' })));
   assert.deepEqual(Object.keys(f), ['psi.npy', 'axis.npy', 'meta.json']);
   const psi = readNpy(f['psi.npy']), axis = readNpy(f['axis.npy']), meta = JSON.parse(new TextDecoder().decode(f['meta.json']));
   assert.match(psi.head, /'descr': '<c8'/); assert.match(psi.head, /'fortran_order': False/); assert.match(psi.head, new RegExp(`'shape': \\(${n}, ${n}, ${n}\\)`));
@@ -192,7 +195,7 @@ function readNpy(b) {
   }
   assert.equal(worst, 0); assert.ok(Math.abs(A[0] - (-half + half / n)) < 1e-6 && Math.abs(A[n - 1] - (half - half / n)) < 1e-6);
   assert.equal(meta.N, n); assert.equal(meta.half, half); assert.equal(meta.space, 'r'); assert.equal(meta.t, 1.5); assert.equal(meta.units, 'bohr'); assert.equal(meta.label, '1s₊0');
-  const p = JSON.parse(new TextDecoder().decode(unzip(npz({ re: g.re, im: g.im, N: n, half, space: 'p' }))['meta.json']));
+  const p = JSON.parse(new TextDecoder().decode(unzip(await read(npz({ re: g.re, im: g.im, N: n, half, space: 'p' })))['meta.json']));
   assert.equal(p.space, 'p'); assert.match(p.units, /hbar\/bohr/);
   pass(`NPZ: the stored ZIP's local headers name psi.npy, axis.npy, meta.json; psi.npy is <c8 (${n}, ${n}, ${n}) with psi[i, j, k] = ψ(x_i, y_j, z_k), bytes round-trip exactly; axis.npy <f4 (${n},) the voxel centres; meta.json carries N, half, space ('r' and 'p'), units, t`);
 }
@@ -228,7 +231,7 @@ function readNpy(b) {
   const base = { texels: tex, N, half: HALF, rhoMax, isoFrac: ISO / rhoMax, label: '1s₊0', build: 'test', space: 'r', t: 0, atoms: [{ Z: 1, x: 0, y: 0, z: 0 }],
     colour: { on: false }, camera: { eye: [3.3, 0, 0], dir: [1, 0, 0], right: [0, 1, 0], up: [0, 0, 1], yfov: 0.6, aspect: 1.6 } };
   const out = Object.fromEntries(EXPORTS.map((e) => [e.fmt, buildFile({ ...base, fmt: e.fmt })]));
-  for (const [f, r] of Object.entries(out)) assert.ok(!r.error && r.bytes instanceof Uint8Array && r.bytes.byteLength > 0, f + ' ' + r.error);
+  for (const [f, r] of Object.entries(out)) assert.ok(!r.error && (r.bytes instanceof Uint8Array || r.bytes instanceof Blob) && (r.bytes.byteLength ?? r.bytes.size) > 0, f + ' ' + r.error);
   const G = readGLB(out.glb.bytes);
   assert.equal(G.json.accessors[3].count / 3, out.glb.triangles); assert.equal(new DataView(out.stl.bytes.buffer).getUint32(80, true), out.glb.triangles);
   assert.ok(Math.abs(out.glb.triangles - nt) / nt < 0.05, 'the f16 grid marches to the f32 one\'s surface');
@@ -239,10 +242,10 @@ function readNpy(b) {
   /* 0.4.0 S1: the orbital's names in all three metadata homes — the GLB's extras, the cube's comment line, the NPZ's meta.json */
   const names = { group: 'C2v', config: '(1a1)²(2a1)²(1b2)²(3a1)²(1b1)²', orbital: { k: 5, frontier: 'HOMO', plain: '1b1', latex: '$1b_{1}$', ascii: '1b1' } };
   const nGlb = readGLB(buildFile({ ...base, fmt: 'glb', names }).bytes), nCube = new TextDecoder().decode(buildFile({ ...base, fmt: 'cube', names }).bytes).split('\n')[0];
-  const nMeta = JSON.parse(new TextDecoder().decode(unzip(buildFile({ ...base, fmt: 'npz', names }).bytes)['meta.json']));
+  const nMeta = JSON.parse(new TextDecoder().decode(unzip(await read(buildFile({ ...base, fmt: 'npz', names }).bytes))['meta.json']));
   assert.deepEqual(nGlb.json.asset.extras.names.orbital, names.orbital); assert.deepEqual(nMeta.names, names);
   assert.equal(nCube, '1s+0 - MO 5 1b1 $1b_{1}$ HOMO, C2v', nCube);
   assert.equal(ascii('0.3.2-alpha · the offer'), '0.3.2-alpha - the offer'); assert.equal(ascii('2p₋1 + 3d₊2'), '2p-1 + 3d+2');
-  pass(`the worker op from half-float texels: all five files (${EXPORTS.map((e) => e.fmt + ' ' + out[e.fmt].bytes.byteLength).join(', ')} bytes), the GLB's and the STL's triangle counts agree (${out.glb.triangles}), the camera sits at dist·half, and an empty field, an ISO above the peak and an unknown format are refused`);
+  pass(`the worker op from half-float texels: all five files (${EXPORTS.map((e) => e.fmt + ' ' + (out[e.fmt].bytes.byteLength ?? out[e.fmt].bytes.size)).join(', ')} bytes), the GLB's and the STL's triangle counts agree (${out.glb.triangles}), the camera sits at dist·half, and an empty field, an ISO above the peak and an unknown format are refused`);
 }
 console.log('GREEN export3d.test');
