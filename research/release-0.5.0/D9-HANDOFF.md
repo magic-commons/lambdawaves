@@ -27,16 +27,21 @@
    h2plus → "opened LEGACY/H2PLUS · retired in 0.5.0: H₂⁺ (opened as MOLECULES · H₂ σu)", chem on, preset H2, VIEW orbital 2,
    owner, no page error; qcd → "opened LEGACY/QCD · retired in 0.5.0: QCD (QUARKONIUM keeps its parameters)", ham cornell,
    qcd bottom/log .51/.23/.81, no page error.
-5. NEXT — HELIUM (commit 3), the history cases, the demos, the H₂/ELECTROSTATICS measure, the ledger + REPORT + D9-BUILD.
+5. DONE `5baa301` — HELIUM deleted: **34,480 → 34,246 (−234)**: helium.js 140 + heliumview.js 75 + tests/helium.test.mjs;
+   mathworker's `helium` op; rack.js −14 (card, imports, every field-owner branch, shift-click, __LW.helium/placeElectron,
+   `instruments.helium`); THE SHIM: `I.helium.on` (no chem/h2 owner) → `setElement(2); fillValence();` + notice "retired in 0.5.0:
+   HELIUM (opened as ATOM · He 1s)"; new-project regenerated (16,329 B, --check in step); digest-lock's `helium` scene gone;
+   current / molecular-names / legacy-boot (B33, B37 retired) follow. capture.js / render-exact.js guarded lines and the WGSL
+   space-4 branch LEFT for C7. Node GREEN **82 suites**; browser: molecular-names 6/6, current 15/15, render-regressions 2/2;
+   probe helium → ham atom, atomZ 2, 1 populated, ATOMS open, no page error.
+6. NEXT — the history suite's three fixture cases, the demos, the H₂/ELECTROSTATICS measure, the ledger + REPORT + D9-BUILD.
 
 ## The exact next step
 
-HELIUM: `lab/heliumview.js` (75) + `lab/helium.js` (140) leave; mathworker's `helium` op and rack's HELIUM_BASES import go;
-`tests/helium.test.mjs` goes; shim in restore: `I.helium.on` (no chem/h2 owner) → `setElement(2); fillValence();` +
-`gone.push('HELIUM (opened as ATOM · He 1s)')`; drop `helium` from new-project (`node tools/new-project.mjs` + `--check`),
-digest-lock's `helium` scene, `current`, `legacy/boot` guards. LEAVE `lab/capture.js` / `lab/render-exact.js`'s guarded
-`LW.helium` lines (C7's files). `node tests/pwa.test.mjs --write`; node gate; `molecular-names`, `current`,
-`render-regressions`, `.tmp/probe-legacy.mjs helium`.
+`tests/history.browser-test.mjs`: three cases — open each of `tests/fixtures/legacy-{h2plus,helium,qcd}.lambdawaves.json`
+through `P.importText` + `P.open`; each names the retired window in the PROJECTS status and lands on its shim target
+(h2plus → chem on, H2, orbital view 2; helium → hamiltonian atom, Z 2; qcd → cornell bottom/log .51/.23/.81).
+Run `history` (39 + 3). Commit.
 
 ## Decisions so far
 
