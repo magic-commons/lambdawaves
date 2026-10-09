@@ -122,7 +122,7 @@ try {
     assert.equal(v.altArrow.length, 3, 'three Alt+Arrow keydowns were seen'); assert.ok(v.altArrow.every((x) => x === true), 'each one defaultPrevented');
   });
   await check('a double-click (RESET VIEW) brings the pivot home', `
-    const cv = document.getElementById('field'); __LW.camera.setShift(0.3, 0.2); cv.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    const cv = document.getElementById('field'), b = cv.getBoundingClientRect(); __LW.camera.setShift(0.3, 0.2); cv.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, clientX: b.left + b.width / 2, clientY: b.top + b.height / 2 }));   // 0.5.0 C3/C9: a double-click at the canvas ORIGIN now falls in the rack column's UI space and the scene guard keeps it; a real double-click lands on the open stage
     return { shift: __LW.obs.shift };`, (v) => assert.deepEqual(v.shift, [0, 0]));
 
   /* ── 4 · THE PANEL, THE SCOPE, THE LINK (K3) ── */
