@@ -157,40 +157,35 @@ const importVh = /class="vh"/.test(html) && !/accept="application\/json,\.json" 
 judge('A6 index.html carries the two skip links, both racks as tabindex="-1" fragment targets (a target, never a stop), the canvas as role="img", and IMPORT\'s file input visually hidden rather than `hidden` — which resolved to display:none !important and took it out of the tab order AND out of the accessibility tree',
   skipCount === 2 && racksNeg && fieldImg && importVh, { skipCount, racksNeg, fieldImg, importVh });
 
-/* ── 5 · the single-key law is still key-and-role shaped ─────────────────────────────────────── */
-const rack = TEXT.get('lab/keys.js') || '';   // wave 130 seam 10: the dispatcher and its key-and-role law live in lab/keys.js
-const owned = /const OWNED = \{/.test(rack);
-const sliderOwnsNoSpace = /slider:\s*new Set\(\[\.\.\.ARROWS[^\]]*\]\)/.test(rack) && !/slider:\s*new Set\(\[[^\]]*'Space'/.test(rack);
-/* WAVE 88 · THE LAW THIS LINE GUARDS HAS CHANGED, SO THE LINE CHANGES WITH IT — it is not deleted
-   and it is not loosened.  Josh ruled Space to the transport alone ("the space bar will act as a
-   'click' or an activate … make it so that the space bar ONLY affects the playhead AND the modulation
-   play"), because after any click something is focused and Space therefore meant whatever you last
-   touched.  ENTER is the activator now, for both roles, so a keyboard user loses nothing.
-   THREE THINGS ARE ASSERTED, because taking Space out of OWNED is only a third of the fix:
-     · no role owns Space any more (the guard cannot hand it over),
-     · the dispatcher CANCELS it (or the browser fires a focused button's click by itself),
-     · a <select> no longer returns early on it (a focused menu was swallowing it too). */
-const buttonOwnsEnterOnly = /button:\s*new Set\(\['Enter'\]\)/.test(rack);
-const noRoleOwnsSpace = !/(?:button|radio):\s*new Set\(\[[^\]]*'Space'/.test(rack);
-const spaceCancelled = /if \(e\.code === 'Space'\) e\.preventDefault\(\);/.test(rack);
-const selectYieldsSpace = /tag === 'SELECT' && e\.code !== 'Space'/.test(rack);
-const buttonOwnsSpace = buttonOwnsEnterOnly && noRoleOwnsSpace && spaceCancelled && selectYieldsSpace;
-const stageContinue = /if \(a\.stage && !stageHasFocus\(\)\) continue;/.test(rack);
-/* WAVE 68: the guard reads ROLES (the logo is the lab's one <div role="button">, and Space on it opened
-   the menu AND started the clock), refuses a control that will not act, and the loop honours a handled
-   event.  The TAB RULE moved OFF the two stage actions and onto THE KEY, where no rebinding can get
-   underneath it — two clicks in the shipped KEYS panel put wave 57's trap back, persisted to storage. */
-const roleAware = /\[role="button"\]/.test(rack) && /const seatOf = \(el\) =>/.test(rack);
-const notDead = /w\.disabled === true \|\| w\.getAttribute\('aria-disabled'\) === 'true'/.test(rack);
-const handled = /if \(e\.defaultPrevented\) return;/.test(rack);
-const tabLaw = /if \(e\.code === 'Tab' && !stageHasFocus\(\)\) return;/.test(rack);
-/* optimization N4: the refusal lived in the SETTINGS KEYS capture branch, dead since 5f6421e deleted its panel; the law is
-   lab/shortcuts.js bindingError now — the one road of the keyboard editor, the saved overrides and keys.bind. */
-const tabRefused = /if \(binding\.key === 'Tab' && !action\.stage\) return 'Tab is reserved for focus navigation\.';/.test(TEXT.get('lab/shortcuts.js') || '');
-judge('A7 the single-key law is a property of THE KEY AND THE ROLE — a slider owns the arrows, a button owns ENTER, and the arrows still step time from a focused switch — with ONE key carved out of it entirely: SPACE IS THE TRANSPORT\'S (wave 88, Josh). No role owns it, the dispatcher cancels its native activation, and a focused <select> yields it too; Enter is the activator everywhere. And the dispatcher\'s stage guard is a `continue`, not a `return` — a `return` abandoned the whole ACTIONS loop rather than skipping one action',
+/* ── 5 · the single-key law is still key-and-role shaped — 0.5.0 C3: lab/keys.js and lab/shortcuts.js LEFT for MIR's ONE KEY TABLE
+   (lab/mir/shell/keys.js: ownsKey, pickAction, the one listener, bindError, read by its exact path) through λWAVES' rows (lab/key-table.js).
+   The laws are the same; where each one lives now:
+     · ROLES, not tags: the kit's ownsKey reads `role` (a slider its arrows, a radio its arrows, a button / link its Space and Enter);
+     · A HANDLED EVENT IS HANDLED and A CONTROL THAT WILL NOT ACT DOES NOT OWN THE KEYS (wave 68): every λWAVES row is `overControls`, so a
+       control keeps a key only by acting on it — the kit's knob, seg and fader prevent the default on what they turn — and the one listener
+       returns on e.defaultPrevented; a disabled one acts on nothing and the app has the key;
+     · SPACE IS THE TRANSPORT'S (wave 88, Josh): over any control (overControls), its release taken so a button never clicks (the kit's
+       `taken`), and over a focused <select> too (key-table's own listener: the kit counts a select a field);
+     · THE TAB RULE: the stage rows run only while the stage has the focus (`when`, which the kit's pickAction skips past — a `continue`), and
+       the binding law refuses Tab on any chord to every other row (key-table's check over the kit's bindError). */
+const kitKeys = (() => { try { return fs.readFileSync(path.join(LAB, 'mir/shell/keys.js'), 'utf8'); } catch (_) { return ''; } })();
+const kt = TEXT.get('lab/key-table.js') || '';
+const owned = /export function ownsKey\(n, chord\)/.test(kitKeys) && /n\.getAttribute && n\.getAttribute\('role'\)/.test(kitKeys);
+const sliderOwnsNoSpace = /role === 'slider'[^\n]*return ARROWS\.has\(chord\) \|\| chord === 'PageUp' \|\| chord === 'PageDown';/.test(kitKeys);
+const buttonOwnsEnterOnly = /overControls: true,/.test(kt);                 // a button's Space is the transport's; Enter stays the activator (no row holds it)
+const noRoleOwnsSpace = buttonOwnsEnterOnly && /if \(owned && !a\.overControls\) continue;/.test(kitKeys);
+const spaceCancelled = /if \(owned\) taken\.add\(e\.code\);/.test(kitKeys) && /if \(taken\.delete\(e\.code\)\) e\.preventDefault\(\);/.test(kitKeys);
+const selectYieldsSpace = /e\.code !== 'Space' \|\| e\.defaultPrevented \|\| !t \|\| t\.tagName !== 'SELECT'/.test(kt);
+const stageContinue = /when: a\.stage \? stageHasFocus : undefined/.test(kt) && /if \(ok\) return a;/.test(kitKeys);
+const roleAware = owned && /\^\(radio\|tab\|option\|menuitem/.test(kitKeys);
+const notDead = buttonOwnsEnterOnly && /if \(rec \|\| e\.defaultPrevented/.test(kitKeys);
+const handled = /if \(rec \|\| e\.defaultPrevented \|\| e\.isComposing/.test(kitKeys);
+const tabLaw = /when: a\.stage \? stageHasFocus : undefined/.test(kt) && /p\.code === 'Tab' && \(p\.mods\.length === 0/.test(kitKeys);
+const tabRefused = /\/\(\^\|\\\+\)Tab\$\/\.test\(c \|\| ''\) \? 'Tab is reserved for focus navigation\.'/.test(kt);
+judge('A7 the single-key law is a property of THE KEY AND THE ROLE — a slider owns the arrows, a button owns ENTER, and the arrows still step time from a focused switch — with ONE key carved out of it entirely: SPACE IS THE TRANSPORT\'S (wave 88, Josh). No role keeps it from the transport, its native activation is cancelled, and a focused <select> yields it too; Enter is the activator everywhere. And the stage guard skips one action (a `continue`), never the table (0.5.0 C3: MIR\'s ONE KEY TABLE through lab/key-table.js)',
   owned && sliderOwnsNoSpace && buttonOwnsEnterOnly && noRoleOwnsSpace && spaceCancelled && selectYieldsSpace && stageContinue,
   { owned, sliderOwnsNoSpace, buttonOwnsEnterOnly, noRoleOwnsSpace, spaceCancelled, selectYieldsSpace, stageContinue });
-judge('A11 the guard knows ROLES and not tags, refuses to swallow for a control that will not act, the ACTIONS loop honours e.defaultPrevented, and TAB off the stage is the browser\'s whatever the binding table says — enforced on THE KEY in the dispatcher and refused by the binding law (lab/shortcuts.js), so the trap wave 57 removed cannot be rebuilt by rebinding',
+judge('A11 the guard knows ROLES and not tags, refuses to swallow for a control that will not act, the one listener honours e.defaultPrevented, and TAB off the stage is the browser\'s whatever the binding table says — the stage rows run on the stage alone and the binding law (lab/key-table.js over the kit\'s bindError) refuses Tab to every other row, so the trap wave 57 removed cannot be rebuilt by rebinding',
   roleAware && notDead && handled && tabLaw && tabRefused, { roleAware, notDead, handled, tabLaw, tabRefused });
 
 console.log('\n      ' + TEXT.size + ' files read (no recursion, no browser) · wall time ' + ((Date.now() - T0) / 1000).toFixed(2) + ' s');

@@ -14,7 +14,7 @@ export const FAMILIES = Object.freeze({
   'lambdawaves.q0.notebook': ['rack.js NB_KEY', 'PROJECT'], 'lambdawaves.q0.notebook.title': ['rack.js NB_TITLE', 'PROJECT'],
   'lambdawaves.q0.notebook.subtitle': ['rack.js NB_SUBTITLE', 'PROJECT'], 'lambdawaves.q0.projects': ['rack.js PJ_KEY', 'PROJECT'],
   'lambdawaves.q0.experiment': ['rack.js LS_EXP', 'PROJECT'], 'lambdawaves.q0.presentation': ['rack.js LS_PRES', 'PROJECT'],
-  'lambdawaves.q0.keys': ['keys.js', 'PREFERENCE'], 'lw.keyboard.position.v1': ['keymap.js', 'PREFERENCE'], 'lw.lean.v1': ['window-chrome.js', 'PREFERENCE'],
+  'lambdawaves.q0.keys': ['key-table.js (MIR createKeys)', 'PREFERENCE'], 'lw.keyboard.position.v1': ['the kit keyboard window (mir/keyboard)', 'PREFERENCE'], 'lw.lean.v1': ['window-chrome.js', 'PREFERENCE'],
   'lambdawaves.q0.library': ['library.js', 'LIBRARY'], 'lambdawaves.q0.modpresets': ['mir/modulation/mod.js PRESET_LS', 'PREFERENCE'],
   'lambdawaves.q0.modulation': ['rack.js modStore (mir/modulation/bind.js localStore): modArm, modCadence', 'PREFERENCE'],   // 0.5.0 C4
   'mir.gui': ['look.js createLook (mir/core/prefs.js createPrefs over LOOK_SCHEMA rows)', 'PREFERENCE'],                     // 0.5.0 C2

@@ -132,23 +132,18 @@ disconnected rack cards all have intentional gaps. A moved or scrolled window
 must schedule a PRESENT even while paused. Run
 `tests/frame-occlusion.browser-test.mjs` after changing this geometry.
 
-The keyboard editor is app-owned (`lab/keymap.js`, `lab/lab.css`), not an
-adopted MIR file. It is a floating MIR-skinned pane, whose occlusion follows
-its drag. `lab/shortcuts.js` is the common law for defaults, saved bindings,
-the Settings recorder and the keyboard editor: reject overlapping chords and
-reserved keys, and only unbind another action after an explicit steal.
-Shift+Q/E adjusts POV; Ctrl+Shift+Q/E is a coupled dolly zoom; WASD orbit is
-eased through the presentation loop. Run `tests/keyboard-shortcuts.test.mjs`
-and `tests/keyboard-window.browser-test.mjs` when changing these controls.
-Keep its always-visible chrome minimal: keyboard title, platform switch,
-modifier legend, board, action search/list, and Record/Reset above that list.
-Status appears only when needed; do not restore the redundant headings,
-binding count, drag instruction or bottom help strip.
-The desktop pane fits the five key rows in 416 px with no hard keyboard UI
-borders. Keep the legend and icon platform switch in one row and the centered,
-subtitle-free Record/Reset controls above search; contextual status carries
-the recording instructions. Preserve the raised/inset charcoal-blue skin,
-visible focus glows and the phone's taller action-only editor.
+The rack is MIR's `createRack` (0.5.0 C3): every `.dev` registered in place,
+`layout`'s verbs aliases over it, captureLayout's v3 still the WORKSPACE
+record; the menubar is `createMenubar` over MENUS; the transport stays
+λWAVES'. Keys are MIR's ONE KEY TABLE via `lab/key-table.js` (ACTIONS: `ctrl:
+true` Mod, `'Ctrl'` the Control key; no `shift`: Shift is the fine step; every
+row `overControls`; an overlap binds only on an explicit steal;
+`lambdawaves.q0.keys` lifts 0.4.0's shape). The KEYBOARD window is the kit's
+`createKeyboardWindow` on `#floats`, painted by `lab.css` §KEYBOARD
+(unlayered: five rows in 416 px, legend + switch on one row, centred RECORD /
+RESET, status only when needed); its occlusion follows its drag and its close.
+Run `keyboard-shortcuts`, `keyboard-window`, `menubar` and `history` after
+touching any of it.
 
 The ACTIONS rows in `lab/rack.js` are the rows MIR's `createKeys` will read:
 an id is the kit's where the kit has a twin (`transport.play`, `save`,

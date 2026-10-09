@@ -4979,6 +4979,51 @@ live stage ground; `onAccent` → the modulation window). The theme's engine sid
 **Lines.** `cat lab/*.js | wc -l`: **30,553 → 30,429 (−124)**: `accent-wheel.js` −152, `look.js` +95, `rack.js` −50, `first-run.js` −16,
 `native-ui.js` −7. Brief J is not consumed: the kit's palette has no Jet Black row, so `lab/palette-app.js` stays. Seven brief
 candidates and the draft CLAUDE.md paragraph: `research/release-0.5.0/C2-BUILD.md`.
+### wave 205: C3 THE RACK, THE TRANSPORT, THE MENUBAR, THE KEYS — the kit's rack, menubar, key table and KEYBOARD window; the transport and the skin stay λWAVES'; 1,496 lines out
+
+**The rack is the kit's.** `createRack` adopts `#rack #rackL #floats` and the ◧ + ☆ chrome by id, and every `.dev` is registered in
+place with its `device()` (the TRANSPORT as an app card). `layout`'s verbs stay, as aliases over the kit (`popOut` → `float`,
+`dockWindow` → `dock`, `reopen` → `open` …), so every `__LW.layout` call still answers. `captureLayout`'s v3 record stays the WORKSPACE
+record, and a ☆ slot the kit captures is written in it, so 0.4.0 reads every slot. The hands, the float helpers, the rack half of the
+peek, the phone crossing's card moves and `rack-menus.js` left. The kit's rack now hands the scene guard its columns (C9's open item).
+The CAMERA card stays adopted in place (C1's): the kit would otherwise register a second `camera`.
+
+**The history red the first builder paused on** was a measurement, not a state change. The kit's rack animates a card's height for
+320 ms when its content grows, and block 1b read the HISTORY card one frame into that animation (190 → 408 px, read at 280–340). The
+block now reads the card at rest. Undo and redo stay byte-identical in all 42 blocks, and the rebuild counts are unchanged.
+
+**The menubar is the kit's** `createMenubar`, over λWAVES' MENUS rows: the same DOM and the same aria-label, with LANGUAGE hidden.
+λWAVES' focus hand-back after a row's act stays as glue. MENUS' four old-id calls now use the kit ids, and the `ACTIONS.find`
+fallback is gone. **The transport stays λWAVES-built**: the kit's `createTransport` would draw four of its parts differently (briefs
+T1, T2).
+
+**The keys are MIR's ONE KEY TABLE** through `lab/key-table.js` (82 lines in place of `keys.js` + `shortcuts.js`):
+- A9's rows: `ctrl: true` is `Mod` and `ctrl: 'Ctrl'` the Control key. **The NEW Ctrl-vs-Mod case**: ⌘⇧Q never runs the dolly zoom on
+  a Mac, and off a Mac Ctrl IS Mod.
+- A row with no `shift` answers its chord and Shift+chord, with Shift as the fine step; held keys repeat.
+- Every row is `overControls`: a focused control keeps a key only by acting on it, and a control that will not act yields it (wave 68).
+  Space plays over any control and over a focused `<select>` (wave 88).
+- The binding law holds: an overlap binds only on an explicit steal; Tab, Escape and a modifier alone are refused.
+- A 0.4.0 save, `{ play: { key, … } }`, is lifted onto `transport.play`.
+
+**The KEYBOARD window is the kit's** `createKeyboardWindow` on `#floats`, with λWAVES' charcoal-blue skin re-aimed in `lab.css`
+§KEYBOARD (R5-S3). The screens match 0.4.0 key for key. What Josh will see: no header bar (the kit's rail carries the grip and the
+close), the board centred in a taller well, and `Ctrl` in a ctrl badge where 0.4.0 wrote `⌃`. `keymap.js` (878) left.
+`keyboard-window` is rewritten wholesale: a real `?` opens it; a real drag moves it and its mask follows; a real recording binds; a
+taken chord is asked about and stolen on the second press; Escape's three steps; the platform switch; RESET; a 0.4.0 save across a
+reload. `keyboard-shortcuts` is re-aimed with the Ctrl-vs-Mod case on both platforms.
+
+**Parity.** The A4 probe (base vs tip) differs in 219 lines, every one a z-index of the kit's one raise stack, a home index counting
+visible windows, `dockIndex` read on the settled rack, or their rack-order fallout. The WIGNER hint was timing. Stylehash over 8
+states: 0 element-properties changed. The one new element is the kit rack's invisible grip, and 280 px sit inside SHADOW's own plot.
+
+**Gates** (8883/5353, base 8887/5357, one at a time, 4 s apart):
+- `history` **42** · `frame-occlusion` **7** · `menubar` **8** · `keyboard-window` **8** (one marionette reload error, re-run alone) · `keyboard-shortcuts` **6**
+- `input` **13** · `offer` **16** · `new-project` **8** + `--check` · `take-in-bugs` **4** · `latex-copy`, `molecular-names`, `export3d` green
+- hit-probe-set **52 / 0 reached** · settings-probe **0 red** · node **82/82** (`access` A7/A11 re-aimed)
+
+`cat lab/*.js | wc -l`: **30,553 → 29,057 (−1,496)**. The brief candidates (R1–R6, T1/T2, P, M1, K1–K4, W1) and the drafted
+CLAUDE.md paragraph are in `research/release-0.5.0/C3-BUILD.md`.
 
 ## 2026-10-08 · 0.5.0 D — THE INFORMATIONAL'S LEDGER
 

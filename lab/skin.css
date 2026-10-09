@@ -146,9 +146,9 @@ body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .dev:not(:wh
 
 /* The keyboard is a dense editor rather than an airy instrument card. Keep its
    MIR tint and frost, but give the small legends a readable surface in either theme. */
-body[data-card="refractive"] .km-panel.glass { background: var(--glass-sheen), hsl(var(--glass-tint) / .94); }
-body.frost[data-card="refractive"][data-theme="dark"] .km-panel.glass { background: var(--glass-sheen), hsl(var(--glass-tint) / .94); }
-body[data-card="tinted"] .km-panel.glass { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--card-opacity)); }
+body[data-card="refractive"] .km-win.glass { background: var(--glass-sheen), hsl(var(--glass-tint) / .94); }
+body.frost[data-card="refractive"][data-theme="dark"] .km-win.glass { background: var(--glass-sheen), hsl(var(--glass-tint) / .94); }
+body[data-card="tinted"] .km-win.glass { background: var(--glass-sheen), hsl(var(--glass-tint) / var(--card-opacity)); }
 
 
 body.frost.frost-hold .dev, body.frost.frost-hold .glass, body.frost.frost-hold #transport { -webkit-backdrop-filter: none; backdrop-filter: none; }

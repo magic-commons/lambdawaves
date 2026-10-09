@@ -36,7 +36,7 @@ const SCENES = [
   ['its chip rail', '[data-mir-rail="modulation"]', MOD],
   ['a floated card, DISCONNECTED (the first-run look: head and body apart)', '#floats > .dev[data-id="shadow"]', FLOAT + ' __LW.setDisconnected(true);'],
   ['a floated card, JOINED', '#floats > .dev[data-id="shadow"]', FLOAT + ' __LW.setDisconnected(false);'],
-  ['the keyboard window', '[data-mir-window="keyboard"] .km-panel', SHUT + ' __LW.keymap.open();'],
+  ['the keyboard window', '[data-mir-window="keyboard"]', SHUT + ' __LW.keymap.open();'],
   ['the notebook', '[data-mir-window="notebook"]', SHUT + ' __LW.layout.notebook.open();'],
   ['the sheet', '#sheet', SHUT + " document.getElementById('sheet').hidden = false;"],
   ['the offer', '#offer', SHUT + " const sw = __LW.sw; sw.state = 'ready'; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'hit-probe' }; sw.offer();"],

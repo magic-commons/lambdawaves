@@ -22,6 +22,9 @@ try {
   /* ── the page's helpers: pointer events as a hand makes them, the controls by their captions, and THE SCENE ── */
   await g.ev(`window.__w = (n) => new Promise((r) => setTimeout(r, n));
     window.__frame = () => new Promise((r) => requestAnimationFrame(() => r()));   /* S4: the HISTORY card repaints on the next frame */
+    /* 0.5.0 C3: a card's height AT REST — the kit's rack animates a card's height when its content grows (createRackMotion, 320 ms),
+       so the height is read once its ResizeObserver has had a frame and the card's own motion has finished */
+    window.__rest = async (el) => { await __frame(); await __frame(); await Promise.all(el.getAnimations().map((a) => a.finished.catch(() => {}))); return el.getBoundingClientRect().height; };
     window.__ser = () => JSON.stringify(__LW.serialize({ scope: 'edit' }));
     let pid = 700;
     const PE = (el, type, x, y, pointerId) => el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, composed: true, pointerId, pointerType: 'mouse', button: 0, buttons: type === 'pointerup' ? 0 : 1, isPrimary: true, clientX: x, clientY: y }));
@@ -115,14 +118,14 @@ try {
          card, and the card stops growing (its height with 13 rows = with 26) ── */
   const card = await ev(`const H = __LW.history, list = __show(document.querySelector('.dev[data-id="history"] .hist-list')), dev = list.closest('.dev');
     await __w(100); const readings = [__ser()]; let h12 = 0;
-    for (let i = 1; i <= 25; i++) { __LW.setStage(0.2 + i / 100); H.flush(); readings.push(__ser()); if (i === 12) { await __frame(); h12 = dev.getBoundingClientRect().height; } }
-    await __frame();
+    for (let i = 1; i <= 25; i++) { __LW.setStage(0.2 + i / 100); H.flush(); readings.push(__ser()); if (i === 12) h12 = await __rest(dev); }
+    const h25 = await __rest(dev);
     const rowEls = () => [...list.querySelectorAll('.hist-row')], idx = (b) => +b.querySelector('.hist-i').textContent;
     const cur = () => rowEls().filter((b) => b.getAttribute('aria-current') === 'true');
     const inView = (b) => { const L = list.getBoundingClientRect(), R = b.getBoundingClientRect(); return R.top >= L.top - 0.5 && R.bottom <= L.bottom + 0.5; };
     const rows = rowEls();
     const top = { n: rows.length, order: rows.map(idx).join(','), bottom: rows.at(-1).querySelector('.hist-lbl').textContent,
-      current: cur().map(idx), currentShown: inView(cur()[0]), scrolls: list.scrollHeight > list.clientHeight, h12, h25: dev.getBoundingClientRect().height, listH: list.clientHeight };
+      current: cur().map(idx), currentShown: inView(cur()[0]), scrolls: list.scrollHeight > list.clientHeight, h12, h25, listH: list.clientHeight };
     /* a hand's click: scroll the list to the row, press it */
     const click = async (k) => { const b = rowEls().find((x) => idx(x) === k); list.scrollTop += b.getBoundingClientRect().top - list.getBoundingClientRect().top; await __press(b); await __frame();
       return { k, lands: __ser() === readings[k], cursor: H.cursor, current: cur().map(idx), shown: inView(cur()[0]) }; };

@@ -67,7 +67,7 @@ try {
     for (const d of [document.querySelector('.dev[data-id="shadow"]'), first]) d.querySelector('.dev-fold').click(); window.__folded = first.dataset.id; return 1;`);
   await snap('10 two cards folded', 'return [...document.querySelectorAll(".dev.folded")].map((d) => d.dataset.id);');
   await g.ev(`__LW.keymap.open(); return 1;`);
-  await snap('11 the keyboard window open', 'return !document.getElementById("keymap").hidden;');
+  await snap('11 the keyboard window open', 'return __LW.keymap.isOpen;');
   await g.ev(`__LW.keys.toggleUI(); return 1;`);
   await snap('12 the interface hidden', 'return __LW.uiHidden;');
   await g.ev(`__LW.keys.toggleUI(); return 1;`);
