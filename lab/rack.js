@@ -524,10 +524,10 @@ export async function boot(dom) {
      flips `field.ok` to false and, with no handler, TELLS NOBODY.  A driver reset, a backgrounded mobile tab
      whose GPU is reclaimed, a laptop switching cards — the rack goes on working, the readouts go on updating,
      and the picture is frozen with no explanation.  That is the most likely failure on a phone and it is the
-     one this app was silent about. */
+     one this app was silent about.  0.5.0 C9 · R14: this is λWAVES' GPU RECOVERY, `gpuRecovery` (gate: tests/gpu-recovery). */
   const field = await createField(dom.canvas, { resolution: quality.res,
     onError: (m) => showBanner('GPU error', m),
-    onLost: (i) => showBanner('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.') });
+    onLost: function gpuRecovery(i) { showBanner('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.'); } });
   if (field.ok) wheel.setGamutCss((rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')'));   // wave 54: one map, both sides
   /* M1 (2026-09-24): a device lost before createField finished has already put up onLost's own banner (the GPU device
      was lost … RELOAD); "WebGPU unavailable" over it would be the wrong sentence, so that one road keeps its banner. */
@@ -5390,7 +5390,10 @@ export async function boot(dom) {
       ratio: (a, b) => contrastRatio(a.map((v) => v / 255), b.map((v) => v / 255)) },
     /** the ONE input to the TAB rule: are the hands on the world, or in the rack? */
     get stageFocus() { return stageHasFocus(); },
-    version: 'QWAVE-0.1 hydrogen shadow lab · FRONTIER · 2026-09-03'
+    version: 'QWAVE-0.1 hydrogen shadow lab · FRONTIER · 2026-09-03',
+    /** 0.5.0 C9 · R14 · FOLDERS' thumbnail() for C6's project adapter, whose toThumb() drawImage()s what it gets (a WebGPU canvas can
+     *  answer that BLANK): capture's readability probe decides — the canvas when this browser reads it, else the GPU readback's PNG. */
+    async thumbnail() { const c = capApi.capture; if ((await c.probe()).canvasReadable) { await LW.settle(); return dom.canvas; } const r = await c.picture({ width: 320 }); return r.ok ? r.blob : null; }
   };
   window.__LW = LW;
 
