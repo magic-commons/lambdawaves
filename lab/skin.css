@@ -274,8 +274,8 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
      back to 47: a smaller MARK must never mean a smaller TARGET. */
   .sp-row .sp-knobs .k.rate .k-dial::before { left: -16px; right: -16px; top: -16px; bottom: -16px; }
   .sp-b, .sp-x { position: relative; align-self: center; justify-self: center; }
-  .sp-b::after { content: ''; position: absolute; inset: -3px -6px; }
-  .sp-x::after { content: ''; position: absolute; inset: -4px -9px; }
+  .sp-b::after { content: ''; position: absolute; inset: -3px -4px; }
+  .sp-x::after { content: ''; position: absolute; inset: -4px -4px; }
 
   /* (d) WAVE 52 — the playhead's ⤢ EXPAND, on the same law: the SEAT grows, the ink does not.  Its round
      22-px puck is painted into the content box of a 44-px box, exactly as ⏻ ⓘ ⇱ already do above.
@@ -559,3 +559,25 @@ body.window-info-off .settings-help { display:none; }
 .dev .shadow-controls .seg-b { flex:1 1 0;padding:0 4px; }
 .dev .shadow-controls > .shadow-details-toggle { width:32px;min-width:32px; }
 #transport.docked .native-play-row > .dock-btn { order:-1; }
+
+/* ═══ 0.5.1 D10-F · THE PHONE'S 44 PX, RESTORED (B70 / B71) ═══════════════════════════════════════════
+ * The wave-51 block above is "the LAST one in the LAST stylesheet"; the native rules written after it
+ * (the docked transport's 34-px row, the 32-px segments, the 32-px SHADOW toggle, the 58-px `#transport .k`)
+ * beat it on source order, and the `(pointer: coarse)` twins above never match a headless phone.  SIZES
+ * only — no colour, no border — under the SAME breakpoint, and the last word of the sheet. */
+@media (hover: none) and (max-width: 700px),
+       (hover: none) and (max-height: 520px) and (max-width: 1000px) {
+  #transport.docked .native-play-row > .tbtn { height: var(--touch); }     /* 45 × 34 → 45 × 44: play, MOD, home, step ×2, jump, the tempo chip */
+  #transport.docked .dock-btn { position: relative; }
+  #transport.docked .dock-btn::after { content: ''; position: absolute; inset: -7px; }   /* 34 px of ink, 46 of finger (an inset runs from the PADDING box: the 1-px edge is paid twice) */
+  .dev[data-id="camera"] .k[data-param="observer.panx"] { margin-bottom: 11px; }         /* the kit's route ring is 32 px out: two routed dials need a 64-px pitch, PAN X over PAN Y had 53 */
+  .dev[data-id="observer"] .k:is([data-param="material.exposure"], [data-param="material.softness"], [data-param="material.hue"]) { margin-bottom: 8px; }   /* … and these three over ISO / GRAIN / KNEE had 56 */
+  .native-clean .native-rotors { margin-bottom: 14px; }                    /* … and the STATE rotors' ring ran 5 px into the next group before it was cut */
+  #transport .k-route-depth.k { width: 22px; min-width: 22px; }           /* `#transport .k` (58 px) stretched the kit's depth dial over the RATE dial's top half */
+  .dev .trig { min-height: var(--touch); }                                /* RENDER's and CAMERA's 40-px triggers, SETTINGS' 18-px FOLLOW chip */
+  .native-clean[data-id="observer"] .seg button { min-height: var(--touch); }
+  .native-clean[data-id="spectrum"] .grp .seg button { min-width: var(--touch); }
+  .dev .shadow-controls { grid-template-columns: minmax(0, 1fr) var(--touch); }
+  .dev .shadow-controls > .shadow-details-toggle { width: var(--touch); min-width: var(--touch); }
+  .stage-colour { width: var(--touch); height: var(--touch); }
+}

@@ -311,3 +311,26 @@ LW_PORT=8963 GD_PORT=5433 node .tmp/probe.mjs .tmp/p-b139.js                    
 bash test.sh node                                                                    # exit 0, 940 PASS, 0 red
 ```
 The pre-C7b comparison tree was a `git archive f0d4566` export served on 8967 (read-only, from the predecessor's `.tmp/base-pre`).
+
+## 11. 0.5.1 D10-F (2026-10-09): B70, B71 and B78 fixed
+
+Sonnet 5.5, worktree `.claude/worktrees/agent-a2df55598db210f01`, from `27eb96a`. Write-up: `research/release-0.5.1/D10-F-BUILD.md`. Two product files
+(`lab/skin.css`, `lab/rack.js`, three strings) and this suite changed.
+
+| Run | verdicts | GREEN | RED | red rows |
+|---|---|---|---|---|
+| BEFORE · `27eb96a` (PLAN.md:47, the integrator's count; the full suite was not re-run on the cut; B70, B71, B78 re-measured red as chunks) | 152 | 148 | 4 | B70 B71 B78 B149 |
+| AFTER · this tip, alone (`.tmp/boot-full.txt`) | 152 | 150 | 2 | B6 B149 |
+
+* **B6** is the stray tags-tick timing red §9 warns of: the badge is read 200 ms after a mute and the tick had not landed. GREEN alone as a chunk straight after; unrelated to D10-F.
+* **B149** is the kit's FLIP reorder (`tab.running` 5): the MIR brief candidate, unchanged.
+* §5's account of B70 was a third of the truth. At `27eb96a` the portrait and the landscape walk each fail **49** hit-tests, not 46 or eight: the transport's seven `tbtn`
+  (the tempo chip too), DOCK (34 × 34), SPECTRUM's six lane dials (43 wide), three MUTE buttons (42) and the BOX segment (37), SHADOW's toggle (32), RENDER's four triggers (40),
+  CAMERA's two (40), SETTINGS' FOLLOW chip (18) and colour chip (26), OBSERVER's 20 segments (32), and `dev-power` / `dev-fold` (the badge row). The routed pass also failed `bandMin ≥ 7`
+  (ten rows: PAN X, EXPOSURE, SOFTNESS, HUE, the three STATE rotors, RATE, and the two arc knobs the walk cannot see). RATE's 26 was the kit's route-depth dial stretched by
+  `#transport .k { width: 58px }`.
+* The three re-aims, each a comment at its site: the walk runs with the shipped STATUS TAGS off (`hitWalk()`; the baseline's badge row over ⏻ / ▾ is §5's own "exists only because the
+  baseline turns the tags on"); the listener walk skips a control whose bare walk finds no turn target (`b.v < 2`: `observer.yaw` / `pitch`, the arc knobs, whose capture-phase
+  `pointerdown` stops before the walk's listener); B78's trigger clause reads `RELEASE` (the trigger left in `5f6421e`, the BOW-feel redesign, and `a526bda` wrote the card's note
+  around it) and its group clause reads `data-help-en` (native-ui.js shows a group's first clause; the kit's control-help keeps the whole text there). B78's words clause is untouched.
+* Commands: the chunks for these rows are `m:const rect = (w, h) => new Promise~judge('B72 W-MOBILE` (B69 to B71) and `m:const nameT = await g.ev~const logoT = await g.ev` (B78).
