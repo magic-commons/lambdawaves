@@ -22,6 +22,25 @@ spawn prompt; PLAN §2 C row C0 is the spec.
 | `858515e` | THE GLASS DEFAULTS. lab.css §G restores λWAVES' disconnected head (classes 4 and 6). `--glass-shadow-flat` → `--glass-shadow` (a bug: the docked cards had lost their shadow). |
 | (next) | `C0-GLASS-RULINGS.md` + 16 PNGs in `c0-glass/` (7 before/after pairs, plus 2 `-kit`). |
 
+**PAUSED AGAIN (manual pause).** The rulings commit is `a46260f`. Measured since, uncommitted (the raw files are in `.tmp/canary/`):
+
+**Gates that are green.**
+- `adopt.mjs --check`: "in step with MIR 1.5.0-alpha.24".
+- `bash test.sh node`: exit 0. The per-suite run gives **85/85 green** (A0's bare adopt had 7 red).
+- Precache: base **191 entries / 4,874,333 B (4.65 MiB)**, C0 **263 / 5,899,980 B (5.63 MiB)**.
+- `lab/*.js`: **36,288 → 36,361 (+73)**. That is `sw.js` alone: its generated table grew 191 → 263 entries (+72), plus the one R5-W1 row. My first commit message called it "unchanged"; that was wrong, before the table grew.
+
+**THE 27 BROWSER SUITES** (8783/5253, one at a time, 4 s apart): **25 green, 2 red.**
+- **`keyboard-window`: RED, C0's OWN BREAKAGE.**
+  - Re-run alone at load 1.66: still red. The base copy (8787/5257): green.
+  - Error: `assert.ok(dragged.x >= before.left + 60 && dragged.saved.x === dragged.x)`.
+  - Root cause: MIR 1.4.3's `mir/css/base.css:381–382` gave λWAVES' own `#keymap` its stacking: `#keymap { position: fixed; inset: 0; z-index: var(--z-veil); display: flex; flex-direction: column; } #keymap[hidden] { display: none; }`. MIR 1.5's `base.css` has no `#keymap` rule, so the pane falls under `#rackL` (z 30); the test's drag point hits `canvas.shadow-c`. The kit's `keyboard/keyboard.css`, loaded through `mir.css`, also styles 87 `.km-*` selectors on our app-owned pane: 315 key children get `pointer-events: none`, plus overflow, a legend dot border, the search box's `user-select` and the list's `touch-action`. All of it is in `.tmp/km-base.json` vs `.tmp/km-c0.json`.
+  - Fix to apply: move the two 1.4.3 `#keymap` rules into lab.css, as λWAVES' own (the editor is app-owned, CLAUDE.md). Check that `--z-veil` is declared on 1.5. Then re-run `keyboard-window`, and stylehash with the keymap open (a new `cap.mjs` set: `__LW.layout.keymap.toggle()`) to judge the `.km-*` collision: twin or keep.
+- **`mir-controls`: RED**, `AssertionError: 0.25 != 0.5`. Not yet investigated or re-run alone. Run it on the base copy first (`.tmp/run1.mjs <root> <port> <gd> mir-controls.browser-test.mjs`).
+- **The other 25:** `camera-shift`, `chem` 55, `current`, `export3d`, `field-molecule`, `frame-occlusion`, `gpu-recovery`, `history`, `input`, `latex-copy`, `lfo-tension`, `library`, `menubar`, `molecular-diff` 15, `molecular-names`, `molecule-demos`, `new-project`, `offer` 16/16, `official-defaults-palette`, `orbitals` 24, `register` 17, `render-regressions`, `routed-knob` 4, `stage-text`, `take-in-bugs`. Loads ran 2.2–5.8, with sibling builders on the machine.
+
+**NOT RUN YET:** the ms/s pair. `.tmp/msps.mjs 3` is written; it needs both gate servers up (8787 base, 8783 mine) and a load under 4. Then REPORT wave 196 and `C0-BUILD.md`.
+
 **Status (update):** steps 1–6 of the brief are done. Still to do: step 7, `adopt.mjs --check`; step 8, the second canary (node 85, then the 27 browser suites one at a time); step 9, the ms/s pair; step 10, the line counts; steps 11–12, the `__LW` law check, REPORT wave 196, and `C0-BUILD.md`. The servers: gate `server.py` on 8783 (my tree) and 8787 (`.tmp/base`); stop them by pid.
 
 ## Measured so far
