@@ -51,7 +51,7 @@ import { MOLECULES, MOLECULE_BY_ID, SECTIONS, COST, eriWork, rpaWork, counts, CA
 import { CURATED_IE, CONVENTION, operations, frameOf, nameOrbitals, characters, coreCount } from '../lab/names.js';
 import { basisFrom, nuclearRepulsion } from '../lab/md.js';
 import { evaluator } from '../lab/molecular-field.js';
-import { moleculeLatex } from '../lab/latex-state.js';
+import { moleculeLatex, stemOf, EV } from '../lab/latex-state.js';   // 0.5.1 D2: the stem's solve-decided members are the lab head's own composition
 import { validateRecord, recordPath, SCHEMA, atomsKey as geometryKey } from '../lab/library.js';
 
 const ROOT = new URL('../', import.meta.url), at = (rel) => fileURLToPath(new URL(rel, ROOT));
@@ -223,7 +223,6 @@ const MASS = [0, 1.008, 4.0026, 6.94, 9.0122, 10.81, 12.011, 14.007, 15.999, 18.
 const SYMBOL = ['X', 'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca',
   'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr'];
 const DEBYE = 2.541746473;                                         // debye per atomic unit of dipole (e·a₀)
-const EV = 27.211386245988;
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const f64 = (a) => ({ $f64: Buffer.from(Float64Array.from(a).buffer).toString('base64') });
 const i32 = (a) => ({ $i32: Buffer.from(Int32Array.from(a).buffer).toString('base64') });
@@ -342,8 +341,7 @@ function build(e) {
   if (sym.group !== 'C1' && !names.reliable && !e.indicesOnly) throw new Error(`orbital-library: ${e.id}: the projection named nothing in ${sym.group} — ${names.reason}`);
   const dom = (k) => { const q = []; for (let r = 0; r < d; r++) for (let j = 0; j < 4; j++) { const p = sp.roots[r].dominant[j]; q.push(p ? k(p) : (k === domI || k === domA ? -1 : 0)); } return q; };
   const domI = (p) => p.i, domA = (p) => p.a;
-  const nm = names.reliable ? names.mos : null, gap = g.eps[nocc] - g.eps[nocc - 1];
-  const homo = nm ? nm[nocc - 1] : null, ie = CURATED_IE[e.id];
+  const S = stemOf({ eps: g.eps, nocc, names }), ie = CURATED_IE[e.id];
   const over = predicted(row.ang, charge) > CAP_MS * 1.02;
   const fr = frameOf(atoms, sym.frame), ids = IDS[e.id] || null;
   const chirality = e.family === 'amino-acids' ? hand(row.ang) : null;
@@ -360,10 +358,10 @@ function build(e) {
       tdaOmega: f64(sp.tda.map((r) => r.omega)), tdaF: f64(sp.tda.map((r) => r.f)), tdaMu: f64(sp.tda.flatMap((r) => Array.from(r.mu))),
       gauge: 'ω and f are gauge-free; inside a DEGENERATE root the μ vectors and the dominant pairs are the eigensolver\'s own basis, not a canonical gauge — compare them as a subspace (the STATES ladder, where stored, is canonical)' },
     ...(st ? { states: { d: st.count, omega: f64(st.omega), f: f64(st.f), mu: f64(st.mu), cluster: i32(st.cluster), size: i32(st.size), pivot: f64(st.pivot), X: f64(X), rMO: f64(st.rMO) } } : {}),
-    stem: { formula: row.formula, pointGroup: names.group || null, frame: names.frame || null, approximate: !!names.approximate,
+    stem: { formula: row.formula, pointGroup: S.pointGroup, frame: names.frame || null, approximate: !!names.approximate,
       mass: +atoms.reduce((s, a) => s + MASS[a.Z], 0).toFixed(3), massUnit: 'u (IUPAC conventional atomic weights)', charge, multiplicity: 1,
       dipoleDebye: +(Math.hypot(...g.dipole) * DEBYE).toFixed(4),
-      gapEh: gap, gapEv: +(gap * EV).toFixed(4), homo: homo ? homo.label + ' · ' + homo.frontier : 'HOMO', geometrySource: row.source,
+      gapEh: S.gapEh, gapEv: S.gapEv, homo: S.homo, geometrySource: row.source,
       inchiKey: (ids && !ids.none && ids.inchiKey) || null, pubchemCid: (ids && !ids.none && ids.cid) || null,
       identifiers: !ids ? 'UNVERIFIED: no PubChem identifiers recorded for this entry (tools/library/pubchem-ids.json)' : ids.none ? 'none: ' + ids.none : ids.status || 'UNVERIFIED: not yet asked of PubChem', blurb: e.stem.blurb,
       ...(chirality !== null ? { chirality: 'L at Cα: the sense of carboxyl C → side chain → N about Cα is the wwPDB L-alanine\'s (the CORN rule, checked by the generator)' } : {}),
