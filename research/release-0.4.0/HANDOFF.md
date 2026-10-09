@@ -617,6 +617,9 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > λWAVES-own items) + `BRIEF-D1/D10-19/D10-24/D10-F.md`. **LAUNCHED 16:15 from `27eb96a`:** D1 (Opus, 8973/5443 + 8977/5447), D10-19 (Sonnet, 8983/5453),
 > D10-24 (Sonnet, 8993/5463), D10-F (Sonnet, 9003/5473). Then D2+D8 (one Opus, after D1 merges) → D-V (fresh Opus) → the local cut `v0.5.1-alpha ·
 > Informational Update` on Josh's word. Servers: mine 8751; Sos's 8731 idle; Josh's 8721/8741 untouched.
+> **16:45 — D10-19 MERGED `064f3b0`** (Sonnet `d700374`: the flash guard's limiter on exposure/gamma/stage/knee, calibrated from the shader by
+> `tools/flash-calibrate.mjs`, held only while a modulator drives, the trip in METERS; +20 → 27,614; node 0; CLAUDE.md paragraph applied;
+> `research/release-0.5.1/CHANGES-0.5.1.md` started). Running: D1, D10-24, D10-F.
 
 ## 3 · What happens next, in order
 
