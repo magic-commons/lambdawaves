@@ -4586,3 +4586,77 @@ one at a time and 4 s apart: `frame-occlusion` **7/7** (twice), `menubar` **8**,
 **39**, `render-regressions` **2** and `offer` **16** (it reads the masks too). No timing red, so nothing was re-run alone.
 `cat lab/*.js | wc -l`: **36,198 → 36,226 (+28**: occlusion.js +40, rack.js −13, sw.js +1). Hand-off:
 `research/release-0.5.0/A7-BUILD.md`.
+
+## 2026-10-08 · 0.5.0 D — THE INFORMATIONAL'S LEDGER
+
+### wave 202: D9 THE LEGACY FIVE — QCD, H₂⁺ and HELIUM deleted behind restore shims, two demos, H₂ and ELECTROSTATICS measured
+
+R5-L1 decides the five hidden LEGACY windows. QCD is deleted. H₂⁺ and HELIUM become MOLECULES/preset demos with a restore
+shim. H₂ and ELECTROSTATICS are decided by use. Two Opus builders built D9 in relay on the MIR 1.4.3 tree with no adopt.
+The first (`agent-a9d0b021fc0378e70`) took QCD and H₂⁺ and was paused by a usage alarm. The second
+(`agent-a22de79aa0ec72dc9`) continued from its tip `79d10c4`.
+
+**The fixtures come first.** The pre-D9 build wrote three REAL old files at `7044f37`:
+- `tests/fixtures/legacy-h2plus` (H₂⁺ owns the field on σu, R = 2);
+- `legacy-helium` (HELIUM owns the field, 3 Hylleraas terms);
+- `legacy-qcd` (QUARKONIUM in force, QCD open on bb̄ under LOG).
+
+Every shim is proved on these files, not on hand-made records.
+
+**QCD** (`59bb55f`). `qcd.js` and `qcdview.js` go. `cornell.js`, QUARKONIUM's Hamiltonian and the render road (digest-lock
+`quarkonium`, link `T_HAM`), takes the Numerov solver, the potentials, the defaults and the fit. `instruments.qcd` stays as
+QUARKONIUM's parameters. A file whose layout had QCD open opens without it, and says so in one line: the PROJECTS status and
+STATE's status, through a new `restoreNotice` fed by restore's `gone` list.
+
+**H₂⁺** (`57dca21`). The `molecule` card goes, with W-MO and W-PULSE: `moleculeview`, `moview`, `pulseview` and `pulse`
+(802 lines). `mo.js` and `twocentre.js` (814) are the node proofs' physical system, and no lab file imports them once the card
+is gone. They MOVE to `tests/lib/` and are booked as moved, not deleted. RHF refuses one electron (measured), so the shim
+opens a file H₂⁺ owned as MOLECULES · H₂ (STO-3G) on VIEW ORBITAL 2 (σu), or 1 (σg) for a σg or ON-A file. In a basis of two
+1s functions, both orbitals are fixed by symmetry: the combinations the card drew.
+
+**HELIUM** (`5baa301`). `helium.js` and `heliumview.js` go, with mathworker's `helium` op, the shift-click placement,
+`__LW.helium` and `__LW.placeElectron`. The shim runs `setElement(2); fillValence();`. A file HELIUM owned opens on
+SPECTRUM's ATOM at Z = 2 with the 1s filled, and the ATOM law raises ATOMS beside it. A MOLECULES He row would need a PySCF
+oracle row, and none exists here. The field kernel's space-4 WGSL branch and the guarded `LW.helium` lines in `capture.js`
+and `render-exact.js` are C7's, and stay for the digest lock to retire. In every deletion the `__LW` law held: a deleted
+member leaves its suites in the same commit (`current`, `molecular-names`, `legacy/boot` B29 · B33 · B37 · B58 · B105
+retired in the B29 form, the digest lock's `h2plus` and `helium` scenes). The empty project is regenerated (`molecule`,
+`pulse`, `mo`, `helium` leave; 16,329 B, `--check` in step).
+
+**The old files, through the PROJECTS road** (`e9cb3d9`). `history` gains section 10. On a fresh page each fixture goes
+through `P.importText` + `P.open`. Each is the origin row `[open · NAME]` at depth 0, and the PROJECTS status names the
+retired window. No retired card or record comes back, and there is no page error. Each lands on its shim target:
+- H₂⁺ → MOLECULES · H₂ orbital 2, owning the field;
+- HELIUM → `atom`, Z 2, one label, ATOMS open;
+- QCD → `cornell` with the file's bb̄ / LOG / .51 .23 .81.
+
+**The two demos** (`e1d3cb8`) are made by the app, on wave 139's road: a headless session builds the scene, saves it as
+`DEMOS/<NAME>`, exports it through `projects.exportText`, and W129 strips `quality` and `camera`.
+- `H₂ σu` is MOLECULES · H₂ on 1σu, the LUMO, in N₂'s pose. A screenshot shows two lobes of opposite phase with the nodal
+  plane between the protons. E = −1.116706 E_h; ε(1σg) = −0.5781 and ε(1σu) = +0.6701, Szabo–Ostlund's numbers.
+- `HELIUM` is SPECTRUM's ATOM with He picked in ATOMS' table, then FILL THE VALENCE: ε(1s) = −0.7426 E_h. The notebook says
+  what ATOMS' footer says: ε is not an IP.
+
+Each notebook says where its retired window went. Two `.pj-demo` buttons follow N₂ on the PROJECTS face, and that is the only
+edit to `index.html`. `molecule-demos` covers both (5/5).
+
+**H₂ and ELECTROSTATICS are not deleted.** `research/release-0.5.0/D9-BUILD.md` measures them for the ruling:
+- H₂ is 268 lines of its own (`h2view` 186, `h2.js` 82); `h2ci.js` stays.
+- ELECTROSTATICS is 673 (`electrostatics.js` 437 and `fieldview.js` 236, which the PLAN did not count).
+- A user reaches either one ONLY by opening an older project that turned it on: `instruments.h2.on`, or `field.overlay ≠ off`.
+- Neither has a row in + / WINDOW / TAB, and no bundled file turns either on.
+- The table also gives what each file carries, the importers, and what would move rather than go.
+
+**The ledger.** `cat lab/*.js | wc -l` went **36,288 → 36,134 → 34,480 → 34,246 → 34,248**, which is **−2,040**. That is
+1,236 deleted plus 814 moved to `tests/lib/`, with +10 elsewhere (cornell +63, rack −42, mathworker −3, sw −8). Without the
+moved lines, D's credit is **−1,226**. The PLAN's ceiling was 1,139 plus H₂⁺'s files, which D9 measured at 802 deletable +
+814 movable. The three decided windows' share, 219 + 802 + 215, is achieved whole. The held pair's 705, measured at about 935
+with `fieldview.js` and the rack blocks, is what the ruling can still free. Node suites went 85 → 82: `qcd`, `pulse` and
+`helium` left, and the Airy anchors moved to `cornell.test`.
+
+Gates: `bash test.sh node` exited 0 (82 suites). `node tools/new-project.mjs --check` and `node tests/pwa.test.mjs --write`
+(183 precached files) both passed. The browser suites ran on 8843/5313, alone and 4 s apart: `molecular-names` **6/6**,
+`render-regressions` **2/2**, `current` **15/15**, `history` **42/42** and `molecule-demos` **5/5**. The first run of
+`current` had one red, the audio face's palette transition read at 250 ms, in a file D9 does not touch; it was green alone on
+a re-run. `legacy/boot` was run once (two builders had edited it blind). It gave 55 GREEN / 57 RED before a crash at the B96 headless
+reload. All six D9 cases are green (B22, B29, B33, B37, B55, B58). The reds are stale cases D9 does not touch. Hand-off: `research/release-0.5.0/D9-BUILD.md`.

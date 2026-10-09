@@ -58,16 +58,14 @@ item it crosses; RIGHT click removes one, RIGHT drag removes every item it
 crosses (Alt/Option+left = right; a finger = left). A crossed degenerate row is
 taken whole. One stroke is one undo row.
 
-H₂ and ELECTROSTATICS are hidden LEGACY windows (2026-10)
-that need an upgrade, re-adoption into MIR, or deletion — read
-`docs/LEGACY-WINDOWS.md` before touching them. They keep their ids, models and
-save records; H₂ resurfaces when a project turns it on as field owner,
-ELECTROSTATICS when a project's overlay is on. HELIUM was DELETED in 0.5.0 D9:
-a file whose field it owned opens as SPECTRUM's ATOM · He 1s (`setElement(2)`,
-`fillValence`), saying so in one line. QCD was DELETED in 0.5.0 D9:
-QUARKONIUM (`cornell.js`) keeps the Numerov solver and `instruments.qcd` as its
-parameters, its button stays hidden, and a file that had the QCD window open
-opens without it, saying so in one line. Do not re-list them in + or WINDOW.
+QCD, H₂⁺ and HELIUM were DELETED in 0.5.0 D9 (R5-L1). An older file that used
+one opens on its shim and says so in one line (PROJECTS and STATE status): a
+QCD seat opens without the window (QUARKONIUM, `cornell.js`, keeps the solver
+and `instruments.qcd`), an H₂⁺ field as MOLECULES · H₂ on σg/σu, a HELIUM field
+as SPECTRUM's ATOM · He 1s; the DEMOS `H₂ σu` and `HELIUM` open the same. H₂ and
+ELECTROSTATICS stay hidden LEGACY windows until Josh rules "by use" (read
+`docs/LEGACY-WINDOWS.md`, `research/release-0.5.0/D9-BUILD.md`): H₂ resurfaces
+as a project's field owner, ELECTROSTATICS when its overlay is on. Not in + or WINDOW.
 ATOMS left that list in 0.4.0 (R-A2): it is the periodic-table window — H–Kr
 cells in SPECTRUM's own picker, periods as columns on the card and a phone and
 rows floating, its Δ-SCF / quantum-defect / α-order readouts kept — opened by
