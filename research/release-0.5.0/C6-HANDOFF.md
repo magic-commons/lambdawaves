@@ -15,7 +15,10 @@
 2. `9b4bbe6` — hand-off.
 3. `942a2fc` — `the serialize-bytes probe`: `tools/serialize-bytes.mjs`, 11 of 11 readings byte-identical base vs tree
    (`research/release-0.5.0/c6-serialize-bytes.json`).
-4. this hand-off commit.
+4. `60662e8` — hand-off.
+5. `6166fa4` — `the R10 fixture suite`: `tests/project-formats.test.mjs` (node, 8 judged lines) +
+   `tests/project-formats.browser-test.mjs` (4/4, where the store is live).
+6. this hand-off commit.
 
 The first builder's commits: `443332e` (C6-DESIGN.md), `b6d61ec` (the two modules, WIP), `9da702d` (its hand-off).
 
@@ -35,7 +38,7 @@ The first builder's commits: `443332e` (C6-DESIGN.md), `b6d61ec` (the two module
 
 | suite | result |
 |---|---|
-| `bash test.sh node` | exit 0, 80 suites (82 − project-storage − project-import) |
+| `bash test.sh node` | exit 0, 81 suites (82 − project-storage − project-import + project-formats) |
 | `new-project` | 8/8 |
 | `history` | 42/42 |
 | `molecule-demos` | 5/5 |
@@ -43,6 +46,11 @@ The first builder's commits: `443332e` (C6-DESIGN.md), `b6d61ec` (the two module
 | `menubar` | 8/8 · `latex-copy` green · `take-in-bugs` 4/4 · `stage-text` 4/4 |
 | `current` | 15/15 on the alone re-run. Case 10 (audio face) reads CSS 250 ms after a change; red twice here and once on BASE under the same load (frame gaps 100–200 ms on the shared GPU) — a timing red, not C6 |
 | `hit-probe-set` | 49 gap presses, 0 reached the stage (FOLDERS and its rail are scenes) |
+| `project-formats` (node) | 8 judged lines GREEN (a1–a5 · a6 · a7 · b1 · b2 · b3–b4 · c · the unsaved mark), ~4 s |
+| `project-formats.browser-test` | 4/4 (read-only in the page · the door · R-I3 first half · a 1.4 notebook is page 0) |
+| `node tools/new-project.mjs --check` | in step (16329 B) — the empty project's bytes did not move |
+| `tools/settings-probe.mjs` | 0 of 6 RED (its first run's WATER open hit the 3 s rAF watchdog on the shared GPU; alone, green) |
+| the first FOLDERS picture | 1,029 ms (capture's probe), worst frame gap 102 ms; later pictures 33 ms, gap 18 ms (`.tmp/thumbgap.mjs`, not committed) |
 | `tools/serialize-bytes.mjs` | **11/11 identical**, full and edit scope: 4 demos + the empty project + 6 history snapshots, base 8897 vs tree 8893 |
 
 ## Lines
@@ -56,7 +64,6 @@ None.
 ## Exact next step
 
 1. ~~The byte-identity probe~~ done (`942a2fc`).
-2. The R10 fixture suite `tests/project-formats.test.mjs` (node: C6-DESIGN §7 a1–a7, b1–b4, c1) + a browser case for the live store.
-3. `node tools/new-project.mjs --check`; `tools/settings-probe.mjs` zero RED.
+2. ~~The R10 fixture suite~~ done (`6166fa4`). 3. ~~`--check`, settings-probe~~ done.
 4. Lines, REPORT wave 206, `C6-BUILD.md`, the CLAUDE.md paragraph, the final hand-off. Then (if time) BRIEF-C6 §4 step 3: the session,
    the opener, the banner, the veil, the wake lock.
