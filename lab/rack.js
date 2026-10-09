@@ -73,7 +73,7 @@ import { createRegisterSturmian } from './sturmianreg.js';
 import { stateLatex, moleculeLatex, formulaLatex, BASIS_LABEL } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
-import { createHistory } from './history.js';
+import { createEditHistory } from './edit-domain.js';   // 0.5.0 C5: the one `edit` domain on the kit's stack (mir/history/history.js); lab/history.js left
 import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { createCameraPanel } from './mir/panels/camera.js';           // 0.5.0 C1: the CAMERA card's rows are the kit's panel over the law's port
 import { barTempo } from './mir/modulation/host.js';
@@ -4964,14 +4964,15 @@ export async function boot(dom) {
 
 
   /* 0.3.1 · S3 THE TRUE HISTORY: one reader, writer and key over the edit scope (the chrome, a PREFERENCE, left with the hand-kept
-     lists); the key is FNV-1a over the record's JSON, taken at a commit and by canUndo / canRedo — never per frame */
+     lists); the key is FNV-1a over the record's JSON, taken at a commit and by canUndo / canRedo — never per frame.  0.5.0 C5: the
+     rows are the kit's stack (mir/history/history.js), this record its one `edit` domain (lab/edit-domain.js) */
   const hKey = (j) => { let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) h = Math.imul(h ^ j.charCodeAt(i), 0x01000193); return (h >>> 0).toString(36) + ':' + j.length; };
   let __hver = reg.version;
   Object.defineProperty(reg, 'version', { configurable: true, get() { return __hver; }, set(v) { __hver = v; if (!rotTicking) hNote(); } });
   /* the LIST repaints itself whenever the ring moves — `onChange` is the ring's own hook and fires on
      every commit, undo, redo, goto and clear, so nothing polls and nothing can drift out of step. */
   let hRender = null;
-  history = createHistory({ read: () => { const S = serialize({ scope: 'edit' }); S.key = hKey(JSON.stringify(S)); return S; },
+  history = createEditHistory({ read: () => { const S = serialize({ scope: 'edit' }); S.key = hKey(JSON.stringify(S)); return S; },
     write: (S) => restore(S, { history: true }), liveKey: () => hKey(JSON.stringify(serialize({ scope: 'edit' }))), depth: 60, quiet: 400, driven: () => rotMoved && rotDriving(),
     onChange: () => { if (hRender) hRender(); } });
   /* ══ WAVE 106 · THE ROWS GET THEIR NAMES FROM THE THING THE HAND TOUCHED ════════════════════════

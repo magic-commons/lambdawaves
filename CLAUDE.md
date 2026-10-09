@@ -185,7 +185,7 @@ NEW opens the hidden empty project `lab/new-project.lambdawaves.json` through
 the same restore-with-rollback road as any project; `tools/new-project.mjs`
 writes that file from the modulation model and the boot defaults and
 `--check` proves it byte-exact — run it after changing a default. The undo
-ring (`lab/history.js`) reads `serialize({ scope: 'edit' })` and writes
+ring (the kit's stack, `lab/mir/history/history.js`, with ONE domain `edit` in `lab/edit-domain.js`) reads `serialize({ scope: 'edit' })` and writes
 `restore(S, { history: true })`; do not add a hand-kept key list beside it.
 An open never closes the notebook; it opens it only for non-blank text. Run
 `tests/history.browser-test.mjs`, `tests/new-project.browser-test.mjs` and
