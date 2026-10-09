@@ -18,7 +18,10 @@
 4. `60662e8` — hand-off.
 5. `6166fa4` — `the R10 fixture suite`: `tests/project-formats.test.mjs` (node, 8 judged lines) +
    `tests/project-formats.browser-test.mjs` (4/4, where the store is live).
-6. this hand-off commit.
+6. `4cc311c` — hand-off.
+7. `83fe811` — `FOLDERS is painted glass where it lands`: the occlusion block is taken again when FOLDERS' entrance motion
+   ends (paused, it kept a mid-entrance rect, 12 px short at the top); `project-formats.browser-test` case 5 pins it (5/5).
+8. this hand-off commit.
 
 The first builder's commits: `443332e` (C6-DESIGN.md), `b6d61ec` (the two modules, WIP), `9da702d` (its hand-off).
 
@@ -47,7 +50,8 @@ The first builder's commits: `443332e` (C6-DESIGN.md), `b6d61ec` (the two module
 | `current` | 15/15 on the alone re-run. Case 10 (audio face) reads CSS 250 ms after a change; red twice here and once on BASE under the same load (frame gaps 100–200 ms on the shared GPU) — a timing red, not C6 |
 | `hit-probe-set` | 49 gap presses, 0 reached the stage (FOLDERS and its rail are scenes) |
 | `project-formats` (node) | 8 judged lines GREEN (a1–a5 · a6 · a7 · b1 · b2 · b3–b4 · c · the unsaved mark), ~4 s |
-| `project-formats.browser-test` | 4/4 (read-only in the page · the door · R-I3 first half · a 1.4 notebook is page 0) |
+| `project-formats.browser-test` | 5/5 (read-only in the page · the door · R-I3 first half · a 1.4 notebook is page 0 · FOLDERS is painted glass) |
+| re-run on the committed tree | `new-project` 8/8 (twice), `history` 42/42, `molecule-demos` 5/5, `offer` 16/16, `frame-occlusion` 7/7 |
 | `node tools/new-project.mjs --check` | in step (16329 B) — the empty project's bytes did not move |
 | `tools/settings-probe.mjs` | 0 of 6 RED (its first run's WATER open hit the 3 s rAF watchdog on the shared GPU; alone, green) |
 | the first FOLDERS picture | 1,029 ms (capture's probe), worst frame gap 102 ms; later pictures 33 ms, gap 18 ms (`.tmp/thumbgap.mjs`, not committed) |
@@ -55,7 +59,8 @@ The first builder's commits: `443332e` (C6-DESIGN.md), `b6d61ec` (the two module
 
 ## Lines
 
-`cat lab/*.js | wc -l`: 30,553 at `f0fcbc4` → 30,906 at the WIP tip → **30,842** at `7fc6f04`.
+`cat lab/*.js | wc -l`: 30,553 at `f0fcbc4` → 30,906 at the WIP tip → 30,842 at `7fc6f04` → **30,844** at `83fe811` (+291: rack.js −94,
+projects.js +271, project-store.js +165, project-storage.js −25, project-import.js −41, sw.js +13, settings-store.js +2).
 
 ## Blockers
 
