@@ -566,6 +566,22 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > re-aim → **C-V** (`BRIEF-C-V.md`, fresh Opus) → fix rounds → the pre-release gates → the LOCAL 0.5.0-alpha cut + `CHANGES-0.5.0.md` on Josh's word.
 > NO push, NO deploy. Servers: Josh's 8721 (pid 2266539) and 8741 (pid 3602240) untouched; mine will be 8731/5203 at merge time. Checkpoint:
 > `sos-s0/.claude/handoffs/latest.md` and `~/.claude/handoffs/latest.md`. (Memory capture — claude-mem — paused for a quota cooldown until ~10:43.)
+> **UPDATE (Claude Sos, 2026-10-09 12:10 CDT) — C7b MERGED `9c42a5a`; C-V: FIT WITH NOTES.** C7b's fresh builder (`a492a2b`, note
+> `agents/a0ff0fd25c7aa306c.md`) fixed the settings-probe red with one changed line (the RENDER card at the TOP of the right rack, `rack.prepend`:
+> the `closed` list is page order, so a card appended at the foot stood second after a demo open and last after a reload) and finished steps 3–4.
+> Merged across C6b (conflicts: the LW literal's end, FAMILIES, REPORT.md waves 208 C7b then 209 C6b, sw.js regenerated); THE FILM paragraph applied
+> to CLAUDE.md; the CHANGES line added; `lab/*.js` **27,593**. Gates on 8731: THE LOCK 860 · 0/0 + 1004 · 0/0, settings-probe 0/6, render-exact 40/40,
+> timeline 14/14, film-probe/compare identical, offer 16, menubar 8, hit-probe 49/0, history, gpu-recovery, new-project, keyboard-window/-shortcuts,
+> frame-occlusion, film-handover, node 0. **`tests/opener` RED under load on BOTH trees** (sos-s0 scene 6 ×3 / 5 ×1 / 7 ×1; Yan's `f0d4566` without C7b
+> green ×1, scene 7 ×1) — a load-sensitive suite, re-run ALONE at the pre-release gates. **C-V** (`3f68483`, `research/release-0.5.0/C-V.md`, note
+> `agents/aabaf58d164cdd3ae.md`): **FIT WITH NOTES, no BLOCKER** — R1–R15 green but R7's `opener` (its one SHOULD: 6/7 then 5/7 alone, read as the kit's
+> animations not advancing while headless Firefox holds frames after a heavy boot; owner C6b); the seven classes: 4 and 6 (λWAVES' head) 0 on every
+> surface, Josh's defaults hold; TIMELINE/RENDER open 0 style changes; ms/s pair **Δ +1.005 ms/s** (gate 3.536; base 40.055 / tip 41.060; raw medians
+> drifted +2.7/+3.7 vs MEASURE's 37.335 this session, the pair is the gate); `adopt --check` in step; `__LW` law green per commit; 27,593 vs 30,000;
+> M5 pending. Its five CLAUDE.md NOTE rows fixed in `9f80e98` (LINKED retired at C4; stage-text/BRIEF 6 at 0.5.1; the 0.3.2 stray "DOMAIN"; 32 `!important`).
+> Not verified by C-V: camera-routes, mir-controls, serialize-bytes, ms/s with TIMELINE open. **Next:** merge the legacy/boot re-aim (Sonnet, still
+> running) → `opener` ALONE on a quiet GPU (if scene 7 reds alone it is a real C6b race: the trap `.tmp/opener-s7b.mjs`) → the pre-release gates →
+> the LOCAL 0.5.0-alpha cut + `CHANGES-0.5.0.md` **on Josh's word** (he has not yet ruled 0.5.0-as-the-adoption vs building D2–D10 first). NO push, NO deploy.
 
 ## 3 · What happens next, in order
 
