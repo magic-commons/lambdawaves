@@ -26,7 +26,11 @@ builder), geckodriver 5303; suites one at a time, 4 s apart.
   (bpm 30, byte-identical to C0's/D9's: sha-256 5b8a90de…) and `--check` in step. Gates: node 85 = 82 + 3 known reds
   (new-project --check now green); first-run 11/11; new-project browser 8/8; `.tmp/probe-modstore.mjs` correct;
   settings-probe 5/6 (WAVE DANCER: `modwin.modes.s3` pruned on reload — step 5's finding).
-- `lab/*.js`: 36,288 (base) → 36,469 (adopt) → 36,478 (14f0fac) → 36,464 (be03a83) → 36,472 (step 2).
+- **Step 3 DONE** ("R-B1 complete — lab/modwindow.js (3,110) and lab/audio.js (438) leave"): audio-capture.js VERIFIED (same
+  exports, same logic; no shim); tests/audio.test.mjs re-aimed; lab.css badge block + `.k-route-x` gone (modhost.css carries
+  them); rack.js comments re-aimed (4 in-place lines). Gates: node 82 + 3 known; routed-knob 4/4, take-in-bugs 4/4,
+  new-project 8/8, history 39/39.
+- `lab/*.js`: 36,288 (base) → 36,469 (adopt) → 36,478 (14f0fac) → 36,464 (be03a83) → 36,472 (step 2) → **32,921** (step 3).
 
 ## Node reds (C0's, not fixed): mir-manifest (alpha.24 not ACCEPTED); new-project --check OUT OF STEP (bpm 60 → 30); wiring
 (allowlist `lab/mir/shell/wordmark.js` is reached via `window/workspaces.js`; R5-W1); pwa (absolute URL in lab/mir/shell/gui.js).
@@ -52,4 +56,6 @@ builder), geckodriver 5303; suites one at a time, 4 s apart.
 - take-in-bugs' WAVE DANCER scene reads t 0.00 → 64.18 (the project's own clock after open; green, noted only).
 
 ## Exact next step
-Step 3 (deletions): verify `lab/mir/modulation/audio-capture.js` exports `createAudioCapture` and `AUDIO_STATE` first.
+Step 5 (`s3`): settings-probe's WAVE DANCER red is `modwin.modes.s3` lost on reload (the reload boots the shipped rack s1/s2);
+decide whether that is the window's law (record) or ours (≤ 10 lines). Note: `tools/perf/device-report.js:679` says the OLD
+modwindow.js pruned it the same way (rebuildDevices) — compare with the base before calling it new.
