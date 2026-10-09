@@ -389,7 +389,9 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #floats > .dev.compact { width: var(--rail-w); }
 .dev.floating.compact .dev-stat { display: none; }
 #rackAdd > svg { width: 16px; height: 16px; }
-.dock-btn > svg, .mod-exp > svg { width: 13px; height: 13px; }
+/* 0.5.0 C0 · TWIN: the kit sizes the dock / pop-out glyphs (`button:is([data-gly="north"], …) > svg`, 12 px) and on 1.4.3 its
+   rule out-ranked this one there; unlayered on 1.5 this would grow the transport's dock glyph to 13 px. */
+.dock-btn > svg:not(:where(button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg)), .mod-exp > svg:not(:where(button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg)) { width: 13px; height: 13px; }
 .sp-cap, .sturm-note { font-family: var(--font-sans); font-size: var(--fs-small); color: var(--dim); line-height: 1.35; padding: 0 2px 2px; }   /* the note's look, outside the ⓘ sweep */
 .sp-cap b, .sturm-note b { color: var(--fg-soft); font-weight: var(--w-med); }
 
@@ -457,10 +459,14 @@ body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
 .reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }
 .reg-bar { align-items: center; }
-.reg-bar .sel { flex: 1 1 0; min-width: 0; }
+.reg-bar .sel { min-width: 0; }
+/* 0.5.0 C0 · TWINS: the kit's `.row > select.sel { flex: 1 1 auto }` and `.row.tight { justify-content: flex-start }` out-ranked the
+   next two on 1.4.3 (the MO-REGISTRY bar and its morph row are kit `.row`s); unlayered on 1.5 they would win.  Kept as written. */
+.reg-bar .sel:not(:where(.row > select.sel)) { flex: 1 1 0; }
 .reg-bar .trig { flex: 0 0 auto; padding: 0 8px; }
 .reg-bar .trig.on { color: var(--acc); }
-.reg-morph { align-items: center; justify-content: space-between; }
+.reg-morph { align-items: center; }
+.reg-morph:not(:where(.row.tight)) { justify-content: space-between; }
 .reg-morph .k { flex: 0 0 auto; }
 .reg-drive { align-items: center; }
 .reg-drive .sel { flex: 1 1 0; min-width: 0; }

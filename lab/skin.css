@@ -103,7 +103,10 @@
 #transport.mini .fd { order: 0; }
 
 
-#modwin.mir-modwindow .m2workbar button { display: inline-flex; align-items: center; justify-content: center; }
+#modwin.mir-modwindow .m2workbar button { justify-content: center; }
+/* 0.5.0 C0 · TWIN: on 1.4.3 the kit's `#modwin .modtempo { display: grid }` (a :root ladder) out-ranked this; unlayered on 1.5
+   it would make the tempo pill a flex row (132 → 124 px).  The pill keeps the kit's grid. */
+#modwin.mir-modwindow .m2workbar button:not(:where(.modtempo)) { display: inline-flex; align-items: center; }
 #modwin.mir-modwindow .m2workbar button > svg { display: block; margin: auto; }
 #modwin.mir-modwindow .m2presave svg { width: 26px; height: 26px; }
 
@@ -130,7 +133,13 @@ body[data-card="refractive"] #transport.mini { background: transparent; }
 body.frost[data-card="tinted"] #transport.mini { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
 
 
-body.frost[data-card="refractive"] .dev, body.frost[data-card="refractive"] .glass, body.frost #transport { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); background: hsl(0 0% 100% / .10); }
+/* 0.5.0 C0 · TWINS (MIR 1.5: every kit rule is in a layer, so this unlayered rule now out-ranks two kit rules it LOST to on
+   1.4.3 — the kit's LAYERS.md §6 (b)): the kit's dark frost (`body.frost[data-card="refractive"][data-theme="dark"] .dev/.glass`,
+   a black .10 veil, mir/css/skin.css) and the modulation window's own `#modwin` material (its root is a transparent layout
+   box with gaps, CLAUDE.md).  `:not(:where(…))` keeps the 1.4.3 winner and adds no specificity, so nothing of ours re-ranks.
+   Found by mapping every property both a kit and an app sheet declare, base vs adopted (research/release-0.5.0/C0-BUILD.md). */
+body.frost[data-card="refractive"] .dev:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost[data-card="refractive"] .glass:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost #transport { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
+body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .dev:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .glass:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost #transport { background: hsl(0 0% 100% / .10); }
 
 /* The keyboard is a dense editor rather than an airy instrument card. Keep its
    MIR tint and frost, but give the small legends a readable surface in either theme. */
