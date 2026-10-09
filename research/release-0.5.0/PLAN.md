@@ -236,3 +236,14 @@ changes after the release of 0.5.0 or 0.5.5")
   the kit's FREEZE THIS LOOK; first-run film choices are C7's (6 s, the canvas size, driven when MOD is armed); the picture takes two taps; no ▶ in the
   timeline's work bar; films keep λWAVES' file names; the ruler never moves ψ(t) live. The build (C7b) launches after C3 merges.
 
+
+### Rulings of 2026-10-09, afternoon (Josh, verbatim)
+
+- 12:20 CDT, asked what a cut does ("Is that merging? Or pushing?") and told it is neither — the version line, a local tag, the changelog,
+  the snapshot; no merge to main, no push, no deploy, no release: **"Ah, yea we can cut it once the last few agents or whoever comes back."**
+  Taken as: **cut v0.5.0-alpha LOCALLY as THE ADOPTION** (R5-Q2's minimum: A + C0–C7 + C9 + C6b + C7b + D9/D9b on the pinned alpha.24,
+  C-V FIT WITH NOTES) once the running `tests/legacy/boot` re-aim is merged, `tests/opener` has had its run alone on a quiet GPU and the
+  pre-release gates are green. **D2, D3, D4, D6, D8, D10 (no kit brief needed) and D1, D5, D7, C8 (0.5.1 by the spike) are the next plan's**
+  (0.5.5 or 0.5.1 — Josh names it). The no-push ruling of 10-07 stands: nothing goes to GitHub or Cloudflare at this cut.
+- 12:00 CDT: "I was screen recording lambdawaves on the web" during C-V's ms/s pair — the discarded base run (load 12) and the +2.7/+3.7
+  raw drift are accounted for; the interleaved pair (+1.005) stands; the opener's quiet run comes after.
