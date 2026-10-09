@@ -4,7 +4,7 @@
 - branch: `worktree-agent-a1a6731f62408d489`, reset to `7044f37` (the `sos-s0` tip)
 - `lab/*.js` before: **36,288** · now **36,355** (this includes `lab/sw.js` growing with the adopt's precache entries;
   compute C5's own delta as rack.js + edit-domain.js − history.js, see below)
-- **PAUSED by a usage alarm (five-hour limit 98 %) at `d22ffb9`.** Gate server on 8803 stopped.
+- Resumed 20:50; the card commit `d22ffb9` was REVERTED at `111aba2` (history block 8 red: the kit list does not paint a closed card) → history **39/39** on `111aba2`. Gate server on 8803 pid 3479086.
 
 ## Commits
 
