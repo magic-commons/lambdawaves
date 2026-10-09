@@ -21,6 +21,11 @@
    `.tmp/base` = git archive of the adopt): 58 of 58 reached. Control 3/3 both. JSON in `research/release-0.5.0/c9-hit-probe/`.
    Servers: 8823 (this tree) still up, pid 3578115 — stop by pid at the end; 8827 stopped.
 
+4. `6ae9973` R14: `onLost: function gpuRecovery(i)` in place; `LW.thumbnail()` at the END of LW (probe().canvasReadable →
+   canvas, else picture({ width: 320 }).blob); gpu-recovery test + THE THUMBNAIL PROBE (both roads lit) + THE GPU RECOVERY
+   (device.destroy → banner, field.ok false, register live, no errors). gpu-recovery GREEN alone. lab/*.js 36,482 (+13 over adopt).
+   Node 81/85 (C0's four). new-project --check: only bpm 60→30 (the adopt; C0 regenerates).
+
 ## Findings so far
 - The kit (alpha.24) has NO "readability probe": the probe is λWAVES' own `capture.probe()` (`canvasReadable`, capture.js).
 - λWAVES has NO `thumbnail()` today (FOLDERS is C6's). Plan: add `LW.thumbnail()` at the END of the LW literal (reads
@@ -32,5 +37,5 @@
   camera; the guard now makes it UI (the kit's law: a window's whole rect is UI space).
 
 ## Next
-R14 (name `gpuRecovery` in place; `LW.thumbnail()` at the END; gpu-recovery test gains the device-lost + thumbnail cases);
-then the browser suites (offer 16, input, gpu-recovery, frame-occlusion 7, keyboard-window, menubar); then REPORT + C9-BUILD.md.
+The browser suites, each alone on 8823/5293 with 4 s between: offer 16, input, frame-occlusion 7, keyboard-window, menubar;
+then REPORT (`## 2026-10-08 · 0.5.0 C — THE ADOPTION`, `### wave 200: C9 …`) + C9-BUILD.md; then stop server pid 3578115.
