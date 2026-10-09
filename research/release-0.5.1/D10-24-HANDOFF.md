@@ -31,5 +31,11 @@ new-project 8/8 + `new-project --check` in step (no layout record in the file) +
 - A headless-Firefox rAF stall ("animation frames stopped" / `stats.frames` 0 after a reload) shows up now and then under load; the suite therefore
   reads the frame mask before its reload step.
 
+## Step 2 · presents/s, BUILD, REPORT — DONE (commit 2)
+presents/s over 30 s, WAVE DANCER, headless Chromium CDP, three interleaved pairs: neutral 15.03 (14.99 to 15.15), S-curve 12.18 (12.09 to 12.22): -19.0 %.
+`D10-24-BUILD.md` carries the ledger, the figures, the suites, the brief candidates, the merge notes, the drafted CLAUDE.md sentence, the M5 recipe and
+"what Josh will see".  `REPORT.md` has wave 210 under a new "0.5.1 · THE INFORMATIONAL UPDATE" heading (renumber at the merge if another builder took 210).
+`tools/perf/device-report.js` gained one `curves` field in the per-bin state sample.
+
 ## Next
-presents/s (neutral vs S-curve, WAVE DANCER, 30 s, interleaved, Chromium CDP), BUILD, REPORT, commit 2.
+Nothing in this row.  The integrator merges by the branch tip.  The server on 8993 is stopped by pid at the end.
