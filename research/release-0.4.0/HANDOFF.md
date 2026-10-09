@@ -582,6 +582,14 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > Not verified by C-V: camera-routes, mir-controls, serialize-bytes, ms/s with TIMELINE open. **Next:** merge the legacy/boot re-aim (Sonnet, still
 > running) → `opener` ALONE on a quiet GPU (if scene 7 reds alone it is a real C6b race: the trap `.tmp/opener-s7b.mjs`) → the pre-release gates →
 > the LOCAL 0.5.0-alpha cut + `CHANGES-0.5.0.md` **on Josh's word** (he has not yet ruled 0.5.0-as-the-adoption vs building D2–D10 first). NO push, NO deploy.
+> **UPDATE (Claude Sos, 2026-10-09 14:49 CDT) — USAGE PAUSE at the door of the cut.** Josh's word is given (12:20) and the name is **"GUI Adoption"**
+> (14:10; no "The" in release names; the D rows become "Informational Update", number his; stage D = one short re-plan round). `sos-s0` `59168b9`
+> clean: the legacy/boot re-aim merged `7edae5c` (145/152; the 7 reds are law: 5 regressions of 0.5.0 + 2 pre-existing), the opener's reds proved
+> to be the HOST (headless Firefox's dead rAF after a real press or a quick navigation — v0.4.0 too) and fixed in the suite's `nav()` (7/7 twice alone,
+> `59168b9`); CHANGES-0.5.0.md drafted (11 rows). Running at the pause and told to hand back: **FIX ROUND 1** (Opus; B78, B111, B144, B139 committed
+> at `7bd1bf6`; B149b + FIX-ROUND-1.md + gates pending) and **the five boot rows after C7b** (Sonnet; B66/B108 stale vs the RENDER card, B127 ?, B84/B134
+> timing; no commit yet). **Next:** merge both → the boot suite + settings-probe once → `bash .tmp/cut-0.5.0.sh` (local tag v0.5.0-alpha, CHANGELOG,
+> snapshot) → CHANGES-0.5.0.md final + vault → "safe to compact". Checkpoint `~/.claude/handoffs/latest.md` (block "STATE AT 14:49"). NO push, NO deploy.
 
 ## 3 · What happens next, in order
 
