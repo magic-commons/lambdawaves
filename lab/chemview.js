@@ -88,7 +88,7 @@ export function createChem(host, api) {
   const keepSw = sw({ label: 'INSTALLED', value: false, title: 'Every record of this section kept on this device: press to install them all, press again to remove them', onChange: (v) => { keep(v); } });
   rH.appendChild(keepSw.root);
   const r0 = el('div', 'row tight', host);
-  const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule’s density', onChange: (v) => { setOn(v); } });
+  const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule’s density', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
   r0.appendChild(onSw.root);
   /* ── THE MOLECULE DROPDOWN ────────────────────────────────────────────────────────────────────────────────
    * paletteview.js:22's node and class, and its lesson too: a `<select>` fires `change` only when the VALUE
@@ -121,7 +121,9 @@ export function createChem(host, api) {
     mSel.value = preset; if (mSel.value !== preset) mSel.selectedIndex = -1;   // turned away from the molecule on screen: nothing chosen here yet
     header();
   }
-  mSel.addEventListener('change', () => { solve(mSel.value, { press: true }); });   // a hand press: a DOWNLOAD row installs (and asks persist once)
+  mSel.addEventListener('change', () => { handPick(mSel.value); });   // a hand press: a DOWNLOAD row installs (and asks persist once)
+  /** THE HAND'S PICK (the dropdown; a notebook link, 0.5.1 D8): the solve as a press, and the app told — its head waits for this solve (D2) */
+  function handPick(id) { const p = solve(id, { press: true }); if (api.hand) api.hand(preset); return p; }
   /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
      the store is re-read when the menu is opened (the browser may have evicted it: then the row says DOWNLOAD again, never broken) */
   const have = new Map(), optOf = (id) => [...mSel.options].find((o) => o.value === id);
@@ -306,7 +308,7 @@ export function createChem(host, api) {
       const r = await call(m, () => here(basis).then((W) => { try { return W.chemOpen(m); } catch (e) { return { refused: String(e && e.message || e) }; } }));
       if (!r || r.refused) { why = (r && r.refused) || `${P.name}'s record did not open`; return null; }
       if (wantRef && hash !== wantRef.hash) { pendingKey = pendingKey || wantRef.nameKey || null; note = 'the project named an older record; this is the current one, its orbital found by name'; }
-      r.opened = { bytes: got.bytes, from: got.from };
+      r.opened = { bytes: got.bytes, from: got.from }; r.stem = got.record.stem || null;   // 0.5.1 D2: the head of a record-opened molecule is its stem's
       return r;
     };
     const first = () => (rec ? viaRecord() : Promise.resolve(null)).then((r) => {
@@ -869,7 +871,7 @@ export function createChem(host, api) {
     get speed() { return speed; }, setSpeed(v) { if (!Number.isFinite(v)) return speed; speed = Math.min(50, Math.max(1, Math.round(v))); return speed; },
     knobs: { kick: () => kapKnob, speed: () => spdKnob },
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
-    solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); },
+    solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); }, pick: handPick,
     preset() { return preset; },
     setView(v) { if (!['density', 'orbital', 'diff'].includes(v) || (v !== 'orbital' && sol && !sol.D)) return view; view = v; vSeg.set(v); seats(); pushMatrix(v === 'diff' && !rt); refresh(); return view; },
     orbital(k) { if (Number.isFinite(k)) { const [lo, hi] = span(); orbital = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
