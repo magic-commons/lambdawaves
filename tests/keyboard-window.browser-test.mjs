@@ -1,129 +1,181 @@
+// 0.5.0 C3 · THE KEYBOARD WINDOW IS THE KIT'S (mir/keyboard/keyboard.js createKeyboardWindow over MIR's ONE KEY TABLE, lab/key-table.js),
+// its paint λWAVES' (lab.css §KEYBOARD, R5-S3).  Rewritten wholesale from the 0.4.0 editor's suite: the rows and their chords (A9, R-K1,
+// the kit's spelling), the window opened by its ACTION with a real key, CLAUDE.md's geometry (five rows in 416 px, legend + switch on one
+// row, centred subtitle-free RECORD / RESET above the search, status only when needed, no hard borders), a real drag that the occlusion
+// follows and the place remembered, a recording with real keys, a taken chord asked then stolen on the second press, Escape's three steps,
+// the platform switch, RESET, a 0.4.0-shaped saved binding across a reload, the camera chords (⌘⇧Q never the dolly zoom) and keys.bind's law.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
-import { actions, relActions } from '../tools/gate/drv.mjs';
+import { actions, relActions, go } from '../tools/gate/drv.mjs';
 
 const url = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
-const g = await open(url, { width: 1440, height: 900, script: 30000 });
+const g = await open(url, { width: 1920, height: 1080, script: 30000 });
+const SHIFT = '', CTRL = '', ESC = '';
+let n = 0;
+const press = async (value, mods = []) => { const a = [...mods.map((m) => ({ type: 'keyDown', value: m })), { type: 'keyDown', value }, { type: 'pause', duration: 30 }, { type: 'keyUp', value }, ...mods.map((m) => ({ type: 'keyUp', value: m }))];
+  await actions(g.s, [{ type: 'key', id: 'k' + (++n), actions: a }]); await relActions(g.s); };
+const ev = async (body) => { const r = await g.ev(body); assert.ok(r && !r.E, 'page threw: ' + JSON.stringify(r)); return r; };
 try {
   assert.equal((await g.waitFor('window.__LW?.ready', 200, 100)).ok, 1);
-  const binding = await g.ev(`const a=__LW.keys.actions;
-    const overlap=(x,y)=>x.key&&x.key===y.key&&!!x.ctrl===!!y.ctrl&&!!x.alt===!!y.alt&&(x.shift===undefined||y.shift===undefined||!!x.shift===!!y.shift);
-    return {n:a.length,collisions:a.flatMap((x,i)=>a.slice(i+1).filter(y=>overlap(x,y)).map(y=>[x.id,y.id])),
-      camera:Object.fromEntries(['dollyIn','povIn','dollyZoomIn','dollyOut','povOut','dollyZoomOut'].map(id=>{const x=a.find(a=>a.id===id);return [id,[x.key,x.ctrl||false,!!x.shift]]})),
-      chord:Object.fromEntries(['transport.play','folders','pitchDn','modArm','help','hide','modulation','save','notebook','rack','dock','fullscreen'].map(id=>{const x=a.find(a=>a.id===id);return [id,x&&[x.key,x.ctrl||false,!!x.shift]]})),
-      gone:['play','hideUI','keysheet','modWin'].filter(id=>a.some(x=>x.id===id)),kitWindows:['history','keyboard'].map(id=>{const x=a.find(y=>y.id===id);return x?x.key:'missing'}),
-      hooks:[...document.querySelectorAll('[data-key-action]')].map(e=>e.dataset.keyAction).filter(id=>!a.some(x=>x.id===id)),
-      hooked:['rack','folders','notebook','camReset','undo','redo','view','style','palette'].filter(id=>!document.querySelector('[data-key-action="'+id+'"]')),
-      kit:await import('./mir/shell/keys.js').then(m=>m.KIT_KEYS?Object.fromEntries(Object.entries(m.KIT_KEYS).map(([k,v])=>[k,m.normalize(v)])):null,()=>null),errors:__e.slice()};`);
-  assert.deepEqual(binding.collisions, []);
-  assert.deepEqual(binding.camera, { dollyIn:['KeyQ',false,false],povIn:['KeyQ',false,true],dollyZoomIn:['KeyQ','Ctrl',true],
-    dollyOut:['KeyE',false,false],povOut:['KeyE',false,true],dollyZoomOut:['KeyE','Ctrl',true] });   // the coupled dolly is the Control key alone (0.5.0 A9)
-  /* 0.5.0 A9 · the kit's ids where the kit has a twin; R-K1: S stays pitch-down, FOLDERS is O, the MOD arm is Ctrl+Space */
-  assert.deepEqual(binding.chord, { 'transport.play':['Space',false,false], folders:['KeyO',false,false], pitchDn:['KeyS',false,false],
-    modArm:['Space','Ctrl',false], help:['Slash',false,true], hide:['KeyH',false,false], modulation:['KeyM',false,false], save:['KeyS',true,false],
-    notebook:['KeyJ',false,false], rack:['KeyB',false,false], dock:['KeyT',false,false], fullscreen:['KeyF',false,false] });
-  assert.deepEqual(binding.gone, []); assert.deepEqual(binding.kitWindows, [null, null], 'the kit\'s windows are rows with no chord (ADOPTING-1.5 §11)'); assert.deepEqual(binding.hooks, [], 'a data-key-action names a row that exists'); assert.deepEqual(binding.hooked, []);
-  /* on an adopted kit that ships its table (1.5: KIT_KEYS), every twin is the kit's own chord spelled the kit's way, but FOLDERS (R-K1) */
-  if (binding.kit) {
-    const kitSpell = ([key, ctrl, shift]) => [ctrl === 'Ctrl' ? 'Ctrl' : ctrl ? 'Mod' : '', shift ? 'Shift' : '', key].filter(Boolean).join('+');
-    for (const id of Object.keys(binding.kit)) assert.ok(binding.chord[id], 'the kit row ' + id + ' has a twin here');
-    for (const id of Object.keys(binding.kit).filter((id) => id !== 'folders')) assert.equal(kitSpell(binding.chord[id]), binding.kit[id], id);
-    assert.equal(binding.kit.folders, 'KeyS'); assert.equal(kitSpell(binding.chord.folders), 'KeyO', 'R-K1: FOLDERS is O here, S is pitch-down');
-  }
+
+  /* ── 1 · THE ROWS AND THE TABLE: A9's ids, R-K1, Ctrl vs Mod in the kit's spelling, the kit's windows with no chord, hooks that exist ── */
+  const binding = await ev(`const a = __LW.keys.actions, T = __LW.keys.table, row = (id) => { const x = a.find((y) => y.id === id); return x && [x.key, x.ctrl || false, !!x.shift]; };
+    const kit = await import('./mir/shell/keys.js');
+    return { conflicts: T.conflicts(), platform: T.platform,
+      camera: Object.fromEntries(['dollyIn', 'povIn', 'dollyZoomIn', 'dollyOut', 'povOut', 'dollyZoomOut'].map((id) => [id, row(id)])),
+      chord: Object.fromEntries(['transport.play', 'folders', 'pitchDn', 'modArm', 'help', 'hide', 'modulation', 'save', 'notebook', 'rack', 'dock', 'fullscreen'].map((id) => [id, row(id)])),
+      spelled: Object.fromEntries(['transport.play', 'dollyZoomIn', 'modArm', 'save', 'help', 'nextWindow', 'history', 'keyboard'].map((id) => [id, T.chords(id)])),
+      gone: ['play', 'hideUI', 'keysheet', 'modWin'].filter((id) => a.some((x) => x.id === id) || T.get(id)),
+      hooks: [...document.querySelectorAll('[data-key-action]')].map((e) => e.dataset.keyAction).filter((id) => !T.get(id)),
+      hooked: ['rack', 'folders', 'notebook', 'camReset', 'undo', 'redo', 'view', 'style', 'palette', 'dock', 'modulation'].filter((id) => !document.querySelector('[data-key-action="' + id + '"]')),
+      hint: document.getElementById('rackToggle').getAttribute('aria-keyshortcuts'),
+      kit: Object.fromEntries(Object.entries(kit.KIT_KEYS).map(([k, v]) => [k, kit.normalize(v)])), errors: __e.slice() };`);
+  assert.deepEqual(binding.conflicts, [], 'two rows hold one chord');
+  assert.equal(binding.platform, 'other', 'the gate runs on Linux: Mod is Ctrl');
+  assert.deepEqual(binding.camera, { dollyIn: ['KeyQ', false, false], povIn: ['KeyQ', false, true], dollyZoomIn: ['KeyQ', 'Ctrl', true],
+    dollyOut: ['KeyE', false, false], povOut: ['KeyE', false, true], dollyZoomOut: ['KeyE', 'Ctrl', true] });
+  assert.deepEqual(binding.chord, { 'transport.play': ['Space', false, false], folders: ['KeyO', false, false], pitchDn: ['KeyS', false, false],
+    modArm: ['Space', 'Ctrl', false], help: ['Slash', false, true], hide: ['KeyH', false, false], modulation: ['KeyM', false, false], save: ['KeyS', true, false],
+    notebook: ['KeyJ', false, false], rack: ['KeyB', false, false], dock: ['KeyT', false, false], fullscreen: ['KeyF', false, false] });
+  /* the fine step is the chord and its Shift; `ctrl: 'Ctrl'` is the kit's Ctrl, which off a Mac IS Mod (the NEW Ctrl-vs-Mod case's other half is node) */
+  assert.deepEqual(binding.spelled, { 'transport.play': ['Space', 'Shift+Space'], dollyZoomIn: ['Mod+Shift+KeyQ'], modArm: ['Mod+Space', 'Mod+Shift+Space'],
+    save: ['Mod+KeyS'], help: ['Shift+Slash'], nextWindow: ['Tab'], history: [], keyboard: [] });
+  assert.deepEqual(binding.gone, []); assert.deepEqual(binding.hooks, [], 'a data-key-action names a row'); assert.deepEqual(binding.hooked, []);
+  assert.equal(binding.hint, 'B Shift+B', 'the table writes aria-keyshortcuts on a tagged control');
+  for (const id of Object.keys(binding.kit).filter((id) => id !== 'folders')) assert.equal(binding.spelled[id] ? binding.spelled[id][0] : (await ev(`return __LW.keys.table.chords(${JSON.stringify(id)});`))[0], binding.kit[id], 'the kit row ' + id);
+  assert.equal(binding.kit.folders, 'KeyS'); assert.deepEqual(binding.chord.folders, ['KeyO', false, false], 'R-K1: FOLDERS is O, S is pitch-down');
   assert.deepEqual(binding.errors, []);
+  console.log('PASS the rows on the kit\'s table: no shared chord, A9 ids, R-K1, Ctrl+Shift+Q spelled Mod+Shift+KeyQ off a Mac, the fine step as a chord and its Shift, the kit\'s windows with no chord, every tag a row, hints written');
 
-  const geometry = await g.ev(`const field=__LW.field,original=field.setOcclusion;window.__frameMasks=[];
-    field.setOcclusion=function(rects){window.__frameMasks=rects.map(r=>r.slice());return original.call(field,rects)};
-    __LW.keymap.open();await __LW.settle();const host=document.querySelector('[data-mir-window="keyboard"]'),p=host.querySelector('.km-panel'),b=p.getBoundingClientRect();
-    const canvas=document.querySelector('#field').getBoundingClientRect(), mask=__frameMasks.some(r=>r[0]<=b.left-canvas.left+20&&r[1]<=b.top-canvas.top+20&&r[2]>=b.right-canvas.left-20&&r[3]>=b.bottom-canvas.top-20);
-    const col=p.querySelector('.km-col-left').getBoundingClientRect(),header=p.querySelector('.km-col-header').getBoundingClientRect(),rows=p.querySelectorAll('.km-kb-row');
-    const first=rows[0].getBoundingClientRect(),last=rows[rows.length-1].getBoundingClientRect();
-    const editor=p.querySelector('.km-col-right').getBoundingClientRect(),buttons=[...p.querySelectorAll('.km-editor-actions .km-btn')].map(e=>e.getBoundingClientRect());
-    const borders=['.km-panel','.km-col','.km-platform-switch','.km-key-bound','.km-key-unbound','.km-search','.km-action-row','.km-chip','.km-btn','.km-close']
-      .map(sel=>getComputedStyle(p.querySelector(sel)??p).borderWidth);
-    return {width:b.width,height:b.height,x:b.x,y:b.y,hostPointer:getComputedStyle(host).pointerEvents,pointer:getComputedStyle(p).pointerEvents,
-      topGap:first.top-header.bottom,bottomGap:col.bottom-last.bottom,borders,
-      legendAndSwitch:p.querySelector('.km-legend').parentElement===p.querySelector('.km-platform-switch').parentElement,
-      platformIcons:[p.querySelector('.km-os-mac').textContent,p.querySelectorAll('.km-os-windows > span').length],
-      buttonCenter:Math.abs((buttons[0].left+buttons[1].right)/2-(editor.left+editor.right)/2),
-      buttonSubtitles:p.querySelectorAll('.km-editor-actions .km-btn-sub').length,
-      rows:p.querySelectorAll('.km-kb-row').length,groups:p.querySelectorAll('.km-action-group').length,
-      q:p.querySelector('.km-key[data-code="KeyQ"] .km-badge').textContent,card:document.body.dataset.card,mask,
-      tabLabel:p.querySelector('.km-action-row[data-id="povIn"] .km-chips').textContent,
-      removed:p.querySelectorAll('.km-eyebrow,.km-header-hint,.km-col-title,.km-count,.km-footer,.km-hint').length,
-      editor:p.querySelector('.km-editor-actions')?.parentElement.classList.contains('km-col-right'),
-      controls:p.querySelectorAll('.km-editor-actions .km-btn').length,statusHidden:p.querySelector('.km-status').hidden,
-      errors:__e.slice()};`);
-  assert.ok(geometry.width < 1440 && geometry.width > 900 && geometry.height <= 416);
-  assert.ok(geometry.topGap >= 0 && geometry.topGap < 20 && geometry.bottomGap >= 0 && geometry.bottomGap < 20);
-  assert.deepEqual(geometry.borders, Array(10).fill('0px'));
-  assert.equal(geometry.legendAndSwitch, true);
-  assert.deepEqual(geometry.platformIcons, ['⌘', 4]);
-  assert.ok(geometry.buttonCenter < 2); assert.equal(geometry.buttonSubtitles, 0);
-  assert.ok(geometry.x >= 8 && geometry.y >= 8);
-  assert.equal(geometry.hostPointer, 'none'); assert.equal(geometry.pointer, 'auto');
-  assert.equal(geometry.rows, 5); assert.ok(geometry.groups >= 4);
-  assert.equal(geometry.removed, 0); assert.equal(geometry.editor, true);
-  assert.equal(geometry.controls, 2); assert.equal(geometry.statusHidden, true);
-  assert.equal(geometry.mask, true);
-  assert.match(geometry.q, /⇧/); assert.match(geometry.tabLabel, /⇧/);
-  assert.equal(geometry.card, 'refractive'); assert.deepEqual(geometry.errors, []);
+  /* ── 2 · OPENED BY ITS ACTION (a real ?), and CLAUDE.md's pane ── */
+  await ev(`const f = __LW.field, set = f.setOcclusion; window.__masks = []; f.setOcclusion = function (r) { window.__masks = r.map((x) => x.slice()); return set.call(f, r); };
+    __LW.pause(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return 1;`);
+  await press('/', [SHIFT]);
+  const geo = await ev(`await __LW.settle(); await new Promise((r) => setTimeout(r, 400)); await __LW.settle();
+    const w = document.querySelector('[data-mir-window="keyboard"]'), b = w.getBoundingClientRect(), c = document.querySelector('#field').getBoundingClientRect();
+    const covers = (r) => __masks.some((m) => m[0] <= r.left - c.left + 20 && m[1] <= r.top - c.top + 20 && m[2] >= r.right - c.left - 20 && m[3] >= r.bottom - c.top - 20);
+    const col = w.querySelector('.km-col-left').getBoundingClientRect(), head = w.querySelector('.km-col-header').getBoundingClientRect(), rows = [...w.querySelectorAll('.km-kb-row')];
+    const right = w.querySelector('.km-col-right').getBoundingClientRect(), btns = [...w.querySelectorAll('.km-editor-actions .km-btn')], bb = btns.map((e) => e.getBoundingClientRect());
+    return { open: __LW.keymap.isOpen, focusIn: w.contains(document.activeElement), layer: w.parentElement.id, w: b.width, h: b.height, x: b.x, y: b.y, pointer: getComputedStyle(w).pointerEvents,
+      rows: rows.length, inWell: rows[0].getBoundingClientRect().top >= head.bottom && rows.at(-1).getBoundingClientRect().bottom <= col.bottom,
+      groups: [...w.querySelectorAll('.km-action-group')].map((x) => x.textContent),
+      oneRow: w.querySelector('.km-legend').parentElement === w.querySelector('.km-platform').parentElement,
+      icons: [w.querySelector('.km-os-mac').textContent, w.querySelectorAll('.km-os-windows > span').length],
+      centred: Math.abs((bb[0].left + bb[1].right) / 2 - (right.left + right.right) / 2), above: bb.every((r) => r.bottom <= w.querySelector('.km-search').getBoundingClientRect().top),
+      bare: btns.map((e) => e.textContent.trim()), statusShown: getComputedStyle(w.querySelector('.km-status')).display !== 'none',
+      borders: ['.km-col', '.km-platform .seg', '.km-key-bound', '.km-key-unbound', '.km-search', '.km-action-row', '.km-chip', '.km-btn'].map((s) => getComputedStyle(w.querySelector(s)).borderTopWidth).concat(getComputedStyle(w).borderTopWidth),
+      q: w.querySelector('.km-key[data-code="KeyQ"] .km-badge').textContent, more: w.querySelectorAll('.km-chip-more').length,
+      play: w.querySelector('.km-action-row[data-id="transport.play"] .km-chips').textContent, card: document.body.dataset.card, mask: covers(b), errors: __e.slice() };`);
+  assert.equal(geo.open, true, 'the ? key did not open the window'); assert.equal(geo.focusIn, true, 'the focus did not go into the window');
+  assert.equal(geo.layer, 'floats'); assert.equal(geo.pointer, 'auto');
+  assert.ok(geo.w > 900 && geo.w < 1440 && geo.h <= 416, 'the pane is ' + geo.w + ' × ' + geo.h);
+  assert.ok(geo.x >= 8 && geo.y >= 8);
+  assert.equal(geo.rows, 5); assert.equal(geo.inWell, true, 'the five rows do not fit the board\'s well');
+  assert.deepEqual(geo.groups, ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'PROJECT']);
+  assert.equal(geo.oneRow, true); assert.deepEqual(geo.icons, ['⌘', 4]);
+  assert.ok(geo.centred < 2); assert.equal(geo.above, true); assert.deepEqual(geo.bare, ['RECORD INPUT', 'RESET TO DEFAULT'], 'RECORD / RESET carry no subtitle');
+  assert.equal(geo.statusShown, false, 'an empty status is shown'); assert.deepEqual(geo.borders, Array(9).fill('0px'));
+  assert.match(geo.q, /⇧/); assert.equal(geo.more, 0, 'the fine step\'s Shift twin is drawn as a second chord'); assert.equal(geo.play, 'Space');
+  assert.equal(geo.card, 'refractive'); assert.equal(geo.mask, true, 'the pane is not in the occlusion mask'); assert.deepEqual(geo.errors, []);
+  console.log(`PASS opened by a real ?: the kit's window on the float layer, ${geo.w} × ${geo.h}, five rows in the board's well, the five groups in order, legend and switch on one row, RECORD / RESET centred above the search with no subtitle, no status, no border, the pane masked`);
 
-  const before = await g.ev(`const b=document.querySelector('.km-header').getBoundingClientRect();return {x:b.x+90,y:b.y+b.height/2,left:document.querySelector('.km-panel').getBoundingClientRect().left};`);
-  await actions(g.s, [{ type:'pointer', id:'dragKeyboard', parameters:{pointerType:'mouse'}, actions:[
-    {type:'pointerMove',origin:'viewport',x:Math.round(before.x),y:Math.round(before.y)},
-    {type:'pointerDown',button:0},{type:'pointerMove',origin:'viewport',x:Math.round(before.x+70),y:Math.round(before.y+50),duration:250},
-    {type:'pointerUp',button:0}]}]);
+  /* ── 3 · A REAL DRAG by the rail's grip: the window moves, the mask follows, the place is remembered ── */
+  const grip = await ev(`const d = document.querySelector('[data-mir-rail="keyboard"] .mir-grip-dots').closest('.mir-chip').getBoundingClientRect(), p = document.querySelector('[data-mir-window="keyboard"]').getBoundingClientRect();
+    return { x: d.left + d.width / 2, y: d.top + d.height / 2, left: p.left, top: p.top };`);
+  await actions(g.s, [{ type: 'pointer', id: 'drag' + (++n), parameters: { pointerType: 'mouse' }, actions: [
+    { type: 'pointerMove', origin: 'viewport', x: Math.round(grip.x), y: Math.round(grip.y) }, { type: 'pointerDown', button: 0 },
+    { type: 'pointerMove', origin: 'viewport', x: Math.round(grip.x + 70), y: Math.round(grip.y + 50), duration: 250 }, { type: 'pointerUp', button: 0 }] }]);
   await relActions(g.s);
-  const dragged = await g.ev(`await __LW.settle();const p=document.querySelector('.km-panel'),b=p.getBoundingClientRect(),c=document.querySelector('#field').getBoundingClientRect();
-    const mask=__frameMasks.some(r=>r[0]<=b.left-c.left+20&&r[1]<=b.top-c.top+20&&r[2]>=b.right-c.left-20&&r[3]>=b.bottom-c.top-20);
-    return {x:b.left,y:b.top,saved:JSON.parse(localStorage.getItem('lw.keyboard.position.v1')),mask};`);
-  assert.ok(dragged.x >= before.left + 60 && dragged.saved.x === dragged.x);
-  assert.equal(dragged.mask, true);
+  const dragged = await ev(`await new Promise((r) => setTimeout(r, 450)); await __LW.settle();
+    const b = document.querySelector('[data-mir-window="keyboard"]').getBoundingClientRect(), c = document.querySelector('#field').getBoundingClientRect();
+    return { left: b.left, top: b.top, saved: JSON.parse(localStorage.getItem('lw.keyboard.position.v1')),
+      mask: __masks.some((m) => m[0] <= b.left - c.left + 20 && m[1] <= b.top - c.top + 20 && m[2] >= b.right - c.left - 20 && m[3] >= b.bottom - c.top - 20) };`);
+  assert.ok(dragged.left >= grip.left + 60 && dragged.top >= grip.top + 40, 'the drag did not move the window: ' + JSON.stringify([grip, dragged]));
+  assert.ok(dragged.saved && Math.abs(dragged.saved.x - dragged.left) <= 1 && Math.abs(dragged.saved.y - dragged.top) <= 1, 'the place was not remembered: ' + JSON.stringify(dragged.saved));
+  assert.equal(dragged.mask, true, 'the mask did not follow the drag');
+  console.log('PASS a real drag by the grip moves the window, the occlusion mask follows it and lw.keyboard.position.v1 remembers { x, y }');
 
-  const camera = await g.ev(`const L=__LW,K=(code,mods={})=>window.dispatchEvent(new KeyboardEvent('keydown',{code,bubbles:true,cancelable:true,...mods}));
-    const panel=document.querySelector('.km-panel').getBoundingClientRect(),canvas=document.querySelector('#field').getBoundingClientRect();
-    L.keymap.close();await L.settle();const keyboardMask=__frameMasks.some(r=>Math.abs(r[0]-(panel.left-canvas.left))<1&&Math.abs(r[1]-(panel.top-canvas.top))<1);
-    L.camera.reset();let d0=L.obs.dist,f0=L.obs.fov;
-    K('KeyQ',{shiftKey:true});const pov={dist:L.obs.dist,fov:L.obs.fov};
-    K('KeyE',{shiftKey:true});const m0=[L.obs.dist,L.obs.fov];K('KeyQ',{metaKey:true,shiftKey:true});const cmdInert=L.obs.dist===m0[0]&&L.obs.fov===m0[1];
-    K('KeyQ',{ctrlKey:true,shiftKey:true});const zoom={dist:L.obs.dist,fov:L.obs.fov,product:L.obs.dist*Math.tan(L.obs.fov/2)};
-    L.camera.reset();const yaw0=L.obs.yaw;K('KeyA');const instant=L.obs.yaw;
-    await new Promise(r=>setTimeout(r,450));const eased=L.obs.yaw;L.camera.reset();
-    return {d0,f0,pov,zoom,cmdInert,product0:d0*Math.tan(f0/2),yaw0,instant,eased,keyboardMask,errors:__e.slice()};`);
-  assert.equal(camera.keyboardMask, false); assert.equal(camera.cmdInert, true, '⌘⇧Q is never the dolly (the kit\'s Ctrl, not Mod)');
-  assert.equal(camera.pov.dist, camera.d0); assert.ok(camera.pov.fov < camera.f0);
-  assert.ok(camera.zoom.dist < camera.d0 && camera.zoom.fov > camera.f0);
-  assert.ok(Math.abs(camera.zoom.product - camera.product0) < 1e-9);
-  assert.equal(camera.instant, camera.yaw0); assert.ok(camera.eased < camera.yaw0 - .1);
-  assert.deepEqual(camera.errors, []);
+  /* ── 4 · RECORDING, with real keys: a free chord binds; a taken chord asks, the second press steals and names the loser ── */
+  const pick = (id) => ev(`const w = document.querySelector('[data-mir-window="keyboard"]'); w.querySelector('.km-action-row[data-id="${id}"]').click(); w.querySelector('.km-btn-record').click();
+    return { listening: w.querySelector('.km-btn-record').classList.contains('on'), status: w.querySelector('.km-status').textContent };`);
+  const rec1 = await pick('povIn');
+  await press('l', [CTRL, SHIFT]);
+  const free = await ev(`const T = __LW.keys.table, x = __LW.keys.actions.find((a) => a.id === 'povIn');
+    return { chords: T.chords('povIn'), row: [x.key, x.ctrl, x.shift], saved: JSON.parse(localStorage.getItem('lambdawaves.q0.keys')), status: document.querySelector('[data-mir-window="keyboard"] .km-status').textContent };`);
+  assert.equal(rec1.listening, true); assert.match(rec1.status, /Listening/);
+  assert.deepEqual(free.chords, ['Mod+Shift+KeyL']); assert.deepEqual(free.row, ['KeyL', true, true]); assert.deepEqual(free.saved, { povIn: ['Mod+Shift+KeyL'] });
+  assert.match(free.status, /now bound to/);
+  await pick('camReset');
+  await press('q');
+  const asked = await ev(`const w = document.querySelector('[data-mir-window="keyboard"]'); return { status: w.querySelector('.km-status').textContent, tone: w.querySelector('.km-status').dataset.tone, cam: __LW.keys.table.chords('camReset') };`);
+  await press('q');
+  const stolen = await ev(`const T = __LW.keys.table; return { cam: T.chords('camReset'), dolly: T.chords('dollyIn'), row: __LW.keys.actions.find((a) => a.id === 'dollyIn').key, status: document.querySelector('[data-mir-window="keyboard"] .km-status').textContent, errors: __e.slice() };`);
+  assert.match(asked.status, /already bound to “dolly in”/); assert.equal(asked.tone, 'conflict'); assert.deepEqual(asked.cam, ['KeyR', 'Shift+KeyR'], 'the first press of a taken chord bound it');
+  assert.deepEqual(stolen.cam, ['KeyQ']); assert.deepEqual(stolen.dolly, []); assert.equal(stolen.row, null); assert.match(stolen.status, /taken from “dolly in”/);
+  assert.deepEqual(stolen.errors, []);
+  console.log('PASS recording with real keys: Ctrl+Shift+L binds POV tighter (table, row and lambdawaves.q0.keys say so); Q for cam reset asks, the second Q steals it and names "dolly in"');
 
-  const collisions = await g.ev(`const k=__LW.keys,before=k.actions.find(a=>a.id==='camReset').key;
-    const taken=k.bind('camReset',{key:'KeyQ',shift:true}),tab=k.bind('camReset',{key:'Tab'}),esc=k.bind('camReset',{key:'Escape'});
-    const free=k.bind('camReset',{key:'KeyL',shift:false});const saved=JSON.parse(localStorage.getItem('lambdawaves.q0.keys'));
-    k.reset();return {taken,tab,esc,free,saved:saved.camReset,before,restored:k.actions.find(a=>a.id==='camReset').key};`);
-  assert.deepEqual(collisions.taken.conflicts, ['povIn']);
-  assert.equal(collisions.tab.ok, false); assert.equal(collisions.esc.ok, false);
-  assert.equal(collisions.free.ok, true); assert.equal(collisions.saved.key, 'KeyL');
-  assert.equal(collisions.restored, collisions.before);
-  const editor = await g.ev(`__LW.keymap.open();const p=document.querySelector('.km-panel');
-    p.querySelector('.km-action-row[data-id="povIn"]').click();
-    p.querySelector('.km-btn-record').click();
-    const listening=!p.querySelector('.km-status').hidden;
-    window.dispatchEvent(new KeyboardEvent('keydown',{code:'KeyL',ctrlKey:true,shiftKey:true,bubbles:true,cancelable:true}));
-    const changed=__LW.keys.actions.find(a=>a.id==='povIn');
-    const rebound=[changed.key,changed.ctrl,changed.shift];
-    p.querySelector('.km-btn-reset').click();
-    const restored=__LW.keys.actions.find(a=>a.id==='povIn');
-    return {listening,rebound,restored:[restored.key,restored.ctrl,restored.shift],errors:__e.slice()};`);
-  assert.equal(editor.listening, true);
-  assert.deepEqual(editor.rebound, ['KeyL',true,true]);
-  assert.deepEqual(editor.restored, ['KeyQ',false,true]);
-  assert.deepEqual(editor.errors, []);
-  const dark = await g.ev(`__LW.setTheme('dark');const p=document.querySelector('.km-panel');
-    const bg=getComputedStyle(p).backgroundColor;
-    return {theme:document.body.dataset.theme,alpha:Number(bg.match(/,\\s*([0-9.]+)\\)$/)?.[1]),errors:__e.slice()};`);
-  assert.equal(dark.theme, 'dark'); assert.ok(dark.alpha >= .9);
-  assert.deepEqual(dark.errors, []);
-  console.log('PASS keyboard window: floating MIR geometry, drag, layered chords, POV/dolly zoom, eased WASD, collision-safe rebinding');
+  /* ── 5 · ESCAPE'S THREE STEPS (a recording, the search, the window), the platform switch, RESET ── */
+  await pick('zoomIn');
+  await press(ESC);
+  const step1 = await ev(`const w = document.querySelector('[data-mir-window="keyboard"]'), s = w.querySelector('.km-search'); const out = { open: __LW.keymap.isOpen, recording: w.querySelector('.km-btn-record').classList.contains('on'), status: w.querySelector('.km-status').textContent, zoom: __LW.keys.table.chords('zoomIn') };
+    s.focus(); s.value = 'zoom'; s.dispatchEvent(new Event('input')); out.rows = w.querySelectorAll('.km-action-row').length; return out;`);
+  await press(ESC);
+  const step2 = await ev(`const w = document.querySelector('[data-mir-window="keyboard"]'); return { open: __LW.keymap.isOpen, search: w.querySelector('.km-search').value, rows: w.querySelectorAll('.km-action-row').length };`);
+  const plat = await ev(`const w = document.querySelector('[data-mir-window="keyboard"]'), sw = [...w.querySelectorAll('.km-platform .seg-b')], cap = (c) => w.querySelector('.km-key[data-code="' + c + '"] .km-key-cap').textContent;
+    window.__kbRect = w.getBoundingClientRect();
+    sw[0].click(); const mac = [cap('MetaLeft'), cap('AltLeft')]; sw[1].click(); const other = [cap('MetaLeft'), cap('AltLeft')];
+    w.querySelector('.km-btn-reset').click(); const T = __LW.keys.table;
+    return { mac, other, reset: [T.chords('camReset'), T.chords('dollyIn'), T.chords('povIn')], stored: localStorage.getItem('lambdawaves.q0.keys'), status: w.querySelector('.km-status').textContent };`);
+  await ev(`document.querySelector('[data-mir-window="keyboard"] .km-search').focus(); return 1;`);
+  await press(ESC);
+  const step3 = await ev(`await new Promise((r) => setTimeout(r, 400)); const c = document.querySelector('#field').getBoundingClientRect(), b = window.__kbRect;
+    return { open: __LW.keymap.isOpen, masked: __masks.some((m) => Math.abs(m[0] - (b.left - c.left)) < 1 && Math.abs(m[1] - (b.top - c.top)) < 1), errors: __e.slice() };`);
+  assert.deepEqual([step1.open, step1.recording], [true, false], 'Escape did not cancel the recording first'); assert.match(step1.status, /Cancelled/); assert.deepEqual(step1.zoom, ['ArrowUp', 'Shift+ArrowUp']);
+  assert.ok(step1.rows > 0 && step1.rows < 10, 'the search did not filter');
+  assert.equal(step2.open, true); assert.equal(step2.search, ''); assert.ok(step2.rows > step1.rows, 'Escape did not clear the search');
+  assert.deepEqual(plat.mac, ['⌘', '⌥']); assert.deepEqual(plat.other, ['WIN', 'ALT']);
+  assert.deepEqual(plat.reset, [['KeyR', 'Shift+KeyR'], ['KeyQ'], ['Shift+KeyQ']]); assert.equal(plat.stored, null); assert.match(plat.status, /default/);
+  assert.equal(step3.open, false, 'the third Escape did not close the window'); assert.equal(step3.masked, false, 'a closed window still masks'); assert.deepEqual(step3.errors, []);
+  console.log('PASS Escape cancels the recording, then clears the search, then closes the window (and its mask goes); the switch relabels the bottom row ⌘ ⌥ ↔ WIN ALT; RESET TO DEFAULT restores every chord and removes lambdawaves.q0.keys');
+
+  /* ── 6 · THE CAMERA CHORDS: Shift+Q is POV, ⌘⇧Q is nothing, Ctrl+Shift+Q the dolly zoom (size held), WASD eased ── */
+  const camera = await ev(`const L = __LW, K = (code, mods = {}) => window.dispatchEvent(new KeyboardEvent('keydown', { code, bubbles: true, cancelable: true, ...mods }));
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    L.camera.reset(); const d0 = L.obs.dist, f0 = L.obs.fov;
+    K('KeyQ', { shiftKey: true }); const pov = { dist: L.obs.dist, fov: L.obs.fov };
+    K('KeyE', { shiftKey: true }); const m0 = [L.obs.dist, L.obs.fov]; K('KeyQ', { metaKey: true, shiftKey: true }); const cmdInert = L.obs.dist === m0[0] && L.obs.fov === m0[1];
+    K('KeyQ', { ctrlKey: true, shiftKey: true }); const zoom = { dist: L.obs.dist, fov: L.obs.fov, product: L.obs.dist * Math.tan(L.obs.fov / 2) };
+    L.camera.reset(); const yaw0 = L.obs.yaw; K('KeyA'); const instant = L.obs.yaw; await new Promise((r) => setTimeout(r, 450)); const eased = L.obs.yaw; L.camera.reset();
+    return { d0, f0, pov, zoom, cmdInert, product0: d0 * Math.tan(f0 / 2), yaw0, instant, eased, errors: __e.slice() };`);
+  assert.equal(camera.cmdInert, true, '⌘⇧Q ran the dolly zoom'); assert.equal(camera.pov.dist, camera.d0); assert.ok(camera.pov.fov < camera.f0);
+  assert.ok(camera.zoom.dist < camera.d0 && camera.zoom.fov > camera.f0); assert.ok(Math.abs(camera.zoom.product - camera.product0) < 1e-9);
+  assert.equal(camera.instant, camera.yaw0); assert.ok(camera.eased < camera.yaw0 - 0.1); assert.deepEqual(camera.errors, []);
+  console.log('PASS the camera chords: Shift+Q tightens the POV, ⌘⇧Q runs nothing, Ctrl+Shift+Q dollies with the size held, A is eased');
+
+  /* ── 7 · keys.bind's law (CLAUDE.md): an overlap is refused without an explicit steal, Tab and Escape never bind, a free chord saves ── */
+  const law = await ev(`const k = __LW.keys, before = k.table.chords('camReset');
+    const taken = k.bind('camReset', { key: 'KeyQ', shift: true }), tab = k.bind('camReset', { key: 'Tab' }), esc = k.bind('camReset', { key: 'Escape' }), stage = k.bind('nextWindow', { key: 'KeyL' });
+    const free = k.bind('camReset', { key: 'KeyL', shift: false }), saved = JSON.parse(localStorage.getItem('lambdawaves.q0.keys'));
+    const steal = k.bind('camReset', { key: 'KeyQ', shift: true }, { steal: true }), pov = k.table.chords('povIn');
+    k.reset(); return { taken, tab: tab.ok, esc: esc.ok, stage: stage.ok, free, saved, steal, pov, restored: k.table.chords('camReset'), before, errors: __e.slice() };`);
+  assert.deepEqual(law.taken.conflicts, ['povIn']); assert.equal(law.taken.ok, false);
+  assert.equal(law.tab, false); assert.equal(law.esc, false); assert.equal(law.stage, false, 'window cycling bound off Tab');
+  assert.equal(law.free.ok, true); assert.deepEqual(law.saved, { camReset: ['KeyL'] });
+  assert.deepEqual(law.steal, { ok: true, conflicts: ['povIn'] }); assert.deepEqual(law.pov, []);
+  assert.deepEqual(law.restored, law.before); assert.deepEqual(law.errors, []);
+  console.log('PASS keys.bind keeps the binding law: Shift+Q for cam reset is refused naming povIn, Tab / Escape / window cycling off Tab refused, KeyL saved in the kit\'s shape, an explicit steal unbinds the loser, reset restores');
+
+  /* ── 8 · A 0.4.0 SAVE LOADS: { play: { key, ctrl, alt, shift } } under the old id, read across a reload onto transport.play ── */
+  await ev(`localStorage.setItem('lambdawaves.q0.keys', JSON.stringify({ play: { key: 'KeyL', ctrl: false, alt: false, shift: false }, dollyZoomIn: { key: 'KeyX', ctrl: 'Ctrl', alt: false, shift: true } })); return 1;`);
+  await go(g.s, url);
+  assert.equal((await g.waitFor('window.__LW?.ready', 200, 100)).ok, 1);
+  const lifted = await ev(`const T = __LW.keys.table; __LW.pause(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return { play: T.chords('transport.play'), dz: T.chords('dollyZoomIn'), row: __LW.keys.actions.find((a) => a.id === 'transport.play').key };`);
+  await press('l');
+  const played = await ev(`const out = { playing: __LW.clock.playing }; __LW.pause(); __LW.keys.reset(); out.stored = localStorage.getItem('lambdawaves.q0.keys'); out.errors = __e.slice(); return out;`);
+  assert.deepEqual(lifted.play, ['KeyL'], 'the 0.4.0 binding saved under "play" did not load onto transport.play');
+  assert.deepEqual(lifted.dz, ['Mod+Shift+KeyX']); assert.equal(lifted.row, 'KeyL');
+  assert.equal(played.playing, true, 'L does not play after the lift'); assert.equal(played.stored, null); assert.deepEqual(played.errors, []);
+  console.log('PASS a 0.4.0 save loads: { play: KeyL } under the old id plays on L after a reload, { dollyZoomIn: Ctrl+Shift+X } reads as Mod+Shift+KeyX');
+  console.log('GREEN keyboard-window.browser-test');
 } finally { await g.close(); }

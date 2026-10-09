@@ -38,8 +38,8 @@ import { createVortex } from './vortex.js';
 import { createParticles } from './particles.js';
 import { createKepler } from './keplerview.js';
 import { createExactRenderer } from './render-exact.js';
-import { createKeymap } from './keymap.js';        // wave 106: the drawn keyboard and the rebinding seam
-import { installKeys, keyName } from './keys.js';   // wave 130 seam 10: the keyboard dispatcher, out of boot() (its ACTIONS table stays)
+import { createKeyboardWindow } from './mir/keyboard/keyboard.js';   // 0.5.0 C3: the KEYBOARD window is the kit's (keymap.js left)
+import { createKeyTable } from './key-table.js';    // 0.5.0 C3: ACTIONS on MIR's ONE KEY TABLE (keys.js and shortcuts.js left)
 import { keplerOrbits } from './kepler.js';
 import { createGas } from './gas.js';
 import { densityPeriod, densityPeriodExact, fmtPeriod } from './period.js';
@@ -3228,7 +3228,7 @@ export async function boot(dom) {
   function refreshOcclusion(nowMs) {
     occludeDirty = false; occludeAt = nowMs;
     /* LA3 · HIDDEN, NOTHING IS PAINTED, SO NOTHING MASKS.  Under body.ui-hidden every surface below is display:none
-       (lab.css: the racks, transport, sheet and both lists !important; #floats and #notebook !important; #keymap), and
+       (lab.css: the racks, transport, sheet and both lists !important; #floats (the keyboard window too) and #notebook !important), and
        #keysheet no longer exists — so the burst's answer is exactly [] and its layout reads bought nothing, every 300 ms
        (AUDIT-B FB5, REFUTE-E/F).  The empty block is still HANDED OVER, because the line pass still runs under H (the
        slice outline) and the rectangles from before the hide must not punch holes in it; setOcclusion compares its
@@ -3253,7 +3253,7 @@ export async function boot(dom) {
     modView.onGeometry(dirty);
     occlusion.register('floats', () => rects([...floats.children].filter((d) => d.classList.contains('dev') && shown(d)).flatMap(panes)));
     occlusion.register('extra', () => rects(['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => document.getElementById(id))));
-    occlusion.register('keymap', () => [paintedRect(document.querySelector('#keymap .km-panel'))]);
+    occlusion.register('keymap', () => rects([document.querySelector('[data-mir-window="keyboard"]'), ...document.querySelectorAll('[data-mir-rail="keyboard"] .mir-chip')]));   // C3: the kit's window and its rail
     occlusion.register('rack', () => rackShown() ? rects([rack, rackL].flatMap((rk) => rk ? [...rk.children] : []).filter((d) => d.classList.contains('dev') && !d.classList.contains('closed')).flatMap(panes)) : [],
       { standIn: () => rackShown() ? [paintedRect(rack), paintedRect(rackL)] : [] });   // past the block's 32 the two columns stand in for their cards
     for (const el of [floats, rack, rackL]) occlusion.watch(el, { childList: true });
@@ -3549,7 +3549,7 @@ export async function boot(dom) {
          fine = 1, as a bare key press runs it) or a named function, and its key hint is read from the live binding
          (keyFor), so a rebind renames the row (ANTI-PATTERN 6). */
       const runAction = (id) => { const a = ACTIONS.find((x) => x.id === id); if (a) a.run(1); };
-      const keyFor = (id) => { const a = ACTIONS.find((x) => x.id === id); return a ? keyName(a) : ''; };
+      const keyFor = (id) => kt.keyText(id);
       const MENUS = {
         FILE: () => [['NEW project', () => layout.projects.requestFresh()], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…') + '\t' + keyFor('save'), () => { if (layout.projects.current) layout.projects.save(); else { layout.notebook.open('projects'); } }], ['SAVE project AS…\t' + keyFor('saveAs'), () => layout.notebook.open('projects')], ['OPEN a project…', () => layout.notebook.open('projects')],
           ...layout.projects.recent().slice(0, 5).map((p) => ['↺  ' + p, () => layout.projects.requestOpen(p), null, '', { raw: true }]),
@@ -3586,37 +3586,6 @@ export async function boot(dom) {
     }
 
 
-    /* ── WAVE 106 · THE KEYBOARD MANUAL, and why it is a second thing beside the sheet ──────────────
-     * The '?' sheet of wave 53 was a LIST you read; this is a PICTURE of the board you edit on — every bound
-     * key lit in its own place, so "what is still free" is a glance rather than a search through forty
-     * rows. The board and the searchable action list share __LW_hooks.keys rather than copying the
-     * binding table: the editor calls keys.bind()/reset(), then re-reads keys.actions in the same
-     * tick. Escape closes it, as it closes the sheet. */
-    {
-      const km = el('div', '', document.getElementById('lab')); km.id = 'keymap'; km.hidden = true;
-      km.setAttribute('aria-label', 'Keyboard shortcuts window');
-      let returnFocus = null;
-      const man = createKeymap(km, {
-        get actions() { return __LW_hooks.keys ? __LW_hooks.keys.actions : []; },
-        bind(id, spec, options) { return __LW_hooks.keys.bind(id, spec, options); },
-        conflicts(id, spec) { return __LW_hooks.keys.conflicts(id, spec); },
-        reset() { return __LW_hooks.keys.reset(); }
-      }, { onMove: occlusion.dirty, onClose() {
-        km.hidden = true;
-        occlusion.dirty();
-        if (returnFocus && returnFocus.isConnected) returnFocus.focus();
-      } });
-      // The editor owns a second hidden root and its recording lifecycle. Showing only
-      // the host left a blank modal and a key listener whose isOpen guard never passed.
-      const open = () => { returnFocus = document.activeElement; km.hidden = false; man.open(); man.root.querySelector('button').focus(); return true; };
-      const close = () => { man.close(); return false; };
-      /* ONE ROAD: a rebind anywhere (keys.bind, keys.reset) ends in ui.keysRefresh(), so the manual hangs off that
-         rather than owning a second notification of its own.  (It used to chain onto a no-op stub left by the
-         SETTINGS KEYS panel 5f6421e deleted: optimization N4.) */
-      ui.keysRefresh = () => { if (!km.hidden) man.refresh(); };
-      layout.keymap = { open, close, toggle() { return km.hidden ? open() : close(); }, get isOpen() { return !km.hidden; } };
-      layout.keysheet = layout.keymap;   // the '?' LIST sheet of wave 53 is gone; the manual is the one bindings surface
-    }
     /* LEAN (the Aa button) and the KIND taxonomy (data-kind, ⧉ COPY, the boot folds): lab/window-chrome.js (N7 seam 9) */
     installWindowChrome({ KIND, layout, present: () => schedule(TIER.PRESENT) });
     for (const t of ['devclose', 'devopen']) document.addEventListener(t, () => saveSettings());   // C3: the kit's + opens a window itself
@@ -4044,7 +4013,7 @@ export async function boot(dom) {
      between their parts are UI, not picture) and the app's own panes.  A press there never reaches the stage.  0.5.0 C3: the kit's rack
      hands in its columns (less their shadow gutter) and its float layer (C9's open item). */
   bindStageGestures(dom.canvas, {
-    ui: uiSpace({ rack: rk, extra:() => ['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => paintedRect(document.getElementById(id))).concat(paintedRect(document.querySelector('#keymap .km-panel'))) }),
+    ui: uiSpace({ rack: rk, extra:() => ['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => paintedRect(document.getElementById(id))) }),
     camera, travel: camTravel, law: CAM,
     getDistance: () => obs.dist, zoomAt, pan: panBy, orbitBy, resetView,
     setDragging: value => { dragging = value; },
@@ -4188,11 +4157,35 @@ export async function boot(dom) {
   const TRAVELS = new Set(['undo', 'redo', 'redoY', 'historyUndo']);
   const keyEdit = (a, run) => {
     if (!history || history.holding || TRAVELS.has(a.id)) return run();   // an undo is not an edit: noting its name lent it to the next unnamed edit
-    const name = a.label + ' · ' + keyName(a);
+    const name = a.label + ' · ' + kt.keyText(a.id);
     if (history.pendingLabel !== name) history.flush();
     run(); history.note(name);
   };
-  const keys = installKeys({ ACTIONS, layout, canvas: dom.canvas, stageHasFocus, refresh: () => { if (ui.keysRefresh) ui.keysRefresh(); }, edit: keyEdit });
+  const kt = createKeyTable({ rows: ACTIONS, stageHasFocus, edit: keyEdit });   // 0.5.0 C3: the one listener, the save, the binding law (lab/key-table.js)
+  /* ── 0.5.0 C3 · THE KEYBOARD WINDOW is the kit's createKeyboardWindow (keymap.js left): the drawn board, the platform switch, RECORD /
+     RESET, the search and the list, the steal on a second press, Escape's three steps, the drag — on the float layer (UI space for the
+     scene guard), its move telling the occlusion (CLAUDE.md).  Its paint is λWAVES' charcoal-blue skin (lab.css §KEYBOARD, R5-S3).  Its
+     place is remembered as it was ({ x, y } in lw.keyboard.position.v1, PREFERENCE); focus goes in on open and back out on close. */
+  {
+    const KB_AT = 'lw.keyboard.position.v1';
+    let back = null;
+    const kb = createKeyboardWindow({ keys: kt.window, host: floats,
+      onMoved: (r) => { occlusion.dirty(); const f = document.activeElement; if (r === null && back && back.isConnected && (!f || f === document.body || kb.win.root.contains(f))) back.focus({ preventScroll: true }); },
+      persist: { read() { try { return JSON.parse(localStorage.getItem(KB_AT)); } catch (_) { return null; } },
+        write(st) { try { if (st.x !== null) localStorage.setItem(KB_AT, JSON.stringify({ x: st.x, y: st.y })); } catch (_) {} } } });
+    for (const n of [kb.win.root, kb.win.rail && kb.win.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });   // its `hidden` lands when the exit ends: the paused mask lets go then
+    layout.keymap = {
+      open() { if (!kb.isOpen()) { back = document.activeElement; kb.open(); } const k = kb.root.querySelector('.km-key[tabindex="0"]'); (k && k.offsetParent ? k : kb.root.querySelector('.km-action-row') || kb.root).focus({ preventScroll: true }); return true; },
+      close() { kb.close(); return false; },
+      toggle() { return kb.isOpen() ? layout.keymap.close() : layout.keymap.open(); },
+      get isOpen() { return kb.isOpen(); },
+    };
+    layout.keysheet = layout.keymap;   // the '?' LIST sheet of wave 53 is gone; the window is the one bindings surface
+    /* Escape: inside the window the kit's three steps (a recording, the search, the window); from anywhere else it still closes the window
+       (wave 106), and from the stage it hands the keyboard back to the interface (wave 57).  The menubar and the + / ☆ lists are the kit's. */
+    window.addEventListener('keydown', (e) => { if (e.code !== 'Escape' || e.defaultPrevented) return; if (kb.isOpen()) { e.preventDefault(); kb.close(); } else if (stageHasFocus()) dom.canvas.blur(); });
+    kt.table.hints(document); kt.table.onChange(() => kt.table.hints(document));   // every [data-key-action] says its live chord (aria-keyshortcuts)
+  }
 
 
   function toggleUI() {
@@ -4229,15 +4222,15 @@ export async function boot(dom) {
   }
   __LW_hooks.keys = {
     actions: ACTIONS,
-    bind: keys.bind, conflicts: keys.conflicts, reset: keys.reset,   // wave 130 seam 10: the three storage verbs live in lab/keys.js
+    bind: kt.bind, conflicts: kt.conflicts, reset: kt.reset,   // 0.5.0 C3: λWAVES' binding law over the kit's table (lab/key-table.js)
     /* optimization N4: capture(id) and the dispatcher's capture branch served only the SETTINGS KEYS chips that 5f6421e
        deleted; the keyboard editor records its chords itself.  `capturing` stays readable (the legacy gate reads it). */
-    name: keyName, get capturing() { return null; },
+    name: (a) => kt.keyText(a.id), get capturing() { return null; },
     /* WAVE 55: the frozen cycle, readable and re-freezable — the ONE road to a stated order rather than a
        gate re-deriving it from the DOM and calling its own guess the law. */
     get tabOrder() { return (tabOrder || []).map((d) => d.dataset.id); },
     resetTabs() { tabOrder = null; tabIdx = 0; return true; },
-    toggleUI, cycleWindow,
+    toggleUI, cycleWindow, table: kt.table,
   };
 
   /* ── persistence (§46): experiment and presentation, separately ───────── */
