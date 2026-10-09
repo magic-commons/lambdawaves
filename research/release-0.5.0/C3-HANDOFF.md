@@ -1,4 +1,4 @@
-# C3 · hand-off (wave 205) — continued by a second builder; step 2 CLOSED, step 3 next
+# C3 · hand-off (wave 205) — continued by a second builder; steps 2–4 CLOSED, step 5 next
 
 | | |
 |---|---|
@@ -20,6 +20,12 @@
 8. `b9fa26d` **step 3: the menubar is the kit's `createMenubar` (menubar.js left); MENUS on the kit ids, the `ACTIONS.find`
    fallback gone, dock/modulation tagged; the transport stays λWAVES-built.**  menubar 8 + GREEN · take-in-bugs 4 + GREEN · offer
    16/16 · frame-occlusion 7/7 · phone bar geometry = base (+ `--menubar-bottom`, `max-width`).  lab 30,119 → 30,033.
+9. `841c7d7` hand-off.
+10. `1addffd` **step 4: the keys are MIR's ONE KEY TABLE (`lab/key-table.js` over `createKeys`) and the KEYBOARD window is the kit's
+   `createKeyboardWindow` on `#floats`, λWAVES' skin re-aimed in `lab.css` (keymap.js, keys.js, shortcuts.js left).**
+   keyboard-window rewritten 8 + GREEN (a marionette decode error on its reload re-run alone, green) · keyboard-shortcuts re-aimed 6 ·
+   access 11 (A7/A11 re-aimed) · menubar 8 + GREEN · input 13 · history 42 · frame-occlusion 7 · hit-probe 52/0 · settings-probe 0 red ·
+   --check · node 82/82.  lab 30,033 → 29,057.
 
 ## The history red — cause and fix (`d75d3f7`)
 Block 1b's "the card grew from 408 to 340.2 px" was read INSIDE the kit's rack motion: `createRackMotion` (lab/mir/shell/rack.js)
@@ -44,9 +50,8 @@ all 42 blocks, rebuild counts 1× modulation / 0× elsewhere, as before).
   to re-run (timing).
 
 ## Exact next step
-Step 4: the keys and the keyboard (C3-DESIGN §6): `createKeys` over A9's ACTIONS (Ctrl vs Mod), saved bindings lifted from
-`lambdawaves.q0.keys` (0.4.0 shape + `was`), `createKeyboardWindow` with λWAVES' charcoal-blue skin as unlayered rules over the
-kit's `km-*` DOM (R5-S3), occlusion following its drag; `keymap.js`, `keys.js`, `shortcuts.js` leave; `__LW.keys.*` /
-`__LW.keymap.*` / `layout.keymap` / `layout.keysheet` keep their verbs; `tests/keyboard-window.browser-test.mjs` rewritten,
-`tests/keyboard-shortcuts.test.mjs` re-aimed with the Ctrl-vs-Mod case.  Gates: keyboard-window, keyboard-shortcuts, menubar,
-input 13, history 42, hit-probe-set.  Then step 5 (lines, parity probe, wave 205, C3-BUILD.md).
+Step 5: the final sweep (offer, new-project 8, take-in-bugs on the tip), the parity probe base vs tip (`LW_PORT=8887 GD_PORT=5357 node
+tools/a4-window-probe.mjs .tmp/probe-base.json`, then 8883/5353 → `.tmp/probe-tip.json`, diff each difference explained; re-run the
+WIGNER status hint), `cat lab/*.js | wc -l` (30,553 → 29,057 so far), REPORT.md wave 205 under `## 2026-10-08 · 0.5.0 C — THE
+ADOPTION`, `research/release-0.5.0/C3-BUILD.md` in A7-BUILD.md's shape with the drafted CLAUDE.md paragraph (≤ 8 lines), this file final.
+Screens of the keyboard (base vs tip, light/dark/phone) are `.tmp/kb-*-compare.png` (not committed).
