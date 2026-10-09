@@ -4849,6 +4849,43 @@ after the reload, and it names the ones it drops. settings-probe: **6/6**.
 `mir-controls` was not touched: re-aiming it to the kit's ONE KNOB LAW (vertical drag, ⅛ fine) belongs to C0's continuation.
 `cat lab/*.js | wc -l`: **36,288 → 32,921 (−3,367)**. Brief candidates (four) and open items: `research/release-0.5.0/C4-BUILD.md`.
 
+### wave 204: C2 THE LOOK IS THE KIT'S — `mir.gui` holds the look, SETTINGS keeps its seats, 0 element-states moved
+
+**The store and the engine are MIR's.** `lab/look.js` replaces `lab/accent-wheel.js`. It builds `createPrefs({ key: 'mir.gui' })`
+over the kit's own LOOK_SCHEMA rows, taken by key: theme, ACCENT A/B, VIVID, card, frost, blur, DISCONNECTED, HINTS, HELP and STATUS
+TAGS. So every hook is the kit's spec, and no other row is ever written. The accents are the kit's `createAccent` (palette model; the
+live stage ground; `onAccent` → the modulation window). The theme's engine side (the stage ground, `mat.lightUI`, `#themeColor`) is one
+`run` on the theme row, so SYSTEM following the OS reaches it too.
+- **λWAVES' first run is the store's `defaults`** (`LOOK_DEFAULTS` in rack.js): light, refractive + ALWAYS frost, 22 px, 50 % VIVID,
+  DISCONNECTED. The device's card and frost come from `lab/first-run.js` as before (tinted, frost OFF on a phone or tablet), and the phone
+  crossing's FROST OFF override stays a later law of the app's.
+- **SETTINGS stays the surface (R5-S1, road (a)).** Every control keeps its seat; each is a `look.set`, repainted from the store.
+  MIR OPTIONS is not built: hidden, `createGui` would still install `html.kbm-*` and `body.touch-tablet` (C2-DESIGN §1).
+- **The lift, once, forward only.** At boot an older blob's `theme`, `card` (only where `cardSet` said it), `frost` (`true` = ALWAYS),
+  `disc`, `blur`, `accent`, `badges`, `controlHints` (or `hint`), and HELP's own `lw-window-info`, go into `mir.gui` by the laws
+  rack.js read them by, and leave. `saveSettings` never names them again. A fresh profile never runs it.
+- `lab/settings-store.js` FAMILIES classes `mir.gui` as PREFERENCE. `tools/settings-probe.mjs` now fails a scene whose B3 still holds a
+  look key. `docs/STATE-SCOPES.md` gives the look one `mir.gui` row and names `modpresets` and `nativeLayout`.
+
+**Measured.** stylehash (the kit's tool, C0's recipe and settle; base `f0fcbc4` twice against this tree):
+- **0 element-states in the seven classes, and 0 anywhere**, closed (903), modulation window open (1,284) and notebook open (918) × 8
+  states; the kit's compare finds no element and no pixel.
+- `--acc`/`--acc2`, read directly (the token scan cannot see behind `@import`), are identical in all 8 states.
+- The first builder's unsettled captures had 107 changes in the first state only: 0.12 s transitions caught at their light start,
+  C0's boot-timing transient.
+
+**Gates.**
+- Node 82/82 (`bash test.sh node`: no RED); `first-run` 12; `new-project --check` in step.
+- Browser (8873/5343, one at a time): `official-defaults-palette` 3 (the saved case proves the lift), `menubar`, `keyboard-window`,
+  `frame-occlusion` 7 (re-run alone after one red right after `keyboard-window`), `new-project` 8, `offer` 16, `take-in-bugs`.
+- settings-probe **6/6**, B1 = B3, no look key in any blob. Three runs died in the browser first (frames stopped; Marionette
+  could not decode a reload); alone it was green twice.
+- No `__LW` member a test uses is renamed or removed; `__LW.look` is added at the END. No digest lock (C7's).
+
+**Lines.** `cat lab/*.js | wc -l`: **30,553 → 30,429 (−124)**: `accent-wheel.js` −152, `look.js` +95, `rack.js` −50, `first-run.js` −16,
+`native-ui.js` −7. Brief J is not consumed: the kit's palette has no Jet Black row, so `lab/palette-app.js` stays. Seven brief
+candidates and the draft CLAUDE.md paragraph: `research/release-0.5.0/C2-BUILD.md`.
+
 ## 2026-10-08 · 0.5.0 D — THE INFORMATIONAL'S LEDGER
 
 ### wave 202: D9 THE LEGACY FIVE — QCD, H₂⁺ and HELIUM deleted behind restore shims, two demos, H₂ and ELECTROSTATICS measured
