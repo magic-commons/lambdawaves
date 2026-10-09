@@ -96,7 +96,7 @@
  *   THE CAMERA BUTTON        await cap.picture({ scale: 2 }) or ({ width: 3840 }) → { blob, name, w, h, bytes, ms, clipped }
  *   THE LOOP BUTTON'S PLAN   cap.planLoop({ fps: 30, seconds: 6 }) → plan.ok, plan.message, plan.schedule (the film
  *                            itself is render-exact.js': createFilm(LW).render({ schedule, format: 'mp4' }))
- *   cap.save(r) hands a file over (the kit's saveBlob); cap.limits() is the ceiling; every returned object carries `name`.
+ *   cap.save(r) hands a file over (`handOver`); cap.limits() is the ceiling; every returned object carries `name`.
  *   `createCapture(LW, { energies })` — HAND IT THE HOST'S OWN ENERGY EXPRESSION.  Without it this file falls back to
  *   LW.reg.Ediag, which under a PROPAGATOR (the STURMIAN switch) is the label's <a|H|a>/<a|S|a> and not an eigenvalue;
  *   rather than guess wrong there it returns none, and the phase view is WARNED.  See WAVE 58.
@@ -642,6 +642,21 @@ export async function readback(f, canvas, w, h, draw, wit = null) {
   return { rgba, w, h, ms: (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0 };
 }
 
+/** THE HAND-OVER, the one both roads reach (cap.save and render-exact's film.save).  The kit's saveBlob takes the share sheet
+ *  when the browser offers one (the iPad's "Save Image"), but a share is allowed only inside the tap that asked, and saveBlob
+ *  neither awaits it nor falls back: after a film's render or a GPU readback the activation is spent, share() rejects, and
+ *  NOTHING was saved (Chrome, Edge, macOS Safari).  So the kit's road only while the activation is live; otherwise the
+ *  `<a download>` λWAVES used before C7, its URL kept as the kit keeps one (a video ten minutes, anything else one).  A
+ *  browser without navigator.userActivation counts as spent.  tools/perf/handover-probe.mjs counts the road taken. */
+export function handOver(blob, name) {
+  if (typeof navigator !== 'undefined' && navigator.userActivation && navigator.userActivation.isActive) return saveBlob(blob, name);
+  const url = URL.createObjectURL(blob), a = document.createElement('a'), video = (blob.type || '').startsWith('video/') || /\.mp4$/i.test(name);
+  a.href = url; a.download = name; a.rel = 'noopener';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { try { URL.revokeObjectURL(url); } catch (_) { /* gone */ } a.remove(); }, video ? 10 * 60 * 1000 : 60000);
+  return 'download';
+}
+
 /**
  * createCapture(LW, { canvas, caption, energies }) — the camera over a booted lab.
  * LW is window.__LW; the canvas is the FIELD's (dom.canvas), found by id if not given; `caption()` is the line a capture
@@ -776,10 +791,10 @@ export function createCapture(LW, opts = {}) {
     return planPeriodRecording(P, Object.assign({ t0: LW.clock.t, rate: LW.clock.rate, energies, observable, wave }, o));
   }
 
-  /** the hand-over.  Takes anything with { blob, name }: the kit's saveBlob (the share sheet on an iPad, else a download). */
+  /** the hand-over.  Takes anything with { blob, name }: `handOver` (the share sheet inside a live tap, else a download). */
   function save(r) {
     if (!r || !r.blob) return false;
-    saveBlob(r.blob, r.name || 'lambdawaves.bin');
+    handOver(r.blob, r.name || 'lambdawaves.bin');
     return true;
   }
 

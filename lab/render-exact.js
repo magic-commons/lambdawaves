@@ -96,11 +96,10 @@
 import {
   AU_FS, VIEW_NAMES, viewCarriesGlobalPhase, wavePeriod, seamError, planPeriodRecording,
   maxPictureSize, fitPicture, slug, stamp, uniqueName, captureName,
-  readback, configureCopy, captionOver,
+  readback, configureCopy, captionOver, handOver,
 } from './capture.js';
 import { createRecorder } from './mir/render/recorder.js';
 import { RECORD_FPS, estimateFilm, ceilingWarning, fmtMs, fmtBytes } from './mir/render/plan.js';
-import { saveBlob } from './mir/folders/save-blob.js';
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
    PART 1 — THE LAWS.  Nothing below touches the DOM, WebGPU or a clock; all of it is proved in node.
@@ -522,7 +521,7 @@ export const FILM_FPS = RECORD_FPS;
  *   film.render({ schedule | <plan options>, format: 'mp4' | 'png', scale | width | height, caption, poseAt, beforeFrame,
  *                 modulation: 'freeze' | 'drive', camera: 'refuse' | 'still', onProgress }) → { stop(), stopped, done }
  *   film.verify(o)  → the same short schedule rendered twice through the seam, digest against digest
- *   film.save(r)    → every file of a finished film handed over (the kit's saveBlob), under λWAVES' names
+ *   film.save(r)    → every file of a finished film handed over (capture.js' handOver), under λWAVES' names
  * `opts.hold(on)` is the host's own lock (rack.js: its loop stands aside and its state is put back); `opts.grab` replaces
  * the GPU road (the proof's fake lab); `opts.storage` / `opts.calib` / `opts.guard` reach the kit's recorder.
  */
@@ -826,10 +825,11 @@ export function createFilm(LW, opts = {}) {
         : bad.length + ' of ' + da.length + ' frames differ between two runs of the SAME schedule — ' + JSON.stringify(bad.slice(0, 4)) + '. Something in the picture\'s input closure is not pinned; read hazards() and the witnesses in the manifest.' };
   }
 
-  /** the hand-over: every file of a finished film, under λWAVES' name (the kit's saveBlob); the store's copy goes a little later */
+  /** the hand-over: every file of a finished film, under λWAVES' name (capture.js' handOver: the render spent the tap, so a
+   *  download); the store's copy goes a little later */
   function save(r) {
     if (!r || !r.files || !r.files.length) return false;
-    r.files.forEach((x, i) => saveBlob(x.blob, r.files.length === 1 ? r.name : r.name.replace(/\.zip$/, '') + '-part' + String(i + 1).padStart(3, '0') + '.zip'));
+    r.files.forEach((x, i) => handOver(x.blob, r.files.length === 1 ? r.name : r.name.replace(/\.zip$/, '') + '-part' + String(i + 1).padStart(3, '0') + '.zip'));
     setTimeout(() => discard(r), 120000);
     return true;
   }
