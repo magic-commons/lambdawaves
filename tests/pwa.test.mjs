@@ -990,7 +990,7 @@ console.log(`PASS the math face covers what the lab sets in it: ${runs} <m> runs
  *    register under `navigator.webdriver` unless `?sw=1` says so (and `?sw=0` always refuses).  A worker
  *    installed on the gate's origin would serve every later navigation out of a cache, so one stale §1
  *    entry would make the whole browser suite measure yesterday's build.  It is the photosensitivity
- *    warning's own three-input shape (rack.js `warning.needed`).
+ *    warning's own three-input shape (main.js `warning.needed`).
  *
  * NOTE on `apple-mobile-web-app-status-bar-style`: "default" is what shipped, because only skin.css's
  * PHONE block reads env(safe-area-inset-*).  "black-translucent" gives a fuller bleed but puts the iOS

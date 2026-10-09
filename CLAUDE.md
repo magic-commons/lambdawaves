@@ -162,9 +162,24 @@ first run is the store's `defaults` (`LOOK_DEFAULTS`, `lab/rack.js`): light/refr
 hints on, tags and Help off; on a phone or tablet (`lab/first-run.js`, rack.js' own `isPhone()`/`isTablet()`) frost OFF, tinted. Captions
 and window notes off, AUTO SCALE and governor on stay the blob's. A stored choice wins; an older blob's look (and `lw-window-info`) is
 lifted once by `liftLook`; the phone's frost override stays the app's. Never add a look key to `saveSettings`.
-STATUS TAGS off hides the four ψ-badges, never the build offer; an untouched
-session takes a waiting build itself (`lab/sw-client.js`, `rack.js`
-`untouched`), any other session only on a press. DOMAIN
+THE START (0.5.0 C6b, `lab/main.js`). THE PHOTOSENSITIVITY LAW is λWAVES', not
+the kit's: a human visitor reads the kit's photosensitivity notice once per
+browser BEFORE anything animates, and NO query string silences it for a human
+(the kit's `?warn=0` is not honoured); only a test driver skips it (`?warn=1`
+forces it there). Its seen-flag is the settings blob's `warned`; `__LW.warning`
+keeps show dismiss needed onAccept reset seen remembered open; `?play=1` waits
+for it; `LW.ready` never does. Then MIR's title screen: the six demos as covers
+(`lab/demos/covers`, `tools/make-covers.mjs`), NEW and RESUME
+(`lambdawaves.q0.session`, MIR's `createSession` over the one part, PROJECT).
+The boot runs behind it and awaits the choice. A driver, a link, `?preset=` or
+`?view=` skip it (`?starter=` or the boot); `?opener=1` shows it under a driver
+(`tests/opener.browser-test.mjs`); CDP tools add `&starter=home`. STATUS TAGS
+off hides the four ψ-badges, never the build offer; an untouched session (ring
+origin boot/link) takes a waiting build itself (`lab/sw-client.js`, `rack.js`
+`untouched`) and its reload skips the title screen; RESUME and a cover are
+offered it, any other session only on a press. The banner is MIR's
+`installBanner`, the veil MIR's `bootVeil`, and the wake lock follows THE play.
+DOMAIN
 AUTO on is a project default, not a preference (see the scopes below). In
 `lab/field.js`, WAVE density uses palette θ=0; Δρ uses the same ±π/2 pair as
 Re/Im; palette OFF retains the old colors. Keep
@@ -235,7 +250,7 @@ worktree's `adopt.mjs`, then `--check`. `index.html` declares `@layer app,
 mir;` then `mir/mir.css`; `lab.css` and `skin.css` stay UNLAYERED and beat
 every kit layer. An `app.*` layer ranks below the kit for a normal declaration,
 so keep a λWAVES look with an unlayered rule, and narrow an app rule the layers
-made live with a twin `:not(:where())`. The 37 `!important`s stay unlayered.
+made live with a twin `:not(:where())`. The 33 `!important`s stay unlayered (four left with C6b's banner and warning pane).
 R5-W1: a kit module no root reaches is reported by `wiring --unreached-kit`,
 never precached, never failed; our own modules keep the hard gate. The
 keyboard editor's stacking (`#keymap` fixed at `--z-veil`, `[hidden]` none) is

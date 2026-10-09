@@ -49,7 +49,7 @@ async function chromium() {
     await b.goto(`${ORIGIN}/tools/perf/orbital-dispatch.html`, 500);
     for (let i = 0; i < 100; i++) { if (await b.eval('!!window.__orb')) break; await sleep(100); }
     R.orbital = await b.eval(`(async()=>{ ${ORB} })()`);
-    await b.goto(`${ORIGIN}/lab/?sw=0`, 1000);
+    await b.goto(`${ORIGIN}/lab/?sw=0&starter=home`, 1000);
     for (let i = 0; i < 400; i++) { try { if (await b.eval('!!(window.__LW && __LW.ready)')) break; } catch {} await sleep(100); }
     R.reference = await b.eval(`(async()=>{ ${REF} })()`);
     R.logs = b.logs.slice(0, 20);

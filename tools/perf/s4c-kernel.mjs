@@ -225,7 +225,7 @@ async function chromium() {
     /* a fresh headless Chromium on Vulkan can answer the lab's very first requestAdapter (top of <head>) with null; one adapter
        asked for on another page first brings the GPU process up (the S0 orbital-dispatch run went there first, too) */
     await b.goto(`${ORIGIN}/tools/perf/limits.html`, 1500);
-    await b.goto(`${ORIGIN}/lab/?sw=0`, 1000);
+    await b.goto(`${ORIGIN}/lab/?sw=0&starter=home`, 1000);
     for (let i = 0; i < 600; i++) { try { if (await b.eval('!!(window.__LW && __LW.ready)')) break; } catch {} await sleep(100); }
     return await b.eval(`(async()=>{ ${PAGE(ONLY)} })()`);
   } finally { await b.close(); }

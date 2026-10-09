@@ -21,7 +21,7 @@ const t0 = Date.now();
 /* --no-sandbox is a LAUNCH argument: Chromium checks the SUID helper before any app code runs (this box's chrome-sandbox is not root-owned; see hosts-m0's ACCEPTANCE-MATRIX) */
 const proc = spawn(ELECTRON, [new URL('./electron-main.cjs', import.meta.url).pathname, ...(process.env.LW_SANDBOX ? [] : ['--no-sandbox'])], { stdio: ['ignore', 'ignore', 'pipe'],
   env: { ...process.env, DISPLAY: process.env.DISPLAY || ':0', LW_CDP_PORT: String(cdpPort), LW_W: String(W), LW_H: String(H), LW_NO_SANDBOX: process.env.LW_NO_SANDBOX || '1', LW_PROFILE: PROFILE,
-    LW_URL: `https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz&sw=0&warn=0` } });
+    LW_URL: `https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz&sw=0&warn=0&starter=home` } });
 let stderr = ''; proc.stderr.on('data', (d) => { stderr += d; });
 let ws = null;
 try {

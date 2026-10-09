@@ -20,6 +20,7 @@ export const FAMILIES = Object.freeze({
   'mir.gui': ['look.js createLook (mir/core/prefs.js createPrefs over LOOK_SCHEMA rows)', 'PREFERENCE'],                     // 0.5.0 C2
   'lambdawaves.q0.projects.window': ['projects.js FOLDERS (mir/folders/folders.js localPrefs): place, size, open, rail side, sort', 'WORKSPACE'],   // 0.5.0 C6
   'lambdawaves.q0.projects.seeded': ['projects.js FOLDERS (mir/folders/seed.js): the starters added once', 'PROJECT'],   // 0.5.0 C6
+  'lambdawaves.q0.session': ['main.js createSession (mir/core/session.js): the live project, the one part as it stands', 'PROJECT'],   // 0.5.0 C6b
 });
 export function createSettingsStore(storage) {
   const ls = () => storage || globalThis.localStorage;

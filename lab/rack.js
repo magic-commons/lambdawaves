@@ -3,6 +3,7 @@ import { uiSpace } from './mir/shell/scene-guard.js';   // 0.5.0 C9: the kit's U
 import { coalesce } from './frame-coalescer.js';
 import { waitForPaint } from './frame-settle.js';
 import { createProjects } from './projects.js';   // 0.5.0 C6: PROJECTS are MIR's FOLDERS over the one project part (lab/projects.js, lab/project-store.js)
+import { installWakeLock } from './mir/core/wakelock.js';   // 0.5.0 C6b: the screen stays on while THE play plays
 import { renderNotebook } from './mir/shell/notebook-render.js';   // N6: the kit's copy (lab/notebook-render.js was byte-identical)
 import { reworkNative, planeModel } from './native-ui.js';
 import { firstRunMaterial, firstRunQuality, deviceQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
@@ -480,25 +481,16 @@ export async function boot(dom) {
      flips `field.ok` to false and, with no handler, TELLS NOBODY.  A driver reset, a backgrounded mobile tab
      whose GPU is reclaimed, a laptop switching cards — the rack goes on working, the readouts go on updating,
      and the picture is frozen with no explanation.  That is the most likely failure on a phone and it is the
-     one this app was silent about.  0.5.0 C9 · R14: this is λWAVES' GPU RECOVERY, `gpuRecovery` (gate: tests/gpu-recovery). */
+     one this app was silent about.  0.5.0 C9 · R14: this is λWAVES' GPU RECOVERY, `gpuRecovery` (gate: tests/gpu-recovery).
+     0.5.0 C6b: the banner is the kit's (main.js installBanner, dom.banner: its pane, its ×, its ink on both themes). */
   const field = await createField(dom.canvas, { resolution: quality.res,
-    onError: (m) => showBanner('GPU error', m),
-    onLost: function gpuRecovery(i) { showBanner('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.'); } });
+    onError: (m) => dom.banner.fail('GPU error', m),
+    onLost: function gpuRecovery(i) { dom.banner.fail('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.'); } });
   if (field.ok) look.setGamut((rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')'));   // wave 54: one map, both sides
   /* M1 (2026-09-24): a device lost before createField finished has already put up onLost's own banner (the GPU device
      was lost … RELOAD); "WebGPU unavailable" over it would be the wrong sentence, so that one road keeps its banner. */
-  if (!field.ok && !/^device lost/.test(field.error || '')) showBanner('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
+  if (!field.ok && !/^device lost/.test(field.error || '')) dom.banner.warn('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
   markBatchBegin();                   // M7: the boot's build is one synchronous task from here to busyHost() at its tail — one mark paint, there
-  /* IT IS DISMISSIBLE NOW (wave 59).  It sat at z-index 60 over the stage for the whole session with no way
-     down, which is a poor thing to do with a pane whose ink could not be read.  The × is wired in lab/main.js
-     — the one place that reaches BOTH this banner and the `boot failed` one, which never gets here because
-     boot() threw — and this re-wires it only if that did not run (a host that calls boot() directly).  Both
-     are idempotent through data-wired, so the button never carries two listeners. */
-  function showBanner(title, text) {
-    dom.banner.hidden = false; dom.banner.querySelector('h3').textContent = title; dom.banner.querySelector('p').textContent = text;
-    const x = dom.banner.querySelector('.banner-x');
-    if (x && !x.dataset.wired) { x.dataset.wired = '1'; x.addEventListener('click', () => { dom.banner.hidden = true; }); }
-  }
   /* ── THE MATHS WORKERS (wave 45): lab/worker-pool.js (N7 seam 3) — bow · period · cards · chem, and the two card roads.
      The constructor is the one literal worker road in the lab, so it stays here. ── */
   const { maths, scan, cards, solveCard, solveChem } = createWorkerPool({ busyWrap,
@@ -2774,27 +2766,28 @@ export async function boot(dom) {
 
   /* ── WAVE 56 · THE INSTALL LAYER'S INTERFACE HALF: lab/sw-client.js (N7 seam 5).  The tab that ASKED reloads; a tab that
      did not ask is told and keeps its work.  It is LW.sw. ── */
+  /* THE QUIET TAKE'S ONE DEFINITION (wave 133): a reload would bring back the same scene — a fresh boot, or the same link —
+     and this browser's settings, so it loses nothing the reader made.  What a reload does NOT keep is the clock's position,
+     a capture in flight and the AUTO-ROTATE switch; a capture is excluded here, and so, in the foreground, is a clock that
+     has moved (played and paused, or scrubbed): that session is offered, not taken.  The take-on-hide road (ignorePlaying)
+     keeps ignoring the clock — it takes while nobody watches.  So: the ring holds only its origin row, named `boot` or `link`
+     (an `open · …`, `new project` or `resume` origin is a scene a reload would not bring back: the opener's covers and RESUME
+     are offered a build, never taken); nothing is pending or held; the project is clean; no pointer is down; the
+     photosensitivity notice is not up; nothing is being typed; no capture is running; and, unless the caller says playing is
+     fine, the transport is paused at t = 0.  Read only after boot (register waits ≥ 1.5 s past load).  0.5.0 C6b: the same
+     question, asked on pagehide, decides whether a reload of this tab skips the title screen (the boot tail). */
+  const untouched = (ignorePlaying) => {
+    const rows = history ? history.entries() : [];
+    return rows.length === 1 && !history.canUndo && !history.pendingLabel && !history.holding
+      && (rows[0].label === 'boot' || rows[0].label === 'link')
+      && !(layout.projects && layout.projects.dirty) && !pointerHeld
+      && !(warning && warning.open)
+      && !(document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName))
+      && !(capApi && capApi.busy)
+      && (ignorePlaying || (!clock.playing && !clock.t));
+  };
   const swClient = createSwClient({ buildBadge: () => badges.build,
-    setStatus: (text) => { if (ui.set) ui.set.setStatus(text, 'warn'); }, getProjects: () => layout.projects,
-    untouched: (ignorePlaying) => {
-      /* THE QUIET TAKE'S ONE DEFINITION (wave 133): a reload would bring back the same scene — a fresh boot, or the same link —
-         and this browser's settings, so it loses nothing the reader made.  What a reload does NOT keep is the clock's position,
-         a capture in flight and the AUTO-ROTATE switch; a capture is excluded here, and so, in the foreground, is a clock that
-         has moved (played and paused, or scrubbed): that session is offered, not taken.  The take-on-hide road (ignorePlaying)
-         keeps ignoring the clock — it takes while nobody watches.  So: the ring holds only its origin row, named `boot` or `link`
-         (an `open · …` or `new project` origin is a scene a reload would not bring back: there is no reopen-last-project at
-         boot); nothing is pending or held; the project is clean; no pointer is down; the photosensitivity notice is not up;
-         nothing is being typed; no capture is running; and, unless the caller says playing is fine, the transport is paused at
-         t = 0.  Read only after boot (register waits ≥ 1.5 s past load). */
-      const rows = history ? history.entries() : [];
-      return rows.length === 1 && !history.canUndo && !history.pendingLabel && !history.holding
-        && (rows[0].label === 'boot' || rows[0].label === 'link')
-        && !(layout.projects && layout.projects.dirty) && !pointerHeld
-        && !(warning && warning.open)
-        && !(document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName))
-        && !(capApi && capApi.busy)
-        && (ignorePlaying || (!clock.playing && !clock.t));
-    },
+    setStatus: (text) => { if (ui.set) ui.set.setStatus(text, 'warn'); }, getProjects: () => layout.projects, untouched,
     host: dom.badges.parentElement });
 
   /* ── THE BOW: ctrl+drag draws it, release fires, releasing CTRL first cancels ── */
@@ -4803,6 +4796,7 @@ export async function boot(dom) {
      *  answer that BLANK): capture's readability probe decides — the canvas when this browser reads it, else the GPU readback's PNG. */
     async thumbnail() { const c = capApi.capture; if ((await c.probe()).canvasReadable) { await LW.settle(); return dom.canvas; } const r = await c.picture({ width: 320 }); return r.ok ? r.blob : null; },
     look: look.prefs,   // 0.5.0 C2: the look store (`mir.gui`), for probes (`__LW.look.get('theme')`)
+    session: dom.start ? dom.start.session : null,   // 0.5.0 C6b: THE SESSION (main.js createSession over the one part): read(), armed(), flush()
   };
   window.__LW = LW;
 
@@ -4867,61 +4861,11 @@ export async function boot(dom) {
   });
 
 
-  const warning = (() => {
-    const pane = document.getElementById('warnPane');
-    const seen = () => readSettings().warned === true;
-    const remember = (v) => { const S = readSettings(); settingsStore.write({ ...S, warned: v }); };
-    let open = false, prevFocus = null, offKey = null;
-    const accepted = [];                          // wave 57: what may only happen once the notice has been read
-    function dismiss() {
-      if (!pane || !open) return false;
-      open = false; remember(true);
-      while (accepted.length) { try { accepted.shift()(); } catch (e) {} }   // the pane is down: whatever was waiting on it may run
-      if (offKey) { document.removeEventListener('keydown', offKey, true); offKey = null; }
-      pane.classList.add('warn-out');
-      let done = false;
-      const gone = () => { if (done) return; done = true; pane.hidden = true; pane.classList.remove('warn-out'); if (prevFocus && prevFocus.focus) { try { prevFocus.focus(); } catch (e) {} } prevFocus = null; };
-      pane.addEventListener('transitionend', gone, { once: true }); setTimeout(gone, 380);
-      return true;
-    }
-    function show() {
-      if (!pane || open) return false;
-      open = true; prevFocus = document.activeElement;
-      pane.hidden = false; pane.classList.remove('warn-out');
-      const btn = pane.querySelector('.warn-btn');
-      /* the trap is MANDELBROT's: Tab cannot leave, Enter and Space fire, and there is no Escape and no
-         click-outside — the only way past a photosensitivity notice is to read it and press the button */
-      offKey = (e) => { if (!open) return; if (e.key === 'Tab') { e.preventDefault(); btn && btn.focus(); } else if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { if (document.activeElement === btn || document.activeElement === pane) { e.preventDefault(); dismiss(); } } e.stopPropagation(); };
-      document.addEventListener('keydown', offKey, true);
-      if (btn) { btn.focus(); requestAnimationFrame(() => { if (open) btn.focus(); }); }
-      return true;
-    }
-    if (pane) { const b = pane.querySelector('.warn-btn'); if (b) b.addEventListener('click', dismiss); }
-    /* WAVE 59 · `?warn=0` WAS A THIRD DOOR, AND IT WAS IN THE URL.  `…/lab/?play=1&warn=0#s=…` showed a
-       first-time visitor no notice at all — `needed()` answered false before `seen()` was ever consulted,
-       `remember(true)` was never called, and `onAccept` therefore fired SYNCHRONOUSLY, so the field ran at
-       full rate with the notice never displayed.  Wave 56 made links the way this lab travels, which made
-       that likelier rather than rarer, and wave 57's own header says "NOTHING MOVES UNTIL THE NOTICE HAS
-       BEEN ACCEPTED".  The stated reason for the door was a convenience "so a test can ask the question
-       without a reload" — but `navigator.webdriver` already covers every test, so it bought the gate
-       nothing and shipped a query string that silences a photosensitivity warning.
-       BOTH ?warn INPUTS NOW REQUIRE THE DRIVER.  ?warn=1 (force) is harmless in itself but is kept behind
-       the same check, because a gate with one arm reachable from a public URL is not one rule.  The `o`
-       override is how the node/browser proofs drive it, and it is not reachable from location.search. */
-    function needed(o) {
-      const q = new URLSearchParams((o && o.query !== undefined) ? o.query : location.search);
-      const driver = (o && o.driver !== undefined) ? o.driver : navigator.webdriver === true;
-      if (driver === true) { if (q.get('warn') === '1') return true; return false; }
-      return !seen();
-    }
-    return { show, dismiss, needed, onAccept(fn) { if (open) accepted.push(fn); else fn(); return true; },
-      reset() { remember(false); return true; }, get seen() { return seen(); },
-      get remembered() { return seen(); }, get open() { return open; } };
-  })();
+  /* the photosensitivity notice is main.js' `warning` (0.5.0 C6b: λWAVES' law over the kit's notice, shown before the title screen) */
+  const warning = dom.start.warning;
   ui.saveNative = saveSettings;
   reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, modApi:()=>modView&&modView.api, cadence:()=>MOD.hz, setCadence:mod.setCadence });
   __LW_hooks.warning = warning;
-  if (warning.needed()) warning.show();
   /* ── WAVE 57 · THE ORDER, AND IT IS THE WHOLE FIX ────────────────────────────────────────────────
    * NOTHING MOVES UNTIL THE NOTICE HAS BEEN ACCEPTED — or was accepted by this browser before and is
    * remembered.  `onAccept` fires immediately when the pane is not up, so a returning visitor loses
@@ -4936,7 +4880,6 @@ export async function boot(dom) {
     if (MOTION.autoplay !== 'started') MOTION.autoplay = 'waiting for the notice';
     return true;
   }
-  armAutoplay();
   if (MOTION.reduced && ui.rateKnob) ui.rateKnob.root.title = 'Reduced motion lowered RATE. Adjust it to override.';
   history.clear(linkAtBoot.opened && linkAtBoot.ok ? 'link' : 'boot');   // the shipped boot (and a ?preset= in the URL) is the BOTTOM of the stack, not a step in it
 
@@ -4945,6 +4888,18 @@ export async function boot(dom) {
   busyHost();                         // the mark is cloned and painted before anything can need it
   markBatchEnd();                     // M7: …painted here, once, every copy of it (the clones included)
   if (layout.projects) { await Promise.race([layout.projects.seed().catch(() => null), new Promise((r) => setTimeout(r, 3000))]); layout.projects.markClean(); }   // 0.5.0 C6: the six demos are FOLDERS' starters before the lab says ready
+  /* 0.5.0 C6b · THE SESSION hears the one part: the ring's moves and the notebook's input (projects.changed, the part's subscribe) */
+  if (layout.projects) { history.subscribe(layout.projects.changed); const nbEl = document.getElementById('notebook'); if (nbEl) nbEl.addEventListener('input', layout.projects.changed); }
+  /* THE CHOICE (main.js: the title screen's pick, ?starter=, or `boot` for a driven or direct start).  NEW and the boot keep the shipped
+     scene and its `boot` / `link` origin; a cover opens its demo (origin `open · NAME`); RESUME puts the session back (origin `resume`).
+     NEW and a cover forget the session, the boot arms it.  ?play=1 waits for the choice and then for the notice (armAutoplay). */
+  const S = LW.session, id = await dom.start.choice;
+  if (id === 'boot') S.arm(); else if (id === 'resume') layout.projects.resume(S); else S.discard();
+  if (!['home', 'boot', 'resume'].includes(id)) await layout.projects.demo(id);
+  armAutoplay();
+  installWakeLock({ clock: appPlay });   // ONE clock: the wake lock is held while THE play plays (asked inside a gesture, armed otherwise; no timer)
+  /* a reload of this tab skips the title screen only while a reload loses nothing (the quiet take's own question) */
+  addEventListener('pagehide', () => { try { if (untouched(true)) sessionStorage.setItem('lambdawaves.opener', 'home'); else sessionStorage.removeItem('lambdawaves.opener'); } catch (_) {} });
   LW.ready = true;
   LW.report = (o, t = performance.now()) => import('../tools/perf/device-report.js').then((m) => m.run(LW, o, t)); if (q.get('report') === '1') LW.report(q);   // THE DEVICE REPORT (2026-09-25): a diagnostic in tools/, never precached — `?report=1` or __LW.report() measures this device and puts every setting back
   return LW;

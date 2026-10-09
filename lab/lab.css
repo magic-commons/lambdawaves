@@ -280,24 +280,6 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 #offer .offer-row { display: flex; gap: var(--sp-2); }
 body.phone #offer { top: 76px; }
 body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE takes the badge it points at, so it takes the pane */
-#banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: var(--z-banner); max-width: 520px; padding: var(--sp-5); border-radius: var(--r-lg);
-  font-family: var(--font-sans); background: hsl(350 40% 18% / .95); border: 1px solid hsl(350 60% 50% / .6); }
-/* WAVE 59 · THE BANNER IS THE ONE PANE THAT DOES NOT FOLLOW THE THEME, so its ink is written here and not
-   inherited.  It paints its own dark maroon ground unconditionally (above), while `body { color: var(--fg) }`
-   resolves to NEAR-BLACK on the shipped LIGHT theme — measured in the page at 1.19 : 1, and worse than a
-   plain miss because showBanner() runs three thousand lines BEFORE applySettings(): the sentence appeared
-   white-on-maroon and went DARK a second later.  It is the only thing a visitor without WebGPU ever sees,
-   so it is written unconditionally — one string of ink on BOTH themes, 13.69 : 1 on the pane's own ground,
-   with the heading at 6.64 : 1.  Nothing here is an accent (STYLE-LOCK's ruling stands). */
-#banner, #banner p { color: hsl(0 0% 96%); }
-#banner p { margin: 0; }
-#banner h3 { margin: 0 0 6px; padding-right: 30px; font-family: var(--font-ui); letter-spacing: var(--tr-wide); color: var(--bad); }
-/* …and a way out.  It sat at z-index 60 over the stage for the whole session with no dismiss and no
-   pointer-events rule, so the message a broken browser could not read was also one it could not put down. */
-#banner .banner-x { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
-  background: none; border: 0; border-radius: var(--r-sm); color: hsl(0 0% 96%); opacity: .75; font-size: var(--fs-lead); line-height: 1; cursor: pointer; }
-#banner .banner-x::after { content: ''; position: absolute; inset: -9px; }    /* 26 px of ink, 44 px of finger — wave 51's rule, not a 44-px mark */
-#banner .banner-x:hover, #banner .banner-x:focus-visible { opacity: 1; background: hsl(0 0% 100% / .12); }
 /* ── transport strip (the master logical transport, §25) ───────────────── */
 #transport { position: absolute; left: var(--sp-4); right: var(--sp-4); bottom: var(--sp-4); z-index: var(--z-chrome); display: flex; align-items: center; gap: var(--sp-2);
   height: 56px; padding: 0 var(--sp-3); border-radius: var(--r-lg); }
@@ -572,33 +554,6 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
    its right edge is the rack's inner edge, but never further in than a 440-px pane can be and stay on screen. */
 
 
-#warnPane { position: fixed; inset: 0; z-index: calc(var(--z-banner) + 40); display: flex; align-items: center; justify-content: center;
-  padding: 1.5rem; background: hsl(0 0% 100% / .34); color: #000;
-  /* 2026-09-11 (Josh): less blur, still a strong veil — the blur drops to just over half the glass blur and a faint
-     ground takes over the legibility the blur used to carry, so the field reads through as shapes, not as haze */
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * .55)) saturate(.6); backdrop-filter: blur(calc(var(--glass-blur) * .55)) saturate(.6);
-  font-family: var(--font-ui); opacity: 1; animation: lw-warn-in 350ms ease-out forwards;
-  transition: opacity 350ms cubic-bezier(.16, .84, .44, 1); }
-body[data-theme="dark"] #warnPane { color: #fff; background: hsl(0 0% 4% / .42); }
-
-
-@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
-  #warnPane { background: hsl(0 0% 100% / .88); }
-  body[data-theme="dark"] #warnPane { background: hsl(0 0% 4% / .88); }
-}
-#warnPane.warn-out { opacity: 0; pointer-events: none; }
-.warn-card { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 34em; width: 100%; margin: auto; }
-.warn-sign { display: block; width: clamp(200px, 44vmin, 420px); height: auto; margin: 0 auto 2rem; user-select: none; pointer-events: none; }
-.warn-title { margin: 0 0 1rem; font-size: clamp(1.1rem, 2.8vmin, 1.45rem); font-weight: 700; letter-spacing: .18em;
-  line-height: 1.3; text-transform: uppercase; max-width: 14em; }
-.warn-body { margin: 0 0 2.25rem; font-size: clamp(.95rem, 2vmin, 1.05rem); font-weight: 400; line-height: 1.65; max-width: 26em; }
-.warn-btn { display: inline-block; background: transparent; color: inherit; font: inherit; font-size: .95rem; font-weight: 600;
-  letter-spacing: .14em; text-transform: uppercase; padding: .8rem 2.5rem; border: 1px solid currentColor; border-radius: 4px;
-  cursor: pointer; min-height: 44px; min-width: 44px; opacity: .82;
-  transition: background-color 150ms ease, color 150ms ease, opacity 150ms ease; }
-.warn-btn:hover, .warn-btn:focus-visible { opacity: 1; background: currentColor; outline: none; }
-#warnPane .warn-btn:hover, #warnPane .warn-btn:focus-visible { color: #fff; background: #000; }
-body[data-theme="dark"] #warnPane .warn-btn:hover, body[data-theme="dark"] #warnPane .warn-btn:focus-visible { color: #000; background: #fff; }
 /* ═══ WAVE 81 · THE PLAYHEAD'S OTHER SEAT, AND THE TUNNEL BETWEEN THEM ════════════════════════
  * The pill has always lived at the bottom.  When the modulation plugin is dragged over that seat,
  * rack.js (`modDodge`) sends it to the top instead — and the move is a TUNNEL: it leaves through the
@@ -612,11 +567,8 @@ body[data-theme="dark"] #warnPane .warn-btn:hover, body[data-theme="dark"] #warn
 @media (prefers-reduced-motion: reduce) {
   /* "fewer and gentler, never zero": the palette turn and the busy breath are COLOUR and OPACITY and they stay
      (MOTION-LAW); what goes is the one transform-based motion the logo has, the menu's enlarge. */
-  #warnPane { animation: none !important; transition: none !important; }
   #title { transition: none !important; }
   #title.menu-open { transform: none !important; }
-  #warnPane { opacity: 1 !important; }
-  #warnPane.warn-out { opacity: 0 !important; }
   /* ── WAVE 69 · THE HALF THE DOC SAID WAS MISSING, TAKEN BEFORE ANOTHER ANIMATION WAS ADDED ───────
    * MOTION-LAW's accessibility section names this list and says it will keep growing until somebody
    * closes it: the rack's 310-px slide losing on SPECIFICITY, the two fold chevrons, the card's
