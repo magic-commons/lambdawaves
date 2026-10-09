@@ -373,6 +373,14 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > `/report` caps + inbox; the device report POSTs only on `post=1`). Josh's: the firewall command, the iPad's exception, the 8768/8931 servers and
 > the MANDELBROT CA cert (§5), CSP/HSTS at the next deploy (§3 fix 10), the content caps (§3 fixes 6–8, for C-V/D).
 
+> **UPDATE (Claude Sos, 2026-10-08 21:40 CDT — set up early at 92 % usage).** `sos-s0` tip `09b45b7` (code `762f25a`), GREEN. **Staging `sos-c`
+> `4824a62`**: the adopt + C1 (`a72905b`) + C5 (`f403f3c`) + C9 (`8b5fe3a`) + three CLAUDE.md paragraphs; `lab/*.js` 36,223; staged gates green but
+> C0's four node reds and `keyboard-window` (C0's cascade). C7 DONE on `74ade0c` (the lock green at every step; own −716; films pixel-identical);
+> its fresh-Opus verifier RUNNING → `C7-VERIFY.md`, merge on YES. RUNNING: C0 (at the seven classes, `C0-GLASS-RULINGS.md` on its branch), C4
+> (kit window wired), D9 (QCD out, H₂⁺ next). The checkpoint `~/.claude/handoffs/latest.md` "STATE AT 21:35 CDT" has the table and the resume
+> steps. Josh's rulings queue: the glass (seven classes), the film's exactness-vs-speed, the legibility PNGs, the M5 block, the doubleTap row, the
+> firewall/iPad/CA-cert items from SECURITY-REVIEW.md §3/§5.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
