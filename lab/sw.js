@@ -284,7 +284,7 @@ const PRECACHE = [
   ['./particles.js',                                                '639d5fc3f9dd'],
   ['./period.js',                                                   'c04a731fcddd'],
   ['./project-store.js',                                            '0a9b5c558738'],
-  ['./projects.js',                                                 '69c18a694a31'],
+  ['./projects.js',                                                 'd9e62d4aa65a'],
   ['./qho.js',                                                      'dc55dfe4479f'],
   ['./rack-menus.js',                                               'adecc705a800'],
   ['./rack.js',                                                     '0e7f72fb939f'],

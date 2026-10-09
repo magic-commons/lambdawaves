@@ -7,7 +7,9 @@
 //   3 · R-I3, THE PAGES TRAVEL WITH THE PROJECT: a save's FOLDERS entry, its .mir export, its .json export and a .mir brought back in
 //       all carry the notebook (page 0), and the .mir re-opened puts it back on the live notebook;
 //   4 · A 1.4 NOTEBOOK IS PAGE 0: a browser holding only the 0.4 notebook keys boots onto them, a save carries them into the ONE
-//       part, and the kit's pageFromNotebook reads that as the project's first page.
+//       part, and the kit's pageFromNotebook reads that as the project's first page;
+//   5 · FOLDERS IS PAINTED GLASS (CLAUDE.md's mask law): paused, its pane and its rail's chips join the occlusion block where the
+//       entrance LANDS (not mid-motion), and leave it when it closes.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
@@ -110,11 +112,28 @@ try {
   assert.deepEqual(p0.page, { title: 'OLD NOTES', md: '*from 0.4*\n\n## a 1.4 notebook\n\nwritten before FOLDERS' });
   assert.deepEqual(p0.errs, []);
   pass('a 1.4 notebook is page 0: a browser holding only the 0.4 notebook keys boots onto them, a save carries them into the ONE part (the stored item and the FOLDERS entry), and the kit\'s pageFromNotebook reads them as the first page ("OLD NOTES", the subtitle in italics)');
+  /* ── 5 · FOLDERS IS PAINTED GLASS ── */
+  const occ = await g.ev(`const w = (n) => new Promise((r) => setTimeout(r, n)), f = __LW.field, o = f.setOcclusion.bind(f);
+    f.setOcclusion = (rects) => { window.__occ = rects.map((x) => x.map(Math.round)); return o(rects); };
+    __LW.pause(); await w(300); document.body.classList.add('pf-probe'); await w(50); document.body.classList.remove('pf-probe'); await w(600);   /* a body class dirties the block: read it once */
+    const before = (window.__occ || []).length;
+    const F = __LW.projects.folders; F.open(); await w(1200);
+    const cb = document.getElementById('field').getBoundingClientRect(), rr = F.win.root.getBoundingClientRect();
+    const want = [rr.left - cb.left, rr.top - cb.top, rr.right - cb.left, rr.bottom - cb.top].map(Math.round);
+    const chips = [...F.win.rail.el.querySelectorAll('.mir-chip')].filter((c) => c.getBoundingClientRect().width > 2).length;
+    const open = window.__occ || [], landed = open.some((x) => x.every((v, i) => Math.abs(v - want[i]) <= 1));
+    F.close(); await w(1200);
+    return { before, open: open.length, chips, landed, after: (window.__occ || []).length, errs: __e.slice() };`);
+  assert.equal(occ.landed, true, 'paused, the mask kept FOLDERS mid-entrance: ' + JSON.stringify(occ));
+  assert.equal(occ.open, occ.before + 1 + occ.chips, 'the pane and its ' + occ.chips + ' chips did not join the block: ' + JSON.stringify(occ));
+  assert.equal(occ.after, occ.before, 'FOLDERS stayed in the block after it closed');
+  assert.deepEqual(occ.errs, []);
+  pass('FOLDERS is painted glass: paused, its pane (where the entrance lands, not mid-motion) and its ' + occ.chips + ' rail chips join the occlusion block (' + occ.before + ' → ' + occ.open + ' rects) and leave it when it closes');
 } catch (e) {
   failed = true; console.error(e);
 } finally {
   try { await Promise.race([g.close(), new Promise((_, reject) => setTimeout(() => reject(new Error('driver cleanup exceeded 10 seconds')), 10000))]); }
   catch (error) { failed = true; console.error('INFRASTRUCTURE:', error.message); }
-  console.log((failed ? 'RED' : 'GREEN') + ' project-formats.browser-test — ' + n + ' of 4');
+  console.log((failed ? 'RED' : 'GREEN') + ' project-formats.browser-test — ' + n + ' of 5');
   process.exit(failed ? 1 : 0);
 }

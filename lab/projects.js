@@ -124,8 +124,10 @@ export function createProjects(port) {
          400 ms of MediaRecorder), which a Ctrl+S or a test's open must not pay for behind the window that shows nothing */
       thumbnail: () => (folders.isOpen() ? port.thumbnail() : null),
     },
-    /* …and FOLDERS opened over the current project, clean and still without one, takes it then */
-    onOpen: () => { const e = currentId && files.entry(currentId); if (e && !e.thumb && !dirty()) Promise.resolve(port.thumbnail()).then(toThumb)
+    /* FOLDERS' entrance is a motion (core/motion.js presence): the mask is taken again where it lands, paused or not (CLAUDE.md's
+       mask law).  And opened over the current project, clean and still without a picture, it takes one then */
+    onOpen: () => { const { root, rail } = folders.win; Promise.all([root, rail.el].flatMap((el) => (el && el.getAnimations ? el.getAnimations() : [])).map((a) => a.finished.catch(() => null))).then(() => port.onMoved());
+      const e = currentId && files.entry(currentId); if (e && !e.thumb && !dirty()) Promise.resolve(port.thumbnail()).then(toThumb)
       .then((thumb) => { if (thumb) files.overwrite(e.id, { payload: e.payload, thumb, facts: e.facts, at: e.at }); }).catch(() => {}); },
     onOpened: () => { if (echo) { toast(echo, true); echo = null; } },
     /* FOLDERS' own SAVE / SAVE AS: an untitled notebook takes the project's name, in the file too (λWAVES' save always did) */
