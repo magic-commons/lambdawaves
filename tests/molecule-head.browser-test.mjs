@@ -51,11 +51,11 @@ try {
   pass(`a hand pick of WATER: solved in ${t1.tSolve.toFixed(0)} ms, its head on the stage ${(t1.tHead - t1.tSolve).toFixed(0)} ms later (≤ 500) — "${t1.text.slice(0, 120)}…"; a press on the picture at ${early.at.toFixed(0)} ms kept it, one at ≈ 2.65 s took it and the formula came back; STATUS TAGS off`);
 
   /* ── 2 · Escape takes the head at once; the next pick takes it before its own solve lands ── */
-  const t2 = await ev(`const S = __LW.stageText, Hd = __LW.head, n0 = Hd.shown;
-    __pick('N2'); await __until(() => Hd.shown === n0 + 1); await __w(300); const n2 = { banner: S.banner === Hd.md, md: Hd.md };
+  const t2 = await ev(`const S = __LW.stageText, Hd = __LW.head, H = __LW.history, n0 = Hd.shown; H.flush(); await __w(450); H.flush(); const c0 = H.cursor;
+    __pick('N2'); await __until(() => Hd.shown === n0 + 1); await __w(500); H.flush(); const n2 = { banner: S.banner === Hd.md, md: Hd.md, rows: H.cursor - c0, label: H.entries()[H.cursor].label };
     return { n0, n2, shown: Hd.shown };`);
-  assert.ok(t2.n2.banner && /nitrogen/.test(t2.n2.md) && /\$D_\{\\infty h\}\$/.test(t2.n2.md) && /HOMO \$3\\sigma_\{g\}\$/.test(t2.n2.md), 'N₂\'s head: ' + JSON.stringify(t2));
-  await g.press('');
+  assert.ok(t2.n2.rows === 1 && t2.n2.banner && /nitrogen/.test(t2.n2.md) && /\$D_\{\\infty h\}\$/.test(t2.n2.md) && /HOMO \$3\\sigma_\{g\}\$/.test(t2.n2.md), 'N₂\'s head: ' + JSON.stringify(t2));
+  await g.press('\uE00C');
   const esc = await ev(`await __w(500); return { banner: __LW.stageText.banner, fades: __fades() };`);
   assert.deepEqual(esc, { banner: null, fades: 0 }, 'Escape did not take the head: ' + JSON.stringify(esc));
   const t2b = await ev(`const S = __LW.stageText, Hd = __LW.head, n0 = Hd.shown;

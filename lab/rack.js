@@ -28,6 +28,7 @@ import { createOcclusion, paintedRect } from './occlusion.js';   // 0.5.0 A7: th
 import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, toScreen, cameraKey, quatFromYawPitch } from './field.js';
 import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
 import { MOLECULE_BY_ID, moleculeAtoms } from './molecules.js';
+import { orbitalName } from './names.js';                        // 0.5.1 D8: a notebook link's orbital, by its name
 import { ELEMENT } from './md.js';
 import { createInfoLayer, infoActions } from './mir/info/layer.js';   // 0.5.1 D1: the STAGE TEXT is one block of the kit's INFORMATIONAL layer
 import { isField } from './mir/core/pointer.js';                       // 0.5.1 D2: the head's Escape, as the kit's greet reads it
@@ -3457,6 +3458,39 @@ export async function boot(dom) {
       nb.querySelector('.nb-mode').addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }
         if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation(); });
+      /* 0.5.1 D8 · `lw:` LINKS in the VIEW (R6-K): `[water](lw:molecule=h2o)` drives the lab through a WHITELIST of hand verbs — preset
+         (STATE's PRESET), molecule (the MOLECULE dropdown's pick, and MOLECULES on), view (the V key's observable), orbital (the ORBITAL
+         dial by name or number, VIEW orbital) — one ring row and one fade a press (a molecule's fade is its head, D2); the ring is never
+         cleared.  Any other key — a whole state (`lw:s=…`, E9) above all — is ignored and said on the foot.  Capture phase: the sanitiser
+         keeps the href but sends every link to a new tab (notebook-render.js), so the press is stopped before it goes. */
+      const orbitalOf = (s, w) => { if (!s) return 0; if (/^\d+$/.test(w)) return +w >= 1 && +w <= s.nAO ? +w : 0;
+        for (let k = 0; k < s.nAO; k++) if (orbitalName(s.names, k, s.nocc).replace(/ \(\w\)/, '').split(' · ').some((x) => x.toLowerCase() === w.toLowerCase().replace('-', '−'))) return k + 1;
+        return 0; };
+      function lwLink(q) {
+        const kv = new Map(), bad = [];
+        for (const p of q.split('&')) { const [k, v = ''] = p.split('='); try { kv.set(k, decodeURIComponent(v)); } catch (_) { bad.push(k); } }
+        const mol = [...MOLECULE_BY_ID.keys()].find((id) => id.toLowerCase() === String(kv.get('molecule')).toLowerCase());
+        const orb = () => { const s = chem.solution(), k = orbitalOf(s, kv.get('orbital')); if (k) { chem.setView('orbital'); chem.orbital(k); } return k ? orbitalName(s.names, k - 1, s.nocc, 'latex') : ''; };
+        let fade = '', own = false;                                    // own: the verb announces itself (a hand's preset; a molecule's head)
+        for (const [k, v] of kv) {
+          if (k === 'preset' && PRESET_BY_ID.has(v)) own = loadPreset(v, { hand: true });
+          else if (k === 'molecule' && mol) { own = true; const p = chem.pick(mol); chem.setOn(true); if (kv.has('orbital')) p.then(() => (history ? history.absorb(orb) : orb())); }
+          else if (k === 'view' && VIEW[v] !== undefined) { LW.setView(v); fade = fade || 'VIEW · ' + mdText(v); }
+          else if (k === 'orbital' && !mol) { const n = orb(); if (n) fade = fade || 'ORBITAL · ' + n; else bad.push(k); }
+          else if (k !== 'orbital') bad.push(k);                       // with a molecule, the orbital waits for its solve (above)
+        }
+        if (fade && !own && stageText) stageText.announce(fade);
+        return bad.length ? 'ignored: ' + bad.join(', ') : '';
+      }
+      view.addEventListener('click', (e) => {
+        const a = e.target.closest && e.target.closest('a[href^="lw:"]'); if (!a) return;
+        e.preventDefault(); e.stopPropagation();
+        const name = 'LINK · ' + (a.textContent.trim().slice(0, 32) || a.getAttribute('href'));
+        if (history && history.pendingLabel !== name) history.flush();
+        const said = lwLink(a.getAttribute('href').slice(3));
+        if (history) history.note(name);
+        const c = nb.querySelector('.nb-count'); if (c && said) { c.textContent = said; setTimeout(count, 2400); }
+      }, true);
       /* ── PROJECTS (0.5.0 C6): MIR's FOLDERS over ONE project part — this one, below; the notebook is its page 0 ── */
       /* The saved project is wider than undo: notebook, camera, palette, and modulation all
          belong here. Compare on a destructive act, never on a frame. Playback time and the
