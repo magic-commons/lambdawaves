@@ -211,3 +211,17 @@ install: false })` in `lab/stage-gestures.js`, UI space from `uiSpace` in
 `rack.js`): a press, a double-click or a wheel in a window's gap never reaches
 the stage. `tools/hit-probe-set.mjs` is its gate, and the count is 0 reached.
 (0.5.0 C9)
+
+The modulation window is MIR's `createModulation(floats, port)`
+(`lab/mir/modulation/window.js`) over A5's port (`lab/mod-port.js`: no
+`targets`, `dock: false`), not `installModulation` (a second tick and a device
+copy of the rack). There is ONE clock (R-B1): THE play's edge plays or pauses
+the modulation on every edge (`mod.follow`, holding the `app.play` demand).
+The MOD power (the button, Ctrl+Space, the window's seat) is
+`setModulationEnabled`, a route bypass: power never plays and play never
+powers. LINKED/SEPARATE and `clockLink` are retired; the tempo grid has eight
+tiles. The power and cadence (`modArm`, `modCadence`) are PREFERENCE in the
+kit's record `lambdawaves.q0.modulation` (`rack.js` `modStore`/`saveMod`,
+bind.js `localStore`), never in the settings blob. `lab/modwindow.js` and
+`lab/audio.js` are gone; the kit's `audio-capture.js` is the capture.
+(0.5.0 C4)
