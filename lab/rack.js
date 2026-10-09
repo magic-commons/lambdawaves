@@ -82,7 +82,8 @@ import { createWorkerPool } from './worker-pool.js';    // N7 seam 3: the maths 
 import { createAccentWheel } from './accent-wheel.js';  // N7 seam 4: the accent wheel, the mark and its turn, out of boot()
 import { createSwClient } from './sw-client.js';        // N7 seam 5: the install layer's interface half, out of boot()
 import { createBadges } from './badges.js';             // N7 seam 6: the badges and the canvas's sentence, out of boot()
-import { installRackMenus } from './rack-menus.js';     // N7 seam 7: the + and ☆ lists, out of boot()
+import { createRack, readLayout, layoutLabel as rackLayoutLabel } from './mir/shell/rack.js';
+import { device as kitDevice } from './mir/kit.js';   // 0.5.0 C3: the rack, its + and ☆ lists, the phone's crossing (rack-menus.js left)
 import { installMenubar } from './menubar.js';           // N7 seam 8: the logo's bar, out of boot() (its MENUS table stays)
 import { installWindowChrome } from './window-chrome.js'; // N7 seam 9: the LEAN and KIND passes, out of boot()
 import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK
@@ -96,6 +97,7 @@ const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
 
 export async function boot(dom) {
+  const DEVICES = new Map(), device = (o) => { const d = kitDevice(o); DEVICES.set(o.id, d); return d; };   // 0.5.0 C3: the rack registers each card with its device(), so its fold is called, never re-clicked
   const reg = new Register();
   const __LW_hooks = {};
   /* UNDO / REDO: the ring is built at the foot of boot(), once every path it writes through exists; hNote() is
@@ -3261,68 +3263,70 @@ export async function boot(dom) {
     new MutationObserver(dirty).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     for (const rk of [rack, rackL]) if (rk) rk.addEventListener('scroll', dirty, { passive: true });
     window.addEventListener('resize', dirty, { passive: true });
+    /* 0.5.0 C3 · the kit's rack moves a floating card by `translate` and left/top and animates a folding card's height: a card's OWN
+       style or class (never a knob's inside it) dirties the block, so a paused field's mask follows the hand and the fold */
+    const own = new MutationObserver((rs) => { if (rs.some((r) => [floats, rack, rackL].includes(r.target.parentElement))) dirty(); });
+    for (const el of [floats, rack, rackL]) if (el) own.observe(el, { attributes: true, subtree: true, attributeFilter: ['style', 'class'] });
   }
-  const floatState = new Map();        // id → { home:{side,index}, x, y, w, compact } — the ARRANGEMENT, never the physics
-  let floatZ = 0;                      // the stacking counter; a press hands out the next one
   const devById = (id) => document.querySelector('.dev[data-id="' + id + '"]');
   /** a rack card's width, from the RACK's own content box — the scrollbar is already out of clientWidth */
   const rackCardWidth = () => { const cs = getComputedStyle(rack); return Math.max(180, Math.round(rack.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0))); };
-  /** THE CLAMP: a header is always reachable — 120 px of it across, all 44 of it down */
-  function clampFloat(x, y, w) {
-    const HEAD = 44, keep = Math.min(120, w);
-    return [Math.round(Math.max(keep - w, Math.min(window.innerWidth - keep, x))),
-      Math.round(Math.max(0, Math.min(Math.max(0, window.innerHeight - HEAD), y)))];
-  }
-  function placeFloat(d, x, y) {
-    const st = floatState.get(d.dataset.id); if (!st) return;
-    const [cx, cy] = clampFloat(x, y, st.w);
-    st.x = cx; st.y = cy; d.style.left = cx + 'px'; d.style.top = cy + 'px';
-    occlusion.dirty();   // detached windows move over a paused canvas too
-  }
-  const raiseFloat = (d) => { if (!d || !d.classList.contains('floating')) return false; d.style.zIndex = String(++floatZ); return true; };
-  const frontFloat = () => { let best = null, z = -1; if (floats) for (const d of floats.querySelectorAll('.dev')) { const q = +d.style.zIndex || 0; if (q > z) { z = q; best = d; } } return best; };
-  /** the pop chip wears the act the NEXT press performs — off the rack, or back onto it */
+  /** the TRANSPORT's pop chip wears the act its next press performs (its floating mode is the pill); every other card's is the kit's */
   function popFace(d) {
     const b = d && d.querySelector('.dev-pop'); if (!b) return;
-    if (d === wTr.root) {                                              // the transport's floating mode is the pill, and it has always had one
-      chip(b, layout.docked ? 'north' : 'reopen', layout.docked ? 'undock the transport' : 'dock the transport');
-      b.title = 'Dock or undock the transport';
-      return;
+    chip(b, layout.docked ? 'north' : 'reopen', layout.docked ? 'undock the transport' : 'dock the transport');
+    b.title = 'Dock or undock the transport';
+  }
+  /* ── 0.5.0 C3 · THE RACK IS THE KIT'S (lab/mir/shell/rack.js createRack; research/release-0.5.0/C3-DESIGN.md §2–3) ──────────
+   * #rack, #rackL, #floats and the ◧ + ☆ chrome are adopted BY ID (their classes, sheets and listeners kept) and every .dev is
+   * registered IN PLACE: the float layer, the ONE gesture (THE TITLE BAR DECIDES), BASINS' motion, ONE raise stack, the clamp,
+   * hide and peek, the + and ☆ lists and the phone's crossing of cards and floats are the kit's.  What stays here is the
+   * WORKSPACE record's shape — captureLayout's v3, so every ☆ slot and project part is a record 0.4.0 reads — and what the
+   * kit's record does not carry: the transport's dock and the MORE / CORE folds (layoutExtras), the transport card itself
+   * (`card: true`), and `hidden` (a legacy card, a card a molecule stood down) kept out of the + list.  A reload keeps only
+   * `closed`, as before (saveSettings), so the store hands the kit its ☆ slots and no layout. */
+  const sideKey = (s) => (s === 'L' || s === 'left' ? 'left' : s === 'R' || s === 'right' ? 'right' : undefined), sideLR = (s) => (s === 'left' ? 'L' : 'R');
+  let parkedIds = [];   // the floats the crossing parks (the kit's memory is private: BRIEF R2), read by this listener, registered AHEAD of the kit's
+  window.addEventListener('resize', () => { if (!rk.phone && isPhone()) parkedIds = rk.floating(); }, { passive: true });
+  const rk = createRack({ host: document.getElementById('lab'), favourites: LAYOUT_SLOTS, handle: 'never', tabletClamp: false, phone: isPhone, retired: RETIRED_WINDOWS,
+    notebook: () => (layout.notebookSize ? { size: layout.notebookSize, resize: layout.notebookResize } : null),
+    store: {
+      get: () => ({ favs: readSettings().layouts || {} }),
+      /* a slot the kit has just captured (its v1) is written as captureLayout's v3 of the same instant; nothing else is the kit's to write */
+      set(v) {
+        const S = readSettings(), was = S.layouts || {}, m = { ...((v && v.favs) || {}) };
+        for (const k of Object.keys(m)) if (m[k] && m[k].v === 1 && (!was[k] || was[k].at !== m[k].at)) m[k] = layout.captureLayout();
+        if (JSON.stringify(m) !== JSON.stringify(was)) settingsStore.write({ ...S, layouts: m });
+      },
+    },
+    onChange: () => occlusion.dirty() });   // a kit-side act moved a window: the mask follows (what is remembered is saveSettings', on its own edges)
+  const devTitle = (d) => ((d.querySelector('.dev-eyebrow') || {}).textContent || d.dataset.id).trim();
+  for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, title: devTitle(d), hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
+  /* the kit's + list knows nothing of `hidden` (a legacy card, or one a molecule stood down): those rows go (BRIEF R5) */
+  if (rk.el.add) rk.el.add.addEventListener('click', () => { for (const it of rk.el.addList.querySelectorAll('.mb-item[data-win]')) { const d = devById(it.dataset.win); if (d && d.hidden) it.remove(); } });
+  /* the ☆ list's LOAD is the kit's apply; the extras follow from the same slot once its click is done (BRIEF R4) */
+  if (rk.el.favList) rk.el.favList.addEventListener('click', (e) => {
+    const it = e.target.closest('.mb-item'); if (!it || e.target.closest('.fav-x')) return;
+    const L = rk.layouts()[[...rk.el.favList.querySelectorAll('.mb-item')].indexOf(it) - 1], R = L && (readSettings().layouts || {})[L.slot];
+    if (R) queueMicrotask(() => { if (typeof R.docked === 'boolean' && R.docked !== layout.docked) layout.dockTransport(); layoutExtras(R); saveSettings(); });
+  }, { capture: true });
+  /** what the kit's readLayout does not carry: the TRANSPORT card's seat and state (`card: true`) and the folds a card keeps in the record */
+  function layoutExtras(L) {
+    for (const c of L.cards) {
+      const d = devById(c.id); if (!d) continue;
+      if (d === wTr.root) {
+        layout.dockSide = sideKey(c.side) === 'left' ? 'L' : 'R'; layout.dockIndex = [...d.parentElement.querySelectorAll('.dev')].indexOf(d);   // project order owns the docked transport seat too
+        d.classList.toggle('closed', c.closed === true || c.open === false);
+        if (d.classList.contains('folded') !== !!c.folded) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
+      }
+      const mt = typeof c.more === 'boolean' ? d.querySelector('.mol-more-toggle') : null;   // an older record has no `more`: the fold stays as it is
+      if (mt && (mt.getAttribute('aria-expanded') === 'true') !== c.more) mt.click();
+      const ct = typeof c.core === 'boolean' ? d.querySelector('.orb-core-toggle') : null;   // likewise MO-REGISTRY's CORE fold
+      if (ct && (ct.getAttribute('aria-expanded') === 'true') !== c.core) ct.click();
     }
-    const out = d.classList.contains('floating');
-    chip(b, out ? 'reopen' : 'north', out ? 'dock this window back into the rack' : 'take this window off the rack');
-    b.title = out ? 'Return this window to its rack'
-      : 'Move this window onto the stage';
-  }
-  function railFace(d) {
-    const b = d && d.querySelector('.dev-rail'); if (!b) return;
-    const c = d.classList.contains('compact');
-    chip(b, c ? 'expand' : 'compact', c ? 'give this window its full width back' : 'narrow this window to its rail');
-    b.title = c ? 'Use the full window layout'
-      : 'Use the compact window layout';
-  }
-  /* ── WAVE 69 · THE ONE ENTRANCE IN THE LAB, and everything about it is a gate in MOTION-LAW ─────
-   * FREQUENCY: "window open/close" is the OCCASIONAL tier, which is the one tier that gets a standard
-   * animation.  PURPOSE (gate 2): spatial continuity — a card arrives at the TOP of a rack that may
-   * already be scrolled and full, and without this it simply exists, one frame after a menu closed
-   * somewhere else.  NUMBERS: 220 ms, inside the 300 ms ceiling, entrance easing
-   * `cubic-bezier(.23, 1, .32, 1)` verbatim.  SIGNAL (gate 3): it is opacity and a 7-px slide on
-   * chrome, in no accent colour, and it is a ONE-SHOT — nothing here drifts, pulses or breathes.
-   *   IT IS ON `reopen()` ALONE, and that is the law rather than an oversight.  `raise()` also clears
-   * `.closed`, and it must NOT animate: TAB reaches it, and a keyboard-initiated action is never
-   * animated — "the key is the user asking for the result, not the journey".  A window raised by the
-   * WINDOW menu is the same act by a different road and travels no further.
-   *   The class is REMOVED before it is added, with a forced reflow between, because a card reopened
-   * twice inside the animation's own 220 ms would otherwise not restart — a one-shot slower than the
-   * eye may legally restart, and this one does. */
-  function enterWindow(dev) {
-    dev.classList.remove('dev-enter');
-    void dev.offsetWidth;
-    dev.classList.add('dev-enter');
-    dev.addEventListener('animationend', () => dev.classList.remove('dev-enter'), { once: true });
   }
   const layout = {
-    toggleRack() { document.body.classList.toggle('rack-hidden'); document.body.classList.remove('rack-peek', 'transport-peek'); saveSettings(); },   // wave 59: on a phone the press IS the browser saying which it wants (see enterPhone)
+    toggleRack() { rk.setHidden(!rk.hidden); saveSettings(); },   // wave 59: on a phone the press IS the browser saying which it wants (see enterPhone)
     /** move a card to the other rack (or to a named side) — the MIRROR: same windows, either side */
     moveToRack(id, side) {
       const card = document.querySelector('.dev[data-id="' + id + '"]'); if (!card || !rackL) return false;
@@ -3332,7 +3336,7 @@ export async function boot(dom) {
     /* WAVE 55: which rack a window BELONGS TO.  A floating card's parent is the float layer, so reading
        the parent would answer 'R' for a window whose home is the mirror rack — and `captureLayout`,
        `dockWindow` and the ⇄ all mean the HOME.  Ask the float record first. */
-    side(id) { const st = floatState.get(id); if (st) return st.home.side; const card = document.querySelector('.dev[data-id="' + id + '"]'); return card && card.parentElement === rackL ? 'L' : 'R'; },
+    side(id) { const st = rk.floatOf(id); if (st) return sideLR(st.home.side); const card = document.querySelector('.dev[data-id="' + id + '"]'); return card && card.parentElement === rackL ? 'L' : 'R'; },
     moveCard(id, index) { const list = [...rack.querySelectorAll('.dev')]; const card = list.find((d) => d.dataset.id === id); if (!card) return false; const rest = list.filter((d) => d !== card); const ref = rest[Math.max(0, Math.min(index, rest.length))] || null; rack.insertBefore(card, ref); return true; },
     order() { return [...rack.querySelectorAll('.dev')].map((d) => d.dataset.id); },
     orderAll() { return [...document.querySelectorAll('#rackL .dev, #rack .dev')].map((d) => d.dataset.id); },
@@ -3356,108 +3360,31 @@ export async function boot(dom) {
       schedule(TIER.PRESENT);
       popFace(wTr.root);                                             // the pop chip and the pill's own dock chip say the same thing
     },
-    /* ── WAVE 55 · THE FLOAT VERBS ─────────────────────────────────────────────────────────────── */
-    /** which windows are off the rack, BACK-MOST FIRST (so replaying the list reproduces the stack) */
-    floating() { return floats ? [...floats.querySelectorAll('.dev')].sort((a, b) => (+a.style.zIndex || 0) - (+b.style.zIndex || 0)).map((d) => d.dataset.id) : []; },
-    isFloating(id) { const d = devById(id); return !!d && d.classList.contains('floating'); },
-    floatOf(id) { const st = floatState.get(id), d = devById(id); return st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: +(d && d.style.zIndex || 0), home: { ...st.home } } : null; },
-    /** TAKE IT OFF THE RACK.  `at` overrides the landing spot and the home slot (a saved layout supplies both). */
+    /* ── the kit's float verbs under their 0.4.0 names (C3-DESIGN §2): a home side is 'L'/'R' here, 'left'/'right' in the kit ── */
+    floating: () => rk.floating(),
+    isFloating: (id) => rk.floating().includes(id),
+    floatOf(id) { const st = rk.floatOf(id); return st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: rk.floating().indexOf(id), home: { side: sideLR(st.home.side), index: st.home.index } } : null; },
+    /** TAKE IT OFF THE RACK.  `at` overrides the landing spot and the home slot (a saved layout supplies both); the TRANSPORT's floating mode is the pill */
     popOut(id, at) {
-      const d = devById(id); if (!d || !floats) return false;
-      if (d === wTr.root) { if (layout.docked) layout.dockTransport(); return true; }        // its floating mode is the pill
-      if (document.body.classList.contains('phone')) return false;                           // wave 51: one rack, and nothing floats
-      if (d.classList.contains('floating')) { raiseFloat(d); return true; }
-      const host = d.parentElement === rackL ? rackL : rack;
-      const sibs = [...host.querySelectorAll('.dev')];
-      const home = at && at.home ? { side: at.home.side === 'L' ? 'L' : 'R', index: Math.max(0, at.home.index | 0) }
-        : { side: host === rackL ? 'L' : 'R', index: Math.max(0, sibs.indexOf(d)) };
-      const w = (at && at.w) || rackCardWidth();
-      const r = d.getBoundingClientRect();
-      /* IT COMES OFF SIDEWAYS: the same height, one card's width in from the rack it left, so the window
-         lands ON THE STAGE and never underneath the rack it just came out of.  A CLOSED card measures
-         0 × 0 (display:none), and a window opening straight into the float layer — MODULATION does — has
-         no rectangle to leave from, so that case centres it instead of trusting a zero. */
-      const x = at && at.x !== undefined ? at.x
-        : (r.width ? (home.side === 'L' ? r.left + w + 24 : r.left - w - 24) : Math.round((window.innerWidth - w) / 2));
-      /* THE LANDING IS NOT THE CLAMP.  The clamp only promises a reachable header, which is the right law
-         for a DRAG and the wrong one for a first appearance: a card sitting at the bottom of a scrolled rack
-         would pop out with nothing but its header on the screen.  So a window LANDS fully on the stage when
-         it fits, and falls back to the clamp when it does not. */
-      let y = at && at.y !== undefined ? at.y : (r.height ? r.top : 72);
-      if (!(at && at.y !== undefined)) { const h = Math.min(r.height || 320, window.innerHeight - 16); y = Math.max(8, Math.min(y, window.innerHeight - h - 8)); }
-      floatState.set(id, { home, x, y, w, compact: false });
-      /* THE WIDTH IS A CUSTOM PROPERTY, not an inline `width`: COMPACT then overrides it with an ordinary
-         stylesheet rule instead of an `!important` fighting an inline declaration. */
-      d.style.setProperty('--float-w', w + 'px');
-      d.classList.add('floating');
-      floats.appendChild(d);
-      placeFloat(d, x, y);
-      raiseFloat(d);
-      if (at && at.compact) layout.setCompact(id, true);
-      popFace(d); railFace(d);
-      schedule(TIER.PRESENT);
-      return true;
+      if (id === 'transport') { if (layout.docked) layout.dockTransport(); return true; }
+      const a = { ...(at || {}), w: (at && at.w) || rackCardWidth() };
+      if (at && at.home) a.home = { side: sideKey(at.home.side) || 'right', index: Math.max(0, at.home.index | 0) };
+      return rk.float(id, a);
     },
-    /** PUT IT BACK.  With no `drop` it goes HOME — the rack and the slot it left; with one, exactly there. */
-    dockWindow(id, drop) {
-      const d = devById(id); if (!d) return false;
-      if (d === wTr.root) { if (!layout.docked) layout.dockTransport(); return true; }
-      const st = floatState.get(id); if (!st) return false;
-      const host = drop && drop.host ? drop.host : (st.home.side === 'L' && rackL ? rackL : rack);
-      d.classList.remove('floating', 'compact');
-      d.style.left = ''; d.style.top = ''; d.style.zIndex = ''; d.style.removeProperty('--float-w');
-      let ref = null;
-      if (drop && drop.host) ref = drop.ref && drop.ref.parentElement === host ? drop.ref : null;
-      else { const sibs = [...host.querySelectorAll('.dev')]; ref = sibs[Math.min(st.home.index, sibs.length)] || null; }
-      host.insertBefore(d, ref);
-      floatState.delete(id);
-      popFace(d); railFace(d);
-      schedule(TIER.PRESENT);
-      return true;
-    },
-    toggleFloat(id) {
-      const d = devById(id); if (!d) return false;
-      if (d === wTr.root) { layout.dockTransport(); return true; }
-      return d.classList.contains('floating') ? layout.dockWindow(id) : layout.popOut(id);
-    },
-    /** COMPACT IS A MODE, NOT A RESIZE.  The body stands down and the header re-flows to a vertical rail
-     *  carrying the window's NAME, its POWER switch and its CLOSE — the three the reference keeps — plus
-     *  the way back.  Nothing inside the body moves, so FULL restores it exactly (STYLE-LOCK). */
-    setCompact(id, on) {
-      const d = devById(id), st = floatState.get(id); if (!d || !st) return false;
-      st.compact = !!on; d.classList.toggle('compact', !!on);
-      railFace(d); schedule(TIER.PRESENT); return true;
-    },
-    moveFloat(id, x, y) { const d = devById(id); if (!d || !floatState.has(id)) return false; placeFloat(d, x, y); return true; },
-    raiseFloat(id) { return raiseFloat(devById(id)); },
-    /** every floating window home again — the phone's crossing, RESET LAYOUT, and any layout that predates floating */
-    dockAll(remember) {
-      const kept = {};
-      for (const id of layout.floating()) { if (remember) kept[id] = layout.floatOf(id); layout.dockWindow(id); }
-      return kept;
-    },
-    /** bring a window to the top of its rack, unfolded, with the rack shown — or, if it floats, to the FRONT */
-    raise(id) {
-      const dev = document.querySelector('.dev[data-id="' + id + '"]'); if (!dev) return false;
-      dev.hidden = false; dev.classList.remove('closed');
-      if (dev.classList.contains('floating')) {                      // wave 55: "the top" of a floating window is the top of the STACK
-        raiseFloat(dev); if (dev.classList.contains('compact')) layout.setCompact(id, false);
-      } else { (dev.parentElement || rack).prepend(dev); }
-      saveSettings();
-      if (dev.classList.contains('folded')) { const f = dev.querySelector('.dev-fold'); if (f) f.click(); }
-      document.body.classList.remove('rack-hidden'); (dev.parentElement || rack).scrollTop = 0; return true;
-    },
+    dockWindow(id) { if (id === 'transport') { if (!layout.docked) layout.dockTransport(); return true; } return rk.dock(id); },
+    toggleFloat(id) { if (id === 'transport') { layout.dockTransport(); return true; } return rk.toggleFloat(id); },
+    setCompact: (id, on) => rk.setCompact(id, on),
+    /** the kit has no move for a float (BRIEF R1): dock and float it again at (x, y), clamped, in the same seat of the layer */
+    moveFloat(id, x, y) { const st = rk.floatOf(id), d = devById(id), next = d && d.nextElementSibling; if (!st) return false; rk.dock(id); const ok = rk.float(id, { x, y, w: st.w, compact: st.compact, home: st.home }); if (next && next.parentElement === floats) floats.insertBefore(d, next); return ok; },
+    raiseFloat: (id) => rk.floating().includes(id) && rk.float(id),
+    /** every floating window home again — RESET LAYOUT, and any layout that predates floating */
+    dockAll(remember) { const kept = {}; for (const id of rk.floating()) { if (remember) kept[id] = layout.floatOf(id); rk.dock(id); } return kept; },
+    /** to the top of its rack, unfolded, the rack shown — or, floating, to the FRONT; a hidden legacy card comes back by id */
+    raise(id) { const dev = devById(id); if (!dev) return false; dev.hidden = false; rk.raise(id); saveSettings(); return true; },
     /** the ids of windows that no longer exist, and the window that absorbed each of them (wave 56) */
     retired: RETIRED_WINDOWS,
     /** reopen a closed window into a rack (default: the one it was in) */
-    reopen(id, side) {
-      const dev = document.querySelector('.dev[data-id="' + id + '"]'); if (!dev) return false;
-      dev.hidden = false; dev.classList.remove('closed'); const host = side === 'L' ? rackL : side === 'R' ? rack : dev.parentElement || rack;
-      const first = host.querySelector('.dev'); if (first) host.insertBefore(dev, first); else host.appendChild(dev);
-      enterWindow(dev);
-      dev.dispatchEvent(new CustomEvent('devopen'));
-      saveSettings(); return true;
-    },
+    reopen(id, side) { const dev = devById(id); if (!dev) return false; dev.hidden = false; rk.open(id, { side: sideKey(side) }); saveSettings(); return true; },
     closed() { return [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id); },
     /* ── FAVOURITE LAYOUTS (wave 54): capture, restore, and the four slots in this browser's settings key ──── */
     /** THE ARRANGEMENT, and nothing else.  Order is the ARRAY's order — restoring appends in it, which reproduces
@@ -3476,11 +3403,11 @@ export async function boot(dom) {
              read it; only the capture did not, and the asymmetry was the bug.  With the shipped arrangement
              (SPECTRUM lives on the LEFT rack out of the box) that meant: rotate a tablet past the breakpoint,
              press ☆, rotate back, load — and the mirror rack is empty for ever. */
-          const st = floatState.get(d.dataset.id), mt = d.querySelector('.mol-more-toggle');   // 0.4.0 S0: MOLECULES' MORE fold is the card's own WORKSPACE key
+          const st = rk.floatOf(d.dataset.id), mt = d.querySelector('.mol-more-toggle');   // 0.4.0 S0: MOLECULES' MORE fold is the card's own WORKSPACE key
           const ct = d.querySelector('.orb-core-toggle');                                      // 0.4.0 S1: MO-REGISTRY's CORE fold, the same kind of key
-          return { id: d.dataset.id, side: st ? st.home.side : (d.dataset.phoneFrom === 'L' || d.parentElement === rackL ? 'L' : 'R'),
+          return { id: d.dataset.id, side: st ? sideLR(st.home.side) : (d.dataset.phoneFrom === 'left' || d.parentElement === rackL ? 'L' : 'R'),
             folded: d.classList.contains('folded'), closed: d.classList.contains('closed'), off: d.classList.contains('off'),
-            float: st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: +(d.style.zIndex || 0), index: st.home.index } : null,
+            float: st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: rk.floating().indexOf(d.dataset.id), index: st.home.index } : null,
             ...(mt ? { more: mt.getAttribute('aria-expanded') === 'true' } : {}), ...(ct ? { core: ct.getAttribute('aria-expanded') === 'true' } : {}) };
         }),
         docked: !!layout.docked, rackHidden: document.body.classList.contains('rack-hidden'),
@@ -3488,106 +3415,28 @@ export async function boot(dom) {
            them they wrote the accents, the field chrome and the camera's feel (PREFERENCE) into every project and link. */
         nb: nb && nb.style.width ? [parseInt(nb.style.width, 10) || 0, parseInt(nb.style.height, 10) || 0] : null };
     },
-    /** put it back.  Fold and power go through the BUTTONS, not the classes, because the glyph and the
-     *  aria-pressed state live in device()'s closure and only the click keeps all three in step. */
+    /** put it back: the kit's apply (a retired id opens its heir, a phone parks the floats, `nb` sizes the notebook), then the extras */
     applyLayout(L) {
       if (!L || !Array.isArray(L.cards)) return false;
       if (typeof L.docked === 'boolean' && L.docked !== layout.docked) layout.dockTransport();
-      /* EVERY WINDOW DOCKS FIRST.  Order is the ARRAY's order and appending reproduces it, so the float
-         pass has to run on a settled rack — and this is also what makes a v1 layout (no float data at all)
-         mean what it says: nothing floats.  ON A PHONE THE PASS NEVER RUNS: wave 51 gives the phone one
-         rack and no floating, so a layout saved on a desktop with three windows on the stage LOADS there
-         with those three windows DOCKED, in their home racks, rather than breaking. */
-      layout.dockAll(false);
-      const ph = document.body.classList.contains('phone');
-      /* WAVE 56 · A RETIRED ID STILL LOADS.  Board #59 merged DRAW STYLE into the WAVE window and kept the
-         HEIR'S id (`observer`), so `style` is a name that every layout saved before this wave still carries.
-         The old loop simply `continue`d past a card it could not find: the layout loaded, and the seat the
-         retired window held vanished without a word.  Now a retired id resolves to its heir — and because
-         every such record names the heir as well, THE HEIR'S OWN RECORD WINS and the retired one is dropped:
-         it is one window now, and one window can only be in one rack, folded or not, open or closed.
-         NOTHING HERE BUMPS THE VERSION.  A v1 record (wave 54, no `float` key) and a v2 record (wave 55) are
-         read exactly as they always were; this only renames a card on the way in. */
-      const named = new Set(L.cards.map((c) => c.id));
-      const heirOf = (id) => (RETIRED_WINDOWS[id] && !named.has(RETIRED_WINDOWS[id]) ? RETIRED_WINDOWS[id] : id);
-      /* ── WAVE 59 · THE PHONE'S FLOAT MEMORY IS THE ARRANGEMENT'S, AND A LOAD IS A NEW ARRANGEMENT ────
-         `enterPhone()` docks every floating window and remembers where each one was, so the crossing is
-         reversible (wave 51's law); `leavePhone()` replays that record.  But a LOAD on the phone arranged
-         every card, SKIPPED the float pass (a phone has no floating), and left `phone.floats` untouched —
-         so rotating back popped the PRE-CROSSING windows out at their PRE-CROSSING positions, on top of the
-         layout the user had just loaded, and no control they pressed said so.  The record was describing an
-         arrangement that no longer existed.
-         The fix is not to forget: it is to make the record describe the arrangement that IS loaded.  The
-         layout carries its own float block per card, in the same shape `floatOf()` returns, so a load on a
-         phone REPLACES `phone.floats` with the layout's own — and crossing back then reproduces the layout
-         in full, floats included, which is what loading it meant.  A layout with no floats leaves nothing to
-         replay, which is also what it meant.  (RESET LAYOUT clears it outright: reset means nothing floats.) */
-      if (ph) {
-        phone.floats = null;
-        for (const c of L.cards) {
-          if (!c.float || c.closed || (RETIRED_WINDOWS[c.id] && named.has(RETIRED_WINDOWS[c.id]))) continue;
-          (phone.floats || (phone.floats = {}))[heirOf(c.id)] =
-            { x: c.float.x, y: c.float.y, w: c.float.w, compact: !!c.float.compact, z: c.float.z || 0, home: { side: c.side, index: c.float.index } };
-        }
-      }
-      for (const c of L.cards) {
-        if (RETIRED_WINDOWS[c.id] && named.has(RETIRED_WINDOWS[c.id])) continue;
-        const d = document.querySelector('.dev[data-id="' + heirOf(c.id) + '"]'); if (!d) continue;
-        /* FOUND BY THE GATE, and it predates this wave: on a phone `#rackL` is `display: none !important`,
-           so appending a card the record marks 'L' into the mirror rack made the window VANISH.  Wave 51's
-           law is one rack on a phone, and its crossing is reversible through `data-phone-from` — so that is
-           what a load writes here, and leaving the breakpoint puts the card back in the mirror rack. */
-        const host = !ph && c.side === 'L' && rackL ? rackL : rack;
-        if (ph) { if (c.side === 'L') d.dataset.phoneFrom = 'L'; else delete d.dataset.phoneFrom; }
-        host.appendChild(d);if(d===wTr.root){layout.dockSide=c.side==='L'?'L':'R';layout.dockIndex=[...host.querySelectorAll('.dev')].indexOf(d);}                     // Project order owns the docked transport seat too.
-        d.classList.toggle('closed', !!c.closed);
-        if (d.classList.contains('folded') !== !!c.folded) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
-        if (d.classList.contains('off') !== !!c.off) { const pw = d.querySelector('.dev-power'); if (pw) pw.click(); }
-        const mt = typeof c.more === 'boolean' ? d.querySelector('.mol-more-toggle') : null;   // an older record has no `more`: the fold stays as it is
-        if (mt && (mt.getAttribute('aria-expanded') === 'true') !== c.more) mt.click();
-        const ct = typeof c.core === 'boolean' ? d.querySelector('.orb-core-toggle') : null;   // likewise MO-REGISTRY's CORE fold
-        if (ct && (ct.getAttribute('aria-expanded') === 'true') !== c.core) ct.click();
-      }
-      if (!ph) for (const c of L.cards.filter((q) => q.float && !(RETIRED_WINDOWS[q.id] && named.has(RETIRED_WINDOWS[q.id]))).sort((a, b) => (a.float.z || 0) - (b.float.z || 0)))
-        layout.popOut(heirOf(c.id), { x: c.float.x, y: c.float.y, w: c.float.w, compact: c.float.compact, home: { side: c.side, index: c.float.index } });
-      document.body.classList.toggle('rack-hidden', !!L.rackHidden);
-      if (Array.isArray(L.nb) && L.nb[0] && layout.notebookResize) layout.notebookResize(L.nb[0], L.nb[1]);
+      rk.apply(L); layoutExtras(L);
+      if (document.body.classList.contains('phone')) parkedIds = L.cards.filter((c) => c.float && !c.closed && c.open !== false).map((c) => (RETIRED_WINDOWS[c.id] && !L.cards.some((q) => q.id === RETIRED_WINDOWS[c.id]) ? RETIRED_WINDOWS[c.id] : c.id));
       saveSettings(); schedule(TIER.PRESENT);
       return true;
     },
-    /** the label a numbered slot wears in the menu — the information a name would have carried */
-    layoutLabel(L, slot) {
-      /* wave 59: a v1 record naming BOTH a retired id and its heir restores one window, not two — applyLayout
-         drops the retired one.  The row is the only place a user can compare, so it counts the same set. */
-      const live = L.cards.filter((c) => !(RETIRED_WINDOWS[c.id] && L.cards.some((q) => q.id === RETIRED_WINDOWS[c.id])));
-      const open = live.filter((c) => !c.closed).length, sides = new Set(live.filter((c) => !c.closed).map((c) => c.side));
-      const d = new Date(L.at || Date.now());
-      const fl = live.filter((c) => c.float && !c.closed).length;
-      return slot + '  ·  ' + open + ' window' + (open === 1 ? '' : 's') + '  ·  ' + (sides.size > 1 ? 'both racks' : sides.has('L') ? 'left rack' : 'right rack')
-        + (fl ? '  ·  ' + fl + ' floating' : '')
-        + '  ·  ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-    },
-    layouts() { const m = readSettings().layouts || {}; return Object.keys(m).map(Number).filter((n) => n >= 1 && n <= LAYOUT_SLOTS).sort((a, b) => a - b).map((slot) => ({ slot, label: layout.layoutLabel(m[slot], slot), at: m[slot].at })); },
-    saveLayout(slot) {
-      const S = readSettings(), m = S.layouts || {};
-      let n = +slot || 0;
-      if (!n) { for (let i = 1; i <= LAYOUT_SLOTS && !n; i++) if (!m[i]) n = i; }
-      if (!n) { let oldest = 1; for (let i = 2; i <= LAYOUT_SLOTS; i++) if ((m[i].at || 0) < (m[oldest].at || 0)) oldest = i; n = oldest; }   // full: the oldest goes
-      m[n] = layout.captureLayout();
-      settingsStore.write({ ...S, layouts: m });
-      return n;
-    },
+    layoutLabel: (L, slot) => rackLayoutLabel(readLayout(L, null, RETIRED_WINDOWS), slot),
+    layouts: () => rk.layouts(),
+    saveLayout: (slot) => rk.saveLayout(slot),
     loadLayout(slot) { const m = readSettings().layouts || {}; return m[slot] ? layout.applyLayout(m[slot]) : false; },
-    forgetLayout(slot) { const S = readSettings(), m = S.layouts || {}; delete m[slot]; settingsStore.write({ ...S, layouts: m }); return true; },
+    forgetLayout: (slot) => rk.forgetLayout(slot),
+    /** RESET LAYOUT: the kit's (every float home, every window opened, powered and unfolded, on its home rack, the rack shown); the transport's dock is λWAVES' */
     resetLayout() {
-      layout.dockAll(false);                                                 // wave 55: "reopen and unfold every window" now also means put every one of them back on a rack
-      for (const d of document.querySelectorAll('.dev')) { d.classList.remove('closed', 'off'); if (d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); } }
+      rk.resetLayout();
       const ph = document.body.classList.contains('phone');
-      if (ph) phone.floats = null;                                            // wave 59: RESET LAYOUT is a new arrangement too — see applyLayout
+      if (ph) parkedIds = [];
       if (layout.docked !== ph) layout.dockTransport();                       // wave 51: on a phone the transport is DOCKED, not floating — reset does not undock it
-      for (const d of [...document.querySelectorAll('#rackL .dev')]) if (d.dataset.id !== 'transport') rack.appendChild(d);
       if (ph) rack.insertBefore(wTr.root, rack.firstElementChild);            // … and it goes back to the TOP of the one rack
-      document.body.classList.remove('rack-hidden'); saveSettings();
+      saveSettings();
     },
     /** an INFO panel's digest: every readout, the status, and the module's own table — as text for the notebook */
     digest(id) {
@@ -3608,8 +3457,9 @@ export async function boot(dom) {
   const wTr = device({ id: 'transport', eyebrow: 'TRANSPORT', status: '' });
   wTr.root.hidden = true; (rackL || rack).appendChild(wTr.root);
   windowActivity.track(wTr);
+  rk.register({ id: 'transport', el: wTr, title: 'TRANSPORT', card: true, onFold: () => saveSettings() }); popFace(wTr.root);   // C3: an app card (its own buttons; in neither + nor WINDOW)
+  { const p = wTr.root.querySelector('.dev-pop'); if (p) p.addEventListener('click', (e) => { e.stopPropagation(); layout.dockTransport(); }); }
   {
-    const tb = document.getElementById('rackToggle'); if (tb) tb.addEventListener('click', () => layout.toggleRack());
     /* WAVE 62 · THE SKIP LINKS MOVE FOCUS THEMSELVES.  The anchors are real anchors — without script
        the browser's own fragment jump still lands on a `tabindex="-1"` rack — but in THIS app the
        FRAGMENT IS THE STATE ADDRESS (wave 56 mints `#s=…` and listens on `hashchange`), so writing
@@ -3619,9 +3469,6 @@ export async function boot(dom) {
     for (const a of document.querySelectorAll('a.skip')) {
       a.addEventListener('click', (e) => { const t = document.querySelector(a.getAttribute('href')); if (!t) return; e.preventDefault(); t.focus(); });
     }
-    const peek = document.getElementById('rackPeek');
-    if (peek) { peek.addEventListener('pointerenter', () => document.body.classList.add('rack-peek')); }
-    /* (the rack's own pointerleave no longer dismisses a peek: Firefox synthesises one when the rack slides, and the window handler above owns peeking now) */
     /* a dock button on the transport itself */
     const tr = document.getElementById('transport');
     /* WAVE 55: the same drawing every floating window's DOCK chip wears — one mark, one meaning, and never
@@ -3767,9 +3614,8 @@ export async function boot(dom) {
     }
     /* LEAN (the Aa button) and the KIND taxonomy (data-kind, ⧉ COPY, the boot folds): lab/window-chrome.js (N7 seam 9) */
     installWindowChrome({ KIND, layout, present: () => schedule(TIER.PRESENT) });
-    document.addEventListener('devclose', () => saveSettings());
-    /* the + (closed windows) and ☆ (favourite layouts) lists under the hide button: lab/rack-menus.js (N7 seam 7) */
-    installRackMenus({ layout, readSettings, winHint, LAYOUT_SLOTS });
+    for (const t of ['devclose', 'devopen']) document.addEventListener(t, () => saveSettings());   // C3: the kit's + opens a window itself
+    layout.addMenu = rk.addMenu; layout.favMenu = rk.favMenu;   // 0.5.0 C3: the + and ☆ lists are the kit's (createRack chrome)
     /* ── THE NOTEBOOK: a free glass over the stage; its ⓘ flips it into the ABOUT face ── */
     const nb = document.getElementById('notebook');
     if (nb) {
@@ -4064,26 +3910,14 @@ export async function boot(dom) {
       count();
       layout.notebook = { open: (face = 'notes') => show(face), close: () => { nb.hidden = true; }, toggle: () => { if (nb.hidden) show('notes'); else nb.hidden = true; }, get isOpen() { return !nb.hidden; }, get face() { return nb.dataset.face; }, moveTo(x, y) { nbMoved = true; nb.style.left = x + 'px'; nb.style.top = y + 'px'; }, dump: dumpText, get text() { return ta.value; }, set text(v) { ta.value = v; ta.dispatchEvent(new Event('input')); }, get title() { return titleIn.value; }, set title(v) { titleIn.value = v; titleIn.dispatchEvent(new Event('input')); }, get subtitle() { return subIn ? subIn.value : ''; }, set subtitle(v) { if (subIn) { subIn.value = v; subIn.hidden = !v; subIn.dispatchEvent(new Event('input')); } }, get mode() { return nb.dataset.mode; }, setMode, render: renderMarkdown, get html() { return view.innerHTML; } };
     }
-    /* a hidden rack peeks when the pointer nears its column and goes when it leaves; the playhead
-       does the same around whichever seat modDodge currently gives it. */
-    /* wave 48: this handler ran getComputedStyle(documentElement) on EVERY pointer move — a style resolution of the
-       root, on the pointer's thread, sixty times a second, to read a constant.  --rack-w changes with the viewport
-       and with nothing else, so it is read once and on resize.  And a hidden INTERFACE peeks at nothing: the racks
-       are display:none under H, so the handler leaves before it touches anything. */
-    const peekLast = { x: -1, y: -1, armed: false, bar: false };
+    /* a hidden rack peeks by the kit's pointer law (createRack); the playhead does the same around whichever seat modDodge gives it */
+    const peekLast = { x: -1, y: -1, bar: false };
     const peekTransport = document.getElementById('transport');
-    let rackW = 300;
-    const readRackW = () => { rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300; };
-    readRackW(); window.addEventListener('resize', readRackW, { passive: true });
     window.addEventListener('pointermove', (e) => {
       if (e.pointerType === 'touch' || uiHidden || !document.body.classList.contains('rack-hidden')) return;
       if (Math.abs(e.clientX - peekLast.x) < 2 && Math.abs(e.clientY - peekLast.y) < 2) return;   // a synthesised move after a layout change is not the pointer leaving
       peekLast.x = e.clientX; peekLast.y = e.clientY;
-      const W = window.innerWidth, H = window.innerHeight, rw = rackW;
-      const hasL = rackL && rackL.children.length > 0;
-      const near = e.clientX > W - 60 || (hasL && e.clientX < 60);
-      const inside = e.clientX > W - rw - 24 || (hasL && e.clientX < rw + 24);
-      if (near) { document.body.classList.add('rack-peek'); peekLast.armed = true; } else if (!inside && peekLast.armed) { document.body.classList.remove('rack-peek'); peekLast.armed = false; }   // only a peek this handler armed is its to dismiss
+      const W = window.innerWidth, H = window.innerHeight;
       /* WAVE 108 · THE REVEAL TARGET FOLLOWS THE PLAYHEAD.  modDodge can tunnel the native
          transport from its bottom seat to its top seat, but the hidden-rack hit area used to stay
          hard-coded at the bottom of the viewport.  The pill's `at-top` class is the current seat
@@ -4098,171 +3932,17 @@ export async function boot(dom) {
       if (nearBar) { document.body.classList.add('transport-peek'); peekLast.bar = true; }
       else if (!insideBar && peekLast.bar) { document.body.classList.remove('transport-peek'); peekLast.bar = false; }
     });
-    /* ── WAVE 67 · A DRAG WRITES ONCE A FRAME, AND READS NO GEOMETRY IN A POINTER HANDLER ──────────────
-     * BOTH window drags — reorder a rack card, and move a floating one — used to do their whole job
-     * SYNCHRONOUSLY inside `pointermove`: the reorder measured every other card in the target rack with
-     * `getBoundingClientRect()` and then `insertBefore`d, and the float called `getBoundingClientRect()` on
-     * both racks and wrote `style.left/top`.  A mouse delivers coalesced moves at 120–1000 Hz, so over a
-     * canvas that is already missing frames that is several FORCED STYLE RECALCULATIONS per displayed
-     * frame, every one of them thrown away — and a DOM mutation per event on top of it for the reorder.
-     * That is why ours felt bad; the mechanism that fixes it is BASINS' `dragHandle` (`window.js:861-874`)
-     * and it is taken as a REFERENCE, not copied: a pointermove STORES a delta and schedules, at most one
-     * geometry pass happens per frame, and a `setTimeout` FLOOR flushes it anyway if rAF is starved —
-     * which is exactly what a busy WebGPU canvas does to rAF.  `flush()` on the end so the finger's LAST
-     * position wins, which is the difference between a drop landing where you let go and where the last
-     * frame happened to be.  MEASURED (B137): 40 synchronous moves used to force 40+ layouts and now force
-     * ZERO, and the window still lands on the last pointer position exactly. */
-    /* drag a card by its header to reorder the rack — or across to the other rack */
-    let drag = null;
-    const racks = [rack, rackL].filter(Boolean);
-    /* the rects are read HERE, once a frame, and never in the handler.  They cannot be hoisted to
-       pointerdown the way the float's rack rects can: each insertBefore moves every card below it, so the
-       geometry this reads is the geometry this pass itself just wrote. */
-    const reorderTo = (p) => {
-      if (!drag) return;
-
-
-      const want = (rackL && !document.body.classList.contains('phone') && p.x < window.innerWidth / 2) ? rackL : rack;          // which rack is under the pointer: the left half of the window is the mirror rack — and on a phone there is only one
-      const cards = [...want.querySelectorAll('.dev')].filter((d) => d !== drag.card && !d.hidden);
-      let ref = null; for (const c of cards) { const r = c.getBoundingClientRect(); if (p.y < r.top + r.height / 2) { ref = c; break; } }
-      if (drag.card.parentElement !== want || ref !== drag.card.nextSibling) {
-
-
-        const before = new Map();
-        for (const c of [...want.children, ...(drag.card.parentElement === want ? [] : drag.card.parentElement.children)])
-          if (c.classList && c.classList.contains('dev')) before.set(c, c.getBoundingClientRect().top);
-        want.insertBefore(drag.card, ref);
-        if (!MOTION.reduced) for (const [c, y0] of before) {
-          if (c === drag.card) continue;
-          const dy = y0 - c.getBoundingClientRect().top;
-          if (!dy) continue;
-          c.style.transition = 'none'; c.style.transform = 'translateY(' + dy + 'px)';
-          requestAnimationFrame(() => { c.style.transition = 'transform .22s cubic-bezier(.23,1,.32,1)'; c.style.transform = ''; });
-          setTimeout(() => { c.style.transition = ''; c.style.transform = ''; }, 320);
-        }
-      }
-    };
-    const reorderPump = coalesce(reorderTo);
-    for (const rk of racks) rk.addEventListener('pointerdown', (e) => {
-      const head = e.target.closest('.dev-head'); if (!head || e.target.closest('button')) return;
-      const card = head.closest('.dev'); drag = { card, y0: e.clientY, moved: false }; head.setPointerCapture && head.setPointerCapture(e.pointerId);
-    });
-    window.addEventListener('pointermove', (e) => {
-      if (!drag) return;
-      if (!drag.moved && Math.abs(e.clientY - drag.y0) < 6) return;
-      if (!drag.moved) { drag.moved = true; drag.card.classList.add('dragging'); }
-
-
-      measureRacks();
-
-
-      if (!rackUnder(e.clientX) && !document.body.classList.contains('phone')) {
-        const card = drag.card, id = card.dataset.id, r = card.getBoundingClientRect();
-        drag.card.classList.remove('dragging'); drag = null;
-        if (!layout.floating().includes(id)) layout.toggleFloat(id);
-        measureRacks();
-        fdrag = { card, dx: Math.max(0, Math.min(e.clientX - r.left, r.width)),
-                  dy: Math.max(0, Math.min(e.clientY - r.top, 34)),
-                  x0: e.clientX, y0: e.clientY, moved: true, rk: null };
-        card.classList.add('dragging');
-        floatPump.post({ x: e.clientX, y: e.clientY });
-        return;
-      }
-      reorderPump.post({ x: e.clientX, y: e.clientY });
-    });
-    const endDrag = () => { if (!drag) return; reorderPump.flush(); drag.card.classList.remove('dragging'); drag = null; };
-    window.addEventListener('pointerup', endDrag); window.addEventListener('pointercancel', endDrag);
-
-    /* ── WAVE 55 · THE POP-OUT AND ITS RAIL, WIRED ONCE FOR EVERY WINDOW ───────────────────────────
-     * device() built the two chips; the act is here, because taking a card off a rack needs the racks,
-     * the stage and the phone breakpoint, and the kit knows about none of them.  The TRANSPORT is wired
-     * by the same loop and its chip calls `dockTransport()`: one control, one meaning, no second system. */
-    for (const d of document.querySelectorAll('.dev')) {
-      const pop = d.querySelector('.dev-pop'), rail = d.querySelector('.dev-rail');
-      /* WAVE 96 · THE POP CHIP IS RETIRED for rack windows — the drag above does its whole job — but
-         it is still WIRED, because the TRANSPORT keeps one as its dock control and because a host
-         that un-hides it should get a working button rather than a dead one (ANTI-PATTERN 7 the
-         other way round).  The hiding is skin.css's; this is only the act. */
-      if (pop) { popFace(d); pop.addEventListener('click', (e) => { e.stopPropagation(); layout.toggleFloat(d.dataset.id); }); }
-      if (rail) { railFace(d); rail.addEventListener('click', (e) => { e.stopPropagation(); layout.setCompact(d.dataset.id, !d.classList.contains('compact')); }); }
-    }
-
-    /* ── DRAGGING IS BY THE HEADER ALONE ───────────────────────────────────────────────────────────
-     * The one thing that would make the instrument unusable is a knob drag that moves the window under
-     * the finger, so the grip is the HEADER and not one pixel of the body — and not even all of the
-     * header: the chips in it keep their own clicks.  Pointer events throughout, so mouse, pen and touch
-     * are the same code path (`.dev-head` already carries `touch-action: none`).
-     * A PRESS ANYWHERE ON A FLOATING WINDOW RAISES IT.  That is deliberately separate from the drag test
-     * above it: focus follows the press, dragging follows the header. */
-    let fdrag = null;
-    /* THE RACK RECTS ARE MEASURED ONCE, at the press and on a resize — never in the move handler.  A rack's
-       column does not move while a window is being carried over it, so reading it sixty times a second was
-       a forced layout bought for nothing (wave 67; the same law as wave 48's --rack-w read). */
-    let rackRects = [];
-    const measureRacks = () => {
-      rackRects = (document.body.classList.contains('rack-hidden') || document.body.classList.contains('phone')) ? []
-        : [rack, rackL].filter(Boolean).map((rk) => ({ rk, r: rk.getBoundingClientRect() })).filter((o) => o.r.width > 2);
-    };
-    const rackUnder = (x) => { for (const o of rackRects) if (x >= o.r.left && x <= o.r.right) return o.rk; return null; };
-    const refInRack = (rk, y) => { for (const c of rk.querySelectorAll('.dev')) { const r = c.getBoundingClientRect(); if (r.height && y < r.top + r.height / 2) return c; } return null; };
-    const floatTo = (p) => {
-      if (!fdrag) return;
-      layout.moveFloat(fdrag.card.dataset.id, p.x - fdrag.dx, p.y - fdrag.dy);
-      /* DROP BACK ONTO A RACK.  "Returning a window puts it back where it was UNLESS the user dropped it
-         somewhere specific" — so a drag that ends over a rack docks THERE, at the slot under the pointer,
-         and the rack says so while the finger is over it. */
-      const rk = rackUnder(p.x);
-      if (rk !== fdrag.rk) { if (fdrag.rk) fdrag.rk.classList.remove('rack-drop'); fdrag.rk = rk; if (rk) rk.classList.add('rack-drop'); }
-    };
-    const floatPump = coalesce(floatTo);
-    if (floats) floats.addEventListener('pointerdown', (e) => {
-      const card = e.target.closest('.dev'); if (!card) return;
-      raiseFloat(card);
-      const head = e.target.closest('.dev-head');
-      if (!head || e.target.closest('button')) return;
-      const r = card.getBoundingClientRect();
-      measureRacks();
-      fdrag = { card, dx: e.clientX - r.left, dy: e.clientY - r.top, x0: e.clientX, y0: e.clientY, moved: false, rk: null };
-      try { head.setPointerCapture(e.pointerId); } catch (_) {}
-      e.preventDefault();
-    });
-    window.addEventListener('pointermove', (e) => {
-      if (!fdrag) return;
-      if (!fdrag.moved && Math.abs(e.clientX - fdrag.x0) < 4 && Math.abs(e.clientY - fdrag.y0) < 4) return;
-      if (!fdrag.moved) { fdrag.moved = true; fdrag.card.classList.add('dragging'); }
-      floatPump.post({ x: e.clientX, y: e.clientY });
-    });
-    const endFloatDrag = (e) => {
-      if (!fdrag) return;
-      floatPump.flush();                       // THE FINGER'S LAST POSITION WINS — a drop lands where you let go, not where the last frame was
-      const f = fdrag; fdrag = null;
-      f.card.classList.remove('dragging');
-      if (f.rk) f.rk.classList.remove('rack-drop');
-      if (f.moved && f.rk) layout.dockWindow(f.card.dataset.id, { host: f.rk, ref: refInRack(f.rk, e ? e.clientY : 0) });
-    };
-    window.addEventListener('pointerup', endFloatDrag); window.addEventListener('pointercancel', endFloatDrag);
-    /* THE VIEWPORT CAN SHRINK UNDER A FLOATING WINDOW (a rotation, a resized browser), and a header that
-       has gone off the edge cannot be grabbed back.  Every float is re-clamped on resize, on the same law
-       the drag uses, so a window is never stranded. */
-    window.addEventListener('resize', () => { measureRacks(); for (const id of layout.floating()) { const st = floatState.get(id); if (st) placeFloat(devById(id), st.x, st.y); } }, { passive: true });
   }
 
 
-  const phone = { on: false, applied: false, hooked: false, DPR: 1.5, wasDocked: false, wasRes: 0, wasSteps: 0, wasScale: 0, wasCard: '', wasRackHidden: false, wasFrost: 'off', floats: null };
+  const phone = { on: false, applied: false, DPR: 1.5, wasDocked: false, wasRes: 0, wasSteps: 0, wasScale: 0, wasCard: '', wasFrost: 'off' };
   function enterPhone() {
 
 
     requestAnimationFrame(() => { if (document.body.classList.contains('phone') && __LW_hooks.showMenuBar) __LW_hooks.showMenuBar(); });
-    /* ── WAVE 55 · THE PHONE HAS NO FLOATING ───────────────────────────────────────────────────────
-       One rack, everything docked: the pop-out chip stands down in CSS at this breakpoint (skin.css §5a)
-       and every window that was on the stage goes back on the rack HERE — before the mirror rack is
-       folded into the one rack below, so a window whose home is the LEFT rack still makes the trip.
-       It is REMEMBERED, because wave 51's law is that crossing the breakpoint is reversible either way:
-       a tablet in a stand rotates, and neither turn should cost the user their arrangement. */
-    phone.floats = layout.dockAll(true);
-    /* ONE RACK, ON THE LEFT.  Everything the mirror rack held joins the one rack, in its own order and at
-       the top; each card remembers where it came from so leaving the breakpoint puts it back exactly. */
-    if (rackL) for (const d of [...rackL.querySelectorAll('.dev')].reverse()) { d.dataset.phoneFrom = 'L'; rack.insertBefore(d, rack.firstElementChild); }
+    /* WAVE 55 · THE PHONE HAS NO FLOATING, and ONE RACK: the kit's crossing (createRack `phone`) has already docked every float
+       (remembered, so the crossing is reversible — wave 51's law) and folded the mirror rack into the one rack, each card
+       marked `data-phone-from="left"`; this half is the transport, the phone's rack default and the low-power path. */
     /* THE TRANSPORT DOCKS AT THE TOP OF THE RACK, and it is HIDEABLE, NEVER CLOSABLE: the × stands down in
        CSS at this breakpoint, ▾ is the hide, and which way it was left is this browser's to remember. */
     phone.wasDocked = layout.docked;
@@ -4273,10 +3953,8 @@ export async function boot(dom) {
     wTr.fold(s.phoneTr === true);
 
 
-    phone.wasRackHidden = document.body.classList.contains('rack-hidden');   // the crossing is reversible in BOTH directions (wave 51's law)
     document.body.classList.toggle('rack-hidden', readSettings().phoneRack !== true);
     phone.wasCard = document.body.dataset.card;
-    if (!phone.hooked) { phone.hooked = true; const fb = wTr.root.querySelector('.dev-fold'); if (fb) fb.addEventListener('click', () => saveSettings()); }
     /* THE LOW-POWER PATH, once per page.  Every one of these is a DEFAULT, not an override: a value this
        browser has SAID in SETTINGS still wins, exactly as CARD STYLE's default does. */
     if (!phone.applied) {
@@ -4322,8 +4000,6 @@ export async function boot(dom) {
     /* the crossing is REVERSIBLE in both directions: the cards go back to the rack they came from, the transport
        to the dock state it had, and the grid to the one the phone stepped down from — unless the hand changed it
        in the meantime, in which case the hand wins. */
-    document.body.classList.toggle('rack-hidden', !!phone.wasRackHidden);   // wave 59: the phone's default was the PHONE's; the desktop gets back exactly the state it crossed with
-    for (const d of [...rack.querySelectorAll('.dev[data-phone-from="L"]')]) { delete d.dataset.phoneFrom; if (rackL) rackL.appendChild(d); }
     if (!cardChosen && phone.wasCard && document.body.dataset.card !== phone.wasCard) applyCard(phone.wasCard);
     if (phone.wasFrost !== 'off' && frostMode === 'off') setFrost(phone.wasFrost, { quiet: true });   // wave 67: the policy the desktop crossed with
     if (layout.docked !== phone.wasDocked) layout.dockTransport();
@@ -4334,9 +4010,7 @@ export async function boot(dom) {
        if only its first half is written. */
     else if (phone.wasSteps) { quality.steps = phone.wasSteps; quality.scale = phone.wasScale; }
     phone.wasSteps = 0; phone.wasScale = 0;
-    /* … and what was on the stage goes back to the stage, in the stacking order it had (`body.phone` is
-       already off by the time this runs, so `popOut` is allowed to answer again). */
-    if (phone.floats) { for (const id of Object.keys(phone.floats).sort((a, b) => (phone.floats[a].z || 0) - (phone.floats[b].z || 0))) layout.popOut(id, phone.floats[id]); phone.floats = null; }
+    parkedIds = [];                                                    // the kit has put the parked floats back on the stage
     phone.applied = false;
     if (field.setDprCap) field.setDprCap(2);
     schedule(TIER.REBUILD);
@@ -4360,7 +4034,7 @@ export async function boot(dom) {
   }
   window.addEventListener('resize', syncPhone, { passive: true });
   window.addEventListener('orientationchange', syncPhone, { passive: true });
-  layout.phone = { get on() { return phone.on; }, get dprCap() { return field.dprCap; }, get transportFolded() { return wTr.root.classList.contains('folded'); }, get parkedFloats() { return phone.floats ? Object.keys(phone.floats) : []; }, sync: syncPhone };
+  layout.phone = { get on() { return phone.on; }, get dprCap() { return field.dprCap; }, get transportFolded() { return wTr.root.classList.contains('folded'); }, get parkedFloats() { return phone.on ? parkedIds.slice() : []; }, sync: syncPhone };
   layout.tablet = { get on() { return tablet.on; }, get dprCap() { return field.dprCap; }, get stepCap() { return field.stepCap; }, sync: syncPhone };
 
   /* Stage gestures own pointer lifetimes; these callbacks own the instrument.  0.5.0 C9 · `ui` is UI SPACE for the stage's scene guard:
@@ -4542,13 +4216,13 @@ export async function boot(dom) {
   function cycleWindow(dir) {
     if (!tabOrder) tabOrder = [...(rackL ? rackL.querySelectorAll('.dev') : []), ...rack.querySelectorAll('.dev'), ...(floats ? floats.querySelectorAll('.dev') : [])];
     const n = tabOrder.length; if (!n) return;
-    const front = frontFloat();
+    const fl = rk.floating(), front = fl.length ? devById(fl[fl.length - 1]) : null;
     const isTop = (d) => (d.classList.contains('floating') ? d === front : d === (d.parentElement || rack).querySelector('.dev:not([hidden])'));
     let i = tabIdx, guard = 0;
     do { i = (i + dir + n) % n; guard++; } while ((tabOrder[i].hidden || tabOrder[i].classList.contains('closed') || isTop(tabOrder[i])) && guard < 2 * n);
     tabIdx = i;
     const dev = tabOrder[i];
-    if (dev.classList.contains('floating')) { raiseFloat(dev); if (dev.classList.contains('compact')) layout.setCompact(dev.dataset.id, false); }
+    if (dev.classList.contains('floating')) { rk.float(dev.dataset.id); if (dev.classList.contains('compact')) layout.setCompact(dev.dataset.id, false); }
     else { (dev.parentElement || rack).prepend(dev); (dev.parentElement || rack).scrollTop = 0; }
     if (dev.classList.contains('folded')) { const f = dev.querySelector('.dev-fold'); if (f) f.click(); }
     dev.classList.add('tab-hot'); setTimeout(() => dev.classList.remove('tab-hot'), 600);
@@ -5046,7 +4720,7 @@ export async function boot(dom) {
 
 
   const wHist = device({ id: 'history', eyebrow: 'HISTORY', status: '' });
-  rack.appendChild(wHist.root);
+  rack.appendChild(wHist.root); rk.register({ id: 'history', el: wHist, title: 'HISTORY', hint: 'HISTORY' });   // C3: registered where it is built (A4's open item)
   const histList = el('div', 'hist-list', wHist.body);
   let histUndoBtn = null, histRedoBtn = null, histReturnBtn = null;
   {
@@ -5385,6 +5059,7 @@ export async function boot(dom) {
   }
   initStageText(); LW.stageText = stageText;   // the gate reads its string, its render count and its announcements
   applySettings();
+  rk.start();                         // 0.5.0 C3: the kit's rack takes the furniture as it stands, and its crossing runs before λWAVES' half
   syncPhone();                        // wave 51: the breakpoint is read once the browser's settings are in, so the phone's DEFAULTS never overwrite them
 
   /* ── WAVE 56 · A LINK OPENS HERE ──────────────────────────────────────────────────────────────────
