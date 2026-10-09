@@ -542,6 +542,19 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > made (for Josh, in C6B-BUILD.md): `home` is remembered only while untouched (a reload after edits shows RESUME); the title-screen key stop is bubble-
 > phase (the covers' arrow keys); no per-cover accent, the text logo, the veil's black fill on the light theme are left as the kit's.
 
+> **UPDATE (Claude Yan, 2026-10-09 10:15 CDT) — USAGE PAUSE (the agent-control plugin, five_hour 94 %, at 10:13; = "set up shop").** ALL WORKERS
+> REPORTED. `yan-c` tip `04b1ea8` (HANDOFF), code `8388309` (C6b merged), tree clean, `lab/*.js` 27,553. **C7b PAUSED by the plugin's worker alarm
+> at `f34569a` = WIP STEP 3 — NOT MERGED, do not merge as it stands:** steps 1–2 green (`9d8671b` the TIMELINE window on the one clock; NEW
+> `tests/timeline` 8/8 → 14/14 at step 3; ms/s closed ≈ +1.2); step 3's gates green but ONE — `tools/settings-probe.mjs` 4/6 RED: the late-registered
+> `render` card's `closed` state is lost across a demo open + reload (cause suspected and the fix named in its note); step 4 (wave 208, in its
+> git-ignored `.tmp/wave208.md`) not done; its own lines +40 (over the band by 20); CLAUDE.md's THE FILM paragraph drafted in `C7B-BUILD.md`, not
+> applied; new brief candidates B13–B17; found-not-fixed: a film keeps the window mask that stood when it started (predates C7b; its own row). Note
+> `agents/ab12528fb3c1bb358.md` (saved by Yan; the guard refused its write) holds the EXACT NEXT STEP. The legacy/boot re-aim (Sonnet) was NOT
+> launched (refused at 10:13). My server 8731 stopped by pid; Sos's 8721/8741 untouched; no browser. **Whoever continues:** resume C7b (same account:
+> SendMessage; other account: fresh Opus from `f34569a` with its `.tmp/` copied) → merge it across C6b → the legacy/boot re-aim → C-V (`BRIEF-C-V.md`)
+> → fix rounds → the pre-release gates → the LOCAL 0.5.0-alpha cut + `CHANGES-0.5.0.md` on Josh's word. Checkpoint:
+> `optimization-2026-09-24/.claude/handoffs/latest.md`. (Clock note: my 07:xx stamps above ran ~30 min fast — `date` is the truth.)
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
