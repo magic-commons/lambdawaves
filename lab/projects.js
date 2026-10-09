@@ -18,6 +18,7 @@
  *
  * createProjects(port) → the facade: list recent current dirty markClean discard requestOpen requestFresh save open remove
  *   fresh exportText importText · demo(file) (a DEMOS press) · download() (EXPORT .json) · pick() (IMPORT) · seed() · status · folders
+ *   · changed() (the part's subscribe hears it)
  *   port { host, part, snapshot(), rollback(S) → bool, busy(±1), opened(label), notice() → D9's line, thumbnail(), confirm(text),
  *          rack, onMoved(rect), titleAfterSave(name) → bool } */
 import { createFolders, FOLDERS_ACTIONS, toThumb } from './mir/folders/folders.js';
@@ -25,12 +26,16 @@ import { createFiles } from './mir/folders/files.js';
 import { registerProjectPart, restoreProject, projectSignature } from './mir/core/project.js';
 import { saveBlob } from './mir/folders/save-blob.js';
 import { notice } from './mir/shell/notice.js';
+import { coalesce } from './frame-coalescer.js';   // 0.5.0 C6b: the part's subscribe, once a frame
 import { PJ_KEY, PART, MAX_PROJECT_BYTES, MAX_LIBRARY_CHARS, UNTOUCHED, pathOf, splitPath, readCollection, createProjectStore, touchRecent,
   parseProjectFile, projectFileText, STARTERS, starterOf } from './project-store.js';
 
 export function createProjects(port) {
   const ls = globalThis.localStorage, store = createProjectStore(ls);
-  registerProjectPart(PART, port.part);
+  /* THE PART'S subscribe (0.5.0 C6b): rack.js calls `changed()` when the ring moves and the notebook is typed in; it says so once a
+     frame (coalesced) to every subscriber of the shared registry — the session books its save, FOLDERS repaints its mark */
+  const heard = new Set(), say = coalesce(() => { for (const fn of heard) { try { fn(); } catch (_) {} } }), changed = () => say.post();
+  registerProjectPart(PART, { ...port.part, subscribe: (fn) => { heard.add(fn); return () => heard.delete(fn); } });
   let currentId = null, status = '', echo = null, hush = 0, pinned = null, cleanAt = null;
   const told = new Set(), skips = [];
   const toast = (line, warn) => notice(line, { kind: warn ? 'warn' : 'ok', ms: warn ? 5000 : 3200 });
@@ -168,7 +173,7 @@ export function createProjects(port) {
   const starterOfFile = (file) => files.entries().find((e) => e.facts && e.facts.seedId === 'demos/' + file) || null;
 
   const api = {
-    folders, store,
+    folders, store, changed,
     get status() { return status; },
     list() { const C = collection(); return Object.values(C ? C.items : {}).sort((a, b) => (b.saved || '').localeCompare(a.saved || '')); },
     recent() { const C = collection(); return C ? (C.recent || []).filter((p) => Object.hasOwn(C.items, p)) : []; },

@@ -1,10 +1,14 @@
 /* main.js — boot the lab, then arm the install layer. */
 import { boot } from './rack.js';
+import { createSession } from './mir/core/session.js';   // 0.5.0 C6b: THE SESSION, the live project kept over the one part
 window.__e = window.__e || [];
 addEventListener('error', (e) => __e.push('ERR ' + e.message));
 addEventListener('unhandledrejection', (e) => __e.push('REJ ' + String(e.reason && e.reason.message || e.reason)));
 const $ = (id) => document.getElementById(id);
-boot({ canvas: $('field'), vortex: $('vortex'), particles: $('particles'), flow: $('flow'), kepler: $('kepler'), stage: $('stage'), rack: $('rack'), transport: $('transport'), badges: $('badges'), sheet: $('sheet'), banner: $('banner') })
+/* 0.5.0 C6b · THE SESSION (MIR core/session.js): the one part's capture in `lambdawaves.q0.session` (PROJECT), written a quiet
+   300 ms after the part says it changed and at once on pagehide; never a ring row, never an edit; nothing is written until it is armed */
+const session = createSession({ key: 'lambdawaves.q0.session' });
+boot({ canvas: $('field'), vortex: $('vortex'), particles: $('particles'), flow: $('flow'), kepler: $('kepler'), stage: $('stage'), rack: $('rack'), transport: $('transport'), badges: $('badges'), sheet: $('sheet'), banner: $('banner'), start: { session } })
   .then((LW) => { try { installLayer(LW); } catch (e) { if (LW && LW.sw) { LW.sw.mode = 'failed'; LW.sw.error = String(e && e.message || e); } } })
   .catch((e) => { __e.push('BOOT ' + (e && e.stack || e)); const b = $('banner'); b.hidden = false; b.querySelector('h3').textContent = 'boot failed'; b.querySelector('p').textContent = String(e && e.message || e); });
 /* WAVE 59 · THE BANNER'S × IS WIRED HERE TOO, and it must be: this is the ONE path where rack.js never ran

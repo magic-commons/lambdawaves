@@ -4803,6 +4803,7 @@ export async function boot(dom) {
      *  answer that BLANK): capture's readability probe decides — the canvas when this browser reads it, else the GPU readback's PNG. */
     async thumbnail() { const c = capApi.capture; if ((await c.probe()).canvasReadable) { await LW.settle(); return dom.canvas; } const r = await c.picture({ width: 320 }); return r.ok ? r.blob : null; },
     look: look.prefs,   // 0.5.0 C2: the look store (`mir.gui`), for probes (`__LW.look.get('theme')`)
+    session: dom.start ? dom.start.session : null,   // 0.5.0 C6b: THE SESSION (main.js createSession over the one part): read(), armed(), flush()
   };
   window.__LW = LW;
 
@@ -4945,6 +4946,9 @@ export async function boot(dom) {
   busyHost();                         // the mark is cloned and painted before anything can need it
   markBatchEnd();                     // M7: …painted here, once, every copy of it (the clones included)
   if (layout.projects) { await Promise.race([layout.projects.seed().catch(() => null), new Promise((r) => setTimeout(r, 3000))]); layout.projects.markClean(); }   // 0.5.0 C6: the six demos are FOLDERS' starters before the lab says ready
+  /* 0.5.0 C6b · THE SESSION hears the one part: the ring's moves and the notebook's input (projects.changed, the part's subscribe) */
+  if (layout.projects) { history.subscribe(layout.projects.changed); const nbEl = document.getElementById('notebook'); if (nbEl) nbEl.addEventListener('input', layout.projects.changed); }
+  if (LW.session) LW.session.arm();
   LW.ready = true;
   LW.report = (o, t = performance.now()) => import('../tools/perf/device-report.js').then((m) => m.run(LW, o, t)); if (q.get('report') === '1') LW.report(q);   // THE DEVICE REPORT (2026-09-25): a diagnostic in tools/, never precached — `?report=1` or __LW.report() measures this device and puts every setting back
   return LW;
