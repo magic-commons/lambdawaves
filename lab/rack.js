@@ -76,7 +76,7 @@ import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createHistory } from './history.js';
 import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { barTempo } from './mir/modulation/host.js';
-import { createModulation } from './modwindow.js';   // wave 64: the PORTED window's host side — lab/mir/modulation/modwindow/ is the artifact
+import { createModulation } from './mir/modulation/window.js';   // 0.5.0 C4: the kit's window controller (MIR 1.5), over A5's port
 import { createModPort } from './mod-port.js';       // 0.5.0 A5: the port that window takes, and the edges behind it
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
@@ -2552,7 +2552,10 @@ export async function boot(dom) {
       return { left, right: left + w, top, bottom: top + h };
     }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
-    function modDodge(r) {
+    function modDodge(rect) {
+      /* 0.5.0 C4: the kit's close reports null, and its place() reports the real box even while closed (λWAVES' copy sent the
+         zero rect): a window that is not open has nothing to dodge */
+      const r = rect && modView && modView.isOpen ? rect : { left: -1, right: -1, top: -1, bottom: -1 };
       occlusion.dirty();   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
       if (!t || !t.classList.contains('mini')) return;
@@ -2607,6 +2610,7 @@ export async function boot(dom) {
       /* WAVE 65 · THE ARM'S OTHER DOOR: pressing the window's PLAY on a disarmed rack asks the host to arm, and the MOD lamp on
          the transport lights.  The host owns the flag, the glow and the persistence; the window only asks. */
       armed: () => modArm, arm: (on) => setModArm(!!on) }));
+    modView.root.dataset.mirWindow = 'modulation';    // 0.5.0 A10's hook (the kit's controller sets the rail's, not the pane's)
     applyAccent();                                    // the two angles reach the window as soon as it exists
     modView.restore(readSettings().modwin);
     /* wave 54: the modulation clock's visibility is driven by the ONE authority (setPageHidden), not by a second listener of its own — it still RE-ANCHORS and never jumps */
@@ -3299,6 +3303,10 @@ export async function boot(dom) {
     /* Device cards scroll inside the modulation run. Their offscreen bounds must not mask the stage. */
     occlusion.register('modwin', () => shown(mw) ? [...mw.querySelectorAll('.m2rail, .m2dev, .m2workbar')].map((s) => paintedRect(s, s.classList.contains('m2dev') && s.closest('.m2run'))) : []);
     occlusion.register('chiprail', () => shown(rail) ? rects([...rail.querySelectorAll('.crail-chip')]) : []);
+    /* 0.5.0 C4: the kit's window travels (tweenRect) and fades (presence); its `hidden` lands when the exit ends, and onGeometry
+       tells every place, landing, open and close — both are the one producer's, so a paused field's mask follows them */
+    for (const el of [mw, rail]) occlusion.watch(el, { attributes: true, attributeFilter: ['hidden'] });
+    modView.onGeometry(dirty);
     occlusion.register('floats', () => rects([...floats.children].filter((d) => d.classList.contains('dev') && shown(d)).flatMap(panes)));
     occlusion.register('extra', () => rects(['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => document.getElementById(id))));
     occlusion.register('keymap', () => [paintedRect(document.querySelector('#keymap .km-panel'))]);

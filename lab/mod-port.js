@@ -1,6 +1,6 @@
-/* mod-port.js — THE MODULATION PORT (0.5.0 A5): the object `createModulation(host, port)` takes, key for key (lab/modwindow.js
- * today, MIR 1.5 `modulation/window.js` at adoption: M, registry, targets, clock, apply, knobOf, persist, cadence, setCadence,
- * armed, arm, audio, rateControl, moved, opened, closed), and the edges behind it that rack.js held in five places.
+/* mod-port.js — THE MODULATION PORT (0.5.0 A5): the object MIR 1.5's `createModulation(host, port)` (`modulation/window.js`,
+ * the window since C4) takes, key for key: M, registry, clock, apply, knobOf, persist, cadence, setCadence, armed, arm, audio,
+ * rateControl, moved, opened, closed, dock — and the edges behind it that rack.js held in five places.
  *   · THE CATALOGUE'S HOOKS.  rack.js keeps the catalogue (its defs list: ids, ranges, adapters); install(defs, roots) registers
  *     it (host-contract.md PART 3: registry · target host · clock · presentation, and nothing else), stamps every dial that has
  *     one with its id (the drop hit-test is `.k[data-param]`, wave 61), hands each its registry BASE (`setBase`, wave 68: a
@@ -110,9 +110,10 @@ export function createModPort({ available, present, view, onCapture, save }) {
     port({ moved, rateControl, persist, note, device, armed, arm }) {
       const C = host.clock;
       return { moved, rateControl, persist, armed, arm, knobOf: P.knobOf,
-        M: host.model, registry: host.registry, targets: host.targets, clock: C,
+        M: host.model, registry: host.registry, clock: C,   // 0.5.0 C4: no `targets` — the kit reads it as the routable-control SELECTOR
+        dock: false,                                                     // 0.5.0 C4: the window floats; the dock span is the kit rack's (C3)
         opened: () => { C.setPresentationActive(true); present(); },   // the editor's preview demand only: THE play holds its own (A6)
-        closed: () => { C.setPresentationActive(false); moved({ left: -1, right: -1, top: -1, bottom: -1 }); },
+        closed: () => { C.setPresentationActive(false); },              // the kit's close reports moved(null) itself
         apply: () => { C.applyAll(false); present(); note(); },
         cadence: () => cadence.hz, setCadence: P.setCadence,
         audio: {

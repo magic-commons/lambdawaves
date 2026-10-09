@@ -15,7 +15,7 @@ const clickTwice = async ({ x, y }) => {
   ] }]);
   await relActions(g.s);
 };
-const handle = id => g.ev(`const V=__LW.mod.view,c=V.curve(${JSON.stringify(id)}),i=c.hseg[0];
+const handle = id => g.ev(`await __still();const V=__LW.mod.view,c=V.curve(${JSON.stringify(id)}),i=c.hseg[0];
   const a=c.points[i],b=c.points[i+1],t=(a.t+b.t)/2;
   const at=V.at(${JSON.stringify(id)},t,V.evalAt(c.points,t));
   const svg=document.querySelector('.m2dev[data-id=${JSON.stringify(id)}] .m2svg');
@@ -28,6 +28,12 @@ try {
   const initial = await g.ev(`
     __LW.pause();__LW.mod.stop();__LW.mod.reset();
     if(!__LW.mod.expanded)__LW.mod.expand();
+    /* 0.5.0 C4: the kit's window MOVES — it enters (core/motion.js presence) and its devices glide to new widths (layout-motion.js):
+       a handle read mid-flight is clicked where the device no longer is, so every read waits for the window's animations to land */
+    window.__still = async () => { const W = document.querySelector('[data-mir-window="modulation"]');
+      for (let i = 0; i < 6; i++) { const a = W.getAnimations({ subtree: true }).filter((x) => x.playState === 'running');
+        if (!a.length) return; await Promise.all(a.map((x) => x.finished.catch(() => 0))); } };
+    await __still();
     const M=__LW.mod.model,V=__LW.mod.view;
     const lfo=__LW.mod.addSource('lfo'),env=__LW.mod.addSource('env');
     V.sync();
