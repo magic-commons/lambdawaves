@@ -603,6 +603,21 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > number — Josh's to rename to 0.5.5), one Opus@high audit, then the D rows as parallel Opus builders, merged as they land, then its local cut on his word.**
 > Servers: mine 8751 (this worktree); Sos's 8731 (pid 686256, idle, serves `sos-s0`) left alone; Josh's 8721/8741 untouched. NO push, NO deploy.
 
+> **UPDATE (Claude Yan, 2026-10-09 16:15 CDT) — v0.5.0-alpha "GUI Adoption" CUT LOCALLY; STAGE D under way.** The five boot rows after C7b merged
+> `20d3cfe` (Sonnet `fb886a3`: B66/B108 re-aimed at the RENDER card, B127 the `schedule(1)` read + six named live regions, B134 by R5 exact resume, B84 a 5 s
+> absence for Gecko's hidden-timer grid; it found FIX ROUND 1's B139 still red for TINTED → the second half fixed `7d088b1`, one unlayered `skin.css` line,
+> verified live by the pass). The boot suite alone on the cut tree **148/152** (B6 green alone — the tags' tick; the law reds: B70/B71/B78-BOW pre-existing →
+> 0.5.1 D10-F; B149 a MIR brief candidate). **THE CUT:** `f478482` the version line `0.5.0-alpha · GUI Adoption · 2026-10-09` + README status; tag
+> **`v0.5.0-alpha`**; CHANGELOG `27eb96a`; snapshot #17 `~/Documents/LAMBDAWAVES-RELEASES/v0.5.0-alpha`; `CHANGES-0.5.0.md` (11 feature rows, title "GUI
+> Adoption") mirrored to the vault `LAMBDAWAVES CLAUDE 0.5.0 CHANGES 2026-10-09.md`. `lab/*.js` 27,594. **NOT pushed, NOT deployed** (10-07). **STAGE D
+> ("Informational Update"; 0.5.1 the DEFAULT number, Josh's to rename):** the one re-plan round is DONE — `research/release-0.5.1/PLAN-DRAFT-0.md` (Fable) →
+> `AUDIT-OPUS.md` (Opus@high, SOUND WITH CHANGES: D1 one kit block and the atom letters stay λWAVES'; D2's pages already exist in the records; D4 struck;
+> SCENES 0.5.x; D8/D10-19 re-scoped; the pair a noise gate each row passes alone) → **`PLAN.md`** (§9 twelve rulings TAKEN as defaults — R6-I the kit's look,
+> R6-F the kit's seat still, R6-L the letters stay shape D1; Josh should look) + `BRIEFS-0.5.1.md` (Sonnet: 79 kit candidates, the 9 waiting briefs, 19
+> λWAVES-own items) + `BRIEF-D1/D10-19/D10-24/D10-F.md`. **LAUNCHED 16:15 from `27eb96a`:** D1 (Opus, 8973/5443 + 8977/5447), D10-19 (Sonnet, 8983/5453),
+> D10-24 (Sonnet, 8993/5463), D10-F (Sonnet, 9003/5473). Then D2+D8 (one Opus, after D1 merges) → D-V (fresh Opus) → the local cut `v0.5.1-alpha ·
+> Informational Update` on Josh's word. Servers: mine 8751; Sos's 8731 idle; Josh's 8721/8741 untouched.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
