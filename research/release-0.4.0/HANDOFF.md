@@ -461,6 +461,19 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >   `worktree-agent-a61a67e5a1ec8eb66` (BRIEF-C6.md; 8893/5363 + 8897/5367; wave 206). Three on `rack.js` in disjoint regions; the integrator resolves.
 > - Yan's gate server for `yan-c`: 8731/5203 (stop by pid at the end). Nothing pushed, deployed or released.
 
+> **UPDATE (Claude Yan, 2026-10-08 23:10 CDT) — C7 MERGED with its fix; the verifier's condition met.** The C7-FIX follow-up (`3f995ee`, `0838e2e`):
+> `tests/film-handover.browser-test.mjs` (104 lines; share stubs, anchor counts, the saves' timers on a virtual clock; a REAL RECORD tap → activation true at
+> the click, false at `film.save`, 1 download 0 shares; a REAL picture tap → 1 share) GREEN on the fix, RED on `74ade0c` (scene 1) and on the fix without the
+> URL change (scene 2); `tools/perf/handover-probe.mjs` folded in; the store's copy now waits 10 min (one constant — the longest any hand-over keeps its URL;
+> a memory copy was refused: a whole film on the heap is what the kit's OPFS store avoids, and an await would spend a live tap). The lock GREEN 1004 + 1148
+> again (58 s). **Merged `217701e`** (conflicts: CLAUDE.md both paragraphs; REPORT waves 199/203 folded in order; `rack.js` C7's W-CAPTURE comment without D9's
+> deleted `mo`/`pulse` getters; `sw.js` OURS + regenerated, pwa GREEN 288 files) **+ the verifier's report `dc6fd2e`** (C7-VERIFY.md, `measure/c7-verify/`).
+> **Staged `lab/*.js` 29,863.** Open items carried (C7-BUILD.md): a film cancelled before its first checkpoint leaves job.json + an empty payload.bin in
+> OPFS (the kit's `recoveries()` skips it — brief); ONE PERIOD has no STOP; the film's bytes differ with the CAMERA card open (the occlusion mask?);
+> RECORD's manifest motion named `loop`; `render-exact.test` crashes at :598 before its tally when H1 is mutated (harden). Josh will see: on Chrome/Edge/
+> macOS Safari a finished film lands in Downloads instead of vanishing; a late confirmation (≤ 10 min) still finds the file; on the iPad a quick picture
+> shares and the frames zip downloads. Merged so far on `yan-c`: C0 C1 C4 C5 C7 C9 + D9 (+ Sos's A). Building: C2, C3, C6.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
