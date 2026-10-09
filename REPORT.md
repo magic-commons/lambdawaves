@@ -5302,3 +5302,28 @@ Gates:
   of its cases pass.
 
 Hand-off: `research/release-0.5.0/D9B-BUILD.md`. Every rack.js hunk for C3's re-apply is in `D9B-rack.patch`.
+
+## 2026-10-09 · 0.5.1 · THE INFORMATIONAL UPDATE
+
+### wave 210: D10-F THE TWO OLD LAW REDS — B70 / B71 (44 px on a phone) and B78 (the STATE card's IMPULSE words) green, 49 failing hit-tests found where the brief named eight
+
+**B70 / B71.** The brief named the transport's six 45 × 34 buttons and two short routed knobs. The law's list on `27eb96a` was **49 failing hit-tests** (the same in portrait
+and landscape) **plus ten routed dials whose ring band was under the law's 7 px**. One cause behind nearly all of it: the wave-51 phone block says it is "the last one in the
+last stylesheet", and the September native rules were appended after it, so they beat it on source order; the `(pointer: coarse)` twins written beside them never match a
+headless phone (which reports `hover: none` only). **One closing block at the foot of `skin.css`**, under the phone's own breakpoint, sizes only: the docked transport's
+`tbtn` row 34 → 44 (play, MOD, home, step ×2, jump, the tempo chip); DOCK a 46-px halo over its unchanged 34-px ink; the 32-px segments of OBSERVER and the 40-px triggers of
+CAMERA and RENDER and the 18-px FOLLOW chip to 44; SHADOW's toggle and SETTINGS' colour chip; SPECTRUM's BOX segment. The lane's M / S / × halos (`-6/-9`) lost the 17-px dials one
+pixel each, since the native rules had widened the buttons to their 44-px column: `-4/-4`. **RATE's 26-px turn target** was not its own: `#transport .k { width: 58px }` also
+matched the kit's route-depth dial (22 px) and stretched it over the top of the dial. **The ring band** (r 24–32, so two routed dials one under the other need a 64-px
+pitch) gets 11 / 8 / 14 px of margin under PAN X, EXPOSURE / SOFTNESS / HUE and the STATE rotors. `lab/*.js` 27,594 → 27,594; `skin.css` 561 → 583.
+Two harness re-aims in the walk, each named at its site: it runs with the SHIPPED status tags (off) — the baseline's badge row lies over the transport's ⏻ / ▾ on a phone
+(LEGACY-BOOT-REAIM §5 says that is the harness's) — and it skips the CAMERA panel's two arc knobs, whose capture-phase `pointerdown` the listener walk cannot see (bare 1 × 1).
+
+**B78.** `a526bda` is not where the trigger left: `5f6421e` ("freeze") replaced Josh's wave-53 IMPULSE seats with the BOW-feel redesign (group `BOW`, trigger `RELEASE`, readout
+`BOW · escaped / momentum`), and `a526bda` then wrote the card's note around RELEASE. The group and the readout are renamed (`IMPULSE  ·  a sudden momentum kick  ψ ↦ e^{ik·x}ψ`,
+`LAST IMPULSE · escaped / momentum`) and the three feel knobs' hints say `Impulse …`; the trigger stays RELEASE and the law's trigger clause is re-aimed with that reason; the group
+clause now reads the label's hint (`data-help-en`, where native-ui.js's first-clause cut keeps the whole text); the words clause (`leftN === 0`) is untouched.
+
+**Proofs.** The full `tests/legacy/boot` alone: **152 verdicts, 150 GREEN, 2 RED** — B149 (the kit's reorder animation, the expected law red) and B6 (a stray tags-tick timing red,
+GREEN alone straight after); B70, B71 and B78 GREEN. `access` 0/11, `hit-probe-set` 0 reached, `frame-occlusion` 7, `keyboard-shortcuts`, `keyboard-window`, `first-run` 12,
+`offer` 16/16, `bash test.sh node` exit 0. Hand-off: `research/release-0.5.1/D10-F-BUILD.md`.
