@@ -47,7 +47,7 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
     onAccent: (A, B) => { const v = getModView(); if (v) v.setAccent(A, B); } });
   const ctx = { doc: document, accent, moving: false, lastAccent: null };
   const schema = lookSchema().filter((r) => LOOK_ROWS.includes(r.key)).map((r) => ({ ...r, ...(r.key in defaults ? { default: defaults[r.key] } : {}),
-    ...(r.key === 'blur' ? { max: 30 } : {}),                         // GLASS BLUR's travel (the kit's row stops at 24): no stored value moves
+    ...(r.key === 'blur' ? { max: 30 } : r.key.startsWith('accent') ? { wrap: false } : {}),   // GLASS BLUR's travel (the kit's row stops at 24): no stored value moves; an ACCENT keeps END's 360° (wave 68: it renders as 0°, a fold left the eye at 0° and HOME dead)
     ...(r.key === 'theme' ? { apply: [...r.apply, { run: (v, s, e) => { if (seen !== v + e.theme) { seen = v + e.theme; onTheme(e.theme, v); } } }] } : {}) }));
   const prefs = createPrefs({ key: LOOK_KEY, schema, context: ctx });
   const blob = settings.read(), held = BLOB_LOOK.filter((k) => k in blob);

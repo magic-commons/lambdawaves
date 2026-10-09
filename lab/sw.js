@@ -116,7 +116,7 @@ const PRECACHE = [
   ['./library.js',                                                  'bd2ee94dc6e1'],
   ['./library.json',                                                '7e8098e337ec'],
   ['./linalg.js',                                                   'da2367cdcb97'],
-  ['./look.js',                                                     'da0b56377a95'],
+  ['./look.js',                                                     '57d9fc14f025'],
   ['./main.js',                                                     '02c6741e9ce5'],
   ['./manifest.webmanifest',                                        '4771fb9dfe63'],
   ['./mathworker.js',                                               '42a33d614f3c'],
