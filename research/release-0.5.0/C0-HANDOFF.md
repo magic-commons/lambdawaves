@@ -20,6 +20,8 @@ step so a kill loses only uncommitted work.
 |---|---|---|
 | 1 | `e99375b` | THE KEYMAP RULES: MIR 1.4.3 `base.css`'s two `#keymap` rules (stacking at `--z-veil`, `[hidden]` → none) move into `lab/lab.css` as λWAVES' own; `--z-veil` is still declared on 1.5 (`mir/css/base.css:65`, 40). `pwa --write`. `keyboard-window` GREEN alone. The `.km-*` judgement below. `c0-glass/keyboard-{before,after}.png`. |
 | 2 | `ad0b4dc` | MIR-CONTROLS re-aimed to MIR 1.5's ONE KNOB LAW (`kit.js` `setKnobLaw`, alpha.13): vertical drag (220 px rise, 320 under a finger, sideways ignored), the ⅛ gear on a knob drag, a fader drag and a Shift arrow. Old test green on the base copy; new test green here and red on the base copy at the sideways line (`0.5 != 0.25`), so it pins the 1.5 law. The test alone in its commit. |
+| 3 | `88fedce`, `1dc3a08` | hand-offs; step 3's suites (below) |
+| 4 | (this commit) | `C0-BUILD.md` and REPORT.md wave 196 (under a NEW `## 2026-10-08 · 0.5.0 C — THE ADOPTION` at the end: this tree had no C heading); the ms/s pair marked PENDING in both |
 
 ## Step 1 · the `.km-*` judgement (the kit's `keyboard/keyboard.css` on λWAVES' own pane)
 Measured three ways: `kmdiff.mjs` (gate Firefox, every pane element, light first-run), `kmshot.mjs` (gate Firefox: pane PNG, clip test,
@@ -53,4 +55,4 @@ real-pointer hover on a badge) and a stylehash pair with the keymap open (`cap.m
 None.
 
 ## Exact next step
-Step 4: REPORT.md wave 196 under `## 2026-10-08 · 0.5.0 C — THE ADOPTION` (create it at the END if absent) and `research/release-0.5.0/C0-BUILD.md`; commit. Then step 5: `node tools/perf/wait-gpu.mjs`, then `.tmp/msps.mjs 3` (both gate servers up), gate |Δ median| ≤ 3.536 ms/s vs 37.335; deferral to C-V if the load stays ≥ 4 for 15 minutes.
+Step 5: `node .tmp/wait-gpu.mjs 900` (C7's `tools/perf/wait-gpu.mjs`, copied: it is not on this branch), then `node .tmp/msps.mjs 3` with both gate servers up (8787 base, 8783 this tree). Gate |Δ median| ≤ 3.536 ms/s (MEASURE §2: pre-C 37.335, notice dismissed). If the load does not drop under 4 within 15 minutes: "ms/s pair deferred to C-V" in C0-BUILD.md §ms/s and wave 196. Then replace the two PENDING lines, stop the servers by pid, final hand-off.
