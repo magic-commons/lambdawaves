@@ -25,10 +25,11 @@ import { Clock, onePlay } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
 import { createOcclusion, paintedRect } from './occlusion.js';   // 0.5.0 A7: the occlusion providers (KIT BRIEF 8's twin)
-import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, toScreen, quatFromYawPitch } from './field.js';
+import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, toScreen, cameraKey, quatFromYawPitch } from './field.js';
 import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
-import { MOLECULE_BY_ID } from './molecules.js';
-import { createStageText } from './stage-text.js';   // 0.4.0 S3 · F2: the STAGE TEXT — the interim renderer 0.5.0 deletes
+import { MOLECULE_BY_ID, moleculeAtoms } from './molecules.js';
+import { ELEMENT } from './md.js';
+import { createInfoLayer, infoActions } from './mir/info/layer.js';   // 0.5.1 D1: the STAGE TEXT is one block of the kit's INFORMATIONAL layer
 import { createSpectrum } from './spectrum.js';
 import { createMeters } from './meters.js';
 import { createShadowView, createShadowFoot } from './shadowview.js';
@@ -157,7 +158,7 @@ export async function boot(dom) {
   const LOOK_DEFAULTS = { theme: 'light', card: FIRST_RUN.card, frost: FIRST_RUN.frost, blur: 22, vivid: 0.5, disconnected: true };
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
-  let molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (stage-text.js TYPE), a PREFERENCE
+  let molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (lab.css .lw-stage), a PREFERENCE
   function readSettings() { return settingsStore.read(); }
   function saveSettings() {
     if (!settingsLoaded) return;
@@ -847,7 +848,7 @@ export async function boot(dom) {
       const c = modeStateT === clock.t && modeStateVersion === reg.version ? modeState : reg.at(clock.t, cRe, cIm);
       perf.counts.cpu++;
       if (reg.version !== govVersion) { govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
-      if (stageText) { stageTextTick(); stageText.atomLabels(chem && chem.on ? chem.preset() : '', obs, domain.half); }   // the STAGE TEXT follows the register; the ATOM LABELS the camera (stage-text.js: compares only)
+      if (stageText) { stageTextTick(); stageText.atomLabels(chem && chem.on ? chem.preset() : '', obs, domain.half); }   // the STAGE TEXT follows the register; the ATOM LABELS the camera (initStageText: compares only)
       if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
       if (may('shadow', wSh)) tick('shadow', () => { shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected); if (ui.shadowDetails && !ui.shadowDetails.hidden) shadowFoot.update(reg, c, clock.t, stateReaders().populated); });
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
@@ -1997,8 +1998,7 @@ export async function boot(dom) {
     derived: (fill) => (history ? history.absorb(fill) : fill()),   // S4 · a solve's derived defaults join the row that asked for it
     now: () => clock.t });
 
-  /* THE STAGE TEXT (Settings › Display; 0.4.0 S3 · F2) — lab/stage-text.js renders it, and 0.5.0 deletes that file for the
-     kit's INFORMATIONAL layer.  Here is only its SOURCE: what is playing, as markdown — the MOLECULES formula
+  /* THE STAGE TEXT (Settings › Display; 0.4.0 S3 · F2; 0.5.1 D1 below) — its SOURCE: what is playing, as markdown — the MOLECULES formula
      ($\mathrm{H_{2}O}$, latex-state.js formulaLatex) while MOLECULES is on, else SPECTRUM's populated states in stateLatex's
      own prose ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION).  The states go in with UNIT coefficients — the list line
      depends on which labels are populated, never on c — so no live coefficient can reach the stage.  The source is asked
@@ -2035,8 +2035,82 @@ export async function boot(dom) {
     stageSrc.v = reg.version; stageSrc.id = id;
     stageText.setFormula(stageMd());
   }
+  /* 0.5.1 D1 · THE STAGE TEXT IS ONE BLOCK of the kit's INFORMATIONAL layer (mir/info/layer.js; stage-text.js left): the kit's ink,
+     shade and serif at the kit's seat — the free stage's top + 12 %, between the racks, clear of the transport and a docked TIMELINE —
+     and STILL: no subject, no labels, no parallax, no drift, no following, and never told of a camera move (a block with no subject
+     depends on no view; the layer's own ResizeObserver and `resize` cover a size, and the racks and the transport are told below).
+     THE LAWS kept: the key is the STRING — a changed one is remove() + addBlock(), the kit's exit and entrance — and KaTeX runs at
+     most four times a second (a change inside the quarter second waits, then renders whatever is wanted by then); OFF COSTS NOTHING
+     (the root hidden, nothing added); THE FADE is a HAND's preset (`{ hand: true }`; the register's `announce`) in the formula's seat
+     for 2.4 s — the formula leaves and comes back, and the kit's exit IS the fade.  The type (lab.css .lw-stage) is the notebook's:
+     the formula its title (34 px), an announcement its heading (22 px), × SIZE.  THE ATOM LETTERS stay λWAVES' (R6-L): one element
+     symbol per nucleus at its projected place, written only when the camera, the molecule, the SIZE or the canvas changed; white
+     under `difference`, so each glyph inverts what it is on; the notebook's body (14 px) × SIZE. */
   function initStageText() {
-    stageText = createStageText({ stage: dom.stage, canvas: dom.canvas, racks: [rackL, rack], docked: () => layout.docked });
+    const KATEX_MS = 250, racks = () => [rackL, rack].filter((r) => r && r.querySelector('.dev:not(.closed):not([hidden])'));
+    const layer = createInfoLayer({ stage: dom.stage, parallax: false, drift: false, follow: false,
+      avoid: () => [...racks(), layout.docked ? null : document.getElementById('transport'), tl && tl.isOpen() ? tl.root : null].map((e) => paintedRect(e)).filter(Boolean) });
+    layer.root.classList.add('lw-stage'); layer.root.setAttribute('aria-hidden', 'true');
+    const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0 };   // the gate's witnesses: KaTeX runs, banners, re-placements asked, letter moves
+    let on = true, scale = 1, formula = '', banner = null, shown = '', block = null, lastRender = -1e9, wait = 0, fadeT = 0;
+    function show() {                                                // the markdown wanted now, as a new block if it changed and KaTeX's quarter second has passed
+      if (!on) return;
+      const md = banner !== null ? banner : formula;
+      if (md === shown) return;
+      const due = lastRender + KATEX_MS - performance.now();
+      if (due > 0) { if (!wait) wait = setTimeout(() => { wait = 0; show(); }, due); return; }
+      if (block) block.remove();
+      block = md ? layer.addBlock({ md }) : null; shown = md;
+      if (block) { block.el.toggleAttribute('data-fade', banner !== null); lastRender = performance.now(); stats.renders++; }
+    }
+    /* the racks hide, peek and slide (body classes), the transport docks or goes to the top, the TIMELINE opens or docks: only THOSE
+       re-place the block — the play edge's frost-hold and the tablet's motion class are not a reason to read layout */
+    const place = () => { stats.places++; layer.viewChanged(); };
+    const rackKey = () => ['rack-hidden', 'rack-peek', 'rack-l', 'ui-hidden', 'phone', 'transport-peek'].map((c) => +document.body.classList.contains(c)).join('');
+    let racksAt = rackKey();
+    new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); setTimeout(place, 400); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    for (const [n, f] of [[document.getElementById('transport'), ['class']], [tl && tl.root, ['hidden', 'style']]]) if (n) new MutationObserver(place).observe(n, { attributes: true, attributeFilter: f });
+
+    const labels = el('div', '', dom.stage); labels.id = 'atomLabels'; labels.setAttribute('aria-hidden', 'true'); labels.hidden = true;
+    let cssW = dom.canvas.clientWidth, cssH = dom.canvas.clientHeight;
+    if (typeof ResizeObserver === 'function') new ResizeObserver((e) => { const b = e[e.length - 1].contentRect; cssW = b.width; cssH = b.height; }).observe(dom.canvas);
+    let atomsId = '', atoms = [], spans = [], labelsKey = '', placeKey = '';
+    function atomLabels(id, obs, half) {
+      if (!id || !on) { if (!labels.hidden) labels.hidden = true; labelsKey = placeKey = ''; return; }
+      if (id !== atomsId) { atomsId = id; atoms = moleculeAtoms(id); labelsKey = ''; }
+      if (labelsKey !== id + '|' + scale) {
+        labelsKey = id + '|' + scale; placeKey = '';
+        labels.textContent = ''; spans = atoms.map((a) => el('span', 'atom-label', labels, ELEMENT[a.Z] || '?'));
+        labels.style.fontSize = Math.round(14 * scale) + 'px';
+      }
+      labels.hidden = false;
+      if (cssW < 32 || cssH < 32) return;
+      const key = `${labelsKey}|${cameraKey(obs)}|${obs.dist}|${obs.fov}|${half}|${cssW}|${cssH}`;
+      if (key === placeKey) return;
+      placeKey = key; stats.labelWrites++;
+      const S = toScreen(obs, half, cssW, cssH);
+      for (let i = 0; i < atoms.length; i++) {
+        const a = atoms[i], sp = spans[i], q = S.at(a.x, a.y, a.z);
+        if (!q) { sp.style.display = 'none'; continue; }
+        sp.style.display = ''; sp.style.transform = `translate(${q[0].toFixed(1)}px, ${q[1].toFixed(1)}px) translate(-50%, -50%)`;
+      }
+    }
+    stageText = {
+      layer, stats, atomLabels,
+      /** the formula's markdown ('' for none); the DOM moves only if the string did */
+      setFormula(md) { formula = md || ''; if (banner === null) show(); },
+      /** THE FADE: `md` in the formula's seat for `ttl`, then its exit and the formula's return.  Only a HAND calls it. */
+      announce(md, ttl = 2400) {
+        if (!on || !md) return false;
+        stats.announced++; clearTimeout(fadeT); banner = md; show();
+        fadeT = setTimeout(() => { banner = null; show(); }, ttl);
+        return true;
+      },
+      setOn(v) { on = !!v; layer.root.hidden = !on; show(); },
+      /** SIZE: the type × s (lab.css), then a re-measure — setPane(false) measures every bare block again (layer.js) */
+      setScale(s) { scale = s; labelsKey = ''; layer.root.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
+      get on() { return on; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
+    };
     wChem.root.addEventListener('change', stageTextTick);           // the pick lands in `preset` at once; the solve comes later
     chem.subscribe(() => stageTextTick());                         // … and a restore / undo / link that re-solves
     paintMarks(); stageTextTick();
@@ -3747,6 +3821,7 @@ export async function boot(dom) {
     { id: 'prevWindow', short: 'prev win', label: 'previous window to the top of the rack (from the stage)', key: 'Tab', shift: true, stage: true, run: () => cycleWindow(-1) },
     { id: 'reseed', group: KG.S, short: 'reseed', label: 'reset the particles', key: 'KeyR', ctrl: true, run: () => { particles.setOn(true); particles.seed(160, reg, clock.t, domain.half); schedule(TIER.PRESENT); } },
     { id: 'help', was: 'keysheet', short: 'keys', label: 'the keyboard — edit bindings', key: 'Slash', shift: true, run: () => layout.keymap.toggle() },
+    (({ id, run, up }) => ({ id, short: 'hold text', label: 'hold the stage text still (while I is held)', key: 'KeyI', shift: false, run, up }))(infoActions(() => stageText && stageText.layer)[0]),   // 0.5.1 D1: the kit's hold-still row
     { id: 'notes', short: 'notes', label: 'show / hide window help', key: 'KeyN', run: () => { const on = document.body.classList.contains('window-info-off'); if (ui.setWindowInfo) ui.setWindowInfo(on); if (ui.windowInfoSw) ui.windowInfoSw.set(on); } },
     { id: 'rack', short: 'rack', label: 'hide / show the rack', key: 'KeyB', run: () => layout.toggleRack() },
     { id: 'dock', short: 'dock', label: 'dock / undock the transport', key: 'KeyT', run: () => layout.dockTransport() },
