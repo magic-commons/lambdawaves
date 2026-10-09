@@ -1,4 +1,4 @@
-# λWAVES 0.5.1 "Informational Update" — THE PLAN (Claude Yan, 2026-10-09 16:20 CDT; DRAFT 0 + AUDIT-OPUS folded)
+# λWAVES 0.5.1 "Informational Update" — THE PLAN (Claude Yan, 2026-10-09 15:55 CDT; DRAFT 0 + AUDIT-OPUS folded)
 
 **What this is.** Stage D of `research/release-0.5.0/PLAN.md`, re-planned ONCE as Josh ruled (PLAN §9 ≈14:00: a Fable draft, one Opus@high audit,
 then build). `PLAN-DRAFT-0.md` is the draft; `AUDIT-OPUS.md` is the audit (SOUND WITH CHANGES; every change read against the tree with file:line);
