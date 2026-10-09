@@ -4586,3 +4586,58 @@ one at a time and 4 s apart: `frame-occlusion` **7/7** (twice), `menubar` **8**,
 **39**, `render-regressions` **2** and `offer` **16** (it reads the masks too). No timing red, so nothing was re-run alone.
 `cat lab/*.js | wc -l`: **36,198 → 36,226 (+28**: occlusion.js +40, rack.js −13, sw.js +1). Hand-off:
 `research/release-0.5.0/A7-BUILD.md`.
+
+## 2026-10-08 · 0.5.0 C — THE ADOPTION
+
+### wave 199: C7 THE FILM — MIR's recorder, λWAVES' frame; the lock held, the film pixel for pixel
+
+The film is now MIR's `createRecorder` handed λWAVES' `frame(i, ctx)` (`lab/render-exact.js` `createFilm`). RECORD and ONE PERIOD
+are MP4s made by WebCodecs and the kit's muxer, and every frame is rendered at its scheduled time, so the tempo is exact by
+construction. EXPORT FRAMES writes the lossless PNG frames into the kit's stored ZIP, beside its `recording.json`, which carries the
+film's schedule. The kit owns:
+- the encoding, and the encoder proven on two frames first;
+- the take clock, which steps the modulation by exactly 1/fps when a film DRIVES it (MOD armed);
+- the store on disk;
+- the input guard (Escape, or a `[data-render-cancel]` STOP);
+- the progress.
+
+λWAVES keeps, named:
+- the schedules (both endpoint rules, the fold, the arithmetic);
+- the GPU readback + settle (capture.js `readback`, now the one road for a picture and a film frame);
+- **the jitter seed 13, pinned per frame**;
+- the governor and AUTO SCALE pins (H1–H3) with their witnesses, beside the field-clock, clock, domain and interloper witnesses;
+- the hazard register, each row now `owner: 'app' | 'kit'`.
+
+**What left:**
+- **capture.js 1,127 → 789:** the MediaRecorder road, the probe of the WebGPU canvas, the 2-D relay, `drive`, `record`, `recordLoop`, `pngSequence` and `verifyVideo`. `crc32` and `save` are now the kit's.
+- **render-exact.js 1,233 → 840:** `createExactRenderer`'s driver, `zipStored` (export3d's NPZ now writes the kit's `StoredZip`), and the cost table (the kit's `estimateFilm` on λWAVES' 181 ms + 131 ms/Mpx seed, then the device's own).
+- **Net:** `lab/*.js` 36,288 → 35,753. C7's own share is −716; the bare adopt's `sw.js` +181 is C0's too.
+- **Against the plan's 1,200–1,800:** smaller, because the period laws, the picture road (λWAVES' own PNG encoder past the 2-D canvas's area cap) and the 312-line seam stay.
+
+**THE ONE LOCK.** 1004 and 1148 were GREEN, 0 differences, on the bare adopt and after each of the three steps that touched the render road (58–65 s each, alone on the GPU).
+
+**The film road's own lock.** The adopted tree before C7 (`2171df3`) was served as a base copy beside this one. EXPORT FRAMES' 25 frames decode to identical pixels at identical times. Only the containers differ: λWAVES' deflate 2,797,435 B, the kit's 3,248,483 B. TAKE A PICTURE is byte-identical (97,866 B).
+
+**Produced on the RTX 3070** (1400×814; `tools/perf/film-probe.mjs`, the film verifier's harness):
+
+| output | size | frames | decode |
+|---|---|---|---|
+| ONE PERIOD MP4 | 953,575 B | 180 | 6.0 s |
+| RECORD MP4 | 744,558 B | 180 | 6.0 s |
+
+Each took about 37 s to render; the old real-time WebM took 6 s. `verify()` was DETERMINISTIC, 6/6 on the GPU.
+
+**`tests/render-exact.test.mjs`, re-aimed at the seam.** Its laws are unchanged. It now drives the kit's own recorder in node, on a canvas stand-in that encodes through capture.js, and uses the kit's real modulation host for DRIVE. Every pin is removed in turn. It passes **37/37**, and removing the H1 pin turns 14 judgements red.
+
+**Gates:**
+- Node: 85 suites, only C0's four cascade reds (mir-manifest, new-project, wiring, pwa).
+- Browser: `export3d` 10, `render-regressions` 2, `stage-text`, `offer` 16/16 (s9 asks 24 fps, edited in the same commit as the kit's FPS list) and `menubar` are green.
+
+**The one blocker met** was EXPORT FRAMES' `AbortError`. The kit's store hands files back as origin-private Files, and the rack discarded them under a kept result. Fixed.
+
+**Brief candidates:**
+- The kit's FREEZE writes every target once on enter (λWAVES avoids it with a host-less recorder).
+- `discard` invalidates a result's blobs.
+- A RENDER card for an app with no timeline.
+
+Hand-off: `research/release-0.5.0/C7-BUILD.md`. The film verifier's brief: `BRIEF-C7-VERIFY.md`.

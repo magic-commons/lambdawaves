@@ -16,7 +16,7 @@
 | 4 the old capture road deleted (capture.js 1,188 → 789; picture byte-identical, ff9ca6bf) | (this commit) | 1004 GREEN (59 s, 0/0) · 1148 GREEN (61 s, 0/0) |
 | 5 render-exact's old driver deleted (1,233 → 840) + the re-aimed test (37/37) + export3d on the kit's StoredZip | (this commit) | 1004 GREEN (58 s, 0/0) · 1148 GREEN (58 s, 0/0) |
 | 6 the base-copy pixel lock of EXPORT FRAMES (base `2171df3` on 8817 vs `42438c6` on 8813, `tools/perf/film-probe.mjs` + `film-compare.mjs`) | (this commit) | 25/25 EXPORT FRAMES frames decode to identical pixels, identical times; TAKE A PICTURE byte-identical (97,866 B, ff9ca6bf) |
-| 7 REPORT wave 199, C7-BUILD.md, BRIEF-C7-VERIFY.md | | |
+| 7 REPORT wave 199 (new `## 2026-10-08 · 0.5.0 C — THE ADOPTION`), C7-BUILD.md, BRIEF-C7-VERIFY.md, CLAUDE.md's film paragraph, `tools/perf/wait-gpu.mjs` | (this commit) | — (docs only) |
 
 Lock commands (alone on the GPU, load < 4, 4 s apart):
 - 1004: `LW_PORT=8813 GD_PORT=5283 node tools/perf/digest-lock.mjs --check --query gastab=0`
@@ -31,6 +31,6 @@ PNG 97,866 B (byte-identical twice) · ONE PERIOD MP4 953,575 B, 180 f, decodes 
 EXPORT FRAMES 25 PNG + recording.json, 3,248,579 B; frame 0's pixels equal the picture's.
 
 ## Next
-Step 7: REPORT.md wave 199 under `## 2026-10-08 · 0.5.0 C — THE ADOPTION`, `C7-BUILD.md`, `BRIEF-C7-VERIFY.md`.
-Browser at step 5: export3d 10 PASS · render-regressions 2 PASS · stage-text GREEN · offer 16/16 · menubar GREEN · verify() 6/6 on
-the GPU. `lab/*.js` 35,753 (−535). Measurements: `research/release-0.5.0/measure/c7-film-base-2171df3.json`, `c7-film-42438c6.json`.
+C7 is BUILT. Next: the film verifier, a fresh Opus with `research/release-0.5.0/BRIEF-C7-VERIFY.md`. Then the integrator merges this branch after C0's.
+Merge note: `lab/sw.js` is the standing conflict (`node tests/pwa.test.mjs --write`). The adopt commit `0327937` is identical to C0's.
+Final numbers: `lab/*.js` 36,288 → 35,753 (C7's own −716; the adopt's sw.js +181). Lock GREEN at every step.

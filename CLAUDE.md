@@ -197,3 +197,10 @@ its scope tables, and `tools/settings-probe.mjs` is their gate). The camera's
 port is `createCameraLaw(...).port`, the object MIR's CAMERA panel takes. The
 stage's bindings are `STAGE_BINDINGS` in `lab/stage-gestures.js`; a binding
 change is a row edit there. (0.5.0 A1/A8)
+
+THE FILM (0.5.0 C7) is MIR's `createRecorder` handed λWAVES' `frame(i, ctx)` (`lab/render-exact.js` `createFilm`): RECORD and ONE
+PERIOD are MP4s, EXPORT FRAMES the PNG frames in the kit's stored ZIP, every frame at its scheduled time. The kit owns the encoding,
+the take clock (only when a film drives the modulation; a frozen film's recorder has no host), the store, the input guard and the
+progress; λWAVES keeps the schedules, the GPU readback + settle (`lab/capture.js` `readback`, the one road a picture shares), the
+jitter seed 13 pinned per frame and hazards H1–H3 with their witnesses (`HAZARDS[].owner`). Run `node tests/render-exact.test.mjs`,
+the digest lock (1004 + 1148) and `tools/perf/film-probe.mjs` after touching any of it.
