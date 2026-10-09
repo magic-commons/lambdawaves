@@ -3,6 +3,15 @@
 Base: `27eb96a` (yan-c, the 0.5.0-alpha "GUI Adoption" cut). Ports: tip 8973, base 8977 (`git archive 27eb96a` → `.tmp/base`).
 Brief: `research/release-0.5.1/BRIEF-D1.md`.
 
+**THE VERDICT — every closer met; the row is offered for merge.** THE PAIR: boot **−0.109 ms/s**, D1 scene **−0.368 ms/s** (gate
+3.536; presents/s unchanged). THE WITNESS: **0 records** on `layer.root` over 10 s of AUTO-ROTATE and over 10 s of a 40 moves/s sweep
+over the picture, `debug().running` false (a sweep THROUGH the block moves it — the kit's pointer push, writer found, U2 C). U3
+**18/18** clear (after a settle fix); U4 **4 renders / 4 entrances** in a stroke's second; U5 **one fade, 2.4 s**, 0 on undo / link /
+project / a handless preset. Suites green (legacy boot = its 4 known law reds). Ledger **−56** (27,594 → 27,538). Found on the way:
+the letters' `difference` blend costs ≈ 30 % of the frames in the D1 scene (§the frame cost; unchanged here, R6-L).
+Sections below, in the order they were taken: §measure (step 1, U2, the pair) · the CLAUDE.md draft · U4 · U5 · §the build (what
+changed, the ledger, THE LOCK) · brief candidates · merge notes · U3 · §suites · what Josh will see · the frame cost.
+
 ## §measure
 
 ### Step 1 · the instrument (U1)
@@ -41,7 +50,7 @@ no geckodriver / chrome / marionette; then `wait-gpu.mjs`). Served rack.js sha-2
 frame rate goes down by a third (26.7 → 18.1 presents/s). Per present the main thread pays 3.53 ms off and 3.77 ms on (+0.24 ms a
 frame: the letters' transform writes under AUTO-ROTATE). The rest is NOT main-thread work: something the stage text puts on the
 page costs the compositor / GPU a third of the frames in this scene (the prime suspect is `#atomLabels`' `mix-blend-mode:
-difference` over the WebGPU canvas; not isolated here — a diagnostic arm, not a gate). **Read every ms/s pair of this row with its
+difference` over the WebGPU canvas — isolated later: §the frame cost). **Read every ms/s pair of this row with its
 presents/s beside it**: a tip that changed the frame rate would move ms/s for a reason the pair cannot see. The letters stay in
 0.5.1 (R6-L), so base-on and the tip both carry them.
 
@@ -117,7 +126,7 @@ vs 19.35 · 3.90 · 8.81. The frame rate did not move (the reading the pair cann
 **THE THREE ARMS (U1), read together:** D1 scene · base STAGE TEXT off 94.171 ms/s at 26.7 presents/s · base on (today) 68.190 at
 18.1 (step 1's run) / 64.895 at 18.7 (this pair's run) · **tip 64.527 at 18.6**. The kit's block costs what `#molFormula` cost — nothing
 the instrument can see — and today's third of the frames is still paid by what both trees share with STAGE TEXT on (the
-letters, which stay by R6-L, are the suspect; see §the frame cost below if measured).
+letters' `difference` blend, which stays by R6-L: §the frame cost).
 
 ### U4 · the churn (tip, 2026-10-09 16:53 / 17:02; `.tmp/p-u4b.mjs` → `d1-measure/u4-churn.json`, `.tmp/p-u4.mjs` → `u4-churn-vertical.json`)
 
@@ -156,7 +165,7 @@ size on the fade block is 22 px (the suite and the PNG probe). `stats.announced`
 
 ## §the build
 
-**What changed** (commit `0f7915a` + the settle fix in commit 3):
+**What changed** (commit `0f7915a` + the settle fix `aaeb88e`):
 - `lab/rack.js` `initStageText()` — ONE `createInfoLayer({ stage: dom.stage, parallax: false, drift: false, follow: false, avoid })`,
   no `subject`, no `features`, no labels; `avoid()` = the two racks' columns that hold an open card, the transport while it is NOT
   docked (docked, it sits inside the right rack and the kit's `free()` would read it as a bar), an open TIMELINE's root. `show()` is
@@ -186,10 +195,10 @@ size on the fade block is 22 px (the suite and the PNG probe). `stats.announced`
   `stats.labelWrites`, `stats.places` (now: the re-placements asked of the layer — 0 under play, as before), and `md` / `formula` /
   `banner` / `on`, `setFormula`, `announce`, `atomLabels`, `setOn`, `setScale`; new: `layer`. Gone: `place` (internal, no reader).
 
-**The ledger** (`cat lab/*.js | wc -l`): **27,594 → 27,537 = −57** (rack.js 4,780 → 4,857 +77 · stage-text.js −132 · look.js 95 → 89
+**The ledger** (`cat lab/*.js | wc -l`): **27,594 → 27,538 = −56** (rack.js 4,780 → 4,858 +78 · stage-text.js −132 · look.js 95 → 89
 −6 · key-table.js ±0 · sw.js 566 → 570 +4); `lab.css` 808 → 801 −7. The brief's estimate was ≈ −70: the block is ≈ 35 lines as
 planned, the letters 28, and the re-place observers (≈ 8) and the API object (≈ 14) came over from stage-text.js rather than
-vanishing. Bar 30,000: 2,463 under.
+vanishing. Bar 30,000: 2,462 under.
 
 **THE LOCK is not needed** (no frame-path change: `field.js`, the shaders, the readback, ψ(t) untouched; the caption `drawCaption`
 untouched; the film path untouched).
@@ -261,3 +270,40 @@ that second look in stage-text.js); then 18 / 18. The seat is never the foot (R6
 | `node tests/pwa.test.mjs --write` | written (345 files) |
 | `bash test.sh node` | **exit 0, 940 PASS, 0 red** |
 | G-U `grep -rn "\[!mir\|ui:" lab/` (outside lab/mir) | empty |
+
+## §what Josh will see
+
+- **The formula's new look** (R6-I): the kit's — the serif face (Spectral; Playfair for a `#`), dark ink on the light theme
+  (`rgb(20, 21, 31)`) and light ink on the dark (`rgb(248, 246, 241)`), over the kit's feathered shade, instead of today's
+  transparent STIX/KaTeX ink chosen by the stage's colour. KaTeX is the notebook's (renderNotebook through the layer), at the
+  notebook's 1.08 em. PNGs (headless: the WebGPU canvas captures blank, so the words show over white): `.tmp/shots/d1-boot-states.png`,
+  `d1-h2o-formula.png`, `d1-h2o-announce.png`, `d1-h2o-dark.png`, `u3-*.png` (not committed; the spike's 24 legibility PNGs are the
+  look over a real orbital: `research/release-0.5.0/canary-a0/legibility/`).
+- **Its seat** (R6-F): centred between the racks, at the top of the free stage + 12 % (118 px down on a 1600 × 1000 window with the
+  pill at the foot), and still — no parallax, no drift. It no longer goes to the FOOT when the transport is docked or at the top: it
+  moves down below a top pill (217 px) or a docked TIMELINE's dodged pill (163 px) instead. A pointer that passes within ≈ 260 px of
+  it nudges it aside and it springs back (the kit's "parts like water", U2 C); holding **I** freezes it.
+- **A change of string** is the kit's exit + entrance (a quick rise from 10 px below, ≈ 0.34 s); a paint stroke on the ladder re-enters
+  it four times a second while the hand moves (U4).
+- **THE FADE**: a hand's preset replaces the formula in the same seat at the heading size for 2.4 s, then leaves and the formula
+  returns (U5). Restore / undo / link / project open: nothing, as before.
+- **The atom letters: unchanged** — on each nucleus, every atom, inverted (`difference`), following the turn.
+- **SIZE** scales the formula, the announcement and the letters as before; **STAGE TEXT off** hides all of it and adds nothing.
+
+## §the frame cost (a diagnostic, not a gate; tip `aaeb88e`, served `9ba25f860f158216`, 2026-10-09 17:20; `d1-measure/m3-frame-cost-diagnostic.json`)
+
+Step 1 found that STAGE TEXT on costs a third of the frames in the D1 scene. Three arms on the tip, interleaved 3 + 3 + 3, the D1
+scene + sweep, the setup's last line changing only the letters' container (`#atomLabels`):
+
+| arm | presents/s (median; runs) | ms/s median |
+|---|---|---|
+| STAGE TEXT on, as shipped (`mix-blend-mode: difference`) | **17.4** (17.4 17.4 18.2) | 67.222 |
+| on, the letters `visibility: hidden` (the blend still declared) | 20.8 (20.5 21.2 20.8) | 74.063 |
+| on, the letters `mix-blend-mode: normal` | **25.0** (24.3 25.6 25.0) | 84.932 |
+| (step 1) STAGE TEXT off, base | 26.7 | 94.171 |
+
+**The letters' `difference` blend over the WebGPU canvas is most of it**: it costs ≈ 30 % of the presents in this scene (17.4 vs 25.0);
+the kit's block and everything else the switch turns on cost ≈ 1.7 presents/s at most (25.0 vs 26.7, two trees, inside the
+noise). Headless Chromium on the RTX 3070 only — the M5 iPad is unmeasured. Nothing changed for it here: R6-L keeps the letters
+"unchanged in look and law" in 0.5.1. It is a λWAVES item for Josh (D1b's kit labels, or an inversion that does not blend the
+canvas), not a kit brief.

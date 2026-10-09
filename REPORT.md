@@ -5302,3 +5302,58 @@ Gates:
   of its cases pass.
 
 Hand-off: `research/release-0.5.0/D9B-BUILD.md`. Every rack.js hunk for C3's re-apply is in `D9B-rack.patch`.
+
+## 2026-10-09 · 0.5.1 · THE INFORMATIONAL UPDATE
+
+### wave 210: D1 THE STAGE TEXT IS THE KIT'S BLOCK — one INFORMATIONAL block, never told of a camera move; the letters stay; stage-text.js leaves
+
+PLAN 0.5.1's first row. One Opus builder (`agent-aeba657c669ee3661`) built it from the 0.5.0-alpha cut `27eb96a`, instrument first.
+
+**The instrument came first** (`596f3a3`). `tools/perf/main-thread.mjs` gained `--setup '<js>'`, awaited on the measured page after
+`__LW.ready` and the notice, before the pause and the play. It also gained `--sweep S` (CDP pointer moves over the picture, 40 a
+second) and `served`, the PORT's rack.js version line and sha-256 (the printed sha was always the CWD's). The D1 scene is H₂O in
+MOLECULES, ORBITAL on the HOMO, AUTO-ROTATE on, with a 10 s sweep. On the base, STAGE TEXT off read 94.171 ms/s at 26.7 presents/s
+and on read 68.190 at 18.1. The main thread did not pay for the text: the frame rate did.
+
+**The block** (`0f7915a`, `aaeb88e`). `rack.js initStageText` makes ONE `createInfoLayer({ stage, avoid, parallax: false, drift:
+false, follow: false })`:
+- no subject, no features, no labels; `viewChanged()` only when the racks, the transport or the TIMELINE move (once at once, once
+  400 ms on), never for the camera;
+- the formula or SPECTRUM's prose is `addBlock({ md })`; a changed string is `remove()` + `addBlock()` behind stage-text.js' own
+  250 ms KaTeX gate;
+- THE FADE is the announcement as the block (`data-fade`, 22 px) for 2.4 s, then the kit's exit and the formula's return;
+  `{ hand: true }` only;
+- the switch hides the root and adds nothing; SIZE is `--lw-stage-size` over the kit's `--info-size-body` (34 px, 8 vw, ≥ 16 px) and a
+  re-measure; z 20 under the racks, never in the occlusion mask;
+- the kit's look (ink, the feathered shade, Spectral) at the kit's seat, the free stage's top + 12 %, clear of the racks, the
+  undocked transport and an open TIMELINE.
+The ATOM LETTERS moved in whole (on the nuclei, `difference`, per camera key). HOLD on I is the kit's `infoActions` row:
+`key-table.js` now hands the kit a row's `up` (one line), so the key holds while it is down. `stage-text.js`, its `#molFormula` rules
+and look.js' `paintInk` left.
+
+**The closers.**
+- THE PAIR, base vs tip interleaved 5 + 5: boot **−0.109 ms/s**, the D1 scene **−0.368 ms/s** (gate 3.536). Presents/s did not move.
+- THE WITNESS: 0 mutation records on the layer's root over 10 s of AUTO-ROTATE and over 10 s of the sweep, the runner idle. A sweep
+  THROUGH the block moves it: the kit's pointer push inside 260 px, which no option turns off (a STILL block is a brief candidate).
+- U3: 18/18 placements clear of every UI rect across shift ±1/0, the transport floating, docked or at the top, and the TIMELINE
+  docked. The first pass had three reds in one cell (the pill's dodge lands after its class); a second re-place fixed it.
+- U4: 4 KaTeX renders and 4 entrances in a paint stroke's second, the last string landing.
+- U5: one fade block for 2.4 s; 0 announcements on undo, link, project open or a handless preset.
+
+**Found on the way.** The letters' `difference` blend over the WebGPU canvas costs about 30 % of the frames in the D1 scene: 17.4
+presents/s, against 25.0 with `normal` (headless Chromium, RTX 3070). It is unchanged, by R6-L, and is Josh's call.
+
+**The `__LW` law held.** Every stage-text witness is kept (`stats.renders/announced/places/labelWrites`, `md`, `formula`, `banner`,
+`on`); `layer` is new; `place` (internal) left. `tests/stage-text.browser-test.mjs` was re-aimed in the same commit.
+
+**The ledger.** `cat lab/*.js | wc -l` **27,594 → 27,538 (−56)**: rack.js +78, stage-text.js −132, look.js −6, sw.js +4. THE LOCK
+was not run: there is no frame-path change.
+
+Gates:
+- `bash test.sh node` exit 0, 940 PASS.
+- Browser, one at a time: `stage-text` 4/4, `frame-occlusion` 7/7 (re-run alone after one paused-drag timing red), `hit-probe-set`
+  0 of 49 reached, `keyboard-window`, `menubar`, `offer` 16/16, `history` 44/44.
+- `legacy/boot` 4 of 152 red, the known law reds B70/B71/B78/B149; B6, B22 and B23 green.
+
+Hand-off: `research/release-0.5.1/D1-BUILD.md`, which also holds the CLAUDE.md STAGE TEXT paragraph drafted for D-V, six brief
+candidates and the merge notes. Measurements: `research/release-0.5.1/d1-measure/`.

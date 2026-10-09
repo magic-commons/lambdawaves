@@ -2038,7 +2038,8 @@ export async function boot(dom) {
   /* 0.5.1 D1 · THE STAGE TEXT IS ONE BLOCK of the kit's INFORMATIONAL layer (mir/info/layer.js; stage-text.js left): the kit's ink,
      shade and serif at the kit's seat — the free stage's top + 12 %, between the racks, clear of the transport and a docked TIMELINE —
      and STILL: no subject, no labels, no parallax, no drift, no following, and never told of a camera move (a block with no subject
-     depends on no view; the layer's own ResizeObserver and `resize` cover a size, and the racks and the transport are told below).
+     depends on no view; the layer's own ResizeObserver and `resize` cover a size, and the racks and the transport are told below);
+     only a pointer passing within the kit's reach (260 px) parts it, and HOLD (I) freezes even that.
      THE LAWS kept: the key is the STRING — a changed one is remove() + addBlock(), the kit's exit and entrance — and KaTeX runs at
      most four times a second (a change inside the quarter second waits, then renders whatever is wanted by then); OFF COSTS NOTHING
      (the root hidden, nothing added); THE FADE is a HAND's preset (`{ hand: true }`; the register's `announce`) in the formula's seat

@@ -2,27 +2,26 @@
 
 Base `27eb96a`. Brief `research/release-0.5.1/BRIEF-D1.md`. Ports 8973 (tip) / 8977 (base, `.tmp/base` from `git archive 27eb96a`).
 
-## Done
-1. **Step 1** — `tools/perf/main-thread.mjs` `--setup` / `--sweep` / `served`; the two base arms in the D1 scene (off 94.171 ms/s,
-   26.7 presents/s · on 68.190 ms/s, 18.1 presents/s; `D1-BUILD.md` §measure). Commit `0.5.1 D1 · main-thread.mjs --setup; the three base arms`.
+## STATE: DONE — every closer met; offered for merge (the integrator merges by the tip)
 
-2. **Step 2** — the code (`0f7915a`): one kit block in `rack.js initStageText`, the letters moved in, HOLD on I (key-table carries
-   `up`), stage-text.js + `#molFormula` CSS + look.js paintInk gone, `.lw-stage` rules; stage-text suite GREEN; node 940/0; pwa written.
+1. **Step 1** (`596f3a3`) — `tools/perf/main-thread.mjs` `--setup` / `--sweep` / `served`; base arms in the D1 scene: off 94.171 ms/s
+   at 26.7 presents/s · on 68.190 at 18.1.
+2. **Step 2** (`0f7915a`) — one kit block in `rack.js initStageText`, the letters moved in, HOLD on I (key-table carries `up`),
+   stage-text.js + `#molFormula` CSS + look.js paintInk gone, `.lw-stage` rules; stage-text suite re-aimed GREEN; pwa written.
+3. **The settle fix** (`aaeb88e`) — a second re-place 400 ms after any re-place (U3's one red cell: the pill's dodge).
+4. **Commit 3** — the measurements + REPORT.md wave 210 + D1-BUILD.md (verdict at its top; the drafted CLAUDE.md paragraph; six
+   brief candidates; merge notes; what Josh will see; the frame-cost diagnostic) + a one-line rack.js comment (the pointer push).
 
-3. **Measured** — U2 witness: A 0 records / B 0 records, runner idle (C, a sweep THROUGH the block: 749, the kit's pointer push,
-   writer found — `D1-BUILD.md` U2). THE PAIR: boot −0.109 ms/s, D1 −0.368 ms/s, both PASS (≤ 3.536), presents unchanged.
+Numbers: THE PAIR boot −0.109 ms/s, D1 −0.368 ms/s (≤ 3.536, presents unchanged) · THE WITNESS 0 / 0 records, runner idle (a sweep
+through the block: the kit's pointer push, writer found) · U3 18/18 · U4 4 renders / 4 entrances per second · U5 one fade 2.4 s, 0
+otherwise · suites green (legacy boot 4/152 = the known law reds; frame-occlusion 7/7 on a re-run alone) · node 940/0 · ledger −56.
 
-4. **U3–U5 + suites** — U3 18/18 clear after the settle fix (a second re-place 400 ms on: the pill's dodge); U4 4 renders / 4
-   entrances in the stroke's second; U5 one fade 2.4 s, 0 on undo/link/project/no-hand; HOLD down/up ok; suites all green
-   (frame-occlusion 7/7 on a re-run alone; legacy boot 4/152 = the known law reds; node 940/0). Diagnostic arms (letters' blend) running.
+## Nothing left on this row. For the integrator
+- Merge notes: `D1-BUILD.md` §merge notes (rack.js regions; `lab/sw.js` ours then `pwa --write`).
+- CLAUDE.md: the drafted THE STAGE TEXT paragraph in `D1-BUILD.md` (not applied).
+- Josh's to see: the kit's look and seat (no foot seat), the 4 Hz re-entry under a paint stroke, the pointer push near the words,
+  the letters' `difference` blend costing ≈ 30 % of the frames (unchanged, R6-L).
 
-## Next (exact)
-5. Finish: the diagnostic's numbers into D1-BUILD §the frame cost, "what Josh will see", REPORT.md wave 210, commit 3, hand back.
-(old) 4. U3 / U4 / U5 probes (`bash .tmp/probes.sh` → `.tmp/u3.txt u4.txt u5.txt`), then the suites one at a time on 8973 (GD 5443):
-   frame-occlusion, `tools/hit-probe-set.mjs`, keyboard-window, legacy boot (whole, or B6/B22/B23 by `.tmp/chunk.mjs`), offer,
-   history; then REPORT.md wave 210 under "0.5.1 · THE INFORMATIONAL UPDATE", D1-BUILD.md's remaining sections. Commit 3.
-(old) The pair (boot + D1 scene, base 8977 vs tip 8973, interleaved 5 + 5: `.tmp/arms.sh`), the witness (U2), U3–U5, the suites. Commit 3.
-
-## Scripts (in `.tmp/`, gitignored — rebuild from here if lost)
-`rig.sh` (quiet check), `arms.sh <out> <rounds> label:port:scene:sweep…`, `scene.mjs on|off` (the setup), `sum.mjs <dir>`.
-Servers: `python3 tools/gate/server.py <tree> <port>` run in the background; stop by pid.
+## Scripts (in `.tmp/`, gitignored)
+`rig.sh`, `when-quiet.sh`, `arms.sh <out> <rounds> label:port:scene:sweep…`, `scene.mjs on|off|noblend|noletters`, `sum.mjs <dir>`,
+`p-lib.mjs`, `p-u2/u3/u4/u4b/u5/shot.mjs`. Servers: `python3 tools/gate/server.py <tree> <port>` in the background; stop by pid.
