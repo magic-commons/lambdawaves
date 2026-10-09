@@ -36,8 +36,8 @@ try {
   await g.ev(HELP); await g.ev('return __quiet();');
   for (const [name, file] of SCENES) {
     const r = await g.ev(`__LW.layout.notebook.open('projects'); await __w(200);
-      if (${JSON.stringify(!!file)}) { document.querySelector('.pj-demo[data-file=${JSON.stringify(file || '')}]').click();
-        for (let i = 0; i < 100 && !/opened demo/.test(document.querySelector('.pj-status').textContent); i++) await __w(100); }
+      if (${JSON.stringify(!!file)}) { __LW.projects.demo(${JSON.stringify(file || '')});   /* 0.5.0 C6: the DEMOS press */
+        for (let i = 0; i < 100 && !/opened demo/.test(__LW.projects.status); i++) await __w(100); }
       else await __LW.layout.projects.requestFresh();
       await __quiet();
       const P = (await (await fetch(${JSON.stringify(file ? 'demos/' + file + '.lambdawaves.json' : 'new-project.lambdawaves.json')}, { cache: 'no-cache' })).json()).data.presentation;
@@ -64,7 +64,7 @@ try {
         hands[id] = { dial: true, moved: b1 !== b0, b0, b1, routeKept: still, stillModulated: mod, putBack: R.baseOf(id) === b0 }; k.blur(); }
       if (started) __LW.mod.stop();
       for (const id of routedIds) if (!hands[id]) hands[id] = { dial: !!document.querySelector('[data-param="' + id + '"]'), moved: false, why: 'never modulated, even playing' };
-      return { status: document.querySelector('.pj-status').textContent, saved, live, hands, errs: __e.slice() };`);
+      return { status: __LW.projects.status, saved, live, hands, errs: __e.slice() };`);
     if (!r || r.E) throw new Error(name + ': the open threw in the page — ' + (r && r.E));
     const s = { name, ...r }; run.scenes.push(s);
     const why = [];

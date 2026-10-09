@@ -178,12 +178,18 @@ project, a link or a history row, never changed by opening one), WORKSPACE
 last one wins) and PROJECT (the work; the whole of the undo history except the
 camera pose, the notebook text and the quality hint). A project open must
 leave `lambdawaves.q0.settings` byte-identical outside the WORKSPACE keys.
-NEW opens the hidden empty project `lab/new-project.lambdawaves.json` through
-the same restore-with-rollback road as any project; `tools/new-project.mjs`
-writes that file from the modulation model and the boot defaults and
-`--check` proves it byte-exact — run it after changing a default. The undo
-ring (the kit's stack, `lab/mir/history/history.js`, with ONE domain `edit` in `lab/edit-domain.js`) reads `serialize({ scope: 'edit' })` and writes
-`restore(S, { history: true })`; do not add a hand-kept key list beside it.
+PROJECTS are MIR's FOLDERS over ONE project part (lab/projects.js,
+lab/project-store.js): `lambdawaves` = { data: projectSnapshot(), notebook } —
+the notebook is the project's page 0 — signed by projectKey();
+serialize()/restore() bytes never move (tools/serialize-bytes.mjs).
+`lambdawaves.q0.projects` keeps λWAVES' { items, recent } through a byte-exact
+translator; an invalid collection is read-only, 8 MiB a project, 24 MiB the
+library (tests/project-formats.*). `__LW.projects` keeps every old verb
+(`demo(file)` is a DEMOS press, `status` the last line). NEW opens the hidden
+empty project lab/new-project.lambdawaves.json through the same
+restore-with-rollback road; tools/new-project.mjs writes it and --check proves
+it. The undo ring reads serialize({ scope: 'edit' }) and writes restore(S, {
+history: true }); no hand-kept key list beside it. (0.5.0 C6)
 An open never closes the notebook; it opens it only for non-blank text. Run
 `tests/history.browser-test.mjs`, `tests/new-project.browser-test.mjs` and
 `node tests/new-project.test.mjs` when touching any of this.

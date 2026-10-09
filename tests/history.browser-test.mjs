@@ -537,7 +537,7 @@ try {
     return g2.ev(`window.confirm = () => true; const P = __LW.layout.projects, path = P.importText(${JSON.stringify(text)}), ok = P.open(path);
       await __LW.settle(); await __w(2500); await __LW.settle();
       const S = __LW.serialize({ scope: 'edit' }).presentation, chem = __LW.chem.state(), card = (id) => document.querySelector('.dev[data-id="' + id + '"]');
-      return { ok, status: document.querySelector('[data-mir-window="notebook"] .pj-status').textContent, notice: ${JSON.stringify(expect)},
+      return { ok, status: __LW.projects.status, notice: ${JSON.stringify(expect)},
         rows: __LW.history.entries().map((e) => e.label), depth: __LW.history.depth,
         ham: __LW.hamiltonian, atomZ: __LW.atomZ, populated: __LW.reg.populated().length, qcd: S.instruments.qcd, records: Object.keys(S.instruments),
         chem: { on: chem.on, preset: __LW.chem.preset(), view: chem.view, orbital: chem.orbital, owner: chem.fieldOwner }, fieldRecord: 'field' in S, fieldCanvas: !!document.getElementById('fieldlines'),

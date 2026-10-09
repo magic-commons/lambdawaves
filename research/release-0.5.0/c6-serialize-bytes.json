@@ -1,0 +1,99 @@
+{
+ "probe": "tools/serialize-bytes.mjs",
+ "base": "f0fcbc4 (.tmp/base on 8897)",
+ "tree": "worktree-agent-a535a978caceb2b07 at 9b4bbe6 (8893)",
+ "compared": "JSON.stringify(serialize()) and JSON.stringify(serialize({ scope: \"edit\" })), byte for byte",
+ "layoutAtZeroed": 11,
+ "identical": 11,
+ "of": 11,
+ "cases": [
+  {
+   "name": "WAVE DANCER",
+   "bytes": 12725,
+   "sha256": "09f30699746532090c9233af129b6be720c0839ca6a4d29736e71dc37e017957",
+   "editBytes": 10043,
+   "editSha256": "1209acad65958e724ea6eacaac4d0bfc5d1bded4d6c1b3537183ad8291c70ce3",
+   "identical": true
+  },
+  {
+   "name": "WATER",
+   "bytes": 8900,
+   "sha256": "27758b5ad0fe307a5010fd1bfe5a80ad6fb3882fa3a80795cc8e839212e598a8",
+   "editBytes": 6296,
+   "editSha256": "3a7f4bbe9595af95acd7a11e6ff2dbe016f94456c870bd4fb17d2360253f7d54",
+   "identical": true
+  },
+  {
+   "name": "BENZENE",
+   "bytes": 9063,
+   "sha256": "e5f6b7aae458c4ab5d5d15ad091801b979b1ec7f7e3453d4562fd41c29248136",
+   "editBytes": 6460,
+   "editSha256": "d224e8a03b78d460f7446db56e91052ee2ae06a6ba00dc1184cf6d1af59fc3c4",
+   "identical": true
+  },
+  {
+   "name": "N₂",
+   "bytes": 8897,
+   "sha256": "9f8c2ca0230f0486bc8c7fb74edb9b20f2acd210b0274218cc98eb7dc6b97372",
+   "editBytes": 6295,
+   "editSha256": "1d9680aa436a142311a1ccfbc43673e57f9e554739d31a8ce559bae50e88d5a6",
+   "identical": true
+  },
+  {
+   "name": "the empty project",
+   "bytes": 10821,
+   "sha256": "807314ca76d07da48a8f1d9d840de70105a5faef2359c18ebe68fc02b6ebca24",
+   "editBytes": 8214,
+   "editSha256": "e1bcbb1a3b482e75867955584fa87c2f5ddcd5c406af0ed68b3c10418fd1fa58",
+   "identical": true
+  },
+  {
+   "name": "history · preset 1s+2pz",
+   "bytes": 11012,
+   "sha256": "676b29a066a13c993101792b91cf2206d15047a2fada220431d260ca58221119",
+   "editBytes": 8404,
+   "editSha256": "983654c903534e69262ee666a41f5993a5e4e4d968f243d42ac24c108a5ad2fd",
+   "identical": true
+  },
+  {
+   "name": "history · stage 0.30",
+   "bytes": 11011,
+   "sha256": "21bcfe0a3dc9e0aced9bf25788d0512f422da5fd216b8298078e4167d3efd011",
+   "editBytes": 8403,
+   "editSha256": "49f92db045363f5d150046617fe14dec7894773e188bf66cf6b018910dfcf1ff",
+   "identical": true
+  },
+  {
+   "name": "history · style solid",
+   "bytes": 11011,
+   "sha256": "a11781e57bbb518c26567a2e5d8355d5d0f0b51d5426862ac8c166fef6e56458",
+   "editBytes": 8403,
+   "editSha256": "0d73394518502c3bcf8d727fc14b2cf3a0b7ca820fbfcfcef86e069ee70f4f6e",
+   "identical": true
+  },
+  {
+   "name": "history · palette on",
+   "bytes": 11009,
+   "sha256": "46390c675d447f59c37ac9270da8282a0b467bf6669a3859be979d8d806977a5",
+   "editBytes": 8401,
+   "editSha256": "193b2bd71ccf28dd84ec3ca6612a6dc82be00526ee5772ae086d0f837e1c6c45",
+   "identical": true
+  },
+  {
+   "name": "history · hamiltonian qho",
+   "bytes": 11019,
+   "sha256": "67b326f1dcbcb6f8b8c31d9c58821f3a19bfa216903f1ba34abd2e5d4325e804",
+   "editBytes": 8396,
+   "editSha256": "b7c17c948239276aec4c284b6eaa9eb9614782b1eaa20d3ff3462a6bf366d5b6",
+   "identical": true
+  },
+  {
+   "name": "history · rate 0 → 1.7",
+   "bytes": 11021,
+   "sha256": "062d578e04085e63ab2b6b3b21f0c15ee2e8d1f402d2c67207ffcb8393690b17",
+   "editBytes": 8398,
+   "editSha256": "92c60cbd03b6c37440170efcd5f378829cca4b974cbd1aab2949d6f83d7a8cf4",
+   "identical": true
+  }
+ ]
+}

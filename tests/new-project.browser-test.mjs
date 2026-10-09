@@ -21,7 +21,7 @@ try {
       if (P.mat) delete P.mat.steps; if (P.domain && P.domain.auto) delete P.domain.half; return P; };
     window.__ws = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack']) delete o[k]; return JSON.stringify(o); };
     window.__arr = () => { const L = __LW.layout.captureLayout(); return JSON.stringify({ cards: L.cards, docked: L.docked, rackHidden: L.rackHidden, closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id).sort() }); };
-    window.__st = () => document.querySelector('[data-mir-window="notebook"] .pj-status').textContent;
+    window.__st = () => __LW.projects.status;   /* 0.5.0 C6: FOLDERS speaks through the kit toast; the facade keeps the last line */
     window.__w = (n) => new Promise((r) => setTimeout(r, n));
     return 1;`);
 
@@ -38,15 +38,16 @@ try {
   assert.deepEqual(drift.errs, []);
   console.log('PASS the empty project is the shipped default: a fresh boot serialises to the file on all ' + drift.keys + ' non-modulation presentation keys (no quality, layout, modwin or notebook size in it)');
 
-  /* ── 2 · THE DEMO BUTTON ASKS before it discards unsaved changes (the stored open's question), then opens — and an untouched
+  /* ── 2 · THE DEMO PRESS (0.5.0 C6: P.demo, the alias of the old DEMOS button) ASKS before it discards unsaved changes (the stored open's question), then opens — and an untouched
          open stays CLEAN: WAVE DANCER's mat.steps 240 becomes this device's quality.steps a frame later, which is not an edit
          (projectKey() drops quality and mat.steps); the stage colour is the work and dirties it ── */
   const demo = await g.ev(`const P = __LW.layout.projects; let asked = 0; const c0 = window.confirm;
     __LW.layout.notebook.open('projects'); await __w(150);
     __LW.setStage(0.61); const dirty = P.dirty;
-    window.confirm = () => { asked++; return false; }; document.querySelector('.pj-demo').click(); await __w(900);
-    const refused = { asked, current: P.current, list: P.list().length, status: __st() };
-    window.confirm = () => { asked++; return true; }; document.querySelector('.pj-demo').click();
+    const list0 = P.list().length;   /* 0.5.0 C6: the six demos are FOLDERS' starters from boot; Cancel adds nothing to them */
+    window.confirm = () => { asked++; return false; }; await P.demo('wave-dancer'); await __w(900);
+    const refused = { asked, current: P.current, list: P.list().length - list0, status: __st() };
+    window.confirm = () => { asked++; return true; }; P.demo('wave-dancer');
     for (let i = 0; i < 60 && !/opened demo/.test(__st()); i++) await __w(50);
     window.confirm = c0;
     const steps0 = JSON.parse(localStorage.getItem('lambdawaves.q0.projects')).items[P.current].data.presentation.mat.steps; await __w(1000); const clean = { dirty: P.dirty, steps: [steps0, __LW.mat.steps] };
@@ -115,24 +116,30 @@ try {
   assert.equal(linked.dirty, false, 'the LFO moving its own macro made the empty project dirty'); assert.deepEqual(linked.errs, []);
   console.log(`PASS the one clock on the get-go: with the modulation window shown, play moved the mod transport and macro LFO in ${linked.ms.toFixed(0)} ms, no refusal, no microphone, still clean`);
 
-  /* ── 5 · THE NOTEBOOK LAW (the coordinator's ruling): an open NEVER CLOSES the notebook, it only declines to OPEN one — a
-         project with text opens onto its NOTES; a blank one (NEW's included) leaves the pane's visibility and face as they are ── */
+  /* ── 5 · THE NOTEBOOK LAW (the coordinator's ruling; R-I3's second half): an open NEVER CLOSES the notebook, it only declines to
+         OPEN one — a project with text opens onto its NOTES; a blank one (NEW's included) leaves the pane's visibility and face as
+         they are.  0.5.0 C6: the list is FOLDERS' gallery — a tile pressed (select, then open) takes the kit's road ── */
   const law = await g.ev(`const P = __LW.layout.projects, N = __LW.layout.notebook, c0 = window.confirm; window.confirm = () => true;
     const data = JSON.parse(JSON.stringify(__LW.serialize()));
     const put = (path, text) => P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, path, data, notebook: { title: path, text } }));
     const blank = put('probe/blank', '  \\n\\t '), hello = put('probe/hello', 'hello');
-    const click = (name) => { const it = [...document.querySelectorAll('[data-mir-window="notebook"] .pj-item .pj-name')].find((e) => e.textContent.split('  ·')[0] === name); if (it) it.click(); return !!it; };
+    const F = P.folders, tile = (path) => document.querySelector('#folders .sv-card[data-name="' + path.split('/').pop() + '"] .sv-shot');
+    const press = async (path) => { F.gallery.go('probe'); await __w(50); for (let i = 0; i < 2; i++) { const t = tile(path); if (!t) return false; const sel = t.closest('.sv-card').classList.contains('selected'); t.click(); if (sel) break; await __w(50); } await __w(400); return true; };
     const r = {};
     N.close(); r.a = { ok: await P.requestFresh(), open: N.isOpen };                                   /* (a) NEW with the notebook closed */
     N.close(); r.closedBlank = { ok: P.open(blank), open: N.isOpen };                                   /* a blank open over a closed notebook */
-    N.open('projects'); await __w(100);
-    r.c = { clicked: click(blank), open: N.isOpen, face: N.face, current: P.current };                /* (c) a blank project from the PROJECTS list */
-    r.d = { clicked: click(hello), open: N.isOpen, face: N.face, text: __LW.notebook.text, current: P.current };   /* (d) text opens onto NOTES */
-    window.confirm = c0; r.errs = __e.slice(); return r;`);
-  assert.deepEqual(law, { a: { ok: true, open: false }, closedBlank: { ok: true, open: false },
-    c: { clicked: true, open: true, face: 'projects', current: 'probe/blank' },
-    d: { clicked: true, open: true, face: 'notes', text: 'hello', current: 'probe/hello' }, errs: [] });
-  console.log('PASS the notebook law: an open never closes the notebook — NEW and a blank project (whitespace only) leave a closed notebook closed and a PROJECTS pane on PROJECTS; a project with text opens onto its NOTES');
+    N.open('projects'); await __w(300);                                                                  /* the alias: FOLDERS, the notebook untouched */
+    r.alias = { folders: F.isOpen(), open: N.isOpen };
+    r.closedGallery = { pressed: await press(blank), open: N.isOpen, folders: F.isOpen(), current: P.current };   /* a blank tile over a closed notebook */
+    N.open('about'); await __w(100);
+    r.c = { pressed: await press(blank), open: N.isOpen, face: N.face, current: P.current };            /* (c) a blank tile keeps the notebook's face */
+    r.d = { pressed: await press(hello), open: N.isOpen, face: N.face, text: __LW.notebook.text, current: P.current };   /* (d) text opens onto NOTES */
+    F.close(); window.confirm = c0; r.errs = __e.slice(); return r;`);
+  assert.deepEqual(law, { a: { ok: true, open: false }, closedBlank: { ok: true, open: false }, alias: { folders: true, open: false },
+    closedGallery: { pressed: true, open: false, folders: true, current: 'probe/blank' },
+    c: { pressed: true, open: true, face: 'about', current: 'probe/blank' },
+    d: { pressed: true, open: true, face: 'notes', text: 'hello', current: 'probe/hello' }, errs: [] });
+  console.log('PASS the notebook law: an open never closes the notebook — NEW, a blank project (whitespace only) and a blank FOLDERS tile leave a closed notebook closed and an ABOUT face on ABOUT; a project with text opens onto its NOTES; open(\'projects\') is FOLDERS');
 
   /* ── 6 · A NEW THAT CANNOT LAND CHANGES NOTHING: the file unreachable, and a file whose restore throws half-way (M5b) ── */
   const fail = await g.ev(`const P = __LW.layout.projects, f0 = window.fetch;

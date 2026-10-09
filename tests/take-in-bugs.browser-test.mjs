@@ -46,8 +46,8 @@ try {
   starts.push(await space('after NEW, editor closed, nothing routed', `await __LW.layout.projects.requestFresh(); await __LW.settle(); await __w(400);
     __LW.layout.notebook.close(); __LW.layout.modulation.collapse(); if (__LW.clock.playing) __LW.pause(); await __w(400)`));
   starts.push(await space('MOD power off, editor closed, nothing routed', `__LW.mod.arm(false); await __w(200)`));
-  starts.push(await space('WAVE DANCER opened (routed), editor closed', `__LW.mod.arm(true); __LW.layout.notebook.open('projects'); await __w(200); document.querySelector('.pj-demo').click();
-    for (let i = 0; i < 60 && !/WAVE DANCER/.test(document.querySelector('.pj-status').textContent); i++) await __w(100);
+  starts.push(await space('WAVE DANCER opened (routed), editor closed', `__LW.mod.arm(true); __LW.projects.demo('wave-dancer');
+    for (let i = 0; i < 60 && !/WAVE DANCER/.test(__LW.projects.status); i++) await __w(100);
     await __w(400); __LW.layout.notebook.close(); __LW.layout.modulation.collapse(); if (__LW.clock.playing) __LW.pause(); await __w(400)`));
   for (const s of starts) {
     const why = JSON.stringify(s), routed = s.after.routes > 0;

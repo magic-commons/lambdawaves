@@ -5024,6 +5024,61 @@ states: 0 element-properties changed. The one new element is the kit rack's invi
 
 `cat lab/*.js | wc -l`: **30,553 → 29,057 (−1,496)**. The brief candidates (R1–R6, T1/T2, P, M1, K1–K4, W1) and the drafted
 CLAUDE.md paragraph are in `research/release-0.5.0/C3-BUILD.md`.
+### wave 206: C6 FOLDERS, THE PAGES AND THE ONE PART — the kit's project window over serialize()/restore(), the library's bytes kept, 11/11 serialize readings identical
+
+**One part.** λWAVES' project is now ONE kit project part, `lambdawaves`:
+- `{ data: projectSnapshot(), notebook: { title, subtitle, text } }`, with the notebook as the project's page 0, in the form 0.4 reads;
+- its restore is `restore(data, { project: true })` (it throws when the file does not take), then the notebook is put back;
+- its signature is `projectKey()`.
+
+`rack.js` builds the part and calls `createProjects(port)` (`lab/projects.js`). The facade keeps every old verb, because `__LW.projects`
+is read by 12 test suites and 4 tools. It adds `demo(file)` (the old DEMOS press), `download()`, `pick()`, `seed()` and `status` (the last line; FOLDERS
+speaks through BASINS' toast). Every open takes one road, `openPayload`:
+- M5b's snapshot and roll-back on the facade's verbs, the kit's `openWithRollback` on the gallery's;
+- then the bookkeeping: the ring's origin row, RECENT, D9's notice, and the landing. R-I3: an open never closes the notebook, and
+  opens it only for text.
+
+There is one unsaved mark, FOLDERS'. After a facade open, save or NEW, FOLDERS is told with a forced `openEntry` or `fresh` and
+the restore skipped, and its clean mark is put back to the facade's when the telling ends.
+
+**What a browser stored does not change.** `lambdawaves.q0.projects` keeps λWAVES' `{ items, recent }`. FOLDERS reads and writes it
+through `lab/project-store.js`, a Storage-shaped translator whose round trip is byte-exact through ten kit writes.
+- An invalid collection is read-only: never set aside, emptied or replaced.
+- The caps are 8 MiB a project (the file before its parse, the store, the door) and 24 MiB the library (BASINS' 24 MB as FOLDERS'
+  `capChars`).
+- A 0.4 browser keeps every project, RECENT and its notes, and a 0.4 build still reads the key.
+- The six demos are FOLDERS' read-only starters in DEMOS, seeded before `LW.ready`. A demo a 0.4 browser had pressed becomes the
+  starter in place when untouched; an edited copy keeps its path.
+
+**What left.** These are gone:
+- `lab/project-storage.js` and `lab/project-import.js`, with their two suites;
+- the notebook's PROJECTS face (`.nb-projectsface`, `renderProjects`, the SAVE AS / EXPORT / IMPORT / demo handlers);
+- the `.pj-*` CSS.
+
+▤, O and FILE › SAVE AS / OPEN open FOLDERS, and `layout.notebook.open('projects')` is its alias. FOLDERS is masked from the field
+lines where its entrance lands, paused too: measured, a mid-motion rect left a 12 px band.
+
+**Pictures.** A picture is taken only while FOLDERS is open. The first one runs capture's readability probe (1,029 ms, worst frame
+gap 102 ms), and that probe disturbed `current`'s timing when every open paid for it.
+
+**Proofs.**
+- **`tools/serialize-bytes.mjs` (NEW)**: `serialize()` and `serialize({ scope: 'edit' })` on the 4 demos, the empty project and 6
+  history snapshots. All **11 of 11 are byte-identical** between `f0fcbc4` and this tree (`research/release-0.5.0/c6-serialize-bytes.json`).
+- **The R10 suite (NEW)**: `tests/project-formats.test.mjs` (8 judged lines: five damaged collections read-only, a 0.4 collection's bytes
+  and RECENT kept, the byte-exact round trip, 8 MiB and 24 MiB, the 8 vs 24 MB cap, a 1.4 notebook as page 0, the unsaved mark) and
+  `tests/project-formats.browser-test.mjs` (5/5: read-only in the page, the door, R-I3's first half, 1.4 notes booted into page 0,
+  FOLDERS as painted glass).
+- **Gates**, 8893/5363, one browser at a time:
+  - `new-project` **8/8** (case 5 rewritten over FOLDERS' tiles) · `history` **42/42** · `offer` **16/16** · `molecule-demos` **5/5**
+  - `menubar` 8 · `latex-copy` · `take-in-bugs` 4 · `stage-text` 4 · `frame-occlusion` 7 · `current` 15. `current` was re-run alone:
+    case 10's 250 ms CSS reads are timing-bound on the shared GPU, and red on base under the same load.
+  - `hit-probe-set` **49 gap presses, 0 reached**, with FOLDERS and its rail as scenes · settings-probe **0 of 6 RED** ·
+    `new-project.mjs --check` in step
+  - Node **81 suites** green.
+
+`cat lab/*.js | wc -l`: **30,553 → 30,844 (+291)**, against the design's ≈ +50. The two new modules came in at 436 lines against 220.
+The session, the opener, the banner, the veil and the wake lock (BRIEF-C6 step 3) are the named next step. The tabbed notebook is a
+0.5.x brief candidate, because it changes what the notebook is. Details: `research/release-0.5.0/C6-BUILD.md`.
 
 ## 2026-10-08 · 0.5.0 D — THE INFORMATIONAL'S LEDGER
 

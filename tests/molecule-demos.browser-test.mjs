@@ -21,15 +21,14 @@ try {
     ['h2-sigma-u', 'H2', 'DEMOS/H₂ σu', 1, 2, 2]];   // [file, preset, path, occupied, AOs, the orbital on view]
   for (const [file, id, path, homo, nAO, view] of DEMOS) {
     const r = await g.ev(`__LW.saveSettings(); await __w(50); const before = __ws(), t0 = performance.now();
-      __LW.layout.notebook.open('projects'); await __w(200);
-      const btn = document.querySelector('.pj-demo[data-file="${file}"]'); btn.click();
-      const status = () => document.querySelector('.pj-status').textContent;
+      __LW.projects.demo(${JSON.stringify(file)});   /* 0.5.0 C6: the DEMOS press is P.demo (a FOLDERS starter) */
+      const status = () => __LW.projects.status;
       for (let i = 0; i < 100 && !status().includes(${JSON.stringify(path)}); i++) await __w(100);
       let st = __LW.chem.state();
       for (let i = 0; i < 600 && !(st.on && st.fieldOwner && st.nocc); i++) { await __w(100); st = __LW.chem.state(); }
       await __LW.settle(); await __w(200);
       const nb = document.querySelector('[data-mir-window="notebook"]');
-      return { label: btn.textContent, status: status(), ms: performance.now() - t0, preset: __LW.chem.preset(), on: st.on, owner: st.fieldOwner, view: st.view,
+      return { label: ${JSON.stringify(path)}.slice(6), status: status(), ms: performance.now() - t0, preset: __LW.chem.preset(), on: st.on, owner: st.fieldOwner, view: st.view,
         orbital: st.orbital, nocc: st.nocc, nAO: st.nAO, notebookOpen: !nb.hidden, text: __LW.layout.notebook.text.split('\\n')[0],
         settingsSame: __ws() === before, gum: __gum, errs: __e.slice() };`);
     const why = JSON.stringify(r);
@@ -43,13 +42,12 @@ try {
   }
   /* HELIUM: no molecule — SPECTRUM's ATOM at Z = 2 with the 1s filled, ATOMS open beside it, MOLECULES off */
   const he = await g.ev(`__LW.saveSettings(); await __w(50); const before = __ws(), t0 = performance.now();
-    __LW.layout.notebook.open('projects'); await __w(200);
-    const btn = document.querySelector('.pj-demo[data-file="helium"]'); btn.click();
-    const status = () => document.querySelector('.pj-status').textContent;
+    __LW.projects.demo('helium');
+    const status = () => __LW.projects.status;
     for (let i = 0; i < 100 && !status().includes('DEMOS/HELIUM'); i++) await __w(100);
     await __LW.settle(); await __w(300);
     const nb = document.querySelector('[data-mir-window="notebook"]'), atoms = document.querySelector('.dev[data-id="atoms"]');
-    return { label: btn.textContent, status: status(), ms: performance.now() - t0, ham: __LW.hamiltonian, Z: __LW.atomZ, populated: __LW.reg.populated(),
+    return { label: 'HELIUM', status: status(), ms: performance.now() - t0, ham: __LW.hamiltonian, Z: __LW.atomZ, populated: __LW.reg.populated(),
       atomsOpen: !atoms.hidden && !atoms.classList.contains('closed'), chemOn: __LW.chem.state().on, notebookOpen: !nb.hidden, text: __LW.layout.notebook.text.split('\\n')[0],
       settingsSame: __ws() === before, gum: __gum, errs: __e.slice() };`);
   const whyHe = JSON.stringify(he);

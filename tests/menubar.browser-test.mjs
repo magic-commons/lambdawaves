@@ -187,13 +187,14 @@ try {
     { document.querySelector('.dev[data-id="settings"]').classList.add('closed'); const r = await __row('ABOUT', 'SETTINGS'); R.settingsA = ok(r) && !document.querySelector('.dev[data-id="settings"]').classList.contains('closed'); }
     { let reloaded = 0; const rl = __LW.sw.reload; __LW.sw.reload = () => { reloaded++; }; const r = await __row('ABOUT', 'UPDATE APP'); for (let i = 0; i < 40 && !reloaded; i++) await new Promise((q) => setTimeout(q, 50)); __LW.sw.reload = rl; __LW.sw.state = 'idle'; R.update = ok(r) && reloaded === 1; }
     /* FILE (the project rows) */
-    { const r = await __row('FILE', 'SAVE project AS'); R.saveAs = ok(r) && __LW.layout.notebook.face === 'projects'; __LW.layout.notebook.close(); }
-    { const r = await __row('FILE', 'OPEN a project'); R.openP = ok(r) && __LW.layout.notebook.face === 'projects'; __LW.layout.notebook.close(); }
-    { const r = await __row('FILE', 'SAVE project'); R.saveP = ok(r) && __LW.layout.notebook.face === 'projects'; __LW.layout.notebook.close(); }
-    { const r = await __row('FILE', 'EXPORT project'); R.exportP = ok(r) && /nothing to export/.test(document.querySelector('.pj-status').textContent); }
+    /* 0.5.0 C6: the project rows open FOLDERS (the PROJECTS face left the notebook); the line is the facade's status */
+    { const r = await __row('FILE', 'SAVE project AS'); R.saveAs = ok(r) && __LW.projects.folders.isOpen(); __LW.projects.folders.close(); }
+    { const r = await __row('FILE', 'OPEN a project'); R.openP = ok(r) && __LW.projects.folders.isOpen(); __LW.projects.folders.close(); }
+    { const r = await __row('FILE', 'SAVE project'); R.saveP = ok(r) && __LW.projects.folders.isOpen(); __LW.projects.folders.close(); }
+    { const r = await __row('FILE', 'EXPORT project'); R.exportP = ok(r) && /nothing to export/.test(__LW.projects.status); }
     { const r = await __row('FILE', 'IMPORT project'); R.importP = ok(r); }
     { __LW.loadPreset('1s+2pz'); const r = await __row('FILE', 'NEW project');   /* 0.3.1 · S2: NEW fetches the empty project before it opens it — wait for its status */
-      for (let i = 0; i < 60 && document.querySelector('.pj-status').textContent !== 'new'; i++) await new Promise((q) => setTimeout(q, 50));
+      for (let i = 0; i < 60 && __LW.projects.status !== 'new'; i++) await new Promise((q) => setTimeout(q, 50));
       R.fresh = ok(r) && __LW.reg.populated().length === 0 && __LW.layout.projects.current === null; __LW.layout.notebook.close(); }
     R.errors = __e.slice();
     return R;`);
