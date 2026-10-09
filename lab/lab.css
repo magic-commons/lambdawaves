@@ -88,9 +88,6 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 #notebook[data-mode="view"] .nb-text { display: none; } #notebook[data-mode="view"] .nb-view { display: block; }
 #notebook[data-mode="edit"] .nb-view { display: none !important; }
 .nb-mode, .nb-projects-btn { font-size: 12px; }
-.nb-projectsface { gap: 8px; }
-.pj-new { display: flex; gap: 6px; } .pj-path { flex: 1 1 auto; border: 1px solid hsl(0 0% 50% / .3); border-radius: 8px; background: var(--nb-btn); padding: 4px 8px; font: 13px var(--font-ui); color: var(--fg); }
-.pj-save, .pj-export, .pj-import { height: 26px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); font: 700 10px var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; display: inline-flex; align-items: center; }
 /* ══ WAVE 106 · THE HISTORY LIST ═══════════════════════════════════════════════════════════════
    Newest at the top, the way a stack reads.  Three states, and only ONE of them is a colour trick:
      · PAST     the ordinary ink — these happened and they hold.
@@ -122,34 +119,6 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .hist-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
 .hist-actions > .trig { width: 100%; min-width: 0; padding-inline: 5px; }
 
-/* WAVE 106 · THE PROJECT LIST SCROLLS, AND NOW IT SAYS SO.  It always had `overflow: auto`, but no
-   scrollbar of its own while #rack two rules below wears an explicit 2-px accent one — so a list
-   longer than the box gave a reader nothing to see and nothing to grab, on a face that already looked
-   empty for a different reason (see rack.js's `show('projects')`).  It takes the RACK'S OWN
-   scrollbar, not a new one, plus the two behaviours every other scroller in this lab has: the scroll
-   stops at its own ends instead of dragging the notebook behind it, and iOS gets momentum. */
-.pj-list { display: flex; flex-direction: column; gap: 2px; max-height: 44vh; overflow: hidden auto;
-  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
-.pj-list::-webkit-scrollbar { width: 2px; }
-.pj-list::-webkit-scrollbar-thumb { background: var(--acc); border-radius: 2px; }
-.pj-list::-webkit-scrollbar-track { background: transparent; }
-/* WAVE 106 · THE ROOTS, shown above the list so SAVE AS can aim at one.  They wear the .pj-folder
-   heading's own type — same micro size, same tracking — because a chip here NAMES the heading it
-   scrolls you to; it is the same word, made pressable.  A 44-px target would tower over a 13-px
-   field, so these take the notebook's own dense scale and rely on being a wide, well-spaced row. */
-.pj-roots { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 2px; }
-.pj-root { border: 1px solid hsl(0 0% 50% / .3); background: var(--nb-btn); color: var(--dim);
-  border-radius: var(--r-pill); padding: 3px 9px; cursor: pointer;
-  font: var(--fs-micro)/1.5 var(--font-ui); letter-spacing: var(--tr-wider); }
-.pj-root:hover { color: var(--fg); border-color: color-mix(in srgb, var(--acc) 55%, transparent); }
-.pj-root:active { background: var(--glass-press); }
-.pj-folder { margin-top: 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--dim); }
-.pj-item { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 6px; } .pj-item:hover { background: hsl(0 0% 50% / .12); }
-.pj-item .pj-name { flex: 1 1 auto; cursor: pointer; font-size: 13px; color: var(--fg); } .pj-item .pj-when { font-size: var(--fs-micro); color: var(--dim); }
-.pj-item button { border: 0; background: transparent; color: var(--dim); cursor: pointer; font-size: 12px; } .pj-item button:hover { color: var(--acc); }
-.pj-foot { display: flex; align-items: center; gap: 8px; font-size: var(--fs-micro); color: var(--dim); }
-.pj-none { font-size: 12px; color: var(--dim); padding: 6px; }
 .nb-tools { display: flex; gap: 4px; }
 .nb-tools button { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); cursor: pointer; font-size: 13px; line-height: 1; }
 .nb-about { font: italic 700 12px Georgia, 'Times New Roman', serif; }
@@ -851,9 +820,6 @@ body[data-theme="dark"] .km-key-unbound {
 .stage-colour:focus-visible { box-shadow: 0 0 0 1.5px var(--acc); }
 .stage-follow { height: 18px; min-height: 18px; padding: 0 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
 
-/* the bundled demos row in the PROJECTS face */
-.pj-demos { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; }
-.pj-demos .ab-eyebrow { margin: 0; }
 
 /* the MOLECULE dropdown (chemview.js): 54 entries in seven optgroups, so it takes the row's slack rather than
    shrinking to fit its longest option — `.segw` is not in base.css's `.row >` flex list, so it says so itself. */

@@ -495,6 +495,23 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > "STATE AT 02:10 CDT" block (the seven glass classes; H₂/ELECTROSTATICS by use; the film's behaviour changes; the legibility PNGs; the M5 block; the
 > doubleTap row; the security items; the MIR brief candidates).
 
+> **UPDATE (Claude Sos, 2026-10-09 06:10 CDT) — the morning's merges and Josh's rulings.** Josh (02:30): "H2 and Electrostatics should go, and record or
+> render should be something related to the timeline window of MIR 1.5. And I guess defaults for everything? I definitely need a changelog of just the
+> major feature changes after the release of 0.5.0 or 0.5.5" + (02:45) "don't use Sol for coding anymore … Continue using Sonnet and Haiku wherever is
+> appropriate" — all in PLAN §9 (`c83b7ee`, `569855f`). Merged on `sos-s0` since the baton came back: **C2 `5ef57f4`** (the look in `mir.gui` via
+> `lab/look.js`; −124; stylehash 0 moved; probe 6/6), **D9b `1aa1d4d`** (H₂ + ELECTROSTATICS gone behind shims; −1,014; the lock's new baseline **860 ·
+> 0/0 and 1004 · 0/0**), **C3 `4555945`** (the rack = `createRack`, the menubar `createMenubar`, the keys `createKeys` via `lab/key-table.js`, the
+> KEYBOARD window the kit's in λWAVES' skin; the transport stays λWAVES'; −1,496; `tests/camera-shift` double-click re-aimed at the stage `0f4f042`),
+> **C6 `e0621f8`** (FOLDERS over one project part; `lab/projects.js` + `project-store.js`; serialize 11/11 identical; the R10 suite; +291 explained),
+> the C7b design `c232bef` (R1–R11 as defaults). **`lab/*.js` 27,515** (36,288 at the pre-C baseline; the C-V bar 30,000). Every merged tree gated
+> on my server 8731 (node 0 each time; the owning suites; the lock after D9b). Four CLAUDE.md paragraphs replaced/added (C2 first-run, C3 keyboard,
+> D9b legacy windows, C6 PROJECTS). RUNNING (Opus): **C7b** the film's UI on the kit's RENDER card + TIMELINE window (from `4555945`, four
+> lock-gated commits), **C6b** the session/opener/banner/veil/wake lock (from `e0621f8`). THEN: `tests/legacy/boot` re-aim (Sonnet, its own pass),
+> **C-V** (`BRIEF-C-V.md`, fresh Opus), fix rounds, the pre-release gates, **the LOCAL 0.5.0-alpha cut + `CHANGES-0.5.0.md`** (major features, plain
+> words, + vault) on Josh's word. Josh's queue now: the glass PNGs (defaults applied), the film's behaviour (accepted as defaults), the legibility
+> PNGs, the M5 block, the security items; MIR brief candidates from every C row for the primary account. Flakes seen under load and green alone:
+> `current` followsPalette, the settings probe's frame watchdog.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on

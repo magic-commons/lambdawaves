@@ -2,8 +2,7 @@ import { bindStageGestures, STAGE_BINDINGS } from './stage-gestures.js';
 import { uiSpace } from './mir/shell/scene-guard.js';   // 0.5.0 C9: the kit's UI space, the stage guard's rects
 import { coalesce } from './frame-coalescer.js';
 import { waitForPaint } from './frame-settle.js';
-import { readProjectCollection } from './project-storage.js';
-import { MAX_PROJECT_BYTES, parseProjectImport, storeProjectImport } from './project-import.js';
+import { createProjects } from './projects.js';   // 0.5.0 C6: PROJECTS are MIR's FOLDERS over the one project part (lab/projects.js, lab/project-store.js)
 import { renderNotebook } from './mir/shell/notebook-render.js';   // N6: the kit's copy (lab/notebook-render.js was byte-identical)
 import { reworkNative, planeModel } from './native-ui.js';
 import { firstRunMaterial, firstRunQuality, deviceQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
@@ -3428,7 +3427,7 @@ export async function boot(dom) {
         FILE: () => [['NEW project', () => layout.projects.requestFresh()], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…') + '\t' + keyFor('save'), () => { if (layout.projects.current) layout.projects.save(); else { layout.notebook.open('projects'); } }], ['SAVE project AS…\t' + keyFor('saveAs'), () => layout.notebook.open('projects')], ['OPEN a project…', () => layout.notebook.open('projects')],
           ...layout.projects.recent().slice(0, 5).map((p) => ['↺  ' + p, () => layout.projects.requestOpen(p), null, '', { raw: true }]),
           null,
-          ['EXPORT project (.json)', () => document.querySelector('.pj-export').click()], ['IMPORT project (.json)…', () => document.querySelector('.pj-import input').click()],
+          ['EXPORT project (.json)', () => layout.projects.download()], ['IMPORT project (.json)…', () => layout.projects.pick()],
           null,
           ['SAVE the experiment (quick)', () => save()], ['LOAD the last quick save', () => restore()], ['COPY as JSON', () => copyJSON()],
           ['COPY a LINK to this state', () => copyLink(), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)'],
@@ -3467,8 +3466,8 @@ export async function boot(dom) {
     /* ── THE NOTEBOOK: a free glass over the stage; its ⓘ flips it into the ABOUT face ── */
     const nb = document.getElementById('notebook');
     if (nb) {
-      const NB_KEY = 'lambdawaves.q0.notebook', NB_TITLE = 'lambdawaves.q0.notebook.title', NB_SUBTITLE = 'lambdawaves.q0.notebook.subtitle', PJ_KEY = 'lambdawaves.q0.projects';
-      const ta = nb.querySelector('.nb-text'), view = nb.querySelector('.nb-view'), titleIn = nb.querySelector('.nb-title'), subIn = nb.querySelector('.nb-subtitle'), faces = { notes: nb.querySelector('.nb-notes'), about: nb.querySelector('.nb-aboutface'), projects: nb.querySelector('.nb-projectsface') };
+      const NB_KEY = 'lambdawaves.q0.notebook', NB_TITLE = 'lambdawaves.q0.notebook.title', NB_SUBTITLE = 'lambdawaves.q0.notebook.subtitle';
+      const ta = nb.querySelector('.nb-text'), view = nb.querySelector('.nb-view'), titleIn = nb.querySelector('.nb-title'), subIn = nb.querySelector('.nb-subtitle'), faces = { notes: nb.querySelector('.nb-notes'), about: nb.querySelector('.nb-aboutface') };
       /* the ABOUT face's version line is BUILD_LINE, never hand-written markup: the copy dump reads this same text back out of the face */
       const abV = nb.querySelector('.ab-version');
       if (abV) { const i = BUILD_LINE.indexOf(' · '); abV.textContent = ''; el('span', 'ab-tag', abV, i < 0 ? BUILD_LINE : BUILD_LINE.slice(0, i)); if (i >= 0) abV.appendChild(document.createTextNode(BUILD_LINE.slice(i))); }
@@ -3513,10 +3512,7 @@ export async function boot(dom) {
       nb.querySelector('.nb-mode').addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }
         if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation(); });
-      /* ── PROJECTS: sessions in folders, a recent list, the notebook as each one's landing page ── */
-      const pjRead = () => { try { return readProjectCollection(localStorage, PJ_KEY); } catch (e) { pjStatus('projects unavailable — ' + e.message + '. Stored data was left untouched.'); return null; } };
-      const pjWrite = (P) => { try { localStorage.setItem(PJ_KEY, JSON.stringify(P)); return true; } catch (e) { pjStatus('save failed — ' + e.message); return false; } };
-      let pjCurrent = null, pjBaseline = null;
+      /* ── PROJECTS (0.5.0 C6): MIR's FOLDERS over ONE project part — this one, below; the notebook is its page 0 ── */
       /* The saved project is wider than undo: notebook, camera, palette, and modulation all
          belong here. Compare on a destructive act, never on a frame. Playback time and the
          quality governor are runtime; routed numbers compare their hand-owned bases so an
@@ -3552,140 +3548,51 @@ export async function boot(dom) {
         for (const m of (pr.modulation && pr.modulation.macros) || []) if (m.sourceId) delete m.value;   // S2: a bound macro reads its source (deserialize overwrites the value) — NEW's LFO playing is not an edit
         return JSON.stringify([data, titleIn.value, subIn ? subIn.value : '', ta.value]);
       }
-      const projectClean = () => { pjBaseline = projectKey(); };
-      const projectDirty = () => pjBaseline !== null && projectKey() !== pjBaseline;
-      function discardProject(action) {
-        return !projectDirty() || window.confirm(action + ' WITHOUT SAVING?\nYour unsaved project changes will be lost. Cancel to save them first.');
-      }
-      addEventListener('beforeunload', (e) => {
-        if (!projectDirty()) return;
-        e.preventDefault(); e.returnValue = '';
-      });
-      /* wave 62 · ONE of the at most THREE live regions in this document (#banner's role="alert" is
-         another).  It changes once per user act — a save, an open, an import — which is exactly what a
-         status region is for, and is why the 107 readouts must never become one. */
-      { const st = nb.querySelector('.pj-status'); if (st) st.setAttribute('role', 'status'); }
-      const pjStatus = (t) => { const s = nb.querySelector('.pj-status'); if (s) s.textContent = t; };
-      const pjTouch = (P, path, key) => { P.recent = [path, ...(P.recent || []).filter((p) => p !== path)].slice(0, 8); };
-      const projects = {
-        list() { const P = pjRead(); return Object.values(P ? P.items : {}).sort((a, b) => (b.saved || '').localeCompare(a.saved || '')); },
-        recent() { const P = pjRead(); return P ? (P.recent || []).filter((p) => Object.hasOwn(P.items, p)) : []; },
-        get current() { return pjCurrent; },
-        get dirty() { return projectDirty(); },
-        markClean: projectClean,
-        discard(action) { return discardProject(action); },   // wave 133: the same question for a link opened over unsaved work (the hashchange road)
-        requestOpen(path) { return discardProject('OPEN') && projects.open(path); },
-        requestFresh() { return discardProject('START A NEW PROJECT') ? projects.fresh() : Promise.resolve(false); },
-        save(path) {
-          path = String(path || pjCurrent || '').trim().replace(/^\/+|\/+$/g, ''); if (!path) return false;
-          const i = path.lastIndexOf('/'), folder = i < 0 ? '' : path.slice(0, i), name = i < 0 ? path : path.slice(i + 1);
-          const P = pjRead(); if (!P) return false; const now = new Date().toISOString();
-          Object.defineProperty(P.items, path, { configurable: true, enumerable: true, writable: true, value: { path, folder, name, saved: now, opened: Object.hasOwn(P.items, path) ? P.items[path].opened : now, data: projectSnapshot(), notebook: { title: titleIn.value === 'NOTEBOOK' ? name : titleIn.value, subtitle: subIn ? subIn.value : '', text: ta.value } } });
-          pjTouch(P, path); if (!pjWrite(P)) return false; pjCurrent = path; pjStatus('saved ' + path); if (titleIn.value === 'NOTEBOOK') { titleIn.value = name; } projectClean(); renderProjects(); return true;
-        },
-        open(path, file) {
-          /* 0.3.1 · S2: `file` is a parsed project that is not in the collection (NEW's empty project, below): it takes this
-             same road, M5b's roll-back included, and stores nothing and leaves nothing current. */
-          const P = file ? null : pjRead(), it = file || (P && Object.hasOwn(P.items, path) ? P.items[path] : null); if (!it) return false;
-          const failed = file ? 'new project failed' : 'open failed ' + path;
-          /* wave 48: a project load rebuilds the register, the operator and the field — BUSY work */
-          /* M5b (2026-09-24): the instrument as it stands, taken before the file touches it — the SAME road a saved project
-             takes (serialize → JSON → restore) — and whether it was clean, so a failed open can hand both back. */
-          const before = JSON.parse(JSON.stringify(serialize())), baseline = pjBaseline, wasClean = !projectDirty();
-          let restored = false, back = true;
-          busy.n++; busySync(); try { restored = restore(it.data, { project: true }); if (!restored) { try { back = restore(before) === true; } catch (_) { back = false; } } } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
-          /* OPTIMIZATION 2026-09-24 · M5 · A FAILED OPEN COMMITS NOTHING OF ITS OWN.  restore() answers false when the file's
-             data threw half-way (importText checks only the envelope), and this used to carry on regardless: the
-             notebook keys, `recent`, `current` = the broken path and a CLEAN mark over the half-applied state, so a
-             plain Ctrl+S overwrote the stored file with it.  Now the previous project stays current, the notebook and
-             the recent list are untouched, nothing is marked clean, and the status says so.
-             M5b · …AND THE INSTRUMENT COMES BACK.  A half-applied state left current was one Ctrl+S away from overwriting the
-             PREVIOUS project (measured), so the pre-open snapshot is restored through the same road and the pre-open
-             dirty state re-applied: clean if it was clean, dirty against the old baseline if it was not.  If even the
-             roll-back fails, nothing is current, so no SAVE can land on a file — and the status says that too. */
-          if (!restored) {
-            if (back) { if (wasClean && baseline !== null) projectClean(); else pjBaseline = baseline; pjStatus(failed + ' — the previous state is back'); }
-            else { pjCurrent = null; pjStatus(failed + ' — the previous state could not be put back; nothing is current, SAVE AS to keep this'); }
-            return false;
-          }
+      /* 0.5.0 C6 · THE ONE PROJECT PART (R5-A3): λWAVES' project is serialize()/restore() — projectSnapshot() above — with the
+         notebook as its page 0, { title, subtitle, text }, in the form 0.4 reads.  FOLDERS, the facade's verbs and the .mir / PNG
+         exports carry this part (R-I3: the pages travel with the project); projectKey() is its signature, the unsaved mark.
+         restore() THROWS when the file did not take, so the kit counts the part failed; when it took, the notebook is put back. */
+      const part = {
+        capture: (name) => ({ data: projectSnapshot(), notebook: { title: name && titleIn.value === 'NOTEBOOK' ? name : titleIn.value, subtitle: subIn ? subIn.value : '', text: ta.value } }),
+        restore(v, ctx) {
+          if (!v || typeof v !== 'object' || !v.data || restore(v.data, { project: true }) !== true) throw new Error('the project did not take');
+          const n = v.notebook && typeof v.notebook === 'object' ? v.notebook : {};
           if (nbTimer) { clearTimeout(nbTimer); nbTimer = 0; } nbPending.clear();   // S2: the last project's keystrokes still in the 300 ms debounce must not land over this one's notebook
-          ta.value = it.notebook.text || ''; titleIn.value = it.notebook.title || it.name;
-          if (subIn) { subIn.value = (it.notebook && it.notebook.subtitle) || ''; subIn.hidden = !subIn.value; }
+          ta.value = n.text || ''; titleIn.value = n.title || (ctx && ctx.name) || 'NOTEBOOK';
+          if (subIn) { subIn.value = n.subtitle || ''; subIn.hidden = !subIn.value; }
           try { localStorage.setItem(NB_KEY, ta.value); localStorage.setItem(NB_TITLE, titleIn.value); if (subIn) localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {}
-          if (P) { it.opened = new Date().toISOString(); pjTouch(P, path); const remembered = pjWrite(P); pjCurrent = path; pjStatus('opened ' + path + (remembered ? '' : ' — recent history could not be saved') + (restoreNotice ? ' · ' + restoreNotice : '')); }
-          else { pjCurrent = null; pjStatus('new'); }
-          projectClean(); count();
-          if (history) history.clear(file ? 'new project' : 'open · ' + it.name);   // S3: its bottom row named for the file
-          /* 0.3.1 · S2 THE NOTEBOOK LAW (PLAN §3.4): a project opens onto its notebook only when the notebook has text — the complete
-             notebook, in its scrollable pane.  A blank one (NEW's included) opens nothing and closes nothing: the pane keeps its
-             visibility and face, so a hand in PROJECTS stays in PROJECTS.  "Edited" is read off the text: no flag. */
-          if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; }
-          render();                                                                                // the preview never keeps the last project's notes
           return true;
         },
-        remove(path) { const P = pjRead(); if (!P || !Object.hasOwn(P.items, path)) return false; delete P.items[path]; P.recent = (P.recent || []).filter((p) => p !== path); if (!pjWrite(P)) return false; if (pjCurrent === path) pjCurrent = null; renderProjects(); return true; },
-        /* 0.3.1 · S2 NEW OPENS THE EMPTY PROJECT, lab/new-project.lambdawaves.json (tools/new-project.mjs writes it), through
-           open() above: restore(…, { project: true }) resets every PROJECT key — the register, clock, trails, reference, the
-           A/B transition (stood down first), the modulation, stage, look, palette, overlays, instruments — and the ring, and no
-           PREFERENCE or WORKSPACE key, because the file carries none.  A file that cannot be fetched changes nothing. */
-        async fresh() {
-          let file;
-          try { const r = await fetch('./new-project.lambdawaves.json', { cache: 'no-cache' }); if (!r.ok) throw new Error('HTTP ' + r.status); file = parseProjectImport(await r.text()); }
-          catch (err) { pjStatus('new project failed — ' + err.message + '; nothing was changed'); return false; }
-          return projects.open(null, file);
-        },
-        exportText(path) { const P = pjRead(), it = P && Object.hasOwn(P.items, path || pjCurrent) ? P.items[path || pjCurrent] : null; return it ? JSON.stringify({ lambdawaves: 'project', version: 1, ...it }, null, 1) : null; },
-        importText(text) { const path = storeProjectImport(text, () => JSON.parse(localStorage.getItem(PJ_KEY) || '{"items":{},"recent":[]}'), pjWrite); renderProjects(); return path; },
+        signature: () => projectKey(),
       };
-      function renderProjects() {
-        const list = nb.querySelector('.pj-list'); if (!list) return; list.innerHTML = '';
-        const items = projects.list(); if (!items.length) { el('div', 'pj-none', list, 'no projects yet — name one above and SAVE AS'); return; }
-        const byFolder = new Map(); for (const it of items) { const f = it.folder || '(root)'; if (!byFolder.has(f)) byFolder.set(f, []); byFolder.get(f).push(it); }
-
-
-        let roots = nb.querySelector('.pj-roots');
-        if (!roots) { roots = el('div', 'pj-roots', null); list.parentElement.insertBefore(roots, list); }
-        roots.innerHTML = '';
-        const path = nb.querySelector('.pj-path');
-        for (const f of [...byFolder.keys()].sort((a, b) => a.localeCompare(b))) {
-          const c = el('button', 'pj-root', roots, f); c.type = 'button';
-          c.title = f === '(root)' ? 'save into no folder' : 'save into ' + f;
-          c.addEventListener('click', () => {
-            if (!path) return;
-            const name = (path.value.split('/').pop() || '').trim();
-            path.value = (f === '(root)' ? '' : f + '/') + name;
-            path.focus();
-          });
-        }
-        /* …and the group headings sort by NAME.  `[...map.entries()].sort()` with no comparator sorts
-           the STRINGIFIED pairs — "demo,[object Object]" — which happened to order by folder but only
-           by accident, and case-sensitively.  It is the key, compared as a name. */
-        for (const [f, arr] of [...byFolder.entries()].sort((a, b) => a[0].localeCompare(b[0]))) { el('div', 'pj-folder', list, f); for (const it of arr) { const row = el('div', 'pj-item', list); const nm = el('span', 'pj-name', row, it.name + (it.path === pjCurrent ? '  ·  current' : '')); nm.addEventListener('click', () => projects.requestOpen(it.path)); el('span', 'pj-when', row, (it.saved || '').slice(0, 16).replace('T', ' ')); const x = el('button', '', row, '×'); x.title = 'delete this project'; x.addEventListener('click', (e) => { e.stopPropagation(); projects.remove(it.path); }); } }
-      }
-      nb.querySelector('.pj-save').addEventListener('click', () => { const p = nb.querySelector('.pj-path').value.trim() || pjCurrent; if (p) projects.save(p); else pjStatus('give it a name: folder/name'); });
-      /* wave 106: …and the field stops swallowing the save keys.  The dispatcher listens on `window`
-         in the BUBBLE phase, so this `stopPropagation` was a second, independent block on Ctrl+S —
-         fixing only the early return above would have left it dead here. */
-      nb.querySelector('.pj-path').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); nb.querySelector('.pj-save').click(); }
-        if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation(); });
-      nb.querySelector('.pj-export').addEventListener('click', () => { const t = projects.exportText(); if (!t) { pjStatus('nothing to export — save first'); return; } const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'application/json' })); a.download = (pjCurrent || 'project').replace(/\//g, '__') + '.lambdawaves.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
-      nb.querySelector('.pj-import input').addEventListener('change', async (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; try { if (f.size > MAX_PROJECT_BYTES) throw new Error('project file exceeds 8 MiB'); const p = projects.importText(await f.text()); pjStatus('imported ' + p); } catch (err) { pjStatus('import failed: ' + err.message); } e.target.value = ''; });
-      /* THE BUNDLED DEMOS (2026-09-11): a project file shipped under lab/demos/, imported through the same road a
-         file from disk takes, then opened. Josh's WAVE DANCER is the first. */
-      for (const b of nb.querySelectorAll('.pj-demo')) b.addEventListener('click', async () => {
-        if (!discardProject('OPEN')) return;                                                   // S2: a stored open's question, asked before anything is fetched or stored
-        try { const r = await fetch('./demos/' + b.dataset.file + '.lambdawaves.json', { cache: 'no-cache' }); if (!r.ok) throw new Error('HTTP ' + r.status);
-          const p = projects.importText(await r.text()); if (projects.open(p)) pjStatus('opened demo ' + p); }   // M5: a failed open keeps its own status
-        catch (err) { pjStatus('demo failed: ' + err.message); }
+      const projects = createProjects({ host: floats || document.body, part,
+        snapshot: () => JSON.parse(JSON.stringify(serialize())), rollback: (S) => restore(S) === true,   // M5b: the instrument as it stood, through the same road
+        busy: (d) => { busy.n = Math.max(0, busy.n + d); busySync(); },   // wave 48: a project load rebuilds the register, the operator and the field — BUSY work
+        notice: () => restoreNotice, thumbnail: () => LW.thumbnail(), confirm: (text) => window.confirm(text), onMoved: () => occlusion.dirty(),
+        rack: { keepClear: () => ['rack', 'rackL', 'transport'].map((id) => paintedRect(document.getElementById(id))).filter(Boolean) },
+        /* 0.3.1 · S2 THE NOTEBOOK LAW (PLAN §3.4): a project opens onto its notebook only when the notebook has text — the complete
+           notebook, in its scrollable pane.  A blank one (NEW's included) opens nothing and closes nothing.  "Edited" is read off the
+           text: no flag.  S3: the ring's bottom row is named for the file. */
+        opened(label) { count(); if (history) history.clear(label); if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; } render(); },
+        titleAfterSave(name) { if (titleIn.value !== 'NOTEBOOK') return false; titleIn.value = name; return true; } });
+      addEventListener('beforeunload', (e) => {
+        if (!projects.dirty) return;
+        e.preventDefault(); e.returnValue = '';
       });
-      nb.querySelector('.nb-projects-btn').addEventListener('click', () => { if (nb.dataset.face === 'projects') show('notes'); else { renderProjects(); const pp = nb.querySelector('.pj-path'); if (pp && pjCurrent) pp.value = pjCurrent; show('projects'); } });
+      /* FOLDERS lives in #floats: its pane and its rail's chips are painted glass (CLAUDE.md's mask law); a move dirties the block
+         (onMoved above), and so do its open and close */
+      { const { root, rail } = projects.folders.win;
+        occlusion.register('folders', () => projects.folders.isOpen() ? [paintedRect(root), ...(rail.el ? [...rail.el.querySelectorAll('.mir-chip')].map((c) => paintedRect(c)) : [])] : []);
+        for (const el of [root, rail.el]) occlusion.watch(el, { attributes: true, attributeFilter: ['hidden'] }); }
+      nb.querySelector('.nb-projects-btn').addEventListener('click', () => projects.folders.toggle());
       layout.projects = projects;
       const count = () => { const c = nb.querySelector('.nb-count'); if (c) c.textContent = ta.value.trim() ? ta.value.trim().split(/\s+/).length + ' words · kept in this browser' : 'empty · kept in this browser'; };
       ta.addEventListener('input', () => { nbStore(NB_KEY, ta.value); count(); });
       const ABOUT_DEF_W = 470, ABOUT_DEF_H = 670;
       const NOTES_DEF_W = 640, NOTES_DEF_H = 460;
       const show = (face) => {
-        nb.hidden = false; faces.notes.hidden = face !== 'notes'; faces.about.hidden = face !== 'about'; faces.projects.hidden = face !== 'projects'; nb.dataset.face = face;
+        if (face === 'projects') { projects.folders.open(); return; }   // 0.5.0 C6: the PROJECTS face left the notebook; its open is FOLDERS'
+        nb.hidden = false; faces.notes.hidden = face !== 'notes'; faces.about.hidden = face !== 'about'; nb.dataset.face = face;
         const S = readSettings();
         if (face === 'about') {
           const w = typeof S.abW === 'number' ? S.abW : ABOUT_DEF_W;
@@ -3708,7 +3615,6 @@ export async function boot(dom) {
         }
 
 
-        if (face === 'projects') renderProjects();
         if (face === 'notes') ta.focus();
       };
       nb.querySelector('.nb-about').addEventListener('click', () => show(nb.dataset.face === 'about' ? 'notes' : 'about'));
@@ -4017,7 +3923,7 @@ export async function boot(dom) {
     { id: 'saveAs', group: KG.P, short: 'save as', inFields: true, label: 'save the project under a new name', key: 'KeyS', ctrl: true, shift: true,
       run: () => layout.notebook.open('projects') },
     { id: 'folders', group: KG.P, short: 'folders', label: 'the projects — save, open, folders, recent (FOLDERS)', key: 'KeyO',
-      run: () => { const nb = layout.notebook; if (nb.isOpen && nb.face === 'projects') nb.close(); else nb.open('projects'); } },
+      run: () => layout.projects.folders.toggle() },
     /* the kit's windows λWAVES has are rows with NO chord (MIR ADOPTING-1.5 §11: their keys are Josh's to give; bind one in the keyboard) */
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
@@ -5028,7 +4934,7 @@ export async function boot(dom) {
   accent.turn();
   busyHost();                         // the mark is cloned and painted before anything can need it
   markBatchEnd();                     // M7: …painted here, once, every copy of it (the clones included)
-  if (layout.projects) layout.projects.markClean();
+  if (layout.projects) { await Promise.race([layout.projects.seed().catch(() => null), new Promise((r) => setTimeout(r, 3000))]); layout.projects.markClean(); }   // 0.5.0 C6: the six demos are FOLDERS' starters before the lab says ready
   LW.ready = true;
   LW.report = (o, t = performance.now()) => import('../tools/perf/device-report.js').then((m) => m.run(LW, o, t)); if (q.get('report') === '1') LW.report(q);   // THE DEVICE REPORT (2026-09-25): a diagnostic in tools/, never precached — `?report=1` or __LW.report() measures this device and puts every setting back
   return LW;

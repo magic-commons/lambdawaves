@@ -30,12 +30,12 @@ try {
 
   /* ── 1 · WAVE DANCER opens through the projects road; Josh's two sentences are read out of its notebook ── */
   const demo = await g.ev(`const w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
-    __LW.layout.notebook.open('projects'); await w(200); document.querySelector('.pj-demo').click();
-    for (let i = 0; i < 60 && !/WAVE DANCER/.test(document.querySelector('.pj-status').textContent); i++) await w(100);
+    __LW.projects.demo('wave-dancer');   /* 0.5.0 C6: the DEMOS press */
+    for (let i = 0; i < 60 && !/WAVE DANCER/.test(__LW.projects.status); i++) await w(100);
     await w(300);
     const m = __LW.layout.notebook.text.match(/running (.+?) in STATE-A and (.+?) in STATE-B/);
     __LW.layout.notebook.close(); __LW.pause();
-    return { status: document.querySelector('.pj-status').textContent, A: m && m[1], B: m && m[2], ab: !!(__LW.ab.A && __LW.ab.B), mix: __LW.ab.on, errs: __e.slice() };`);
+    return { status: __LW.projects.status, A: m && m[1], B: m && m[2], ab: !!(__LW.ab.A && __LW.ab.B), mix: __LW.ab.on, errs: __e.slice() };`);
   assert.match(demo.status, /opened demo DEMOS\/WAVE DANCER/);
   assert.equal(demo.A, '$2p_{-1}$, $2p_{1}$, $4p_{-1}$, and $4d_{2}$');
   assert.equal(demo.B, '$2s_{0}$, $2p_{0}$, $4p_{1}$, and $4d_{-2}$');

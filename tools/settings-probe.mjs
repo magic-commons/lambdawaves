@@ -57,11 +57,11 @@ try {
     const r = { name };
     if (name !== 'boot') {
       const opened = await g.ev(`__LW.layout.notebook.open('projects'); await __w(200); __LW.saveSettings(); await __w(50); const s0 = __snap();
-        if (${JSON.stringify(!!file)}) { document.querySelector('.pj-demo[data-file=${JSON.stringify(file || '')}]').click();
-          for (let i = 0; i < 100 && !/opened demo/.test(document.querySelector('.pj-status').textContent); i++) await __w(100); }
+        if (${JSON.stringify(!!file)}) { __LW.projects.demo(${JSON.stringify(file || '')});   /* 0.5.0 C6: the DEMOS press; FOLDERS is open (the alias) */
+          for (let i = 0; i < 100 && !/opened demo/.test(__LW.projects.status); i++) await __w(100); }
         else await __LW.layout.projects.requestFresh();
         await __quiet(); const s1 = __snap(); __LW.saveSettings(); await __w(50);
-        return { s0, s1, s2: __snap(), status: document.querySelector('.pj-status').textContent, errs: __e.slice() };`);
+        return { s0, s1, s2: __snap(), status: __LW.projects.status, errs: __e.slice() };`);
       if (!opened || opened.E) throw new Error(name + ': the open threw in the page — ' + (opened && opened.E));
       r.status = opened.status; r.errs = opened.errs;
       r.wrote = diff(opened.s0, opened.s1); r.live = diff(opened.s0, opened.s2);
