@@ -1,4 +1,4 @@
-# λWAVES 0.5.0 — what changed, in plain words
+# λWAVES 0.5.0 GUI Adoption — what changed, in plain words
 
 Josh's ruling (PLAN §9, 2026-10-09): "I definitely need a changelog of just the major feature changes after the release of 0.5.0 or 0.5.5." This
 file collects the user-facing feature changes of 0.5.0 as each row merges; it is finished and mirrored to the vault at the cut, and it is separate
