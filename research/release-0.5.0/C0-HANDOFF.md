@@ -1,97 +1,53 @@
-# C0 · THE BARE ADOPTION — HAND-OFF (in progress)
+# C0 · THE BARE ADOPTION — HAND-OFF (live)
 
-Written 2026-10-08 by the C0 builder (Opus), at a safe boundary between the cascade and the pin. The brief is the
-spawn prompt; PLAN §2 C row C0 is the spec.
+The brief is the integrator's relaunch prompt (Claude Yan, 2026-10-08); PLAN §2 C row C0 is the spec. This file is rewritten after every
+step so a kill loses only uncommitted work.
 
 ## Where
-- Worktree: `/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a34f1eb47fe65acfb`
-- Branch: `worktree-agent-a34f1eb47fe65acfb`, from `7044f37` (the `sos-s0` pre-C baseline).
-- **Recreated once.** After the first usage pause, both the worktree and the branch were gone; they had most likely
-  been auto-cleaned because they were unchanged. The session's cwd was left in the integrator's `sos-s0`, which was
-  never touched and never reset. I recreated the worktree with
-  `git -C ~/Documents/LAMBDAWAVES worktree add -b worktree-agent-a34f1eb47fe65acfb <path> 7044f37`.
-- Nothing is pushed, merged, tagged or deployed. No server is running (8783 and 8787 were stopped by pid).
+- Worktree: `/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-ae28efe993cf25783` (the CONTINUATION builder, Opus 5.5).
+- Branch: `worktree-agent-ae28efe993cf25783`, reset to `07b03d7` (the predecessor's tip on `worktree-agent-a34f1eb47fe65acfb`, from
+  `7044f37` = the `sos-s0` pre-C baseline). `.tmp/` was copied whole from the old worktree (`base/` = `git archive 7044f37 lab tools`);
+  its scripts were re-pointed at this worktree. The old worktree is never written.
+- Ports: gate 8783 + geckodriver 5253 (this tree), 8787 + 5257 (`.tmp/base`). Nothing is pushed, merged, tagged or deployed.
 
-## Commits
-| commit | what |
-|---|---|
-| `42b7631` | THE BARE ADOPT, by the 1.5 worktree's tool. `adopted MIR 1.5.0-alpha.24 (1b7ae99b9905): 196 added, 23 updated, 0 removed, 43 unchanged`. `lab/mir` + `lab/fonts` went 66 → 262 files; `lab/mir` 1,544,306 → 6,341,901 B; `lab/fonts` 131,211 → 454,120 B. The manifest's sha-256 is `3f969725fe44715bb96a42fc56d668defc9b9cfceeb4219d146ecd24cad35351`. `pwa --write` gave 372 entries, 7.34 MiB. |
-| `49cf802` | THE CASCADE: `<style>@layer app, mir;</style>` + `mir/mir.css`, then `lab.css` and `skin.css` unlayered, then KaTeX. Five twin `:not(:where())` rules (see the commit message). All 37 `!important`s are kept unlayered (see below). |
-| `ce5b2e1` | This hand-off, first version. |
-| `7c049ed` | THE PIN: alpha.24's sha-256 is in `ACCEPTED`. new-project regenerated (bpm 60 → 30, the kit's default = the plan's). R5-W1: wiring §6b plus `--unreached-kit`; pwa and build-deploy read that set; 114 kit modules are reported and unprecached; the five ALLOWLIST rows retired; precache 263 entries, 5.62 MiB. |
-| `858515e` | THE GLASS DEFAULTS. lab.css §G restores λWAVES' disconnected head (classes 4 and 6). `--glass-shadow-flat` → `--glass-shadow` (a bug: the docked cards had lost their shadow). |
-| (next) | `C0-GLASS-RULINGS.md` + 16 PNGs in `c0-glass/` (7 before/after pairs, plus 2 `-kit`). |
+## Commits (predecessor, kept)
+`42b7631` THE BARE ADOPT (alpha.24, 1b7ae99b9905) · `49cf802` THE CASCADE (`@layer app, mir;`, five twins, 37 `!important` kept) ·
+`ce5b2e1` hand-off · `7c049ed` THE PIN + new-project bpm 30 + R5-W1 · `858515e` THE GLASS DEFAULTS · `a46260f` C0-GLASS-RULINGS.md +
+16 PNGs · `07b03d7` hand-off at the manual pause.
 
-**PAUSED AGAIN (manual pause).** The rulings commit is `a46260f`. Measured since, uncommitted (the raw files are in `.tmp/canary/`):
+## Commits (this continuation)
+| step | commit | what |
+|---|---|---|
+| 1 | (this commit) | THE KEYMAP RULES: MIR 1.4.3 `base.css`'s two `#keymap` rules (stacking at `--z-veil`, `[hidden]` → none) move into `lab/lab.css` as λWAVES' own; `--z-veil` is still declared on 1.5 (`mir/css/base.css:65`, 40). `pwa --write`. `keyboard-window` GREEN alone. The `.km-*` judgement below. `c0-glass/keyboard-{before,after}.png`. |
 
-**Gates that are green.**
-- `adopt.mjs --check`: "in step with MIR 1.5.0-alpha.24".
-- `bash test.sh node`: exit 0. The per-suite run gives **85/85 green** (A0's bare adopt had 7 red).
-- Precache: base **191 entries / 4,874,333 B (4.65 MiB)**, C0 **263 / 5,899,980 B (5.63 MiB)**.
-- `lab/*.js`: **36,288 → 36,361 (+73)**. That is `sw.js` alone: its generated table grew 191 → 263 entries (+72), plus the one R5-W1 row. My first commit message called it "unchanged"; that was wrong, before the table grew.
+## Step 1 · the `.km-*` judgement (the kit's `keyboard/keyboard.css` on λWAVES' own pane)
+Measured three ways: `kmdiff.mjs` (gate Firefox, every pane element, light first-run), `kmshot.mjs` (gate Firefox: pane PNG, clip test,
+real-pointer hover on a badge) and a stylehash pair with the keymap open (`cap.mjs km-before 8787 km` / `km-after 8783 km`, 8 states,
+1,521 elements each, through the kit's `serve.mjs` on the same two ports).
+- **Nothing breaks the editor → nothing twinned.** The drag point hits `H2.km-title` again (it hit `canvas.shadow-c` before the fix);
+  `keyboard-window` passes. The 315 key children with `pointer-events: none` only pass the pointer to their `.km-key` button, which owns
+  every handler (`keymap.js:402–408`) and the `title`: a real pointer over a badge now reports the button as hit and the key hovered (base:
+  the span, the key hovered too). `.km-search`'s `user-select: text` is an input's own default. `.km-list`'s `touch-action: pan-y` keeps
+  the vertical scroll. `overflow: hidden` on the 57 labels and 57 chip rows clips nothing (scroll = client on all 114); the legend's 1 px
+  over-height is the same on base.
+- **Visible, not breaking — the input for C3 (which owns the KEYBOARD skin under R5-S3) and brief candidates:**
+  - an accent LED dot (`.km-key-bound::after`) on the 42 bound keys, every state (pixel diff: the dots, the scrollbar, text AA only);
+  - the list's scrollbar: Firefox's white track → the kit's groove thumb on transparent (`scrollbar-color`);
+  - the unbound legend dot gains a 1 px hairline;
+  - class 1 (press scale on keys and rows, `transition: all` → the kit's three), class 2 (the pane's upward shadow term), class 5 (the
+    glass emboss off in 6 states) reach the pane exactly as they reach the rack; the .84 → .86 rider under light · tinted · frost off.
+- **Brief candidate (MIR):** `keyboard.css` styles bare `.km-*` classes, so it lands on any app DOM that shares the names; scope it to the
+  kit's own window (`.km-win`, `.km`, `.km-help`) the way the values block is already scoped.
 
-**THE 27 BROWSER SUITES** (8783/5253, one at a time, 4 s apart): **25 green, 2 red.**
-- **`keyboard-window`: RED, C0's OWN BREAKAGE.**
-  - Re-run alone at load 1.66: still red. The base copy (8787/5257): green.
-  - Error: `assert.ok(dragged.x >= before.left + 60 && dragged.saved.x === dragged.x)`.
-  - Root cause: MIR 1.4.3's `mir/css/base.css:381–382` gave λWAVES' own `#keymap` its stacking: `#keymap { position: fixed; inset: 0; z-index: var(--z-veil); display: flex; flex-direction: column; } #keymap[hidden] { display: none; }`. MIR 1.5's `base.css` has no `#keymap` rule, so the pane falls under `#rackL` (z 30); the test's drag point hits `canvas.shadow-c`. The kit's `keyboard/keyboard.css`, loaded through `mir.css`, also styles 87 `.km-*` selectors on our app-owned pane: 315 key children get `pointer-events: none`, plus overflow, a legend dot border, the search box's `user-select` and the list's `touch-action`. All of it is in `.tmp/km-base.json` vs `.tmp/km-c0.json`.
-  - Fix to apply: move the two 1.4.3 `#keymap` rules into lab.css, as λWAVES' own (the editor is app-owned, CLAUDE.md). Check that `--z-veil` is declared on 1.5. Then re-run `keyboard-window`, and stylehash with the keymap open (a new `cap.mjs` set: `__LW.layout.keymap.toggle()`) to judge the `.km-*` collision: twin or keep.
-- **`mir-controls`: RED**, `AssertionError: 0.25 != 0.5`. Not yet investigated or re-run alone. Run it on the base copy first (`.tmp/run1.mjs <root> <port> <gd> mir-controls.browser-test.mjs`).
-- **The other 25:** `camera-shift`, `chem` 55, `current`, `export3d`, `field-molecule`, `frame-occlusion`, `gpu-recovery`, `history`, `input`, `latex-copy`, `lfo-tension`, `library`, `menubar`, `molecular-diff` 15, `molecular-names`, `molecule-demos`, `new-project`, `offer` 16/16, `official-defaults-palette`, `orbitals` 24, `register` 17, `render-regressions`, `routed-knob` 4, `stage-text`, `take-in-bugs`. Loads ran 2.2–5.8, with sibling builders on the machine.
+## Tests so far (this continuation)
+- `node tests/pwa.test.mjs --write`: PASS (263 precached).
+- `keyboard-window` (8783/5253) alone: **PASS** (red before the fix).
 
-**NOT RUN YET:** the ms/s pair. `.tmp/msps.mjs 3` is written; it needs both gate servers up (8787 base, 8783 mine) and a load under 4. Then REPORT wave 196 and `C0-BUILD.md`.
-
-**Status (update):** steps 1–6 of the brief are done. Still to do: step 7, `adopt.mjs --check`; step 8, the second canary (node 85, then the 27 browser suites one at a time); step 9, the ms/s pair; step 10, the line counts; steps 11–12, the `__LW` law check, REPORT wave 196, and `C0-BUILD.md`. The servers: gate `server.py` on 8783 (my tree) and 8787 (`.tmp/base`); stop them by pid.
-
-## Measured so far
-- **stylehash** (kit 1.5 tool, http via the kit's `tools/serve.mjs`, the README's λWAVES recipe, `--gpu 1`):
-  - The base copy (`git archive 7044f37 lab tools` → `.tmp/base`) has 790 elements per state with the rack closed, 1,169 with the modulation window open and 805 with the notebook open. These equal A0's.
-  - The bare adopt (old links) gives, closed, in element-states over the 8 states:
-
-    | class | element-states |
-    |---|---|
-    | press-scale transition | 816 |
-    | box-shadow | 536–613 |
-    | focus outline (`.k-val`) | 224 |
-    | ON text-shadow | 132 |
-    | `.dev-head` background | 80 |
-    | backdrop-filter | 80 |
-    | border (`.dev-power`) | 80 |
-
-    Nothing is gone or new.
-  - With the modulation window open, 34 elements are gone and 34 new in each state: the kit's own modwindow glyph swap, R13 (C4).
-  - The `mir.css` switch alone changes **0** elements, closed and with the window open. One capture had a first-state transient; it was re-taken.
-- **Dead-now-live**, mapped by CDP across 4 states (window open) plus the notebook: 5 app rules out-rank kit rules they lost to on 1.4.3. All 5 now have twins; a re-map shows 0. Live-now-dead: 0.
-- **`!important`**: 37 on this tree. None meets a kit `!important` with a different value. The kit has 22, and where both sides declare the same property the values are identical.
-  - 12 of ours existed only to beat the kit's 1.4.3 specificity: `.picker` / `.pk-n` ×2 (lab.css:166) and the `.native-info-content` popover ×10 (skin.css:291–300).
-  - These 12 are candidates to drop the flag. That is NOT done yet, because it needs a probe with the popover open.
-  - The other 25 are app-vs-app, inline (`#notebook` phone geometry) or reduced-motion; they stay.
-- `lab/*.js` = 36,288, unchanged by both commits.
-
-## The tools (untracked, in `.tmp/`; `.gitignore` has `.tmp/`)
-| tool | what it does |
-|---|---|
-| `cap.mjs <name> <port> <closed\|mod\|nb>` | one stylehash capture into `.tmp/sh` |
-| `classes.mjs <before> <after> <noise\|-> [--gone N]` | sorts the changes into the seven classes, counted in element-states |
-| `inwin.mjs` | changes on elements matching a key substring |
-| `who.mjs <port> <set> <state> <spec.json>` | the winning rules for some selectors |
-| `flips.mjs` + `flipdiff.mjs` | contested properties across the whole page; dead-now-live |
-
-Captures are in `.tmp/sh/`: before, before2, mod-before(2), nb-before(2), bare, mod-bare, links, links2, mod-links.
-
-## Not done (in the brief's order)
-1. **The pin:** add `'1.5.0-alpha.24': '3f969725…5351'` to `ACCEPTED` in `tests/mir-manifest.test.mjs`, keeping the 1.4.3 row. Then `node tools/new-project.mjs` and `--check`. bpm becomes 30: the kit's `BPM_DEFAULT` = 30 equals the plan's.
-2. **R5-W1** in `tests/wiring.test.mjs`, `tests/pwa.test.mjs` and `tools/build-deploy.mjs`:
-   - A `lab/mir/**` file in the manifest that no root reaches is reported, not precached, and not failed. App files keep the hard gate. The five dated ALLOWLIST rows retire.
-   - pwa's `STAGED` must come from that set, not from the ALLOWLIST regex. One idea: `wiring.test.mjs --unreached-kit` prints JSON, and pwa and build-deploy spawn it.
-   - Then `pwa --write`.
-   - pwa's remaining reds after the write: D2 (`mir/shell/gui.js` fabiandesmet URL), D3 (`mir/app.js → ../LICENSE`), the uncached loads, and the font gate counting `fonts/info` as "ours" (expects 3).
-   - pwa.test:445 reads the CSS loads from a fixed list; with `mir.css` linked it should follow the `<link>`s and `@import`s.
-3. **The seven classes:** the defaults per §9, `C0-GLASS-RULINGS.md`, and the PNG pairs with the gate Firefox `g.snap()` (`tools/gate/gatekit.mjs`) into `research/release-0.5.0/c0-glass/`.
-4. `adopt.mjs --check`.
-5. The second canary: node 85 and all 27 browser suites, one at a time.
-6. The ms/s pair: `tools/perf/main-thread.mjs --runs 3`, interleaved base / mine, gate 3.536.
-7. REPORT.md wave 196; `C0-BUILD.md`.
+## Blockers
+None.
 
 ## Exact next step
-Edit `ACCEPTED` in `tests/mir-manifest.test.mjs`, then run `node tests/mir-manifest.test.mjs`, then `node tools/new-project.mjs && node tools/new-project.mjs --check`.
+Step 2: run `mir-controls` on the base copy (`LW_PORT=8787 GD_PORT=5257`), expect green; read the kit's `setKnobLaw()` under `lab/mir/`;
+re-aim `tests/mir-controls.browser-test.mjs` to MIR 1.5's ONE KNOB LAW (vertical drag, ⅛ fine gear) in its own commit. The gate
+servers must be restarted first (`python3 tools/gate/server.py <tree> 8783`, `… .tmp/base 8787`); the kit `serve.mjs` pair used for
+stylehash is stopped by pid.

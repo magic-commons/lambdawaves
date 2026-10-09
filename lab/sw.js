@@ -109,7 +109,7 @@ const PRECACHE = [
   ['./keymap.js',                                                   '9c4d439d1a9e'],
   ['./keys.js',                                                     'bb78c9e95855'],
   ['./kick.js',                                                     '586697c01ee5'],
-  ['./lab.css',                                                     'be6c4fc72db9'],
+  ['./lab.css',                                                     'd125cf9325fc'],
   ['./ladder-model.js',                                             '69199febdca1'],
   ['./ladder.js',                                                   'ab571c69fb38'],
   ['./latex-state.js',                                              '4511e84cddc9'],
