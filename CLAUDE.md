@@ -197,3 +197,11 @@ its scope tables, and `tools/settings-probe.mjs` is their gate). The camera's
 port is `createCameraLaw(...).port`, the object MIR's CAMERA panel takes. The
 stage's bindings are `STAGE_BINDINGS` in `lab/stage-gestures.js`; a binding
 change is a row edit there. (0.5.0 A1/A8)
+
+The CAMERA card is MIR's `createCameraPanel` over `createCameraLaw(...).port`
+(`rack.js`, grep `createCameraPanel`); the saved `observer.*` routes stay
+`rack.js`' definitions, whose dials are the panel's (`camKnobs`) — the panel
+registers none (its `mod` has no `add`). The phase palette is MIR's
+`createRampPanel` (`DEFAULT_PALETTE` in `lab/palette-app.js`).
+`tools/camera-routes.mjs` proves the saved routes after a camera change.
+(0.5.0 C1)
