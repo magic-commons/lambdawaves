@@ -10,6 +10,9 @@
  *             --states a,b,c   only these states (0.4.0 S4a: `--states` with the thirteen pre-S4a names checks the old fixture
  *                        on a tree that has the new ones; research/release-0.4.0/measure/digest-lock-s4a.json is the lock
  *                        S4c checks: the 1004 values plus benzene, lysine and lysine's HOMO, recorded on the S4a base tree)
+ *   THE COUNTS ON THE 0.5.0 TREE (each retired state is 48 values: 3 grids × 16; the fixtures are never re-baked):
+ *             `--check --query gastab=0` compares 860 values, and the same plus `--fixture research/release-0.4.0/measure/
+ *             digest-lock-s4a.json` 1004, both 0/0, since D9b retired `h2` (908 / 1052 after D9's h2plus and helium).
  *
  * What it locks, every number read from the SHIPPED pipelines through the booted app (window.__LW, __LW.field) —
  * no replica, no copied WGSL:

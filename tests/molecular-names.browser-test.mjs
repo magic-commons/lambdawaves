@@ -49,7 +49,7 @@ try {
   }
   assert.equal(boot.ids.includes('molecule') || boot.records.includes('molecule'), false, 'the deleted H₂⁺ card has no seat and no record');
   assert.deepEqual(boot.errors, []);
-  console.log('PASS Molecules and MO-Registry start on the left rack under SPECTRUM, the legacy windows are hidden, ATOMS has its + and WINDOW rows, saved IDs are stable');
+  console.log('PASS Molecules and MO-Registry start on the left rack under SPECTRUM, the five legacy windows are gone (0.5.0 D9, D9b), ATOMS has its + and WINDOW rows, saved IDs are stable');
 
   /* 0.4.0 S0 · wave 136 (audit F6): SPECTRUM's two orphaned operators — QUARKONIUM's button is hidden while QCD is, but the
      value still restores; a press on ATOM opens ATOMS, the periodic table (0.4.0 S3) */
