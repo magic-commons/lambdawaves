@@ -41,3 +41,8 @@ Final numbers: `lab/*.js` 36,288 → 35,753 (C7's own −716; the adopt's sw.js 
 - the docs commit on top: C7-BUILD.md § the hand-over fix, REPORT wave 203, this section. **The tip is that docs commit.**
 - Lock on `c994505`: 1004 GREEN 59 s 0/0 · 1148 GREEN 59 s 0/0. `handover-probe`: spent → 1 download, 0 shares (before: 1 rejected share, 0 downloads); live → 1 share.
 - `lab/*.js` 35,753 → 35,768. Next: the integrator takes this branch in place of `74ade0c`. The film verifier's findings on `74ade0c` still apply, since only the hand-over moved.
+- **Follow-up after the verifier's HOLD** (`worktree-agent-a4c46eea610dff207` `50ef3d2`):
+  - The commit `0.5.0 C7 · the hand-over's guard and its URL` adds `tests/film-handover.browser-test.mjs` (4 scenes; GREEN here, RED on `74ade0c` scene 1, RED on `c994505` scene 2) and deletes `tools/perf/handover-probe.mjs`.
+  - `render-exact.js` `save` now discards the store's copy after 10 min, not 2.
+  - The docs commit follows. **The tip is the last commit on `worktree-agent-a60503e61fea6f97e`.**
+  - Lock 1004 GREEN 58 s 0/0 · 1148 GREEN 58 s 0/0. `lab/*.js` 35,769.

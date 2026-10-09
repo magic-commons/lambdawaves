@@ -185,10 +185,10 @@ Linux Firefox has no `navigator.share`, so every gate here was green.
 - `lab/capture.js` +15: `handOver` is 8 lines of code and 6 of comment, and `save` calls it.
 - `lab/render-exact.js` ±0: the `saveBlob` import leaves, `handOver` joins the `./capture.js` import, and `save` calls it.
 - `lab/sw.js` is rewritten by `pwa --write` (hashes only).
-- `lab/*.js` went from **35,753 to 35,768**.
-- `tools/perf/handover-probe.mjs` is new: 58 lines, the only probe that runs the hand-over (`film-probe.mjs` stubs it away).
+- `lab/*.js` went from **35,753 to 35,768** at `c994505` (35,769 after the follow-up below).
+- `tools/perf/handover-probe.mjs` was new at `c994505` (58 lines, the only probe that ran the hand-over; `film-probe.mjs` stubs it away). The follow-up below folds it into `tests/film-handover.browser-test.mjs` and deletes it.
 
-**The evidence** (`LW_PORT=8863 GD_PORT=5333 node tools/perf/handover-probe.mjs`, Firefox 157 headless, RTX 3070). The probe
+**The evidence** (`LW_PORT=8863 GD_PORT=5333 node tools/perf/handover-probe.mjs` at `c994505`, Firefox 157 headless, RTX 3070). The probe
 stubs `navigator.share` / `canShare`: a share outside a live activation rejects with NotAllowedError, as Chrome's does. It
 patches `HTMLAnchorElement.prototype.click` to count `download` anchors without making them. *film* is EXPORT FRAMES (25 frames,
 about 4.3 s of rendering). *picture* is TAKE A PICTURE from a script, which carries no activation. *tap* is TAKE A PICTURE from a
@@ -227,3 +227,64 @@ handed over inside a live tap would share part 1 and download the rest. No film 
 **What Josh will see.** On Chrome, Edge and macOS Safari, a finished RECORD, ONE PERIOD, EXPORT FRAMES, picture or EXPORT SHAPE
 lands in Downloads. Before this fix it vanished without a word. On the iPad a quick TAKE A PICTURE still opens the share sheet
 ("Save Image"), and the EXPORT FRAMES zip now downloads instead of being lost.
+
+### § the regression and the URL (the follow-up after the film verifier's HOLD on `74ade0c`)
+
+The verifier (`worktree-agent-a4c46eea610dff207` at `50ef3d2`, `research/release-0.5.0/C7-VERIFY.md`) made the hand-over fix the
+condition to merge and asked for two follow-ups.
+
+**1 · The regression: `tests/film-handover.browser-test.mjs`** (104 lines). It replaces `tools/perf/handover-probe.mjs`, which is
+deleted, so only one of the two remains.
+- **Stubs.** In the page, `navigator.canShare` is permissive (Safari's) and `navigator.share` rejects NotAllowedError outside a
+  live activation (the spec's rule). Every `<a download>` is counted, not followed.
+- **Timers.** The timers each save sets are caught and run on a virtual clock, so no scene waits minutes. Most of the run
+  is the RECORD's ~37 s render.
+
+| scene | what it does | what it asserts |
+|---|---|---|
+| 1 | a REAL tap on RECORD in the CAMERA card | `isActive` true at the click and false at `film.save` (~37 s later); then 1 download (a blob URL named as the film), 0 shares |
+| 2 | the save's timers run in delay order, with the URL read and the OPFS store counted around each | the URL reads the film until its own revoke, never dying by the store's discard, and reads at every step up to 125 s; the film's directory then leaves OPFS |
+| 3 | TAKE A PICTURE from a script | 1 download, 0 shares |
+| 4 | a REAL tap on TAKE A PICTURE | its save is inside the activation; 1 share, 0 downloads |
+
+**It guards** (one run on each tree):
+
+| tree | port | result | where it fails |
+|---|---|---|---|
+| this tree | 8863 | **GREEN**, 4 PASS | — |
+| `74ade0c` (base copy, `git archive 74ade0c lab tools` → `.tmp/base-74ade0c`) | 8867 / 5337 | **RED** | scene 1: `shares: 1, downloads: []`, activation spent at the save. Assertion: "a film with the activation spent took the share road (it is lost there)" |
+| `c994505` (this tree, before the URL fix below) | 8863 | **RED** | scene 2: `{"ms":120000,"url":"TypeError","left":1}`. The 2-minute discard killed the URL; it read 742,908 B before |
+
+**2 · The URL against the discard: the store's copy now waits ten minutes.**
+- **The change.** `render-exact.js` `save`: `setTimeout(() => discard(r), 120000)` became `10 * 60 * 1000`. Ten minutes is the
+  longest any hand-over keeps its URL: a video's, on `handOver`'s road and on the kit's. That is one constant and one comment line.
+- **Not changed:** `rack.js:1651`. That is the `download: false` road: nothing is handed over, so no URL reads the store.
+- **Why not a memory copy** (`new Blob([await blob.arrayBuffer()])`):
+  - It would hold a whole film on the heap. That is what the kit's OPFS store exists to avoid, and the kit's own header records
+    that a large in-memory movie terminated the iPad page.
+  - It doubles the peak memory of a multi-part EXPORT FRAMES (128 MB parts).
+  - It puts an await before the hand-over, which would spend the activation of a save that was inside a live tap.
+- **The cost.** A finished film's OPFS copy lives 10 minutes instead of 2, so a tab closed inside that window orphans it (lead 2).
+  The sweep belongs to the kit (brief candidate 2 above).
+- **Proof:** scene 2 is GREEN on this tree (steps `[{"ms":600000,"url":"TypeError","left":0},{"ms":600000,"url":"TypeError","left":1}]`:
+  the revoke first, then the discard) and RED without the change, as the table above shows.
+
+**Gates on this follow-up** (8863/5333, one browser at a time, `wait-gpu` before each):
+- `DIGEST LOCK GREEN: 1004 values compared · 0 readback differences · 0 record-byte differences · unrepeatable now: none · page errors 0 · 58 s`
+- `DIGEST LOCK GREEN: 1148 values compared · 0 readback differences · 0 record-byte differences · unrepeatable now: none · page errors 0 · 58 s`
+- `render-exact` 37/37, `capture` 33/33.
+- Browser: `film-handover` GREEN 4/4, `offer` 16/16, `export3d` 10 PASS.
+- `pwa --write` was rerun. `lab/*.js` went from 35,768 to **35,769** (+1, the comment line), and is +16 against `74ade0c`.
+
+**Open items the verifier found, carried here and not fixed:**
+1. **A film cancelled before its first checkpoint leaves `job.json` and an empty `payload.bin` in OPFS forever.** The kit's
+   `RenderStore.recoveries()` skips a job with no files and no checkpoint samples, so λWAVES' `discard({ token })` never sees it.
+   An EXPORT FRAMES cancelled before its first 128 MB part is the same case. Brief candidate: `recoveries()`, or a sweep, lists
+   job directories with no files.
+2. **ONE PERIOD has no STOP.** Its button carries no `data-render-cancel`, and `capRecordLoop` ignores a second press, so only
+   Escape cancels a 37 s ONE PERIOD. RECORD and EXPORT FRAMES both have STOP.
+3. **A film's bytes depend on the window arrangement.** The same RECORD was 742,908 B with the CAMERA card open and 744,558 B
+   without it; this suite's RECORD, with the card open, is also 742,908 B. The suspect is the frame/axis occlusion mask
+   (`rack.js` `refreshOcclusion`). The HAZARDS register does not name it, and it was not investigated.
+4. **RECORD's kit manifest names its motion `loop`** (label ONE PERIOD) for a clip, because of
+   `motion: sched.mode === 'span' ? 'span' : 'loop'`. Cosmetic.

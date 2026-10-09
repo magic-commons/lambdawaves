@@ -4675,4 +4675,11 @@ downloads):
 - `saveBlob` should consult `userActivation.isActive` and download when `share()` rejects.
 - The recorder store wants a sweep of orphaned films.
 
-Hand-off: `research/release-0.5.0/C7-BUILD.md` § the hand-over fix.
+**The follow-up after the verifier's HOLD.**
+- `tests/film-handover.browser-test.mjs`, the permanent guard, replaces the probe: a real RECORD tap downloads, the URL outlives the
+  store's copy, a scripted picture downloads, and a real picture tap shares. It is GREEN 4/4 here, RED on `74ade0c` (the film shared
+  and was lost) and RED on `c994505` (the 2-minute discard killed the URL).
+- The store's copy of a handed-over film now waits ten minutes, the URL's longest lifetime, instead of two.
+- The lock was GREEN again (1004 and 1148, 0/0), and `lab/*.js` is 35,769.
+
+Hand-off: `research/release-0.5.0/C7-BUILD.md` § the hand-over fix and § the regression and the URL.
