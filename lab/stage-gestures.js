@@ -5,6 +5,10 @@
 // one pixel of drag moves the picture one pixel).
 // 0.5.0 A8 · THE BINDINGS are ONE data table (R5-C1: today's stand, and a change is a row edit; brief 1 takes it as
 // configuration).  bindStageGestures reads it through `bindings`; rack.js' Alt+Arrow quartet reads `nudge`.
+// 0.5.0 C9 · THE SCENE GUARD (MIR 1.5 mir/shell/scene-guard.js, `install: false`, as BASINS' gestures.js): `ui()` is UI space, and
+// a press or a double-click there starts nothing on the stage and its wheel goes to that region's scroller.  The table is the law
+// for every press that does reach the stage; a drag begun on the stage keeps its pointer across the UI.
+import { createSceneGuard } from './mir/shell/scene-guard.js';
 const frozen = (o) => Object.freeze(Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v && typeof v === 'object' ? frozen(v) : v])));
 export const STAGE_BINDINGS = frozen({
   pointer: { button: 0, slide: { altKey: true, ctrlKey: false }, fine: 'shiftKey' }, // one finger or the mouse: these modifiers slide; else the instrument's special; else orbit (`fine` × law.FINE)
@@ -17,8 +21,9 @@ export const STAGE_BINDINGS = frozen({
 });
 export function bindStageGestures(canvas, {
   camera, travel, law, getDistance, zoomAt, pan, orbitBy, resetView,
-  setDragging, present, startSpecial, hover, now = () => performance.now(), bindings: B = STAGE_BINDINGS,
+  setDragging, present, startSpecial, hover, now = () => performance.now(), bindings: B = STAGE_BINDINGS, ui = () => [],
 }) {
+  const guard = createSceneGuard({ canvas, rects: ui, install: false });
   const points = new Map(), history = [];
   let special = null, pinch = null, down = null, lastTap = null, fine = false;
   const doc = canvas.ownerDocument, win = doc.defaultView;
@@ -59,7 +64,7 @@ export function bindStageGestures(canvas, {
     if (Math.hypot(wy, wp) >= law.REST) camera.fling(wy, wp);
   }
   function pointerDown(e) {
-    if (e.button !== B.pointer.button || special || points.has(e.pointerId) || points.size === 2) return;
+    if (e.button !== B.pointer.button || special || points.has(e.pointerId) || points.size === 2 || guard.hit(e)) return;
     try { canvas.focus({ preventScroll: true }); } catch (_) {}
     if (!points.size) {
       const action = held(e, B.pointer.slide) ? slide(e) : startSpecial(e);
@@ -133,12 +138,13 @@ export function bindStageGestures(canvas, {
   canvas.addEventListener('pointerup', e => finish(e, false));
   for (const type of ['pointercancel', 'lostpointercapture']) canvas.addEventListener(type, e => finish(e, true));
   canvas.addEventListener('wheel', e => {
+    const r = guard.hit(e); if (r) return guard.wheel(e, r);
     e.preventDefault();
     // WheelEvent deltaMode: pixels, lines (16 CSS px), or viewport pages.
     const W = B.wheel, unit = e.deltaMode === 1 ? W.line : e.deltaMode === 2 ? (W.page ?? canvas.clientHeight) : 1;
     zoomAt(W.atCursor ? uv(e.clientX, e.clientY, canvas.getBoundingClientRect()) : [0, 0], getDistance() * Math.pow(W.base, e.deltaY * unit / W.per));
   }, { passive: false });
-  if (B.dblclick) canvas.addEventListener('dblclick', resetView);
+  if (B.dblclick) canvas.addEventListener('dblclick', e => { if (!guard.hit(e)) resetView(); });
   win.addEventListener('blur', cancel);
   win.addEventListener('pagehide', cancel);
   doc.addEventListener('visibilitychange', () => { if (doc.hidden) cancel(); });

@@ -1,4 +1,5 @@
 import { bindStageGestures, STAGE_BINDINGS } from './stage-gestures.js';
+import { uiSpace } from './mir/shell/scene-guard.js';   // 0.5.0 C9: the kit's UI space, the stage guard's rects
 import { coalesce } from './frame-coalescer.js';
 import { waitForPaint } from './frame-settle.js';
 import { readProjectCollection } from './project-storage.js';
@@ -4413,8 +4414,11 @@ export async function boot(dom) {
   layout.phone = { get on() { return phone.on; }, get dprCap() { return field.dprCap; }, get transportFolded() { return wTr.root.classList.contains('folded'); }, get parkedFloats() { return phone.floats ? Object.keys(phone.floats) : []; }, sync: syncPhone };
   layout.tablet = { get on() { return tablet.on; }, get dprCap() { return field.dprCap; }, get stepCap() { return field.stepCap; }, sync: syncPhone };
 
-  /* Stage gestures own pointer lifetimes; these callbacks own the instrument. */
+  /* Stage gestures own pointer lifetimes; these callbacks own the instrument.  0.5.0 C9 · `ui` is UI SPACE for the stage's scene guard:
+     every window on the float layer by its WHOLE rect (the modulation window with its rail and work bars, a floated card: the gaps
+     between their parts are UI, not picture) and the app's own panes.  A press there never reaches the stage. */
   bindStageGestures(dom.canvas, {
+    ui: uiSpace({ layer: floats, extra: () => ['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => paintedRect(document.getElementById(id))).concat(paintedRect(document.querySelector('#keymap .km-panel'))) }),
     camera, travel: camTravel, law: CAM,
     getDistance: () => obs.dist, zoomAt, pan: panBy, orbitBy, resetView,
     setDragging: value => { dragging = value; },
