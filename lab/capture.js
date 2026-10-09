@@ -647,7 +647,7 @@ export async function readback(f, canvas, w, h, draw, wit = null) {
  *  neither awaits it nor falls back: after a film's render or a GPU readback the activation is spent, share() rejects, and
  *  NOTHING was saved (Chrome, Edge, macOS Safari).  So the kit's road only while the activation is live; otherwise the
  *  `<a download>` λWAVES used before C7, its URL kept as the kit keeps one (a video ten minutes, anything else one).  A
- *  browser without navigator.userActivation counts as spent.  tools/perf/handover-probe.mjs counts the road taken. */
+ *  browser without navigator.userActivation counts as spent.  tests/film-handover.browser-test.mjs is its guard. */
 export function handOver(blob, name) {
   if (typeof navigator !== 'undefined' && navigator.userActivation && navigator.userActivation.isActive) return saveBlob(blob, name);
   const url = URL.createObjectURL(blob), a = document.createElement('a'), video = (blob.type || '').startsWith('video/') || /\.mp4$/i.test(name);

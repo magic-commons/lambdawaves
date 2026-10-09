@@ -826,11 +826,12 @@ export function createFilm(LW, opts = {}) {
   }
 
   /** the hand-over: every file of a finished film, under λWAVES' name (capture.js' handOver: the render spent the tap, so a
-   *  download); the store's copy goes a little later */
+   *  download).  The handed-over URL reads the store's file, so the store's copy goes after ten minutes, the longest a
+   *  hand-over keeps its URL (a video's); at two a download confirmed late failed (C7-VERIFY N1, film-handover scene 2) */
   function save(r) {
     if (!r || !r.files || !r.files.length) return false;
     r.files.forEach((x, i) => handOver(x.blob, r.files.length === 1 ? r.name : r.name.replace(/\.zip$/, '') + '-part' + String(i + 1).padStart(3, '0') + '.zip'));
-    setTimeout(() => discard(r), 120000);
+    setTimeout(() => discard(r), 10 * 60 * 1000);
     return true;
   }
 
