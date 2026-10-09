@@ -2,8 +2,9 @@
  * §2.6 C3): H₂ with the correlation put back, twice, in the lab's own JS.
  *   node tests/h2ci.test.mjs
  * Oracles, in order of independence:
- *   · lab/h2.js's own Heitler–London TRIPLET — an exact eigenvector of the CI matrix, so at ζ = 1 the two files
- *     must agree to the last bit.  This validates the whole 1s-STO integral set against code written years apart.
+ *   · Heitler–London's closed-form TRIPLET (lab/h2.js's h2Energies until the H₂ card left in 0.5.0 D9b; below) — an exact
+ *     eigenvector of the CI matrix, so at ζ = 1 the two must agree to the last bit.  This validates the whole 1s-STO
+ *     integral set against code written years apart.  Q8 keeps tests/h2.test.mjs's anchors on the closed forms h2ci.js took.
  *   · prolate-spheroidal quadrature of the hybrid integral (aa|ab), and radial quadrature of (aa|aa) and F₀.
  *   · the tables: Weinbaum 1933 (E = −1.1478, D_e = 4.02 eV, ζ = 1.193 at R = 1.40) and Szabo–Ostlund's STO-3G
  *     H₂ (RHF −1.116714, FCI −1.137276 at R = 1.4) — KNOWN, from memory.
@@ -11,8 +12,8 @@
  *     RHF −0.656048251146, FCI −0.933631844558.
  */
 import { h2Curves, weinbaum, weinbaumOptimal, sto3gH2, sto3gIntegrals, stoIntegrals, minimalH2, sto3gHydrogen,
-  hybridAAAB, coulombAAAA, boys0, dissociation, HARTREE_EV } from '../lab/h2ci.js';
-import { h2Energies } from '../lab/h2.js';
+  hybridAAAB, coulombAAAA, boys0, dissociation, HARTREE_EV, expint1, coulombJ2, exchangeK2 } from '../lab/h2ci.js';
+import { overlapS, coulombJ, resonanceK, EV } from '../lab/molecule.js';
 import { gaussLegendre } from './lib/twocentre.js';
 
 let FAILED = 0, TOTAL = 0;
@@ -24,6 +25,13 @@ const T0 = performance.now();
 const near = (a, b, tol) => Math.abs(a - b) <= tol;
 const sig = (v, d = 8) => +v.toPrecision(d);
 const ANG = 0.529177210903;
+/* Heitler–London 1927 in closed form (lab/h2.js's h2Energies, moved here with the H₂ card's deletion, 0.5.0 D9b):
+   E± = −1 + 1/R + [2J + J′ ± (2SK + K′)] / (1 ± S²), with H₂⁺'s S, J, K and the two-electron J′, K′ */
+function h2Energies(R) {
+  const S = overlapS(R), J = coulombJ(R), K = resonanceK(R), J2 = coulombJ2(R), K2 = exchangeK2(R);
+  const Ecoul = 2 * J + J2, Eexch = 2 * S * K + K2;
+  return { S, J, K, J2, K2, singlet: -1 + 1 / R + (Ecoul + Eexch) / (1 + S * S), triplet: -1 + 1 / R + (Ecoul - Eexch) / (1 - S * S) };
+}
 
 /* ── Q1  the Boys function, against its own defining integral ─────────────────────────────────────────────────── */
 {
@@ -60,7 +68,7 @@ const ANG = 0.529177210903;
     { maxHybridDeviation: sig(maxDev, 3), selfRepulsionDeviation: sig(selfDev, 3), 'limit R→0': sig(lim, 10), '5ζ/8': sig(self, 10), rows });
 }
 
-/* ── Q3  the exact cross-check against lab/h2.js: the M_s = 0 triplet is the same number ───────────────────────── */
+/* ── Q3  the exact cross-check against Heitler–London's closed form: the M_s = 0 triplet is the same number ────── */
 {
   let maxT = 0, maxRes = 0, allBelow = true; const rows = [];
   for (const R of [1.0, 1.4, 2.0, 3.0, 6.0]) {
@@ -69,7 +77,7 @@ const ANG = 0.529177210903;
     if (!(mine.fci <= hl.singlet)) allBelow = false;
     rows.push({ R, triplet: sig(mine.triplet, 12), fci: sig(mine.fci, 9), hlSinglet: sig(hl.singlet, 9) });
   }
-  judge('Q3 THE INDEPENDENT ORACLE — h2.js AND h2ci.js ARE THE SAME PHYSICS AT ζ = 1: the M_s = 0 triplet, which is an exact eigenvector of the 4-determinant CI by spin symmetry alone, equals Heitler–London\'s closed-form triplet (Sugiura\'s J′, K′ and the exponential integral) to 1e-14 at five separations, with CI residual ‖(H−E)t‖ < 1e-14; and the CI singlet lies BELOW the Heitler–London singlet at every one of them — the ionic configuration is the variational gain, and it is the whole content of Weinbaum',
+  judge('Q3 THE INDEPENDENT ORACLE — HEITLER–LONDON\'S CLOSED FORM AND h2ci.js ARE THE SAME PHYSICS AT ζ = 1: the M_s = 0 triplet, which is an exact eigenvector of the 4-determinant CI by spin symmetry alone, equals Heitler–London\'s closed-form triplet (Sugiura\'s J′, K′ and the exponential integral) to 1e-14 at five separations, with CI residual ‖(H−E)t‖ < 1e-14; and the CI singlet lies BELOW the Heitler–London singlet at every one of them — the ionic configuration is the variational gain, and it is the whole content of Weinbaum',
     maxT < 1e-14 && maxRes < 1e-14 && allBelow, { maxTripletDeviation: sig(maxT, 3), maxCIResidual: sig(maxRes, 3), rows });
 }
 
@@ -127,6 +135,31 @@ const ANG = 0.529177210903;
   arrayOk = arr.length === Rs.length && near(arr[2], h2Curves('fci', 1.4), 1e-15);
   judge('Q7 h2Curves(kind, R) — the export a UI wave can draw: five curves (rhf, fci, weinbaum, hl, triplet), a number for a number and a Float64Array for an array, with the variational ordering FCI ≤ RHF, FCI ≤ triplet and Weinbaum ≤ Heitler–London holding at all seven separations from 0.8 to 8 a₀',
     ordered && arrayOk, { rows, arrayLength: arr.length });
+}
+
+/* ── Q8  tests/h2.test.mjs's anchors on the closed forms h2ci.js took from lab/h2.js (0.5.0 D9b: the H₂ card and h2.js left;
+         its density-weight and collision judges guarded deleted code and went with them) ────────────────────────────── */
+{
+  /* E₁(1) = 0.219383934, E₁(0.5) = 0.559773595, E₁(4) = 0.003779352 (tables) */
+  judge('Q8 the exponential integral E₁ matches the tables at 0.5, 1, 4 (1e-8), and the series/continued-fraction seam at x = 1 is continuous (1e-12)',
+    Math.abs(expint1(1) - 0.219383934) < 1e-8 && Math.abs(expint1(0.5) - 0.559773595) < 1e-8 && Math.abs(expint1(4) - 0.003779352) < 1e-8 && Math.abs(expint1(0.999999) - expint1(1.000001)) < 1e-5, [expint1(0.5), expint1(1), expint1(4)]);
+  /* J′ = ∫ b²(x) V_a(x) d³x with the exact potential of a 1s cloud, V_a(r) = 1/r − e^{−2r}(1 + 1/r): cylindrical quadrature */
+  const R = 1.4, NP = 600, NZ = 1200, P = 12, dp = P / NP, dz = 2 * P / NZ, w = (i, n) => (i === 0 || i === n) ? 1 : (i % 2 ? 4 : 2);
+  let I = 0;
+  for (let i = 1; i <= NP; i++) { const rho = i * dp; for (let l = 0; l <= NZ; l++) { const z = -P + l * dz, ww = w(i, NP) * w(l, NZ) * dp * dz / 9 * 2 * Math.PI * rho;
+    const rb = Math.hypot(rho, z - R / 2), ra = Math.hypot(rho, z + R / 2); const b2 = Math.exp(-2 * rb) / Math.PI, Va = 1 / ra - Math.exp(-2 * ra) * (1 + 1 / ra); I += ww * b2 * Va; } }
+  judge('Q8 THE COULOMB ORACLE: J′(1.4) by direct quadrature of b² against the exact 1s potential matches the closed form 1/R − e^{−2R}(1/R + 11/8 + 3R/4 + R²/6) to 3e-5', Math.abs(I - coulombJ2(R)) < 3e-5, { quad: I, closed: coulombJ2(R) });
+  /* Heitler–London's equilibrium by golden section on [0.8, 4] (h2.js's h2Equilibrium, verbatim) */
+  let a = 0.8, b = 4; const gr = (Math.sqrt(5) - 1) / 2; let c = b - gr * (b - a), d = a + gr * (b - a);
+  const E = (r) => h2Energies(r).singlet;
+  for (let i = 0; i < 100; i++) { if (E(c) < E(d)) b = d; else a = c; c = b - gr * (b - a); d = a + gr * (b - a); }
+  const Re = (a + b) / 2, Emin = E(Re), eq = { Re, E: Emin, De: -1 - Emin, DeEV: (-1 - Emin) * EV };
+  judge('Q8 HEITLER–LONDON 1927: R_e = 1.64 a₀ and D_e = 3.156 eV (exact: 1.40 a₀, 4.75 eV) — the first bond, as a variational bound (1e-4 on D_e)', Math.abs(eq.Re - 1.64) < 0.02 && Math.abs(eq.DeEV - 3.1557) < 1e-4 && eq.E > -1.1745, eq);
+  let repulsive = true, ordered = true;
+  for (let r = 0.6; r <= 10; r += 0.2) { const e = h2Energies(r); if (e.triplet < -1) repulsive = false; if (e.singlet > e.triplet) ordered = false; }
+  judge('Q8 the Heitler–London triplet is repulsive at every R (E > −1, the separated atoms) and lies above the singlet — Pauli repulsion is electrostatics of the exchange density', repulsive && ordered);
+  const far = h2Energies(25);
+  judge('Q8 at R = 25 both Heitler–London curves are two free atoms, E = −1 (1e-6)', Math.abs(far.singlet + 1) < 1e-6 && Math.abs(far.triplet + 1) < 1e-6, far);
 }
 
 console.log('wall ' + ((performance.now() - T0) / 1000).toFixed(2) + ' s');

@@ -14,8 +14,8 @@
  *   the KIT'S OWN RECORDER (lab/mir/render/recorder.js, unchanged, in node with a canvas stand-in that encodes PNG
  *   frames through capture.js' encoder and no file system, so the run keeps its frames in memory) drives λWAVES'
  *   frame against a FAKE LAB that REPRODUCES EVERY HAZARD: its fake shader reads the jitter counter, its fake governor
- *   drops the grid when frames run long, its fake AUTO SCALE moves the canvas, its fake rack loop interlopes, its fake
- *   H2 needs update(t) first.  The DRIVEN modulation is the kit's real host and record clock.  So "the same schedule
+ *   drops the grid when frames run long, its fake AUTO SCALE moves the canvas, its fake rack loop interlopes (H₂'s impure field, H7,
+ *   left with its window in 0.5.0 D9b).  The DRIVEN modulation is the kit's real host and record clock.  So "the same schedule
  *   twice is byte-identical" and "a slow machine gives the same pixels as a fast one" are real tests, and EVERY PIN
  *   IS REMOVED IN TURN (`unpin`) to show the test that guards it goes RED without it.
  *
@@ -297,10 +297,9 @@ const NOCALIB = { read: () => null, write() {} };
  *   · a GOVERNOR that steps the grid down when the fake wall clock says frames are slow
  *   · an AUTO SCALE that moves the canvas size on the same reading
  *   · a MODULATION clock that writes into `mat` from the fake wall clock while it is running
- *   · an H2 whose fieldModes read an R that only update(t) sets
  *   · a RACK LOOP that interlopes mid-frame, presenting once with an unpinned seed
  */
-function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, h2 = false, modulation = false, camera = null, presents = 0 } = {}) {
+function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, modulation = false, camera = null, presents = 0 } = {}) {
   const RES_LADDER = [64, 96, 128];
   const stats = { presents, generation: 0 };
   let wall = 0;                                   // the FAKE machine's clock. The frame must never read it.
@@ -311,7 +310,6 @@ function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, h2 = false
   const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6 };
   const mat = { view: 0, exposure: 1, softness: 0.5, style: 0, dither: 0.5, steps: 160 };
   const cam = Object.assign({ dy: 0, dp: 0, autoRotate: false, speed: 0.25, get ambient() { return this.autoRotate ? this.speed : 0; }, get moving() { return this.ambient !== 0 || this.dy !== 0 || this.dp !== 0; } }, camera || {});
-  const h2state = { on: h2, R: 6, update(t) { this.R = 6 + 2 * Math.sin(0.3 * t); } };
   const mod = { _running: modulation, _phase: 0, get running() { return this._running; }, get playing() { return this._running; },
     host: {}, stop() { this._running = false; }, play() { this._running = true; },
     _wallTick(dw) { if (this._running) { this._phase += dw; mat.exposure = 1 + 0.5 * Math.sin(2 * Math.PI * this._phase); } } };
@@ -339,7 +337,7 @@ function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, h2 = false
     field.frame();                                     // presents with WHATEVER seed is in the counter
   }
   const LW = {
-    clock, quality, domain, obs, mat, field, camera: cam, h2: h2state, mod,
+    clock, quality, domain, obs, mat, field, camera: cam, mod,
     governor: { get on() { return gov.on; }, set on(v) { gov.on = v; if (!v) gov.drop = 0; }, get drop() { return gov.drop; }, get resolution() { return field.resolution; } },
     stats: { scheduled: false, frames: 0 },
     fieldRate: { capMs: 33 },
@@ -348,14 +346,12 @@ function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, h2 = false
     stateDigest: () => 'fake-state',
     version: 'fake',
     modesAt(t) {
-      /* the register is analytic; H2's contribution is NOT a function of t alone — it reads the R that
-         update(t) set, exactly as h2view.js does */
-      const c = E12.map((E) => ({ re: Math.SQRT1_2 * Math.cos(-E * t), im: Math.SQRT1_2 * Math.sin(-E * t) }));
-      return h2state.on ? c.concat([{ re: h2state.R, im: 0 }]) : c;
+      /* the register is analytic: a pure function of t (H₂'s R-reading modes, H7, left in 0.5.0 D9b) */
+      return E12.map((E) => ({ re: Math.SQRT1_2 * Math.cos(-E * t), im: Math.SQRT1_2 * Math.sin(-E * t) }));
     },
     play() { clock.playing = true; },
   };
-  return { LW, canvas, field, stats, gov, quality, mod, h2: h2state, rackFrame,
+  return { LW, canvas, field, stats, gov, quality, mod, rackFrame,
     get wall() { return wall; }, tick(ms) { wall += ms === undefined ? msPerFrame : ms; }, get msPerFrame() { return msPerFrame; } };
 }
 
@@ -556,13 +552,6 @@ function rigFor(lab, route = true) {
     { frozenPin: frozen.pins.modulation, frozenMatchesUnmodulated: pix(frozen) === REF, restarted: mLab.LW.mod.running, drivenPin: drivenA.pins.modulation,
       driveSameAcrossSpeeds: pix(drivenA) === pix(drivenB), retryStepsOnce: pix(drivenC) === pix(drivenA), routeReachesPicture: pix(drivenA) !== pix(unrouted), exposureBack });
 
-  /* H7 — H2's impure field modes */
-  const h2Lab = fakeLab({ h2: true }), h2Lab2 = fakeLab({ h2: true });
-  const h2On = await runFake(h2Lab, { frames: 8 });
-  const h2Off = await runFake(h2Lab2, { frames: 8, unpin: ['h2'] });
-  judge('PIN REMOVED · H7 H2 IS THE ONE IMPURE FIELD SOURCE. h2.fieldModes() reads the current R, which only h2.update(t) sets — and the rack sets it AFTER the frame. The film\'s frame calls update(t) itself; without it, R never moves and every frame carries the same molecule',
-    h2On.ok && h2Off.ok && pix(h2On) !== pix(h2Off) && new Set(digestsOf(h2On)).size === 8 && Math.abs(h2Lab2.h2.R - 6) < 1e-12 && Math.abs(h2Lab.h2.R - 6) > 1e-6,
-    { pinnedR: h2Lab.h2.R, unpinnedR: h2Lab2.h2.R });
 
   /* H9 — the interloper witness itself: three failures abort by name, through the kit's failure road */
   const stubborn = fakeLab({});
@@ -627,14 +616,14 @@ function rigFor(lab, route = true) {
 
   const H = film.hazards();
   const KIT = ['modulation', 'dpr', 'overlays', 'deflate', 'gamut'];
-  const tested = ['jitter', 'governor', 'autoscale', 'fieldclock', 'camera', 'modulation', 'h2', 'interloper'];
-  judge('EVERY HAZARD IN THE REGISTER IS THE SAME LIST THE FRAME PINS, THE REPORT SHOWS AND THIS FILE TESTS, AND EACH SAYS WHOSE IT IS NOW: thirteen found; H1–H5, H7–H9 are λWAVES\' (the jitter seed 13, the governor and AUTO SCALE named among them), the modulation clock, the DPR, the overlays, the container and the gamut are the KIT\'S; eight have a test above that goes RED when the pin is removed',
-    HAZARDS.length === 13 && HAZARD_IDS.length === 13
+  const tested = ['jitter', 'governor', 'autoscale', 'fieldclock', 'camera', 'modulation', 'interloper'];
+  judge('EVERY HAZARD IN THE REGISTER IS THE SAME LIST THE FRAME PINS, THE REPORT SHOWS AND THIS FILE TESTS, AND EACH SAYS WHOSE IT IS NOW: twelve found (H7, H₂\'s impure field, left with its window in 0.5.0 D9b); H1–H5, H8–H9 are λWAVES\' (the jitter seed 13, the governor and AUTO SCALE named among them), the modulation clock, the DPR, the overlays, the container and the gamut are the KIT\'S; seven have a test above that goes RED when the pin is removed',
+    HAZARDS.length === 12 && HAZARD_IDS.length === 12
     && HAZARDS.every((h) => h.id && h.what && h.where && h.pin && h.witness && (h.owner === 'app' || h.owner === 'kit'))
     && HAZARDS.filter((h) => h.owner === 'kit').map((h) => h.id).join() === KIT.join()
     && ['jitter', 'governor', 'autoscale'].every((id) => HAZARDS.find((h) => h.id === id).owner === 'app')
     && tested.every((id) => HAZARD_IDS.includes(id))
-    && H.readings.length === 13 && H.readings.every((x) => typeof x.note === 'string' && x.state),
+    && H.readings.length === 12 && H.readings.every((x) => typeof x.note === 'string' && x.state),
     { app: HAZARDS.filter((h) => h.owner === 'app').map((h) => h.id), kit: HAZARDS.filter((h) => h.owner === 'kit').map((h) => h.id), blockingNow: H.blocking });
 
   const warnLab = fakeLab({ camera: { autoRotate: true }, modulation: true });

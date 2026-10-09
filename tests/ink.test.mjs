@@ -108,14 +108,14 @@ const p3css = (rgb) => 'color(display-p3 ' + srgbToP3(rgb).map((v) => v.toFixed(
   /* AND THE LITERALS ARE GONE.  The six sites the audit named, plus the reader's own last resort, which was
      a SECOND copy of the same cyan; kit.js is not swept because its number ladder legitimately owns [120,225,240]
      as shell level 2, which has nothing to do with the accent. */
-  const files = ['atomsview.js', 'fieldview.js', 'radiationview.js', 'wignerview.js'];   // moview.js left with the H₂⁺ card (0.5.0 D9)
+  const files = ['atomsview.js', 'radiationview.js', 'wignerview.js'];   // moview.js left with the H₂⁺ card (0.5.0 D9), fieldview.js with ELECTROSTATICS (D9b)
   const hits = [];
   for (const f of files) {
     const src = fs.readFileSync(path.join(LAB, f), 'utf8');
     for (const [re, what] of [[/78e1f0/g, '#78e1f0'], [/d97ce8/g, '#d97ce8'], [/120,\s*225,\s*240/g, '[120, 225, 240]']])
       if (re.test(src)) hits.push(f + ' still carries ' + what);
   }
-  judge('W57-1 not one of the four canvas views still holds a hard-coded copy of the pre-wheel house cyan or magenta — the accents come from the wheel through kit.js\'s setAccentRGB, and the CSS token is only the fallback',
+  judge('W57-1 not one of the three canvas views still holds a hard-coded copy of the pre-wheel house cyan or magenta — the accents come from the wheel through kit.js\'s setAccentRGB, and the CSS token is only the fallback',
     hits.length === 0, hits);
 }
 

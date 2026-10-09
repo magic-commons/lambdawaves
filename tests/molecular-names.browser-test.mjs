@@ -24,7 +24,7 @@ try {
       oldGone: !card('molecule'),
       onLeft: ['chem', 'orbitals'].map(id => !card(id).classList.contains('closed') && card(id).parentElement.id === 'rackL'),
       underSpectrum: (() => { const L = [...document.querySelectorAll('#rackL > .dev')].map(d => d.dataset.id); const i = L.indexOf('spectrum'); return L.slice(i + 1, i + 3); })(),
-      legacyHidden: ['h2', 'field'].map(id => card(id).hidden), qcdGone: !card('qcd'), heliumGone: !card('helium'), atomsSeat: !card('atoms').hidden && card('atoms').querySelector('.dev-eyebrow').textContent,
+      legacyGone: ['h2', 'field'].map(id => !card(id)), qcdGone: !card('qcd'), heliumGone: !card('helium'), atomsSeat: !card('atoms').hidden && card('atoms').querySelector('.dev-eyebrow').textContent,
       choices, windows, ids: saved.presentation.layout.cards.map(c => c.id),
       records: Object.keys(saved.presentation.instruments), errors: __e.slice()
     };
@@ -33,14 +33,14 @@ try {
   assert.equal(boot.oldGone, true, 'the H₂⁺ card is deleted (0.5.0 D9)');
   assert.deepEqual(boot.onLeft, [true, true]);                       // 2026-10: the first-run LEFT rack, under SPECTRUM
   assert.deepEqual(boot.underSpectrum, ['chem', 'orbitals']);
-  assert.deepEqual(boot.legacyHidden, [true, true]);
+  assert.deepEqual(boot.legacyGone, [true, true], 'the H₂ and ELECTROSTATICS windows are deleted (0.5.0 D9b)');
   assert.equal(boot.qcdGone, true, 'the QCD window is deleted (0.5.0 D9)');
   assert.equal(boot.heliumGone, true, 'the HELIUM window is deleted (0.5.0 D9)');
   assert.equal(boot.atomsSeat, 'ATOMS');
   assert.equal(boot.choices.includes('atoms'), true, 'ATOMS has no row in +: ' + JSON.stringify(boot.choices));
   assert.equal(boot.windows.some((w) => /ATOMS$/.test(w)), true, 'ATOMS has no row in WINDOW: ' + JSON.stringify(boot.windows));
   assert.equal(boot.choices.includes('molecule'), false);
-  for (const id of ['qcd', 'helium', 'h2', 'field']) assert.equal(boot.choices.includes(id), false);   // qcd, helium: deleted, so no row either
+  for (const id of ['qcd', 'helium', 'h2', 'field']) assert.equal(boot.choices.includes(id), false);   // qcd, helium (D9), h2, field (D9b): deleted, so no row either
   assert.equal(boot.windows.includes('↑  MOLECULES'), true);
   assert.equal(boot.windows.includes('↑  MO-REGISTRY'), true);
   for (const id of ['chem', 'orbitals']) {
@@ -49,7 +49,7 @@ try {
   }
   assert.equal(boot.ids.includes('molecule') || boot.records.includes('molecule'), false, 'the deleted H₂⁺ card has no seat and no record');
   assert.deepEqual(boot.errors, []);
-  console.log('PASS Molecules and MO-Registry start on the left rack under SPECTRUM, the legacy windows are hidden, ATOMS has its + and WINDOW rows, saved IDs are stable');
+  console.log('PASS Molecules and MO-Registry start on the left rack under SPECTRUM, the five legacy windows are gone (0.5.0 D9, D9b), ATOMS has its + and WINDOW rows, saved IDs are stable');
 
   /* 0.4.0 S0 · wave 136 (audit F6): SPECTRUM's two orphaned operators — QUARKONIUM's button is hidden while QCD is, but the
      value still restores; a press on ATOM opens ATOMS, the periodic table (0.4.0 S3) */

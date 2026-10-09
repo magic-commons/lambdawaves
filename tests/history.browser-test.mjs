@@ -525,9 +525,10 @@ try {
   assert.deepEqual(molNew.before, { on: true, orbital: molOn.orbital, lanes: 1 }, 'Ctrl+Shift+Z did not bring MOLECULES back filled: ' + JSON.stringify(molNew.before));
   assert.equal(molNew.orbital, molNew.fileOrbital); assert.equal(molNew.lanes, molNew.fileLanes, 'NEW after MOLECULES is not the file: ' + JSON.stringify(molNew)); assert.deepEqual(molNew.errs, []);
   pass(`the MOLECULES undo leaves nothing: NEW → a real click on MOLECULES ON (orbital ${molOn.orbital}, one STATES lane) → Ctrl+Z is byte-identical to the pre-ON reading and clean 1 s later; back on by Ctrl+Shift+Z, then NEW is the file (orbital ${molNew.orbital}, lanes ${molNew.lanes})`);
-  /* ── 10 · 0.5.0 D9 · AN OLD FILE THAT USED A RETIRED WINDOW: each of three REAL files written by the pre-D9 build opens through
-         the PROJECTS road (importText + open) as the origin row, names the retired window in the PROJECTS status in one line, and
-         lands on its shim target — H₂⁺ → MOLECULES · H₂ σu, HELIUM → SPECTRUM's ATOM · He 1s, QCD → QUARKONIUM's parameters ── */
+  /* ── 10 · 0.5.0 D9 · AN OLD FILE THAT USED A RETIRED WINDOW: each of the REAL files written by the pre-D9 build (and, D9b, by the
+         pre-D9b build) opens through the PROJECTS road (importText + open) as the origin row, names the retired window in the PROJECTS status in one line, and
+         lands on its shim target — H₂⁺ → MOLECULES · H₂ σu, HELIUM → SPECTRUM's ATOM · He 1s, QCD → QUARKONIUM's parameters,
+         H₂ → MOLECULES · H₂ density, ELECTROSTATICS → nothing drawn ── */
   const legacy = async (n, expect) => {
     const text = readFileSync(new URL('./fixtures/legacy-' + n + '.lambdawaves.json', import.meta.url), 'utf8');
     return g2.ev(`window.confirm = () => true; const P = __LW.layout.projects, path = P.importText(${JSON.stringify(text)}), ok = P.open(path);
@@ -536,14 +537,14 @@ try {
       return { ok, status: document.querySelector('[data-mir-window="notebook"] .pj-status').textContent, notice: ${JSON.stringify(expect)},
         rows: __LW.history.entries().map((e) => e.label), depth: __LW.history.depth,
         ham: __LW.hamiltonian, atomZ: __LW.atomZ, populated: __LW.reg.populated().length, qcd: S.instruments.qcd, records: Object.keys(S.instruments),
-        chem: { on: chem.on, preset: __LW.chem.preset(), view: chem.view, orbital: chem.orbital, owner: chem.fieldOwner },
-        atomsOpen: !card('atoms').hidden && !card('atoms').classList.contains('closed'), cards: ['molecule', 'helium', 'qcd'].filter(card), errs: __e.slice() };`);
+        chem: { on: chem.on, preset: __LW.chem.preset(), view: chem.view, orbital: chem.orbital, owner: chem.fieldOwner }, fieldRecord: 'field' in S, fieldCanvas: !!document.getElementById('fieldlines'),
+        atomsOpen: !card('atoms').hidden && !card('atoms').classList.contains('closed'), cards: ['molecule', 'helium', 'qcd', 'h2', 'field'].filter(card), errs: __e.slice() };`);
   };
   const retired = (r, name) => {
     assert.equal(r.ok, true, name + ' did not open: ' + JSON.stringify(r));
     assert.ok(r.status.includes('retired in 0.5.0: ' + r.notice), name + ': the PROJECTS status does not name the retired window: ' + JSON.stringify(r.status));
     assert.deepEqual({ rows: r.rows, depth: r.depth }, { rows: ['open · ' + name], depth: 0 }, name + ': the open is not the origin row');
-    assert.deepEqual(r.cards, [], name + ': a retired card came back'); assert.equal(r.records.some((k) => k === 'molecule' || k === 'helium' || k === 'pulse'), false, name + ': a retired record is still written');
+    assert.deepEqual(r.cards, [], name + ': a retired card came back'); assert.equal(r.records.some((k) => k === 'molecule' || k === 'helium' || k === 'pulse' || k === 'h2'), false, name + ': a retired record is still written');
     assert.deepEqual(r.errs, [], name + ': page errors');
   };
   const h2p = await legacy('h2plus', 'H₂⁺ (opened as MOLECULES · H₂ σu)');
@@ -558,6 +559,14 @@ try {
   retired(qcd, 'QCD');
   assert.equal(qcd.ham, 'cornell'); assert.deepEqual(qcd.qcd, { kind: 'bottom', potential: 'log', params: { alphaS: 0.51, sigma: 0.23, C: 0.81 } }, 'QUARKONIUM lost the file\'s parameters: ' + JSON.stringify(qcd.qcd));
   pass(`an old file with QCD open opens as [open · QCD] on QUARKONIUM (bb̄, LOG, α_s .51 σ .23 C .81) without the window; the status says "${qcd.notice}"`);
+  const h2f = await legacy('h2', 'H₂ (opened as MOLECULES · H₂)');   // 0.5.0 D9b
+  retired(h2f, 'H2');
+  assert.deepEqual({ on: h2f.chem.on, preset: h2f.chem.preset, view: h2f.chem.view, owner: h2f.chem.owner }, { on: true, preset: 'H2', view: 'density', owner: true }, 'H₂ did not land on MOLECULES · H₂ density: ' + JSON.stringify(h2f.chem));
+  pass(`an old H₂ file (Heitler–London singlet, R = 1.4) opens as [open · H2] on MOLECULES · H₂ (STO-3G) VIEW DENSITY owning the field, without the window or its record; the status says "${h2f.notice}"`);
+  const elf = await legacy('electrostatics', 'ELECTROSTATICS');   // 0.5.0 D9b
+  retired(elf, 'ELECTROSTATICS');
+  assert.deepEqual({ fieldRecord: elf.fieldRecord, fieldCanvas: elf.fieldCanvas, ham: elf.ham, populated: elf.populated, chemOn: elf.chem.on }, { fieldRecord: false, fieldCanvas: false, ham: 'hydrogen', populated: 2, chemOn: false }, 'ELECTROSTATICS did not open on its state with nothing drawn: ' + JSON.stringify(elf));
+  pass(`an old ELECTROSTATICS file (the Φ overlay on, 12 levels) opens as [open · ELECTROSTATICS] on its (1s + 2p_z)/√2 with nothing drawn — no window, no #fieldlines layer, no field record; the status says "${elf.notice}"`);
 } catch (e) {
   failed = true; console.error(e);
 } finally {

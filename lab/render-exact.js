@@ -40,7 +40,7 @@
  *
  * and `modesAt(t)` is a pure function of t — `reg.at`, `molecule.fieldModes(t)`, `gas.fieldModes(t)` all are,
  * and `helium.fieldModes()` is t-independent (while its worker solves a new basis it serves the LAST one, so a film
- * demands `helium.sol` first) — with ONE exception, H₂ (H7 below).
+ * demands `helium.sol` first) — H₂'s exception (H7, its R set by update(t)) left with its window in 0.5.0 D9b.
  *
  * ── THE SCHEDULE, AND THE TWO ENDPOINT RULES ─────────────────────────────────────────────────────────────────
  *   A LOOP is a CIRCLE.  t0 and t0+T are the same point of it.  N frames at t0 + (k/N)·T, k = 0 … N−1; the frame
@@ -75,7 +75,7 @@
  *   H3  AUTO SCALE multiplies the canvas size; a window resize or a DPR change does the same, and NOTHING PRESENTS
  *       when it happens.  PIN: quality.auto = false.  WITNESS: the canvas size read AT the readback.
  *   H4 the field clock (field.frame is called with modes every frame; the generation advances by one), H5 the camera
- *   (above), H7 H₂'s impure field (h2.update(t) before modesAt), H8 the reused mode list (modesAt inline in the draw)
+ *   (above), H8 the reused mode list (modesAt inline in the draw; H7, H₂'s impure field, left with H₂ in 0.5.0 D9b)
  *   and H9 an interloping rack frame (the rack's own lock while a film owns the page; the jitter, generation and size
  *   witnesses all see one).
  *   THE KIT'S — H6 the modulation clock (its record clock, or no host at all), H10 the device pixel ratio (an explicit
@@ -443,7 +443,6 @@ export const HAZARDS = Object.freeze([
   hz('fieldclock', 'app', 'the rack reconstructs psi on an EVOLVE tier only when the field clock is due, so a capped field clock renders the same picture twice', 'rack.js loop, fieldRate.capMs / lastReconMs', 'the frame bypasses the tier router and passes a non-null modes to field.frame, so the compute pass is unconditional', 'field.stats.generation advances by exactly one per frame'),
   hz('camera', 'app', 'the camera pose is an integrator: omega decays as exp(-mu dt) and AUTO-ROTATE drifts at camera.speed rad per WALL second', 'camera-law.js cameraStep', 'a moving camera is refused; or stilled (dy = dp = 0, autoRotate off) and restored. A camera move comes from poseAt(k, N), a pure function of the frame index', 'camera.moving is false, and obs is what the schedule wrote'),
   hz('modulation', 'kit', 'the modulation rack runs on the wall clock, and its one-pole SMOOTH filters and envelopes accumulate dt — there is no modulated(t) to evaluate', 'rack.js loop → mir/host.js advanceTo', "'freeze': the rack stops it (every target back to base) and the recorder is built with no host, so it steps nothing; 'drive': the kit's record clock (render/clock.js) replays it FROM FIRST SPACE at exactly 1/fps a frame and puts the live runtime back in one operation", "frozen: LW.mod.running is false for the whole film; driven: the kit's clock holds the realtime pump suspended"),
-  hz('h2', 'app', 'h2.fieldModes() takes no t: it reads the current R, which h2.update(t) sets from a pre-computed trajectory — and in the rack loop that call sits AFTER the frame, so the live H2 field is one frame stale', 'rack.js loop; h2view.js update', 'the frame calls h2.update(t) itself, immediately before modesAt, whenever H2 is on', 'none available from outside — h2 exposes no R-at-t reader'),
   hz('modealias', 'app', 'LW.modesAt(t) returns a module-level array of module-level records rewritten in place, so anything that calls modesAt between our call and field.frame\'s consumption rewrites our modes', 'rack.js modesAt / modeRecs', 'modesAt is evaluated inline in the draw, with nothing between', 'covered by the jitter witness — an interloper that could rewrite the modes had to present to do it'),
   hz('interloper', 'app', 'any schedule() from anywhere arms a rAF that resizes the canvas, presents with an unpinned seed and advances the modulation on wall time', 'rack.js schedule / loop', 'the rack\'s own hold while a film owns the page (exportLocked: no rAF is armed), and a drain before frame 0', 'the jitter, generation and size witnesses all fire; the frame is rendered again, and one that will not settle aborts the film by name'),
   hz('dpr', 'kit', 'field.resize multiplies by window.devicePixelRatio, so a film sized by scale inherits the machine\'s DPR', 'field.js resize', 'the kit\'s recorder takes an explicit even size; a scale-sized film records the resolved size and flags sizeFromMachine', 'the manifest carries the resolved size'),
@@ -589,7 +588,6 @@ export function createFilm(LW, opts = {}) {
         case 'autoscale': return { state: (LW.quality && LW.quality.auto) ? 'live' : 'off', blocking: false, value: LW.quality ? LW.quality.autoScale : null, note: 'auto scale ' + ((LW.quality && LW.quality.auto) ? 'is on; a film holds it off and renders at the size asked for' : 'is off') };
         case 'camera': { const m = !!(LW.camera && LW.camera.moving); return { state: m ? 'live' : 'off', blocking: m, value: LW.camera ? { dy: LW.camera.dy, dp: LW.camera.dp, ambient: LW.camera.ambient } : null, note: m ? 'THE CAMERA IS MOVING' + (LW.camera.ambient ? ' (AUTO-ROTATE is on)' : ' (a fling is still coasting)') + ': its pose is an integrator on the wall clock, so a film would depend on machine speed. camera: "still" brings it to rest; poseAt(k, N) is a camera move that IS deterministic.' : 'the camera is at rest' }; }
         case 'modulation': { const r = !!(LW.mod && LW.mod.running); return { state: r ? 'live' : 'off', blocking: r, value: r, note: r ? 'THE MODULATION RACK IS RUNNING on the wall clock, and its smoothing filters accumulate. A film freezes it (every target back to its knob), or modulation: "drive" hands it to the kit\'s record clock, FROM FIRST SPACE at 1/fps a frame.' : 'the modulation rack is not running' }; }
-        case 'h2': { const on = !!(LW.h2 && LW.h2.on); return { state: on ? 'live' : 'off', blocking: false, value: on, note: on ? 'H2 IS ON: a film calls h2.update(t) itself before every frame.' : 'H2 is off' }; }
         case 'interloper': { const s = !!(LW.stats && LW.stats.scheduled); return { state: s ? 'live' : 'off', blocking: false, value: s, note: s ? 'a rack frame is scheduled; a film drains it and the per-frame witnesses catch any that arrive anyway' : 'no rack frame is scheduled' }; }
         case 'gamut': return { state: (f && f.ok && f.gamut && f.gamut !== 'srgb') ? 'live' : 'off', blocking: false, value: f && f.ok ? f.gamut : null, note: (f && f.ok && f.gamut && f.gamut !== 'srgb') ? 'THIS CANVAS IS ' + f.gamut + ': the film is declared display-p3 to the kit\'s encoder' : 'the canvas is sRGB' };
         case 'fieldclock': return { state: 'live', blocking: false, value: LW.fieldRate ? LW.fieldRate.capMs : null, note: 'the field clock caps reconstructs; a film bypasses the tier router entirely' };
@@ -687,7 +685,6 @@ export function createFilm(LW, opts = {}) {
       const wit = {};
       LW.clock.scrub(t);
       if (J.poseAt) Object.assign(LW.obs, J.poseAt(i, J.N, t) || {});
-      if (pinned('h2') && LW.h2 && LW.h2.on && LW.h2.update) LW.h2.update(t);       // H7: H2's R is set before modesAt reads it
       if (pinned('jitter') && f && f.stats) f.stats.presents = JITTER_SEED;         // H1: the seed, pinned for THIS frame
       shot = opts.grab ? await opts.grab({ t, w, h, wit, k: i, seed: JITTER_SEED, pinned })
         : await readback(f, canvas, w, h, () => f.frame({ modes: LW.modesAt(t), obs: LW.obs, mat: LW.mat }), wit);   // H8: modesAt inline, nothing between
@@ -767,8 +764,7 @@ export function createFilm(LW, opts = {}) {
       const J = job = { token: 'lw-' + (++token) + '-' + Math.round(now()), sched, N, fps, pinned, drive, format, size, kind: o.kind || P.kind || sched.mode,
         label: o.label || stateLabel(), observable: P.observable || null, caption: o.caption || '', poseAt: o.poseAt || null, beforeFrame: o.beforeFrame || null,
         retries: o.retries === undefined ? DEFAULTS.retries : o.retries, log: [], contended: 0, aborted: null, driven: sched.at(0), rate: 0, prev: null, base: null, drained: null,
-        pins: { jitter: pinned('jitter') ? 'presents pinned to ' + JITTER_SEED + ' before every frame' : 'NOT PINNED (unpin)', fieldclock: 'bypassed: field.frame is called directly with modes every frame',
-          h2: (LW.h2 && LW.h2.on) ? 'h2.update(t) called before every frame' : 'H2 off' } };
+        pins: { jitter: pinned('jitter') ? 'presents pinned to ' + JITTER_SEED + ' before every frame' : 'NOT PINNED (unpin)', fieldclock: 'bypassed: field.frame is called directly with modes every frame' } };
       const wall0 = now();
       let result = null, err = null;
       try {

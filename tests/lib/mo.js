@@ -6,9 +6,10 @@
 import { gaussLegendre, hydrogenicFn, sturmianFn, sto, sigmaBasis, twoCentre, parityBlocks, prepare, equilibrium as goldenSection } from './twocentre.js';
 import { generalisedEigen } from '../../lab/sturmian.js';
 import { legendreDerivCoeffs, ylmNorm, HARTREE_EV } from '../../lab/hydrogen.js';
-import { MU_H2 } from '../../lab/h2.js';
 
-export { MU_H2, HARTREE_EV };
+/** m_p/2 in electron masses: the protons' reduced mass (lab/h2.js's MU_H2 until the H₂ card left in 0.5.0 D9b) */
+export const MU_H2 = 918.0764;
+export { HARTREE_EV };
 const TWO_PI = 2 * Math.PI;
 const horner = (p, r) => { let s = 0; for (let j = p.length - 1; j >= 0; j--) s = s * r + p[j]; return s; };
 /** a_lm of z Y_lm = a_{l+1,m} Y_{l+1,m} + a_lm Y_{l−1,m} */
