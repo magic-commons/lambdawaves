@@ -249,7 +249,7 @@ changes after the release of 0.5.0 or 0.5.5")
   raw drift are accounted for; the interleaved pair (+1.005) stands; the opener's quiet run comes after.
 - ≈14:00 CDT: **"Let the name of each version number be a one-two word 'main' update name. Like 'Timeline' or 'Informational Update' or
   whatever."** Taken as: every release carries a name beside its number, in the build line, the tag message, CHANGELOG.md's heading and
-  CHANGES-<version>.md's title. **0.5.0-alpha = "The Adoption"** (its build line already says `0.5.0-alpha · the adoption`; Josh may rename it
+  CHANGES-<version>.md's title. **0.5.0-alpha = "GUI Adoption"** (Josh ≈14:10: "I would avoid the word 'The' to title things. It's not very 'code-y' like. 'GUI Adoption' is a better one or something tryhard"; the build line becomes `0.5.0-alpha · GUI Adoption`; he may still rename it
   before the cut). **The next release (the D rows) = "Informational Update"** — its number (0.5.5 or 0.5.1) is Josh's. Earlier cuts keep their
   build-line names (0.3.2 the offer, 0.3.3 the exports, 0.4.0 the library).
 - ≈14:00 CDT, asked whether stage D needs another NACRE planning set: the integrator's answer is **no full set — one short re-plan round.** Stage D
