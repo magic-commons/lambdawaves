@@ -4586,3 +4586,51 @@ one at a time and 4 s apart: `frame-occlusion` **7/7** (twice), `menubar` **8**,
 **39**, `render-regressions` **2** and `offer` **16** (it reads the masks too). No timing red, so nothing was re-run alone.
 `cat lab/*.js | wc -l`: **36,198 → 36,226 (+28**: occlusion.js +40, rack.js −13, sw.js +1). Hand-off:
 `research/release-0.5.0/A7-BUILD.md`.
+
+## 2026-10-08 · 0.5.0 C — THE ADOPTION
+
+### wave 198: C5 HISTORY AS THE ONE EDIT DOMAIN — the kit's stack holds the rows, `lab/history.js` left, the card stays
+
+**What changed.** Since 0.3.1 S3 the undo ring was λWAVES' own. `lab/history.js` (187 lines) kept a ring of snapshots of
+`serialize({ scope: 'edit' })`. MIR 1.5's `history/history.js` is BASINS' command stack lifted into the kit: rows of
+`{ label, undo, redo }` over named snapshot domains. In 0.5.0 C5 that stack holds the rows. λWAVES registers ONE domain on it,
+`edit`: read = the edit record with its FNV-1a key, write = `restore(S, { history: true })`. There is no hand-kept key list.
+`lab/history.js` is deleted.
+
+The two stacks do not keep the same laws. The browser suite is written against the old ring, and nine of its laws have no
+twin in the kit. Here they are:
+- a turning drive is one gesture;
+- an undo, a redo, a jump or a press commits an edit nobody announced;
+- a jump is one write (the kit's `goto` writes every row it walks);
+- HISTORY UNDO's one-use branch;
+- a solve's fill re-keys the row it joins;
+- the bottom row takes the name of the row that fell off;
+- `edit` / `start` and 0-based rows;
+- canUndo counts an edit in its quiet window;
+- on touch, a gesture's name waits one quiet window for the tap's late click.
+
+These live in `lab/edit-domain.js` (103 lines, `createEditHistory`). It takes the old port, so rack.js changed by four
+lines. Each law is named K1–K9 in the module's header and is a brief candidate for MIR. Every row lives in the kit's stack;
+not one of the 39 blocks runs on the old ring.
+
+**The card did not leave.** With the kit's `historyList` in the HISTORY card, `history` read 35 PASS, then:
+`the HISTORY card after NEW: ["link ·current"]`. The card is closed at boot and closed again by a demo's layout. The kit's
+list will not paint a hidden root, so the closed card kept its last visible rows, and block 8 reads them. The test was not
+loosened. The card's own renderer stays, and the gap is K10 (a list that stays current while hidden, or a forced paint).
+
+**Measured.** `history` **39/39** on the final tree (8803/5273, alone): flush 0.26 ms median, canUndo with an edit pending
+0.18 ms, 0 reads and 0 rows in 5 s of play, undo latency max 50.78 ms (the modulation; it was 108 ms on the first wiring run),
+MOLECULES ON one row with its fill, HISTORY UNDO restoring the 61-row timeline.
+- `node tests/history.test.mjs` passes **18/18** with every judge unchanged. Only the import moved, to the module. That covers
+  the pre-image, truncation at the cursor, goto in one write, the drive, the names, the touch-order name and the derived fill.
+- `new-project` 8, `take-in-bugs` 4, `render-regressions` 2 and `menubar` 8 are green.
+- `mir-controls` is red from the adopt's kit (`0.25 != 0.5`, a knob drag on the adopted `kit.js`; C0's).
+- Node 85 shows the bare adopt's four reds (`mir-manifest`, `new-project`, `wiring`, `pwa`), all C0's.
+- No lock was run (C7's).
+
+`cat lab/*.js | wc -l`: **36,288 → 36,386**. The adopt's `sw.js` precache list is +181. **C5's own is −83**: `history.js`
+−187, `edit-domain.js` +103, `rack.js` +1. The plan expected about −200; the card (K10) and the 103 lines of K1–K9 are the
+difference. Both go when MIR takes the briefs.
+
+**What is not claimed.** K9 is proven in node, not on a touch screen. Pressing a control now reads the edit scope twice (K2),
+about 0.3 ms; nothing was added per frame. Hand-off: `research/release-0.5.0/C5-BUILD.md`.

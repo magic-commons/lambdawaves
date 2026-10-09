@@ -5,6 +5,7 @@
 - `lab/*.js` before: **36,288** · now **36,355** (this includes `lab/sw.js` growing with the adopt's precache entries;
   compute C5's own delta as rack.js + edit-domain.js − history.js, see below)
 - Resumed 20:50; the card commit `d22ffb9` was REVERTED at `111aba2` (history block 8 red: the kit list does not paint a closed card) → history **39/39** on `111aba2`. Gate server on 8803 pid 3479086.
+- **DONE** (21:xx): gates run on `111aba2` — history 39/39, new-project 8, take-in-bugs 4, render-regressions 2, menubar 8, mir-controls RED (adopt's kit), node 85 with the adopt's 4 reds; C5-BUILD.md + REPORT wave 198 written. Server 8803 stopped. The steps below are history.
 
 ## Commits
 
