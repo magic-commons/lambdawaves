@@ -3,7 +3,10 @@
 Base `76b1d5e` (yan-c: 0.5.0-alpha + D10-19 + D10-F + D1). Brief `research/release-0.5.1/BRIEF-D2-D8.md`. Ports 9013 / GD 5483.
 `cat lab/*.js | wc -l` at the base = **27,558**.
 
-## STATE: steps 1–2 DONE (D2 built); next = step 3 (D8)
+## STATE: steps 1–3 DONE (D2 + D8 built, their scenes GREEN); next = the suites, then commit 4 (BUILD + REPORT)
+
+3. **Step 3** — D8 in rack.js' notebook block (`orbitalOf`, `lwLink`, the capture click), `tests/lw-links.browser-test.mjs`
+   GREEN 5/5; the D2 suite gained "a hand pick is one ring row" (GREEN 3/3 again).
 
 1. **Step 1** — the composer (`lab/latex-state.js` moleculeHead / stemOf / EV / mdText), the generator's factor (`--check --only`
    nine records: in step), `tests/molecule-head.test.mjs` GREEN (38 records + H₂O/N₂ live).
