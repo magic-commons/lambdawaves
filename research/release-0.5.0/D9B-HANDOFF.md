@@ -19,8 +19,13 @@
    rack −16, render-exact −4, mathworker −3, sw −2. Node: exit 0, **81** suites (h2.test left; h2ci 8 → 13 judges with its
    five anchors on kept code; render-exact 37 → 36, H7 gone). Browser on this tree: `history` **43/43** (42 + the legacy-h2 case).
    new-project 16,329 → 16,198 B, `--check` in step.
-3. NEXT — ELECTROSTATICS goes (commit 3, the script is `.tmp/d9b_field.py`); then the lock ALONE + the browser gates + ledger +
-   hand-off + docs (commit 4: CLAUDE.md's paragraph, `docs/LEGACY-WINDOWS.md`, `docs/STATE-SCOPES.md` are edited in the tree).
+3. DONE `1012497` — ELECTROSTATICS deleted. `lab/*.js` 29,589 → **28,849 (−740)**: electrostatics −437, fieldview −236,
+   rack −65, sw −2. H₂⁺'s Hellmann–Feynman force moved VERBATIM (63 lines) to `tests/lib/hellmann-feynman.js`; its 8 judges to
+   `mo.test` as G0 (33 → 41). Node: exit 0, **80** suites (electrostatics.test left). new-project 16,198 → 16,117 B.
+4. NEXT — the lock ALONE (`--check --query gastab=0`, then `--fixture …digest-lock-s4a.json`), the browser gates one at a time
+   (history, new-project, molecule-demos, molecular-names, current, render-regressions, offer), then ledger + D9B-BUILD.md +
+   REPORT wave 207 + docs (commit 4: CLAUDE.md's paragraph, `docs/LEGACY-WINDOWS.md`, `docs/STATE-SCOPES.md` are edited in
+   the tree, uncommitted).
 
 ## Decisions so far
 
