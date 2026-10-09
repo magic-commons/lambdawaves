@@ -2,28 +2,28 @@
 
 Worktree `/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-ac5f1a2ff05f502de`, branch
 `worktree-agent-ac5f1a2ff05f502de`, reset to `7044f37` (sos-s0 tip). Never pushed, merged or tagged.
+Gate server: `python3 tools/gate/server.py <worktree> 8833` (pid 3640553 at the time of writing; stop it by pid). GD_PORT 5303.
 
-## State
-- `b7ad98b` the bare adopt of MIR 1.5 alpha.24 (adopt.mjs --line 1.5; 196 added, 23 updated, 0 removed, 43 unchanged), identical to C0's.
-- `lab/*.js` 36,288 before the adopt.
-- Reading done. Design chosen (see "Design" below). Next: wire the kit's `createModulation` (lab/mir/modulation/window.js) over A5's port.
+## Commits
+- `b7ad98b` the bare adopt of MIR 1.5 alpha.24 (identical to C0's).
+- `7514000` hand-off (design).
+- `14f0fac` wave 201: the kit's window, `createModulation` (lab/mir/modulation/window.js) over A5's port. `lab/modwindow.js`
+  is no longer imported but still on disk. Port fixes: no `targets` (the kit reads it as the routable SELECTOR), `dock: false`,
+  `closed` reports nothing (the kit's close reports `moved(null)`). `modDodge` takes null and ignores a closed window.
+  Occlusion hears the window's `hidden` flips and `onGeometry`. `tests/lfo-tension` waits for the window's animations.
+  Gates: routed-knob 4/4, take-in-bugs 4/4, lfo-tension 3/3, history 39/39, new-project 8/8, frame-occlusion 7/7; node: C0's 4.
+- `lab/*.js`: 36,288 (base) → 36,469 (adopt, sw.js +181) → 36,478 (this commit).
 
-## Design (decided)
-- The window: the kit's `createModulation(floats, mod.port(...))` from `lab/mir/modulation/window.js` (MODULATION.md's λWAVES row:
-  "rack.js builds the port: createModulation(floats, port)"). Not `installModulation` itself: it builds a second host and its own
-  core/frame.js tick (a second clock advancer beside rack.js `loop()`), keeps a device copy of the rack (`modulationState`) and a
-  second visibility listener. `project: false` holds by construction: no `registerModulationParts` call.
-- The one clock: `installModulation().play`'s law, i.e. A6's `mod.follow` on EVERY play edge (no armed/LINKED gate). The power is
-  `host.clock.setModulationEnabled` (a route bypass; time runs), as bind.js `setArm`.
-- LINKED/SEPARATE retired: `clockLink` gone; the tempo tiles lose LINKED and MOD ▶ (10 → 8).
-- The three keys leave the PREFERENCE blob: `clockLink` retired; `modArm` + `modCadence` move to the kit's modulation record
-  (bind.js `localStore('lambdawaves.q0.modulation')`, installModulation's record shape), read once from an old blob.
-- `lab/audio.js` leaves: the kit's `modulation/audio-capture.js` is the same capture (same exports). `tests/audio.test.mjs` re-aimed.
-- `lab.css` badge ladder (the `:root:root:root:root` block + `.k-route-x`, lines 432–446 on 7044f37) leaves: modhost.css carries it.
-- The `s3` question: a reload boots the shipped rack (no reopen-last-project), so WAVE DANCER's `s3` does not exist after it and
-  the window's prune law drops its mode. To verify with tools/settings-probe.mjs.
-- `mir-controls` red: MIR 1.5's ONE KNOB LAW (vertical drag, ⅛ fine gear); the test drags sideways at 1.4 numbers. Re-aim.
+## Design (decided) — see the first version of this file in `7514000`
+- the window: kit `createModulation(floats, mod.port(...))`; not `installModulation` (second host + own tick + device copy of the
+  rack); `project: false` holds by construction.
+- the one clock: `mod.follow` on EVERY play edge; power = `setModulationEnabled` (bypass).
+- LINKED/SEPARATE retired; tempo tiles 10 → 8; `clockLink` gone; `modArm` + `modCadence` → the kit's record
+  `lambdawaves.q0.modulation` (bind.js `localStore`), read once from an old blob.
+- `lab/audio.js` → the kit's `audio-capture.js`; lab.css badge ladder (432–446 on 7044f37) leaves.
+- `s3`: a reload boots the shipped rack, so WAVE DANCER's `s3` is gone and its mode is pruned (the window's law). Verify.
+- `mir-controls`: MIR 1.5's ONE KNOB LAW (vertical, ⅛). Re-aim.
 
 ## Exact next step
-Edit rack.js: import createModulation from './mir/modulation/window.js'; set `root.dataset.mirWindow`; pass `dock: false`;
-make `modDodge` accept `null`. Then `node tests/pwa.test.mjs --write`, node gate, browser closers on 8833/5303.
+The one clock + LINKED retired (rack.js setModArm/appPlay/clockLink/ui.setClockLink/LW.mod.clockLink, native-ui tiles), with
+take-in-bugs, new-project.browser-test and history's SEPARATE scene edited in the same commit (the `__LW` law).
