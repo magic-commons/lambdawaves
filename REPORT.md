@@ -4586,3 +4586,86 @@ one at a time and 4 s apart: `frame-occlusion` **7/7** (twice), `menubar` **8**,
 **39**, `render-regressions` **2** and `offer` **16** (it reads the masks too). No timing red, so nothing was re-run alone.
 `cat lab/*.js | wc -l`: **36,198 → 36,226 (+28**: occlusion.js +40, rack.js −13, sw.js +1). Hand-off:
 `research/release-0.5.0/A7-BUILD.md`.
+
+
+## 2026-10-08 · 0.5.0 C — THE ADOPTION
+
+### wave 197: C1 THE CAMERA PANEL — MIR's CAMERA and RAMP over λWAVES' own law; `paletteview.js` and CAMERA MOTION leave
+
+**The adopt.** The branch starts with the bare adopt, identical to C0's: the 1.5 worktree's `adopt.mjs --line 1.5` took MIR
+1.5.0-alpha.24 (`1b7ae99b9905`: 196 added, 23 updated, 0 removed, 43 unchanged) and `pwa --write` grew the precache to 372
+entries. `lab/mir/**` was written only by that tool.
+
+**The CAMERA card is the kit's panel.** `createCameraPanel({ mode: '3d', port, modPrefix: 'observer', project: false, mod })`
+builds its rows into the card (`spec.build`; λWAVES has no kit rack until C3). The port is A8's (`createCameraLaw(...).port`),
+passed with one wrapper: a hand on SPIN, FRICTION, DRAG or FLING also saves the settings, coalesced to 250 ms, because the
+camera's feel is a PREFERENCE. There is no history: the pose rides λWAVES' own project and is not an edit. The rows, top down:
+- HOME, which carries `data-key-action="camReset"`, after the port's own PAN HOME verb;
+- CONTROL (TURNTABLE · FREE);
+- the direction sphere with its YAW and PITCH arcs;
+- the PAN pad with its X and Y knobs;
+- ZOOM and FOV;
+- the HAND: DRAG, FRICTION, FLING, AUTO-ROTATE, SPIN.
+
+SET Δρ REF keeps its own row under the panel. ZOOM stays a distance (1.2–8), not the kit's nearness. FOV, YAW and PITCH stay in
+radians.
+
+**A8's three open items.**
+1. *The registry.* The panel is handed λWAVES' modulation port, which has no `add`. The panel therefore registers no target,
+   and the kit tests for exactly that (`typeof mod.add === 'function'`). The six saved `observer.*` definitions stay in
+   `rack.js` with their ids, maps and ranges unchanged, and the registry's road still writes the pose raw. Their `knob`
+   accessors are now the panel's own dials (`camKnobs`, read from `view.targets()`), so a route paints the panel and the
+   dials are the drop targets. `mod-port.js` gains the panel's two reads, `isModulated` and `baseOf`. A hand on a routed dial
+   goes through `mod.hand` and moves the base. An unrouted hand goes through `port.set`, the law's own road. No raw road was
+   needed. A raw `port.set` would have broken the unrouted hand: ZOOM's centre anchor and FREE YAW's turn.
+2. *The notices.* Each `observer.*` setter ends in `camOut`: `setKnob` on the panel's dial, `cameraPort.notify()`, PRESENT.
+3. *SPIN's range* lives once, as `CAM.SPIN` / `CAM.SPIN_DEF`. `camera.speed` and `port.ranges.spin` both read it, and the
+   knob that wrote it a second time is gone.
+
+**The law loses its `ui` edge.** The panel reads the port on the frame after a notice, so every dial write in `camera-law.js`
+became a notice. `setDragGain` and `setFling` now tell, and `syncCamUI` is `tell`. `loop()` is untouched, and the law's maths
+is unchanged. One fix came with it, from brief 2's acceptance: a dial is one axis. `port.set('panY')` used to call `setShift`
+with both axes, which wrote a routed PAN X's base to its live value. `setShift(x, y, axis)` now takes the hand on its own axis
+only, while `setShift(x, y)` (Alt-drag, two fingers, PAN HOME) still moves both. The PAN readout stays the shift in NDC
+(`+0.25`).
+
+**RAMP replaces `paletteview.js`.** The phase palette's editor is `createRampPanel({ parent, cyclic: true, project: false,
+presets in λWAVES' grouped order, labels −π … +π, SEAM at ±π, ARG ψ in rad })`. Its table is `palette.js` `toLUT`, bit for bit.
+PALETTE stays the app's switch, with the `palette` key action. `palette` keeps the editor's API (`stops`, `selected`, `on`,
+`id`, `groups`, `setOn`, `select`, `load(stops, selected, id)`), so serialize, restore, the link and `LW` are unchanged.
+`DEFAULT_PALETTE` moved to `lab/palette-app.js`, and `tools/new-project.mjs` imports it there. The empty project is unchanged
+except for C0's bpm 60 → 30. `native-ui.js` lost its camera re-layout (8 lines) and its palette re-layout (4 lines). INVERT
+keeps its own row, and the kit's seam readout stays.
+
+**The route script (NEW closer).** `tools/camera-routes.mjs` opens WAVE DANCER, WATER, BENZENE, N₂ and NEW and checks four
+things:
+- every saved `observer.*` route is live with the same id, target, macro, min and max;
+- every `observer.*` base is the file's;
+- the six targets keep their saved-route law;
+- every target has a dial, and on a routed one a key on that dial moves the base and keeps the route.
+
+The C1 tree is **GREEN on all 5** and **SAME as `3a60679`** (the adopt before C1): routes, bases and law are byte-identical.
+WAVE DANCER's `r4 → observer.fov` base moved 1.2 → 1.1905 under a key on both trees, and its route stayed. The base tree reds
+on one thing only: YAW and PITCH had no dial before C1. Now all six dials are the panel's.
+
+**Gates.** All ran on 8793/5263, one browser at a time and 4 s apart. Every suite was green on its first run, so nothing was
+re-run.
+- Browser: `camera-shift` **11/11**; `official-defaults-palette` **3/3**; `new-project` **8/8**; `history` **39/39**;
+  `render-regressions` **2/2**; `input` **13/13**.
+- Node: 85 suites, with only C0's 4 reds: `mir-manifest`, `new-project --check` (bpm only), `wiring` and `pwa` (the kit
+  ABOUT's URL).
+- `keyboard-window` is red on its drag check, and **the same on the adopt-only `3a60679`**. It is the adopt's, not C1's. Its
+  `camReset` and `palette` hooks pass.
+
+There is no digest lock: C7 owns the one lock, and `writeView` is untouched. No `__LW` member a test uses was renamed or
+removed (`palette.repaint` left, and no test read it). Test edits:
+- `camera-shift` node §8 is new;
+- the browser §4 waits a frame for the panel's coalesced read;
+- `history`'s two palette scenes now press the RAMP's stepper and colour well. Their row names ("edit", the swatch's long
+  aria-label) are what `hTouchName` makes of kit controls today, and C5's kit gesture names replace them.
+
+`index.html` links four kit sheets (`controls`, `colour-controls`, `panels/camera`, `panels/ramp`) as an interim; C0's
+`mir/mir.css` supersedes them.
+
+`cat lab/*.js | wc -l`: **36,288 → 36,469** after the adopt (+181, the generated `sw.js` list, C0's too) **→ 36,293**.
+C1's own ledger is **−176**: −29 for the camera, −147 for the RAMP. Hand-off: `research/release-0.5.0/C1-BUILD.md`.

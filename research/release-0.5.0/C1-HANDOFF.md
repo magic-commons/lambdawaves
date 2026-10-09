@@ -50,5 +50,6 @@
 - GRADE not built: the row's "what leaves" lists none; λWAVES' tone knobs are field-shader uniforms on WAVE (C2/C-later).
 
 ## Exact next step
-Item 1 DONE (`daad244`; fingerprints `.tmp/routes-base.json`, `.tmp/routes-c1.json`). Now item 2: the remaining browser gates
-(server on 8793, pid in `.tmp/server-8793.pid`), then REPORT wave 197 and C1-BUILD.md.
+C1 is COMPLETE (the docs commit: REPORT.md wave 197 + `C1-BUILD.md`). Final gates: camera-shift 11/11, render-regressions 2/2,
+input 13/13, the route script GREEN 5/5 and SAME as `3a60679`; node 85 with C0's 4 reds; `keyboard-window` red at its drag line
+on this tree AND on `3a60679` (the adopt's). All servers stopped. Next: Claude Sos merges this branch after C0 (`C1-BUILD.md`).
