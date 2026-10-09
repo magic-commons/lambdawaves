@@ -5,7 +5,7 @@
 | task | 0.5.0 C3 — the rack, transport, menubar, keys and keyboard onto MIR 1.5.0-alpha.24 (`research/release-0.5.0/BRIEF-C3.md`) |
 | worktree | `/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a85bd972b2222e143` (the first builder's, `agent-ab53b6b1093934d5b`, is read-only) |
 | branch | `worktree-agent-a85bd972b2222e143`, reset to `59717ae` (the first builder's tip), from `f0fcbc4` |
-| servers | 8883 (this tree, `python3 tools/gate/server.py <worktree> 8883`, pid 4082571 — stop by pid); 8887 not started |
+| servers | 8883 (this tree, pid 4082571) and 8887 (`.tmp/base` = f0fcbc4, started by me) — `python3 tools/gate/server.py <root> <port>`, stop by pid |
 
 ## Commits (from `f0fcbc4`)
 1. `8e55952` the design hand-off — `C3-DESIGN.md` (the transport stays λWAVES-built, §4; brief P stays open; the record stays v3) + `tools/a4-window-probe.mjs`.
@@ -16,6 +16,10 @@
 6. `59d6758` **the kit's rack hands the scene guard its columns (C9's open item); the CAMERA card stays adopted in place (C1's,
    resolved: `createCameraPanel({ rack })` would register a second `camera` or split CAPTURE out of the card).**  input's synthetic
    presses moved from (120, 120) — `#rackL`'s column — to the open stage (560–660, 420).  input 13/13 · hit-probe 52/0.
+7. `565b0aa` hand-off.
+8. `b9fa26d` **step 3: the menubar is the kit's `createMenubar` (menubar.js left); MENUS on the kit ids, the `ACTIONS.find`
+   fallback gone, dock/modulation tagged; the transport stays λWAVES-built.**  menubar 8 + GREEN · take-in-bugs 4 + GREEN · offer
+   16/16 · frame-occlusion 7/7 · phone bar geometry = base (+ `--menubar-bottom`, `max-width`).  lab 30,119 → 30,033.
 
 ## The history red — cause and fix (`d75d3f7`)
 Block 1b's "the card grew from 408 to 340.2 px" was read INSIDE the kit's rack motion: `createRackMotion` (lab/mir/shell/rack.js)
@@ -40,9 +44,9 @@ all 42 blocks, rebuild counts 1× modulation / 0× elsewhere, as before).
   to re-run (timing).
 
 ## Exact next step
-Step 3: `createMenubar({ opener: #title, host: #lab, menus: MENUS, phone: isPhone })` replaces `lab/menubar.js` (λWAVES' focus
-hand-back after a row's act stays as a wrapper on each row's `run` — the kit returns focus only on Escape: brief candidate);
-rename MENUS' four `keyFor/runAction` calls to the kit ids, delete the `ACTIONS.find` fallback, tag the dock button
-(`data-key-action="dock"`) and the modulation door (`modulation`); the phone crossing's `showMenuBar` call goes (the kit's crossing).
-Gates: `menubar`, `take-in-bugs`, `offer`, `frame-occlusion` 7, `input` 13.  Then step 4 (keys + keyboard window + tests), step 5
-(lines, wave 205, C3-BUILD.md).
+Step 4: the keys and the keyboard (C3-DESIGN §6): `createKeys` over A9's ACTIONS (Ctrl vs Mod), saved bindings lifted from
+`lambdawaves.q0.keys` (0.4.0 shape + `was`), `createKeyboardWindow` with λWAVES' charcoal-blue skin as unlayered rules over the
+kit's `km-*` DOM (R5-S3), occlusion following its drag; `keymap.js`, `keys.js`, `shortcuts.js` leave; `__LW.keys.*` /
+`__LW.keymap.*` / `layout.keymap` / `layout.keysheet` keep their verbs; `tests/keyboard-window.browser-test.mjs` rewritten,
+`tests/keyboard-shortcuts.test.mjs` re-aimed with the Ctrl-vs-Mod case.  Gates: keyboard-window, keyboard-shortcuts, menubar,
+input 13, history 42, hit-probe-set.  Then step 5 (lines, parity probe, wave 205, C3-BUILD.md).
