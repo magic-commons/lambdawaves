@@ -5284,8 +5284,8 @@ export async function boot(dom) {
     get history() { return historyApi; },
     get mo() { return moPanel ? moPanel.api : null; },      /* W-MO: the general basis, the force line and the nuclei */
     get pulse() { return pulsePanel ? pulsePanel.api : null; },  /* W-PULSE: the field-driven molecule on the same card */
-    /** W-CAPTURE (wave 58): lab/capture.js itself, built on first use — picture · record · planLoop · recordLoop ·
-     *  pngSequence · probe · verifyVideo · save · limits, and `laws` for the pure schedule functions. */
+    /** W-CAPTURE (wave 58): lab/capture.js itself, built on first use — picture · planLoop · save · limits · grab, and `laws` for the
+     *  pure schedule functions (0.5.0 C7: the film is captureUI.exact, render-exact.js createFilm over the kit's recorder). */
     get capture() { return capApi ? capApi.capture : null; }, get capturePlan() { return capApi ? capApi.plan(true) : null; },
     get captureUI() { return capApi; },
     /* W-EXPORT (wave 134): FILE › EXPORT SHAPE / GRID's own module instance — run(fmt), busy, last (the proof's hook;

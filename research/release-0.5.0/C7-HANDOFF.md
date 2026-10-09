@@ -13,7 +13,7 @@
 | 2 the lock on the adopted tree | `2171df3` | 1004 GREEN (58 s, 0/0) · 1148 GREEN (59 s, 0/0) |
 | 3 the recorder wired beside the app's road (WIP) | `32f0f2f` | — |
 | 3b EXPORT FRAMES' AbortError fixed (a kept result's OPFS files were discarded under it) | `4568463` | 1004 GREEN (59 s, 0/0) · 1148 GREEN (65 s, 0/0) |
-| 4 the old capture road deleted | next | |
+| 4 the old capture road deleted (capture.js 1,188 → 789; picture byte-identical, ff9ca6bf) | (this commit) | 1004 GREEN (59 s, 0/0) · 1148 GREEN (61 s, 0/0) |
 | 5 render-exact's old driver deleted + the re-aimed test + export3d on the kit's StoredZip | | |
 | 6 the base-copy pixel lock of EXPORT FRAMES | | |
 | 7 REPORT wave 199, C7-BUILD.md, BRIEF-C7-VERIFY.md | | |
@@ -31,5 +31,4 @@ PNG 97,866 B (byte-identical twice) · ONE PERIOD MP4 953,575 B, 180 f, decodes 
 EXPORT FRAMES 25 PNG + recording.json, 3,248,579 B; frame 0's pixels equal the picture's.
 
 ## Next
-Step 4: `python3 .tmp/splice-capture.py` (header `.tmp/cap-head.js`, PART 2 `.tmp/cap-part2.js`), pwa --write, node gate, lock.
 Step 5: `python3 .tmp/splice-rx.py` (`.tmp/rx-head.js`, `.tmp/rx-cost.js`, `.tmp/rx-hz.js`), export3d.js → `StoredZip`, the re-aimed test (`.tmp/rxt-head.js` + new §5–§12).
