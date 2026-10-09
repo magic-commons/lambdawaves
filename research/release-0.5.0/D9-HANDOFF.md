@@ -34,14 +34,17 @@
    current / molecular-names / legacy-boot (B33, B37 retired) follow. capture.js / render-exact.js guarded lines and the WGSL
    space-4 branch LEFT for C7. Node GREEN **82 suites**; browser: molecular-names 6/6, current 15/15, render-regressions 2/2;
    probe helium → ham atom, atomZ 2, 1 populated, ATOMS open, no page error.
-6. NEXT — the history suite's three fixture cases, the demos, the H₂/ELECTROSTATICS measure, the ledger + REPORT + D9-BUILD.
+6. DONE `e9cb3d9` — history's section 10: the three REAL fixtures through `P.importText` + `P.open` on a fresh page — each the
+   origin row [open · NAME] at depth 0, the PROJECTS status naming the retired window, no retired card/record back, no page
+   error, and its shim target (H₂⁺ → chem H2 orbital 2 owner; HELIUM → atom Z 2, 1 label, ATOMS open; QCD → cornell bb̄/LOG/
+   .51/.23/.81). `history` **42/42** (39 + 3).
+7. NEXT — the two demos, the H₂/ELECTROSTATICS measure, the ledger + REPORT + D9-BUILD.
 
 ## The exact next step
 
-`tests/history.browser-test.mjs`: three cases — open each of `tests/fixtures/legacy-{h2plus,helium,qcd}.lambdawaves.json`
-through `P.importText` + `P.open`; each names the retired window in the PROJECTS status and lands on its shim target
-(h2plus → chem on, H2, orbital view 2; helium → hamiltonian atom, Z 2; qcd → cornell bottom/log .51/.23/.81).
-Run `history` (39 + 3). Commit.
+The demos: two files in `lab/demos/` beside water/benzene/n2 — H₂ σu (for H₂⁺) and ATOM He 1s (for HELIUM) — WRITTEN BY THE LIVE
+BUILD the way the existing demos were (find their writer in tools/), and their two `.pj-demo` buttons in lab/index.html (only
+those two lines: C0 owns index.html's cascade). `node tests/pwa.test.mjs --write`; `molecule-demos` suite. Commit.
 
 ## Decisions so far
 
