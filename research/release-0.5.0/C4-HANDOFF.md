@@ -30,6 +30,10 @@ builder), geckodriver 5303; suites one at a time, 4 s apart.
   exports, same logic; no shim); tests/audio.test.mjs re-aimed; lab.css badge block + `.k-route-x` gone (modhost.css carries
   them); rack.js comments re-aimed (4 in-place lines). Gates: node 82 + 3 known; routed-knob 4/4, take-in-bugs 4/4,
   new-project 8/8, history 39/39.
+- Step 4 SKIPPED (the integrator's order: `tests/mir-controls` is C0's continuation's).
+- **Step 5 DONE** ("s3 — a reload boots the shipped rack"): `.tmp/probe-s3.mjs` boot s1 LFO + s2 ENV → WAVE DANCER s1 + s3 AUDIO,
+  modes {s1,s3} → reload: the shipped rack, modes {s1} → reopen: {s1,s3} from the file. Pre-existing on 1e1a4f8 (A1). Fix in
+  `tools/settings-probe.mjs` (+6): rows of sources absent after the reload are compared out and named. settings-probe **6/6**.
 - `lab/*.js`: 36,288 (base) → 36,469 (adopt) → 36,478 (14f0fac) → 36,464 (be03a83) → 36,472 (step 2) → **32,921** (step 3).
 
 ## Node reds (C0's, not fixed): mir-manifest (alpha.24 not ACCEPTED); new-project --check OUT OF STEP (bpm 60 → 30); wiring
@@ -56,6 +60,4 @@ builder), geckodriver 5303; suites one at a time, 4 s apart.
 - take-in-bugs' WAVE DANCER scene reads t 0.00 → 64.18 (the project's own clock after open; green, noted only).
 
 ## Exact next step
-Step 5 (`s3`): settings-probe's WAVE DANCER red is `modwin.modes.s3` lost on reload (the reload boots the shipped rack s1/s2);
-decide whether that is the window's law (record) or ours (≤ 10 lines). Note: `tools/perf/device-report.js:679` says the OLD
-modwindow.js pruned it the same way (rebuildDevices) — compare with the base before calling it new.
+Step 6: C4-BUILD.md (A7-BUILD shape) + REPORT.md `### wave 201` under `## 2026-10-08 · 0.5.0 C — THE ADOPTION` (at the END).
