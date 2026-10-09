@@ -45,8 +45,12 @@ real-pointer hover on a badge) and a stylehash pair with the keymap open (`cap.m
 - `keyboard-window` (8783/5253) alone: **PASS** (red before the fix).
 - `mir-controls`: base copy (8787/5257), old test **PASS 2/2**; this tree, re-aimed test **PASS 2/2**; re-aimed test on the base copy RED (`0.5 != 0.25`, as intended).
 
+- **Step 3** (final tree `88fedce`): `bash test.sh node` exit 0, **85/85** suites. Browser on 8783/5253, one at a time, 4 s apart: `keyboard-window` **1/1**, `mir-controls` **2/2**, `frame-occlusion` **7/7**, `menubar` GREEN. No timing red, nothing re-run.
+- adopt `--check` (`node ~/Documents/MIR/.claude/worktrees/mir-1.5/tools/adopt.mjs <this worktree> --check`): "in step with MIR 1.5.0-alpha.24", exit 0. `node tools/new-project.mjs --check`: in step (16,889 B).
+- `cat lab/*.js | wc -l` = **36,361** (base 36,288, +73, all `sw.js`; this continuation changed no app JS). Precache 263 entries, 5,900,325 B (base 191 / 4,874,333 B); `wiring --unreached-kit` = 114.
+
 ## Blockers
 None.
 
 ## Exact next step
-Step 3: `bash test.sh node` (expect 85 green), then ONLY `keyboard-window`, `mir-controls`, `frame-occlusion`, `menubar` on 8783/5253, one at a time, 4 s apart. Then step 4 (lines, the `__LW` law, adopt `--check`, REPORT wave 196, C0-BUILD.md) and step 5 (the ms/s pair). The gate servers run on 8783 (this tree) and 8787 (`.tmp/base`); stop them by pid at the end.
+Step 4: REPORT.md wave 196 under `## 2026-10-08 · 0.5.0 C — THE ADOPTION` (create it at the END if absent) and `research/release-0.5.0/C0-BUILD.md`; commit. Then step 5: `node tools/perf/wait-gpu.mjs`, then `.tmp/msps.mjs 3` (both gate servers up), gate |Δ median| ≤ 3.536 ms/s vs 37.335; deferral to C-V if the load stays ≥ 4 for 15 minutes.
