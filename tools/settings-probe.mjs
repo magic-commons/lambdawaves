@@ -6,6 +6,8 @@
  *       WORKSPACE and PROJECT is RED.
  *   2 · THE BLOB ROUND TRIP: saveSettings → B1; reload → B2 (what the boot left) → saveSettings → B3.  B1 and B3 must be the
  *       same bytes (less the modwin.modes rows of sources the reloaded, shipped rack lacks — named); B2 is reported.
+ *   3 · THE LOOK IS THE KIT'S (0.5.0 C2): `mir.gui` is PREFERENCE (FAMILIES), and a B3 that still holds a look key (lab/look.js
+ *       BLOB_LOOK: the keys the lift moves out of the blob) is RED.
  *   python3 tools/gate/server.py <root> <LW_PORT>   (stop it by pid)
  *   LW_PORT=… GD_PORT=… node tools/settings-probe.mjs [--out .tmp/settings-probe.json]
  * --out keeps every blob and every diff, so a tree served from `git archive` can be compared with this one by `diff`. */
@@ -13,6 +15,7 @@ import { writeFileSync } from 'node:fs';
 import { open } from './gate/gatekit.mjs';
 import { go } from './gate/drv.mjs';
 import { SETTINGS_KEY, WORKSPACE, FAMILIES } from '../lab/settings-store.js';
+import { BLOB_LOOK } from '../lab/look.js';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
 const OUT = process.argv.includes('--out') ? process.argv[process.argv.indexOf('--out') + 1] : null;
@@ -73,11 +76,13 @@ try {
     const ids = await g.ev('return __LW.mod.model.sourceList().map((s) => s.id);'), u1 = unseat(r.B1, ids);
     r.unseated = u1.gone; r.roundTrip = r.B1 === r.B3 || u1.json === unseat(r.B3, ids).json; r.bootLeft = r.B2 === r.B1;
     r.reloadErrs = (await g.ev('return __e.slice();'));
-    const ok = r.roundTrip && !(r.outside || []).length && !(r.errs || []).length && !r.reloadErrs.length && (name === 'boot' || /^(opened demo|new)/.test(r.status));
+    r.lookLeft = BLOB_LOOK.filter((k) => k in JSON.parse(r.B3 || '{}'));
+    const ok = r.roundTrip && !r.lookLeft.length && !(r.outside || []).length && !(r.errs || []).length && !r.reloadErrs.length && (name === 'boot' || /^(opened demo|new)/.test(r.status));
     if (!ok) red++;
     console.log((ok ? 'GREEN ' : 'RED   ') + name.padEnd(12) + ' blob ' + r.B1.length + ' B, reload ' + (r.roundTrip ? (r.B1 === r.B3 ? 'byte-identical' : 'byte-identical but modwin.modes ' + r.unseated.join(', ') + ' (no such source after the reload)') : 'DIFFERS: ' + JSON.stringify(diff({ [SETTINGS_KEY]: r.B1 }, { [SETTINGS_KEY]: r.B3 })))
       + (r.bootLeft ? '' : ' (the boot left ' + (r.B2 ? r.B2.length + ' B' : 'no blob') + ' before its save)')
       + (r.wrote ? ' · the open wrote ' + (r.wrote.map((d) => d.sub ? 'settings.' + d.sub : d.key).join(', ') || 'nothing') + ' · after a save ' + (r.live.map((d) => d.sub ? 'settings.' + d.sub : d.key).join(', ') || 'nothing') : '')
+      + (r.lookLeft.length ? ' · LOOK KEYS STILL IN THE BLOB: ' + r.lookLeft.join(', ') : '')
       + (r.outside && r.outside.length ? ' · OUTSIDE WORKSPACE/PROJECT: ' + JSON.stringify(r.outside) : '') + (r.status ? ' · "' + r.status + '"' : ''));
     dump.scenes.push(r);
   }

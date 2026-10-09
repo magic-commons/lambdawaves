@@ -291,7 +291,7 @@ const PRECACHE = [
   ['./rotor4.js',                                                   '074250aea7e6'],
   ['./rpa-inspector.js',                                            'baf1eaa062e7'],
   ['./scf.js',                                                      '50cc85f7fd01'],
-  ['./settings-store.js',                                           '14034bbbd442'],
+  ['./settings-store.js',                                           '267f19dc949f'],
   ['./shadow.js',                                                   '98d26391c1b5'],
   ['./shadowview.js',                                               '7e055c93afe3'],
   ['./shortcuts.js',                                                '6f0fc3211c39'],
