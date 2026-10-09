@@ -12,7 +12,10 @@
 1. `7fc6f04` — `0.5.0 C6 · FOLDERS over the one part`: rack.js wired to `createProjects`; `project-storage.js`, `project-import.js`,
    their two suites, the `.nb-projectsface` markup and the `.pj-*` CSS leave; the two todos fixed; every test and tool that pressed
    `.pj-demo` or read `.pj-status` edited in the same commit (the `__LW` law).
-2. this hand-off commit.
+2. `9b4bbe6` — hand-off.
+3. `942a2fc` — `the serialize-bytes probe`: `tools/serialize-bytes.mjs`, 11 of 11 readings byte-identical base vs tree
+   (`research/release-0.5.0/c6-serialize-bytes.json`).
+4. this hand-off commit.
 
 The first builder's commits: `443332e` (C6-DESIGN.md), `b6d61ec` (the two modules, WIP), `9da702d` (its hand-off).
 
@@ -40,6 +43,7 @@ The first builder's commits: `443332e` (C6-DESIGN.md), `b6d61ec` (the two module
 | `menubar` | 8/8 · `latex-copy` green · `take-in-bugs` 4/4 · `stage-text` 4/4 |
 | `current` | 15/15 on the alone re-run. Case 10 (audio face) reads CSS 250 ms after a change; red twice here and once on BASE under the same load (frame gaps 100–200 ms on the shared GPU) — a timing red, not C6 |
 | `hit-probe-set` | 49 gap presses, 0 reached the stage (FOLDERS and its rail are scenes) |
+| `tools/serialize-bytes.mjs` | **11/11 identical**, full and edit scope: 4 demos + the empty project + 6 history snapshots, base 8897 vs tree 8893 |
 
 ## Lines
 
@@ -51,8 +55,7 @@ None.
 
 ## Exact next step
 
-1. The byte-identity probe `tools/serialize-bytes.mjs` (from `tools/settings-probe.mjs`'s pattern): `serialize()` bytes on the 4 demos
-   + the empty project + 6 history snapshots, base (8897) vs tree (8893); commit its output under `research/release-0.5.0/`.
+1. ~~The byte-identity probe~~ done (`942a2fc`).
 2. The R10 fixture suite `tests/project-formats.test.mjs` (node: C6-DESIGN §7 a1–a7, b1–b4, c1) + a browser case for the live store.
 3. `node tools/new-project.mjs --check`; `tools/settings-probe.mjs` zero RED.
 4. Lines, REPORT wave 206, `C6-BUILD.md`, the CLAUDE.md paragraph, the final hand-off. Then (if time) BRIEF-C6 §4 step 3: the session,
