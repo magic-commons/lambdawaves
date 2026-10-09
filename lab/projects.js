@@ -18,7 +18,7 @@
  *
  * createProjects(port) → the facade: list recent current dirty markClean discard requestOpen requestFresh save open remove
  *   fresh exportText importText · demo(file) (a DEMOS press) · download() (EXPORT .json) · pick() (IMPORT) · seed() · status · folders
- *   · changed() (the part's subscribe hears it)
+ *   · changed() (the part's subscribe hears it) · resume(session) (the opener's RESUME)
  *   port { host, part, snapshot(), rollback(S) → bool, busy(±1), opened(label), notice() → D9's line, thumbnail(), confirm(text),
  *          rack, onMoved(rect), titleAfterSave(name) → bool } */
 import { createFolders, FOLDERS_ACTIONS, toThumb } from './mir/folders/folders.js';
@@ -219,6 +219,13 @@ export function createProjects(port) {
     async fresh() {
       let file; try { file = await fetchNew(); } catch (err) { pjStatus('new project failed — ' + err.message + '; nothing was changed', true); return false; }
       return api.open(null, file);
+    },
+    /** resume(session) — the opener's RESUME (0.5.0 C6b): the session's part put back through the part's own restore, then the landing
+     *  (the notebook law, the ring's origin `resume`).  Nothing is current, and the work stays unsaved until a SAVE */
+    resume(session) {
+      let r = null; port.busy(1); try { r = session.resume(); } finally { port.busy(-1); }
+      if (!r || !r.ok || r.failed.length) { pjStatus('the last session could not be put back', true); return false; }
+      currentId = null; port.opened('resume'); return true;
     },
     exportText(path) { const C = collection(), p = path || api.current; return C && p && Object.hasOwn(C.items, p) ? projectFileText(C.items[p]) : null; },
     /** importText(text) → the path it is stored at.  The same project already at its path is that path (a demo re-imported is the

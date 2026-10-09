@@ -146,32 +146,6 @@
 
 
   <div id="busyMark" aria-hidden="true" hidden></div>
-
-
-  <div id="warnPane" role="dialog" aria-modal="true" aria-labelledby="warnTitle" aria-describedby="warnBody" tabindex="-1" hidden>
-    <div class="warn-card">
-      <svg class="warn-sign" viewBox="0 0 120 106" role="img" aria-label="Caution triangle filled with a λWAVES orbital, the exclamation mark knocked out of it">
-        <defs>
-          <clipPath id="warnTri"><path d="M 52.20 21.50 A 9 9 0 0 1 67.80 21.50 L 104.20 84.50 A 9 9 0 0 1 96.41 98 L 23.59 98 A 9 9 0 0 1 15.80 84.50 Z"/></clipPath>
-
-
-          <mask id="warnBang" maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="106">
-            <rect x="0" y="0" width="120" height="106" fill="#fff"/>
-            <g class="warn-bang" fill="#000" stroke="#000" stroke-width="3.5" stroke-linejoin="round">
-              <path d="M 55.9 31 L 64.1 31 L 61.6 64 L 58.4 64 Z"/>
-            </g>
-            <circle class="warn-bang" cx="60" cy="78" r="5.6" fill="#000"/>
-          </mask>
-        </defs>
-
-
-        <image href="./img/warning-orbital.png" x="-14" y="-12" width="148" height="148" clip-path="url(#warnTri)" mask="url(#warnBang)" preserveAspectRatio="xMidYMid slice"/>
-      </svg>
-      <h1 id="warnTitle" class="warn-title">PHOTOSENSITIVITY WARNING</h1>
-      <p id="warnBody" class="warn-body">This app displays rapid strobing effects and changing colors. If you have a history of photosensitive epilepsy or seizures, do not continue.</p>
-      <button class="warn-btn" type="button">CONTINUE</button>
-    </div>
-  </div>
   <!-- `tabindex="-1"` is NOT a tab stop: it is what makes a fragment jump move FOCUS rather than only
        set the sequential-navigation start point.  A rack must never get `tabindex="0"` — it buys
        nothing and costs two stops, because Tab already scrolls a rack by scrolling each newly focused

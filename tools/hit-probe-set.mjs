@@ -23,7 +23,7 @@ const PW = path.join(os.homedir(), '.cache/ms-playwright/chromium-1243/chrome-li
 if (!process.env.CHROMIUM && fs.existsSync(PW)) process.env.CHROMIUM = PW;
 const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
 const GRID = Number(opt('--grid', 9)), STEP = Number(opt('--step', 4)), PRESS = Number(opt('--press', 12)), JSON_OUT = opt('--json', null);
-const URL_ = `https://127.0.0.1:${process.env.LW_PORT || 8823}/lab/?sw=0&warn=0`;
+const URL_ = `https://127.0.0.1:${process.env.LW_PORT || 8823}/lab/?sw=0&warn=0&starter=home`;
 const POSE = 'JSON.stringify([__LW.obs.yaw, __LW.obs.pitch, __LW.obs.dist, __LW.obs.shift])';
 const MOD = `__LW.layout.modulation.expand(); for (let i = 0; i < 3; i++) __LW.mod.addSource('lfo');`;
 const SHUT = '__LW.layout.modulation.collapse();';   // the first-run modulation window is open over the middle of the stage: every other scene shuts it

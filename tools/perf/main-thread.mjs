@@ -49,7 +49,7 @@ const r3 = (x) => Math.round(x * 1000) / 1000;
 async function one(i) {
   const b = await launch({ width: 1600, height: 1000, gpu: true, args: CHROME_ARGS });
   try {
-    const url = `https://127.0.0.1:${PORT}/lab/?sw=0&warn=0`;
+    const url = `https://127.0.0.1:${PORT}/lab/?sw=0&warn=0&starter=home`;
     const ready = async () => { let r = false; for (let k = 0; k < 120 && !r; k++) { r = await b.eval('!!(window.__LW && __LW.ready)'); if (!r) await sleep(500); } return r; };
     await b.goto(url, 500); if (!(await ready())) throw new Error('the lab never became ready (warm-up): ' + b.logs.slice(0, 3).join(' | '));   // the warm-up navigation (header)
     await b.goto(url, 500); if (!(await ready())) throw new Error('the lab never became ready: ' + b.logs.slice(0, 3).join(' | '));

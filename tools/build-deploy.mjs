@@ -700,7 +700,7 @@ const ownFonts = distFiles.filter((r) => r.startsWith(at('fonts/')) && r.endsWit
 const katex    = distFiles.filter((r) => r.startsWith(at('mir/shell/vendor/katex/fonts/')));
 const later = [
   [ownFonts.length, `the lab's own faces (${ownFonts.map((f) => path.posix.basename(f)).join(', ')}) — @font-face with font-display:swap, requested during the first paint`],
-  [inDist.has(at('img/warning-orbital.png')) ? 1 : 0, 'img/warning-orbital.png — the PHOTOSENSITIVITY panel is shown at boot'],
+  [inDist.has(at('img/warning-sign.png')) ? 1 : 0, 'img/warning-sign.png — the PHOTOSENSITIVITY notice (MIR\'s, its art λWAVES\' sign) is shown before the title screen'],
   [inDist.has(at('sw.js')) && !eager.has(at('sw.js')) ? 1 : 0, 'sw.js — fetched by register(); it then precaches the WHOLE tree in the background (see below)'],
   [inDist.has(at('mathworker.js')) ? 1 : 0, 'mathworker.js — a module Worker, constructed on demand by rack.js, not at boot'],
   [katex.length, 'KaTeX faces — a @font-face loads only when a glyph in it is actually rendered; a first visit typically pulls 2–5 of these, never all'],
