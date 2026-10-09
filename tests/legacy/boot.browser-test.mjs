@@ -2816,8 +2816,8 @@ try {
     R.left = bad.slice(0, 6); R.leftN = bad.length;
     /* AND THE NEW WORDS SIT IN EVERY SEAT THE OLD ONES HELD */
     const st = document.querySelector('.dev[data-id="state"]');
-    R.button = [...st.querySelectorAll('.trig-l')].map((t) => t.textContent).indexOf('IMPULSE') >= 0;
-    R.group = [...st.querySelectorAll('.grp-lbl')].map((t) => t.textContent).some((t) => t.indexOf('IMPULSE  ·  a sudden momentum kick') === 0);
+    R.button = [...st.querySelectorAll('.trig-l')].map((t) => t.textContent).indexOf('RELEASE') >= 0;   /* 0.5.1 re-aim (D10-F): the trigger has read RELEASE since 5f6421e (the BOW-feel redesign: "Ctrl + drag · release to fire") and a526bda wrote the card's note around that word ("RELEASE applies e^{ik·x}"); the group, the readout and the words clause below stay strict */
+    R.group = [...st.querySelectorAll('.grp-lbl')].map((t) => t.dataset.helpEn || t.title || t.textContent).some((t) => t.indexOf('IMPULSE  ·  a sudden momentum kick') === 0);   /* 0.5.1 re-aim (D10-F): native-ui.js cuts every native card's group label to its first clause and keeps the whole text as its hint (the kit's control-help moves a title to data-help-en), so the card SHOWS "IMPULSE" and the hint says the rest — the words are read from where they are kept */
     R.readoutOk = [...st.querySelectorAll('.ro-lbl')].map((t) => t.textContent).some((t) => t.indexOf('LAST IMPULSE') === 0);
     /* 0.5.0 C3/C2: the key sheet is the kit's KEYBOARD window (no __LW.keysheet.rows) and the hint bar is the kit's CONTROL HINTS row (no #hint) — their two clauses are retired; the sweep above reads the KEYBOARD window's DOM as part of the live document */
     /* the STATUS LINE the gesture writes, and the readout sub it lands with */
