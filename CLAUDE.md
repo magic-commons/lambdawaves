@@ -85,37 +85,30 @@ SLICE / CLIP): the ids `slice` / `clip`, `slice.*` and the `material.slice.*`
 targets are unchanged. PERFORMANCE sits in SETTINGS › QUALITY beside GOVERNOR;
 METERS keeps the GOVERNOR readout and FRAME PROFILE.
 
-THE STAGE TEXT (Settings › Display, ONE row: the switch and its SIZE;
-PREFERENCE `molFormula` / `molFormulaSize`, on by default, 50–300 %) writes what
-is playing on the stage in the notebook's own markdown + KaTeX
-(`lab/stage-text.js` — the interim renderer; the kit's INFORMATIONAL layer
-replaces it at 0.5.1, D1 by the A0 spike): the MOLECULES formula ($\mathrm{H_{2}O}$) while
-MOLECULES is on, otherwise SPECTRUM's populated states in `stateLatex`'s prose
-("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION) — never a live
-coefficient. Its key is the string it would render: the DOM moves only when
-the string does, KaTeX runs at most four times a second, nothing renders while
-it is off, and nothing reads layout per tick (only on a resize, a transport or
-rack move, a SIZE change or a new string). THE FADE: a HAND's preset (STATE's
-PRESET and RELOAD, MO-REGISTRY's WINDING / HOMO + LUMO and STATES presets) is
-announced in the same node — `WINDING · $1e_{1g}$ (a) + (b)`, the names from
-`lab/names.js` — and fades back to the formula; the press threads
-`{ hand: true }`, so a restore, an undo, a project or link open never announces
-(`tests/stage-text.browser-test.mjs`). The same switch and SIZE govern the
-ATOM LABELS: each MOLECULES nucleus marked with its element symbol at its
-projected position (`toScreen`, written only when the camera, molecule, size or
-canvas changed), white under `mix-blend-mode: difference` so they invert
-whatever is beneath them. The older `atomLabels` / `atomLabelsSize` keys are
-read once (only where `molFormula` was never written) and dropped. The type
-scale is the notebook's three sizes: the formula is its title (34 px), an
-announcement its heading (22 px), an atom label its body (14 px), each × SIZE;
-the formula is centred between the racks with a wide margin; it WRAPS inside
-that width (only an unbreakable word is shrunk); at the top while the transport
-pill floats at the foot, at the foot when the transport is docked or the pill is
-at the top. It is transparent text under every window and never part of the
-occlusion mask, and it never reaches an export: a picture, a loop and a video
-carry instead its one plain-Unicode CAPTION (`H₂O · 1b1 HOMO · STO-3G`, or the
-states), drawn by `lab/capture.js` `drawCaption` and following the same switch
-(KIT BRIEF 6 replaces it at 0.5.1, D5).
+THE STAGE TEXT (Settings › Display, ONE row: the switch and its SIZE; PREFERENCE `molFormula` / `molFormulaSize`, on by default,
+50–300 %) writes what is playing on the stage as ONE block of the kit's INFORMATIONAL layer (`createInfoLayer` in `rack.js`
+`initStageText`, 0.5.1 D1; `lab/stage-text.js` is gone): the MOLECULES formula ($\mathrm{H_{2}O}$) while MOLECULES is on,
+otherwise SPECTRUM's populated states in `stateLatex`'s prose ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION) — never a
+live coefficient. The layer has no subject, no features and no labels, parallax, drift and following off, and is NEVER told of a
+camera move (`viewChanged()` only when the racks hide or slide, the transport docks or moves, or the TIMELINE opens or docks; the
+kit's ResizeObserver covers a size): idle it writes nothing (D1-BUILD U2: 0 records over AUTO-ROTATE and a pointer sweep).
+Its key is the string it would render: a changed string is `remove()` + `addBlock({ md })` (the kit's exit and entrance), KaTeX
+runs at most four times a second, and nothing is added while the switch is off (the root `hidden`). It wears the kit's look —
+ink, the feathered shade, the serif face — at the kit's seat: the free stage's top + 12 %, between the racks, clear of the
+undocked transport and an open TIMELINE (`avoid`); under every window (`.mir-info.lw-stage` z 20 < the racks' 30, `lab.css`),
+never a pointer target, never in the occlusion mask. THE FADE: a HAND's preset (STATE's PRESET and RELOAD, MO-REGISTRY's WINDING
+/ HOMO + LUMO and STATES presets) is announced as the block (`data-fade`, the heading size) for 2.4 s — the formula leaves and
+returns, and the kit's exit is the fade — `WINDING · $1e_{1g}$ (a) + (b)`, the names from `lab/names.js`; the press threads
+`{ hand: true }`, so a restore, an undo, a project or link open never announces (`tests/stage-text.browser-test.mjs`). HOLD (I,
+the kit's `infoActions` row; `lab/key-table.js` carries a row's `up`) holds the words still while the key is down. The same
+switch and SIZE govern the ATOM LABELS, λWAVES' own letters (R6-L; kit labels are D1b, Group II): each MOLECULES nucleus marked
+with its element symbol at its projected position (`toScreen`, written only when the camera, molecule, size or canvas changed),
+white under `mix-blend-mode: difference` so they invert whatever is beneath them. The older `atomLabels` / `atomLabelsSize` keys
+are read once (only where `molFormula` was never written) and dropped. The type scale is the notebook's three sizes: the formula
+its title (34 px), an announcement its heading (22 px) — the kit's `--info-size-body` overridden in `lab.css`, each held to 8 vw
+and at least 16 px — an atom label its body (14 px), each × SIZE. It never reaches an export: a picture, a loop and a video carry
+instead its one plain-Unicode CAPTION (`H₂O · 1b1 HOMO · STO-3G`, or the states), drawn by `lab/capture.js` `drawCaption` and
+following the same switch (D5, Group II, replaces it).
 While a molecule owns the field SPECTRUM is FOLDED, not hidden
 (`moleculeMode`), and unfolds when the molecule lets go; EDIT › COPY then
 copies the molecule's page (`moleculeLatex`, `lab/latex-state.js`).

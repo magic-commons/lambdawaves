@@ -624,6 +624,13 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > block beaten by later native rules; one closing block at the foot of `skin.css`, +22, sizes only; B78 the STATE card's IMPULSE words, the trigger stays
 > RELEASE (it left in `5f6421e`'s BOW redesign); four harness re-aims accepted; the boot suite alone 150/152 on its tree — B149 the law red, B6 timing; REPORT
 > wave 211; `lab/*.js` 27,614 unchanged by it; node 0; CHANGES line). `BRIEF-D2-D8.md` and `BRIEF-D-V.md` written (`42e5610`, `6d79813`). Running: D1, D10-24.
+> **17:33 — D1 MERGED `76b1d5e`** (Opus `52e51aa`: THE STAGE TEXT IS THE KIT'S BLOCK — every closer met: the pair boot Δ −0.109 / the D1 scene Δ −0.368
+> (gate 3.536), the idle witness 0 records, placement 18/18, churn ≤ 4/s, the fade law; the letters stay; `stage-text.js` gone; −56 → **27,558**; HOLD (I) a
+> real held key; `main-thread.mjs` `--setup`/`--sweep`/`served`; REPORT wave 212; CLAUDE.md THE STAGE TEXT paragraph replaced by its draft; CHANGES line).
+> FOUND for Josh: the letters' `difference` blend costs ≈ 30 % of frames while the camera turns (pre-existing; R6-L); the kit's pointer force nudges the block
+> when the pointer comes within 260 px (a STILL block is a brief candidate; R6-F). **D2+D8 LAUNCHED 17:35 from `76b1d5e`** (Opus, 9013/5483, `BRIEF-D2-D8.md`).
+
+## 3 · What happens next, in order
 
 ## 3 · What happens next, in order
 

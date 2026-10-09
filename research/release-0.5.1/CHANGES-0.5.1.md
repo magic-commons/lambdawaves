@@ -13,3 +13,8 @@ per feature, no code names; the row that brought it in brackets.
   OBSERVER, CAMERA, RENDER, SPECTRUM and SETTINGS are 44 px, and stacked dials have a little more air so two rings never overlap. Desktop and iPad are
   unchanged. The STATE card's momentum kick is called IMPULSE again (the group, its readout `LAST IMPULSE`, the knobs' hints); the trigger still says
   RELEASE. (D10-F)
+
+- The words on the stage, the molecule's formula or the playing states, are now written by MIR's own INFORMATIONAL layer: ink with a soft shade in
+  the kit's serif face, sitting still at the top of the free stage between the racks, never under the transport or the TIMELINE; a hand's preset
+  still announces itself over them for a moment and fades back. Holding I keeps the words still. The element letters on each nucleus are as they were.
+  The old renderer is gone, and the picture costs nothing more while the camera turns. (D1)
