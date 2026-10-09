@@ -38,7 +38,7 @@ export function createKeyTable({ rows, edit = (a, run) => run(), stageHasFocus =
   const table = createKeys({ platform, target, storage: { get: () => liftSaved(storage.get(), rows), set: (o) => storage.set(o) },
     actions: [...rows].sort((x, y) => ORDER.indexOf(group(x)) - ORDER.indexOf(group(y))).map((a) => ({ id: a.id, label: a.label, group: group(a), short: a.short,
       keys: chordsOf(a), inFields: !!a.inFields, repeat: true, overControls: true, when: a.stage ? stageHasFocus : undefined,
-      run: (e) => edit(a, () => a.run(e && e.shiftKey ? 0.25 : 1)) })) });
+      run: (e) => edit(a, () => a.run(e && e.shiftKey ? 0.25 : 1)), up: a.up && (() => a.up()) })) });   // `up`: a HELD row (the kit's: its release, or leaving the page, runs it)
   const P = table.platform, row = (id) => table.list().find((x) => x.id === id);
   const view = target || (typeof window !== 'undefined' ? window : null);   // wave 88: a focused <select> yields Space (the kit counts it a field)
   if (view) view.addEventListener('keydown', (e) => { const t = e.target; if (e.code !== 'Space' || e.defaultPrevented || !t || t.tagName !== 'SELECT') return;

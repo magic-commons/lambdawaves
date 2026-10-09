@@ -3,6 +3,9 @@
 // does not change); nothing reads layout per tick (the placement's witness does not move while the transport plays, the
 // atom labels write only when the camera moves); a HAND's preset is announced and fades back to the formula — and an undo,
 // a project open and a link open announce nothing (one banner, not three); the WINDING / HOMO + LUMO banners speak the names.
+// 0.5.1 D1 · re-aimed: the text is ONE block of the kit's INFORMATIONAL layer (`__LW.stageText.layer`, root `.mir-info.lw-stage`),
+// the newest `.mir-info-block` in it is the one showing (a changed string is remove() + addBlock(); the old one is leaving), an
+// announcement is a block marked `data-fade` at the heading size, and the switch hides the layer's root.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
@@ -14,13 +17,15 @@ const ev = async (body) => { const r = await g.ev(body); assert.ok(r !== undefin
 try {
   assert.equal((await g.waitFor('window.__LW&&__LW.ready', 200, 100)).ok, 1);
   await g.ev(`window.__w = (n) => new Promise((r) => setTimeout(r, n));
-    window.__node = () => document.getElementById('molFormula');
+    window.__node = () => [...__LW.stageText.layer.root.querySelectorAll('.mir-info-block')].pop() || null;
     window.__field = (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); };
     return 1;`);
 
   /* ── 1 · the formula is KaTeX, keyed on its string ── */
   const t1 = await ev(`const S = __LW.stageText, n = __node(); await __LW.settle(); await __w(400);
-    const boot = { md: S.md, katex: n.querySelectorAll('.katex').length, err: n.querySelectorAll('.katex-error').length, hidden: n.hidden };
+    const R = S.layer.root, cs = getComputedStyle(R);
+    const boot = { md: S.md, katex: n.querySelectorAll('.katex').length, err: n.querySelectorAll('.katex-error').length, hidden: R.hidden || n.dataset.state !== 'in',
+      blocks: R.querySelectorAll('.mir-info-block').length, lw: R.classList.contains('lw-stage'), z: cs.zIndex, pe: cs.pointerEvents, title: getComputedStyle(n).fontSize };
     const r0 = S.stats.renders, p0 = S.stats.places;
     /* the transport, frame by frame (a loaded GPU starves a free-running rAF): twelve CPU ticks at twelve clock times */
     for (let i = 1; i <= 12; i++) { __LW.scrub(0.37 * i); await __LW.settle(); }
@@ -33,6 +38,7 @@ try {
     return { boot, play, burst, errs: __e.slice() };`);
   assert.equal(t1.boot.md, '$1s_{0}$ and $2p_{0}$', 'boot md: ' + JSON.stringify(t1));
   assert.ok(t1.boot.katex === 2 && t1.boot.err === 0 && !t1.boot.hidden, 'the formula is not KaTeX: ' + JSON.stringify(t1.boot));
+  assert.ok(t1.boot.blocks === 1 && t1.boot.lw && t1.boot.z === '20' && t1.boot.pe === 'none' && t1.boot.title === '34px', 'not ONE kit block at the title size, under the racks, never a target: ' + JSON.stringify(t1.boot));
   assert.deepEqual(t1.play, { renders: 0, places: 0 }, 'playing an unchanged state rendered or read layout: ' + JSON.stringify(t1.play));
   assert.ok(t1.burst.renders <= Math.ceil(t1.burst.span / 250) + 1 && t1.burst.md === '$x_{10}$' && t1.burst.preset === '$3d_{0}$', 'the burst: ' + JSON.stringify(t1.burst));
   assert.deepEqual(t1.errs, []);
@@ -43,20 +49,21 @@ try {
     const sel = document.querySelector('.dev[data-id="state"] select.sel'); H.flush(); await __w(450); H.flush();
     const a0 = S.stats.announced;
     __field(sel, '1s+2s'); await __w(80);
-    const pressed = { banner: S.banner, md: S.md, n: S.stats.announced - a0, heading: __node().style.fontSize };
+    const pressed = { banner: S.banner, md: S.md, n: S.stats.announced - a0, heading: getComputedStyle(__node()).fontSize, fades: S.layer.root.querySelectorAll('.mir-info-block[data-fade]').length };
     await __w(520); H.flush();
     const undid = H.undo(); await __w(400);
     const href = __LW.link.mint().href; const link = __LW.link.open(href); await __w(300);
     const r = await fetch('./demos/wave-dancer.lambdawaves.json', { cache: 'no-cache' }); const path = P.importText(await r.text()); P.open(path); await __w(800);
     window.confirm = c0;
     await __w(3200);   /* the ttl and the fade */
-    return { pressed, undid, link: link.opened && link.ok, n: S.stats.announced - a0, after: { banner: S.banner, md: S.md, title: __node().style.fontSize }, errs: __e.slice() };`);
+    return { pressed, undid, link: link.opened && link.ok, n: S.stats.announced - a0, after: { banner: S.banner, md: S.md, title: getComputedStyle(__node()).fontSize, fades: S.layer.root.querySelectorAll('.mir-info-block[data-fade]').length }, errs: __e.slice() };`);
   assert.equal(t2.pressed.banner, '1s \\+ 2s  beat', 'the press did not announce its preset: ' + JSON.stringify(t2));
   assert.equal(t2.pressed.n, 1); assert.equal(t2.undid, true); assert.equal(t2.link, true);
   assert.equal(t2.n, 1, 'an undo, a link or a project open announced: ' + JSON.stringify(t2));
   assert.equal(t2.after.banner, null, 'the banner did not fade: ' + JSON.stringify(t2.after));
   assert.ok(/^\$/.test(t2.after.md), 'the formula did not come back: ' + JSON.stringify(t2.after));
   assert.equal(t2.pressed.heading, '22px', 'the announcement is not the notebook heading (22 px): ' + JSON.stringify(t2));
+  assert.ok(t2.pressed.fades === 1 && t2.after.fades === 0, 'not one fade block that leaves: ' + JSON.stringify(t2));
   assert.deepEqual(t2.errs, []);
   pass(`a hand's preset announced once ("${t2.pressed.banner}" at ${t2.pressed.heading}) and faded back to the formula (${t2.after.title}); the undo, the link and the project open announced nothing — one banner, not three`);
 
@@ -84,7 +91,7 @@ try {
     if (__LW.ab && __LW.ab.on) __LW.ab.set(false);   /* WAVE DANCER (section 2) left its A ↔ B transition playing */
     __LW.loadPreset('1s+2pz'); await __LW.settle(); await __w(300);
     const on = await C.picture({ scale: 1 }), off = await C.picture({ scale: 1, caption: false }), off2 = await C.picture({ scale: 1, caption: false });
-    sw.click(); await __w(100); const swOff = await C.picture({ scale: 1 }), stageOff = !__LW.stageText.on, hidden = __node().hidden; sw.click(); await __w(100);
+    sw.click(); await __w(100); const swOff = await C.picture({ scale: 1 }), stageOff = !__LW.stageText.on, hidden = __LW.stageText.layer.root.hidden; sw.click(); await __w(100);
     await __LW.chem.solve('H2O'); __LW.chem.setOn(true); __LW.chem.setView('orbital'); await __LW.settle(); await __w(400);
     const mol = await C.picture({ scale: 1 }); __LW.chem.setOn(false); await __LW.settle();
     return { caption: on.caption, hOn: await hash(on), hOff: await hash(off), hOff2: await hash(off2), swCaption: swOff.caption, hSw: await hash(swOff), stageOff, hidden,

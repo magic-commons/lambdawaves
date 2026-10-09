@@ -25,12 +25,20 @@
  * `?warn=0` is not honoured and the photosensitivity notice is OPEN on every fresh profile — the five floor runs in MEASURE §1 and the
  * field-present floor were measured with its pane up.  The instrument now calls `__LW.warning.dismiss()` on the measured page before
  * the play (and records `notice: 'dismissed'`); `--keep-notice` leaves it up (`notice: 'open'`) for a figure comparable with those rows.
+ * THE SCENE (0.5.1 D1, U1): --setup '<js>' is an expression `await`-evaluated on the MEASURED page after __LW.ready and the notice,
+ * BEFORE the pause / settle / 400 ms / play (a row's own scene: MOLECULES, a view, AUTO-ROTATE …; its answer recorded as `setup`);
+ * --sweep S moves the pointer over the stage for the first S s of the window through CDP Input.dispatchMouseEvent, 40 moves a
+ * second (a slow figure across the picture, x 30–70 %, y 50–80 % of the 1600 × 1000 page; recorded as `sweep`).  THE SERVED TREE (C-V N8):
+ * the sha printed is the CWD's, so `served` records what the PORT serves — rack.js' BUILD_LINE and the sha-256 of rack.js (two
+ * trees with one version line still differ there).
  * STATUS: written whole; the first five runs are in 0.4.0 MEASURE.md §6 → 0.5.0 MEASURE.md §1. */
 import { launch, sleep } from './cdp.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import https from 'node:https';
+import crypto from 'node:crypto';
 
 const PORT = process.env.LW_PORT || '8775';
 const PW = path.join(os.homedir(), '.cache/ms-playwright/chromium-1243/chrome-linux64/chrome');
@@ -41,6 +49,9 @@ const opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] :
 const RUNS = Number(opt('--runs', 5)), SECS = Number(opt('--secs', 30)), JSON_OUT = opt('--json', null), LABEL = opt('--label', '');
 const ALLOW_NO_FIELD = argv.includes('--allow-no-field');
 const KEEP_NOTICE = argv.includes('--keep-notice');
+const SETUP = opt('--setup', null), SWEEP = Number(opt('--sweep', 0));
+const served = () => new Promise((res) => https.get(`https://127.0.0.1:${PORT}/lab/rack.js`, { rejectUnauthorized: false }, (r) => { let t = ''; r.on('data', (c) => (t += c)); r.on('end', () => res({
+  buildLine: (t.match(/const BUILD_LINE = '([^']*)'/) || [])[1] || null, rackSha256: crypto.createHash('sha256').update(t).digest('hex').slice(0, 16) })); }).on('error', (e) => res({ error: String(e) })));
 const load = () => fs.readFileSync('/proc/loadavg', 'utf8').split(' ').slice(0, 3).map(Number);
 const sha = () => { try { return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { return 'unknown'; } };
 const med = (a) => { const s = [...a].sort((x, y) => x - y), k = s.length >> 1; return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };
@@ -56,24 +67,29 @@ async function one(i) {
     const field = await b.eval('(() => { const f = __LW.field || {}; return { ok: !!f.ok, error: f.error ? String(f.error) : null, adapter: f.adapterInfo && f.adapterInfo.description || null }; })()');
     if (!field.ok && !ALLOW_NO_FIELD) throw new Error('no field present on the measured page (__LW.field.ok false: ' + field.error + '); pass --allow-no-field for a deliberate no-GPU figure');
     const notice = await b.eval(`(() => { const w = __LW.warning; if (!w) return 'none'; if (!w.open) return 'closed'; if (${KEEP_NOTICE}) return 'open'; w.dismiss(); return w.open ? 'open' : 'dismissed'; })()`);
+    const setup = SETUP ? await b.eval(`(async () => { const r = await (${SETUP}); return r === undefined ? null : r; })()`) : null;
     await b.eval('(async () => { __LW.pause(); await __LW.settle(); })()');
     await sleep(400);
     const st = () => b.eval('(() => { const s = __LW.stats || {}; return { frames: s.frames, presents: s.presents, skipped: s.skipped || 0 }; })()');
     await b.eval('__LW.play()');
     const L0 = load(), s0 = await st(), m0 = await b.metrics(), t0 = Date.now();
-    await sleep(SECS * 1000);
+    if (SWEEP > 0) {                                                   // the pointer over the stage, 40 moves a second, for the first SWEEP s
+      const n = Math.round(SWEEP * 40);
+      for (let k = 0; k < n; k++) { const u = k / 40; await b.mouse(Math.round(1600 * (0.5 + 0.2 * Math.sin(u * 1.3))), Math.round(1000 * (0.65 + 0.15 * Math.sin(u * 2.1)))); await sleep(Math.max(0, t0 + (k + 1) * 25 - Date.now())); }
+    }
+    await sleep(Math.max(0, t0 + SECS * 1000 - Date.now()));
     const m1 = await b.metrics(), s1 = await st(), L1 = load(), dt = (Date.now() - t0) / 1000;
     const d = (k) => (m1[k] - m0[k]) * 1000 / SECS;
-    return { run: i + 1, secs: dt, field, notice, loadBefore: L0, loadAfter: L1, msPerSec: r3(d('TaskDuration')), script: r3(d('ScriptDuration')), layout: r3(d('LayoutDuration')),
+    return { run: i + 1, secs: dt, field, notice, setup, loadBefore: L0, loadAfter: L1, msPerSec: r3(d('TaskDuration')), script: r3(d('ScriptDuration')), layout: r3(d('LayoutDuration')),
       recalcStyle: r3(d('RecalcStyleDuration')), frames: s0.frames === undefined ? null : s1.frames - s0.frames, presents: s0.presents === undefined ? null : s1.presents - s0.presents,
       skipped: s1.skipped - s0.skipped, errors: b.logs.slice(0, 5) };
   } finally { await b.close(); }
 }
 
-const out = { sha: sha(), port: PORT, secs: SECS, label: LABEL, when: new Date().toISOString(), runs: [] };
+const out = { sha: sha(), served: await served(), port: PORT, secs: SECS, label: LABEL, setup: SETUP, sweep: SWEEP, when: new Date().toISOString(), runs: [] };
 for (let i = 0; i < RUNS; i++) {
   const r = await one(i); out.runs.push(r);
-  console.log(`run ${r.run}/${RUNS}  ${r.msPerSec} ms/s   (script ${r.script} · layout ${r.layout} · recalcStyle ${r.recalcStyle} ms/s)  frames ${r.frames ?? '—(__LW.stats not exposed)'} · presents ${r.presents ?? '—'} · held ${r.skipped}  field ${r.field.ok ? 'ok · ' + r.field.adapter : 'ABSENT'} · notice ${r.notice}  load ${r.loadBefore[0]}→${r.loadAfter[0]}  sha ${out.sha}`);
+  console.log(`run ${r.run}/${RUNS}  ${r.msPerSec} ms/s   (script ${r.script} · layout ${r.layout} · recalcStyle ${r.recalcStyle} ms/s)  frames ${r.frames ?? '—(__LW.stats not exposed)'} · presents ${r.presents ?? '—'} · held ${r.skipped}  field ${r.field.ok ? 'ok · ' + r.field.adapter : 'ABSENT'} · notice ${r.notice}${SETUP ? ' · setup ' + JSON.stringify(r.setup) : ''}  load ${r.loadBefore[0]}→${r.loadAfter[0]}  sha ${out.sha} · served ${out.served.buildLine} ${out.served.rackSha256}`);
 }
 const v = out.runs.map((r) => r.msPerSec), m = med(v);
 out.median = r3(m); out.spread = r3(Math.max(...v) - Math.min(...v)); out.mad = r3(med(v.map((x) => Math.abs(x - m))));

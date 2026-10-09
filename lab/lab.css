@@ -783,23 +783,16 @@ body[data-theme="dark"] .km-key-unbound {
 .dev.lean .dev-body .mol-section > .ro { display: flex; }
 .mol-section > .sw { flex: 0 1 auto; }
 
-/* THE STAGE TEXT (Settings › Display; lab/stage-text.js, the interim renderer 0.5.0 deletes): what is playing, in the
-   notebook's markdown + KaTeX, on the stage.  Transparent text beneath every window (z 20 < rack 30 < #floats 32), never a
-   pointer target, never in the occlusion mask.  Its ink and halo are written by accent-wheel.js from the live STAGE colour
-   (KaTeX inherits both); the side is chosen against the transport; an announcement fades out and the formula fades back. */
-#molFormula { position: fixed; left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: none; user-select: none; -webkit-user-select: none;
-  font-family: var(--font-math); font-style: normal; font-weight: 400; line-height: 1.08; letter-spacing: .01em;
-  width: max-content; white-space: normal; text-align: center; overflow-wrap: normal;   /* wraps inside the max-width stage-text.js sets */
-  color: var(--fg); opacity: .92; text-shadow: 0 0 .1em var(--mf-halo, transparent); transition: opacity .6s ease; }
-#molFormula p { margin: 0; }
-#molFormula .katex { font-size: 1.08em; }   /* the notebook's own KaTeX size (.nb-view .katex) */
-#molFormula.st-fade { opacity: 0; }
-#molFormula.mf-top { top: 64px; }
-#molFormula.mf-foot { bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
-#molFormula[hidden] { display: none; }
+/* THE STAGE TEXT (Settings › Display; 0.5.1 D1: one block of the kit's INFORMATIONAL layer, rack.js initStageText) wears the kit's ink,
+   shade and serif at the kit's seat; beneath every window (z 20 < rack 30 < #floats 32: the kit's root has none), never a pointer
+   target, never in the occlusion mask.  The type is the notebook's × SIZE (--lw-stage-size): the formula its title (34 px), an
+   announcement ([data-fade]) its heading (22 px), each held to 8 % of the window's width and at least 16 px, KaTeX at .nb-view's 1.08em. */
+.mir-info.lw-stage { z-index: 20; --info-size-body: calc(clamp(16px, 8vw, 34px) * var(--lw-stage-size, 1)); }
+.mir-info.lw-stage .mir-info-block[data-fade] { font-size: calc(clamp(16px, 8vw, 22px) * var(--lw-stage-size, 1)); }
+.mir-info.lw-stage .katex { font-size: 1.08em; }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
 .dev .mol-more-toggle { flex: 0 0 30px; padding: 0; }
-/* ATOM LABELS (Settings › Display; stage-text.js atomLabels): each nucleus's element symbol, small, at its projected
+/* ATOM LABELS (Settings › Display; rack.js initStageText atomLabels): each nucleus's element symbol, small, at its projected
    position.  White under `difference`, so each glyph INVERTS what it sits on — dark over a light cloud or stage, light
    over a dark one.  Transparent, never a pointer target, beneath every window, never in the occlusion mask. */
 #atomLabels { position: fixed; inset: 0; z-index: 9; pointer-events: none; user-select: none; -webkit-user-select: none;

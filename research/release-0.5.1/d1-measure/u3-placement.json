@@ -1,0 +1,272 @@
+{
+ "allClear": true,
+ "timeline": {
+  "open": true,
+  "dock": "bottom",
+  "rect": [
+   364,
+   552,
+   1300,
+   992
+  ]
+ },
+ "cells": [
+  {
+   "tl": "closed",
+   "tr": "floating",
+   "shift": 1,
+   "block": {
+    "left": 765,
+    "top": 118,
+    "right": 835,
+    "bottom": 167
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "closed",
+   "tr": "floating",
+   "shift": -1,
+   "block": {
+    "left": 765,
+    "top": 118,
+    "right": 835,
+    "bottom": 167
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "closed",
+   "tr": "floating",
+   "shift": 0,
+   "block": {
+    "left": 765,
+    "top": 118,
+    "right": 835,
+    "bottom": 167
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "closed",
+   "tr": "docked",
+   "shift": 1,
+   "block": {
+    "left": 765,
+    "top": 131,
+    "right": 835,
+    "bottom": 180
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "closed",
+   "tr": "docked",
+   "shift": -1,
+   "block": {
+    "left": 765,
+    "top": 131,
+    "right": 835,
+    "bottom": 180
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "closed",
+   "tr": "docked",
+   "shift": 0,
+   "block": {
+    "left": 765,
+    "top": 131,
+    "right": 835,
+    "bottom": 180
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "closed",
+   "tr": "top",
+   "shift": 1,
+   "block": {
+    "left": 765,
+    "top": 217,
+    "right": 835,
+    "bottom": 266
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "closed",
+   "tr": "top",
+   "shift": -1,
+   "block": {
+    "left": 765,
+    "top": 217,
+    "right": 835,
+    "bottom": 266
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "closed",
+   "tr": "top",
+   "shift": 0,
+   "block": {
+    "left": 765,
+    "top": 217,
+    "right": 835,
+    "bottom": 266
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "docked-foot",
+   "tr": "floating",
+   "shift": 1,
+   "block": {
+    "left": 765,
+    "top": 163,
+    "right": 835,
+    "bottom": 212
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "docked-foot",
+   "tr": "floating",
+   "shift": -1,
+   "block": {
+    "left": 765,
+    "top": 163,
+    "right": 835,
+    "bottom": 212
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "docked-foot",
+   "tr": "floating",
+   "shift": 0,
+   "block": {
+    "left": 765,
+    "top": 163,
+    "right": 835,
+    "bottom": 212
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "docked-foot",
+   "tr": "docked",
+   "shift": 1,
+   "block": {
+    "left": 765,
+    "top": 77,
+    "right": 835,
+    "bottom": 126
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "docked-foot",
+   "tr": "docked",
+   "shift": -1,
+   "block": {
+    "left": 765,
+    "top": 77,
+    "right": 835,
+    "bottom": 126
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "docked-foot",
+   "tr": "docked",
+   "shift": 0,
+   "block": {
+    "left": 765,
+    "top": 77,
+    "right": 835,
+    "bottom": 126
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "docked-foot",
+   "tr": "top",
+   "shift": 1,
+   "block": {
+    "left": 765,
+    "top": 163,
+    "right": 835,
+    "bottom": 212
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "docked-foot",
+   "tr": "top",
+   "shift": -1,
+   "block": {
+    "left": 765,
+    "top": 163,
+    "right": 835,
+    "bottom": 212
+   },
+   "state": "in",
+   "meets": []
+  },
+  {
+   "tl": "docked-foot",
+   "tr": "top",
+   "shift": 0,
+   "block": {
+    "left": 765,
+    "top": 163,
+    "right": 835,
+    "bottom": 212
+   },
+   "state": "in",
+   "meets": []
+  }
+ ],
+ "ui0": [
+  {
+   "left": 0,
+   "top": 0,
+   "right": 300,
+   "bottom": 1000
+  },
+  {
+   "left": 1300,
+   "top": 0,
+   "right": 1600,
+   "bottom": 1000
+  },
+  {
+   "left": 480,
+   "top": 894,
+   "right": 1120,
+   "bottom": 940
+  }
+ ],
+ "errors": [
+  "warning WebGPU unavailable no WebGPU adapter. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU."
+ ]
+}

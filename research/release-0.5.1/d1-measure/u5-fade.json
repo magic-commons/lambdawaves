@@ -1,0 +1,109 @@
+{
+ "field": {
+  "ok": true,
+  "error": null
+ },
+ "notice": "dismissed",
+ "load": [
+  2.39,
+  2.02,
+  2
+ ],
+ "samples": [
+  {
+   "t": 101,
+   "fades": 1,
+   "fadeIn": 1,
+   "blocks": 2,
+   "banner": "1s \\+ 2s  beat",
+   "announced": 1
+  },
+  {
+   "t": 1200,
+   "fades": 1,
+   "fadeIn": 1,
+   "blocks": 1,
+   "banner": "1s \\+ 2s  beat",
+   "announced": 1
+  },
+  {
+   "t": 2301,
+   "fades": 1,
+   "fadeIn": 1,
+   "blocks": 1,
+   "banner": "1s \\+ 2s  beat",
+   "announced": 1
+  },
+  {
+   "t": 2501,
+   "fades": 1,
+   "fadeIn": 1,
+   "blocks": 2,
+   "banner": null,
+   "announced": 1
+  },
+  {
+   "t": 2700,
+   "fades": 0,
+   "fadeIn": 0,
+   "blocks": 1,
+   "banner": null,
+   "announced": 1
+  },
+  {
+   "t": 3200,
+   "fades": 0,
+   "fadeIn": 0,
+   "blocks": 1,
+   "banner": null,
+   "announced": 1
+  }
+ ],
+ "a0": 0,
+ "formulaBack": {
+  "left": 714,
+  "top": 117,
+  "right": 886,
+  "bottom": 166,
+  "state": "in",
+  "fade": false,
+  "font": "34px",
+  "family": "Spectral",
+  "color": "rgb(20, 21, 31)",
+  "n": 1,
+  "text": "1s0​ and 2s0​\n"
+ },
+ "noHand": 0,
+ "undo": {
+  "ok": true,
+  "d": 0
+ },
+ "link": {
+  "ok": true,
+  "d": 0
+ },
+ "project": {
+  "d": 0,
+  "status": "opened DEMOS/WAVE DANCER"
+ },
+ "handAnnounced": 1,
+ "holdKey": {
+  "down": true,
+  "up": false,
+  "row": {
+   "keys": [
+    "KeyI"
+   ],
+   "label": "hold the stage text still (while I is held)",
+   "group": "WINDOWS & DISPLAY"
+  }
+ },
+ "errors": [
+  "error the GPU device was lost A valid external Instance reference no longer exists. — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched."
+ ],
+ "loadAfter": [
+  2.48,
+  2.05,
+  2.01
+ ]
+}

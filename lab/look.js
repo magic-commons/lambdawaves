@@ -42,7 +42,7 @@ export function liftLook(s = {}, help = null) {
  *  paint wears it), after the lift.  onTheme(theme, choice) runs once per resolved change (SYSTEM following the OS included). */
 export function createLook({ settings, defaults, mat, wheelStops, getModView, onTheme }) {
   let gamutCss = (rgb) => rgbToHex(rgb), seen = '';
-  const stageGround = () => mat.bg;                                  // the header λ and the stage text sit on the CANVAS: the live STAGE colour
+  const stageGround = () => mat.bg;                                  // the header λ sits on the CANVAS: the live STAGE colour
   const accent = createAccent({ model: 'palette', vivid: defaults.vivid, wheelStops, stageGround, gamut: (rgb) => gamutCss(rgb),
     onAccent: (A, B) => { const v = getModView(); if (v) v.setAccent(A, B); } });
   const ctx = { doc: document, accent, moving: false, lastAccent: null };
@@ -62,20 +62,14 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
       for (const b of document.querySelectorAll('.native-info-button')) b.setAttribute('aria-expanded', 'false'); }
   });
 
-  /* THE STAGE TEXT (stage-text.js) is on the CANVAS too: plain ink, light or dark by the live STAGE, haloed in it */
-  function paintInk() {
-    const mf = document.getElementById('molFormula'); if (!mf) return;
-    const g = stageGround(), L = 0.2126 * g[0] + 0.7152 * g[1] + 0.0722 * g[2];
-    mf.style.color = gamutCss(L > 0.35 ? [0.07, 0.08, 0.1] : [0.95, 0.96, 0.98]); mf.style.setProperty('--mf-halo', gamutCss(g));
-  }
   /** the accents again, with what the engine holds apart brought up to date (and `extra`: the palette's new stops) */
-  function applyAccent(extra) { accent.set({ hueShift: mat.hueShift || 0, paletteOn: !!mat.paletteOn, ...extra }); paintInk(); }
+  function applyAccent(extra) { accent.set({ hueShift: mat.hueShift || 0, paletteOn: !!mat.paletteOn, ...extra }); }
   /* M7 · ONE PAINT PER BATCH (the boot's build, restore()): inside one, a paint only marks the marks dirty; the end paints once */
   let batch = 0, dirty = false;
   function paintMarks() {
     if (batch) { dirty = true; return; }
     if (accent.hueShift !== (mat.hueShift || 0) || accent.paletteOn !== !!mat.paletteOn) return applyAccent();   // the wheel moved under the mark
-    accent.paintMarks(); paintInk();
+    accent.paintMarks();
   }
   let inkCv = null;
   return { prefs, accent, ctx, get: prefs.get, applyAccent, paintMarks, stageGround,

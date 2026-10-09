@@ -1,0 +1,65 @@
+{
+ "field": {
+  "ok": true,
+  "error": null
+ },
+ "notice": "dismissed",
+ "load": [
+  1.83,
+  2.05,
+  2
+ ],
+ "cells": [
+  {
+   "label": "4s₀",
+   "x": 81,
+   "y": 444
+  },
+  {
+   "label": "4p₋₁",
+   "x": 122,
+   "y": 444
+  },
+  {
+   "label": "4p₀",
+   "x": 163,
+   "y": 444
+  },
+  {
+   "label": "4p₁",
+   "x": 204,
+   "y": 444
+  },
+  {
+   "label": "4d₋₂",
+   "x": 245,
+   "y": 444
+  }
+ ],
+ "before": {
+  "md": ""
+ },
+ "strokeMs": 1003,
+ "after": {
+  "md": "$4s_{0}$, $4p_{-1}$, $4p_{0}$, $4p_{1}$, and $4d_{-2}$",
+  "renders": 5,
+  "entrances": 5,
+  "entranceMs": [
+   45.69999998807907,
+   294.69999998807907,
+   544.6999999880791,
+   800.6999999880791,
+   1053.699999988079
+  ],
+  "inStrokeSecond": 4,
+  "blocksNow": 1
+ },
+ "errors": [
+  "error the GPU device was lost A valid external Instance reference no longer exists. — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched."
+ ],
+ "loadAfter": [
+  1.85,
+  2.05,
+  2
+ ]
+}
