@@ -4,7 +4,7 @@
  "step": 4,
  "press": 12,
  "kit": "/home/joshua-hosain/Documents/MIR/.claude/worktrees/mir-1.5/tools",
- "when": "2026-10-09T02:15:59.167Z",
+ "when": "2026-10-09T02:28:45.176Z",
  "scenes": [
   {
    "name": "control: the bare stage",
@@ -230,7 +230,7 @@
    "presses": []
   },
   {
-   "name": "a floated card",
+   "name": "a floated card, DISCONNECTED (the first-run look: head and body apart)",
    "selector": "#floats > .dev[data-id=\"shadow\"]",
    "field": true,
    "found": true,
@@ -353,7 +353,7 @@
    ]
   },
   {
-   "name": "a floated card, DISCONNECTED",
+   "name": "a floated card, JOINED",
    "selector": "#floats > .dev[data-id=\"shadow\"]",
    "field": true,
    "found": true,
@@ -361,7 +361,7 @@
     640,
     180,
     300,
-    349
+    340
    ],
    "grid": {
     "n": 9,
@@ -371,96 +371,16 @@
    },
    "raster": {
     "step": 4,
-    "points": 6525,
-    "stage": 93
+    "points": 6375,
+    "stage": 6
    },
-   "pressed": 12,
-   "reached": 12,
+   "pressed": 6,
+   "reached": 6,
    "presses": [
     {
      "at": [
       642,
-      210
-     ],
-     "landedOn": "canvas#field",
-     "reached": true
-    },
-    {
-     "at": [
-      654,
-      218
-     ],
-     "landedOn": "canvas#field",
-     "reached": true
-    },
-    {
-     "at": [
-      686,
-      218
-     ],
-     "landedOn": "canvas#field",
-     "reached": true
-    },
-    {
-     "at": [
-      718,
-      218
-     ],
-     "landedOn": "canvas#field",
-     "reached": true
-    },
-    {
-     "at": [
-      746,
-      218
-     ],
-     "landedOn": "canvas#field",
-     "reached": true
-    },
-    {
-     "at": [
-      778,
-      218
-     ],
-     "landedOn": "canvas#field",
-     "reached": true
-    },
-    {
-     "at": [
-      810,
-      218
-     ],
-     "landedOn": "canvas#field",
-     "reached": true
-    },
-    {
-     "at": [
-      842,
-      218
-     ],
-     "landedOn": "canvas#field",
-     "reached": true
-    },
-    {
-     "at": [
-      870,
-      218
-     ],
-     "landedOn": "canvas#field",
-     "reached": true
-    },
-    {
-     "at": [
-      902,
-      218
-     ],
-     "landedOn": "canvas#field",
-     "reached": true
-    },
-    {
-     "at": [
-      934,
-      218
+      182
      ],
      "landedOn": "canvas#field",
      "reached": true
@@ -468,7 +388,39 @@
     {
      "at": [
       938,
-      522
+      182
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      938,
+      514
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      642,
+      518
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      934,
+      518
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      938,
+      518
      ],
      "landedOn": "canvas#field",
      "reached": true
@@ -787,8 +739,8 @@
   }
  ],
  "total": {
-  "pressed": 58,
-  "reached": 58
+  "pressed": 52,
+  "reached": 52
  },
  "ok": false
 }
