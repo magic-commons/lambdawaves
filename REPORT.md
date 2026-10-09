@@ -4758,6 +4758,59 @@ difference. Both go when MIR takes the briefs.
 about 0.3 ms; nothing was added per frame. Hand-off: `research/release-0.5.0/C5-BUILD.md`.
 
 
+### wave 199: C7 THE FILM — MIR's recorder, λWAVES' frame; the lock held, the film pixel for pixel
+
+The film is now MIR's `createRecorder` handed λWAVES' `frame(i, ctx)` (`lab/render-exact.js` `createFilm`). RECORD and ONE PERIOD
+are MP4s made by WebCodecs and the kit's muxer, and every frame is rendered at its scheduled time, so the tempo is exact by
+construction. EXPORT FRAMES writes the lossless PNG frames into the kit's stored ZIP, beside its `recording.json`, which carries the
+film's schedule. The kit owns:
+- the encoding, and the encoder proven on two frames first;
+- the take clock, which steps the modulation by exactly 1/fps when a film DRIVES it (MOD armed);
+- the store on disk;
+- the input guard (Escape, or a `[data-render-cancel]` STOP);
+- the progress.
+
+λWAVES keeps, named:
+- the schedules (both endpoint rules, the fold, the arithmetic);
+- the GPU readback + settle (capture.js `readback`, now the one road for a picture and a film frame);
+- **the jitter seed 13, pinned per frame**;
+- the governor and AUTO SCALE pins (H1–H3) with their witnesses, beside the field-clock, clock, domain and interloper witnesses;
+- the hazard register, each row now `owner: 'app' | 'kit'`.
+
+**What left:**
+- **capture.js 1,127 → 789:** the MediaRecorder road, the probe of the WebGPU canvas, the 2-D relay, `drive`, `record`, `recordLoop`, `pngSequence` and `verifyVideo`. `crc32` and `save` are now the kit's.
+- **render-exact.js 1,233 → 840:** `createExactRenderer`'s driver, `zipStored` (export3d's NPZ now writes the kit's `StoredZip`), and the cost table (the kit's `estimateFilm` on λWAVES' 181 ms + 131 ms/Mpx seed, then the device's own).
+- **Net:** `lab/*.js` 36,288 → 35,753. C7's own share is −716; the bare adopt's `sw.js` +181 is C0's too.
+- **Against the plan's 1,200–1,800:** smaller, because the period laws, the picture road (λWAVES' own PNG encoder past the 2-D canvas's area cap) and the 312-line seam stay.
+
+**THE ONE LOCK.** 1004 and 1148 were GREEN, 0 differences, on the bare adopt and after each of the three steps that touched the render road (58–65 s each, alone on the GPU).
+
+**The film road's own lock.** The adopted tree before C7 (`2171df3`) was served as a base copy beside this one. EXPORT FRAMES' 25 frames decode to identical pixels at identical times. Only the containers differ: λWAVES' deflate 2,797,435 B, the kit's 3,248,483 B. TAKE A PICTURE is byte-identical (97,866 B).
+
+**Produced on the RTX 3070** (1400×814; `tools/perf/film-probe.mjs`, the film verifier's harness):
+
+| output | size | frames | decode |
+|---|---|---|---|
+| ONE PERIOD MP4 | 953,575 B | 180 | 6.0 s |
+| RECORD MP4 | 744,558 B | 180 | 6.0 s |
+
+Each took about 37 s to render; the old real-time WebM took 6 s. `verify()` was DETERMINISTIC, 6/6 on the GPU.
+
+**`tests/render-exact.test.mjs`, re-aimed at the seam.** Its laws are unchanged. It now drives the kit's own recorder in node, on a canvas stand-in that encodes through capture.js, and uses the kit's real modulation host for DRIVE. Every pin is removed in turn. It passes **37/37**, and removing the H1 pin turns 14 judgements red.
+
+**Gates:**
+- Node: 85 suites, only C0's four cascade reds (mir-manifest, new-project, wiring, pwa).
+- Browser: `export3d` 10, `render-regressions` 2, `stage-text`, `offer` 16/16 (s9 asks 24 fps, edited in the same commit as the kit's FPS list) and `menubar` are green.
+
+**The one blocker met** was EXPORT FRAMES' `AbortError`. The kit's store hands files back as origin-private Files, and the rack discarded them under a kept result. Fixed.
+
+**Brief candidates:**
+- The kit's FREEZE writes every target once on enter (λWAVES avoids it with a host-less recorder).
+- `discard` invalidates a result's blobs.
+- A RENDER card for an app with no timeline.
+
+Hand-off: `research/release-0.5.0/C7-BUILD.md`. The film verifier's brief: `BRIEF-C7-VERIFY.md`.
+
 ### wave 200: C9 THE SCENE GUARD — a window's gap is UI, not picture: 52 presses through a gap, 0 reach the stage
 
 **The guard.** The stage's pointer road now asks MIR 1.5's scene guard first.
@@ -4848,6 +4901,48 @@ after the reload, and it names the ones it drops. settings-probe: **6/6**.
 
 `mir-controls` was not touched: re-aiming it to the kit's ONE KNOB LAW (vertical drag, ⅛ fine) belongs to C0's continuation.
 `cat lab/*.js | wc -l`: **36,288 → 32,921 (−3,367)**. Brief candidates (four) and open items: `research/release-0.5.0/C4-BUILD.md`.
+
+### wave 203: C7 THE HAND-OVER — a spent activation downloads, a live one shares
+
+**What was wrong.** The kit's `saveBlob` shares whenever the browser offers `navigator.share`, without awaiting the share and
+without a fallback. A film's save runs after its render, and a picture's after a GPU readback, so the activation is spent:
+`share()` rejects and nothing was saved. That held on Chrome, Edge and macOS Safari, and for the iPad's EXPORT FRAMES zip.
+Linux has no `navigator.share`, so every gate here was green.
+
+**The fix.** `lab/capture.js` `handOver(blob, name)` is now the one hand-over, reached by `cap.save` and by `render-exact.js`
+`film.save` through the existing import seam. It uses the kit's `saveBlob` only while `navigator.userActivation.isActive`;
+otherwise it makes λWAVES' pre-C7 `<a download>`, with the URL kept ten minutes for a video and one minute otherwise.
+`lab/mir/**`, the 2-minute discard and the store are untouched. `lab/*.js` went from 35,753 to 35,768.
+
+**The evidence** (`tools/perf/handover-probe.mjs`, which stubs `navigator.share` in the gate Firefox and counts shares and anchor
+downloads):
+
+| hand-over | before | after |
+|---|---|---|
+| EXPORT FRAMES (activation spent) | 1 share, 0 downloads | 0 shares, 1 download |
+| a scripted picture (spent) | 1 share, 0 downloads | 0 shares, 1 download |
+| a picture from a real press (live) | 1 share | 1 share |
+
+**Gates.**
+- The lock: 1004 and 1148 GREEN, 0/0, 59 s each.
+- `render-exact` 37/37 and `capture` 33/33.
+- Node: 85 suites, with only C0's four reds.
+- Browser: `export3d` 10, `offer` 16/16 and `render-regressions` 2.
+- `film-compare` against `c7-film-42438c6` exits 0: the picture is byte-identical, and the frames are pixel-identical at the same
+  times.
+
+**Brief candidates for MIR.**
+- `saveBlob` should consult `userActivation.isActive` and download when `share()` rejects.
+- The recorder store wants a sweep of orphaned films.
+
+**The follow-up after the verifier's HOLD.**
+- `tests/film-handover.browser-test.mjs`, the permanent guard, replaces the probe: a real RECORD tap downloads, the URL outlives the
+  store's copy, a scripted picture downloads, and a real picture tap shares. It is GREEN 4/4 here, RED on `74ade0c` (the film shared
+  and was lost) and RED on `c994505` (the 2-minute discard killed the URL).
+- The store's copy of a handed-over film now waits ten minutes, the URL's longest lifetime, instead of two.
+- The lock was GREEN again (1004 and 1148, 0/0), and `lab/*.js` is 35,769.
+
+Hand-off: `research/release-0.5.0/C7-BUILD.md` § the hand-over fix and § the regression and the URL.
 
 ## 2026-10-08 · 0.5.0 D — THE INFORMATIONAL'S LEDGER
 

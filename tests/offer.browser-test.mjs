@@ -243,7 +243,7 @@ try {
 
   /* ── 9 · a capture in flight is offered, never taken ── */
   const s9 = await g2.ev(`const before = __probe();
-    window.__exp = __LW.captureUI.exportFrames({ download: false, fps: 2, seconds: 6 });
+    window.__exp = __LW.captureUI.exportFrames({ download: false, fps: 24, seconds: 6 });   /* 0.5.0 C7: a film runs at the kit's rates (24, 30, 48, 60) */
     let busy = false; for (let i = 0; i < 100 && !(busy = __LW.captureUI.busy); i++) await new Promise((q) => setTimeout(q, 20));
     const during = __probe();
     __LW.captureUI.exportFrames();   // the same act again is STOP EXPORT

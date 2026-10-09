@@ -37,7 +37,7 @@ import { createOrbit } from './orbit.js';
 import { createVortex } from './vortex.js';
 import { createParticles } from './particles.js';
 import { createKepler } from './keplerview.js';
-import { createExactRenderer } from './render-exact.js';
+import { createFilm, exactSchedule, FILM_FPS } from './render-exact.js';   // 0.5.0 C7: the film is MIR's recorder with λWAVES' frame
 import { createKeymap } from './keymap.js';        // wave 106: the drawn keyboard and the rebinding seam
 import { installKeys, keyName } from './keys.js';   // wave 130 seam 10: the keyboard dispatcher, out of boot() (its ACTIONS table stays)
 import { keplerOrbits } from './kepler.js';
@@ -1450,8 +1450,23 @@ export async function boot(dom) {
      * and the readout says STALE (with the button down) when the state or the view has moved since.  A stale plan
      * is not an ok plan, which is exactly what `plan.ok` gating the button has to mean. */
     const gcap = group(wCam.body, 'CAPTURE');
-    let exact = null, exactRun = null;
-    const exactRenderer = () => exact || (exact = createExactRenderer(LW, { canvas: dom.canvas, energies: periodEnergies }));
+    let exact = null, exactRun = null, filmBefore = null;
+    /* 0.5.0 C7 · THE FILM IS MIR's RECORDER (render-exact.js createFilm): RECORD and ONE PERIOD are MP4s and EXPORT FRAMES the
+       lossless PNG frames, every frame rendered at its scheduled time by λWAVES' frame(i, ctx) and encoded by the kit.  While a
+       film owns the page the rack's loop stands aside (no frame of ours presents with an unpinned seed: hazard H9), and what the
+       film steps through — the state, the material, the pose, the rotation rates — is put back exactly as it was. */
+    function filmHold(on) {
+      if (on) {
+        filmBefore = { state: reg.serialize(clock.t), version: reg.version, mat: structuredClone(mat), obs: { ...obs }, rot: { ...rotRate } };
+        exportLocked = true; if (rafId) cancelAnimationFrame(rafId); rafId = 0; stats.scheduled = false;
+        return;
+      }
+      const b = filmBefore; filmBefore = null;
+      if (b) { if (reg.version !== b.version) reg.restore(b.state); Object.assign(mat, b.mat); Object.assign(obs, b.obs); Object.assign(rotRate, b.rot); }   // a film that moved no coefficient leaves the register (and the loop plan made on it) as it was
+      exportLocked = false; modWall = 0; lastWall = performance.now() / 1000;
+      schedule(TIER.RECONSTRUCT);
+    }
+    const exactRenderer = () => exact || (exact = createFilm(LW, { canvas: dom.canvas, energies: periodEnergies, canvasCap: 16384, host: () => modHost, hold: filmHold }));
     let cap = null, capBusy = false, capRun = null, capPlan = null, capKey = '';
     let capSoft = false, capWait = false;   // LA7: the plan in hand came from a hover (never handed to a caller) · a hover is waiting for the scan
     const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies, caption: () => stageCaption() }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩; 0.4.0 S3: and draws the STAGE TEXT's caption
@@ -1467,9 +1482,10 @@ export async function boot(dom) {
     ui.capSec = knob({ label: 'SECONDS', min: 1, max: 30, value: 6, step: 0.5, fmt: (v) => v.toFixed(1) + ' s', onInput: () => capStale() });
     ui.capSec.root.title = 'Duration for free recording and loop frame planning';
     rc2.appendChild(ui.capSec.root);
-    ui.capFps = seg({ label: 'FPS', value: '30', options: [{ id: '15', label: '15' }, { id: '30', label: '30' }, { id: '60', label: '60' }], onChange: () => capStale() });
+    ui.capFps = seg({ label: 'FPS', value: '30', options: FILM_FPS.map((f) => ({ id: String(f), label: String(f) })), onChange: () => capStale() });
     rc2.appendChild(ui.capFps.root);
-    ui.capRec = trig({ label: 'RECORD', title: 'Record using browser frame timing', onFire: () => capRecord() });
+    ui.capRec = trig({ label: 'RECORD', title: 'Record an MP4 of the clock as it runs, every frame at its exact time', onFire: () => capRecord() });
+    ui.capRec.root.dataset.renderCancel = '';   // the kit's input guard lets its STOP through while a film runs
     rc2.appendChild(ui.capRec.root);
     ui.capLoop = trig({ label: 'ONE PERIOD', title: 'Record one usable recurrence period', onFire: () => capRecordLoop() });
     rc2.appendChild(ui.capLoop.root);
@@ -1477,6 +1493,7 @@ export async function boot(dom) {
     rc2.appendChild(ui.capPlanT.root);
     const rx = el('div', 'row tight', gcap);
     ui.capExact = trig({ label: 'EXPORT FRAMES', title: 'Export deterministic PNG frames and a manifest as ZIP', onFire: () => capExportFrames() });
+    ui.capExact.root.dataset.renderCancel = '';
     rx.appendChild(ui.capExact.root);
     ui.capExactRo = readout({ label: 'FRAME EXPORT', cls: 'wide', value: '—', sub: 'At least 30 seconds · PNG sequence + manifest · modulation starts at beat zero' });
     gcap.appendChild(ui.capExactRo.root);
@@ -1546,70 +1563,66 @@ export async function boot(dom) {
       } catch (e) { ui.capShot.set('error', 'warn'); ui.capShot.setSub(String(e && e.message || e)); }
       capBusy = false; ui.capPic.root.disabled = false; capPaint();
     }
+    const capProgressTo = (ro) => (p) => { ro.set(`${p.done} / ${p.total} frames`, 'live'); ro.setSub(p.human || 'Rendering the scheduled frame times'); };
     function capBadge(kind, r) {
-      if (!r || r.ok === false) { ui.capPlanRo.set('refused', 'warn'); ui.capPlanRo.setSub(String(r && r.error || 'no result')); return; }
+      if (!r || r.ok === false) { ui.capPlanRo.set(r && r.stopped ? 'stopped' : 'refused', 'warn'); ui.capPlanRo.setSub(String(r && (r.message || r.error) || 'no result')); return; }
       ui.capPlanRo.set(`${kind} · ${r.frames} frames · ${(r.bytes / 1024).toFixed(0)} kB`, 'ok');
-      const M = r.measured || {};
-      ui.capPlanRo.setSub(`${r.name} · ${r.w} × ${r.h} · measured ${M.fps ? M.fps.toFixed(1) : '?'} fps against ${r.fps} asked (worst interval off by ${M.worstIntervalErrMs ? M.worstIntervalErrMs.toFixed(1) : '?'} ms) · engine ${r.engine || '?'} — the CONTENT is exact, the tempo is what the wall gave and is MEASURED, never claimed`);
+      ui.capPlanRo.setSub(`${r.name} · ${r.w} × ${r.h} · ${r.fps} fps MP4 — every frame rendered at its scheduled time, so the tempo is exact; MIR's recorder encoded it (${r.report.human})`);
     }
+    /** RECORD: a CLIP of the clock as it runs, [t0, t0 + seconds·rate) in N frames, the next take's first dropped as a loop's is.
+     *  AUTO-ROTATE rides as a pose path, yaw by the frame index: the one camera move a film can render exactly. */
     async function capRecord() {
       if (capRun) { capRun.stop(); return; }
-      if (capBusy) return; capBusy = true; ui.capRec.setLabel('STOP'); ui.capRec.on = true; capPaint();
-      try { capRun = capture().record({ fps: +ui.capFps.get(), seconds: ui.capSec.get() });
-        const r = await capRun.done; capBadge('CLIP', r); if (r && r.blob) capture().save(r);
+      if (capBusy) return;
+      const fps = +ui.capFps.get(), N = Math.max(1, Math.round(fps * ui.capSec.get()));
+      const sched = exactSchedule({ mode: 'loop', T: (N / fps) * clock.rate, t0: clock.t, fps, frames: N });
+      const spin = camera.ambient && obs.mode !== 'free' ? camera.ambient : 0, yaw0 = obs.yaw;
+      capBusy = true; ui.capRec.setLabel('STOP'); ui.capRec.on = true; capPaint();
+      try { capRun = exactRenderer().render({ schedule: sched, kind: 'clip', format: 'mp4', camera: 'still', caption: stageCaption(), modulation: modArm ? 'drive' : 'freeze',
+          beforeFrame: ({ dt }) => rotStep(dt), poseAt: spin ? (k) => ({ yaw: yaw0 + spin * (k / fps) }) : null, onProgress: capProgressTo(ui.capPlanRo) });
+        const r = await capRun.done; capBadge('CLIP', r); if (r && r.ok) exactRenderer().save(r);
       } catch (e) { ui.capPlanRo.set('error', 'warn'); ui.capPlanRo.setSub(String(e && e.message || e)); }
       capRun = null; capBusy = false; ui.capRec.setLabel('RECORD'); ui.capRec.on = false; capPaint();
     }
+    /** ONE PERIOD: the plan's own times, bit for bit (render-exact.test §11), the camera still and the modulation frozen — a loop closes only if nothing else moves */
     async function capRecordLoop() {
       if (capBusy || capRun) return;
       const P = capMakePlan(true);
       if (!P.ok) return;                                       // the readout already carries plan.message: the refusal IS the answer
+      if (P.kind === 'stationary') { capBadge('STATIONARY', { ok: false, message: P.message }); return; }
+      const sched = exactSchedule({ mode: 'loop', T: P.T, t0: P.schedule.t0, fps: P.fps, frames: P.N });
       capBusy = true; ui.capLoop.on = true; capPaint();
-      try { const run = capture().recordLoop({ fps: +ui.capFps.get(), seconds: ui.capSec.get() });
-        const r = await run.done; capBadge(P.kind === 'exact' ? 'PERIOD LOOP' : 'NEAR', r); if (r && r.blob) capture().save(r);
+      try { capRun = exactRenderer().render({ schedule: sched, kind: P.kind === 'exact' ? 'loop' : 'near', format: 'mp4', camera: 'still', caption: stageCaption(), onProgress: capProgressTo(ui.capPlanRo) });
+        const r = await capRun.done; capBadge(P.kind === 'exact' ? 'PERIOD LOOP' : 'NEAR', r); if (r && r.ok) exactRenderer().save(r);
       } catch (e) { ui.capPlanRo.set('error', 'warn'); ui.capPlanRo.setSub(String(e && e.message || e)); }
-      capBusy = false; ui.capLoop.on = false; capPaint();
+      capRun = null; capBusy = false; ui.capLoop.on = false; capPaint();
     }
     async function capExportFrames(options = {}) {
       if (exactRun) { exactRun.stop(); return; }
       if (capBusy) return;
       const ex = exactRenderer();
       const driven = modArm;
-      if (driven && modHost.model.sourceList().some(s => s.on && s.kind === 'audio')) {
-        const result = {ok:false, message:'Live microphone input cannot be replayed deterministically. Bypass the AUDIO device before exporting.'};
-        ui.capExactRo.set('refused', 'warn'); ui.capExactRo.setSub(result.message); return result;
-      }
       const seconds = Math.max(30, ui.capSec.get());
-      const settings = { fps: +ui.capFps.get(), seconds, t0:0, scale:+ui.capScale.get(), camera:'still', modulation:driven ? 'drive' : 'freeze', zip:true, ...options };
+      const settings = { fps: +ui.capFps.get(), seconds, t0: 0, scale: +ui.capScale.get(), camera: 'still', modulation: driven ? 'drive' : 'freeze', format: 'png', kind: 'frames', ...options };
       let plan = ex.plan(settings);
       if (driven || rotDriving() || !plan.ok || plan.N < seconds * settings.fps) {
         settings.mode = 'span'; settings.span = seconds * Math.max(.1, clock.rate);
         plan = ex.plan(settings);
       }
       if (!plan.ok) { ui.capExactRo.set('refused', 'warn'); ui.capExactRo.setSub(plan.message); return plan; }
-      if (driven) modHost.clock.applyAll(false);
-      const stateBefore = reg.serialize(clock.t), materialBefore = structuredClone(mat), observerBefore = {...obs};
-      const ratesBefore = {...rotRate};
       capBusy = true; ui.capExact.setLabel('STOP EXPORT'); ui.capExact.on = true; capPaint();
       try {
-        exportLocked = true;
-        if (rafId) cancelAnimationFrame(rafId); rafId = 0; stats.scheduled = false;
-        exactRun = ex.render({ ...settings, beforeFrame: ({dt}) => rotStep(dt), onProgress(p) {
-          ui.capExactRo.set(`${p.done} / ${p.total} frames`, 'live');
-          ui.capExactRo.setSub(p.human || 'Rendering the scheduled frame times');
-        } });
+        exactRun = ex.render({ ...settings, beforeFrame: ({ dt }) => rotStep(dt), onProgress: capProgressTo(ui.capExactRo) });
         const result = await exactRun.done;
         ui.capExactRo.set(result.ok ? 'exported' : result.stopped ? 'stopped' : 'refused', result.ok ? 'ok' : 'warn');
         ui.capExactRo.setSub(result.message || result.error || 'Export finished');
-        if (result.ok && result.blob && options.download !== false) ex.save(result);
+        if (result.ok && options.download !== false) ex.save(result); else if (result.ok) setTimeout(() => ex.discard(result), 120000);   // the files are the kit store's: a caller that keeps the result reads them first
         return result;
       } catch (e) {
         ui.capExactRo.set('error', 'warn'); ui.capExactRo.setSub(String(e.message || e));
         return { ok: false, error: String(e.message || e) };
       } finally {
-        reg.restore(stateBefore); Object.assign(mat, materialBefore); Object.assign(obs, observerBefore); Object.assign(rotRate, ratesBefore);
-        exportLocked = false; modWall = 0; lastWall = performance.now() / 1000;
-        schedule(TIER.RECONSTRUCT); exactRun = null; capBusy = false;
+        exactRun = null; capBusy = false;
         ui.capExact.setLabel('EXPORT FRAMES'); ui.capExact.on = false; capPaint();
       }
     }
@@ -5228,8 +5241,8 @@ export async function boot(dom) {
     },
     /* UNDO / REDO over the edit scope (S3): the whole PROJECT but the view, quality and the notebook — never the layout or a preference */
     get history() { return historyApi; },
-    /** W-CAPTURE (wave 58): lab/capture.js itself, built on first use — picture · record · planLoop · recordLoop ·
-     *  pngSequence · probe · verifyVideo · save · limits, and `laws` for the pure schedule functions. */
+    /** W-CAPTURE (wave 58): lab/capture.js itself, built on first use — picture · planLoop · save · limits · grab, and `laws` for the
+     *  pure schedule functions (0.5.0 C7: the film is captureUI.exact, render-exact.js createFilm over the kit's recorder). */
     get capture() { return capApi ? capApi.capture : null; }, get capturePlan() { return capApi ? capApi.plan(true) : null; },
     get captureUI() { return capApi; },
     /* W-EXPORT (wave 134): FILE › EXPORT SHAPE / GRID's own module instance — run(fmt), busy, last (the proof's hook;

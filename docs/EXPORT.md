@@ -50,8 +50,8 @@ elsewhere, per CLAUDE.md and REPORT.md; this file only writes down what the grid
 
 ## FILE › EXPORT GRID — NPZ · CUBE
 
-- **NPZ** — a ZIP (the same stored, uncompressed writer as EXPORT FRAMES, `render-exact.js`'s `zipStored`; this
-  module imports it rather than carrying a second copy) of three files:
+- **NPZ** — a ZIP (the same stored, uncompressed writer as EXPORT FRAMES: MIR's `StoredZip`, `lab/mir/core/zip.js`,
+  which the kit's recorder writes its PNG frame parts with — 0.5.0 C7) of three files:
   - `psi.npy` — NumPy format 1.0, `<c8` (little-endian complex64), shape `(N, N, N)`, **C order**, so
     `psi[i, j, k] == ψ(axis[i], axis[j], axis[k])` — x outer, z innermost, the same order the cube file uses for
     its own index. `np.load(file)['psi']` in Python (`np.load` on a `.npz` reads every member by name).
