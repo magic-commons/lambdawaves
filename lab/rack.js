@@ -37,6 +37,7 @@ import { createVortex } from './vortex.js';
 import { createParticles } from './particles.js';
 import { createKepler } from './keplerview.js';
 import { createFilm, FILM_FPS } from './render-exact.js';   // 0.5.0 C7: the film is MIR's recorder with λWAVES' frame
+import { installTimeline } from './mir/timeline/bind.js';   // 0.5.0 C7b: the kit's TIMELINE window, on λWAVES' one modulation host
 import { createKeyboardWindow } from './mir/keyboard/keyboard.js';   // 0.5.0 C3: the KEYBOARD window is the kit's (keymap.js left)
 import { createKeyTable } from './key-table.js';    // 0.5.0 C3: ACTIONS on MIR's ONE KEY TABLE (keys.js and shortcuts.js left)
 import { keplerOrbits } from './kepler.js';
@@ -189,6 +190,7 @@ export async function boot(dom) {
            in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
            is not here — that rides in the project file, exactly as it did before. */
         modwin: modView ? modView.presentation() : S0.modwin,
+        tlwin: S0.tlwin,   // 0.5.0 C7b: the TIMELINE window's shape and work lane (WORKSPACE), written by its own store and carried here
         frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode:mat.axisMode, cornerSide:mat.cornerSide,
         /* ⚠ WAVE 106 · TWO MORE OF THE FIELD'S CHROME, AND ONE CLOSES AN ASYMMETRY NEVER DECIDED.
            `invert` IS NEW HERE: it sat in the same row as FRAME and AXIS from wave 56 and was the only
@@ -408,7 +410,7 @@ export async function boot(dom) {
   /* WAVE 52 · W-MODWINDOW.  The modulation host (lab/mir) and its face.  Declared HERE, beside the
      scheduler's own state, because the frame loop drives the modulation clock and must be able to
      guard on it before the window that shows it has been built.  0.5.0 A5: the port is lab/mod-port.js. */
-  let modHost = null, modView = null, modWall = 0, modExpOn = null;
+  let modHost = null, modView = null, modWall = 0, modExpOn = null, dodge = null, tl = null;   // C7b: the pill's dodge (both kit windows) · the TIMELINE
   const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => modView, onCapture: (c) => { audioCap = c; }, save: saveMod });
   const { setKnob, hand: modHand, syncBases: modSyncBases, feedAudio, cadence: MOD, knobs: modKnobs, gets: modGets, held: modHeld } = mod;   // the hand / base / modulated law, the feed, the cadence, the maps
   appPlay.onChange((on) => mod.follow(on));   // 0.5.0 C4 (R-B1): ONE clock — every play edge, the power on or off, holding the app-play demand while it plays
@@ -926,6 +928,7 @@ export async function boot(dom) {
        the EXPAND lamp, which is the one thing that must be painted whether the window is open or not. */
     if (modHost) {
       if (!uiHidden && modView && modView.isOpen) modView.paint(false);
+      if (!uiHidden && tl && tl.isOpen()) tl.paintHead();   // 0.5.0 C7b: the playhead paints from the one present (TIMELINE.md: no tick of its own)
       const on = modHost.clock.isRunning();
       if (on !== modExpOn) { modExpOn = on; if (ui.modExp) ui.modExp.classList.toggle('live', on); }
     }
@@ -2423,14 +2426,16 @@ export async function boot(dom) {
       return { left, right: left + w, top, bottom: top + h };
     }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
-    function modDodge(rect) {
+    const dodging = {};   // 0.5.0 C7b: each kit window's open rect (the modulation window's, the TIMELINE's): the pill gives way to both
+    function modDodge(rect, who = 'mod') {
       /* 0.5.0 C4: the kit's close reports null, and its place() reports the real box even while closed (λWAVES' copy sent the
          zero rect): a window that is not open has nothing to dodge */
-      const r = rect && modView && modView.isOpen ? rect : { left: -1, right: -1, top: -1, bottom: -1 };
+      dodging[who] = rect && (who === 'mod' ? modView && modView.isOpen : tl && tl.isOpen()) ? rect : null;
+      const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));
       occlusion.dirty();   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
       if (!t || !t.classList.contains('mini')) return;
-      if (trMoving) { if (r.right < 0) setTimeout(() => modDodge(r), 320); return; }
+      if (trMoving) { if (!rs.length) setTimeout(() => modDodge(rect, who), 320); return; }
       if (document.body.classList.contains('rack-hidden')) return;   // it is already parked off-screen
       /* OPTIMIZATION 2026-09-24 · N8 · A CLOSED WINDOW HAS NOTHING TO DODGE, AND ASKING COST THE BOOT A LAYOUT.  A closed
          modulation window reports the origin's empty rect (the kit's window.js place(); `closed` sends −1s).  No seat can hit a
@@ -2439,14 +2444,14 @@ export async function boot(dom) {
          When the pill already sits there, that answer changed nothing but it read the pill's rect first: on a first visit
          the boot's forced style + layout, 30–38 ms, once the closed H₂ and MOLECULES cards stopped paying it
          (probes/N/n8-reads.mjs).  Any other case falls through to the measured road below, unchanged. */
-      if (r.right <= 0 && r.bottom <= 0 && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) return;
+      if (!rs.length && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) return;
       const box = t.getBoundingClientRect();
       const w = box.width || 560, h = box.height || 34;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
       if (narrowRack) trSeat = 'top';
       const want = narrowRack ? 'top'
-                 : !hits(seatRect('bottom', w, h), r) ? 'bottom'
-                 : !hits(seatRect('top', w, h), r) ? 'top' : trSeat;
+                 : free('bottom', w, h) ? 'bottom'
+                 : free('top', w, h) ? 'top' : trSeat;
       if (want === trSeat) return;
       trMoving = true;
       const leaving = trSeat === 'bottom' ? 'lw-tr-out-down' : 'lw-tr-out-up';
@@ -2484,6 +2489,7 @@ export async function boot(dom) {
     modView.root.dataset.mirWindow = 'modulation';    // 0.5.0 A10's hook (the kit's controller sets the rail's, not the pane's)
     applyAccent();                                    // the two angles reach the window as soon as it exists
     modView.restore(readSettings().modwin);
+    dodge = modDodge;                                 // 0.5.0 C7b: the TIMELINE's `moved` gives way through the same seat chooser
     /* wave 54: the modulation clock's visibility is driven by the ONE authority (setPageHidden), not by a second listener of its own — it still RE-ANCHORS and never jumps */
     if (page.hidden) modHost.clock.setHidden(true);
   }
@@ -3442,7 +3448,7 @@ export async function boot(dom) {
           ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE TEXT  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
 
 
-        WINDOW: () => [['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
+        WINDOW: () => [['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['TIMELINE', () => runAction('timeline')], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
           ...[...document.querySelectorAll('.dev:not([hidden])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
 
 
@@ -3927,6 +3933,7 @@ export async function boot(dom) {
     /* the kit's windows λWAVES has are rows with NO chord (MIR ADOPTING-1.5 §11: their keys are Josh's to give; bind one in the keyboard) */
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
+    { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', key: null, run: () => { if (tl) tl.toggle(); } },   // 0.5.0 C7b
   ];
   /* THE DISPATCHER (the saved chords, the one keydown listener, whose key a press is): lab/keys.js (wave 130 seam 10) */
   /* S4 · A KEY'S EDIT IS A ROW OF ITS OWN, named for its action: C / V / P changed the edit scope and armed nothing, so the row came
@@ -3963,6 +3970,28 @@ export async function boot(dom) {
        (wave 106), and from the stage it hands the keyboard back to the interface (wave 57).  The menubar and the + / ☆ lists are the kit's. */
     window.addEventListener('keydown', (e) => { if (e.code !== 'Escape' || e.defaultPrevented) return; if (kb.isOpen()) { e.preventDefault(); kb.close(); } else if (stageHasFocus()) dom.canvas.blur(); });
     kt.table.hints(document); kt.table.onChange(() => kt.table.hints(document));   // every [data-key-action] says its live chord (aria-keyshortcuts)
+  }
+  /* ── 0.5.0 C7b · THE TIMELINE is the kit's installTimeline (TIMELINE.md) on λWAVES' ONE modulation host: its `mod` is this seam (bind.js
+     reads host, registry, play, arm, armed, onPlay, setTimeline), so it builds no second host and no tick.  Its play is THE play (clock.js
+     onePlay), its playhead paints from loop()'s present, the arrangement is the host clock's automation and rides in serialize()
+     (presentation.timeline) with its own undo; λWAVES' pill stays the one transport (R9), the window a WORKSPACE record (`tlwin`) that
+     ships closed (R1).  Its rows join the ONE KEY TABLE (undo/redo are λWAVES' own ids: its own are reachable from its ⋯ menu). */
+  if (modHost && modView) {
+    tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'),
+      mod: { host: modHost, registry: modHost.registry, armed: () => modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => modView.setTimeline(x),
+        play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
+      dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, transport: false, audio: false,
+      store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },
+      busy: () => capApi.busy || capApi.exact.running, moved: (r) => dodge(r, 'tl'), onWindow: () => occlusion.dirty() });
+    /* the window draws no pane of its own: its ruler, lanes and work bar are each a .glass pane (a lane clipped by the scroller), its rail chips */
+    occlusion.register('timeline', () => tl.isOpen() ? [...tl.root.querySelectorAll('.glass'), ...(tl.rail.el ? tl.rail.el.querySelectorAll('.mir-chip') : [])].map((s) => paintedRect(s, s.closest('.tl-viewport'))) : []);
+    for (const n of [tl.root, tl.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });
+    /* a ROUTED dial's hold and right-click stay its ring's (RANGE · REMOVE · RESET): the kit's TIMELINE CLIP (timeline/knobs.js, 500 ms,
+       document capture) and the ring (600 ms) claim one gesture, so the window's capture hides that dial's id from the timeline for the
+       one event and gives it back right after the timeline has looked (brief B13); an unrouted dial's hold is TIMELINE CLIP's */
+    for (const type of ['pointerdown', 'contextmenu']) window.addEventListener(type, (e) => { const k = e.target.closest && e.target.closest('.k[data-param]');
+      if (!k || !modHost.model.routesOfTarget(k.dataset.param).some((r) => !r.dormant)) return; const id = k.dataset.param; k.removeAttribute('data-param');
+      document.addEventListener(type, () => { k.dataset.param = id; }, { capture: true, once: true }); }, true);
   }
 
 
@@ -4067,6 +4096,7 @@ export async function boot(dom) {
         overlays: { vortex: { on: !!vortex.on, overlay: !!vortex.overlay }, kepler: !!kepler.on, particles: { on: !!particles.on, count: particles.points.length }, dials: !!spectrum.dials },
         ab: ui.ab ? ui.ab.get() : null,
         notebook: !edit && layout.notebookSize ? (() => { const n = layout.notebookSize(); return n.custom ? { w: n.w, h: n.h } : null; })() : null } };
+    const T = !edit && tl ? tl.model.serialize() : null; if (T && (T.clips.length || T.active)) S.presentation.timeline = T;   // 0.5.0 C7b: the arrangement, only when there is one (NEW and the demos stay byte-exact); never an undo row's
     if (!edit) return S;
     const pr = S.presentation, R = modHost && modHost.registry;
     delete S.experiment.t; delete pr.mat.steps; if (pr.domain.auto) delete pr.domain.half;
@@ -4294,6 +4324,7 @@ export async function boot(dom) {
         if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
         if (modWas) modHost.clock.play(performance.now() / 1000);       // S4 · restoreModulation put the clock down: an undo under THE play puts it back to playing (its demand is still held)
         if (pr.modwin && modView) modView.restore(pr.modwin);
+        if (!hist && tl) tl.model.restore(pr.timeline || null);           // 0.5.0 C7b: an open replaces the arrangement (NEW clears it); an undo leaves it — it keeps its own
       }
       schedule(TIER.REBUILD); wState.setStatus(gone.length ? restoreNotice : 'restored', gone.length ? 'warn' : 'live');
       return true;
@@ -4793,6 +4824,7 @@ export async function boot(dom) {
      *  answer that BLANK): capture's readability probe decides — the canvas when this browser reads it, else the GPU readback's PNG. */
     async thumbnail() { const c = capApi.capture; if ((await c.probe()).canvasReadable) { await LW.settle(); return dom.canvas; } const r = await c.picture({ width: 320 }); return r.ok ? r.blob : null; },
     look: look.prefs,   // 0.5.0 C2: the look store (`mir.gui`), for probes (`__LW.look.get('theme')`)
+    get timeline() { return tl; },   // 0.5.0 C7b: the kit's TIMELINE (installTimeline's result: model, editor, controller, open/close), for the timeline suite
   };
   window.__LW = LW;
 

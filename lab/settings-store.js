@@ -9,7 +9,8 @@
  * `nativeLayout` is PREFERENCE, as STATE-SCOPES and the byte-identical gates have it.
  * THE FAMILIES THAT STAY where they are: their own localStorage keys, never inside this blob, each with its owner and scope. */
 export const SETTINGS_KEY = 'lambdawaves.q0.settings';
-export const WORKSPACE = Object.freeze(['closed', 'layouts', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'phoneTr', 'phoneRack']);
+export const WORKSPACE = Object.freeze(['closed', 'layouts', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'phoneTr', 'phoneRack',
+  'tlwin']);   // 0.5.0 C7b: the TIMELINE window's shape and work lane (the kit's createTimeline store)
 export const FAMILIES = Object.freeze({
   'lambdawaves.q0.notebook': ['rack.js NB_KEY', 'PROJECT'], 'lambdawaves.q0.notebook.title': ['rack.js NB_TITLE', 'PROJECT'],
   'lambdawaves.q0.notebook.subtitle': ['rack.js NB_SUBTITLE', 'PROJECT'], 'lambdawaves.q0.projects': ['project-store.js PJ_KEY (FOLDERS\' store, in λWAVES\' form)', 'PROJECT'],

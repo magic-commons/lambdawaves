@@ -21,7 +21,10 @@ try {
   /* ── 1 · THE ROWS AND THE TABLE: A9's ids, R-K1, Ctrl vs Mod in the kit's spelling, the kit's windows with no chord, hooks that exist ── */
   const binding = await ev(`const a = __LW.keys.actions, T = __LW.keys.table, row = (id) => { const x = a.find((y) => y.id === id); return x && [x.key, x.ctrl || false, !!x.shift]; };
     const kit = await import('./mir/shell/keys.js');
-    return { conflicts: T.conflicts(), platform: T.platform,
+    /* 0.5.0 C7b: the TIMELINE's rows (timeline.*) share chords with λWAVES' by design — live only while its surface has the focus, they
+       win there (key-table.js THE FOCUS LAW); any other shared chord is a conflict */
+    return { conflicts: T.conflicts().filter((c) => c.ids.filter((id) => id.startsWith('timeline.')).length !== 1 || c.ids.length !== 2), platform: T.platform,
+      timeline: T.list().filter((x) => x.id.startsWith('timeline.') && T.get(x.id).when).length,
       camera: Object.fromEntries(['dollyIn', 'povIn', 'dollyZoomIn', 'dollyOut', 'povOut', 'dollyZoomOut'].map((id) => [id, row(id)])),
       chord: Object.fromEntries(['transport.play', 'folders', 'pitchDn', 'modArm', 'help', 'hide', 'modulation', 'save', 'notebook', 'rack', 'dock', 'fullscreen'].map((id) => [id, row(id)])),
       spelled: Object.fromEntries(['transport.play', 'dollyZoomIn', 'modArm', 'save', 'help', 'nextWindow', 'history', 'keyboard'].map((id) => [id, T.chords(id)])),
@@ -30,7 +33,7 @@ try {
       hooked: ['rack', 'folders', 'notebook', 'camReset', 'undo', 'redo', 'view', 'style', 'palette', 'dock', 'modulation'].filter((id) => !document.querySelector('[data-key-action="' + id + '"]')),
       hint: document.getElementById('rackToggle').getAttribute('aria-keyshortcuts'),
       kit: Object.fromEntries(Object.entries(kit.KIT_KEYS).map(([k, v]) => [k, kit.normalize(v)])), errors: __e.slice() };`);
-  assert.deepEqual(binding.conflicts, [], 'two rows hold one chord');
+  assert.deepEqual(binding.conflicts, [], 'two rows hold one chord'); assert.ok(binding.timeline >= 30, 'the TIMELINE\'s rows are on the table, each with its focus `when`: ' + binding.timeline);
   assert.equal(binding.platform, 'other', 'the gate runs on Linux: Mod is Ctrl');
   assert.deepEqual(binding.camera, { dollyIn: ['KeyQ', false, false], povIn: ['KeyQ', false, true], dollyZoomIn: ['KeyQ', 'Ctrl', true],
     dollyOut: ['KeyE', false, false], povOut: ['KeyE', false, true], dollyZoomOut: ['KeyE', 'Ctrl', true] });
@@ -45,7 +48,7 @@ try {
   for (const id of Object.keys(binding.kit).filter((id) => id !== 'folders')) assert.equal(binding.spelled[id] ? binding.spelled[id][0] : (await ev(`return __LW.keys.table.chords(${JSON.stringify(id)});`))[0], binding.kit[id], 'the kit row ' + id);
   assert.equal(binding.kit.folders, 'KeyS'); assert.deepEqual(binding.chord.folders, ['KeyO', false, false], 'R-K1: FOLDERS is O, S is pitch-down');
   assert.deepEqual(binding.errors, []);
-  console.log('PASS the rows on the kit\'s table: no shared chord, A9 ids, R-K1, Ctrl+Shift+Q spelled Mod+Shift+KeyQ off a Mac, the fine step as a chord and its Shift, the kit\'s windows with no chord, every tag a row, hints written');
+  console.log('PASS the rows on the kit\'s table: no shared chord (the ' + binding.timeline + ' TIMELINE rows share theirs only under its focus), A9 ids, R-K1, Ctrl+Shift+Q spelled Mod+Shift+KeyQ off a Mac, the fine step as a chord and its Shift, the kit\'s windows with no chord, every tag a row, hints written');
 
   /* ── 2 · OPENED BY ITS ACTION (a real ?), and CLAUDE.md's pane ── */
   await ev(`const f = __LW.field, set = f.setOcclusion; window.__masks = []; f.setOcclusion = function (r) { window.__masks = r.map((x) => x.slice()); return set.call(f, r); };
@@ -64,14 +67,14 @@ try {
       centred: Math.abs((bb[0].left + bb[1].right) / 2 - (right.left + right.right) / 2), above: bb.every((r) => r.bottom <= w.querySelector('.km-search').getBoundingClientRect().top),
       bare: btns.map((e) => e.textContent.trim()), statusShown: getComputedStyle(w.querySelector('.km-status')).display !== 'none',
       borders: ['.km-col', '.km-platform .seg', '.km-key-bound', '.km-key-unbound', '.km-search', '.km-action-row', '.km-chip', '.km-btn'].map((s) => getComputedStyle(w.querySelector(s)).borderTopWidth).concat(getComputedStyle(w).borderTopWidth),
-      q: w.querySelector('.km-key[data-code="KeyQ"] .km-badge').textContent, more: w.querySelectorAll('.km-chip-more').length,
+      q: w.querySelector('.km-key[data-code="KeyQ"] .km-badge').textContent, more: w.querySelectorAll('.km-action-row:not([data-id^="timeline."]) .km-chip-more').length,   /* C7b: a timeline row's second chord is a real one (Delete · Backspace) */
       play: w.querySelector('.km-action-row[data-id="transport.play"] .km-chips').textContent, card: document.body.dataset.card, mask: covers(b), errors: __e.slice() };`);
   assert.equal(geo.open, true, 'the ? key did not open the window'); assert.equal(geo.focusIn, true, 'the focus did not go into the window');
   assert.equal(geo.layer, 'floats'); assert.equal(geo.pointer, 'auto');
   assert.ok(geo.w > 900 && geo.w < 1440 && geo.h <= 416, 'the pane is ' + geo.w + ' × ' + geo.h);
   assert.ok(geo.x >= 8 && geo.y >= 8);
   assert.equal(geo.rows, 5); assert.equal(geo.inWell, true, 'the five rows do not fit the board\'s well');
-  assert.deepEqual(geo.groups, ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'PROJECT']);
+  assert.deepEqual(geo.groups, ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'PROJECT', 'TIMELINE']);   // 0.5.0 C7b: the TIMELINE's rows, after λWAVES' own
   assert.equal(geo.oneRow, true); assert.deepEqual(geo.icons, ['⌘', 4]);
   assert.ok(geo.centred < 2); assert.equal(geo.above, true); assert.deepEqual(geo.bare, ['RECORD INPUT', 'RESET TO DEFAULT'], 'RECORD / RESET carry no subtitle');
   assert.equal(geo.statusShown, false, 'an empty status is shown'); assert.deepEqual(geo.borders, Array(9).fill('0px'));
