@@ -37,7 +37,7 @@ import { createOrbit } from './orbit.js';
 import { createVortex } from './vortex.js';
 import { createParticles } from './particles.js';
 import { createKepler } from './keplerview.js';
-import { createFilm, exactSchedule, FILM_FPS } from './render-exact.js';   // 0.5.0 C7: the film is MIR's recorder with λWAVES' frame
+import { createFilm, FILM_FPS } from './render-exact.js';   // 0.5.0 C7: the film is MIR's recorder with λWAVES' frame
 import { createKeyboardWindow } from './mir/keyboard/keyboard.js';   // 0.5.0 C3: the KEYBOARD window is the kit's (keymap.js left)
 import { createKeyTable } from './key-table.js';    // 0.5.0 C3: ACTIONS on MIR's ONE KEY TABLE (keys.js and shortcuts.js left)
 import { keplerOrbits } from './kepler.js';
@@ -1405,7 +1405,9 @@ export async function boot(dom) {
       exportLocked = false; modWall = 0; lastWall = performance.now() / 1000;
       schedule(TIER.RECONSTRUCT);
     }
-    const exactRenderer = () => exact || (exact = createFilm(LW, { canvas: dom.canvas, energies: periodEnergies, canvasCap: 16384, host: () => modHost, hold: filmHold }));
+    const exactRenderer = () => exact || (exact = createFilm(LW, { canvas: dom.canvas, energies: periodEnergies, canvasCap: 16384, host: () => modHost, hold: filmHold,
+      road: { pending: () => ({ caption: stageCaption(), spin: camera.ambient && obs.mode !== 'free' ? camera.ambient : 0, yaw0: obs.yaw }), step: rotStep, rotating: rotDriving,
+        plan: (o) => capture().planLoop(o) } }));   // 0.5.0 C7b: the rack's own for the film's three schedules (take) and the card's road
     let cap = null, capBusy = false, capRun = null, capPlan = null, capKey = '';
     let capSoft = false, capWait = false;   // LA7: the plan in hand came from a hover (never handed to a caller) · a hover is waiting for the scan
     const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies, caption: () => stageCaption() }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩; 0.4.0 S3: and draws the STAGE TEXT's caption
@@ -1513,12 +1515,8 @@ export async function boot(dom) {
     async function capRecord() {
       if (capRun) { capRun.stop(); return; }
       if (capBusy) return;
-      const fps = +ui.capFps.get(), N = Math.max(1, Math.round(fps * ui.capSec.get()));
-      const sched = exactSchedule({ mode: 'loop', T: (N / fps) * clock.rate, t0: clock.t, fps, frames: N });
-      const spin = camera.ambient && obs.mode !== 'free' ? camera.ambient : 0, yaw0 = obs.yaw;
       capBusy = true; ui.capRec.setLabel('STOP'); ui.capRec.on = true; capPaint();
-      try { capRun = exactRenderer().render({ schedule: sched, kind: 'clip', format: 'mp4', camera: 'still', caption: stageCaption(), modulation: modArm ? 'drive' : 'freeze',
-          beforeFrame: ({ dt }) => rotStep(dt), poseAt: spin ? (k) => ({ yaw: yaw0 + spin * (k / fps) }) : null, onProgress: capProgressTo(ui.capPlanRo) });
+      try { capRun = exactRenderer().take('clip', { fps: +ui.capFps.get(), seconds: ui.capSec.get(), drive: modArm, onProgress: capProgressTo(ui.capPlanRo) });
         const r = await capRun.done; capBadge('CLIP', r); if (r && r.ok) exactRenderer().save(r);
       } catch (e) { ui.capPlanRo.set('error', 'warn'); ui.capPlanRo.setSub(String(e && e.message || e)); }
       capRun = null; capBusy = false; ui.capRec.setLabel('RECORD'); ui.capRec.on = false; capPaint();
@@ -1529,9 +1527,8 @@ export async function boot(dom) {
       const P = capMakePlan(true);
       if (!P.ok) return;                                       // the readout already carries plan.message: the refusal IS the answer
       if (P.kind === 'stationary') { capBadge('STATIONARY', { ok: false, message: P.message }); return; }
-      const sched = exactSchedule({ mode: 'loop', T: P.T, t0: P.schedule.t0, fps: P.fps, frames: P.N });
       capBusy = true; ui.capLoop.on = true; capPaint();
-      try { capRun = exactRenderer().render({ schedule: sched, kind: P.kind === 'exact' ? 'loop' : 'near', format: 'mp4', camera: 'still', caption: stageCaption(), onProgress: capProgressTo(ui.capPlanRo) });
+      try { capRun = exactRenderer().take('period', { plan: P, onProgress: capProgressTo(ui.capPlanRo) });
         const r = await capRun.done; capBadge(P.kind === 'exact' ? 'PERIOD LOOP' : 'NEAR', r); if (r && r.ok) exactRenderer().save(r);
       } catch (e) { ui.capPlanRo.set('error', 'warn'); ui.capPlanRo.setSub(String(e && e.message || e)); }
       capRun = null; capBusy = false; ui.capLoop.on = false; capPaint();
@@ -1540,19 +1537,12 @@ export async function boot(dom) {
       if (exactRun) { exactRun.stop(); return; }
       if (capBusy) return;
       const ex = exactRenderer();
-      const driven = modArm;
-      const seconds = Math.max(30, ui.capSec.get());
-      const settings = { fps: +ui.capFps.get(), seconds, t0: 0, scale: +ui.capScale.get(), camera: 'still', modulation: driven ? 'drive' : 'freeze', format: 'png', kind: 'frames', ...options };
-      let plan = ex.plan(settings);
-      if (driven || rotDriving() || !plan.ok || plan.N < seconds * settings.fps) {
-        settings.mode = 'span'; settings.span = seconds * Math.max(.1, clock.rate);
-        plan = ex.plan(settings);
-      }
-      if (!plan.ok) { ui.capExactRo.set('refused', 'warn'); ui.capExactRo.setSub(plan.message); return plan; }
+      const run = ex.take('frames', { fps: +ui.capFps.get(), seconds: ui.capSec.get(), scale: +ui.capScale.get(), drive: modArm, options, onProgress: capProgressTo(ui.capExactRo) });
       capBusy = true; ui.capExact.setLabel('STOP EXPORT'); ui.capExact.on = true; capPaint();
       try {
-        exactRun = ex.render({ ...settings, beforeFrame: ({ dt }) => rotStep(dt), onProgress: capProgressTo(ui.capExactRo) });
+        exactRun = run;
         const result = await exactRun.done;
+        if (result.refused && result.plan && !result.plan.ok) { ui.capExactRo.set('refused', 'warn'); ui.capExactRo.setSub(result.message); return result.plan; }
         ui.capExactRo.set(result.ok ? 'exported' : result.stopped ? 'stopped' : 'refused', result.ok ? 'ok' : 'warn');
         ui.capExactRo.setSub(result.message || result.error || 'Export finished');
         if (result.ok && options.download !== false) ex.save(result); else if (result.ok) setTimeout(() => ex.discard(result), 120000);   // the files are the kit store's: a caller that keeps the result reads them first

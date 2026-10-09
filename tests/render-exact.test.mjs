@@ -665,6 +665,65 @@ function spanHasOwnSchedule() {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   §13 — THE CARD'S ROAD (0.5.0 C7b): the kit's RENDER card calls the recorder's run() itself, so the job is built from the
+   kit's spec under THE TIME LAW — the period clip's schedule inside one, the RATE integral when RATE can move, else the RECORD
+   law — and a RESUME after a reload rebuilds the same job from the spec the store kept.
+   ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+{
+  const W = 16, H = 16, N = 8, fps = 30;
+  /* the card's recorder over a fake lab: the host recorder, handed an editor (the timeline's) and the state signature */
+  const cardFilm = (lab, host, editor) => { const f = createFilm(lab.LW, { canvas: lab.canvas, grab: fakeGrabFor(lab, {}), now: () => lab.wall, energies: () => E12,
+    storage: {}, calib: NOCALIB, guard: false, pauseWhileHidden: false, host: () => host }); return { film: f, rec: f.recorder({ editor: editor ? () => editor : undefined, signature: () => lab.LW.stateDigest() }) }; };
+  const logT = (f) => (f.last ? f.last.log.map((x) => x.t) : []), logD = (f) => (f.last ? f.last.log.map((x) => x.digest) : []);
+  const still = { motion: 'still', fps, durationS: N / fps, size: { w: W, h: H }, format: 'png', timeline: false };
+
+  /* rule 3 — THE RECORD LAW: nothing can move RATE, so frame k is the lab's t at the tap + (k/N)·(N/fps)·rate */
+  const labA = fakeLab({}); labA.LW.clock.t = 1.5;
+  const A = cardFilm(labA, rigFor(labA, false));
+  const zA = await A.rec.run({ ...still, modulation: false });
+  const recordLaw = exactSchedule({ mode: 'loop', T: (N / fps) * 4, t0: 1.5, fps, frames: N });
+  const labR = fakeLab({}); labR.LW.clock.t = 1.5;
+  const facade = await filmFor(labR, {}).render({ schedule: recordLaw, width: W, height: H, format: 'png', modulation: 'freeze' }).done;
+  judge('THE CARD\'S ROAD · RULE 3, THE RECORD LAW: a STILL from the kit\'s own run() — no film in hand at the tap — builds its job from the kit\'s spec: describe() records the lab at the tap (t, RATE, the caption, the spin) and before(spec) makes C7\'s RECORD schedule from it. Its eight frames sit at the RECORD law\'s times to the last bit and equal the facade\'s frozen RECORD digest for digest, and after() releases the job',
+    zA.frames === N && logT(A.film).join() === recordLaw.times.join() && logD(A.film).join() === digestsOf(facade).join() && facade.ok && A.film.running === false && A.film.last.kind === 'clip',
+    { times: logT(A.film).length, sameDigests: logD(A.film).join() === digestsOf(facade).join(), running: A.film.running });
+
+  /* rule 2 — RATE CAN MOVE (MODULATION ON): the previous frame's RATE integrated once per output interval, frame zero time zero */
+  const labD = fakeLab({}), labF = fakeLab({});
+  const D = cardFilm(labD, rigFor(labD));
+  await D.rec.run({ ...still, modulation: true });
+  const driven = await filmFor(labF, { host: rigFor(labF) }).render({ schedule: exactSchedule({ mode: 'loop', T: (N / fps) * 4, t0: 0, fps, frames: N }), width: W, height: H, format: 'png', modulation: 'drive' }).done;
+  const dt = logT(D.film), step = dt.slice(1).map((t, k) => t - dt[k]);
+  judge('THE CARD\'S ROAD · RULE 2, RATE CAN MOVE: with MODULATION ON the card\'s film is C7\'s driven film — frame zero is the lab\'s t, every later frame the previous frame\'s RATE integrated over 1/fps — and its frames equal the facade\'s driven RECORD digest for digest through the same kit host',
+    driven.ok && dt[0] === 0 && step.every((s) => Math.abs(s - 4 / fps) < 1e-12) && logD(D.film).join() === digestsOf(driven).join(),
+    { t0: dt[0], step: step[0], sameDigests: logD(D.film).join() === digestsOf(driven).join() });
+
+  /* rule 1 — INSIDE A PERIOD CLIP: ONE PERIOD's own schedule; TIMELINE · ACTIVE over the clip equals the facade's ONE PERIOD */
+  const labP = fakeLab({}), hostP = rigFor(labP, false), spb = 60 / hostP.model.transport.bpm, beats = N / fps / spb, t0 = 2.75;
+  const doc = { meter: 4, lanes: [{ id: 'l' }], active: { start: 0, end: beats }, curves: [{ id: 'v', kind: 'lw-period', targetId: 'lw.period', t0, T: D12.T }],
+    clips: [{ id: 'c', curveId: 'v', laneId: 'l', start: 0, duration: beats, mute: false }] };
+  const editor = { model: { state: () => doc, serialize: () => doc, subscribe: () => () => {} }, range: () => null, activeRange: () => doc.active };
+  const P = cardFilm(labP, hostP, editor);
+  await P.rec.run({ motion: 'timeline-active', fps, size: { w: W, h: H }, format: 'png', modulation: false });
+  const onePeriod = exactSchedule({ mode: 'loop', T: D12.T, t0, fps, frames: N });
+  const labO = fakeLab({}); labO.LW.clock.t = 9.25;
+  const loop = await filmFor(labO, {}).render({ schedule: onePeriod, width: W, height: H, format: 'png', camera: 'still', modulation: 'freeze' }).done;
+  judge('THE CARD\'S ROAD · RULE 1, INSIDE A PERIOD CLIP: TIMELINE · ACTIVE over a `lw-period` clip films ONE PERIOD\'s own times, bit for bit — not the lab\'s t, which stood elsewhere — and its frames equal the facade\'s ONE PERIOD digest for digest; the film is named a LOOP of T_ψ',
+    loop.ok && logT(P.film).join() === onePeriod.times.join() && logD(P.film).join() === digestsOf(loop).join() && P.film.last.kind === 'loop' && P.film.last.T === D12.T,
+    { frames: logT(P.film).length, sameTimes: logT(P.film).join() === onePeriod.times.join(), sameDigests: logD(P.film).join() === digestsOf(loop).join(), kind: P.film.last && P.film.last.kind });
+
+  /* a RESUME after a reload: a fresh lab (its t moved), a fresh film, the spec the store kept (recording.json) and its checkpoint */
+  const part = readZip(await archive(zA)).find((e) => e.name === 'recording.json'), spec = JSON.parse(new TextDecoder().decode(part.bytes));
+  const labB = fakeLab({}); labB.LW.clock.t = 33.3;
+  const B = cardFilm(labB, rigFor(labB, false)), files = [];
+  const store = { id: 'resume', manifest: { checkpoint: { frames: 3 } }, resume: async () => {}, savePart: async (name, blob) => { files.push(name); return { name, blob, bytes: blob.size }; }, finishParts: async () => {}, interrupt: async () => {} };
+  const rB = await B.rec.recover({ spec, store });
+  judge('THE CARD\'S ROAD · A RESUME AFTER A RELOAD rebuilds its job from the spec the store kept (app.pending: the lab as it stood at the first tap), not from the lab now — the lab\'s t has moved to 33.3 — so frames 3 … 7 land on the first run\'s times and pixels exactly',
+    rB.frames === N && logT(B.film).join() === recordLaw.times.slice(3).join() && logD(B.film).join() === logD(A.film).slice(3).join() && !!spec.app && !!spec.app.pending && files.length === 1,
+    { resumed: logT(B.film).length, sameTimes: logT(B.film).join() === recordLaw.times.slice(3).join(), samePixels: logD(B.film).join() === logD(A.film).slice(3).join() });
+}
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
    §12 — WHAT ONLY A BROWSER CAN ANSWER
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 console.log('\n      NOT PROVED HERE — a browser must answer these (the film verifier\'s brief, research/release-0.5.0/BRIEF-C7-VERIFY.md):\n'
