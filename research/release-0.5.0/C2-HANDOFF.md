@@ -10,7 +10,7 @@ First builder: `177be6b` design · `b817b27` handoff · `2e22fdc` WIP step 2 (lo
 thin; tests re-worded) · `c312219` handoff (paused).
 Continuation: `77edad0` handoff (step 1: the stylehash compare, 0 in the seven classes) · `fa69ff7` step 3 (`mir.gui` PREFERENCE in FAMILIES;
 the probe fails a look key left in B3; STATE-SCOPES rewritten) · `37001b4` handoff · `7b02b1a` step 4 (STATUS TAGS, CONTROL HINTS, HELP
-are the kit's rows; first-run keeps only the defaults) · this handoff.
+are the kit's rows; first-run keeps only the defaults) · `9ce1b4a` handoff · this handoff (step 5, measured; no code).
 
 ## Step 1 · the stylehash classifier compare — DONE, 0 in the seven classes
 - The first builder's captures (`.tmp/sh/base`, `base2`, `s2`, closed set, no settle) gave **107 element·properties, all in the FIRST state
@@ -41,6 +41,14 @@ are the kit's rows; first-run keeps only the defaults) · this handoff.
 - tests: first-run 12 judges (the reading laws through `liftLook` + the kit's `repair`; one new lift judge); official-defaults-palette's
   saved case (`left: []`, `helpKey: null`, `gui` with hints/help/badges); new-project.test's PREFERENCE set names the `mir.gui` keys.
 
+## Step 5 · the eight states, measured — DONE (no code; captures in `.tmp/sh`, untracked)
+- stylehash (the kit's `tools/stylehash.mjs` via `.tmp/cap.mjs`, `--gpu 1`, the README's λWAVES recipe, C0's 2.5 s settle): base `f0fcbc4`
+  (`.tmp/base`, http 8877) twice and this tree at `7b02b1a` (http 8873), three sets — **closed 903 elements, modulation window open 1,284,
+  notebook open 918, × 8 states each: 0 element-states in the seven classes, 0 in OTHER, 0 gone, 0 new — even unmasked (the noise run
+  itself differs by 0)**; the kit's compare: **neutral, no element and no pixel** in all three sets.
+- `--acc`/`--acc2` (and `--acc-glow`, `--acc-ink`, `--glass-blur`, on `<html>` and `<body>`, plus `#themeColor`) read directly in each of the 8
+  states (`.tmp/acc.mjs`, the kit's CDP Chromium with a real adapter): **12 values × 8 states identical, 0 diffs** (`.tmp/acc-{base,tree}.json`).
+
 ## Tests
 - at 7b02b1a: node **82/82**; `new-project --check` in step; browser one at a time: official-defaults-palette **3/3**, menubar **GREEN**,
   keyboard-window **PASS**, frame-occlusion **7/7** (the first run, 4 s after keyboard-window, was red; re-run ALONE twice: 7/7), new-project
@@ -56,12 +64,10 @@ are the kit's rows; first-run keeps only the defaults) · this handoff.
 ## Blockers
 None.
 
-## Servers running (stop by pid when done)
-gate server 8873 (`tools/gate/server.py`, this tree) · `python3 -m http.server 8877` serving `.tmp/base` (the `f0fcbc4` copy, for step 5).
+## Servers running
+None of mine (all stopped by task id / pid).
 
 ## Exact next step
-Step 5: stylehash on base `f0fcbc4` (`.tmp/base`, http 8877) and this tree (http 8873 — stop the gate server first, or serve with
-`python3 -m http.server 8873 --bind 127.0.0.1 --directory <tree>`): `node .tmp/cap.mjs <name> <port> wait|mod|nb` for basew/base2w (have: closed),
-then mod and nb for base, base2 and tree, and the tree's closed again (`s5w`); `node .tmp/classes.mjs <base> <tree> <base2>` for each set → 0 in the
-seven classes; `--acc`/`--acc2` read directly on the 8 states (a CDP script over the kit's `tools/cdp.mjs`, as stylehash does). Then step 6
-(lines, `bash test.sh node`, REPORT wave 204 after wave 201, `C2-BUILD.md`, the CLAUDE.md draft, final handoff).
+Step 6: `cat lab/*.js | wc -l`; `bash test.sh node`; REPORT.md `### wave 204: C2 THE LOOK IS THE KIT'S — …` after wave 201 under
+`## 2026-10-08 · 0.5.0 C — THE ADOPTION` (before the D heading); `research/release-0.5.0/C2-BUILD.md` in A7-BUILD.md's shape (what left, what
+stays, the key map, the gates with counts, brief candidates, the draft CLAUDE.md paragraph ≤ 8 lines); final handoff.
