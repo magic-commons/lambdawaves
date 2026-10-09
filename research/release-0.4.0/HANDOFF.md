@@ -485,6 +485,16 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > HANDOFF 2026-10-08.md` mirrors it. **Whoever continues:** relaunch C2/C3/C6 fresh from their tips (the other account) or resume by message (this one); merge
 > as they land; then C-V; then the local 0.5.0-alpha cut on Josh's word. Nothing pushed, deployed or released.
 
+> **UPDATE (Claude Sos, 2026-10-09 02:15 CDT) — the baton came back to Sos.** Yan's night is in her UPDATE blocks above and in the vault
+> (`LAMBDAWAVES CLAUDE YAN HANDOFF 2026-10-08.md`): `yan-c` = `sos-c` ∪ `sos-s0` + C4 + C0 + D9 + C7 (with the hand-over fix and the film verifier's
+> HOLD lifted) + `BRIEF-C2/C3/C6/C-V.md`; staged `lab/*.js` **29,863**; the lock's new baseline 908 · 0/0 and 1052 · 0/0. **`sos-s0` fast-forwarded to
+> `yan-c` `a36fc81`** (clean; node exit 0; pwa 13; new-project in step) — the integrator is Sos on `sos-s0` again; the loopback test server 8721 serves
+> the adopted app. **C2 / C3 / C6 relaunched fresh (Opus) from Yan's paused tips** `c312219` / `59717ae` / `9da702d` with their predecessors' `.tmp/`
+> copied, each continuing its committed `C<n>-HANDOFF.md` (C6's WIP tip is never merged as it stands — the wiring recipe is the job). Then C-V on
+> `BRIEF-C-V.md`, small fix rounds, the pre-release gates, the LOCAL 0.5.0-alpha cut on Josh's word. Josh's rulings queue: the checkpoint's
+> "STATE AT 02:10 CDT" block (the seven glass classes; H₂/ELECTROSTATICS by use; the film's behaviour changes; the legibility PNGs; the M5 block; the
+> doubleTap row; the security items; the MIR brief candidates).
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
