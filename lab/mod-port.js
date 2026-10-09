@@ -20,16 +20,35 @@
  *   · THE ONE CLOCK's modulation half (0.5.0 A6, the facade; C4, R-B1: every edge, LINKED/SEPARATE retired): `follow(on)` is THE
  *     play's edge (clock.js onePlay), the power on or off.  A play holds the kit's `demand('app.play')` first, so the modulation is
  *     never refused for want of a route or an open editor (MIR 1.5 `installModulation().play`); a pause releases it.
+ *   · THE FLASH GUARD's LIMITER (0.5.1 D10-19, PARTIAL): `guardRoutes`, below — four luminance routes, nothing else.
  */
 import { createModHost } from './mir/modulation/host.js';
 import { createAudioCapture, AUDIO_STATE } from './mir/modulation/audio-capture.js';   // wave 102's capture half, the kit's since 1.5 (0.5.0 C4: lab/audio.js deleted)
+import { createFlashGuard, WCAG } from './mir/shell/flash-guard.js';
+
+/** THE FLASH GUARD's LIMITER (0.5.1 D10-19) on the four routes that reach the pixel's luminance; HUE is out (a wrap seam reads as a
+ *  0.98 swing) and so is everything else.  PARTIAL: reg.morph, chem.kick and the camera can still flash — only the FIELD JUDGE (a pixel
+ *  readback, 0.5.x) sees that.  FLASH_STEP is the step, in the map's own space (ln for a log route), that moves the picture's luminance
+ *  by 10 % at the route's default (tools/flash-calibrate.mjs, U8), so ranges = [0, step / delta].  A route is held only while a
+ *  modulator drives it: a hand's write and the restore to the base on a stop pass untouched and let go of the guard. */
+export const FLASH_STEP = { 'material.exposure': 0.0953, 'material.gamma': 0.1319, 'material.stage': 0.1131, 'material.knee': 0.2595 };
+export function guardRoutes(defs, { driven, now, say }) {
+  const on = defs.filter((d) => d.id in FLASH_STEP);
+  const guard = createFlashGuard({ now, ranges: Object.fromEntries(on.map((d) => [d.label, [0, FLASH_STEP[d.id] / WCAG.delta]])),
+    onTrip: (t) => say(`FLASH GUARD · ${t.route} ${t.hz.toFixed(1)} Hz held to ${WCAG.maxHz}/s`), onRelease: () => say('') });
+  return defs.map((d) => (!on.includes(d) ? d : { ...d, set: (v) => {
+    if (!driven(d.id)) { if (guard.state(d.label)?.held) say(''); guard.reset(d.label); return d.set(v); }
+    const log = d.map === 'log', x = log ? Math.log(v) : v, g = guard(x, d.label);
+    return d.set(g === x ? v : log ? Math.exp(g) : g);          // a pass hands over the number it was given, never exp(ln v)
+  } }));
+}
 
 const CAP = ['state', 'reason', 'live', 'deviceId', 'sampleRate', 'frames', 'inputLatencyMs', 'analysisLatencyMs', 'visualLatencyMs', 'latencyMs', 'latencyEstimated'];
 const IDLE = { state: AUDIO_STATE.IDLE, reason: '', live: false, deviceId: '', sampleRate: 0, frames: 0, inputLatencyMs: null,
   analysisLatencyMs: 0, visualLatencyMs: 0, latencyMs: 0, latencyEstimated: true };
 
-/** deps: { available, present (never a tier above PRESENT), view: () => the window or null, onCapture(cap), save() } */
-export function createModPort({ available, present, view, onCapture, save }) {
+/** deps: { available, present (never a tier above PRESENT), view: () => the window or null, onCapture(cap), save(), say(text): the flash guard's line } */
+export function createModPort({ available, present, view, onCapture, save, say }) {
   let host = null, cap = null, syncing = false, adapters = [], idOf = null;
   const knobs = Object.create(null), gets = Object.create(null), held = new Set();
   const cadence = { hz: 60, get step() { return 1000 / this.hz - 0.5; } };
@@ -83,6 +102,7 @@ export function createModPort({ available, present, view, onCapture, save }) {
       return n;
     },
     install(defs, roots) {
+      defs = guardRoutes(defs, { driven: routed, now: () => host.clock.stats().seconds, say });   // the modulation's own seconds: wall live, the exact step in a film
       adapters = defs; idOf = null;
       host = createModHost({ available, present, presentationActive: false, roots });   // a closed editor has no preview demand
       host.install(defs.map(({ knob: _k, ...d }) => d));

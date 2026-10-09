@@ -413,7 +413,7 @@ export async function boot(dom) {
      scheduler's own state, because the frame loop drives the modulation clock and must be able to
      guard on it before the window that shows it has been built.  0.5.0 A5: the port is lab/mod-port.js. */
   let modHost = null, modView = null, modWall = 0, modExpOn = null, dodge = null, tl = null, filmCard = null;   // C7b: the pill's dodge (both kit windows) · the TIMELINE · the RENDER card
-  const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => modView, onCapture: (c) => { audioCap = c; }, save: saveMod });
+  const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => modView, onCapture: (c) => { audioCap = c; }, save: saveMod, say: (t) => wMet.setStatus(t, t ? 'warn' : '') });   // 0.5.1 D10-19: the flash guard's one line, METERS' status
   const { setKnob, hand: modHand, syncBases: modSyncBases, feedAudio, cadence: MOD, knobs: modKnobs, gets: modGets, held: modHeld } = mod;   // the hand / base / modulated law, the feed, the cadence, the maps
   appPlay.onChange((on) => mod.follow(on));   // 0.5.0 C4 (R-B1): ONE clock — every play edge, the power on or off, holding the app-play demand while it plays
   let feedMs = 0;                      // wave 105: the SMOOTHED feed interval, ms — see the pump

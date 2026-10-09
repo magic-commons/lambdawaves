@@ -31,4 +31,59 @@ Notes on the conventions, for the integrator:
   within a factor of about 2 of the exact measure in the bright range. "About 10 %" is what U8 asked for; the exact one is the field judge's.
 - `material.stage` is inert in the default state (FOLLOW THEME on); the guard still wraps it, and it matters once the ground is chosen.
 
-## 2 · (the wrapping, the test, the counts — filled in by commits 2 and 3)
+## 2 · The wrapping (`lab/mod-port.js`, +22 −2; `lab/rack.js` one line)
+
+`guardRoutes(defs, { driven, now, say })` is exported from `lab/mod-port.js` (node loads it: its imports are the kit's host and
+capture, no DOM at import) and `createModPort.install` calls it first: `defs = guardRoutes(defs, { driven: routed, now, say })`, then
+`host.install(...)` as before. It wraps the `set` of the four whitelisted defs and no other. `FLASH_STEP` is the four steps of §1;
+`createFlashGuard({ ranges })` takes `[0, step / WCAG.delta]` per route, so `delta × span` is the step in the map's own space.
+
+- **Log routes in log.** `material.exposure` and `material.knee` (the def's own `map === 'log'`) hand the guard `ln v`; a hold hands
+  the def `exp(held)`. **A pass hands the def the number it was given**, never `exp(ln v)` (wave 63's law: zero influence is the base,
+  bit for bit; `exp(ln 0.6)` is not 0.6).
+- **Held only while a modulator drives the route** (`driven` = the port's `routed`, `registry.isModulated`). A write that is not a
+  modulator's passes untouched and resets the route's guard: a hand through the registry (`syncBases` writes the hand's value back with
+  `registry.write`, which publishes to `set`), and `restoreBase` on a stop (the registry clears `modulated` before it publishes).
+  This is a correction to the brief's bare "wrap the set": without it a restore that landed in a held second would be refused, leaving
+  the picture off the base while the registry says base, and `syncBases` would then adopt the held LFO value as the user's base.
+- **The clock is the modulation's own seconds** (`host.clock.stats().seconds`, advanced by `advanceTo` live and by `step(d)` in a
+  film), not `performance.now()`: a film rendered faster or slower than real time must hold the same frames (determinism), and the
+  rate that matters to a viewer is video time. A hidden-tab gap is clamped by the clock's `maxStep`, like every LFO.
+- **The knob follows the held value.** The def's own `set` is what is wrapped and it calls `setKnob(ui.expK, v)` with the number it
+  was handed, so the dial shows the held value (confirmed in the app: below).
+- **The trip is said.** `onTrip` → `say("FLASH GUARD · EXPOSURE 10.0 Hz held to 3/s")` (the guard's route key is the def's label; the Hz
+  is the INPUT's own rate, the kit's `rateOf`); `onRelease` → `say('')`; a stop that releases a held route also clears it. rack.js passes
+  `say: (t) => wMet.setStatus(t, t ? 'warn' : '')`, METERS' status, which nothing else writes (the GOVERNOR parks only `READERS`, and
+  METERS is not one). **METERS' status line was empty before this row** (`status: ''`); the brief's "where METERS already writes
+  status" is therefore a new write into an empty seat. If METERS is closed the line is in a card the reader has closed.
+  A pause (no more sets) leaves the line up until a quiet second is next seen; the picture is in fact held there.
+- **Nothing else.** `material.hue` (a wrap), `observer.*`, `reg.*`, `chem.*`, `transport.rate`, `material.softness|iso|grain|slice.*`
+  are not wrapped and never held. No new stored key (`settings-probe` 0 of 6 red); the guard is always on, `guard.enabled` is not exposed.
+- **No frame-path change.** No readback; at most four guard calls a frame, each only on a routed set, plus one `clock.stats()` copy per
+  call. THE LOCK is not needed: no shader, readback or schedule changed, and the lock runs with the modulation clock stopped
+  (`tools/perf/digest-lock.mjs:35,113`), so no wrapped route is ever driven in its scenes; a held route changes only the number a
+  modulator writes, and only past 3 flashes/s. The interleaved pair is not needed: there is no per-frame work beyond those ≤ 4 calls
+  on routed sets.
+
+## 3 · Tests and counts
+
+- `tests/flash-routes.test.mjs` (new, node): the four constants equal `tools/flash-calibrate.mjs steps()` (6e-5) · a 10 Hz square of
+  ±0.3 stop on EXPOSURE gives ≤ 6 output direction changes in any second, still ≥ 8 in 3 s (held to the safe rate, not frozen), one
+  sentence matching `FLASH GUARD · EXPOSURE 10.0 Hz held to 3/s`, cleared once on release · ±0.05 stop passes bit for bit, silent ·
+  a 0.1 Hz ramp passes bit for bit · the same 10 Hz square on `observer.yaw`, `observer.dist` (a log route), `reg.morph`, `chem.kick`
+  passes bit for bit · HUE across the 1 → 0 seam passes, silent · GAMMA, STAGE, KNEE trip when a square is wider than their step
+  (and name themselves) and pass at about half of it · a non-modulator write is never held and clears a held route · and the
+  wiring case over the REAL port and model: a synced square LFO at 10 Hz routed to EXPOSURE and ZOOM, stepped with `clock.step(0.02)`
+  for 3 s: EXPOSURE 17 reversals (max 6 in any second), ZOOM 58 (free), one sentence, the routes removed → the restore is the base
+  exactly and the line clears.
+- `bash test.sh node`: exit 0, 80 suites (79 + this one); `node tests/pwa.test.mjs --write` after the lab edit (341 entries, 2
+  re-hashed: `mod-port.js`, `rack.js`; the kit's `flash-guard.js` was already precached).
+- Browser (served from this worktree, port 8983, one at a time on a quiet GPU): `take-in-bugs` 4/4 · `routed-knob` 4/4 ·
+  `mir-controls` 2/2 · `offer` 16/16 · `settings-probe` 0 of 6 scenes red.
+- An uncommitted probe in the real app (a synced square LFO at 10 Hz on EXPOSURE and ZOOM, `__LW.play()`, sampled every 8 ms for
+  3 s): `mat.exposure` takes two values (1 and 1.5157, the LFO's 0.6-stop swing) with 17 reversals in 3 s, ZOOM 50 (free), the knob's
+  `aria-valuetext` equals `mat.exposure` in 85 % of samples (the rest is the knob's own throttled DOM write), METERS' status read
+  `FLASH GUARD · EXPOSURE 10.0 Hz held to 3/s` and nothing else; after MOD power off and the sources removed it read `` and
+  `mat.exposure` was the base 1.
+- Lines: `lab/mod-port.js` 132 → 152 (+20 net), `lab/rack.js` ±0 (one line extended), `lab/sw.js` ±0 (two hashes). **`lab/*.js` +20**
+  (the plan said ≈ +25).
