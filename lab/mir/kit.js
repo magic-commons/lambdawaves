@@ -43,7 +43,10 @@
  *   of the eleven modulation targets its registry base, and a dial nobody drives never sees it.
  *   B140 gates the EAR, the EYE and the MODEL together, which is what B127 could not see.
  */
-import { setGlyph } from './glyph.js';
+import { setGlyph, glyphEl } from './glyph.js';
+import { setText, setVar } from './core/perf.js';   // paint writes only what changed, and the meter counts both
+import { t as tx, onLanguage } from './core/i18n.js';
+import { srgbToLinear, linearToSrgb, contrastRatio, hslToRgb01, rgbToHsl, hexToRgb } from './palette.js';
 
 
 export const chip = (btn, name, label) => setGlyph(btn, name, { label });
@@ -78,30 +81,107 @@ export function el(tag, cls, parent, text) {
   if (parent) parent.appendChild(e);
   return e;
 }
+const SVG_NS = 'http://www.w3.org/2000/svg';
+/** svgEl(tag, cls?, parent?) — the SVG twin of el(): an element in the SVG namespace, its class, appended */
+export function svgEl(tag, cls, parent) {
+  const e = document.createElementNS(SVG_NS, tag);
+  if (cls) e.setAttribute('class', cls);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+/** svgNode(tag, attrs, parent) — an SVG element with every attribute of `attrs` set, appended to `parent` */
+export function svgNode(tag, attrs, parent) {
+  const n = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  parent.append(n);
+  return n;
+}
+/* ── 1.5.4 · THE LANGUAGE CHOKE POINT ────────────────────────────────────────────────────────────
+ * Every label a builder in this file writes goes through `label()`, every accessible name it writes through
+ * `ariaLabel()`.  Each translates now and KEEPS THE ENGLISH ON THE NODE (`data-t`, `data-t-aria`, `data-t-vars`),
+ * so a language change is one pass over those attributes (`relabel()`) and costs nothing until it happens.
+ * Nothing finds or styles a node by these attributes' VALUES: they are the English, which is text, not an id.
+ * A plain `title` is NOT translated here: it becomes a hint at ONE hop (control-help.js), which translates it there.
+ * A hint with {vars} is written with `hint()`, which keeps its English (`data-t-title`) for that hop and for relabel.
+ * `context` (optional, last) splits one English word with two meanings into two keys: label(n, 'LIGHT', null, 'theme mode'). */
+const keyOf = (en, context) => (context ? context + '::' + en : en);
+const json = (v) => { try { return v ? JSON.parse(v) : undefined; } catch (_) { return undefined; } };
+export function label(node, en, vars, context) {
+  if (typeof en !== 'string' || en === '') { delete node.dataset.t; delete node.dataset.tVars; return mathText(node, en); }
+  node.dataset.t = keyOf(en, context);
+  if (vars) node.dataset.tVars = JSON.stringify(vars); else delete node.dataset.tVars;
+  return mathText(node, tx(node.dataset.t, vars));
+}
+export function ariaLabel(node, en, vars, context) {
+  if (typeof en !== 'string' || en === '') return node;
+  node.dataset.tAria = keyOf(en, context);
+  if (vars) node.dataset.tAvars = JSON.stringify(vars); else delete node.dataset.tAvars;
+  node.setAttribute('aria-label', mathPlain(tx(node.dataset.tAria, vars)));
+  return node;
+}
+/** hint(node, en, vars?, context?) — a hint with values in it: the title in this language, its English kept for the hint hop */
+export function hint(node, en, vars, context) {
+  if (Array.isArray(en)) [en, vars] = en;                          // a builder's `title: ['… {x} …', { x }]`
+  if (typeof en !== 'string' || en === '') { node.removeAttribute('title'); return node; }
+  node.dataset.tTitle = keyOf(en, context);
+  if (vars) node.dataset.tHvars = JSON.stringify(vars); else delete node.dataset.tHvars;
+  node.title = mathPlain(tx(node.dataset.tTitle, vars));
+  return node;
+}
+/** placeholder(input, en, vars?, context?) — a field's placeholder, translated and kept the same way */
+export function placeholder(node, en, vars, context) {
+  node.dataset.tPh = keyOf(en, context);
+  if (vars) node.dataset.tPvars = JSON.stringify(vars); else delete node.dataset.tPvars;
+  node.placeholder = tx(node.dataset.tPh, vars);
+  return node;
+}
+/** write every kit-written label and name under `root` again in the current language */
+export function relabel(root = document) {
+  for (const n of root.querySelectorAll('[data-t-ph]')) n.placeholder = tx(n.dataset.tPh, json(n.dataset.tPvars));
+  for (const n of root.querySelectorAll('[data-t]')) mathText(n, tx(n.dataset.t, json(n.dataset.tVars)));
+  for (const n of root.querySelectorAll('[data-t-aria]')) n.setAttribute('aria-label', mathPlain(tx(n.dataset.tAria, json(n.dataset.tAvars))));
+  for (const n of root.querySelectorAll('[data-t-title][title]')) n.title = mathPlain(tx(n.dataset.tTitle, json(n.dataset.tHvars)));
+  for (const n of root.querySelectorAll('.dev-stat')) statCaps(n);
+}
+/** a window's state words, drawn by skin.css as ' · ' attr(data-cap-off | data-cap-copied) after its status */
+function statCaps(n) { n.dataset.capOff = tx('OFF'); n.dataset.capCopied = tx('COPIED'); }
+if (typeof document !== 'undefined') onLanguage(() => relabel(document));
+/** a control that shows a VALUE never mirrors: a knob turns clockwise and a fader grows rightwards in every language */
+const ltr = (node) => { node.dir = 'ltr'; return node; };
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
-/** double-tap detector shared by knobs and faders — and, since wave 61, by the modulation
- *  ARC on a routed knob, so the 320 ms that separates a tap from a double-tap is ONE number
- *  in ONE file and the arc's "double-tap to remove the route" feels like the dial's own
- *  "double-tap to default". */
+/** THE ONE DOUBLE-TAP LAW (Josh, 2026-10-07, call 20: "300ms"): two presses within 300 ms and 14 px.  It was two laws
+ *  (320 ms anywhere here, 300 ms within 14 px in the colour controls); this is the one, and controls/gesture.js re-exports
+ *  it (TAP, tapHome) so the colour controls read the same numbers. */
+export const TAP = Object.freeze({ ms: 300, px: 14 });
+/** tapWatcher(fn) → (e?) → true when this press is the second of a double-tap (fn(e) has run).  Shared by knobs, faders,
+ *  the modulation arc and the colour controls.  Hand it the press event and the 14 px half of the law holds; a caller
+ *  that gives none is timed only. */
 export function tapWatcher(fn) {
-  let last = 0;
-  return () => { const now = performance.now(); if (now - last < 320) { last = 0; fn(); } else last = now; };
+  let last = null;
+  return (e) => {
+    const now = performance.now(), x = e && e.clientX, y = e && e.clientY, placed = Number.isFinite(x) && Number.isFinite(y);
+    if (last && now - last.t < TAP.ms && (!placed || !last.placed || Math.hypot(x - last.x, y - last.y) <= TAP.px)) { last = null; fn(e); return true; }
+    last = { t: now, x, y, placed };
+    return false;
+  };
 }
 
-/**
- * knob({ label, aria, title, min, max, value, log, wrap, step, fmt, unit, onInput, onChange, onDelta, onReset, size, cls, travel, fine })
- *   wrap: free-spinning (phase); onDelta(dRad) reports drag deltas instead of absolute values (a JOG WHEEL);
- *   onReset: what a wheel's reset does; size: 'lg'; travel / fine: this knob's own drag law (see setKnobLaw).
- *   → { root, get, set(x, silent = true), show(x), shown, setDefault(x), setDisabled(on), setBase(fn), paint }
- */
-/* THE DRAG LAW, as defaults an app may retune (BASINS asked for Shift = 1/8): travel = px for a full scale,
-   fine = the Shift divisor on a drag, keyFine = the Shift factor on an arrow step. A knob or fader may
-   carry its own `travel` / `fine`; the shipped defaults are the numbers the lab has always used. */
-const KNOB_LAW = { travel: 220, fine: 900 / 220, keyFine: 0.25, faderFine: 5, touchTravel: 320 };   // the fader's Shift has always been a fifth
+/* ── 1.5.0-alpha.13 · THE ONE KNOB LAW (docs/CONTROLS.md) ─────────────────────────────────────────────────────────────
+ * Josh: "currently holding shift gives a 1/4 fine tuning, can we make this 1/8?" — and BASINS' own law, taken whole
+ * (colour-controls.js wireTouches / fineHeld):
+ *   · THE DRAG IS VERTICAL.  A full scale is `travel` px of rise (220; a finger 320); sideways motion is ignored.
+ *   · THE FINE GEAR IS ⅛, and ANY modifier engages it (Shift, Alt, Ctrl, Meta), and so does a SECOND FINGER put down while
+ *     one drags.  It runs on a VIRTUAL POINT (p += gear · Δy / travel), so engaging or leaving the gear moves nothing.
+ *   · DOUBLE-TAP (300 ms, 14 px: TAP) or double-click = home.
+ * `verticalDrag(e)` is that law as one small object, so the arc knob, the lane slider, the swatch, the number field and the
+ * XY pad stand on the same arithmetic instead of copying it.  `setKnobLaw()` retunes it (`fine` alone moves every gear). */
+/** setKnobLaw's defaults: travel = px for a full scale, fine = the gear's divisor on a drag, keyFine = the Shift factor on an
+ *  arrow step, faderFine = the fader's divisor, touchTravel = px for a full scale under a finger */
+const KNOB_LAW = { travel: 220, fine: 8, keyFine: 1 / 8, faderFine: 8, touchTravel: 320 };
 /** setKnobLaw({ travel, fine, keyFine, faderFine, touchTravel }) → the law now in force.
- *  `fine` alone retunes every Shift at once (knob drag, fader drag, arrow step = 1/fine) — BASINS' Shift = ⅛ is
- *  setKnobLaw({ fine: 8 }).  A part named explicitly wins over the one `fine` implies, so the returned object
+ *  `fine` alone retunes every gear at once (knob drag, fader drag, arrow step = 1/fine); the default is ⅛ (alpha.13; it was
+ *  900/220, a quarter-ish, and a fifth on a fader).  A part named explicitly wins over the one `fine` implies, so the object
  *  handed back is the identity: setKnobLaw(setKnobLaw()) changes nothing. */
 export function setKnobLaw(o) {
   if (o && o.travel > 0) KNOB_LAW.travel = o.travel;
@@ -111,15 +191,58 @@ export function setKnobLaw(o) {
   if (o && o.touchTravel > 0) KNOB_LAW.touchTravel = o.touchTravel;
   return { ...KNOB_LAW };
 }
+/* THE SECOND FINGER.  A touch that is down while another pointer drags is the fine gear on a glass; a primary touch means
+   no other touch is down, which clears a lost pointerup.  One document-level watcher, wired on first use. */
+const touches = new Set();
+let touchWired = false;
+/** watchTouches() — start tracking the fingers that are down (idempotent; every builder that takes the law calls it) */
+export function watchTouches() {
+  if (touchWired || typeof document === 'undefined') return;
+  touchWired = true;
+  const opt = { capture: true, passive: true };
+  document.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'touch') return; if (e.isPrimary) touches.clear(); touches.add(e.pointerId); }, opt);
+  const up = (e) => touches.delete(e.pointerId);
+  document.addEventListener('pointerup', up, opt);
+  document.addEventListener('pointercancel', up, opt);
+}
+/** is a finger other than `id` down? */
+export const otherTouch = (id) => { for (const t of touches) if (t !== id) return true; return false; };
+/** fineHeld(event, pointerId) — the fine gear's one decision: Shift, Alt, Ctrl or Meta held, or a second finger down */
+export const fineHeld = (e, id) => !!(e && (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey)) || (id !== undefined && otherTouch(id));
+/** gearOf(event, pointerId, fine?) → 1, or 1/fine (⅛) while the gear is engaged */
+export const gearOf = (e, id, fine) => (fineHeld(e, id) ? 1 / (fine || KNOB_LAW.fine) : 1);
+/** verticalDrag(downEvent, { travel, fine, touchTravel, axis }) → { id, touch, move(e) → the travel so far (up is +), gear, p }
+ *  The law as an accumulator: each move adds gear · Δy / travel to the running travel `p`, so the gear is a virtual point
+ *  and engaging it moves nothing.  `axis: 'sum'` also adds Δx (the 1.4 law).  Feed it the moves of the pointer that went down. */
+export function verticalDrag(e, { travel, fine, touchTravel, axis = 'y' } = {}) {
+  watchTouches();
+  const id = e.pointerId, touch = e.pointerType === 'touch';
+  const d = { id, touch, p: 0, gear: 1, lx: e.clientX, ly: e.clientY,
+    move(ev) {
+      d.gear = gearOf(ev, id, fine);
+      const span = touch ? (touchTravel || KNOB_LAW.touchTravel) : (travel || KNOB_LAW.travel);
+      d.p += d.gear * ((d.ly - ev.clientY) + (axis === 'sum' ? ev.clientX - d.lx : 0)) / span;
+      d.lx = ev.clientX; d.ly = ev.clientY;
+      return d.p;
+    } };
+  return d;
+}
 /** the pixels of pointer travel for a full scale under the law, for a drag surface the kit did not build
- *  (the modulation window's dials still carry their own copy: 220, 900 with Shift, 320 under a finger) */
+ *  (the modulation window's dials still carry their own copy: 220, 1760 with a modifier, 320 under a finger) */
 export function dragTravel(e, { touch = false, travel, fine } = {}) {
-  if (e && e.shiftKey) return (travel || KNOB_LAW.travel) * (fine || KNOB_LAW.fine);
+  if (fineHeld(e)) return (travel || KNOB_LAW.travel) * (fine || KNOB_LAW.fine);
   return touch ? KNOB_LAW.touchTravel : (travel || KNOB_LAW.travel);
 }
+/**
+ * knob({ label, aria, title, min, max, value, log, wrap, step, fmt, unit, onInput, onChange, onDelta, onReset, size, cls, travel, fine, dragAxis })
+ *   wrap: free-spinning (phase); onDelta(dRad) reports drag deltas instead of absolute values (a JOG WHEEL);
+ *   onReset: what a wheel's reset does; size: 'lg'; travel / fine: this knob's own drag law (see setKnobLaw).
+ *   dragAxis: 'vertical' (the default: one law for every knob) or 'sum' (the 1.4 law, rise + sideways, for an app that has not moved).
+ *   → { root, get, set(x, silent = true), show(x), shown, setDefault(x), setDisabled(on), setBase(fn), paint }
+ */
 export function knob(o) {
-  const root = el('div', 'k' + (o.size === 'lg' ? ' k-lg' : '') + (o.cls ? ' ' + o.cls : ''));
-  if (o.label) el('div', 'k-lbl', root, o.label);
+  const root = ltr(el('div', 'k' + (o.size === 'lg' ? ' k-lg' : '') + (o.cls ? ' ' + o.cls : '')));
+  if (o.label) label(el('div', 'k-lbl', root), o.label);
   const dial = el('div', 'k-dial', root);
   const needle = el('i', 'k-needle', dial);
   const val = el('div', 'k-val', root);
@@ -132,7 +255,7 @@ export function knob(o) {
   /* WAVE 62 · THE DIAL IS A SLIDER.  The role goes on the ROOT, not the dial: skin.css's
      `.k:focus-within .k-val` has been waiting for a focusable root since it was written, so the value
      tooltip appears on Tab for free.  No `aria-orientation` — a knob is neither horizontal nor
-     vertical and both arrow axes work, exactly as the pointer sums both axes.
+     vertical and both arrow axes work, including for a vertical pointer drag.
      A JOG WHEEL (`o.onDelta`: ROTATE z, STARK K_z, DEFECT L², the palette's ROTATE) holds no value:
      it reports drag deltas.  It is still a slider, and what it announces is THE TURN IT HAS APPLIED —
      0…360°, folded — which is honest, satisfies ARIA's demand for a valuenow, and is the same
@@ -142,10 +265,10 @@ export function knob(o) {
   root.tabIndex = 0;
   root.setAttribute('role', 'slider');
   const ariaName = o.aria || o.label;                       // `aria` OVERRIDES: the two nameless dials and the 91 spectrum lanes name themselves at the call site
-  if (ariaName) root.setAttribute('aria-label', mathPlain(ariaName));
+  if (ariaName) ariaLabel(root, ariaName);
   root.setAttribute('aria-valuemin', String(wheel ? 0 : lo));
   root.setAttribute('aria-valuemax', String(wheel ? 360 : hi));
-  if (o.title) root.title = mathPlain(o.title);             // knob() silently dropped `title:` at ten call sites; the hint was already written
+  if (o.title) hint(root, o.title);                      // knob() silently dropped `title:` at ten call sites; the hint was already written
   /** the announcement — guarded, and only ever the string the eye is reading (`fmt`), never a bare number.
    *  The two `!==` compare against a CLOSURE and not the DOM: paint() runs on the frame loop for every
    *  live and every modulated dial, and this module already knows what it last wrote. */
@@ -162,7 +285,7 @@ export function knob(o) {
     let b = null;
     if (!wheel && baseOf) { try { const x = baseOf(); if (Number.isFinite(x)) b = x; } catch (_) {} }
     if (b !== null) {
-      const now = String(fromUser ? v : b), text = fmt(fromUser ? v : b) + ' · base · modulated';
+      const now = String(fromUser ? v : b), text = tx('{value} · base · modulated', { value: fmt(fromUser ? v : b) });
       if (saidNow !== now) { saidNow = now; root.setAttribute('aria-valuenow', now); }
       if (saidText !== text) { saidText = text; root.setAttribute('aria-valuetext', text); }
       return;
@@ -170,20 +293,20 @@ export function knob(o) {
     if (!fromUser && focused) return;                                  // THE CHATTER GUARD: never announce a change the APP made to a control the user is sitting on
     /* a value PAINTED by show() with no base road: valuenow is the hand's v, so valuetext must be too (1.4.0) */
     const modulated = !wheel && shown !== null && !dragging;
-    const now = String(wheel ? turn : v), text = wheel ? (turn ? '+' + turn.toFixed(0) + '° · ' : '') + val.textContent : modulated ? fmt(v) + ' · modulated' : val.textContent;
+    const now = String(wheel ? turn : v), text = wheel ? (turn ? '+' + turn.toFixed(0) + '° · ' : '') + val.textContent : modulated ? tx('{value} · modulated', { value: fmt(v) }) : val.textContent;
     if (saidNow !== now) { saidNow = now; root.setAttribute('aria-valuenow', now); }
     if (saidText !== text) { saidText = text; root.setAttribute('aria-valuetext', text); }
   }
   function paint(fromUser) {
     const shownV = (shown !== null && !dragging) ? shown : v;
     const p = o.wrap ? (norm(shownV) % 1 + 1) % 1 : clamp01(norm(shownV));
-    needle.style.setProperty('--turn', (o.wrap ? p * 360 : -135 + p * 270) + 'deg');
-    val.textContent = fmt(shownV);
+    setVar(needle, '--turn', (o.wrap ? p * 360 : -135 + p * 270) + 'deg');
+    setText(val, fmt(shownV));
     /* THE BASE STAYS VISIBLE UNDER A MODULATOR (Bitwig's convention): while a painted value dances the needle, a
        small tick at the rim marks the base the hand owns — where a drag starts and what the file saves. */
     const mod = shown !== null && !dragging;
     root.classList.toggle('k-mod', mod);
-    if (mod) { const pb = o.wrap ? (norm(v) % 1 + 1) % 1 : clamp01(norm(v)); dial.style.setProperty('--base-turn', (o.wrap ? pb * 360 : -135 + pb * 270) + 'deg'); }
+    if (mod) { const pb = o.wrap ? (norm(v) % 1 + 1) % 1 : clamp01(norm(v)); setVar(dial, '--base-turn', (o.wrap ? pb * 360 : -135 + pb * 270) + 'deg'); }
     announce(fromUser);
   }
   /** WAVE 68 · ONE QUANTISER, ONE FOLD, ONE CLAMP — and BOTH ROADS TAKE IT.  The fold lived in the
@@ -197,27 +320,30 @@ export function knob(o) {
     if (o.wrap) return lo + ((((nv - lo) % (hi - lo)) + (hi - lo)) % (hi - lo));
     return Math.min(hi, Math.max(lo, nv));
   };
-  let p0 = 0, x0 = 0, y0 = 0, acc = 0;
+  let p0 = 0, vd = null, acc = 0;
+  /* THE GESTURE belongs to the pointer that started it: a second finger (the fine gear) is neither a new drag nor a move of this one. */
   dial.addEventListener('pointerdown', (e) => {
-    if (disabled) return;
+    if (disabled || dragging) return;
     e.preventDefault(); try { dial.setPointerCapture(e.pointerId); } catch (_) {}   // a pointer already gone (or a synthetic one) must not abort the drag
-    dragging = true; root.classList.add('drag'); root.classList.add('active'); p0 = norm(v); x0 = e.clientX; y0 = e.clientY; acc = 0;   // p0 is the BASE: a routed knob's drag moves the range, never teleports it to where the modulator was
-    tap();
+    dragging = true; root.classList.add('drag'); root.classList.add('active'); p0 = norm(v); acc = 0;   // p0 is the BASE: a routed knob's drag moves the range, never teleports it to where the modulator was
+    vd = verticalDrag(e, { travel: o.travel, fine: o.fine, axis: o.dragAxis === 'sum' ? 'sum' : 'y' });
+    tap(e);
   });
   dial.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-    const dp = ((y0 - e.clientY) + (e.clientX - x0)) / ((o.travel || KNOB_LAW.travel) * (e.shiftKey ? (o.fine || KNOB_LAW.fine) : 1));
+    if (!dragging || e.pointerId !== vd.id) return;
+    const dp = vd.move(e);                              // the virtual point: changing the gear in place never moves the value
     if (o.onDelta) { const d = dp - acc; acc = dp; turn = ((turn + d * 360) % 360 + 360) % 360; o.onDelta(d * 2 * Math.PI); announce(true); return; }
     const nv = settle(denorm(o.wrap ? p0 + dp : clamp01(p0 + dp)));
     if (nv !== v) { v = nv; paint(); if (o.onInput) o.onInput(v); }
   });
-  const end = () => { if (!dragging) return; dragging = false; root.classList.remove('drag'); setTimeout(() => root.classList.remove('active'), 700); if (o.onChange && !o.onDelta) o.onChange(v); };
-  dial.addEventListener('pointerup', end); dial.addEventListener('pointercancel', end);
+  const end = (e) => { if (!dragging || (e && e.isTrusted && vd && e.pointerId !== vd.id)) return;   // a synthetic cancel (the timeline's hold, a test) ends it whoever it names
+    dragging = false; vd = null; root.classList.remove('drag'); setTimeout(() => root.classList.remove('active'), 700); if (o.onChange && !o.onDelta) o.onChange(v); };
+  dial.addEventListener('pointerup', end); dial.addEventListener('pointercancel', end); dial.addEventListener('lostpointercapture', end);
   const reset = () => { if (o.onDelta) { if (o.onReset) o.onReset(); return; } v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };
-  const tap = tapWatcher(reset);                       // two taps within 320 ms reset the control to its default …
+  const tap = tapWatcher(reset);                       // two taps within 300 ms and 14 px reset the control to its default …
   dial.addEventListener('dblclick', (e) => { e.preventDefault(); reset(); });   // … and so does a double-click
   dial.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
-  /* THE KEY MAP.  Δp = 1/100 of TRAVEL · Shift ×0.25 · Page ×10 · Home/End the ends · Delete resets.
+  /* THE KEY MAP.  Δp = 1/100 of TRAVEL · Shift ×⅛ (the one gear) · Page ×10 · Home/End the ends · Delete resets.
      Three rulings a builder gets wrong, so they are written here rather than inferred:
        · SHIFT ON A STEPPED KNOB IS IGNORED.  `o.step` quantizes with Math.round(nv/step)*step, so a
          quarter-step lands off the lattice, rounds straight back to where it started, and Shift+Arrow
@@ -269,7 +395,7 @@ export function knob(o) {
   paint();
   return { root, get: () => v, set(x, silent = true) { v = x; shown = null; paint(); if (!silent && o.onChange) o.onChange(v); },
     /** paint a modulated value over the base — the needle dances, the base (and a drag's start) stays the hand's */
-    show(x) { shown = x; paint(); }, get shown() { return shown; }, setDefault(x) { def = x; },
+    show(x) { shown = x; paint(); }, get shown() { return shown; }, setDefault(x) { def = x; }, dragging: () => dragging,
     /* WAVE 68 · A DEAD CONTROL SAYS SO, AND DOES NOT KEEP THE SEAT.  This wrote a class and a
        tabIndex and nothing else, so λ SCALE, HALF-WIDTH and STRENGTH mounted as sliders holding a
        live `aria-valuenow` that no key could move — and rack.js's single-key guard, keyed on the
@@ -284,14 +410,23 @@ export function knob(o) {
     setBase, paint };
 }
 
-/** sw({ label, value, onChange }) — a boolean */
+/** sw({ label, value, onChange, lamp, glyph, glyphSize, title, cls }) — a boolean that stays on.  It wears the LAMP (Josh: "I like the
+ *  little light switches when things are on"); `lamp: false` is for the listed cases where the lamp is wrong (docs/CONTROLS.md): the label is
+ *  then ON's light, as a trigger's is (accent, no glow).  `glyph: name` is the case where the glyph is the state (power, an eye, invert): a
+ *  44 px round target with no face and no word (the label is its accessible name), `.sw-glyph` in controls.css; the owner says how the
+ *  glyph shows ON (GRADE's INVERT turns it over).  A momentary action is `trig`, never a lamp; a window opener is `latch()`. */
 export function sw(o) {
-  const b = el('button', 'sw' + (o.cls ? ' ' + o.cls : ''));
+  const b = el('button', 'sw' + (o.glyph ? ' sw-glyph' : o.lamp === false ? ' sw-nolamp' : '') + (o.cls ? ' ' + o.cls : ''));
   b.type = 'button';
-
-
-  if (o.title) b.title = mathPlain(o.title);
-  el('i', 'sw-led', b); el('span', 'sw-lbl', b, o.label);
+  if (o.title) hint(b, o.title);
+  if (o.glyph) {                                     // the glyph is the state (power, an eye, invert): no lamp, no word, no ON face (docs/CONTROLS.md)
+    const g = glyphEl(o.glyph, 'gly gly-' + o.glyph, o.glyphSize || 24);
+    if (g) b.append(g);
+    ariaLabel(b, o.label);
+  } else {
+    if (o.lamp !== false) el('i', 'sw-led', b);
+    label(el('span', 'sw-lbl', b), o.label);
+  }
   let v = !!o.value;
   const paint = () => { b.classList.toggle('on', v); b.setAttribute('aria-pressed', String(v)); };
   b.addEventListener('click', () => { v = !v; paint(); if (o.onChange) o.onChange(v); });
@@ -302,7 +437,7 @@ export function sw(o) {
 /** seg({ label, aria, options: [{id, label, title}], value, onChange }) — an enumeration */
 export function seg(o) {
   const root = el('div', 'segw' + (o.cls ? ' ' + o.cls : ''));
-  if (o.label) el('div', 'k-lbl', root, o.label);
+  if (o.label) label(el('div', 'k-lbl', root), o.label);
   const row = el('div', 'seg', root);
   /* WAVE 62 · THIS IS THE ONE PLACE THE INTERFACE PRESENTED STATE IT DID NOT EXPOSE: the selection
      lived in a CSS class and nowhere else, across 42 groups and about a hundred buttons.
@@ -316,10 +451,10 @@ export function seg(o) {
      code here — what they need is the app to get out of the way, which is rack.js's OWNED guard. */
   row.setAttribute('role', 'radiogroup');
   const ariaName = o.aria || o.label;
-  if (ariaName) row.setAttribute('aria-label', mathPlain(ariaName));
+  if (ariaName) ariaLabel(row, ariaName);
   let v = o.value; const btns = new Map(); const ids = [];
   for (const opt of o.options) {
-    const b = el('button', 'seg-b', row, opt.label); b.type = 'button'; if (opt.title) b.title = mathPlain(opt.title);
+    const b = label(el('button', 'seg-b', row), opt.label); b.type = 'button'; if (opt.title) hint(b, opt.title);
     b.setAttribute('role', 'radio');
     b.addEventListener('click', () => { if (v === opt.id) return; v = opt.id; paint(); if (o.onChange) o.onChange(v); });
     b.addEventListener('keydown', onKey);
@@ -330,9 +465,12 @@ export function seg(o) {
     const live = ids.filter((id) => !btns.get(id).disabled);
     if (!live.length) return;
     const i = Math.max(0, live.indexOf(v));
+    /* a segmented row is chrome and MIRRORS under dir="rtl", so the arrow that points at the next option is Left there */
+    let rtl = false; try { rtl = row.matches(':dir(rtl)'); } catch (_) {}
+    const fwd = rtl ? 'ArrowLeft' : 'ArrowRight', back = rtl ? 'ArrowRight' : 'ArrowLeft';
     let id = null;
-    if (e.code === 'ArrowRight' || e.code === 'ArrowDown') id = live[(i + 1) % live.length];
-    else if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') id = live[(i - 1 + live.length) % live.length];
+    if (e.code === fwd || e.code === 'ArrowDown') id = live[(i + 1) % live.length];
+    else if (e.code === back || e.code === 'ArrowUp') id = live[(i - 1 + live.length) % live.length];
     else if (e.code === 'Home') id = live[0];
     else if (e.code === 'End') id = live[live.length - 1];
     else return;                                            // not ours: it reaches the app
@@ -368,12 +506,7 @@ export function seg(o) {
 /** THE DOT GRIP — Josh's 5×5: dots at rows 1, 3, 5 × columns 1, 3, 5. The reorder handle in the modulation
  *  rail and the transport's macro tiles; the four-way cross stays the ROUTING grip. */
 export function gripDots(parent, size = 13) {
-  const NS = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 5 5'); svg.setAttribute('aria-hidden', 'true');
-  svg.setAttribute('width', String(size)); svg.setAttribute('height', String(size)); svg.style.display = 'block'; svg.style.pointerEvents = 'none';
-  for (const y of [0.5, 2.5, 4.5]) for (const x of [0.5, 2.5, 4.5]) {
-    const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', String(x)); c.setAttribute('cy', String(y)); c.setAttribute('r', '0.5'); c.setAttribute('fill', 'currentColor'); svg.appendChild(c);
-  }
+  const svg = glyphEl('gripDots', 'mir-grip-dots-svg', size); svg.style.display = 'block'; svg.style.pointerEvents = 'none';
   if (parent) parent.appendChild(svg);
   return svg;
 }
@@ -381,22 +514,22 @@ export function trig(o) {
   const b = el('button', 'trig' + (o.cls ? ' ' + o.cls : ''));
   b.type = 'button';
   if (o.glyph) el('span', 'trig-g', b, o.glyph);
-  el('span', 'trig-l', b, o.label);
-  if (o.title) b.title = mathPlain(o.title);
+  label(el('span', 'trig-l', b), o.label);
+  if (o.title) hint(b, o.title);
   b.addEventListener('click', (e) => { if (o.onFire) o.onFire(e); });
   /* wave 62: a `trig` used as a STATE says so.  A trig that never sets `on` never gets the attribute,
      so this is correct for every caller and costs one expression. */
-  return { root: b, setLabel(t) { mathText(b.querySelector('.trig-l'), t); }, setGlyph(g) { const s = b.querySelector('.trig-g'); if (s) s.textContent = g; }, set on(v) { b.classList.toggle('on', !!v); b.setAttribute('aria-pressed', String(!!v)); } };
+  return { root: b, setLabel(s) { label(b.querySelector('.trig-l'), s); }, setGlyph(g) { const s = b.querySelector('.trig-g'); if (s) s.textContent = g; }, set on(v) { b.classList.toggle('on', !!v); b.setAttribute('aria-pressed', String(!!v)); } };
 }
 
 /** fader({ label, aria, min, max, value, fmt, log, fine, cls, onInput, onChange }) — a horizontal scalar
  *   log: a log scale (min must be > 0); fine: this fader's Shift divisor (see setKnobLaw)
  *   → { root, get, set(x), show(x), shown, setBase(fn), setDisabled(on), paint, setDefault(x), setLabel(t), dragging() } */
 export function fader(o) {
-  const root = el('div', 'fd' + (o.cls ? ' ' + o.cls : ''));
+  const root = ltr(el('div', 'fd' + (o.cls ? ' ' + o.cls : '')));
   const fill = el('div', 'fd-fill', root);
   const edge = el('div', 'fd-edge', root);
-  const lbl = el('div', 'fd-lbl', root, o.label || '');
+  const lbl = label(el('div', 'fd-lbl', root), o.label || '');
   const val = el('div', 'fd-val', root);
   let v = o.value, def = o.value, dragging = false, lastX = 0;
   const lo = o.min, hi = o.max;
@@ -412,7 +545,7 @@ export function fader(o) {
   root.tabIndex = 0;
   root.setAttribute('role', 'slider');
   const ariaName = o.aria || o.label;
-  if (ariaName) root.setAttribute('aria-label', mathPlain(ariaName));
+  if (ariaName) ariaLabel(root, ariaName);
   root.setAttribute('aria-valuemin', String(lo));
   root.setAttribute('aria-valuemax', String(hi));
   let saidNow = null, saidText = null, baseOf = null, disabled = false;
@@ -422,23 +555,25 @@ export function fader(o) {
     let b = null;
     if (baseOf) { try { const x = baseOf(); if (Number.isFinite(x)) b = x; } catch (_) {} }
     if (b !== null) {
-      const now = String(fromUser ? v : b), text = fmt(fromUser ? v : b) + ' · base · modulated';
+      const now = String(fromUser ? v : b), text = tx('{value} · base · modulated', { value: fmt(fromUser ? v : b) });
       if (saidNow !== now) { saidNow = now; root.setAttribute('aria-valuenow', now); }
       if (saidText !== text) { saidText = text; root.setAttribute('aria-valuetext', text); }
       return;
     }
     if (!fromUser && root === document.activeElement) return;
-    const now = String(v), text = shown !== null && !dragging ? fmt(v) + ' · modulated' : val.textContent;
+    const now = String(v), text = shown !== null && !dragging ? tx('{value} · modulated', { value: fmt(v) }) : val.textContent;
     if (saidNow !== now) { saidNow = now; root.setAttribute('aria-valuenow', now); }
     if (saidText !== text) { saidText = text; root.setAttribute('aria-valuetext', text); }
   }
-  const paint = (fromUser) => { const sv = (shown !== null && !dragging) ? shown : v; root.style.setProperty('--fill', norm(sv)); val.textContent = fmt(sv); root.classList.toggle('mod', shown !== null && !dragging); announce(fromUser); };
+  const paint = (fromUser) => { const sv = (shown !== null && !dragging) ? shown : v; setVar(root, '--fill', norm(sv)); setText(val, fmt(sv)); root.classList.toggle('mod', shown !== null && !dragging); announce(fromUser); };
   const fromEvent = (e) => { const r = root.getBoundingClientRect(); return denorm((e.clientX - r.left) / Math.max(1, r.width)); };
-  root.addEventListener('pointerdown', (e) => { if (disabled) return; e.preventDefault(); try { root.setPointerCapture(e.pointerId); } catch (_) {} dragging = true; root.classList.add('drag'); tap(); lastX = e.clientX; if (!e.shiftKey) v = fromEvent(e); paint(); if (o.onInput) o.onInput(v); });
+  watchTouches();
+  let gid = null;   // the pointer that owns the gesture: a second finger is the fine gear, not a second drag
+  root.addEventListener('pointerdown', (e) => { if (disabled || dragging) return; e.preventDefault(); try { root.setPointerCapture(e.pointerId); } catch (_) {} dragging = true; gid = e.pointerId; root.classList.add('drag'); tap(e); lastX = e.clientX; if (!fineHeld(e, gid)) v = fromEvent(e); paint(); if (o.onInput) o.onInput(v); });
   let dragRect = null;   // 2026-09-11: the rect is read once per drag, not once per move
-  root.addEventListener('pointermove', (e) => { if (!dragging) return; if (e.shiftKey) { const r = dragRect || (dragRect = root.getBoundingClientRect()); v = denorm(norm(v) + (e.clientX - lastX) / Math.max(1, r.width * fine)); } else v = fromEvent(e); lastX = e.clientX; paint(); if (o.onInput) o.onInput(v); });
-  const end = () => { if (!dragging) return; dragging = false; dragRect = null; root.classList.remove('drag'); if (o.onChange) o.onChange(v); };
-  root.addEventListener('pointerup', end); root.addEventListener('pointercancel', end);
+  root.addEventListener('pointermove', (e) => { if (!dragging || e.pointerId !== gid) return; if (fineHeld(e, gid)) { const r = dragRect || (dragRect = root.getBoundingClientRect()); v = denorm(norm(v) + (e.clientX - lastX) / Math.max(1, r.width * fine)); } else v = fromEvent(e); lastX = e.clientX; paint(); if (o.onInput) o.onInput(v); });
+  const end = (e) => { if (!dragging || (e && e.isTrusted && e.pointerId !== gid)) return; dragging = false; gid = null; dragRect = null; root.classList.remove('drag'); if (o.onChange) o.onChange(v); };
+  root.addEventListener('pointerup', end); root.addEventListener('pointercancel', end); root.addEventListener('lostpointercapture', end);
   const reset = () => { if (disabled) return; v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };   // a disabled fader does not reset either (1.4.0)
   const tap = tapWatcher(reset);
   root.addEventListener('dblclick', (e) => { e.preventDefault(); reset(); });
@@ -464,13 +599,13 @@ export function fader(o) {
     /** a dead fader says so and gives up its seat, as the knob does */
     setDisabled(on) { disabled = !!on; root.classList.toggle('disabled', disabled); root.tabIndex = disabled ? -1 : 0; root.setAttribute('aria-disabled', String(disabled));
       if (disabled && root === document.activeElement) { const dev = root.closest('.dev'); const seat = dev && dev.querySelector('.dev-power'); if (seat) seat.focus(); else root.blur(); } },
-    paint, setDefault(x) { def = x; }, setLabel(t) { lbl.textContent = t; }, dragging: () => dragging };
+    paint, setDefault(x) { def = x; }, setLabel(s) { label(lbl, s); }, dragging: () => dragging };
 }
 
 /** readout({ label, value, cls }) — a labelled number */
 export function readout(o) {
   const root = el('div', 'ro' + (o.cls ? ' ' + o.cls : ''));
-  el('div', 'ro-lbl', root, o.label);
+  label(el('div', 'ro-lbl', root), o.label);
   const val = el('div', 'ro-val', root, o.value === undefined ? '—' : String(o.value));
   el('div', 'ro-sub', root, o.sub || '');
   /* WAVE 69 · both writers take the `<m>` marker, so a readout can print `⟨p⟩ gained` or
@@ -495,13 +630,13 @@ export function formula(o) {
       if (typeof part === 'string') { mathText(el('span', null, row), part); continue; }
       const v = el('i', 'fx-v', row, part.v === undefined ? '—' : String(part.v));
       v.dataset.s = part.s;
-      slots.set(part.s, { el: v, was: v.textContent });
+      slots.set(part.s, { el: v });
     }
   }
   return {
     root,
-    /** write only the slots whose value MOVED — the dirty-check is the closure, never the DOM */
-    set(vals) { for (const k in vals) { const sl = slots.get(k); if (!sl) continue; const t = String(vals[k]); if (sl.was !== t) { sl.was = t; sl.el.textContent = t; } } },
+    /** write only the slots whose value MOVED — setText skips an identical write */
+    set(vals) { for (const k in vals) { const sl = slots.get(k); if (sl) setText(sl.el, vals[k]); } },
     get names() { return [...slots.keys()]; }
   };
 }
@@ -517,19 +652,19 @@ export function device(o) {
   const headHint = (st) => { const name = mathPlain(o.eyebrow || o.id || 'window'); head.title = st ? name + ': ' + mathPlain(st) : name; };
   headHint(o.status || '');
   const idz = el('div', 'dev-id', head);
-  el('div', 'dev-eyebrow', idz, o.eyebrow || '');
+  label(el('div', 'dev-eyebrow', idz), o.eyebrow || '');
   /* WAVE 62 · TWENTY-FIVE NAMED REGIONS, for three lines.  A <section> is only a landmark once it has
      an accessible name, and the name it should carry is the <h2> already sitting in its header — so a
      screen-reader user navigates this rack BY REGION rather than by four hundred Tab presses.  This is
      the real answer to "hundreds of tab stops" for the population that has region navigation; the two
      skip links in index.html are the answer for the population that does not. */
-  const h2 = el('h2', 'dev-title', idz, o.eyebrow || o.id || 'window');
+  const h2 = o.eyebrow ? label(el('h2', 'dev-title', idz), o.eyebrow) : el('h2', 'dev-title', idz, o.id || 'window');   // an id is never translated
   h2.id = 'devt-' + o.id;
   root.setAttribute('aria-labelledby', h2.id);
-  const stat = el('div', 'dev-stat', head, o.status || '');
+  const stat = el('div', 'dev-stat', head, o.status || ''); statCaps(stat);
   const util = el('div', 'dev-util', head);
   const power = el('button', 'dev-power', util, ''); power.type = 'button'; power.title = 'Turn this window on or off'; power.setAttribute('aria-pressed', 'true');
-  power.setAttribute('aria-label', 'power');                 // it has no content, so that 90-character `title` WAS its accessible name
+  ariaLabel(power, 'power');                 // it has no content, so that 90-character `title` WAS its accessible name
   const fold = el('button', 'dev-fold', util); fold.type = 'button'; fold.title = 'Collapse or expand this window';
   chip(fold, 'chevronDown', 'fold or unfold this window');   // ONE drawing: `.folded` turns it a quarter turn, which is the caret's own idiom (glyph.js, chevronDown)
   /* ── WAVE 55 · THE POP-OUT, and the rail beside it ──────────────────────────────────────────────
@@ -539,7 +674,7 @@ export function device(o) {
    * The rail chip is in the DOM for every window and shown by CSS only while the window floats, so the
    * header's box never changes shape when a window comes off the rack. */
   const pop = el('button', 'dev-pop', util); pop.type = 'button';
-  chip(pop, 'north', 'take this window off the rack');
+  chip(pop, 'popOut', 'take this window off the rack');
   pop.title = 'Move this window between the rack and stage';
   const rail = el('button', 'dev-rail', util); rail.type = 'button';
   chip(rail, 'compact', 'narrow this window to its rail');
@@ -575,7 +710,7 @@ export function device(o) {
   /* the mark a waiting card shows: o.loadingMark is an element, a selector, or false for none (default: the wordmark's) */
   const markSrc = o.loadingMark === false ? null : o.loadingMark instanceof Element ? o.loadingMark : document.querySelector(typeof o.loadingMark === 'string' ? o.loadingMark : '#title .mark');
   if (markSrc) loading.appendChild(markSrc.cloneNode(true));
-  el('span', 'dev-loading-label', loading, 'CALCULATING');
+  label(el('span', 'dev-loading-label', loading), 'CALCULATING');
   const setLoading = (v, key = 'work') => {
     if (v) loadingKeys.add(key); else loadingKeys.delete(key);
     const on = loadingKeys.size > 0;
@@ -593,9 +728,9 @@ export function device(o) {
 }
 
 /** a labelled group inside a device body */
-export function group(parent, label) {
+export function group(parent, text) {
   const g = el('div', 'grp', parent);
-  if (label) el('div', 'grp-lbl', g, label);
+  if (text) label(el('div', 'grp-lbl', g), text);
   return g;
 }
 export const N_COLOR = ['', 'var(--n1)', 'var(--n2)', 'var(--n3)', 'var(--n4)', 'var(--n5)', 'var(--n6)'];
@@ -615,18 +750,11 @@ export const lightTheme = () => document.body.dataset.theme === 'light';
 /** the shell colour of level n as it must be drawn on THIS theme's ground */
 export const nRGB = (n) => ((lightTheme() ? N_RGB_LIGHT : N_RGB)[n] || [255, 255, 255]);
 
-const LIN = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
-const LUM = (c) => 0.2126 * LIN(c[0]) + 0.7152 * LIN(c[1]) + 0.0722 * LIN(c[2]);
-const RATIO = (a, b) => { const x = LUM(a), y = LUM(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+/* the colour maths is palette.js's (0…1); these adapt it to the 0…255 triples this file works in */
+const U = (c) => [c[0] / 255, c[1] / 255, c[2] / 255];
+const RATIO = (a, b) => contrastRatio(U(a), U(b));
 const CARD_LIGHT = [236, 239, 243], WELL_LIGHT = [220, 225, 232];   // measured in the page, not derived from the tokens
-function hsl2rgb(h, s, l) { const k = (n) => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
-  const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-  return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)]; }
-function rgb2hsl(r, g, b) { r /= 255; g /= 255; b /= 255;
-  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2; let h = 0, s = 0;
-  if (mx !== mn) { const d = mx - mn; s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
-    h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; }
-  return [h, s, l]; }
+const hsl2rgb = (h, s, l) => hslToRgb01(h, s, l).map((v) => Math.round(v * 255));
 const inkCache = new Map();
 /** vividInk(rgb) — the same walk for any other graph colour: identity on the dark theme, and on the
  *  light one the same hue at higher chroma and lower lightness until it clears 3 : 1 on the well. */
@@ -634,15 +762,13 @@ export function vividInk(rgb) {
   if (!lightTheme() || !rgb) return rgb;
   const key = rgb[0] + ',' + rgb[1] + ',' + rgb[2];
   const got = inkCache.get(key); if (got) return got;
-  const [h, s0, l0] = rgb2hsl(rgb[0], rgb[1], rgb[2]);
+  const [h, s0, l0] = rgbToHsl(U(rgb));
   const s = Math.min(1, s0 + 0.12);
   let out = rgb;
   for (let l = l0; l >= 0.06; l -= 0.005) { const c = hsl2rgb(h, s, l);
     if (RATIO(c, CARD_LIGHT) >= 3 && RATIO(c, WELL_LIGHT) >= 3) { out = c; break; } }
   inkCache.set(key, out); return out;
 }
-/** the contrast ratio of a drawn colour against this theme's card — the proof B61 recomputes */
-export const inkRatio = (rgb, ground) => RATIO(rgb, ground || (lightTheme() ? CARD_LIGHT : [56, 60, 65]));
 
 /* ── the theme flip ─────────────────────────────────────────────────────────────────────────────
  * A CARD CANVAS IS PAINTED WHEN ITS DATA MOVES, NOT EVERY FRAME (wave 46).  MOLECULE, H₂, QCD and the
@@ -685,7 +811,7 @@ export function hideGraphTip(owner) {
 /** the tip never leaves the viewport: it is fixed on the body, so no card can clip it */
 function placeTip(txt, cx, cy) {
   const t = tipNode();
-  if (t.textContent !== txt) t.textContent = txt;
+  setText(t, txt);
   t.hidden = false;
   const r = t.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight;
   let x = cx + 13, y = cy + 15;
@@ -874,19 +1000,14 @@ export function fitText(g, txt, x, y, rect, align = 'left', clip = false) {
  * curve); the rows sum to 1, so D65 white stays white, and out-of-sRGB colours clamp per channel — the
  * same thing the browser does when it paints one on an sRGB canvas. */
 const M_P3_SRGB = [[1.224940, -0.224940, 0], [-0.042057, 1.042057, 0], [-0.019638, -0.078635, 1.098274]];
-const C_LIN = (u) => (u <= 0.04045 ? u / 12.92 : Math.pow((u + 0.055) / 1.055, 2.4));
-const C_ENC = (u) => (u <= 0.0031308 ? 12.92 * u : 1.055 * Math.pow(u, 1 / 2.4) - 0.055);
 const c255 = (u) => Math.max(0, Math.min(255, Math.round(u * 255)));
 /** parseCssColor(str) → [r, g, b] 0…255, or null — the four forms a canvas can hand back */
 export function parseCssColor(t) {
   if (!t) return null;
   const s = String(t).trim();
-  let m = /^#([0-9a-f]{6})$/i.exec(s);
-  if (m) { const k = parseInt(m[1], 16); return [k >> 16 & 255, k >> 8 & 255, k & 255]; }
-  m = /^#([0-9a-f]{8})$/i.exec(s);
-  if (m) { const k = parseInt(m[1].slice(0, 6), 16); return [k >> 16 & 255, k >> 8 & 255, k & 255]; }
-  m = /^#([0-9a-f]{3,4})$/i.exec(s);
-  if (m) return [0, 1, 2].map((i) => parseInt(m[1][i] + m[1][i], 16));
+  let m = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(s);
+  if (m) { const h = m[1].length < 6 ? [0, 1, 2].map((i) => m[1][i] + m[1][i]).join('') : m[1].slice(0, 6);
+    return hexToRgb(h).map((v) => Math.round(v * 255)); }
   m = /^rgba?\(([^)]+)\)$/i.exec(s);
   if (m) { const tok = m[1].split(/[,\s/]+/).filter((x) => x !== '');
     if (tok.length < 3) return null;
@@ -898,9 +1019,9 @@ export function parseCssColor(t) {
       .map((x) => (/%$/.test(x) ? parseFloat(x) / 100 : parseFloat(x)));
     if (p.length < 3 || p.some((x) => !isFinite(x))) return null;
     if (space === 'srgb') return [c255(p[0]), c255(p[1]), c255(p[2])];
-    if (space === 'srgb-linear') return [c255(C_ENC(p[0])), c255(C_ENC(p[1])), c255(C_ENC(p[2]))];
-    if (space === 'display-p3') { const l = [C_LIN(p[0]), C_LIN(p[1]), C_LIN(p[2])];
-      return M_P3_SRGB.map((r) => c255(C_ENC(Math.max(0, Math.min(1, r[0] * l[0] + r[1] * l[1] + r[2] * l[2]))))); }
+    if (space === 'srgb-linear') return [c255(linearToSrgb(p[0])), c255(linearToSrgb(p[1])), c255(linearToSrgb(p[2]))];
+    if (space === 'display-p3') { const l = [srgbToLinear(p[0]), srgbToLinear(p[1]), srgbToLinear(p[2])];
+      return M_P3_SRGB.map((r) => c255(linearToSrgb(Math.max(0, Math.min(1, r[0] * l[0] + r[1] * l[1] + r[2] * l[2]))))); }
     return null;                                     // a space we do not write: say so rather than guess
   }
   return null;
@@ -939,3 +1060,18 @@ export function accentRGB(g, n) {
   if (held) return held.slice();
   return cssRGB(g, n === 2 ? '--acc2' : '--acc', lightTheme() ? '#1b2027' : '#f2f5f7');
 }
+
+/* ── 1.5.0-alpha.13 · THE CONTROL LANGUAGE, from the one door (docs/CONTROLS.md) ──────────────────────────────────────────
+ * The general set (stepper, select and its list pane, number field, range slider, XY pad, control(descriptor)) and the colour family
+ * (arc knob, hue swatch, lane slider, chip strip, sortable list) live in mir/controls/; an app may import them from here.  They import
+ * this file for el / label / knob and use them only when called, so the cycle is harmless. */
+export { stepper } from './controls/stepper.js';
+export { select, listPane } from './controls/select.js';
+export { number, bindNumber } from './controls/number.js';
+export { rangeSlider } from './controls/range.js';
+export { xyPad } from './controls/xy.js';
+export { control, controlKind } from './controls/factory.js';
+export { arcKnob, arcRing } from './controls/arc.js';
+export { hueSwatch, rgbCss, rgbToHsv, hsvToRgb } from './controls/swatch.js';
+export { laneSlider, laneInk } from './controls/lane.js';
+export { chipStrip, sortableList } from './controls/list.js';

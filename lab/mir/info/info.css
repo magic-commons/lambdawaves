@@ -1,0 +1,154 @@
+/* info/info.css — INFORMATIONAL: words on the picture.  Load after the kit's sheets (it is in mir.kit.house).
+ *
+ * THE LAW IT DRAWS: WORDS ON THE STAGE ARE INK OVER A SOFT DARKNESS — NO OUTLINE, AND A PANE ONLY WHEN ASKED.  Josh,
+ * 2026-10-01, on the first page: "way less drop shadow or outline.  Let it be a soft darkness underneath."  So
+ * there is no tight shadow round the glyphs: a wide, faint shade sits under each block of words (a feathered
+ * ellipse in the opposite ink, no edge), and the glyphs carry only a broad, weak blur of it (INTENT, the row
+ * "words on the stage").  A block may ask for a glass pane instead (`data-pane`, below).  The layer never takes a click: `pointer-events: none` throughout, except a label while
+ * EDIT is on.
+ *
+ * Type comes through tokens; the real faces (Spectral, Playfair Display, Alegreya SC for links) are in
+ * mir/info/faces.css — a page links it before this sheet, and without it the system serifs stand in.  Sizes are read from the layer's own width (`cqi`), not the
+ * window's.  NOTE for INVERT (not built): the root is a size container, which makes it a stacking context, so a
+ * future `mix-blend-mode: difference` must go ON the root, not on a label inside it (draft 1 §1.6, measured).
+ */
+@layer mir.kit.house {
+  /* FROST · values ─────────────────────────────────────────────────────────────────────────────────────────────────
+     1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md), on the layer's root and its light
+     theme; the rules below read names only.  The faces themselves are read through --font-info-body, -display and
+     -link, with the real faces as their fallbacks. */
+  .mir-info {
+    --info-ink: hsl(40 33% 96%);
+    --info-paper: hsl(228 40% 4% / .27);
+    --info-paper-soft: hsl(228 40% 4% / .14);
+    --info-halo: 0 1px 12px var(--info-paper-soft), 0 2px 30px var(--info-paper-soft);
+    --info-line-w: 1.25px;
+    --info-halo-w: 3px;
+    --info-lh: 1.45;
+    --info-size-body: clamp(14px, 8px + .68cqi, 18px);
+    --info-size-label: clamp(13px, 7.5px + .6cqi, 16.5px);
+    --info-size-title: clamp(16px, 9px + .8cqi, 22px);
+    --info-size-h1: clamp(26px, 13px + 2.3cqi, 48px);
+    --info-size-h2: clamp(18px, 10px + 1cqi, 28px);
+    --info-measure: 22em;
+    --info-measure-narrow: 13em;
+    --info-pane-pad: .85em 1.15em .95em;
+    --info-block-measure: 23em;
+    --info-dim: .5;
+    --info-over-fade: .62;      /* a block that found no room beside the subject sits over it, dimmed */
+    --info-travel: .55;
+    --info-pin-time: 1.9s;
+    --info-weight-display: 700;                                  /* Playfair Display's one weight (mir/info/faces.css) */
+    --info-weight-heading: 600; --info-weight-strong: 600;       /* Spectral's semibold */
+  }
+  [data-theme="light"] .mir-info {
+    --info-ink: hsl(232 22% 10%);
+    --info-paper: hsl(42 45% 97% / .38);
+    --info-paper-soft: hsl(42 45% 97% / .2);
+  }
+  /* ── end of the values ── */
+
+  .mir-info {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    container-type: size; pointer-events: none; overflow: visible;
+    color: var(--info-ink); font-family: var(--font-info-body, "Spectral", Georgia, "Times New Roman", serif);
+    font-size: var(--info-size-body); line-height: var(--info-lh); font-variant-ligatures: none;
+    user-select: none; -webkit-user-select: none;
+  }
+
+  /* ── the lines: one svg, a halo stroke under the ink, a dot on the thing's edge ── */
+  .mir-info-lines { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .mir-info[data-lines="off"] .mir-info-lines { display: none; }
+  .mir-info-leader { visibility: hidden; }
+  .mir-info-leader[data-state="in"] { visibility: visible; }
+  .mir-info-halo, .mir-info-ink { fill: none; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1 1; stroke-dashoffset: 0; }
+  .mir-info-halo { stroke: var(--info-paper-soft); stroke-width: var(--info-halo-w); }
+  .mir-info-ink { stroke: var(--info-ink); stroke-width: var(--info-line-w); }
+  .mir-info-dot { fill: var(--info-ink); stroke: var(--info-paper); stroke-width: var(--info-line-w); transform-box: fill-box; transform-origin: center; }
+
+  /* ── labels and blocks: ink over a soft shade, no box, no outline ── */
+  .mir-info-label, .mir-info-block {
+    position: absolute; left: 0; top: 0; box-sizing: border-box; margin: 0; isolation: isolate;
+    text-shadow: var(--info-halo); visibility: hidden;
+    transition: opacity var(--motion-structural) var(--ease-out);
+  }
+  /* the shade: a feathered ellipse under the words, wider than they are, with no edge to see */
+  .mir-info-label::before, .mir-info-block::before {
+    content: ''; position: absolute; z-index: -1; inset: -2em -3.2em; pointer-events: none;
+    background: radial-gradient(ellipse closest-side, var(--info-paper) 0%, var(--info-paper-soft) 50%, transparent 100%);
+    opacity: 0; transition: opacity var(--motion-structural) var(--ease-out);
+  }
+  .mir-info-label[data-state="in"]::before, .mir-info-block[data-state="in"]::before { opacity: 1; }
+  .mir-info-label[data-state="in"], .mir-info-block[data-state="in"] { visibility: visible; }
+  .mir-info-label { width: max-content; max-width: var(--info-measure); font-size: var(--info-size-label); }
+  /* a phone: the stage is narrow, so a label takes a shorter line (the layer is the size container) */
+  @container (max-width: 560px) { .mir-info-label { max-width: var(--info-measure-narrow); } }
+  .mir-info-label[data-side="left"] { text-align: right; }
+  .mir-info-block { width: max-content; max-width: min(var(--info-block-measure), 42cqi); }
+  .mir-info-text > * { margin: 0; transform-origin: left center; }
+  .mir-info-label[data-side="left"] .mir-info-text > * { transform-origin: right center; }
+  .mir-info-text > * + * { margin-top: .3em; }
+
+  /* the type: # and a label's title in the display face, bold; # centred; ## semibold, left */
+  .mir-info-title, .mir-info-text h1 { font-family: var(--font-info-display, "Playfair Display", Georgia, serif); font-weight: var(--info-weight-display); line-height: 1.2; }
+  .mir-info-title { font-size: var(--info-size-title); padding-bottom: .12em; }
+  .mir-info-text h1 { font-size: var(--info-size-h1); text-align: center; margin-bottom: .2em; }
+  .mir-info-text h2, .mir-info-text h3 { font-family: var(--font-info-body, "Spectral", Georgia, "Times New Roman", serif); font-weight: var(--info-weight-heading); text-align: left; line-height: 1.2; }
+  .mir-info-text h2 { font-size: var(--info-size-h2); }
+  .mir-info-text strong { font-weight: var(--info-weight-strong); }
+  .mir-info-text a { font-family: var(--font-info-link, "Alegreya SC", Georgia, serif); color: inherit; text-decoration-thickness: 1px; text-underline-offset: .18em; }
+  .mir-info-text .katex-display { margin: .45em 0 .1em; }
+  .mir-info-text .katex { white-space: nowrap; }                     /* a formula never breaks across lines in a label */
+  .mir-info-block .mir-info-text > p:has(> .katex-display) { text-align: center; }
+
+  /* GONE: an anchor that left the stage (or a feature the app no longer names) hides its labels and its line; they
+     come back, on their seats, when it returns */
+  .mir-info .mir-info-label[data-gone], .mir-info .mir-info-leader[data-gone] {
+    opacity: 0; visibility: hidden; transition: opacity var(--motion-ui) var(--ease-out), visibility var(--motion-ui) var(--ease-out);   /* visibility stays visible until the end */
+  }
+
+  /* BARE OR ON A PANE (Josh: floating text "that also has the notebook's title and body stylings without the window or
+     with window").  Bare is the default: the soft darkness above.  On a pane the same type sits on INTENT's "a pane
+     floats": the surface tokens with their 1.4 fallbacks, one drop shadow falling down, no shade, no glyph halo.
+     TINTED never blurs; REFRACTIVE carries the blur. */
+  .mir-info-block[data-pane] {
+    padding: var(--info-pane-pad); text-shadow: none;
+    border: var(--surface-edge-width, var(--glass-border)) solid var(--surface-edge, var(--glass-border-color));
+    border-radius: var(--surface-radius, var(--card-r));
+    box-shadow: var(--surface-shadow, var(--glass-shadow));
+    background: var(--surface-sheen, var(--glass-sheen)), var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity)));
+  }
+  .mir-info-block[data-pane]::before { display: none; }
+  body[data-card="refractive"] .mir-info-block[data-pane] {
+    background: var(--surface-veil, transparent);
+    -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter));
+  }
+
+  /* THE OVERLAY: a control's line, drawn over the whole document (windows, the rack) and never taking a click */
+  .mir-info.mir-info-over { position: fixed; inset: 0; width: auto; height: auto; container-type: normal; z-index: calc(var(--z-banner) + 4); }
+
+  /* strength: the blocks recede while you look at the subject, and come back the moment you reach for them */
+  .mir-info[data-pointer="subject"] .mir-info-block:not([data-reach]) { opacity: var(--info-dim); }
+  .mir-info-block[data-over]:not([data-reach]) { opacity: var(--info-over-fade); }
+  .mir-info-block[data-travel] { opacity: var(--info-travel); }
+  .mir-info[data-hold] .mir-info-block, .mir-info .mir-info-block[data-reach] { opacity: 1; }
+
+  /* EDIT: the only time the layer takes the pointer */
+  .mir-info[data-edit] .mir-info-label { pointer-events: auto; cursor: grab; touch-action: none; }
+  .mir-info[data-edit] .mir-info-label[data-carried] { cursor: grabbing; }
+
+  /* THE PIN: shown once, the first time a block moves away — "this is meant" */
+  .mir-info-pin { position: absolute; top: -.1em; right: -1.1em; width: .5em; height: .9em; opacity: 0; pointer-events: none; }
+  .mir-info-pin::before { content: ''; position: absolute; left: 0; top: 0; width: .5em; height: .5em; border-radius: 50%; background: var(--info-ink); box-shadow: var(--info-halo); }
+  .mir-info-pin::after { content: ''; position: absolute; left: calc(.25em - .5px); top: .45em; width: 1px; height: .45em; background: var(--info-ink); }
+  .mir-info-pin[data-show] { animation: mir-info-pin var(--info-pin-time) var(--ease-out) both; }
+  @keyframes mir-info-pin {
+    0% { opacity: 0; transform: translateY(-.6em) scale(.6); }
+    14% { opacity: 1; transform: none; }
+    70% { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: none; }
+  }
+  @keyframes mir-info-pin-fade { 0%, 100% { opacity: 0; } 14%, 70% { opacity: 1; } }
+  :root[data-motion="reduced"] .mir-info-pin[data-show] { animation-name: mir-info-pin-fade; }
+  :root[data-motion="off"] .mir-info-pin[data-show] { animation: none; }
+}

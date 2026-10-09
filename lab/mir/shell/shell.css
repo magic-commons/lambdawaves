@@ -17,122 +17,183 @@
  * ground for an app that wants it.
  *
  * THIS SHEET IS THE FROST SKIN'S SHELL.  Structure and look are still one sheet here; when skins arrive the look
- * moves under [data-skin]. */
+ * moves under [data-skin].
+ *
+ * 1.5.0 · LAYER mir.kit.house (the order is declared once, at the top of base.css; docs/LAYERS.md).  Every rule is in the
+ * same layer as base.css and skin.css, so the cascade among the three is 1.4's; the app's own sheets, in no layer,
+ * now beat the shell with a plain selector.  The one exception is the reduced-motion pair, which is a guarantee and
+ * sits in mir.a11y.  tools/extract-shell-css.mjs emits the layer blocks itself, so the sheet stays reproducible.
+ *
+ * 1.5.0-alpha.2 · THE 1.5 NAMES, AND WHERE THIS SHEET STOPS BEING λWAVES' BYTES.  The surface, state, label and display
+ * names are read here at the place of use with λWAVES' exact value as the fallback — `var(--surface-filter,
+ * blur(var(--glass-blur)) saturate(115%))` — so what is drawn is unchanged, but the declarations are no longer byte for
+ * byte λWAVES' and `extract-shell-css.mjs --frame` now reports a difference in exactly those declarations.  The lines
+ * that differ are the ones that read a --surface-*, --state-*, --label-* or --font-display name. */
 
 /* ── from λWAVES lab/lab.css ── */
-#notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 320px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: 16px;
-  border: 1px solid hsl(0 0% 100% / .45); background: transparent; -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(115%); backdrop-filter: blur(var(--glass-blur)) saturate(115%);
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .55), 0 8px 24px hsl(0 0% 0% / .18); color: var(--fg); overflow: hidden; }
-#notebook[data-face="about"] { width: 470px; height: 670px; left: calc(50% - 235px); top: max(20px, calc(50% - 335px)); }
-body[data-theme="dark"] #notebook { border-color: hsl(0 0% 100% / .18); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 8px 24px hsl(0 0% 0% / .45); --nb-line: hsl(0 0% 100% / .18); --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); }
-body[data-theme="dark"] #notebook::before { content: ''; position: absolute; inset: 0; z-index: -1; background: hsl(0 0% 0% / .22); pointer-events: none; }
-.nb-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 8px 8px 6px 14px; cursor: grab; user-select: none; touch-action: none; }
+@layer mir.kit.house {
+/* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────
+   1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md); the rules below read names only.
+   A value with no var() is on :root.  The notebook's own inks are on #notebook and change with the theme on
+   body[data-theme="dark"] #notebook (the selectors they always had, moved up out of the rules that carried them);
+   a value that reads another token is declared on the element that draws it.  The help glyph's face and size are
+   skin.css's (--font-help-glyph, --help-glyph-size), the math face is base.css's --font-math. */
+:root {
+  --nb-r: 16px;                                                    /* the notebook's corner (--surface-radius reaches it) */
+  --nb-shade: hsl(0 0% 0% / .22);                                  /* dark theme: the shade under the frosted notebook */
+  --nb-title-size: 34px; --nb-title-tracking: .04em;
+  --nb-subtitle-size: 18px; --nb-subtitle-tracking: .04em; --nb-placeholder-fade: .6;
+  --nb-view-size: 14px; --nb-h1-size: 22px; --nb-h2-size: 18px; --nb-h3-size: 15px; --nb-katex-scale: 1.08em;
+  --nb-code-size: 12px; --nb-code-r: 4px; --nb-code-fill: hsl(0 0% 50% / .14);
+  --nb-pre-r: 8px; --nb-pre-fill: hsl(0 0% 50% / .12);
+  --nb-cell-rule: hsl(0 0% 50% / .25); --nb-hr: hsl(0 0% 50% / .3);
+  --nb-mode-size: 12px; --nb-tool-glyph: 13px;
+  --nb-btn-r: 8px;                                                 /* the notebook's foot buttons, DUMP and HOME */
+  --nb-grip-r: 3px; --nb-grip-fade: .85;
+  --nb-logo-size: 35px;
+  --nb-lam-face: 'STIX Two Math', 'Latin Modern Math', 'Noto Serif', 'DejaVu Serif', serif;   /* the about face's λ (no Libertinus: see docs/SKINS.md) */
+  --lam-scale: 1.3em;                                              /* the λ beside the wordmark, in the title and on the about face */
+  --wordmark-tracking: .06em; --wordmark-ink: #fff; --wordmark-ink-light: #000;
+  --ab-version-size: 12px; --ab-version-tracking: .06em; --ab-credit-size: 12px; --ab-fine-size: 10.5px;
+  --ab-made-w: 440px;        /* the makers block's measure (BASINS about.css:46) */
+  --ab-makers-gap: 8px;      /* between the three makers */
+  --ab-rule-ink: hsl(0 0% 50% / .25);
+  --mb-btn-r: 7px; --mb-list-r: 10px; --mb-item-r: 6px;
+}
+#notebook { --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); --nb-edge: hsl(0 0% 100% / .45);
+  --nb-phone-fill: hsl(var(--glass-tint) / 1); }                  /* the phone's opaque notebook */
+body[data-theme="dark"] #notebook { --nb-line: hsl(0 0% 100% / .18); --nb-btn: hsl(0 0% 100% / .08); --nb-btn-line: hsl(0 0% 100% / .2); --nb-edge: hsl(0 0% 100% / .18); }
+.nb-tools button { --state-hover-wash: inset 0 0 0 99px var(--state-hover, var(--glass-raise)); }
+.nb-dump, .ab-home { --nb-btn-line-hot: color-mix(in srgb, var(--acc) 45%, var(--nb-btn-line)); }
+.mb-list { --mb-list-veil: hsl(var(--glass-tint) / .65); }
+/* ── end of the values ── */
+#notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 320px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: var(--surface-radius, var(--nb-r));
+  border: var(--surface-edge-width, 1px) solid var(--pane-edge, var(--surface-edge, var(--nb-edge))); background: var(--surface-veil, transparent); -webkit-backdrop-filter: var(--surface-filter, blur(var(--glass-blur)) saturate(115%)); backdrop-filter: var(--surface-filter, blur(var(--glass-blur)) saturate(115%));
+  box-shadow: var(--surface-shadow-float, var(--glass-shadow)); color: var(--fg); overflow: hidden; }   /* it floats like a window: height 3 (L14/L15) */
+#notebook[data-face="about"] { width: 520px; height: 812px; left: calc(50% - 260px); top: max(20px, calc(50% - 438px)); }
+body[data-theme="dark"] #notebook { border-color: var(--pane-edge, var(--surface-edge, var(--nb-edge))); }
+body[data-theme="dark"] #notebook::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--nb-shade); pointer-events: none; }
+.nb-head { display: flex; align-items: flex-start; justify-content: space-between; padding-block: 8px 6px; padding-inline: 14px 8px; cursor: grab; user-select: none; touch-action: none; }
 .nb-titles { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
-.nb-title { font-family: 'LW Title', var(--font-ui); font-size: 34px; letter-spacing: .04em; color: var(--fg); background: transparent; border: 0; outline: 0; padding: 0; width: 100%; min-width: 0; }
-.nb-title:focus { color: var(--acc); }
-.nb-subtitle { font-family: 'LW Title', var(--font-ui); font-size: 18px; letter-spacing: .04em; color: var(--fg-soft); background: transparent; border: 0; outline: 0; padding: 0; width: 100%; min-width: 0; margin-top: 2px; }
-.nb-subtitle:focus { color: var(--acc); }
-.nb-subtitle::placeholder { color: var(--dim); opacity: .6; }
+.nb-title { font-family: var(--font-display, 'LW Title', var(--font-ui)); font-size: var(--nb-title-size); letter-spacing: var(--nb-title-tracking); color: var(--fg); background: transparent; border: 0; outline: 0; padding: 0; width: 100%; min-width: 0; }
+.nb-subtitle { font-family: var(--font-display, 'LW Title', var(--font-ui)); font-size: var(--nb-subtitle-size); letter-spacing: var(--nb-subtitle-tracking); color: var(--fg-soft); background: transparent; border: 0; outline: 0; padding: 0; width: 100%; min-width: 0; margin-top: 2px; }
+.nb-subtitle::placeholder { color: var(--dim); opacity: var(--nb-placeholder-fade); }
 #notebook[data-face="about"] .nb-titles, #notebook[data-face="projects"] .nb-titles, #notebook[data-face="about"] .nb-title, #notebook[data-face="projects"] .nb-title, #notebook[data-face="about"] .nb-subtitle, #notebook[data-face="projects"] .nb-subtitle { visibility: hidden; }
-.nb-view { flex: 1 1 auto; min-height: 120px; overflow: auto; padding: 4px 2px; font: 14px/1.6 var(--font-ui); color: var(--fg); }
-.nb-view h1, .nb-view h2, .nb-view h3 { margin: .6em 0 .3em; line-height: 1.2; font-weight: 700; color: var(--fg); }
-.nb-view h1 { font-size: 22px; }
-.nb-view h2 { font-size: 18px; }
-.nb-view h3 { font-size: 15px; }
+.nb-view { flex: 1 1 auto; min-height: 120px; overflow: auto; padding: 4px 2px; font: var(--nb-view-size)/1.6 var(--font-ui); color: var(--fg); }
+.nb-view h1, .nb-view h2, .nb-view h3 { margin: .6em 0 .3em; line-height: 1.2; font-weight: var(--w-heavy); color: var(--fg); }
+.nb-view h1 { font-size: var(--nb-h1-size); }
+.nb-view h2 { font-size: var(--nb-h2-size); }
+.nb-view h3 { font-size: var(--nb-h3-size); }
 .nb-view p { margin: .35em 0; }
 .nb-view ul, .nb-view ol { margin: .3em 0 .3em 1.4em; }
 .nb-view li { margin: .1em 0; }
-.nb-view code { font-family: var(--font-mono); font-size: 12px; padding: 0 4px; border-radius: 4px; background: hsl(0 0% 50% / .14); }
-.nb-view pre { padding: 8px 10px; border-radius: 8px; background: hsl(0 0% 50% / .12); overflow: auto; }
+.nb-view code { font-family: var(--font-mono); font-size: var(--nb-code-size); padding: 0 4px; border-radius: var(--nb-code-r); background: var(--nb-code-fill); }
+.nb-view pre { padding: 8px 10px; border-radius: var(--nb-pre-r); background: var(--nb-pre-fill); overflow: auto; }
 .nb-view pre code { padding: 0; background: transparent; }
-.nb-view blockquote { margin: .4em 0; padding: 2px 10px; border-left: 2px solid var(--acc); color: var(--fg-soft); }
+.nb-view blockquote { margin: .4em 0; padding: 2px 10px; border-inline-start: 2px solid var(--acc); color: var(--fg-soft); }
 .nb-view table { border-collapse: collapse; margin: .4em 0; }
-.nb-view th, .nb-view td { padding: 3px 8px; border-bottom: 1px solid hsl(0 0% 50% / .25); }
-.nb-view hr { border: 0; height: 1px; background: hsl(0 0% 50% / .3); margin: .8em 0; }
+.nb-view th, .nb-view td { padding: 3px 8px; border-bottom: 1px solid var(--nb-cell-rule); }
+.nb-view hr { border: 0; height: 1px; background: var(--nb-hr); margin: .8em 0; }
 .nb-view a { color: var(--acc); }
-.nb-view .katex { font-size: 1.08em; }
+.nb-view .katex { font-size: var(--nb-katex-scale); }
 .nb-view .katex-display { margin: .5em 0; overflow-x: auto; }
 #notebook[data-mode="view"] .nb-text { display: none; }
 #notebook[data-mode="view"] .nb-view { display: block; }
 #notebook[data-mode="edit"] .nb-view { display: none !important; }
-.nb-mode, .nb-projects-btn { font-size: 12px; }
+.nb-mode, .nb-projects-btn { font-size: var(--nb-mode-size); }
 .nb-tools { display: flex; gap: 4px; }
-.nb-tools button { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); cursor: pointer; font-size: 13px; line-height: 1; }
-.nb-about { font: italic 700 12px Georgia, 'Times New Roman', serif; }
-.nb-tools button:hover { color: var(--acc); }
+.nb-tools button { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); cursor: pointer; font-size: var(--nb-tool-glyph); line-height: 1; }
+.nb-about { font: italic var(--w-heavy) var(--help-glyph-size) var(--font-help-glyph); }
+.nb-tools button:hover { color: var(--fg); box-shadow: var(--state-hover-wash); }
 .nb-face { display: flex; flex-direction: column; padding: 0 14px 12px; flex: 1 1 auto; min-height: 0; overflow: auto; }
-.nb-text { flex: 1 1 auto; min-height: 120px; resize: none; border: 0; outline: 0; background: transparent; color: var(--fg); font: 13px/1.5 var(--font-ui); padding: 4px 0; }
+.nb-text { flex: 1 1 auto; min-height: 120px; resize: none; border: 0; outline: 0; background: transparent; color: var(--fg); font: var(--fs-lead)/1.5 var(--font-ui); padding: 4px 0; }
 .nb-text::placeholder { color: var(--dim); }
-.nb-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--dim); }
-.nb-foot button, .nb-dump, .ab-home { border-radius: 8px; border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); font: 700 10px var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; box-sizing: border-box; }
+.nb-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wide)); color: var(--dim); }
+.nb-foot button, .nb-dump, .ab-home { border-radius: var(--nb-btn-r); border: 1px solid var(--nb-btn-line); background: var(--nb-btn); color: var(--fg-soft); font: var(--w-heavy) var(--fs-small) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); cursor: pointer; box-sizing: border-box; }
 .nb-foot button { height: 26px; padding: 0 12px; }
 .nb-dump, .ab-home { height: 30px; padding: 0 14px; line-height: 28px; }
 .nb-aboutface { align-items: center; text-align: center; gap: 4px; padding-top: 4px; }
-.nb-logo { display: flex; align-items: baseline; gap: 0; font-size: 35px; margin: 6px 0 4px; }
-.nb-logo .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; margin-right: -.04em; }
-.nb-logo .word { font-family: 'LW Title', var(--font-ui); font-weight: 700; letter-spacing: .06em; color: var(--fg); }
+.nb-logo { display: flex; align-items: baseline; gap: 0; font-size: var(--nb-logo-size); margin: 6px 0 4px; }
+.nb-logo .lam { font-family: var(--nb-lam-face); font-style: italic; font-weight: var(--w-heavy); font-size: var(--lam-scale); line-height: 1; margin-right: -.04em; }
+.nb-logo .word { font-family: var(--font-display, 'LW Title', var(--font-ui)); font-weight: var(--w-heavy); letter-spacing: var(--wordmark-tracking); color: var(--fg); }
 .nb-logo .mark { align-self: center; height: 1.05em; width: 1.05em; margin-left: .05em; }
-.ab-eyebrow { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--dim); margin-top: 6px; }
-.ab-version { font-size: 12px; letter-spacing: .06em; color: var(--acc); }
-.ab-tag { text-transform: uppercase; }
-.ab-tagline { margin: 4px 0; font-size: 13px; line-height: 1.45; color: var(--fg); max-width: 34ch; }
-.ab-credit { margin: 2px 0; font-size: 12px; line-height: 1.4; color: var(--fg-soft); }
+.ab-eyebrow { font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--dim); margin-top: 6px; }
+.ab-version { font-size: var(--ab-version-size); letter-spacing: var(--ab-version-tracking); color: var(--acc); }
+.ab-tag { text-transform: var(--label-case, uppercase); }
+.ab-tagline { margin: 4px 0; font-size: var(--fs-lead); line-height: 1.45; color: var(--fg); max-width: 34ch; }
+.ab-credit { margin: 2px 0; font-size: var(--ab-credit-size); line-height: 1.4; color: var(--fg-soft); }
 .ab-team { color: var(--fg); }
 .ab-made { text-align: center; }
-.ab-fine { margin: 1px 0; font-size: 10.5px; color: var(--dim); }
+.ab-made:has(> .ab-makers) { width: 100%; max-width: var(--ab-made-w); }
+.ab-makers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ab-makers-gap); margin-top: 4px; }
+.ab-makers small { display: block; font-size: var(--fs-small); }
+.ab-fine { margin: 1px 0; font-size: var(--ab-fine-size); color: var(--dim); }
 .nb-aboutface a { color: var(--acc); }
-.ab-rule { width: 60%; height: 1px; background: hsl(0 0% 50% / .25); margin: 8px 0; }
+.ab-rule { width: 60%; height: 1px; background: var(--ab-rule-ink); margin: 8px 0; }
 .ab-actions { display: flex; align-items: center; justify-content: center; gap: 24px; width: 100%; margin-top: auto; padding-top: 12px; flex: 0 0 auto; }
 .nb-aboutface .ab-home { color: var(--fg-soft); text-decoration: none; }
-.nb-dump:hover, .ab-home:hover { color: var(--fg); border-color: color-mix(in srgb, var(--acc) 45%, var(--nb-btn-line)); }
-.nb-dump:active, .ab-home:active { transform: translateY(1px); background: var(--glass-press); }
+.nb-dump:hover, .ab-home:hover { color: var(--fg); border-color: var(--nb-btn-line-hot); }
+.nb-dump:active, .ab-home:active { scale: var(--state-press-scale, .96); background: var(--state-press, var(--glass-press)); }
 .mb-group { position: relative; }
-.mb-btn { height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--fg-soft); font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; }
-.mb-btn:hover { background: transparent; color: var(--acc); }
-.mb-list { position: absolute; left: 0; top: 30px; min-width: 240px; max-height: 60vh; overflow: auto; padding: 4px; border-radius: 10px; background: hsl(var(--glass-tint) / .97); border: 1px solid var(--glass-hairline); box-shadow: var(--glass-shadow); display: flex; flex-direction: column; }
-.mb-item { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; text-align: left; border: 0; background: transparent; color: var(--fg-soft); padding: 6px 10px; border-radius: 6px; font: var(--fs-small) var(--font-ui); cursor: pointer; white-space: nowrap; }
-.mb-item:hover { background: var(--glass-raise); color: var(--fg); }
-.mb-key { color: var(--dim); font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
+.mb-btn { height: 26px; padding: 0 10px; border: 0; border-radius: var(--mb-btn-r); background: transparent; color: var(--fg-soft); font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); cursor: pointer; }
+.mb-btn:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.mb-list { position: absolute; inset-inline-start: 0; top: 30px; min-width: 240px; max-height: 60vh; overflow: auto; padding: 4px; border-radius: var(--surface-radius, var(--mb-list-r)); box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); display: flex; flex-direction: column; }
+.mb-item { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; text-align: start; border: 0; background: transparent; color: var(--fg-soft); padding: 6px 10px; border-radius: var(--mb-item-r); font: var(--fs-small) var(--font-ui); cursor: pointer; white-space: nowrap; }
+.mb-item:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.mb-key { color: var(--dim); font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wide)); }
 .mb-sep { height: 1px; margin: 4px 8px; background: var(--glass-hairline); pointer-events: none; }
-.mb-item:disabled { color: var(--dim); opacity: .45; cursor: default; }
+.mb-item:disabled { color: var(--dim); opacity: var(--state-disabled, .38); cursor: default; }
 .mb-item:disabled:hover { background: transparent; color: var(--dim); }
 #title { position: absolute; left: calc(var(--rack-w) + 14px); top: 6px; z-index: var(--z-chrome); display: flex; align-items: center; gap: var(--sp-3);
   padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill); pointer-events: none; }
 #title .lam { color: var(--acc); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); }
-#title .word { color: var(--fg); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: .14em; }
+#title .word { color: var(--fg); font-size: var(--fs-lead); font-weight: var(--w-bold); letter-spacing: var(--tr-wider); }
 #title .mark { height: 1.05em; width: 1.05em; display: inline-block; vertical-align: -0.12em; }
 #title .ms { display: none; }
 body.ui-hidden #menubar, body.ui-hidden #title { display: none !important; }
+:root[data-logo="hidden"] #title { visibility: hidden; pointer-events: none; }
 body.ui-hidden #notebook { display: none !important; }
 .nb-grip { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; z-index: 4; cursor: nwse-resize; touch-action: none; }
-.nb-grip::before { content: ''; position: absolute; right: 5px; bottom: 5px; width: 10px; height: 10px; opacity: .85;
-  border-right: 2px solid var(--nb-line); border-bottom: 2px solid var(--nb-line); border-bottom-right-radius: 3px; }
+.nb-grip::before { content: ''; position: absolute; right: 5px; bottom: 5px; width: 10px; height: 10px; opacity: var(--nb-grip-fade);
+  border-right: 2px solid var(--nb-line); border-bottom: 2px solid var(--nb-line); border-bottom-right-radius: var(--nb-grip-r); }
 .nb-grip:hover::before { opacity: 1; }
 #title .mark, .nb-logo .mark { transform-origin: 50% 50%; }
-#title .mark.turn rect { animation-duration: var(--logo-turn, 1.2s); animation-timing-function: linear; animation-iteration-count: 1; }
-#title .mark.busy rect { animation-duration: var(--logo-turn, 1.2s); animation-timing-function: linear; animation-iteration-count: infinite; }
+#title .mark.turn rect { animation-duration: var(--logo-turn); animation-timing-function: var(--ease-linear); animation-iteration-count: 1; }
+#title .mark.busy rect { animation-duration: var(--logo-turn); animation-timing-function: var(--ease-linear); animation-iteration-count: infinite; }
 #title { transform-origin: left center; }
 #title.menu-open { transform: none; }
+}
+@layer mir.a11y {
 @media (prefers-reduced-motion: reduce) {
 #title { transition: none !important; }
 #title.menu-open { transform: none !important; }
 }
+}
 
 /* ── from λWAVES lab/skin.css ── */
+@layer mir.kit.house {
 #title .ms { display: none; }
 #title:hover .ms { display: none; }
-#title .word { font-family: 'LW Title', var(--font-ui); color: #fff; letter-spacing: .06em; margin-right: -.06em; margin-left: .02em; }
-#title .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Libertinus Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; letter-spacing: 0; margin-right: -.04em; }
+#title .word { font-family: var(--font-display, 'LW Title', var(--font-ui)); color: var(--wordmark-ink); letter-spacing: var(--wordmark-tracking); margin-right: -.06em; margin-left: .02em; }
+#title .lam { font-family: var(--font-math); font-style: italic; font-weight: var(--w-heavy); font-size: var(--lam-scale); line-height: 1; letter-spacing: 0; margin-right: -.04em; }
 #title .mark { margin-left: .05em; }
 #title .ms { margin-left: 10px; }
-body[data-theme="light"] #title .word { color: #000; }
+body[data-theme="light"] #title .word { color: var(--wordmark-ink-light); }
+/* 1.5.0-alpha.12 · THE WORDMARK'S OWN ART (wordmark({ svg }), BASINS about.css §2): an app's lettering seated as one SVG or as a
+   dark and a light image; `.mark` stays in the DOM, unseen, so `#title .mark` still feeds the loading seats */
+#title .word[data-art] { display: inline-flex; align-items: center; position: relative; height: var(--title-art-h, 26px); letter-spacing: normal; line-height: 0; }
+#title .word[data-art] > .wordmark { display: block; width: auto; height: 100%; max-width: none; }
+#title .word[data-art] > .wordmark-light { display: none; }
+body[data-theme="light"] #title .word[data-art] > .wordmark-dark { display: none; }
+body[data-theme="light"] #title .word[data-art] > .wordmark-light { display: block; }
+#title .word[data-art] > .mark { position: absolute; width: 0; height: 0; overflow: hidden; opacity: 0; pointer-events: none; }
 #title { pointer-events: auto; align-items: baseline; background: none; border: none; box-shadow: none; padding: 6px 10px; gap: 0; opacity: 1; }
 #title .mark { align-self: center; }
 @media (hover: none) and (max-width: 700px),
        (hover: none) and (max-height: 520px) and (max-width: 1000px) {
 #title { left: max(env(safe-area-inset-left), 8px); top: calc(env(safe-area-inset-top) + 3px); z-index: calc(var(--z-chrome) + 6); padding: 4px 6px; min-height: 40px; }
 #title::after { content: ''; position: absolute; inset: -3px -8px; }
-#notebook { -webkit-backdrop-filter: none; backdrop-filter: none; background: hsl(var(--glass-tint) / 1); }
+#notebook { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--surface-fill, var(--nb-phone-fill)); }
 body[data-theme="dark"] #notebook::before { display: none; }
 #notebook { left: 0 !important; top: 0 !important; width: 100vw !important; height: 100dvh !important;   /* !important beats the inline width/height the desktop's resize grip wrote */
     max-width: none; max-height: none; border-radius: 0; resize: none;
@@ -140,9 +201,33 @@ body[data-theme="dark"] #notebook::before { display: none; }
 .nb-grip { display: none; }
 .mb-list { max-width: calc(100vw - 24px); }
 .mb-item { min-height: var(--touch); }
+#menubar { flex-wrap: wrap; }                 /* seven groups do not fit beside the wordmark on 390 px: menubar.js gives the bar the room to the edge and it wraps */
 }
-#menubar .mb-list { background:var(--glass-sheen),hsl(var(--glass-tint) / .65);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));box-shadow:var(--glass-shadow);border:1px solid var(--glass-border-color); }
+/* 1.5.0-alpha.3 · A MENU IS A PANE, AND WEARS CARD STYLE's MATERIAL (INTENT rule 4, L08 / L70; open question O8).
+   It was a .65 tint AND a blur, neither material.  TINTED: the tint, never a blur.  REFRACTIVE: the veil and the blur.
+   Height 4, falling down (on .mb-list above); the material is drawn here once, where λWAVES' sheet issued it twice (L07 / L08). */
+#menubar .mb-list { border: var(--surface-edge-width, 1px) solid var(--surface-edge, var(--glass-border-color));
+  background: var(--surface-sheen, var(--glass-sheen)), var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity))); }
+/* 1.5.0-alpha.5 · CARD STYLE · SOLID: the notebook is the opaque pane too (no blur, no shade over it) */
+body[data-card="solid"] #notebook { background: var(--surface-fill, var(--nb-phone-fill)); -webkit-backdrop-filter: none; backdrop-filter: none; }
+body[data-card="solid"] #notebook::before { display: none; }
+/* 1.5.0-alpha.7 · under REFRACTIVE with FROST a menu is BASINS' glass: the theme's .10 frost veil (or VEIL), the blur, no sheen */
+body.frost[data-card="refractive"] #menubar .mb-list { background: var(--surface-veil, var(--frost-veil-light)); }
+body.frost[data-card="refractive"][data-theme="dark"] #menubar .mb-list { background: var(--surface-veil, var(--frost-veil-dark)); }
+body[data-card="refractive"] #menubar .mb-list { background: var(--surface-sheen, var(--glass-sheen)), var(--surface-veil, var(--mb-list-veil));
+  -webkit-backdrop-filter: var(--surface-filter, blur(var(--glass-blur))); backdrop-filter: var(--surface-filter, blur(var(--glass-blur))); }
+/* 1.5.0-alpha.11 · TINTED CAN BLUR (INTENT O12): under FROST the tinted list thins to .58 with every tinted pane
+   (--card-opacity, skin.css) and takes the frost filter, as BASINS draws it; FROST · STILL holds it */
+body.frost:not(.frost-hold)[data-card="tinted"] #menubar .mb-list {
+  -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter)); }
+}
 
 /* ── kit additions (not from λWAVES) ── */
+@layer mir.kit.house {
+/* KEYBOARD FOCUS (INTENT, S2): the accent ring outside, as skin.css draws it for the widgets — the shell's buttons and
+   the notebook's two title fields (whose focus was the ink turning accent: L44 / L45). */
+:is(.mb-btn, .mb-item, .nb-tools button, .nb-foot button, .nb-dump, .ab-home, .nb-title, .nb-subtitle):focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .nb-dump:active, .ab-home:active { scale: none; } }
 /* a face an app adds wears what λWAVES' PROJECTS face wears: the notebook's own title stands aside for it */
 #notebook:not([data-face="notes"]) .nb-titles, #notebook:not([data-face="notes"]) .nb-title, #notebook:not([data-face="notes"]) .nb-subtitle { visibility: hidden; }
+}

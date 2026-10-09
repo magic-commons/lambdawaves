@@ -1,0 +1,55 @@
+/* panels/curves.css — THE CURVES PANEL'S SHEET (panels/curves.js): the plot and its rows.
+ *
+ * The plot is SOLEIL's (sol.css:160–166): a well the width of the card, a faint dashed diagonal, the curve in accent B (a transfer is a
+ * relationship, INTENT's accent B, and SOLEIL drew it so), filled dots for the points and open rings for the tension.  Photoshop's quarter
+ * grid and its channel inks are added: R, G and B draw their curve in their own colour (tokens), MASTER and any other channel in accent B.
+ * The chosen point wears the accent-A ring (live: the hand's); a point dragged out of the plot fades (it goes on release).
+ *
+ * INTENT (docs/INTENT.md): the plot is a WELL (inset); nothing is an accent fill but the dots, which are marks, not faces; focus is the
+ * accent ring outside.  Tokens only, declared on the panel's root; a kit layer (mir.kit.plugin.host). */
+@layer mir.kit.plugin.host {
+
+/* ── the values ── */
+.mir-curves {
+  --curves-gap: var(--sp-3);                         /* between the rows */
+  --curves-plot-max: 320px;                          /* the plot's largest side (it is square, the card's width below that) */
+  --curves-ink: var(--acc2);                         /* the curve, its dots and rings: accent B (SOLEIL) */
+  --curves-ink-r: #ff5a5a;                           /* the R channel's curve (Photoshop's red) */
+  --curves-ink-g: #4fd27a;                           /* the G channel's curve */
+  --curves-ink-b: #5a8cff;                           /* the B channel's curve */
+  --curves-grid: color-mix(in srgb, var(--ink-faint) 45%, transparent);   /* the quarter grid and the diagonal: faint */
+  --curves-hist: color-mix(in srgb, var(--ink-key) 22%, transparent);   /* the histogram behind the curve */
+  --curves-stroke: 2px;                              /* the curve's line */
+  --curves-bent: color-mix(in srgb, var(--curves-ink) 30%, transparent);   /* a ring whose segment is bent: half filled */
+}
+.mir-curves[data-channel="r"] { --curves-ink: var(--curves-ink-r); }
+.mir-curves[data-channel="g"] { --curves-ink: var(--curves-ink-g); }
+.mir-curves[data-channel="b"] { --curves-ink: var(--curves-ink-b); }
+/* ── end of the values ── */
+
+.mir-curves { display: flex; flex-direction: column; gap: var(--curves-gap); min-width: 0; }
+.mir-curves .curves-row { display: grid; gap: var(--sp-2); min-width: 0; }
+.mir-curves .curves-channel > .segw { width: 100%; }
+.mir-curves .curves-channel .seg { display: flex; width: 100%; }
+.mir-curves .curves-channel .seg-b { flex: 1 1 0; min-width: 0; padding: 0 var(--sp-1); }
+.mir-curves .curves-foot { grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: var(--sp-3); }
+.mir-curves .curves-verbs > .trig { width: 100%; min-width: 0; }
+
+/* ── the plot ── */
+.mir-curve { width: 100%; max-width: var(--curves-plot-max); align-self: center; }
+.mir-curve.disabled { opacity: var(--state-disabled, .38); pointer-events: none; }
+.mir-curve .cv-svg { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; box-sizing: border-box; overflow: visible; border-radius: var(--r-sm);
+  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; }
+.mir-curve .cv-svg:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-curve .cv-hist { fill: var(--curves-hist); stroke: none; }
+.mir-curve .cv-grid { fill: none; stroke: var(--curves-grid); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.mir-curve .cv-diag { fill: none; stroke: var(--curves-grid); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.mir-curve .cv-path { fill: none; stroke: var(--curves-ink); stroke-width: var(--curves-stroke); stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.mir-curve .cv-dot { fill: var(--curves-ink); cursor: grab; }
+.mir-curve .cv-dot.sel { stroke: var(--acc); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.mir-curve .cv-svg.drag { cursor: grabbing; }
+.mir-curve .cv-svg.out .cv-path { opacity: .55; }
+.mir-curve .cv-ten { fill: transparent; stroke: var(--curves-ink); stroke-width: 1.5; vector-effect: non-scaling-stroke; cursor: ns-resize; }
+.mir-curve .cv-ten.bent { fill: var(--curves-bent); }
+
+}   /* end @layer mir.kit.plugin.host */

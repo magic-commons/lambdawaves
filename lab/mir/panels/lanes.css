@@ -1,0 +1,131 @@
+/* MIR · panels/lanes.css — THE LANES PANEL'S SHEET (panels/lanes.js; docs/PANEL-LANES.md).
+ *
+ * The two layouts are one DOM.  ROWS is BASINS' colour window (colour.css `.colour-lane`): a pane per lane, the swatch and the lane
+ * slider across row one, the arcs and the blend on row two, 44 px rows, the chips (the sortable list's) on the outer edge.  STRIPS is
+ * NEBULA's AGE strip and SOLEIL's lanes: the lane stood up (the hue arc, the blend, a vertical slider, the mute dot, the solo, the
+ * name) and set side by side, with a small chip strip under each.  Every drawing is the colour controls' (colour-controls.css): this
+ * sheet lays them out and draws only what a lane adds: its head, its mute dot, its solo, its fold and the muted / inactive states.
+ * The lane's colour is --lane-ink (a muted lane wears the faint ink, as NEBULA's and SOLEIL's do).
+ *
+ * INTENT: the mute dot is itself the lamp, in the lane's ink (docs/CONTROLS.md: a lane's dot needs no second lamp); a press sinks; focus
+ * is a ring outside; the solo's peek is accent B (time).  Tokens only: every look value is in the values block; the rules read names.
+ * Kit layer `mir.kit.plugin.host`, level with the colour controls, so the arc's and the stepper's own sizes give way here. */
+@layer mir.kit.plugin.host {
+
+/* ── values ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+.mir-lanes {
+  --lanes-row-h: 44px;                                           /* BASINS' two rows of 44 px */
+  --lanes-gap: 5px;                                              /* between the controls of a lane (BASINS' 5 px) */
+  --lanes-pad: 0 10px 0 6px;                                     /* a lane's inset in its pane */
+  --lanes-head-h: 32px;                                          /* the head: the name and the lane's state */
+  --lanes-name-size: var(--fs-micro);
+  --lanes-dot: 9px;                                              /* the mute dot (NEBULA's .age-mute) */
+  --lanes-dot-glow: 0 0 8px color-mix(in srgb, var(--lane-ink, var(--acc)) 55%, transparent);
+  --lanes-state-w: 28px;                                         /* the mute, the solo and the fold: 28 px, the full finger on a coarse pointer */
+  --lanes-dim: .28;                                              /* a lane past the count (NEBULA's .age-lane.inactive) */
+  --lanes-chip: 30px;                                            /* EARTH's display swatch */
+  --lanes-chip-rim: inset 0 0 0 1px hsl(0 0% 100% / .16);
+  --lanes-peek: 0 0 0 1px var(--acc2);                           /* a peek is time: accent B */
+  --lanes-fold-turn: 180deg;
+  --strip-w: 44px;                                               /* a strip: NEBULA's eight across a 372 px rack */
+  --strip-gap: 2px;
+  --strip-len: 104px;                                            /* the vertical slider's length (NEBULA's .age-fader) */
+  --strip-pad: 8px 6px;
+  --strip-chip-target: 28px;                                     /* the chip strip under a strip: smaller than a rack window's 44 */
+  --strip-chip-disc: 22px;
+  --strip-blend-size: var(--fs-micro);
+  --strip-blend-track: 0;                                        /* a strip's blend name has 44 px: no tracking, an ellipsis, the list on a tap */
+}
+@media (pointer: coarse) { .mir-lanes { --lanes-state-w: 44px; --strip-chip-target: 36px; --strip-chip-disc: 28px; } }
+
+.mir-lanes { min-width: 0; }
+.mir-lanes [hidden] { display: none; }
+
+/* ── the lane: one body, both layouts ───────────────────────────────────────────────────────────────────────── */
+.mir-lane-body { min-width: 0; }
+.mir-lane-body[data-muted] { --lane-ink: var(--ink-faint); }
+.mir-lane-body[data-inactive] { opacity: var(--lanes-dim); }
+.mir-lane-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--lane-ink, var(--acc));
+  font-size: var(--lanes-name-size); font-weight: var(--w-bold); letter-spacing: var(--tr-wide); font-variant-numeric: tabular-nums; }
+.mir-lane-name:empty { display: none; }
+.mir-lane-state { display: flex; align-items: center; gap: 2px; }
+
+/* the mute dot IS the lamp, in the lane's ink: hollow when out, filled and glowing when in */
+.sw.mir-lane-mute { min-width: 0; width: var(--lanes-state-w); min-height: var(--lanes-head-h); padding: 0; border: 0; background: transparent; box-shadow: none; display: grid; place-items: center; }
+.sw.mir-lane-mute .sw-lbl { display: none; }
+.sw.mir-lane-mute .sw-led { width: var(--lanes-dot); height: var(--lanes-dot); border: 1px solid var(--lane-ink, var(--acc)); background: transparent; box-shadow: none; }
+.sw.mir-lane-mute.on .sw-led { background: var(--lane-ink, var(--acc)); box-shadow: var(--lanes-dot-glow); }
+.sw.mir-lane-mute:is(:hover, .on, :active) { background: transparent; box-shadow: none; }
+.sw.mir-lane-mute:focus-visible { outline: 0; }
+.sw.mir-lane-mute:focus-visible .sw-led { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+
+/* the solo: the kit's trigger, round and small; a peek is accent B */
+.trig.mir-lane-solo { min-width: 0; width: var(--lanes-state-w); height: var(--lanes-state-w); min-height: 0; padding: 0; border-radius: 50%; justify-content: center; }
+.trig.mir-lane-solo[data-peek] { box-shadow: var(--lanes-peek); }
+
+/* the fold: a chevron that turns; shown only where the extras are folded (a coarse pointer, or `fold: true`) */
+.mir-lane-fold { display: none; width: var(--lanes-state-w); height: var(--lanes-state-w); padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink-key); place-items: center; cursor: pointer; touch-action: manipulation;
+  transition: background-color var(--motion-micro) var(--ease-out); }
+.mir-lane-fold:hover { background: var(--state-hover, var(--glass-raise)); }
+.mir-lane-fold:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-lane-fold .gly { transition: transform var(--motion-micro) var(--ease-out); }
+.mir-lane-fold[aria-expanded="true"] .gly { transform: rotate(var(--lanes-fold-turn)); }
+.mir-lanes[data-fold="on"] .mir-lane-fold { display: grid; }
+.mir-lanes[data-fold="on"] .mir-lane-body:not([data-open]) :is(.mir-lane-extras, .mir-lane-blend) { display: none; }
+.mir-lanes[data-fold="off"] .mir-lane-head[data-quiet] { display: none; }
+
+/* EARTH's layer swatch: a display disc in the lane's ink (or its gradient), no hand on it */
+.mir-lane-chip { display: block; width: var(--lanes-chip); height: var(--lanes-chip); border-radius: 50%; background: var(--lane-fill, var(--lane-ink, var(--acc))); box-shadow: var(--lanes-chip-rim); }
+
+/* the lane's arcs: each wears the lane's ink (colour-controls.css draws the dial) */
+.mir-lane-extras { display: flex; align-items: center; gap: var(--lanes-gap); min-width: 0; flex-wrap: wrap; }
+
+/* the blend stepper, as BASINS' blend row: arrows at the ends, the mode's name between, in the ink-key micro caps */
+.mir-lane-blend { min-width: 0; width: 100%; }
+.mir-lane-blend .mir-step-row { width: 100%; justify-content: space-between; gap: 2px; }
+.mir-lane-blend .mir-step-name { flex: 1 1 0; min-width: 0; padding: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--strip-blend-size); letter-spacing: var(--tr-wide); color: var(--ink-key); }
+.mir-lane-blend .mir-step-text { display: block; overflow: hidden; text-overflow: ellipsis; }
+.mir-lane-blend .mir-step-b:focus-visible, .mir-lane-blend .mir-step-name:focus-visible { outline-color: var(--lane-ink, var(--acc)); }
+
+/* ── ROWS: BASINS' lane ───────────────────────────────────────────────────────────────────────────────────── */
+.mir-lanes[data-layout="rows"] .mir-lane-body { display: flex; flex-direction: column; gap: 0; padding: var(--lanes-pad); }
+.mir-lanes[data-layout="rows"] .mir-lane-head { display: flex; align-items: center; gap: var(--lanes-gap); min-height: var(--lanes-head-h); }
+.mir-lanes[data-layout="rows"] .mir-lane-grid { display: grid; grid-template-columns: minmax(30px, auto) minmax(30px, auto) minmax(0, 1fr); grid-auto-rows: var(--lanes-row-h);
+  row-gap: var(--lanes-gap); column-gap: var(--lanes-gap); align-items: center; }
+.mir-lanes[data-layout="rows"] .mir-lane-colour { grid-column: 1; grid-row: 1; justify-self: center; }
+.mir-lanes[data-layout="rows"] .mir-lane-principal { grid-column: 2 / 4; grid-row: 1; }
+.mir-lanes[data-layout="rows"] .mir-lane-body:not(:has(.mir-lane-colour)) .mir-lane-principal { grid-column: 1 / 4; }
+.mir-lanes[data-layout="rows"] .mir-lane-extras { grid-column: 1 / 3; grid-row: 2; }
+.mir-lanes[data-layout="rows"] .mir-lane-blend { grid-column: 3; grid-row: 2; }
+.mir-lanes[data-layout="rows"] .mir-lane-body:not(:has(.mir-lane-extras)) .mir-lane-blend { grid-column: 1 / 4; }
+.mir-lanes[data-layout="rows"] .mir-lane-principal { width: 100%; }
+/* BASINS' arcs: a 22 px dial in a 30 px seat, room for the modulation window's RANGE dial when routed */
+.mir-lanes .k.k-arcknob.k-arc-sm { color: var(--lane-ink, var(--acc)); }
+
+/* ── STRIPS: NEBULA's AGE lane and SOLEIL's, side by side (the kit's sortableList with axis 'x': one island pane, a chip strip under each) ── */
+.mir-lanes[data-layout="strips"] > .mir-list { gap: var(--lanes-gap); }
+.mir-lanes[data-layout="strips"] .mir-list-rows { align-items: stretch; justify-content: space-between; gap: var(--strip-gap); padding: var(--strip-pad); border-radius: var(--r-md); min-width: 0; }
+.mir-lanes[data-layout="strips"] .mir-list-item { flex: 1 1 var(--strip-w); max-width: calc(var(--strip-w) * 1.6); min-width: 0; row-gap: 4px; }
+.mir-lanes[data-layout="strips"] .mir-list-pane { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+/* fixed: the count is the app's; no grips, no ×, no + ADD */
+.mir-lanes[data-fixed] :is(.mir-list-item > .mir-chipstrip, .mir-list-addrow) { display: none; }
+.mir-lanes[data-fixed][data-layout="rows"] .mir-list-item { grid-template-columns: minmax(0, 1fr); }
+.mir-lanes[data-layout="strips"] .mir-lane-body { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; flex: 1 1 auto; }
+.mir-lanes[data-layout="strips"] :is(.mir-lane-head, .mir-lane-grid, .mir-lane-state) { display: contents; }
+.mir-lanes[data-layout="strips"] .mir-lane-colour { order: 1; }
+.mir-lanes[data-layout="strips"] .mir-lane-fold { order: 2; }
+.mir-lanes[data-layout="strips"] .mir-lane-extras { order: 3; flex-direction: column; gap: 2px; }
+.mir-lanes[data-layout="strips"] .mir-lane-blend { order: 4; }
+.mir-lanes[data-layout="strips"] .mir-lane-principal { order: 5; flex: 0 0 auto; --lane-slider-len: var(--strip-len); }
+.mir-lanes[data-layout="strips"] .mir-lane-mute { order: 6; }
+.mir-lanes[data-layout="strips"] .mir-lane-solo { order: 7; }
+.mir-lanes[data-layout="strips"] .mir-lane-name { order: 8; flex: 0 0 auto; text-align: center; max-width: 100%; }
+/* a strip's blend is its name (stepper({ compact: true }): a tap on the name opens the list; ← → still step it from the keys) */
+.mir-lanes[data-layout="strips"] .mir-lane-blend { --step-b: 20px; }
+.mir-lanes[data-layout="strips"] .mir-lane-blend .mir-step-name { min-height: var(--step-b); text-align: center; letter-spacing: var(--strip-blend-track); }
+.mir-lanes[data-layout="strips"] .mir-lane-body[data-muted] .mir-lane-principal { opacity: var(--lanes-dim); }
+.mir-lanes[data-layout="strips"] .mir-chipstrip { --chipstrip-target: var(--strip-chip-target); --chipstrip-disc: var(--strip-chip-disc); --chipstrip-gap: 0; }
+
+@media (prefers-reduced-motion: reduce) { .mir-lane-fold, .mir-lane-fold .gly { transition: none; } }
+
+}   /* end @layer mir.kit.plugin.host */

@@ -1,0 +1,185 @@
+/* controls/colour-controls.css — THE COLOUR CONTROLS' SHEET: the arc, the hue swatch, the lane slider, the static chip
+ * strip and the sortable list (harvested from BASINS app/colour.css, 2026-10-02; docs/CONTROLS-COLOUR.md).
+ *
+ * Load it after the kit's sheets (mir.css imports it after modhost.css).  It lives in `mir.kit.plugin.host`: above the
+ * house, level with the modulation host whose has-ring rules a routed arc must beat (the arc has no body, so the host's
+ * raised puck and accent ring must not land on it), and an app's plain rule beats it.  Every look value is a token in the
+ * values block below, declared on the component's own root; the rules read names only, and the colour a control draws in
+ * is --lane-ink (the colour of the thing it belongs to: a lane's root sets it, an arc's `ink` option sets it), then the
+ * swatch's colour, then the accent.  A lane's ink is never --ink, so the adaptive ink leaves it alone. */
+@layer mir.kit.plugin.host {
+
+/* ── values ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+.k-arcknob, .mir-swatch-seat {
+  --arc-groove: var(--glass-groove-hot);                         /* the unlit part of an arc: a light on dark, a shade on light (below) */
+  --arc-pad: 2px;                                                /* how far the ring stands outside the dial */
+  --arc-stroke: 4;                                               /* the ring's width, in its 40-unit box: 4 of 40 is 2.6 px on a 22 px dial, 3.8 on a 34 */
+}
+body[data-theme="light"] :is(.k-arcknob, .mir-swatch-seat) { --arc-groove: hsl(0 0% 0% / .14); }   /* --glass-groove-hot is a light in both themes; on a pale card it vanishes */
+.k-arcknob {
+  --dial-size: 34px;                                             /* the kit's dial (42 px at size 'lg'): the live dot rides its rim */
+  --arc-live: var(--fg);                                         /* the live dot a route rides the ring with */
+  --arc-live-edge: 0 0 0 1px hsl(0 0% 0% / .45);                 /* a dark 1 px edge round the live dot */
+  --arc-live-size: 4px;
+  --arc-sm-w: 30px;                                              /* the lane's arc: SOLEIL's 22 px dial, no label (the title and the value chip name it) */
+  --arc-sm-w-routed: 54px;                                       /* room for the dial and the RANGE dial the modulation window seats beside it */
+  --arc-sm-dial: 22px;
+  --arc-sm-reach: -8px -12px;                                    /* the 46 × 38 finger SOLEIL's lane measured */
+}
+.k-arcknob.k-lg { --dial-size: 42px; }
+.mir-swatch-seat {
+  --swatch-size: 30px;
+  --swatch-pick: 44px;                                           /* the transparent chooser the tap lands on: a full finger */
+  --swatch-shadow: inset 0 0 0 1px hsl(0 0% 100% / .16);         /* a 1 px rim; no glow in its own colour (Josh, 2026-10-07) */
+  --swatch-shadow-drag: inset 0 0 0 1px hsl(0 0% 100% / .22);    /* the rim a little brighter under a hue drag */
+  --arc-pad: 4px;                                                /* the hue ring rides 4 px outside the circle, 2 units wide */
+  --arc-stroke: 2;
+}
+.mir-lane-slider {
+  --lane-slider-h: 24px;                                         /* the pill's seat: a 6 px track and a 15 px thumb in 24 */
+  --lane-slider-len: 96px;                                       /* a vertical pill's length */
+  --lane-track-h: 6px;
+  --lane-track-rim: inset 0 0 0 1px var(--glass-hairline);
+  --lane-thumb: 15px;                                            /* the thumb is the lane's ink, with no glow in it (Josh, 2026-10-07) */
+  --lane-routed-fill: .85;                                       /* a routed lane's fill: a little less certain */
+}
+.mir-chipstrip {
+  --chipstrip-target: 44px;                                      /* the lane rows' chips: 44 px targets round 36 px discs (BASINS plan §8.1) */
+  --chipstrip-disc: 36px;
+  --chipstrip-gap: var(--sp-2);
+  --chipstrip-sure-size: var(--fs-micro);
+  --chipstrip-sure-track: .08em;
+}
+.mir-list {
+  --list-gap: var(--disc-gap);                                   /* the islands stand the constellation's own gap apart */
+  --list-rail: 44px;                                             /* the chip column */
+  --list-rail-gap: 4px;
+  --list-add-pad: 18px;                                          /* the + ADD pill */
+  --list-add-min: 96px;
+  --list-foot-gap: 5px;                                          /* the rows to the + ADD row: this, then the islands' gap (BASINS' 5 + 7) */
+  --list-step-glyph: 22px;                                       /* a pane's stepper arrows: BASINS' blend, 44 px squares with a 22 px glyph */
+  --list-drag-fade: .55;                                         /* the pane of the row under the hand */
+  --list-glide: var(--motion-micro);                             /* the rows it passes glide out of its way */
+}
+
+/* ── THE ARC ───────────────────────────────────────────────────────────────────────────────────────────────── */
+/* the ring itself (one build: arcRing); a ring in a knob is a child of the dial, in a swatch a child of the seat */
+.k-arc { position: absolute; inset: calc(-1 * var(--arc-pad)); width: calc(100% + 2 * var(--arc-pad)); height: calc(100% + 2 * var(--arc-pad));
+  overflow: visible; pointer-events: none; fill: none; stroke-width: var(--arc-stroke); stroke-linecap: round; shape-rendering: geometricPrecision;
+  transform: rotate(calc(var(--arc-from, 0deg) - 90deg)); }
+.k-arc-track { stroke: var(--arc-groove); stroke-dasharray: var(--arc-span, 360) 360; }
+.k-arc-value { stroke: var(--lane-ink, var(--swatch, var(--acc))); stroke-dasharray: var(--arc-dash, 0) 360; }
+.k-arc-value[data-off] { visibility: hidden; }                  /* a zero-length round cap would draw a dot */
+
+/* the knob wearing it: no body.  Every selector is a CHILD chain: the modulation window seats its own RANGE dial, a kit
+   knob, INSIDE a routed knob's root, and a descendant selector would strip that dial's body and needle too.  The three
+   forms of the dial are spelled out so the host's has-ring puck and accent ring lose at any load order. */
+.k.k-arcknob > .k-dial, .k.k-arcknob.has-ring > .k-dial, .k.k-arcknob.has-ring.mod-selected > .k-dial {
+  border: 0; background: transparent; box-shadow: none; cursor: grab; --dial-r: calc(var(--dial-size) / 2); }
+.k.k-arcknob.drag > .k-dial { cursor: grabbing; }
+.k.k-arcknob > .k-dial > .k-needle { display: none; }           /* the arc's end is the value */
+.k.k-arcknob.k-mod > .k-dial::after { display: none; }          /* the kit's base tick: the arc IS the base */
+/* the LIVE value under a route: a small dot riding the ring (the arc keeps the base the hand owns) */
+.k-arcknob > .k-dial > .k-live { display: none; position: absolute; left: 50%; top: 50%; width: var(--arc-live-size); height: var(--arc-live-size);
+  margin: calc(var(--arc-live-size) / -2) 0 0 calc(var(--arc-live-size) / -2); border-radius: 50%; pointer-events: none; z-index: 1;
+  background: var(--arc-live); box-shadow: var(--arc-live-edge);
+  transform: rotate(var(--live-turn, 0deg)) translateY(calc(-1 * var(--dial-r) + .5px)); }
+.k-arcknob.mod-held > .k-dial > .k-live { display: block; }
+
+/* the lane's size: a 22 px dial and no label */
+.k-arcknob.k-arc-sm { width: var(--arc-sm-w); min-width: 0; gap: 0; position: relative; color: var(--lane-ink, var(--acc)); }
+.k-arcknob.k-arc-sm.has-ring { width: var(--arc-sm-w-routed); }
+.k-arcknob.k-arc-sm > .k-lbl { display: none; }
+.k.k-arcknob.k-arc-sm > .k-dial { width: var(--arc-sm-dial); height: var(--arc-sm-dial); --dial-size: var(--arc-sm-dial); }
+.k-arcknob.k-arc-sm > .k-dial::before { inset: var(--arc-sm-reach); }
+.k-arcknob.k-arc-sm > .k-val { padding: 1px 3px; border-radius: var(--r-xs); background: var(--glass-raise); white-space: nowrap; }   /* the value chip under the hand */
+
+/* ── THE HUE SWATCH: the colour is a circle, its hue an arc round it; the tap lands on the transparent chooser ──── */
+.mir-swatch-seat { position: relative; display: block; width: var(--swatch-size); height: var(--swatch-size); }
+.mir-swatch-seat .mir-swatch { display: block; width: var(--swatch-size); height: var(--swatch-size); margin: 0; padding: 0; border: 0; border-radius: 50%; pointer-events: none;
+  background: var(--swatch, var(--lane-ink, var(--acc)));
+  box-shadow: var(--swatch-shadow); }
+.mir-swatch-seat.drag .mir-swatch { box-shadow: var(--swatch-shadow-drag); }
+.mir-swatch-seat .k-arc-value { stroke: var(--swatch, var(--lane-ink, var(--acc))); }
+.mir-swatch-pick { position: absolute; left: calc((var(--swatch-size) - var(--swatch-pick)) / 2); top: calc((var(--swatch-size) - var(--swatch-pick)) / 2);
+  width: var(--swatch-pick); height: var(--swatch-pick); margin: 0; padding: 0; border: 0; opacity: 0; cursor: ns-resize; touch-action: none; }
+/* keyboard focus: BASINS' hairline in the colour's own ink, outside the hue ring (BASINS colour.css:135); no accent ring (Josh, 2026-10-07, call 16) */
+.mir-swatch-seat:has(> .mir-swatch-pick:focus-visible) .mir-swatch { outline: 1px solid var(--swatch, var(--lane-ink, var(--acc))); outline-offset: 5px; }
+
+/* ── THE LANE SLIDER: a long pill in the thing's ink, its thumb a disc of the same ink ───────────────────────── */
+.mir-lane-slider { height: var(--lane-slider-h); min-width: 0; border: 0; background: transparent; box-shadow: none; border-radius: 0; overflow: visible; cursor: ew-resize; }
+.mir-lane-slider::before { content: ''; position: absolute; left: 0; right: 0; top: calc((var(--lane-slider-h) - var(--lane-track-h)) / 2); height: var(--lane-track-h);
+  border-radius: var(--r-pill); box-shadow: var(--lane-track-rim); background: var(--glass-well); }
+.mir-lane-slider > .fd-fill { top: calc((var(--lane-slider-h) - var(--lane-track-h)) / 2); bottom: auto; height: var(--lane-track-h); border-radius: var(--r-pill); background: var(--lane-ink, var(--acc)); }
+.mir-lane-slider > .fd-edge { top: calc((var(--lane-slider-h) - var(--lane-thumb)) / 2); bottom: auto; width: var(--lane-thumb); height: var(--lane-thumb); margin-left: calc(var(--lane-thumb) / -2);
+  border-radius: 50%; box-sizing: border-box; background: var(--lane-ink, var(--acc)); border: 1px solid var(--lane-ink, var(--acc));
+  box-shadow: none; }
+.mir-lane-slider.drag > .fd-edge, .mir-lane-slider.active > .fd-edge {
+  background: var(--lane-ink, var(--acc)); box-shadow: none; }
+/* a routed lane keeps its own ink (the range bar and the dot say "routed"); the host's accent needle does not recolour the thumb */
+.mir-lane-slider.has-ring > .fd-edge, .mir-lane-slider.has-ring.mod-selected > .fd-edge { background: var(--lane-ink, var(--acc)); }
+.mir-lane-slider > .fd-lbl { display: none; }
+.mir-lane-slider > .fd-val { right: auto; left: 50%; transform: translateX(-50%); bottom: auto; top: -15px; padding: 1px 4px; border-radius: var(--r-xs); background: var(--glass-raise); z-index: 2; }
+.mir-lane-slider.mod > .fd-fill { opacity: var(--lane-routed-fill); }
+/* VERTICAL: the top is the maximum; the modulation window's range bar and live dot turn with it */
+.mir-lane-slider[data-orient="v"] { width: var(--lane-slider-h); height: var(--lane-slider-len); min-width: 0; cursor: ns-resize; }
+.mir-lane-slider[data-orient="v"]::before { left: calc((var(--lane-slider-h) - var(--lane-track-h)) / 2); right: auto; top: 0; bottom: 0; width: var(--lane-track-h); height: auto; }
+.mir-lane-slider[data-orient="v"] > .fd-fill { left: calc((var(--lane-slider-h) - var(--lane-track-h)) / 2); right: auto; top: auto; bottom: 0; width: var(--lane-track-h); height: calc(var(--fill, 0) * 100%); }
+.mir-lane-slider[data-orient="v"] > .fd-edge { left: calc((var(--lane-slider-h) - var(--lane-thumb)) / 2); top: auto; bottom: calc(var(--fill, 0) * 100%);
+  margin: 0 0 calc(var(--lane-thumb) / -2) 0; width: var(--lane-thumb); height: var(--lane-thumb); }
+.mir-lane-slider[data-orient="v"] > .fd-val { left: calc(100% + 4px); right: auto; top: 50%; bottom: auto; transform: translateY(-50%); }
+.mir-lane-slider[data-orient="v"] > .m2fdrange { left: var(--m2-fdrange-top); top: auto; bottom: calc(var(--m2-route-lo, 0) * 100%); width: var(--m2-fdrange-h); height: calc(var(--m2-route-span, 0) * 100%); }
+.mir-lane-slider[data-orient="v"] > .m2fdrangedot { left: var(--m2-fddot-top); top: auto; bottom: calc(var(--fill, 0) * 100%); margin: 0 0 calc(var(--m2-fddot) / -2) 0; }
+
+/* ── THE STATIC CHIP STRIP: the rail's round discs, in the flow ──────────────────────────────────────────────── */
+/* it IS a .mir-rail (the same disc tokens, the same ladder of card styles, the same chip faces in window.css); this puts
+   it in the flow instead of seating it beside a window */
+.mir-rail.mir-chipstrip { --chrome-chip-target: var(--chipstrip-target); --chrome-chip-disc: var(--chipstrip-disc);
+  position: static; inset: auto; width: auto; gap: var(--chipstrip-gap); z-index: auto; transform: none; }
+.mir-rail.mir-chipstrip[data-flow="row"] { flex-direction: row; }
+.mir-chipstrip .mir-chip:disabled { opacity: var(--state-disabled, .38); cursor: default; }
+.mir-chipstrip .mir-chip .mir-chip-sure { color: var(--bad); font-size: var(--chipstrip-sure-size); font-weight: var(--w-bold); line-height: 1; letter-spacing: var(--chipstrip-sure-track); text-transform: none; }
+
+/* ── THE SORTABLE LIST: a pane per item, the chips on the rack's outer edge, + ADD at the foot ────────────────── */
+.mir-list { display: flex; flex-direction: column; gap: var(--list-foot-gap); min-width: 0; }
+.mir-list-rows { display: flex; flex-direction: column; gap: var(--list-gap); }
+.mir-list-item { display: grid; grid-template-columns: minmax(0, 1fr) var(--list-rail); gap: var(--list-rail-gap); align-items: center; }
+.mir-list-item { transition: transform var(--list-glide) var(--ease-out); }
+.mir-list-item.dragging { position: relative; z-index: 2; transition: none; }
+.mir-list-item.dragging > .mir-list-pane { opacity: var(--list-drag-fade); }
+.mir-list-rows.settling > .mir-list-item { transition: none; }
+/* the DOM keeps the rail first (the grip is the first tab stop); only the grid moves it: on the right of the pane on the
+   right rack and in a floating window, on the left of it on the left rack and on a phone (whose one rack is on the left).
+   The rack is read by its behaviour hook, [data-mir-rack], which the kit's racks and an app's adopted ones both carry
+   (BASINS' #rackL wears no kit look class, so `.mir-rack` never reached it) */
+.mir-list-item > .mir-chipstrip { grid-column: 2; grid-row: 1; }
+.mir-list-item > .mir-list-pane { grid-column: 1; grid-row: 1; min-width: 0; }
+[data-mir-rack][data-side="left"] .mir-list:not([data-side="right"], [data-axis="x"]) > .mir-list-rows > .mir-list-item, body.phone .mir-list:not([data-side="right"], [data-axis="x"]) > .mir-list-rows > .mir-list-item, .mir-list[data-side="left"]:not([data-axis="x"]) > .mir-list-rows > .mir-list-item {
+  grid-template-columns: var(--list-rail) minmax(0, 1fr); }
+[data-mir-rack][data-side="left"] .mir-list:not([data-side="right"], [data-axis="x"]) > .mir-list-rows > .mir-list-item > .mir-chipstrip, body.phone .mir-list:not([data-side="right"], [data-axis="x"]) > .mir-list-rows > .mir-list-item > .mir-chipstrip, .mir-list[data-side="left"]:not([data-axis="x"]) > .mir-list-rows > .mir-list-item > .mir-chipstrip { grid-column: 1; }
+[data-mir-rack][data-side="left"] .mir-list:not([data-side="right"], [data-axis="x"]) > .mir-list-rows > .mir-list-item > .mir-list-pane, body.phone .mir-list:not([data-side="right"], [data-axis="x"]) > .mir-list-rows > .mir-list-item > .mir-list-pane, .mir-list[data-side="left"]:not([data-axis="x"]) > .mir-list-rows > .mir-list-item > .mir-list-pane { grid-column: 2; }
+/* axis 'x' (strips): the items side by side in one island pane, each one's chips under it, whatever the rack's side */
+.mir-list[data-axis="x"] > .mir-list-rows { flex-direction: row; }
+.mir-list[data-axis="x"] > .mir-list-rows > .mir-list-item { grid-template-columns: minmax(0, 1fr); grid-template-rows: 1fr auto; justify-items: center; align-items: stretch; }
+.mir-list[data-axis="x"] > .mir-list-rows > .mir-list-item > .mir-list-pane { grid-column: 1; grid-row: 1; width: 100%; }
+.mir-list[data-axis="x"] > .mir-list-rows > .mir-list-item > .mir-chipstrip { grid-column: 1; grid-row: 2; }
+/* + ADD: a centred pill under the last item, in the look's corner; it dims at the cap.  It floats outside the panes, so it wears
+   their material: the TINTED fill (thinner under FROST), and FROST's filter (none while frost holds), BASINS colour.css:65–66 and
+   material.css:154–161.  A press shows the trigger's own pressed face.  Its relief stays the trigger's raise: BASINS gives it the
+   pane's float shadow, which INTENT forbids on a button ("a pane floats; a button does not"), so that one line is not taken. */
+.mir-list-addrow { display: flex; justify-content: center; margin-top: var(--list-gap); }
+.mir-list-addrow > .trig.mir-list-add { border-radius: var(--surface-radius, var(--card-r)); padding: 0 var(--list-add-pad); min-width: var(--list-add-min);
+ }
+body[data-card="tinted"] .mir-list-addrow > .trig.mir-list-add:not(:active) { background-color: hsl(var(--glass-tint) / var(--card-opacity)); background-image: none; }
+body.frost[data-card="tinted"] .mir-list-addrow > .trig.mir-list-add:not(:active) { background-color: hsl(var(--glass-tint) / var(--frost-opacity)); }
+body.frost:not(.frost-hold) .mir-list-addrow > .trig.mir-list-add { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
+
+/* a stepper in an item's pane (BASINS' blend, colour.css:59–63): it spans the pane, its name is the micro size in the key ink, its
+   arrows are squares in the small corner with a large glyph */
+.mir-list-pane .mir-step { min-width: 0; align-items: stretch; }
+.mir-list-pane .mir-step-row { display: flex; justify-content: space-between; gap: 2px; }
+.mir-list-pane .mir-step-name { flex: 1; min-width: 0; min-height: 0; padding: 0; border-radius: var(--r-xs); text-align: center; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--ink-key); }
+.mir-list-pane .mir-step-text { font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--ink-key); }
+.mir-list-pane .mir-step-b { border-radius: var(--r-xs); font: var(--list-step-glyph)/1 var(--font-ui); color: var(--ink-key); }
+
+}   /* end @layer mir.kit.plugin.host */

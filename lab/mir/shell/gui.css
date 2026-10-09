@@ -1,0 +1,114 @@
+/* MIR · shell/gui.css — the GUI windows: MIR OPTIONS (its tab row and one grid of groups per tab) and MIR ABOUT in one column.
+ *
+ * THE LAW IT KEEPS: THE HEAD NEVER MOVES (1.5.0 wave 19, the hand law).  The tabs share one grid cell, so the body is the
+ * size of the biggest tab and a tab changes nothing but what is painted; shell/gui.js sizes the window once for that and
+ * keeps its top-left.  At phone width (720 px and under) each tab is one column and the body scrolls.
+ * The window itself is the kit's (mir/window/window.css, a `.glass`), so every look option paints it too.  The controls
+ * are the kit's, unrestyled: this sheet only lays them out.  The one control it draws is the `‹ NAME ›` stepper, by the
+ * rules of docs/INTENT.md: no relief at rest, hover a lighter face, press a sink and a small scale, focus an accent ring
+ * outside.  Every value is a token declared on `.mir-gui`; inside `@layer mir.kit.house`. */
+@layer mir.kit.house {
+
+/* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────
+   1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md); the rules below read names only. */
+.mir-gui {
+  --gui-col: 208px;                                         /* one grid column: every group is one or two of them */
+  --gui-col-narrow: 300px;                                  /* the one column of a phone sheet */
+  --gui-about-w: 440px;
+  --gui-about-w-narrow: 300px;
+  --gui-gap: var(--sp-4);                                   /* the gutter between groups, and inside them */
+  --gui-grp-r: var(--r-lg);
+  --gui-grp-pad: var(--sp-3) var(--sp-4) var(--sp-4);
+  --gui-logo-h: 92px;
+}
+/* ── end of the values ── */
+
+/* ── the tab row: one fixed row under the title (1.5.0 wave 19); on a narrow window it scrolls sideways, never wraps ── */
+.mir-gui .gui-tabbar { flex: 0 0 auto; display: flex; justify-content: center; padding: 0 var(--sp-4) var(--sp-3); overflow-x: auto; scrollbar-width: none; }
+.mir-gui .gui-tabs .seg { flex-wrap: nowrap; }
+.mir-gui .gui-tabs .seg-b { white-space: nowrap; }
+
+/* ── OPTIONS: one grid per tab, all in ONE grid cell, so the body is as big as the biggest tab and a tab never changes
+   the window's size; the tab not shown is invisible (no paint, no hits, out of the accessibility tree) ── */
+.gui-options { display: grid; width: max-content; }
+.gui-options > .gui-grid { grid-area: 1 / 1; align-self: start; }
+.gui-options:not([data-tab="look"]) > .gui-grid[data-tab="look"],
+.gui-options:not([data-tab="light"]) > .gui-grid[data-tab="light"],
+.gui-options:not([data-tab="windows"]) > .gui-grid[data-tab="windows"] { visibility: hidden; }
+.gui-grid {
+  display: grid; gap: var(--gui-gap); width: max-content; align-items: stretch;
+  grid-template-columns: repeat(5, var(--gui-col));         /* equal columns: shared edges, equal gutters */
+  grid-template-areas: "theme theme accent text quality" "material material controls motion motion";
+}
+.gui-grid[data-tab="light"] { grid-template-columns: repeat(2, var(--gui-col)); grid-template-areas: "light light"; }
+.gui-grid[data-tab="windows"] { grid-template-columns: repeat(2, var(--gui-col)); grid-template-areas: "windows sampling"; }
+.gui-grp[data-group="sampling"] { grid-area: sampling; }
+/* help prose goes with HELP (BASINS: "make it go away when 'help' is OFF"), and keeps its seat: a switch never moves the
+   rows under it (the hand law) */
+body.window-info-off .mir-gui .gui-help { visibility: hidden; }
+.gui-grp[data-group="theme"] { grid-area: theme; }
+.gui-grp[data-group="accent"] { grid-area: accent; }
+.gui-grp[data-group="quality"] { grid-area: quality; }
+.gui-grp[data-group="material"] { grid-area: material; }
+.gui-grp[data-group="controls"] { grid-area: controls; }
+.gui-grp[data-group="text"] { grid-area: text; }
+.gui-grp[data-group="motion"] { grid-area: motion; }
+.gui-grp[data-group="light"] { grid-area: light; }
+.gui-grp[data-group="windows"] { grid-area: windows; }
+.gui-grp {
+  display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; margin: 0;
+  padding: var(--gui-grp-pad); border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--gui-grp-r);
+}
+.gui-grp > * { flex-shrink: 0; }                            /* a title or a row never gives up height: every title keeps the same inset */
+/* a group's title is the house label */
+.gui-grp-lbl { margin: 0; font-size: var(--fs-micro); font-weight: var(--w-bold); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-faint); line-height: 1; }
+.gui-line { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-2); }
+.gui-line.gui-knobs { justify-content: space-between; flex-wrap: nowrap; }
+.gui-line.gui-knobs > .sw.gui-link { flex: 0 0 auto; align-self: center; }   /* RELIEF's LINK, in a dial row */
+.gui-line.gui-pair { gap: var(--gui-gap); flex-wrap: nowrap; }
+/* SPACING's four levels (0 · TIGHT · DEFAULT · AIRY) on one line in the one-column WINDOWS group: the segment fills the
+   row and its seats take the house's smallest inline padding (a mouse; a finger keeps the 44 px seats, which may wrap) */
+@media not (pointer: coarse) {
+  .gui-grp:is([data-group="windows"], [data-group="sampling"], [data-group="quality"]) .segw { flex: 1 1 100%; }
+  .gui-grp:is([data-group="windows"], [data-group="sampling"], [data-group="quality"]) .seg { display: flex; flex-wrap: nowrap; width: 100%; }
+  .gui-grp:is([data-group="windows"], [data-group="sampling"], [data-group="quality"]) .seg-b { min-width: 0; padding-inline: var(--sp-2); }
+}
+.gui-line.gui-sws > .sw { flex: 1 1 0; justify-content: flex-start; }
+.gui-line.gui-col { flex-direction: column; align-items: stretch; }   /* switches one under another */
+.gui-show { flex: 1 1 auto; align-items: stretch; }
+.gui-note { font-size: var(--fs-tiny); letter-spacing: var(--label-tracking, var(--tr-wide)); color: var(--ink-faint); }
+.gui-cost { flex-wrap: nowrap; }
+.gui-cost > .ro { flex: 1 1 0; }
+.gui-pair > .mir-step { flex: 1 1 0; min-width: 0; }
+.gui-pair > .mir-step .mir-step-name { min-width: 0; flex: 1 1 auto; }
+.gui-pair > .mir-step .mir-step-row { width: 100%; }
+.gui-pair > .trig { align-self: flex-end; }
+.gui-theme-cost { font-variant-numeric: tabular-nums; }
+.gui-ro .ro-sub { display: none; }
+.gui-ro .ro-val { font-size: var(--fs-small); }
+
+/* ── ABOUT ── */
+.gui-about { width: var(--gui-about-w); display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); text-align: center; }
+.gui-logo { width: 100%; height: var(--gui-logo-h); display: grid; place-items: center; border-radius: var(--gui-grp-r); }
+.gui-logo-art { width: 100%; height: var(--gui-logo-h); display: grid; place-items: center; }
+.gui-logo-art > svg { display: block; width: 100%; height: var(--gui-logo-h); }
+.gui-ab-ver { font-size: var(--fs-micro); font-weight: var(--w-bold); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-key); }
+.gui-ab-std { font-size: var(--fs-lead); color: var(--fg); }
+.gui-ab-words { margin: 0; font-size: var(--fs-base); line-height: var(--lh); color: var(--fg-soft); }
+.gui-ab-fine { margin: 0; font-size: var(--fs-small); line-height: var(--lh); color: var(--dim); }
+.gui-ab-fine a, .gui-ab-words a { color: var(--acc); text-decoration: none; }
+.gui-ab-fine a:hover { text-decoration: underline; }
+
+/* ── a phone: the same tabs, one column, the body scrolling; the window is the screen's height (gui.js), so the tab not
+   shown leaves the layout instead of lengthening the scroll ── */
+@media (max-width: 720px) {
+  .gui-grid, .gui-grid:is([data-tab="light"], [data-tab="windows"]) { grid-template-columns: var(--gui-col-narrow); grid-template-areas: none; }
+  .gui-grid > .gui-grp { grid-area: auto; }
+  .gui-line.gui-pair { flex-wrap: wrap; }
+  .gui-options:not([data-tab="look"]) > .gui-grid[data-tab="look"],
+  .gui-options:not([data-tab="light"]) > .gui-grid[data-tab="light"],
+  .gui-options:not([data-tab="windows"]) > .gui-grid[data-tab="windows"] { display: none; }
+  .gui-about { width: var(--gui-about-w-narrow); }
+}
+
+}   /* end @layer mir.kit.house */
