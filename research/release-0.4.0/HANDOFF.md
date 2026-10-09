@@ -620,6 +620,10 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > **16:35 — D10-19 MERGED `064f3b0`** (Sonnet `d700374`: the flash guard's limiter on exposure/gamma/stage/knee, calibrated from the shader by
 > `tools/flash-calibrate.mjs`, held only while a modulator drives, the trip in METERS; +20 → 27,614; node 0; CLAUDE.md paragraph applied;
 > `research/release-0.5.1/CHANGES-0.5.1.md` started). Running: D1, D10-24, D10-F.
+> **17:10 — D10-F MERGED `d058d6f`** (Sonnet `5e8d338`: B70/B71 44 px touch targets on a phone — 49 failing hit-tests behind one cause, the wave-51 phone
+> block beaten by later native rules; one closing block at the foot of `skin.css`, +22, sizes only; B78 the STATE card's IMPULSE words, the trigger stays
+> RELEASE (it left in `5f6421e`'s BOW redesign); four harness re-aims accepted; the boot suite alone 150/152 on its tree — B149 the law red, B6 timing; REPORT
+> wave 211; `lab/*.js` 27,614 unchanged by it; node 0; CHANGES line). `BRIEF-D2-D8.md` and `BRIEF-D-V.md` written (`42e5610`, `6d79813`). Running: D1, D10-24.
 
 ## 3 · What happens next, in order
 
