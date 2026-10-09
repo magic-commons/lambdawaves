@@ -1,0 +1,260 @@
+{
+ "field": {
+  "ok": true,
+  "error": null
+ },
+ "notice": "dismissed",
+ "load": [
+  1.36,
+  1.62,
+  1.61
+ ],
+ "water": {
+  "md": "$\\mathrm{H_{2}O}$"
+ },
+ "block": {
+  "left": 765,
+  "top": 118,
+  "right": 835,
+  "bottom": 167,
+  "state": "in",
+  "fade": false,
+  "font": "34px",
+  "family": "Spectral",
+  "color": "rgb(20, 21, 31)",
+  "n": 1,
+  "text": "H2​O\n"
+ },
+ "A": {
+  "mo": 0,
+  "running": false,
+  "letters": 40,
+  "renders": 0,
+  "places": 0,
+  "yaw": 2.4999,
+  "kitWrites": 1554,
+  "kitSkipped": 5994,
+  "kitReads": 380,
+  "frames": 163,
+  "runningEnd": false,
+  "recs": []
+ },
+ "B": {
+  "mo": 0,
+  "running": false,
+  "letters": 103,
+  "renders": 0,
+  "places": 0,
+  "yaw": 5.6539,
+  "kitWrites": 3813,
+  "kitSkipped": 14996,
+  "kitReads": 952,
+  "frames": 409,
+  "runningEnd": false,
+  "recs": []
+ },
+ "C": {
+  "mo": 749,
+  "running": true,
+  "letters": 107,
+  "renders": 0,
+  "places": 0,
+  "yaw": 5.6831,
+  "kitWrites": 4721,
+  "kitSkipped": 16636,
+  "kitReads": 1000,
+  "frames": 429,
+  "runningEnd": true,
+  "recs": [
+   {
+    "t": 38768,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 763.71px 117.5px;"
+   },
+   {
+    "t": 38800,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 759.06px 115.35px;"
+   },
+   {
+    "t": 38832,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 752.04px 112.09px;"
+   },
+   {
+    "t": 38878,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 743.58px 108.13px;"
+   },
+   {
+    "t": 38910,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 735.09px 104.13px;"
+   },
+   {
+    "t": 38927,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 734.7px 103.95px;"
+   },
+   {
+    "t": 38959,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 726.57px 100.11px;"
+   },
+   {
+    "t": 38992,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 719.57px 96.79px;"
+   },
+   {
+    "t": 39005,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 718.93px 96.49px;"
+   },
+   {
+    "t": 39037,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 713.33px 93.83px;"
+   },
+   {
+    "t": 39062,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 712.29px 93.33px;"
+   },
+   {
+    "t": 39094,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 708.6px 91.57px;"
+   },
+   {
+    "t": 39118,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 707.25px 90.92px;"
+   },
+   {
+    "t": 39150,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 705.85px 90.25px;"
+   },
+   {
+    "t": 39172,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 705.67px 90.15px;"
+   },
+   {
+    "t": 39204,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 705.98px 90.29px;"
+   },
+   {
+    "t": 39231,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 706.86px 90.7px;"
+   },
+   {
+    "t": 39263,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 708.83px 91.62px;"
+   },
+   {
+    "t": 39292,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 709.9px 92.12px;"
+   },
+   {
+    "t": 39324,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 712.74px 93.46px;"
+   },
+   {
+    "t": 39350,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 714.67px 94.37px;"
+   },
+   {
+    "t": 39382,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 718.04px 95.95px;"
+   },
+   {
+    "t": 39407,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 719.36px 96.57px;"
+   },
+   {
+    "t": 39439,
+    "type": "attributes",
+    "attr": "style",
+    "target": "DIV.mir-info-block",
+    "value": "translate: 722.88px 98.23px;"
+   }
+  ]
+ },
+ "blockAfter": {
+  "left": 766,
+  "top": 118,
+  "right": 837,
+  "bottom": 167,
+  "state": "in",
+  "fade": false,
+  "font": "34px",
+  "family": "Spectral",
+  "color": "rgb(20, 21, 31)",
+  "n": 1,
+  "text": "H2​O\n"
+ },
+ "errors": [
+  "error the GPU device was lost A valid external Instance reference no longer exists. — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched."
+ ],
+ "loadAfter": [
+  2.62,
+  1.96,
+  1.73
+ ]
+}
