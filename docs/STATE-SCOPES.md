@@ -37,7 +37,9 @@ this file.
 | `theme` (light / dark / system) | settings | PREFERENCE |
 | `card`, `cardSet`, `frost`, `disc`, `blur`, `accent [a, b, vivid]` | settings | PREFERENCE |
 | tags (`badges`), `controlHints`, `captions`, `molFormula` / `molFormulaSize` (the STAGE TEXT and its SIZE: the formula, the fade, the atom labels and the capture's caption; since 0.4.0 S3 an older `atomLabels` / `atomLabelsSize` is read once, where `molFormula` was never written, and dropped by the next save), Help, window notes (LEAN), `gamut` / `p3Mode`, `warned`, `audioDevice`, key bindings, keyboard-editor position, `nativeLayout` | settings (and their own keys) | PREFERENCE |
-| AUTO SCALE (`auto`), `governor`, `keepFrames`, `perfMode`, `modCadence`, `modArm`, `clockLink` | settings | PREFERENCE |
+| AUTO SCALE (`auto`), `governor`, `keepFrames`, `perfMode` | settings | PREFERENCE |
+| the modulation's POWER `modArm` (routes on or bypassed; time runs on) and its cadence `modCadence` (60 / 120 Hz) | the kit's modulation record `lambdawaves.q0.modulation` (`rack.js` `modStore`, MIR's `bind.js` `localStore`: the record `installModulation` reads), never settings; since 0.5.0 C4 an older settings blob's pair is read once into the record and dropped by the blob's next save; FORGET clears it with the settings | PREFERENCE |
+| `clockLink` (LINKED / SEPARATE) — RETIRED at 0.5.0 C4 (R-B1, the one clock: THE play plays the modulation, the power never plays). An older blob's key is never read and is dropped by the next save | — | — |
 | camera feel: `friction`, `spin` (speed), `dragGain`, `fling` | settings | PREFERENCE (D4) |
 | field chrome: `frame`, `axis`, `frameMode`, `axisMode`, `cornerSide`, `invert`, `axisInk` | settings | PREFERENCE (D1) |
 | camera MODE, `presentation.obs.mode` (free / turntable) | project | PROJECT (D4's escape hatch, see below), not in history (it travels with the pose) |
@@ -131,6 +133,7 @@ The camera feel (friction, spin, drag gain, fling) stays PREFERENCE.
 
 Choose its scope before you write it.  Device content a build ships and a hand installs (a record, a future pack) is
 LIBRARY: content-addressed under a DATA root (`lab/sw.js` §1b), never inside a project; a project names it by
-`{ id, hash, nameKey }`. A PREFERENCE key goes in `saveSettings()` / `applySettings()` only. A PROJECT
+`{ id, hash, nameKey }`. A PREFERENCE key goes in `saveSettings()` / `applySettings()` only (the modulation's own preferences go in the kit's
+modulation record, `saveMod()`, read by `applySettings()`). A PROJECT
 key goes in `serialize()` / `restore()` only, and joins the history unless it is a view. A WORKSPACE key goes in the
 layout record and the settings. No key belongs to two scopes.

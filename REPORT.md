@@ -4761,3 +4761,49 @@ about 0.3 ms; nothing was added per frame. Hand-off: `research/release-0.5.0/C5-
 
 **Lines.** `cat lab/*.js | wc -l`: 36,288 → 36,469 after the adopt (+181, generated `sw.js` rows) → **36,482**. C9 is **+13**: the guard
 +10 and the thumbnail +3. Nothing in λWAVES did either job, so there was nothing to delete. Hand-off: `research/release-0.5.0/C9-BUILD.md`.
+
+### wave 201: C4 THE MODULATION WINDOW AND THE ONE CLOCK — the kit's window over A5's port, LINKED/SEPARATE retired, 3,548 lines out
+
+**The window is the kit's.** `rack.js` builds it with `createModulation(floats, mod.port(…))` from MIR 1.5's
+`lab/mir/modulation/window.js`, over A5's port. `installModulation` itself was not used. It would build a second host and its own
+`core/frame.js` tick, a second clock beside `loop()`, plus a device copy of the rack and a second visibility listener. So R5-A3's
+`project: false` holds by construction. Four changes made the port fit the kit:
+- It carries no `targets`. The kit reads that key as the routable-control selector, and A5's host object made every `closest()` throw.
+- It passes `dock: false`. The dock span is the kit rack's, which arrives at C3.
+- Its `closed` reports nothing. The kit's own close reports `moved(null)`.
+- `modDodge` takes null and ignores a closed window, because the kit's `place()` reports a real box while closed.
+
+The occlusion listens to the window's `hidden` flips and its `onGeometry`. `lfo-tension` now waits for the window's entrance and
+device glide.
+
+**There is one clock (R-B1).** THE play's edge reaches `mod.follow` on every edge. It holds the app-play demand while playing and
+releases it on pause. The power (the MOD button, Ctrl+Space, the window's power seat) is `setModulationEnabled`, a route bypass: time,
+the sources and the HOLDs run on, power never plays and play never powers. `clockLink`, LINKED/SEPARATE and the MOD ▶ tile are gone.
+`LW.mod.play()/stop()` are THE play and THE pause. The tempo grid is 8 tiles in two rows of four. `take-in-bugs` §1 is five boots,
+each with 0 refusals, and the fifth is "MOD power off: play never powers".
+
+**The power and the cadence leave the blob.** `modArm` and `modCadence` now live in the kit's record `lambdawaves.q0.modulation`
+(MIR `bind.js` `localStore`; the shape `installModulation` reads), written by `saveMod()`, and `saveSettings` writes neither.
+- An older blob's pair is read once into the record and dropped on the blob's next save.
+- FORGET clears the pair along with the settings.
+- `.tmp/probe-modstore.mjs` showed the move end to end: an old blob (false, 120) becomes the record, a reload keeps it, and the blob comes out clean.
+- `docs/STATE-SCOPES.md` gives the record its own row and marks `clockLink` RETIRED. `settings-store.js` FAMILIES has the row.
+- `tools/new-project.mjs` was regenerated: bpm 30, byte-identical to C0's and D9's. `--check` is green.
+
+**What left.** `lab/modwindow.js` (3,110) and `lab/audio.js` (438) are deleted. The kit's `audio-capture.js` was checked before
+the switch: same exports, same logic line for line, so no shim was needed, and `tests/audio.test.mjs` now targets it. The lab.css badge
+ladder (the `:root:root:root:root` block and `.k-route-x`) is gone too; `modhost.css` carries those rules.
+
+**`s3`.** A reload boots the shipped rack (s1 LFO + s2 ENV), because there is no reopen-last-project. The window keeps `modes` rows
+only for sources that exist, so WAVE DANCER's `s3` row drops on a reload. Reopening WAVE DANCER brings it back from the file. This
+was already red on `1e1a4f8` with the old window. `tools/settings-probe.mjs` (+6) now compares those rows only for the sources live
+after the reload, and it names the ones it drops. settings-probe: **6/6**.
+
+**Gates** (8833/5303, one at a time, 4 s apart):
+- `take-in-bugs` **4/4** (twice) · `new-project` **8/8** (three times) · `history` **39/39** (twice) · `routed-knob` **4/4** (twice) · `lfo-tension` **3/3**
+- `first-run` **11/11** · settings-probe **6/6** · `.tmp/probe-tempo.mjs`: 8 tiles in 2 rows
+- On `14f0fac`: frame-occlusion **7/7**
+- Node: 85 suites, 82 green, plus the three known kit reds (`mir-manifest`, `wiring`, `pwa`), which resolve at merge.
+
+`mir-controls` was not touched: re-aiming it to the kit's ONE KNOB LAW (vertical drag, ⅛ fine) belongs to C0's continuation.
+`cat lab/*.js | wc -l`: **36,288 → 32,921 (−3,367)**. Brief candidates (four) and open items: `research/release-0.5.0/C4-BUILD.md`.

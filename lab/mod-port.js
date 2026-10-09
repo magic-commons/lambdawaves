@@ -1,6 +1,6 @@
-/* mod-port.js — THE MODULATION PORT (0.5.0 A5): the object `createModulation(host, port)` takes, key for key (lab/modwindow.js
- * today, MIR 1.5 `modulation/window.js` at adoption: M, registry, targets, clock, apply, knobOf, persist, cadence, setCadence,
- * armed, arm, audio, rateControl, moved, opened, closed), and the edges behind it that rack.js held in five places.
+/* mod-port.js — THE MODULATION PORT (0.5.0 A5): the object MIR 1.5's `createModulation(host, port)` (`modulation/window.js`,
+ * the window since C4) takes, key for key: M, registry, clock, apply, knobOf, persist, cadence, setCadence, armed, arm, audio,
+ * rateControl, moved, opened, closed, dock — and the edges behind it that rack.js held in five places.
  *   · THE CATALOGUE'S HOOKS.  rack.js keeps the catalogue (its defs list: ids, ranges, adapters); install(defs, roots) registers
  *     it (host-contract.md PART 3: registry · target host · clock · presentation, and nothing else), stamps every dial that has
  *     one with its id (the drop hit-test is `.k[data-param]`, wave 61), hands each its registry BASE (`setBase`, wave 68: a
@@ -17,12 +17,12 @@
  *     (`feedAudio`, one read for every AUDIO card); the closer off the frame path (`audio.sync` after every rebuild); silence when
  *     the signal stops (`audioReset`, or every follower pins its last value); the input remembered as a device HANDLE, never audio.
  *   · THE CADENCE: 60 or 120 Hz, the panel's, never the display's.
- *   · THE ONE CLOCK's modulation half (0.5.0 A6, the facade): `follow(on)` is THE play's edge (clock.js onePlay), taken while MOD is
- *     armed and LINKED.  A play holds the kit's `demand('app.play')` first, so the modulation is never refused for want of a route
- *     or an open editor (MIR 1.5 `installModulation().play`; KIT-BRIEFS "LINKED refusal"); a pause releases it.
+ *   · THE ONE CLOCK's modulation half (0.5.0 A6, the facade; C4, R-B1: every edge, LINKED/SEPARATE retired): `follow(on)` is THE
+ *     play's edge (clock.js onePlay), the power on or off.  A play holds the kit's `demand('app.play')` first, so the modulation is
+ *     never refused for want of a route or an open editor (MIR 1.5 `installModulation().play`); a pause releases it.
  */
 import { createModHost } from './mir/modulation/host.js';
-import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the kit's port deliberately left behind
+import { createAudioCapture, AUDIO_STATE } from './mir/modulation/audio-capture.js';   // wave 102's capture half, the kit's since 1.5 (0.5.0 C4: lab/audio.js deleted)
 
 const CAP = ['state', 'reason', 'live', 'deviceId', 'sampleRate', 'frames', 'inputLatencyMs', 'analysisLatencyMs', 'visualLatencyMs', 'latencyMs', 'latencyEstimated'];
 const IDLE = { state: AUDIO_STATE.IDLE, reason: '', live: false, deviceId: '', sampleRate: 0, frames: 0, inputLatencyMs: null,
@@ -112,9 +112,10 @@ export function createModPort({ available, present, view, onCapture, save }) {
     port({ moved, rateControl, persist, note, device, armed, arm }) {
       const C = host.clock;
       return { moved, rateControl, persist, armed, arm, knobOf: P.knobOf,
-        M: host.model, registry: host.registry, targets: host.targets, clock: C,
+        M: host.model, registry: host.registry, clock: C,   // 0.5.0 C4: no `targets` — the kit reads it as the routable-control SELECTOR
+        dock: false,                                                     // 0.5.0 C4: the window floats; the dock span is the kit rack's (C3)
         opened: () => { C.setPresentationActive(true); present(); },   // the editor's preview demand only: THE play holds its own (A6)
-        closed: () => { C.setPresentationActive(false); moved({ left: -1, right: -1, top: -1, bottom: -1 }); },
+        closed: () => { C.setPresentationActive(false); },              // the kit's close reports moved(null) itself
         apply: () => { C.applyAll(false); present(); note(); },
         cadence: () => cadence.hz, setCadence: P.setCadence,
         audio: {

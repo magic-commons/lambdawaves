@@ -6,7 +6,7 @@ export { infoPanel, installControlHelp, consolidateWindowHelp, planeModel };
 import { buildMacroSlot } from './mir/modulation/modwindow/modwindow.js';   // the window's own slot builder: the transport's tiles are its rows, faces hidden
 
 
-export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCadence, arm }) {
+export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCadence }) {
   const ids=['spectrum','state','palette','observer','camera','clip','slice','settings'];
   for(const id of ids){const d=document.querySelector(`.dev[data-id="${id}"]`);if(!d)continue;d.classList.add('native-clean');
     for(const l of d.querySelectorAll('.grp-lbl')) { l.title=l.textContent;l.textContent=l.textContent.split(/·|  |\(/)[0].trim(); }
@@ -125,8 +125,8 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
      modulation window's macro rail: number badge, name, value, the same thin fader — read and written
      through the model, so it is the same macro, not a copy. The window is still the only place that BUILDS
      macros (STYLE-LOCK). RIGHT — the CLOCK in two rows of tiles. The BPM field is gone: the pill already
-     carries the tempo (drag, arrows, TAP). In its place is the LAW the two clocks were missing — LINK: the
-     modulation clock follows the transport, no in-between state; FREE: it runs on its own MOD PLAY. */
+     carries the tempo (drag, arrows, TAP). 0.5.0 C4 (R-B1): there is ONE clock — the transport's play — so
+     LINKED and MOD ▶ are gone and the grid is eight tiles: TAP, WALL, the cadence, the three bends, the two HOLDs. */
   const macroPane=el('div','tempo-pane tempo-macros',panel);macroPane.setAttribute('aria-label','macros');
   /* THE TILES ARE THE WINDOW'S ROWS. `buildMacroSlot` is the ported window's own builder — the same grip,
      the same numbered depth seat with its ring, the same reorder tool — and the window's API wires the
@@ -166,12 +166,6 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   function syncMacros(){buildMacros();paintTiles();}
   const clockPane=el('div','tempo-pane tempo-clock',panel);clockPane.setAttribute('aria-label','clock');
   const grid=el('div','tempo-grid',clockPane);
-  /* THE LAW OF THE TWO CLOCKS. Linked, the modulation clock is a follower of the transport — rack.js
-     holds it there every frame, so there is no state where one runs and the other does not. Free, the
-     modulation clock is its own instrument: MOD PLAY starts and stops it, the transport does not. */
-  const linkB=trig({label:'LINKED',title:'Modulation clock follows the transport (LINKED) or runs on its own MOD PLAY (SEPARATE)',onFire:()=>{ui.setClockLink(!ui.clockLink());sync();ui.saveNative();}});grid.appendChild(linkB.root);
-  const play=trig({label:'MOD ▶',title:'Play/pause the modulation clock on its own (SEPARATE only)',onFire:()=>{if(ui.clockLink())return;const want=!C.isPlaying();arm(true);const r=want?C.play(performance.now()/1000):C.pause(performance.now()/1000);   // decide BEFORE arming: arming while the transport plays starts the clock itself, and a blind toggle then stopped it again
-    play.root.title=r&&r.ok===false?'Nothing to run — add a source in the modulation window':'Play/pause the modulation clock on its own (SEPARATE only)';sync();}});grid.appendChild(play.root);
   let taps=[];grid.appendChild(trig({label:'TAP',title:'Tap the tempo',onFire:()=>{const r=M.tapTempo(taps,performance.now());taps=r.taps;if(r.bpm)C.setBpm(r.bpm);sync();ui.saveNative();}}).root);
   const syncB=trig({label:'WALL',title:'Sync the modulation clock to the wall clock or run it free',onFire:()=>{C.setSync(M.syncMode()==='wall'?'free':'wall');sync();ui.saveNative();}});grid.appendChild(syncB.root);
   const cad=trig({label:'60 Hz',title:'Modulation cadence',onFire:()=>{setCadence(cadence()===120?60:120);sync();}});grid.appendChild(cad.root);
@@ -196,11 +190,11 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   });
   const holds=['1/4','1'].map(note=>{const b=trig({label:'HOLD '+(note==='1/4'?'¼':note),title:'Stutter: hold the beat at this note value',onFire:()=>{if(M.transport.hold&&M.transport.holdNote===note)C.release();else{if(M.transport.hold)C.release();C.hold(note);}sync();}});grid.appendChild(b.root);return b;});
   const infoSeat=el('div','tempo-info',panel);infoSeat.appendChild(repeatInfo);   // the repeat mathematics, in the panel's corner — not a tile
-  function syncNow(){const n=M.transport.bpm.toFixed(M.transport.bpm<100?1:0),rate=(M.transport.bpm/60).toFixed(2)+' Hz';tempoNum.textContent=n;tempoHz.textContent=rate;expand.setAttribute('aria-label',n+' beats per minute. Drag vertically to change; press to show tempo controls');expand.setAttribute('aria-valuemin',String(M.BPM_MIN));expand.setAttribute('aria-valuemax',String(M.BPM_MAX));expand.setAttribute('aria-valuenow',String(M.transport.bpm));expand.setAttribute('aria-valuetext',n+' BPM, '+rate);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});const linked=ui.clockLink();linkB.root.classList.toggle('on',linked);linkB.root.setAttribute('aria-pressed',String(linked));linkB.setLabel(linked?'LINKED':'SEPARATE');play.root.disabled=linked;play.on=C.isPlaying();play.setLabel(C.isPlaying()?'MOD ❚❚':'MOD ▶');for(const {b,label} of bends){const on=bend.which===label;b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(on));}if(!panel.hidden)syncMacros();}
+  function syncNow(){const n=M.transport.bpm.toFixed(M.transport.bpm<100?1:0),rate=(M.transport.bpm/60).toFixed(2)+' Hz';tempoNum.textContent=n;tempoHz.textContent=rate;expand.setAttribute('aria-label',n+' beats per minute. Drag vertically to change; press to show tempo controls');expand.setAttribute('aria-valuemin',String(M.BPM_MIN));expand.setAttribute('aria-valuemax',String(M.BPM_MAX));expand.setAttribute('aria-valuenow',String(M.transport.bpm));expand.setAttribute('aria-valuetext',n+' BPM, '+rate);syncB.root.querySelector('.trig-l').textContent=M.syncMode().toUpperCase();cad.root.querySelector('.trig-l').textContent=cadence()+' Hz';holds.forEach((b,i)=>{const on=M.transport.hold&&M.transport.holdNote===['1/4','1'][i];b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(!!on));});for(const {b,label} of bends){const on=bend.which===label;b.root.classList.toggle('on',on);b.root.setAttribute('aria-pressed',String(on));}if(!panel.hidden)syncMacros();}
   /* 2026-09-11: the 200-ms tempo-panel timer used to rewrite ~15 DOM fields blind. The writes now happen only
      when their inputs changed — a signature of everything sync() paints, macros included. */
   let syncSig='';
-  function sync(){const T=M.transport;const sig=[T.bpm,M.syncMode(),cadence(),T.hold,T.holdNote,C.isPlaying(),ui.clockLink(),bend.which,bend.latched,panel.hidden,
+  function sync(){const T=M.transport;const sig=[T.bpm,M.syncMode(),cadence(),T.hold,T.holdNote,bend.which,bend.latched,panel.hidden,
     M.macroList().map(m=>m.id+':'+m.name+':'+m.kind+':'+(+m.masterDepth).toFixed(4)+':'+(m.sourceId||'')).join('|')].join('\u0001');
     if(sig===syncSig)return;syncSig=sig;syncNow();}
   sync();

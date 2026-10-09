@@ -1,6 +1,7 @@
 // THE TAKE-IN's CHEAP BUGS (0.4.0 S0 · wave 137), in the real app, each with the road a user takes:
-//   1 · THE ONE CLOCK (0.5.0 A6; S0's LINKED): a real Space plays THE play and, LINKED, the modulation with it — editor closed, nothing
-//       routed, no sources — holding the kit's app-play demand; a pause releases it; a bare host with no demand still refuses
+//   1 · THE ONE CLOCK (0.5.0 A6; C4 R-B1: LINKED/SEPARATE retired): a real Space plays THE play and the modulation with it — editor
+//       closed, nothing routed, no sources, MOD power off — holding the kit's app-play demand; a pause releases it; a bare host with no
+//       demand still refuses
 //   2 · CALCULUS's ⧉ copies its rows, not one header line (DIGESTS.calculus read a `stats` field the view never had); since 0.4.0 S3 the prose figure
 //   3 · the STATUS TAGS tick with METERS closed (they rode METERS' tick and went stale)
 //   4 · WIGNER stands down under MOLECULES (hydroReader did not know `chem`)
@@ -14,17 +15,17 @@ let failed = false;
 try {
   assert.equal((await g.waitFor('window.__LW&&__LW.ready', 150, 100)).ok, 1);
   const helpers = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
-    window.__clocks = () => ({ field: __LW.clock.playing, t: __LW.clock.t, mod: __LW.mod.playing, refused: __LW.mod.clock.stats().refusedPlays, link: __LW.mod.clockLink, editor: __LW.mod.expanded,
+    window.__clocks = () => ({ field: __LW.clock.playing, t: __LW.clock.t, mod: __LW.mod.playing, refused: __LW.mod.clock.stats().refusedPlays, editor: __LW.mod.expanded,
       running: __LW.mod.running, power: __LW.mod.armed, demand: __LW.mod.clock.anyRouted() && !__LW.mod.model.needsClock(), sources: __LW.mod.model.sourceList().length,
       routes: __LW.mod.model.routeList().length, held: __LW.mod.registry.isModulated('material.stage') });
     return 1;`;
   await g.ev(helpers);
 
-  /* ── 1 · THE ONE CLOCK (0.5.0 A6 · R-B1; S0's LINKED scenes, rewritten to the facade).  A real Space is THE play, and the
-         modulation follows it by holding the kit's app-play demand (host.clock.demand('app.play'), MIR 1.5's
-         installModulation().play — KIT-BRIEFS "LINKED refusal") while MOD is armed and LINKED (the default).  Four scenes: (a) with
-         the editor CLOSED and nothing routed — at a fresh boot, with no sources at all, after NEW — the play SUCCEEDS: no
-         'nothing-to-run', app time advances, the demand is held; (b) a pause releases the demand; (c) a routed source (WAVE DANCER) follows the one clock;
+  /* ── 1 · THE ONE CLOCK (0.5.0 A6 · C4 R-B1: LINKED/SEPARATE retired).  A real Space is THE play, and the modulation follows it
+         by holding the kit's app-play demand (host.clock.demand('app.play'), MIR 1.5's installModulation().play) on EVERY edge.
+         Four scenes: (a) with the editor CLOSED and nothing routed — at a fresh boot, with no sources at all, after NEW, with the MOD
+         POWER OFF (a route bypass: play never powers, power never plays) — the play SUCCEEDS: no 'nothing-to-run', app time advances,
+         the demand is held; (b) a pause releases the demand; (c) a routed source (WAVE DANCER) follows the one clock;
          (d) a bare host play with no demand still refuses with its own reason — that law stays the kit's. ── */
   const space = async (label, setup) => {
     await g.ev(`${setup || ''}; if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); return 1;`);
@@ -44,12 +45,13 @@ try {
     __LW.mod.clock.recomputeRunning()`));
   starts.push(await space('after NEW, editor closed, nothing routed', `await __LW.layout.projects.requestFresh(); await __LW.settle(); await __w(400);
     __LW.layout.notebook.close(); __LW.layout.modulation.collapse(); if (__LW.clock.playing) __LW.pause(); await __w(400)`));
-  starts.push(await space('WAVE DANCER opened (routed), editor closed', `__LW.layout.notebook.open('projects'); await __w(200); document.querySelector('.pj-demo').click();
+  starts.push(await space('MOD power off, editor closed, nothing routed', `__LW.mod.arm(false); await __w(200)`));
+  starts.push(await space('WAVE DANCER opened (routed), editor closed', `__LW.mod.arm(true); __LW.layout.notebook.open('projects'); await __w(200); document.querySelector('.pj-demo').click();
     for (let i = 0; i < 60 && !/WAVE DANCER/.test(document.querySelector('.pj-status').textContent); i++) await __w(100);
     await __w(400); __LW.layout.notebook.close(); __LW.layout.modulation.collapse(); if (__LW.clock.playing) __LW.pause(); await __w(400)`));
   for (const s of starts) {
     const why = JSON.stringify(s), routed = s.after.routes > 0;
-    assert.equal(s.before.link, true, 'LINKED is the default: ' + why); assert.equal(s.before.editor, false, 'the editor is closed: ' + why); assert.equal(routed, /routed\)/.test(s.label), 'routes as the scene says: ' + why);
+    assert.equal(s.after.power, !/power off/.test(s.label), 'play never powers, power never plays: ' + why); assert.equal(s.before.editor, false, 'the editor is closed: ' + why); assert.equal(routed, /routed\)/.test(s.label), 'routes as the scene says: ' + why);
     assert.equal(s.before.field, false, 'paused before the press: ' + why); assert.equal(s.before.mod, false, 'mod paused before the press: ' + why);
     assert.equal(s.after.field, true, 'Space plays THE play: ' + why); assert.ok(s.after.t > s.before.t, 'app time advances: ' + why);
     assert.equal(s.after.mod, true, 'the modulation follows the one clock: ' + why);

@@ -17,6 +17,7 @@ export const FAMILIES = Object.freeze({
   'lambdawaves.q0.keys': ['keys.js', 'PREFERENCE'], 'lw.keyboard.position.v1': ['keymap.js', 'PREFERENCE'],
   'lw.lean.v1': ['window-chrome.js', 'PREFERENCE'], 'lw-window-info': ['native-ui.js', 'PREFERENCE'],
   'lambdawaves.q0.library': ['library.js', 'LIBRARY'], 'lambdawaves.q0.modpresets': ['mir/modulation/mod.js PRESET_LS', 'PREFERENCE'],
+  'lambdawaves.q0.modulation': ['rack.js modStore (mir/modulation/bind.js localStore): modArm, modCadence', 'PREFERENCE'],   // 0.5.0 C4
 });
 export function createSettingsStore(storage) {
   const ls = () => storage || globalThis.localStorage;
