@@ -2,15 +2,17 @@
  * about the world X and Y axes (never gimbal-locked at the pole), Home resets. Paints only when something moved.
  * 1.4.0: the drawing is 400 × 280 CSS units whatever the backing store, so it is sharp at every device-pixel
  * ratio; a theme flip repaints it (it held the other theme's ink); an accent written inline on <body> (the kit's
- * accent engine, λWAVES', BASINS') is noticed on the next paint().  Its size and material are mir/css/skin.css's. */
-import { el, onThemeChange } from './kit.js';
+ * accent engine, λWAVES', BASINS') is noticed on the next paint().  Its size and material are mir/css/skin.css's.
+ * 1.5.0-alpha.14: the one knob law (kit.js gearOf): the fine gear is ⅛ on any modifier or a second finger (it was ⅕ on Shift),
+ * the pointer that went down owns the drag (a lost capture ends it), and a double-tap is home. */
+import { el, onThemeChange, gearOf, watchTouches, setKnobLaw } from './kit.js';
 
 export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
   const cv = el('canvas', 'plane-model', host); cv.width = 400; cv.height = 280; cv.tabIndex = 0;
   let dpr = 0;
   const fitStore = () => { const d = Math.max(1, Math.min(3, globalThis.devicePixelRatio || 1)); if (d === dpr) return false; dpr = d; cv.width = Math.round(400 * d); cv.height = Math.round(280 * d); return true; };
   cv.setAttribute('role', 'application'); cv.setAttribute('aria-label', 'Slice sphere and plane. Drag or use arrow keys to rotate; Home resets.');
-  cv.title = 'Orient the plane. Shift gives finer motion; Home resets.';
+  cv.title = 'Orient the plane. Shift or a second finger gives finer motion; a double-tap or Home resets.';
   const unit = a => { const n = Math.hypot(...a) || 1; return a.map(v => v / n); };
   const cross = (a,b) => [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
   const project = p => [200+85*Math.SQRT1_2*(p[0]-p[1]),140+85*((p[0]+p[1])/Math.sqrt(6)-p[2]*Math.sqrt(2/3))];
@@ -41,10 +43,13 @@ export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
     let cx=Math.cos(dx),sx=Math.sin(dx); [x,z]=[x*cx+z*sx, -x*sx+z*cx];           // about Y: a horizontal drag tips it left/right
     onTurn(unit([x,y,z]));paint();paint(true); }
   let drag=null;
-  cv.addEventListener('pointerdown',e=>{if(cv.getAttribute('aria-disabled')==='true')return;drag=[e.clientX,e.clientY];try{cv.setPointerCapture(e.pointerId);}catch(_){}cv.focus();});
-  cv.addEventListener('pointermove',e=>{if(!drag)return;const gain=e.shiftKey?.003:.015;turn((e.clientX-drag[0])*gain,(drag[1]-e.clientY)*gain);drag=[e.clientX,e.clientY];});
-  for(const type of ['pointerup','pointercancel'])cv.addEventListener(type,()=>{drag=null;});
-  cv.addEventListener('keydown',e=>{if(cv.getAttribute('aria-disabled')==='true')return;const k=e.shiftKey?.015:.1;if(e.key==='Home'){onTurn([0,0,1]);paint(true);}else if(e.key.startsWith('Arrow'))turn(e.key==='ArrowLeft'?-k:e.key==='ArrowRight'?k:0,e.key==='ArrowUp'?k:e.key==='ArrowDown'?-k:0);else return;e.preventDefault();});
+  /* the one knob law (kit.js): the fine gear is ⅛ on any modifier or a second finger; the pointer that went down owns the drag; a double-tap is home */
+  watchTouches();
+  cv.addEventListener('pointerdown',e=>{if(cv.getAttribute('aria-disabled')==='true'||drag)return;drag=[e.clientX,e.clientY,e.pointerId];try{cv.setPointerCapture(e.pointerId);}catch(_){}cv.focus();});
+  cv.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag[2])return;const gain=.015*gearOf(e,drag[2]);turn((e.clientX-drag[0])*gain,(drag[1]-e.clientY)*gain);drag[0]=e.clientX;drag[1]=e.clientY;});
+  for(const type of ['pointerup','pointercancel','lostpointercapture'])cv.addEventListener(type,e=>{if(drag&&e.pointerId===drag[2])drag=null;});
+  cv.addEventListener('dblclick',()=>{if(cv.getAttribute('aria-disabled')==='true')return;onTurn([0,0,1]);paint(true);});
+  cv.addEventListener('keydown',e=>{if(cv.getAttribute('aria-disabled')==='true')return;const k=e.shiftKey?.1*setKnobLaw().keyFine:.1;if(e.key==='Home'){onTurn([0,0,1]);paint(true);}else if(e.key.startsWith('Arrow'))turn(e.key==='ArrowLeft'?-k:e.key==='ArrowRight'?k:0,e.key==='ArrowUp'?k:e.key==='ArrowDown'?-k:0);else return;e.preventDefault();});
   const ro = new ResizeObserver(()=>paint(true)); ro.observe(cv);
   const offTheme = onThemeChange(()=>paint(true));
   paint(true); return { root:cv, paint, destroy(){ offTheme(); ro.disconnect(); cv.remove(); } };

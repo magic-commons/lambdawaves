@@ -1,0 +1,205 @@
+/* window/window.css — the floating window and its chip rail, native.
+ *
+ * THE LAW IT KEEPS: THE WINDOW WEARS THE HOUSE GLASS, AND ITS CHIPS WEAR THEIR WINDOW.
+ * The pane is a `.glass` (window.js puts the class on it), so skin.css paints it in every seat — theme × card style ×
+ * frost — exactly as it paints a card, and this sheet adds only its box.  Nothing is cloned: this replaces the
+ * ~1,250 modulation-window rules BASINS kwin.js copied into every window at startup (survey B §1).
+ * The chip is lab.css §56's law (BASINS, 2026-09-26), as tokens on the rail:
+ *   REST    the disc is its window's pane: --chip-fill and --chip-filter answer the same seat ladder the pane does;
+ *   HOVER   a lighter face (--chip-lift) and 6 % larger — docs/INTENT.md "a lighter face and a small lift", no ring;
+ *   ON      the frost face (--chip-on ← --state-on) with a thin rim (--chip-on-rim ← --state-on-rim), never an accent
+ *           fill — a latched toggle, the
+ *           chosen pane of a radio pair, a grip mid-drag (.drag) or held for a seat (.armed);
+ *   PRESS   it sinks: the press wash, --chip-sink and 8 % smaller; `.press` gives a finger what :active gives a mouse.
+ * Motion is the core's tokens (--motion-micro, --ease-out).  Everything is in mir.kit.house, after skin.css. */
+@layer mir.kit.house {
+
+/* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────
+   1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md).  The chip's material is declared on
+   the rail and re-pointed seat by seat (theme × card × frost) on the selectors it always had, in the order it always
+   had; the rules below read names only. */
+:root { --chip-hover-scale: 1.06; --chip-press-scale: .92; }     /* HOVER grows the disc 6 %, PRESS sinks it to 92 % */
+/* the title bar of a rail-less window (chrome: 'close'): its height, its two buttons' seat and glyph; a finger's 44 on a
+   touch tablet (below) */
+.mir-win { --win-head-h: 38px; --win-head-btn: 32px; --win-head-glyph: 18px; --win-head-press: .92; }
+/* the resize corner's two hairlines, drawn toward the corner the window grows from: bottom right (135°), or top right
+   (45°) docked at the bottom.  The angle is the only thing that turns: no transform on the handle, so a sheet that
+   draws its own glyph on the handle (the timeline's ::after) is not turned twice */
+.mir-win-resize { --win-corner-angle: 135deg; }
+.mir-win[data-dock="bottom"] .mir-win-resize { --win-corner-angle: 45deg; }
+/* 1.5.0-alpha.8 · THE WINDOW MATERIAL ([data-mir-material="modulation"] on a window's root and its rail): the modulation window's
+   rail, controls and corner, as BASINS' SAVE, TIMELINE and COLOUR windows wear them — by sharing the plugin's values
+   (one block in mir/css/skin.css: --m2-mat-frost, --glass-hairline .09, --m2-rail-track), not by cloning its rules. */
+[data-mir-material="modulation"] {
+  --win-corner: 18px; --win-corner-inset: 2px; --win-corner-rest: .5; --win-corner-z: 4;   /* the resize corner (BASINS kwin) */
+  --win-trig-size: 11px; --win-trig-track: .12em;                                         /* a trigger's type: 11 px, 1.32 px */
+}
+.mir-rail {
+  /* the disc's material, seat by seat below — the same ladder skin.css §14c gives the pane (L64/L65 change both) */
+  --chip-fill: hsl(var(--glass-tint) / var(--glass-opacity));
+  --chip-filter: var(--glass-filter);
+  --chip-lift: hsl(0 0% 100% / .16);
+  --chip-ink-drop: drop-shadow(0 1px 0 var(--glass-raise));   /* the glyph's and the dots' one-pixel lift (BASINS rail rule 32) */
+  --chip-rim: hsl(0 0% 100% / .30);
+  --chip-sink: inset 0 2px 5px hsl(0 0% 0% / .30), inset 0 0 0 1px var(--chip-rim);
+  /* ON reads the semantic tier (a skin may set it); the fallbacks are §56's: the plugin's frost at its default blend */
+  --chip-on: var(--state-on, hsl(0 0% 100% / .086));
+  --chip-on-rim: var(--state-on-rim, inset 0 0 0 1px var(--chip-rim), inset 0 1px 0 hsl(0 0% 100% / .12));
+  /* 1.5.0-alpha.5 · A DOCKED RAIL SITS TIGHTER (BASINS, Josh 2026-10-01: "Reduce the padding on all the chips when docked"):
+     along the rail each chip is its disc plus --rail-gap, and the chips stand --rail-gap apart.  It follows SPACING through
+     --rack-gap (gui.js writes it on <html>): two thirds of it, at most 4 px — 4 at the default (6), 2 at tight (3), 0 flush. */
+  --rail-gap-max: 4px;
+  --rail-gap-share: .667;
+  --rail-gap-derived: min(var(--rail-gap-max), calc(var(--rack-gap, 6px) * var(--rail-gap-share)));   /* the fallback: SPACING writes --rail-gap on <html> (the look engine), and that wins */
+}
+body[data-theme="light"] .mir-rail { --chip-rim: hsl(214 30% 40% / .34); }
+body:is([data-card="tinted"], [data-card="solid"]) .mir-rail { --chip-fill: var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity))); }
+body[data-card="refractive"] .mir-rail { --chip-fill: var(--surface-veil, transparent); }
+body.frost .mir-rail { --chip-filter: var(--surface-filter, var(--frost-filter)); }   /* every card style, as BASINS' rails (lab.css §56); TINTED's fill thins with --card-opacity */
+body.frost[data-card="refractive"][data-theme="dark"] .mir-rail { --chip-fill: var(--surface-veil, var(--frost-veil-dark)); }
+body.frost.frost-hold .mir-rail { --chip-filter: none; }
+body.frost.frost-hold[data-card="refractive"] .mir-rail { --chip-fill: var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity))); }   /* FROST · STILL: the chip holds with its pane (skin.css) */
+/* ── end of the values ── */
+/* THE MATERIAL'S RULES (eight; the values are above and in skin.css) */
+.mir-rail[data-mir-material="modulation"] .mir-chip { letter-spacing: var(--m2-rail-track); }
+.mir-rail[data-mir-material="modulation"] { --chip-on: var(--m2-mat-frost); --chip-on-rim: inset 0 0 0 1px var(--chip-rim); }
+.mir-win[data-mir-material="modulation"] .trig { font-size: var(--win-trig-size); letter-spacing: var(--win-trig-track); }
+/* a trigger that is not a toolbar verb is the modulation window's own button (its radius, padding and ink, from the
+   plugin's button reset through the shared values); ON keeps its accent label */
+.mir-win[data-mir-material="modulation"] .seg-b {   /* a segment is the plugin's own button too (its edge, corner, type, padding); CHOSEN keeps its ruled ON face */
+  border: var(--glass-border) solid var(--glass-border-color); border-radius: var(--m2-button-r); padding: var(--m2-button-pad);
+  font-size: var(--win-trig-size); letter-spacing: var(--win-trig-track); }
+.mir-win[data-mir-material="modulation"] .seg-b:not(.on) { color: var(--fg); }
+/* a disabled control says so under the pointer, as the plugin's own (modwindow.css: button:disabled, input:disabled) */
+.mir-win[data-mir-material="modulation"] :is(button, input, select):disabled, .mir-win[data-mir-material="modulation"] :is(.k, .fd, .sw).disabled { cursor: not-allowed; }
+.mir-win[data-mir-material="modulation"] .trig:not(.on):not(:where(.sv-toolbar *)) { border-radius: var(--m2-button-r); padding: var(--m2-button-pad); color: var(--fg);
+  border-color: var(--glass-border-color); background: var(--glass-raise); }   /* … and its face: the material's .06 and the pane's edge (GLASS faces still clear it) */
+.mir-win[data-mir-material="modulation"] .mir-win-resize {
+  width: var(--win-corner); height: var(--win-corner); right: var(--win-corner-inset); bottom: var(--win-corner-inset); z-index: var(--win-corner-z);
+  opacity: var(--win-corner-rest); transition: opacity var(--motion-micro) var(--ease-out);
+  background-image: linear-gradient(var(--win-corner-angle), transparent 52%, var(--ink-key) 52% 58%, transparent 58% 70%, var(--ink-key) 70% 76%, transparent 76%); }
+.mir-win[data-mir-material="modulation"] .mir-win-resize:hover, .mir-win[data-mir-material="modulation"].resizing .mir-win-resize { opacity: 1; }
+.mir-win[data-mir-material="modulation"][data-dock="bottom"] .mir-win-resize { top: var(--win-corner-inset); bottom: auto; }
+
+/* ── THE PANE ─────────────────────────────────────────────────────────────────────────────────────────────── */
+.mir-win {
+  position: fixed; box-sizing: border-box; display: flex; flex-direction: column; min-width: 0; overflow: hidden;
+  border-radius: var(--surface-radius, var(--r-lg)); pointer-events: auto; contain: layout paint; isolation: isolate;   /* CORNERS reaches the window (1.5.0-alpha.5) */
+}
+.mir-win-body {
+  flex: 1 1 auto; min-height: 0; overflow: hidden auto; overscroll-behavior: contain;
+  padding: var(--sp-3) var(--sp-4) var(--sp-4); touch-action: pan-y;
+  scrollbar-width: thin; scrollbar-color: var(--glass-groove-hot) transparent;
+}
+/* the resize corner: two hairlines in the corner; docked at the bottom it moves to the top edge, where the height grows,
+   and its hairlines point there (--win-corner-angle, above).  1.5.0 wave 19: this used to turn the handle itself
+   (transform: scaleY(-1)); the timeline draws its own L on the handle's ::after and turns that, so the two turns cancelled
+   and its top-right corner pointed bottom right (Josh, iPad 2026-10-06) */
+.mir-win-resize {
+  position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; cursor: nwse-resize; touch-action: none;
+  background-image: linear-gradient(var(--win-corner-angle), transparent 58%, var(--glass-groove-hot) 58% 63%, transparent 63% 73%, var(--glass-groove-hot) 73% 78%, transparent 78%);
+}
+.mir-win[data-dock="bottom"] .mir-win-resize { top: 0; bottom: auto; cursor: nesw-resize; }
+
+/* ── THE TITLE BAR (chrome: 'close'): the title, the head buttons, a plain × in the corner; the whole bar drags ──── */
+.mir-win-head {
+  flex: 0 0 auto; display: flex; align-items: center; gap: var(--sp-2); min-height: var(--win-head-h); box-sizing: border-box;
+  padding: 0 var(--sp-2) 0 var(--sp-4); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.mir-win-head.drag { cursor: grabbing; }
+.mir-win-title {
+  flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: var(--w-bold) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-faint);
+}
+.mir-win-tools { flex: 0 0 auto; display: flex; align-items: center; gap: var(--sp-1); }
+.mir-win-btn {
+  width: var(--win-head-btn); height: var(--win-head-btn); flex: 0 0 auto; padding: 0; border: 0; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; background: transparent; color: var(--ink-key); cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--motion-micro) var(--ease-out), transform var(--motion-micro) var(--ease-out);
+}
+.mir-win-btn > svg { width: var(--win-head-glyph); height: var(--win-head-glyph); pointer-events: none; }
+/* hover follows the LIVE pointer (core/kbm.js, 1.5.0 wave 21), not `(hover: hover)`: a trackpad on an iPad hovers, a
+   finger never leaves a sticky hover; :where() adds no weight, and a page without the layer keeps its hover */
+:where(:root:not(.kbm-touch)) .mir-win-btn:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.mir-win-btn:is(:active, .press) { background: var(--state-press, var(--glass-press)); color: var(--fg); transform: scale(var(--win-head-press)); }
+.mir-win-btn:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+/* a finger: the bar and its buttons a touch target tall */
+body.touch-tablet .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--touch); }
+@media (pointer: coarse) { .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--touch); } }
+/* a title-bar window's body starts under the bar: the bar carries the top inset */
+.mir-win[data-chrome="close"] > .mir-win-body { padding-top: 0; }
+
+/* ── THE RAIL ─────────────────────────────────────────────────────────────────────────────────────────────── */
+.mir-rail {
+  --chrome-chip-disc: calc(48px * var(--ui-scale));
+  --chrome-chip-target: max(var(--touch), calc(62px * var(--ui-scale)));
+  position: fixed; display: flex; flex-direction: column; align-items: center; gap: var(--sp-3);
+  margin: 0; padding: 0; pointer-events: auto;
+}
+.mir-rail:is([data-side="top"], [data-side="bottom"]) { flex-direction: row; }
+/* docked at the top or bottom: tighter ALONG the rail; across it the 62 px target stays (the dock lane is measured from it) */
+.mir-rail:is([data-dock="top"], [data-dock="bottom"]) { gap: var(--rail-gap, var(--rail-gap-derived)); }
+.mir-rail:is([data-dock="top"], [data-dock="bottom"]):not([data-side="top"], [data-side="bottom"]) > .mir-chip {
+  flex-basis: calc(var(--chrome-chip-disc) + var(--rail-gap, var(--rail-gap-derived))); height: calc(var(--chrome-chip-disc) + var(--rail-gap, var(--rail-gap-derived))); }
+.mir-rail:is([data-dock="top"], [data-dock="bottom"]):is([data-side="top"], [data-side="bottom"]) > .mir-chip {
+  flex-basis: calc(var(--chrome-chip-disc) + var(--rail-gap, var(--rail-gap-derived))); width: calc(var(--chrome-chip-disc) + var(--rail-gap, var(--rail-gap-derived))); }
+
+/* ── THE CHIP: a 62 px target around a 48 px disc ─────────────────────────────────────────────────────────── */
+.mir-chip {
+  box-sizing: border-box; position: relative; z-index: 0; flex: 0 0 var(--chrome-chip-target);
+  width: var(--chrome-chip-target); height: var(--chrome-chip-target); margin: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center; overflow: visible;
+  border: 0; border-radius: 50%; background: transparent; color: var(--ink-key);
+  font: var(--w-heavy) var(--fs-small)/1 var(--font-ui); cursor: pointer; outline: none;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  transition: color var(--motion-micro) var(--ease-out);
+}
+.mir-chip::before {
+  content: ""; position: absolute; z-index: -1; left: 50%; top: 50%;
+  width: var(--chrome-chip-disc); height: var(--chrome-chip-disc); box-sizing: border-box;
+  border: var(--glass-border) solid var(--glass-border-color); border-radius: 50%;
+  background-color: var(--chip-fill); background-image: none; box-shadow: var(--surface-shadow, var(--glass-shadow));
+  -webkit-backdrop-filter: var(--chip-filter); backdrop-filter: var(--chip-filter);
+  transform: translate(-50%, -50%);
+  transition: background-color var(--motion-micro) var(--ease-out), box-shadow var(--motion-micro) var(--ease-out), transform var(--motion-micro) var(--ease-out);
+}
+.mir-chip-ink, .mir-grip-dots, .mir-chip-text { pointer-events: none; }
+.mir-chip-text { white-space: nowrap; }
+.mir-chip:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }   /* focus: the accent ring OUTSIDE */
+.mir-chip[data-kind="grip"] { cursor: move; touch-action: none; }
+.mir-grip-dots {
+  width: calc(14px * var(--ui-scale)); height: calc(14px * var(--ui-scale));
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(2px * var(--ui-scale));
+}
+.mir-grip-dots > i {
+  width: calc(2px * var(--ui-scale)); height: calc(2px * var(--ui-scale));
+  align-self: center; justify-self: center; border-radius: 50%; background: currentColor;
+}
+/* the dots wear the chip's ink and its one-pixel lift, as BASINS' rail rule 32 (.kwin-chiprail .crail-ink, .kwin-grip-dots): colour --ink-key, drop-shadow(0 1px 0 --glass-raise) */
+.mir-grip-dots { color: var(--ink-key); filter: var(--chip-ink-drop); }
+
+/* ON — the frost face and its rim */
+.mir-chip:is(.on, .drag, .armed) { color: var(--fg); }
+.mir-chip:is(.on, .drag, .armed)::before {
+  background-image: linear-gradient(var(--chip-on), var(--chip-on)); box-shadow: var(--surface-shadow, var(--glass-shadow)), var(--chip-on-rim);   /* the pane shadow (the cast, under the engine) and the rim, as BASINS' chip */
+}
+/* HOVER — a lighter face and a small lift, only while the pointer in use hovers (core/kbm.js: not under a finger) */
+:where(:root:not(.kbm-touch)) .mir-chip:hover { color: var(--fg); }
+:where(:root:not(.kbm-touch)) .mir-chip:hover::before { background-image: linear-gradient(var(--chip-lift), var(--chip-lift)); transform: translate(-50%, -50%) scale(var(--chip-hover-scale)); }
+/* PRESS — it sinks, for a mouse (:active) and for a finger (.press, core/pointer.js installPress) */
+.mir-chip:is(:active, .press) { color: var(--fg); }
+.mir-chip:is(:active, .press)::before {
+  background-image: linear-gradient(var(--glass-press), var(--glass-press)); box-shadow: var(--chip-sink);
+  transform: translate(-50%, -50%) scale(var(--chip-press-scale));
+}
+
+/* ── THE MIR SWITCH between two workspaces (window/workspaces.js workspaceSwitch; BASINS skin.css:652–654): the palette
+   diamond in a 44 × 34 seat with no face; the app seats it (the modulation preset bar, after the picker arrows) ── */
+.mir-workspace-switch { --ws-w: 44px; --ws-h: 34px; --ws-r: 8px; --ws-diamond: 26px; --ws-flat: 0 0 0 0 transparent;
+  flex: 0 0 var(--ws-w); width: var(--ws-w); height: var(--ws-h); padding: 0; border: 0; background: transparent; box-shadow: var(--ws-flat);
+  border-radius: var(--ws-r); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.mir-workspace-switch > .mod-palette-mark { display: block; width: var(--ws-diamond); height: var(--ws-diamond); overflow: visible; stroke: none; }
+.mir-workspace-switch:focus-visible { outline: 1px solid var(--acc2); outline-offset: -2px; }
+
+}   /* end @layer mir.kit.house */

@@ -1,0 +1,51 @@
+/* fx/fx.css — what the two pointer helpers draw: the light under the pointer (fx/pointer-light.js) and the parallax
+ * drift (fx/parallax.js).
+ *
+ * THE LAW IT KEEPS: NOTHING IS DRAWN UNLESS THE HELPER IS LIVE.  Both are gated on the attribute their helper writes on
+ * <html> while it runs (`data-pointer-light`, `data-parallax-live`), and the helpers are off on touch, under reduced or
+ * no motion, in the flat tier and when the GUI's switch is off.  So off is not "drawn invisibly": it is not drawn.
+ *
+ * THE LIGHT is BASINS' opener glow (startup.css:96-101): a 105 px radial light at the pointer.  The opener blends it
+ * with `overlay` over opaque cover art; a glass pane has almost nothing under it to overlay (survey A §5.2), so here the
+ * light is painted UNDER the surface's content and OVER its own pane, with a blend chosen per theme (--light-blend) so it
+ * reads on clear glass.  Measured in screenshots of the gallery (2026-10-01): `overlay` and `soft-light` draw nothing
+ * visible on either theme's glass; `screen` at 55 % reads as a soft light on the dark glass; on the light glass only
+ * `plus-lighter` (35 %) reads as light — `normal` reads as a faint stain.  A surface may re-point any of the --light-* tokens.
+ * It uses the surface's ::after.  Do not put `data-light` on a part whose ::after already draws something.
+ *
+ * THE PARALLAX moves `[data-parallax]` by `translate` only, eased.  core/motion.js also animates `translate` on the
+ * windows it places, so never put `data-parallax` on a window pane: put it on a layer inside one.
+ *
+ * Inside `@layer mir.kit.house`, like the window sheet: an app's unlayered rule beats it. */
+@layer mir.kit.house {
+
+/* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────
+   1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md); the rules below read names only. */
+:where([data-light]) {
+  --light-r: 105px;                                          /* the opener's radius */
+  --light-ink: var(--acc);
+  --light-strength: 55%;
+  --light-blend: screen;
+}
+:where(body[data-theme="light"] [data-light]) { --light-strength: 35%; --light-blend: plus-lighter; }
+/* declared where --light-x/--light-y are written (the surface itself), so it resolves against the pointer's place */
+:where(html[data-pointer-light] [data-light]) {
+  --light-paint: radial-gradient(circle var(--light-r) at var(--light-x, 50%) var(--light-y, 50%),
+    color-mix(in srgb, var(--light-ink) var(--light-strength), transparent),
+    color-mix(in srgb, var(--light-ink) calc(var(--light-strength) * .55), transparent) 30%, transparent 100%);
+}
+/* ── end of the values ── */
+:where([data-light]) { position: relative; isolation: isolate; }
+html[data-pointer-light] [data-light]::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: var(--light-paint, none); mix-blend-mode: var(--light-blend);
+  opacity: 0; transition: opacity var(--motion-ui) var(--ease-out);
+}
+html[data-pointer-light] [data-light][data-lit]::after { opacity: 1; }
+
+html[data-parallax-live] [data-parallax] {
+  translate: var(--plx-x, 0px) var(--plx-y, 0px);
+  transition: translate var(--motion-structural) var(--ease-out);
+}
+
+}   /* end @layer mir.kit.house */

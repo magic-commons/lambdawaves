@@ -14,8 +14,9 @@
 const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 
 /* ── sRGB ↔ OKLab (Ottosson 2020) ─────────────────────────────────────────── */
-function srgbToLinear(c) { return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
-function linearToSrgb(c) { return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055; }
+/** the sRGB transfer curve, one channel in 0…1 (the kit's one copy: kit.js and look.js adapt their 0…255 callers to it) */
+export function srgbToLinear(c) { return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+export function linearToSrgb(c) { return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055; }
 export function rgbToOklab(rgb) {
   const r = srgbToLinear(rgb[0]), g = srgbToLinear(rgb[1]), b = srgbToLinear(rgb[2]);
   const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
@@ -36,6 +37,20 @@ export function oklabToRgb(lab) {
 }
 export const hexToRgb = (h) => { const s = h.replace('#', ''); return [parseInt(s.slice(0, 2), 16) / 255, parseInt(s.slice(2, 4), 16) / 255, parseInt(s.slice(4, 6), 16) / 255]; };
 export const rgbToHex = (c) => '#' + c.map((v) => Math.round(clamp01(v) * 255).toString(16).padStart(2, '0')).join('');
+/** hslToRgb01(h°, s 0…1, l 0…1) → [r, g, b] 0…1 — the kit's one HSL → RGB (look.js, accent.js and kit.js scale it) */
+export function hslToRgb01(h, s, l) {
+  const k = (n) => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  return [f(0), f(8), f(4)];
+}
+/** rgbToHsl([r, g, b] 0…1) → [h° 0…360, s 0…1, l 0…1] — the kit's one RGB → HSL */
+export function rgbToHsl(rgb) {
+  const r = rgb[0], g = rgb[1], b = rgb[2];
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2; let h = 0, s = 0;
+  if (mx !== mn) { const d = mx - mn; s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+    h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; }
+  return [h, s, l];
+}
 
 /* ── WAVE 57 · A FLOOR FOR A MARK DRAWN IN A COLOUR NOBODY CHOSE ────────────────────────────────────
  * A palette sample is a colour picked for a PHASE, not for a ground, and any wheel angle can land on the
@@ -52,9 +67,8 @@ export const rgbToHex = (c) => '#' + c.map((v) => Math.round(clamp01(v) * 255).t
  *     ground (down on a light ground, up on a dark one), 0.005 L at a time.
  * `floor` is a WCAG 2.x ratio.  3 : 1 is the non-text / graphical-object floor and the right one for a
  * logotype (1.4.11 exempts logotypes outright — this floor is a choice, not a debt). */
-const RGB_LIN = (c) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
 /** WCAG 2.x relative luminance of an rgb triple in 0…1 */
-export const relLuminance = (c) => 0.2126 * RGB_LIN(clamp01(c[0])) + 0.7152 * RGB_LIN(clamp01(c[1])) + 0.0722 * RGB_LIN(clamp01(c[2]));
+export const relLuminance = (c) => 0.2126 * srgbToLinear(clamp01(c[0])) + 0.7152 * srgbToLinear(clamp01(c[1])) + 0.0722 * srgbToLinear(clamp01(c[2]));
 /** the WCAG contrast ratio between two rgb triples in 0…1 */
 export function contrastRatio(a, b) { const x = relLuminance(a), y = relLuminance(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
 /* ── WAVE 59 · WHICH WAY IS "AWAY FROM THE GROUND" ────────────────────────────────────────────────────
@@ -151,7 +165,7 @@ export const PRESETS = [
     note: 'the fire scale, closed through indigo', stops: [{ at: 0, rgb: hexToRgb('#fff0c8') }, { at: 0.25, rgb: hexToRgb('#ff8a3d') }, { at: 0.5, rgb: hexToRgb('#8c1f4a') }, { at: 0.75, rgb: hexToRgb('#2a1b4a') }] },
   { id: 'sea', label: 'sea', points: 4, constL: false, harsh: false, cvd: false,
     note: 'foam · shallows · deep · violet', stops: [{ at: 0, rgb: hexToRgb('#eafff4') }, { at: 0.25, rgb: hexToRgb('#37c1a8') }, { at: 0.5, rgb: hexToRgb('#0b3d63') }, { at: 0.75, rgb: hexToRgb('#7a5cc0') }] },
-  { id: 'lambda', label: 'λWAVES', points: 5, constL: false, harsh: false, cvd: true,
+  { id: 'lambda', label: 'λWAVES', points: 5, constL: false, harsh: false, cvd: true,   // tr[λWAVES]: the app's name: keep it exactly as written
     note: 'the house palette', stops: [{ at: 0, rgb: hexToRgb('#5ee7d8') }, { at: 0.2, rgb: hexToRgb('#f5f7fa') }, { at: 0.45, rgb: hexToRgb('#d97ce8') }, { at: 0.62, rgb: hexToRgb('#2b3f7a') }, { at: 0.82, rgb: hexToRgb('#ffb35c') }] },
   { id: 'bipolar', label: 'bipolar (Re/Im legible)', points: 4, constL: false, harsh: false, cvd: true,
     note: 'the real axis white↔black, the imaginary axis blue↔orange', stops: [{ at: 0, rgb: hexToRgb('#2b7fff') }, { at: 0.25, rgb: hexToRgb('#f2f2f2') }, { at: 0.5, rgb: hexToRgb('#ff8a29') }, { at: 0.75, rgb: hexToRgb('#111417') }] },

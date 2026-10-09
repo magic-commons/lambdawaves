@@ -1,0 +1,70 @@
+/* panels/xy.css — THE XY CONTROLLER'S SHEET (panels/xy.js): one pad, three uses (PAIR · ROUTE · MORPH), as a rack card.
+ *
+ * The controls are the kit's (.mir-xy and its knobs, .segw, .mir-step, .sw, .trig): this sheet lays them out and draws three things of
+ * its own — the TRAIL (the dot's last positions while a route moves it), the ROUTE GRIPS (a trigger's face carrying the routing cross),
+ * and AUTOMATA's MORPH bank (lab/automata.css 264–290: the rows, the corners laid out as the pad is, the number that assigns a slot).
+ *
+ * INTENT (docs/INTENT.md): the trail is accent B (a relationship: the modulator's value), faint and fading, never a fill; an armed grip
+ * lights its label in accent B (a route waiting); a corner waiting for a slot is a chosen trigger (the kit's .on); the number that will
+ * take an armed corner is a raised face with an accent rim.  No look literal: tokens, with the kit's names as the fallbacks.  Kit layer. */
+@layer mir.kit.house {
+
+/* ── the values ── */
+.mir-xypanel {
+  --xy-gap: var(--sp-3);                             /* between the panel's rows */
+  --xy-trail-dot: 6px;                               /* one dot of the trail */
+  --xy-trail-alpha: .55;                             /* the newest trail dot's opacity; the rest fade to nothing */
+  --xy-grip-h: 44px;                                 /* a route grip's height (the modulation window's grip is 44) */
+  --xy-num: 26px;                                    /* a snapshot's number button (AUTOMATA's .mp-num) */
+}
+@media (pointer: coarse) { .mir-xypanel { --xy-grip-h: var(--touch); --xy-num: var(--touch); } }
+/* ── end of the values ── */
+
+.mir-xypanel { display: flex; flex-direction: column; gap: var(--xy-gap); min-width: 0; }
+.mir-xypanel .xy-head > .segw { width: 100%; }
+.mir-xypanel .xy-head .seg { display: flex; width: 100%; }
+.mir-xypanel .xy-head .seg-b { flex: 1 1 0; min-width: 0; padding: 0 var(--sp-1); }
+.mir-xypanel .xy-body { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.mir-xypanel .xy-body[hidden] { display: none; }
+.mir-xypanel .xy-pick { align-self: stretch; }
+.mir-xypanel .mir-xy { width: 100%; }
+.mir-xypanel .xy-title { font-size: var(--fs-tiny); letter-spacing: var(--tr-wider); color: var(--ink-key); }
+.mir-xypanel .xy-quiet { margin: 0; font-size: var(--fs-tiny); line-height: 1.4; color: var(--fg-soft); }
+
+/* ── the trail: the dot's last positions while a route moves it (accent B, fading; painted only when the dot moves) ── */
+.mir-xypanel .xy-trail { position: absolute; inset: 0; pointer-events: none; }
+.mir-xypanel .xy-trail[hidden], .mir-xypanel .xy-trail-dot[hidden] { display: none; }
+.mir-xypanel .xy-trail-dot { position: absolute; left: calc(var(--x, .5) * 100%); bottom: calc(var(--y, .5) * 100%); width: var(--xy-trail-dot); height: var(--xy-trail-dot);
+  margin: 0 0 calc(var(--xy-trail-dot) / -2) calc(var(--xy-trail-dot) / -2); border-radius: 50%; background: var(--acc2);
+  opacity: calc(var(--xy-trail-alpha) * (1 - var(--i, 0) / 12)); }
+
+/* ── ROUTE: the two grips (X, Y) under the pad, each a trigger's face with the routing cross and how many controls it reaches ── */
+.mir-xypanel .xy-grips { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-2); }
+.mir-xypanel .xy-grip { display: flex; align-items: center; justify-content: center; gap: var(--sp-1); min-width: 0; min-height: var(--xy-grip-h); touch-action: none; cursor: grab; }
+.mir-xypanel .xy-grip:active { cursor: grabbing; }
+.mir-xypanel .xy-grip-g { display: block; flex: 0 0 auto; pointer-events: none; }
+.mir-xypanel .xy-grip-n { font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--acc2); font-variant-numeric: tabular-nums; }
+.mir-xypanel .xy-grip.m2arm .trig-l { color: var(--acc2); }
+
+/* ── MORPH: AUTOMATA's bank, corners and pad ── */
+.mir-xypanel .xy-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "num name on" "num acts acts"; align-items: center;
+  column-gap: var(--sp-2); row-gap: 3px; padding: var(--sp-1) 0; border-bottom: 1px solid var(--glass-hairline); }
+.mir-xypanel .xy-num { grid-area: num; align-self: start; min-width: var(--xy-num); height: var(--xy-num); padding: 0 var(--sp-1); border: 1px solid var(--glass-hairline);
+  border-radius: var(--r-xs); background: transparent; color: var(--dim); font: inherit; font-size: var(--fs-tiny); font-variant-numeric: tabular-nums; cursor: pointer; }
+.mir-xypanel .xy-num:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-xypanel .xy-rows.assigning .xy-num { border-color: var(--acc); color: var(--fg); background: var(--glass-raise); }
+.mir-xypanel .xy-name { grid-area: name; min-width: 0; width: 100%; padding: 3px var(--sp-1); border: 1px solid transparent; border-radius: var(--r-xs); background: transparent;
+  color: var(--fg); font: inherit; font-size: var(--fs-tiny); letter-spacing: var(--tr-wide); }
+.mir-xypanel .xy-name:hover, .mir-xypanel .xy-name:focus { border-color: var(--glass-hairline); outline: none; }
+.mir-xypanel .xy-on { grid-area: on; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
+.mir-xypanel .xy-acts { grid-area: acts; display: flex; gap: var(--sp-1); min-width: 0; }
+.mir-xypanel .xy-acts .trig { flex: 1 1 0; min-width: 0; }
+.mir-xypanel .xy-acts .xy-del { flex: 0 0 auto; }
+.mir-xypanel .xy-row-store { display: flex; }
+.mir-xypanel .xy-row-store .trig { flex: 1 1 auto; }
+.mir-xypanel .xy-corners { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-1); }
+.mir-xypanel .xy-corner { min-width: 0; justify-content: flex-start; }
+.mir-xypanel .xy-pad.engaged:not(.mod) .xy-dot { background: var(--acc); }   /* AUTOMATA: an engaged pad's dot is live (accent A); a routed one stays accent B */
+.mir-xypanel .xy-corner .trig-l { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+}

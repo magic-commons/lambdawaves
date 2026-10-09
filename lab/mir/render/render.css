@@ -1,0 +1,157 @@
+/* render/render.css — THE RENDER PANEL'S SHEET: the picture and the film, in FOLDERS' window or in a rack card (render/panel.js).
+ *
+ * Harvested from BASINS REDUX app/mir-plugins/files/save.css (HEAD b7eb63e), its RENDER half (`.sr-*`): the layout, the sizes, the
+ * rows and their order are BASINS'.  The controls are the kit's (.trig, .seg, select.sel); this sheet only lays them out.
+ * The panel's root is `.mir-render`; in a rack card it also carries data-seat="card", which is BASINS' `.sv-rack-render`
+ * (compact: 8 px sections, 26 px rows, the fps and clock rows full width).
+ *
+ * INTENT (docs/INTENT.md), where BASINS broke it, as FOLDERS' sheet corrects the same sheet:
+ *   · the primary actions (CAPTURE IMAGE, RENDER) are a raised kit trigger whose label is the accent and whose rim is the
+ *     accent at .55, not a face filled with the accent (BASINS' `--acc-soft` fill is "ON is never an accent fill");
+ *   · a disabled primary is the quiet well, as BASINS drew it; the rest of the disabled states use the kit's token.
+ * BASINS parity (its save.css, measured on its RENDER pane 2026-10-06): the notes inherit the window's text; the key facts are the first
+ * and the second; a disabled RENDER and DOWNLOAD IMAGE fade by the kit's one disabled fade in the window and by .55 in the card; the
+ * card's sections stand flush; the panel declares no container (an app's own @container rules stay as they were); a motion's rows
+ * keep the section's gap.
+ * Tokens only: every look value is in the FROST block below; the rules read names.  Kit layer. */
+@layer mir.kit.house {
+
+/* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────── */
+.mir-render {
+  --render-gap: 8px;                                 /* between the sections */
+  --render-section-gap: 7px;                         /* inside one */
+  --render-section-pad: 10px;
+  --render-row-h: 30px;                              /* a row; 44 px for the film's controls (a finger) */
+  --render-touch-h: 44px;
+  --render-label-w: 72px;
+  --render-time-w: 96px;                             /* the number fields: length, start at */
+  --render-primary-rim: color-mix(in srgb, var(--acc) 55%, var(--glass-hairline));
+  --render-disabled: .55;                            /* BASINS' disabled primary and download in the rack card (the window: --state-disabled) */
+  --render-lines-h: 160px;                           /* the self-test's printout */
+  --render-video-h: 220px;                           /* the preview player */
+  --render-status-pad: 7px 9px;
+  --render-unit-track: .1em;
+  --render-files-gap: 6px;                           /* FILES' rows, and above them (BASINS' .sr-files-body) */
+}
+.mir-render[data-seat="card"] { --render-section-gap: 5px; --render-section-pad: 8px; --render-row-h: 26px; }
+.mir-render[data-seat="card"] { gap: 0; }            /* BASINS' card: its sections stacked flush */
+/* ── end of the values ── */
+
+.mir-render { position: relative; display: flex; flex-direction: column; gap: var(--render-gap); min-width: 0; }
+.mir-render [hidden] { display: none; }
+.mir-render .sr-section { display: flex; flex-direction: column; gap: var(--render-section-gap); padding: var(--render-section-pad); border-radius: var(--r-md);
+  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
+.mir-render .sr-title { font: var(--w-heavy) var(--fs-small)/1.3 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg); touch-action: none; }
+.mir-render .sr-row { display: flex; align-items: center; gap: var(--render-gap); min-height: var(--render-row-h); }
+.mir-render .sr-label { flex: 0 0 var(--render-label-w); font: var(--w-semi) var(--fs-micro)/1.2 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-faint); text-transform: uppercase; touch-action: none; }
+.mir-render .sr-value { flex: 1 1 auto; min-width: 0; font: var(--w-med) var(--fs-small)/1.35 var(--font-mono); color: var(--fg-soft); overflow-wrap: anywhere; }
+.mir-render .sr-row .segw, .mir-render .sr-row .fd { flex: 1 1 auto; min-width: 0; }
+:where(.mir-render .sv-note) { font: inherit; color: inherit; }   /* BASINS: a note is the window's own text (its estimate and status rules below still win) */
+
+/* the buttons: a kit trigger in the column, raised at rest; the primary's label is the accent and its rim is the accent's .55 */
+.mir-render .sv-act.trig { flex: 1 1 auto; min-height: 40px; }
+.mir-render .sv-wide.trig { width: 100%; flex: 0 0 auto; }
+.mir-render .sv-primary.trig .trig-l { color: var(--acc); }
+.mir-render :is(.sv-danger, .armed).trig .trig-l { color: var(--bad); }
+.mir-render .sr-film > .sv-primary.trig { min-height: var(--render-touch-h); border-color: var(--render-primary-rim); }
+.mir-render .sr-film > .sv-primary.trig:disabled { background: var(--glass-well); border-color: var(--glass-hairline); }
+.mir-render :is(.sr-film > .sv-primary.trig, .sr-picture .sr-download):disabled { opacity: var(--state-disabled); }
+.mir-render[data-seat="card"] :is(.sr-film > .sv-primary.trig, .sr-picture .sr-download):disabled { opacity: var(--render-disabled); }
+
+/* ── the subject: THIS VIEW, or the project the gallery's i pointed at ── */
+.mir-render .sr-subject { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--render-section-gap) var(--render-gap); }
+.mir-render .sr-subject-head { display: flex; align-items: center; min-width: 0; gap: var(--render-gap); }
+.mir-render .sr-subject-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: var(--w-heavy) var(--fs-base)/1.2 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg); }
+.mir-render .sr-back.trig { flex: 0 0 auto; min-height: var(--render-touch-h); }
+.mir-render .sr-verbs { display: flex; gap: 5px; }
+.mir-render .sr-verbs .trig { flex: 0 0 auto; min-width: 66px; min-height: var(--render-touch-h); padding: 0 8px; }
+.mir-render .sr-action-glyph { width: 16px; height: 16px; }
+.mir-render .sr-subject-summary { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.mir-render[data-seat="card"] .sr-subject-summary { gap: 3px var(--render-gap); }
+.mir-render .sr-keyfact { display: inline-flex; align-items: baseline; min-width: 0; gap: 6px; }
+.mir-render .sr-keyfact .sr-label { flex: 0 0 auto; }
+.mir-render .sr-keyfact .sr-value { flex: 0 1 auto; }
+.mir-render .sr-keyfact:first-child .sr-value { font-size: var(--fs-base); color: var(--fg); }
+.mir-render .sr-keyfact:nth-child(2) { flex: 1 1 140px; }
+.mir-render .sr-view-details { grid-column: 1 / -1; min-width: 0; }
+.mir-render .sr-detail-toggle { display: flex; align-items: center; gap: 5px; min-height: 40px; list-style: none; cursor: pointer;
+  font: var(--w-semi) var(--fs-micro)/1.2 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
+.mir-render .sr-detail-toggle::-webkit-details-marker { display: none; }
+.mir-render .sr-detail-glyph { display: inline-flex; color: var(--acc); }
+.mir-render .sr-files-toggle { list-style: none; cursor: pointer; padding: 2px; }                   /* BASINS' SETTINGS & FILES summary */
+.mir-render .sr-files-toggle::-webkit-details-marker { display: none; }
+.mir-render .sr-files-toggle:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-render .sr-files-body { display: flex; flex-direction: column; gap: var(--render-files-gap); padding-top: var(--render-files-gap); }
+/* OPEN ZIP…'s "save this first?" (FOLDERS' ask, folders.js openZip) opens here, below the button, in the flow: FILES is the
+   panel's foot, so it moves nothing above it (the hand law) */
+.mir-render .sr-zip-ask:empty { display: none; }
+.mir-render .sr-zip-ask > .sv-context.sv-ask { position: relative; }
+.mir-render .sr-detail-toggle:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-render .sr-view-details[open] { border-top: 1px solid var(--glass-hairline); padding-top: 3px; }
+.mir-render .sr-view-details .sr-row { min-height: 25px; }
+.mir-render[data-seat="card"] :is(.sr-view-details, .sr-video-details, .sr-files) { margin: 0; }
+
+/* ── the picture ── */
+.mir-render .sr-picture-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; }
+.mir-render .sr-picture-format { display: inline-flex; align-items: center; gap: 7px; }
+.mir-render .sr-picture-format .sr-label { flex: 0 0 auto; }
+.mir-render .sr-picture-format .segw { flex: 0 1 auto; }
+.mir-render .sr-picture-size { font: var(--w-med) var(--fs-small)/1.3 var(--font-mono); color: var(--fg-soft); }
+.mir-render .sr-picture-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.mir-render .sr-picture-actions .trig { min-width: 0; width: 100%; min-height: var(--render-touch-h); padding: 0 6px; }
+.mir-render .sr-picture:not(.has-capture) .sr-capture.trig,
+.mir-render .sr-picture.has-capture .sr-download.trig { border-color: var(--render-primary-rim); }
+.mir-render .sr-picture:not(.has-capture) .sr-capture .trig-l,
+.mir-render .sr-picture.has-capture .sr-download .trig-l { color: var(--acc); }
+.mir-render .sr-picture-note { min-height: 13px; font: var(--w-med) var(--fs-micro)/1.35 var(--font-ui); color: var(--fg-soft); }
+
+/* ── the film ── */
+.mir-render .sr-motion-ui:not([hidden]) { display: flex; flex-direction: column; gap: var(--render-section-gap); }   /* a motion's rows, at the section's gap */
+.mir-render .sr-motion-ui:empty { display: none; }
+.mir-render .sr-record .sr-row, .mir-render .sr-route { min-height: var(--render-touch-h); }
+.mir-render[data-seat="card"] .sr-record .sr-row { min-height: var(--render-row-h); }
+.mir-render .sr-sel { flex: 1 1 0; min-width: 0; max-width: 100%; min-height: var(--render-touch-h); }
+.mir-render .mir-select.sr-sel .mir-sel-b { width: 100%; min-width: 0; min-height: var(--render-touch-h); }   /* the kit's SELECT fills the native one's seat (call 19), so its words never resize it */
+.mir-render .sr-record-time { box-sizing: border-box; width: var(--render-time-w); flex: 0 1 var(--render-time-w); padding: 0 8px;
+  border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset));
+  color: var(--fg); font: var(--w-semi) var(--fs-base)/1 var(--font-mono); }
+/* LENGTH and START AT are the kit's NUMBER FIELD (call 19): its face is the well, in the input's seat, size and face */
+.mir-render .mir-num.sr-record-time { --num-w: 100%; padding: 0; border: 0; background: none; box-shadow: none; }
+.mir-render .mir-num.sr-record-time :is(.mir-num-box, .mir-num-face, .mir-num-in) { width: 100%; }
+.mir-render .mir-num.sr-record-time :is(.mir-num-face, .mir-num-in) { padding: 0 8px; border-color: var(--glass-hairline); border-radius: var(--r-sm); font: var(--w-semi) var(--fs-base)/1 var(--font-mono); }
+.mir-render .sr-record .sr-unit { color: var(--ink-faint); font: var(--w-semi) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--render-unit-track); }
+.mir-render .sr-arrow { color: var(--dim); }
+.mir-render .sr-record-estimate { color: var(--fg-soft); font-family: var(--font-mono); }
+.mir-render .sr-record-status { color: var(--fg-soft); }
+.mir-render .sr-render-status { padding: var(--render-status-pad); border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); font: var(--w-med) var(--fs-small)/1.4 var(--font-ui); color: var(--fg-soft); }
+.mir-render .sr-render-status.is-warning { border-color: var(--bad); }
+.mir-render .sr-record-files { display: flex; flex-direction: column; gap: 5px; }
+.mir-render .sr-prog[hidden], .mir-render .sr-done[hidden] { display: none; }
+/* THE HAND (1.5.0-alpha.19): the progress row is always there; CANCEL keeps its own word's width at the row's end and the
+   progress reads on one line beside it, so the words changing never move or resize the button */
+.mir-render .sr-prog .sv-act.trig { flex: 0 0 auto; }
+.mir-render .sr-prog .sr-value { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mir-render .sr-record-status { min-height: 1lh; }   /* its line is kept when it is empty, so "Render cancelled …" moves nothing under it */
+.mir-render .sr-done { display: flex; flex-direction: column; gap: 4px; }
+.mir-render .sr-video-preview { width: 100%; max-height: var(--render-video-h); border-radius: var(--r-sm); }
+.mir-render .sr-video-details { border-top: 1px solid var(--glass-hairline); padding-top: 3px; }
+.mir-render .sr-video-details .sr-row { min-height: var(--render-row-h); }
+.mir-render[data-seat="card"] :is(.sr-fps-row, .sr-clock-row) { flex-wrap: wrap; gap: 4px; }
+.mir-render[data-seat="card"] :is(.sr-fps-row, .sr-clock-row) > .sr-label { flex: 0 0 100%; }
+.mir-render[data-seat="card"] :is(.sr-fps-row, .sr-clock-row) > .segw { flex: 1 1 100%; width: 100%; }
+.mir-render[data-seat="card"] :is(.sr-fps-row, .sr-clock-row) .seg { display: grid; width: 100%; box-sizing: border-box; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.mir-render[data-seat="card"] .sr-clock-row .seg { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mir-render[data-seat="card"] :is(.sr-fps-row, .sr-clock-row) .seg-b { min-width: 0; padding: 0 2px; }
+
+/* ── the check ── */
+.mir-render .sr-lines { margin: 0; max-height: var(--render-lines-h); overflow: auto; font: var(--w-med) var(--fs-micro)/1.5 var(--font-mono); color: var(--fg-soft); white-space: pre-wrap; }
+.mir-render .sr-lines:empty { display: none; }
+
+@container (max-width: 315px) {
+  .mir-render .sr-subject-head, .mir-render .sr-verbs { grid-column: 1 / -1; }
+  .mir-render .sr-verbs .trig { flex: 1 1 0; }
+  .mir-render .sr-route { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 4px; }
+  .mir-render .sr-route .sr-label { grid-column: 1 / -1; }
+}
+}

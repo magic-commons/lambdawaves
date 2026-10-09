@@ -1,0 +1,192 @@
+/* shell/rack.css — the rack's boxes: the two columns, the float layer, the chrome column, the edge handle, the phone.
+ *
+ * THE LAW IT KEEPS: A RACK HIDES BY TRANSFORM AND DELAYED VISIBILITY, NEVER BY FADING.  An ancestor with opacity
+ * below one becomes the backdrop root of every glass inside it, so the windows would blur that empty layer instead of
+ * the picture (BASINS material.css:203-213 found it; the Linux "a clicked rack window loses its blur" report is the
+ * likely symptom).  Nothing here sets opacity on a rack, on the float layer or on a carried window.
+ *
+ * The geometry is λWAVES' (lab.css §2, skin.css §1/§3 for the phone) with BASINS' shadow gutter; the class and id
+ * hooks are the ones app sheets already style (#rack, #rackL, #floats, #rackAdd, .dev.floating, .dragging), so an
+ * app that keeps its own rules keeps its look: an app rule is unlayered and beats everything here.
+ * Motion is the core's tokens; everything sits in mir.kit.house, after skin.css. */
+@layer mir.kit.house {
+
+/* the two halves of "slide, then stop painting": visibility turns on at the start of a show and off at the end of a hide */
+:is(.mir-rack, .mir-rack-transport) { --rack-step-show: step-start; --rack-step-hide: step-end; }
+.mir-rack { --rack-flush-radius: 0px; --rack-flush-shadow: 0 0 0 0 transparent; }   /* SPACING at 0: square, and no pane shadow inside the slab */
+/* THE RACK'S MOTION (BASINS rack-motion.js RACK_MOTION: 320 ms, cubic-bezier(.22, 1, .36, 1) = the core's structural
+   duration and ease-out).  On every rack the kit runs, its own or an app's adopted one ([data-mir-rack]); read by
+   shell/rack.js where the motion starts.  The flat tier's 0 ms structural reaches it, so flat jumps. */
+[data-mir-rack] { --rack-motion: var(--motion-structural); --rack-ease: var(--ease-out);
+  --rack-enter: var(--dev-enter-time); --rack-enter-ease: var(--dev-enter-ease); }   /* a card's entrance: BASINS' .dev-enter, 6 px up over .22 s on its own curve (base.css says it once) */
+/* a card whose height is travelling clips what it is growing into (BASINS lab.css:977); a disconnected card's parts
+   carry their own shadows, so it does not clip them (BASINS material.css:216) */
+[data-mir-rack] > .dev.rack-sizing { overflow: clip; }
+body.disconnected:not(.phone) [data-mir-rack] > .dev.rack-sizing { overflow: visible; }
+
+/* ── THE COLUMNS ─────────────────────────────────────────────────────────────────────────────────────────── */
+.mir-rack {
+  --rack-shadow-gutter: 0px;   /* paint space beside the cards for their shadows; not a hit-test column */
+  position: absolute; top: 0; right: 0; bottom: auto; max-height: 100%; width: calc(var(--rack-w) + var(--rack-shadow-gutter));
+  box-sizing: border-box; z-index: var(--z-chrome); min-height: 0; overflow: hidden auto; overscroll-behavior: contain;
+  padding: var(--rack-inset, var(--card-gap, var(--sp-2))); display: flex; flex-direction: column; gap: var(--rack-gap, var(--card-gap, var(--sp-2)));
+  background: transparent; border: 0; pointer-events: none; touch-action: pan-y;
+  scrollbar-width: thin; scrollbar-color: var(--acc) transparent;
+  transition: transform var(--motion-structural) var(--ease-out), visibility var(--motion-structural) var(--rack-step-show);
+}
+.mir-rack > * { pointer-events: auto; }
+/* A FINGER SCROLLS THE RACK (1.5.0 wave 19; .tmp/W19/IPAD-FINDINGS.md §1): Safari does not touch-scroll a scroller whose
+   own pointer-events is none, even from a child that takes the pointer (Chromium and Firefox do).  On a touch tablet, and
+   on any coarse pointer, the column takes the pointer itself.  THE COST: a touch on the rack's blank areas (the gaps, the
+   gutter, the column below the last window) scrolls the rack instead of reaching the picture; the scene guard already
+   counts those gaps as interface, so nothing else changes.  It keys on the attribute too (alpha.20): an adopted app's
+   column can carry only [data-mir-rack], not the class (BASINS' #rack / #rackL), and the law never reached it. */
+body.touch-tablet :is(.mir-rack, [data-mir-rack]) { pointer-events: auto; }
+@media (pointer: coarse) { :is(.mir-rack, [data-mir-rack]) { pointer-events: auto; } }
+.mir-rack[data-side="left"] { right: auto; left: 0; padding-right: calc(var(--rack-inset, var(--card-gap, var(--sp-2))) + var(--rack-shadow-gutter)); }
+.mir-rack[data-side="right"] { padding-left: calc(var(--rack-inset, var(--card-gap, var(--sp-2))) + var(--rack-shadow-gutter)); direction: rtl; }   /* the scrollbar on the inner edge */
+/* SPACING (1.5.0-alpha.5): --rack-gap between the windows, --rack-inset from the screen's edge, --pane-pad inside a window
+   (skin.css .dev-body), written by the GUI window on <html>.  At 0 (html[data-flush]) the column is one slab: the windows
+   meet square, with one hairline between them and no drop shadow or shine falling across a neighbour; a window that
+   floats keeps its corner and its shadow. */
+html[data-flush] .mir-rack > .dev { --surface-radius: var(--rack-flush-radius); --surface-shadow: var(--rack-flush-shadow); --shine-term: var(--rack-flush-shadow); }
+html[data-flush] .mir-rack > .dev + .dev { border-top-color: transparent; }
+.mir-rack[data-side="right"] > * { direction: ltr; }
+.mir-rack:focus { outline: none; }
+@media (min-width: 861px) { .mir-rack { --rack-shadow-gutter: 48px; } }
+/* BASINS material.css:244 gives the gutter on `body:not(.phone)` only: a landscape phone wider than 860 px has none
+   (the phone draws its own rack below, and nothing that reads the gutter — the span, the scrollbar — sees one) */
+body.phone .mir-rack { --rack-shadow-gutter: 0px; }
+/* a window carried in a rack, and its header as a keyboard handle */
+.mir-rack .dev-head:focus-visible, .mir-rack-floats .dev-head:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mir-rack > .dev.dragging, .mir-rack-floats > .dev.dragging { opacity: 1; }   /* the carried pane keeps its blur (see the law) */
+
+/* ── HIDDEN: slide out, then stop painting (the visibility waits for the slide) ───────────────────────────── */
+body.rack-hidden:not(.rack-peek-right) .mir-rack[data-side="right"],
+body.rack-hidden:not(.rack-peek-left) .mir-rack[data-side="left"] {
+  visibility: hidden; transition: transform var(--motion-structural) var(--ease-out), visibility var(--motion-structural) var(--rack-step-hide);
+}
+body.rack-hidden:not(.rack-peek-right) .mir-rack[data-side="right"] { transform: translateX(calc(100% + 12px)); }
+body.rack-hidden:not(.rack-peek-left) .mir-rack[data-side="left"] { transform: translateX(calc(-100% - 12px)); }
+/* the house's explicit `visibility: visible` on a disconnected window's parts must not outlive its hidden rack */
+body.rack-hidden:not(.rack-peek-right) .mir-rack[data-side="right"] > .dev > *,
+body.rack-hidden:not(.rack-peek-left) .mir-rack[data-side="left"] > .dev > * { visibility: inherit; }
+/* H: the whole interface out of paint */
+body.ui-hidden :is(.mir-rack, .mir-rack-floats, .mir-rack-btn, .mir-rack-list) { display: none; }
+
+/* ── THE SCROLLBAR AT THE CARD COLUMN (BASINS rack-scrollbars.js + skin.css:657-667; shell/rack-scrollbar.js) ──────
+   createRack({ scrollbar: true }): the native bar is off on a wide screen and a transparent 12-px track stands beside
+   the cards, at the gutter's inner edge, with a 2-px accent thumb.  The class names are BASINS'.
+   ONE BAR, 2 PX (1.5.0 wave 19; Josh, iPad 2026-10-06: "a simple 2PX scroll bar is visible only").  The native bar is
+   hidden by `scrollbar-width: none` on the scroller, the standard property (Safari ships it since 18.2; that the iOS
+   overlay indicator obeys it is checked on the iPad, not here); `::-webkit-scrollbar` is the older engines' door and
+   does not reach an iOS overlay bar.  The track stays 12 px wide as the touch target and paints nothing; only the
+   2-px thumb is drawn.  An app sheet that sets `scrollbar-width` or `::-webkit-scrollbar` on its rack itself (unlayered,
+   it wins) brings the native bar back beside the kit's: it must leave the rack's bar to the kit. */
+@media (min-width: 861px) {
+  body.rack-scrollbars:not(.phone) [data-mir-rack] { scrollbar-width: none; }
+  body.rack-scrollbars:not(.phone) [data-mir-rack]::-webkit-scrollbar { width: 0; display: none; }
+}
+.rack-scrollbar {
+  --rack-scrollbar-w: 12px; --rack-scrollbar-thumb-w: 2px; --rack-scrollbar-thumb-x: 5px;
+  --rack-scrollbar-rest: .65; --rack-scrollbar-fade: 150ms; --rack-scrollbar-ease: ease;
+  --rack-scrollbar-focus-r: 6px;
+  position: absolute; z-index: calc(var(--z-chrome) + 1); width: var(--rack-scrollbar-w); background: transparent; border: 0; touch-action: none; cursor: default;
+}
+.rack-scrollbar[hidden] { display: none; }
+.rack-scrollbar-thumb {
+  position: absolute; left: var(--rack-scrollbar-thumb-x); width: var(--rack-scrollbar-thumb-w); border-radius: var(--r-pill);
+  background: var(--acc); opacity: var(--rack-scrollbar-rest); transition: opacity var(--rack-scrollbar-fade) var(--rack-scrollbar-ease);
+}
+.rack-scrollbar:hover .rack-scrollbar-thumb, .rack-scrollbar.drag .rack-scrollbar-thumb { opacity: 1; }
+.rack-scrollbar:focus-visible { outline: 1px solid var(--acc); outline-offset: -2px; border-radius: var(--rack-scrollbar-focus-r); }   /* BASINS: inside the 12-px track */
+:root:is([data-motion="reduced"], [data-motion="off"]) .rack-scrollbar-thumb { transition: none; }
+body.ui-hidden .rack-scrollbar { display: none; }
+
+
+/* ── THE FLOAT LAYER ─────────────────────────────────────────────────────────────────────────────────────── */
+.mir-rack-floats { position: absolute; inset: 0; z-index: calc(var(--z-chrome) + 2); pointer-events: none; }
+.mir-rack-floats > .dev { position: absolute; pointer-events: auto; width: var(--float-w, var(--rack-w)); max-height: calc(100% - 16px); }
+.mir-rack-floats > .dev > .dev-body { min-height: 0; overflow: hidden auto; overscroll-behavior: contain; }
+.mir-rack-floats > .dev.compact { width: var(--rail-w); }
+/* the one gesture's grip: off screen, never pressed by a hand (a header press is handed to it) */
+.mir-rack-grip { position: fixed; left: -8px; top: -8px; width: 1px; height: 1px; overflow: hidden; touch-action: none; }
+
+/* ── THE CHROME COLUMN: hide, +, ☆, and their lists (λWAVES lab.css §2) ──────────────────────────────────── */
+.mir-rack-btn {
+  position: absolute; right: calc(var(--rack-w) + 14px); top: 8px; z-index: calc(var(--z-chrome) + 1);
+  width: 30px; height: 30px; border-radius: 50%; padding: 0; color: var(--fg-soft); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.mir-rack-btn[data-rack-btn="add"] { top: 44px; }
+.mir-rack-btn[data-rack-btn="fav"] { top: 80px; }
+.mir-rack-btn > svg { width: 16px; height: 16px; }
+.mir-rack-btn:hover, .mir-rack-btn[aria-expanded="true"] { color: var(--acc); }
+.mir-rack-btn:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+body.rack-hidden .mir-rack-btn[data-rack-btn="toggle"] { color: var(--acc); }
+body.rack-hidden:not(.rack-peek-right) :is(.mir-rack-btn[data-rack-btn="add"], .mir-rack-btn[data-rack-btn="fav"], .mir-rack-list) { visibility: hidden; }
+.mir-rack-list {
+  position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3);
+  display: flex; flex-direction: column; min-width: 260px; max-height: calc(100% - 132px); overflow: auto; padding: 4px; border-radius: var(--r-lg);
+}
+.mir-rack-list .mb-item { position: relative; justify-content: flex-start; }
+.mir-rack-list .mb-glyph { flex: 0 0 auto; color: var(--dim); }
+.mir-rack-list .mb-item.queued { color: var(--fg); }
+.mir-rack-list .mb-num { margin-left: auto; color: var(--acc); font-variant-numeric: tabular-nums; }
+.mir-rack-list .mb-fav { margin-left: auto; color: var(--acc2); display: inline-flex; align-self: center; }
+.mir-rack-list .mb-fav > svg { width: 1em; height: 1em; }   /* the drawn star at the size the typed ★ had: the row's own font */
+.mir-rack-list .fav-x { margin-left: auto; color: var(--dim); }
+.mir-rack-list .mb-item:hover .fav-x { color: var(--acc2); }
+
+/* ── THE EDGE HANDLE: a touch user's way back from H (and from a hidden rack, where there is no hover peek) ── */
+.mir-rack-handle {
+  position: fixed; top: 50%; z-index: calc(var(--z-chrome) + 8); width: 32px; height: 64px; margin-top: -32px; padding: 0;
+  border: 0; background: transparent; cursor: pointer; display: none; touch-action: manipulation;
+}
+.mir-rack-handle[data-side="right"] { right: 0; }
+.mir-rack-handle[data-side="left"] { left: 0; }
+.mir-rack-handle::before {      /* the visible tab: a short pill on the edge, the hit area is the whole 32 × 64 */
+  content: ''; position: absolute; top: 12px; bottom: 12px; width: 5px; border-radius: var(--r-pill);
+  background: var(--glass-groove-hot, var(--acc)); box-shadow: var(--acc-glow);
+}
+.mir-rack-handle[data-side="right"]::before { right: 4px; }
+.mir-rack-handle[data-side="left"]::before { left: 4px; }
+.mir-rack-handle:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: -2px; }
+.mir-rack-handle[data-when="always"] { display: none; }
+body.ui-hidden .mir-rack-handle[data-when="always"] { display: block; }
+@media (any-pointer: coarse) {
+  body.ui-hidden .mir-rack-handle[data-when="coarse"] { display: block; }
+}
+
+/* ── THE TRANSPORT: hidden with the rack (slid, then not painted), peeking around its own seat ─────────────── */
+.mir-rack-transport { transition: translate var(--motion-structural) var(--ease-out), visibility var(--motion-structural) var(--rack-step-show); }
+body.rack-hidden:not(.transport-peek) .mir-rack-transport {
+  translate: 0 140px; visibility: hidden;
+  transition: translate var(--motion-structural) var(--ease-out), visibility var(--motion-structural) var(--rack-step-hide);
+}
+body.rack-hidden:not(.transport-peek) .mir-rack-transport[data-seat="top"] { translate: 0 -140px; }
+
+/* ── THE NARROW SCREEN (an iPad in portrait, a narrow desktop window): the rack along the bottom (λWAVES lab.css) ── */
+@media (max-width: 860px) {
+  .mir-rack[data-side="right"] { top: auto; bottom: 0; left: 0; right: 0; width: auto; height: 46vh; }
+}
+
+/* ── THE PHONE: one rack, on the left, and the chrome follows its edge in the thumb zone (λWAVES skin.css §1, §3) ── */
+@media (hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px) {
+  body.rack-hidden { --rack-edge: 0px; }
+  .mir-rack[data-side="right"] {
+    top: max(calc(env(safe-area-inset-top) + var(--top-bar)), var(--menubar-bottom, 0px)); bottom: 0; left: 0;   /* below a menubar that wrapped (menubar.js) */ right: auto; width: var(--rack-w); height: auto; max-height: none; direction: ltr;
+    padding: var(--rack-inset, var(--card-gap)) var(--rack-inset, var(--card-gap)) max(var(--rack-inset, var(--card-gap)), env(safe-area-inset-bottom)) max(var(--rack-inset, var(--card-gap)), env(safe-area-inset-left));
+  }
+  body.rack-hidden:not(.rack-peek-right) .mir-rack[data-side="right"] { transform: translateX(calc(-100% - 12px)); }   /* it leaves to the LEFT */
+  .mir-rack[data-side="left"] { display: none; }
+  .mir-rack-btn { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto; top: auto;
+    transition: left var(--motion-structural) var(--ease-out); }
+  .mir-rack-btn[data-rack-btn="toggle"] { bottom: calc(max(env(safe-area-inset-bottom), 0px) + 14px); }
+  .mir-rack-btn[data-rack-btn="add"] { bottom: calc(max(env(safe-area-inset-bottom), 0px) + 60px); }
+  .mir-rack-btn[data-rack-btn="fav"] { bottom: calc(max(env(safe-area-inset-bottom), 0px) + 106px); }
+  .mir-rack-btn::after { content: ''; position: absolute; inset: -8px; }   /* 30 px of ink, 44 px of finger */
+  .mir-rack-list { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto; top: auto;
+    bottom: calc(max(env(safe-area-inset-bottom), 0px) + 152px); max-width: calc(100vw - var(--rack-edge) - 24px); max-height: 50vh; }
+}
+}
