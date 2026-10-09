@@ -3,6 +3,25 @@
    the tokens and the widgets, not the stage). */
 html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #070a0f; }
 
+/* ── G · THE GLASS DEFAULTS (0.5.0 C0; Josh rules each class: research/release-0.5.0/C0-GLASS-RULINGS.md) ─────────────
+   MIR 1.5's first look changes seven property classes on the kit's own controls.  PLAN §9's default, class by class: λWAVES'
+   look where λWAVES originated it, the kit's where BASINS designed it.  Five take the kit's and need nothing here.  TWO keep
+   λWAVES' — the DISCONNECTED HEAD's lighter fill and its brightness/saturate lift (classes 4 `.dev-head` background and 6
+   backdrop-filter): λWAVES' disconnected rack, whose head "keeps its own lighter fill — the difference is the point" (MIR 1.4.3
+   mir/css/skin.css), where 1.5 makes the head the pane (BASINS' "the only difference is the fill").  These are the three 1.4.3
+   kit rules that painted that head, verbatim, UNLAYERED and FIRST among our rules: so they beat every kit layer as 1.4.3's
+   unlayered kit did, and λWAVES' own head rules below (skin.css: a selected or TAB-hot head) still win by order, as then.
+   Not an `app.*` layer: `@layer app, mir;` ranks app BELOW the kit for a normal declaration, so a layered rule cannot keep a
+   look the kit paints (only `!important` could, and it would also beat our own state rules).  Josh's "take the kit's" for
+   either class = delete its lines here; nothing else depends on them. */
+body.disconnected:not(.phone) .dev > .dev-head { background: var(--glass-raise);
+  -webkit-backdrop-filter: brightness(1.03) saturate(1.03);
+  backdrop-filter: brightness(1.03) saturate(1.03); }
+body.disconnected.frost:not(.phone) .dev > .dev-head {
+  -webkit-backdrop-filter: var(--frost-filter) brightness(1.03) saturate(1.03);
+  backdrop-filter: var(--frost-filter) brightness(1.03) saturate(1.03); }
+body.disconnected.frost.frost-hold:not(.phone) .dev > .dev-head { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
 /* ── shell ──────────────────────────────────────────────────────────────── */
 /* THE STAGE IS THE WHOLE WINDOW; the rack floats over it as detached cards */
 #lab { position: fixed; inset: 0; display: block; }

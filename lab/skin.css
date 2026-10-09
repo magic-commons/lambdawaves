@@ -2,7 +2,10 @@
 #rack, #rackL { background: transparent; border-left: 0; padding: var(--card-gap); gap: var(--card-gap); opacity: 1; box-shadow: none; }
 
 
-#rack > .dev, #rackL > .dev { box-shadow: var(--glass-shadow-flat); }  /* no continuous rack slab, no veil: cards float alone */
+#rack > .dev, #rackL > .dev { box-shadow: var(--glass-shadow); }  /* no continuous rack slab, no veil: cards float alone */
+/* 0.5.0 C0: MIR 1.5 removed `--glass-shadow-flat` ("read by nothing" — this rule read it) and made `--glass-shadow` the same flat
+   recipe in both themes (mir/css/skin.css: "what wave 98's --glass-shadow-flat was"); the dangling name had dropped the docked cards'
+   shadow to `none`. */
 @media (max-width: 860px) { #rack { border-top: 0; }
 }
 /* THE STATUS LINE GOES.  It is the "secondary writing" — a right-aligned second string beside the
