@@ -1,7 +1,7 @@
 // The visible molecular names may change, while CSS hooks and project keys stay stable.
 // 2026-10 (supersedes W129's first-run rule): MOLECULES and MO-REGISTRY start OPEN on the first-run LEFT rack under SPECTRUM;
 // closed, + and WINDOW bring them back; a project whose field owner is MOLECULES brings them back onto the rack (MO-REGISTRY
-// too when its register is on) — the H₂⁺ card's law.  QCD, HELIUM, H₂ and ELECTROSTATICS are hidden LEGACY windows; ATOMS is back
+// too when its register is on) — the H₂⁺ card's law.  HELIUM, H₂ and ELECTROSTATICS are hidden LEGACY windows (QCD was deleted in 0.5.0 D9); ATOMS is back
 // (0.4.0 S3 · R-A2) as the periodic table, with its own row in + and WINDOW.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
@@ -20,31 +20,34 @@ try {
     __LW.layout.menu.close();
     const saved = __LW.serialize();
     return {
-      names: ['molecule', 'chem', 'orbitals'].map(id => card(id).querySelector('.dev-eyebrow').textContent),
-      oldHidden: card('molecule').hidden && getComputedStyle(card('molecule')).display === 'none',
+      names: ['chem', 'orbitals'].map(id => card(id).querySelector('.dev-eyebrow').textContent),
+      oldGone: !card('molecule'),
       onLeft: ['chem', 'orbitals'].map(id => !card(id).classList.contains('closed') && card(id).parentElement.id === 'rackL'),
       underSpectrum: (() => { const L = [...document.querySelectorAll('#rackL > .dev')].map(d => d.dataset.id); const i = L.indexOf('spectrum'); return L.slice(i + 1, i + 3); })(),
-      legacyHidden: ['qcd', 'helium', 'h2', 'field'].map(id => card(id).hidden), atomsSeat: !card('atoms').hidden && card('atoms').querySelector('.dev-eyebrow').textContent,
+      legacyHidden: ['h2', 'field'].map(id => card(id).hidden), qcdGone: !card('qcd'), heliumGone: !card('helium'), atomsSeat: !card('atoms').hidden && card('atoms').querySelector('.dev-eyebrow').textContent,
       choices, windows, ids: saved.presentation.layout.cards.map(c => c.id),
       records: Object.keys(saved.presentation.instruments), errors: __e.slice()
     };
   `);
-  assert.deepEqual(boot.names, ['H₂⁺ · LEGACY', 'MOLECULES', 'MO-REGISTRY']);
-  assert.equal(boot.oldHidden, true);
+  assert.deepEqual(boot.names, ['MOLECULES', 'MO-REGISTRY']);
+  assert.equal(boot.oldGone, true, 'the H₂⁺ card is deleted (0.5.0 D9)');
   assert.deepEqual(boot.onLeft, [true, true]);                       // 2026-10: the first-run LEFT rack, under SPECTRUM
   assert.deepEqual(boot.underSpectrum, ['chem', 'orbitals']);
-  assert.deepEqual(boot.legacyHidden, [true, true, true, true]);
+  assert.deepEqual(boot.legacyHidden, [true, true]);
+  assert.equal(boot.qcdGone, true, 'the QCD window is deleted (0.5.0 D9)');
+  assert.equal(boot.heliumGone, true, 'the HELIUM window is deleted (0.5.0 D9)');
   assert.equal(boot.atomsSeat, 'ATOMS');
   assert.equal(boot.choices.includes('atoms'), true, 'ATOMS has no row in +: ' + JSON.stringify(boot.choices));
   assert.equal(boot.windows.some((w) => /ATOMS$/.test(w)), true, 'ATOMS has no row in WINDOW: ' + JSON.stringify(boot.windows));
   assert.equal(boot.choices.includes('molecule'), false);
-  for (const id of ['qcd', 'helium', 'h2', 'field']) assert.equal(boot.choices.includes(id), false);
+  for (const id of ['qcd', 'helium', 'h2', 'field']) assert.equal(boot.choices.includes(id), false);   // qcd, helium: deleted, so no row either
   assert.equal(boot.windows.includes('↑  MOLECULES'), true);
   assert.equal(boot.windows.includes('↑  MO-REGISTRY'), true);
-  for (const id of ['molecule', 'chem', 'orbitals']) {
+  for (const id of ['chem', 'orbitals']) {
     assert.equal(boot.ids.includes(id), true);
     assert.equal(boot.records.includes(id), true);
   }
+  assert.equal(boot.ids.includes('molecule') || boot.records.includes('molecule'), false, 'the deleted H₂⁺ card has no seat and no record');
   assert.deepEqual(boot.errors, []);
   console.log('PASS Molecules and MO-Registry start on the left rack under SPECTRUM, the legacy windows are hidden, ATOMS has its + and WINDOW rows, saved IDs are stable');
 
@@ -136,19 +139,21 @@ try {
   assert.deepEqual(named.errors, []);
   console.log(`PASS the names: the knob reads "1b1 · HOMO", CH₄'s three HOMO members all read HOMO, the CORE fold opens (a WORKSPACE key), benzene named in ${named.benz.ms} ms`);
 
+  /* 0.5.0 D9: the H₂⁺ card is deleted; a record whose field it owned restores as MOLECULES · H₂ on σu (its `kind`), the card
+     itself nowhere, MOLECULES reachable on the rack even under a layout that closed it, and STATE names what happened */
   const legacy = await g.ev(`
-    __LW.molecule.setOn(true);
     const saved = __LW.serialize();
-    saved.presentation.layout.cards.find(c => c.id === 'molecule').closed = true;
-    __LW.molecule.setOn(false);
-    const ok = __LW.restore(saved), old = document.querySelector('.dev[data-id="molecule"]');
-    return { ok, on: __LW.molecule.on, visible: !old.hidden && !old.classList.contains('closed'),
-      savedOn: __LW.serialize().presentation.instruments.molecule.on, errors: __e.slice() };
+    saved.presentation.instruments.molecule = { on: true, R: 2, kind: 'sigma_u' };
+    saved.presentation.layout.cards.find(c => c.id === 'chem').closed = true;
+    const ok = __LW.restore(saved), chem = document.querySelector('.dev[data-id="chem"]');
+    let st = __LW.chem.state(); for (let i = 0; i < 100 && !(st.on && st.nocc); i++) { await new Promise(r => setTimeout(r, 100)); st = __LW.chem.state(); }
+    const out = { ok, gone: !document.querySelector('.dev[data-id="molecule"]'), on: st.on, preset: __LW.chem.preset(), view: st.view, orbital: st.orbital,
+      visible: !chem.hidden && !chem.classList.contains('closed'), status: document.querySelector('.dev[data-id="state"] .dev-stat').textContent,
+      saved: Object.keys(__LW.serialize().presentation.instruments).includes('molecule'), errors: __e.slice() };
+    __LW.chem.setOn(false); await __LW.settle();
+    return out;
   `);
-  assert.equal(legacy.ok, true);
-  assert.equal(legacy.on, true);
-  assert.equal(legacy.visible, true);
-  assert.equal(legacy.savedOn, true);
-  assert.deepEqual(legacy.errors, []);
-  console.log('PASS an active legacy H₂⁺ project restores with its controls reachable');
+  assert.deepEqual(legacy, { ok: true, gone: true, on: true, preset: 'H2', view: 'orbital', orbital: 2, visible: true,
+    status: 'retired in 0.5.0: H₂⁺ (opened as MOLECULES · H₂ σu)', saved: false, errors: [] }, JSON.stringify(legacy));
+  console.log('PASS an active legacy H₂⁺ record restores as MOLECULES · H₂ on σu, its controls reachable, STATE saying so in one line');
 } finally { await g.close(); }

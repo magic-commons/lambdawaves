@@ -98,7 +98,7 @@ try {
     return { specSide: __LW.layout.side('spectrum'), pickerOpen: __LW.spectrum.pickerOpen, keplerOn: __LW.kepler.on, theme: document.body.dataset.theme, phaseDefault: __LW.bootView === 'phase' && v0 === vP && v0 !== vD, vortexOn: __LW.vortex.on, vortexOverlay: __LW.vortex.overlay, font, bodyFont: getComputedStyle(document.body).fontFamily, kinds, settings: !!set, keysInSettings: set ? set.querySelectorAll('.keys-chip').length : 0, themeSegInSettings: !!(set && [...set.querySelectorAll('.seg')].length), adds: document.querySelectorAll('#rackAdd').length, veil: getComputedStyle(document.getElementById('rack')).opacity, shadow: getComputedStyle(document.body).getPropertyValue('--glass-shadow') };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B43 THE SHIPPED DEFAULTS: SPECTRUM on the left rack with MODE open, KEPLER off, LIGHT theme, arg ψ as the observable, the vortex census and its overlay off; Roboto is the interface face; every window has ⏻ ▾ ×, INFO panels have ⧉ COPY, CONTROL and OTHER windows start folded, CORE open; SETTINGS exists with the key bindings inside; both racks carry a + and no veil; the card shadow is the tight one',
-    !dfT.error && dfT.specSide === 'L' && dfT.pickerOpen && dfT.keplerOn === false && dfT.theme === 'light' && dfT.phaseDefault && dfT.vortexOn === false && dfT.vortexOverlay === false && dfT.font && /Roboto/.test(dfT.bodyFont) && dfT.kinds.state.kind === 'core' && !dfT.kinds.state.folded && dfT.kinds.qcd.kind === 'info' && dfT.kinds.qcd.copy && dfT.kinds.orbit.kind === 'control' && dfT.kinds.orbit.folded && dfT.kinds.meters.kind === 'info' && dfT.kinds.meters.copy && !dfT.kinds.meters.folded && dfT.kinds.state.power && dfT.kinds.state.close && dfT.settings && dfT.keysInSettings > 10 && dfT.adds === 1 && dfT.veil === '1' && /0 -2px 6px/.test(dfT.shadow), dfT);   /* ⚠ wave 80 (Josh: "too strong and too far … a drop shadow but in the opposite direction") halved the blur and INVERTED the offset, so a card reads as lifted toward the light */
+    !dfT.error && dfT.specSide === 'L' && dfT.pickerOpen && dfT.keplerOn === false && dfT.theme === 'light' && dfT.phaseDefault && dfT.vortexOn === false && dfT.vortexOverlay === false && dfT.font && /Roboto/.test(dfT.bodyFont) && dfT.kinds.state.kind === 'core' && !dfT.kinds.state.folded && !dfT.kinds.qcd && dfT.kinds.wigner.kind === 'info' && dfT.kinds.wigner.copy && dfT.kinds.orbit.kind === 'control' && dfT.kinds.orbit.folded && dfT.kinds.meters.kind === 'info' && dfT.kinds.meters.copy && !dfT.kinds.meters.folded && dfT.kinds.state.power && dfT.kinds.state.close && dfT.settings && dfT.keysInSettings > 10 && dfT.adds === 1 && dfT.veil === '1' && /0 -2px 6px/.test(dfT.shadow), dfT);   /* ⚠ wave 80 (Josh: "too strong and too far … a drop shadow but in the opposite direction") halved the blur and INVERTED the offset, so a card reads as lifted toward the light */
   /* ══ WAVE 106 · THE GATE OPENS THE CHANNELS, BECAUSE A NEW USER NO LONGER ARRIVES WITH THEM OPEN ══
      Josh: "For spectrum, always 'Hide' the spinny wheels for new users."  SPECTRUM is the window this
      rack opens on and the lanes are ninety-one spinning phase dials — an introduction that is a wall —
@@ -375,20 +375,10 @@ try {
   judge('B21 KEYS: WASD/QE move the camera without touching ψ; X/Y/Z picks the rotation axis and [ ] turns the STATE about it; C cycles the draw style back to where it started',
     !keys.error && keys.cam.yaw && keys.cam.pitch && keys.cam.dist && keys.cam.stateSame && keys.rotated && keys.styleAfter !== keys.styleBefore && keys.styleBack === keys.styleBefore && keys.errs === 0, keys);
 
-  /* ── QCD: the window computes, draws, and prints the refutation ────────── */
-  const qcd = await g.ev(`try { const w = document.querySelector('.dev[data-id="qcd"]'); if (!w) return { error: 'no QCD window' };
-    if (w.classList.contains('folded')) w.querySelector('.dev-fold').click();
-    await __LW.settle(); await new Promise(r => setTimeout(r, 200));
-    const c = __LW.qcd.cache; const cv = w.querySelector('canvas.qcd-c');
-    const cornell = { split: c.sp.split, meas: c.sp.measuredSplit, ratio: c.flav.predRatio, v0: c.v0, m2: c.sp.levels[1].M };
-    __LW.qcd.setPotential('linear'); __LW.schedule(1); await __LW.settle(); await new Promise(r => setTimeout(r, 200));
-    const lin = { ratio: __LW.qcd.cache.flav.predRatio, airy: __LW.qcd.cache.flav.airyRatio };
-    const subs = [...w.querySelectorAll('.ro-sub')].map(e => e.textContent).join(' | ');
-    __LW.qcd.setPotential('cornell'); __LW.schedule(1); await __LW.settle();
-    return { cornell, lin, refuted: subs.includes('REFUTED'), canvas: cv && cv.width > 0 && cv.height > 0, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B22 QCD: the window solves Cornell (2S−1S = 0.6036, ψ(2S) within 20 MeV with V₀ fitted), draws the ladder, and under the LINEAR potential prints the Airy spectroscopy as REFUTED with the rigid 0.679 ratio',
-    !qcd.error && Math.abs(qcd.cornell.split - 0.6036) < 2e-3 && Math.abs(qcd.cornell.m2 - 3.6861) < 0.02 && Math.abs(qcd.lin.ratio - 0.679) < 0.02 && qcd.refuted && qcd.canvas && qcd.errs === 0, qcd);
+  /* ── QCD: DELETED in 0.5.0 D9 (R5-L1) — the window, qcd.js, qcdview.js and tests/qcd.test.mjs; QUARKONIUM (cornell.js) keeps
+        the Numerov solver, and its Airy and Round 9 anchors moved into tests/cornell.test.mjs ── */
+  const qcd = await g.ev(`return { gone: !document.querySelector('.dev[data-id="qcd"]'), api: 'qcd' in __LW, errs: window.__e.length };`) || { error: 'no result' };
+  judge('B22 (0.5.0 D9) QCD is deleted: no window and no __LW.qcd', qcd.gone && !qcd.api && qcd.errs === 0, qcd);
 
   /* ── MOMENTUM SPACE: Parseval on the GPU grid ──────────────────────────── */
   const mom = await g.ev(`try { __LW.loadPreset('2p+'); __LW.setView('density'); await __LW.settle();
@@ -517,26 +507,9 @@ try {
       && keysT.tab1.id !== keysT.first0 && !keysT.tab1.folded && keysT.tab2 === keysT.first0
       && keysT.seeded.on && keysT.seeded.count > 0 && Math.abs(keysT.notReset - 2.0) < 1e-12 && Math.abs(keysT.reset - 0.65) < 1e-12 && keysT.saved.camReset && keysT.saved.camReset.key === 'KeyT' && keysT.errs === 0, keysT);
 
-  /* ── THE MOLECULE: H₂⁺ takes the field — two centred orbitals on the GPU, the tunnelling electron ── */
-  const mol = await g.ev(`try { __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s'); __LW.setView('density'); await __LW.settle();
-    const atomInt = (await __LW.fieldDigest()).integral;
-    __LW.molecule.setOn(true); __LW.molecule.setR(2); __LW.molecule.setKind('sigma_g'); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const gInt = (await __LW.fieldDigest()).integral, half = __LW.domain.half;
-    const stateHidden = document.querySelector('.dev[data-id="state"]').hidden, status = document.body.textContent.includes('H₂⁺ · LCAO · CLASSICAL NUCLEI');
-    __LW.molecule.setKind('sigma_u'); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const uInt = (await __LW.fieldDigest()).integral;
-    __LW.molecule.setKind('on_A'); __LW.clock.reset(); await __LW.settle(); await new Promise(r => setTimeout(r, 200));
-    const w = document.querySelector('.dev[data-id="molecule"]');
-    const roA = () => [...w.querySelectorAll('.ro-val')].map(e => e.textContent).find(t => /^[01]\\.\\d{4}$/.test(t));
-    const p0 = roA();
-    __LW.clock.step(15.991 / 2); await __LW.settle(); await new Promise(r => setTimeout(r, 200));
-    const pHalf = roA();
-    __LW.molecule.setOn(false); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const back = { stateHidden: document.querySelector('.dev[data-id="state"]').hidden, integral: (await __LW.fieldDigest()).integral };
-    return { atomInt, gInt, uInt, half, stateHidden, status, p0, pHalf, back, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B29 MOLECULE: with H₂⁺ holding the field the GPU integrates σg and σu — two 1s orbitals centred on the protons at ±1 — to 1 (2%; the centred-orbital kernel works and the non-orthogonal normalisation is right), the atom windows stand down, the status names the labels, the electron ON A reads 1.0000 at t = 0 and 0.0000 half a tunnelling period later, and OFF gives the atom back',
-    !mol.error && Math.abs(mol.atomInt - 1) < 0.02 && Math.abs(mol.gInt - 1) < 0.02 && Math.abs(mol.uInt - 1) < 0.02 && Math.abs(mol.half - 7) < 1e-9 && mol.stateHidden && mol.status && mol.p0 === '1.0000' && mol.pHalf === '0.0000' && !mol.back.stateHidden && Math.abs(mol.back.integral - 1) < 0.02 && mol.errs === 0 && !mol.gpu, mol);
+  /* ── THE MOLECULE (B29): the H₂⁺ card is deleted (0.5.0 D9) ── */
+  const mol = await g.ev(`return { gone: !document.querySelector('.dev[data-id="molecule"]') && !('molecule' in __LW) && !('mo' in __LW) && !('pulse' in __LW), errs: window.__e.length };`) || { error: 'no result' };
+  judge('B29 (0.5.0 D9) RETIRED: the H₂⁺ card and its `__LW.molecule`, `__LW.mo`, `__LW.pulse` were deleted in 0.5.0 D9 — restore opens its files as MOLECULES · H₂', mol.gone && mol.errs === 0, mol);
 
   /* ── PERFORMANCE: the frame profile measures, 120 Hz mode throttles the CPU windows, the field never waits ── */
   const perfT = await g.ev(`try { ${RATE}
@@ -562,7 +535,7 @@ try {
     { fullFps: +perfT.full.fps.toFixed(1), fastFps: +perfT.fast.fps.toFixed(1), fullMs: perfT.full.profile.total && +perfT.full.profile.total.toFixed(2), fastMs: perfT.fast.profile.total && +perfT.fast.profile.total.toFixed(2), fieldMs: perfT.full.profile.field && +perfT.full.profile.field.toFixed(2), cpuFull: perfT.full.cpu, cpuFast: perfT.fast.cpu, frames: [perfT.full.frames, perfT.fast.frames], wallMs: [Math.round(perfT.full.ms), Math.round(perfT.fast.ms)], error: perfT.error });
 
   /* ── THE BOX: the spherical well on the GPU — j_l by Miller's recurrence in WGSL, a hard wall, a bouncing packet ── */
-  const wellT = await g.ev(`try { __LW.molecule.setOn(false); __LW.reg.clear(); __LW.reg.set(0, 1, 0); await __LW.settle();
+  const wellT = await g.ev(`try { __LW.reg.clear(); __LW.reg.set(0, 1, 0); await __LW.settle();
     __LW.setHamiltonian('well'); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const E0 = __LW.reg.E[0], half = __LW.domain.half;
     const g0 = await __LW.fieldDigest();
@@ -592,25 +565,12 @@ try {
   judge('B32 Z = 2 (He⁺): E_1s = −2, the box halves to ±8, the GPU integrates the scaled 2p₊ to 1 in position AND momentum space (the exponent fix), the status names the ion, the hydrogen-theorem windows stand down, and Z = 1 restores everything',
     !zT.error && Math.abs(zT.E0 + 2) < 1e-12 && Math.abs(zT.half - 8) < 1e-9 && Math.abs(zT.xInt - 1) < 0.02 && Math.abs(zT.pInt - 1) < 0.02 && Math.abs(zT.halfP - 4.0) < 1e-9 && zT.status.includes('Z = 2') && zT.ladderHidden && Math.abs(zT.back.E0 + 0.5) < 1e-12 && Math.abs(zT.back.half - 16) < 1e-9 && !zT.back.ladderHidden && zT.errs === 0 && !zT.gpu, zT);
 
-  /* ── HELIUM: the conditional cloud of electron 2 on the GPU, moving away from electron 1 ── */
-  const heT = await g.ev(`try { __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s'); __LW.setView('density'); await __LW.settle();
-    __LW.helium.setBasis('six'); __LW.helium.place(0.8, 0); __LW.helium.setOn(true); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const d1 = await __LW.fieldDigest(), half = __LW.domain.half, space = __LW.field.space;
-    const stateHidden = document.querySelector('.dev[data-id="state"]').hidden, status = document.body.textContent.includes('HELIUM · HYLLERAAS · CONDITIONAL DENSITY');
-    __LW.helium.place(2.0, Math.PI / 2); __LW.schedule(4); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const d2 = await __LW.fieldDigest();
-    const w = document.querySelector('.dev[data-id="helium"]');
-    const vals = [...w.querySelectorAll('.ro-val')].map(e => e.textContent);
-    __LW.helium.setOn(false); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const back = { stateHidden: document.querySelector('.dev[data-id="state"]').hidden, integral: (await __LW.fieldDigest()).integral, space: __LW.field.space };
-    return { half, space, int1: d1.integral, int2: d2.integral, hash1: d1.hash, hash2: d2.hash, nan: d1.nan + d2.nan, stateHidden, status, vals, back, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B33 HELIUM: with helium holding the field the kernel runs the two-electron branch (space 4) on a ±4 box, draws a finite conditional cloud that CHANGES when electron 1 is moved (different grid, no NaN), the window prints the variational energy above the exact one with the cusp near ½, the atom windows stand down, and OFF gives the atom back',
-    !heT.error && heT.space === 4 && Math.abs(heT.half - 4) < 1e-9 && heT.int1 > 0 && heT.int2 > 0 && heT.hash1 !== heT.hash2 && !heT.nan && heT.stateHidden && heT.status
-      && heT.vals.some(v => v.startsWith('-2.903')) && !heT.back.stateHidden && Math.abs(heT.back.integral - 1) < 0.02 && heT.back.space === 0 && heT.errs === 0 && !heT.gpu, heT);
+  /* ── HELIUM (B33): the HELIUM card is deleted (0.5.0 D9) ── */
+  const heT = await g.ev(`return { gone: !document.querySelector('.dev[data-id="helium"]') && !('helium' in __LW), errs: window.__e.length };`) || { error: 'no result' };
+  judge('B33 (0.5.0 D9) RETIRED: the HELIUM card and its `__LW.helium` were deleted in 0.5.0 D9 — restore opens its files as SPECTRUM\'s ATOM · He 1s', heT.gone && heT.errs === 0, heT);
 
   /* ── THE GAS: a packet launched in the box flies at its momentum and bounces ── */
-  const gasT = await g.ev(`try { __LW.molecule.setOn(false); __LW.helium.setOn(false); __LW.setHamiltonian('well'); await __LW.settle();
+  const gasT = await g.ev(`try { __LW.setHamiltonian('well'); await __LW.settle();
     __LW.clock.reset(); __LW.launchPacket([0, 0, -4], [0, 0, 0.8], 1.6); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const L = __LW.lastLaunch, norm = __LW.reg.norm(), pop = __LW.reg.populated().length;
     const c0 = __LW.packetCentroid(24), d0 = await __LW.fieldDigest();
@@ -625,7 +585,7 @@ try {
     !gasT.error && gasT.captured > 0.85 && Math.abs(gasT.norm - 1) < 1e-9 && gasT.pop > 20 && Math.abs(gasT.c0[2] + 4) < 0.4 && Math.abs(gasT.c3[2] + 1.6) < 0.7 && gasT.hash0 !== gasT.hash3 && Math.abs(gasT.int0 - 1) < 0.02 && Math.abs(gasT.int3 - 1) < 0.02 && gasT.ro && gasT.ro.includes('held') && gasT.errs === 0 && !gasT.gpu, gasT);
 
   /* ── H₂: two atoms on the GPU as an incoherent density, and the collision on the triplet curve ── */
-  const h2T = await g.ev(`try { __LW.molecule.setOn(false); __LW.helium.setOn(false); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s'); __LW.setView('density'); await __LW.settle();
+  const h2T = await g.ev(`try { __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s'); __LW.setView('density'); await __LW.settle();
     __LW.h2.setWhich('triplet'); __LW.h2.setR(6); __LW.h2.setOn(true); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const d6 = await __LW.fieldDigest(), space = __LW.field.space, half = __LW.domain.half;
     __LW.h2.setR(1.4); __LW.h2.setWhich('singlet'); __LW.schedule(4); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
@@ -657,17 +617,9 @@ try {
   judge('B36 CALCULUS: on 1s + 2p_z at t = 1.3 the live table shows five rows with Ehrenfest I and II holding (residuals < 1e-5 relative, marked ok), the dipole moving (|⟨p_z⟩| > 0.01), and under the oscillator the law reads Newton (−⟨z⟩)',
     !calcT.error && calcT.n === 5 && Math.abs(calcT.ehrI.r) < 1e-5 * (1 + Math.abs(calcT.ehrI.p)) && Math.abs(calcT.ehrII.r) < 1e-5 * (1 + Math.abs(calcT.ehrII.p)) && Math.abs(calcT.ehrI.p) > 0.01 && calcT.res[2].includes('ok') && calcT.res[3].includes('ok') && calcT.lawQ.includes('−⟨z⟩') && calcT.errs === 0, calcT);
 
-  /* ── HELIUM: shift-click (or its API) puts electron 1 under the cursor, and electron 2's cloud follows ── */
-  const plT = await g.ev(`try { __LW.h2.setOn(false); __LW.molecule.setOn(false); __LW.setHamiltonian('hydrogen'); __LW.helium.setBasis('six'); __LW.helium.place(0.8, 0); __LW.helium.setOn(true); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const x0 = __LW.helium.x1.slice(), d0 = await __LW.fieldDigest();
-    const cv = document.getElementById('field'), W = cv.clientWidth, H = cv.clientHeight;
-    __LW.placeElectron(W * 0.62, H * 0.42); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const x1 = __LW.helium.x1.slice(), d1 = await __LW.fieldDigest();
-    const moved = Math.hypot(x1[0] - x0[0], x1[1] - x0[1], x1[2] - x0[2]);
-    __LW.helium.setOn(false); await __LW.settle();
-    return { x0, x1, moved, changed: d0.hash !== d1.hash, inside: Math.hypot(...x1) < 3.5, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B37 shift-click places electron 1 where the cursor points on the plane facing the camera (moved > 0.3 a₀, inside the box), and the conditional cloud of electron 2 is rebuilt', !plT.error && plT.moved > 0.3 && plT.inside && plT.changed && plT.errs === 0, plT);
+  /* ── HELIUM (B37): shift-click placed electron 1; the card is deleted (0.5.0 D9) ── */
+  const plT = await g.ev(`return { gone: !('placeElectron' in __LW) && !('helium' in __LW), errs: window.__e.length };`) || { error: 'no result' };
+  judge('B37 (0.5.0 D9) RETIRED: the HELIUM card and its `__LW.helium` and `__LW.placeElectron` were deleted in 0.5.0 D9 — restore opens its files as SPECTRUM\'s ATOM · He 1s', plT.gone && plT.errs === 0, plT);
 
   /* ── THE FLOATING RACK: hide/peek, reorder, the mini transport that docks, notes behind hint icons ── */
   const layT = await g.ev(`try { const body = document.body, rackEl = document.getElementById('rack'), tr = document.getElementById('transport');
@@ -911,13 +863,13 @@ try {
     __LW.setHamiltonian('cornell'); await __LW.settle(); await new Promise((r) => setTimeout(r, 200)); await __LW.settle();
     const h = __LW.hamiltonian, px = await __LW.readPixels(), pop = __LW.reg.populated().length;
     const spec = document.querySelector('.dev[data-id="spectrum"]'), es = [...spec.querySelectorAll('.sp-e')].map((e) => e.textContent), names = [...spec.querySelectorAll('.sp-nm')].map((e) => e.textContent), stat = spec.querySelector('.dev-stat').textContent;
-    const E = [__LW.reg.Ediag ? __LW.reg.Ediag(0) : null, __LW.energyOf ? null : null], half = __LW.domain.half, qcdKind = document.querySelector('.dev[data-id="qcd"]').dataset.kind;
+    const E = [__LW.reg.Ediag ? __LW.reg.Ediag(0) : null, __LW.energyOf ? null : null], half = __LW.domain.half, qcdKind = document.querySelector('.dev[data-id="qcd"]') ? 'present' : 'deleted';
     __LW.play(); await new Promise((r) => setTimeout(r, 500)); __LW.pause(); const px2 = await __LW.readPixels();
     __LW.setHamiltonian('hydrogen'); await __LW.settle(); const back = __LW.hamiltonian;
     return { h, lit: px.nonBlack, lit2: px2.nonBlack, pop, es, names, stat, half, qcdKind, back, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B48 QUARKONIUM: the selector switches the same 1s+2pz register to the Cornell Hamiltonian; the field draws it through the tabulated-radial branch with no GPU or shader error; the channel energies read in GeV with quarkonium labels (1S, 1P), the status names QUARKONIUM, the domain is a few GeV⁻¹, it evolves, the QCD panel is an information panel, and hydrogen comes back',
-    !qqT.error && qqT.h === 'cornell' && qqT.lit > 300 && qqT.lit2 > 300 && qqT.pop === 2 && qqT.es.length === 2 && qqT.es.every((t) => /GeV/.test(t) && /^3\./.test(t)) && /1S/.test(qqT.names[0]) && /1P/.test(qqT.names[1]) && /QUARKONIUM/.test(qqT.stat) && qqT.half > 0.5 && qqT.half < 20 && qqT.qcdKind === 'info' && qqT.back === 'hydrogen' && qqT.shader === 0 && qqT.errs === 0 && !qqT.gpu, qqT);
+  judge('B48 QUARKONIUM: the selector switches the same 1s+2pz register to the Cornell Hamiltonian; the field draws it through the tabulated-radial branch with no GPU or shader error; the channel energies read in GeV with quarkonium labels (1S, 1P), the status names QUARKONIUM, the domain is a few GeV⁻¹, it evolves, the QCD panel is deleted (0.5.0 D9), and hydrogen comes back',
+    !qqT.error && qqT.h === 'cornell' && qqT.lit > 300 && qqT.lit2 > 300 && qqT.pop === 2 && qqT.es.length === 2 && qqT.es.every((t) => /GeV/.test(t) && /^3\./.test(t)) && /1S/.test(qqT.names[0]) && /1P/.test(qqT.names[1]) && /QUARKONIUM/.test(qqT.stat) && qqT.half > 0.5 && qqT.half < 20 && qqT.qcdKind === 'deleted' && qqT.back === 'hydrogen' && qqT.shader === 0 && qqT.errs === 0 && !qqT.gpu, qqT);
 
   /* ── B49: NOTEBOOK II — the typeable title, markdown + LaTeX preview, and PROJECTS in folders with a recent list and the notebook as the landing page ── */
   const pjT = await g.ev(`try { const nb = document.getElementById('notebook'); const N = __LW.notebook, P = __LW.projects; N.open('notes'); N.setMode('edit');
@@ -1058,7 +1010,7 @@ try {
   const elT = await g.ev(`try { ${RATE}
     const Hy = await import('/lab/hydrogen.js');
     __LW.pause(); __LW.setTheme('dark'); __LW.ab.set(false); __LW.reg.setField({ Fz: 0 });
-    if (__LW.molecule.on) __LW.molecule.setOn(false); if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.setHamiltonian('hydrogen'); __LW.setIonZ(1); __LW.setSpace('x'); await __LW.settle();
     const shipsClosed = (__LW.bootClosed || []).includes('field'), iF = __LW.bootOrder.indexOf('field'), shipsLast = __LW.bootOrder.slice(iF, iF + 3).join(' ') === 'field wigner radiation';
     __LW.layout.reopen('field', 'R');
@@ -1088,10 +1040,6 @@ try {
     const mirror = Math.abs(mL - mR) / Math.max(1, (mL + mR) / 2);
     const phiE0_1s = __LW.fieldlines.stats.phiE0, Q1s = __LW.fieldlines.stats.Q, B1s = __LW.fieldlines.stats.Bmag;
     if (hadCaps) document.body.classList.remove('no-captions');
-    /* the MOLECULE's force line at R = 2: Hellmann–Feynman, the Pulay term and its bound */
-    __LW.molecule.setR(2); await __LW.settle();
-    const dm = __LW.layout.digest('molecule').split(String.fromCharCode(8722)).join('-');
-    const molHF = dm.indexOf('-0.1339') >= 0, molBound = dm.indexOf('0.102') >= 0, molExact = dm.indexOf('0.053804') >= 0;
     /* the Hamiltonian guard: the closed form is hydrogenic */
     __LW.setHamiltonian('qho'); await settle(350);
     const qhoInk = ink(), qhoStat = stat();
@@ -1127,7 +1075,7 @@ try {
       dig: dig.indexOf('0.52') >= 0 && dig.indexOf('T') >= 0 && dig.indexOf('-6.803') >= 0 && dig.indexOf('5.068e+11') >= 0 && dig.length > 600,
       ink: inkPhi > 500 && inkE > 500 && inkJ > 500 && inkOff === 0,
       mir: mirror < 0.10 && mL > 500, s1: Math.abs(phiE0_1s + 1) < 1e-9 && Math.abs(Q1s - 1) < 1e-9 && B1s === 0,
-      mol: molHF && molBound && molExact, guard: qhoInk === 0 && /hydrogenic register only/.test(qhoStat) && backInk > 500,
+      guard: qhoInk === 0 && /hydrogenic register only/.test(qhoStat) && backInk > 500,
       proj: saved.overlay === 'E' && saved.lines === 14 && noTheme && back.ov === 'E' && back.lines === 14 && back.ink > 500,
       fps: fps > 0.72 * fpsShut && !on.short && !shut.short && drawnInk > 500, closed: document.querySelector('.dev[data-id="field"]').classList.contains('closed'), err: window.__e.length === 0 };
     const env = { fpsShut, fpsIdle, fps, fpsMeter, cost: 1 - fps / fpsShut, buildMs, drawnInk,
@@ -1137,7 +1085,7 @@ try {
       bnZ: bn.Bz, bnMag: bn.mag, slots: s.slots, Lmax: s.Lmax, buildMs: s.buildMs, terms: s.terms,
       digHasB: dig.indexOf('0.52') >= 0 && dig.indexOf('T') >= 0, digHasVolts: dig.indexOf('-6.803') >= 0,
       digHasE: dig.indexOf('5.068e+11') >= 0, digLen: dig.length,
-      mL, mR, mirror, phiE0_1s, Q1s, B1s, molHF, molBound, molExact, qhoInk, qhoStat, backInk, backStat,
+      mL, mR, mirror, phiE0_1s, Q1s, B1s, qhoInk, qhoStat, backInk, backStat,
       saved, noTheme, back, closedAtEnd: document.querySelector('.dev[data-id="field"]').classList.contains('closed'),
       errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
@@ -1150,7 +1098,6 @@ try {
     && elT.digHasB && elT.digHasVolts && elT.digHasE && elT.digLen > 600
     && elT.inkPhi > 500 && elT.inkE > 500 && elT.inkJ > 500 && elT.polysE > 0 && elT.polysJ > 0 && elT.inkOff === 0
     && elT.mirror < 0.10 && elT.mL > 500 && Math.abs(elT.phiE0_1s + 1) < 1e-9 && Math.abs(elT.Q1s - 1) < 1e-9 && elT.B1s === 0
-    && elT.molHF && elT.molBound && elT.molExact
     && elT.qhoInk === 0 && /hydrogenic register only/.test(elT.qhoStat) && elT.backInk > 500 && /closed form/.test(elT.backStat)
     && elT.saved.overlay === 'E' && elT.saved.lines === 14 && elT.noTheme && elT.back.ov === 'E' && elT.back.lines === 14 && elT.back.ink > 500
     && elT.chk.fps && elT.closedAtEnd && elT.errs === 0 && !elT.gpu, elT);
@@ -1238,7 +1185,7 @@ try {
   const wrT = await g.ev(`try {
     const Hy = await import('/lab/hydrogen.js');
     __LW.pause(); __LW.setTheme('dark'); __LW.ab.set(false); __LW.reg.setField({ Fz: 0 });
-    if (__LW.molecule.on) __LW.molecule.setOn(false); if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.setHamiltonian('hydrogen'); __LW.setIonZ(1); __LW.setSpace('x'); await __LW.settle();
     const order = __LW.bootOrder, closed = __LW.bootClosed || [];
     const ships = closed.indexOf('wigner') >= 0 && closed.indexOf('radiation') >= 0
@@ -1334,82 +1281,9 @@ try {
   judge('B57 PHASE SPACE AND THE DIPOLE: WIGNER and RADIATION ship CLOSED, after ELECTROSTATICS, each with a ⧉ COPY digest. Opened on the 1s, WIGNER draws the (z, p_z) SLICE at 64 × 64 with W(0, 0) = 1/π³ = 0.0322515344 to 1e-9 and its minimum refined off the grid to the certified −3.09725752e-4 at (1.3295, 1.3791), the digest carrying 0.03225, −3.0973e-4 and the word SLICE — the map is signed, with more than 200 pixels of the first accent AND of the second, so both signs of a function that is not positive are on the card; on 2p_z, a real orbital of definite parity, the map is EVEN in z to 1.5e-11 of its peak; Z RANGE 14 and P RANGE 3 round-trip through a project (and the theme still never). On 1s + 2p_z, RADIATION reads the pair 1s₀ → 2p₀ with A = 6.2649 × 10⁸ s⁻¹ (NIST\'s reduced-mass value), τ = 1.596 ns, λ = 2296 a₀, ħω = 10.2043 eV, |⟨a|r|b⟩| = 0.744935539 and P = |c₁|²|c₂|² ħωA = 1.4215e-9 a.u. — the identity held to 1e-20 — and draws its far-field pattern; the Δm = 0 pattern stands still at three times while the Δm = +1 pattern of 1s + 2p₊1 turns with the clock and returns at Δωt = π. A lone 1s has no allowed pair and the window says exactly "no dipole in this state" and draws its EMPTY FRAME and nothing more (under a third of the pattern\u2019s ink) rather than the blank slab it used to leave. The STURMIAN scale stands the slice down (no ink, LW.wigner.slice() null) with its note, and disables STARK K_z and DEFECT L² with the wave-39 note in their titles; HYDROGEN re-enables both and the ink comes back; the oscillator stands both windows down with "hydrogenic register only"; zero errors',
     !wrT.error && wrT.chk && Object.keys(wrT.chk).every((k) => wrT.chk[k] === true) && !wrT.gpu, wrT);
 
-  /* ── B58: W-MO — the general basis on two centres, the force it really exerts, and the nuclei it drives ── */
-  const moT = await g.ev(`try { ${RATE}
-    __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.setIonZ(1); __LW.setSpace('x');
-    if (__LW.molecule.on) __LW.molecule.setOn(false); if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false);
-    await __LW.settle();
-    const M = __LW.mo, dev = document.querySelector('.dev[data-id="molecule"]');
-    const D = () => __LW.layout.digest('molecule').split(String.fromCharCode(8722)).join('-');
-    const has = (d, xs) => xs.every((x) => d.indexOf(x) >= 0);
-    await M.whenReady();
-    /* the 1s LCAO at R = 2: the wave-38 line, now computed by the general machinery (mo.test.mjs G2 pins it to 1e-9) */
-    __LW.molecule.setR(2); await M.whenReady();
-    const d1 = D(), s1 = M.state();
-    const one = has(d1, ['-0.5538', '-0.1339', '0.0623', '0.102', '0.053804', '2.4928']);
-    /* the Sturmian n <= 4 at lambda = 1.7611, and the 42-function register — each with its own equilibrium */
-    M.setBasis('sturmian'); await M.whenReady(); M.setR(2); await M.whenReady();
-    const d2 = D(), s2 = M.state(), stur = has(d2, ['-0.60262', '1.997']);
-    M.setBasis('hydrogenic'); await M.whenReady(); M.setR(2); await M.whenReady();
-    const d3 = D(), s3 = M.state(), reg = has(d3, ['2.352']);
-    /* back to the 1s LCAO: the old line comes back word for word */
-    M.setBasis('lcao1s'); await M.whenReady(); M.setR(2); await M.whenReady();
-    const d4 = D(), backOld = has(d4, ['-0.5538', '-0.1339', '0.0623', '0.102', '0.053804']);
-    /* THE RUN: BO electrons on -dE/dR from R0 = 2.8 at rest, dt = 5, 160 steps ~ one vibration */
-    M.setDynamics('bo'); M.setForce('exact'); M.setR0(2.8); M.setV0(0); M.setDt(5); M.reset();
-    M.step(160);
-    const run = M.state();
-    /* the honest failure: the SAME basis under the electrostatic force simply runs away */
-    M.setForce('hf'); M.reset(); M.step(60);
-    const away = M.state(), noteText = M.note(), d5 = D();
-    const noteIn = d5.indexOf('This frozen basis gives a repulsive electrostatic force') >= 0;
-    /* the project carries the basis and the scale, and still not the theme */
-    M.setBasis('sturmian'); M.setLambda(1.7611); await M.whenReady();
-    const proj = __LW.serialize(), saved = proj.presentation.mo;
-    const noTheme = proj.presentation.mat.bg === undefined && proj.presentation.mat.gamma === undefined;
-    M.setBasis('lcao1s'); await M.whenReady();
-    __LW.restore(proj); await M.whenReady();
-    const back = M.state();
-    /* the caption says where the bigger bases are drawn — and goes with STAGE CAPTIONS */
-    const capOn = M.state().caption, hadCaps = !document.body.classList.contains('no-captions');
-    document.body.classList.add('no-captions');
-    const capOff = M.state().caption;
-    if (hadCaps) document.body.classList.remove('no-captions');
-    /* THE FRAME BUDGET: 30 frames with the 42-function register stepping Ehrenfest, against the same page shut */
-    M.setBasis('hydrogenic'); await M.whenReady();
-    await rateN(30);                                                   // a warm-up run, thrown away (B55's lesson)
-    dev.querySelector('.dev-close').click(); await __LW.settle();
-    const shutR = await rateN(30), fpsShut = shutR.fps;
-    __LW.layout.reopen('molecule', 'R'); await __LW.settle();
-    M.setDynamics('ehrenfest'); M.reset(); M.run();
-    const runR = await rateN(30), fpsRun = runR.fps;
-    const rs = M.state();
-    M.hold(); M.setDynamics('hold'); M.setBasis('lcao1s'); await M.whenReady(); M.setR(2); await M.whenReady();
-    __LW.loadPreset('1s+2pz'); await __LW.settle();
-    const chk = {
-      one, stur: stur && Math.abs(s2.E0 + 0.6026243) < 1e-6 && Math.abs(s2.Re - 1.997204) < 3e-5 && s2.n === 20,
-      reg: reg && Math.abs(s3.Re - 2.352277) < 3e-5 && Math.abs(s3.De_eV - 2.1246) < 1e-3 && s3.n === 42,
-      lcao: Math.abs(s1.E0 + 0.5537715) < 1e-6 && Math.abs(s1.Re - 2.492830) < 1e-5 && s1.n === 2 && backOld,
-      run: run.steps === 160 && run.Rmin < 2.8 && run.Rmin > 2.2 && run.Rt > 2.7 && run.Rt < 2.8
-        && (Math.abs(run.drift) <= run.integratedBound || Math.abs(run.drift) < 1e-5) && run.badge === 'drift ≤ ∫bound',
-      away: away.Rt > 3 && away.Rmin >= 2.8 - 1e-9 && noteIn && noteText.indexOf('repulsive at every R') > 0,
-      proj: saved.kind === 'sturmian' && Math.abs(saved.lambda - 1.7611) < 1e-12 && noTheme
-        && back.kind === 'sturmian' && Math.abs(back.lambda - 1.7611) < 1e-12,
-      cap: capOn.indexOf('shown on the card; the stage draws the 1s LCAO only') > 0 && capOff === '',
-      fps: fpsRun > 0.35 * fpsShut && !runR.short && !shutR.short && rs.steps >= 12 && rs.every === 2 && rs.stepMs > 0,
-      open: !dev.classList.contains('closed'), err: window.__e.length === 0 };
-    /* WAVE 63: fps comes SECOND because gatekit prints only the first 300 characters of a payload,
-       and the whole point of deleting the absolute floor was that the RATIO stays readable in the log
-       - a number nobody can see is not "printed". */
-    return { chk,
-      fps: { ratio: +(fpsRun / fpsShut).toFixed(3), run: +fpsRun.toFixed(1), shut: +fpsShut.toFixed(1), ms: [Math.round(shutR.ms), Math.round(runR.ms)], short: [shutR.short, runR.short], steps: rs.steps, stepMs: +rs.stepMs.toFixed(2), every: rs.every },
-      s1, s2, s3, run, away, saved, back, noTheme, noteText, capOn, capOff,
-      fpsMore: { drift: rs.drift, ib: rs.integratedBound, gap: rs.adiabaticGap },
-      digLen: [d1.length, d2.length, d3.length, d4.length],
-      errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B58 THE GENERAL BASIS AND THE NUCLEI IT DRIVES (W-MO): the MOLECULE window carries a BASIS segment — the 1s LCAO (2 functions, E(2) = −0.5537715, R_e = 2.4928), the Coulomb Sturmians n ≤ 4 at λ = 1.7611 (20 functions, E(2) = −0.60262 above the exact −0.602634214, R_e = 1.9972) and the register\'s own σ set n ≤ 6 (42 functions, R_e = 2.35227, D_e = 2.1246 eV, computed lazily by a job queue that hands the frame loop back the wall every 24 ms) — and the wave-38 Hellmann–Feynman line is now the general one for whichever basis is chosen: at the 1s LCAO the digest still reads F_elec −0.1339, Pulay 0.0623, bound 0.102 and F_exact 0.053804, and switching away and back restores it word for word. Let the nuclei go on −dE/dR with Born–Oppenheimer electrons from R₀ = 2.8 at rest (dt = 5, 160 steps): R falls to 2.24 and comes back above 2.7 — one vibration — with |drift| ≤ ∫bound and the badge reading "drift ≤ ∫bound"; the SAME basis under the electrostatic force runs away instead (R past 3, never once below 2.8) and the window says why in the note the segment carries, "the HF force is repulsive at every R". A project keeps { kind: sturmian, λ: 1.7611 } and still no theme; the card\'s caption says the bigger bases are shown on the card because the stage draws the 1s LCAO only, and goes with STAGE CAPTIONS; and 30 frames with the 42-function register stepping EHRENFEST — one step per OTHER frame, the 30 ms budget — cost under 65 % of the frame against the SAME page with the window shut, measured in the same run. WAVE 63 DELETED THE ABSOLUTE BESIDE IT: `fpsRun > 15` flaked twice in six runs and did no work the ratio was not already doing better, because an absolute rate is a property of the machine and not of this window — five minutes into a headless run on a shared box the page is at a third of the rate it holds fresh, whatever is drawn. The rate is still printed, so a ratio drifting across waves is visible; what is JUDGED is the comparison and the sample size (thirty counted frames, or `short` says the 12 s ceiling ran out first and the block goes red with a reason)',
-    !moT.error && moT.chk && Object.keys(moT.chk).every((k) => moT.chk[k] === true) && !moT.gpu, moT);
+  /* ── B58: W-MO — deleted with the H₂⁺ card (0.5.0 D9); tests/lib/mo.js keeps its engine for the node proofs ── */
+  const moT = await g.ev(`return { gone: !document.querySelector('.dev[data-id="molecule"]') && !('molecule' in __LW) && !('mo' in __LW) && !('pulse' in __LW), errs: window.__e.length };`) || { error: 'no result' };
+  judge('B58 (0.5.0 D9) RETIRED: the H₂⁺ card and its `__LW.molecule`, `__LW.mo`, `__LW.pulse` were deleted in 0.5.0 D9 — restore opens its files as MOLECULES · H₂', moT.gone && moT.errs === 0, moT);
 
   const unT = await g.ev(`try {
     const H = __LW.history, reg = __LW.reg, T = () => __LW.clock.t, pops = () => reg.populated().slice();
@@ -2002,7 +1876,7 @@ try {
        here reads the LOOP, so the clock is stopped and the camera put at its shipped pose before a measurement. */
     if (__LW.uiHidden) __LW.keys.toggleUI();
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
-    if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false); if (__LW.molecule.on) __LW.molecule.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     const C = __LW.camera, nap = (ms) => new Promise((r) => setTimeout(r, ms));
     const REST = 0.003, mu = 2.5;
     /* WAVE 106 BOOTS THE CAMERA FREE (Josh), and in FREE the pose IS a unit quaternion while obs.yaw is
@@ -2071,7 +1945,7 @@ try {
     if (__LW.uiHidden) __LW.keys.toggleUI();
     document.body.classList.remove('rack-hidden', 'rack-peek');
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
-    if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false); if (__LW.molecule.on) __LW.molecule.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.kepler.setOn(false);
     const wake = (id) => { __LW.layout.reopen(id); const d = document.querySelector('.dev[data-id="' + id + '"]'); if (!d) return null;
       d.classList.remove('closed');
@@ -2162,7 +2036,7 @@ try {
   const dragT = await g.ev(`try {
     if (__LW.uiHidden) __LW.keys.toggleUI();
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
-    if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false); if (__LW.molecule.on) __LW.molecule.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.kepler.setOn(false);                                    // the stage's own handle must not take the pointer
     /* WAVE 106 BOOTS THE CAMERA FREE, where a horizontal drag turns a QUATERNION about the screen axes
        and obs.yaw is only a readout of the pose -- so 60 px is not 0.390 rad of yaw there and cannot be.
@@ -2223,7 +2097,7 @@ try {
     document.body.classList.remove('rack-hidden', 'rack-peek');
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
     if (__LW.sturmian && __LW.sturmian.on) __LW.sturmian.set(false);
-    if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     const wake = (id) => { __LW.layout.reopen(id); const d = document.querySelector('.dev[data-id="' + id + '"]'); if (!d) return null;
       d.classList.remove('closed');
       if (d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
@@ -2252,33 +2126,15 @@ try {
     __LW.pause(); await __LW.settle();
     const probe = { parkedMs, backMs, probes: __LW.governor.probes - p0, probeMs: __LW.governor.probeMs, cost: __LW.governor.work.spectrum,
       parked: /PARKED/.test(status), statusBack: st ? st.textContent : '', still: __LW.governor.parked };
-    /* 3 — LEFTOVER 4: the MOLECULE's moving-basis CONNECTION, and the dt ceiling it is only resolved under */
-    const mo = __LW.mo;
-    mo.setBasis('lcao1s'); await mo.whenReady();
-    mo.setDynamics('ehrenfest'); mo.setConnection(true); mo.setDt(5);
-    const roC = [...mol.querySelectorAll('.ro')].find((e) => /MOVING BASIS/.test(e.querySelector('.ro-lbl').textContent));
-    const at5 = { val: roC.querySelector('.ro-val').textContent, cls: roC.querySelector('.ro-val').className, sub: roC.querySelector('.ro-sub').textContent.slice(0, 90) };
-    mo.step(2); const carriedOn = mo.state().carried;
-    mo.setDt(2);
-    const at2 = { val: roC.querySelector('.ro-val').textContent, cls: roC.querySelector('.ro-val').className };
-    mo.step(2); const carriedStill = mo.state().carried;
-    const swEl = [...mol.querySelectorAll('.sw')].find((e) => /CONNECTION/.test(e.textContent));
-    const swOnAtBoot = swEl.classList.contains('on');
-    swEl.click(); mo.step(2);
-    const off = { sw: swEl.classList.contains('on'), state: mo.state().connection, carried: mo.state().carried, val: roC.querySelector('.ro-val').textContent };
-    swEl.click(); const backOn = swEl.classList.contains('on') && mo.state().connection === true;
-    mo.step(2); const digest = mo.digest();
-    mo.setDt(5); mo.setDynamics('hold'); mo.reset();
-    const conn = { swOnAtBoot, carriedOn, carriedStill, at5, at2, off, backOn, ceiling: mo.dtCeiling, inDigest: /moving-basis connection/.test(digest) };
+    /* 3 — LEFTOVER 4 (the MOLECULE's moving-basis CONNECTION) left with the H₂⁺ card (0.5.0 D9) */
+    const conn = null;
     __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz'); __LW.pause(); await __LW.settle();
     return { rate, probe, conn, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B68 THE FOUR RACK LEFTOVERS. (2) api.energyOf ignored the RATE: the register evolves label a at H.energy(a) × rates[a], and the API every reader prints from returned H.energy(a) alone, so with RATE ≠ 1 the SPECTRUM lane printed an energy the state was not moving with. It is the same function now — RATE 1.7 on the 1s prints −0.8500 Eh, exactly reg.Ediag(0), and 1.0 prints −0.5000 again — and the two other places that painted a lane by hand (the WELL RADIUS knob and switchHamiltonian) go through it too. (1) THE READER-LAW RE-PROBE: a reader whose measured cost is over a frame\'s budget is PARKED while the transport plays, and before this it was never measured again, so a window that got cheap stayed parked for the session. Now a parked reader is let through ONCE every 3 s — the governor\'s own recovery cadence — with its stale measurement cleared first, so the fresh number is the one judged: a SPECTRUM forced to 40 ms parks within half a second and comes back on its own inside two probes, its warning status restored to what it said before. (4) THE MOLECULE\'s moving-basis CONNECTION, which mo.js has taken since wave 49 with nothing on the card able to reach it, is a switch — ON by default, EHRENFEST only, carrying exp(−ΔR S⁻¹D) with D = S′/2 + ½diag(P, −P), which on the 1s LCAO is exactly the metric term (P is 1 × 1 and zero) — and the run it builds reports connection true; turning it off gives the wave-42 branch and the run reports false. Beside it the dt CEILING now says what was silent: at the shipped dt = 5 the line goes amber, because with the connection carried the generator is R-dependent and the step is only resolved for dt ≤ 2.5 (mo.test W49-6: the excess electronic energy runs 3.08e-5 · 2.14e-6 · 1.19e-6 at dt = 5 · 2.5 · 1.25), and at dt = 2 it is green. (3) The misplaced comment on the WIGNER reader\'s throttle (rack.js:488) named the SLICE and now names WIGNER. Zero errors',
     !leftT.error && leftT.rate.printed === '-0.8500 Eh' && Math.abs(leftT.rate.Ediag + 0.85) < 1e-12 && leftT.rate.agrees && leftT.rate.back === '-0.5000 Eh' && Math.abs(leftT.rate.EdiagBack + 0.5) < 1e-12
       && leftT.probe.parkedMs !== null && leftT.probe.parkedMs < 1500 && leftT.probe.parked && leftT.probe.backMs !== null && leftT.probe.backMs < 3 * leftT.probe.probeMs && leftT.probe.probes >= 1 && leftT.probe.still.indexOf('spectrum') < 0 && !/PARKED/.test(leftT.probe.statusBack)
-      && leftT.conn.swOnAtBoot && leftT.conn.carriedOn === true && leftT.conn.carriedStill === true && /CARRIED/.test(leftT.conn.at5.val) && /warn/.test(leftT.conn.at5.cls) && /2\.5/.test(leftT.conn.at5.val)
-      && /ok/.test(leftT.conn.at2.cls) && !/warn/.test(leftT.conn.at2.cls) && leftT.conn.off.sw === false && leftT.conn.off.state === false && leftT.conn.off.carried === false && /OFF/.test(leftT.conn.off.val)
-      && leftT.conn.backOn && leftT.conn.ceiling === 2.5 && leftT.conn.inDigest && leftT.errs === 0 && !leftT.gpu, leftT);
+      && leftT.conn === null && leftT.errs === 0 && !leftT.gpu, leftT);
 
 
   /* ══ WAVE 51 · W-MOBILE — the phone layout, proved at real phone viewports ═══════════════════════
@@ -4713,79 +4569,9 @@ try {
 
   await w57goto('');
 
-  /* ── WAVE 58: the two maths faces, and the two things Josh asked for ───── */
-  const pulT = await g.ev(`try {
-    const R = {};
-    __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz'); __LW.pause(); __LW.scrub(0);
-    const wake = (id) => { __LW.layout.reopen(id); const d = document.querySelector('.dev[data-id="' + id + '"]'); if (!d) return null;
-      d.classList.remove('closed');
-      if (d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
-      if (d.classList.contains('off')) { const p = d.querySelector('.dev-power'); if (p) p.click(); }
-      return d; };
-    const dev = wake('molecule'); __LW.layout.raise('molecule');
-    await __LW.settle();
-    const P = __LW.pulse;
-    R.api = !!P;
-    R.controls = [...dev.querySelectorAll('.k-lbl')].map((e) => e.textContent);
-    R.trigs = [...dev.querySelectorAll('.trig-l')].map((e) => e.textContent);
-    R.label = P.state().label;
-    /* THE CONTRACT'S OWN TRACE, through the interface: the shipped pulse at R = 2 and dt = 0.05 */
-    P.setBasis('lcao1s'); P.setR(2); P.setDt(0.05);
-    P.setPulse({ amplitude: 0.02, omega: 0.3929175297217954, duration: 48, phase: 0 });
-    R.gap = P.gap();
-    const s = P.runAll();
-    R.popOut = s.popOut; R.z = s.z; R.norm = s.norm; R.absorbed = s.absorbed; R.work = s.work; R.balance = s.balance;
-    R.steps = s.steps; R.N = s.N; R.t = s.t;
-    R.trace = P.trace.length;
-    /* SECOND ORDER, self-contained: the same run at four timesteps.  No oracle is fetched — the CONVERGENCE is
-       the claim, so the successive differences are what is measured, and they must quarter. */
-    const pops = [], bals = [];
-    for (const dt of [0.2, 0.1, 0.05, 0.025]) { P.setDt(dt); const r = P.runAll(); pops.push(r.popOut); bals.push(Math.abs(r.balance)); }
-    R.pops = pops; R.bals = bals;
-    R.popRatios = [(pops[1] - pops[0]) / (pops[2] - pops[1]), (pops[2] - pops[1]) / (pops[3] - pops[2])];
-    R.balRatios = [bals[0] / bals[1], bals[1] / bals[2], bals[2] / bals[3]];
-    /* the twelve-function Sturmian, whose g and u blocks the field couples */
-    P.setDt(0.05); P.setBasis('sturmian');
-    const b = P.runAll();
-    R.sturmN = P.state().n; R.sturmNorm = b.norm; R.sturmOut = b.popOut;
-    P.setBasis('lcao1s'); P.setDt(0.05);
-    /* THE LAB'S CLOCK IS THE PULSE'S CLOCK: fire, run the transport, and the drive's t is t_lab − t0 */
-    const body = (d) => d.split('\\n').slice(1).join('\\n');      // the digest's first line carries a wall timestamp: the STATE is the rest
-    const dig0 = body(__LW.layout.digest('state')), ver0 = __LW.reg.version;
-    __LW.scrub(0); P.reset(); P.fire();
-    const t0 = __LW.clock.t; const rate0 = __LW.clock.rate; __LW.clock.setRate(40); __LW.play();
-    await new Promise((r) => setTimeout(r, 700));
-    __LW.pause();
-    const mid = P.state();
-    R.ran = mid.t > 0 && mid.t <= __LW.clock.t - t0 + 1e-9;
-    R.clockGap = (__LW.clock.t - t0) - mid.t;
-    const held0 = mid.t;
-    await new Promise((r) => setTimeout(r, 200));
-    R.stopsWhenPaused = Math.abs(P.state().t - held0) < 1e-12;
-    __LW.scrub(t0);                                            // scrubbed BACK: a driven state cannot be un-integrated
-    __LW.play(); await new Promise((r) => setTimeout(r, 250)); __LW.pause();
-    R.rewound = P.state().rewound === true && Math.abs(P.state().t - held0) < 1e-9;
-    P.reset(); __LW.clock.setRate(rate0); __LW.scrub(0);
-    R.digestSame = body(__LW.layout.digest('state')) === dig0 && __LW.reg.version === ver0;   // the pulse is the card's own: it never touches ψ
-    R.digest = __LW.layout.digest('molecule').indexOf('THE PULSE') >= 0;
-    R.errs = window.__e.length;
-    return R;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B105 W-PULSE — THE FIELD-DRIVEN MOLECULE FINALLY HAS A FACE (wave 58, board #24, ledger C1). lab/modrive.js is the other lab\'s (Astra, GPT-6): a length-gauge H₂⁺ driven by a sin² pulse, iSċ = (H₀ + E_z(t)Z)c, propagated by the exponential midpoint with the FULL matrix re-solved at every distinct field value — and nothing in the interface reached it. The MOLECULE card now carries amplitude, ω, duration, phase, Δt, a basis and a FIRE, and shows while it runs the three things the contract asks for: the population that left the ground state, ⟨z⟩ and the absorbed energy. THE NUMBERS ARE THE OTHER LAB\'S AND ARE ASSERTED, NOT RE-DERIVED — at R = 2 and Δt = 0.05, t = 96: popU 0.0852227 and ⟨z⟩ −0.0170653, both to 1e-6 of Astra\'s DOP853 trace, with the S-norm 1 to 1e-10 and nothing renormalised anywhere. AND THE CLAIM THAT DECIDES WHETHER IT WORKS RATHER THAN MERELY MOVES: the scheme is SECOND ORDER, measured here through the interface at Δt = 0.2, 0.1, 0.05, 0.025 with no oracle fetched — the successive differences in the final population QUARTER (ratios 4.00 ± 0.05, twice), and so does the residue of the work balance ⟨H₀⟩ − ⟨H₀⟩₀ = ∫Ė⟨z⟩dt, which is exact for the exact solution and is computed here on the same trace by two different routes (8.6e-6 → 1.35e-7 down the ladder). The twelve-function Sturmian n ≤ 3 runs the same pulse and stays S-unitary to 2e-10. THE CLOCK IS THE LAB\'S AND THERE IS NO THIRD ONE: FIRE remembers t₀ and the drive\'s time is t_lab − t₀ in the same atomic units, so RATE decides how fast you watch and Δt decides how accurately it is solved; pausing stops it, and scrubbing BACK holds it and says so rather than pretending a driven state can be un-integrated. It never touches ψ — the state digest is identical before and after — and the card is labelled in one line as NUMERICAL propagation of a VARIATIONAL model with EXACT integrals.',
-    !pulT.error && pulT.api === true
-      && Math.abs(pulT.popOut - 0.0852227) < 1e-6 && Math.abs(pulT.z + 0.0170653) < 1e-6
-      && Math.abs(pulT.norm - 1) < 1e-10 && pulT.steps === 1920 && pulT.N === 1920 && Math.abs(pulT.t - 96) < 1e-6
-      && Math.abs(pulT.absorbed - 3.348550e-2) < 1e-7 && Math.abs(pulT.balance) < 1e-5
-      && pulT.popRatios.every((r) => Math.abs(r - 4) < 0.05)
-      && pulT.balRatios.every((r) => Math.abs(r - 4) < 0.05)
-      && pulT.sturmN === 12 && Math.abs(pulT.sturmNorm - 1) < 2e-10 && pulT.sturmOut > 1e-6
-      && pulT.trace > 400 && pulT.trace < 900
-      && pulT.controls.indexOf('AMPLITUDE') >= 0 && pulT.controls.indexOf('PHASE') >= 0 && pulT.controls.indexOf('DURATION') >= 0
-      && pulT.trigs.indexOf('FIRE') >= 0 && pulT.trigs.indexOf('RESONANT') >= 0
-      && pulT.label.indexOf('NUMERICAL') === 0 && pulT.label.indexOf('VARIATIONAL') > 0 && pulT.label.indexOf('EXACT') > 0 && pulT.label.indexOf('DESIGN CHOICE') > 0
-      && Math.abs(pulT.gap - 0.3929175297) < 1e-9
-      && pulT.ran === true && pulT.stopsWhenPaused === true && pulT.rewound === true
-      && pulT.digestSame === true && pulT.digest === true && pulT.errs === 0, pulT);
+  /* ── WAVE 58 (B105): W-PULSE — deleted with the H₂⁺ card (0.5.0 D9) ── */
+  const pulT = await g.ev(`return { gone: !document.querySelector('.dev[data-id="molecule"]') && !('molecule' in __LW) && !('mo' in __LW) && !('pulse' in __LW), errs: window.__e.length };`) || { error: 'no result' };
+  judge('B105 (0.5.0 D9) RETIRED: the H₂⁺ card and its `__LW.molecule`, `__LW.mo`, `__LW.pulse` were deleted in 0.5.0 D9 — restore opens its files as MOLECULES · H₂', pulT.gone && pulT.errs === 0, pulT);
 
   const h2cT = await g.ev(`try {
     const R = {};

@@ -1,9 +1,12 @@
 
 
+/* tests/lib/mo.js — W-MO's general-basis H₂⁺ engine.  It shipped in lab/ under the H₂⁺ card (moview.js, pulseview.js), which
+ * 0.5.0 D9 deleted; it is kept here, beside gaussian.js, as the physical system tests/absorb, density, math-audit, modrive
+ * and mo use for their proofs.  No lab file imports it. */
 import { gaussLegendre, hydrogenicFn, sturmianFn, sto, sigmaBasis, twoCentre, parityBlocks, prepare, equilibrium as goldenSection } from './twocentre.js';
-import { generalisedEigen } from './sturmian.js';
-import { legendreDerivCoeffs, ylmNorm, HARTREE_EV } from './hydrogen.js';
-import { MU_H2 } from './h2.js';
+import { generalisedEigen } from '../../lab/sturmian.js';
+import { legendreDerivCoeffs, ylmNorm, HARTREE_EV } from '../../lab/hydrogen.js';
+import { MU_H2 } from '../../lab/h2.js';
 
 export { MU_H2, HARTREE_EV };
 const TWO_PI = 2 * Math.PI;

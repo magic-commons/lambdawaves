@@ -6,7 +6,7 @@
  * numbers (Sol Q3, Opus Q3/Q7, the numpy oracle of this wave): Eg(2) = −0.553771495318, fixed {1s,2p_z} E(2) =
  * −0.553815296857 with R_e = 2.508709526, the Sturmian −0.602624 (n ≤ 4, λ = 1.7611), the 42-function register R_e = 2.35227.
  */
-import { gaussLegendre, gaussLaguerre, sto, hydrogenicFn, sturmianFn, sigmaBasis, selfOverlap, twoCentre, parityBlocks, h2plusEnergy, h2plusSturmian, equilibrium } from '../lab/twocentre.js';
+import { gaussLegendre, gaussLaguerre, sto, hydrogenicFn, sturmianFn, sigmaBasis, selfOverlap, twoCentre, parityBlocks, h2plusEnergy, h2plusSturmian, equilibrium } from './lib/twocentre.js';
 import { overlapS, coulombJ, resonanceK, energies, EV } from '../lab/molecule.js';
 import { sturmianOverlap, symmetricEigen, generalisedEigen } from '../lab/sturmian.js';
 import { factorial, energy } from '../lab/hydrogen.js';

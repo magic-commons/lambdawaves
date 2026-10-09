@@ -1,7 +1,7 @@
 /* cornell.js — QUARKONIUM as a Hamiltonian of the register.
  *
  * The Cornell potential V(r) = −4α_s/3r + σr + V₀ for a heavy quark pair of reduced mass μ = m_q/2, solved
- * NUMERICALLY by the same Numerov shooting the QCD panel uses, for every (n_r, l) the 91 labels name:
+ * NUMERICALLY by Numerov shooting (below; the QCD window that shared it left in 0.5.0 D9), for every (n_r, l) the 91 labels name:
  * n_r = n − l − 1 ∈ 0..5, l ∈ 0..5 — thirty-six radial functions.  Units are GeV and GeV⁻¹ (ħ = c = 1;
  * 1 GeV⁻¹ = 0.197 fm).  The energies handed to the register are the MASSES M = 2m_q + E_{n_r l}, with V₀ fitted so
  * the 1S sits on the measured ground state (J/ψ or Υ(1S)) — the one constant every potential model carries.
@@ -12,7 +12,70 @@
  * is not built for this Hamiltonian: the selector forces position space, as it does for the box.
  */
 import { BASIS, ylmNorm, legendreDerivCoeffs } from './hydrogen.js';
-import { numerov, POTENTIALS, DEFAULTS, MEASURED, fitOffset } from './qcd.js';
+
+/** the standard potential models, all in GeV / GeV⁻¹ (moved from qcd.js, 0.5.0 D9) */
+export const POTENTIALS = {
+  cornell: { label: 'Cornell  −4α_s/3r + σr + V₀', f: (r, p) => -4 * p.alphaS / (3 * r) + p.sigma * r + (p.V0 || 0) },
+  linear: { label: 'linear  σr + V₀  (the Airy limit)', f: (r, p) => p.sigma * r + (p.V0 || 0) },
+  coulomb: { label: 'Coulomb  −4α_s/3r', f: (r, p) => -4 * p.alphaS / (3 * r) + (p.V0 || 0) },
+  log: { label: 'logarithmic  C ln(r/r₀) + V₀', f: (r, p) => p.C * Math.log(r / p.r0) + (p.V0 || 0) },
+};
+export const DEFAULTS = { alphaS: 0.39, sigma: 0.18, C: 0.733, r0: 1.0, V0: 0 };
+/** the measured levels this is judged against (PDG; GeV) */
+export const MEASURED = {
+  charm: { label: 'charmonium (cc̄)', m: 1.5, levels: [{ n: 1, name: 'J/ψ(1S)', M: 3.0969 }, { n: 2, name: 'ψ(2S)', M: 3.6861 }, { n: 3, name: 'ψ(3S)', M: 4.039 }] },
+  bottom: { label: 'bottomonium (bb̄)', m: 4.8, levels: [{ n: 1, name: 'Υ(1S)', M: 9.4603 }, { n: 2, name: 'Υ(2S)', M: 10.0234 }, { n: 3, name: 'Υ(3S)', M: 10.3552 }] },
+};
+/**
+ * Numerov shooting for the radial equation u'' = [2μ(V(r) − E) + l(l+1)/r²] u, u = rR.  The eigenvalue is found by
+ * bisection on the NODE COUNT, which is monotone in E — robust where matching conditions are not.  Returns { E, u, r, nodes, h }.
+ */
+export function numerov(V, mu, l, level, opt = {}) {
+  const rmax = opt.rmax || 12 / Math.sqrt(mu * 0.2), N = opt.N || 4000, h = rmax / N;
+  const r = new Float64Array(N + 1), u = new Float64Array(N + 1);
+  for (let i = 0; i <= N; i++) r[i] = (i + 1e-9) * h;
+  const kOf = (E) => { const k = new Float64Array(N + 1); for (let i = 0; i <= N; i++) k[i] = 2 * mu * (V(r[i]) - E) + l * (l + 1) / (r[i] * r[i]); return k; };
+  function shoot(E) {
+    const k = kOf(E);
+    u[0] = Math.pow(r[0], l + 1); u[1] = Math.pow(r[1], l + 1);
+    let nodes = 0;
+    const f = (i) => 1 - h * h * k[i] / 12;
+    for (let i = 1; i < N; i++) {
+      u[i + 1] = ((2 + 10 * h * h * k[i] / 12) * u[i] - f(i - 1) * u[i - 1]) / f(i + 1);
+      if (u[i + 1] * u[i] < 0) nodes++;
+      if (Math.abs(u[i + 1]) > 1e30) { for (let j = 0; j <= i + 1; j++) u[j] *= 1e-30; }
+    }
+    return nodes;
+  }
+  let lo = opt.eMin === undefined ? -4 : opt.eMin, hi = opt.eMax === undefined ? 40 : opt.eMax;
+  for (let it = 0; it < 200; it++) {
+    const mid = (lo + hi) / 2;
+    if (shoot(mid) >= level) hi = mid; else lo = mid;
+    if (hi - lo < 1e-12) break;
+  }
+  const E = (lo + hi) / 2;
+  const nodes = shoot(E);
+  let nrm = 0; for (let i = 0; i <= N; i++) nrm += u[i] * u[i] * h;
+  if (nrm > 0) { const s = 1 / Math.sqrt(nrm); for (let i = 0; i <= N; i++) u[i] *= s; }
+  return { E, u, r, nodes, h };
+}
+/** the S-wave spectrum of one system: M_n = 2m + E_n */
+export function spectrum(kind, potential, params, count = 3) {
+  const sys = MEASURED[kind], mu = sys.m / 2, V = (r) => POTENTIALS[potential].f(r, params);
+  const out = [];
+  for (let n = 1; n <= count; n++) {
+    const s = numerov(V, mu, 0, n, { rmax: 40 / Math.sqrt(mu), N: 4000 });
+    out.push({ n, E: s.E, M: 2 * sys.m + s.E, u: s.u, r: s.r, measured: sys.levels[n - 1] });
+  }
+  return { kind, label: sys.label, m: sys.m, mu, levels: out,
+    split: out.length > 1 ? out[1].E - out[0].E : 0,
+    measuredSplit: sys.levels.length > 1 ? sys.levels[1].M - sys.levels[0].M : 0 };
+}
+/** the V₀ that puts the ground state exactly on its measured mass — so the 2S mass becomes a genuine prediction */
+export function fitOffset(kind, potential, params) {
+  const s = spectrum(kind, potential, { ...params, V0: 0 }, 1);
+  return MEASURED[kind].levels[0].M - s.levels[0].M;
+}
 
 export const NR = 256;                       // samples per tabulated radial row
 export const ROWS = 36;                      // (n_r, l) pairs

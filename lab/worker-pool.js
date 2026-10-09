@@ -45,7 +45,7 @@ export function createWorkerPool({ busyWrap, spawn }) {
      aesthetic.  (1) Benzene/STO-3G is 36 s of McMurchie–Davidson integrals on this machine — the 8 s cap would
      declare a timeout and hand that work to the FRAME THREAD, which is the one thing the card must never do.
      (2) The real-time record (P, P(t−h), the trace) lives in ONE worker instance, so chem.rt.init and every
-     chem.rt.run after it must reach the same worker; sharing `cards` would also let a 36 s solve block HELIUM. */
+     chem.rt.run after it must reach the same worker; sharing `cards` would also let a 36 s solve block H₂'s curve. */
   const chemW = makeWorker('chem', 300000);
   const solveCard = (msg, fallback, pluck = (r) => r.result) => {
     const local = () => busyWrap(new Promise((resolve, reject) => requestAnimationFrame(() => setTimeout(() => { try { resolve(fallback()); } catch (e) { reject(e); } }, 0))));

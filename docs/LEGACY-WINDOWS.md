@@ -4,15 +4,16 @@
 picker, opened by SPECTRUM's ATOM, with its own row in + and WINDOW.  The rest are decided at 0.5.0.
 
 **Status (2026-10, Josh):** hidden. Each of these windows **needs an upgrade, re-adoption, or deletion.** They are
-not offered by the + menu, the WINDOW menu or TAB, and a first visit never sees them. Nothing was deleted: ids,
-models, save records and node suites are intact, so every older project still opens.
+not offered by the + menu, the WINDOW menu or TAB, and a first visit never sees them. 0.5.0 D9 deleted QCD, H₂⁺ and
+HELIUM (R5-L1), each with a restore shim; H₂'s and ELECTROSTATICS' ids, models, save records and node suites are intact
+(their fate is Josh's "by use" ruling), so every older project still opens.
 
 | id | title | what it is | files |
 |---|---|---|---|
-| `molecule` | H₂⁺ · LEGACY | H₂⁺ in the 1s LCAO basis (hidden since 0.2.0; the model for the rest) | `molecule.js`, `moleculeview.js`, `mo.js`, `moview.js` |
+| `molecule` | H₂⁺ · **DELETED 0.5.0 D9** | H₂⁺ in the 1s LCAO basis (hidden since 0.2.0; the model for the rest), with W-MO and W-PULSE | deleted: `moleculeview.js`, `moview.js`, `pulseview.js`, `pulse.js`; moved to `tests/lib/`: `mo.js`, `twocentre.js` (the node proofs' physical system); `molecule.js` stays (`h2ci.js`, `h2.js`, `electrostatics.js` import it) |
 | `h2` | H₂ · LEGACY | two atoms, Heitler–London curves and the collision | `h2.js`, `h2view.js` (`h2ci.js` is a shared library — keep it) |
-| `helium` | HELIUM · LEGACY | two electrons, Hylleraas; the conditional cloud of electron 2 | `helium.js`, `heliumview.js` |
-| `qcd` | QCD · LEGACY | quarkonium under a chosen potential; the CORNELL parameters | `cornell.js`, `qcdview.js` |
+| `helium` | HELIUM · **DELETED 0.5.0 D9** | two electrons, Hylleraas; the conditional cloud of electron 2 | deleted: `helium.js`, `heliumview.js` (+ mathworker's `helium` op, `tests/helium.test.mjs`); the field kernel's space-4 branch is left for C7's digest lock |
+| `qcd` | QCD · **DELETED 0.5.0 D9** | quarkonium under a chosen potential; the CORNELL parameters | was `qcd.js`, `qcdview.js` (deleted); `cornell.js` (QUARKONIUM) stays and took the Numerov solver |
 | `field` | ELECTROSTATICS · LEGACY | Φ, E, B and the current of the register's own charge; the stage overlay | `electrostatics.js`, `fieldlines` in `rack.js` |
 
 ## How they are hidden
@@ -26,12 +27,20 @@ for them, so their readers stop. `layout.raise(id)` / `layout.reopen(id)` still 
 
 A project that NEEDS one brings it back, so a live field owner never loses its OFF switch:
 
-- **HELIUM, H₂** — field owners. Their `setOn(true)` un-hides and opens the card; `restore` does the same when the
-  file turns one on (beside the H₂⁺ line).
+- **HELIUM** — never: DELETED in 0.5.0 D9 (R5-L1). A file whose field it owned opens as SPECTRUM's ATOM at Z = 2 with the
+  1s filled (`setElement(2)`, `fillValence`; ATOMS opens with it) — the central-field He; Hylleraas's correlation, its basis
+  and electron 1 have no twin. The one-line notice says so.
+- **H₂** — a field owner. Its `setOn(true)` un-hides and opens the card; `restore` does the same when the
+  file turns it on.
+- **H₂⁺** — never: DELETED in 0.5.0 D9 (R5-L1). A file whose field it owned opens as MOLECULES · H₂ (STO-3G) on σg or σu
+  (its `kind`; ON A opens σg) — in a minimal basis of two 1s functions both are fixed by symmetry, the combinations the card
+  drew; its R, the tunnelling start, W-MO and W-PULSE have no twin. RHF refuses H₂⁺'s one electron. The one-line notice
+  says so.
 - **ELECTROSTATICS** — its overlay draws only while the card can present, so a file whose overlay is not `off` raises
   the card (`layout.raise('field')`: un-hidden, open, unfolded, on screen).
-- **QCD** — never. Its Hamiltonian (`cornell`) still restores and its saved parameters still apply; it simply cannot be
-  edited until this is decided (SPECTRUM's QUARKONIUM button is hidden while QCD is).
+- **QCD** — never: DELETED in 0.5.0 D9 (R5-L1). Its Hamiltonian (`cornell`) still restores and a file's `instruments.qcd`
+  (written on, as QUARKONIUM's parameters) still applies; nothing edits it (SPECTRUM's QUARKONIUM button stays hidden). A file
+  whose layout had the QCD window open opens without it and says so in one line (the PROJECTS status, STATE's status).
 
 ## The three choices, per window
 

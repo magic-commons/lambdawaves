@@ -78,8 +78,6 @@ function presentation() {
       slice: { mode: 'space', half: 8, gain: 1.6, rotor: { qL: [1, 0, 0, 0], qR: [1, 0, 0, 0] } },   // sliceview.js:63
       kepler: { shell: 3 } },                                         // rack.js:2139 (ui.kepShell)
     instruments: {
-      molecule: { on: false, R: 2, kind: 'sigma_g' },                 // moleculeview.js:30
-      helium: { on: false, basis: 'six', x1: [0, 0, 0.8] },           // heliumview.js:11 (r1 0.8 on the z axis)
       h2: { on: false, R: 6, which: 'triplet', showCI: true, ke: 0.02, kappa: 300 },                 // h2view.js:23
       chem: { preset: 'H2O', basis: 'sto-3g', view: 'density', orbital: null, axis: 'y', kappa: 0.001, speed: 10, dt: 0.01,
         integrator: 'mmut', tda: false, core: false, valence: false, on: false },     // chemview.js:56–57 (valence: 0.4.0 S4c)
@@ -87,11 +85,9 @@ function presentation() {
       states: { on: false, view: 'change', ref: 'ground', flow: false, morph: 0, morphOn: false, A: null, B: null,
         drive: { pol: 'x', omega: 0.4, e0: 0.01, envelope: 'cw', duration: 400, phase: 0 }, lanes: [] },   // statesview.js:60
       register: { mode: 'orbital' },                                  // registerview.js:17
-      qcd: { kind: 'charm', potential: 'cornell', params: { alphaS: 0.39, sigma: 0.18, C: 0.733 } },  // qcdview.js:10 (qcd.js DEFAULTS)
-      pulse: { basis: 'lcao1s', R: 2, dt: 0.05, pulse: { amplitude: 0.02, omega: 0.3929175297217954, duration: 48, phase: 0, start: 0 } },   // pulseview.js:16
+      qcd: { kind: 'charm', potential: 'cornell', params: { alphaS: 0.39, sigma: 0.18, C: 0.733 } },  // cornell.js DEFAULTS: QUARKONIUM's parameters (the QCD window that edited them left in 0.5.0 D9)
       ladder: { nbar: 30, sigma: 2, d: 0, teeth: 8 },                 // ladder.js:13
       particles: { count: 160, trail: 24 } },                         // rack.js VORTEX's PARTICLES knobs (0.4.0 S3), particles.js:21
-    mo: { kind: 'lcao1s', lambda: 1.7611, R: 2, electron: 'hold', force: 'exact', connection: true, dt: 5 },   // moview.js:54–55
     rates: new Array(91).fill(1),                                     // rack.js:109
     rotationRates: { z: 0, kz: 0, def: 0 },                           // rack.js:450
     sturmian: { on: false, lambda: 1 },                               // rack.js:113

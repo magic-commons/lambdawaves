@@ -58,7 +58,7 @@ try {
   const impulse = await g.ev(`
     __LW.mod.reset();
     __LW.layout.modulation.collapse();
-    __LW.molecule.setOn(true);
+    __LW.setSpace('p');   // outside the hydrogen overlay domain (momentum space; the H₂⁺ card this used left in 0.5.0 D9)
     await __LW.settle();
     const canvas = document.getElementById('kepler'), ctx = canvas.getContext('2d');
     const clearRect = ctx.clearRect.bind(ctx);
@@ -75,7 +75,7 @@ try {
     __LW.bow.cancel();
     await __LW.settle();
     ctx.clearRect = clearRect;
-    __LW.molecule.setOn(false);
+    __LW.setSpace('x');
     return { afterStart, afterMove, active: __LW.bow.active, errors: __e.slice() };
   `);
   assert.ok(impulse.afterStart > 0, `impulse start did not clear its overlay: ${JSON.stringify(impulse)}`);

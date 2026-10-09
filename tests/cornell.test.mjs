@@ -1,23 +1,36 @@
 /* tests/cornell.test.mjs — the node proof of QUARKONIUM as a Hamiltonian of the register.
  *   node tests/cornell.test.mjs
- * Oracles: the QCD panel's own Numerov spectrum (the same solver), the measured masses (PDG), normalisation and
- * orthogonality of the radial functions by quadrature on the fine grid, node counts, the table's consistency.
+ * Oracles: the S-wave Numerov spectrum (the same solver), the measured masses (PDG), normalisation and
+ * orthogonality of the radial functions by quadrature on the fine grid, node counts, the table's consistency — and, since
+ * 0.5.0 D9 deleted qcd.js and its suite, the two anchors that suite held for the solver this file keeps: the exact Airy
+ * spectrum of V = σr, and Round 9's independently computed Cornell splittings.
  */
 import { BASIS } from '../lab/hydrogen.js';
-import { spectrum, fitOffset, DEFAULTS, MEASURED } from '../lab/qcd.js';
-import { configure, solved, radialAt, cornellEnergyOf, cornellTableFor, cornellFromTable, cornellPsiAt, cornellDomainFor, cornellLabelOf, cornellSpectrum, cornellRadialTable, NR } from '../lab/cornell.js';
+import { configure, solved, radialAt, cornellEnergyOf, cornellTableFor, cornellFromTable, cornellPsiAt, cornellDomainFor, cornellLabelOf, cornellSpectrum, cornellRadialTable, NR,
+  spectrum, fitOffset, numerov, DEFAULTS, MEASURED } from '../lab/cornell.js';
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {
   TOTAL++; if (!ok) FAILED++;
   console.log((ok ? 'GREEN ' : 'RED   ') + name + (detail === undefined ? '' : '\n      ' + JSON.stringify(detail).slice(0, 300)));
 }
+/* the solver against a problem with a known closed form (moved from qcd.test.mjs): the linear potential IS Airy's equation,
+   E_n = (σ²/2μ)^{1/3} |a_n| with a_n the zeros of Ai */
+{
+  const mu = 0.75, sigma = 0.18, A = [2.33810741, 4.08794944, 5.52055983], s = Math.cbrt(sigma * sigma / (2 * mu));
+  let worst = 0;
+  for (let n = 1; n <= 3; n++) worst = Math.max(worst, Math.abs(numerov((r) => sigma * r, mu, 0, n, { rmax: 60, N: 8000 }).E / (s * A[n - 1]) - 1));
+  judge('AIRY: the Numerov solver reproduces the EXACT spectrum of V = σr for the first three S levels (1e-5 relative)', worst < 1e-5, worst);
+  const c = spectrum('charm', 'cornell', DEFAULTS, 3), b = spectrum('bottom', 'cornell', DEFAULTS, 3);
+  judge('ROUND 9: the Cornell 2S−1S splittings are 0.6036 GeV (cc̄) and 0.5810 GeV (bb̄), as Round 9\'s independent Numerov + matrix diagonalisation found',
+    Math.abs(c.split - 0.60364) < 2e-3 && Math.abs(b.split - 0.58102) < 2e-3, { charm: c.split, bottom: b.split });
+}
 configure('charm', { ...DEFAULTS }, 'cornell');
 {
   const S = solved();
   const V0 = fitOffset('charm', 'cornell', DEFAULTS), ref = spectrum('charm', 'cornell', { ...DEFAULTS, V0 }, 3);
   const M1 = cornellEnergyOf(1, 0), M2 = cornellEnergyOf(2, 0), M3 = cornellEnergyOf(3, 0);
-  judge('CHARMONIUM S-wave masses agree with the QCD panel\'s spectrum (same solver) to 1e-9, the 1S sits on J/ψ (fitted V₀), the 2S is a PREDICTION within 25 MeV of PDG, and the 3S — above the open-charm threshold, where a potential model is known to overshoot — within 120 MeV',
+  judge('CHARMONIUM S-wave masses agree with the S-wave spectrum (same solver) to 1e-9, the 1S sits on J/ψ (fitted V₀), the 2S is a PREDICTION within 25 MeV of PDG, and the 3S — above the open-charm threshold, where a potential model is known to overshoot — within 120 MeV',
     Math.abs(M1 - ref.levels[0].M) < 1e-9 && Math.abs(M2 - ref.levels[1].M) < 1e-9 && Math.abs(M3 - ref.levels[2].M) < 1e-9 && Math.abs(M1 - 3.0969) < 1e-6 && Math.abs(M2 - 3.6861) < 0.025 && Math.abs(M3 - 4.039) < 0.12, { M1, M2, M3, ref: ref.levels.map((x) => x.M) });
   const rows = S.rows.filter((R) => R.l === 0).slice(0, 3);
   const dot = (A, B) => { let s = 0; for (let i = 0; i < A.u.length; i++) s += A.u[i] * B.u[i]; return s * A.h; };

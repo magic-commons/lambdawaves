@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { createMO } from '../lab/mo.js';
+import { createMO } from './lib/mo.js';
 import { generalisedEigen } from '../lab/sturmian.js';
 import { kick, fieldFreeTrace, spectrum, peaks, integrate, kickSpectrum } from '../lab/absorb.js';
 

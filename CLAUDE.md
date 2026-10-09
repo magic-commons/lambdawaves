@@ -28,8 +28,9 @@ overlay regressions.
 
 The 0.2.0 alpha molecular UI is MOLECULES (`chem`) and MO-REGISTRY
 (`orbitals`). Keep those saved IDs, `chem.*` and `reg.*` modulation targets,
-and the `mol-*`/`reg-*` CSS hooks stable. The old H₂⁺ `molecule` card is hidden
-at startup but must be shown if an older project restores it as field owner.
+and the `mol-*`/`reg-*` CSS hooks stable. The old H₂⁺ `molecule` card was DELETED
+in 0.5.0 D9: an older project whose field it owned opens as MOLECULES · H₂ on σg
+or σu (the minimal-basis shape of its orbital; RHF cannot hold one electron).
 MOLECULES and MO-REGISTRY start OPEN on the first-run LEFT rack directly under
 SPECTRUM (folded on a phone or tablet), unsolved until MOLECULES is switched on;
 a restored project whose field owner is MOLECULES brings them back onto the rack
@@ -57,12 +58,14 @@ item it crosses; RIGHT click removes one, RIGHT drag removes every item it
 crosses (Alt/Option+left = right; a finger = left). A crossed degenerate row is
 taken whole. One stroke is one undo row.
 
-QCD, HELIUM, H₂ and ELECTROSTATICS are hidden LEGACY windows (2026-10)
-that need an upgrade, re-adoption into MIR, or deletion — read
-`docs/LEGACY-WINDOWS.md` before touching them. They keep their ids, models and
-save records; HELIUM/H₂ resurface when a project turns them on as field owner,
-ELECTROSTATICS when a project's overlay is on (QUARKONIUM's button is hidden
-while QCD is; the value still restores). Do not re-list them in + or WINDOW.
+QCD, H₂⁺ and HELIUM were DELETED in 0.5.0 D9 (R5-L1). An older file that used
+one opens on its shim and says so in one line (PROJECTS and STATE status): a
+QCD seat opens without the window (QUARKONIUM, `cornell.js`, keeps the solver
+and `instruments.qcd`), an H₂⁺ field as MOLECULES · H₂ on σg/σu, a HELIUM field
+as SPECTRUM's ATOM · He 1s; the DEMOS `H₂ σu` and `HELIUM` open the same. H₂ and
+ELECTROSTATICS stay hidden LEGACY windows until Josh rules "by use" (read
+`docs/LEGACY-WINDOWS.md`, `research/release-0.5.0/D9-BUILD.md`): H₂ resurfaces
+as a project's field owner, ELECTROSTATICS when its overlay is on. Not in + or WINDOW.
 ATOMS left that list in 0.4.0 (R-A2): it is the periodic-table window — H–Kr
 cells in SPECTRUM's own picker, periods as columns on the card and a phone and
 rows floating, its Δ-SCF / quantum-defect / α-order readouts kept — opened by

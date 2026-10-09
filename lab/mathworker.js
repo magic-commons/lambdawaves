@@ -8,7 +8,6 @@
  *   kick    { re, im, k, d, ham, Z, radius }       → the bow's slap e^{ik·x} on a snapshot of c(t): the kicked vector, ⟨p⟩ along d before and after
  *   packet  { x0, k, sigma, radius }               → the BOX bow: the Gaussian projected on the well's 91 eigenstates (well.js wellPacket)
  *   period  { energies, horizon }                  → the density's period / near-recurrence scan (period.js densityPeriod) for the transport's readout
- *   helium  { basis }                              → the selected Hylleraas variational solve
  *   ladder  { params }                             → the revival packet, scan and asymptotic prediction
  *   h2curve { Rmin, Rmax, count }                  → the correlated H₂ energy curves
  *   gas.stats { radius, t, re0, im0, t0 }          → the AXIAL GAS's norm, ⟨z⟩, σ_z, ⟨r⟩ at t (gas.js stats) — SPECTRUM's readout (K5w)
@@ -38,7 +37,6 @@ import { applyRotor } from './frontier.js';
 import { rotorsToZ } from './kick.js';
 import { wellPacket } from './well.js';
 import { densityPeriod } from './period.js';
-import { hylleraas, BASES } from './helium.js';
 import { solveLadder } from './ladder-model.js';
 import { h2CurveTable } from './h2ci.js';
 import { moleculeRHF, registerRecord, BASIS_FILES } from './rhf-molecule.js';
@@ -132,7 +130,6 @@ function work(m) {
       const P = wellPacket(m.x0, m.k, m.sigma);
       out = { re: P.re, im: P.im, captured: P.captured }; transfer = [P.re.buffer, P.im.buffer];
     } else if (m.op === 'period') { out = densityPeriod(m.energies, { horizon: m.horizon || 2e4 }); }
-    else if (m.op === 'helium') { if (!BASES[m.basis]) throw new Error('unknown helium basis ' + m.basis); out = { sol: hylleraas(BASES[m.basis]) }; }
     else if (m.op === 'ladder') { out = { result: solveLadder(m.params || {}) }; }
     else if (m.op === 'h2curve') { out = { result: h2CurveTable(m.Rmin, m.Rmax, m.count) }; }
     else if (m.op === 'gas.stats') { out = gasStats(m); }
