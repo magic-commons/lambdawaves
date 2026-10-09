@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+/* 0.5.1 D10-19 · U8 — THE FLASH GUARD's calibration.  The limiter counts swings of `delta × span` in a route's own units
+ * (lab/mir/shell/flash-guard.js).  This derives, from lab/field.js' own tone formulas and lab/rack.js' defaults, the parameter
+ * step that moves the picture's relative luminance by 10 % at the route's default — in the map's own space (ln for a log
+ * route) — so lab/flash-routes.js can set ranges[route] = [0, step / delta].  `node tools/flash-calibrate.mjs` prints them
+ * with the checks; tests/flash-routes.test.mjs holds the lab's numbers to `steps()`.
+ *
+ * THE RULE (the brief's, one for all four): the step that changes a pixel's relative luminance L by 10 % of itself, taken where
+ * that is also ≈ the WCAG delta (0.1 of the maximum) — at the pixel/state where L is highest for that route.  The shader's
+ * output `o` is the proxy for L (the canvas encoding's sRGB curve is not modelled; the field judge, which reads pixels, is the
+ * exact one — a 0.5.x row).
+ *
+ *   exposure   field.js: sigma = 24·exposure; a = 1 − exp(−wEff·sigma·stepN·4) per step.  Optical depth τ ∝ exposure, so a thin
+ *              cloud's radiance is LINEAR in exposure (and every thicker one is sub-linear): ×1.1 is the most a 10 % step can
+ *              give.  Step = ln 1.1 (log route).
+ *   gamma      field.js: o = pow(col + bg·bgBlend, 1/gamma).  At mid-grey 0.5 and gamma 1 (the default): o = 0.5 → 0.45 is the
+ *              darker, smaller step (0.55 is the larger); Δgamma = ln 0.5 / ln 0.45 − 1 (linear route).
+ *   stage      rack.js setStageMix: mat.bg = ground + (custom − ground)·mix (when FOLLOW THEME is off; it is a bypass otherwise).
+ *              field.js paints bg·(0.82..1.25) and the same factor scales both L and dL, so the relative step is independent of
+ *              it.  dL/dmix = Y(custom) − Y(ground); the LIGHT ground (L ≈ 0.92) is where a stage swing is a flash — the dark
+ *              ground's whole range is ΔL = 0.10, so 10 % of its own L is 0.004 and can never be one.  Linear route.
+ *   knee       field.js: wEff = w/(1 + knee·w), w ≤ 1 (w = ρ/ρmax)^soft.  dln(wEff)/dln(knee) = −knee·w/(1+knee·w), largest at
+ *              w = 1, where a 10 % change of wEff is knee 0.6 → 0.7778 (wEff −10 %) or → 0.4545 (wEff +10 %); the smaller in
+ *              ln space.  A thin ray's L ∝ ∫wEff, so this bounds every ray (checked below).  Log route.
+ */
+import { pathToFileURL } from 'node:url';
+
+const Y = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+const DARK = [0.028, 0.038, 0.058], LIGHT = [0.93, 0.95, 0.975], CUSTOM = [0.12, 0.14, 0.18];   // rack.js THEMES.bg, mat.stageCustom
+const STAGE0 = 0.04, KNEE0 = 0.6, GAMMA0 = 1, MID = 0.5, REL = 0.1;                              // rack.js: stageMix, mat.knee, mat.gamma
+
+export function steps() {
+  const dY = Y(CUSTOM) - Y(LIGHT), L0 = Y(LIGHT) + dY * STAGE0;                                  // the light ground, mix 0.04
+  const gammaDown = GAMMA0 * Math.log(MID) / Math.log(MID * (1 - REL)) - GAMMA0;                  // 1/γ' = ln0.45/ln0.5 → γ' < 1
+  const kneeUp = (1 + KNEE0) / (1 - REL) - 1, kneeDn = (1 + KNEE0) / (1 + REL) - 1;              // w = 1: wEff ×0.9 / ×1.1
+  return {
+    'material.exposure': Math.log(1 + REL),
+    'material.gamma': Math.abs(gammaDown),
+    'material.stage': Math.abs(REL * L0 / dY),
+    'material.knee': Math.min(Math.log(kneeUp / KNEE0), Math.log(KNEE0 / kneeDn)),
+  };
+}
+
+/** the checks: the exposure step never moves a pixel more than 10 %, and neither does the knee step on a real ray */
+export function checks() {
+  const L = (tau, yb = 0) => (1 - Math.exp(-tau)) + Math.exp(-tau) * yb;                          // a unit-colour cloud over a ground yb
+  let expMax = 0; for (let tau = 1e-6; tau < 40; tau *= 1.25) expMax = Math.max(expMax, L(tau * 1.1) / L(tau) - 1);
+  const S = steps(), kd = S['material.knee'];
+  /* a Gaussian ray through the box: w = pow(rho, soft) along 160 steps, tau = 96·exposure·Σ wEff·stepN; the knee moved by ±kd */
+  const tau = (e, k, soft, peak) => { let s = 0; for (let i = 0; i < 160; i++) { const x = (i + 0.5) / 160 * 6 - 3, w = Math.pow(peak * Math.exp(-x * x), soft); s += w / (1 + k * w) / 160; } return 96 * e * s; };
+  let kneeMax = 0;
+  for (const e of [0.08, 0.3, 1, 3, 12]) for (const soft of [0.5, 0.7, 1.5]) for (const peak of [1, 0.3, 0.05]) for (const sgn of [1, -1]) {
+    const a = L(tau(e, KNEE0, soft, peak)), b = L(tau(e, KNEE0 * Math.exp(sgn * kd), soft, peak));
+    kneeMax = Math.max(kneeMax, Math.abs(b / a - 1));
+  }
+  const gamma = (g) => Math.pow(MID, 1 / g);
+  return { exposureMax: expMax, kneeMax, gammaUp: gamma(GAMMA0 + steps()['material.gamma']) / MID - 1, gammaDown: 1 - gamma(GAMMA0 - steps()['material.gamma']) / MID,
+    stageLight: steps()['material.stage'] * Math.abs(Y(CUSTOM) - Y(LIGHT)), stageDark: steps()['material.stage'] * Math.abs(Y(CUSTOM) - Y(DARK)) };
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const S = steps(), C = checks();
+  for (const [id, v] of Object.entries(S)) console.log(id.padEnd(20), v.toFixed(4), '→ ranges = [0, ' + (v / 0.1).toFixed(3) + ']');
+  console.log(JSON.stringify(C, (k, v) => (typeof v === 'number' ? +v.toFixed(4) : v)));
+}
