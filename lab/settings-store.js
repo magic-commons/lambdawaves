@@ -23,7 +23,8 @@ export const FAMILIES = Object.freeze({
   'lambdawaves.q0.projects.seeded': ['projects.js FOLDERS (mir/folders/seed.js): the starters added once', 'PROJECT'],   // 0.5.0 C6
   'lambdawaves.q0.session': ['main.js createSession (mir/core/session.js): the live project, the one part as it stands', 'PROJECT'],   // 0.5.0 C6b
   'lambdawaves.q0.render': ['film-card.js (MIR createRenderView, its prefix): the RENDER card\'s choices and the picture scale', 'PREFERENCE'],   // 0.5.0 C7b
-  'mir.render.calib': ['the kit recorder (mir/render/recorder.js CALIB_KEY): this device\'s measured ms a frame', 'PREFERENCE'],   // 0.5.0 C7b
+  'lambdawaves.q0.curves': ['rack.js curvesStore (mir/panels/curves.js model.serialize): the CURVES card\'s screen grade, the points per channel and AMOUNT', 'PREFERENCE'],   // 0.5.1 D10-24
+  'mir.render.calib':['the kit recorder (mir/render/recorder.js CALIB_KEY): this device\'s measured ms a frame', 'PREFERENCE'],   // 0.5.0 C7b
 });
 export function createSettingsStore(storage) {
   const ls = () => storage || globalThis.localStorage;

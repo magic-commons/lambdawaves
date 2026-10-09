@@ -5405,3 +5405,30 @@ Gates:
 
 Hand-off: `research/release-0.5.1/D1-BUILD.md`, which also holds the CLAUDE.md STAGE TEXT paragraph drafted for D-V, six brief
 candidates and the merge notes. Measurements: `research/release-0.5.1/d1-measure/`.
+### wave 213: D10-24 CURVES — the kit's curves panel over the picture, screen only, shipped closed, its grade a PREFERENCE; a graded screen costs 19 % of the field's presents/s
+
+Row D10-24 of the 0.5.1 plan (R6-C taken: a screen-only grade remembered per device). One Sonnet builder (`agent-a41df2f5a03718877`) built it on `27eb96a`.
+
+**The card.** `createCurvesPanel({ parent, canvas: dom.canvas, project: false })` with no `history`, no `port` and no `mod`, in a closed card on the right rack after
+RENDER, in + and WINDOW. MASTER · R · G · B go through the kit's one SVG picture filter on the stage canvas, so the SCREEN is graded and nothing else; the card says so
+in one line ("Grades the screen only — pictures and films are untouched."). AMOUNT is not routed. Neutral reads `filter: none`.
+
+**The state.** One PREFERENCE record, `lambdawaves.q0.curves` (FAMILIES): restored at boot, written 250 ms after a change, removed by FORGET, never in the settings blob, a
+project, a link or a history row (`docs/STATE-SCOPES.md` has the row).
+
+**Measured.**
+- Screen only: with an S-curve on MASTER the driver's screenshot changes and `capture.picture`'s PNG has the same sha-256; THE LOCK 860 and 1004 are 0/0.
+- The cost (U9, the pair cannot see it): WAVE DANCER, 30 s, three interleaved pairs, headless Chromium on the RTX 3070: **15.03 presents/s neutral
+  (14.99 to 15.15) against 12.18 with the S-curve (12.09 to 12.22): -19.0 %**, at the same 6.0 ms of main thread a frame. Neutral costs nothing. Josh's M5 device report
+  is the real figure; its recipe is in `research/release-0.5.1/D10-24-BUILD.md`.
+- Suites: `hit-probe-set` 71 presses through gaps, 0 reached (two new CURVES scenes); `frame-occlusion` 7/7; `settings-probe` 0 of 6 red; `serialize-bytes` 11/11 `edit` shas
+  identical to the base (the full bytes +81 B each: the one WORKSPACE card row); `history` 44/44; `new-project` 8/8; `menubar`; `render-regressions`; `bash test.sh node` exit 0;
+  new `tests/curves.browser-test.mjs` 7 PASS.
+
+**A bug found by the probe.** The card first sat at the foot of the rack, and `settings-probe` went 4 of 6 red: `closed[]` was saved in two orders (a project open leaves a card its
+layout does not list where it stood, so it ended second from the top; a reload put it last). It is seated right after RENDER, where both orders agree.
+
+**Ledger.** `cat lab/*.js | wc -l` 27,594 -> 27,613 (+19, of which 2 are sw.js's precache rows). **Known gap, not this row's:** a browser whose saved `closed[]` predates a card opens
+it once (RENDER does too); × closes it for good.
+
+Hand-off: `research/release-0.5.1/D10-24-BUILD.md`.

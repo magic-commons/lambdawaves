@@ -274,3 +274,13 @@ route a MODULATOR drives to 3 flashes a second on the modulation clock's own sec
 held), said once in METERS' status (`FLASH GUARD · EXPOSURE 10.0 Hz held to 3/s`); `material.hue` and every other route are never
 held. It does not see `reg.morph`, `chem.kick` or the camera: only THE FIELD JUDGE (a 64² luminance readback per frame, a frame-path
 row, 0.5.x) does. THE PHOTOSENSITIVITY LAW (the notice, C6b) is unchanged.
+
+THE CURVES CARD (0.5.1 D10-24, `lab/rack.js` after the RENDER registration) is MIR's `createCurvesPanel({ parent, canvas: dom.canvas,
+project: false })` — no `history`, no `port`, no `mod` — over the stage canvas: MASTER · R · G · B through the kit's one SVG picture
+filter, so it grades the SCREEN only (`capture.js`' GPU readback, the film's `frame(i, ctx)` and THE LOCK never see a CSS filter) and
+the card says so in one line. It ships CLOSED on the right rack after RENDER, in + and WINDOW; neutral reads `filter: none` and costs
+nothing, a graded screen costs a compositor pass (WAVE DANCER: 15.0 → 12.2 presents/s on the headless rig; Josh's M5 report is the
+real figure). AMOUNT is not routed (a flash route outside D10-19's guard). The grade is PREFERENCE, its own record
+`lambdawaves.q0.curves` (FAMILIES; the model's `serialize()`, written 250 ms after a change, removed by FORGET), never a project, link
+or history row. A card that ships closed and that no layout lists is seated where an unlisted card stays (after RENDER), or `closed[]`
+saves in two orders. `tests/curves.browser-test.mjs` is its guard; `__LW.curves` is the model.

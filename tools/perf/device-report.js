@@ -197,6 +197,7 @@ function stateSample(LW) {
     autoScale: q.autoScale, scale: q.scale, auto: q.auto, res: q.res, field: safe(() => f.resolution),
     gov: safe(() => LW.governor.state), drop: safe(() => LW.governor.drop), pipesPending: safe(() => f.renderPipelines.pending),
     view: VIEW_NAMES[LW.mat.view], style: STYLE_NAMES[LW.mat.style], cls: document.body.className,
+    curves: safe(() => f.canvas.style.filter || 'none'),   // 0.5.1 D10-24: the CURVES card's screen grade ('none' neutral, url(#mir-picture-N) graded), so two posted reports say which was which
   };
 }
 

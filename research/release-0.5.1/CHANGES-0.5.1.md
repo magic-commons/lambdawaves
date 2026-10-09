@@ -18,3 +18,8 @@ per feature, no code names; the row that brought it in brackets.
   the kit's serif face, sitting still at the top of the free stage between the racks, never under the transport or the TIMELINE; a hand's preset
   still announces itself over them for a moment and fades back. Holding I keeps the words still. The element letters on each nucleus are as they were.
   The old renderer is gone, and the picture costs nothing more while the camera turns. (D1)
+
+- A CURVES card, in + and WINDOW and closed until you open it: Photoshop-style curves (MASTER, R, G, B; presets LINEAR, LIFT, S, LOG, GAMMA, INVERT;
+  an AMOUNT) that grade what you see on the screen at once. Pictures, films and frame exports are untouched, and the card says so. The grade is
+  remembered on this device across reloads and project opens, and FORGET clears it. A graded screen costs some frame rate; the neutral curve costs
+  nothing. (D10-24)

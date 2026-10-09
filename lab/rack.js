@@ -74,6 +74,8 @@ import { createCameraPanel } from './mir/panels/camera.js';           // 0.5.0 C
 import { barTempo } from './mir/modulation/host.js';
 import { createModulation } from './mir/modulation/window.js';   // 0.5.0 C4: the kit's window controller (MIR 1.5), over A5's port
 import { localStore } from './mir/modulation/bind.js';          // 0.5.0 C4: the kit's modulation record (the power and the cadence)
+import { createCurvesPanel } from './mir/panels/curves.js';     // 0.5.1 D10-24: the CURVES card's rows are the kit's panel over the stage canvas
+import { jsonStore } from './mir/core/prefs.js';                // 0.5.1 D10-24: and its record, `lambdawaves.q0.curves` (PREFERENCE)
 import { createModPort } from './mod-port.js';       // 0.5.0 A5: the port that window takes, and the edges behind it
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
@@ -464,6 +466,7 @@ export async function boot(dom) {
   let modArm = true;
   const modStore = localStore('lambdawaves.q0.modulation');   // 0.5.0 C4: { modArm, modCadence }, PREFERENCE (docs/STATE-SCOPES.md)
   function saveMod() { modStore.write({ modArm, modCadence: MOD.hz }); }
+  const curvesStore = jsonStore('lambdawaves.q0.curves');   // 0.5.1 D10-24: the CURVES card's screen grade (the model's serialize()), PREFERENCE (docs/STATE-SCOPES.md); FORGET removes it
   let occludeDirty = true, occludeAt = 0;    // INK UNDER GLASS: the window rectangles the line pass skips; refreshed at the top of a frame, before any DOM write
   const occlusion = createOcclusion(() => { occludeDirty = true; schedule(TIER.PRESENT); });   // 0.5.0 A7: dirty() is the one producer (a PRESENT even while paused)
   let stageMix = 0.04, stageFollow = true;   // STAGE: 0 = theme, 1 = chosen colour; FOLLOW THEME bypasses the mix without erasing either setting
@@ -1135,7 +1138,7 @@ export async function boot(dom) {
     ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE TEXT\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading, an atom label its body',
       onInput: (v) => { molFormulaScale = v; if (stageText) stageText.setScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
-    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); look.prefs.forget(); modStore.write({ modArm: undefined, modCadence: undefined }); location.reload(); } }).root);
+    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); look.prefs.forget(); modStore.write({ modArm: undefined, modCadence: undefined }); curvesStore.remove(); location.reload(); } }).root);
 
 
     const rc = el('div', 'row tight', gi);
@@ -4751,6 +4754,19 @@ export async function boot(dom) {
     digest: () => reg.digest(), key: () => [reg.version, mat.view, obs.yaw, obs.pitch, obs.dist, obs.fov, obs.shift.join(), clock.t].join('|') });
   rack.prepend(filmCard.card.root);   // at the top, where a reopen puts it and a layout that does not list it (a demo's) leaves it: a reload saves the same `closed`
   rk.register({ id: 'render', el: filmCard.card, side: 'right', closed: true, title: 'RENDER', glyph: 'render', hint: 'the picture and the film' });
+  /* 0.5.1 D10-24 · THE CURVES CARD: the kit's curves panel over the stage canvas (MASTER · R · G · B through its one SVG picture filter), so the SCREEN is
+     graded and nothing else: capture.js reads the GPU texture and the film draws frame(i, ctx), neither sees a CSS filter.  `project: false` (ONE project
+     part), no `history`, no `port`, no `mod` (AMOUNT is not routed).  The grade is PREFERENCE (`lambdawaves.q0.curves`): restored here, written 250 ms
+     after a change, never in a project, a link or a history row.  Neutral = `filter: none`.  Closed, in + and WINDOW, seated after RENDER (where a layout
+     that does not list it leaves it, so a reload saves the same `closed`); `__LW.curves` is the model. */
+  const wCurves = device({ id: 'curves', eyebrow: 'CURVES', status: '' });
+  el('div', 'note', wCurves.body, 'Grades the screen only — pictures and films are untouched.');
+  const curves = createCurvesPanel({ parent: wCurves.body, canvas: dom.canvas, project: false }).model;
+  curves.restore(curvesStore.get());
+  let curvesSave = 0;
+  curves.onChange(() => { clearTimeout(curvesSave); curvesSave = setTimeout(() => curvesStore.set(curves.serialize()), 250); });
+  filmCard.card.root.after(wCurves.root); rk.register({ id: 'curves', el: wCurves, side: 'right', closed: true, title: 'CURVES', glyph: 'curves', hint: 'grade the screen: a transfer curve per channel' });
+  LW.curves = curves;
 
   /* ── go ───────────────────────────────────────────────────────────────── */
   LW.bootView = VIEW_NAMES[mat.view]; LW.bootVortex = vortex.on; LW.bootOrder = layout.orderAll(); LW.bootClosed = layout.closed();   // the shipped defaults, recorded before a URL preset's visuals apply
