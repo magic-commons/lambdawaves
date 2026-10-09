@@ -12,7 +12,7 @@ models, save records and node suites are intact, so every older project still op
 | `molecule` | H₂⁺ · LEGACY | H₂⁺ in the 1s LCAO basis (hidden since 0.2.0; the model for the rest) | `molecule.js`, `moleculeview.js`, `mo.js`, `moview.js` |
 | `h2` | H₂ · LEGACY | two atoms, Heitler–London curves and the collision | `h2.js`, `h2view.js` (`h2ci.js` is a shared library — keep it) |
 | `helium` | HELIUM · LEGACY | two electrons, Hylleraas; the conditional cloud of electron 2 | `helium.js`, `heliumview.js` |
-| `qcd` | QCD · LEGACY | quarkonium under a chosen potential; the CORNELL parameters | `cornell.js`, `qcdview.js` |
+| `qcd` | QCD · **DELETED 0.5.0 D9** | quarkonium under a chosen potential; the CORNELL parameters | was `qcd.js`, `qcdview.js` (deleted); `cornell.js` (QUARKONIUM) stays and took the Numerov solver |
 | `field` | ELECTROSTATICS · LEGACY | Φ, E, B and the current of the register's own charge; the stage overlay | `electrostatics.js`, `fieldlines` in `rack.js` |
 
 ## How they are hidden
@@ -30,8 +30,9 @@ A project that NEEDS one brings it back, so a live field owner never loses its O
   file turns one on (beside the H₂⁺ line).
 - **ELECTROSTATICS** — its overlay draws only while the card can present, so a file whose overlay is not `off` raises
   the card (`layout.raise('field')`: un-hidden, open, unfolded, on screen).
-- **QCD** — never. Its Hamiltonian (`cornell`) still restores and its saved parameters still apply; it simply cannot be
-  edited until this is decided (SPECTRUM's QUARKONIUM button is hidden while QCD is).
+- **QCD** — never: DELETED in 0.5.0 D9 (R5-L1). Its Hamiltonian (`cornell`) still restores and a file's `instruments.qcd`
+  (written on, as QUARKONIUM's parameters) still applies; nothing edits it (SPECTRUM's QUARKONIUM button stays hidden). A file
+  whose layout had the QCD window open opens without it and says so in one line (the PROJECTS status, STATE's status).
 
 ## The three choices, per window
 

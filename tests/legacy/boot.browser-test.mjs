@@ -98,7 +98,7 @@ try {
     return { specSide: __LW.layout.side('spectrum'), pickerOpen: __LW.spectrum.pickerOpen, keplerOn: __LW.kepler.on, theme: document.body.dataset.theme, phaseDefault: __LW.bootView === 'phase' && v0 === vP && v0 !== vD, vortexOn: __LW.vortex.on, vortexOverlay: __LW.vortex.overlay, font, bodyFont: getComputedStyle(document.body).fontFamily, kinds, settings: !!set, keysInSettings: set ? set.querySelectorAll('.keys-chip').length : 0, themeSegInSettings: !!(set && [...set.querySelectorAll('.seg')].length), adds: document.querySelectorAll('#rackAdd').length, veil: getComputedStyle(document.getElementById('rack')).opacity, shadow: getComputedStyle(document.body).getPropertyValue('--glass-shadow') };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B43 THE SHIPPED DEFAULTS: SPECTRUM on the left rack with MODE open, KEPLER off, LIGHT theme, arg ψ as the observable, the vortex census and its overlay off; Roboto is the interface face; every window has ⏻ ▾ ×, INFO panels have ⧉ COPY, CONTROL and OTHER windows start folded, CORE open; SETTINGS exists with the key bindings inside; both racks carry a + and no veil; the card shadow is the tight one',
-    !dfT.error && dfT.specSide === 'L' && dfT.pickerOpen && dfT.keplerOn === false && dfT.theme === 'light' && dfT.phaseDefault && dfT.vortexOn === false && dfT.vortexOverlay === false && dfT.font && /Roboto/.test(dfT.bodyFont) && dfT.kinds.state.kind === 'core' && !dfT.kinds.state.folded && dfT.kinds.qcd.kind === 'info' && dfT.kinds.qcd.copy && dfT.kinds.orbit.kind === 'control' && dfT.kinds.orbit.folded && dfT.kinds.meters.kind === 'info' && dfT.kinds.meters.copy && !dfT.kinds.meters.folded && dfT.kinds.state.power && dfT.kinds.state.close && dfT.settings && dfT.keysInSettings > 10 && dfT.adds === 1 && dfT.veil === '1' && /0 -2px 6px/.test(dfT.shadow), dfT);   /* ⚠ wave 80 (Josh: "too strong and too far … a drop shadow but in the opposite direction") halved the blur and INVERTED the offset, so a card reads as lifted toward the light */
+    !dfT.error && dfT.specSide === 'L' && dfT.pickerOpen && dfT.keplerOn === false && dfT.theme === 'light' && dfT.phaseDefault && dfT.vortexOn === false && dfT.vortexOverlay === false && dfT.font && /Roboto/.test(dfT.bodyFont) && dfT.kinds.state.kind === 'core' && !dfT.kinds.state.folded && !dfT.kinds.qcd && dfT.kinds.wigner.kind === 'info' && dfT.kinds.wigner.copy && dfT.kinds.orbit.kind === 'control' && dfT.kinds.orbit.folded && dfT.kinds.meters.kind === 'info' && dfT.kinds.meters.copy && !dfT.kinds.meters.folded && dfT.kinds.state.power && dfT.kinds.state.close && dfT.settings && dfT.keysInSettings > 10 && dfT.adds === 1 && dfT.veil === '1' && /0 -2px 6px/.test(dfT.shadow), dfT);   /* ⚠ wave 80 (Josh: "too strong and too far … a drop shadow but in the opposite direction") halved the blur and INVERTED the offset, so a card reads as lifted toward the light */
   /* ══ WAVE 106 · THE GATE OPENS THE CHANNELS, BECAUSE A NEW USER NO LONGER ARRIVES WITH THEM OPEN ══
      Josh: "For spectrum, always 'Hide' the spinny wheels for new users."  SPECTRUM is the window this
      rack opens on and the lanes are ninety-one spinning phase dials — an introduction that is a wall —
@@ -375,20 +375,10 @@ try {
   judge('B21 KEYS: WASD/QE move the camera without touching ψ; X/Y/Z picks the rotation axis and [ ] turns the STATE about it; C cycles the draw style back to where it started',
     !keys.error && keys.cam.yaw && keys.cam.pitch && keys.cam.dist && keys.cam.stateSame && keys.rotated && keys.styleAfter !== keys.styleBefore && keys.styleBack === keys.styleBefore && keys.errs === 0, keys);
 
-  /* ── QCD: the window computes, draws, and prints the refutation ────────── */
-  const qcd = await g.ev(`try { const w = document.querySelector('.dev[data-id="qcd"]'); if (!w) return { error: 'no QCD window' };
-    if (w.classList.contains('folded')) w.querySelector('.dev-fold').click();
-    await __LW.settle(); await new Promise(r => setTimeout(r, 200));
-    const c = __LW.qcd.cache; const cv = w.querySelector('canvas.qcd-c');
-    const cornell = { split: c.sp.split, meas: c.sp.measuredSplit, ratio: c.flav.predRatio, v0: c.v0, m2: c.sp.levels[1].M };
-    __LW.qcd.setPotential('linear'); __LW.schedule(1); await __LW.settle(); await new Promise(r => setTimeout(r, 200));
-    const lin = { ratio: __LW.qcd.cache.flav.predRatio, airy: __LW.qcd.cache.flav.airyRatio };
-    const subs = [...w.querySelectorAll('.ro-sub')].map(e => e.textContent).join(' | ');
-    __LW.qcd.setPotential('cornell'); __LW.schedule(1); await __LW.settle();
-    return { cornell, lin, refuted: subs.includes('REFUTED'), canvas: cv && cv.width > 0 && cv.height > 0, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B22 QCD: the window solves Cornell (2S−1S = 0.6036, ψ(2S) within 20 MeV with V₀ fitted), draws the ladder, and under the LINEAR potential prints the Airy spectroscopy as REFUTED with the rigid 0.679 ratio',
-    !qcd.error && Math.abs(qcd.cornell.split - 0.6036) < 2e-3 && Math.abs(qcd.cornell.m2 - 3.6861) < 0.02 && Math.abs(qcd.lin.ratio - 0.679) < 0.02 && qcd.refuted && qcd.canvas && qcd.errs === 0, qcd);
+  /* ── QCD: DELETED in 0.5.0 D9 (R5-L1) — the window, qcd.js, qcdview.js and tests/qcd.test.mjs; QUARKONIUM (cornell.js) keeps
+        the Numerov solver, and its Airy and Round 9 anchors moved into tests/cornell.test.mjs ── */
+  const qcd = await g.ev(`return { gone: !document.querySelector('.dev[data-id="qcd"]'), api: 'qcd' in __LW, errs: window.__e.length };`) || { error: 'no result' };
+  judge('B22 (0.5.0 D9) QCD is deleted: no window and no __LW.qcd', qcd.gone && !qcd.api && qcd.errs === 0, qcd);
 
   /* ── MOMENTUM SPACE: Parseval on the GPU grid ──────────────────────────── */
   const mom = await g.ev(`try { __LW.loadPreset('2p+'); __LW.setView('density'); await __LW.settle();
@@ -911,13 +901,13 @@ try {
     __LW.setHamiltonian('cornell'); await __LW.settle(); await new Promise((r) => setTimeout(r, 200)); await __LW.settle();
     const h = __LW.hamiltonian, px = await __LW.readPixels(), pop = __LW.reg.populated().length;
     const spec = document.querySelector('.dev[data-id="spectrum"]'), es = [...spec.querySelectorAll('.sp-e')].map((e) => e.textContent), names = [...spec.querySelectorAll('.sp-nm')].map((e) => e.textContent), stat = spec.querySelector('.dev-stat').textContent;
-    const E = [__LW.reg.Ediag ? __LW.reg.Ediag(0) : null, __LW.energyOf ? null : null], half = __LW.domain.half, qcdKind = document.querySelector('.dev[data-id="qcd"]').dataset.kind;
+    const E = [__LW.reg.Ediag ? __LW.reg.Ediag(0) : null, __LW.energyOf ? null : null], half = __LW.domain.half, qcdKind = document.querySelector('.dev[data-id="qcd"]') ? 'present' : 'deleted';
     __LW.play(); await new Promise((r) => setTimeout(r, 500)); __LW.pause(); const px2 = await __LW.readPixels();
     __LW.setHamiltonian('hydrogen'); await __LW.settle(); const back = __LW.hamiltonian;
     return { h, lit: px.nonBlack, lit2: px2.nonBlack, pop, es, names, stat, half, qcdKind, back, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B48 QUARKONIUM: the selector switches the same 1s+2pz register to the Cornell Hamiltonian; the field draws it through the tabulated-radial branch with no GPU or shader error; the channel energies read in GeV with quarkonium labels (1S, 1P), the status names QUARKONIUM, the domain is a few GeV⁻¹, it evolves, the QCD panel is an information panel, and hydrogen comes back',
-    !qqT.error && qqT.h === 'cornell' && qqT.lit > 300 && qqT.lit2 > 300 && qqT.pop === 2 && qqT.es.length === 2 && qqT.es.every((t) => /GeV/.test(t) && /^3\./.test(t)) && /1S/.test(qqT.names[0]) && /1P/.test(qqT.names[1]) && /QUARKONIUM/.test(qqT.stat) && qqT.half > 0.5 && qqT.half < 20 && qqT.qcdKind === 'info' && qqT.back === 'hydrogen' && qqT.shader === 0 && qqT.errs === 0 && !qqT.gpu, qqT);
+  judge('B48 QUARKONIUM: the selector switches the same 1s+2pz register to the Cornell Hamiltonian; the field draws it through the tabulated-radial branch with no GPU or shader error; the channel energies read in GeV with quarkonium labels (1S, 1P), the status names QUARKONIUM, the domain is a few GeV⁻¹, it evolves, the QCD panel is deleted (0.5.0 D9), and hydrogen comes back',
+    !qqT.error && qqT.h === 'cornell' && qqT.lit > 300 && qqT.lit2 > 300 && qqT.pop === 2 && qqT.es.length === 2 && qqT.es.every((t) => /GeV/.test(t) && /^3\./.test(t)) && /1S/.test(qqT.names[0]) && /1P/.test(qqT.names[1]) && /QUARKONIUM/.test(qqT.stat) && qqT.half > 0.5 && qqT.half < 20 && qqT.qcdKind === 'deleted' && qqT.back === 'hydrogen' && qqT.shader === 0 && qqT.errs === 0 && !qqT.gpu, qqT);
 
   /* ── B49: NOTEBOOK II — the typeable title, markdown + LaTeX preview, and PROJECTS in folders with a recent list and the notebook as the landing page ── */
   const pjT = await g.ev(`try { const nb = document.getElementById('notebook'); const N = __LW.notebook, P = __LW.projects; N.open('notes'); N.setMode('edit');

@@ -1,7 +1,7 @@
 // The visible molecular names may change, while CSS hooks and project keys stay stable.
 // 2026-10 (supersedes W129's first-run rule): MOLECULES and MO-REGISTRY start OPEN on the first-run LEFT rack under SPECTRUM;
 // closed, + and WINDOW bring them back; a project whose field owner is MOLECULES brings them back onto the rack (MO-REGISTRY
-// too when its register is on) — the H₂⁺ card's law.  QCD, HELIUM, H₂ and ELECTROSTATICS are hidden LEGACY windows; ATOMS is back
+// too when its register is on) — the H₂⁺ card's law.  HELIUM, H₂ and ELECTROSTATICS are hidden LEGACY windows (QCD was deleted in 0.5.0 D9); ATOMS is back
 // (0.4.0 S3 · R-A2) as the periodic table, with its own row in + and WINDOW.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
@@ -24,7 +24,7 @@ try {
       oldHidden: card('molecule').hidden && getComputedStyle(card('molecule')).display === 'none',
       onLeft: ['chem', 'orbitals'].map(id => !card(id).classList.contains('closed') && card(id).parentElement.id === 'rackL'),
       underSpectrum: (() => { const L = [...document.querySelectorAll('#rackL > .dev')].map(d => d.dataset.id); const i = L.indexOf('spectrum'); return L.slice(i + 1, i + 3); })(),
-      legacyHidden: ['qcd', 'helium', 'h2', 'field'].map(id => card(id).hidden), atomsSeat: !card('atoms').hidden && card('atoms').querySelector('.dev-eyebrow').textContent,
+      legacyHidden: ['helium', 'h2', 'field'].map(id => card(id).hidden), qcdGone: !card('qcd'), atomsSeat: !card('atoms').hidden && card('atoms').querySelector('.dev-eyebrow').textContent,
       choices, windows, ids: saved.presentation.layout.cards.map(c => c.id),
       records: Object.keys(saved.presentation.instruments), errors: __e.slice()
     };
@@ -33,12 +33,13 @@ try {
   assert.equal(boot.oldHidden, true);
   assert.deepEqual(boot.onLeft, [true, true]);                       // 2026-10: the first-run LEFT rack, under SPECTRUM
   assert.deepEqual(boot.underSpectrum, ['chem', 'orbitals']);
-  assert.deepEqual(boot.legacyHidden, [true, true, true, true]);
+  assert.deepEqual(boot.legacyHidden, [true, true, true]);
+  assert.equal(boot.qcdGone, true, 'the QCD window is deleted (0.5.0 D9)');
   assert.equal(boot.atomsSeat, 'ATOMS');
   assert.equal(boot.choices.includes('atoms'), true, 'ATOMS has no row in +: ' + JSON.stringify(boot.choices));
   assert.equal(boot.windows.some((w) => /ATOMS$/.test(w)), true, 'ATOMS has no row in WINDOW: ' + JSON.stringify(boot.windows));
   assert.equal(boot.choices.includes('molecule'), false);
-  for (const id of ['qcd', 'helium', 'h2', 'field']) assert.equal(boot.choices.includes(id), false);
+  for (const id of ['qcd', 'helium', 'h2', 'field']) assert.equal(boot.choices.includes(id), false);   // qcd: deleted, so no row either
   assert.equal(boot.windows.includes('↑  MOLECULES'), true);
   assert.equal(boot.windows.includes('↑  MO-REGISTRY'), true);
   for (const id of ['molecule', 'chem', 'orbitals']) {
