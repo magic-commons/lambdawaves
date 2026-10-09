@@ -13,36 +13,38 @@ async function check(name, script, verify) {
 }
 try {
   assert.equal((await g.waitFor('window.__LW?.ready', 150, 100)).ok, 1);
+  /* 0.5.0 C3: the synthetic presses land on the OPEN stage (560–660, 420), not at (120, 120) — that point is the left rack's column, which
+     the kit's rack hands the scene guard as UI space (a real press there reaches the rack, never the canvas) */
   await g.ev(`window.pointer=(type,id,x,y,extra={})=>document.getElementById('field').dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,pointerId:id,pointerType:'touch',button:0,clientX:x,clientY:y,...extra}));return true`);
   await check('an impulse belongs to the pointer that started it', `
-    pointer('pointerdown',1,120,120,{ctrlKey:true});
-    pointer('pointermove',2,180,120);const foreignMoved=__LW.bow.k;
-    pointer('pointerup',2,180,120);const stillActive=__LW.bow.active;
-    __LW.bow.cancel();await __LW.bow.landed;pointer('pointercancel',1,120,120);
+    pointer('pointerdown',1,560,420,{ctrlKey:true});
+    pointer('pointermove',2,620,420);const foreignMoved=__LW.bow.k;
+    pointer('pointerup',2,620,420);const stillActive=__LW.bow.active;
+    __LW.bow.cancel();await __LW.bow.landed;pointer('pointercancel',1,560,420);
     return {foreignMoved,stillActive};`, value => assert.deepEqual(value, { foreignMoved: 0, stillActive: true }));
   await check('canceling an impulse never applies it to the state', `
     const before=__LW.reg.version;
-    pointer('pointerdown',3,120,120,{ctrlKey:true});pointer('pointermove',3,180,120);
-    pointer('pointercancel',3,180,120);const inFlight=__LW.bow.inFlight;
+    pointer('pointerdown',3,560,420,{ctrlKey:true});pointer('pointermove',3,620,420);
+    pointer('pointercancel',3,620,420);const inFlight=__LW.bow.inFlight;
     await __LW.bow.landed;
     return {inFlight,changed:__LW.reg.version!==before,active:__LW.bow.active};`, value => assert.deepEqual(value, { inFlight: false, changed: false, active: false }));
   await check('losing pointer capture releases the camera gesture', `
-    const cv=document.getElementById('field');pointer('pointerdown',4,120,120);pointer('lostpointercapture',4,120,120);
-    const held=cv.classList.contains('drag');pointer('pointercancel',4,120,120);return {held};`, value => assert.deepEqual(value, { held: false }));
+    const cv=document.getElementById('field');pointer('pointerdown',4,560,420);pointer('lostpointercapture',4,560,420);
+    const held=cv.classList.contains('drag');pointer('pointercancel',4,560,420);return {held};`, value => assert.deepEqual(value, { held: false }));
   await check('secondary mouse buttons do not rotate the stage', `
     __LW.camera.stop();const yaw=__LW.obs.yaw;
-    pointer('pointerdown',5,120,120,{pointerType:'mouse',button:2});pointer('pointermove',5,180,120,{pointerType:'mouse',button:2});
-    const moved=__LW.obs.yaw!==yaw;pointer('pointercancel',5,180,120);__LW.camera.stop();return {moved};`, value => assert.deepEqual(value, { moved: false }));
+    pointer('pointerdown',5,560,420,{pointerType:'mouse',button:2});pointer('pointermove',5,620,420,{pointerType:'mouse',button:2});
+    const moved=__LW.obs.yaw!==yaw;pointer('pointercancel',5,620,420);__LW.camera.stop();return {moved};`, value => assert.deepEqual(value, { moved: false }));
   await check('losing capture closes the undo gesture without waiting for another click', `
-    __LW.setDamping(0);__LW.history.clear();pointer('pointerdown',7,120,120);
-    __LW.setDamping(0.01);pointer('lostpointercapture',7,120,120);
+    __LW.setDamping(0);__LW.history.clear();pointer('pointerdown',7,560,420);
+    __LW.setDamping(0.01);pointer('lostpointercapture',7,560,420);
     await new Promise(r=>setTimeout(r,500));const cursor=__LW.history.cursor;
-    pointer('pointercancel',7,120,120);return {cursor};`, value => assert.deepEqual(value, { cursor: 1 }));
+    pointer('pointercancel',7,560,420);return {cursor};`, value => assert.deepEqual(value, { cursor: 1 }));
   await check('unrelated releases cannot close another finger\'s undo gesture', `
-    __LW.history.clear();pointer('pointerdown',11,120,120);pointer('pointerdown',12,220,120);
-    __LW.setDamping(0.02);pointer('pointerup',99,10,10);pointer('pointerup',11,120,120);pointer('lostpointercapture',11,120,120);
+    __LW.history.clear();pointer('pointerdown',11,560,420);pointer('pointerdown',12,660,420);
+    __LW.setDamping(0.02);pointer('pointerup',99,10,10);pointer('pointerup',11,560,420);pointer('lostpointercapture',11,560,420);
     await new Promise(r=>setTimeout(r,500));const heldCursor=__LW.history.cursor;
-    pointer('pointerup',12,220,120);await new Promise(r=>setTimeout(r,50));
+    pointer('pointerup',12,660,420);await new Promise(r=>setTimeout(r,50));
     return {heldCursor,releasedCursor:__LW.history.cursor};`, value => assert.deepEqual(value, { heldCursor: 0, releasedCursor: 1 }));
   await check('wheel zoom converts line and page units to pixels', `
     const cv=document.getElementById('field'),zoom=(deltaY,deltaMode)=>{__LW.camera.setDist(3);cv.dispatchEvent(new WheelEvent('wheel',{deltaY,deltaMode,cancelable:true}));return __LW.obs.dist};
