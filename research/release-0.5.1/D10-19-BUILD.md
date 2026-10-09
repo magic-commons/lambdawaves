@@ -85,5 +85,52 @@ capture, no DOM at import) and `createModPort.install` calls it first: `defs = g
   `aria-valuetext` equals `mat.exposure` in 85 % of samples (the rest is the knob's own throttled DOM write), METERS' status read
   `FLASH GUARD · EXPOSURE 10.0 Hz held to 3/s` and nothing else; after MOD power off and the sources removed it read `` and
   `mat.exposure` was the base 1.
-- Lines: `lab/mod-port.js` 132 → 152 (+20 net), `lab/rack.js` ±0 (one line extended), `lab/sw.js` ±0 (two hashes). **`lab/*.js` +20**
-  (the plan said ≈ +25).
+- Lines: `lab/mod-port.js` 132 → 152 (+20 net), `lab/rack.js` ±0 (one line extended), `lab/sw.js` ±0 (two hashes). **`lab/*.js` 27,594 →
+  27,614, +20** (the plan said ≈ +25). REPORT.md: wave 210 under a new "## 2026-10-09 · 0.5.1 · THE INFORMATIONAL UPDATE" heading (the
+  last wave on this base is 209; the other 0.5.1 builders will also have taken 210 — renumber at the merge, and keep one heading).
+
+## 4 · What Josh will see
+
+A routed EXPOSURE (or KNEE, or GAMMA, or STAGE once FOLLOW THEME is off) LFO that swings the picture by about 10 % or more faster
+than three times a second is held to three swings a second; the dial shows the held value; METERS' head line reads
+`FLASH GUARD · EXPOSURE 10.0 Hz held to 3/s` (visible when the card is folded, not when it is closed) and clears a quiet second after
+the LFO calms, or at once when it is stopped or MOD is powered off. A slow LFO, or one too shallow to be a flash (±0.05 stop), is
+never touched, and nothing on the camera, the register or the molecules is ever held by this row.
+
+## 5 · Brief candidates (for the integrator; the kit is not edited here)
+
+1. **A space per route in `createFlashGuard`** (`spaces: { route: 'log' | 'linear' }`, the guard does `ln` itself and hands back the
+   untouched input on a pass). Every app with a log parameter has to do this wrapping, and the "a pass is the given number" rule is
+   easy to break.
+2. **A `driven` notion in the kit**: the limiter should hold a MODULATOR's output, not a hand's, and a stop's restore must never be
+   held. Here it is the app's `routed` check; the kit's registry knows it already (`isModulated`).
+3. **`guard.reset(route)` should call `onRelease` for a held route** (here the app does it by hand so the status line clears).
+4. **A cheap seconds accessor on the modulation clock** (`clock.now()`): `stats()` copies fifteen fields per call; four calls a frame
+   is fine, a per-set read of one number is what is wanted.
+5. **The exact WCAG calibration** is the field judge's (pixels), not a parameter step; until it exists the steps are proxies on the
+   shader's output `o` (see §1). If Josh finds a KNEE LFO held too early: a Gaussian ray moves L by at most 3.8 % at the step, so it
+   would still count every 10 % swing at about 2.6× the step (a linear extrapolation on that one ray); it was not relaxed without a
+   measurement of real scenes.
+6. A shared transient-notice seat in the kit's device head (METERS' status was empty, so using it cost nothing here; if three
+   features want it, they will fight over one string).
+
+## 6 · Merge notes
+
+- Files: `lab/mod-port.js` (a new import of the kit's `flash-guard.js`, the exports `guardRoutes` and `FLASH_STEP`, the `say` dep of
+  `createModPort`, one line in `install`), `lab/rack.js` line 416 (the `createModPort({ … })` call gains `say`; no other hunk, so it
+  should not collide with D1, D10-24 or D10-F), `lab/sw.js` (generated: after the merge run `node tests/pwa.test.mjs --write`),
+  `tests/flash-routes.test.mjs`, `tools/flash-calibrate.mjs`, `REPORT.md`, this file and `D10-19-HANDOFF.md`. Nothing in `lab/mir/**`.
+- After merging: `node tests/pwa.test.mjs --write`, `bash test.sh node`, then `take-in-bugs` · `routed-knob` · `mir-controls` · `offer`.
+- Not run (not touched): the digest lock, `film-probe`, `render-exact` (no shader, readback or schedule changed).
+- Known behaviour the integrator may want to rule on: a HAND flailing a luminance knob back and forth faster than 3 Hz is NOT held by
+  this row (it is not a modulator's write). The brief asked for the modulation road; a held hand would fight the finger.
+
+## 7 · The CLAUDE.md sentence (DRAFTED for the integrator, not applied)
+
+> THE FLASH GUARD's LIMITER (0.5.1 D10-19, PARTIAL) is `guardRoutes` in `lab/mod-port.js`: the kit's `createFlashGuard` on exactly
+> four routes — `material.exposure`, `material.gamma`, `material.stage`, `material.knee`, each in its map's own space (`FLASH_STEP`,
+> derived by `tools/flash-calibrate.mjs` from `field.js`' tone formulas and held to it by `tests/flash-routes.test.mjs`) — holding a
+> route a MODULATOR drives to 3 flashes a second on the modulation clock's own seconds (a hand's write and a stop's restore are never
+> held), said once in METERS' status (`FLASH GUARD · EXPOSURE 10.0 Hz held to 3/s`); `material.hue` and every other route are never
+> held. It does not see `reg.morph`, `chem.kick` or the camera: only THE FIELD JUDGE (a 64² luminance readback per frame, a frame-path
+> row, 0.5.x) does. THE PHOTOSENSITIVITY LAW (the notice, C6b) is unchanged.

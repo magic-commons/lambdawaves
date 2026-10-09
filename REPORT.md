@@ -5302,3 +5302,32 @@ Gates:
   of its cases pass.
 
 Hand-off: `research/release-0.5.0/D9B-BUILD.md`. Every rack.js hunk for C3's re-apply is in `D9B-rack.patch`.
+
+## 2026-10-09 · 0.5.1 · THE INFORMATIONAL UPDATE
+
+### wave 210: D10-19 THE FLASH GUARD, the limiter half — four luminance routes held to three flashes a second, calibrated from the shader, PARTIAL on purpose
+
+**The limiter.** `guardRoutes` in `lab/mod-port.js` wraps the `set` of `material.exposure`, `material.gamma`, `material.stage` and
+`material.knee` with the kit's `createFlashGuard` (`mir/shell/flash-guard.js`) as `createModPort.install` registers them. Nothing
+else is wrapped: not `material.hue` (a wrap seam reads as a 0.98 swing), not `observer.*`, `reg.*`, `chem.*`.
+- Each route is guarded in its map's own space (ln for the two log routes); a pass hands the def the number it was given, so wave
+  63's "zero influence is the base, bit for bit" holds.
+- A route is held only while a MODULATOR drives it. A hand's write and the restore to the base on a stop pass untouched (a held
+  restore would leave the picture off the base and let `syncBases` adopt the LFO's value as the base).
+- Time is the modulation clock's own seconds (`clock.stats().seconds`), so a film rendered off real time holds the same frames.
+- The trip is one line in METERS' status: `FLASH GUARD · EXPOSURE 10.0 Hz held to 3/s`, cleared on release or on a stop. No banner.
+- **It is PARTIAL.** It sees four parameters. A fast LFO on `reg.morph`, `chem.kick` or the camera can still flash a large area;
+  only THE FIELD JUDGE (a pixel readback per frame, a frame-path row, 0.5.x) sees that.
+
+**The calibration (U8)**, `tools/flash-calibrate.mjs`, run in node before the wrapping was written, from `field.js`' formulas:
+exposure ln 1.1 = 0.0953 (optical depth is linear in exposure; ×1.1 is the thin-cloud ceiling, checked at 10.0 %), gamma 0.1319
+(mid-grey 0.5 → 0.45), stage 0.1131 (the light ground; `bg = ground + (custom − ground)·mix`), knee 0.2595 (`wEff = w/(1 + knee·w)`
+at w = 1; on a Gaussian ray the step moves L by at most 3.8 %). `ranges[route] = [0, step / 0.1]`.
+
+**Gates.** `tests/flash-routes.test.mjs`: 10 Hz ±0.3 stop on EXPOSURE held to ≤ 6 direction changes in any second (17 in 3 s through
+the real port and model), said once, cleared on release; ±0.05 stop, a 0.1 Hz ramp, YAW/ZOOM/MORPH/KICK untouched; HUE across the
+seam silent. `bash test.sh node` exit 0 (80 suites); `take-in-bugs` 4/4, `routed-knob` 4/4, `mir-controls` 2/2, `offer` 16/16,
+`settings-probe` 0 of 6 red. In the app a synced 10 Hz LFO on EXPOSURE took two values with 17 reversals in 3 s while ZOOM took 50.
+
+**Lines.** `lab/*.js` 27,594 → **27,614 (+20)**: `lab/mod-port.js` +20, `lab/rack.js` one line extended, `lab/sw.js` two hashes.
+Hand-off: `research/release-0.5.1/D10-19-BUILD.md`.
