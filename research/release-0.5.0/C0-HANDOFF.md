@@ -17,6 +17,12 @@ spawn prompt; PLAN §2 C row C0 is the spec.
 |---|---|
 | `42b7631` | THE BARE ADOPT, by the 1.5 worktree's tool. `adopted MIR 1.5.0-alpha.24 (1b7ae99b9905): 196 added, 23 updated, 0 removed, 43 unchanged`. `lab/mir` + `lab/fonts` went 66 → 262 files; `lab/mir` 1,544,306 → 6,341,901 B; `lab/fonts` 131,211 → 454,120 B. The manifest's sha-256 is `3f969725fe44715bb96a42fc56d668defc9b9cfceeb4219d146ecd24cad35351`. `pwa --write` gave 372 entries, 7.34 MiB. |
 | `49cf802` | THE CASCADE: `<style>@layer app, mir;</style>` + `mir/mir.css`, then `lab.css` and `skin.css` unlayered, then KaTeX. Five twin `:not(:where())` rules (see the commit message). All 37 `!important`s are kept unlayered (see below). |
+| `ce5b2e1` | This hand-off, first version. |
+| `7c049ed` | THE PIN: alpha.24's sha-256 is in `ACCEPTED`. new-project regenerated (bpm 60 → 30, the kit's default = the plan's). R5-W1: wiring §6b plus `--unreached-kit`; pwa and build-deploy read that set; 114 kit modules are reported and unprecached; the five ALLOWLIST rows retired; precache 263 entries, 5.62 MiB. |
+| `858515e` | THE GLASS DEFAULTS. lab.css §G restores λWAVES' disconnected head (classes 4 and 6). `--glass-shadow-flat` → `--glass-shadow` (a bug: the docked cards had lost their shadow). |
+| (next) | `C0-GLASS-RULINGS.md` + 16 PNGs in `c0-glass/` (7 before/after pairs, plus 2 `-kit`). |
+
+**Status (update):** steps 1–6 of the brief are done. Still to do: step 7, `adopt.mjs --check`; step 8, the second canary (node 85, then the 27 browser suites one at a time); step 9, the ms/s pair; step 10, the line counts; steps 11–12, the `__LW` law check, REPORT wave 196, and `C0-BUILD.md`. The servers: gate `server.py` on 8783 (my tree) and 8787 (`.tmp/base`); stop them by pid.
 
 ## Measured so far
 - **stylehash** (kit 1.5 tool, http via the kit's `tools/serve.mjs`, the README's λWAVES recipe, `--gpu 1`):
