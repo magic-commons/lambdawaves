@@ -4715,3 +4715,49 @@ difference. Both go when MIR takes the briefs.
 
 **What is not claimed.** K9 is proven in node, not on a touch screen. Pressing a control now reads the edit scope twice (K2),
 about 0.3 ms; nothing was added per frame. Hand-off: `research/release-0.5.0/C5-BUILD.md`.
+
+
+### wave 200: C9 THE SCENE GUARD — a window's gap is UI, not picture: 52 presses through a gap, 0 reach the stage
+
+**The guard.** The stage's pointer road now asks MIR 1.5's scene guard first.
+- `lab/stage-gestures.js` builds `createSceneGuard({ canvas, rects: ui, install: false })` (the kit's `mir/shell/scene-guard.js`).
+- Like BASINS' `gestures.js`, it calls `guard.hit(e)` on `pointerdown`, `wheel` and `dblclick`. In UI space a press, a touch tap
+  and a double-click start nothing, and a wheel goes to that region's scroller (the modulation run) or is swallowed.
+- `STAGE_BINDINGS` is not touched. It is still the law for every press that reaches the stage.
+- A drag begun on the stage keeps its pointer across the UI.
+- `rack.js` hands it the kit's `uiSpace({ layer: floats, extra })`:
+  - every window on the float layer by its WHOLE rect: the modulation window with its rail and work bars, and a floated card;
+  - the transport, notebook (and FOLDERS in it), sheet, offer, the two rack lists and the keyboard panel, by A7's `paintedRect`.
+- The rack columns are left out: they are pointer-solid.
+- One felt change: DISCONNECTED is the first-run look, and a press between a floated card's head and body no longer orbits the
+  camera (the kit's law, Josh's 2026-10-01 words in its header). The frame ink still shows through that gap.
+
+**The hit-probe set.** `tools/hit-probe-set.mjs` is λWAVES' scene list for the 1.5 `tools/hit-probe.mjs`.
+- It imports the kit tool's `probe()` and `gridPoints()` from the 1.5 worktree. The browser is `tools/perf/cdp.mjs`.
+- Ten fresh pages: a bare-stage control, the modulation window open, its chip rail, a floated card DISCONNECTED and JOINED, the
+  keyboard window, the notebook, the sheet, the offer, and FOLDERS.
+- The gaps are the points the browser hit-tests as `canvas#field`, on the kit's 9 × 9 grid and on a 4 px raster.
+- The kit's probe press-drags at up to 12 of them, with `--watch` on the camera pose.
+- **On this tree: 52 gap presses, 0 reached the stage.** On the adopt alone: 52 of 52 reached. The control was 3 of 3 on both.
+- BASINS' 25/0 is its own count.
+
+**R14.**
+- The device-lost recovery, an anonymous `onLost` arrow, is now `function gpuRecovery(i)`, in place. Its gate keeps the plan's
+  name, `tests/gpu-recovery`.
+- MIR 1.5 alpha.24 has no readability probe. The one there is is λWAVES' `capture.probe()` (`canvasReadable`).
+- λWAVES had no `thumbnail()`. C9 adds `LW.thumbnail()`, at the END of `LW`, for C6 to hand to FOLDERS: the canvas when the probe
+  read it, else `picture({ width: 320 })`'s GPU readback.
+- `tests/gpu-recovery` gains THE THUMBNAIL PROBE: the kit's `toThumb()` over it, lit on both roads (7,290 and 7,653 lit pixels at
+  320 × 204).
+- It also gains THE GPU RECOVERY: `device.destroy()` gives the banner, `field.ok` false, a live register and no page error.
+- Skipped: the `[data-mir-offer]` case in `offer`. Brief 9′ is not in alpha.24.
+
+**Gates.**
+- Node: 81/85 — exactly C0's four cascade reds: `mir-manifest`, `new-project` (bpm 60 → 30), `wiring` (108 unreached) and
+  `pwa` (the kit ABOUT's URL).
+- Browser, alone on 8823/5293: `offer` 16, `input` 13, `gpu-recovery` (11), `frame-occlusion` 7/7 and `menubar` 8 are green.
+- `keyboard-window` is red on the adopt alone too: the panel stacks under the rack, so it is C0's cascade.
+- No digest lock: that belongs to C7.
+
+**Lines.** `cat lab/*.js | wc -l`: 36,288 → 36,469 after the adopt (+181, generated `sw.js` rows) → **36,482**. C9 is **+13**: the guard
++10 and the thumbnail +3. Nothing in λWAVES did either job, so there was nothing to delete. Hand-off: `research/release-0.5.0/C9-BUILD.md`.

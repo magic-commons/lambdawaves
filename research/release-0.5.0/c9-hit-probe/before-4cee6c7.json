@@ -1,0 +1,746 @@
+{
+ "url": "https://127.0.0.1:8827/lab/?sw=0&warn=0",
+ "grid": 9,
+ "step": 4,
+ "press": 12,
+ "kit": "/home/joshua-hosain/Documents/MIR/.claude/worktrees/mir-1.5/tools",
+ "when": "2026-10-09T02:28:45.176Z",
+ "scenes": [
+  {
+   "name": "control: the bare stage",
+   "selector": "#field",
+   "field": true,
+   "found": true,
+   "box": [
+    0,
+    0,
+    1600,
+    1000
+   ],
+   "grid": {
+    "n": 9,
+    "inside": 0,
+    "stage": 59,
+    "other": {
+     "canvas.shadow-c": 2,
+     "button#rackFav.glass": 1,
+     "aside#rack": 1,
+     "select.sel": 1,
+     "div#devb-shadow.dev-body": 1,
+     "canvas.pal-strip": 1,
+     "header.dev-head": 2,
+     "button.trig": 1,
+     "canvas": 1,
+     "div.pk-chips": 1,
+     "button.seg-b": 2,
+     "button.pk-c": 3,
+     "div.k-dial": 2,
+     "div.k-lbl": 1,
+     "div.native-play-row": 2
+    }
+   },
+   "raster": null,
+   "pressed": 3,
+   "reached": 3,
+   "presses": [
+    {
+     "at": [
+      800,
+      500
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      800,
+      400
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      800,
+      600
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    }
+   ]
+  },
+  {
+   "name": "the modulation window open",
+   "selector": "[data-mir-window=\"modulation\"]",
+   "field": true,
+   "found": true,
+   "box": [
+    8,
+    267,
+    1584,
+    440
+   ],
+   "grid": {
+    "n": 9,
+    "inside": 67,
+    "stage": 12,
+    "other": {
+     "button.pk-c": 1,
+     "div#devb-observer.dev-body": 1
+    }
+   },
+   "raster": {
+    "step": 4,
+    "points": 43560,
+    "stage": 6240
+   },
+   "pressed": 12,
+   "reached": 12,
+   "presses": [
+    {
+     "at": [
+      325,
+      619
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      483,
+      619
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      642,
+      619
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      800,
+      619
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      958,
+      619
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      325,
+      663
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      483,
+      663
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      642,
+      663
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      800,
+      663
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      958,
+      663
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1117,
+      663
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1275,
+      663
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    }
+   ]
+  },
+  {
+   "name": "its chip rail",
+   "selector": "[data-mir-rail=\"modulation\"]",
+   "field": true,
+   "found": true,
+   "box": [
+    1538,
+    310,
+    62,
+    269
+   ],
+   "grid": {
+    "n": 9,
+    "inside": 27,
+    "stage": 0,
+    "other": {
+     "path.m2fill": 22,
+     "path.m2path": 1,
+     "svg.m2svg": 1,
+     "button.m2preset": 12,
+     "button.m2chk": 12,
+     "div.m2k": 5,
+     "div.m2kd": 1
+    }
+   },
+   "raster": {
+    "step": 4,
+    "points": 1005,
+    "stage": 0
+   },
+   "pressed": 0,
+   "reached": 0,
+   "presses": []
+  },
+  {
+   "name": "a floated card, DISCONNECTED (the first-run look: head and body apart)",
+   "selector": "#floats > .dev[data-id=\"shadow\"]",
+   "field": true,
+   "found": true,
+   "box": [
+    640,
+    180,
+    300,
+    349
+   ],
+   "grid": {
+    "n": 9,
+    "inside": 81,
+    "stage": 0,
+    "other": {}
+   },
+   "raster": {
+    "step": 4,
+    "points": 6525,
+    "stage": 93
+   },
+   "pressed": 12,
+   "reached": 12,
+   "presses": [
+    {
+     "at": [
+      642,
+      210
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      654,
+      218
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      686,
+      218
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      718,
+      218
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      746,
+      218
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      778,
+      218
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      810,
+      218
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      842,
+      218
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      870,
+      218
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      902,
+      218
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      934,
+      218
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      938,
+      522
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    }
+   ]
+  },
+  {
+   "name": "a floated card, JOINED",
+   "selector": "#floats > .dev[data-id=\"shadow\"]",
+   "field": true,
+   "found": true,
+   "box": [
+    640,
+    180,
+    300,
+    340
+   ],
+   "grid": {
+    "n": 9,
+    "inside": 81,
+    "stage": 0,
+    "other": {}
+   },
+   "raster": {
+    "step": 4,
+    "points": 6375,
+    "stage": 6
+   },
+   "pressed": 6,
+   "reached": 6,
+   "presses": [
+    {
+     "at": [
+      642,
+      182
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      938,
+      182
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      938,
+      514
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      642,
+      518
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      934,
+      518
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      938,
+      518
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    }
+   ]
+  },
+  {
+   "name": "the keyboard window",
+   "selector": "[data-mir-window=\"keyboard\"] .km-panel",
+   "field": true,
+   "found": true,
+   "box": [
+    260,
+    292,
+    1080,
+    416
+   ],
+   "grid": {
+    "n": 9,
+    "inside": 81,
+    "stage": 0,
+    "other": {}
+   },
+   "raster": {
+    "step": 4,
+    "points": 28080,
+    "stage": 0
+   },
+   "pressed": 0,
+   "reached": 0,
+   "presses": []
+  },
+  {
+   "name": "the notebook",
+   "selector": "[data-mir-window=\"notebook\"]",
+   "field": true,
+   "found": true,
+   "box": [
+    480,
+    120,
+    640,
+    460
+   ],
+   "grid": {
+    "n": 9,
+    "inside": 81,
+    "stage": 0,
+    "other": {}
+   },
+   "raster": {
+    "step": 4,
+    "points": 18400,
+    "stage": 7
+   },
+   "pressed": 7,
+   "reached": 7,
+   "presses": [
+    {
+     "at": [
+      482,
+      122
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1114,
+      122
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1118,
+      122
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1118,
+      126
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      482,
+      574
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      482,
+      578
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      486,
+      578
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    }
+   ]
+  },
+  {
+   "name": "the sheet",
+   "selector": "#sheet",
+   "field": true,
+   "found": true,
+   "box": [
+    1150,
+    52,
+    440,
+    243
+   ],
+   "grid": {
+    "n": 9,
+    "inside": 81,
+    "stage": 0,
+    "other": {}
+   },
+   "raster": {
+    "step": 4,
+    "points": 6710,
+    "stage": 4
+   },
+   "pressed": 4,
+   "reached": 4,
+   "presses": [
+    {
+     "at": [
+      1152,
+      54
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1152,
+      290
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1152,
+      294
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1156,
+      294
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    }
+   ]
+  },
+  {
+   "name": "the offer",
+   "selector": "#offer",
+   "field": true,
+   "found": true,
+   "box": [
+    590,
+    40,
+    420,
+    189
+   ],
+   "grid": {
+    "n": 9,
+    "inside": 81,
+    "stage": 0,
+    "other": {}
+   },
+   "raster": {
+    "step": 4,
+    "points": 4935,
+    "stage": 4
+   },
+   "pressed": 4,
+   "reached": 4,
+   "presses": [
+    {
+     "at": [
+      592,
+      42
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1008,
+      42
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      592,
+      226
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1008,
+      226
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    }
+   ]
+  },
+  {
+   "name": "FOLDERS (the notebook's PROJECTS face)",
+   "selector": "[data-mir-window=\"notebook\"]",
+   "field": true,
+   "found": true,
+   "box": [
+    480,
+    120,
+    640,
+    460
+   ],
+   "grid": {
+    "n": 9,
+    "inside": 81,
+    "stage": 0,
+    "other": {}
+   },
+   "raster": {
+    "step": 4,
+    "points": 18400,
+    "stage": 7
+   },
+   "pressed": 7,
+   "reached": 7,
+   "presses": [
+    {
+     "at": [
+      482,
+      122
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1114,
+      122
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1118,
+      122
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      1118,
+      126
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      482,
+      574
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      482,
+      578
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    },
+    {
+     "at": [
+      486,
+      578
+     ],
+     "landedOn": "canvas#field",
+     "reached": true
+    }
+   ]
+  }
+ ],
+ "total": {
+  "pressed": 52,
+  "reached": 52
+ },
+ "ok": false
+}

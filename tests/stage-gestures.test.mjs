@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { bindStageGestures, STAGE_BINDINGS } from '../lab/stage-gestures.js';
 
-function stage(bindings) {
+function stage(bindings, ui) {
   const canvas = new EventTarget(), doc = new EventTarget(), win = new EventTarget(), classes = new Set();
   canvas.ownerDocument = doc; doc.defaultView = win;
   canvas.classList = { add: name => classes.add(name), remove: name => classes.delete(name) };
@@ -20,7 +20,7 @@ function stage(bindings) {
     pan: (du, dv) => result.pans.push([du, dv]),
     orbitBy: (yaw, pitch) => { travel.yaw += yaw; travel.pitch += pitch; },
     resetView: () => result.resets++, setDragging: v => { result.held = v; }, present() {}, hover() {}, now: () => time,
-    startSpecial: e => e.ctrlKey ? { move: () => result.moved++, end: () => result.ended++, cancel: () => result.canceled++ } : null, bindings,
+    startSpecial: e => e.ctrlKey ? { move: () => result.moved++, end: () => result.ended++, cancel: () => result.canceled++ } : null, bindings, ui,
   });
   function send(type, id = 1, x = 100, y = 100, extra = {}) {
     const event = new Event(type, { cancelable: true });
@@ -130,3 +130,18 @@ console.log('PASS stage gestures: drag, fine gain, fling, interruption, special 
   assert.deepEqual(centre.result.anchors, [[0, 0]]); assert.ok(Math.abs(centre.result.distance - 3 * Math.pow(1.1, 16)) < 1e-12, 'a line is 16 px');
 }
 console.log('PASS the bindings are one data table: STAGE_BINDINGS is today\'s (pointer, wheel, pinch, tap, double tap, double-click, nudge), frozen, and an edited row (a quicker double tap, Shift to slide, the wheel at the centre) is what the stage does');
+// 0.5.0 C9 · THE SCENE GUARD: in UI space (a kit window's gap) a press, a touch tap, a double-click and a wheel start nothing on the
+// stage (the wheel is swallowed: this region has no scroller); the same press on the stage orbits, and dragged INTO the UI keeps it.
+{
+  const s = stage(undefined, () => [{ left: 0, top: 0, right: 200, bottom: 200 }]), mouse = { pointerType: 'mouse' };
+  s.send('pointerdown', 1, 100, 100, mouse); s.advance(20); s.send('pointermove', 1, 150, 120, mouse); s.send('pointerup', 1, 150, 120, mouse);
+  assert.equal(s.travel.yaw, 0); assert.equal(s.result.held, false); assert.deepEqual(s.result.flings, []);
+  s.send('pointerdown', 2); s.send('pointerup', 2); s.advance(100); s.send('pointerdown', 3); s.send('pointerup', 3);
+  s.canvas.dispatchEvent(Object.assign(new Event('dblclick'), { clientX: 100, clientY: 100 })); assert.equal(s.result.resets, 0);
+  const wheel = Object.assign(new Event('wheel', { cancelable: true }), { deltaY: 100, deltaMode: 0, clientX: 100, clientY: 100 });
+  s.canvas.dispatchEvent(wheel); assert.equal(s.result.distance, 3); assert.equal(wheel.defaultPrevented, true);
+  s.send('pointerdown', 4, 500, 500, mouse); s.advance(20); s.send('pointermove', 4, 100, 100, mouse); s.send('pointerup', 4, 100, 100, mouse);
+  assert.ok(Math.abs(s.travel.yaw - 2.6) < 1e-12); assert.equal(s.result.held, false);
+  s.canvas.dispatchEvent(Object.assign(new Event('dblclick'), { clientX: 500, clientY: 500 })); assert.equal(s.result.resets, 1);
+}
+console.log('PASS the scene guard (C9): a press, a tap, a double-click and a wheel in UI space start nothing on the stage; a stage drag keeps its pointer across the UI');
