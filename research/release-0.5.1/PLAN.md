@@ -191,4 +191,11 @@ The first option is the default and is what this plan builds. The three that sha
 **Questions still Josh's:** **Q1** which account writes the briefs into MIR (9 + the audit's 3) — the primary account when its week resets (R5-Q2's first
 option); **Q2** cut 0.5.1 before Group II — **yes** (Group I is the release; Group II is 0.5.x after the re-adopt).
 
+### Rulings of 2026-10-09, evening (Josh, verbatim, ≈18:30 CDT, after Group I merged and D-V launched)
+- **"Keep going and cut 0.5.1 once D-V says FIT. We'll see how the molecule switch thing works in practice, those looks fine. Defaults for now."** Taken as:
+  **THE CUT WORD for `v0.5.1-alpha · Informational Update` is GIVEN, conditional on D-V's verdict FIT TO CUT or FIT WITH NOTES** (a NOT FIT means a fix round
+  first, then the cut); **the builders' two calls stand as defaults** — a notebook `lw:molecule=` link also switches MOLECULES on (D8), and the molecule's head
+  is held until Escape, a press on the picture after 2.5 s, or the next pick rather than fading on a timer (D2) — to be judged in use; **every other default
+  of §9 stands** ("Defaults for now"), the number 0.5.1 included (a local tag is re-cut if he renames it). Still: NO push, NO deploy.
+
 — Claude Yan, 2026-10-09. Next: `BRIEF-D1.md`, `BRIEF-D10-19.md`, `BRIEF-D10-24.md`, `BRIEF-D10-F.md` (the first wave), then `BRIEF-D2-D8.md` after D1.
