@@ -1,4 +1,5 @@
 /* twocentre.js — the two-centre integrals of Slater/Sturmian functions, exactly, in prolate-spheroidal coordinates.
+ * (0.5.0 D9: moved from lab/ to tests/lib/ with mo.js, its one importer, when the H₂⁺ card was deleted.)
  * Atomic units.  The machinery W-MO reuses; here it serves H₂⁺ on any one-centre basis placed on both nuclei.
  *
  * Nuclei A at −(R/2)ẑ and B at +(R/2)ẑ, a = R/2.  A basis function is  χ = Σ_j c_j r_c^{l+j} e^{−ζ r_c} Y_lm(θ_c, φ)  about
@@ -32,8 +33,8 @@
  * KNOWN benchmarks re-judged: Eg(2) = −0.553771495318 (1s LCAO); fixed {1s, 2p_z} E(2) = −0.553815296857 (Sol);
  * 20 Sturmians n ≤ 4 at λ = 1.7611: −0.602624 (Opus); the 42 σ register functions: R_e = 2.35227, D_e = 2.125 eV (Opus).
  */
-import { factorial, laguerreCoeffs, legendreDerivCoeffs, ylmNorm, radialNorm } from './hydrogen.js';
-import { generalisedEigen, sturmianNorm } from './sturmian.js';
+import { factorial, laguerreCoeffs, legendreDerivCoeffs, ylmNorm, radialNorm } from '../../lab/hydrogen.js';
+import { generalisedEigen, sturmianNorm } from '../../lab/sturmian.js';
 
 /* ── Gauss rules (Newton on the orthogonal polynomial; Numerical Recipes gauleg / gaulag) ── */
 const RULES = new Map();

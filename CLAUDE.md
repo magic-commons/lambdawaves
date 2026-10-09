@@ -28,8 +28,9 @@ overlay regressions.
 
 The 0.2.0 alpha molecular UI is MOLECULES (`chem`) and MO-REGISTRY
 (`orbitals`). Keep those saved IDs, `chem.*` and `reg.*` modulation targets,
-and the `mol-*`/`reg-*` CSS hooks stable. The old H₂⁺ `molecule` card is hidden
-at startup but must be shown if an older project restores it as field owner.
+and the `mol-*`/`reg-*` CSS hooks stable. The old H₂⁺ `molecule` card was DELETED
+in 0.5.0 D9: an older project whose field it owned opens as MOLECULES · H₂ on σg
+or σu (the minimal-basis shape of its orbital; RHF cannot hold one electron).
 MOLECULES and MO-REGISTRY start OPEN on the first-run LEFT rack directly under
 SPECTRUM (folded on a phone or tablet), unsolved until MOLECULES is switched on;
 a restored project whose field owner is MOLECULES brings them back onto the rack

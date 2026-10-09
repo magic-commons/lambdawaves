@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createMO } from '../lab/mo.js';
+import { createMO } from './lib/mo.js';
 import { createMODrive, sin2Pulse } from '../lab/modrive.js';
 
 const ref = JSON.parse(readFileSync(new URL('../research/astra-2026-09-05/reference-drive.json', import.meta.url)));

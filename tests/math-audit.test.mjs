@@ -19,7 +19,7 @@
 import { readFileSync } from 'node:fs';
 import { BASIS } from '../lab/hydrogen.js';
 import { shellCharacter, shellCoefficients, shellMatrix, applyRotor } from '../lab/frontier.js';
-import { createMO } from '../lab/mo.js';
+import { createMO } from './lib/mo.js';
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {

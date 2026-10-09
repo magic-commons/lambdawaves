@@ -9,7 +9,7 @@ models, save records and node suites are intact, so every older project still op
 
 | id | title | what it is | files |
 |---|---|---|---|
-| `molecule` | H₂⁺ · LEGACY | H₂⁺ in the 1s LCAO basis (hidden since 0.2.0; the model for the rest) | `molecule.js`, `moleculeview.js`, `mo.js`, `moview.js` |
+| `molecule` | H₂⁺ · **DELETED 0.5.0 D9** | H₂⁺ in the 1s LCAO basis (hidden since 0.2.0; the model for the rest), with W-MO and W-PULSE | deleted: `moleculeview.js`, `moview.js`, `pulseview.js`, `pulse.js`; moved to `tests/lib/`: `mo.js`, `twocentre.js` (the node proofs' physical system); `molecule.js` stays (`h2ci.js`, `h2.js`, `electrostatics.js` import it) |
 | `h2` | H₂ · LEGACY | two atoms, Heitler–London curves and the collision | `h2.js`, `h2view.js` (`h2ci.js` is a shared library — keep it) |
 | `helium` | HELIUM · LEGACY | two electrons, Hylleraas; the conditional cloud of electron 2 | `helium.js`, `heliumview.js` |
 | `qcd` | QCD · **DELETED 0.5.0 D9** | quarkonium under a chosen potential; the CORNELL parameters | was `qcd.js`, `qcdview.js` (deleted); `cornell.js` (QUARKONIUM) stays and took the Numerov solver |
@@ -27,7 +27,11 @@ for them, so their readers stop. `layout.raise(id)` / `layout.reopen(id)` still 
 A project that NEEDS one brings it back, so a live field owner never loses its OFF switch:
 
 - **HELIUM, H₂** — field owners. Their `setOn(true)` un-hides and opens the card; `restore` does the same when the
-  file turns one on (beside the H₂⁺ line).
+  file turns one on.
+- **H₂⁺** — never: DELETED in 0.5.0 D9 (R5-L1). A file whose field it owned opens as MOLECULES · H₂ (STO-3G) on σg or σu
+  (its `kind`; ON A opens σg) — in a minimal basis of two 1s functions both are fixed by symmetry, the combinations the card
+  drew; its R, the tunnelling start, W-MO and W-PULSE have no twin. RHF refuses H₂⁺'s one electron. The one-line notice
+  says so.
 - **ELECTROSTATICS** — its overlay draws only while the card can present, so a file whose overlay is not `off` raises
   the card (`layout.raise('field')`: un-hidden, open, unfolded, on screen).
 - **QCD** — never: DELETED in 0.5.0 D9 (R5-L1). Its Hamiltonian (`cornell`) still restores and a file's `instruments.qcd`

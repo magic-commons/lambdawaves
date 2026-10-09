@@ -44,7 +44,7 @@ this file.
 | palette: `paletteId`, `palette {on, selected, stops}` | project | PROJECT (D2) |
 | `ui.stage {mix, custom, follow}` | project | PROJECT |
 | `experiment` (modes, preset, Bz/Fz, t, rate, window, damping) | project | PROJECT |
-| `hamiltonian`, `rates`, `rotationRates`, `sturmian`, `wigner`, `mo`, `instruments`, `field`, `readers`, `space`, `domain`, `shadow` | project | PROJECT |
+| `hamiltonian`, `rates`, `rotationRates`, `sturmian`, `wigner`, `instruments`, `field`, `readers`, `space`, `domain`, `shadow` | project | PROJECT (0.5.0 D9: `mo`, `instruments.molecule` and `instruments.pulse` left with the H₂⁺ card; an older file's are read only to open it as MOLECULES · H₂) |
 | `mat` LOOK: view, style, exposure, softness, iso, grain, knee, dither, hueShift, boost, gamma, finish, bow, slice, steps, paletteOn | project | PROJECT |
 | `overlays` (vortex, kepler, particles, dials) | project | PROJECT |
 | `obs` pose (yaw, pitch, dist, fov, quat, `shift` — the lens shift, 0.4.0 S2; a file or link without it opens at 0) and `camera.autoRotate` | project | PROJECT, not in history |

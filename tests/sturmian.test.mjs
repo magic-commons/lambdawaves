@@ -7,7 +7,7 @@
  */
 import { sturmianNorm, sturmianRadial, sturmianRecord, sturmianOverlap, sturmianMatrices, generalisedEigen, symmetricEigen, createSturmian } from '../lab/sturmian.js';
 import { BASIS, modeTable, orbitalFromTable, orbital, radialNorm, ylm, laguerreCoeffs, factorial, energy } from '../lab/hydrogen.js';
-import { gaussLaguerre } from '../lab/twocentre.js';
+import { gaussLaguerre } from './lib/twocentre.js';
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {

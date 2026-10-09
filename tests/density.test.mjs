@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createMO } from '../lab/mo.js';
+import { createMO } from './lib/mo.js';
 import { createMODrive, sin2Pulse } from '../lab/modrive.js';
 import { sBasis, sto3g1s, ZETA } from './lib/gaussian.js';
 import { rhf } from '../lab/scf.js';

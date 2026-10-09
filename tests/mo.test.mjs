@@ -6,10 +6,10 @@
  * −0.602624, the register R_e = 2.35227 / D_e = 2.1246 eV), Hurley's identity −dE_c/dR = F_rel − pulay checked by
  * central differences for RANDOM real and complex vectors, grid doubling, and the dynamics' own energy bookkeeping.
  */
-import { createMO, createDynamics, aLower, aUpper, oneCentreP, symmetricEigen, solveInPlace } from '../lab/mo.js';
+import { createMO, createDynamics, aLower, aUpper, oneCentreP, symmetricEigen, solveInPlace } from './lib/mo.js';
 import { energies, equilibrium as lcaoEquilibrium, psiAt as lcaoPsi, moState } from '../lab/molecule.js';
 import { hellmannFeynman } from '../lab/electrostatics.js';
-import { sturmianFn, hydrogenicFn, sigmaBasis, twoCentre } from '../lab/twocentre.js';
+import { sturmianFn, hydrogenicFn, sigmaBasis, twoCentre } from './lib/twocentre.js';
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {

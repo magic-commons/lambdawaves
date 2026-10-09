@@ -13,7 +13,7 @@
 import { h2Curves, weinbaum, weinbaumOptimal, sto3gH2, sto3gIntegrals, stoIntegrals, minimalH2, sto3gHydrogen,
   hybridAAAB, coulombAAAA, boys0, dissociation, HARTREE_EV } from '../lab/h2ci.js';
 import { h2Energies } from '../lab/h2.js';
-import { gaussLegendre } from '../lab/twocentre.js';
+import { gaussLegendre } from './lib/twocentre.js';
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {

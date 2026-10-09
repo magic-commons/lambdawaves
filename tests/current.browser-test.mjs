@@ -7,26 +7,26 @@ let failed = false;
 try {
  assert.equal((await g.waitFor('window.__LW&&__LW.ready',150,100)).ok,1);
  const boot = await g.ev(`const workers=__LW.maths.started,period=__LW.period;return {errors:__e,dirty:__LW.layout.projects.dirty,gpu:__LW.field.error||null,workers,period,workersAfterPeriod:__LW.maths.started,
-  heliumComputed:__LW.helium.computed,ladderComputed:__LW.ladder.computed,moCurveDone:__LW.mo.state().curveDone}`);
+  heliumComputed:__LW.helium.computed,ladderComputed:__LW.ladder.computed}`);
  assert.deepEqual(boot.errors,[]); assert.equal(boot.dirty,false);
  assert.deepEqual(boot.workers,{bow:false,scan:false,cards:false});
  assert.equal(boot.period.exact,true); assert.deepEqual(boot.workersAfterPeriod,{bow:false,scan:false,cards:false});
- assert.equal(boot.heliumComputed,false);assert.equal(boot.ladderComputed,false);assert.equal(boot.moCurveDone,0);
+ assert.equal(boot.heliumComputed,false);assert.equal(boot.ladderComputed,false);
  console.log('PASS current boot: no page errors, clean new project');
  console.log('GPU status:',boot.gpu || 'available');
  const spectrumHelp=await g.ev(`const card=document.querySelector('.dev[data-id="spectrum"]'),fx=card.querySelector('.sp-fx'),book=card.querySelector('.window-help-book'),button=card.querySelector('.window-help .native-info-button');
   return {inHelp:!!book&&fx.parentElement===book,hidden:!!book&&!book.matches(':popover-open'),button:!!button,bodyFree:!card.querySelector(':scope > .dev-body > .sp-fx')};`);
  assert.deepEqual(spectrumHelp,{inHelp:true,hidden:true,button:true,bodyFree:true});
  console.log('PASS Spectrum coefficient details live in the window help surface');
- const lazy=await g.ev(`const ids=['helium','h2','ladder','molecule'];ids.forEach(id=>__LW.layout.reopen(id,'R'));
+ const lazy=await g.ev(`const ids=['helium','h2','ladder'];ids.forEach(id=>__LW.layout.reopen(id,'R'));
   const immediate={loading:Object.fromEntries(ids.map(id=>[id,document.querySelector('.dev[data-id="'+id+'"]').classList.contains('loading')])),busy:__LW.busy.count,
     centered:ids.every(id=>!!document.querySelector('.dev[data-id="'+id+'"] .dev-loading .mark'))};
-  await Promise.all([__LW.helium.prepare(),__LW.h2.prepare(),__LW.ladder.prepare(),__LW.mo.whenReady()]);
-  const done={helium:__LW.helium.computed,h2:__LW.h2.curveReady,ladder:__LW.ladder.computed,mo:__LW.mo.state().curveDone,
+  await Promise.all([__LW.helium.prepare(),__LW.h2.prepare(),__LW.ladder.prepare()]);
+  const done={helium:__LW.helium.computed,h2:__LW.h2.curveReady,ladder:__LW.ladder.computed,
     loading:ids.some(id=>document.querySelector('.dev[data-id="'+id+'"]').classList.contains('loading')),errors:__e};
   ids.forEach(id=>document.querySelector('.dev[data-id="'+id+'"]').classList.add('closed'));return {immediate,done}`);
- assert.deepEqual(lazy.immediate.loading,{helium:true,h2:true,ladder:true,molecule:true});assert.ok(lazy.immediate.busy>0);assert.equal(lazy.immediate.centered,true);
- assert.deepEqual(lazy.done,{helium:true,h2:true,ladder:true,mo:40,loading:false,errors:[]});
+ assert.deepEqual(lazy.immediate.loading,{helium:true,h2:true,ladder:true});assert.ok(lazy.immediate.busy>0);assert.equal(lazy.immediate.centered,true);
+ assert.deepEqual(lazy.done,{helium:true,h2:true,ladder:true,loading:false,errors:[]});
  console.log('PASS multi-add queues every heavy card with local and cursor loading states');
  const persistence = await g.ev(`const p=__LW.layout.projects,n=__LW.layout.notebook;
   p.save('acceptance/new');const clean=!p.dirty;n.subtitle='edited subtitle';const dirty=p.dirty;
@@ -195,8 +195,8 @@ try {
   __LW.camera.setAutoRotate(false);__LW.orbit(.27,-.14);const pose={yaw:__LW.obs.yaw,pitch:__LW.obs.pitch,quat:__LW.obs.quat.slice()};
   __LW.spectrum.select(4);__LW.spectrum.setDials(false);
   const rotor={qL:[.9238795325,.3826834324,0,0],qR:[.9659258263,0,.2588190451,0]};__LW.slice.load({mode:'ks',half:13.5,gain:3.25,rotor});
-  __LW.molecule.load({on:true,R:3.4,kind:'sigma_u'});
-  __LW.pulse.load({basis:'lcao1s',R:2.7,dt:.1,pulse:{amplitude:.041,omega:.62,duration:72,phase:.4}});__LW.helium.load({on:false,basis:'one',x1:[.3,.4,.5]});
+  
+  __LW.helium.load({on:false,basis:'one',x1:[.3,.4,.5]});
   __LW.h2.load({on:false,R:4.2,which:'singlet',showCI:false,ke:.044,kappa:640});__LW.ladder.set({nbar:42,sigma:3.5,d:4,teeth:6});__LW.particles.setTrail(37);__LW.particleUI.n.set(230);__LW.particleUI.trail.set(37);
   const pal=__LW.paletteGroups.flatMap(g=>g.items).find(id=>id!==__LW.paletteId);__LW.setPalette(pal);__LW.palette.load([{at:.08,rgb:[.1,.2,.3]},{at:.47,rgb:[.7,.4,.2]},{at:.82,rgb:[.2,.8,.5]}],1);__LW.palette.setOn(true);
   const macro=M.macroList()[0];M.setMacro(macro.id,{value:.88,masterDepth:.73});const added=M.addRoute(macro.id,'material.exposure',.12,.42);__LW.mod.clock.applyAll(true);
@@ -206,7 +206,7 @@ try {
   P.save('acceptance/complete-state');const disk=JSON.parse(localStorage.getItem('lambdawaves.q0.projects')).items['acceptance/complete-state'].data;
   __LW.ab.set(false);R.setBase('material.gamma',.8);R.setBase('material.exposure',.4);R.setBase('transport.rate',4);__LW.spectrum.select(-1);__LW.spectrum.setDials(true);
   __LW.slice.load({mode:'space',half:3,gain:.2,rotor:{qL:[1,0,0,0],qR:[1,0,0,0]}});__LW.setPalette(__LW.paletteGroups[0].items[0]);__LW.palette.load([{at:0,rgb:[1,0,0]},{at:.5,rgb:[0,0,1]}],0);
-  __LW.molecule.load({on:false,R:1.1,kind:'sigma_g'});__LW.pulse.load({basis:'lcao1s',R:1.2,dt:.2,pulse:{amplitude:.01,omega:.2,duration:12,phase:0}});__LW.helium.load({on:false,basis:'six',x1:[0,0,.8]});__LW.h2.load({on:false,R:8,which:'triplet',showCI:true,ke:.01,kappa:100});__LW.ladder.set({nbar:20,sigma:1,d:0,teeth:3});__LW.particles.setTrail(8);__LW.particleUI.n.set(40);
+  __LW.helium.load({on:false,basis:'six',x1:[0,0,.8]});__LW.h2.load({on:false,R:8,which:'triplet',showCI:true,ke:.01,kappa:100});__LW.ladder.set({nbar:20,sigma:1,d:0,teeth:3});__LW.particles.setTrail(8);__LW.particleUI.n.set(40);
   const opened=P.open('acceptance/complete-state');await w(600);const restored=__LW.serialize().presentation,restoredRoute=M.routeList().find(r=>r.id===route.id),restoredSlice=__LW.slice.save(),poseNow={yaw:__LW.obs.yaw,pitch:__LW.obs.pitch,quat:__LW.obs.quat.slice()};
   const beforePlay={t:__LW.clock.t,playing:__LW.clock.playing,transition:__LW.ab.on,theta:__LW.reg.mixAngle(__LW.clock.t)};__LW.play();await w(250);
   const afterPlay={t:__LW.clock.t,theta:__LW.reg.mixAngle(__LW.clock.t),transition:__LW.ab.on};__LW.pause();
@@ -221,7 +221,7 @@ try {
  assert.equal(projectState.rate,33);assert.equal(projectState.gamma,1.71);assert.equal(projectState.stage,.63);assert.ok(Math.abs(projectState.poseNow.yaw-projectState.pose.yaw)<1e-12);assert.ok(Math.abs(projectState.poseNow.pitch-projectState.pose.pitch)<1e-12);assert.deepEqual(projectState.poseNow.quat,projectState.pose.quat);
  assert.deepEqual(projectState.spectrum,{selected:4,dials:false});assert.equal(projectState.slice.mode,'ks');assert.equal(projectState.slice.half,13.5);assert.equal(projectState.slice.gain,3.25);
  assert.deepEqual(projectState.slice.rotor.qL.map(v=>+v.toFixed(8)),[.92387953,.38268343,0,0]);assert.equal(projectState.palette.id,projectState.pal);assert.equal(projectState.palette.selected,1);assert.equal(projectState.palette.stops.length,3);
- assert.deepEqual(projectState.instruments.qcd,{kind:'charm',potential:'cornell',params:{alphaS:.39,sigma:.18,C:.733}});/* 0.5.0 D9: QCD's window is gone; QUARKONIUM's parameters ride at their default (only a file sets them: history's legacy-qcd case) */assert.deepEqual(projectState.instruments.molecule,{on:true,R:3.4,kind:'sigma_u'});assert.deepEqual(projectState.instruments.pulse,{basis:'lcao1s',R:2.7,dt:.1,pulse:{amplitude:.041,omega:.62,duration:72,phase:.4,start:0}});assert.equal(projectState.instruments.helium.basis,'one');assert.deepEqual(projectState.instruments.helium.x1.map(v=>+v.toFixed(8)),[.3,.4,.5]);assert.deepEqual(projectState.instruments.h2,{on:false,R:4.2,which:'singlet',showCI:false,ke:.044,kappa:640});assert.deepEqual(projectState.instruments.ladder,{nbar:42,sigma:3.5,d:4,teeth:6});assert.deepEqual(projectState.instruments.particles,{count:230,trail:37});
+ assert.deepEqual(projectState.instruments.qcd,{kind:'charm',potential:'cornell',params:{alphaS:.39,sigma:.18,C:.733}});/* 0.5.0 D9: QCD's window is gone; QUARKONIUM's parameters ride at their default (only a file sets them: history's legacy-qcd case) */assert.equal('molecule' in projectState.instruments,false);assert.equal('pulse' in projectState.instruments,false);/* 0.5.0 D9: the H₂⁺ card (molecule, W-MO, W-PULSE) is deleted — history's legacy-h2plus case opens its old file */assert.equal(projectState.instruments.helium.basis,'one');assert.deepEqual(projectState.instruments.helium.x1.map(v=>+v.toFixed(8)),[.3,.4,.5]);assert.deepEqual(projectState.instruments.h2,{on:false,R:4.2,which:'singlet',showCI:false,ke:.044,kappa:640});assert.deepEqual(projectState.instruments.ladder,{nbar:42,sigma:3.5,d:4,teeth:6});assert.deepEqual(projectState.instruments.particles,{count:230,trail:37});
  assert.equal(projectState.modwin.selectedMacro,projectState.macro.id);assert.equal(projectState.modwin.audioBands[projectState.audioId],'high');assert.equal(projectState.macro.value,.88);assert.equal(projectState.macro.depth,.73);
  assert.ok(projectState.historyBefore>0);assert.equal(projectState.historyAfter,0);assert.deepEqual(projectState.beforePlay,{t:0,playing:false,transition:true,theta:0});assert.equal(projectState.afterPlay.transition,true);assert.ok(projectState.afterPlay.t>0);assert.notEqual(projectState.afterPlay.theta,0);
  assert.equal(projectState.dirty,false);assert.deepEqual(projectState.errors,[]);
