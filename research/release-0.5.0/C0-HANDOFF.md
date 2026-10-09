@@ -18,7 +18,8 @@ step so a kill loses only uncommitted work.
 ## Commits (this continuation)
 | step | commit | what |
 |---|---|---|
-| 1 | (this commit) | THE KEYMAP RULES: MIR 1.4.3 `base.css`'s two `#keymap` rules (stacking at `--z-veil`, `[hidden]` → none) move into `lab/lab.css` as λWAVES' own; `--z-veil` is still declared on 1.5 (`mir/css/base.css:65`, 40). `pwa --write`. `keyboard-window` GREEN alone. The `.km-*` judgement below. `c0-glass/keyboard-{before,after}.png`. |
+| 1 | `e99375b` | THE KEYMAP RULES: MIR 1.4.3 `base.css`'s two `#keymap` rules (stacking at `--z-veil`, `[hidden]` → none) move into `lab/lab.css` as λWAVES' own; `--z-veil` is still declared on 1.5 (`mir/css/base.css:65`, 40). `pwa --write`. `keyboard-window` GREEN alone. The `.km-*` judgement below. `c0-glass/keyboard-{before,after}.png`. |
+| 2 | `ad0b4dc` | MIR-CONTROLS re-aimed to MIR 1.5's ONE KNOB LAW (`kit.js` `setKnobLaw`, alpha.13): vertical drag (220 px rise, 320 under a finger, sideways ignored), the ⅛ gear on a knob drag, a fader drag and a Shift arrow. Old test green on the base copy; new test green here and red on the base copy at the sideways line (`0.5 != 0.25`), so it pins the 1.5 law. The test alone in its commit. |
 
 ## Step 1 · the `.km-*` judgement (the kit's `keyboard/keyboard.css` on λWAVES' own pane)
 Measured three ways: `kmdiff.mjs` (gate Firefox, every pane element, light first-run), `kmshot.mjs` (gate Firefox: pane PNG, clip test,
@@ -42,12 +43,10 @@ real-pointer hover on a badge) and a stylehash pair with the keymap open (`cap.m
 ## Tests so far (this continuation)
 - `node tests/pwa.test.mjs --write`: PASS (263 precached).
 - `keyboard-window` (8783/5253) alone: **PASS** (red before the fix).
+- `mir-controls`: base copy (8787/5257), old test **PASS 2/2**; this tree, re-aimed test **PASS 2/2**; re-aimed test on the base copy RED (`0.5 != 0.25`, as intended).
 
 ## Blockers
 None.
 
 ## Exact next step
-Step 2: run `mir-controls` on the base copy (`LW_PORT=8787 GD_PORT=5257`), expect green; read the kit's `setKnobLaw()` under `lab/mir/`;
-re-aim `tests/mir-controls.browser-test.mjs` to MIR 1.5's ONE KNOB LAW (vertical drag, ⅛ fine gear) in its own commit. The gate
-servers must be restarted first (`python3 tools/gate/server.py <tree> 8783`, `… .tmp/base 8787`); the kit `serve.mjs` pair used for
-stylehash is stopped by pid.
+Step 3: `bash test.sh node` (expect 85 green), then ONLY `keyboard-window`, `mir-controls`, `frame-occlusion`, `menubar` on 8783/5253, one at a time, 4 s apart. Then step 4 (lines, the `__LW` law, adopt `--check`, REPORT wave 196, C0-BUILD.md) and step 5 (the ms/s pair). The gate servers run on 8783 (this tree) and 8787 (`.tmp/base`); stop them by pid at the end.
