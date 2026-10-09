@@ -86,7 +86,7 @@ slide, its transform, and the chevron's transition.
 | **B78** · wave 53 (the part that is not `slap`) | After the rename, no SLAP and no BOW is left in any text node or label of the live document, and IMPULSE has its seats: the STATE card's `IMPULSE` trigger, the `IMPULSE · a sudden momentum kick` group, the `LAST IMPULSE` readout. | STATE card: group `BOW`, readout `BOW · escaped / momentum`, no IMPULSE trigger/group/readout (`button`, `group`, `readoutOk` all `false`). | Identical on v0.4.0-alpha (`.tmp/p48.js`). The rename of wave 53 did not reach these labels, and the trigger left the card with a526bda. |
 
 B78 is red for BOTH reasons: the `slap` hits are a 0.5.0 regression (section 4); the BOW labels and the missing IMPULSE seats are this row.
-The red verdicts are B70, B71, B78, B111, B139, B144, B149: seven.
+The red verdicts are B70, B71, B78, B111, B139, B144, B149: seven. (After the C7b merge: section 10.)
 
 ## 6. The re-aim and retirement table
 
@@ -241,3 +241,73 @@ kill "$(cat .tmp/server.pid)"
   are the two that are timing (the tags tick; the ladder's next repaint hides an unowned tip), and both now read what they
   need on the move or a tick later. B61 was red in 2 of the 5 full runs before that and green in the one after; it is the
   row to look at first if a later run shows a stray red.
+
+## 10. After the C7b merge (2026-10-09)
+
+Sonnet 5.5 (diagnosis, a2ea2bd5682f64c9c) then Fable 5.1 (edits and runs), worktree `.claude/worktrees/agent-a02df547124e9823f`, branch
+`worktree-agent-a02df547124e9823f`, from `b9e0c57` (`yan-c`: sos-s0 `bc2a5cc` + FIX ROUND 1). One tracked file changed besides this note:
+`tests/legacy/boot.browser-test.mjs`. Nothing under `lab/`. C7b (the TIMELINE window, the RENDER card, R5's exact resume) moved five rows.
+
+### 10a. Counts
+
+| Run | verdicts | GREEN | RED | red rows |
+|---|---|---|---|---|
+| the integrator's merged run (sos-s0 with C7b, before FIX ROUND 1) | 152 | 140 | 12 | B66 B70 B71 B78 B84 B108 B111 B127 B134 B139 B144 B149 |
+| BEFORE · this tree `b9e0c57`, alone (`.tmp/boot-1.txt`) | 152 | 143 | 9 | B66 B70 B71 B78 B108 B127 B134 B139 B149 |
+| the same, re-run with untruncated detail (`.tmp/boot-1f.txt`, B13 not run) | 151 | 141 | 10 | the nine above and **B84** |
+| AFTER · this tree with the five re-aimed, alone (`.tmp/boot-2.txt`) | 152 | 147 | 5 | B70 B71 B78 B139 B149 |
+| `bash test.sh node` (`.tmp/node-gate.txt`) | | 940 PASS/GREEN | 0 | exit 0 |
+
+B84 is the flaky one: green in the baseline, red in the detailed re-run and red alone as a chunk on both trees (§10b). B16 never showed the
+ResizeObserver cascade FIX ROUND 1 saw once: both of my full runs were alone on the rig (it was the neighbouring suite).
+
+### 10b. The five rows
+
+| Row | Wave | Old assertion | Now | Verdict |
+|---|---|---|---|---|
+| B66 | 106 (list: 58) | CAMERA knobs end `…SPIN\|SECONDS`; the buttons include TAKE A PICTURE and ONE PERIOD | knobs end at `SPIN`; the buttons are pinned EXACTLY to `PAN HOME\|HOME\|SET Δρ REF`; the picture and film verbs are the RENDER card's and B108 holds them | **STALE** (C7b: the capture group left the CAMERA card; observed knobs `YAW…SPIN`, switch `AUTO-ROTATE`) |
+| B84 | 54 | the stat read lands inside a 3-s absence | the absence is 5 s; every claim unchanged | **HARNESS RACE** (not a regression: it fails alone on the pre-C7b export with the same numbers). Gecko throttles the hidden tab's timers to a one-second grid; the 700 ms arm timer landed at hide + 1003 ms in one run and hide + 2006 ms in another, so the 250 ms stat timer after it fell at 2.0 s or past the 3.0 s resume, and the worker's reply reaches the main thread only when that timer runs. Three runs of the new file: `armed` at +999, +2007 and +2006 ms, all green. The worker side (`bowParkedThen`, `bowIdleWhileHidden` 0, `bowRanAfter` > 0, parks and resumes 1/1, `firstDt` 0) held in every red run |
+| B108 | 58 | the CAMERA card's `TAKE A PICTURE`, `RECORD`, `ONE PERIOD`, `PLAN`; `loopEnabled` / `loopDisabled` read off the ONE PERIOD button | the RENDER card's `CAPTURE IMAGE`, `RENDER`, `PLACE ONE PERIOD`, `PLAN`; the exact plan is `__LW.render.plan()` with the label and message in `.sr-period-plan`; a refused plan makes `__LW.render.place()` return `null`, say the planner's label and message verbatim in the readout, and leave the TIMELINE's clip count where it was | **STALE** (C7b R3: PLACE ONE PERIOD is a plain trigger that refuses, not a button that goes down). Every planner clause (phase, density, one-energy, STURMIAN, the real picture and its restore) was green and is unchanged |
+| B127 | 62 | the canvas label is read 300 ms after a change; at most FOUR live regions | the read waits 150 ms, asks one more frame (`__LW.schedule(1)`), waits 500 ms; the live regions are SIX, named, and none is written during 3 s of playback | **STALE** twice. (1) A paused sentence is written from a frame at most every 100 ms (`rack.js:938`), so a change inside that window leaves the old one standing: the same tick as B23 and the pause read below. Seen once by the predecessor, not by me; the pre-C7b export is green. (2) The live-region ceiling was a deterministic red on this tree: six seats (`DIV.m2hint`, `DIV.km-status`, `DIV.mir-banner`, `SPAN.mir-step-text` in the RAMP, and **`DIV.tl-status` and `SPAN.mir-step-text` (the snap stepper `tl-snap`) in the TIMELINE window**); the pre-C7b export has four. Both new ones are the kit's TIMELINE, written on a user act (a selection, a step); `liveBad` stays 0 and a MutationObserver over all six sees zero writes while the transport runs |
+| B134 | 65 | the BPM chip's resume floors the beat to the note boundary just passed (`applied` true, `moved` = the fraction, phase restarts at 0) | the SHIPPED resume is exact: law `BPM`, grid 1, `applied` false, `moved` 0, the beat and the phase continue; the old clause is kept on the kit's legacy road (`__LW.mod.host.clock.setExactResume(false)` for one lap, put back in a `finally`) | **STALE by ruling R5** (`C7B-DESIGN.md` §1.2 and §6: installing the TIMELINE calls `clock.setExactResume(true)`, controller.js:26). The ANCHOR and TRIG rows and the bar-lock were green and are unchanged. Josh's wave-65 sentence ("hitting space bar in between a note simply jumps to the truncated note") no longer describes the shipped lab; that was R5 and B9 asks MIR for an option |
+
+### 10c. FIX ROUND 1's four, confirmed on the merged tree
+
+| Row | Fix | Boot suite on `b9e0c57` |
+|---|---|---|
+| B78 · the `slap` words | `31f4849` | **GREEN half**: the sweep finds 2 hits, both `BOW` (STATE's group and readout), the pre-existing part. B78 stays red for that and the missing IMPULSE seats |
+| B111 · `phoneRack` stored | `acd5761` | **GREEN** |
+| B144 · accent End stop 360 | `7c3da43` | **GREEN** |
+| B139 · FROST STILL keeps the fill | `7bd1bf6` | **STILL RED in the full run.** GREEN alone (`.tmp/c-b139.txt`, a first-run REFRACTIVE card). B112 leaves the card style TINTED in the look store, so the full run measures TINTED + dark + DISCONNECTED: the held body goes `rgba(28,32,38,.58)` to `.84` (`.tmp/boot-1f.txt`, `ctx.play` against `ctx.stop`). The cause is the kit's `skin.css:512`: `body.frost:not(.frost-hold)[data-card="tinted"] { --card-opacity: var(--frost-opacity) }`, thin while it blurs and full during the hold. 0.4.0 satisfied the law because a tinted pane did not blur at all. FIX ROUND 1 measured refractive only. A probe that injects the one unlayered rule `body.frost.frost-hold[data-card="tinted"] { --card-opacity: var(--frost-opacity); }` keeps `.58` stopped and `.58` playing for tinted and moves nothing for refractive (`.tmp/p-b139.js`). Not applied (`lab/skin.css` is not this task's) |
+
+### 10d. What is still red, and why
+
+| Row | Class | Note |
+|---|---|---|
+| B70, B71 | pre-existing (v0.4.0-alpha too) | unchanged (§5): the transport's buttons are 45 × 34 on a phone and two routed knobs are under 44 px; this run's landscape sweep counts 49 failing hit-tests |
+| B78 (BOW) | pre-existing | `BOW` labels and no IMPULSE seats in the STATE card |
+| B139 (TINTED) | REAL REGRESSION of 0.5.0, the fix round's second half | §10c; one `lab/skin.css` line (candidate verified in the live page) |
+| B149 (b) | MIR brief candidate (B149b) | a Tab starts the rack's 320 ms reflow animation (`tab.running` 5); the kit has no instant option |
+
+### 10e. Found, not fixed
+
+* A PAUSED canvas label (`#field` `aria-label`) can stay one step behind a change for as long as nothing schedules a frame: the badges tick
+  writes it from a frame at most every 100 ms (`rack.js:938`). The test now asks for the frame; a screen-reader user who changes the view
+  while paused and hears nothing new is the product's side of it.
+* The TIMELINE window added two live regions to a document that capped them at four. Both are user-act writers (`editor.js:133` guards the
+  status write with a compare), so the ceiling was raised to six and named, but a seventh must be argued for the same way.
+* B84's 5 s costs the suite two seconds.
+
+### 10f. Commands
+
+```
+python3 tools/gate/server.py <worktree> 8963 &                                       # pid in .tmp/server.pid, stopped by pid
+LW_PORT=8963 GD_PORT=5433 node tests/legacy/boot.browser-test.mjs > .tmp/boot-2.txt  # about 7 min, alone on the rig
+LW_PORT=8963 GD_PORT=5433 node .tmp/chunk.mjs @.tmp/spec-c.txt                       # B66 and B108
+LW_PORT=8963 GD_PORT=5433 node .tmp/chunk.mjs @.tmp/spec-b121.txt                    # B127 (with its helpers)
+LW_PORT=8963 GD_PORT=5433 node .tmp/chunk.mjs @.tmp/spec-b132.txt                    # B134 (with its helpers)
+LW_PORT=8963 GD_PORT=5433 node .tmp/chunk.mjs 'm:/* ── B84 · THE BACKGROUNDED TAB~/* ── B85 ·'
+LW_PORT=8963 GD_PORT=5433 node .tmp/probe.mjs .tmp/p-b139.js                         # the TINTED hold probe
+bash test.sh node                                                                    # exit 0, 940 PASS, 0 red
+```
+The pre-C7b comparison tree was a `git archive f0d4566` export served on 8967 (read-only, from the predecessor's `.tmp/base-pre`).
