@@ -512,6 +512,23 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > PNGs, the M5 block, the security items; MIR brief candidates from every C row for the primary account. Flakes seen under load and green alone:
 > `current` followsPalette, the settings probe's frame watchdog.
 
+> **UPDATE (Claude Yan, 2026-10-09 07:20 CDT) — the baton came back to Yan** (Josh 07:05: "Sos got ahead of you now, it's time to pick back up where
+> *he* left off … every post compaction should also read some of Sos's new files"). Sos's morning is in his two UPDATE blocks above and his checkpoint
+> (`.claude/worktrees/sos-s0/.claude/handoffs/latest.md`, "STATE AT 03:25 CDT"): C2 `5ef57f4`, D9b `1aa1d4d`, C3 `4555945` + `0f4f042`, C6 `e0621f8`,
+> the C7b design `c232bef`, PLAN §9 rulings `c83b7ee` `569855f`; `lab/*.js` **27,515**; THE LOCK **860 · 0/0 and 1004 · 0/0**. **`yan-c` fast-forwarded
+> to `sos-s0` `5518182`** (clean — `sos-s0` was a descendant of `yan-c` `a36fc81`); `BRIEF-C6B.md` written `011e6a5`. **The integrator is Yan on `yan-c`
+> again.** Sos's two servers (8721, 8741) left running — his. **RELAUNCHED FRESH (Opus) at 07:15:** **C7b** from `ae5add1` (Sos's builder's tip: step 1
+> `f40733d` done, lock 860/1004 green, film-compare exit 0; told to merge `yan-c` into its branch first, re-run the lock, offer s9, then C7B-DESIGN §4
+> steps 2–4; ports 8913/5383 + 8917/5387; the predecessor's `.tmp/base` + `film-base.json` copied) and **C6b** from `011e6a5` on `BRIEF-C6B.md` (the
+> session over the one part; the opener with six demo covers + NEW + RESUME; the kit's photosensitivity notice behind λWAVES' `__LW.warning` facade —
+> THE PHOTOSENSITIVITY LAW stays λWAVES', no query string silences it for a human; `installBanner({ errors: false })`, `bootVeil`, the wake lock on THE
+> play; Sos's C6b read-phase note `agents/a98be3262dbdf60ad.md` = its 13 findings; ports 8923/5393 + 8927/5397; wave 209). Both commit
+> `C7B-/C6B-HANDOFF.md` per step; neither merges. THEN: merge C7b (lock ×2, film-compare, the NEW `timeline` suite), merge C6b (offer 16, gpu-recovery,
+> legacy/boot, the NEW `opener` suite, serialize-bytes 11/11), `tests/legacy/boot` re-aim (Sonnet) if needed, **C-V** (`BRIEF-C-V.md`, fresh Opus), fix
+> rounds, the pre-release gates, **the LOCAL 0.5.0-alpha cut + `CHANGES-0.5.0.md`** on Josh's word. NO push, NO deploy. Josh's queue unchanged (the
+> glass + legibility PNGs, the M5 block, the security items, the MIR brief candidates, 0.5.0 vs 0.5.5 for the changelog, the cut word). Josh (07:25)
+> asked to be told when compaction is safe: the answer is "when the baton files are written and no merge is half-done" — say it plainly each time.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
