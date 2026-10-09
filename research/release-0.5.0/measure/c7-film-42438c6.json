@@ -1,0 +1,224 @@
+{
+ "steps": [
+  "picture",
+  "loop",
+  "video",
+  "frames",
+  "verify"
+ ],
+ "canvas": [
+  1400,
+  814,
+  "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0"
+ ],
+ "picture": {
+  "name": "lambdawaves-still-2modes-1400x814-20261009-021901.png",
+  "w": 1400,
+  "h": 814,
+  "bytes": 97866,
+  "same": true,
+  "hash": "ff9ca6bf",
+  "px": {
+   "w": 1400,
+   "h": 814,
+   "hash": "663e6078",
+   "lit": 1
+  },
+  "wallMs": 967
+ },
+ "loop": {
+  "kind": "ONE PERIOD",
+  "name": "lambdawaves-loop-2modes-1400x814-30fps-180f-t50_265au-20261009-021939.mp4",
+  "ok": true,
+  "frames": 180,
+  "w": 1400,
+  "h": 814,
+  "fps": 30,
+  "bytes": 953575,
+  "files": [
+   [
+    "lambdawaves-render.mp4",
+    953575
+   ]
+  ],
+  "box": "ftyp",
+  "decoded": {
+   "w": 1400,
+   "h": 814,
+   "duration": 6
+  },
+  "contended": 0,
+  "report": "36.9 s for 180 frames · 954 kB",
+  "mode": "loop",
+  "first": {
+   "k": 0,
+   "t": 0,
+   "off": 0,
+   "digest": "2088c5f014bb867a",
+   "retries": 0
+  },
+  "last": {
+   "k": 179,
+   "t": 49.9862297771176,
+   "off": 49.9862297771176,
+   "digest": "d1913841258f1dd8",
+   "retries": 0
+  },
+  "err": null,
+  "ro": [
+   "THE LOOP PLANEXACT LOOPEXACT LOOP · 180 frames at 30 fps = 6.000 s of wall for one period T = 50.265482 a.u. (1.2159 fs) (gcd 0.1250 Eh over 3 energies). The last frame is t0 + 179T/180; the frame at t0 + T is dropped because it IS frame 0. the observable is phase, which paints the GLOBAL phase of psi, so the loop runs to T_psi = 2*pi/gcd{|E|} = 3 x T_rho and the hue closes with it. · period used: wave (3 laps of T_ρ)"
+  ],
+  "wallMs": 36959
+ },
+ "video": {
+  "kind": "RECORD",
+  "name": "lambdawaves-clip-2modes-1400x814-30fps-180f-t24_000au-20261009-022016.mp4",
+  "ok": true,
+  "frames": 180,
+  "w": 1400,
+  "h": 814,
+  "fps": 30,
+  "bytes": 744558,
+  "files": [
+   [
+    "lambdawaves-render.mp4",
+    744558
+   ]
+  ],
+  "box": "ftyp",
+  "decoded": {
+   "w": 1400,
+   "h": 814,
+   "duration": 6
+  },
+  "contended": 0,
+  "report": "36.7 s for 180 frames · 745 kB",
+  "mode": "loop",
+  "first": {
+   "k": 0,
+   "t": 0,
+   "off": 0,
+   "digest": "2088c5f014bb867a",
+   "retries": 0
+  },
+  "last": {
+   "k": 179,
+   "t": 23.86666666666662,
+   "off": 23.86666666666662,
+   "digest": "e471ab0a9245c9c8",
+   "retries": 0
+  },
+  "err": null,
+  "ro": [
+   "THE LOOP PLANEXACT LOOPEXACT LOOP · 180 frames at 30 fps = 6.000 s of wall for one period T = 50.265482 a.u. (1.2159 fs) (gcd 0.1250 Eh over 3 energies). The last frame is t0 + 179T/180; the frame at t0 + T is dropped because it IS frame 0. the observable is phase, which paints the GLOBAL phase of psi, so the loop runs to T_psi = 2*pi/gcd{|E|} = 3 x T_rho and the hue closes with it. · period used: wave (3 laps of T_ρ)"
+  ],
+  "wallMs": 36770
+ },
+ "frames": {
+  "ok": true,
+  "message": "25 frames · 1400×814 · SPAN · PNG frames · 3.2 MB · rendered in 5.2 s. Exact: frame k is t0 + off(k), whatever the machine's speed.",
+  "mode": "span",
+  "N": 25,
+  "times": [
+   0,
+   0.16666666666666666,
+   0.3333333333333333,
+   0.5,
+   0.6666666666666666,
+   0.8333333333333333,
+   0.9999999999999999,
+   1.1666666666666665,
+   1.3333333333333333,
+   1.5,
+   1.6666666666666667,
+   1.8333333333333335,
+   2,
+   2.1666666666666665,
+   2.333333333333333,
+   2.4999999999999996,
+   2.666666666666666,
+   2.8333333333333326,
+   2.999999999999999,
+   3.1666666666666656,
+   3.333333333333332,
+   3.4999999999999987,
+   3.666666666666665,
+   3.8333333333333317,
+   3.9999999999999982
+  ],
+  "zip": {
+   "name": "lambdawaves-frames-2modes-1400x814-24fps-25f-20261009-022021.zip",
+   "part": "lambdawaves-frames-render-mv0c8jb7-dja6k-001.zip",
+   "bytes": 3248483,
+   "entries": 26,
+   "first": "frame_000000.png",
+   "frames": 25,
+   "hashes": [
+    "663e6078",
+    "35e8a317",
+    "43c534fb",
+    "d0c3056a",
+    "729f5eb3",
+    "71083e02",
+    "da0f39e3",
+    "17431acc",
+    "e514c1e8",
+    "34299e93",
+    "e8943dde",
+    "34368cee",
+    "d92f0f4",
+    "524c5921",
+    "265173d3",
+    "1ad009b4",
+    "b3dc95b6",
+    "6a1a8ef7",
+    "c55dfbca",
+    "c341211b",
+    "7156eb26",
+    "e780800b",
+    "3db678b0",
+    "cce2e1e4",
+    "16972853"
+   ],
+   "lit0": 1,
+   "size": [
+    1400,
+    814
+   ],
+   "recording": {
+    "kind": "lambdawaves-deterministic-png",
+    "fps": 24,
+    "frames": 25,
+    "motion": "span",
+    "app": true,
+    "schedule": "span"
+   }
+  },
+  "wallMs": 18723
+ },
+ "verify": {
+  "ok": true,
+  "frames": 6,
+  "message": "DETERMINISTIC: 6 frames rendered twice through the kit's recorder, every digest identical.",
+  "mismatches": [],
+  "digests": [
+   "830a4249b3bcb933",
+   "d1db8597686893ab",
+   "0b3cd84933de28a7",
+   "401950816c631cc6",
+   "75e4dc53df552cf8",
+   "fe63b440cf1e2b97"
+  ],
+  "wallMs": 2144
+ },
+ "after": {
+  "t": 0,
+  "playing": false,
+  "canvas": [
+   1400,
+   814
+  ],
+  "scheduled": false,
+  "errors": []
+ }
+}
