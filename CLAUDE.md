@@ -6,9 +6,9 @@ MIR owns generic instrument behavior. Before changing modulation controls, read
 adapt `lab/modwindow.js`; do not edit adopted files under `lab/mir/`.
 The modulation port is `lab/mod-port.js` (the object `createModulation(port)`
 takes, key for key with MIR 1.5); THE play is `onePlay` in `lab/clock.js`, and
-while MOD is armed and LINKED the modulation follows its edges holding the kit's
+while MOD is armed the modulation follows every edge of it, holding the kit's
 `demand('app.play')`, so a play is never refused for want of a route or an open
-editor (0.5.0 A5/A6).
+editor (0.5.0 A5/A6; LINKED/SEPARATE retired at C4 — one clock, no link).
 
 MIR 1.4.2 restores FL Studio's curve workflow: right-drag empty space adds and
 places a point; Shift-right-click adds at the curve's current value; left-drag moves a point or tension handle; Ctrl fine-tunes
@@ -88,8 +88,8 @@ METERS keeps the GOVERNOR readout and FRAME PROFILE.
 THE STAGE TEXT (Settings › Display, ONE row: the switch and its SIZE;
 PREFERENCE `molFormula` / `molFormulaSize`, on by default, 50–300 %) writes what
 is playing on the stage in the notebook's own markdown + KaTeX
-(`lab/stage-text.js` — the interim renderer, which 0.5.0 deletes for the kit's
-INFORMATIONAL layer): the MOLECULES formula ($\mathrm{H_{2}O}$) while
+(`lab/stage-text.js` — the interim renderer; the kit's INFORMATIONAL layer
+replaces it at 0.5.1, D1 by the A0 spike): the MOLECULES formula ($\mathrm{H_{2}O}$) while
 MOLECULES is on, otherwise SPECTRUM's populated states in `stateLatex`'s prose
 ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION) — never a live
 coefficient. Its key is the string it would render: the DOM moves only when
@@ -115,7 +115,7 @@ at the top. It is transparent text under every window and never part of the
 occlusion mask, and it never reaches an export: a picture, a loop and a video
 carry instead its one plain-Unicode CAPTION (`H₂O · 1b1 HOMO · STO-3G`, or the
 states), drawn by `lab/capture.js` `drawCaption` and following the same switch
-(KIT BRIEF 6 replaces it at 0.5.0).
+(KIT BRIEF 6 replaces it at 0.5.1, D5).
 While a molecule owns the field SPECTRUM is FOLDED, not hidden
 (`moleculeMode`), and unfolds when the molecule lets go; EDIT › COPY then
 copies the molecule's page (`moleculeLatex`, `lab/latex-state.js`).
@@ -162,6 +162,7 @@ first run is the store's `defaults` (`LOOK_DEFAULTS`, `lab/rack.js`): light/refr
 hints on, tags and Help off; on a phone or tablet (`lab/first-run.js`, rack.js' own `isPhone()`/`isTablet()`) frost OFF, tinted. Captions
 and window notes off, AUTO SCALE and governor on stay the blob's. A stored choice wins; an older blob's look (and `lw-window-info`) is
 lifted once by `liftLook`; the phone's frost override stays the app's. Never add a look key to `saveSettings`.
+
 THE START (0.5.0 C6b, `lab/main.js`). THE PHOTOSENSITIVITY LAW is λWAVES', not
 the kit's: a human visitor reads the kit's photosensitivity notice once per
 browser BEFORE anything animates, and NO query string silences it for a human
@@ -179,7 +180,7 @@ origin boot/link) takes a waiting build itself (`lab/sw-client.js`, `rack.js`
 `untouched`) and its reload skips the title screen; RESUME and a cover are
 offered it, any other session only on a press. The banner is MIR's
 `installBanner`, the veil MIR's `bootVeil`, and the wake lock follows THE play.
-DOMAIN
+
 AUTO on is a project default, not a preference (see the scopes below). In
 `lab/field.js`, WAVE density uses palette θ=0; Δρ uses the same ±π/2 pair as
 Re/Im; palette OFF retains the old colors. Keep
@@ -250,7 +251,7 @@ worktree's `adopt.mjs`, then `--check`. `index.html` declares `@layer app,
 mir;` then `mir/mir.css`; `lab.css` and `skin.css` stay UNLAYERED and beat
 every kit layer. An `app.*` layer ranks below the kit for a normal declaration,
 so keep a λWAVES look with an unlayered rule, and narrow an app rule the layers
-made live with a twin `:not(:where())`. The 33 `!important`s stay unlayered (four left with C6b's banner and warning pane).
+made live with a twin `:not(:where())`. The 32 `!important`s stay unlayered (23 in skin.css, 9 in lab.css; four left with C6b's banner and warning pane).
 R5-W1: a kit module no root reaches is reported by `wiring --unreached-kit`,
 never precached, never failed; our own modules keep the hard gate. The
 keyboard editor's stacking (`#keymap` fixed at `--z-veil`, `[hidden]` none) is
