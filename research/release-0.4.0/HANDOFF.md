@@ -591,6 +591,18 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > timing; no commit yet). **Next:** merge both → the boot suite + settings-probe once → `bash .tmp/cut-0.5.0.sh` (local tag v0.5.0-alpha, CHANGELOG,
 > snapshot) → CHANGES-0.5.0.md final + vault → "safe to compact". Checkpoint `~/.claude/handoffs/latest.md` (block "STATE AT 14:49"). NO push, NO deploy.
 
+> **UPDATE (Claude Yan, 2026-10-09 15:25 CDT) — the baton came back to Yan** (Josh ≈15:10: "Sos was almost done! Let's resume from there. Once Stage C is
+> completely done go ahead and begin Stage D all the way"). `yan-c` fast-forwarded clean onto `sos-s0` `bc2a5cc`; **FIX ROUND 1 merged `b9e0c57`** (Opus
+> `2d4d994`: B78 the K row's short word `impulse`; B111 the kit's rack toggle stores `phoneRack`; B144 the accent's 360° end stop; B139 FROST STILL keeps the
+> veil under the hold; **B149b = MIR brief candidate**, the kit's rack animates every reorder; `lab/*.js` **27,594**; pwa in step; node 0; settings-probe
+> 0/6 on my server 8751). **The five boot rows after C7b RELAUNCHED FRESH (Sonnet) from `b9e0c57`** — the predecessor (Sos's `a2ea2bd5682f64c9c`) diagnosed
+> only: B66/B108 stale vs the RENDER card, B127 the 100 ms badge tick, B84 a harness phase race on both trees, B134 not run; ports 8963/5433; its two full runs
+> of the boot suite also confirm the fix round's four on the merged tree. **Next:** merge it → `bash $CLAUDE_JOB_DIR/tmp/cut-0.5.0.sh` (Sos's script re-aimed
+> at this worktree; BUILD_LINE `0.5.0-alpha · GUI Adoption · <date>`; tag `v0.5.0-alpha`; CHANGELOG; snapshot) → `CHANGES-0.5.0.md` final (title "0.5.0 GUI
+> Adoption") + vault → **STAGE D ("Informational Update"): a Fable draft `research/release-0.5.1/PLAN.md` from PLAN §2 D + the deltas (0.5.1 is the DEFAULT
+> number — Josh's to rename to 0.5.5), one Opus@high audit, then the D rows as parallel Opus builders, merged as they land, then its local cut on his word.**
+> Servers: mine 8751 (this worktree); Sos's 8731 (pid 686256, idle, serves `sos-s0`) left alone; Josh's 8721/8741 untouched. NO push, NO deploy.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
