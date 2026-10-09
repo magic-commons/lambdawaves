@@ -231,4 +231,8 @@ changes after the release of 0.5.0 or 0.5.5")
 - **At the cut: a MAJOR-FEATURES changelog** — `research/release-0.5.0/CHANGES-0.5.0.md` (+ vault), the user-facing feature changes of 0.5.0 in
   plain words (the adoption's visible changes, the film, the retired legacy windows, the camera panel, the one clock, FOLDERS …), separate from the
   tag-generated CHANGELOG.md; the same at 0.5.5 if that is the cut Josh names.
+- **C7b's eleven design rulings (C7B-DESIGN.md R1–R11) taken as the defaults** under "defaults for everything": the TIMELINE window and the RENDER card ship
+  closed (listed in + and WINDOW); ONE PERIOD keeps a button as PLACE ONE PERIOD; AUTO-ROTATE is not a clip; exact resume on; MODULATION OFF on the card =
+  the kit's FREEZE THIS LOOK; first-run film choices are C7's (6 s, the canvas size, driven when MOD is armed); the picture takes two taps; no ▶ in the
+  timeline's work bar; films keep λWAVES' file names; the ruler never moves ψ(t) live. The build (C7b) launches after C3 merges.
 
