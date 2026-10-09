@@ -216,3 +216,19 @@ Every ruling in §3 takes its first option until Josh says otherwise:
   WebKit road for 0.5.0 is the kit's probe (PASS 2 §5's block), not `check-app.mjs`, which needs `createDescribe` wired and WebKit libraries
   this machine lacks; (f) for A-M: `main-thread.mjs` measures with the photosensitivity notice open under CDP Chromium — UNVERIFIED whether
   that moves the floor; the pre-C baseline takes a notice-dismissed pair beside it before anything is re-based.
+
+### Rulings of 2026-10-09 (Josh, 02:30 CDT, verbatim: "Whatever she left behind states that H2 and Electrostatics should go, and record or render should
+be something related to the timeline window of MIR 1.5. And I guess defaults for everything? I definitely need a changelog of just the major feature
+changes after the release of 0.5.0 or 0.5.5")
+- **R5-L1 closed: H₂ and ELECTROSTATICS GO** (D9b — `h2view.js` 186 + `h2.js` 82 with `h2ci.js`'s imports moved first; `electrostatics.js` 437 +
+  `fieldview.js` 236; their suites, the digest-lock `h2` scene, legacy/boot B35/B55; old files naming them get the D9 restore notice).
+- **The film's UI is the kit's RENDER card and TIMELINE window (C7b):** RECORD / ONE PERIOD / EXPORT FRAMES leave λWAVES' own verbs for the kit's
+  `createRenderCard` + the 1.5 timeline window, with `createFilm`'s `frame(i, ctx)` road, the hazards, the lock and the hand-over fix kept; λWAVES'
+  motions (ONE PERIOD's span, AUTO-ROTATE's pose path, the modulation drive) become the timeline's. C7-BUILD.md's open item 3 is answered the other
+  way: adopt the timeline, do not hide it.
+- **Defaults for everything else on the rulings queue:** the seven glass classes as C0 applied them; no ink brief (bare reads 12/12); the doubleTap
+  row stays λWAVES' 320 ms / 40 px; the film's exactness over speed and its behaviour changes stand; the M5 numbers remain Josh's command.
+- **At the cut: a MAJOR-FEATURES changelog** — `research/release-0.5.0/CHANGES-0.5.0.md` (+ vault), the user-facing feature changes of 0.5.0 in
+  plain words (the adoption's visible changes, the film, the retired legacy windows, the camera panel, the one clock, FOLDERS …), separate from the
+  tag-generated CHANGELOG.md; the same at 0.5.5 if that is the cut Josh names.
+
