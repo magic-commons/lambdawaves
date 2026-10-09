@@ -565,25 +565,12 @@ try {
   judge('B32 Z = 2 (He⁺): E_1s = −2, the box halves to ±8, the GPU integrates the scaled 2p₊ to 1 in position AND momentum space (the exponent fix), the status names the ion, the hydrogen-theorem windows stand down, and Z = 1 restores everything',
     !zT.error && Math.abs(zT.E0 + 2) < 1e-12 && Math.abs(zT.half - 8) < 1e-9 && Math.abs(zT.xInt - 1) < 0.02 && Math.abs(zT.pInt - 1) < 0.02 && Math.abs(zT.halfP - 4.0) < 1e-9 && zT.status.includes('Z = 2') && zT.ladderHidden && Math.abs(zT.back.E0 + 0.5) < 1e-12 && Math.abs(zT.back.half - 16) < 1e-9 && !zT.back.ladderHidden && zT.errs === 0 && !zT.gpu, zT);
 
-  /* ── HELIUM: the conditional cloud of electron 2 on the GPU, moving away from electron 1 ── */
-  const heT = await g.ev(`try { __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s'); __LW.setView('density'); await __LW.settle();
-    __LW.helium.setBasis('six'); __LW.helium.place(0.8, 0); __LW.helium.setOn(true); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const d1 = await __LW.fieldDigest(), half = __LW.domain.half, space = __LW.field.space;
-    const stateHidden = document.querySelector('.dev[data-id="state"]').hidden, status = document.body.textContent.includes('HELIUM · HYLLERAAS · CONDITIONAL DENSITY');
-    __LW.helium.place(2.0, Math.PI / 2); __LW.schedule(4); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const d2 = await __LW.fieldDigest();
-    const w = document.querySelector('.dev[data-id="helium"]');
-    const vals = [...w.querySelectorAll('.ro-val')].map(e => e.textContent);
-    __LW.helium.setOn(false); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const back = { stateHidden: document.querySelector('.dev[data-id="state"]').hidden, integral: (await __LW.fieldDigest()).integral, space: __LW.field.space };
-    return { half, space, int1: d1.integral, int2: d2.integral, hash1: d1.hash, hash2: d2.hash, nan: d1.nan + d2.nan, stateHidden, status, vals, back, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B33 HELIUM: with helium holding the field the kernel runs the two-electron branch (space 4) on a ±4 box, draws a finite conditional cloud that CHANGES when electron 1 is moved (different grid, no NaN), the window prints the variational energy above the exact one with the cusp near ½, the atom windows stand down, and OFF gives the atom back',
-    !heT.error && heT.space === 4 && Math.abs(heT.half - 4) < 1e-9 && heT.int1 > 0 && heT.int2 > 0 && heT.hash1 !== heT.hash2 && !heT.nan && heT.stateHidden && heT.status
-      && heT.vals.some(v => v.startsWith('-2.903')) && !heT.back.stateHidden && Math.abs(heT.back.integral - 1) < 0.02 && heT.back.space === 0 && heT.errs === 0 && !heT.gpu, heT);
+  /* ── HELIUM (B33): the HELIUM card is deleted (0.5.0 D9) ── */
+  const heT = await g.ev(`return { gone: !document.querySelector('.dev[data-id="helium"]') && !('helium' in __LW), errs: window.__e.length };`) || { error: 'no result' };
+  judge('B33 (0.5.0 D9) RETIRED: the HELIUM card and its `__LW.helium` were deleted in 0.5.0 D9 — restore opens its files as SPECTRUM\'s ATOM · He 1s', heT.gone && heT.errs === 0, heT);
 
   /* ── THE GAS: a packet launched in the box flies at its momentum and bounces ── */
-  const gasT = await g.ev(`try { __LW.helium.setOn(false); __LW.setHamiltonian('well'); await __LW.settle();
+  const gasT = await g.ev(`try { __LW.setHamiltonian('well'); await __LW.settle();
     __LW.clock.reset(); __LW.launchPacket([0, 0, -4], [0, 0, 0.8], 1.6); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const L = __LW.lastLaunch, norm = __LW.reg.norm(), pop = __LW.reg.populated().length;
     const c0 = __LW.packetCentroid(24), d0 = await __LW.fieldDigest();
@@ -598,7 +585,7 @@ try {
     !gasT.error && gasT.captured > 0.85 && Math.abs(gasT.norm - 1) < 1e-9 && gasT.pop > 20 && Math.abs(gasT.c0[2] + 4) < 0.4 && Math.abs(gasT.c3[2] + 1.6) < 0.7 && gasT.hash0 !== gasT.hash3 && Math.abs(gasT.int0 - 1) < 0.02 && Math.abs(gasT.int3 - 1) < 0.02 && gasT.ro && gasT.ro.includes('held') && gasT.errs === 0 && !gasT.gpu, gasT);
 
   /* ── H₂: two atoms on the GPU as an incoherent density, and the collision on the triplet curve ── */
-  const h2T = await g.ev(`try { __LW.helium.setOn(false); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s'); __LW.setView('density'); await __LW.settle();
+  const h2T = await g.ev(`try { __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s'); __LW.setView('density'); await __LW.settle();
     __LW.h2.setWhich('triplet'); __LW.h2.setR(6); __LW.h2.setOn(true); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const d6 = await __LW.fieldDigest(), space = __LW.field.space, half = __LW.domain.half;
     __LW.h2.setR(1.4); __LW.h2.setWhich('singlet'); __LW.schedule(4); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
@@ -630,17 +617,9 @@ try {
   judge('B36 CALCULUS: on 1s + 2p_z at t = 1.3 the live table shows five rows with Ehrenfest I and II holding (residuals < 1e-5 relative, marked ok), the dipole moving (|⟨p_z⟩| > 0.01), and under the oscillator the law reads Newton (−⟨z⟩)',
     !calcT.error && calcT.n === 5 && Math.abs(calcT.ehrI.r) < 1e-5 * (1 + Math.abs(calcT.ehrI.p)) && Math.abs(calcT.ehrII.r) < 1e-5 * (1 + Math.abs(calcT.ehrII.p)) && Math.abs(calcT.ehrI.p) > 0.01 && calcT.res[2].includes('ok') && calcT.res[3].includes('ok') && calcT.lawQ.includes('−⟨z⟩') && calcT.errs === 0, calcT);
 
-  /* ── HELIUM: shift-click (or its API) puts electron 1 under the cursor, and electron 2's cloud follows ── */
-  const plT = await g.ev(`try { __LW.h2.setOn(false); __LW.setHamiltonian('hydrogen'); __LW.helium.setBasis('six'); __LW.helium.place(0.8, 0); __LW.helium.setOn(true); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const x0 = __LW.helium.x1.slice(), d0 = await __LW.fieldDigest();
-    const cv = document.getElementById('field'), W = cv.clientWidth, H = cv.clientHeight;
-    __LW.placeElectron(W * 0.62, H * 0.42); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const x1 = __LW.helium.x1.slice(), d1 = await __LW.fieldDigest();
-    const moved = Math.hypot(x1[0] - x0[0], x1[1] - x0[1], x1[2] - x0[2]);
-    __LW.helium.setOn(false); await __LW.settle();
-    return { x0, x1, moved, changed: d0.hash !== d1.hash, inside: Math.hypot(...x1) < 3.5, errs: window.__e.length };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B37 shift-click places electron 1 where the cursor points on the plane facing the camera (moved > 0.3 a₀, inside the box), and the conditional cloud of electron 2 is rebuilt', !plT.error && plT.moved > 0.3 && plT.inside && plT.changed && plT.errs === 0, plT);
+  /* ── HELIUM (B37): shift-click placed electron 1; the card is deleted (0.5.0 D9) ── */
+  const plT = await g.ev(`return { gone: !('placeElectron' in __LW) && !('helium' in __LW), errs: window.__e.length };`) || { error: 'no result' };
+  judge('B37 (0.5.0 D9) RETIRED: the HELIUM card and its `__LW.helium` and `__LW.placeElectron` were deleted in 0.5.0 D9 — restore opens its files as SPECTRUM\'s ATOM · He 1s', plT.gone && plT.errs === 0, plT);
 
   /* ── THE FLOATING RACK: hide/peek, reorder, the mini transport that docks, notes behind hint icons ── */
   const layT = await g.ev(`try { const body = document.body, rackEl = document.getElementById('rack'), tr = document.getElementById('transport');
@@ -1031,7 +1010,7 @@ try {
   const elT = await g.ev(`try { ${RATE}
     const Hy = await import('/lab/hydrogen.js');
     __LW.pause(); __LW.setTheme('dark'); __LW.ab.set(false); __LW.reg.setField({ Fz: 0 });
-    if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.setHamiltonian('hydrogen'); __LW.setIonZ(1); __LW.setSpace('x'); await __LW.settle();
     const shipsClosed = (__LW.bootClosed || []).includes('field'), iF = __LW.bootOrder.indexOf('field'), shipsLast = __LW.bootOrder.slice(iF, iF + 3).join(' ') === 'field wigner radiation';
     __LW.layout.reopen('field', 'R');
@@ -1206,7 +1185,7 @@ try {
   const wrT = await g.ev(`try {
     const Hy = await import('/lab/hydrogen.js');
     __LW.pause(); __LW.setTheme('dark'); __LW.ab.set(false); __LW.reg.setField({ Fz: 0 });
-    if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.setHamiltonian('hydrogen'); __LW.setIonZ(1); __LW.setSpace('x'); await __LW.settle();
     const order = __LW.bootOrder, closed = __LW.bootClosed || [];
     const ships = closed.indexOf('wigner') >= 0 && closed.indexOf('radiation') >= 0
@@ -1897,7 +1876,7 @@ try {
        here reads the LOOP, so the clock is stopped and the camera put at its shipped pose before a measurement. */
     if (__LW.uiHidden) __LW.keys.toggleUI();
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
-    if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     const C = __LW.camera, nap = (ms) => new Promise((r) => setTimeout(r, ms));
     const REST = 0.003, mu = 2.5;
     /* WAVE 106 BOOTS THE CAMERA FREE (Josh), and in FREE the pose IS a unit quaternion while obs.yaw is
@@ -1966,7 +1945,7 @@ try {
     if (__LW.uiHidden) __LW.keys.toggleUI();
     document.body.classList.remove('rack-hidden', 'rack-peek');
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
-    if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.kepler.setOn(false);
     const wake = (id) => { __LW.layout.reopen(id); const d = document.querySelector('.dev[data-id="' + id + '"]'); if (!d) return null;
       d.classList.remove('closed');
@@ -2057,7 +2036,7 @@ try {
   const dragT = await g.ev(`try {
     if (__LW.uiHidden) __LW.keys.toggleUI();
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
-    if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.kepler.setOn(false);                                    // the stage's own handle must not take the pointer
     /* WAVE 106 BOOTS THE CAMERA FREE, where a horizontal drag turns a QUATERNION about the screen axes
        and obs.yaw is only a readout of the pose -- so 60 px is not 0.390 rad of yaw there and cannot be.
@@ -2118,7 +2097,7 @@ try {
     document.body.classList.remove('rack-hidden', 'rack-peek');
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
     if (__LW.sturmian && __LW.sturmian.on) __LW.sturmian.set(false);
-    if (__LW.helium.on) __LW.helium.setOn(false); if (__LW.h2.on) __LW.h2.setOn(false);
+    if (__LW.h2.on) __LW.h2.setOn(false);
     const wake = (id) => { __LW.layout.reopen(id); const d = document.querySelector('.dev[data-id="' + id + '"]'); if (!d) return null;
       d.classList.remove('closed');
       if (d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }

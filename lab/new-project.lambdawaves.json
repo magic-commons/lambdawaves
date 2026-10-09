@@ -182,15 +182,6 @@
     }
    },
    "instruments": {
-    "helium": {
-     "on": false,
-     "basis": "six",
-     "x1": [
-      0,
-      0,
-      0.8
-     ]
-    },
     "h2": {
      "on": false,
      "R": 6,
