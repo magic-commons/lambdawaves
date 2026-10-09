@@ -12,6 +12,10 @@
 2. `124f691` WIP step 2, the rack is the kit's `createRack` (the first builder; see that commit's message).
 3. `59717ae` WIP hand-off at the usage pause.
 4. `d75d3f7` **the rack is the kit's createRack — the history red read and fixed; step 2's gates green.**
+5. `425537f` hand-off.
+6. `59d6758` **the kit's rack hands the scene guard its columns (C9's open item); the CAMERA card stays adopted in place (C1's,
+   resolved: `createCameraPanel({ rack })` would register a second `camera` or split CAPTURE out of the card).**  input's synthetic
+   presses moved from (120, 120) — `#rackL`'s column — to the open stage (560–660, 420).  input 13/13 · hit-probe 52/0.
 
 ## The history red — cause and fix (`d75d3f7`)
 Block 1b's "the card grew from 408 to 340.2 px" was read INSIDE the kit's rack motion: `createRackMotion` (lab/mir/shell/rack.js)
@@ -36,9 +40,9 @@ all 42 blocks, rebuild counts 1× modulation / 0× elsewhere, as before).
   to re-run (timing).
 
 ## Exact next step
-Step 3: `createMenubar({ opener: #title, host: #lab, menus: MENUS, label, phone })` replaces `lab/menubar.js` (λWAVES' focus
+Step 3: `createMenubar({ opener: #title, host: #lab, menus: MENUS, phone: isPhone })` replaces `lab/menubar.js` (λWAVES' focus
 hand-back after a row's act stays as a wrapper on each row's `run` — the kit returns focus only on Escape: brief candidate);
 rename MENUS' four `keyFor/runAction` calls to the kit ids, delete the `ACTIONS.find` fallback, tag the dock button
-(`data-key-action="dock"`) and the modulation door (`modulation`); the C9 (`uiSpace({ rack })`) and C1 (`createCameraPanel` with
-`rack`, no `spec.build`) open items.  Gates: `menubar`, `take-in-bugs`, `offer`, `frame-occlusion` 7, `input` 13, hit-probe-set.
-Then step 4 (keys + keyboard window + tests), step 5 (lines, wave 205, C3-BUILD.md).
+(`data-key-action="dock"`) and the modulation door (`modulation`); the phone crossing's `showMenuBar` call goes (the kit's crossing).
+Gates: `menubar`, `take-in-bugs`, `offer`, `frame-occlusion` 7, `input` 13.  Then step 4 (keys + keyboard window + tests), step 5
+(lines, wave 205, C3-BUILD.md).
