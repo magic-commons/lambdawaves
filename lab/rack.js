@@ -1648,7 +1648,7 @@ export async function boot(dom) {
         const result = await exactRun.done;
         ui.capExactRo.set(result.ok ? 'exported' : result.stopped ? 'stopped' : 'refused', result.ok ? 'ok' : 'warn');
         ui.capExactRo.setSub(result.message || result.error || 'Export finished');
-        if (result.ok && options.download !== false) ex.save(result); else if (result.ok) ex.discard(result);
+        if (result.ok && options.download !== false) ex.save(result); else if (result.ok) setTimeout(() => ex.discard(result), 120000);   // the files are the kit store's: a caller that keeps the result reads them first
         return result;
       } catch (e) {
         ui.capExactRo.set('error', 'warn'); ui.capExactRo.setSub(String(e.message || e));
