@@ -12,8 +12,13 @@ Base `27eb96a`. Brief `research/release-0.5.1/BRIEF-D1.md`. Ports 8973 (tip) / 8
 3. **Measured** — U2 witness: A 0 records / B 0 records, runner idle (C, a sweep THROUGH the block: 749, the kit's pointer push,
    writer found — `D1-BUILD.md` U2). THE PAIR: boot −0.109 ms/s, D1 −0.368 ms/s, both PASS (≤ 3.536), presents unchanged.
 
+4. **U3–U5 + suites** — U3 18/18 clear after the settle fix (a second re-place 400 ms on: the pill's dodge); U4 4 renders / 4
+   entrances in the stroke's second; U5 one fade 2.4 s, 0 on undo/link/project/no-hand; HOLD down/up ok; suites all green
+   (frame-occlusion 7/7 on a re-run alone; legacy boot 4/152 = the known law reds; node 940/0). Diagnostic arms (letters' blend) running.
+
 ## Next (exact)
-4. U3 / U4 / U5 probes (`bash .tmp/probes.sh` → `.tmp/u3.txt u4.txt u5.txt`), then the suites one at a time on 8973 (GD 5443):
+5. Finish: the diagnostic's numbers into D1-BUILD §the frame cost, "what Josh will see", REPORT.md wave 210, commit 3, hand back.
+(old) 4. U3 / U4 / U5 probes (`bash .tmp/probes.sh` → `.tmp/u3.txt u4.txt u5.txt`), then the suites one at a time on 8973 (GD 5443):
    frame-occlusion, `tools/hit-probe-set.mjs`, keyboard-window, legacy boot (whole, or B6/B22/B23 by `.tmp/chunk.mjs`), offer,
    history; then REPORT.md wave 210 under "0.5.1 · THE INFORMATIONAL UPDATE", D1-BUILD.md's remaining sections. Commit 3.
 (old) The pair (boot + D1 scene, base 8977 vs tip 8973, interleaved 5 + 5: `.tmp/arms.sh`), the witness (U2), U3–U5, the suites. Commit 3.

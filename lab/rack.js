@@ -2064,12 +2064,14 @@ export async function boot(dom) {
       if (block) { block.el.toggleAttribute('data-fade', banner !== null); lastRender = performance.now(); stats.renders++; }
     }
     /* the racks hide, peek and slide (body classes), the transport docks or goes to the top, the TIMELINE opens or docks: only THOSE
-       re-place the block — the play edge's frost-hold and the tablet's motion class are not a reason to read layout */
-    const place = () => { stats.places++; layer.viewChanged(); };
+       re-place the block — the play edge's frost-hold and the tablet's motion class are not a reason to read layout — and once more
+       400 ms on, when the slide or the pill's dodge (a class first, then its arrival) has landed */
+    let settle = 0;
+    const place = (again = true) => { stats.places++; layer.viewChanged(); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
     const rackKey = () => ['rack-hidden', 'rack-peek', 'rack-l', 'ui-hidden', 'phone', 'transport-peek'].map((c) => +document.body.classList.contains(c)).join('');
     let racksAt = rackKey();
-    new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); setTimeout(place, 400); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    for (const [n, f] of [[document.getElementById('transport'), ['class']], [tl && tl.root, ['hidden', 'style']]]) if (n) new MutationObserver(place).observe(n, { attributes: true, attributeFilter: f });
+    new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    for (const [n, f] of [[document.getElementById('transport'), ['class']], [tl && tl.root, ['hidden', 'style']]]) if (n) new MutationObserver(() => place()).observe(n, { attributes: true, attributeFilter: f });
 
     const labels = el('div', '', dom.stage); labels.id = 'atomLabels'; labels.setAttribute('aria-hidden', 'true'); labels.hidden = true;
     let cssW = dom.canvas.clientWidth, cssH = dom.canvas.clientHeight;
