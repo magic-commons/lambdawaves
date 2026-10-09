@@ -87,7 +87,7 @@ try {
      gate's probes were written before that law and read windows the 900-px viewport never shows; presenting
      them off-screen keeps those probes honest without weakening the structural gates (closed, folded, off). */
   await g.ev("__LW.windowActivity.presentOffscreen(true);");
-  const bootInfo = await g.ev('return { ok: __LW.field.ok, err: __LW.field.error, shader: __LW.field.shaderMessages, errs: window.__e, banner: !document.getElementById("banner").hidden };');
+  const bootInfo = await g.ev('return { ok: __LW.field.ok, err: __LW.field.error, shader: __LW.field.shaderMessages, errs: window.__e, banner: !!document.querySelector("#mir-banner:not([hidden])") };');
   judge('B1 WebGPU field is up, no shader messages, no page errors, no banner', bootInfo.ok && !bootInfo.err && (bootInfo.shader || []).length === 0 && bootInfo.errs.length === 0 && !bootInfo.banner, bootInfo);
   if (!bootInfo.ok) throw new Error('GPU gate cannot continue: ' + bootInfo.err);
   /* ── B43: the shipped defaults, read on the fresh page before the proof sets its own baseline ── */
@@ -1562,30 +1562,25 @@ try {
     const file = JSON.parse(__LW.projects.exportText('wave48/themecheck'));
     R.projMat = Object.keys(file.data.presentation.mat || {}).filter((k) => k === 'bg' || k === 'gamma' || k === 'lightUI').join(',');
     __LW.projects.remove('wave48/themecheck');
-    /* THE PHOTOSENSITIVITY NOTICE: the text and the symbol are MANDELBROT's, the ground and the ink are ours */
+    /* THE PHOTOSENSITIVITY NOTICE: the words are MANDELBROT's, the sign is ours.  0.5.0 C6b: the pane is the kit's
+       photosensitivityNotice (its glass, its ink: no look of λWAVES' own to judge here) behind main.js' warning facade */
     __LW.setTheme('light'); await __LW.settle(); __LW.warning.reset();
     R.needed0 = __LW.warning.needed({ driver: false, query: '' });
     R.remembered0 = __LW.warning.remembered;
     R.driverSkips = __LW.warning.needed();
     R.forced = __LW.warning.needed({ driver: true, query: '?warn=1' });
-    R.shown = __LW.warning.show(); await wait(80);
-    const wp = document.getElementById('warnPane');
-    R.up = !wp.hidden;
-    R.title = wp.querySelector('.warn-title').textContent;
-    R.body = wp.querySelector('.warn-body').textContent;
-    R.btn = wp.querySelector('.warn-btn').textContent;
+    R.shown = __LW.warning.show();
+    for (let i = 0; i < 60 && !document.querySelector('.mir-dialog[data-kind="notice"]'); i++) await wait(50);
+    const wp = document.querySelector('.mir-dialog[data-kind="notice"]');
+    R.up = !!wp && !wp.hidden;
+    R.title = wp.querySelector('.mir-dialog-title').textContent;
+    R.body = wp.querySelector('.mir-dialog-body').textContent;
+    R.btn = wp.querySelector('.trig[data-kind="primary"]').textContent;
     R.modal = wp.getAttribute('aria-modal') + '/' + wp.getAttribute('role');
-    R.inkLight = getComputedStyle(wp).color;
-    R.ground = getComputedStyle(wp).backgroundColor;
-    R.frost = getComputedStyle(wp).backdropFilter || getComputedStyle(wp).webkitBackdropFilter;
-    R.blurToken = getComputedStyle(document.documentElement).getPropertyValue('--glass-blur').trim();
-    R.blurPx = parseFloat(R.blurToken); R.frostPx = parseFloat(String(R.frost).replace('blur(', ''));   // the token may read '18.0px' and the computed filter 'blur(18px)': one length, two spellings
-    R.sign = (wp.querySelector('image') || {}).getAttribute ? wp.querySelector('image').getAttribute('href') : '';
-    R.clipped = wp.querySelector('image').getAttribute('clip-path') === 'url(#warnTri)' && !!wp.querySelector('clipPath path');
-    R.bang = wp.querySelectorAll('.warn-bang').length;
-    __LW.setTheme('dark'); await wait(60); R.inkDark = getComputedStyle(wp).color;
-    wp.querySelector('.warn-btn').click(); await wait(520);
-    R.down = wp.hidden; R.remembered1 = __LW.warning.remembered;
+    R.sign = (wp.querySelector('img.mir-notice-art') || { getAttribute: () => '' }).getAttribute('src');
+    wp.querySelector('.trig[data-kind="primary"]').click();
+    for (let i = 0; i < 60 && document.querySelector('.mir-dialog[data-kind="notice"]'); i++) await wait(50);
+    R.down = !document.querySelector('.mir-dialog[data-kind="notice"]'); R.remembered1 = __LW.warning.remembered;
     R.needed1 = __LW.warning.needed({ driver: false, query: '' });
     /* the SETTINGS row is the way back, and it forgets so the NEXT load shows it too */
     R.row = [...document.querySelectorAll('.dev[data-id="settings"] .trig-l')].map((t) => t.textContent).filter((t) => t === 'SHOW THE WARNING AGAIN').length;
@@ -1612,12 +1607,11 @@ try {
       && chT.seats === 'LIGHT|DARK|SYSTEM' && chT.choice === 'system' && chT.resolved === chT.expect
       && chT.bodyTheme === chT.expect && chT.saved === 'system' && chT.projMat === ''
       && chT.needed0 === true && chT.remembered0 === false && chT.driverSkips === false && chT.forced === true
-      && chT.shown === true && chT.up === true && chT.modal === 'true/dialog'
+      && chT.shown === true && chT.up === true && chT.modal === 'true/alertdialog'
       && chT.title === 'PHOTOSENSITIVITY WARNING'
       && chT.body === 'This app displays rapid strobing effects and changing colors. If you have a history of photosensitive epilepsy or seizures, do not continue.'
-      && chT.btn === 'CONTINUE' && chT.inkLight === 'rgb(0, 0, 0)' && chT.inkDark === 'rgb(255, 255, 255)'
-      && chT.ground === 'rgba(0, 0, 0, 0)' && chT.frost.indexOf('blur(') === 0 && chT.frostPx === chT.blurPx && chT.frost.indexOf('saturate') > 0
-      && chT.sign === './img/warning-orbital.png' && chT.clipped === true && chT.bang === 2
+      && chT.btn === 'CONTINUE'
+      && chT.sign === './img/warning-sign.png'
       && chT.down === true && chT.remembered1 === true && chT.needed1 === false
       && chT.row === 1 && chT.needed2 === true
       && chT.themeNow === chT.theme0 && chT.errs === 0, chT);
@@ -2968,45 +2962,28 @@ try {
       && hovT.afterLeave.cls === false && hovT.afterLeave.tr === 'none' && hovT.afterLeave.bar === true
       && hovT.errs === 0, hovT);
 
-  /* B81 — the cutout is judged in PIXELS, on the driver's own composited screenshot: the geometry is asked for in
-     the page, the shot is decoded here, and three points are read out of it. */
-  const cutGeo = {}, cutPix = {};
-  for (const theme of ['light', 'dark']) {
-    cutGeo[theme] = await g.ev(`try {
+  /* B81 — 0.5.0 C6b: the sign is a picture now (lab/img/warning-sign.png: the old SVG composite, its clip and its luminance mask,
+     rendered once), shown by the kit's notice as its `art`.  The cutout is judged in that picture's own pixels. */
+  const cutT = await g.ev(`try {
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms)), N = '.mir-dialog[data-kind="notice"]';
       if (__LW.uiHidden) __LW.keys.toggleUI();
-      __LW.setTheme('${theme}'); await __LW.settle();
       __LW.warning.reset(); __LW.warning.show();
-      await new Promise((r) => setTimeout(r, 420));
-      const wp = document.getElementById('warnPane');
-      /* THE PAGE BEHIND, made a colour we can name.  The pane's own ground is transparent and its frost is a
-         backdrop-filter, so what shows through a hole is whatever is behind the pane — this says what that is. */
-      wp.style.background = 'rgb(0,255,0)'; wp.style.backdropFilter = 'none'; wp.style.webkitBackdropFilter = 'none';
-      await new Promise((r) => setTimeout(r, 140));
-      const sv = wp.querySelector('.warn-sign').getBoundingClientRect(), s = sv.width / 120;
-      const at = (vx, vy) => [Math.round(sv.left + vx * s), Math.round(sv.top + vy * s)];
-      return { stem: at(60, 45), dot: at(60, 78), fillL: at(44, 70), fillR: at(76, 70), outside: at(20, 30),
-        masked: wp.querySelector('image').getAttribute('mask'), clipped: wp.querySelector('image').getAttribute('clip-path'),
-        bangs: wp.querySelectorAll('.warn-bang').length, inMask: wp.querySelectorAll('mask .warn-bang').length,
-        painted: wp.querySelectorAll('svg > .warn-bang, svg > g.warn-bang').length, err: null };
+      for (let i = 0; i < 60 && !document.querySelector(N + ' img.mir-notice-art'); i++) await wait(50);
+      const img = document.querySelector(N + ' img.mir-notice-art'); await img.decode();
+      const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+      const s = c.width / 120, a = (vx, vy) => x.getImageData(Math.round(vx * s), Math.round(vy * s), 1, 1).data[3];
+      const R = { src: img.getAttribute('src'), w: c.width, h: c.height, stem: a(60, 45), dot: a(60, 78), fillL: a(44, 70), fillR: a(76, 70), outside: a(20, 30) };
+      await Promise.race([new Promise((r) => requestAnimationFrame(r)), wait(2000)]);
+      __LW.warning.dismiss();
+      for (let i = 0; i < 100 && document.querySelector(N); i++) await wait(50);
+      R.down = !document.querySelector(N) && !__LW.warning.open; R.errs = window.__e.length;
+      return R;
     } catch (e) { return { err: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { err: 'no result' };
-    const shot = decodePNG(Buffer.from(await g.snap(), 'base64'));
-    cutPix[theme] = {};
-    for (const k of ['stem', 'dot', 'fillL', 'fillR', 'outside']) cutPix[theme][k] = patch(shot, cutGeo[theme][k][0], cutGeo[theme][k][1]);
-    await g.ev(`const wp = document.getElementById('warnPane'); wp.style.background = ''; wp.style.backdropFilter = ''; wp.style.webkitBackdropFilter = '';
-      __LW.warning.dismiss(); await new Promise((r) => setTimeout(r, 520)); return 1;`);
-  }
-  const cutT = { geo: cutGeo.light, pix: cutPix, restored: await g.ev(`__LW.setTheme('dark'); await __LW.settle(); return { theme: __LW.theme, warnDown: document.getElementById('warnPane').hidden, errs: window.__e.length };`) };
-  const isGreen = (p) => p[0] < 40 && p[1] > 215 && p[2] < 40;
-  const notGreen = (p) => !isGreen(p) && (p[0] > 60 || p[2] > 60);
-  judge('B81 THE WARNING\'S "!" IS A CUTOUT, NOT AN OVERLAY (wave 53, Josh, board #41: knocked out of the image-filled caution triangle so the page behind shows through it, as in the MANDELBROT reference). It used to be two shapes painted on top in currentColor. They are the same two shapes, with the same .warn-bang class, moved into an SVG luminance MASK on the <image> — white keeps the orbital, black cuts the hole — so nothing in the sign reads the pane\'s own background or the theme, which is why it works on both. Proved in PIXELS on the driver\'s composited screenshot, with a nameable colour put BEHIND the pane and its frost switched off: the centre of the exclamation\'s stroke and the centre of its dot both come back as that colour exactly, identical to a point outside the triangle altogether — that is, they are the page behind the pane — while the triangle either side of the stroke comes back as the orbital\'s own ink and nothing like it. Both readings hold in LIGHT and in DARK, over the light stage and the dark one, and the sign still carries its clip-path, its two .warn-bang shapes and its href',
-    !cutT.geo.err && !cutT.restored.errs
-      && cutT.geo.masked === 'url(#warnBang)' && cutT.geo.clipped === 'url(#warnTri)'
-      && cutT.geo.bangs === 2 && cutT.geo.inMask === 2 && cutT.geo.painted === 0
-      && ['light', 'dark'].every((t) => isGreen(cutPix[t].stem) && isGreen(cutPix[t].dot) && isGreen(cutPix[t].outside)
-        && notGreen(cutPix[t].fillL) && notGreen(cutPix[t].fillR)
-        && cutPix[t].stem.join() === cutPix[t].outside.join())
-      && cutT.restored.theme === 'dark' && cutT.restored.warnDown === true
-      && cutT.restored.errs === 0, { geo: cutT.geo, pix: cutPix, restored: cutT.restored });
+  judge('B81 THE WARNING\'S "!" IS A CUTOUT, NOT AN OVERLAY (wave 53, Josh, board #41: knocked out of the image-filled caution triangle so what is behind shows through it, as in the MANDELBROT reference). 0.5.0 C6b: the sign is the old SVG composite — the triangle clip and the luminance mask that cuts the stroke and the dot — rendered once into lab/img/warning-sign.png, the kit notice\'s `art`. Proved in the picture\'s own pixels: the centre of the stroke, the centre of the dot and a point outside the triangle are fully transparent, the triangle either side of the stroke fully opaque; dismiss() puts the kit\'s pane down',
+    !cutT.err && cutT.src === './img/warning-sign.png' && cutT.w === 480 && cutT.h === 424
+      && cutT.stem === 0 && cutT.dot === 0 && cutT.outside === 0 && cutT.fillL === 255 && cutT.fillR === 255
+      && cutT.down === true && cutT.errs === 0, cutT);
 
   const ksT = await g.ev(`try {
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -4354,7 +4331,7 @@ try {
     R.stillPaused = !__LW.clock.playing;
     R.notAdvanced = __LW.clock.t === R.t0;
     /* the ONLY way past it is the button — and past it, the transport starts */
-    const btn = document.querySelector('#warnPane .warn-btn');
+    const btn = document.querySelector('.mir-dialog[data-kind="notice"] .trig[data-kind="primary"]');
     R.hasBtn = !!btn; btn.click();
     await new Promise((r) => setTimeout(r, 450));
     R.paneDown = !__LW.warning.open;
@@ -4627,15 +4604,15 @@ try {
   /* ── B109 · THE ONLY MESSAGE A VISITOR WITHOUT WebGPU EVER SEES ────────────────────────────────── */
   const banT = await g.ev(`try {
     const R = { theme0: __LW.themeChoice };
-    const b = document.getElementById('banner'), h3 = b.querySelector('h3'), p = b.querySelector('p'), x = b.querySelector('.banner-x');
-    R.hasX = !!x;
+    /* 0.5.0 C6b: the banner is the kit's (main.js installBanner): the messages go through its own module, the one main.js holds */
+    const K = await import('./mir/shell/banner.js');
+    K.warn('WebGPU unavailable', 'navigator.gpu is absent — WebGPU is not enabled in this browser. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
+    const b = document.getElementById('mir-banner'), item = b.querySelector('.mir-banner-item'), h3 = item.querySelector('.mir-banner-title'), p = item, x = b.querySelector('.mir-banner-x');
+    R.hasX = !!x; R.role = b.getAttribute('role');
     const px = (s) => __LW.ink.parse(s);            /* kit.js's reader returns 0…255, which is what ink.ratio takes */
     const LOST = 'the browser took the WebGPU device back — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.';
     for (const th of ['light', 'dark']) {
       __LW.setTheme(th); await __LW.settle(); await new Promise((r) => setTimeout(r, 140));
-      b.hidden = false;
-      h3.textContent = 'WebGPU unavailable';
-      p.textContent = 'navigator.gpu is absent — WebGPU is not enabled in this browser. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.';
       const bg = px(getComputedStyle(b).backgroundColor);
       R[th] = { bg, p: +__LW.ink.ratio(px(getComputedStyle(p).color), bg).toFixed(2),
         h3: +__LW.ink.ratio(px(getComputedStyle(h3).color), bg).toFixed(2),
@@ -4645,8 +4622,9 @@ try {
     /* the ink is the SAME on both themes, because this pane paints its own ground and does not follow one */
     R.sameBothThemes = getComputedStyle(p).color;
     /* the LOST-DEVICE sentence lands in the same pane and reads the same way */
-    p.textContent = LOST; R.lostLen = p.textContent.length;
-    R.lostReadable = +__LW.ink.ratio(px(getComputedStyle(p).color), px(getComputedStyle(b).backgroundColor)).toFixed(2);
+    K.fail('the GPU device was lost', LOST);
+    const lost = [...b.querySelectorAll('.mir-banner-item')].pop(); R.lostLen = lost.textContent.length;
+    R.lostReadable = +__LW.ink.ratio(px(getComputedStyle(lost).color), px(getComputedStyle(b).backgroundColor)).toFixed(2);
     /* and there is a way out — 26 px of ink inside a 44-px finger (wave 51's rule), topmost at its centre */
     const xr = x.getBoundingClientRect();
     R.xInk = [Math.round(xr.width), Math.round(xr.height)];
@@ -4663,13 +4641,14 @@ try {
     const iCreate = rackSrc.indexOf('createField(dom.canvas, {');
     R.passesOnLost = iCreate >= 0 && rackSrc.indexOf('onLost:', iCreate) > iCreate && rackSrc.indexOf('onLost:', iCreate) - iCreate < 500;
     R.fieldCallsIt = fieldSrc.indexOf('if (opts.onLost) opts.onLost(info)') >= 0;
-    R.bootFailWired = mainSrc.indexOf(String.fromCharCode(39) + '.banner-x' + String.fromCharCode(39)) >= 0 && mainSrc.indexOf('x.addEventListener') >= 0;
+    /* the boot failure (rack.js never ran) goes to the same kit pane, whose × the kit wires */
+    R.bootFailWired = mainSrc.indexOf('installBanner({ errors: false })') >= 0 && mainSrc.indexOf(String.fromCharCode(39) + 'boot failed' + String.fromCharCode(39)) >= 0;
     __LW.setTheme(R.theme0); await __LW.settle();
     R.errs = window.__e.length;
     return R;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B109 THE ONE MESSAGE A BROKEN BROWSER GETS, MADE READABLE AND MADE DISMISSIBLE (wave 59, AUDIT-FIRSTRUN R1). lab.css had no `#banner p` rule at all, so the paragraph inherited `body { color: var(--fg) }` — NEAR-BLACK on the shipped LIGHT theme — on the dark maroon ground the pane paints for itself: 1.19 : 1 measured here with the lab\'s own arithmetic, and worse than a plain miss because `showBanner()` runs three thousand lines BEFORE `applySettings()`, so the sentence appeared white-on-maroon and went DARK a second later as the theme resolved. It is the only thing a visitor without WebGPU ever sees, it names the cause and says what still works, and it could not be read. The ink is now written UNCONDITIONALLY, because this is the one pane in the lab that does not follow the theme: the same string of ink on both themes, 13.69 : 1 on the pane\'s own ground in each. The heading was always fine (--bad is never redefined for light) and still is, at 6.64 : 1. It also had no way down — z-index 60 over the stage for the whole session — so there is a × now: 26 px of ink inside a 44-px finger, topmost at its own centre and still hit 6 px outside its ink, and one press hides the pane. AND THE LOST DEVICE FINALLY SPEAKS: `field.js` has offered `onLost` since it was written and `rack.js` passed only `onError`, so a driver reset, a reclaimed mobile tab or a laptop switching GPUs froze the picture and told NOBODY. That path is asserted from the SOURCE — the three files are fetched and read here — because a real WebGPU device cannot be lost on demand; the pane the message lands in is driven for real.',
-    !banT.error && banT.hasX === true
+    !banT.error && banT.hasX === true && banT.role === 'alert'
       && banT.light.p >= 4.5 && banT.dark.p >= 4.5 && banT.light.h3 >= 3 && banT.dark.h3 >= 3
       && banT.light.inherits === false && banT.light.bodyInk < 2
       && banT.lostReadable >= 4.5 && banT.lostLen > 100
@@ -4691,7 +4670,7 @@ try {
     /* the OLD timer fired 9 s after boot, with the pane still up.  Wait past that and look. */
     await new Promise((r) => setTimeout(r, 9600));
     R.stillUpAt96 = __LW.warning.open; R.goneUnderPane = gone();
-    document.querySelector('#warnPane .warn-btn').click();
+    document.querySelector('.mir-dialog[data-kind="notice"] .trig[data-kind="primary"]').click();
     await new Promise((r) => setTimeout(r, 1200));
     R.paneDown = !__LW.warning.open; R.goneJustAfter = gone();
     await new Promise((r) => setTimeout(r, 8800));
@@ -4862,7 +4841,7 @@ try {
     /* (a) THE WAVE-54 HOLE, STILL OPEN FOR THE KEY WAVE 48 ADDED AFTERWARDS.
        Accept the notice, then do any of the ordinary things that write the settings key, and read it back. */
     __LW.warning.reset(); R.after0 = __LW.warning.remembered;
-    __LW.warning.show(); document.querySelector('#warnPane .warn-btn').click();
+    __LW.warning.show(); __LW.warning.dismiss();   /* 0.5.0 C6b: the kit's notice is put down through the facade */
     await new Promise((r) => setTimeout(r, 560));
     R.accepted = __LW.warning.remembered && read().warned === true;
     const trail = [];
@@ -4890,7 +4869,7 @@ try {
       warn1_driver: __LW.warning.needed({ driver: true, query: '?warn=1' }),
       plain_driver: __LW.warning.needed({ driver: true, query: '' }) };
     /* and once this browser HAS accepted, no query is needed to keep it quiet */
-    __LW.warning.show(); document.querySelector('#warnPane .warn-btn').click();
+    __LW.warning.show(); __LW.warning.dismiss();
     await new Promise((r) => setTimeout(r, 560));
     R.q.afterAccept_public = __LW.warning.needed({ driver: false, query: '' });
     /* (c) THE MOTION PREFERENCE.  ?motion=full in a link overrode the OS preference outright; the query is
@@ -6189,16 +6168,18 @@ try {
     const back = window.__body.querySelector('[role="slider"], button'); if (back) back.focus();
     return { inert: window.__body.inert, seatBack: window.__body.contains(document.activeElement) };`);
   await goto('warn=1');
-  const warnT2 = await g.ev(`await new Promise((r) => setTimeout(r, 300)); const p = document.getElementById('warnPane');
-    const b = p.querySelector('.warn-btn'); b.focus(); return { up: !p.hidden, modal: p.getAttribute('aria-modal'), at: document.activeElement === b };`);
+  /* 0.5.0 C6b: the one legitimate trap is the kit's notice (shell/dialog.js `dismiss: false`): Tab cycles inside, Escape does nothing */
+  const warnT2 = await g.ev(`for (let i = 0; i < 60 && !document.querySelector('.mir-dialog[data-kind="notice"] .trig'); i++) await new Promise((r) => setTimeout(r, 50));
+    const p = document.querySelector('.mir-dialog[data-kind="notice"]');
+    const b = p.querySelector('.trig[data-kind="primary"]'); b.focus(); return { up: !p.hidden, modal: p.getAttribute('aria-modal'), at: document.activeElement === b };`);
   await press(KEY.TAB);
-  const warnT3 = await g.ev(`return { inPane: document.getElementById('warnPane').contains(document.activeElement) };`);
+  const warnT3 = await g.ev(`return { inPane: document.querySelector('.mir-dialog[data-kind="notice"]').contains(document.activeElement) };`);
   await press(KEY.ESC);
-  const warnT4 = await g.ev(`await new Promise((r) => setTimeout(r, 200)); const R = { stillUp: !document.getElementById('warnPane').hidden };
-    /* the pane goes down on its own transition with a 380 ms fallback, so the read has to outlast BOTH —
-       a 300 ms wait measured a pane that was already dismissed and still on screen, which is not a defect */
-    document.querySelector('#warnPane .warn-btn').click(); await new Promise((r) => setTimeout(r, 800));
-    R.gone = document.getElementById('warnPane').hidden; R.errs = window.__e.length; return R;`);
+  const warnT4 = await g.ev(`await new Promise((r) => setTimeout(r, 200)); const N = '.mir-dialog[data-kind="notice"]', R = { stillUp: !!document.querySelector(N) && __LW.warning.open };
+    /* the pane leaves by the kit's presence motion: the read waits for it to go */
+    document.querySelector(N + ' .trig[data-kind="primary"]').click();
+    for (let i = 0; i < 100 && document.querySelector(N); i++) await new Promise((r) => setTimeout(r, 50));
+    R.gone = !document.querySelector(N); R.errs = window.__e.length; return R;`);
   const trapT = { distinct: new Set(longWalk).size, stuck, surfaces, off: offT, offTab, on: onT, warn: [warnT2, warnT3, warnT4] };
   judge('B125 NO KEYBOARD TRAP ANYWHERE, AND THE ONE LEGITIMATE TRAP IS INTACT (wave 62, WCAG 2.1.2). Sixty real Tab presses from the head of the page reach sixty distinct seats and no seat appears three times in a row — the falsifiable form of "focus never sticks", since a full wrap through the browser chrome is not reliably observable headless. Six surfaces are opened and then WALKED — the notebook, the key sheet, the menubar, the + list, the ☆ list and the SETTINGS window — three Tabs to three distinct seats in each, and each closes on its own road. THE POWERED-OFF WINDOW IS THE ONE PLACE `inert` WAS NEEDED IN THIS WHOLE APPLICATION: every other hidden state is already `display:none` or `visibility:hidden` and therefore already out of the tree, but `.dev.off .dev-body` is `opacity:.38; pointer-events:none` — visible to Tab, dead to the hand, which is a control that can be focused and cannot be used. A real Tab from the header now walks PAST the dead body, and the focus rescue is not garnish: the spec sends focus to <body> when its ancestor becomes inert, so a user who powers a window off from inside it would have been silently teleported to the top of the document. And the one trap this lab is SUPPOSED to have still holds — under the photosensitivity notice Tab stays inside the pane and Escape does not dismiss it, because that pane is a decision, not an obstacle.',
     trapT.distinct >= 55 && stuck === 0

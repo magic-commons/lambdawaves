@@ -43,9 +43,9 @@ try {
  }
  // 0.5.0 C9 · R14 · THE GPU RECOVERY (rack.js gpuRecovery): a lost device says so on the banner, the FIELD stands down, the page throws nothing.
  const lost=await g.ev(`__LW.field.device.destroy();for(let i=0;i<60&&__LW.field.ok;i++)await new Promise(r=>setTimeout(r,50));
-  const v0=__LW.reg.version;__LW.loadPreset('2p+');await new Promise(r=>setTimeout(r,400));const b=document.getElementById('banner');   // timers, not frames: headless Firefox can hold rAF for seconds after a destroy
-  return {ok:__LW.field.ok,error:__LW.field.error,banner:b.hidden?null:b.querySelector('h3').textContent,stateLive:__LW.reg.version!==v0,errors:__e}`);
- assert.equal(lost.ok,false);assert.match(String(lost.error),/^device lost/);assert.equal(lost.banner,'the GPU device was lost');assert.equal(lost.stateLive,true);assert.deepEqual(lost.errors,[],JSON.stringify(lost));
+  const v0=__LW.reg.version;__LW.loadPreset('2p+');await new Promise(r=>setTimeout(r,400));const b=document.getElementById('mir-banner');   // timers, not frames: headless Firefox can hold rAF for seconds after a destroy
+  return {ok:__LW.field.ok,error:__LW.field.error,banner:!b||b.hidden?null:b.querySelector('.mir-banner-title').textContent,role:b&&b.getAttribute('role'),stateLive:__LW.reg.version!==v0,errors:__e}`);
+ assert.equal(lost.ok,false);assert.match(String(lost.error),/^device lost/);assert.equal(lost.banner,'⛔ the GPU device was lost');assert.equal(lost.role,'alert');assert.equal(lost.stateLive,true);assert.deepEqual(lost.errors,[],JSON.stringify(lost));
  console.log('PASS the GPU recovery',JSON.stringify(lost));
 } catch(error) {failed=true;console.error(error);}
 finally {

@@ -280,24 +280,6 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 #offer .offer-row { display: flex; gap: var(--sp-2); }
 body.phone #offer { top: 76px; }
 body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE takes the badge it points at, so it takes the pane */
-#banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: var(--z-banner); max-width: 520px; padding: var(--sp-5); border-radius: var(--r-lg);
-  font-family: var(--font-sans); background: hsl(350 40% 18% / .95); border: 1px solid hsl(350 60% 50% / .6); }
-/* WAVE 59 · THE BANNER IS THE ONE PANE THAT DOES NOT FOLLOW THE THEME, so its ink is written here and not
-   inherited.  It paints its own dark maroon ground unconditionally (above), while `body { color: var(--fg) }`
-   resolves to NEAR-BLACK on the shipped LIGHT theme — measured in the page at 1.19 : 1, and worse than a
-   plain miss because showBanner() runs three thousand lines BEFORE applySettings(): the sentence appeared
-   white-on-maroon and went DARK a second later.  It is the only thing a visitor without WebGPU ever sees,
-   so it is written unconditionally — one string of ink on BOTH themes, 13.69 : 1 on the pane's own ground,
-   with the heading at 6.64 : 1.  Nothing here is an accent (STYLE-LOCK's ruling stands). */
-#banner, #banner p { color: hsl(0 0% 96%); }
-#banner p { margin: 0; }
-#banner h3 { margin: 0 0 6px; padding-right: 30px; font-family: var(--font-ui); letter-spacing: var(--tr-wide); color: var(--bad); }
-/* …and a way out.  It sat at z-index 60 over the stage for the whole session with no dismiss and no
-   pointer-events rule, so the message a broken browser could not read was also one it could not put down. */
-#banner .banner-x { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
-  background: none; border: 0; border-radius: var(--r-sm); color: hsl(0 0% 96%); opacity: .75; font-size: var(--fs-lead); line-height: 1; cursor: pointer; }
-#banner .banner-x::after { content: ''; position: absolute; inset: -9px; }    /* 26 px of ink, 44 px of finger — wave 51's rule, not a 44-px mark */
-#banner .banner-x:hover, #banner .banner-x:focus-visible { opacity: 1; background: hsl(0 0% 100% / .12); }
 /* ── transport strip (the master logical transport, §25) ───────────────── */
 #transport { position: absolute; left: var(--sp-4); right: var(--sp-4); bottom: var(--sp-4); z-index: var(--z-chrome); display: flex; align-items: center; gap: var(--sp-2);
   height: 56px; padding: 0 var(--sp-3); border-radius: var(--r-lg); }

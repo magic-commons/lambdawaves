@@ -5,6 +5,8 @@ import { createOpener } from './mir/shell/opener.js';   // 0.5.0 C6b: THE OPENER
 import { photosensitivityNotice } from './mir/shell/flash-guard.js';   // 0.5.0 C6b: the kit's notice, under λWAVES' law
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 C6b: the notice's seen-flag is the blob's `warned`
 import { STARTERS } from './project-store.js';   // 0.5.0 C6b: the six demos are the opener's covers
+import { installBanner } from './mir/shell/banner.js';   // 0.5.0 C6b: THE BANNER is the kit's
+import { bootVeil } from './mir/shell/boot.js';   // 0.5.0 C6b: THE BOOT VEIL, down at the first real frame
 window.__e = window.__e || [];
 addEventListener('error', (e) => __e.push('ERR ' + e.message));
 addEventListener('unhandledrejection', (e) => __e.push('REJ ' + String(e.reason && e.reason.message || e.reason)));
@@ -48,14 +50,14 @@ const given = ['home', 'resume', ...covers.map((c) => c.id)].includes(q.get('sta
   : (navigator.webdriver === true && q.get('opener') !== '1') || /(^|&)s=/.test(location.hash.slice(1)) || q.has('preset') || q.has('view') ? 'boot'
   : remembered === 'home' ? 'home' : null;
 let pick; const choice = new Promise((r) => { pick = r; });
-boot({ canvas: $('field'), vortex: $('vortex'), particles: $('particles'), flow: $('flow'), kepler: $('kepler'), stage: $('stage'), rack: $('rack'), transport: $('transport'), badges: $('badges'), sheet: $('sheet'), banner: $('banner'), start: { session, warning, choice } })
+/* 0.5.0 C6b · THE BANNER is the kit's (shell/banner.js: BASINS' maroon pane, role="alert", its own × and ink on both themes): the GPU
+   and boot failures in λWAVES' words, nothing else (errors: false).  THE BOOT VEIL (bootVeil) hides the black of a configured WebGPU
+   canvas until the first picture is presented (8 s at most); neither is a window, so neither is in the stage's mask */
+const banner = installBanner({ errors: false });
+bootVeil({ ready: () => !!(window.__LW && __LW.stats.presents) });
+boot({ canvas: $('field'), vortex: $('vortex'), particles: $('particles'), flow: $('flow'), kepler: $('kepler'), stage: $('stage'), rack: $('rack'), transport: $('transport'), badges: $('badges'), sheet: $('sheet'), banner, start: { session, warning, choice } })
   .then((LW) => { try { installLayer(LW); } catch (e) { if (LW && LW.sw) { LW.sw.mode = 'failed'; LW.sw.error = String(e && e.message || e); } } })
-  .catch((e) => { __e.push('BOOT ' + (e && e.stack || e)); const b = $('banner'); b.hidden = false; b.querySelector('h3').textContent = 'boot failed'; b.querySelector('p').textContent = String(e && e.message || e); });
-/* WAVE 59 · THE BANNER'S × IS WIRED HERE TOO, and it must be: this is the ONE path where rack.js never ran
-   (boot threw, so showBanner and everything around it does not exist), and it is the path that puts the
-   longest message on the screen.  Both wirings are idempotent — each marks the button with data-wired. */
-{ const b = $('banner'), x = b && b.querySelector('.banner-x');
-  if (x && !x.dataset.wired) { x.dataset.wired = '1'; x.addEventListener('click', () => { b.hidden = true; }); } }
+  .catch((e) => { __e.push('BOOT ' + (e && e.stack || e)); banner.fail('boot failed', String(e && e.message || e)); });
 /* the boot has run to its first await, so the look is on: the notice and the title screen wear this browser's glass.  While the screen
    is up no key reaches the lab (stopped on the document, after the covers' own arrows and before the kit's key table on the window) */
 if (warning.needed()) warning.show();

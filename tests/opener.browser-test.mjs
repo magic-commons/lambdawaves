@@ -36,7 +36,10 @@ const g = await open(URL_, { width: 1300, height: 900, script: 120000 });
 let failed = false;
 /* the title screen scrolls (two rows of 9 : 16 covers, then NEW / RESUME): the target is scrolled into view as a reader would, then tapped */
 const press = async (sel) => {
-  await g.ev(`await __w(900); const e = document.querySelector('${sel}'); if (e) e.scrollIntoView({ block: 'center' }); await __w(450); return 1;`);   // the covers' entrance (.6 s + a stagger) first
+  /* the covers' entrance first (.6 s + a stagger, an opacity animation): headless Firefox can hold its frames for seconds while the lab's
+     pipelines compile behind the screen, so the wait is for the target's own opacity, by timers */
+  await g.ev(`const e = document.querySelector('${sel}'); if (e) e.scrollIntoView({ block: 'center' });
+    for (let i = 0; i < 160 && e && getComputedStyle(e).opacity !== '1'; i++) await __w(50); await __w(450); return 1;`);
   const r = await g.tap(sel); if (!r || !r.ok) throw new Error(sel + ' was not pressable: ' + JSON.stringify(r)); return r; };
 const nav = async (u) => { await go(g.s, u); await g.waitFor('document.readyState !== "loading"', 100, 50); await g.armErrors(); return g.ev(HELP); };
 try {

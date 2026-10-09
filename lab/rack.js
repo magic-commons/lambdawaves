@@ -3,6 +3,7 @@ import { uiSpace } from './mir/shell/scene-guard.js';   // 0.5.0 C9: the kit's U
 import { coalesce } from './frame-coalescer.js';
 import { waitForPaint } from './frame-settle.js';
 import { createProjects } from './projects.js';   // 0.5.0 C6: PROJECTS are MIR's FOLDERS over the one project part (lab/projects.js, lab/project-store.js)
+import { installWakeLock } from './mir/core/wakelock.js';   // 0.5.0 C6b: the screen stays on while THE play plays
 import { renderNotebook } from './mir/shell/notebook-render.js';   // N6: the kit's copy (lab/notebook-render.js was byte-identical)
 import { reworkNative, planeModel } from './native-ui.js';
 import { firstRunMaterial, firstRunQuality, deviceQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
@@ -480,25 +481,16 @@ export async function boot(dom) {
      flips `field.ok` to false and, with no handler, TELLS NOBODY.  A driver reset, a backgrounded mobile tab
      whose GPU is reclaimed, a laptop switching cards — the rack goes on working, the readouts go on updating,
      and the picture is frozen with no explanation.  That is the most likely failure on a phone and it is the
-     one this app was silent about.  0.5.0 C9 · R14: this is λWAVES' GPU RECOVERY, `gpuRecovery` (gate: tests/gpu-recovery). */
+     one this app was silent about.  0.5.0 C9 · R14: this is λWAVES' GPU RECOVERY, `gpuRecovery` (gate: tests/gpu-recovery).
+     0.5.0 C6b: the banner is the kit's (main.js installBanner, dom.banner: its pane, its ×, its ink on both themes). */
   const field = await createField(dom.canvas, { resolution: quality.res,
-    onError: (m) => showBanner('GPU error', m),
-    onLost: function gpuRecovery(i) { showBanner('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.'); } });
+    onError: (m) => dom.banner.fail('GPU error', m),
+    onLost: function gpuRecovery(i) { dom.banner.fail('the GPU device was lost', ((i && i.message) || 'the browser took the WebGPU device back') + ' — the FIELD is frozen where it stands. RELOAD to bring it back; SPECTRUM, SHADOW and METERS are still live and the state is untouched.'); } });
   if (field.ok) look.setGamut((rgb) => (field.gamut === 'srgb' ? rgbToHex(rgb) : 'color(display-p3 ' + field.gamutInk(rgb).map((v) => v.toFixed(4)).join(' ') + ')'));   // wave 54: one map, both sides
   /* M1 (2026-09-24): a device lost before createField finished has already put up onLost's own banner (the GPU device
      was lost … RELOAD); "WebGPU unavailable" over it would be the wrong sentence, so that one road keeps its banner. */
-  if (!field.ok && !/^device lost/.test(field.error || '')) showBanner('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
+  if (!field.ok && !/^device lost/.test(field.error || '')) dom.banner.warn('WebGPU unavailable', field.error + '. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU.');
   markBatchBegin();                   // M7: the boot's build is one synchronous task from here to busyHost() at its tail — one mark paint, there
-  /* IT IS DISMISSIBLE NOW (wave 59).  It sat at z-index 60 over the stage for the whole session with no way
-     down, which is a poor thing to do with a pane whose ink could not be read.  The × is wired in lab/main.js
-     — the one place that reaches BOTH this banner and the `boot failed` one, which never gets here because
-     boot() threw — and this re-wires it only if that did not run (a host that calls boot() directly).  Both
-     are idempotent through data-wired, so the button never carries two listeners. */
-  function showBanner(title, text) {
-    dom.banner.hidden = false; dom.banner.querySelector('h3').textContent = title; dom.banner.querySelector('p').textContent = text;
-    const x = dom.banner.querySelector('.banner-x');
-    if (x && !x.dataset.wired) { x.dataset.wired = '1'; x.addEventListener('click', () => { dom.banner.hidden = true; }); }
-  }
   /* ── THE MATHS WORKERS (wave 45): lab/worker-pool.js (N7 seam 3) — bow · period · cards · chem, and the two card roads.
      The constructor is the one literal worker road in the lab, so it stays here. ── */
   const { maths, scan, cards, solveCard, solveChem } = createWorkerPool({ busyWrap,
@@ -4905,6 +4897,7 @@ export async function boot(dom) {
   if (id === 'boot') S.arm(); else if (id === 'resume') layout.projects.resume(S); else S.discard();
   if (!['home', 'boot', 'resume'].includes(id)) await layout.projects.demo(id);
   armAutoplay();
+  installWakeLock({ clock: appPlay });   // ONE clock: the wake lock is held while THE play plays (asked inside a gesture, armed otherwise; no timer)
   /* a reload of this tab skips the title screen only while a reload loses nothing (the quiet take's own question) */
   addEventListener('pagehide', () => { try { if (untouched(true)) sessionStorage.setItem('lambdawaves.opener', 'home'); else sessionStorage.removeItem('lambdawaves.opener'); } catch (_) {} });
   LW.ready = true;

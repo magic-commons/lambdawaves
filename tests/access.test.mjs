@@ -142,7 +142,7 @@ for (const [name, src] of TEXT) {
     }
   });
 }
-judge('A4 at most ' + CEILING + ' live regions in the whole of lab/ — and the four that exist are the four that change once per user act: #banner (role="alert", the one thing a visitor without WebGPU ever sees), FOLDERS\' kit toast (role="status", a save or an open; 0.5.0 C6: .pj-status left with the PROJECTS face, and the toast lives in mir/shell/notice.js), wave 68\'s .keys-say (role="status", the one binding the KEYS panel refuses) and wave 105\'s .m2hint (role="status", the modulation window\'s one message seat — 54 sentences that were being written into a display:none node). The 107 readouts are NOT among them and must never be',
+judge('A4 at most ' + CEILING + ' live regions in the whole of lab/ — and the four that exist are the four that change once per user act: the banner (role="alert", the one thing a visitor without WebGPU ever sees; 0.5.0 C6b: the kit\'s #mir-banner, mir/shell/banner.js), FOLDERS\' kit toast (role="status", a save or an open; 0.5.0 C6: .pj-status left with the PROJECTS face, and the toast lives in mir/shell/notice.js), wave 68\'s .keys-say (role="status", the one binding the KEYS panel refuses) and wave 105\'s .m2hint (role="status", the modulation window\'s one message seat — 54 sentences that were being written into a display:none node). The 107 readouts are NOT among them and must never be',
   speakers.length <= CEILING, speakers);
 const inReadout = speakers.filter((s) => /ro-val|ro-lbl|dev-stat/.test(s));
 judge('A5 no live region is a readout or a .dev-stat — those rewrite on a 10 Hz change-guard, and a polite region on one of them queues an utterance per change on a queue that does not drop',
