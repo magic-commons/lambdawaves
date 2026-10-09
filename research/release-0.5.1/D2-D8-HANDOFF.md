@@ -3,7 +3,14 @@
 Base `76b1d5e` (yan-c: 0.5.0-alpha + D10-19 + D10-F + D1). Brief `research/release-0.5.1/BRIEF-D2-D8.md`. Ports 9013 / GD 5483.
 `cat lab/*.js | wc -l` at the base = **27,558**.
 
-## STATE: step 0 — read the brief, PLAN, AUDIT E3–E9/E15–E18, D1-BUILD; design taken (below); nothing built yet
+## STATE: steps 1–2 DONE (D2 built); next = step 3 (D8)
+
+1. **Step 1** — the composer (`lab/latex-state.js` moleculeHead / stemOf / EV / mdText), the generator's factor (`--check --only`
+   nine records: in step), `tests/molecule-head.test.mjs` GREEN (38 records + H₂O/N₂ live).
+2. **Step 2** — the hand road (chemview `handPick` + ON → `api.hand`; `sol.stem` from a record), rack.js `headPick`/`headLand`
+   after the createChem call, D1's `announce(md, 0)` + `dismiss(md)`, `__LW.head`; `tests/molecule-head.browser-test.mjs`
+   GREEN 3/3 on 9013. (A trap met: chemview already had a `function pick(k, i)` — the spectrum's — so the hand's is `handPick`.)
+   Suites for D2 (stage-text, history, molecule-demos, hit-probe-set, frame-occlusion) are run once at the end, on the tip.
 
 ### The design (so a relaunch does not re-derive it)
 - **The composer** `moleculeHead({ molecule, basis, ground, stem })` + `stemOf({ eps, nocc, names })` + `EV` + `mdText` in
@@ -18,4 +25,6 @@ Base `76b1d5e` (yan-c: 0.5.0-alpha + D10-19 + D10-F + D1). Brief `research/relea
   one ring row (keyEdit's pattern), one fade per press; unknown keys said in `.nb-count`.
 
 ## Next step
-Commit 1: the composer + the generator's factor + the node test.
+Step 3 (D8): the capture-phase click on `.nb-view` in rack.js' notebook block + `tests/lw-links.browser-test.mjs`; then the
+suites (one browser at a time; `node tools/perf/wait-gpu.mjs` + `pgrep -a geckodriver` first), `bash test.sh node`, the BUILD,
+REPORT wave, commit 4. Server: `python3 tools/gate/server.py <worktree> 9013` in the background; `.tmp/probe-head.mjs` probes.
