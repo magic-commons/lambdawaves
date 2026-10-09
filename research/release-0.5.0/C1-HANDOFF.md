@@ -13,6 +13,8 @@
 | `47b3338`, `34926a1` | this hand-off |
 | `82c0313` | the CAMERA panel over A8's port; CAMERA MOTION (47) leaves; A8 open items 2–4 resolved |
 | `e8c831d` | RAMP: `paletteview.js` (156) leaves for `createRampPanel` |
+| `6cfa33d` | hand-off at the usage pause |
+| `daad244` | `tools/camera-routes.mjs`: GREEN on the 5 projects, SAME as `3a60679` (routes, bases, law); resumed after the pause |
 
 ## Gates run (8793/5263, one browser suite at a time, 4 s apart; every one green on its FIRST run, none re-run)
 - node 85: after the adopt, the camera and the RAMP — the same 4 reds, all C0's: `mir-manifest` (alpha.24 not in ACCEPTED),
@@ -48,4 +50,5 @@
 - GRADE not built: the row's "what leaves" lists none; λWAVES' tone knobs are field-shader uniforms on WAVE (C2/C-later).
 
 ## Exact next step
-Unfinished item 1, then 2. `git add tools/camera-routes.mjs` with its result.
+Item 1 DONE (`daad244`; fingerprints `.tmp/routes-base.json`, `.tmp/routes-c1.json`). Now item 2: the remaining browser gates
+(server on 8793, pid in `.tmp/server-8793.pid`), then REPORT wave 197 and C1-BUILD.md.
