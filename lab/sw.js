@@ -351,7 +351,7 @@ const PRECACHE = [
   ['./settings-store.js',                                           '77b8932e7c90'],
   ['./shadow.js',                                                   '98d26391c1b5'],
   ['./shadowview.js',                                               '7e055c93afe3'],
-  ['./skin.css',                                                    'b1d0d3a1ab89'],
+  ['./skin.css',                                                    '8b1494e86a9e'],
   ['./slice.js',                                                    '6d7648bd5e5b'],
   ['./sliceview.js',                                                'f5d04bcfd8e3'],
   ['./spectrum.js',                                                 '0eb68f2f8540'],
