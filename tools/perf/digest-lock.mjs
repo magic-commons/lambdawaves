@@ -13,8 +13,8 @@
  *
  * What it locks, every number read from the SHIPPED pipelines through the booted app (window.__LW, __LW.field) —
  * no replica, no copied WGSL:
- *   states × grids   {1s+2pz, rydberg, 91 labels, BOX packet, AXIAL gas 256, H₂, momentum, oscillator,
- *                     quarkonium, a Sturmian state, one molecule (MOLECULES · H₂O; legacy H₂⁺ and HELIUM left with their cards in 0.5.0 D9); since 0.4.0 S4a benzene (36 AO,
+ *   states × grids   {1s+2pz, rydberg, 91 labels, BOX packet, AXIAL gas 256, momentum, oscillator,
+ *                     quarkonium, a Sturmian state, one molecule (MOLECULES · H₂O; legacy H₂⁺ and HELIUM left with their cards in 0.5.0 D9, H₂ in D9b); since 0.4.0 S4a benzene (36 AO,
  *                     the cap-40 tier) and lysine (64 AO: the widest tier, full) by density and lysine's HOMO by ORBITAL, all
  *                     three opened from their library records (fixed bytes, so no browser's own solve moves an input)} × {64, 96, 128}:
  *                     fieldDigest (hash of every rgba16float texel's re/im halves + integral + maxRho), readPixels at
@@ -112,7 +112,6 @@ async function freeze(t) {
 }
 async function base() {
   try { if (LW.chem.state && LW.chem.state().on) LW.chem.setOn(false); } catch (_) {}
-  if (LW.h2 && LW.h2.on) LW.h2.setOn(false);
   if (LW.sturmian.on) LW.sturmian.set(false);
   if (LW.space !== 'x') LW.setSpace('x');
   LW.setGasBasis('reg');
@@ -138,7 +137,6 @@ const STATES = {
   h91: async () => { LW.loadPreset('1s'); LW.pause(); LW.clock.scrub(0); for (let a = 0; a < 91; a++) LW.reg.set(a, 1, 0, 0); LW.reg.normalize(); await freeze(3.7); },
   box: async () => { LW.loadPreset('1s'); LW.setHamiltonian('well'); LW.setGasBasis('reg'); LW.pause(); LW.clock.scrub(0); LW.enterBox(); await freeze(2.0); },
   gas: async () => { LW.setHamiltonian('well'); LW.setGasBasis('axial'); LW.pause(); LW.clock.scrub(0); LW.enterBox(); await gasTableSettled(); await freeze(2.0); },
-  h2: async () => { LW.h2.load({ on: true, R: 1.4, which: 'singlet' }); await freeze(3.7); },
   momentum: async () => { LW.setSpace('p'); await freeze(3.7); },
   oscillator: async () => { LW.setHamiltonian('qho'); LW.loadPreset('1s+2pz'); LW.pause(); LW.clock.scrub(0); await freeze(1.3); },
   quarkonium: async () => { LW.setHamiltonian('cornell'); LW.loadPreset('1s+2pz'); LW.pause(); LW.clock.scrub(0); await freeze(3.7); },
@@ -254,7 +252,7 @@ const fixture = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'));
 /* 0.4.0 S4c (the S4a verifier's S1): a state this tree has and the FIXTURE does not hold is skipped and named, never a difference —
    the pre-S4a fixtures predate S4a's three record-opened states, and `--check` against them is the old lock, not a red one */
 const held = new Set(Object.keys(fixture.states || {})), skipped = Object.keys(result.states).filter((s) => !held.has(s));
-const retired = [...held].filter((s) => treeStates && !treeStates.includes(s));   // 0.5.0 D9: h2plus and helium left with their cards
+const retired = [...held].filter((s) => treeStates && !treeStates.includes(s));   // 0.5.0 D9: h2plus and helium left with their cards; D9b: h2
 for (const s of retired) held.delete(s);
 if (retired.length) console.log('RETIRED (in the fixture, gone from this tree):', retired.join(', '));
 const pick = (r) => { const o = {}; if (ONLY.includes('states')) { o.states = {}; for (const [s, v] of Object.entries(r.states || {})) { if ((ONLY_STATES && !ONLY_STATES.includes(s)) || !held.has(s)) continue; o.states[s] = {}; for (const gr of GRIDS) if (v[gr]) o.states[s][gr] = v[gr]; } } if (ONLY.includes('styles')) o.styles = r.styles; if (ONLY.includes('lines')) o.lines = r.lines; return o; };

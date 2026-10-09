@@ -78,7 +78,6 @@ function presentation() {
       slice: { mode: 'space', half: 8, gain: 1.6, rotor: { qL: [1, 0, 0, 0], qR: [1, 0, 0, 0] } },   // sliceview.js:63
       kepler: { shell: 3 } },                                         // rack.js:2139 (ui.kepShell)
     instruments: {
-      h2: { on: false, R: 6, which: 'triplet', showCI: true, ke: 0.02, kappa: 300 },                 // h2view.js:23
       chem: { preset: 'H2O', basis: 'sto-3g', view: 'density', orbital: null, axis: 'y', kappa: 0.001, speed: 10, dt: 0.01,
         integrator: 'mmut', tda: false, core: false, valence: false, on: false },     // chemview.js:56–57 (valence: 0.4.0 S4c)
       orbitals: { on: false, selection: [] },                         // orbitalsview.js:469

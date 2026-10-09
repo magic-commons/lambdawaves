@@ -584,22 +584,9 @@ try {
   judge('B34 THE GAS: a σ = 1.6 packet launched at z = −4 with k = 0.8 is held by the box to > 85%, is a unit-norm state of > 20 well eigenstates, sits at z ≈ −4, moves to ≈ −1.6 in three time units, the GPU grid integrates it to 1 (2%) before and after, and the readout reports how much the box holds',
     !gasT.error && gasT.captured > 0.85 && Math.abs(gasT.norm - 1) < 1e-9 && gasT.pop > 20 && Math.abs(gasT.c0[2] + 4) < 0.4 && Math.abs(gasT.c3[2] + 1.6) < 0.7 && gasT.hash0 !== gasT.hash3 && Math.abs(gasT.int0 - 1) < 0.02 && Math.abs(gasT.int3 - 1) < 0.02 && gasT.ro && gasT.ro.includes('held') && gasT.errs === 0 && !gasT.gpu, gasT);
 
-  /* ── H₂: two atoms on the GPU as an incoherent density, and the collision on the triplet curve ── */
-  const h2T = await g.ev(`try { __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s'); __LW.setView('density'); await __LW.settle();
-    __LW.h2.setWhich('triplet'); __LW.h2.setR(6); __LW.h2.setOn(true); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const d6 = await __LW.fieldDigest(), space = __LW.field.space, half = __LW.domain.half;
-    __LW.h2.setR(1.4); __LW.h2.setWhich('singlet'); __LW.schedule(4); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const d14 = await __LW.fieldDigest();
-    __LW.h2.setWhich('triplet'); __LW.clock.reset(); const traj = __LW.h2.collide(0.02); __LW.schedule(4); await __LW.settle();
-    const status = document.body.textContent.includes('CLASSICAL NUCLEI');
-    __LW.clock.step(1.5); __LW.schedule(3); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const Rmid = __LW.h2.R;
-    __LW.h2.setOn(false); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const back = { space: __LW.field.space, integral: (await __LW.fieldDigest()).integral };
-    return { space, half, int6: d6.integral, int14: d14.integral, nan: d6.nan + d14.nan, Rmin: traj.Rmin, Rmid, status, back, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B35 H₂: the kernel\'s incoherent two-group branch integrates the Heitler–London one-electron density to 2 electrons (2%) at R = 6 (triplet) and at R = 1.4 (singlet, where the σu group is nearly gone), the collision on the triplet turns around at R ≈ 3.4 and the nuclei are on their way in 1.5 time units later (R between the turning point and the start), the status says classical nuclei, and OFF gives the atom back',
-    !h2T.error && h2T.space === 5 && Math.abs(h2T.half - 8) < 1e-9 && Math.abs(h2T.int6 - 2) < 0.04 && Math.abs(h2T.int14 - 2) < 0.04 && !h2T.nan && h2T.Rmin > 2.8 && h2T.Rmin < 4.2 && h2T.Rmid < 8 && h2T.Rmid > h2T.Rmin - 1e-9 && h2T.status && h2T.back.space === 0 && Math.abs(h2T.back.integral - 1) < 0.02 && h2T.errs === 0 && !h2T.gpu, h2T);
+  /* ── H₂ (B35): the Heitler–London card is deleted (0.5.0 D9b) ── */
+  const h2T = await g.ev(`return { gone: !document.querySelector('.dev[data-id="h2"]') && !('h2' in __LW), errs: window.__e.length };`) || { error: 'no result' };
+  judge('B35 (0.5.0 D9b) RETIRED: the H₂ card (Heitler–London, the collision) and its `__LW.h2` were deleted in 0.5.0 D9b — restore opens its files as MOLECULES · H₂ on its density', h2T.gone && h2T.errs === 0, h2T);
 
   /* ── CALCULUS: the live table shows Ehrenfest holding, and switches its law with the Hamiltonian ── */
   const calcT = await g.ev(`try { __LW.setHamiltonian('hydrogen'); __LW.reg.clear(); __LW.reg.set(0, 0.8, 0); __LW.reg.set(3, 0.6, 0); __LW.clock.reset(); __LW.clock.step(1.3); __LW.schedule(3); await __LW.settle();
@@ -1010,7 +997,6 @@ try {
   const elT = await g.ev(`try { ${RATE}
     const Hy = await import('/lab/hydrogen.js');
     __LW.pause(); __LW.setTheme('dark'); __LW.ab.set(false); __LW.reg.setField({ Fz: 0 });
-    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.setHamiltonian('hydrogen'); __LW.setIonZ(1); __LW.setSpace('x'); await __LW.settle();
     const shipsClosed = (__LW.bootClosed || []).includes('field'), iF = __LW.bootOrder.indexOf('field'), shipsLast = __LW.bootOrder.slice(iF, iF + 3).join(' ') === 'field wigner radiation';
     __LW.layout.reopen('field', 'R');
@@ -1185,7 +1171,6 @@ try {
   const wrT = await g.ev(`try {
     const Hy = await import('/lab/hydrogen.js');
     __LW.pause(); __LW.setTheme('dark'); __LW.ab.set(false); __LW.reg.setField({ Fz: 0 });
-    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.setHamiltonian('hydrogen'); __LW.setIonZ(1); __LW.setSpace('x'); await __LW.settle();
     const order = __LW.bootOrder, closed = __LW.bootClosed || [];
     const ships = closed.indexOf('wigner') >= 0 && closed.indexOf('radiation') >= 0
@@ -1876,7 +1861,6 @@ try {
        here reads the LOOP, so the clock is stopped and the camera put at its shipped pose before a measurement. */
     if (__LW.uiHidden) __LW.keys.toggleUI();
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
-    if (__LW.h2.on) __LW.h2.setOn(false);
     const C = __LW.camera, nap = (ms) => new Promise((r) => setTimeout(r, ms));
     const REST = 0.003, mu = 2.5;
     /* WAVE 106 BOOTS THE CAMERA FREE (Josh), and in FREE the pose IS a unit quaternion while obs.yaw is
@@ -1945,7 +1929,6 @@ try {
     if (__LW.uiHidden) __LW.keys.toggleUI();
     document.body.classList.remove('rack-hidden', 'rack-peek');
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
-    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.kepler.setOn(false);
     const wake = (id) => { __LW.layout.reopen(id); const d = document.querySelector('.dev[data-id="' + id + '"]'); if (!d) return null;
       d.classList.remove('closed');
@@ -2036,7 +2019,6 @@ try {
   const dragT = await g.ev(`try {
     if (__LW.uiHidden) __LW.keys.toggleUI();
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
-    if (__LW.h2.on) __LW.h2.setOn(false);
     __LW.kepler.setOn(false);                                    // the stage's own handle must not take the pointer
     /* WAVE 106 BOOTS THE CAMERA FREE, where a horizontal drag turns a QUATERNION about the screen axes
        and obs.yaw is only a readout of the pose -- so 60 px is not 0.390 rad of yaw there and cannot be.
@@ -2097,7 +2079,6 @@ try {
     document.body.classList.remove('rack-hidden', 'rack-peek');
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz');
     if (__LW.sturmian && __LW.sturmian.on) __LW.sturmian.set(false);
-    if (__LW.h2.on) __LW.h2.setOn(false);
     const wake = (id) => { __LW.layout.reopen(id); const d = document.querySelector('.dev[data-id="' + id + '"]'); if (!d) return null;
       d.classList.remove('closed');
       if (d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
@@ -4573,51 +4554,9 @@ try {
   const pulT = await g.ev(`return { gone: !document.querySelector('.dev[data-id="molecule"]') && !('molecule' in __LW) && !('mo' in __LW) && !('pulse' in __LW), errs: window.__e.length };`) || { error: 'no result' };
   judge('B105 (0.5.0 D9) RETIRED: the H₂⁺ card and its `__LW.molecule`, `__LW.mo`, `__LW.pulse` were deleted in 0.5.0 D9 — restore opens its files as MOLECULES · H₂', pulT.gone && pulT.errs === 0, pulT);
 
-  const h2cT = await g.ev(`try {
-    const R = {};
-    const wake = (id) => { __LW.layout.reopen(id); const d = document.querySelector('.dev[data-id="' + id + '"]'); if (!d) return null;
-      d.classList.remove('closed');
-      if (d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
-      if (d.classList.contains('off')) { const p = d.querySelector('.dev-power'); if (p) p.click(); }
-      return d; };
-    const dev = wake('h2'); __LW.layout.raise('h2');
-    await __LW.settle();
-    const H = __LW.h2;
-    const ANG = 0.529177210903;
-    R.at14 = H.ci(1.4); R.at074 = H.ci(0.74 / ANG); R.at300 = H.ci(3.00 / ANG);
-    R.rhfMinusFci3 = R.at300.rhf - R.at300.fci;
-    R.readouts = [...dev.querySelectorAll('.ro-lbl')].map((e) => e.textContent);
-    R.switches = [...dev.querySelectorAll('.sw-lbl')].map((e) => e.textContent);
-    const note = dev.querySelector('.note').textContent;
-    R.saysVariational = note.indexOf('are VARIATIONAL') > 0;
-    R.saysExactInBasis = note.indexOf('EXACT IN THIS BASIS') > 0;
-    R.saysTwoLimits = note.indexOf('two different dissociation limits') > 0;
-    /* THE TWO LIMITS ARE BOTH DRAWN, and the hover objects name them for what they are */
-    H.setShowCI(true); H.setR(1.4); H.refresh();
-    await new Promise((r) => setTimeout(r, 80));
-    const cv = dev.querySelector('canvas'), c2 = cv.getContext('2d');
-    const on = c2.getImageData(0, 0, cv.width, cv.height).data;
-    let onInk = 0; for (let i = 3; i < on.length; i += 4) if (on[i] > 8) onInk++;
-    H.setShowCI(false); H.refresh();
-    await new Promise((r) => setTimeout(r, 80));
-    const off = c2.getImageData(0, 0, cv.width, cv.height).data;
-    let offInk = 0; for (let i = 3; i < off.length; i += 4) if (off[i] > 8) offInk++;
-    R.inkOn = onInk; R.inkOff = offInk; R.switchWorks = onInk > offInk * 1.05;
-    H.setShowCI(true); H.refresh();
-    await new Promise((r) => setTimeout(r, 80));
-    R.errs = window.__e.length;
-    return R;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B106 THE H₂ CI CARD SAYS WHICH CURVE IS WHICH, AND DRAWS THE LIMIT IT IS ACTUALLY HEADING FOR (wave 58, board #35, ledger C3). lab/h2ci.js and its four curves were already built and gated in wave 49, so this wave added only what was missing rather than rebuilding working work: (1) a CORRELATED PAIR switch that takes the STO-3G pair down TOGETHER, because RHF and FCI mean nothing apart — the distance between them IS the correlation energy — measured here as a real change in the ink on the canvas; (2) WEINBAUM in its own readout beside the STO-3G one instead of buried in its sub-line, since the two are the SAME 2 × 2 full CI fed by two different integral sets and the pair of numbers is the comparison; (3) THE DISSOCIATION LIMIT DRAWN AS WHAT IT IS — the dashed rule at −1 is two REAL hydrogen atoms, and the STO-3G curves are not going there: their atom is −0.4665819, so a second rule at −0.933164 is drawn in FCI\'s own colour, which is the line that curve actually reaches while RHF leaves the top of the box; (4) a note that says plainly, in words, that Heitler–London, Weinbaum and RHF are VARIATIONAL bounds from above while STO-3G FCI is EXACT IN THIS BASIS and still misses the real H₂ by 0.037 hartree. The ledger\'s numbers, asserted from the card\'s own function: Weinbaum −1.1478 at R = 1.4 with ζ = 1.193 (±2e-3); RHF −1.116759307 and FCI −1.137283834 at 0.74 Å, to 1e-8 of PySCF 2.14.0 run by the other lab; FCI −0.933631845 at 3.00 Å; and RHF − FCI there = 0.2776, which is the whole point — a restricted Hartree–Fock determinant cannot break a bond and the CI can.',
-    !h2cT.error
-      && Math.abs(h2cT.at14.weinbaum + 1.1478) < 2e-3 && Math.abs(h2cT.at14.zeta - 1.193) < 0.01
-      && Math.abs(h2cT.at074.rhf + 1.116759307) < 1e-8 && Math.abs(h2cT.at074.fci + 1.137283834) < 1e-8
-      && Math.abs(h2cT.at300.fci + 0.933631845) < 1e-8 && Math.abs(h2cT.rhfMinusFci3 - 0.2776) < 5e-4
-      && Math.abs(h2cT.at14.limit + 0.933164) < 1e-5
-      && h2cT.switches.indexOf('CORRELATED PAIR') >= 0
-      && h2cT.readouts.some((s) => s.indexOf('WEINBAUM') === 0) && h2cT.readouts.some((s) => s.indexOf('STO-3G') === 0)
-      && h2cT.saysVariational && h2cT.saysExactInBasis && h2cT.saysTwoLimits
-      && h2cT.switchWorks === true && h2cT.errs === 0, h2cT);
+  /* ── B106: the H₂ CI card's curves — deleted with the H₂ card (0.5.0 D9b); lab/h2ci.js and tests/h2ci.test.mjs keep the physics ── */
+  const h2cT = await g.ev(`return { gone: !document.querySelector('.dev[data-id="h2"]') && !('h2' in __LW), errs: window.__e.length };`) || { error: 'no result' };
+  judge('B106 (0.5.0 D9b) RETIRED: the H₂ card that drew the STO-3G RHF / FCI / Weinbaum curves was deleted in 0.5.0 D9b — lab/h2ci.js (h2CurveTable, h2Curves) and tests/h2ci.test.mjs keep the physics', h2cT.gone && h2cT.errs === 0, h2cT);
 
   const camGT = await g.ev(`try {
     const R = {}, cam = __LW.camera;

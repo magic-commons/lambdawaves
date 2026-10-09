@@ -16,7 +16,7 @@
  *         h_aa = ζ²/2 − ζ − (ζ/w)[1 − (1+w)e^{−2w}]                             (kinetic + both nuclei)
  *         h_ab = −(ζ²/2)S + (2 − ζ)K₁,   K₁ = ⟨a|−1/r_A|b⟩ = −ζ(1+w)e^{−w}
  *           (using (−½∇² − ζ/r_B)b = −(ζ²/2)b, so ⟨a|−½∇²|b⟩ = −(ζ²/2)S − ζK₁)
- *         (aa|bb) = ζ·J′(w),  (ab|ab) = ζ·K′(w)                                 h2.js's coulombJ2 / exchangeK2
+ *         (aa|bb) = ζ·J′(w),  (ab|ab) = ζ·K′(w)                                 coulombJ2 / exchangeK2 below
  *         (aa|aa) = 5ζ/8                                                        (Coulomb self-repulsion of a 1s)
  *         (aa|ab) = ζ[ e^{−w}(w + 1/8 + 5/(16w)) − e^{−3w}(1/8 + 5/(16w)) ]     THE HYBRID INTEGRAL
  *     The hybrid is Slater's closed form (KNOWN: Slater, *Quantum Theory of Molecules and Solids* I; Coulson 1937);
@@ -46,13 +46,32 @@
  *     other two of the six determinants are M_s = ±1 and cannot be the singlet ground state).  With i the α orbital
  *     and j the β orbital, ⟨ij|H|kl⟩ = δ_jl h_ik + δ_ik h_jl + (ik|jl) — no exchange between opposite spins — and
  *     the lowest eigenvalue is the exact energy IN THAT BASIS.  The M_s = 0 triplet is one of the four eigenvalues,
- *     which the test uses as an exact cross-check against h2.js's own Heitler–London triplet at ζ = 1.
+ *     which the test uses as an exact cross-check against Heitler–London's closed-form triplet at ζ = 1.
  */
-import { coulombJ2, exchangeK2, EV } from './h2.js';
-import { overlapS } from './molecule.js';
+import { overlapS, EV } from './molecule.js';
 import { eigSymQL } from './linalg.js';
 
 export const HARTREE_EV = EV;
+/* ── J′ = (aa|bb) and K′ = (ab|ab) over 1s STOs at ζ = 1 (Sugiura 1927, with E₁) — moved here from h2.js when the H₂ card
+   left in 0.5.0 D9b; tests/h2ci.test.mjs keeps their anchors (E₁'s tables, J′ by quadrature, Heitler–London 1927) ── */
+export const EULER_GAMMA = 0.5772156649015329;
+/** the exponential integral E₁(x) = ∫_x^∞ e^{−t}/t dt for x > 0 (series below 1, continued fraction above) */
+export function expint1(x) {
+  if (x <= 0) throw new Error('E1 needs x > 0');
+  if (x < 1) { let s = 0, term = 1; for (let k = 1; k < 60; k++) { term *= -x / k; s += -term / k; } return -EULER_GAMMA - Math.log(x) + s; }
+  /* Lentz continued fraction: E1(x) = e^{−x} / (x + 1/(1 + 1/(x + 2/(1 + 2/(x + …))))) */
+  let b = x + 1, c = 1e300, d = 1 / b, h = d;
+  for (let i = 1; i < 200; i++) { const an = -i * i; b += 2; d = 1 / (an * d + b); c = b + an / c; const del = c * d; h *= del; if (Math.abs(del - 1) < 1e-16) break; }
+  return h * Math.exp(-x);
+}
+export const Ei = (x) => -expint1(-x);                            // Ei(−R) = −E₁(R)
+export const coulombJ2 = (R) => 1 / R - Math.exp(-2 * R) * (1 / R + 11 / 8 + 3 * R / 4 + R * R / 6);
+export function exchangeK2(R) {
+  const S = overlapS(R), Sp = Math.exp(R) * (1 - R + R * R / 3);
+  const A = -Math.exp(-2 * R) * (-25 / 8 + 23 * R / 4 + 3 * R * R + R * R * R / 3);
+  const B = (6 / R) * (S * S * (EULER_GAMMA + Math.log(R)) + Sp * Sp * Ei(-4 * R) - 2 * S * Sp * Ei(-2 * R));
+  return (A + B) / 5;
+}
 /** the STO-3G hydrogen 1s: three primitives, the ζ = 1.24 scaled exponents (KNOWN, Hehre–Stewart–Pople 1969) */
 export const STO3G_H = { alpha: [3.42525091, 0.62391373, 0.16885540], coef: [0.15432897, 0.53532814, 0.44463454] };
 
@@ -256,7 +275,7 @@ export function minimalH2({ S, h, eri, Enuc }) {
      degenerate with the ¹Σu state and no pattern match survives that).  (|1α2β⟩ − |2α1β⟩)/√2 is an exact eigenvector
      of Hci by spin symmetry alone, so its Rayleigh quotient IS the triplet energy; `tripletResidual` reports
      ‖(H − E)t‖, which the test judges to be zero — that is the check that the CI matrix has the spin symmetry it
-     should, and at ζ = 1 the number agrees with h2.js's own Heitler–London triplet to 1e-15. */
+     should, and at ζ = 1 the number agrees with Heitler–London's closed-form triplet to 1e-15. */
   const tv = [0, Math.SQRT1_2, -Math.SQRT1_2, 0];
   let triplet = 0, tripletResidual = 0;
   for (let m = 0; m < 4; m++) for (let n = 0; n < 4; n++) triplet += tv[m] * Hci[m * 4 + n] * tv[n];
@@ -287,7 +306,7 @@ function golden(f, lo, hi, iters) {
 /** STO-3G RHF and FCI at R */
 export const sto3gH2 = (R) => minimalH2(sto3gIntegrals(R));
 
-/** The serialisable correlated-curve table used by the H₂ card and its background worker. */
+/** The serialisable correlated-curve table (the retired H₂ card drew it; kept for D6's MAPS and tests/card-solvers). */
 export function h2CurveTable(Rmin = 0.6, Rmax = 10, count = 221) {
   const n = Math.max(2, count | 0), rhf = new Float64Array(n), fci = new Float64Array(n), R = new Float64Array(n);
   for (let i = 0; i < n; i++) { const r = Rmin + (Rmax - Rmin) * i / (n - 1), s = sto3gH2(r); R[i] = r; rhf[i] = s.rhf; fci[i] = s.fci; }
@@ -307,7 +326,7 @@ export function sto3gHydrogen() {
  * h2Curves(kind, R) → the total energy in hartree at separation R (a number, or a Float64Array if R is an array).
  *   'weinbaum'  correlated 1s-STO CI with ζ re-optimised at every R   (the correlated minimal-STO curve)
  *   'weinbaum-fixed'  the same at ζ = 1.193, Weinbaum's own value at R_e
- *   'hl'        Heitler–London singlet, ζ = 1 (h2.js — the covalent-only bound, for the comparison)
+ *   'hl'        Heitler–London singlet, ζ = 1 (the covalent-only bound, for the comparison)
  *   'rhf'       STO-3G restricted Hartree–Fock       'fci'  STO-3G full CI       'triplet'  STO-3G M_s = 0 triplet
  */
 export function h2Curves(kind, R) {

@@ -182,14 +182,6 @@
     }
    },
    "instruments": {
-    "h2": {
-     "on": false,
-     "R": 6,
-     "which": "triplet",
-     "showCI": true,
-     "ke": 0.02,
-     "kappa": 300
-    },
     "chem": {
      "preset": "H2O",
      "basis": "sto-3g",

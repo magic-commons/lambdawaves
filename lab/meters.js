@@ -31,7 +31,7 @@ export function createMeters(host) {
     tier.set(m.lastTier); tier.setSub(`P ${m.tiers.PRESENT} · R ${m.tiers.RECONSTRUCT} · E ${m.tiers.EVOLVE} · B ${m.tiers.REBUILD}`);
     status.set(m.status, m.rendered < m.populated ? 'warn' : 'ok');
     if (m.profile) {
-      const p = m.profile, win = p.spectrum + p.shadow + p.orbit + p.slice + p.molecule + p.meters;
+      const p = m.profile, win = p.spectrum + p.shadow + p.orbit + p.slice + p.meters;
       prof.set(`${p.total.toFixed(2)} · ${p.field.toFixed(2)} · ${win.toFixed(2)}`, p.total < 8.3 ? 'ok' : 'warn');
       const ms = (name) => (p[name] || 0).toFixed(2);
       prof.setSub(`${m.perfMode === '120' ? '120 Hz mode · ' : ''}spectrum ${ms('spectrum')} · shadow ${ms('shadow')} · orbit ${ms('orbit')} · vortex ${ms('vortex')} · particles ${ms('particles')} · Kepler ${ms('kepler')} · field lines ${ms('fieldlines')} · slice ${ms('slice')} · meters ${ms('meters')} · 8.33 ms is a 120 Hz frame`);
