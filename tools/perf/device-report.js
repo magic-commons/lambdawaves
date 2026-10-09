@@ -882,9 +882,9 @@ function notebookSnapshot() {
   const nb = document.getElementById('notebook'); if (!nb) return null;
   const q = (x) => nb.querySelector(x), sub = q('.nb-subtitle');
   return { nb, hidden: nb.hidden, face: nb.dataset.face, mode: nb.dataset.mode, style: nb.getAttribute('style'),
-    faces: ['.nb-notes', '.nb-aboutface', '.nb-projectsface'].map((x) => { const e = q(x); return e ? [e, e.hidden] : null; }),
+    faces: ['.nb-notes', '.nb-aboutface'].map((x) => { const e = q(x); return e ? [e, e.hidden] : null; }),
     text: q('.nb-text') ? q('.nb-text').value : null, title: q('.nb-title') ? q('.nb-title').value : null, sub: sub ? [sub.value, sub.hidden] : null,
-    view: q('.nb-view') ? q('.nb-view').innerHTML : null, status: q('.pj-status') ? q('.pj-status').textContent : null, active: document.activeElement };
+    view: q('.nb-view') ? q('.nb-view').innerHTML : null, status: null, active: document.activeElement };
 }
 function notebookPut(S) {
   if (!S) return;
@@ -898,7 +898,6 @@ function notebookPut(S) {
   if (S.title !== null) q('.nb-title').value = S.title;
   if (S.sub) { q('.nb-subtitle').value = S.sub[0]; q('.nb-subtitle').hidden = S.sub[1]; }
   if (S.view !== null && q('.nb-view').innerHTML !== S.view) q('.nb-view').innerHTML = S.view;
-  if (S.status !== null) q('.pj-status').textContent = S.status;
   if (document.activeElement !== S.active) { try { if (S.active && S.active !== document.body && S.active.focus) S.active.focus({ preventScroll: true }); else if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (_) {} }
 }
 
@@ -944,7 +943,7 @@ function armDirty(P0) {
 async function runProjectOpen(LW, found, S, scene, say, err, force) {
   const label = 'project open (3 s → WAVE DANCER → 4 s → the state as found → 4 s)';
   const P0 = safe(() => LW.projects), field = LW.field;
-  const demo = () => document.querySelector('#notebook .pj-demo[data-file="wave-dancer"]');
+  const demo = () => (P0 && typeof P0.demo === 'function' ? P0 : null);   // 0.5.0 C6: the DEMOS press is projects.demo (a FOLDERS starter)
   const asFound = projectState(LW);                                               // { current, dirty } as found: what force=1 puts back
   const why = safe(() => LW.layout.phone.on) ? 'a phone — the project open is read on a tablet or a desktop'
     : !asFound ? 'no projects (NOTEBOOK) in this page'
@@ -1030,7 +1029,7 @@ async function runProjectOpen(LW, found, S, scene, say, err, force) {
   };
   const at = [
     /* 0.3.1 · S2: the button asks before it discards unsaved changes (synchronously, before its first await) — force=1 already said yes */
-    { ms: 3000, what: 'WAVE DANCER', fn: () => { ev.click = { t: performance.now(), before: reading() }; const c0 = window.confirm; if (force) window.confirm = () => true; try { demo().click(); } finally { window.confirm = c0; } ev.click.syncMs = r3(performance.now() - ev.click.t); return 'pj-demo'; } },
+    { ms: 3000, what: 'WAVE DANCER', fn: () => { ev.click = { t: performance.now(), before: reading() }; const c0 = window.confirm; if (force) window.confirm = () => true; try { demo().demo('wave-dancer'); } finally { window.confirm = c0; } ev.click.syncMs = r3(performance.now() - ev.click.t); return 'projects.demo'; } },
     { ms: 7000, what: 'the state as found', fn: () => { if (!ev.open || !ev.open.ok) return 'skipped: the demo had not opened'; ev.restore = restoreFound('in play'); return '__LW.restore'; } },
   ];
   try { await scene(label, null, null, 11000, at, BIN_MS, tap); s = S[S.length - 1]; }
@@ -1057,7 +1056,6 @@ async function runProjectOpen(LW, found, S, scene, say, err, force) {
         } else if (P0.current) { residue.current = 'the open made ' + P0.current + ' current — removed, then the stored collection as found'; P0.remove(P0.current); }
       }
       for (const k of KEYS) { const v = stored[k]; if (localStorage.getItem(k) !== v) { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } }
-      if (nbFound && nbFound.face === 'projects' && !nbFound.hidden && LW.notebook) LW.notebook.open('projects');   // its list re-renders from the collection as found
       notebookPut(nbFound);
       if (LW.history) { LW.history.clear(); residue.undoRing = 'cleared to one row, the state as found (' + (ringFound ? ringFound.rows + ' row' + (ringFound.rows === 1 ? '' : 's') + ', cursor ' + ringFound.cursor : '?') + ' before) — a project open clears it and its rows cannot be written back'; }
       if (!asFound.dirty) { P0.markClean(); residue.unsavedGuard = 're-armed against the state as found (projects.markClean)'; }

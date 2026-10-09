@@ -241,8 +241,8 @@ try {
  /* THE BUNDLED DEMO (2026-09-11): WAVE DANCER ships under lab/demos/ and opens through the projects road — eight
     modes, three macros, five routes, the A/B stores and the notebook, with no page error.  0.3.1 · S2: the button asks before it
     discards unsaved changes (the scenes above leave some), so the confirm is accepted here. */
- const demo=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n));window.confirm=()=>true;__LW.layout.notebook.open('projects');await w(200);document.querySelector('.pj-demo').click();await w(1500);
-  const S=__LW.serialize(),nb=document.querySelector('[data-mir-window="notebook"]');return {status:nb.querySelector('.pj-status')?.textContent||'',modes:S.experiment.modes.length,routes:(S.presentation.modulation.routes||[]).length,macros:(S.presentation.modulation.macros||[]).length,title:nb.querySelector('.nb-title').value,ab:!!(S.presentation.ab&&S.presentation.ab.a&&S.presentation.ab.b),errs:__e.slice()}`);
+ const demo=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n));window.confirm=()=>true;__LW.projects.demo('wave-dancer');await w(1500);
+  const S=__LW.serialize(),nb=document.querySelector('[data-mir-window="notebook"]');return {status:__LW.projects.status,modes:S.experiment.modes.length,routes:(S.presentation.modulation.routes||[]).length,macros:(S.presentation.modulation.macros||[]).length,title:nb.querySelector('.nb-title').value,ab:!!(S.presentation.ab&&S.presentation.ab.a&&S.presentation.ab.b),errs:__e.slice()}`);
  assert.match(demo.status,/opened demo DEMOS\/WAVE DANCER/); assert.equal(demo.modes,8); assert.equal(demo.routes,5); assert.equal(demo.macros,3); assert.equal(demo.title,'WAVE DANCER'); assert.equal(demo.ab,true); assert.deepEqual(demo.errs,[]);
  console.log('PASS the bundled demo: WAVE DANCER opens with its modes, macros, routes, A/B and notebook');
 } catch(error) { failed=true;console.error(error); }

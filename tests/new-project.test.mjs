@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { parseProjectImport } from '../lab/project-import.js';
+import { parseProjectFile } from '../lab/project-store.js';   // 0.5.0 C6: project-import.js left; the parse is the store's
 import * as M from '../lab/mir/modulation/mod.js';
 
 const at = (rel) => fileURLToPath(new URL(rel, import.meta.url));
@@ -19,14 +19,14 @@ const check = spawnSync(process.execPath, [at('../tools/new-project.mjs'), '--ch
 assert.equal(check.status, 0, 'tools/new-project.mjs --check: ' + check.stdout + check.stderr);
 assert.match(check.stdout, /in step/);
 
-/* 2 · the envelope: lab/project-import.js reads it (version 1), and it is not a demo (the PROJECTS face lists lab/demos/ only) */
+/* 2 · the envelope: lab/project-store.js reads it (version 1), and it is not a demo (FOLDERS seeds lab/demos/ only) */
 const env = JSON.parse(text);
 assert.equal(env.lambdawaves, 'project'); assert.equal(env.version, 1); assert.equal(env.name, 'NEW');
-const parsed = parseProjectImport(text);
+const parsed = parseProjectFile(text);
 assert.deepEqual(parsed.notebook, { title: 'NOTEBOOK', subtitle: '', text: '' });
 assert.deepEqual(Object.keys(parsed.data), ['experiment', 'presentation']);
 assert.equal(existsSync(at('../lab/demos/new-project.lambdawaves.json')), false);
-assert.ok(readFileSync(at('../lab/rack.js'), 'utf8').includes("fetch('./new-project.lambdawaves.json'"), 'rack.js no longer fetches the file NEW opens');
+assert.ok(readFileSync(at('../lab/projects.js'), 'utf8').includes("fetch('./new-project.lambdawaves.json'"), 'projects.js no longer fetches the file NEW opens');
 assert.ok(readFileSync(at('../lab/sw.js'), 'utf8').includes("'./new-project.lambdawaves.json'"), 'the empty project is not precached — NEW would fail offline');
 
 /* 3 · PROJECT keys only */

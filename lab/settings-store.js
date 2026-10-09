@@ -12,12 +12,14 @@ export const SETTINGS_KEY = 'lambdawaves.q0.settings';
 export const WORKSPACE = Object.freeze(['closed', 'layouts', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'phoneTr', 'phoneRack']);
 export const FAMILIES = Object.freeze({
   'lambdawaves.q0.notebook': ['rack.js NB_KEY', 'PROJECT'], 'lambdawaves.q0.notebook.title': ['rack.js NB_TITLE', 'PROJECT'],
-  'lambdawaves.q0.notebook.subtitle': ['rack.js NB_SUBTITLE', 'PROJECT'], 'lambdawaves.q0.projects': ['rack.js PJ_KEY', 'PROJECT'],
+  'lambdawaves.q0.notebook.subtitle': ['rack.js NB_SUBTITLE', 'PROJECT'], 'lambdawaves.q0.projects': ['project-store.js PJ_KEY (FOLDERS\' store, in λWAVES\' form)', 'PROJECT'],
   'lambdawaves.q0.experiment': ['rack.js LS_EXP', 'PROJECT'], 'lambdawaves.q0.presentation': ['rack.js LS_PRES', 'PROJECT'],
   'lambdawaves.q0.keys': ['keys.js', 'PREFERENCE'], 'lw.keyboard.position.v1': ['keymap.js', 'PREFERENCE'],
   'lw.lean.v1': ['window-chrome.js', 'PREFERENCE'], 'lw-window-info': ['native-ui.js', 'PREFERENCE'],
   'lambdawaves.q0.library': ['library.js', 'LIBRARY'], 'lambdawaves.q0.modpresets': ['mir/modulation/mod.js PRESET_LS', 'PREFERENCE'],
   'lambdawaves.q0.modulation': ['rack.js modStore (mir/modulation/bind.js localStore): modArm, modCadence', 'PREFERENCE'],   // 0.5.0 C4
+  'lambdawaves.q0.projects.window': ['projects.js FOLDERS (mir/folders/folders.js localPrefs): place, size, open, rail side, sort', 'WORKSPACE'],   // 0.5.0 C6
+  'lambdawaves.q0.projects.seeded': ['projects.js FOLDERS (mir/folders/seed.js): the starters added once', 'PROJECT'],   // 0.5.0 C6
 });
 export function createSettingsStore(storage) {
   const ls = () => storage || globalThis.localStorage;

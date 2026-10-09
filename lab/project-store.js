@@ -8,18 +8,23 @@
  *   · THE ROUND TRIP IS BYTE-EXACT: the kit's conflict check compares two getItem texts, so toFiles(fromFiles(t)) === t for
  *     anything the kit writes (an entry's key order, its `bytes` reprice, `at` ↔ the ISO `saved`).  `recent` and `opened`
  *     are λWAVES' and the kit never sees them: fromFiles keeps them by entry id, so a rename keeps its row in RECENT.
+ *   · Two stored paths that are one name to the kit ('a//b' and 'a/b', or 'X' and 'x' in one folder) are told apart as the kit
+ *     tells names apart ("b 2"), so no first write can fold one project onto another.
  *   · R10 (a) AN INVALID COLLECTION IS READ-ONLY.  A stored text that does not parse or validate is shown to the kit as an
  *     empty library, and every write under the key is REFUSED with the reason — never set aside, never emptied, never
  *     replaced.  The words are the ones λWAVES always said: "Stored data was left untouched."
- *   · R10 (b) THE 8 MiB CAP HOLDS through every door: parseProjectFile() refuses a larger file before it is parsed, and the
- *     translator refuses a write that would hold an entry larger than that.
+ *   · R10 (b) THE CAPS.  8 MiB a project (λWAVES' since wave 46): parseProjectFile() refuses a larger file before it is
+ *     parsed, and the translator refuses a write that would bring in a new or changed entry larger than that.  24 MiB the
+ *     collection (BASINS' 24 MB, the kit's LIMITS.project): FOLDERS' own cap, MAX_LIBRARY_CHARS (the browser's quota is
+ *     usually the first to say no).
  * ONE PROJECT PART (R5-A3): a FOLDERS entry's payload is { parts: { lambdawaves: { data, notebook } } }, where `data` is
  * rack.js projectSnapshot() (serialize()'s form) and `notebook` the project's page 0, { title, subtitle, text }. */
-import { FILES_KIT, FILES_V, normalizeFolder } from './mir/folders/files.js';
+import { FILES_KIT, FILES_V, normalizeFolder, uniqueName } from './mir/folders/files.js';
 
 export const PJ_KEY = 'lambdawaves.q0.projects';
 export const PART = 'lambdawaves';
 export const MAX_PROJECT_BYTES = 8 * 1024 * 1024;
+export const MAX_LIBRARY_CHARS = 24 << 20;
 export const UNTOUCHED = 'Stored data was left untouched.';
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const leaf = (p) => p.slice(p.lastIndexOf('/') + 1);
@@ -27,6 +32,8 @@ const parent = (p) => (p.lastIndexOf('/') < 0 ? '' : p.slice(0, p.lastIndexOf('/
 const iso = (ms) => new Date(ms).toISOString();
 const put = (o, k, v) => Object.defineProperty(o, k, { configurable: true, enumerable: true, writable: true, value: v });   // "__proto__" is a project name
 export const pathOf = (e) => (e.folder ? e.folder + '/' + e.name : e.name);
+/** splitPath('a/b/c') → { folder: 'a/b', name: 'c' } — a path as λWAVES' save names it (trimmed of its outer slashes) */
+export const splitPath = (path) => { const p = String(path || '').trim().replace(/^\/+|\/+$/g, ''); return { folder: normalizeFolder(parent(p)), name: leaf(p) }; };
 
 /** validateProjectCollection(c) → c, or throws: the shape every λWAVES build has read (an invalid one is never overwritten) */
 export function validateProjectCollection(c) {
@@ -54,15 +61,16 @@ function idsOf(items) {
 }
 /** toFiles(c) → the kit's library envelope for a valid collection (files.js createFiles reads it as its own) */
 export function toFiles(c) {
-  const items = Object.values(c.items), { ids, max } = idsOf(items);
+  const items = Object.values(c.items), { ids, max } = idsOf(items), done = [];
   const entries = items.map((it, i) => {
-    const e = { id: ids[i], name: typeof it.name === 'string' && it.name ? it.name : leaf(it.path),
-      folder: normalizeFolder(typeof it.folder === 'string' ? it.folder : parent(it.path)),
+    const folder = normalizeFolder(typeof it.folder === 'string' ? it.folder : parent(it.path)), own = typeof it.name === 'string' && it.name ? it.name : leaf(it.path);
+    const e = { id: ids[i], name: uniqueName(own, folder, done), folder,
       at: Number.isFinite(Date.parse(it.saved)) ? Date.parse(it.saved) : 0, thumb: typeof it.thumb === 'string' ? it.thumb : '',
       facts: isObj(it.facts) ? it.facts : {},
       payload: { parts: { [PART]: { data: it.data, notebook: it.notebook, ...(isObj(it.part) ? it.part : {}) }, ...(isObj(it.parts) ? it.parts : {}) }, ...(isObj(it.payload) ? it.payload : {}) },
       bytes: 0 };
     e.bytes = JSON.stringify(e).length;                                // files.js reprice(), the same arithmetic
+    done.push(e);
     return e;
   });
   return { kit: FILES_KIT, formatVersion: FILES_V, seq: Math.max(max, Number.isFinite(c.seq) ? Math.floor(c.seq) : 0, entries.length), entries, folders: isObj(c.folders) ? c.folders : {} };
@@ -88,32 +96,38 @@ export function fromFiles(env, prev) {
   return out;
 }
 
-/** createProjectStore(storage) — the Storage-shaped translator FOLDERS is handed (createFolders({ storage })) */
+/** createProjectStore(storage) — the Storage-shaped translator FOLDERS is handed (createFiles({ storage }), createFolders({ storage })) */
 export function createProjectStore(ls = globalThis.localStorage) {
   const refuse = (why) => { throw new Error('the saved projects could not be read (' + why + ') — nothing was written. ' + UNTOUCHED); };
+  const view = () => { const r = readCollection(ls); return r.c ? JSON.stringify(toFiles(r.c)) : null; };
+  let saw;                                                            // the view of PJ_KEY the kit last read or wrote
   return {
     get length() { return ls.length; }, key: (i) => ls.key(i),
-    getItem(k) { if (k !== PJ_KEY) return ls.getItem(k); const r = readCollection(ls); return r.c ? JSON.stringify(toFiles(r.c)) : null; },
+    getItem(k) { return k !== PJ_KEY ? ls.getItem(k) : (saw = view()); },
     setItem(k, v) {
       if (k !== PJ_KEY && !k.startsWith(PJ_KEY + '.refused-')) { ls.setItem(k, v); return; }
       const r = readCollection(ls);
       if (r.why) refuse(r.why);
       if (k !== PJ_KEY) refuse('a set-aside copy is never made here');
-      const env = JSON.parse(v);
-      for (const e of env.entries) if (e.bytes > MAX_PROJECT_BYTES) throw new Error('“' + e.name + '” is larger than a project may be (8 MiB) — nothing was written');
+      const env = JSON.parse(v), had = new Map(r.c ? toFiles(r.c).entries.map((e) => [e.id, e.bytes]) : []);
+      for (const e of env.entries) if (e.bytes > MAX_PROJECT_BYTES && had.get(e.id) !== e.bytes) throw new Error('“' + e.name + '” is larger than a project may be (8 MiB) — nothing was written');
       ls.setItem(PJ_KEY, JSON.stringify(validateProjectCollection(fromFiles(env, r.c))));
+      saw = view();
     },
-    removeItem(k) { if (k === PJ_KEY && readCollection(ls).why) refuse(readCollection(ls).why); ls.removeItem(k); },
+    removeItem(k) { if (k === PJ_KEY) { const why = readCollection(ls).why; if (why) refuse(why); saw = null; } ls.removeItem(k); },
+    /** stale() — true when the collection moved since the kit last saw it (a write by another road of this tab: RECENT, a test) */
+    stale() { return saw !== undefined && view() !== saw; },
     /** the reason the collection is read-only, or null */
     get refusal() { return readCollection(ls).why || null; },
   };
 }
 
-/** touchRecent(storage, path) → bool — λWAVES' RECENT (8 kept; the FILE menu shows 5): written straight into the stored
- *  collection, outside the kit's envelope (toFiles never reads it, so no FOLDERS view sees a change) */
-export function touchRecent(ls, path) {
+/** touchRecent(storage, path, opened?) → bool — λWAVES' RECENT (8 kept; the FILE menu shows 5) and the item's `opened` stamp,
+ *  written straight into the stored collection, outside the kit's envelope (toFiles never reads either, so no view changes) */
+export function touchRecent(ls, path, opened) {
   const r = readCollection(ls); if (!r.c || !Object.hasOwn(r.c.items, path)) return false;
   r.c.recent = [path, ...(r.c.recent || []).filter((p) => p !== path)].slice(0, 8);
+  if (opened) r.c.items[path].opened = opened;
   try { ls.setItem(PJ_KEY, JSON.stringify(r.c)); return true; } catch (_) { return false; }
 }
 
@@ -129,8 +143,8 @@ export function parseProjectFile(text) {
   if (o.notebook !== undefined && !isObj(o.notebook)) throw new Error('invalid project notebook');
   const nb = o.notebook || {};
   for (const k of ['title', 'subtitle', 'text']) if (nb[k] !== undefined && typeof nb[k] !== 'string') throw new Error('invalid project notebook ' + k);
-  const path = o.path.trim().replace(/^\/+|\/+$/g, '');
-  return { path, folder: typeof o.folder === 'string' ? normalizeFolder(o.folder) : normalizeFolder(parent(path)), name: o.name || leaf(path),
+  const path = o.path.trim().replace(/^\/+|\/+$/g, ''), where = splitPath(path);
+  return { path, folder: typeof o.folder === 'string' ? normalizeFolder(o.folder) : where.folder, name: o.name || where.name,
     saved: o.saved || new Date().toISOString(), opened: o.opened || '', data: o.data,
     notebook: { title: nb.title ?? (o.name || path), subtitle: nb.subtitle ?? '', text: nb.text ?? '' } };
 }

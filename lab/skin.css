@@ -43,7 +43,6 @@
 .skip:focus { width: auto; height: auto; clip-path: none; left: 8px; top: 8px; z-index: 9999; padding: 6px 10px;
   border-radius: var(--r-pill); background: hsl(var(--glass-tint) / .98); color: var(--fg); box-shadow: var(--neu-raise);
   font: var(--w-bold) var(--fs-small)/1 var(--font-ui); letter-spacing: var(--tr-wide); text-decoration: none; }
-.pj-import:focus-within { border-color: var(--acc); color: var(--fg); }        /* the input is 1 px; the LABEL is what the eye finds */
 
 /* ── 12. the transport: `#transport.mini` — a 32-px subtitle bar, centred, the scrub a thin line ── */
 #transport { border-radius: var(--card-r); }
@@ -511,7 +510,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 /* Window contents expand naturally. The rack/page handles navigation; History alone keeps its list scroll. */
 #floats > .dev { max-height:none; }
 #floats > .dev > .dev-body { overflow:visible; }
-.dev .picker, .dev .pj-list { max-height:none;overflow:visible; }
+.dev .picker { max-height:none;overflow:visible; }
 .native-clean[data-id="settings"] .settings-viewport { height:auto;overflow:visible; }
 .native-clean .sp-knobs .k-val { max-width:80px; }
 .native-clean[data-id="settings"] .settings-actions > .trig { flex:1 1 70px; }

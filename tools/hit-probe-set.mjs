@@ -40,7 +40,8 @@ const SCENES = [
   ['the notebook', '[data-mir-window="notebook"]', SHUT + ' __LW.layout.notebook.open();'],
   ['the sheet', '#sheet', SHUT + " document.getElementById('sheet').hidden = false;"],
   ['the offer', '#offer', SHUT + " const sw = __LW.sw; sw.state = 'ready'; sw.offered = null; sw.pending = { type: 'LW_SW_WAITING', build: 'hit-probe' }; sw.offer();"],
-  ['FOLDERS (the notebook\'s PROJECTS face)', '[data-mir-window="notebook"]', SHUT + " __LW.layout.notebook.open('projects');"],
+  ['FOLDERS (0.5.0 C6: the kit window; the notebook\'s PROJECTS face left)', '[data-mir-window="folders"]', SHUT + " __LW.layout.notebook.open('projects');"],
+  ['its chip rail', '[data-mir-rail="folders"]', SHUT + " __LW.layout.notebook.open('projects');"],
 ];
 /* the page side: the first visible match's box, and what each point hit-tests as ('inside' · 'stage' · the name of anything else) */
 const FIND = (sel) => `[...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; })`;
