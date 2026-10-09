@@ -346,7 +346,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .tempo-info { position: absolute; top: 6px; right: 6px; }
 .tempo-empty { font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.4; }
 .tempo-empty { grid-column: 1 / -1; font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.4; }
-.tempo-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 4px; }
+.tempo-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 4px; }   /* 0.5.0 C4: eight tiles (LINKED and MOD ▶ retired), two rows of four */
 #transport.tempo-open { flex-wrap: wrap; }
 /* Motion can change ink, never the dimensions of the controls around it. */
 .native-clean .formula { white-space: normal; }
