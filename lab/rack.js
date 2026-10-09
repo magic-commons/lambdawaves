@@ -330,9 +330,6 @@ export async function boot(dom) {
   const gov = { on: true, drop: 0, median: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
 
 
-  /** the MOMENT's half: the only thing that may move while the field runs is the filter, never the fill (0.5.0 C2: the kit's
-   *  frost row writes frost-hold under STILL while the picture moves; this tells it, on the edge only) */
-  function frostSync() { look.moving(clock.playing); }
   const effectiveRes = () => { if (!gov.drop) return quality.res; let i = RES_LADDER.findIndex((r) => r >= quality.res); if (i < 0) i = RES_LADDER.length - 1; return RES_LADDER[Math.max(0, i - gov.drop)]; };
   const READER_LAW = { park: 16, slow: 6, parkDrop: 8, slowDrop: 3, probeMs: 3000 };   // ms per update: parked while playing / slowed to every 6 × cost — and the tighter pair once stepped down
 
@@ -731,7 +728,8 @@ export async function boot(dom) {
     else if (!cornerAxis.hidden) cornerAxis.hidden=true;
     if(ui.frameSw) { const mode=mat.frame===false?'OFF':(mat.frameMode||'box').toUpperCase(); if(ui.frameSw.root.dataset.mode!==mode)ui.frameSw.root.dataset.mode=mode; }
     if(ui.axisSw) { const mode=mat.axis===false?'OFF':(mat.axisMode||'box').toUpperCase(); if(ui.axisSw.root.dataset.mode!==mode)ui.axisSw.root.dataset.mode=mode; }
-    frostSync();   /* WAVE 67: the FROST policy's one per-frame act — a class compare, no read of anything.
+    look.moving(clock.playing);   /* WAVE 67: the FROST policy's one per-frame act — a compare, no read of anything (0.5.0 C2: on the
+                      edge the kit's frost row writes frost-hold under STILL: the filter moves while the field runs, never the fill).
                       It rides the loop rather than the play button because there are seven ways to start the
                       transport in this lab (the button, the key, LW.play, the A/B switch, the bow, the slap,
                       a preset restore) and a policy wired to one of them is a policy that is wrong six times.
