@@ -2411,7 +2411,7 @@ export async function boot(dom) {
    * one card and it carries its own chrome, its own chip rail and its own drag grip — a 300 px
    * rack slot cannot hold it and wrapping it in `device()` would put the house's frame around a
    * window whose frame is the thing that travelled.  So it is built into the FLOAT LAYER by
-   * `lab/modwindow.js` and shown by the transport pill's ⤢, exactly as wave 55 already opened it
+   * the kit's controller (`lab/mir/modulation/window.js`, 0.5.0 C4; `lab/modwindow.js`, its copy, is deleted) and shown by the transport pill's ⤢, exactly as wave 55 already opened it
    * (`layout.modulation` below is unchanged in its verbs and rewritten in its mechanism).
    * `lab/modview.js` — 1705 lines, the window this replaces — is deleted with it. */
   {
@@ -2567,7 +2567,7 @@ export async function boot(dom) {
       if (trMoving) { if (r.right < 0) setTimeout(() => modDodge(r), 320); return; }
       if (document.body.classList.contains('rack-hidden')) return;   // it is already parked off-screen
       /* OPTIMIZATION 2026-09-24 · N8 · A CLOSED WINDOW HAS NOTHING TO DODGE, AND ASKING COST THE BOOT A LAYOUT.  A closed
-         modulation window reports the origin's empty rect (modwindow.js place(); `closed` sends −1s).  No seat can hit a
+         modulation window reports the origin's empty rect (the kit's window.js place(); `closed` sends −1s).  No seat can hit a
          rect at or left of x = 0: a seat's left is (vw − w)/2 and the pill is `min(640px, 100vw − 24px)` wide
          (skin.css), so it starts ≥ 12 px in — the old chain always answered 'bottom' (or 'top' on a narrow rack) for it.
          When the pill already sits there, that answer changed nothing but it read the pill's rect first: on a first visit
@@ -2608,7 +2608,7 @@ export async function boot(dom) {
       moved: modDodge, persist: () => saveSettings(), note: hNote,
       rateControl: () => knob({ label: 'RATE', min: 0.1, max: 3000, value: clock.rate, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (!modHand('transport.rate', v)) { clock.setRate(v); ui.rateKnob.set(v); } } }),
       /* WAVE 102 · THE FIFTH EDGE's memory: the chosen input, kept in this browser's settings so a returning user is not asked to
-         pick it again — a device HANDLE, never audio (lab/audio.js's header says why that distinction matters). */
+         pick it again — a device HANDLE, never audio (the kit's mir/modulation/audio-capture.js header says why that distinction matters). */
       device: { read: () => readSettings().audioDevice || '',
         write: (id) => { const S = readSettings();
           settingsStore.write({ ...S, audioDevice: id }); } },
@@ -4736,7 +4736,7 @@ export async function boot(dom) {
       if (Number.isFinite(v)) modHost.registry.setBase(id, v);
     }
     modHost.clock.applyAll(true);
-    if (modView && !opening) modView.rebuild();                    // wave 127: a window the file opens is rebuilt by its open() (modwindow.js restore → open → rebuild)
+    if (modView && !opening) modView.rebuild();                    // wave 127: a window the file opens is rebuilt by its open() (the kit's window.js restore → open → rebuild)
     schedule(TIER.PRESENT);
     return ok;
   }

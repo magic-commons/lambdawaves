@@ -3,18 +3,18 @@
  * A microphone cannot be gated in CI, so this gate does the two things that CAN be proved without
  * one, and they are the two that actually carry the risk:
  *
- *   1 · THE MEASUREMENT.  `lab/audio.js` is driven against a STUBBED Web Audio API whose spectrum
+ *   1 · THE MEASUREMENT.  the kit's `mir/modulation/audio-capture.js` is driven against a STUBBED Web Audio API whose spectrum
  *       and waveform are chosen by this file, so `rms`, `bandPower` and `flux` are checked against
  *       numbers computed here independently.  Every one of those three has a units trap in it —
  *       amplitude vs power, dB vs linear, per-bin vs summed — and a units error is silent: the
  *       instrument still moves, it just moves by the wrong amount forever.
- *   2 · THE SEAM.  The packet `audio.js` emits is fed to the REAL `modFeedAudio`, and the model's
+ *   2 · THE SEAM.  The packet the capture emits is fed to the REAL `modFeedAudio`, and the model's
  *       own follower, gate and onset detector are asserted through it.  This is what stops the two
  *       halves drifting apart: if either side renames a field or changes a unit, this fails.
  *
  * What is NOT claimed here: that a real microphone sounds right.  That is Josh's ear.
  */
-import { createAudioCapture, audioSupport, AUDIO_STATE, BANDS } from '../lab/audio.js';
+import { createAudioCapture, audioSupport, AUDIO_STATE, BANDS } from '../lab/mir/modulation/audio-capture.js';   // 0.5.0 C4: the kit's capture (lab/audio.js, its twin, is deleted)
 import * as M from '../lab/mir/modulation/mod.js';
 
 let pass = 0, fail = 0;
@@ -28,7 +28,7 @@ const near = (a, b, tol) => Math.abs(a - b) <= tol;
    below goes through this — which is also a fair description of what a browser does. */
 const define = (k, v) => Object.defineProperty(globalThis, k, { value: v, configurable: true, writable: true });
 
-/* ── THE STUB.  Only what audio.js actually touches, and it answers honestly. ─────────────────── */
+/* ── THE STUB.  Only what the capture actually touches, and it answers honestly. ─────────────────── */
 const SR = 48000, FFT = 2048, BINS = FFT / 2;
 let stubSpectrumDb = new Float32Array(BINS).fill(-Infinity);
 let stubWave = new Float32Array(FFT);
@@ -123,7 +123,7 @@ ok('a permitted start goes LIVE', cap.state === AUDIO_STATE.LIVE, cap.state);
   /* ONE tone of magnitude m in the MID band: mean power over that band's bins is m²/count. */
   const binHz = SR / 2 / BINS;
   const mid = BANDS[1];
-  /* the same CONTIGUOUS rule audio.js uses, computed here independently: LOW ends at ceil(250/binHz)
+  /* the same CONTIGUOUS rule the capture uses, computed here independently: LOW ends at ceil(250/binHz)
      and MID therefore starts one bin later, so no bin is in two bands. */
   const lowEnd = Math.max(Math.max(1, Math.floor(BANDS[0].lo / binHz)), Math.min(BINS - 1, Math.ceil(BANDS[0].hi / binHz)));
   const i0 = Math.max(1, lowEnd + 1, Math.floor(mid.lo / binHz));

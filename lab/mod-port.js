@@ -22,7 +22,7 @@
  *     never refused for want of a route or an open editor (MIR 1.5 `installModulation().play`); a pause releases it.
  */
 import { createModHost } from './mir/modulation/host.js';
-import { createAudioCapture, AUDIO_STATE } from './audio.js';   // wave 102: the capture half the kit's port deliberately left behind
+import { createAudioCapture, AUDIO_STATE } from './mir/modulation/audio-capture.js';   // wave 102's capture half, the kit's since 1.5 (0.5.0 C4: lab/audio.js deleted)
 
 const CAP = ['state', 'reason', 'live', 'deviceId', 'sampleRate', 'frames', 'inputLatencyMs', 'analysisLatencyMs', 'visualLatencyMs', 'latencyMs', 'latencyEstimated'];
 const IDLE = { state: AUDIO_STATE.IDLE, reason: '', live: false, deviceId: '', sampleRate: 0, frames: 0, inputLatencyMs: null,
