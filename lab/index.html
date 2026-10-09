@@ -49,28 +49,21 @@
 <meta name="apple-mobile-web-app-title" content="λWAVES">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta id="themeColor" name="theme-color" content="#070a0f">
-<!-- MIR · the kit's sheets come first: tokens and widgets, then the material language; the app's own sheets follow. -->
-<link rel="stylesheet" href="./mir/css/base.css">
-<link rel="stylesheet" href="./mir/css/skin.css">
-<!-- 0.5.0 C1 (interim; C0's mir/mir.css supersedes these four): the sheets the kit's CAMERA and RAMP panels draw with -->
-<link rel="stylesheet" href="./mir/controls/controls.css">
-<link rel="stylesheet" href="./mir/controls/colour-controls.css">
-<link rel="stylesheet" href="./mir/panels/camera.css">
-<link rel="stylesheet" href="./mir/panels/ramp.css">
+<!-- ── MIR 1.5 · THE CASCADE (0.5.0 C0) ───────────────────────────────────────────────────────────────
+     Every kit rule is in a cascade layer since 1.5 (lab/mir/css/base.css declares `mir.*`'s order; docs in the kit's
+     LAYERS.md §1).  `@layer app, mir;` comes FIRST, before base.css, so a layer of ours is named `app.*` and ranks
+     BELOW the kit for a normal declaration and ABOVE it for an `!important` one (ADOPTING-1.5 §4: never `mir.*`).
+     Then the kit's ONE sheet, mir/mir.css (it @imports every kit sheet in the order the kit is tested in), then ours:
+     lab.css and skin.css are UNLAYERED, so a rule of ours beats every kit rule on a property both set, whatever comes
+     first.  WAVE 64's "the modulation window's two sheets last, nothing follows them" is retired by the layers, not by
+     the order: modwindow.css sits in mir.kit.plugin.artifact and modhost.css in .plugin.host, and an unlayered rule
+     of ours that reaches inside `.mir-modwindow` now wins by rank (the kit's LAYERS.md §6 (b)) — skin.css §M says
+     which of ours are meant to.  KaTeX's sheet is the vendor's, unlayered; it styles `.katex` alone. -->
+<style>@layer app, mir;</style>
+<link rel="stylesheet" href="./mir/mir.css">
 <link rel="stylesheet" href="./lab.css">
 <link rel="stylesheet" href="./skin.css">
     <link rel="stylesheet" href="./mir/shell/vendor/katex/katex.min.css">
-<!-- ── WAVE 64 · THE PORTED WINDOW'S TWO SHEETS, AND THEY ARE LAST ON PURPOSE ────────────────────────
-     `lab/mir/modulation/modwindow/modwindow.css` is BASINS' modulation window, 667 of 667 declaration blocks
-     byte-identical to the source's, moved here whole under docs/ui/STYLE-LOCK.md's PORTED-WINDOW
-     EXCEPTION.  In BASINS its own sheet is appended to <head> at first open, so it wins every tie;
-     host-contract.md's rule four is "do not load a host sheet after it that can reach inside
-     `.mir-modwindow`", and this is where that rule is kept — nothing follows it.
-     `modhost.css` is the OTHER half of the contract: the 67 host tokens the window reads and declares
-     nothing of, SCOPED rather than pasted onto :root, because λWAVES already owns 24 of those names
-     with its own values.  It comes first because a custom property is resolved where it is USED. -->
-    <link rel="stylesheet" href="./mir/modulation/modhost.css">
-    <link rel="stylesheet" href="./mir/modulation/modwindow/modwindow.css">
     <!-- Notebook parsers are ordered deferred scripts: they remain ready before DOMContentLoaded, while the HTML
          parser can reach the stage and main module without waiting for 308 KB of notebook-only JavaScript. -->
     <script defer src="./mir/shell/vendor/marked.min.js"></script>

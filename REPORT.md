@@ -4589,6 +4589,47 @@ one at a time and 4 s apart: `frame-occlusion` **7/7** (twice), `menubar` **8**,
 
 ## 2026-10-08 · 0.5.0 C — THE ADOPTION
 
+### wave 196: C0 THE BARE ADOPTION — MIR 1.5.0-alpha.24 pinned, `@layer app, mir;`, the seven classes defaulted for Josh
+
+λWAVES now runs on MIR **1.5.0-alpha.24** (`1b7ae99b9905`), copied by the 1.5 worktree's own `adopt.mjs` (196 added, 23 updated,
+0 removed, 43 unchanged; `lab/mir` + `lab/fonts` 66 → 262 files) and pinned: the manifest's sha-256 `3f969725…5351` joins the 1.4.3 row
+in `tests/mir-manifest.test.mjs` `ACCEPTED`, and adopt `--check` reads "in step with MIR 1.5.0-alpha.24". **The cascade:** the kit's four
+1.4.3 `<link>`s become `<style>@layer app, mir;</style>` + `mir/mir.css`, with `lab.css` and `skin.css` unlayered after it; the link change
+alone moves 0 element-properties in stylehash (closed and with the modulation window open). Mapping every property both sides declare
+(CDP, 4 states with the window open, plus the notebook) found five app rules that LOST to the kit on 1.4.3 and would win unlayered; each
+has a twin `:not(:where(…))` narrowing (the frost veil, the tempo pill's buttons, `.dock-btn` glyphs, `.reg-bar .sel`, `.reg-morph`), and
+a re-map shows 0 either way. The 37 `!important`s stay unlayered (none meets a kit `!important` with a different value); twelve now beat
+the kit for nothing and are left for a popover-open probe, because unflagged they could lose to our own rules. **new-project**: bpm 60 → 30
+(the kit's default and the plan's). **R5-W1**: a kit module no root reaches is reported, not precached, not failed — 114 on alpha.24 —
+and `pwa`/`build-deploy` read that set; the precache is **263 entries, 5,900,325 B** (base 191 / 4,874,333 B; the bare adopt would have
+been 372 / 7.34 MiB).
+
+**The glass.** stylehash (the kit's tool, 8 states, base `7044f37` + a noise run against the adopted tree) sorts what 1.5 restyles into PLAN
+§2's seven classes. PLAN §9's default is applied class by class: the kit's for press-scale (816 element-states), box-shadow (456), the
+`.k-val` outline (224), the ON text-shadow (132) and the `.dev-power` border (80) — BASINS' INTENT, or Josh's own power ruling — and
+λWAVES' for the disconnected head's fill and lift (80 + 80 → 0), restored by three 1.4.3 rules in lab.css §G. A bug, not a ruling, was
+fixed beside them: skin.css read `--glass-shadow-flat`, which 1.5 removed, and every docked card had lost its shadow. Each class is in
+`research/release-0.5.0/C0-GLASS-RULINGS.md` with its before/after (and the kit's) picture, for Josh to keep, take the kit's, or call a bug.
+
+**The two reds.** `keyboard-window` was C0's own: 1.4.3's `base.css` stacked λWAVES' app-owned `#keymap` (`position: fixed; inset: 0;
+z-index: var(--z-veil)` and `[hidden] → none`), 1.5 does not, and the pane fell under the left rack. Both rules are λWAVES' own in `lab.css`
+now (`--z-veil` is still the kit's 40); the drag point hits the title again. The kit's `keyboard.css` still reaches our pane through its bare
+`.km-*` classes — measured by a per-element dump, a gate-Firefox shot with a real-pointer hover and a keymap-open stylehash pair (1,521
+elements × 8 states) — and breaks nothing (the 315 key children with `pointer-events: none` hand the pointer to the button that owns every
+handler; nothing is clipped); it adds an LED dot on the 42 bound keys, a groove scrollbar and a legend hairline, which are C3's input under
+R5-S3. `mir-controls` was the test: 1.5's ONE KNOB LAW drags a knob vertically (220 px of rise, 320 under a finger, sideways ignored) with
+one ⅛ gear on a drag, a fader and a Shift arrow, and the test dragged sideways with 1.4.3's numbers. It is re-aimed; green here, and red on
+the base copy at its own sideways line, so it guards the law.
+
+**Measured.** `bash test.sh node` exit 0, **85/85**. Browser **27/27**: the second canary's 25 (one at a time, 4 s apart) and, on the final
+tree, `keyboard-window` 1/1, `mir-controls` 2/2, `frame-occlusion` 7/7, `menubar` green. `node tools/new-project.mjs --check` in step.
+`cat lab/*.js | wc -l` **36,288 → 36,361 (+73**, the generated `sw.js` alone; no app JS changed, no `__LW` member touched). The ms/s pair
+(`main-thread.mjs --runs 1` interleaved base `7044f37` / C0 × 3, notice dismissed, every row `field ok`, 0 held; a first attempt was
+discarded because three runs started above load 4): base 38.827 · 39.345 · 39.968 (median **39.345**), C0 39.382 · 41.634 · 41.959
+(median **41.634**), loads 1.15–3.87 — **|Δ median| 2.289 ≤ 3.536 ms/s, PASS** (the discarded attempt read 1.838). Against the stored
+pre-C baseline 37.335 C0 reads +4.299, over the gate; the same-session base reads +2.010 with nothing changed, so about 2 ms/s of it is
+the session. C0's own cost is ≈ +2 ms/s (Script ≈ +0.6–0.9); C-V is where it is located. Hand-off: `research/release-0.5.0/C0-BUILD.md`.
+
 ### wave 197: C1 THE CAMERA PANEL — MIR's CAMERA and RAMP over λWAVES' own law; `paletteview.js` and CAMERA MOTION leave
 
 **The adopt.** The branch starts with the bare adopt, identical to C0's: the 1.5 worktree's `adopt.mjs --line 1.5` took MIR

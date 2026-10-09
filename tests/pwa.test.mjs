@@ -22,6 +22,7 @@ import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from '
 import { createHash } from 'node:crypto';
 import { inflateSync, brotliDecompressSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 
 const LAB = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'lab');
@@ -249,6 +250,11 @@ const ALLOW_BLOCK = (WIRING.match(/\nconst ALLOWLIST = \[\n([\s\S]*?)\n\];/) || 
 assert.ok(ALLOW_BLOCK !== undefined, 'tests/wiring.test.mjs: the ALLOWLIST array moved — the precache cannot derive its STAGED set');
 const STAGED = new Set([...ALLOW_BLOCK.matchAll(/\{ file: 'lab\/([^']+)'/g)].map((m) => m[1]));
 assert.equal(STAGED.size, (ALLOW_BLOCK.match(/\bfile:/g) || []).length, 'tests/wiring.test.mjs: an ALLOWLIST entry this parser cannot read');
+/* 0.5.0 C0 · R5-W1 (PLAN §9): …and an ADOPTED KIT MODULE that no root reaches — deployed, never precached, never a load of the running
+   lab.  The set is wiring.test.mjs's own walk (`--unreached-kit`), never kept here: the day a consumer imports a kit module, the walk
+   reaches it, the module leaves the set and rejoins the precache by itself, exactly as a staged module does. */
+const KIT_UNREACHED = new Set(JSON.parse(execFileSync(process.execPath, [path.join(LAB, '..', 'tests', 'wiring.test.mjs'), '--unreached-kit'], { encoding: 'utf8' })));
+assert.ok([...KIT_UNREACHED].every((r) => r.startsWith('mir/')), 'tests/wiring.test.mjs --unreached-kit named a file outside lab/mir/ — R5-W1 is for the kit\'s files only');
 /* 0.4.0 S4a · THE ONE EXEMPTION: a file under one of sw.js §1b's DATA roots (library/) is content-addressed device content —
    deployed, never precached.  The list is READ from sw.js, so the worker, this walk and tools/build-deploy.mjs cannot disagree. */
 const DATA = JSON.parse((text('sw.js').match(/\nconst DATA = (\[[^\]]*\]);/) || [])[1].replace(/'/g, '"'));
@@ -258,7 +264,7 @@ const IS_DATA = (rel) => DATA.some((d) => rel.startsWith(d));
 const KIT_SKIP = JSON.parse((text('sw.js').match(/\nconst SKIP = (\[[^\]]*\]);/) || [])[1].replace(/'/g, '"'));
 const skipRe = (p) => new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*') + (p.endsWith('/') ? '' : '$'));
 const IS_KIT_SKIP = (rel) => KIT_SKIP.some((p) => skipRe(p).test(rel));
-const SKIP = (rel) => rel === 'sw.js' || rel === 'smoke.html' || (/\.(md|txt)$/i.test(rel) && !LICENCE(rel)) || STAGED.has(rel) || IS_DATA(rel) || IS_KIT_SKIP(rel);
+const SKIP = (rel) => rel === 'sw.js' || rel === 'smoke.html' || (/\.(md|txt)$/i.test(rel) && !LICENCE(rel)) || STAGED.has(rel) || KIT_UNREACHED.has(rel) || IS_DATA(rel) || IS_KIT_SKIP(rel);
 const walk = (d, out = []) => { for (const e of readdirSync(d, { withFileTypes: true })) {
   const f = path.join(d, e.name); if (e.isDirectory()) walk(f, out); else out.push(path.relative(LAB, f).split(path.sep).join('/')); } return out; };
 const onDisk = walk(LAB).sort();
@@ -311,7 +317,7 @@ assert.ok(listed.includes('manifest.webmanifest'), 'sw.js: the manifest itself m
 
 /* The prose in sw.js must name every rule the walk actually applies, so the two cannot drift apart silently. */
 const never = SW.LW_SW.NEVER_PRECACHE.map(([k]) => k).join(' ');
-for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'a DATA root (§1b: library/)', 'a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)'])
+for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'an adopted kit module no root reaches (R5-W1)', 'a DATA root (§1b: library/)', 'a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)'])
   assert.ok(never.includes(rule), `sw.js: NEVER_PRECACHE does not document the rule "${rule}" that the walk applies`);
 /* and the exception must be REAL, not merely written: every licence text in lab/ is in the precache list. */
 const licences = onDisk.filter(LICENCE);
@@ -390,6 +396,10 @@ const ALLOW = [
   [(f) => f.rel === 'index.html' && new RegExp('<a[^>]+href="' + f.url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"').test(f.src),
     'an ABOUT credit link: a plain <a target="_blank"> the reader clicks, never a load'],
   [(f) => /(^|\/)vendor\//.test(f.rel), 'a vendored library\'s own banner comment or error text (marked names its home page when it throws) — D1 above scans these same files for every loading construct, so an allowance here cannot hide a real fetch'],
+  /* 0.5.0 C0 · R5-W1: inside an adopted kit module that NO ROOT REACHES the URL is shipped but never loaded and never shown (on
+     alpha.24: mir/shell/gui.js, the MIR logo's type credit in MIR ABOUT).  The allowance is the reach, not the file: the day a
+     consumer imports the module (createGui is C2) it leaves the set and the URL is judged here on its own. */
+  [(f) => KIT_UNREACHED.has(f.rel), 'inside an adopted kit module no root reaches (R5-W1) — deployed, never loaded, never shown; judged again the day a consumer reaches it'],
   /* WAVE 59 · og:image is METADATA, and it is the one absolute URL the lab is allowed to contain.  A link
      unfurler is a crawler on another machine with no base URL to resolve against, so a relative og:image is
      simply dropped; this page never fetches it, and D1 above proves that by construction (a <meta content=>
@@ -437,12 +447,27 @@ const live = (s, html) => (html ? s.replace(/<!--[\s\S]*?-->/g, ' ') : s)
 let refs = 0;
 const noteAll = (rel, src, re, g = 1) => { for (const m of src.matchAll(re)) { refs++; note(rel, m[g]); } };
 noteAll('index.html', live(text('index.html'), true), /(?:src|href)="([^"]+)"/g);
-for (const rel of onDisk.filter((r) => /\.js$/.test(r) && !r.startsWith('vendor/') && !STAGED.has(r))) {   // M10: a staged module's imports are not loads of the running lab
+for (const rel of onDisk.filter((r) => /\.js$/.test(r) && !r.startsWith('vendor/') && !STAGED.has(r) && !KIT_UNREACHED.has(r))) {   // M10 + R5-W1: a staged or unreached kit module's imports are not loads of the running lab
   const src = live(text(rel));
   noteAll(rel, src, /(?:from|import)\s*\(?\s*['"](\.[^'"]+)['"]/g);
   noteAll(rel, src, /new URL\(\s*['"](\.[^'"]+)['"]\s*,\s*import\.meta\.url/g);
 }
-for (const rel of ['mir/css/base.css', 'mir/css/skin.css', 'lab.css', 'skin.css']) noteAll(rel, live(text(rel)), /url\(\s*['"]?(\.[^'")]+)/g);   // MIR's sheets first: the fonts are the kit's
+/* 0.5.0 C0 · THE SHEETS THE PAGE REALLY LOADS, not a hand-kept list: index.html's <link rel="stylesheet">s and every @import they
+   make, followed (MIR 1.5's mir/mir.css imports the kit's whole set; info/faces.css reaches fonts/info/).  Each sheet's relative
+   url()s must exist and be precached.  A vendor sheet is left to its own check below (KaTeX names woff and ttf fallbacks it does not ship). */
+const SHEETS = [];
+const addSheet = (rel) => {
+  if (SHEETS.includes(rel)) return;
+  if (!existsSync(path.join(LAB, rel))) { dangling.push(`a stylesheet lab/${rel} that index.html or an @import names`); return; }
+  SHEETS.push(rel);
+  for (const m of live(text(rel)).matchAll(/@import\s+(?:url\(\s*)?['"]?([^'")\s;]+)/g)) {
+    refs++; note(rel, m[1]); addSheet(path.posix.normalize(path.posix.join(path.posix.dirname(rel), m[1])));
+  }
+};
+for (const m of live(text('index.html'), true).matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="\.\/([^"]+)"/g)) addSheet(m[1]);
+for (const must of ['mir/css/base.css', 'mir/css/skin.css', 'lab.css', 'skin.css'])
+  assert.ok(SHEETS.includes(must), `index.html no longer reaches ${must} through its <link>s and their @imports — the page's look and its fonts hang on it`);
+for (const rel of SHEETS.filter((r) => !/(^|\/)vendor\//.test(r))) noteAll(rel, live(text(rel)), /url\(\s*['"]?(?!data:|https?:|#|\/)([^'")]+)/g);
 /* the stripper must not have eaten live code: these three are certainly there */
 for (const [rel, ref] of [['main.js', './rack.js'], ['index.html', './main.js'], ['rack.js', './mathworker.js']])
   assert.ok(live(text(rel), rel.endsWith('.html')).includes(ref), `the comment stripper removed ${ref} from lab/${rel} — it is over-eager and D3 is not proving anything`);
@@ -761,8 +786,23 @@ for (const rel of licenceTexts)
   for (const m of text(rel).matchAll(/Reserved Font Names?\s+((?:"[^"]+"|[A-Za-z_][\w ]*?)(?:\s*,\s*(?:"[^"]+"|[A-Za-z_][\w]*))*)(?=\.|\s+and\s|\n|$)/g))
     for (const nm of m[1].split(/\s*,\s*/)) { const v = nm.replace(/^"|"$/g, '').trim(); if (v && v.toLowerCase() !== 'the' && !/^is /.test(v)) RFN.add(v); }
 const FACES = onDisk.filter((r) => /\.woff2$/i.test(r)).sort();
-const ours = FACES.filter((r) => r.startsWith('fonts/')), vendored = FACES.filter((r) => !r.startsWith('fonts/'));
+/* 0.5.0 C0 · MIR 1.5 adopts its notebook faces into lab/fonts/info/ (Spectral, Playfair Display, Alegreya SC).  They are not ours and
+   not subsets of ours: they are Google Fonts' own files, fetched UNMODIFIED — lab/fonts/info/SOURCE.txt records each file's byte
+   count and URL, and the bytes are held to it below — so, like KaTeX's, they are vendored faces whose Reserved Font Names stand. */
+const KIT_FACES = FACES.filter((r) => r.startsWith('fonts/info/'));
+const ours = FACES.filter((r) => r.startsWith('fonts/') && !KIT_FACES.includes(r)), vendored = FACES.filter((r) => !r.startsWith('fonts/'));
 assert.equal(ours.length, 3, `expected the three subset interface faces in lab/fonts/, found ${ours.length}`);
+if (KIT_FACES.length) {
+  const kitSource = text('fonts/info/SOURCE.txt');
+  for (const rel of KIT_FACES) {
+    const base = path.posix.basename(rel), rec = kitSource.match(new RegExp('^' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s+(\\d+) B\\s+https://', 'm'));
+    assert.ok(rec, `lab/fonts/info/SOURCE.txt has no line for ${base} — a kit face whose origin is unrecorded`);
+    assert.equal(statSync(path.join(LAB, rel)).size, Number(rec[1]), `lab/${rel} is not the ${rec[1]} B SOURCE.txt records — a kit face changed after it was fetched is a Modified Version`);
+    assert.ok(existsSync(path.join(LAB, 'fonts/info', base.split('-')[0] + '-OFL.txt')), `lab/${rel} ships without its family's OFL text beside it`);
+    for (const m of (woff2Names(rel)[13] || '').matchAll(/Reserved Font Names?\s+([\w]+)/g)) RFN.add(m[1]);
+  }
+  console.log(`PASS the kit's ${KIT_FACES.length} notebook faces (lab/fonts/info/) are the bytes SOURCE.txt records as fetched, each beside its family's OFL — vendored, unmodified.`);
+}
 /* 0.4.0 S0 · wave 138: ONE set — lab/index.html loads the kit's KaTeX and the byte-identical lab/vendor/katex is deleted */
 assert.equal(vendored.filter((r) => r.startsWith('mir/shell/vendor/katex/fonts/')).length, 20, 'expected the twenty unmodified KaTeX faces under mir/shell/vendor/katex/fonts/');
 assert.equal(vendored.length, 20, `expected one complete set of twenty unmodified KaTeX faces (the kit's), found ${vendored.length}`);

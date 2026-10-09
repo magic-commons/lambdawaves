@@ -3,6 +3,25 @@
    the tokens and the widgets, not the stage). */
 html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #070a0f; }
 
+/* ── G · THE GLASS DEFAULTS (0.5.0 C0; Josh rules each class: research/release-0.5.0/C0-GLASS-RULINGS.md) ─────────────
+   MIR 1.5's first look changes seven property classes on the kit's own controls.  PLAN §9's default, class by class: λWAVES'
+   look where λWAVES originated it, the kit's where BASINS designed it.  Five take the kit's and need nothing here.  TWO keep
+   λWAVES' — the DISCONNECTED HEAD's lighter fill and its brightness/saturate lift (classes 4 `.dev-head` background and 6
+   backdrop-filter): λWAVES' disconnected rack, whose head "keeps its own lighter fill — the difference is the point" (MIR 1.4.3
+   mir/css/skin.css), where 1.5 makes the head the pane (BASINS' "the only difference is the fill").  These are the three 1.4.3
+   kit rules that painted that head, verbatim, UNLAYERED and FIRST among our rules: so they beat every kit layer as 1.4.3's
+   unlayered kit did, and λWAVES' own head rules below (skin.css: a selected or TAB-hot head) still win by order, as then.
+   Not an `app.*` layer: `@layer app, mir;` ranks app BELOW the kit for a normal declaration, so a layered rule cannot keep a
+   look the kit paints (only `!important` could, and it would also beat our own state rules).  Josh's "take the kit's" for
+   either class = delete its lines here; nothing else depends on them. */
+body.disconnected:not(.phone) .dev > .dev-head { background: var(--glass-raise);
+  -webkit-backdrop-filter: brightness(1.03) saturate(1.03);
+  backdrop-filter: brightness(1.03) saturate(1.03); }
+body.disconnected.frost:not(.phone) .dev > .dev-head {
+  -webkit-backdrop-filter: var(--frost-filter) brightness(1.03) saturate(1.03);
+  backdrop-filter: var(--frost-filter) brightness(1.03) saturate(1.03); }
+body.disconnected.frost.frost-hold:not(.phone) .dev > .dev-head { -webkit-backdrop-filter: none; backdrop-filter: none; }
+
 /* ── shell ──────────────────────────────────────────────────────────────── */
 /* THE STAGE IS THE WHOLE WINDOW; the rack floats over it as detached cards */
 #lab { position: fixed; inset: 0; display: block; }
@@ -389,7 +408,9 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #floats > .dev.compact { width: var(--rail-w); }
 .dev.floating.compact .dev-stat { display: none; }
 #rackAdd > svg { width: 16px; height: 16px; }
-.dock-btn > svg, .mod-exp > svg { width: 13px; height: 13px; }
+/* 0.5.0 C0 · TWIN: the kit sizes the dock / pop-out glyphs (`button:is([data-gly="north"], …) > svg`, 12 px) and on 1.4.3 its
+   rule out-ranked this one there; unlayered on 1.5 this would grow the transport's dock glyph to 13 px. */
+.dock-btn > svg:not(:where(button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg)), .mod-exp > svg:not(:where(button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg)) { width: 13px; height: 13px; }
 .sp-cap, .sturm-note { font-family: var(--font-sans); font-size: var(--fs-small); color: var(--dim); line-height: 1.35; padding: 0 2px 2px; }   /* the note's look, outside the ⓘ sweep */
 .sp-cap b, .sturm-note b { color: var(--fg-soft); font-weight: var(--w-med); }
 
@@ -442,10 +463,14 @@ body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
 .reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }
 .reg-bar { align-items: center; }
-.reg-bar .sel { flex: 1 1 0; min-width: 0; }
+.reg-bar .sel { min-width: 0; }
+/* 0.5.0 C0 · TWINS: the kit's `.row > select.sel { flex: 1 1 auto }` and `.row.tight { justify-content: flex-start }` out-ranked the
+   next two on 1.4.3 (the MO-REGISTRY bar and its morph row are kit `.row`s); unlayered on 1.5 they would win.  Kept as written. */
+.reg-bar .sel:not(:where(.row > select.sel)) { flex: 1 1 0; }
 .reg-bar .trig { flex: 0 0 auto; padding: 0 8px; }
 .reg-bar .trig.on { color: var(--acc); }
-.reg-morph { align-items: center; justify-content: space-between; }
+.reg-morph { align-items: center; }
+.reg-morph:not(:where(.row.tight)) { justify-content: space-between; }
 .reg-morph .k { flex: 0 0 auto; }
 .reg-drive { align-items: center; }
 .reg-drive .sel { flex: 1 1 0; min-width: 0; }
@@ -709,7 +734,10 @@ body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45;
 .mod-poprts > .grp-lbl { flex: 1 0 100%; }
 .mod-poprts > .mod-mchip { border: 0; cursor: pointer; font: inherit; font-size: var(--fs-micro); }
 .mod-poprts > .mod-mchip.on { box-shadow: inset 0 0 0 1px var(--acc2); font-weight: var(--w-bold); }
-#keymap { pointer-events: none; }
+/* THE KEYBOARD EDITOR IS THE APP'S (CLAUDE.md): its stacking was MIR 1.4.3 base.css's two #keymap rules, which MIR 1.5 dropped
+   (0.5.0 C0) — so they are λWAVES' own here; --z-veil (40) is still the kit's token. */
+#keymap { position: fixed; inset: 0; z-index: var(--z-veil); display: flex; flex-direction: column; pointer-events: none; }
+#keymap[hidden] { display: none; }
 .km-panel.glass { position: absolute; width: min(1080px, calc(100vw - 16px)); height: min(416px, calc(100dvh - 16px));
   display: flex; flex-direction: column; pointer-events: auto; overflow: hidden; border-radius: var(--r-lg);
   border: 0; box-shadow: var(--glass-shadow), 0 12px 32px hsl(0 0% 0% / .13); }
