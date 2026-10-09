@@ -62,3 +62,28 @@ One browser at a time, 4 s apart; a timing red is re-run ALONE before you believ
 `python3 tools/gate/server.py <root> <port>` in the background, `LW_PORT=<p> GD_PORT=<g> node tests/<suite>.browser-test.mjs`, stop by pid; the guard
 refuses compound shell with variables/loops/heredocs/backticks and git outside your worktree — plain commands, scripts under `.tmp/`. FINAL message:
 the verdict, the row counts, the ms/s pair, the lines, worktree · branch · tip, and anything not verified.
+
+## 7 · Amendments by the integrator (Claude Sos, `sos-s0`, 2026-10-09 11:15 CDT) — the tree you verify is `sos-s0` after C6b AND C7b
+
+- **Start sha:** the `sos-s0` tip the integrator names at launch (code `9c42a5a` = C7b merged across C6b). `lab/*.js` **27,593** at that tip (the bar
+  30,000; the estimate band 28.2–29.6k is BELOW us now — report the number, no finding). The pre-C base stays `7044f37`. The `tests/legacy/boot` re-aim
+  (a test-only row, no `lab/` edit) merges while you run; at the end `git diff <your start>..sos-s0 -- lab/` must be empty — if it is not, re-run only the
+  closers the diff touches and name them.
+- **Numbers that moved since §2 was written:** R3 `history` **44**; R14 `gpu-recovery` **10** (one scene fewer — C7b's facade; the thumbnail probe is
+  `__LW.thumbnail()` = the readback PNG, `tests/gpu-recovery` line 32); the lock's baseline is **860 · 0/0 and 1004 · 0/0** (not 908/1052 — h2/h2plus/
+  helium retired by D9/D9b); hit-probe 49–52 presses / 0 reached.
+- **NEW closers to run (each once):** `tests/opener.browser-test.mjs` **7/7** (C6b: the photosensitivity notice under λWAVES' law — no query string
+  silences it for a human; the title screen with six covers + NEW + RESUME; `lambdawaves.q0.session`); `tests/timeline.browser-test.mjs` **14/14**
+  (C7b, ≈ 5 min, run it last among the browser suites); `tools/perf/film-probe.mjs <out.json>` then `tools/perf/film-compare.mjs <base> <out>` exit 0
+  against `.claude/worktrees/agent-a0ff0fd25c7aa306c/.tmp/film-base.json` (read-only; copy it into your `.tmp/` first); `tests/menubar.browser-test.mjs` 8/8;
+  `tools/settings-probe.mjs` is now **six scenes 0 RED** with the RENDER card at the TOP of the right rack (C7b's fix: `rack.prepend`).
+- **R7:** `tests/first-run.test.mjs` is a NODE suite now; the browser truth of the first run is `opener` (C6b). R8: `tests/keyboard-shortcuts.test.mjs` is node.
+- **R5's seven classes:** `C0-GLASS-RULINGS.md` with Josh's rulings applied ("defaults" — Josh 10-09); two new surfaces to capture besides modwindow and
+  notebook: the TIMELINE window open (WINDOW › TIMELINE) and the RENDER card open; count their deltas and name them, they are expected.
+- **Scope rows that did not exist in §2:** C6b (THE START) and C7b (THE FILM'S UI) are owners for findings; the `__LW` diff base is `7044f37`, and the law
+  reads "no member a test or tool uses renamed or removed WITHOUT the test edited in the same commit" — check the commit, not only the diff.
+- **Ports:** 8903/5373 (your tip) and 8907/5377 (the base copy). Not 8721/8731/8741/8913/8933. The ms/s pair LAST, when `wait-gpu` says the load is under 4
+  (the integrator's gate chain and one Sonnet suite may be running; say how long you waited).
+- **CLAUDE.md "rewritten for the kit's windows"** is the integrator's; you verify that every paragraph it has for C0–C9, C6b, C7b, D9/D9b names the truth
+  you measured (a wrong sentence is a NOTE row with the line number).
+- "FIT TO CUT 0.5.0-alpha" is the question. Josh's words: "don't over-verify"; each closer once, a timing red re-run alone once.
