@@ -38,13 +38,18 @@
    origin row [open · NAME] at depth 0, the PROJECTS status naming the retired window, no retired card/record back, no page
    error, and its shim target (H₂⁺ → chem H2 orbital 2 owner; HELIUM → atom Z 2, 1 label, ATOMS open; QCD → cornell bb̄/LOG/
    .51/.23/.81). `history` **42/42** (39 + 3).
-7. NEXT — the two demos, the H₂/ELECTROSTATICS measure, the ledger + REPORT + D9-BUILD.
+7. DONE `e1d3cb8` — the two shim demos, MADE BY THE APP (`.tmp/make-demos.mjs`, the wave-139 road: build → save DEMOS/<NAME> →
+   `projects.exportText` → strip `quality`/`camera`): `lab/demos/h2-sigma-u` (MOLECULES · H₂ STO-3G, VIEW ORBITAL 2 = 1σu,
+   N₂'s pose, screenshot-checked) and `lab/demos/helium` (ATOM · He picked in ATOMS · FILL THE VALENCE); two `.pj-demo` buttons
+   in lab/index.html (`<m>H₂</m> σu`, HELIUM); molecule-demos **5/5**; node GREEN (first-run's demo law reads them).
+8. NEXT — the H₂/ELECTROSTATICS measure (a table in D9-BUILD.md, nothing deleted), the ledger, REPORT wave 202, D9-BUILD.md.
 
 ## The exact next step
 
-The demos: two files in `lab/demos/` beside water/benzene/n2 — H₂ σu (for H₂⁺) and ATOM He 1s (for HELIUM) — WRITTEN BY THE LIVE
-BUILD the way the existing demos were (find their writer in tools/), and their two `.pj-demo` buttons in lab/index.html (only
-those two lines: C0 owns index.html's cascade). `node tests/pwa.test.mjs --write`; `molecule-demos` suite. Commit.
+Measure H₂ and ELECTROSTATICS for Josh's "by use" ruling — files and lines, importers, the control a user reaches each by, what
+a project file carries — into a short table in `research/release-0.5.0/D9-BUILD.md`. Then the ledger (lab/*.js per window:
+36,288 → 36,134 → 34,480 → 34,246 → 34,248 after the demos' sw.js), REPORT.md's `## 2026-10-08 · 0.5.0 D — THE INFORMATIONAL'S
+LEDGER` + `### wave 202: D9 THE LEGACY FIVE — …` at the END, D9-BUILD.md, the final hand-off.
 
 ## Decisions so far
 
