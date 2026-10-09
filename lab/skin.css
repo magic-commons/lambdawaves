@@ -144,6 +144,7 @@ body.frost[data-card="refractive"] .dev:not(:where(.mir-modwindow, .mir-modwindo
 body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .dev:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .glass:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost #transport { background: hsl(0 0% 100% / .10); }
 /* 0.5.0 fix · B139 (wave 67): FROST · STILL changes the FILTER, never the material.  MIR 1.5's hold also swaps a REFRACTIVE
    veil for the tinted fill (mir/css/skin.css "FROST · STILL"); λWAVES' panes keep the veil (light joined: the twin above). */
+body.frost.frost-hold[data-card="tinted"] { --card-opacity: var(--frost-opacity); }   /* B139 TINTED (0.5.0 fix round 1b): the kit thins a tinted pane only while it blurs (mir/css/skin.css:522) and restores it under the hold — the fill must not move while playing */
 body.disconnected.frost.frost-hold[data-card="refractive"]:not(.phone) .dev > .dev-body { background: var(--surface-veil, var(--frost-veil-light)); }
 body.frost.frost-hold[data-card="refractive"][data-theme="dark"] :where(.dev, .glass):not(:where(.mir-modwindow, .mir-modwindow *)), body.disconnected.frost.frost-hold[data-card="refractive"][data-theme="dark"]:not(.phone) .dev > .dev-body { background: var(--surface-veil, var(--frost-veil-dark)); }
 
