@@ -1913,9 +1913,8 @@ try {
        View window's two dials (board #63) and for the camera and record buttons (board #57), so DRAG GAIN and
        FLING join FRICTION and the CAPTURE group brings SECONDS with it.  The list stays EXACT rather than being
        loosened to a `some` — pinning what the window contains is the whole point of this assertion. */
-    !camUIT.error && camUIT.sws.join('|').includes('AUTO-ROTATE') && camUIT.knobs.join('|') === 'YAW|PITCH|X|Y|ZOOM|FOV|DRAG|FRICTION|FLING|SPIN|SECONDS'   /* 0.5.0 re-aim: the card is the kit's CAMERA panel (C1) — YAW · PITCH · X · Y · ZOOM · FOV and the HAND (DRAG · FRICTION · FLING · SPIN); RESET VIEW is its HOME */
-      && camUIT.trigs.some((t) => /HOME/.test(t)) && camUIT.trigs.some((t) => /SET Δρ REF/.test(t))
-      && camUIT.trigs.some((t) => /TAKE A PICTURE/.test(t)) && camUIT.trigs.some((t) => /ONE PERIOD/.test(t))
+    !camUIT.error && camUIT.sws.join('|').includes('AUTO-ROTATE') && camUIT.knobs.join('|') === 'YAW|PITCH|X|Y|ZOOM|FOV|DRAG|FRICTION|FLING|SPIN'   /* 0.5.0 re-aim: the card is the kit's CAMERA panel (C1) — YAW · PITCH · X · Y · ZOOM · FOV and the HAND (DRAG · FRICTION · FLING · SPIN); RESET VIEW is its HOME. 0.5.0 re-aim (C7b): SECONDS went with the capture group — the picture and the film are the RENDER card's (film-card.js; B108 pins its buttons), so the CAMERA card's knob list ends at SPIN */
+      && camUIT.trigs.join('|') === 'PAN HOME|HOME|SET Δρ REF'   /* 0.5.0 re-aim (C7b): pinned EXACTLY, as the knob list is — the HOME buttons and SET Δρ REF are all the CAMERA card carries; TAKE A PICTURE and ONE PERIOD (wave 58) are the RENDER card's CAPTURE IMAGE and PLACE ONE PERIOD, held by B108 */
       /* wave 106: the SHIPPED friction is 1.0, not 2.5 (Josh: "the friction to be quite low but not
          too low").  mu is the reciprocal e-folding time, so 2.5 stopped a flick in 0.4 s and 1.0 gives
          it a full second of coast.  The LAW this block proves is untouched — 0 still means forever,
@@ -3079,7 +3078,12 @@ try {
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   const newWin = await wd('POST', '/window/new', { type: 'tab' });
   await wd('POST', '/window', { handle: newWin.handle });
-  await sleep(3000);                                        // three seconds of a genuinely hidden lab
+  /* 0.5.0 re-aim (C7b): FIVE seconds, not three.  The two timers that arm the jobs and read the worker's ledger (700 ms, then 250 ms) run in a tab Gecko throttles to
+     a one-second grid, and a timer whose deadline falls just before a grid tick waits for the NEXT one: measured, `armed` landed at hide + 1003 ms in one run
+     and hide + 2006 ms in another, so the stat read (one more timer after it) landed at 2.0 s or past 3.0 s — and the worker's reply reaches the page's main
+     thread only when that timer runs.  Three seconds left no margin for the late phase (statReadWhileHidden failed alone on the pre-C7b export too, with the
+     same numbers); five does.  Every claim below is unchanged. */
+  await sleep(5000);                                        // five seconds of a genuinely hidden lab
   await wd('POST', '/window', { handle: homeWin });
   const bgT = await g.ev(`try {
     await new Promise(r => setTimeout(r, 250));                 // let a frame or two actually run, so firstDt is a number and not "not yet"
@@ -4519,12 +4523,15 @@ try {
       if (d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
       if (d.classList.contains('off')) { const p = d.querySelector('.dev-power'); if (p) p.click(); }
       return d; };
-    const dev = wake('camera'); __LW.layout.raise('camera');
+    /* 0.5.0 re-aim (C7b): the picture and the film are the RENDER card's (film-card.js: CAPTURE IMAGE, DOWNLOAD IMAGE, RENDER, PREVIEW FIRST 3 SECONDS,
+       PLAN, PLACE ONE PERIOD), no longer the CAMERA card's TAKE A PICTURE / RECORD / ONE PERIOD / PLAN.  The loop plan's readout is its .sr-period-plan. */
+    const dev = wake('render'); __LW.layout.raise('render');
     __LW.setCamMode ? __LW.setCamMode('turntable') : null;
     __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz'); __LW.pause(); __LW.scrub(0);
     await __LW.settle();
     R.trigs = [...dev.querySelectorAll('.trig-l')].map((e) => e.textContent);
-    const loopBtn = [...dev.querySelectorAll('.trig')].find((b) => b.textContent.indexOf('ONE PERIOD') >= 0);
+    const ro = dev.querySelector('.sr-period-plan'), ed = () => __LW.timeline && __LW.timeline.editor;
+    const clipsN = () => { const e = ed(); return e ? e.model.state().clips.length : -1; };
     /* THE CEILING IS READ, NOT ASSERTED — and it is no longer WebGPU's default, because field.js now asks the
        adapter for its own limit rather than taking whatever requestDevice() hands out */
     const lim = __LW.capture.limits();
@@ -4534,7 +4541,10 @@ try {
     __LW.setView('phase');
     const p1 = __LW.capturePlan;
     R.phase = { ok: p1.ok, kind: p1.kind, used: p1.usedPeriod, laps: p1.laps, T: p1.T, N: p1.N, under: p1.undersampled, carries: p1.carriesGlobalPhase };
-    R.loopEnabled = loopBtn ? !loopBtn.disabled : null;
+    /* 0.5.0 re-aim (C7b): the old EXACT LOOP button was enabled by plan.ok; PLACE ONE PERIOD asks the same planner at the card's FPS and LENGTH
+       and says its sentence in the readout */
+    const rp = __LW.render.plan();
+    R.planOk = rp.ok === true && rp.kind === 'exact' && ro.textContent.indexOf(rp.label) === 0 && ro.textContent.indexOf(rp.message) >= 0;
     __LW.setView('density');
     const p0 = __LW.capturePlan;
     R.density = { ok: p0.ok, kind: p0.kind, used: p0.usedPeriod, laps: p0.laps, T: p0.T };
@@ -4553,7 +4563,11 @@ try {
     await __LW.settle();
     const pn = __LW.capturePlan;
     R.refused = { ok: pn.ok, kind: pn.kind, label: pn.label, hasNo: pn.message.indexOf('NO EXACT PERIOD') >= 0 };
-    R.loopDisabled = loopBtn ? loopBtn.disabled : null;
+    /* 0.5.0 re-aim (C7b): the button no longer goes down — PLACE ONE PERIOD is a plain trigger that REFUSES: it returns null, places no clip, and the
+       .sr-period-plan readout carries the planner's label and message verbatim (the interface never re-derives what the planner decided) */
+    const clips0 = clipsN(), rq = __LW.render.plan(), placed = __LW.render.place();
+    R.refusedPlace = { ok: rq.ok, label: rq.label, placed, readout: ro.textContent, labelIn: ro.textContent.indexOf(rq.label) === 0,
+      messageIn: ro.textContent.indexOf(rq.message) >= 0, hasNo: ro.textContent.indexOf('NO EXACT PERIOD') >= 0, clips0, clips1: clipsN() };
     __LW.reg.setField({ Fz: 0 }); await __LW.settle();
     /* (C2) THE REVIEW'S OWN CASE, END TO END: 1s+2s under the STURMIAN switch at λ = 1.4, in the phase view. The
        density has NO exact period there (6 incommensurate occupied eigenvalues), and the psi period computed from
@@ -4576,15 +4590,17 @@ try {
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B108 THE CAMERA AND RECORD BUTTONS — AND THE PLANNER THEY STAND ON, CORRECTED FIRST (wave 58, board #57). lab/capture.js is 1033 lines and thirty node gates and NOTHING imported it, so an adversarial review of it found three defects no browser had ever run into — and a button that says EXACT LOOP over a half-turn seam is worse than no button, so they were fixed before the buttons went on. (1) planPeriodRecording believed the ψ period without checking that the DENSITY period was exact; the two verdicts are numerical and planLoop was computing them from two DIFFERENT energy sets, so under STURMIAN a state with no period at all came back kind:"exact", closes:true, seamError:0, laps:0, with a true seam of 0.49 of a turn — antiphase, the worst there is. capture.js now requires D.exact, and rack.js hands it the SAME energy expression periodNow() uses, because two of them is how this happened. (2) The stationary branch fired ABOVE the line that reads the observable, so 2p₊ — a preset that ships in the PHASE view and whose own note says the picture lives in arg ψ — was told "the density never changes, so every frame is the same picture" while its hue turned 0.95° a frame. It now loops at T_ψ = 2π/|E| = 50.265482 a.u., a number state.js already carried as that preset\'s own window. (3) laps was unbounded, so an exact loop could be a picture of nothing; it stays ok, because it IS a loop, and now carries framesPerDensityPeriod and an UNDERSAMPLED flag instead of silence. On top of that: PICTURE with a size, RECORD with seconds and fps, ONE PERIOD gated by plan.ok, and a wide readout carrying plan.message verbatim — so the interface never re-derives what the planner decided. In the shipped PHASE view the plan runs three laps of the density period; a Stark field is refused with its near-recurrence and the button goes down; and a real picture comes off the GPU at the stage\'s size and puts the canvas, the clock and ψ back exactly. THE CEILING IS ALSO REAL NOW: field.js asked requestDevice() for nothing, so the device took WebGPU\'s DEFAULT 8192 on an adapter offering 32767 — one line, and the largest picture this build can take doubled on a side.',
     !capT.error
-      && capT.trigs.indexOf('TAKE A PICTURE') >= 0 && capT.trigs.indexOf('RECORD') >= 0 && capT.trigs.indexOf('ONE PERIOD') >= 0 && capT.trigs.indexOf('PLAN') >= 0
+      && capT.trigs.indexOf('CAPTURE IMAGE') >= 0 && capT.trigs.indexOf('RENDER') >= 0 && capT.trigs.indexOf('PLACE ONE PERIOD') >= 0 && capT.trigs.indexOf('PLAN') >= 0   /* 0.5.0 re-aim (C7b): the RENDER card's labels */
       && capT.requested === 32767 && capT.lim.tex === 32767 && capT.lim.isDefault === false && capT.lim.side === 16384
       && capT.phase.ok === true && capT.phase.kind === 'exact' && capT.phase.used === 'wave' && capT.phase.laps === 3
-      && capT.phase.carries === true && capT.phase.under === false && capT.loopEnabled === true
+      && capT.phase.carries === true && capT.phase.under === false && capT.planOk === true
       && capT.density.used === 'density' && capT.density.laps === 1 && capT.threeLaps === true
       && capT.onePhase.kind === 'exact' && capT.onePhase.used === 'wave' && capT.onePhase.N > 1
       && Math.abs(capT.onePhase.T - 50.265482457) < 1e-6
       && capT.oneDensity.kind === 'stationary' && capT.oneDensity.frames === 1
-      && capT.refused.ok === false && capT.refused.hasNo === true && capT.loopDisabled === true
+      && capT.refused.ok === false && capT.refused.hasNo === true
+      && capT.refusedPlace.ok === false && capT.refusedPlace.placed === null && capT.refusedPlace.labelIn && capT.refusedPlace.messageIn && capT.refusedPlace.hasNo
+      && capT.refusedPlace.clips0 >= 0 && capT.refusedPlace.clips1 === capT.refusedPlace.clips0   /* 0.5.0 re-aim (C7b): refused = null, the sentence in the readout, the TIMELINE untouched */
       && capT.sturm.active === true && capT.sturm.ok === false && capT.sturm.kind === 'near'
       && capT.sturm.used === 'density' && capT.sturm.T > 2000
       && capT.pic.ok === true && capT.pic.bytes > 1000 && capT.pic.png === 'image/png' && capT.restored === true
@@ -5393,9 +5409,14 @@ try {
   const canvasT = await g.ev(`try {
     const cv = document.getElementById('field');
     const R = { role: cv.getAttribute('role'), tab: cv.tabIndex, label0: cv.getAttribute('aria-label') };
-    __LW.setView('density'); await __LW.settle(); await new Promise((r) => setTimeout(r, 300));
+    /* 0.5.0 re-aim (C7b): the sentence is written from a frame, and only every 100 ms (rack.js: badgesWall); a PAUSED lab draws no further frame, so a change that lands
+       inside the 100 ms of the last write leaves the old sentence standing until something asks for the next one.  The read waits 150 ms, asks one more frame
+       (the same tick as the pause read below and B23's), then waits for it.  (Found, not fixed: a paused canvas label can be one step behind a change for as long as
+       nothing schedules a frame — a product note, never a wording one.) */
+    const afterFrame = async () => { await __LW.settle(); await new Promise((r) => setTimeout(r, 150)); __LW.schedule(1); await new Promise((r) => setTimeout(r, 500)); };
+    __LW.setView('density'); await afterFrame();
     R.density = cv.getAttribute('aria-label');
-    __LW.setStyle('grain'); await __LW.settle(); await new Promise((r) => setTimeout(r, 300));
+    __LW.setStyle('grain'); await afterFrame();
     R.grain = cv.getAttribute('aria-label');
     __LW.setView('phase'); __LW.setStyle('cloud'); await new Promise((r) => setTimeout(r, 300));
     /* THE CADENCE PROOF.  The observer is armed AFTER the play edge has settled, because the edge
@@ -5405,8 +5426,15 @@ try {
     let n = 0; const seen = [];
     const mo = new MutationObserver(function (rs) { n += rs.length; seen.push(cv.getAttribute('aria-label')); });
     mo.observe(cv, { attributes: true, attributeFilter: ['aria-label'] });
+    /* 0.5.0 re-aim (C7b): and every OTHER live region in the document, watched for the same three seconds — the ceiling below is a count of seats, this is the proof
+       that none of them speaks while the transport runs (each is written by a user act, never from a frame) */
+    const liveSeats = [...document.querySelectorAll('[aria-live],[role="status"],[role="alert"],output')];
+    let spoke = 0; const spokeWhere = [];
+    const lo = new MutationObserver(function (rs) { spoke += rs.length; for (const r of rs) spokeWhere.push((r.target.nodeType === 1 ? r.target : r.target.parentElement).className); });
+    for (const e of liveSeats) lo.observe(e, { subtree: true, childList: true, characterData: true, attributes: true });
     await new Promise((r) => setTimeout(r, 3000));
-    R.during = n; R.tMoved = __LW.clock.t > 10;
+    lo.disconnect();
+    R.during = n; R.tMoved = __LW.clock.t > 10; R.liveSpoke = spoke; R.liveSpokeWhere = spokeWhere.slice(0, 6);
     __LW.pause(); await new Promise((r) => setTimeout(r, 150)); __LW.schedule(1); await new Promise((r) => setTimeout(r, 500));   /* 0.5.0 re-aim: the sentence is written from a frame at most every 100 ms, so a final frame inside that window leaves it saying 'playing' — one more frame, as B23 asks */
     R.onPause = n - R.during; R.paused = cv.getAttribute('aria-label'); mo.disconnect();
     /* THE CEILING ON SPEECH.  This is the clause that stops a later wave gold-plating §6 into
@@ -5423,9 +5451,15 @@ try {
        after 4.2 s — the same shape as .pj-status and .keys-say.  liveBad below is UNTOUCHED and is
        the clause that actually carries the safety: no live region may be a readout, a .dev-stat or
        the canvas.  tests/access.test.mjs's A4 was raised in step and names the same four; A5 there
-       is this file's liveBad.  (NO BACKTICKS IN THIS COMMENT: it lives inside a template literal.) */
+       is this file's liveBad.
+         0.5.0 C7b · FOUR BECAME SIX, AND BOTH ARE THE KIT'S TIMELINE: its status line (role status, the selection and the mode's one
+       sentence, written on a selection change) and one stepper (aria-live polite, written when its value is stepped).  They are the same
+       admitted kind as wave 105's, a USER ACT's words, and they are NAMED here rather than counted: a seventh seat, or a different kind,
+       fails this line, and liveSpoke below proves that none of the six is written while the transport runs.
+       (NO BACKTICKS IN THIS COMMENT: it lives inside a template literal.) */
     const live = [...document.querySelectorAll('[aria-live],[role="status"],[role="alert"],output')];
     R.live = live.length;
+    R.liveKinds = live.map(function (e) { return e.tagName + '.' + (typeof e.className === 'string' ? e.className : ''); }).sort().join(' ');
     R.liveBad = live.filter(function (e) { return e.closest('.ro') || e.classList.contains('dev-stat') || e.id === 'field'; }).length;
     R.liveWhat = live.map(function (e) { return e.tagName + '.' + (typeof e.className === 'string' ? e.className : '') + '#' + e.id; });
     R.overlays = [...document.querySelectorAll('#vortex,#particles,#kepler')].filter(function (c) { return c.getAttribute('aria-hidden') === 'true'; }).length;
@@ -5459,7 +5493,8 @@ try {
       && canvasT.density.indexOf('density') >= 0 && canvasT.grain.indexOf('grain') >= 0
       && canvasT.during === 0 && canvasT.tMoved === true && canvasT.onPause === 1
       && canvasT.paused.indexOf('paused at t =') >= 0
-      && canvasT.live <= 4 && canvasT.liveBad === 0 && canvasT.overlays === 3
+      && canvasT.live === 6 && canvasT.liveBad === 0 && canvasT.overlays === 3
+      && canvasT.liveKinds === 'DIV.km-status DIV.m2hint DIV.mir-banner DIV.tl-status SPAN.mir-step-text SPAN.mir-step-text' && canvasT.liveSpoke === 0   /* 0.5.0 re-aim (C7b): four became six (the TIMELINE's status line and stepper), named, and silent while playing */
       && chatterT.focused === true && chatterT.tab === 0 && chatterT.during === 0
       && chatterAfterT.after === 1 && chatterAfterT.text !== chatterT.text
       && chatterAfterT.scrubTab === -1 && chatterAfterT.errs === 0 && canvasT.errs === 0, sayT);
@@ -5608,7 +5643,14 @@ try {
   const w65anchC = await chipClick('ANCHOR');
   const w65anch = await w65lap(2000);
   const w65bpmC = await chipClick('ANCHOR');            // ANCHOR off; BPM stays on
+  /* 0.5.0 re-aim (C7b, ruling R5): installing the kit's TIMELINE makes the modulation's resume EXACT (timeline/controller.js:26,
+     clock.setExactResume(true)), so the shipped lab resumes from the paused beat and applyResume() does not re-quantise it.  The chip still
+     names the law (BPM, grid 1); what moved is whether the rack applies it.  So this lap runs under the SHIPPED law and the old clause —
+     the beat floors to the note boundary just passed — is kept on the kit's legacy road (exact resume off for one lap, put back in a finally). */
+  const w65exact = await g.ev(`return __LW.mod.host.clock.isExactResume();`);
   const w65bpm = await w65lap(2000);
+  await g.ev(`__LW.mod.host.clock.setExactResume(false); return 1;`);
+  let w65bpmL; try { w65bpmL = await w65lap(2000); } finally { await g.ev(`__LW.mod.host.clock.setExactResume(true); return 1;`); }
   await chipClick('BPM');                                // BPM off: a free-Hz source
   const w65trigC = await chipClick('TRIG');               // and TRIG is not a toggle: it is one of a pair
   const w65trig = await w65lap(2000);
@@ -5626,7 +5668,7 @@ try {
     const before = __LW.mod.model.transport.bpm, r = __LW.mod.barLock();
     const out = { r: r, kept: __LW.mod.model.transport.bpm === before, hint: (document.querySelector('#modwin .m2hint') || {}).textContent.slice(0, 90) };
     __LW.reg.setField({ Fz: 0 }); return out;`);
-  const w65lawT = { anchor: [w65anchC, w65anch], bpm: [w65bpmC, w65bpm], trig: [w65trigC, w65trig],
+  const w65lawT = { anchor: [w65anchC, w65anch], bpm: [w65bpmC, w65bpm], exact: w65exact, bpmLegacy: w65bpmL, trig: [w65trigC, w65trig],
                     bar: [w65bar0, w65bar1, w65bar2] };
   judge('B134 THE THREE RESUME LAWS ARE THE ARTIFACT\'S OWN CHIPS, AND EACH IS PROVED BY THE CURVE\'S PHASE ACROSS A REAL SPACE PRESS (wave 65). Josh named the controls rather than asking for new ones — "inside the modulation window there are already useful buttons to link these behaviours to: ANCH, TRIG, and BPM" — so this block CLICKS those three buttons, in the ported window, by their own labels, and then drives the transport with the real key. ANCHOR: two seconds in, the LFO is caught mid-curve, 700 ms of wall clock pass with everything down, and the resume comes back on the SAME phase and the SAME beat — not on where the wall says the beat should be, which is a third of a beat further on. BPM (ANCHOR off, sync on): the same rack floors the beat to the note boundary just passed — the beat goes BACKWARDS by the fraction it was interrupted at and the curve restarts at phase 0, which is Josh\'s "hitting space bar in between a note simply jumps to the truncated note". TRIG on a free-Hz source: the phase goes to 0 and the BEAT IS NOT TOUCHED, because that rewind is the source\'s own and claims nothing global. The arithmetic is `mir/host.js`\'s `resumeGrid` and `beatsPerCycle` — the model\'s own note ladder, never re-derived here — and the law each press ran is read back off the clock and matches the chip that was pressed. AND THE GLOBAL CLOCK THAT CHIP FOLLOWS IS THE INSTRUMENT\'S OWN: Josh\'s BPM sentence says the divisors line up with an EXISTING GLOBAL CLOCK, and the g key makes one BAR one RECURRENCE OF THE DENSITY \u2014 `mir/host.js`\'s barTempo({T, rate}) over period.js\'s exact T \u2014 so a bar of the loop clock and a repeat of \u03c8 are one event to 1e-9, and the window says which. It never guesses: turn on a static field and there is no exact period at all, so it REFUSES by name, keeps the tempo it had, and prints the reason. THE MEASUREMENT IS THE POINT: nothing here asserts a flag. At BPM 20 one beat is three seconds, so the round trip between a driver key and a read is about a hundredth of a beat, against jumps of half of one.',
     w65anchC.found === true && w65anchC.on === true && w65anchC.pressed === 'true'
@@ -5643,11 +5685,17 @@ try {
       && w65bpmC.anchor === false && w65bpmC.sync === true && w65bpmC.law === 'BPM' && w65bpmC.grid === 1
       && w65bpm.paused.phase > 0.1 && w65bpm.paused.phase < 0.9 && w65bpm.paused.running === false
       && w65bpm.paused.phase - w65bpm.before.phase < 0.05
-      && w65bpm.after.law === 'BPM' && w65bpm.after.applied === true && w65bpm.after.grid === 1
-      && w65bpm.after.beats < w65bpm.paused.beats
-      && Math.abs(w65bpm.after.moved - (w65bpm.paused.beats - Math.floor(w65bpm.paused.beats))) < 1e-9
-      && Math.floor(w65bpm.after.beats) === Math.floor(w65bpm.paused.beats)
-      && w65bpm.after.phase < 0.05
+      /* 0.5.0 re-aim (C7b, R5): the SHIPPED resume is exact — the chip's law is still BPM on grid 1, and the beat and the curve continue from where they paused */
+      && w65exact === true && w65bpm.after.law === 'BPM' && w65bpm.after.grid === 1 && w65bpm.after.applied === false && w65bpm.after.moved === 0
+      && w65bpm.after.beats >= w65bpm.paused.beats && w65bpm.after.beats < w65bpm.paused.beats + 0.05
+      && Math.abs(w65bpm.after.phase - w65bpm.paused.phase) < 0.05
+      /* and the kit's legacy road, wave 65's own sentence: the beat goes BACKWARDS by the fraction it was interrupted at and the curve restarts at phase 0 */
+      && w65bpmL.paused.phase > 0.1 && w65bpmL.paused.phase < 0.9 && w65bpmL.paused.running === false
+      && w65bpmL.after.law === 'BPM' && w65bpmL.after.applied === true && w65bpmL.after.grid === 1
+      && w65bpmL.after.beats < w65bpmL.paused.beats
+      && Math.abs(w65bpmL.after.moved - (w65bpmL.paused.beats - Math.floor(w65bpmL.paused.beats))) < 1e-9
+      && Math.floor(w65bpmL.after.beats) === Math.floor(w65bpmL.paused.beats)
+      && w65bpmL.after.phase < 0.05
 
       && w65trigC.on === true && w65trigC.trig === true && w65trigC.sync === false && w65trigC.law === 'TRIG'
       && w65trig.paused.phase > 0.1 && w65trig.paused.running === false
