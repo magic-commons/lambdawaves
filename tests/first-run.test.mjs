@@ -47,18 +47,18 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 {
   const src = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
   const wires = {
-    imported: /import \{ firstRunMaterial, storedCard, storedFrost, firstRunQuality, deviceQuality \} from '\.\/first-run\.js'/.test(src),
+    imported: /import \{ firstRunMaterial, firstRunQuality, deviceQuality \} from '\.\/first-run\.js'/.test(src),
     asksCrossings: /const FIRST_RUN = firstRunMaterial\(isPhone\(\) \|\| isTablet\(\)\);/.test(src),
     tabletBeforeAsk: src.indexOf('const isTablet = () =>') > 0 && src.indexOf('const isTablet = () =>') < src.indexOf('const FIRST_RUN = '),
     oneTabletPredicate: src.split('const isTablet = () =>').length === 2,
-    defaultCard: /const defaultCard = \(\) => FIRST_RUN\.card;/.test(src),
-    frostSeed: /let frostMode = FIRST_RUN\.frost;/.test(src),
-    applyFrost: src.includes('setFrost(storedFrost(s, frostMode), { quiet: true });'),
-    applyCard: src.includes('setCardStyle(storedCard(s, undefined));'),
-    phoneOverrideKept: src.includes("phone.wasFrost = frostMode; setFrost('off', { quiet: true });"),
+    /* 0.5.0 C2: the first-run material is the look store's `defaults` (lab/look.js, mir.gui); a stored choice is the store's */
+    lookDefaults: src.includes("const LOOK_DEFAULTS = { theme: 'light', card: FIRST_RUN.card, frost: FIRST_RUN.frost, blur: 22, vivid: 0.5, disconnected: true };"),
+    storeTakesThem: src.includes('createLook({ settings: settingsStore, defaults: LOOK_DEFAULTS,'),
+    unnamedCardIsTheDevices: src.includes("look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card })"),
+    phoneOverrideKept: src.includes("phone.wasFrost = look.get('frost'); setFrost('off');"),
     foldsFromSeed: src.includes('const fold=FIRST_RUN.folded.includes(id);') && !src.includes("const fold=['settings','state']"),
   };
-  judge('THE WIRING: rack.js asks with its own crossings (isPhone() || isTablet(), one tablet predicate, declared before the ask), seeds defaultCard, frostMode and the furniture\'s folds from the answer, reads stored choices through storedFrost / storedCard, and the phone crossing\'s FROST OFF override is untouched',
+  judge('THE WIRING: rack.js asks with its own crossings (isPhone() || isTablet(), one tablet predicate, declared before the ask), seeds the look store\'s card and frost defaults (0.5.0 C2: LOOK_DEFAULTS → createLook, mir.gui) and the furniture\'s folds from the answer, an unnamed card is the device\'s, and the phone crossing\'s FROST OFF override is kept',
     Object.values(wires).every(Boolean), wires);
 }
 {

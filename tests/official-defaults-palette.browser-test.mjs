@@ -69,8 +69,13 @@ try {
       auto:__LW.quality.auto,governor:__LW.governor.on,theme:__LW.themeChoice,
       card:__LW.cardStyle,frost:__LW.frost,
       blur:getComputedStyle(document.documentElement).getPropertyValue('--glass-blur').trim(),
-      vivid:+vivid.getAttribute('aria-valuenow'),errors:__e.slice()};`);
+      vivid:+vivid.getAttribute('aria-valuenow'),
+      // 0.5.0 C2 · THE LOOK LIFT: the older blob's look went into the kit's store, once, and left the blob
+      left:['theme','card','cardSet','frost','disc','blur','accent'].filter(k=>k in JSON.parse(localStorage.getItem('lambdawaves.q0.settings')||'{}')),
+      gui:JSON.parse(localStorage.getItem('mir.gui')||'null'),errors:__e.slice()};`);
+  // the kit's blur row writes `14px` (its map is v + 'px'); the stored look is the kit's record, the blob keeps none of it
   assert.deepEqual(saved, { tags:true,captions:true,hints:false,help:true,notes:true,aaShown:true,
-    auto:false,governor:false,theme:'dark',card:'tinted',frost:'off',blur:'14.0px',vivid:.1,errors:[] });
-  console.log('PASS prior explicit browser choices survive the new first-run defaults');
+    auto:false,governor:false,theme:'dark',card:'tinted',frost:'off',blur:'14px',vivid:.1,left:[],
+    gui:{theme:'dark',accentA:30,accentB:300,vivid:.1,card:'tinted',frost:'off',blur:14,disconnected:true},errors:[] });
+  console.log('PASS prior explicit browser choices survive the new first-run defaults, lifted once into mir.gui');
 } finally { await g.close(); }

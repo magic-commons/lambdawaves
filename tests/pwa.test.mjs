@@ -400,6 +400,10 @@ const ALLOW = [
      alpha.24: mir/shell/gui.js, the MIR logo's type credit in MIR ABOUT).  The allowance is the reach, not the file: the day a
      consumer imports the module (createGui is C2) it leaves the set and the URL is judged here on its own. */
   [(f) => KIT_UNREACHED.has(f.rel), 'inside an adopted kit module no root reaches (R5-W1) — deployed, never loaded, never shown; judged again the day a consumer reaches it'],
+  /* 0.5.0 C2 · judged: lab/look.js reaches mir/shell/gui.js for its LOOK_SCHEMA rows.  Its one URL is MIR ABOUT's credit for the
+     logo's typeface, which shell/about.js richText makes a plain <a target="_blank" rel="noopener"> — a link a reader clicks,
+     never a load (D1 above scans the file for every loading construct) — and λWAVES builds no MIR ABOUT (R5-S1). */
+  [(f) => f.rel === 'mir/shell/gui.js' && f.url === 'https://www.fabiandesmet.com/', 'MIR ABOUT\'s typeface credit in the kit\'s gui.js: a plain <a target="_blank"> the reader clicks, never a load; λWAVES builds no MIR ABOUT (R5-S1)'],
   /* WAVE 59 · og:image is METADATA, and it is the one absolute URL the lab is allowed to contain.  A link
      unfurler is a crawler on another machine with no base URL to resolve against, so a relative og:image is
      simply dropped; this page never fetches it, and D1 above proves that by construction (a <meta content=>
