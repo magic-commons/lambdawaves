@@ -18,7 +18,8 @@ cases. The closers are green: `new-project` 8, `history` 42, `offer` 16, `molecu
 | `942a2fc` | `tools/serialize-bytes.mjs` and its result `research/release-0.5.0/c6-serialize-bytes.json` (11/11) |
 | `6166fa4` | the R10 suite: `tests/project-formats.test.mjs` + `tests/project-formats.browser-test.mjs` |
 | `83fe811` | FOLDERS is painted glass where it lands (the occlusion block re-taken when its entrance motion ends) |
-| hand-offs | `9b4bbe6`, `60662e8`, `4cc311c`, `9fc50eb`, and the docs commit (this file + REPORT.md wave 206) |
+| `4dd0a7b` | the docs: this file + REPORT.md wave 206 (after wave 201, the last C wave) |
+| hand-offs | `9b4bbe6`, `60662e8`, `4cc311c`, `9fc50eb`, and the final one after `4dd0a7b` |
 | the first builder | `443332e` (C6-DESIGN.md, the whole plan) · `b6d61ec` (the two modules, unwired) · `9da702d` (its hand-off) |
 | gate servers | 8893 (pid 4170599, this tree) and 8897 (pid 5936, `.tmp/base` = `f0fcbc4`). Both were started by me and stopped by pid; GD ports 5363/5367 |
 
