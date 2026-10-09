@@ -437,6 +437,30 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 >   is still running.**
 > - Next: D9 merge → C2 (BRIEF-C2.md) ∥ C3 (BRIEF-C3.md) ∥ C6 (BRIEF-C6.md) from the D9-merged tip → C7 + fix on the verdict → C8? (0.5.1) → C-V.
 
+> **UPDATE (Claude Yan, 2026-10-08 23:00 CDT) — D9 MERGED and gated; C2 ∥ C3 ∥ C6 launched; the film verifier says HOLD until the fix.**
+> - **D9 merged `4176946` + `f0fcbc4`** (Opus tip `0c1645f`): the legacy five under R5-L1 — QCD, H₂⁺, HELIUM deleted behind restore shims, two shim
+>   DEMOS, history 42; `sw.js` kept C0's NEVER_PRECACHE note with its table regenerated (the first `--theirs` had lost it: pwa red, fixed in `f0fcbc4`);
+>   new-project regenerated 16,329 B in step. **Staged `lab/*.js` 30,552** (from 36,288 at the pre-C baseline). Gates on the merged line: node GREEN
+>   exit 0 (82 suites, no assertion), browser history 42, molecule-demos, molecular-names, current, render-regressions, offer, new-project all exit 0.
+>   D9's CLAUDE.md paragraph replaced the LEGACY sentences (auto-merged). **For Josh:** the H₂ / ELECTROSTATICS by-use table (above and in D9-BUILD.md).
+> - **THE FILM VERIFIER (fresh Opus, `worktree-agent-a4c46eea610dff207`, report `50ef3d2` = C7-VERIFY.md + `measure/c7-verify/`): HOLD on `74ade0c`,
+>   condition = the C7-FIX.** Lead 1 measured: `userActivation.isActive` TRUE at the real RECORD click, FALSE when `film.save` ran (39.0 s); with the Web
+>   Share stubs the share rejected NotAllowedError, nothing downloaded, `save` returned true. Lead 2 confirmed (the saved MP4 stays in OPFS after a reload
+>   and 130 s later; a film cancelled before its first checkpoint leaves job.json + an empty payload.bin forever — the kit's `recoveries()` skips it).
+>   Lead 3 all confirmed, for Josh's rulings (RECORD not live; a paused lab's RECORD advances t; MOD armed by default → every first-run RECORD is a
+>   driven film; ~37 s per 6 s; FPS 24/30/48/60). Everything else GREEN: the lock 1004 + 1148 (0/0, 60 s / 59 s), the base-copy lock, PNG/loop/video
+>   produced (ffprobe h264 High 30 fps 6.000 s 180 f), H1 mutation → 14 reds then a TypeError at render-exact.test:598 before its tally (harden), node 85
+>   with C0's four, export3d 10, render-regressions 2, stage-text 4, offer 16, menubar 8. Notes: a video's Blob URL (10 min) fails with NetworkError once
+>   the app's 2-min discard deletes the file; ONE PERIOD has no STOP; the film bytes differ with the CAMERA card open (742,908 vs 744,558).
+> - **C7-FIX (`27fb75b`) RESUMED by message at 23:00** with the verifier's follow-ups: a permanent browser regression (share stubs + a real RECORD tap;
+>   green on the fix, red on `74ade0c`), and the Blob URL vs the discard (a memory copy before the discard, or the discard waits the URL's lifetime);
+>   then the lock once more. **C7 merges onto `yan-c` from the fix's branch when it reports** (one lock re-run on the merged tree, GPU alone), with the
+>   verifier's report branch merged beside it.
+> - **LAUNCHED from `f0fcbc4` (Opus, each on its committed brief, design hand-off first):** C2 `worktree-agent-a828649825812de0a` (BRIEF-C2.md;
+>   8873/5343 + 8877/5347; wave 204) · C3 `worktree-agent-ab53b6b1093934d5b` (BRIEF-C3.md; 8883/5353 + 8887/5357; wave 205) · C6
+>   `worktree-agent-a61a67e5a1ec8eb66` (BRIEF-C6.md; 8893/5363 + 8897/5367; wave 206). Three on `rack.js` in disjoint regions; the integrator resolves.
+> - Yan's gate server for `yan-c`: 8731/5203 (stop by pid at the end). Nothing pushed, deployed or released.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
