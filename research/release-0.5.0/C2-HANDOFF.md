@@ -9,7 +9,8 @@ first builder's `.tmp/` copied, `classes.mjs` and `cap.mjs` re-pointed at this t
 First builder: `177be6b` design · `b817b27` handoff · `2e22fdc` WIP step 2 (look.js, the kit's store + accent, the lift; rack.js setters
 thin; tests re-worded) · `c312219` handoff (paused).
 Continuation: `77edad0` handoff (step 1: the stylehash compare, 0 in the seven classes) · `fa69ff7` step 3 (`mir.gui` PREFERENCE in FAMILIES;
-the probe fails a look key left in B3; STATE-SCOPES rewritten) · this handoff.
+the probe fails a look key left in B3; STATE-SCOPES rewritten) · `37001b4` handoff · `7b02b1a` step 4 (STATUS TAGS, CONTROL HINTS, HELP
+are the kit's rows; first-run keeps only the defaults) · this handoff.
 
 ## Step 1 · the stylehash classifier compare — DONE, 0 in the seven classes
 - The first builder's captures (`.tmp/sh/base`, `base2`, `s2`, closed set, no settle) gave **107 element·properties, all in the FIRST state
@@ -30,12 +31,27 @@ the probe fails a look key left in B3; STATE-SCOPES rewritten) · this handoff.
 - **settings-probe** (gate server 8873, GD 5343): **six scenes GREEN, 0 RED, B1 = B3 byte-identical** (WAVE DANCER: `modwin.modes s3` named),
   no look key in any B3. Dump: `.tmp/settings-probe-s3.json`.
 
+## Step 4 · the SETTINGS surface on the store — DONE (`7b02b1a`)
+- `LOOK_ROWS` + `hints`, `help`, `badges` (the kit's rows; their kit defaults ARE λWAVES' first run); `BLOB_LOOK` + `badges`, `controlHints`,
+  `hint`; `liftLook(blob, help)` also reads HELP's own `lw-window-info` (removed after the lift) and keeps two corner laws exactly (an unknown
+  theme was DARK, an unknown frost OFF). One subscribe in look.js: a hints change → `controlhintschange`; HELP off → open ⓘ panels close.
+- rack.js INTERFACE: STATUS TAGS / CONTROL HINTS / HELP are `look.set` switches (HELP moved from native-ui; `ui.setWindowInfo` keeps its name
+  for the `notes` action); applySettings / saveSettings drop badges / controlHints. native-ui.js loses its HELP store; first-run.js loses
+  storedCard / storedFrost / bootMaterial; FAMILIES drops `lw-window-info`; STATE-SCOPES' `mir.gui` row names the three switches.
+- tests: first-run 12 judges (the reading laws through `liftLook` + the kit's `repair`; one new lift judge); official-defaults-palette's
+  saved case (`left: []`, `helpKey: null`, `gui` with hints/help/badges); new-project.test's PREFERENCE set names the `mir.gui` keys.
+
 ## Tests
+- at 7b02b1a: node **82/82**; `new-project --check` in step; browser one at a time: official-defaults-palette **3/3**, menubar **GREEN**,
+  keyboard-window **PASS**, frame-occlusion **7/7** (the first run, 4 s after keyboard-window, was red; re-run ALONE twice: 7/7), new-project
+  **8/8**, offer **16/16**, take-in-bugs **GREEN**, settings-probe **6/6** (three runs died in the browser — "Render did not settle: animation
+  frames stopped" in N₂'s open, then `Failed to decode response from marionette` on the BENZENE reload, twice; the fourth, alone with
+  GD_VERBOSE=1, GREEN, B1 = B3, no look key; blob 746 → 711 B: badges/controlHints gone).
 - at 2e22fdc (the first builder): node 82/82 · official-defaults-palette 3/3 · menubar GREEN · keyboard-window PASS.
 - at fa69ff7: node **82/82** (`node .tmp/suites.mjs`) · settings-probe **6/6**.
 
 ## Lines
-`cat lab/*.js | wc -l`: 30,553 (f0fcbc4) → 30,439 (2e22fdc/c312219) → 30,440 (fa69ff7; settings-store +1), −113 so far (estimate ≈ −160).
+`cat lab/*.js | wc -l`: 30,553 (f0fcbc4) → 30,439 (2e22fdc/c312219) → 30,440 (fa69ff7) → 30,430 (7b02b1a), −123 so far (estimate ≈ −160).
 
 ## Blockers
 None.
@@ -44,10 +60,8 @@ None.
 gate server 8873 (`tools/gate/server.py`, this tree) · `python3 -m http.server 8877` serving `.tmp/base` (the `f0fcbc4` copy, for step 5).
 
 ## Exact next step
-Step 4 (C2-DESIGN §3): rows `hints`, `help`, `badges` into `LOOK_ROWS` and the lift (blob `badges`, `controlHints` / legacy `hint`; HELP's
-own key `lw-window-info`, removed after the lift); STATUS TAGS / CONTROL HINTS (rack.js INTERFACE) and HELP (native-ui.js; `ui.setWindowInfo`
-keeps its name for the `notes` action) call `look.set`; the subscribe dispatches `controlhintschange` on a hints change and closes open info
-popovers on help off; saveSettings drops badges/controlHints; first-run.js loses storedCard/storedFrost/bootMaterial and first-run.test's
-reading-law judges move to `liftLook`; FAMILIES drops `lw-window-info`. `node tools/new-project.mjs --check`; tests new-project (8), menubar,
-keyboard-window, frame-occlusion, offer. Then step 5 (stylehash closed + mod + nb, base vs tree, `cap.mjs <name> <port> wait|mod|nb`;
-`--acc`/`--acc2` read directly on the 8 states) and step 6 (lines, `bash test.sh node`, REPORT wave 204, `C2-BUILD.md`, CLAUDE.md draft).
+Step 5: stylehash on base `f0fcbc4` (`.tmp/base`, http 8877) and this tree (http 8873 — stop the gate server first, or serve with
+`python3 -m http.server 8873 --bind 127.0.0.1 --directory <tree>`): `node .tmp/cap.mjs <name> <port> wait|mod|nb` for basew/base2w (have: closed),
+then mod and nb for base, base2 and tree, and the tree's closed again (`s5w`); `node .tmp/classes.mjs <base> <tree> <base2>` for each set → 0 in the
+seven classes; `--acc`/`--acc2` read directly on the 8 states (a CDP script over the kit's `tools/cdp.mjs`, as stylehash does). Then step 6
+(lines, `bash test.sh node`, REPORT wave 204 after wave 201, `C2-BUILD.md`, the CLAUDE.md draft, final handoff).
