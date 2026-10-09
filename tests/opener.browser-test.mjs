@@ -41,7 +41,19 @@ const press = async (sel) => {
   await g.ev(`const e = document.querySelector('${sel}'); if (e) e.scrollIntoView({ block: 'center' });
     for (let i = 0; i < 160 && e && getComputedStyle(e).opacity !== '1'; i++) await __w(50); await __w(450); return 1;`);
   const r = await g.tap(sel); if (!r || !r.ok) throw new Error(sel + ' was not pressable: ' + JSON.stringify(r)); return r; };
-const nav = async (u) => { await go(g.s, u); await g.waitFor('document.readyState !== "loading"', 100, 50); await g.armErrors(); return g.ev(HELP); };
+/* 0.5.0: the navigation hops through about:blank after a pause and checks that the new page PAINTS — this headless Firefox leaves the next page's
+   requestAnimationFrame dead after a real pointer press or a navigation within a moment of the last frame (v0.4.0-alpha too; the legacy/boot re-aim's
+   goPainted, LEGACY-BOOT-REAIM.md), and the kit's entrance and exit motions (the covers' backwards-filled fade, the notice's leaving) then never advance */
+const nav = async (u) => {
+  for (let k = 0; k < 6; k++) {
+    await new Promise((r) => setTimeout(r, 1200)); await go(g.s, 'about:blank'); await new Promise((r) => setTimeout(r, 400));
+    await go(g.s, u); await g.waitFor('document.readyState !== "loading"', 100, 50); await g.armErrors();
+    const painted = await g.ev(`return await Promise.race([new Promise((r) => requestAnimationFrame(() => r(1))), new Promise((r) => setTimeout(() => r(0), 2000))]);`);
+    if (painted) return g.ev(HELP);
+    console.log('NOTE a navigation came up unpainted (rAF dead); hopping again');
+  }
+  throw new Error('six navigations came up unpainted');
+};
 try {
   await g.ev(HELP);
   /* ── 1 · THE NOTICE COMES FIRST ── */
