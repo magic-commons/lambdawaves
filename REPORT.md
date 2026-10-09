@@ -5405,3 +5405,44 @@ Gates:
 
 Hand-off: `research/release-0.5.1/D1-BUILD.md`, which also holds the CLAUDE.md STAGE TEXT paragraph drafted for D-V, six brief
 candidates and the merge notes. Measurements: `research/release-0.5.1/d1-measure/`.
+### wave 213: D2 + D8 THE MOLECULE'S HEAD on a hand pick, and `lw:` LINKS in the notebook — every number the record's or the solve's; one row, one fade a press
+
+One Opus builder (`agent-ac75ffa2c710c409f`) built both rows on D1's layer, from `76b1d5e`.
+
+**D2 · the head.** A HAND pick of a molecule (the MOLECULE dropdown, MOLECULES ON, a notebook link) shows four lines where the formula
+sits, once that molecule's solve lands: formula and name; RHF/basis and E; nocc of nAO and the point group; the HOMO's name and the
+HOMO–LUMO gap in Eₕ and eV.
+- The composer is `latex-state.js` `moleculeHead`, beside `moleculeLatex`. A record gives its `stem`; a live solve goes through
+  `stemOf`, which `tools/orbital-library.mjs` now calls to write those stem members (`--check --only` on nine records: in step).
+- No blurb (R6-B), no CURATED_IE, and "—" for a point group the record does not know (C₆₀ only).
+- It rides THE FADE: D1's `announce(md, 0)` holds the seat and `dismiss(md)` frees it. It is not `showPage`, whose second block would
+  stack beside the formula.
+- It leaves as the kit's `greet` does: Escape, a press on the picture after 2.5 s, or the next pick.
+- Only chemview's hand road calls it (`handPick`, ON). A restore, an undo, or a project, link or demo open never shows it.
+- The witness is `__LW.head.shown`. A trap was met: chemview already had a `function pick` (the spectrum's), which a second
+  declaration would silently replace.
+
+**D8 · `lw:` links.** A capture-phase click on the notebook's `.nb-view` takes `a[href^="lw:"]` before the sanitiser's
+`target=_blank` opens a tab. The grammar is `lw:key=value[&…]` over four hand verbs:
+- `preset` → `loadPreset(…, { hand: true })`;
+- `molecule` → the dropdown's pick, plus MOLECULES on; its head is the fade;
+- `view` → the V key's observable;
+- `orbital` → the ORBITAL dial by name or number, after a molecule's solve, joined to its row.
+
+Each press is one ring row (`LINK · <text>`) and one fade, and the ring is never cleared. Any other key, `lw:s=` above all, is ignored
+and named on the notebook's foot. No whole-state link exists (E9).
+
+**Gates.**
+- `tests/molecule-head.test.mjs`: all 38 records' heads are parsed against an anchored template, so every numeral sits in a named field,
+  and each field is diffed against its source (the stem, the ground, the record's `page`). `stemOf` reproduces the stem on all 37
+  non-frontier records. H₂O and N₂ are solved live in node (E −74.963023 / −107.495888; HOMO 1b₁ / 3σg). "—" appears once.
+- `molecule-head.browser-test` 3/3: WATER's head 0 ms after its ≈ 160 ms solve; one row per pick; Escape; the next pick; 0 heads, 0 fades
+  and 0 announcements on an undo, a link, a demo and under STAGE TEXT off.
+- `lw-links.browser-test` 5/5, by a real pointer: density / water / nh3+lumo each give 1 row and 1 fade, with `window.open` 0 and no tab.
+  `lw:s=abc` does nothing and the foot says `ignored: s`. An https link still opens its tab.
+- `stage-text` 4/4, `history` 44, `molecule-demos` 5, `hit-probe-set` 0 of 49 reached, `frame-occlusion` 7/7, `new-project` 8 + `--check`,
+  `offer` 16/16, `settings-probe` 0 of 6 red, `serialize-bytes` 11/11 identical to the base. `bash test.sh node` exit 0 (81 suites, 942 verdict lines).
+- Nothing is on the frame path: no lock, no pair.
+
+**Lines.** `lab/*.js` **27,558 → 27,638 (+80)**: rack.js +57, latex-state.js +21, chemview.js +2. Hand-off:
+`research/release-0.5.1/D2-D8-BUILD.md` (five brief candidates, the merge notes, the drafted CLAUDE.md sentences and CHANGES lines).

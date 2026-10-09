@@ -3458,11 +3458,10 @@ export async function boot(dom) {
       nb.querySelector('.nb-mode').addEventListener('click', () => setMode(nb.dataset.mode === 'view' ? 'edit' : 'view'));
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }
         if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation(); });
-      /* 0.5.1 D8 · `lw:` LINKS in the VIEW (R6-K): `[water](lw:molecule=h2o)` drives the lab through a WHITELIST of hand verbs — preset
-         (STATE's PRESET), molecule (the MOLECULE dropdown's pick, and MOLECULES on), view (the V key's observable), orbital (the ORBITAL
-         dial by name or number, VIEW orbital) — one ring row and one fade a press (a molecule's fade is its head, D2); the ring is never
-         cleared.  Any other key — a whole state (`lw:s=…`, E9) above all — is ignored and said on the foot.  Capture phase: the sanitiser
-         keeps the href but sends every link to a new tab (notebook-render.js), so the press is stopped before it goes. */
+      /* 0.5.1 D8 · `lw:` LINKS in the VIEW (R6-K): `[water](lw:molecule=h2o)` runs a WHITELIST of hand verbs — preset (STATE's), molecule
+         (the MOLECULE dropdown's pick, MOLECULES on), view (the V key's), orbital (the ORBITAL dial by name or number, VIEW orbital) — one
+         ring row and one fade a press (a molecule's fade is its head, D2), the ring never cleared; any other key (a whole state `lw:s=…`,
+         E9) is ignored and said on the foot.  Capture phase: the sanitiser sends every link to a new tab (notebook-render.js). */
       const orbitalOf = (s, w) => { if (!s) return 0; if (/^\d+$/.test(w)) return +w >= 1 && +w <= s.nAO ? +w : 0;
         for (let k = 0; k < s.nAO; k++) if (orbitalName(s.names, k, s.nocc).replace(/ \(\w\)/, '').split(' · ').some((x) => x.toLowerCase() === w.toLowerCase().replace('-', '−'))) return k + 1;
         return 0; };

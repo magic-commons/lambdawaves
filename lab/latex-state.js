@@ -116,12 +116,10 @@ export function moleculeLatex({ molecule, basis, charge, ground } = {}) {
   return head + cfg + '\n$' + ladder.join(',\\ ') + '$';
 }
 
-/* ── THE MOLECULE'S HEAD (0.5.1 D2): what a HAND pick shows on the stage, in THE FADE's seat (rack.js headLand) ─────────────
- * Four short lines: the formula and name; RHF/basis and E; the occupied count of n AO and the point group; the HOMO's name and
- * the HOMO–LUMO gap.  EVERY number is the record's (its `stem`; E, nocc and nAO from its ground) or the live solve's — `stemOf`
- * is the composition tools/orbital-library.mjs writes into each record's stem — never the blurb, never CURATED_IE (R6-B, E6);
- * a point group the record does not know (C₆₀) is "—".  tests/molecule-head.test.mjs diffs every numeral of all 38 records
- * and of H₂O and N₂ solved live. */
+/* ── THE MOLECULE'S HEAD (0.5.1 D2): a HAND pick shows it in THE FADE's seat (rack.js headLand).  Four lines — formula and name;
+ * RHF/basis and E; nocc of nAO and the point group ("—" where the record has none: C₆₀); the HOMO's name and the gap — and EVERY
+ * number the record's (its `stem`; E, nocc, nAO from its ground) or the live solve's through `stemOf`, the composition
+ * tools/orbital-library.mjs writes into each stem; never the blurb, never CURATED_IE (R6-B, E6).  tests/molecule-head.test.mjs. */
 export const EV = 27.211386245988;                                   // eV per E_h (CODATA 2018), the generator's
 /** the stem's members a solve decides, as the generator writes them: { pointGroup, gapEh, gapEv, homo } */
 export function stemOf({ eps, nocc, names }) {
