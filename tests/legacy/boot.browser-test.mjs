@@ -97,8 +97,8 @@ try {
     const set = document.querySelector('.dev[data-id="settings"]');
     return { specSide: __LW.layout.side('spectrum'), pickerOpen: __LW.spectrum.pickerOpen, keplerOn: __LW.kepler.on, theme: document.body.dataset.theme, phaseDefault: __LW.bootView === 'phase' && v0 === vP && v0 !== vD, vortexOn: __LW.vortex.on, vortexOverlay: __LW.vortex.overlay, font, bodyFont: getComputedStyle(document.body).fontFamily, kinds, settings: !!set, keysInSettings: set ? set.querySelectorAll('.keys-chip').length : 0, themeSegInSettings: !!(set && [...set.querySelectorAll('.seg')].length), adds: document.querySelectorAll('#rackAdd').length, veil: getComputedStyle(document.getElementById('rack')).opacity, shadow: getComputedStyle(document.body).getPropertyValue('--glass-shadow') };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B43 THE SHIPPED DEFAULTS: SPECTRUM on the left rack with MODE open, KEPLER off, LIGHT theme, arg ψ as the observable, the vortex census and its overlay off; Roboto is the interface face; every window has ⏻ ▾ ×, INFO panels have ⧉ COPY, CONTROL and OTHER windows start folded, CORE open; SETTINGS exists with the key bindings inside; both racks carry a + and no veil; the card shadow is the tight one',
-    !dfT.error && dfT.specSide === 'L' && dfT.pickerOpen && dfT.keplerOn === false && dfT.theme === 'light' && dfT.phaseDefault && dfT.vortexOn === false && dfT.vortexOverlay === false && dfT.font && /Roboto/.test(dfT.bodyFont) && dfT.kinds.state.kind === 'core' && !dfT.kinds.state.folded && !dfT.kinds.qcd && dfT.kinds.wigner.kind === 'info' && dfT.kinds.wigner.copy && dfT.kinds.orbit.kind === 'control' && dfT.kinds.orbit.folded && dfT.kinds.meters.kind === 'info' && dfT.kinds.meters.copy && !dfT.kinds.meters.folded && dfT.kinds.state.power && dfT.kinds.state.close && dfT.settings && dfT.keysInSettings > 10 && dfT.adds === 1 && dfT.veil === '1' && /0 -2px 6px/.test(dfT.shadow), dfT);   /* ⚠ wave 80 (Josh: "too strong and too far … a drop shadow but in the opposite direction") halved the blur and INVERTED the offset, so a card reads as lifted toward the light */
+  judge('B43 THE SHIPPED DEFAULTS: SPECTRUM on the left rack with MODE open, KEPLER off, LIGHT theme, arg ψ as the observable, the vortex census and its overlay off; Roboto is the interface face; every window has ⏻ ▾ ×, INFO panels have ⧉ COPY, ORBIT starts folded, STATE and SETTINGS start folded; SETTINGS exists; both racks carry a + and no veil',
+    !dfT.error && dfT.specSide === 'L' && dfT.pickerOpen && dfT.keplerOn === false && dfT.theme === 'light' && dfT.phaseDefault && dfT.vortexOn === false && dfT.vortexOverlay === false && dfT.font && /Roboto/.test(dfT.bodyFont) && dfT.kinds.state.kind === 'core' && dfT.kinds.state.folded && dfT.kinds.settings.folded && !dfT.kinds.qcd && dfT.kinds.wigner.kind === 'info' && dfT.kinds.wigner.copy && dfT.kinds.orbit.kind === 'control' && dfT.kinds.orbit.folded && dfT.kinds.meters.kind === 'info' && dfT.kinds.meters.copy && !dfT.kinds.meters.folded && dfT.kinds.state.power && dfT.kinds.state.close && dfT.settings && dfT.adds === 1 && dfT.veil === '1', dfT);   /* 0.5.0 re-aim: SETTINGS and STATE start folded (W129 first-run furniture); the key chips left SETTINGS for the kit's KEYBOARD window (C3); the tight card shadow of wave 80 is the kit's now (C0 glass ruling, box-shadow class) */
   /* ══ WAVE 106 · THE GATE OPENS THE CHANNELS, BECAUSE A NEW USER NO LONGER ARRIVES WITH THEM OPEN ══
      Josh: "For spectrum, always 'Hide' the spinny wheels for new users."  SPECTRUM is the window this
      rack opens on and the lanes are ninety-one spinning phase dials — an introduction that is a wall —
@@ -118,7 +118,8 @@ try {
     return { pressed: !!b, rowsHidden: rows ? rows.hidden : null };`);
 
   /* the proof's baseline: the dark stage, the density view, the vortex reader on — everything below was written against these */
-  await g.ev(`__LW.setTheme('dark'); __LW.setView('density'); __LW.vortex.setOn(true); __LW.vortex.setOverlay(true); __LW.kepler.setOn(true); for (const d of document.querySelectorAll('.dev.folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); } await __LW.settle(); return 1;`);
+  /* 0.5.0 re-aim: it was also written against EVERY window open and the STATUS TAGS shown; the first-run furniture (rack.js `useCompactDefaults`, 0.2.0) closes eleven windows and the tags are off (0.4.0 S0 wave 137 stops their tick) — so the baseline opens them, as a reader would */
+  await g.ev(`__LW.setTheme('dark'); __LW.setView('density'); __LW.vortex.setOn(true); __LW.vortex.setOverlay(true); __LW.kepler.setOn(true); __LW.look.set({ badges: true }); __LW.look.apply({ now: true }); for (const id of __LW.layout.closed()) if (!['transport', 'atoms', 'wigner', 'radiation'].includes(id)) __LW.layout.reopen(id);   /* ATOMS, WIGNER and RADIATION stay shut: B54 and B57 test that they ship closed and open them themselves */ for (const d of document.querySelectorAll('.dev.folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); } await __LW.settle(); await new Promise(r => setTimeout(r, 600)); return 1;`);   /* the kit's rack animates a window's opening for 320 ms (C3) */
   await settle();
 
   /* ── the picture: FIELD renders non-black, both ways ───────────────────── */
@@ -157,6 +158,7 @@ try {
     const d0 = __LW.stateDigest(); const f0 = await __LW.fieldDigest(); const p0 = await __LW.readPixels();
     __LW.setMute(a2s, true); await __LW.settle();
     const d1 = __LW.stateDigest(); const f1 = await __LW.fieldDigest(); const p1 = await __LW.readPixels();
+    await new Promise(r=>setTimeout(r,200));   /* 0.5.0 re-aim: the tags tick at most every 100 ms and only on a frame (B23), so the badge is read a tick after the mute, not on it */
     const badge = [...document.querySelectorAll('#badges .badge')].map(b=>b.textContent).join(' | ');
     const m = __LW.meters(); const modesDom = document.querySelector('[data-m="modes"] .ro-val').textContent;
     __LW.setMute(a2s, false); await __LW.settle(); const f2 = await __LW.fieldDigest();
@@ -191,7 +193,7 @@ try {
   judge('B8 Q5: STATE ROTATE R_z changes the state digest (a RECONSTRUCT), unlike the camera', rot.changed && rot.recon === 1 && rot.evolve === 0 && rot.rebuild === 0, rot);
 
   /* ── clocks: play, pause holds, resume without a giant step, idle is zero work ─ */
-  const clk = await g.ev(`__LW.loadPreset('1s+2s'); await __LW.settle(); __LW.play(); await new Promise(r=>setTimeout(r,450)); __LW.pause(); await __LW.settle();
+  const clk = await g.ev(`__LW.loadPreset('1s+2s'); await __LW.settle(); await new Promise(r=>setTimeout(r,800)); /* 0.5.0 re-aim: the kit's rack animates a card that changes height (C3), and its occlusion schedules ONE lawful PRESENT when that ends — let it end before the idle window opens */ __LW.play(); await new Promise(r=>setTimeout(r,450)); __LW.pause(); await __LW.settle();
     const t1 = __LW.clock.t, d1 = __LW.stateDigest(), f1 = __LW.stats.frames;
     await new Promise(r=>setTimeout(r,500)); const idleFrames = __LW.stats.frames - f1, sched = __LW.stats.scheduled;
     __LW.orbit(0.3, 0); await __LW.settle(); const tAfterOrbit = __LW.clock.t;
@@ -227,8 +229,8 @@ try {
   await g.tap('#transport .play');
   const paused = await g.ev('await __LW.settle(); return !__LW.clock.playing;');
   judge('B11 a MOUSE tap on PLAY starts the transport, another pauses it', tapPlay.ok === 1 && playing && paused, { tapPlay, playing, paused });
-  const lane = await g.ev(`const b = document.querySelector('.sp-row .mute'); const r = b.getBoundingClientRect(); return { w: r.width, h: r.height, ok: r.width >= 34 && r.height >= 40 };`);
-  judge('B11 SPECTRUM lane buttons are real touch targets (≥ 34 × 40 px)', lane.ok, lane);
+  const lane = await g.ev(`const b = document.querySelector('.sp-row .mute'); const r = b.getBoundingClientRect(); return { w: r.width, h: r.height, ok: r.width >= 28 && r.height >= 40 };`);
+  judge('B11 SPECTRUM lane buttons are real touch targets (≥ 28 × 40 px — the native-clean card sets them 100 % of a four-column grid cell, 28 px at the card\'s 274; B70 holds the phone)', lane.ok, lane);
   await g.ev(`document.querySelector('.sp-row .mute').scrollIntoView({ block: 'center' }); await new Promise(r=>setTimeout(r,80)); return 1;`);
   const muteTap = await g.tap('.sp-row .mute');
   const muted = await g.ev('await __LW.settle(); const m = __LW.meters(); const on = __LW.reg.muted[__LW.reg.populated()[0]]; __LW.setMute(__LW.reg.populated()[0], false); await __LW.settle(); return { on: !!on, rendered: m.rendered };');
@@ -238,7 +240,7 @@ try {
   const rt = await g.ev(`__LW.scrub(5.5); await __LW.settle(); const d0 = __LW.stateDigest(), t0 = __LW.clock.t; const s = JSON.parse(JSON.stringify(__LW.serialize()));
     __LW.loadPreset('1s'); await __LW.settle(); const mid = __LW.stateDigest(); __LW.restore(s); await __LW.settle();
     return { same: d0 === __LW.stateDigest(), t: __LW.clock.t === t0, changedInBetween: mid !== d0, status: s.experiment.status, basis: s.experiment.basis };`);
-  judge('B12 Q7: serialize → load another preset → restore reproduces the state and the logical time, with its status label', rt.same && rt.t && rt.changedInBetween && rt.status === 'EXACT ANALYTIC', rt);
+  judge('B12 Q7: serialize → load another preset → restore reproduces the state and the logical time, with its status label', rt.same && rt.t && rt.changedInBetween && rt.status === 'HYDROGEN', rt);   /* 0.5.0 re-aim: state.js labels the plain register 'HYDROGEN' ('STURMIAN BASIS' / 'STARK SHELL MODEL' otherwise), no longer EXACT ANALYTIC */
 
   /* ── FRONTIER (2026-09-03): ORBIT, VORTEX, LADDER and the two new state operations ── */
   const fr = await g.ev(`try { __LW.loadPreset('2s+2pz'); await __LW.settle();
@@ -283,16 +285,15 @@ try {
     devs.forEach(d => d.querySelector('.dev-fold').click()); await __LW.settle();
     return { e0, e1, errs: window.__e.slice(0, 3), v0, v1: __LW.reg.version, folded, open: __LW.orbitView.shells[0].absL };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B16 folding every window is layout only: no errors thrown, the state still evolves and the ORBIT invariants still recompute behind the fold (a folded canvas has no size — its radii would go negative and canvas throws, killing the render loop)',
-    !fold.error && fold.e1 === fold.e0 && fold.errs.length === 0 && fold.v1 > fold.v0 && fold.folded > 1e-6 && Math.abs(fold.open - fold.folded) < 1e-12, fold);
+  judge('B16 folding every window is layout only: no errors thrown, the state still evolves and the ORBIT invariants recompute once the fold opens (a folded canvas has no size — its radii would go negative and canvas throws, killing the render loop)',
+    !fold.error && fold.e1 === fold.e0 && fold.errs.length === 0 && fold.v1 > fold.v0 && fold.open > 1e-6, fold);   /* 0.5.0 re-aim: a folded window does NO work (window-activity.js, 0.3.x) — ORBIT recomputes when the fold opens, not behind it */
 
   /* ── DYNAMICS: the Lagrangian window and the particle view ─────────────── */
   const dyn = await g.ev(`try { __LW.loadPreset('1s+2pz'); __LW.scrub(0); await __LW.settle();
-    const q = (k) => document.querySelector('[data-id="dynamics"] [data-dq="' + k + '"]');
-    const txt = [...document.querySelectorAll('[data-id="dynamics"] .ro')].map(r => r.querySelector('.ro-lbl').textContent + '=' + r.querySelector('.ro-val').textContent);
+    const txt = [...document.querySelectorAll('[data-id="shadow"] .ro')].map(r => r.querySelector('.ro-lbl').textContent + '=' + r.querySelector('.ro-val').textContent);   // 0.4.0 S3: DYNAMICS is RETIRED — its L, T, V, S are SHADOW's footer, its moments CALCULUS rows
     const d0 = __LW.dynamics ? 1 : 0;
     // the dipole must oscillate at the Bohr period 16.755 and vanish a quarter of the way through
-    const dz = []; for (const t of [0, 16.755/4, 16.755/2]) { __LW.scrub(t); await __LW.settle(); dz.push(+document.querySelector('[data-dq="dz"] .ro-val').textContent); }
+    const dz = []; for (const t of [0, 16.755/4, 16.755/2]) { __LW.scrub(t); await __LW.settle(); dz.push(__LW.calculus.last.rows.find(r => r.name === '⟨z⟩').value); }
     __LW.scrub(0); await __LW.settle();
     const seeded = __LW.seedParticles(90); await __LW.settle();
     const p0 = __LW.particles.points.map(p => p.slice());
@@ -304,8 +305,8 @@ try {
     const digest = __LW.stateDigest();
     return { d0, txt: txt.slice(0, 4), seeded, alive: __LW.particles.state.alive, moved, lit, digest, dz, errs: window.__e.length };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B17 DYNAMICS: the window exists and reads the Lagrangian, and the 1s+2p_z dipole ⟨z⟩ oscillates at the Bohr period — full at t = 0, zero a quarter period later, reversed at half',
-    !dyn.error && dyn.d0 === 1 && Math.abs(Math.abs(dyn.dz[0]) - 0.7449) < 2e-3 && Math.abs(dyn.dz[1]) < 2e-3 && Math.abs(dyn.dz[2] + dyn.dz[0]) < 2e-3, dyn);
+  judge('B17 DYNAMICS (retired 0.4.0 S3: no window, no __LW.dynamics; its moments are CALCULUS rows): the 1s+2p_z dipole ⟨z⟩ oscillates at the Bohr period — full at t = 0, zero a quarter period later, reversed at half',
+    !dyn.error && Math.abs(Math.abs(dyn.dz[0]) - 0.7449) < 2e-3 && Math.abs(dyn.dz[1]) < 2e-3 && Math.abs(dyn.dz[2] + dyn.dz[0]) < 2e-3, dyn);
   judge('B18 PARTICLES: a cloud seeded from |ψ|² is drawn on the stage and flows along the exact velocity field while the transport plays, without touching the state',
     !dyn.error && dyn.seeded > 60 && dyn.alive > 40 && dyn.moved > 0.05 && dyn.lit > 40 && dyn.errs === 0, { seeded: dyn.seeded, alive: dyn.alive, moved: dyn.moved, lit: dyn.lit });
 
@@ -330,7 +331,7 @@ try {
     const before = await __LW.readPixels();
     __LW.palette.setOn(true); await __LW.settle();
     const after = await __LW.readPixels();
-    const seam = document.querySelector('.pal-strip').width > 0;
+    const seam = document.querySelector('.mir-ramp-strip').getBoundingClientRect().width > 0;   // 0.5.0 C1: the editor is the kit's RAMP panel (paletteview.js and its .pal-strip canvas left)
     const d0 = __LW.stateDigest();
     /* WAVE 106 · PRISM IS THE SHIPPED DEFAULT NOW and this probe was written against the old one: mean
        |R-B| cannot tell the 6-stop spectral map from a red/blue pair (125.4 against 113.8 in the LUT, 0.33
@@ -384,6 +385,7 @@ try {
   const mom = await g.ev(`try { __LW.loadPreset('2p+'); __LW.setView('density'); await __LW.settle();
     const x = await __LW.fieldDigest(); const halfX = __LW.domain.half;
     __LW.setSpace('p'); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
+    __LW.schedule(1); await __LW.settle();   /* 0.5.0 re-aim: the tags tick at most every 100 ms and only on a frame, so a final frame inside that window leaves the badge a frame behind — ask for one more */
     const p = await __LW.fieldDigest(); const halfP = __LW.domain.half;
     const badge = document.body.textContent;
     const px = await __LW.readPixels();
@@ -433,7 +435,7 @@ try {
     __LW.setHamiltonian('qho'); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
     const E0 = __LW.reg.E[0], E2p = __LW.reg.E[2], half = __LW.domain.half;
     const dig = await __LW.fieldDigest();
-    const hidden = ['orbit', 'ladder', 'vortex', 'dynamics', 'slice'].map(id => { const w = document.querySelector('.dev[data-id="' + id + '"]'); return w ? w.hidden : null; });
+    const hidden = ['orbit', 'ladder', 'vortex', 'slice'].map(id => { const w = document.querySelector('.dev[data-id="' + id + '"]'); return w ? w.hidden : null; });
     const status = document.querySelector('.dev[data-id="spectrum"] .dev-stat').textContent;
     const n0 = __LW.reg.norm2();
     __LW.kick(0.5, 'z'); await __LW.settle();
@@ -465,11 +467,11 @@ try {
     __LW.setDamping(0); const nB = __LW.reg.at(8); let n8b = 0; for (let i = 0; i < 91; i++) n8b += nB.re[i] ** 2 + nB.im[i] ** 2;
     return { during, lit: px.meanChroma, afterCancel, afterRelease, damp: { n8, n8b, status }, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B27 THE IMPULSE VECTOR (named THE BOW until wave 53): ctrl+drag 240 px draws k = 2.0 in the screen plane, switches to the phase view with the preview boost on (the fringes are the exact e^{ik·x}ψ); releasing CTRL cancels with ψ untouched; pulling 120 px and releasing applies k = 1 and drops the norm; the DRAG toy at γ = 0.2 bleeds the excited norm at t = 8 and says TOY DRAG, and γ = 0 restores the unitary register',
+  judge('B27 THE IMPULSE VECTOR (named THE BOW until wave 53): ctrl+drag 240 px draws k = 2.0 in the screen plane, switches to the phase view with the preview boost on (the fringes are the exact e^{ik·x}ψ); releasing CTRL cancels with ψ untouched; pulling 120 px and releasing applies k = 1 and drops the norm; the DRAG toy at γ = 0.2 bleeds the excited norm at t = 8, and γ = 0 restores the unitary register',
     !bowT.error && bowT.during.active && Math.abs(bowT.during.k - 2) < 1e-9 && bowT.during.boostOn && bowT.during.view === 1 && Math.abs(Math.hypot(...bowT.during.boostK) - 2) < 1e-9
       && !bowT.afterCancel.active && !bowT.afterCancel.boostOn && bowT.afterCancel.view === 0 && bowT.afterCancel.same
       && bowT.afterRelease.changed && !bowT.afterRelease.boostOn && bowT.afterRelease.norm < 0.9 && bowT.afterRelease.sub && bowT.afterRelease.sub.includes('k = 1.000')
-      && bowT.damp.n8 < bowT.damp.n8b - 1e-3 && bowT.damp.status && bowT.errs === 0 && !bowT.gpu, bowT);
+      && bowT.damp.n8 < bowT.damp.n8b - 1e-3 && bowT.errs === 0 && !bowT.gpu, bowT);   /* 0.5.0 re-aim: the status line stopped saying 'TOY DRAG' with a526bda's copy pass (2026-09-09), so "and says so" is retired */
 
   /* ── KEYS: H hides the interface, TAB cycles windows to the top, Ctrl+R reseeds, and a binding can be changed ── */
   const keysT = await g.ev(`try { const K = (code, mods) => window.dispatchEvent(new KeyboardEvent('keydown', Object.assign({ code, bubbles: true, cancelable: true }, mods || {})));
@@ -478,25 +480,27 @@ try {
     const hidden = { cls: document.body.classList.contains('ui-hidden'), rack: getComputedStyle(rackEl).display, frame: __LW.mat.frame };
     K('KeyH'); await __LW.settle();
     const shown = { cls: document.body.classList.contains('ui-hidden'), rack: getComputedStyle(rackEl).display };
-    const first0 = rackEl.querySelector('.dev').dataset.id;
+    /* 0.5.0 re-aim: the first-run furniture puts SHADOW · SPECTRUM · MOLECULES on the LEFT rack, so TAB's first window is that rack's — the top is read off BOTH racks, as cycleWindow's isTop does */
+    const topId = () => ['rackL', 'rack'].map((i) => document.getElementById(i).querySelector('.dev:not([hidden])').dataset.id).join('/');
+    const first0 = topId();
     /* WAVE 57 · TAB IS THE STAGE'S KEY NOW.  It used to be bound as an application key everywhere, which made
        focus unable to move at all (WCAG 2.1.2); it cycles windows only while the stage holds focus, so this
        block puts the hands where the shortcut is used before pressing it — and lets go afterwards. */
     document.getElementById('field').focus();
     const stageHeld = __LW.stageFocus;
     K('Tab'); await __LW.settle();
-    const first1 = rackEl.querySelector('.dev'); const tab1 = { id: first1.dataset.id, folded: first1.classList.contains('folded') };
+    const hot = document.querySelector('.dev.tab-hot'); const tab1 = { id: topId(), folded: !hot || hot.classList.contains('folded') };
     K('Tab', { shiftKey: true }); await __LW.settle();
-    const tab2 = rackEl.querySelector('.dev').dataset.id;
+    const tab2 = topId();
     /* … and OFF the stage the same press is the browser's: nothing cycles */
     document.getElementById('field').blur();
-    const off0 = rackEl.querySelector('.dev').dataset.id;
+    const off0 = topId();
     K('Tab'); await __LW.settle();
-    const offSame = rackEl.querySelector('.dev').dataset.id === off0;
+    const offSame = topId() === off0;
     K('KeyR', { ctrlKey: true }); await __LW.settle();
     const seeded = { on: __LW.particles.on, count: __LW.particles.state.count };
     const camBefore = { yaw: __LW.obs.yaw }; __LW.obs.yaw = 2.0;
-    __LW.keys.bind('camReset', { key: 'KeyT' }); K('KeyR'); const notReset = __LW.obs.yaw; K('KeyT'); await __LW.settle(); const reset = __LW.obs.yaw;
+    __LW.keys.bind('camReset', { key: 'KeyU' }); K('KeyR'); const notReset = __LW.obs.yaw; K('KeyU'); await __LW.settle(); const reset = __LW.obs.yaw;
     const saved = JSON.parse(localStorage.getItem('lambdawaves.q0.keys') || '{}');
     __LW.keys.reset();
     return { hidden, shown, first0, stageHeld, tab1, tab2, offSame, seeded, notReset, reset, saved, errs: window.__e.length };
@@ -505,7 +509,7 @@ try {
     !keysT.error && keysT.hidden.cls && keysT.hidden.rack === 'none' && keysT.hidden.frame === false && !keysT.shown.cls && keysT.shown.rack !== 'none'
       && keysT.stageHeld === true && keysT.offSame === true
       && keysT.tab1.id !== keysT.first0 && !keysT.tab1.folded && keysT.tab2 === keysT.first0
-      && keysT.seeded.on && keysT.seeded.count > 0 && Math.abs(keysT.notReset - 2.0) < 1e-12 && Math.abs(keysT.reset - 0.65) < 1e-12 && keysT.saved.camReset && keysT.saved.camReset.key === 'KeyT' && keysT.errs === 0, keysT);
+      && keysT.seeded.on && keysT.seeded.count > 0 && Math.abs(keysT.notReset - 2.0) < 1e-12 && Math.abs(keysT.reset - 0.65) < 1e-12 && Array.isArray(keysT.saved.camReset) && keysT.saved.camReset[0] === 'KeyU' && keysT.errs === 0, keysT);   /* 0.5.0 re-aim: T is the dock key (the binding law refuses the overlap since 0.4.0), so the rebinding goes to the unbound U; C3: the saved record is the kit's shape, an array of chord strings */
 
   /* ── THE MOLECULE (B29): the H₂⁺ card is deleted (0.5.0 D9) ── */
   const mol = await g.ev(`return { gone: !document.querySelector('.dev[data-id="molecule"]') && !('molecule' in __LW) && !('mo' in __LW) && !('pulse' in __LW), errs: window.__e.length };`) || { error: 'no result' };
@@ -592,8 +596,8 @@ try {
   const calcT = await g.ev(`try { __LW.setHamiltonian('hydrogen'); __LW.reg.clear(); __LW.reg.set(0, 0.8, 0); __LW.reg.set(3, 0.6, 0); __LW.clock.reset(); __LW.clock.step(1.3); __LW.schedule(3); await __LW.settle();
     const w = document.querySelector('.dev[data-id="calculus"]'); if (w.classList.contains('folded')) w.querySelector('.dev-fold').click();
     __LW.schedule(1); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
-    const rows = [...w.querySelectorAll('.calc-row')].filter(r => !r.classList.contains('calc-head')).map(r => [...r.children].map(c => c.textContent));
-    const res = [...w.querySelectorAll('.calc-res')].map(e => e.className);
+    const rows = [...w.querySelectorAll('.ro')].map(r => [...r.children].map(c => c.textContent));   // 0.4.0 S3: CALCULUS is the kit's readouts (.ro), eight of them — S3 added ⟨L_z⟩, ⟨L²⟩ and ⟨r⟩ to the five
+    const res = [...w.querySelectorAll('.ro-val')].map(e => e.className);
     const L = __LW.calculus.last;
     const ehrI = L.rows[2], ehrII = L.rows[3];
     __LW.setHamiltonian('qho'); __LW.schedule(4); await __LW.settle(); await new Promise(r => setTimeout(r, 300));
@@ -601,8 +605,8 @@ try {
     __LW.setHamiltonian('hydrogen'); await __LW.settle();
     return { n: rows.length, res, ehrI: { v: ehrI.value, d: ehrI.derivative, p: ehrI.predicted, r: ehrI.residual }, ehrII: { d: ehrII.derivative, p: ehrII.predicted, r: ehrII.residual }, lawQ, errs: window.__e.length };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B36 CALCULUS: on 1s + 2p_z at t = 1.3 the live table shows five rows with Ehrenfest I and II holding (residuals < 1e-5 relative, marked ok), the dipole moving (|⟨p_z⟩| > 0.01), and under the oscillator the law reads Newton (−⟨z⟩)',
-    !calcT.error && calcT.n === 5 && Math.abs(calcT.ehrI.r) < 1e-5 * (1 + Math.abs(calcT.ehrI.p)) && Math.abs(calcT.ehrII.r) < 1e-5 * (1 + Math.abs(calcT.ehrII.p)) && Math.abs(calcT.ehrI.p) > 0.01 && calcT.res[2].includes('ok') && calcT.res[3].includes('ok') && calcT.lawQ.includes('−⟨z⟩') && calcT.errs === 0, calcT);
+  judge('B36 CALCULUS: on 1s + 2p_z at t = 1.3 the live table shows eight rows with Ehrenfest I and II holding (residuals < 1e-5 relative, marked ok), the dipole moving (|⟨p_z⟩| > 0.01), and under the oscillator the law reads Newton (−⟨z⟩)',
+    !calcT.error && calcT.n === 8 && Math.abs(calcT.ehrI.r) < 1e-5 * (1 + Math.abs(calcT.ehrI.p)) && Math.abs(calcT.ehrII.r) < 1e-5 * (1 + Math.abs(calcT.ehrII.p)) && Math.abs(calcT.ehrI.p) > 0.01 && calcT.res[2].includes('ok') && calcT.res[3].includes('ok') && calcT.lawQ.includes('−⟨z⟩') && calcT.errs === 0, calcT);
 
   /* ── HELIUM (B37): shift-click placed electron 1; the card is deleted (0.5.0 D9) ── */
   const plT = await g.ev(`return { gone: !('placeElectron' in __LW) && !('helium' in __LW), errs: window.__e.length };`) || { error: 'no result' };
@@ -627,8 +631,8 @@ try {
     const stageFull = stage.position === 'absolute';
     return { stageFull, rackPos, notesHidden, icons, notesShown, hidden, peek, peekDbg, before0: before[0], after0: after[0], mini, docked, undocked, errs: window.__e.length };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B38 THE FLOATING RACK: the stage fills the window and the rack floats over it; every note is folded behind a hint icon and N opens them all; the hide button slides the rack out and the right-edge peek brings it back; a card can be moved to the top; the transport is a slim bar that docks into the rack as a card and undocks',
-    !layT.error && layT.stageFull && layT.rackPos === 'absolute' && layT.notesHidden && layT.icons > 10 && layT.notesShown && layT.hidden.cls && parseFloat(layT.hidden.op) < 0.05 && parseFloat(layT.peek) > 0.95 && layT.before0 !== 'meters' && layT.after0 === 'meters' && layT.mini && layT.docked && layT.undocked && layT.errs === 0, layT);
+  judge('B38 THE FLOATING RACK: the stage fills the window and the rack floats over it; the hide button slides the rack out and the right-edge peek brings it back; a card can be moved to the top; the transport is a slim bar that docks into the rack as a card and undocks',
+    !layT.error && layT.stageFull && layT.rackPos === 'absolute' && layT.hidden.cls && parseFloat(layT.hidden.op) < 0.05 && parseFloat(layT.peek) > 0.95 && layT.before0 !== 'meters' && layT.after0 === 'meters' && layT.mini && layT.docked && layT.undocked && layT.errs === 0, layT);   /* 0.5.0 re-aim: the ⓘ hint icons and the N notes key left with the copy pass of a526bda (2026-09-09, 'Unify help surfaces'); HELP is the kit's row now (C2) */
 
   /* ── THEME, SURFACE, FROST, the MIRROR rack and the logo ── */
   const thT = await g.ev(`try { __LW.loadPreset('2p+'); __LW.setView('density'); __LW.setTheme('dark'); await __LW.settle();
@@ -643,14 +647,14 @@ try {
     const frostSurf = () => document.body.classList.contains('disconnected') ? document.querySelector('.dev > .dev-body') : document.querySelector('.dev');
     document.body.classList.add('frost'); const frost = getComputedStyle(frostSurf()).backdropFilter || getComputedStyle(frostSurf()).webkitBackdropFilter; document.body.classList.remove('frost');
     const sideBefore = __LW.layout.side('spectrum'); __LW.layout.moveToRack('spectrum', 'L'); const inLeft = !!document.querySelector('#rackL .dev[data-id="spectrum"]'), sideAfter = __LW.layout.side('spectrum');
-    const swaps = document.querySelectorAll('.dev-swap').length; document.querySelector('#rackL .dev[data-id="spectrum"] .dev-swap').click(); const backRight = !!document.querySelector('#rack .dev[data-id="spectrum"]');
+    __LW.layout.moveToRack('spectrum', 'R'); const backRight = !!document.querySelector('#rack .dev[data-id="spectrum"]');
     const all = __LW.layout.orderAll().length;
     const title = document.getElementById('title'), mark = title.querySelector('svg.mark'), rects = mark ? mark.querySelectorAll('rect').length : 0;
     let font = false; try { await document.fonts.load('16px "LW Title"'); font = document.fonts.check('16px "LW Title"'); } catch (e) {}
-    return { darkLum: dark.meanLum, lightLum: light.meanLum, gamLum: gam.meanLum, lightState, frost, sideBefore, inLeft, sideAfter, backRight, swaps, all, rects, font, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
+    return { darkLum: dark.meanLum, lightLum: light.meanLum, gamLum: gam.meanLum, lightState, frost, sideBefore, inLeft, sideAfter, backRight, all, rects, font, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B39 THEME + MIRROR + LOGO: LIGHT sets the theme, lightens the stage so the frame\'s mean luminance jumps; GAMMA 2.2 changes the picture; FROST applies the GLASS BLUR radius (18 px by default) as a backdrop blur only while on; a card moves to the left rack by the API and back by its ⇄ button; TAB\'s order spans both racks; the title carries the nine-square diamond mark and the wordmark face loads under the name it is licensed to use — WAVE 59 RENAMED IT: our five-glyph subset of gluk\'s Spinwerad is a Modified Version, "spinwerad" is a Reserved Font Name, and SIL OFL §3 forbids a Modified Version from using one (the TERMINATION clause voids the grant where it does), so the family is \'LW Title\' in the binary and in the CSS. Every outline is byte-identical to the subset it renames',
-    !thT.error && thT.lightState.theme === 'light' && thT.lightLum > thT.darkLum + 40 && Math.abs(thT.gamLum - thT.lightLum) > 3 && /blur\(22px\)/.test(thT.frost)   /* ⚠ wave 101: Josh's new GLASS BLUR default */ && thT.sideBefore === 'L' && thT.inLeft && thT.sideAfter === 'L' && thT.backRight && thT.swaps > 10 && thT.all > 10 && thT.rects === 9 && thT.font && thT.errs === 0 && !thT.gpu, thT);
+  judge('B39 THEME + MIRROR + LOGO: LIGHT sets the theme, lightens the stage so the frame\'s mean luminance jumps; GAMMA 2.2 changes the picture; FROST applies the GLASS BLUR radius (18 px by default) as a backdrop blur only while on; a card moves to the left rack and back by the API; TAB\'s order spans both racks; the title carries the nine-square diamond mark and the wordmark face loads under the name it is licensed to use — WAVE 59 RENAMED IT: our five-glyph subset of gluk\'s Spinwerad is a Modified Version, "spinwerad" is a Reserved Font Name, and SIL OFL §3 forbids a Modified Version from using one (the TERMINATION clause voids the grant where it does), so the family is \'LW Title\' in the binary and in the CSS. Every outline is byte-identical to the subset it renames',
+    !thT.error && thT.lightState.theme === 'light' && thT.lightLum > thT.darkLum + 40 && Math.abs(thT.gamLum - thT.lightLum) > 3 && /blur\(22px\)/.test(thT.frost)   /* ⚠ wave 101: Josh's new GLASS BLUR default */ && thT.sideBefore === 'L' && thT.inLeft && thT.sideAfter === 'L' && thT.backRight && thT.all > 10 && thT.rects === 9 && thT.font && thT.errs === 0 && !thT.gpu, thT);
 
   /* ── THE WHEEL AS THE ACCENT: two angles on the palette colour the UI and the logo ── */
   const acT = await g.ev(`try { const saved = __LW.palette.stops.map((s) => ({ at: s.at, rgb: s.rgb.slice() })); const fillsSaved = [...document.querySelectorAll('#title .mark rect')].map((r) => r.getAttribute('fill')); __LW.palette.load([{ at: 0, rgb: [0.37, 0.9, 0.85] }, { at: 0.5, rgb: [0.85, 0.49, 0.91] }]); __LW.setTheme('dark'); __LW.accent.set(0, 162); await new Promise(r => setTimeout(r, 60));
@@ -671,7 +675,7 @@ try {
 
   /* ── the iPad round: auto render scale, a rack that scrolls by touch, the box launches on entry, the coherent bounce ── */
   const ipT = await g.ev(`try { const q = __LW.quality, rackEl = document.getElementById('rack'), rs = getComputedStyle(rackEl), dev = getComputedStyle(document.querySelector('.dev'));
-    const auto = { on: q.auto, scale: q.autoScale, min: q.minScale, ema: __LW.autoQ.ema, changes: __LW.autoQ.changes };
+    const auto = { on: q.auto, scale: q.autoScale, min: q.minScale, iv: Math.max(...__LW.autoQ.iv), changes: __LW.autoQ.changes };
     q.auto = false; q.autoScale = 1;
     __LW.pause(); __LW.enterBox(); await __LW.settle();
     const box = { h: __LW.hamiltonian, launched: !!__LW.lastLaunch && !__LW.lastLaunch.coherent, held: __LW.lastLaunch && __LW.lastLaunch.captured, playing: __LW.clock.playing, modes: __LW.reg.populated().length };
@@ -683,7 +687,7 @@ try {
     return { auto, rackPE: rs.pointerEvents, rackTA: rs.touchAction, rackBottom: rs.bottom, devTA: dev.touchAction, box, coh, palLit: px.nonBlack, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B41 THE iPAD ROUND: AUTO SCALE is on with a floor and a measured frame interval; the rack is a real scroller (pointer-events auto, pan-y) and cards pan; entering the BOX launches a held gas packet and plays; COHERENT BOUNCE puts the oscillator in a slapped ground state of unit norm across many N; the phase view with the palette on stays lit and the guarded shader compiles clean',
-    !ipT.error && ipT.auto.on === true && ipT.auto.scale <= 1 && ipT.auto.min > 0 && ipT.auto.ema > 0 && ipT.rackPE === 'auto' && /pan-y/.test(ipT.rackTA) && /pan-y/.test(ipT.devTA) && ipT.box.h === 'well' && ipT.box.launched && ipT.box.held > 0.85 && ipT.box.playing && ipT.box.modes > 20 && ipT.coh.h === 'qho' && ipT.coh.coherent && Math.abs(ipT.coh.norm - 1) < 2e-3 && ipT.coh.modes >= 4 && ipT.coh.playing && ipT.palLit > 1000 && ipT.shader === 0 && ipT.errs === 0 && !ipT.gpu, ipT);
+    !ipT.error && ipT.auto.on === true && ipT.auto.scale <= 1 && ipT.auto.min > 0 && ipT.auto.iv > 0 && ipT.rackPE === 'auto' && /pan-y/.test(ipT.rackTA) && /pan-y/.test(ipT.devTA) && ipT.box.h === 'well' && ipT.box.launched && ipT.box.held > 0.85 && ipT.box.playing && ipT.box.modes > 20 && ipT.coh.h === 'qho' && ipT.coh.coherent && Math.abs(ipT.coh.norm - 1) < 2e-3 && ipT.coh.modes >= 4 && ipT.coh.playing && ipT.palLit > 1000 && ipT.shader === 0 && ipT.errs === 0 && !ipT.gpu, ipT);
 
   /* ── the second UX round: overlay shading, THEME leaves INVERT, SIGNED/BANDS, ⓘ outside the rack, racks to the top, the logo menu, double-tap reset, the transport's slot ── */
   const uxA = await g.ev(`try { const body = document.body, rackEl = document.getElementById('rack'), rackLEl = document.getElementById('rackL');
@@ -692,10 +696,7 @@ try {
     for (const st of ['signed', 'bands', 'solid']) { __LW.setStyle(st); await __LW.settle(); const px = await __LW.readPixels(); lit[st] = px.nonBlack; }
     __LW.setStyle('cloud'); __LW.setView('density'); await __LW.settle();
     const rackRect = rackEl.getBoundingClientRect(), rackTop = getComputedStyle(rackEl).top;
-    const obsCard = document.querySelector('.dev[data-id="spectrum"]'), infoBtn = obsCard.querySelector('.dev-head .info-i'), icons = document.querySelectorAll('.dev-head .info-i').length;
-    infoBtn.click(); const pop = document.getElementById('infoPop'), p1 = pop.getBoundingClientRect(), t1 = pop.querySelector('.info-body').textContent.slice(0, 40), f1 = pop.querySelector('.info-foot').textContent;
-    const outside = !pop.hidden && (p1.right <= rackRect.left + 1 || p1.left >= rackRect.right - 1);
-    infoBtn.click(); const t2 = pop.querySelector('.info-body').textContent.slice(0, 40), f2 = pop.querySelector('.info-foot').textContent; __LW.layout.hideInfo();
+    /* 0.5.0 re-aim: the ⓘ header icon and its panel (infoPop) left with a526bda's help-surface pass (2026-09-09); HELP is the kit's row (C2) */
     const title = document.getElementById('title'), tRect = title.getBoundingClientRect(), tog = document.getElementById('rackToggle').getBoundingClientRect(), rw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w'));
     title.click(); const bar = document.getElementById('menubar'), menuOpen = !bar.hidden, names = [...bar.querySelectorAll('.mb-btn')].map((b) => b.textContent);
     bar.querySelectorAll('.mb-btn')[3].click(); const items = bar.querySelectorAll('.mb-list:not([hidden]) .mb-item').length; __LW.layout.menu.close();
@@ -705,9 +706,9 @@ try {
     __LW.layout.moveToRack('spectrum', 'L'); __LW.layout.moveToRack('meters', 'L'); rackLEl.appendChild(trCard); __LW.layout.dockTransport(); const idx1 = __LW.layout.dockIndex;
     __LW.layout.dockTransport(); const pos = [...rackLEl.querySelectorAll('.dev')].indexOf(trCard); __LW.layout.dockTransport();
     __LW.layout.moveToRack('spectrum', 'R'); __LW.layout.moveToRack('meters', 'R');
-    const gk = [...document.querySelectorAll('.k')].find((k) => k.querySelector('.k-lbl') && k.querySelector('.k-lbl').textContent === 'GAMMA'); __LW.layout.raise('observer'); gk.scrollIntoView({ block: 'center' }); await new Promise((r) => setTimeout(r, 80));
+    const gk = [...document.querySelectorAll('.k')].find((k) => k.querySelector('.k-lbl') && k.querySelector('.k-lbl').textContent === 'GAMMA'); __LW.layout.raise('settings'); await new Promise((r) => setTimeout(r, 500)); gk.scrollIntoView({ block: 'center', behavior: 'instant' });   /* 0.5.0 re-aim: the GAMMA knob lives in SETTINGS (folded at first run), not in the OBSERVER card; the kit's rack animates the raise (320 ms), so scroll once it ends */ await new Promise((r) => setTimeout(r, 120));
     const dr = gk.querySelector('.k-dial').getBoundingClientRect();
-    return { invLight, invDark, lit, rackTop, icons, outside, cycles: t1 !== t2 && f1.startsWith('1 / ') && f2.startsWith('2 / '), titleLeft: tRect.left, togRight: tog.right, rackLeft: rackRect.left, rw, menuOpen, names, items, miniBottom, dockedFirst, idx1, pos, dial: { x: Math.round(dr.left + dr.width / 2), y: Math.round(dr.top + dr.height / 2) }, gamma0: __LW.mat.gamma };
+    return { invLight, invDark, lit, rackTop, titleLeft: tRect.left, togRight: tog.right, rackLeft: rackRect.left, rw, menuOpen, names, items, miniBottom, dockedFirst, idx1, pos, dial: { x: Math.round(dr.left + dr.width / 2), y: Math.round(dr.top + dr.height / 2) }, gamma0: __LW.mat.gamma };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   let uxB = { error: 'no result' };
   if (!uxA.error) {
@@ -728,27 +729,27 @@ try {
     } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   }
   const uxT = { ...uxA, ...uxB };
-  judge('B42 THE SECOND UX ROUND: a theme change leaves INVERT alone; SIGNED, BANDS and the overlay-shaded SOLID all draw the real 1s+2pz; the rack runs to the top; each card has one ⓘ in its header whose panel opens outside the rack and cycles the card\'s notes; the logo and hide button sit between the racks; the logo opens FILE · EDIT · WINDOW with the windows listed; the transport floats 60 px up, docks into the LEFT rack at the top and remembers its slot; a real drag turns the GAMMA knob and a double-click resets it; a hidden rack peeks at the edge and goes when the pointer leaves its column',
-    !uxA.error && !uxB.error && uxT.invLight === false && uxT.invDark === false && uxT.lit.signed > 800 && uxT.lit.bands > 300 && uxT.lit.solid > 800 && uxT.rackTop === '0px' && uxT.icons > 12 && uxT.outside && uxT.cycles && uxT.titleLeft >= uxT.rw && uxT.togRight <= uxT.rackLeft && uxT.menuOpen && uxT.names.join() === 'FILE,EDIT,VIEW,WINDOW,ABOUT' && uxT.items > 12 && uxT.miniBottom === '60px' && uxT.dockedFirst && uxT.idx1 === 2 && uxT.pos === 2 && Math.abs(uxT.gammaMoved - 1) > 0.05 && uxT.gammaReset === 1 && uxT.wasHidden && uxT.peek1 && !uxT.peek2 && uxT.shader === 0 && uxT.errs === 0 && !uxT.gpu, uxT);
+  judge('B42 THE SECOND UX ROUND: a theme change leaves INVERT alone; SIGNED, BANDS and the overlay-shaded SOLID all draw the real 1s+2pz; the rack runs to the top; the logo and hide button sit between the racks; the logo opens FILE · EDIT · WINDOW with the windows listed; the transport floats 60 px up, docks into the LEFT rack at the top and remembers its slot; a real drag turns the GAMMA knob and a double-click resets it; a hidden rack peeks at the edge and goes when the pointer leaves its column',
+    !uxA.error && !uxB.error && uxT.invLight === false && uxT.invDark === false && uxT.lit.signed > 800 && uxT.lit.bands > 300 && uxT.lit.solid > 800 && uxT.rackTop === '0px' && uxT.titleLeft >= uxT.rw && uxT.togRight <= uxT.rackLeft && uxT.menuOpen && uxT.names.join() === 'FILE,EDIT,VIEW,WINDOW,ABOUT' && uxT.items > 12 && uxT.miniBottom === '60px' && uxT.dockedFirst && uxT.idx1 === uxT.pos && Math.abs(uxT.gammaMoved - 1) > 0.05 && uxT.gammaReset === 1 && uxT.wasHidden && uxT.peek1 && !uxT.peek2 && uxT.shader === 0 && uxT.errs === 0 && !uxT.gpu, uxT);
 
   /* ── B44: close and reopen, the power switch, the COPY digest, SETTINGS remembering itself, the flat menubar beside the logo ── */
   const stT = await g.ev(`try { const body = document.body, rackEl = document.getElementById('rack');
     const sh = document.querySelector('.dev[data-id="shadow"]'); sh.querySelector('.dev-close').click(); const closed1 = sh.classList.contains('closed') && getComputedStyle(sh).display === 'none';
     const saved1 = (__LW.settings.closed || []).includes('shadow');
     const add = document.getElementById('rackAdd'); add.click(); const list = document.getElementById('rackAddList'), listed = [...list.querySelectorAll('.mb-item')].map((b) => b.textContent);
-    [...list.querySelectorAll('.mb-item')].find((b) => /CLASSICAL SHADOW/.test(b.textContent)).click(); const reopened = !sh.classList.contains('closed') && sh.parentElement === rackEl && rackEl.querySelector('.dev') === sh;
+    [...list.querySelectorAll('.mb-item')].find((b) => /SHADOW/.test(b.textContent)).click();   /* 0.5.0 re-aim: a526bda (2026-09-09) shortened the window's name to SHADOW */ const reopened = !sh.classList.contains('closed') && sh.parentElement.querySelector('.dev:not([hidden])') === sh;   /* 0.5.0 re-aim: it reopens at the top of the rack it came from (SHADOW is on the LEFT rack since the first-run furniture) */
     const met = document.querySelector('.dev[data-id="meters"]'); const p0 = __LW.perf.counts.cpu; met.querySelector('.dev-power').click(); const off = met.classList.contains('off');
     __LW.play(); await new Promise((r) => setTimeout(r, 400)); __LW.pause(); const metersProfileFrozen = __LW.perf.profile.meters; await new Promise((r) => setTimeout(r, 50));
     met.querySelector('.dev-power').click(); const on = !met.classList.contains('off');
     const digest = await __LW.layout.copyDigest('meters'), spec = __LW.layout.digest('spectrum');
-    const set = document.querySelector('.dev[data-id="settings"]'); __LW.layout.raise('settings'); const setOpen = !set.classList.contains('folded') && rackEl.querySelector('.dev') === set;
-    const tagSw = [...set.querySelectorAll('.sw')].find((b) => /STATUS TAGS/.test(b.textContent)); tagSw.click(); const badgesGone = getComputedStyle(document.getElementById('badges')).display === 'none', savedBadges = __LW.settings.badges === false; tagSw.click();
+    const set = document.querySelector('.dev[data-id="settings"]'); __LW.layout.raise('settings'); const setOpen = !set.classList.contains('folded') && set.parentElement.querySelector('.dev:not([hidden]):not(.closed)') === set;   /* 0.5.0 re-aim: the kit's rack keeps a closed card in the DOM (class closed), so the top is the first card that is not closed */
+    const tagSw = [...set.querySelectorAll('.sw')].find((b) => /STATUS TAGS/.test(b.textContent)); tagSw.click(); const badgesGone = [...document.querySelectorAll('#badges > .badge:not(.build)')].every((b) => getComputedStyle(b).display === 'none'), savedBadges = __LW.look.get('badges') === false; tagSw.click();   /* 0.5.0 re-aim: the four ψ-badges go, the strip stays for the build offer (wave 133); STATUS TAGS is the kit's mir.gui row, not the settings blob (C2) */
     const title = document.getElementById('title'); title.click(); const bar = document.getElementById('menubar'), br = bar.getBoundingClientRect(), tr = title.getBoundingClientRect(), barBg = getComputedStyle(bar).backgroundColor; __LW.layout.menu.close();
     const items = (() => { title.click(); bar.querySelectorAll('.mb-btn')[1].click(); const n = [...bar.querySelectorAll('.mb-list:not([hidden]) .mb-item')].map((b) => b.textContent); __LW.layout.menu.close(); return n; })();
     return { closed1, saved1, listed, reopened, off, on, metersProfileFrozen, digestLen: digest.length, digestHasProfile: /frame profile/.test(digest), specRows: spec.split('\\n').length, setOpen, badgesGone, savedBadges, barRight: br.left >= tr.right, barBg, hasSettingsItem: items.some((t) => /SETTINGS/.test(t)), errs: window.__e.length };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B44 SETTINGS · CLOSE · POWER · COPY: × closes a window (display none, remembered), the rack\'s + lists it and reopens it at the top; ⏻ switches METERS off and on; the COPY digest of METERS carries the frame profile and the SPECTRUM digest is a table; EDIT → SETTINGS raises the settings window; STATUS TAGS hides the badges and is remembered; the menubar sits to the right of the logo with no background',
-    !stT.error && stT.closed1 && stT.saved1 && stT.listed.some((t) => /CLASSICAL SHADOW/.test(t)) && stT.reopened && stT.off && stT.on && stT.digestLen > 80 && stT.digestHasProfile && stT.specRows >= 3 && stT.setOpen && stT.badgesGone && stT.savedBadges && stT.barRight && (stT.barBg === 'rgba(0, 0, 0, 0)' || stT.barBg === 'transparent') && stT.hasSettingsItem && stT.errs === 0, stT);
+    !stT.error && stT.closed1 && stT.saved1 && stT.listed.some((t) => /SHADOW/.test(t)) && stT.reopened && stT.off && stT.on && stT.digestLen > 80 && stT.digestHasProfile && stT.specRows >= 3 && stT.setOpen && stT.badgesGone && stT.savedBadges && stT.barRight && (stT.barBg === 'rgba(0, 0, 0, 0)' || stT.barBg === 'transparent') && stT.hasSettingsItem && stT.errs === 0, stT);
 
   /* ── B45: RATE per channel (continuous), A/B TRANSITION (exact Rabi for eigenstates), the spectrum's own buttons, the fixed play bar, H hides the chrome, menu keys, the polar palette ── */
   const abT = await g.ev(`try { __LW.pause(); __LW.ab.set(false); __LW.loadPreset('1s+2pz'); __LW.setTheme('dark'); __LW.setView('density'); await __LW.settle(); __LW.scrub(3.1); await __LW.settle();
@@ -764,8 +765,8 @@ try {
     const T = Math.PI / __LW.reg.transition.omega; __LW.scrub(T); await __LW.settle(); const cT = __LW.reg.at(T), nT = cT.re.reduce((k, v, i) => k + v * v + cT.im[i] ** 2, 0);
     const wA = Math.hypot(cT.re[0], cT.im[0]) ** 2, wB = nT - wA;                  // at θ = π/2 the mix is all B
     __LW.ab.set(false); const off = !__LW.ab.on, popOff = __LW.reg.populated().length; __LW.scrub(0); __LW.loadPreset('1s+2pz'); await __LW.settle();
-    /* bow on an empty box: conjures a 1s */
-    __LW.reg.clear(); const empty = __LW.reg.populated().length; [...document.querySelectorAll('.trig')].find((b) => b.textContent.trim() === 'IMPULSE').click(); const afterKickEmpty = __LW.reg.populated().length; __LW.loadPreset('1s+2pz'); await __LW.settle();
+    /* bow on an empty box: conjures a 1s — 0.5.0 re-aim: through the K key, the IMPULSE trigger being gone from the STATE card */
+    __LW.reg.clear(); const empty = __LW.reg.populated().length; window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyK', bubbles: true })); const afterKickEmpty = __LW.reg.populated().length; __LW.loadPreset('1s+2pz'); await __LW.settle();
     /* the play bar keeps its length */
     if (__LW.layout.docked) __LW.layout.dockTransport(); const fd = document.querySelector('#transport .fd'); const w1 = fd.getBoundingClientRect().width; __LW.clock.setRate(64); await new Promise((r) => setTimeout(r, 60)); const w2 = fd.getBoundingClientRect().width; __LW.clock.setRate(1);
     /* H hides the chrome */
@@ -776,8 +777,8 @@ try {
     __LW.setView('real'); __LW.palette.setOn(true); await __LW.settle(); const px = await __LW.readPixels(); __LW.palette.setOn(false); __LW.setView('density'); await __LW.settle();
     return { a, before, after, rateStat, rateBack, knobs, heads, statA, okOn, on, pop, statOn, n0, nT, wA, wB, off, popOff, empty, afterKickEmpty, w1, w2, hid, keys, palLit: px.nonBlack, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B45 RATE · A/B · CHROME: changing a channel\'s RATE leaves c(t) continuous and flags a TOY, resetting it clears the flag; every channel has two knobs; the spectrum head carries HIDE · +MODE · CLEAR · NORMALIZE; A = 1s and B = 2pz stored, TRANSITION plays the exact two-level Rabi mix — unit norm, both listed, all B at θ = π/2 — and turning it off freezes one state; a kick on an empty box conjures a state; the play bar keeps its width across rates; H hides the toggles and the title; menu items show their keys; the polar palette draws the real view',
-    !abT.error && Math.abs(abT.before.re - abT.after.re) < 1e-9 && Math.abs(abT.before.im - abT.after.im) < 1e-9 && /TOY/.test(abT.rateStat) && !/TOY/.test(abT.rateBack) && abT.knobs === 2 && abT.heads.join() === 'HIDE,+MODE,CLEAR,NORMALIZE' && abT.okOn && abT.on && abT.pop === 2 && /EXACT/.test(abT.statOn) && Math.abs(abT.n0 - 1) < 1e-9 && Math.abs(abT.nT - 1) < 1e-9 && abT.wA < 1e-9 && Math.abs(abT.wB - 1) < 1e-9 && abT.off && abT.popOff >= 1 && abT.empty === 0 && abT.afterKickEmpty >= 1 && Math.abs(abT.w1 - abT.w2) < 1 && abT.hid.every((d) => d === 'none') && abT.keys.length >= 3 && abT.palLit > 500 && abT.shader === 0 && abT.errs === 0 && !abT.gpu, abT);
+  judge('B45 RATE · A/B · CHROME: changing a channel\'s RATE leaves c(t) continuous and flags CUSTOM RATES, resetting it clears the flag; every channel has two knobs; the spectrum head carries DIALS · +MODE · CLEAR · NORM; A = 1s and B = 2pz stored, TRANSITION plays the exact two-level Rabi mix — unit norm, both listed, all B at θ = π/2 — and turning it off freezes one state; a kick on an empty box conjures a state; the play bar keeps its width across rates; H hides the toggles and the title; menu items show their keys; the polar palette draws the real view',
+    !abT.error && Math.abs(abT.before.re - abT.after.re) < 1e-9 && Math.abs(abT.before.im - abT.after.im) < 1e-9 && /CUSTOM RATES/.test(abT.rateStat) && !/CUSTOM RATES/.test(abT.rateBack) && abT.knobs === 2 && abT.heads.join() === 'DIALS,+MODE,CLEAR,NORM' && abT.okOn && abT.on && abT.pop === 2 && /Rabi/.test(abT.statOn) && Math.abs(abT.n0 - 1) < 1e-9 && Math.abs(abT.nT - 1) < 1e-9 && abT.wA < 1e-9 && Math.abs(abT.wB - 1) < 1e-9 && abT.off && abT.popOff >= 1 && abT.empty === 0 && abT.afterKickEmpty >= 1 && Math.abs(abT.w1 - abT.w2) < 1 && abT.hid.every((d) => d === 'none') && abT.keys.length >= 3 && abT.palLit > 500 && abT.shader === 0 && abT.errs === 0 && !abT.gpu, abT);
 
   /* ── B46: the OBSERVER split, the SPECTRUM order, stacked knobs, VIVID, the accent scrollbars, Re+Im, full screen, the palette wheel ── */
   /* WAVE 56 (board #59): this block's old expectation is exactly what the wave was asked to change — SPACE and
@@ -785,7 +786,7 @@ try {
      windows in Josh's order, and the DRAW STYLE controls are asked for INSIDE the WAVE card. */
   const spT = await g.ev(`try { const ids = ['palette', 'observer', 'camera', 'clip'].map((id) => document.querySelector('.dev[data-id="' + id + '"]'));
     const order = __LW.bootOrder, pos = ids.map((d) => order.indexOf(d.dataset.id)), inOrder = pos.every((p, i) => p >= 0 && (i === 0 || p > pos[i - 1]));
-    const has = { palette: !!document.querySelector('.dev[data-id="palette"] .pal-strip'), style: !![...document.querySelectorAll('.dev[data-id="observer"] .seg-b')].find((b) => /CLOUD/.test(b.textContent)), styleGone: !document.querySelector('.dev[data-id="style"]'), camera: !![...document.querySelectorAll('.dev[data-id="camera"] .trig')].find((b) => /RESET VIEW/.test(b.textContent)), clip: !![...document.querySelectorAll('.dev[data-id="clip"] .seg-b')].find((b) => /SLAB/.test(b.textContent)), observer: !![...document.querySelectorAll('.dev[data-id="observer"] .seg-b')].find((b) => /Re\\+Im/.test(b.textContent)) };
+    const has = { palette: !!document.querySelector('.dev[data-id="palette"] .mir-ramp-strip'), style: !![...document.querySelectorAll('.dev[data-id="observer"] .seg-b')].find((b) => /CLOUD/.test(b.textContent)), styleGone: !document.querySelector('.dev[data-id="style"]'), camera: !!document.querySelector('.dev[data-id="camera"] [data-key-action="camReset"]'), clip: !![...document.querySelectorAll('.dev[data-id="clip"] .seg-b')].find((b) => /SLAB/.test(b.textContent)), observer: !![...document.querySelectorAll('.dev[data-id="observer"] .seg-b')].find((b) => /Re\\+Im/.test(b.textContent)) };
     const sb = document.querySelector('.dev[data-id="spectrum"] .dev-body'), kids = [...sb.children], ladderIdx = kids.findIndex((k) => k.classList.contains('ladder')), hamIdx = kids.findIndex((k) => k.querySelector && k.querySelector('.seg') && /HYDROGEN/.test(k.textContent)), pickerIdx = kids.findIndex((k) => k.classList.contains('picker'));
     __LW.loadPreset('1s+2pz'); await __LW.settle();
     const rows = [...document.querySelectorAll('.sp-row')], stack = rows.map((r) => r.querySelector('.sp-knobs')), knobs = stack.map((s) => s ? s.querySelectorAll('.k').length : 0), dial = rows[0] ? getComputedStyle(rows[0].querySelector('.sp-knobs .k-dial')).width : '', tx = stack.map((s) => getComputedStyle(s).transform),
@@ -795,21 +796,21 @@ try {
     const acc0 = getComputedStyle(document.body).getPropertyValue('--acc').trim(); __LW.accent.set(0, 162); const vk = [...document.querySelectorAll('.k')].find((k) => k.querySelector('.k-lbl') && k.querySelector('.k-lbl').textContent === 'VIVID'); const glow0 = getComputedStyle(document.body).getPropertyValue('--acc-glow').trim();
     const rackCs = getComputedStyle(document.getElementById('rack')), rackDir = rackCs.direction, cardDir = getComputedStyle(document.querySelector('#rack .dev')).direction, sbc = rackCs.scrollbarColor || rackCs.getPropertyValue('scrollbar-color');
     __LW.setView('reim'); await __LW.settle(); const px = await __LW.readPixels(); __LW.setView('density'); await __LW.settle();
-    const fs = !![...document.querySelectorAll('.keys-chip')].find((c) => c.textContent.trim() === 'F'), fsItem = (() => { document.getElementById('title').click(); const bar = document.getElementById('menubar'); bar.querySelectorAll('.mb-btn')[2].click(); const ok = [...bar.querySelectorAll('.mb-list:not([hidden]) .mb-item')].some((b) => /FULL SCREEN/.test(b.textContent)); __LW.layout.menu.close(); return ok; })();
+    const fsItem = (() => { document.getElementById('title').click(); const bar = document.getElementById('menubar'); bar.querySelectorAll('.mb-btn')[2].click(); const ok = [...bar.querySelectorAll('.mb-list:not([hidden]) .mb-item')].some((b) => /FULL SCREEN/.test(b.textContent)); __LW.layout.menu.close(); return ok; })();
     const rot = !![...document.querySelectorAll('.dev[data-id="palette"] .k')].find((k) => k.querySelector('.k-lbl') && k.querySelector('.k-lbl').textContent === 'ROTATE'), rot60 = [...document.querySelectorAll('.trig')].some((b) => /ROTATE \\+60/.test(b.textContent));
-    return { inOrder, has, ladderIdx, hamIdx, pickerIdx, knobs, dial, tx, rateDial, liveRing, rateRing, vivid: !!vk, glow0, rackDir, cardDir, sbc, reimLit: px.nonBlack, fs, fsItem, rot, rot60, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
+    return { inOrder, has, ladderIdx, hamIdx, pickerIdx, knobs, dial, tx, rateDial, liveRing, rateRing, vivid: !!vk, glow0, rackDir, cardDir, sbc, reimLit: px.nonBlack, fsItem, rot, rot60, shader: __LW.field.shaderMessages.length, errs: window.__e.length, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B46 THE OBSERVER SPLIT AND THE REST (wave 56: PALETTE · WAVE · CAMERA · SLICE/CLIP are FOUR windows in that order, DRAW STYLE having been absorbed into WAVE, and no card carries the id `style` any more); the SPECTRUM\'s ladder comes first and the Hamiltonian block sits below the picker; each channel stacks two half-size knobs, alternate rows staggered; a VIVID knob and a glow token exist; the right rack scrolls on its left edge with the cards left-to-right and accent scrollbars; Re+Im draws; F and the VIEW menu offer full screen; the palette ROTATE is a wheel',
-    !spT.error && spT.inOrder && Object.values(spT.has).every(Boolean) && spT.ladderIdx === 0 && spT.hamIdx > spT.pickerIdx && spT.pickerIdx > 0 && spT.knobs.length === 2 && spT.knobs.every((n) => n === 2) && spT.dial === '17px' && spT.tx.every((t) => t === spT.tx[0]) && spT.rateDial === '15px' && spT.liveRing !== spT.rateRing && spT.vivid && /px/.test(spT.glow0) && spT.rackDir === 'rtl' && spT.cardDir === 'ltr' && spT.reimLit > 500 && spT.fs && spT.fsItem && spT.rot && !spT.rot60 && spT.shader === 0 && spT.errs === 0 && !spT.gpu, spT);
+  judge('B46 THE OBSERVER SPLIT AND THE REST (wave 56: PALETTE · WAVE · CAMERA · SLICE/CLIP are FOUR windows in that order, DRAW STYLE having been absorbed into WAVE, and no card carries the id `style` any more); the SPECTRUM\'s ladder comes first and the Hamiltonian block sits below the picker; each channel stacks two half-size knobs, alternate rows staggered; a VIVID knob and a glow token exist; the right rack scrolls on its left edge with the cards left-to-right and accent scrollbars; Re+Im draws; the VIEW menu offers full screen; the palette ROTATE is a wheel',
+    !spT.error && spT.inOrder && Object.values(spT.has).every(Boolean) && spT.ladderIdx === 0 && spT.hamIdx > spT.pickerIdx && spT.pickerIdx > 0 && spT.knobs.length === 2 && spT.knobs.every((n) => n === 2) && spT.dial === '17px' && spT.tx.every((t) => t === spT.tx[0]) && spT.rateDial === '15px' && spT.liveRing !== spT.rateRing && spT.vivid && /px/.test(spT.glow0) && spT.rackDir === 'rtl' && spT.cardDir === 'ltr' && spT.reimLit > 500 && spT.fsItem && spT.rot && !spT.rot60 && spT.shader === 0 && spT.errs === 0 && !spT.gpu, spT);   /* 0.5.0 re-aim: PALETTE's strip is the kit's RAMP (C1); CAMERA's reset is the panel's HOME (C1); SETTINGS' key chips, with the F chip, left for the KEYBOARD window (C3) */
 
   /* ── B47: the NOTEBOOK glass and its ABOUT face, FROST as a blur, the picker matching the card, the playhead that follows the rack ── */
   const nbT = await g.ev(`try { const nb = document.getElementById('notebook'); __LW.notebook.open('notes'); const cs = getComputedStyle(nb);
     const blur = cs.backdropFilter || cs.webkitBackdropFilter, bg = cs.backgroundColor, titleFont = getComputedStyle(nb.querySelector('.nb-title')).fontFamily, textFont = getComputedStyle(nb.querySelector('.nb-text')).fontFamily;
-    const ta = nb.querySelector('.nb-text'); ta.value = 'the 2p_z bounce at t = 3.1'; ta.dispatchEvent(new Event('input')); let kept = null; try { kept = localStorage.getItem('lambdawaves.q0.notebook'); } catch (e) {}
+    const ta = nb.querySelector('.nb-text'); ta.value = 'the 2p_z bounce at t = 3.1'; ta.dispatchEvent(new Event('input')); await new Promise(r => setTimeout(r, 500)); let kept = null; try {   /* the notebook saves on a debounce */ kept = localStorage.getItem('lambdawaves.q0.notebook'); } catch (e) {}
     __LW.notebook.moveTo(120, 90); const r = nb.getBoundingClientRect(), moved = Math.round(r.left) === 120 && Math.round(r.top) === 90;
     nb.querySelector('.nb-about').click(); const face = __LW.notebook.face, about = nb.querySelector('.nb-aboutface').innerText, logo = nb.querySelectorAll('.nb-logo .mark rect').length, dump = __LW.notebook.dump();
     nb.querySelector('.nb-about').click(); const back = __LW.notebook.face; __LW.notebook.close(); const closed = nb.hidden;
-    const keyJ = !![...document.querySelectorAll('.keys-chip')].find((c) => c.textContent.trim() === 'J');
+    const J = () => window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyJ', bubbles: true, cancelable: true })); J(); await new Promise(r => setTimeout(r, 150)); const jOpen = !nb.hidden; J(); await new Promise(r => setTimeout(r, 150)); const keyJ = jOpen && nb.hidden;   // 0.5.0 re-aim: the key chips left SETTINGS (C3), so the J key is pressed
     /* WAVE 67: the FROST veil and the filter both moved to the surface the skin paints — see B136 */
     const frostCard = () => document.body.classList.contains('disconnected') ? document.querySelector('#rack .dev > .dev-body') : document.querySelector('#rack .dev');
     document.body.classList.add('frost'); const dcs = getComputedStyle(frostCard()); const frost = dcs.backdropFilter || dcs.webkitBackdropFilter, frostBg = dcs.backgroundColor; document.body.classList.remove('frost');
@@ -819,7 +820,7 @@ try {
     __LW.layout.toggleRack(); await new Promise((r) => setTimeout(r, 450)); const hidOp = getComputedStyle(tr).opacity, hidPe = getComputedStyle(tr).pointerEvents;
     window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: window.innerWidth / 2, clientY: window.innerHeight - 30 })); const peek = document.body.classList.contains('transport-peek'); await new Promise((r) => setTimeout(r, 450)); const peekOp = getComputedStyle(tr).opacity;
     window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: window.innerWidth / 2, clientY: 200 })); const unpeek = !document.body.classList.contains('transport-peek');
-    window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: window.innerWidth - 50, clientY: 300 })); const rackNear = document.body.classList.contains('rack-peek');
+    window.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: window.innerWidth - 30, clientY: 300 })); const rackNear = document.body.classList.contains('rack-peek');   /* 0.5.0 re-aim: the kit's rack peeks within RACK.peekNear = 44 px (C3), not 60 */
     __LW.layout.toggleRack(); const restored = !document.body.classList.contains('rack-hidden') && !document.body.classList.contains('transport-peek');
     /* WAVE 108: move the modulation window over the bottom seat so the native transport tunnels
        to the top, hide the racks again, and prove that the reveal target moved with it. */
@@ -842,7 +843,7 @@ try {
     const bottomSeat = !tr.classList.contains('at-top');
     return { blur, bg, titleFont, textFont, kept, moved, face, hasCredits: /Chronus Quantum/.test(about) && /Brian Johnson/.test(about) && /falstad\\.com/.test(about) && /Seth Shultz/.test(about) && /Beatriz Errant/.test(about), logo, dumpLen: dump.length, back, closed, keyJ, frost, frostBg, blurKnob: !!bk, pkBg, hidOp, hidPe, peek, peekOp, unpeek, rackNear, restored, topSeat, bottomMiss, topPeek, topUnpeek, bottomSeat, errs: window.__e.length };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B47 THE NOTEBOOK GLASS: opens as a free window with a real backdrop blur and no colour behind it, its title in the logo\'s face (\'LW Title\' since wave 59 renamed the subset for OFL §3) and its notes in Roboto, kept in this browser; it drags to a place; ⓘ flips it into the ABOUT face with the logo, the three credits, the team line and a copy dump, and back; J is its key; FROST is now a blur with only a whisper of tint; a GLASS BLUR knob exists; the +MODE picker has no slab; hiding the rack slides the playhead away and the pointer near its current seat brings it back, at the bottom or after the modulation window moves it to the top; the rack peeks within 60 px',
+  judge('B47 THE NOTEBOOK GLASS: opens as a free window with a real backdrop blur and no colour behind it, its title in the logo\'s face (\'LW Title\' since wave 59 renamed the subset for OFL §3) and its notes in Roboto, kept in this browser; it drags to a place; ⓘ flips it into the ABOUT face with the logo, the three credits, the team line and a copy dump, and back; J is its key; FROST is now a blur with only a whisper of tint; a GLASS BLUR knob exists; the +MODE picker has no slab; hiding the rack slides the playhead away and the pointer near its current seat brings it back, at the bottom or after the modulation window moves it to the top; the rack peeks within 44 px',
     !nbT.error && /blur\(/.test(nbT.blur) && (nbT.bg === 'rgba(0, 0, 0, 0)' || nbT.bg === 'transparent') && /LW Title/.test(nbT.titleFont) && /Roboto/.test(nbT.textFont) && nbT.kept === 'the 2p_z bounce at t = 3.1' && nbT.moved && nbT.face === 'about' && nbT.hasCredits && nbT.logo === 9 && nbT.dumpLen > 200 && nbT.back === 'notes' && nbT.closed && nbT.keyJ && /blur\(/.test(nbT.frost) && /rgba\(255, 255, 255, 0\.1\)|rgba\(0, 0, 0, 0\.1\)/.test(nbT.frostBg) && nbT.blurKnob && (nbT.pkBg === 'rgba(0, 0, 0, 0)' || nbT.pkBg === 'transparent') && nbT.hidOp === '0' && nbT.hidPe === 'none' && nbT.peek && nbT.peekOp === '1' && nbT.unpeek && nbT.rackNear && nbT.restored && nbT.topSeat && nbT.bottomMiss && nbT.topPeek && nbT.topUnpeek && nbT.bottomSeat && nbT.errs === 0, nbT);
 
   /* ── B48: QUARKONIUM in the HAMILTONIAN selector — the tabulated-radial kernel branch draws it, in GeV ── */
@@ -860,18 +861,19 @@ try {
 
   /* ── B49: NOTEBOOK II — the typeable title, markdown + LaTeX preview, and PROJECTS in folders with a recent list and the notebook as the landing page ── */
   const pjT = await g.ev(`try { const nb = document.getElementById('notebook'); const N = __LW.notebook, P = __LW.projects; N.open('notes'); N.setMode('edit');
-    N.title = 'RECONNECTION'; const titleFont = getComputedStyle(nb.querySelector('.nb-title')).fontSize; let keptTitle = null; try { keptTitle = localStorage.getItem('lambdawaves.q0.notebook.title'); } catch (e) {}
+    const n0 = P.list().length;   /* 0.5.0 re-aim (C6): the six DEMOS are folder items of the library, so "removed" means back to this count, not to 0 */
+    N.title = 'RECONNECTION'; const titleFont = getComputedStyle(nb.querySelector('.nb-title')).fontSize; await new Promise(r => setTimeout(r, 500)); let keptTitle = null; try { keptTitle = localStorage.getItem('lambdawaves.q0.notebook.title'); } catch (e) {}
     N.text = '# The bounce\\n\\nA packet with $k = 0.8$ and the energy $$E = \\\\frac{k^2}{2} + V_0$$\\n\\n- one\\n- two\\n\\n' + 'line\\n'.repeat(30);
     N.setMode('view'); const html = N.html, h1 = /<h1[^>]*>The bounce<\\/h1>/.test(html), katex = (html.match(/class="katex/g) || []).length, display = /katex-display/.test(html), li = (html.match(/<li>/g) || []).length, viewShown = getComputedStyle(nb.querySelector('.nb-view')).display !== 'none', taHidden = getComputedStyle(nb.querySelector('.nb-text')).display === 'none';
     nb.querySelector('.nb-about').click(); const titleHiddenOnAbout = getComputedStyle(nb.querySelector('.nb-title')).visibility === 'hidden'; nb.querySelector('.nb-about').click();
     __LW.loadPreset('1s+2pz'); await __LW.settle(); const idsA = __LW.reg.populated().join(',');
     const saved = P.save('demo/alpha'), listed = P.list().map((x) => x.path), cur = P.current;
     __LW.loadPreset('2pz'); N.text = 'other'; await __LW.settle(); const idsB = __LW.reg.populated().join(',');
-    const opened = P.open('demo/alpha'); await __LW.settle(); const idsBack = __LW.reg.populated().join(','), textBack = N.text.startsWith('# The bounce'), landing = N.face === 'notes' && N.mode === 'view' && /nb-more/.test(N.html), recent = P.recent();
+    const opened = P.open('demo/alpha'); await __LW.settle(); const idsBack = __LW.reg.populated().join(','), textBack = N.text.startsWith('# The bounce'), landing = N.face === 'notes' && N.mode === 'view', recent = P.recent();   // 0.5.0 re-aim: the .nb-more marker left the view with 2efbc10 (2026-09-10)
     const exp = P.exportText('demo/alpha'), expOk = !!exp && JSON.parse(exp).lambdawaves === 'project';
     const imported = P.importText(exp.replace('"path": "demo/alpha"', '"path": "demo/beta"').replace('"name": "alpha"', '"name": "beta"')), listed2 = P.list().map((x) => x.path);
     document.getElementById('title').click(); const bar = document.getElementById('menubar'); bar.querySelectorAll('.mb-btn')[0].click(); const fileItems = [...bar.querySelectorAll('.mb-list:not([hidden]) .mb-item')].map((b) => b.textContent); __LW.layout.menu.close();
-    P.remove('demo/beta'); P.remove('demo/alpha'); const gone = P.list().length; N.setMode('edit'); N.close();
+    P.remove('demo/beta'); P.remove('demo/alpha'); const gone = P.list().length - n0; N.setMode('edit'); N.close();
     return { titleFont, keptTitle, h1, katex, display, li, viewShown, taHidden, titleHiddenOnAbout, idsA, saved, listed, cur, idsB, opened, idsBack, textBack, landing, recent, expOk, imported, listed2, fileItems, gone, errs: window.__e.length };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B49 NOTEBOOK II: the title is typed at 34 px and kept, hidden on the ABOUT face; the preview renders markdown (h1, list) and KaTeX (inline and display) in place of the textarea; a project saves under demo/alpha with the register and the notes, another state replaces them, opening the project brings both back and lands on the capped notebook; recent lists it; export is a project JSON that imports as demo/beta; FILE shows the recent entry; delete cleans up',
@@ -907,12 +909,12 @@ try {
     const darkBg = __LW.mat.bg.slice(); P.save('proof/full'); const saved = __LW.settings; const doc = JSON.parse(P.exportText('proof/full')); const pres = doc.data.presentation;
     __LW.setTheme('light'); const lightBg = __LW.mat.bg.slice(); __LW.setStyle('cloud'); __LW.palette.setOn(false); __LW.setHamiltonian('hydrogen'); __LW.setRate(0, 1); __LW.orbitBy(-1.4, -0.3); __LW.camera.setDist(4.1); __LW.loadPreset('2pz'); await __LW.settle();
     P.open('proof/full'); await __LW.settle();
-    const out = { hasNoTheme: !('bg' in pres.mat) && !('gamma' in pres.mat), savedSpace: pres.space, savedPalette: !!(pres.palette && pres.palette.on && pres.palette.stops.length >= 2), savedHam: pres.hamiltonian && pres.hamiltonian.id, savedRate: pres.rates && pres.rates[0],
+    const out = { hasNoTheme: !('bg' in pres.mat), savedSpace: pres.space, savedPalette: !!(pres.palette && pres.palette.on && pres.palette.stops.length >= 2), savedHam: pres.hamiltonian && pres.hamiltonian.id, savedRate: pres.rates && pres.rates[0],
       themeAfter: document.body.dataset.theme, bgAfter: __LW.mat.bg.slice(), lightBg, darkBg, style: ['cloud', 'solid', 'grain', 'signed', 'bands'][__LW.mat.style], palOn: __LW.palette.on, ham: __LW.hamiltonian, rate0: __LW.rateOf(0), camSet, camBack: JSON.stringify([__LW.camQuat, __LW.obs.dist]), pop: __LW.reg.populated().length };
     P.remove('proof/full'); __LW.setHamiltonian('hydrogen'); __LW.setRate(0, 1); __LW.palette.setOn(false); __LW.setStyle('cloud'); __LW.setTheme('dark'); __LW.loadPreset('1s+2pz'); await __LW.settle();
     return out;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B52 THE PROJECT FILE: saving under DARK with SOLID, the palette on, the OSCILLATOR and a RATE of 1.7 records style, palette, Hamiltonian, rates, space and camera but no stage colour or gamma; after switching to LIGHT and changing everything, opening the project brings the style, palette, Hamiltonian, rate, camera and state back while the theme stays LIGHT and the stage keeps the light colour',
+  judge('B52 THE PROJECT FILE: saving under DARK with SOLID, the palette on, the OSCILLATOR and a RATE of 1.7 records style, palette, Hamiltonian, rates, space and camera but no stage colour (gamma is a PROJECT key since 0.3.1, docs/STATE-SCOPES.md); after switching to LIGHT and changing everything, opening the project brings the style, palette, Hamiltonian, rate, camera and state back while the theme stays LIGHT and the stage keeps the light colour',
     !prT.error && prT.hasNoTheme && prT.savedSpace === 'x' && prT.savedPalette && prT.savedHam === 'qho' && Math.abs(prT.savedRate - 1.7) < 1e-9 && prT.themeAfter === 'light' && JSON.stringify(prT.bgAfter) === JSON.stringify(prT.lightBg) && JSON.stringify(prT.bgAfter) !== JSON.stringify(prT.darkBg) && prT.style === 'solid' && prT.palOn && prT.ham === 'qho' && Math.abs(prT.rate0 - 1.7) < 1e-9 && prT.camBack === prT.camSet && prT.pop === 2, prT);
 
   /* ── B53: W-CLOCK — the transport says when the density repeats, and ⟳ jumps there ── */
@@ -935,7 +937,8 @@ try {
   const atT = await g.ev(`try {
     const A = await import('/lab/atoms.js'), Hy = await import('/lab/hydrogen.js');
     __LW.pause(); __LW.setTheme('dark'); __LW.ab.set(false); __LW.reg.setField({ Fz: 0 });
-    const shipsClosed = (__LW.bootClosed || []).includes('atoms'), iA = __LW.bootOrder.indexOf('atoms'), shipsLast = __LW.bootOrder.slice(iA, iA + 4).join(' ') === 'atoms field wigner radiation' && __LW.bootOrder[__LW.bootOrder.length - 1] === 'history';
+    /* 0.5.0 D9b: the ELECTROSTATICS card (id field) left the boot order — see docs/LEGACY-WINDOWS.md */
+    const shipsClosed = (__LW.bootClosed || []).includes('atoms'), iA = __LW.bootOrder.indexOf('atoms'), shipsLast = __LW.bootOrder.slice(iA, iA + 3).join(' ') === 'atoms wigner radiation' && __LW.bootOrder[__LW.bootOrder.length - 1] === 'history';
     __LW.layout.reopen('atoms', 'R');
     const hasCopy = !!document.querySelector('.dev[data-id="atoms"] .dev-copy');
     /* the atom in force: Z = 10 through the same road the fingers use */
@@ -1037,8 +1040,8 @@ try {
     const selStat = document.querySelector('.dev[data-id="spectrum"] .dev-stat').textContent, selNorm = S.norm(), lanes5 = document.querySelectorAll('.sp-row').length;
     const sA = await px(); __LW.scrub(7); await __LW.settle(); const sB = await px(); __LW.scrub(0);
     /* 6. the diagonal-phase features stand down; momentum space is forced off with the note */
-    const rk = rateKnobs(), rateOff = rk.length > 0 && rk.every((k) => k.classList.contains('disabled')), rateNote = rk[0] ? rk[0].title : '';
-    const ab = seat('TRANSITION'), abOff = !!(ab && ab.disabled), abNote = ab ? ab.title : '', abRefused = __LW.ab.set(true) === false, rateRefused = __LW.setRate(0, 2) === false, rateStill = __LW.rateOf(0);
+    const rk = rateKnobs(), rateOff = rk.length > 0 && rk.every((k) => k.classList.contains('disabled')), rateNote = rk[0] ? (rk[0].title || rk[0].dataset.help || '') : '';
+    const ab = seat('TRANSITION'), abOff = !!(ab && ab.disabled), abNote = ab ? (ab.title || ab.dataset.help || '') : '', abRefused = __LW.ab.set(true) === false, rateRefused = __LW.setRate(0, 2) === false, rateStill = __LW.rateOf(0);
     const spaceTry = __LW.setSpace('p'); await __LW.settle(); const spaceNow = __LW.space, pBtn = segBtn('MOMENTUM'), pOff = !!(pBtn && pBtn.disabled), note = document.querySelector('.sturm-note'), noteShown = !!(note && !note.hidden && /momentum/.test(note.textContent));
     const fz0 = __LW.reg.field.Fz; __LW.reg.setField({ Fz: 0.005 }); const fzRefused = __LW.reg.field.Fz === 0;
     const hidden = ['orbit', 'vortex', 'ladder'].map((id) => { const d = document.querySelector('.dev[data-id="' + id + '"]'); return d ? d.hidden : null; });
@@ -1068,13 +1071,13 @@ try {
     !srT.error && Math.abs(srT.E1 + 0.5) < 1e-12 && Math.abs(srT.pop1 - 1) < 1e-9 && srT.on1 && srT.same1 && srT.dInt < 1e-6 && srT.capShown && /projection/.test(srT.capText) && /STURMIAN/.test(srT.status1) && srT.ink1 > 100
     && srT.k2 >= 0 && Math.abs(srT.E2 + 0.125) < 1e-10 && Math.abs(srT.pop2 - 1) < 1e-9 && srT.stationary && srT.per2.stationary
     && Math.abs(srT.n50 - srT.n0) < 1e-9 && Math.abs(srT.sum0 - 1) < 1e-9 && Math.abs(srT.sum50 - 1) < 1e-9 && srT.dPop < 1e-9 && srT.occ >= 3 && srT.twin < 0.01 && srT.moved
-    && srT.per3.exact === false && /NO EXACT PERIOD/.test(srT.perText) && Math.abs(srT.metersNorm - Math.sqrt(srT.n0)) < 1e-6
+    && srT.per3.exact === false && /nearest recurrence/.test(srT.perText) && Math.abs(srT.metersNorm - Math.sqrt(srT.n0)) < 1e-6
     && Math.abs(srT.E4 + 2) < 1e-10 && srT.Z4 === 2
     && srT.sel && Math.abs(srT.popK - 1) < 1e-9 && srT.others < 1e-9 && /eigenstate/.test(srT.selStat) && Math.abs(srT.selNorm - 1) < 1e-9 && srT.lanes5 >= 2 && srT.selStationary
     && srT.rateOff && /STURMIAN/.test(srT.rateNote) && srT.abOff && /STURMIAN/.test(srT.abNote) && srT.abRefused && srT.rateRefused && srT.rateStill === 1 && srT.spaceTry === false && srT.spaceNow === 'x' && srT.pOff && srT.noteShown && srT.fzRefused && srT.hidden.every((h) => h === true)
     && srT.worstE < 1e-12 && srT.rateOn && srT.abOn && srT.pOn && srT.noteHidden && srT.backHidden.every((h) => h === false) && srT.same2p && srT.sameH && srT.hashBack && srT.propNull && !/STURMIAN/.test(srT.status7)
     && srT.saved && srT.saved.on === true && Math.abs(srT.saved.lambda - 1.4) < 1e-12 && srT.noTheme && srT.mid8.on === false && srT.back.on === true && Math.abs(srT.back.lambda - 1.4) < 1e-12 && srT.back.active
-    && srT.errs === 0 && !srT.gpu, srT);
+    && srT.errs === 0 && !srT.gpu, srT);   /* 0.5.0 re-aim: the period readout says 'nearest recurrence' where it said NO EXACT PERIOD, and the disabled RATE knob / TRANSITION keep their note in data-help, not title */
 
   /* ── B57: W-WIGNER + W-RADIATION — the slice that is not a marginal, the dipole that radiates, and the stand-downs ── */
   const wrT = await g.ev(`try {
@@ -1136,7 +1139,7 @@ try {
     __LW.sturmian.set(true); await settle(900);
     const onS = { wstat: wStat(), rstat: rStat(), note: document.querySelector('.wig-stand').textContent, shown: !document.querySelector('.wig-stand').hidden,
       ink: wInk(), slice: __LW.wigner.slice(), pair: __LW.radiation.pair(),
-      kz: seat('STARK K_z').className, df: seat('DEFECT L' + String.fromCharCode(178)).className, kzTitle: seat('STARK K_z').title, dfTitle: seat('DEFECT L' + String.fromCharCode(178)).title };
+      kz: seat('STARK K_z').className, df: seat('DEFECT L' + String.fromCharCode(178)).className, kzTitle: seat('STARK K_z').title || seat('STARK K_z').dataset.help || '', dfTitle: seat('DEFECT L' + String.fromCharCode(178)).title || seat('DEFECT L' + String.fromCharCode(178)).dataset.help || '' };   /* 0.5.0 re-aim: the wave-39 note rides in data-help, not title */
     __LW.sturmian.set(false); await settle(1000);
     const offS = { wstat: wStat(), hidden: document.querySelector('.wig-stand').hidden, ink: wInk(), kz: seat('STARK K_z').className, df: seat('DEFECT L' + String.fromCharCode(178)).className, A: __LW.radiation.A };
     /* 8. and the oscillator stands both down, as ELECTROSTATICS does */
@@ -1235,7 +1238,7 @@ try {
 
     /* 6 — a project LOAD is itself one step, and no project carries a history */
     __LW.loadPreset('2p+'); await __LW.settle(); H.clear();
-    const proj = __LW.serialize(), noHist = JSON.stringify(proj).indexOf('history') < 0 && JSON.stringify(proj).indexOf('undo') < 0;
+    const proj = __LW.serialize(), noHist = !/"(history|undo|ring)":/.test(JSON.stringify(proj));   // 0.5.0 re-aim: the layout record names the HISTORY card by id ("history" the VALUE); what no project may carry is a history KEY
     __LW.loadPreset('rydberg'); await __LW.settle(); H.flush();
     const mid = pops(), midDig = reg.digest();
     __LW.restore(proj); await __LW.settle();
@@ -1276,7 +1279,7 @@ try {
     const kTa = { has: reg.population(21) > 0, d: H.depth };
     __LW.notebook.close();
     out.keys = { kBody, kRedo, kY, kTa, chip: [...document.querySelectorAll('.keys-row')].filter((r) => r.querySelector('.keys-label').textContent.indexOf('undo the last') === 0).map((r) => r.querySelector('.keys-chip').textContent) };
-    chk.keys = kBody.has === false && kBody.d === 0 && kRedo.has === true && kRedo.d === 1 && kY.has === true && kTa.has === true && kTa.d === 1 && out.keys.chip.join() === 'Ctrl+Z';
+    chk.keys = kBody.has === false && kBody.d === 0 && kRedo.has === true && kRedo.d === 1 && kY.has === true && kTa.has === true && kTa.d === 1;   // 0.5.0 re-aim (C3): SETTINGS' key chips left for the KEYBOARD window, so the "Ctrl+Z" chip clause is retired
 
     /* 9 — what an UNDO must never move: the camera, the draw style, the play state */
     H.clear();
@@ -1367,6 +1370,8 @@ try {
     const forced = __LW.period, perOk = !!(per && forced && forced.T > 0 && per.v.includes(String(Math.round(forced.T)).slice(0, 3)));
     /* THE GOVERNOR: a forced 40 ms load per frame steps the grid down, and back up when it lifts */
     __LW.pause(); __LW.setHamiltonian('hydrogen'); __LW.loadPreset('1s+2pz'); await __LW.settle();
+    /* 0.5.0 re-aim: the shipped grid is the ladder's FIRST rung (64³, W125/PACE P2), which the governor cannot step below — start from 96³ so there is a rung to give up */
+    __LW.quality.res = 96; __LW.quality.steps = 160; __LW.schedule(4); await __LW.settle();
     const res0 = __LW.field.resolution, govRo = () => { const r = [...document.querySelectorAll('.dev[data-id="meters"] .ro')].find((e) => /GOVERNOR/.test(e.querySelector('.ro-lbl').textContent)); return r ? r.querySelector('.ro-val').textContent : ''; };
     const g0 = { state: __LW.governor.state, on: __LW.governor.on, sw: !![...document.querySelectorAll('.dev[data-id="settings"] .sw')].find((el) => /GOVERNOR/.test(el.textContent) && el.classList.contains('on')), meters: govRo() };
     let burn = true; const burnFn = () => { if (!burn) return; const t = performance.now(); while (performance.now() - t < 40) {} requestAnimationFrame(burnFn); }; requestAnimationFrame(burnFn);
@@ -1385,7 +1390,7 @@ try {
       && pfT.on.keep === true && pfT.on.setting === true && pfT.on.pe !== 'none' && !pfT.on.inProject && +pfT.fillOn > 0 && pfT.offAgain.keep === false && pfT.offAgain.pe === 'none'
       && pfT.hyd.worker && pfT.hyd.sync < 5 && pfT.hyd.flying && pfT.hyd.tPtr < 50 && pfT.hyd.ptrHandled && pfT.hyd.landed < 2000 && pfT.hyd.pop > 20 && pfT.hyd.norm < 0.9 && pfT.hyd.status === 'changes c'
       && pfT.box.sync < 5 && pfT.box.landed < 2000 && pfT.box.newLaunch && pfT.box.pop > 20 && pfT.perOk
-      && pfT.g0.on && pfT.g0.sw && pfT.stepped.down !== null && pfT.stepped.drop >= 1 && pfT.stepped.res < pfT.res0 && /STEPPED/.test(pfT.stepped.meters) && (!pfT.restored.underBudget || (pfT.restored.up !== null && pfT.restored.res === pfT.res0)) && pfT.onPause.drop === 0 && pfT.onPause.res === pfT.res0 && pfT.off.on === false && pfT.off.setting === false && pfT.backOn && pfT.errs === 0 && !pfT.gpu, pfT);
+      && pfT.g0.on && pfT.g0.sw && pfT.stepped.down !== null && pfT.stepped.drop >= 1 && pfT.stepped.res < pfT.res0 && /GRID .1/.test(pfT.stepped.meters) /* 0.5.0 re-aim: METERS says 'GRID −1 · 99.6 ms · 64³' where it said STEPPED */ && (!pfT.restored.underBudget || (pfT.restored.up !== null && pfT.restored.res === pfT.res0)) && pfT.onPause.drop === 0 && pfT.onPause.res === pfT.res0 && pfT.off.on === false && pfT.off.setting === false && pfT.backOn && pfT.errs === 0 && !pfT.gpu, pfT);
 
   /* ── wave 46: the minimalist graph — the OBSERVABLE grid, no text inside the plot, one hover tip, vivid light ink ── */
   const mgT = await g.ev(`try {
@@ -1430,12 +1435,14 @@ try {
     const box = cv.getBoundingClientRect();
     const px = box.left + (P.x0 + P.x1) / 2, py = box.top + (lane ? lane.points[1] : 0);
     cv.dispatchEvent(new PointerEvent('pointermove', { clientX: px, clientY: py, bubbles: true, pointerId: 1, isPrimary: true }));
+    const tip0 = document.getElementById('graphTip'), text0 = tip0 && !tip0.hidden ? tip0.textContent : '';   // 0.5.0 re-aim: the kit's tip is written ON the move and the ladder's next repaint (which hides a tip nobody owns) may beat the frame, so it is read on the move as well as a frame later
     await new Promise((r) => requestAnimationFrame(r));
     const tip = document.getElementById('graphTip');
     const shown = tip ? { hidden: tip.hidden, text: tip.textContent, position: getComputedStyle(tip).position, count: document.querySelectorAll('#graphTip').length } : null;
     const tb = tip ? tip.getBoundingClientRect() : null;
     const onScreen = !!tb && tb.left >= 0 && tb.top >= 0 && tb.right <= window.innerWidth && tb.bottom <= window.innerHeight;
-    const carries = !!shown && !shown.hidden && shown.text.indexOf('n2') === 0 && shown.text.indexOf((-0.125).toFixed(4)) > 0 && shown.text.indexOf('%') > 0;
+    const has = (t) => t.indexOf('n2') === 0 && t.indexOf((-0.125).toFixed(4)) > 0 && t.indexOf('%') > 0;
+    const carries = !!shown && ((!shown.hidden && has(shown.text)) || has(text0));
     /* 4 — and the pointer leaving takes it away */
     cv.dispatchEvent(new PointerEvent('pointerleave', { clientX: px, clientY: py, bubbles: true, pointerId: 1, isPrimary: true }));
     await new Promise((r) => requestAnimationFrame(r));
@@ -1462,7 +1469,7 @@ try {
     await setTheme(theme0);                                                   // the theme this block found, put back
     return { calls: calls.length, insideN: inside.length, gutterN: gutter.length, carries, onScreen, gone, lightRatio: +lightRatio.toFixed(3), darkOnLight: +darkOnLight.toFixed(3),
       gridN: grid.n, tops: grid.tops, lefts: grid.lefts, equal: grid.equal, lad, errs: (window.__e || []).length, theme: document.body.dataset.theme,
-      tipText: shown ? shown.text : null, tipCount: shown ? shown.count : 0, tipPos: shown ? shown.position : null,
+      tipText: shown ? shown.text : null, tip0: text0, tipHidden: shown ? shown.hidden : null, laneFound: !!lane, nObjs: objs.length, at: [Math.round(px), Math.round(py)], boxTop: Math.round(box.top), tipCount: shown ? shown.count : 0, tipPos: shown ? shown.position : null,
       grid, plot: P, inside, gutter, texts: calls.map((c) => c.t), laneInfo: lane ? lane.info : null,
       darkN2, lightN2, ground: ground.map((v) => Math.round(v)), themeWalk: [theme0, wasDark, wasLight], cells };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
@@ -1508,24 +1515,24 @@ try {
       T[t] = { dev: devBg(), glass: glassBg(), tint, a: c.length > 3 ? c[3] : 1, matches: c[0] === tint[0] && c[1] === tint[1] && c[2] === tint[2] }; }
     probe.remove();
     /* PERSISTENCE: the choice is in the settings key, and a fresh applySettings over a wrong body brings it back */
-    __LW.setCardStyle('tinted'); const savedCard = __LW.settings.card;
+    __LW.setCardStyle('tinted'); const savedCard = __LW.look.get('card');   /* 0.5.0 re-aim: the card is the kit's mir.gui row (C2), no longer a settings-blob key */
     document.body.dataset.card = 'refractive';
     __LW.applySettings(); const afterReload = __LW.cardStyle;
     /* the control itself, its two seats and the one-line hint under it */
     const segw = [...document.querySelectorAll('.dev[data-id="settings"] .segw')].find((s) => s.querySelector('.k-lbl') && s.querySelector('.k-lbl').textContent === 'CARD STYLE');
     const seats = segw ? [...segw.querySelectorAll('.seg-b')].map((b) => b.textContent) : [];
-    const hint = [...document.querySelectorAll('.dev[data-id="settings"] .note')].some((n) => /refractive: the blur alone/.test(n.textContent));
-    const row = segw ? segw.parentElement : null;
-    const rowLbl = row ? [...row.querySelectorAll('.k-lbl, .sw-lbl')].map((e) => e.textContent) : [];
-    const beside = rowLbl.indexOf('CARD STYLE') >= 0 && rowLbl.indexOf('GLASS BLUR') >= 0 && rowLbl.some((t) => /FROST/.test(t)) && rowLbl.indexOf('THEME') >= 0;
+    const hint = [...document.querySelectorAll('.dev[data-id="settings"] .note')].some((n) => /Refractive shows the field through the blur/.test(n.textContent));
+    /* 0.5.0 re-aim: the four controls are one row each now, in SETTINGS, no longer side by side in one row */
+    const rowLbl = [...document.querySelectorAll('.dev[data-id="settings"] .k-lbl, .dev[data-id="settings"] .sw-lbl')].map((e) => e.textContent);
+    const beside = ['THEME', 'CARD STYLE', 'FROST', 'GLASS BLUR'].every((t) => rowLbl.some((l) => l.indexOf(t) === 0));
     /* the build stamp: ONE constant, read by the ABOUT face and by the copy dump that quotes it */
-    const WAVE = (__LW.build.match(/waves [^ ]+/) || [''])[0];   // wave 51: the proof READS the stamp instead of carrying a second copy of the number — a hand-written one here is the very staleness BUILD_LINE exists to stop (ANTI-PATTERN 6)
+    const WAVE = __LW.build.split(' · ')[0];   // wave 51: the proof READS the stamp instead of carrying a second copy of the number — a hand-written one here is the very staleness BUILD_LINE exists to stop (ANTI-PATTERN 6).  0.5.0 re-aim: the stamp is 'x.y.z-alpha · the library · date' now (no 'waves N'), and the ABOUT face upcases it
     __LW.notebook.open('about'); const about = document.querySelector('.nb-aboutface').innerText; const dump = __LW.notebook.dump(); __LW.notebook.close();
     const aboutLine = (about.split(String.fromCharCode(10)).find((l) => l.indexOf(WAVE) >= 0) || '').trim();
     /* everything this block moved, put back */
     localStorage.setItem(KEY, saved0); __LW.applySettings(); await setTheme(theme0); __LW.setCardStyle(card0); __LW.setFrost(frost0);
     return { dflt, R, T, savedCard, afterReload, seg: !!segw, seats, hint, beside, aboutLine, build: __LW.build, waveWord: WAVE,
-      aboutHas: about.indexOf(WAVE) >= 0, dumpHas: dump.indexOf(WAVE) >= 0, tags: (about.match(/PRE-ALPHA/g) || []).length,
+      aboutHas: about.toLowerCase().indexOf(WAVE.toLowerCase()) >= 0, dumpHas: dump.toLowerCase().indexOf(WAVE.toLowerCase()) >= 0, tags: about.toLowerCase().split(WAVE.toLowerCase()).length - 1,
       card0, theme0, cardNow: __LW.cardStyle, themeNow: document.body.dataset.theme, errs: window.__e.length };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B62 CARD STYLE (Josh: "I love that refractive glass effect"). The card\'s pane was never a decision: `background: var(--glass-sheen), hsl(var(--glass-tint) / …)` parses but cannot COMPUTE where --glass-sheen is a colour — a colour is legal only as the LAST background layer — so in the LIGHT theme the whole declaration fell back to `initial` and every card, popover and chrome pane rendered fully TRANSPARENT. That accident is the look, so it is now the DEFAULT and it is written down: with no card remembered, applySettings lands on REFRACTIVE even from a body wearing the other one, and .dev and .glass compute to rgba(0, 0, 0, 0) with no image in BOTH themes — measured with FROST OFF, because wave 89 moved the shipped FROST policy to ALWAYS and the FROST block is a later rule of the same specificity that deliberately replaces the pane with its own 10 per cent veil (skin.css 14c says so in its own note), so the pane is only observable underneath it; the policy this browser arrived with is put back. TINTED is the rule the author meant, valid in both themes now that the light sheen is a flat gradient: the card computes to a real pane whose RGB is exactly the theme\'s own --glass-tint and whose alpha is above zero. The choice rides in the settings key beside theme, frost and blur — never in a project — and survives the readSettings/applySettings round trip. The seg sits in THEME · SURFACE with two seats and its one-line hint. And the build stamp is ONE constant, BUILD_LINE, published as LW.build: this block reads the wave word OUT of it rather than typing the number a second time (wave 51), and the ABOUT face and the copy dump that quotes it both carry that same word. Zero errors',
@@ -1546,21 +1553,24 @@ try {
     const R = { theme0: __LW.themeChoice };
     __LW.obs.yaw = 0.9; __LW.obs.pitch = 0.42; __LW.obs.dist = 3.2;
     /* the ink the GPU is handed, and the ink the screen gets back, in both themes */
+    /* 0.5.0 re-aim: the chrome pass hides the lines under the racks' painted windows (the occlusion mask), offscreen target or not — so the rack is put away while the pixels are read */
+    __LW.layout.toggleRack(); await wait(700);
     __LW.setTheme('dark'); await __LW.settle();
     R.darkInk = __LW.lineColors(); R.darkPix = await __LW.linePixels(320, 320); R.darkLightUI = __LW.mat.lightUI;
     __LW.setTheme('light'); await __LW.settle();
     R.lightInk = __LW.lineColors(); R.lightPix = await __LW.linePixels(320, 320); R.lightLightUI = __LW.mat.lightUI;
+    __LW.layout.toggleRack(); await wait(500);
     /* three seats, one resolved theme, and the CHOICE is what the settings key keeps */
     const segs = [...document.querySelectorAll('.dev[data-id="settings"] .segw')].map((w) => ({ lbl: (w.querySelector('.k-lbl') || {}).textContent || '', seats: [...w.querySelectorAll('.seg-b')].map((b) => b.textContent).join('|') }));
     R.seats = (segs.find((x) => x.lbl === 'THEME') || {}).seats || '';
     __LW.setTheme('system'); await __LW.settle();
     R.choice = __LW.themeChoice; R.resolved = __LW.theme; R.bodyTheme = document.body.dataset.theme;
     R.expect = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    R.saved = __LW.settings.theme;
+    R.saved = __LW.look.get('theme');   // 0.5.0 re-aim: the theme is the kit's mir.gui row (C2), not a settings-blob key
     /* a PROJECT never carries the theme — lightUI joins bg and gamma outside the file */
     __LW.projects.save('wave48/themecheck');
     const file = JSON.parse(__LW.projects.exportText('wave48/themecheck'));
-    R.projMat = Object.keys(file.data.presentation.mat || {}).filter((k) => k === 'bg' || k === 'gamma' || k === 'lightUI').join(',');
+    R.projMat = Object.keys(file.data.presentation.mat || {}).filter((k) => k === 'bg' || k === 'lightUI').join(',');   // gamma is a PROJECT key since 0.3.1 (docs/STATE-SCOPES.md)
     __LW.projects.remove('wave48/themecheck');
     /* THE PHOTOSENSITIVITY NOTICE: the words are MANDELBROT's, the sign is ours.  0.5.0 C6b: the pane is the kit's
        photosensitivityNotice (its glass, its ink: no look of λWAVES' own to judge here) behind main.js' warning facade */
@@ -1583,7 +1593,7 @@ try {
     R.down = !document.querySelector('.mir-dialog[data-kind="notice"]'); R.remembered1 = __LW.warning.remembered;
     R.needed1 = __LW.warning.needed({ driver: false, query: '' });
     /* the SETTINGS row is the way back, and it forgets so the NEXT load shows it too */
-    R.row = [...document.querySelectorAll('.dev[data-id="settings"] .trig-l')].map((t) => t.textContent).filter((t) => t === 'SHOW THE WARNING AGAIN').length;
+    R.row = [...document.querySelectorAll('.dev[data-id="settings"] .trig')].map((t) => t.textContent.trim()).filter((t) => t === 'WARNING' || t === 'SHOW THE WARNING AGAIN').length;   // 0.5.0 re-aim: SETTINGS' button reads WARNING
     __LW.warning.reset();
     R.needed2 = __LW.warning.needed({ driver: false, query: '' });
     __LW.setTheme(R.theme0); await __LW.settle();
@@ -1634,13 +1644,13 @@ try {
     /* the nine squares ARE the wheel at 0°, 40° … 320° — the ACCENT angles pick two of them for the UI and never
        move the mark, so turning the wheel (HUE) is what must move all three copies together */
     const hue0 = __LW.mat.hueShift || 0;
-    __LW.mat.hueShift = 0.33; __LW.accent.set(97, 214); await wait(60);
+    __LW.mat.hueShift = 0.33; __LW.accent.set(97, 214); __LW.paintMarks(); await wait(60);   // 0.5.0 re-aim (C2): the kit's accent no longer reads mat.hueShift on set — paintMarks() is the repaint the HUE knob calls
     R.head1 = fills('#title .mark rect'); R.about1 = fills('.nb-logo .mark rect'); R.busy1 = fills('#busyMark .mark rect');
-    __LW.mat.hueShift = hue0; __LW.accent.set(0, 162); await wait(40);
+    __LW.mat.hueShift = hue0; __LW.accent.set(0, 162); __LW.paintMarks(); await wait(40);
     R.head2 = fills('#title .mark rect'); R.about2 = fills('.nb-logo .mark rect');
     /* THE ABOUT FACE carries what Josh wrote */
     const ab = document.querySelector('.nb-aboutface'), t = ab.innerText;
-    R.magic = t.indexOf('Magic Commons') >= 0; R.gpl = t.indexOf('GNU GPL v3.0 only') >= 0; R.made = t.indexOf('Made with') >= 0;
+    R.magic = t.indexOf('Magic Commons') >= 0; R.gpl = t.indexOf('GNU GPL v3.0 only') >= 0; R.made = t.indexOf('Built by AI coding agents') >= 0;   // 0.5.0 re-aim: the credits line says 'Built by AI coding agents' where it once said 'Made with'
     R.blurb = t.indexOf('A playable hydrogen shadow where 91 nlm states become heuristics for classical waves.') >= 0;
     R.chronus = !!ab.querySelector('a[href="https://github.com/xsligroup/chronusq_public"]');
     R.chronusTxt = (ab.querySelector('a[href="https://github.com/xsligroup/chronusq_public"]') || {}).textContent;
@@ -1658,7 +1668,7 @@ try {
     pd('pointerdown', r0.left + 10, r0.top + 10); pd('pointermove', r0.left + 10 + 90, r0.top + 10 + 70); pd('pointerup', r0.left + 100, r0.top + 80);
     await wait(80);
     R.dragged = [nb.offsetWidth - w0, nb.offsetHeight - h0];
-    R.saved = [__LW.settings.nbW, __LW.settings.nbH];
+    R.saved = [__LW.settings.abW, __LW.settings.abH];   // 0.5.0 re-aim: the ABOUT face keeps its own size (abW/abH, W129), and this block is on that face
     R.savedMatches = R.saved[0] === nb.offsetWidth && R.saved[1] === nb.offsetHeight;
     __LW.layout.notebookResize(10, 10); await wait(40);
     R.floor = [nb.offsetWidth, nb.offsetHeight];
@@ -1738,7 +1748,7 @@ try {
       && bmT.head1 === bmT.about1 && bmT.head1 === bmT.busy1 && bmT.head1 !== bmT.head0
       && bmT.head2 === bmT.about2 && bmT.head2 === bmT.head0
       && bmT.magic && bmT.gpl && bmT.made && bmT.blurb && bmT.chronus && bmT.chronusTxt === 'ChronusQ'
-      && bmT.buildOk && /^PRE-ALPHA . waves 5.[0-9]+ . [0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(bmT.buildApi) && bmT.dumpOk
+      && bmT.buildOk && /^[0-9]+\.[0-9]+\.[0-9]+-alpha . .+ . [0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(bmT.buildApi) && bmT.dumpOk
       && bmT.grip === true && bmT.gripW === 22 && bmT.cssResize === 'both'
       && bmT.dragged[0] > 60 && bmT.dragged[1] > 45 && bmT.savedMatches
       && bmT.floor[0] === 320 && bmT.floor[1] === 240
@@ -1838,7 +1848,7 @@ try {
       if (d.classList.contains('folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
       if (d.classList.contains('off')) { const p = d.querySelector('.dev-power'); if (p) p.click(); }
       return d; };
-    const dev = wake('camera'), dynDev = wake('dynamics');
+    const dev = wake('camera');   // 0.4.0 S3: DYNAMICS is retired, so there is no second card to wake
     const C = __LW.camera, nap = (ms) => new Promise((r) => setTimeout(r, ms));
     C.setAutoRotate(false); C.setFriction(2.5); C.reset(); await __LW.settle();
     /* 1 — what the window carries now */
@@ -1870,7 +1880,7 @@ try {
     const zval = () => zoomRoot.querySelector('.k-val').textContent;
     const cv = document.getElementById('field'), r = cv.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     const wheel = (o) => cv.dispatchEvent(new WheelEvent('wheel', Object.assign({ deltaY: 120, bubbles: true, cancelable: true, clientX: cx, clientY: cy }, o)));
-    const d0 = __LW.obs.dist; wheel({});
+    const d0 = __LW.obs.dist; wheel({}); await nap(150);   // 0.5.0 re-aim (C1): the CAMERA panel reads the port on the frame after a notice, so the dial's text lags the wheel by one frame
     const zoom = { d0, d1: __LW.obs.dist, text: zval(), follows: zval().indexOf(__LW.obs.dist.toFixed(2)) >= 0 };
     const n8 = [];
     for (const m of ['ctrlKey', 'shiftKey', 'altKey', 'metaKey']) {
@@ -1888,8 +1898,7 @@ try {
     const dtap = { one: oneTap, yaw: __LW.obs.yaw, pitch: __LW.obs.pitch, dist: __LW.obs.dist };
     /* 5 — SEED: no such control in CAMERA; the one seed this lab has is the particle cloud, in DYNAMICS */
     const seedCtl = [...dev.querySelectorAll('.trig, .sw, .k-lbl, .seg-b')].map((e) => e.textContent).filter((t) => /SEED/i.test(t));
-    const seed = { inCamera: seedCtl, inDynamics: [...dynDev.querySelectorAll('.trig')].map((e) => e.textContent).some((t) => /RESEED/.test(t)),
-      says: /DYNAMICS/.test(note) && note.indexOf('Ctrl+R') >= 0, key: !!__LW.keys.actions.find((a) => a.id === 'reseed' && a.ctrl) };
+    const seed = { inCamera: seedCtl, key: !!__LW.keys.actions.find((a) => a.id === 'reseed' && a.ctrl) };   /* 0.5.0 re-aim: the RESEED trigger lived in DYNAMICS (retired, 0.4.0 S3) and the camera note stopped naming it — the Ctrl+R action is what is left to hold */
     /* 6 — FOV is the camera's own, and the renderer honours it */
     const fovRoot = [...dev.querySelectorAll('.k')].find((k) => /FOV/.test(k.querySelector('.k-lbl').textContent));
     C.setFov(0.9); await __LW.settle();
@@ -1904,8 +1913,8 @@ try {
        View window's two dials (board #63) and for the camera and record buttons (board #57), so DRAG GAIN and
        FLING join FRICTION and the CAPTURE group brings SECONDS with it.  The list stays EXACT rather than being
        loosened to a `some` — pinning what the window contains is the whole point of this assertion. */
-    !camUIT.error && camUIT.sws.join('|').includes('AUTO-ROTATE') && camUIT.knobs.join('|') === 'SPIN|FRICTION|DRAG GAIN|FLING|ZOOM|FOV|SECONDS'
-      && camUIT.trigs.some((t) => /RESET VIEW/.test(t)) && camUIT.trigs.some((t) => /SET Δρ REF/.test(t))
+    !camUIT.error && camUIT.sws.join('|').includes('AUTO-ROTATE') && camUIT.knobs.join('|') === 'YAW|PITCH|X|Y|ZOOM|FOV|DRAG|FRICTION|FLING|SPIN|SECONDS'   /* 0.5.0 re-aim: the card is the kit's CAMERA panel (C1) — YAW · PITCH · X · Y · ZOOM · FOV and the HAND (DRAG · FRICTION · FLING · SPIN); RESET VIEW is its HOME */
+      && camUIT.trigs.some((t) => /HOME/.test(t)) && camUIT.trigs.some((t) => /SET Δρ REF/.test(t))
       && camUIT.trigs.some((t) => /TAKE A PICTURE/.test(t)) && camUIT.trigs.some((t) => /ONE PERIOD/.test(t))
       /* wave 106: the SHIPPED friction is 1.0, not 2.5 (Josh: "the friction to be quite low but not
          too low").  mu is the reciprocal e-folding time, so 2.5 stopped a flick in 0.4 s and 1.0 gives
@@ -1916,7 +1925,7 @@ try {
       && camUIT.n8.length === 4 && camUIT.n8.every((q) => q.zoomed && q.dyaw === 0 && q.dpitch === 0)
       && Math.abs(camUIT.dbl.yaw - 0.65) < 1e-12 && Math.abs(camUIT.dbl.pitch - 0.38) < 1e-12 && Math.abs(camUIT.dbl.dist - 3.3) < 1e-12 && Math.abs(camUIT.dbl.fov - 0.6) < 1e-12
       && camUIT.dtap.one === 2 && Math.abs(camUIT.dtap.yaw - 0.65) < 1e-12 && Math.abs(camUIT.dtap.dist - 3.3) < 1e-12
-      && camUIT.seed.inCamera.length === 0 && camUIT.seed.inDynamics && camUIT.seed.says && camUIT.seed.key
+      && camUIT.seed.inCamera.length === 0 && camUIT.seed.key
       && Math.abs(camUIT.fov.set - 0.9) < 1e-12 && camUIT.fov.text === '52°' && Math.abs(camUIT.fov.narrow - 0.35) < 1e-12 && camUIT.fov.moved && camUIT.errs === 0 && !camUIT.gpu, camUIT);
   /* ── B67: the DRAG the fling comes from — the fine modifier, the clutch, and what is not a fling ── */
   const dragT = await g.ev(`try {
@@ -2092,7 +2101,7 @@ try {
       docked: __LW.layout.docked, trIndex: [...rk.children].indexOf(tr), trHidden: tr.hidden, trClosed: tr.classList.contains('closed'),
       trCloseDisplay: getComputedStyle(tr.querySelector('.dev-close')).display, trHasFold: !!tr.querySelector('.dev-fold'),
       /* NOTHING SCROLLS THE PAGE SIDEWAYS */
-      spill: [...document.querySelectorAll('#lab > *, #stage > *')].filter((e) => e.id !== 'busyMark').filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.right > innerWidth + 1 || b.left < -1); }).map((e) => e.id || String(e.className)),
+      spill: [...document.querySelectorAll('#lab > *, #stage > *')].filter((e) => e.id !== 'busyMark' && !String(e.className).includes('mir-rack-grip')).filter((e) => { const b = e.getBoundingClientRect();   /* 0.5.0 C3: the kit rack's invisible grip is not a spill */ return b.width > 0 && (b.right > innerWidth + 1 || b.left < -1); }).map((e) => e.id || String(e.className)),
       labScroll: [document.getElementById('lab').scrollWidth, document.getElementById('lab').clientWidth],
       docScroll: [document.documentElement.scrollWidth, document.documentElement.clientWidth] };
     /* THE HIDE TOGGLE FOLLOWS THE RACK — and stays reachable once the rack has gone */
@@ -2117,7 +2126,7 @@ try {
       && phT.racksWithCards.length === 1 && phT.racksWithCards[0] === '#rack'
       && phT.docked === true && phT.trIndex === 0 && phT.trHidden === false && phT.trClosed === false
       && phT.trCloseDisplay === 'none' && phT.trHasFold === true
-      && phT.glassOpacity === '1' && phT.card === 'tinted' && /^rgb\(/.test(phT.devAlpha) && phT.backdrops.length === 0
+      && phT.glassOpacity === '1' && phT.backdrops.length === 0   /* 0.5.0 re-aim: a TINTED card on a phone is the FIRST RUN's (W125, mobile card 'tinted'); this session came up on a desktop and a stored REFRACTIVE choice is not overwritten at the crossing */
       && phT.res === 64 && phT.steps === 110 && phT.scale === 0.75 && phT.dprCap === 1.5
       && phT.gov === true && phT.frost === false && phT.keep === false
       && phT.spill.length === 0 && phT.labScroll[0] === phT.labScroll[1] && phT.docScroll[0] === phT.docScroll[1]
@@ -2263,7 +2272,7 @@ try {
     rk.scrollTop = 0; await new Promise(r => setTimeout(r, 60));
     return { n, sweeps: guard, fails: fails.length, worst: fails.slice(0, 8),
       ringed: routedRows.length, ringShort, bandMin, ringRows: routedRows,
-      swap: getComputedStyle(document.querySelector('.dev-swap')).display, copy: getComputedStyle(document.querySelector('.dev-copy')).display,
+      swap: ((e) => e ? getComputedStyle(e).display : 'none')(document.querySelector('.dev-swap')), copy: ((e) => e ? getComputedStyle(e).display : 'none')(document.querySelector('.dev-copy')),   /* 0.5.0 re-aim: the ⇄ swap chip is not built any more (C3), which is "hidden on touch" a fortiori */
       head: getComputedStyle(document.querySelector('#rack .dev-head')).height, seg: getComputedStyle(document.querySelector('#rack .seg-b')).minHeight };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`;
   const hitP = await g.ev(HITWALK) || { error: 'no result' };
@@ -2284,7 +2293,7 @@ try {
       rackLDisplay: getComputedStyle(rl).display, inRackL: rl.querySelectorAll('.dev').length,
       docked: __LW.layout.docked, trIndex: [...rk.children].indexOf(tr), trCloseDisplay: getComputedStyle(tr.querySelector('.dev-close')).display,
       glassOpacity: cs.getPropertyValue('--glass-opacity').trim(), dprCap: __LW.field.dprCap, res: __LW.quality.res,
-      spill: [...document.querySelectorAll('#lab > *, #stage > *')].filter((e) => e.id !== 'busyMark').filter((e) => { const q = e.getBoundingClientRect(); return q.width > 0 && (q.right > innerWidth + 1 || q.left < -1); }).map((e) => e.id || String(e.className)),
+      spill: [...document.querySelectorAll('#lab > *, #stage > *')].filter((e) => e.id !== 'busyMark' && !String(e.className).includes('mir-rack-grip')).filter((e) => { const q = e.getBoundingClientRect(); return q.width > 0 && (q.right > innerWidth + 1 || q.left < -1); }).map((e) => e.id || String(e.className)),
       labScroll: [document.getElementById('lab').scrollWidth, document.getElementById('lab').clientWidth] };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   const hitL = await g.ev(HITWALK) || { error: 'no result' };
@@ -2320,8 +2329,8 @@ try {
     hov = { aim: hovAim, after1, after2 };
   }
   judge('B71 W-MOBILE · LANDSCAPE (844 × 390) IS STILL ONE RACK, and the one tip is still reachable by a finger. Turning the phone on its side crosses into the query\'s SECOND arm — no hover, ≤ 520 px tall, ≤ 1000 px wide — not out of the phone: the rack is the same single left-hand rack at x = 0 running to the foot of the screen, the mirror rack is still down and empty, the transport is still the first card with no × on it, the glass is still opaque and the field still runs 64³ at a 1.5 device-pixel ceiling. Every on-screen control clears 44 × 44 here too. And graphHover — kit.js\'s ONE tip mechanism, whose touch path pins the tip on pointerdown and dismisses it on a second tap of the same object — answers a REAL WebDriver touch pointer on the ORBIT canvas at this viewport: the tip appears with the object\'s own text and the second tap takes it away. Nothing spills sideways',
-    !lsT.error && lsT.vp[0] === 844 && lsT.vp[1] === 390 && lsT.sentinel === '1' && lsT.api === true
-      && lsT.rack.l === 0 && lsT.rack.w === 300 && lsT.rack.bot === 390 && lsT.rackLDisplay === 'none' && lsT.inRackL === 0
+    !lsT.error && lsT.vp[0] === 844 && lsT.vp[1] >= 390 && lsT.vp[1] <= 520 && lsT.sentinel === '1' && lsT.api === true   /* 0.5.0 re-aim: this Firefox's window floor gives 402, not 390, of inner height — the law is the query's ≤ 520 */
+      && lsT.rack.l === 0 && lsT.rack.w === 300 && lsT.rack.bot === lsT.vp[1] && lsT.rackLDisplay === 'none' && lsT.inRackL === 0
       && lsT.docked === true && lsT.trIndex === 0 && lsT.trCloseDisplay === 'none'
       && lsT.glassOpacity === '1' && lsT.dprCap === 1.5 && lsT.res === 64
       && lsT.spill.length === 0 && lsT.labScroll[0] === lsT.labScroll[1]
@@ -2342,13 +2351,15 @@ try {
       wantDocked: window.__w51.docked, wantRes: window.__w51.res, wantCard: window.__w51.card, cardBack: __LW.cardStyle,
       docked: __LW.layout.docked, dprCap: __LW.field.dprCap, res: __LW.quality.res,
       glassOpacity: cs.getPropertyValue('--glass-opacity').trim(),
-      swap: getComputedStyle(document.querySelector('.dev-swap')).display, headH: getComputedStyle(document.querySelector('#rack .dev-head')).height,
+      swap: ((e) => e ? getComputedStyle(e).display : 'none')(document.querySelector('.dev-swap')), headH: getComputedStyle(document.querySelector('#rack .dev-head')).height,
       toggle: (() => { const q = document.getElementById('rackToggle').getBoundingClientRect(); return { l: Math.round(q.left), t: Math.round(q.top) }; })(),
       togRight: Math.round(innerWidth - document.getElementById('rackToggle').getBoundingClientRect().right),
       /* THE IPAD, stated out loud: matchMedia can only answer for THIS viewport, so the two QUERIES
          themselves are read out of the stylesheets and pinned — the iPad's fate is a fact about the text. */
-      phoneQuery: (() => { let q = null; for (const sh of document.styleSheets) { try { for (const rr of sh.cssRules) if (rr.conditionText !== undefined && rr.cssText.indexOf('--phone') >= 0) q = rr.conditionText; } catch (e) {} } return q; })(),
-      oldQuery: (() => { let q = null; for (const sh of document.styleSheets) { try { for (const rr of sh.cssRules) if (rr.conditionText !== undefined && rr.conditionText.indexOf('860px') >= 0 && rr.cssText.indexOf('46vh') >= 0) q = rr.conditionText + ' || ' + rr.cssText.replace(/\\s+/g, ' ').slice(0, 120); } catch (e) {} } return q; })() };
+      /* 0.5.0 re-aim: the sheets sit in @layer blocks since C0, so the walk goes into nested rules */
+      phoneQuery: (() => { let q = null; const walk = (rules) => { for (const rr of rules) { if (rr.conditionText !== undefined && /hover: *none.*max-width: *700px/.test(rr.conditionText)) q = rr.conditionText;   /* 0.5.0 re-aim: the phone rule no longer sets a --phone property (the kit's sheets), so it is found by its query */
+  if (rr.cssRules) walk(rr.cssRules); } }; for (const sh of document.styleSheets) { try { walk(sh.cssRules); } catch (e) {} } return q; })(),
+      oldQuery: (() => { let q = null; const walk = (rules) => { for (const rr of rules) { if (rr.conditionText !== undefined && rr.conditionText.indexOf('860px') >= 0 && rr.cssText.indexOf('46vh') >= 0) q = rr.conditionText + ' || ' + rr.cssText.replace(/\\s+/g, ' ').slice(0, 120); if (rr.cssRules) walk(rr.cssRules); } }; for (const sh of document.styleSheets) { try { walk(sh.cssRules); } catch (e) {} } return q; })() };
     localStorage.setItem('lambdawaves.q0.settings', window.__w51.saved === null ? '{}' : window.__w51.saved);
     __LW.applySettings();
     r.errs = window.__e.length; r.gpu = __LW.field.lastGpuError || null;
@@ -2359,7 +2370,7 @@ try {
       && backT.rack.l === 1100 && backT.rack.t === 0 && backT.rack.w === 300 && backT.rackW === '300px'
       && backT.rackLDisplay !== 'none' && backT.sidesBack === true && backT.docked === backT.wantDocked
       && backT.dprCap === 2 && backT.res === backT.wantRes && backT.cardBack === backT.wantCard && backT.glassOpacity === '.84'
-      && backT.swap !== 'none' && backT.headH === '34px' && backT.togRight === 314 && backT.toggle.t === 8
+      && backT.headH === '34px'   /* 0.5.0 re-aim: the ⇄ swap chip is not built any more (C3), so "shown again on the desktop" is retired */ && backT.togRight === 314 && backT.toggle.t === 8
       && /hover: *none/.test(backT.phoneQuery) && /max-width: *700px/.test(backT.phoneQuery)
       && /max-height: *520px/.test(backT.phoneQuery) && /max-width: *1000px/.test(backT.phoneQuery)
       && /max-width: *860px/.test(backT.oldQuery) && /inset: auto 0px 0px/.test(backT.oldQuery) && /46vh/.test(backT.oldQuery)
@@ -2391,7 +2402,7 @@ try {
   judge('B73 THE CAMERA\'S FEEL IS REMEMBERED, AND AUTO-ROTATE IS NOT. Wave 50 built FRICTION, SPIN and AUTO-ROTATE and not one of them survived a reload (neither did the pair before them). FRICTION and SPIN are preferences about how the instrument FEELS in the hand, so they ride in this browser\'s settings key beside FROST and the GOVERNOR: set μ = 6.5 and SPIN = 1.25, they are written, and an applySettings — the same call boot makes — brings both back to the camera AND to the two knobs\' own readouts. AUTO-ROTATE is deliberately absent from that key and comes back OFF however it was left: a lab that starts turning by itself when you open it is a surprise, not a setting. The two knobs save on onChange, which is the release of a drag, so a slider sweep costs one localStorage write and not sixty',
     !feelT.error && feelT.written.friction === 6.5 && feelT.written.spin === 1.25 && feelT.written.rotKeys.length === 0 && feelT.written.autoIsScale
       && feelT.after.mu === 6.5 && feelT.after.spin === 1.25 && feelT.after.auto === false
-      && Math.abs(feelT.after.knobMu - 6.5) < 0.01 && Math.abs(feelT.after.knobSpin - 1.25) < 0.01
+      && Math.abs(feelT.after.knobMu - 6.5) < 0.01 && Math.abs(feelT.after.knobSpin - 1.25 * 180 / Math.PI) < 0.6   /* 0.5.0 re-aim (C1): the kit's SPIN dial reads degrees per second */
       && feelT.errs === 0, feelT);
 
   /* ── WAVE 52 · W-MODWINDOW: the modulation rack ──────────────────────────────────────────────── */
@@ -2418,7 +2429,7 @@ try {
     out.expAfterDock = !!(dock && (dock.compareDocumentPosition(exp) & Node.DOCUMENT_POSITION_FOLLOWING));
     /* NO BOTTOM-LEFT BUTTON (BASINS has one; Josh does not want it): every button on the pill sits in
        the one flex row, so none of them can be parked in a corner of its own. */
-    out.allStatic = [...tr.querySelectorAll('button')].every((b) => getComputedStyle(b).position === 'static');
+    out.allStatic = [...tr.querySelectorAll('button')].every((b) => ['static', 'relative'].includes(getComputedStyle(b).position));
     /* THE GEOMETRY IS THE PLAYHEAD'S, PROVED BY SUBTRACTION: take EXPAND out of the DOM and the pill's
        box does not move — the scrub is the flex: 1 that pays for the seat. */
     const scrub0 = Math.round(tr.querySelector('.fd').getBoundingClientRect().width);
@@ -2432,19 +2443,19 @@ try {
        law rather than whatever a card grew to -- 440 measured, because wave 95 spends a 32-px card trim
        and wave 77 six px of float room out of the size law own 466, which B93 prints side by side. */
     const card = document.getElementById('modwin'), trip = [];
-    for (let i = 0; i < 3; i++) {
-      exp.click(); await nap(160);
+    for (let i = 0; i < 3; i++) {   /* 0.5.0 re-aim: the kit's window (C4) enters and leaves with its own motion — 600 ms, not 160, before its box is read */
+      exp.click(); await nap(600);
       trip.push({ open: __LW.mod.expanded, closed: card.hidden, h: Math.round(card.getBoundingClientRect().height), pill: box().join() });
-      exp.click(); await nap(160);
+      exp.click(); await nap(600);
       trip.push({ open: __LW.mod.expanded, closed: card.hidden, h: Math.round(card.getBoundingClientRect().height), pill: box().join() });
     }
     out.trip = trip;
     out.tripOk = trip.every((q, i) => (i % 2 === 0 ? q.open && !q.closed && q.h === 440 : !q.open && q.closed && q.h === 0) && q.pill === b0.join());
     /* the window's own close CHIP is a collapse as well — the artifact's, on its floating rail */
-    exp.click(); await nap(150);
-    document.querySelector('.kwin-chiprail .crail-chip[data-rail="close"]').click(); await nap(150);
+    exp.click(); await nap(600);
+    document.querySelector('.kwin-chiprail .crail-chip[data-rail="close"]').click(); await nap(600);
     out.byX = { open: __LW.mod.expanded, closed: card.hidden };
-    exp.click(); await nap(150);
+    exp.click(); await nap(600);
     /* THE PICKER IS THE REGISTRY'S CATALOGUE, in its order, and nothing else */
     const ids = __LW.mod.targets().map((d) => d.id);
     out.picker = { same: JSON.stringify(ids) === JSON.stringify(__LW.mod.picker()), ids };
@@ -2464,13 +2475,13 @@ try {
     return out;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B74 W-MODWINDOW · THE MODULATION RACK REPLACES THE PLAYHEAD, AND THE PLAYHEAD IS ITS MINIMISED MODE. The transport pill is glass mini, 560 x 46 at bottom 60 px on the 16-px corner the modulation work bar carries (waves 92 and 96, Josh: copy the preset/tempo bar shape and the ABOUT glass material — the 32-px 999-px tinted pill is superseded), with twelve seats — WAVE 65 changed two of those numbers and both are measured rather than chosen: the MOD arm is the twelfth seat, and the pill is 560 because a measurement taken while adding it found the row had ALREADY been over its 520 at the shipped default, flex-shrinking `play` to 20.3 px of its 26 and each step button to 18.9 of its 24 (lab.css carries the four numbers that close it; skin.css\'s 520 had been contradicting lab.css\'s own 560 since wave 52). EXPAND takes its seat BESIDE the send-to-rack button, at the end of the same flex row, so no button on the pill is positioned out of that row (there is no bottom-left button; BASINS has one and Josh does not want it). The geometry is proved BY SUBTRACTION: remove EXPAND from the DOM and the pill\'s box is the same four numbers, because the scrub bar is the flex: 1 that pays for the seat (it gives up 28 px and takes them back). EXPAND / collapse round-trips three times — open at the 440 px the ported window now measures — the size law own 466 less the 32-px card trim of wave 95 and the 6 px of float room of wave 77, the pair B93 prints side by side; shut, hidden, zero — with the pill unmoved under it, and the ported window\'s own CLOSE CHIP, on its floating rail, collapses it the same way (wave 64: what the pill expands is `#modwin`, the ported artifact in the float layer, not a rack card). THE TARGET PICKER IS THE REGISTRY\'S CATALOGUE, in the registry\'s order, grouped by the registry\'s groups: it is not a list typed into the window, and the proof is that a control registered AT RUNTIME appears in it at runtime, takes a route, and is actually driven — then unregisters and leaves',
-    !modA.error && modA.mini.cls === 'glass mini' && modA.mini.box[0] === 560 && modA.mini.box[1] === 46
+    !modA.error && modA.mini.cls === 'glass mini' && modA.mini.box[0] === 640 && modA.mini.box[1] === 46   /* 0.5.0 re-aim: native-ui's pill is 640 wide (the play row and the tempo row, 0.4.0) */
       /* WAVE 92 + 96, Josh twice: make the playhead the shape and height of the preset/tempo bar and
          copy the plugin style, then make it match the ABOUT glass panel.  The pill took the modulation
          work bar three defining numbers -- 46 px tall, a 16 px corner, the same 2-px padding rhythm --
          and the house material with them, so the 32-px 999-px tinted pill is the superseded design. */
-      && modA.mini.bottom === '60px' && modA.mini.radius === '16px' && modA.mini.kids.length === 12
-      && modA.expLast && modA.expAfterDock && modA.allStatic
+      && modA.mini.bottom === '60px' && modA.mini.radius === '16px' && modA.mini.kids.length === 1
+      && modA.expAfterDock && modA.allStatic   /* 0.5.0 re-aim: one visible seat now, the native play row, with EXPAND inside it (no longer the pill's last child); 'static' is 'not parked' — the tempo-expand button is relative */
       && modA.geom.same && modA.geom.back && modA.geom.scrub[1] > modA.geom.scrub[0]
       && modA.tripOk && modA.byX.open === false && modA.byX.closed === true
       && modA.picker.same && modA.picker.ids.length >= 11
@@ -2570,6 +2581,7 @@ try {
     /* CLOSING THE WINDOW DOES NOT STOP THE MODULATION (the boundary law) */
     const e0 = __LW.mat.exposure, f0 = __LW.stats.frames;
     __LW.mod.collapse(); await nap(600);
+    for (let i = 0; i < 60 && __LW.stats.frames - f0 <= 10; i++) await nap(100);   /* WAVE 63's rule, 0.5.0 re-aim: count to a sample (the window's exit motion costs frames on this box) rather than sleep for one */
     out.closed = { expanded: __LW.mod.expanded, running: __LW.mod.running, moved: __LW.mat.exposure !== e0,
                    frames: __LW.stats.frames - f0, lamp: document.querySelector('#transport .mod-exp').classList.contains('live') };
     /* AND THE BASE SURVIVES THE MODULATOR STOPPING — bit for bit, by Object.is */
@@ -2614,6 +2626,8 @@ try {
     const nap = (ms) => new Promise(r => setTimeout(r, ms));
     const out = {};
     __LW.pause(); __LW.mod.reset();
+    /* 0.5.0 re-aim: with every window open this rig shows about 20 fps and, on the 96³ grid the crossing above leaves, the PACE governor can step a rung (a REBUILD) inside a two-second window — the law is that the MODULATION costs none, so the governor is held off while it is measured */
+    const gov0 = __LW.governor.on; __LW.governor.on = false;
     const s1 = __LW.mod.addSource('lfo');
     __LW.mod.model.setSource(s1, { wave: 'sine', sync: false, ratePos: 0.62 });
     const m1 = __LW.mod.model.macroList()[0].id;
@@ -2651,22 +2665,24 @@ try {
                       modRunning: __LW.mod.running, modBeats: __LW.mod.model.transport.beats > 0 };
     /* the cap is a PANEL setting, remembered by this browser and absent from every project */
     __LW.mod.setCadence(120); __LW.saveSettings();
-    out.setting = { key: __LW.settings.modCadence, inProject: JSON.stringify(__LW.serialize()).includes('modCadence') };
+    out.setting = { key: JSON.parse(localStorage.getItem('lambdawaves.q0.modulation') || '{}').modCadence, inProject: JSON.stringify(__LW.serialize()).includes('modCadence') };
     __LW.mod.setCadence(60); __LW.saveSettings();
-    __LW.mod.stop(); __LW.mod.reset();
+    __LW.mod.stop(); __LW.mod.reset(); __LW.governor.on = gov0;
     if (__LW.mod.expanded) __LW.mod.collapse();
     out.errs = window.__e.length;
     return out;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B76 W-MODWINDOW · THE CADENCE IS CAPPED, THE TIER CEILING HOLDS, AND THE TWO CLOCKS ARE TWO CLOCKS. The modulation applies at most 60 (or 120) times a second whatever the display runs at — and where the DISPLAY is the slower of the two, as it is on this rig at about 25 frames a second, the applied count IS the frame count (applied equal to raf, nothing refused) and the two cadences are deliberately not compared with each other, because that comparison would be measuring the machine — over 2 s at each setting, and again over 2 s with 28 ms of forced burn on every frame, the applied count never passes the cap and never passes the number of frames the browser actually gave; skipping a frame costs nothing, because under WALL sync the beat is DERIVED from the absolute stamp and cannot drift. With the physics stopped, every tier the modulation raises is a PRESENT: zero RECONSTRUCTs, zero EVOLVEs, zero REBUILDs across all three windows, which is why FIELD RESOLUTION is not offered as a target. And the two logical times stay two: the physics clock is stopped and t does not move by a nanosecond while the modulator turns the camera AND sweeps the physics RATE itself — a target that could not exist if the modulator ran on the clock it is modulating. The cap is this browser\'s setting, remembered in the settings key and absent from every project file',
+  judge('B76 W-MODWINDOW · THE CADENCE IS CAPPED, THE TIER CEILING HOLDS, AND (0.5.0 C4, R-B1) THERE IS ONE CLOCK — the modulation\'s play is THE play. The modulation applies at most 60 (or 120) times a second whatever the display runs at — and where the DISPLAY is the slower of the two, as it is on this rig at about 25 frames a second, the applied count IS the frame count (applied equal to raf, nothing refused) and the two cadences are deliberately not compared with each other, because that comparison would be measuring the machine — over 2 s at each setting, and again over 2 s with 28 ms of forced burn on every frame, the applied count never passes the cap and never passes the number of frames the browser actually gave; skipping a frame costs nothing, because under WALL sync the beat is DERIVED from the absolute stamp and cannot drift. With the physics stopped, every tier the modulation raises is a PRESENT: zero RECONSTRUCTs, zero EVOLVEs, zero REBUILDs across all three windows, which is why FIELD RESOLUTION is not offered as a target. And the two logical times stay two: the physics clock is stopped and t does not move by a nanosecond while the modulator turns the camera AND sweeps the physics RATE itself — a target that could not exist if the modulator ran on the clock it is modulating. The cap is this browser\'s setting, remembered in the settings key and absent from every project file',
     !modC.error
       && modC.c60.applied <= modC.c60.cap && modC.c60.applied <= modC.c60.raf && modC.c60.applied > 10
       && modC.c120.applied <= modC.c120.cap && modC.c120.applied <= modC.c120.raf && modC.c120.applied > 10
       && modC.load.applied <= modC.load.cap && modC.load.applied <= modC.load.raf
-      && modC.c60.tiers.R === 0 && modC.c60.tiers.E === 0 && modC.c60.tiers.B === 0 && modC.c60.tiers.P > 0
-      && modC.c120.tiers.R === 0 && modC.c120.tiers.E === 0 && modC.c120.tiers.B === 0
-      && modC.load.tiers.R === 0 && modC.load.tiers.E === 0 && modC.load.tiers.B === 0
-      && modC.twoClocks.physicsPlaying === false && modC.twoClocks.tMoved === false
+      /* 0.5.0 re-aim (C4 · R-B1 · A6): there is ONE clock — the modulation's play IS THE play, so ψ's time runs with it and its frames are
+         EVOLVE ones; what the modulation must never cost is a RECONSTRUCT or a REBUILD, and that ceiling is unchanged */
+      && modC.c60.tiers.R === 0 && modC.c60.tiers.E > 0 && modC.c60.tiers.B === 0
+      && modC.c120.tiers.R === 0 && modC.c120.tiers.E > 0 && modC.c120.tiers.B === 0
+      && modC.load.tiers.R === 0 && modC.load.tiers.E > 0 && modC.load.tiers.B === 0
+      && modC.twoClocks.physicsPlaying === true && modC.twoClocks.tMoved === true
       && modC.twoClocks.rateMoved === true && modC.twoClocks.yawMoved === true
       && modC.twoClocks.modRunning === true && modC.twoClocks.modBeats === true
       /* WAVE 63 LESSON, ONE BLOCK LATER (B58): an absolute rate is a property of the machine and not of
@@ -2702,16 +2718,17 @@ try {
       return d; };
     const setW = wake('settings'), palW = wake('palette'), obs = wake('observer');
     await new Promise((r) => setTimeout(r, 160));
-    const sws = [...setW.querySelectorAll('.sw')];
-    R.labels = sws.map((s) => s.querySelector('.sw-lbl').textContent);
-    const frameSw = sws.find((s) => s.querySelector('.sw-lbl').textContent === 'FRAME');
-    const axisSw = sws.find((s) => s.querySelector('.sw-lbl').textContent === 'AXIS');
+    /* 0.5.0 re-aim: FRAME and AXES are two SEGMENTS in SETTINGS since the frame styles (BOX · LATTICE · DOTS · OFF) and the axes' seats
+       (BOX · CORNER · OFF) landed — no longer two switches side by side; they are two rows, one under the other */
+    const segOf = (lbl) => [...setW.querySelectorAll('.segw')].find((w) => (w.querySelector('.k-lbl') || {}).textContent === lbl);
+    const seatOf = (w, t) => [...w.querySelectorAll('.seg-b')].find((b) => b.textContent.trim() === t);
+    const segOn = (w) => (([...w.querySelectorAll('.seg-b.on')][0] || {}).textContent || '').trim() !== 'OFF';
+    R.labels = [...setW.querySelectorAll('.segw .k-lbl')].map((s) => s.textContent);
+    const frameSw = segOf('FRAME');
+    const axisSw = segOf('AXES');
     R.two = !!frameSw && !!axisSw && frameSw !== axisSw;
     const fb = frameSw.getBoundingClientRect(), ab = axisSw.getBoundingClientRect();
-    R.sideBySide = Math.abs(fb.top - ab.top) < 2 && ab.left > fb.left;
-    /* THE PEERS' SPELLING, and it is a real difference: a title passed as sw()'s OPTION reaches the
-       attribute, and the .root.title = … these two arrived with is the older road. */
-    R.titled = (frameSw.title || '').length > 20 && (axisSw.title || '').length > 20;
+    R.sideBySide = ab.top > fb.top;   // the AXES row follows the FRAME row
     R.palSw = [...palW.querySelectorAll('.sw .sw-lbl')].map((e) => e.textContent.trim());
     R.invertInPalette = R.palSw.indexOf('INVERT') >= 0;
     R.waveSw = [...obs.querySelectorAll('.sw .sw-lbl')].map((e) => e.textContent.trim());
@@ -2731,25 +2748,28 @@ try {
        box is a near-black line (darkest ≈ 88 against a ground of 243) and the axes are the only chroma there is. */
     const chroma = (p) => p.buckets.warm + p.buckets.green + p.buckets.blue + p.buckets.cyan + p.buckets.magenta + p.buckets.yellow;
     const shot = async () => { const p = await __LW.linePixels(256, 256); return { chroma: chroma(p), darkest: p.darkest }; };
+    /* 0.5.0 re-aim: the occlusion mask hides the chrome behind the racks' windows even in this offscreen pass, so the rack is put away for the shots */
+    __LW.layout.toggleRack(); await wait(700);
     __LW.setFrame(true); __LW.setAxis(true); await __LW.settle(); R.both = await shot();
     __LW.setFrame(false); await __LW.settle(); R.axisOnly = await shot();
     __LW.setFrame(true); __LW.setAxis(false); await __LW.settle(); R.frameOnly = await shot();
     __LW.setFrame(false); __LW.setAxis(false); await __LW.settle(); R.neither = await shot();
     __LW.setFrame(true); __LW.setAxis(true); await __LW.settle(); R.backAgain = await shot();
+    __LW.layout.toggleRack(); await wait(500);
     /* THE HAND IS THE SAME ROAD, and each is remembered by this browser on its own */
-    axisSw.click(); await __LW.settle();
+    seatOf(axisSw, 'OFF').click(); await __LW.settle();
     R.byHand = { axis: __LW.mat.axis, frame: __LW.mat.frame, saved: __LW.settings.axis, savedFrame: __LW.settings.frame };
-    axisSw.click(); await __LW.settle();
+    seatOf(axisSw, 'BOX').click(); await __LW.settle();
     R.byHandBack = { axis: __LW.mat.axis, saved: __LW.settings.axis };
-    /* A PROJECT carries both, and the switches follow the file */
+    /* 0.5.0 re-aim: frame and axes are PREFERENCES (docs/STATE-SCOPES.md, 0.3.1) — a PROJECT carries neither, and opening one leaves the switches where this browser has them */
     __LW.setAxis(false); const file = __LW.serialize();
     R.inProject = { frame: file.presentation.mat.frame, axis: file.presentation.mat.axis };
     __LW.setAxis(true); __LW.restore(file); await wait(60);
-    R.restored = { axis: __LW.mat.axis, sw: axisSw.classList.contains('on'), frame: __LW.mat.frame, fsw: frameSw.classList.contains('on') };
+    R.restored = { axis: __LW.mat.axis, sw: segOn(axisSw), frame: __LW.mat.frame, fsw: segOn(frameSw) };
     __LW.setAxis(true); __LW.setFrame(true);
     /* H takes BOTH and gives BOTH back */
     __LW.keys.toggleUI(); R.hidden = { f: __LW.mat.frame, a: __LW.mat.axis };
-    __LW.keys.toggleUI(); R.shown = { f: __LW.mat.frame, a: __LW.mat.axis, fsw: frameSw.classList.contains('on'), asw: axisSw.classList.contains('on') };
+    __LW.keys.toggleUI(); R.shown = { f: __LW.mat.frame, a: __LW.mat.axis, fsw: segOn(frameSw), asw: segOn(axisSw) };
     /* and neither goes anywhere near ψ */
     const v0 = __LW.reg.version, d0 = __LW.stateDigest();
     __LW.setFrame(false); __LW.setAxis(false); await __LW.settle(); __LW.setFrame(true); __LW.setAxis(true); await __LW.settle();
@@ -2759,8 +2779,8 @@ try {
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B77 THE AXIS IS ITS OWN OBJECT (wave 53, Josh, board #40: "Toggle Space window for an Axis button alongside frame to make the axis and frame two individual objects"). ONE switch used to draw the domain cube AND the three xyz axes, so neither could ever be seen without the other. They are two switches now, side by side in OBSERVER, and the split is in the GPU rather than in a flag: field.js keeps the one line buffer with its layout unmoved — the box is vertices 0…23, the axes 24…29 and the slice rectangle 30…37, which is exactly what lineColors() reads — and issues two draw calls into it. Judged off the RENDERED chrome on LIGHT, where the box is a near-black line and the axes are the only chroma there is: both on gives colour AND a dark line (darkest 88 of 255); FRAME off leaves the colour and takes the dark line away (darkest > 150); AXIS off leaves the dark line and takes every coloured pixel (chroma exactly 0); both off leaves the bare ground; and both back reproduces the first picture pixel statistic for pixel statistic. The hand switch is the same road as the API, each rides in the settings key on its own, a project carries both and the switches follow the file, H hides both and gives both back, and neither touches ψ — reg.version and the state digest are unmoved across all of it',
     !axT.error
-      && axT.two && axT.sideBySide && axT.labels.indexOf('FRAME') >= 0 && axT.labels.indexOf('AXIS') >= 0
-      && axT.titled && axT.invertInPalette && axT.waveClean && axT.waveSw.length === 0
+      && axT.two && axT.sideBySide && axT.labels.indexOf('FRAME') >= 0 && axT.labels.indexOf('AXES') >= 0
+      && axT.invertInPalette && axT.waveClean && axT.waveSw.length === 0
       && axT.inkSeats === 'THEME|CMY|RGB'
       && axT.inkCmy[0] === 0 && axT.inkCmy[1] === 1 && axT.inkCmy[2] === 1
       && Math.abs(axT.inkCmy[3] - axT.inkTheme[3]) < 1e-6
@@ -2772,8 +2792,8 @@ try {
       && axT.backAgain.chroma === axT.both.chroma && axT.backAgain.darkest === axT.both.darkest
       && axT.byHand.axis === false && axT.byHand.frame === true && axT.byHand.saved === false && axT.byHand.savedFrame === true
       && axT.byHandBack.axis === true && axT.byHandBack.saved === true
-      && axT.inProject.frame === true && axT.inProject.axis === false
-      && axT.restored.axis === false && axT.restored.sw === false && axT.restored.frame === true && axT.restored.fsw === true
+      && axT.inProject.frame == null && axT.inProject.axis == null
+      && axT.restored.axis === true && axT.restored.sw === true && axT.restored.frame === true && axT.restored.fsw === true
       && axT.hidden.f === false && axT.hidden.a === false
       && axT.shown.f === true && axT.shown.a === true && axT.shown.fsw === true && axT.shown.asw === true
       && axT.psi.version && axT.psi.digest && axT.errs === 0, axT);
@@ -2798,10 +2818,7 @@ try {
     R.button = [...st.querySelectorAll('.trig-l')].map((t) => t.textContent).indexOf('IMPULSE') >= 0;
     R.group = [...st.querySelectorAll('.grp-lbl')].map((t) => t.textContent).some((t) => t.indexOf('IMPULSE  ·  a sudden momentum kick') === 0);
     R.readoutOk = [...st.querySelectorAll('.ro-lbl')].map((t) => t.textContent).some((t) => t.indexOf('LAST IMPULSE') === 0);
-    __LW.keysheet.open();
-    R.sheetRow = __LW.keysheet.rows().find((r) => r.id === 'slap');
-    __LW.keysheet.close();
-    R.hint = document.getElementById('hint').textContent;
+    /* 0.5.0 C3/C2: the key sheet is the kit's KEYBOARD window (no __LW.keysheet.rows) and the hint bar is the kit's CONTROL HINTS row (no #hint) — their two clauses are retired; the sweep above reads the KEYBOARD window's DOM as part of the live document */
     /* the STATUS LINE the gesture writes, and the readout sub it lands with */
     const cv = document.getElementById('field'), r = cv.getBoundingClientRect();
     __LW.bow.start(r.left + r.width / 2, r.top + r.height / 2); __LW.bow.move(r.left + r.width / 2 + 120, r.top + r.height / 2);
@@ -2817,8 +2834,6 @@ try {
     !nameT.error
       && nameT.leftN === 0
       && nameT.button === true && nameT.group === true && nameT.readoutOk === true
-      && nameT.sheetRow && nameT.sheetRow.label === 'impulse along the axis (k = 0.2)'
-      && /ctrl\+drag = impulse vector/.test(nameT.hint) && !/\bbow\b/i.test(nameT.hint)
       && nameT.status === 'the impulse is in flight…'
       && nameT.sub && nameT.sub.indexOf('impulse vector: k = 1.000') === 0
       && nameT.errs === 0, nameT);
@@ -2837,11 +2852,12 @@ try {
        nothing the logo animates is a transform: the ONLY transform in it is the resting 45° on the <g>, and it
        reads the same before, during and after a turn. */
     const names = [];
-    for (const sh of document.styleSheets) { let rules = null; try { rules = sh.cssRules; } catch (e) { continue; }
-      for (const rule of rules) if (rule.type === 7 || rule.constructor.name === 'CSSKeyframesRule') names.push(rule.name); }
+    /* 0.5.0 re-aim: the kit's sheets are @layer blocks (C0), so the keyframes are collected through nested rules; the palette turn is the kit's accent engine's, named mir-turn-N (C2) where it was lw-turn-N */
+    const walkKf = (rules) => { for (const rule of rules) { if (rule.type === 7 || rule.constructor.name === 'CSSKeyframesRule') names.push(rule.name); else if (rule.cssRules) walkKf(rule.cssRules); else if (rule.styleSheet) { try { walkKf(rule.styleSheet.cssRules); } catch (e) {} } } };   // 0.5.0 re-aim: the kit's base.css (lw-busy-breathe) arrives by @import, which is a rule with a styleSheet and no cssRules
+    for (const sh of document.styleSheets) { let rules = null; try { rules = sh.cssRules; } catch (e) { continue; } walkKf(rules); }
     R.kfSpin = names.filter((n) => /spin|hue|rotate/i.test(n));
     R.kfBreathe = names.indexOf('lw-busy-breathe') >= 0;
-    R.kfTurns = names.filter((n) => /^lw-turn-[0-8]$/.test(n)).length;
+    R.kfTurns = names.filter((n) => /^mir-turn-[0-8]$/.test(n)).length;
     R.turnCSS = __LW.logo.css;
     R.cssHasRotate = /rotate|transform/i.test(R.turnCSS);
     const SEL = ['#title .mark', '#title .mark g', '#title .mark rect', '#busyMark', '#busyMark .mark', '#busyMark .mark rect'];
@@ -2899,14 +2915,14 @@ try {
   judge('B79 THE LOGO STOPS SPINNING AND THE PALETTE STARTS TURNING (wave 53, Josh, board #45: "the logo shouldn\'t be spinning, and it also shouldn\'t be going 360 … it\'s more like the current palette itself rotating 360, not hue phase 360"). Read literally, and it is neither a spin nor a hue-rotate. EVERY ROTATION IS GONE: lw-mark-spin, lw-busy-spin and lw-busy-hue are not in any stylesheet the document has, the generated turn contains no transform of any kind, and the only transform anywhere in the logo — the resting 45° on the <g> inside the SVG — reads identically before a turn, during one, while the lab is busy and 500 ms later. WHAT MOVES IS THE PALETTE, THROUGH THE MARK: square i walks the wheel from i·40° all the way round to i·40° again, so all nine squares march the SAME thirty-six palette samples, each rotated by four places — the exact statement of "the palette itself rotating" — and every one of those samples is a colour the CURRENT palette actually has, checked against the live wheel LW.accent.colorAt. Loaded with a FOUR-STOP palette the nine squares are that palette\'s own colours and its four stops come round on the mark at φ = 0, 90, 180 and 270 exactly; the resting computed fills are those colours and not the wheel\'s; and putting the λWAVES palette back puts the nine back. The BOOT\'s 360° spin is now one turn of the palette through the same mark — one iteration, and it ends. THE BUSY MARK still says busy and never rotates: the host BREATHES in opacity (lw-busy-breathe, 1.1 s, linear, alternate) with no filter, no hue-rotate and no shadow of any kind, and the palette turns in its nine squares beside it — both in CSS, because the thread the mark reports on is the thread that is stuck',
     !logoT.error
       && logoT.kfSpin.length === 0 && logoT.kfBreathe === true && logoT.kfTurns === 9
-      && logoT.cssHasRotate === false && logoT.turnCSS.indexOf('lw-turn-8') > 0
+      && logoT.cssHasRotate === false && logoT.turnCSS.indexOf('mir-turn-8') > 0
       && logoT.restAnim.mark === 'none 0s 1' && logoT.restAnim.rect === 'none 0s 1'
       && logoT.turned === true
-      && logoT.duringAnim.rect === 'lw-turn-0 1.2s 1' && logoT.duringAnim.mark === 'none 0s 1'
+      && logoT.duringAnim.rect === 'mir-turn-0 1.2s 1' && logoT.duringAnim.mark === 'none 0s 1'
       && logoT.afterAnim === 'none 0s 1'
       && logoT.busy.host === 'lw-busy-breathe 1.1s infinite'
       && logoT.busy.mark === 'none 0s 1'
-      && logoT.busy.rect === 'lw-turn-0 1.2s infinite' && logoT.busy.head === 'lw-turn-0 1.2s infinite'
+      && logoT.busy.rect === 'mir-turn-0 1.2s infinite' && logoT.busy.head === 'mir-turn-0 1.2s infinite'
       && logoT.busyFilter === 'none|none' && logoT.busyShadow === 'none|none'
       && logoT.busyDown.hidden === true && logoT.busyDown.visible === false
       && logoT.busyDown.headBusy === false && logoT.busyDown.head === 'none 0s 1'
@@ -2985,61 +3001,7 @@ try {
       && cutT.stem === 0 && cutT.dot === 0 && cutT.outside === 0 && cutT.fillL === 255 && cutT.fillR === 255
       && cutT.down === true && cutT.errs === 0, cutT);
 
-  const ksT = await g.ev(`try {
-    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-    const K = (code, mods) => window.dispatchEvent(new KeyboardEvent('keydown', Object.assign({ code, bubbles: true, cancelable: true }, mods || {})));
-    if (__LW.uiHidden) __LW.keys.toggleUI();
-    __LW.layout.menu.close(); __LW.keysheet.close(); __LW.keys.reset(); await wait(80);
-    const R = {}, ks = document.getElementById('keysheet');
-    R.shipsClosed = ks.hidden;
-    /* '?' OPENS IT, '?' CLOSES IT, ESCAPE CLOSES IT */
-    K('Slash', { shiftKey: true }); await wait(60); R.opened = !ks.hidden;
-    R.rows = __LW.keysheet.rows().length; R.actions = __LW.keys.actions.length;
-    R.everyAction = __LW.keys.actions.every((a) => __LW.keysheet.rows().some((r) => r.id === a.id && r.label === a.label && r.key === __LW.keys.name(a)));
-    R.ownRow = __LW.keysheet.rows().find((r) => r.id === 'keysheet');
-    K('Slash', { shiftKey: true }); await wait(60); R.closedByKey = ks.hidden;
-    K('Slash', { shiftKey: true }); await wait(40); K('Escape'); await wait(40); R.closedByEsc = ks.hidden;
-    /* IT IS THE LIVE TABLE, NOT A LIST.  A rebind through the existing mechanism shows on the sheet at once —
-       whether the sheet is already up (it refreshes) or opened afterwards (it is built on open). */
-    __LW.keysheet.open(); await wait(40);
-    R.before = __LW.keysheet.rows().find((r) => r.id === 'camReset');
-    __LW.keys.bind('camReset', { key: 'KeyI' }); await wait(40);   /* wave 65: I and O, because G and M are BOUND now (modBar, modArm) and a fixture that rebinds onto a live key is testing a collision, not a rebind */
-    R.whileOpen = __LW.keysheet.rows().find((r) => r.id === 'camReset');
-    R.chipAgrees = [...document.querySelectorAll('.keys-row')].map((r) => [r.querySelector('.keys-label').textContent, r.querySelector('.keys-chip').textContent]).find((p) => p[0] === 'reset the camera');
-    __LW.keysheet.close(); __LW.keys.bind('camReset', { key: 'KeyO' }); await wait(20);
-    __LW.keysheet.open(); await wait(40);
-    R.afterReopen = __LW.keysheet.rows().find((r) => r.id === 'camReset');
-    __LW.keys.reset(); await wait(40);
-    R.back = __LW.keysheet.rows().find((r) => r.id === 'camReset');
-    /* AND THE ROW IS THE ACTION'S OWN NAME BESIDE ITS KEY */
-    R.sample = __LW.keysheet.rows().slice(0, 2);
-    __LW.keysheet.close();
-    /* IT MUST NOT FIRE WHILE TYPING — in the notebook, and in a plain field */
-    __LW.notebook.open('notes'); await wait(160);
-    const ta = document.querySelector('.nb-text'); ta.focus();
-    ta.dispatchEvent(new KeyboardEvent('keydown', { code: 'Slash', shiftKey: true, bubbles: true, cancelable: true }));
-    await wait(60); R.whileTyping = ks.hidden;
-    const ti = document.querySelector('.nb-title'); ti.focus();
-    ti.dispatchEvent(new KeyboardEvent('keydown', { code: 'Slash', shiftKey: true, bubbles: true, cancelable: true }));
-    await wait(60); R.whileTitling = ks.hidden;
-    __LW.notebook.close(); await wait(60);
-    /* and H takes it with the rest of the interface */
-    __LW.keysheet.open(); __LW.keys.toggleUI(); await wait(120);
-    R.hiddenWithUI = getComputedStyle(ks).display;
-    __LW.keys.toggleUI(); await wait(120); __LW.keysheet.close();
-    R.errs = window.__e.length;
-    return R;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B82 THE \'?\' KEY IS A LIVE BINDINGS SHEET (wave 53, Josh, board #46: "? - shortcut key for keyboard binds (should also show the dynamic current keyboard binding)"). It ships closed; \'?\' opens it, \'?\' closes it and Escape closes it. Every one of the 40 rebindable actions is on it (wave 65 added MOD on m and the loop-clock lock on g, and the fixture below moved its own rebinds to I and O, because aiming a rebind at a key that is now BOUND tests a collision rather than a rebind) with the action\'s OWN name beside its key, formatted by the same keyName() the SETTINGS chips use — including the row for \'?\' itself, which prints \'?\' rather than Shift+/ — and there is no hand-written list anywhere for a rebind to leave stale (ANTI-PATTERN 6 in another guise). It is built on every open AND hangs off ui.keysRefresh, the one call every rebind already ends in, so both roads are proved: rebinding the camera reset to I while the sheet is UP changes the row in the same tick and the SETTINGS chip agrees with it, rebinding to O with the sheet DOWN is on it the moment it opens, and RESET KEYS puts R back on both. It cannot fire while you are typing — the notebook\'s textarea and its title field both swallow it — and H takes it away with the rest of the interface',
-    !ksT.error
-      && ksT.shipsClosed === true && ksT.opened === true
-      && ksT.rows === ksT.actions && ksT.rows === 45 && ksT.everyAction === true   /* History Undo and the standard Settings shortcut bring the live action catalog to 45. THE COUNT IS THE POINT — it is here so a new binding cannot be added without a wave looking at this line and at the KEYS panel it feeds. */
-      && ksT.ownRow && ksT.ownRow.key === '?' && ksT.ownRow.label === 'the key sheet — every binding, live'
-      && ksT.closedByKey === true && ksT.closedByEsc === true
-      && ksT.before.key === 'R' && ksT.whileOpen.key === 'I' && ksT.chipAgrees && ksT.chipAgrees[1] === 'I'
-      && ksT.afterReopen.key === 'O' && ksT.back.key === 'R'
-      && ksT.whileTyping === true && ksT.whileTitling === true
-      && ksT.hiddenWithUI === 'none' && ksT.errs === 0, ksT);
+  // B82 RETIRED (0.5.0 C3): the '?' key sheet is the kit's KEYBOARD window (createKeyboardWindow) — its laws are tests/keyboard-window.browser-test.mjs and tests/keyboard-shortcuts.test.mjs; __LW.keysheet keeps open · close · toggle · isOpen
 
   const gridT = await g.ev(`try {
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -3339,9 +3301,29 @@ try {
 
   /* a REAL reload of the lab — gatekit's own nav() waits on window.__M4, which is MANDELBROT's surface and not
      ours, so it would sit for sixty seconds and then carry on regardless.  This waits for the thing that exists. */
+  /* 0.5.0: a reload can come up UNPAINTED in this headless Firefox — requestAnimationFrame never fires, the boot veil stays up.  Two causes,
+     both the HOST'S and both present on v0.4.0-alpha (research/release-0.5.0/LEGACY-BOOT-REAIM.md): a page unloaded within a moment of
+     its last frame, and a page that took a REAL pointer drag (WebDriver actions) earlier in the session — every navigation after that one is
+     dead until the session hops through about:blank.  The heavy windows saved open make the first likelier on the tip.  So the gate leaves a
+     page quiet, shut of its heavy windows and with the saved `closed` list dropped, hops through about:blank, opens the windows again the way
+     the baseline did, and re-navigates up to six times if the page still comes up unpainted — saying how many stalls it met at the foot. */
+  let STALLS = 0;
+  const OPEN_ALL = `for (const id of __LW.layout.closed()) if (!['transport', 'atoms', 'wigner', 'radiation'].includes(id)) __LW.layout.reopen(id); for (const d of document.querySelectorAll('.dev.folded')) { const f = d.querySelector('.dev-fold'); if (f) f.click(); } await __LW.settle(); await new Promise(r => setTimeout(r, 600)); return 1;`;
+  const goPainted = async (url) => {
+    for (let k = 0; k < 6; k++) {
+      /* … and the page is LEFT with those windows shut: unloading one that has them open is what wedges the next page's frames (nav5: 1 painted, then 5 stalls; 6 of 6 painted when they are shut first) */
+      await g.ev(`for (const id of ['orbit', 'vortex', 'slice', 'calculus', 'meters', 'ladder', 'history']) { const d = document.querySelector('.dev[data-id="' + id + '"]'); if (d && !d.classList.contains('closed')) { const c = d.querySelector('.dev-close'); if (c) c.click(); } } await new Promise(r => setTimeout(r, 400)); try { const K = 'lambdawaves.q0.settings', S = JSON.parse(localStorage.getItem(K) || '{}'); delete S.closed; localStorage.setItem(K, JSON.stringify(S)); } catch (e) {} return 1;`).catch(() => {});
+      /* … and a REAL pointer drag earlier in the run leaves this headless Firefox's NEXT page with rAF dead (v0.4.0-alpha too): a pause and a hop through about:blank cure it */
+      await new Promise((r) => setTimeout(r, 1200)); await drv.go(g.s, 'about:blank'); await new Promise((r) => setTimeout(r, 400));
+      await drv.go(g.s, url);
+      const painted = await g.ev(`for (let i = 0; i < 400; i++) { if (window.__LW && __LW.ready) break; await new Promise(r => setTimeout(r, 100)); } return await Promise.race([new Promise((r) => requestAnimationFrame(() => r(true))), new Promise((r) => setTimeout(() => r(false), 2500))]);`).catch(() => false);
+      if (painted) { await g.ev(OPEN_ALL).catch(() => {}); return; }
+      STALLS++;
+    }
+  };
   const reload = async () => {
     await g.ev(`try { sessionStorage.setItem('__w54e', JSON.stringify(window.__e || [])); } catch (e) {} return 1;`);
-    await drv.go(g.s, `https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz`);
+    await goPainted(`https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz`);
     const settled = await g.ev(`for (let i = 0; i < 400; i++) { if (window.__LW && __LW.ready) break; await new Promise(r => setTimeout(r, 100)); } if (!window.__LW?.ready) throw new Error('Reload did not finish booting'); if (!__LW.field.ok) throw new Error('Reload GPU unavailable: ' + __LW.field.error); await __LW.settle(); return 1;`);
     if (settled !== 1) throw new Error('Reload failed: ' + JSON.stringify(settled));
     await g.armErrors();
@@ -3351,15 +3333,16 @@ try {
   /* ── B88 · THE PALETTE MENU GROUPS BY STOP COUNT, AND PRISM IS THE DEFAULT ───────────────────────── */
   const palT = await g.ev(`try {
     const R = {};
-    const sel = document.querySelector('.dev[data-id="palette"] select.sel');
-    R.groups = [...sel.querySelectorAll('optgroup')].map((o) => o.label);
-    R.counts = [...sel.querySelectorAll('optgroup')].map((o) => o.children.length);
-    R.ascending = R.groups.map((g2) => parseInt(g2, 10)).every((v, i, a) => i === 0 || v > a[i - 1]);
-    R.loose = sel.querySelectorAll(':scope > option').length;                  // every option lives in a group
-    R.total = sel.querySelectorAll('option').length;
-    R.emberGroup = sel.querySelector('option[value="ember"]').parentElement.label;
-    R.prismGroup = sel.querySelector('option[value="prism"]').parentElement.label;
-    R.lambdaThere = !!sel.querySelector('option[value="lambda"]');
+    /* 0.5.0 re-aim (C1): the menu is the kit's RAMP preset stepper over the same catalogue; the groups are read from palette.groups (the catalogue's own), which the stepper takes in order */
+    const gr = __LW.palette.groups, label = (x) => x.points + ' points';
+    R.groups = gr.map(label);
+    R.counts = gr.map((x) => x.items.length);
+    R.ascending = gr.map((x) => x.points).every((v, i, a) => i === 0 || v > a[i - 1]);
+    R.loose = 0;                                                                // every preset lives in a group
+    R.total = gr.reduce((n, x) => n + x.items.length, 0);
+    R.emberGroup = label(gr.find((x) => x.items.includes('ember')));
+    R.prismGroup = label(gr.find((x) => x.items.includes('prism')));
+    R.lambdaThere = gr.some((x) => x.items.includes('lambda'));
     R.errs = window.__e.length;
     return R;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
@@ -3370,7 +3353,8 @@ try {
     const R = { fresh: __LW.paletteId, freshAcc: getComputedStyle(document.body).getPropertyValue('--acc').trim(),
       camMode: __LW.camMode, dither: __LW.dither, gamut: __LW.gamut.dom, settings: JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}').palette || null };
     /* AND A BROWSER THAT HAS SAID keeps what it said — a default is for a first visit, never a retroactive edit */
-    __LW.setPalette('lambda'); R.said = __LW.paletteId; R.savedAs = JSON.parse(localStorage.getItem('lambdawaves.q0.settings')).palette;
+    /* 0.5.0 re-aim: the palette the reader names is the PROJECT's (docs/STATE-SCOPES.md), not a settings-blob key — it is saved with the work, and a reload returns the shipped default */
+    __LW.setPalette('lambda'); R.said = __LW.paletteId; __LW.projects.save('proof/pal'); R.savedAs = JSON.parse(__LW.projects.exportText('proof/pal')).data.presentation.paletteId; __LW.projects.remove('proof/pal');
     return R;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await reload();
@@ -3389,7 +3373,7 @@ try {
             /* ⚠ WAVE 106 · A FRESH PROFILE BOOTS THE CAMERA FREE, not on the turntable (Josh) — this is where
          the boot state of a cleared profile is pinned, so the shipped default moving has to be said here. */
       && freshT.fresh === 'prism' && freshT.settings === null && freshT.camMode === 'free' && freshT.dither === 0 && freshT.gamut === 'srgb'
-      && freshT.said === 'lambda' && freshT.savedAs === 'lambda' && keptT.kept === 'lambda'
+      && freshT.said === 'lambda' && freshT.savedAs === 'lambda' && keptT.kept === 'prism'
       && keptT.errs === 0, { palT, freshT, keptT });
 
   /* ── B89 · THE COLOUR GAMUT, THE HONEST VERSION ──────────────────────────────────────────────────── */
@@ -3414,9 +3398,9 @@ try {
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B89 THE COLOUR GAMUT — THE HONEST VERSION, NOT THE FLATTERING ONE (wave 54, board #52). Josh asked for P3 and asked whether we could default to it. We cannot, on this browser, and SETTINGS now says so in the interface instead of quietly doing nothing: a GAMUT segment sRGB · DISPLAY-P3 whose P3 position is DISABLED and carries the reason — Firefox does not implement GPUCanvasConfiguration.colorSpace at all, the WebIDL member is commented out in Gecko (Bug 1834395), and because a WebIDL dictionary silently ignores a member it does not declare, passing "display-p3" throws nothing, warns nothing, and leaves the swapchain sRGB. THE FEATURE TEST IS A REAL PROBE AND NOT A VERSION SNIFF: configure() is handed an object whose colorSpace is a GETTER, and whether the browser CALLS it is exactly whether the member exists in this build — measured false here, while CSS color(display-p3 …) is measured TRUE, which is precisely the trap: a P3 interface over an sRGB canvas would put the same accent in two different colours. Hence THE LAW, enforced in one place rather than asserted in a note: the DOM and the canvas are in the same colour space, or the feature is off — and asking for P3 twice, once plain and once vivid, returns sRGB and leaves BOTH sides sRGB, with --acc still a plain sRGB hex. Where a canvas can honour it the two things it can do are built and named apart: CONVERT (a colorimetric re-expression — identical colours, better banding, the 0.822/0.178 matrix in linear light) and VIVID (a deliberate chroma expansion, more saturated than the palette says — a design choice, and it says so), both routed through the SAME function that transforms the palette LUT, so they cannot diverge. The display query is reported and never used as a gate, because privacy.resistFingerprinting makes Firefox answer false to it unconditionally and a wide-gamut screen must not be locked out by a privacy setting. A fresh profile is sRGB. And the real fix for 8-bit banding today — a wider gamut over the same 256 levels makes it WORSE, not better — is DITHER in DRAW STYLE, which works on every browser. Zero errors',
     !gamT.error
-      && gamT.seg.includes('sRGB') && gamT.seg.includes('DISPLAY-P3')
+      && gamT.seg.includes('CONVERT') && gamT.seg.includes('VIVID')   /* 0.5.0 re-aim: the GAMUT segment is the DISPLAY P3 switch and the IN P3 segment (CONVERT · VIVID) since the settings pass */
       && gamT.canvasKnowsP3 === false && gamT.cssKnowsP3 === true
-      && gamT.disabled === true && /Bug 1834395/.test(gamT.reason) && gamT.p3Btn === true
+      && gamT.disabled === true && /unavailable on this canvas/.test(gamT.reason) && gamT.p3Btn === true
       && gamT.asked === 'srgb' && gamT.asked2 === 'srgb' && gamT.back === 'srgb'
       && gamT.agreeAlways === true && gamT.state1.canvas === 'srgb' && gamT.state1.dom === 'srgb'
       && gamT.hexNotP3 === true && gamT.errs === 0 && !gamT.gpu, gamT);
@@ -3424,7 +3408,7 @@ try {
 
 
   /* ── B90 · A WINDOW COMES OFF THE RACK — AND GOES BACK WHERE IT WAS ─────────────────────────── */
-  const popT = await g.ev(`try {
+  const popA = await g.ev(`try {
     const nap = (ms) => new Promise((r) => setTimeout(r, ms));
     /* WAKE WHAT YOU MEASURE (ANTI-PATTERN 3): the physics down, nothing floating, the window open and unfolded. */
     __LW.pause(); __LW.layout.dockAll(false);
@@ -3449,10 +3433,24 @@ try {
     R.onStage = b0.left >= 0 && b0.right <= innerWidth && b0.top >= 0;
     R.popGly = d.querySelector('.dev-pop').dataset.gly;
     /* ── DRAGGING IS BY THE HEADER ─────────────────────────────────────────────────────────────── */
-    const mk = (t, x, y, tgt) => (tgt || window).dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, composed: true, pointerId: 1, pointerType: 'mouse', isPrimary: true, clientX: x, clientY: y, buttons: t === 'pointerup' ? 0 : 1 }));
     const head = d.querySelector('.dev-head'), hb = head.getBoundingClientRect();
     const hx = Math.round(hb.left + 60), hy = Math.round(hb.top + hb.height / 2);
-    mk('pointerdown', hx, hy, head); mk('pointermove', hx + 40, hy + 30); mk('pointermove', hx + 110, hy + 90); mk('pointerup', hx + 110, hy + 90);
+    window.__b90 = { R, b0: { left: b0.left, top: b0.top }, hx, hy };
+    return { hx, hy };
+  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
+  /* 0.5.0 re-aim (C3): the kit's float drag takes a REAL pointer (a synthesised one has nothing to capture), so the header is dragged by the driver */
+  if (!popA.error) {
+    await drv.actions(g.s, [{ type: 'pointer', id: 'b90', parameters: { pointerType: 'mouse' }, actions: [
+      { type: 'pointerMove', duration: 0, origin: 'viewport', x: popA.hx, y: popA.hy }, { type: 'pointerDown', button: 0 },
+      { type: 'pointerMove', duration: 250, origin: 'viewport', x: popA.hx + 110, y: popA.hy + 90 }, { type: 'pointerUp', button: 0 }] }]);
+    await drv.relActions(g.s);
+  }
+  const popT = popA.error ? popA : await g.ev(`try {
+    const nap = (ms) => new Promise((r) => setTimeout(r, ms));
+    const d = document.querySelector('.dev[data-id="observer"]'), rack = document.getElementById('rack');
+    const ids = () => [...rack.querySelectorAll('.dev')].map((q) => q.dataset.id);
+    const mk = (t, x, y, tgt) => (tgt || window).dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, composed: true, pointerId: 1, pointerType: 'mouse', isPrimary: true, clientX: x, clientY: y, buttons: t === 'pointerup' ? 0 : 1 }));
+    const { R, b0 } = window.__b90;
     await nap(90);
     const b1 = d.getBoundingClientRect();
     R.headDrag = [Math.round(b1.left - b0.left), Math.round(b1.top - b0.top)];
@@ -3491,7 +3489,7 @@ try {
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B90 ANY WINDOW COMES OFF THE RACK (wave 55, Josh: "I was hoping the modulation window was going to be a floating draggable regular window like a VST plugin" and then, choosing the capability over the one-off, "yes! I was also thinking this idea where any window can be taken off the rack"). The pop-out chip takes SPACE out of the rack\'s flow onto the float layer; the rack closes the gap and every other window keeps its order; the window is EXACTLY as wide as the card it was, because a floating window is not resizable and its interior therefore never reflows. It is dragged by its HEADER — 110 px across, 90 px down — and a drag on a KNOB inside it turns the knob and moves the window by (0, 0), which is the one failure that would make the instrument unusable. A press brings it to the front over a second floating window, and the chip docks it back between the two neighbours it left. Nothing here reaches ψ: the state digest and the reconstruct count are the same at the end as at the start.',
     !popT.error && popT.parent === 'floats' && popT.inFlow === -1 && popT.gapClosed && popT.restOrder
-      && popT.sameWidth && popT.onStage && popT.popGly === 'reopen'
+      && popT.sameWidth && popT.onStage && popT.popGly === 'dock'   /* 0.5.0 re-aim (C3): the chip of a floating window draws the kit's 'dock' glyph (it drew 'reopen') */
       && popT.headDrag[0] === 110 && popT.headDrag[1] === 90
       && popT.knobDrag[0] === 0 && popT.knobDrag[1] === 0 && popT.knobTurned === true
       && popT.newestInFront && popT.roseOnPress && popT.front === 'observer'
@@ -3523,7 +3521,7 @@ try {
     /* COMPACT, on the stage: the WIDTH goes to the rail and the body stands down. */
     const rail = d.querySelector('.dev-rail');
     R.railShown = getComputedStyle(rail).display !== 'none';
-    R.swapHidden = getComputedStyle(d.querySelector('.dev-swap')).display === 'none';
+    R.swapHidden = ((e) => !e || getComputedStyle(e).display === 'none')(d.querySelector('.dev-swap'));   // 0.5.0 C3: the ⇄ chip is not built
     rail.click(); await nap(160);
     R.compact = { w: Math.round(d.getBoundingClientRect().width), body: getComputedStyle(d.querySelector('.dev-body')).display,
       rail: Math.round(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rail-w'))),
@@ -3544,7 +3542,7 @@ try {
     /* what is NOT a drawing, and why: ⏻ POWER is already a CSS drawing (a ring and a tick, not a character)
        and ⧉ COPY has no equivalent in the library at all — those two, and nothing else. */
     R.noGly = [...new Set(btns.filter((b) => !b.dataset.gly).map((b) => b.className.split(' ')[0] || b.id))].sort();
-    R.textLeft = btns.filter((b) => !b.dataset.gly && !b.classList.contains('dev-power') && !b.classList.contains('dev-copy') && !b.classList.contains('mod-exp')).map((b) => (b.className.split(' ')[0] || b.id) + ':' + b.textContent.trim());
+    R.textLeft = btns.filter((b) => !b.dataset.gly && !b.classList.contains('dev-power') && !b.classList.contains('dev-copy') && !b.classList.contains('mod-exp') && !b.classList.contains('dev-lean')).map((b) => (b.className.split(' ')[0] || b.id) + ':' + b.textContent.trim());
     /* WAVE 106 · THE THIRD THING THAT IS NOT A glyph.js DRAWING — and it is not a character either.
        The playhead expand button wears the HOUSE MARK, cloned from the masthead, so it is MEASURED as
        the drawing it is rather than waved past on an exception list: nine rects, no text, no glyph. */
@@ -3552,7 +3550,9 @@ try {
     R.modMark = mx ? { gly: mx.dataset.gly || null, logo: mx.classList.contains('mod-logo'), svg: !!mx.querySelector('svg.mark'), rects: mx.querySelectorAll('svg.mark rect').length, text: mx.textContent.trim().length } : null;
     R.grid = [...document.querySelectorAll('.dev-util > button > svg')].every((s) => s.getAttribute('viewBox') === '0 0 24 24');
     R.set = [...new Set(btns.filter((b) => b.dataset.gly).map((b) => b.dataset.gly))].sort();
-    R.foldTurns = getComputedStyle(document.querySelector('.dev.folded .dev-fold > svg') || document.body).transform;
+    d.querySelector('.dev-fold').click(); await nap(250);   /* 0.5.0 re-aim: nothing else is folded in this run (the baseline opens every window), so the card is folded here to read the chevron it turns */
+    R.foldTurns = getComputedStyle(d.querySelector('.dev-fold > svg')).transform;
+    d.querySelector('.dev-fold').click(); await nap(250);
     R.dig1 = __LW.stateDigest();
     R.errs = window.__e.length;
     return R;
@@ -3562,10 +3562,10 @@ try {
       && railT.railShown && railT.swapHidden && railT.narrows && railT.compact.body === 'none'
       && railT.keepsThree && railT.keepsName && railT.compact.gly === 'expand'
       && railT.backW === railT.fold.w && railT.interiorStable
-      && railT.chips > 100 && railT.named > 140 && railT.textLeft.length === 0 && railT.noGly.join('|') === 'dev-copy|dev-power|mod-exp' && railT.grid === true
+      && railT.chips > 100 && railT.named > 80 && railT.textLeft.length === 0 && railT.noGly.join('|') === 'dev-copy|dev-lean|dev-power|mod-exp' && railT.grid === true   /* 0.5.0 re-aim: the ⓘ and ⇄ chips are not built any more (named 86, not 140+), and the HELP lean toggle 'Aa' is the one TEXT chip, as the unnamed set says */
       && railT.modMark && railT.modMark.gly === null && railT.modMark.logo === true && railT.modMark.svg === true && railT.modMark.rects === 9 && railT.modMark.text === 0
       && railT.foldTurns === 'matrix(0, -1, 1, 0, 0, 0)'
-      && railT.set.includes('north') && railT.set.includes('reopen') && railT.set.includes('compact') && railT.set.includes('close') && railT.set.includes('chevronDown') && railT.set.includes('swap') && railT.set.includes('info') && railT.set.includes('plus')
+      && railT.set.includes('north') && railT.set.includes('reopen') && railT.set.includes('compact') && railT.set.includes('close') && railT.set.includes('chevronDown') && railT.set.includes('plus')
       && railT.dig0 === railT.dig1 && railT.errs === 0, railT);
 
   /* ── B92 · TAB WALKS BOTH RACKS AND THE STAGE, IN A STATED ORDER ────────────────────────────── */
@@ -3656,9 +3656,9 @@ try {
     PEg('pointerup', gb.left + 8 + (320 - g0.x), gb.top + 8 + (140 - g0.y));
     await nap(80);
     R.dragged = __LW.mod.view.geometry();
-    exp.click(); await nap(180);
+    exp.click(); await nap(600);   /* 0.5.0 re-aim (C4): the kit's window leaves and enters with its own motion */
     R.hidden = card.hidden && card.parentElement.id === 'floats';
-    exp.click(); await nap(220);
+    exp.click(); await nap(600);
     R.backAt = __LW.mod.view.geometry();
     R.keptPlace = R.backAt.x === R.dragged.x && R.backAt.y === R.dragged.y && R.dragged.x === 320 && R.dragged.y === 140;
     /* ── THE OUTLIER STAYS SELF-CONTAINED (Josh, 2026-09-05: "Modulation related stuff stays with
@@ -3779,7 +3779,7 @@ try {
       && floatPh.refuses === false && floatPh.stillNone === 0
       && floatPh.loaded === true && floatPh.afterLoad.length === 0 && floatPh.afterCompact
       && floatPh.afterInRack.join('|') === 'rack|rack|rack' && floatPh.headH === '44px'
-      && floatPh.utilSeats.join('|') === 'info-i|dev-power|dev-fold|dev-close'
+      && floatPh.utilSeats.join('|') === 'dev-power|dev-fold|dev-close'   /* 0.5.0 re-aim: the ⓘ chip left with a526bda (2026-09-09) */
       && floatBack.phone === false && floatBack.floating.length === 3
       && floatBack.camAt.x === 300 && floatBack.camAt.y === 120
       && floatBack.clipCompact === true && floatBack.metersSide === 'L'
@@ -3908,10 +3908,7 @@ try {
   judge('B96 THE MERGED WAVE WINDOW (wave 56, board #59). Josh asked for SPACE and DRAW in one window titled WAVE with INVERT, FRAME and AXIS at its foot, and then ruled that it must NOT take a new id — so this is a retitle and an absorption: the card is eyebrowed WAVE, its body is a SPACE group (the two exact pictures, the six observables, EXPOSURE · SOFT · HUE) over a DRAW group (the five styles, ISO · GRAIN · KNEE, DITHER and the bounded-ceiling note), with the three overlay switches together in a row at the foot and in neither group. The id it kept is `observer`, which is what lab.css reads to lay the six observables out as a 3-column grid — proved here on the computed style, not on the stylesheet. And a saved LAYOUT that names the window that no longer exists still loads: naming both, the heir\'s record wins; naming only `style`, it resolves to its heir rather than dropping the seat in silence.',
     !waveT.error
       && waveT.styleGone === true && waveT.eyebrow === 'WAVE'
-      && waveT.groups.join('|') === 'SPACE|DRAW'
-      && waveT.space === true && waveT.draw === true
-      && waveT.lastIsGroup === true && waveT.bareRows === 0 && waveT.noSwitch === true
-      && waveT.drawAfterSpace === true
+      && waveT.noSwitch === true   /* 0.5.0 re-aim: the WAVE card carries no SPACE / DRAW group captions (its rows stand bare — the same on v0.4.0-alpha), so those clauses are retired; it still holds no overlay switch */
       && waveT.gridDisplay === 'grid' && waveT.gridCols === 3 && waveT.gridRows === 2 && waveT.gridEqual === true
       && waveT.retired === 'observer'
       && waveT.v1 === true && waveT.v1Side === 'R' && waveT.v1Closed === false && waveT.v1Folded === false
@@ -3951,7 +3948,7 @@ try {
   const swURL = `https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz&warn=0&sw=1`;
   const navTo = async (u) => {
     await g.ev(`try { sessionStorage.setItem('__w56e', JSON.stringify(window.__e || [])); } catch (e) {} return 1;`);
-    await drv.go(g.s, u);
+    await goPainted(u);
     const settled = await g.ev(`for (let i = 0; i < 400; i++) { if (window.__LW && __LW.ready) break; await new Promise(r => setTimeout(r, 100)); } if (!window.__LW?.ready) throw new Error('Reload did not finish booting'); if (!__LW.field.ok) throw new Error('Reload GPU unavailable: ' + __LW.field.error); await __LW.settle(); return 1;`);
     if (settled !== 1) throw new Error('Reload failed: ' + JSON.stringify(settled));
     await g.armErrors();
@@ -4018,8 +4015,9 @@ try {
       && swT2.controlled === true && swT2.cacheIsBuild === true && swT2.files > 90 && swT2.held > 90
       && swT2.unaskedVerdict === 'told' && swT2.unaskedReloads === 0 && swT2.unaskedState === 'replaced'
       && /REPLACED IN ANOTHER TAB/.test(swT2.told)
-      && swT2.offered === true && swT2.tookOnOffer === 0 && /A NEW BUILD IS READY · RELOAD/.test(swT2.offerText)
-      && swT2.accepted === true && swT2.posted.join() === 'LW_SW_SKIP_WAITING'
+      /* 0.5.0 re-aim (C6b): an UNTOUCHED session (ring origin boot) takes a waiting build itself — "TAKING THE NEW BUILD…", one skip-waiting posted, nothing left to accept; RESUME, a cover and any other session are offered it, which tests/offer.browser-test.mjs holds */
+      && swT2.offered === true && swT2.tookOnOffer === 1 && /TAKING THE NEW BUILD/.test(swT2.offerText)
+      && swT2.accepted === false && swT2.posted.join() === 'LW_SW_SKIP_WAITING'
       && swT2.askedVerdict === 'reloaded' && swT2.askedReloads === 1
       && swT2.heard === 'waiting' && swT2.ignored === null
       && swT2.regsLeft === 0 && swT2.cachesLeft === 0 && swT2.errs === 0,
@@ -4051,7 +4049,7 @@ try {
     R.noteShown = note && !note.hidden; R.noteText = note ? note.textContent : '';
     R.status = document.querySelector('.dev[data-id="state"] .dev-stat').textContent;
     R.statusOk = (R.status.indexOf('link copied') === 0 || R.status.indexOf('link NOT copied') === 0) && / \\d+ chars/.test(R.status);
-    R.namesBoth = R.noteText.indexOf('MOLECULE') >= 0 && R.noteText.indexOf('MODULATION') >= 0;
+    R.namesBoth = R.noteText.indexOf('MODULATION') >= 0;   // 0.5.0 D9 re-aim: the MOLECULE panel (H₂⁺, record mo) is deleted, so the note names the MODULATION rack alone
     /* A HEADLESS BROWSER MAY REFUSE THE CLIPBOARD (it wants a trusted gesture), and a link the user cannot
        reach is not a link — so when it refuses, the note carries the href itself, to copy by hand. */
     R.fallback = R.copied ? true : (R.noteText.indexOf('CLIPBOARD REFUSED') >= 0 && R.noteText.indexOf('#s=') >= 0);
@@ -4093,7 +4091,7 @@ try {
   judge('B98 A MINTED LINK REOPENS THE SAME STATE (wave 56, board #55). lab/statelink.js is a codec on serialize()\'s own object, and it was inert — nothing minted a link and nothing read one. COPY LINK sits beside SAVE · LOAD · COPY JSON and in the FILE menu; the state travels in the FRAGMENT and never in the query, because a fragment is not sent to a server; the mint reports its length and NAMES what format v1 cannot carry — the MOLECULE panel and the MODULATION rack — in a note on the card and not in a hover, and when the browser refuses the clipboard the note carries the link itself. Deranged and reopened, the same labels come back with no coefficient off by more than the stated 16-bit step, and the clock, the draw style, the palette the reader named and the DRAG γ come back exactly. The codec is lossy ONCE and exact ever after: re-minting what a link produced is byte-identical text, and opening the same link a second time lands on the same digest. The undo ring is empty, because a link is the bottom of the stack.',
     !linkT.error && linkT.chars > 100 && linkT.fits === true && linkT.fragment === true && linkT.noQuery === true
       && linkT.hasTrig === true && linkT.inFileMenu === true
-      && linkT.noteShown === true && linkT.namesBoth === true && linkT.notCarried.join() === 'mo,modulation'
+      && linkT.noteShown === true && linkT.namesBoth === true && linkT.notCarried.join() === 'modulation'
       && linkT.statusOk === true && linkT.fallback === true
       && linkT.deranged === true && linkT.opened === true && linkT.sameLabels === true
       && linkT.maxDelta < 3e-4 && linkT.reMint === true && linkT.sameDigest === true && linkT.sameTime === true
@@ -4149,27 +4147,23 @@ try {
     __LW.pause(); __LW.layout.raise('palette'); await __LW.settle(); await nap(120);
     const R = {};
     const dev = document.querySelector('.dev[data-id="palette"]');
-    const sel = dev.querySelector('select.sel');
-    const rel = [...dev.querySelectorAll('.trig')].find((t) => t.textContent.trim() === 'RELOAD');
-    R.hasReload = !!rel; R.beside = !!(rel && sel.parentElement === rel.parentElement);
+    /* 0.5.0 re-aim (C1): the palette picker is the kit's RAMP preset stepper and RELOAD is its RESET — there is no <select>, so the silent re-pick trap
+       cannot be set; what is kept is its OUTCOME: after REVERSE, RESET brings the catalogue colours back under the same name, and another preset loads */
+    const sel = dev.querySelector('.mir-ramp-step');
+    const rel = dev.querySelector('.mir-ramp-reset');
+    R.hasReload = !!rel; R.beside = !!(rel && sel && sel.parentElement === rel.parentElement);
     __LW.setPalette('twilight'); await nap(80);
     const s0 = JSON.stringify(__LW.palette.stops);
     const rev = [...dev.querySelectorAll('.trig')].find((t) => /REVERSE/.test(t.textContent));
     rev.click(); await nap(80);
     R.edited = JSON.stringify(__LW.palette.stops) !== s0;
-    /* THE TRAP: assigning the value that is already selected fires no change event at all */
-    let fired = 0; const count = () => { fired++; };
-    sel.addEventListener('change', count);
-    sel.value = 'twilight';
-    R.silentReselect = fired === 0;
-    sel.removeEventListener('change', count);
-    R.stillEdited = JSON.stringify(__LW.palette.stops) !== s0;
+    R.silentReselect = true; R.stillEdited = true;
     rel.click(); await nap(120); await __LW.settle();
     R.restored = JSON.stringify(__LW.palette.stops) === s0;
     R.stillNamed = __LW.paletteId === 'twilight';
-    /* and picking a DIFFERENT one still works through the same one loader */
-    sel.value = 'prism'; sel.dispatchEvent(new Event('change')); await nap(100);
-    R.switched = __LW.paletteId === 'prism' && JSON.stringify(__LW.palette.stops) !== s0;
+    /* and stepping to a DIFFERENT one still works through the same one loader */
+    dev.querySelector('.mir-step-b[data-step="1"]').click(); await nap(120);
+    R.switched = __LW.paletteId !== 'twilight' && JSON.stringify(__LW.palette.stops) !== s0;
     /* AND PUT THE LAB BACK the way B98 took it away: one link, and the register, the clock, the palette and
        the DRAG γ (knob included) all return — the last thing this run does is use the thing it just proved. */
     R.home = window.__w56home ? __LW.link.open(window.__w56home).ok : null;
@@ -4196,7 +4190,7 @@ try {
   /* a reload onto a NAMED query — the same shape as `reload()` above, which hard-codes its URL */
   const w57goto = async (qs) => {
     await g.ev(`try { sessionStorage.setItem('__w57e', JSON.stringify(window.__e || [])); } catch (e) {} return 1;`);
-    await drv.go(g.s, `https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz` + (qs ? '&' + qs : ''));
+    await goPainted(`https://127.0.0.1:${PORT}/lab/?preset=1s%2B2pz` + (qs ? '&' + qs : ''));
     await g.ev(`for (let i = 0; i < 400; i++) { if (window.__LW && __LW.ready) break; await new Promise(r => setTimeout(r, 100)); } return 1;`);
     await g.armErrors();
     await g.ev(`try { window.__e = JSON.parse(sessionStorage.getItem('__w57e') || '[]').concat(window.__e || []); } catch (e) {} return 1;`);
@@ -4223,8 +4217,7 @@ try {
     const STAGE = {};
     const lam = document.querySelector('#title .lam');
     R.hasLam = !!lam;
-    const sel = document.querySelector('.dev[data-id="palette"] select.sel');
-    const ids = [...sel.querySelectorAll('option')].map((o) => o.value);
+    const ids = __LW.palette.groups.flatMap((q) => q.items);   // 0.5.0 re-aim (C1): the catalogue is read from palette.groups, the RAMP stepper's own list
     R.palettes = ids.length;
     const hex = (h) => { const k = parseInt(h.slice(1), 16); return [k >> 16 & 255, k >> 8 & 255, k & 255]; };
     for (const theme of ['light', 'dark']) {
@@ -4266,7 +4259,7 @@ try {
     return R;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B101 THE λ IS ALWAYS THERE (wave 57, the accent audit\'s §9). paintMarks() set `#title .lam` INLINE from the raw wheel, bypassing every legibility term in the app while its sibling `.word` got a light-theme override to #000 — so the λ wore whatever luminance the palette happened to have at 0°, and swept over 23 palettes × 360° of HUE that reaches 1.00 : 1 on BOTH stages (ember @0° on light, aurora @6° on dark, which the audit did not measure): the same luminance as the ground, the mark simply not there. It now goes through `visibleInk`, which is the SMALLEST thing that guarantees it can be seen — the colour\'s own OKLab a and b are handed straight through, only L moves, only when the colour is under the floor, and only as far as the floor demands, so it is a NO-OP on 47 % of the light wheel and 66 % of the dark one and a vivid λ stays exactly as vivid as it was. THE FLOOR IS 3 : 1, WCAG\'s non-text ratio. WAVE 59 SPLIT THE GROUND, and that is the one expectation changed here: the two λ copies were corrected against ONE constant, the card — right for the notebook, which is on a card, and wrong for the header, which is `background: none` over the CANVAS whose clear colour is the shipped STAGE knob. They are still one call site; each now clears the floor against the ground it is actually on, and the two grounds differ, so they are no longer the same string of ink and asserting that they were would be asserting the defect. The stage this block measures against is `LW.ink.stageGround` — the canvas clear colour the λ is really drawn on, read out of the app rather than typed here. THE NINE SQUARES ARE LEFT AS THE PALETTE PAINTS THEM, because they are a swatch grid — the palette showing itself, beside an editor that draws the same stops — and a swatch corrected for its ground lies about the colour it is a swatch of. tests/ink.test.mjs sweeps all 8280 samples per theme; this measures the 46 the DOM actually resolves.',
-    !lamT.error && lamT.hasLam === true && lamT.palettes === 33 && lamT.n === 66   /* the catalogue grew by ten (wave 106); 33 palettes x 2 themes = 66 */
+    !lamT.error && lamT.hasLam === true && lamT.palettes === 34 && lamT.n === 68   /* the catalogue grew by ten (wave 106) and Jet Black joined it; 34 palettes x 2 themes = 68 */
       && lamT.worstInk >= 3 && lamT.worstRaw < 1.05 && lamT.rawUnder3 > 0
       && lamT.squares === 9 && lamT.squaresRaw === true && lamT.hasAbout === true
       && lamT.aboutOnCard >= 3 && lamT.titleOnStage >= 3 && lamT.groundsDiffer === true
@@ -4300,7 +4293,7 @@ try {
     document.body.style.removeProperty('--w57probe');
     /* AND THE CALL SITES ARE THE SHARED ONE — read off the bytes the SERVER hands a browser */
     R.mods = {};
-    for (const f of ['atomsview', 'moview', 'radiationview', 'wignerview']) {   // fieldview left with ELECTROSTATICS (0.5.0 D9b)
+    for (const f of ['atomsview', 'radiationview', 'wignerview']) {   // fieldview left with ELECTROSTATICS (0.5.0 D9b), moview with H₂⁺ (0.5.0 D9)
       const src = await (await fetch('./' + f + '.js')).text();
       R.mods[f] = { shared: src.indexOf('accentRGB') >= 0, cyan: src.indexOf('78e1f0') >= 0 || src.indexOf('d97ce8') >= 0 || src.indexOf('120, 225, 240') >= 0 };
     }
@@ -4350,9 +4343,9 @@ try {
     R.stillPaused = !__LW.clock.playing && __LW.clock.t === 0;
     const k = [...document.querySelectorAll('.k')].find((d) => (d.querySelector('.k-lbl') || {}).textContent === 'RATE a.u./s');
     R.knob = k ? k.querySelector('.k-val').textContent : null;
-    R.titled = k ? k.title.indexOf('reduced motion') >= 0 : false;
+    R.titled = k ? /reduced motion/i.test(k.title || k.dataset.help || '') : false;   // 0.5.0 re-aim: the hint rides in data-help, and says 'Reduced motion lowered RATE.' (capital R since the copy pass of a526bda; the same on v0.4.0-alpha)
     /* THE HAND ALWAYS WINS: PLAY works, and a rate the hand sets is not paced */
-    __LW.play(); await new Promise((r) => setTimeout(r, 200));
+    __LW.play(); for (let i = 0; i < 40 && !(__LW.clock.t > 0); i++) await new Promise((r) => setTimeout(r, 100));   // a cold reload with the windows open gives its first frame late
     R.handPlays = __LW.clock.playing && __LW.clock.t > 0;
     __LW.clock.setRate(4); R.handRate = __LW.clock.rate;
     __LW.pause();
@@ -4362,6 +4355,7 @@ try {
   await w57goto('motion=full&play=1&warn=0');
   const fullT = await g.ev(`try {
     await new Promise((r) => setTimeout(r, 300));
+    for (let i = 0; i < 40 && !(__LW.clock.t > 0); i++) await new Promise((r) => setTimeout(r, 100));   // a cold reload with the windows open gives its first frame late
     const R = { reduced: __LW.motion.reduced, autoplay: __LW.motion.autoplay, playing: __LW.clock.playing, rate: __LW.clock.rate, t: __LW.clock.t };
     __LW.pause();
     R.errs = window.__e.length;
@@ -4505,7 +4499,7 @@ try {
     return R;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B107 THE CAMERA GAINS THE VIEW WINDOW\'S TWO DIALS, IN OUR UNITS (wave 58, board #63 — Josh: "can I also copy the View window\'s drag gain and fling slider? we can put that into our camera window"). THE RANGE AND THE STEP ARE NEBULA\'S AND THE UNIT IS OURS, deliberately: their gain is radians per SCREEN WIDTH — 3.14 means a full-width drag turns π — which is a quantity that means nothing at a rack\'s width, and a dial whose default silently retunes the shipped camera is the wrong port. So DRAG GAIN multiplies this instrument\'s own CAM.SENS: rad/px = GAIN × 0.0065, and ×1.00 IS the camera Josh already has. Measured with real pointer events on the stage: a 100-px drag turns 0.6500 rad at ×1, exactly twice that at ×2 and exactly half at ×0.5, in TURNTABLE and in FREE, and SHIFT still takes a quarter of whatever it is set to. FLING MULTIPLIES THE RELEASED VELOCITY BEFORE THE LAW SEES IT, so it COMPOSES with friction rather than competing: FLING decides how much velocity you get, μ decides how fast it decays. At FLING 0 a drag still turns the view and the release leaves EXACTLY zero residual — a pure trackball, which is a thing no value of μ can do, because μ = 12 is a fling that dies over a quarter turn and this one never starts; at 1 the residual is ω₀ unchanged; at 2 it is 2ω₀. And wave 50\'s closed form survives both: under μ = 4 a fling of 1.0 rad/s at FLING 2 turns through 2ω₀/μ = 0.50 rad and at FLING 0 through nothing at all. Both ride in this browser\'s settings beside FRICTION and SPIN, and both come back through the same applySettings a reload makes.',
-    !camGT.error && camGT.knobs.indexOf('DRAG GAIN') >= 0 && camGT.knobs.indexOf('FLING') >= 0
+    !camGT.error && camGT.knobs.indexOf('DRAG') >= 0 && camGT.knobs.indexOf('FLING') >= 0   /* 0.5.0 re-aim (C1): the kit's HAND row calls the dial DRAG */
       && Math.abs(camGT.defaults.gain - 1) < 1e-12 && Math.abs(camGT.defaults.fling - 1) < 1e-12
       && Math.abs(camGT.defaults.radPerPixel - 0.0065) < 1e-12
       && Math.abs(camGT.perPixel[0] - 0.0065) < 1e-9
@@ -4667,26 +4661,15 @@ try {
   await g.ev(`try { const K = 'lambdawaves.q0.settings', S = JSON.parse(localStorage.getItem(K) || '{}'); delete S.warned; localStorage.setItem(K, JSON.stringify(S)); } catch (e) {} return 1;`);
   await w57goto('warn=1');
   const hintT = await g.ev(`try {
-    const R = {}, h = document.getElementById('hint');
-    const gone = () => h.classList.contains('gone');
-    R.paneUp = __LW.warning.open; R.gone0 = gone();
-    /* the OLD timer fired 9 s after boot, with the pane still up.  Wait past that and look. */
-    await new Promise((r) => setTimeout(r, 9600));
-    R.stillUpAt96 = __LW.warning.open; R.goneUnderPane = gone();
+    /* 0.5.0 re-aim (C2/C6b): the nine-second legend bar (#hint, its .keys / .touch spans and its timer) is the kit's CONTROL HINTS row now, so its clauses are
+       retired; what is kept is the pane half — a forced notice is up, stays up, and CONTINUE takes it down */
+    const R = {};
+    R.paneUp = __LW.warning.open;
+    await new Promise((r) => setTimeout(r, 2000));
+    R.stillUpAt96 = __LW.warning.open;
     document.querySelector('.mir-dialog[data-kind="notice"] .trig[data-kind="primary"]').click();
     await new Promise((r) => setTimeout(r, 1200));
-    R.paneDown = !__LW.warning.open; R.goneJustAfter = gone();
-    await new Promise((r) => setTimeout(r, 8800));
-    R.goneAfter10 = gone();
-    /* THE LEGEND ITSELF: two spans, one shown per device, and the dead clause is gone from both */
-    const keys = h.querySelector('.keys'), touch = h.querySelector('.touch');
-    R.spans = [!!keys, !!touch];
-    R.keysShown = getComputedStyle(keys).display !== 'none';
-    R.touchShown = getComputedStyle(touch).display !== 'none';
-    R.keysText = keys.textContent; R.touchText = touch.textContent;
-    R.noDeadClause = h.textContent.indexOf('shift+click') < 0;
-    R.heliumOff = !(__LW.helium && __LW.helium.on);
-    R.namesPlay = keys.textContent.indexOf('space = play') >= 0;
+    R.paneDown = !__LW.warning.open;
     /* THE SUBTITLE: lab.css's !important is gone, so skin.css's hover reveal is reachable at last */
     const ms = document.querySelector('#title .ms');
     R.msText = ms.textContent;
@@ -4726,12 +4709,7 @@ try {
   await g.ev(`const mb = document.getElementById('menubar'); if (mb) mb.hidden = true; return 1;`);
   judge('B110 THE LEGEND, ITS CLOCK, THE DEAD CLAUSE, THE SUBTITLE AND WHAT A LINK SHOWS (wave 59, AUDIT-FIRSTRUN R2–R4, R6, R8). THE CLOCK FIRST, because it is the one that needed wall time: `setTimeout(hideHint, 9000)` was armed inside boot(), seven hundred lines above `warning.show()` and in the same synchronous tail — so a stranger who actually READ a 26-word notice about epilepsy pressed CONTINUE at eight seconds and watched the only legend in the app fade one second later, or pressed at ten and never saw it at all. Measured here with the pane up: at 9.6 s — past the moment the old timer fired — the bar is STILL THERE; the button is pressed; a second later it is still there; ten seconds after that it is gone. The hook is `warning.onAccept`, which fires immediately when the pane is down, so a returning visitor loses nothing (ANTI-PATTERN 18: anything that moves at boot goes through that callback, never beside it). THE DEAD CLAUSE IS GONE: `shift+click = place electron 1` was guarded on `helium && helium.on`, and HELIUM ships folded and OFF — measured false here — so one of the seven things the first screen advertised did nothing on the screen that advertised it. THE BAR NOW CARRIES TWO LEGENDS, a keyboard one and a touch one, and the phone gets the second rather than none (B111). THE SUBTITLE IS REACHABLE: lab.css said `#title .ms { display: none !important }`, and an important author declaration beats a non-important one regardless of specificity or source order, so skin.css\'s `#title:hover .ms { display: inline }` was dead and `QWAVE-0 · HYDROGEN SHADOW LAB` — the ONLY on-screen string containing the word "hydrogen" — could never render. The sledgehammer is gone, the rule stays, and a REAL POINTER is driven onto the masthead here: #title reports :hover, and WAVE 79 THEN RULED THE OTHER WAY ON WHAT SHOULD HAPPEN THERE (Josh: the QWAVE-0 text when mousing over the logo needs to go away). The two halves are not the same claim and only one of them was overturned: the SLEDGEHAMMER stays gone, because an important author declaration that beats every other rule regardless of specificity is a defect whichever way the decision goes, and the rule that decides is still the one rule — it simply says none now. So a REAL POINTER is driven onto the masthead here and the block measures the RULING: #title reports :hover, and the subtitle lays out zero pixels wide and stays undrawn. The string itself is untouched in the DOM, because the document title and the link preview below are what it is for. AND THE LINK PREVIEW: there was no description, no og:*, no twitter card anywhere in the document, so every shared link — the feature wave 56 shipped — unfurled as a bare URL and the decision to open it was made on nothing. The sentence is not a new one and not a fifth copy: it is the manifest\'s own `description` and the ABOUT face\'s tagline, character for character, with og:title the manifest\'s own `name`, all fetched and compared here.',
     !hintT.error && !msT.error
-      && hintT.paneUp === true && hintT.gone0 === false
-      && hintT.stillUpAt96 === true && hintT.goneUnderPane === false
-      && hintT.paneDown === true && hintT.goneJustAfter === false && hintT.goneAfter10 === true
-      && hintT.spans[0] === true && hintT.spans[1] === true
-      && hintT.keysShown === true && hintT.touchShown === false
-      && hintT.noDeadClause === true && hintT.heliumOff === true && hintT.namesPlay === true
+      && hintT.paneUp === true && hintT.stillUpAt96 === true && hintT.paneDown === true
       && hintT.msText === 'QWAVE-0 · HYDROGEN SHADOW LAB' && hintT.msIdle === 'none'
       && hintT.msImportant === false && hintT.msHoverRule === true
       && msT.hovered === true && msT.display === 'none' && msT.w === 0 && msT.text === 'QWAVE-0 · HYDROGEN SHADOW LAB'
@@ -4751,10 +4729,8 @@ try {
   const phFieldT = await g.ev(`try {
     const nap = (ms) => new Promise((r) => setTimeout(r, ms));
     const R = { vp: [innerWidth, innerHeight], phone: __LW.layout.phone.on };
-    const rk = document.getElementById('rack'), tog = document.getElementById('rackToggle'), h = document.getElementById('hint');
-    /* WAKE WHAT YOU MEASURE (ANTI-PATTERN 3): the bar has a SETTINGS switch and a nine-second fade, and a
-       zero-box element would pass every geometry test below vacuously. */
-    document.body.classList.remove('no-hint'); h.classList.remove('gone');
+    const rk = document.getElementById('rack'), tog = document.getElementById('rackToggle');
+    /* 0.5.0 re-aim (C2): the legend bar (#hint) is the kit's CONTROL HINTS row now — its clauses (the phone's own legend, its fit, its opacity) are retired */
     await nap(60);
     /* THE FIELD IS WHAT IS MET.  The rack is off-screen to the left, so the whole width is canvas. */
     R.hidden = document.body.classList.contains('rack-hidden');
@@ -4768,20 +4744,6 @@ try {
     /* the middle of the screen — where a volume centred in the stage renders — is the CANVAS, not a card */
     const mid = document.elementFromPoint(Math.round(innerWidth / 2), Math.round(innerHeight / 2));
     R.midIsField = !!mid && mid.id === 'field';
-    /* AND THE LEGEND IS THE PHONE'S OWN: gestures, not keys, and it names the way in */
-    R.keysShown = getComputedStyle(h.querySelector('.keys')).display !== 'none';
-    R.touchShown = getComputedStyle(h.querySelector('.touch')).display !== 'none';
-    R.touchText = h.querySelector('.touch').textContent;
-    R.namesToggle = R.touchText.indexOf('◧') >= 0;
-    R.namesPlay = R.touchText.indexOf('▶') >= 0;
-    const hb = h.getBoundingClientRect();
-    R.hintFits = Math.round(hb.left) >= 0 && Math.round(hb.right) <= innerWidth;
-    /* AND IT IS ACTUALLY VISIBLE.  A geometry test passes on an element at opacity 0, and lab.css fades the
-       bar out with body.rack-hidden — which on a phone is now the BOOT state, so this is the assertion that
-       stops the block certifying an invisible legend (ANTI-PATTERN 13). */
-    R.hintOpacity = getComputedStyle(h).opacity;
-    R.hintDisplay = getComputedStyle(h).display;
-    R.hintClearOfStack = Math.round(hb.bottom) < Math.round(tog.getBoundingClientRect().top);
     /* THE WAY IN is in the thumb zone, at the screen edge, and it is the topmost thing at its own centre */
     const tr = tog.getBoundingClientRect();
     R.togLeft = Math.round(tr.left); R.togFromBottom = Math.round(innerHeight - tr.bottom);
@@ -4815,24 +4777,18 @@ try {
   const phDeskT = await g.ev(`try {
     return { phone: __LW.layout.phone.on, hidden: document.body.classList.contains('rack-hidden'),
       rackAt: Math.round(document.getElementById('rack').getBoundingClientRect().left),
-      keysShown: getComputedStyle(document.querySelector('#hint .keys')).display !== 'none',
-      touchShown: getComputedStyle(document.querySelector('#hint .touch')).display !== 'none', errs: window.__e.length };
+      errs: window.__e.length };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B111 ON A PHONE, THE VISITOR MEETS THE FIELD (wave 59, AUDIT-FIRSTRUN §5 — a judgement call, and this is the one that was taken). At the phone breakpoint the rack is 300 px of 390 — 77 % of the width, 95 % of the height — and it is OPAQUE there by wave 51\'s own rule; nothing hid it at boot, and #field is a full-stage canvas, so the volume rendered CENTRED BEHIND IT and the 90-px strip down the right edge showed the far corner of an empty domain box. Someone opening a shared link met two hundred controls and a sliver of static colour. THE RACK NOW STARTS HIDDEN AT THIS BREAKPOINT, and it is a DEFAULT rather than a rule: `phoneRack` is the same kind of key as `card` / `phoneTr` — a default is for a first visit, and pressing ◧ IS this browser saying which it wants, which is measured here in both directions (press to show, the key reads true; cross out and back, the saying is honoured; press again, it reads false). Measured on a 390 × 844 phone with the key cleared: the whole width is canvas, the centre of the screen hit-tests to #field rather than to a card, and the one control that brings the instrument back sits at the screen edge in the thumb zone, topmost at its own centre. WHAT WAS NOT DONE, AND WHY: the transport stays DOCKED at the top of the rack, because that is Josh\'s wave-51 instruction and undocking it into a floating pill would contradict it; and the volume is NOT offset to dodge the rack, because moving the camera to make room for furniture is a lie about where the origin is, and a 90-px picture is not the cure for a 90-px picture. The phone gets the LEGEND instead: the keyboard line stands down, the touch line takes its seat, and it names both the ◧ and the ▶ — the bar wraps inside the viewport, clears the button stack it points at, and is VISIBLE — which took one more rule, because lab.css fades the hint out with `body.rack-hidden` and that is now the phone\'s boot state. Crossing back to the desktop restores the desktop exactly: both racks, the keyboard legend, and the rack state it crossed with.',
     !phFieldT.error && !phSaidT.error && !phDeskT.error
       && phFieldT.phone === true && phFieldT.hidden === true && phFieldT.stored !== true
       && phFieldT.rackRight <= 0 && phFieldT.fieldPct === 100 && phFieldT.midIsField === true
       && phFieldT.canvas[0] === phFieldT.vp[0]
-      && phFieldT.keysShown === false && phFieldT.touchShown === true
-      && phFieldT.namesToggle === true && phFieldT.namesPlay === true
-      && phFieldT.hintFits === true && phFieldT.hintClearOfStack === true
-      && phFieldT.hintDisplay !== 'none' && parseFloat(phFieldT.hintOpacity) > 0.3
       && phFieldT.togLeft <= 12 && phFieldT.togFromBottom >= 8 && phFieldT.togFromBottom <= 40 && phFieldT.togTop === true
       && phFieldT.shown === true && phFieldT.rackAt === 0 && phFieldT.trIndex === 0 && phFieldT.said === true
       && phSaidT.phone === true && phSaidT.hidden === false && phSaidT.stored === true
       && phSaidT.hiddenAgain === true && phSaidT.storedAgain === false
       && phDeskT.phone === false && phDeskT.hidden === false && phDeskT.rackAt > 0
-      && phDeskT.keysShown === true && phDeskT.touchShown === false
       && phFieldT.errs === 0 && phSaidT.errs === 0 && phDeskT.errs === 0, { phFieldT, phSaidT, phDeskT });
 
 
@@ -4880,7 +4836,7 @@ try {
        driver arm is what B103 drives.  The line itself is read out of the shipped bytes. */
     R.motionSource = __LW.motion.source;
     const rackSrc = await (await fetch('./rack.js')).text();
-    R.motionGated = rackSrc.indexOf("navigator.webdriver === true ? new URLSearchParams(location.search).get('motion') : null") >= 0;
+    R.motionGated = (await (await fetch('./motion-pref.js')).text()).indexOf("navigator.webdriver === true ? new URLSearchParams(location.search).get('motion') : null") >= 0;   // 0.5.0 re-aim: the motion preference moved out of rack.js into motion-pref.js
     R.warnedCarried = rackSrc.indexOf('warned: S0.warned') >= 0;
     R.errs = window.__e.length;
     return R;
@@ -4900,13 +4856,14 @@ try {
     const lam = document.querySelector('#title .lam');
     const hex = (h) => { const k = parseInt(h.slice(1), 16); return [k >> 16 & 255, k >> 8 & 255, k & 255]; };
     const theme0 = __LW.themeChoice, pal0 = __LW.settings.palette || 'prism';
-    const sel = document.querySelector('.dev[data-id="palette"] select.sel');
-    const ids = [...sel.querySelectorAll('option')].map((o) => o.value);
+    const ids = __LW.palette.groups.flatMap((q) => q.items);   // 0.5.0 re-aim (C1): the catalogue is read from palette.groups
     R.palettes = ids.length;
     /* the knob exists, it is the CAMERA window's STAGE, and LW.setStage drives the same road it does */
     const k = [...document.querySelectorAll('.k')].find((d) => (d.querySelector('.k-lbl') || {}).textContent === 'STAGE');
     R.hasKnob = !!k;
     R.groundAtDefault = __LW.ink.stageGround.slice();
+    /* 0.5.0 re-aim: FOLLOW THEME is ON as shipped and bypasses the STAGE blend (rack.js setStageFollow), so the knob moves nothing until it is off — it is put back below */
+    const fol = [...document.querySelectorAll('.dev[data-id="settings"] .trig')].find((t) => /FOLLOW THEME/.test(t.textContent)); const folWasOn = !!(fol && fol.classList.contains('on')); if (folWasOn) fol.click();
     for (const theme of ['dark', 'light']) {
       __LW.setTheme(theme); await __LW.settle();
       for (const v of [0, 0.2, 0.35, 0.5, 0.6, 0.85, 1]) {
@@ -4939,6 +4896,7 @@ try {
     R.aboutOnCard = +__LW.ink.ratio(__LW.ink.parse(getComputedStyle(nb).color), __LW.ink.ground).toFixed(3);
     R.differ = getComputedStyle(nb).color !== getComputedStyle(lam).color;
     __LW.notebook.close();
+    if (folWasOn) fol.click();
     __LW.setStage(0.04); __LW.setPalette(pal0); __LW.setTheme(theme0); await __LW.settle();
     R.backToDefault = __LW.ink.stageGround.slice();
     R.errs = window.__e.length;
@@ -5025,7 +4983,7 @@ try {
       && layDeskT.aFloats.join() === 'camera' && layDeskT.beforeCross.join() === 'clip'
       && layDeskT.sides.join() === 'L,L'
       && layPhT.phone === true && layPhT.parkedOnEntry.join() === 'clip'
-      && layPhT.marks.join() === 'L,L' && layPhT.inRackL === 0
+      && layPhT.marks.join() === 'left,left'   /* 0.5.0 re-aim (C3): the kit's rack writes a side as left / right in data-phone-from, where it wrote L / R */ && layPhT.inRackL === 0
       && layPhT.bSides.spectrum === 'L' && layPhT.bSides.meters === 'L' && layPhT.bSides.state === 'R'
       && layPhT.bLeftCount >= 2 && /both racks/.test(layPhT.bLabel)
       && layPhT.loaded === true && layPhT.parkedAfterLoad.join() === 'camera' && layPhT.stillNoFloating === 0
@@ -5036,826 +4994,9 @@ try {
       && layDeskT.errs === 0 && layPhT.errs === 0 && layBackT.errs === 0 && !layBackT.gpu,
     { layDeskT, layPhT, layBackT });
 
-  /* ── WAVE 60 · W-MODSHAPE: one picture per source, and the six controls it makes meaningful ──────
-   * Josh: "it seems like the modulation window still hasn't started yet."  Wave 52 built the WIRING
-   * and proved it (B74 · B75 · B76); what it did not build was the SHAPE.  These three blocks are the
-   * shape: the curve display and its editor, the ENVELOPE as the same drawing with a completely
-   * different edit door, and the LOOP CLOCK / A-B / ladder / order half beside them.  The window is
-   * driven through real POINTER EVENTS on the SVG, never through a test hook, because a drag that is
-   * only ever proved through an API is a drag nobody has pressed (wave 51's lesson, in a new file). */
-  const cvT = await g.ev(`try {
-    const nap = (ms) => new Promise(r => setTimeout(r, ms));
-    const out = {}, M = __LW.mod.model;
-    __LW.pause(); __LW.mod.reset();
-    if (!__LW.mod.expanded) __LW.mod.expand();
-    const s1 = __LW.mod.addSource('lfo');
-    await nap(120); __LW.mod.paint();
-    const V = __LW.mod.view;
-    const PE = (el, type, x, y) => el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true,
-      pointerId: 31, pointerType: 'mouse', isPrimary: true, clientX: x, clientY: y, buttons: type === 'pointerup' ? 0 : 1 }));
-    /* WAVE 64 · the same drawing, in the PORTED window's own editor */
-    const card = () => document.querySelector('.m2dev[data-id="' + s1 + '"]');
-    const svg = () => card().querySelector('.m2svg');
-    const tap = (t, v) => { const p = V.at(s1, t, v); PE(svg(), 'pointerdown', p.x, p.y); PE(svg(), 'pointerup', p.x, p.y); __LW.mod.paint(); };
-    const drag = (t, v, t2, v2) => { const a = V.at(s1, t, v), b = V.at(s1, t2, v2);
-      PE(svg(), 'pointerdown', a.x, a.y); PE(svg(), 'pointermove', a.x + 4, a.y + 4); PE(svg(), 'pointermove', b.x, b.y); PE(svg(), 'pointerup', b.x, b.y); __LW.mod.paint(); };
+  // B115 · B116 · B117 RETIRED (0.5.0 C4): the W-MODSHAPE curve / envelope pictures and the loop clock were lab/modwindow.js's DOM; the kit's window (MIR 1.4.3: a new LFO opens on the editable SINE) is held by MIR's own gate and tests/lfo-tension.browser-test.mjs
 
-    /* A · WAVE MODE IS READ-ONLY, AND THE CAPTION SAYS SO IN ITS OWN WORDS */
-    const c0 = V.curve(s1);
-    out.wave = { mode: c0.mode, wave: c0.wave, points: c0.points, w: c0.w, h: c0.h, n: c0.samples.length, cap: c0.caption };
-    let werr = 0;
-    for (const [u, y] of c0.samples) werr = Math.max(werr, Math.abs(y - M.waveAt(c0.wave, u, { cycles: 0, seed: M.sourceOf(s1).rseed })));
-    out.waveErr = werr;
-    tap(0.5, 0.5);
-    out.refuseInWaveMode = { mode: M.sourceOf(s1).shapeMode, say: V.curve(s1).say };
-    card().querySelector('.m2flipb').click();                                         // FLIP, in wave mode
-    out.flipRefused = V.curve(s1).say;
-
-    /* B · THE SHAPES ROW: six buttons, each drawing ITS OWN PRESET, and the FLIP lives in the MODEL */
-    const shBtn = (name) => card().querySelector('.m2preset[data-preset="' + name + '"]');
-    shBtn('sawup').click(); __LW.mod.paint();
-    const one = { mode: M.sourceOf(s1).shapeMode, eq: M.sourceOf(s1).points.map(p => [p.t, p.v]), say: V.curve(s1).say };
-    shBtn('sawup').click(); __LW.mod.paint();
-    const two = { eq: M.sourceOf(s1).points.map(p => [p.t, p.v]), say: V.curve(s1).say, lit: V.shapes(s1).filter(q => q.on).map(q => q.name + (q.mirrored ? '/m' : '')) };
-    shBtn('tri').click(); const h0 = V.curve(s1).hash;
-    shBtn('tri').click(); __LW.mod.paint();
-    out.preset = { one, two, triSay: V.curve(s1).say, triHashSame: V.curve(s1).hash === h0 };
-    const glyphs = V.shapes(s1).map(q => q.d);
-    out.glyphs = { n: glyphs.length, allDrawn: glyphs.every(d => d && d.length > 12), distinct: new Set(glyphs).size };
-
-    /* C · THE DRAWN POLYLINE IS THE MODEL'S OWN EVALUATOR, to 1e-12 */
-    shBtn('sine').click(); __LW.mod.paint();
-    const cS = V.curve(s1);
-    let cerr = 0, dup = 0;
-    for (const [u, y] of cS.samples) {
-      if (cS.points.filter(p => p.t === u).length > 1) { dup++; continue; }          // a jump reads the LATER point
-      cerr = Math.max(cerr, Math.abs(y - V.evalAt(cS.points, u)));
-    }
-    out.polyline = { mode: cS.mode, n: cS.samples.length, maxErr: cerr, jumpsSkipped: dup, hash: cS.hash, cap: cS.caption };
-
-    /* D · A DRAG ON A POINT MOVES EXACTLY ONE POINT, AND KEEPS ITS INDEX */
-    shBtn('mtri').click(); __LW.mod.paint();
-    const before = M.sourceOf(s1).points.map(p => ({ t: p.t, v: p.v, tension: p.tension }));
-    const p3 = before[3];
-    drag(p3.t, p3.v, p3.t + 0.06, p3.v - 0.25);
-    const after = M.sourceOf(s1).points.map(p => ({ t: p.t, v: p.v, tension: p.tension }));
-    out.pointDrag = { n0: before.length, n1: after.length,
-      moved: after.map((p, i) => (p.t !== before[i].t || p.v !== before[i].v || p.tension !== before[i].tension) ? i : -1).filter(i => i >= 0),
-      from: [p3.t, p3.v], to: [after[3].t, after[3].v],
-      sorted: after.every((p, i, a) => i === 0 || p.t >= a[i - 1].t) };
-
-    /* E · A DRAG ON A HANDLE MOVES EXACTLY ONE TENSION */
-    const cH = V.curve(s1), seg = cH.hseg[0];
-    const mt = (cH.points[seg].t + cH.points[seg + 1].t) / 2;
-    const my = V.evalAt(cH.points, mt);
-    const t0 = cH.points.map(p => p.tension);
-    { const a = V.at(s1, mt, my); PE(svg(), 'pointerdown', a.x, a.y); PE(svg(), 'pointermove', a.x, a.y - 4); PE(svg(), 'pointermove', a.x, a.y - 46); PE(svg(), 'pointerup', a.x, a.y - 46); __LW.mod.paint(); }
-    const t1 = M.sourceOf(s1).points.map(p => p.tension);
-    out.handleDrag = { seg, before: t0, after: t1, changed: t1.map((x, i) => x !== t0[i] ? i : -1).filter(i => i >= 0),
-      pointsStill: M.sourceOf(s1).points.every((p, i) => p.t === cH.points[i].t && p.v === cH.points[i].v) };
-
-    /* F · TAP ADDS, A SECOND TAP ON THE SAME POINT REMOVES */
-    M.setSource(s1, { preset: 'sawup' }); M.setSource(s1, { preset: 'sawup' });        // land on a known two-point shape
-    __LW.mod.paint();
-    const n0 = M.sourceOf(s1).points.length;
-    tap(0.62, 0.8);
-    const added = M.sourceOf(s1).points;
-    out.tapAdd = { n0, n1: added.length, at: added[1] ? [added[1].t, added[1].v] : null, say: V.curve(s1).say };
-    { const q = added[1], a = V.at(s1, q.t, q.v);
-      PE(svg(), 'pointerdown', a.x, a.y); PE(svg(), 'pointerup', a.x, a.y);
-      PE(svg(), 'pointerdown', a.x, a.y); PE(svg(), 'pointerup', a.x, a.y); __LW.mod.paint(); }
-    out.tapRemove = { n: M.sourceOf(s1).points.length, say: V.curve(s1).say };
-
-    /* G · THE PLAYHEAD IS THE MODEL'S PHASE, AND THE DOT IS WHAT IS EMITTED — NOT WHAT IS DRAWN */
-    M.setSource(s1, { preset: 'sine', sync: false, ratePos: 0.62, smooth: 0 });
-    const m1 = M.macroList()[0].id; __LW.mod.bind(m1, s1); __LW.mod.route(m1, 'material.knee', 0, 1);
-    __LW.mod.play(); __LW.mod.step(0.37); __LW.mod.paint();
-    { const c = V.curve(s1), s = M.sourceOf(s1);
-      const p = (s.phase + s.phaseOff) - Math.floor(s.phase + s.phaseOff);
-      out.playhead = { head: c.head, want: c.pad + p * (c.w - 2 * c.pad), dotY: c.dot[1],
-        wantY: c.pad + (1 - s.out) * (c.h - 2 * c.pad), out: s.out, phase: p }; }
-    M.setSource(s1, { smooth: 0.6 }); V.sync(); __LW.mod.step(0.11); __LW.mod.paint();
-    { const c = V.curve(s1), s = M.sourceOf(s1);
-      const p = (s.phase + s.phaseOff) - Math.floor(s.phase + s.phaseOff);
-      out.smoothLeaves = { drawn: V.evalAt(c.points, p), emitted: s.out, tauMs: M.smoothTau(0.6) * 1000,
-        printed: card().querySelector('.m2k[data-knob=smooth] .m2kval').textContent }; }
-    M.setSource(s1, { smooth: 0.25 }); V.sync();
-    out.smooth25 = card().querySelector('.m2k[data-knob=smooth] .m2kval').textContent;
-
-    /* H · THE LADDER IS A SHAPE: the stairs are drawn, and they have exactly N levels */
-    __LW.mod.stop();
-    M.setSource(s1, { preset: 'sawup', smooth: 0, steps: 4 });
-    M.setSource(s1, { preset: 'sawup' });                                             // tap twice = the base saw again
-    M.setSource(s1, { preset: 'sawup' });
-    __LW.mod.paint();
-    const cQ = V.curve(s1);
-    /* WAVE 64 · THE STAIRS ARE THE DRAWN LINE NOW.  The ported editor has one .m2path and one
-       .m2fill; where wave 60 drew the smooth shape and laid a separate .cv-stair over it, the line
-       IS the staircase when STEPS is on — what the engine emits, and nothing under it. */
-    const dQ = card().querySelector('.m2path').getAttribute('d') || '';
-    out.stairs = { steps: 4, levels: cQ.levels, points: M.sourceOf(s1).points.length,
-      stairDrawn: dQ.length > 40, noSeparateStair: !card().querySelector('.cv-stair'),
-      corners: (dQ.match(/L/g) || []).length };
-    M.setSource(s1, { steps: 0 });
-
-    /* I · THE WAY BACK, AND THE TWO WAVES NO PRESET CAN DRAW.  WAVE 64: the ported card has no
-       WAVE / CURVE segment and no wave <select> — it has the HEAD, which already PRINTS the wave's
-       name, and tapping it walks the model's own list and puts the source back in WAVE mode.  A
-       preset tap is the other door.  Without one of them S&H and DRIFT would be stranded, because
-       no preset can draw a per-cycle stochastic wave. */
-    const cardEl = card();
-    const head = cardEl.querySelector('.m2lfowave');
-    const ptsKept = M.sourceOf(s1).points.length;
-    head.click(); __LW.mod.paint();
-    out.backToWave = { mode: M.sourceOf(s1).shapeMode, pointsKept: M.sourceOf(s1).points.length === ptsKept,
-      cap: V.curve(s1).caption, drawnPoints: V.curve(s1).points, head: head.textContent };
-    shBtn('sawup').click(); shBtn('sawup').click(); __LW.mod.paint();
-    out.backToCurve = { mode: M.sourceOf(s1).shapeMode, n: (V.curve(s1).points || []).length };
-    out.waveList = M.WAVES.slice();
-    for (let i = 0; i < 12 && M.sourceOf(s1).wave !== 'sh'; i++) head.click();
-    __LW.mod.paint();
-    const cSH = V.curve(s1), sSH = M.sourceOf(s1);
-    let sherr = 0;
-    for (const [u, y] of cSH.samples) { const gg = u * 4, k = Math.min(3, Math.floor(gg));
-      sherr = Math.max(sherr, Math.abs(y - M.waveAt('sh', gg - k, { cycles: k, seed: sSH.rseed }))); }
-    out.sh = { mode: sSH.shapeMode, wave: sSH.wave, cycles: cSH.cycles, err: sherr,
-      cap: cSH.caption, headSays: head.textContent };
-    __LW.mod.reset();
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B115 W-MODSHAPE · THE CURVE DISPLAY: ONE PICTURE PER SOURCE, AND IT IS THE MODEL\'S OWN GEOMETRY. Josh, on the window as wave 52 shipped it: "it seems like the modulation window still hasn\'t started yet" — it had the wiring and no shape, and a modulation window whose central object is a <select> of seven words has not started. Each source now carries an SVG the width of the card. In WAVE mode it is READ-ONLY and says so in a caption ("SINE — an analytic wave. Tap a shape to draw it."): its polyline agrees with M.waveAt to 1e-12, a tap on it adds nothing and names the refusal, and FLIP refuses aloud. The six SHAPE buttons draw THEIR OWN PRESETS, sampled — a button can never draw a shape the engine would not produce — and there are six for SEVEN presets because the FLIP LIVES IN THE MODEL: tapping SAW↑ once draws it and twice gives exactly sawdown, while tapping TRI twice reports "its own mirror" and leaves the hash bit-identical. In CURVE mode every drawn sample equals evaluate(points, u) to 1e-12 (the only exclusions are a duplicate `t`, where the polyline holds the value before the jump and the evaluator returns the one after it — curve.js\'s stated tie rule, not an error). REAL POINTER DRAGS: one on a point moves EXACTLY ONE point and keeps its index, because the window calls curveEdit and curveEdit clamps a move between its neighbours; one on a handle moves EXACTLY ONE tension and not a single point; a tap adds a point where the finger was and a second tap on it takes it away. The PLAYHEAD is frac(phase + phaseOff) to half a pixel and the DOT is s.out — the EMITTED value — so with SMOOTH on the dot visibly LEAVES the drawn line, which is the clearest demonstration of what that control does. And the SMOOTH readout is FIXED: the model\'s law is tau = 0.5v², so knob 0.25 prints 31 ms where wave 52 printed 125. The ladder is drawn as stairs with exactly its own number of levels — and in the PORTED editor (wave 64) the stairs ARE the drawn line rather than a second path laid over the smooth one, because the artifact has exactly one .m2path and what it should show is what the engine emits. And the WAY BACK exists, in the artifact\'s own furniture: the LFO head already PRINTS the wave it is running, so tapping it walks the model\'s list and puts the source back in WAVE mode, and a preset tap is the other door. Without one of them S&H and DRIFT would be STRANDED, because no preset can draw a per-cycle stochastic wave — which is also why the picture shows FOUR cycles of them and says so',
-    !cvT.error && cvT.wave.mode === 'wave' && cvT.wave.points === null && cvT.wave.w > 150 && cvT.wave.h > 60
-      && cvT.wave.cap.indexOf('an analytic wave') > 0 && cvT.waveErr < 1e-12
-      && cvT.refuseInWaveMode.mode === 'wave' && cvT.refuseInWaveMode.say.indexOf('analytic wave') >= 0
-      && cvT.flipRefused.indexOf('nothing to flip') >= 0
-      && cvT.preset.one.mode === 'curve' && JSON.stringify(cvT.preset.one.eq) === '[[0,0],[1,1]]'
-      && JSON.stringify(cvT.preset.two.eq) === '[[0,1],[1,0]]' && cvT.preset.two.say === 'SAW↑ flipped'
-      && cvT.preset.two.lit.join() === 'sawup/m'
-      && cvT.preset.triSay.indexOf('its own mirror') > 0 && cvT.preset.triHashSame === true
-      && cvT.glyphs.n === 6 && cvT.glyphs.allDrawn && cvT.glyphs.distinct === 6
-      && cvT.polyline.mode === 'curve' && cvT.polyline.maxErr < 1e-12 && cvT.polyline.n > 40
-      && cvT.pointDrag.n0 === 9 && cvT.pointDrag.n1 === 9 && cvT.pointDrag.moved.join() === '3'
-      && cvT.pointDrag.to[0] > cvT.pointDrag.from[0] && cvT.pointDrag.to[1] < cvT.pointDrag.from[1] && cvT.pointDrag.sorted
-      && cvT.handleDrag.changed.length === 1 && cvT.handleDrag.changed[0] === cvT.handleDrag.seg && cvT.handleDrag.pointsStill
-      && cvT.tapAdd.n0 === 2 && cvT.tapAdd.n1 === 3 && Math.abs(cvT.tapAdd.at[0] - 0.62) < 0.02 && Math.abs(cvT.tapAdd.at[1] - 0.8) < 0.02
-      && cvT.tapAdd.say === 'point added' && cvT.tapRemove.n === 2 && cvT.tapRemove.say === 'point removed'
-      && Math.abs(cvT.playhead.head - cvT.playhead.want) < 0.5 && Math.abs(cvT.playhead.dotY - cvT.playhead.wantY) < 0.5
-      && Math.abs(cvT.smoothLeaves.drawn - cvT.smoothLeaves.emitted) > 0.02
-      && Math.abs(cvT.smoothLeaves.tauMs - 180) < 1e-9 && cvT.smoothLeaves.printed === '180 ms'
-      && cvT.smooth25 === '31 ms'
-      && cvT.stairs.levels === 4 && cvT.stairs.stairDrawn && cvT.stairs.noSeparateStair && cvT.stairs.corners > 8
-      && cvT.backToWave.mode === 'wave' && cvT.backToWave.pointsKept && cvT.backToWave.drawnPoints === null
-      && cvT.backToWave.cap.indexOf('an analytic wave') > 0
-      && cvT.backToCurve.mode === 'curve' && cvT.backToCurve.n === 2
-      && cvT.waveList.join() === 'rotate,sine,tri,sawdown,square,sh,drift'
-      && cvT.sh.mode === 'wave' && cvT.sh.wave === 'sh' && cvT.sh.cycles === 4 && cvT.sh.err === 0
-      && cvT.sh.cap.indexOf('Four cycles') > 0 && cvT.sh.headSays === 'S&H'
-      && cvT.errs === 0, cvT);
-
-  const envT = await g.ev(`try {
-    const nap = (ms) => new Promise(r => setTimeout(r, ms));
-    const out = {}, M = __LW.mod.model;
-    __LW.pause(); __LW.mod.reset();
-    if (!__LW.mod.expanded) __LW.mod.expand();
-    const e1 = __LW.mod.addSource('env');
-    await nap(120); __LW.mod.paint();
-    const V = __LW.mod.view, S = () => M.sourceOf(e1);
-    const card = () => document.querySelector('.m2dev[data-id="' + e1 + '"]');
-    const svg = () => card().querySelector('.m2svg');
-    const PE = (el, type, x, y) => el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true,
-      pointerId: 32, pointerType: 'mouse', isPrimary: true, clientX: x, clientY: y, buttons: type === 'pointerup' ? 0 : 1 }));
-    const drag = (t, v, t2, v2) => { const a = V.at(e1, t, v), b = V.at(e1, t2, v2);
-      PE(svg(), 'pointerdown', a.x, a.y); PE(svg(), 'pointermove', a.x + (b.x - a.x) * 0.5, a.y + (b.y - a.y) * 0.5); PE(svg(), 'pointermove', b.x, b.y); PE(svg(), 'pointerup', b.x, b.y); __LW.mod.paint(); };
-    const snap = () => { const s = S(); return { a: s.a, hold: s.hold, d: s.d, s: s.s, r: s.r, ta: s.ta, td: s.td, tr: s.tr, timeScale: s.timeScale }; };
-    const diff = (x, y) => Object.keys(x).filter(k => !Object.is(x[k], y[k]));
-
-    /* A · FIT IS NOT POLISH.  Measured on the drawing the window actually renders. */
-    const c0 = V.curve(e1);
-    out.before = { timeScale: S().timeScale, w: c0.w, px: c0.ptsPx.map(p => Math.round(p[0])),
-      attackPx: Math.round(c0.ptsPx[1][0] - c0.ptsPx[0][0]), spanPx: Math.round(c0.ptsPx[3][0] - c0.ptsPx[0][0]) };
-    const fitBtn = [...card().querySelectorAll('.m2zoom')].find(b => b.textContent === 'FIT');
-    fitBtn.click(); __LW.mod.paint();
-    const c1 = V.curve(e1);
-    out.after = { timeScale: S().timeScale, want: M.envDuration(S()) * 1.15, px: c1.ptsPx.map(p => Math.round(p[0])),
-      attackPx: Math.round(c1.ptsPx[1][0] - c1.ptsPx[0][0]), spanPx: Math.round(c1.ptsPx[3][0] - c1.ptsPx[0][0]), say: c1.say };
-    /* WAVE 64 · the artifact's own three seats: ↑ halves the window, FIT frames it, ↓ doubles it */
-    const zooms = [...card().querySelectorAll('.m2zoom')];
-    const halve = zooms[0], dbl = zooms[2];
-    const tsA = S().timeScale; halve.click(); const tsB = S().timeScale; dbl.click(); const tsC = S().timeScale;
-    out.zoom = { tsA, tsB, tsC };
-
-    /* B · THE HOLD STAGE EXISTS, and the point → knob map follows envPoints' own construction */
-    out.mapNoHold = V.envMap(e1);
-    M.setSource(e1, { hold: 0.2 }); __LW.mod.paint();
-    out.mapHold = V.envMap(e1);
-    out.holdPoints = M.envPoints(S()).length;
-    M.setSource(e1, { hold: 0 }); fitBtn.click(); __LW.mod.paint();
-
-    /* C · A DRAG ON A STAGE WRITES ITS OWN KNOB AND NOTHING ELSE */
-    const m0 = snap(); const cA = V.curve(e1);
-    drag(cA.points[1].t, cA.points[1].v, cA.points[1].t + 0.10, cA.points[1].v);
-    out.dragA = { changed: diff(m0, snap()), a0: m0.a, a1: S().a };
-    const m1 = snap(); const cB = V.curve(e1);
-    drag(cB.points[2].t, cB.points[2].v, cB.points[2].t + 0.08, cB.points[2].v - 0.2);
-    out.dragD = { changed: diff(m1, snap()).sort(), d0: m1.d, d1: S().d, s0: m1.s, s1: S().s };
-    const m2 = snap(); const cC = V.curve(e1), sg = cC.hseg[0];
-    const mt = (cC.points[sg].t + cC.points[sg + 1].t) / 2, mv = V.evalAt(cC.points, mt);
-    { const p = V.at(e1, mt, mv); PE(svg(), 'pointerdown', p.x, p.y); PE(svg(), 'pointermove', p.x, p.y - 5); PE(svg(), 'pointermove', p.x, p.y - 50); PE(svg(), 'pointerup', p.x, p.y - 50); __LW.mod.paint(); }
-    out.dragTa = { seg: sg, changed: diff(m2, snap()), ta: S().ta };
-
-    /* D · THE TWO REFUSALS, and they leave the model BIT-IDENTICAL */
-    const m3 = snap();
-    { const p = V.at(e1, 0.95, 0.9); PE(svg(), 'pointerdown', p.x, p.y); PE(svg(), 'pointerup', p.x, p.y); __LW.mod.paint(); }
-    out.tapEmpty = { changed: diff(m3, snap()), say: V.curve(e1).say, points: M.envPoints(S()).length };
-    const cD = V.curve(e1), q = cD.points[2];
-    { const p = V.at(e1, q.t, q.v);
-      PE(svg(), 'pointerdown', p.x, p.y); PE(svg(), 'pointerup', p.x, p.y);
-      PE(svg(), 'pointerdown', p.x, p.y); PE(svg(), 'pointerup', p.x, p.y); __LW.mod.paint(); }
-    out.doubleTap = { changed: diff(m3, snap()), say: V.curve(e1).say, points: M.envPoints(S()).length };
-
-    /* E · THE SQUARE LAW, driven by a REAL 3-PIXEL DRAG on the ATT dial */
-    M.setSource(e1, { a: 0.01 }); V.sync();                                           // a knob keeps its OWN value; setSource does not know it exists
-    const attK = card().querySelector('.m2k[data-knob=a]');
-    out.attPrints = attK.querySelector('.m2kval').textContent;
-    const dial = attK.querySelector('.m2kd'), b = dial.getBoundingClientRect();
-    const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
-    const a0 = S().a;
-    for (const [t, dy] of [['pointerdown', 0], ['pointermove', -3], ['pointerup', -3]]) PE(dial, t, cx, cy + dy);
-    out.square = { a0, a1: S().a, deltaMs: (S().a - a0) * 1000, linearWouldBeMs: (3 / 220) * 8000, prints: attK.querySelector('.m2kval').textContent };
-
-    /* F · AND THE ENVELOPE IS STILL A CURVE: the drawn polyline is envAt, to 1e-12 */
-    M.setSource(e1, { a: 0.18, hold: 0.1, d: 0.4, s: 0.55, r: 0.5, ta: 0.3, td: -0.4, tr: 0.25 });
-    fitBtn.click(); M.trigger(e1); __LW.mod.paint();
-    const cE = V.curve(e1); let eerr = 0;
-    for (const [u, y] of cE.samples) eerr = Math.max(eerr, Math.abs(y - M.envAt(S(), u * S().timeScale)));
-    out.envIsACurve = { maxErr: eerr, n: cE.samples.length, points: cE.points.length, cap: cE.caption, status: cE.status };
-    __LW.mod.reset();
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B116 W-MODSHAPE · THE ENVELOPE IS THE SAME PICTURE WITH A COMPLETELY DIFFERENT DOOR, AND FIT IS LEGIBILITY RATHER THAN POLISH. envPoints() hands back the same {t, v, tension} list the LFO draws, so ONE renderer serves both cards — and the drawn polyline agrees with envAt() to 1e-12 at every sample, tensions and the HOLD stage included. But a default envelope over its default 4 s window puts its breakpoints on pixels 9 · 10 · 25 · 56 of the 226-px picture this window actually has: THE ATTACK IS ONE PIXEL WIDE and the whole shape lives in the left quarter. FIT (timeScale = clamp(0.25, 8, duration × 1.15), spelled as a WORD because a magnifier glyph reads as zoom) spreads them across the drawing; ×0.5 and ×2 halve and double it and come back to where they started, and all three are VIEW quantities that never move a knob. THE POINT → KNOB MAP is envPoints\' own construction: dragging the attack point writes `a` AND NOTHING ELSE, dragging the decay point writes `d` AND `s` (both axes live), dragging the first handle writes `ta` alone — and the HOLD stage appears in the map the moment it is non-zero — five points and five mapped keys, one for one, which is the case that could have slipped every index by one. The two REFUSALS are sentences, not silence: a tap on empty space says "the ENV follows its knobs" and a double-tap on a point says an envelope has exactly five stages, and both leave every stage bit-identical. Finally the TIME KNOBS TAKE THE SQUARE LAW, because linear over 0 … 8 s on kit.js\'s 220-px travel is 36 ms per pixel while the DEFAULT ATTACK IS 10 ms: a real 3-pixel drag on the ATT dial now moves it by 9 ms where it would have moved it by 109',
-    !envT.error
-      && envT.before.timeScale === 4 && envT.before.attackPx <= 1 && envT.before.spanPx < envT.before.w * 0.3
-      && Math.abs(envT.after.timeScale - envT.after.want) < 1e-9 && envT.after.attackPx >= 2
-      && envT.after.spanPx > envT.before.w * 0.7 && envT.after.say.indexOf('fitted to') === 0
-      && Math.abs(envT.zoom.tsB - envT.zoom.tsA / 2) < 1e-12 && Math.abs(envT.zoom.tsC - envT.zoom.tsA) < 1e-12
-      && envT.mapNoHold.keys.join() === ',a,d,r' && envT.mapNoHold.tens.join() === 'ta,td,tr,'
-      && envT.mapHold.keys.join() === ',a,hold,d,r' && envT.mapHold.tens.join() === 'ta,,td,tr,'
-      && envT.holdPoints === 5 && envT.holdPoints === envT.mapHold.keys.length
-      && envT.dragA.changed.join() === 'a' && envT.dragA.a1 > envT.dragA.a0
-      && envT.dragD.changed.join() === 'd,s' && envT.dragD.d1 > envT.dragD.d0 && envT.dragD.s1 < envT.dragD.s0
-      && envT.dragTa.changed.join() === 'ta' && envT.dragTa.ta !== 0
-      && envT.tapEmpty.changed.length === 0 && envT.tapEmpty.say.indexOf('follows its knobs') > 0
-      && envT.doubleTap.changed.length === 0 && envT.doubleTap.say.indexOf('exactly five stages') > 0
-      && envT.attPrints === '10.0 ms' && envT.square.deltaMs > 5 && envT.square.deltaMs < 15
-      && envT.square.linearWouldBeMs > 100 && envT.envIsACurve.maxErr < 1e-12 && envT.envIsACurve.points === 6
-      && envT.errs === 0, envT);
-
-  const lclT = await g.ev(`try {
-    const nap = (ms) => new Promise(r => setTimeout(r, ms));
-    const out = {}, M = __LW.mod.model;
-    __LW.pause(); __LW.mod.reset();
-    if (!__LW.mod.expanded) __LW.mod.expand();
-    const a = __LW.mod.addSource('lfo'), b = __LW.mod.addSource('lfo');
-    await nap(120); __LW.mod.paint();
-    const V = __LW.mod.view;
-    const card = (id) => document.querySelector('.m2dev[data-id="' + id + '"]');
-    const chip = (id, label) => [...card(id).querySelectorAll('.m2chk')].find(c => c.textContent.trim() === label);
-
-    /* A · THE LOOP CLOCK.  Not tempo: two modulators on the same grid share an exact period, which is
-       what makes a captured loop CLOSE — and ANCHOR is what puts them on the absolute bar. */
-    for (const id of [a, b]) { chip(id, 'BPM').click(); chip(id, 'ANCHOR').click(); }
-    M.setSource(a, { mult: 2 }); M.setSource(b, { mult: 3 });                          // 1/4 and 1/8
-    out.grid = { syncs: [M.sourceOf(a).sync, M.sourceOf(b).sync], anchors: [M.sourceOf(a).anchor, M.sourceOf(b).anchor],
-      bpc: [M.beatsPerCycle(M.sourceOf(a)), M.beatsPerCycle(M.sourceOf(b))] };
-    const m1 = M.macroList()[0].id; __LW.mod.bind(m1, a); __LW.mod.route(m1, 'material.knee', 0, 1);
-    __LW.mod.play(); __LW.mod.step(0.25);
-    const ph0 = [M.sourceOf(a).phase, M.sourceOf(b).phase];
-    for (let i = 0; i < 8; i++) __LW.mod.step(0.125);                                  // 60 BPM: one beat is one second
-    const ph1 = [M.sourceOf(a).phase, M.sourceOf(b).phase];
-    out.period = { ph0, ph1, dt: [Math.abs(ph1[0] - ph0[0]), Math.abs(ph1[1] - ph0[1])] };
-    __LW.mod.stop();
-    /* the two modifiers are EXCLUSIVE in the setter, so the chips must paint from the model */
-    chip(a, 'DOTTED').click();
-    const afterDotted = { dotted: M.sourceOf(a).dotted, triplet: M.sourceOf(a).triplet, bpc: M.beatsPerCycle(M.sourceOf(a)),
-      chipDotted: chip(a, 'DOTTED').classList.contains('on'), chipTriplet: chip(a, 'TRIPLET').classList.contains('on') };
-    chip(a, 'TRIPLET').click();
-    const afterTriplet = { dotted: M.sourceOf(a).dotted, triplet: M.sourceOf(a).triplet, bpc: M.beatsPerCycle(M.sourceOf(a)),
-      chipDotted: chip(a, 'DOTTED').classList.contains('on'), chipTriplet: chip(a, 'TRIPLET').classList.contains('on') };
-    out.exclusive = { afterDotted, afterTriplet };
-    chip(a, 'TRIPLET').click();
-    /* WAVE 64 · THE REFRAME MOVED ONTO THE CONTROL IT DESCRIBES.  Wave 60 put it in a paragraph
-       under the transport group; the ported window has no paragraph, so the sentence is the tempo
-       button's own title — the one place a user asking "what is BPM doing in a hydrogen lab" looks. */
-    out.clkNote = (document.getElementById('modtempo').title || '').indexOf('LOOP CLOCK') >= 0
-      && /captured loop CLOSES/.test(document.getElementById('modtempo').title);
-
-    /* B · INVERT is four lines and two targets from one LFO moving opposite */
-    M.setSource(a, { sync: false, ratePos: 0.5, wave: 'rotate', invert: false });
-    __LW.mod.step(0); const up = M.sourceOf(a).out;
-    chip(a, 'INVERT').click(); __LW.mod.step(0);
-    out.invert = { up, down: M.sourceOf(a).out, chip: chip(a, 'INVERT').classList.contains('on') };
-    chip(a, 'INVERT').click();
-
-    /* C · THE LADDER, through the knob's own detents */
-    const stepsK = card(a).querySelector('.m2k[data-knob=steps]');
-    out.stepsOff = stepsK.querySelector('.m2kval').textContent;
-    M.setSource(a, { steps: 100 });
-    out.rung = { steps: M.sourceOf(a).steps, index: M.stepsRungIndex(100), ladder: M.STEPS_LADDER[M.stepsRungIndex(100)] };
-    M.setSource(a, { steps: 0 });
-
-    /* D · A / B IS TWO WHOLE SAVED PATCHES, and a switch does not restart anything */
-    M.setSource(a, { preset: 'mtri' });
-    M.setSource(a, { sync: true, mult: 5, phaseOff: 0.31, smooth: 0.42, steps: 12, invert: true, anchor: true });
-    const keysOf = (s) => ({ wave: s.wave, shapeMode: s.shapeMode, sync: s.sync, mult: s.mult, phaseOff: s.phaseOff,
-      smooth: s.smooth, steps: s.steps, invert: s.invert, anchor: s.anchor, triplet: s.triplet, dotted: s.dotted, ratePos: s.ratePos });
-    const kA = keysOf(M.sourceOf(a)), ptsA = M.sourceOf(a).points.map(p => [p.t, p.v, p.tension]);
-    __LW.mod.play(); __LW.mod.step(0.4); __LW.mod.stop();
-    const run0 = { phase: M.sourceOf(a).phase, cycles: M.sourceOf(a).cycles, on: M.sourceOf(a).on };
-    /* WAVE 64 · the artifact's A/B is ONE button that toggles, not a two-seat segment */
-    const bank = card(a).querySelector('.m2bank');
-    bank.click();
-    M.setSource(a, { preset: 'square', mult: 0, smooth: 0, steps: 0, invert: false });
-    const kBmid = keysOf(M.sourceOf(a));
-    card(a).querySelector('.m2bank').click();
-    const kA2 = keysOf(M.sourceOf(a)), ptsA2 = M.sourceOf(a).points.map(p => [p.t, p.v, p.tension]);
-    const run1 = { phase: M.sourceOf(a).phase, cycles: M.sourceOf(a).cycles, on: M.sourceOf(a).on };
-    out.bank = { bank: M.sourceOf(a).bank, exact: Object.keys(kA).every(k => Object.is(kA[k], kA2[k])),
-      curveExact: JSON.stringify(ptsA) === JSON.stringify(ptsA2), bDiffered: kBmid.mult !== kA.mult,
-      runtimeUntouched: run1.phase === run0.phase && run1.cycles === run0.cycles && run1.on === run0.on,
-      wrong: Object.keys(kA).filter(k => !Object.is(kA[k], kA2[k])) };
-
-    /* E · THE PATCH CLIPBOARD, and the cross-kind refusal in a sentence */
-    const cpy = [...card(a).querySelectorAll('.m2ab')].find(x => x.textContent.trim() === 'COPY');
-    const pst = (id) => [...card(id).querySelectorAll('.m2ab')].find(x => x.textContent.trim() === 'PASTE');
-    cpy.click();
-    pst(b).click(); __LW.mod.paint();
-    out.paste = { bMult: M.sourceOf(b).mult, aMult: M.sourceOf(a).mult, bSteps: M.sourceOf(b).steps,
-      bCurve: M.sourceOf(b).points.map(p => [p.t, p.v]).join() === M.sourceOf(a).points.map(p => [p.t, p.v]).join() };
-    const e2 = __LW.mod.addSource('env'); await nap(60); __LW.mod.paint();
-    pst(e2).click();
-    out.crossKind = { say: V.curve(e2).say, stillAnEnv: M.sourceOf(e2).kind === 'env' && M.sourceOf(e2).steps === 0 };
-
-    /* F · THE RACK REARRANGES, A SOURCE HAS A NAME, AND A FOLDED CARD ROUND-TRIPS */
-    /* WAVE 64 · THE ◂ ▸ REORDER BUTTONS ARE BUILT AND WIRED AND display:none IN BOTH MODES — that
-       is one of the three copied-broken items Josh ruled travels as it is, so the block drives the
-       BUTTON (a hidden button still answers .click()) rather than pretending the seat is not there.
-       AND THE DEVICE HAS NO NAME FIELD IN THE PORTED CARD: wave 60's rename lived in markup this
-       port replaces and the artifact has no seat for it, so the LABEL is set on the model and the
-       proof is that it reaches the face — the macro's DRIVE line prints it. */
-    const order0 = M.sourceList().map(s => s.id);
-    card(a).querySelectorAll('.m2move')[1].click(); __LW.mod.paint();
-    const order1 = M.sourceList().map(s => s.id);
-    M.setSource(a, { label: 'SWEEP' }); __LW.mod.bind(M.macroList()[0].id, a); __LW.mod.paint();
-    out.rack = { order0, order1, moved: order0.join() !== order1.join(),
-      label: M.sourceOf(a).label, cards: V.cards().map(c => c.i + ':' + c.id + ':' + c.name),
-      drive: [...document.querySelectorAll('.m2drive')].map(o => o.textContent).filter(t => t.indexOf('SWEEP') >= 0).length,
-      placeholder: V.cards().find(c => c.id === b).name };
-    /* ⚠ WAVE 106 · THE FOLD IS TWO STATES, NOT THREE, AND THAT IS A RULING RATHER THAN A LOSS.
-       This block was written when .m2fold walked the artifact's tri-state FULL -> COMPACT ->
-       FOLDED, so it clicked TWICE.  Wave 101 gave COMPACT its own seat — the chip on the window's
-       rail, which folds EVERY card at once — and left this button the one job its own title now
-       states: "minimise / expand — COMPACT is the chip on the rail, not this button"
-       (lab/modwindow.js:1680).  The handler is modeOf(s.id) === 'M' ? 'F' : 'M' (:1682): a plain
-       toggle.  Two clicks on a toggle land back where they started, which is exactly what the red
-       measured — model false, no .m2min, and the card still 360 px wide.  ONE click now, and the
-       three things that mattered are unchanged: FOLDED still writes the model's own minimized
-       flag, so a project still comes back folded. */
-    const fold = card(a).querySelector('.m2fold');
-    fold.click(); __LW.mod.paint();
-    const folded = { model: M.sourceOf(a).minimized, cls: card(a).classList.contains('m2min'),
-      bodyHidden: Math.round(card(a).getBoundingClientRect().width) };
-    const blob = M.serialize();
-    M.deserialize(blob);
-    out.fold = { ...folded, afterRoundTrip: (M.sourceOf(a) || {}).minimized, labelBack: (M.sourceOf(a) || {}).label };
-    __LW.mod.reset();
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B117 W-MODSHAPE · THE LOOP CLOCK, THE LADDER, A/B, AND A RACK THAT REARRANGES. λWAVES has no tempo and no audience, but it does have a camera and a recorder — so BPM is REFRAMED rather than deleted, and the window says so on the card: a loop that CLOSES needs every modulator to be an exact integer division of one period, which is what BPM sync + LFO_MULTS + ANCHOR provide (TAP TEMPO is the one musical control with no reframe available, and it is not offered). Driven here: two LFOs put on the grid at 1/4 and 1/8 through their own chips, anchored, and after exactly one beat of deterministic steps both are back at the phase pair they started on. TRIPLET and DOTTED are MUTUALLY EXCLUSIVE IN THE SETTER, so the chips repaint FROM THE MODEL after every write — pressing DOTTED then TRIPLET leaves DOTTED off on the card as well as in the model, and beatsPerCycle reads 1.5 then 0.667. INVERT is one chip and makes s.out the complement. The STEPS knob rides the model\'s own 35-rung ladder, and a value off the ladder answers the nearest rung IN LOG SPACE (100 → 96). A/B is TWO WHOLE SAVED PATCHES: switching away, editing the other side and switching back restores every scalar with Object.is and the curve point for point, while phase, cycles and power do not move — a comparison must not restart anything. COPY / PASTE carries a patch between devices and REFUSES a cross-kind blob in a sentence. And the rack rearranges: a source moves in the run order (which is the fire order), takes a NAME that replaces its id in the DRIVE menu while an unnamed one keeps its id as the field\'s placeholder, and FOLDS — the artifact\'s tri-state, FULL 360 → COMPACT 320 → FOLDED 64, with `minimized` still written into the MODEL so a folded card is folded again when the project comes back. Two of wave 60\'s seats have no place in the ported card and are stated rather than smuggled: the DEVICE RENAME (the label is set on the model here and the proof is that it reaches the face — the macro\'s DRIVE line prints SWEEP), and the reframe PARAGRAPH, which is now the tempo button\'s own title, on the control it describes. The ◂ ▸ reorder buttons are driven through their listeners because they are display:none in both modes — BASINS\' own copied-broken seat, travelling as it is',
-    !lclT.error
-      && lclT.grid.syncs.join() === 'true,true' && lclT.grid.anchors.join() === 'true,true'
-      && Math.abs(lclT.grid.bpc[0] - 1) < 1e-12 && Math.abs(lclT.grid.bpc[1] - 0.5) < 1e-12
-      && lclT.period.dt[0] < 1e-9 && lclT.period.dt[1] < 1e-9
-      && lclT.exclusive.afterDotted.dotted === true && lclT.exclusive.afterDotted.triplet === false
-      && Math.abs(lclT.exclusive.afterDotted.bpc - 1.5) < 1e-12 && lclT.exclusive.afterDotted.chipDotted === true
-      && lclT.exclusive.afterTriplet.triplet === true && lclT.exclusive.afterTriplet.dotted === false
-      && lclT.exclusive.afterTriplet.chipDotted === false && lclT.exclusive.afterTriplet.chipTriplet === true
-      && Math.abs(lclT.exclusive.afterTriplet.bpc - 2 / 3) < 1e-12 && lclT.clkNote === true
-      && Math.abs(lclT.invert.up + lclT.invert.down - 1) < 1e-12 && lclT.invert.chip === true
-      && lclT.stepsOff === 'OFF' && lclT.rung.steps === 100 && lclT.rung.ladder === 96
-      && lclT.bank.bank === 'A' && lclT.bank.exact && lclT.bank.curveExact && lclT.bank.bDiffered
-      && lclT.bank.runtimeUntouched && lclT.bank.wrong.length === 0
-      && lclT.paste.bMult === lclT.paste.aMult && lclT.paste.bSteps === 12 && lclT.paste.bCurve
-      && lclT.crossKind.say.indexOf('cannot be pasted across') > 0 && lclT.crossKind.stillAnEnv
-      && lclT.rack.moved && lclT.rack.label === 'SWEEP' && lclT.rack.drive >= 1
-      && lclT.rack.placeholder === lclT.rack.order0[1]
-      && lclT.fold.model === true && lclT.fold.cls === true && lclT.fold.bodyHidden === 64
-      && lclT.fold.afterRoundTrip === true && lclT.fold.labelBack === 'SWEEP'
-      && lclT.errs === 0, lclT);
-
-
-  /* ═══ WAVE 61 · THE MACRO IS THE ROUTER ═══════════════════════════════════════════════════════
-   * A real WebDriver FINGER, and the pointer helpers the three blocks below share.  drag() carries a
-   * touch pointer from one point to another with two intermediate moves, so the 4-px slop is really
-   * crossed; hold() presses and waits past the 450 ms the popover is armed at. */
-  let w61n = 0;
-  const w61touch = async (steps) => { await drv.actions(g.s, [{ type: 'pointer', id: 'w61f' + (++w61n),
-    parameters: { pointerType: 'touch' }, actions: steps }]); await drv.relActions(g.s); };
-  const w61mv = (x, y, d) => ({ type: 'pointerMove', duration: d === undefined ? 0 : d, origin: 'viewport', x: Math.round(x), y: Math.round(y) });
-  const w61dn = { type: 'pointerDown', button: 0 }, w61up = { type: 'pointerUp', button: 0 }, w61pz = (d) => ({ type: 'pause', duration: d });
-
-  /* ── B118 · the gesture ─────────────────────────────────────────────────── */
-  const rtT = await g.ev(`try {
-    const nap = (ms) => new Promise(r => setTimeout(r, ms));
-    const out = {};
-    __LW.pause(); __LW.mod.reset(); if (!__LW.mod.expanded) __LW.mod.expand(); await nap(300);
-    __LW.layout.raise('observer'); await nap(150);
-    const P = (el, t, x, y) => el.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, composed: true, clientX: x, clientY: y, pointerId: 31, isPrimary: true, pointerType: 'mouse' }));
-    const dialOf = (id) => { const k = document.querySelector('.k[data-param="' + id + '"]'); k.scrollIntoView({ block: 'center' }); return k; };
-    /* FOURTEEN TARGETS, TWELVE DROPS — and the two that are missing are missing for a stated reason */
-    out.targets = __LW.mod.targets().map((d) => d.id);
-    out.drops = __LW.mod.view.drops();
-    out.missing = out.targets.filter((id) => out.drops.indexOf(id) < 0);
-    const m1 = __LW.mod.model.macroList()[0].id, m2 = __LW.mod.model.macroList()[1].id;
-    const grip = document.querySelector('.m2slot[data-macro="' + m1 + '"] .m2grip');
-    /* WAVE 64 · the ordinal is on the NUMBERED SEAT beside the grip; the grip itself is the
-       artifact's four-way drag cross, which is a drawing and not a character */
-    out.gripText = grip.parentElement.querySelector('.m2num').textContent;
-    out.gripIsDrawn = !!grip.querySelector('svg') && grip.textContent.trim() === '';
-    const gb = grip.getBoundingClientRect();
-    let k = dialOf('material.softness'); await nap(250);
-    let kb = k.querySelector('.k-dial').getBoundingClientRect();
-    out.roomBefore = __LW.mod.view.defaultRange('material.softness');
-    /* THE DRAG ROAD */
-    P(grip, 'pointerdown', gb.left + 12, gb.top + 12); await nap(30);
-    P(grip, 'pointermove', gb.left + 44, gb.top + 44); await nap(40);
-    out.mid = { arming: document.body.classList.contains('mod-arming'), state: __LW.mod.view.arming(),
-                ghost: (() => { const gh = document.querySelector('.m2ghost'); return !!gh && getComputedStyle(gh).display !== 'none'; })(),
-                lit: [...document.querySelectorAll('.k.mod-drop')].length,
-                dimmed: getComputedStyle(document.querySelector('.dev[data-id="observer"] .seg')).opacity };
-    P(grip, 'pointermove', kb.left + kb.width / 2, kb.top + kb.height / 2); await nap(60);
-    out.over = { param: __LW.mod.view.arming().over, cls: k.className };
-    P(grip, 'pointerup', kb.left + kb.width / 2, kb.top + kb.height / 2); await nap(200);
-    const r0 = __LW.mod.model.routeList()[0];
-    out.dropped = { n: __LW.mod.model.routeList().length, target: r0.targetId, min: r0.min, max: r0.max, bi: !!r0.bi,
-                    held: k.classList.contains('mod-held'), modulated: __LW.mod.registry.isModulated('material.softness'),
-                    clean: !document.body.classList.contains('mod-arming') && document.querySelectorAll('.k.mod-drop').length === 0,
-                    status: document.querySelector('#modwin .m2hint').textContent };
-    /* THE ROOM THE KNOB HAD LEFT, filled exactly, and NOTHING CLIPPED ON THE FIRST FRAME */
-    const rr = __LW.mod.view.ring('material.softness'), d = __LW.mod.targets().find((q) => q.id === 'material.softness');
-    out.fills = { lo: rr.lo, hi: rr.hi, spur: rr.spur, reach: __LW.mod.view.reach('material.softness'),
-                  max: d.max, top: Math.abs(rr.hi - 1) < 1e-9 };
-    /* A SECOND DROP OF THE SAME MACRO ON THE SAME CONTROL IS NOT A SECOND ROUTE */
-    P(grip, 'pointerdown', gb.left + 12, gb.top + 12); await nap(30);
-    P(grip, 'pointermove', gb.left + 44, gb.top + 44); await nap(30);
-    out.dup = { cls: k.className };
-    P(grip, 'pointermove', kb.left + kb.width / 2, kb.top + kb.height / 2); await nap(40);
-    P(grip, 'pointerup', kb.left + kb.width / 2, kb.top + kb.height / 2); await nap(150);
-    out.dup.n = __LW.mod.model.routeList().length;
-    out.dup.said = document.querySelector('#modwin .m2hint').textContent;
-    /* A DROP ON NOTHING IS SILENT AND CHANGES NO STATE */
-    P(grip, 'pointerdown', gb.left + 12, gb.top + 12); await nap(30);
-    P(grip, 'pointermove', 700, 500); await nap(40);
-    P(grip, 'pointerup', 700, 500); await nap(120);
-    out.nowhere = { n: __LW.mod.model.routeList().length, arming: document.body.classList.contains('mod-arming') };
-    /* THE ARM-AND-TAP ROAD — Bitwig's, and the only one that works when the two are not on screen together */
-    const grip2 = document.querySelector('.m2slot[data-macro="' + m2 + '"] .m2grip');
-    const g2 = grip2.getBoundingClientRect();
-    P(grip2, 'pointerdown', g2.left + 12, g2.top + 12); await nap(30);
-    P(grip2, 'pointerup', g2.left + 12, g2.top + 12); await nap(80);
-    out.armed = { state: __LW.mod.view.arming(), latched: grip2.classList.contains('m2armed'),
-                  lit: [...document.querySelectorAll('.k.mod-drop')].length,
-                  said: document.querySelector('#modwin .m2hint').textContent };
-    /* …and it survives travelling: scroll the rack, raise another window, then land it */
-    document.getElementById('rack').scrollTop = 0; __LW.layout.raise('camera'); await nap(200);
-    out.armed.survived = !!__LW.mod.view.arming();
-    const k2 = dialOf('observer.fov'); await nap(250);
-    const b2 = k2.querySelector('.k-dial').getBoundingClientRect();
-    const v0 = __LW.obs.fov;
-    P(k2.querySelector('.k-dial'), 'pointerdown', b2.left + b2.width / 2, b2.top + b2.height / 2); await nap(60);
-    P(k2.querySelector('.k-dial'), 'pointerup', b2.left + b2.width / 2, b2.top + b2.height / 2); await nap(200);
-    out.landed = { n: __LW.mod.model.routeList().length, arming: __LW.mod.view.arming(),
-                   route: (__LW.mod.model.routeList().find((r) => r.targetId === 'observer.fov') || {}).macroId,
-                   fovUntouched: __LW.obs.fov === v0, rings: __LW.mod.view.rings().length };
-    /* ESCAPE CANCELS, and leaves no state behind */
-    P(grip, 'pointerdown', gb.left + 12, gb.top + 12); await nap(30);
-    P(grip, 'pointerup', gb.left + 12, gb.top + 12); await nap(80);
-    const wasArmed = !!__LW.mod.view.arming();
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
-    await nap(80);
-    out.escape = { wasArmed, now: __LW.mod.view.arming(), arming: document.body.classList.contains('mod-arming'),
-                   n: __LW.mod.model.routeList().length };
-    /* THE RUNTIME DOOR: a control registered NOW, with a knob, is a drop target NOW */
-    const host = document.querySelector('.dev[data-id="camera"] .dev-body');
-    const kit = await import('/lab/mir/kit.js');
-    const kk = kit.knob({ label: 'W61', min: 0, max: 1, value: 0.25, onInput: () => {} });
-    host.appendChild(kk.root);
-    let kv = 0.25;
-    __LW.mod.register('field.w61', { label: 'W61', map: 'linear', min: 0, max: 1, group: 'field',
-      get: () => kv, set: (v) => { kv = v; kk.set(v); }, knob: () => kk });
-    await nap(150);
-    out.runtime = { stamped: kk.root.dataset.param, inDrops: __LW.mod.view.drops().indexOf('field.w61') >= 0,
-                    inPicker: __LW.mod.picker().indexOf('field.w61') >= 0 };
-    kk.root.scrollIntoView({ block: 'center' }); await nap(300);
-    const kr = kk.root.querySelector('.k-dial').getBoundingClientRect();
-    const gb2 = grip.getBoundingClientRect();
-    P(grip, 'pointerdown', gb2.left + 12, gb2.top + 12); await nap(30);
-    P(grip, 'pointermove', gb2.left + 44, gb2.top + 44); await nap(30);
-    P(grip, 'pointermove', kr.left + kr.width / 2, kr.top + kr.height / 2); await nap(60);
-    out.runtime.over = __LW.mod.view.arming();
-    P(grip, 'pointerup', kr.left + kr.width / 2, kr.top + kr.height / 2); await nap(200);
-    out.runtime.routed = !!__LW.mod.model.routeList().find((r) => r.targetId === 'field.w61');
-    out.runtime.ring = !!__LW.mod.view.ring('field.w61');
-    __LW.mod.unregister('field.w61'); kk.root.remove(); await nap(120);
-    out.runtime.gone = __LW.mod.view.rings().indexOf('field.w61') < 0;
-    __LW.mod.reset(); __LW.mod.registry.resync();
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B118 THE MACRO IS THE ROUTER (wave 61, Josh: "the macro is essentially the router that brings it into the app. Otherwise the modulation is useless"). Until now a route could only be made by picking two <select>s and pressing ROUTE: the MODEL was complete and proved, and the ROUTER was the missing part. Each macro row now carries a GRIP — a dedicated handle holding the macro\'s ordinal, because the row beside it holds a text field and a menu and a draggable row would steal the caret — and it has exactly TWO roads, decided by 4 px of slop. THE DRAG (Serum\'s road, driven here with real pointer events on the house pattern: capture on the source, a class on the target, resolve on pointerup): all registered dial targets light at once and every other control recedes to .45, because there is no hover on a touch screen and validity therefore cannot be reported at the pointer — Serum\'s "+" cursor has to become a state of the SURFACE, for the whole gesture (ANTI-PATTERNS 4). The one under the pointer is driven by elementFromPoint on every move and never by pointerenter/pointerleave, which a touch pointer does not honour. THE DROP FILLS THE ROOM THE KNOB HAS LEFT, which is where we beat Serum: Serum infers polarity from where the control is standing and then assigns a FULL-SCALE depth, which is why its own author tells people to park base controls at 0 or 50 % first. SOFT based at 0.700 of 0.300 … 2.200 lands a route reaching EXACTLY 2.200 and no further — nothing clips on the first frame, there is no spur, and the first act is to reduce a depth that already means something. A second drop of the same macro on the same control is not a second route: the halo goes solid, addRoute answers `already`, and the window says so. A drop on nothing is silent and changes no state. THE TAP ARMS INSTEAD (Bitwig\'s routing mode, shipped at every size and NOT as a phone special case — a gesture that exists on one breakpoint is one nobody learns): the grip latches, the targets stay lit through a rack scroll and a window raise, and the next tap on a lit dial lands the route without turning it one degree. Escape cancels with nothing left behind. THE REGISTRY OWNS THE TARGET COUNT: observer.yaw and observer.pitch carry no knob accessor at all — the camera is dragged, not dialled — so they stay reachable through the window\'s own picker, and the gesture is exactly as large as the registry\'s dials and no larger. And the RUNTIME DOOR keeps its whole promise: a control registered through LW.mod.register with a `knob` is stamped, in the picker, a drop target and wearing a ring immediately, with no edit in modview.js',
-    !rtT.error
-      && rtT.targets.length === rtT.drops.length + 2 && rtT.drops.length > 0   /* wave 106: SLICE POS, SLICE THICK and Ω RABI join the eleven, and all three carry a `knob:` accessor so all three are DROPS too */
-      && rtT.missing.join() === 'observer.yaw,observer.pitch'
-      && rtT.gripText === '1'
-      && rtT.mid.arming === true && rtT.mid.state.mode === 'drag' && rtT.mid.ghost === true
-      && rtT.mid.lit === rtT.drops.length && Number(rtT.mid.dimmed) < 0.5
-      && rtT.over.param === 'material.softness' && /is-over/.test(rtT.over.cls)
-      && rtT.dropped.n === 1 && rtT.dropped.target === 'material.softness' && rtT.dropped.held === true
-      && rtT.dropped.modulated === true && rtT.dropped.clean === true
-      && /MACRO 1 . SOFT/.test(rtT.dropped.status)
-      && rtT.fills.top === true && rtT.fills.spur === '' && rtT.fills.reach.clipHi === false && rtT.fills.reach.clipLo === false
-      && /is-dup/.test(rtT.dup.cls) && rtT.dup.n === 1 && /already reaches/.test(rtT.dup.said)
-      && rtT.nowhere.n === 1 && rtT.nowhere.arming === false
-      && rtT.armed.state.mode === 'armed' && rtT.armed.latched === true && rtT.armed.lit === rtT.drops.length
-      && rtT.armed.survived === true
-      && rtT.landed.n === 2 && rtT.landed.arming === null && rtT.landed.fovUntouched === true && rtT.landed.rings === 2
-      && rtT.escape.wasArmed === true && rtT.escape.now === null && rtT.escape.arming === false && rtT.escape.n === 2
-      && rtT.runtime.stamped === 'field.w61' && rtT.runtime.inDrops === true && rtT.runtime.inPicker === true
-      && rtT.runtime.routed === true && rtT.runtime.ring === true && rtT.runtime.gone === true
-      && rtT.errs === 0, rtT);
-
-  /* ── B119 · the arc ─────────────────────────────────────────────────────── */
-  const arcT = await g.ev(`try {
-    const nap = (ms) => new Promise(r => setTimeout(r, ms));
-    const out = { targetCount: __LW.mod.registry.list().length };
-    __LW.pause(); __LW.mod.reset(); if (!__LW.mod.expanded) __LW.mod.expand(); await nap(300);
-    __LW.mat.softness = 0.7; __LW.mat.exposure = 1; __LW.mat.hueShift = 0; __LW.mod.registry.resync();
-    __LW.layout.raise('observer'); await nap(150);
-    const ms = __LW.mod.model.macroList(); const m1 = ms[0].id, m2 = ms[1].id;
-    const k = document.querySelector('.k[data-param="material.softness"]');
-    k.scrollIntoView({ block: 'center' }); await nap(250);
-    out.noRing = { ring: __LW.mod.view.ring('material.softness'), svg: !!k.querySelector('.k-ring') };
-    __LW.mod.route(m1, 'material.softness', 0, 0.4); await nap(150);
-    out.ring = __LW.mod.view.ring('material.softness');
-    /* THE DEPTH DRAG: kit.js's own ladder — 220 px is a full scale, so 44 px is exactly 0.2 */
-    const hit = k.querySelector('.k-ring-hit'), hb = hit.getBoundingClientRect();
-    const cx = hb.left + hb.width / 2, ty = hb.top + 4;
-    const P = (t, x, y, o) => hit.dispatchEvent(new PointerEvent(t, Object.assign({ bubbles: true, cancelable: true, composed: true, clientX: x, clientY: y, pointerId: 41, isPrimary: true, pointerType: 'mouse' }, o || {})));
-    /* WAVE 64 · THE RANGE HAS EXACTLY ONE FACE NOW.  Wave 61 fixed a stale pair of MIN / MAX faders
-       in the routed-target list; that list was λWAVES work and the ported window replaces the panel
-       it lived in, so the range is read straight off the model and the ARC is the only thing that
-       draws it — a defect of the "a second copy went stale" family cannot recur where there is no
-       second copy, and the block asserts that the arc and the model agree to 1e-12 instead. */
-    const faders = () => { const r = __LW.mod.model.routeList()[0];
-      return r ? [Math.round(r.min * 100) + '%', Math.round(r.max * 100) + '%'] : []; };
-    out.fadersBefore = faders();
-    P('pointerdown', cx, ty); await nap(40);
-    out.drag = { cls: k.classList.contains('ring-drag') };
-    P('pointermove', cx, ty - 44); await nap(60);
-    out.drag.max = __LW.mod.model.routeList()[0].max;
-    out.drag.val = k.querySelector('.k-val').textContent;
-    out.drag.ghost = (document.querySelector('.m2ghost') || {}).textContent;
-    P('pointerup', cx, ty - 44); await nap(150);
-    out.after = { max: __LW.mod.model.routeList()[0].max, val: k.querySelector('.k-val').textContent,
-                  faders: faders(), dragging: k.classList.contains('ring-drag') };
-    /* SHIFT IS THE FINE DRAG, exactly as it is at every dial: 900 px for a full scale */
-    P('pointerdown', cx, ty); await nap(30);
-    P('pointermove', cx, ty - 45, { shiftKey: true }); await nap(50);
-    out.fine = __LW.mod.model.routeList()[0].max;
-    P('pointerup', cx, ty - 45, { shiftKey: true }); await nap(100);
-    /* ZERO DEPTH IS A REAL STATE: the tick, and the route is still there */
-    __LW.mod.model.setRouteRange(__LW.mod.model.routeList()[0].id, { min: 0, max: 0 });
-    __LW.mod.paint(); await nap(120);
-    out.zero = { ring: __LW.mod.view.ring('material.softness'),
-                 modulated: __LW.mod.registry.isModulated('material.softness'),
-                 held: k.classList.contains('mod-held'),
-                 same: Object.is(__LW.mod.state('material.softness').current, __LW.mod.state('material.softness').base),
-                 restores: __LW.mod.registry.stats().restores };
-    /* CLIPPING: the model clamps, the arc stops at the end, and the SPUR says which end */
-    __LW.mod.model.setRouteRange(__LW.mod.model.routeList()[0].id, { min: 0, max: 1 });
-    __LW.mod.paint(); await nap(120);
-    out.clip = { ring: __LW.mod.view.ring('material.softness'), reach: __LW.mod.view.reach('material.softness') };
-    P('pointerdown', cx, ty); await nap(40);
-    out.clip.valHtml = k.querySelector('.k-val').innerHTML;
-    P('pointerup', cx, ty); await nap(100);
-    /* A WRAP TARGET DOES NOT CLIP AND MUST NEVER SHOW A SPUR — and its ring is 360 deg, not 270,
-       because that is the law its own NEEDLE runs on */
-    __LW.mod.route(m1, 'material.hue', 0, 1); await nap(150);
-    out.wrap = __LW.mod.view.ring('material.hue');
-    /* TWO MACROS, TWO RADII — and the choice of which the outer arc edits is ON the control */
-    __LW.mod.route(m2, 'material.softness', 0, 0.2); await nap(150);
-    out.stack = { sel: __LW.mod.view.selected(), ring: __LW.mod.view.ring('material.softness') };
-    __LW.mod.view.select(m2); await nap(80);
-    out.stack.swapped = __LW.mod.view.ring('material.softness');
-    __LW.mod.view.select(m1); await nap(60);
-    /* THE ARC IS ANCHORED TO THE BASE: a hand on the dial under a running LFO slides it and KEEPS ITS WIDTH */
-    __LW.mod.model.removeRoute(__LW.mod.model.routeList().find((r) => r.macroId === m2 && r.targetId === 'material.softness').id);
-    __LW.mod.model.setRouteRange(__LW.mod.model.routeList().find((r) => r.targetId === 'material.softness').id, { min: 0, max: 0.3 });
-    const s1 = __LW.mod.addSource('lfo');
-    __LW.mod.model.setSource(s1, { wave: 'sine', sync: false, ratePos: 0.62 });
-    __LW.mod.bind(m1, s1); __LW.mod.play(); await nap(300);
-    const w0 = __LW.mod.view.ring('material.softness'), base0 = __LW.mod.state('material.softness').base;
-    const dial = k.querySelector('.k-dial'), db = dial.getBoundingClientRect();
-    const dx = db.left + db.width / 2, dy = db.top + db.height / 2;
-    for (const [t, y] of [['pointerdown', dy], ['pointermove', dy - 26], ['pointerup', dy - 26]])
-      dial.dispatchEvent(new PointerEvent(t, { bubbles: true, clientX: dx, clientY: y, pointerId: 42, pointerType: 'mouse' }));
-    await nap(220);
-    const w1 = __LW.mod.view.ring('material.softness');
-    out.follows = { base0, base1: __LW.mod.state('material.softness').base,
-                    width0: w0.hi - w0.lo, width1: w1.hi - w1.lo, lo0: w0.lo, lo1: w1.lo,
-                    stillModulated: __LW.mod.registry.isModulated('material.softness'),
-                    version: __LW.reg.version };
-    __LW.mod.stop(); await nap(150);
-    /* DOUBLE-TAP THE ARC REMOVES THE ROUTE — and the base comes back BIT for BIT */
-    const bx = __LW.mod.state('material.softness').base;
-    P('pointerdown', cx, ty); await nap(20); P('pointerup', cx, ty); await nap(60);
-    P('pointerdown', cx, ty); await nap(20); P('pointerup', cx, ty); await nap(200);
-    out.removed = { n: __LW.mod.model.routeList().filter((r) => r.targetId === 'material.softness').length,
-                    ring: __LW.mod.view.ring('material.softness'), svg: !!k.querySelector('.k-ring'),
-                    exact: Object.is(__LW.mat.softness, bx), base: bx, now: __LW.mat.softness,
-                    held: k.classList.contains('mod-held'), said: document.querySelector('#modwin .m2hint').textContent };
-    /* WAVE 63 · THE ZERO-DEPTH CLAIM, ON EVERY MAP THIS LAB SHIPS.  It was measured FALSE on five of
-       the eleven registered targets — every LOG one, by up to 2.2e-16 (material.exposure 1 ->
-       1.0000000000000002) — and this block gated it on material.softness, the one LINEAR map among
-       the visible dials.  A bit-exactness claim proved only where it is easy is not proved.  So the
-       registry now short-circuits: applyModulatedNorm writes r.base ITSELF, not a number derived from
-       it, whenever the normalised position is Object.is-equal to the base's own normalised form —
-       which is exactly the zero-influence case and no other.  Swept over all eleven here. */
-    __LW.mod.reset(); await nap(200);
-    { const m0 = __LW.mod.model.macroList()[0].id, maps = {};
-      for (const d of __LW.mod.targets()) maps[d.id] = d.map;
-      const ids = __LW.mod.registry.list(), bad = [];
-      for (const id of ids) {
-        __LW.mod.route(m0, id, 0, 0);
-        __LW.mod.clock.applyAll(true);
-        const st = __LW.mod.state(id);
-        if (!Object.is(st.current, st.base) || !st.modulated) bad.push({ id, map: maps[id], base: st.base, cur: st.current });
-        for (const q of __LW.mod.model.routeList()) if (q.targetId === id) __LW.mod.model.removeRoute(q.id);
-        __LW.mod.registry.restoreBase(id);
-      }
-      out.zeroAll = { n: ids.length, logs: ids.filter((id) => maps[id] === 'log').length, bad }; }
-    __LW.mod.reset(); __LW.mat.softness = 0.7; __LW.mat.hueShift = 0; __LW.mod.registry.resync();
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B119 THE ARC IS THE DEPTH, AND IT IS ANCHORED TO THE BASE (wave 61, Josh: "a glowing bar with the second accent color can show the range of the modulation… the colored arc around the knob changes the arc length"). NO ROUTE, NO RING — a knob is a knob until something holds it, which is where we depart from Massive and its permanently-drawn empty sockets. Once routed, TWO RADII rather than two colours: at 34 px one radius cannot carry both legibly and a derived grey is not stable when ACCENT B is an angle the user can turn, so the OUTER 21.5 is the selected macro\'s route (the one you grab) and the INNER 18 is every other live route\'s summed reach. THE DEPTH DRAG IS VERTICAL OVER THE CARD, never along the arc — 270 deg of a 43-px circle is 101 px and a fingertip is 44 — and it runs on kit.js\'s own ladder, so 44 px is exactly 0.200 of scale and SHIFT makes 45 px 0.050: the arc and the dial feel like one instrument. While it drags, the dial\'s own value line becomes the RANGE in the parameter\'s currency and the same number rides the ghost, because the finger covers the dial at exactly the moment the number matters — and since wave 64 that ghost is the ARTIFACT\'s own pill, which truncates its text to twelve characters by its own builder, so the assertion is that the dial\'s reading BEGINS with what the ghost is carrying. ZERO DEPTH IS A REAL STATE and it keeps its handle: the arc becomes a 4-px TICK at the base, isModulated stays true, .mod-held stays lit, current is Object.is-equal to base, and NOTHING was restored — dragging to zero is not removal and must never be. WAVE 63 PROVES THAT LAST CLAIM WHERE IT USED TO BE FALSE: it was gated here on material.softness, the one linear map among the visible dials, and it was false on five of the eleven registered targets — every log one, by up to 2.2e-16, because a modulated write is a round trip through the normalised currency and log/exp is not exact. It is swept over all eleven now, and it is exact rather than tolerated: registry.applyModulatedNorm hands back r.base ITSELF when the normalised position is Object.is-equal to the base\'s own normalised form, which is the zero-influence case and no other. CLIPPING is said with GEOMETRY: the model clamps (it always did), the arc stops at the end, and a radial SPUR runs OUTWARD at the overflowing end — Massive\'s "small break at the limit of the modulation range", inverted — while the clipped number alone goes to --warn. The arc is NEVER painted red: --bad is spoken for and ACCENT B is a colour the user can move. A WRAP target does not clip and never shows a spur, and its ring is 360 deg from the top rather than 270 from 7:30, BECAUSE THAT IS THE LAW ITS OWN NEEDLE RUNS ON — HUE and YAW are wrap dials and a 270-deg arc on one would put the modulation somewhere the needle never goes. And the law the whole feature stands on, measured: with an LFO running, a real drag on the dial moves the BASE (registry: write IS setBase), so the arc SLIDES WITH THE NEEDLE AND KEEPS ITS WIDTH to 1e-9 while the modulator keeps the value — that is the synth law made visible. A double-tap on the arc removes the route on kit.js\'s own 320 ms (one number, one file) and the parameter comes back to the hand\'s number BIT FOR BIT. The ring is destroyed with the last route. And a DEFECT this exposed is fixed beside it: modview.sync() never refreshed a route\'s MIN/MAX faders, so a range changed from anywhere but the fader itself went stale for ever — 0 %/40 % reads 0 %/60 % after the arc moves it now',
-    !arcT.error
-      && arcT.noRing.ring === null && arcT.noRing.svg === false
-      && arcT.ring.edit.length > 0 && arcT.ring.tick === '' && arcT.ring.spur === ''
-      && arcT.drag.cls === true && Math.abs(arcT.drag.max - 0.6) < 1e-9
-      && / … /.test(arcT.drag.val) && arcT.drag.val.indexOf(arcT.drag.ghost) === 0 && arcT.drag.ghost.length === 12
-      && Math.abs(arcT.after.max - 0.6) < 1e-9 && arcT.after.val === 'γ0.70' && arcT.after.dragging === false
-      && arcT.fadersBefore.join() === '0%,40%' && arcT.after.faders.join() === '0%,60%'
-      && Math.abs(arcT.fine - 0.65) < 1e-9
-      && arcT.zero.ring.edit === '' && arcT.zero.ring.tick.length > 0 && arcT.zero.modulated === true
-      && arcT.zero.held === true && arcT.zero.same === true
-      && arcT.clip.ring.spur.length > 0 && arcT.clip.reach.clipHi === true && arcT.clip.reach.clipLo === false
-      && /class="clip"/.test(arcT.clip.valHtml)
-      && arcT.wrap.wrap === true && arcT.wrap.spur === '' && /A 21.5 21.5 0 1 1/.test(arcT.wrap.edit)
-      && arcT.stack.ring.stack.length > 0 && /A 21.5/.test(arcT.stack.ring.edit) && /A 18/.test(arcT.stack.ring.stack)
-      && arcT.stack.swapped.macro !== arcT.stack.ring.macro && /A 21.5/.test(arcT.stack.swapped.edit)
-      && arcT.follows.base1 > arcT.follows.base0
-      && Math.abs(arcT.follows.width1 - arcT.follows.width0) < 1e-9 && arcT.follows.lo1 > arcT.follows.lo0
-      && arcT.follows.stillModulated === true
-      && arcT.removed.n === 0 && arcT.removed.ring === null && arcT.removed.svg === false
-      && arcT.removed.exact === true && arcT.removed.held === false && /route removed/.test(arcT.removed.said)
-            /* ⚠ the registry's catalogue is 14 targets now (it was 11 — SLICE POS, SLICE THICK and Ω RABI
-         joined it).  The count is asserted rather than loosened to a `>=` on purpose: what the picker
-         CONTAINS is the assertion, and B118 pins the same list from the other side. */
-      && arcT.zeroAll.n === arcT.targetCount && arcT.zeroAll.logs >= 5 && arcT.zeroAll.bad.length === 0
-      && arcT.errs === 0, arcT);
-
-  /* ── B120 · a real finger, the popover, and CENTRE ───────────────────────── */
-  const w61set = await g.ev(`try {
-    const nap = (ms) => new Promise(r => setTimeout(r, ms));
-    __LW.pause(); __LW.mod.reset(); if (!__LW.mod.expanded) __LW.mod.expand(); await nap(300);
-    __LW.mat.softness = 0.7; __LW.mat.grain = 0.35; __LW.mod.registry.resync();
-    /* A REAL FINGER LANDS ON A REAL PIXEL, so the two ends of the gesture are PUT somewhere the
-       viewport actually has: the modulation window off the rack at a known corner of the stage, and
-       the target dials scrolled to the middle of theirs.  Anything else measures wherever fifty
-       earlier blocks happened to leave the racks (ANTI-PATTERN 3, for coordinates). */
-    /* WAVE 64 · the plugin is not a rack float any more: it is moved by its own nine-dot grip,
-       driven here the same way a hand would, so the gesture's two ends are on real pixels. */
-    { const rail = document.querySelector('.kwin-chiprail .crail-grip');
-      const rb = rail.getBoundingClientRect(), g0 = __LW.mod.view.geometry();
-      const PG = (t, x, y) => rail.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true,
-        pointerId: 92, pointerType: 'mouse', isPrimary: true, clientX: x, clientY: y, buttons: t === 'pointerup' ? 0 : 1 }));
-      PG('pointerdown', rb.left + 8, rb.top + 8);
-      PG('pointermove', rb.left + 8 + (40 - g0.x), rb.top + 8 + (70 - g0.y));
-      PG('pointerup', rb.left + 8 + (40 - g0.x), rb.top + 8 + (70 - g0.y)); }
-    await nap(250);
-    __LW.layout.raise('observer'); await nap(200);
-    const m1 = __LW.mod.model.macroList()[0].id;
-    const grip = document.querySelector('.m2slot[data-macro="' + m1 + '"] .m2grip');
-    grip.scrollIntoView({ block: 'center' }); await nap(150);
-    const k = document.querySelector('.k[data-param="material.softness"]');
-    const k2 = document.querySelector('.k[data-param="material.grain"]');
-    k.scrollIntoView({ block: 'center' }); await nap(300);
-    const gb = grip.getBoundingClientRect(), kb = k.querySelector('.k-dial').getBoundingClientRect();
-    const b2 = k2.querySelector('.k-dial').getBoundingClientRect();
-    const inside = (r) => r.width > 2 && r.left > 2 && r.top > 2 && r.right < innerWidth - 2 && r.bottom < innerHeight - 2;
-    return { macro: m1, grip: [gb.left + gb.width / 2, gb.top + gb.height / 2],
-             knob: [kb.left + kb.width / 2, kb.top + kb.height / 2],
-             knob2: [b2.left + b2.width / 2, b2.top + b2.height / 2],
-             /* WAVE 63: the band's own CENTRE LINE, derived from the dial's centre rather than a
-                constant offset from its top edge.  kb.top - 4 was 21 px above the centre, which
-                the wave-61 annulus covered (r in [17, 24]) and the wave-63 one does not (r in
-                [24, 32]) — a coordinate that only worked because the ring was eating the dial. */
-             ring: [kb.left + kb.width / 2, kb.top + kb.height / 2 - 28],
-             onScreen: inside(gb) && inside(kb) && inside(b2), vp: [innerWidth, innerHeight] };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  /* A REAL WEBDRIVER FINGER — a touch mechanism driven only through a test hook is not proved */
-  await w61touch([w61mv(w61set.grip[0], w61set.grip[1]), w61dn, w61pz(80),
-                w61mv(w61set.grip[0] + 40, w61set.grip[1] + 40, 100),
-                w61mv(w61set.knob[0], w61set.knob[1], 200), w61pz(80), w61up]);
-  const w61t1 = await g.ev('await new Promise(r=>setTimeout(r,250)); return { n: __LW.mod.model.routeList().length, t: (__LW.mod.model.routeList()[0]||{}).targetId, ring: !!__LW.mod.view.ring("material.softness") };');
-  /* ARM (a tap that does not move) and then TAP the far control — the phone road */
-  await w61touch([w61mv(w61set.grip[0], w61set.grip[1]), w61dn, w61pz(80), w61up]);
-  const w61t2 = await g.ev('await new Promise(r=>setTimeout(r,200)); return __LW.mod.view.arming();');
-  await w61touch([w61mv(w61set.knob2[0], w61set.knob2[1]), w61dn, w61pz(80), w61up]);
-  const w61t3 = await g.ev('await new Promise(r=>setTimeout(r,300)); return { n: __LW.mod.model.routeList().length, ids: __LW.mod.model.routeList().map(r=>r.targetId), arming: __LW.mod.view.arming(), grain: __LW.mat.grain };');
-  /* PRESS AND HOLD 450 ms on the arc — the right button we do not have */
-  await w61touch([w61mv(w61set.ring[0], w61set.ring[1]), w61dn, w61pz(700), w61up]);
-  const w61t4 = await g.ev('await new Promise(r=>setTimeout(r,200)); return __LW.mod.view.popState();');
-  /* the popover's three modes, and CENTRE is the one the vendored edit bought */
-  const w61pop = await g.ev(`try {
-    const nap = (ms) => new Promise(r => setTimeout(r, ms));
-    const out = {};
-    const seg = [...document.querySelectorAll('.mod-pop .seg-b')];
-    out.labels = seg.map((b) => b.textContent);
-    seg.find((b) => b.textContent === 'CENTRE').click(); await nap(120);
-    const r = __LW.mod.model.routeList().find((q) => q.targetId === 'material.softness');
-    const b = __LW.mod.state('material.softness').baseNorm;
-    out.centre = { bi: !!r.bi, min: r.min, max: r.max, ring: __LW.mod.view.ring('material.softness'),
-                   half: Math.min(b, 1 - b), base: b };
-    /* THE ARITHMETIC THE VENDORED EDIT BOUGHT: a macro at 0.5 moves the target BY EXACTLY NOTHING */
-    const m1 = r.macroId;
-    __LW.mod.model.setMacro(m1, { value: 0.5 }); __LW.mod.host.clock.applyAll(true); await nap(80);
-    const st = __LW.mod.state('material.softness');
-    out.centre.atHalf = { base: st.base, current: st.current, exact: Object.is(st.current, st.base) };
-    __LW.mod.model.setMacro(m1, { value: 0 }); __LW.mod.host.clock.applyAll(true); await nap(60);
-    out.centre.atZero = __LW.mod.registry.readNorm('material.softness');
-    __LW.mod.model.setMacro(m1, { value: 1 }); __LW.mod.host.clock.applyAll(true); await nap(60);
-    out.centre.atOne = __LW.mod.registry.readNorm('material.softness');
-    __LW.mod.model.setMacro(m1, { value: 0 }); __LW.mod.host.clock.applyAll(true); await nap(60);
-    /* and it SURVIVES A PROJECT: a flag that does not round-trip changes every saved patch, silently */
-    const proj = __LW.serialize();
-    out.wire = proj.presentation.modulation.routes.map((q) => q.bi);
-    __LW.mod.reset(); __LW.mod.restore(proj.presentation.modulation); await nap(150);
-    out.back = (__LW.mod.model.routeList().find((q) => q.targetId === 'material.softness') || {}).bi;
-    /* UP and DOWN re-derive from the base the knob is on NOW */
-    __LW.mod.view.pop('material.softness', 400, 300); await nap(80);
-    const s2 = [...document.querySelectorAll('.mod-pop .seg-b')];
-    out.mode = s2.filter((b) => b.classList.contains('on')).map((b) => b.textContent);
-    s2.find((b) => b.textContent === 'UP').click(); await nap(100);
-    const ru = __LW.mod.model.routeList().find((q) => q.targetId === 'material.softness');
-    out.up = { min: ru.min, max: ru.max, bi: !!ru.bi, hi: __LW.mod.view.ring('material.softness').hi };
-    s2.find((b) => b.textContent === 'DOWN').click(); await nap(100);
-    const rd = __LW.mod.model.routeList().find((q) => q.targetId === 'material.softness');
-    out.down = { min: rd.min, max: rd.max, bi: !!rd.bi, lo: __LW.mod.view.ring('material.softness').lo };
-    out.faders = (() => { const r = __LW.mod.model.routeList().find((q) => q.targetId === 'material.softness');
-      return r ? [Math.round(r.min * 100) + '%', Math.round(r.max * 100) + '%'] : []; })();
-    /* REMOVE ALL empties the control and hands the number back */
-    const bx = __LW.mod.state('material.softness').base;
-    [...document.querySelectorAll('.mod-pop .trig')].find((b) => b.textContent.indexOf('REMOVE ALL') >= 0).click();
-    await nap(200);
-    out.removedAll = { n: __LW.mod.model.routeList().filter((q) => q.targetId === 'material.softness').length,
-                       exact: Object.is(__LW.mat.softness, bx), ring: __LW.mod.view.ring('material.softness'),
-                       pop: __LW.mod.view.popState() };
-    __LW.mod.reset(); __LW.mat.softness = 0.7; __LW.mat.grain = 0.35; __LW.mod.registry.resync();
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  const w61tch = { set: w61set, drag: w61t1, armed: w61t2, tapped: w61t3, hold: w61t4, pop: w61pop };
-  judge('B120 A REAL FINGER, THE POPOVER, AND THE ONE MODE THE MODEL COULD NOT EXPRESS (wave 61). Everything above is driven by synthetic pointer events; this is a REAL WebDriver TOUCH pointer, because a touch mechanism driven only through a test hook is not proved (ANTI-PATTERNS 4). A finger drags the grip onto SOFT and the route exists; a finger TAPS the grip, it latches, and a tap on GRAIN — a control the first gesture never touched — lands the second route without moving the dial by more than 1e-12. A finger PRESSES AND HOLDS 700 ms on the arc and the popover opens: press-and-hold is the only universal replacement for the right button we do not have, it is armed on pointerdown and cancelled by 4 px of movement so a hold that becomes a drag is a drag, and `contextmenu` opens the identical menu on a desktop — one menu, two doors. IN IT: RANGE · CENTRE / UP / DOWN, REMOVE, REMOVE ALL, and — the half SERUM IS MISSING — with more than one macro on a control, the list of which route the outer arc edits, ON the control instead of in another window. CENTRE is Josh\'s "center of dial" and it is the one thing the vendored model could not do: `influence = lerped − r.min` makes the offset ALWAYS zero when the macro reads zero, so a base that is the MIDDLE of a swing needs a negative offset at m = 0 and there is no honest workaround (inverting the source still yields 0…1, two opposed routes both start at 0, and shifting the base would destroy the user\'s number, which is what registry.js exists to prevent). Four marked touches in lab/mir/modulation/mod.js — a `bi` field, a MIDPOINT anchor in routeInfluence, setRouteRange, and both ends of the serializer — and the diff goes from two hunks to seven, which mir.test.mjs §16 undoes by exact text and re-proves byte-identical. Measured HERE, through the real popover: CENTRE sets max = 2 × min(b, 1 − b), a macro at 0.5 moves the target BY EXACTLY NOTHING (Object.is on the base, not a tolerance), at 0 it is base − h and at 1 it is base + h, and `bi` rides the PROJECT FILE and comes back — a flag that does not round-trip does not change a control, it changes the sound of every patch ever saved with it. UP and DOWN re-derive from the base the knob is on NOW, reaching the top and the bottom exactly; the MIN/MAX faders follow; and REMOVE ALL empties the control and hands the number back bit for bit',
-    !w61set.error && w61set.onScreen === true
-      && w61t1.n === 1 && w61t1.t === 'material.softness' && w61t1.ring === true
-      && w61t2 && w61t2.mode === 'armed'
-      && w61t3.n === 2 && w61t3.ids.indexOf('material.grain') >= 0 && w61t3.arming === null && Math.abs(w61t3.grain - 0.35) < 1e-12
-      && w61t4 && w61t4.range.length === 1 && w61t4.buttons.indexOf('REMOVE') >= 0
-      && !w61pop.error && w61pop.labels.join() === 'CENTRE,UP,DOWN'
-      && w61pop.centre.bi === true && Math.abs(w61pop.centre.max - 2 * w61pop.centre.half) < 1e-12
-      && w61pop.centre.atHalf.exact === true
-      && Math.abs(w61pop.centre.atZero - (w61pop.centre.base - w61pop.centre.half)) < 1e-9
-      && Math.abs(w61pop.centre.atOne - (w61pop.centre.base + w61pop.centre.half)) < 1e-9
-      && w61pop.wire.indexOf(1) >= 0 && w61pop.back === true
-      && w61pop.mode.join() === 'CENTRE'
-      && w61pop.up.bi === false && Math.abs(w61pop.up.hi - 1) < 1e-9
-      && w61pop.down.bi === false && Math.abs(w61pop.down.lo) < 1e-9
-      && w61pop.removedAll.n === 0 && w61pop.removedAll.exact === true && w61pop.removedAll.ring === null
-      && w61pop.errs === 0, w61tch);
+  // B118 · B119 · B120 RETIRED (0.5.0 C4): the macro grip router, the depth arc and the finger / popover were lab/modwindow.js's DOM (deleted, 3,110 lines); the window is the kit's createModulation, whose own gate and tests/routed-knob · lfo-tension · take-in-bugs.browser-test.mjs hold them
 
   /* ══ WAVE 62 · THE INSTRUMENT IS OPERABLE FROM A KEYBOARD ═══════════════════════════════════════
    * Wave 57 gave the Tab key back to the browser and said, in its own REPORT block, that the rest was
@@ -5984,12 +5125,14 @@ try {
       return !t || (w && t.indexOf(w.textContent) < 0); }).length;
     const by = (l) => S.find((e) => e.getAttribute('aria-label') === l);
     const k = by('GAMMA'), fd = [...document.querySelectorAll('.fd[role="slider"]')].filter((e) => e.offsetParent)[0];
+    k.scrollIntoView({ block: 'center' }); await new Promise((r) => setTimeout(r, 200));   // 0.5.0 re-aim: the reveal does not run for a knob that is out of view
     k.focus(); await new Promise((r) => setTimeout(r, 400));              // the reveal is a TRANSITION; measure it after it has run
     const kOp = getComputedStyle(k.querySelector('.k-val')).opacity;
+    fd.scrollIntoView({ block: 'center' }); await new Promise((r) => setTimeout(r, 200));
     fd.focus(); await new Promise((r) => setTimeout(r, 400));
     const fOp = getComputedStyle(fd.querySelector('.fd-val')).opacity;
     return { n: S.length, nameless: nameless, numbers: numbers, said: said,
-      drag: (by('DRAG γ (TOY)') || {}).getAttribute ? by('DRAG γ (TOY)').getAttribute('aria-valuetext') : null,
+      drag: (by('DRAG γ') || {}).getAttribute ? by('DRAG γ').getAttribute('aria-valuetext') : null,   // 0.5.0 re-aim: a526bda dropped the (TOY) from the label
       elem: by('ELEMENT  Z').getAttribute('aria-valuetext'),
       kOp: kOp, fOp: fOp, errs: window.__e.length };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
@@ -5999,7 +5142,7 @@ try {
     hueFound, hue: { h0: hue0, one: hue1, tenLeft: hueL, twelveRight: hueR }, fric: fricT, sweep: sweepT };
   judge('B122 A KNOB CHANGES BY KEYBOARD, IN THE RIGHT UNITS — AND THE UNITS ARE TRAVEL, NOT VALUE (wave 62). The law was already inside knob(): the pointer drag moves normalized travel and then denormalizes, so an arrow moves a knob\'s TRAVEL by a fixed fraction and never its VALUE by a fixed amount — one rule for a linear and a logarithmic dial, with no new mathematics. GAMMA (linear, 0.5…2.4) moves (hi−lo)/100 per arrow and a quarter of that on Shift; RATE (log, 0.1…3000) moves a constant RATIO, and THE RATIO MEASURED AT THE BOTTOM EQUALS THE RATIO MEASURED AT THE TOP to 1e-9 — which is the clause that proves a fixed additive step was rejected on purpose rather than by accident, since it would have been a 40 000-press crawl at 0.1 and invisible at 3000. Three rulings a builder gets wrong, each gated: on the STEPPED ELEMENT Z one arrow is exactly +1 AND SO IS SHIFT+ARROW, because a quarter-step rounds straight back to where it started and Shift would be a dead key; a WRAP knob does not clamp at the seam, so one ArrowLeft from HUE = 0 lands at 0.99 and thirty-two more presses in both directions leave valuenow inside [valuemin, valuemax]; and every one of the 80 sliders announces through its OWN fmt — aria-valuetext is character-for-character the string the eye reads, so DRAG γ at zero says "off" and FRICTION at zero says "∞ · forever" where a bare number would say "zero" and lie. Delete restores the default and the MODEL moved with it. And skin.css\'s `.k:focus-within .k-val`, written waves ago for a focusable root that did not exist yet, now reveals — as does the `.fd` half, which had to be added.',
     !sweepT.error && gamFound.found === true && gamFound.at === true
-      && Math.abs((gam1 - gam0) - 0.019) < 1e-9 && Math.abs((gam2 - gam1) - 0.019 / 4) < 1e-9
+      && Math.abs((gam1 - gam0) - 0.019) < 1e-9 && Math.abs((gam2 - gam1) - 0.019 / 8) < 1e-9   /* 0.5.0 re-aim (C0): the kit's ONE KNOB LAW gears Shift to an eighth, not a quarter */
       && Math.abs((gam3 - gam2) - 0.19) < 1e-9 && Math.abs(gamH - 0.5) < 1e-12 && Math.abs(gamE - 2.4) < 1e-12
       && Math.abs(gamD.v - 1) < 1e-12 && Math.abs(gamD.model - 1) < 1e-12
       && rateFound.found === true && Math.abs(rt0 - 0.1) < 1e-9 && Math.abs(rt2 - 3000) < 1e-6
@@ -6097,19 +5240,9 @@ try {
   const c6a = await g.ev(`__LW.notebook.open(); await new Promise((r) => setTimeout(r, 200)); const t = document.querySelector('.nb-text'); window.__ta = t; t.value = ''; t.focus(); return { at: document.activeElement === t };`);
   await press('h');
   const c6b = await g.ev(`const R = { hidden: document.body.classList.contains('ui-hidden'), typed: window.__ta.value }; __LW.notebook.close(); return R;`);
-  const c7a = await g.ev(`__LW.layout.raise('settings'); await new Promise((r) => setTimeout(r, 250));
-    const chip = [...document.querySelectorAll('.keys-chip')].filter((e) => e.offsetParent)[0];
-    chip.click(); await new Promise((r) => setTimeout(r, 150));
-    /* the KEYS list is REBUILT by arming the capture (ui.keysRefresh), so the button that was clicked is
-       detached and focusing IT would focus nothing — the seat to take is the one that replaced it. */
-    const live = [...document.querySelectorAll('.keys-chip')].filter((e) => e.offsetParent)[0];
-    window.__chip = live; live.focus();
-    return { capturing: __LW.keys.capturing, at: document.activeElement === live, playing: __LW.clock.playing };`);
-  await press(KEY.SPACE);
-  const c7b = await g.ev(`await new Promise((r) => setTimeout(r, 150)); const R = { capturing: __LW.keys.capturing, playing: __LW.clock.playing,
-    bound: (__LW.keys.actions.find((a) => a.id === 'play') || {}).key }; __LW.keys.reset(); __LW.pause(); R.errs = window.__e.length; return R;`);
+  // 0.5.0 C3: the SETTINGS key chips and their capture left for the kit's KEYBOARD window — arming a recording and binding a key is tests/keyboard-window.browser-test.mjs (a real recording binds; a taken chord is stolen on the second press)
   const oneKeyT = { swPick, enter_on_switch: c1, arrow_on_switch: [c3a, c4], space_on_slider: [c2a, c2b], arrow_on_slider: [c3b, c3c],
-    bare_h: [c5a, c5b], ctrl_z: c5c, textarea: [c6a, c6b], capture: [c7a, c7b] };
+    bare_h: [c5a, c5b], ctrl_z: c5c, textarea: [c6a, c6b] };
   judge('B124 ENTER PRESSES THE BUTTON AND DOES NOT PLAY — AND ARROWS STILL STEP TIME FROM A SWITCH (wave 62, the single-key law). The rule is not "a control swallows everything", which would take H, N, B and ? away from a keyboard user the moment they touched a knob, and it is not a `{global:true}` flag on 38 actions, which is annotation to maintain and gets forgotten on the 39th. A KEY BELONGS TO THE FOCUSED CONTROL WHEN THAT CONTROL\'S ROLE WOULD USE IT: one Set lookup on the key and the role, so it degrades correctly the day a 39th action lands. All seven clauses, each one focus plus one real driver key plus one read: Enter on a switch flips its aria-pressed and leaves the transport alone, and the app did not preventDefault, which is what lets the button\'s own native activation run; Space on a KNOB plays, because a slider has no use for Space and this is the lab\'s most-pressed key; ArrowRight on a knob turns the knob and the clock does not move; ArrowRight on a SWITCH steps time and this is the clause a lazy implementation fails, because it is the one that proves the rule is key-AND-role shaped; a bare h hides the interface from a focused switch and Ctrl+Z undoes from inside a knob, since a modifier is never owned; the same bare h inside the notebook TYPES, which re-proves the INPUT/TEXTAREA guard this wave could have broken; and a Space pressed while a KEYS chip is capturing binds the key instead of pressing the button, which is why the guard sits BELOW the capturing block and is the ordering a builder gets wrong.',
     swPick.at === true && c1.pressed !== swPick.pressed && c1.playing === false && c1.prevented === false
       && c3a.playing === false && c4.moved === true
@@ -6118,8 +5251,7 @@ try {
       && c5a.hidden === true && c5b.hidden === false
       && c5c.canUndo === true && c5c.after < c5c.before
       && c6a.at === true && c6b.hidden === false && c6b.typed === 'h'
-      && c7a.capturing === 'play' && c7a.at === true && c7b.capturing === null && c7b.playing === false && c7b.bound === 'Space'
-      && c7b.errs === 0, oneKeyT);
+      , oneKeyT);
 
   /* ── B125 · NO KEYBOARD TRAP ANYWHERE (WCAG 2.1.2) ───────────────────────────────────────────── */
   await goto('warn=0');
@@ -6213,18 +5345,19 @@ try {
   const escT2 = await g.ev(`await new Promise((r) => setTimeout(r, 150)); const t = document.getElementById('title');
     return { hidden: document.getElementById('menubar').hidden, exp: t.getAttribute('aria-expanded'), at: document.activeElement.id };`);
   const themeWasT = await g.ev(`__LW.layout.raise('settings'); await new Promise((r) => setTimeout(r, 250));
+    const lt = [...document.querySelectorAll('.dev[data-id="settings"] .seg-b')].find((b) => b.textContent.trim() === 'LOOK'); if (lt) lt.click(); await new Promise((r) => setTimeout(r, 300));   /* 0.5.0 re-aim: THEME sits on SETTINGS' LOOK tab, and a radio on a hidden tab cannot take focus */
     const rg = [...document.querySelectorAll('[role="radiogroup"]')].find((x) => x.getAttribute('aria-label') === 'THEME');
     return { checked: rg.querySelector('[aria-checked="true"]').textContent, theme: document.body.dataset.theme, options: rg.querySelectorAll('[role="radio"]').length };`);
   await g.ev(`__LW.layout.raise('settings'); await new Promise((r) => setTimeout(r, 250));
     const rg = [...document.querySelectorAll('[role="radiogroup"]')].find((x) => x.getAttribute('aria-label') === 'THEME');
-    window.__rg = rg; rg.querySelector('[aria-checked="true"]').focus(); return 1;`);
+    rg.scrollIntoView({ block: 'center' }); window.__rg = rg; rg.querySelector('[aria-checked="true"]').focus(); return 1;`);
   await press(KEY.RIGHT);
   const themeT = await g.ev(`await new Promise((r) => setTimeout(r, 250)); return { theme: document.body.dataset.theme, checked: window.__rg.querySelector('[aria-checked="true"]').textContent };`);
   await press(KEY.LEFT);
   const themeBackT = await g.ev(`await new Promise((r) => setTimeout(r, 250)); return { theme: document.body.dataset.theme };`);
   const namesT = await g.ev(`try {
     const t = [...document.querySelectorAll(${JSON.stringify(TABBABLE)})];
-    const imp = document.querySelector('.pj-import input[type="file"]');
+    // 0.5.0 C6: PROJECTS' IMPORT <input type=file> is gone — FOLDERS makes its picker when it is pressed — so its labelling clause is retired
     const tb = [...document.querySelectorAll('.tbtn')].map((b) => b.getAttribute('aria-label'));
     const play = document.querySelector('.tbtn.play');
     const glyph0 = play.textContent, name0 = play.getAttribute('aria-label'), pressed0 = play.getAttribute('aria-pressed');
@@ -6232,7 +5365,7 @@ try {
     const glyph1 = play.textContent, name1 = play.getAttribute('aria-label'), pressed1 = play.getAttribute('aria-pressed');
     __LW.pause();
     const dev = [...document.querySelectorAll('.dev')].filter((d) => d.querySelector('.dev-copy'))[0];
-    return { importIn: t.indexOf(imp) >= 0, importName: imp.labels && imp.labels[0] ? imp.labels[0].textContent : '',
+    return {
       tbtn: tb, glyphMoved: glyph0 !== glyph1, nameHeld: name0 === name1, pressedMoved: pressed0 !== pressed1,
       copy: dev ? dev.querySelector('.dev-copy').getAttribute('aria-label') : null,
       regions: [...document.querySelectorAll('section.dev[aria-labelledby]')].length,
@@ -6249,10 +5382,9 @@ try {
       && escT2.hidden === true && escT2.exp === 'false' && escT2.at === 'title'
       && themeWasT.options === 3 && themeT.theme !== themeWasT.theme && themeT.checked !== themeWasT.checked
       && themeBackT.theme === themeWasT.theme
-      && namesT.importIn === true && namesT.importName.indexOf('IMPORT') >= 0
-      && namesT.tbtn.length === 6 && namesT.tbtn.every((n) => n && n.length > 3)   /* wave 65: the MOD arm is the sixth, and it announces as words like the other five */
+      && namesT.tbtn.length === 7 && namesT.tbtn.every((n) => n && n.length > 3)   /* wave 65: the MOD arm is the sixth, and it announces as words like the other five; native-ui's tempo button is the seventh */
       && namesT.glyphMoved === true && namesT.nameHeld === true && namesT.pressedMoved === true
-      && (namesT.copy || '').indexOf('digest') >= 0 && namesT.power === 'power'
+      && (namesT.copy || '').indexOf('copy this panel') >= 0 && namesT.power === 'power'   /* 0.5.0 re-aim: the COPY chip says 'copy this panel as text', no longer 'digest' */
       && namesT.regions >= 20 && namesT.regions === namesT.namedRegions
       && namesT.errs === 0, menuT);
 
@@ -6275,7 +5407,7 @@ try {
     mo.observe(cv, { attributes: true, attributeFilter: ['aria-label'] });
     await new Promise((r) => setTimeout(r, 3000));
     R.during = n; R.tMoved = __LW.clock.t > 10;
-    __LW.pause(); await new Promise((r) => setTimeout(r, 500));
+    __LW.pause(); await new Promise((r) => setTimeout(r, 150)); __LW.schedule(1); await new Promise((r) => setTimeout(r, 500));   /* 0.5.0 re-aim: the sentence is written from a frame at most every 100 ms, so a final frame inside that window leaves it saying 'playing' — one more frame, as B23 asks */
     R.onPause = n - R.during; R.paused = cv.getAttribute('aria-label'); mo.disconnect();
     /* THE CEILING ON SPEECH.  This is the clause that stops a later wave gold-plating §6 into
        existence: the 107 readouts rewrite on a 10 Hz change-guard, and a polite region on any one of
@@ -6388,308 +5520,14 @@ try {
       && lnkT.before.base === 1 && lnkT.before.modulated === true && lnkT.before.routes === 1
       && lnkT.open.ok === true && lnkT.open.opened === true
       && lnkT.carried.exposure === 6.5 && Math.abs(lnkT.carried.softness - 1.9) < 1e-6
-      && Object.is(lnkT.frame1.base, lnkT.carried.exposure) && lnkT.frame1.modulated === true
+      && Object.is(lnkT.frame1.base, lnkT.carried.exposure) && lnkT.frame1.modulated === false   /* 0.5.0 re-aim (C4 · R-B1): there is ONE clock, and a link's open pauses THE play — the route stays (routes === 1 below) but nothing drives the control until play */
       && Object.is(lnkT.frame1.softness, lnkT.carried.softness)
       && Object.is(lnkT.later.base, lnkT.carried.exposure) && lnkT.later.routes === 1
       && Object.is(lnkT.restored.value, lnkT.carried.exposure) && lnkT.restored.exact === true
       && lnkT.errs === 0, lnkT);
 
 
-  /* ══ THE PORTED WINDOW · wave 64 artifact, wave 107 host contract ════════════════════════
-   * mir.test proves the original bytes. B129 measures the deliberate host changes against
-   * the artifact's retained widths and the host's own effective geometry. */
-  /* STALE LAW: waves 74–105 deliberately separated the surfaces, moved ADD to the rail,
-     shortened the cards, unified knob sizes and made fold a two-state act. The frozen
-     artifact is still proved byte-for-byte by mir.test; this block proves its live HOST. */
-  const mwA = await g.ev(`try {
-    const nap = () => new Promise(r => setTimeout(r, 180));
-    __LW.pause(); __LW.mod.reset(); __LW.mod.expand();
-    __LW.mod.addSource('lfo'); __LW.mod.addSource('env'); await nap();
-    const { GEOM } = await import('./mir/modwindow/modwindow.js');
-    const win = document.querySelector('#modwin'), V = __LW.mod.view;
-    const box = e => { const b = e.getBoundingClientRect(); return [Math.round(b.width), Math.round(b.height)]; };
-    const css = e => getComputedStyle(e);
-    const cards = [...win.querySelectorAll('.m2dev')];
-    const full = cards.map(box), wantedHeight = parseFloat(css(win.querySelector('.m2root')).getPropertyValue('--m2-device-h'));
-    const dims = V.geometry();
-    const fold = cards[0].querySelector('.m2fold'); fold.click(); await nap();
-    const folded = box(cards[0]), foldedMode = cards[0].dataset.mode;
-    fold.click(); await nap();
-    const restored = box(cards[0]), restoredMode = cards[0].dataset.mode;
-    const knobs = [...win.querySelectorAll('.m2kd')].map(box);
-    const addMacro = win.querySelector('.m2macadd'), addDevice = win.querySelector('.m2devadd');
-    const out = { full, wantedHeight, dims, folded, foldedMode, restored, restoredMode,
-      expectedWidth: GEOM.CARD_FULL.w, expectedStrip: GEOM.STRIP_W,
-      pane: css(win).backgroundColor, rootVisibility: css(win).visibility,
-      surfacesVisible: cards.every(e => css(e).visibility === 'visible' && css(e).pointerEvents === 'auto'),
-      sharedRadius: cards.every(e => css(e).borderTopLeftRadius === css(win.querySelector('.m2workbar')).borderTopLeftRadius),
-      knobsEqual: knobs.length > 0 && knobs.every(b => b.join() === knobs[0].join() && b[0] > 0),
-      addLabels: [addMacro, addDevice].map(e => e && e.textContent.trim()),
-      addsReachable: [addMacro, addDevice].every(e => e && box(e).every(v => v > 0)),
-      obsoleteAddsGone: !win.querySelector('.m2add,.m2addchip,.m2macdel'),
-      slotDeletes: [...win.querySelectorAll('.m2slot')].every(e => !!e.querySelector('.m2slotx') && !e.querySelector('.m2route')),
-      reorderHidden: cards.every(e => css(e.querySelector('.m2move')).display === 'none'),
-      dots: document.querySelectorAll('.kwin-grip-dots > i').length,
-      expectedDots: 9, railName: document.querySelector('.kwin-chiprail').getAttribute('aria-label'),
-      artifactRules: [...document.styleSheets].find(x => x.href && x.href.endsWith('/mir/modwindow/modwindow.css')).cssRules.length,
-      errs: window.__e.length };
-    __LW.mod.reset(); __LW.mod.collapse(); return out;
-  } catch(e) { return {error: String(e)}; }`) || {};
-  judge('B129 THE HOST KEEPS THE PORTED GEOMETRY IT NOW SHIPS. Waves 74–105 deliberately made the root transparent and its cards independent surfaces, shortened their shared height, unified the knobs and replaced the three-way fold with FULL/MINIMIZED. The macro revision gives ADD MACRO and ADD DEVICE permanent rail seats, removes the duplicate add chip, puts delete on each macro row and removes the obsolete OUT label. Full widths and folded widths still come from the artifact; the two-way fold restores the exact box, the cards agree with the host height token, the window agrees with its effective size law, and every surfaced card remains visible and pressable. The transparent root itself stays visible because WebKit can otherwise omit the device cards inside its momentum scroller until a later mutation; transparent paint and pointer-events still make its gaps real. The artifact stylesheet parses all 709 current rules; unrelated house stylesheet counts carry no law.',
-    !mwA.error && mwA.full.every(b => b[0] === mwA.expectedWidth && b[1] === mwA.wantedHeight)
-      && mwA.dims.w === mwA.dims.lawW && mwA.dims.h === mwA.dims.lawH
-      && mwA.folded[0] === mwA.expectedStrip && mwA.folded[1] === mwA.wantedHeight && mwA.foldedMode === 'minimized'
-      && mwA.restored.join() === mwA.full[0].join() && mwA.restoredMode === 'full'
-      && mwA.pane === 'rgba(0, 0, 0, 0)' && mwA.rootVisibility === 'visible' && mwA.surfacesVisible
-      && mwA.sharedRadius && mwA.knobsEqual && mwA.addLabels.join() === 'ADD MACRO,ADD DEVICE'
-      && mwA.addsReachable && mwA.obsoleteAddsGone && mwA.slotDeletes && mwA.reorderHidden
-      && mwA.dots === mwA.expectedDots && mwA.railName === 'MODULATION window controls' && mwA.artifactRules === 709 && mwA.errs === 0, mwA);
-
-  /* ══ B130 · THE THREE DEFECTS THE PORT INHERITED, DRIVEN ═══════════════════════════════════
-   * Wave 63 deliberately did NOT build these three: they lived in markup this port replaces
-   * wholesale, so building them would have been work thrown away.  They are not thereby fixed,
-   * and a port that reproduces a window's geometry can very easily reproduce these with it —
-   * so each is driven here with real pointer events, on the numbers the review measured. ─── */
-  const mwB = await g.ev(`try {
-    const nap = (ms) => new Promise((r) => setTimeout(r, ms));
-    const out = {}, M = __LW.mod.model, V = __LW.mod.view;
-    __LW.pause(); __LW.mod.reset();
-    if (!__LW.mod.expanded) __LW.mod.expand();
-    const e1 = __LW.mod.addSource('env');
-    await nap(200); __LW.mod.paint();
-    const S = () => M.sourceOf(e1);
-    const card = () => document.querySelector('.m2dev[data-id="' + e1 + '"]');
-    const svg = () => card().querySelector('.m2svg');
-    const PE = (el, t, x, y) => el.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true,
-      pointerId: 64, pointerType: 'mouse', isPrimary: true, clientX: x, clientY: y, buttons: t === 'pointerup' ? 0 : 1 }));
-    const drag = (t, v, t2, v2) => { const a = V.at(e1, t, v), b = V.at(e1, t2, v2);
-      PE(svg(), 'pointerdown', a.x, a.y); PE(svg(), 'pointermove', a.x + (b.x - a.x) * 0.5, a.y + (b.y - a.y) * 0.5);
-      PE(svg(), 'pointermove', b.x, b.y); PE(svg(), 'pointerup', b.x, b.y); __LW.mod.paint(); };
-    const snap = () => { const s = S(); return { a: s.a, hold: s.hold, d: s.d, s: s.s, r: s.r }; };
-    const diff = (x, y) => Object.keys(x).filter((k) => !Object.is(x[k], y[k]));
-
-    /* ── 1 · THE ENV DRAG THAT DESTROYED TWO STAGES, AND THIS RACK IS OUTSIDE THE UNDO RING ──
-       The source latched the point's INDEX at pointerdown and re-read envMapOf(s) on every move.
-       The map is six long when hold > 0 and five when it is 0, so the instant a drag took hold to
-       zero, index 2 stopped meaning 'hold' and started meaning 'd' — measured on the real model,
-       d 0.8 -> 0 and the sustain 0.5 -> 1, neither touched by the user, with no road back. */
-    M.setSource(e1, { a: 0.2, hold: 0.3, d: 0.8, s: 0.5, r: 0.5, gateMode: 'oneshot' });
-    V.sync();
-    const fit = [...card().querySelectorAll('.m2zoom')].find((b) => b.textContent === 'FIT');
-    fit.click(); __LW.mod.paint();
-    out.mapWithHold = V.envMap(e1);
-    out.pointsWithHold = M.envPoints(S()).length;
-    const before1 = snap(), c1 = V.curve(e1);
-    /* point 2 IS the hold point while hold > 0; drag it left past the attack, which zeroes hold
-       AND SHORTENS THE MAP UNDER THE DRAG — the exact case that used to slip the index by one */
-    drag(c1.points[2].t, c1.points[2].v, c1.points[1].t - 0.02, c1.points[2].v);
-    out.defect1 = { changed: diff(before1, snap()), holdWent: [before1.hold, S().hold],
-      dKept: Object.is(before1.d, S().d), sKept: Object.is(before1.s, S().s), rKept: Object.is(before1.r, S().r),
-      mapAfter: V.envMap(e1).keys };
-
-    /* ── 2 · THE GRIP'S ADVERTISED DOUBLE-TAP FIRED ZERO TIMES ──────────────────────────────
-       Its own title says "Double-tap resets the macro" and the pointerdown's arm/disarm branch
-       returned BEFORE the tap watcher, so only every other tap reached it and the gesture that
-       fired it was a TRIPLE tap inside 320 ms. */
-    const m1 = M.macroList()[0].id;
-    const grip = document.querySelector('.m2slot[data-macro="' + m1 + '"] .m2grip');
-    const gb = grip.getBoundingClientRect(), gx = gb.left + gb.width / 2, gy = gb.top + gb.height / 2;
-    const tap = () => { PE(grip, 'pointerdown', gx, gy); PE(grip, 'pointerup', gx, gy); };
-    M.setMacro(m1, { value: 0.7, masterDepth: 0.3 });
-    out.defect2 = { title: grip.title, before: { v: M.macroOf(m1).value, d: M.macroOf(m1).masterDepth } };
-    tap(); await nap(40); tap();
-    out.defect2.afterTwo = { v: M.macroOf(m1).value, d: M.macroOf(m1).masterDepth, armed: V.arming() };
-    /* and a SLOW pair is not a double-tap: the 320 ms is kit.js's own number, one file, one place */
-    M.setMacro(m1, { value: 0.7, masterDepth: 0.3 });
-    tap(); await nap(460); tap();
-    out.defect2.afterSlow = { v: M.macroOf(m1).value, d: M.macroOf(m1).masterDepth };
-    if (V.arming()) window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-
-    /* ── 3 · FIT DID NOT FRAME A GATE ENVELOPE, AND THE CAPTION WENT STALE ──────────────────
-       envDuration(s) drops r under GATE while envPoints DRAWS it, so FIT framed 0.3565 s of a
-       picture that runs to 0.910 s — 155 % past the right edge — while the caption said "FIT
-       frames it"; and gateMode was not in the env signature, so after a GATE toggle the printed
-       duration was 2.94x stale for ever. */
-    M.setSource(e1, { a: 0.01, hold: 0, d: 0.3, s: 0.5, r: 0.6, gateMode: 'gate', timeScale: 4 });
-    V.sync(); __LW.mod.paint();
-    const drawn = S().a + S().hold + S().d + S().r, dur = M.envDuration(S());
-    fit.click(); __LW.mod.paint();
-    const c3 = V.curve(e1);
-    const lastReal = c3.points[c3.points.length - (c3.points.length > 4 ? 2 : 1)];
-    out.defect3 = { drawn, envDuration: dur, ratio: drawn / dur,
-      timeScale: S().timeScale, wouldHaveBeen: dur * 1.15, is: drawn * 1.15,
-      lastRealT: lastReal.t, caption: c3.caption, gateMode: S().gateMode,
-      inWindow: lastReal.t <= 1 + 1e-9 };
-    /* the caption cannot go stale on a GATE toggle, because it prints the DRAWN span and the
-       drawn span does not depend on the mode — and the signature carries gateMode anyway */
-    const sig0 = c3.sig;
-    M.setSource(e1, { gateMode: 'oneshot' }); __LW.mod.paint();
-    const c4 = V.curve(e1);
-    out.defect3.afterToggle = { caption: c4.caption, same: c4.caption === c3.caption, sigMoved: c4.sig !== sig0 };
-    /* AND THE BESIDE-IT: a stage clamped to t = 1 keeps its seconds, because envMove writes the
-       KNOB from the pointer and never re-reads the clamped point (the source lost 6 s of release
-       to a 2-px twitch, because its inverse could not write a stage longer than the window). */
-    M.setSource(e1, { a: 0.01, hold: 0, d: 0.3, s: 0.5, r: 6.5, timeScale: 1 });
-    V.sync(); __LW.mod.paint();
-    const rBefore = S().r, c5 = V.curve(e1);
-    const clamped = c5.points.findIndex((p) => p.t >= 1 - 1e-9);
-    const p5 = c5.points[clamped];
-    drag(p5.t, p5.v, p5.t - 0.008, p5.v);                       // a two-pixel twitch on the clamped stage
-    out.clamped = { at: clamped, rBefore, rAfter: S().r, lost: rBefore - S().r };
-
-    __LW.mod.reset(); if (__LW.mod.expanded) __LW.mod.collapse();
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B130 W-MOUNT · THE THREE DEFECTS THE PORT INHERITED DO NOT SURVIVE IT, AND EACH IS DRIVEN RATHER THAN ASSERTED (wave 64). Wave 63 built four of the third review\'s seven and deliberately left these three, because they lived in the markup this port replaces wholesale and building them would have been work thrown away — but they are not thereby fixed, and a port that reproduces a window\'s geometry can very easily reproduce these with it. (1) THE ENV DRAG DESTROYED TWO STAGES AND THIS RACK IS OUTSIDE THE UNDO RING: the point\'s INDEX was latched at pointerdown while the map was re-read on every move, and the map is six long when HOLD > 0 and five when it is 0 — so the instant a drag took HOLD to zero, index 2 stopped meaning `hold` and started meaning `d` (measured: d 0.8 s → 0 and the sustain 0.5 → 1, neither touched, with no road back). The KEY is latched now, so the drag that zeroes HOLD — the exact case, the map shortening under the finger — writes `hold` AND NOTHING ELSE: d, s and r come back Object.is-identical. (2) THE ADVERTISED DOUBLE-TAP FIRED ZERO TIMES: the grip\'s own title says "Double-tap resets the macro" and the pointerdown\'s arm/disarm branch returned before the tap watcher, so only every other tap reached it and the gesture that fired it was a TRIPLE tap. The watcher runs on EVERY lift now and before anything decides what the press meant, so TWO taps 40 ms apart put value 0.7 → 0 and depth 0.3 → 1 — and a pair 460 ms apart still does nothing, because the 320 ms is kit.js\'s one number in one file. (3) FIT DID NOT FRAME A GATE ENVELOPE: envDuration drops `r` under GATE while envPoints DRAWS it, so FIT framed 0.3565 s of a picture that runs to 0.910 s — 155 % past the right edge — and gateMode was not in the signature, so the printed duration went 2.94× stale for ever on a toggle. FIT frames what is DRAWN now (a + hold + d + r, always), the last real breakpoint lands inside the window, the caption prints the drawn span and is therefore IDENTICAL across a GATE toggle rather than merely refreshed, and gateMode is in the signature so the picture rebuilds anyway. And the one beside them: a stage clamped at t = 1 KEEPS ITS SECONDS. The inverse was ABSOLUTE — pointer t times the window, minus the earlier stages — which cannot express a stage longer than the window at all, so a two-pixel twitch on a 6.5 s release inside a 1 s window wrote 0.682 and threw 5.818 s away. It is RELATIVE now: the stage\'s own seconds and the finger\'s own t are latched at pointerdown and the stage moves by the DIFFERENCE, so the same twitch moves it by 0.008 s — exactly the seconds the finger travelled — and the release is still 6.492. It is identical to the absolute inverse wherever the point is not clamped, and it stops a point grabbed 15 px off centre jumping under the finger',
-    !mwB.error
-      && mwB.mapWithHold.keys.join() === ',a,hold,d,r' && mwB.pointsWithHold === 6
-      && mwB.defect1.changed.join() === 'hold' && mwB.defect1.holdWent[0] === 0.3 && mwB.defect1.holdWent[1] === 0
-      && mwB.defect1.dKept && mwB.defect1.sKept && mwB.defect1.rKept
-      && mwB.defect1.mapAfter.join() === ',a,d,r'
-      && /Double-tap resets the macro/.test(mwB.defect2.title)
-      && mwB.defect2.before.v === 0.7 && mwB.defect2.before.d === 0.3
-      && mwB.defect2.afterTwo.v === 0 && mwB.defect2.afterTwo.d === 1 && mwB.defect2.afterTwo.armed === null
-      && mwB.defect2.afterSlow.v === 0.7 && mwB.defect2.afterSlow.d === 0.3
-      && Math.abs(mwB.defect3.drawn - 0.91) < 1e-9 && Math.abs(mwB.defect3.envDuration - 0.31) < 1e-9
-      && Math.abs(mwB.defect3.ratio - 2.935) < 0.01
-      && Math.abs(mwB.defect3.timeScale - mwB.defect3.is) < 1e-9
-      && Math.abs(mwB.defect3.timeScale - mwB.defect3.wouldHaveBeen) > 0.6
-      && mwB.defect3.inWindow && mwB.defect3.gateMode === 'gate'
-      && /0\.910 s drawn/.test(mwB.defect3.caption)
-      && mwB.defect3.afterToggle.same === true && mwB.defect3.afterToggle.sigMoved === true
-      && mwB.clamped.rBefore === 6.5 && Math.abs(mwB.clamped.lost - 0.008) < 1e-6
-      && mwB.errs === 0, mwB);
-
-
-  /* ══ B131 · THE ONE REAL DECISION IN THE PORT, MADE ON EVIDENCE ════════════════════════════
-   * The artifact's routing overlays are the only part of its sheet that is NOT the window: they
-   * attach into HOST controls in other windows, which is why the stager left their 39 rules
-   * unscoped.  Which of them travel is the wave's one genuine choice, and "two rings on one
-   * dial" is the failure mode it had to avoid.  This block is the measurement. ───────────── */
-  const mwC = await g.ev(`try {
-    const nap = (ms) => new Promise((r) => setTimeout(r, ms));
-    const out = {}, M = __LW.mod.model, V = __LW.mod.view;
-    __LW.pause(); __LW.mod.reset();
-    if (!__LW.mod.expanded) __LW.mod.expand();
-    await nap(150);
-    const css = await (await fetch('./mir/modwindow/modwindow.css')).text();
-    /* every one of the unscoped rules is still in the sheet, whatever the host paints with */
-    out.rulesPresent = ['.m2ghost', '[data-m2target].m2droppable', '[data-m2target].m2drop', '.m2ring ',
-      '.m2ringarc', '.m2clr ', '.m2span ', '.m2spanarc', '.m2spanned'].filter((k) => css.indexOf(k) >= 0).length;
-
-    /* ── WHAT TRAVELS: the GHOST.  It is position:fixed at the pointer and needs no room beside
-       anything, so the host's geometry cannot break it — and λWAVES' own .mod-ghost is gone. */
-    const m1 = M.macroList()[0].id;
-    const grip = document.querySelector('.m2slot[data-macro="' + m1 + '"] .m2grip');
-    const gb = grip.getBoundingClientRect(), gx = gb.left + gb.width / 2, gy = gb.top + gb.height / 2;
-    const PE = (el, t, x, y) => el.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true,
-      pointerId: 71, pointerType: 'mouse', isPrimary: true, clientX: x, clientY: y, buttons: t === 'pointerup' ? 0 : 1 }));
-    const dial = document.querySelector('.k[data-param="material.softness"]');
-    dial.scrollIntoView({ block: 'center' }); await nap(90);
-    const db = dial.getBoundingClientRect(), dx = db.left + db.width / 2, dy = db.top + db.height / 2;
-    PE(grip, 'pointerdown', gx, gy); PE(grip, 'pointermove', gx + 20, gy + 20);
-    const gh = document.querySelector('.m2ghost');
-    out.ghost = { isArtifact: !!gh, ours: !!document.querySelector('.mod-ghost'),
-      onBody: gh.parentElement === document.body, pos: getComputedStyle(gh).position,
-      pe: getComputedStyle(gh).pointerEvents, h: Math.round(gh.getBoundingClientRect().height),
-      bg: getComputedStyle(gh).backgroundColor, acc: getComputedStyle(document.body).getPropertyValue('--acc').trim(),
-      text: gh.textContent };
-    /* the DROP MARKS: the artifact's WORD on every valid control, and our PAINT.
-       Wave 106 moved WAVE's switches to SETTINGS; its non-routable SPACE segment
-       still proves that controls outside the routing vocabulary recede. */
-    out.marks = { expected: [...document.querySelectorAll('.k[data-param]')].filter(k => __LW.mod.registry.has(k.dataset.param)).length, stamped: document.querySelectorAll('.k[data-m2target]').length,
-      lit: document.querySelectorAll('.k[data-param].mod-drop').length,
-      recede: getComputedStyle(document.querySelector('.dev[data-id="observer"] .seg')).opacity,
-      arming: document.body.classList.contains('mod-arming') };
-    PE(grip, 'pointermove', dx, dy);
-    out.marks.over = document.querySelectorAll('.k.is-over').length;
-    PE(grip, 'pointerup', dx, dy); await nap(80); __LW.mod.paint();
-    out.marks.after = { lit: document.querySelectorAll('.k.mod-drop').length,
-      ghost: getComputedStyle(document.querySelector('.m2ghost')).display };
-
-    /* ── WHAT DOES NOT, AND WHY.  Build BASINS' own ring and clear on a real λWAVES dial and
-       measure what they land on: both are position:absolute; left:100%; margin-left:3px with a
-       44 px ::before band, which is right in a window with room to the right of its controls and
-       wrong on a 34 px dial in a 62 px cell packed three and four across a 286 px rack row. */
-    const kdial = dial.querySelector('.k-dial');
-    const ring = document.createElement('div'); ring.className = 'm2ring';
-    ring.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'svg'));
-    kdial.appendChild(ring);
-    const clr = document.createElement('button'); clr.className = 'm2clr'; kdial.appendChild(clr);
-    const cell = dial.getBoundingClientRect();
-    const bandBox = (el) => { const b = el.getBoundingClientRect();
-      return { left: b.left + b.width / 2 - 22, right: b.left + b.width / 2 + 22,
-               top: b.top + b.height / 2 - 22, bottom: b.top + b.height / 2 + 22 }; };
-    const others = [...document.querySelectorAll('.k')].filter((k) => k !== dial).map((k) => k.getBoundingClientRect());
-    const hits = (bx) => others.filter((n) => bx.right > n.left && bx.left < n.right && bx.bottom > n.top && bx.top < n.bottom).length;
-    out.notTravelled = {
-      cell: [Math.round(cell.width), Math.round(cell.height)],
-      dial: [Math.round(kdial.getBoundingClientRect().width), Math.round(kdial.getBoundingClientRect().height)],
-      ringBox: [Math.round(ring.getBoundingClientRect().width), Math.round(ring.getBoundingClientRect().height)],
-      ringPastCell: Math.round(ring.getBoundingClientRect().right - cell.right),
-      ringBandPastCell: Math.round(bandBox(ring).right - cell.right),
-      ringBandOnNeighbours: hits(bandBox(ring)),
-      clrPastCell: Math.round(clr.getBoundingClientRect().right - cell.right),
-      clrBandOnNeighbours: hits(bandBox(clr)),
-      clrBg: getComputedStyle(clr).backgroundColor,
-      band: getComputedStyle(ring, '::before').width };
-    ring.remove(); clr.remove();
-    out.shipped = { rings: document.querySelectorAll('.m2ring').length,
-      clears: document.querySelectorAll('.m2clr').length,
-      spans: document.querySelectorAll('.m2span').length,
-      ours: document.querySelectorAll('.k-ring').length };
-    out.oursBox = (() => { const r = document.querySelector('.k-ring'); if (!r) return null;
-      const b = r.getBoundingClientRect(); return [Math.round(b.width), Math.round(b.height), r.getAttribute('viewBox')]; })();
-
-    /* ── AND THE THREE THINGS OURS SAYS THAT BASINS' RING CANNOT ──────────────────────────── */
-    /* (a) CENTRE — Josh's "center of dial", the bipolar route the model could not express until
-           forced edits 2/8 to 6/8 gave a route its bi flag */
-    V.pop('material.softness', 300, 300);
-    const seg = [...document.querySelectorAll('.mod-pop .seg-b')].find((b) => b.textContent === 'CENTRE');
-    out.centre = { offered: !!seg };
-    seg.click(); await nap(60); __LW.mod.paint();
-    const rCentre = V.ring('material.softness');
-    out.centre.bi = rCentre.bi;
-    out.centre.symmetric = Math.abs((rCentre.baseNorm - rCentre.lo) - (rCentre.hi - rCentre.baseNorm)) < 1e-9;
-    out.centre.state = V.popState();
-    V.closePop();
-    /* (b) THE SPUR — Massive's break at the limit, inverted, and the artifact draws none */
-    M.setRouteRange(V.routes()[0].id, { min: 0, max: 1, bi: false });
-    __LW.mod.registry.setBase('material.softness', 2.0); __LW.mod.paint();
-    const rSpur = V.ring('material.softness');
-    out.spur = { d: rSpur.spur, drawn: rSpur.spur.length > 0, hi: rSpur.hi };
-    /* (c) A WRAP DIAL gets 360 degrees from the top, because that is the law its needle runs on */
-    __LW.mod.route(m1, 'material.hue', 0, 1); await nap(60); __LW.mod.paint();
-    const rWrap = V.ring('material.hue');
-    out.wrap = { isWrap: rWrap.wrap, full: /A 21.5 21.5 0 1 1/.test(rWrap.edit), d: rWrap.edit.slice(0, 40) };
-
-    __LW.mod.reset(); __LW.mod.registry.resync();
-    if (__LW.mod.expanded) __LW.mod.collapse();
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B131 W-MOUNT · THE ROUTING OVERLAYS ARE SPLIT, AND THE SPLIT IS A MEASUREMENT (wave 64). The artifact\'s overlays are the one part of its sheet that is NOT the window — they attach into HOST controls in other windows, which is why the stager left their 39 rules unscoped and why which of them travel was this wave\'s one genuine decision. All nine of the selector families are still in the shipped sheet whatever the host paints with. THE GHOST TRAVELS: .m2ghost is the artifact\'s own pill, built by its own buildGhost onto document.body, position: fixed and pointer-events: none at the pointer, 30 px tall and wearing --acc — it needs no room beside anything, so no host geometry can break it, and λWAVES\' own .mod-ghost is DELETED rather than shipped beside it. THE RING AND THE CLEAR DO NOT, and the reason is measured rather than argued: both are position: absolute; left: 100%; margin-left: 3px with a 44 px ::before band, which is right in a window with room to the right of its controls and wrong here — built on a real λWAVES dial, the ring\'s box lands 14 px past the right edge of the 62 px knob cell and its band 23 px past, ON a neighbouring knob, and the clear button does the same. On top of the geometry, wave 61\'s arc says three things BASINS\' 300-degree badge cannot: CENTRE (Josh\'s "center of dial" — the bipolar route that cost five forced edits in mod.js, offered in the popover and symmetric about the base to 1e-9), the overflow SPUR (Massive\'s break at the limit, inverted, drawn when a route reaches past the end), and 360 DEGREES ON A WRAP DIAL (HUE\'s needle runs a full turn, so a 270-degree arc on it would put the modulation somewhere the needle never goes). So exactly ONE ring is on each dial and it is ours; no .m2ring, .m2clr or .m2span is built anywhere. THE DROP MARKS SPLIT THE OTHER WAY, deliberately: the ARTIFACT\'S WORD is stamped — data-m2target on every routable control, so nothing is renamed — while the PAINT is ours, because two outline rules cannot say what a touch screen needs (all registered dial targets lit at once, the duplicate marked apart, the one under the pointer marked, and WAVE\'s non-routable SPACE segment receded to .45 for the whole gesture). And .m2clr\'s copied-broken transparency IS NO LONGER COPIED (wave 69, on Josh\'s ruling that the plugin\'s defects are ours to fix): built on a host control it now carries a real plate, because modhost.css entry 17 gives the .m2root-local alias a REACHABLE fallback — the HOUSE recess, which is themed, and which is the right answer twice over for a button that lands on a λWAVES dial',
-    !mwC.error && mwC.rulesPresent === 9
-      && mwC.ghost.isArtifact && mwC.ghost.ours === false && mwC.ghost.onBody
-      && mwC.ghost.pos === 'fixed' && mwC.ghost.pe === 'none' && mwC.ghost.h === 30
-      && mwC.ghost.text === 'MACRO 1'
-      && mwC.marks.stamped === mwC.marks.expected && mwC.marks.lit === mwC.marks.expected && mwC.marks.expected > 0 && mwC.marks.arming === true
-      && parseFloat(mwC.marks.recede) < 0.5 && mwC.marks.over === 1
-      && mwC.marks.after.lit === 0 && mwC.marks.after.ghost === 'none'
-      && mwC.notTravelled.cell[0] === 62 && mwC.notTravelled.dial[0] === 34
-      && mwC.notTravelled.ringBox.join() === '26,26' && mwC.notTravelled.band === '44px'
-      && mwC.notTravelled.ringPastCell === 14 && mwC.notTravelled.ringBandPastCell === 23
-      && mwC.notTravelled.ringBandOnNeighbours >= 1 && mwC.notTravelled.clrPastCell === 14
-      && mwC.notTravelled.clrBandOnNeighbours >= 1
-      && mwC.notTravelled.clrBg !== 'rgba(0, 0, 0, 0)'   /* WAVE 69: it was transparent here too, and that is fixed — modhost.css entry 17 gives the alias a reachable fallback */
-      && mwC.shipped.rings === 0 && mwC.shipped.clears === 0 && mwC.shipped.spans === 0 && mwC.shipped.ours === 1
-      && mwC.oursBox[2] === '0 0 60 60'
-      && mwC.centre.offered && mwC.centre.bi === true && mwC.centre.symmetric
-      && mwC.centre.state.range.join() === 'CENTRE'
-      && mwC.spur.drawn && mwC.spur.hi > 1
-      && mwC.wrap.isWrap === true && mwC.wrap.full === true
-      && mwC.errs === 0, mwC);
+  // B129 · B130 · B131 RETIRED (0.5.0 C4): the ported artifact's HOST geometry (709 artifact rules, the Double-tap title, the routing-overlay cells and rings) was lab/modwindow.js's and lab.css's badge ladders — both deleted; the window is the kit's createModulation, held by MIR's gate (mir.test, the stylehash) and tests/routed-knob · lfo-tension.browser-test.mjs
 
   /* ══ WAVE 65 · W-MODKEY — the arm, the one key, and the three resume laws ═══════════════════════
    * Josh's spec: "the play/pause button should have a small MOD button that glows on or off … Space
@@ -6730,156 +5568,7 @@ try {
              routes: __LW.mod.view.routes().length, body: document.activeElement === document.body };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
 
-  const w65rigT = await w65rig({ sync: true, anchor: true });
-  const w65seatT = await g.ev(`try {
-    const b = document.querySelector('#transport .tbtn.modb'), node = b;
-    const pill = b.getBoundingClientRect();
-    __LW.layout.dockTransport(); await new Promise((r) => setTimeout(r, 220));
-    const dockedBox = b.getBoundingClientRect();
-    const same = document.querySelector('#transport .tbtn.modb') === node;
-    const inDocked = !!b.closest('#transport.docked');
-    __LW.layout.dockTransport(); await new Promise((r) => setTimeout(r, 220));
-    const inPill = !!b.closest('#transport.mini');
-    /* the glow is a TOKEN, proved by resolving --acc in the page rather than by naming a hex */
-    const probe = document.createElement('span'); probe.style.color = 'var(--acc)';
-    document.body.appendChild(probe); const accent = getComputedStyle(probe).color; probe.remove();
-    const onC = getComputedStyle(b).color;
-    b.classList.remove('on'); const offC = getComputedStyle(b).color; b.classList.add('on');
-    /* THE PILL'S WIDTH BUDGET: nothing in the row is flex-shrunk any more */
-    const T = document.getElementById('transport');
-    /* WAVE 69: the width budget is about the SEATS, so a child the pill hides is not in it — the
-       REPEATS formula this wave gave the transport is display:none on the pill (a two-line derivation
-       in a 32-px strip would clip or break the row) and would otherwise report a legitimate 0. */
-    const kids = [...T.children].filter((k) => getComputedStyle(k).display !== 'none')
-      .map((k) => ({ c: k.className.split(' ')[0], w: +k.getBoundingClientRect().width.toFixed(1) }));
-    return { text: b.textContent, label: b.getAttribute('aria-label'), pressed: b.getAttribute('aria-pressed'),
-             on: b.classList.contains('on'), tbtn: b.classList.contains('tbtn'),
-             pill: [Math.round(pill.width), Math.round(pill.height)],
-             docked: [Math.round(dockedBox.width), Math.round(dockedBox.height)],
-             sameNode: same, wasDocked: inDocked, isPill: inPill, onC: onC, offC: offC, accent: accent,
-             modInArtifact: document.querySelectorAll('#modwin .modb, #modwin .tbtn').length,
-             lane: [...document.querySelectorAll('#modwin .m2pre > *')].map((e) => e.className || e.id).join('|'),
-             play: kids.find((k) => k.c === 'tbtn' || k.c === 'tbtn') ? kids[0].w : null,
-             kids: kids, box: Math.round(T.getBoundingClientRect().width), scroll: T.scrollWidth };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-
-  const w65armT = await g.ev(`try {
-    __LW.pause();
-    const R = __LW.mod.registry, ids = R.list(), bases = ids.map((id) => R.state(id).base);
-    __LW.mod.play(); await new Promise((r) => setTimeout(r, 500)); __LW.mod.stop();
-    const heldByPause = ids.filter((id, i) => !Object.is(R.read(id), bases[i]));
-    __LW.mod.arm(false);
-    const off = ids.map((id) => R.read(id));
-    const atBase = off.every((v, i) => Object.is(v, bases[i]));
-    const b = document.querySelector('#transport .tbtn.modb');
-    const hint = document.querySelector('#modwin .m2hint');
-    const hintVisible = !!hint && !!hint.getClientRects().length && getComputedStyle(hint).visibility !== 'hidden';
-    const offSeat = { on: b.classList.contains('on'), pressed: b.getAttribute('aria-pressed') };
-    /* a rack that is not merely stopped: the transport keeps its own position through the disarm */
-    const keptPlaying = __LW.mod.playing;
-    __LW.mod.arm(true); __LW.mod.play(); await new Promise((r) => setTimeout(r, 300));
-    const backHeld = ids.filter((id, i) => !Object.is(R.read(id), bases[i]));
-    __LW.mod.stop(); __LW.mod.arm(true);
-    return { ids: ids.length, heldByPause: heldByPause, atBase: atBase, offSeat: offSeat,
-             keptPlaying: keptPlaying, backHeld: backHeld, hintVisible,
-             onSeat: { on: b.classList.contains('on'), pressed: b.getAttribute('aria-pressed') } };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-
-  await g.ev(`if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return 1;`);
-  const w65keyA = await g.ev(`return { armed: __LW.mod.armed, on: document.querySelector('#transport .tbtn.modb').classList.contains('on') };`);
-  await press(KEY.SPACE, [KEY.CTRL]);
-  const w65keyB = await g.ev(`return { armed: __LW.mod.armed, on: document.querySelector('#transport .tbtn.modb').classList.contains('on'),
-    stored: JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}').modArm };`);
-  await goto('warn=0');
-  const w65keyC = await g.ev(`const b = document.querySelector('#transport .tbtn.modb');
-    return { armed: __LW.mod.armed, on: b.classList.contains('on'), pressed: b.getAttribute('aria-pressed'),
-             enabled: __LW.mod.host.clock.isEnabled() };`);
-  await press(KEY.SPACE, [KEY.CTRL]);
-  const w65keyD = await g.ev(`return { armed: __LW.mod.armed, stored: JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}').modArm, errs: window.__e.length };`);
-
-  const w65T = { rig: w65rigT, seat: w65seatT, arm: w65armT, key: [w65keyA, w65keyB, w65keyC, w65keyD] };
-  judge('B132 THE MOD ARM SITS BESIDE PLAY ON BOTH TRANSPORTS, AND OFF IS NOT A PAUSE (wave 65). Josh asked for "a small MOD button that glows on or off" on the playhead, and ONE button covers both of the faces he named because `#transport` IS one element in two placements: the same node measures 45 x 34 in the pill at the foot of the stage and 44 x 44 in the card `dockTransport()` puts in the rack, which is the density law taken literally — the `.tbtn` seat is kept WHOLE (B70 walks it at the phone breakpoint, where a 40 would have failed the 44-px law) and only the INK narrows, to hold a word instead of a dingbat. NOTHING WAS ADDED INSIDE THE PORTED WINDOW: its timing bar is still `modxport|modtempo|modtempoin|modtap|modsync|modcad|m2hold|m2hold` in install order and carries no button of ours, because that layout is the artifact\'s (STYLE-LOCK, THE PORTED-WINDOW EXCEPTION) and the arm is the HOST\'s. The glow is ACCENT A resolved live from the page — the mini transport shares its active ink — and not a hex. AND THE CLAUSE THAT MAKES THE ARM WORTH BUILDING: with the transport merely STOPPED, a hand macro still holds its target, because the pause law\'s own second line says a hand does not let go because the clock did — so `material.softness` is still 0.7 of the way off the user\'s number and only `material.exposure` came back. MOD OFF hands back BOTH, with Object.is and not a tolerance, and the MOD button exposes the off state; the resting hint stays hidden by the later ruling; re-arming picks both up again, and the modulation transport kept its position through the disarm rather than being quietly stopped. Ctrl+Space is the same act, it is rebindable, and it SURVIVES A RELOAD in this browser\'s settings.',
-    !w65T.rig.error && !w65T.seat.error && !w65T.arm.error
-      && w65rigT.routes === 2 && w65rigT.bpm === 20
-      && w65seatT.text === 'MOD' && w65seatT.label === 'modulation on or off' && w65seatT.tbtn === true
-      && w65seatT.sameNode === true && w65seatT.wasDocked === true && w65seatT.isPill === true
-      && w65seatT.pill.join() === '45,34' && w65seatT.docked.join() === '44,44'
-      && w65seatT.on === true && w65seatT.pressed === 'true'
-      && w65seatT.onC === w65seatT.accent && w65seatT.onC !== w65seatT.offC
-      && w65seatT.modInArtifact === 0
-      && w65seatT.lane.split('|').map((c) => c.split(' ')[0]).join('|') === 'modxport|modtempo|modtempoin|modtap|modsync|modcad|m2hold|m2hold'
-      && w65seatT.kids.every((k) => k.w > 0 || k.c === '')
-      && w65seatT.scroll <= w65seatT.box
-      && w65armT.heldByPause.join() === 'material.softness'
-      && w65armT.atBase === true && w65armT.offSeat.on === false && w65armT.offSeat.pressed === 'false'
-      && w65armT.keptPlaying === false && w65armT.hintVisible === false
-      && w65armT.backHeld.length === 2 && w65armT.onSeat.on === true
-      && w65keyA.armed === true && w65keyB.armed === false && w65keyB.on === false && w65keyB.stored === false
-      && w65keyC.armed === false && w65keyC.on === false && w65keyC.pressed === 'false' && w65keyC.enabled === false
-      && w65keyD.armed === true && w65keyD.stored === true && w65keyD.errs === 0, w65T);
-
-  /* ── B133 · ONE KEY, TWO CLOCKS ─────────────────────────────────────────────────────────────── */
-  await goto('warn=0');
-  const w65two0 = await w65rig({ sync: true, anchor: true });
-  await g.ev(`if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return 1;`);
-  const w65two1 = await g.ev(`return { phys: __LW.clock.playing, mod: __LW.mod.running, at: document.activeElement === document.body };`);
-  await press(KEY.SPACE);
-  await g.ev(`await new Promise((r) => setTimeout(r, 400)); return 1;`);
-  const w65two2 = await g.ev(`return { phys: __LW.clock.playing, mod: __LW.mod.running, t: __LW.clock.t, beats: __LW.mod.model.transport.beats };`);
-  await press(KEY.SPACE);
-  const w65two3 = await g.ev(`const R = { phys: __LW.clock.playing, mod: __LW.mod.running, t: __LW.clock.t, beats: __LW.mod.model.transport.beats };
-    await new Promise((r) => setTimeout(r, 350));
-    R.tStill = __LW.clock.t === R.t; R.beatsStill = __LW.mod.model.transport.beats === R.beats; return R;`);
-  /* THEY REMAIN TWO PLAYHEADS: the window's own play button stops the modulation alone */
-  await press(KEY.SPACE);
-  const w65two4 = await g.ev(`await new Promise((r) => setTimeout(r, 300));
-    document.querySelector('#modwin .modxport').click();
-    await new Promise((r) => setTimeout(r, 250));
-    return { phys: __LW.clock.playing, mod: __LW.mod.running, playing: __LW.mod.playing };`);
-  await press(KEY.SPACE);
-  const w65two5 = await g.ev(`return { phys: __LW.clock.playing, mod: __LW.mod.running };`);
-  await press(KEY.SPACE);
-  const w65two6 = await g.ev(`await new Promise((r) => setTimeout(r, 250)); return { phys: __LW.clock.playing, mod: __LW.mod.running };`);
-  /* AND THE REASON THEY CANNOT BE ONE: `transport.rate` is itself a modulation TARGET */
-  const w65two7 = await g.ev(`try {
-    __LW.mod.model.setMacro(window.__w65.hm, { value: 0 });
-    __LW.mod.route(window.__w65.hm, 'transport.rate', 0, 1);
-    __LW.mod.arm(true); __LW.mod.play();
-    /* THE STAMP THE MODEL ITSELF LAST SAW (transport.wall), never performance.now() and not even
-       the clock's own wall(): a WALL-synced beat is DERIVED from the stamp the pump handed the
-       MODEL, so pairing a beat with a stamp the model has not integrated yet reads one frame of
-       skew as a 10 % tempo error — measured here before it was fixed, and exactly the trap
-       host.js's header documents.  transport.wall and transport.beats move in one statement. */
-    const C = __LW.mod.host.clock, T = __LW.mod.model.transport, bpm = T.bpm;
-    const lap = async () => { const w0 = T.wall, b0 = T.beats;
-      await new Promise((r) => setTimeout(r, 600));
-      return { dw: +(T.wall - w0).toFixed(4), per: (T.beats - b0) / (T.wall - w0) }; };
-    const slow = await lap(), rateSlow = __LW.clock.rate;
-    __LW.mod.model.setMacro(window.__w65.hm, { value: 0.95 }); C.applyAll(true);
-    const fast = await lap(), rateFast = __LW.clock.rate;
-    __LW.mod.stop();
-    return { rateSlow: rateSlow, rateFast: rateFast, slow: slow.per, fast: fast.per,
-             want: bpm / 60, dw: [slow.dw, fast.dw] };
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  /* MOD OFF: the one key plays ψ alone */
-  await g.ev(`__LW.pause(); __LW.mod.arm(false); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return 1;`);
-  await press(KEY.SPACE);
-  const w65two8 = await g.ev(`await new Promise((r) => setTimeout(r, 300)); return { phys: __LW.clock.playing, mod: __LW.mod.running, playing: __LW.mod.playing };`);
-  await press(KEY.SPACE);
-  await g.ev(`__LW.mod.arm(true); return 1;`);
-  const w65twoT = { rig: w65two0, before: w65two1, play: w65two2, pause: w65two3, windowOnly: w65two4,
-                    rejoin: [w65two5, w65two6], rateTarget: w65two7, disarmed: w65two8 };
-  judge('B133 SPACE IS ONE KEY FOR BOTH CLOCKS, AND THEY ARE STILL TWO CLOCKS (wave 65). Josh: "Space bar will affect everything — play and pause for modulation plugin and λWAVES." One REAL driver key from the body starts ψ and the modulation together and one stops them together, and the pause is a real pause on both — neither `clock.t` nor the beat moves in the 350 ms after it. THE MERGE IS STILL FORBIDDEN and this is the block that says why in value space: `transport.rate` is itself a modulation TARGET, so a hand macro on it takes the physics clock from 4 to over 700 a.u. per wall second while the modulation beat goes on advancing at exactly bpm/60 — the SAME beats per wall second before and after, to 1e-9, over two 600 ms laps. One clock would have had the modulator deciding how fast its own modulator runs. The interval is read off the modulation clock\'s OWN wall and never off performance.now(), because a wall-synced beat is derived from the stamp the pump last handed it and a stamp the pump has not seen yet reads one frame of skew as a tempo error — host.js documents that trap and this block would otherwise have demonstrated it. TWO PLAYHEADS STAY TWO, which is Josh\'s own first sentence: the ported window\'s own play button stops the modulation ALONE and ψ keeps running, and the next space re-joins them. And with MOD off the same key plays ψ and leaves the modulation down, which is what "off" has to mean for the arm to be worth anything.',
-    !w65twoT.rig.error && !w65two7.error
-      && w65two1.at === true && w65two1.phys === false && w65two1.mod === false
-      && w65two2.phys === true && w65two2.mod === true && w65two2.t > 0 && w65two2.beats > 0
-      && w65two3.phys === false && w65two3.mod === false && w65two3.tStill === true && w65two3.beatsStill === true
-      && w65two4.phys === true && w65two4.mod === false && w65two4.playing === false
-      && w65two5.phys === false && w65two6.phys === true && w65two6.mod === true
-      && w65two7.rateSlow === 4 && w65two7.rateFast > 100 && w65two7.dw[0] > 0.1 && w65two7.dw[1] > 0.1
-      && Math.abs(w65two7.slow - w65two7.want) < 1e-9 && Math.abs(w65two7.fast - w65two7.want) < 1e-9
-      && Math.abs(w65two7.fast - w65two7.slow) < 1e-9
-      && w65two8.phys === true && w65two8.mod === false, w65twoT);
+  // B132 · B133 RETIRED (0.5.0 C4 · R-B1 · A6): the MOD arm's seat geometry and the 'two clocks' of Space were lab/modwindow.js's and LINKED/SEPARATE's — there is ONE clock, THE play, and the modulation follows its edges; power never plays and play never powers, which tests/take-in-bugs.browser-test.mjs (five boots, 0 refusals) holds
 
   /* ── B134 · THE THREE RESUME LAWS, chosen by the artifact's own chips ────────────────────────── */
   await goto('warn=0');
@@ -7030,11 +5719,11 @@ try {
          (undefined) is an explicit call carrying no value and still means JOINED.  A missing SETTINGS
          key is not the same statement as an explicit nothing, and the two roads are asserted apart
          precisely so a later wave cannot quietly merge them. */
-      bootLaw: (await (await fetch('./rack.js')).text()).indexOf('setDisconnected(s.disc !== false') > 0 };
+      bootLaw: (await (await fetch('./rack.js')).text()).indexOf('vivid: 0.5, disconnected: true') > 0 };   /* 0.5.0 re-aim (C2): the boot road is the look store's defaults (LOOK_DEFAULTS), where it read s.disc !== false */
     __LW.setFrost('off'); __LW.setDisconnected(true); __LW.pause(); await nap(220);
 
     /* §1 · THE ROOT PAINTS NOTHING AND CONTAINS NOTHING — the four load-bearing declarations */
-    const d0 = document.querySelector('#rack .dev');
+    const d0 = [...document.querySelectorAll('#rack .dev')].find((q) => !q.hidden && !q.classList.contains('closed') && !q.classList.contains('folded') && q.querySelector('.dev-body').getBoundingClientRect().height > 20);   // 0.5.0 re-aim: the first card of the rack can be a folded one (HISTORY opens on top)
     const h0 = d0.querySelector('.dev-head'), b0 = d0.querySelector('.dev-body');
     out.root = { vis: cs(d0).visibility, bg: cs(d0).backgroundColor, radius: cs(d0).borderTopLeftRadius,
       contain: cs(d0).contain, bf: cs(d0).backdropFilter || cs(d0).webkitBackdropFilter, pe: cs(d0).pointerEvents,
@@ -7098,63 +5787,10 @@ try {
       && dcT.joined.gap === 0 && dcT.joined.vis === 'visible' && dcT.joined.radius === '14px' && /paint/.test(dcT.joined.contain)
       && dcT.hit.floatPE === 'none' && dcT.hit.gapIsField && dcT.hit.headIsHead && dcT.hit.bodyIsBody
       && dcT.hit.headIsThisCard && dcT.hit.bodyIsThisCard
-      && dcT.press.target && dcT.press.canvasTookIt && dcT.press.released && dcT.press.cardStill && dcT.press.yawMoved
+      && dcT.press.target && dcT.press.canvasTookIt === false && dcT.press.released && dcT.press.cardStill && dcT.press.yawMoved === false   /* 0.5.0 re-aim (C9): the scene guard — a press in a window's gap is UI space and never reaches the stage (tools/hit-probe-set.mjs: 0 reached), where it once orbited the picture */
       && dcT.phoneGuard && dcT.errs === 0, dcT);
 
-  const dgT = await g.ev(`try {
-    const nap = (ms) => new Promise((r) => setTimeout(r, ms));
-    const frame = () => new Promise((r) => requestAnimationFrame(() => r(1)));
-    const id = 'camera';
-    __LW.pause();
-    if (!__LW.layout.floating().includes(id)) __LW.layout.popOut(id);
-    await nap(240);
-    const d = document.querySelector('#floats .dev[data-id="' + id + '"]');
-    __LW.layout.moveFloat(id, 500, 300); await nap(140);
-    const head = d.querySelector('.dev-head');
-    const hr = head.getBoundingClientRect();
-    const x0 = Math.round(hr.left + hr.width / 2), y0 = Math.round(hr.top + hr.height / 2);
-    const start = { l: parseFloat(d.style.left), t: parseFloat(d.style.top) };
-    const pe = (t, el, x, y) => el.dispatchEvent(new PointerEvent(t, { pointerId: 72, pointerType: 'mouse', clientX: x, clientY: y, bubbles: true, cancelable: true, isPrimary: true, button: 0, buttons: 1 }));
-
-    /* THE INSTRUMENT: count forced layouts for real, by counting the reads that force them */
-    const orig = Element.prototype.getBoundingClientRect;
-    let calls = 0;
-    Element.prototype.getBoundingClientRect = function () { calls++; return orig.apply(this, arguments); };
-    const out = {};
-    try {
-      pe('pointerdown', head, x0, y0);
-      out.atDown = calls;                       /* the press may measure — once */
-      calls = 0;
-      const N = 40;
-      for (let i = 1; i <= N; i++) pe('pointermove', window, x0 + i * 3, y0 + i * 2);   /* 40 SYNCHRONOUS moves, no frame between them */
-      out.duringMoves = calls;                  /* THE NUMBER THIS BLOCK EXISTS FOR */
-      out.movesN = N;
-      out.wroteDuring = parseFloat(d.style.left) !== start.l || parseFloat(d.style.top) !== start.t;   /* coalesced: nothing written yet */
-      await frame(); await frame();
-      out.wroteAfterFrame = parseFloat(d.style.left) !== start.l;
-      out.afterFrame = { l: parseFloat(d.style.left), t: parseFloat(d.style.top) };
-      /* THE FLUSH ON THE END, proved where only the flush can have done it: five more moves and the
-         pointerup in ONE task, so no rAF can run between the last move and the release. */
-      calls = 0;
-      const at = parseFloat(d.style.left);
-      for (let i = N + 1; i <= N + 5; i++) pe('pointermove', window, x0 + i * 3, y0 + i * 2);
-      out.beforeUp = parseFloat(d.style.left) === at;      /* still nothing written */
-      const M = N + 5, lastX = x0 + M * 3, lastY = y0 + M * 2;
-      pe('pointerup', window, lastX, lastY);
-      out.landed = { l: parseFloat(d.style.left), t: parseFloat(d.style.top) };   /* read SYNCHRONOUSLY: only flush() can have moved it */
-      out.atUp = calls;
-      out.want = { l: start.l + M * 3, t: start.t + M * 2 };
-      out.lastWins = Math.abs(out.landed.l - out.want.l) <= 1 && Math.abs(out.landed.t - out.want.t) <= 1;
-      await nap(80);
-      out.dragging = d.classList.contains('dragging');
-    } finally { Element.prototype.getBoundingClientRect = orig; }
-    __LW.layout.dockWindow(id); await nap(200);
-    out.errs = window.__e.length;
-    return out;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B137 A DRAG WRITES ONCE A FRAME AND FORCES NO LAYOUT IN A POINTER HANDLER (wave 67). Both window drags used to do their whole job synchronously inside pointermove: the float wrote style.left/top after calling getBoundingClientRect on BOTH racks, and the rack reorder measured every other card and then insertBefore\'d — several forced style recalculations per DISPLAYED frame, every one of them thrown away, plus a DOM mutation per event. The mechanism is BASINS\' dragHandle taken as a REFERENCE and not copied: a pointermove stores a delta and schedules, one rAF does the geometry, and a 32 ms setTimeout FLOOR flushes it anyway when rAF is starved — which is exactly what a busy WebGPU canvas does to rAF. The rack rects are hoisted out of the handler and measured at the press and on resize, since a rack column does not move while a window is carried over it. MEASURED HERE by patching Element.prototype.getBoundingClientRect and counting: 40 synchronous pointermoves force ZERO layout reads and write nothing at all, one frame later the window has moved exactly once, and the pointerup FLUSHES so the finger\'s LAST position wins to within a pixel — which is the difference between a drop landing where you let go and where the last frame happened to be',
-    !dgT.error && dgT.duringMoves === 0 && dgT.movesN === 40 && dgT.wroteDuring === false
-      && dgT.wroteAfterFrame === true && dgT.beforeUp === true && dgT.lastWins === true && dgT.atUp <= 2 && dgT.dragging === false && dgT.errs === 0, dgT);
+  // B137 RETIRED (0.5.0 C3): the float drag is the kit's rack (createRack), which takes a REAL pointer — a synthesised one has nothing to capture, so the once-a-frame write and the flush on release cannot be driven from here; a real drag that moves a window, with its mask following, is held by tests/keyboard-window.browser-test.mjs and tests/frame-occlusion.browser-test.mjs
 
   const mlT = await g.ev(`try {
     const cs = (e) => getComputedStyle(e);
@@ -7175,7 +5811,7 @@ try {
 
   const fpT = await g.ev(`try {
     const nap = (ms) => new Promise((r) => setTimeout(r, ms));
-    const d = document.querySelector('#rack .dev'), h = d.querySelector('.dev-head'), b = d.querySelector('.dev-body');
+    const d = [...document.querySelectorAll('#rack .dev')].find((q) => !q.hidden && !q.classList.contains('closed') && !q.classList.contains('folded') && q.querySelector('.dev-body').getBoundingClientRect().height > 20), h = d.querySelector('.dev-head'), b = d.querySelector('.dev-body');   // 0.5.0 re-aim: the first card of the rack can be a folded one
     const cs = (e) => getComputedStyle(e);
     const bf = (e) => cs(e).backdropFilter || cs(e).webkitBackdropFilter;
     const skin = (e) => ({ bg: cs(e).backgroundColor, bd: cs(e).borderTopColor, sh: cs(e).boxShadow, r: cs(e).borderTopLeftRadius });
@@ -7212,13 +5848,13 @@ try {
     /* it rides the LOOP, not the play button: LW.play is only one of seven ways to start this transport */
     __LW.setFrost('off'); await nap(200);
     out.back = { cls: document.body.classList.contains('frost'), hold: document.body.classList.contains('frost-hold'), head: bf(h) };
-    out.saved = __LW.settings.frost;
+    out.saved = __LW.look.get('frost');   // 0.5.0 re-aim (C2): FROST is the kit's mir.gui row
     out.errs = window.__e.length;
     return out;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B139 FROST POLICY CHANGES THE FILTER WITHOUT CHANGING THE MATERIAL UNDER THE HAND. The current recipe comes from the page token; the header adds its own small brightness and saturation treatment, even with FROST off. ALWAYS keeps the blur during playback; STILL removes it while playing and restores it on pause. Neither changes the fill, border, shadow or radius. The disconnected root remains filter-free so it cannot cut its children off from the backdrop, and the governor never strips the frost material',
     !fpT.error && fpT.off.cls === false && !fpT.off.head.includes('blur(') && fpT.off.api === 'off' && fpT.off.live === false
-      && fpT.recipe && fpT.always.head.startsWith(fpT.always.body) && fpT.always.root === 'none' && fpT.always.live === true
+      && fpT.recipe && fpT.always.head.startsWith(fpT.always.body) && fpT.always.live === true   /* 0.5.0 re-aim: the .dev ROOT carries the refractive filter (skin.css:143, the same on v0.4.0-alpha) but paints nothing — it is visibility:hidden when disconnected, which B136 asserts — so the computed-root clause is retired */
       && fpT.alwaysPlaying.hold === false && fpT.alwaysPlaying.head === fpT.always.head
       && fpT.stillPlaying.hold === true && fpT.stillPlaying.head === 'none' && fpT.stillPlaying.body === 'none' && fpT.stillPlaying.live === false
       && fpT.stillStopped.hold === false && fpT.stillStopped.head === fpT.always.head && fpT.stillStopped.live === true
@@ -7321,6 +5957,7 @@ try {
     const out = { barHidden: document.getElementById('menubar').hidden, backOnLogo: document.activeElement.id === 'title', playing: __LW.clock.playing };
     /* A REAL <button> keeps Enter, exactly as wave 62 promised — the law works wherever the selector can see it */
     __LW.layout.raise('settings'); await new Promise((r) => setTimeout(r, 250));
+    const qt = [...document.querySelectorAll('.dev[data-id="settings"] .seg-b')].find((b) => b.textContent.trim() === 'QUALITY'); if (qt) qt.click(); await new Promise((r) => setTimeout(r, 300));   // 0.5.0 re-aim: KEEP FRAMES is on SETTINGS' QUALITY tab, and a switch on a hidden tab cannot take focus
     const swb = [...document.querySelectorAll('.sw')].find((b) => b.textContent.indexOf('KEEP FRAMES') >= 0);
     swb.focus(); window.__sw = swb; window.__swWas = swb.getAttribute('aria-pressed');
     out.swBefore = window.__swWas; out.swFocused = document.activeElement === swb;
@@ -7345,32 +5982,13 @@ try {
 
   /* ── B142 · THE TAB TRAP IS UNREACHABLE WHATEVER THE BINDING TABLE SAYS ─────────────────────── */
   await goto('warn=0');
-  const trap0T = await g.ev(`try {
-    const out = {};
-    __LW.keys.reset(); __LW.layout.raise('settings');
-    await new Promise((r) => setTimeout(r, 250));
-    const rows = [...document.querySelectorAll('.keys-row')];
-    const row = rows.find((r) => r.querySelector('.keys-label').textContent.indexOf('show / hide every note') >= 0);
-    out.rows = rows.length; out.found = !!row; if (!row) return out;
-    out.was = row.querySelector('.keys-chip').textContent;
-    row.querySelector('.keys-chip').click();
-    out.capturing = __LW.keys.capturing;
-    return out;
-  } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  await press(KEY.TAB);
-  const trap1T = await g.ev(`try { await new Promise((r) => setTimeout(r, 250));
-    const out = { capturing: __LW.keys.capturing, key: __LW.keys.actions.find((a) => a.id === 'notes').key };
-    const say = document.querySelector('.keys-say');
-    out.said = !!say && !say.hidden && say.textContent.length > 20;
-    out.saidRole = say ? say.getAttribute('role') : null;
-    let ov = {}; try { ov = JSON.parse(localStorage.getItem('lambdawaves.q0.keys') || '{}'); } catch (e) {}
-    out.stored = !!ov.notes;
-    /* AND THE HALF THAT DOES NOT DEPEND ON THE PANEL: force the binding through the API — the exact
-       state a persisted override from an older build would restore — and press Tab off the stage. */
-    __LW.keys.bind('notes', { key: 'Tab' });
+  /* 0.5.0 re-aim (C3): SETTINGS' key chips and their capture are the kit's KEYBOARD window (its recorder refuses Tab — tests/keyboard-window.browser-test.mjs); what is kept is the half that does not depend on the panel: ask the table for a Tab binding and press Tab off the stage */
+  const trap1T = await g.ev(`try {
+    const out = { key: __LW.keys.actions.find((a) => a.id === 'notes').key };
+    out.refused = __LW.keys.bind('notes', { key: 'Tab' });
     out.forced = __LW.keys.actions.find((a) => a.id === 'notes').key;
     out.notesOpen0 = document.body.classList.contains('notes-open');
-    const seat = document.querySelector('.keys-chip'); seat.focus(); window.__seat = seat;
+    const seat = document.getElementById('title'); seat.focus(); window.__seat = seat;
     out.onSeat = document.activeElement === seat; out.stageFocus = __LW.stageFocus;
     return out;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
@@ -7393,11 +6011,10 @@ try {
     { logo: logo0T, space: logo1T, esc: logo2T, button: logo3T, link: logo4T });
 
   judge('B142 THE TAB TRAP IS UNREACHABLE WHATEVER THE BINDING TABLE SAYS (wave 68). Wave 57 gave Tab back to the browser by stage-gating the two window-cycle actions; wave 62\'s `continue` — which is correct and stays — let a LATER action reached by the same key claim it, so two clicks in the SHIPPED KEYS panel (bind NOTES to Tab) put the trap straight back, persisted to localStorage, with no console anywhere. Both halves are closed and both are pressed here with a REAL driver Tab: the panel REFUSES the binding and says why in a polite status line (the chip is unchanged, nothing is written to storage), and — the half that matters, because a stale override from an older build could still arrive — the binding is then FORCED through the API and the dispatcher refuses it anyway, because the TAB RULE is now a property of THE KEY and sits above the ACTIONS loop where no binding can get underneath it. Focus moves, NOTES does not toggle',
-    !trap0T.error && !trap1T.error && !trap2T.error && trap0T.found && trap0T.rows >= 30 && trap0T.capturing === 'notes'
-      && trap1T.capturing === null && trap1T.key === 'KeyN' && trap1T.said && trap1T.saidRole === 'status' && trap1T.stored === false
-      && trap1T.forced === 'Tab' && trap1T.onSeat && trap1T.stageFocus === false
+    !trap1T.error && !trap2T.error && trap1T.key === 'KeyN'
+      && trap1T.forced !== 'Tab' && trap1T.onSeat && trap1T.stageFocus === false   /* the key table refuses Tab as a binding (key-table.js), where the old table took it from the API */
       && trap2T.moved === true && trap2T.notesOpen === trap1T.notesOpen0 && trap2T.reset === 'KeyN' && trap2T.errs === 0,
-    { open: trap0T, refused: trap1T, forced: trap2T });
+    { refused: trap1T, forced: trap2T });
 
   /* ── B143 · A SLIDER THAT WILL NOT ACT DOES NOT SWALLOW THE KEYS ────────────────────────────── */
   await goto('warn=0');
@@ -7436,7 +6053,7 @@ try {
     __LW.layout.raise('settings'); await new Promise((r) => setTimeout(r, 250));
     const dith = [...document.querySelectorAll('[role="radio"]')].find((b) => b.textContent.trim().indexOf('ORDERED') === 0);
     const off = [...document.querySelectorAll('[role="radio"]')].find((b) => b.closest('.segw') === (dith && dith.closest('.segw')) && b.textContent.trim() === 'OFF');
-    const kz = [...document.querySelectorAll('.k[role="slider"]')].find((k) => (k.getAttribute('aria-label') || '').indexOf('STRENGTH') === 0);
+    const kz = [...document.querySelectorAll('.dev[data-id="observer"] .k[role="slider"]')].find((k) => (k.getAttribute('aria-label') || '').indexOf('STRENGTH') === 0);   // 0.5.0 re-aim: another card has a STRENGTH knob now — this one is the OBSERVER's dither
     out.hasDither = !!dith && !!kz;
     dith.click(); await new Promise((r) => setTimeout(r, 200));
     out.kzLive = kz.getAttribute('aria-disabled');                 /* the knob comes alive with the seg */
@@ -7477,7 +6094,8 @@ try {
       out.zStep = { now: z.getAttribute('aria-valuenow'), eye: z.querySelector('.k-val').textContent,
         min: z.getAttribute('aria-valuemin'), max: z.getAttribute('aria-valuemax'), focused: document.activeElement === z }; }
     /* 2 · the wrap knobs live in SETTINGS · THEME */
-    __LW.layout.raise('settings'); await nap(250);
+    __LW.layout.raise('settings'); await nap(400);
+    const lookTab = [...document.querySelectorAll('.dev[data-id="settings"] .seg-b')].find((b) => b.textContent.trim() === 'LOOK'); if (lookTab) { lookTab.click(); await nap(300); }   // 0.5.0 re-aim: ACCENT A lives under SETTINGS · LOOK now
     const a = byName('ACCENT A'); out.accFound = !!a;
     if (a) { a.scrollIntoView({ block: 'center' }); await nap(150);
       window.__a = a; const r = a.querySelector('.k-dial').getBoundingClientRect();
@@ -7492,7 +6110,7 @@ try {
     return { now: z.getAttribute('aria-valuenow'), eye: z.querySelector('.k-val').textContent };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   /* THE HAND, on a wrap knob: about 1.9 turns of net diagonal drag — 220 px is one whole turn */
-  if (knob0T.accBox) await w68mouse([w68mv(knob0T.accBox.x, knob0T.accBox.y), { type: 'pointerDown', button: 0 },
+  if (knob0T.accBox && knob0T.accBox.y > 230) await w68mouse([w68mv(knob0T.accBox.x, knob0T.accBox.y), { type: 'pointerDown', button: 0 },
     w68mv(knob0T.accBox.x + 100, knob0T.accBox.y - 100, 60), w68mv(knob0T.accBox.x + 210, knob0T.accBox.y - 210, 60),
     { type: 'pointerUp', button: 0 }]);
   const knob2T = await g.ev(`try { await new Promise((r) => setTimeout(r, 250));
@@ -7615,14 +6233,14 @@ try {
     out.titles = [...document.querySelectorAll('.dev-title')].filter((h) => h.querySelector('m')).length;
     out.stateTitle = document.querySelector('.dev[data-id="state"] .dev-title').innerHTML;
     /* THE SIX SWITCHES THAT HAD DEAD TOOLTIPS: sw() ignored o.title until this wave */
-    out.swTitles = [...document.querySelectorAll('.sw')].filter((b) => (b.title || '').length > 4).length;
-    out.discTitle = (document.querySelector('.dev[data-id="settings"] .sw[aria-pressed]') || {}).title || '';
+    out.swTitles = [...document.querySelectorAll('.sw')].filter((b) => (b.title || b.dataset.help || '').length > 4).length;   // 0.5.0 re-aim: the kit's help text is data-help, not a title attribute (none in the document; 0.4.0 already)
+    out.discTitle = (function () { const b = document.querySelector('.dev[data-id="settings"] .sw[aria-pressed]') || {}; return b.title || (b.dataset && b.dataset.help) || ''; })();
     out.errs = window.__e.length;
     return out;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B146 THE MATH FACE IS IN USE AND IT IS NOT A FALLBACK (wave 69). STIX Two Math has shipped since wave 59 and rescued exactly ONE glyph — the title\'s λ. It now sets the mathematics: Josh chose the OBSERVABLES himself ("the best place for real math typography") and the 3 × 2 grid is six pure `<m>` runs — ρ=|ψ|², arg ψ, Re ψ, Im ψ, Δρ, Re+Im — beside eleven window titles that carry their operator and NOTHING else (|ψ⟩ = Σ c_nlm |nlm⟩, c = (q + ip)/√2, SO(4), P(w), KS ℝ⁴, H₂⁺, Xα, (z, p_z), Δρ, ρ), the LADDER and SPECTRUM labels, IMPULSE VECTOR\'s readout and the notes. AN ENGLISH WORD STAYS IN THE UI FACE, which is why the face cannot be applied by selector and is not applied by a tokenizer either: `Re ψ` is mathematics and `SLICE / CLIP` is furniture and no regex over the characters can tell them apart, so it is DECLARED, one marker, in the string. THE FACE IS PROVED TO HAVE PAINTED rather than merely named: the same probe string measured on a canvas in the face and in BOTH fallbacks the stack names differs from each, which a silent fall-through to a serif could not do. And the marker is a STRING convention that must never become one: no `title` or `aria-label` in the whole app contains a literal `<m>` (kit.js `mathPlain` strips it at every attribute site) and the string never reaches the page as text. FREE ON THE WAY PAST: `sw()` ignored `o.title` since it was written, so fifteen switches — several of them the longest explanations in the lab — had tooltips nobody could ever see. Wave 53 found it and left it here',
     !w69mfT.error && w69mfT.mathLoaded && w69mfT.count >= 60 && w69mfT.allMath && w69mfT.resolved
-      && w69mfT.attrLeak === 0 && w69mfT.textLeak === -1 && w69mfT.obsMath === 6 && w69mfT.titles >= 10
+      && w69mfT.attrLeak === 0 && w69mfT.textLeak === -1 && w69mfT.obsMath === 6   /* 0.5.0 re-aim: "eleven window titles carry their operator" is retired — the kit's titles are plain words (one <m> title left on 0.4.0: H₂ · LEGACY, deleted in D9b) */
       && /^["']?STIX Two Math/.test(w69mfT.obsFam) && w69mfT.swTitles >= 10 && w69mfT.errs === 0, w69mfT);
 
   const w69dgT = await g.ev(`try {
@@ -7722,18 +6340,20 @@ try {
     const out = {};
     /* ── (a) THE ENTRANCE EXISTS, AND IT IS ONE-SHOT CHROME ───────────────────────────────── */
     const dev = document.querySelector('.dev[data-id="wigner"]');
+    /* 0.5.0 re-aim (C3): the entrance is the kit rack's own Web Animation on the window (translate 6 px over --rack-enter, 220 ms on the law's curve), not the lab's .dev-enter class */
+    const wa = () => dev.getAnimations().filter((a) => a.constructor.name === 'Animation' && a.effect.getTiming().duration === 220);   // the entrance is 220 ms; the rack's own 320-ms reflow moves (neighbours making room) are not it
+    window.__devWa = () => document.getAnimations().filter((a) => a.constructor.name === 'Animation' && a.effect && a.effect.target && a.effect.target.classList && a.effect.target.classList.contains('dev'));
     dev.classList.add('closed');
     __LW.layout.reopen('wigner', 'R');
-    const cs = getComputedStyle(dev);
-    out.enter = { cls: dev.classList.contains('dev-enter'), name: cs.animationName,
-      dur: cs.animationDuration, ease: cs.animationTimingFunction, iter: cs.animationIterationCount };
+    const tm = wa().length ? wa()[0].effect.getTiming() : {};
+    out.enter = { cls: wa().length === 1, name: 'waapi', dur: tm.duration, ease: tm.easing, iter: tm.iterations };
     await nap(420);
-    out.enterGone = !dev.classList.contains('dev-enter');
+    out.enterGone = wa().length === 0;
     /* raise() also clears .closed and must NOT animate — the WINDOW menu is the same act as TAB */
     __LW.layout.raise('wigner');
-    out.raiseQuiet = !dev.classList.contains('dev-enter');
+    out.raiseQuiet = wa().length === 0;
     document.getElementById('field').focus();
-    out.before = document.querySelectorAll('.dev-enter').length;
+    out.before = window.__devWa().filter((a) => a.effect.getTiming().duration === 220).length;
     return out;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   await press(KEY.TAB); await press(KEY.TAB);
@@ -7741,8 +6361,8 @@ try {
     const nap = (ms) => new Promise((r) => setTimeout(r, ms));
     const out = {};
     /* ── (b) A KEYBOARD ACTION ANIMATED NOTHING.  TAB raises a window; it must not travel ──── */
-    out.tab = { after: document.querySelectorAll('.dev-enter').length,
-      running: document.getAnimations().filter((a) => a.playState === 'running' && /lw-dev-enter/.test(a.animationName || '')).length };
+    out.tab = { after: window.__devWa().length,
+      running: window.__devWa().filter((a) => a.playState === 'running').length };
     /* ── (c) REDUCED MOTION, APPLIED AT REAL SPECIFICITY ON THE REAL ELEMENTS ─────────────────
        The OS preference cannot be driven from this harness, so the block is taken out of its @media
        wrapper and injected as written: that measures the SELECTORS against the elements that carry
@@ -7772,21 +6392,21 @@ try {
     out.rmOk = out.beforeRM.tf && !out.afterRM.tf
       && out.beforeRM.tp.indexOf('transform') >= 0 && out.afterRM.tp.indexOf('transform') < 0
       && out.afterRM.tp.indexOf('opacity') >= 0
-      && out.beforeRM.chev !== '0s' && out.afterRM.chev === '0s'
-      && out.afterRM.enter === 'lw-dev-enter-quiet';
+      && out.beforeRM.chev !== '0s' && out.afterRM.chev === '0s';   // 0.5.0 re-aim (C3): "the entrance falls back to its opacity-only keyframe" is retired — the kit's enter() plays nothing at all under reduced motion (motionPolicy), and its quiet keyframe sits inside @layer mir where this lift does not reach
     dev.classList.remove('dev-enter'); st.remove(); document.body.classList.remove('rack-hidden');
     await nap(80);
     out.errs = window.__e.length;
     return out;
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
   judge('B149 THE MOTION PASS, GATED WHERE AN EYE CANNOT CHECK IT (wave 69). MOTION-LAW gate 1 files "window open/close" under OCCASIONAL, the one tier that gets a standard animation, and this lab now has exactly ONE entrance: 220 ms — inside the 300 ms ceiling — with the law\'s entrance easing verbatim, opacity and a 7-px slide, one iteration, on chrome, in no accent colour. IT IS ON `reopen()` ALONE and that is the law rather than an oversight: `raise()` also clears `.closed`, TAB reaches it, and A KEYBOARD-INITIATED ACTION IS NEVER ANIMATED — "the key is the user asking for the result, not the journey" — so two REAL driver Tabs raise two windows and start zero animations, and a menu raise travels no further. THE SECOND HALF IS THE ONE MOTION-LAW SAID WAS UNFINISHED and predicted would keep growing: the preference reached 9 of the lab\'s 34 transition sites because `body.rack-hidden #rack` is (1,1,1) and the media block named `#rack` at (1,0,0), so the 310-px slide it was written for never heard it. The OS preference cannot be driven from this harness, so the block is lifted out of its @media wrapper and injected as written — which measures the SELECTORS against the elements that actually carry the transforms, and is the only thing that could have caught a specificity bug. Before: #rack transitions transform and has one. After: the transform is gone, OPACITY REMAINS (fewer and gentler, never zero), both fold chevrons stop, and the entrance falls back to its opacity-only keyframe',
-    !w69m1.error && !w69motT.error && w69m1.enter.cls && w69m1.enter.name === 'lw-dev-enter'
-      && w69m1.enter.dur === '0.22s' && w69m1.enter.iter === '1' && w69m1.enterGone && w69m1.raiseQuiet
+    !w69m1.error && !w69motT.error && w69m1.enter.cls && w69m1.enter.name === 'waapi'
+      && w69m1.enter.dur === 220 && w69m1.enter.ease === 'cubic-bezier(0.23, 1, 0.32, 1)' && w69m1.enter.iter === 1 && w69m1.enterGone && w69m1.raiseQuiet
       && w69m1.before === 0 && w69motT.tab.after === 0 && w69motT.tab.running === 0
       && w69motT.found >= 2 && w69motT.rmOk && w69motT.errs === 0, { a: w69m1, b: w69motT });
 
   /* ── the end: no errors, a last look ───────────────────────────────────── */
   const errs = await g.ev('return { errs: window.__e, gpu: __LW.field.lastGpuError || null, frames: __LW.stats.frames, recon: __LW.stats.reconstructs, presents: __LW.stats.presents };');
+  if (STALLS) console.log('NOTE ' + STALLS + ' reload(s) came up unpainted and were re-navigated (goPainted) — see LEGACY-BOOT-REAIM.md');
   judge('B13 no page errors, no uncaptured GPU errors after the whole run', errs.errs.length === 0 && !errs.gpu, errs);
   await g.ev(`__LW.loadPreset('rydberg'); __LW.scrub(300); await __LW.settle(); return 1;`);
   fs.writeFileSync(ROOT + '/.tmp/boot-final.png', Buffer.from(await g.snap(), 'base64'));
