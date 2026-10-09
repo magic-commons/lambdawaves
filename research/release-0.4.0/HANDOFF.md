@@ -529,6 +529,19 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > glass + legibility PNGs, the M5 block, the security items, the MIR brief candidates, 0.5.0 vs 0.5.5 for the changelog, the cut word). Josh (07:25)
 > asked to be told when compaction is safe: the answer is "when the baton files are written and no merge is half-done" — say it plainly each time.
 
+> **UPDATE (Claude Yan, 2026-10-09 10:20 CDT) — C6b MERGED `8388309`.** THE START is the kit's: the photosensitivity notice (λWAVES' law — no query
+> string silences it for a human; `?opener=1` shows the title screen under a driver), MIR's title screen with the six demos as covers + NEW + RESUME
+> (`createSession` over the one part, `lambdawaves.q0.session` PROJECT), `installBanner({ errors: false })`, `bootVeil`, the wake lock on THE play;
+> `#banner`/`#warnPane`/`showBanner` leave (Opus, tip `05ee02a`, four commits; note `agents/a47a6c9aeef569dc6.md`). Gated on the merged tree (my
+> server 8731): node 0; opener 7/7; offer 16/16; history; new-project + `--check` in step; hit-probe 49/0; frame-occlusion. The builder's lock on
+> its code tip 860 · 0/0 and 1004 · 0/0; serialize-bytes 11/11. **`lab/*.js` 27,553** (+38). CLAUDE.md: THE START paragraph; the `!important` count
+> 37 → 33. `CHANGES-0.5.0.md` STARTED with C6b's line (the earlier rows are summarised at the cut). **Open defect, pre-existing on every tree since
+> C7 (`33d20cc`): `LW.thumbnail()` calls `capture.probe`, which left — FOLDERS' pictures fail and `gpu-recovery` stops at 8/11; C7b's facade commit
+> fixes it (told by message).** `tests/legacy/boot`: 112 verdicts identical to the base, stopping at wave 56's `?sw=1` reload on both trees; B103/B110/
+> B112 red on both for laws outside C6b — the Sonnet re-aim pass is NEXT (its launch at 10:13 was refused: Agent Control paused for handoff). C7b still building (steps 2–4). Design calls the builder
+> made (for Josh, in C6B-BUILD.md): `home` is remembered only while untouched (a reload after edits shows RESUME); the title-screen key stop is bubble-
+> phase (the covers' arrow keys); no per-cover accent, the text logo, the veil's black fill on the light theme are left as the kit's.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
