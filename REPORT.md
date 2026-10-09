@@ -5017,3 +5017,55 @@ Gates: `bash test.sh node` exited 0 (82 suites). `node tools/new-project.mjs --c
 `current` had one red, the audio face's palette transition read at 250 ms, in a file D9 does not touch; it was green alone on
 a re-run. `legacy/boot` was run once (two builders had edited it blind). It gave 55 GREEN / 57 RED before a crash at the B96 headless
 reload. All six D9 cases are green (B22, B29, B33, B37, B55, B58). The reds are stale cases D9 does not touch. Hand-off: `research/release-0.5.0/D9-BUILD.md`.
+
+### wave 207: D9b H₂ AND ELECTROSTATICS GO — both deleted behind restore shims, the last two legacy windows, 1,014 lines out
+
+Josh ruled on 10-09 (PLAN §9, R5-L1 closed): "H2 and Electrostatics should go." D9 had measured both for that ruling. One Opus
+builder (`agent-aba28140791c56025`) built D9b on the adopted tree from `c83b7ee`.
+
+**The fixtures come first** (`822acff`). The pre-D9b build wrote two REAL old files through its own SAVE + EXPORT, on D9's road:
+- `tests/fixtures/legacy-h2` (H₂ owns the field: the Heitler–London singlet at R = 1.4 a₀, its seat open);
+- `legacy-electrostatics` ((1s + 2p_z)/√2 with the Φ overlay on, 12 levels, its seat open).
+
+**H₂** (`9ebf35c`). `h2view.js` and `h2.js` go (268 lines), with mathworker's `h2curve` op, render-exact's H7 pin (H₂'s
+impure field), the digest-lock scene `h2` and `tests/h2.test.mjs`. What `h2ci.js` needed moves into it first: J′, K′ and E₁.
+`EV` now comes from `molecule.js`, the same 27.211386. `MU_H2` moves to `tests/lib/mo.js`. Heitler–London's closed form becomes
+`h2ci.test`'s Q3 oracle, and h2.test's five anchors on kept code are its Q8 (8 → 13 judges). The shim opens a file H₂ owned as
+MOLECULES · H₂ (STO-3G) on VIEW DENSITY, the twin of the one-electron density the card drew, with "retired in 0.5.0: H₂ (opened
+as MOLECULES · H₂)".
+
+**ELECTROSTATICS** (`1012497`). `electrostatics.js` and `fieldview.js` go (673 lines), with:
+- the `#fieldlines` canvas and its CSS;
+- capture.js' overlay, window-chrome's ⧉ case, METERS' "field lines";
+- `tests/electrostatics.test.mjs`.
+
+H₂⁺'s Hellmann–Feynman force had served only tests since D9. It moves VERBATIM (63 lines) to `tests/lib/hellmann-feynman.js`,
+and its eight judges become `mo.test`'s G0 (33 → 41). The other 30 judged `electrostatics.js`' own closed forms and went with
+it. With no hidden window left, `legacyWindow` and `.legacy-note` go too. The shim opens a file whose overlay was on, on its own
+state with nothing drawn: "retired in 0.5.0: ELECTROSTATICS".
+
+**The `__LW` law held.** `h2`, `fieldlines` and `electrostatics` left with their suites in the same commits:
+- `current`: the lazy-card case is LADDER alone, and `instruments.h2` is gone;
+- `molecular-names`;
+- `render-exact`: twelve hazards;
+- `ink`;
+- `legacy/boot`: B35, B55 and B106 retired in the B29 form, six `__LW.h2` guards, B57's order, B127's overlay count, B102's list.
+
+`history` gains the two old files through the PROJECTS road (44/44).
+
+**The lock** ran ALONE: **860 values · 0/0**, and **1004 · 0/0** with the s4a fixture. Each is 48 below D9's 908 / 1052, because
+the retired `h2` scene is named. No fixture was re-baked, and the header records the counts. The film probe passed every step.
+A base-copy (`git archive c83b7ee`) gives the same picture, the same 25 frame hashes and the same 6 verify digests.
+
+**The ledger.** `cat lab/*.js | wc -l` went **29,863 → 29,589 → 28,849 (−1,014)**, or −951 without the 63 lines booked as
+moved. D9-BUILD estimated about 935. D so far is −3,054, or −2,177 on lines that truly leave the product. Node suites went
+82 → 80 and stay GREEN.
+
+Gates:
+- `bash test.sh node` exit 0, and `new-project --check` at 16,117 B.
+- Browser, one at a time: `history` 44/44, `new-project` 8/8, `molecule-demos` 5/5, `molecular-names` 6/6,
+  `render-regressions` 2/2, `offer` 16/16.
+- `current` is red at `followsPalette`, and the base `c83b7ee`'s own suite is red there too. With that key set aside, all 15
+  of its cases pass.
+
+Hand-off: `research/release-0.5.0/D9B-BUILD.md`. Every rack.js hunk for C3's re-apply is in `D9B-rack.patch`.
