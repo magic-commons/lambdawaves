@@ -179,7 +179,7 @@ export async function boot(dom) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, badges: !document.body.classList.contains('no-badges'), controlHints: !document.body.classList.contains('control-hints-off'), captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
+      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
         auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -224,16 +224,13 @@ export async function boot(dom) {
   function setDisconnected(v) { look.set({ disconnected: !!v }); return !!v; }
   /** the SETTINGS controls the look store drives, repainted from it */
   function lookSync(s, keys) {
-    const c = { theme: ui.themeSeg, card: ui.cardSeg, frost: ui.frostSeg, disconnected: ui.discSw, blur: ui.blurK, accentA: ui.accA, accentB: ui.accB, vivid: ui.vivid };
+    const c = { theme: ui.themeSeg, card: ui.cardSeg, frost: ui.frostSeg, disconnected: ui.discSw, blur: ui.blurK, accentA: ui.accA, accentB: ui.accB, vivid: ui.vivid,
+      badges: ui.badgesSw, hints: ui.controlHintsSw, help: ui.windowInfoSw };
     for (const k of keys) if (c[k]) c[k].set(s[k]);
   }
   function applySettings() {
     const s = readSettings();
     look.rerun(); lookSync(look.prefs.all(), Object.keys(look.prefs.all()));   // 0.5.0 C2: the look again, now that the theme's engine hooks exist
-    const badges = s.badges === true;
-    document.body.classList.toggle('no-badges', !badges); if (ui.badgesSw) ui.badgesSw.set(badges);
-    const controlHints = s.controlHints === undefined ? s.hint !== false : s.controlHints !== false;
-    document.body.classList.toggle('control-hints-off', !controlHints); if (ui.controlHintsSw) ui.controlHintsSw.set(controlHints);
     const captions = s.captions === true;
     document.body.classList.toggle('no-captions', !captions); if (ui.capSw) ui.capSw.set(captions);
     /* THE STAGE TEXT (0.4.0 S3): one switch for the formula, the fade and the atom labels; nothing said means ON.  The ATOM
@@ -1146,8 +1143,11 @@ export async function boot(dom) {
     ui.set = device({ id: 'settings', eyebrow: 'SETTINGS', status: '' });
     const gi = group(ui.set.body, 'INTERFACE');
     const ri = el('div', 'row tight', gi);
-    ui.badgesSw = sw({ label: 'STATUS TAGS', value: false, title: 'Show status tags at the top', onChange: (v) => { document.body.classList.toggle('no-badges', !v); saveSettings(); } }); ri.appendChild(ui.badgesSw.root);
-    ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: true, title: 'Show control hints after a short hover', onChange: (v) => { document.body.classList.toggle('control-hints-off', !v); document.dispatchEvent(new Event('controlhintschange')); saveSettings(); } }); ri.appendChild(ui.controlHintsSw.root);
+    /* 0.5.0 C2: STATUS TAGS, CONTROL HINTS and HELP are the look store's (mir.gui); native-ui.js seats them on DISPLAY */
+    ui.badgesSw = sw({ label: 'STATUS TAGS', value: look.get('badges'), title: 'Show status tags at the top', onChange: (v) => look.set({ badges: v }) }); ri.appendChild(ui.badgesSw.root);
+    ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: look.get('hints'), title: 'Show control hints after a short hover', onChange: (v) => look.set({ hints: v }) }); ri.appendChild(ui.controlHintsSw.root);
+    ui.setWindowInfo = (v) => look.set({ help: v });   // the WINDOW menu's `notes` action calls it by this name
+    ui.windowInfoSw = sw({ label: 'HELP', value: look.get('help'), title: 'Show window help buttons', onChange: ui.setWindowInfo }); ri.appendChild(ui.windowInfoSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
     ui.molFormulaSw = sw({ label: 'STAGE TEXT', value: true, title: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states, a preset\'s name as it is pressed, the element of each nucleus — and caption a picture or a recording with it', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); if (stageText) stageText.setOn(v); schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
     ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE TEXT\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading, an atom label its body',

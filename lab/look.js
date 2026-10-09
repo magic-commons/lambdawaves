@@ -6,8 +6,8 @@
  * THE ACCENTS are the kit's engine (shell/accent.js createAccent, the port of what this file was); λWAVES feeds it what it
  * holds apart — the HUE knob and the palette switch (applyAccent), the palette's stops, the live stage ground, the gamut,
  * the modulation window — and keeps its own the stage text's ink and M7's one paint per batch.
- * THE LIFT (once, forward only): an older settings blob's look keys are set into `mir.gui` by the laws applySettings read
- * them by, and leave the blob.  A fresh profile never runs it.  Node-testable: liftLook (tests/first-run.test.mjs). */
+ * THE LIFT (once, forward only): an older settings blob's look keys (and HELP's own key) are set into `mir.gui` by the laws
+ * rack.js read them by, and leave the blob.  A fresh profile never runs it.  Node-testable: liftLook (tests/first-run.test.mjs). */
 import { createPrefs } from './mir/core/prefs.js';
 import { lookSchema } from './mir/shell/gui.js';
 import { createAccent } from './mir/shell/accent.js';
@@ -16,19 +16,25 @@ export { CARD_GROUND } from './mir/shell/accent.js';   // the card the notebook'
 
 export const LOOK_KEY = 'mir.gui';
 /** the LOOK_SCHEMA rows SETTINGS reaches: the store holds these and nothing else */
-export const LOOK_ROWS = Object.freeze(['theme', 'accentA', 'accentB', 'vivid', 'card', 'frost', 'blur', 'disconnected']);
-/** what the look left the settings blob with */
-export const BLOB_LOOK = Object.freeze(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent']);
+export const LOOK_ROWS = Object.freeze(['theme', 'accentA', 'accentB', 'vivid', 'card', 'frost', 'blur', 'disconnected', 'hints', 'help', 'badges']);
+/** what the look left the settings blob with; HELP had its own key */
+export const BLOB_LOOK = Object.freeze(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'badges', 'controlHints', 'hint']);
+export const HELP_KEY = 'lw-window-info';
 
-/** liftLook(blob) → the `mir.gui` patch an older blob becomes, by applySettings' own laws */
-export function liftLook(s = {}) {
-  const p = {}, f = s.frost === true ? 'always' : s.frost, a = Array.isArray(s.accent) ? s.accent : null;
-  if (['light', 'dark', 'system'].includes(s.theme)) p.theme = s.theme;
-  if (s.cardSet === true && (s.card === 'tinted' || s.card === 'refractive')) p.card = s.card;   // wave 51: said, not merely saved
-  if (['off', 'still', 'always'].includes(f)) p.frost = f;                                         // wave 67: a legacy `true` is ALWAYS
+/** liftLook(blob, help) → the `mir.gui` patch an older blob (and HELP's 'on' | 'off') becomes, by the laws rack.js read them by:
+ *  an unknown theme was DARK; a card counts only when this browser SAID it (cardSet, wave 51); a legacy frost `true` is ALWAYS
+ *  (wave 67) and an unknown one OFF; an absent or false key is not lifted, so the device's first-run default stands. */
+export function liftLook(s = {}, help = null) {
+  const p = {}, a = Array.isArray(s.accent) ? s.accent : null;
+  if (s.theme) p.theme = ['light', 'dark', 'system'].includes(s.theme) ? s.theme : 'dark';
+  if (s.cardSet === true && (s.card === 'tinted' || s.card === 'refractive')) p.card = s.card;
+  if (s.frost) p.frost = s.frost === true ? 'always' : s.frost === 'still' || s.frost === 'always' ? s.frost : 'off';
   if (typeof s.disc === 'boolean') p.disconnected = s.disc;
   if (Number.isFinite(s.blur)) p.blur = s.blur;
   if (a) Object.assign(p, { accentA: +a[0] || 0, accentB: +a[1] || 0, vivid: +a[2] || 0 });
+  if ('badges' in s) p.badges = s.badges === true;
+  if ('controlHints' in s || 'hint' in s) p.hints = s.controlHints === undefined ? s.hint !== false : s.controlHints !== false;
+  if (help === 'on' || help === 'off') p.help = help === 'on';
   return p;
 }
 
@@ -45,8 +51,16 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
     ...(r.key === 'theme' ? { apply: [...r.apply, { run: (v, s, e) => { if (seen !== v + e.theme) { seen = v + e.theme; onTheme(e.theme, v); } } }] } : {}) }));
   const prefs = createPrefs({ key: LOOK_KEY, schema, context: ctx });
   const blob = settings.read(), held = BLOB_LOOK.filter((k) => k in blob);
-  if (held.length) { prefs.set(liftLook(blob)); for (const k of held) delete blob[k]; settings.write(blob); }
+  let help = null; try { help = localStorage.getItem(HELP_KEY); localStorage.removeItem(HELP_KEY); } catch (_) {}
+  if (held.length || help) prefs.set(liftLook(blob, help));
+  if (held.length) { for (const k of held) delete blob[k]; settings.write(blob); }
   prefs.apply({ now: true });
+  /* the help rows' own moment (control-help.js): a hints change closes an open hint; HELP off closes an open ⓘ panel */
+  prefs.subscribe((s, keys) => {
+    if (keys.includes('hints')) document.dispatchEvent(new Event('controlhintschange'));
+    if (keys.includes('help') && !s.help) { for (const p of document.querySelectorAll('.native-info-content:popover-open')) p.hidePopover();
+      for (const b of document.querySelectorAll('.native-info-button')) b.setAttribute('aria-expanded', 'false'); }
+  });
 
   /* THE STAGE TEXT (stage-text.js) is on the CANVAS too: plain ink, light or dark by the live STAGE, haloed in it */
   function paintInk() {
