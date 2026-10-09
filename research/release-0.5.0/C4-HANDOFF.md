@@ -20,7 +20,13 @@ builder), geckodriver 5303; suites one at a time, 4 s apart.
   history's ONE CLOCK scene.
 - **Step 1 DONE** (this hand-off's commit, no code change): on be03a83, take-in-bugs **4/4** (its §1 now five scenes, all
   0 refusals), new-project **8/8**, history **39/39**, routed-knob **4/4**. Nothing red; nothing to fix.
-- `lab/*.js`: 36,288 (base) → 36,469 (adopt) → 36,478 (14f0fac) → 36,464 (be03a83).
+- **Step 2 DONE** (`git log` "modArm + modCadence leave the settings blob"): `modStore = localStore('lambdawaves.q0.modulation')`
+  (MIR bind.js), `saveMod()`; saveSettings writes neither key; applySettings reads the record, an older blob's pair once into it;
+  FORGET clears the pair. STATE-SCOPES row split (record row; `clockLink` RETIRED); FAMILIES row; new-project regenerated
+  (bpm 30, byte-identical to C0's/D9's: sha-256 5b8a90de…) and `--check` in step. Gates: node 85 = 82 + 3 known reds
+  (new-project --check now green); first-run 11/11; new-project browser 8/8; `.tmp/probe-modstore.mjs` correct;
+  settings-probe 5/6 (WAVE DANCER: `modwin.modes.s3` pruned on reload — step 5's finding).
+- `lab/*.js`: 36,288 (base) → 36,469 (adopt) → 36,478 (14f0fac) → 36,464 (be03a83) → 36,472 (step 2).
 
 ## Node reds (C0's, not fixed): mir-manifest (alpha.24 not ACCEPTED); new-project --check OUT OF STEP (bpm 60 → 30); wiring
 (allowlist `lab/mir/shell/wordmark.js` is reached via `window/workspaces.js`; R5-W1); pwa (absolute URL in lab/mir/shell/gui.js).
@@ -46,4 +52,4 @@ builder), geckodriver 5303; suites one at a time, 4 s apart.
 - take-in-bugs' WAVE DANCER scene reads t 0.00 → 64.18 (the project's own clock after open; green, noted only).
 
 ## Exact next step
-Step 2 (scopes).
+Step 3 (deletions): verify `lab/mir/modulation/audio-capture.js` exports `createAudioCapture` and `AUDIO_STATE` first.
