@@ -629,6 +629,10 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > real held key; `main-thread.mjs` `--setup`/`--sweep`/`served`; REPORT wave 212; CLAUDE.md THE STAGE TEXT paragraph replaced by its draft; CHANGES line).
 > FOUND for Josh: the letters' `difference` blend costs ≈ 30 % of frames while the camera turns (pre-existing; R6-L); the kit's pointer force nudges the block
 > when the pointer comes within 260 px (a STILL block is a brief candidate; R6-F). **D2+D8 LAUNCHED 17:35 from `76b1d5e`** (Opus, 9013/5483, `BRIEF-D2-D8.md`).
+> **17:45 — D10-24 MERGED** (Sonnet `c8e8473`: THE CURVES CARD, closed after RENDER, screen only — an S-curve leaves the exported picture's sha unchanged;
+> PREFERENCE record `lambdawaves.q0.curves`, FORGET removes it; presents/s neutral 15.03 → S-curve 12.18 on the headless rig, neutral free; the lock 0/0;
+> +19 → **27,577**; REPORT wave 213; CLAUDE.md paragraph; CHANGES line). FOUND for Josh: a returning browser sees any card newer than its saved blob open once
+> (a general gap of `applySettings`' exact `closed[]`); only `#field` is graded. **The first wave is IN (4/4).** Running: D2+D8. Then D-V.
 
 ## 3 · What happens next, in order
 
