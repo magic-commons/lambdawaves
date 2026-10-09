@@ -247,3 +247,14 @@ changes after the release of 0.5.0 or 0.5.5")
   (0.5.5 or 0.5.1 — Josh names it). The no-push ruling of 10-07 stands: nothing goes to GitHub or Cloudflare at this cut.
 - 12:00 CDT: "I was screen recording lambdawaves on the web" during C-V's ms/s pair — the discarded base run (load 12) and the +2.7/+3.7
   raw drift are accounted for; the interleaved pair (+1.005) stands; the opener's quiet run comes after.
+- ≈14:00 CDT: **"Let the name of each version number be a one-two word 'main' update name. Like 'Timeline' or 'Informational Update' or
+  whatever."** Taken as: every release carries a name beside its number, in the build line, the tag message, CHANGELOG.md's heading and
+  CHANGES-<version>.md's title. **0.5.0-alpha = "The Adoption"** (its build line already says `0.5.0-alpha · the adoption`; Josh may rename it
+  before the cut). **The next release (the D rows) = "Informational Update"** — its number (0.5.5 or 0.5.1) is Josh's. Earlier cuts keep their
+  build-line names (0.3.2 the offer, 0.3.3 the exports, 0.4.0 the library).
+- ≈14:00 CDT, asked whether stage D needs another NACRE planning set: the integrator's answer is **no full set — one short re-plan round.** Stage D
+  was planned by the full NACRE (DRAFT-1 → REVIEW-SONNET-0 → DRAFT-2 → AUDIT-OPUS-1 → §2 D); what moved since is known and small: the A0 spike
+  (D1/D5/D7 to 0.5.1, D4 text only), C8 waiting on kit brief 8, D6's "no named out, not built", the net ≤ 0 ledger, C-V's not-verified list, the
+  two found-not-fixed items (a film keeps the window mask it started with; B17 NEW's AUDIO source refuses MODULATION ON films), the opener's
+  held-frames flake, and the MIR brief candidates B1–B17. So: **a Fable draft of `research/release-0.5.5/PLAN.md` (or 0.5.1) derived from §2 D with
+  those deltas, one Opus@high audit, then build** — not five passes. Josh's call; recorded as the default.
