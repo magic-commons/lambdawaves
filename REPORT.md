@@ -5697,3 +5697,44 @@ One Opus builder (`agent-ad72f08e558dc8f5f`) ran the row as PAIR 2 beside R2b, f
 **Lines.** `lab/*.js` + shell + windows **27,856 → 27,873 (+17)** of 27,943. `rack.js` 3,605 → 2,448; the modules 233 · 341 · 379 · 217.
 
 Hand-off: `research/release-0.5.2/R3b-BUILD.md`.
+
+### wave 221: R2c THE MATERIAL + THE SETTINGS CARD + THE FILM ROAD — WAVE · CLIP · PALETTE · CAMERA and the SETTINGS card move verbatim into `lab/windows/` at two seats each, the film road at one; `filmHold` stays as `app.loop.hold`; nothing Josh sees moves
+
+One builder (`agent-aa99c668f22d59ca3`, another account's) ran the row as PAIR 3 beside R2d, from `8796d15`, and was paused on the usage alarm after the light check; a second
+agent (`agent-a4c23cd57faad2656`) wrote the BUILD and this wave from its HANDOFF and logs.
+
+**The move** (`.tmp/r2c/move.mjs`, at the walker's token positions; every edit printed):
+- The 340-line block of `boot()` that interleaved WAVE, SETTINGS and THE FILM dissolves. WAVE's head, DRAW, CLIP, PALETTE · INVERT and CAMERA → `createMaterial(app)` (127 lines,
+  TWO seats: the root makes the four `device()`s and WAVE's head and returns `createDrawClipPaletteCamera()`); the SETTINGS card → `createSettingsCard(app)` (177, TWO seats: it returns
+  `createFieldQuality()`); the film road (`film()`, `capture()`, the takes, `app.state.capApi`) → `createFilmApi(app)` (22, one seat). `boot()` calls the five where the five spans
+  stood (`rack.js:666 · 668 · 669 · 675 · 676`), so the rack's card order is the base's.
+- `filmHold` leaves the block for boot level, hoisted, as `app.loop.hold` by value (the literal's `hold: filmHold`); its tokens are unchanged. film.js takes it as `{ hold: filmHold } = app.loop`.
+- 296 of the 319 moved non-blank lines are byte-identical, 15 are re-indented (`filmHold`, the headers), 8 differ: the 3 inits the literal already held (deleted),
+  `app.sh.layout.resetLayout()`, the split `let`, and 3 film lines reading `LW` / `periodEnergies` / `stageCaption()` through their slots.
+- The card registers its seven stage hooks on `app.hooks` at its root. `boot()` fills the slots the modules read that no moved module owns: `app.host.cameraPort`,
+  `app.sh.setCardStyle`, `app.sh.setDisconnected`, and `app.w.stageCaption` on the `go` line (the integrator deletes that one at the merge with R2d).
+- 15 names left `rack.js`'s imports (44 → 41 lines), the dead `toLUT` among them.
+
+**The tool.** `tools/rack-deps.mjs` learns that a slot the literal holds by value under another key (`loop.hold: filmHold`) hands that boot-level name; without it `{ hold } = app.loop`
+is a G-A stray. settings-card's file is `lab/windows/settings-card.js`, and `PLANNED_CUT` has six rows for the new seats. `rack-deps.test` gains the law (RED on the base tool, GREEN now).
+
+**Gates.**
+- **The classes table:** material 1 → 1 · settings-card 5 → 5 · film 6 → 5 (it owns `capApi`) · notebook 21 → 20 (it owns `exporter3d`) · boot 76 → 79; 0 bare writes; G-A clean;
+  the hinge holds (SPECTRUM 24); 16 module files measured; `modStore` is now unread in `boot()`.
+- **The bytes:** `serialize-bytes` 11/11 full and 11/11 edit, sha-identical to the live base export; `settings-probe`'s boot (716 B) and WAVE DANCER (752 B) blobs equal the base's.
+- **The film and the camera:** `film-probe` on both trees — the picture (97,519 B), 25 frames, the ONE PERIOD loop and the RECORD clip (180 frames each) have identical digests,
+  times and MP4 bytes; `film-handover` 4/4; `camera-routes` 5/5, SAME as the base; `camera-shift` green.
+- **The suites:** node exit 0 (`first-run` 12, `auto-scale` 23/23, `render-exact` 0 of 40 failing); `lw-facade` 1/1; the boot suite's WAVE / SETTINGS / CAMERA / PALETTE blocks 21/23,
+  the same twenty-three verdicts as the base.
+- **The rig's reds, identical on the base:** `curves` scene 3 (the same screenshot hash on both), `settings-probe`'s WATER ("did not settle"; BENZENE, N₂ and NEW unreached), boot B60
+  (the governor's median 66 ms) and B65 (the travel `restMs`). `take-in-bugs` read red twice on the frame-paced "app time advances" (a different case each time), then 4/4 green;
+  the base's one run was green.
+
+**For the merge.** `boot()` destructures 5 names from the material seat and 1 from the settings-card seat. Six judgement calls: the `{ hold: filmHold }` alias with its tool clause and law;
+three boot fills (`cameraPort`, which R2d writes too — keep one — and `setCardStyle` / `setDisconnected` on R3b's `quality` line); the `go` line deleted at the merge; `PLANNED_CUT` reordered
+and settings-card's `file:` string; 15 import names out, so the import block conflicts with R2d's deletions — take both; `modStore` dropped from the controller-seat destructure in a fix round.
+Re-run `node tests/pwa.test.mjs --write` on the merged tip.
+
+**Lines.** `lab/*.js` + shell + windows **27,893 → 27,902 (+9)** of 27,943 (41 left for the five modules still to move). `rack.js` 2,001 → 1,681; the modules 127 · 177 · 22.
+
+Hand-off: `research/release-0.5.2/R2c-BUILD.md`.
