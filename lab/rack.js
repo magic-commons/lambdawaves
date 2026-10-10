@@ -68,6 +68,7 @@ import { createRegisterSturmian } from './sturmianreg.js';
 import { stateLatex, moleculeLatex, moleculeHead, mdText, formulaLatex, BASIS_LABEL } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page; 0.5.1 D2: its head
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
+import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js';   // 0.5.2 R3a (edit-domain.js left with the history)
 import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { createCameraPanel } from './mir/panels/camera.js';           // 0.5.0 C1: the CAMERA card's rows are the kit's panel over the law's port
 import { barTempo } from './mir/modulation/host.js';
@@ -76,7 +77,6 @@ import { createCurvesPanel } from './mir/panels/curves.js';     // 0.5.1 D10-24:
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
 import { createController } from './shell/controller.js';   // 0.5.2 R1: ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD, out of boot()
-import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js';   // 0.5.2 R3a
 import { CARD_GROUND } from './look.js';    // 0.5.0 C2: the look is the kit's — mir.gui (createPrefs over LOOK_SCHEMA rows) and createAccent (once N7 seam 4, accent-wheel.js)
 import { createSwClient } from './sw-client.js';        // N7 seam 5: the install layer's interface half, out of boot()
 import { createBadges } from './badges.js';             // N7 seam 6: the badges and the canvas's sentence, out of boot()
