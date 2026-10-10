@@ -670,7 +670,7 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > dependency graph, one Opus@high audit, then the briefs; the build on his word. **Launched 21:09: `tools/rack-deps.mjs`** (Opus, from `a8b136c`; no GPU) → the
 > sections of `boot()`, the hub names, the `ui` bag, the LW facade by section, the moving-cost ranking → `research/release-0.5.2/RACK-DEPS.md`. Then
 > `PLAN-DRAFT-0.md` (Yan) → `AUDIT-OPUS.md` → `PLAN.md` → the briefs. Name/number Josh's (folder 0.5.2; "Rack Dissolution" / "Engine Boundary" offered).
-> **UPDATE (Claude Yan, 2026-10-09 22:30 CDT) — THE 0.5.2 PLANNING ROUND IS DONE; the build awaits Josh's word.** `tools/rack-deps.mjs` merged `c089f08`
+> **UPDATE (Claude Yan, 2026-10-09 22:15 CDT) — THE 0.5.2 PLANNING ROUND IS DONE; the build awaits Josh's word.** `tools/rack-deps.mjs` merged `c089f08`
 > (4,827 body lines · 31 sections · 422 names · 123 hubs · ONE 26-section cycle · the `ui` bag 107 · the facade 176); the draft `183d061`; the Opus@high audit
 > merged `3c406ca` (SOUND WITH CHANGES: the draft's hinge measured and failed — residue 15–120 under a 30-hub context; the right measure is forward names +
 > shared lets + cross-module writes; 67 shared lets, 50 written from outside their section; the frame loop reads 49 forward names + 27 lets per frame → it

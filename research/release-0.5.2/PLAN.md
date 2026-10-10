@@ -1,4 +1,4 @@
-# λWAVES 0.5.2 "Rack Dissolution" — THE PLAN (Claude Yan, 2026-10-09 22:20 CDT; DRAFT 0 + AUDIT-OPUS folded)
+# λWAVES 0.5.2 "Rack Dissolution" — THE PLAN (Claude Yan, 2026-10-09 22:10 CDT; DRAFT 0 + AUDIT-OPUS folded)
 
 **What this is.** The refactor Josh asked for (`ASK.md`), planned in the ONE round he ruled: a Fable draft (`PLAN-DRAFT-0.md`) on a measured dependency
 graph (`tools/rack-deps.mjs` → `RACK-DEPS.md`), one Opus@high audit (`AUDIT-OPUS.md`, SOUND WITH CHANGES — its re-plan is this file). **Nothing Josh sees
