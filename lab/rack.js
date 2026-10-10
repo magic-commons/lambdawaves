@@ -1203,7 +1203,6 @@ export async function boot(dom) {
       mat.bg = THEMES[theme].bg.slice();
       if (app.hooks.restage) app.hooks.restage();
       mat.lightUI = theme === 'light';
-      if (app.hooks.themeChanged) app.hooks.themeChanged(theme);
       schedule(TIER.PRESENT);
     };
     ui.themeSeg = seg({ label: 'THEME', value: look.get('theme'), options: [

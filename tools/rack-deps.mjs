@@ -1070,7 +1070,29 @@ export function classes(src, opts = {}) {
     };
   });
   const stateMembers = uniq(modules.flatMap((m) => [...m.state, ...m.stateOwn]));
+  /* ── G-A, read statically: the `app` literal's namespaces and keys, and every `app.x` / `app.<ns>.x` that names a key the literal
+     does not hold (an extension), every `Object.assign(app…` and every `delete app.…` ── */
+  const appDecl = W.bootHits[0].scope.names.get('app');
+  const appInit = appDecl && W.declInit.get(appDecl.at);
+  const appShape = { line: appDecl ? toks[appDecl.at].line : -1, top: [], ns: {} };
+  if (appInit && appInit.obj !== undefined) for (const k of W.objKeys.get(appInit.obj) || []) {
+    appShape.top.push(k.key);
+    if (k.kind === 'value' && P(k.at + 1) === ':' && P(k.at + 2) === '{') appShape.ns[k.key] = (W.objKeys.get(k.at + 2) || []).map((x) => x.key);
+  }
+  const strays = [];
+  for (const r of refs) {
+    if (r.name !== 'app') continue;
+    if (P(r.at - 1) === '(' && nameAt(r.at - 2) === 'assign') { strays.push(`line ${r.line}: Object.assign(app…`); continue; }
+    if (nameAt(r.at - 1) === 'delete') { strays.push(`line ${r.line}: delete app…`); continue; }
+    if (P(r.at + 1) !== '.') { if (P(r.at + 1) === '[') strays.push(`line ${r.line}: app[…]`); continue; }
+    const top = nameAt(r.at + 2);
+    if (!appShape.top.includes(top)) { strays.push(`line ${r.line}: app.${top}`); continue; }
+    if (appShape.ns[top] && P(r.at + 3) === '.' && nameAt(r.at + 4) && !appShape.ns[top].includes(toks[r.at + 4].v)) strays.push(`line ${r.line}: app.${top}.${toks[r.at + 4].v}`);
+    if (appShape.ns[top] && P(r.at + 3) === '[') strays.push(`line ${r.line}: app.${top}[…]`);
+  }
+  appShape.largest = Math.max(appShape.top.length, ...Object.values(appShape.ns).map((x) => x.length));
   return {
+    appShape, appStrays: strays,
     file: R.file, sha256: R.sha256, lines: R.lines, boot: R.boot, pieces, modules, sharedLets, stateMembers,
     stateOwners: Object.fromEntries(stateMembers.map((x) => [x, stateOwnerOf(x)])),
     crossNames: [...crossNames.values()].map((c) => ({ ...c, users: [...c.users].sort(byName) })).sort((a, b) => a.line - b.line),
@@ -1092,6 +1114,8 @@ export function classesText(C) {
   out.push('');
   out.push(`THE HINGE (G-G): bare writes across scopes ${C.hinge.crossWrites}; the largest moving module ${C.hinge.worst.id} at ${C.hinge.worst.forwardShared} (limit ${C.hinge.limit}) → ${C.hinge.ok ? 'HOLDS' : 'FAILS'}`);
   out.push(`shared lets still bare (${C.sharedLets.length}): ${C.sharedLets.join(', ') || 'none'}`);
+  out.push(C.appShape.line < 0 ? 'G-A (static): no `app` literal yet'
+    : `G-A (static): \`app\` at line ${C.appShape.line}: ${C.appShape.top.length} keys; ${Object.entries(C.appShape.ns).map(([k, v]) => k + ' ' + v.length).join(' · ')}; the largest ${C.appShape.largest} (< 128: a literal that size is born a dictionary); members named outside the literal, Object.assign, delete: ${C.appStrays.length ? C.appStrays.join('; ') : 'none'}`);
   out.push(`app.state members in use (${C.stateMembers.length}): ${C.stateMembers.join(', ') || 'none'}`);
   out.push(`const / function names crossing a scope (${C.crossNames.length}; hoisted declarations ${C.crossNames.filter((c) => c.kind === 'function').length})`);
   return out.join('\n');

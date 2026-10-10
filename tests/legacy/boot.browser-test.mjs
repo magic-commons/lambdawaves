@@ -13,6 +13,10 @@ import fs from 'node:fs';
 import http from 'node:http';   // wave 51: Set Window Rect on the live session — the only way to reach a phone viewport mid-run
 import { open, judge, done } from '../../tools/gate/gatekit.mjs';
 const drv = await import('../../tools/gate/drv.mjs');
+import { appFiles } from '../helpers/app-source.mjs';
+/* 0.5.2 G-S: a law that reads the app's source reads THE APP — rack.js and every module born in lab/windows/ and lab/shell/ — fetched
+   from the page's own server in tests/helpers/app-source.mjs' order (B108, B112, B136), so a moved block does not move its law */
+const APP_SRC = `(await Promise.all(${JSON.stringify(appFiles())}.map(async (f) => (await fetch('./' + f)).text()))).join('\\n')`;
 
 const PORT = process.env.LW_PORT || '8701';
 const ROOT = decodeURIComponent(new URL('..', import.meta.url).pathname).replace(/\/$/, '');
@@ -4650,7 +4654,7 @@ try {
     x.click(); await new Promise((r) => setTimeout(r, 60));
     R.dismissed = b.hidden === true; R.mainPane = !!main && main.getAttribute('role') === 'alert'; if (b !== main) b.remove();
     /* WHAT IS PROVED FROM THE SOURCE, and it is said so: a real device cannot be lost on demand */
-    const rackSrc = await (await fetch('./rack.js')).text(), fieldSrc = await (await fetch('./field.js')).text(), mainSrc = await (await fetch('./main.js')).text();
+    const rackSrc = ${APP_SRC}, fieldSrc = await (await fetch('./field.js')).text(), mainSrc = await (await fetch('./main.js')).text();
     /* plain string search, not a regex: ANTI-PATTERN 10, and it is also what makes this block replayable
        through peek-block.mjs, which hands the browser the template's RAW source and doubles every escape. */
     const iCreate = rackSrc.indexOf('createField(dom.canvas, {');
@@ -4853,7 +4857,7 @@ try {
        read ONLY under a driver now.  With no query at all the source is the media query, live — and the
        driver arm is what B103 drives.  The line itself is read out of the shipped bytes. */
     R.motionSource = __LW.motion.source;
-    const rackSrc = await (await fetch('./rack.js')).text();
+    const rackSrc = ${APP_SRC};
     R.motionGated = (await (await fetch('./motion-pref.js')).text()).indexOf("navigator.webdriver === true ? new URLSearchParams(location.search).get('motion') : null") >= 0;   // 0.5.0 re-aim: the motion preference moved out of rack.js into motion-pref.js
     R.warnedCarried = rackSrc.indexOf('warned: S0.warned') >= 0;
     R.errs = window.__e.length;
@@ -5775,7 +5779,7 @@ try {
          (undefined) is an explicit call carrying no value and still means JOINED.  A missing SETTINGS
          key is not the same statement as an explicit nothing, and the two roads are asserted apart
          precisely so a later wave cannot quietly merge them. */
-      bootLaw: (await (await fetch('./rack.js')).text()).indexOf('vivid: 0.5, disconnected: true') > 0 };   /* 0.5.0 re-aim (C2): the boot road is the look store's defaults (LOOK_DEFAULTS), where it read s.disc !== false */
+      bootLaw: (${APP_SRC}).indexOf('vivid: 0.5, disconnected: true') > 0 };   /* 0.5.0 re-aim (C2): the boot road is the look store's defaults (LOOK_DEFAULTS), where it read s.disc !== false */
     __LW.setFrost('off'); __LW.setDisconnected(true); __LW.pause(); await nap(220);
 
     /* §1 · THE ROOT PAINTS NOTHING AND CONTAINS NOTHING — the four load-bearing declarations */

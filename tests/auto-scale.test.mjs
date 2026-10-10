@@ -6,10 +6,10 @@
  * replaced, 7dca938's EMA at 0.15, −0.1 / +0.05 every 24 loop frames, is modelled beside it); part two drives the real loop
  * block through present-bound and reconstruct-bound scenes, with and without vsync quantisation, and the pause edge.
  *   node tests/auto-scale.test.mjs */
-import { readFileSync } from 'node:fs';
+import { appSource } from './helpers/app-source.mjs';   // 0.5.2: the app's source — rack.js and the modules it dissolves into
 
-const src = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
-const slice = (from, to, inclusive) => { const a = src.indexOf(from), b = src.indexOf(to, a); if (a < 0 || b < a) throw new Error('not found in lab/rack.js: ' + from.trim().slice(0, 60)); return src.slice(a, b + (inclusive ? to.length : 0)); };
+const src = appSource();
+const slice = (from, to, inclusive) => { const a = src.indexOf(from), b = src.indexOf(to, a); if (a < 0 || b < a) throw new Error('not found in the app source: ' + from.trim().slice(0, 60)); return src.slice(a, b + (inclusive ? to.length : 0)); };
 const controlStep = new Function(slice('  function controlStep(', '\n  }\n', true) + '; return controlStep;')();
 /** the scale lever alone, in AS's old signature: AUTO SCALE on, no grid rung free */
 const autoScaleStep = (scale, iv, k, budgetMs, minScale, sinceMs, presented) => {
