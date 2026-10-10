@@ -6,7 +6,7 @@ MIR owns generic instrument behavior. Before changing modulation controls, read
 adapt `lab/modwindow.js`; do not edit adopted files under `lab/mir/`.
 The modulation port is `lab/mod-port.js` (the object `createModulation(port)`
 takes, key for key with MIR 1.5); THE play is `onePlay` in `lab/clock.js`, and
-while MOD is armed the modulation follows every edge of it, holding the kit's
+the modulation follows every edge of it, armed or not (the MOD power is a route bypass), holding the kit's
 `demand('app.play')`, so a play is never refused for want of a route or an open
 editor (0.5.0 A5/A6; LINKED/SEPARATE retired at C4 — one clock, no link).
 
@@ -110,8 +110,8 @@ pick, and a restore, an undo, a project, link or demo open never shows it (`__LW
 the kit's `infoActions` row; `lab/key-table.js` carries a row's `up`) holds the words still while the key is down. The same
 switch and SIZE govern the ATOM LABELS, λWAVES' own letters (R6-L; kit labels are D1b, Group II): each MOLECULES nucleus marked
 with its element symbol at its projected position (`toScreen`, written only when the camera, molecule, size or canvas changed),
-white under `mix-blend-mode: difference` so they invert whatever is beneath them. The older `atomLabels` / `atomLabelsSize` keys
-are read once (only where `molFormula` was never written) and dropped. The type scale is the notebook's three sizes: the formula
+white under `mix-blend-mode: difference` so they invert whatever is beneath them. The older `atomLabels` key is read once
+(only where `molFormula` was never written) and dropped; `atomLabelsSize` is not read. The type scale is the notebook's three sizes: the formula
 its title (34 px), an announcement its heading (22 px) — the kit's `--info-size-body` overridden in `lab.css`, each held to 8 vw
 and at least 16 px — an atom label its body (14 px), each × SIZE. It never reaches an export: a picture, a loop and a video carry
 instead its one plain-Unicode CAPTION (`H₂O · 1b1 HOMO · STO-3G`, or the states), drawn by `lab/capture.js` `drawCaption` and
@@ -181,7 +181,7 @@ origin boot/link) takes a waiting build itself (`lab/sw-client.js`, `rack.js`
 offered it, any other session only on a press. The banner is MIR's
 `installBanner`, the veil MIR's `bootVeil`, and the wake lock follows THE play.
 
-AUTO on is a project default, not a preference (see the scopes below). In
+DOMAIN AUTO on is a project default, not a preference (see the scopes below). In
 `lab/field.js`, WAVE density uses palette θ=0; Δρ uses the same ±π/2 pair as
 Re/Im; palette OFF retains the old colors. Keep
 `tests/official-defaults-palette.browser-test.mjs` green when editing either.
@@ -197,7 +197,8 @@ leave `lambdawaves.q0.settings` byte-identical outside the WORKSPACE keys.
 PROJECTS are MIR's FOLDERS over ONE project part (lab/projects.js,
 lab/project-store.js): `lambdawaves` = { data: projectSnapshot(), notebook } —
 the notebook is the project's page 0 — signed by projectKey();
-serialize()/restore() bytes never move (tools/serialize-bytes.mjs).
+serialize({ scope: 'edit' }) bytes never move (tools/serialize-bytes.mjs); the full
+bytes gain one WORKSPACE layout row per new card (RENDER at C7b, CURVES at 0.5.1).
 `lambdawaves.q0.projects` keeps λWAVES' { items, recent } through a byte-exact
 translator; an invalid collection is read-only, 8 MiB a project, 24 MiB the
 library (tests/project-formats.*). `__LW.projects` keeps every old verb

@@ -638,6 +638,14 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > node test over 38 records + H₂O/N₂ live with every numeral traced; `lw:` LINKS in the notebook view over preset/molecule/view/orbital, one ring row + one
 > fade a press, no tab, no whole-state link; +80 → **27,657**; REPORT wave 214; CLAUDE.md THE HEAD sentence + the `lw:` LINKS paragraph; CHANGES lines).
 > **GROUP I IS COMPLETE: D1 · D2 · D8 · D10-19 · D10-24 · D10-F.** Next: **D-V** (`BRIEF-D-V.md`, fresh Opus, from this tip, base `v0.5.0-alpha`).
+> **19:35 — D-V MERGED `710d9df`: FIT WITH NOTES, no BLOCKER** (Opus `593f4bc`; `research/release-0.5.1/D-V.md`): the cumulative pair boot Δ +0.116 / D1 scene
+> Δ +0.227 (gate 3.536); the lock 860/1004 · 0/0; 27,657 lines, every ledger exact; the `__LW` law held; every suite green (opener 7/7 alone, timeline 14/14,
+> film-compare identical, camera-routes SAME, serialize-bytes edit 11/11); boot alone 150/152. **Josh ≈18:30: "Keep going and cut 0.5.1 once D-V says FIT …
+> Defaults for now"** (PLAN §9). SHOULDs → **FIX ROUND 2 launched 19:40** (Sonnet, from `710d9df`, 9033/5503): S1 the guard can stay held when the modulator
+> goes constant (the registry skips unchanged writes — re-apply + clear after the quiet second), S2 B127's live-region ceiling names the CURVES stepper, S3
+> gpu-recovery alone on an empty rig (flaky on both trees under a desktop Firefox); + the hand on a ROUTED dial is held (the docs say never — fix the behaviour
+> if the registry marks a hand's write, else the wording). CLAUDE.md's four contradicted lines fixed by the integrator (line 9 the play edge armed or not; line
+> 184 DOMAIN restored; `atomLabelsSize` not read; serialize bytes = the edit scope). **Then the cut `v0.5.1-alpha · Informational Update`.**
 
 ## 3 · What happens next, in order
 
