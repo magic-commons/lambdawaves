@@ -798,6 +798,18 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > `history` 20 then 3b (identical). THE LOCK + frame-occlusion still OWED on the tip (the rig). CLAUDE.md: the R3a paragraph. `markBatchBegin`
 > is destructured at the controller's seat and unread in `boot()` — the fix round's. Next: fold these facts into `BRIEF-R2b.md` /
 > `BRIEF-R3b.md` (the seats above), then launch PAIR 2 {R2b · R3b} from the merged tip.
+>
+> **UPDATE (Claude Yan, 2026-10-10 08:50 CDT) — the integrator's two dedups; PAIR 2 LAUNCHED.** After R3a's merge four slots stood filled twice (each builder
+> at a different declaration): `app.w.wAtoms`, `app.w.gas`, `app.sh.layout`, and R3a's whole appends-seat line (`app.w.wState` + SPECTRUM's four functions,
+> which R2a's modules already register at their roots) — made single (`e467ab1`, `87aad5e`; −2 lines; `rack.js` 3,605; `lab/*.js` + shell + windows 27,856
+> of 27,943; rack-deps.test 53; lw-facade 1/1 after each). A law for the next rows, written into both briefs: a slot another module registers is NOT filled
+> again in `boot()` (grep every `app.<ns>.x =` across `lab/` first); persist destructures `app.w` handles and `app.sh.layout/phone/tablet/quality` at its
+> creation, so a module seated before it registers them eagerly at its root. `BRIEF-R2b.md` / `BRIEF-R3b.md` as-built blocks rewritten at `87aad5e`'s
+> anchors (`1d5b060`): the fills each row inherits; the TRANSPORT card (`wTr` :2478) is §19a's — rack-wiring's, not the strip's; `keyState` :3015–3017 goes
+> with whichever module takes it; the third readout span's tail :1659–1673 stays; the line law — 87 lines for 14 modules, the cap WILL be passed, Josh's
+> ruling at R-V. **PAIR 2 LAUNCHED 08:50 from `1d5b060`:** R2b (Opus, `worktree-agent-a1dd669ddd57e6ee1`, 9083/5553 + 9087/5557, wave 219) and R3b (Opus,
+> `worktree-agent-ad72f08e558dc8f5f`, 9093/5563 + 9097/5567, wave 220). Next: their reports → merge by the recipe, CLAUDE.md sentences, CHANGES, HANDOFF →
+> `BRIEF-R2c.md` / `BRIEF-R2d.md` from PLAN §3 → PAIR 3.
 
 ## 3 · What happens next, in order
 
