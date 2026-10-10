@@ -1067,13 +1067,17 @@ export function classes(src, opts = {}) {
   const appChain = (r) => chainOf(toks, r);
   /* ── a module file's references, as its module's: the names it was handed (boot-level names, by key), its app chains ── */
   const seatOf = (id) => { const p = pieces.find((q) => q.module === id); return p ? p.from : -1; };
+  /* 0.5.2 R3a: a module file's EAGER fills (`app.<ns>.x = …` at its root) run at its seat — a later-seated file may destructure them */
+  for (const F of files) F.fills = new Set(F.refs.filter((r) => r.name === 'app' && !r.deferred).map((r) => chainOf(F.toks, r)).filter((c) => c && c.write && c.x).map((c) => c.ns + '.' + c.x));
+  const fileFills = (ns, x, seat) => files.some((G) => G.seat < seat && G.fills.has(ns + '.' + x));
+  for (const F of files) F.seat = seatOf(F.module);
   for (const F of files) {
-    F.seat = seatOf(F.module);
     if (F.seat < 0) throw new Error(`classes: ${F.rel} (${F.module}) has no seat — keep a piece of it (its header and the call) in PLANNED_CUT`);
     F.uses = new Map();     // boot-level name → { w }
     F.unknown = [];
     for (const [local, h] of F.handed) {
       if (h.key === 'dom' || CONTEXT_BAGS.has(h.key)) continue;   // boot's parameter and the context's bags: not crossing names (as in rack.js)
+      if (!by.has(h.key) && h.ns && fileFills(h.ns, h.key, F.seat)) continue;   // a name an earlier-seated module registers (settings' lookSync): backward, not boot's
       if (!by.has(h.key)) { F.unknown.push(`${F.rel}:${h.line}: \`${h.key}\` handed from app${h.ns ? '.' + h.ns : ''} is no boot-level name`); continue; }
       for (const r of F.refs) if (r.name === local) { const e = F.uses.get(h.key) || { w: false }; if (r.kind === 'write' || r.kind === 'rw') e.w = true; F.uses.set(h.key, e); }
     }
@@ -1187,7 +1191,7 @@ export function classes(src, opts = {}) {
   const strayCheck = (T, r, where) => {
     const P = (k) => (k >= 0 && k < T.length && T[k].t === 'punct' ? T[k].v : null);
     const nm = (k) => (k >= 0 && k < T.length && T[k].t === 'name' ? T[k].v : null);
-    if (P(r.at - 1) === '(' && nm(r.at - 2) === 'assign') { strays.push(`${where}${r.line}: Object.assign(app…`); return; }
+    if (P(r.at - 1) === '(' && nm(r.at - 2) === 'assign' && !(P(r.at + 1) === '.' && P(r.at + 3) === '.')) { strays.push(`${where}${r.line}: Object.assign(app…`); return; }   // into app or a namespace; a member's object (app.ctl.domain) is not the shape
     if (nm(r.at - 1) === 'delete') { strays.push(`${where}${r.line}: delete app…`); return; }
     if (P(r.at + 1) !== '.') { if (P(r.at + 1) === '[') strays.push(`${where}${r.line}: app[…]`); return; }
     const top = nm(r.at + 2);
@@ -1201,7 +1205,7 @@ export function classes(src, opts = {}) {
     strays.push(...F.unknown);
     for (const [, h] of F.handed) {
       if (h.ns ? !(appShape.ns[h.ns] || []).includes(h.key) : !appShape.top.includes(h.key)) strays.push(`${F.rel}:${h.line}: \`${h.key}\` handed from app${h.ns ? '.' + h.ns : ''} is no key of the literal`);
-      else if (h.ns && appShape.nullSlots.includes(h.ns + '.' + h.key)
+      else if (h.ns && appShape.nullSlots.includes(h.ns + '.' + h.key) && !fileFills(h.ns, h.key, F.seat)
         && !refs.some((r) => r.name === 'app' && !r.deferred && r.line < F.seat && (({ ns, x, write } = appChain(r) || {}) => write && ns === h.ns && x === h.key)()))
         strays.push(`${F.rel}:${h.line}: destructures app.${h.ns}.${h.key}, a null slot boot does not fill before the seat (it would freeze the null — read it live)`);
     }

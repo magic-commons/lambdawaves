@@ -211,6 +211,14 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   let S = null;
   try { S = classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/controller.js': mod('schedule, page') } }); } catch (e) { err = e.message; }
   check(!!S && S.appStrays.some((x) => /destructures app\.loop\.page, a null slot/.test(x)), 'module files: G-A — destructuring a slot the literal holds as null (filled later by boot) is a stray: it would freeze the null', S ? S.appStrays.join('; ') : err);
+  /* 0.5.2 R3a: a file's eager fills run at its seat, so a LATER-seated file may destructure them (settings' lookSync, the controller's app.ctl);
+     Object.assign into a member's object (app.ctl.gov) is not an extension of the shape */
+  const win = ['export function createWin(app) {', '  const { gov } = app.ctl;', '  Object.assign(app.ctl.gov, { seen: true });', '  return { on: gov.on };', '}', ''].join('\n');
+  const twoFiles = (ctl) => { try { return classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/controller.js': ctl, 'lab/windows/spectrum.js': win } }); } catch (e) { err = e.message; return null; } };
+  const U = twoFiles(mod('schedule').replace('  return { gov, touch };', '  app.ctl.gov = gov;\n  return { gov, touch };')), V = twoFiles(mod('schedule'));
+  check(!!U && U.appStrays.length === 0 && !!V && V.appStrays.some((x) => /destructures app\.ctl\.gov, a null slot/.test(x)) && !V.appStrays.some((x) => /Object\.assign/.test(x)),
+    'module files: G-A — a slot an EARLIER-seated file fills eagerly may be destructured by a later one (without that fill it is still a stray); Object.assign into app.ctl.gov is no stray',
+    U && V ? JSON.stringify([U.appStrays, V.appStrays]) : err);
   let T = '';
   try { classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/nowhere.js': mod('schedule') } }); } catch (e) { T = e.message; }
   check(/no planned module's file/.test(T), 'module files: a file under lab/shell/ that no planned module names is refused', T);
