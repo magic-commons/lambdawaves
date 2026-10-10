@@ -650,6 +650,21 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > **27,666**; the probe 0/3 stuck); S2 B127 names the seventh live region; S3 gpu-recovery = the rig's rAF stall on both trees under Josh's desktop Firefox,
 > not patched; the hand on a ROUTED dial IS held — CLAUDE.md + CHANGES reworded). The cut's run of record (boot alone + take-in-bugs + routed-knob on the
 > merged tree) running; then `bash $CLAUDE_JOB_DIR/tmp/cut-0.5.1.sh`.
+> **UPDATE (Claude Yan, 2026-10-09 20:35 CDT) — v0.5.1-alpha "Informational Update" CUT LOCALLY.** Josh ≈18:30: "Keep going and cut 0.5.1 once D-V says
+> FIT … Defaults for now." The run of record on the merged tree `3ae4146`: the boot suite alone **151/152** (B149 the only red — the kit's rack animates every
+> reorder, a MIR brief candidate; Josh's desktop Firefox up throughout), take-in-bugs GREEN, routed-knob 4/4, node 0, pwa in step. **THE CUT:** `a8b2d7b` the
+> version line `0.5.1-alpha · Informational Update · 2026-10-09` + README `0.5.1 alpha`; tag **`v0.5.1-alpha`**; CHANGELOG `db4b6c5`; snapshot #18
+> `~/Documents/LAMBDAWAVES-RELEASES/v0.5.1-alpha`; `research/release-0.5.1/CHANGES-0.5.1.md` (six feature lines) mirrored to the vault `LAMBDAWAVES CLAUDE 0.5.1
+> CHANGES 2026-10-09.md`. `lab/*.js` **27,666** (27,594 at the 0.5.0 cut; 36,288 at the pre-C baseline). **NOT pushed, NOT deployed** (the 10-07 ruling: nothing
+> goes to GitHub or Cloudflare until the whole plan has run — that decision is Josh's now). **The day on `yan-c`:** the baton back 15:10 → FIX ROUND 1 + the five
+> boot rows + B139 TINTED → **GUI Adoption cut 16:15** → the stage D re-plan round (draft, Opus audit, PLAN.md, BRIEFS-0.5.1.md) → six rows built and merged (D1 ·
+> D10-19 · D10-F · D10-24 · D2+D8) → D-V FIT WITH NOTES → FIX ROUND 2 → **Informational Update cut 20:35**. **What is left of the plan:** 0.5.1 Group II (D1b · D3 ·
+> D5 · D7 · C8 · D2′/D3′/D4′/D8′) waits on nine kit briefs + the audit's three in MIR (Josh's primary account; `BRIEFS-0.5.1.md`) and ONE re-adopt (R5-G1);
+> 0.5.x rows: SCENES (R6-S), the film's window mask (R6-M), the field judge, the general "a new card opens once for a returning browser" gap (`applySettings`'
+> exact `closed[]`), B149's brief. **FOR JOSH:** the legibility PNGs (`research/release-0.5.1/d-v/legibility/`; R6-I; the C₆₀ head wraps to a fifth line with a
+> dangling "=" and a literal `h_u`); the letters' `difference` blend costs ≈ 30 % of frames while the camera turns (R6-L); an open TIMELINE halves the frame
+> rate (0.5.0's); gpu-recovery reds under his desktop Firefox (the rig's rAF stall, both trees); the number 0.5.1 (a local re-cut if 0.5.5); the hand on a
+> ROUTED dial is held (a flash is a flash); `lw:molecule=` also switches MOLECULES on. Servers: mine 8751 up (this worktree), Sos's 8731 idle, Josh's 8721/8741.
 
 ## 3 · What happens next, in order
 
