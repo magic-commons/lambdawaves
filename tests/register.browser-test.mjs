@@ -7,7 +7,7 @@
  * length on lanes named by their axis, and that presets, stores, MORPH, the record and the modulation targets work.
  * 0.5.3 M2 · R11 drives C₆₀'s ladder by hand: a pick of C₆₀ under the browser's change rule after a failed record open, the
  * driver's real clicks and a real drag down the ladder, a real press of ON.  M3 · R12: the sentence on the STATES switch, a real press
- * of ON over S₀ alone, and the one re-arm seat.
+ * of ON over S₀ alone, and the one re-arm seat.  M10 · R13: the eight ORBITAL presets on water and on C₆₀.
  */
 import http from 'node:http';
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
@@ -269,6 +269,27 @@ try {
     r12c.back && r12c.re.on && r12c.re.lanes.length === 2 && r12c.re.sel === 'states'
       && r12c.refused.hit && r12c.refused.hit.ladder === false && r12c.refused.hit.on === false && /ON when it lands/.test(r12c.refused.hit.status) && r12c.refused.on === true && r12c.refused.lanes.join() === 'S₀'
       && r12c.loaded.parked && r12c.loaded.parked.ladder === false && r12c.loaded.parked.load === true && r12c.loaded.on === true && r12c.loaded.lanes && r12c.errs.length === 0, r12c);
+
+  /* ── R13 · THE EIGHT ORBITAL PRESETS (0.5.3 M10), one table: on water each takes its levels or refuses with its sentence; on C₆₀
+         every one stays inside the record's eight columns or refuses with the record's own sentence ─────────────────────────────── */
+  const r13 = await g.ev(`${HELP}
+    __LW.register.setMode('orbital'); const opts = [...document.querySelector('.dev[data-id="orbitals"] .reg-bar select.sel').options].map((o) => o.value).filter(Boolean);
+    const run = () => Object.fromEntries(opts.map((p) => { const ok = __LW.orbitals.preset(p), st = __LW.orbitals.state();
+      return [p, ok ? st.selection.map((q) => q.k + ':' + q.amp.toFixed(4) + (q.phase ? '@' + q.phase.toFixed(4) : '')).join(' ') : 'refused · ' + st.status]; }));
+    await __LW.chem.solve('H2O'); await wait(() => __LW.orbitals.solution() && __LW.orbitals.solution().nAO === 7); const water = run();
+    await __LW.chem.solve('C60'); await wait(() => __LW.orbitals.solution() && __LW.orbitals.solution().cols); const c60 = run(), cols = __LW.orbitals.solution().cols.slice();
+    const on = __LW.orbitals.preset('FRONTIER FOUR') && __LW.orbitals.setOn(true); await frames(3); const st = __LW.orbitals.state(); __LW.orbitals.setOn(false);
+    return { opts, water, c60, cols, on, refusal: st.refusal, errs: window.__e.slice() };`);
+  const ks = (v) => (v.startsWith('refused') ? null : v.split(' ').map((t) => +t.split(':')[0]));
+  const inCols = Object.values(r13.c60).filter((v) => !v.startsWith('refused')).every((v) => ks(v).every((k) => r13.cols.includes(k)));
+  judge('R13 eight ORBITAL presets from one table: water takes HOMO 4 · LUMO 5 · FRONTIER FOUR 3–6 · OCCUPIED 1–4 (equal |c|, equal phase) and refuses WINDING with its sentence; on C₆₀ every preset stays inside cols 175–182 and OCCUPIED refuses with the record\'s sentence; ON is answered',
+    r13.opts.join('|') === 'HOMO|LUMO|HOMO + LUMO|FRONTIER FOUR|HOMO SET|LUMO SET|WINDING|OCCUPIED'
+      && r13.water['HOMO'] === '4:1.0000' && r13.water['LUMO'] === '5:1.0000' && r13.water['HOMO + LUMO'] === '4:0.7071 5:0.7071'
+      && r13.water['FRONTIER FOUR'] === '3:0.5000 4:0.5000 5:0.5000 6:0.5000' && r13.water['HOMO SET'] === '4:1.0000' && r13.water['LUMO SET'] === '5:1.0000'
+      && /^refused · WINDING: no degenerate orbital pair/.test(r13.water['WINDING']) && r13.water['OCCUPIED'] === '1:0.5000 2:0.5000 3:0.5000 4:0.5000'
+      && inCols && ks(r13.c60['HOMO SET']).every((k) => k < 180) && ks(r13.c60['HOMO SET']).includes(179) && ks(r13.c60['LUMO SET']).every((k) => k >= 180) && ks(r13.c60['LUMO SET']).includes(180)
+      && ks(r13.c60['FRONTIER FOUR']).join() === '178,179,180,181' && /^refused · OCCUPIED: this record carries orbitals 176–183 only/.test(r13.c60['OCCUPIED'])
+      && r13.on === true && r13.refusal === null && r13.errs.length === 0, r13);
 
   const errs = await g.ev('return { errs: window.__e.slice(), gpu: __LW.field.lastGpuError || null };');
   judge('RZ no page error and no GPU error at any step', errs.errs.length === 0 && !errs.gpu, errs);
