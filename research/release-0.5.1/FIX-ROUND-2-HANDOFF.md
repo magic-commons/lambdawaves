@@ -7,7 +7,8 @@ reset to the integrator's `710d9df`. Ports 9033 / 5503. Never pushed, merged or 
 - [x] 1 · S1, the flash guard lets go (`lab/mod-port.js`, `tests/flash-routes.test.mjs`, `lab/sw.js` re-hashed). `bash test.sh node` exit 0
   (942 PASS, 0 red); take-in-bugs 4/4, routed-knob 4/4, mir-controls 2/2, offer 16/16, settings-probe 0 of 6; `p-guard3` 0 of 3 stuck (was 3 of 3).
   The hand on a ROUTED dial: NOT FIXED, on purpose (a bypass lets a wiggled dial through a strobe); the docs are to be reworded.
-- [ ] 2 · S2, B127 names the CURVES stepper (7th live seat).
+- [x] 2 · S2, B127 names the CURVES stepper (7th live seat): `tests/legacy/boot.browser-test.mjs` only (`live === 7`, three `SPAN.mir-step-text`,
+  `liveCurves` is that one span; `liveBad === 0` and the 3 s MutationObserver clause kept). B127 chunk: 10/10 green. No `lab/` change.
 - [ ] 3 · `FIX-ROUND-2.md`.
 
 ## Exact next step
