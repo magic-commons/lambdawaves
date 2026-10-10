@@ -42,7 +42,7 @@ real seams, over an explicit context. Nothing a hand or an eye meets is meant to
   27,943 (50 left for PAIR 3's seven and R5). The hinge holds (readouts 7, kepler 4; SPECTRUM 24 the largest); 0 bare writes; 13 module files measured.
   Gates on the merged tip: node exit 0; `rack-deps.test` 54 PASS; `serialize-bytes` 11/11 full + 11/11 edit vs the 0.5.1 base (`8755`); `lw-facade` 1/1; `settings-probe` 2 of 6 reached then WATER stalled (the rig — the base's recorded reading is identical); the six new module files and `rack.js` parse. **You see nothing.**
 
-- **R2c THE MATERIAL + THE SETTINGS CARD + THE FILM ROAD** (merged 2026-10-10 12:30 from `5cff63e`; clean): WAVE · CLIP · PALETTE · CAMERA leave `boot()` for
+- **R2c THE MATERIAL + THE SETTINGS CARD + THE FILM ROAD** (merged 2026-10-10 12:08 from `5cff63e`; clean): WAVE · CLIP · PALETTE · CAMERA leave `boot()` for
   `lab/windows/material.js` (127 lines, two seats — the root and `createDrawClipPaletteCamera()` where DRAW stood), the SETTINGS card for `settings-card.js` (177;
   two seats, `createFieldQuality()` where FIELD QUALITY stood; its seven stage hooks registered at the root) and the film road for `film.js` (22; one seat);
   `filmHold` stays in `boot()` as `app.loop.hold` by value. 296 of 319 moved non-blank lines byte-identical, 15 re-indented, 8 read a slot; 15 import names out
@@ -52,3 +52,17 @@ real seams, over an explicit context. Nothing a hand or an eye meets is meant to
   `serialize-bytes` 11/11 full + edit; `take-in-bugs` 4/4 on its third run (a frame-timed flake twice); `curves` scene 3, `settings-probe` (2 of 6 reached) and
   the boot chunk (21/23: B60, B65) identical on the base (the rig). The integrator's gates on the merge: pwa, doubles 0, 17 files parse, node 0, the classes
   table unchanged. **You see nothing.**
+
+- **R2d MOLECULES + THE STAGE WORDS + THE MODULATION SEAM + INK** (merged 2026-10-10 12:14 from `489ab9c`; conflicts in the import block, REPORT.md and
+  sw.js): MOLECULES with the molecular session and MO-REGISTRY leave `boot()` for `lab/windows/molecules.js` (100 lines, two seats — the root where the LEGACY
+  note stands and `createMoRegistry()` where ORBITALS stood), the stage text and its caption for `lab/shell/stage-words.js` (126; registers `stageTextTick` and
+  `stageCaption` at creation), the modulation seam for `modulation.js` (228; the one `defs` table, `mod.install` unchanged) and §18 INK for `ink.js` (51);
+  463 of 470 moved lines byte-identical; 19 import names out (44 → 35 import lines on its tree). The integrator took both sides' import deletions, kept ONE
+  `app.host.cameraPort` fill, dropped `stageCaption` from the stage-words destructure and deleted R2c's boot-kept `go` copy (stage-words registers it).
+  `rack.js` 1,681 → **1,202** with PAIR 3 in (4,931 at 0.5.1); `lab/*.js` + shell + windows **27,932 of the 27,943 cap — 11 lines for R5: the cap WILL be
+  passed; Josh's ruling at R-V.** The hinge holds (molecules 8, stage-words 5, modulation 10, ink 3; SPECTRUM 24 the largest); 0 bare writes; 20 module
+  files measured; doubles 0 (168 slots, 21 files). The builder's light check: node 0; `serialize-bytes` 11/11 + 11/11; `lw-facade` 1/1; `stage-text`,
+  `molecule-demos`, `molecular-names`, `mir-controls`, `routed-knob` 4/4, `camera-routes` 5/5 green; `chem` 54/55 (a timing red), `molecule-head` `:44`,
+  `frame-occlusion` chipGap, `hit-probe-set` and the boot chunks identical on the base (the rig before the reboot). The integrator's gates on the merge: pwa; doubles 0; serialize-bytes 11/11 full + 11/11 edit vs the 0.5.1 base (8735); lw-facade 1/1 (176); settings-probe 0/6 (all six scenes reached);
+  21 files parse; the classes table; node 0; the owed THE LOCK re-run on the healthy rig at `2a5df88` before the pair: 860 · 0/0 and 1004 · 0/0, frame-occlusion
+  7/7. **You see nothing.**

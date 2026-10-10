@@ -374,3 +374,14 @@ and FIELD QUALITY stood, so the cards keep their rack order; the card registers 
 FILM's road (`film()`, `capture()`, the takes, `app.state.capApi`) is `lab/windows/film.js` `createFilmApi(app)` at one. `filmHold` stays in
 `boot()` beside the loop as `app.loop.hold`, handed to the film BY VALUE (`const { hold: filmHold } = app.loop`; the tool counts a slot the
 literal holds by value under another key as backward), and `LW`, `periodEnergies` and `stageCaption` are read through `app.sh` / `app.w` at use.
+
+THE MOLECULES, THE STAGE WORDS, THE MODULATION SEAM AND INK (0.5.2 R2d): MOLECULES with the molecular session and THE HEAD's seat, and
+MO-REGISTRY, are `lab/windows/molecules.js` `createMolecules(app)` at TWO seats — the root builds MOLECULES where the LEGACY note stands and
+returns `createMoRegistry()`, which `boot()` calls where ORBITALS stood, below the stage words (`app.w.wChem` is registered at the end of the
+first span, `app.w.wOrbs` at the second); THE STAGE TEXT with its caption is `lab/shell/stage-words.js` `createStageWords(app)` (it registers
+`app.w.stageTextTick` and `app.w.stageCaption` at creation and returns `initStageText` for `go`; `app.state.stageText` is the literal's, assigned
+live), the ONE `defs` table, `mod.install`, the pill's seat and dodge and `app.state.modView` are `lab/shell/modulation.js` `createModSeam(app)`,
+and §18 INK is `lab/shell/ink.js` `createInk(app)` (it returns `refreshOcclusion` for the loop) — all moved verbatim and called at their seats under
+the kept section notes. A name `boot()` makes after a seat is read through its slot inside a callback (`app.w.wLad`, `app.w.wCalc`,
+`app.w.stageTextTick`, `app.host.rackL`, `app.sh.layout`, `app.sh.setModArm`), and `app.host.cameraPort` is filled on the camera law's line so the
+seam can destructure it.
