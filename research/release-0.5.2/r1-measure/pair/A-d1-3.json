@@ -1,0 +1,56 @@
+{
+ "sha": "62e61e0",
+ "served": {
+  "buildLine": "0.5.1-alpha · Informational Update · 2026-10-09",
+  "rackSha256": "c72dad06cbda82c6"
+ },
+ "port": "9057",
+ "secs": 30,
+ "label": "pair A-d1 r3",
+ "setup": "(async () => { const c = __LW.chem; await c.solve('H2O'); c.setOn(true); c.setView('orbital'); c.orbital(c.state().nocc);\n  __LW.camera.setAutoRotate(true); await __LW.settle(); await __LW.settle();\n  if (__LW.stageText.on !== true) [...document.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === 'STAGE TEXT').click();\n  await new Promise((r) => setTimeout(r, 900));\n  return { mol: c.state().on, view: c.state().view, homo: c.orbital(), auto: __LW.camera.autoRotate, stage: __LW.stageText.on, md: __LW.stageText.md }; })()",
+ "sweep": 10,
+ "when": "2026-10-10T06:55:43.707Z",
+ "runs": [
+  {
+   "run": 1,
+   "secs": 30.044,
+   "field": {
+    "ok": true,
+    "error": null,
+    "adapter": "NVIDIA GeForce RTX 3070"
+   },
+   "notice": "dismissed",
+   "setup": {
+    "mol": true,
+    "view": "orbital",
+    "homo": 5,
+    "auto": true,
+    "stage": true,
+    "md": "$\\mathrm{H_{2}O}$"
+   },
+   "loadBefore": [
+    1.47,
+    1.11,
+    0.86
+   ],
+   "loadAfter": [
+    1.75,
+    1.21,
+    0.9
+   ],
+   "msPerSec": 64.752,
+   "script": 19.906,
+   "layout": 3.94,
+   "recalcStyle": 8.714,
+   "frames": 572,
+   "presents": 572,
+   "skipped": 0,
+   "errors": [
+    "warning WebGPU unavailable WebGPU device request failed: Failed to execute 'requestDevice' on 'GPUAdapter': A valid external Instance reference no longer exists.. The FIELD needs WebGPU; SPECTRUM, SHADOW and METERS still run on the CPU."
+   ]
+  }
+ ],
+ "median": 64.752,
+ "spread": 0,
+ "mad": 0
+}

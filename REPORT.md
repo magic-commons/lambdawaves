@@ -5534,3 +5534,48 @@ suite's B108, B112 and B136. No law's string or threshold changed.
 **Lines.** `lab/*.js` **27,666 → 27,693 (+27)**: the literal +38, OUT −11. Hand-off: `research/release-0.5.2/R0-BUILD.md`, which
 holds the classes tables before and after, the U1 / U7 / U8 lists, nine brief candidates, the merge notes and the drafted CLAUDE.md
 sentences.
+
+### wave 216: R1 THE CONTROLLER — ONE CONTROLLER, FIELD, THE MATHS WORKERS and ONE ROAD move verbatim into `lab/shell/controller.js`; the loop stays; nothing Josh sees moves
+
+One Opus builder (`agent-a95ee74e08fc0dd64`) ran the row alone, from `86968b7` (R0 merged).
+
+**The measure first.** `tools/rack-deps.mjs --classes` now also reads `lab/shell/*.js` and `lab/windows/*.js`. Each file is ONE
+`create<X>(app)` and is measured as a piece of its planned module:
+- a name destructured from `app` is the boot-level name of that key, backward or forward against the module's seat;
+- an `app.<ns>.x` chain counts as in rack.js, except a module's fill of its own name, which is its registration;
+- G-A refuses a destructured null slot that boot does not fill before the seat.
+
+On the base the table is byte-identical. `rack-deps.test` §5 is its law.
+
+**The move.** §2–§4 and §7 (303 lines) are `createController(app)`. It is async because it awaits `createField`. `boot()` awaits it
+at §2's seat (`rack.js:335–339`) and destructures its 68 names there, so §5–§6, `schedule`, `filmHold` and §13–§14 read closure
+slots as before.
+- 293 of the 303 lines are byte-identical. The other 10 are nine forward reads, now `app.loop.page` / `windowActivity` / `paceRate`
+  and `app.w.wMet` / `wSpec` / `spectrum` / `shadowView` / `normalizeNow`, and the worker road, now `'../mathworker.js'`.
+- `boot()` fills those eight slots and §1's `lookSync` / `quality` right after their declarations. `app.ctl` is not filled: no reader
+  outside the module yet.
+- The 29 controller-owned `app.state` members stay live, and `saveMod` stays a function declaration (U1).
+- Imports: rack.js has 75 import lines (was 80); the module has 16, with 19 names, among them `TIER` from `'../rack.js'` (a safe
+  cycle). `pwa.test` and `build-deploy` follow the worker road.
+
+**Gates.**
+- **The classes table:** only line counts change. The controller row is backward 12, forward 10, shared 2 (+29 own),
+  fwd + shared 12, 0 bare writes; the hinge holds (SPECTRUM 24). rack.js now has 28 sections and §2 is the 6-line seat.
+- **THE LOCK:** 860 · 0/0 and 1004 · 0/0, both on the first run.
+- **The pair**, base vs tree, 5 + 5: boot +0.044, D1 +0.157 ms/s, both PASS against 3.536.
+- **The bytes:** `serialize-bytes` 11/11 full and 11/11 edit sha-identical.
+- **`settings-probe`:** no scene red. The sixth scene is unreached on both trees: the driver dies first.
+- **The estate:** 34 of 35 green (current 15, frame-occlusion 7, history 44, new-project 8, offer 16, render-regressions 2,
+  routed-knob 4, mir-controls 2, take-in-bugs 4, lw-facade 1/1, timeline 14).
+  - `keyboard-window` and `settings-probe`'s sixth scene die identically on the base, with "Failed to decode response from
+    marionette" after in-session reloads (snap Firefox 157.0.1).
+  - `gpu-recovery` flakes on both trees ("Render did not settle"), with Josh's desktop Firefox up.
+- **The boot suite alone:** 151/152 twice, B149 the only red.
+- `bash test.sh node` exits 0.
+
+**Lines.** `lab/*.js` (with `lab/shell/`) **27,693 → 27,739 (+46)**. `rack.js` 4,958 → 4,664; the module 339.
+
+**For the pairs.** The controller names each moving module reads, and their union: 56 (42 without the facade). The integrator fills
+exactly that union on `app.ctl` at the merge, so the pair rows only read.
+
+Hand-off: `research/release-0.5.2/R1-BUILD.md`.

@@ -24,7 +24,7 @@
  * A root is what the BROWSER loads, and two of the three are not imports at all:
  *   · the <script> tags in lab/index.html — src'd (classic or module) and inline module blocks alike;
  *   · lab/sw.js, fetched by `navigator.serviceWorker.register('./sw.js')` in main.js;
- *   · lab/mathworker.js, constructed by `new Worker(new URL('./mathworker.js', import.meta.url))` in rack.js.
+ *   · lab/mathworker.js, constructed by `new Worker(new URL('../mathworker.js', import.meta.url))` in lab/shell/controller.js (0.5.2 R1; rack.js before).
  * The last two are DISCOVERED by walking the graph, never hardcoded.  Delete the register() call and sw.js
  * becomes an orphan and this test goes red — which is exactly what should have happened in wave 55.
  *

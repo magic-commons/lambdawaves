@@ -716,6 +716,31 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > the as-built block in `BRIEF-R2a.md` / `BRIEF-R3a.md` (`3e3f674`) → launch PAIR 1. My servers 8751/8755 stopped; R1's 9053/9057 asked to stop by pid. The
 > checkpoint `optimization-2026-09-24/.claude/handoffs/latest.md` has the full next-step list. NO push, NO deploy.
 > **06:35 — PAUSE RELEASED; Josh: continue as Yan, no switch to Sos.** R1 RESUMED by message from its tip `48b678d` (its context intact — the two-account law prefers a resume to a replacement): it restarts its servers, runs serialize-bytes base vs tree and settings-probe, fills the BUILD, writes wave 216, commit 2, and lists per planned module the `app.ctl` names it reads (the integrator fills exactly that union at the merge, not all 68 — the line law: 27,739 of 27,943). My server 8751 back up (pid 2868853). Then: merge R1 by the recipe → the `app.ctl` fill commit → fill the as-built blocks in BRIEF-R2a/R3a → launch PAIR 1.
+>
+> **UPDATE (Claude Yan, 2026-10-10 07:10 CDT) — R1 THE CONTROLLER IS IN; the `app.ctl` fill; PAIR 1 next — on a DEGRADED RIG.** R1 (Opus, final tip
+> `e00a73c`; resumed by message after the pause) merged clean onto `yan-c`. AS BUILT (`research/release-0.5.2/R1-BUILD.md`): `00c75bf` the tool measures a
+> moved module from its own file (`rack-deps.test` §5, 11 laws); `62e61e0` THE MOVE — §2 ONE CONTROLLER + §3 FIELD + §4 THE MATHS WORKERS + §7 ONE ROAD →
+> `lab/shell/controller.js` `createController(app)` (339 lines; 293 of 303 moved lines identical, the 10 others = 9 forward reads through `app.loop.*` /
+> `app.w.*` + the worker URL `'../mathworker.js'`), awaited at §2's seat (`rack.js:335–339`) where `boot()` destructures its 68 names; the loop, `schedule`,
+> `filmHold`, §13–§14 stay; 10 slots filled in `boot()` right after their declarations (`app.sh.lookSync/quality`, `app.loop.page/windowActivity/paceRate`,
+> `app.w.wSpec/spectrum/normalizeNow/shadowView/wMet`); `rack.js` 4,958 → 4,664; `lab/*.js` (+ `lab/shell/`) 27,739 (+46 — 16 import lines, the 68 names
+> twice, the 10 fills); imports 80 → 75 in rack.js, 16 lines / 19 names in the module (`TIER` from `'../rack.js'`, a safe cycle). R1's gates: THE LOCK 860 + 1004 ·
+> 0/0; the pair boot +0.044 / D1 +0.157 PASS; serialize-bytes 11/11; estate 34/35 (`keyboard-window` red on the base too — marionette dies on its reload);
+> boot alone 151/152 twice (B149 only); node 0; classes table unchanged but line counts (controller 12, 0 bare writes; SPECTRUM 24 the largest).
+> **The integrator's fill (next commit):** the 56 controller names the MOVING modules read (R1's union, `r1-measure/ctlunion.txt`) are assigned on `app.ctl`
+> once at the end of `createController` (+15 lines; G-A static clean; the hinge holds; `rack-deps.test` green); the 12 only boot/the loop read stay closure
+> slots. `lab/*.js` 27,754 — **189 lines left under the +1 % law for 12 more modules: the pair briefs cap each module's header + signature + return at 12.**
+> **MY GATES ON THE MERGED TREE:** node gate 0; serialize-bytes 11/11 vs `v0.5.1-alpha` (8755); lw-facade 1/1; settings-probe boot/WAVE DANCER/WATER/BENZENE
+> green then N₂ "Render did not settle: animation frames stopped"; **THE LOCK FAILED SIX TIMES at `state gas` with "animation frames stopped" — and the 0.5.1
+> BASE fails identically; `frame-occlusion` fails `chipGap` (line 41) on BOTH trees.** The states before gas run 9–12 s each where the whole 860 run took 57 s
+> at 01:08: **the GPU is ≈ 3× slower than six hours ago and stalls on the heaviest states; the machine is idle (99 % idle, no D-state, Josh's Firefox 0 %).**
+> The lab bytes are IDENTICAL to R1's tip (`git diff e00a73c -- lab/ tools/ tests/` empty), whose lock read 0/0 at ≈02:00 — the merge is taken on that plus
+> my byte probes; **the lock and frame-occlusion are to be RE-RUN on this tree when the rig recovers (before R5 at the latest).** FOR JOSH: `/var/run/reboot-required`
+> is set (kernel 7.0.0-38 installed, 7.0.0-34 running; the NVIDIA kernel module 595.91.07 ≠ the 595.99.02 userspace — `nvidia-smi` cannot read the GPU); a
+> reboot aligns the driver and likely clears the GPU's state; his desktop Firefox (pid 2002078, 12 h) is the other suspect. Nothing of his was touched.
+> CLAUDE.md: THE CONTROLLER paragraph (R1's §10 + the fill). `CHANGES-0.5.2.md` R1 line. Next: fill the as-built blocks in `BRIEF-R2a.md` / `BRIEF-R3a.md`,
+> launch PAIR 1 (R2a 9063/5533 + 9067/5537; R3a 9073/5543 + 9077/5547) with the rig caveat: a "did not settle" red is checked against the base export,
+> identical = the rig, recorded, not looped on.
 
 ## 3 · What happens next, in order
 

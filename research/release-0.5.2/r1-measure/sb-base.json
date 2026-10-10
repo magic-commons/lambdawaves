@@ -1,0 +1,93 @@
+{
+ "lab": "https://127.0.0.1:9057/lab/",
+ "cases": [
+  {
+   "name": "WAVE DANCER",
+   "bytes": 12600,
+   "sha": "6ea08561449bee33cbc07809be9e17fbbd0372310443101770707c3bbc787099",
+   "editBytes": 9911,
+   "editSha": "5b1df2122ba5c70ed341f4a238e68a9119037c7c32ccacbd952a603a0dbeaab8",
+   "errs": []
+  },
+  {
+   "name": "WATER",
+   "bytes": 8775,
+   "sha": "2eb3b2081f935832de34852572a6908951505697737d933469e22ad5582871a7",
+   "editBytes": 6164,
+   "editSha": "18768bd605b8cccf740ffb238a441bc96971998081874cda8d321fb8865d00e2",
+   "errs": []
+  },
+  {
+   "name": "BENZENE",
+   "bytes": 8938,
+   "sha": "1327a09b2885bd885d610cd98486e51756561dd58ae6ae0f588f73d1ce5b7342",
+   "editBytes": 6328,
+   "editSha": "0c1cba66970f11e26f243c5dce464f07e1939c09884906d18f9afd6b897cc0b6",
+   "errs": []
+  },
+  {
+   "name": "N₂",
+   "bytes": 8772,
+   "sha": "2fe5d9da49ad6700e27bc97dd4d2adbf699b068219d9f0177d9ea401170b7884",
+   "editBytes": 6163,
+   "editSha": "ee9da860d4b2d39459c59f885ea59630a31cc15f4aff3499a1c299339d665306",
+   "errs": []
+  },
+  {
+   "name": "the empty project",
+   "bytes": 10696,
+   "sha": "7496d19242d53d0f994bc1e43fa9e8400e230e1edf3f2088a1c23b598b9806b4",
+   "editBytes": 8082,
+   "editSha": "4f2ab384f1a9f13eb7e2429fdaef6fae3286fef2b7ef0711eee46e3a793a6d3f",
+   "errs": []
+  },
+  {
+   "name": "history · preset 1s+2pz",
+   "bytes": 10887,
+   "sha": "c193b1b42cfe9753b0115edcaf61c4d595a893096949c6dc47a92b1f138acb76",
+   "editBytes": 8272,
+   "editSha": "34ef2d52b863219e5b1cd1d407b6fda90faa6467a9237b388f9cd8c376afaf0d",
+   "errs": []
+  },
+  {
+   "name": "history · stage 0.30",
+   "bytes": 10886,
+   "sha": "4a026034df91e82d876a7231a02d7cb91118615b75268894cc2f7131503a90bb",
+   "editBytes": 8271,
+   "editSha": "9f5b31fef3c444155c5932b133fca267963fc70936037492abe26244b6b84912",
+   "errs": []
+  },
+  {
+   "name": "history · style solid",
+   "bytes": 10886,
+   "sha": "fdfdcce6de885ccd236680e7bc3b91c19782494d7fb2e7a39ebeac27963df12e",
+   "editBytes": 8271,
+   "editSha": "ef58266533d0463f2bd6b942a481699fccc7bf2c28999373b410742f3a0c6796",
+   "errs": []
+  },
+  {
+   "name": "history · palette on",
+   "bytes": 10884,
+   "sha": "a91096788a3bf658265abc83188c14673a5a3601283ca3999317632b1ba3eb78",
+   "editBytes": 8269,
+   "editSha": "6bd88e9b79d90703ce69cb75ed211776aeb17e569b5f557feaff1d2cef56152c",
+   "errs": []
+  },
+  {
+   "name": "history · hamiltonian qho",
+   "bytes": 10894,
+   "sha": "d0ba6b7e4c2a0865a3965524e154bebaa30534fc55fdb71b159c9000b9e0e42f",
+   "editBytes": 8264,
+   "editSha": "91da43bea964d7377cd3f1976f8b0b0e398d995a946fcb4314cfdac04a21a26c",
+   "errs": []
+  },
+  {
+   "name": "history · rate 0 → 1.7",
+   "bytes": 10896,
+   "sha": "5f4672025b77286e2c4bb4f90f496812ba86425f4a9376f6dc2355258409b218",
+   "editBytes": 8266,
+   "editSha": "d942b9f5bfdea4797e643f93bebcefdd8fc331f313eee620e7765e7ac06b94a9",
+   "errs": []
+  }
+ ]
+}

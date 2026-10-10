@@ -473,7 +473,7 @@ for (const must of ['mir/css/base.css', 'mir/css/skin.css', 'lab.css', 'skin.css
   assert.ok(SHEETS.includes(must), `index.html no longer reaches ${must} through its <link>s and their @imports — the page's look and its fonts hang on it`);
 for (const rel of SHEETS.filter((r) => !/(^|\/)vendor\//.test(r))) noteAll(rel, live(text(rel)), /url\(\s*['"]?(?!data:|https?:|#|\/)([^'")]+)/g);
 /* the stripper must not have eaten live code: these three are certainly there */
-for (const [rel, ref] of [['main.js', './rack.js'], ['index.html', './main.js'], ['rack.js', './mathworker.js']])
+for (const [rel, ref] of [['main.js', './rack.js'], ['index.html', './main.js'], ['shell/controller.js', '../mathworker.js']])   // 0.5.2 R1: the worker road moved with THE MATHS WORKERS
   assert.ok(live(text(rel), rel.endsWith('.html')).includes(ref), `the comment stripper removed ${ref} from lab/${rel} — it is over-eager and D3 is not proving anything`);
 assert.ok(refs > 150, `D3 only found ${refs} relative references across lab/ — the scan has stopped seeing the source`);
 /* KaTeX offers each face as woff2, then woff, then ttf; only the woff2 files are shipped, and every browser
