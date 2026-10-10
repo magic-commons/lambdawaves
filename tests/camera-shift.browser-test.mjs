@@ -138,6 +138,24 @@ try {
     assert.deepEqual(v.shown, ['+0.25', '-0.50']); assert.ok(v.afterKey[0] > 0.25 && v.afterKey[1] === -0.5, 'the PAN X dial moves x alone');
     assert.deepEqual(v.homed, [0, 0]); assert.equal(v.rows, 0, 'a view is not an edit');
   });
+  /* 0.5.3 M5 · THE SPHERE RINGS ANSWER LIVE: dragged from the rack, the sphere's arrow and its YAW · PITCH arcs follow every move
+     BEFORE the release (the kit's port.turn road never set them and its sync skips a sphere mid-drag: they froze until a later
+     notice, and each step turned from the stale arrow), and the stage presents on each move */
+  await check('the SPHERE answers live (0.5.3 M5): its arrow, the YAW · PITCH arcs, the pose and the stage move on every step before the release', `
+    const LW = __LW, S = document.querySelector('.dev[data-id="camera"]'); S.classList.remove('closed'); if (S.classList.contains('folded')) S.querySelector('.dev-fold').click();
+    LW.camera.reset(); LW.camera.stop(); const svg = document.querySelector('.mir-camsphere svg.cs-svg'); svg.scrollIntoView({ block: 'center' }); await new Promise((r) => setTimeout(r, 300)); await LW.settle();
+    const tip = () => { const t = svg.querySelector('.cs-tip'); return t.getAttribute('cx') + ',' + t.getAttribute('cy'); }, arc = (id) => document.querySelector('[data-param="' + id + '"] .k-val').textContent;
+    const b = svg.querySelector('.cs-tip').getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2;
+    const ptr = (type, dx, dy) => svg.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 61, pointerType: 'mouse', button: 0, buttons: type === 'pointerup' ? 0 : 1, clientX: x + dx, clientY: y + dy }));
+    const read = () => ({ tip: tip(), yaw: arc('observer.yaw'), pitch: arc('observer.pitch'), p: LW.stats.presents, frames: LW.stats.frames, skipped: LW.stats.skipped, pose: [LW.obs.yaw, LW.obs.pitch] });
+    const s0 = read(), held = []; ptr('pointerdown', 0, 0);
+    for (let i = 1; i <= 3; i++) { const p0 = LW.stats.presents; ptr('pointermove', -6 * i, -4 * i); for (let k = 0; k < 60 && LW.stats.presents === p0; k++) await new Promise((r) => setTimeout(r, 20)); held.push(read()); }   /* a present within 1.2 s, the button still down */
+    ptr('pointerup', -18, -12); LW.camera.reset();
+    return { s0, held };`, (v) => {
+    for (let i = 0; i < 3; i++) { const p = i ? v.held[i - 1] : v.s0, s = v.held[i];
+      assert.notEqual(s.tip, p.tip, 'the arrow moved on step ' + (i + 1)); assert.notDeepEqual(s.pose, p.pose, 'the pose moved on step ' + (i + 1)); assert.ok(s.p > p.p, 'the stage presented on step ' + (i + 1)); }
+    assert.ok(v.held.some((s) => s.yaw !== v.s0.yaw) && v.held.some((s) => s.pitch !== v.s0.pitch), 'the YAW and PITCH arcs followed before the release');
+  });
   await check('a project carries the shift, and an older project without one opens centred', `
     const LW = __LW; LW.camera.reset(); LW.camera.setShift(0.3, 0.2); const S = LW.serialize(), saved = S.presentation.obs.shift.slice();
     LW.camera.setShift(-0.7, 0.1); LW.restore(JSON.parse(JSON.stringify(S))); const back = LW.obs.shift.slice();
