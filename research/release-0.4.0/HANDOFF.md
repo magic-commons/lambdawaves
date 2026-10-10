@@ -824,6 +824,20 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > SHELL paragraph. Candidates taken into the PAIR 3 briefs: R2d's ink is §18's occlusion host alone (51 lines); the creation-time TDZ check; the boot fills on
 > returning seats become registrations when a file is next opened. Next: R2b's report → merge (imports + tool + REPORT + sw.js conflicts expected; dedupe), then
 > `BRIEF-R2c.md` / `BRIEF-R2d.md` (generated from the merged tip) → PAIR 3.
+>
+> **UPDATE (Claude Yan, 2026-10-10 10:18 CDT) — R2b IN; PAIR 2 COMPLETE.** `7ed3c1b` merged onto the R3b tip (conflicts: REPORT.md — waves 219 then 220 kept —
+> and `lab/sw.js`, regenerated; `rack.js` and `tools/rack-deps.mjs` auto-merged). THE READOUTS: `lab/windows/readouts.js` 158 at THREE seats (the root +
+> `createCalcMetersLadder()` / `createAtomsWignerRadiation()` as root-level function declarations the root returns — THE MULTI-SEAT SHAPE, which the tool now
+> measures as eager at its own piece; +1 law, 54 PASS; the kept tail `READERS` / track / `hydroReader` reads the handles `boot()` destructures); KEPLER:
+> `lab/windows/kepler.js` `createKeplerSurface(app)` 307 (registers `keplerTurn` beside `kepShell`/`keplerRowSync` and the five gas names; R3b's §17 line
+> keeps filling `bowStart`/`bowMove`/`bowRelease`/`bowCancel`/`keplerDragTo` from the seat's destructure). The integrator dropped the six import names only
+> the moved code used (`createKeyTable`, `densityPeriod`/`densityPeriodExact`/`fmtPeriod`, `mdText`; `keplerOrbits`, `createGas`, `wellPacket` — four whole
+> lines and two names; `wellCentroid` kept). `rack.js` 2,448 → **2,001**; `lab/*.js` + shell + windows **27,893 of 27,943 — 50 left for PAIR 3's seven modules
+> and R5; the cap WILL be passed (Josh's ruling at R-V).** Doubles 0 (163 slots, 14 files). Gates on the merged tip: node exit 0; `rack-deps.test` 54 PASS; `serialize-bytes` 11/11 full + 11/11 edit vs the 0.5.1 base (`8755`); `lw-facade` 1/1; `settings-probe` 2 of 6 reached then WATER stalled (the rig — the base's recorded reading is identical); the six new module files and `rack.js` parse. Candidates folded into the PAIR 3 briefs: the multi-seat
+> shape for R2c's two-span cards and R2d's MOLECULES; `app.w.wSh` has no registration (R2d adds it to readouts' root line); `rigfree.mjs` instead of
+> `wait-gpu` (which counts a poll that names "marionette"); for the fix round: `solveCard` and `markBatchBegin` are unread by boot (drop from the 68),
+> settings.js/spectrum.js/state.js returns filled in boot become registrations when next opened. Next: `node $job/tmp/pair3/gen.mjs` → `BRIEF-R2c.md` /
+> `BRIEF-R2d.md` from this tip, commit, launch PAIR 3 {R2c · R2d}.
 
 ## 3 · What happens next, in order
 

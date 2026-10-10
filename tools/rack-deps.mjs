@@ -1009,8 +1009,19 @@ export function measureFile(text, rel) {
       }
     }
   }
+  /* 0.5.2 R2b: a module with SEVERAL seats (readouts: three) declares each later seat as a `function create<Y>()` at its root's statement
+     level, returned to boot() and called at that seat — its statement-level code runs as boot's would there (eager, not deferred), its
+     declarations are the module's own, and part k's eager writes stand at the module's k-th seat (`r.part`; 0 is the root) */
+  const seatFns = [...B.scope.names].filter(([n, d]) => d.kind === 'function' && /^create[A-Z]\w*$/.test(n)).map(([, d]) => W.scopes.get(M[d.at + 1] + 1)).sort((a, b) => a.key - b.key);
+  const own = new Set(B.scope.names.keys());
+  for (const s of seatFns) for (const n of s.names.keys()) own.add(n);
   const refs = W.refs.filter((r) => r.where === 'boot');
-  return { rel, fn: toks[B.nameAt].v, lines: L.lines, bodyLines: toks[B.close].line - toks[B.open].line - 1, toks, refs, handed, own: B.scope.names, warnings: W.warnings };
+  for (const r of refs) {
+    let part = 0, deferred = false;
+    for (let s = r.scope; s && s !== B.scope; s = s.parent) if (s.kind === 'function') { const k = seatFns.indexOf(s); if (k < 0) deferred = true; else part = k + 1; }
+    if (seatFns.length) { r.deferred = deferred; r.part = part; }
+  }
+  return { rel, fn: toks[B.nameAt].v, lines: L.lines, bodyLines: toks[B.close].line - toks[B.open].line - 1, toks, refs, handed, own, warnings: W.warnings };
 }
 
 export function classes(src, opts = {}) {
@@ -1067,9 +1078,11 @@ export function classes(src, opts = {}) {
   const appChain = (r) => chainOf(toks, r);
   /* ── a module file's references, as its module's: the names it was handed (boot-level names, by key), its app chains ── */
   const seatOf = (id) => { const p = pieces.find((q) => q.module === id); return p ? p.from : -1; };
-  /* 0.5.2 R3a: a module file's EAGER fills (`app.<ns>.x = …` at its root) run at its seat — a later-seated file may destructure them */
-  for (const F of files) F.fills = new Set(F.refs.filter((r) => r.name === 'app' && !r.deferred).map((r) => chainOf(F.toks, r)).filter((c) => c && c.write && c.x).map((c) => c.ns + '.' + c.x));
-  const fileFills = (ns, x, seat) => files.some((G) => G.seat < seat && G.fills.has(ns + '.' + x));
+  /* 0.5.2 R3a: a module file's EAGER fills (`app.<ns>.x = …` at its root) run at its seat — a later-seated file may destructure them
+     (R2b: a later seat's part fills at that seat, the module's k-th piece) */
+  const partSeat = (F, r) => { const ps = pieces.filter((q) => q.module === F.module); return (ps[r.part || 0] || ps[0] || { from: -1 }).from; };
+  for (const F of files) { F.fills = new Map(); for (const r of F.refs) { const c = r.name === 'app' && !r.deferred && chainOf(F.toks, r); if (c && c.write && c.x && !F.fills.has(c.ns + '.' + c.x)) F.fills.set(c.ns + '.' + c.x, partSeat(F, r)); } }
+  const fileFills = (ns, x, seat) => files.some((G) => G.fills.has(ns + '.' + x) && G.fills.get(ns + '.' + x) < seat);
   for (const F of files) F.seat = seatOf(F.module);
   for (const F of files) {
     if (F.seat < 0) throw new Error(`classes: ${F.rel} (${F.module}) has no seat — keep a piece of it (its header and the call) in PLANNED_CUT`);
@@ -1104,7 +1117,7 @@ export function classes(src, opts = {}) {
     const c = appChain(r);
     if (c && c.ns === 'state' && c.x && c.write && moduleAt(r.line)) seatAt(c.x, r.line, moduleAt(r.line));
   }
-  for (const F of files) for (const { r, c } of F.chains) if (!r.deferred && c.ns === 'state' && c.x && c.write) seatAt(c.x, F.seat + 0.5, F.module);
+  for (const F of files) for (const { r, c } of F.chains) if (!r.deferred && c.ns === 'state' && c.x && c.write) seatAt(c.x, partSeat(F, r) + 0.5, F.module);
   const stateOwnerOf = (x) => (stateSeat.get(x) || { module: 'boot' }).module;
   const sharedLets = [...letScopes].filter(([n, s]) => [...s].some((x) => x !== scopeOfModule(ownerOf(n)))).map(([n]) => n).sort((a, b) => by.get(a).line - by.get(b).line);
   /* the const / function names that cross a scope boundary: the members the context must carry */

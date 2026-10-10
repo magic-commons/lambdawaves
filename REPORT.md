@@ -5641,6 +5641,35 @@ fills at its root, and it no longer reads `Object.assign(app.ctl.domain, …)` a
 **Lines.** `lab/*.js` + `lab/shell/` **27,754 → 27,815 (+61)** of 27,943. `rack.js` 4,664 → 4,012; the modules 147 · 311 · 85 · 166.
 
 Hand-off: `research/release-0.5.2/R3a-BUILD.md`.
+### wave 219: R2b THE READOUTS + KEPLER — the nine readout cards move verbatim into `lab/windows/readouts.js` at three seats, THE BOW + KEPLER into `lab/windows/kepler.js`; READERS, track and hydroReader stay; nothing Josh sees moves
+
+**What moved** (`.tmp/r2b-move.mjs` at the walker's token positions; every edit printed):
+- SHADOW · ORBIT · VORTEX · PLANE, CALCULUS · METERS · LADDER and ATOMS · WIGNER · RADIATION → `createReadouts(app)`. The cards interleave with
+  MOLECULES, MO-REGISTRY and the modulation seam in creation order, so the module has THREE seats: the root builds the first group and returns
+  `createCalcMetersLadder()` and `createAtomsWignerRadiation()`, which `boot()` calls where CALCULUS and ATOMS stood. No `device()` /
+  `appendChild` moved. The kept tail (`Object.assign(READERS, …)`, the track loop, `hydroReader`) reads the handles the seats hand back.
+- THE BOW + KEPLER AS A CONTROL SURFACE → `createKeplerSurface(app)` (keplerview.js already owns the name `createKepler`).
+- 424 of the 433 moved lines are byte-identical; 8 read a slot (`app.w.keplerRowSync` / `keplerTurn` / `wChem` / `wOrbs`, `app.sh.keyState`), one
+  registers `keplerTurn` beside `keplerRowSync`; two blank lines left. The ten inherited `app.w` fills moved with their declarations and are the
+  modules' registrations now; no boot fill was added.
+
+**The tool.** A later seat is a root-level `function create<Y>()`: `tools/rack-deps.mjs` reads its statement level as eager at its own piece and its
+declarations as the module's own (without it the base tool refuses the tree: persist destructures four of those fills). `rack-deps.test` §5 gains
+the law.
+
+**Gates.**
+- **The classes table:** readouts 7, kepler 4 — the same names, class for class, as before; 0 bare writes; G-A clean; the hinge holds (SPECTRUM 24).
+- **The bytes:** `serialize-bytes` 11/11 full and 11/11 edit, sha-identical to the live base export. **`settings-probe`:** 0 of 6 red, all six reached.
+- **The suites:** node exit 0; `lw-facade` 1/1; `routed-knob` 4/4; `camera-shift`; `molecule-demos`; take-in-bugs' CALCULUS / METERS / WIGNER
+  scenes 3/3; the boot suite's readout and Kepler laws 44/48 (B3, B7, B14, B16–B18, B24–B27, B34, B36, B44, B50, B57 GREEN).
+- **The rig's reds, identical on the base:** B9 ×2, B51, B54 (its GPU integral equal to sixteen digits), take-in-bugs' ONE CLOCK, `frame-occlusion`'s
+  chipGap, `hit-probe-set`'s "did not settle", `current`'s modulation audio face.
+
+**Lines.** `lab/*.js` + `lab/shell/` + `lab/windows/` **27,856 → 27,880 (+24)** of 27,943. `rack.js` 3,605 → 3,162; the modules 158 · 307. Three
+imports (two lines and one name) left unreferenced in `rack.js` on purpose, adjacent to R3b's import lines; the merge deletes them.
+
+Hand-off: `research/release-0.5.2/R2b-BUILD.md`.
+
 ### wave 220: R3b TRANSPORT + RACK WIRING + NOTEBOOK + KEYS — §12, §19a, §19b and §20–§23 move verbatim into four `lab/shell/` modules called at their seats; §19a keeps its two seats; nothing Josh sees moves
 
 One Opus builder (`agent-ad72f08e558dc8f5f`) ran the row as PAIR 2 beside R2b, from `1d5b060`.

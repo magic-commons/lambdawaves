@@ -32,3 +32,12 @@ real seams, over an explicit context. Nothing a hand or an eye meets is meant to
   hinge holds (notebook 21, keys 13; SPECTRUM 24 the largest); 0 bare writes. Serialize bytes 11/11 full + edit, the facade 1/1, `timeline` 14/14, `offer`
   16/16, `new-project` 8/8, `keyboard-window` green; `menubar`, `history`, `frame-occlusion`, `hit-probe-set`, `settings-probe` and the boot chunks stop
   where the base stops (the rig). **You see nothing.**
+
+- **R2b THE READOUTS + KEPLER** (merged 2026-10-10 10:18 from `7ed3c1b`; conflicts in REPORT.md and sw.js only): the nine readout cards leave `boot()` for
+  `lab/windows/readouts.js` (158 lines, THREE seats — the root and two root-level `function create<Y>()` seats `boot()` calls where CALCULUS and ATOMS stood,
+  so every card is created in its old order; `READERS`, the track loop and `hydroReader` stay) and THE BOW + KEPLER for `lab/windows/kepler.js`
+  `createKeplerSurface(app)` (307); 424 of 433 moved lines byte-identical, 8 read a slot, the ten inherited fills became registrations (+`keplerTurn`).
+  `tools/rack-deps.mjs` learns the multi-seat shape (+1 law, 54 PASS). The integrator dropped six import names only the moved code used (R2b's three and R3b's
+  three, left apart on purpose so the pair's hunks would not touch). `rack.js` 2,448 → 2,001 with both of PAIR 2 in; `lab/*.js` + shell + windows 27,893 of
+  27,943 (50 left for PAIR 3's seven and R5). The hinge holds (readouts 7, kepler 4; SPECTRUM 24 the largest); 0 bare writes; 13 module files measured.
+  Gates on the merged tip: node exit 0; `rack-deps.test` 54 PASS; `serialize-bytes` 11/11 full + 11/11 edit vs the 0.5.1 base (`8755`); `lw-facade` 1/1; `settings-probe` 2 of 6 reached then WATER stalled (the rig — the base's recorded reading is identical); the six new module files and `rack.js` parse. **You see nothing.**

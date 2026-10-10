@@ -357,3 +357,12 @@ and reading persist's, the history's, the keys' and the facade's names through `
 `window.__LW = LW` line). A boot function a module calls WHILE IT IS BEING CREATED must not read a name that module returns (`popFace` read `layout` and moved
 with §19a for that). A name a moved module returns that a later module reads is filled in `boot()` on the returning seat's line until that module's file is next
 opened, when the fill becomes its registration (`app.sh.saveSettings` … on §1's seat; `app.w.toggleFullscreen` … after SPECTRUM's).
+
+THE READOUTS AND KEPLER (0.5.2 R2b): SHADOW · ORBIT · VORTEX · PLANE, CALCULUS · METERS · LADDER and ATOMS · WIGNER · RADIATION are `lab/windows/readouts.js`
+`createReadouts(app)` at THREE seats — the root builds the first and returns `createCalcMetersLadder()` / `createAtomsWignerRadiation()`, which `boot()` calls
+where CALCULUS and ATOMS stood (`READERS`, the track loop and `hydroReader` stay in `boot()`) — and THE BOW + KEPLER AS A CONTROL SURFACE is
+`lab/windows/kepler.js` `createKeplerSurface(app)` (`keplerview.js` owns the name `createKepler`). THE MULTI-SEAT SHAPE: a module whose spans interleave with
+other cards declares each later seat as a root-level `function create<Y>()` that its root returns, and `boot()` calls it where the span stood, so no `device()`
+or append changes its order; `tools/rack-deps.mjs` measures such a function as eager at its own piece and its declarations as the module's own (an arrow or a
+nested closure is read as a deferred callback and its fills as never made — the tool refuses that tree; `tests/rack-deps.test.mjs` §5). `rack.js` stands at
+2,001 lines with PAIR 2 in; thirteen module files are measured.
