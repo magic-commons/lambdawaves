@@ -11,7 +11,8 @@
  *   node tools/rack-deps.mjs --section 8      one section's detail (its § number, or a word of its header); writes nothing
  *   node tools/rack-deps.mjs --no-write       the summary only
  *   node tools/rack-deps.mjs --file x.js      another file of the same shape (exactly one `export async function boot(dom)`)
- *   node tools/rack-deps.mjs --classes        0.5.2 G-G: the classes table for the plan's cut (§5b); --verbose names, --strict exits 1 on a red hinge
+ *   node tools/rack-deps.mjs --classes        0.5.2 G-G: the classes table for the plan's cut (§5b); --verbose names, --strict exits 1 on a red hinge;
+ *                                             a module that has left rack.js is measured from its file (lab/shell/, lab/windows/: R1)
  *   node tools/rack-deps.mjs --rename x=app.state.x [--rename …|map.json] [--dry-run]   a resolver-driven rename at token positions (§5c)
  *
  * No dependencies (the repo has no node_modules, so no acorn).  §1 is a lexer: comments, strings, templates with ${…}
@@ -25,7 +26,7 @@
  * §4 cuts boot's body into sections at its own `/* ── NAME ──` headers (two-space indent, brace depth 1); the smaller
  * headers become sub-notes.  §5 measures; §6 writes.  Deterministic: no clock, no randomness, every list sorted.
  */
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
@@ -211,8 +212,9 @@ const ASSIGN = new Set(['=', '+=', '-=', '*=', '/=', '%=', '**=', '<<=', '>>=', 
 /* `name.<m>(` with one of these is a MUTATION of the object the name holds (an array's, a Map's or a Set's own verbs). */
 const MUTATORS = new Set(['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse', 'fill', 'copyWithin', 'set', 'add', 'delete', 'clear']);
 
-export function scopeWalk(toks, M) {
+export function scopeWalk(toks, M, opts = {}) {
   const N = toks.length;
+  const isRoot = opts.root ? (v) => opts.root.test(v) : (v) => v === 'boot';   // 0.5.2 R1: a module file's root is its create<X>(app)
   const scopes = new Map();
   const warnings = [], refs = [], shadows = [], fns = [], imports = [], bootHits = [];
   const objKeys = new Map();     // `{` index of an object literal → its keys [{ key, kind, at }]
@@ -444,7 +446,7 @@ export function scopeWalk(toks, M) {
     if (!isP(body, '{')) { warn(i, 'function without a body'); return body; }
     const fs = scopeAt(body, 'function', scope);
     if (nameAt >= 0) declare(decl ? scope : fs, toks[nameAt].v, nameAt, decl ? 'function' : 'fnexpr');
-    if (pass === 1 && decl && scope === module && nameAt >= 0 && toks[nameAt].v === 'boot') {
+    if (pass === 1 && decl && scope === module && nameAt >= 0 && isRoot(toks[nameAt].v)) {
       bootHits.push({ scope: fs, fnAt: i, nameAt, params: [j, M[j]], open: body, close: M[body] });
     }
     bindList(j + 1, M[j], fs, fs, 'param');
@@ -953,17 +955,85 @@ export const HINGE = 25;
 /* the context's own bags: counted by their members elsewhere (the ui registry, the hook bag), never as a crossing name */
 const CONTEXT_BAGS = new Set(['ui', 'app']);
 
+/* ── 0.5.2 R1 · THE MODULE FILES.  A planned module that has LEFT rack.js lives in its file (`PLANNED[m].file`, under lab/shell/ or
+   lab/windows/) as ONE `export (async) function create<X>(app) { … }`, called at its seat in boot().  Its body is measured as a piece of
+   its module: a name it destructures from the context (`const { reg, clock } = app`, `const { quality } = app.sh`) is the boot-level
+   name of that key — backward or forward by where boot declares it against the module's seat (its first piece in rack.js) — and an
+   `app.<ns>.x` chain counts as it does in rack.js (`state` live, the others forward), except a module's fill of its OWN name
+   (`app.w.wSpec = wSpec`), which is its registration, not a crossing.  The pieces it left are dropped from PLANNED_CUT; its seat
+   (a header and the call) stays a piece of it. ── */
+export const MODULE_FOLDERS = ['shell', 'windows'];
+export function moduleSources(root = ROOT) {
+  const out = {};
+  for (const dir of MODULE_FOLDERS) {
+    const at = path.join(root, 'lab', dir);
+    if (!existsSync(at)) continue;
+    for (const f of readdirSync(at, { recursive: true }).map(String).filter((f) => f.endsWith('.js')).sort()) {
+      const rel = 'lab/' + dir + '/' + f.split('\\').join('/');
+      out[rel] = readFileSync(path.join(root, rel), 'utf8');
+    }
+  }
+  return out;
+}
+/* one module file: its root function, the names it destructures from `app`, and every reference its body makes */
+export function measureFile(text, rel) {
+  const L = lex(text), M = pairBrackets(L.toks), W = scopeWalk(L.toks, M, { root: /^create[A-Z]\w*$/ });
+  const { toks } = L;
+  if (W.bootHits.length !== 1) throw new Error(`${rel}: ${W.bootHits.length} top-level create<X>(…) functions — a module file holds exactly one`);
+  const B = W.bootHits[0];
+  const params = toks.slice(B.params[0] + 1, B.params[1]).map((t) => t.v).join('');
+  if (params !== 'app') throw new Error(`${rel}: ${toks[B.nameAt].v}(${params}) — a module is handed the context alone, (app)`);
+  const P = (k) => (k >= 0 && k < toks.length && toks[k].t === 'punct' ? toks[k].v : null);
+  const nameAt = (k) => (k >= 0 && k < toks.length && toks[k].t === 'name' ? toks[k].v : null);
+  /* the hand-over: `const { a, b: c } = app` / `= app.<ns>` at the root's statement level */
+  const handed = new Map();   // local name → { key, ns, line }
+  for (const D of W.decls) {
+    if (D.scope !== B.scope || D.kw !== 'const') continue;
+    for (const x of D.declarators) {
+      if (x.nameAt >= 0 || x.eqAt < 0 || P(x.from) !== '{') continue;
+      const e = x.eqAt + 1;
+      let ns = null;
+      if (nameAt(e) !== 'app') continue;
+      if (x.to === e + 1) ns = null;
+      else if (x.to === e + 3 && P(e + 1) === '.' && nameAt(e + 2)) ns = toks[e + 2].v;
+      else continue;
+      let k = x.from + 1;
+      const close = M[x.from];
+      while (k < close) {
+        if (P(k) === ',') { k++; continue; }
+        const key = nameAt(k);
+        if (!key) throw new Error(`${rel}:${toks[k].line}: a hand-over from app names something other than a plain key`);
+        let local = key;
+        if (P(k + 1) === ':' && nameAt(k + 2)) { local = toks[k + 2].v; k += 3; } else k += 1;
+        if (P(k) !== ',' && k < close) throw new Error(`${rel}:${toks[k].line}: a hand-over from app with a default or a nested pattern`);
+        handed.set(local, { key, ns, line: toks[x.from].line });
+      }
+    }
+  }
+  const refs = W.refs.filter((r) => r.where === 'boot');
+  return { rel, fn: toks[B.nameAt].v, lines: L.lines, bodyLines: toks[B.close].line - toks[B.open].line - 1, toks, refs, handed, own: B.scope.names, warnings: W.warnings };
+}
+
 export function classes(src, opts = {}) {
+  const PL = opts.planned || PLANNED, CUT = opts.cut || PLANNED_CUT;
   const R = analyze(src, opts);
   const L = lex(src), M = pairBrackets(L.toks), W = scopeWalk(L.toks, M);
   const { toks } = L;
   const lines = src.split('\n');
   const { openLine, closeLine } = R.boot;
+  /* the module files: those under lab/shell/ and lab/windows/ when the file measured is the app's own rack.js, else what opts hands */
+  const sources = opts.modules || (!opts.file || opts.file === 'lab/rack.js' ? moduleSources() : {});
+  const files = Object.entries(sources).map(([rel, text]) => {
+    const id = Object.keys(PL).find((m) => PL[m].file === rel);
+    if (!id) throw new Error(`classes: ${rel} is no planned module's file (PLANNED[…].file)`);
+    if (PL[id].stays) throw new Error(`classes: ${rel} belongs to ${id}, which stays in boot()`);
+    return { ...measureFile(text, rel), module: id };
+  });
   /* ── the pieces ── */
   const pieces = [];
   let cursor = openLine + 1;
-  for (const [re, mod, offset = 0] of PLANNED_CUT) {
-    if (!PLANNED[mod]) throw new Error(`classes: piece module ${mod} is not in PLANNED`);
+  for (const [re, mod, offset = 0] of CUT) {
+    if (!PL[mod]) throw new Error(`classes: piece module ${mod} is not in PLANNED`);
     let from;
     if (!re) from = openLine + 1;
     else {
@@ -979,71 +1049,97 @@ export function classes(src, opts = {}) {
   for (let k = 0; k < pieces.length; k++) pieces[k].to = k + 1 < pieces.length ? pieces[k + 1].from - 1 : closeLine - 1;
   const pieceOf = (line) => { let lo = 0, hi = pieces.length - 1; while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (pieces[mid].from <= line) lo = mid; else hi = mid - 1; } return pieces[lo]; };
   const moduleAt = (line) => (line > openLine && line < closeLine ? pieceOf(line).module : null);
-  const scopeOfModule = (m) => (PLANNED[m].stays ? 'boot' : m);
+  const scopeOfModule = (m) => (PL[m].stays ? 'boot' : m);
   const by = new Map(R.names.map((d) => [d.name, d]));
   const refs = W.refs.filter((r) => r.where === 'boot' && r.line > openLine && r.line < closeLine && by.has(r.name));
-  /* ── `app.<ns>.<x>` chains: the context's members as the code reads and writes them (after R0) ── */
+  /* ── `app.<ns>.<x>` chains: the context's members as the code reads and writes them (after R0), in rack.js or a module file ── */
+  const chainOf = (T, r) => {
+    const P = (k) => (k >= 0 && k < T.length && T[k].t === 'punct' ? T[k].v : null);
+    const nm = (k) => (k >= 0 && k < T.length && T[k].t === 'name' ? T[k].v : null);
+    if (r.name !== 'app' || P(r.at + 1) !== '.' || !nm(r.at + 2)) return null;
+    const ns = T[r.at + 2].v;
+    if (P(r.at + 3) !== '.' || !nm(r.at + 4)) return { ns, x: null, write: false };
+    const nx = P(r.at + 5);
+    const write = ASSIGN.has(nx) || ((nx === '++' || nx === '--') && T[r.at + 5].line === T[r.at + 4].line) || P(r.at - 1) === '++' || P(r.at - 1) === '--';
+    return { ns, x: T[r.at + 4].v, write };
+  };
   const P = (k) => (k >= 0 && k < toks.length && toks[k].t === 'punct' ? toks[k].v : null);
   const nameAt = (k) => (k >= 0 && k < toks.length && toks[k].t === 'name' ? toks[k].v : null);
-  const appChain = (r) => {
-    if (r.name !== 'app' || P(r.at + 1) !== '.' || !nameAt(r.at + 2)) return null;
-    const ns = toks[r.at + 2].v;
-    if (P(r.at + 3) !== '.' || !nameAt(r.at + 4)) return { ns, x: null, write: false };
-    const nx = P(r.at + 5);
-    const write = ASSIGN.has(nx) || ((nx === '++' || nx === '--') && toks[r.at + 5].line === toks[r.at + 4].line) || P(r.at - 1) === '++' || P(r.at - 1) === '--';
-    return { ns, x: toks[r.at + 4].v, write };
-  };
+  const appChain = (r) => chainOf(toks, r);
+  /* ── a module file's references, as its module's: the names it was handed (boot-level names, by key), its app chains ── */
+  const seatOf = (id) => { const p = pieces.find((q) => q.module === id); return p ? p.from : -1; };
+  for (const F of files) {
+    F.seat = seatOf(F.module);
+    if (F.seat < 0) throw new Error(`classes: ${F.rel} (${F.module}) has no seat — keep a piece of it (its header and the call) in PLANNED_CUT`);
+    F.uses = new Map();     // boot-level name → { w }
+    F.unknown = [];
+    for (const [local, h] of F.handed) {
+      if (h.key === 'dom' || CONTEXT_BAGS.has(h.key)) continue;   // boot's parameter and the context's bags: not crossing names (as in rack.js)
+      if (!by.has(h.key)) { F.unknown.push(`${F.rel}:${h.line}: \`${h.key}\` handed from app${h.ns ? '.' + h.ns : ''} is no boot-level name`); continue; }
+      for (const r of F.refs) if (r.name === local) { const e = F.uses.get(h.key) || { w: false }; if (r.kind === 'write' || r.kind === 'rw') e.w = true; F.uses.set(h.key, e); }
+    }
+    F.chains = F.refs.filter((r) => r.name === 'app').map((r) => ({ r, c: chainOf(F.toks, r) })).filter((x) => x.c);
+  }
   /* ── ownership: a let is SHARED when a scope other than its owner's references it ── */
   const letScopes = new Map();
+  const letSeen = (name, m) => { if (!letScopes.has(name)) letScopes.set(name, new Set()); letScopes.get(name).add(scopeOfModule(m)); };
   for (const r of refs) {
     const d = by.get(r.name);
     if (d.kind !== 'let') continue;
     const m = moduleAt(r.line);
-    if (!m) continue;
-    if (!letScopes.has(r.name)) letScopes.set(r.name, new Set());
-    letScopes.get(r.name).add(scopeOfModule(m));
+    if (m) letSeen(r.name, m);
   }
+  for (const F of files) for (const n of F.uses.keys()) if (by.get(n).kind === 'let') letSeen(n, F.module);
   const ownerOf = (name) => moduleAt(by.get(name).line);
   /* an `app.state` member's OWNER is the module of its seat — its first eager write (boot's statement level, never inside a function)
-     in file order, as the `let` it was declared at; a member with no seat is boot's (the literal's placeholder holds it) */
-  const stateOwner = new Map();
+     in file order, as the `let` it was declared at; a member with no seat is boot's (the literal's placeholder holds it).  A module
+     file's eager writes stand at its seat in that order (the call runs them there). */
+  const stateSeat = new Map();   // x → { pos, module }
+  const seatAt = (x, pos, m) => { const s = stateSeat.get(x); if (!s || pos < s.pos) stateSeat.set(x, { pos, module: m }); };
   for (const r of refs) {
     if (r.name !== 'app' || r.deferred) continue;
     const c = appChain(r);
-    if (c && c.ns === 'state' && c.x && c.write && !stateOwner.has(c.x) && moduleAt(r.line)) stateOwner.set(c.x, moduleAt(r.line));
+    if (c && c.ns === 'state' && c.x && c.write && moduleAt(r.line)) seatAt(c.x, r.line, moduleAt(r.line));
   }
-  const stateOwnerOf = (x) => stateOwner.get(x) || 'boot';
+  for (const F of files) for (const { r, c } of F.chains) if (!r.deferred && c.ns === 'state' && c.x && c.write) seatAt(c.x, F.seat + 0.5, F.module);
+  const stateOwnerOf = (x) => (stateSeat.get(x) || { module: 'boot' }).module;
   const sharedLets = [...letScopes].filter(([n, s]) => [...s].some((x) => x !== scopeOfModule(ownerOf(n)))).map(([n]) => n).sort((a, b) => by.get(a).line - by.get(b).line);
   /* the const / function names that cross a scope boundary: the members the context must carry */
   const crossNames = new Map();
-  for (const r of refs) {
-    const d = by.get(r.name);
-    if (d.kind === 'let' || CONTEXT_BAGS.has(r.name)) continue;
-    const m = moduleAt(r.line), o = moduleAt(d.line);
-    if (!m || !o || scopeOfModule(m) === scopeOfModule(o)) continue;
-    if (!crossNames.has(r.name)) crossNames.set(r.name, { name: r.name, owner: o, kind: d.kind, fn: d.fn, line: d.line, users: new Set() });
-    crossNames.get(r.name).users.add(m);
-  }
+  const crossSeen = (name, m) => {
+    const d = by.get(name);
+    if (d.kind === 'let' || CONTEXT_BAGS.has(name)) return;
+    const o = moduleAt(d.line);
+    if (!m || !o || scopeOfModule(m) === scopeOfModule(o)) return;
+    if (!crossNames.has(name)) crossNames.set(name, { name, owner: o, kind: d.kind, fn: d.fn, line: d.line, users: new Set() });
+    crossNames.get(name).users.add(m);
+  };
+  for (const r of refs) crossSeen(r.name, moduleAt(r.line));
+  for (const F of files) for (const n of F.uses.keys()) crossSeen(n, F.module);
   /* ── per module ── */
-  const modules = Object.entries(PLANNED).map(([id, meta]) => {
+  const modules = Object.entries(PL).map(([id, meta]) => {
     const ps = pieces.filter((p) => p.module === id);
     const first = ps.length ? ps[0].from : Infinity;
     const inMod = (line) => ps.some((p) => line >= p.from && line <= p.to);
+    const mine = files.filter((F) => F.module === id);
     const f = new Map(), state = new Map(), ctx = new Map();
+    const chain = (c, own) => {
+      if (c.ns === 'state' && c.x) { const e = state.get(c.x) || { w: false }; if (c.write) e.w = true; state.set(c.x, e); }
+      else if (c.x && c.ns !== 'hooks' && !(c.write && own(c.x))) ctx.set(c.ns + '.' + c.x, true);   // a fill of its own name is its registration
+    };
     for (const r of refs) {
       if (!inMod(r.line)) continue;
-      if (r.name === 'app') {
-        const c = appChain(r);
-        if (c && c.ns === 'state' && c.x) { const e = state.get(c.x) || { w: false }; if (c.write) e.w = true; state.set(c.x, e); }
-        else if (c && c.x && c.ns !== 'hooks') ctx.set(c.ns + '.' + c.x, true);
-        continue;
-      }
+      if (r.name === 'app') { const c = appChain(r); if (c) chain(c, (x) => by.has(x) && inMod(by.get(x).line)); continue; }
       if (CONTEXT_BAGS.has(r.name)) continue;
       const d = by.get(r.name);
       if (inMod(d.line)) continue;
       const e = f.get(r.name) || { w: false };
       if (r.kind === 'write' || r.kind === 'rw') e.w = true;
       f.set(r.name, e);
+    }
+    for (const F of mine) {
+      for (const { c } of F.chains) chain(c, (x) => F.own.has(x) && !F.handed.has(x));
+      for (const [n, u] of F.uses) { const e = f.get(n) || { w: false }; if (u.w) e.w = true; f.set(n, e); }
     }
     const backward = [], forward = [], lets = [], bareWrites = [], crossWrites = [];
     for (const [n, e] of f) {
@@ -1060,9 +1156,11 @@ export function classes(src, opts = {}) {
     const stateOwn = [...state.keys()].filter((x) => scopeOfModule(stateOwnerOf(x)) === scopeOfModule(id)).sort(byName);
     const ctxNames = [...ctx.keys()].sort(byName);
     const fs = forward.length + ctxNames.length + crossLets.length + stateNames.length;
+    const pieceLines = ps.reduce((k, p) => k + p.to - p.from + 1, 0);
     return {
       id, title: meta.title, row: meta.row, file: meta.file, stays: !!meta.stays,
-      spans: ps.map((p) => [p.from, p.to]), lines: ps.reduce((k, p) => k + p.to - p.from + 1, 0),
+      spans: ps.map((p) => [p.from, p.to]), lines: pieceLines + mine.reduce((k, F) => k + F.lines, 0), pieceLines,
+      files: mine.map((F) => ({ rel: F.rel, fn: F.fn, lines: F.lines, bodyLines: F.bodyLines, seat: F.seat, handed: F.handed.size })),
       backward: backward.sort(byName), forward: forward.sort(byName), context: ctxNames, lets: lets.sort(byName), crossLets: crossLets.sort(byName),
       state: stateNames, stateOwn, stateWrites: stateNames.filter((n) => state.get(n).w),
       bareWrites: bareWrites.sort(byName), crossWrites: crossWrites.sort(byName),
@@ -1071,29 +1169,44 @@ export function classes(src, opts = {}) {
   });
   const stateMembers = uniq(modules.flatMap((m) => [...m.state, ...m.stateOwn]));
   /* ── G-A, read statically: the `app` literal's namespaces and keys, and every `app.x` / `app.<ns>.x` that names a key the literal
-     does not hold (an extension), every `Object.assign(app…` and every `delete app.…` ── */
+     does not hold (an extension), every `Object.assign(app…` and every `delete app.…` — in rack.js and in every module file; and a
+     module that destructures a slot the literal holds as null and boot fills later (it would freeze the null) ── */
   const appDecl = W.bootHits[0].scope.names.get('app');
   const appInit = appDecl && W.declInit.get(appDecl.at);
-  const appShape = { line: appDecl ? toks[appDecl.at].line : -1, top: [], ns: {} };
+  const appShape = { line: appDecl ? toks[appDecl.at].line : -1, top: [], ns: {}, nullSlots: [] };
   if (appInit && appInit.obj !== undefined) for (const k of W.objKeys.get(appInit.obj) || []) {
     appShape.top.push(k.key);
-    if (k.kind === 'value' && P(k.at + 1) === ':' && P(k.at + 2) === '{') appShape.ns[k.key] = (W.objKeys.get(k.at + 2) || []).map((x) => x.key);
+    if (k.kind === 'value' && P(k.at + 1) === ':' && P(k.at + 2) === '{') {
+      appShape.ns[k.key] = (W.objKeys.get(k.at + 2) || []).map((x) => x.key);
+      for (const x of W.objKeys.get(k.at + 2) || []) if (x.kind === 'value' && nameAt(x.at + 2) === 'null') appShape.nullSlots.push(k.key + '.' + x.key);
+    }
   }
   const strays = [];
-  for (const r of refs) {
-    if (r.name !== 'app') continue;
-    if (P(r.at - 1) === '(' && nameAt(r.at - 2) === 'assign') { strays.push(`line ${r.line}: Object.assign(app…`); continue; }
-    if (nameAt(r.at - 1) === 'delete') { strays.push(`line ${r.line}: delete app…`); continue; }
-    if (P(r.at + 1) !== '.') { if (P(r.at + 1) === '[') strays.push(`line ${r.line}: app[…]`); continue; }
-    const top = nameAt(r.at + 2);
-    if (!appShape.top.includes(top)) { strays.push(`line ${r.line}: app.${top}`); continue; }
-    if (appShape.ns[top] && P(r.at + 3) === '.' && nameAt(r.at + 4) && !appShape.ns[top].includes(toks[r.at + 4].v)) strays.push(`line ${r.line}: app.${top}.${toks[r.at + 4].v}`);
-    if (appShape.ns[top] && P(r.at + 3) === '[') strays.push(`line ${r.line}: app.${top}[…]`);
+  const strayCheck = (T, r, where) => {
+    const P = (k) => (k >= 0 && k < T.length && T[k].t === 'punct' ? T[k].v : null);
+    const nm = (k) => (k >= 0 && k < T.length && T[k].t === 'name' ? T[k].v : null);
+    if (P(r.at - 1) === '(' && nm(r.at - 2) === 'assign') { strays.push(`${where}${r.line}: Object.assign(app…`); return; }
+    if (nm(r.at - 1) === 'delete') { strays.push(`${where}${r.line}: delete app…`); return; }
+    if (P(r.at + 1) !== '.') { if (P(r.at + 1) === '[') strays.push(`${where}${r.line}: app[…]`); return; }
+    const top = nm(r.at + 2);
+    if (!appShape.top.includes(top)) { strays.push(`${where}${r.line}: app.${top}`); return; }
+    if (appShape.ns[top] && P(r.at + 3) === '.' && nm(r.at + 4) && !appShape.ns[top].includes(T[r.at + 4].v)) strays.push(`${where}${r.line}: app.${top}.${T[r.at + 4].v}`);
+    if (appShape.ns[top] && P(r.at + 3) === '[') strays.push(`${where}${r.line}: app.${top}[…]`);
+  };
+  for (const r of refs) if (r.name === 'app') strayCheck(toks, r, 'line ');
+  for (const F of files) {
+    for (const r of F.refs) if (r.name === 'app') strayCheck(F.toks, r, F.rel + ':');
+    strays.push(...F.unknown);
+    for (const [, h] of F.handed) {
+      if (h.ns ? !(appShape.ns[h.ns] || []).includes(h.key) : !appShape.top.includes(h.key)) strays.push(`${F.rel}:${h.line}: \`${h.key}\` handed from app${h.ns ? '.' + h.ns : ''} is no key of the literal`);
+      else if (h.ns && appShape.nullSlots.includes(h.ns + '.' + h.key)) strays.push(`${F.rel}:${h.line}: destructures app.${h.ns}.${h.key}, a null slot (it would freeze the null — read it live)`);
+    }
   }
   appShape.largest = Math.max(appShape.top.length, ...Object.values(appShape.ns).map((x) => x.length));
   return {
     appShape, appStrays: strays,
     file: R.file, sha256: R.sha256, lines: R.lines, boot: R.boot, pieces, modules, sharedLets, stateMembers,
+    files: files.map((F) => ({ rel: F.rel, module: F.module, fn: F.fn, lines: F.lines, bodyLines: F.bodyLines, seat: F.seat, handed: [...F.handed.values()].map((h) => (h.ns ? h.ns + '.' : '') + h.key), warnings: F.warnings.length })),
     stateOwners: Object.fromEntries(stateMembers.map((x) => [x, stateOwnerOf(x)])),
     crossNames: [...crossNames.values()].map((c) => ({ ...c, users: [...c.users].sort(byName) })).sort((a, b) => a.line - b.line),
     hinge: { limit: HINGE, ok: modules.every((m) => m.ok), crossWrites: modules.reduce((k, m) => k + m.crossWrites.length, 0),
@@ -1116,6 +1229,7 @@ export function classesText(C) {
   out.push(`shared lets still bare (${C.sharedLets.length}): ${C.sharedLets.join(', ') || 'none'}`);
   out.push(C.appShape.line < 0 ? 'G-A (static): no `app` literal yet'
     : `G-A (static): \`app\` at line ${C.appShape.line}: ${C.appShape.top.length} keys; ${Object.entries(C.appShape.ns).map(([k, v]) => k + ' ' + v.length).join(' · ')}; the largest ${C.appShape.largest} (< 128: a literal that size is born a dictionary); members named outside the literal, Object.assign, delete: ${C.appStrays.length ? C.appStrays.join('; ') : 'none'}`);
+  out.push(`module files measured (${C.files.length}): ${C.files.map((F) => `${F.rel} → ${F.module} (${F.fn}(app), ${F.lines} lines, seated at rack.js:${F.seat}, handed ${F.handed.length})`).join('; ') || 'none — every planned module is still in rack.js'}`);
   out.push(`app.state members in use (${C.stateMembers.length}): ${C.stateMembers.join(', ') || 'none'}`);
   out.push(`const / function names crossing a scope (${C.crossNames.length}; hoisted declarations ${C.crossNames.filter((c) => c.kind === 'function').length})`);
   return out.join('\n');

@@ -8,6 +8,9 @@
  *    a clean walk (no warning), and the shadows the file is known to carry (`rk` re-declared in a for-head at line ~3034).
  * §4 (0.5.2 R0) the classes table on the plan's cut — the pieces tile the body, no shared let is left bare, every app.state member is
  *    a key of the literal, no bare cross-module write, the hinge (forward + shared ≤ 25) — and G-A read statically; the app-source helper.
+ * §5 (0.5.2 R1) a module that has left rack.js is measured from its file (lab/shell/, lab/windows/) as a piece of its planned module:
+ *    a fixture boot + controller file (handed names by key, app chains, the file's seats at its call, a module's fill of its own name
+ *    not a crossing, a null slot destructured is a stray, an unplanned file refused), then the real tree keeps its 23 rows.
  *
  * Run:  node tests/rack-deps.test.mjs
  */
@@ -152,6 +155,71 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const files = appFiles();
   check(files[0] === 'rack.js' && files.slice(1).every((f) => APP_FOLDERS.some((d) => f.startsWith(d + '/'))) && appSource().startsWith(src),
     `tests/helpers/app-source.mjs: the app's source is rack.js first, then ${APP_FOLDERS.map((d) => 'lab/' + d + '/').join(' and ')} (${files.length} file${files.length > 1 ? 's' : ''} now)`, files.join(' '));
+}
+
+/* ── §5 A MODULE THAT LEFT rack.js IS MEASURED FROM ITS FILE (0.5.2 R1): a fixture boot and its controller file, then the real tree ── */
+{
+  const rack = [
+    'export async function boot(dom) {',
+    '  const reg = { n: 1 };',
+    '  const app = { dom, reg, state: { seen: false, n: 0 }, loop: { schedule, page: null }, ctl: { gov: null }, w: { wX: null } };',
+    '  /* ── ONE ── */',
+    '  const { gov, touch } = await createCtl(app);',
+    '  /* ── LOOP ── */',
+    '  const page = { hidden: false };',
+    '  app.loop.page = page;',
+    '  function schedule() { return gov.on && reg.n; }',
+    '  app.state.n = 2;',
+    '  /* ── WIN ── */',
+    '  const wX = { x: 1 };',
+    '  app.w.wX = wX;',
+    '  touch();',
+    '  return app;',
+    '}',
+  ].join('\n') + '\n';
+  const mod = (hand) => [
+    'export async function createCtl(app) {',
+    '  const { reg } = app;',
+    `  const { ${hand} } = app.loop;`,
+    '  app.state.seen = true;',
+    '  const gov = { on: true };',
+    '  function touch() { if (!app.loop.page.hidden) schedule(); app.state.n++; return app.w.wX.x + reg.n; }',
+    '  return { gov, touch };',
+    '}',
+  ].join('\n') + '\n';
+  const planned = { boot: PLANNED.boot, controller: PLANNED.controller, loop: PLANNED.loop, spectrum: PLANNED.spectrum };
+  const cut = [[null, 'boot'], [/^ {2}\/\* ── ONE/, 'controller'], [/^ {2}\/\* ── LOOP/, 'loop'], [/^ {2}\/\* ── WIN/, 'spectrum']];
+  let C = null, err = '';
+  try { C = classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/controller.js': mod('schedule') } }); } catch (e) { err = e.message; }
+  check(!!C, 'module files: a fixture boot with its controller in lab/shell/controller.js is measured', err);
+  if (C) {
+    const row = (id) => C.modules.find((m) => m.id === id);
+    const ctl = row('controller'), loop = row('loop'), win = row('spectrum');
+    check(ctl.files.length === 1 && ctl.files[0].rel === 'lab/shell/controller.js' && ctl.files[0].fn === 'createCtl' && C.files[0].seat === 4,
+      'module files: the controller row is measured from its file, seated at its rack.js piece (line 4)', JSON.stringify(ctl.files));
+    check(same(ctl.backward, ['reg']) && same(ctl.forward, ['schedule']) && same(ctl.context, ['loop.page', 'w.wX']),
+      'module files: a name handed from app is the boot-level name (reg backward, schedule forward: boot declares it after the seat); app.loop.page and app.w.wX are forward', JSON.stringify([ctl.backward, ctl.forward, ctl.context]));
+    check(same(ctl.stateOwn, ['seen']) && same(ctl.state, ['n']) && same(ctl.stateWrites, ['n']) && C.stateOwners.seen === 'controller' && C.stateOwners.n === 'loop',
+      'module files: the file\'s eager app.state write is a seat at its call (seen is the controller\'s); its deferred n++ writes the loop\'s member', JSON.stringify([ctl.stateOwn, ctl.state, C.stateOwners]));
+    check(ctl.forwardShared === 4 && ctl.crossWrites.length === 0 && ctl.ok, 'module files: forward + shared 4 (schedule, loop.page, w.wX, n), no bare write', String(ctl.forwardShared));
+    check(same(loop.context, []) && same(win.context, []) && same(win.backward, ['touch']) && loop.backward.includes('gov'),
+      'module files: a fill of a module\'s OWN name (app.loop.page = page, app.w.wX = wX) is its registration, not a crossing; the names the seat destructures are the controller\'s',
+      JSON.stringify([loop.context, win.context, win.backward, loop.backward]));
+    check(C.crossNames.some((c) => c.name === 'touch' && c.owner === 'controller') && C.crossNames.some((c) => c.name === 'schedule' && c.users.includes('controller')) && C.appStrays.length === 0,
+      'module files: the crossing names run both ways across the file (touch the controller\'s, schedule into it); G-A clean', JSON.stringify([C.crossNames, C.appStrays]));
+  }
+  let S = null;
+  try { S = classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/controller.js': mod('schedule, page') } }); } catch (e) { err = e.message; }
+  check(!!S && S.appStrays.some((x) => /destructures app\.loop\.page, a null slot/.test(x)), 'module files: G-A — destructuring a slot the literal holds as null (filled later by boot) is a stray: it would freeze the null', S ? S.appStrays.join('; ') : err);
+  let T = '';
+  try { classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/nowhere.js': mod('schedule') } }); } catch (e) { T = e.message; }
+  check(/no planned module's file/.test(T), 'module files: a file under lab/shell/ that no planned module names is refused', T);
+  /* the real tree: every file under lab/shell/ and lab/windows/ is a planned module's, measured; the table keeps one row per planned module */
+  const src = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
+  let R = null; err = '';
+  try { R = classes(src); } catch (e) { err = e.message; }
+  check(!!R && R.modules.length === Object.keys(PLANNED).length && R.modules.length === 23 && R.files.every((F) => R.modules.find((m) => m.id === F.module).files.some((x) => x.rel === F.rel)),
+    `the real tree: ${R ? R.files.length : '?'} module file(s) measured as their planned modules (${R ? R.files.map((F) => F.rel + ' → ' + F.module).join(', ') || 'none yet' : err}); the table keeps its 23 rows`, err);
 }
 
 if (red) { console.log(`RED ${red} rack-deps check(s)`); process.exit(1); }
