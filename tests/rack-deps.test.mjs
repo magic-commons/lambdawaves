@@ -230,6 +230,17 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   check(!!U2 && U2.appStrays.length === 0 && !!V2 && V2.appStrays.some((x) => /destructures app\.ctl\.gov, a null slot/.test(x)) && !V2.appStrays.some((x) => /Object\.assign/.test(x)),
     'module files: G-A — a slot an EARLIER-seated file fills eagerly may be destructured by a later one (without that fill it is still a stray); Object.assign into app.ctl.gov is no stray',
     U2 && V2 ? JSON.stringify([U2.appStrays, V2.appStrays]) : err);
+  /* 0.5.2 R2b: a module with two seats declares the later one as `function create<Y>()` at its root, called by boot() at its second piece:
+     that function's statement-level fill is eager AT that piece (a later file may destructure it) and registers a name it declares (no crossing) */
+  const cut2 = [[null, 'boot'], [/^ {2}\/\* ── ONE/, 'controller'], [/^ {2}\/\* ── LOOP/, 'loop'], [/^ {2}app\.state\.n = 2;/, 'controller'], [/^ {2}\/\* ── WIN/, 'spectrum']];
+  const twoSeats = ['export async function createCtl(app) {', '  const gov = { on: true };', '  function createLate() {', '  const wX = { x: 1 };', '  app.w.wX = wX;',
+    '  const f = () => app.loop.page;', '  return { wX, f }; }', '  return { gov, touch: () => 0, createLate };', '}', ''].join('\n');
+  const readsWX = 'export function createWin(app) {\n  const { wX } = app.w;\n  return { on: () => wX.x };\n}\n';
+  let Q = null; err = '';
+  try { Q = classes(rack, { file: 'fixture.js', planned, cut: cut2, modules: { 'lab/shell/controller.js': twoSeats, 'lab/windows/spectrum.js': readsWX } }); } catch (e) { err = e.message; }
+  const q = Q && Q.modules.find((m) => m.id === 'controller');
+  check(!!q && same(q.context, ['loop.page']) && Q.appStrays.length === 0,
+    'module files: a later seat (`function create<Y>()` at the root) fills eagerly at its own piece — a later module destructures app.w.wX clean — and that fill is its registration; the callback\'s app.loop.page is a crossing', q ? JSON.stringify([q.context, Q.appStrays]) : err);
   let T = '';
   try { classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/nowhere.js': mod('schedule') } }); } catch (e) { T = e.message; }
   check(/no planned module's file/.test(T), 'module files: a file under lab/shell/ that no planned module names is refused', T);
