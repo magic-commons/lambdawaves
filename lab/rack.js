@@ -83,6 +83,7 @@ import { createBadges } from './badges.js';             // N7 seam 6: the badges
 import { createRack, readLayout, layoutLabel as rackLayoutLabel } from './mir/shell/rack.js';   // 0.5.0 C3: the rack, its + and ☆ lists, the phone's crossing (rack-menus.js left)
 import { createMenubar } from './mir/shell/menubar.js';    // 0.5.0 C3: the logo's bar is the kit's (menubar.js left; its MENUS table stays)
 import { installWindowChrome } from './window-chrome.js'; // N7 seam 9: the LEAN and KIND passes, out of boot()
+import { readLink, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
