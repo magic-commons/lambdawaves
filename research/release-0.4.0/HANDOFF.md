@@ -646,6 +646,10 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > gpu-recovery alone on an empty rig (flaky on both trees under a desktop Firefox); + the hand on a ROUTED dial is held (the docs say never — fix the behaviour
 > if the registry marks a hand's write, else the wording). CLAUDE.md's four contradicted lines fixed by the integrator (line 9 the play edge armed or not; line
 > 184 DOMAIN restored; `atomLabelsSize` not read; serialize bytes = the edit scope). **Then the cut `v0.5.1-alpha · Informational Update`.**
+> **20:22 — FIX ROUND 2 MERGED `f1b715a`** (Sonnet `610e4c4`: S1 the guard lets go after the quiet second on the modulation clock's own seconds (+9 →
+> **27,666**; the probe 0/3 stuck); S2 B127 names the seventh live region; S3 gpu-recovery = the rig's rAF stall on both trees under Josh's desktop Firefox,
+> not patched; the hand on a ROUTED dial IS held — CLAUDE.md + CHANGES reworded). The cut's run of record (boot alone + take-in-bugs + routed-knob on the
+> merged tree) running; then `bash $CLAUDE_JOB_DIR/tmp/cut-0.5.1.sh`.
 
 ## 3 · What happens next, in order
 
