@@ -12,36 +12,54 @@ slices `projectSnapshot`/`projectKey` out of §19b's PROJECTS block — keep tha
 `CLAUDE.md` (the paragraphs on the rack, the menubar, the ONE KEY TABLE, THE START, PROJECTS, THE FILM's TIMELINE; the last four: THE CONTEXT, THE CONTROLLER, THE
 WINDOWS / THE READ LAW, R3a's).
 
-## As-built facts (the integrator, 2026-10-10; the BUILD files are the authority)
+## As-built facts (the integrator, 2026-10-10 after PAIR 1 — the launch tip `87aad5e`; the BUILD files are the authority)
 
 - **THE READ LAW (R2a, binding):** your four modules are all seated AFTER the controller — a name that is a CONST by then (§0's consts, the loop's hoisted
   functions, the rack, the controller's 68 on `app.ctl`, what R2a/R3a registered on `app.w`/`app.sh` before your seats) is DESTRUCTURED ONCE at the top of the
   module; a name `boot()` makes LATER than your seat is read through its slot inside a callback; a shared `let` is always `app.state.x`, live. A const read through
-  `app.<ns>.x` at use counts as a forward crossing — the notebook (21 after R0) cannot afford one.
-- **Fills you inherit (R2a's candidate 2):** `boot()` holds `app.sh.layout` and `app.sh.keyState` one-line fills written by R2a (SPECTRUM reads them) — each moves
-  WITH its declaration into your module and becomes its registration. R3a's `app.sh.save`/`restore`/`copyJSON`/`copyLink` are persist's; R2a's redundant copy at
-  `/* ── go ──` was removed at R3a's merge (check `grep -n 'app.sh.save' lab/rack.js`).
-- **Lines at `ee92ddc`** (R2a in; R3a's merge moves everything below §1 up — re-locate by grep on your base): `lab/rack.js` 4,261 — §12 `/* ── transport strip
-  (§25)` :1809 → before `/* ── badges (§41)` :2038 (§13–§14 badges + the install layer :2038–2067 STAY); §19a+§19b `/* ── 0.5.0 C3 · THE RACK IS THE KIT'S` :2432 →
-  before `/* ── KEYS: a rebindable action table` :3150 — inside it the planning base's three spans map to ≈ :2432–2614 (rack · layout · phone · gestures, incl. the
-  kit's apply / "put it back" :2571), ≈ :2615–3001 (skip links · dock chip · `const MENUS = {` :2707 · `createMenubar(` :2737 · the notebook's move/resize :2761 ·
-  "A project opens onto its notebook" :2787 · `/* ── PROJECTS (0.5.0 C6)` :2828) and ≈ :3002–3149 (rack wiring, second half) — **measure the real seams with
-  `node tools/rack-deps.mjs --section` and name them in the BUILD**; §20 `/* ── KEYS` :3150, §21 `/* ── 0.5.0 C3 · THE KEYBOARD WINDOW` :3259, §22 `/* ── 0.5.0
-  C7b · THE TIMELINE` :3283, §23 `/* ── THE TAB ORDER` :3316 → before `/* ── persistence (§46)` :3352 (R3a moved §24 out; the anchor after §23 on your base is
-  whatever follows). §17 THE FLOATING RACK :2363 and §18 INK :2372 are R2d's; §30 stays.
-- **Line law:** `lab/*.js` + `lab/shell/` + `lab/windows/` = **27,799 of a 27,943 cap after R2a (R3a's Δ pending) — ≈ 140 for 10 modules: your four modules' header
-  comment + signature + return ≤ 12 lines EACH, no new blank lines; find subtractions while you move and say them.** Say your exact Δ.
-- **The rig** (since ≈ 02:00): the GPU stalls on the heaviest states ("Render did not settle: animation frames stopped"), play does not advance in some suites,
-  marionette dies after ≈ 5 in-session reloads (`keyboard-window`'s reload, `settings-probe`'s 6th scene) — all on the BASE as well. **A red of that kind is
-  checked ONCE against your base export on your second port: identical = the rig; record BOTH readings in the BUILD and move on. Never loop on it; never touch
-  another process.** Josh may reboot during your run: if your servers die, restart them by the same commands and continue.
+  `app.<ns>.x` at use counts as a forward crossing — the notebook (21) cannot afford one. (Persist read its nine controller names at use because its brief said
+  so and sits at 23; you destructure.)
+- **Your rows at the launch tip (the merged table):** transport 230 lines, backward 15, forward 0, another scope's `app.state` 4, **fwd + shared 4**; rack-wiring
+  330, 39, 0, 4, **4**; notebook 389, 28, 10, 11, **21**; keys 202, 32, 1, 12, **13**. Limit 25, zero bare writes. Count before and after; STOP at a committed WIP
+  if a move would pass 25.
+- **R3a as built (`R3a-BUILD.md`):** `lab/shell/settings.js` `createSettings(app)` (§1, seated `rack.js:190–191` BEFORE the controller's seat :194 — it reads
+  `app.ctl.x`, `app.host.camera`, `app.sh.setModArm`, `app.sh.quality` inside callbacks), `persist.js` `createPersist(app)` (:3220–3221; `serialize`/`restore`
+  whole; it DESTRUCTURES at creation `app.sh.quality`, `layout`, `phone`, `tablet`, `app.host.*` and twenty `app.w` handles), `links.js` `createLinks(app)`
+  (:3222–3223), `history.js` `createHistory(app)` (:3224–3225; the HISTORY card with it). `app.sh` holds: `quality` (boot :193), `lookSync` (settings),
+  `serialize`/`restore`/`save`/`copyJSON` (persist), `esc`/`copyLink` (links), and three boot fills that are YOURS to take (below). R2a's redundant
+  `app.sh.save/restore/copyJSON/copyLink` copy at `/* ── go ──` is gone (`grep -n 'app.sh.save' lab/rack.js` → nothing).
+- **Fills you inherit — each moves WITH its declaration into your module and becomes its registration; none stays in `boot()`:** `app.sh.setModArm = setModArm;`
+  :1876 (after `function setModArm` :1861, INSIDE §12 → transport's registration; settings reads it at use); `app.sh.rk = rk; app.sh.layout = layout;
+  app.sh.phone = phone; app.sh.tablet = tablet;` :2948 (inside §19a → rack-wiring's — **persist destructures all four at its creation :3221, so register them at
+  your module's ROOT the moment they exist, never inside a callback**; the tool's G-A accepts an earlier-seated file's eager fill, `rack-deps.test` §5);
+  `app.sh.keyState = keyState;` :3016 (`const keyState` :3015 and `function keyHelp()` :3017 sit between §19's end and `/* ── KEYS` :3018 — they go with
+  whichever of your modules takes :3015–3017; say which). **Every slot is filled exactly once**: the integrator removed four double fills PAIR 1 left — a slot
+  another module registers is NOT filled again in `boot()` (grep `app.sh.<x> =` across `lab/` before you write one).
+- **Lines at `87aad5e`** (PAIR 1 in; `lab/rack.js` 3,605 — re-locate by grep on your base): §12 `/* ── transport strip (§25)` :1675 → before `/* ── badges (§41)`
+  :1905 (§13–§14 badges + the install layer :1905–1934 STAY; `/* ── THE BOW` :1935 is R2b's); §19a+§19b `/* ── 0.5.0 C3 · THE RACK IS THE KIT'S` :2300 → before
+  `/* ── KEYS: a rebindable action table` :3018 — inside it the TRANSPORT CARD `const wTr = device({ id: 'transport' …` :2478 + `windowActivity.track(wTr)` :2480
+  (the rack's seat for the strip — rack-wiring's, NOT §12's), `const MENUS = {` :2574, `createMenubar(` :2604, the notebook's move/resize, "A project opens onto
+  its notebook" :2654, `/* ── PROJECTS (0.5.0 C6)` :2695, the rack wiring's second half to :3014 — **measure the real seams with `node tools/rack-deps.mjs
+  --section` and name them in the BUILD**; §20 `/* ── KEYS` :3018, §21 `/* ── 0.5.0 C3 · THE KEYBOARD WINDOW` :3127, §22 `/* ── 0.5.0 C7b · THE TIMELINE` :3151,
+  §23 `/* ── THE TAB ORDER` :3184 → before persist's seat header `/* ── persistence (§46): lab/shell/persist.js` :3220. §17 THE FLOATING RACK :2231 and §18 INK
+  :2240 are R2d's; §30 stays.
+- **Line law:** `lab/*.js` + `lab/shell/` + `lab/windows/` = **27,856 of a 27,943 cap after PAIR 1 — 87 lines for the FOURTEEN modules still to move, so the cap
+  WILL be passed before the pairs end; that ruling is Josh's at R-V, not yours.** Your part: each module's header comment + signature + return ≤ 12 lines (R3a's
+  four read 7 / 7 / 6 / 6), no new blank lines, every inherited fill line leaves `boot()` (−3 lines there), and find subtractions while you move — say them. Say
+  your exact Δ.
+- **The rig** (since ≈ 02:00): the GPU draws 2–3 frames a second and stalls on the heaviest states ("Render did not settle: animation frames stopped" — molecule
+  opens in `settings-probe` (WATER / N₂) and `serialize-bytes`' base export (WAVE DANCER), `hit-probe-set`, `frame-occlusion`'s chipGap), frame-paced waits go
+  red (`history` 3b/9b at 20 or 38 of 44, `new-project`'s LFO), marionette dies after ≈ 5 in-session reloads (`keyboard-window`'s reload, `settings-probe`'s
+  6th scene) — all on the BASE as well. **A red of that kind is checked ONCE against your base export on your second port: identical = the rig; record BOTH
+  readings in the BUILD and move on. Never loop on it; never touch another process.** If the base export dies in `serialize-bytes`, compare your tree's shas to
+  R1's recorded base reading (`r1-measure/sb-base.json`). Josh may reboot during your run: if your servers die, restart them by the same commands and continue.
 
 ## The contract (a MOVE, not a rewrite)
 
 1. **What moves — four modules, each called at its seat (G-O):**
    - §12 THE TRANSPORT STRIP (229) → **`lab/shell/transport.js`** `createTransport(app)` — λWAVES' own bar stays λWAVES' (no kit transport); `setModArm` stays a
-     function declaration INSIDE the module (U1); `windowActivity.track(wTr)` (:2613 at `ee92ddc`) is the strip's own line and moves with it if it is inside §12 —
-     check; the strip's `ui.x` registrations keep their names (`native-ui.js` re-parents the transport's children).
+     function declaration INSIDE the module (U1); the TRANSPORT CARD (`const wTr` :2478, `windowActivity.track(wTr)` :2480) is the rack's seat for the strip, inside §19a —
+     rack-wiring's, not the strip's; the strip's `ui.x` registrations keep their names (`native-ui.js` re-parents the transport's children).
    - §19a rack · layout · phone · gestures (the two halves, ≈ 329) → **`lab/shell/rack-wiring.js`** `createRackWiring(app)` — ONE module with TWO seats if the two
      halves must stay apart in creation order (return a closure for the second half), else one seat; `layout`'s verbs stay aliases over the kit's rack;
      `captureLayout`'s v3 stays the WORKSPACE record.
