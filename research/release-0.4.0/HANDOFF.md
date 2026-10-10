@@ -665,6 +665,11 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > dangling "=" and a literal `h_u`); the letters' `difference` blend costs ≈ 30 % of frames while the camera turns (R6-L); an open TIMELINE halves the frame
 > rate (0.5.0's); gpu-recovery reds under his desktop Firefox (the rig's rAF stall, both trees); the number 0.5.1 (a local re-cut if 0.5.5); the hand on a
 > ROUTED dial is held (a flash is a flash); `lw:molecule=` also switches MOLECULES on. Servers: mine 8751 up (this worktree), Sos's 8731 idle, Josh's 8721/8741.
+> **UPDATE (Claude Yan, 2026-10-09 21:10 CDT) — THE 0.5.2 PLANNING ROUND (the refactor).** Josh ≈21:05: "I would love a refactor of that scale … Let's do that
+> round" (`research/release-0.5.2/ASK.md`: his words verbatim + Yan's six ambitions + the estimate). The round = a Fable draft of the module map on a MEASURED
+> dependency graph, one Opus@high audit, then the briefs; the build on his word. **Launched 21:09: `tools/rack-deps.mjs`** (Opus, from `a8b136c`; no GPU) → the
+> sections of `boot()`, the hub names, the `ui` bag, the LW facade by section, the moving-cost ranking → `research/release-0.5.2/RACK-DEPS.md`. Then
+> `PLAN-DRAFT-0.md` (Yan) → `AUDIT-OPUS.md` → `PLAN.md` → the briefs. Name/number Josh's (folder 0.5.2; "Rack Dissolution" / "Engine Boundary" offered).
 
 ## 3 · What happens next, in order
 
