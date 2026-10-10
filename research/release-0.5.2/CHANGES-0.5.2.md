@@ -13,3 +13,8 @@ real seams, over an explicit context. Nothing a hand or an eye meets is meant to
   byte-identical), awaited where they stood; the frame loop stays. `rack.js` 4,958 → 4,664. The tool now measures a moved module from its own file. The lock
   860 + 1004 at 0/0, the main-thread pair +0.04 / +0.16 ms/s, serialize bytes 11/11. The integrator then filled the 56 controller names the later modules
   read onto `app.ctl` once (+15 lines) so no pair row touches that file. **You see nothing.**
+- **R2a STATE + SPECTRUM** (`a8cb47e`, merged 2026-10-10 08:08): the STATE card (with CLEAR) and the SPECTRUM card leave `rack.js` for
+  `lab/windows/state.js` (182 lines) and `lab/windows/spectrum.js` (264), created where they stood; 393 of 413 moved lines byte-identical, the rest
+  read a later-made name through its slot. `rack.js` 4,664 → 4,261. SPECTRUM's row stays at 24 of the hinge's 25 because a module destructures the
+  controller's names once at creation (a read at use would have counted 32). Serialize bytes 11/11, the facade 1/1, the settings blobs the same; the
+  rig's stalls were measured against the base, law for law. **You see nothing.**

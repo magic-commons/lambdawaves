@@ -742,6 +742,30 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > launch PAIR 1 (R2a 9063/5533 + 9067/5537; R3a 9073/5543 + 9077/5547) with the rig caveat: a "did not settle" red is checked against the base export,
 > identical = the rig, recorded, not looped on.
 > **07:13 — PAIR 1 LAUNCHED from `ff2b3e6`** (R1 merged `bad8642`; the `app.ctl` fill `ff2b3e6`): **R2a** STATE + SPECTRUM → `lab/windows/` (Opus @ high, `worktree-agent-af9d75d8973fa3306`, ports 9063/5533 + 9067/5537, `BRIEF-R2a.md`, wave 217) ∥ **R3a** §1 SETTINGS (minus the kept `readSettings`) + §24 PERSISTENCE + §25 LINKS + HISTORY → `lab/shell/` (Opus @ high, `worktree-agent-af4da7c2119c9a84d`, ports 9073/5543 + 9077/5547, `BRIEF-R3a.md`, wave 218). Both carry the rig caveat (a "did not settle" red is checked once against the base export). On their reports: merge R2a then R3a by the recipe (`rack.js` must auto-merge; a duplicated boot-kept fill line kept once), re-run THE LOCK + `frame-occlusion` when the rig recovers, then write + launch PAIR 2 {R2b · R3b}.
+>
+> **UPDATE (Claude Yan, 2026-10-10 08:08 CDT) — R2a STATE + SPECTRUM IS IN; R3a still running.** R2a (Opus, `a8cb47e`, ≈55 min) merged clean onto
+> `yan-c`. AS BUILT (`research/release-0.5.2/R2a-BUILD.md`): STATE (+ CLEAR, 168 lines) → `lab/windows/state.js` `createStateCard(app)` 182; SPECTRUM (245)
+> → `lab/windows/spectrum.js` `createSpectrumCard(app)` 264; seats `rack.js:1167–1168` / `:1170–1172` under the kept `// STATE` / `// SPECTRUM` lines; the five
+> appends stay; 393 of 413 moved lines identical (the 20 others read a later-made name through its slot inside a callback). **THE JUDGEMENT CALL (taken):**
+> reading a controller name as `app.ctl.x` AT USE counts as a forward crossing in the tool and would put SPECTRUM at 32 > 25 — so a module seated after the
+> controller DESTRUCTURES the controller's names once at creation (`const { … } = app.ctl`; consts, filled before the seat returns = backward, PLAN §1.1's
+> own pattern); G-A now accepts an eager fill from a module file seated earlier (one clause in `tools/rack-deps.mjs`, two laws in `rack-deps.test` §5; 52
+> PASS). Result STATE 8, SPECTRUM 24, 0 bare writes, the hinge holds. `rack.js` 4,664 → 4,261; `lab/*.js` + shell + windows 27,754 → **27,799 (+45: state +14,
+> spectrum +19, rack +10 fills, sw +2) — 144 left under the cap for 10 modules**; imports rack 75 → 74 (7 names left: `createSpectrum`, `ATOMS`, `configOf`,
+> `createRegisterSturmian`, `stateOf`, `AXIS_TO_Z`, `moleculeLatex`); state.js 6 import lines, spectrum.js 9 (both `TIER` from `'../rack.js'`). Fills: the
+> modules register `app.w.wState`, `wSpec`, `spectrum`, `normalizeNow` (R1's three moved with their declarations), `switchHamiltonian`, `applySturmian`,
+> `setElement`, `fillValence` (persist's reads); `boot()` fills 8 lines for names other rows own — `app.host.rack` (:823), the readouts windows
+> (`wOrb`/`wVor`/`wSlice`, `wCalc`/`wLad`, `wAtoms`/`atomsView`), kepler (`gas`, `gasSigma`, `launchPacket`, `enterBox`, `coherentBounce`), `app.sh.layout`,
+> `app.sh.keyState`, and `app.sh.save`/`restore`/`copyJSON`/`copyLink` at the head of `/* ── go ──` (redundant once R3a's persist registers them — delete at
+> R3a's merge). R2a's gates: node 0; serialize-bytes 11/11 full + edit; lw-facade 1/1; register 17/17; settings-probe 5 of 6 reached (marionette); the boot
+> suite's STATE/SPECTRUM blocks 33/35 (B9 ×2 red — IDENTICAL on the base), orbitals 23/24 (L9, identical), offer 7/16 (scene 8, identical), history 28 then
+> red (base 20 then red), frame-occlusion chipGap (identical), hit-probe-set "did not settle" (identical) — **every red is the rig's, measured against the base
+> law for law**; THE LOCK not run (nothing the loop/field reads changed shape). MY GATES: node 0 (pending at this line); classes table (hinge holds; 52 PASS);
+> serialize-bytes 11/11 vs the 0.5.1 base; lw-facade 1/1. **Candidates taken into the next briefs:** destructure the controller's names (R3b's notebook
+> would fail the hinge otherwise); R2b carries 4 of R2a's boot fills (readouts, kepler), R3b `layout` + `keyState` — each moves with its span; slots still
+> unfilled because their readers are in `boot()`: `clearRegister`, `toggleFullscreen`, `copyLatex`, `occupiedEigen`, `periodEnergies`, `setSturmian`,
+> `selectEigen`, `sturmEigen`, `paintSturmRo`; a fill inside a moving span counts against that module; the reboot before R-V. CLAUDE.md: THE WINDOWS
+> paragraph (R2a's §11 + THE READ LAW). Next: R3a's merge (watch `app.host.rack` and the `go` line), then PAIR 2 {R2b · R3b}.
 
 ## 3 · What happens next, in order
 

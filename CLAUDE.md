@@ -324,3 +324,14 @@ module reads are filled on `app.ctl` once, at the end of `createController` (nev
 loop read stay closure slots, and a module created BEFORE that seat (§1 SETTINGS) reads `app.ctl.x` inside a callback, never at creation
 (they are TDZ above the seat). The worker road is `new URL('../mathworker.js', import.meta.url)` in that module; `node tools/rack-deps.mjs
 --classes` measures a moved module from its own file (`lab/shell/*.js`, `lab/windows/*.js`), and an unplanned file there is refused.
+
+THE WINDOWS (0.5.2 R2a): STATE (with its CLEAR) is `lab/windows/state.js` `createStateCard(app)` and SPECTRUM `lab/windows/spectrum.js`
+`createSpectrumCard(app)`, moved verbatim and created at their seats under the kept `// STATE` / `// SPECTRUM` lines (the five appends
+stay in `boot()`). THE READ LAW for a moved module: a name that is a CONST by the time its seat runs — §0's consts, the loop's hoisted
+functions, the rack, the controller's 68 (`app.ctl` is filled before the controller's seat returns) — is destructured ONCE at creation
+(`const { gov, look } = app.ctl`), which the tool counts as backward; a name `boot()` makes LATER is read through its slot inside a
+callback (`app.w.gas`, `app.sh.layout` …, filled in `boot()` right after its owner's declaration — a module created before the
+controller's seat, §1 SETTINGS, reads `app.ctl.x` that way too); a shared `let` is always `app.state.x`, live. Reading a const through
+`app.ctl.x` at use is NOT the pattern — the tool counts every `app.<ns>.x` read as a forward crossing and SPECTRUM would read 32 > 25.
+Each module registers on `app.w` only what a moved reader needs; a fill placed inside a moving module's span counts against that module.
+`node tools/rack-deps.mjs --classes`'s G-A accepts an eager fill from a module file seated earlier (`tests/rack-deps.test.mjs` §5).
