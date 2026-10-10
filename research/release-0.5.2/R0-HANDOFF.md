@@ -12,8 +12,13 @@ The base export is `.tmp/base` (served on 9047 when needed); my tree is served o
   (folded into kitDevice). Hinge HOLDS (0 cross writes; SPECTRUM 24). Fixture re-captured (frost 31 → 147, windowActivity 142 → 149). `test.sh node` exit 0;
   smoke boot + four demos clean on 9043. lab/*.js 27,666 → 27,694.
 
+- **Step 3** `cc6d7ff`: `tests/helpers/app-source.mjs` (appFiles / appSource); auto-scale, first-run, ink, project-formats, access re-pointed;
+  the boot suite's B108 / B112 / B136 fetch appFiles() (APP_SRC); `tests/rack-deps.test.mjs` §4 (tiles, no bare shared let, state keys, no cross write, the hinge,
+  static G-A, the helper); the dead `app.hooks.themeChanged` read out. `test.sh node` exit 0.
+- **Step 4 under way**: U4 floor DONE (base vs base: boot Δ −0.165, D1 Δ −0.054; spreads ≤ 1.85); the pair base 9047 vs tree 9043 running (`.tmp/pairs-pair.log`).
+
 ## Next
-- **Step 3** `tests/helpers/app-source.mjs` (`appSource()` = rack.js + `lab/windows/**` + `lab/shell/**`); re-point auto-scale, first-run, ink, project-formats,
+- ~~Step 3~~ `tests/helpers/app-source.mjs` (`appSource()` = rack.js + `lab/windows/**` + `lab/shell/**`); re-point auto-scale, first-run, ink, project-formats,
   access and the boot suite's B108 / B112 / `:5778` reads; extend `tests/rack-deps.test.mjs` (`--classes` tiles the body; every shared let is app.state; no bare write).
 - **Step 4** U4 the floor (base vs base 5 + 5, both scenes), the pair (base vs tree), U5 (`%HasFastProperties`), THE LOCK 860/1004, the estate one at a time, the boot
   suite alone (B149 the only law red), serialize-bytes 11/11 full + edit, settings-probe 0/6, history 44, new-project 8 + --check; R0-BUILD.md; REPORT wave.
