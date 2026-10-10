@@ -202,9 +202,9 @@ green('R10 c · a 1.4 notebook is page 0: the kit\'s pageFromNotebook reads λWA
   assert.ok(snapStart > 0 && snapEnd > snapStart && keyEnd > keyStart, 'projectSnapshot / projectKey / the part moved in the app source');
   let state = { experiment: { t: 0 }, presentation: { quality: { autoScale: 1 }, domain: { auto: true, half: 7 }, obs: {}, mat: { slice: {} }, rotationRates: {} } };
   const subtitle = { value: '' };
-  const makeKey = new Function('serialize', 'titleIn', 'subIn', 'ta', 'modHost', 'modSeats',
+  const makeKey = new Function('app', 'titleIn', 'subIn', 'ta', 'modHost',   // 0.5.2 R3b: the slice reads persist's serialize / modSeats through app.sh
     `const modulationBases=()=>null;${rack.slice(snapStart, snapEnd)}\n${rack.slice(keyStart, keyEnd)};return projectKey;`);
-  const projectKey = makeKey(() => structuredClone(state), { value: 'Study' }, subtitle, { value: 'notes' }, null, () => ({}));
+  const projectKey = makeKey({ sh: { serialize: () => structuredClone(state), modSeats: () => ({}) } }, { value: 'Study' }, subtitle, { value: 'notes' }, null);
   const baseline = projectKey();
   state.presentation.domain.half = 16; state.experiment.t = 42; state.presentation.quality.autoScale = .5;
   assert.equal(projectKey(), baseline, 'automatic sizing, time or scale dirtied the project');

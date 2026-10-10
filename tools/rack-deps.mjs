@@ -935,15 +935,15 @@ export const PLANNED_CUT = [
   [/^ {2}\/\* ── WAVE 52 · W-MODWINDOW/, 'modulation'],                               // §10–§11 the seam
   [/^ {2}\/\/ ATOMS — the periodic table/, 'readouts'],                               // ATOMS · WIGNER · RADIATION
   [/^ {2}Object\.assign\(READERS, \{/, 'boot'],                                      // READERS · track · hydroReader stay
-  [/^ {2}\/\* ── transport strip/, 'transport'],                                      // §12
+  [/^ {2}\/\* ── transport strip/, 'transport'],                                      // §12: the seat (0.5.2 R3b: lab/shell/transport.js)
   [/^ {2}\/\* ── badges/, 'boot'],                                                    // §13–§14
   [/^ {2}\/\* ── THE BOW:/, 'kepler'],                                                // §15–§16
   [/^ {2}\/\* ── THE FLOATING RACK/, 'boot'],                                         // §17
-  [/^ {2}\/\* ── INK STAYS UNDER GLASS/, 'ink'],                                      // §18
-  [/^ {2}\/\* ── 0\.5\.0 C3 · THE RACK IS THE KIT'S/, 'rack-wiring'],                 // §19a
-  [/^ {4}\/\* WAVE 62 · THE SKIP LINKS MOVE FOCUS/, 'notebook', -1],                 // §19b (its `{` is the line before)
-  [/^ {2}const phone = \{ on: false/, 'rack-wiring'],                                // §19a, second span
-  [/^ {2}\/\* ── KEYS: a rebindable action table/, 'keys'],                           // §20–§23
+  [/^ {2}\/\* ── INK STAYS UNDER GLASS/, 'ink'],                                      // §18 (devById, rackCardWidth, popFace left with §19a at R3b)
+  [/^ {2}\/\* ── 0\.5\.0 C3 · THE RACK IS THE KIT'S/, 'rack-wiring'],                 // §19a: the seat (0.5.2 R3b: lab/shell/rack-wiring.js)
+  [/^ {2}\/\* ── §19b the skip links/, 'notebook'],                                   // §19b: the seat (0.5.2 R3b: lab/shell/notebook.js)
+  [/^ {2}wireStage\(\);/, 'rack-wiring'],                                            // §19a's second seat
+  [/^ {2}\/\* ── KEYS: a rebindable action table/, 'keys'],                           // §20–§23: the seat (0.5.2 R3b: lab/shell/keys.js)
   [/^ {2}\/\* ── persistence/, 'persist'],                                           // §24
   [/^ {2}\/\* ── WAVE 56 · SHAREABLE LINKS/, 'links'],                                // §25 the links
   [/^ {2}\/\* 0\.3\.1 · S3 THE TRUE HISTORY/, 'history'],                              // §25 the history
