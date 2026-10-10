@@ -211,6 +211,17 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   let S = null;
   try { S = classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/controller.js': mod('schedule, page') } }); } catch (e) { err = e.message; }
   check(!!S && S.appStrays.some((x) => /destructures app\.loop\.page, a null slot/.test(x)), 'module files: G-A — destructuring a slot the literal holds as null (filled later by boot) is a stray: it would freeze the null', S ? S.appStrays.join('; ') : err);
+  /* 0.5.2 R2a: a slot a module file seated EARLIER fills eagerly (createController's app.ctl fill) may be destructured by a later module, and
+     the name is backward there; the same destructure in the earlier module itself, before its own fill, is still a stray */
+  let U = null; err = '';
+  const ctlFill = mod('schedule').replace('  return { gov, touch };', '  app.ctl.gov = gov;\n  return { gov, touch };');
+  const winMod = (hand) => `export function createWin(app) {\n  const { ${hand} } = app.ctl;\n  return { on: () => gov.on };\n}\n`;
+  try { U = classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/controller.js': ctlFill, 'lab/windows/spectrum.js': winMod('gov') } }); } catch (e) { err = e.message; }
+  check(!!U && U.appStrays.length === 0 && U.modules.find((m) => m.id === 'spectrum').backward.includes('gov') && !U.modules.find((m) => m.id === 'spectrum').context.includes('ctl.gov'),
+    'module files: G-A — a slot an earlier-seated module file fills eagerly (app.ctl.gov) is filled for a later module: destructured there, it is backward', U ? JSON.stringify([U.appStrays, U.modules.find((m) => m.id === 'spectrum').backward]) : err);
+  let V = null; err = '';
+  try { V = classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/controller.js': ctlFill.replace('  const { reg } = app;', '  const { reg } = app;\n  const { gov: g0 } = app.ctl;') } }); } catch (e) { err = e.message; }
+  check(!!V && V.appStrays.some((x) => /destructures app\.ctl\.gov, a null slot/.test(x)), 'module files: G-A — a module destructuring its OWN later fill is still a stray', V ? V.appStrays.join('; ') : err);
   let T = '';
   try { classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/nowhere.js': mod('schedule') } }); } catch (e) { T = e.message; }
   check(/no planned module's file/.test(T), 'module files: a file under lab/shell/ that no planned module names is refused', T);

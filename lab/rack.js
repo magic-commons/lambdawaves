@@ -19,7 +19,7 @@ import { firstRunMaterial, firstRunQuality, deviceQuality } from './first-run.js
  * presentation clock is the display rate.  Observer controls never touch the register (§14).
  */
 import { DEFAULT_PALETTE } from './palette-app.js';   // Jet Black: the app's palette row, appended to the kit's catalogue before anything reads it (KIT BRIEF J)
-import { BASIS, domainFor, psiAt, stateOf, orbitalFromTable } from './hydrogen.js';
+import { BASIS, domainFor, psiAt, orbitalFromTable } from './hydrogen.js';
 import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock, onePlay } from './clock.js';
 import { createWindowActivity } from './mir/window-activity.js';
@@ -31,7 +31,7 @@ import { orbitalName } from './names.js';                        // 0.5.1 D8: a 
 import { ELEMENT } from './md.js';
 import { createInfoLayer, infoActions } from './mir/info/layer.js';   // 0.5.1 D1: the STAGE TEXT is one block of the kit's INFORMATIONAL layer
 import { isField } from './mir/core/pointer.js';                       // 0.5.1 D2: the head's Escape, as the kit's greet reads it
-import { createSpectrum } from './spectrum.js';
+import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createMeters } from './meters.js';
 import { createShadowView, createShadowFoot } from './shadowview.js';
 import { createLadder } from './ladder.js';
@@ -60,12 +60,11 @@ import { createSliceView } from './sliceview.js';
 import { createAtoms } from './atomsview.js';
 import { createWigner } from './wignerview.js';
 import { createRadiation } from './radiationview.js';
-import { ATOMS, configOf } from './atoms.js';
 import { toLUT, PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb, contrastRatio } from './mir/palette.js';   // N6: the kit's copy (lab/palette.js differed only in two comment lines)
-import { momentumZ, AXIS_TO_Z, rotorsToZ } from './kick.js';
+import { momentumZ, rotorsToZ } from './kick.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
-import { createRegisterSturmian } from './sturmianreg.js';
-import { stateLatex, moleculeLatex, moleculeHead, mdText, formulaLatex, BASIS_LABEL } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page; 0.5.1 D2: its head
+import { createStateCard } from './windows/state.js';   // 0.5.2 R2a: the STATE card, out of boot()
+import { stateLatex, moleculeHead, mdText, formulaLatex, BASIS_LABEL } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page; 0.5.1 D2: its head
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
 import { createEditHistory } from './edit-domain.js';   // 0.5.0 C5: the one `edit` domain on the kit's stack (mir/history/history.js); lab/history.js left
@@ -821,6 +820,7 @@ export async function boot(dom) {
     camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, panBy, port: cameraPort } = createCameraLaw({ obs, present: () => schedule(TIER.PRESENT),
     modHand, resetWall: app.loop.resetWall });
   const rack = dom.rack;
+  app.host.rack = rack;
 
 
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
@@ -1164,422 +1164,12 @@ export async function boot(dom) {
     el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. KEEP FRAMES updates the playhead every frame and may cost performance.';
   }
 
-  /* OPTIMIZATION 2026-09-24 · N1 · STATE's CLEAR, NAMED.  The menubar's "CLEAR the register" pressed the FIRST `.trig`
-     reading CLEAR in document order — SPECTRUM's head row on a first visit (c ↦ 0, no clock reset), the undo ring's own
-     CLEAR once HISTORY floated (AUDIT-E FE1).  The register's CLEAR is this one function now, and both the STATE trigger
-     and the menu row call it (the lead's ruling: STATE's CLEAR; Josh may reverse it). */
-  function clearRegister() { reg.clear(); app.state.refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); touchState(); }
   // STATE — preparation. Everything here changes c.
-  const wState = device({ id: 'state', eyebrow: 'STATE', status: '' });
-  rack.appendChild(wState.root);
-  {
-    const r1 = wState.row();
-    ui.presetSel = el('select', 'sel', r1); ui.presetSel.setAttribute('aria-label', 'preset superposition');
-    for (const p of PRESETS) { const o = el('option', '', ui.presetSel, p.label); o.value = p.id; }
-    ui.presetSel.addEventListener('change', () => loadPreset(ui.presetSel.value, { hand: true }));
-    ui.presetSel.style.flex = '1 1 160px';
-
-
-    r1.appendChild(trig({ label: 'RELOAD', title: 'Reload the selected preset and reset time', onFire: () => loadPreset(ui.presetSel.value, { hand: true }) }).root);
-    r1.appendChild(sw({ label: 'PRESET VISUALS', value: true, onChange: (v) => { app.state.applyVisuals = v; } }).root);
-    ui.presetNote = el('div', 'note', wState.body, '');
-    const r2 = wState.row();
-    r2.appendChild(trig({ label: 'NORMALIZE', title: 'Normalize the state coefficients', onFire: () => normalizeNow() }).root);
-
-
-    r2.appendChild(trig({ label: 'CLEAR', onFire: () => clearRegister() }).root);
-    r2.appendChild(knob({ label: 'ROTATE z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)', onDelta: (d) => { reg.rotateZ(d); touchState(); } }).root);
-    /* THE JOG WHEEL ABOVE AND THE DIAL BELOW ARE NOT TWO TRUTHS.  The wheel is a DELTA — one shove,
-       applied and forgotten, holding nothing (mir/kit.js knob, `onDelta`).  This is a RATE, in rad/s, and it is a
-       real stored number: rotRate.z IS what the registry reads and writes, so `get` cannot lie and
-       modSyncBases cannot fight it.  Nothing anywhere accumulates the angle the two of them make. */
-    ui.rotZRate = knob({ label: 'SPIN z', min: -ROT_LIMIT.z, max: ROT_LIMIT.z, value: 0, cls: 'rot',
-      title: 'Continuous state rotation about z. Double-click to stop.',
-      fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
-      onInput: (v) => { if (modHand('state.rot.z', v)) return; setRotationRate('z', v); } });
-    r2.appendChild(ui.rotZRate.root);
-    {
-      const gab = group(wState.body, 'A / B  ·  TRANSITION  (Rabi)');
-      const rab = el('div', 'row tight', gab);
-      let abA = null, abB = null, abOmega = 0.05;
-      const snap = () => ({ re: Float64Array.from(reg.re0), im: Float64Array.from(reg.im0) });
-      const recall = (S) => { if (!S) return; if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } reg.re0.set(S.re); reg.im0.set(S.im); reg.version++; touchState(); abStatus(); };
-      ui.abRo = readout({ label: 'A / B', value: '—  /  —', sub: 'store two states, then TRANSITION plays A → B → A at Ω' });
-      rab.appendChild(trig({ label: 'STORE A', title: 'keep the register as it is now as state A', onFire: () => { abA = snap(); abStatus(); hNote(); } }).root);
-      rab.appendChild(trig({ label: 'STORE B', title: 'keep the register as it is now as state B', onFire: () => { abB = snap(); abStatus(); hNote(); } }).root);
-      rab.appendChild(trig({ label: 'A', title: 'recall state A', onFire: () => recall(abA) }).root);
-      rab.appendChild(trig({ label: 'B', title: 'recall state B', onFire: () => recall(abB) }).root);
-      const rab2 = el('div', 'row tight', gab);
-      ui.abSw = sw({ label: 'TRANSITION', value: false, title: 'play the Rabi mix cos(Ω(t−t₀)/2)·A(t) + sin(Ω(t−t₀)/2)·B(t)', onChange: (v) => {
-        if (v && sturm.P) { ui.abSw.set(false); ui.abRo.set('off under STURMIAN', 'warn'); ui.abRo.setSub('A / B TRANSITION is a diagonal-phase feature (two exact diagonal evolutions mixed): switch SCALE back to HYDROGEN'); return; }
-        if (v) { if (!abA || !abB) { ui.abSw.set(false); ui.abRo.set('store A and B first', 'warn'); return; } reg.setTransition(abA, abB, abOmega, clock.t); if (!clock.playing) { clock.play(performance.now() / 1000); schedule(TIER.EVOLVE); } }
-        else if (reg.transition) reg.clearTransition(clock.t);
-        touchState(); abStatus();
-      } });
-      rab2.appendChild(ui.abSw.root);
-      ui.abOmega = knob({ label: 'Ω  RABI', min: 0.005, max: 1, value: 0.05, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (reg.transition) { const th = reg.mixAngle(clock.t); reg.transition.omega = v; reg.transition.t0 = clock.t - 2 * th / v; } abOmega = v; } });
-      rab2.appendChild(ui.abOmega.root);
-      rab2.appendChild(ui.abRo.root);
-      /* THE PROJECT'S ROAD (Josh, 2026-09-10: "state transitions don't keep"): both stores, Ω and whether the
-         transition is running — plain arrays in the file, typed arrays in the block. */
-      ui.ab = {
-        get: () => ({ a: abA ? { re: Array.from(abA.re), im: Array.from(abA.im) } : null, b: abB ? { re: Array.from(abB.re), im: Array.from(abB.im) } : null, omega: abOmega, on: !!reg.transition }),
-        set(o) { if (!o) return; const take = (S) => (S && Array.isArray(S.re) && S.re.length === 91 && Array.isArray(S.im)) ? { re: Float64Array.from(S.re), im: Float64Array.from(S.im) } : null;
-          abA = take(o.a); abB = take(o.b); if (Number.isFinite(o.omega)) { abOmega = Math.max(0.005, Math.min(1, o.omega)); if (ui.abOmega) ui.abOmega.set(abOmega); }
-          if (reg.transition) reg.clearTransition(clock.t);
-          if (o.on && abA && abB && !sturm.P) { reg.setTransition(abA, abB, abOmega, clock.t); ui.abSw.set(true); } else ui.abSw.set(false);
-          abStatus(); }
-      };
-      function abStatus() {
-        const count = (S) => S ? S.re.reduce((k, v, i) => k + ((v || S.im[i]) ? 1 : 0), 0) : 0, nA = count(abA), nB = count(abB);
-        let ov = 0; if (abA && abB) { let r = 0, im = 0; for (let a = 0; a < 91; a++) { r += abA.re[a] * abB.re[a] + abA.im[a] * abB.im[a]; im += abA.re[a] * abB.im[a] - abA.im[a] * abB.re[a]; } ov = Math.hypot(r, im); }
-        const exact = nA === 1 && nB === 1 && ov < 1e-9;
-        ui.abRo.set((abA ? nA + (nA === 1 ? ' mode' : ' modes') : '—') + '  /  ' + (abB ? nB + (nB === 1 ? ' mode' : ' modes') : '—'), reg.transition ? (exact ? 'ok' : 'warn') : '');
-        ui.abRo.setSub(reg.transition ? (exact ? 'two-level Rabi drive · |⟨A|B⟩| = ' + ov.toFixed(3) : 'composite-state envelope · |⟨A|B⟩| = ' + ov.toFixed(3)) : 'store two states, then TRANSITION plays A → B → A at Ω');
-      }
-      app.hooks.ab = { get A() { return abA; }, get B() { return abB; }, storeA() { abA = snap(); abStatus(); hNote(); }, storeB() { abB = snap(); abStatus(); hNote(); }, setStores(A, B) { abA = A ? { re: Float64Array.from(A.re), im: Float64Array.from(A.im) } : null; abB = B ? { re: Float64Array.from(B.re), im: Float64Array.from(B.im) } : null; abStatus(); }, recallA() { recall(abA); }, recallB() { recall(abB); }, set(v) { if (v && sturm.P) return false; ui.abSw.set(v); if (v) { if (!abA || !abB) return false; reg.setTransition(abA, abB, abOmega, clock.t); } else if (reg.transition) reg.clearTransition(clock.t); touchState(); abStatus(); return true; }, get on() { return !!reg.transition; }, get status() { return ui.abRo.root.textContent; },
-        /* WAVE 106 · Ω REACHES THE DEFS THROUGH HERE, and it has to.  `abOmega` is block-local (it is
-           `let` a few lines up) and the MIR `defs` array is far outside this block, so a target could
-           not see it.  Worse, a setter that wrote only `reg.transition.omega` would leave `abOmega`
-           stale and the NEXT `setTransition` would start the mix at the old rate — two truths for one
-           number.  This writes both, and re-solves t0 exactly as the knob does so the mix angle is
-           CONTINUOUS across a change: theta = Omega*(t - t0)/2, so holding theta while Omega moves
-           means t0 = t - 2*theta/Omega.  A modulator sweeping Omega therefore bends the rate without
-           ever jumping the phase. */
-        get omega() { return abOmega; },
-        setOmega(v) { const w = Math.max(0.005, Math.min(1, +v || 0.05));
-          if (reg.transition) { const th = reg.mixAngle(clock.t); reg.transition.omega = w; reg.transition.t0 = clock.t - 2 * th / w; }
-          abOmega = w; return w; } };
-      el('div', 'note', gab).innerHTML = '<b>A / B.</b> STORE A and STORE B capture two states. TRANSITION mixes them at Ω; composite states use the same envelope as an illustrative model. Turning the transition off keeps the current mix.';
-    }
-    ui.kzKnob = knob({ label: 'STARK K_z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{−iθK_z}', onDelta: (d) => { reg.rotateK(d); touchState(); } });
-    r2.appendChild(ui.kzKnob.root);
-    ui.defKnob = knob({ label: 'DEFECT L²', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{iαL²}', onDelta: (d) => { reg.defectWait(d); touchState(); } });
-    r2.appendChild(ui.defKnob.root);
-    /* THE TWO DEFLECTION RATES.  Both setters CLAMP TO ZERO under STURMIAN rather than trusting the
-       disable, because a modulated base survives a setDisabled(): the dial would sit dead while an
-       LFO went on writing behind it.  A guard in rotStep alone would be worse — the dial would then
-       read a rate that does nothing, and a knob that does not follow the value it owns is a knob
-       that lies.  So: clamped here, zeroed and disabled in applySturmian, and ignored in rotStep. */
-    ui.kzRate = knob({ label: 'SPIN K_z', min: -ROT_LIMIT.kz, max: ROT_LIMIT.kz, value: 0, cls: 'rot',
-      title: 'Continuous Stark rotation. Double-click to stop.',
-      fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
-      onInput: (v) => { const w = sturm.P ? 0 : v; if (w !== v) ui.kzRate.set(w); if (modHand('state.stark.kz', w)) return; setRotationRate('kz', w); } });
-    r2.appendChild(ui.kzRate.root);
-    ui.defRate = knob({ label: 'SPIN L²', min: -ROT_LIMIT.def, max: ROT_LIMIT.def, value: 0, cls: 'rot',
-      title: 'Continuous l-dependent phase. Double-click to stop.',
-      fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
-      onInput: (v) => { const w = sturm.P ? 0 : v; if (w !== v) ui.defRate.set(w); if (modHand('state.defect.l2', w)) return; setRotationRate('def', w); } });
-    r2.appendChild(ui.defRate.root);
-    el('div', 'note', wState.body).innerHTML = '<b>State transforms.</b> STATE ROTATE changes m phase. STARK ROTATE mixes l within each (n,m) shell. DEFECT WAIT adds an l-dependent phase. Camera rotation changes only the view.';
-
-
-    const gK = group(wState.body, 'IMPULSE  ·  a sudden momentum kick  <m>ψ ↦ e^{ik·x}ψ</m>');
-    mat.bow = { gain: 1, curve: 1, limit: 3, ...(mat.bow || {}) };
-    const feel = el('div', 'row tight bow-feel', gK);
-    ui.bowKnobs = {};
-    for (const [key,label,min,max] of [['gain','PULL',.25,4],['curve','RESPONSE',.25,3],['limit','LIMIT',.1,3]]) {
-      const k = knob({ label, min, max, value:mat.bow[key], fmt:v=>v.toFixed(2), title: key==='curve'?'Shape the response around linear':'Impulse '+label.toLowerCase(), onInput:v=>{mat.bow[key]=v;} }); ui.bowKnobs[key]=k; feel.appendChild(k.root);
-    }
-    el('div','bow-hint',gK,'Ctrl + drag · release to fire');
-    const rk = el('div', 'row tight', gK);
-    let kickK = 0.2, kickAxis = 'z';
-    rk.appendChild(knob({ label: 'STRENGTH', min: 0.01, max: 1.5, value: 0.2, log: true, fmt: (v) => v.toFixed(3) + ' a.u.', onInput: (v) => { kickK = v; } }).root);
-    ui.kickAxis = seg({ label: 'ALONG', value: 'z', options: [{ id: 'x', label: 'x' }, { id: 'y', label: 'y' }, { id: 'z', label: 'z' }], onChange: (v) => { kickAxis = v; } });
-    rk.appendChild(ui.kickAxis.root);
-    rk.appendChild(trig({ label: 'RELEASE', title: 'Apply ψ ↦ e^{ik·x}ψ on the selected axis', onFire: () => slap(kickK, kickAxis) }).root);
-    ui.dragKnob = knob({ label: 'DRAG <m>γ</m>', min: 0, max: 0.5, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(3), onInput: (v) => { reg.setDamping(v); touchState(); } });
-    rk.appendChild(ui.dragKnob.root);
-    ui.kickRo = readout({ label: 'LAST IMPULSE · escaped / momentum', value: '—', cls: 'two', sub: 'no impulse yet' });
-    rk.appendChild(ui.kickRo.root);
-    el('div', 'note', gK).innerHTML = '<b>Impulse.</b> RELEASE applies e<sup>ik·x</sup> and keeps only the part represented by n ≤ 6; ESCAPED reports the omitted norm. Ctrl-drag on the field sets direction and strength. DRAG γ damps excited amplitudes as a display model and discards the lost norm.';
-    function pAlong(axis) {
-      const c = reg.at(clock.t);                                  // sum over the WHOLE register: a rotation moves amplitude between m
-      if (axis === 'z') return momentumZ(c.re, c.im);
-      const R = AXIS_TO_Z[axis], re = Float64Array.from(c.re), im = Float64Array.from(c.im);
-      rotorOnCopy(re, im, { which: 'both', axis: R.axis, angle: R.angle });
-      return momentumZ(re, im);
-    }
-    function slap(k, axis) {
-      const n0 = reg.norm2(), p0 = pAlong(axis);
-      if (!reg.populated().length && getHamiltonian().id !== 'well') reg.set(0, 1, 0, clock.t);
-      reg.kick(k, axis, clock.t);
-      const n1 = reg.norm2(), p1 = pAlong(axis);
-      const esc = n0 > 0 ? 1 - n1 / n0 : 0;
-      ui.kickRo.set(`${(100 * esc).toFixed(2)}% · ${(p1 - p0).toFixed(4)}`, esc > 0.2 ? 'warn' : 'ok');
-      ui.kickRo.setSub(`<m>k</m> = ${k.toFixed(3)} along ${axis} · Ehrenfest would give ${k.toFixed(3)}; the deficit is the continuum · <m>‖ψ‖</m> now ${Math.sqrt(n1).toFixed(4)}`);
-      touchState();
-    }
-    app.hooks.slap = slap;
-
-    const gF = group(wState.body, 'STATIC FIELD');
-    const rf = el('div', 'row tight', gF);
-    ui.bz = knob({ label: 'ZEEMAN B', min: 0, max: 0.05, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(4), onInput: (v) => { reg.setField({ Bz: v }); touchState(); } });
-    ui.fz = knob({ label: 'STARK F', min: 0, max: 0.01, value: 0, fmt: (v) => v === 0 ? 'off' : v.toExponential(1), onInput: (v) => { if (!getHamiltonian().stark || sturm.P) { ui.fz.set(0); return; } reg.setField({ Fz: v }); touchState(); } });
-    rf.appendChild(ui.bz.root); rf.appendChild(ui.fz.root);
-    rf.appendChild(trig({ label: 'NO FIELD', onFire: () => { reg.setField({ Bz: 0, Fz: 0 }); ui.bz.set(0); ui.fz.set(0); touchState(); } }).root);
-    ui.fieldRo = readout({ label: 'H IN FORCE', value: 'H₀ (bare Coulomb)', cls: 'two', sub: '' });
-    rf.appendChild(ui.fieldRo.root);
-    el('div', 'note', gF).innerHTML = '<b>Fields.</b> ZEEMAN adds an orbital m-dependent phase. STARK mixes l within each shell and omits coupling between shells; keep F well below the limit shown in the readout.';
-
-    const r3 = wState.row();
-    r3.appendChild(trig({ label: 'SAVE', title: 'Save the experiment and presentation separately', onFire: () => { save(); } }).root);
-    r3.appendChild(trig({ label: 'LOAD', onFire: () => { restore(); } }).root);
-    r3.appendChild(trig({ label: 'COPY JSON', onFire: () => copyJSON() }).root);
-    /* WAVE 56 (board #55): the whole session as a URL.  Its seat is beside SAVE / LOAD / COPY JSON because
-       that is where "this state, made portable" already lives — and the FILE menu names it too. */
-    r3.appendChild(trig({ label: 'COPY LINK', title: 'Copy a link to the current state and presentation', onFire: () => copyLink() }).root);
-    /* THE PLACE THE LINK SPEAKS.  A `.note` and not a hover: what a link dropped is information, and
-       information reachable only by hover is unreachable on the iPad (ANTI-PATTERNS 4). */
-    ui.linkNote = el('div', 'note link-note', wState.body, ''); ui.linkNote.hidden = true;
-  }
+  const { clearRegister, wState } = createStateCard(app);   // 0.5.2 R2a: lab/windows/state.js (STATE's CLEAR with it)
 
   // SPECTRUM
-  const wSpec = device({ id: 'spectrum', eyebrow: 'SPECTRUM', status: '' });
-  app.w.wSpec = wSpec;
-  rack.appendChild(wSpec.root);
-  /* 0.3.3 · wave 135 · THE COPY.  SPECTRUM's ⧉ is the INFO panels' ⧉ (window-chrome.js): the same class, the same glyph,
-     the same seat before the fold — the kit already styles `.dev-copy` in the power button's box and tokens (base.css)
-     and stands it down on a phone (skin.css §5), where EDIT › COPY the state as LaTeX is the road.  What it copies is
-     the state, not the panel's text: copyLatex() below. */
-  { const util = wSpec.root.querySelector('.dev-util'), b = el('button', 'dev-copy', null, '⧉'); b.type = 'button';
-    b.title = 'Copy the state as LaTeX'; b.setAttribute('aria-label', 'Copy the state as LaTeX');
-    util.insertBefore(b, util.querySelector('.dev-fold')); b.addEventListener('click', (e) => { e.stopPropagation(); copyLatex(); }); }
-  {
-    const hamGroup = group(wSpec.body, 'HAMILTONIAN');
-    const rh = el('div', 'row tight', hamGroup);
-    ui.hamSeg = seg({ label: 'OPERATOR', value: 'hydrogen', options: [
-      { id: 'hydrogen', label: 'HYDROGEN', title: 'E = −1/(2n²); every window is a theorem about it' },
-      { id: 'qho', label: 'OSCILLATOR', title: 'Harmonic oscillator levels with spacing ħω' },
-      { id: 'well', label: 'BOX', title: 'Infinite spherical well with a hard boundary' },
-      { id: 'atom', label: 'ATOM', title: 'Self-consistent Xα central-field atom from H to Kr' },
-      { id: 'cornell', label: 'QUARKONIUM', title: 'Solve heavy-quark levels with Numerov' }],
-      onChange: (v) => { switchHamiltonian(v); if (v === 'well') enterBox(); if (v === 'atom') { wAtoms.root.hidden = false; wAtoms.root.classList.remove('closed'); } } });
-    /* 0.4.0 S0 · wave 136 (audit F6): the two operators whose only editors are LEGACY windows.  ATOM opens ATOMS again (its
-       element picker) by un-hiding it; QUARKONIUM's button is HIDDEN (its editor, QCD,
-       left in 0.5.0 D9) — the button, not the value: an older project restoring `cornell` still sets it (set() paints any id). */
-    ui.hamSeg.button('cornell').hidden = true;
-    rh.appendChild(ui.hamSeg.root);
-    ui.wellKnob = knob({ label: 'WELL RADIUS <m>a</m>', min: 3, max: 30, value: 10, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => { HAMILTONIANS.well.setRadius(v); gas.setRadius(v); hNote(); if (getHamiltonian().id === 'well') { reg.setEnergies(energyOf); wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; }); schedule(TIER.REBUILD); } } });
-    rh.appendChild(ui.wellKnob.root);
-    {
-      const rg = wSpec.row('tight');
-      rg.appendChild(knob({ label: 'GAS  σ', min: 0.5, max: 3, value: 1.8, fmt: (v) => v.toFixed(2) + ' a₀', onInput: (v) => { app.state.gasWidth = v; } }).root);
-      ui.gasBasis = seg({ label: 'GAS BASIS', value: 'reg', options: [{ id: 'reg', label: '91', title: 'the register\'s 91 labels (l ≤ 5): a packet no smaller than about a/6, launched on any axis' }, { id: 'axial', label: 'AXIAL 256', title: 'Use the larger axial box basis for narrower z packets' }], onChange: (v) => { app.state.gasAxial = v === 'axial'; if (!app.state.gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); } });
-      rg.appendChild(ui.gasBasis.root);
-      ui.gasSpeed = knob({ label: 'GAS  |k|', min: 0.1, max: 2.5, value: 0.8, log: true, fmt: (v) => v.toFixed(2), onInput: () => {} });
-      rg.appendChild(ui.gasSpeed.root);
-      rg.appendChild(trig({ label: 'LAUNCH', title: 'Launch a Gaussian packet in the box', onFire: () => {
-        if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); }
-        const ax = keyState.axis, a = HAMILTONIANS.well.radius, d = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] }[ax], k = ui.gasSpeed.get ? ui.gasSpeed.get() : 0.8;
-        launchPacket(d.map((v) => -v * a / 2), d.map((v) => v * k), gasSigma(k));
-      } }).root);
-      ui.gasRo = readout({ label: 'GAS  packet held by the box', value: '—', sub: 'nothing launched' });
-      rg.appendChild(ui.gasRo.root);
-      rg.appendChild(trig({ label: 'COHERENT BOUNCE', title: 'Launch a non-spreading oscillator packet', onFire: () => coherentBounce() }).root);
-      el('div', 'note', wSpec.body).innerHTML = '<b>Coherent bounce.</b> In the oscillator, an impulse moves the ground-state packet without changing its width. In the box, the packet disperses and reflects from the wall.';
-      el('div', 'note', wSpec.body).innerHTML = '<b>Gas packet.</b> LAUNCH projects a Gaussian packet into the box basis. CAPTURED reports how much fits. Ctrl-drag on the field sets its launch point, direction, and strength.';
-    }
-    /* WAVE 68 · `step: 1`, and it is the only knob in the lab that lacked one.  Without it an arrow
-       moved 1/100 of the travel = 0.05 = a TWENTIETH of an integer, so eleven real presses produced
-       TWO announced values while `aria-valuenow` walked 1.05 … 1.55 through Z values the register
-       cannot hold.  A dial whose `fmt` rounds has a lattice; the travel law has to know about it. */
-    ui.zKnob = knob({ label: 'Z  (ion)', min: 1, max: 6, value: 1, step: 1, fmt: (v) => 'Z = ' + Math.round(v), onInput: (v) => { setZ(Math.round(v)); if (getHamiltonian().id === 'hydrogen') switchHamiltonian('hydrogen'); } });
-    rh.appendChild(ui.zKnob.root);
-    ui.elemKnob = knob({ label: 'ELEMENT  Z', min: 1, max: 36, value: 10, step: 1, fmt: (v) => 'Z = ' + Math.round(v) + '  ' + ATOMS[Math.max(0, Math.min(35, Math.round(v) - 1))].symbol, onChange: (v) => setElement(Math.round(v)) });
-    rh.appendChild(ui.elemKnob.root);
-    {
-      const rs = wSpec.row('tight');
-      ui.scaleSeg = seg({ label: 'SCALE  ·  the exponent of the 91 radials  (hydrogen operator only)', value: 'hydrogen', options: [
-        { id: 'hydrogen', label: 'HYDROGEN  1/n', title: 'Use standard hydrogen radial functions' },
-        { id: 'sturmian', label: 'STURMIAN  λ', title: 'Use one common radial exponent λ for every label' }],
-        onChange: (v) => setSturmian({ on: v === 'sturmian' }) });
-      rs.appendChild(ui.scaleSeg.root);
-      ui.lambdaKnob = knob({ label: 'λ  SCALE', min: 0.25, max: 3, value: 1, fmt: (v) => 'λ = ' + v.toFixed(3), onInput: (v) => { if (sturm.on) setSturmian({ lambda: v }); else sturm.lambda = Math.max(0.25, Math.min(3, v)); } });
-      ui.lambdaKnob.root.title = 'Set the Sturmian exponent; Shift is finer; double-tap resets';
-      ui.lambdaKnob.setDisabled(true);
-      rs.appendChild(ui.lambdaKnob.root);
-      ui.sturmRo = readout({ label: 'SCALE', value: 'HYDROGEN 1/n', cls: 'two', sub: 'the shipped radials · λ acts once STURMIAN is on' });
-      rs.appendChild(ui.sturmRo.root);
-      el('div', 'note', wSpec.body).innerHTML = '<b>Radial scale.</b> HYDROGEN uses the standard n-dependent orbitals. STURMIAN gives all labels one exponent λ and evolves them in a non-orthogonal basis. Controls that require diagonal hydrogen phases are disabled while it is active.';
-    }
-    el('div', 'note', wSpec.body).innerHTML = '<b>Hamiltonian.</b> Z rescales hydrogen-like ions. OSCILLATOR uses equally spaced levels; BOX uses spherical-well levels; ATOM and QUARKONIUM load numerical radial tables. Windows tied to hydrogen identities pause under other operators.';
-  }
-    el('div', 'note', wSpec.body).innerHTML = '<b>Atom operator.</b> Uses the selected element’s self-consistent Xα central field. Occupied shells have drawable radial functions; ° marks virtual shells with energy only. Momentum space is unavailable. See ATOMS for Δ-SCF and −ε values.';
-  api.hamiltonian = () => sturm.P ? sturmSpectrum() : getHamiltonian().spectrum;          // W-STURMIAN: the eigen ladder under the scale
-  /* wave 50: THE RATE WAS MISSING HERE.  The register evolves label a at energyOf(a) = H.energy(a) · rates[a]
-     (`energyOf` at the top of boot(), what reg.setEnergies is given), and this — the API every reader prints from, SPECTRUM's Eh and
-     the digests — returned H.energy(a) alone, so with any RATE ≠ 1 the card printed an energy the state was
-     not moving with.  It is the same function now.  (Under STURMIAN the labels are not eigenstates, RATE is
-     refused there, and the label's ⟨a|H|a⟩/⟨a|S|a⟩ stands.) */
-  api.energyOf = (a) => sturm.P ? labelExpect(a) : energyOf(a);
-  api.rateDisabled = () => !!sturm.P;
-  api.rateNote = () => 'RATE is a diagonal-phase feature (a multiplier on one label\'s own E): off under STURMIAN, where the labels are not eigenstates — switch SCALE back to HYDROGEN';
-  api.selectEigen = (k) => selectEigen(k);
-  api.unit = () => (getHamiltonian().unit === 'hartree' ? 'Eh' : getHamiltonian().unit);
-  api.labelOf = (s) => getHamiltonian().labelOf(s);
-  const spectrum = createSpectrum(wSpec.body, api);
-  app.w.spectrum = spectrum;
-  { const kids = [...wSpec.body.children], i = kids.findIndex((k) => k.classList.contains('ladder')); const h=kids[0]; for(const k of kids.slice(1,Math.max(0,i)))h.appendChild(k); wSpec.body.appendChild(h); }
-  /** NORMALIZE, and say what it did — a unit-norm state looks the same afterwards, which is why it seemed to do nothing */
-  function toggleFullscreen() { const d = document; if (d.fullscreenElement) { if (d.exitFullscreen) d.exitFullscreen(); } else { const e = d.documentElement; const f = e.requestFullscreen || e.webkitRequestFullscreen; if (f) try { f.call(e); } catch (err) {} } }
-  function normalizeNow() {
-    const n = reg.normalize(); touchState();
-    const nm = sturm.P ? '⟨c|S|c⟩^½' : '‖c‖';                                     // W-STURMIAN: the S-norm is the norm
-    const msg = Math.abs(n - 1) < 5e-4 ? nm + ' was 1 already · nothing to do' : nm + ' ' + n.toFixed(4) + ' → 1';
-    wState.setStatus(msg, 'live'); wSpec.setStatus(msg, 'live');
-    setTimeout(() => { wState.setStatus('changes c'); wSpec.setStatus(...specStatus()); }, 1800);
-  }
-  app.w.normalizeNow = normalizeNow;
-  /** THE COPY (0.3.3 · wave 135): the populated register at the clock's t — c(t), the mix while A/B plays — as the notebook's
-   *  LaTeX in chemistry order (lab/latex-state.js), through copyDigest's one clipboard road and its `copied` flash.  SPECTRUM's
-   *  status line says what went: it is where the ⧉ is.  An empty register says so and writes nothing.
-   *  0.4.0 S0 · wave 136: under a MOLECULAR field owner the copy is the MOLECULE's page (moleculeLatex: the formula, RHF/basis,
-   *  E, the ε ladder), never greyed — SPECTRUM only folds there now (moleculeMode), so its own list is not what the field shows. */
-  let copySaid = 0;                                                  // the status restore of the last copy: a second press restarts it
-  function copyLatex() {
-    let text, said;
-    if (app.state.chem && app.state.chem.on) {
-      const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null, sol = row ? app.state.chem.solution() : null;
-      const ground = sol && sol.key === app.state.chem.preset() + '|' + app.state.chem.basis + '|' + row.charge ? sol : null;   // chemview's own solve key: never the previous molecule's ladder
-      text = moleculeLatex({ molecule: row, basis: app.state.chem && app.state.chem.basis, charge: row && row.charge, ground });
-      said = text ? mathPlain(row.formula) + '’s page as LaTeX' : row ? 'nothing to copy — ' + mathPlain(row.formula) + ' is still solving' : 'nothing to copy — this molecule has no page';
-    } else {
-      const c = reg.at(clock.t), H = getHamiltonian();
-      const states = reg.populated().map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: c.re[a], im: c.im[a] }));
-      text = stateLatex({ states, H }); const n = text ? text.split('\n')[0].split('$').length >> 1 : 0;
-      said = text ? n + (n === 1 ? ' state' : ' states') + ' as LaTeX' : 'nothing to copy — the register is empty';
-    }
-    wSpec.setStatus(said, text ? 'live' : 'warn');
-    clearTimeout(copySaid); copySaid = setTimeout(() => wSpec.setStatus(...specStatus()), 1800);
-    return text ? layout.copyText('spectrum', text) : Promise.resolve('');
-  }
-  function switchHamiltonian(id) {
-    if (!app.state.warmTimer && !app.state.warmIdle && !page.hidden) warmArm(120);       // LA5: the kick tables are keyed on the operator — warm the new one in idle slices
-    const H = setHamiltonian(id);
-    if (id !== 'well' && gas.on) { gas.off(); schedule(TIER.RECONSTRUCT); }
-    reg.setEnergies(energyOf);
-    if (!H.stark && reg.field.Fz !== 0) { reg.setField({ Fz: 0 }); if (ui.fz) ui.fz.set(0); }
-    if (H.noMomentum && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
-    for (const w of [wOrb, wVor, wSlice, wLad]) if (w) w.root.hidden = !H.hydrogenTheorems;
-    wSpec.setStatus(hamLabel(), H.id === 'hydrogen' ? '' : 'live');
-    wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; });   // wave 50: the API, so the RATE is in the number the card shows
-    wSpec.body.querySelectorAll('.sp-nm[data-a]').forEach((e) => { e.textContent = H.labelOf(BASIS[+e.dataset.a]); });
-    if (sturm.on) { applySturmian(); return; }                        // W-STURMIAN: re-arm (or stand down) the scale under the operator now in force
-    app.state.refSnapshot = null; app.state.pendingRef = null;
-    schedule(TIER.REBUILD);
-  }
-
-
-  const sturmLabel = () => `STURMIAN · λ ${sturm.lambda.toFixed(3)} · Z ${getZ()} · 91 labels`;
-  /* the SAME sentence switchHamiltonian writes (wave 44): it used to drop the element, so an UNDO of an ELEMENT
-     change or of FILL THE VALENCE left the status reading "ATOM  Xα(2/3) + Latter tail" with no atom named */
-  const hamLabel = () => { const H = getHamiltonian(); return H.id === 'atom' ? H.label + '  ·  ' + H.short : H.label; };
-  const specStatus = () => sturm.P ? [sturmLabel(), 'live'] : [hamLabel(), getHamiltonian().id === 'hydrogen' ? '' : 'live'];
-  function setSturmian(o = {}) {
-    if (o.on !== undefined) sturm.on = !!o.on;
-    if (o.lambda !== undefined) sturm.lambda = Math.max(0.25, Math.min(3, +o.lambda || 1));
-    applySturmian();
-    return { on: sturm.on, lambda: sturm.lambda, active: !!sturm.P };
-  }
-  function applySturmian(keepAnchor = false) {
-    const H = getHamiltonian(), want = sturm.on && H.id === 'hydrogen';
-    if (want && reg.transition) { reg.clearTransition(clock.t); if (ui.abSw) ui.abSw.set(false); }   // the mix is a diagonal-phase feature: frozen as the state
-    const c = keepAnchor ? null : reg.at(clock.t);                                                     // the state NOW, continuous across the change
-    if (want) {
-      const t0 = performance.now();
-      sturm.P = createRegisterSturmian(sturm.lambda, { Z: getZ() }); sturm.rec = sturm.P.records(); sturm.buildMs = performance.now() - t0;
-      if (app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }                      // momentum space is not built for the scaled radials
-      reg.setPropagator(sturm.P);
-    } else { sturm.P = null; sturm.rec = null; reg.setPropagator(null); reg.setEnergies(energyOf); }
-    if (c) reg.anchorFrom(c.re, c.im, clock.t);
-    const on = !!sturm.P;
-    if (ui.scaleSeg) ui.scaleSeg.set(sturm.on ? 'sturmian' : 'hydrogen');
-    if (ui.lambdaKnob) { ui.lambdaKnob.set(sturm.lambda); ui.lambdaKnob.setDisabled(!on); }
-    const keep = (elm, title) => { if (elm.dataset.title0 === undefined) elm.dataset.title0 = elm.title || ''; elm.title = on ? title : elm.dataset.title0; };
-    if (ui.abSw) { ui.abSw.root.disabled = on; ui.abSw.root.classList.toggle('disabled', on); keep(ui.abSw.root, 'A / B TRANSITION is a diagonal-phase feature (two exact diagonal evolutions mixed): off under STURMIAN — switch SCALE back to HYDROGEN'); }
-    if (ui.abOmega) ui.abOmega.setDisabled(on);
-    if (ui.abRo && !on && /STURMIAN/.test(ui.abRo.root.textContent)) { ui.abRo.set('—  /  —', ''); ui.abRo.setSub('store two states, then TRANSITION plays A → B → A at Ω'); }
-    if (ui.fz) { ui.fz.setDisabled(on); if (on) ui.fz.set(0); }
-    /* wave 40: e^{−iθK_z} and e^{iαL²} are moves inside a COULOMB SHELL — written in a degeneracy the Sturmian
-       scale does not have (its eigenvalues are variational, its shells are not n²-fold), so they stand down too */
-    if (ui.kzKnob) { ui.kzKnob.setDisabled(on); keep(ui.kzKnob.root, 'STARK K_z is an SO(4) rotation inside a Coulomb shell: off under STURMIAN — switch SCALE back to HYDROGEN'); }
-    if (ui.defKnob) { ui.defKnob.setDisabled(on); keep(ui.defKnob.root, 'DEFECT L² is a wait under the shell\'s l-dependent phase: off under STURMIAN — switch SCALE back to HYDROGEN'); }
-    /* AND THE TWO RATES WITH THEM — the STORED number, not just the dial.  A rate left running into
-       a scale change would go on turning a register the operator has no business turning, and
-       switching back to HYDROGEN would find it already spun.  ROTATE z's rate is untouched: m is
-       still m under the Sturmian scale, which is why its jog wheel is not disabled either. */
-    if (on) { rotRate.kz = 0; rotRate.def = 0; }
-    if (ui.kzRate) { ui.kzRate.setDisabled(on); if (on) ui.kzRate.set(0); keep(ui.kzRate.root, 'SPIN K_z drives an SO(4) rotation inside a Coulomb shell: off under STURMIAN — switch SCALE back to HYDROGEN'); }
-    if (ui.defRate) { ui.defRate.setDisabled(on); if (on) ui.defRate.set(0); keep(ui.defRate.root, 'SPIN L² drives a wait under the shell\'s l-dependent phase: off under STURMIAN — switch SCALE back to HYDROGEN'); }
-    if (ui.spaceSeg) { const b = ui.spaceSeg.button('p'); if (b) { b.disabled = on; keep(b, 'not built for the Sturmians: position space only under STURMIAN'); } }
-    if (ui.spaceNote) ui.spaceNote.hidden = !on;
-    for (const w of [wOrb, wVor, wSlice, wLad]) if (w) w.root.hidden = on || !H.hydrogenTheorems;
-    if (wCalc) wCalc.root.hidden = on;   // theorems about hydrogen's eigenfunctions stand down
-    wSpec.setStatus(...specStatus());
-    wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; });
-    if (ui.sturmRo) paintSturmRo();
-    app.state.refSnapshot = null; app.state.pendingRef = null; app.state.lastNmax = -1;
-    touchState(); schedule(TIER.REBUILD);
-  }
-  /** the scale's readout: the ground eigenvalue, the occupied count, the S-norm and ⟨H⟩ of the state */
-  function paintSturmRo() {
-    sturm.roVersion = reg.version;
-    if (!sturm.P) { ui.sturmRo.set(sturm.on ? 'STURMIAN · hydrogen operator only' : 'HYDROGEN 1/n', sturm.on ? 'warn' : ''); ui.sturmRo.setSub(sturm.on ? 'the scale acts under the HYDROGEN operator; switch the Hamiltonian back' : 'the shipped radials · λ acts once STURMIAN is on'); return; }
-    const e = sturmEigen(); let occ = 0; for (const p of e.pop) if (p > 1e-6) occ++;
-    ui.sturmRo.set(`λ = ${sturm.lambda.toFixed(3)} · E₀ = ${e.E[0].toFixed(5)} Eh · ${occ} occupied`, 'live');
-    ui.sturmRo.setSub(`⟨c|S|c⟩ = ${e.norm.toFixed(4)} · ⟨H⟩ = ${e.energy.toFixed(5)} Eh · rank ${e.rank} · built in ${sturm.buildMs < 1 ? '< 1' : sturm.buildMs.toFixed(1)} ms · every E_k is an UPPER BOUND on level k of its (l, m)`);
-  }
-  /** the eigen-decomposition of the state: E_k, its population (the S-metric projection of c(t) — a constant of the motion), (l, m), the dominant n */
-  function sturmEigen(t) {
-    const P = sturm.P; if (!P) return null;
-    const c = t === undefined ? { re: reg.re0, im: reg.im0 } : reg.at(t);
-    return { E: Array.from(P.E), pop: Array.from(P.populations(c)), l: Array.from(P.lK), m: Array.from(P.mK), n: Array.from(P.nK), rank: P.rank, lambda: sturm.lambda, Z: getZ(), norm: P.norm(c), energy: P.energyOf(c) };
-  }
-  /** the energies THE CLOCK reads under the scale: the occupied eigenvalues (populations > 1e-6), Zeeman-shifted */
-  const occupiedEigen = () => { const e = sturmEigen(), out = []; for (let k = 0; k < e.rank; k++) if (e.pop[k] > 1e-6) out.push(e.E[k] + reg.field.Bz * e.m[k] / 2); return out; };
-  /* THE ENERGIES A PERIOD IS READ FROM — ONE expression, because TWO of them is how wave 58's review found a
-     confident EXACT LOOP over a state with no period at all: capture.js was computing the psi period from
-     reg.Ediag (the LABEL's ⟨H⟩ under a propagator) while periodNow() used the occupied eigenvalues. */
-  function periodEnergies() { return sturm.P ? occupiedEigen() : reg.populated().map((a) => reg.Ediag(a)); }
-  /** the ladder's descriptor under the scale (spectrum.js paints `eigen`) */
-  function sturmSpectrum() {
-    const e = sturmEigen(), Z = getZ();
-    const eigen = e.E.map((E, k) => ({ k, E, pop: e.pop[k], n: e.n[k], label: `${'spdfgh'[e.l[k]]}${e.m[k] >= 0 ? '₊' : '₋'}${Math.abs(e.m[k])}` }));
-    return { eigen, Emin: Math.min(e.E[0], -0.5 * Z * Z) * 1.02, Etop: 0, Emax: e.E[e.rank - 1], levels: [], levelKey: () => 0,
-      footer: `S⁻¹H · λ ${sturm.lambda.toFixed(3)} · rank ${e.rank} · E > 0 pseudo-continuum`,
-      caption: 'non-orthogonal basis: populations are projections ⟨C_k|S|c⟩ (the ladder) · a lane\'s energy is the label\'s ⟨H⟩, not an eigenvalue' };
-  }
-  /** load the k-th eigenvector (S-normalised, real) into the labels AT the current time: a stationary state of the scale */
-  function selectEigen(k) {
-    const P = sturm.P; if (!P || !(k >= 0 && k < P.rank)) return false;
-    const e = P.eigenstate(k);
-    reg.clear(); reg.anchorFrom(e.re, e.im, clock.t); app.state.lastNmax = -1;
-    spectrum.select(-1); setReference(); shadowView.clearTrail(); touchState(); schedule(TIER.REBUILD);
-    wSpec.setStatus(`eigenstate ${k} · E = ${P.E[k].toFixed(6)} Eh · ${'spdfgh'[P.lK[k]]}${P.mK[k] >= 0 ? '₊' : '₋'}${Math.abs(P.mK[k])} · stationary`, 'live');
-    return true;
-  }
-
-  /** the ELEMENT knob: which atom the ATOM Hamiltonian solves (Z = 1 … 36); the register is re-read in it */
-  function setElement(Z) {
-    Z = Math.max(1, Math.min(36, Math.round(Z) || 1));
-    busy.n++; busySync();                                              // wave 48: the atom is re-solved on a log mesh, twice, and Richardson-extrapolated — the mark says so
-    let changed; try { changed = HAMILTONIANS.atom.configure(Z); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
-    if (ui.elemKnob) ui.elemKnob.set(Z);
-    if (changed) { if (atomsView) atomsView.invalidate(); hNote(); if (getHamiltonian().id === 'atom') switchHamiltonian('atom'); else schedule(TIER.PRESENT); }
-    return Z;
-  }
-  /** FILL THE VALENCE: the outermost occupied shell of the atom in force, every m of it equally and in phase */
-  function fillValence() {
-    if (getHamiltonian().id !== 'atom') { switchHamiltonian('atom'); if (ui.hamSeg) ui.hamSeg.set('atom'); }
-    const cfg = configOf(HAMILTONIANS.atom.Z), sh = cfg[cfg.length - 1], amp = 1 / Math.sqrt(2 * sh.l + 1);
-    reg.clear();
-    for (let m = -sh.l; m <= sh.l; m++) reg.set(stateOf(sh.n, sh.l, m).index, amp, 0, clock.t);
-    touchState(); schedule(TIER.REBUILD);
-    const msg = `${HAMILTONIANS.atom.short} ${sh.n}${'spdfgh'[sh.l]} · ${2 * sh.l + 1} label${sh.l ? 's' : ''}, equal and in phase`;
-    wState.setStatus(msg, 'live'); if (wAtoms) wAtoms.setStatus(msg, 'live');
-    return { n: sh.n, l: sh.l, labels: 2 * sh.l + 1 };
-  }
+  const { wSpec, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen,
+    periodEnergies, selectEigen, setElement, fillValence } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
 
   rack.appendChild(wPal.root); rack.appendChild(wObs.root); rack.appendChild(wCam.root); rack.appendChild(wClip.root);
   rack.appendChild(ui.set.root);
@@ -1670,6 +1260,7 @@ export async function boot(dom) {
 
   // PLANE (id `slice`) — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
   const wSlice = device({ id: 'slice', eyebrow: 'PLANE', status: '' });   // 0.4.0 S3 (R-W3): PLANE, once SLICE — the id and slice.* stay
+  app.w.wOrb = wOrb; app.w.wVor = wVor; app.w.wSlice = wSlice;
   const slice = createSliceView(wSlice.body, {
     lut: () => (app.state.palette && app.state.palette.on ? toLUT(app.state.palette.stops) : null),
     repaint() { schedule(TIER.PRESENT); }
@@ -1918,6 +1509,7 @@ export async function boot(dom) {
   }
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
   const wLad = device({ id: 'ladder', eyebrow: 'LADDER', status: '' });
+  app.w.wCalc = wCalc; app.w.wLad = wLad;
   if (useCompactDefaults) wLad.root.classList.add('closed');
   rack.appendChild(wLad.root);
   const ladder = createLadder(wLad.body, { active: () => canPresent(wLad), loading: cardLoading(wLad, 'revival'), solve: (params) => solveCard({ op: 'ladder', params }, () => solveLadder(params)) });
@@ -2184,6 +1776,7 @@ export async function boot(dom) {
     fill: () => fillValence(),
     active: () => getHamiltonian().id === 'atom',
   });
+  app.w.wAtoms = wAtoms; app.w.atomsView = atomsView;
 
   /* ELECTROSTATICS · LEGACY (Φ, E, B and j of the register's charge, the #fieldlines overlay) was DELETED in 0.5.0 D9b */
 
@@ -2743,6 +2336,7 @@ export async function boot(dom) {
     touchState();
     if (!clock.playing) { clock.play(performance.now() / 1000); schedule(TIER.EVOLVE); }
   }
+  app.w.gas = gas; app.w.gasSigma = gasSigma; app.w.launchPacket = launchPacket; app.w.enterBox = enterBox; app.w.coherentBounce = coherentBounce;
   function bowCancel() {
     app.state.bow = null; mat.boost.on = false; kepler.setBow(null); app.state.keplerDirty = true;   // one clearing draw of the KEPLER canvas after the arrow
     if (bowPrevView !== null) { mat.view = bowPrevView; if (ui.viewSeg) ui.viewSeg.set(VIEW_NAMES[bowPrevView]); bowPrevView = null; }
@@ -3011,6 +2605,7 @@ export async function boot(dom) {
     async copyText(id, t) { try { await navigator.clipboard.writeText(t); } catch (e) {} const dev = document.querySelector('.dev[data-id="' + id + '"]'); if (dev) { dev.classList.add('copied'); setTimeout(() => dev.classList.remove('copied'), 900); } return t; },
     copyDigest(id) { return layout.copyText(id, layout.digest(id)); },
   };
+  app.sh.layout = layout;
   /** a window's hover hint in the + list and the WINDOW menu: its long title, and its status when it says something (wave 44) */
   const winHint = (d) => { const t = (d.querySelector('.dev-title') || {}).textContent || '', st = ((d.querySelector('.dev-stat') || {}).textContent || '').trim(); return st ? t + '  ·  ' + st : t; };
   const wTr = device({ id: 'transport', eyebrow: 'TRANSPORT', status: '' });
@@ -3550,6 +3145,7 @@ export async function boot(dom) {
    * The axis keys never move the camera and the camera keys never touch ψ — the badge on each window says which.
    */
   const keyState = { axis: 'z', which: 'both' };
+  app.sh.keyState = keyState;
   function keyHelp() { return `axis ${keyState.axis.toUpperCase()} · rotor ${keyState.which}`; }
   /* ── KEYS: a rebindable action table.  `fine` is shift for the stepping actions; actions that declare `shift`
      require it (so TAB and Shift+TAB are two actions).  Overrides live in localStorage.
@@ -4559,6 +4155,7 @@ export async function boot(dom) {
   LW.curves = curves;
 
   /* ── go ───────────────────────────────────────────────────────────────── */
+  app.sh.save = save; app.sh.restore = restore; app.sh.copyJSON = copyJSON; app.sh.copyLink = copyLink;   // STATE's SAVE / LOAD / COPY read them at use (0.5.2 R2a)
   LW.bootView = VIEW_NAMES[mat.view]; LW.bootVortex = vortex.on; LW.bootOrder = layout.orderAll(); LW.bootClosed = layout.closed();   // the shipped defaults, recorded before a URL preset's visuals apply
   const q = new URLSearchParams(location.search);
   loadPreset(q.get('preset') && PRESET_BY_ID.has(q.get('preset')) ? q.get('preset') : '1s+2pz');

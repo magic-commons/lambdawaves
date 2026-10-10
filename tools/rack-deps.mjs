@@ -923,8 +923,8 @@ export const PLANNED_CUT = [
   [/^ {4}function filmHold\(on\) \{/, 'loop'],                                       // filmHold stays beside the loop (app.loop.hold)
   [/^ {4}const film = \(\) => exact \|\| /, 'film'],
   [/^ {4}const gq = group\(ui\.set\.body, 'FIELD QUALITY'\)/, 'settings-card'],       // SETTINGS, second span (to the block's end)
-  [/^ {2}\/\* OPTIMIZATION 2026-09-24 · N1 · STATE's CLEAR, NAMED/, 'state'],
-  [/^ {2}\/\/ SPECTRUM$/, 'spectrum'],
+  [/^ {2}\/\/ STATE — preparation/, 'state'],                                       // the seat (0.5.2 R2a: the card and its CLEAR are lab/windows/state.js)
+  [/^ {2}\/\/ SPECTRUM$/, 'spectrum'],                                              // the seat (0.5.2 R2a: lab/windows/spectrum.js)
   [/^ {2}rack\.appendChild\(wPal\.root\); rack\.appendChild\(wObs\.root\)/, 'boot'],   // the five appends stay at their seat
   [/^ {2}\/\* THE ABOUT FACE LIVES IN THE NOTEBOOK GLASS/, 'spectrum'],
   [/^ {2}\/\/ SHADOW$/, 'readouts'],
@@ -1172,7 +1172,9 @@ export function classes(src, opts = {}) {
   const stateMembers = uniq(modules.flatMap((m) => [...m.state, ...m.stateOwn]));
   /* ── G-A, read statically: the `app` literal's namespaces and keys, and every `app.x` / `app.<ns>.x` that names a key the literal
      does not hold (an extension), every `Object.assign(app…` and every `delete app.…` — in rack.js and in every module file; and a
-     module that destructures a slot the literal holds as null and boot fills later (it would freeze the null) ── */
+     module that destructures a slot the literal holds as null and boot fills later (it would freeze the null).  A slot is filled before
+     a module's seat when rack.js writes it eagerly above the seat, or a module file seated earlier writes it eagerly at its root (0.5.2
+     R2a: createController fills app.ctl before its seat returns, createStateCard app.w.wState before SPECTRUM's) ── */
   const appDecl = W.bootHits[0].scope.names.get('app');
   const appInit = appDecl && W.declInit.get(appDecl.at);
   const appShape = { line: appDecl ? toks[appDecl.at].line : -1, top: [], ns: {}, nullSlots: [] };
@@ -1202,7 +1204,8 @@ export function classes(src, opts = {}) {
     for (const [, h] of F.handed) {
       if (h.ns ? !(appShape.ns[h.ns] || []).includes(h.key) : !appShape.top.includes(h.key)) strays.push(`${F.rel}:${h.line}: \`${h.key}\` handed from app${h.ns ? '.' + h.ns : ''} is no key of the literal`);
       else if (h.ns && appShape.nullSlots.includes(h.ns + '.' + h.key)
-        && !refs.some((r) => r.name === 'app' && !r.deferred && r.line < F.seat && (({ ns, x, write } = appChain(r) || {}) => write && ns === h.ns && x === h.key)()))
+        && !refs.some((r) => r.name === 'app' && !r.deferred && r.line < F.seat && (({ ns, x, write } = appChain(r) || {}) => write && ns === h.ns && x === h.key)())
+        && !files.some((G) => G.seat < F.seat && G.chains.some(({ r, c }) => !r.deferred && c.write && c.ns === h.ns && c.x === h.key)))
         strays.push(`${F.rel}:${h.line}: destructures app.${h.ns}.${h.key}, a null slot boot does not fill before the seat (it would freeze the null — read it live)`);
     }
   }
