@@ -98,7 +98,33 @@ seat, the registration rule, the null-slot stray, an unplanned file refused; the
 **After** (this tree, rack.js `78281bac6006`, 38 pieces; `module files measured (1): lab/shell/controller.js → controller
 (createController(app), 339 lines, seated at rack.js:335, handed 16)`):
 
-TABLE_AFTER
+| module | row → file | lines | backward | forward | shared lets (bare) | app.state (another scope's) | **fwd + shared** | bare writes to another scope's let | hinge |
+|---|---|---|---|---|---|---|---|---|---|
+| boot (stays) | — → `lab/rack.js` | 283 | 0 | 56 | 0 (+1 boot-kept) | 11 | **67** | 0 | exempt |
+| loop (stays) | — → `lab/rack.js` | 487 | 41 | 49 | 0 | 27 (+4 own) | **76** | 0 | exempt |
+| settings | R3a → `lab/shell/settings.js` | 144 | 7 | 13 | 0 | 2 (+2 own) | **15** | 0 | ok |
+| controller | R1 → `lab/shell/controller.js` | 345 | 12 | 10 | 0 | 2 (+29 own) | **12** | 0 | ok |
+| material | R2c → `lab/windows/material.js` | 131 | 11 | 0 | 0 | 1 (+4 own) | **1** | 0 | ok |
+| settings-card | R2c → `lab/windows/settings.js` | 178 | 21 | 1 | 0 | 4 | **5** | 0 | ok |
+| film | R2c → `lab/windows/film.js` | 21 | 5 | 3 | 0 | 3 | **6** | 0 | ok |
+| state | R2a → `lab/windows/state.js` | 170 | 13 | 6 | 0 | 2 | **8** | 0 | ok |
+| spectrum | R2a → `lab/windows/spectrum.js` | 253 | 18 | 15 | 0 | 9 | **24** | 0 | ok |
+| readouts | R2b → `lab/windows/readouts.js` | 141 | 14 | 4 | 0 | 3 (+1 own) | **7** | 0 | ok |
+| molecules | R2d → `lab/windows/molecules.js` | 97 | 18 | 3 | 0 | 5 (+6 own) | **8** | 0 | ok |
+| stage-words | R2d → `lab/shell/stage-words.js` | 123 | 4 | 2 | 0 | 2 (+1 own) | **4** | 0 | ok |
+| modulation | R2d → `lab/shell/modulation.js` | 247 | 19 | 1 | 0 | 9 | **10** | 0 | ok |
+| transport | R3b → `lab/shell/transport.js` | 229 | 15 | 0 | 0 | 4 | **4** | 0 | ok |
+| kepler | R2b → `lab/windows/kepler.js` | 294 | 15 | 1 | 0 | 3 (+7 own) | **4** | 0 | ok |
+| ink | R2d → `lab/shell/ink.js` | 60 | 6 | 1 | 0 | 3 | **4** | 0 | ok |
+| rack-wiring | R3b → `lab/shell/rack-wiring.js` | 327 | 39 | 0 | 0 | 4 | **4** | 0 | ok |
+| notebook | R3b → `lab/shell/notebook.js` | 389 | 28 | 10 | 0 | 11 | **21** | 0 | ok |
+| keys | R3b → `lab/shell/keys.js` | 202 | 32 | 1 | 0 | 12 | **13** | 0 | ok |
+| persist | R3a → `lab/shell/persist.js` | 294 | 49 | 0 | 0 | 13 (+1 own) | **13** | 0 | ok |
+| links | R3a → `lab/shell/links.js` | 78 | 5 | 0 | 0 | 3 (+1 own) | **3** | 0 | ok |
+| history | R3a → `lab/shell/history.js` | 158 | 11 | 0 | 0 | 4 (+1 own) | **4** | 0 | ok |
+| facade | R5 → `lab/shell/facade.js` | 255 | 121 | 1 | 0 | 21 | **22** | 0 | ok |
+
+THE HINGE (G-G): bare writes across scopes 0; the largest moving module spectrum at 24 (limit 25) → HOLDS
 
 **The diff is line counts only**: controller 305 → 345 (the 6-line seat piece + the 339-line file), loop 484 → 487, settings
 142 → 144, spectrum 250 → 253, readouts 139 → 141 (the fills). **Every class count is the base's**: the controller backward 12
@@ -169,22 +195,47 @@ the tree; candidate 6.) Raw: `research/release-0.5.2/r1-measure/pair/`.
 | `keyboard-window.browser-test` | 7 PASS, then the in-session reload (`go(url)` in block 8) dies: `POST …/url -> 500 "Failed to decode response from marionette"`, twice | **RED on the BASE too, identically** (`86968b7` on 9057/5527, twice) — the rig's, not R1's; R0 had it green on 10-09 |
 | `gpu-recovery.browser-test` alone (Josh's desktop Firefox UP) | tree: 3 of 5 attempts green (the reds: "Render did not settle: animation frames stopped" after a reload, cycle 1–2); base: 1 of 3 green, the same message | the base's flake, the same reading both ways |
 | `latex-copy.browser-test` | GREEN this time (R0 read it red on the base) | GREEN |
-BOOT_ROW
-SERIALIZE_ROW
-SETTINGS_ROW
+| `tests/legacy/boot.browser-test.mjs` alone (twice: the estate runner re-runs a red) | **151/152 both runs** — B149 the only red; B6, B22, B23, B108 (`createField(dom.canvas, {` … `onLost:` now read from `lab/shell/controller.js` through `appFiles()`), B112, B136 GREEN; B69 GREEN both runs | **B149 the only LAW red** |
+| `tools/serialize-bytes.mjs` base (9057/5527) vs tree (9053/5523) | **11/11 full + 11/11 edit sha-identical**, 0 page errors either side (the four demos, NEW, six history rows) | GREEN |
+| `tools/settings-probe.mjs` | tree, twice: **5 of 6 scenes GREEN, 0 judged red** (boot, WAVE DANCER, WATER, BENZENE, N₂ — blobs 716 / 752 / 736 / 736 / 736 B, reloads byte-identical); the sixth (NEW) never ran — the driver died first, `POST …/execute/async -> 500 "Failed to decode response from marionette"`. The BASE dies the same way, earlier (after BENZENE, 4 of 6 green). The rig: snap Firefox 157.0.1 loses marionette after ~5 in-session reloads (keyboard-window's block 8 is the same death); NEW's road is covered by `new-project` 8/8 | no scene red; the 6th unreached on both trees |
 | `node tools/new-project.mjs --check` · `node tests/new-project.test.mjs` | in step (16117 B) · GREEN | GREEN |
 
 ## 8 · Brief candidates (for R2 / R3 and the integrator)
 
-1. **`app.ctl` stays null after R1.** The first row that moves a reader of a controller name (PAIR 1: STATE reads `modHand`,
-   `ROT_LIMIT`, `setRotationRate`, `touchState`, `loadPreset`; SPECTRUM `rotRate`, `busy`, `busySync`, `warmArm`, `touchState`,
-   `setReference`, `api`; §1 SETTINGS `gov`, `keep`, `perf`, `MOD`, `look`, `modStore`, `saveMod`, `setGovernor`, `setKeepFrames`,
-   `setPerfMode`; PERSIST `domain`, `modSyncBases`, `modGets`, `rotRate`, `setRotationRate`, `applyAccent`, `setReference`,
-   `markBatchBegin`, `markBatchEnd`) must fill `app.ctl.x`. Both rows of PAIR 1 would then add `app.ctl.x = x` lines to
-   `lab/shell/controller.js` (the owner registers at creation) — a merge conflict inside one pair. **Recommendation:** before PAIR 1, the
-   integrator fills ALL 68 once — `createController` registers its crossing names onto `app.ctl` and `boot()` destructures from
-   `app.ctl` instead of the return (`await createController(app); const { … } = app.ctl;`): every slot is then read (by boot's
-   destructure), none is a dead store, and no later row edits the controller.
+1. **`app.ctl` stays null after R1 — the union the pair rows will read** (measured with the module-file mode on this tree:
+   `classes(rack.js).crossNames` owned by the controller, by reading module; `.tmp/ctlunion.mjs`). Every reader of a controller name
+   is still in `boot()`, so R1 fills none. When a row moves a reader it must read `app.ctl.x` — backward (destructured once at its
+   creation) for every module seated after §2, **forward (read live, inside callbacks) for §1 SETTINGS (R3a)**, which runs before the
+   seat. Per planned moving module, the `app.ctl` names it reads:
+
+   | module | row | n | the `app.ctl` names it reads (the ctl literal's order) |
+   |---|---|---|---|
+   | settings | R3a | 11 | gov, keep, perf, setGovernor, setKeepFrames, setPerfMode, MOD, modStore, saveMod, look, field |
+   | material | R2c | 5 | mod, modHand, applyAccent, field, setReference |
+   | settings-card | R2c | 12 | domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, modHand, modStore, curvesStore, look, applyAccent, paintMarks, field |
+   | film | R2c | 3 | rotDriving, rotStep, field |
+   | state | R2a | 5 | modHand, ROT_LIMIT, setRotationRate, touchState, loadPreset |
+   | spectrum | R2a | 7 | rotRate, busy, busySync, warmArm, touchState, setReference, api |
+   | readouts | R2b | 5 | domain, cardLoading, solveCard, touchState, api |
+   | molecules | R2d | 3 | cardLoading, field, solveChem |
+   | stage-words | R2d | 1 | paintMarks |
+   | modulation | R2d | 8 | mod, modHand, setKnob, ROT_LIMIT, rotRate, setRotationRate, occlusion, applyAccent |
+   | transport | R3b | 6 | keep, setKeepFrames, modHand, rotDriving, saveMod, scan |
+   | kepler | R2b | 4 | domain, field, maths, touchState |
+   | ink | R2d | 2 | occlusion, field |
+   | rack-wiring | R3b | 5 | setGovernor, setKeepFrames, occlusion, look, field |
+   | notebook | R3b | 8 | modSyncBases, occlusion, paintMarks, busy, busySync, field, cards, loadPreset |
+   | keys | R3b | 3 | domain, occlusion, touchState |
+   | persist | R3a | 9 | domain, modSyncBases, modGets, rotRate, setRotationRate, applyAccent, markBatchBegin, markBatchEnd, setReference |
+   | history | R3a | 1 | rotDriving |
+   | facade | R5 | 42 | autoQ, gov, effectiveRes, READER_LAW, keep, domain, fieldRate, perf, setGovernor, setKeepFrames, setPerfMode, stats, mod, MOD, modHand, modGets, modKnobs, modHeld, ROT_LIMIT, rotRate, rotDriving, setRotationRate, look, paintMarks, wheelColor, accent, inkCtx, markInk, stageGround, busyWrap, busyFlash, busy, busySync, busyHost, field, maths, scan, cards, touchState, loadPreset, setReference, api |
+
+   **THE UNION: 56 names — autoQ, gov, effectiveRes, READER_LAW, keep, domain, fieldRate, perf, setGovernor, setKeepFrames, setPerfMode, stats, mod, MOD, modSyncBases, modHand, setKnob, modGets, modKnobs, modHeld, ROT_LIMIT, rotRate, rotDriving, setRotationRate, rotStep, modStore, saveMod, curvesStore, occlusion, look, applyAccent, paintMarks, markBatchBegin, markBatchEnd, wheelColor, accent, inkCtx, markInk, stageGround, busyWrap, busyFlash, busy, busySync, cardLoading, busyHost, field, maths, scan, cards, solveChem, solveCard, warmArm, touchState, loadPreset, setReference, api** (42 without the facade's R5 row; the facade alone adds autoQ, effectiveRes,
+   READER_LAW, stats, modKnobs, modHeld, wheelColor, accent, inkCtx, markInk, stageGround, busyWrap, busyFlash, busyHost = 14).
+   Never read outside `boot()` (stay with the loop, never filled): 12 — controlStep, RES_LADDER, frameBudget, perfBudgetMs, tick, READERS, may, unpark, cRe, cIm, feedAudio, cancelWarm.
+   **Recommendation (the integrator's, taken):** fill exactly that union on `app.ctl` inside `createController` at creation, in one
+   commit at the merge, so the pair rows only read and nobody edits `lab/shell/controller.js` inside a pair; ~6 lines at 200 columns
+   (`app.ctl.gov = gov; app.ctl.keep = keep; …`), against `lab/*.js` 27,739 of the 27,943 cap.
 2. **The boot-kept fills move with their declarations.** `app.w.wSpec`, `app.w.spectrum`, `app.w.normalizeNow` (R2a, SPECTRUM) and
    `app.w.shadowView`, `app.w.wMet` (R2b, readouts) become those modules' registrations inside their `create*(app)`; `app.sh.lookSync`
    and `app.sh.quality` move with §1 into `createSettings` (R3a) — which runs before §2's seat, so the controller's hand-over still sees
@@ -233,7 +284,7 @@ SETTINGS_ROW
 
 ## 11 · What Josh will see
 
-**Nothing.** The pixels: THE LOCK 860 and 1004, 0/0, both first run. The work: SERIALIZE_PROOF. The browser's memory:
-SETTINGS_PROOF. The facade: `lw-facade` 1/1 — the same 176 members, kinds and order as R0's fixture (the moved functions are the same
+**Nothing.** The pixels: THE LOCK 860 and 1004, 0/0, both first run. The work: `serialize-bytes` 11/11 full and 11/11 edit sha-identical to the base. The browser's memory:
+`settings-probe` 0 scenes judged red (5 of 6 reached on the tree, 4 of 6 on the base — the driver dies on both). The facade: `lw-facade` 1/1 — the same 176 members, kinds and order as R0's fixture (the moved functions are the same
 values, read through the same literal). The suites: 34 of 35 green, the 35th (`keyboard-window`) red on the base identically; the boot
-suite: BOOT_PROOF. The main thread: Δ +0.044 (boot) and +0.157 (D1) ms/s against a 3.536 gate.
+suite: 151/152 twice, B149 the only law red, as on the base. The main thread: Δ +0.044 (boot) and +0.157 (D1) ms/s against a 3.536 gate.
