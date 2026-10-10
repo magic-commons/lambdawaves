@@ -346,3 +346,14 @@ moved module owns yet is filled in `boot()` right after its declaration (11 line
 G-A: a module file's eager fills (`app.<ns>.x = …` at its root) run at its seat, so a later-seated file may destructure them; `Object.assign` into a
 member's object (`app.ctl.domain`) is not an extension of the shape. A lost import is invisible to `rack-deps` (it reports only the unused
 direction): a move checks each file's free names against the base (`research/release-0.5.2/r3a-measure/freenames.mjs`) before the browser does.
+
+THE SHELL (0.5.2 R3b): λWAVES' transport strip is `lab/shell/transport.js` `createTransport(app)` (`setModArm` a function declaration inside it); §19a is
+`lab/shell/rack-wiring.js` `createRackWiring(app)` — createRack, the layout verbs (aliases over the kit's rack; captureLayout's v3 the WORKSPACE record), the
+TRANSPORT card, the phone and tablet crossings, and §18's `devById` / `rackCardWidth` / `popFace` — with TWO seats: the module at §19a's, and its returned
+`wireStage()` (the crossings' listeners and the stage gestures) right after the notebook's, where those statements stood; §19b (the skip links, the dock chip,
+MENUS and the kit's menubar, THE NOTEBOOK, PROJECTS whole) is `lab/shell/notebook.js` `createNotebook(app)`; §20–§23 (`keyState`, the ACTIONS rows, the
+KEYBOARD window, THE TIMELINE, the tab order) is `lab/shell/keys.js` `createKeys(app)` — moved verbatim, each destructuring what `boot()` made before its seat
+and reading persist's, the history's, the keys' and the facade's names through `app.sh` at use (`app.sh.LW` is the facade object, filled on the
+`window.__LW = LW` line). A boot function a module calls WHILE IT IS BEING CREATED must not read a name that module returns (`popFace` read `layout` and moved
+with §19a for that). A name a moved module returns that a later module reads is filled in `boot()` on the returning seat's line until that module's file is next
+opened, when the fill becomes its registration (`app.sh.saveSettings` … on §1's seat; `app.w.toggleFullscreen` … after SPECTRUM's).

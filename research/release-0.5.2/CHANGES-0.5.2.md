@@ -23,3 +23,12 @@ real seams, over an explicit context. Nothing a hand or an eye meets is meant to
   moved lines byte-identical, the rest read a later-made name through its slot. `rack.js` 4,261 → 3,607 with both of PAIR 1 in. Persist's row
   23 of the hinge's 25; 0 bare writes. Serialize bytes 11/11, the facade 1/1, the settings blobs the same; `history` stops at a frame-paced
   wait on both trees (the rig). **You see nothing.**
+
+- **R3b THE SHELL** (merged 2026-10-10 10:03 from `7a69aba`; clean): §12 the transport strip, §19a the rack wiring (two seats — the module and its `wireStage()`),
+  §19b the notebook with MENUS and PROJECTS whole, §20–§23 the keys with the KEYBOARD window and the TIMELINE leave `boot()` for `lab/shell/transport.js` (233
+  lines), `rack-wiring.js` (341; §18's `devById`/`rackCardWidth`/`popFace` with it — `popFace` reads `layout` while the module is being made),
+  `notebook.js` (379) and `keys.js` (217); 1,101 of 1,121 moved lines byte-identical, 17 read a later name through `app.sh`, 3 fills became registrations.
+  `rack.js` 3,605 → 2,448; 12 import lines out, 36 blank lines out; 31 slots filled in `boot()` for the shell's reads (`app.sh.LW` the facade object). The
+  hinge holds (notebook 21, keys 13; SPECTRUM 24 the largest); 0 bare writes. Serialize bytes 11/11 full + edit, the facade 1/1, `timeline` 14/14, `offer`
+  16/16, `new-project` 8/8, `keyboard-window` green; `menubar`, `history`, `frame-occlusion`, `hit-probe-set`, `settings-probe` and the boot chunks stop
+  where the base stops (the rig). **You see nothing.**

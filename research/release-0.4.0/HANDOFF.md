@@ -810,6 +810,20 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > ruling at R-V. **PAIR 2 LAUNCHED 08:50 from `1d5b060`:** R2b (Opus, `worktree-agent-a1dd669ddd57e6ee1`, 9083/5553 + 9087/5557, wave 219) and R3b (Opus,
 > `worktree-agent-ad72f08e558dc8f5f`, 9093/5563 + 9097/5567, wave 220). Next: their reports → merge by the recipe, CLAUDE.md sentences, CHANGES, HANDOFF →
 > `BRIEF-R2c.md` / `BRIEF-R2d.md` from PLAN §3 → PAIR 3.
+>
+> **UPDATE (Claude Yan, 2026-10-10 10:03 CDT) — R3b IN (clean merge of `7a69aba`).** THE SHELL: `lab/shell/transport.js` 233, `rack-wiring.js` 341 (TWO seats —
+> `createRackWiring(app)` at §19a's and its returned `wireStage()` after the notebook's; §18's `devById`/`rackCardWidth`/`popFace` moved with it: `popFace` reads
+> `layout` while the module is being made — a boot function a module calls at creation must not read a name that module returns, R3b's law), `notebook.js` 379
+> (MENUS and PROJECTS whole; row 21), `keys.js` 217 (keyState + keyHelp with it). `rack.js` 3,605 → 2,448; `lab/*.js` + shell + windows 27,856 → 27,873 (+17; 70
+> under the cap with R2b, PAIR 3's seven and R5 to come). 31 boot fills for the shell's reads (settings' five on §1's seat line, the camera law's eight, STATE's
+> `clearRegister`, SPECTRUM's four incl. `periodEnergies`, §17's `rackL`/`LAYOUT_SLOTS`/`floats`/`swClient` + kepler's five bow names, `modSeats`,
+> `historyApi`, **`app.sh.LW`** — a slot ADDED to the literal and filled on the `window.__LW` line; `BUILD_LINE` is exported for notebook.js). R3b left three
+> unused import lines beside R2b's hunks on purpose (`createKeyTable`; `densityPeriod`/`densityPeriodExact`/`fmtPeriod`; `mdText`) — the integrator drops them
+> after R2b's merge, with the §17 kepler-fill line if kepler.js registers those five. Gates on the merged tip (lab bytes = R3b's tree): rack-deps.test 11 files
+> measured; doubles 0; node (background); lw-facade (background). `tests/project-formats.test.mjs` re-pointed to `app.sh.serialize`/`modSeats`. CLAUDE.md: THE
+> SHELL paragraph. Candidates taken into the PAIR 3 briefs: R2d's ink is §18's occlusion host alone (51 lines); the creation-time TDZ check; the boot fills on
+> returning seats become registrations when a file is next opened. Next: R2b's report → merge (imports + tool + REPORT + sw.js conflicts expected; dedupe), then
+> `BRIEF-R2c.md` / `BRIEF-R2d.md` (generated from the merged tip) → PAIR 3.
 
 ## 3 · What happens next, in order
 

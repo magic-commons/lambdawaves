@@ -5641,3 +5641,30 @@ fills at its root, and it no longer reads `Object.assign(app.ctl.domain, …)` a
 **Lines.** `lab/*.js` + `lab/shell/` **27,754 → 27,815 (+61)** of 27,943. `rack.js` 4,664 → 4,012; the modules 147 · 311 · 85 · 166.
 
 Hand-off: `research/release-0.5.2/R3a-BUILD.md`.
+### wave 220: R3b TRANSPORT + RACK WIRING + NOTEBOOK + KEYS — §12, §19a, §19b and §20–§23 move verbatim into four `lab/shell/` modules called at their seats; §19a keeps its two seats; nothing Josh sees moves
+
+One Opus builder (`agent-ad72f08e558dc8f5f`) ran the row as PAIR 2 beside R2b, from `1d5b060`.
+
+**The move** (`.tmp/r3b-move.mjs` + `r3b-write.mjs`, at the walker's token positions; every edit printed):
+- §12 THE TRANSPORT STRIP → `createTransport(app)`; `setModArm` stays a function declaration inside it (U1); λWAVES' own bar.
+- §19a → `createRackWiring(app)`, ONE module with TWO seats: the notebook block stood between its halves, so the second half's statements
+  (the crossings' listeners, `layout.phone`/`.tablet`, the stage gestures, the ResizeObserver) are its returned `wireStage()`, called right after
+  the notebook's seat. `devById`, `rackCardWidth` and `popFace` came with it: `popFace` reads `layout` while §19a is still being created.
+- §19b → `createNotebook(app)`, the block whole: the skip links, the dock chip, MENUS and the kit's menubar, THE NOTEBOOK, PROJECTS. MENUS stays
+  in it (the row is 21).
+- §20–§23 (with keyState and keyHelp) → `createKeys(app)`: the ACTIONS rows, the KEYBOARD window, THE TIMELINE, the tab order.
+- 1,101 of the 1,121 moved non-blank lines are byte-identical; 17 read a later name through `app.sh`; 3 inherited fills became registrations.
+  34 blank lines inside the spans were dropped.
+
+**Gates.**
+- **The classes table:** transport 4 · rack-wiring 4 · notebook 21 · keys 13, each as before; 0 bare writes; G-A clean; the hinge holds.
+- **The bytes:** `serialize-bytes` 11/11 full and 11/11 edit, sha-identical to the base export run beside it and to R1's recorded base.
+- **The suites:** node exit 0 (`project-formats` re-pointed: its slice reads `app.sh`); `lw-facade` 1/1; `timeline` 14/14; `offer` 16/16;
+  `keyboard-window` green; `new-project` 8/8 + `--check`; `menubar` 8/8 with the rig's session flush tolerated (red at `:143` on both trees
+  without it); `settings-probe` the same four blobs as the base, no reached scene red.
+- **The rig's reds, identical on the base:** `history` (3b / 9b), `frame-occlusion` (`chipGap`), `hit-probe-set` ("did not settle"), and the
+  boot suite's chunked blocks (29 laws law for law; B91's chevron re-read identical on both).
+
+**Lines.** `lab/*.js` + shell + windows **27,856 → 27,873 (+17)** of 27,943. `rack.js` 3,605 → 2,448; the modules 233 · 341 · 379 · 217.
+
+Hand-off: `research/release-0.5.2/R3b-BUILD.md`.
