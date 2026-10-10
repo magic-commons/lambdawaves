@@ -890,7 +890,7 @@ export const PLANNED = {
   settings: { title: '§1 settings', row: 'R3a', file: 'lab/shell/settings.js' },
   controller: { title: '§2–§4 + §7 the controller · the one road', row: 'R1', file: 'lab/shell/controller.js' },
   material: { title: 'WAVE · CLIP · PALETTE · CAMERA (the 1100 block\'s material)', row: 'R2c', file: 'lab/windows/material.js' },
-  'settings-card': { title: 'SETTINGS card (the 1100 block, two spans)', row: 'R2c', file: 'lab/windows/settings.js' },
+  'settings-card': { title: 'SETTINGS card (the 1100 block, two spans)', row: 'R2c', file: 'lab/windows/settings-card.js' },   // not settings.js: lab/shell/settings.js is §1's
   film: { title: 'FILM / capture (filmHold stays)', row: 'R2c', file: 'lab/windows/film.js' },
   state: { title: 'STATE', row: 'R2a', file: 'lab/windows/state.js' },
   spectrum: { title: 'SPECTRUM (the five appends stay)', row: 'R2a', file: 'lab/windows/spectrum.js' },
@@ -916,13 +916,12 @@ export const PLANNED_CUT = [
   [/^ {2}\/\* ── ONE CONTROLLER/, 'controller'],                                     // §2–§4 + §7: the seat (0.5.2 R1: the module is lab/shell/controller.js)
   [/^ {2}\/\* ── THE BACKGROUNDED TAB/, 'loop'],                                     // §5–§6 (§7 ONE ROAD, after it, left with R1)
   [/^ {2}\/\* ── windows ──/, 'boot'],                                                // §8 head: the camera law and the seats
-  [/^ {2}const wObs = device\(\{ id: 'observer'/, 'material'],                       // WAVE · PALETTE · CAMERA · CLIP seats, WAVE's head
-  [/^ {4}\/\* ── THEME and SURFACE/, 'settings-card'],                                // SETTINGS, first span
-  [/^ {4}const gd = group\(gDraw, /, 'material'],                                    // WAVE's DRAW · CLIP · PALETTE · CAMERA
-  [/^ {4}\/\* ── THE FILM \(0\.5\.0 C7/, 'film'],                                     // the FILM / capture
-  [/^ {4}function filmHold\(on\) \{/, 'loop'],                                       // filmHold stays beside the loop (app.loop.hold)
-  [/^ {4}const film = \(\) => exact \|\| /, 'film'],
-  [/^ {4}const gq = group\(ui\.set\.body, 'FIELD QUALITY'\)/, 'settings-card'],       // SETTINGS, second span (to the block's end)
+  [/^ {2}function filmHold\(on\) \{/, 'loop'],                                       // filmHold stays beside the loop (app.loop.hold by value; 0.5.2 R2c: out of the block)
+  [/^ {2}const \{ wObs, wPal, wCam, wClip, /, 'material'],                            // the seat (0.5.2 R2c: lab/windows/material.js): the four cards, WAVE's head
+  [/^ {2}\/\* ── THEME and SURFACE/, 'settings-card'],                                // the seat (0.5.2 R2c: lab/windows/settings-card.js): SETTINGS, first span
+  [/^ {2}createDrawClipPaletteCamera\(\);/, 'material'],                             // material's second seat: WAVE's DRAW · CLIP · PALETTE · CAMERA
+  [/^ {2}\/\* ── THE FILM \(0\.5\.0 C7/, 'film'],                                     // the seat (0.5.2 R2c: lab/windows/film.js): the FILM / capture
+  [/^ {2}createFieldQuality\(\);/, 'settings-card'],                                 // the SETTINGS card's second seat: FIELD QUALITY
   [/^ {2}\/\/ STATE — preparation/, 'state'],                                       // the seat (0.5.2 R2a: the card and its CLEAR are lab/windows/state.js)
   [/^ {2}\/\/ SPECTRUM$/, 'spectrum'],                                              // the seat (0.5.2 R2a: lab/windows/spectrum.js)
   [/^ {2}rack\.appendChild\(wPal\.root\); rack\.appendChild\(wObs\.root\)/, 'boot'],   // the five appends stay at their seat
@@ -1084,6 +1083,9 @@ export function classes(src, opts = {}) {
   for (const F of files) { F.fills = new Map(); for (const r of F.refs) { const c = r.name === 'app' && !r.deferred && chainOf(F.toks, r); if (c && c.write && c.x && !F.fills.has(c.ns + '.' + c.x)) F.fills.set(c.ns + '.' + c.x, partSeat(F, r)); } }
   const fileFills = (ns, x, seat) => files.some((G) => G.fills.has(ns + '.' + x) && G.fills.get(ns + '.' + x) < seat);
   for (const F of files) F.seat = seatOf(F.module);
+  /* 0.5.2 R2c: a slot the literal holds BY VALUE under another key (`loop: { hold: filmHold }`) hands that boot-level name */
+  const litName = new Map(), appLit = W.declInit.get((W.bootHits[0].scope.names.get('app') || {}).at);
+  if (appLit && appLit.obj !== undefined) for (const k of W.objKeys.get(appLit.obj) || []) if (P(k.at + 2) === '{') for (const x of W.objKeys.get(k.at + 2) || []) if (x.kind === 'value' && by.has(nameAt(x.at + 2)) && [',', '}'].includes(P(x.at + 3))) litName.set(k.key + '.' + x.key, nameAt(x.at + 2));
   for (const F of files) {
     if (F.seat < 0) throw new Error(`classes: ${F.rel} (${F.module}) has no seat — keep a piece of it (its header and the call) in PLANNED_CUT`);
     F.uses = new Map();     // boot-level name → { w }
@@ -1091,8 +1093,9 @@ export function classes(src, opts = {}) {
     for (const [local, h] of F.handed) {
       if (h.key === 'dom' || CONTEXT_BAGS.has(h.key)) continue;   // boot's parameter and the context's bags: not crossing names (as in rack.js)
       if (!by.has(h.key) && h.ns && fileFills(h.ns, h.key, F.seat)) continue;   // a name an earlier-seated module registers (settings' lookSync): backward, not boot's
-      if (!by.has(h.key)) { F.unknown.push(`${F.rel}:${h.line}: \`${h.key}\` handed from app${h.ns ? '.' + h.ns : ''} is no boot-level name`); continue; }
-      for (const r of F.refs) if (r.name === local) { const e = F.uses.get(h.key) || { w: false }; if (r.kind === 'write' || r.kind === 'rw') e.w = true; F.uses.set(h.key, e); }
+      const key = (!by.has(h.key) && h.ns && litName.get(h.ns + '.' + h.key)) || h.key;
+      if (!by.has(key)) { F.unknown.push(`${F.rel}:${h.line}: \`${h.key}\` handed from app${h.ns ? '.' + h.ns : ''} is no boot-level name`); continue; }
+      for (const r of F.refs) if (r.name === local) { const e = F.uses.get(key) || { w: false }; if (r.kind === 'write' || r.kind === 'rw') e.w = true; F.uses.set(key, e); }
     }
     F.chains = F.refs.filter((r) => r.name === 'app').map((r) => ({ r, c: chainOf(F.toks, r) })).filter((x) => x.c);
   }

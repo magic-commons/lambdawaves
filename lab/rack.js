@@ -1,6 +1,6 @@
 import { waitForPaint } from './frame-settle.js';
 import { installWakeLock } from './mir/core/wakelock.js';   // 0.5.0 C6b: the screen stays on while THE play plays
-import { reworkNative, planeModel } from './native-ui.js';
+import { reworkNative } from './native-ui.js';
 import { firstRunMaterial, firstRunQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
 /* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
  *
@@ -20,29 +20,26 @@ import { Clock, onePlay } from './clock.js';
 import { createWindowActivity } from './mir/window-activity.js';
 import { paintedRect } from './occlusion.js';   // 0.5.0 A7: the occlusion providers (KIT BRIEF 8's twin)
 import { VIEW, VIEW_NAMES, STYLE, cameraBasis, toScreen, cameraKey, quatFromYawPitch } from './field.js';
-import { el, knob, sw, seg, trig, readout, device as kitDevice, group, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
+import { el, knob, device as kitDevice, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
 import { MOLECULE_BY_ID, moleculeAtoms } from './molecules.js';
 import { ELEMENT } from './md.js';
 import { createInfoLayer } from './mir/info/layer.js';   // 0.5.1 D1: the STAGE TEXT is one block of the kit's INFORMATIONAL layer
 import { isField } from './mir/core/pointer.js';                       // 0.5.1 D2: the head's Escape, as the kit's greet reads it
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
-import { createFilm } from './render-exact.js';   // 0.5.0 C7: the film is MIR's recorder with λWAVES' frame
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
-import { createCapture, maxPictureSize } from './capture.js';
 import { createChem } from './chemview.js';   // wave CHEMISTRY: the RHF · real-time window (contract B-H2O-8)
 import { createRegister } from './registerview.js';   // REGISTER: one window, two registers — ORBITAL (orbitalsview.js, MATH-H2O Proposition 1) and STATES (statesview.js, the many-electron TD-CIS register)
 import { createMolecularSession } from './molecular-session.js';   // the ONE owner of the molecular volume (MOLECULAR WAVES stage 1)
 import { calculusMarkdown } from './calculus.js';
-import { createRampPanel } from './mir/panels/ramp.js';   // 0.5.0 C1: the phase palette's editor (paletteview.js left)
-import { toLUT, PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb, contrastRatio } from './mir/palette.js';   // N6: the kit's copy (lab/palette.js differed only in two comment lines)
+import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
+import { rgbToHex, contrastRatio } from './mir/palette.js';   // N6: the kit's copy (lab/palette.js differed only in two comment lines)
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
 import { createStateCard } from './windows/state.js';   // 0.5.2 R2a: the STATE card, out of boot()
 import { stateLatex, moleculeHead, formulaLatex, BASIS_LABEL } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page; 0.5.1 D2: its head
 import { wellCentroid } from './well.js';
 import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js';   // 0.5.2 R3a (edit-domain.js left with the history)
 import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
-import { createCameraPanel } from './mir/panels/camera.js';           // 0.5.0 C1: the CAMERA card's rows are the kit's panel over the law's port
 import { createModulation } from './mir/modulation/window.js';   // 0.5.0 C4: the kit's window controller (MIR 1.5), over A5's port
 import { createCurvesPanel } from './mir/panels/curves.js';     // 0.5.1 D10-24: the CURVES card's rows are the kit's panel over the stage canvas
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
@@ -132,9 +129,9 @@ export async function boot(dom) {
     state: { history: null, palette: null, molFormulaScale: 1, space: 'x', playedLast: false, uiHidden: false, pointerHeld: false, metersWall: 0, govVersion: -1, keplerDirty: true, badgesWall: 0,
       applyVisuals: true, modView: null, modHost: null, modWall: 0, tl: null, modExpOn: null, dodge: null, filmCard: null, feedMs: 0, rotMoved: false, rotTicking: false, audioCap: null, modArm: true,
       occludeDirty: true, occludeAt: 0, stageMix: 0.04, stageFollow: true, refSnapshot: null, pendingRef: null, warmTimer: 0, warmIdle: 0, dragging: false, cornerLayoutDirty: true,
-      exportLocked: false, histShown: null, lastNmax: 1, capApi: null, camKnobs: null, exporter3d: null, flowEpoch: null, chem: null, restampParams: null, molSession: null, register: null,
+      exportLocked: false, histShown: null, lastNmax: 1, capApi: null, camKnobs: {}, exporter3d: null, flowEpoch: null, chem: null, restampParams: null, molSession: null, register: null,
       orbitals: null, states: null, stageText: null, bow: null, bowInFlight: 0, bowChain: null, kdrag: null, gasWidth: 1.8, gasAxial: false, lastLaunch: null, restoreNotice: '', linkLast: null },
-    loop: { schedule, hold: null, resetWall: () => { lastWall = performance.now() / 1000; }, page: null, loopRing: null, ringMedian: null, windowActivity: null, canPresent: null, modesAt, refModes,
+    loop: { schedule, hold: filmHold, resetWall: () => { lastWall = performance.now() / 1000; }, page: null, loopRing: null, ringMedian: null, windowActivity: null, canPresent: null, modesAt, refModes,
       meterSnapshot, paceRate: null, MOTION: null },
     host: { camera: null, orbitBy: null, camTravel: null, queueKeyOrbit: null, camLevel: null, syncFreeAngles: null, setCamMode: null, cameraPort: null, resetView: null, zoomAt: null, panBy: null,
       setDist: null, setFov: null, syncCamUI: null, rack: null, hydroReader, swClient: null, rackL: null, LAYOUT_SLOTS: null, floats: null, warning: null },
@@ -160,7 +157,7 @@ export async function boot(dom) {
   /* ── SETTINGS: what this browser remembers — lab/shell/settings.js (0.5.2 R3a), created here ── */
   const { saveSettings, setCardStyle, setFrost, setDisconnected, applySettings, KIND, RETIRED_WINDOWS, powered, DIGESTS } = createSettings(app);
   const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 };   // PACE P2: 64³ × 160 × 1 on a desktop (and a phone, whose crossing has its own rule), the GRID pairing 64³ × 110 × 0.75 on a tablet
-  app.sh.quality = quality; app.sh.saveSettings = saveSettings; app.sh.setFrost = setFrost; app.sh.KIND = KIND; app.sh.RETIRED_WINDOWS = RETIRED_WINDOWS; app.sh.DIGESTS = DIGESTS;   // 0.5.2 R3b: the shell modules' reads
+  app.sh.quality = quality; app.sh.saveSettings = saveSettings; app.sh.setFrost = setFrost; app.sh.KIND = KIND; app.sh.RETIRED_WINDOWS = RETIRED_WINDOWS; app.sh.DIGESTS = DIGESTS; app.sh.setCardStyle = setCardStyle; app.sh.setDisconnected = setDisconnected;   // 0.5.2 R3b · R2c: the shell modules' and the SETTINGS card's reads
   /* ── ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD: lab/shell/controller.js (0.5.2 R1), created here; the loop stays below ── */
   const { autoQ, controlStep, RES_LADDER, gov, effectiveRes, READER_LAW, keep, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, setGovernor, setKeepFrames,
     setPerfMode, stats, cRe, cIm, mod, MOD, modSyncBases, feedAudio, modHand, setKnob, modGets, modKnobs, modHeld, ROT_LIMIT, rotRate, rotDriving, setRotationRate, rotStep, modStore, saveMod,
@@ -652,349 +649,31 @@ export async function boot(dom) {
     modHand, resetWall: app.loop.resetWall });
   const rack = dom.rack;
   app.host.camera = camera; app.host.camLevel = camLevel; app.host.syncFreeAngles = syncFreeAngles; app.host.syncCamUI = syncCamUI; app.host.rack = rack; app.host.panBy = panBy;
-  app.host.camTravel = camTravel; app.host.orbitBy = orbitBy; app.host.queueKeyOrbit = queueKeyOrbit; app.host.setDist = setDist; app.host.setFov = setFov; app.host.resetView = resetView; app.host.zoomAt = zoomAt;
+  app.host.camTravel = camTravel; app.host.orbitBy = orbitBy; app.host.queueKeyOrbit = queueKeyOrbit; app.host.setDist = setDist; app.host.setFov = setFov; app.host.resetView = resetView; app.host.zoomAt = zoomAt; app.host.cameraPort = cameraPort;
 
-
-  const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
-  const wPal = device({ id: 'palette', eyebrow: 'PALETTE', status: '' });
-  const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
-  app.state.capApi = null;                      // wave 58: the CAPTURE group's handle, published out of the block that builds it (LW reads it)
-  app.state.camKnobs = {};                      // 0.5.0 C1: the CAMERA panel's dials by modulation id, published the same way (the observer.* defs read it)
-  app.state.exporter3d = null;                  // wave 134: FILE › EXPORT SHAPE / GRID's module instance, published the same way (LW.shapeExport reads it)
-  const wClip = device({ id: 'clip', eyebrow: 'CLIP', status: '' });   // 0.4.0 S3 (R-W3): CLIP, once SLICE / CLIP — the id stays
-  {
-
-
-    const gSpace = group(wObs.body, 'SPACE');
-    const gDraw = group(wObs.body, 'DRAW');
-    {
-      const r0 = el('div', 'row', gSpace);
-      ui.spaceSeg = seg({ label: 'the same state, two exact pictures', value: 'x', options: [
-        { id: 'x', label: 'POSITION ψ(x)', title: 'the wavefunction in space' },
-        { id: 'p', label: 'MOMENTUM φ(p)', title: 'Momentum-space view of the current state' }],
-        onChange: (v) => { app.state.space = v; schedule(TIER.REBUILD); } });
-      r0.appendChild(ui.spaceSeg.root);
-      ui.spaceNote = el('div', 'sturm-note', gSpace); ui.spaceNote.hidden = true;          // its own class: the ⓘ sweep folds every .note away, and this one must be seen
-      ui.spaceNote.innerHTML = '<b>STURMIAN:</b> momentum space is not built for the scaled radials (the Podolsky–Pauling transform would need its own table) — position space only until SCALE is back on HYDROGEN.';
+  function filmHold(on) {
+    if (on) {
+      filmBefore = { state: reg.serialize(clock.t), version: reg.version, mat: structuredClone(mat), obs: { ...obs }, rot: { ...rotRate } };
+      app.state.exportLocked = true; if (rafId) cancelAnimationFrame(rafId); rafId = 0; stats.scheduled = false;
+      return;
     }
-    const r1 = el('div', 'row', gSpace);
-    ui.viewSeg = seg({ label: 'OBSERVABLE (colour is semantic)', value: 'phase', options: [
-
-
-      { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density; palette θ = 0 when enabled, original blue when off' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
-      { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: palette ±π/2 or original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>' }, { id: 'diff', label: '<m>Δρ</m>', title: 'ρ(t) − ρ_ref: palette −π/2 gain and +π/2 loss, or original yellow/blue' }, { id: 'reim', label: '<m>Re+Im</m>', title: 'Overlay real and imaginary parts in one volume' }],
-      onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); } });
-    r1.appendChild(ui.viewSeg.root).dataset.keyAction = 'view';
-    const r2 = el('div', 'row tight', gSpace);
-    ui.expK = knob({ label: 'EXPOSURE', min: 0.08, max: 12, value: 1, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.exposure', v)) return; mat.exposure = v; schedule(TIER.PRESENT); } }); r2.appendChild(ui.expK.root);
-    ui.softK = knob({ label: 'SOFT', min: 0.3, max: 2.2, value: 0.7, fmt: (v) => 'γ' + v.toFixed(2), onInput: (v) => { if (modHand('material.softness', v)) return; mat.softness = v; schedule(TIER.PRESENT); } }); r2.appendChild(ui.softK.root);
-    ui.hueK = knob({ label: 'HUE', min: 0, max: 1, value: 0, wrap: true, fmt: (v) => (v * 360).toFixed(0) + '°', onInput: (v) => { if (modHand('material.hue', v)) return; mat.hueShift = v; applyAccent(); schedule(TIER.PRESENT); } }); r2.appendChild(ui.hueK.root);
-
-
-    /* ── THEME and SURFACE: the interface's skin, and the stage underneath it ── */
-    ui.set = device({ id: 'settings', eyebrow: 'SETTINGS', status: '' });
-    const gi = group(ui.set.body, 'INTERFACE');
-    const ri = el('div', 'row tight', gi);
-    /* 0.5.0 C2: STATUS TAGS, CONTROL HINTS and HELP are the look store's (mir.gui); native-ui.js seats them on DISPLAY */
-    ui.badgesSw = sw({ label: 'STATUS TAGS', value: look.get('badges'), title: 'Show status tags at the top', onChange: (v) => look.set({ badges: v }) }); ri.appendChild(ui.badgesSw.root);
-    ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: look.get('hints'), title: 'Show control hints after a short hover', onChange: (v) => look.set({ hints: v }) }); ri.appendChild(ui.controlHintsSw.root);
-    ui.setWindowInfo = (v) => look.set({ help: v });   // the WINDOW menu's `notes` action calls it by this name
-    ui.windowInfoSw = sw({ label: 'HELP', value: look.get('help'), title: 'Show window help buttons', onChange: ui.setWindowInfo }); ri.appendChild(ui.windowInfoSw.root);
-    ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
-    ui.molFormulaSw = sw({ label: 'STAGE TEXT', value: true, title: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states, a preset\'s name as it is pressed, the element of each nucleus — and caption a picture or a recording with it', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); if (app.state.stageText) app.state.stageText.setOn(v); schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
-    ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE TEXT\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading, an atom label its body',
-      onInput: (v) => { app.state.molFormulaScale = v; if (app.state.stageText) app.state.stageText.setScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
-    ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
-    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); look.prefs.forget(); modStore.write({ modArm: undefined, modCadence: undefined }); curvesStore.remove(); location.reload(); } }).root);
-
-
-    const rc = el('div', 'row tight', gi);
-    ui.frameSw = sw({ label: 'FRAME', value: true, title: 'Show the field boundary', onChange: () => { const modes=['box','lattice','dots','off']; const current=mat.frame===false?'off':mat.frameMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.frame=next!=='off'; mat.frameMode=next==='off'?'box':next; ui.frameSw.set(mat.frame); ui.frameSw.root.title='FRAME · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
-    rc.appendChild(ui.frameSw.root);
-    ui.axisSw = sw({ label: 'AXIS', value: true, title: 'Show or hide the x, y, and z axes', onChange: () => { const modes=['box','corner','off']; const current=mat.axis===false?'off':mat.axisMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.axis=next!=='off'; mat.axisMode=next==='off'?'box':next; ui.axisSw.set(mat.axis); ui.axisSw.root.title='AXIS · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
-    rc.appendChild(ui.axisSw.root);
-    ui.axisInkSeg = seg({ label: 'AXIS COLOUR', value: 'theme', options: [
-      { id: 'theme', label: 'THEME', title: 'Choose axis colours from the current theme' },
-      { id: 'cmy', label: 'CMY', title: 'Use cyan, magenta, and yellow axes' },
-      { id: 'rgb', label: 'RGB', title: 'Use red, green, and blue axes' }],
-      onChange: (v) => { mat.axisInk = v; saveSettings(); schedule(TIER.PRESENT); } });
-    rc.appendChild(ui.axisInkSeg.root);
-    ri.appendChild(trig({ label: 'SHOW THE WARNING AGAIN', title: 'Show the photosensitivity notice now and on the next load', onFire: () => { if (app.hooks.warning) { app.hooks.warning.reset(); app.hooks.warning.show(); } } }).root);
-    el('div', 'note', gi).innerHTML = '<b>Settings.</b> Appearance and performance choices are stored in this browser. Window power stops its reader; collapse changes layout; close removes the window until reopened from + or WINDOW.';
-    const gt = group(ui.set.body, 'THEME  ·  SURFACE');
-    const rt = el('div', 'row tight', gt);
-    const THEMES = { dark: { bg: [0.028, 0.038, 0.058], invert: false }, light: { bg: [0.93, 0.95, 0.975], invert: true } };
-
-
-    /* THE THEME'S ENGINE SIDE (0.5.0 C2): the kit's theme row writes body[data-theme] (SYSTEM follows the OS by itself) and its
-       `run` calls this once per resolved change.  WAVE 56: the browser's own chrome follows the theme — <meta name="theme-color">
-       overrides the manifest wherever it is honoured; #eef1f6 is skin.css's `body[data-theme="light"] #stage`, #070a0f lab.css's
-       unconditional ground.  Wave 48: the GPU chrome (the cube frame, the three axes) cannot read a CSS token — it reads lightUI. */
-    app.hooks.theme = (theme) => {
-      const tc = document.getElementById('themeColor');
-      if (tc) tc.setAttribute('content', theme === 'light' ? '#eef1f6' : '#070a0f');
-      mat.bg = THEMES[theme].bg.slice();
-      if (app.hooks.restage) app.hooks.restage();
-      mat.lightUI = theme === 'light';
-      schedule(TIER.PRESENT);
-    };
-    ui.themeSeg = seg({ label: 'THEME', value: look.get('theme'), options: [
-      { id: 'light', label: 'LIGHT', title: 'Use the light interface and stage' },
-      { id: 'dark', label: 'DARK', title: 'Use the dark interface and stage' },
-      { id: 'system', label: 'SYSTEM', title: 'Follow the operating system theme' }],
-      onChange: (v) => look.set({ theme: v }) });
-    rt.appendChild(ui.themeSeg.root);
-
-
-    ui.discSw = sw({ label: 'DISCONNECTED', value: look.get('disconnected'), title: 'Separate window headers from their bodies', onChange: (v) => setDisconnected(v) });
-    rt.appendChild(ui.discSw.root);
-    ui.frostSeg = seg({ label: 'FROST', value: look.get('frost'), options: [
-      { id: 'off', label: 'OFF', title: 'Disable backdrop filtering' },
-      { id: 'still', label: 'STILL', title: 'Apply frost while the field is paused' },
-      { id: 'always', label: 'ALWAYS', title: 'Apply frost continuously. This can reduce frame rate.' }],
-      onChange: (v) => setFrost(v) });
-    rt.appendChild(ui.frostSeg.root);
-    el('div', 'note', rt, 'Frost filters the field behind windows. STILL applies it while paused; ALWAYS keeps it during motion.');
-    ui.blurK = knob({ label: 'GLASS BLUR', min: 0, max: 30, value: look.get('blur'), fmt: (v) => v.toFixed(0) + ' px', title: 'the blur radius of the NOTEBOOK glass and of FROST', onInput: (v) => look.set({ blur: v }) }); rt.appendChild(ui.blurK.root);
-    /* THE STAGE KNOB IS THE HEADER λ's GROUND (wave 59), which is why moving it repaints the mark: `#title`
-       is `background: none` over `#field`, so `mat.bg` — this value — is the surface the λ is drawn on, and a
-       correction against a ground the hand can drag is not a correction.  One named function, so the knob,
-       LW.setStage and the gate all take the same road. */
-    /* STAGE has one plain law: 0% is the active theme ground and 100% is the retained custom colour.
-       FOLLOW THEME bypasses the blend without changing the knob or swatch, so it is reversible. */
-    const themeGround = () => THEMES[document.body.dataset.theme === 'light' ? 'light' : 'dark'].bg;
-    mat.stageCustom = [0.12, 0.14, 0.18];
-    function setStageMix(v) {
-      app.state.stageMix = Math.max(0, Math.min(1, Number.isFinite(+v) ? +v : 0));
-      const a = themeGround(), b = mat.stageCustom;
-      mat.bg = app.state.stageFollow ? a.slice() : [0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * app.state.stageMix);
-      paintMarks(); schedule(TIER.PRESENT);
-    }
-    app.hooks.restage = () => setStageMix(app.state.stageMix);
-    function setStageColour(colour) {
-      if (Array.isArray(colour) && colour.length >= 3) mat.stageCustom = colour.slice(0, 3).map((v) => Math.max(0, Math.min(1, +v || 0)));
-      if (ui.stageColour) ui.stageColour.value = rgbToHex(mat.stageCustom);
-      setStageMix(app.state.stageMix);
-    }
-    function setStageFollow(on) {
-      app.state.stageFollow = !!on;
-      if (ui.stageFollow) { ui.stageFollow.classList.toggle('on', app.state.stageFollow); ui.stageFollow.setAttribute('aria-pressed', String(app.state.stageFollow)); }
-      setStageMix(app.state.stageMix);
-    }
-    app.hooks.setStageColour = setStageColour;
-    app.hooks.setStageFollow = setStageFollow;
-    ui.stageK = knob({ label: 'STAGE', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
-    app.hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); ui.stageK.set(x); setStageMix(x); return x; };
-    { const seat = el('div', 'stage-seat', rt); ui.stageSeat = { root: seat };
-      ui.stageColour = el('input', 'pal-color stage-colour', seat); ui.stageColour.type = 'color'; ui.stageColour.title = 'Stage colour at 100%'; ui.stageColour.setAttribute('aria-label', 'stage colour');
-      ui.stageColour.addEventListener('input', () => { setStageColour(hexToRgb(ui.stageColour.value)); setStageFollow(false); });
-      ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button'; ui.stageFollow.title = 'Ignore the chosen stage colour';
-      ui.stageFollow.addEventListener('click', () => setStageFollow(!app.state.stageFollow));
-      rt.appendChild(ui.stageK.root); setStageColour(mat.stageCustom); setStageFollow(true); }
-    ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } }); rt.appendChild(ui.gammaK.root);
-    ui.cardSeg = seg({ label: 'CARD STYLE', value: look.get('card'), options: [
-      { id: 'refractive', label: 'REFRACTIVE', title: 'Use transparent window surfaces' },
-      { id: 'tinted', label: 'TINTED', title: 'Add the theme tint behind window content' },
-    ], onChange: (v) => setCardStyle(v) });
-    rt.appendChild(ui.cardSeg.root);
-    el('div', 'note', gt, 'Refractive shows the field through the blur. Tinted adds the theme panel colour.');
-
-
-    const gamutSup = field.ok && field.gamutSupport ? field.gamutSupport : { canvas: false, css: false, display: false, reason: 'no WebGPU device: the canvas has no colour space to set' };
-    const gamutOK = !!(gamutSup.canvas && gamutSup.css);
-    const rg = el('div', 'row tight', gt);
-    ui.gamutSeg = seg({ label: 'GAMUT', value: 'srgb', options: [
-      { id: 'srgb', label: 'sRGB', title: 'Use the sRGB colour space' },
-      { id: 'p3', label: 'DISPLAY-P3', title: gamutOK ? 'the wider space, on BOTH sides at once — the canvas is re-configured and every accent is re-expressed in it' : gamutSup.reason }],
-      onChange: (v) => setGamut(v) });
-    rg.appendChild(ui.gamutSeg.root);
-    ui.p3Seg = seg({ label: 'IN P3', value: 'convert', options: [
-      { id: 'convert', label: 'CONVERT', title: 'Preserve authored colours in Display P3' },
-      { id: 'vivid', label: 'VIVID', title: 'Increase chroma in Display P3' }],
-      onChange: () => { if (field.ok && field.gamut !== 'srgb') setGamut('p3'); } });
-    rg.appendChild(ui.p3Seg.root);
-    /** the ONE road into the gamut: it asks the canvas, believes the answer, and puts the DOM wherever the canvas ended up */
-    function setGamut(id) {
-      const got = field.ok ? field.setGamut(id === 'p3' ? (ui.p3Seg && ui.p3Seg.get() === 'vivid' ? 'p3-vivid' : 'p3') : 'srgb') : 'srgb';
-      const on = got !== 'srgb';
-      document.body.dataset.gamut = on ? 'p3' : 'srgb';
-      ui.gamutSeg.set(on ? 'p3' : 'srgb');
-      applyAccent();                                   // the DOM's accents go through the SAME map the LUT went through
-      if (ui.gamutRo) ui.gamutRo.set(on ? (got === 'p3-vivid' ? 'DISPLAY-P3 · vivid' : 'DISPLAY-P3') : 'sRGB', on ? 'ok' : '');
-      if (ui.gamutRo) ui.gamutRo.setSub(gamutOK ? 'the interface and the field are both ' + (on ? 'DISPLAY-P3' : 'sRGB') : gamutSup.reason);
-      saveSettings(); schedule(TIER.PRESENT);
-      return got;
-    }
-    app.hooks.setGamut = setGamut;
-    ui.gamutRo = readout({ label: 'IN FORCE', value: 'sRGB', sub: '' });
-    rg.appendChild(ui.gamutRo.root);
-    if (!gamutOK) {
-      for (const id of ['p3']) { const b = ui.gamutSeg.button(id); if (b) { b.disabled = true; b.classList.add('disabled'); } }
-      for (const id of ['convert', 'vivid']) { const b = ui.p3Seg.button(id); if (b) { b.disabled = true; b.classList.add('disabled'); b.title = gamutSup.reason; } }
-    }
-    ui.gamutRo.set('sRGB'); ui.gamutRo.setSub(gamutOK ? 'the interface and the field are both sRGB' : gamutSup.reason);
-    el('div', 'note', gt).innerHTML = '<b>Gamut.</b> Display P3 is available only when both CSS and the WebGPU canvas support it. CONVERT preserves authored colours; VIVID increases chroma. DITHER reduces visible 8-bit banding.';
-    const ra = el('div', 'row tight', gt);
-    ui.accA = knob({ label: 'ACCENT A', min: 0, max: 360, value: look.get('accentA'), wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'the first UI accent: an angle on the current palette wheel', onInput: (v) => look.set({ accentA: v }) }); ra.appendChild(ui.accA.root);
-    ui.accB = knob({ label: 'ACCENT B', min: 0, max: 360, value: look.get('accentB'), wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'Set Accent B', onInput: (v) => look.set({ accentB: v }) }); ra.appendChild(ui.accB.root);
-    ui.vivid = knob({ label: 'VIVID', min: 0, max: 1, value: look.get('vivid'), fmt: (v) => (v * 100).toFixed(0) + '%', title: 'Increase accent chroma and glow', onInput: (v) => look.set({ vivid: v }) }); ra.appendChild(ui.vivid.root);
-    el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Theme changes the interface and stage. Stage, gamma, accents, hue, exposure, and invert affect presentation without changing ψ. Frost may reduce frame rate while the field moves.';
-    app.hooks.setTheme = (t) => look.set({ theme: t });
-
-    const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: DRAW STYLE (window id `style`) merged into WAVE (board #59); this block is the DRAW section of the WAVE window
-    const rd = el('div', 'row tight', gd);
-    ui.styleSeg = seg({ label: 'STYLE', value: 'cloud', options: [
-      { id: 'cloud', label: 'CLOUD', title: 'the emission/absorption integral' },
-      { id: 'solid', label: 'SOLID', title: 'Render a lit density shell' },
-      { id: 'grain', label: 'GRAIN', title: 'Render a sparse particle field' },
-      { id: 'signed', label: 'SIGNED', title: 'Render signed lobes and nodal surfaces' },
-      { id:'dust',label:'DUST',title:'World-locked fine particles; GRAIN controls their count' },
-      { id:'glass',label:'SHELL',title:'Render a translucent density shell' },
-      { id:'additive',label:'ADD',title:'Additive emission through the field' },
-      { id: 'bands', label: 'BANDS', title: 'Draw amplitude level bands; GRAIN sets their count' }],
-      onChange: (v) => { mat.style = STYLE[v]; schedule(TIER.PRESENT); } });
-    rd.appendChild(ui.styleSeg.root).dataset.keyAction = 'style';
-    /* 2026-09-10 (Josh): ISO, GRAIN and KNEE sit directly under EXPOSURE, SOFT and HUE — one six-knob
-       material row above STYLE — instead of a second row below the style seg. */
-    ui.isoK = knob({ label: 'ISO', min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.isoK.root);
-    ui.grainK = knob({ label: 'GRAIN', min: 0.02, max: 1, value: 0.35, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.grain', v)) return; mat.grain = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.grainK.root);
-    ui.kneeK = knob({ label: 'KNEE', min: 0.02, max: 8, value: 0.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.kneeK.root);
-
-
-    const rdd = el('div', 'row tight', gd);
-    ui.ditherSeg = seg({ label: 'DITHER', value: 'off', options: [
-      { id: 'off', label: 'OFF', title: 'the colour goes to the 8-bit swapchain as it is' },
-      { id: 'ordered', label: 'ORDERED 8×8', title: 'Apply ordered dithering to reduce 8-bit colour bands' }],
-      onChange: (v) => { mat.dither = v === 'off' ? 0 : (ui.ditherK ? ui.ditherK.get() : 1); if (ui.ditherK) ui.ditherK.setDisabled(v === 'off'); schedule(TIER.PRESENT); } });
-    rdd.appendChild(ui.ditherSeg.root);
-    ui.ditherK = knob({ label: 'STRENGTH', min: 0.25, max: 2, value: 1, fmt: (v) => '±' + (v / 2).toFixed(2) + ' LSB', onInput: (v) => { if (ui.ditherSeg.get() !== 'off') { mat.dither = v; schedule(TIER.PRESENT); } } });
-    ui.ditherK.root.title = 'Dither strength in 8-bit output levels; 1 is ±½ level';
-    ui.ditherK.setDisabled(true);
-    rdd.appendChild(ui.ditherK.root);
-    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE limits opacity growth. ISO sets the solid or shell threshold; GRAIN controls particle density or band count. Ordered dithering reduces colour steps; strength 1 is ±½ output level.';
-
-    const gs = group(wClip.body, 'observer only');
-    const r3 = el('div', 'row', gs);
-    /* wave 106: these two keep their handles for the same reason POS and THICK now do — an undo has to
-       be able to MOVE a control, and a control nothing holds cannot be moved. */
-    ui.sliceModeSeg = seg({ aria: 'slice mode', value: 'off', options: [{ id: 'off', label: 'VOLUME' }, { id: 'clip', label: 'CLIP' }, { id: 'slab', label: 'SLAB' }], onChange: (v) => { mat.slice.mode = { off: 0, clip: 1, slab: 2 }[v]; schedule(TIER.PRESENT); } });
-    r3.appendChild(ui.sliceModeSeg.root);
-    ui.sliceAxisSeg = seg({ aria: 'slice axis', value: 'z', options: [{ id: 'x', label: 'X' }, { id: 'y', label: 'Y' }, { id: 'z', label: 'Z' }], onChange: (v) => { mat.slice.axis = { x: 0, y: 1, z: 2 }[v]; delete mat.slice.normal; schedule(TIER.PRESENT); } });
-    r3.appendChild(ui.sliceAxisSeg.root);
-    const sliceNormals = [[1,0,0],[0,1,0],[0,0,1]];
-    const mini = planeModel(gs, { getNormal:()=>mat.slice.normal || sliceNormals[mat.slice.axis|0] || sliceNormals[2], getPosition:()=>mat.slice.pos, onTurn:n=>{mat.slice.normal=n; schedule(TIER.PRESENT);} });
-    ui.sliceMini = mini;
-    ui.sliceAxisSeg.root.hidden = true;
-    /* WAVE 106 · THESE TWO KEEP THEIR HANDLES NOW, and that is what makes them modulatable.  Both
-       were built inline — `knob({...}).root` appended straight into the row — so the objects went
-       out of scope the instant they were made and nothing could ever read or move them again.  A MIR
-       target needs a `knob:` accessor to become a DROP target (registration alone only puts it in the
-       picker), and `setKnob` needs the handle to move the needle when a macro drives it.
-         `modHand` in front of each setter is the law every registered knob obeys (see ISO/GRAIN/KNEE):
-       on a modulated parameter the hand's turn is a change to the BASE, routed through the registry,
-       not a write straight to the instrument — otherwise `applyAll` stomps it on the next frame. */
-    ui.slicePosK = knob({ label: 'POS', min: -1, max: 1, value: 0, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.slice.pos', v)) return; mat.slice.pos = v; schedule(TIER.PRESENT); } });
-    r3.appendChild(ui.slicePosK.root);
-    ui.sliceThickK = knob({ label: 'THICK', min: 0.01, max: 0.4, value: 0.03, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.slice.thick', v)) return; mat.slice.thick = v; schedule(TIER.PRESENT); } });
-    r3.appendChild(ui.sliceThickK.root);
-    /* 0.5.0 C1 · RAMP: the phase palette's editor is MIR's createRampPanel (panels/ramp.js — paletteview.js made generic, which leaves):
-       the strip IS the phase circle (−π … +π, wrapping), its seam read in OKLab, the ring, the stops as handles, the presets in λWAVES'
-       grouped order; the table is palette.js toLUT bit for bit.  PALETTE (on/off, the `palette` key) stays the app's switch, and the
-       stops ride λWAVES' own project (`project: false`); `palette` keeps the editor's old API for serialize/restore, the link and LW. */
-    const gp = group(wPal.body, 'COLOUR');
-    const palOn = (v) => { mat.paletteOn = v; applyAccent(); if (v) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } schedule(TIER.PRESENT); };
-    const palSw = sw({ label: 'PALETTE', value: false, onChange: palOn });
-    el('div', 'row tight palette-enable', gp).appendChild(palSw.root).dataset.keyAction = 'palette';
-    let palId = PAL_DEF, palStops = PALETTE_BY_ID.get(PAL_DEF).stops;
-    const rv = createRampPanel({ parent: gp, cyclic: true, project: false, presets: PRESET_GROUPS.flatMap((g) => g.items),
-      labels: { ticks: [[0, '−π'], [0.25, '−π/2'], [0.5, '0'], [0.75, '+π/2'], [1, '+π']], seam: 'SEAM at ±π', seamWarn: 'a visible seam at arg ψ = ±π', at: 'ARG ψ', fmt: (u) => ((2 * u - 1) * Math.PI).toFixed(3) + ' rad' },
-      ramp: { get: () => ({ stops: palStops, preset: palId }), set: (s, o) => { palStops = s; if (o.preset) palId = o.preset; },
-        lut: (lut) => { if (field.ok) field.setPalette(lut); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }).view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
-    el('div', 'note', gp).innerHTML = '<b>Phase palette.</b> The strip runs from arg ψ = −π to +π and wraps at the seam. Tap the strip to add a stop, drag one to move it, drag it off the strip to remove it. OKLab blending keeps transitions perceptually even.';
-    app.state.palette = { get stops() { return rv.stops(); }, get selected() { return rv.selected(); }, get on() { return palSw.get(); }, get id() { return palId; },
-      get groups() { return PRESET_GROUPS.map((g) => ({ points: g.points, items: g.items.map((p) => p.id) })); },
-      setOn(v) { palSw.set(!!v); palOn(!!v); }, select: (id) => rv.preset(id),
-      /** the file's own stops under its name (the preset is kept when the file names none, so RESET still reloads it); `selected` is the stop the hand had */
-      load(s, selected = 0, id) { rv.load(s, PALETTE_BY_ID.get(id) ? id : palId); const h = rv.handle(Math.max(0, Math.min(rv.stops().length - 1, Math.trunc(selected) || 0))); if (h) h.dispatchEvent(new FocusEvent('focus')); } };
-
-
-    const rInv = el('div', 'row tight', wPal.body);
-    ui.invertSw = sw({ label: 'INVERT', value: false, title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
-    rInv.appendChild(ui.invertSw.root);
-    /* 0.5.0 C1 · THE CAMERA PANEL: MIR's createCameraPanel over A8's port, its rows built into this card now — HOME and the port's
-       PAN HOME, CONTROL, the direction sphere (YAW · PITCH), the PAN pad (X · Y), ZOOM · FOV and the HAND (DRAG · FRICTION · FLING ·
-       AUTO-ROTATE · SPIN).  No project part and no history: the pose rides λWAVES' own project and is no edit; the feel is a
-       PREFERENCE, so a hand on it saves the settings (coalesced).  `mod` is the modulation port WITHOUT `add`: the panel registers no
-       target — the saved observer.* routes stay the defs' below, whose knob accessors are these dials (camKnobs) — and a hand on a
-       routed dial writes its base (modHand), as everywhere. */
-    const gc = group(wCam.body, 'CAMERA'), FEEL = new Set(['spin', 'friction', 'drag', 'fling']); let feelSave = 0;
-    const camPanel = createCameraPanel({ mode: '3d', modPrefix: 'observer', project: false, mod,
-      port: { ...cameraPort, set(id, v) { cameraPort.set(id, v); if (FEEL.has(id)) { clearTimeout(feelSave); feelSave = setTimeout(saveSettings, 250); } } } });
-    camPanel.spec.build(gc, null);
-    const camView = camPanel.view(); camView.homeBtn.root.dataset.keyAction = 'camReset';
-    app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
-    el('div', 'row tight', gc).appendChild(trig({ label: 'SET Δρ REF', title: 'Use the current density as the difference reference', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
-    el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt-drag, two fingers or the PAN pad slide the picture; the molecule stays the pivot. Double-click, double-tap or HOME restores the camera.';
-
-    /* ── THE FILM (0.5.0 C7 · C7b): MIR's recorder handed λWAVES' frame(i, ctx) (render-exact.js createFilm); its UI is the kit's — the
-       RENDER card (lab/film-card.js) and the TIMELINE window — and the CAPTURE group left.  While a film owns the page the rack's loop
-       stands aside (no frame of ours presents with an unpinned seed: hazard H9), and what the film steps through — the state, the
-       material, the pose, the rotation rates — is put back exactly as it was.  `__LW.captureUI` is its scripting facade: createFilm's
-       named takes at C7's defaults (30 fps, 6 s, ×2), no UI; a verb while one runs stops it. */
-    let exact = null, filmBefore = null, cap = null, facadeRun = null;
-    function filmHold(on) {
-      if (on) {
-        filmBefore = { state: reg.serialize(clock.t), version: reg.version, mat: structuredClone(mat), obs: { ...obs }, rot: { ...rotRate } };
-        app.state.exportLocked = true; if (rafId) cancelAnimationFrame(rafId); rafId = 0; stats.scheduled = false;
-        return;
-      }
-      const b = filmBefore; filmBefore = null;
-      if (b) { if (reg.version !== b.version) reg.restore(b.state); Object.assign(mat, b.mat); Object.assign(obs, b.obs); Object.assign(rotRate, b.rot); }   // a film that moved no coefficient leaves the register (and the loop plan made on it) as it was
-      app.state.exportLocked = false; app.state.modWall = 0; lastWall = performance.now() / 1000;
-      schedule(TIER.RECONSTRUCT);
-    }
-    const film = () => exact || (exact = createFilm(LW, { canvas: dom.canvas, energies: periodEnergies, canvasCap: 16384, host: () => app.state.modHost, hold: filmHold,
-      road: { pending: () => ({ caption: stageCaption(), spin: camera.ambient && obs.mode !== 'free' ? camera.ambient : 0, yaw0: obs.yaw }), step: rotStep, rotating: rotDriving,
-        plan: (o) => capture().planLoop(o) } }));   // the rack's own for the film's three schedules (take) and the card's road
-    const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies, caption: () => stageCaption() }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩; 0.4.0 S3: and draws the STAGE TEXT's caption
-    const take = async (kind, o, keep) => {
-      if (facadeRun) { facadeRun.stop(); return null; }
-      facadeRun = film().take(kind, { fps: 30, seconds: 6, scale: 2, drive: app.state.modArm, ...o });
-      try { const r = await facadeRun.done; if (r && r.ok && keep) film().save(r); return r; }
-      catch (e) { return { ok: false, error: String(e && e.message || e) }; } finally { facadeRun = null; }
-    };
-    app.state.capApi = { get exact() { return film(); }, get capture() { return capture(); }, plan: () => capture().planLoop({ fps: 30, seconds: 6 }),
-      limits: () => { try { return capture().limits(); } catch (_) { return maxPictureSize(field && field.ok ? field.device.limits : null, 16384); } },
-      async picture() { const r = await capture().picture({ scale: 2 }); if (r && r.ok !== false) capture().save(r); return r; },
-      record: () => take('clip', {}, true), loop: () => take('period', {}, true), exportFrames: (options = {}) => take('frames', { options }, options.download !== false),
-      get busy() { return !!facadeRun || !!(exact && exact.running); } };
-    const gq = group(ui.set.body, 'FIELD QUALITY');
-    const r5 = el('div', 'row', gq);
-    ui.gridSeg = seg({ label: 'GRID', value: String(quality.res),   /* wave 101: the CONTROL reads the shipped grid rather than restating it — a hardcoded '96' here would have disagreed with quality.res the moment the default moved */ options: [{ id: '64', label: '64³' }, { id: '96', label: '96³' }, { id: '128', label: '128³' }],
-      onChange: (v) => { quality.res = +v; quality.steps = { 64: 110, 96: 160, 128: 240 }[+v]; quality.scale = { 64: 0.75, 96: 1, 128: 1 }[+v]; schedule(TIER.REBUILD); } });
-    r5.appendChild(ui.gridSeg.root);
-    r5.appendChild(seg({ label: 'FIELD CLOCK cap', value: '0', options: [{ id: '0', label: 'MAX' }, { id: '33', label: '30 Hz' }, { id: '66', label: '15 Hz' }, { id: '200', label: '5 Hz' }],
-      onChange: (v) => { fieldRate.capMs = +v; } }).root);
-    const r5b = el('div', 'row tight', gq);
-    ui.autoSw = sw({ label: 'AUTO SCALE', value: true, title: 'Adjust canvas resolution to the frame budget', onChange: (v) => { quality.auto = v; if (!v) quality.autoScale = 1; saveSettings(); } }); r5b.appendChild(ui.autoSw.root);
-    ui.govSw = sw({ label: 'GOVERNOR', value: true, title: 'Protect the frame rate automatically', onChange: (v) => { setGovernor(v); saveSettings(); } }); r5b.appendChild(ui.govSw.root);
-    ui.perfSeg = seg({ label: 'PERFORMANCE', value: '120', options: [   // 0.4.0 S3: out of METERS, beside the GOVERNOR it works with
-      { id: 'full', label: 'FULL', title: 'Update visible readers every frame' },
-      { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
-      onChange: (v) => { setPerfMode(v); saveSettings(); } });
-    r5b.appendChild(ui.perfSeg.root);
-    ui.scaleRo = readout({ label: 'RENDER SCALE', value: '100%', sub: 'canvas pixels per CSS pixel × DPR' });
-    r5b.appendChild(ui.scaleRo.root);
-    const r6 = el('div', 'row', gq);
-    ui.domainAuto = sw({ label: 'DOMAIN AUTO', value: true, onChange: (v) => { domain.auto = v; ui.domainKnob.setDisabled(v); schedule(TIER.REBUILD); } });
-    r6.appendChild(ui.domainAuto.root);
-    ui.domainKnob = knob({ label: 'HALF-WIDTH', min: 3, max: 140, value: 7, log: true, fmt: (v) => '±' + v.toFixed(0) + ' a₀', onChange: (v) => { domain.half = v; schedule(TIER.REBUILD); } });
-    ui.domainKnob.setDisabled(true);
-    r6.appendChild(ui.domainKnob.root);
-    const r7 = el('div', 'row tight', gq);
-    ui.keepSw = sw({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
-    el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. KEEP FRAMES updates the playhead every frame and may cost performance.';
+    const b = filmBefore; filmBefore = null;
+    if (b) { if (reg.version !== b.version) reg.restore(b.state); Object.assign(mat, b.mat); Object.assign(obs, b.obs); Object.assign(rotRate, b.rot); }   // a film that moved no coefficient leaves the register (and the loop plan made on it) as it was
+    app.state.exportLocked = false; app.state.modWall = 0; lastWall = performance.now() / 1000;
+    schedule(TIER.RECONSTRUCT);
   }
+  let filmBefore = null;   // THE FILM's hold (0.5.2 R2c): filmHold stays beside the loop, app.loop.hold by value; the film's road is lab/windows/film.js
+  const { wObs, wPal, wCam, wClip, createDrawClipPaletteCamera } = createMaterial(app);   // 0.5.2 R2c: lab/windows/material.js — WAVE's head and the four cards (two seats)
+  /* ── THEME and SURFACE: the interface's skin, and the stage underneath it ── */
+  const { createFieldQuality } = createSettingsCard(app);   // 0.5.2 R2c: lab/windows/settings-card.js — the SETTINGS card (two seats)
+  createDrawClipPaletteCamera();   // 0.5.2 R2c: material's second seat — WAVE's DRAW, CLIP, PALETTE · INVERT, CAMERA
+  /* ── THE FILM (0.5.0 C7 · C7b): MIR's recorder handed λWAVES' frame(i, ctx) (render-exact.js createFilm); its UI is the kit's — the
+     RENDER card (lab/film-card.js) and the TIMELINE window — and the CAPTURE group left.  While a film owns the page the rack's loop
+     stands aside (no frame of ours presents with an unpinned seed: hazard H9), and what the film steps through — the state, the
+     material, the pose, the rotation rates — is put back exactly as it was.  `__LW.captureUI` is its scripting facade: createFilm's
+     named takes at C7's defaults (30 fps, 6 s, ×2), no UI; a verb while one runs stops it. */
+  createFilmApi(app);   // 0.5.2 R2c: lab/windows/film.js — film(), capture(), the takes, app.state.capApi
+  createFieldQuality();   // 0.5.2 R2c: the SETTINGS card's second seat — FIELD QUALITY
 
   // STATE — preparation. Everything here changes c.
   const { clearRegister, wState } = createStateCard(app); app.w.clearRegister = clearRegister;   // 0.5.2 R2a: lab/windows/state.js (STATE's CLEAR with it)
@@ -1896,6 +1575,7 @@ export async function boot(dom) {
   LW.curves = curves;
 
   /* ── go ───────────────────────────────────────────────────────────────── */
+  app.w.stageCaption = stageCaption;   // 0.5.2 R2c: the film's caption (boot-kept until R2d's stage-words.js registers it — the integrator deletes this line at the merge)
   LW.bootView = VIEW_NAMES[mat.view]; LW.bootVortex = vortex.on; LW.bootOrder = layout.orderAll(); LW.bootClosed = layout.closed();   // the shipped defaults, recorded before a URL preset's visuals apply
   const q = new URLSearchParams(location.search);
   loadPreset(q.get('preset') && PRESET_BY_ID.has(q.get('preset')) ? q.get('preset') : '1s+2pz');

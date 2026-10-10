@@ -366,3 +366,11 @@ other cards declares each later seat as a root-level `function create<Y>()` that
 or append changes its order; `tools/rack-deps.mjs` measures such a function as eager at its own piece and its declarations as the module's own (an arrow or a
 nested closure is read as a deferred callback and its fills as never made — the tool refuses that tree; `tests/rack-deps.test.mjs` §5). `rack.js` stands at
 2,001 lines with PAIR 2 in; thirteen module files are measured.
+
+THE MATERIAL, THE SETTINGS CARD AND THE FILM (0.5.2 R2c): WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA are
+`lab/windows/material.js` `createMaterial(app)` and the SETTINGS card is `lab/windows/settings-card.js` `createSettingsCard(app)` — each at
+TWO seats (the root builds the first span and returns `createDrawClipPaletteCamera()` / `createFieldQuality()`, which `boot()` calls where DRAW
+and FIELD QUALITY stood, so the cards keep their rack order; the card registers its seven stage hooks on `app.hooks` at its root) — and THE
+FILM's road (`film()`, `capture()`, the takes, `app.state.capApi`) is `lab/windows/film.js` `createFilmApi(app)` at one. `filmHold` stays in
+`boot()` beside the loop as `app.loop.hold`, handed to the film BY VALUE (`const { hold: filmHold } = app.loop`; the tool counts a slot the
+literal holds by value under another key as backward), and `LW`, `periodEnergies` and `stageCaption` are read through `app.sh` / `app.w` at use.

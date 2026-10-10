@@ -41,3 +41,14 @@ real seams, over an explicit context. Nothing a hand or an eye meets is meant to
   three, left apart on purpose so the pair's hunks would not touch). `rack.js` 2,448 → 2,001 with both of PAIR 2 in; `lab/*.js` + shell + windows 27,893 of
   27,943 (50 left for PAIR 3's seven and R5). The hinge holds (readouts 7, kepler 4; SPECTRUM 24 the largest); 0 bare writes; 13 module files measured.
   Gates on the merged tip: node exit 0; `rack-deps.test` 54 PASS; `serialize-bytes` 11/11 full + 11/11 edit vs the 0.5.1 base (`8755`); `lw-facade` 1/1; `settings-probe` 2 of 6 reached then WATER stalled (the rig — the base's recorded reading is identical); the six new module files and `rack.js` parse. **You see nothing.**
+
+- **R2c THE MATERIAL + THE SETTINGS CARD + THE FILM ROAD** (merged 2026-10-10 12:30 from `5cff63e`; clean): WAVE · CLIP · PALETTE · CAMERA leave `boot()` for
+  `lab/windows/material.js` (127 lines, two seats — the root and `createDrawClipPaletteCamera()` where DRAW stood), the SETTINGS card for `settings-card.js` (177;
+  two seats, `createFieldQuality()` where FIELD QUALITY stood; its seven stage hooks registered at the root) and the film road for `film.js` (22; one seat);
+  `filmHold` stays in `boot()` as `app.loop.hold` by value. 296 of 319 moved non-blank lines byte-identical, 15 re-indented, 8 read a slot; 15 import names out
+  (the dead `toLUT` among them). `rack.js` 2,001 → 1,681; `lab/*.js` + shell + windows 27,893 → 27,902 (41 under the cap). The hinge holds (material 1,
+  settings-card 5, film 5; SPECTRUM 24 the largest); 0 bare writes; 16 module files measured. The builder's light check: node 0; `lw-facade` 1/1;
+  `film-handover` 4/4; `film-probe` + `film-compare` identical to the base in digests, times and MP4 bytes; `camera-routes` SAME 5/5; `camera-shift` green;
+  `serialize-bytes` 11/11 full + edit; `take-in-bugs` 4/4 on its third run (a frame-timed flake twice); `curves` scene 3, `settings-probe` (2 of 6 reached) and
+  the boot chunk (21/23: B60, B65) identical on the base (the rig). The integrator's gates on the merge: pwa, doubles 0, 17 files parse, node 0, the classes
+  table unchanged. **You see nothing.**
