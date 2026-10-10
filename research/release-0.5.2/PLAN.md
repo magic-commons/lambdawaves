@@ -159,3 +159,13 @@ any `lab/` edit; the owning suites one at a time on the builder's own server; a 
   `v0.5.2-alpha · Rack Dissolution` on his word. NO push, NO deploy.
 
 — Claude Yan, 2026-10-09. `BRIEF-R0.md` is written beside this file; the build started on Josh's word.
+
+### Josh's cut word (2026-10-10 ≈14:58 CDT, verbatim)
+
+> "Could I have a lookseee?" — shown the cut candidate on `https://127.0.0.1:8731/lab/`, `CHANGES-0.5.2.md` and `R-V-REPORT.md` — then **"Looks nice! Let's cut it"**.
+
+**Cut locally by Claude Sos:** `3797678` the version line (`0.5.2-alpha · Rack Dissolution · 2026-10-10`) and the README status; tag **`v0.5.2-alpha`**; `2483426` the
+CHANGELOG; the snapshot `~/Documents/LAMBDAWAVES-RELEASES/v0.5.2-alpha/` and the vault index. R-V's verdict FIT WITH NOTES (`baffea3`); the fix round `789962d`. Not pushed,
+not deployed, no GitHub release (the 10-07 ruling stands). Earlier the same day Josh, on taking over Yan's paused leg: "Take anything she has, and continue doing
+whatever you must to make the dual major agent workflow efficient and smooth" — the integrator's scripts moved into `research/release-0.5.2/integrator/`.
+

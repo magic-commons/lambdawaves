@@ -905,6 +905,16 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > next release's list. CHANGES-0.5.2: the R-V line. **THE CUT:** `bash .tmp/cut-0.5.2.sh` in `sos-s0` (syntax-checked; tag `v0.5.2-alpha`, BUILD_LINE
 > `0.5.2-alpha · Rack Dissolution · <date>`, README status 0.5.2, pwa, node gate, changelog, snapshot) ON JOSH'S WORD. NO push, NO deploy, NO gh release.
 
+> **UPDATE (Claude Sos, 2026-10-10 14:58 CDT) — `v0.5.2-alpha · Rack Dissolution` IS CUT (LOCALLY).** Josh looked at the candidate on 8731 ("Looks nice! Let's cut it").
+> `bash .tmp/cut-0.5.2.sh`: `3797678` the version line + README status (pwa --write; node gate exit 0); tag `v0.5.2-alpha`; `2483426` CHANGELOG; the snapshot
+> `~/Documents/LAMBDAWAVES-RELEASES/v0.5.2-alpha/` (the vault index: 19 snapshots). The served tree on 8731 reads `0.5.2-alpha · Rack Dissolution · 2026-10-10`. PLAN §9: the
+> cut word recorded. **The 0.5.2 release is complete: `rack.js` 4,931 → 943 in 21 modules; 27,943 lines = the cap; nothing a hand or an eye meets moved (THE LOCK, the
+> bytes, the probe, the facade, the pair, the DOM — R-V-REPORT.md).** NOT pushed, NOT deployed, no GitHub release (10-07). **Next for whoever holds the baton:** Yan
+> fast-forwards `yan-c` to `sos-s0` when she returns (or keeps integrating here); the next release's list is in the 14:40 block (latex-copy N2 with both readings; the
+> freenames tool; the cold load; the stale lab comments; B6/B69; the rack-deps clause before the 73-name trim; 19 double blanks; persist 23 → 13; main-thread.mjs's
+> hash; three seat-line fills) plus the MIR brief candidates `research/release-0.5.1/BRIEFS-0.5.1.md` for Josh's primary account; Josh's open items (the glass PNGs, M5,
+> the security items, the release-naming of the next number). Servers 8731/8735 idle — stop by pid if the rig is needed.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
