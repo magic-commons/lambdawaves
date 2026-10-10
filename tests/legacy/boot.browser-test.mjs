@@ -5458,9 +5458,14 @@ try {
        sentence, written on a selection change) and one stepper (aria-live polite, written when its value is stepped).  They are the same
        admitted kind as wave 105's, a USER ACT's words, and they are NAMED here rather than counted: a seventh seat, or a different kind,
        fails this line, and liveSpoke below proves that none of the six is written while the transport runs.
+         0.5.1 re-aim (D10-24): SIX BECAME SEVEN, AND THE SEVENTH IS THE CURVES CARD'S PRESET STEPPER.  It is the kit's stepper, whose name is
+       aria-live polite (controls/stepper.js), the same admitted kind as the PALETTE's and the TIMELINE's: written when the user steps it, never
+       from a frame (liveSpoke below still proves it, the card being in the DOM though closed).  It is NAMED by its card (liveCurves), not just
+       counted: an eighth seat, or a different kind, fails this line.
        (NO BACKTICKS IN THIS COMMENT: it lives inside a template literal.) */
     const live = [...document.querySelectorAll('[aria-live],[role="status"],[role="alert"],output')];
     R.live = live.length;
+    R.liveCurves = live.filter(function (e) { return e.closest('.dev[data-id="curves"]'); }).map(function (e) { return e.tagName + '.' + e.className; });
     R.liveKinds = live.map(function (e) { return e.tagName + '.' + (typeof e.className === 'string' ? e.className : ''); }).sort().join(' ');
     R.liveBad = live.filter(function (e) { return e.closest('.ro') || e.classList.contains('dev-stat') || e.id === 'field'; }).length;
     R.liveWhat = live.map(function (e) { return e.tagName + '.' + (typeof e.className === 'string' ? e.className : '') + '#' + e.id; });
@@ -5495,8 +5500,9 @@ try {
       && canvasT.density.indexOf('density') >= 0 && canvasT.grain.indexOf('grain') >= 0
       && canvasT.during === 0 && canvasT.tMoved === true && canvasT.onPause === 1
       && canvasT.paused.indexOf('paused at t =') >= 0
-      && canvasT.live === 6 && canvasT.liveBad === 0 && canvasT.overlays === 3
-      && canvasT.liveKinds === 'DIV.km-status DIV.m2hint DIV.mir-banner DIV.tl-status SPAN.mir-step-text SPAN.mir-step-text' && canvasT.liveSpoke === 0   /* 0.5.0 re-aim (C7b): four became six (the TIMELINE's status line and stepper), named, and silent while playing */
+      && canvasT.live === 7 && canvasT.liveBad === 0 && canvasT.overlays === 3
+      && canvasT.liveKinds === 'DIV.km-status DIV.m2hint DIV.mir-banner DIV.tl-status SPAN.mir-step-text SPAN.mir-step-text SPAN.mir-step-text' && canvasT.liveSpoke === 0   /* 0.5.0 re-aim (C7b): four became six (the TIMELINE's status line and stepper), named, and silent while playing */
+      && canvasT.liveCurves.join() === 'SPAN.mir-step-text'   /* 0.5.1 re-aim (D10-24): six became seven — the CURVES card's PRESET stepper, named by its card (the same admitted kind, a user act's words) */
       && chatterT.focused === true && chatterT.tab === 0 && chatterT.during === 0
       && chatterAfterT.after === 1 && chatterAfterT.text !== chatterT.text
       && chatterAfterT.scrubTab === -1 && chatterAfterT.errs === 0 && canvasT.errs === 0, sayT);

@@ -6,8 +6,10 @@ per feature, no code names; the row that brought it in brackets.
 
 - A modulated brightness control can no longer flash the picture: an LFO on EXPOSURE, GAMMA, KNEE or the STAGE ground that would swing the
   picture by a tenth or more faster than three times a second is held to three swings a second, the dial shows the held value, and METERS says
-  so (`FLASH GUARD · EXPOSURE 10.0 Hz held to 3/s`) until it calms. Your own hand on a dial, slow or shallow sweeps, and every other control are
-  never touched. This guard sees only those four controls; a fast sweep of the register, a kick or the camera is not judged yet. (D10-19)
+  so (`FLASH GUARD · EXPOSURE 10.0 Hz held to 3/s`) until it calms. A slow or shallow sweep and every other control are never touched, and your
+  own hand on a dial nothing modulates passes straight through; a hand sweeping faster than three times a second on a dial an LFO is also driving
+  is held like the LFO, because the picture it makes is the same flash. The line clears by itself a second after the LFO stops moving. This guard
+  sees only those four controls; a fast sweep of the register, a kick or the camera is not judged yet. (D10-19)
 
 - On a phone every control is now a real finger target: the transport's buttons and tempo chip are 44 px tall, the small segments and triggers in
   OBSERVER, CAMERA, RENDER, SPECTRUM and SETTINGS are 44 px, and stacked dials have a little more air so two rings never overlap. Desktop and iPad are

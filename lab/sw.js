@@ -321,7 +321,7 @@ const PRECACHE = [
   ['./mir/window/window.css',                                       'caec49352b98'],
   ['./mir/window/window.js',                                        '7587cddda52a'],
   ['./mir/window/workspaces.js',                                    '060feaa914d7'],
-  ['./mod-port.js',                                                 'abcd0f862b5c'],
+  ['./mod-port.js',                                                 'a68127704b0a'],
   ['./modrive.js',                                                  '89b99a6568d1'],
   ['./molecular-field.js',                                          'caa6acc2bd92'],
   ['./molecular-flow.js',                                           '805b732eebdc'],
