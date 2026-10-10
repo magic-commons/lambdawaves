@@ -11,6 +11,8 @@
  *   node tools/rack-deps.mjs --section 8      one section's detail (its § number, or a word of its header); writes nothing
  *   node tools/rack-deps.mjs --no-write       the summary only
  *   node tools/rack-deps.mjs --file x.js      another file of the same shape (exactly one `export async function boot(dom)`)
+ *   node tools/rack-deps.mjs --classes        0.5.2 G-G: the classes table for the plan's cut (§5b); --verbose names, --strict exits 1 on a red hinge
+ *   node tools/rack-deps.mjs --rename x=app.state.x [--rename …|map.json] [--dry-run]   a resolver-driven rename at token positions (§5c)
  *
  * No dependencies (the repo has no node_modules, so no acorn).  §1 is a lexer: comments, strings, templates with ${…}
  * nesting, regex literals (a `/` after an operator, an opener, a `,` `;` `:` or a keyword such as `return` / `typeof`
@@ -25,6 +27,7 @@
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -214,6 +217,8 @@ export function scopeWalk(toks, M) {
   const warnings = [], refs = [], shadows = [], fns = [], imports = [], bootHits = [];
   const objKeys = new Map();     // `{` index of an object literal → its keys [{ key, kind, at }]
   const declInit = new Map();    // the name token of `const name = …` → { fn } | { obj: `{` index }
+  const shorthands = new Set();  // token indices of SHORTHAND references (`{ x }` in a literal or an assignment pattern): a rename writes `x: path`
+  const decls = [];              // every const / let / var statement: { kw, kwAt, scope, end, declarators: [{ from, nameAt, eqAt, to }] } (--rename rewrites these)
   let pass = 1;
 
   const P = (k) => (k >= 0 && k < N && toks[k].t === 'punct' ? toks[k].v : null);
@@ -343,6 +348,7 @@ export function scopeWalk(toks, M) {
       return;
     }
     const r = { name, at: i, line: toks[i].line, where: s === b ? 'boot' : 'module', kind: forced || refKind(i), deferred: isDeferred(scope) };
+    Object.defineProperty(r, 'scope', { value: scope, enumerable: false });   // the scope the reference sits in (--rename checks the path's root is not shadowed there)
     if ((isP(i + 1, '.') || isP(i + 1, '?.')) && isN(i + 2)) { r.member = toks[i + 2].v; r.memberDef = ASSIGN.has(P(i + 3)); }
     else if (isP(i + 1, '[')) r.dynamic = true;
     if (isP(i - 1, '(') && isN(i - 2, 'assign') && isP(i - 3, '.') && isN(i - 4, 'Object') && isP(i + 1, ',') && isP(i + 2, '{')) r.assignObj = i + 2;
@@ -386,7 +392,7 @@ export function scopeWalk(toks, M) {
       if (isObj) {
         if (isP(k, '[')) { walk(k + 1, M[k], scope, 'expr'); k = M[k] + 1; if (isP(k, ':')) k++; }
         else if (isP(k + 1, ':')) k += 2;
-        else { if (isN(k)) { noteRef(k, scope, 'write'); k++; } if (isP(k, '=')) walk(k + 1, b, scope, 'expr'); return; }
+        else { if (isN(k)) { if (pass === 2) shorthands.add(k); noteRef(k, scope, 'write'); k++; } if (isP(k, '=')) walk(k + 1, b, scope, 'expr'); return; }
       }
       if (isP(k, '{') || isP(k, '[')) { assignTargets(k + 1, M[k], scope, isP(k, '{')); k = M[k] + 1; }
       else if (isN(k) && (k + 1 >= b || isP(k + 1, '='))) { noteRef(k, scope, 'write'); k++; }
@@ -404,19 +410,26 @@ export function scopeWalk(toks, M) {
   };
   const declList = (i, hi, scope, kw) => {
     const ds = kw === 'var' ? fnScopeOf(scope) : scope;
+    const rec = { kw, kwAt: i, scope: ds, end: -1, declarators: [] };
     i++;
     while (i < hi) {
       const at = i;
       i = bindTarget(i, hi, ds, scope, kw);
+      const dcl = { from: at, nameAt: isN(at) && i === at + 1 ? at : -1, eqAt: -1, to: i };
       if (isP(i, '=')) {
         const e = exprEnd(i + 1, hi);
         if (isN(at) && pass === 1) declInit.set(at, initKind(i + 1, e));
+        dcl.eqAt = i;
         walk(i + 1, e, scope, 'expr');
         i = e;
+        dcl.to = e;
       }
+      rec.declarators.push(dcl);
       if (isP(i, ',')) { i++; continue; }
       break;
     }
+    rec.end = i;
+    if (pass === 1) decls.push(rec);
     return i;
   };
 
@@ -476,8 +489,8 @@ export function scopeWalk(toks, M) {
         return;
       }
       if (isP(k, ':')) { keys.push({ key, kind: 'value', at: keyAt }); walk(k + 1, b, scope, 'expr'); return; }
-      if (isN(keyAt) && !mod && k === b) { keys.push({ key, kind: 'shorthand', at: keyAt }); noteRef(keyAt, scope); return; }
-      if (isN(keyAt) && !mod && isP(k, '=')) { keys.push({ key, kind: 'shorthand', at: keyAt }); noteRef(keyAt, scope); walk(k + 1, b, scope, 'expr'); return; }
+      if (isN(keyAt) && !mod && k === b) { keys.push({ key, kind: 'shorthand', at: keyAt }); if (pass === 2) shorthands.add(keyAt); noteRef(keyAt, scope); return; }
+      if (isN(keyAt) && !mod && isP(k, '=')) { keys.push({ key, kind: 'shorthand', at: keyAt }); if (pass === 2) shorthands.add(keyAt); noteRef(keyAt, scope); walk(k + 1, b, scope, 'expr'); return; }
       warn(a, 'object entry not understood'); walk(a, b, scope, 'expr');
     });
     if (pass === 1) objKeys.set(open, keys);
@@ -587,7 +600,7 @@ export function scopeWalk(toks, M) {
   }
 
   for (pass = 1; pass <= 2; pass++) walk(0, N, module, 'stmt');
-  return { module, scopes, refs, shadows, fns, imports, bootHits, objKeys, declInit, warnings };
+  return { module, scopes, refs, shadows, fns, imports, bootHits, objKeys, declInit, warnings, shorthands, decls };
 }
 
 /* ══ 4.  SECTIONS ════════════════════════════════════════════════════════════════════════════════════════════════
@@ -851,6 +864,300 @@ export function analyze(src, opts = {}) {
   };
 }
 
+/* ══ 5b.  THE CLASSES TABLE (0.5.2 G-G) ══════════════════════════════════════════════════════════════════════════
+ * The plan's cut (research/release-0.5.2/PLAN.md §3) as PIECES in file order: each piece starts at the first line, after the
+ * previous piece's start, that its anchor matches (offset lines added), and runs to the line before the next piece; the first
+ * piece starts on boot's first body line.  So the cut tiles the body by construction, and an edit that moves lines (R0's `app`
+ * literal) moves no boundary.  A piece names its planned MODULE; a module that STAYS in boot() (the head, the loop, the seats)
+ * shares boot's scope, so a `let` read only by stay-pieces is not cross-module.  Per module, every foreign boot-level name it
+ * references falls in one class (AUDIT-OPUS §3.2):
+ *   backward  — a const / function declared before the module's first line: destructured once from `app`, free afterwards
+ *   forward   — a const / function declared after it: read lazily as `app.<ns>.x` inside callbacks
+ *   shared    — a `let` another scope owns: read and written live, so it must be `app.state.x` (counted with the `app.state`
+ *               members the module already uses)
+ *   bare write — an assignment to a `let` another scope owns: the hinge says there are none.
+ * THE HINGE: zero bare writes across scopes, and forward + shared ≤ 25 in every module that moves (the stay-pieces exempt). */
+export const PLANNED = {
+  boot: { title: 'boot() — the head, the seats, §13–§14, §17, §27–§30', row: '—', file: 'lab/rack.js', stays: true },
+  loop: { title: 'the loop §5–§6 + filmHold — stays in boot()', row: '—', file: 'lab/rack.js', stays: true },
+  settings: { title: '§1 settings', row: 'R3a', file: 'lab/shell/settings.js' },
+  controller: { title: '§2–§4 + §7 the controller · the one road', row: 'R1', file: 'lab/shell/controller.js' },
+  material: { title: 'WAVE · CLIP · PALETTE · CAMERA (the 1100 block\'s material)', row: 'R2c', file: 'lab/windows/material.js' },
+  'settings-card': { title: 'SETTINGS card (the 1100 block, two spans)', row: 'R2c', file: 'lab/windows/settings.js' },
+  film: { title: 'FILM / capture (filmHold stays)', row: 'R2c', file: 'lab/windows/film.js' },
+  state: { title: 'STATE', row: 'R2a', file: 'lab/windows/state.js' },
+  spectrum: { title: 'SPECTRUM (the five appends stay)', row: 'R2a', file: 'lab/windows/spectrum.js' },
+  readouts: { title: 'SHADOW·ORBIT·VORTEX·PLANE + CALC·METERS·LADDER + ATOMS·WIGNER·RADIATION', row: 'R2b', file: 'lab/windows/readouts.js' },
+  molecules: { title: 'MOLECULES · session · head + MO-REGISTRY', row: 'R2d', file: 'lab/windows/molecules.js' },
+  'stage-words': { title: 'the stage text + the caption', row: 'R2d', file: 'lab/shell/stage-words.js' },
+  modulation: { title: 'the modulation seam (defs · the pill · modView)', row: 'R2d', file: 'lab/shell/modulation.js' },
+  transport: { title: '§12 the transport strip', row: 'R3b', file: 'lab/shell/transport.js' },
+  kepler: { title: '§15–§16 the bow · Kepler', row: 'R2b', file: 'lab/windows/kepler.js' },
+  ink: { title: '§18 ink under glass', row: 'R2d', file: 'lab/shell/ink.js' },
+  'rack-wiring': { title: '§19a rack · layout · phone · gestures', row: 'R3b', file: 'lab/shell/rack-wiring.js' },
+  notebook: { title: '§19b skip · dock · menubar · notebook · projects', row: 'R3b', file: 'lab/shell/notebook.js' },
+  keys: { title: '§20–§23 keys · keyboard · timeline · tabs', row: 'R3b', file: 'lab/shell/keys.js' },
+  persist: { title: '§24 persist', row: 'R3a', file: 'lab/shell/persist.js' },
+  links: { title: '§25 the links', row: 'R3a', file: 'lab/shell/links.js' },
+  history: { title: '§25 THE TRUE HISTORY + its card', row: 'R3a', file: 'lab/shell/history.js' },
+  facade: { title: '§26 the facade (the literal, whole)', row: 'R5', file: 'lab/shell/facade.js' },
+};
+/* [anchor, module, offset]: the anchor is a regex over one line; the piece starts `offset` lines from the line it matches */
+export const PLANNED_CUT = [
+  [null, 'boot'],                                                                    // §0 the head
+  [/^ {2}\/\* ── SETTINGS: what this browser remembers/, 'settings'],                 // §1
+  [/^ {2}\/\* ── ONE CONTROLLER/, 'controller'],                                     // §2–§4
+  [/^ {2}\/\* ── THE BACKGROUNDED TAB/, 'loop'],                                     // §5–§6
+  [/^ {2}\/\* ── state mutations: ONE road/, 'controller'],                          // §7
+  [/^ {2}\/\* ── windows ──/, 'boot'],                                                // §8 head: the camera law and the seats
+  [/^ {2}const wObs = device\(\{ id: 'observer'/, 'material'],                       // WAVE · PALETTE · CAMERA · CLIP seats, WAVE's head
+  [/^ {4}\/\* ── THEME and SURFACE/, 'settings-card'],                                // SETTINGS, first span
+  [/^ {4}const gd = group\(gDraw, /, 'material'],                                    // WAVE's DRAW · CLIP · PALETTE · CAMERA
+  [/^ {4}\/\* ── THE FILM \(0\.5\.0 C7/, 'film'],                                     // the FILM / capture
+  [/^ {4}function filmHold\(on\) \{/, 'loop'],                                       // filmHold stays beside the loop (app.loop.hold)
+  [/^ {4}const film = \(\) => exact \|\| /, 'film'],
+  [/^ {4}const gq = group\(ui\.set\.body, 'FIELD QUALITY'\)/, 'settings-card'],       // SETTINGS, second span (to the block's end)
+  [/^ {2}\/\* OPTIMIZATION 2026-09-24 · N1 · STATE's CLEAR, NAMED/, 'state'],
+  [/^ {2}\/\/ SPECTRUM$/, 'spectrum'],
+  [/^ {2}rack\.appendChild\(wPal\.root\); rack\.appendChild\(wObs\.root\)/, 'boot'],   // the five appends stay at their seat
+  [/^ {2}\/\* THE ABOUT FACE LIVES IN THE NOTEBOOK GLASS/, 'spectrum'],
+  [/^ {2}\/\/ SHADOW$/, 'readouts'],
+  [/^ {2}\/\* ── LEGACY WINDOWS/, 'molecules'],                                       // §9
+  [/^ {2}\/\* THE STAGE TEXT \(Settings › Display;/, 'stage-words'],
+  [/^ {2}\/\* ORBITALS — the MOLECULAR REGISTER/, 'molecules'],                       // MO-REGISTRY
+  [/^ {2}\/\/ CALCULUS — the stats/, 'readouts'],                                     // CALC · METERS · LADDER
+  [/^ {2}\/\* ── WAVE 52 · W-MODWINDOW/, 'modulation'],                               // §10–§11 the seam
+  [/^ {2}\/\/ ATOMS — the periodic table/, 'readouts'],                               // ATOMS · WIGNER · RADIATION
+  [/^ {2}Object\.assign\(READERS, \{/, 'boot'],                                      // READERS · track · hydroReader stay
+  [/^ {2}\/\* ── transport strip/, 'transport'],                                      // §12
+  [/^ {2}\/\* ── badges/, 'boot'],                                                    // §13–§14
+  [/^ {2}\/\* ── THE BOW:/, 'kepler'],                                                // §15–§16
+  [/^ {2}\/\* ── THE FLOATING RACK/, 'boot'],                                         // §17
+  [/^ {2}\/\* ── INK STAYS UNDER GLASS/, 'ink'],                                      // §18
+  [/^ {2}\/\* ── 0\.5\.0 C3 · THE RACK IS THE KIT'S/, 'rack-wiring'],                 // §19a
+  [/^ {4}\/\* WAVE 62 · THE SKIP LINKS MOVE FOCUS/, 'notebook', -1],                 // §19b (its `{` is the line before)
+  [/^ {2}const phone = \{ on: false/, 'rack-wiring'],                                // §19a, second span
+  [/^ {2}\/\* ── KEYS: a rebindable action table/, 'keys'],                           // §20–§23
+  [/^ {2}\/\* ── persistence/, 'persist'],                                           // §24
+  [/^ {2}\/\* ── WAVE 56 · SHAREABLE LINKS/, 'links'],                                // §25 the links
+  [/^ {2}\/\* 0\.3\.1 · S3 THE TRUE HISTORY/, 'history'],                              // §25 the history
+  [/^ {2}\/\* ── the diagnostics surface/, 'facade'],                                 // §26
+  [/^ {2}\/\* ── 0\.5\.0 C7b · THE RENDER CARD/, 'boot'],                              // §27–§30
+];
+export const HINGE = 25;
+/* the context's own bags: counted by their members elsewhere (the ui registry, the hook bag), never as a crossing name */
+const CONTEXT_BAGS = new Set(['ui', 'app']);
+
+export function classes(src, opts = {}) {
+  const R = analyze(src, opts);
+  const L = lex(src), M = pairBrackets(L.toks), W = scopeWalk(L.toks, M);
+  const { toks } = L;
+  const lines = src.split('\n');
+  const { openLine, closeLine } = R.boot;
+  /* ── the pieces ── */
+  const pieces = [];
+  let cursor = openLine + 1;
+  for (const [re, mod, offset = 0] of PLANNED_CUT) {
+    if (!PLANNED[mod]) throw new Error(`classes: piece module ${mod} is not in PLANNED`);
+    let from;
+    if (!re) from = openLine + 1;
+    else {
+      let hit = -1;
+      for (let k = cursor; k < closeLine; k++) if (re.test(lines[k - 1])) { hit = k; break; }
+      if (hit < 0) throw new Error(`classes: the anchor ${re} (module ${mod}) matches no line after ${cursor} — the cut needs re-anchoring`);
+      from = hit + offset;
+      if (from <= (pieces.length ? pieces[pieces.length - 1].from : openLine)) throw new Error(`classes: the anchor ${re} lands at ${from}, not after the previous piece`);
+    }
+    pieces.push({ module: mod, from, to: -1, anchor: re ? String(re) : '(boot body)' });
+    cursor = from + 1;
+  }
+  for (let k = 0; k < pieces.length; k++) pieces[k].to = k + 1 < pieces.length ? pieces[k + 1].from - 1 : closeLine - 1;
+  const pieceOf = (line) => { let lo = 0, hi = pieces.length - 1; while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (pieces[mid].from <= line) lo = mid; else hi = mid - 1; } return pieces[lo]; };
+  const moduleAt = (line) => (line > openLine && line < closeLine ? pieceOf(line).module : null);
+  const scopeOfModule = (m) => (PLANNED[m].stays ? 'boot' : m);
+  const by = new Map(R.names.map((d) => [d.name, d]));
+  const refs = W.refs.filter((r) => r.where === 'boot' && r.line > openLine && r.line < closeLine && by.has(r.name));
+  /* ── `app.<ns>.<x>` chains: the context's members as the code reads and writes them (after R0) ── */
+  const P = (k) => (k >= 0 && k < toks.length && toks[k].t === 'punct' ? toks[k].v : null);
+  const nameAt = (k) => (k >= 0 && k < toks.length && toks[k].t === 'name' ? toks[k].v : null);
+  const appChain = (r) => {
+    if (r.name !== 'app' || P(r.at + 1) !== '.' || !nameAt(r.at + 2)) return null;
+    const ns = toks[r.at + 2].v;
+    if (P(r.at + 3) !== '.' || !nameAt(r.at + 4)) return { ns, x: null, write: false };
+    const nx = P(r.at + 5);
+    const write = ASSIGN.has(nx) || ((nx === '++' || nx === '--') && toks[r.at + 5].line === toks[r.at + 4].line) || P(r.at - 1) === '++' || P(r.at - 1) === '--';
+    return { ns, x: toks[r.at + 4].v, write };
+  };
+  /* ── ownership: a let is SHARED when a scope other than its owner's references it ── */
+  const letScopes = new Map();
+  for (const r of refs) {
+    const d = by.get(r.name);
+    if (d.kind !== 'let') continue;
+    const m = moduleAt(r.line);
+    if (!m) continue;
+    if (!letScopes.has(r.name)) letScopes.set(r.name, new Set());
+    letScopes.get(r.name).add(scopeOfModule(m));
+  }
+  const ownerOf = (name) => moduleAt(by.get(name).line);
+  const sharedLets = [...letScopes].filter(([n, s]) => [...s].some((x) => x !== scopeOfModule(ownerOf(n)))).map(([n]) => n).sort((a, b) => by.get(a).line - by.get(b).line);
+  /* the const / function names that cross a scope boundary: the members the context must carry */
+  const crossNames = new Map();
+  for (const r of refs) {
+    const d = by.get(r.name);
+    if (d.kind === 'let' || CONTEXT_BAGS.has(r.name)) continue;
+    const m = moduleAt(r.line), o = moduleAt(d.line);
+    if (!m || !o || scopeOfModule(m) === scopeOfModule(o)) continue;
+    if (!crossNames.has(r.name)) crossNames.set(r.name, { name: r.name, owner: o, kind: d.kind, fn: d.fn, line: d.line, users: new Set() });
+    crossNames.get(r.name).users.add(m);
+  }
+  /* ── per module ── */
+  const modules = Object.entries(PLANNED).map(([id, meta]) => {
+    const ps = pieces.filter((p) => p.module === id);
+    const first = ps.length ? ps[0].from : Infinity;
+    const inMod = (line) => ps.some((p) => line >= p.from && line <= p.to);
+    const f = new Map(), state = new Map(), ctx = new Map();
+    for (const r of refs) {
+      if (!inMod(r.line)) continue;
+      if (r.name === 'app') {
+        const c = appChain(r);
+        if (c && c.ns === 'state' && c.x) { const e = state.get(c.x) || { w: false }; if (c.write) e.w = true; state.set(c.x, e); }
+        else if (c && c.x && c.ns !== 'hooks') ctx.set(c.ns + '.' + c.x, true);
+        continue;
+      }
+      if (CONTEXT_BAGS.has(r.name)) continue;
+      const d = by.get(r.name);
+      if (inMod(d.line)) continue;
+      const e = f.get(r.name) || { w: false };
+      if (r.kind === 'write' || r.kind === 'rw') e.w = true;
+      f.set(r.name, e);
+    }
+    const backward = [], forward = [], lets = [], bareWrites = [], crossWrites = [];
+    for (const [n, e] of f) {
+      const d = by.get(n);
+      if (d.kind === 'let') {
+        lets.push(n);
+        if (e.w) { bareWrites.push(n); if (scopeOfModule(ownerOf(n)) !== scopeOfModule(id)) crossWrites.push(n); }
+      } else if (d.line < first) backward.push(n); else forward.push(n);
+    }
+    /* a let both scopes keep (a stay-piece reading a §0 let) is a closure slot, not a crossing */
+    const crossLets = lets.filter((n) => scopeOfModule(ownerOf(n)) !== scopeOfModule(id));
+    const stateNames = [...state.keys()].sort(byName);
+    const ctxNames = [...ctx.keys()].sort(byName);
+    const fs = forward.length + ctxNames.length + crossLets.length + stateNames.length;
+    return {
+      id, title: meta.title, row: meta.row, file: meta.file, stays: !!meta.stays,
+      spans: ps.map((p) => [p.from, p.to]), lines: ps.reduce((k, p) => k + p.to - p.from + 1, 0),
+      backward: backward.sort(byName), forward: forward.sort(byName), context: ctxNames, lets: lets.sort(byName), crossLets: crossLets.sort(byName),
+      state: stateNames, stateWrites: stateNames.filter((n) => state.get(n).w),
+      bareWrites: bareWrites.sort(byName), crossWrites: crossWrites.sort(byName),
+      forwardShared: fs, ok: meta.stays ? crossWrites.length === 0 : (crossWrites.length === 0 && fs <= HINGE),
+    };
+  });
+  const stateMembers = uniq(modules.flatMap((m) => m.state));
+  return {
+    file: R.file, sha256: R.sha256, lines: R.lines, boot: R.boot, pieces, modules, sharedLets, stateMembers,
+    crossNames: [...crossNames.values()].map((c) => ({ ...c, users: [...c.users].sort(byName) })).sort((a, b) => a.line - b.line),
+    hinge: { limit: HINGE, ok: modules.every((m) => m.ok), crossWrites: modules.reduce((k, m) => k + m.crossWrites.length, 0),
+      worst: modules.filter((m) => !m.stays).reduce((w, m) => (m.forwardShared > w.forwardShared ? m : w), { forwardShared: -1 }) },
+  };
+}
+
+export function classesText(C) {
+  const out = [];
+  out.push(`rack-deps --classes · ${C.file} · ${C.lines} lines · sha-256 ${C.sha256.slice(0, 12)} · ${C.pieces.length} pieces tile the body ${C.boot.openLine + 1}–${C.boot.closeLine - 1}`);
+  out.push('');
+  out.push('| module | row → file | lines | backward | forward | shared lets (bare) | app.state | **fwd + shared** | bare writes to another scope\'s let | hinge |');
+  out.push('|---|---|---|---|---|---|---|---|---|---|');
+  for (const m of C.modules) {
+    const fwd = m.forward.length + m.context.length;
+    out.push(`| ${m.id}${m.stays ? ' (stays)' : ''} | ${m.row} → \`${m.file}\` | ${m.lines} | ${m.backward.length} | ${fwd} | ${m.crossLets.length}${m.lets.length > m.crossLets.length ? ` (+${m.lets.length - m.crossLets.length} boot-kept)` : ''} | ${m.state.length} | **${m.forwardShared}** | ${m.crossWrites.length}${m.crossWrites.length ? ' (' + m.crossWrites.join(', ') + ')' : ''} | ${m.stays ? (m.crossWrites.length ? 'RED' : 'exempt') : m.ok ? 'ok' : 'RED'} |`);
+  }
+  out.push('');
+  out.push(`THE HINGE (G-G): bare writes across scopes ${C.hinge.crossWrites}; the largest moving module ${C.hinge.worst.id} at ${C.hinge.worst.forwardShared} (limit ${C.hinge.limit}) → ${C.hinge.ok ? 'HOLDS' : 'FAILS'}`);
+  out.push(`shared lets still bare (${C.sharedLets.length}): ${C.sharedLets.join(', ') || 'none'}`);
+  out.push(`app.state members in use (${C.stateMembers.length}): ${C.stateMembers.join(', ') || 'none'}`);
+  out.push(`const / function names crossing a scope (${C.crossNames.length}; hoisted declarations ${C.crossNames.filter((c) => c.kind === 'function').length})`);
+  return out.join('\n');
+}
+
+/* ══ 5c.  --rename: a resolver-driven rename at the walker's token positions ══════════════════════════════════════
+ * `--rename x=app.state.x` (repeatable, or `--rename map.json` holding { "x": "app.state.x", … }) rewrites exactly the references
+ * the walker resolves to boot's own binding of x — never an inner shadow — and its declaration:
+ *   a reference         x            → app.state.x
+ *   a shorthand          { x }        → { x: app.state.x }        (an object literal or an assignment pattern)
+ *   a declaration        let x = e    → app.state.x = e           (a list is split in order: `let a = 1, x = 2` → `let a = 1; app.state.x = 2`)
+ *                        let x        → app.state.x = undefined
+ * It refuses a name boot does not declare as a let / const, a destructured declaration that holds one, a reference whose scope
+ * re-declares the path's root (`app`), and a dirty git tree.  Every edit is printed (line:col · before → after). */
+export function renamePlan(src, map) {
+  const L = lex(src), M = pairBrackets(L.toks), W = scopeWalk(L.toks, M);
+  const { toks } = L;
+  const B = W.bootHits[0];
+  if (!B) throw new Error('rename: no top-level `function boot`');
+  const boot = B.scope;
+  const names = Object.keys(map);
+  const problems = [];
+  for (const n of names) {
+    const d = boot.names.get(n);
+    if (!d) problems.push(`\`${n}\` is not a boot-level name`);
+    else if (d.kind !== 'let' && d.kind !== 'const') problems.push(`\`${n}\` is a ${d.kind}, not a let / const (functions and imports keep their names)`);
+    if (!/^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)+$/.test(map[n])) problems.push(`\`${map[n]}\` is not a member path`);
+  }
+  const roots = new Set(names.map((n) => map[n].split('.')[0]));
+  const rep = new Map();   // token index → replacement text
+  const col = (k) => { const at = toks[k].at; return at - src.lastIndexOf('\n', at - 1); };
+  for (const r of W.refs) {
+    if (r.where !== 'boot' || !Object.hasOwn(map, r.name)) continue;
+    for (let s = r.scope; s && s !== boot; s = s.parent) for (const root of roots) if (s.names.has(root) && map[r.name].startsWith(root + '.')) problems.push(`line ${r.line}: \`${root}\` is re-declared in the scope of a reference to \`${r.name}\``);
+    rep.set(r.at, W.shorthands.has(r.at) ? `${r.name}: ${map[r.name]}` : map[r.name]);
+  }
+  /* rebuild a token range's text with the replacements applied (the whitespace and comments between tokens kept) */
+  const endOf = (k) => toks[k].at + toks[k].v.length;
+  const textOf = (a, b) => {   // tokens [a, b)
+    let s = '', pos = toks[a].at;
+    for (let k = a; k < b; k++) { s += src.slice(pos, toks[k].at) + (rep.has(k) ? rep.get(k) : toks[k].v); pos = endOf(k); }
+    return s;
+  };
+  const regions = [];   // { from, to (char offsets), text, line, before }
+  const covered = new Set();
+  const placeholders = {};
+  for (const D of W.decls) {
+    if (D.scope !== boot || (D.kw !== 'let' && D.kw !== 'const')) continue;
+    const hit = D.declarators.some((x) => x.nameAt >= 0 && Object.hasOwn(map, toks[x.nameAt].v));
+    const patternHit = D.declarators.some((x) => x.nameAt < 0 && names.some((n) => { for (let k = x.from; k < (x.eqAt >= 0 ? x.eqAt : x.to); k++) if (toks[k].t === 'name' && toks[k].v === n) return true; return false; }));
+    if (patternHit) problems.push(`line ${toks[D.kwAt].line}: a destructured ${D.kw} declares a renamed name — rename it by hand`);
+    if (!hit) continue;
+    const parts = [];
+    let plain = [];   // consecutive declarators that keep their binding: one `let …` with their own text and separators
+    const flush = () => { if (plain.length) { parts.push(`${D.kw} ${textOf(plain[0].from, plain[plain.length - 1].to)}`); plain = []; } };
+    for (const x of D.declarators) {
+      const nm = x.nameAt >= 0 ? toks[x.nameAt].v : null;
+      if (nm && Object.hasOwn(map, nm)) {
+        flush();
+        const init = x.eqAt >= 0 ? textOf(x.eqAt + 1, x.to).trim() : 'undefined';
+        parts.push(`${map[nm]} = ${init}`);
+        const one = x.eqAt >= 0 && x.to === x.eqAt + 2 ? toks[x.eqAt + 1] : null;
+        const neg = x.eqAt >= 0 && x.to === x.eqAt + 3 && toks[x.eqAt + 1].v === '-' && toks[x.eqAt + 2].t === 'num';
+        placeholders[nm] = x.eqAt < 0 ? 'undefined' : neg ? '-' + toks[x.eqAt + 2].v
+          : one && (one.t === 'num' || (one.t === 'str' && !one.tpl) || ['true', 'false', 'null'].includes(one.v)) ? one.v : 'null';
+      } else plain.push(x);
+    }
+    flush();
+    const last = D.declarators[D.declarators.length - 1].to;   // exclusive token index
+    const from = toks[D.kwAt].at, to = endOf(last - 1);
+    regions.push({ from, to, text: parts.join('; '), line: toks[D.kwAt].line, col: col(D.kwAt), before: src.slice(from, to) });
+    for (let k = D.kwAt; k < last; k++) covered.add(k);
+  }
+  for (const [k, text] of rep) if (!covered.has(k)) regions.push({ from: toks[k].at, to: endOf(k), text, line: toks[k].line, col: col(k), before: toks[k].v });
+  regions.sort((a, b) => a.from - b.from);
+  for (let k = 1; k < regions.length; k++) if (regions[k].from < regions[k - 1].to) problems.push(`line ${regions[k].line}: two edits overlap`);
+  let out = '', pos = 0;
+  for (const g of regions) { out += src.slice(pos, g.from) + g.text; pos = g.to; }
+  out += src.slice(pos);
+  const counts = Object.fromEntries(names.map((n) => [n, [...rep.keys()].filter((k) => toks[k].v === n).length]));
+  return { src: out, edits: regions, problems, placeholders, counts };
+}
+
 /* ══ 6.  THE REPORTS ═════════════════════════════════════════════════════════════════════════════════════════════ */
 const sid = (k) => '§' + k;
 const list = (xs, empty = '—') => (xs && xs.length ? xs.join(', ') : empty);
@@ -1107,7 +1414,42 @@ export function jsonText(R) {
 function main(argv) {
   const arg = (k) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : undefined; };
   const rel = arg('--file') || 'lab/rack.js';
-  const R = analyze(readFileSync(path.resolve(ROOT, rel), 'utf8'), { file: rel });
+  const text = readFileSync(path.resolve(ROOT, rel), 'utf8');
+  if (argv.includes('--classes')) {
+    const C = classes(text, { file: rel });
+    console.log(classesText(C));
+    if (argv.includes('--verbose')) {
+      for (const m of C.modules) console.log(`\n${m.id} · ${m.spans.map(([a, b]) => a + '–' + b).join(', ')}\n  backward ${list(m.backward)}\n  forward ${list([...m.forward, ...m.context])}\n  shared lets (bare) ${list(m.crossLets)}\n  app.state ${list(m.state)}${m.stateWrites.length ? ' · writes ' + list(m.stateWrites) : ''}\n  bare writes ${list(m.bareWrites)}`);
+      console.log(`\ncrossing names: ${C.crossNames.map((c) => `${c.name}(${c.owner}${c.kind === 'function' ? ' fn' : ''}→${c.users.join('/')})`).join(' ')}`);
+    }
+    if (argv.includes('--json')) console.log(JSON.stringify({ sharedLets: C.sharedLets, crossNames: C.crossNames, modules: C.modules }, null, 1));
+    if (!C.hinge.ok && argv.includes('--strict')) process.exit(1);
+    return;
+  }
+  const renames = argv.flatMap((a, i) => (a === '--rename' ? [argv[i + 1]] : []));
+  if (renames.length) {
+    const map = {};
+    for (const r of renames) {
+      if (!r) { console.error('--rename needs name=app.path or a .json map'); process.exit(2); }
+      if (!r.includes('=') && r.endsWith('.json')) Object.assign(map, JSON.parse(readFileSync(path.resolve(process.cwd(), r), 'utf8')));
+      else { const [k, v] = r.split('='); map[k] = v; }
+    }
+    const dry = argv.includes('--dry-run');
+    if (!dry) {
+      const dirty = execFileSync('git', ['-C', ROOT, 'status', '--porcelain', '--untracked-files=no'], { encoding: 'utf8' }).trim();
+      if (dirty) { console.error('rename: the tree is dirty — commit or set aside first (a rename must be one reviewable diff):\n' + dirty); process.exit(3); }
+    }
+    const plan = renamePlan(text, map);
+    for (const e of plan.edits) console.log(`${String(e.line).padStart(5)}:${String(e.col).padEnd(4)} ${e.before.replace(/\s+/g, ' ')}  →  ${e.text.replace(/\s+/g, ' ')}`);
+    console.log(`\n${plan.edits.length} edits · references per name: ${Object.entries(plan.counts).map(([k, v]) => k + ' ' + v).join(', ')}`);
+    console.log(`placeholders for the literal: { ${Object.entries(plan.placeholders).map(([k, v]) => `${k}: ${v}`).join(', ')} }`);
+    if (plan.problems.length) { console.error('\nrename REFUSED:\n  ' + plan.problems.join('\n  ')); process.exit(4); }
+    if (dry) { console.log('(dry run: nothing written)'); return; }
+    writeFileSync(path.resolve(ROOT, rel), plan.src);
+    console.log(`wrote ${rel}`);
+    return;
+  }
+  const R = analyze(text, { file: rel });
   const want = arg('--section');
   if (want !== undefined) {
     let k = /^\d+$/.test(want) ? +want : R.sections.findIndex((s) => (s.header || s.title).toLowerCase().includes(want.toLowerCase()));
