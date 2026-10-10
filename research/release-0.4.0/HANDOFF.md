@@ -854,9 +854,29 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > and the rig. Next: their reports → merge by the recipe (doubles → 0 after deleting R2c's `go` copy), CLAUDE.md sentences, CHANGES, HANDOFF → `BRIEF-R5.md`
 > (the facade) → R5 → `BRIEF-R-V.md` (the rig must be healthy) → the fix round → the local cut on Josh's word.
 
-## 3 · What happens next, in order
-
-## 3 · What happens next, in order
+> **UPDATE (Claude Sos, 2026-10-10 12:14 CDT) — THE BATON TAKEN AT 11:50 (Yan's usage pause of 11:30; Josh: "Take anything she has"); PAIR 3 IS IN (`7c3eebe` on `sos-s0`).**
+> `sos-s0` was fast-forwarded to `yan-c` `2a5df88` (its tip was an ancestor), so the integration continues on the Sos branch and Yan's worktree is untouched;
+> `yan-c` stays at `2a5df88` for her to fast-forward when she returns. The rig rebooted at 11:46 (up 5 min at the baton; GPU P8 idle) — **the owed gates on
+> `2a5df88` are paid: THE LOCK 860 · 0/0 and 1004 · 0/0 (58 s each — the degraded rig took minutes), frame-occlusion 7/7.** The two-account law applied:
+> Yan's paused PAIR 3 builders (R2c `aa99c668f22d59ca3` at `9b13d04`, R2d `a5571173c3ce60a48` at `6bb18f4`, both with their MOVE and light check
+> committed) were RELAUNCHED FRESH as Sonnet docs-only agents (`git reset --hard <tip>`, the predecessor's `.tmp/` copied): R2c → `5cff63e`
+> (`a4c23cd57faad2656`, R2c-BUILD.md + wave 221), R2d → `489ab9c` (`a32145a840b1c4736`, R2d-BUILD.md + wave 222); notes under `~/.claude/handoffs/agents/`.
+> **R2c merged `8ca115a`** (clean): material 127 / settings-card 177 / film 22; `rack.js` 2,001 → 1,681. **R2d merged `7c3eebe`**: molecules 100 /
+> stage-words 126 / modulation 228 / ink 51; conflicts in the import block (both sides' deletions taken), REPORT.md (221 then 222), sw.js (pwa --write);
+> the merge notes applied (ONE `app.host.cameraPort` fill; `stageCaption` dropped from the stage-words destructure, R2c's boot-kept `go` copy deleted).
+> **`rack.js` 1,202** (4,931 at 0.5.1); 20 module files; **`lab/*.js` + shell + windows 27,932 of the 27,943 cap — 11 lines for R5: the cap WILL be passed
+> (R5 ≈ +10 by the plan's own estimate); FOR JOSH at R-V.** Gates on `7c3eebe`: pwa; doubles 0 (168 slots, 21 files); 21 files parse; the hinge holds
+> (spectrum 24; molecules 8 · stage-words 5 · modulation 10 · ink 3); 0 bare writes; node 0; serialize-bytes 11/11 full + 11/11 edit vs `v0.5.1-alpha`;
+> lw-facade 1/1 (176); settings-probe 0/6 — all six scenes reached for the first time since the rig degraded. CLAUDE.md: the R2c and R2d paragraphs.
+> CHANGES-0.5.2: both lines. **Workflow:** Yan's integrator scripts (doubles, syntax-check, facade-names, sb-compare, gen + the R5/R-V templates) now live in
+> `research/release-0.5.2/integrator/` with paths resolved from their own location (`12da257`) — either account runs them unchanged; the Sos checkpoint is
+> `~/.claude/handoffs/latest.md`, Yan's is `optimization-2026-09-24/.claude/handoffs/latest.md` (untracked), this file is the one both read. **Fix-round
+> candidates found by the pair:** `modStore`, `setKnob`, `occlusion`, `cardLoading`, `solveChem` unread in the controller-seat destructure and `wState` (:991)
+> unread (R2d's count 8 → 13; `markBatchBegin` and `solveCard` older); `app.w.head` has no registration (R5 needs it — the generated brief's nullSlot list);
+> `app.sh.refreshOcclusion` and `app.w.initStageText` stay null; the chunk runner's `goto is not defined` at `.tmp/chunk-gen.mjs:732` after B93 (both trees).
+> Servers: 8731 tree (pid 22893), 8735 the 0.5.1 base export (pid 26420), my job tmp `~/.config/claude-backup/jobs/8497d75b/tmp`. **Next:** `BRIEF-R5.md` +
+> `BRIEF-R-V.md` generated from `7c3eebe` → R5 (Opus, `isolation: worktree`, 9123/5593 + 9127/5597, wave 223) → merge → R-V (fresh Opus, 9133/5603 +
+> 9137/5607, wave 224) → the fix round → the local cut `v0.5.2-alpha · Rack Dissolution` on Josh's word. NO push, NO deploy, NO tag before.
 
 ## 3 · What happens next, in order
 

@@ -28,7 +28,7 @@ byte-identical), `tests/helpers/app-source.mjs`, `tools/rack-deps.mjs` (`--class
   §1 item 4: `Object.assign` would freeze a getter into a value and the fixture would say so), the comments inside it travelling. `createFilm(LW, …)` /
   `createCapture(LW, …)` already read `app.sh.LW` lazily (R2c): nothing of theirs changes.
 - **Your row at the launch tip:** facade {{row.facade}} (limit 25, zero bare writes). Count before and after. ({{hinge}}; {{measured}} module files measured.)
-- **The 121 backward names, by where each lives at `{{tip}}`** (`$job/tmp/facade-names.mjs`, re-run it on your base first — PAIR 3 moved some):
+- **The 121 backward names, by where each lives at `{{tip}}`** (`research/release-0.5.2/integrator/facade-names.mjs`, re-run it on your base first — PAIR 3 moved some):
 {{facadeAudit}}
   **registered** → destructure from that slot. **headConst** → destructure from `app` (`const { reg, clock, … } = app`). **byValue** → destructure from `app.loop`
   (`hydroReader`, `meterSnapshot`, `modesAt`, `schedule` sit in the literal by value; `readSettings` in `app.sh`). **nullSlot** → the slot exists in the literal but
@@ -37,7 +37,7 @@ byte-identical), `tests/helpers/app-source.mjs`, `tools/rack-deps.mjs` (`--class
   `lab/shell/settings.js` for `applySettings` / `setCardStyle` / `setDisconnected`; `links.js` for `mintLink` / `notCarriedWords` / `openLink`; `persist.js` for
   `restoreModulation`; `keys.js` for `stageHasFocus`; `molecules.js` for `head` if R2d did not), or a boot-kept line right after a boot-kept declaration (`loopRing`
   :249 / `ringMedian` :251 / `MOTION` are the LOOP's — one line after `ringMedian`'s, the loop piece is exempt; `setCamMode` goes on the camera law's host line
-  :{{hostfill}}). **Every slot is filled exactly once** (grep `app.<ns>.<x> =` across `lab/` before each; `$job/tmp/doubles.mjs` must read 0 at the end). **noSlot**
+  :{{hostfill}}). **Every slot is filled exactly once** (grep `app.<ns>.<x> =` across `lab/` before each; `research/release-0.5.2/integrator/doubles.mjs` must read 0 at the end). **noSlot**
   must be empty; if a name has no slot, STOP and say so (R0 planned every one).
 - **THE RUNTIME FIXTURE is the gate, not a thing you re-capture:** `LW_PORT=… GD_PORT=… node tests/lw-facade.browser-test.mjs` → `PASS 1 … 176 members … GREEN 1 of 1`
   WITHOUT `--write`. A diff means a getter became a value, a key moved, or a member was lost — fix the move, never the fixture. (`--write` is for a row that changes
@@ -72,8 +72,8 @@ byte-identical), `tests/helpers/app-source.mjs`, `tools/rack-deps.mjs` (`--class
 3. **Never edit `lab/shell/controller.js`**, `lab/mir/**`, `lab/fonts/**`; never `--write` the fixture; no `sed` over `rack.js`.
 
 ## Acceptance
-- `bash test.sh node` 0; `node tools/rack-deps.mjs --classes` before/after (`facade` from its file, ≤ 25, 0 bare writes; `tests/rack-deps.test.mjs` green); `$job/tmp/doubles.mjs`
-  → 0 (ask the integrator's copy: `/home/joshua-hosain/.claude/jobs/2ea66c54/tmp/doubles.mjs <your worktree>`); **`lw-facade` 1/1 without `--write`**; **THE LOCK**, both
+- `bash test.sh node` 0; `node tools/rack-deps.mjs --classes` before/after (`facade` from its file, ≤ 25, 0 bare writes; `tests/rack-deps.test.mjs` green); `research/release-0.5.2/integrator/doubles.mjs`
+  → 0 (ask the integrator's copy: `research/release-0.5.2/integrator/doubles.mjs <your worktree>`); **`lw-facade` 1/1 without `--write`**; **THE LOCK**, both
   runs (or the rig's identical stall on both trees, recorded); `serialize-bytes` 11/11 full + edit vs your base export; `settings-probe` 0/6 (5 reached if marionette dies);
   a light set of the suites that drive `__LW` hardest — `history`, `new-project` + `--check`, `offer`, `menubar`, `stage-text`, `curves`, `timeline`, `keyboard-shortcuts`
   (R-V runs the whole estate); `node tests/pwa.test.mjs --write` after every `lab/` edit.

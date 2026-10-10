@@ -22,7 +22,7 @@ whole (you will judge it against the tree), `docs/NOTES-FOR-AGENTS.md`, `docs/ST
 
 1. **G-A the shape:** `node tools/perf/app-shape.mjs` (every namespace a fast-properties object; none ≥ 128 keys); `node tools/rack-deps.mjs --classes` (0 bare writes;
    fwd + shared ≤ 25 per moving module; the loop and boot exempt; every module file measured; `PLANNED_CUT` tiles the body; `tests/rack-deps.test.mjs` green); the
-   doubles law: `node /home/joshua-hosain/.claude/jobs/2ea66c54/tmp/doubles.mjs <your worktree>` → 0 slots filled twice; the cycle count — every module importing from
+   doubles law: `node research/release-0.5.2/integrator/doubles.mjs <your worktree>` → 0 slots filled twice; the cycle count — every module importing from
    `'../rack.js'` (`TIER`, `BUILD_LINE`: the accepted cycle; list them).
 2. **G-G the classes, final:** `rack.js` ≤ 1,500; no module > 600 lines (list the largest three); the facade's row ≤ 25.
 3. **G-D THE LOCK:** `node tools/perf/digest-lock.mjs --check --query gastab=0` → 860 values · 0/0; then with `--fixture research/release-0.4.0/measure/digest-lock-s4a.json
@@ -31,7 +31,7 @@ whole (you will judge it against the tree), `docs/NOTES-FOR-AGENTS.md`, `docs/ST
 4. **G-M the pair:** `tools/perf/main-thread.mjs` by R1-BUILD's recipe — the 0.5.1 base export vs the tip, the boot scene AND D1's scene (`--setup`), interleaved 5 + 5 on a
    quiet rig, U4's same-tree floor FIRST (the base against itself) — |Δ| ≤ 3.536 ms/s. A gross Δ with G-A clean points at a module boundary on the frame path: name it.
 5. **G-B the bytes:** `tools/serialize-bytes.mjs --out` on the tip vs the base export — 11/11 full AND 11/11 edit sha-identical (the integrator's comparer:
-   `/home/joshua-hosain/.claude/jobs/2ea66c54/tmp/sb-compare.mjs <tree.json> <base.json>`; the base reading `sb-base.json` beside it); `tools/settings-probe.mjs` 0 of 6 red
+   `research/release-0.5.2/integrator/sb-compare.mjs <tree.json> <base.json>`; the base reading `sb-base.json` beside it); `tools/settings-probe.mjs` 0 of 6 red
    (every reached scene byte-identical on reload; the WATER / N₂ stall is the rig's — base once).
 6. **G-W the facade:** `tests/lw-facade.browser-test.mjs` 1/1 WITHOUT `--write` (176 members: 56 value · 48 get · 72 method, names and order).
 7. **G-S the suites:** `bash test.sh node` exit 0 (82 node suites); **every one of the 35 browser suites** (`ls tests/*.browser-test.mjs`), one at a time, each count

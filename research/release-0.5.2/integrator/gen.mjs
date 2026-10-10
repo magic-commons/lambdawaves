@@ -52,7 +52,7 @@ const A = [
 for (const [tok, re, after] of A) {
   const from = after ? Number(V[after]) : 0;
   const i = rack.findIndex((l, k) => k >= from && re.test(l));
-  if (i < 0) throw new Error('anchor not found: ' + tok + ' ' + re);
+  if (i < 0) { console.error('anchor not found (skipped — a PAIR 3 anchor no longer in rack.js, or a missing one a template will name): ' + tok); continue; }
   V[tok] = String(i + 1);
 }
 /* grep tokens: where a slot is filled across lab/, or "nowhere yet" */
@@ -66,7 +66,7 @@ for (const [tok, needle] of G) {
   V[tok] = out ? '`' + out.trim().split(/\s+/).join('`, `') + '`' : 'nowhere yet';
 }
 /* the facade's name audit (R5): where every backward name lives, and the null slots with their owners */
-try { V.facadeAudit = sh('node', ['/home/joshua-hosain/.config/claude-backup/jobs/8497d75b/tmp/facade-names.mjs', W.replace(/\/$/, '')]).trim().split('\n').map((l) => '  ' + l).join('\n'); } catch (e) { V.facadeAudit = '  (audit failed: ' + String(e.message).slice(0, 120) + ')'; }
+try { V.facadeAudit = sh('node', [T + 'facade-names.mjs', W.replace(/\/$/, '')]).trim().split('\n').map((l) => '  ' + l).join('\n'); } catch (e) { V.facadeAudit = '  (audit failed: ' + String(e.message).slice(0, 120) + ')'; }
 V.LWlines = String(Number(V.LWend) - Number(V.LWconst) + 1);
 V.LWgetters = String((rack.slice(Number(V.LWconst) - 1, Number(V.LWend)).join('\n').match(/\bget [A-Za-z_$][\w$]*\(\)/g) || []).length);
 /* the classes table rows */
