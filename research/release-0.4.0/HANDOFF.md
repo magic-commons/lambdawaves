@@ -741,6 +741,7 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > CLAUDE.md: THE CONTROLLER paragraph (R1's §10 + the fill). `CHANGES-0.5.2.md` R1 line. Next: fill the as-built blocks in `BRIEF-R2a.md` / `BRIEF-R3a.md`,
 > launch PAIR 1 (R2a 9063/5533 + 9067/5537; R3a 9073/5543 + 9077/5547) with the rig caveat: a "did not settle" red is checked against the base export,
 > identical = the rig, recorded, not looped on.
+> **07:13 — PAIR 1 LAUNCHED from `ff2b3e6`** (R1 merged `bad8642`; the `app.ctl` fill `ff2b3e6`): **R2a** STATE + SPECTRUM → `lab/windows/` (Opus @ high, `worktree-agent-af9d75d8973fa3306`, ports 9063/5533 + 9067/5537, `BRIEF-R2a.md`, wave 217) ∥ **R3a** §1 SETTINGS (minus the kept `readSettings`) + §24 PERSISTENCE + §25 LINKS + HISTORY → `lab/shell/` (Opus @ high, `worktree-agent-af4da7c2119c9a84d`, ports 9073/5543 + 9077/5547, `BRIEF-R3a.md`, wave 218). Both carry the rig caveat (a "did not settle" red is checked once against the base export). On their reports: merge R2a then R3a by the recipe (`rack.js` must auto-merge; a duplicated boot-kept fill line kept once), re-run THE LOCK + `frame-occlusion` when the rig recovers, then write + launch PAIR 2 {R2b · R3b}.
 
 ## 3 · What happens next, in order
 
