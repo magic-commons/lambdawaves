@@ -112,7 +112,7 @@ const PRECACHE = [
   ['./lab.css',                                                     '6b681404a204'],
   ['./ladder-model.js',                                             '69199febdca1'],
   ['./ladder.js',                                                   'ab571c69fb38'],
-  ['./latex-state.js',                                              'c8e76e8350cf'],
+  ['./latex-state.js',                                              'ae170b570c6b'],
   ['./library.js',                                                  'bd2ee94dc6e1'],
   ['./library.json',                                                '7e8098e337ec'],
   ['./linalg.js',                                                   'da2367cdcb97'],

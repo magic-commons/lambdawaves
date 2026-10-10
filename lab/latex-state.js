@@ -90,12 +90,13 @@ export function stateLatex(o) {
  * BY LEVEL (a degenerate HOMO is one HOMO): `\varepsilon_{5} = -0.3913\ (1b_{1},\ \mathrm{HOMO})`.  With no names the tag is
  * by level when the record has levels, by index otherwise.  '' when there is no ground. */
 export const BASIS_LABEL = { 'sto-3g': 'STO-3G', '6-31+g-star': '6-31+G*' };
-const SUB = '₀₁₂₃₄₅₆₇₈₉';
-/** a library formula ('<m>H₂O</m>', 'NH₄⁺', 'CO(NH₂)₂') as upright LaTeX: \mathrm{H_{2}O} */
+const SUB = '₀₁₂₃₄₅₆₇₈₉', SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻';
+/** a library formula ('<m>H₂O</m>', 'NH₄⁺', 'B₁₂H₁₂²⁻') as upright LaTeX: \mathrm{H_{2}O}.  A superscript RUN is one ^{…} (²⁻ → ^{2-}:
+ *  two would be KaTeX's double superscript, the red B₁₂H₁₂²⁻ of 0.5.2); its class is spelled out, as ¹²³ are U+00B9/B2/B3, outside ⁰–⁹ */
 export function formulaLatex(f) {
   const s = String(f || '').replace(/<\/?m>/g, '')
     .replace(/[₀-₉]+/g, (d) => '_{' + [...d].map((c) => SUB.indexOf(c)).join('') + '}')
-    .replace(/⁺/g, '^{+}').replace(/⁻/g, '^{-}');
+    .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+/g, (u) => '^{' + [...u].map((c) => '0123456789+-'[SUP.indexOf(c)]).join('') + '}');
   return '\\mathrm{' + s + '}';
 }
 /** level k's tag in the copy: its symmetry name (math) and its frontier word, from the one service */
