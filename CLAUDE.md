@@ -86,7 +86,7 @@ targets are unchanged. PERFORMANCE sits in SETTINGS › QUALITY beside GOVERNOR;
 METERS keeps the GOVERNOR readout and FRAME PROFILE.
 
 THE STAGE TEXT (Settings › Display, ONE row: the switch and its SIZE; PREFERENCE `molFormula` / `molFormulaSize`, on by default,
-50–300 %) writes what is playing on the stage as ONE block of the kit's INFORMATIONAL layer (`createInfoLayer` in `rack.js`
+50–300 %) writes what is playing on the stage as ONE block of the kit's INFORMATIONAL layer (`createInfoLayer` in `lab/shell/stage-words.js` `initStageText`
 `initStageText`, 0.5.1 D1; `lab/stage-text.js` is gone): the MOLECULES formula ($\mathrm{H_{2}O}$) while MOLECULES is on,
 otherwise SPECTRUM's populated states in `stateLatex`'s prose ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION) — never a
 live coefficient. The layer has no subject, no features and no labels, parallax, drift and following off, and is NEVER told of a
@@ -125,7 +125,7 @@ catalogue at boot) until MIR carries it (KIT BRIEF J); every other palette is
 MIR's. Cloud: PRs only, never `lab/mir`; a kit need is a MIR issue or a line in
 the PR.
 
-The stage frame/axis mask is built in `lab/rack.js` `refreshOcclusion()` and
+The stage frame/axis mask is built in `lab/shell/ink.js` `refreshOcclusion()` (`createInk` hands it to the loop) and
 consumed by the line shader in `lab/field.js`. Mask painted window surfaces,
 never a transparent layout box: the modulation root, its chip rail, and
 disconnected rack cards all have intentional gaps. A moved or scrolled window
@@ -145,7 +145,7 @@ RESET, status only when needed); its occlusion follows its drag and its close.
 Run `keyboard-shortcuts`, `keyboard-window`, `menubar` and `history` after
 touching any of it.
 
-The ACTIONS rows in `lab/rack.js` are the rows MIR's `createKeys` will read:
+The ACTIONS rows in `lab/shell/keys.js` are the rows MIR's `createKeys` will read:
 an id is the kit's where the kit has a twin (`transport.play`, `save`,
 `folders`, `modulation`, `notebook`, `rack`, `dock`, `hide`, `fullscreen`,
 `help`, `undo`, `redo`) and `was` keeps a binding saved under the old id
@@ -224,8 +224,8 @@ stage's bindings are `STAGE_BINDINGS` in `lab/stage-gestures.js`; a binding
 change is a row edit there. (0.5.0 A1/A8)
 
 The CAMERA card is MIR's `createCameraPanel` over `createCameraLaw(...).port`
-(`rack.js`, grep `createCameraPanel`); the saved `observer.*` routes stay
-`rack.js`' definitions, whose dials are the panel's (`camKnobs`) — the panel
+(`lab/windows/material.js`, grep `createCameraPanel`); the saved `observer.*` routes stay
+the ONE `defs` table's (`lab/shell/modulation.js`), whose dials are the panel's (`camKnobs`) — the panel
 registers none (its `mod` has no `add`). The phase palette is MIR's
 `createRampPanel` (`DEFAULT_PALETTE` in `lab/palette-app.js`).
 `tools/camera-routes.mjs` proves the saved routes after a camera change.
@@ -233,7 +233,7 @@ registers none (its `mod` has no `add`). The phase palette is MIR's
 
 The stage's pointer road asks MIR's scene guard first (`createSceneGuard({
 install: false })` in `lab/stage-gestures.js`, UI space from `uiSpace` in
-`rack.js`): a press, a double-click or a wheel in a window's gap never reaches
+`lab/shell/rack-wiring.js`, `wireStage`): a press, a double-click or a wheel in a window's gap never reaches
 the stage. `tools/hit-probe-set.mjs` is its gate, and the count is 0 reached.
 (0.5.0 C9)
 
@@ -257,7 +257,7 @@ worktree's `adopt.mjs`, then `--check`. `index.html` declares `@layer app,
 mir;` then `mir/mir.css`; `lab.css` and `skin.css` stay UNLAYERED and beat
 every kit layer. An `app.*` layer ranks below the kit for a normal declaration,
 so keep a λWAVES look with an unlayered rule, and narrow an app rule the layers
-made live with a twin `:not(:where())`. The 36 `!important`s stay unlayered (25 in skin.css, 11 in lab.css; four left with C6b's banner and warning pane).
+made live with a twin `:not(:where())`. The 32 `!important` declarations stay unlayered (23 in skin.css, 9 in lab.css; `grep -o` reads 36 — four more sit in comments; four left with C6b's banner and warning pane).
 R5-W1: a kit module no root reaches is reported by `wiring --unreached-kit`,
 never precached, never failed; our own modules keep the hard gate. The
 keyboard editor's stacking (`#keymap` fixed at `--z-veil`, `[hidden]` none) is
@@ -268,7 +268,7 @@ five the kit's, two λWAVES' (the disconnected head's fill and lift, lab.css §G
 
 THE FILM (0.5.0 C7, C7b) is MIR's `createRecorder` handed λWAVES' `frame(i, ctx)` (`lab/render-exact.js` `createFilm`), and its UI
 is the kit's: the RENDER card (`createRenderCard` in `lab/film-card.js`, registered in the rack as `render`, closed on the right)
-and the TIMELINE window (`installTimeline` over λWAVES' one modulation host through the seam in `rack.js`: its play is THE play,
+and the TIMELINE window (`installTimeline` over λWAVES' one modulation host through the seam in `lab/shell/keys.js`: its play is THE play,
 λWAVES' pill the one transport, the arrangement `presentation.timeline` with its own undo, the window the WORKSPACE key `tlwin`).
 RENDER films STILL (a clip of the clock), TIMELINE · ACTIVE or TIMELINE · SELECTION as an MP4 or PNG frames; ONE PERIOD is a
 `lw-period` clip (PLACE ONE PERIOD) whose t0 and T the frame reads. THE TIME LAW: the ruler is the automation's beat and t the
@@ -330,7 +330,7 @@ THE WINDOWS (0.5.2 R2a): STATE (with its CLEAR) is `lab/windows/state.js` `creat
 stay in `boot()`). THE READ LAW for a moved module: a name that is a CONST by the time its seat runs — §0's consts, the loop's hoisted
 functions, the rack, the controller's 68 (`app.ctl` is filled before the controller's seat returns) — is destructured ONCE at creation
 (`const { gov, look } = app.ctl`), which the tool counts as backward; a name `boot()` makes LATER is read through its slot inside a
-callback (`app.w.gas`, `app.sh.layout` …, filled in `boot()` right after its owner's declaration — a module created before the
+callback (`app.w.gas`, `app.sh.layout` …, registered by the module that makes it, or filled in `boot()` right after the declaration of a name `boot()` keeps (`app.host.camera`, `app.loop.page`) — a module created before the
 controller's seat, §1 SETTINGS, reads `app.ctl.x` that way too); a shared `let` is always `app.state.x`, live. Reading a const through
 `app.ctl.x` at use is NOT the pattern — the tool counts every `app.<ns>.x` read as a forward crossing and SPECTRUM would read 32 > 25.
 Each module registers on `app.w` only what a moved reader needs; a fill placed inside a moving module's span counts against that module.
@@ -345,7 +345,7 @@ line in `boot()`'s head (§0 calls it first). `serialize` / `restore` / `save` /
 moved module owns yet is filled in `boot()` right after its declaration (11 lines, 30 slots, each moving with its owner's row). `tools/rack-deps.mjs`'
 G-A: a module file's eager fills (`app.<ns>.x = …` at its root) run at its seat, so a later-seated file may destructure them; `Object.assign` into a
 member's object (`app.ctl.domain`) is not an extension of the shape. A lost import is invisible to `rack-deps` (it reports only the unused
-direction): a move checks each file's free names against the base (`research/release-0.5.2/r3a-measure/freenames.mjs`) before the browser does.
+direction): a move checks each file's free names against the base (`research/release-0.5.2/r3a-measure/freenames.mjs`, copied into `.tmp/` and pointed at the base — it cannot run in place; a `tools/freenames.mjs --base` is a candidate) before the browser does.
 
 THE SHELL (0.5.2 R3b): λWAVES' transport strip is `lab/shell/transport.js` `createTransport(app)` (`setModArm` a function declaration inside it); §19a is
 `lab/shell/rack-wiring.js` `createRackWiring(app)` — createRack, the layout verbs (aliases over the kit's rack; captureLayout's v3 the WORKSPACE record), the
@@ -356,7 +356,7 @@ KEYBOARD window, THE TIMELINE, the tab order) is `lab/shell/keys.js` `createKeys
 and reading persist's, the history's, the keys' and the facade's names through `app.sh` at use (`app.sh.LW` is the facade object, filled on the
 `window.__LW = LW` line). A boot function a module calls WHILE IT IS BEING CREATED must not read a name that module returns (`popFace` read `layout` and moved
 with §19a for that). A name a moved module returns that a later module reads is filled in `boot()` on the returning seat's line until that module's file is next
-opened, when the fill becomes its registration (`app.sh.saveSettings` … on §1's seat; `app.w.toggleFullscreen` … after SPECTRUM's).
+opened, when the fill becomes its registration (`app.w.clearRegister` on STATE's seat, `app.sh.modSeats` on persist's, `app.sh.historyApi` on the history's; R5 sent settings.js', spectrum.js' and kepler.js' fills home).
 
 THE READOUTS AND KEPLER (0.5.2 R2b): SHADOW · ORBIT · VORTEX · PLANE, CALCULUS · METERS · LADDER and ATOMS · WIGNER · RADIATION are `lab/windows/readouts.js`
 `createReadouts(app)` at THREE seats — the root builds the first and returns `createCalcMetersLadder()` / `createAtomsWignerRadiation()`, which `boot()` calls
@@ -364,8 +364,8 @@ where CALCULUS and ATOMS stood (`READERS`, the track loop and `hydroReader` stay
 `lab/windows/kepler.js` `createKeplerSurface(app)` (`keplerview.js` owns the name `createKepler`). THE MULTI-SEAT SHAPE: a module whose spans interleave with
 other cards declares each later seat as a root-level `function create<Y>()` that its root returns, and `boot()` calls it where the span stood, so no `device()`
 or append changes its order; `tools/rack-deps.mjs` measures such a function as eager at its own piece and its declarations as the module's own (an arrow or a
-nested closure is read as a deferred callback and its fills as never made — the tool refuses that tree; `tests/rack-deps.test.mjs` §5). `rack.js` stands at
-2,001 lines with PAIR 2 in; thirteen module files are measured.
+nested closure is read as a deferred callback and its fills as never made — the tool refuses that tree; `tests/rack-deps.test.mjs` §5). `rack.js` stood at
+2,001 lines with PAIR 2 in (943 at the cut; 21 module files measured).
 
 THE MATERIAL, THE SETTINGS CARD AND THE FILM (0.5.2 R2c): WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA are
 `lab/windows/material.js` `createMaterial(app)` and the SETTINGS card is `lab/windows/settings-card.js` `createSettingsCard(app)` — each at

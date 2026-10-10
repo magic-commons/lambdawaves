@@ -890,6 +890,21 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > 9137/5607, wave 224; its one commit is `R-V-REPORT.md`) → the fix round → the local cut `v0.5.2-alpha · Rack Dissolution` on Josh's word (`sos-s0/.tmp/cut-0.5.2.sh`
 > drafted, syntax-checked, NOT run). NO push, NO deploy, NO tag before.
 
+> **UPDATE (Claude Sos, 2026-10-10 14:40 CDT) — R-V IN (`baffea3`): FIT WITH NOTES, NO BLOCKING DEFECT; THE FIX ROUND DONE BY HAND; THE CUT WAITS ON JOSH'S WORD.**
+> R-V (fresh Opus, `a41339d31c3c73662`, `805af88`) ran the whole estate on the healthy rig: THE LOCK 860 + 1004 · 0/0; the pair boot Δ +0.648 / D1 Δ +0.435 ms/s
+> (floor +0.390 / +0.441); serialize-bytes 11/11 + 11/11; settings-probe 0/6; lw-facade 1/1; node 0; browser 34/35 (`latex-copy` red on both trees); boot alone 150/152
+> ×2 (B149 the law red; B6/B69 the base's flakes, re-read interleaved); film-probe identical incl. MP4; DOM 4,139 elements identical; lines 27,943 = the cap (ledger
+> +277 from git); free names none lost. **The fix round (the integrator, docs and the script):** N1 `.tmp/cut-0.5.2.sh` anchors `^export const BUILD_LINE` and
+> asserts the rewrite (HANDOFF §3's old recipe re-anchored too); N4 CLAUDE.md:260 back to 32 declarations with the `grep -o` 36 note; N6 the 17 stale pointers
+> re-aimed (CLAUDE.md ×12, NOTES-FOR-AGENTS ×6, STATE-SCOPES ×3 — R-V's proposed text). **N2 `latex-copy` stays OPEN:** R-V read the copy button sliding from
+> y≈1100 to 30 after `raise('spectrum')`; a rect-still wait added by the integrator did not cure it, and a diagnostic run read the raised card at y 818 with a
+> `.segw.mol-pick` SELECT (another card's body) at the button's centre — a stacking/scroll question from 0.5.1 (red on the base), not a 0.5.2 regression; the test is
+> reverted to its committed form; a candidate for the next release with both readings. N3 (a `tools/freenames.mjs --base`), N5 (cold load +32 ms; `modulepreload`),
+> N7 (stale comments in settings-store.js, worker-pool.js, shell/persist.js — when next opened) and R-V's confirmed candidates (B6/B69 re-aim; the tool clause before
+> trimming 73 dead destructured names; 19 double blank lines; persist 23 → 13; `main-thread.mjs` hashing rack.js alone; the three remaining seat-line fills) are the
+> next release's list. CHANGES-0.5.2: the R-V line. **THE CUT:** `bash .tmp/cut-0.5.2.sh` in `sos-s0` (syntax-checked; tag `v0.5.2-alpha`, BUILD_LINE
+> `0.5.2-alpha · Rack Dissolution · <date>`, README status 0.5.2, pwa, node gate, changelog, snapshot) ON JOSH'S WORD. NO push, NO deploy, NO gh release.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
@@ -898,7 +913,7 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 2. **Cut v0.3.3-alpha** from `release-0.4.0` (R-A1; Josh authorised it with the plan and "build S0 and onward") — the road:
    ```
    # in the Major Agent's worktree, on release-0.4.0, tree green
-   sed -i "s/^const BUILD_LINE = '[^']*'/const BUILD_LINE = '0.3.3-alpha · the exports · 2026-10-0X'/" lab/rack.js   # lab/rack.js:90, the only place the number lives
+   sed -i "s/^export const BUILD_LINE = '[^']*'/export const BUILD_LINE = '0.3.3-alpha · the exports · 2026-10-0X'/" lab/rack.js   # lab/rack.js:90, the only place the number lives
    # README.md:14  "**Status: 0.3.3 alpha.**"
    node tests/pwa.test.mjs --write && bash test.sh node
    git commit -am "0.3.3-alpha: the version line and the README status"

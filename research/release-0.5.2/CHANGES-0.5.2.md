@@ -77,3 +77,12 @@ real seams, over an explicit context. Nothing a hand or an eye meets is meant to
   rebooted rig); `lw-facade` 1/1 (176 members: 56 value · 48 get · 72 method) without `--write`; `serialize-bytes` 11/11 full + 11/11 edit; `settings-probe`
   0/6 (six reached); node 0; history 44, new-project 8 + `--check` 16,117 B, offer 16/16, menubar 8, stage-text 4, curves 7, timeline 14/14, lw-links 5,
   camera-shift 11, film-handover 4 — nothing red, so no base reading was needed. Left to R-V: the boot suite, the pair, latex-copy, keyboard-window. **You see nothing.**
+
+- **R-V THE VERIFICATION ROUND** (merged 2026-10-10 14:40 from `805af88`): **FIT WITH NOTES** — on the rebooted rig every gate is green or reads the same as the
+  0.5.1 base: THE LOCK 860 + 1004 · 0/0; the main-thread pair boot +0.648 / D1 +0.435 ms/s (the same-tree floor +0.390 / +0.441; limit 3.536); serialize bytes
+  11/11 full + edit; the settings probe 0/6; the facade 176 members; node 0; 34 of 35 browser suites green (`latex-copy` red on both trees since 0.5.1); the boot suite
+  150/152 with B149 the only law red and B6/B69 the base's flakes; the film probe identical to the base, MP4 bytes included; 4,139 DOM elements identical in order and
+  attributes; the ledger +277 lines from git, 27,943 = the cap. Seven notes, none blocking: the cut script's version-line anchor (fixed before the cut), `latex-copy`'s
+  covered button (open — the readings differ run to run: a slide to y 30 in R-V's, a molecule-picker select over the raised card's head in the integrator's), the
+  free-names tool unrunnable in place, the `!important` count (32 declarations; fixed), the cold load +32 ms from 21 more module requests (no gate; `modulepreload`
+  a later option), 17 stale document pointers (fixed), three stale `lab/` comments (reworded when those files are next opened). **You see nothing.**

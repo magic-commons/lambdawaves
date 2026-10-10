@@ -45,12 +45,12 @@ and the code disagree, the code is right; please say so in an issue.
 ## 4. Quality: GRID, AUTO SCALE and PERFORMANCE
 
 - SETTINGS → FIELD QUALITY → GRID picks the volume and sets the march steps and render scale with it: 64³ = 110
-  steps × 0.75, 96³ = 160 × 1, 128³ = 240 × 1. Source: `lab/first-run.js` (`GRID_PAIRING`), `lab/rack.js`
+  steps × 0.75, 96³ = 160 × 1, 128³ = 240 × 1. Source: `lab/first-run.js` (`GRID_PAIRING`), `lab/windows/settings-card.js`
   (`ui.gridSeg`).
 - AUTO SCALE (same group) moves the canvas backing scale, never the grid. Once 250 ms and six frames have passed
   it compares the median rAF interval with the frame budget, jumps once to the scale that should fit (not below
-  0.35), then holds. Pausing returns it to 1 and draws one full-resolution frame. Source: `lab/rack.js` (the
-  AUTO SCALE comment above `autoScaleStep`), `tests/auto-scale.test.mjs`.
+  0.35), then holds. Pausing returns it to 1 and draws one full-resolution frame. Source: `lab/shell/controller.js` (the
+  ONE CONTROLLER comment above `controlStep`), `tests/auto-scale.test.mjs`.
 - METERS → PERFORMANCE sets the budget. `120 Hz`, the default, uses the display's observed cadence (as short as
   8.33 ms) and updates the CPU readers every fourth frame. `FULL` keeps a 16.7 ms (60 fps) budget and updates
   readers every frame. On a 120 Hz panel, `120 Hz` makes AUTO SCALE chase 8.3 ms (the M5 iPad settles at 0.75
@@ -62,7 +62,7 @@ and the code disagree, the code is right; please say so in an issue.
 - A tablet starts at 64³ × 110 × 0.75 and never marches more than 96³: a saved 128³ opens as 96³ × 160 × 1. A
   phone runs 64³ × 110 × 0.75 (its crossing applies it and gives the old values back on the way out) with frost
   off. Both cap the device pixel ratio at 1.5; a desktop caps it at 2 and starts at 64³ × 160 × 1. Source:
-  `lab/first-run.js` (`FIRST_RUN_QUALITY`, `QUALITY_CEILING`, `deviceQuality`), `lab/rack.js` (`syncPhone`,
+  `lab/first-run.js` (`FIRST_RUN_QUALITY`, `QUALITY_CEILING`, `deviceQuality`), `lab/shell/rack-wiring.js` (`syncPhone`,
   `enterPhone`), `tests/first-run.test.mjs`.
 - A project file never turns AUTO SCALE off on the device that opens it, and the bundled demos carry no quality,
   theme, card style, frost or camera feel. The device's stored choices always win over first-run defaults.
@@ -119,11 +119,11 @@ and the code disagree, the code is right; please say so in an issue.
   [MIR](https://github.com/magic-commons/mir) first, then are adopted, and `node <MIR>/tools/adopt.mjs <repo>
   --check` must say "in step". Source: CLAUDE.md, AI_POLICY.md.
 - The debug surface is `window.__LW` (`serialize()`, `restore()`, `fieldDigest()`, `readPixels()`, `perf`,
-  `governor`, `quality`, `layout`, `report()`). Source: `lab/rack.js` (`const LW = {`).
+  `governor`, `quality`, `layout`, `report()`). Source: `lab/shell/facade.js` (`createFacade`; `rack.js` adds the late members at their seats).
 - A window's "copy" is one clipboard road: `layout.copyText(id, text)` writes and flashes `copied` on the named
   card; `layout.copyDigest(id)` (the INFO panels' ⧉) and SPECTRUM's ⧉ / EDIT › COPY the state as LaTeX
   (`copyLatex()`, `lab/latex-state.js`'s pure `stateLatex()`, chemistry/Madelung order, Josh's notebook spelling)
-  both go through it. Source: `lab/rack.js` (`layout.copyText`, `copyLatex`), `lab/window-chrome.js`.
+  both go through it. Source: `lab/shell/rack-wiring.js` (`layout.copyText`), `lab/windows/spectrum.js` (`copyLatex`), `lab/window-chrome.js`.
 
 ## 8. Playing a release snapshot
 
@@ -133,8 +133,8 @@ and the code disagree, the code is right; please say so in an issue.
   `tools/snapshot-release.mjs`, RELEASING.md.
 - From a clone, `git worktree add ../lw-<tag> <tag>` and `./serve.sh` there does the same.
 - Projects and settings live in the browser's storage for one origin (host and port). A snapshot served on another
-  port starts fresh and cannot touch the projects of the copy on 8700. Source: `lab/rack.js` (the settings and
-  projects keys in `localStorage`).
+  port starts fresh and cannot touch the projects of the copy on 8700. Source: `lab/settings-store.js` (`SETTINGS_KEY` and the
+  FAMILIES table).
 - The installed app is cache-first and changes build through the offer (the build badge and its pane, never hidden by
   STATUS TAGS), a quiet take for an untouched session (`rack.js` `untouched`), or ABOUT › UPDATE APP; `?sw=0` declines
   the service worker for development. Source: `lab/main.js`, `lab/sw.js`, `lab/sw-client.js`, `tests/pwa.test.mjs`,
