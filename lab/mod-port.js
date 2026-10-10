@@ -30,15 +30,24 @@ import { createFlashGuard, WCAG } from './mir/shell/flash-guard.js';
  *  0.98 swing) and so is everything else.  PARTIAL: reg.morph, chem.kick and the camera can still flash — only the FIELD JUDGE (a pixel
  *  readback, 0.5.x) sees that.  FLASH_STEP is the step, in the map's own space (ln for a log route), that moves the picture's luminance
  *  by 10 % at the route's default (tools/flash-calibrate.mjs, U8), so ranges = [0, step / delta].  A route is held only while a
- *  modulator drives it: a hand's write and the restore to the base on a stop pass untouched and let go of the guard. */
+ *  modulator drives it: a hand's write on an UNROUTED dial and the restore to the base on a stop pass untouched and let go of the guard.
+ *  A hand on a ROUTED dial moves the BASE (registry.setBase publishes nothing under a modulator) and the modulator's next output carries
+ *  it, a write no different from the modulator's own, so that picture IS held (D-V N3: a flash is a flash whoever makes it, and a bypass
+ *  that resets the guard would let a wiggled dial through a 10 Hz strobe). */
 export const FLASH_STEP = { 'material.exposure': 0.0953, 'material.gamma': 0.1319, 'material.stage': 0.1131, 'material.knee': 0.2595 };
-export function guardRoutes(defs, { driven, now, say }) {
-  const on = defs.filter((d) => d.id in FLASH_STEP);
+export function guardRoutes(defs, { driven, now, say, read, onAdvance }) {
+  const on = defs.filter((d) => d.id in FLASH_STEP), lastWrite = new Map();   // a HELD def → the modulation-second its last write came
   const guard = createFlashGuard({ now, ranges: Object.fromEntries(on.map((d) => [d.label, [0, FLASH_STEP[d.id] / WCAG.delta]])),
     onTrip: (t) => say(`FLASH GUARD · ${t.route} ${t.hz.toFixed(1)} Hz held to ${WCAG.maxHz}/s`), onRelease: () => say('') });
+  /* THE QUIET SECOND (D-V S1).  The kit lets go only inside guard(), and the registry never calls a set whose value did not change, so a
+     modulator gone constant mid-hold would leave the picture off the registry's number and the line up for good.  The modulation's own
+     seconds do the waiting (`onAdvance` fires after every tick and every film step, so a film lets go on the same frame): a held route
+     with no write for WCAG.releaseS is let go of and handed the registry's current value. */
+  onAdvance(() => { for (const [d, t] of lastWrite) if (now() - t >= WCAG.releaseS) { lastWrite.delete(d); guard.reset(d.label); say(''); d.set(read(d.id)); } });
   return defs.map((d) => (!on.includes(d) ? d : { ...d, set: (v) => {
-    if (!driven(d.id)) { if (guard.state(d.label)?.held) say(''); guard.reset(d.label); return d.set(v); }
+    if (!driven(d.id)) { lastWrite.delete(d); if (guard.state(d.label)?.held) say(''); guard.reset(d.label); return d.set(v); }
     const log = d.map === 'log', x = log ? Math.log(v) : v, g = guard(x, d.label);
+    if (guard.state(d.label)?.held) lastWrite.set(d, now()); else lastWrite.delete(d);
     return d.set(g === x ? v : log ? Math.exp(g) : g);          // a pass hands over the number it was given, never exp(ln v)
   } }));
 }
@@ -102,9 +111,9 @@ export function createModPort({ available, present, view, onCapture, save, say }
       return n;
     },
     install(defs, roots) {
-      defs = guardRoutes(defs, { driven: routed, now: () => host.clock.stats().seconds, say });   // the modulation's own seconds: wall live, the exact step in a film
-      adapters = defs; idOf = null;
       host = createModHost({ available, present, presentationActive: false, roots });   // a closed editor has no preview demand
+      defs = guardRoutes(defs, { driven: routed, now: () => host.clock.stats().seconds, say, read: host.registry.read, onAdvance: host.clock.onAdvance });   // the modulation's own seconds: wall live, the exact step in a film
+      adapters = defs; idOf = null;
       host.install(defs.map(({ knob: _k, ...d }) => d));
       for (const d of defs) { if (d.knob) knobs[d.id] = d.knob; gets[d.id] = d.get; }
       requestAnimationFrame(P.stamp);                   // a frame later: the `ui.*` dials the accessors close over exist by then
