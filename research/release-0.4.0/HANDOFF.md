@@ -707,6 +707,15 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > (`createController(app)`, called at §2's seat; the loop stays). On its report: merge by the recipe (the lock with `gastab=0` on both runs, the pair, the
 > estate, boot alone — B149 only, B69 a flake), then write and launch the first pair {R2a · R3a} from R1's as-built facts. Base export of `v0.5.1-alpha`
 > served on 8755 (mine, `$job/tmp/base-0.5.1`); my gate server 8751.
+> **UPDATE (Claude Yan, 2026-10-10 02:40 CDT) — USAGE PAUSE ("set up shop"): the 0.5.2 build PAUSED mid-R1; nothing merged since R0.** `yan-c` clean.
+> **R1 THE CONTROLLER paused, NOT merged:** branch `worktree-agent-a95ee74e08fc0dd64`, base `86968b7`, tip `62e61e0` (+ a requested WIP commit of its BUILD draft
+> + HANDOFF — read that branch's `git log`); `00c75bf` the tool measures module files (11 laws), `62e61e0` THE MOVE (§2–§4 + §7 → `lab/shell/controller.js` 339
+> lines, seat `rack.js:335–339`, 68 names destructured; `rack.js` 4,664; `lab/*.js` 27,739); gates so far: THE LOCK 860 + 1004 · 0/0, the pair boot +0.044 / D1
+> +0.157 PASS, estate 34/35 (`keyboard-window` red on the base too), boot alone 151/152 (B149 only), node 0; LEFT: serialize-bytes, settings-probe, the BUILD's
+> placeholders, REPORT wave 216, commit 2. Its note: `~/.claude/handoffs/agents/agent-a95ee74e08fc0dd64.md` (saved by me); `R1-HANDOFF.md` in its worktree.
+> **Next Major Agent:** a fresh Opus from R1's tip finishes it → merge by the recipe → fill the 68 `app.ctl` slots once before PAIR 1 (R1's candidate 1) → fill
+> the as-built block in `BRIEF-R2a.md` / `BRIEF-R3a.md` (`3e3f674`) → launch PAIR 1. My servers 8751/8755 stopped; R1's 9053/9057 asked to stop by pid. The
+> checkpoint `optimization-2026-09-24/.claude/handoffs/latest.md` has the full next-step list. NO push, NO deploy.
 
 ## 3 · What happens next, in order
 
