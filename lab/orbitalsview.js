@@ -140,6 +140,9 @@ export function createOrbitals(host, api) {
   /* ── the register ─────────────────────────────────────────────────────────────────────────────── */
   const nAO = () => (sol ? sol.nAO : 0);
   const nocc = () => (sol ? sol.nocc : 0);
+  /* 0.5.3 M2 · a FRONTIER record (C₆₀) carries 8 of its 300 columns (`sol.cols`): a level it does not carry is drawn dim and no hand
+     reaches it — select, a paint stroke and a crossed row all skip it — so the refusal() below is never one click away */
+  const carried = (k) => !!sol && k >= 0 && k < sol.nAO && (!sol.cols || sol.cols.includes(k));
   /* THE NAMES (0.4.0 S1, lab/names.js): the worker names the ladder with the solve.  A rung reads `1b1 · HOMO`, `3a1`,
      `1e1g (a)`; a degenerate HOMO is ONE HOMO (the frontier is by level).  No name (refused, C₁, unconverged): the
      frontier word by level, and the hover says why. */
@@ -186,7 +189,7 @@ export function createOrbitals(host, api) {
   }
 
   function select(k, amp = 1, phase = 0) {
-    if (!sol || !(k >= 0) || k >= sol.nAO) return false;
+    if (!carried(k)) return false;
     sel.set(k | 0, { amp: Math.max(0, Math.min(1, +amp || 0)), phase: ((+phase || 0) % TAU + TAU) % TAU });
     selected = k | 0; touch(); rebuild(); paint(); refresh(); api.repaint(); return true;
   }
@@ -198,7 +201,7 @@ export function createOrbitals(host, api) {
     if (!sol || !ks.length) return 0;
     let n = 0;
     for (const k0 of ks) {
-      const k = k0 | 0; if (!(k >= 0) || k >= sol.nAO) continue;
+      const k = k0 | 0; if (!carried(k)) continue;
       if (on) { if (sel.has(k)) continue; sel.set(k, { amp: 1, phase: 0 }); selected = k; n++; }
       else if (sel.delete(k)) { if (selected === k) selected = -1; n++; }
     }
@@ -460,17 +463,17 @@ export function createOrbitals(host, api) {
       }
       for (let j = 0; j < row.items.length; j++) {
         const lv = row.items[j], x0 = left + j * seg + 1, x1 = x0 + seg - 2;
-        const c = sel.get(lv.k), lit = !!c, ink = lv.occ ? occInk : virInk;
-        g.strokeStyle = lit ? ink(1) : ink(lv.occ ? 0.6 : 0.4); g.lineWidth = lit ? 2 : 1;
+        const c = sel.get(lv.k), lit = !!c, ink = lv.occ ? occInk : virInk, dim = !carried(lv.k);
+        g.strokeStyle = lit ? ink(1) : ink(dim ? 0.14 : lv.occ ? 0.6 : 0.4); g.lineWidth = lit ? 2 : 1;
         g.beginPath(); g.moveTo(x0, yy); g.lineTo(x1, yy); g.stroke();
-        if (lv.occ) { g.fillStyle = ink(lit ? 0.34 : 0.16); g.fillRect(x0, yy - 3, x1 - x0, 6); }   // occupied: filled; virtual: hollow
+        if (lv.occ) { g.fillStyle = ink(lit ? 0.34 : dim ? 0.04 : 0.16); g.fillRect(x0, yy - 3, x1 - x0, 6); }   // occupied: filled; virtual: hollow; uncarried: dim
         if (lit && c.amp > 0) { g.fillStyle = ink(0.72); g.fillRect(x0, yy - 4, Math.max(3, (x1 - x0) * c.amp), 8); }   // the register's own |c|
         if (lv.k === selected) { g.strokeStyle = T.fg(0.9); g.lineWidth = 1; g.strokeRect(x0 - 1, yy - 5, x1 - x0 + 2, 10); }
         hits.push({ y: yy, x0, x1, k: lv.k });
         hovers.push({ kind: 'line', key: 'L' + lv.k, points: [x0, yy, x1, yy], lw: lit ? 2 : 1, colour: ink(1),
           info: `${label(lv.k)}  ·  k${lv.k + 1}  ·  ε = ${lv.eps.toFixed(6)} Eh  ·  ${lv.occ ? lv.occ + ' electrons' : 'virtual, 0 electrons'}`
             + (sol.names ? '  ·  ' + about(lv.k) : '')
-            + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : '  ·  click to add') });
+            + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : dim ? '  ·  not carried by this record' : '  ·  click to add') });
       }
       /* the gutter: the level's plain name (no component tag: a row IS the level), with HOMO / LUMO beside it */
       const mo0 = moOf(row.items[0].k), fr = frontierOf(row.items[0].k), edge = fr === 'HOMO' || fr === 'LUMO';
@@ -512,7 +515,7 @@ export function createOrbitals(host, api) {
   /** every level on every row strictly between a and b */
   function crossed(a, b) {
     const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y);
-    return hi - lo < 0.5 ? [] : hits.filter((h) => !h.core && h.y > lo && h.y < hi).map((h) => h.k);
+    return hi - lo < 0.5 ? [] : hits.filter((h) => !h.core && h.y > lo && h.y < hi && carried(h.k)).map((h) => h.k);
   }
   const stroke = paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(),
     at: (p) => { const h = nearestHit(p, 8); return h ? [h.core ? 'core' : h.k] : []; }, across: crossed,

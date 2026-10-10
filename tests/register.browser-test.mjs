@@ -5,7 +5,10 @@
  * hands it the field as a `signed` product under the `real` observable, that time is closed-form (periodic to
  * round-off under a scrub), that one register plays at a time, that benzene's RING is a rotating dipole of constant
  * length on lanes named by their axis, and that presets, stores, MORPH, the record and the modulation targets work.
+ * 0.5.3 M2 · R11 drives C₆₀'s ladder by hand: a pick of C₆₀ under the browser's change rule after a failed record open, the
+ * driver's real clicks and a real drag down the ladder, a real press of ON.
  */
+import http from 'node:http';
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
 
 const PORT = process.env.LW_PORT || 8706;
@@ -179,6 +182,55 @@ try {
     return { nAO: __LW.chem.solution() && 0, basisNH3: '6-31+g-star', count: lad && lad.count, ms, ring, labels: st.lanes.map((l) => l.label), spread: Math.max(...mags) - Math.min(...mags), mag: mags[0], refused, energy: null, errs: window.__e.slice() };`);
   judge('R10 NH₃ in 6-31+G* (25 Cartesian AOs, 100 states): the canonical ladder arrives, RING finds the E pair and its dipole turns at constant length; benzene falls back to STO-3G with a sentence',
     r10.count === 100 && r10.ring === true && r10.labels.length === 3 && /x$|y$|z$/.test(r10.labels[1]) && r10.spread < 1e-9 && r10.mag > 0.05 && r10.refused === 'sto-3g' && r10.errs.length === 0, r10);
+
+  /* ── R11 · C₆₀'S LADDER (0.5.3 M2), by hand: a failed record open gives the dropdown back; no click on a dim rung refuses ON ──── */
+  const wd = (method, path, body) => new Promise((res, rej) => {   // the driver's own pointer road: real presses and a real drag on the ladder
+    const q = http.request({ host: '127.0.0.1', port: process.env.GD_PORT || 4444, path, method, headers: { 'content-type': 'application/json' } }, (x) => {
+      let b = ''; x.on('data', (d) => { b += d; }); x.on('end', () => { try { res(JSON.parse(b).value); } catch (e) { rej(e); } }); });
+    q.on('error', rej); q.end(body ? JSON.stringify(body) : undefined); });
+  /* the hand's pick, under the browser's own rule: a <select> fires `change` only when its VALUE changes (Firefox's driver fires it on
+     every <option> click, so its element road cannot stand in for a hand here) — the page turned to the molecule's section first */
+  const choose = (id) => g.ev(`const s = document.querySelector('.dev[data-id="chem"] .mol-pick select.sel');
+    for (const sec of ['DIATOMICS', 'HYDRIDES', 'ORGANIC', 'BIO', 'LATTICE', 'HEAVY']) { if ([...s.options].some((o) => o.value === '${id}')) break; __LW.chem.section(sec); }
+    if (s.value === '${id}') return false;
+    s.value = '${id}'; s.dispatchEvent(new Event('input', { bubbles: true })); s.dispatchEvent(new Event('change', { bubbles: true })); return true;`);
+  const r11a = await g.ev(`__LW.chem.setOn(true);
+    const h = ((await (await fetch('./library.json')).json()).rows.find((r) => r.id === 'C60') || {}).hash;
+    if ('caches' in window) await (await caches.open('lw-data-v1')).delete(new URL('./library/' + h + '.json', location.href).href);
+    window.__f0 = window.fetch; window.fetch = (u, o) => (String(u && u.url || u).includes(h) ? Promise.reject(new TypeError('the gate is offline for C60')) : __f0(u, o));
+    return { h, before: __LW.chem.preset() };`);
+  const pick1 = await choose('C60');
+  const r11b = await g.ev(`${HELP}
+    await wait(() => /record is not open/.test(__LW.chem.state().status));
+    const s = document.querySelector('.dev[data-id="chem"] .mol-pick select.sel');
+    const out = { preset: __LW.chem.preset(), value: s.value, sol: !!__LW.chem.solution(), status: __LW.chem.state().status };
+    window.fetch = __f0; return out;`);
+  const pick2 = await choose('C60');
+  const r11c = await g.ev(`${HELP} const ok = await wait(() => { const s = __LW.chem.solution(); return s && /^C60\\|/.test(s.key); }, ${pick2 ? 600 : 1}); return { ok: !!ok, preset: __LW.chem.preset() };`);
+  judge('R11 C₆₀ offline: the failed record open gives the dropdown back (the last solved molecule chosen again, no solution), so a hand re-pick of C₆₀ is a change and opens it',
+    r11a.before !== 'C60' && pick1 && r11b.preset === r11a.before && r11b.value === r11a.before && !r11b.sol && pick2 && r11c.ok && r11c.preset === 'C60', { r11a, pick1, r11b, pick2, r11c });
+  const geo = await g.ev(`${HELP}
+    __LW.register.setMode('orbital'); const d = document.querySelector('.dev[data-id="orbitals"]'); d.classList.remove('closed', 'folded'); d.scrollIntoView({ block: 'start' });
+    await frames(); __LW.orbitals.clear(); await frames(2);
+    const b = d.querySelector('.reg-pane:not([hidden]) canvas.mol-c').getBoundingClientRect();
+    return { x: Math.round(b.left + b.width * 0.6), y0: Math.round(b.top + 14), y1: Math.round(b.bottom - 30) };`);
+  const clicks = [];
+  for (let y = geo.y0; y <= geo.y1; y += 3) clicks.push({ type: 'pointerMove', duration: 0, origin: 'viewport', x: geo.x, y }, { type: 'pointerDown', button: 0 }, { type: 'pause', duration: 20 }, { type: 'pointerUp', button: 0 });
+  await wd('POST', `/session/${g.s}/actions`, { actions: [{ type: 'pointer', id: 'r11c', parameters: { pointerType: 'mouse' }, actions: clicks }] });
+  await wd('DELETE', `/session/${g.s}/actions`);
+  const afterClicks = await g.ev(`${HELP} await frames(2); return __LW.orbitals.state().selection.map((q) => q.k);`);
+  const drag = [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: geo.x, y: geo.y0 }, { type: 'pointerDown', button: 0 }];
+  for (let y = geo.y0 + 6; y <= geo.y1; y += 6) drag.push({ type: 'pointerMove', duration: 16, origin: 'viewport', x: geo.x, y });
+  drag.push({ type: 'pointerUp', button: 0 });
+  await wd('POST', `/session/${g.s}/actions`, { actions: [{ type: 'pointer', id: 'r11d', parameters: { pointerType: 'mouse' }, actions: drag }] });
+  await wd('DELETE', `/session/${g.s}/actions`);
+  const r11d = await g.ev(`${HELP} await frames(2); const st = __LW.orbitals.state(); return { sel: st.selection.map((q) => q.k), cols: __LW.orbitals.solution().cols.slice(), refusal: st.refusal, rungs: st.rungs.length };`);
+  const tapOn = await g.tap('.dev[data-id="orbitals"] .reg-mode > .sw.orb-on:not([hidden])');
+  const r11e = await g.ev(`${HELP} await frames(4); const st = __LW.orbitals.state(); const out = { on: __LW.orbitals.on, refusal: st.refusal, status: st.status, sel: __LW.molsession.state().selected, errs: window.__e.slice() };
+    __LW.orbitals.setOn(false); return out;`);
+  judge('R11 C₆₀ by hand: ' + clicks.length / 4 + ' clicks and a drag down the whole ladder put only carried levels (cols 175–182) in the register, and a real press of ON is answered, not refused',
+    afterClicks.every((k) => r11d.cols.includes(k)) && r11d.sel.length > 0 && r11d.sel.every((k) => r11d.cols.includes(k)) && r11d.refusal === null
+      && tapOn.ok === 1 && r11e.on === true && r11e.refusal === null && r11e.sel === 'orbital-packet' && r11e.errs.length === 0, { afterClicks, r11d, tapOn, r11e });
 
   const errs = await g.ev('return { errs: window.__e.slice(), gpu: __LW.field.lastGpuError || null };');
   judge('RZ no page error and no GPU error at any step', errs.errs.length === 0 && !errs.gpu, errs);
