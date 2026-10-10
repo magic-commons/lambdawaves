@@ -11,6 +11,68 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.5.1-alpha` — 2026-10-09
+
+Commit `a8b2d7b` · waves 210–214 · 45 commits.
+
+- **wave 210**: D10-19 THE FLASH GUARD, the limiter half — four luminance routes held to three flashes a second, calibrated from the shader, PARTIAL on purpose
+- **wave 211**: D10-F THE TWO OLD LAW REDS — B70 / B71 (44 px on a phone) and B78 (the STATE card's IMPULSE words) green, 49 failing hit-tests found where the brief named eight
+- **wave 212**: D1 THE STAGE TEXT IS THE KIT'S BLOCK — one INFORMATIONAL block, never told of a camera move; the letters stay; stage-text.js leaves
+- **wave 213**: D10-24 CURVES — the kit's curves panel over the picture, screen only, shipped closed, its grade a PREFERENCE; a graded screen costs 19 % of the field's presents/s
+- **wave 214**: D2 + D8 THE MOLECULE'S HEAD on a hand pick, and `lw:` LINKS in the notebook — every number the record's or the solve's; one row, one fade a press
+
+<details><summary>commits</summary>
+
+- `27eb96a` 2026-10-09 — CHANGELOG for v0.5.0-alpha
+- `b8654c2` 2026-10-09 — HANDOFF §2: v0.5.0-alpha GUI Adoption CUT LOCALLY (f478482 / 27eb96a; snapshot #17; CHANGES…
+- `79cbcc8` 2026-10-09 — 0.5.1 D10-19 · the calibration: the four luminance steps
+- `596f3a3` 2026-10-09 — 0.5.1 D1 · main-thread.mjs --setup; the three base arms
+- `5ccd238` 2026-10-09 — 0.5.1 D10-19 · the flash guard's limiter on the four luminance routes; hue excluded; the trip in…
+- `d700374` 2026-10-09 — 0.5.1 D10-19 · wave 210; D10-19-BUILD.md
+- `0f7915a` 2026-10-09 — 0.5.1 D1 · the formula and the fade are the kit's block; the letters move; stage-text.js leaves
+- `d13e620` 2026-10-09 — 0.5.1 D1 · D1-HANDOFF after step 2
+- `064f3b0` 2026-10-09 — Merge D10-19 (0.5.1; Sonnet, d700374): THE FLASH GUARD's limiter half
+- `9224ded` 2026-10-09 — 0.5.1 D10-19 docs: CLAUDE.md THE FLASH GUARD's LIMITER paragraph (the builder's draft, applied);…
+- `42e5610` 2026-10-09 — 0.5.1 · BRIEF-D2-D8.md (one Opus builder after D1): the molecule's head on a hand pick from stem…
+- `a337538` 2026-10-09 — HANDOFF §2: the D10-19 line's stamp by the machine clock
+- `f768355` 2026-10-09 — 0.5.1 D10-F · 44 px touch targets: the transport's six buttons and the ring's short knobs on a…
+- `6d79813` 2026-10-09 — 0.5.1 · BRIEF-D-V.md (the verifier, fresh Opus, after Group I): the cumulative pair vs…
+- `cdb1af8` 2026-10-09 — 0.5.1 D10-F · the STATE card's IMPULSE seats (B78-BOW)
+- `c479e0e` 2026-10-09 — 0.5.1 D1 · the witness and the pair, recorded (HANDOFF)
+- `5e8d338` 2026-10-09 — 0.5.1 D10-F · the boot suite alone: 152 verdicts, 150 GREEN, 2 RED (B6 a stray timing red, B149…
+- `d058d6f` 2026-10-09 — Merge D10-F (0.5.1; Sonnet, 5e8d338): the two pre-existing boot reds green — B70/B71 44 px touch…
+- `ad16257` 2026-10-09 — HANDOFF §2: D10-F merged d058d6f 17:10; the D2+D8 and D-V briefs written; running D1, D10-24
+- `aaeb88e` 2026-10-09 — 0.5.1 D1 · the block is re-placed once more 400 ms on (the pill's dodge lands after its class);…
+- `52e51aa` 2026-10-09 — 0.5.1 D1 · the pair, the witness, placement, churn, fade; wave 210; D1-BUILD.md
+- `76b1d5e` 2026-10-09 — Merge D1 (0.5.1; Opus, 52e51aa): THE STAGE TEXT IS THE KIT'S BLOCK
+- `636e681` 2026-10-09 — 0.5.1 D1 docs: CLAUDE.md THE STAGE TEXT paragraph replaced by D1's draft (the kit's block; the…
+- `5ef0fec` 2026-10-09 — 0.5.1 D10-24 · the CURVES card: the kit's panel over the picture, screen only, closed; the…
+- `c8e8473` 2026-10-09 — 0.5.1 D10-24 · presents/s neutral vs S-curve; wave 210; D10-24-BUILD.md
+- `e623e37` 2026-10-09 — Merge D10-24 (0.5.1; Sonnet, c8e8473): THE CURVES CARD
+- `c59489e` 2026-10-09 — HANDOFF §2: D10-24 merged e623e37
+- `2bdb754` 2026-10-09 — 0.5.1 D2+D8 · HANDOFF step 0: the design taken (the head rides THE FADE; the hand road through…
+- `7903399` 2026-10-09 — 0.5.1 D2 · the molecule's head: the composer (stem / the live solve) + the node test over 38…
+- `e5250ff` 2026-10-09 — 0.5.1 D2 · the head on a hand pick, dismissed as greet does; never on open/undo/restore
+- `8160f50` 2026-10-09 — 0.5.1 D2+D8 · HANDOFF after step 2
+- `f9028a5` 2026-10-09 — 0.5.1 D8 · lw: links in the notebook view: a whitelist grammar onto hand verbs, one ring row,…
+- `0f69cb0` 2026-10-09 — 0.5.1 D2+D8 · HANDOFF after step 3
+- `7e38b12` 2026-10-09 — 0.5.1 D2+D8 · wave 213; D2-D8-BUILD.md
+- `69458d8` 2026-10-09 — Merge D2+D8 (0.5.1; Opus, 7e38b12): THE MOLECULE'S HEAD on a hand pick (moleculeHead beside…
+- `a017f51` 2026-10-09 — 0.5.1 PLAN §9: Josh ≈18:30
+- `593f4bc` 2026-10-09 — 0.5.1 D-V · the verifier's report
+- `710d9df` 2026-10-09 — Merge D-V (0.5.1; Opus, 593f4bc): FIT WITH NOTES, no BLOCKER
+- `d9ee1de` 2026-10-09 — CLAUDE.md: D-V's four contradicted lines
+- `f3bd6cd` 2026-10-09 — 0.5.1 fix · the flash guard lets go: after the quiet second a held route is re-applied and the…
+- `5ad8bee` 2026-10-09 — 0.5.1 · tests/legacy/boot B127
+- `610e4c4` 2026-10-09 — 0.5.1 · FIX-ROUND-2.md
+- `f1b715a` 2026-10-09 — Merge FIX ROUND 2 (0.5.1; Sonnet, 610e4c4): D-V S1
+- `3ae4146` 2026-10-09 — HANDOFF §2: FIX ROUND 2 merged f1b715a; the cut's run of record running
+- `a8b2d7b` 2026-10-09 — 0.5.1-alpha Informational Update: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.5.0-alpha` — 2026-10-09
 
 Commit `f478482` · waves 188–209 · 275 commits.
