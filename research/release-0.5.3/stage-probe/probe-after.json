@@ -1,0 +1,274 @@
+{
+ "url": "https://127.0.0.1:8943/lab/?sw=0&warn=0&starter=home",
+ "step": 24,
+ "when": "2026-10-10T22:53:47.677Z",
+ "viewport": [
+  1600,
+  1000
+ ],
+ "scenes": [
+  {
+   "n": 1,
+   "name": "first run",
+   "field": true,
+   "took": true,
+   "pass": true,
+   "readings": [
+    {
+     "label": "reading",
+     "points": 2814,
+     "count": {
+      "ui": 1114,
+      "gap": 42,
+      "stage": 1658
+     },
+     "dead": {},
+     "boxes": {},
+     "gaps": {
+      "rack": 42
+     },
+     "leaks": 0
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "SETTINGS open (raised, AXES set to CORNER)",
+   "field": true,
+   "took": true,
+   "pass": true,
+   "readings": [
+    {
+     "label": "reading",
+     "points": 2814,
+     "count": {
+      "ui": 1114,
+      "gap": 42,
+      "stage": 1646,
+      "box": 12
+     },
+     "dead": {},
+     "boxes": {
+      "button.corner-axis-hit": 12
+     },
+     "gaps": {
+      "rack": 42
+     },
+     "leaks": 0
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "name": "the modulation window open with its bars",
+   "field": true,
+   "took": true,
+   "pass": true,
+   "readings": [
+    {
+     "label": "reading",
+     "points": 2814,
+     "count": {
+      "ui": 1742,
+      "gap": 174,
+      "stage": 898
+     },
+     "dead": {},
+     "boxes": {},
+     "gaps": {
+      "rack": 24,
+      "div#modwin.kwin": 150
+     },
+     "leaks": 0
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "name": "MOLECULES on",
+   "field": true,
+   "took": true,
+   "pass": true,
+   "readings": [
+    {
+     "label": "reading",
+     "points": 2814,
+     "count": {
+      "ui": 1114,
+      "gap": 42,
+      "stage": 1658
+     },
+     "dead": {},
+     "boxes": {},
+     "gaps": {
+      "rack": 42
+     },
+     "leaks": 0
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "name": "the keyboard editor open",
+   "field": true,
+   "took": true,
+   "pass": true,
+   "readings": [
+    {
+     "label": "reading",
+     "points": 2814,
+     "count": {
+      "ui": 1828,
+      "gap": 66,
+      "stage": 920
+     },
+     "dead": {},
+     "boxes": {},
+     "gaps": {
+      "rack": 24,
+      "div.mir-win": 42
+     },
+     "leaks": 0
+    }
+   ]
+  },
+  {
+   "n": 6,
+   "name": "a dialog (the kit's confirmDialog)",
+   "field": true,
+   "took": true,
+   "pass": true,
+   "readings": [
+    {
+     "label": "reading",
+     "points": 2814,
+     "count": {
+      "modal": 2766,
+      "ui": 48
+     },
+     "dead": {},
+     "boxes": {},
+     "gaps": {},
+     "leaks": 0
+    }
+   ]
+  },
+  {
+   "n": 7,
+   "name": "ui-hidden (H), AXES at CORNER first",
+   "field": true,
+   "took": true,
+   "pass": true,
+   "readings": [
+    {
+     "label": "reading",
+     "points": 2814,
+     "count": {
+      "stage": 2814
+     },
+     "dead": {},
+     "boxes": {},
+     "gaps": {},
+     "leaks": 0
+    }
+   ]
+  },
+  {
+   "n": 8,
+   "name": "after a drag",
+   "field": true,
+   "took": true,
+   "pass": true,
+   "readings": [
+    {
+     "label": "after the release",
+     "points": 2814,
+     "count": {
+      "ui": 1114,
+      "gap": 42,
+      "stage": 1658
+     },
+     "dead": {},
+     "boxes": {},
+     "gaps": {
+      "rack": 42
+     },
+     "leaks": 0
+    },
+    {
+     "label": "after a lost pointerup",
+     "points": 2814,
+     "count": {
+      "ui": 1114,
+      "gap": 42,
+      "stage": 1658
+     },
+     "dead": {},
+     "boxes": {},
+     "gaps": {
+      "rack": 42
+     },
+     "leaks": 0
+    }
+   ],
+   "drag": {
+    "at": [
+     600,
+     300
+    ],
+    "moved": true
+   }
+  },
+  {
+   "n": 9,
+   "name": "the transport docked",
+   "field": true,
+   "took": true,
+   "pass": true,
+   "readings": [
+    {
+     "label": "reading",
+     "points": 2814,
+     "count": {
+      "ui": 1060,
+      "gap": 42,
+      "stage": 1712
+     },
+     "dead": {},
+     "boxes": {},
+     "gaps": {
+      "rack": 42
+     },
+     "leaks": 0
+    }
+   ]
+  },
+  {
+   "n": 10,
+   "name": "the rack folded by its key (B) while the ☆ list is open",
+   "field": true,
+   "took": true,
+   "pass": true,
+   "readings": [
+    {
+     "label": "reading",
+     "points": 2814,
+     "count": {
+      "box": 84,
+      "stage": 2723,
+      "ui": 7
+     },
+     "dead": {},
+     "boxes": {
+      "div#rackPeekL": 42,
+      "div#rackPeek": 42
+     },
+     "gaps": {},
+     "leaks": 0
+    }
+   ]
+  }
+ ],
+ "ok": true,
+ "passed": 10
+}
