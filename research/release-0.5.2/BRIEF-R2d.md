@@ -10,7 +10,7 @@ it), `tests/helpers/app-source.mjs`, `tools/rack-deps.mjs` (`--classes`; `--sect
 paragraphs and the MOLECULES / STAGE TEXT / modulation paragraphs), `docs/STATE-SCOPES.md`, `lab/mir/modulation/modwindow/host-contract.md` (the seam's law; the kit
 is never edited).
 
-## As-built facts (the integrator, 2026-10-10 after PAIR 2 — the launch tip `03200df`; the BUILD files are the authority)
+## As-built facts (the integrator, 2026-10-10 after PAIR 2 — the launch tip `8796d15`; the BUILD files are the authority)
 
 - **THE READ LAW (R2a, binding):** your four modules are seated AFTER the controller — a name that is a CONST by then (§0's consts, the loop's hoisted functions, the
   rack, the controller's 68 on `app.ctl`, what every earlier-seated module registered on `app.w` / `app.sh` / `app.host` — `wSpec`, `wState`, `wSh`, `wOrb`, `wVor`,
@@ -20,7 +20,7 @@ is never edited).
   Reading a const through `app.<ns>.x` at use is NOT the pattern (a forward crossing each; modulation sits at 10).
 - **Your rows at the launch tip (the merged table):** molecules 98 lines, backward 18, forward 3, another scope's `app.state` 5 (+6 own), **fwd + shared 8**; stage-words 124 lines, backward 4, forward 2, another scope's `app.state` 2 (+1 own), **fwd + shared 4**; modulation 247 lines, backward 19, forward 1, another scope's `app.state` 9, **fwd + shared 10**; ink 51 lines, backward 6, forward 0, another scope's `app.state` 3, **fwd + shared 3**.
   Limit 25, zero bare writes. Count before and after. (THE HINGE (G-G): bare writes across scopes 0; the largest moving module spectrum at 24 (limit 25) → HOLDS; 13 module files measured.)
-- **Your regions** (`lab/rack.js` 2001 lines at `03200df` — re-locate by grep on your base). **MOLECULES, two spans:** `/* ── LEGACY WINDOWS` :1019
+- **Your regions** (`lab/rack.js` 2001 lines at `8796d15` — re-locate by grep on your base). **MOLECULES, two spans:** `/* ── LEGACY WINDOWS` :1019
   (the five retired shims' notes; `let specFoldedByMol` :1027), `/* CHEMISTRY — eight molecules` :1047 (`let chemPrevView` :1049), `/* THE
   MOLECULAR SESSION` :1058, `const wChem = device(` :1064 → before `/* THE STAGE TEXT` :1099; and `/* ORBITALS — the MOLECULAR REGISTER`
   :1223 (`const wOrbs = device(` :1228; `app.w.wChem = wChem; app.w.wOrbs = wOrbs;` :1229) → before `// CALCULUS` :1241 (R2b's seat).
@@ -35,9 +35,11 @@ is never edited).
   RACK :1547–:1556 (`const rackL` :1548, `LAYOUT_SLOTS` :1552, `const floats` :1555) STAYS in `boot()`; §27 stays.
 - **The seats (G-O, the DOM-order law):** `wChem` :1064 and `wOrbs` :1228 are the region's only `device()`s; the stage words create none; the seam creates
   none (the modulation window is the kit's on `#floats`). **Default: molecules keeps TWO seats** in THE MULTI-SEAT SHAPE (R2b, and the tool's rule): the root builds the first span and RETURNS the
-  later seat as a **root-level `function create<Y>() { … return { … }; }` declaration** (never an arrow or a nested closure — the tool reads those as deferred
-  callbacks and their fills as never made, and refuses the tree): `const { wChem, createRegister } = createMolecules(app);` where :1019 stood and `const {
-  wOrbs } = createRegister();` where :1223 stood — `lab/windows/readouts.js` is the worked example; **ONE seat is allowed with the proof** that MO-REGISTRY's
+  later seat as a **`function create<Y>() { … return { … }; }` declaration at the statement level of the create function's BODY** — inside `createMolecules(app)`,
+  exactly as `createCalcMetersLadder` sits inside `createReadouts` in `lab/windows/readouts.js`; NOT a second top-level `create<X>` in the file (the tool's
+  `measureFile` refuses a module file with more than one), and never an arrow or a nested closure (the tool reads those as deferred callbacks and their fills as
+  never made): `const { wChem, createMoRegistry } = createMolecules(app);` where :1019 stood and `const { wOrbs } = createMoRegistry();` where :1223
+  stood (**not `createRegister`** — `rack.js` imports that name from `./registerview.js` and MO-REGISTRY's span calls it); **ONE seat is allowed with the proof** that MO-REGISTRY's
   span reads no stage-words product at creation and `serialize-bytes` 11/11 full holds. `createStageWords(app)` one seat where :1099 stood; `createModSeam(app)` one
   seat where :1244 stood; `createInk(app)` one seat where :1557 stood. Say which shape you chose and why.
 - **Fills you inherit — each moves WITH its declaration into your module and becomes its registration; none stays in `boot()`:** `app.w.stageTextTick =
@@ -64,8 +66,8 @@ is never edited).
   wSh;` to readouts' root registration line (`lab/windows/readouts.js`, the owner's line — the ONE edit outside your regions; R2b candidate 6) and destructure it
   with the other three, or read it at use; say which.
 - **The names you read that others own:** `app.sh.layout` (rack-wiring's eager registration, seated AFTER you → at use inside callbacks; filled at `lab/shell/rack-wiring.js:277`),
-  `app.sh.setModArm` (transport's, seated after the seam → at use; `lab/shell/transport.js:204`), `app.w.wCalc` / `wLad` (readouts' second seat, after molecules → at use;
-  `lab/windows/readouts.js:121` / `lab/windows/readouts.js:121`), `app.host.rackL` / `floats` / `LAYOUT_SLOTS` (§17's consts, boot-kept, declared BEFORE ink and the stage words — R3b fills them on §17's
+  `app.sh.setModArm` (transport's, seated after the seam → at use; `lab/shell/transport.js:204`), `app.w.wCalc` / `wLad` (readouts' second seat, after molecules' first → at use inside `moleculeMode`'s body, which is
+  where the span reads them; the table's forward 3 already counts them; `lab/windows/readouts.js:121`), `app.host.rackL` / `floats` / `LAYOUT_SLOTS` (§17's consts, boot-kept, declared BEFORE ink and the stage words — R3b fills them on §17's
   `floats` line, `lab/rack.js:1555`: destructure them in ink; the stage words read `rackL` inside `initStageText`'s closures — at use or destructured, both are
   backward there). `occlusion`, `mod`, `modHand`, `setKnob`, `cameraPort`, `orbitBy`, `rotRate` … are the controller's / the camera law's (`app.ctl`, `app.host`):
   destructure.

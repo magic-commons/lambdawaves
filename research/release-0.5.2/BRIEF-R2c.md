@@ -7,7 +7,7 @@ wiring, the notebook, the keys — and what each registered), `BRIEF-R2b.md` (th
 MORE THAN ONE SEAT — your material and settings-card are that shape), `lab/windows/state.js`, `lab/shell/controller.js` (NEVER edit it), `tests/helpers/app-source.mjs`,
 `tools/rack-deps.mjs` (`--classes`; the module-file mode; `PLANNED_CUT`'s anchors; G-A's accepted fills), `CLAUDE.md` (its last six paragraphs), `docs/STATE-SCOPES.md`.
 
-## As-built facts (the integrator, 2026-10-10 after PAIR 2 — the launch tip `03200df`; the BUILD files are the authority)
+## As-built facts (the integrator, 2026-10-10 after PAIR 2 — the launch tip `8796d15`; the BUILD files are the authority)
 
 - **THE READ LAW (R2a, binding):** your three modules are seated AFTER the controller — a name that is a CONST by then (§0's consts, the loop's hoisted functions,
   the camera law's names, the rack, the controller's 68 on `app.ctl`, and what every earlier-seated module registered on `app.w` / `app.sh` / `app.host`) is
@@ -16,7 +16,7 @@ MORE THAN ONE SEAT — your material and settings-card are that shape), `lab/win
   shared `let` is always `app.state.x`, live, never destructured. Reading a const through `app.<ns>.x` at use is NOT the pattern (a forward crossing each).
 - **Your rows at the launch tip (the merged table):** material 131 lines, backward 11, forward 0, another scope's `app.state` 1 (+4 own), **fwd + shared 1**; settings-card 178 lines, backward 21, forward 1, another scope's `app.state` 4, **fwd + shared 5**; film 21 lines, backward 5, forward 3, another scope's `app.state` 3, **fwd + shared 6**. Limit 25, zero bare
   writes. Count before and after. (THE HINGE (G-G): bare writes across scopes 0; the largest moving module spectrum at 24 (limit 25) → HOLDS; 13 module files measured.)
-- **The region** (`lab/rack.js` 2001 lines at `03200df` — re-locate by grep on your base): §8's head `/* ── windows ──` :647 → the camera law :650 and
+- **The region** (`lab/rack.js` 2001 lines at `8796d15` — re-locate by grep on your base): §8's head `/* ── windows ──` :647 → the camera law :650 and
   `app.host.camera … rack` :654 STAY in `boot()` (the boot piece). Your region is the four seats `const wObs = device(` :658 … `const wClip = device(`
   :664 with the three `app.state` inits between them (:661–:663), then ONE block `{` :665 … `}` :997 that INTERLEAVES
   the pieces (`tools/rack-deps.mjs` `PLANNED_CUT` tiles it exactly so): **material** = :658–:693 (the seats, `gSpace` :668, `gDraw` :669, SPACE,
@@ -31,8 +31,9 @@ MORE THAN ONE SEAT — your material and settings-card are that shape), `lab/win
 - **The seats (G-O, the DOM-order law):** card creation order writes bytes (`closed[]`, `captureLayout`). The four `device()`s :658–:664 and `ui.set`
   :695 are the only card creations in the region; the RENDER and CURVES cards are made later (`app.state.filmCard = createFilmCard(` in §27). **Default:
   every span keeps its seat** — THE MULTI-SEAT SHAPE (R2b, and the tool's rule): the module's root builds the first span and RETURNS the later seats as
-  **root-level `function create<Y>() { … return { … }; }` declarations** (never an arrow or a nested closure — the tool reads those as deferred callbacks and
-  their fills as never made, and refuses the tree): `const { wObs, wPal, wCam, wClip, createDrawClipPaletteCamera } = createMaterial(app);` at :658 and
+  **`function create<Y>() { … return { … }; }` declarations at the statement level of the create function's BODY** — inside `createMaterial(app)`, exactly as
+  `createCalcMetersLadder` sits inside `createReadouts` in `lab/windows/readouts.js`; NOT a second top-level `create<X>` in the file (the tool's `measureFile`
+  refuses a module file with more than one), and never an arrow or a nested closure (the tool reads those as deferred callbacks and their fills as never made): `const { wObs, wPal, wCam, wClip, createDrawClipPaletteCamera } = createMaterial(app);` at :658 and
   `createDrawClipPaletteCamera();` (your name) where :844 stood; `createSettingsCard(app)` the same (`createFieldQuality()` where :971 stood);
   `createFilmApi(app)` one seat where :939 stood. `lab/windows/readouts.js` is the worked example (its root returns `createCalcMetersLadder` and
   `createAtomsWignerRadiation`). **ONE seat per module is allowed only with the proof**: (a) no `device()` in the later span
