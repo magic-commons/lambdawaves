@@ -10,6 +10,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { firstRunMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING } from '../lab/first-run.js';
 import { liftLook, LOOK_ROWS, BLOB_LOOK } from '../lab/look.js';
+import { appSource } from './helpers/app-source.mjs';   // 0.5.2: the app's source — rack.js and the modules it dissolves into
 import { repair } from '../lab/mir/core/prefs.js';
 import { lookSchema } from '../lab/mir/shell/gui.js';
 /** what a boot wears (0.5.0 C2): an older blob lifted (liftLook), repaired by the kit's own LOOK_SCHEMA rows, over the device's
@@ -70,7 +71,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     && eq(rows.blobLook, ['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'badges', 'controlHints', 'hint']), rows);
 }
 {
-  const src = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
+  const src = appSource();
   const wires = {
     imported: /import \{ firstRunMaterial, firstRunQuality, deviceQuality \} from '\.\/first-run\.js'/.test(src),
     asksCrossings: /const FIRST_RUN = firstRunMaterial\(isPhone\(\) \|\| isTablet\(\)\);/.test(src),
@@ -92,7 +93,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     eq(rows.desktop, ['settings', 'state']) && eq(rows.mobile, ['settings', 'state', 'shadow', 'chem', 'orbitals']) && Object.isFrozen(rows.desktop) && Object.isFrozen(rows.mobile), rows);
 }
 {
-  const rows = { desktop: firstRunMaterial(false).more, mobile: firstRunMaterial(true).more, wired: readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8').includes('moreOpen: FIRST_RUN.more') };
+  const rows = { desktop: firstRunMaterial(false).more, mobile: firstRunMaterial(true).more, wired: appSource().includes('moreOpen: FIRST_RUN.more') };
   judge('THE MOLECULES MORE FOLD (0.4.0 S0): KICK / RUN / TDA / the spectra are OPEN on a desktop and folded on a phone or tablet, and rack.js hands the answer to the card',
     rows.desktop === true && rows.mobile === false && rows.wired, rows);
 }
@@ -117,7 +118,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     && QUALITY_CEILING.tablet === 96 && QUALITY_CEILING.phone === 64 && QUALITY_CEILING.desktop === undefined, rows);
   const autoDropped = ['desktop', 'tablet', 'phone'].every((d) => !('auto' in deviceQuality({ res: 64, auto: false }, d)) && !('auto' in deviceQuality({ res: 64, auto: true }, d)));
   judge('A FILE NEVER CARRIES AUTO SCALE: `auto` is dropped on every device, whether the file says true or false (the switch is the device\'s, in the settings key; serialize() still writes it for older readers)', autoDropped);
-  const src = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
+  const src = appSource();
   const demoDir = new URL('../lab/demos/', import.meta.url);
   const demos = readdirSync(demoDir).filter((f) => f.endsWith('.lambdawaves.json')).map((f) => JSON.parse(readFileSync(new URL(f, demoDir), 'utf8')));
   const wires = {

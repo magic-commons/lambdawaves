@@ -6,11 +6,14 @@
  *    inner const read before its line (TDZ) — and whose reads / writes / mutates, ui members and LW facade are known;
  *    §3 lab/rack.js itself: ONE boot body, the sections' lines sum to it, every boot-level name in exactly one section,
  *    a clean walk (no warning), and the shadows the file is known to carry (`rk` re-declared in a for-head at line ~3034).
+ * §4 (0.5.2 R0) the classes table on the plan's cut — the pieces tile the body, no shared let is left bare, every app.state member is
+ *    a key of the literal, no bare cross-module write, the hinge (forward + shared ≤ 25) — and G-A read statically; the app-source helper.
  *
  * Run:  node tests/rack-deps.test.mjs
  */
 import { readFileSync } from 'node:fs';
-import { lex, analyze } from '../tools/rack-deps.mjs';
+import { lex, analyze, classes, PLANNED, HINGE } from '../tools/rack-deps.mjs';
+import { appFiles, appSource, APP_FOLDERS } from './helpers/app-source.mjs';
 
 let red = 0;
 const check = (ok, what, detail = '') => { if (ok) console.log('PASS ' + what); else { red++; console.log('RED  ' + what + (detail ? ' — ' + detail : '')); } };
@@ -122,6 +125,33 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     check(rkFor > 0 && rkShadows.includes(rkFor), `rack.js: the for-head \`rk\` at line ${rkFor} is a shadow, never a use of the boot-level rack`, JSON.stringify(rkShadows));
     check(R.totals.forward.eagerTdz === 0, 'rack.js: no eager use of a let/const from a later section (it would throw at boot)', String(R.totals.forward.eagerTdz));
   }
+}
+
+/* ── §4 THE CLASSES TABLE AND THE CONTEXT (0.5.2 R0: G-G and G-A, read statically) ── */
+{
+  const src = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
+  let C = null, err = '';
+  try { C = classes(src); } catch (e) { err = e.message; }
+  check(!!C, '--classes: every anchor of the plan\'s cut is found, in order', err);
+  if (C) {
+    const P = C.pieces;
+    check(P[0].from === C.boot.openLine + 1 && P[P.length - 1].to === C.boot.closeLine - 1 && P.every((p, k) => k === 0 || p.from === P[k - 1].to + 1),
+      `--classes: the ${P.length} pieces tile boot's body edge to edge`, JSON.stringify(P.map((p) => [p.module, p.from, p.to])).slice(0, 300));
+    check(Object.keys(PLANNED).every((m) => P.some((p) => p.module === m)), 'every planned module holds at least one piece');
+    check(C.sharedLets.length === 0, 'every shared let the cut names is an `app.state` member: none is left a bare `let` two scopes touch', C.sharedLets.join(', '));
+    const stateKeys = C.appShape.ns.state || [];
+    check(C.stateMembers.length > 0 && C.stateMembers.every((x) => stateKeys.includes(x)), `every app.state member the code uses (${C.stateMembers.length}) is a key of the literal's state namespace`,
+      C.stateMembers.filter((x) => !stateKeys.includes(x)).join(', '));
+    check(C.hinge.crossWrites === 0, 'no bare write to a binding another planned module owns', C.modules.filter((m) => m.crossWrites.length).map((m) => m.id + ': ' + m.crossWrites.join(' ')).join('; '));
+    check(C.modules.every((m) => m.stays || m.forwardShared <= HINGE), `THE HINGE: forward + shared ≤ ${HINGE} in every module that moves (the largest: ${C.hinge.worst.id} ${C.hinge.worst.forwardShared})`,
+      C.modules.filter((m) => !m.stays && m.forwardShared > HINGE).map((m) => m.id + ' ' + m.forwardShared).join(', '));
+    check(C.appShape.line > C.boot.openLine && C.appShape.line <= P[0].to && C.appStrays.length === 0 && C.appShape.largest < 128,
+      `G-A: \`app\` is ONE literal in the boot head (line ${C.appShape.line}), every member the code names is a key of it, no Object.assign, no delete, no namespace of 128 keys (V8 would make it a dictionary)`,
+      C.appStrays.slice(0, 5).join('; ') + ' · largest ' + C.appShape.largest);
+  }
+  const files = appFiles();
+  check(files[0] === 'rack.js' && files.slice(1).every((f) => APP_FOLDERS.some((d) => f.startsWith(d + '/'))) && appSource().startsWith(src),
+    `tests/helpers/app-source.mjs: the app's source is rack.js first, then ${APP_FOLDERS.map((d) => 'lab/' + d + '/').join(' and ')} (${files.length} file${files.length > 1 ? 's' : ''} now)`, files.join(' '));
 }
 
 if (red) { console.log(`RED ${red} rack-deps check(s)`); process.exit(1); }

@@ -9,6 +9,33 @@ row: 234 lines, backward 11, forward 5, shared 1, writes 0; the one road: 71, ba
 `tests/auto-scale.test.mjs` (its indentation-sensitive slices of `controlStep` and the loop's bookkeeping), `tests/render-exact.test.mjs`, `tests/window-activity.test.mjs`,
 `tests/helpers/app-source.mjs` (R0's helper), `tests/legacy/boot.browser-test.mjs` B108 (re-pointed by R0), `tools/perf/digest-lock.mjs`, `tools/perf/main-thread.mjs`, `CLAUDE.md`.
 
+## R0's as-built facts (these BIND; `R0-BUILD.md` is the authority where this summary is short)
+
+- **Your FIRST commit, before any move: teach `tools/rack-deps.mjs` the module files** (R0's brief candidate 1). `classes()` reads `lab/rack.js` alone; once §2
+  leaves, its anchors are gone (the tool throws "the cut needs re-anchoring") and the controller's names live in `lab/shell/controller.js`. Measure each
+  `lab/shell/*.js` / `lab/windows/*.js` module as a piece of its planned module (its `create<X>(app)` body), resolve its free names against `app`'s keys, and
+  drop the moved pieces from `PLANNED_CUT`; `tests/rack-deps.test.mjs` gets the law (a moved module is measured from its file; the table keeps its 23 rows).
+  Without this the classes table AFTER cannot be produced, and the acceptance below asks for it.
+- `app` is the LAST statement of §0 (`lab/rack.js:165`), 30 keys; `app.ctl` has 68 NULL slots for the controller's crossing names — `createController(app)`
+  fills the ones a reader outside your module needs (`app.ctl.gov = gov` … at creation), never edits the literal; a slot nothing reads stays null (a fill
+  nothing reads is a dead store). The 29 controller-owned `app.state` members (BUILD §6: applyVisuals, audioCap, badgesWall, dodge, feedMs, filmCard,
+  govVersion, keplerDirty, lastNmax, metersWall, modArm, modExpOn, modHost, modView, modWall, occludeAt, occludeDirty, pendingRef, playedLast, pointerHeld,
+  refSnapshot, rotMoved, rotTicking, stageFollow, stageMix, tl, uiHidden, warmIdle, warmTimer) stay `app.state.x`, read and written live, never destructured;
+  their seats (`app.state.x = init`) travel with the code that owns them.
+- The controller's row AFTER R0: 305 lines, backward 12, forward 10, another scope's `app.state` 2, bare writes 0, fwd + shared **12**. Hold it ≤ 25.
+- **U1:** `saveMod` (§2) is touched before its line INSIDE your module — keep it a function declaration inside `createController`. `setModArm` is §12's
+  (the transport's), not yours. `readSettings` sits on `app.sh` by value and is not your row.
+- **U8:** `ui` is `app.ui`, the one flat registry; `native-ui.js` writes five members and patches four `.set`s (BUILD §7). The controller is not a window
+  and owns no `ui` row; keep every `ui.x` registration it touches under the same name.
+- **Slices across files (candidate 9):** `tests/auto-scale.test.mjs` slices `controlStep` and the loop's bookkeeping through `appSource()` (rack.js then the
+  modules); a sliced block must stay whole inside one file — the controller's slices move whole with it, the loop's stay whole in `rack.js`.
+- **The base for the pair and for `serialize-bytes`:** the integrator's tip named in your launch message, exported with `git archive <sha> | tar -x -C <dir>`
+  and served on your second port with `LW_CERTS=<your worktree>/.certs` (an export has no `.certs`). THE LOCK's 1004 fixture is checked WITH `--query
+  gastab=0` (the tool's header; without it the gas states read red at every grid — a command error, not a tree's).
+- **The base's reds (not yours):** the boot suite's B149 is the only law red; B6 and B69 flake on the base (BUILD §10 — re-run the single block alone before
+  believing one); `latex-copy.browser-test` is red on `v0.5.1-alpha` too. Say them, do not fix them.
+- REPORT.md: your wave is **216** under the `2026-10-10 · 0.5.2 · RACK DISSOLUTION` heading R0 made (never a second heading).
+
 ## The contract (a MOVE, not a rewrite)
 
 1. **What moves:** §2 ONE CONTROLLER (the governor, AUTO SCALE's one rule, the look, the busy marks, the mod port, the rotation drive), §3 FIELD (`createField`, `onLost`),

@@ -26,6 +26,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { appSource } from './helpers/app-source.mjs';   // 0.5.2: the app's source — rack.js and the modules it dissolves into
 
 const ROOT = path.resolve(new URL('.', import.meta.url).pathname, '..');
 const LAB = path.join(ROOT, 'lab');
@@ -93,7 +94,7 @@ const said = () => [dial.root.getAttribute('aria-valuenow'), dial.root.getAttrib
 const plain = said(); dial.setBase(() => 1.71); dial.show(2.5); const driven = said(); dial.root.focus(); dial.show(3.1); const focusedDriven = said();
 const baseSaid = plain[1] === gfmt(1) && driven[0] === '1.71' && driven[1].startsWith(gfmt(1.71)) && driven[1].length > gfmt(1.71).length
   && !driven[1].includes(gfmt(2.5)) && focusedDriven[0] === '1.71' && focusedDriven[1] === driven[1];
-const rackWire = /k\.setBase\(\(\) =>/.test((TEXT.get('lab/mod-port.js') || '') + (TEXT.get('lab/rack.js') || ''));   // 0.5.0 A5 moved the wire into the port
+const rackWire = /k\.setBase\(\(\) =>/.test((TEXT.get('lab/mod-port.js') || '') + appSource());   // 0.5.0 A5 moved the wire into the port
 judge('A8 a control the app is DRIVING under a focused user announces the base and says so: a kit knob given setBase(fn) and driven to another number speaks the base (valuenow, and the base\'s own text followed by the word) and keeps speaking it while focused and driven again, and rack.js hands every modulation target its registry base — so what is spoken is either the current value or is explicitly framed as the base, never a stale number presented as the value',
   baseSaid && rackWire, { plain, driven, focusedDriven, rackWire });
 

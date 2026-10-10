@@ -300,3 +300,18 @@ real figure). AMOUNT is not routed (a flash route outside D10-19's guard). The g
 `lambdawaves.q0.curves` (FAMILIES; the model's `serialize()`, written 250 ms after a change, removed by FORGET), never a project, link
 or history row. A card that ships closed and that no layout lists is seated where an unlisted card stays (after RENDER), or `closed[]`
 saves in two orders. `tests/curves.browser-test.mjs` is its guard; `__LW.curves` is the model.
+
+THE CONTEXT (0.5.2 R0, "Rack Dissolution"). `boot()`'s ONE `app` (the last statement of its head, `lab/rack.js`, grep `const app = {`) is
+fixed-shape namespaces — §0's consts by value, `ui` (the one flat registry `native-ui.js` and `badges.js` read and write), `hooks`, `state`,
+`loop`, `host`, `w`, `ctl`, `sh` — each ONE literal with every key, never extended, never `Object.assign`ed into, never deleted, and none of
+128 keys or more (V8 makes such a literal a dictionary; `tools/perf/app-shape.mjs` asks `%HasFastProperties`). Every `let` two planned
+modules touch is `app.state.x`, read and written live, never destructured; consts and functions keep their names; a null slot is filled by
+the row that moves its first reader (a module registers its own names when it is created, a boot-kept name right after its declaration).
+Rename a shared binding only with `node tools/rack-deps.mjs --rename`, never `sed`; `node tools/rack-deps.mjs --classes` is G-G (0 bare
+cross-module writes, forward + shared ≤ 25 per moving module; the loop and the boot head exempt — they stay in `boot()`) and
+`tests/rack-deps.test.mjs` its law. A law that reads the app's SOURCE reads `tests/helpers/app-source.mjs` (`appSource()` in node,
+`appFiles()` fetched in the page: rack.js, then every module under `lab/windows/` and `lab/shell/`), never `lab/rack.js` alone.
+`tests/lw-facade.browser-test.mjs` pins `window.__LW` — names, kinds (get / method / value) and order — against
+`research/release-0.5.2/lw-facade.json`; a row that changes the facade re-captures it with `--write` and says the diff. THE LOCK's 1004-value
+fixture (`research/release-0.4.0/measure/digest-lock-s4a.json`) predates the gas table and is checked WITH `--query gastab=0`, as the tool's
+header says; without it the gas states read red at every grid.

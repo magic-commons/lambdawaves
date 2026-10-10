@@ -14,6 +14,7 @@
  * Run:  node tests/project-formats.test.mjs */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { appSource } from './helpers/app-source.mjs';   // 0.5.2: the app's source — rack.js and the modules it dissolves into
 import { createFiles } from '../lab/mir/folders/files.js';
 import { seed } from '../lab/mir/folders/seed.js';
 import { pageFromNotebook } from '../lab/mir/shell/pages.js';
@@ -195,10 +196,10 @@ green('R10 c · a 1.4 notebook is page 0: the kit\'s pageFromNotebook reads λWA
 
 /* ── THE UNSAVED MARK (the part's signature, projectKey()), sliced out of rack.js as project-storage.test did ── */
 {
-  const rack = read('../lab/rack.js');
+  const rack = appSource();
   const snapStart = rack.indexOf('function projectSnapshot()'), snapEnd = rack.indexOf('function projectKey()', snapStart);
   const keyStart = rack.indexOf('function projectKey() {'), keyEnd = rack.indexOf('const part = {', keyStart);
-  assert.ok(snapStart > 0 && snapEnd > snapStart && keyEnd > keyStart, 'projectSnapshot / projectKey / the part moved in rack.js');
+  assert.ok(snapStart > 0 && snapEnd > snapStart && keyEnd > keyStart, 'projectSnapshot / projectKey / the part moved in the app source');
   let state = { experiment: { t: 0 }, presentation: { quality: { autoScale: 1 }, domain: { auto: true, half: 7 }, obs: {}, mat: { slice: {} }, rotationRates: {} } };
   const subtitle = { value: '' };
   const makeKey = new Function('serialize', 'titleIn', 'subIn', 'ta', 'modHost', 'modSeats',

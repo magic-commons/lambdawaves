@@ -37,6 +37,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PRESETS, toLUT, rgbToOklab, oklabToRgb, visibleInk, contrastRatio, relLuminance } from '../lab/mir/palette.js';
 import { parseCssColor } from '../lab/mir/kit.js';
+import { appSource } from './helpers/app-source.mjs';   // 0.5.2: the app's source — rack.js and the modules it dissolves into
 
 const LAB = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'lab');
 let FAILED = 0, TOTAL = 0;
@@ -192,12 +193,12 @@ for (const p of PRESETS) { const lut = toLUT(p.stops); for (let d = 0; d < 360; 
    now takes the LIVE value for `#title`; this sweeps the whole travel of the knob at both themes. */
 const STAGE_ENDS = { dark: [0.028, 0.038, 0.058], light: [0.93, 0.95, 0.975] };
 {
-  const rackSrc = fs.readFileSync(path.join(LAB, 'rack.js'), 'utf8');
+  const rackSrc = appSource();
   const m = rackSrc.match(/const THEMES = \{ dark: \{ bg: \[([^\]]+)\][^}]*\}, light: \{ bg: \[([^\]]+)\]/);
   judge('W59-1 the two ends of the STAGE travel in this file ARE rack.js\'s THEMES.dark.bg and THEMES.light.bg — the knob\'s range is read out of the app, not assumed',
     !!m && JSON.stringify(m[1].split(',').map(Number)) === JSON.stringify(STAGE_ENDS.dark)
         && JSON.stringify(m[2].split(',').map(Number)) === JSON.stringify(STAGE_ENDS.light),
-    m ? { dark: m[1], light: m[2] } : 'THEMES not found in rack.js');
+    m ? { dark: m[1], light: m[2] } : 'THEMES not found in the app source');
 
   /* markInk's own reader, transcribed: the LIVE stage for #title, the CARD constant for .nb-logo. */
   const stageAt = (v) => [0, 1, 2].map((i) => STAGE_ENDS.dark[i] + (STAGE_ENDS.light[i] - STAGE_ENDS.dark[i]) * v);

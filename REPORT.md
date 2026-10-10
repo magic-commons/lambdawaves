@@ -5473,3 +5473,64 @@ and named on the notebook's foot. No whole-state link exists (E9).
 
 **Lines.** `lab/*.js` **27,558 → 27,638 (+80)**: rack.js +57, latex-state.js +21, chemview.js +2. Hand-off:
 `research/release-0.5.1/D2-D8-BUILD.md` (five brief candidates, the merge notes, the drafted CLAUDE.md sentences and CHANGES lines).
+
+## 2026-10-10 · 0.5.2 · RACK DISSOLUTION
+
+### wave 215: R0 THE CONTEXT — `app` of fixed-shape namespaces in boot()'s head, the 57 shared lets live in `app.state`, the hinge holds, nothing Josh sees moves
+
+One Opus builder (`agent-a3cd6c8bc9017c753`) ran the measuring row alone, from `54865a3` (`v0.5.1-alpha` + the 0.5.2 plan), on
+Josh's word of 2026-10-09 ≈ 22:20.
+
+**The measure first.** `tools/rack-deps.mjs` learned two modes:
+- `--classes` prints AUDIT §3.2's table for the plan's own cut. The cut is 39 pieces, each anchored on a line, so they tile boot()'s
+  body by construction. For each planned module it counts backward names, forward names, shared lets and bare writes to a binding
+  another module owns, and it reports the hinge.
+- `--rename x=app.state.x` rewrites exactly the references the scope walker resolves to boot's own binding (never a shadow), expands
+  a shorthand `{ x }`, splits a declaration list in order, prints every edit and refuses a dirty tree.
+
+On the base it read 57 shared lets, 238 crossing names, SPECTRUM 24 the largest, and 54 bare cross-module writes.
+
+**U1, the hoisting audit.** A scratch tree went through two transforms, then booted with the suite's preamble and the four demos.
+- **probe**: a guard on every boot-level function records a call made before its declaration.
+- **const**: every function declaration became `const x = function x(…)`.
+
+The result is three functions: `readSettings` (§0 calls it at `:131` — the one cross-module case, so it sits on `app` by value),
+and `setModArm` and `saveMod` (each touched early inside its own module).
+
+**U7, the facade fixture.** `Object.getOwnPropertyDescriptors(__LW)` on `v0.5.1-alpha` gives 176 members: 56 value · 48 get · 72
+method, in order. `tests/lw-facade.browser-test.mjs` checks it in one scene.
+
+**THE CONTEXT.** `app` is the last statement of the boot head:
+- §0's 21 crossing consts and `dom` by value; `ui`, the one registry (`const ui = {}` moved up);
+- `hooks` (12, the old `__LW_hooks`);
+- `state`, the 57 lets, with their literal inits as placeholders;
+- `loop` { `schedule`, `hold`, `resetWall`, … }, `host` (21), `w` (71), `ctl` (68), `sh` (45).
+
+`app` holds every name the cut makes cross a module. Each namespace is one literal and none reaches 128 keys, the size at which V8
+makes a literal a dictionary. A slot is null until the row that moves a reader fills it. The rename made 891 edits. The things that
+left:
+- the dead `windowActivity` wrapper (the getter stays);
+- the first `frost`;
+- `ui.camSeg`'s read, and `app.hooks.themeChanged`'s read (nothing ever assigned either);
+- four unused imports, and the `device` import that boot's wrapper shadowed, folded into `kitDevice`.
+
+Seven source-reading laws now read `tests/helpers/app-source.mjs`: auto-scale, first-run, ink, project-formats, access, and the boot
+suite's B108, B112 and B136. No law's string or threshold changed.
+
+**Gates.**
+- **The hinge (G-G):** 0 bare cross-module writes; forward + shared ≤ 25 everywhere (SPECTRUM 24). `rack-deps.test` §4 is its law,
+  with G-A read statically.
+- **U5:** `tools/perf/app-shape.mjs` reaches `app` through a facade closure's `[[Scopes]]`. `%HasFastProperties` is true for `app`
+  and every namespace, at ready and after play.
+- **U4, the pair's floor:** −0.17 / −0.05 ms/s. **The pair:** boot +0.94, D1 +0.41, and the boot scene again −0.63 — all PASS
+  against 3.536.
+- **THE LOCK:** 860 · 0/0 and 1004 · 0/0. `serialize-bytes` 11/11 full + edit; `settings-probe` 0 of 6; film-compare identical.
+- **The estate:** 34 of 35 browser suites green (history 44, new-project 8, timeline 14, lw-facade 1/1, …). `latex-copy` is red on
+  `v0.5.1-alpha` too: a base defect no ledger names.
+- **The boot suite alone:** B149 the only LAW red. B6 and B69 flake on the base too, measured interleaved in context (B6 red 3 of 5
+  on the base, 1 of 5 here; B69 1 of 3 each, the same `togFollowed` 306 reading).
+- `bash test.sh node` exit 0.
+
+**Lines.** `lab/*.js` **27,666 → 27,693 (+27)**: the literal +38, OUT −11. Hand-off: `research/release-0.5.2/R0-BUILD.md`, which
+holds the classes tables before and after, the U1 / U7 / U8 lists, nine brief candidates, the merge notes and the drafted CLAUDE.md
+sentences.

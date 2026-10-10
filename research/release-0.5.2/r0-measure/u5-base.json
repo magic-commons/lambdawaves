@@ -1,0 +1,32 @@
+{
+ "port": "9047",
+ "url": "https://127.0.0.1:9047/lab/?sw=0&warn=0&starter=home",
+ "secs": 6,
+ "ready": true,
+ "flag": true,
+ "field": true,
+ "atReady": {
+  "tag": "LW.ready",
+  "app": null,
+  "ui": {
+   "fast": true,
+   "keys": 107
+  },
+  "__LW_hooks": {
+   "fast": true,
+   "keys": 12
+  }
+ },
+ "afterPlay": {
+  "tag": "after 6 s of play",
+  "app": null,
+  "ui": {
+   "fast": true,
+   "keys": 107
+  },
+  "__LW_hooks": {
+   "fast": true,
+   "keys": 12
+  }
+ }
+}

@@ -1,0 +1,284 @@
+{
+ "camera-shift.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 7,
+  "tail": "GREEN camera-shift.browser-test",
+  "reds": [],
+  "rig": "free · load 0.69"
+ },
+ "chem.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 13,
+  "tail": "GREEN chem — 0 failing of 55",
+  "reds": [],
+  "rig": "free · load 0.89"
+ },
+ "current.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 14,
+  "tail": "PASS the bundled demo: WAVE DANCER opens with its modes, macros, routes, A/B and notebook",
+  "reds": [],
+  "rig": "free · load 1.22"
+ },
+ "curves.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 17,
+  "tail": "GREEN curves.browser-test",
+  "reds": [],
+  "rig": "free · load 1.16"
+ },
+ "export3d.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 6,
+  "tail": "GREEN export3d.browser-test",
+  "reds": [],
+  "rig": "free · load 0.83"
+ },
+ "field-molecule.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 8,
+  "tail": "PASS no page errors: window.__e is empty after every molecular dispatch and readback.",
+  "reds": [],
+  "rig": "free · load 0.86"
+ },
+ "film-handover.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 60,
+  "tail": "GREEN film-handover",
+  "reds": [],
+  "rig": "free · load 0.9"
+ },
+ "frame-occlusion.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 5,
+  "tail": "PASS joined rack window still masks its single pane",
+  "reds": [],
+  "rig": "free · load 0.76"
+ },
+ "gpu-recovery.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 8,
+  "tail": "PASS the GPU recovery {\"ok\":false,\"error\":\"device lost: Device destroyed\",\"banner\":\"⛔ the GPU device was lost\",\"role\":\"alert\",\"stateLive\":true,\"errors\":[]}",
+  "reds": [],
+  "rig": "free · load 0.8"
+ },
+ "history.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 136,
+  "tail": "PASS an old ELECTROSTATICS file (the Φ overlay on, 12 levels) opens as [open · ELECTROSTATICS] on its (1s + 2p_z)/√2 with nothing drawn — no window, no #fieldlines layer, no field record; the status says \"ELECTROSTATICS\"",
+  "reds": [],
+  "rig": "free · load 0.83"
+ },
+ "input.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 5,
+  "tail": "PASS responsive input layout 1280×814 desktop",
+  "reds": [],
+  "rig": "free · load 1.18"
+ },
+ "keyboard-window.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 7,
+  "tail": "GREEN keyboard-window.browser-test",
+  "reds": [],
+  "rig": "free · load 1.15"
+ },
+ "latex-copy.browser-test": {
+  "exit": 1,
+  "attempt": 2,
+  "secs": 3,
+  "tail": "RED latex-copy.browser-test",
+  "reds": [
+   "RED latex-copy.browser-test"
+  ],
+  "rig": "free · load 1.13"
+ },
+ "lfo-tension.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 4,
+  "tail": "PASS real double-click resets only the ENV segment under its handle",
+  "reds": [],
+  "rig": "free · load 1.12"
+ },
+ "library.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 14,
+  "tail": "GREEN library — install → open offline → evict → \"not installed\" → the sections → the two-press race",
+  "reds": [],
+  "rig": "free · load 1.11"
+ },
+ "lw-facade.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 3,
+  "tail": "GREEN lw-facade.browser-test — 1 of 1 scenes",
+  "reds": [],
+  "rig": "free · load 0.94"
+ },
+ "lw-links.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 13,
+  "tail": "GREEN lw-links",
+  "reds": [],
+  "rig": "free · load 1.27"
+ },
+ "menubar.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 12,
+  "tail": "GREEN menubar.browser-test",
+  "reds": [],
+  "rig": "free · load 1.06"
+ },
+ "mir-controls.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 3,
+  "tail": "PASS adopted MIR supports opt-in sensitivity, log faders, independent display/base values and reset defaults",
+  "reds": [],
+  "rig": "free · load 0.98"
+ },
+ "molecular-diff.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 22,
+  "tail": "GREEN molecular-diff — 0 failing of 15",
+  "reds": [],
+  "rig": "free · load 1.15"
+ },
+ "molecular-names.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 7,
+  "tail": "PASS an active legacy H₂⁺ record restores as MOLECULES · H₂ on σu, its controls reachable, STATE saying so in one line",
+  "reds": [],
+  "rig": "free · load 0.76"
+ },
+ "molecule-demos.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 7,
+  "tail": "GREEN molecule-demos.browser-test",
+  "reds": [],
+  "rig": "free · load 0.8"
+ },
+ "molecule-head.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 34,
+  "tail": "GREEN molecule-head",
+  "reds": [],
+  "rig": "free · load 0.93"
+ },
+ "new-project.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 22,
+  "tail": "PASS on a tablet a saved 128³ × 240 project opens clamped to 96 × 160 and is still clean 1 s later; a stage colour dirties it; NEW there is clean and marches at the device's 160 steps",
+  "reds": [],
+  "rig": "free · load 0.69"
+ },
+ "offer.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 22,
+  "tail": "GREEN offer.browser-test — 16 of 16 scenes",
+  "reds": [],
+  "rig": "free · load 1.18"
+ },
+ "official-defaults-palette.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 4,
+  "tail": "PASS prior explicit browser choices survive the new first-run defaults, lifted once into mir.gui",
+  "reds": [],
+  "rig": "free · load 1.48"
+ },
+ "opener.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 23,
+  "tail": "GREEN opener.browser-test — 7 of 7 scenes",
+  "reds": [],
+  "rig": "free · load 1.36"
+ },
+ "orbitals.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 8,
+  "tail": "GREEN orbitals — 0 failing of 24",
+  "reds": [],
+  "rig": "free · load 1.37"
+ },
+ "project-formats.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 12,
+  "tail": "GREEN project-formats.browser-test — 5 of 5",
+  "reds": [],
+  "rig": "free · load 1.24"
+ },
+ "register.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 33,
+  "tail": "GREEN register — 0 failing of 17",
+  "reds": [],
+  "rig": "free · load 1.27"
+ },
+ "render-regressions.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 3,
+  "tail": "PASS the impulse overlay clears every frame outside the hydrogen overlay domain",
+  "reds": [],
+  "rig": "free · load 1.47"
+ },
+ "routed-knob.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 6,
+  "tail": "GREEN routed-knob — 0 failing of 4",
+  "reds": [],
+  "rig": "free · load 1.35"
+ },
+ "stage-text.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 20,
+  "tail": "GREEN stage-text",
+  "reds": [],
+  "rig": "free · load 1.34"
+ },
+ "take-in-bugs.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 13,
+  "tail": "GREEN take-in-bugs.browser-test",
+  "reds": [],
+  "rig": "free · load 1.22"
+ },
+ "timeline.browser-test": {
+  "exit": 0,
+  "attempt": 1,
+  "secs": 281,
+  "tail": "GREEN timeline.browser-test — 0 failing of 14",
+  "reds": [],
+  "rig": "free · load 1.17"
+ }
+}

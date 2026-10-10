@@ -683,6 +683,25 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > `--rename` for the tool; `appSource()`; the dead facade keys and the four imports out). Estimate ≈ 29 h ≈ 2.5–3 relay days. Nothing built; nothing pushed.
 > **22:20 — Josh: "Let's do it!" → THE 0.5.2 BUILD STARTED** under §9's defaults: **R0 THE CONTEXT launched** (Opus, from `54865a3`, 9043/5513 + 9047/5517).
 > Order: R0 alone → R1 alone → {R2a·R3a} → {R2b·R3b} → {R2c·R2d} → R5 → R-V → fix round → the local cut. NO push, NO deploy.
+>
+> **UPDATE (Claude Yan, 2026-10-10 01:20 CDT) — R0 THE CONTEXT IS IN; THE HINGE HOLDS; R1 next.** R0 (Opus, `72fa863`, ≈2.8 h) merged onto `yan-c`
+> clean (no conflict: the branch had only research files since R0's base). AS BUILT (`research/release-0.5.2/R0-BUILD.md`): `app` = the last statement of
+> §0 (`lab/rack.js:165`), 30 keys — `dom`, `ui`, §0's 21 consts by value, and seven namespaces `hooks` 12 · `state` 57 · `loop` 13 · `host` 21 · `w` 71 · `ctl` 68
+> · `sh` 45 (none ≥ 128; `tools/perf/app-shape.mjs` reads `%HasFastProperties` true at ready and after 6 s of play); the 57 shared lets live as `app.state.x`
+> (`--rename`: 891 edits, 41 declarations, 5 shorthands); `__LW_hooks` → `app.hooks`; a null slot is filled by the row that moves its first reader (R0 fills
+> none). OUT: the dead `windowActivity` wrapper, the first `frost`, `ui.camSeg`'s and `app.hooks.themeChanged`'s dead reads, the four unused imports, the
+> shadowed `device` import. `lab/*.js` 27,666 → 27,693 (+27; the law allows 27,943). U1: only `readSettings` is called before its line across modules (kept on
+> `app.sh` by value); `setModArm`/`saveMod` stay function declarations inside their modules. U4 the pair's floor: base vs base −0.165 / −0.054; the pair boot
+> +0.942 then −0.629 on a re-run (noise), D1 +0.412. U7 `tests/lw-facade.browser-test.mjs` + `lw-facade.json`: 176 members (56 value · 48 get · 72 method),
+> names and kinds unchanged, two keys enumerate later. U8 the `ui` contract: 58 members `native-ui.js`/`badges.js` touch (5 written, 4 `.set` patched).
+> **THE CLASSES TABLE AFTER: 0 bare cross-module writes (54 before); every moving module ≤ 25 forward + shared — SPECTRUM 24, the facade 22, notebook 21,
+> settings 15, keys 13, persist 13, controller 12; the loop 76 and boot 67 exempt (they stay).** My gates on the merged tree: THE LOCK 860 · 0/0 and 1004 ·
+> 0/0 (the 1004 fixture WITH `--query gastab=0`, as the tool's header says — without it the gas states read red at every grid; now in CLAUDE.md); node gate
+> exit 0; serialize-bytes 11/11 full + edit sha-identical to `v0.5.1-alpha` (base export served on 8755); settings-probe 0/6; lw-facade 1/1; the boot suite
+> alone (below). R0's brief candidates (BUILD §11) fold into the later briefs: the tool must learn the module files BEFORE R1 moves anything (R1's first
+> commit); fills by the first-reader row; `latex-copy` red on the base (fix round); B6/B69 flake on the base (re-aim, fix round). CLAUDE.md: THE CONTEXT
+> paragraph appended (R0's §13 draft + the gastab line). Base export: `$job/tmp/base-0.5.1` on 8755. Next: R1 THE CONTROLLER alone (`BRIEF-R1.md` amended
+> with R0's facts), then the pairs.
 
 ## 3 · What happens next, in order
 
