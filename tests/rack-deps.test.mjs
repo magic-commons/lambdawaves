@@ -241,6 +241,12 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const q = Q && Q.modules.find((m) => m.id === 'controller');
   check(!!q && same(q.context, ['loop.page']) && Q.appStrays.length === 0,
     'module files: a later seat (`function create<Y>()` at the root) fills eagerly at its own piece — a later module destructures app.w.wX clean — and that fill is its registration; the callback\'s app.loop.page is a crossing', q ? JSON.stringify([q.context, Q.appStrays]) : err);
+  /* 0.5.2 R2c: a slot the literal holds BY VALUE under another key (`loop: { hold: filmHold }`) hands that boot-level name — backward, G-A clean */
+  const rackHold = rack.replace('loop: { schedule, page: null }', 'loop: { schedule, page: null, hold: stand }').replace('  app.state.n = 2;', '  function stand() { return 1; }\n  app.state.n = 2;');
+  let H = null; err = '';
+  try { H = classes(rackHold, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/controller.js': mod('schedule'), 'lab/windows/spectrum.js': 'export function createWin(app) {\n  const { hold: stand } = app.loop;\n  return { on: () => stand() };\n}\n' } }); } catch (e) { err = e.message; }
+  check(!!H && H.appStrays.length === 0 && H.modules.find((m) => m.id === 'spectrum').backward.includes('stand'),
+    'module files: a slot the literal holds by value under another key (loop.hold: stand) hands that name — backward, no stray', H ? JSON.stringify([H.appStrays, H.modules.find((m) => m.id === 'spectrum').backward]) : err);
   let T = '';
   try { classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/nowhere.js': mod('schedule') } }); } catch (e) { T = e.message; }
   check(/no planned module's file/.test(T), 'module files: a file under lab/shell/ that no planned module names is refused', T);
