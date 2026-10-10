@@ -5801,3 +5801,33 @@ The seat destructures were kept whole on purpose: trimming the 58 names only the
 lose 73 crossing names. Trimming them needs one tool clause first (a candidate for R-V or the fix round).
 
 Hand-off: `research/release-0.5.2/R5-BUILD.md`.
+
+### wave 224: R-V THE VERIFICATION ROUND — FIT WITH NOTES: every gate green or base-identical on the rebooted rig, no BLOCKING defect; the cut script's version line must be re-anchored first
+
+One fresh Opus verifier (`agent-a41339d31c3c73662`) read, measured and judged the tip `fd1b415` (lab bytes = R5's merge `855ab99`) beside a
+`git archive v0.5.1-alpha` export, one browser at a time on the RTX 3070 (rebooted 11:46, quiet throughout). It fixed nothing.
+
+**Gates.**
+- **THE LOCK:** 860 · 0/0 and 1004 · 0/0, 57 s each, first run.
+- **The pair:** the same-tree floor first (the base against itself: boot Δ +0.390, D1 Δ +0.441 ms/s), then the base vs the tip: boot **Δ +0.648**,
+  D1 **Δ +0.435** — inside the 3.536 gate and the floor's spreads.
+- **The shape and the classes:** `app` and every namespace FAST at ready and after play; 0 bare writes, SPECTRUM 24 the largest, facade 21; doubles 0
+  (190 slots); 0 slots read but never filled; no lost import or binding in any of the 22 files; `rack.js` 943, the largest module 379.
+- **The bytes and the facade:** `serialize-bytes` 11/11 full + 11/11 edit; `settings-probe` 0 of 6 (one N₂ stall on the first run, gone on the
+  re-run), every blob byte-identical to the base's; `lw-facade` 1/1 without `--write`.
+- **The suites:** node exit 0; 34 of 35 browser suites green; `latex-copy` red on the base too — the test hit-tests SPECTRUM's ⧉ while the raised card
+  is still sliding (measured on both trees). The boot suite alone: 150/152 twice (B69 then B6, each beside B149); the base 151/152 (B149). B6 and B69
+  read again interleaved: B6 red 3 of 15 tip readings and 1 of 14 base, the same reading; B69 1 of 4 and 0 of 3. B149 stays the only law red.
+- **The film:** `render-exact` 0 of 40; `film-probe` picture, frames, ONE PERIOD and RECORD byte-identical to the base's, MP4s included.
+- **New witnesses:** the page's 4,139 elements and 23 cards in the same order, with the same rects and computed look on both trees (the only
+  difference a random FOLDERS id); 4,628 of 0.5.1 `rack.js`' 4,766 lines found again in the tip's app source.
+- **Lines:** 27,943 of 27,943 — the cut cap exactly, 0 over; the ledger re-measured from git at every merge (+277).
+- **U9, the cold load:** 929 → 961 ms (+32 ms, +3.4 %) to `LW.ready` with the cache off — the 21 new module requests; the installed app is cache-first.
+
+**Notes for the fix round** (none BLOCKING): N1 the drafted cut script anchors `^const BUILD_LINE`, which R3b's `export const` no longer matches —
+fix before the cut or the tag ships saying 0.5.1; N2 `latex-copy`'s race; N3 `r3a-measure/freenames.mjs` cannot run from its folder; N4 the
+`!important` count is 32 declarations (36 occurrences, four in comments); N5 the cold load; N6 the stale CLAUDE.md / docs pointers, each with its
+proposed text; N7 stale lab comments. The integrator's candidates are each confirmed or dismissed with a reading (the line-law overrun and `LW.warning`
+before `go` dismissed).
+
+Hand-off: `research/release-0.5.2/R-V-REPORT.md`.
