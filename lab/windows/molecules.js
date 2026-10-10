@@ -96,5 +96,5 @@ export function createMolecules(app) {
     now: () => clock.t, field: () => field, chem: () => app.state.chem, session: app.state.molSession });
   app.state.orbitals = app.state.register.orbitals; app.state.states = app.state.register.states;
   return { wOrbs }; }
-  app.w.wChem = wChem; return { wChem, head, createMoRegistry };
+  app.w.wChem = wChem; app.w.head = head; return { wChem, head, createMoRegistry };
 }

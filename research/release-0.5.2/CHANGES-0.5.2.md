@@ -66,3 +66,14 @@ real seams, over an explicit context. Nothing a hand or an eye meets is meant to
   `frame-occlusion` chipGap, `hit-probe-set` and the boot chunks identical on the base (the rig before the reboot). The integrator's gates on the merge: pwa; doubles 0; serialize-bytes 11/11 full + 11/11 edit vs the 0.5.1 base (8735); lw-facade 1/1 (176); settings-probe 0/6 (all six scenes reached);
   21 files parse; the classes table; node 0; the owed THE LOCK re-run on the healthy rig at `2a5df88` before the pair: 860 · 0/0 and 1004 · 0/0, frame-occlusion
   7/7. **You see nothing.**
+
+- **R5 THE FACADE, MOVED WHOLE** (merged 2026-10-10 12:54 from `c737c8e`; clean): §26's `__LW` literal leaves `boot()` for `lab/shell/facade.js`
+  `createFacade(app)` (269 lines), returned whole — 251 of 253 moved lines byte-identical (`const LW = {` → `return {`; `warning` read as `app.hooks.warning`);
+  its 121 backward names destructured once at the top, the 21 shared lets read live; the 22 slots nobody filled are registered by their owners on existing lines
+  (readouts, kepler, spectrum, settings, links, persist, keys, molecules; `loopRing`/`ringMedian`/`MOTION`/`setCamMode` in `boot()`), and three boot fill lines
+  went home to `settings.js`, `spectrum.js` and `kepler.js`. `rack.js` 1,202 → **943** (4,931 at 0.5.1); 21 module files; **`lab/*.js` + shell + windows
+  27,943 — the +1 % cap EXACTLY, 0 lines to spare: the line law holds without a ruling.** The hinge holds (facade 21, SPECTRUM 24 the largest); 0 bare writes;
+  doubles 0 (190 slots, 22 files); facade-names 106 registered · 0 null · 0 without a slot. The builder's gates: THE LOCK 860 · 0/0 and 1004 · 0/0 (57–58 s on the
+  rebooted rig); `lw-facade` 1/1 (176 members: 56 value · 48 get · 72 method) without `--write`; `serialize-bytes` 11/11 full + 11/11 edit; `settings-probe`
+  0/6 (six reached); node 0; history 44, new-project 8 + `--check` 16,117 B, offer 16/16, menubar 8, stage-text 4, curves 7, timeline 14/14, lw-links 5,
+  camera-shift 11, film-handover 4 — nothing red, so no base reading was needed. Left to R-V: the boot suite, the pair, latex-copy, keyboard-window. **You see nothing.**

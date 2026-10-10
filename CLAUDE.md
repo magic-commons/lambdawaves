@@ -385,3 +385,11 @@ and §18 INK is `lab/shell/ink.js` `createInk(app)` (it returns `refreshOcclusio
 the kept section notes. A name `boot()` makes after a seat is read through its slot inside a callback (`app.w.wLad`, `app.w.wCalc`,
 `app.w.stageTextTick`, `app.host.rackL`, `app.sh.layout`, `app.sh.setModArm`), and `app.host.cameraPort` is filled on the camera law's line so the
 seam can destructure it.
+
+THE FACADE (0.5.2 R5) is `lab/shell/facade.js` `createFacade(app)`, which returns §26's `__LW` literal whole — key for key, getter for getter, its
+comments travelling (`Object.assign` would freeze a getter into a value) — destructuring its 121 backward names once at its top (it is seated after every
+module), reading its 21 shared lets as `app.state.x` and `warning` as `app.hooks.warning`; `boot()` keeps the `/* ── the diagnostics surface` header (the
+tool's anchor), `const LW = createFacade(app); window.__LW = LW; app.sh.LW = LW;` and every member it adds later (`LW.curves`, `LW.bootView` …
+`LW.stageText`, `LW.ready`, `LW.report`) at its seat, so `research/release-0.5.2/lw-facade.json` holds without `--write`. Every slot the facade reads is
+filled exactly once by its owner (`research/release-0.5.2/integrator/doubles.mjs` reads 0), and `boot()`'s seat destructures keep naming what a module
+returns even where only a module reads it: `tools/rack-deps.mjs --classes` knows a crossing name by its boot-level declaration.

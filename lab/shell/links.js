@@ -80,6 +80,6 @@ export function createLinks(app) {
     linkSay(ok ? 'opened from a link' : 'link read, restore failed', ok && !say.length ? 'live' : 'warn', say.join(' '));
     return { ok, opened: true, code: null, message: null, warnings: got.warnings, unknownSections: got.unknownSections };
   }
-  app.sh.esc = esc; app.sh.copyLink = copyLink;
+  app.sh.esc = esc; app.sh.copyLink = copyLink; app.sh.notCarriedWords = notCarriedWords; app.sh.mintLink = mintLink; app.sh.openLink = openLink;
   return { notCarriedWords, mintLink, copyLink, openLink };
 }

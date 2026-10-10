@@ -78,7 +78,7 @@ export function createSettings(app) {
       badges: ui.badgesSw, hints: ui.controlHintsSw, help: ui.windowInfoSw };
     for (const k of keys) if (c[k]) c[k].set(s[k]);
   }
-  app.sh.lookSync = lookSync;
+  app.sh.lookSync = lookSync; app.sh.saveSettings = saveSettings; app.sh.setCardStyle = setCardStyle; app.sh.setFrost = setFrost; app.sh.setDisconnected = setDisconnected; app.sh.applySettings = applySettings;
   function applySettings() {
     const s = readSettings();
     app.ctl.look.rerun(); lookSync(app.ctl.look.prefs.all(), Object.keys(app.ctl.look.prefs.all()));   // 0.5.0 C2: the look again, now that the theme's engine hooks exist
@@ -141,7 +141,7 @@ export function createSettings(app) {
   /* POWER is persistent device state. Presentation eligibility is a separate, transient visibility law below:
      leaving the viewport must save work without rewriting the user's project or switches. */
   const powered = (w) => !(w && w.root && w.root.classList.contains('off'));
-  const DIGESTS = {};
+  const DIGESTS = {}; app.sh.KIND = KIND; app.sh.RETIRED_WINDOWS = RETIRED_WINDOWS; app.sh.DIGESTS = DIGESTS;
   app.state.space = 'x';                 // 'x' position ψ(x) · 'p' momentum φ(p): the same state, two exact pictures
   return { saveSettings, setCardStyle, setFrost, setDisconnected, applySettings, KIND, RETIRED_WINDOWS, powered, DIGESTS };
 }

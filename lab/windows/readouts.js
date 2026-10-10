@@ -89,7 +89,7 @@ export function createReadouts(app) {
 
   // PLANE (id `slice`) — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
   const wSlice = device({ id: 'slice', eyebrow: 'PLANE', status: '' });   // 0.4.0 S3 (R-W3): PLANE, once SLICE — the id and slice.* stay
-  app.w.wSh = wSh; app.w.wOrb = wOrb; app.w.wVor = wVor; app.w.wSlice = wSlice;
+  app.w.wSh = wSh; app.w.wOrb = wOrb; app.w.wVor = wVor; app.w.wSlice = wSlice; app.w.orbit = orbit; app.w.flowTracers = flowTracers;
   const slice = createSliceView(wSlice.body, {
     lut: () => (app.state.palette && app.state.palette.on ? toLUT(app.state.palette.stops) : null),
     repaint() { schedule(TIER.PRESENT); }
@@ -118,7 +118,7 @@ export function createReadouts(app) {
   }
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
   const wLad = device({ id: 'ladder', eyebrow: 'LADDER', status: '' });
-  app.w.wCalc = wCalc; app.w.wLad = wLad;
+  app.w.wCalc = wCalc; app.w.wLad = wLad; app.w.calculus = calculus;
   if (useCompactDefaults) wLad.root.classList.add('closed');
   rack.appendChild(wLad.root);
   const ladder = createLadder(wLad.body, { active: () => canPresent(wLad), loading: cardLoading(wLad, 'revival'), solve: (params) => solveCard({ op: 'ladder', params }, () => solveLadder(params)) });
@@ -151,7 +151,7 @@ export function createReadouts(app) {
   // RADIATION — what the prepared pair would radiate, and the shape of its far field; also CLOSED
   const wRad = device({ id: 'radiation', eyebrow: 'RADIATION', status: '' });
   rack.appendChild(wRad.root); wRad.root.classList.add('closed');
-  const radiationView = createRadiation(wRad.body, { repaint() { schedule(TIER.PRESENT); }, ab: () => app.hooks.ab });
+  const radiationView = createRadiation(wRad.body, { repaint() { schedule(TIER.PRESENT); }, ab: () => app.hooks.ab }); app.w.radiationView = radiationView;
   const WIG_OK = 'numerical · a slice, not a marginal', RAD_OK = 'exact matrix elements · classical far field';
   return { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, WIG_OK, RAD_OK }; }
   return { wSh, shadowView, shadowFoot, wOrb, orbit, kepler, wVor, vortex, particles, flowTracers, wSlice, slice, createCalcMetersLadder, createAtomsWignerRadiation };
