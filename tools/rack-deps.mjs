@@ -913,9 +913,8 @@ export const PLANNED = {
 export const PLANNED_CUT = [
   [null, 'boot'],                                                                    // §0 the head
   [/^ {2}\/\* ── SETTINGS: what this browser remembers/, 'settings'],                 // §1
-  [/^ {2}\/\* ── ONE CONTROLLER/, 'controller'],                                     // §2–§4
-  [/^ {2}\/\* ── THE BACKGROUNDED TAB/, 'loop'],                                     // §5–§6
-  [/^ {2}\/\* ── state mutations: ONE road/, 'controller'],                          // §7
+  [/^ {2}\/\* ── ONE CONTROLLER/, 'controller'],                                     // §2–§4 + §7: the seat (0.5.2 R1: the module is lab/shell/controller.js)
+  [/^ {2}\/\* ── THE BACKGROUNDED TAB/, 'loop'],                                     // §5–§6 (§7 ONE ROAD, after it, left with R1)
   [/^ {2}\/\* ── windows ──/, 'boot'],                                                // §8 head: the camera law and the seats
   [/^ {2}const wObs = device\(\{ id: 'observer'/, 'material'],                       // WAVE · PALETTE · CAMERA · CLIP seats, WAVE's head
   [/^ {4}\/\* ── THEME and SURFACE/, 'settings-card'],                                // SETTINGS, first span
@@ -1116,6 +1115,9 @@ export function classes(src, opts = {}) {
   };
   for (const r of refs) crossSeen(r.name, moduleAt(r.line));
   for (const F of files) for (const n of F.uses.keys()) crossSeen(n, F.module);
+  /* …and a name read through its slot (`app.loop.page`, `app.w.wSpec`) crosses as surely as a bare one (a fill is the owner's own) */
+  for (const r of refs) { const c = r.name === 'app' && appChain(r); if (c && c.x && !c.write && c.ns !== 'state' && c.ns !== 'hooks' && by.has(c.x)) crossSeen(c.x, moduleAt(r.line)); }
+  for (const F of files) for (const { c } of F.chains) if (c.x && !c.write && c.ns !== 'state' && c.ns !== 'hooks' && by.has(c.x)) crossSeen(c.x, F.module);
   /* ── per module ── */
   const modules = Object.entries(PL).map(([id, meta]) => {
     const ps = pieces.filter((p) => p.module === id);
@@ -1199,7 +1201,9 @@ export function classes(src, opts = {}) {
     strays.push(...F.unknown);
     for (const [, h] of F.handed) {
       if (h.ns ? !(appShape.ns[h.ns] || []).includes(h.key) : !appShape.top.includes(h.key)) strays.push(`${F.rel}:${h.line}: \`${h.key}\` handed from app${h.ns ? '.' + h.ns : ''} is no key of the literal`);
-      else if (h.ns && appShape.nullSlots.includes(h.ns + '.' + h.key)) strays.push(`${F.rel}:${h.line}: destructures app.${h.ns}.${h.key}, a null slot (it would freeze the null — read it live)`);
+      else if (h.ns && appShape.nullSlots.includes(h.ns + '.' + h.key)
+        && !refs.some((r) => r.name === 'app' && !r.deferred && r.line < F.seat && (({ ns, x, write } = appChain(r) || {}) => write && ns === h.ns && x === h.key)()))
+        strays.push(`${F.rel}:${h.line}: destructures app.${h.ns}.${h.key}, a null slot boot does not fill before the seat (it would freeze the null — read it live)`);
     }
   }
   appShape.largest = Math.max(appShape.top.length, ...Object.values(appShape.ns).map((x) => x.length));

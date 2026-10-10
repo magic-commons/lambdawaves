@@ -436,7 +436,7 @@ for (const rel of distFiles.filter((r) => /\.webmanifest$/i.test(r))) {
   /* `id` is NOT added here: it is not resolved against the manifest's URL — see MANIFEST IDENTITY below. */
 }
 /* the stripper must not have eaten live code, or this whole section proves nothing */
-for (const [rel, needle] of [[at('main.js'), './rack.js'], [INDEX, './main.js'], [at('rack.js'), './mathworker.js']])
+for (const [rel, needle] of [[at('main.js'), './rack.js'], [INDEX, './main.js'], [at('shell/controller.js'), '../mathworker.js']])   // 0.5.2 R1: the worker road moved with THE MATHS WORKERS
   if (inDist.has(rel) && !(rel.endsWith('.html') ? stripHTML(textD(rel)) : stripJS(textD(rel))).includes(needle))
     fail('V2', `the comment stripper removed ${needle} from dist/${rel} — it is over-eager and this check is not proving anything`);
 if (refs.length < 150) fail('V2', `only ${refs.length} references found across dist/ — the scan has stopped seeing the source`);
@@ -702,7 +702,7 @@ const later = [
   [ownFonts.length, `the lab's own faces (${ownFonts.map((f) => path.posix.basename(f)).join(', ')}) — @font-face with font-display:swap, requested during the first paint`],
   [inDist.has(at('img/warning-sign.png')) ? 1 : 0, 'img/warning-sign.png — the PHOTOSENSITIVITY notice (MIR\'s, its art λWAVES\' sign) is shown before the title screen'],
   [inDist.has(at('sw.js')) && !eager.has(at('sw.js')) ? 1 : 0, 'sw.js — fetched by register(); it then precaches the WHOLE tree in the background (see below)'],
-  [inDist.has(at('mathworker.js')) ? 1 : 0, 'mathworker.js — a module Worker, constructed on demand by rack.js, not at boot'],
+  [inDist.has(at('mathworker.js')) ? 1 : 0, 'mathworker.js — a module Worker, constructed on demand by shell/controller.js, not at boot'],
   [katex.length, 'KaTeX faces — a @font-face loads only when a glyph in it is actually rendered; a first visit typically pulls 2–5 of these, never all'],
 ].filter(([n]) => n > 0);
 console.log(`\ncold first visit — ${eager.size} requests are certain:`);
