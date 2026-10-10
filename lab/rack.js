@@ -1650,7 +1650,7 @@ export async function boot(dom) {
   const wWig = device({ id: 'wigner', eyebrow: 'WIGNER', status: '' });
   rack.appendChild(wWig.root); wWig.root.classList.add('closed');                // reopened from the + at the top of the rack
   const wignerView = createWigner(wWig.body, { repaint() { schedule(TIER.PRESENT); } });
-  app.w.wAtoms = wAtoms; app.w.wignerView = wignerView;
+  app.w.wignerView = wignerView;
 
   // RADIATION — what the prepared pair would radiate, and the shape of its far field; also CLOSED
   const wRad = device({ id: 'radiation', eyebrow: 'RADIATION', status: '' });
@@ -2139,7 +2139,7 @@ export async function boot(dom) {
   /* a DESIGN CHOICE, labelled: a harder pull launches a tighter packet (a boost alone never changes a width) */
   app.state.gasWidth = 1.8; app.state.gasAxial = false;
   const gas = createGas(HAMILTONIANS.well.radius);
-  app.w.kepShell = kepShell; app.w.keplerRowSync = keplerRowSync; app.w.gas = gas;
+  app.w.kepShell = kepShell; app.w.keplerRowSync = keplerRowSync;
   /* K5w (optimization 2026-09-24 · AUDIT-B FB1, AUDIT-F F11, SOL-REVIEW K5, PLAN §9) · SPECTRUM's `⟨z⟩ · σ_z` line.
      gas.stats(t) is 8–17 ms and ran on the frame thread every 6th CPU tick while the gas played — outside tick(), so no
      profile or governor saw it.  Now the maths worker runs the SAME stats() on its own gas (mathworker.js gasStats: its
@@ -2474,7 +2474,6 @@ export async function boot(dom) {
     async copyText(id, t) { try { await navigator.clipboard.writeText(t); } catch (e) {} const dev = document.querySelector('.dev[data-id="' + id + '"]'); if (dev) { dev.classList.add('copied'); setTimeout(() => dev.classList.remove('copied'), 900); } return t; },
     copyDigest(id) { return layout.copyText(id, layout.digest(id)); },
   };
-  app.sh.layout = layout;
   /** a window's hover hint in the + list and the WINDOW menu: its long title, and its status when it says something (wave 44) */
   const winHint = (d) => { const t = (d.querySelector('.dev-title') || {}).textContent || '', st = ((d.querySelector('.dev-stat') || {}).textContent || '').trim(); return st ? t + '  ·  ' + st : t; };
   const wTr = device({ id: 'transport', eyebrow: 'TRANSPORT', status: '' });
