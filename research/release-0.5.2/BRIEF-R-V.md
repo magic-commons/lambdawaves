@@ -6,15 +6,15 @@ whole (you will judge it against the tree), `docs/NOTES-FOR-AGENTS.md`, `docs/ST
 `tools/perf/digest-lock.mjs`'s header, `tools/perf/main-thread.mjs`'s header and **R1-BUILD's pair recipe** (the exact invocation, both scenes, the same-tree floor U4),
 `research/release-0.4.0/HANDOFF.md` §2's 0.5.2 blocks (the integrator's running ledger: what was owed and why).
 
-## The state you verify (the integrator, 2026-10-10 — the tip `7c3eebe`; the BUILD files are the authority)
+## The state you verify (the integrator, 2026-10-10 — the tip `855ab99`; the BUILD files are the authority)
 
-- **The build is complete.** `rack.js` 1202 lines (4,931 at `v0.5.1-alpha`); 20 module files under `lab/shell/` and `lab/windows/`; `lab/*.js` + shell +
-  windows **27,932** against the cut cap 27,943 (+1 %; the merge cap 28,219 = +2 %) — **11 to the cap** (a negative number is the overrun; the ruling on it is
+- **The build is complete.** `rack.js` 943 lines (4,931 at `v0.5.1-alpha`); 21 module files under `lab/shell/` and `lab/windows/`; `lab/*.js` + shell +
+  windows **27,943** against the cut cap 27,943 (+1 %; the merge cap 28,219 = +2 %) — **0 to the cap** (a negative number is the overrun; the ruling on it is
   Josh's — you STATE the ledger exactly: in, out, per module). THE HINGE (G-G): bare writes across scopes 0; the largest moving module spectrum at 24 (limit 25) → HOLDS.
-- **The rig** was REBOOTED at 11:46 on 2026-10-10 and is healthy: THE LOCK read 860 · 0/0 and 1004 · 0/0 in 58 s each on `2a5df88`, frame-occlusion 7/7,
-  `settings-probe` reached all six scenes on `7c3eebe`. THE LOCK and the pair ARE measurable. Before the reboot (≈ 02:00–11:30) the RTX drew 2–3 frames a second and
-  the heaviest states stalled on every tree including the 0.5.1 base — that is why the R1–R2d BUILD files carry "rig" reds with base readings beside them; a red of
-  that kind that still appears on the healthy rig is checked once against the base export and judged. Never loop on a stall; never touch another process.
+- **The rig** was REBOOTED at 11:46 on 2026-10-10 and is healthy: THE LOCK read 860 · 0/0 and 1004 · 0/0 in 57–58 s on `2a5df88` and on R5's tree, frame-occlusion 7/7,
+  `settings-probe` reached all six scenes. THE LOCK and the pair ARE measurable. Before the reboot (≈ 02:00–11:30) the RTX drew 2–3 frames a second and the heaviest
+  states stalled on every tree including the 0.5.1 base — that is why the R1–R2d BUILD files carry "rig" reds with base readings beside them; a red of that kind that
+  still appears on the healthy rig is checked once against the base export and judged. Never loop on a stall; never touch another process.
 - **Two readings exist for every rig red** in the BUILD files (the tree and the 0.5.1 base export beside it). A red you find that is NOT in them, or that differs from the
   base, is a defect — say which file, which law, both readings.
 

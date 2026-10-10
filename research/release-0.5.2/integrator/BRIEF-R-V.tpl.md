@@ -11,10 +11,10 @@ whole (you will judge it against the tree), `docs/NOTES-FOR-AGENTS.md`, `docs/ST
 - **The build is complete.** `rack.js` {{rackLines}} lines (4,931 at `v0.5.1-alpha`); {{measured}} module files under `lab/shell/` and `lab/windows/`; `lab/*.js` + shell +
   windows **{{labLines}}** against the cut cap 27,943 (+1 %; the merge cap 28,219 = +2 %) — **{{labLeft}} to the cap** (a negative number is the overrun; the ruling on it is
   Josh's — you STATE the ledger exactly: in, out, per module). {{hinge}}.
-- **The rig.** THE LOCK and the pair need a healthy GPU. Since ≈ 02:00 on 2026-10-10 the RTX drew 2–3 frames a second and the lock's gas state, molecule opens and
-  `serialize-bytes`' base export stalled ("Render did not settle: animation frames stopped") on every tree INCLUDING the 0.5.1 base; marionette died after ≈ 5 reloads.
-  **Your launch message says whether Josh has rebooted.** If the base export still stalls on the lock's gas state, the lock and the pair are NOT MEASURABLE on this rig:
-  you record both readings (tree and base), say so in one line, and the verdict can be at most FIT WITH NOTES. Never loop on a stall; never touch another process.
+- **The rig** was REBOOTED at 11:46 on 2026-10-10 and is healthy: THE LOCK read 860 · 0/0 and 1004 · 0/0 in 57–58 s on `2a5df88` and on R5's tree, frame-occlusion 7/7,
+  `settings-probe` reached all six scenes. THE LOCK and the pair ARE measurable. Before the reboot (≈ 02:00–11:30) the RTX drew 2–3 frames a second and the heaviest
+  states stalled on every tree including the 0.5.1 base — that is why the R1–R2d BUILD files carry "rig" reds with base readings beside them; a red of that kind that
+  still appears on the healthy rig is checked once against the base export and judged. Never loop on a stall; never touch another process.
 - **Two readings exist for every rig red** in the BUILD files (the tree and the 0.5.1 base export beside it). A red you find that is NOT in them, or that differs from the
   base, is a defect — say which file, which law, both readings.
 
@@ -70,8 +70,7 @@ whole (you will judge it against the tree), `docs/NOTES-FOR-AGENTS.md`, `docs/ST
 ## Harness
 Isolated worktree (the harness gives you one; your shell starts in it): `git reset --hard <the integrator's tip named in your launch message>` first. Ports: yours
 **9133/5603** (the tip) + **9137/5607** (the base export: `git archive v0.5.1-alpha | tar -x -C <dir>`, served with `LW_CERTS=<your worktree>/.certs`). `python3
-tools/gate/server.py <path> <port>` (run_in_background); `LW_PORT=… GD_PORT=…`. You run alone, but the integrator's servers (8751, 8755) and Josh's processes (Firefox
-2002078; 8721, 8731, 8741) are never touched; `node research/release-0.5.2/r2b-measure/rigfree.mjs` before every suite; stop your servers by pid; never `pkill -f`. The
+tools/gate/server.py <path> <port>` (run_in_background); `LW_PORT=… GD_PORT=…`. You run alone, but the integrator's servers (8731 the tree, 8735 the 0.5.1 base) and any process that is not yours are never touched; `node research/release-0.5.2/r2b-measure/rigfree.mjs` before every suite; stop your servers by pid; never `pkill -f`. The
 shell guard refuses compound lines (plain commands or `bash .tmp/x.sh` / `node .tmp/x.mjs`). You edit NOTHING under `lab/`, `tests/`, `tools/`, `docs/` or `CLAUDE.md` —
 your commit is the report (`0.5.2 R-V · R-V-REPORT.md: <the verdict>; wave 224` with REPORT.md's wave under the 0.5.2 heading). Never merge, push, tag. Hand back by
 message (the verdict line first, then the defect list) + try `~/.claude/handoffs/agents/<id>.md`.

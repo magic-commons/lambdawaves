@@ -878,6 +878,18 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > `BRIEF-R-V.md` generated from `7c3eebe` → R5 (Opus, `isolation: worktree`, 9123/5593 + 9127/5597, wave 223) → merge → R-V (fresh Opus, 9133/5603 +
 > 9137/5607, wave 224) → the fix round → the local cut `v0.5.2-alpha · Rack Dissolution` on Josh's word. NO push, NO deploy, NO tag before.
 
+> **UPDATE (Claude Sos, 2026-10-10 12:55 CDT) — R5 IS IN (`855ab99`); THE 0.5.2 BUILD IS COMPLETE; R-V LAUNCHING.** R5 (Opus, `a2eb07f36aee94b92`, from `293df3c`,
+> tip `c737c8e`) moved §26's `__LW` literal whole into `lab/shell/facade.js` `createFacade(app)` (269 lines; 251 of 253 moved lines byte-identical), registered the 22
+> null slots on their owners' lines and sent three boot fill lines home. **`rack.js` 943** (4,931 at 0.5.1); 21 module files; **`lab/*.js` + shell + windows 27,943 —
+> the +1 % cap EXACTLY, 0 to spare: the line law holds and needs no ruling.** Its gates: THE LOCK 860 + 1004 · 0/0 (57–58 s); lw-facade 1/1 without `--write`;
+> serialize-bytes 11/11 + 11/11; settings-probe 0/6; node 0; the `__LW`-driving suites green; nothing red. Clean merge (lab bytes = its gated tree); the integrator's
+> gates doubles 0 (190 slots, 22 files), 22 files parse, facade 21 / hinge holds, node 0. CLAUDE.md: THE FACADE paragraph (+ `b00e613`: three stale lines PLAN §0
+> named, fixed ahead of R-V — modwindow.js, modStore's home, 36 `!important`s). CHANGES-0.5.2 R5 line. R5's candidates for the fix round (R5-BUILD §9): 58 dead
+> names in boot's seat destructures (needs a tool clause first — trimming them hides crossings from `--classes`); 14 double blank lines; 32 unread `app` literal slots;
+> `LW.warning` null before `go`. `BRIEF-R-V.md` regenerated from `855ab99` (the template now carries the healthy-rig text). **Next:** R-V (fresh Opus, 9133/5603 +
+> 9137/5607, wave 224; its one commit is `R-V-REPORT.md`) → the fix round → the local cut `v0.5.2-alpha · Rack Dissolution` on Josh's word (`sos-s0/.tmp/cut-0.5.2.sh`
+> drafted, syntax-checked, NOT run). NO push, NO deploy, NO tag before.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
