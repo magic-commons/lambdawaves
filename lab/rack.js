@@ -25,8 +25,8 @@ import { Clock, onePlay } from './clock.js';
 import { createFrameBudget } from './frame-budget.js';
 import { createWindowActivity } from './mir/window-activity.js';
 import { createOcclusion, paintedRect } from './occlusion.js';   // 0.5.0 A7: the occlusion providers (KIT BRIEF 8's twin)
-import { createField, tableFor, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, toScreen, cameraKey, quatFromYawPitch } from './field.js';
-import { el, knob, sw, seg, trig, fader, readout, device, group, formula, chip, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
+import { createField, VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, cameraBasis, cameraEye, toScreen, cameraKey, quatFromYawPitch } from './field.js';
+import { el, knob, sw, seg, trig, fader, readout, device as kitDevice, group, formula, chip, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
 import { MOLECULE_BY_ID, moleculeAtoms } from './molecules.js';
 import { orbitalName } from './names.js';                        // 0.5.1 D8: a notebook link's orbital, by its name
 import { ELEMENT } from './md.js';
@@ -40,7 +40,7 @@ import { createOrbit } from './orbit.js';
 import { createVortex } from './vortex.js';
 import { createParticles } from './particles.js';
 import { createKepler } from './keplerview.js';
-import { createFilm, FILM_FPS } from './render-exact.js';   // 0.5.0 C7: the film is MIR's recorder with λWAVES' frame
+import { createFilm } from './render-exact.js';   // 0.5.0 C7: the film is MIR's recorder with λWAVES' frame
 import { installTimeline } from './mir/timeline/bind.js';   // 0.5.0 C7b: the kit's TIMELINE window, on λWAVES' one modulation host
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
 import { createKeyboardWindow } from './mir/keyboard/keyboard.js';   // 0.5.0 C3: the KEYBOARD window is the kit's (keymap.js left)
@@ -63,7 +63,6 @@ import { createWigner } from './wignerview.js';
 import { createRadiation } from './radiationview.js';
 import { ATOMS, configOf } from './atoms.js';
 import { toLUT, PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb, contrastRatio } from './mir/palette.js';   // N6: the kit's copy (lab/palette.js differed only in two comment lines)
-import { domainForP, momentumTableFor } from './momentum.js';
 import { momentumZ, AXIS_TO_Z, rotorsToZ, warmStep as kickWarm, tablesReady as kickReady } from './kick.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
 import { createRegisterSturmian } from './sturmianreg.js';
@@ -86,8 +85,7 @@ import { createWorkerPool } from './worker-pool.js';    // N7 seam 3: the maths 
 import { createLook, CARD_GROUND } from './look.js';    // 0.5.0 C2: the look is the kit's — mir.gui (createPrefs over LOOK_SCHEMA rows) and createAccent (once N7 seam 4, accent-wheel.js)
 import { createSwClient } from './sw-client.js';        // N7 seam 5: the install layer's interface half, out of boot()
 import { createBadges } from './badges.js';             // N7 seam 6: the badges and the canvas's sentence, out of boot()
-import { createRack, readLayout, layoutLabel as rackLayoutLabel } from './mir/shell/rack.js';
-import { device as kitDevice } from './mir/kit.js';   // 0.5.0 C3: the rack, its + and ☆ lists, the phone's crossing (rack-menus.js left)
+import { createRack, readLayout, layoutLabel as rackLayoutLabel } from './mir/shell/rack.js';   // 0.5.0 C3: the rack, its + and ☆ lists, the phone's crossing (rack-menus.js left)
 import { createMenubar } from './mir/shell/menubar.js';    // 0.5.0 C3: the logo's bar is the kit's (menubar.js left; its MENUS table stays)
 import { installWindowChrome } from './window-chrome.js'; // N7 seam 9: the LEAN and KIND passes, out of boot()
 import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK
@@ -103,18 +101,15 @@ const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentati
 export async function boot(dom) {
   const DEVICES = new Map(), device = (o) => { const d = kitDevice(o); DEVICES.set(o.id, d); return d; };   // 0.5.0 C3: the rack registers each card with its device(), so its fold is called, never re-clicked
   const reg = new Register();
-  const __LW_hooks = {};
-  /* UNDO / REDO: the ring is built at the foot of boot(), once every path it writes through exists; hNote() is
+  /* UNDO / REDO: the ring (`app.state.history`) is built at the foot of boot(), once every path it writes through exists; hNote() is
      the "an edit may have happened" ping for the few register-side setters that do not bump reg.version */
-  let history = null;
-  const hNote = () => { if (history) history.note(); };
+  const hNote = () => { if (app.state.history) app.state.history.note(); };
   const clock = new Clock(), appPlay = onePlay(clock);   // 0.5.0 A6: THE play (clock.js) — every road that plays or pauses the physics clock is its edge
 
 
   const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38), shift: [0, 0] };   // wave 54: TURNTABLE reads (yaw, pitch); FREE reads `quat` and the angles become a READOUT; 0.4.0 S2: `shift`, the pivot's place on the frame (NDC)
   const mat = { view: VIEW.phase, exposure: 1, softness: 0.7, steps: 160, slice: { mode: 0, axis: 2, pos: 0, thick: 0.03 }, hueShift: 0, invert: false, frame: true, axis: true, axisInk: 'theme', paletteOn: false, style: STYLE.cloud, iso: 0.06, grain: 0.35, knee: 0.6, dither: 0, boost: { k: [0, 0, 0], on: false }, bg: [0.028, 0.038, 0.058], gamma: 1, lightUI: false, finish: 'lit' };   // S3: 'lit' from the boot, as restore() writes it
   const FIELD_CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk'];   // 0.3.1 · S1 (D1): the reader's measurement furniture — PREFERENCE, never in a project or a link (docs/STATE-SCOPES.md)
-  let palette = null;
 
   const rates = new Float64Array(91).fill(1);
   const energyOf = (a) => getHamiltonian().energy(a) * rates[a];
@@ -160,9 +155,47 @@ export async function boot(dom) {
      frost (W125), 22 px blur, 50 % VIVID, disconnected cards.  A browser that has never chosen wears these; a stored choice wins.
      The phone crossing's FROST OFF is a later, separate law (enterPhone). */
   const LOOK_DEFAULTS = { theme: 'light', card: FIRST_RUN.card, frost: FIRST_RUN.frost, blur: 22, vivid: 0.5, disconnected: true };
+  /* THE CONTEXT (0.5.2 R0 · research/release-0.5.2/PLAN.md §1, G-A): `app`, the one object a module is handed.  Fixed-shape namespaces,
+     each ONE literal with every key, never extended, never Object.assign-ed into, never deleted (V8 makes a literal of 128 keys or more a
+     dictionary, so none is that large).  The keys are every boot-level name the planned cut makes cross a module (`node tools/rack-deps.mjs
+     --classes`).  A const or function keeps its name and sits here by value where the value exists at this line (§0's consts, the hoisted
+     functions that never move, and readSettings, which §0 calls first — U1); null until the row that moves a reader fills it at its owner's
+     seat.  Every SHARED let lives in `state`: read and written live as app.state.x, never destructured.  `ui` is the one flat registry. */
+  const ui = {};
+  const app = {
+    dom, ui, device, DEVICES, reg, hNote, clock, appPlay, obs, mat, FIELD_CHROME, rates, energyOf, sturm, labelExpect, settingsStore, useCompactDefaults, PAL_DEF, isPhone, isTablet, FIRST_RUN,
+    appleDevice, LOOK_DEFAULTS,
+    hooks: { theme: null, restage: null, setStageColour: null, setStageFollow: null, setStage: null, setGamut: null, setTheme: null, ab: null, slap: null, period: null, keys: null, warning: null },
+    state: { history: null, palette: null, molFormulaScale: 1, space: 'x', playedLast: false, uiHidden: false, pointerHeld: false, metersWall: 0, govVersion: -1, keplerDirty: true, badgesWall: 0,
+      applyVisuals: true, modView: null, modHost: null, modWall: 0, tl: null, modExpOn: null, dodge: null, filmCard: null, feedMs: 0, rotMoved: false, rotTicking: false, audioCap: null, modArm: true,
+      occludeDirty: true, occludeAt: 0, stageMix: 0.04, stageFollow: true, refSnapshot: null, pendingRef: null, warmTimer: 0, warmIdle: 0, dragging: false, cornerLayoutDirty: true,
+      exportLocked: false, histShown: null, lastNmax: 1, capApi: null, camKnobs: null, exporter3d: null, flowEpoch: null, chem: null, restampParams: null, molSession: null, register: null,
+      orbitals: null, states: null, stageText: null, bow: null, bowInFlight: 0, bowChain: null, kdrag: null, gasWidth: 1.8, gasAxial: false, lastLaunch: null, restoreNotice: '', linkLast: null },
+    loop: { schedule, hold: null, resetWall: () => { lastWall = performance.now() / 1000; }, page: null, loopRing: null, ringMedian: null, windowActivity: null, canPresent: null, modesAt, refModes,
+      meterSnapshot, paceRate: null, MOTION: null },
+    host: { camera: null, orbitBy: null, camTravel: null, queueKeyOrbit: null, camLevel: null, syncFreeAngles: null, setCamMode: null, cameraPort: null, resetView: null, zoomAt: null, panBy: null,
+      setDist: null, setFov: null, syncCamUI: null, rack: null, hydroReader, swClient: null, rackL: null, LAYOUT_SLOTS: null, floats: null, warning: null },
+    w: { wObs: null, wPal: null, wCam: null, wClip: null, clearRegister: null, wState: null, wSpec: null, spectrum: null, toggleFullscreen: null, normalizeNow: null, copyLatex: null,
+      switchHamiltonian: null, setSturmian: null, applySturmian: null, paintSturmRo: null, sturmEigen: null, occupiedEigen: null, periodEnergies: null, selectEigen: null, setElement: null,
+      fillValence: null, wSh: null, shadowView: null, shadowFoot: null, wOrb: null, orbit: null, kepler: null, wVor: null, vortex: null, particles: null, flowTracers: null, wSlice: null, slice: null,
+      wChem: null, head: null, stageCaption: null, stageTextTick: null, initStageText: null, wOrbs: null, wCalc: null, calculus: null, wMet: null, meters: null, wLad: null, ladder: null, wAtoms: null,
+      atomsView: null, wWig: null, wignerView: null, wRad: null, radiationView: null, WIG_OK: null, RAD_OK: null, bowStart: null, bowMove: null, bowRelease: null, orbitOfShell: null, kepShell: null,
+      keplerTurn: null, keplerDragToPoint: null, keplerDragTo: null, keplerRowSync: null, gas: null, gasReadout: null, gasTableOn: null, gasSigma: null, launchPacket: null, enterBox: null,
+      coherentBounce: null, bowCancel: null, slapAlong: null },
+    ctl: { autoQ: null, controlStep: null, RES_LADDER: null, gov: null, effectiveRes: null, READER_LAW: null, keep: null, domain: null, fieldRate: null, perf: null, frameBudget: null,
+      perfBudgetMs: null, tick: null, READERS: null, may: null, unpark: null, setGovernor: null, setKeepFrames: null, setPerfMode: null, stats: null, cRe: null, cIm: null, mod: null, MOD: null,
+      modSyncBases: null, feedAudio: null, modHand: null, setKnob: null, modGets: null, modKnobs: null, modHeld: null, ROT_LIMIT: null, rotRate: null, rotDriving: null, setRotationRate: null,
+      rotStep: null, modStore: null, saveMod: null, curvesStore: null, occlusion: null, look: null, applyAccent: null, paintMarks: null, markBatchBegin: null, markBatchEnd: null, wheelColor: null,
+      accent: null, inkCtx: null, markInk: null, stageGround: null, busyWrap: null, busyFlash: null, busy: null, busySync: null, cardLoading: null, busyHost: null, field: null, maths: null,
+      scan: null, cards: null, solveChem: null, solveCard: null, cancelWarm: null, warmArm: null, touchState: null, loadPreset: null, setReference: null, api: null },
+    sh: { readSettings, saveSettings: null, setCardStyle: null, setFrost: null, setDisconnected: null, lookSync: null, applySettings: null, KIND: null, RETIRED_WINDOWS: null, powered: null,
+      DIGESTS: null, quality: null, transport: null, togglePlay: null, setModArm: null, barLock: null, refreshOcclusion: null, devById: null, rackCardWidth: null, popFace: null, rk: null,
+      layout: null, winHint: null, wTr: null, phone: null, tablet: null, syncPhone: null, keyState: null, keyHelp: null, stageHasFocus: null, ACTIONS: null, kt: null, modSeats: null, serialize: null,
+      restoreModulation: null, save: null, copyJSON: null, restore: null, notCarriedWords: null, esc: null, mintLink: null, copyLink: null, openLink: null, historyApi: null, LW: null },
+  };
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
-  let molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (lab.css .lw-stage), a PREFERENCE
+  app.state.molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (lab.css .lw-stage), a PREFERENCE
   function readSettings() { return settingsStore.read(); }
   function saveSettings() {
     if (!settingsLoaded) return;
@@ -185,7 +218,7 @@ export async function boot(dom) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: molFormulaScale,
+      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: app.state.molFormulaScale,
         auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -196,7 +229,7 @@ export async function boot(dom) {
            host-contract.md says a host owes it: where the window sits, which lane the work bars are
            in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
            is not here — that rides in the project file, exactly as it did before. */
-        modwin: modView ? modView.presentation() : S0.modwin,
+        modwin: app.state.modView ? app.state.modView.presentation() : S0.modwin,
         tlwin: S0.tlwin,   // 0.5.0 C7b: the TIMELINE window's shape and work lane (WORKSPACE), written by its own store and carried here
         frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode:mat.axisMode, cornerSide:mat.cornerSide,
         /* ⚠ WAVE 106 · TWO MORE OF THE FIELD'S CHROME, AND ONE CLOSES AN ASYMMETRY NEVER DECIDED.
@@ -245,8 +278,8 @@ export async function boot(dom) {
        next save with its SIZE: a stored molFormula decides, because the row is one switch and that is the key it keeps. */
     const molFormula = s.molFormula !== undefined ? s.molFormula !== false : s.atomLabels !== false;
     document.body.classList.toggle('no-mol-formula', !molFormula); if (ui.molFormulaSw) ui.molFormulaSw.set(molFormula);
-    molFormulaScale = Number.isFinite(+s.molFormulaSize) ? Math.max(0.5, Math.min(3, +s.molFormulaSize)) : 1; if (ui.molFormulaK) ui.molFormulaK.set(molFormulaScale);
-    if (stageText) { stageText.setScale(molFormulaScale); stageText.setOn(molFormula); }
+    app.state.molFormulaScale = Number.isFinite(+s.molFormulaSize) ? Math.max(0.5, Math.min(3, +s.molFormulaSize)) : 1; if (ui.molFormulaK) ui.molFormulaK.set(app.state.molFormulaScale);
+    if (app.state.stageText) { app.state.stageText.setScale(app.state.molFormulaScale); app.state.stageText.setOn(molFormula); }
     if (s.auto === false) { quality.auto = false; if (ui.autoSw) ui.autoSw.set(false); }
     if (s.governor === false) setGovernor(false);                 // wave 45: the governor held off
     if (s.keepFrames === true) setKeepFrames(true);              // wave 45: the playhead follows every frame (off by default)
@@ -258,7 +291,7 @@ export async function boot(dom) {
     /* 0.5.0 C4 · THE POWER AND THE CADENCE are this browser's (PREFERENCE) and live in the kit's modulation record, the one
        MIR's installModulation reads; an older blob's pair is read ONCE into it, and the blob drops it on its next save. */
     const mr = { modArm: s.modArm, modCadence: s.modCadence, ...modStore.read() };
-    MOD.hz = mr.modCadence === 120 ? 120 : 60; if (modView) modView.sync();   // wave 52: the modulation's cadence cap is the PANEL's, not the project's
+    MOD.hz = mr.modCadence === 120 ? 120 : 60; if (app.state.modView) app.state.modView.sync();   // wave 52: the modulation's cadence cap is the PANEL's, not the project's
     if (mr.modArm === false) setModArm(false, { quiet: true });   // wave 65: ARMED is the default a fresh visit gets
     if (s.modArm !== undefined || s.modCadence !== undefined) saveMod();
     if (s.frame === false) { mat.frame = false; if (ui.frameSw) ui.frameSw.set(false); }     // wave 53: FRAME and AXIS, independently
@@ -298,7 +331,7 @@ export async function boot(dom) {
      leaving the viewport must save work without rewriting the user's project or switches. */
   const powered = (w) => !(w && w.root && w.root.classList.contains('off'));
   const DIGESTS = {};
-  let space = 'x';                 // 'x' position ψ(x) · 'p' momentum φ(p): the same state, two exact pictures
+  app.state.space = 'x';                 // 'x' position ψ(x) · 'p' momentum φ(p): the same state, two exact pictures
 
 
   const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 };   // PACE P2: 64³ × 160 × 1 on a desktop (and a phone, whose crossing has its own rule), the GRID pairing 64³ × 110 × 0.75 on a tablet
@@ -332,7 +365,7 @@ export async function boot(dom) {
     const x = 20 * scale * Math.min(1.15, Math.max(0.5, Math.sqrt((over ? budgetMs : budgetMs * 1.08) / ms)));
     return { median: ms, rung: false, scale: Math.min(1, Math.max(minScale, (over ? Math.ceil(x - 1e-9) : Math.floor(x + 1e-9)) / 20)) };
   }
-  let playedLast = false;          // W125: was the transport playing on the last frame the loop ran?  The pause EDGE is playedLast && !playing
+  app.state.playedLast = false;          // W125: was the transport playing on the last frame the loop ran?  The pause EDGE is playedLast && !playing
   const RES_LADDER = [64, 96, 128];
   const gov = { on: true, drop: 0, median: 0, changes: 0, scroll: 0, parked: new Map(), probes: 0, probeFrame: -1 };
 
@@ -357,7 +390,7 @@ export async function boot(dom) {
       every frame exactly as before, so nothing a proof reads after settle() has changed.  The SLICE was the case: a 128²
       resample of every populated mode, 20–100 ms each at 8 Hz — every hitch of the idle histogram, and 134 ms per call
       after a bow (wave 45's measurements). */
-  let uiHidden = false;
+  app.state.uiHidden = false;
   const READERS = {};
   function may(name, w) {
     if (w && !windowActivity.canPresent(w)) return false;
@@ -411,17 +444,17 @@ export async function boot(dom) {
   }
   const stats = { frames: 0, presents: 0, skipped: 0, reconstructs: 0, evolves: 0, rebuilds: 0, tiers: { PRESENT: 0, RECONSTRUCT: 0, EVOLVE: 0, REBUILD: 0 }, lastTier: 'NONE', scheduled: false, fps: 0, reconPerSec: 0, stepsPerSec: 0, lastEncodeMs: 0, fieldT: 0 };
   const cRe = new Float64Array(91), cIm = new Float64Array(91);
-  let pointerHeld = false;       // a gesture is in flight: the expensive per-frame readouts wait it out (see periodNow)
-  let keplerDirty = true, govVersion = -1, metersWall = 0, badgesWall = 0;   // wave 45: the KEPLER canvas is drawn only while on (one clearing draw after), the parked readers re-run on an edit, METERS repaints at 10 Hz while playing
-  let applyVisuals = true;
+  app.state.pointerHeld = false;       // a gesture is in flight: the expensive per-frame readouts wait it out (see periodNow)
+  app.state.keplerDirty = true; app.state.govVersion = -1; app.state.metersWall = 0; app.state.badgesWall = 0;   // wave 45: the KEPLER canvas is drawn only while on (one clearing draw after), the parked readers re-run on an edit, METERS repaints at 10 Hz while playing
+  app.state.applyVisuals = true;
   /* WAVE 52 · W-MODWINDOW.  The modulation host (lab/mir) and its face.  Declared HERE, beside the
      scheduler's own state, because the frame loop drives the modulation clock and must be able to
      guard on it before the window that shows it has been built.  0.5.0 A5: the port is lab/mod-port.js. */
-  let modHost = null, modView = null, modWall = 0, modExpOn = null, dodge = null, tl = null, filmCard = null;   // C7b: the pill's dodge (both kit windows) · the TIMELINE · the RENDER card
-  const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => modView, onCapture: (c) => { audioCap = c; }, save: saveMod, say: (t) => wMet.setStatus(t, t ? 'warn' : '') });   // 0.5.1 D10-19: the flash guard's one line, METERS' status
+  app.state.modHost = null; app.state.modView = null; app.state.modWall = 0; app.state.modExpOn = null; app.state.dodge = null; app.state.tl = null; app.state.filmCard = null;   // C7b: the pill's dodge (both kit windows) · the TIMELINE · the RENDER card
+  const mod = createModPort({ available: () => field.ok, present: () => schedule(TIER.PRESENT), view: () => app.state.modView, onCapture: (c) => { app.state.audioCap = c; }, save: saveMod, say: (t) => wMet.setStatus(t, t ? 'warn' : '') });   // 0.5.1 D10-19: the flash guard's one line, METERS' status
   const { setKnob, hand: modHand, syncBases: modSyncBases, feedAudio, cadence: MOD, knobs: modKnobs, gets: modGets, held: modHeld } = mod;   // the hand / base / modulated law, the feed, the cadence, the maps
   appPlay.onChange((on) => mod.follow(on));   // 0.5.0 C4 (R-B1): ONE clock — every play edge, the power on or off, holding the app-play demand while it plays
-  let feedMs = 0;                      // wave 105: the SMOOTHED feed interval, ms — see the pump
+  app.state.feedMs = 0;                      // wave 105: the SMOOTHED feed interval, ms — see the pump
 
 
   const ROT_LIMIT = { z: 2 * Math.PI, kz: 2 * Math.PI, def: Math.PI };
@@ -431,7 +464,7 @@ export async function boot(dom) {
      turns nothing, and a set rate froze the ring over every edit (probes/S3-verify/rotdrive.mjs).  NOT "and the clock plays": the
      drive integrates on the modulation tick's wall clock, and a paused 2p_x keeps turning (probes/S4/rot-paused.js).  The drive's
      own version bumps note nothing (rotTicking): its stop notes 'rotation drive', once. */
-  let rotMoved = false, rotTicking = false;
+  app.state.rotMoved = false; app.state.rotTicking = false;
   function setRotationRate(key, value) {
     if (!(key in ROT_LIMIT) || !Number.isFinite(value)) return false;
     const v = key !== 'z' && sturm.P ? 0 : Math.max(-ROT_LIMIT[key], Math.min(ROT_LIMIT[key], value));
@@ -439,7 +472,7 @@ export async function boot(dom) {
     rotRate[key] = v;
     const k = key === 'z' ? ui.rotZRate : key === 'kz' ? ui.kzRate : ui.defRate;
     setKnob(k, v);
-    if (!rotDriving()) { rotMoved = false; if (history) history.note('rotation drive'); }
+    if (!rotDriving()) { app.state.rotMoved = false; if (app.state.history) app.state.history.note('rotation drive'); }
     schedule(TIER.PRESENT);
     return v;
   }
@@ -454,33 +487,33 @@ export async function boot(dom) {
        a modulated rate cannot creep past a disabled dial.  ROTATE z survives: m is still m. */
     const az = rotRate.z * dt, ak = sturm.P ? 0 : rotRate.kz * dt, ad = sturm.P ? 0 : rotRate.def * dt;
     if (az === 0 && ak === 0 && ad === 0) return false;
-    const d0 = reg.digest(); rotTicking = true;
+    const d0 = reg.digest(); app.state.rotTicking = true;
     if (az !== 0) reg.rotateZ(az);
     if (ak !== 0) reg.rotateK(ak);                    // ≤ 35 blocks of ≤ 6×6 symEig, unpopulated ones skipped
     if (ad !== 0) reg.defectWait(ad);
-    rotTicking = false; rotMoved = reg.digest() !== d0;
+    app.state.rotTicking = false; app.state.rotMoved = reg.digest() !== d0;
     touchState();                                     // ONE schedule for all three, not three
     return true;
   }
-  let audioCap = null;   // wave 102: THE ONE MICROPHONE, built lazily by the port on a MIC press (never by adding a device); read by the loop and setPageHidden
+  app.state.audioCap = null;   // wave 102: THE ONE MICROPHONE, built lazily by the port on a MIC press (never by adding a device); read by the loop and setPageHidden
 
 
-  let modArm = true;
+  app.state.modArm = true;
   const modStore = localStore('lambdawaves.q0.modulation');   // 0.5.0 C4: { modArm, modCadence }, PREFERENCE (docs/STATE-SCOPES.md)
-  function saveMod() { modStore.write({ modArm, modCadence: MOD.hz }); }
+  function saveMod() { modStore.write({ modArm: app.state.modArm, modCadence: MOD.hz }); }
   const curvesStore = jsonStore('lambdawaves.q0.curves');   // 0.5.1 D10-24: the CURVES card's screen grade (the model's serialize()), PREFERENCE (docs/STATE-SCOPES.md); FORGET removes it
-  let occludeDirty = true, occludeAt = 0;    // INK UNDER GLASS: the window rectangles the line pass skips; refreshed at the top of a frame, before any DOM write
-  const occlusion = createOcclusion(() => { occludeDirty = true; schedule(TIER.PRESENT); });   // 0.5.0 A7: dirty() is the one producer (a PRESENT even while paused)
-  let stageMix = 0.04, stageFollow = true;   // STAGE: 0 = theme, 1 = chosen colour; FOLLOW THEME bypasses the mix without erasing either setting
-  let refSnapshot = null;        // { re, im, ids } — the DIFF reference state
-  let pendingRef = null;
+  app.state.occludeDirty = true; app.state.occludeAt = 0;    // INK UNDER GLASS: the window rectangles the line pass skips; refreshed at the top of a frame, before any DOM write
+  const occlusion = createOcclusion(() => { app.state.occludeDirty = true; schedule(TIER.PRESENT); });   // 0.5.0 A7: dirty() is the one producer (a PRESENT even while paused)
+  app.state.stageMix = 0.04; app.state.stageFollow = true;   // STAGE: 0 = theme, 1 = chosen colour; FOLLOW THEME bypasses the mix without erasing either setting
+  app.state.refSnapshot = null;        // { re, im, ids } — the DIFF reference state
+  app.state.pendingRef = null;
 
 
   /* 0.5.0 C2 · THE LOOK (lab/look.js): the kit's store `mir.gui` over LOOK_SCHEMA rows and its accent engine, applied at once —
      before a single window is built, so the FIRST paint is already this browser's glass.  The theme's engine side (the stage
      ground, the GPU chrome, the browser's bar) is __LW_hooks.theme, which the SETTINGS block registers. */
   const look = createLook({ settings: settingsStore, defaults: LOOK_DEFAULTS, mat, wheelStops: PALETTE_BY_ID.get(PAL_DEF).stops,
-    getModView: () => modView, onTheme: (t, choice) => { if (__LW_hooks.theme) __LW_hooks.theme(t, choice); } });
+    getModView: () => app.state.modView, onTheme: (t, choice) => { if (app.hooks.theme) app.hooks.theme(t, choice); } });
   const { accent, applyAccent, paintMarks, markBatchBegin, markBatchEnd, stageGround, inkCtx } = look, { wheelColor, markInk } = accent;
   look.prefs.subscribe(lookSync);
   const { busy, busyHost, busySync, busyFlash, busyWrap, cardLoading } = createBusyMark({ paintMarks, markBusy: accent.busy });   // N7 seam 2: lab/busy-mark.js
@@ -507,13 +540,13 @@ export async function boot(dom) {
   /* …and on this thread too (the K key and the IMPULSE trigger are synchronous). This used to spend 8 ms every
      40 ms beginning 1.5 s after boot: a deliberate 20% main-thread tax during the exact interval an iPad was
      trying to settle its first field. Warm in short idle slices instead, after the first-use path is stable. */
-  let warmTimer = 0, warmIdle = 0, workerWarmStarted = false;
+  app.state.warmTimer = 0; app.state.warmIdle = 0; let workerWarmStarted = false;
   const cancelWarm = () => {
-    if (warmTimer) { clearTimeout(warmTimer); warmTimer = 0; }
-    if (warmIdle && globalThis.cancelIdleCallback) { cancelIdleCallback(warmIdle); warmIdle = 0; }
+    if (app.state.warmTimer) { clearTimeout(app.state.warmTimer); app.state.warmTimer = 0; }
+    if (app.state.warmIdle && globalThis.cancelIdleCallback) { cancelIdleCallback(app.state.warmIdle); app.state.warmIdle = 0; }
   };
   const warmKick = (deadline) => {
-    warmTimer = warmIdle = 0; if (page.hidden) return;
+    app.state.warmTimer = app.state.warmIdle = 0; if (page.hidden) return;
     const room = deadline && deadline.timeRemaining ? deadline.timeRemaining() : 3;
     /* The worker graph used to load during boot. Its speculative table now starts only in real idle time and does
        not raise the cursor busy mark; the first user-requested bow still starts the same worker immediately. */
@@ -528,9 +561,9 @@ export async function boot(dom) {
   };
   const warmArm = (ms) => {
     cancelWarm();
-    warmTimer = setTimeout(() => {
-      warmTimer = 0;
-      if (globalThis.requestIdleCallback) warmIdle = requestIdleCallback(warmKick, { timeout: 1500 });
+    app.state.warmTimer = setTimeout(() => {
+      app.state.warmTimer = 0;
+      if (globalThis.requestIdleCallback) app.state.warmIdle = requestIdleCallback(warmKick, { timeout: 1500 });
       else warmKick(null);
     }, ms);
   };
@@ -569,8 +602,8 @@ export async function boot(dom) {
       page.mark = { t: clock.t, camT: camera.t, frames: stats.frames, presents: stats.presents, wall: page.hiddenAt };
       if (maths.ok) maths.park(); if (scan.ok) scan.park(); if (cards.ok) cards.park();     // the workers: the one thing the browser throttles for nobody
       cancelWarm();                                             // the idle reader and its delay
-      if (modHost) modHost.clock.setHidden(true);                 // the modulation clock stops (and releases any hold)
-      if (audioCap && audioCap.setHidden) audioCap.setHidden(true);  // wave 105: the capture reports to the SAME authority — it owns no listener of its own
+      if (app.state.modHost) app.state.modHost.clock.setHidden(true);                 // the modulation clock stops (and releases any hold)
+      if (app.state.audioCap && app.state.audioCap.setHidden) app.state.audioCap.setHidden(true);  // wave 105: the capture reports to the SAME authority — it owns no listener of its own
     } else {
       page.resumes++; page.hiddenMs += performance.now() - page.hiddenAt;
       const now = performance.now();
@@ -582,14 +615,14 @@ export async function boot(dom) {
       /* THE RE-ANCHOR.  Not one of these clocks may receive the whole gap as one delta. */
       clock._wall = null;                       // PHYSICS: clock.js's own idiom — "the next dt is NOT a dt" (what pause() leaves behind)
       lastWall = now / 1000;                    // CAMERA: exactly what camera.wake() does
-      modWall = now; lastReconMs = -1e9;        // the modulation cadence and the FIELD clock start their windows here
+      app.state.modWall = now; lastReconMs = -1e9;        // the modulation cadence and the FIELD clock start their windows here
       autoQ.lastMs = 0; autoQ.presented = 0;   // the controller's window, and the "the thread was blocked" flash that a 3-minute gap would otherwise fire
-      metersWall = 0; winStart = 0; winFrames = winRecon = winSteps = 0;
+      app.state.metersWall = 0; winStart = 0; winFrames = winRecon = winSteps = 0;
       if (camLevel.from) camLevel.t0 = now;     // a levelling slerp interrupted by a tab switch resumes, it does not finish in one frame
       page.firstDt = null;                      // the loop records the first dt it actually integrates, and the gate reads it
       if (maths.ok) maths.resume(); if (scan.ok) scan.resume(); if (cards.ok) cards.resume();
-      if (modHost) modHost.clock.setHidden(false);                // mir/modulation/host.js re-anchors itself: prevWall = null + reanchorTransport
-      if (audioCap && audioCap.setHidden) audioCap.setHidden(false); // wave 105: …and the follower spends one frame re-learning the spectrum rather than firing a phantom onset
+      if (app.state.modHost) app.state.modHost.clock.setHidden(false);                // mir/modulation/host.js re-anchors itself: prevWall = null + reanchorTransport
+      if (app.state.audioCap && app.state.audioCap.setHidden) app.state.audioCap.setHidden(false); // wave 105: …and the follower spends one frame re-learning the spectrum rather than firing a phantom onset
       warmArm(60);
       schedule(TIER.PRESENT);
     }
@@ -609,7 +642,7 @@ export async function boot(dom) {
   window.addEventListener('pageshow', () => setPageHidden(document.visibilityState === 'hidden', 'pageshow'));
 
   /* ── the router ───────────────────────────────────────────────────────── */
-  let pending = TIER.NONE, rafId = 0, lastWall = 0, lastReconMs = -1e9, dragging = false, inLoop = false;
+  let pending = TIER.NONE, rafId = 0, lastWall = 0, lastReconMs = -1e9; app.state.dragging = false; let inLoop = false;
   /* OPTIMIZATION 2026-09-24 · LA1: the WHOLE loop's own ms, from entry (before the occlusion burst and the modulation
      pump, which perf.ring's tFrame0 leaves out), 60 deep, beside perf.ring — LW.perf.loopMedian reads it.  Both rings
      are written to the slot the frame's head captured (the tail used to write the NEXT slot, so the getter read the
@@ -624,16 +657,16 @@ export async function boot(dom) {
   const cornerAxis = el('button','corner-axis-hit',document.getElementById('lab'));
   cornerAxis.type='button'; cornerAxis.hidden=true; cornerAxis.setAttribute('aria-label','Swap corner axis side');
   cornerAxis.title='Double-click or double-tap to swap sides; Enter also swaps';
-  let cornerLayoutDirty=true,cornerSideAtLayout='',cornerVW=0,cornerVH=0;
-  const swapCorner=()=>{mat.cornerSide=mat.cornerSide==='left'?'right':'left';cornerLayoutDirty=true;saveSettings();schedule(TIER.PRESENT);};
+  app.state.cornerLayoutDirty = true; let cornerSideAtLayout='',cornerVW=0,cornerVH=0;
+  const swapCorner=()=>{mat.cornerSide=mat.cornerSide==='left'?'right':'left';app.state.cornerLayoutDirty=true;saveSettings();schedule(TIER.PRESENT);};
   let cornerTap=0;
   cornerAxis.addEventListener('click',e=>{const now=performance.now();if(e.detail===0 || now-cornerTap<400){swapCorner();cornerTap=0;}else cornerTap=now;});
   function placeCornerAxis() {
     if (mat.axis===false || mat.axisMode!=='corner') { if (!cornerAxis.hidden) cornerAxis.hidden=true; return; }
-    if (cornerAxis.hidden) { cornerAxis.hidden=false; cornerLayoutDirty=true; }
-    if (cornerSideAtLayout!==mat.cornerSide || cornerVW!==window.innerWidth || cornerVH!==window.innerHeight) cornerLayoutDirty=true;
-    if (!cornerLayoutDirty) return;
-    cornerLayoutDirty=false;
+    if (cornerAxis.hidden) { cornerAxis.hidden=false; app.state.cornerLayoutDirty=true; }
+    if (cornerSideAtLayout!==mat.cornerSide || cornerVW!==window.innerWidth || cornerVH!==window.innerHeight) app.state.cornerLayoutDirty=true;
+    if (!app.state.cornerLayoutDirty) return;
+    app.state.cornerLayoutDirty=false;
     const vw=window.innerWidth,vh=window.innerHeight,left=mat.cornerSide==='left';
     cornerSideAtLayout=mat.cornerSide;cornerVW=vw;cornerVH=vh;
     const rack=document.getElementById(left?'rackL':'rack'),r=rack&&rack.getBoundingClientRect();
@@ -644,9 +677,9 @@ export async function boot(dom) {
     if(cornerAxis.style.top!==cssTop)cornerAxis.style.top=cssTop;
     mat.cornerX=x/vw*2-1;mat.cornerY=1-y/vh*2;mat.cornerScaleX=64/vw;mat.cornerScaleY=64/vh;
   }
-  document.addEventListener('transitionrun',e=>{if(!['rack','rackL'].includes(e.target.id)||mat.axisMode!=='corner')return;const end=performance.now()+500;const tick=()=>{cornerLayoutDirty=true;schedule(TIER.PRESENT);if(performance.now()<end)requestAnimationFrame(tick);};tick();});
-  document.addEventListener('transitionend',e=>{if(e.target.id==='rack'||e.target.id==='rackL'){cornerLayoutDirty=true;schedule(TIER.PRESENT);}});
-  let exportLocked = false;
+  document.addEventListener('transitionrun',e=>{if(!['rack','rackL'].includes(e.target.id)||mat.axisMode!=='corner')return;const end=performance.now()+500;const tick=()=>{app.state.cornerLayoutDirty=true;schedule(TIER.PRESENT);if(performance.now()<end)requestAnimationFrame(tick);};tick();});
+  document.addEventListener('transitionend',e=>{if(e.target.id==='rack'||e.target.id==='rackL'){app.state.cornerLayoutDirty=true;schedule(TIER.PRESENT);}});
+  app.state.exportLocked = false;
   function schedule(tier) {
     if (mod.syncing) return;                   // wave 52: a re-base writes what is already there (modSyncBases)
     if (tier > pending) pending = tier;
@@ -654,7 +687,7 @@ export async function boot(dom) {
        during an export (GRID, DOMAIN, SPACE, OPERATOR) was dropped: the export's finally raises only RECONSTRUCT, and
        the field went on marching the old grid under a control that showed the new one (AUDIT-F F8).  No rAF is armed
        while locked (render-exact's H9 witness); the finally's schedule() arms one frame at max(pending, RECONSTRUCT). */
-    if (exportLocked) return;
+    if (app.state.exportLocked) return;
     /* WAVE 54 · A HIDDEN PAGE ASKS FOR NO FRAMES.  `pending` still rises, so nothing asked for is lost — the
        resume schedules once and the next frame does all of it.  See the measurement in setPageHidden. */
     if (page.hidden) { stats.scheduled = false; return; }
@@ -662,12 +695,12 @@ export async function boot(dom) {
   }
   /* The frame loop asks this cached service instead of reading layout geometry. IntersectionObserver accounts for
      both viewport clipping and a rack's scrollport; class/hidden mutations wake one catch-up frame on re-entry. */
-  let histShown = null;                // S4: the HISTORY card's reveal (below) rides the one activity hook the rack already has
-  const windowActivity = createWindowActivity({ onChange: () => { schedule(TIER.PRESENT); if (histShown) histShown(); } });
+  app.state.histShown = null;                // S4: the HISTORY card's reveal (below) rides the one activity hook the rack already has
+  const windowActivity = createWindowActivity({ onChange: () => { schedule(TIER.PRESENT); if (app.state.histShown) app.state.histShown(); } });
   const canPresent = (w) => windowActivity.canPresent(w);
-  const canPresentTransport = () => !uiHidden && (layout.docked ? canPresent(wTr)
+  const canPresentTransport = () => !app.state.uiHidden && (layout.docked ? canPresent(wTr)
     : (!document.body.classList.contains('rack-hidden') || document.body.classList.contains('transport-peek')));
-  const tableOf = (a) => sturm.P ? sturm.rec[a] : (space === 'p' ? getHamiltonian().momentumTableFor(BASIS[a]) : getHamiltonian().tableFor(BASIS[a]));   // W-STURMIAN: the scaled record, else the operator's
+  const tableOf = (a) => sturm.P ? sturm.rec[a] : (app.state.space === 'p' ? getHamiltonian().momentumTableFor(BASIS[a]) : getHamiltonian().tableFor(BASIS[a]));   // W-STURMIAN: the scaled record, else the operator's
   const sturmHalf = () => { const nm = reg.nmax(1e-3); return domainFor(nm) / (nm * sturm.lambda); };   // a Sturmian's extent is hydrogen's for n over nλ (ρ = 2λr against 2r/n)
   /* Population membership, mute/solo eligibility and ordering change only with register.version. During exact
      time evolution the coefficients rotate but these lists do not; rebuilding and sorting them each frame was
@@ -685,7 +718,7 @@ export async function boot(dom) {
   const modeState = { re: cRe, im: cIm };
   function modesAt(t) {
     modeStateT = NaN; modeStateVersion = -1;
-    if (chem && chem.on) return null;                                      // CHEMISTRY: the field reads an AO density matrix, not a mode list — packModes is skipped entirely
+    if (app.state.chem && app.state.chem.on) return null;                                      // CHEMISTRY: the field reads an AO density matrix, not a mode list — packModes is skipped entirely
     if (gas && gas.on) return gas.fieldModes(t);                           // the AXIAL GAS: the box's second register
     const c = reg.at(t, cRe, cIm), ids = stateReaders().rendered.ids; modeStateT = t; modeStateVersion = reg.version;
     modeList.length = ids.length;                                        // wave 45: the same 91 records, rewritten in place (was 1–91 fresh objects per reconstruct)
@@ -694,21 +727,21 @@ export async function boot(dom) {
   }
   const modeRecs = Array.from({ length: 91 }, () => ({ table: null, re: 0, im: 0 })), modeList = [];
   function refModes() {
-    if (!refSnapshot) return null;
-    return refSnapshot.ids.map((a) => ({ table: tableOf(a), re: refSnapshot.re[a], im: refSnapshot.im[a] }));
+    if (!app.state.refSnapshot) return null;
+    return app.state.refSnapshot.ids.map((a) => ({ table: tableOf(a), re: app.state.refSnapshot.re[a], im: app.state.refSnapshot.im[a] }));
   }
   function applyRebuild() {
     busyWrap(null);                                                    // wave 48: a rebuild is BUSY work — synchronous, so it only shows when the frame-gap rule catches it running long
     const HH = getHamiltonian();
-    if (domain.auto) domain.half = (chem && chem.on) ? chem.half : (space === 'p' ? HH.domainForP(reg.nmin()) : sturm.P ? sturmHalf() : HH.domainFor(reg.nmax(1e-3)));   // ignore a slap's 1e-4 tails
-    if (field.ok) field.setSpace(space === 'p' ? HH.kernelSpace.p : HH.kernelSpace.x);
+    if (domain.auto) domain.half = (app.state.chem && app.state.chem.on) ? app.state.chem.half : (app.state.space === 'p' ? HH.domainForP(reg.nmin()) : sturm.P ? sturmHalf() : HH.domainFor(reg.nmax(1e-3)));   // ignore a slap's 1e-4 tails
+    if (field.ok) field.setSpace(app.state.space === 'p' ? HH.kernelSpace.p : HH.kernelSpace.x);
     if (field.ok && HH.radialTable) field.setRadialTable(HH.radialTable());   // QUARKONIUM: the tabulated radial rows the kernel reads
     if (field.ok) {
       field.setDomain(domain.half);
       const want = effectiveRes(); if (field.resolution !== want) field.setResolution(want);   // the governor's notch, if it stepped
     }
     mat.steps = quality.steps;
-    if (refSnapshot) pendingRef = refModes();      // the reference lives on the grid: rebuild it with the grid
+    if (app.state.refSnapshot) app.state.pendingRef = refModes();      // the reference lives on the grid: rebuild it with the grid
     stats.rebuilds++;
     ui.domainKnob.set(domain.half);
   }
@@ -716,12 +749,12 @@ export async function boot(dom) {
 
   function loop(nowMs) {
     rafId = 0;
-    if (page.hidden || exportLocked) { stats.scheduled = false; return; }   // wave 54: a frame that arrived after the tab went away does nothing and re-arms nothing
+    if (page.hidden || app.state.exportLocked) { stats.scheduled = false; return; }   // wave 54: a frame that arrived after the tab went away does nothing and re-arms nothing
     inLoop = true;
     const tLoop0 = performance.now();                                 // LA1: the whole loop, timed from entry
     let fault = '';
     try {   /* LA4 · the body is deliberately NOT re-indented (one exception anywhere used to end the loop for the session: AUDIT-B FB7) */
-    if (field.ok && field.setOcclusion && (occludeDirty || nowMs - occludeAt > 300)) refreshOcclusion(nowMs);   // layout is read HERE, before the writes below
+    if (field.ok && field.setOcclusion && (app.state.occludeDirty || nowMs - app.state.occludeAt > 300)) refreshOcclusion(nowMs);   // layout is read HERE, before the writes below
     if (mat.axis!==false && mat.axisMode==='corner') placeCornerAxis();
     else if (!cornerAxis.hidden) cornerAxis.hidden=true;
     if(ui.frameSw) { const mode=mat.frame===false?'OFF':(mat.frameMode||'box').toUpperCase(); if(ui.frameSw.root.dataset.mode!==mode)ui.frameSw.root.dataset.mode=mode; }
@@ -740,10 +773,10 @@ export async function boot(dom) {
        stamp, so it cannot drift, and under FREE sync the next dt carries the whole gap.  Its present
        callback is schedule(TIER.PRESENT), which is why this sits ABOVE the read of `pending`: the output
        of this frame is presented on this frame.  It runs whether or not the window that shows it is open. */
-    if (modHost) {
-      const modRunning = modHost.clock.isRunning();
+    if (app.state.modHost) {
+      const modRunning = app.state.modHost.clock.isRunning();
       if (modRunning) modSyncBases();
-      if (nowMs - modWall >= MOD.step) {
+      if (nowMs - app.state.modWall >= MOD.step) {
         /* WAVE 102 · THE FEED RATE IS MEASURED, NOT NOMINAL.  `modFeedAudio` turns each output's
            attack and release MILLISECONDS into per-frame coefficients using this number, so handing
            it a nominal 60 while the loop is really running at 43 would make every one of those eight
@@ -754,20 +787,20 @@ export async function boot(dom) {
            `dtFeed = 0.2 s` and decrements the 83 ms gate hold and the onset refractory by that in a
            SINGLE step — the gate slams shut and the followers collapse to pass-through.  A short EMA
            over the last few intervals costs nothing and cannot spike. */
-        if (modWall) {
-          const dt = Math.min(500, Math.max(1, nowMs - modWall));
-          feedMs = feedMs ? feedMs + (dt - feedMs) * 0.25 : dt;
+        if (app.state.modWall) {
+          const dt = Math.min(500, Math.max(1, nowMs - app.state.modWall));
+          app.state.feedMs = app.state.feedMs ? app.state.feedMs + (dt - app.state.feedMs) * 0.25 : dt;
         }
-        const feedHz = feedMs ? 1000 / feedMs : MOD.hz;
+        const feedHz = app.state.feedMs ? 1000 / app.state.feedMs : MOD.hz;
         /* THE ROTATION RATES INTEGRATE ON THIS TICK, from the RAW interval — never from `feedMs`,
            which is an EMA and would make the accumulated angle drift against the wall clock.  The
            250 ms ceiling is wave 105's own measurement used again: one 200 ms stall must not become
            a 1.3-radian jump in a single step. */
-        const modDt = modWall ? Math.min(0.25, (nowMs - modWall) / 1000) : 0;
-        modWall = nowMs;
-        if (modRunning || (audioCap && audioCap.live) || rotDriving()) {
+        const modDt = app.state.modWall ? Math.min(0.25, (nowMs - app.state.modWall) / 1000) : 0;
+        app.state.modWall = nowMs;
+        if (modRunning || (app.state.audioCap && app.state.audioCap.live) || rotDriving()) {
           feedAudio(feedHz);
-          modHost.clock.advanceTo(now);
+          app.state.modHost.clock.advanceTo(now);
         }
         /* AFTER advanceTo AND NOT BEFORE: the macros have just written the rates, so the angle this
            tick applies is driven by the rate this tick asked for, with no one-frame lag between the
@@ -781,14 +814,14 @@ export async function boot(dom) {
     if (dt !== 0) { tier = Math.max(tier, TIER.EVOLVE); stats.evolves++; winSteps++; }
     if (camLevel.from && camLevelStep(nowMs)) tier = Math.max(tier, TIER.PRESENT);   // wave 54: FREE → TURNTABLE levels the roll, it never snaps
     if (stepKeyOrbit(Math.min(0.1, Math.max(0, now - lastWall)))) tier = Math.max(tier, TIER.PRESENT);
-    if (!dragging && camera.moving) {                                // CAMERA clock: observer only (§12) — the law, never the state
+    if (!app.state.dragging && camera.moving) {                                // CAMERA clock: observer only (§12) — the law, never the state
       if (cameraStep(Math.min(0.1, Math.max(0, now - lastWall)))) tier = Math.max(tier, TIER.PRESENT);
     }
     lastWall = now;
     /* On iPad, the nested neumorphic shadow stack competes with the live WebGPU canvas even without
        backdrop blur. Keep the silhouettes and fills, and flatten only inner shadows while pixels move. */
-    const tabletMotion = tablet.on && (clock.playing || dragging || camera.moving || camLevel.from ||
-      (modHost && modHost.clock.isRunning()) || rotDriving());
+    const tabletMotion = tablet.on && (clock.playing || app.state.dragging || camera.moving || camLevel.from ||
+      (app.state.modHost && app.state.modHost.clock.isRunning()) || rotDriving());
     if (tabletMotion !== document.body.classList.contains('tablet-motion'))
       document.body.classList.toggle('tablet-motion', tabletMotion);
     /* PACE (P1, 2026-09-25) · A BOUNDED QUEUE where the GPU's completion is prompt (field.paced): with FOUR submitted frames
@@ -812,8 +845,8 @@ export async function boot(dom) {
     const tFrame0 = performance.now();
     if (tier >= TIER.PRESENT && field.ok) {                          // PRESENTATION
       field.setStepCap(tabletMotion ? tablet.steps : Infinity);   // full saved quality returns on the first still frame
-      tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: pendingRef, obs, mat, molecule: !!(molSession && molSession.molecule) }); });   // ONE owner flag: the session holds the molecule, so the session says whether the volume is molecular
-      pendingRef = null;
+      tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: app.state.pendingRef, obs, mat, molecule: !!(app.state.molSession && app.state.molSession.molecule) }); });   // ONE owner flag: the session holds the molecule, so the session says whether the volume is molecular
+      app.state.pendingRef = null;
       stats.presents++; stats.lastEncodeMs = field.stats.lastEncodeMs;
     }
     if (modes) stats.reconstructs++;
@@ -839,12 +872,12 @@ export async function boot(dom) {
       gov.median = d.median; autoQ.presented = 0;
       if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%', quality.auto && quality.autoScale < 1 ? 'warn' : '');
     }
-    if (playedLast && !clock.playing) {                              // THE PAUSE EDGE (W125-2): the user's grid and canvas come back at once, and the window restarts
+    if (app.state.playedLast && !clock.playing) {                              // THE PAUSE EDGE (W125-2): the user's grid and canvas come back at once, and the window restarts
       autoQ.presented = autoQ.lastMs = autoQ.m0 = 0;                 // the play's intervals, and the edge's own transition interval, are not the still picture's
       if (gov.drop) { gov.drop = 0; gov.changes++; schedule(TIER.REBUILD); }
       if (quality.auto && quality.autoScale < 1) { quality.autoScale = 1; autoQ.changes++; schedule(TIER.PRESENT); if (ui.scaleRo) ui.scaleRo.set((100 * quality.scale).toFixed(0) + '%', ''); }   // the still picture repaints at full size on the next frame (REFUTE-B: nothing else would)
     }
-    playedLast = clock.playing;
+    app.state.playedLast = clock.playing;
     perf.counts.frames++;
     const cpuTick = !clock.playing || (perf.counts.frames % perf.cpuEvery) === 0;   // the CPU windows' cadence
     if (cpuTick) {
@@ -852,13 +885,13 @@ export async function boot(dom) {
          in 120 Hz mode the other three frames need no CPU-reader coefficient vector at all. */
       const c = modeStateT === clock.t && modeStateVersion === reg.version ? modeState : reg.at(clock.t, cRe, cIm);
       perf.counts.cpu++;
-      if (reg.version !== govVersion) { govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
-      if (stageText) { stageTextTick(); stageText.atomLabels(chem && chem.on ? chem.preset() : '', obs, domain.half); }   // the STAGE TEXT follows the register; the ATOM LABELS the camera (initStageText: compares only)
+      if (reg.version !== app.state.govVersion) { app.state.govVersion = reg.version; if (gov.parked.size) { const np = reg.populated().length; for (const [name, p] of [...gov.parked.entries()]) if (np < p.pop) unpark(name, READERS[name]); } }   // an edit that SHRANK the state: a parked reader may have got cheap — re-measured (one that grew stays parked: the landing frame measured 449 ms with the SLICE re-measuring on 91 labels)
+      if (app.state.stageText) { stageTextTick(); app.state.stageText.atomLabels(app.state.chem && app.state.chem.on ? app.state.chem.preset() : '', obs, domain.half); }   // the STAGE TEXT follows the register; the ATOM LABELS the camera (initStageText: compares only)
       if (may('spectrum', wSpec)) tick('spectrum', () => spectrum.update(c, clock.t));
       if (may('shadow', wSh)) tick('shadow', () => { shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected); if (ui.shadowDetails && !ui.shadowDetails.hidden) shadowFoot.update(reg, c, clock.t, stateReaders().populated); });
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
     }
-    const overlayDomain = space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P && !(chem && chem.on);
+    const overlayDomain = app.state.space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P && !(app.state.chem && app.state.chem.on);
     if (overlayDomain) {
       const vortexVisible = canPresent(wVor);
       if (vortexVisible && may('vortex')) tick('vortex', () => vortex.update(reg, clock.t, obs, domain.half, clock.playing));
@@ -871,10 +904,10 @@ export async function boot(dom) {
       });
       else if (!particlesVisible || !particles.on) particles.suspend(clock.t);   // retain switch/points; skip hidden time instead of a catch-up burst
 
-      const keplerVisible = bow || canPresent(wOrb);
-      if (keplerVisible && (kepler.on || kdrag || keplerDirty || bow) && (bow || may('kepler'))) tick('kepler', () => {
-        kepler.update(reg, clock.t, obs, domain.half); keplerDirty = !!kepler.on;
-        if (!kepler.on && !bow) kepler.suspend();
+      const keplerVisible = app.state.bow || canPresent(wOrb);
+      if (keplerVisible && (kepler.on || app.state.kdrag || app.state.keplerDirty || app.state.bow) && (app.state.bow || may('kepler'))) tick('kepler', () => {
+        kepler.update(reg, clock.t, obs, domain.half); app.state.keplerDirty = !!kepler.on;
+        if (!kepler.on && !app.state.bow) kepler.suspend();
       });
       else if (!keplerVisible) kepler.suspend();
     } else {
@@ -882,26 +915,26 @@ export async function boot(dom) {
       /* The impulse remains a stage gesture when a molecule, momentum space or a
          Sturmian owns the field.  Those modes deliberately skip the Kepler redraw above, so clear
          its transparent canvas explicitly before bowFrame() paints the next arrow. */
-      if (bow) kepler.clear(); else kepler.suspend();
+      if (app.state.bow) kepler.clear(); else kepler.suspend();
     }
 
     kepler.bowFrame();
-    chem.setActive(canPresent(wChem));
+    app.state.chem.setActive(canPresent(wChem));
     /* ONE PRODUCT A FRAME, AND THE ORDER OF THESE TWO CALLS DECIDES NOTHING.  Both windows hand their product to
        molSession, which selects a model by RANK (the real-time run, then the register, then the card) and drops
        what the unselected ones offer — where this used to be "whoever writes the matrix last owns the frame". */
-    molSession.tick();
-    if (chem.on && powered(wChem)) chem.update(clock.t);   // the RT pump: one outstanding worker request, then an upload — no maths on this thread, so no tick()
-    register.setActive(canPresent(wOrbs));
-    if ((orbitals.on || states.on) && powered(wOrbs)) register.update(clock.t);
+    app.state.molSession.tick();
+    if (app.state.chem.on && powered(wChem)) app.state.chem.update(clock.t);   // the RT pump: one outstanding worker request, then an upload — no maths on this thread, so no tick()
+    app.state.register.setActive(canPresent(wOrbs));
+    if ((app.state.orbitals.on || app.state.states.on) && powered(wOrbs)) app.state.register.update(clock.t);
     if (flowTracers) {
       /* the source belongs to the model that is PLAYING: the STATES register, the ORBITAL packet, or CHEMISTRY's run */
-      const playing = molSession ? molSession.selected : null;
-      const src = playing === 'states' ? (states.flowOn ? states.flowSource() : null) : playing === 'orbital-packet' ? orbitals.flowSource() : (playing === 'tdhf' || playing === 'ground') && chem ? chem.flowSource() : null;
+      const playing = app.state.molSession ? app.state.molSession.selected : null;
+      const src = playing === 'states' ? (app.state.states.flowOn ? app.state.states.flowSource() : null) : playing === 'orbital-packet' ? app.state.orbitals.flowSource() : (playing === 'tdhf' || playing === 'ground') && app.state.chem ? app.state.chem.flowSource() : null;
       if (src && src.ready) {
-        if (!flowTracers.on || flowEpoch !== src) { flowTracers.setOn(true); flowTracers.setTrail(48); flowTracers.setCap(2.5); flowTracers.seedFrom(src, 220, Number.isFinite(src.time) ? src.time : clock.t, chem.half * 0.75); flowEpoch = src; }
-        tick('particles', () => { flowTracers.advanceFrom(src, Number.isFinite(src.time) ? src.time : clock.t, chem.half * 0.75); flowTracers.draw(obs, domain.half); });
-      } else if (flowTracers.on) { flowTracers.setOn(false); flowEpoch = null; }
+        if (!flowTracers.on || app.state.flowEpoch !== src) { flowTracers.setOn(true); flowTracers.setTrail(48); flowTracers.setCap(2.5); flowTracers.seedFrom(src, 220, Number.isFinite(src.time) ? src.time : clock.t, app.state.chem.half * 0.75); app.state.flowEpoch = src; }
+        tick('particles', () => { flowTracers.advanceFrom(src, Number.isFinite(src.time) ? src.time : clock.t, app.state.chem.half * 0.75); flowTracers.draw(obs, domain.half); });
+      } else if (flowTracers.on) { flowTracers.setOn(false); app.state.flowEpoch = null; }
     }
     const sliceVisible = canPresent(wSlice); slice.setActive(sliceVisible);
     ladder.setActive(canPresent(wLad));
@@ -917,7 +950,7 @@ export async function boot(dom) {
         const st = G.status !== null ? G.status : radiationView.cache ? RAD_OK : 'no dipole in this state';
         wRad.setStatus(st, st === RAD_OK ? '' : 'warn');
       });
-      if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P && !(chem && chem.on)) calculus.update(reg, clock.t); });
+      if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P && !(app.state.chem && app.state.chem.on)) calculus.update(reg, clock.t); });
       if (canPresent(wSh)) ui.hc.set(reg.energy().toFixed(5));
       if (canPresent(wSpec) && sturm.P && ui.sturmRo && sturm.roVersion !== reg.version) paintSturmRo();   // W-STURMIAN: the scale's readout follows the state
       if (canPresent(wSpec) && gas && gas.on && ui.gasRo && (perf.counts.cpu % 6) === 0) gasReadout(clock.t);   // K5w: the maths worker's stats(), painted when it lands
@@ -925,11 +958,11 @@ export async function boot(dom) {
     if (canPresentTransport()) transport.update();
     /* WAVE 52: the strip, the meters and the beat readout, at 30 Hz (modview throttles itself) — and
        the EXPAND lamp, which is the one thing that must be painted whether the window is open or not. */
-    if (modHost) {
-      if (!uiHidden && modView && modView.isOpen) modView.paint(false);
-      if (!uiHidden && tl && tl.isOpen()) tl.paintHead();   // 0.5.0 C7b: the playhead paints from the one present (TIMELINE.md: no tick of its own)
-      const on = modHost.clock.isRunning();
-      if (on !== modExpOn) { modExpOn = on; if (ui.modExp) ui.modExp.classList.toggle('live', on); }
+    if (app.state.modHost) {
+      if (!app.state.uiHidden && app.state.modView && app.state.modView.isOpen) app.state.modView.paint(false);
+      if (!app.state.uiHidden && app.state.tl && app.state.tl.isOpen()) app.state.tl.paintHead();   // 0.5.0 C7b: the playhead paints from the one present (TIMELINE.md: no tick of its own)
+      const on = app.state.modHost.clock.isRunning();
+      if (on !== app.state.modExpOn) { app.state.modExpOn = on; if (ui.modExp) ui.modExp.classList.toggle('live', on); }
     }
     if (now - winStart >= 1) {
       const w = now - winStart; stats.fps = winFrames / w; stats.reconPerSec = winRecon / w; stats.stepsPerSec = winSteps / w;
@@ -937,11 +970,11 @@ export async function boot(dom) {
     }
     inLoop = false;
     loopTail(false);                                                  // LA4: the re-arm, one function for this tail and the fault's
-    if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - metersWall >= 100)) { metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
+    if (cpuTick && canPresent(wMet) && (!clock.playing || nowMs - app.state.metersWall >= 100)) { app.state.metersWall = nowMs; tick('meters', () => { meters.update(meterSnapshot()); paintGovernor(); }); }   // wave 45: 10 Hz while playing (fifteen strings and a snapshot per call), every frame when paused
     /* 0.4.0 S0 · wave 137: the STATUS TAGS, the Stark/Zeeman and masked/truncated warnings and the canvas's sentence tick on
        their OWN ≤ 10 Hz clock — they rode METERS' tick and went stale whenever METERS was closed.  Gated on the tags being
        shown or the canvas being read (focused); the governor's readout stays with METERS. */
-    if (cpuTick && nowMs - badgesWall >= 100 && (!document.body.classList.contains('no-badges') || document.activeElement === dom.canvas)) { badgesWall = nowMs; tick('badges', () => badges.update()); }
+    if (cpuTick && nowMs - app.state.badgesWall >= 100 && (!document.body.classList.contains('no-badges') || document.activeElement === dom.canvas)) { app.state.badgesWall = nowMs; tick('badges', () => badges.update()); }
     if (ui.sliceMini && canPresent(wClip)) ui.sliceMini.paint();   // the plane model lives in CLIP (id `clip`), not in PLANE (id `slice`) — gated on the wrong window it never repainted while dragged
     const tEnd = performance.now(), spent = tEnd - tFrame0;
     perf.profile.total = perf.profile.total * 0.9 + spent * 0.1;
@@ -964,7 +997,7 @@ export async function boot(dom) {
      the transport stopped opened the device and then never read it: the meter sat at 0.00, the
      followers never moved, and the recording indicator stayed lit on a capture nothing was using. */
   function loopTail(faultRepeat) {
-    if (clock.playing || camera.moving || keyOrbitMoving() || camLevel.from || (pending && !faultRepeat) || (audioCap && audioCap.live) || (modHost && modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // camera key easing schedules only until its last queued increment lands
+    if (clock.playing || camera.moving || keyOrbitMoving() || camLevel.from || (pending && !faultRepeat) || (app.state.audioCap && app.state.audioCap.live) || (app.state.modHost && app.state.modHost.clock.isRunning()) || rotDriving()) { rafId = requestAnimationFrame(loop); stats.scheduled = true; }   // camera key easing schedules only until its last queued increment lands
     else { stats.scheduled = false; stats.fps = 0; stats.reconPerSec = 0; stats.stepsPerSec = 0; autoQ.lastMs = autoQ.presented = 0; frameBudget.breakSequence(); }
   }
   /** LA4: a thrown frame is REPORTED ONCE per distinct message (32 kept) to window.__e and the console — a throw that
@@ -1010,21 +1043,21 @@ export async function boot(dom) {
   const { MOTION, paceRate } = createMotionPref();
 
   /* ── state mutations: ONE road (finger, key, test, restore all come here) ─ */
-  let lastNmax = 1;
+  app.state.lastNmax = 1;
   function touchState() {
     const nm = reg.nmax();
-    if (domain.auto && nm !== lastNmax) { lastNmax = nm; schedule(TIER.REBUILD); }
+    if (domain.auto && nm !== app.state.lastNmax) { app.state.lastNmax = nm; schedule(TIER.REBUILD); }
     else schedule(TIER.RECONSTRUCT);
   }
   /** a preset into the atom register.  `opt.hand` is the PRESS (the STATE select and RELOAD): only a hand's preset is
    *  announced on the stage (0.4.0 S3 · F2) — the boot, a URL preset, a test, a restore or an undo say nothing */
   function loadPreset(id, opt) {
     const p = PRESET_BY_ID.get(id); if (!p) return false;
-    if (opt && opt.hand && stageText) stageText.announce(mdText(p.label));   // the label as text: markdown's specials escaped
+    if (opt && opt.hand && app.state.stageText) app.state.stageText.announce(mdText(p.label));   // the label as text: markdown's specials escaped
     for (const key of Object.keys(rotRate)) setRotationRate(key, 0);
-    reg.load(p); clock.reset(); lastNmax = -1;
+    reg.load(p); clock.reset(); app.state.lastNmax = -1;
     clock.window = p.visual.window;
-    if (applyVisuals) { clock.setRate(paceRate(p.visual.rate)); mat.view = VIEW[p.visual.view]; ui.viewSeg.set(p.visual.view); ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
+    if (app.state.applyVisuals) { clock.setRate(paceRate(p.visual.rate)); mat.view = VIEW[p.visual.view]; ui.viewSeg.set(p.visual.view); ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
     ui.presetSel.value = id; ui.presetNote.textContent = p.note;
     setReference();
     spectrum.select(-1);
@@ -1035,8 +1068,8 @@ export async function boot(dom) {
   }
   function setReference() {
     const c = reg.at(clock.t);
-    refSnapshot = { re: Float64Array.from(c.re), im: Float64Array.from(c.im), ids: reg.populated(), t: clock.t, digest: reg.digest() };
-    pendingRef = refModes(); schedule(TIER.PRESENT);
+    app.state.refSnapshot = { re: Float64Array.from(c.re), im: Float64Array.from(c.im), ids: reg.populated(), t: clock.t, digest: reg.digest() };
+    app.state.pendingRef = refModes(); schedule(TIER.PRESENT);
   }
   const api = {
     reg,
@@ -1064,7 +1097,7 @@ export async function boot(dom) {
       const n = reg.norm() || 1; const c = reg.coeffAt(a, clock.t); const ph = Math.atan2(c.im, c.re);
       reg.setPolar(a, Math.sqrt(Math.max(0, v)) * n, ph, clock.t); touchState();
     },
-    clear() { reg.clear(); refSnapshot = null; touchState(); },
+    clear() { reg.clear(); app.state.refSnapshot = null; touchState(); },
     normalize() { normalizeNow(); },
     rateOf(a) { return rates[a]; },
     setRate(a, r) {
@@ -1081,21 +1114,20 @@ export async function boot(dom) {
   };
 
   /* ── windows ──────────────────────────────────────────────────────────── */
-  const ui = {};
   /* THE CAMERA LAW (wave 50) and the observer's pose — CAM, the camera, the two modes, orbitBy, the key orbit, ZOOM / FOV /
      RESET VIEW: lab/camera-law.js (wave 130 seam 11).  Built here, before the first window that reads it. */
   const { camera, camTravel, camLevel, syncFreeAngles, orbitBy, keyOrbitMoving, queueKeyOrbit, stepKeyOrbit, setCamMode,
     camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, panBy, port: cameraPort } = createCameraLaw({ obs, present: () => schedule(TIER.PRESENT),
-    modHand, resetWall: () => { lastWall = performance.now() / 1000; } });
+    modHand, resetWall: app.loop.resetWall });
   const rack = dom.rack;
 
 
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
   const wPal = device({ id: 'palette', eyebrow: 'PALETTE', status: '' });
   const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
-  let capApi = null;                      // wave 58: the CAPTURE group's handle, published out of the block that builds it (LW reads it)
-  let camKnobs = {};                      // 0.5.0 C1: the CAMERA panel's dials by modulation id, published the same way (the observer.* defs read it)
-  let exporter3d = null;                  // wave 134: FILE › EXPORT SHAPE / GRID's module instance, published the same way (LW.shapeExport reads it)
+  app.state.capApi = null;                      // wave 58: the CAPTURE group's handle, published out of the block that builds it (LW reads it)
+  app.state.camKnobs = {};                      // 0.5.0 C1: the CAMERA panel's dials by modulation id, published the same way (the observer.* defs read it)
+  app.state.exporter3d = null;                  // wave 134: FILE › EXPORT SHAPE / GRID's module instance, published the same way (LW.shapeExport reads it)
   const wClip = device({ id: 'clip', eyebrow: 'CLIP', status: '' });   // 0.4.0 S3 (R-W3): CLIP, once SLICE / CLIP — the id stays
   {
 
@@ -1107,7 +1139,7 @@ export async function boot(dom) {
       ui.spaceSeg = seg({ label: 'the same state, two exact pictures', value: 'x', options: [
         { id: 'x', label: 'POSITION ψ(x)', title: 'the wavefunction in space' },
         { id: 'p', label: 'MOMENTUM φ(p)', title: 'Momentum-space view of the current state' }],
-        onChange: (v) => { space = v; schedule(TIER.REBUILD); } });
+        onChange: (v) => { app.state.space = v; schedule(TIER.REBUILD); } });
       r0.appendChild(ui.spaceSeg.root);
       ui.spaceNote = el('div', 'sturm-note', gSpace); ui.spaceNote.hidden = true;          // its own class: the ⓘ sweep folds every .note away, and this one must be seen
       ui.spaceNote.innerHTML = '<b>STURMIAN:</b> momentum space is not built for the scaled radials (the Podolsky–Pauling transform would need its own table) — position space only until SCALE is back on HYDROGEN.';
@@ -1136,9 +1168,9 @@ export async function boot(dom) {
     ui.setWindowInfo = (v) => look.set({ help: v });   // the WINDOW menu's `notes` action calls it by this name
     ui.windowInfoSw = sw({ label: 'HELP', value: look.get('help'), title: 'Show window help buttons', onChange: ui.setWindowInfo }); ri.appendChild(ui.windowInfoSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
-    ui.molFormulaSw = sw({ label: 'STAGE TEXT', value: true, title: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states, a preset\'s name as it is pressed, the element of each nucleus — and caption a picture or a recording with it', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); if (stageText) stageText.setOn(v); schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
+    ui.molFormulaSw = sw({ label: 'STAGE TEXT', value: true, title: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states, a preset\'s name as it is pressed, the element of each nucleus — and caption a picture or a recording with it', onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); if (app.state.stageText) app.state.stageText.setOn(v); schedule(TIER.PRESENT); saveSettings(); } }); ri.appendChild(ui.molFormulaSw.root);
     ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: (v) => Math.round(v * 100) + '%', title: 'The STAGE TEXT\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading, an atom label its body',
-      onInput: (v) => { molFormulaScale = v; if (stageText) stageText.setScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
+      onInput: (v) => { app.state.molFormulaScale = v; if (app.state.stageText) app.state.stageText.setScale(v); schedule(TIER.PRESENT); }, onChange: () => saveSettings() }); ri.appendChild(ui.molFormulaK.root);
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => layout.resetLayout() }).root);
     ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); look.prefs.forget(); modStore.write({ modArm: undefined, modCadence: undefined }); curvesStore.remove(); location.reload(); } }).root);
 
@@ -1154,7 +1186,7 @@ export async function boot(dom) {
       { id: 'rgb', label: 'RGB', title: 'Use red, green, and blue axes' }],
       onChange: (v) => { mat.axisInk = v; saveSettings(); schedule(TIER.PRESENT); } });
     rc.appendChild(ui.axisInkSeg.root);
-    ri.appendChild(trig({ label: 'SHOW THE WARNING AGAIN', title: 'Show the photosensitivity notice now and on the next load', onFire: () => { if (__LW_hooks.warning) { __LW_hooks.warning.reset(); __LW_hooks.warning.show(); } } }).root);
+    ri.appendChild(trig({ label: 'SHOW THE WARNING AGAIN', title: 'Show the photosensitivity notice now and on the next load', onFire: () => { if (app.hooks.warning) { app.hooks.warning.reset(); app.hooks.warning.show(); } } }).root);
     el('div', 'note', gi).innerHTML = '<b>Settings.</b> Appearance and performance choices are stored in this browser. Window power stops its reader; collapse changes layout; close removes the window until reopened from + or WINDOW.';
     const gt = group(ui.set.body, 'THEME  ·  SURFACE');
     const rt = el('div', 'row tight', gt);
@@ -1165,13 +1197,13 @@ export async function boot(dom) {
        `run` calls this once per resolved change.  WAVE 56: the browser's own chrome follows the theme — <meta name="theme-color">
        overrides the manifest wherever it is honoured; #eef1f6 is skin.css's `body[data-theme="light"] #stage`, #070a0f lab.css's
        unconditional ground.  Wave 48: the GPU chrome (the cube frame, the three axes) cannot read a CSS token — it reads lightUI. */
-    __LW_hooks.theme = (theme) => {
+    app.hooks.theme = (theme) => {
       const tc = document.getElementById('themeColor');
       if (tc) tc.setAttribute('content', theme === 'light' ? '#eef1f6' : '#070a0f');
       mat.bg = THEMES[theme].bg.slice();
-      if (__LW_hooks.restage) __LW_hooks.restage();
+      if (app.hooks.restage) app.hooks.restage();
       mat.lightUI = theme === 'light';
-      if (__LW_hooks.themeChanged) __LW_hooks.themeChanged(theme);
+      if (app.hooks.themeChanged) app.hooks.themeChanged(theme);
       schedule(TIER.PRESENT);
     };
     ui.themeSeg = seg({ label: 'THEME', value: look.get('theme'), options: [
@@ -1201,31 +1233,31 @@ export async function boot(dom) {
     const themeGround = () => THEMES[document.body.dataset.theme === 'light' ? 'light' : 'dark'].bg;
     mat.stageCustom = [0.12, 0.14, 0.18];
     function setStageMix(v) {
-      stageMix = Math.max(0, Math.min(1, Number.isFinite(+v) ? +v : 0));
+      app.state.stageMix = Math.max(0, Math.min(1, Number.isFinite(+v) ? +v : 0));
       const a = themeGround(), b = mat.stageCustom;
-      mat.bg = stageFollow ? a.slice() : [0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * stageMix);
+      mat.bg = app.state.stageFollow ? a.slice() : [0, 1, 2].map((i) => a[i] + (b[i] - a[i]) * app.state.stageMix);
       paintMarks(); schedule(TIER.PRESENT);
     }
-    __LW_hooks.restage = () => setStageMix(stageMix);
+    app.hooks.restage = () => setStageMix(app.state.stageMix);
     function setStageColour(colour) {
       if (Array.isArray(colour) && colour.length >= 3) mat.stageCustom = colour.slice(0, 3).map((v) => Math.max(0, Math.min(1, +v || 0)));
       if (ui.stageColour) ui.stageColour.value = rgbToHex(mat.stageCustom);
-      setStageMix(stageMix);
+      setStageMix(app.state.stageMix);
     }
     function setStageFollow(on) {
-      stageFollow = !!on;
-      if (ui.stageFollow) { ui.stageFollow.classList.toggle('on', stageFollow); ui.stageFollow.setAttribute('aria-pressed', String(stageFollow)); }
-      setStageMix(stageMix);
+      app.state.stageFollow = !!on;
+      if (ui.stageFollow) { ui.stageFollow.classList.toggle('on', app.state.stageFollow); ui.stageFollow.setAttribute('aria-pressed', String(app.state.stageFollow)); }
+      setStageMix(app.state.stageMix);
     }
-    __LW_hooks.setStageColour = setStageColour;
-    __LW_hooks.setStageFollow = setStageFollow;
+    app.hooks.setStageColour = setStageColour;
+    app.hooks.setStageFollow = setStageFollow;
     ui.stageK = knob({ label: 'STAGE', min: 0, max: 1, value: 0.04, fmt: (v) => (v * 100).toFixed(0) + '%', onInput: (v) => { if (!modHand('material.stage', v)) setStageMix(v); } });
-    __LW_hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); ui.stageK.set(x); setStageMix(x); return x; };
+    app.hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); ui.stageK.set(x); setStageMix(x); return x; };
     { const seat = el('div', 'stage-seat', rt); ui.stageSeat = { root: seat };
       ui.stageColour = el('input', 'pal-color stage-colour', seat); ui.stageColour.type = 'color'; ui.stageColour.title = 'Stage colour at 100%'; ui.stageColour.setAttribute('aria-label', 'stage colour');
       ui.stageColour.addEventListener('input', () => { setStageColour(hexToRgb(ui.stageColour.value)); setStageFollow(false); });
       ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button'; ui.stageFollow.title = 'Ignore the chosen stage colour';
-      ui.stageFollow.addEventListener('click', () => setStageFollow(!stageFollow));
+      ui.stageFollow.addEventListener('click', () => setStageFollow(!app.state.stageFollow));
       rt.appendChild(ui.stageK.root); setStageColour(mat.stageCustom); setStageFollow(true); }
     ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } }); rt.appendChild(ui.gammaK.root);
     ui.cardSeg = seg({ label: 'CARD STYLE', value: look.get('card'), options: [
@@ -1261,7 +1293,7 @@ export async function boot(dom) {
       saveSettings(); schedule(TIER.PRESENT);
       return got;
     }
-    __LW_hooks.setGamut = setGamut;
+    app.hooks.setGamut = setGamut;
     ui.gamutRo = readout({ label: 'IN FORCE', value: 'sRGB', sub: '' });
     rg.appendChild(ui.gamutRo.root);
     if (!gamutOK) {
@@ -1275,7 +1307,7 @@ export async function boot(dom) {
     ui.accB = knob({ label: 'ACCENT B', min: 0, max: 360, value: look.get('accentB'), wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'Set Accent B', onInput: (v) => look.set({ accentB: v }) }); ra.appendChild(ui.accB.root);
     ui.vivid = knob({ label: 'VIVID', min: 0, max: 1, value: look.get('vivid'), fmt: (v) => (v * 100).toFixed(0) + '%', title: 'Increase accent chroma and glow', onInput: (v) => look.set({ vivid: v }) }); ra.appendChild(ui.vivid.root);
     el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Theme changes the interface and stage. Stage, gamma, accents, hue, exposure, and invert affect presentation without changing ψ. Frost may reduce frame rate while the field moves.';
-    __LW_hooks.setTheme = (t) => look.set({ theme: t });
+    app.hooks.setTheme = (t) => look.set({ theme: t });
 
     const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: DRAW STYLE (window id `style`) merged into WAVE (board #59); this block is the DRAW section of the WAVE window
     const rd = el('div', 'row tight', gd);
@@ -1347,7 +1379,7 @@ export async function boot(dom) {
       ramp: { get: () => ({ stops: palStops, preset: palId }), set: (s, o) => { palStops = s; if (o.preset) palId = o.preset; },
         lut: (lut) => { if (field.ok) field.setPalette(lut); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }).view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
     el('div', 'note', gp).innerHTML = '<b>Phase palette.</b> The strip runs from arg ψ = −π to +π and wraps at the seam. Tap the strip to add a stop, drag one to move it, drag it off the strip to remove it. OKLab blending keeps transitions perceptually even.';
-    palette = { get stops() { return rv.stops(); }, get selected() { return rv.selected(); }, get on() { return palSw.get(); }, get id() { return palId; },
+    app.state.palette = { get stops() { return rv.stops(); }, get selected() { return rv.selected(); }, get on() { return palSw.get(); }, get id() { return palId; },
       get groups() { return PRESET_GROUPS.map((g) => ({ points: g.points, items: g.items.map((p) => p.id) })); },
       setOn(v) { palSw.set(!!v); palOn(!!v); }, select: (id) => rv.preset(id),
       /** the file's own stops under its name (the preset is kept when the file names none, so RESET still reloads it); `selected` is the stop the hand had */
@@ -1368,7 +1400,7 @@ export async function boot(dom) {
       port: { ...cameraPort, set(id, v) { cameraPort.set(id, v); if (FEEL.has(id)) { clearTimeout(feelSave); feelSave = setTimeout(saveSettings, 250); } } } });
     camPanel.spec.build(gc, null);
     const camView = camPanel.view(); camView.homeBtn.root.dataset.keyAction = 'camReset';
-    camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
+    app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
     el('div', 'row tight', gc).appendChild(trig({ label: 'SET Δρ REF', title: 'Use the current density as the difference reference', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt-drag, two fingers or the PAN pad slide the picture; the molecule stays the pivot. Double-click, double-tap or HOME restores the camera.';
 
@@ -1381,25 +1413,25 @@ export async function boot(dom) {
     function filmHold(on) {
       if (on) {
         filmBefore = { state: reg.serialize(clock.t), version: reg.version, mat: structuredClone(mat), obs: { ...obs }, rot: { ...rotRate } };
-        exportLocked = true; if (rafId) cancelAnimationFrame(rafId); rafId = 0; stats.scheduled = false;
+        app.state.exportLocked = true; if (rafId) cancelAnimationFrame(rafId); rafId = 0; stats.scheduled = false;
         return;
       }
       const b = filmBefore; filmBefore = null;
       if (b) { if (reg.version !== b.version) reg.restore(b.state); Object.assign(mat, b.mat); Object.assign(obs, b.obs); Object.assign(rotRate, b.rot); }   // a film that moved no coefficient leaves the register (and the loop plan made on it) as it was
-      exportLocked = false; modWall = 0; lastWall = performance.now() / 1000;
+      app.state.exportLocked = false; app.state.modWall = 0; lastWall = performance.now() / 1000;
       schedule(TIER.RECONSTRUCT);
     }
-    const film = () => exact || (exact = createFilm(LW, { canvas: dom.canvas, energies: periodEnergies, canvasCap: 16384, host: () => modHost, hold: filmHold,
+    const film = () => exact || (exact = createFilm(LW, { canvas: dom.canvas, energies: periodEnergies, canvasCap: 16384, host: () => app.state.modHost, hold: filmHold,
       road: { pending: () => ({ caption: stageCaption(), spin: camera.ambient && obs.mode !== 'free' ? camera.ambient : 0, yaw0: obs.yaw }), step: rotStep, rotating: rotDriving,
         plan: (o) => capture().planLoop(o) } }));   // the rack's own for the film's three schedules (take) and the card's road
     const capture = () => cap || (cap = createCapture(LW, { canvas: dom.canvas, canvasCap: 16384, energies: periodEnergies, caption: () => stageCaption() }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩; 0.4.0 S3: and draws the STAGE TEXT's caption
     const take = async (kind, o, keep) => {
       if (facadeRun) { facadeRun.stop(); return null; }
-      facadeRun = film().take(kind, { fps: 30, seconds: 6, scale: 2, drive: modArm, ...o });
+      facadeRun = film().take(kind, { fps: 30, seconds: 6, scale: 2, drive: app.state.modArm, ...o });
       try { const r = await facadeRun.done; if (r && r.ok && keep) film().save(r); return r; }
       catch (e) { return { ok: false, error: String(e && e.message || e) }; } finally { facadeRun = null; }
     };
-    capApi = { get exact() { return film(); }, get capture() { return capture(); }, plan: () => capture().planLoop({ fps: 30, seconds: 6 }),
+    app.state.capApi = { get exact() { return film(); }, get capture() { return capture(); }, plan: () => capture().planLoop({ fps: 30, seconds: 6 }),
       limits: () => { try { return capture().limits(); } catch (_) { return maxPictureSize(field && field.ok ? field.device.limits : null, 16384); } },
       async picture() { const r = await capture().picture({ scale: 2 }); if (r && r.ok !== false) capture().save(r); return r; },
       record: () => take('clip', {}, true), loop: () => take('period', {}, true), exportFrames: (options = {}) => take('frames', { options }, options.download !== false),
@@ -1436,7 +1468,7 @@ export async function boot(dom) {
      reading CLEAR in document order — SPECTRUM's head row on a first visit (c ↦ 0, no clock reset), the undo ring's own
      CLEAR once HISTORY floated (AUDIT-E FE1).  The register's CLEAR is this one function now, and both the STATE trigger
      and the menu row call it (the lead's ruling: STATE's CLEAR; Josh may reverse it). */
-  function clearRegister() { reg.clear(); refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); touchState(); }
+  function clearRegister() { reg.clear(); app.state.refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); touchState(); }
   // STATE — preparation. Everything here changes c.
   const wState = device({ id: 'state', eyebrow: 'STATE', status: '' });
   rack.appendChild(wState.root);
@@ -1449,7 +1481,7 @@ export async function boot(dom) {
 
 
     r1.appendChild(trig({ label: 'RELOAD', title: 'Reload the selected preset and reset time', onFire: () => loadPreset(ui.presetSel.value, { hand: true }) }).root);
-    r1.appendChild(sw({ label: 'PRESET VISUALS', value: true, onChange: (v) => { applyVisuals = v; } }).root);
+    r1.appendChild(sw({ label: 'PRESET VISUALS', value: true, onChange: (v) => { app.state.applyVisuals = v; } }).root);
     ui.presetNote = el('div', 'note', wState.body, '');
     const r2 = wState.row();
     r2.appendChild(trig({ label: 'NORMALIZE', title: 'Normalize the state coefficients', onFire: () => normalizeNow() }).root);
@@ -1505,7 +1537,7 @@ export async function boot(dom) {
         ui.abRo.set((abA ? nA + (nA === 1 ? ' mode' : ' modes') : '—') + '  /  ' + (abB ? nB + (nB === 1 ? ' mode' : ' modes') : '—'), reg.transition ? (exact ? 'ok' : 'warn') : '');
         ui.abRo.setSub(reg.transition ? (exact ? 'two-level Rabi drive · |⟨A|B⟩| = ' + ov.toFixed(3) : 'composite-state envelope · |⟨A|B⟩| = ' + ov.toFixed(3)) : 'store two states, then TRANSITION plays A → B → A at Ω');
       }
-      __LW_hooks.ab = { get A() { return abA; }, get B() { return abB; }, storeA() { abA = snap(); abStatus(); hNote(); }, storeB() { abB = snap(); abStatus(); hNote(); }, setStores(A, B) { abA = A ? { re: Float64Array.from(A.re), im: Float64Array.from(A.im) } : null; abB = B ? { re: Float64Array.from(B.re), im: Float64Array.from(B.im) } : null; abStatus(); }, recallA() { recall(abA); }, recallB() { recall(abB); }, set(v) { if (v && sturm.P) return false; ui.abSw.set(v); if (v) { if (!abA || !abB) return false; reg.setTransition(abA, abB, abOmega, clock.t); } else if (reg.transition) reg.clearTransition(clock.t); touchState(); abStatus(); return true; }, get on() { return !!reg.transition; }, get status() { return ui.abRo.root.textContent; },
+      app.hooks.ab = { get A() { return abA; }, get B() { return abB; }, storeA() { abA = snap(); abStatus(); hNote(); }, storeB() { abB = snap(); abStatus(); hNote(); }, setStores(A, B) { abA = A ? { re: Float64Array.from(A.re), im: Float64Array.from(A.im) } : null; abB = B ? { re: Float64Array.from(B.re), im: Float64Array.from(B.im) } : null; abStatus(); }, recallA() { recall(abA); }, recallB() { recall(abB); }, set(v) { if (v && sturm.P) return false; ui.abSw.set(v); if (v) { if (!abA || !abB) return false; reg.setTransition(abA, abB, abOmega, clock.t); } else if (reg.transition) reg.clearTransition(clock.t); touchState(); abStatus(); return true; }, get on() { return !!reg.transition; }, get status() { return ui.abRo.root.textContent; },
         /* WAVE 106 · Ω REACHES THE DEFS THROUGH HERE, and it has to.  `abOmega` is block-local (it is
            `let` a few lines up) and the MIR `defs` array is far outside this block, so a target could
            not see it.  Worse, a setter that wrote only `reg.transition.omega` would leave `abOmega`
@@ -1578,7 +1610,7 @@ export async function boot(dom) {
       ui.kickRo.setSub(`<m>k</m> = ${k.toFixed(3)} along ${axis} · Ehrenfest would give ${k.toFixed(3)}; the deficit is the continuum · <m>‖ψ‖</m> now ${Math.sqrt(n1).toFixed(4)}`);
       touchState();
     }
-    __LW_hooks.slap = slap;
+    app.hooks.slap = slap;
 
     const gF = group(wState.body, 'STATIC FIELD');
     const rf = el('div', 'row tight', gF);
@@ -1631,8 +1663,8 @@ export async function boot(dom) {
     rh.appendChild(ui.wellKnob.root);
     {
       const rg = wSpec.row('tight');
-      rg.appendChild(knob({ label: 'GAS  σ', min: 0.5, max: 3, value: 1.8, fmt: (v) => v.toFixed(2) + ' a₀', onInput: (v) => { gasWidth = v; } }).root);
-      ui.gasBasis = seg({ label: 'GAS BASIS', value: 'reg', options: [{ id: 'reg', label: '91', title: 'the register\'s 91 labels (l ≤ 5): a packet no smaller than about a/6, launched on any axis' }, { id: 'axial', label: 'AXIAL 256', title: 'Use the larger axial box basis for narrower z packets' }], onChange: (v) => { gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); } });
+      rg.appendChild(knob({ label: 'GAS  σ', min: 0.5, max: 3, value: 1.8, fmt: (v) => v.toFixed(2) + ' a₀', onInput: (v) => { app.state.gasWidth = v; } }).root);
+      ui.gasBasis = seg({ label: 'GAS BASIS', value: 'reg', options: [{ id: 'reg', label: '91', title: 'the register\'s 91 labels (l ≤ 5): a packet no smaller than about a/6, launched on any axis' }, { id: 'axial', label: 'AXIAL 256', title: 'Use the larger axial box basis for narrower z packets' }], onChange: (v) => { app.state.gasAxial = v === 'axial'; if (!app.state.gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); } });
       rg.appendChild(ui.gasBasis.root);
       ui.gasSpeed = knob({ label: 'GAS  |k|', min: 0.1, max: 2.5, value: 0.8, log: true, fmt: (v) => v.toFixed(2), onInput: () => {} });
       rg.appendChild(ui.gasSpeed.root);
@@ -1704,10 +1736,10 @@ export async function boot(dom) {
   let copySaid = 0;                                                  // the status restore of the last copy: a second press restarts it
   function copyLatex() {
     let text, said;
-    if (chem && chem.on) {
-      const row = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null, sol = row ? chem.solution() : null;
-      const ground = sol && sol.key === chem.preset() + '|' + chem.basis + '|' + row.charge ? sol : null;   // chemview's own solve key: never the previous molecule's ladder
-      text = moleculeLatex({ molecule: row, basis: chem && chem.basis, charge: row && row.charge, ground });
+    if (app.state.chem && app.state.chem.on) {
+      const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null, sol = row ? app.state.chem.solution() : null;
+      const ground = sol && sol.key === app.state.chem.preset() + '|' + app.state.chem.basis + '|' + row.charge ? sol : null;   // chemview's own solve key: never the previous molecule's ladder
+      text = moleculeLatex({ molecule: row, basis: app.state.chem && app.state.chem.basis, charge: row && row.charge, ground });
       said = text ? mathPlain(row.formula) + '’s page as LaTeX' : row ? 'nothing to copy — ' + mathPlain(row.formula) + ' is still solving' : 'nothing to copy — this molecule has no page';
     } else {
       const c = reg.at(clock.t), H = getHamiltonian();
@@ -1720,18 +1752,18 @@ export async function boot(dom) {
     return text ? layout.copyText('spectrum', text) : Promise.resolve('');
   }
   function switchHamiltonian(id) {
-    if (!warmTimer && !warmIdle && !page.hidden) warmArm(120);       // LA5: the kick tables are keyed on the operator — warm the new one in idle slices
+    if (!app.state.warmTimer && !app.state.warmIdle && !page.hidden) warmArm(120);       // LA5: the kick tables are keyed on the operator — warm the new one in idle slices
     const H = setHamiltonian(id);
     if (id !== 'well' && gas.on) { gas.off(); schedule(TIER.RECONSTRUCT); }
     reg.setEnergies(energyOf);
     if (!H.stark && reg.field.Fz !== 0) { reg.setField({ Fz: 0 }); if (ui.fz) ui.fz.set(0); }
-    if (H.noMomentum && space === 'p') { space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
+    if (H.noMomentum && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
     for (const w of [wOrb, wVor, wSlice, wLad]) if (w) w.root.hidden = !H.hydrogenTheorems;
     wSpec.setStatus(hamLabel(), H.id === 'hydrogen' ? '' : 'live');
     wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; });   // wave 50: the API, so the RATE is in the number the card shows
     wSpec.body.querySelectorAll('.sp-nm[data-a]').forEach((e) => { e.textContent = H.labelOf(BASIS[+e.dataset.a]); });
     if (sturm.on) { applySturmian(); return; }                        // W-STURMIAN: re-arm (or stand down) the scale under the operator now in force
-    refSnapshot = null; pendingRef = null;
+    app.state.refSnapshot = null; app.state.pendingRef = null;
     schedule(TIER.REBUILD);
   }
 
@@ -1754,7 +1786,7 @@ export async function boot(dom) {
     if (want) {
       const t0 = performance.now();
       sturm.P = createRegisterSturmian(sturm.lambda, { Z: getZ() }); sturm.rec = sturm.P.records(); sturm.buildMs = performance.now() - t0;
-      if (space === 'p') { space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }                      // momentum space is not built for the scaled radials
+      if (app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }                      // momentum space is not built for the scaled radials
       reg.setPropagator(sturm.P);
     } else { sturm.P = null; sturm.rec = null; reg.setPropagator(null); reg.setEnergies(energyOf); }
     if (c) reg.anchorFrom(c.re, c.im, clock.t);
@@ -1784,7 +1816,7 @@ export async function boot(dom) {
     wSpec.setStatus(...specStatus());
     wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; });
     if (ui.sturmRo) paintSturmRo();
-    refSnapshot = null; pendingRef = null; lastNmax = -1;
+    app.state.refSnapshot = null; app.state.pendingRef = null; app.state.lastNmax = -1;
     touchState(); schedule(TIER.REBUILD);
   }
   /** the scale's readout: the ground eigenvalue, the occupied count, the S-norm and ⟨H⟩ of the state */
@@ -1819,7 +1851,7 @@ export async function boot(dom) {
   function selectEigen(k) {
     const P = sturm.P; if (!P || !(k >= 0 && k < P.rank)) return false;
     const e = P.eigenstate(k);
-    reg.clear(); reg.anchorFrom(e.re, e.im, clock.t); lastNmax = -1;
+    reg.clear(); reg.anchorFrom(e.re, e.im, clock.t); app.state.lastNmax = -1;
     spectrum.select(-1); setReference(); shadowView.clearTrail(); touchState(); schedule(TIER.REBUILD);
     wSpec.setStatus(`eigenstate ${k} · E = ${P.E[k].toFixed(6)} Eh · ${'spdfgh'[P.lK[k]]}${P.mK[k] >= 0 ? '₊' : '₋'}${Math.abs(P.mK[k])} · stationary`, 'live');
     return true;
@@ -1930,12 +1962,12 @@ export async function boot(dom) {
      the STATES register hands it a source (lab/molecular-flow.js) whose matrices it rebuilds once a frame */
   const flowTracers = dom.flow ? createParticles(dom.flow, { ink: () => (document.body.dataset.theme === 'light' ? { trail: 'rgba(16,36,84,0.42)', dot: 'rgba(10,22,56,0.92)', text: 'rgba(20,30,50,0.6)' } : { trail: 'rgba(190,230,255,0.4)', dot: 'rgba(235,248,255,0.95)', text: 'rgba(255,255,255,0.5)' }),
     caption: (st) => `FLOW · ${st.alive}/${st.count} tracers on v = j/ρ of the TD-CIS density matrix · sense exact, magnitude qualitative in STO-3G` }) : null;
-  let flowEpoch = null;                                                // the SOURCE the tracers were seeded from: a new source is a new ensemble
+  app.state.flowEpoch = null;                                                // the SOURCE the tracers were seeded from: a new source is a new ensemble
 
   // PLANE (id `slice`) — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
   const wSlice = device({ id: 'slice', eyebrow: 'PLANE', status: '' });   // 0.4.0 S3 (R-W3): PLANE, once SLICE — the id and slice.* stay
   const slice = createSliceView(wSlice.body, {
-    lut: () => (palette && palette.on ? toLUT(palette.stops) : null),
+    lut: () => (app.state.palette && app.state.palette.on ? toLUT(app.state.palette.stops) : null),
     repaint() { schedule(TIER.PRESENT); }
   });
   /* OPTIMIZATION 2026-09-24 · M6(b): appended AFTER its view is built (in its old seat, so the rack order and
@@ -1948,10 +1980,10 @@ export async function boot(dom) {
      (R5-L1; ATOMS came back in 0.4.0 S3).  An older file that used one opens on its shim in restore and says so in one line. */
 
   /* H₂⁺ · LEGACY (the `molecule` card, with W-MO and W-PULSE) was DELETED in 0.5.0 D9: restore opens a file it owned as MOLECULES · H₂ */
-  let chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
-  let restampParams = null;                                            // re-tag knobs as modulation targets: lanes built after boot call it (the REGISTER's phase needles)
-  let molSession = null;                                               // the one owner of the molecular volume, assigned beside CHEMISTRY below (the frame loop reads it)
-  let orbitals = null, states = null, register = null;                 // REGISTER: the window (register) and its two modes, assigned beside CHEMISTRY below
+  app.state.chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
+  app.state.restampParams = null;                                            // re-tag knobs as modulation targets: lanes built after boot call it (the REGISTER's phase needles)
+  app.state.molSession = null;                                               // the one owner of the molecular volume, assigned beside CHEMISTRY below (the frame loop reads it)
+  app.state.orbitals = null; app.state.states = null; app.state.register = null;                 // REGISTER: the window (register) and its two modes, assigned beside CHEMISTRY below
   let specFoldedByMol = false;           // 2026-10: SPECTRUM folded by a molecule taking the field (so the molecule's end unfolds it)
   function moleculeMode(v) {
     for (const w of [wState, wSh, wOrb, wVor, wSlice, wLad, wCalc]) if (w) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
@@ -1962,9 +1994,9 @@ export async function boot(dom) {
       if (v && !folded) { wSpec.fold(true); specFoldedByMol = true; }
       else if (!v && specFoldedByMol) { if (folded) wSpec.fold(false); specFoldedByMol = false; }
     }
-    if (v && space === 'p') { space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
+    if (v && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
     if (!v) switchHamiltonian(getHamiltonian().id);                  // restore the atom's own hiding rules
-    refSnapshot = null; pendingRef = null;
+    app.state.refSnapshot = null; app.state.pendingRef = null;
     schedule(TIER.REBUILD);
   }
 
@@ -1987,12 +2019,12 @@ export async function boot(dom) {
      PRODUCERS of its named models; it is the only module that touches the field's two molecular setters, and the
      only caller of the view road above, so the observable comes back to the user by the same rule whichever model
      let go of the field.  tests/field-owner.test.mjs is the law that keeps that "only" true. */
-  molSession = createMolecularSession({ field: () => field, fieldView: molFieldView,
+  app.state.molSession = createMolecularSession({ field: () => field, fieldView: molFieldView,
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); } });
   const wChem = device({ id: 'chem', eyebrow: 'MOLECULES', title: 'RHF · real time', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // built closed (chemview's N8 shown() guard); the first-run block opens it on the LEFT rack — still no solve until it is switched on
   rack.appendChild(wChem.root);
-  chem = createChem(wChem.body, { active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
+  app.state.chem = createChem(wChem.body, { active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
@@ -2000,36 +2032,36 @@ export async function boot(dom) {
     hand: (id) => headPick(id),                                      // 0.5.1 D2: a HAND pick (the dropdown, ON, a notebook link)
     /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
        model is playing and which observable the field shows.  See molecular-session.js. */
-    session: molSession,
-    derived: (fill) => (history ? history.absorb(fill) : fill()),   // S4 · a solve's derived defaults join the row that asked for it
+    session: app.state.molSession,
+    derived: (fill) => (app.state.history ? app.state.history.absorb(fill) : fill()),   // S4 · a solve's derived defaults join the row that asked for it
     now: () => clock.t });
   /* 0.5.1 D2 · THE MOLECULE'S HEAD (R6-G): a HAND pick shows its head (latex-state.js moleculeHead: every number the record's stem or
      the live solve) in THE FADE's seat once THIS molecule's solve lands — held until Escape, a press on the picture after 2.5 s, or
      the next pick: the dismiss half of the kit's greet (info/page.js; λWAVES has no pages model).  A restore, an undo, a project,
      link or demo open never shows it — none comes through `hand`.  `head.shown` is the gate's witness (__LW.head). */
   const head = { shown: 0, md: null, want: null, bye: null };
-  function headPick(id) { if (head.bye) head.bye(); head.want = id; headLand(chem.solution()); }
+  function headPick(id) { if (head.bye) head.bye(); head.want = id; headLand(app.state.chem.solution()); }
   function headLand(sol) {
     const id = head.want, row = id && MOLECULE_BY_ID.get(id);
-    if (!row || !sol || !stageText) return;
-    if (chem.preset() !== id) { head.want = null; return; }                      // the molecule changed first: nothing
-    if (sol.key !== id + '|' + chem.basis + '|' + row.charge) return;             // chemview's solve key: this molecule's landing
+    if (!row || !sol || !app.state.stageText) return;
+    if (app.state.chem.preset() !== id) { head.want = null; return; }                      // the molecule changed first: nothing
+    if (sol.key !== id + '|' + app.state.chem.basis + '|' + row.charge) return;             // chemview's solve key: this molecule's landing
     head.want = null;
-    const md = moleculeHead({ molecule: row, basis: chem.basis, ground: sol, stem: sol.stem });
-    if (!md || !stageText.announce(md, 0)) return;
+    const md = moleculeHead({ molecule: row, basis: app.state.chem.basis, ground: sol, stem: sol.stem });
+    if (!md || !app.state.stageText.announce(md, 0)) return;
     head.shown++; head.md = md;
-    const life = new AbortController(), until = performance.now() + 2500, bye = head.bye = () => { life.abort(); if (head.bye === bye) head.bye = null; stageText.dismiss(md); };
+    const life = new AbortController(), until = performance.now() + 2500, bye = head.bye = () => { life.abort(); if (head.bye === bye) head.bye = null; app.state.stageText.dismiss(md); };
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && !isField(e.target, true)) bye(); }, { signal: life.signal });
     dom.canvas.addEventListener('pointerdown', () => { if (performance.now() >= until) bye(); }, { signal: life.signal, passive: true });
   }
-  chem.subscribe(headLand);
+  app.state.chem.subscribe(headLand);
 
   /* THE STAGE TEXT (Settings › Display; 0.4.0 S3 · F2; 0.5.1 D1 below) — its SOURCE: what is playing, as markdown — the MOLECULES formula
      ($\mathrm{H_{2}O}$, latex-state.js formulaLatex) while MOLECULES is on, else SPECTRUM's populated states in stateLatex's
      own prose ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION).  The states go in with UNIT coefficients — the list line
      depends on which labels are populated, never on c — so no live coefficient can reach the stage.  The source is asked
      only when one of its inputs moved (the register's version, the pick, a legacy owner): one compare a CPU tick. */
-  let stageText = null;
+  app.state.stageText = null;
   const stageSrc = { v: -1, id: null };
   /** the states that play, as stateLatex's prose with UNIT coefficients (md) or as their plain labels, comma-separated */
   function stageStates(md) {
@@ -2041,25 +2073,25 @@ export async function boot(dom) {
     return line(reg.populated());
   }
   function stageMd() {
-    const row = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null;
+    const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null;
     return row ? '$' + formulaLatex(row.formula) + '$' : stageStates(true);
   }
   /** THE CAPTION a capture carries (T3): the same stage text as ONE plain-Unicode line — `H₂O · 1b1 HOMO · STO-3G` (the
    *  formula, the ORBITAL on the field in names.js's plain form, the basis) or SPECTRUM's states ("2s₀, 2p₋₁"; A ↔ B) — drawn
    *  by capture.js, since the DOM formula never reaches an export.  It follows the STAGE TEXT switch.  KIT BRIEF 6 replaces it. */
   function stageCaption() {
-    if (!stageText || !stageText.on) return '';
-    const row = chem && chem.on ? MOLECULE_BY_ID.get(chem.preset()) : null;
+    if (!app.state.stageText || !app.state.stageText.on) return '';
+    const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null;
     if (!row) return stageStates(false);
-    const o = chem.exportNames(), k = o && o.orbital;
-    return [mathPlain(row.formula), k && k.plain ? k.plain + (/^(HOMO|LUMO)$/.test(k.frontier) ? ' ' + k.frontier : '') : '', BASIS_LABEL[chem.basis] || ''].filter(Boolean).join(' · ');
+    const o = app.state.chem.exportNames(), k = o && o.orbital;
+    return [mathPlain(row.formula), k && k.plain ? k.plain + (/^(HOMO|LUMO)$/.test(k.frontier) ? ' ' + k.frontier : '') : '', BASIS_LABEL[app.state.chem.basis] || ''].filter(Boolean).join(' · ');
   }
   function stageTextTick() {
-    if (!stageText) return;
-    const id = chem && chem.on ? chem.preset() : '';
+    if (!app.state.stageText) return;
+    const id = app.state.chem && app.state.chem.on ? app.state.chem.preset() : '';
     if (reg.version === stageSrc.v && id === stageSrc.id) return;
     stageSrc.v = reg.version; stageSrc.id = id;
-    stageText.setFormula(stageMd());
+    app.state.stageText.setFormula(stageMd());
   }
   /* 0.5.1 D1 · THE STAGE TEXT IS ONE BLOCK of the kit's INFORMATIONAL layer (mir/info/layer.js; stage-text.js left): the kit's ink,
      shade and serif at the kit's seat — the free stage's top + 12 %, between the racks, clear of the transport and a docked TIMELINE —
@@ -2076,7 +2108,7 @@ export async function boot(dom) {
   function initStageText() {
     const KATEX_MS = 250, racks = () => [rackL, rack].filter((r) => r && r.querySelector('.dev:not(.closed):not([hidden])'));
     const layer = createInfoLayer({ stage: dom.stage, parallax: false, drift: false, follow: false,
-      avoid: () => [...racks(), layout.docked ? null : document.getElementById('transport'), tl && tl.isOpen() ? tl.root : null].map((e) => paintedRect(e)).filter(Boolean) });
+      avoid: () => [...racks(), layout.docked ? null : document.getElementById('transport'), app.state.tl && app.state.tl.isOpen() ? app.state.tl.root : null].map((e) => paintedRect(e)).filter(Boolean) });
     layer.root.classList.add('lw-stage'); layer.root.setAttribute('aria-hidden', 'true');
     const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0 };   // the gate's witnesses: KaTeX runs, banners, re-placements asked, letter moves
     let on = true, scale = 1, formula = '', banner = null, shown = '', block = null, lastRender = -1e9, wait = 0, fadeT = 0;
@@ -2098,7 +2130,7 @@ export async function boot(dom) {
     const rackKey = () => ['rack-hidden', 'rack-peek', 'rack-l', 'ui-hidden', 'phone', 'transport-peek'].map((c) => +document.body.classList.contains(c)).join('');
     let racksAt = rackKey();
     new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    for (const [n, f] of [[document.getElementById('transport'), ['class']], [tl && tl.root, ['hidden', 'style']]]) if (n) new MutationObserver(() => place()).observe(n, { attributes: true, attributeFilter: f });
+    for (const [n, f] of [[document.getElementById('transport'), ['class']], [app.state.tl && app.state.tl.root, ['hidden', 'style']]]) if (n) new MutationObserver(() => place()).observe(n, { attributes: true, attributeFilter: f });
 
     const labels = el('div', '', dom.stage); labels.id = 'atomLabels'; labels.setAttribute('aria-hidden', 'true'); labels.hidden = true;
     let cssW = dom.canvas.clientWidth, cssH = dom.canvas.clientHeight;
@@ -2124,7 +2156,7 @@ export async function boot(dom) {
         sp.style.display = ''; sp.style.transform = `translate(${q[0].toFixed(1)}px, ${q[1].toFixed(1)}px) translate(-50%, -50%)`;
       }
     }
-    stageText = {
+    app.state.stageText = {
       layer, stats, atomLabels,
       /** the formula's markdown ('' for none); the DOM moves only if the string did */
       setFormula(md) { formula = md || ''; if (banner === null) show(); },
@@ -2143,7 +2175,7 @@ export async function boot(dom) {
       get on() { return on; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
     };
     wChem.root.addEventListener('change', stageTextTick);           // the pick lands in `preset` at once; the solve comes later
-    chem.subscribe(() => stageTextTick());                         // … and a restore / undo / link that re-solves
+    app.state.chem.subscribe(() => stageTextTick());                         // … and a restore / undo / link that re-solves
     paintMarks(); stageTextTick();
   }
 
@@ -2155,14 +2187,14 @@ export async function boot(dom) {
   const wOrbs = device({ id: 'orbitals', eyebrow: 'MO-REGISTRY', title: 'molecular orbital registry', status: '' });   // the id stays `orbitals` so saved layouts survive the rename (REGISTER-WINDOW-SPEC §11.1)
   if (useCompactDefaults) wOrbs.root.classList.add('closed');   // the same rule CHEMISTRY keeps; the first-run block opens it under MOLECULES
   rack.appendChild(wOrbs.root);
-  register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs),
-    stamp: () => { if (restampParams) requestAnimationFrame(restampParams); },   // a lane built after boot becomes a drop target for a macro
+  app.state.register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs),
+    stamp: () => { if (app.state.restampParams) requestAnimationFrame(app.state.restampParams); },   // a lane built after boot becomes a drop target for a macro
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wOrbs.setStatus(t, cls); },
-    announce: (md) => stageText && stageText.announce(md),        // a HAND's preset only (orbitalsview / statesview presetSel)
-    now: () => clock.t, field: () => field, chem: () => chem, session: molSession });
-  orbitals = register.orbitals; states = register.states;
+    announce: (md) => app.state.stageText && app.state.stageText.announce(md),        // a HAND's preset only (orbitalsview / statesview presetSel)
+    now: () => clock.t, field: () => field, chem: () => app.state.chem, session: app.state.molSession });
+  app.state.orbitals = app.state.register.orbitals; app.state.states = app.state.register.states;
 
   // CALCULUS — the stats, derived live, with their laws and residuals
   const wCalc = device({ id: 'calculus', eyebrow: 'CALCULUS', status: '' });
@@ -2186,8 +2218,8 @@ export async function boot(dom) {
   const ladder = createLadder(wLad.body, { active: () => canPresent(wLad), loading: cardLoading(wLad, 'revival'), solve: (params) => solveCard({ op: 'ladder', params }, () => solveLadder(params)) });
   /* Shift multi-add reopens several cards in one gesture. Each explicit request enters the card worker queue even
      if later cards land below the rack clip; the single worker keeps those solves from competing with the field. */
-  wChem.root.addEventListener('devopen', () => chem.prepare());
-  wOrbs.root.addEventListener('devopen', () => { chem.prepare(); orbitals.paint(); orbitals.refresh(); });   // the register runs on CHEMISTRY's ladder: opening it asks for one
+  wChem.root.addEventListener('devopen', () => app.state.chem.prepare());
+  wOrbs.root.addEventListener('devopen', () => { app.state.chem.prepare(); app.state.orbitals.paint(); app.state.orbitals.refresh(); });   // the register runs on CHEMISTRY's ladder: opening it asks for one
   wLad.root.addEventListener('devopen', () => ladder.prepare());
 
   /* ── WAVE 52 · W-MODWINDOW: THE MODULATION RACK ────────────────────────────────────────────────
@@ -2234,27 +2266,27 @@ export async function boot(dom) {
        So the two wrapped setters write only when the ANGLE differs — which is the only difference that
        means anything — and an un-modulated yaw is never quietly re-based by the sync above. */
     const sameCycle = (a, b, L) => Math.abs(((a - b) % L + L + L / 2) % L - L / 2) < 1e-9;
-    const camOut = (id, v) => { setKnob(camKnobs[id], v); cameraPort.notify(); schedule(TIER.PRESENT); };   // C1 (A8's open item 3): a route's write is a notice
+    const camOut = (id, v) => { setKnob(app.state.camKnobs[id], v); cameraPort.notify(); schedule(TIER.PRESENT); };   // C1 (A8's open item 3): a route's write is a notice
     const defs = [
       /* 0.5.0 C1 · the six saved observer.* routes keep their ids, maps and ranges, and stay HERE (the registry's road writes the pose
          raw; the panel registers none of them).  Their dials are the CAMERA panel's (camKnobs: the sphere's two arcs, ZOOM, FOV, the
          pad's X and Y), and a modulator's write is a notice to the port's subscribers (camOut), so the panel follows a route. */
-      { id: 'observer.yaw', label: 'YAW', unit: ' rad', map: 'wrap', min: 0, max: 2 * Math.PI, group: 'observer', knob: () => camKnobs['observer.yaw'],
+      { id: 'observer.yaw', label: 'YAW', unit: ' rad', map: 'wrap', min: 0, max: 2 * Math.PI, group: 'observer', knob: () => app.state.camKnobs['observer.yaw'],
         hint: 'the camera azimuth — free-spinning, because an orbit that reaches the end of the dial and stops is not an orbit',
         get: () => obs.yaw, set: (v) => { if (sameCycle(v, obs.yaw, 2 * Math.PI)) return; if (obs.mode === 'free') orbitBy(v - obs.yaw, 0); else obs.yaw = v; camOut('observer.yaw', obs.yaw); } },
-      { id: 'observer.pitch', label: 'PITCH', unit: ' rad', map: 'bipolar', min: -CAM.PITCH, max: CAM.PITCH, def: 0, group: 'observer', knob: () => camKnobs['observer.pitch'],
+      { id: 'observer.pitch', label: 'PITCH', unit: ' rad', map: 'bipolar', min: -CAM.PITCH, max: CAM.PITCH, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.pitch'],
         hint: 'Pitch balance; 50% is level',
         get: () => obs.pitch, set: (v) => { const w = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, v)); if (w === obs.pitch) return; if (obs.mode === 'free') orbitBy(0, w - obs.pitch); else obs.pitch = w; camOut('observer.pitch', obs.pitch); } },
-      { id: 'observer.dist', label: 'ZOOM', map: 'log', min: CAM.DIST[0], max: CAM.DIST[1], group: 'observer', knob: () => camKnobs['observer.dist'],
+      { id: 'observer.dist', label: 'ZOOM', map: 'log', min: CAM.DIST[0], max: CAM.DIST[1], group: 'observer', knob: () => app.state.camKnobs['observer.dist'],
         hint: 'the ZOOM dial itself — log, because the interesting half of a zoom is always the near half',
         get: () => obs.dist, set: (v) => { obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); camOut('observer.dist', obs.dist); } },
-      { id: 'observer.fov', label: 'FOV', map: 'linear', min: CAM.FOV[0], max: CAM.FOV[1], group: 'observer', knob: () => camKnobs['observer.fov'],
+      { id: 'observer.fov', label: 'FOV', map: 'linear', min: CAM.FOV[0], max: CAM.FOV[1], group: 'observer', knob: () => app.state.camKnobs['observer.fov'],
         get: () => obs.fov, set: (v) => { obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); camOut('observer.fov', obs.fov); } },
-      { id: 'observer.panx', label: 'PAN X', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => camKnobs['observer.panx'], hint: 'the lens shift across: where the pivot sits on the frame',   // 0.4.0 S2
+      { id: 'observer.panx', label: 'PAN X', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.panx'], hint: 'the lens shift across: where the pivot sits on the frame',   // 0.4.0 S2
         get: () => obs.shift[0], set: (v) => { obs.shift = [clampShift([v, 0])[0], obs.shift[1]]; camOut('observer.panx', obs.shift[0]); } },
-      { id: 'observer.pany', label: 'PAN Y', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => camKnobs['observer.pany'], hint: 'the lens shift up and down: where the pivot sits on the frame',
+      { id: 'observer.pany', label: 'PAN Y', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.pany'], hint: 'the lens shift up and down: where the pivot sits on the frame',
         get: () => obs.shift[1], set: (v) => { obs.shift = [obs.shift[0], clampShift([0, v])[1]]; camOut('observer.pany', obs.shift[1]); } },
-      { id: 'material.stage', label: 'STAGE', map: 'linear', min: 0, max: 1, group: 'material', knob: () => ui.stageK, get: () => ui.stageK.get(), set: (v) => __LW_hooks.setStage(v) },
+      { id: 'material.stage', label: 'STAGE', map: 'linear', min: 0, max: 1, group: 'material', knob: () => ui.stageK, get: () => ui.stageK.get(), set: (v) => app.hooks.setStage(v) },
       { id: 'material.gamma', label: 'GAMMA', map: 'linear', min: 0.5, max: 2.4, group: 'material', knob: () => ui.gammaK, get: () => mat.gamma, set: (v) => { mat.gamma = v; setKnob(ui.gammaK, v); schedule(TIER.PRESENT); } },
       { id: 'material.exposure', label: 'EXPOSURE', map: 'log', min: 0.08, max: 12, group: 'material', knob: () => ui.expK,
         get: () => mat.exposure, set: (v) => { mat.exposure = v; setKnob(ui.expK, v); schedule(TIER.PRESENT); } },
@@ -2322,42 +2354,42 @@ export async function boot(dom) {
          running a frame of its own when either matters).  The ORBITAL INDEX is deliberately NOT registered:
          it changes WHICH quantity the volume means, which is a rebuild of the picture's subject rather than
          a value to sweep — the same line that keeps FIELD RESOLUTION and STEPS out of this array. */
-      { id: 'chem.kick', label: 'κ KICK', map: 'log', min: 1e-4, max: 1e-2, def: 1e-3, group: 'state', knob: () => (chem ? chem.knobs.kick() : null),
+      { id: 'chem.kick', label: 'κ KICK', map: 'log', min: 1e-4, max: 1e-2, def: 1e-3, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.kick() : null),
         hint: 'the δ-kick strength the next KICK will use — linear response wants the smallest κ the trace can carry',
-        get: () => (chem ? chem.kappa : 1e-3), set: (v) => { if (chem) { chem.setKappa(v); setKnob(chem.knobs.kick(), chem.kappa); } } },
-      { id: 'chem.speed', label: 'MOLECULES SPEED', unit: ' steps/frame', map: 'linear', min: 1, max: 50, def: 10, group: 'state', knob: () => (chem ? chem.knobs.speed() : null),
+        get: () => (app.state.chem ? app.state.chem.kappa : 1e-3), set: (v) => { if (app.state.chem) { app.state.chem.setKappa(v); setKnob(app.state.chem.knobs.kick(), app.state.chem.kappa); } } },
+      { id: 'chem.speed', label: 'MOLECULES SPEED', unit: ' steps/frame', map: 'linear', min: 1, max: 50, def: 10, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.speed() : null),
         hint: 'real-time propagation steps asked of the worker each frame',
-        get: () => (chem ? chem.speed : 10), set: (v) => { if (chem) { chem.setSpeed(v); setKnob(chem.knobs.speed(), chem.speed); } } },
+        get: () => (app.state.chem ? app.state.chem.speed : 10), set: (v) => { if (app.state.chem) { app.state.chem.setSpeed(v); setKnob(app.state.chem.knobs.speed(), app.state.chem.speed); } } },
       /* THE REGISTER's SLOTS (REGISTER-WINDOW-SPEC §6): MORPH, and eight lane slots in lane order — S₀ is slot 1.
          PRESENT-only like every target here: a setter stores a number and the register's own frame push reads it.
          A slot with no lane behind it is a no-op, which is the present-only law for a lane that is not there. */
-      { id: 'reg.morph', label: 'REG MORPH', map: 'linear', min: 0, max: 1, def: 0, group: 'state', knob: () => (states ? states.knobs.morph() : null),
+      { id: 'reg.morph', label: 'REG MORPH', map: 'linear', min: 0, max: 1, def: 0, group: 'state', knob: () => (app.state.states ? app.state.states.knobs.morph() : null),
         hint: 'where the STATES register plays on the path from store A to store B (MORPH must be on)',
-        get: () => (states ? states.morph : 0), set: (v) => { if (states) { states.setMorphValue(v); setKnob(states.knobs.morph(), states.morph); } } },
-      { id: 'reg.e0', label: 'DRIVE E₀', unit: ' a.u.', map: 'log', min: 1e-4, max: 0.2, def: 0.01, group: 'state', knob: () => (states ? states.knobs.driveE() : null),
+        get: () => (app.state.states ? app.state.states.morph : 0), set: (v) => { if (app.state.states) { app.state.states.setMorphValue(v); setKnob(app.state.states.knobs.morph(), app.state.states.morph); } } },
+      { id: 'reg.e0', label: 'DRIVE E₀', unit: ' a.u.', map: 'log', min: 1e-4, max: 0.2, def: 0.01, group: 'state', knob: () => (app.state.states ? app.state.states.knobs.driveE() : null),
         hint: 'the STATES drive’s field amplitude — a live knob of the running propagation, never a restart',
-        get: () => (states ? states.drive.e0 : 0.01), set: (v) => { if (states) { states.setDriveParam('e0', v); setKnob(states.knobs.driveE(), states.drive.e0); } } },
-      { id: 'reg.w', label: 'DRIVE ω', unit: ' Eh', map: 'log', min: 0.05, max: 3, def: 0.4, group: 'state', knob: () => (states ? states.knobs.driveW() : null),
+        get: () => (app.state.states ? app.state.states.drive.e0 : 0.01), set: (v) => { if (app.state.states) { app.state.states.setDriveParam('e0', v); setKnob(app.state.states.knobs.driveE(), app.state.states.drive.e0); } } },
+      { id: 'reg.w', label: 'DRIVE ω', unit: ' Eh', map: 'log', min: 0.05, max: 3, def: 0.4, group: 'state', knob: () => (app.state.states ? app.state.states.knobs.driveW() : null),
         hint: 'the STATES drive’s carrier frequency — sweep it through a stick to watch the resonance',
-        get: () => (states ? states.drive.omega : 0.4), set: (v) => { if (states) { states.setDriveParam('omega', v); setKnob(states.knobs.driveW(), states.drive.omega); } } },
+        get: () => (app.state.states ? app.state.states.drive.omega : 0.4), set: (v) => { if (app.state.states) { app.state.states.setDriveParam('omega', v); setKnob(app.state.states.knobs.driveW(), app.state.states.drive.omega); } } },
       ...Array.from({ length: 8 }, (_, i) => ({ id: `reg.amp${i + 1}`, label: `REG |b|² ${i + 1}`, map: 'linear', min: 0, max: 1, def: 0, group: 'state',
-        knob: () => (states ? states.knobs.pop(i) : null), hint: `the population of lane ${i + 1} of the STATES register (lane 1 is S₀)`,
-        get: () => (states ? states.slotAmp(i) : 0), set: (v) => { if (states) { states.setSlotAmp(i, v); setKnob(states.knobs.pop(i), states.slotAmp(i)); } } })),
+        knob: () => (app.state.states ? app.state.states.knobs.pop(i) : null), hint: `the population of lane ${i + 1} of the STATES register (lane 1 is S₀)`,
+        get: () => (app.state.states ? app.state.states.slotAmp(i) : 0), set: (v) => { if (app.state.states) { app.state.states.setSlotAmp(i, v); setKnob(app.state.states.knobs.pop(i), app.state.states.slotAmp(i)); } } })),
       ...Array.from({ length: 8 }, (_, i) => ({ id: `reg.ph${i + 1}`, label: `REG PHASE ${i + 1}`, unit: ' rad', map: 'linear', min: 0, max: 2 * Math.PI, def: 0, group: 'state',
-        knob: () => (states ? states.knobs.ph(i) : null), hint: `the phase of lane ${i + 1} of the STATES register — on the y lane of a degenerate pair this sweeps slosh → ring → slosh → counter-ring`,
-        get: () => (states ? states.slotPhase(i) : 0), set: (v) => { if (states) states.setSlotPhase(i, v); } })),
+        knob: () => (app.state.states ? app.state.states.knobs.ph(i) : null), hint: `the phase of lane ${i + 1} of the STATES register — on the y lane of a degenerate pair this sweeps slosh → ring → slosh → counter-ring`,
+        get: () => (app.state.states ? app.state.states.slotPhase(i) : 0), set: (v) => { if (app.state.states) app.state.states.setSlotPhase(i, v); } })),
 
       { id: 'state.rabi', label: 'Ω RABI', map: 'log', min: 0.005, max: 1, def: 0.05, group: 'state', knob: () => ui.abOmega,
         hint: 'Set the A–B transition rate',
-        get: () => __LW_hooks.ab.omega,
-        set: (v) => { __LW_hooks.ab.setOmega(v); setKnob(ui.abOmega, v); schedule(TIER.PRESENT); } },
+        get: () => app.hooks.ab.omega,
+        set: (v) => { app.hooks.ab.setOmega(v); setKnob(ui.abOmega, v); schedule(TIER.PRESENT); } },
     ];
     /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:
        CHEMISTRY's two targets are `chem.kick` and `chem.speed`, and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
        sphere arcs, so they are drop targets now, like every observer.* dial. */
-    modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg']);
-    restampParams = mod.stamp;
+    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg']);
+    app.state.restampParams = mod.stamp;
 
 
     let trSeat = 'bottom', trMoving = false;
@@ -2373,7 +2405,7 @@ export async function boot(dom) {
     function modDodge(rect, who = 'mod') {
       /* 0.5.0 C4: the kit's close reports null, and its place() reports the real box even while closed (λWAVES' copy sent the
          zero rect): a window that is not open has nothing to dodge */
-      dodging[who] = rect && (who === 'mod' ? modView && modView.isOpen : tl && tl.isOpen()) ? rect : null;
+      dodging[who] = rect && (who === 'mod' ? app.state.modView && app.state.modView.isOpen : app.state.tl && app.state.tl.isOpen()) ? rect : null;
       const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));
       occlusion.dirty();   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
@@ -2418,7 +2450,7 @@ export async function boot(dom) {
       setTimeout(arrive, 220);                                  // the same belt on the leaving half
     }
 
-    modView = createModulation(document.getElementById('floats') || document.getElementById('lab'), mod.port({
+    app.state.modView = createModulation(document.getElementById('floats') || document.getElementById('lab'), mod.port({
       moved: modDodge, persist: () => saveSettings(), note: hNote,
       rateControl: () => knob({ label: 'RATE', min: 0.1, max: 3000, value: clock.rate, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (!modHand('transport.rate', v)) { clock.setRate(v); ui.rateKnob.set(v); } } }),
       /* WAVE 102 · THE FIFTH EDGE's memory: the chosen input, kept in this browser's settings so a returning user is not asked to
@@ -2428,13 +2460,13 @@ export async function boot(dom) {
           settingsStore.write({ ...S, audioDevice: id }); } },
       /* WAVE 65 · THE ARM'S OTHER DOOR: pressing the window's PLAY on a disarmed rack asks the host to arm, and the MOD lamp on
          the transport lights.  The host owns the flag, the glow and the persistence; the window only asks. */
-      armed: () => modArm, arm: (on) => setModArm(!!on) }));
-    modView.root.dataset.mirWindow = 'modulation';    // 0.5.0 A10's hook (the kit's controller sets the rail's, not the pane's)
+      armed: () => app.state.modArm, arm: (on) => setModArm(!!on) }));
+    app.state.modView.root.dataset.mirWindow = 'modulation';    // 0.5.0 A10's hook (the kit's controller sets the rail's, not the pane's)
     applyAccent();                                    // the two angles reach the window as soon as it exists
-    modView.restore(readSettings().modwin);
-    dodge = modDodge;                                 // 0.5.0 C7b: the TIMELINE's `moved` gives way through the same seat chooser
+    app.state.modView.restore(readSettings().modwin);
+    app.state.dodge = modDodge;                                 // 0.5.0 C7b: the TIMELINE's `moved` gives way through the same seat chooser
     /* wave 54: the modulation clock's visibility is driven by the ONE authority (setPageHidden), not by a second listener of its own — it still RE-ANCHORS and never jumps */
-    if (page.hidden) modHost.clock.setHidden(true);
+    if (page.hidden) app.state.modHost.clock.setHidden(true);
   }
 
   // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); it ships CLOSED.  0.4.0 S3 (R-A2):
@@ -2458,7 +2490,7 @@ export async function boot(dom) {
   // RADIATION — what the prepared pair would radiate, and the shape of its far field; also CLOSED
   const wRad = device({ id: 'radiation', eyebrow: 'RADIATION', status: '' });
   rack.appendChild(wRad.root); wRad.root.classList.add('closed');
-  const radiationView = createRadiation(wRad.body, { repaint() { schedule(TIER.PRESENT); }, ab: () => __LW_hooks.ab });
+  const radiationView = createRadiation(wRad.body, { repaint() { schedule(TIER.PRESENT); }, ab: () => app.hooks.ab });
   const WIG_OK = 'numerical · a slice, not a marginal', RAD_OK = 'exact matrix elements · classical far field';
   Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wVor, kepler: wOrb,
     slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
@@ -2472,7 +2504,7 @@ export async function boot(dom) {
       why: 'the STURMIAN scale is on: the scaled radials are not the ones this window integrates — switch SCALE back to HYDROGEN' };
     if (H.id !== 'hydrogen') return { on: false, status: 'hydrogenic register only', why: 'hydrogenic register only — the operator in force is ' + H.label };
     if (getZ() !== 1) return { on: false, status: 'hydrogenic register only (Z = 1)', why: 'the ion at Z = ' + getZ() + ' scales every radial: this window reads the Z = 1 closed forms' };
-    if (chem && chem.on) return { on: false, status: 'hydrogenic register only', why: 'another model holds the field — this window reads the hydrogenic register' };   // 0.4.0 S0 · wave 137: MOLECULES too
+    if (app.state.chem && app.state.chem.on) return { on: false, status: 'hydrogenic register only', why: 'another model holds the field — this window reads the hydrogenic register' };   // 0.4.0 S0 · wave 137: MOLECULES too
     return { on: true, status: null, why: '' };
   }
 
@@ -2489,7 +2521,7 @@ export async function boot(dom) {
     modB.setAttribute('aria-label', 'modulation on or off');
     modB.setAttribute('aria-pressed', 'true');
     modB.title = 'Enable modulation';
-    modB.addEventListener('click', () => setModArm(!modArm));
+    modB.addEventListener('click', () => setModArm(!app.state.modArm));
     ui.modB = modB;
 
 
@@ -2570,7 +2602,7 @@ export async function boot(dom) {
          periodPending got a new key sixty times a second and this posted a fresh O(pairs × 2·10⁶)
          scan to the worker on every one of them, for as long as the rate turned.  Same law, same
          line — an expensive answer waits until the movement stops. */
-      if (!force && lastPeriod && periodCostMs > 8 && (pointerHeld || keyHeld || rotDriving())) { periodSettling = true; return lastPeriod; }
+      if (!force && lastPeriod && periodCostMs > 8 && (app.state.pointerHeld || keyHeld || rotDriving())) { periodSettling = true; return lastPeriod; }
       const key = keyNow();
       if (reg.field.Fz !== 0) { Object.assign(pk, key); periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, stark: true, T: 0 }; return lastPeriod; }
       if (reg.transition) { Object.assign(pk, key); periodCostMs = 0; periodSettling = false; lastPeriod = { exact: false, mix: true, T: 0 }; return lastPeriod; }
@@ -2621,7 +2653,7 @@ export async function boot(dom) {
     /** paint the REPEATS readout now — a forced scan (LW.period, ⟳, the digest) and the worker's answer both call it, so a paused
         instrument shows the answer the moment it exists rather than on a frame it will not run (wave 45) */
     function paintPeriod() { if (!ui.periodRo) return; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub); paintPeriodFx(); }
-    __LW_hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer
+    app.hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer
     const laps = () => Math.floor(clock.t / clock.window);
     const compactClock = (v, threshold, decimals) => Math.abs(v) < threshold
       ? v.toFixed(decimals)
@@ -2652,7 +2684,7 @@ export async function boot(dom) {
       if (ui.periodRo && (!on || keep.frames || now - periodWall >= 200)) { periodWall = now; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub); paintPeriodFx(); }   // periodNow() is cached on the register's version; the scan itself runs off the frame (wave 45) or waits out a live gesture (wave 44).  WAVE 69: the formula rides the SAME cadence law — every frame with KEEP FRAMES on, 5 Hz without — so a moving number obeys the readout law the transport already owns rather than inventing a second one
     }
     setKeepFrames(keep.frames);                                // the shipped default: the bar disabled
-    setModArm(modArm, { quiet: true });                        // wave 65: ONE writer paints the lamp, boot included
+    setModArm(app.state.modArm, { quiet: true });                        // wave 65: ONE writer paints the lamp, boot included
     return { update, stepDt };
   })();
 
@@ -2664,18 +2696,18 @@ export async function boot(dom) {
    *  and the HOLDs run on, so power on picks the routes up in time.  Power never plays; play never powers (bind.js setArm). */
   function setModArm(on, opts) {
     const want = !!on, o = opts || {};
-    modArm = want;
+    app.state.modArm = want;
     if (ui.modB) {
       ui.modB.classList.toggle('on', want);
       ui.modB.setAttribute('aria-pressed', String(want));
     }
-    if (modHost) {
-      modHost.clock.setModulationEnabled(want);
-      if (modView) modView.sync();
+    if (app.state.modHost) {
+      app.state.modHost.clock.setModulationEnabled(want);
+      if (app.state.modView) app.state.modView.sync();
     }
     if (!o.quiet) saveMod();
     schedule(TIER.PRESENT);
-    return modArm;
+    return app.state.modArm;
   }
   /** THE LOOP CLOCK, LOCKED TO THE STATE (g).  `barTempo({T, rate})` turns the density's own exact
    *  recurrence into a tempo at which ONE BAR IS ONE RECURRENCE — which is what makes the BPM chip's
@@ -2685,29 +2717,29 @@ export async function boot(dom) {
    *  to grow; the sentence lives on the MOD button and in the keyboard editor.  It never guesses: no exact
    *  period, no lock, and the refusal says which. */
   function barLock() {
-    if (!modHost) return { ok: false, reason: 'no modulation rack' };
-    const P = __LW_hooks.period ? __LW_hooks.period() : null;
+    if (!app.state.modHost) return { ok: false, reason: 'no modulation rack' };
+    const P = app.hooks.period ? app.hooks.period() : null;
     if (!P || !P.exact || !(P.T > 0)) {
       const why = !P ? 'no recurrence scan' : P.stark ? 'no exact period under a static field'
         : P.mix ? 'the A ↔ B mix has its own clock' : P.stationary ? 'one energy: the density never changes'
         : 'no exact period — the energies are incommensurate';
-      if (modView) modView.say('the loop clock cannot be locked to this state: ' + why, 'warn');
+      if (app.state.modView) app.state.modView.say('the loop clock cannot be locked to this state: ' + why, 'warn');
       return { ok: false, reason: why };
     }
     const r = barTempo({ T: P.T, rate: clock.rate });
     if (!r.ok) return { ok: false, reason: r.reason };
-    modHost.clock.setBpm(r.clamped ? r.bpmThatFits : r.bpm);
-    if (modView) { modView.sync(); modView.say(r.clamped
-      ? 'one bar = ' + r.lapsThatFit + ' laps of the recurrence at ' + modHost.model.transport.bpm.toFixed(1) + ' BPM (one lap would be ' + r.wanted.toFixed(1) + ', past the tempo range)'
-      : 'one bar = one recurrence of the density, at ' + modHost.model.transport.bpm.toFixed(1) + ' BPM'); }
+    app.state.modHost.clock.setBpm(r.clamped ? r.bpmThatFits : r.bpm);
+    if (app.state.modView) { app.state.modView.sync(); app.state.modView.say(r.clamped
+      ? 'one bar = ' + r.lapsThatFit + ' laps of the recurrence at ' + app.state.modHost.model.transport.bpm.toFixed(1) + ' BPM (one lap would be ' + r.wanted.toFixed(1) + ', past the tempo range)'
+      : 'one bar = one recurrence of the density, at ' + app.state.modHost.model.transport.bpm.toFixed(1) + ' BPM'); }
     saveSettings();
-    return { ok: true, bpm: modHost.model.transport.bpm, wanted: r.wanted, clamped: r.clamped,
+    return { ok: true, bpm: app.state.modHost.model.transport.bpm, wanted: r.wanted, clamped: r.clamped,
              laps: r.clamped ? r.lapsThatFit : 1, T: P.T, seconds: r.seconds, fits: r.fitsAtLaps };
   }
 
   /* ── badges (§41) ─────────────────────────────────────────────────────── */
   const badges = createBadges({ dom, accept: () => swClient.accept(), field, reg, mat, clock, domain, quality,
-    getSpace: () => space, stateReaders, ui });   // N7 seam 6: lab/badges.js
+    getSpace: () => app.state.space, stateReaders, ui });   // N7 seam 6: lab/badges.js
 
   /* ── WAVE 56 · THE INSTALL LAYER'S INTERFACE HALF: lab/sw-client.js (N7 seam 5).  The tab that ASKED reloads; a tab that
      did not ask is told and keeps its work.  It is LW.sw. ── */
@@ -2722,13 +2754,13 @@ export async function boot(dom) {
      fine, the transport is paused at t = 0.  Read only after boot (register waits ≥ 1.5 s past load).  0.5.0 C6b: the same
      question, asked on pagehide, decides whether a reload of this tab skips the title screen (the boot tail). */
   const untouched = (ignorePlaying) => {
-    const rows = history ? history.entries() : [];
-    return rows.length === 1 && !history.canUndo && !history.pendingLabel && !history.holding
+    const rows = app.state.history ? app.state.history.entries() : [];
+    return rows.length === 1 && !app.state.history.canUndo && !app.state.history.pendingLabel && !app.state.history.holding
       && (rows[0].label === 'boot' || rows[0].label === 'link')
-      && !(layout.projects && layout.projects.dirty) && !pointerHeld
+      && !(layout.projects && layout.projects.dirty) && !app.state.pointerHeld
       && !(warning && warning.open)
       && !(document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName))
-      && !(capApi && capApi.busy)
+      && !(app.state.capApi && app.state.capApi.busy)
       && (ignorePlaying || (!clock.playing && !clock.t));
   };
   const swClient = createSwClient({ buildBadge: () => badges.build,
@@ -2736,49 +2768,49 @@ export async function boot(dom) {
     host: dom.badges.parentElement });
 
   /* ── THE BOW: ctrl+drag draws it, release fires, releasing CTRL first cancels ── */
-  let bow = null, bowPrevView = null;
+  app.state.bow = null; let bowPrevView = null;
   function bowStart(e) {
     const r = dom.canvas.getBoundingClientRect();
-    bow = { x0: e.clientX - r.left, y0: e.clientY - r.top, x1: e.clientX - r.left, y1: e.clientY - r.top, k: 0, dir: [0, 0, 1] };
+    app.state.bow = { x0: e.clientX - r.left, y0: e.clientY - r.top, x1: e.clientX - r.left, y1: e.clientY - r.top, k: 0, dir: [0, 0, 1] };
     bowPrevView = mat.view; mat.view = VIEW.phase; if (ui.viewSeg) ui.viewSeg.set('phase');
     try { if (e.pointerId !== undefined) dom.canvas.setPointerCapture(e.pointerId); } catch (_) {}
-    kepler.setBow(bow); schedule(TIER.PRESENT);
+    kepler.setBow(app.state.bow); schedule(TIER.PRESENT);
   }
   function bowMove(e) {
-    if (!bow) return;
+    if (!app.state.bow) return;
     const r = dom.canvas.getBoundingClientRect();
-    bow.x1 = e.clientX - r.left; bow.y1 = e.clientY - r.top;
-    const dx = bow.x1 - bow.x0, dy = bow.y1 - bow.y0;
-    bow.k = Math.min(mat.bow?.limit ?? 3, Math.pow(Math.hypot(dx, dy) / 120, mat.bow?.curve ?? 1) * (mat.bow?.gain ?? 1));                    // 120 px of pull = 1 a.u. of momentum, capped at 3
+    app.state.bow.x1 = e.clientX - r.left; app.state.bow.y1 = e.clientY - r.top;
+    const dx = app.state.bow.x1 - app.state.bow.x0, dy = app.state.bow.y1 - app.state.bow.y0;
+    app.state.bow.k = Math.min(mat.bow?.limit ?? 3, Math.pow(Math.hypot(dx, dy) / 120, mat.bow?.curve ?? 1) * (mat.bow?.gain ?? 1));                    // 120 px of pull = 1 a.u. of momentum, capped at 3
     const B = cameraBasis(obs);
     const d = [-(dx * B.right[0] - dy * B.up[0]), -(dx * B.right[1] - dy * B.up[1]), -(dx * B.right[2] - dy * B.up[2])];   // a bow: the arrow flies opposite to the pull; screen y points down
     const n = Math.hypot(d[0], d[1], d[2]);
-    bow.dir = n > 0 ? [d[0] / n, d[1] / n, d[2] / n] : [0, 0, 1];
-    mat.boost.k = [bow.dir[0] * bow.k, bow.dir[1] * bow.k, bow.dir[2] * bow.k]; mat.boost.on = bow.k > 0;
-    kepler.setBow(bow); schedule(TIER.PRESENT);
+    app.state.bow.dir = n > 0 ? [d[0] / n, d[1] / n, d[2] / n] : [0, 0, 1];
+    mat.boost.k = [app.state.bow.dir[0] * app.state.bow.k, app.state.bow.dir[1] * app.state.bow.k, app.state.bow.dir[2] * app.state.bow.k]; mat.boost.on = app.state.bow.k > 0;
+    kepler.setBow(app.state.bow); schedule(TIER.PRESENT);
   }
   /* THE BOW LANDS ASYNCHRONOUSLY (wave 45).  The slap (kick.js) or the packet (well.js) is computed in the maths
      worker and lands when it answers — the pointer is free the moment the finger lifts (measured before: 127 ms on
      the first hydrogen bow, 191 ms + a 1.2 s frame on a BOX bow).  bowChain is the queue: two bows in flight land in
      order, on the state the first one left; LW.bow.landed resolves when the queue is empty.  The SLAP trigger, the K
      key and LAUNCH keep the synchronous road. */
-  let bowChain = Promise.resolve(), bowInFlight = 0;
+  app.state.bowChain = Promise.resolve(); app.state.bowInFlight = 0;
   function bowRelease() {
-    if (!bow) return;
-    const k = bow.k, dir = bow.dir, x0 = bow.x0, y0 = bow.y0; bowCancel();
+    if (!app.state.bow) return;
+    const k = app.state.bow.k, dir = app.state.bow.dir, x0 = app.state.bow.x0, y0 = app.state.bow.y0; bowCancel();
     if (k <= 0.005) return;
     const job = getHamiltonian().id === 'well' ? () => launchPacketAsync(unproject(x0, y0), dir.map((v) => v * k), gasSigma(k)) : () => slapAlongAsync(k, dir);   // the GAS: a new packet where you pressed
-    bowInFlight++; wState.setStatus('the impulse is in flight…', 'live');
-    bowChain = bowChain.then(job).catch((e) => { __e.push('BOW ' + (e && e.message || e)); }).then(() => { if (--bowInFlight === 0) wState.setStatus('changes c'); });
+    app.state.bowInFlight++; wState.setStatus('the impulse is in flight…', 'live');
+    app.state.bowChain = app.state.bowChain.then(job).catch((e) => { __e.push('BOW ' + (e && e.message || e)); }).then(() => { if (--app.state.bowInFlight === 0) wState.setStatus('changes c'); });
   }
   /** the BOX bow: wellPacket in the worker, the same numbers as launchPacket, landed on the clock's time when it answers */
   async function launchPacketAsync(x0, kvec, sigma) {
-    if (gasAxial || !maths.ok) { launchPacket(x0, kvec, sigma); return; }
+    if (app.state.gasAxial || !maths.ok) { launchPacket(x0, kvec, sigma); return; }
     const r = await maths.call({ op: 'packet', x0, k: kvec, sigma, radius: HAMILTONIANS.well.radius });
     if (!r || r.error) { launchPacket(x0, kvec, sigma); return; }
-    if (getHamiltonian().id !== 'well' || gasAxial) return;                             // the box was left while the packet was in flight
+    if (getHamiltonian().id !== 'well' || app.state.gasAxial) return;                             // the box was left while the packet was in flight
     reg.clear(); for (let a = 0; a < 91; a++) if (r.re[a] || r.im[a]) reg.set(a, r.re[a], r.im[a], clock.t);
-    lastLaunch = { x0, k: kvec, sigma, captured: r.captured };
+    app.state.lastLaunch = { x0, k: kvec, sigma, captured: r.captured };
     if (ui.gasRo) { ui.gasRo.set(`${(100 * r.captured).toFixed(1)}% held`, r.captured > 0.85 ? 'ok' : 'warn'); ui.gasRo.setSub(`σ = ${sigma.toFixed(2)} a₀ at (${x0.map((v) => v.toFixed(1)).join(', ')}) · |k| = ${Math.hypot(...kvec).toFixed(2)} · the box resolves ≈ a/6 = ${(HAMILTONIANS.well.radius / 6).toFixed(1)} a₀`); }
     touchState();
   }
@@ -2928,7 +2960,7 @@ export async function boot(dom) {
       ? 'below coherence ½ NO ELLIPSE IS DRAWN (Round 11 A5) — but ⟨L⟩ and ⟨K⟩ are exact and so are the rotors, so the knobs stay live: the refusal is the picture\'s, not the operator\'s'
       : `L̂ = (${o.normal.map((v) => v.toFixed(2)).join(', ')}) · û = (${o.u.map((v) => v.toFixed(2)).join(', ')}) · the rotors turn EVERY populated shell; this shell supplies the axes`);
   }
-  let kdrag = null;
+  app.state.kdrag = null;
   /* the point on the plane through the origin ⟂ the view direction that sits under a screen position */
   function unproject(px, py) {
     const { cam, d, B, target: T } = pointerRay(px, py);              // N6: pointerRay's ray met with the plane through the TARGET
@@ -2939,7 +2971,7 @@ export async function boot(dom) {
   }
   camera.pointer = { ray: pointerRay, unproject };                  // S2: the pointer maths, for the camera-shift gate (__LW.camera.pointer)
   /* a DESIGN CHOICE, labelled: a harder pull launches a tighter packet (a boost alone never changes a width) */
-  let gasWidth = 1.8, gasAxial = false;
+  app.state.gasWidth = 1.8; app.state.gasAxial = false;
   const gas = createGas(HAMILTONIANS.well.radius);
   /* K5w (optimization 2026-09-24 · AUDIT-B FB1, AUDIT-F F11, SOL-REVIEW K5, PLAN §9) · SPECTRUM's `⟨z⟩ · σ_z` line.
      gas.stats(t) is 8–17 ms and ran on the frame thread every 6th CPU tick while the gas played — outside tick(), so no
@@ -2971,24 +3003,24 @@ export async function boot(dom) {
      Armed at boot, built only once the axial gas holds a packet (gas.js slices it in idle time), uploaded by the field, and
      the records carry their rows only once it is held; the landing repaints a live gas.  While an EXPORT holds the loop the
      upload answers null (not now) and gas.js retries on a later idle slice: a deterministic render never straddles it. */
-  const gasTableOn = (on) => gas.setTable(on, (tab) => exportLocked ? null : !!(field.ok && field.setGasTable && field.setGasTable(tab)), () => { if (gas.on) schedule(TIER.RECONSTRUCT); });
-  const gasSigma = (k) => Math.max(0.5, Math.min(3, gasWidth * (1 - 0.18 * Math.min(k, 3))));
+  const gasTableOn = (on) => gas.setTable(on, (tab) => app.state.exportLocked ? null : !!(field.ok && field.setGasTable && field.setGasTable(tab)), () => { if (gas.on) schedule(TIER.RECONSTRUCT); });
+  const gasSigma = (k) => Math.max(0.5, Math.min(3, app.state.gasWidth * (1 - 0.18 * Math.min(k, 3))));
   function launchPacket(x0, kvec, sigma) {
-    if (gasAxial) {                                                      // the AXIAL register: along z, on the axis
+    if (app.state.gasAxial) {                                                      // the AXIAL register: along z, on the axis
       const A = HAMILTONIANS.well.radius, z0 = Math.max(-0.8 * A, Math.min(0.8 * A, x0[2] || -A / 2)), kz = kvec[2] !== 0 ? kvec[2] : Math.hypot(...kvec);
       const G = gas.launch(z0, kz, sigma, clock.t);
-      reg.clear(); refSnapshot = null;
-      lastLaunch = { x0: [0, 0, z0], k: [0, 0, kz], sigma, captured: G.captured, axial: true };
+      reg.clear(); app.state.refSnapshot = null;
+      app.state.lastLaunch = { x0: [0, 0, z0], k: [0, 0, kz], sigma, captured: G.captured, axial: true };
       if (ui.gasRo) { ui.gasRo.set(`${(100 * G.captured).toFixed(1)}% held · axial`, G.captured > 0.85 ? 'ok' : 'warn'); ui.gasRo.setSub(`σ = ${sigma.toFixed(2)} a₀ at z = ${z0.toFixed(1)} · k = ${kz.toFixed(2)} along z · ${G.modes} modes (m = 0, l ≤ 15)`); }
       touchState(); return;
     }
     const P = wellPacket(x0, kvec, sigma);
     reg.clear(); for (let a = 0; a < 91; a++) if (P.re[a] || P.im[a]) reg.set(a, P.re[a], P.im[a], clock.t);
-    lastLaunch = { x0, k: kvec, sigma, captured: P.captured };
+    app.state.lastLaunch = { x0, k: kvec, sigma, captured: P.captured };
     if (ui.gasRo) { ui.gasRo.set(`${(100 * P.captured).toFixed(1)}% held`, P.captured > 0.85 ? 'ok' : 'warn'); ui.gasRo.setSub(`σ = ${sigma.toFixed(2)} a₀ at (${x0.map((v) => v.toFixed(1)).join(', ')}) · |k| = ${Math.hypot(...kvec).toFixed(2)} · the box resolves ≈ a/6 = ${(HAMILTONIANS.well.radius / 6).toFixed(1)} a₀`); }
     touchState();
   }
-  let lastLaunch = null;
+  app.state.lastLaunch = null;
 
   function enterBox() {
     const ax = keyState.axis, a = HAMILTONIANS.well.radius, d = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] }[ax], k = ui.gasSpeed && ui.gasSpeed.get ? ui.gasSpeed.get() : 0.8;
@@ -3001,13 +3033,13 @@ export async function boot(dom) {
     const ax = keyState.axis, d = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] }[ax], k = ui.gasSpeed && ui.gasSpeed.get ? ui.gasSpeed.get() : 0.8;
     reg.clear(); reg.set(0, 1, 0, clock.t);            // label 0 = 1s = the oscillator's ground state
     reg.kickAlong(k, d, clock.t);
-    lastLaunch = { x0: [0, 0, 0], k: d.map((v) => v * k), sigma: 1 / Math.SQRT2, captured: reg.norm2(), coherent: true };
+    app.state.lastLaunch = { x0: [0, 0, 0], k: d.map((v) => v * k), sigma: 1 / Math.SQRT2, captured: reg.norm2(), coherent: true };
     if (ui.gasRo) { ui.gasRo.set(`coherent · |α|² = ${(k * k / 2).toFixed(2)}`, 'ok'); ui.gasRo.setSub(`⟨z⟩ = ${k.toFixed(2)} sin t · rigid · period 2π · ${(100 * reg.norm2()).toFixed(2)}% in N ≤ 10`); }
     touchState();
     if (!clock.playing) { clock.play(performance.now() / 1000); schedule(TIER.EVOLVE); }
   }
   function bowCancel() {
-    bow = null; mat.boost.on = false; kepler.setBow(null); keplerDirty = true;   // one clearing draw of the KEPLER canvas after the arrow
+    app.state.bow = null; mat.boost.on = false; kepler.setBow(null); app.state.keplerDirty = true;   // one clearing draw of the KEPLER canvas after the arrow
     if (bowPrevView !== null) { mat.view = bowPrevView; if (ui.viewSeg) ui.viewSeg.set(VIEW_NAMES[bowPrevView]); bowPrevView = null; }
     schedule(TIER.PRESENT);
   }
@@ -3027,7 +3059,7 @@ export async function boot(dom) {
     }
     touchState();
   }
-  window.addEventListener('keyup', (e) => { if (e.key === 'Control' && bow) bowCancel(); });
+  window.addEventListener('keyup', (e) => { if (e.key === 'Control' && app.state.bow) bowCancel(); });
 
   /* ── THE FLOATING RACK: hide button, hover-reveal, draggable cards, hint icons, the transport's dock ── */
   const rackL = document.getElementById('rackL');
@@ -3047,7 +3079,7 @@ export async function boot(dom) {
    * provider in lab/occlusion.js, registered below in the old order; this host converts, clears and presents. */
   const NO_OCCLUSION = [];
   function refreshOcclusion(nowMs) {
-    occludeDirty = false; occludeAt = nowMs;
+    app.state.occludeDirty = false; app.state.occludeAt = nowMs;
     /* LA3 · HIDDEN, NOTHING IS PAINTED, SO NOTHING MASKS.  Under body.ui-hidden every surface below is display:none
        (lab.css: the racks, transport, sheet and both lists !important; #floats (the keyboard window too) and #notebook !important), and
        #keysheet no longer exists — so the burst's answer is exactly [] and its layout reads bought nothing, every 300 ms
@@ -3061,7 +3093,7 @@ export async function boot(dom) {
       return x1 - x0 < 2 || y1 - y0 < 2 || x1 <= 0 || y1 <= 0 || x0 >= cb.width || y0 >= cb.height ? null : [x0, y0, x1, y1]; };
     if (field.setOcclusion(occlusion.rects(toCanvas))) schedule(TIER.PRESENT);
   }
-  { const body = document.body, { root: mw, rail } = modView, dirty = occlusion.dirty, shown = (d) => !d.hidden && !d.classList.contains('closed');
+  { const body = document.body, { root: mw, rail } = app.state.modView, dirty = occlusion.dirty, shown = (d) => !d.hidden && !d.classList.contains('closed');
     const rackShown = () => !body.classList.contains('rack-hidden') || body.classList.contains('rack-peek'), rects = (els) => els.map((s) => paintedRect(s));
     /* a card is one pane, or (DISCONNECTED, never on a phone) its head and its body with the stage showing between them */
     const panes = (d) => body.classList.contains('disconnected') && !body.classList.contains('phone') ? [d.querySelector('.dev-head'), d.querySelector('.dev-body')] : [d];
@@ -3071,7 +3103,7 @@ export async function boot(dom) {
     /* 0.5.0 C4: the kit's window travels (tweenRect) and fades (presence); its `hidden` lands when the exit ends, and onGeometry
        tells every place, landing, open and close — both are the one producer's, so a paused field's mask follows them */
     for (const el of [mw, rail]) occlusion.watch(el, { attributes: true, attributeFilter: ['hidden'] });
-    modView.onGeometry(dirty);
+    app.state.modView.onGeometry(dirty);
     occlusion.register('floats', () => rects([...floats.children].filter((d) => d.classList.contains('dev') && shown(d)).flatMap(panes)));
     occlusion.register('extra', () => rects(['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => document.getElementById(id))));
     occlusion.register('keymap', () => rects([document.querySelector('[data-mir-window="keyboard"]'), ...document.querySelectorAll('[data-mir-rail="keyboard"] .mir-chip')]));   // C3: the kit's window and its rail
@@ -3322,18 +3354,18 @@ export async function boot(dom) {
 
 
     layout.modulation = {
-      get open() { return !!(modView && modView.isOpen); },
+      get open() { return !!(app.state.modView && app.state.modView.isOpen); },
       expand() {
-        if (!modView) return false;
+        if (!app.state.modView) return false;
         /* 2026-09-24 · open() ALONE (optimization LB1, AUDIT-E FE3).  open() already runs rebuild(); place();
            paint(true), and nothing between it and the old wake() touched the model or the registry, so wake()'s
            second rebuild + paint re-read the same model into the same DOM for 15–28 ms per open. */
-        modView.open();
+        app.state.modView.open();
         document.body.classList.remove('rack-hidden');
         saveSettings(); schedule(TIER.PRESENT); return true;
       },
       /** Collapse releases preview-only work. Any route still drives its parameter. */
-      collapse() { if (!modView) return false; modView.close(); saveSettings(); schedule(TIER.PRESENT); return true; },
+      collapse() { if (!app.state.modView) return false; app.state.modView.close(); saveSettings(); schedule(TIER.PRESENT); return true; },
       toggle() { return layout.modulation.open ? layout.modulation.collapse() : layout.modulation.expand(); },
     };
     /* FILE › EXPORT SHAPE (GLB · OBJ · STL) and EXPORT GRID (NPZ · CUBE), wave 134.  THE LAW: what is on screen, by
@@ -3342,22 +3374,22 @@ export async function boot(dom) {
        cameraBasis(obs) at THIS press.  Marching cubes and every writer run in the `cards` worker queue (parked like
        a card prep, never the frame thread); the download is capture()'s own save() (no copy of its ZIP writer). */
     const exportLabel = () => { try { if (reg.preset) return reg.preset; const pop = reg.populated ? reg.populated() : []; return pop.length ? pop.length + 'modes' : 'state'; } catch (_) { return 'state'; } };
-    exporter3d = createExporter({
+    app.state.exporter3d = createExporter({
       field: () => field,
       scene: () => {
         const E = cameraEye(obs, 1), B = E.basis, w = dom.canvas.clientWidth || 1, h = dom.canvas.clientHeight || 1;
-        const q = chem && chem.on && chem.query ? chem.query() : null;
+        const q = app.state.chem && app.state.chem.on && app.state.chem.query ? app.state.chem.query() : null;
         return {
-          label: exportLabel(), build: BUILD_LINE, t: clock.t, space, isoFrac: mat.iso,
-          colour: { on: !!(palette && palette.on), hue: mat.hueShift || 0, invert: !!mat.invert, lut: (palette && palette.on) ? toLUT(palette.stops) : null },
+          label: exportLabel(), build: BUILD_LINE, t: clock.t, space: app.state.space, isoFrac: mat.iso,
+          colour: { on: !!(app.state.palette && app.state.palette.on), hue: mat.hueShift || 0, invert: !!mat.invert, lut: (app.state.palette && app.state.palette.on) ? toLUT(app.state.palette.stops) : null },
           camera: { eye: E.eye, dir: B.dir, right: B.right, up: B.up, yfov: obs.fov || 0.6, aspect: w / h, shift: E.shift },   // the eye in half-units: the worker scales it by its grid's half; S2: the lens shift rides as extras
           atoms: q ? q.atoms : [{ Z: getZ(), x: 0, y: 0, z: 0 }],
         };
       },
       post: (msg, transfer) => cards.call(msg, transfer),
-      save: (r) => capApi.capture.save(r),   /* capApi (depth-1, like exporter3d) wraps the CAPTURE group's own capture()/cap, built lazily there */
+      save: (r) => app.state.capApi.capture.save(r),   /* capApi (depth-1, like exporter3d) wraps the CAPTURE group's own capture()/cap, built lazily there */
       status: (text, cls) => { if (ui.set) ui.set.setStatus(text, cls); },
-      names: () => (chem && chem.on && chem.exportNames ? chem.exportNames() : null),   // 0.4.0 S1: the orbital's name rides in the file's metadata
+      names: () => (app.state.chem && app.state.chem.on && app.state.chem.exportNames ? app.state.chem.exportNames() : null),   // 0.4.0 S1: the orbital's name rides in the file's metadata
     });
 
     /* the logo opens FILE · EDIT · WINDOW */
@@ -3381,9 +3413,9 @@ export async function boot(dom) {
           ['SAVE the experiment (quick)', () => save()], ['LOAD the last quick save', () => restore()], ['COPY as JSON', () => copyJSON()],
           ['COPY a LINK to this state', () => copyLink(), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)'],
           null,
-          ...SHAPE_EXPORTS.map((spec) => [spec.row, () => exporter3d.run(spec.fmt), () => exporter3d.busy || !field.ok, spec.tip])],
+          ...SHAPE_EXPORTS.map((spec) => [spec.row, () => app.state.exporter3d.run(spec.fmt), () => app.state.exporter3d.busy || !field.ok, spec.tip])],
         EDIT: () => [['UNDO\t' + keyFor('undo'), () => historyApi.undo(), () => !historyApi.canUndo], ['REDO\t' + keyFor('redo'), () => historyApi.redo(), () => !historyApi.canRedo], ['HISTORY UNDO\t' + keyFor('historyUndo'), () => historyApi.historyUndo(), () => !historyApi.canHistoryUndo, 'return once to the timeline that existed before the last history-row jump'], ['UNDO HISTORY…', () => layout.raise('history')], null,
-          ['PLAY / PAUSE\t' + keyFor('transport.play'), () => runAction('transport.play')], ['NORMALIZE', () => normalizeNow()], ['COPY the state as LaTeX', () => copyLatex(), null, 'the populated states in chemistry order, in the notebook\'s LaTeX — two lines: the list, then ψ with amplitudes and phases; under a molecule, the molecule\'s page: formula, RHF/basis, E and the ε ladder'], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => __LW_hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
+          ['PLAY / PAUSE\t' + keyFor('transport.play'), () => runAction('transport.play')], ['NORMALIZE', () => normalizeNow()], ['COPY the state as LaTeX', () => copyLatex(), null, 'the populated states in chemistry order, in the notebook\'s LaTeX — two lines: the list, then ψ with amplitudes and phases; under a molecule, the molecule\'s page: formula, RHF/basis, E and the ε ladder'], ['CLEAR the register', () => clearRegister()], ['RESET the view\t' + keyFor('camReset'), () => resetView()], ['RESEED the particles\t' + keyFor('reseed'), () => runAction('reseed')], null, ['RESET the key bindings', () => app.hooks.keys.reset()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')]],
 
 
         VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => LW.setView('phase')], ['Re ψ', () => LW.setView('real')], ['Im ψ', () => LW.setView('imag')], ['Δρ  difference', () => LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => LW.setView('reim')],
@@ -3391,7 +3423,7 @@ export async function boot(dom) {
           ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE TEXT  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['STATUS TAGS  on / off', () => ui.badgesSw && ui.badgesSw.root.click()], ['CONTROL HINTS  on / off', () => ui.controlHintsSw && ui.controlHintsSw.root.click()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
 
 
-        WINDOW: () => [['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['TIMELINE', () => runAction('timeline')], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => __LW_hooks.setTheme && __LW_hooks.setTheme('light')], ['THEME · DARK', () => __LW_hooks.setTheme && __LW_hooks.setTheme('dark')], ['THEME · SYSTEM', () => __LW_hooks.setTheme && __LW_hooks.setTheme('system')], null,
+        WINDOW: () => [['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['TIMELINE', () => runAction('timeline')], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => app.hooks.setTheme && app.hooks.setTheme('light')], ['THEME · DARK', () => app.hooks.setTheme && app.hooks.setTheme('dark')], ['THEME · SYSTEM', () => app.hooks.setTheme && app.hooks.setTheme('system')], null,
           ...[...document.querySelectorAll('.dev:not([hidden])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
 
 
@@ -3472,25 +3504,25 @@ export async function boot(dom) {
         const kv = new Map(), bad = [];
         for (const p of q.split('&')) { const [k, v = ''] = p.split('='); try { kv.set(k, decodeURIComponent(v)); } catch (_) { bad.push(k); } }
         const mol = [...MOLECULE_BY_ID.keys()].find((id) => id.toLowerCase() === String(kv.get('molecule')).toLowerCase());
-        const orb = () => { const s = chem.solution(), k = orbitalOf(s, kv.get('orbital')); if (k) { chem.setView('orbital'); chem.orbital(k); } return k ? orbitalName(s.names, k - 1, s.nocc, 'latex') : ''; };
+        const orb = () => { const s = app.state.chem.solution(), k = orbitalOf(s, kv.get('orbital')); if (k) { app.state.chem.setView('orbital'); app.state.chem.orbital(k); } return k ? orbitalName(s.names, k - 1, s.nocc, 'latex') : ''; };
         let fade = '', own = false;                                    // own: the verb announces itself (a hand's preset; a molecule's head)
         for (const [k, v] of kv) {
           if (k === 'preset' && PRESET_BY_ID.has(v)) own = loadPreset(v, { hand: true });
-          else if (k === 'molecule' && mol) { own = true; const p = chem.pick(mol); chem.setOn(true); if (kv.has('orbital')) p.then(() => (history ? history.absorb(orb) : orb())); }
+          else if (k === 'molecule' && mol) { own = true; const p = app.state.chem.pick(mol); app.state.chem.setOn(true); if (kv.has('orbital')) p.then(() => (app.state.history ? app.state.history.absorb(orb) : orb())); }
           else if (k === 'view' && VIEW[v] !== undefined) { LW.setView(v); fade = fade || 'VIEW · ' + mdText(v); }
           else if (k === 'orbital' && !mol) { const n = orb(); if (n) fade = fade || 'ORBITAL · ' + n; else bad.push(k); }
           else if (k !== 'orbital') bad.push(k);                       // with a molecule, the orbital waits for its solve (above)
         }
-        if (fade && !own && stageText) stageText.announce(fade);
+        if (fade && !own && app.state.stageText) app.state.stageText.announce(fade);
         return bad.length ? 'ignored: ' + bad.join(', ') : '';
       }
       view.addEventListener('click', (e) => {
         const a = e.target.closest && e.target.closest('a[href^="lw:"]'); if (!a) return;
         e.preventDefault(); e.stopPropagation();
         const name = 'LINK · ' + (a.textContent.trim().slice(0, 32) || a.getAttribute('href'));
-        if (history && history.pendingLabel !== name) history.flush();
+        if (app.state.history && app.state.history.pendingLabel !== name) app.state.history.flush();
         const said = lwLink(a.getAttribute('href').slice(3));
-        if (history) history.note(name);
+        if (app.state.history) app.state.history.note(name);
         const c = nb.querySelector('.nb-count'); if (c && said) { c.textContent = said; setTimeout(count, 2400); }
       }, true);
       /* ── PROJECTS (0.5.0 C6): MIR's FOLDERS over ONE project part — this one, below; the notebook is its page 0 ── */
@@ -3499,9 +3531,9 @@ export async function boot(dom) {
          quality governor are runtime; routed numbers compare their hand-owned bases so an
          LFO does not manufacture unsaved edits while the user listens. */
       function modulationBases() {
-        if (!modHost) return null;
+        if (!app.state.modHost) return null;
         modSyncBases(); // catch paused hand edits; routed targets keep their protected base by contract
-        return Object.fromEntries(modHost.registry.list().map((id) => [id, modHost.registry.baseOf(id)]));
+        return Object.fromEntries(app.state.modHost.registry.list().map((id) => [id, app.state.modHost.registry.baseOf(id)]));
       }
       /* A project stores the HAND values behind every routed control. The live Card values may be
          anywhere in an LFO cycle when Save is pressed; those animated values are presentation for
@@ -3549,12 +3581,12 @@ export async function boot(dom) {
       const projects = createProjects({ host: floats || document.body, part,
         snapshot: () => JSON.parse(JSON.stringify(serialize())), rollback: (S) => restore(S) === true,   // M5b: the instrument as it stood, through the same road
         busy: (d) => { busy.n = Math.max(0, busy.n + d); busySync(); },   // wave 48: a project load rebuilds the register, the operator and the field — BUSY work
-        notice: () => restoreNotice, thumbnail: () => LW.thumbnail(), confirm: (text) => window.confirm(text), onMoved: () => occlusion.dirty(),
+        notice: () => app.state.restoreNotice, thumbnail: () => LW.thumbnail(), confirm: (text) => window.confirm(text), onMoved: () => occlusion.dirty(),
         rack: { keepClear: () => ['rack', 'rackL', 'transport'].map((id) => paintedRect(document.getElementById(id))).filter(Boolean) },
         /* 0.3.1 · S2 THE NOTEBOOK LAW (PLAN §3.4): a project opens onto its notebook only when the notebook has text — the complete
            notebook, in its scrollable pane.  A blank one (NEW's included) opens nothing and closes nothing.  "Edited" is read off the
            text: no flag.  S3: the ring's bottom row is named for the file. */
-        opened(label) { count(); if (history) history.clear(label); if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; } render(); },
+        opened(label) { count(); if (app.state.history) app.state.history.clear(label); if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; } render(); },
         titleAfterSave(name) { if (titleIn.value !== 'NOTEBOOK') return false; titleIn.value = name; return true; } });
       addEventListener('beforeunload', (e) => {
         if (!projects.dirty) return;
@@ -3649,7 +3681,7 @@ export async function boot(dom) {
     const peekLast = { x: -1, y: -1, bar: false };
     const peekTransport = document.getElementById('transport');
     window.addEventListener('pointermove', (e) => {
-      if (e.pointerType === 'touch' || uiHidden || !document.body.classList.contains('rack-hidden')) return;
+      if (e.pointerType === 'touch' || app.state.uiHidden || !document.body.classList.contains('rack-hidden')) return;
       if (Math.abs(e.clientX - peekLast.x) < 2 && Math.abs(e.clientY - peekLast.y) < 2) return;   // a synthesised move after a layout change is not the pointer leaving
       peekLast.x = e.clientX; peekLast.y = e.clientY;
       const W = window.innerWidth, H = window.innerHeight;
@@ -3747,7 +3779,7 @@ export async function boot(dom) {
   }
   const tablet = { on: false, DPR: 1.5, steps: 110 };   // isTablet() itself sits beside isPhone() at the top (W125: the first-run material asks it before any window exists)
   function syncPhone() {
-    cornerLayoutDirty=true;
+    app.state.cornerLayoutDirty=true;
     const on = isPhone();
     if (on !== phone.on) {
       phone.on = on; document.body.classList.toggle('phone', on);
@@ -3775,7 +3807,7 @@ export async function boot(dom) {
     ui: uiSpace({ rack: rk, extra:() => ['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => paintedRect(document.getElementById(id))) }),
     camera, travel: camTravel, law: CAM,
     getDistance: () => obs.dist, zoomAt, pan: panBy, orbitBy, resetView,
-    setDragging: value => { dragging = value; },
+    setDragging: value => { app.state.dragging = value; },
     present: () => schedule(TIER.PRESENT),
     startSpecial(e) {
       if (e.ctrlKey) {
@@ -3786,8 +3818,8 @@ export async function boot(dom) {
       if (!e.shiftKey && kepler.on) {
         const hit = kepler.hit(e.clientX - r.left, e.clientY - r.top);
         if (hit) {
-          kdrag = { n: hit.n, id: e.pointerId }; dom.canvas.classList.add('kdrag');
-          const end = () => { kdrag = null; dom.canvas.classList.remove('kdrag'); };
+          app.state.kdrag = { n: hit.n, id: e.pointerId }; dom.canvas.classList.add('kdrag');
+          const end = () => { app.state.kdrag = null; dom.canvas.classList.remove('kdrag'); };
           return {
             move(event) {
               const rect = dom.canvas.getBoundingClientRect();
@@ -3801,7 +3833,7 @@ export async function boot(dom) {
       return null;
     },
     hover(e) {
-      if (bow || !kepler.on) return;
+      if (app.state.bow || !kepler.on) return;
       const r = dom.canvas.getBoundingClientRect(), hit = kepler.hit(e.clientX - r.left, e.clientY - r.top);
       kepler.setHover(hit); dom.canvas.classList.toggle('khover', !!hit);
     },
@@ -3875,16 +3907,16 @@ export async function boot(dom) {
     { id: 'rotorK', group: KG.S, short: 'rotor K', label: 'rotor: Runge–Lenz K', key: 'Digit4', run: () => setWhich('K') },
     { id: 'turnNeg', group: KG.S, short: 'turn −', label: 'turn ψ about the axis, −', key: 'BracketLeft', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: -0.12 * f, t: clock.t }); touchState(); } },
     { id: 'turnPos', group: KG.S, short: 'turn +', label: 'turn ψ about the axis, +', key: 'BracketRight', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: 0.12 * f, t: clock.t }); touchState(); } },
-    { id: 'slap', group: KG.S, short: 'impulse', label: 'impulse along the axis (k = 0.2)', key: 'KeyK', run: (f) => { if (__LW_hooks.slap) __LW_hooks.slap(0.2 * f, keyState.axis); } },
+    { id: 'slap', group: KG.S, short: 'impulse', label: 'impulse along the axis (k = 0.2)', key: 'KeyK', run: (f) => { if (app.hooks.slap) app.hooks.slap(0.2 * f, keyState.axis); } },
     { id: 'style', short: 'style', label: 'cycle the draw style', key: 'KeyC', run: () => { const order = ['cloud', 'solid', 'grain', 'signed', 'bands']; const nx = order[(order.indexOf(STYLE_NAMES[mat.style]) + 1) % 5]; mat.style = STYLE[nx]; ui.styleSeg.set(nx); schedule(TIER.PRESENT); } },
     { id: 'view', short: 'view', label: 'cycle the observable', key: 'KeyV', run: () => { const order = ['density', 'phase', 'real', 'imag', 'diff', 'reim']; const nx = order[(order.indexOf(VIEW_NAMES[mat.view]) + 1) % 6]; mat.view = VIEW[nx]; ui.viewSeg.set(nx); schedule(TIER.PRESENT); } },
-    { id: 'palette', short: 'palette', label: 'toggle the phase palette', key: 'KeyP', run: () => { if (palette) palette.setOn(!palette.on); } },
+    { id: 'palette', short: 'palette', label: 'toggle the phase palette', key: 'KeyP', run: () => { if (app.state.palette) app.state.palette.setOn(!app.state.palette.on); } },
     { id: 'hide', was: 'hideUI', short: 'hide UI', label: 'hide / show the interface (the frame and the axes with it)', key: 'KeyH', run: () => toggleUI() },
     { id: 'nextWindow', short: 'next win', label: 'next window to the top of the rack (from the stage)', key: 'Tab', shift: false, stage: true, run: () => cycleWindow(1) },
     { id: 'prevWindow', short: 'prev win', label: 'previous window to the top of the rack (from the stage)', key: 'Tab', shift: true, stage: true, run: () => cycleWindow(-1) },
     { id: 'reseed', group: KG.S, short: 'reseed', label: 'reset the particles', key: 'KeyR', ctrl: true, run: () => { particles.setOn(true); particles.seed(160, reg, clock.t, domain.half); schedule(TIER.PRESENT); } },
     { id: 'help', was: 'keysheet', short: 'keys', label: 'the keyboard — edit bindings', key: 'Slash', shift: true, run: () => layout.keymap.toggle() },
-    (({ id, run, up }) => ({ id, short: 'hold text', label: 'hold the stage text still (while I is held)', key: 'KeyI', shift: false, run, up }))(infoActions(() => stageText && stageText.layer)[0]),   // 0.5.1 D1: the kit's hold-still row
+    (({ id, run, up }) => ({ id, short: 'hold text', label: 'hold the stage text still (while I is held)', key: 'KeyI', shift: false, run, up }))(infoActions(() => app.state.stageText && app.state.stageText.layer)[0]),   // 0.5.1 D1: the kit's hold-still row
     { id: 'notes', short: 'notes', label: 'show / hide window help', key: 'KeyN', run: () => { const on = document.body.classList.contains('window-info-off'); if (ui.setWindowInfo) ui.setWindowInfo(on); if (ui.windowInfoSw) ui.windowInfoSw.set(on); } },
     { id: 'rack', short: 'rack', label: 'hide / show the rack', key: 'KeyB', run: () => layout.toggleRack() },
     { id: 'dock', short: 'dock', label: 'dock / undock the transport', key: 'KeyT', run: () => layout.dockTransport() },
@@ -3892,7 +3924,7 @@ export async function boot(dom) {
        editor, which is the visible seat neither could have inside the ported window: its timing bar is
        the artifact's and is not ours to grow (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW EXCEPTION). */
     /* R-K1 · the MOD arm is Ctrl+Space (the real Control: ⌘Space is Spotlight); A5+A6 seam: its run() follows the one clock's POWER. */
-    { id: 'modArm', group: KG.T, short: 'mod arm', label: 'MOD — the modulation’s power: routes on or bypassed (time runs on; space plays the one clock)', key: 'Space', ctrl: 'Ctrl', run: () => setModArm(!modArm) },
+    { id: 'modArm', group: KG.T, short: 'mod arm', label: 'MOD — the modulation’s power: routes on or bypassed (time runs on; space plays the one clock)', key: 'Space', ctrl: 'Ctrl', run: () => setModArm(!app.state.modArm) },
     { id: 'modulation', was: 'modWin', label: 'the modulation window — open it, or close it again', key: 'KeyM', run: () => layout.modulation.toggle() },
     { id: 'modBar', group: KG.T, short: 'bar lock', label: 'lock the modulation loop clock: one bar = one recurrence of the density', key: 'KeyG', run: () => barLock() },
     { id: 'undo', group: KG.P, short: 'undo', label: 'undo the last edit', key: 'KeyZ', ctrl: true, shift: false, run: () => historyApi.undo() },
@@ -3909,7 +3941,7 @@ export async function boot(dom) {
     /* the kit's windows λWAVES has are rows with NO chord (MIR ADOPTING-1.5 §11: their keys are Josh's to give; bind one in the keyboard) */
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
-    { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', key: null, run: () => { if (tl) tl.toggle(); } },   // 0.5.0 C7b
+    { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', key: null, run: () => { if (app.state.tl) app.state.tl.toggle(); } },   // 0.5.0 C7b
   ];
   /* THE DISPATCHER (the saved chords, the one keydown listener, whose key a press is): lab/keys.js (wave 130 seam 10) */
   /* S4 · A KEY'S EDIT IS A ROW OF ITS OWN, named for its action: C / V / P changed the edit scope and armed nothing, so the row came
@@ -3917,10 +3949,10 @@ export async function boot(dom) {
      commits first; a held key repeats under one name and stays one row; a key that changed nothing drops its name like any gesture. */
   const TRAVELS = new Set(['undo', 'redo', 'redoY', 'historyUndo']);
   const keyEdit = (a, run) => {
-    if (!history || history.holding || TRAVELS.has(a.id)) return run();   // an undo is not an edit: noting its name lent it to the next unnamed edit
+    if (!app.state.history || app.state.history.holding || TRAVELS.has(a.id)) return run();   // an undo is not an edit: noting its name lent it to the next unnamed edit
     const name = a.label + ' · ' + kt.keyText(a.id);
-    if (history.pendingLabel !== name) history.flush();
-    run(); history.note(name);
+    if (app.state.history.pendingLabel !== name) app.state.history.flush();
+    run(); app.state.history.note(name);
   };
   const kt = createKeyTable({ rows: ACTIONS, stageHasFocus, edit: keyEdit });   // 0.5.0 C3: the one listener, the save, the binding law (lab/key-table.js)
   /* ── 0.5.0 C3 · THE KEYBOARD WINDOW is the kit's createKeyboardWindow (keymap.js left): the drawn board, the platform switch, RECORD /
@@ -3952,30 +3984,30 @@ export async function boot(dom) {
      onePlay), its playhead paints from loop()'s present, the arrangement is the host clock's automation and rides in serialize()
      (presentation.timeline) with its own undo; λWAVES' pill stays the one transport (R9), the window a WORKSPACE record (`tlwin`) that
      ships closed (R1).  Its rows join the ONE KEY TABLE (undo/redo are λWAVES' own ids: its own are reachable from its ⋯ menu). */
-  if (modHost && modView) {
-    tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'),
-      mod: { host: modHost, registry: modHost.registry, armed: () => modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => modView.setTimeline(x),
+  if (app.state.modHost && app.state.modView) {
+    app.state.tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'),
+      mod: { host: app.state.modHost, registry: app.state.modHost.registry, armed: () => app.state.modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => app.state.modView.setTimeline(x),
         play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
       dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, transport: false, audio: false,
       store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },
-      busy: () => capApi.busy, moved: (r) => dodge(r, 'tl'), onWindow: () => occlusion.dirty() });
+      busy: () => app.state.capApi.busy, moved: (r) => app.state.dodge(r, 'tl'), onWindow: () => occlusion.dirty() });
     /* the window draws no pane of its own: its ruler, lanes and work bar are each a .glass pane (a lane clipped by the scroller), its rail chips */
-    occlusion.register('timeline', () => tl.isOpen() ? [...tl.root.querySelectorAll('.glass'), ...(tl.rail.el ? tl.rail.el.querySelectorAll('.mir-chip') : [])].map((s) => paintedRect(s, s.closest('.tl-viewport'))) : []);
-    for (const n of [tl.root, tl.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });
+    occlusion.register('timeline', () => app.state.tl.isOpen() ? [...app.state.tl.root.querySelectorAll('.glass'), ...(app.state.tl.rail.el ? app.state.tl.rail.el.querySelectorAll('.mir-chip') : [])].map((s) => paintedRect(s, s.closest('.tl-viewport'))) : []);
+    for (const n of [app.state.tl.root, app.state.tl.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });
     /* a ROUTED dial's hold and right-click stay its ring's (RANGE · REMOVE · RESET): the kit's TIMELINE CLIP (timeline/knobs.js, 500 ms,
        document capture) and the ring (600 ms) claim one gesture, so the window's capture hides that dial's id from the timeline for the
        one event and gives it back right after the timeline has looked (brief B13); an unrouted dial's hold is TIMELINE CLIP's */
     for (const type of ['pointerdown', 'contextmenu']) window.addEventListener(type, (e) => { const k = e.target.closest && e.target.closest('.k[data-param]');
-      if (!k || !modHost.model.routesOfTarget(k.dataset.param).some((r) => !r.dormant)) return; const id = k.dataset.param; k.removeAttribute('data-param');
+      if (!k || !app.state.modHost.model.routesOfTarget(k.dataset.param).some((r) => !r.dormant)) return; const id = k.dataset.param; k.removeAttribute('data-param');
       document.addEventListener(type, () => { k.dataset.param = id; }, { capture: true, once: true }); }, true);
   }
 
 
   function toggleUI() {
     const on = document.body.classList.toggle('ui-hidden');
-    uiHidden = on;
+    app.state.uiHidden = on;
     if (on) { ui.frameWas = mat.frame; ui.axisWas = mat.axis; mat.frame = false; mat.axis = false; }
-    else { if (ui.frameWas !== undefined) mat.frame = ui.frameWas; if (ui.axisWas !== undefined) mat.axis = ui.axisWas; metersWall = 0; govVersion = -1; }
+    else { if (ui.frameWas !== undefined) mat.frame = ui.frameWas; if (ui.axisWas !== undefined) mat.axis = ui.axisWas; app.state.metersWall = 0; app.state.govVersion = -1; }
     if (ui.frameSw) ui.frameSw.set(mat.frame !== false); if (ui.axisSw) ui.axisSw.set(mat.axis !== false);
     schedule(TIER.PRESENT);
   }
@@ -4003,7 +4035,7 @@ export async function boot(dom) {
     if (dev.classList.contains('folded')) { const f = dev.querySelector('.dev-fold'); if (f) f.click(); }
     dev.classList.add('tab-hot'); setTimeout(() => dev.classList.remove('tab-hot'), 600);
   }
-  __LW_hooks.keys = {
+  app.hooks.keys = {
     actions: ACTIONS,
     bind: kt.bind, conflicts: kt.conflicts, reset: kt.reset,   // 0.5.0 C3: λWAVES' binding law over the kit's table (lab/key-table.js)
     /* optimization N4: capture(id) and the dispatcher's capture branch served only the SETTINGS KEYS chips that 5f6421e
@@ -4036,7 +4068,7 @@ export async function boot(dom) {
   }
   /* 0.5.0 D9 · QCD's window is deleted; its record `instruments.qcd` stays as QUARKONIUM's parameters (the key and shape it had) */
   const quarkonium = () => { const s = HAMILTONIANS.cornell.system; return { kind: s.kind, potential: s.pot, params: { alphaS: s.params.alphaS, sigma: s.params.sigma, C: s.params.C } }; };
-  let restoreNotice = '';   // D9: what the last restore could not bring back (a retired legacy window), in one line; '' when nothing
+  app.state.restoreNotice = '';   // D9: what the last restore could not bring back (a retired legacy window), in one line; '' when nothing
   function serialize(opt) {
     const edit = !!(opt && opt.scope === 'edit');
     const m = JSON.parse(JSON.stringify(mat)); for (const k of ['bg', 'lightUI', 'stageCustom', ...FIELD_CHROME]) delete m[k];   // the stage colour travels under presentation.ui.stage; GAMMA remains an artist-owned material value; the chrome is the reader's (S1)
@@ -4048,33 +4080,33 @@ export async function boot(dom) {
        below is what applies them, because a link is the one road on which they are somebody else's. */
     const S = { experiment: Object.assign(reg.serialize(clock.t), { rate: clock.rate, window: clock.window, damping: reg.damping }),
       presentation: { obs: { ...obs, shift: [...obs.shift] }, mat: m, quality: { ...quality }, domain: { ...domain }, shadow: shadowView.mode,
-        paletteId: palette ? palette.id : PAL_DEF,
-        space, palette: palette ? { on: palette.on, selected: palette.selected, stops: palette.stops.map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) } : null,
-        hamiltonian: { id: H.id, Z: getZ(), atomZ: HAMILTONIANS.atom.Z, well: HAMILTONIANS.well.radius, gasBasis: gasAxial ? 'axial' : 'reg' },
+        paletteId: app.state.palette ? app.state.palette.id : PAL_DEF,
+        space: app.state.space, palette: app.state.palette ? { on: app.state.palette.on, selected: app.state.palette.selected, stops: app.state.palette.stops.map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) } : null,
+        hamiltonian: { id: H.id, Z: getZ(), atomZ: HAMILTONIANS.atom.Z, well: HAMILTONIANS.well.radius, gasBasis: app.state.gasAxial ? 'axial' : 'reg' },
         wigner: { zmax: wignerView.zmax, pmax: wignerView.pmax },
         readers: { spectrum: { selected: spectrum.selected, dials: spectrum.dials }, slice: slice.save(), kepler: { shell: kepShell() } },
         /* Static instrument controls belong to the composition. Solver caches, traces, collisions,
            particles and pulse runs do not: every project still opens paused on its first frame. */
-        instruments: { chem: chem.save(), orbitals: orbitals.save(), states: states.save(), register: { mode: register.mode }, qcd: quarkonium(),
+        instruments: { chem: app.state.chem.save(), orbitals: app.state.orbitals.save(), states: app.state.states.save(), register: { mode: app.state.register.mode }, qcd: quarkonium(),
           ladder: { ...ladder.params },
           particles: { count: Math.round(ui.pN.get()), trail: particles.trailLen } },
         rates: Array.from(rates), rotationRates: { ...rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
-        modulation: modHost ? modRackStamped() : null,
+        modulation: app.state.modHost ? modRackStamped() : null,
         /* 2026-09-10 (Josh): A PROJECT IS A DAW PROJECT — the stage, the window arrangement (every window as it stands,
            floats included), the modulation window's placement, auto-rotate, the overlays, SPECTRUM's DIALS fold, the A/B
            transition, the notebook's size when it was resized. Every key is additive: a file without it opens as before.
            0.3.1 · S1 THE SCOPE LAW (docs/STATE-SCOPES.md): the theme, card style, frost, disconnected cards, accents and
            the camera's feel are PREFERENCE — the reader's furniture — and are never written here again. */
-        ui: { stage: { mix: stageMix, custom: mat.stageCustom.slice(0, 3), follow: stageFollow } },
+        ui: { stage: { mix: app.state.stageMix, custom: mat.stageCustom.slice(0, 3), follow: app.state.stageFollow } },
         layout: !edit && layout.captureLayout ? layout.captureLayout() : null,
-        modwin: !edit && modView ? modView.presentation() : null,
+        modwin: !edit && app.state.modView ? app.state.modView.presentation() : null,
         camera: { autoRotate: !!camera.autoRotate },
         overlays: { vortex: { on: !!vortex.on, overlay: !!vortex.overlay }, kepler: !!kepler.on, particles: { on: !!particles.on, count: particles.points.length }, dials: !!spectrum.dials },
         ab: ui.ab ? ui.ab.get() : null,
         notebook: !edit && layout.notebookSize ? (() => { const n = layout.notebookSize(); return n.custom ? { w: n.w, h: n.h } : null; })() : null } };
-    const T = !edit && tl ? tl.model.serialize() : null; if (T && (T.clips.length || T.active)) S.presentation.timeline = T;   // 0.5.0 C7b: the arrangement, only when there is one (NEW and the demos stay byte-exact); never an undo row's
+    const T = !edit && app.state.tl ? app.state.tl.model.serialize() : null; if (T && (T.clips.length || T.active)) S.presentation.timeline = T;   // 0.5.0 C7b: the arrangement, only when there is one (NEW and the demos stay byte-exact); never an undo row's
     if (!edit) return S;
-    const pr = S.presentation, R = modHost && modHost.registry;
+    const pr = S.presentation, R = app.state.modHost && app.state.modHost.registry;
     delete S.experiment.t; delete pr.mat.steps; if (pr.domain.auto) delete pr.domain.half;
     for (const mc of (pr.modulation && pr.modulation.macros) || []) if (mc.sourceId) delete mc.value;
     if (R) for (const [id, [o, k, f]] of Object.entries(modSeats(S))) if (o && R.has(id) && R.isModulated(id)) o[k] = f ? f(R.baseOf(id)) : R.baseOf(id);
@@ -4093,8 +4125,8 @@ export async function boot(dom) {
    *  honour.  `rack.js` is OURS, so the guard survives an upstream re-take of the vendored file —
    *  which is the whole scenario PORT-NOTES.md warns about. */
   function modRackStamped() {
-    const o = modHost.model.serialize();
-    o.v = modHost.model.MOD_STATE_V;
+    const o = app.state.modHost.model.serialize();
+    o.v = app.state.modHost.model.MOD_STATE_V;
     return o;
   }
   /** LOAD A MODULATION RACK.  The model's own law: a load is STOPPED and starts at bar 1 with phase 0,
@@ -4102,7 +4134,7 @@ export async function boot(dom) {
    *  dormancy law is re-run — a route saved against a target this build does not have keeps its
    *  settings and sits inert rather than being thrown away. */
   function restoreModulation(o, savedBases, opening) {
-    if (!modHost) return false;
+    if (!app.state.modHost) return false;
     /* REFUSE WHAT THIS BUILD CANNOT HONOUR, and say so.  An ABSENT `v` is not a refusal — every
        rack written before wave 63 has none and means "predates the stamp", which is the same
        reading `mod.js` prescribes for an absent preset stamp.  A stamp we do not know is a rack
@@ -4110,25 +4142,25 @@ export async function boot(dom) {
        the silent 30 % the version exists to prevent: leave the rack exactly as it was and put the
        two numbers on the card. */
     const V = o && typeof o === 'object' ? o.v : undefined;
-    if (V !== undefined && !modHost.model.modStateReadable(V)) {
+    if (V !== undefined && !app.state.modHost.model.modStateReadable(V)) {
       wState.setStatus('modulation rack refused — model ' + V + ', this build reads ' +
-                       modHost.model.MOD_STATE_READS.join(' · '), 'warn');
+                       app.state.modHost.model.MOD_STATE_READS.join(' · '), 'warn');
       return false;
     }
-    modHost.clock.pause();
+    app.state.modHost.clock.pause();
     /* Capture the project values before restoreAll hands the previous rack's live targets back.
        Old projects have no explicit base table; for those, the fully restored controls are the
        migration source. New projects use savedBases, which remains stable through modulation. */
-    const incoming = Object.fromEntries(modHost.registry.list().map((id) => [id, modGets[id] ? Number(modGets[id]()) : NaN]));
-    modHost.registry.restoreAll();
-    const ok = modHost.model.deserialize(o || null);
-    modHost.targets.sync();
-    for (const id of modHost.registry.list()) {
+    const incoming = Object.fromEntries(app.state.modHost.registry.list().map((id) => [id, modGets[id] ? Number(modGets[id]()) : NaN]));
+    app.state.modHost.registry.restoreAll();
+    const ok = app.state.modHost.model.deserialize(o || null);
+    app.state.modHost.targets.sync();
+    for (const id of app.state.modHost.registry.list()) {
       const v = savedBases && Number.isFinite(savedBases[id]) ? savedBases[id] : incoming[id];
-      if (Number.isFinite(v)) modHost.registry.setBase(id, v);
+      if (Number.isFinite(v)) app.state.modHost.registry.setBase(id, v);
     }
-    modHost.clock.applyAll(true);
-    if (modView && !opening) modView.rebuild();                    // wave 127: a window the file opens is rebuilt by its open() (the kit's window.js restore → open → rebuild)
+    app.state.modHost.clock.applyAll(true);
+    if (app.state.modView && !opening) app.state.modView.rebuild();                    // wave 127: a window the file opens is rebuilt by its open() (the kit's window.js restore → open → rebuild)
     schedule(TIER.PRESENT);
     return ok;
   }
@@ -4140,10 +4172,10 @@ export async function boot(dom) {
    *  t = 0.  Neither clears the history: the road that opened the file does, naming it (boot, link, open · …). */
   function restore(obj, opt) {
     const hist = !!(opt && opt.history), gone = [];                  // D9: the retired legacy windows this file used, named once below
-    if (!hist) restoreNotice = '';
+    if (!hist) app.state.restoreNotice = '';
     markBatchBegin();                                                // M7: released in the finally below
     try {
-      if (opt && opt.project && modHost) { modHost.clock.pause(); modHost.registry.restoreAll(); }   // S2 · a project open puts the running modulation down FIRST (wave 127's law): a route still holding the stage wrote its old base back over the file's mix
+      if (opt && opt.project && app.state.modHost) { app.state.modHost.clock.pause(); app.state.modHost.registry.restoreAll(); }   // S2 · a project open puts the running modulation down FIRST (wave 127's law): a route still holding the stage wrote its old base back over the file's mix
       const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
       let pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
       /* S3 · an UNDO re-applies a heavy section only when it moved (probes/S3/undo-while-playing.js: reloading an unchanged rack
@@ -4151,7 +4183,7 @@ export async function boot(dom) {
       if (hist && pr) { const now = serialize({ scope: 'edit' }).presentation; pr = { ...pr };
         for (const k of ['modulation', 'palette', 'instruments', 'overlays']) if (JSON.stringify(pr[k]) === JSON.stringify(now[k])) delete pr[k]; }
       if (ex) {
-        if (reg.transition && __LW_hooks.ab) __LW_hooks.ab.set(false);   // wave 127 · every road stands a running A/B transition down FIRST (UNDO's law): clearing it later froze its mix over the register written here
+        if (reg.transition && app.hooks.ab) app.hooks.ab.set(false);   // wave 127 · every road stands a running A/B transition down FIRST (UNDO's law): clearing it later froze its mix over the register written here
         const t = reg.restore(ex);
         if (!hist) {
           clock.pause(); clock.scrub(opt && opt.project ? 0 : t);
@@ -4161,7 +4193,7 @@ export async function boot(dom) {
         if (Number.isFinite(ex.rate) && ex.rate > 0) clock.setRate(paceRate(ex.rate));
         if (ex.window) clock.window = ex.window;
         if (Number.isFinite(ex.damping)) { reg.setDamping(ex.damping); if (ui.dragKnob) ui.dragKnob.set(reg.damping); }
-        ui.rateKnob.set(clock.rate); ui.presetSel.value = reg.preset || ''; lastNmax = -1; setReference();
+        ui.rateKnob.set(clock.rate); ui.presetSel.value = reg.preset || ''; app.state.lastNmax = -1; setReference();
       }
       if (pr) { if (!hist) { camLevel.from = null; Object.assign(obs, pr.obs || {}); if (pr.obs) obs.shift = clampShift(pr.obs.shift); obs.mode = obs.mode === 'free' ? 'free' : 'turntable';   /* S2: a pose without a shift (an older file or link) opens at 0 */ if (!Array.isArray(obs.quat) || obs.quat.length !== 4) obs.quat = quatFromYawPitch(obs.yaw, obs.pitch); if (obs.mode === 'free') { /* WAVE 106 · THE ANGLES ARE A READOUT IN FREE, AND A READOUT MUST NOT MOVE THE RECORD.
       A link rounds the quaternion to f32; re-deriving the angles from THAT quaternion lands them an ulp off the
@@ -4171,7 +4203,7 @@ export async function boot(dom) {
       the ones it carried; anything that genuinely disagrees is still re-derived, which is what an old favourite
       carrying no quaternion needs. */
       const y0 = obs.yaw, p0 = obs.pitch; syncFreeAngles();
-      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } if (ui.camSeg) ui.camSeg.set(obs.mode); camera.stop(); syncCamUI(); } const pm = { ...(pr.mat || {}) }; for (const k of ['bg', 'lightUI', ...FIELD_CHROME]) delete pm[k]; Object.assign(mat, pm);   /* S1: an older file's chrome is the sender's preference — ignored, so the reader's frame, axes and invert stand */ if (Number.isFinite(pm.gamma) && ui.gammaK) ui.gammaK.set(pm.gamma); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));   /* PACE P2: within the device's grid ceiling, and never AUTO SCALE (the device's switch) */ Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
+      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } camera.stop(); syncCamUI(); } const pm = { ...(pr.mat || {}) }; for (const k of ['bg', 'lightUI', ...FIELD_CHROME]) delete pm[k]; Object.assign(mat, pm);   /* S1: an older file's chrome is the sender's preference — ignored, so the reader's frame, axes and invert stand */ if (Number.isFinite(pm.gamma) && ui.gammaK) ui.gammaK.set(pm.gamma); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));   /* PACE P2: within the device's grid ceiling, and never AUTO SCALE (the device's switch) */ Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
       /* A restored number and the control that owns it are one state. Keep every Wave, Clip,
          field and quality control on the value that was just loaded before modulation reads it. */
       if (pr) {
@@ -4199,7 +4231,7 @@ export async function boot(dom) {
            file's numbers for exactly the parameters that were modulated when it opened. */
         if (!hist) modSyncBases(true);   // an UNDO's come from its record, below
         if (sturm.P) { sturm.on = false; sturm.P = null; sturm.rec = null; reg.setPropagator(null); reg.setEnergies(energyOf); }   // W-STURMIAN: stand the scale down silently (no re-anchoring) while the file's operator, Z and rates land; its own scale is applied below
-        if (pr.hamiltonian) { const h = pr.hamiltonian; if (h.atomZ) setElement(h.atomZ); if (h.Z && h.Z !== getZ()) { setZ(h.Z); if (ui.zKnob) ui.zKnob.set(h.Z); } if (h.well && h.well !== HAMILTONIANS.well.radius) { HAMILTONIANS.well.setRadius(h.well); gas.setRadius(h.well); if (ui.wellKnob) ui.wellKnob.set(h.well); } if (h.id && HAMILTONIANS[h.id]) { setHamiltonian(h.id); switchHamiltonian(h.id); if (ui.hamSeg) ui.hamSeg.set(h.id); } gasAxial = h.gasBasis === 'axial'; if (ui.gasBasis) ui.gasBasis.set(gasAxial ? 'axial' : 'reg'); if (!gasAxial) gas.off(); }
+        if (pr.hamiltonian) { const h = pr.hamiltonian; if (h.atomZ) setElement(h.atomZ); if (h.Z && h.Z !== getZ()) { setZ(h.Z); if (ui.zKnob) ui.zKnob.set(h.Z); } if (h.well && h.well !== HAMILTONIANS.well.radius) { HAMILTONIANS.well.setRadius(h.well); gas.setRadius(h.well); if (ui.wellKnob) ui.wellKnob.set(h.well); } if (h.id && HAMILTONIANS[h.id]) { setHamiltonian(h.id); switchHamiltonian(h.id); if (ui.hamSeg) ui.hamSeg.set(h.id); } app.state.gasAxial = h.gasBasis === 'axial'; if (ui.gasBasis) ui.gasBasis.set(app.state.gasAxial ? 'axial' : 'reg'); if (!app.state.gasAxial) gas.off(); }
         if (pr.wigner) { const G = pr.wigner; wignerView.setRange(G.zmax, G.pmax); }
         if (pr.instruments) {
           const I = pr.instruments;
@@ -4221,18 +4253,18 @@ export async function boot(dom) {
              collision have no twin).  The old `h2` record and seat are read by nothing else. */
           const hl = !!(I.h2 && I.h2.on) && !(I.chem && I.chem.on);
           const fieldOwner = (I.chem && I.chem.on) || h2plus || hl ? 'chem' : null;
-          if (I.chem) chem.load({ ...I.chem, on: false });
-          if (h2plus) { const u = I.molecule.kind === 'sigma_u'; chem.load({ preset: 'H2', basis: 'sto-3g', view: 'orbital', orbital: u ? 2 : 1, on: false }); gone.push('H₂⁺ (opened as MOLECULES · H₂ ' + (u ? 'σu' : 'σg') + ')'); }
-          if (hl) { chem.load({ preset: 'H2', basis: 'sto-3g', view: 'density', orbital: null, on: false }); gone.push('H₂ (opened as MOLECULES · H₂)'); }
+          if (I.chem) app.state.chem.load({ ...I.chem, on: false });
+          if (h2plus) { const u = I.molecule.kind === 'sigma_u'; app.state.chem.load({ preset: 'H2', basis: 'sto-3g', view: 'orbital', orbital: u ? 2 : 1, on: false }); gone.push('H₂⁺ (opened as MOLECULES · H₂ ' + (u ? 'σu' : 'σg') + ')'); }
+          if (hl) { app.state.chem.load({ preset: 'H2', basis: 'sto-3g', view: 'density', orbital: null, on: false }); gone.push('H₂ (opened as MOLECULES · H₂)'); }
           /* the ORBITALS register lands OFF first, like every field-touching card, and is switched on only after
              CHEMISTRY holds the volume — its own load() parks the selection until a ladder exists to hang it on */
-          if (I.orbitals) orbitals.load({ ...I.orbitals, on: false });
-          if (I.states) states.load({ ...I.states, on: false });
-          if (I.register) register.setMode(I.register.mode);
+          if (I.orbitals) app.state.orbitals.load({ ...I.orbitals, on: false });
+          if (I.states) app.state.states.load({ ...I.states, on: false });
+          if (I.register) app.state.register.setMode(I.register.mode);
           if (he) { setElement(2); fillValence(); gone.push('HELIUM (opened as ATOM · He 1s)'); }
-          else if (fieldOwner === 'chem') chem.setOn(true);
-          if (I.orbitals && I.orbitals.on && fieldOwner === 'chem') orbitals.setOn(true);
-          if (I.states && I.states.on && fieldOwner === 'chem') states.setOn(true);   // parks itself until the ladder lands (statesview `wanted`)
+          else if (fieldOwner === 'chem') app.state.chem.setOn(true);
+          if (I.orbitals && I.orbitals.on && fieldOwner === 'chem') app.state.orbitals.setOn(true);
+          if (I.states && I.states.on && fieldOwner === 'chem') app.state.states.setOn(true);   // parks itself until the ladder lands (statesview `wanted`)
           if (I.ladder) ladder.load(I.ladder);                         // M2 (2026-09-24): lands the params, defers the scan (ladder.js load)
           if (I.particles) {
             if (Number.isFinite(I.particles.count)) ui.pN.set(I.particles.count);
@@ -4247,10 +4279,10 @@ export async function boot(dom) {
            and are ignored — opening a project never changes this browser's settings (docs/STATE-SCOPES.md). */
         if (pr.ui) { const U = pr.ui;
           if (U.stage) {
-            if (Number.isFinite(U.stage.mix)) { stageMix = Math.max(0, Math.min(1, U.stage.mix)); if (ui.stageK) ui.stageK.set(stageMix); }
+            if (Number.isFinite(U.stage.mix)) { app.state.stageMix = Math.max(0, Math.min(1, U.stage.mix)); if (ui.stageK) ui.stageK.set(app.state.stageMix); }
             const custom = Array.isArray(U.stage.custom) ? U.stage.custom : (Array.isArray(U.stage.b) ? U.stage.b : (Array.isArray(U.stage.a) ? U.stage.a : null));
-            if (__LW_hooks.setStageColour) __LW_hooks.setStageColour(custom);
-            if (__LW_hooks.setStageFollow) __LW_hooks.setStageFollow(typeof U.stage.follow === 'boolean' ? U.stage.follow : !custom);
+            if (app.hooks.setStageColour) app.hooks.setStageColour(custom);
+            if (app.hooks.setStageFollow) app.hooks.setStageFollow(typeof U.stage.follow === 'boolean' ? U.stage.follow : !custom);
           } }
         if (pr.camera) camera.setAutoRotate(!!pr.camera.autoRotate);
         if (pr.overlays) { const O = pr.overlays;
@@ -4267,18 +4299,18 @@ export async function boot(dom) {
         if (pr.notebook && layout.notebookResize && Number.isFinite(pr.notebook.w) && !(pr.layout && pr.layout.nb)) layout.notebookResize(pr.notebook.w, pr.notebook.h);   // wave 127: a layout carrying nb sizes it next (applyLayout), last
         if (pr.layout && layout.applyLayout) layout.applyLayout(pr.layout);
         if (getHamiltonian().id === 'atom' && !hist) { wAtoms.root.hidden = false; wAtoms.root.classList.remove('closed'); }   // 0.4.0 S0: the ATOM operator brings its element picker
-        if (pr.instruments && chem.on && !hist) { wChem.root.classList.remove('closed'); const I = pr.instruments; if ((I.orbitals && I.orbitals.on) || (I.states && I.states.on)) wOrbs.root.classList.remove('closed'); }   // W129 · the same law for MOLECULES (a first visit leaves it and MO-REGISTRY off the rack): a file it owns brings it back, and MO-REGISTRY when the file's register is on
+        if (pr.instruments && app.state.chem.on && !hist) { wChem.root.classList.remove('closed'); const I = pr.instruments; if ((I.orbitals && I.orbitals.on) || (I.states && I.states.on)) wOrbs.root.classList.remove('closed'); }   // W129 · the same law for MOLECULES (a first visit leaves it and MO-REGISTRY off the rack): a file it owns brings it back, and MO-REGISTRY when the file's register is on
         /* D9 · A FILE THAT USED A RETIRED WINDOW OPENS WITHOUT IT, AND SAYS SO IN ONE LINE (the PROJECTS status and STATE's): an old
            layout seat is skipped by applyLayout (no such card), nothing throws.  QCD counts as used when its seat was open. */
         if (!hist && pr.layout && Array.isArray(pr.layout.cards) && pr.layout.cards.some((c) => c && c.id === 'qcd' && !c.closed)) gone.push('QCD (QUARKONIUM keeps its parameters)');
-        if (gone.length) restoreNotice = 'retired in 0.5.0: ' + gone.join(' · ');
+        if (gone.length) app.state.restoreNotice = 'retired in 0.5.0: ' + gone.join(' · ');
         stageTextTick();                                              // the STAGE TEXT follows whatever MOLECULES the file left
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
         /* S3 · an UNDO's bases are its record's seats, never read back off a control the modulator is moving (an unseated target keeps
            its base; an unmodulated one is the control just written) */
         const histBases = {};
-        if (hist) { const R = modHost.registry, seats = modSeats(obj);
+        if (hist) { const R = app.state.modHost.registry, seats = modSeats(obj);
           for (const id of R.list()) if (R.isModulated(id)) { const s = seats[id]; R.setBase(id, histBases[id] = s && s[0] ? (s[3] || Number)(s[0][s[1]]) : R.baseOf(id)); } }
         // Restore operator rates AFTER the destination scale is installed. The old project's
         // Sturmian guard must not erase a Coulomb project's rates on the way in.
@@ -4286,23 +4318,23 @@ export async function boot(dom) {
         for (const key of Object.keys(rotRate)) {
           const v = setRotationRate(key, rr && Number.isFinite(rr[key]) ? rr[key] : 0);
           const id = key === 'z' ? 'state.rot.z' : key === 'kz' ? 'state.stark.kz' : 'state.defect.l2';
-          modHost.registry.setBase(id, v);
+          app.state.modHost.registry.setBase(id, v);
         }
-        if (pr.modulation === undefined) modHost.clock.applyAll(true);
-        if (pr.space && pr.space !== space && !getHamiltonian().noMomentum && !sturm.P) { space = pr.space; if (ui.spaceSeg) ui.spaceSeg.set(space); }
-        if (pr.palette && palette) {
-          if (Array.isArray(pr.palette.stops)) palette.load(pr.palette.stops, pr.palette.selected, pr.paletteId); else if (pr.paletteId) palette.select(pr.paletteId);   // wave 127: the file's own stops under its name — one push, not a catalogue read then a load
-          palette.setOn(!!pr.palette.on); if (!pr.palette.on && mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);
+        if (pr.modulation === undefined) app.state.modHost.clock.applyAll(true);
+        if (pr.space && pr.space !== app.state.space && !getHamiltonian().noMomentum && !sturm.P) { app.state.space = pr.space; if (ui.spaceSeg) ui.spaceSeg.set(app.state.space); }
+        if (pr.palette && app.state.palette) {
+          if (Array.isArray(pr.palette.stops)) app.state.palette.load(pr.palette.stops, pr.palette.selected, pr.paletteId); else if (pr.paletteId) app.state.palette.select(pr.paletteId);   // wave 127: the file's own stops under its name — one push, not a catalogue read then a load
+          app.state.palette.setOn(!!pr.palette.on); if (!pr.palette.on && mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);
         }
         /* Restore modulation last. Its base setters now see the final camera, Stage, transport,
            palette and state controls, so no later project step can overwrite a routed hand value. */
-        const modWas = hist && pr.modulation !== undefined && modHost && modHost.clock.isPlaying();
+        const modWas = hist && pr.modulation !== undefined && app.state.modHost && app.state.modHost.clock.isPlaying();
         if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
-        if (modWas) modHost.clock.play(performance.now() / 1000);       // S4 · restoreModulation put the clock down: an undo under THE play puts it back to playing (its demand is still held)
-        if (pr.modwin && modView) modView.restore(pr.modwin);
-        if (!hist && tl) tl.model.restore(pr.timeline || null);           // 0.5.0 C7b: an open replaces the arrangement (NEW clears it); an undo leaves it — it keeps its own
+        if (modWas) app.state.modHost.clock.play(performance.now() / 1000);       // S4 · restoreModulation put the clock down: an undo under THE play puts it back to playing (its demand is still held)
+        if (pr.modwin && app.state.modView) app.state.modView.restore(pr.modwin);
+        if (!hist && app.state.tl) app.state.tl.model.restore(pr.timeline || null);           // 0.5.0 C7b: an open replaces the arrangement (NEW clears it); an undo leaves it — it keeps its own
       }
-      schedule(TIER.REBUILD); wState.setStatus(gone.length ? restoreNotice : 'restored', gone.length ? 'warn' : 'live');
+      schedule(TIER.REBUILD); wState.setStatus(gone.length ? app.state.restoreNotice : 'restored', gone.length ? 'warn' : 'live');
       return true;
     } catch (e) { console.warn('restore failed', e); wState.setStatus('restore failed', 'warn'); return false; }   // say WHY in the console too: a silent catch hid a scope error for an afternoon
     /* OPTIMIZATION 2026-09-24 · M5: a restore that throws half-way has still moved state, and an early throw left it
@@ -4327,7 +4359,7 @@ export async function boot(dom) {
   const NOT_CARRIED_NAME = { mo: 'the MOLECULE panel', modulation: 'the MODULATION rack', rotationRates: 'the rotation and deflection rates' };
   const notCarriedWords = (keys) => keys.map((k) => NOT_CARRIED_NAME[k] || k).join(' · ');
   const esc = (t) => String(t).replace(/[&<>]/g, (c) => (c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'));
-  let linkLast = null;
+  app.state.linkLast = null;
 
   /** what the interface says about a link, in the two places it can be read: the STATE card's status line
    *  (short, and its hover hint carries the whole of it) and a note on the card that does not disappear. */
@@ -4338,7 +4370,7 @@ export async function boot(dom) {
   }
 
   /** the href for the state as it stands, with everything encodeState measured about it */
-  function mintLink() { linkLast = linkFor(serialize(), { paletteId: palette ? palette.id : PAL_DEF, orbitalKey: chem.on ? chem.orbitalKey() : null }); return linkLast; }   // S2: the molecule's orbital rides by its S1 name
+  function mintLink() { app.state.linkLast = linkFor(serialize(), { paletteId: app.state.palette ? app.state.palette.id : PAL_DEF, orbitalKey: app.state.chem.on ? app.state.chem.orbitalKey() : null }); return app.state.linkLast; }   // S2: the molecule's orbital rides by its S1 name
 
   /** MINT and copy.  Reports `chars`, and when something is not carried it SAYS SO. */
   async function copyLink() {
@@ -4374,11 +4406,11 @@ export async function boot(dom) {
     if (!got) return { ok: true, opened: false, code: null, message: null };
     /* THE PALETTE IS NAMED BEFORE THE STATE IS RESTORED, never after: select() re-reads the catalogue's own
        stops, so doing it second would throw away an EDITED palette that the link had carried in full. */
-    if (got.paletteId && palette && got.paletteId !== palette.id) palette.select(got.paletteId);   // S1 (D2): the palette is the link's, never written into this browser's settings
+    if (got.paletteId && app.state.palette && got.paletteId !== app.state.palette.id) app.state.palette.select(got.paletteId);   // S1 (D2): the palette is the link's, never written into this browser's settings
     const ok = restore(got.state);
     const d = +(got.state.experiment && got.state.experiment.damping);
     if (Number.isFinite(d) && d !== reg.damping) { reg.setDamping(d); if (ui.dragKnob) ui.dragKnob.set(d); }
-    if (history) history.clear('link');                 // a link is the BOTTOM of the stack, exactly as ?preset= is
+    if (app.state.history) app.state.history.clear('link');                 // a link is the BOTTOM of the stack, exactly as ?preset= is
     const say = [];
     for (const w of got.warnings || []) say.push('<b>NOTE.</b> ' + esc(w) + '.');
     if ((got.unknownSections || []).length) say.push('<b>' + got.unknownSections.length + ' part' + (got.unknownSections.length === 1 ? '' : 's')
@@ -4393,12 +4425,12 @@ export async function boot(dom) {
      rows are the kit's stack (mir/history/history.js), this record its one `edit` domain (lab/edit-domain.js) */
   const hKey = (j) => { let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) h = Math.imul(h ^ j.charCodeAt(i), 0x01000193); return (h >>> 0).toString(36) + ':' + j.length; };
   let __hver = reg.version;
-  Object.defineProperty(reg, 'version', { configurable: true, get() { return __hver; }, set(v) { __hver = v; if (!rotTicking) hNote(); } });
+  Object.defineProperty(reg, 'version', { configurable: true, get() { return __hver; }, set(v) { __hver = v; if (!app.state.rotTicking) hNote(); } });
   /* the LIST repaints itself whenever the ring moves — `onChange` is the ring's own hook and fires on
      every commit, undo, redo, goto and clear, so nothing polls and nothing can drift out of step. */
   let hRender = null;
-  history = createEditHistory({ read: () => { const S = serialize({ scope: 'edit' }); S.key = hKey(JSON.stringify(S)); return S; },
-    write: (S) => restore(S, { history: true }), liveKey: () => hKey(JSON.stringify(serialize({ scope: 'edit' }))), depth: 60, quiet: 400, driven: () => rotMoved && rotDriving(),
+  app.state.history = createEditHistory({ read: () => { const S = serialize({ scope: 'edit' }); S.key = hKey(JSON.stringify(S)); return S; },
+    write: (S) => restore(S, { history: true }), liveKey: () => hKey(JSON.stringify(serialize({ scope: 'edit' }))), depth: 60, quiet: 400, driven: () => app.state.rotMoved && rotDriving(),
     onChange: () => { if (hRender) hRender(); } });
   /* ══ WAVE 106 · THE ROWS GET THEIR NAMES FROM THE THING THE HAND TOUCHED ════════════════════════
      An FL-style list is only worth having if a row says what it was — "Move Pattern", not "edit #17".
@@ -4461,39 +4493,39 @@ export async function boot(dom) {
   document.addEventListener('pointerdown', e => {
     if (e.button !== 0 && e.button !== 2) return;
     if (heldPointers.has(e.pointerId)) releasePointer(e);
-    heldPointers.add(e.pointerId); pointerHeld = true;
-    history.hold(hTouchName(e.target));
+    heldPointers.add(e.pointerId); app.state.pointerHeld = true;
+    app.state.history.hold(hTouchName(e.target));
   }, true);
   const releasePointer = e => {
     if (!heldPointers.delete(e.pointerId)) return;
-    pointerHeld = heldPointers.size > 0;
-    history.release(); // Commits on the next task, after the control's onChange.
+    app.state.pointerHeld = heldPointers.size > 0;
+    app.state.history.release(); // Commits on the next task, after the control's onChange.
   };
   // Capture also sees releases that a control stops from bubbling. An implicit
   // lost capture after pointerup must not release a second finger's undo hold.
   for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) document.addEventListener(type, releasePointer, true);
   /* S3 · …and the form fields a pointer does not frame (a colour picker, a <select>, a typed name land after the pointerup): their
      input/change events arm the ring, named like a press (notebook typing moves no edit key: no row) */
-  for (const type of ['input', 'change']) document.addEventListener(type, (e) => history.note(hTouchName(e.target)), true);
+  for (const type of ['input', 'change']) document.addEventListener(type, (e) => app.state.history.note(hTouchName(e.target)), true);
   const releasePointers = () => { for (const pointerId of heldPointers) releasePointer({ pointerId }); };
   window.addEventListener('blur', releasePointers);
   window.addEventListener('pagehide', releasePointers);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releasePointers(); });
   const historyApi = {
-    undo() { const ok = history.undo(); if (ok) wState.setStatus('undone · ' + history.depth + ' back, ' + history.redoDepth + ' forward', 'live'); return ok; },
-    redo() { const ok = history.redo(); if (ok) wState.setStatus('redone · ' + history.depth + ' back, ' + history.redoDepth + ' forward', 'live'); return ok; },
-    historyUndo() { const ok = history.historyUndo(); if (ok) wState.setStatus('returned from history jump', 'live'); return ok; },
-    get canUndo() { return history.canUndo; }, get canRedo() { return history.canRedo; },
-    get canHistoryUndo() { return history.canHistoryUndo; },
-    get depth() { return history.depth; }, get redoDepth() { return history.redoDepth; }, get limit() { return history.limit; },
-    clear() { history.clear(); }, flush() { return history.flush(); }, note(name) { history.note(name); },
+    undo() { const ok = app.state.history.undo(); if (ok) wState.setStatus('undone · ' + app.state.history.depth + ' back, ' + app.state.history.redoDepth + ' forward', 'live'); return ok; },
+    redo() { const ok = app.state.history.redo(); if (ok) wState.setStatus('redone · ' + app.state.history.depth + ' back, ' + app.state.history.redoDepth + ' forward', 'live'); return ok; },
+    historyUndo() { const ok = app.state.history.historyUndo(); if (ok) wState.setStatus('returned from history jump', 'live'); return ok; },
+    get canUndo() { return app.state.history.canUndo; }, get canRedo() { return app.state.history.canRedo; },
+    get canHistoryUndo() { return app.state.history.canHistoryUndo; },
+    get depth() { return app.state.history.depth; }, get redoDepth() { return app.state.history.redoDepth; }, get limit() { return app.state.history.limit; },
+    clear() { app.state.history.clear(); }, flush() { return app.state.history.flush(); }, note(name) { app.state.history.note(name); },
     /* wave 106: the three the LIST needs — the rows, where the instrument is standing, and the jump.
        `goto` commits first (that is the ring's own rule), so jumping away from an unbanked edit banks
        it rather than losing it. */
-    entries() { return history.entries(); }, get cursor() { return history.cursor; },
+    entries() { return app.state.history.entries(); }, get cursor() { return app.state.history.cursor; },
     render() { if (hRender) hRender(true); },   // S4: now (the ring's own onChange waits for the next frame)
-    goto(i) { const ok = history.goto(i); if (ok) wState.setStatus('history · row ' + (history.cursor + 1) + ' of ' + history.entries().length, 'live'); return ok; },
-    label(name) { history.label(name); },
+    goto(i) { const ok = app.state.history.goto(i); if (ok) wState.setStatus('history · row ' + (app.state.history.cursor + 1) + ' of ' + app.state.history.entries().length, 'live'); return ok; },
+    label(name) { app.state.history.label(name); },
   };
 
 
@@ -4541,15 +4573,15 @@ export async function boot(dom) {
   /* S4 · …and when the card comes back into view (opened, unfolded, its rack shown or scrolled to): a jump made while it was
      closed left its list at the top.  window-activity's onChange already fires on each of those flips; this reads one flag. */
   let histWas = canPresent(wHist);   // tracks the card, so its flips reach onChange
-  histShown = () => { const now = canPresent(wHist); if (now && !histWas) histHere(); histWas = now; };
+  app.state.histShown = () => { const now = canPresent(wHist); if (now && !histWas) histHere(); histWas = now; };
   let histRaf = 0;
   hRender = (now) => { if (now) { cancelAnimationFrame(histRaf); renderHistory(); } else if (!histRaf) histRaf = requestAnimationFrame(renderHistory); };
   renderHistory();
 
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
-  const modEdited = () => { if (modView) modView.rebuild(); hNote(); };   // LW.mod's model edits: shown, and maybe a row (S3)
+  const modEdited = () => { if (app.state.modView) app.state.modView.rebuild(); hNote(); };   // LW.mod's model edits: shown, and maybe a row (S3)
   const LW = {
-    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, get particleUI() { return { on: ui.pOn, n: ui.pN, trail: ui.pTrail }; }, slice, kepler, chem, head, calculus, layout, setTheme(t) { if (__LW_hooks.setTheme) __LW_hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frost() { return look.get('frost'); }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return __LW_hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return __LW_hooks.period ? __LW_hooks.period() : null; }, get gas() { return gas; }, /** optimization K7 / W125: the gas table, ON by default — gasTable(true|false) switches it, gasTable() reads 'off' | 'building' (wanted: armed until the first AXIAL launch, then sliced in idle time) | 'on' */ gasTable(on) { if (on !== undefined) gasTableOn(!!on); return gas.table; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); gasAxial = v === 'axial'; if (!gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return __LW_hooks.setStage ? __LW_hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { look.set({ ...(a !== undefined && { accentA: a }), ...(b !== undefined && { accentB: b }) }); }, get a() { return look.get('accentA'); }, get b() { return look.get('accentB'); }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return look.get('theme'); }, launchPacket, get lastLaunch() { return lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { return ringMedian(perf.ring); }, /** LA1: the same median over the WHOLE loop, timed from its entry */ get loopMedian() { return ringMedian(loopRing); }, resetRing() { perf.ring.fill(0); loopRing.fill(0); } }, get keys() { return __LW_hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!bow; }, get k() { return bow ? bow.k : 0; }, get dir() { return bow ? bow.dir : null; }, get landed() { return bowChain; }, get inFlight() { return bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (__LW_hooks.slap) __LW_hooks.slap(k, axis); }, get space() { return space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return palette; },
+    ready: false, reg, clock, obs, mat, quality, domain, camera, fieldRate, stats, field, presets: PRESETS, TIER, shadowView, spectrum, orbitView: orbit, vortex, ladder, particles, get particleUI() { return { on: ui.pOn, n: ui.pN, trail: ui.pTrail }; }, slice, kepler, chem: app.state.chem, head, calculus, layout, setTheme(t) { if (app.hooks.setTheme) app.hooks.setTheme(t); }, setCardStyle(c) { return setCardStyle(c); }, get cardStyle() { return document.body.dataset.card || 'refractive'; }, setFrost(m) { return setFrost(m); }, get frostLive() { return document.body.classList.contains('frost') && !document.body.classList.contains('frost-hold'); }, setDisconnected(v) { return setDisconnected(v); }, get disconnected() { return document.body.classList.contains('disconnected'); }, applySettings, get settings() { return readSettings(); }, get build() { return BUILD_LINE; }, get ab() { return app.hooks.ab; }, get notebook() { return layout.notebook; }, get period() { return app.hooks.period ? app.hooks.period() : null; }, get gas() { return gas; }, /** optimization K7 / W125: the gas table, ON by default — gasTable(true|false) switches it, gasTable() reads 'off' | 'building' (wanted: armed until the first AXIAL launch, then sliced in idle time) | 'on' */ gasTable(on) { if (on !== undefined) gasTableOn(!!on); return gas.table; }, setGasBasis(v) { if (ui.gasBasis) ui.gasBasis.set(v); app.state.gasAxial = v === 'axial'; if (!app.state.gasAxial) gas.off(); hNote(); schedule(TIER.RECONSTRUCT); }, get gasBasis() { return app.state.gasAxial ? 'axial' : 'reg'; }, keplerDrag(n, w) { return keplerDragToPoint(n, w); }, keplerTurn(kind, dth, n) { return keplerTurn(kind, dth, n); }, get keplerShell() { return kepShell(); }, setKeplerShell(n) { if (ui.kepShell) { ui.kepShell.set(String(n)); keplerRowSync(true); } return kepShell(); }, keplerOrbitOf(n) { return orbitOfShell(n === undefined ? kepShell() : n); }, get rotRate() { return { ...rotRate }; }, setRotRate(which, v) { const k = which === 'z' ? 'z' : which === 'kz' ? 'kz' : which === 'def' ? 'def' : null; if (!k) return null; if (!Number.isFinite(v)) return null; const w = (k !== 'z' && sturm.P) ? 0 : Math.max(-ROT_LIMIT[k], Math.min(ROT_LIMIT[k], v)); if (modHand('state.' + (k === 'z' ? 'rot.z' : k === 'kz' ? 'stark.kz' : 'defect.l2'), w)) return w; return setRotationRate(k, w); }, get rotDriving() { return rotDriving(); }, get projects() { return layout.projects; }, rateOf(a) { return rates[a]; }, setRate(a, r) { return api.setRate(a, r); }, saveSettings, setStage(v) { return app.hooks.setStage ? app.hooks.setStage(v) : null; }, setStyle(name) { if (STYLE[name] === undefined) return false; mat.style = STYLE[name]; if (ui.styleSeg) ui.styleSeg.set(name); schedule(TIER.PRESENT); return true; }, accent: { set(a, b) { look.set({ ...(a !== undefined && { accentA: a }), ...(b !== undefined && { accentB: b }) }); }, get a() { return look.get('accentA'); }, get b() { return look.get('accentB'); }, colorAt(deg) { return rgbToHex(wheelColor(deg)); } }, get theme() { return document.body.dataset.theme || 'dark'; }, get themeChoice() { return look.get('theme'); }, launchPacket, get lastLaunch() { return app.state.lastLaunch; }, enterBox() { if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); } enterBox(); }, coherentBounce() { coherentBounce(); }, get autoQ() { return autoQ; }, governor: { get on() { return gov.on; }, set on(v) { setGovernor(v); }, get drop() { return gov.drop; }, get median() { return gov.median; }, get changes() { return gov.changes; }, get parked() { return [...gov.parked.keys()]; }, get probes() { return gov.probes; }, get probeMs() { return READER_LAW.probeMs; }, get state() { return !gov.on ? 'off' : gov.drop ? 'stepped-' + gov.drop : 'nominal'; }, get resolution() { return effectiveRes(); }, get work() { return perf.work; } }, maths: { get ok() { return maths.ok && scan.ok; }, get bow() { return maths.ok; }, get scan() { return scan.ok; }, get started() { return { bow: maths.started, scan: scan.started, cards: cards.started }; }, call: (m) => maths.call(m) }, get keepFrames() { return keep.frames; }, setKeepFrames, packetCentroid(G = 24) { const c = reg.at(clock.t); return wellCentroid(c.re, c.im, reg.populated(), { G }); }, setIonZ(z) { setZ(z); switchHamiltonian('hydrogen'); if (ui.zKnob) ui.zKnob.set(z); }, get Z() { return getZ(); }, perf: { get mode() { return perf.mode; }, setMode: setPerfMode, get profile() { return perf.profile; }, get counts() { return perf.counts; }, /** the median of the loop's OWN main-thread ms over the last 60 frames — the budget-independent read of "is hidden cheaper?" */ get median() { return ringMedian(perf.ring); }, /** LA1: the same median over the WHOLE loop, timed from its entry */ get loopMedian() { return ringMedian(loopRing); }, resetRing() { perf.ring.fill(0); loopRing.fill(0); } }, get keys() { return app.hooks.keys; }, bow: { start: (x, y) => bowStart({ clientX: x, clientY: y }), move: (x, y) => bowMove({ clientX: x, clientY: y }), release: () => bowRelease(), cancel: () => bowCancel(), get active() { return !!app.state.bow; }, get k() { return app.state.bow ? app.state.bow.k : 0; }, get dir() { return app.state.bow ? app.state.bow.dir : null; }, get landed() { return app.state.bowChain; }, get inFlight() { return app.state.bowInFlight > 0; } }, kickAlong(k, d) { slapAlong(k, d); }, setDamping(g) { reg.setDamping(g); touchState(); }, get hamiltonian() { return getHamiltonian().id; }, setHamiltonian(id) { switchHamiltonian(id); if (ui.hamSeg) ui.hamSeg.set(id); }, kick(k, axis = 'z') { if (app.hooks.slap) app.hooks.slap(k, axis); }, get space() { return app.state.space; }, setSpace(s) { if (s === 'p' && sturm.P) return false; app.state.space = s; if (ui.spaceSeg) ui.spaceSeg.set(s); schedule(TIER.REBUILD); }, get palette() { return app.state.palette; },
     /* ── WAVE 54 ─────────────────────────────────────────────────────────────────────────────────────────────── */
     /** THE BACKGROUNDED TAB.  Read-only counters plus the two levers a gate needs: the workers' own busy ledger,
      *  and a speculative job it can issue to prove the park is real in both directions. */
@@ -4576,105 +4608,105 @@ export async function boot(dom) {
       get disabled() { const b = ui.gamutSeg && ui.gamutSeg.button('p3'); return !!(b && b.disabled); },
       get reason() { const b = ui.gamutSeg && ui.gamutSeg.button('p3'); return b ? b.title : ''; },
       state() { const c = field.ok ? field.gamut : 'srgb'; const d = document.body.dataset.gamut || 'srgb'; return { canvas: c === 'srgb' ? 'srgb' : 'p3', dom: d, agree: (c === 'srgb') === (d === 'srgb') }; },
-      set(id) { return __LW_hooks.setGamut ? __LW_hooks.setGamut(id) : 'srgb'; } },
+      set(id) { return app.hooks.setGamut ? app.hooks.setGamut(id) : 'srgb'; } },
     /** THE PALETTE by NAME, and the menu's grouping by stop count */
-    setPalette(id) { return palette ? palette.select(id) : false; },
-    get paletteId() { return palette ? palette.id : null; }, get paletteGroups() { return palette ? palette.groups : []; },
+    setPalette(id) { return app.state.palette ? app.state.palette.select(id) : false; },
+    get paletteId() { return app.state.palette ? app.state.palette.id : null; }, get paletteGroups() { return app.state.palette ? app.state.palette.groups : []; },
     loadPreset, schedule, togglePlay, setReference, serialize, restore, api,
     /* ── ORBITALS · the MOLECULAR REGISTER, one road (MATH-H2O Proposition 1) ─────────────────────
      * ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k over CHEMISTRY's canonical orbitals.  `ladder()` is the
      * solved ε_k with their ground-state occupancies; `state()` carries the selection, Σ|c|² and the
      * beat period 2π/Δε of the two strongest levels — the FROZEN-ORBITAL gap, never ω_RPA. */
     orbitals: {
-      select(k, amp = 1, phase = 0) { return orbitals.select(k, amp, phase); },
-      deselect(k) { return orbitals.deselect(k); },
-      toggle(k) { return orbitals.toggle(k); },
-      clear() { return orbitals.clear(); },
-      norm() { return orbitals.norm(); },
-      setAmp(k, v) { return orbitals.setAmp(k, v); }, setPhase(k, v) { return orbitals.setPhase(k, v); },
-      setOn(v) { return orbitals.setOn(v); }, get on() { return orbitals.on; },
-      setFlow(v) { return orbitals.setFlow(v); }, get flowOn() { return orbitals.flowOn; },
-      preset(name) { return orbitals.preset(name); }, store(w) { return orbitals.store(w); }, setMorph(on, sv) { return orbitals.setMorph(on, sv); },
-      get dials() { return orbitals.dials; }, setDials(v) { return orbitals.setDials(v); },
-      ladder() { return orbitals.ladder(); }, state() { return orbitals.state(); },
-      solution() { return orbitals.solution(); },
-      save() { return orbitals.save(); }, load(r) { return orbitals.load(r); },
+      select(k, amp = 1, phase = 0) { return app.state.orbitals.select(k, amp, phase); },
+      deselect(k) { return app.state.orbitals.deselect(k); },
+      toggle(k) { return app.state.orbitals.toggle(k); },
+      clear() { return app.state.orbitals.clear(); },
+      norm() { return app.state.orbitals.norm(); },
+      setAmp(k, v) { return app.state.orbitals.setAmp(k, v); }, setPhase(k, v) { return app.state.orbitals.setPhase(k, v); },
+      setOn(v) { return app.state.orbitals.setOn(v); }, get on() { return app.state.orbitals.on; },
+      setFlow(v) { return app.state.orbitals.setFlow(v); }, get flowOn() { return app.state.orbitals.flowOn; },
+      preset(name) { return app.state.orbitals.preset(name); }, store(w) { return app.state.orbitals.store(w); }, setMorph(on, sv) { return app.state.orbitals.setMorph(on, sv); },
+      get dials() { return app.state.orbitals.dials; }, setDials(v) { return app.state.orbitals.setDials(v); },
+      ladder() { return app.state.orbitals.ladder(); }, state() { return app.state.orbitals.state(); },
+      solution() { return app.state.orbitals.solution(); },
+      save() { return app.state.orbitals.save(); }, load(r) { return app.state.orbitals.load(r); },
     },
     /* the REGISTER window's switch and its STATES mode: the many-electron register over S₀ and the TDA states */
-    register: { get mode() { return register.mode; }, setMode(v) { return register.setMode(v); }, save() { return register.save(); }, load(r) { return register.load(r); } },
+    register: { get mode() { return app.state.register.mode; }, setMode(v) { return app.state.register.setMode(v); }, save() { return app.state.register.save(); }, load(r) { return app.state.register.load(r); } },
     states: {
-      select(k, amp, phase) { return states.select(k, amp, phase); }, deselect(k) { return states.deselect(k); }, toggle(k) { return states.toggle(k); },
-      clear() { return states.clear(); }, norm() { return states.norm(); }, setAmp(k, v) { return states.setAmp(k, v); }, setPhase(k, v) { return states.setPhase(k, v); },
-      preset(name) { return states.preset(name); }, play(k) { return states.play(k); }, store(w) { return states.store(w); },
-      setMorph(on, s) { return states.setMorph(on, s); }, setView(v) { return states.setView(v); }, setRef(v) { return states.setRef(v); },
-      setFlow(v) { return states.setFlow(v); }, get flowOn() { return states.flowOn; }, flowState() { return flowTracers ? { on: flowTracers.on, ...flowTracers.state } : null; },
-      setDrive(v) { return states.setDrive(v); }, setDriveParam(k, v) { return states.setDriveParam(k, v); }, tune() { return states.tune(); }, get drive() { return states.drive; },
-      setOn(v) { return states.setOn(v); }, get on() { return states.on; },
-      ladder() { return states.ladder(); }, state() { return states.state(); }, save() { return states.save(); }, load(r) { return states.load(r); },
+      select(k, amp, phase) { return app.state.states.select(k, amp, phase); }, deselect(k) { return app.state.states.deselect(k); }, toggle(k) { return app.state.states.toggle(k); },
+      clear() { return app.state.states.clear(); }, norm() { return app.state.states.norm(); }, setAmp(k, v) { return app.state.states.setAmp(k, v); }, setPhase(k, v) { return app.state.states.setPhase(k, v); },
+      preset(name) { return app.state.states.preset(name); }, play(k) { return app.state.states.play(k); }, store(w) { return app.state.states.store(w); },
+      setMorph(on, s) { return app.state.states.setMorph(on, s); }, setView(v) { return app.state.states.setView(v); }, setRef(v) { return app.state.states.setRef(v); },
+      setFlow(v) { return app.state.states.setFlow(v); }, get flowOn() { return app.state.states.flowOn; }, flowState() { return flowTracers ? { on: flowTracers.on, ...flowTracers.state } : null; },
+      setDrive(v) { return app.state.states.setDrive(v); }, setDriveParam(k, v) { return app.state.states.setDriveParam(k, v); }, tune() { return app.state.states.tune(); }, get drive() { return app.state.states.drive; },
+      setOn(v) { return app.state.states.setOn(v); }, get on() { return app.state.states.on; },
+      ladder() { return app.state.states.ladder(); }, state() { return app.state.states.state(); }, save() { return app.state.states.save(); }, load(r) { return app.state.states.load(r); },
     },
     /* the molecular funnel, readable: which model is playing, why, and what the session has dropped */
     molsession: {
-      state() { return molSession.state(); },
-      get selected() { return molSession.selected; }, get reason() { return molSession.reason; },
-      get molecule() { return molSession.molecule; }, get solution() { return molSession.solution; },
-      get counters() { return { ...molSession.counters }; },
-      claimed(id) { return molSession.claimed(id); }, why(id) { return molSession.why(id); },
+      state() { return app.state.molSession.state(); },
+      get selected() { return app.state.molSession.selected; }, get reason() { return app.state.molSession.reason; },
+      get molecule() { return app.state.molSession.molecule; }, get solution() { return app.state.molSession.solution; },
+      get counters() { return { ...app.state.molSession.counters }; },
+      claimed(id) { return app.state.molSession.claimed(id); }, why(id) { return app.state.molSession.why(id); },
     },
     /* ── WAVE 52 · THE MODULATION RACK.  One road to the model, the four edges, the window and the
      * three numbers the strip is showing — `read(id)` hands back exactly what is on the screen. ── */
     mod: {
-      get host() { return modHost; }, get model() { return modHost && modHost.model; },
-      get registry() { return modHost && modHost.registry; }, get clock() { return modHost && modHost.clock; },
-      get view() { return modView && modView.api; },
-      get running() { return !!(modHost && modHost.clock.isRunning()); },
-      get playing() { return !!(modHost && modHost.clock.isPlaying()); },
+      get host() { return app.state.modHost; }, get model() { return app.state.modHost && app.state.modHost.model; },
+      get registry() { return app.state.modHost && app.state.modHost.registry; }, get clock() { return app.state.modHost && app.state.modHost.clock; },
+      get view() { return app.state.modView && app.state.modView.api; },
+      get running() { return !!(app.state.modHost && app.state.modHost.clock.isRunning()); },
+      get playing() { return !!(app.state.modHost && app.state.modHost.clock.isPlaying()); },
       get cadence() { return MOD.hz; },
-      setCadence(hz) { mod.setCadence(hz); if (modView) modView.sync(); return MOD.hz; },
+      setCadence(hz) { mod.setCadence(hz); if (app.state.modView) app.state.modView.sync(); return MOD.hz; },
       /* ── WAVE 65 · THE ARM, THE ONE KEY AND THE RESUME LAW, all readable from outside ────────── */
-      get armed() { return modArm; },
+      get armed() { return app.state.modArm; },
       arm(on) { return setModArm(!!on); },
       /** which law the rack's own chips put on the next resume, and what the last one actually did */
-      resume() { return modHost ? modHost.clock.resumePlan() : null; },
+      resume() { return app.state.modHost ? app.state.modHost.clock.resumePlan() : null; },
       /** the loop clock locked to the density's exact recurrence: one bar = one repeat (g) */
       barLock,
       get expanded() { return layout.modulation.open; },
       expand() { return layout.modulation.expand(); }, collapse() { return layout.modulation.collapse(); },
       /** PACE P3 · the window's remembered presentation, and the road that puts one back (the device report's put-back: its
        *  first open prunes remembered rows for sources that no longer exist, which is the report's doing, not the hand's) */
-      presentation() { return modView ? modView.presentation() : null; }, restorePresentation(o) { if (modView && o) modView.restore(o); return !!(modView && o); },
+      presentation() { return app.state.modView ? app.state.modView.presentation() : null; }, restorePresentation(o) { if (app.state.modView && o) app.state.modView.restore(o); return !!(app.state.modView && o); },
       /* 0.5.0 C4 (R-B1): the modulation has no play of its own — these are THE play and THE pause (the edge follows) */
-      play() { appPlay.play(); schedule(TIER.EVOLVE); return { ok: true, playing: modHost.clock.isPlaying() }; },
-      stop() { appPlay.pause(); schedule(TIER.PRESENT); return { ok: true, playing: modHost.clock.isPlaying() }; },
+      play() { appPlay.play(); schedule(TIER.EVOLVE); return { ok: true, playing: app.state.modHost.clock.isPlaying() }; },
+      stop() { appPlay.pause(); schedule(TIER.PRESENT); return { ok: true, playing: app.state.modHost.clock.isPlaying() }; },
       /** a deterministic step — no realtime anywhere near it, which is what a proof wants */
-      step(dt) { const d = modHost.clock.step(dt); if (modView) modView.paint(true); return d; },
-      targets() { return modHost.registry.describe(); },
-      state(id) { return modHost.registry.state(id); },
-      read(id) { return modView ? modView.api.read(id) : null; },
-      picker() { return modView ? modView.api.picker() : []; },
-      addSource(kind) { const s2 = modHost.model.addSource(kind); modEdited(); return s2.id; },
-      addMacro() { const m = modHost.model.addMacro(null); modEdited(); return m.id; },
+      step(dt) { const d = app.state.modHost.clock.step(dt); if (app.state.modView) app.state.modView.paint(true); return d; },
+      targets() { return app.state.modHost.registry.describe(); },
+      state(id) { return app.state.modHost.registry.state(id); },
+      read(id) { return app.state.modView ? app.state.modView.api.read(id) : null; },
+      picker() { return app.state.modView ? app.state.modView.api.picker() : []; },
+      addSource(kind) { const s2 = app.state.modHost.model.addSource(kind); modEdited(); return s2.id; },
+      addMacro() { const m = app.state.modHost.model.addMacro(null); modEdited(); return m.id; },
       /** BIND: unbind first, always — setMacro REFUSES a change on a macro already bound to a live
        *  source, and a caller that just calls setMacro reads that refusal as a control doing nothing. */
-      bind(macroId, sourceId) { modHost.model.setMacro(macroId, { sourceId: null });
-        if (sourceId) modHost.model.setMacro(macroId, { sourceId }); modHost.clock.recomputeRunning();
-        modEdited(); return modHost.model.macroOf(macroId).sourceId; },
-      route(macroId, targetId, min, max) { const r = modHost.model.addRoute(macroId, targetId, min === undefined ? 0 : min, max === undefined ? 1 : max);
-        modHost.clock.recomputeRunning(); modEdited(); return r && r.route ? r.route.id : null; },
-      unroute(id) { const ok = modHost.model.removeRoute(id); modEdited(); return ok; },
+      bind(macroId, sourceId) { app.state.modHost.model.setMacro(macroId, { sourceId: null });
+        if (sourceId) app.state.modHost.model.setMacro(macroId, { sourceId }); app.state.modHost.clock.recomputeRunning();
+        modEdited(); return app.state.modHost.model.macroOf(macroId).sourceId; },
+      route(macroId, targetId, min, max) { const r = app.state.modHost.model.addRoute(macroId, targetId, min === undefined ? 0 : min, max === undefined ? 1 : max);
+        app.state.modHost.clock.recomputeRunning(); modEdited(); return r && r.route ? r.route.id : null; },
+      unroute(id) { const ok = app.state.modHost.model.removeRoute(id); modEdited(); return ok; },
       /** the runtime door: a control registered NOW is in the picker NOW, with no edit to modview.js */
       /* WAVE 61: a control registered at RUNTIME with a `knob` accessor is a drop target at runtime,
          with no edit anywhere — installOne still strips nothing it did not want, the accessor is kept
          here beside modGets, and the dial is stamped the moment it exists. That is the runtime door's
          whole promise, and without the stamp the new control would be in the picker and not on the glass. */
-      register(id, spec) { const d = modHost.targets.installOne(id, spec); modGets[id] = spec.get;
+      register(id, spec) { const d = app.state.modHost.targets.installOne(id, spec); modGets[id] = spec.get;
         if (spec.knob) { modKnobs[id] = spec.knob; const k = spec.knob(); if (k && k.root) k.root.dataset.param = id; }
-        if (modView) modView.rebuild(); return d; },
-      unregister(id) { const n = modHost.targets.uninstall(id); delete modGets[id]; delete modKnobs[id]; if (modView) modView.rebuild(); return n; },
-      reset() { modHost.clock.pause(); modHost.registry.restoreAll(); modHost.model.modReset();
-        modHost.targets.sync(); modHost.clock.applyAll(true); modEdited(); schedule(TIER.PRESENT); return true; },
-      serialize() { return modHost.model.serialize(); }, restore(o) { const ok = restoreModulation(o); hNote(); return ok; },
-      diagnostics() { return modHost.diagnostics(); },
-      paint() { return modView ? modView.paint(true) : false; },
+        if (app.state.modView) app.state.modView.rebuild(); return d; },
+      unregister(id) { const n = app.state.modHost.targets.uninstall(id); delete modGets[id]; delete modKnobs[id]; if (app.state.modView) app.state.modView.rebuild(); return n; },
+      reset() { app.state.modHost.clock.pause(); app.state.modHost.registry.restoreAll(); app.state.modHost.model.modReset();
+        app.state.modHost.targets.sync(); app.state.modHost.clock.applyAll(true); modEdited(); schedule(TIER.PRESENT); return true; },
+      serialize() { return app.state.modHost.model.serialize(); }, restore(o) { const ok = restoreModulation(o); hNote(); return ok; },
+      diagnostics() { return app.state.modHost.diagnostics(); },
+      paint() { return app.state.modView ? app.state.modView.paint(true) : false; },
       get held() { return [...modHeld]; },
       get knobs() { return Object.keys(modKnobs); },
     },
@@ -4682,17 +4714,17 @@ export async function boot(dom) {
     get history() { return historyApi; },
     /** W-CAPTURE (wave 58): lab/capture.js itself, built on first use — picture · planLoop · save · limits · grab, and `laws` for the
      *  pure schedule functions (0.5.0 C7: the film is captureUI.exact, render-exact.js createFilm over the kit's recorder). */
-    get capture() { return capApi ? capApi.capture : null; }, get capturePlan() { return capApi ? capApi.plan(true) : null; },
-    get captureUI() { return capApi; },
+    get capture() { return app.state.capApi ? app.state.capApi.capture : null; }, get capturePlan() { return app.state.capApi ? app.state.capApi.plan(true) : null; },
+    get captureUI() { return app.state.capApi; },
     /* W-EXPORT (wave 134): FILE › EXPORT SHAPE / GRID's own module instance — run(fmt), busy, last (the proof's hook;
      *  the five rows call run(fmt) themselves and need nothing here) */
-    get shapeExport() { return exporter3d; },
+    get shapeExport() { return app.state.exporter3d; },
     /* W-WIGNER: the (z, p_z) slice — the last map computed (recomputed if the state has moved), its two ranges, its numbers */
     wigner: { slice() { return hydroReader().on ? wignerView.slice(reg, clock.t) : null; }, setRange(z, p) { return wignerView.setRange(z, p); },
       get stats() { return wignerView.stats; }, get zmax() { return wignerView.zmax; }, get pmax() { return wignerView.pmax; },
       get canvas() { return wignerView.canvas; }, table() { return wignerView.table(); } },
     /* W-RADIATION: the pair in force and what it radiates */
-    radiation: { pair() { return hydroReader().on ? radiationView.pair(reg, clock.t, __LW_hooks.ab) : null; },
+    radiation: { pair() { return hydroReader().on ? radiationView.pair(reg, clock.t, app.hooks.ab) : null; },
       get A() { const s = radiationView.stats; return s ? s.A : 0; }, get tau() { const s = radiationView.stats; return s ? s.tau : Infinity; },
       get power() { const s = radiationView.stats; return s ? s.P : 0; }, get stats() { return radiationView.stats; },
       get canvas() { return radiationView.canvas; }, table() { return radiationView.table(); } },
@@ -4719,11 +4751,7 @@ export async function boot(dom) {
       get at() { const h = busy.host; return h ? [h.style.getPropertyValue('--cx'), h.style.getPropertyValue('--cy')] : [null, null]; } },
     /** the photosensitivity notice: shown once per browser, remembered in the settings key, SETTINGS brings it back */
     get warning() { return warning; },
-    get uiHidden() { return uiHidden; },
-    windowActivity: {
-      state(id) { const w = document.querySelector('.dev[data-id="' + id + '"]'); return windowActivity.state(w); },
-      get tracked() { return windowActivity.tracked; }, get changes() { return windowActivity.changes; },
-    },
+    get uiHidden() { return app.state.uiHidden; },
     /** the nine wheel samples every copy of the mark is painted from — the ABOUT face reads the same ones */
     paintMarks,
     /** WAVE 53 · the two chrome objects, each with its own switch and its own seat in the settings key */
@@ -4770,7 +4798,7 @@ export async function boot(dom) {
     /** SHAREABLE LINKS.  mint() builds without copying; copy() is the trig; open() is the boot/hashchange road. */
     link: { mint: () => mintLink(), copy: () => copyLink(), open: (href) => openLink(href),
       read: (href) => readLink(href === undefined ? location.href : href),
-      get last() { return linkLast; }, get ceiling() { return LINK_CHAR_CEILING; },
+      get last() { return app.state.linkLast; }, get ceiling() { return LINK_CHAR_CEILING; },
       names: (keys) => notCarriedWords(keys || []) },
     /** THE INSTALL LAYER's interface half — the offer, the press, and what a controllerchange means here. */
     sw: swClient,
@@ -4798,19 +4826,19 @@ export async function boot(dom) {
     version: 'QWAVE-0.1 hydrogen shadow lab · FRONTIER · 2026-09-03',
     /** 0.5.0 C9 · R14 · FOLDERS' thumbnail() for C6's project adapter, whose toThumb() drawImage()s what it gets (a WebGPU canvas can
      *  answer that BLANK): the GPU readback's PNG, always (C7 took capture's readability probe away; C7b drops its dead branch). */
-    async thumbnail() { const r = await capApi.capture.picture({ width: 320 }); return r.ok ? r.blob : null; },
+    async thumbnail() { const r = await app.state.capApi.capture.picture({ width: 320 }); return r.ok ? r.blob : null; },
     look: look.prefs,   // 0.5.0 C2: the look store (`mir.gui`), for probes (`__LW.look.get('theme')`)
     session: dom.start ? dom.start.session : null,   // 0.5.0 C6b: THE SESSION (main.js createSession over the one part): read(), armed(), flush()
-    get timeline() { return tl; },   // 0.5.0 C7b: the kit's TIMELINE (installTimeline's result: model, editor, controller, open/close), for the timeline suite
-    get render() { return filmCard; },   // 0.5.0 C7b: the RENDER card ({ card, view, recorder, plan, place }; view.state() is the kit's harness read)
+    get timeline() { return app.state.tl; },   // 0.5.0 C7b: the kit's TIMELINE (installTimeline's result: model, editor, controller, open/close), for the timeline suite
+    get render() { return app.state.filmCard; },   // 0.5.0 C7b: the RENDER card ({ card, view, recorder, plan, place }; view.state() is the kit's harness read)
   };
   window.__LW = LW;
   /* ── 0.5.0 C7b · THE RENDER CARD (lab/film-card.js): MIR's createRenderCard over the film's host recorder, built once LW exists (the film
      reads it) and registered closed on the right rack (R2), in + and WINDOW; its saves are the hand-over fix (capture.js handOver) ── */
-  filmCard = createFilmCard({ film: capApi.exact, capture: capApi.capture, editor: () => tl && tl.editor, open: () => tl && tl.open(), armed: () => modArm,
+  app.state.filmCard = createFilmCard({ film: app.state.capApi.exact, capture: app.state.capApi.capture, editor: () => app.state.tl && app.state.tl.editor, open: () => app.state.tl && app.state.tl.open(), armed: () => app.state.modArm,
     digest: () => reg.digest(), key: () => [reg.version, mat.view, obs.yaw, obs.pitch, obs.dist, obs.fov, obs.shift.join(), clock.t].join('|') });
-  rack.prepend(filmCard.card.root);   // at the top, where a reopen puts it and a layout that does not list it (a demo's) leaves it: a reload saves the same `closed`
-  rk.register({ id: 'render', el: filmCard.card, side: 'right', closed: true, title: 'RENDER', glyph: 'render', hint: 'the picture and the film' });
+  rack.prepend(app.state.filmCard.card.root);   // at the top, where a reopen puts it and a layout that does not list it (a demo's) leaves it: a reload saves the same `closed`
+  rk.register({ id: 'render', el: app.state.filmCard.card, side: 'right', closed: true, title: 'RENDER', glyph: 'render', hint: 'the picture and the film' });
   /* 0.5.1 D10-24 · THE CURVES CARD: the kit's curves panel over the stage canvas (MASTER · R · G · B through its one SVG picture filter), so the SCREEN is
      graded and nothing else: capture.js reads the GPU texture and the film draws frame(i, ctx), neither sees a CSS filter.  `project: false` (ONE project
      part), no `history`, no `port`, no `mod` (AMOUNT is not routed).  The grade is PREFERENCE (`lambdawaves.q0.curves`): restored here, written 250 ms
@@ -4822,7 +4850,7 @@ export async function boot(dom) {
   curves.restore(curvesStore.get());
   let curvesSave = 0;
   curves.onChange(() => { clearTimeout(curvesSave); curvesSave = setTimeout(() => curvesStore.set(curves.serialize()), 250); });
-  filmCard.card.root.after(wCurves.root); rk.register({ id: 'curves', el: wCurves, side: 'right', closed: true, title: 'CURVES', glyph: 'curves', hint: 'grade the screen: a transfer curve per channel' });
+  app.state.filmCard.card.root.after(wCurves.root); rk.register({ id: 'curves', el: wCurves, side: 'right', closed: true, title: 'CURVES', glyph: 'curves', hint: 'grade the screen: a transfer curve per channel' });
   LW.curves = curves;
 
   /* ── go ───────────────────────────────────────────────────────────────── */
@@ -4838,7 +4866,7 @@ export async function boot(dom) {
      is now started at the FOOT of boot, after the notice has been shown, and only when it has been accepted
      (or was accepted by this browser before).  See `armAutoplay` below. */
   Object.assign(DIGESTS, {
-    meters: () => 'density period\t' + (() => { const P = __LW_hooks.period ? __LW_hooks.period() : null; return P && P.exact && P.T ? P.T.toFixed(6) + ' a.u. (exact)' : P && P.T ? '≈ ' + P.T.toFixed(3) + ' a.u. (no exact period)' : '—'; })() + '\nframe profile (ms, EMA)\n' + Object.entries(perf.profile).map(([k, v]) => k + '\t' + (+v).toFixed(3)).join('\n') + '\nframes\t' + stats.frames + '\nreconstructs\t' + stats.reconstructs + '\npresents\t' + stats.presents,
+    meters: () => 'density period\t' + (() => { const P = app.hooks.period ? app.hooks.period() : null; return P && P.exact && P.T ? P.T.toFixed(6) + ' a.u. (exact)' : P && P.T ? '≈ ' + P.T.toFixed(3) + ' a.u. (no exact period)' : '—'; })() + '\nframe profile (ms, EMA)\n' + Object.entries(perf.profile).map(([k, v]) => k + '\t' + (+v).toFixed(3)).join('\n') + '\nframes\t' + stats.frames + '\nreconstructs\t' + stats.reconstructs + '\npresents\t' + stats.presents,
     calculus: () => ({ md: calculus && calculus.last ? calculusMarkdown(calculus.last) : '' }),   // 0.4.0 S3: ⧉ copies THE PROSE FIGURE (calculus.js), which pastes into the notebook and renders
     vortex: () => vortex.last && vortex.last.points ? 'nodal points (x, y, z)\n' + vortex.last.points.map((p) => [p.x, p.y, p.z].map((v) => (+v).toFixed(5)).join('\t')).join('\n') : '',
     spectrum: () => { const c = reg.at(clock.t), H = getHamiltonian(); return 'label\tE\t|c|²\targ c\n' + reg.populated().map((a) => H.labelOf(BASIS[a]) + '\t' + H.energy(a).toFixed(6) + '\t' + (c.re[a] ** 2 + c.im[a] ** 2).toFixed(6) + '\t' + Math.atan2(c.im[a], c.re[a]).toFixed(5)).join('\n')
@@ -4857,7 +4885,7 @@ export async function boot(dom) {
     for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',![...left,...right].includes(d.dataset.id));
     for(const [host,ids] of [[rackL,left],[rack,right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
   }
-  initStageText(); LW.stageText = stageText;   // the gate reads its string, its render count and its announcements
+  initStageText(); LW.stageText = app.state.stageText;   // the gate reads its string, its render count and its announcements
   applySettings();
   rk.start();                         // 0.5.0 C3: the kit's rack takes the furniture as it stands, and its crossing runs before λWAVES' half
   syncPhone();                        // wave 51: the breakpoint is read once the browser's settings are in, so the phone's DEFAULTS never overwrite them
@@ -4889,8 +4917,8 @@ export async function boot(dom) {
   /* the photosensitivity notice is main.js' `warning` (0.5.0 C6b: λWAVES' law over the kit's notice, shown before the title screen) */
   const warning = dom.start.warning;
   ui.saveNative = saveSettings;
-  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost, modApi:()=>modView&&modView.api, cadence:()=>MOD.hz, setCadence:mod.setCadence });
-  __LW_hooks.warning = warning;
+  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost: app.state.modHost, modApi:()=>app.state.modView&&app.state.modView.api, cadence:()=>MOD.hz, setCadence:mod.setCadence });
+  app.hooks.warning = warning;
   /* ── WAVE 57 · THE ORDER, AND IT IS THE WHOLE FIX ────────────────────────────────────────────────
    * NOTHING MOVES UNTIL THE NOTICE HAS BEEN ACCEPTED — or was accepted by this browser before and is
    * remembered.  `onAccept` fires immediately when the pane is not up, so a returning visitor loses
@@ -4906,7 +4934,7 @@ export async function boot(dom) {
     return true;
   }
   if (MOTION.reduced && ui.rateKnob) ui.rateKnob.root.title = 'Reduced motion lowered RATE. Adjust it to override.';
-  history.clear(linkAtBoot.opened && linkAtBoot.ok ? 'link' : 'boot');   // the shipped boot (and a ?preset= in the URL) is the BOTTOM of the stack, not a step in it
+  app.state.history.clear(linkAtBoot.opened && linkAtBoot.ok ? 'link' : 'boot');   // the shipped boot (and a ?preset= in the URL) is the BOTTOM of the stack, not a step in it
 
 
   accent.turn();
@@ -4914,7 +4942,7 @@ export async function boot(dom) {
   markBatchEnd();                     // M7: …painted here, once, every copy of it (the clones included)
   if (layout.projects) { await Promise.race([layout.projects.seed().catch(() => null), new Promise((r) => setTimeout(r, 3000))]); layout.projects.markClean(); }   // 0.5.0 C6: the six demos are FOLDERS' starters before the lab says ready
   /* 0.5.0 C6b · THE SESSION hears the one part: the ring's moves and the notebook's input (projects.changed, the part's subscribe) */
-  if (layout.projects) { history.subscribe(layout.projects.changed); const nbEl = document.getElementById('notebook'); if (nbEl) nbEl.addEventListener('input', layout.projects.changed); }
+  if (layout.projects) { app.state.history.subscribe(layout.projects.changed); const nbEl = document.getElementById('notebook'); if (nbEl) nbEl.addEventListener('input', layout.projects.changed); }
   /* THE CHOICE (main.js: the title screen's pick, ?starter=, or `boot` for a driven or direct start).  NEW and the boot keep the shipped
      scene and its `boot` / `link` origin; a cover opens its demo (origin `open · NAME`); RESUME puts the session back (origin `resume`).
      NEW and a cover forget the session, the boot arms it.  ?play=1 waits for the choice and then for the notice (armAutoplay). */

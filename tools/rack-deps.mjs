@@ -678,6 +678,11 @@ export function analyze(src, opts = {}) {
       else if (!r.assignObj) bag.whole.push(r.line);
       if (r.assignObj) for (const k of W.objKeys.get(r.assignObj) || []) if (k.kind !== 'spread') bag.defines.add(k.key);
     }
+    /* 0.5.2 R0: the hook bag is `app.hooks` now — `app.hooks.<m>` counts as the bag's member, as `__LW_hooks.<m>` did */
+    if (r.name === 'app' && r.member === 'hooks' && toks[r.at + 3] && toks[r.at + 3].v === '.' && toks[r.at + 4] && toks[r.at + 4].t === 'name') {
+      const nx = toks[r.at + 5];
+      (nx && nx.t === 'punct' && ASSIGN.has(nx.v) ? sec.bags.__LW_hooks.defines : sec.bags.__LW_hooks.uses).add(toks[r.at + 4].v);
+    }
     const d = bootNames.get(r.name);
     if (!d) continue;                                                // the parameter
     d.refs++; d.users.add(sec.n);
@@ -999,6 +1004,15 @@ export function classes(src, opts = {}) {
     letScopes.get(r.name).add(scopeOfModule(m));
   }
   const ownerOf = (name) => moduleAt(by.get(name).line);
+  /* an `app.state` member's OWNER is the module of its seat — its first eager write (boot's statement level, never inside a function)
+     in file order, as the `let` it was declared at; a member with no seat is boot's (the literal's placeholder holds it) */
+  const stateOwner = new Map();
+  for (const r of refs) {
+    if (r.name !== 'app' || r.deferred) continue;
+    const c = appChain(r);
+    if (c && c.ns === 'state' && c.x && c.write && !stateOwner.has(c.x) && moduleAt(r.line)) stateOwner.set(c.x, moduleAt(r.line));
+  }
+  const stateOwnerOf = (x) => stateOwner.get(x) || 'boot';
   const sharedLets = [...letScopes].filter(([n, s]) => [...s].some((x) => x !== scopeOfModule(ownerOf(n)))).map(([n]) => n).sort((a, b) => by.get(a).line - by.get(b).line);
   /* the const / function names that cross a scope boundary: the members the context must carry */
   const crossNames = new Map();
@@ -1041,21 +1055,24 @@ export function classes(src, opts = {}) {
     }
     /* a let both scopes keep (a stay-piece reading a §0 let) is a closure slot, not a crossing */
     const crossLets = lets.filter((n) => scopeOfModule(ownerOf(n)) !== scopeOfModule(id));
-    const stateNames = [...state.keys()].sort(byName);
+    /* the app.state members it uses that another scope owns: the live crossings (its own members are its state, exposed) */
+    const stateNames = [...state.keys()].filter((x) => scopeOfModule(stateOwnerOf(x)) !== scopeOfModule(id)).sort(byName);
+    const stateOwn = [...state.keys()].filter((x) => scopeOfModule(stateOwnerOf(x)) === scopeOfModule(id)).sort(byName);
     const ctxNames = [...ctx.keys()].sort(byName);
     const fs = forward.length + ctxNames.length + crossLets.length + stateNames.length;
     return {
       id, title: meta.title, row: meta.row, file: meta.file, stays: !!meta.stays,
       spans: ps.map((p) => [p.from, p.to]), lines: ps.reduce((k, p) => k + p.to - p.from + 1, 0),
       backward: backward.sort(byName), forward: forward.sort(byName), context: ctxNames, lets: lets.sort(byName), crossLets: crossLets.sort(byName),
-      state: stateNames, stateWrites: stateNames.filter((n) => state.get(n).w),
+      state: stateNames, stateOwn, stateWrites: stateNames.filter((n) => state.get(n).w),
       bareWrites: bareWrites.sort(byName), crossWrites: crossWrites.sort(byName),
       forwardShared: fs, ok: meta.stays ? crossWrites.length === 0 : (crossWrites.length === 0 && fs <= HINGE),
     };
   });
-  const stateMembers = uniq(modules.flatMap((m) => m.state));
+  const stateMembers = uniq(modules.flatMap((m) => [...m.state, ...m.stateOwn]));
   return {
     file: R.file, sha256: R.sha256, lines: R.lines, boot: R.boot, pieces, modules, sharedLets, stateMembers,
+    stateOwners: Object.fromEntries(stateMembers.map((x) => [x, stateOwnerOf(x)])),
     crossNames: [...crossNames.values()].map((c) => ({ ...c, users: [...c.users].sort(byName) })).sort((a, b) => a.line - b.line),
     hinge: { limit: HINGE, ok: modules.every((m) => m.ok), crossWrites: modules.reduce((k, m) => k + m.crossWrites.length, 0),
       worst: modules.filter((m) => !m.stays).reduce((w, m) => (m.forwardShared > w.forwardShared ? m : w), { forwardShared: -1 }) },
@@ -1066,11 +1083,11 @@ export function classesText(C) {
   const out = [];
   out.push(`rack-deps --classes · ${C.file} · ${C.lines} lines · sha-256 ${C.sha256.slice(0, 12)} · ${C.pieces.length} pieces tile the body ${C.boot.openLine + 1}–${C.boot.closeLine - 1}`);
   out.push('');
-  out.push('| module | row → file | lines | backward | forward | shared lets (bare) | app.state | **fwd + shared** | bare writes to another scope\'s let | hinge |');
+  out.push("| module | row → file | lines | backward | forward | shared lets (bare) | app.state (another scope's) | **fwd + shared** | bare writes to another scope's let | hinge |");
   out.push('|---|---|---|---|---|---|---|---|---|---|');
   for (const m of C.modules) {
     const fwd = m.forward.length + m.context.length;
-    out.push(`| ${m.id}${m.stays ? ' (stays)' : ''} | ${m.row} → \`${m.file}\` | ${m.lines} | ${m.backward.length} | ${fwd} | ${m.crossLets.length}${m.lets.length > m.crossLets.length ? ` (+${m.lets.length - m.crossLets.length} boot-kept)` : ''} | ${m.state.length} | **${m.forwardShared}** | ${m.crossWrites.length}${m.crossWrites.length ? ' (' + m.crossWrites.join(', ') + ')' : ''} | ${m.stays ? (m.crossWrites.length ? 'RED' : 'exempt') : m.ok ? 'ok' : 'RED'} |`);
+    out.push(`| ${m.id}${m.stays ? ' (stays)' : ''} | ${m.row} → \`${m.file}\` | ${m.lines} | ${m.backward.length} | ${fwd} | ${m.crossLets.length}${m.lets.length > m.crossLets.length ? ` (+${m.lets.length - m.crossLets.length} boot-kept)` : ''} | ${m.state.length}${m.stateOwn.length ? ` (+${m.stateOwn.length} own)` : ""} | **${m.forwardShared}** | ${m.crossWrites.length}${m.crossWrites.length ? ' (' + m.crossWrites.join(', ') + ')' : ''} | ${m.stays ? (m.crossWrites.length ? 'RED' : 'exempt') : m.ok ? 'ok' : 'RED'} |`);
   }
   out.push('');
   out.push(`THE HINGE (G-G): bare writes across scopes ${C.hinge.crossWrites}; the largest moving module ${C.hinge.worst.id} at ${C.hinge.worst.forwardShared} (limit ${C.hinge.limit}) → ${C.hinge.ok ? 'HOLDS' : 'FAILS'}`);
@@ -1419,7 +1436,7 @@ function main(argv) {
     const C = classes(text, { file: rel });
     console.log(classesText(C));
     if (argv.includes('--verbose')) {
-      for (const m of C.modules) console.log(`\n${m.id} · ${m.spans.map(([a, b]) => a + '–' + b).join(', ')}\n  backward ${list(m.backward)}\n  forward ${list([...m.forward, ...m.context])}\n  shared lets (bare) ${list(m.crossLets)}\n  app.state ${list(m.state)}${m.stateWrites.length ? ' · writes ' + list(m.stateWrites) : ''}\n  bare writes ${list(m.bareWrites)}`);
+      for (const m of C.modules) console.log(`\n${m.id} · ${m.spans.map(([a, b]) => a + '–' + b).join(', ')}\n  backward ${list(m.backward)}\n  forward ${list([...m.forward, ...m.context])}\n  shared lets (bare) ${list(m.crossLets)}\n  app.state (another's) ${list(m.state)} · own ${list(m.stateOwn)}${m.stateWrites.length ? ' · writes ' + list(m.stateWrites) : ''}\n  bare writes ${list(m.bareWrites)}`);
       console.log(`\ncrossing names: ${C.crossNames.map((c) => `${c.name}(${c.owner}${c.kind === 'function' ? ' fn' : ''}→${c.users.join('/')})`).join(' ')}`);
     }
     if (argv.includes('--json')) console.log(JSON.stringify({ sharedLets: C.sharedLets, crossNames: C.crossNames, modules: C.modules }, null, 1));

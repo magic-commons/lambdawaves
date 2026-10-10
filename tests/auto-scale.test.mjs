@@ -1,7 +1,7 @@
 /* tests/auto-scale.test.mjs — THE ONE CONTROLLER (wave 128): AUTO SCALE's one rule (AS, 2026-09-25) and the GOVERNOR's grid
  * rung as ONE decision, judged on the REAL code: rack.js' `controlStep` is sliced out of the source and run here (the repo's
  * pattern: gpu-cleanup, project-import), and so is the frame loop's own bookkeeping — the window, the decision, the descent
- * record and THE PAUSE EDGE, from `if (tier >= TIER.PRESENT && !autoQ.presented++)` to `playedLast = clock.playing;` — so
+ * record and THE PAUSE EDGE, from `if (tier >= TIER.PRESENT && !autoQ.presented++)` to `app.state.playedLast = clock.playing;` — so
  * this suite cannot drift from the shipped rule.  Part one is the scale lever alone (the AS suite, unchanged: the OLD rule it
  * replaced, 7dca938's EMA at 0.15, −0.1 / +0.05 every 24 loop frames, is modelled beside it); part two drives the real loop
  * block through present-bound and reconstruct-bound scenes, with and without vsync quantisation, and the pause edge.
@@ -125,11 +125,11 @@ const settleMs = (r, target) => { let at = 0; for (const [t, s] of r.trace) at =
 
 /* ══ PART TWO · THE ONE CONTROLLER on the loop's own bookkeeping ══════════════════════════════════════════════════════════ */
 const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
-const LOOP = slice('    if (tier >= TIER.PRESENT && !autoQ.presented++)', '    playedLast = clock.playing;\n', true);
+const LOOP = slice('    if (tier >= TIER.PRESENT && !autoQ.presented++)', '    app.state.playedLast = clock.playing;\n', true);   // 0.5.2 R0: a shared let is app.state's
 const EFFECTIVE = slice('  const effectiveRes = () =>', '\n', false);
 const frameBlock = new Function('S', `const { TIER, autoQ, quality, gov, clock, ui, perf, loopRing, frameBudget, RES_LADDER, schedule, busyFlash, perfBudgetMs, controlStep, effectiveRes } = S;
-  const tier = S.tier, nowMs = S.nowMs, held = false; let playedLast = S.playedLast;
-${LOOP}  S.playedLast = playedLast;`);
+  const tier = S.tier, nowMs = S.nowMs, held = false; const app = { state: { playedLast: S.playedLast } };
+${LOOP}  S.playedLast = app.state.playedLast;`);
 /** a lab playing a scene whose frame costs recon·(grid/128)³ + present·scale² ms, presented on a paced loop: each interval is
  *  the frame's cost (continuous) or that cost rounded up to whole refreshes (vsync-quantised); a grid rung's rebuild frame
  *  costs `rebuildMs` more.  The loop bookkeeping above runs after every present, exactly as in rack.js. */
