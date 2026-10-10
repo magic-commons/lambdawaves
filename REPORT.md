@@ -5769,3 +5769,35 @@ One Opus builder (`agent-a5571173c3ce60a48`) ran the row as PAIR 3 beside R2c, f
 modules 100 · 126 · 228 · 51.
 
 Hand-off: `research/release-0.5.2/R2d-BUILD.md`.
+
+### wave 223: R5 THE FACADE, MOVED WHOLE — §26's `__LW` literal moves verbatim into `lab/shell/facade.js` `createFacade(app)`; its 22 null slots are registered by their owners; nothing Josh sees moves
+
+One Opus builder (`agent-a2eb07f36aee94b92`) ran the row alone, after PAIR 3, from `293df3c` (`sos-s0`; lab bytes = `7c3eebe`).
+
+**The move** (`.tmp/r5/move.mjs`, at hand-found positions, no `sed`):
+- `rack.js` `:825–:1077` (`modEdited` and `const LW = { … };`) → `createFacade(app)`, which returns the same object expression. Every key keeps
+  its order and every accessor stays an accessor. 251 of the 253 moved lines are byte-identical; the other two are `return {` and `get warning()
+  { return app.hooks.warning; }`.
+- The header (the tool's anchor), `window.__LW = LW; app.sh.LW = LW;` and every later `LW.x =` stay at their seats; the seat is `const LW = createFacade(app);`.
+- THE READ LAW: the 121 backward names (and `dom`, `ui`) are destructured once at the module's top, in 8 lines. The 21 shared lets stay
+  `app.state.x`.
+- The 22 null slots are each registered once by their owner, appended to an existing line (readouts ×4, kepler ×4, spectrum ×3, settings,
+  links ×3, persist, keys, molecules' `head`; the loop's `loopRing` / `ringMedian` / `MOTION`, the camera law's `setCamMode`).
+- R3b's three boot fill lines became their owners' registrations: settings.js, spectrum.js and kepler.js (−3 lines). Imports: rack.js 32 → 28
+  lines, 17 names out (including the dead `knob`); facade.js has 4 import lines carrying 25 names.
+
+**Gates.**
+- **The facade:** `lw-facade` **1/1 without `--write`** — 176 members (56 value · 48 get · 72 method) with the same names, kinds and order.
+- **THE LOCK:** **860 · 0/0** (57 s) and **1004 · 0/0** (58 s), both green on the first run on the rebooted rig.
+- **The classes table:** facade 121 backward · 0 forward · 21 → **21** (22 before: `warning` is read through the hook bag now); 0 bare writes;
+  G-A clean; the hinge holds (SPECTRUM 24); 21 module files.
+- **The slots:** `doubles` 0 (190 slots); 0 slots read but never filled; free names: none lost.
+- **The bytes:** `serialize-bytes` **11/11 full + 11/11 edit** sha-identical to the base export. `settings-probe` **0 of 6**, all six reached.
+- **The suites** (all green, so no base reading was owed): node exit 0; `history` 44; `new-project` 8 and `--check`; `offer` 16; `menubar` 8;
+  `stage-text` 4; `curves` 7; `timeline` 14; `lw-links` 5; `camera-shift` 11; `film-handover` 4.
+
+**Lines.** `lab/*.js` + `lab/shell/` + `lab/windows/` **27,932 → 27,943 (+11): the cap exactly.** `rack.js` 1,202 → 943; `facade.js` 269.
+The seat destructures were kept whole on purpose: trimming the 58 names only the facade read is −4 lines, but `rack-deps --classes` would then
+lose 73 crossing names. Trimming them needs one tool clause first (a candidate for R-V or the fix round).
+
+Hand-off: `research/release-0.5.2/R5-BUILD.md`.
