@@ -14,8 +14,16 @@ Ports 9093/5563 (this tree), 9097/5567 (the base export in `.tmp/base`).
 - `menubar`: 4 PASS then `:143` (the quick save also wrote `lambdawaves.q0.session`) — IDENTICAL on the base export (the rig's session
   flush); a scratch copy tolerating that one key (`.tmp/menubar-tol…`) reads 8/8 on this tree.
 
-## Next
+## After step 2 (2026-10-10 ≈09:58 CDT) — THE ROW IS DONE
 
-Step 2: the light check (`keyboard-window`, `keyboard-shortcuts`, `timeline`, `offer`, `first-run`, `access`, `history`, `hit-probe-set`,
-`frame-occlusion`, `settings-probe`, `serialize-bytes` vs the base, `lw-facade`, `new-project` + `--check`, the boot suite's blocks),
-`R3b-BUILD.md`, REPORT wave 220, commit 2, this file again.
+- The light check ran (`R3b-BUILD.md` §8): node exit 0; `lw-facade` 1/1; `timeline` 14/14; `offer` 16/16; `keyboard-window` green;
+  `new-project` 8/8 + `--check`; `serialize-bytes` 11/11 full + edit vs the base export AND R1's recorded base; `settings-probe` the base's four
+  blobs; the boot suite's 29 chunked laws law for law as the base. Rig reds (`history`, `frame-occlusion`, `hit-probe-set`, `menubar :143`,
+  B47/B60/B69–B71/B91/B92 in chunks) read identically on the base.
+- `R3b-BUILD.md` written (the ledger, the classes table, the merge notes, the drafted CLAUDE.md sentence — not applied); REPORT wave 220.
+- Servers 9093/9097 stopped by pid; no geckodriver/Firefox of mine left.
+
+## Next (the integrator's)
+
+Merge with R2b (`R3b-BUILD.md` §10: the §17 kepler-fill line needs R2b's seat to keep `bowStart … keplerDragTo` in boot(); drop the three unused
+imports after the merge; `pwa --write` on the merged tip).
