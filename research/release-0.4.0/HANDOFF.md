@@ -838,6 +838,21 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > `wait-gpu` (which counts a poll that names "marionette"); for the fix round: `solveCard` and `markBatchBegin` are unread by boot (drop from the 68),
 > settings.js/spectrum.js/state.js returns filled in boot become registrations when next opened. Next: `node $job/tmp/pair3/gen.mjs` → `BRIEF-R2c.md` /
 > `BRIEF-R2d.md` from this tip, commit, launch PAIR 3 {R2c · R2d}.
+>
+> **UPDATE (Claude Yan, 2026-10-10 10:26 CDT) — PAIR 3 LAUNCHED (R2c from `8796d15`, R2d from `5fb9671` — same lab bytes)** (`BRIEF-R2c.md` 138 lines +
+> `BRIEF-R2d.md` 140, generated from the PAIR 2 tip by `$job/tmp/pair3/gen.mjs` — every anchor, classes row and count read from the live tree, so the as-built
+> facts are exact at `03200df`; `5fb9671` makes THE MULTI-SEAT SHAPE exact: a later seat is a `function create<Y>()` INSIDE the create function's body, never a
+> second top-level one — the tool refuses that file; R2d's second seat is `createMoRegistry`). THE LAUNCH LAW: an Agent call for a builder MUST carry
+> `isolation: "worktree"` — the first PAIR 3 launch had none; both builders were locked to the integrator's worktree, refused to build there and were relaunched
+> (a fork of the first R2d stopped clean at 8796d15, no commits; its worktree `agent-a2bbb9a441a2433c5` is idle). The integrator's tree was never touched. R2c (Opus,
+> `aa99c668f22d59ca3`, 9103/5573 + 9107/5577, wave 221): material · settings-card (`lab/windows/settings-card.js`, one string in the tool's table) · film;
+> `filmHold` stays boot-level as `app.loop.hold` BY VALUE; `app.sh.LW` and `app.w.periodEnergies` are already filled (R3b); `app.w.stageCaption` is the ONE
+> name it reads from R2d — a boot-kept copy at `go` in its tree, which the integrator deletes at the merge. R2d (Opus, `a5571173c3ce60a48`, 9113/5583 + 9117/5587,
+> wave 222): molecules (two seats) · stage-words (registers `stageCaption`, `stageTextTick` eagerly) · modulation (`createModSeam`; U2's one `defs` list) ·
+> ink (§18's occlusion host alone; adds `app.w.wSh` to readouts' root line). Both briefs carry THE MULTI-SEAT SHAPE (root-level `function create<Y>()` seats),
+> R3b's creation-time TDZ law, `rigfree.mjs` instead of `wait-gpu`, the line law (50 lines for eight modules — the cap WILL be passed; Josh's ruling at R-V)
+> and the rig. Next: their reports → merge by the recipe (doubles → 0 after deleting R2c's `go` copy), CLAUDE.md sentences, CHANGES, HANDOFF → `BRIEF-R5.md`
+> (the facade) → R5 → `BRIEF-R-V.md` (the rig must be healthy) → the fix round → the local cut on Josh's word.
 
 ## 3 · What happens next, in order
 
