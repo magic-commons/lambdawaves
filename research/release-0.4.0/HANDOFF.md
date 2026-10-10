@@ -766,6 +766,38 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > unfilled because their readers are in `boot()`: `clearRegister`, `toggleFullscreen`, `copyLatex`, `occupiedEigen`, `periodEnergies`, `setSturmian`,
 > `selectEigen`, `sturmEigen`, `paintSturmRo`; a fill inside a moving span counts against that module; the reboot before R-V. CLAUDE.md: THE WINDOWS
 > paragraph (R2a's §11 + THE READ LAW). Next: R3a's merge (watch `app.host.rack` and the `go` line), then PAIR 2 {R2b · R3b}.
+>
+> **UPDATE (Claude Yan, 2026-10-10 08:38 CDT) — R3a SETTINGS + PERSISTENCE + LINKS + HISTORY IS IN; PAIR 1 complete.** R3a (Opus, `865e746`,
+> ≈75 min) merged onto `yan-c` with FIVE text conflicts, each resolved by hand (`$job/tmp/resolve-r3a.mjs`): `rack.js` (R2a's `app.host.rack =
+> rack;` against R3a's five-slot host line — the longer kept), `tools/rack-deps.mjs` (two implementations of the same G-A rule — R3a's
+> `fileFills` helper kept, R2a's inline clause dropped; the auto-merged hunk at :1080 already calls it), `tests/rack-deps.test.mjs` (both laws
+> kept, R3a's locals renamed; 53 PASS), `REPORT.md` (waves 217 and 218 both kept), `lab/sw.js` (regenerated). R2a's redundant
+> `app.sh.save/restore/copyJSON/copyLink` fill at `/* ── go ──` DELETED (persist and links register them at their seats; STATE reads them
+> inside `onFire`). AS BUILT (`research/release-0.5.2/R3a-BUILD.md`): §1 → `lab/shell/settings.js` `createSettings(app)` 147 (created BEFORE
+> the controller — reads `app.ctl.x`, `app.host.camera`, `app.sh.setModArm`, `app.sh.quality` inside callbacks); §24 → `persist.js`
+> `createPersist(app)` 311 (`serialize`/`restore` whole; `LS_EXP`/`LS_PRES` moved); the links → `links.js` `createLinks(app)` 85 (§29's
+> `openLink()` stays); THE TRUE HISTORY + its card → `history.js` `createHistory(app)` 166; `readSettings` stays one hoisted line in the head;
+> 623 of 665 moved lines identical, 42 differ by an `app.<ns>.x` read (63 at-use rewrites by a node script at the walker's token positions).
+> Seats at the merged tip: settings `rack.js:190–191`, the controller :194, STATE :1028, SPECTRUM :1031, persist :3222–3223, links :3224–3225,
+> history :3226–3227. Registered on `app.sh`: `lookSync` (settings), `serialize`/`restore`/`save`/`copyJSON` (persist), `esc`/`copyLink`
+> (links). Boot fills for slots no moved module owns yet — 11 lines, 30 slots: `loop.canPresent`; `host` camera/camLevel/syncFreeAngles/
+> syncCamUI/rack; `w` wState + the four SPECTRUM functions (the appends seat), shadowFoot/kepler/vortex/particles/slice, stageTextTick,
+> wChem/wOrbs, ladder, wAtoms/wignerView, kepShell/keplerRowSync/gas; `sh` setModArm, rk/layout/phone/tablet — each moves with its owner's
+> row (R2b, R2d, R3b). THE TOOL: G-A accepts a slot an earlier-seated module FILE fills eagerly (settings' `lookSync` for the controller; the
+> controller's `app.ctl` for every later module); `Object.assign` into a member's object (`app.ctl.domain`) is no stray. Classes (merged):
+> settings 16, persist 23 (its 9 controller names + `app.w.spectrum` read at use as the brief said; destructured they would read 13 — a
+> candidate), links 5, history 8; SPECTRUM 24 still the largest; 0 bare writes; 7 module files measured. `rack.js` 4,261 → **3,607**;
+> `lab/*.js` + shell + windows 27,799 → **27,858 (+59) — 85 left under the 27,943 cap for 8 modules: the line-law ruling for Josh at R-V is
+> now likely.** Imports: rack.js 74 lines (edit-domain's line carries the four shell imports; `createEditHistory`, `linkFor`, `LinkError`,
+> `deviceQuality` left). B128 caught a real bug in R3a's first commit (`readLink` lost; fixed `098fb1b`) — candidate: a free-name check in
+> `tools/` (`r3a-measure/freenames.mjs` is the seed). R3a'S GATES: node 0; serialize-bytes 11/11 + 11/11 vs the recorded base; settings-probe
+> 4 of 6 green then N₂ stalled (its base died at WATER); lw-links, lw-facade 1/1, offer 16/16, new-project 8/8 (run 2), the boot chunk 9/9;
+> `history` 20/20/38/20 against the base's 44 then 20 — frame-paced waits at 2–3 frames a second on BOTH trees (the rig). MY GATES on the
+> merged tip: node exit 0; `rack-deps.test` 53 PASS; the eight module files parse; the classes table (hinge holds); serialize-bytes **11/11 full
+> + 11/11 edit vs the 0.5.1 base on 8755**; lw-facade **1/1**; settings-probe 2 of 6 reached then WATER stalled (R3a's base reading, identical);
+> `history` 20 then 3b (identical). THE LOCK + frame-occlusion still OWED on the tip (the rig). CLAUDE.md: the R3a paragraph. `markBatchBegin`
+> is destructured at the controller's seat and unread in `boot()` — the fix round's. Next: fold these facts into `BRIEF-R2b.md` /
+> `BRIEF-R3b.md` (the seats above), then launch PAIR 2 {R2b · R3b} from the merged tip.
 
 ## 3 · What happens next, in order
 

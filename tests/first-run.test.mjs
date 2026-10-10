@@ -73,7 +73,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 {
   const src = appSource();
   const wires = {
-    imported: /import \{ firstRunMaterial, firstRunQuality, deviceQuality \} from '\.\/first-run\.js'/.test(src),
+    imported: /import \{ firstRunMaterial, firstRunQuality \} from '\.\/first-run\.js'/.test(src) && /import \{ deviceQuality \} from '\.\.\/first-run\.js'/.test(src),   // 0.5.2 R3a: restore()'s deviceQuality left with it (lab/shell/persist.js)
     asksCrossings: /const FIRST_RUN = firstRunMaterial\(isPhone\(\) \|\| isTablet\(\)\);/.test(src),
     tabletBeforeAsk: src.indexOf('const isTablet = () =>') > 0 && src.indexOf('const isTablet = () =>') < src.indexOf('const FIRST_RUN = '),
     oneTabletPredicate: src.split('const isTablet = () =>').length === 2,

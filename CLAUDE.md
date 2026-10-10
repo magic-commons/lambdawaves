@@ -335,3 +335,14 @@ controller's seat, §1 SETTINGS, reads `app.ctl.x` that way too); a shared `let`
 `app.ctl.x` at use is NOT the pattern — the tool counts every `app.<ns>.x` read as a forward crossing and SPECTRUM would read 32 > 25.
 Each module registers on `app.w` only what a moved reader needs; a fill placed inside a moving module's span counts against that module.
 `node tools/rack-deps.mjs --classes`'s G-A accepts an eager fill from a module file seated earlier (`tests/rack-deps.test.mjs` §5).
+
+SETTINGS, PERSISTENCE, THE LINKS and THE TRUE HISTORY (0.5.2 R3a) are `lab/shell/settings.js` `createSettings(app)` (§1, created BEFORE the
+controller's seat, so it reads `app.ctl.x`, `app.host.camera`, `app.sh.setModArm` and `app.sh.quality` inside callbacks), `lab/shell/persist.js`
+`createPersist(app)` (`serialize` and `restore` whole), `lab/shell/links.js` `createLinks(app)` (§29's `openLink()` stays in `boot()`) and
+`lab/shell/history.js` `createHistory(app)` (the HISTORY card with it) — moved verbatim and called at their seats; `readSettings` stays one hoisted
+line in `boot()`'s head (§0 calls it first). `serialize` / `restore` / `save` / `copyJSON` / `esc` / `copyLink` / `lookSync` are registered on
+`app.sh` by the module that makes them (STATE's SAVE / LOAD / COPY read them at use; `boot()` keeps no copy), and a slot a module reads that no
+moved module owns yet is filled in `boot()` right after its declaration (11 lines, 30 slots, each moving with its owner's row). `tools/rack-deps.mjs`'
+G-A: a module file's eager fills (`app.<ns>.x = …` at its root) run at its seat, so a later-seated file may destructure them; `Object.assign` into a
+member's object (`app.ctl.domain`) is not an extension of the shape. A lost import is invisible to `rack-deps` (it reports only the unused
+direction): a move checks each file's free names against the base (`research/release-0.5.2/r3a-measure/freenames.mjs`) before the browser does.

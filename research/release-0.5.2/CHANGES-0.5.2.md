@@ -18,3 +18,8 @@ real seams, over an explicit context. Nothing a hand or an eye meets is meant to
   read a later-made name through its slot. `rack.js` 4,664 → 4,261. SPECTRUM's row stays at 24 of the hinge's 25 because a module destructures the
   controller's names once at creation (a read at use would have counted 32). Serialize bytes 11/11, the facade 1/1, the settings blobs the same; the
   rig's stalls were measured against the base, law for law. **You see nothing.**
+- **R3a SETTINGS + PERSISTENCE + LINKS + HISTORY** (`865e746`, merged 2026-10-10 08:38): §1, §24, §25 and THE TRUE HISTORY leave `rack.js`
+  for `lab/shell/settings.js` (147 lines), `persist.js` (311), `links.js` (85) and `history.js` (166), created where they stood; 623 of 665
+  moved lines byte-identical, the rest read a later-made name through its slot. `rack.js` 4,261 → 3,607 with both of PAIR 1 in. Persist's row
+  23 of the hinge's 25; 0 bare writes. Serialize bytes 11/11, the facade 1/1, the settings blobs the same; `history` stops at a frame-paced
+  wait on both trees (the rig). **You see nothing.**

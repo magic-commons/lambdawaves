@@ -6,7 +6,7 @@ import { createProjects } from './projects.js';   // 0.5.0 C6: PROJECTS are MIR'
 import { installWakeLock } from './mir/core/wakelock.js';   // 0.5.0 C6b: the screen stays on while THE play plays
 import { renderNotebook } from './mir/shell/notebook-render.js';   // N6: the kit's copy (lab/notebook-render.js was byte-identical)
 import { reworkNative, planeModel } from './native-ui.js';
-import { firstRunMaterial, firstRunQuality, deviceQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
+import { firstRunMaterial, firstRunQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
 /* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
  *
  *   STATE → EVOLUTION → OBSERVABLE FIELD → OBSERVER → RENDER        (§52)
@@ -67,7 +67,7 @@ import { createStateCard } from './windows/state.js';   // 0.5.2 R2a: the STATE 
 import { stateLatex, moleculeHead, mdText, formulaLatex, BASIS_LABEL } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page; 0.5.1 D2: its head
 import { wellPacket, wellCentroid } from './well.js';
 import { applyRotor as rotorOnCopy } from './frontier.js';
-import { createEditHistory } from './edit-domain.js';   // 0.5.0 C5: the one `edit` domain on the kit's stack (mir/history/history.js); lab/history.js left
+import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js';   // 0.5.2 R3a (edit-domain.js left with the history)
 import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { createCameraPanel } from './mir/panels/camera.js';           // 0.5.0 C1: the CAMERA card's rows are the kit's panel over the law's port
 import { barTempo } from './mir/modulation/host.js';
@@ -82,7 +82,7 @@ import { createBadges } from './badges.js';             // N7 seam 6: the badges
 import { createRack, readLayout, layoutLabel as rackLayoutLabel } from './mir/shell/rack.js';   // 0.5.0 C3: the rack, its + and ☆ lists, the phone's crossing (rack-menus.js left)
 import { createMenubar } from './mir/shell/menubar.js';    // 0.5.0 C3: the logo's bar is the kit's (menubar.js left; its MENUS table stays)
 import { installWindowChrome } from './window-chrome.js'; // N7 seam 9: the LEAN and KIND passes, out of boot()
-import { linkFor, readLink, LinkError, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK
+import { readLink, LINK_CHAR_CEILING } from './statelink.js';   // wave 56: every state of this lab is a LINK
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
@@ -90,7 +90,6 @@ const BUILD_LINE = '0.5.1-alpha · Informational Update · 2026-10-09';   // THE
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
-const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
 
 export async function boot(dom) {
   const DEVICES = new Map(), device = (o) => { const d = kitDevice(o); DEVICES.set(o.id, d); return d; };   // 0.5.0 C3: the rack registers each card with its device(), so its fold is called, never re-clicked
@@ -187,148 +186,9 @@ export async function boot(dom) {
       layout: null, winHint: null, wTr: null, phone: null, tablet: null, syncPhone: null, keyState: null, keyHelp: null, stageHasFocus: null, ACTIONS: null, kt: null, modSeats: null, serialize: null,
       restoreModulation: null, save: null, copyJSON: null, restore: null, notCarriedWords: null, esc: null, mintLink: null, copyLink: null, openLink: null, historyApi: null, LW: null },
   };
-  /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
-  let settingsLoaded = false;
-  app.state.molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (lab.css .lw-stage), a PREFERENCE
-  function readSettings() { return settingsStore.read(); }
-  function saveSettings() {
-    if (!settingsLoaded) return;
-    try {
-      /* WAVE 54 · FOUND HERE: this writer built the object FROM SCRATCH, so every key written by anyone else was
-         silently dropped on the next call — the notebook's remembered size (nbW / nbH, written by nbSaveSize's own
-         merge) did not survive so much as a fold. The three keys this function does not own are carried through. */
-      /* WAVE 59 · AND `warned` IS THE FOURTH, and it is not bookkeeping.  Wave 48 added the photosensitivity
-         acceptance to this key AFTER wave 54 fixed the three above, so it fell into the same hole: accept the
-         notice, then change the theme / close a window / load a layout / open a link that names a palette, and
-         the acceptance was ERASED — in the same session, before `warning.needed()` reads it.  A safety notice a
-         visitor has answered must stay answered, so it is carried like the other three. `remember()` writes the
-         value; this function's only job is not to throw it away. */
-      const S0 = readSettings();
-      /* WAVE 105 · `audioDevice` IS THE FIFTH CARRIED KEY.  This writer rebuilds the object from
-         scratch, so a key it does not name is destroyed on the next call — the exact hole waves 54 and
-         59 each fixed once, and wave 102 reopened by writing the chosen microphone from somewhere
-         else.  Pick an input, move any window, reload: back to the system default. */
-      /* OPTIMIZATION 2026-09-24 · M4 · `abW` / `abH` ARE THE SIXTH AND SEVENTH, and the fourth time this one hole has been
-         found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
-         preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
-         470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: app.state.molFormulaScale,
-        auto: quality.auto, governor: gov.on, keepFrames: keep.frames, perfMode: perf.mode,
-        /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
-           none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
-           belong beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
-           when you open it is a surprise, not a setting. */
-        friction: camera.friction, spin: camera.speed, dragGain: camera.dragGain, fling: camera.flingGain,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod)
-        /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE, and it is the sixth of the six things
-           host-contract.md says a host owes it: where the window sits, which lane the work bars are
-           in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
-           is not here — that rides in the project file, exactly as it did before. */
-        modwin: app.state.modView ? app.state.modView.presentation() : S0.modwin,
-        tlwin: S0.tlwin,   // 0.5.0 C7b: the TIMELINE window's shape and work lane (WORKSPACE), written by its own store and carried here
-        frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode:mat.axisMode, cornerSide:mat.cornerSide,
-        /* ⚠ WAVE 106 · TWO MORE OF THE FIELD'S CHROME, AND ONE CLOSES AN ASYMMETRY NEVER DECIDED.
-           `invert` IS NEW HERE: it sat in the same row as FRAME and AXIS from wave 56 and was the only
-           one of the three this browser did not remember — two kept over a reload and one silently
-           thrown away.  Moving it to PALETTE is the moment to end that.
-           `axisInk` is a BROWSER PREFERENCE like frame and axis, and NOT like `mat.lightUI`, which
-           serialize() strips out of every project: lightUI is not a choice at all, it is the RESOLVED
-           theme, and a file carrying it would impose the sender's theme on its reader.  AXIS COLOUR
-           *is* a choice, and it is remembered here.  0.3.1 · S1 (D1): the whole field chrome — frame, axis,
-           their modes, the corner, invert, axis colour — is this browser's alone; serialize() strips it and
-           restore() ignores it in an older file, so no project or link can change a reader's axes. */
-        invert: !!mat.invert, axisInk: mat.axisInk || 'theme',        // wave 53: the two chrome objects are this browser's, like FROST and the tags
-        phoneTr: !!document.querySelector('.dev[data-id="transport"].folded'),
-        /* WAVE 59 · WHICH WAY THE PHONE'S RACK WAS LEFT, on exactly phoneTr's pattern — a phone-only chrome
-           preference, derived from the DOM rather than tracked in a second place.  The DEFAULT (nothing said)
-           is HIDDEN, and that default is the whole point: see enterPhone(). */
-        phoneRack: document.body.classList.contains('phone') ? !document.body.classList.contains('rack-hidden') : S0.phoneRack,
-        /* WAVE 54: which colour space this BROWSER asked for.  0.3.1 · S1: the camera MODE and the palette left this key —
-           the palette is PROJECT state (D2), and so is the mode, because a pose cannot be read back without it (D4: a
-           TURNTABLE record's rotor is stale, a FREE one carries roll; docs/STATE-SCOPES.md). */
-        gamut: document.body.dataset.gamut === 'p3' ? 'p3' : 'srgb', p3Mode: ui.p3Seg ? ui.p3Seg.get() : 'convert',
-        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id) });
-    } catch (e) {}
-  }
-
-
-  /* 0.5.0 C2 · THE LOOK'S SETTERS are the store's (lab/look.js): one `set`, on the page in the same task, and SETTINGS repainted
-     from the store (lookSync).  An unnamed card is the device's and an unknown frost is OFF, as they always were. */
-  function setCardStyle(id) { look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card }); return document.body.dataset.card; }
-  function setFrost(mode) { look.set({ frost: mode === 'still' || mode === 'always' ? mode : 'off' }); return look.get('frost'); }
-  function setDisconnected(v) { look.set({ disconnected: !!v }); return !!v; }
-  /** the SETTINGS controls the look store drives, repainted from it */
-  function lookSync(s, keys) {
-    const c = { theme: ui.themeSeg, card: ui.cardSeg, frost: ui.frostSeg, disconnected: ui.discSw, blur: ui.blurK, accentA: ui.accA, accentB: ui.accB, vivid: ui.vivid,
-      badges: ui.badgesSw, hints: ui.controlHintsSw, help: ui.windowInfoSw };
-    for (const k of keys) if (c[k]) c[k].set(s[k]);
-  }
-  app.sh.lookSync = lookSync;
-  function applySettings() {
-    const s = readSettings();
-    look.rerun(); lookSync(look.prefs.all(), Object.keys(look.prefs.all()));   // 0.5.0 C2: the look again, now that the theme's engine hooks exist
-    const captions = s.captions === true;
-    document.body.classList.toggle('no-captions', !captions); if (ui.capSw) ui.capSw.set(captions);
-    /* THE STAGE TEXT (0.4.0 S3): one switch for the formula, the fade and the atom labels; nothing said means ON.  The ATOM
-       LABELS' own key is read ONCE — only where the formula's was never written (an older profile) — and is dropped by the
-       next save with its SIZE: a stored molFormula decides, because the row is one switch and that is the key it keeps. */
-    const molFormula = s.molFormula !== undefined ? s.molFormula !== false : s.atomLabels !== false;
-    document.body.classList.toggle('no-mol-formula', !molFormula); if (ui.molFormulaSw) ui.molFormulaSw.set(molFormula);
-    app.state.molFormulaScale = Number.isFinite(+s.molFormulaSize) ? Math.max(0.5, Math.min(3, +s.molFormulaSize)) : 1; if (ui.molFormulaK) ui.molFormulaK.set(app.state.molFormulaScale);
-    if (app.state.stageText) { app.state.stageText.setScale(app.state.molFormulaScale); app.state.stageText.setOn(molFormula); }
-    if (s.auto === false) { quality.auto = false; if (ui.autoSw) ui.autoSw.set(false); }
-    if (s.governor === false) setGovernor(false);                 // wave 45: the governor held off
-    if (s.keepFrames === true) setKeepFrames(true);              // wave 45: the playhead follows every frame (off by default)
-    setPerfMode(s.perfMode === 'full' ? 'full' : '120');         // an absent key takes the official 120 Hz profile; an explicit FULL choice survives
-    if (typeof s.friction === 'number') camera.setFriction(s.friction);   // wave 51: the camera's feel comes back …
-    if (typeof s.spin === 'number') camera.setSpeed(s.spin);              // … but AUTO-ROTATE never does (see saveSettings)
-    if (typeof s.dragGain === 'number') camera.setDragGain(s.dragGain);   // wave 58: DRAG GAIN and FLING ride beside them
-    if (typeof s.fling === 'number') camera.setFling(s.fling);
-    /* 0.5.0 C4 · THE POWER AND THE CADENCE are this browser's (PREFERENCE) and live in the kit's modulation record, the one
-       MIR's installModulation reads; an older blob's pair is read ONCE into it, and the blob drops it on its next save. */
-    const mr = { modArm: s.modArm, modCadence: s.modCadence, ...modStore.read() };
-    MOD.hz = mr.modCadence === 120 ? 120 : 60; if (app.state.modView) app.state.modView.sync();   // wave 52: the modulation's cadence cap is the PANEL's, not the project's
-    if (mr.modArm === false) setModArm(false, { quiet: true });   // wave 65: ARMED is the default a fresh visit gets
-    if (s.modArm !== undefined || s.modCadence !== undefined) saveMod();
-    if (s.frame === false) { mat.frame = false; if (ui.frameSw) ui.frameSw.set(false); }     // wave 53: FRAME and AXIS, independently
-    if (['box','lattice','dots'].includes(s.frameMode)) mat.frameMode=s.frameMode;
-    if (['box','corner'].includes(s.axisMode)) mat.axisMode=s.axisMode;
-    mat.cornerSide=s.cornerSide==='left'?'left':'right';
-    if (s.axis === false) { mat.axis = false; if (ui.axisSw) ui.axisSw.set(false); }
-    /* ⚠ and the two that left the WAVE window with them.  Both read the NON-DEFAULT ONLY, on exactly
-       the law of the two lines above: NOTHING SAID MEANS THE SHIPPED VALUE, so a profile written
-       before this wave opens as it always did instead of inheriting a default nobody chose. */
-    if (s.invert === true) { mat.invert = true; if (ui.invertSw) ui.invertSw.set(true); }
-    if (s.axisInk === 'cmy' || s.axisInk === 'rgb') { mat.axisInk = s.axisInk; if (ui.axisInkSeg) ui.axisInkSeg.set(s.axisInk); }
-    if (Array.isArray(s.closed)) for (const d of document.querySelectorAll('.dev')) d.classList.toggle('closed', s.closed.includes(d.dataset.id));   // the remembered set, exactly
-    /* 0.3.1 · S1 (D4's escape hatch): the camera MODE is the project's, like the pose it is needed to read, so a `camMode`
-       an older build left here is not read — the boot is FREE (the shipped seed) and a project brings its own. */
-    if (s.p3Mode === 'vivid' && ui.p3Seg) ui.p3Seg.set('vivid');
-
-
-    const wantP3 = s.gamut ? s.gamut === 'p3' : appleDevice();
-    if (wantP3 && ui.gamutSeg) ui.gamutSeg.set(field.ok && field.setGamut ? (field.setGamut(s.p3Mode === 'vivid' ? 'p3-vivid' : 'p3') === 'srgb' ? 'srgb' : 'p3') : 'srgb');   // it can only come back if the canvas can honour it
-    document.body.dataset.gamut = field.ok && field.gamut !== 'srgb' ? 'p3' : 'srgb';
-    settingsLoaded = true;
-  }
-
-
-  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', atoms: 'info', chem: 'other', wigner: 'info', radiation: 'info' };
-  /* WAVE 56 · WINDOWS THAT NO LONGER EXIST, and the window that absorbed each of them.  A saved LAYOUT is
-     a list of window ids and nothing else, so retiring an id would silently drop a seat out of every layout
-     ever saved unless the id has somewhere to go.  `style` (DRAW STYLE) was merged into `observer` (WAVE) by
-     board #59, which kept the heir's id precisely so that three CSS selectors and the gate did not have to
-     move.  Read by layout.applyLayout(); the settings key's `closed[]` needs nothing, because it names each
-     window independently and the heir already names itself. */
-  /* 0.4.0 S3 (R-W1): DYNAMICS is retired into SHADOW (L, T, V, S and the plot), CALCULUS (the moments), RADIATION (the
-     lines) and VORTEX (PARTICLES); a saved layout's DYNAMICS seat lands on SHADOW. */
-  const RETIRED_WINDOWS = { style: 'observer', dynamics: 'shadow' };
-  /* POWER is persistent device state. Presentation eligibility is a separate, transient visibility law below:
-     leaving the viewport must save work without rewriting the user's project or switches. */
-  const powered = (w) => !(w && w.root && w.root.classList.contains('off'));
-  const DIGESTS = {};
-  app.state.space = 'x';                 // 'x' position ψ(x) · 'p' momentum φ(p): the same state, two exact pictures
-
-
+  function readSettings() { return settingsStore.read(); }   // 0.5.2 R3a: §1's reader stays in the head — §0 calls it first (U1), app.sh holds it by value
+  /* ── SETTINGS: what this browser remembers — lab/shell/settings.js (0.5.2 R3a), created here ── */
+  const { saveSettings, setCardStyle, setFrost, setDisconnected, applySettings, KIND, RETIRED_WINDOWS, powered, DIGESTS } = createSettings(app);
   const quality = { ...firstRunQuality(isPhone() ? 'phone' : isTablet() ? 'tablet' : 'desktop'), auto: true, autoScale: 1, minScale: 0.35 };   // PACE P2: 64³ × 160 × 1 on a desktop (and a phone, whose crossing has its own rule), the GRID pairing 64³ × 110 × 0.75 on a tablet
   app.sh.quality = quality;
   /* ── ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD: lab/shell/controller.js (0.5.2 R1), created here; the loop stays below ── */
@@ -468,6 +328,7 @@ export async function boot(dom) {
   const windowActivity = createWindowActivity({ onChange: () => { schedule(TIER.PRESENT); if (app.state.histShown) app.state.histShown(); } });
   app.loop.windowActivity = windowActivity;
   const canPresent = (w) => windowActivity.canPresent(w);
+  app.loop.canPresent = canPresent;
   const canPresentTransport = () => !app.state.uiHidden && (layout.docked ? canPresent(wTr)
     : (!document.body.classList.contains('rack-hidden') || document.body.classList.contains('transport-peek')));
   const tableOf = (a) => sturm.P ? sturm.rec[a] : (app.state.space === 'p' ? getHamiltonian().momentumTableFor(BASIS[a]) : getHamiltonian().tableFor(BASIS[a]));   // W-STURMIAN: the scaled record, else the operator's
@@ -820,7 +681,7 @@ export async function boot(dom) {
     camLevelStep, cameraStep, setDist, setFov, syncCamUI, resetView, zoomAt, panBy, port: cameraPort } = createCameraLaw({ obs, present: () => schedule(TIER.PRESENT),
     modHand, resetWall: app.loop.resetWall });
   const rack = dom.rack;
-  app.host.rack = rack;
+  app.host.camera = camera; app.host.camLevel = camLevel; app.host.syncFreeAngles = syncFreeAngles; app.host.syncCamUI = syncCamUI; app.host.rack = rack;
 
 
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
@@ -1172,6 +1033,7 @@ export async function boot(dom) {
     periodEnergies, selectEigen, setElement, fillValence } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
 
   rack.appendChild(wPal.root); rack.appendChild(wObs.root); rack.appendChild(wCam.root); rack.appendChild(wClip.root);
+  app.w.wState = wState; app.w.switchHamiltonian = switchHamiltonian; app.w.applySturmian = applySturmian; app.w.setElement = setElement; app.w.fillValence = fillValence;
   rack.appendChild(ui.set.root);
   /* THE ABOUT FACE LIVES IN THE NOTEBOOK GLASS (wave 30), and its markup is lab/index.html's `.nb-aboutface`.
      A commented-out copy of the old in-window version sat here for twenty-nine waves; wave 59 deleted it,
@@ -1265,6 +1127,7 @@ export async function boot(dom) {
     lut: () => (app.state.palette && app.state.palette.on ? toLUT(app.state.palette.stops) : null),
     repaint() { schedule(TIER.PRESENT); }
   });
+  app.w.shadowFoot = shadowFoot; app.w.kepler = kepler; app.w.vortex = vortex; app.w.particles = particles; app.w.slice = slice;
   /* OPTIMIZATION 2026-09-24 · M6(b): appended AFTER its view is built (in its old seat, so the rack order and
      LW.bootOrder are unchanged).  Appended first, the plane model's construction-time paint read `cv.clientWidth` on a
      half-built rack and forced its first full style + layout (28.6 ms); disconnected, the read answers 0 without a
@@ -1388,6 +1251,7 @@ export async function boot(dom) {
     stageSrc.v = reg.version; stageSrc.id = id;
     app.state.stageText.setFormula(stageMd());
   }
+  app.w.stageTextTick = stageTextTick;
   /* 0.5.1 D1 · THE STAGE TEXT IS ONE BLOCK of the kit's INFORMATIONAL layer (mir/info/layer.js; stage-text.js left): the kit's ink,
      shade and serif at the kit's seat — the free stage's top + 12 %, between the racks, clear of the transport and a docked TIMELINE —
      and STILL: no subject, no labels, no parallax, no drift, no following, and never told of a camera move (a block with no subject
@@ -1480,6 +1344,7 @@ export async function boot(dom) {
      matrix while REGISTER ON is up.  2026-10 (Josh): it STAYS on the rack whatever MOLECULES does — MOLECULES OFF only stands its
      switch down (orbitalsview.js update), and the ladder stays painted and editable. */
   const wOrbs = device({ id: 'orbitals', eyebrow: 'MO-REGISTRY', title: 'molecular orbital registry', status: '' });   // the id stays `orbitals` so saved layouts survive the rename (REGISTER-WINDOW-SPEC §11.1)
+  app.w.wChem = wChem; app.w.wOrbs = wOrbs;
   if (useCompactDefaults) wOrbs.root.classList.add('closed');   // the same rule CHEMISTRY keeps; the first-run block opens it under MOLECULES
   rack.appendChild(wOrbs.root);
   app.state.register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs),
@@ -1513,6 +1378,7 @@ export async function boot(dom) {
   if (useCompactDefaults) wLad.root.classList.add('closed');
   rack.appendChild(wLad.root);
   const ladder = createLadder(wLad.body, { active: () => canPresent(wLad), loading: cardLoading(wLad, 'revival'), solve: (params) => solveCard({ op: 'ladder', params }, () => solveLadder(params)) });
+  app.w.ladder = ladder;
   /* Shift multi-add reopens several cards in one gesture. Each explicit request enters the card worker queue even
      if later cards land below the rack clip; the single worker keeps those solves from competing with the field. */
   wChem.root.addEventListener('devopen', () => app.state.chem.prepare());
@@ -1784,6 +1650,7 @@ export async function boot(dom) {
   const wWig = device({ id: 'wigner', eyebrow: 'WIGNER', status: '' });
   rack.appendChild(wWig.root); wWig.root.classList.add('closed');                // reopened from the + at the top of the rack
   const wignerView = createWigner(wWig.body, { repaint() { schedule(TIER.PRESENT); } });
+  app.w.wAtoms = wAtoms; app.w.wignerView = wignerView;
 
   // RADIATION — what the prepared pair would radiate, and the shape of its far field; also CLOSED
   const wRad = device({ id: 'radiation', eyebrow: 'RADIATION', status: '' });
@@ -2007,6 +1874,7 @@ export async function boot(dom) {
     schedule(TIER.PRESENT);
     return app.state.modArm;
   }
+  app.sh.setModArm = setModArm;
   /** THE LOOP CLOCK, LOCKED TO THE STATE (g).  `barTempo({T, rate})` turns the density's own exact
    *  recurrence into a tempo at which ONE BAR IS ONE RECURRENCE — which is what makes the BPM chip's
    *  "an existing global clock" the instrument's clock rather than a number somebody typed, and what
@@ -2271,6 +2139,7 @@ export async function boot(dom) {
   /* a DESIGN CHOICE, labelled: a harder pull launches a tighter packet (a boost alone never changes a width) */
   app.state.gasWidth = 1.8; app.state.gasAxial = false;
   const gas = createGas(HAMILTONIANS.well.radius);
+  app.w.kepShell = kepShell; app.w.keplerRowSync = keplerRowSync; app.w.gas = gas;
   /* K5w (optimization 2026-09-24 · AUDIT-B FB1, AUDIT-F F11, SOL-REVIEW K5, PLAN §9) · SPECTRUM's `⟨z⟩ · σ_z` line.
      gas.stats(t) is 8–17 ms and ran on the frame thread every 6th CPU tick while the gas played — outside tick(), so no
      profile or governor saw it.  Now the maths worker runs the SAME stats() on its own gas (mathworker.js gasStats: its
@@ -3078,6 +2947,7 @@ export async function boot(dom) {
     schedule(TIER.REBUILD);
   }
   const tablet = { on: false, DPR: 1.5, steps: 110 };   // isTablet() itself sits beside isPhone() at the top (W125: the first-run material asks it before any window exists)
+  app.sh.rk = rk; app.sh.layout = layout; app.sh.phone = phone; app.sh.tablet = tablet;
   function syncPhone() {
     app.state.cornerLayoutDirty=true;
     const on = isPhone();
@@ -3349,535 +3219,12 @@ export async function boot(dom) {
     toggleUI, cycleWindow, table: kt.table,
   };
 
-  /* ── persistence (§46): experiment and presentation, separately ───────── */
-  /* 0.3.1 · S3 THE EDIT SCOPE (PLAN §4.1, D6; docs/STATE-SCOPES.md) — what the history reads, keys and writes back: the PROJECT keys
-     minus the view, quality, the notebook and the WORKSPACE (no DOM read), and minus what a clock or a modulator moves (experiment.t,
-     a bound macro's value, a modulated target's output — its seat keeps the base —, mat.steps, domain.half under AUTO). */
-  const EDIT_SKIP = ['obs', 'quality', 'layout', 'modwin', 'camera', 'notebook'];
-  /** where each modulation target's hand value sits in a serialize() record, [object, key, f, back]: a saved project and a history
-   *  row keep the registry BASE there.  A STATES lane slot (f: its amplitude / wrapped phase) is seated by the edit scope only. */
-  function modSeats(data) {
-    const pr = data.presentation, I = pr.instruments || {}, st = I.states, T = 2 * Math.PI;
-    return { 'observer.yaw': [pr.obs, 'yaw'], 'observer.pitch': [pr.obs, 'pitch'], 'observer.dist': [pr.obs, 'dist'], 'observer.fov': [pr.obs, 'fov'],
-      'observer.panx': [pr.obs && pr.obs.shift, 0], 'observer.pany': [pr.obs && pr.obs.shift, 1],
-      'material.stage': [pr.ui.stage, 'mix'], 'material.gamma': [pr.mat, 'gamma'], 'material.exposure': [pr.mat, 'exposure'], 'material.softness': [pr.mat, 'softness'],
-      'material.hue': [pr.mat, 'hueShift'], 'material.iso': [pr.mat, 'iso'], 'material.grain': [pr.mat, 'grain'], 'material.knee': [pr.mat, 'knee'],
-      'material.slice.pos': [pr.mat.slice, 'pos'], 'material.slice.thick': [pr.mat.slice, 'thick'], 'transport.rate': [data.experiment, 'rate'],
-      'state.rot.z': [pr.rotationRates, 'z'], 'state.stark.kz': [pr.rotationRates, 'kz'], 'state.defect.l2': [pr.rotationRates, 'def'], 'state.rabi': [pr.ab, 'omega'],
-      'chem.kick': [I.chem, 'kappa'], 'chem.speed': [I.chem, 'speed'], 'reg.morph': [st, 'morph'], 'reg.e0': [st && st.drive, 'e0'], 'reg.w': [st && st.drive, 'omega'],
-      ...Object.fromEntries(((st && st.lanes) || []).slice(0, 8).flatMap((L, i) => [['reg.amp' + (i + 1), [L, 'amp', Math.sqrt, (a) => a * a]], ['reg.ph' + (i + 1), [L, 'phase', (v) => ((v % T) + T) % T]]])) };
-  }
-  /* 0.5.0 D9 · QCD's window is deleted; its record `instruments.qcd` stays as QUARKONIUM's parameters (the key and shape it had) */
-  const quarkonium = () => { const s = HAMILTONIANS.cornell.system; return { kind: s.kind, potential: s.pot, params: { alphaS: s.params.alphaS, sigma: s.params.sigma, C: s.params.C } }; };
-  app.state.restoreNotice = '';   // D9: what the last restore could not bring back (a retired legacy window), in one line; '' when nothing
-  function serialize(opt) {
-    const edit = !!(opt && opt.scope === 'edit');
-    const m = JSON.parse(JSON.stringify(mat)); for (const k of ['bg', 'lightUI', 'stageCustom', ...FIELD_CHROME]) delete m[k];   // the stage colour travels under presentation.ui.stage; GAMMA remains an artist-owned material value; the chrome is the reader's (S1)
-    const H = getHamiltonian();
-    /* WAVE 56 · THE TWO KEYS A LINK NEEDED.  `damping` (DRAG γ) lived only in the undo ring's own record and
-       `paletteId` only in this browser's settings, so a state serialised for a LINK arrived at the reader with
-       neither.  Both are additive: restore() reads neither, so a project written today opens on a build from
-       yesterday and a project written yesterday opens here, unchanged in either direction — the link-open path
-       below is what applies them, because a link is the one road on which they are somebody else's. */
-    const S = { experiment: Object.assign(reg.serialize(clock.t), { rate: clock.rate, window: clock.window, damping: reg.damping }),
-      presentation: { obs: { ...obs, shift: [...obs.shift] }, mat: m, quality: { ...quality }, domain: { ...domain }, shadow: shadowView.mode,
-        paletteId: app.state.palette ? app.state.palette.id : PAL_DEF,
-        space: app.state.space, palette: app.state.palette ? { on: app.state.palette.on, selected: app.state.palette.selected, stops: app.state.palette.stops.map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) } : null,
-        hamiltonian: { id: H.id, Z: getZ(), atomZ: HAMILTONIANS.atom.Z, well: HAMILTONIANS.well.radius, gasBasis: app.state.gasAxial ? 'axial' : 'reg' },
-        wigner: { zmax: wignerView.zmax, pmax: wignerView.pmax },
-        readers: { spectrum: { selected: spectrum.selected, dials: spectrum.dials }, slice: slice.save(), kepler: { shell: kepShell() } },
-        /* Static instrument controls belong to the composition. Solver caches, traces, collisions,
-           particles and pulse runs do not: every project still opens paused on its first frame. */
-        instruments: { chem: app.state.chem.save(), orbitals: app.state.orbitals.save(), states: app.state.states.save(), register: { mode: app.state.register.mode }, qcd: quarkonium(),
-          ladder: { ...ladder.params },
-          particles: { count: Math.round(ui.pN.get()), trail: particles.trailLen } },
-        rates: Array.from(rates), rotationRates: { ...rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
-        modulation: app.state.modHost ? modRackStamped() : null,
-        /* 2026-09-10 (Josh): A PROJECT IS A DAW PROJECT — the stage, the window arrangement (every window as it stands,
-           floats included), the modulation window's placement, auto-rotate, the overlays, SPECTRUM's DIALS fold, the A/B
-           transition, the notebook's size when it was resized. Every key is additive: a file without it opens as before.
-           0.3.1 · S1 THE SCOPE LAW (docs/STATE-SCOPES.md): the theme, card style, frost, disconnected cards, accents and
-           the camera's feel are PREFERENCE — the reader's furniture — and are never written here again. */
-        ui: { stage: { mix: app.state.stageMix, custom: mat.stageCustom.slice(0, 3), follow: app.state.stageFollow } },
-        layout: !edit && layout.captureLayout ? layout.captureLayout() : null,
-        modwin: !edit && app.state.modView ? app.state.modView.presentation() : null,
-        camera: { autoRotate: !!camera.autoRotate },
-        overlays: { vortex: { on: !!vortex.on, overlay: !!vortex.overlay }, kepler: !!kepler.on, particles: { on: !!particles.on, count: particles.points.length }, dials: !!spectrum.dials },
-        ab: ui.ab ? ui.ab.get() : null,
-        notebook: !edit && layout.notebookSize ? (() => { const n = layout.notebookSize(); return n.custom ? { w: n.w, h: n.h } : null; })() : null } };
-    const T = !edit && app.state.tl ? app.state.tl.model.serialize() : null; if (T && (T.clips.length || T.active)) S.presentation.timeline = T;   // 0.5.0 C7b: the arrangement, only when there is one (NEW and the demos stay byte-exact); never an undo row's
-    if (!edit) return S;
-    const pr = S.presentation, R = app.state.modHost && app.state.modHost.registry;
-    delete S.experiment.t; delete pr.mat.steps; if (pr.domain.auto) delete pr.domain.half;
-    for (const mc of (pr.modulation && pr.modulation.macros) || []) if (mc.sourceId) delete mc.value;
-    if (R) for (const [id, [o, k, f]] of Object.entries(modSeats(S))) if (o && R.has(id) && R.isModulated(id)) o[k] = f ? f(R.baseOf(id)) : R.baseOf(id);
-    for (const k of EDIT_SKIP) delete pr[k];
-    return S;
-  }
-  /** WAVE 63 · THE RACK CARRIES ITS MODEL VERSION, because nothing else on this road did.
-   *  `mod.js` stamps `modV` on a PRESET record and `presetApply` refuses a stamp it cannot read —
-   *  that machinery is why bumping MOD_STATE_V to 104 protects the preset store.  But the model's
-   *  own `serialize()` emits NO version at all and `deserialize()` checks none, so a project file
-   *  and this browser's localStorage — the road the lab actually uses every session — were
-   *  version-blind: a rack with a bipolar route, opened by a build that took an upstream `mod.js`
-   *  and lost markers 2/8 and 6/8, would drop the flag and move the base by 30 % of scale with no
-   *  warning at all.  `v` is additive (the model ignores an unknown key, so this is byte-compatible
-   *  in both directions) and `restoreModulation` below is the loader that refuses what it cannot
-   *  honour.  `rack.js` is OURS, so the guard survives an upstream re-take of the vendored file —
-   *  which is the whole scenario PORT-NOTES.md warns about. */
-  function modRackStamped() {
-    const o = app.state.modHost.model.serialize();
-    o.v = app.state.modHost.model.MOD_STATE_V;
-    return o;
-  }
-  /** LOAD A MODULATION RACK.  The model's own law: a load is STOPPED and starts at bar 1 with phase 0,
-   *  so the transport is put down first, every held parameter is handed back to its base, and the
-   *  dormancy law is re-run — a route saved against a target this build does not have keeps its
-   *  settings and sits inert rather than being thrown away. */
-  function restoreModulation(o, savedBases, opening) {
-    if (!app.state.modHost) return false;
-    /* REFUSE WHAT THIS BUILD CANNOT HONOUR, and say so.  An ABSENT `v` is not a refusal — every
-       rack written before wave 63 has none and means "predates the stamp", which is the same
-       reading `mod.js` prescribes for an absent preset stamp.  A stamp we do not know is a rack
-       whose routes may mean something this model does not implement, and loading it half-read is
-       the silent 30 % the version exists to prevent: leave the rack exactly as it was and put the
-       two numbers on the card. */
-    const V = o && typeof o === 'object' ? o.v : undefined;
-    if (V !== undefined && !app.state.modHost.model.modStateReadable(V)) {
-      wState.setStatus('modulation rack refused — model ' + V + ', this build reads ' +
-                       app.state.modHost.model.MOD_STATE_READS.join(' · '), 'warn');
-      return false;
-    }
-    app.state.modHost.clock.pause();
-    /* Capture the project values before restoreAll hands the previous rack's live targets back.
-       Old projects have no explicit base table; for those, the fully restored controls are the
-       migration source. New projects use savedBases, which remains stable through modulation. */
-    const incoming = Object.fromEntries(app.state.modHost.registry.list().map((id) => [id, modGets[id] ? Number(modGets[id]()) : NaN]));
-    app.state.modHost.registry.restoreAll();
-    const ok = app.state.modHost.model.deserialize(o || null);
-    app.state.modHost.targets.sync();
-    for (const id of app.state.modHost.registry.list()) {
-      const v = savedBases && Number.isFinite(savedBases[id]) ? savedBases[id] : incoming[id];
-      if (Number.isFinite(v)) app.state.modHost.registry.setBase(id, v);
-    }
-    app.state.modHost.clock.applyAll(true);
-    if (app.state.modView && !opening) app.state.modView.rebuild();                    // wave 127: a window the file opens is rebuilt by its open() (the kit's window.js restore → open → rebuild)
-    schedule(TIER.PRESENT);
-    return ok;
-  }
-  function save() { try { const s = serialize(); localStorage.setItem(LS_EXP, JSON.stringify(s.experiment)); localStorage.setItem(LS_PRES, JSON.stringify(s.presentation)); wState.setStatus('saved', 'live'); } catch (e) { wState.setStatus('save failed', 'warn'); } }
-  /** the whole session as JSON on the clipboard — STATE's COPY JSON and the FILE menu's row are this one road (N1) */
-  async function copyJSON() { try { await navigator.clipboard.writeText(JSON.stringify(serialize(), null, 1)); } catch (_) {} }
-  /** opt.history (UNDO / REDO, S3): an edit-scope record; the transport stays where it is (the anchor c(0) travels, so the picture
-   *  only moves if the coefficients did) and the ring, notebook, view and arrangement are left alone.  opt.project: a file opens at
-   *  t = 0.  Neither clears the history: the road that opened the file does, naming it (boot, link, open · …). */
-  function restore(obj, opt) {
-    const hist = !!(opt && opt.history), gone = [];                  // D9: the retired legacy windows this file used, named once below
-    if (!hist) app.state.restoreNotice = '';
-    markBatchBegin();                                                // M7: released in the finally below
-    try {
-      if (opt && opt.project && app.state.modHost) { app.state.modHost.clock.pause(); app.state.modHost.registry.restoreAll(); }   // S2 · a project open puts the running modulation down FIRST (wave 127's law): a route still holding the stage wrote its old base back over the file's mix
-      const ex = obj ? obj.experiment : JSON.parse(localStorage.getItem(LS_EXP) || 'null');
-      let pr = obj ? obj.presentation : JSON.parse(localStorage.getItem(LS_PRES) || 'null');
-      /* S3 · an UNDO re-applies a heavy section only when it moved (probes/S3/undo-while-playing.js: reloading an unchanged rack
-         stopped a playing transport and reset every LFO; the palette, instruments and overlays re-upload, re-own or re-seed) */
-      if (hist && pr) { const now = serialize({ scope: 'edit' }).presentation; pr = { ...pr };
-        for (const k of ['modulation', 'palette', 'instruments', 'overlays']) if (JSON.stringify(pr[k]) === JSON.stringify(now[k])) delete pr[k]; }
-      if (ex) {
-        if (reg.transition && app.hooks.ab) app.hooks.ab.set(false);   // wave 127 · every road stands a running A/B transition down FIRST (UNDO's law): clearing it later froze its mix over the register written here
-        const t = reg.restore(ex);
-        if (!hist) {
-          clock.pause(); clock.scrub(opt && opt.project ? 0 : t);
-          if (ui.scrub) ui.scrub.set(0);
-          shadowView.clearTrail(); shadowFoot.clear(); particles.resetClock(clock.t);
-        }
-        if (Number.isFinite(ex.rate) && ex.rate > 0) clock.setRate(paceRate(ex.rate));
-        if (ex.window) clock.window = ex.window;
-        if (Number.isFinite(ex.damping)) { reg.setDamping(ex.damping); if (ui.dragKnob) ui.dragKnob.set(reg.damping); }
-        ui.rateKnob.set(clock.rate); ui.presetSel.value = reg.preset || ''; app.state.lastNmax = -1; setReference();
-      }
-      if (pr) { if (!hist) { camLevel.from = null; Object.assign(obs, pr.obs || {}); if (pr.obs) obs.shift = clampShift(pr.obs.shift); obs.mode = obs.mode === 'free' ? 'free' : 'turntable';   /* S2: a pose without a shift (an older file or link) opens at 0 */ if (!Array.isArray(obs.quat) || obs.quat.length !== 4) obs.quat = quatFromYawPitch(obs.yaw, obs.pitch); if (obs.mode === 'free') { /* WAVE 106 · THE ANGLES ARE A READOUT IN FREE, AND A READOUT MUST NOT MOVE THE RECORD.
-      A link rounds the quaternion to f32; re-deriving the angles from THAT quaternion lands them an ulp off the
-      ones the link carried, so mint(open(link)) stopped being byte-identical the moment the camera began booting
-      FREE — B98's fixed point, and the codec's own node suite cannot see it because the asymmetry is here and not
-      in statelink.js.  A record whose angles already agree with its pose far closer than any dial can show KEEPS
-      the ones it carried; anything that genuinely disagrees is still re-derived, which is what an old favourite
-      carrying no quaternion needs. */
-      const y0 = obs.yaw, p0 = obs.pitch; syncFreeAngles();
-      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } camera.stop(); syncCamUI(); } const pm = { ...(pr.mat || {}) }; for (const k of ['bg', 'lightUI', ...FIELD_CHROME]) delete pm[k]; Object.assign(mat, pm);   /* S1: an older file's chrome is the sender's preference — ignored, so the reader's frame, axes and invert stand */ if (Number.isFinite(pm.gamma) && ui.gammaK) ui.gammaK.set(pm.gamma); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));   /* PACE P2: within the device's grid ceiling, and never AUTO SCALE (the device's switch) */ Object.assign(domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(domain.auto); ui.domainKnob.setDisabled(domain.auto); }
-      /* A restored number and the control that owns it are one state. Keep every Wave, Clip,
-         field and quality control on the value that was just loaded before modulation reads it. */
-      if (pr) {
-        for (const [k, v] of [[ui.expK, mat.exposure], [ui.softK, mat.softness], [ui.hueK, mat.hueShift],
-          [ui.isoK, mat.iso], [ui.grainK, mat.grain], [ui.kneeK, mat.knee], [ui.slicePosK, mat.slice && mat.slice.pos],
-          [ui.sliceThickK, mat.slice && mat.slice.thick]]) if (k && Number.isFinite(v)) k.set(v);
-        if (ui.sliceModeSeg && mat.slice) ui.sliceModeSeg.set(['off', 'clip', 'slab'][mat.slice.mode] || 'off');
-        if (ui.sliceAxisSeg && mat.slice) ui.sliceAxisSeg.set(['x', 'y', 'z'][mat.slice.axis] || 'z');
-        if (ui.gridSeg && [64, 96, 128].includes(quality.res)) ui.gridSeg.set(String(quality.res));
-        if (ui.autoSw) ui.autoSw.set(!!quality.auto);
-        if (ui.domainKnob && Number.isFinite(domain.half)) ui.domainKnob.set(domain.half);
-        if (ui.bz) ui.bz.set(reg.field.Bz); if (ui.fz) ui.fz.set(reg.field.Fz);
-        applyAccent();
-      }
-      if (pr) {
-        /* WAVE 63 · A LINK'S MATERIAL WAS DISCARDED 16 ms AFTER IT OPENED.  `Object.assign` above has
-           just put the sender's camera and material into `obs`/`mat`; for a target THIS browser has
-           routed, nothing then read them: `modSyncBases()` skips modulated ids on every frame by
-           design, and the only unconditional re-base lives inside `restoreModulation`, which runs
-           only `if (pr.modulation !== undefined)` — a key a LINK never sets and an UNDO record
-           deliberately never sets.  So the receiver's own base won one frame later, the visitor never
-           saw the sender's exposure 6.5, and pulling the route off afterwards handed back 1.  The
-           re-base is unconditional now, and it is FIRST, because restoreModulation's own
-           restoreAll() writes the registry's bases back into `mat` and would otherwise clobber the
-           file's numbers for exactly the parameters that were modulated when it opened. */
-        if (!hist) modSyncBases(true);   // an UNDO's come from its record, below
-        if (sturm.P) { sturm.on = false; sturm.P = null; sturm.rec = null; reg.setPropagator(null); reg.setEnergies(energyOf); }   // W-STURMIAN: stand the scale down silently (no re-anchoring) while the file's operator, Z and rates land; its own scale is applied below
-        if (pr.hamiltonian) { const h = pr.hamiltonian; if (h.atomZ) setElement(h.atomZ); if (h.Z && h.Z !== getZ()) { setZ(h.Z); if (ui.zKnob) ui.zKnob.set(h.Z); } if (h.well && h.well !== HAMILTONIANS.well.radius) { HAMILTONIANS.well.setRadius(h.well); gas.setRadius(h.well); if (ui.wellKnob) ui.wellKnob.set(h.well); } if (h.id && HAMILTONIANS[h.id]) { setHamiltonian(h.id); switchHamiltonian(h.id); if (ui.hamSeg) ui.hamSeg.set(h.id); } app.state.gasAxial = h.gasBasis === 'axial'; if (ui.gasBasis) ui.gasBasis.set(app.state.gasAxial ? 'axial' : 'reg'); if (!app.state.gasAxial) gas.off(); }
-        if (pr.wigner) { const G = pr.wigner; wignerView.setRange(G.zmax, G.pmax); }
-        if (pr.instruments) {
-          const I = pr.instruments;
-          if (I.qcd && typeof I.qcd === 'object') {                    // D9: QUARKONIUM's parameters, as the deleted QCD window applied them
-            const q = I.qcd, p = {}; for (const k of ['alphaS', 'sigma', 'C']) if (q.params && Number.isFinite(q.params[k])) p[k] = q.params[k];
-            if (HAMILTONIANS.cornell.configure(q.kind, p, q.potential) && getHamiltonian().id === 'cornell') switchHamiltonian('cornell');
-          }
-          /* Set all field-owning instruments down before selecting the saved one. Their public
-             switches enforce mutual exclusion and also own the window-visibility policy. */
-          /* D9 · THE H₂⁺ SHIM: a file whose field the retired H₂⁺ card owned opens as MOLECULES · H₂ (STO-3G) on σg or σu — in a
-             minimal basis of two 1s functions both orbitals are fixed by symmetry, the combinations the card drew (its R, ON A and the
-             pulse have no twin; RHF refuses H₂⁺'s one electron).  Its old `mo` / `pulse` records are read by nothing. */
-          const h2plus = !!(I.molecule && I.molecule.on) && !(I.chem && I.chem.on) && !(I.h2 && I.h2.on) && !(I.helium && I.helium.on);
-          /* D9 · THE HELIUM SHIM: a file whose field the retired HELIUM card owned opens as SPECTRUM's ATOM at Z = 2 with the 1s
-             filled (fillValence) — the central-field He; Hylleraas's correlation, its basis and electron 1 have no twin. */
-          const he = !!(I.helium && I.helium.on) && !(I.chem && I.chem.on) && !(I.h2 && I.h2.on);
-          /* D9b · THE H₂ SHIM: a file whose field the retired H₂ card (Heitler–London) owned opens as MOLECULES · H₂ (STO-3G) on
-             its DENSITY — the card drew the one-electron density, and this is the same molecule's (its R scan, CI curves and the
-             collision have no twin).  The old `h2` record and seat are read by nothing else. */
-          const hl = !!(I.h2 && I.h2.on) && !(I.chem && I.chem.on);
-          const fieldOwner = (I.chem && I.chem.on) || h2plus || hl ? 'chem' : null;
-          if (I.chem) app.state.chem.load({ ...I.chem, on: false });
-          if (h2plus) { const u = I.molecule.kind === 'sigma_u'; app.state.chem.load({ preset: 'H2', basis: 'sto-3g', view: 'orbital', orbital: u ? 2 : 1, on: false }); gone.push('H₂⁺ (opened as MOLECULES · H₂ ' + (u ? 'σu' : 'σg') + ')'); }
-          if (hl) { app.state.chem.load({ preset: 'H2', basis: 'sto-3g', view: 'density', orbital: null, on: false }); gone.push('H₂ (opened as MOLECULES · H₂)'); }
-          /* the ORBITALS register lands OFF first, like every field-touching card, and is switched on only after
-             CHEMISTRY holds the volume — its own load() parks the selection until a ladder exists to hang it on */
-          if (I.orbitals) app.state.orbitals.load({ ...I.orbitals, on: false });
-          if (I.states) app.state.states.load({ ...I.states, on: false });
-          if (I.register) app.state.register.setMode(I.register.mode);
-          if (he) { setElement(2); fillValence(); gone.push('HELIUM (opened as ATOM · He 1s)'); }
-          else if (fieldOwner === 'chem') app.state.chem.setOn(true);
-          if (I.orbitals && I.orbitals.on && fieldOwner === 'chem') app.state.orbitals.setOn(true);
-          if (I.states && I.states.on && fieldOwner === 'chem') app.state.states.setOn(true);   // parks itself until the ladder lands (statesview `wanted`)
-          if (I.ladder) ladder.load(I.ladder);                         // M2 (2026-09-24): lands the params, defers the scan (ladder.js load)
-          if (I.particles) {
-            if (Number.isFinite(I.particles.count)) ui.pN.set(I.particles.count);
-            if (Number.isFinite(I.particles.trail)) { particles.setTrail(I.particles.trail); ui.pTrail.set(I.particles.trail); }
-          }
-        }
-        /* D9b · THE ELECTROSTATICS SHIM: a file whose overlay the retired window drew opens without it and says so; nothing is drawn */
-        if (pr.field && pr.field.overlay && pr.field.overlay !== 'off') gone.push('ELECTROSTATICS');
-        if (Array.isArray(pr.rates) && pr.rates.length === 91) { rates.set(pr.rates); reg.setEnergies(energyOf); }
-        /* 2026-09-10 · THE DAW KEYS, each only when the file carries it (see serialize).  0.3.1 · S1: of `ui` only the STAGE
-           is read; an older file's theme / card / frost / disc / accent, and its camera feel, are the sender's preferences
-           and are ignored — opening a project never changes this browser's settings (docs/STATE-SCOPES.md). */
-        if (pr.ui) { const U = pr.ui;
-          if (U.stage) {
-            if (Number.isFinite(U.stage.mix)) { app.state.stageMix = Math.max(0, Math.min(1, U.stage.mix)); if (ui.stageK) ui.stageK.set(app.state.stageMix); }
-            const custom = Array.isArray(U.stage.custom) ? U.stage.custom : (Array.isArray(U.stage.b) ? U.stage.b : (Array.isArray(U.stage.a) ? U.stage.a : null));
-            if (app.hooks.setStageColour) app.hooks.setStageColour(custom);
-            if (app.hooks.setStageFollow) app.hooks.setStageFollow(typeof U.stage.follow === 'boolean' ? U.stage.follow : !custom);
-          } }
-        if (pr.camera) camera.setAutoRotate(!!pr.camera.autoRotate);
-        if (pr.overlays) { const O = pr.overlays;
-          if (O.vortex) { vortex.setOn(!!O.vortex.on); vortex.setOverlay(!!O.vortex.overlay); }
-          if (O.kepler !== undefined) { kepler.setOn(!!O.kepler); if (ui.keplerSw) ui.keplerSw.set(!!O.kepler); }
-          if (O.particles) { const count = pr.instruments && pr.instruments.particles && Number.isFinite(pr.instruments.particles.count) ? pr.instruments.particles.count : O.particles.count; if (O.particles.on) { particles.setOn(true); particles.seed(count || 160, reg, clock.t, domain.half); } else particles.setOn(false); ui.pOn.set(!!O.particles.on); }
-          if (O.dials !== undefined && spectrum.setDials && !(pr.readers && pr.readers.spectrum)) spectrum.setDials(!!O.dials); }
-        if (pr.readers) {
-          if (pr.readers.spectrum) { const S = pr.readers.spectrum; if (Number.isFinite(S.selected)) spectrum.select(S.selected); if (S.dials !== undefined) spectrum.setDials(!!S.dials); }
-          if (pr.readers.slice) slice.load(pr.readers.slice);
-          if (pr.readers.kepler && Number.isFinite(pr.readers.kepler.shell) && ui.kepShell) { ui.kepShell.set(String(pr.readers.kepler.shell)); keplerRowSync(true); }
-        }
-        if (pr.ab && ui.ab) ui.ab.set(pr.ab);
-        if (pr.notebook && layout.notebookResize && Number.isFinite(pr.notebook.w) && !(pr.layout && pr.layout.nb)) layout.notebookResize(pr.notebook.w, pr.notebook.h);   // wave 127: a layout carrying nb sizes it next (applyLayout), last
-        if (pr.layout && layout.applyLayout) layout.applyLayout(pr.layout);
-        if (getHamiltonian().id === 'atom' && !hist) { wAtoms.root.hidden = false; wAtoms.root.classList.remove('closed'); }   // 0.4.0 S0: the ATOM operator brings its element picker
-        if (pr.instruments && app.state.chem.on && !hist) { wChem.root.classList.remove('closed'); const I = pr.instruments; if ((I.orbitals && I.orbitals.on) || (I.states && I.states.on)) wOrbs.root.classList.remove('closed'); }   // W129 · the same law for MOLECULES (a first visit leaves it and MO-REGISTRY off the rack): a file it owns brings it back, and MO-REGISTRY when the file's register is on
-        /* D9 · A FILE THAT USED A RETIRED WINDOW OPENS WITHOUT IT, AND SAYS SO IN ONE LINE (the PROJECTS status and STATE's): an old
-           layout seat is skipped by applyLayout (no such card), nothing throws.  QCD counts as used when its seat was open. */
-        if (!hist && pr.layout && Array.isArray(pr.layout.cards) && pr.layout.cards.some((c) => c && c.id === 'qcd' && !c.closed)) gone.push('QCD (QUARKONIUM keeps its parameters)');
-        if (gone.length) app.state.restoreNotice = 'retired in 0.5.0: ' + gone.join(' · ');
-        stageTextTick();                                              // the STAGE TEXT follows whatever MOLECULES the file left
-        if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
-        applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
-        /* S3 · an UNDO's bases are its record's seats, never read back off a control the modulator is moving (an unseated target keeps
-           its base; an unmodulated one is the control just written) */
-        const histBases = {};
-        if (hist) { const R = app.state.modHost.registry, seats = modSeats(obj);
-          for (const id of R.list()) if (R.isModulated(id)) { const s = seats[id]; R.setBase(id, histBases[id] = s && s[0] ? (s[3] || Number)(s[0][s[1]]) : R.baseOf(id)); } }
-        // Restore operator rates AFTER the destination scale is installed. The old project's
-        // Sturmian guard must not erase a Coulomb project's rates on the way in.
-        const rr = pr.rotationRates;
-        for (const key of Object.keys(rotRate)) {
-          const v = setRotationRate(key, rr && Number.isFinite(rr[key]) ? rr[key] : 0);
-          const id = key === 'z' ? 'state.rot.z' : key === 'kz' ? 'state.stark.kz' : 'state.defect.l2';
-          app.state.modHost.registry.setBase(id, v);
-        }
-        if (pr.modulation === undefined) app.state.modHost.clock.applyAll(true);
-        if (pr.space && pr.space !== app.state.space && !getHamiltonian().noMomentum && !sturm.P) { app.state.space = pr.space; if (ui.spaceSeg) ui.spaceSeg.set(app.state.space); }
-        if (pr.palette && app.state.palette) {
-          if (Array.isArray(pr.palette.stops)) app.state.palette.load(pr.palette.stops, pr.palette.selected, pr.paletteId); else if (pr.paletteId) app.state.palette.select(pr.paletteId);   // wave 127: the file's own stops under its name — one push, not a catalogue read then a load
-          app.state.palette.setOn(!!pr.palette.on); if (!pr.palette.on && mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);
-        }
-        /* Restore modulation last. Its base setters now see the final camera, Stage, transport,
-           palette and state controls, so no later project step can overwrite a routed hand value. */
-        const modWas = hist && pr.modulation !== undefined && app.state.modHost && app.state.modHost.clock.isPlaying();
-        if (pr.modulation !== undefined) restoreModulation(pr.modulation, hist ? histBases : pr.modulationBases, !!(pr.modwin && pr.modwin.open));
-        if (modWas) app.state.modHost.clock.play(performance.now() / 1000);       // S4 · restoreModulation put the clock down: an undo under THE play puts it back to playing (its demand is still held)
-        if (pr.modwin && app.state.modView) app.state.modView.restore(pr.modwin);
-        if (!hist && app.state.tl) app.state.tl.model.restore(pr.timeline || null);           // 0.5.0 C7b: an open replaces the arrangement (NEW clears it); an undo leaves it — it keeps its own
-      }
-      schedule(TIER.REBUILD); wState.setStatus(gone.length ? app.state.restoreNotice : 'restored', gone.length ? 'warn' : 'live');
-      return true;
-    } catch (e) { console.warn('restore failed', e); wState.setStatus('restore failed', 'warn'); return false; }   // say WHY in the console too: a silent catch hid a scope error for an afternoon
-    /* OPTIMIZATION 2026-09-24 · M5: a restore that throws half-way has still moved state, and an early throw left it
-       never rebuilt — so the rebuild is asked for on EVERY exit (on success it is the same coalesced request as above). */
-    finally { schedule(TIER.REBUILD); markBatchEnd(); }
-  }
-
-  /* ── WAVE 56 · SHAREABLE LINKS (board #55) ────────────────────────────────────────────────
-   * lab/statelink.js is a CODEC on serialize()'s OWN object — not a second serialisation — so a link is
-   * the project file, minus what format v1 has no room for, in about three hundred characters of FRAGMENT
-   * (never a query: a fragment is not sent to a server, and a link carries somebody's work).
-   * TWO THINGS ARE LAWS HERE, and neither is decoration:
-   *   SAY WHAT IS NOT CARRIED.  encodeState() returns `notCarried`, and v1 does not carry the MOLECULE
-   *     panel or the MODULATION rack.  A link that silently dropped a reader's modulators would be a lie,
-   *     so the mint puts the COUNT in the status line and NAMES them in a note that stays on the card —
-   *     never in a hover, and never only in the console (ANTI-PATTERNS 4).
-   *   A LINK IS THE BOTTOM OF THE STACK.  Exactly as `?preset=` is: opening one clears the undo ring,
-   *     because there is nothing behind it to undo back to.
-   * The two keys serialize() gained above are applied HERE and nowhere else: restore() is the project
-   * road and does not read them, so a link opening is the one place where somebody else's palette choice
-   * and somebody else's DRAG γ land in this browser. */
-  const NOT_CARRIED_NAME = { mo: 'the MOLECULE panel', modulation: 'the MODULATION rack', rotationRates: 'the rotation and deflection rates' };
-  const notCarriedWords = (keys) => keys.map((k) => NOT_CARRIED_NAME[k] || k).join(' · ');
-  const esc = (t) => String(t).replace(/[&<>]/g, (c) => (c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'));
-  app.state.linkLast = null;
-
-  /** what the interface says about a link, in the two places it can be read: the STATE card's status line
-   *  (short, and its hover hint carries the whole of it) and a note on the card that does not disappear. */
-  function linkSay(msg, cls, detail) {
-    wState.setStatus(msg, cls || 'live');
-    if (ui.linkNote) { ui.linkNote.innerHTML = detail || ''; ui.linkNote.hidden = !detail; }
-    return msg;
-  }
-
-  /** the href for the state as it stands, with everything encodeState measured about it */
-  function mintLink() { app.state.linkLast = linkFor(serialize(), { paletteId: app.state.palette ? app.state.palette.id : PAL_DEF, orbitalKey: app.state.chem.on ? app.state.chem.orbitalKey() : null }); return app.state.linkLast; }   // S2: the molecule's orbital rides by its S1 name
-
-  /** MINT and copy.  Reports `chars`, and when something is not carried it SAYS SO. */
-  async function copyLink() {
-    let enc;
-    try { enc = mintLink(); }
-    catch (e) { linkSay('link failed', 'warn', '<b>THE LINK COULD NOT BE BUILT.</b> ' + esc(e && e.message || e)); return null; }
-    let copied = false;
-    try { await navigator.clipboard.writeText(enc.href); copied = true; } catch (_) {}
-    const say = [];
-    if (enc.notCarried.length) say.push('<b>THIS LINK DOES NOT CARRY:</b> ' + notCarriedWords(enc.notCarried)
-      + '. Link format v1 does not carry those settings — everything else in this window is in it: the register and its mask, the clock, the operator and its scale, the camera, the material, the palette and the 91 rates.');
-    if (enc.dropped) say.push('<b>' + enc.dropped + ' coefficient' + (enc.dropped === 1 ? '' : 's') + ' fell below the link\'s 16-bit floor</b> and — at under 2.3e-10 of the peak population — travelled as zero.');
-    if (!enc.fits) say.push('<b>' + enc.chars + ' CHARACTERS.</b> That is past the ' + LINK_CHAR_CEILING
-      + '-character length a URL can be relied on to survive in a chat app or a mail client. It opens here; it may be cut in transit.');
-    if (!copied) say.push('<b>THE CLIPBOARD REFUSED</b> (this browser only hands it to a trusted gesture). The link is here, to copy by hand:<br><code>' + esc(enc.href) + '</code>');
-    linkSay((copied ? 'link copied · ' : 'link NOT copied · ') + enc.chars + ' chars'
-      + (enc.notCarried.length ? ' · ' + enc.notCarried.length + ' not carried' : ''),
-      copied && enc.fits ? 'live' : 'warn', say.join(' '));   // what v1 cannot carry is TRUE OF EVERY LINK, so it is information and not an alarm: the count is in the words, the colour is kept for a link that did not copy or will not survive a paste
-    enc.copied = copied;
-    return enc;
-  }
-
-  /** OPEN a link.  `null` from readLink() means the href simply carries no state, which is a plain visit and
-   *  not an error; a LinkError means one it cannot read, and that is shown — never a console-only failure. */
-  function openLink(href) {
-    let got;
-    try { got = readLink(href === undefined ? location.href : href); }
-    catch (e) {
-      const code = e instanceof LinkError ? e.code : 'error';
-      linkSay('link not read', 'warn', '<b>THIS LINK DID NOT OPEN.</b> ' + esc(e && e.message || e) + ' <i>Nothing in the lab was changed.</i>');
-      return { ok: false, opened: false, code, message: String(e && e.message || e) };
-    }
-    if (!got) return { ok: true, opened: false, code: null, message: null };
-    /* THE PALETTE IS NAMED BEFORE THE STATE IS RESTORED, never after: select() re-reads the catalogue's own
-       stops, so doing it second would throw away an EDITED palette that the link had carried in full. */
-    if (got.paletteId && app.state.palette && got.paletteId !== app.state.palette.id) app.state.palette.select(got.paletteId);   // S1 (D2): the palette is the link's, never written into this browser's settings
-    const ok = restore(got.state);
-    const d = +(got.state.experiment && got.state.experiment.damping);
-    if (Number.isFinite(d) && d !== reg.damping) { reg.setDamping(d); if (ui.dragKnob) ui.dragKnob.set(d); }
-    if (app.state.history) app.state.history.clear('link');                 // a link is the BOTTOM of the stack, exactly as ?preset= is
-    const say = [];
-    for (const w of got.warnings || []) say.push('<b>NOTE.</b> ' + esc(w) + '.');
-    if ((got.unknownSections || []).length) say.push('<b>' + got.unknownSections.length + ' part' + (got.unknownSections.length === 1 ? '' : 's')
-      + ' of this link were written by a newer build</b> and this one skipped them; everything it does know was applied.');
-    linkSay(ok ? 'opened from a link' : 'link read, restore failed', ok && !say.length ? 'live' : 'warn', say.join(' '));
-    return { ok, opened: true, code: null, message: null, warnings: got.warnings, unknownSections: got.unknownSections };
-  }
-
-
-  /* 0.3.1 · S3 THE TRUE HISTORY: one reader, writer and key over the edit scope (the chrome, a PREFERENCE, left with the hand-kept
-     lists); the key is FNV-1a over the record's JSON, taken at a commit and by canUndo / canRedo — never per frame.  0.5.0 C5: the
-     rows are the kit's stack (mir/history/history.js), this record its one `edit` domain (lab/edit-domain.js) */
-  const hKey = (j) => { let h = 0x811c9dc5; for (let i = 0; i < j.length; i++) h = Math.imul(h ^ j.charCodeAt(i), 0x01000193); return (h >>> 0).toString(36) + ':' + j.length; };
-  let __hver = reg.version;
-  Object.defineProperty(reg, 'version', { configurable: true, get() { return __hver; }, set(v) { __hver = v; if (!app.state.rotTicking) hNote(); } });
-  /* the LIST repaints itself whenever the ring moves — `onChange` is the ring's own hook and fires on
-     every commit, undo, redo, goto and clear, so nothing polls and nothing can drift out of step. */
-  let hRender = null;
-  app.state.history = createEditHistory({ read: () => { const S = serialize({ scope: 'edit' }); S.key = hKey(JSON.stringify(S)); return S; },
-    write: (S) => restore(S, { history: true }), liveKey: () => hKey(JSON.stringify(serialize({ scope: 'edit' }))), depth: 60, quiet: 400, driven: () => app.state.rotMoved && rotDriving(),
-    onChange: () => { if (hRender) hRender(); } });
-  /* ══ WAVE 106 · THE ROWS GET THEIR NAMES FROM THE THING THE HAND TOUCHED ════════════════════════
-     An FL-style list is only worth having if a row says what it was — "Move Pattern", not "edit #17".
-     The ring can carry a label now; the question was where a name could come from without touching
-     every one of the hundreds of setters in this file.
-       It comes from the GESTURE.  This handler already fires on the way down for every control in the
-     lab, and the event knows what was pressed — so the name is read off the DOM at exactly the moment
-     the coalescing window opens, and every control in the instrument is named for free, including the
-     ones written after today.  A knob gives its own caption, a switch and a trigger their word, a
-     segment the button plus the group it belongs to; the WINDOW's title comes along so two knobs
-     called RATE in different cards do not read as one thing.
-       An UNNAMED gesture leaves the ring's default alone rather than blanking a name — a press on the
-     card's background should not erase what the drag before it was called. */
-  const hTouchName = (t) => {
-    if (!t || !t.closest) return '';
-    /* the EYEBROW, not the title: `.dev-eyebrow` is the card's short name (ORBIT, WAVE, CLIP) while
-       `.dev-title` is its full sentence — measured, a title gave rows like
-       "EXPOSURE · SPACE · DRAW · WHAT IS DRAWN OVER THE FIELD", which is a paragraph in a list column.
-       This is the same `nameOf` the WINDOW menu already uses for the same reason. */
-    const txt = (e) => (e && (e.textContent || '').trim().replace(/\s+/g, ' ')) || '';
-    const dev = t.closest('.dev'), mw = !dev && t.closest('#modwin');   // S3: a float, titled by its .kwin-title
-    const win = dev ? ((dev.querySelector('.dev-eyebrow') || {}).textContent || dev.dataset.id || '') : mw ? txt(mw.querySelector('.kwin-title')) : '';
-    let what = '';
-    const k = t.closest('.k');
-    if (k) what = txt(k.querySelector('.k-lbl')) || k.getAttribute('aria-label') || 'knob';
-    if (!what) { const sw = t.closest('.sw'); if (sw) what = txt(sw.querySelector('.sw-lbl')) || 'switch'; }
-    /* a SEG labels itself with `.k-lbl` too (kit.js builds both from the same helper) — on the `.segw` that wraps the
-       `.seg` (S4: `closest('.seg, .segw')` stopped at the `.seg`, so a row read DARK, not THEME DARK); safe because
-       the knob branch above already claimed anything inside a .k */
-    if (!what) { const sb = t.closest('.seg-b'); if (sb) { const g = sb.closest('.segw') || sb.closest('.seg');
-      const gl = g ? txt(g.querySelector('.k-lbl')) : ''; what = (gl ? gl + ' ' : '') + txt(sb); } }
-    if (!what) { const tr = t.closest('.trig'); if (tr) what = txt(tr.querySelector('.trig-l')) || txt(tr); }
-    if (!what) { const fd = t.closest('.fd'); if (fd) what = txt(fd.querySelector('.fd-lbl')) || fd.getAttribute('aria-label') || 'fader'; }
-    if (!what) { const f = t.closest('select, input'); if (f && f.type !== 'text' && f.type !== 'search') what = (f.getAttribute('aria-label') || f.title || (f.type === 'color' ? 'colour' : '')).toUpperCase(); }   // S3: a colour well or a <select>
-    /* S3 · the MODULATION window's controls: a dial by device and caption (LFO RATE), the rest by device or macro slot and short
-       label (LFO SINE, MACRO 1 DEPTH); a label too long for a list gives its first word (LFO BYPASS).  S4 · the curve editor (the
-       `.m2svg` of an LFO or ENV; an AUDIO editor is a meter) names its source: its label, else its kind and its place among that
-       kind in the window — CURVE · LFO 1 · MODULATION */
-    if (!what && mw) {
-      const d = t.closest('.m2dev'), slot = t.closest('.m2slot'), k2 = t.closest('.m2k'), c = t.closest('button, input, [aria-label]');
-      const curve = d && t.closest('.m2svg') && ['lfo', 'env'].find((x) => d.classList.contains(x));
-      if (curve) {
-        const own = txt(d.querySelector('.m2minname')).toUpperCase(), K = curve.toUpperCase();
-        what = 'CURVE · ' + (own && own !== K ? own : K + ' ' + ([...mw.querySelectorAll('.m2dev.' + curve)].indexOf(d) + 1));
-      } else {
-        let word = k2 ? txt(k2.querySelector('.m2kcap')) : c ? (c.getAttribute('aria-label') || txt(c)).split(' — ')[0] : '';
-        if (word.length > 24) word = word.split(' ')[0];
-        const owner = (d ? txt(d.querySelector('.m2kind')) : slot ? txt(slot.querySelector('.m2vname')) : '').toUpperCase();
-        word = word.toUpperCase(); what = owner && !word.includes(owner) ? (owner + ' ' + word).trim() : word;
-      }
-    }
-    if (!what) return '';
-    const w = (win || '').trim();
-    return w && w.toUpperCase() !== what.toUpperCase() ? what + ' · ' + w : what;
-  };
-  const heldPointers = new Set();
-  /* S4 · the RIGHT button is a gesture too: MIR's curve editor adds and places a point by right-drag and resets a tension handle by
-     right-click, so button 2 is held and released like button 0 (one row, named).  A pointer already held here lost its up (a
-     native context menu can take it): that hold is released first, so a stale count never outlives the next press. */
-  document.addEventListener('pointerdown', e => {
-    if (e.button !== 0 && e.button !== 2) return;
-    if (heldPointers.has(e.pointerId)) releasePointer(e);
-    heldPointers.add(e.pointerId); app.state.pointerHeld = true;
-    app.state.history.hold(hTouchName(e.target));
-  }, true);
-  const releasePointer = e => {
-    if (!heldPointers.delete(e.pointerId)) return;
-    app.state.pointerHeld = heldPointers.size > 0;
-    app.state.history.release(); // Commits on the next task, after the control's onChange.
-  };
-  // Capture also sees releases that a control stops from bubbling. An implicit
-  // lost capture after pointerup must not release a second finger's undo hold.
-  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) document.addEventListener(type, releasePointer, true);
-  /* S3 · …and the form fields a pointer does not frame (a colour picker, a <select>, a typed name land after the pointerup): their
-     input/change events arm the ring, named like a press (notebook typing moves no edit key: no row) */
-  for (const type of ['input', 'change']) document.addEventListener(type, (e) => app.state.history.note(hTouchName(e.target)), true);
-  const releasePointers = () => { for (const pointerId of heldPointers) releasePointer({ pointerId }); };
-  window.addEventListener('blur', releasePointers);
-  window.addEventListener('pagehide', releasePointers);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) releasePointers(); });
-  const historyApi = {
-    undo() { const ok = app.state.history.undo(); if (ok) wState.setStatus('undone · ' + app.state.history.depth + ' back, ' + app.state.history.redoDepth + ' forward', 'live'); return ok; },
-    redo() { const ok = app.state.history.redo(); if (ok) wState.setStatus('redone · ' + app.state.history.depth + ' back, ' + app.state.history.redoDepth + ' forward', 'live'); return ok; },
-    historyUndo() { const ok = app.state.history.historyUndo(); if (ok) wState.setStatus('returned from history jump', 'live'); return ok; },
-    get canUndo() { return app.state.history.canUndo; }, get canRedo() { return app.state.history.canRedo; },
-    get canHistoryUndo() { return app.state.history.canHistoryUndo; },
-    get depth() { return app.state.history.depth; }, get redoDepth() { return app.state.history.redoDepth; }, get limit() { return app.state.history.limit; },
-    clear() { app.state.history.clear(); }, flush() { return app.state.history.flush(); }, note(name) { app.state.history.note(name); },
-    /* wave 106: the three the LIST needs — the rows, where the instrument is standing, and the jump.
-       `goto` commits first (that is the ring's own rule), so jumping away from an unbanked edit banks
-       it rather than losing it. */
-    entries() { return app.state.history.entries(); }, get cursor() { return app.state.history.cursor; },
-    render() { if (hRender) hRender(true); },   // S4: now (the ring's own onChange waits for the next frame)
-    goto(i) { const ok = app.state.history.goto(i); if (ok) wState.setStatus('history · row ' + (app.state.history.cursor + 1) + ' of ' + app.state.history.entries().length, 'live'); return ok; },
-    label(name) { app.state.history.label(name); },
-  };
-
-
-  const wHist = device({ id: 'history', eyebrow: 'HISTORY', status: '' });
-  rack.appendChild(wHist.root); rk.register({ id: 'history', el: wHist, title: 'HISTORY', hint: 'HISTORY' });   // C3: registered where it is built (A4's open item)
-  const histList = el('div', 'hist-list', wHist.body);
-  let histUndoBtn = null, histRedoBtn = null, histReturnBtn = null;
-  {
-    const rh = wHist.row('tight hist-actions');
-    histUndoBtn = trig({ label: 'UNDO', title: 'step back one row (Ctrl+Z)', onFire: () => historyApi.undo() }).root; rh.appendChild(histUndoBtn).dataset.keyAction = 'undo';
-    histRedoBtn = trig({ label: 'REDO', title: 'step forward one row (Ctrl+Shift+Z, Ctrl+Y)', onFire: () => historyApi.redo() }).root; rh.appendChild(histRedoBtn).dataset.keyAction = 'redo';
-    histReturnBtn = trig({ label: 'HISTORY UNDO', title: 'return once to the timeline from before the last history jump (Ctrl+Alt+Z)', onFire: () => historyApi.historyUndo() }).root; rh.appendChild(histReturnBtn);
-    rh.appendChild(trig({ label: 'CLEAR', title: 'Clear history without changing the state', onFire: () => { historyApi.clear(); } }).root);
-    el('div', 'note', wHist.body).innerHTML = '<b>History.</b> Every edit to the project is a row, newest at the top. The last ' + historyApi.limit + ' are kept for Undo and Redo; older ones fall off the bottom. Select a row to jump there. HISTORY UNDO returns once to the timeline from before that jump, even after a new edit. Preferences, the camera, the windows and the notebook are not edits.';
-  }
-  /* S4 · EVERY ROW (≤ 61 with the bottom), newest at the top; the list scrolls inside the card (lab.css `.hist-list`) and the
-     current row is kept in view — measured against the list's own box, never scrollIntoView, which would scroll the rack too.
-     A full ring built node by node, a listener each, inside the ring's onChange made one flush 2.6–3.9 ms on the desktop, past
-     S3's < 2 ms (probes/S4/render-*.js): so the list is ONE string with ONE click listener, and onChange asks for ONE repaint
-     per frame (sixty flushes in a loop paint once; the boot's first paint is the first frame's, no layout forced mid-boot) */
-  histList.addEventListener('click', (e) => { const b = e.target.closest('.hist-row'); if (b) historyApi.goto(+b.dataset.i); });
-  function renderHistory() {
-    histRaf = 0;
-    const rows = historyApi.entries();
-    let h = '';
-    for (let j = rows.length - 1; j >= 0; j--) {
-      const r = rows[j], name = esc(r.label || 'edit');   /* the title is the WHOLE name (a key's row is a long sentence the column cuts) */
-      h += '<button type="button" class="hist-row hist-' + r.state + '" data-i="' + r.i + '"' + (r.state === 'current' ? ' aria-current="true"' : '')
-        + ' title="' + name.replace(/"/g, '&quot;') + (r.state === 'current' ? ' — where the instrument is standing' : ' — land on this moment') + '"><span class="hist-i">' + r.i + '</span><span class="hist-lbl">' + name + '</span></button>';
-    }
-    histList.innerHTML = h;
-    histHere();
-    if (histUndoBtn) histUndoBtn.disabled = !historyApi.canUndo;
-    if (histRedoBtn) histRedoBtn.disabled = !historyApi.canRedo;
-    if (histReturnBtn) histReturnBtn.disabled = !historyApi.canHistoryUndo;
-    wHist.setStatus(rows.length + ' kept  ·  on ' + (historyApi.cursor + 1), 'live');
-  }
-  /** keep the current row inside the list's box (a closed or folded card has no box: it is done when the card shows) */
-  function histHere() {
-    const here = histList.querySelector('[aria-current]');
-    if (!here || !histList.clientHeight) return;
-    const box = histList.getBoundingClientRect(), at = here.getBoundingClientRect();
-    if (at.top < box.top) histList.scrollTop += at.top - box.top; else if (at.bottom > box.bottom) histList.scrollTop += at.bottom - box.bottom;
-  }
-  /* S4 · …and when the card comes back into view (opened, unfolded, its rack shown or scrolled to): a jump made while it was
-     closed left its list at the top.  window-activity's onChange already fires on each of those flips; this reads one flag. */
-  let histWas = canPresent(wHist);   // tracks the card, so its flips reach onChange
-  app.state.histShown = () => { const now = canPresent(wHist); if (now && !histWas) histHere(); histWas = now; };
-  let histRaf = 0;
-  hRender = (now) => { if (now) { cancelAnimationFrame(histRaf); renderHistory(); } else if (!histRaf) histRaf = requestAnimationFrame(renderHistory); };
-  renderHistory();
+  /* ── persistence (§46): lab/shell/persist.js (0.5.2 R3a), created here — serialize and restore whole ── */
+  const { modSeats, serialize, restoreModulation, save, copyJSON, restore } = createPersist(app);
+  /* ── WAVE 56 · SHAREABLE LINKS: lab/shell/links.js (0.5.2 R3a), created here; the link opens at §29 ── */
+  const { notCarriedWords, mintLink, copyLink, openLink } = createLinks(app);
+  /* 0.3.1 · S3 THE TRUE HISTORY and its card: lab/shell/history.js (0.5.2 R3a), created here, so the card keeps its seat in the rack */
+  const { historyApi } = createHistory(app);
 
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const modEdited = () => { if (app.state.modView) app.state.modView.rebuild(); hNote(); };   // LW.mod's model edits: shown, and maybe a row (S3)
@@ -4155,7 +3502,6 @@ export async function boot(dom) {
   LW.curves = curves;
 
   /* ── go ───────────────────────────────────────────────────────────────── */
-  app.sh.save = save; app.sh.restore = restore; app.sh.copyJSON = copyJSON; app.sh.copyLink = copyLink;   // STATE's SAVE / LOAD / COPY read them at use (0.5.2 R2a)
   LW.bootView = VIEW_NAMES[mat.view]; LW.bootVortex = vortex.on; LW.bootOrder = layout.orderAll(); LW.bootClosed = layout.closed();   // the shipped defaults, recorded before a URL preset's visuals apply
   const q = new URLSearchParams(location.search);
   loadPreset(q.get('preset') && PRESET_BY_ID.has(q.get('preset')) ? q.get('preset') : '1s+2pz');

@@ -5609,3 +5609,35 @@ modules destructure them (PLAN §1.1). G-A learned that an earlier-seated module
 **Lines.** `lab/*.js` + shell + windows **27,754 → 27,799 (+45)**. `rack.js` 4,664 → 4,261; the modules 182 and 264.
 
 Hand-off: `research/release-0.5.2/R2a-BUILD.md`.
+### wave 218: R3a SETTINGS + PERSISTENCE + LINKS + HISTORY — §1, §24 and §25 move verbatim into four `lab/shell/` modules called at their seats; `readSettings` stays in the head; nothing Josh sees moves
+
+One Opus builder (`agent-af4da7c2119c9a84d`) ran the row as PAIR 1 beside R2a, from `ff2b3e6`.
+
+**The move** (`.tmp/r3a-move.mjs`, at the walker's token positions; every edit printed):
+- §1 SETTINGS → `createSettings(app)`. It runs before the controller's seat, so it reads `app.ctl.x`, `app.host.camera`,
+  `app.sh.setModArm` and `app.sh.quality` inside callbacks. `readSettings` stays one hoisted line at the foot of the head (§0 calls it
+  first, U1); `quality` stays.
+- §24 PERSISTENCE → `createPersist(app)`. `serialize` and `restore` move whole; the cards' handles come from `app`; the controller's names
+  and SPECTRUM are read live at use.
+- §25 THE LINKS → `createLinks(app)`. §29's `openLink()` stays in `boot()`.
+- THE TRUE HISTORY and its card → `createHistory(app)`. The card's `device` / `appendChild` / `register` move with it, so HISTORY keeps its
+  seat in the rack (the DOM order read raw: identical to the base).
+- 623 of the 665 moved lines are byte-identical; the other 42 differ only by `app.<ns>.x` reads.
+- The modules register on `app.sh` what another module reads: `lookSync`, `serialize`, `restore`, `save`, `copyJSON`, `esc`, `copyLink`.
+  `boot()` fills the 30 slots they read that no moved module owns yet, in 11 lines, each after its declaration.
+
+**The tool.** `settings.js` registers `lookSync` and the controller destructures it. G-A now accepts a slot an earlier-seated module file
+fills at its root, and it no longer reads `Object.assign(app.ctl.domain, …)` as an assignment into `app`. `rack-deps.test` §5 gains that law.
+
+**Gates.**
+- **The classes table:** settings 16 · persist 23 · links 5 · history 8; 0 bare writes; G-A clean; the hinge holds (SPECTRUM 24).
+- **The bytes:** `serialize-bytes` 11/11 full and 11/11 edit, every sha equal to the recorded base. The base export's own run died at
+  WAVE DANCER ("Render did not settle").
+- **`settings-probe`:** no scene judged red. Four scenes were reached on the tree, two on the base; both died on "did not settle".
+- **The suites:** node exit 0 (`project-formats`, `first-run` 12, `access`); `new-project` 8/8 + `--check`; `lw-links`; `lw-facade` 1/1;
+  `offer` 16/16; the boot suite's B44 · B52 · B98 · B99 · B112 · B128 9/9. B128 found a lost import (`readLink`), now kept in rack.js.
+- **`history`:** red on frame-paced waits (block 3b's 500 ms, 9b's 100 ms) on BOTH trees. The rig drew 2–3 frames a second all session.
+
+**Lines.** `lab/*.js` + `lab/shell/` **27,754 → 27,815 (+61)** of 27,943. `rack.js` 4,664 → 4,012; the modules 147 · 311 · 85 · 166.
+
+Hand-off: `research/release-0.5.2/R3a-BUILD.md`.

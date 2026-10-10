@@ -222,6 +222,14 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   let V = null; err = '';
   try { V = classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/controller.js': ctlFill.replace('  const { reg } = app;', '  const { reg } = app;\n  const { gov: g0 } = app.ctl;') } }); } catch (e) { err = e.message; }
   check(!!V && V.appStrays.some((x) => /destructures app\.ctl\.gov, a null slot/.test(x)), 'module files: G-A — a module destructuring its OWN later fill is still a stray', V ? V.appStrays.join('; ') : err);
+  /* 0.5.2 R3a: a file's eager fills run at its seat, so a LATER-seated file may destructure them (settings' lookSync, the controller's app.ctl);
+     Object.assign into a member's object (app.ctl.gov) is not an extension of the shape */
+  const winOA = ['export function createWin(app) {', '  const { gov } = app.ctl;', '  Object.assign(app.ctl.gov, { seen: true });', '  return { on: gov.on };', '}', ''].join('\n');
+  const twoFiles = (ctl) => { try { return classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/controller.js': ctl, 'lab/windows/spectrum.js': winOA } }); } catch (e) { err = e.message; return null; } };
+  const U2 = twoFiles(mod('schedule').replace('  return { gov, touch };', '  app.ctl.gov = gov;\n  return { gov, touch };')), V2 = twoFiles(mod('schedule'));
+  check(!!U2 && U2.appStrays.length === 0 && !!V2 && V2.appStrays.some((x) => /destructures app\.ctl\.gov, a null slot/.test(x)) && !V2.appStrays.some((x) => /Object\.assign/.test(x)),
+    'module files: G-A — a slot an EARLIER-seated file fills eagerly may be destructured by a later one (without that fill it is still a stray); Object.assign into app.ctl.gov is no stray',
+    U2 && V2 ? JSON.stringify([U2.appStrays, V2.appStrays]) : err);
   let T = '';
   try { classes(rack, { file: 'fixture.js', planned, cut, modules: { 'lab/shell/nowhere.js': mod('schedule') } }); } catch (e) { T = e.message; }
   check(/no planned module's file/.test(T), 'module files: a file under lab/shell/ that no planned module names is refused', T);
