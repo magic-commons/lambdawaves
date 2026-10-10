@@ -915,6 +915,24 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > hash; three seat-line fills) plus the MIR brief candidates `research/release-0.5.1/BRIEFS-0.5.1.md` for Josh's primary account; Josh's open items (the glass PNGs, M5,
 > the security items, the release-naming of the next number). Servers 8731/8735 idle — stop by pid if the rig is needed.
 
+> **UPDATE (Claude Sos, 2026-10-10 15:59 CDT) — 0.5.3 PLANNED TO DRAFT 0; 0.5.4 PRE-MATH SURVEYS HALF IN; THE USAGE ALARM (five_hour 94 %) PAUSED THE SURVEY WRITERS.**
+> Josh's ask of ≈15:25 (`research/release-0.5.3/ASK.md`, verbatim + two screenshots): a 0.5.3 minor update (bugs + adjustments) and the NEXT MAJOR TASK 0.5.4 PRE-MATH
+> by the nacre method (NOT mathcollab) on `~/Documents/OBSIDIAN/LAMB of WAVES/` (Sol's 26 Codex rounds; a pilot Opus elsewhere verifies the math).
+> **0.5.3:** three Sonnet explorers localised every item (`localise/CAMERA-STAGE.md`, `MOLECULES-MO-REGISTRY.md`, `PALETTE-AB-TRANSPORT.md` — file:line, causes with
+> confidence, smallest changes, tests); findings that matter: the red formula is ONE record (`formulaLatex` lacks superscript digits); C₆₀'s registry offers 300 levels of
+> which 8 are carried; the DISPLAY tab lost its two stage-text rows at wave 157 (the live site has STAGE FORMULA + ATOM LABELS — Josh wants them back); the 3×3
+> workspace switch is already in the kit (λWAVES never passes `switchWorkspace`); Alt+Shift+Drag already pans; the classic camera is one `locked` flag in the law.
+> `PLAN-DRAFT-0.md` (`dcbbb62`): rows M1–M14 + M-V, gates, M4 (the live-stage probe) alone then three pairs, ten rulings as defaults, six questions for Josh.
+> **NEXT for 0.5.3:** ONE Opus@high audit of DRAFT 0 (`AUDIT-OPUS-1.md`, full text with changes marked) → `PLAN.md` → Josh's word → the build.
+> **0.5.4 PRE-MATH:** `research/release-0.5.4/NACRE.md` (`be92b8e`, the common sheet); four surveys launched 15:47 — `survey/PILOT-AUDIT.md` WRITTEN (`f41e4aa`);
+> `CODEX-ROUNDS.md` NOT written (its Opus `ae6761276b461ff78` paused; note saved; it had spawned three Sonnet quote-extractors — stopped by the integrator);
+> `ENGINE-VS-TREE.md` NOT written (Opus `a54ff1e31cf9888c9` paused with every fact read — saved verbatim in its note `~/.claude/handoffs/agents/a54ff1e31cf9888c9.md`:
+> §1 claims vs tree, §2 the representation decisions DOES/PARTLY/COULD/CANNOT, §3 twenty-four PRE-MATH rows, §4 tree contradictions); `CHAT-AND-ASKS.md` NOT written
+> (Sonnet `a1f60f7cdc8e416df` paused with the whole survey drafted as templates in `/tmp/clk-build/t1–t4.md`; note saved). **NEXT for 0.5.4:** after `/resume-work`,
+> SendMessage the three paused writers (THIS account's agents) "resume: write your file from your note/templates, then hand back" — or relaunch fresh from their notes if
+> the other account holds the baton; then Fable's `PLAN-DRAFT-0.md` on the four surveys → `REVIEW-SONNET-0.md` → D1 → `AUDIT-OPUS-1.md` → D2 → `REVIEW-SONNET-2.md` → D3
+> → Josh. Nothing built, pushed or deployed; `v0.5.2-alpha` stands. Servers 8731/8735 idle.
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
