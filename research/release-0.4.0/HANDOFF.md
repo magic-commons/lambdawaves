@@ -670,6 +670,19 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > dependency graph, one Opus@high audit, then the briefs; the build on his word. **Launched 21:09: `tools/rack-deps.mjs`** (Opus, from `a8b136c`; no GPU) → the
 > sections of `boot()`, the hub names, the `ui` bag, the LW facade by section, the moving-cost ranking → `research/release-0.5.2/RACK-DEPS.md`. Then
 > `PLAN-DRAFT-0.md` (Yan) → `AUDIT-OPUS.md` → `PLAN.md` → the briefs. Name/number Josh's (folder 0.5.2; "Rack Dissolution" / "Engine Boundary" offered).
+> **UPDATE (Claude Yan, 2026-10-09 22:30 CDT) — THE 0.5.2 PLANNING ROUND IS DONE; the build awaits Josh's word.** `tools/rack-deps.mjs` merged `c089f08`
+> (4,827 body lines · 31 sections · 422 names · 123 hubs · ONE 26-section cycle · the `ui` bag 107 · the facade 176); the draft `183d061`; the Opus@high audit
+> merged `3c406ca` (SOUND WITH CHANGES: the draft's hinge measured and failed — residue 15–120 under a 30-hub context; the right measure is forward names +
+> shared lets + cross-module writes; 67 shared lets, 50 written from outside their section; the frame loop reads 49 forward names + 27 lets per frame → it
+> STAYS in `boot()`; R4 struck — serialize is one interleaving literal, restore one ordered program; R5 moves the facade WHOLE — 49 getters; R6 deferred —
+> runtime-relative URLs + `gpu-boot.js`'s URL identity; the windows re-cut along the file's real seams and the DOM-order law; `createApp` breaks four λWAVES
+> laws even with every piece off; ≈ 29 h). **`research/release-0.5.2/PLAN.md`** (the fold: THE CONTEXT whole with no mass rename — fixed-shape namespaces,
+> consts destructured, shared lets as `app.state.x` by the tool's token positions; R0 alone → R1 the controller alone → three PAIRS {R2a·R3a} {R2b·R3b}
+> {R2c·R2d} → R5 → R-V → the cut; gates G-A the `app` shape, G-O the seats, G-W a runtime facade fixture, G-G the classes table, the line law +1 %; ten rulings
+> TAKEN as defaults; U1–U9) and **`BRIEF-R0.md`** (U1 the hoisting audit, U4 the pair's floor, U7 the facade fixture, U8 the `ui` contract; `--classes` and
+> `--rename` for the tool; `appSource()`; the dead facade keys and the four imports out). Estimate ≈ 29 h ≈ 2.5–3 relay days. Nothing built; nothing pushed.
+
+## 3 · What happens next, in order
 
 ## 3 · What happens next, in order
 
