@@ -1,0 +1,164 @@
+{
+ "port": "9043",
+ "url": "https://127.0.0.1:9043/lab/?sw=0&warn=0&starter=home",
+ "secs": 6,
+ "ready": true,
+ "flag": true,
+ "field": true,
+ "atReady": {
+  "tag": "LW.ready",
+  "app": {
+   "fast": true,
+   "keys": 30,
+   "ns": {
+    "dom": {
+     "fast": true,
+     "keys": 12
+    },
+    "ui": {
+     "fast": true,
+     "keys": 107
+    },
+    "appPlay": {
+     "fast": true,
+     "keys": 6
+    },
+    "obs": {
+     "fast": true,
+     "keys": 7
+    },
+    "mat": {
+     "fast": true,
+     "keys": 24
+    },
+    "sturm": {
+     "fast": true,
+     "keys": 6
+    },
+    "settingsStore": {
+     "fast": true,
+     "keys": 4
+    },
+    "FIRST_RUN": {
+     "fast": true,
+     "keys": 4
+    },
+    "LOOK_DEFAULTS": {
+     "fast": true,
+     "keys": 6
+    },
+    "hooks": {
+     "fast": true,
+     "keys": 12
+    },
+    "state": {
+     "fast": true,
+     "keys": 57
+    },
+    "loop": {
+     "fast": true,
+     "keys": 13
+    },
+    "host": {
+     "fast": true,
+     "keys": 21
+    },
+    "w": {
+     "fast": true,
+     "keys": 71
+    },
+    "ctl": {
+     "fast": true,
+     "keys": 68
+    },
+    "sh": {
+     "fast": true,
+     "keys": 45
+    }
+   }
+  },
+  "ui": {
+   "fast": true,
+   "keys": 107
+  },
+  "__LW_hooks": null
+ },
+ "afterPlay": {
+  "tag": "after 6 s of play",
+  "app": {
+   "fast": true,
+   "keys": 30,
+   "ns": {
+    "dom": {
+     "fast": true,
+     "keys": 12
+    },
+    "ui": {
+     "fast": true,
+     "keys": 107
+    },
+    "appPlay": {
+     "fast": true,
+     "keys": 6
+    },
+    "obs": {
+     "fast": true,
+     "keys": 7
+    },
+    "mat": {
+     "fast": true,
+     "keys": 24
+    },
+    "sturm": {
+     "fast": true,
+     "keys": 6
+    },
+    "settingsStore": {
+     "fast": true,
+     "keys": 4
+    },
+    "FIRST_RUN": {
+     "fast": true,
+     "keys": 4
+    },
+    "LOOK_DEFAULTS": {
+     "fast": true,
+     "keys": 6
+    },
+    "hooks": {
+     "fast": true,
+     "keys": 12
+    },
+    "state": {
+     "fast": true,
+     "keys": 57
+    },
+    "loop": {
+     "fast": true,
+     "keys": 13
+    },
+    "host": {
+     "fast": true,
+     "keys": 21
+    },
+    "w": {
+     "fast": true,
+     "keys": 71
+    },
+    "ctl": {
+     "fast": true,
+     "keys": 68
+    },
+    "sh": {
+     "fast": true,
+     "keys": 45
+    }
+   }
+  },
+  "ui": {
+   "fast": true,
+   "keys": 107
+  },
+  "__LW_hooks": null
+ }
+}
