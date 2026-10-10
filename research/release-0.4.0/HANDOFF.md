@@ -702,7 +702,7 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > commit); fills by the first-reader row; `latex-copy` red on the base (fix round); B6/B69 flake on the base (re-aim, fix round). CLAUDE.md: THE CONTEXT
 > paragraph appended (R0's §13 draft + the gastab line). Base export: `$job/tmp/base-0.5.1` on 8755. Next: R1 THE CONTROLLER alone (`BRIEF-R1.md` amended
 > with R0's facts), then the pairs.
-> **01:35 — R1 THE CONTROLLER LAUNCHED** (Opus @ high, `worktree-agent-a95ee74e08fc0dd64`, from `86968b7` = the R0 merge, ports 9053/5523 + 9057/5527,
+> **01:30 — R1 THE CONTROLLER LAUNCHED** (Opus @ high, `worktree-agent-a95ee74e08fc0dd64`, from `86968b7` = the R0 merge, ports 9053/5523 + 9057/5527,
 > `BRIEF-R1.md`): its first commit teaches `tools/rack-deps.mjs` the module files, then §2–§4 + §7 move verbatim into `lab/shell/controller.js`
 > (`createController(app)`, called at §2's seat; the loop stays). On its report: merge by the recipe (the lock with `gastab=0` on both runs, the pair, the
 > estate, boot alone — B149 only, B69 a flake), then write and launch the first pair {R2a · R3a} from R1's as-built facts. Base export of `v0.5.1-alpha`
