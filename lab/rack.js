@@ -18,32 +18,23 @@ import { BASIS, domainFor, psiAt, orbitalFromTable } from './hydrogen.js';
 import { Register, PRESETS, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock, onePlay } from './clock.js';
 import { createWindowActivity } from './mir/window-activity.js';
-import { paintedRect } from './occlusion.js';   // 0.5.0 A7: the occlusion providers (KIT BRIEF 8's twin)
-import { VIEW, VIEW_NAMES, STYLE, cameraBasis, toScreen, cameraKey, quatFromYawPitch } from './field.js';
-import { el, knob, sw, seg, trig, readout, device as kitDevice, group, cssRGB, accentRGB, parseCssColor, mathPlain } from './mir/kit.js';
-import { MOLECULE_BY_ID, moleculeAtoms } from './molecules.js';
-import { ELEMENT } from './md.js';
-import { createInfoLayer } from './mir/info/layer.js';   // 0.5.1 D1: the STAGE TEXT is one block of the kit's INFORMATIONAL layer
-import { isField } from './mir/core/pointer.js';                       // 0.5.1 D2: the head's Escape, as the kit's greet reads it
+import { VIEW, VIEW_NAMES, STYLE, cameraBasis, quatFromYawPitch } from './field.js';
+import { el, knob, sw, seg, trig, readout, device as kitDevice, group, cssRGB, accentRGB, parseCssColor } from './mir/kit.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
 import { createFilm } from './render-exact.js';   // 0.5.0 C7: the film is MIR's recorder with λWAVES' frame
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
 import { createCapture, maxPictureSize } from './capture.js';
-import { createChem } from './chemview.js';   // wave CHEMISTRY: the RHF · real-time window (contract B-H2O-8)
-import { createRegister } from './registerview.js';   // REGISTER: one window, two registers — ORBITAL (orbitalsview.js, MATH-H2O Proposition 1) and STATES (statesview.js, the many-electron TD-CIS register)
-import { createMolecularSession } from './molecular-session.js';   // the ONE owner of the molecular volume (MOLECULAR WAVES stage 1)
+import { createMolecules } from './windows/molecules.js'; import { createStageWords } from './shell/stage-words.js'; import { createModSeam } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
 import { calculusMarkdown } from './calculus.js';
 import { createRampPanel } from './mir/panels/ramp.js';   // 0.5.0 C1: the phase palette's editor (paletteview.js left)
 import { toLUT, PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb, contrastRatio } from './mir/palette.js';   // N6: the kit's copy (lab/palette.js differed only in two comment lines)
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from './hamiltonian.js';
 import { createStateCard } from './windows/state.js';   // 0.5.2 R2a: the STATE card, out of boot()
-import { stateLatex, moleculeHead, formulaLatex, BASIS_LABEL } from './latex-state.js';   // 0.3.3 · wave 135: SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX; 0.4.0 S0: the molecule's page; 0.5.1 D2: its head
 import { wellCentroid } from './well.js';
 import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js';   // 0.5.2 R3a (edit-domain.js left with the history)
-import { CAM, createCameraLaw, clampShift } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
+import { createCameraLaw } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { createCameraPanel } from './mir/panels/camera.js';           // 0.5.0 C1: the CAMERA card's rows are the kit's panel over the law's port
-import { createModulation } from './mir/modulation/window.js';   // 0.5.0 C4: the kit's window controller (MIR 1.5), over A5's port
 import { createCurvesPanel } from './mir/panels/curves.js';     // 0.5.1 D10-24: the CURVES card's rows are the kit's panel over the stage canvas
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
@@ -652,7 +643,7 @@ export async function boot(dom) {
     modHand, resetWall: app.loop.resetWall });
   const rack = dom.rack;
   app.host.camera = camera; app.host.camLevel = camLevel; app.host.syncFreeAngles = syncFreeAngles; app.host.syncCamUI = syncCamUI; app.host.rack = rack; app.host.panBy = panBy;
-  app.host.camTravel = camTravel; app.host.orbitBy = orbitBy; app.host.queueKeyOrbit = queueKeyOrbit; app.host.setDist = setDist; app.host.setFov = setFov; app.host.resetView = resetView; app.host.zoomAt = zoomAt;
+  app.host.camTravel = camTravel; app.host.orbitBy = orbitBy; app.host.queueKeyOrbit = queueKeyOrbit; app.host.setDist = setDist; app.host.setFov = setFov; app.host.resetView = resetView; app.host.zoomAt = zoomAt; app.host.cameraPort = cameraPort;
 
 
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
@@ -1018,225 +1009,21 @@ export async function boot(dom) {
 
   /* ── LEGACY WINDOWS (2026-10, Josh): all five are gone — QCD, H₂⁺ and HELIUM in 0.5.0 D9, H₂ and ELECTROSTATICS in D9b
      (R5-L1; ATOMS came back in 0.4.0 S3).  An older file that used one opens on its shim in restore and says so in one line. */
-
-  /* H₂⁺ · LEGACY (the `molecule` card, with W-MO and W-PULSE) was DELETED in 0.5.0 D9: restore opens a file it owned as MOLECULES · H₂ */
-  app.state.chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
-  app.state.restampParams = null;                                            // re-tag knobs as modulation targets: lanes built after boot call it (the REGISTER's phase needles)
-  app.state.molSession = null;                                               // the one owner of the molecular volume, assigned beside CHEMISTRY below (the frame loop reads it)
-  app.state.orbitals = null; app.state.states = null; app.state.register = null;                 // REGISTER: the window (register) and its two modes, assigned beside CHEMISTRY below
-  let specFoldedByMol = false;           // 2026-10: SPECTRUM folded by a molecule taking the field (so the molecule's end unfolds it)
-  function moleculeMode(v) {
-    for (const w of [wState, wSh, wOrb, wVor, wSlice, wLad, wCalc]) if (w) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
-    /* 2026-10 (Josh) · SPECTRUM is MINIMISED, not hidden: it stays on the rack, folded, while a molecule has the field, and
-       unfolds when the molecule lets go — unless the reader folded or unfolded it themselves in between. */
-    if (wSpec) {
-      const folded = wSpec.root.classList.contains('folded');
-      if (v && !folded) { wSpec.fold(true); specFoldedByMol = true; }
-      else if (!v && specFoldedByMol) { if (folded) wSpec.fold(false); specFoldedByMol = false; }
-    }
-    if (v && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
-    if (!v) switchHamiltonian(getHamiltonian().id);                  // restore the atom's own hiding rules
-    app.state.refSnapshot = null; app.state.pendingRef = null;
-    schedule(TIER.REBUILD);
-  }
-
-  /* HELIUM · LEGACY (Hylleraas) was DELETED in 0.5.0 D9: restore opens a file it owned as SPECTRUM's ATOM · He 1s */
-
-  /* H₂ · LEGACY (Heitler–London, the collision) was DELETED in 0.5.0 D9b: restore opens a file it owned as MOLECULES · H₂ */
-
-  /* CHEMISTRY — eight molecules, RHF and the real-time δ-kick: the field becomes an AO density matrix.
-     It is a FIELD OWNER, so it goes through the moleculeMode() policy. */
-  let chemPrevView = null;   // the observable the field showed before CHEMISTRY (or the ORBITALS register) took it
-  /* ONE ROAD to the field's observable for the molecular pair.  CHEMISTRY asks for density / real / diff, the
-     ORBITALS register asks for phase, and `null` hands back whatever the user had before either of them took it —
-     so handing the field between the two cards never loses the observable the user chose for themselves. */
-  function molFieldView(name) {
-    if (!name) { if (chemPrevView !== null) { mat.view = chemPrevView; if (ui.viewSeg) ui.viewSeg.set(VIEW_NAMES[chemPrevView]); chemPrevView = null; } }
-    else if (VIEW[name] !== undefined && mat.view !== VIEW[name]) { if (chemPrevView === null) chemPrevView = mat.view; mat.view = VIEW[name]; if (ui.viewSeg) ui.viewSeg.set(name); }
-    schedule(TIER.PRESENT);
-  }
-  /* THE MOLECULAR SESSION — one owner, and the end of "last writer wins".  CHEMISTRY and the ORBITALS register are
-     PRODUCERS of its named models; it is the only module that touches the field's two molecular setters, and the
-     only caller of the view road above, so the observable comes back to the user by the same rule whichever model
-     let go of the field.  tests/field-owner.test.mjs is the law that keeps that "only" true. */
-  app.state.molSession = createMolecularSession({ field: () => field, fieldView: molFieldView,
-    repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); } });
-  const wChem = device({ id: 'chem', eyebrow: 'MOLECULES', title: 'RHF · real time', status: '' });
-  if (useCompactDefaults) wChem.root.classList.add('closed');   // built closed (chemview's N8 shown() guard); the first-run block opens it on the LEFT rack — still no solve until it is switched on
-  rack.appendChild(wChem.root);
-  app.state.chem = createChem(wChem.body, { active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
-    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),
-    repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
-    status(t, cls) { wChem.setStatus(t, cls); },
-    setOn(v) { moleculeMode(v); stageTextTick(); },
-    hand: (id) => headPick(id),                                      // 0.5.1 D2: a HAND pick (the dropdown, ON, a notebook link)
-    /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
-       model is playing and which observable the field shows.  See molecular-session.js. */
-    session: app.state.molSession,
-    derived: (fill) => (app.state.history ? app.state.history.absorb(fill) : fill()),   // S4 · a solve's derived defaults join the row that asked for it
-    now: () => clock.t });
-  /* 0.5.1 D2 · THE MOLECULE'S HEAD (R6-G): a HAND pick shows its head (latex-state.js moleculeHead: every number the record's stem or
-     the live solve) in THE FADE's seat once THIS molecule's solve lands — held until Escape, a press on the picture after 2.5 s, or
-     the next pick: the dismiss half of the kit's greet (info/page.js; λWAVES has no pages model).  A restore, an undo, a project,
-     link or demo open never shows it — none comes through `hand`.  `head.shown` is the gate's witness (__LW.head). */
-  const head = { shown: 0, md: null, want: null, bye: null };
-  function headPick(id) { if (head.bye) head.bye(); head.want = id; headLand(app.state.chem.solution()); }
-  function headLand(sol) {
-    const id = head.want, row = id && MOLECULE_BY_ID.get(id);
-    if (!row || !sol || !app.state.stageText) return;
-    if (app.state.chem.preset() !== id) { head.want = null; return; }                      // the molecule changed first: nothing
-    if (sol.key !== id + '|' + app.state.chem.basis + '|' + row.charge) return;             // chemview's solve key: this molecule's landing
-    head.want = null;
-    const md = moleculeHead({ molecule: row, basis: app.state.chem.basis, ground: sol, stem: sol.stem });
-    if (!md || !app.state.stageText.announce(md, 0)) return;
-    head.shown++; head.md = md;
-    const life = new AbortController(), until = performance.now() + 2500, bye = head.bye = () => { life.abort(); if (head.bye === bye) head.bye = null; app.state.stageText.dismiss(md); };
-    addEventListener('keydown', (e) => { if (e.key === 'Escape' && !isField(e.target, true)) bye(); }, { signal: life.signal });
-    dom.canvas.addEventListener('pointerdown', () => { if (performance.now() >= until) bye(); }, { signal: life.signal, passive: true });
-  }
-  app.state.chem.subscribe(headLand);
+  const { wChem, head, createMoRegistry } = createMolecules(app);   // 0.5.2 R2d: lab/windows/molecules.js, two seats (MO-REGISTRY's below the stage words)
 
   /* THE STAGE TEXT (Settings › Display; 0.4.0 S3 · F2; 0.5.1 D1 below) — its SOURCE: what is playing, as markdown — the MOLECULES formula
      ($\mathrm{H_{2}O}$, latex-state.js formulaLatex) while MOLECULES is on, else SPECTRUM's populated states in stateLatex's
      own prose ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION).  The states go in with UNIT coefficients — the list line
      depends on which labels are populated, never on c — so no live coefficient can reach the stage.  The source is asked
      only when one of its inputs moved (the register's version, the pick, a legacy owner): one compare a CPU tick. */
-  app.state.stageText = null;
-  const stageSrc = { v: -1, id: null };
-  /** the states that play, as stateLatex's prose with UNIT coefficients (md) or as their plain labels, comma-separated */
-  function stageStates(md) {
-    const H = getHamiltonian(), mix = reg.transition;
-    const line = md ? (ids) => stateLatex({ H, states: ids.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: 1, im: 0 })) }).split('\n')[0]
-      : (ids) => ids.map((a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]))).join(', ');
-    const live = (re, im) => BASIS.filter((s) => re[s.index] * re[s.index] + im[s.index] * im[s.index] > 1e-12).map((s) => s.index);
-    if (mix) { const A = line(live(mix.reA, mix.imA)), B = line(live(mix.reB, mix.imB)); return A && B ? A + '  ↔  ' + B : A || B; }
-    return line(reg.populated());
-  }
-  function stageMd() {
-    const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null;
-    return row ? '$' + formulaLatex(row.formula) + '$' : stageStates(true);
-  }
-  /** THE CAPTION a capture carries (T3): the same stage text as ONE plain-Unicode line — `H₂O · 1b1 HOMO · STO-3G` (the
-   *  formula, the ORBITAL on the field in names.js's plain form, the basis) or SPECTRUM's states ("2s₀, 2p₋₁"; A ↔ B) — drawn
-   *  by capture.js, since the DOM formula never reaches an export.  It follows the STAGE TEXT switch.  KIT BRIEF 6 replaces it. */
-  function stageCaption() {
-    if (!app.state.stageText || !app.state.stageText.on) return '';
-    const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null;
-    if (!row) return stageStates(false);
-    const o = app.state.chem.exportNames(), k = o && o.orbital;
-    return [mathPlain(row.formula), k && k.plain ? k.plain + (/^(HOMO|LUMO)$/.test(k.frontier) ? ' ' + k.frontier : '') : '', BASIS_LABEL[app.state.chem.basis] || ''].filter(Boolean).join(' · ');
-  }
-  function stageTextTick() {
-    if (!app.state.stageText) return;
-    const id = app.state.chem && app.state.chem.on ? app.state.chem.preset() : '';
-    if (reg.version === stageSrc.v && id === stageSrc.id) return;
-    stageSrc.v = reg.version; stageSrc.id = id;
-    app.state.stageText.setFormula(stageMd());
-  }
-  app.w.stageTextTick = stageTextTick;
-  /* 0.5.1 D1 · THE STAGE TEXT IS ONE BLOCK of the kit's INFORMATIONAL layer (mir/info/layer.js; stage-text.js left): the kit's ink,
-     shade and serif at the kit's seat — the free stage's top + 12 %, between the racks, clear of the transport and a docked TIMELINE —
-     and STILL: no subject, no labels, no parallax, no drift, no following, and never told of a camera move (a block with no subject
-     depends on no view; the layer's own ResizeObserver and `resize` cover a size, and the racks and the transport are told below);
-     only a pointer passing within the kit's reach (260 px) parts it, and HOLD (I) freezes even that.
-     THE LAWS kept: the key is the STRING — a changed one is remove() + addBlock(), the kit's exit and entrance — and KaTeX runs at
-     most four times a second (a change inside the quarter second waits, then renders whatever is wanted by then); OFF COSTS NOTHING
-     (the root hidden, nothing added); THE FADE is a HAND's preset (`{ hand: true }`; the register's `announce`) in the formula's seat
-     for 2.4 s — the formula leaves and comes back, and the kit's exit IS the fade.  The type (lab.css .lw-stage) is the notebook's:
-     the formula its title (34 px), an announcement its heading (22 px), × SIZE.  THE ATOM LETTERS stay λWAVES' (R6-L): one element
-     symbol per nucleus at its projected place, written only when the camera, the molecule, the SIZE or the canvas changed; white
-     under `difference`, so each glyph inverts what it is on; the notebook's body (14 px) × SIZE. */
-  function initStageText() {
-    const KATEX_MS = 250, racks = () => [rackL, rack].filter((r) => r && r.querySelector('.dev:not(.closed):not([hidden])'));
-    const layer = createInfoLayer({ stage: dom.stage, parallax: false, drift: false, follow: false,
-      avoid: () => [...racks(), layout.docked ? null : document.getElementById('transport'), app.state.tl && app.state.tl.isOpen() ? app.state.tl.root : null].map((e) => paintedRect(e)).filter(Boolean) });
-    layer.root.classList.add('lw-stage'); layer.root.setAttribute('aria-hidden', 'true');
-    const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0 };   // the gate's witnesses: KaTeX runs, banners, re-placements asked, letter moves
-    let on = true, scale = 1, formula = '', banner = null, shown = '', block = null, lastRender = -1e9, wait = 0, fadeT = 0;
-    function show() {                                                // the markdown wanted now, as a new block if it changed and KaTeX's quarter second has passed
-      if (!on) return;
-      const md = banner !== null ? banner : formula;
-      if (md === shown) return;
-      const due = lastRender + KATEX_MS - performance.now();
-      if (due > 0) { if (!wait) wait = setTimeout(() => { wait = 0; show(); }, due); return; }
-      if (block) block.remove();
-      block = md ? layer.addBlock({ md }) : null; shown = md;
-      if (block) { block.el.toggleAttribute('data-fade', banner !== null); lastRender = performance.now(); stats.renders++; }
-    }
-    /* the racks hide, peek and slide (body classes), the transport docks or goes to the top, the TIMELINE opens or docks: only THOSE
-       re-place the block — the play edge's frost-hold and the tablet's motion class are not a reason to read layout — and once more
-       400 ms on, when the slide or the pill's dodge (a class first, then its arrival) has landed */
-    let settle = 0;
-    const place = (again = true) => { stats.places++; layer.viewChanged(); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
-    const rackKey = () => ['rack-hidden', 'rack-peek', 'rack-l', 'ui-hidden', 'phone', 'transport-peek'].map((c) => +document.body.classList.contains(c)).join('');
-    let racksAt = rackKey();
-    new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    for (const [n, f] of [[document.getElementById('transport'), ['class']], [app.state.tl && app.state.tl.root, ['hidden', 'style']]]) if (n) new MutationObserver(() => place()).observe(n, { attributes: true, attributeFilter: f });
-
-    const labels = el('div', '', dom.stage); labels.id = 'atomLabels'; labels.setAttribute('aria-hidden', 'true'); labels.hidden = true;
-    let cssW = dom.canvas.clientWidth, cssH = dom.canvas.clientHeight;
-    if (typeof ResizeObserver === 'function') new ResizeObserver((e) => { const b = e[e.length - 1].contentRect; cssW = b.width; cssH = b.height; }).observe(dom.canvas);
-    let atomsId = '', atoms = [], spans = [], labelsKey = '', placeKey = '';
-    function atomLabels(id, obs, half) {
-      if (!id || !on) { if (!labels.hidden) labels.hidden = true; labelsKey = placeKey = ''; return; }
-      if (id !== atomsId) { atomsId = id; atoms = moleculeAtoms(id); labelsKey = ''; }
-      if (labelsKey !== id + '|' + scale) {
-        labelsKey = id + '|' + scale; placeKey = '';
-        labels.textContent = ''; spans = atoms.map((a) => el('span', 'atom-label', labels, ELEMENT[a.Z] || '?'));
-        labels.style.fontSize = Math.round(14 * scale) + 'px';
-      }
-      labels.hidden = false;
-      if (cssW < 32 || cssH < 32) return;
-      const key = `${labelsKey}|${cameraKey(obs)}|${obs.dist}|${obs.fov}|${half}|${cssW}|${cssH}`;
-      if (key === placeKey) return;
-      placeKey = key; stats.labelWrites++;
-      const S = toScreen(obs, half, cssW, cssH);
-      for (let i = 0; i < atoms.length; i++) {
-        const a = atoms[i], sp = spans[i], q = S.at(a.x, a.y, a.z);
-        if (!q) { sp.style.display = 'none'; continue; }
-        sp.style.display = ''; sp.style.transform = `translate(${q[0].toFixed(1)}px, ${q[1].toFixed(1)}px) translate(-50%, -50%)`;
-      }
-    }
-    app.state.stageText = {
-      layer, stats, atomLabels,
-      /** the formula's markdown ('' for none); the DOM moves only if the string did */
-      setFormula(md) { formula = md || ''; if (banner === null) show(); },
-      /** THE FADE: `md` in the formula's seat for `ttl` (0: until dismiss(md) — the molecule's head, D2), then its exit and the
-       *  formula's return.  Only a HAND calls it. */
-      announce(md, ttl = 2400) {
-        if (!on || !md) return false;
-        stats.announced++; clearTimeout(fadeT); banner = md; show();
-        if (ttl) fadeT = setTimeout(() => { banner = null; show(); }, ttl);
-        return true;
-      },
-      dismiss(md) { if (banner !== md) return; clearTimeout(fadeT); banner = null; show(); },   // a later announcement has already taken the seat: nothing
-      setOn(v) { on = !!v; layer.root.hidden = !on; show(); },
-      /** SIZE: the type × s (lab.css), then a re-measure — setPane(false) measures every bare block again (layer.js) */
-      setScale(s) { scale = s; labelsKey = ''; layer.root.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
-      get on() { return on; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
-    };
-    wChem.root.addEventListener('change', stageTextTick);           // the pick lands in `preset` at once; the solve comes later
-    app.state.chem.subscribe(() => stageTextTick());                         // … and a restore / undo / link that re-solves
-    paintMarks(); stageTextTick();
-  }
+  const { stageCaption, stageTextTick, initStageText } = createStageWords(app);   // 0.5.2 R2d: lab/shell/stage-words.js
 
   /* ORBITALS — the MOLECULAR REGISTER: ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k over CHEMISTRY's canonical orbitals, which
      is where a molecule's `arg` lives (MATH-H2O-2026-09-11, Proposition 1).  It is NOT a sixth field owner: it does
      not upload a molecule and it does not touch moleculeMode() — CHEMISTRY owns the shells and this window owns the
      matrix while REGISTER ON is up.  2026-10 (Josh): it STAYS on the rack whatever MOLECULES does — MOLECULES OFF only stands its
      switch down (orbitalsview.js update), and the ladder stays painted and editable. */
-  const wOrbs = device({ id: 'orbitals', eyebrow: 'MO-REGISTRY', title: 'molecular orbital registry', status: '' });   // the id stays `orbitals` so saved layouts survive the rename (REGISTER-WINDOW-SPEC §11.1)
-  app.w.wChem = wChem; app.w.wOrbs = wOrbs;
-  if (useCompactDefaults) wOrbs.root.classList.add('closed');   // the same rule CHEMISTRY keeps; the first-run block opens it under MOLECULES
-  rack.appendChild(wOrbs.root);
-  app.state.register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs),
-    stamp: () => { if (app.state.restampParams) requestAnimationFrame(app.state.restampParams); },   // a lane built after boot becomes a drop target for a macro
-    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),   // the STATES mode asks the chem worker for its canonical ladder and vectors
-    repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
-    status(t, cls) { wOrbs.setStatus(t, cls); },
-    announce: (md) => app.state.stageText && app.state.stageText.announce(md),        // a HAND's preset only (orbitalsview / statesview presetSel)
-    now: () => clock.t, field: () => field, chem: () => app.state.chem, session: app.state.molSession });
-  app.state.orbitals = app.state.register.orbitals; app.state.states = app.state.register.states;
+  const { wOrbs } = createMoRegistry();   // 0.5.2 R2d: molecules' second seat
 
   // CALCULUS — the stats, derived live, with their laws and residuals
   const { wCalc, calculus, wMet, meters, wLad, ladder } = createCalcMetersLadder();   // 0.5.2 R2b: readouts' second seat
@@ -1264,229 +1051,7 @@ export async function boot(dom) {
    *     about where the parameter is the moment either end is reached.
    * Each adapter also moves the control's REAL DIAL (setKnob), because a knob that does not follow
    * the value it owns is a knob that lies — and the hand's road back is modHand(), above.  */
-  /* ── WAVE 64 · THERE IS NO MODULATION CARD ANY MORE ──────────────────────────────────────────
-   * The modulation window is a PORTED ARTIFACT (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW
-   * EXCEPTION): `lab/mir/modulation/modwindow/`, BASINS' own window, moved here whole.  It is 716 × 466 at
-   * one card and it carries its own chrome, its own chip rail and its own drag grip — a 300 px
-   * rack slot cannot hold it and wrapping it in `device()` would put the house's frame around a
-   * window whose frame is the thing that travelled.  So it is built into the FLOAT LAYER by
-   * the kit's controller (`lab/mir/modulation/window.js`, 0.5.0 C4; `lab/modwindow.js`, its copy, is deleted) and shown by the transport pill's ⤢, exactly as wave 55 already opened it
-   * (`layout.modulation` below is unchanged in its verbs and rewritten in its mechanism).
-   * `lab/modview.js` — 1705 lines, the window this replaces — is deleted with it. */
-  {
-    let accWall = 0;
-    /* the interface's ACCENT wheel follows a modulated HUE at CHROME cadence, not at the field's:
-       applyAccent() repaints three copies of the logo and four custom properties, and none of that
-       is worth sixty times a second — the FIELD, which is what HUE is actually for, follows every frame */
-    const hueAccent = () => { const t = performance.now(); if (t - accWall < 100) return; accWall = t; applyAccent(); };
-    /* A WRAPPED TARGET IS AN ANGLE, and the registry stores the canonical representative of one.  The
-       instrument does NOT: obs.yaw accumulates through every turn a drag makes and the camera law
-       integrates it, so writing the canonical form back would silently subtract 2π from a running fling.
-       So the two wrapped setters write only when the ANGLE differs — which is the only difference that
-       means anything — and an un-modulated yaw is never quietly re-based by the sync above. */
-    const sameCycle = (a, b, L) => Math.abs(((a - b) % L + L + L / 2) % L - L / 2) < 1e-9;
-    const camOut = (id, v) => { setKnob(app.state.camKnobs[id], v); cameraPort.notify(); schedule(TIER.PRESENT); };   // C1 (A8's open item 3): a route's write is a notice
-    const defs = [
-      /* 0.5.0 C1 · the six saved observer.* routes keep their ids, maps and ranges, and stay HERE (the registry's road writes the pose
-         raw; the panel registers none of them).  Their dials are the CAMERA panel's (camKnobs: the sphere's two arcs, ZOOM, FOV, the
-         pad's X and Y), and a modulator's write is a notice to the port's subscribers (camOut), so the panel follows a route. */
-      { id: 'observer.yaw', label: 'YAW', unit: ' rad', map: 'wrap', min: 0, max: 2 * Math.PI, group: 'observer', knob: () => app.state.camKnobs['observer.yaw'],
-        hint: 'the camera azimuth — free-spinning, because an orbit that reaches the end of the dial and stops is not an orbit',
-        get: () => obs.yaw, set: (v) => { if (sameCycle(v, obs.yaw, 2 * Math.PI)) return; if (obs.mode === 'free') orbitBy(v - obs.yaw, 0); else obs.yaw = v; camOut('observer.yaw', obs.yaw); } },
-      { id: 'observer.pitch', label: 'PITCH', unit: ' rad', map: 'bipolar', min: -CAM.PITCH, max: CAM.PITCH, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.pitch'],
-        hint: 'Pitch balance; 50% is level',
-        get: () => obs.pitch, set: (v) => { const w = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, v)); if (w === obs.pitch) return; if (obs.mode === 'free') orbitBy(0, w - obs.pitch); else obs.pitch = w; camOut('observer.pitch', obs.pitch); } },
-      { id: 'observer.dist', label: 'ZOOM', map: 'log', min: CAM.DIST[0], max: CAM.DIST[1], group: 'observer', knob: () => app.state.camKnobs['observer.dist'],
-        hint: 'the ZOOM dial itself — log, because the interesting half of a zoom is always the near half',
-        get: () => obs.dist, set: (v) => { obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); camOut('observer.dist', obs.dist); } },
-      { id: 'observer.fov', label: 'FOV', map: 'linear', min: CAM.FOV[0], max: CAM.FOV[1], group: 'observer', knob: () => app.state.camKnobs['observer.fov'],
-        get: () => obs.fov, set: (v) => { obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); camOut('observer.fov', obs.fov); } },
-      { id: 'observer.panx', label: 'PAN X', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.panx'], hint: 'the lens shift across: where the pivot sits on the frame',   // 0.4.0 S2
-        get: () => obs.shift[0], set: (v) => { obs.shift = [clampShift([v, 0])[0], obs.shift[1]]; camOut('observer.panx', obs.shift[0]); } },
-      { id: 'observer.pany', label: 'PAN Y', map: 'bipolar', min: -CAM.SHIFT, max: CAM.SHIFT, def: 0, group: 'observer', knob: () => app.state.camKnobs['observer.pany'], hint: 'the lens shift up and down: where the pivot sits on the frame',
-        get: () => obs.shift[1], set: (v) => { obs.shift = [obs.shift[0], clampShift([0, v])[1]]; camOut('observer.pany', obs.shift[1]); } },
-      { id: 'material.stage', label: 'STAGE', map: 'linear', min: 0, max: 1, group: 'material', knob: () => ui.stageK, get: () => ui.stageK.get(), set: (v) => app.hooks.setStage(v) },
-      { id: 'material.gamma', label: 'GAMMA', map: 'linear', min: 0.5, max: 2.4, group: 'material', knob: () => ui.gammaK, get: () => mat.gamma, set: (v) => { mat.gamma = v; setKnob(ui.gammaK, v); schedule(TIER.PRESENT); } },
-      { id: 'material.exposure', label: 'EXPOSURE', map: 'log', min: 0.08, max: 12, group: 'material', knob: () => ui.expK,
-        get: () => mat.exposure, set: (v) => { mat.exposure = v; setKnob(ui.expK, v); schedule(TIER.PRESENT); } },
-      { id: 'material.softness', label: 'SOFT', map: 'linear', min: 0.3, max: 2.2, group: 'material', knob: () => ui.softK,
-        get: () => mat.softness, set: (v) => { mat.softness = v; setKnob(ui.softK, v); schedule(TIER.PRESENT); } },
-      { id: 'material.hue', label: 'HUE', map: 'wrap', min: 0, max: 1, group: 'material', knob: () => ui.hueK,
-        hint: 'Turn the palette and interface accents',
-        get: () => mat.hueShift, set: (v) => { if (sameCycle(v, mat.hueShift, 1)) return; mat.hueShift = v; setKnob(ui.hueK, v); hueAccent(); schedule(TIER.PRESENT); } },
-      { id: 'material.iso', label: 'ISO', map: 'log', min: 0.002, max: 0.9, group: 'material', knob: () => ui.isoK,
-        get: () => mat.iso, set: (v) => { mat.iso = v; setKnob(ui.isoK, v); schedule(TIER.PRESENT); } },
-      { id: 'material.grain', label: 'GRAIN', map: 'log', min: 0.02, max: 1, group: 'material', knob: () => ui.grainK,
-        get: () => mat.grain, set: (v) => { mat.grain = v; setKnob(ui.grainK, v); schedule(TIER.PRESENT); } },
-      { id: 'material.knee', label: 'KNEE', map: 'log', min: 0.02, max: 8, group: 'material', knob: () => ui.kneeK,
-        get: () => mat.knee, set: (v) => { mat.knee = v; setKnob(ui.kneeK, v); schedule(TIER.PRESENT); } },
-      /* THE PHYSICS RATE — the clearest reason the modulation clock cannot BE the physics clock: this
-         is a thing an LFO may modulate, so it cannot also be the thing that says how fast the LFO runs.
-         Its setter schedules NOTHING: while it matters the loop is already running an EVOLVE of its own. */
-      { id: 'transport.rate', label: 'RATE', unit: ' a.u./s', map: 'log', min: 0.1, max: 3000, group: 'transport', knob: () => ui.rateKnob,
-        hint: 'Set the physics clock rate',
-        get: () => clock.rate, set: (v) => { clock.setRate(v); setKnob(ui.rateKnob, v); } },
-
-
-      { id: 'material.slice.pos', label: 'CLIP POS', map: 'bipolar', min: -1, max: 1, def: 0, group: 'material', knob: () => ui.slicePosK,
-        hint: 'Set the clip or slab position',
-        get: () => mat.slice.pos, set: (v) => { mat.slice.pos = v; setKnob(ui.slicePosK, v); schedule(TIER.PRESENT); } },
-      { id: 'material.slice.thick', label: 'CLIP THICK', map: 'log', min: 0.01, max: 0.4, group: 'material', knob: () => ui.sliceThickK,
-        hint: 'Set slab depth',
-        get: () => mat.slice.thick, set: (v) => { mat.slice.thick = v; setKnob(ui.sliceThickK, v); schedule(TIER.PRESENT); } },
-
-      /* Ω RABI is the cleanest of the five and the one worth having most: it is the RATE of the A→B→A
-         mix, so a macro on it makes the transition breathe.  `reg.transition.omega` is a plain property
-         write — `setTransition` is the only thing in state.js that bumps `version` — so no undo entry
-         and no rebuild.  The knob's own `onInput` schedules nothing (while a transition plays the loop
-         is already evolving); the SETTER must, or a PAUSED instrument would not repaint under a macro. */
-      /* ══ THE ROTATION AND DEFLECTION RATES — THE HOUSE RULE, KEPT BY CHANGING WHAT IS REGISTERED ══
-       * The rule above this array refused ROTATE z, STARK K_z and DEFECT L² for two reasons, both
-       * true: their setters bump reg.version (the undo trigger and twelve readers' cache key), and
-       * they hold no value to be a target OF.  Registering the RATE answers both.
-       *   · NOTHING GOES STALE.  rotRate.{z,kz,def} is a real stored number and the ONLY truth about
-       *     the drive; the angle is still nowhere.  So `get` is honest, modSyncBases re-bases from
-       *     the instrument rather than from a fiction, and the arc is anchored to something real.
-       *   · THE VERSION BUMP IS ANSWERED SEPARATELY, at the ring, not here — see hDriven below.  A
-       *     driven turn is a MOTION, not an edit, and the undo ring is told so once.
-       * They carry `knob:` accessors on purpose, so all three are DROP targets: a rate is exactly
-       * the kind of number a macro should be dragged onto, and the accessor is also what hands the
-       * dial its base through setBase, so a focused dial under a running LFO announces the number
-       * the hand owns instead of the number the modulator is at.
-       * `map: 'bipolar'` on all three, and it is load-bearing rather than decorative: it makes the
-       * detent at zero EXACT, and zero is the state in which this whole feature costs nothing. */
-      { id: 'state.rot.z', label: 'SPIN z', unit: ' rad/s', map: 'bipolar', min: -ROT_LIMIT.z, max: ROT_LIMIT.z, def: 0, group: 'state', knob: () => ui.rotZRate,
-        hint: 'Set z-rotation speed',
-        get: () => rotRate.z,
-        set: (v) => { setRotationRate('z', v); } },
-      { id: 'state.stark.kz', label: 'SPIN K_z', unit: ' rad/s', map: 'bipolar', min: -ROT_LIMIT.kz, max: ROT_LIMIT.kz, def: 0, group: 'state', knob: () => ui.kzRate,
-        hint: 'Set Stark rotation speed',
-        get: () => rotRate.kz,
-        set: (v) => { setRotationRate('kz', v); } },
-      { id: 'state.defect.l2', label: 'SPIN L²', unit: ' rad/s', map: 'bipolar', min: -ROT_LIMIT.def, max: ROT_LIMIT.def, def: 0, group: 'state', knob: () => ui.defRate,
-        hint: 'Set defect phase speed',
-        get: () => rotRate.def,
-        set: (v) => { setRotationRate('def', v); } },
-
-      /* CHEMISTRY offers exactly TWO targets and the choice is the same law as everywhere above: a κ and a
-         RATE, both PRESENT-only setters that store a number and schedule nothing (the RT pump is already
-         running a frame of its own when either matters).  The ORBITAL INDEX is deliberately NOT registered:
-         it changes WHICH quantity the volume means, which is a rebuild of the picture's subject rather than
-         a value to sweep — the same line that keeps FIELD RESOLUTION and STEPS out of this array. */
-      { id: 'chem.kick', label: 'κ KICK', map: 'log', min: 1e-4, max: 1e-2, def: 1e-3, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.kick() : null),
-        hint: 'the δ-kick strength the next KICK will use — linear response wants the smallest κ the trace can carry',
-        get: () => (app.state.chem ? app.state.chem.kappa : 1e-3), set: (v) => { if (app.state.chem) { app.state.chem.setKappa(v); setKnob(app.state.chem.knobs.kick(), app.state.chem.kappa); } } },
-      { id: 'chem.speed', label: 'MOLECULES SPEED', unit: ' steps/frame', map: 'linear', min: 1, max: 50, def: 10, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.speed() : null),
-        hint: 'real-time propagation steps asked of the worker each frame',
-        get: () => (app.state.chem ? app.state.chem.speed : 10), set: (v) => { if (app.state.chem) { app.state.chem.setSpeed(v); setKnob(app.state.chem.knobs.speed(), app.state.chem.speed); } } },
-      /* THE REGISTER's SLOTS (REGISTER-WINDOW-SPEC §6): MORPH, and eight lane slots in lane order — S₀ is slot 1.
-         PRESENT-only like every target here: a setter stores a number and the register's own frame push reads it.
-         A slot with no lane behind it is a no-op, which is the present-only law for a lane that is not there. */
-      { id: 'reg.morph', label: 'REG MORPH', map: 'linear', min: 0, max: 1, def: 0, group: 'state', knob: () => (app.state.states ? app.state.states.knobs.morph() : null),
-        hint: 'where the STATES register plays on the path from store A to store B (MORPH must be on)',
-        get: () => (app.state.states ? app.state.states.morph : 0), set: (v) => { if (app.state.states) { app.state.states.setMorphValue(v); setKnob(app.state.states.knobs.morph(), app.state.states.morph); } } },
-      { id: 'reg.e0', label: 'DRIVE E₀', unit: ' a.u.', map: 'log', min: 1e-4, max: 0.2, def: 0.01, group: 'state', knob: () => (app.state.states ? app.state.states.knobs.driveE() : null),
-        hint: 'the STATES drive’s field amplitude — a live knob of the running propagation, never a restart',
-        get: () => (app.state.states ? app.state.states.drive.e0 : 0.01), set: (v) => { if (app.state.states) { app.state.states.setDriveParam('e0', v); setKnob(app.state.states.knobs.driveE(), app.state.states.drive.e0); } } },
-      { id: 'reg.w', label: 'DRIVE ω', unit: ' Eh', map: 'log', min: 0.05, max: 3, def: 0.4, group: 'state', knob: () => (app.state.states ? app.state.states.knobs.driveW() : null),
-        hint: 'the STATES drive’s carrier frequency — sweep it through a stick to watch the resonance',
-        get: () => (app.state.states ? app.state.states.drive.omega : 0.4), set: (v) => { if (app.state.states) { app.state.states.setDriveParam('omega', v); setKnob(app.state.states.knobs.driveW(), app.state.states.drive.omega); } } },
-      ...Array.from({ length: 8 }, (_, i) => ({ id: `reg.amp${i + 1}`, label: `REG |b|² ${i + 1}`, map: 'linear', min: 0, max: 1, def: 0, group: 'state',
-        knob: () => (app.state.states ? app.state.states.knobs.pop(i) : null), hint: `the population of lane ${i + 1} of the STATES register (lane 1 is S₀)`,
-        get: () => (app.state.states ? app.state.states.slotAmp(i) : 0), set: (v) => { if (app.state.states) { app.state.states.setSlotAmp(i, v); setKnob(app.state.states.knobs.pop(i), app.state.states.slotAmp(i)); } } })),
-      ...Array.from({ length: 8 }, (_, i) => ({ id: `reg.ph${i + 1}`, label: `REG PHASE ${i + 1}`, unit: ' rad', map: 'linear', min: 0, max: 2 * Math.PI, def: 0, group: 'state',
-        knob: () => (app.state.states ? app.state.states.knobs.ph(i) : null), hint: `the phase of lane ${i + 1} of the STATES register — on the y lane of a degenerate pair this sweeps slosh → ring → slosh → counter-ring`,
-        get: () => (app.state.states ? app.state.states.slotPhase(i) : 0), set: (v) => { if (app.state.states) app.state.states.setSlotPhase(i, v); } })),
-
-      { id: 'state.rabi', label: 'Ω RABI', map: 'log', min: 0.005, max: 1, def: 0.05, group: 'state', knob: () => ui.abOmega,
-        hint: 'Set the A–B transition rate',
-        get: () => app.hooks.ab.omega,
-        set: (v) => { app.hooks.ab.setOmega(v); setKnob(ui.abOmega, v); schedule(TIER.PRESENT); } },
-    ];
-    /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:
-       CHEMISTRY's two targets are `chem.kick` and `chem.speed`, and an id's root is what a saved route is addressed by — so it
-       names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
-       sphere arcs, so they are drop targets now, like every observer.* dial. */
-    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg']);
-    app.state.restampParams = mod.stamp;
-
-
-    let trSeat = 'bottom', trMoving = false;
-    function seatRect(where, w, h) {
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const narrowRack = matchMedia('(max-width: 860px)').matches;
-      const top = where === 'top' ? (narrowRack ? 112 : 52) : vh - 60 - h;
-      const left = narrowRack ? vw - w - 10 : (vw - w) / 2;
-      return { left, right: left + w, top, bottom: top + h };
-    }
-    const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
-    const dodging = {};   // 0.5.0 C7b: each kit window's open rect (the modulation window's, the TIMELINE's): the pill gives way to both
-    function modDodge(rect, who = 'mod') {
-      /* 0.5.0 C4: the kit's close reports null, and its place() reports the real box even while closed (λWAVES' copy sent the
-         zero rect): a window that is not open has nothing to dodge */
-      dodging[who] = rect && (who === 'mod' ? app.state.modView && app.state.modView.isOpen : app.state.tl && app.state.tl.isOpen()) ? rect : null;
-      const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));
-      occlusion.dirty();   // a paused field still has to move its line masks with the window
-      const t = document.getElementById('transport');
-      if (!t || !t.classList.contains('mini')) return;
-      if (trMoving) { if (!rs.length) setTimeout(() => modDodge(rect, who), 320); return; }
-      if (document.body.classList.contains('rack-hidden')) return;   // it is already parked off-screen
-      /* OPTIMIZATION 2026-09-24 · N8 · A CLOSED WINDOW HAS NOTHING TO DODGE, AND ASKING COST THE BOOT A LAYOUT.  A closed
-         modulation window reports the origin's empty rect (the kit's window.js place(); `closed` sends −1s).  No seat can hit a
-         rect at or left of x = 0: a seat's left is (vw − w)/2 and the pill is `min(640px, 100vw − 24px)` wide
-         (skin.css), so it starts ≥ 12 px in — the old chain always answered 'bottom' (or 'top' on a narrow rack) for it.
-         When the pill already sits there, that answer changed nothing but it read the pill's rect first: on a first visit
-         the boot's forced style + layout, 30–38 ms, once the closed H₂ and MOLECULES cards stopped paying it
-         (probes/N/n8-reads.mjs).  Any other case falls through to the measured road below, unchanged. */
-      if (!rs.length && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) return;
-      const box = t.getBoundingClientRect();
-      const w = box.width || 560, h = box.height || 34;
-      const narrowRack = matchMedia('(max-width: 860px)').matches;
-      if (narrowRack) trSeat = 'top';
-      const want = narrowRack ? 'top'
-                 : free('bottom', w, h) ? 'bottom'
-                 : free('top', w, h) ? 'top' : trSeat;
-      if (want === trSeat) return;
-      trMoving = true;
-      const leaving = trSeat === 'bottom' ? 'lw-tr-out-down' : 'lw-tr-out-up';
-      const arriving = want === 'bottom' ? 'lw-tr-in-up' : 'lw-tr-in-down';
-      t.style.animation = leaving + ' 140ms cubic-bezier(.55,0,1,.45) forwards';
-      let arrived = false;
-      const arrive = () => {
-        if (arrived) return;                                    // the event and the belt may BOTH fire
-        arrived = true;
-        t.removeEventListener('animationend', arrive);
-        trSeat = want;
-        t.classList.toggle('at-top', want === 'top');
-        t.style.animation = arriving + ' 160ms cubic-bezier(.23,1,.32,1) forwards';
-        let ended = false;
-        const done = () => { if (ended) return; ended = true;
-          t.removeEventListener('animationend', done); t.style.animation = ''; trMoving = false; };
-        t.addEventListener('animationend', done);
-        setTimeout(done, 400);                                  // the belt: an animation that never fires must not wedge the flag
-      };
-      t.addEventListener('animationend', arrive);
-      setTimeout(arrive, 220);                                  // the same belt on the leaving half
-    }
-
-    app.state.modView = createModulation(document.getElementById('floats') || document.getElementById('lab'), mod.port({
-      moved: modDodge, persist: () => saveSettings(), note: hNote,
-      rateControl: () => knob({ label: 'RATE', min: 0.1, max: 3000, value: clock.rate, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (!modHand('transport.rate', v)) { clock.setRate(v); ui.rateKnob.set(v); } } }),
-      /* WAVE 102 · THE FIFTH EDGE's memory: the chosen input, kept in this browser's settings so a returning user is not asked to
-         pick it again — a device HANDLE, never audio (the kit's mir/modulation/audio-capture.js header says why that distinction matters). */
-      device: { read: () => readSettings().audioDevice || '',
-        write: (id) => { const S = readSettings();
-          settingsStore.write({ ...S, audioDevice: id }); } },
-      /* WAVE 65 · THE ARM'S OTHER DOOR: pressing the window's PLAY on a disarmed rack asks the host to arm, and the MOD lamp on
-         the transport lights.  The host owns the flag, the glow and the persistence; the window only asks. */
-      armed: () => app.state.modArm, arm: (on) => setModArm(!!on) }));
-    app.state.modView.root.dataset.mirWindow = 'modulation';    // 0.5.0 A10's hook (the kit's controller sets the rail's, not the pane's)
-    applyAccent();                                    // the two angles reach the window as soon as it exists
-    app.state.modView.restore(readSettings().modwin);
-    app.state.dodge = modDodge;                                 // 0.5.0 C7b: the TIMELINE's `moved` gives way through the same seat chooser
-    /* wave 54: the modulation clock's visibility is driven by the ONE authority (setPageHidden), not by a second listener of its own — it still RE-ANCHORS and never jumps */
-    if (page.hidden) app.state.modHost.clock.setHidden(true);
-  }
+  createModSeam(app);   // 0.5.2 R2d: lab/shell/modulation.js
 
   // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); it ships CLOSED.  0.4.0 S3 (R-A2):
   // no longer LEGACY — the periodic table of SPECTRUM's ATOM operator, with its own row in + and WINDOW
@@ -1561,50 +1126,7 @@ export async function boot(dom) {
    * frame is cut into a moving rectangle wherever that box goes. Rectangles are gathered here — one
    * layout burst, at most every 300 ms while a frame runs, and never inside a paint.  0.5.0 A7: each species is a
    * provider in lab/occlusion.js, registered below in the old order; this host converts, clears and presents. */
-  const NO_OCCLUSION = [];
-  function refreshOcclusion(nowMs) {
-    app.state.occludeDirty = false; app.state.occludeAt = nowMs;
-    /* LA3 · HIDDEN, NOTHING IS PAINTED, SO NOTHING MASKS.  Under body.ui-hidden every surface below is display:none
-       (lab.css: the racks, transport, sheet and both lists !important; #floats (the keyboard window too) and #notebook !important), and
-       #keysheet no longer exists — so the burst's answer is exactly [] and its layout reads bought nothing, every 300 ms
-       (AUDIT-B FB5, REFUTE-E/F).  The empty block is still HANDED OVER, because the line pass still runs under H (the
-       slice outline) and the rectangles from before the hide must not punch holes in it; setOcclusion compares its
-       signature, so an already-empty block costs a string compare.  The body-class observer below re-dirties the
-       burst on the way back. */
-    if (document.body.classList.contains('ui-hidden')) { if (field.setOcclusion(NO_OCCLUSION)) schedule(TIER.PRESENT); return; }
-    const cb = dom.canvas.getBoundingClientRect();
-    const toCanvas = (r) => { const x0 = r.left - cb.left, y0 = r.top - cb.top, x1 = r.right - cb.left, y1 = r.bottom - cb.top;
-      return x1 - x0 < 2 || y1 - y0 < 2 || x1 <= 0 || y1 <= 0 || x0 >= cb.width || y0 >= cb.height ? null : [x0, y0, x1, y1]; };
-    if (field.setOcclusion(occlusion.rects(toCanvas))) schedule(TIER.PRESENT);
-  }
-  { const body = document.body, { root: mw, rail } = app.state.modView, dirty = occlusion.dirty, shown = (d) => !d.hidden && !d.classList.contains('closed');
-    const rackShown = () => !body.classList.contains('rack-hidden') || body.classList.contains('rack-peek'), rects = (els) => els.map((s) => paintedRect(s));
-    /* a card is one pane, or (DISCONNECTED, never on a phone) its head and its body with the stage showing between them */
-    const panes = (d) => body.classList.contains('disconnected') && !body.classList.contains('phone') ? [d.querySelector('.dev-head'), d.querySelector('.dev-body')] : [d];
-    /* Device cards scroll inside the modulation run. Their offscreen bounds must not mask the stage. */
-    occlusion.register('modwin', () => shown(mw) ? [...mw.querySelectorAll('.m2rail, .m2dev, .m2workbar')].map((s) => paintedRect(s, s.classList.contains('m2dev') && s.closest('.m2run'))) : []);
-    occlusion.register('chiprail', () => shown(rail) ? rects([...rail.querySelectorAll('.crail-chip')]) : []);
-    /* 0.5.0 C4: the kit's window travels (tweenRect) and fades (presence); its `hidden` lands when the exit ends, and onGeometry
-       tells every place, landing, open and close — both are the one producer's, so a paused field's mask follows them */
-    for (const el of [mw, rail]) occlusion.watch(el, { attributes: true, attributeFilter: ['hidden'] });
-    app.state.modView.onGeometry(dirty);
-    occlusion.register('floats', () => rects([...floats.children].filter((d) => d.classList.contains('dev') && shown(d)).flatMap(panes)));
-    occlusion.register('extra', () => rects(['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => document.getElementById(id))));
-    occlusion.register('keymap', () => rects([document.querySelector('[data-mir-window="keyboard"]'), ...document.querySelectorAll('[data-mir-rail="keyboard"] .mir-chip')]));   // C3: the kit's window and its rail
-    occlusion.register('rack', () => rackShown() ? rects([rack, rackL].flatMap((rk) => rk ? [...rk.children] : []).filter((d) => d.classList.contains('dev') && !d.classList.contains('closed')).flatMap(panes)) : [],
-      { standIn: () => rackShown() ? [paintedRect(rack), paintedRect(rackL)] : [] });   // past the block's 32 the two columns stand in for their cards
-    for (const el of [floats, rack, rackL]) occlusion.watch(el, { childList: true });
-    /* A paused field has no periodic frame to notice a source card sliding under the run's clip. */
-    if (floats) floats.addEventListener('scroll', dirty, { capture: true, passive: true });
-    for (const id of ['notebook', 'transport', 'sheet', 'offer', 'rackAddList', 'rackFavList']) occlusion.watch(document.getElementById(id), { attributes: true, attributeFilter: ['style', 'hidden', 'class'] });
-    new MutationObserver(dirty).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    for (const rk of [rack, rackL]) if (rk) rk.addEventListener('scroll', dirty, { passive: true });
-    window.addEventListener('resize', dirty, { passive: true });
-    /* 0.5.0 C3 · the kit's rack moves a floating card by `translate` and left/top and animates a folding card's height: a card's OWN
-       style or class (never a knob's inside it) dirties the block, so a paused field's mask follows the hand and the fold */
-    const own = new MutationObserver((rs) => { if (rs.some((r) => [floats, rack, rackL].includes(r.target.parentElement))) dirty(); });
-    for (const el of [floats, rack, rackL]) if (el) own.observe(el, { attributes: true, subtree: true, attributeFilter: ['style', 'class'] });
-  }
+  const { refreshOcclusion } = createInk(app);   // 0.5.2 R2d: lab/shell/ink.js
   /* ── 0.5.0 C3 · THE RACK IS THE KIT'S: lab/shell/rack-wiring.js (0.5.2 R3b), created here; its second seat, wireStage(), follows the notebook's ── */
   const { rk, layout, wTr, tablet, syncPhone, wireStage } = createRackWiring(app);
   /* ── §19b the skip links · the dock chip · MENUS and the menubar · THE NOTEBOOK · PROJECTS: lab/shell/notebook.js (0.5.2 R3b), created here ── */

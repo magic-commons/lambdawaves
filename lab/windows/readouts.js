@@ -89,7 +89,7 @@ export function createReadouts(app) {
 
   // PLANE (id `slice`) — a rotatable complex plane through ψ (the 4D engine's rotor pair, carrying hydrogen's own 4-space)
   const wSlice = device({ id: 'slice', eyebrow: 'PLANE', status: '' });   // 0.4.0 S3 (R-W3): PLANE, once SLICE — the id and slice.* stay
-  app.w.wOrb = wOrb; app.w.wVor = wVor; app.w.wSlice = wSlice;
+  app.w.wSh = wSh; app.w.wOrb = wOrb; app.w.wVor = wVor; app.w.wSlice = wSlice;
   const slice = createSliceView(wSlice.body, {
     lut: () => (app.state.palette && app.state.palette.on ? toLUT(app.state.palette.stops) : null),
     repaint() { schedule(TIER.PRESENT); }

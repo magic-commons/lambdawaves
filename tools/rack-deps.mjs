@@ -928,18 +928,18 @@ export const PLANNED_CUT = [
   [/^ {2}rack\.appendChild\(wPal\.root\); rack\.appendChild\(wObs\.root\)/, 'boot'],   // the five appends stay at their seat
   [/^ {2}\/\* THE ABOUT FACE LIVES IN THE NOTEBOOK GLASS/, 'spectrum'],
   [/^ {2}\/\/ SHADOW$/, 'readouts'],
-  [/^ {2}\/\* ── LEGACY WINDOWS/, 'molecules'],                                       // §9
-  [/^ {2}\/\* THE STAGE TEXT \(Settings › Display;/, 'stage-words'],
-  [/^ {2}\/\* ORBITALS — the MOLECULAR REGISTER/, 'molecules'],                       // MO-REGISTRY
+  [/^ {2}\/\* ── LEGACY WINDOWS/, 'molecules'],                                       // §9: the seat (0.5.2 R2d: lab/windows/molecules.js)
+  [/^ {2}\/\* THE STAGE TEXT \(Settings › Display;/, 'stage-words'],                    // the seat (0.5.2 R2d: lab/shell/stage-words.js)
+  [/^ {2}\/\* ORBITALS — the MOLECULAR REGISTER/, 'molecules'],                       // MO-REGISTRY: molecules' second seat, createMoRegistry()
   [/^ {2}\/\/ CALCULUS — the stats/, 'readouts'],                                     // CALC · METERS · LADDER
-  [/^ {2}\/\* ── WAVE 52 · W-MODWINDOW/, 'modulation'],                               // §10–§11 the seam
+  [/^ {2}\/\* ── WAVE 52 · W-MODWINDOW/, 'modulation'],                               // §10–§11 the seam: the seat (0.5.2 R2d: lab/shell/modulation.js)
   [/^ {2}\/\/ ATOMS — the periodic table/, 'readouts'],                               // ATOMS · WIGNER · RADIATION
   [/^ {2}Object\.assign\(READERS, \{/, 'boot'],                                      // READERS · track · hydroReader stay
   [/^ {2}\/\* ── transport strip/, 'transport'],                                      // §12: the seat (0.5.2 R3b: lab/shell/transport.js)
   [/^ {2}\/\* ── badges/, 'boot'],                                                    // §13–§14
   [/^ {2}\/\* ── THE BOW:/, 'kepler'],                                                // §15–§16
   [/^ {2}\/\* ── THE FLOATING RACK/, 'boot'],                                         // §17
-  [/^ {2}\/\* ── INK STAYS UNDER GLASS/, 'ink'],                                      // §18 (devById, rackCardWidth, popFace left with §19a at R3b)
+  [/^ {2}\/\* ── INK STAYS UNDER GLASS/, 'ink'],                                      // §18: the seat (0.5.2 R2d: lab/shell/ink.js; devById, rackCardWidth, popFace left with §19a at R3b)
   [/^ {2}\/\* ── 0\.5\.0 C3 · THE RACK IS THE KIT'S/, 'rack-wiring'],                 // §19a: the seat (0.5.2 R3b: lab/shell/rack-wiring.js)
   [/^ {2}\/\* ── §19b the skip links/, 'notebook'],                                   // §19b: the seat (0.5.2 R3b: lab/shell/notebook.js)
   [/^ {2}wireStage\(\);/, 'rack-wiring'],                                            // §19a's second seat
