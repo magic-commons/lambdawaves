@@ -715,6 +715,7 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > **Next Major Agent:** a fresh Opus from R1's tip finishes it → merge by the recipe → fill the 68 `app.ctl` slots once before PAIR 1 (R1's candidate 1) → fill
 > the as-built block in `BRIEF-R2a.md` / `BRIEF-R3a.md` (`3e3f674`) → launch PAIR 1. My servers 8751/8755 stopped; R1's 9053/9057 asked to stop by pid. The
 > checkpoint `optimization-2026-09-24/.claude/handoffs/latest.md` has the full next-step list. NO push, NO deploy.
+> **06:35 — PAUSE RELEASED; Josh: continue as Yan, no switch to Sos.** R1 RESUMED by message from its tip `48b678d` (its context intact — the two-account law prefers a resume to a replacement): it restarts its servers, runs serialize-bytes base vs tree and settings-probe, fills the BUILD, writes wave 216, commit 2, and lists per planned module the `app.ctl` names it reads (the integrator fills exactly that union at the merge, not all 68 — the line law: 27,739 of 27,943). My server 8751 back up (pid 2868853). Then: merge R1 by the recipe → the `app.ctl` fill commit → fill the as-built blocks in BRIEF-R2a/R3a → launch PAIR 1.
 
 ## 3 · What happens next, in order
 
