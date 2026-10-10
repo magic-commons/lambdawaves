@@ -1033,7 +1033,6 @@ export async function boot(dom) {
     periodEnergies, selectEigen, setElement, fillValence } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
 
   rack.appendChild(wPal.root); rack.appendChild(wObs.root); rack.appendChild(wCam.root); rack.appendChild(wClip.root);
-  app.w.wState = wState; app.w.switchHamiltonian = switchHamiltonian; app.w.applySturmian = applySturmian; app.w.setElement = setElement; app.w.fillValence = fillValence;
   rack.appendChild(ui.set.root);
   /* THE ABOUT FACE LIVES IN THE NOTEBOOK GLASS (wave 30), and its markup is lab/index.html's `.nb-aboutface`.
      A commented-out copy of the old in-window version sat here for twenty-nine waves; wave 59 deleted it,
