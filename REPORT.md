@@ -5697,3 +5697,34 @@ One Opus builder (`agent-ad72f08e558dc8f5f`) ran the row as PAIR 2 beside R2b, f
 **Lines.** `lab/*.js` + shell + windows **27,856 → 27,873 (+17)** of 27,943. `rack.js` 3,605 → 2,448; the modules 233 · 341 · 379 · 217.
 
 Hand-off: `research/release-0.5.2/R3b-BUILD.md`.
+
+### wave 222: R2d MOLECULES + THE STAGE WORDS + THE MODULATION SEAM + INK — MOLECULES and MO-REGISTRY (two seats), the stage text, the modulation seam and §18 INK move verbatim into four modules called at their seats; nothing Josh sees moves
+
+One Opus builder (`agent-a5571173c3ce60a48`) ran the row as PAIR 3 beside R2c, from `5fb9671` (`yan-c`); a usage pause at `6bb18f4`, and a second agent
+(`agent-a32145a840b1c4736`) re-read the saved light check and wrote the record.
+
+**The move** (`.tmp/r2d-move.mjs` + `r2d-imports.mjs`, at the walker's token positions; every edit printed):
+- MOLECULES, the molecular session and THE HEAD's seat → `createMolecules(app)` (`lab/windows/molecules.js`) with TWO seats: the root builds MOLECULES where
+  the LEGACY note stands and returns `createMoRegistry()`, which `boot()` calls where ORBITALS stood, below the stage words (the stage words destructure
+  `wChem`; readouts' second seat reads `wOrbs` eagerly). No `device()` / `appendChild` moved.
+- THE STAGE TEXT and the caption → `createStageWords(app)`; the modulation seam (the ONE `defs` table, `mod.install`, the pill's seat and dodge, `modView`) →
+  `createModSeam(app)`; §18 INK → `createInk(app)`. Each is called at its seat, under the kept note.
+- 463 of the 470 moved lines are byte-identical; 5 read a later name through a slot (`app.w.wLad` / `wCalc` / `stageTextTick`, `app.host.rackL`,
+  `app.sh.layout`, `app.sh.setModArm`) and 2 are registrations. Two double blanks and `app.state.stageText = null;` left.
+- Registrations: `app.w.wChem`, `wOrbs` and `stageTextTick` moved with their declarations; `app.w.stageCaption` is new (R2c's film reads it); `app.w.wSh` joins
+  readouts' root line. One new boot fill: `app.host.cameraPort` on the camera law's line. No inherited fill stays in `boot()`.
+
+**Gates.**
+- **The classes table:** molecules 8 · stage-words 5 (4 → 5: `stageText`'s owner is `boot()` now) · modulation 10 · ink 3, the same names class for class; 0 bare
+  writes; G-A clean; the hinge holds (SPECTRUM 24); 17 module files measured. Re-run for the record: identical to the first run.
+- **The bytes:** `serialize-bytes` 11/11 full and 11/11 edit, sha-identical to the base export. **`settings-probe`:** 3 scenes reached on the tree (716 · 752 ·
+  736 B), 4 on the base (BENZENE 736 too); none judged red.
+- **The suites:** node exit 0; `lw-facade` 1/1; `routed-knob` 4/4; `camera-routes` 5/5; `stage-text`, `molecule-demos` (5), `molecular-names`, `mir-controls`
+  GREEN; the boot suite's B74–B77 (the modulation seam), B8, B63, B134, B135, B138 GREEN.
+- **The rig's reds, identical on the base:** `chem` L7's glycine timing (1704 ms against the base's 1789, budget 1638), `molecule-head`'s tap (`:44`, "covered"),
+  `frame-occlusion`'s chipGap, `hit-probe-set`'s "did not settle", B9, B93 (`w` 356 against 360), B140.
+
+**Lines.** `lab/*.js` + `lab/shell/` + `lab/windows/` **27,893 → 27,924 (+31)** of 27,943. `rack.js` 2,001 → 1,523 (44 → 35 import lines, 19 names out); the
+modules 100 · 126 · 228 · 51.
+
+Hand-off: `research/release-0.5.2/R2d-BUILD.md`.
