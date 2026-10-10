@@ -212,6 +212,6 @@ export function createKeys(app) {
     resetTabs() { tabOrder = null; tabIdx = 0; return true; },
     toggleUI, cycleWindow, table: kt.table,
   };
-  app.sh.keyState = keyState; app.sh.ACTIONS = ACTIONS; app.sh.kt = kt;
+  app.sh.keyState = keyState; app.sh.ACTIONS = ACTIONS; app.sh.kt = kt; app.sh.stageHasFocus = stageHasFocus;
   return { stageHasFocus, keyState };
 }

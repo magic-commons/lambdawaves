@@ -8,7 +8,7 @@ import { momentumZ, rotorsToZ } from '../kick.js'; import { applyRotor as rotorO
 export function createKeplerSurface(app) {
   const { dom, ui, reg, clock, obs, mat } = app, { schedule, canPresent } = app.loop, { camera } = app.host, { wState, wSpec, switchHamiltonian, kepler } = app.w,
     { domain, field, maths, touchState } = app.ctl;
-  app.state.bow = null; let bowPrevView = null;
+  app.state.bow = null; let bowPrevView = null; app.w.bowStart = bowStart; app.w.bowMove = bowMove; app.w.bowRelease = bowRelease; app.w.bowCancel = bowCancel;
   function bowStart(e) {
     const r = dom.canvas.getBoundingClientRect();
     app.state.bow = { x0: e.clientX - r.left, y0: e.clientY - r.top, x1: e.clientX - r.left, y1: e.clientY - r.top, k: 0, dir: [0, 0, 1] };
@@ -213,7 +213,7 @@ export function createKeplerSurface(app) {
   /* a DESIGN CHOICE, labelled: a harder pull launches a tighter packet (a boost alone never changes a width) */
   app.state.gasWidth = 1.8; app.state.gasAxial = false;
   const gas = createGas(HAMILTONIANS.well.radius);
-  app.w.kepShell = kepShell; app.w.keplerRowSync = keplerRowSync; app.w.keplerTurn = keplerTurn;
+  app.w.kepShell = kepShell; app.w.keplerRowSync = keplerRowSync; app.w.keplerTurn = keplerTurn; app.w.orbitOfShell = orbitOfShell; app.w.keplerDragToPoint = keplerDragToPoint; app.w.keplerDragTo = keplerDragTo;
   /* K5w (optimization 2026-09-24 · AUDIT-B FB1, AUDIT-F F11, SOL-REVIEW K5, PLAN §9) · SPECTRUM's `⟨z⟩ · σ_z` line.
      gas.stats(t) is 8–17 ms and ran on the frame thread every 6th CPU tick while the gas played — outside tick(), so no
      profile or governor saw it.  Now the maths worker runs the SAME stats() on its own gas (mathworker.js gasStats: its
@@ -279,7 +279,7 @@ export function createKeplerSurface(app) {
     touchState();
     if (!clock.playing) { clock.play(performance.now() / 1000); schedule(TIER.EVOLVE); }
   }
-  app.w.gas = gas; app.w.gasSigma = gasSigma; app.w.launchPacket = launchPacket; app.w.enterBox = enterBox; app.w.coherentBounce = coherentBounce;
+  app.w.gas = gas; app.w.gasSigma = gasSigma; app.w.launchPacket = launchPacket; app.w.enterBox = enterBox; app.w.coherentBounce = coherentBounce; app.w.gasTableOn = gasTableOn; app.w.slapAlong = slapAlong;
   function bowCancel() {
     app.state.bow = null; mat.boost.on = false; kepler.setBow(null); app.state.keplerDirty = true;   // one clearing draw of the KEPLER canvas after the arrow
     if (bowPrevView !== null) { mat.view = bowPrevView; if (ui.viewSeg) ui.viewSeg.set(VIEW_NAMES[bowPrevView]); bowPrevView = null; }

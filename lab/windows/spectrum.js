@@ -97,7 +97,7 @@ export function createSpectrumCard(app) {
   api.unit = () => (getHamiltonian().unit === 'hartree' ? 'Eh' : getHamiltonian().unit);
   api.labelOf = (s) => getHamiltonian().labelOf(s);
   const spectrum = createSpectrum(wSpec.body, api);
-  app.w.spectrum = spectrum;
+  app.w.spectrum = spectrum; app.w.setSturmian = setSturmian; app.w.sturmEigen = sturmEigen; app.w.selectEigen = selectEigen;
   { const kids = [...wSpec.body.children], i = kids.findIndex((k) => k.classList.contains('ladder')); const h=kids[0]; for(const k of kids.slice(1,Math.max(0,i)))h.appendChild(k); wSpec.body.appendChild(h); }
   /** NORMALIZE, and say what it did — a unit-norm state looks the same afterwards, which is why it seemed to do nothing */
   function toggleFullscreen() { const d = document; if (d.fullscreenElement) { if (d.exitFullscreen) d.exitFullscreen(); } else { const e = d.documentElement; const f = e.requestFullscreen || e.webkitRequestFullscreen; if (f) try { f.call(e); } catch (err) {} } }
@@ -108,7 +108,7 @@ export function createSpectrumCard(app) {
     wState.setStatus(msg, 'live'); wSpec.setStatus(msg, 'live');
     setTimeout(() => { wState.setStatus('changes c'); wSpec.setStatus(...specStatus()); }, 1800);
   }
-  app.w.normalizeNow = normalizeNow;
+  app.w.normalizeNow = normalizeNow; app.w.toggleFullscreen = toggleFullscreen; app.w.copyLatex = copyLatex; app.w.periodEnergies = periodEnergies;
   /** THE COPY (0.3.3 · wave 135): the populated register at the clock's t — c(t), the mix while A/B plays — as the notebook's
    *  LaTeX in chemistry order (lab/latex-state.js), through copyDigest's one clipboard road and its `copied` flash.  SPECTRUM's
    *  status line says what went: it is where the ⧉ is.  An empty register says so and writes nothing.
@@ -258,7 +258,7 @@ export function createSpectrumCard(app) {
     wState.setStatus(msg, 'live'); if (app.w.wAtoms) app.w.wAtoms.setStatus(msg, 'live');
     return { n: sh.n, l: sh.l, labels: 2 * sh.l + 1 };
   }
-  app.w.switchHamiltonian = switchHamiltonian; app.w.applySturmian = applySturmian; app.w.setElement = setElement; app.w.fillValence = fillValence;   // persist reads them
+  app.w.switchHamiltonian = switchHamiltonian; app.w.applySturmian = applySturmian; app.w.setElement = setElement; app.w.fillValence = fillValence; app.w.occupiedEigen = occupiedEigen;   // persist reads them (occupiedEigen: the transport)
   return { wSpec, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen, periodEnergies,
     selectEigen, setElement, fillValence };
 }

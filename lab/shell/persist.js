@@ -306,6 +306,6 @@ export function createPersist(app) {
        never rebuilt — so the rebuild is asked for on EVERY exit (on success it is the same coalesced request as above). */
     finally { schedule(TIER.REBUILD); app.ctl.markBatchEnd(); }
   }
-  app.sh.serialize = serialize; app.sh.restore = restore; app.sh.save = save; app.sh.copyJSON = copyJSON;
+  app.sh.serialize = serialize; app.sh.restore = restore; app.sh.save = save; app.sh.copyJSON = copyJSON; app.sh.restoreModulation = restoreModulation;
   return { modSeats, serialize, restoreModulation, save, copyJSON, restore };
 }
