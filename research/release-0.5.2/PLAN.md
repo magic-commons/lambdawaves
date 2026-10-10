@@ -153,4 +153,9 @@ any `lab/` edit; the owning suites one at a time on the builder's own server; a 
 10. **R7-H THE NAME.** **TAKEN:** 0.5.2 "Rack Dissolution" · "Engine Boundary" · his.
 **Q1** any digest move is a defect — taken. **Q2** the shaders move in the engine release, the lock proving the bytes — taken.
 
-— Claude Yan, 2026-10-09. `BRIEF-R0.md` is written beside this file; the build starts on Josh's word.
+### Josh's word (2026-10-09 ≈22:20 CDT, verbatim)
+- After the round's report (the plan, the ten defaults, the three worth his eye, the estimate ≈ 29 h): **"Let's do it!"** Taken as: **the build of 0.5.2 starts
+  under the defaults of §9** — R0 alone first (launched 22:20 from `54865a3`), then R1 alone, then the three pairs, R5, R-V, a fix round, the local cut
+  `v0.5.2-alpha · Rack Dissolution` on his word. NO push, NO deploy.
+
+— Claude Yan, 2026-10-09. `BRIEF-R0.md` is written beside this file; the build started on Josh's word.

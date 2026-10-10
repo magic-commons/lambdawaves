@@ -681,6 +681,8 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 > {R2c·R2d} → R5 → R-V → the cut; gates G-A the `app` shape, G-O the seats, G-W a runtime facade fixture, G-G the classes table, the line law +1 %; ten rulings
 > TAKEN as defaults; U1–U9) and **`BRIEF-R0.md`** (U1 the hoisting audit, U4 the pair's floor, U7 the facade fixture, U8 the `ui` contract; `--classes` and
 > `--rename` for the tool; `appSource()`; the dead facade keys and the four imports out). Estimate ≈ 29 h ≈ 2.5–3 relay days. Nothing built; nothing pushed.
+> **22:20 — Josh: "Let's do it!" → THE 0.5.2 BUILD STARTED** under §9's defaults: **R0 THE CONTEXT launched** (Opus, from `54865a3`, 9043/5513 + 9047/5517).
+> Order: R0 alone → R1 alone → {R2a·R3a} → {R2b·R3b} → {R2c·R2d} → R5 → R-V → fix round → the local cut. NO push, NO deploy.
 
 ## 3 · What happens next, in order
 
