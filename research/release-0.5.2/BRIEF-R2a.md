@@ -8,12 +8,30 @@ pattern of a MOVE row), `lab/rack.js` the windows block (`/* ── windows ─�
 module looks like), `tests/helpers/app-source.mjs`, `tools/rack-deps.mjs` (`--classes`; the module-file mode R1 added), `CLAUDE.md` (the last two
 paragraphs: THE CONTEXT and R1's sentence), `docs/STATE-SCOPES.md`.
 
-## R1's as-built facts (FILLED BY THE INTEGRATOR ON R1's REPORT — do not launch before this block is filled)
+## R1's as-built facts (filled by the integrator 2026-10-10 07:15; `R1-BUILD.md` is the authority)
 
-- The controller's seat line and the destructuring statement in `boot()`: …
-- `app.ctl` members filled at creation (the ones a window reads — `gov`, `quality`, `look`, `schedule`? …): …
-- The tool's module-file mode and how a moved module is named in the classes table: …
-- The line count of `lab/rack.js` at your base and the windows block's new line span: …
+- **The seat:** `lab/rack.js:335–339` — a header line `/* ── ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD: lab/shell/controller.js (0.5.2 R1) …` and
+  `const { …68 names… } = await createController(app);` in the `ctl` literal's key order. Your two cards are created AFTER that seat, so the 68 names are
+  live closure slots in `boot()` — but NOT in your module: **your module reads a controller name as `app.ctl.x`** (`app.ctl.gov`, `app.ctl.look`, `app.ctl.busy`,
+  `app.ctl.touchState`, `app.ctl.loadPreset`, `app.ctl.mod`, `app.ctl.field` …). **All 56 names any moving module reads are ALREADY filled on `app.ctl`** at the end
+  of `createController` (the integrator's commit after R1; `r1-measure/ctlunion.txt`); the 12 only `boot()`/the loop read (`controlStep`, `RES_LADDER`,
+  `frameBudget`, `perfBudgetMs`, `tick`, `READERS`, `may`, `unpark`, `cRe`, `cIm`, `feedAudio`, `cancelWarm`) are not, and a window never needs them. **Never
+  edit `lab/shell/controller.js`.** Read `app.ctl.x` at use (inside the handler), not copied at creation, unless the value is a const object (`mod`, `field`).
+- **The tool:** `node tools/rack-deps.mjs --classes` measures a module from its own file (`lab/shell/*.js`, `lab/windows/*.js`) as a piece of its planned module;
+  a name a file destructures from `app` counts as the boot-level name of that key; a module filling its own slot (`app.w.wSpec = wSpec`) is a registration, not
+  a crossing; G-A flags a destructured null slot unless boot fills it before the seat; an unplanned file is refused. Rows are named as in the table (`state` →
+  `lab/windows/state.js`, `spectrum` → `lab/windows/spectrum.js`). `tests/rack-deps.test.mjs` §5 is its law — keep it green.
+- **R1 already fills in `boot()`,** right after their declarations: `app.w.wSpec`, `app.w.spectrum`, `app.w.normalizeNow`, `app.w.shadowView`, `app.w.wMet`,
+  `app.loop.page/windowActivity/paceRate`, `app.sh.lookSync/quality`. **When you move SPECTRUM, the `app.w.wSpec`/`spectrum`/`normalizeNow` fills move with
+  their declarations into `createSpectrumCard` (one line each, right after the declaration) — the controller reads them live through `app.w`.** `wMet` and
+  `shadowView` are R2b's, not yours: leave those two fill lines in `boot()`.
+- **Lines at your base:** `lab/rack.js` 4,664 (the windows block `/* ── windows ──` at :817 → `/* ── LEGACY WINDOWS` :1683; `const wState = device(` :1173,
+  `const wSpec = device(` :1338, the five appends :1584–1585 — verified at the merged tip; re-locate by grep if your base differs). `lab/*.js` + `lab/shell/` = **27,754 of a 27,943 cap:
+  189 lines are left for TWELVE modules — each module's header comment + signature + return ≤ 12 lines in all; no new blank lines; say your exact Δ.**
+- **The rig (07:00):** the GPU is ≈ 3× slower than six hours ago and stalls on the heaviest states ("Render did not settle: animation frames stopped" at the
+  lock's gas state, a molecule open, `frame-occlusion`'s `chipGap`) — on the 0.5.1 BASE as well. **A "did not settle" red is checked ONCE against your base export
+  on your second port: identical = the rig; record both readings in the BUILD and move on. Never loop on it; never touch another process.** Josh may reboot the
+  machine during your run (a kernel/driver update is pending) — if your servers die, restart them by the same commands and continue.
 
 ## The contract (a MOVE, not a rewrite)
 

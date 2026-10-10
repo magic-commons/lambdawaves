@@ -12,12 +12,30 @@ lines, `lab/shell/controller.js`, `lab/settings-store.js` (`WORKSPACE`, `FAMILIE
 to `appSource()`; they slice `projectSnapshot`/`projectKey`/the quality seed out of the source — your moved blocks must stay WHOLE in one file),
 `tests/legacy/boot.browser-test.mjs` B112, `tools/rack-deps.mjs`, `docs/STATE-SCOPES.md`, `CLAUDE.md` (the scopes paragraph; THE CONTEXT paragraph; R1's).
 
-## R1's as-built facts (FILLED BY THE INTEGRATOR ON R1's REPORT — do not launch before this block is filled)
+## R1's as-built facts (filled by the integrator 2026-10-10 07:15; `R1-BUILD.md` is the authority)
 
-- The controller's seat line and the destructuring statement in `boot()`: …
-- `app.ctl` members filled at creation that persistence/settings read (`gov`, `quality`, `look` …): …
-- The tool's module-file mode and how a moved module is named in the classes table: …
-- The line count of `lab/rack.js` at your base and your four spans' new lines: …
+- **The seat:** `lab/rack.js:335–339` — `/* ── ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD: lab/shell/controller.js (0.5.2 R1) …` and `const { …68
+  names… } = await createController(app);`. **§1 SETTINGS runs BEFORE that seat**: the controller's names are TDZ there, so `createSettings(app)` must read a
+  controller name as `app.ctl.x` INSIDE a callback (a handler, a `lookSync` call, an `applySettings` body that runs later), never at creation, and never
+  destructure `app.ctl` at the top of the module. §24/§25 run after the seat: their modules may still read `app.ctl.x` at use (not copied at creation).
+  **All 56 names any moving module reads are ALREADY filled on `app.ctl`** at the end of `createController` (the integrator's commit after R1;
+  `r1-measure/ctlunion.txt`); the 12 only `boot()`/the loop read are not and no shell module needs them. **Never edit `lab/shell/controller.js`.**
+- **R1 already fills in `boot()`,** right after their declarations: `app.sh.lookSync` and `app.sh.quality` (yours — `lookSync` moves with §1 into
+  `createSettings` as `app.sh.lookSync = lookSync` right after its declaration; `quality` is §2's head and STAYS in `boot()`), plus `app.loop.*` and `app.w.*`
+  fills that are not yours — leave them.
+- **The tool:** `node tools/rack-deps.mjs --classes` measures a module from its own file (`lab/shell/*.js`, `lab/windows/*.js`) as a piece of its planned module;
+  a name a file destructures from `app` counts as the boot-level name of that key; a module filling its own slot is a registration; G-A flags a destructured
+  null slot unless boot fills it before the seat; an unplanned file is refused. Your rows are `settings` → `lab/shell/settings.js`, `persist` →
+  `lab/shell/persist.js`, `links` → `lab/shell/links.js`, `history` → `lab/shell/history.js`. `tests/rack-deps.test.mjs` §5 is its law — keep it green.
+- **Lines at your base:** `lab/rack.js` 4,664 — §1 `/* ── SETTINGS: what this browser remembers` :196 → :334 (unchanged by R1); §24 `/* ── persistence (§46)`
+  ≈ :3756; §25 `/* ── WAVE 56 · SHAREABLE LINKS` ≈ :4050, `/* 0.3.1 · S3 THE TRUE HISTORY` ≈ :4128, `const wHist = device(` ≈ :4237, `/* ── the diagnostics
+  surface` ≈ :4286 — RE-LOCATE by grep, not by number. `lab/*.js` + `lab/shell/` = **27,754 of a 27,943 cap: 189 lines are left for TWELVE modules — each
+  module's header comment + signature + return ≤ 12 lines in all; no new blank lines; say your exact Δ.**
+- **The rig (07:00):** the GPU is ≈ 3× slower than six hours ago and stalls on the heaviest states ("Render did not settle: animation frames stopped" at the
+  lock's gas state, a molecule open — `settings-probe`'s N₂ scene hit it, `frame-occlusion`'s `chipGap`) — on the 0.5.1 BASE as well, and marionette dies after
+  ≈ 5 in-session reloads (`settings-probe`'s 6th scene, `keyboard-window`). **A "did not settle" / marionette red is checked ONCE against your base export on your
+  second port: identical = the rig; record both readings in the BUILD and move on. Never loop on it; never touch another process.** Josh may reboot the machine
+  during your run (a kernel/driver update is pending) — if your servers die, restart them by the same commands and continue.
 
 ## The contract (a MOVE, not a rewrite)
 

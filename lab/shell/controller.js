@@ -332,6 +332,21 @@ export async function createController(app) {
     toggleSolo(a) { reg.setSolo(a, !reg.solo[a]); touchState(); },
     remove(a) { reg.set(a, 0, 0, clock.t); reg.setMute(a, false); reg.setSolo(a, false); touchState(); }
   };
+  /* 0.5.2 (the integrator, after R1): the 56 controller names the MOVING modules read (R1-BUILD §8 candidate 1, r1-measure/ctlunion.txt) live on
+     app.ctl — filled ONCE, here, so no pair row edits this file; a module created before this seat (§1 SETTINGS) reads app.ctl.x inside a callback,
+     never at creation. The 12 only boot() or the loop read (controlStep, RES_LADDER, frameBudget, perfBudgetMs, tick, READERS, may, unpark, cRe, cIm,
+     feedAudio, cancelWarm) stay closure slots, destructured at the seat. Every key is in the ctl literal (G-A); nothing is added. */
+  app.ctl.autoQ = autoQ; app.ctl.gov = gov; app.ctl.effectiveRes = effectiveRes; app.ctl.READER_LAW = READER_LAW; app.ctl.keep = keep; app.ctl.domain = domain;
+  app.ctl.fieldRate = fieldRate; app.ctl.perf = perf; app.ctl.setGovernor = setGovernor; app.ctl.setKeepFrames = setKeepFrames; app.ctl.setPerfMode = setPerfMode;
+  app.ctl.stats = stats; app.ctl.mod = mod; app.ctl.MOD = MOD; app.ctl.modSyncBases = modSyncBases; app.ctl.modHand = modHand; app.ctl.setKnob = setKnob;
+  app.ctl.modGets = modGets; app.ctl.modKnobs = modKnobs; app.ctl.modHeld = modHeld; app.ctl.ROT_LIMIT = ROT_LIMIT; app.ctl.rotRate = rotRate;
+  app.ctl.rotDriving = rotDriving; app.ctl.setRotationRate = setRotationRate; app.ctl.rotStep = rotStep; app.ctl.modStore = modStore; app.ctl.saveMod = saveMod;
+  app.ctl.curvesStore = curvesStore; app.ctl.occlusion = occlusion; app.ctl.look = look; app.ctl.applyAccent = applyAccent; app.ctl.paintMarks = paintMarks;
+  app.ctl.markBatchBegin = markBatchBegin; app.ctl.markBatchEnd = markBatchEnd; app.ctl.wheelColor = wheelColor; app.ctl.accent = accent; app.ctl.inkCtx = inkCtx;
+  app.ctl.markInk = markInk; app.ctl.stageGround = stageGround; app.ctl.busyWrap = busyWrap; app.ctl.busyFlash = busyFlash; app.ctl.busy = busy; app.ctl.busySync = busySync;
+  app.ctl.cardLoading = cardLoading; app.ctl.busyHost = busyHost; app.ctl.field = field; app.ctl.maths = maths; app.ctl.scan = scan; app.ctl.cards = cards;
+  app.ctl.solveChem = solveChem; app.ctl.solveCard = solveCard; app.ctl.warmArm = warmArm; app.ctl.touchState = touchState; app.ctl.loadPreset = loadPreset;
+  app.ctl.setReference = setReference; app.ctl.api = api;
   return { autoQ, controlStep, RES_LADDER, gov, effectiveRes, READER_LAW, keep, domain, fieldRate, perf, frameBudget, perfBudgetMs, tick, READERS, may, unpark, setGovernor, setKeepFrames,
     setPerfMode, stats, cRe, cIm, mod, MOD, modSyncBases, feedAudio, modHand, setKnob, modGets, modKnobs, modHeld, ROT_LIMIT, rotRate, rotDriving, setRotationRate, rotStep, modStore, saveMod,
     curvesStore, occlusion, look, applyAccent, paintMarks, markBatchBegin, markBatchEnd, wheelColor, accent, inkCtx, markInk, stageGround, busyWrap, busyFlash, busy, busySync, cardLoading,

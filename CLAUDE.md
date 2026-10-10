@@ -315,3 +315,12 @@ cross-module writes, forward + shared ≤ 25 per moving module; the loop and the
 `research/release-0.5.2/lw-facade.json`; a row that changes the facade re-captures it with `--write` and says the diff. THE LOCK's 1004-value
 fixture (`research/release-0.4.0/measure/digest-lock-s4a.json`) predates the gas table and is checked WITH `--query gastab=0`, as the tool's
 header says; without it the gas states read red at every grid.
+
+THE CONTROLLER (0.5.2 R1) is `lab/shell/controller.js` `createController(app)` — the governor and AUTO SCALE's one rule, the look, the
+busy marks, the mod port, the rotation drive, `createField` and its GPU recovery, the maths workers and the ONE ROAD of state mutations
+(`touchState`, `loadPreset`, `setReference`, `api`) — moved verbatim; `boot()` awaits it at §2's seat and destructures its 68 names there,
+so the frame loop (§5–§6), `schedule`, `filmHold` and §13–§14 stay in `boot()` and read closure slots. The 56 of those names a later
+module reads are filled on `app.ctl` once, at the end of `createController` (never by a window or shell row); the 12 only `boot()` or the
+loop read stay closure slots, and a module created BEFORE that seat (§1 SETTINGS) reads `app.ctl.x` inside a callback, never at creation
+(they are TDZ above the seat). The worker road is `new URL('../mathworker.js', import.meta.url)` in that module; `node tools/rack-deps.mjs
+--classes` measures a moved module from its own file (`lab/shell/*.js`, `lab/windows/*.js`), and an unplanned file there is refused.
