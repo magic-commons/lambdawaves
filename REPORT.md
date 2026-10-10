@@ -5579,3 +5579,33 @@ slots as before.
 exactly that union on `app.ctl` at the merge, so the pair rows only read.
 
 Hand-off: `research/release-0.5.2/R1-BUILD.md`.
+
+### wave 217: R2a STATE + SPECTRUM — the two cards move verbatim into `lab/windows/`; called at their seats; the five appends stay; nothing Josh sees moves
+
+One Opus builder (`agent-af9d75d8973fa3306`) ran the row beside R3a, from `ff2b3e6` (R0 + R1 + the `app.ctl` fill).
+
+**The move.** STATE with its CLEAR (168 lines) is `createStateCard(app)` in `lab/windows/state.js`; SPECTRUM (245) is
+`createSpectrumCard(app)` in `lab/windows/spectrum.js`. Each is called where its `device()` stood, under the kept `// STATE` /
+`// SPECTRUM` line; the five appends stay in `boot()`.
+- 393 of the 413 lines are byte-identical. The other 20 read a name `boot()` makes later through its slot (`app.w.gas`,
+  `app.w.wOrb`, `app.sh.layout`, `app.sh.save` …), inside callbacks, rewritten at the tool's own token positions.
+- §0's consts, `schedule`, `page`, the rack, `wState` and the controller's names are destructured once: they are backward.
+  `boot()` fills the forward slots right after their owners' declarations (8 lines, 4 of them folding several windows).
+- The modules register `app.w.wState`, R1's `wSpec` / `spectrum` / `normalizeNow` (moved with their declarations) and the four
+  names persist reads. `boot()` destructures 2 + 15 names at the seats.
+
+**One call, said.** The brief asked for the controller's names to be read as `app.ctl.x` at use. The tool counts every such read
+as a lazy crossing, which would take SPECTRUM from 24 to 32. They are consts, filled before the controller's seat returns, so the
+modules destructure them (PLAN §1.1). G-A learned that an earlier-seated module file's eager fill counts (one clause; two
+`rack-deps.test` laws). The table reads the same names as before the move: **STATE 8, SPECTRUM 24**, 0 bare writes, G-A clean.
+
+**Gates** (this tree vs the base export; the GPU driver is mid-update, `nvidia-smi` reports a version mismatch):
+- `serialize-bytes` 11/11 full + edit sha-identical; `lw-facade` 1/1; `register` 17/17; `bash test.sh node` exit 0.
+- `settings-probe`: no scene red (5 reached, R1's exact blobs; the 6th unreached: marionette).
+- The boot suite's STATE/SPECTRUM blocks: 33/35, the base's verdicts law for law (B9 ×2: play does not advance).
+- `orbitals` L9, `offer` scene 8, `history`, `frame-occlusion` (`chipGap`) and `hit-probe-set` ("did not settle") read red on
+  the base too, the same way: the rig.
+
+**Lines.** `lab/*.js` + shell + windows **27,754 → 27,799 (+45)**. `rack.js` 4,664 → 4,261; the modules 182 and 264.
+
+Hand-off: `research/release-0.5.2/R2a-BUILD.md`.
