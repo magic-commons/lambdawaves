@@ -6,7 +6,8 @@
  * round-off under a scrub), that one register plays at a time, that benzene's RING is a rotating dipole of constant
  * length on lanes named by their axis, and that presets, stores, MORPH, the record and the modulation targets work.
  * 0.5.3 M2 · R11 drives C₆₀'s ladder by hand: a pick of C₆₀ under the browser's change rule after a failed record open, the
- * driver's real clicks and a real drag down the ladder, a real press of ON.
+ * driver's real clicks and a real drag down the ladder, a real press of ON.  M3 · R12: the sentence on the STATES switch, a real press
+ * of ON over S₀ alone, and the one re-arm seat.
  */
 import http from 'node:http';
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
@@ -231,6 +232,43 @@ try {
   judge('R11 C₆₀ by hand: ' + clicks.length / 4 + ' clicks and a drag down the whole ladder put only carried levels (cols 175–182) in the register, and a real press of ON is answered, not refused',
     afterClicks.every((k) => r11d.cols.includes(k)) && r11d.sel.length > 0 && r11d.sel.every((k) => r11d.cols.includes(k)) && r11d.refusal === null
       && tapOn.ok === 1 && r11e.on === true && r11e.refusal === null && r11e.sel === 'orbital-packet' && r11e.errs.length === 0, { afterClicks, r11d, tapOn, r11e });
+
+  /* ── R12 · STATES ANSWERS (0.5.3 M3): the sentence on the switch, a hand's ON over S₀ alone plays BEAT, and ONE re-arm seat — the
+         ladder's landing — for a re-solve under ON, an ON refused while the ladder is out, and a parked record that was ON ──────────── */
+  const SWQ = `.dev[data-id="orbitals"] .reg-mode > .sw.orb-on:not([hidden])`;
+  const r12a = await g.ev(`${HELP}
+    __LW.register.setMode('states'); await wait(() => __LW.states.state().refusal && /frontier orbitals only/.test(__LW.states.state().refusal));
+    const sw = document.querySelector('${SWQ}'), says = { label: sw.querySelector('.sw-lbl').textContent, help: sw.dataset.help || sw.title || '' };
+    await __LW.chem.solve('H2O'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 10); await frames(2);
+    __LW.states.clear(); await frames(2); sw.scrollIntoView({ block: 'center' });
+    return { says, back: document.querySelector('${SWQ} .sw-lbl').textContent, lanes0: __LW.states.state().lanes.length };`);
+  const tapStates = await g.tap(SWQ);
+  const r12b = await g.ev(`${HELP} await frames(2); const banner = __LW.stageText.banner; await ready(); await frames(2);
+    const st = __LW.states.state(); return { on: st.on, lanes: st.lanes.map((l) => l.label), banner, sel: __LW.molsession.state().selected };`);
+  judge('R12 STATES says why ON ITS SWITCH (C₆₀: "NO CIS STATES", the worker\'s sentence its hover; water: MO-REGISTRY ON again), and a hand\'s ON over S₀ alone plays BEAT',
+    r12a.says.label === 'NO CIS STATES' && /frontier orbitals only/.test(r12a.says.help) && r12a.back === 'MO-REGISTRY ON' && r12a.lanes0 === 1
+      && tapStates.ok === 1 && r12b.on === true && r12b.lanes.length === 2 && r12b.lanes[0] === 'S₀' && r12b.banner === 'BEAT' && r12b.sel === 'states', { r12a, tapStates, r12b });
+  const r12c = await g.ev(`${HELP}
+    const L0 = __LW.states.ladder().count; await __LW.chem.solve('NH3');
+    const back = await wait(() => __LW.states.ladder() && __LW.states.ladder().count !== L0 && __LW.states.on && __LW.states.state().lanes.length === 2); await ready();
+    const re = { on: __LW.states.on, lanes: __LW.states.state().lanes.map((l) => l.label), sel: __LW.molsession.state().selected };
+    __LW.states.setOn(false); let hit = null;
+    const un = __LW.chem.subscribe((s) => { if (s && /^C6H6\\|/.test(s.key) && !hit) hit = { ladder: !!__LW.states.ladder(), on: __LW.states.setOn(true), status: __LW.states.state().status }; });
+    await __LW.chem.solve('C6H6'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 315 && __LW.states.on); un();
+    const refused = { hit, on: __LW.states.on, lanes: __LW.states.state().lanes.map((l) => l.label) };
+    await __LW.chem.solve('H2O'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 10);
+    __LW.states.setOn(false); __LW.states.preset('BEAT'); await ready(); const rec = __LW.states.save(); let parked = null;
+    await __LW.chem.solve('NH3'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count !== 10);
+    const un2 = __LW.chem.subscribe((s) => { if (s && /^H2O\\|/.test(s.key) && !parked) parked = { ladder: !!__LW.states.ladder(), load: __LW.states.load({ ...rec, on: true }), on: __LW.states.on }; });
+    await __LW.chem.solve('H2O');
+    await wait(() => __LW.states.ladder() && __LW.states.on); await ready(); un2();
+    const loaded = { parked, on: __LW.states.on, lanes: JSON.stringify(__LW.states.save().lanes) === JSON.stringify(rec.lanes) };
+    __LW.states.setOn(false);
+    return { back: !!back, re, refused, loaded, errs: window.__e.slice() };`);
+  judge('R12 ONE re-arm seat: a re-solve under ON comes back ON (BEAT on the new ladder); an ON refused while the ladder is out, and a parked record that was ON, come ON when it lands',
+    r12c.back && r12c.re.on && r12c.re.lanes.length === 2 && r12c.re.sel === 'states'
+      && r12c.refused.hit && r12c.refused.hit.ladder === false && r12c.refused.hit.on === false && /ON when it lands/.test(r12c.refused.hit.status) && r12c.refused.on === true && r12c.refused.lanes.join() === 'S₀'
+      && r12c.loaded.parked && r12c.loaded.parked.ladder === false && r12c.loaded.parked.load === true && r12c.loaded.on === true && r12c.loaded.lanes && r12c.errs.length === 0, r12c);
 
   const errs = await g.ev('return { errs: window.__e.slice(), gpu: __LW.field.lastGpuError || null };');
   judge('RZ no page error and no GPU error at any step', errs.errs.length === 0 && !errs.gpu, errs);
