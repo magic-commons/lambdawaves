@@ -319,7 +319,10 @@ export function createChem(host, api) {
     });
     const task = Promise.all([first(), loadMS()]).then(([r]) => {        // M8: the record module lands with the first solve
       if (seq !== solveSeq) return null;
-      if (!r || r.error || !Number.isFinite(r.energy)) { sol = null; status(why || 'solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); notify(); return null; }
+      /* 0.5.3 M2 · a failed open (C₆₀'s record offline) gives the dropdown BACK before the solution goes: the last solved molecule
+         is chosen again (or, with none, nothing), so a hand re-pick of the one that failed is a change and is answered */
+      if (!r || r.error || !Number.isFinite(r.energy)) { if (sol) { preset = sol.key.split('|')[0]; mSeg.set(preset); } else mSel.selectedIndex = -1;
+        sol = null; status(why || 'solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); notify(); return null; }
       /* 0.3.1 · S4: the defaults this landing fills (the orbital, and through notify() the register's selection and the STATES
          ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
       const fill = () => {

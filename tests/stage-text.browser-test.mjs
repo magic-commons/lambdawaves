@@ -2,7 +2,8 @@
 // notebook's renderer, keyed on its string (KaTeX only on a change, at most four a second, never while playing a state that
 // does not change); nothing reads layout per tick (the placement's witness does not move while the transport plays, the
 // atom labels write only when the camera moves); a HAND's preset is announced and fades back to the formula — and an undo,
-// a project open and a link open announce nothing (one banner, not three); the WINDING / HOMO + LUMO banners speak the names.
+// a project open and a link open announce nothing (one banner, not three); the WINDING / HOMO + LUMO banners speak the names
+// (0.5.3 M10: and one banner for each of the eight ORBITAL presets).
 // 0.5.1 D1 · re-aimed: the text is ONE block of the kit's INFORMATIONAL layer (`__LW.stageText.layer`, root `.mir-info.lw-stage`),
 // the newest `.mir-info-block` in it is the one showing (a changed string is remove() + addBlock(); the old one is leaving), an
 // announcement is a block marked `data-fade` at the heading size, and the switch hides the layer's root.
@@ -73,17 +74,20 @@ try {
     const a0 = S.stats.announced; __field(sel(), 'HOMO + LUMO'); await __w(80); const homo = S.banner;
     const l0 = S.stats.labelWrites; for (let i = 1; i <= 8; i++) { __LW.scrub(0.5 * i); await __LW.settle(); } const still = S.stats.labelWrites - l0;
     __LW.orbitBy(0.3, 0.1); await __LW.settle(); await __LW.settle(); const moved = S.stats.labelWrites - l0;
+    const banners = {}; for (const p of ['HOMO', 'LUMO', 'FRONTIER FOUR', 'HOMO SET', 'LUMO SET', 'OCCUPIED']) { __field(sel(), p); await __w(80); banners[p] = S.banner; }   // 0.5.3 M10
     await __LW.chem.solve('NH3'); await __LW.settle(); await __w(600);
     __field(sel(), 'WINDING'); await __w(80); const winding = S.banner;
     const n = S.stats.announced - a0; await __w(3200); const md = S.md; __LW.chem.setOn(false); await __LW.settle();
-    return { homo, winding, n, md, still, moved, labels: document.querySelectorAll('#atomLabels .atom-label').length, errs: __e.slice() };`);
+    return { homo, banners, winding, n, md, still, moved, labels: document.querySelectorAll('#atomLabels .atom-label').length, errs: __e.slice() };`);
   assert.equal(t3.homo, 'HOMO + LUMO · $1b_{1}$ + $4a_{1}$', 'HOMO + LUMO: ' + JSON.stringify(t3));
   assert.ok(/^WINDING · \$\d+e\$ \(a\) \+ \(b\)$/.test(t3.winding), 'WINDING: ' + JSON.stringify(t3));
-  assert.equal(t3.n, 2); assert.equal(t3.md, '$\\mathrm{NH_{3}}$');
+  assert.deepEqual(t3.banners, { 'HOMO': 'HOMO · $1b_{1}$', 'LUMO': 'LUMO · $4a_{1}$', 'FRONTIER FOUR': 'FRONTIER FOUR · $3a_{1}$ + $1b_{1}$ + $4a_{1}$ + $2b_{2}$',
+    'HOMO SET': 'HOMO SET · $1b_{1}$', 'LUMO SET': 'LUMO SET · $4a_{1}$', 'OCCUPIED': 'OCCUPIED · $2a_{1}$ + $1b_{2}$ + $3a_{1}$ + $1b_{1}$' }, 'the 0.5.3 presets\' banners: ' + JSON.stringify(t3.banners));
+  assert.equal(t3.n, 8); assert.equal(t3.md, '$\\mathrm{NH_{3}}$');
   assert.equal(t3.still, 0, 'the atom labels were rewritten under a still camera: ' + JSON.stringify(t3));
   assert.ok(t3.moved > 0, 'the atom labels did not follow the camera: ' + JSON.stringify(t3));
   assert.deepEqual(t3.errs, []);
-  pass(`the banners speak the names: "${t3.homo}", "${t3.winding}"; the labels wrote 0 times under a still camera across eight clock times and ${t3.moved} after a turn`);
+  pass(`the banners speak the names: "${t3.homo}", "${t3.winding}", and one each for the six 0.5.3 presets ("${t3.banners['FRONTIER FOUR']}" …); the labels wrote 0 times under a still camera across eight clock times and ${t3.moved} after a turn`);
 
   /* ── 4 · THE CAPTION IN CAPTURE (T3): a picture's foot carries the stage text's plain line; with STAGE TEXT off it is clean ── */
   const t4 = await ev(`const C = __LW.capture, hash = async (r) => { const b = new Uint8Array(await r.blob.arrayBuffer()); let h = 2166136261; for (let i = 0; i < b.length; i++) h = Math.imul(h ^ b[i], 16777619) >>> 0; return h; };

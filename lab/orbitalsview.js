@@ -79,20 +79,34 @@ export function createOrbitals(host, api) {
   /* THE SHARED BAR (REGISTER-WINDOW-SPEC §5, §9): the same PRESET · → A · → B · MORPH the STATES mode carries.  A preset
      is a RULE, so it exists for every molecule or says why not; MORPH plays the normalised path between two stored
      registers — for orthogonal stores cos/sin, hydrogen's TRANSITION envelope — and is a performance path, not dynamics. */
-  const ORB_PRESETS = ['HOMO + LUMO', 'WINDING'];
+  /* 0.5.3 M10 · THE ORBITAL PRESETS ARE ONE TABLE (R4): name → [the levels it takes, by k, from the HOMO h and the LUMO l; the sentence it
+     refuses with; the phases, 0 unless named].  Amplitudes are equal, √(1/n).  A level a frontier record does not carry (C₆₀: cols
+     175–182) refuses with the record's own sentence.  σ + σ* is struck: ε alone cannot pair a bonding orbital with its antibonding one. */
+  const NO_VIRTUAL = 'this basis has no virtual orbital';
+  const level = (k) => { let a = k, b = k; while (a > 0 && Math.abs(sol.eps[a - 1] - sol.eps[k]) < DEG) a--; while (b + 1 < sol.nAO && Math.abs(sol.eps[b + 1] - sol.eps[k]) < DEG) b++; return Array.from({ length: b - a + 1 }, (_, i) => a + i); };
+  const pairAt = (k) => carried(k) && carried(k + 1) && Math.abs(sol.eps[k + 1] - sol.eps[k]) < DEG;
+  const ORB_PRESETS = {
+    'HOMO': [(h) => [h], ''], 'LUMO': [(h, l) => [l], NO_VIRTUAL], 'HOMO + LUMO': [(h, l) => [h, l], NO_VIRTUAL],
+    'FRONTIER FOUR': [(h, l) => [h - 1, h, l, l + 1], 'it needs two occupied and two virtual orbitals'],
+    'HOMO SET': [(h) => level(h), ''], 'LUMO SET': [(h, l) => level(l), NO_VIRTUAL],
+    'WINDING': [(h, l) => { let k = pairAt(h - 1) ? h - 1 : pairAt(l) ? l : -1; for (let q = sol.nAO - 2; k < 0 && q >= 0; q--) if (pairAt(q)) k = q; return k < 0 ? null : [k, k + 1]; },
+      'no degenerate orbital pair in this molecule — a winding phase needs a twofold level', [0, Math.PI / 2]],
+    'OCCUPIED': [(h) => { const c = Math.min(nCore(), h); return Array.from({ length: h + 1 - c }, (_, i) => c + i); }, ''],
+  };
   let storeA = null, storeB = null, morphOn = false, morphS = 0;
   const bar = el('div', 'row tight reg-bar', host);
   const presetSel = el('select', 'sel', bar); presetSel.setAttribute('aria-label', 'register preset');
-  presetSel.title = 'HOMO + LUMO: the frozen-orbital beat. WINDING: a degenerate orbital pair a quarter turn apart — a phase that winds around the ring under a stationary density';
-  { const o = el('option', '', presetSel, 'PRESET…'); o.value = ''; for (const p of ORB_PRESETS) { const q = el('option', '', presetSel, p); q.value = p; } }
+  presetSel.title = 'HOMO, LUMO: one orbital. HOMO + LUMO: the frozen-orbital beat. FRONTIER FOUR: HOMO−1 to LUMO+1, four orbitals. HOMO SET, LUMO SET: the whole degenerate level. '
+    + 'WINDING: a degenerate orbital pair a quarter turn apart — a phase that winds around the ring under a stationary density. OCCUPIED: every valence orbital, equal phase';
+  { const o = el('option', '', presetSel, 'PRESET…'); o.value = ''; for (const p of Object.keys(ORB_PRESETS)) { const q = el('option', '', presetSel, p); q.value = p; } }
   /* a HAND's preset is announced on the stage (0.4.0 S3 · F2) by its rule and the orbitals the names give it —
      `WINDING · $1e_{1g}$ (a) + (b)`, `HOMO + LUMO · $1b_{1}$ + $4a_{1}$`; preset() itself (an API, a restore) says nothing */
   presetSel.addEventListener('change', () => { const p = presetSel.value; presetSel.value = ''; if (p && preset(p) && api.announce) api.announce(presetMd(p)); });
   function presetMd(name) {
-    const mos = [...sel.keys()].sort((a, b) => a - b).map(moOf);
+    const mos = keys().map(moOf);
     if (!mos.length || !mos.every((m) => m && m.label)) return name;
-    const pair = mos.length === 2 && mos[0].label === mos[1].label && mos[0].member;
-    return name + ' · ' + (pair ? `${forms(mos[0].label).latex} (${mos[0].member}) + (${mos[1].member})` : mos.map((m) => forms(m).latex).join(' + '));
+    const set = mos.length > 1 && mos.every((m) => m.label === mos[0].label && m.member);   // one degenerate level: its name once, then its members
+    return name + ' · ' + (set ? `${forms(mos[0].label).latex} ` + mos.map((m) => `(${m.member})`).join(' + ') : mos.length > 4 ? mos.length + ' orbitals' : mos.map((m) => forms(m).latex).join(' + '));
   }
   const aBtn = el('button', 'trig', bar); aBtn.type = 'button'; aBtn.textContent = '→ A'; aBtn.title = 'Store this register as A';
   const bBtn = el('button', 'trig', bar); bBtn.type = 'button'; bBtn.textContent = '→ B'; bBtn.title = 'Store this register as B';
@@ -140,6 +154,10 @@ export function createOrbitals(host, api) {
   /* ── the register ─────────────────────────────────────────────────────────────────────────────── */
   const nAO = () => (sol ? sol.nAO : 0);
   const nocc = () => (sol ? sol.nocc : 0);
+  /* 0.5.3 M2 · a FRONTIER record (C₆₀) carries 8 of its 300 columns (`sol.cols`): a level it does not carry is drawn dim and no hand
+     reaches it — select, a paint stroke and a crossed row all skip it — so the refusal() below is never one click away */
+  const carried = (k) => !!sol && k >= 0 && k < sol.nAO && (!sol.cols || sol.cols.includes(k));
+  const colsWhy = () => `this record carries orbitals ${sol.cols[0] + 1}–${sol.cols[sol.cols.length - 1] + 1} only (its HOMO and LUMO sets)`;   // 0.4.0 S4c: a frontier record
   /* THE NAMES (0.4.0 S1, lab/names.js): the worker names the ladder with the solve.  A rung reads `1b1 · HOMO`, `3a1`,
      `1e1g (a)`; a degenerate HOMO is ONE HOMO (the frontier is by level).  No name (refused, C₁, unconverged): the
      frontier word by level, and the hover says why. */
@@ -186,7 +204,7 @@ export function createOrbitals(host, api) {
   }
 
   function select(k, amp = 1, phase = 0) {
-    if (!sol || !(k >= 0) || k >= sol.nAO) return false;
+    if (!carried(k)) return false;
     sel.set(k | 0, { amp: Math.max(0, Math.min(1, +amp || 0)), phase: ((+phase || 0) % TAU + TAU) % TAU });
     selected = k | 0; touch(); rebuild(); paint(); refresh(); api.repaint(); return true;
   }
@@ -198,7 +216,7 @@ export function createOrbitals(host, api) {
     if (!sol || !ks.length) return 0;
     let n = 0;
     for (const k0 of ks) {
-      const k = k0 | 0; if (!(k >= 0) || k >= sol.nAO) continue;
+      const k = k0 | 0; if (!carried(k)) continue;
       if (on) { if (sel.has(k)) continue; sel.set(k, { amp: 1, phase: 0 }); selected = k; n++; }
       else if (sel.delete(k)) { if (selected === k) selected = -1; n++; }
     }
@@ -214,18 +232,11 @@ export function createOrbitals(host, api) {
     touch(); rebuild(); paint(); refresh(); api.repaint(); return true;
   }
   function preset(name) {
-    if (!sol) return false;
-    const h = sol.nocc - 1, l = sol.nocc, R = Math.SQRT1_2;
-    if (name === 'HOMO + LUMO') {
-      if (!(l < sol.nAO)) { status('HOMO + LUMO: this basis has no virtual orbital', 'warn'); return false; }
-      sel.clear(); sel.set(h, { amp: R, phase: 0 }); sel.set(l, { amp: R, phase: 0 }); selected = h;
-    } else if (name === 'WINDING') {
-      const pairAt = (k) => k >= 0 && k + 1 < sol.nAO && Math.abs(sol.eps[k + 1] - sol.eps[k]) < DEG;
-      let k = pairAt(h - 1) ? h - 1 : pairAt(l) ? l : -1;
-      if (k < 0) for (let q = sol.nAO - 2; q >= 0; q--) if (pairAt(q)) { k = q; break; }
-      if (k < 0) { status('WINDING: no degenerate orbital pair in this molecule — a winding phase needs a twofold level', 'warn'); return false; }
-      sel.clear(); sel.set(k, { amp: R, phase: 0 }); sel.set(k + 1, { amp: R, phase: Math.PI / 2 }); selected = k;
-    } else return false;
+    const P = ORB_PRESETS[name];
+    if (!sol || !P) return false;
+    const ks = P[0](sol.nocc - 1, sol.nocc), why = !ks || !ks.every((k) => k >= 0 && k < sol.nAO) ? P[1] : !ks.every(carried) ? colsWhy() : null;
+    if (why) { status(`${name}: ${why}`, 'warn'); return false; }
+    sel.clear(); for (const [i, k] of ks.entries()) sel.set(k, { amp: Math.sqrt(1 / ks.length), phase: P[2] ? P[2][i] : 0 }); selected = ks[0];
     touch(); rebuild(); paint(); refresh(); api.repaint(); return true;
   }
   function store(which) {
@@ -254,7 +265,7 @@ export function createOrbitals(host, api) {
     if (!c) return 'no MOLECULES window';
     if (!c.on) return 'MOLECULES OFF: the register needs its molecule on the field';
     if (!sol) return 'no molecule solved yet';
-    if (sol.cols && keys().some((k) => !sol.cols.includes(k))) return `this record carries orbitals ${sol.cols[0] + 1}–${sol.cols[sol.cols.length - 1] + 1} only (its HOMO and LUMO sets)`;   // 0.4.0 S4c: a frontier record
+    if (sol.cols && keys().some((k) => !sol.cols.includes(k))) return colsWhy();
     const s = S();
     if (s && s.claimed('tdhf')) return 'MOLECULES RT RUN has the field: stop the run to take it';
     const f = F();
@@ -460,17 +471,17 @@ export function createOrbitals(host, api) {
       }
       for (let j = 0; j < row.items.length; j++) {
         const lv = row.items[j], x0 = left + j * seg + 1, x1 = x0 + seg - 2;
-        const c = sel.get(lv.k), lit = !!c, ink = lv.occ ? occInk : virInk;
-        g.strokeStyle = lit ? ink(1) : ink(lv.occ ? 0.6 : 0.4); g.lineWidth = lit ? 2 : 1;
+        const c = sel.get(lv.k), lit = !!c, ink = lv.occ ? occInk : virInk, dim = !carried(lv.k);
+        g.strokeStyle = lit ? ink(1) : ink(dim ? 0.14 : lv.occ ? 0.6 : 0.4); g.lineWidth = lit ? 2 : 1;
         g.beginPath(); g.moveTo(x0, yy); g.lineTo(x1, yy); g.stroke();
-        if (lv.occ) { g.fillStyle = ink(lit ? 0.34 : 0.16); g.fillRect(x0, yy - 3, x1 - x0, 6); }   // occupied: filled; virtual: hollow
+        if (lv.occ) { g.fillStyle = ink(lit ? 0.34 : dim ? 0.04 : 0.16); g.fillRect(x0, yy - 3, x1 - x0, 6); }   // occupied: filled; virtual: hollow; uncarried: dim
         if (lit && c.amp > 0) { g.fillStyle = ink(0.72); g.fillRect(x0, yy - 4, Math.max(3, (x1 - x0) * c.amp), 8); }   // the register's own |c|
         if (lv.k === selected) { g.strokeStyle = T.fg(0.9); g.lineWidth = 1; g.strokeRect(x0 - 1, yy - 5, x1 - x0 + 2, 10); }
         hits.push({ y: yy, x0, x1, k: lv.k });
         hovers.push({ kind: 'line', key: 'L' + lv.k, points: [x0, yy, x1, yy], lw: lit ? 2 : 1, colour: ink(1),
           info: `${label(lv.k)}  ·  k${lv.k + 1}  ·  ε = ${lv.eps.toFixed(6)} Eh  ·  ${lv.occ ? lv.occ + ' electrons' : 'virtual, 0 electrons'}`
             + (sol.names ? '  ·  ' + about(lv.k) : '')
-            + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : '  ·  click to add') });
+            + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : dim ? '  ·  not carried by this record' : '  ·  click to add') });
       }
       /* the gutter: the level's plain name (no component tag: a row IS the level), with HOMO / LUMO beside it */
       const mo0 = moOf(row.items[0].k), fr = frontierOf(row.items[0].k), edge = fr === 'HOMO' || fr === 'LUMO';
@@ -512,7 +523,7 @@ export function createOrbitals(host, api) {
   /** every level on every row strictly between a and b */
   function crossed(a, b) {
     const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y);
-    return hi - lo < 0.5 ? [] : hits.filter((h) => !h.core && h.y > lo && h.y < hi).map((h) => h.k);
+    return hi - lo < 0.5 ? [] : hits.filter((h) => !h.core && h.y > lo && h.y < hi && carried(h.k)).map((h) => h.k);
   }
   const stroke = paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(),
     at: (p) => { const h = nearestHit(p, 8); return h ? [h.core ? 'core' : h.k] : []; }, across: crossed,

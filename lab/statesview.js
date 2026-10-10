@@ -27,7 +27,7 @@
  * CHANGE: GROUND is D₀, MEAN is the stationary part, which leaves exactly the interference terms on screen.
  */
 import { stateName } from './names.js';
-import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB } from './mir/kit.js';
+import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, label as lbl, hint } from './mir/kit.js';
 import { createFlow } from './molecular-flow.js';
 import { paintStroke } from './paint-stroke.js';
 import { GROUND, AU_TIME_AS, createStatesModel, slerpCoefficients, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
@@ -48,6 +48,7 @@ export function createStates(host, api) {
 
   let sol = null, ladder = null, model = null, on = false, active = api.active ? !!api.active() : true, shown = true;
   let version = 0, pushedT = NaN, pushedV = -1, selected = GROUND, wanted = null, unsub = null, ladderSeq = 0, ladderRefused = null;   // S4c-VERIFY N5: the worker's refusal sentence outlives a press
+  let armed = 0;                                   // 0.5.3 M3: ON wished while the ladder is out — 1 a restore's, 2 a hand's; the ladder's landing (fetchLadder) re-arms
   let view = 'change', ref = 'ground', brightOnly = true, morphOn = false, morphS = 0, storeA = null, storeB = null;
   const lanes = new Map();                         // key → { amp, phase, mute, solo }; GROUND first, then ascending K
   const pending = new Set();                       // state keys whose vectors are on their way from the worker
@@ -74,10 +75,11 @@ export function createStates(host, api) {
   const hideBtn = mk('HIDE', 'Hide or show the lanes');
   const clrBtn = mk('CLEAR', 'Empty the register: S₀ alone');
   const nrmBtn = mk('NORM', 'Renormalise the register so Σ|b|² = 1');
-  const onSw = sw({ label: 'MO-REGISTRY ON', value: false, cls: 'orb-on',
-    title: 'Give the field this register’s many-electron state — MOLECULES must be ON and not running a real-time propagation',
-    onChange: (v) => { setOn(v); } });
+  const SW_TITLE = 'Give the field this register’s many-electron state — MOLECULES must be ON and not running a real-time propagation';
+  const onSw = sw({ label: 'MO-REGISTRY ON', value: false, cls: 'orb-on', title: SW_TITLE, onChange: (v) => { setOn(v, true); } });
   head.appendChild(onSw.root);
+  /* 0.5.3 M3 · a record with no CIS states says so ON THE SWITCH, the worker's own sentence its hover — not a status-line whisper */
+  const says = (why) => { lbl(onSw.root.querySelector('.sw-lbl'), why ? 'NO CIS STATES' : 'MO-REGISTRY ON'); hint(onSw.root, why ? why + ' — ORBITAL mode plays its orbitals' : SW_TITLE); };
 
   const bar = el('div', 'row tight reg-bar', host);
   const presetSel = el('select', 'sel', bar); presetSel.title = 'Presets are rules, not indices: each one exists for every molecule or says why it does not';
@@ -166,13 +168,13 @@ export function createStates(host, api) {
     if (!q || !api.solve) return;
     const seq = ++ladderSeq, forSol = sol; ladderRefused = null;
     Promise.resolve(api.solve({ op: 'chem.states', atoms: q.atoms, basis: q.basis, charge: q.charge }, () => null, (r) => r)).then((r) => {
-      if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { ladderRefused = (r && r.refused) || null; status(ladderRefused || 'the state ladder needs the chemistry worker', 'warn'); } return; }   // 0.4.0 S4a: a record without its CIS ladder says so
+      if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { ladderRefused = (r && r.refused) || null; armed = 0; says(ladderRefused); status(ladderRefused || 'the state ladder needs the chemistry worker', 'warn'); } return; }   // 0.4.0 S4a: a record without its CIS ladder says so
       ladder = r;
       model = createStatesModel({ n: r.n, nocc: r.nocc, C: sol.C, D0: sol.D, rMO: r.rMO });
-      if (wanted) { applyRecord(wanted, true); wanted = null; }
+      if (wanted) { applyRecord(wanted, true); armed = armed || (wanted.on ? 1 : 0); wanted = null; }
       request(keys().filter((k) => k !== GROUND));
       touch(); rebuild(); paint(); refresh(); publishPopulations();
-      if (on) push(now(), true);
+      if (armed) { const hand = armed === 2; armed = 0; setOn(true, hand); }   // THE ONE RE-ARM SEAT: a parked record's ON, a refused ON, a re-solve under ON
     }).catch(() => { if (seq === ladderSeq) status('the state ladder failed to arrive', 'warn'); });
   }
   function request(ks) {
@@ -303,18 +305,19 @@ export function createStates(host, api) {
     pushedT = t; pushedV = version;
     return true;
   }
-  function setOn(v) {
+  function setOn(v, hand) {
     const want = !!v;
     if (want && !on) {
       const why = refusal();
-      if (why) { onSw.set(false); status('MO-REGISTRY off — ' + why, 'warn'); return false; }
+      if (why) { armed = !ladder && !ladderRefused && C() && C().on ? (hand ? 2 : 1) : 0; onSw.set(false); status('MO-REGISTRY off — ' + why + (armed ? ' · ON when it lands' : ''), 'warn'); return false; }
+      if (hand && lanes.size < 2 && preset('BEAT') && api.announce) api.announce('BEAT');   // 0.5.3 M3: a hand's ON over S₀ alone plays BEAT, so the stage shows something
       if (!lanes.size) { lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false }); selected = GROUND; touch(); rebuild(); }   // S4: seeded where an empty record left none
       on = true; onSw.set(true); pushedT = NaN; pushedV = -1; trailN = 0; trailAt = 0;
       const c = C(); if (c && c.setTda) c.setTda(true);                            // the sticks on screen belong to the model that is playing
       if (S()) S().claim('states', true, 'the STATES register has the field');
     } else if (!want && on) {
       if (drive.on) setDrive(false);
-      on = false; onSw.set(false); pushedT = NaN; pushedV = -1;
+      on = false; armed = 0; onSw.set(false); pushedT = NaN; pushedV = -1;
       if (S()) S().claim('states', false, 'MO-REGISTRY OFF');
       api.repaint();
     } else onSw.set(on);
@@ -632,8 +635,8 @@ export function createStates(host, api) {
     storeA = storeB = null; aBtn.classList.remove('on'); bBtn.classList.remove('on'); morphOn = false; morphSw.set(false); trailN = 0; trailAt = 0;
     pushedT = NaN; pushedV = -1; touch();
     if (drive.on) { drive.on = false; drive.seq++; drive.busy = false; drive.last = null; driveSw.set(false); rowsEl.classList.remove('reg-driven'); }
-    if (on) setOn(false);
-    paint(); paintScope(); refresh();
+    if (on) { setOn(false); armed = 2; }                                         // 0.5.3 M3: no auto-off — it stands by for the new ladder, which re-arms it
+    says(null); paint(); paintScope(); refresh();
     if (sol) fetchLadder();
   }
   function ensureSub() {
@@ -702,7 +705,7 @@ export function createStates(host, api) {
   const emptyLanes = (r) => Array.isArray(r.lanes) && r.lanes.length === 0;
   function load(r) {
     if (!r) return false;
-    if (!ladder) { wanted = r; if (emptyLanes(r)) lanes.clear(); if (on) setOn(false); return true; }
+    if (!ladder) { wanted = r; armed = 0; if (emptyLanes(r)) lanes.clear(); if (on) setOn(false); return true; }
     applyRecord(r); request(keys()); touch(); rebuild(); paint(); refresh();
     if (r.on && !on) setOn(true); else if (!r.on && on) setOn(false); else if (on) push(now(), true);
     publishPopulations(); api.repaint();

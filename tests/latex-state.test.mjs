@@ -128,6 +128,16 @@ check('the molecule\'s page: water RHF/STO-3G — formula and name, 5 occupied o
     assert.ok(lines(t6)[1].includes('(1e_{1g}^{(a)},\\ \\mathrm{HOMO})') && lines(t6)[1].includes('(1e_{1g}^{(b)},\\ \\mathrm{HOMO})'), 'benzene: one HOMO, two components'); }
   assert.equal(formulaLatex('<m>CO(NH₂)₂</m>'), '\\mathrm{CO(NH_{2})_{2}}');
   assert.equal(formulaLatex('<m>NH₄⁺</m>'), '\\mathrm{NH_{4}^{+}}');
+  assert.equal(formulaLatex('<m>B₁₂H₁₂²⁻</m>'), '\\mathrm{B_{12}H_{12}^{2-}}');   // 0.5.3 M1: ONE superscript run, never ²^{-}
+});
+/* 0.5.3 M1 · THE SWEEP: every formula the lab can put on the stage — MOLECULE_BY_ID (the 54 molecules and the library's record-only
+   rows) and lab/library.json's own rows — through KaTeX with throwOnError.  At least 91, so the {rows:[]} fallback cannot pass empty. */
+check('every formula of MOLECULE_BY_ID and lab/library.json parses under KaTeX (throwOnError, strict \'error\'), at least 91 rows', () => {
+  const lib = JSON.parse(readFileSync(new URL('../lab/library.json', import.meta.url), 'utf8')).rows.filter((r) => r.molecule);
+  const rows = [...MOLECULE_BY_ID.values()].map((m) => [m.id, m.formula]).concat(lib.map((r) => [r.id + ' (library.json)', r.molecule.formula]));
+  assert.ok(MOLECULE_BY_ID.size >= 91 && lib.length >= 37, `MOLECULE_BY_ID ${MOLECULE_BY_ID.size}, library rows ${lib.length}`);
+  for (const [id, f] of rows) { try { katex.renderToString(formulaLatex(f), { throwOnError: true, strict: 'error' }); } catch (e) { throw new Error(`${id} ${f}: ${e.message}`); } }
+  console.log(`     ${rows.length} formulas typeset (${MOLECULE_BY_ID.size} of MOLECULE_BY_ID + ${lib.length} library rows)`);
 });
 check(`every output (${all.length} copies) has balanced $ and braces and parses under KaTeX (throwOnError, strict 'error')`, () => {
   for (const t of all) {

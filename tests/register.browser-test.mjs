@@ -5,7 +5,11 @@
  * hands it the field as a `signed` product under the `real` observable, that time is closed-form (periodic to
  * round-off under a scrub), that one register plays at a time, that benzene's RING is a rotating dipole of constant
  * length on lanes named by their axis, and that presets, stores, MORPH, the record and the modulation targets work.
+ * 0.5.3 M2 · R11 drives C₆₀'s ladder by hand: a pick of C₆₀ under the browser's change rule after a failed record open, the
+ * driver's real clicks and a real drag down the ladder, a real press of ON.  M3 · R12: the sentence on the STATES switch, a real press
+ * of ON over S₀ alone, and the one re-arm seat.  M10 · R13: the eight ORBITAL presets on water and on C₆₀.
  */
+import http from 'node:http';
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
 
 const PORT = process.env.LW_PORT || 8706;
@@ -179,6 +183,113 @@ try {
     return { nAO: __LW.chem.solution() && 0, basisNH3: '6-31+g-star', count: lad && lad.count, ms, ring, labels: st.lanes.map((l) => l.label), spread: Math.max(...mags) - Math.min(...mags), mag: mags[0], refused, energy: null, errs: window.__e.slice() };`);
   judge('R10 NH₃ in 6-31+G* (25 Cartesian AOs, 100 states): the canonical ladder arrives, RING finds the E pair and its dipole turns at constant length; benzene falls back to STO-3G with a sentence',
     r10.count === 100 && r10.ring === true && r10.labels.length === 3 && /x$|y$|z$/.test(r10.labels[1]) && r10.spread < 1e-9 && r10.mag > 0.05 && r10.refused === 'sto-3g' && r10.errs.length === 0, r10);
+
+  /* ── R11 · C₆₀'S LADDER (0.5.3 M2), by hand: a failed record open gives the dropdown back; no click on a dim rung refuses ON ──── */
+  const wd = (method, path, body) => new Promise((res, rej) => {   // the driver's own pointer road: real presses and a real drag on the ladder
+    const q = http.request({ host: '127.0.0.1', port: process.env.GD_PORT || 4444, path, method, headers: { 'content-type': 'application/json' } }, (x) => {
+      let b = ''; x.on('data', (d) => { b += d; }); x.on('end', () => { try { res(JSON.parse(b).value); } catch (e) { rej(e); } }); });
+    q.on('error', rej); q.end(body ? JSON.stringify(body) : undefined); });
+  /* the hand's pick, under the browser's own rule: a <select> fires `change` only when its VALUE changes (Firefox's driver fires it on
+     every <option> click, so its element road cannot stand in for a hand here) — the page turned to the molecule's section first */
+  const choose = (id) => g.ev(`const s = document.querySelector('.dev[data-id="chem"] .mol-pick select.sel');
+    for (const sec of ['DIATOMICS', 'HYDRIDES', 'ORGANIC', 'BIO', 'LATTICE', 'HEAVY']) { if ([...s.options].some((o) => o.value === '${id}')) break; __LW.chem.section(sec); }
+    if (s.value === '${id}') return false;
+    s.value = '${id}'; s.dispatchEvent(new Event('input', { bubbles: true })); s.dispatchEvent(new Event('change', { bubbles: true })); return true;`);
+  const r11a = await g.ev(`__LW.chem.setOn(true);
+    const h = ((await (await fetch('./library.json')).json()).rows.find((r) => r.id === 'C60') || {}).hash;
+    if ('caches' in window) await (await caches.open('lw-data-v1')).delete(new URL('./library/' + h + '.json', location.href).href);
+    window.__f0 = window.fetch; window.fetch = (u, o) => (String(u && u.url || u).includes(h) ? Promise.reject(new TypeError('the gate is offline for C60')) : __f0(u, o));
+    return { h, before: __LW.chem.preset() };`);
+  const pick1 = await choose('C60');
+  const r11b = await g.ev(`${HELP}
+    await wait(() => /record is not open/.test(__LW.chem.state().status));
+    const s = document.querySelector('.dev[data-id="chem"] .mol-pick select.sel');
+    const out = { preset: __LW.chem.preset(), value: s.value, sol: !!__LW.chem.solution(), status: __LW.chem.state().status };
+    window.fetch = __f0; return out;`);
+  const pick2 = await choose('C60');
+  const r11c = await g.ev(`${HELP} const ok = await wait(() => { const s = __LW.chem.solution(); return s && /^C60\\|/.test(s.key); }, ${pick2 ? 600 : 1}); return { ok: !!ok, preset: __LW.chem.preset() };`);
+  judge('R11 C₆₀ offline: the failed record open gives the dropdown back (the last solved molecule chosen again, no solution), so a hand re-pick of C₆₀ is a change and opens it',
+    r11a.before !== 'C60' && pick1 && r11b.preset === r11a.before && r11b.value === r11a.before && !r11b.sol && pick2 && r11c.ok && r11c.preset === 'C60', { r11a, pick1, r11b, pick2, r11c });
+  const geo = await g.ev(`${HELP}
+    __LW.register.setMode('orbital'); const d = document.querySelector('.dev[data-id="orbitals"]'); d.classList.remove('closed', 'folded'); d.scrollIntoView({ block: 'start' });
+    await frames(); __LW.orbitals.clear(); await frames(2);
+    const b = d.querySelector('.reg-pane:not([hidden]) canvas.mol-c').getBoundingClientRect();
+    return { x: Math.round(b.left + b.width * 0.6), y0: Math.round(b.top + 14), y1: Math.round(b.bottom - 30) };`);
+  const clicks = [];
+  for (let y = geo.y0; y <= geo.y1; y += 3) clicks.push({ type: 'pointerMove', duration: 0, origin: 'viewport', x: geo.x, y }, { type: 'pointerDown', button: 0 }, { type: 'pause', duration: 20 }, { type: 'pointerUp', button: 0 });
+  await wd('POST', `/session/${g.s}/actions`, { actions: [{ type: 'pointer', id: 'r11c', parameters: { pointerType: 'mouse' }, actions: clicks }] });
+  await wd('DELETE', `/session/${g.s}/actions`);
+  const afterClicks = await g.ev(`${HELP} await frames(2); return __LW.orbitals.state().selection.map((q) => q.k);`);
+  const drag = [{ type: 'pointerMove', duration: 0, origin: 'viewport', x: geo.x, y: geo.y0 }, { type: 'pointerDown', button: 0 }];
+  for (let y = geo.y0 + 6; y <= geo.y1; y += 6) drag.push({ type: 'pointerMove', duration: 16, origin: 'viewport', x: geo.x, y });
+  drag.push({ type: 'pointerUp', button: 0 });
+  await wd('POST', `/session/${g.s}/actions`, { actions: [{ type: 'pointer', id: 'r11d', parameters: { pointerType: 'mouse' }, actions: drag }] });
+  await wd('DELETE', `/session/${g.s}/actions`);
+  const r11d = await g.ev(`${HELP} await frames(2); const st = __LW.orbitals.state(); return { sel: st.selection.map((q) => q.k), cols: __LW.orbitals.solution().cols.slice(), refusal: st.refusal, rungs: st.rungs.length };`);
+  const tapOn = await g.tap('.dev[data-id="orbitals"] .reg-mode > .sw.orb-on:not([hidden])');
+  const r11e = await g.ev(`${HELP} await frames(4); const st = __LW.orbitals.state(); const out = { on: __LW.orbitals.on, refusal: st.refusal, status: st.status, sel: __LW.molsession.state().selected, errs: window.__e.slice() };
+    __LW.orbitals.setOn(false); return out;`);
+  judge('R11 C₆₀ by hand: ' + clicks.length / 4 + ' clicks and a drag down the whole ladder put only carried levels (cols 175–182) in the register, and a real press of ON is answered, not refused',
+    afterClicks.every((k) => r11d.cols.includes(k)) && r11d.sel.length > 0 && r11d.sel.every((k) => r11d.cols.includes(k)) && r11d.refusal === null
+      && tapOn.ok === 1 && r11e.on === true && r11e.refusal === null && r11e.sel === 'orbital-packet' && r11e.errs.length === 0, { afterClicks, r11d, tapOn, r11e });
+
+  /* ── R12 · STATES ANSWERS (0.5.3 M3): the sentence on the switch, a hand's ON over S₀ alone plays BEAT, and ONE re-arm seat — the
+         ladder's landing — for a re-solve under ON, an ON refused while the ladder is out, and a parked record that was ON ──────────── */
+  const SWQ = `.dev[data-id="orbitals"] .reg-mode > .sw.orb-on:not([hidden])`;
+  const r12a = await g.ev(`${HELP}
+    __LW.register.setMode('states'); await wait(() => __LW.states.state().refusal && /frontier orbitals only/.test(__LW.states.state().refusal));
+    const sw = document.querySelector('${SWQ}'), says = { label: sw.querySelector('.sw-lbl').textContent, help: sw.dataset.help || sw.title || '' };
+    await __LW.chem.solve('H2O'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 10); await frames(2);
+    __LW.states.clear(); await frames(2); sw.scrollIntoView({ block: 'center' });
+    return { says, back: document.querySelector('${SWQ} .sw-lbl').textContent, lanes0: __LW.states.state().lanes.length };`);
+  const tapStates = await g.tap(SWQ);
+  const r12b = await g.ev(`${HELP} await frames(2); const banner = __LW.stageText.banner; await ready(); await frames(2);
+    const st = __LW.states.state(); return { on: st.on, lanes: st.lanes.map((l) => l.label), banner, sel: __LW.molsession.state().selected };`);
+  judge('R12 STATES says why ON ITS SWITCH (C₆₀: "NO CIS STATES", the worker\'s sentence its hover; water: MO-REGISTRY ON again), and a hand\'s ON over S₀ alone plays BEAT',
+    r12a.says.label === 'NO CIS STATES' && /frontier orbitals only/.test(r12a.says.help) && r12a.back === 'MO-REGISTRY ON' && r12a.lanes0 === 1
+      && tapStates.ok === 1 && r12b.on === true && r12b.lanes.length === 2 && r12b.lanes[0] === 'S₀' && r12b.banner === 'BEAT' && r12b.sel === 'states', { r12a, tapStates, r12b });
+  const r12c = await g.ev(`${HELP}
+    const L0 = __LW.states.ladder().count; await __LW.chem.solve('NH3');
+    const back = await wait(() => __LW.states.ladder() && __LW.states.ladder().count !== L0 && __LW.states.on && __LW.states.state().lanes.length === 2); await ready();
+    const re = { on: __LW.states.on, lanes: __LW.states.state().lanes.map((l) => l.label), sel: __LW.molsession.state().selected };
+    __LW.states.setOn(false); let hit = null;
+    const un = __LW.chem.subscribe((s) => { if (s && /^C6H6\\|/.test(s.key) && !hit) hit = { ladder: !!__LW.states.ladder(), on: __LW.states.setOn(true), status: __LW.states.state().status }; });
+    await __LW.chem.solve('C6H6'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 315 && __LW.states.on); un();
+    const refused = { hit, on: __LW.states.on, lanes: __LW.states.state().lanes.map((l) => l.label) };
+    await __LW.chem.solve('H2O'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 10);
+    __LW.states.setOn(false); __LW.states.preset('BEAT'); await ready(); const rec = __LW.states.save(); let parked = null;
+    await __LW.chem.solve('NH3'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count !== 10);
+    const un2 = __LW.chem.subscribe((s) => { if (s && /^H2O\\|/.test(s.key) && !parked) parked = { ladder: !!__LW.states.ladder(), load: __LW.states.load({ ...rec, on: true }), on: __LW.states.on }; });
+    await __LW.chem.solve('H2O');
+    await wait(() => __LW.states.ladder() && __LW.states.on); await ready(); un2();
+    const loaded = { parked, on: __LW.states.on, lanes: JSON.stringify(__LW.states.save().lanes) === JSON.stringify(rec.lanes) };
+    __LW.states.setOn(false);
+    return { back: !!back, re, refused, loaded, errs: window.__e.slice() };`);
+  judge('R12 ONE re-arm seat: a re-solve under ON comes back ON (BEAT on the new ladder); an ON refused while the ladder is out, and a parked record that was ON, come ON when it lands',
+    r12c.back && r12c.re.on && r12c.re.lanes.length === 2 && r12c.re.sel === 'states'
+      && r12c.refused.hit && r12c.refused.hit.ladder === false && r12c.refused.hit.on === false && /ON when it lands/.test(r12c.refused.hit.status) && r12c.refused.on === true && r12c.refused.lanes.join() === 'S₀'
+      && r12c.loaded.parked && r12c.loaded.parked.ladder === false && r12c.loaded.parked.load === true && r12c.loaded.on === true && r12c.loaded.lanes && r12c.errs.length === 0, r12c);
+
+  /* ── R13 · THE EIGHT ORBITAL PRESETS (0.5.3 M10), one table: on water each takes its levels or refuses with its sentence; on C₆₀
+         every one stays inside the record's eight columns or refuses with the record's own sentence ─────────────────────────────── */
+  const r13 = await g.ev(`${HELP}
+    __LW.register.setMode('orbital'); const opts = [...document.querySelector('.dev[data-id="orbitals"] .reg-bar select.sel').options].map((o) => o.value).filter(Boolean);
+    const run = () => Object.fromEntries(opts.map((p) => { const ok = __LW.orbitals.preset(p), st = __LW.orbitals.state();
+      return [p, ok ? st.selection.map((q) => q.k + ':' + q.amp.toFixed(4) + (q.phase ? '@' + q.phase.toFixed(4) : '')).join(' ') : 'refused · ' + st.status]; }));
+    await __LW.chem.solve('H2O'); await wait(() => __LW.orbitals.solution() && __LW.orbitals.solution().nAO === 7); const water = run();
+    await __LW.chem.solve('C60'); await wait(() => __LW.orbitals.solution() && __LW.orbitals.solution().cols); const c60 = run(), cols = __LW.orbitals.solution().cols.slice();
+    const on = __LW.orbitals.preset('FRONTIER FOUR') && __LW.orbitals.setOn(true); await frames(3); const st = __LW.orbitals.state(); __LW.orbitals.setOn(false);
+    return { opts, water, c60, cols, on, refusal: st.refusal, errs: window.__e.slice() };`);
+  const ks = (v) => (v.startsWith('refused') ? null : v.split(' ').map((t) => +t.split(':')[0]));
+  const inCols = Object.values(r13.c60).filter((v) => !v.startsWith('refused')).every((v) => ks(v).every((k) => r13.cols.includes(k)));
+  judge('R13 eight ORBITAL presets from one table: water takes HOMO 4 · LUMO 5 · FRONTIER FOUR 3–6 · OCCUPIED 1–4 (equal |c|, equal phase) and refuses WINDING with its sentence; on C₆₀ every preset stays inside cols 175–182 and OCCUPIED refuses with the record\'s sentence; ON is answered',
+    r13.opts.join('|') === 'HOMO|LUMO|HOMO + LUMO|FRONTIER FOUR|HOMO SET|LUMO SET|WINDING|OCCUPIED'
+      && r13.water['HOMO'] === '4:1.0000' && r13.water['LUMO'] === '5:1.0000' && r13.water['HOMO + LUMO'] === '4:0.7071 5:0.7071'
+      && r13.water['FRONTIER FOUR'] === '3:0.5000 4:0.5000 5:0.5000 6:0.5000' && r13.water['HOMO SET'] === '4:1.0000' && r13.water['LUMO SET'] === '5:1.0000'
+      && /^refused · WINDING: no degenerate orbital pair/.test(r13.water['WINDING']) && r13.water['OCCUPIED'] === '1:0.5000 2:0.5000 3:0.5000 4:0.5000'
+      && inCols && ks(r13.c60['HOMO SET']).every((k) => k < 180) && ks(r13.c60['HOMO SET']).includes(179) && ks(r13.c60['LUMO SET']).every((k) => k >= 180) && ks(r13.c60['LUMO SET']).includes(180)
+      && ks(r13.c60['FRONTIER FOUR']).join() === '178,179,180,181' && /^refused · OCCUPIED: this record carries orbitals 176–183 only/.test(r13.c60['OCCUPIED'])
+      && r13.on === true && r13.refusal === null && r13.errs.length === 0, r13);
 
   const errs = await g.ev('return { errs: window.__e.slice(), gpu: __LW.field.lastGpuError || null };');
   judge('RZ no page error and no GPU error at any step', errs.errs.length === 0 && !errs.gpu, errs);
