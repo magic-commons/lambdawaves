@@ -3,7 +3,7 @@
 MIR owns generic instrument behavior. Before changing modulation controls, read
 `lab/mir/modulation/modwindow/host-contract.md` and the upstream
 `/home/joshua-hosain/Documents/MIR/PROMPT.md`. Update MIR first, adopt it, then
-adapt `lab/modwindow.js`; do not edit adopted files under `lab/mir/`.
+adapt λWAVES' side of the seam (`lab/mod-port.js`, `lab/shell/modulation.js`); do not edit adopted files under `lab/mir/`.
 The modulation port is `lab/mod-port.js` (the object `createModulation(port)`
 takes, key for key with MIR 1.5); THE play is `onePlay` in `lab/clock.js`, and
 the modulation follows every edge of it, armed or not (the MOD power is a route bypass), holding the kit's
@@ -246,7 +246,7 @@ The MOD power (the button, Ctrl+Space, the window's seat) is
 `setModulationEnabled`, a route bypass: power never plays and play never
 powers. LINKED/SEPARATE and `clockLink` are retired; the tempo grid has eight
 tiles. The power and cadence (`modArm`, `modCadence`) are PREFERENCE in the
-kit's record `lambdawaves.q0.modulation` (`rack.js` `modStore`/`saveMod`,
+kit's record `lambdawaves.q0.modulation` (`lab/shell/controller.js` `modStore`/`saveMod`,
 bind.js `localStore`), never in the settings blob. `lab/modwindow.js` and
 `lab/audio.js` are gone; the kit's `audio-capture.js` is the capture.
 (0.5.0 C4)
@@ -257,7 +257,7 @@ worktree's `adopt.mjs`, then `--check`. `index.html` declares `@layer app,
 mir;` then `mir/mir.css`; `lab.css` and `skin.css` stay UNLAYERED and beat
 every kit layer. An `app.*` layer ranks below the kit for a normal declaration,
 so keep a λWAVES look with an unlayered rule, and narrow an app rule the layers
-made live with a twin `:not(:where())`. The 32 `!important`s stay unlayered (23 in skin.css, 9 in lab.css; four left with C6b's banner and warning pane).
+made live with a twin `:not(:where())`. The 36 `!important`s stay unlayered (25 in skin.css, 11 in lab.css; four left with C6b's banner and warning pane).
 R5-W1: a kit module no root reaches is reported by `wiring --unreached-kit`,
 never precached, never failed; our own modules keep the hard gate. The
 keyboard editor's stacking (`#keymap` fixed at `--z-veil`, `[hidden]` none) is
