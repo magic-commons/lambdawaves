@@ -36,8 +36,9 @@ export function bindStageGestures(canvas, {
     return { move(m) { pan(2 * (m.clientX - x) / r.width, -2 * (m.clientY - y) / r.height); x = m.clientX; y = m.clientY; } };
   }
 
-  function capture(id) {
+  function capture(id) { // → whether the stage holds the pointer (a synthetic or expired one is never held)
     try { canvas.setPointerCapture(id); } catch (_) {} // Synthetic or expired pointer.
+    return canvas.hasPointerCapture(id);
   }
   function release(id) {
     try { if (canvas.hasPointerCapture(id)) canvas.releasePointerCapture(id); } catch (_) {}
@@ -63,18 +64,23 @@ export function bindStageGestures(canvas, {
     const wy = (b.yaw - a.yaw) / dt, wp = (b.pitch - a.pitch) / dt;
     if (Math.hypot(wy, wp) >= law.REST) camera.fling(wy, wp);
   }
+  function heal(e) { // 0.5.3 M4: a NEW press first ends, cancelled, a held pointer whose release never came — the same id, or one whose capture is gone (a new touch has a new id)
+    const lost = (id, p) => id === e.pointerId || (p.cap && !canvas.hasPointerCapture(id));
+    if (special && lost(special.id, special)) finish({ pointerId: special.id }, true);
+    for (const [id, p] of [...points]) if (lost(id, p)) finish({ pointerId: id }, true);
+  }
   function pointerDown(e) {
+    heal(e);
     if (e.button !== B.pointer.button || special || points.has(e.pointerId) || points.size === 2 || guard.hit(e)) return;
     try { canvas.focus({ preventScroll: true }); } catch (_) {}
     if (!points.size) {
       const action = held(e, B.pointer.slide) ? slide(e) : startSpecial(e);
       if (action) {
         e.preventDefault(); lastTap = null;
-        special = { id: e.pointerId, action }; capture(e.pointerId); return;
+        special = { id: e.pointerId, action, cap: capture(e.pointerId) }; return;
       }
     }
-    capture(e.pointerId);
-    points.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    points.set(e.pointerId, { x: e.clientX, y: e.clientY, cap: capture(e.pointerId) });
     setDragging(true); canvas.classList.add('drag');
     camera.stop(); fine = e[FINE];
     down = points.size === 1 ? { x: e.clientX, y: e.clientY, t: now() } : null;
@@ -82,6 +88,7 @@ export function bindStageGestures(canvas, {
     rebase();
   }
   function pointerMove(e) {
+    if (e.pointerType === 'mouse' && e.buttons === 0 && (special?.id === e.pointerId || points.has(e.pointerId))) return finish(e, true);   // M4: its button is up, its pointerup lost
     if (special) {
       if (special.id === e.pointerId) special.action.move?.(e);
       return;

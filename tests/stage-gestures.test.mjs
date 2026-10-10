@@ -27,7 +27,7 @@ function stage(bindings, ui) {
     Object.assign(event, { pointerId: id, clientX: x, clientY: y, pointerType: 'touch', button: 0, shiftKey: false, ...extra });
     canvas.dispatchEvent(event);
   }
-  return { send, result, travel, classes, win, doc, canvas, advance: ms => { time += ms; } };
+  return { send, result, travel, classes, win, doc, canvas, captured, advance: ms => { time += ms; } };
 }
 
 // Drag keeps the original sensitivity and releases the measured pose velocity.
@@ -145,3 +145,37 @@ console.log('PASS the bindings are one data table: STAGE_BINDINGS is today\'s (p
   s.canvas.dispatchEvent(Object.assign(new Event('dblclick'), { clientX: 500, clientY: 500 })); assert.equal(s.result.resets, 1);
 }
 console.log('PASS the scene guard (C9): a press, a tap, a double-click and a wheel in UI space start nothing on the stage; a stage drag keeps its pointer across the UI');
+// 0.5.3 M4 · THE LIVE STAGE: a release the browser never delivers (a Linux context menu or a window-manager grab mid-drag) must not
+// leave the stage refusing every later press.  The heal runs on a NEW press only (AUDIT-OPUS-1 B §8 risk 3): a held drag of the SAME
+// id ends first, as cancelled (no fling, no commit); a mouse move with no button down ends a held mouse drag the same way.
+{
+  const s = stage(), mouse = { pointerType: 'mouse', buttons: 1 }, up = { pointerType: 'mouse', buttons: 0 };
+  s.send('pointerdown', 1, 100, 100, mouse); s.advance(20); s.send('pointermove', 1, 150, 100, mouse);   // ...and its pointerup is lost
+  s.advance(500); s.send('pointerdown', 1, 500, 500, mouse); assert.equal(s.result.held, true, 'the next press of the same mouse is taken');
+  s.advance(20); s.send('pointermove', 1, 520, 500, mouse); s.send('pointerup', 1, 520, 500, up);
+  assert.ok(Math.abs(s.travel.yaw + 70 * .0065) < 1e-12, 'both drags orbit: 50 px, then 20 px'); assert.equal(s.result.held, false);
+  assert.equal(s.result.flings.length, 1, 'only the drag that was released flings');
+  s.send('pointerdown', 1, 100, 100, { ...mouse, ctrlKey: true }); s.send('pointermove', 1, 120, 100, mouse);   // a held special (the bow), its release lost
+  s.send('pointerdown', 1, 300, 300, mouse); assert.equal(s.result.canceled, 1, 'the lost special ends cancelled'); assert.equal(s.result.ended, 0, 'and never commits');
+  assert.equal(s.result.held, true, 'the new press orbits'); s.send('pointerup', 1, 300, 300, up);
+  s.send('pointerdown', 1, 100, 100, mouse); s.advance(20); s.send('pointermove', 1, 130, 100, mouse);
+  s.send('pointermove', 1, 140, 100, up);   // the button is up and its pointerup never came
+  assert.equal(s.result.held, false, 'a buttonless mouse move ends the held drag'); assert.equal(s.result.flings.length, 1, 'cancelled: no fling');
+  const yaw = s.travel.yaw; s.send('pointermove', 1, 200, 100, up); assert.equal(s.travel.yaw, yaw, 'then the mouse only hovers');
+}
+// A lost TOUCH, then a new finger: a new touch has a NEW id, so the heal keys on the lost one's capture being gone.  The new finger
+// orbits alone (no pinch against a ghost); a second finger while the first still holds its capture still pinches.
+{
+  const s = stage(); s.send('pointerdown', 1, 100, 100); s.advance(20); s.send('pointermove', 1, 130, 100);
+  s.captured.delete(1);   // the browser dropped the touch: no pointerup, no pointercancel, no lostpointercapture
+  s.advance(500); s.send('pointerdown', 2, 400, 400); s.advance(20); s.send('pointermove', 2, 420, 400);
+  assert.equal(s.result.distance, 3, 'no pinch against the lost finger'); assert.deepEqual(s.result.pans, [], 'and no slide');
+  assert.ok(Math.abs(s.travel.yaw + 50 * .0065) < 1e-12, 'the new finger orbits alone'); s.send('pointerup', 2, 420, 400);
+  assert.equal(s.result.held, false); assert.equal(s.result.resets, 0);
+  s.send('pointerdown', 3, 100, 100); s.send('pointerdown', 4, 200, 100); s.send('pointermove', 4, 300, 100);
+  assert.equal(s.result.distance, 1.5, 'two live fingers still pinch');
+  const synthetic = stage(); synthetic.canvas.setPointerCapture = () => {};   // a synthetic pointer is never captured (the browser suites' pinches; risk 3)
+  synthetic.send('pointerdown', 1, 100, 100); synthetic.send('pointerdown', 2, 200, 100); synthetic.send('pointermove', 2, 300, 100);
+  assert.equal(synthetic.result.distance, 1.5, 'a first finger the stage never held is not a lost one: the pinch still pinches');
+}
+console.log('PASS the live stage (0.5.3 M4): a lost pointerup, a lost special and a buttonless mouse move free the stage, cancelled; a lost touch then a new id orbits alone; a live pinch is untouched');
