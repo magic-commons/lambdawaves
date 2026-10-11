@@ -338,7 +338,7 @@ const PRECACHE = [
   ['./new-project.lambdawaves.json',                                '1134ce61cd21'],
   ['./occlusion.js',                                                'd9d6c6d5b7c6'],
   ['./orbit.js',                                                    '36a22179827b'],
-  ['./orbitalsview.js',                                             'ef964af203ec'],
+  ['./orbitalsview.js',                                             '03ef154b1320'],
   ['./paint-stroke.js',                                             'cbfdfa8270c5'],
   ['./palette-app.js',                                              '3d150ac4b027'],
   ['./particles.js',                                                '639d5fc3f9dd'],
