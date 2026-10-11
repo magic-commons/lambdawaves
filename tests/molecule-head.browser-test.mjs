@@ -77,7 +77,7 @@ try {
     const r = await fetch('./demos/water.lambdawaves.json', { cache: 'no-cache' }); const path = P.importText(await r.text()); P.open(path);
     await __until(() => c.solution() && c.preset() === 'H2O' && c.on); await __w(1500);
     const demo = { on: c.on, shown: Hd.shown - n0, fades: __fades() };
-    const sw = [...document.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === 'STAGE TEXT');
+    const sw = [...document.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === 'STAGE FORMULA');   // 0.5.3 M9: the INFORMATIONAL window's
     sw.click(); await __w(100); __pick('HF'); await __until(() => { const s = c.solution(); return s && s.key === 'HF|sto-3g|0'; }); await __w(600);
     const off = { stage: S.on, shown: Hd.shown - n0 }; sw.click(); await __w(300);
     window.confirm = c0;

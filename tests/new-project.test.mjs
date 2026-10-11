@@ -37,7 +37,7 @@ assert.deepEqual(Object.keys(P.camera), ['autoRotate'], 'camera carries its feel
 for (const k of ['bg', 'lightUI', 'stageCustom', 'frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk', 'steps'])
   assert.equal(k in P.mat, false, 'mat carries ' + k);
 const PREF = new Set(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'friction', 'spin', 'speed', 'dragGain', 'fling', 'camLock', 'camMode',   // 0.5.3 M6: camLock, the camera's LOCK
-  'badges', 'controlHints', 'captions', 'molFormula', 'molFormulaSize', 'gamut', 'p3Mode', 'warned', 'audioDevice', 'nativeLayout', 'phoneTr', 'phoneRack',
+  'badges', 'controlHints', 'captions', 'molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'gamut', 'p3Mode', 'warned', 'audioDevice', 'nativeLayout', 'phoneTr', 'phoneRack',
   'auto', 'governor', 'keepFrames', 'perfMode', 'modCadence', 'modArm', 'clockLink',   // 0.5.0 C4: modArm / modCadence live in the kit's record `lambdawaves.q0.modulation` and clockLink is retired — all three still never ride in a project
   'disconnected', 'accentA', 'accentB', 'vivid', 'hints', 'help']);                        // 0.5.0 C2: the look's names in the kit's `mir.gui` — never in a project either
 /* the bundled demos' own law (tests/first-run.test.mjs, "A BUNDLED DEMO CARRIES NO LOOK"), with its same three lists — the

@@ -21,7 +21,7 @@ export function createStageWords(app) {
   }
   /** THE CAPTION a capture carries (T3): the same stage text as ONE plain-Unicode line — `H₂O · 1b1 HOMO · STO-3G` (the
    *  formula, the ORBITAL on the field in names.js's plain form, the basis) or SPECTRUM's states ("2s₀, 2p₋₁"; A ↔ B) — drawn
-   *  by capture.js, since the DOM formula never reaches an export.  It follows the STAGE TEXT switch.  KIT BRIEF 6 replaces it. */
+   *  by capture.js, since the DOM formula never reaches an export.  It follows the STAGE FORMULA switch.  KIT BRIEF 6 replaces it. */
   function stageCaption() {
     if (!app.state.stageText || !app.state.stageText.on) return '';
     const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null;
@@ -55,7 +55,7 @@ export function createStageWords(app) {
       avoid: () => [...racks(), app.sh.layout.docked ? null : document.getElementById('transport'), app.state.tl && app.state.tl.isOpen() ? app.state.tl.root : null].map((e) => paintedRect(e)).filter(Boolean) });
     layer.root.classList.add('lw-stage'); layer.root.setAttribute('aria-hidden', 'true');
     const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0 };   // the gate's witnesses: KaTeX runs, banners, re-placements asked, letter moves
-    let on = true, scale = 1, formula = '', banner = null, shown = '', block = null, lastRender = -1e9, wait = 0, fadeT = 0;
+    let on = true, labelsOn = true, labelScale = 1, formula = '', banner = null, shown = '', block = null, lastRender = -1e9, wait = 0, fadeT = 0;
     function show() {                                                // the markdown wanted now, as a new block if it changed and KaTeX's quarter second has passed
       if (!on) return;
       const md = banner !== null ? banner : formula;
@@ -81,12 +81,12 @@ export function createStageWords(app) {
     if (typeof ResizeObserver === 'function') new ResizeObserver((e) => { const b = e[e.length - 1].contentRect; cssW = b.width; cssH = b.height; }).observe(dom.canvas);
     let atomsId = '', atoms = [], spans = [], labelsKey = '', placeKey = '';
     function atomLabels(id, obs, half) {
-      if (!id || !on) { if (!labels.hidden) labels.hidden = true; labelsKey = placeKey = ''; return; }
+      if (!id || !labelsOn) { if (!labels.hidden) labels.hidden = true; labelsKey = placeKey = ''; return; }
       if (id !== atomsId) { atomsId = id; atoms = moleculeAtoms(id); labelsKey = ''; }
-      if (labelsKey !== id + '|' + scale) {
-        labelsKey = id + '|' + scale; placeKey = '';
+      if (labelsKey !== id + '|' + labelScale) {
+        labelsKey = id + '|' + labelScale; placeKey = '';
         labels.textContent = ''; spans = atoms.map((a) => el('span', 'atom-label', labels, ELEMENT[a.Z] || '?'));
-        labels.style.fontSize = Math.round(14 * scale) + 'px';
+        labels.style.fontSize = Math.round(14 * labelScale) + 'px';
       }
       labels.hidden = false;
       if (cssW < 32 || cssH < 32) return;
@@ -113,10 +113,11 @@ export function createStageWords(app) {
         return true;
       },
       dismiss(md) { if (banner !== md) return; clearTimeout(fadeT); banner = null; show(); },   // a later announcement has already taken the seat: nothing
-      setOn(v) { on = !!v; layer.root.hidden = !on; show(); },
+      /** STAGE FORMULA (the formula, the fade, the caption) and ATOM LABELS are two switches since 0.5.3 M9 (INFORMATIONAL) */
+      setOn(v) { on = !!v; layer.root.hidden = !on; show(); }, setLabels(v) { labelsOn = !!v; }, setLabelScale(s) { labelScale = s; labelsKey = ''; },
       /** SIZE: the type × s (lab.css), then a re-measure — setPane(false) measures every bare block again (layer.js) */
-      setScale(s) { scale = s; labelsKey = ''; layer.root.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
-      get on() { return on; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
+      setScale(s) { layer.root.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
+      get on() { return on; }, get labelsOn() { return labelsOn; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
     };
     wChem.root.addEventListener('change', stageTextTick);           // the pick lands in `preset` at once; the solve comes later
     app.state.chem.subscribe(() => stageTextTick());                         // … and a restore / undo / link that re-solves
