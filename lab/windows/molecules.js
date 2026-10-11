@@ -74,7 +74,7 @@ export function createMolecules(app) {
     if (app.state.chem.preset() !== id) { head.want = null; return; }                      // the molecule changed first: nothing
     if (sol.key !== id + '|' + app.state.chem.basis + '|' + row.charge) return;             // chemview's solve key: this molecule's landing
     head.want = null;
-    const md = moleculeHead({ molecule: row, basis: app.state.chem.basis, ground: sol, stem: sol.stem });
+    const md = moleculeHead({ molecule: row, basis: app.state.chem.basis, ground: sol, stem: sol.stem, status: app.state.chem.said });   // 0.5.4 P4: tell() ran before notify()
     if (!md || !app.state.stageText.announce(md, 0)) return;
     head.shown++; head.md = md;
     const life = new AbortController(), until = performance.now() + 2500, bye = head.bye = () => { life.abort(); if (head.bye === bye) head.bye = null; app.state.stageText.dismiss(md); };

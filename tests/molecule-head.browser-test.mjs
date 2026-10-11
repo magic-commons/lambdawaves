@@ -2,7 +2,8 @@
 // latex-state.js moleculeHead, every number the live solve's — in THE FADE's seat once that solve lands, at most 500 ms after it;
 // it holds through a press on the picture before 2.5 s and leaves on one after; Escape takes it at once; the next pick takes it
 // before its own solve lands.  A `?preset=` boot, an undo back to the molecule, a link open and a demo open show nothing
-// (`__LW.head.shown`, the witness); STAGE TEXT off shows nothing; STATUS TAGS off (the first run's) hides nothing.
+// (`__LW.head.shown`, the witness); STAGE TEXT off shows nothing; STATUS TAGS off (the first run's) hides nothing.  0.5.4 P4: water's head ends
+// with its fifth line, the molecule-level STATUS (NUMERICAL · its agreement with PySCF's energy; a live molecule has no geometry class).
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
@@ -37,7 +38,7 @@ try {
   assert.equal(t1.shown, 1, 'the hand pick did not show the head once: ' + JSON.stringify(t1));
   assert.ok(t1.tHead - t1.tSolve <= 500, `the head came ${(t1.tHead - t1.tSolve).toFixed(0)} ms after the solve: ` + JSON.stringify(t1));
   assert.ok(t1.banner && t1.katex >= 5 && t1.err === 0, 'the head is not the fade block, set in KaTeX: ' + JSON.stringify(t1));
-  assert.ok(/^\*\*\$\\mathrm\{H_\{2\}O\}\$ · water\*\*\nRHF\/STO-3G · \$E = -74\.\d{6}\\,E_h\$\n5 occupied of 7 AO · \$C_\{2v\}\$\nHOMO \$1b_\{1\}\$ · gap \$\d\.\d{4}\\,E_h\$ = \d+\.\d{2} eV$/.test(t1.md), 'the head: ' + t1.md);
+  assert.ok(/^\*\*\$\\mathrm\{H_\{2\}O\}\$ · water\*\*\nRHF\/STO-3G · \$E = -74\.\d{6}\\,E_h\$\n5 occupied of 7 AO · \$C_\{2v\}\$\nHOMO \$1b_\{1\}\$ · gap \$\d\.\d{4}\\,E_h\$ = \d+\.\d{2} eV\nNUMERICAL · energy agrees with PySCF to \de\\-\d+ Eh$/.test(t1.md), 'the head: ' + t1.md);
   assert.equal(t1.recordOnly, false, 'WATER opened from a record: it has none');
   assert.deepEqual(t1.errs, []);
   await ev(`while (performance.now() - __shownAt < 1000) await __w(20); return 1;`);
