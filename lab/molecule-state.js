@@ -28,6 +28,7 @@
  * identityOf's canonical form: the six lines 'identity 1', 'atoms <library.js atomsKey>', 'basis <basis hash>', 'charge <c>',
  * 'multiplicity <m>', 'model <name>' joined by '\n', and its sha-256 in lowercase hex.  atomsKey is the library's own key
  * (sha-256 of JSON [[Z, x, y, z], …] in bohr), so a record's input.atomsSha256 and a live solve's atoms hash the same way.
+ * CONVENTIONS is what a reader of a state or an export assumes, in one object; neither enters serializeMolecule's record.
  *
  * MUST NOT CLAIM: forward compatibility without a migration, physical reproducibility after a hash mismatch, or
  * that cached integrals belong in the record.
@@ -35,6 +36,7 @@
 import { basisFrom, COMPONENT_ORDER, sha256Hex } from './md.js';
 import { BASIS_FILES } from './rhf-molecule.js';
 import { atomsKey } from './library.js';
+import { CONVENTION } from './names.js';
 
 export const SCHEMA = 1;
 export const BASIS_KIND = 'cartesian';
@@ -130,6 +132,11 @@ const restartLabels = (every, fromRecord) => ({
 /** the molecule's identity: one sha-256 over the canonical form in the header.  Pure, and it judges nothing. */
 export const identityOf = ({ atoms, basisHash, charge, multiplicity, model }) => sha256Hex(['identity 1', 'atoms ' + atomsKey(atoms),
   'basis ' + basisHash, 'charge ' + charge, 'multiplicity ' + multiplicity, 'model ' + model].join('\n'));
+export const CONVENTIONS = Object.freeze({ basisKind: BASIS_KIND, componentOrder: COMPONENT_ORDER_LINE,
+  rd: 'M_pyscf = R_d M R_d; R_d = 1 on s and p, √(4π/5) on xx,yy,zz, √(4π/15) on xy,xz,yz',          // md.js rdOf
+  axes: CONVENTION,                                                                                    // names.js, one frame per point group
+  kernel: 'D = Σ f c c†; P = W D W', current: '−Im D, the transpose',                                  // density.js; FLOW (chemview hands it −Im D)
+  energyRef: Object.freeze({ hydrogen: 'absolute', states: 'relative to ground', packet: 'absolute ε·t' }) });
 
 /* ── serialise ──────────────────────────────────────────────────────────────────────────────────────────────────── */
 /**

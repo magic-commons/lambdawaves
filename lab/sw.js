@@ -328,7 +328,7 @@ const PRECACHE = [
   ['./molecular-flow.js',                                           '0d71b237de78'],
   ['./molecular-register.js',                                       'c274a236d6ef'],
   ['./molecular-session.js',                                        '2f50d787e355'],
-  ['./molecule-state.js',                                           '2a8be9eec89f'],
+  ['./molecule-state.js',                                           'f043047a669c'],
   ['./molecule.js',                                                 'a2f3c70b3705'],
   ['./molecules.js',                                                '1471a3523811'],
   ['./momentum.js',                                                 '0b32cc20e73a'],

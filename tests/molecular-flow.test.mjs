@@ -19,6 +19,7 @@ import { GROUND, createStatesModel, presetLanes } from '../lab/molecular-registe
 import { moleculeRHF } from '../lab/rhf-molecule.js';
 import { createRTHF } from '../lab/density.js';
 import { fieldShells } from '../lab/molecular-field.js';
+import { CONVENTIONS } from '../lab/molecule-state.js';
 
 chemRegister('sto-3g', JSON.parse(fs.readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url), 'utf8')));
 const msg = { atoms: moleculeAtoms('C6H6'), basis: 'sto-3g', charge: 0 }, g = chemGround(msg), st = chemStates(msg), n = st.n, nocc = st.nocc;
@@ -122,5 +123,6 @@ const toAO = (M) => { const half = new Float64Array(n * n), out = new Float64Arr
   for (let ix = 0; ix < N; ix++) for (let iy = 0; iy < N; iy++) for (let iz = 0; iz < N; iz++) { const q = fw.at(-H6 + (ix + 0.5) * hq, -H6 + (iy + 0.5) * hq, -H6 + (iz + 0.5) * hq); Jx -= q.j[0] * hq ** 3; Jy -= q.j[1] * hq ** 3; Jz -= q.j[2] * hq ** 3; }
   /* dipoleAlong is the ELECTRON dipole −Tr(D M_y): its rate is −d⟨y⟩/dt = −∫ j_y dV */
   assert(Math.sign(Jy) === Math.sign(rate) && Math.abs(Jy) > 10 * Math.hypot(Jx, Jz) && Number.isFinite(dMid), `TDHF flow: d(dipole)/dt = ${rate}, −∫ j_y dV = ${Jy}, off-axis ${Math.hypot(Jx, Jz)}`);
+  assert.equal(CONVENTIONS.current, '−Im D, the transpose', '0.5.4 P1: the declared current is the −Im D this case proves (imNeg above)');
   console.log(`PASS TDHF flow: after a y kick the electron dipole moves at ${rate.toExponential(3)} and −∫ j_y dV = ${Jy.toExponential(3)} with −Im D (same sign, ratio ${(Jy / rate).toFixed(3)}; off-axis current ${Math.hypot(Jx, Jz).toExponential(1)}).`);
 }

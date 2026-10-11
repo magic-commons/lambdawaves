@@ -7,6 +7,7 @@ import { rhf } from '../lab/scf.js';
 import { sto3gH2 } from '../lab/h2ci.js';
 import { createRTHF, hermitianEigen, cmat, cmul, cadj, loewdin, sandwich, creal, unitaryOf, idempotencyDefect } from '../lab/density.js';
 import { spectrum, peaks } from '../lab/absorb.js';
+import { CONVENTIONS } from '../lab/molecule-state.js';
 
 const close = (a, b, tol, what) => assert.ok(Math.abs(a - b) < tol, `${what}: ${a} vs ${b} (tol ${tol})`);
 const ref = JSON.parse(readFileSync(new URL('../research/astra-2026-09-05/reference-drive.json', import.meta.url)));
@@ -28,6 +29,16 @@ const oracle = JSON.parse(readFileSync(new URL('../research/chronusq-2026-09-11/
 {
   const mo = createMO({ kind: 'lcao1s' }), R = ref.R, M = mo.basisAt(R).M, n = 2;
   const c0 = mo.vector(mo.solve(R)), D0 = new Float64Array(4); for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) D0[i * n + j] = c0[i] * c0[j];
+  /* 0.5.4 P1 · THE KERNEL, as this case's literals: D = Σ f c c† (one electron, f = 1, the line above) and P = W D W with W² = S */
+  {
+    const e = createRTHF({ n, S: M.S, h: M.H, Z: M.positionZ, nElectrons: 1, D0, dt: 0.5 }), W = e.W, P = e.P; let worst = 0;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      let wdw = 0, ww = 0; for (let k = 0; k < n; k++) { ww += W[i * n + k] * W[k * n + j]; for (let l = 0; l < n; l++) wdw += W[i * n + k] * D0[k * n + l] * W[l * n + j]; }
+      worst = Math.max(worst, Math.abs(P.re[i * n + j] - wdw), Math.abs(P.im[i * n + j]), Math.abs(ww - M.S[i * n + j]));
+    }
+    close(worst, 0, 1e-14, 'P(0) = W D W and W W = S');
+    assert.equal(CONVENTIONS.kernel, 'D = Σ f c c†; P = W D W', 'the declared kernel is the one this case builds');
+  }
   for (const field of [0.03, -0.02]) {
     const a = createMODrive(mo, { R, field: () => field }), b = createRTHF({ n, S: M.S, h: M.H, Z: M.positionZ, nElectrons: 1, D0, field: () => field, dt: 0.5 });
     for (let s = 0; s < 40; s++) { a.step(0.5); b.step(); }

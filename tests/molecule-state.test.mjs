@@ -3,17 +3,18 @@
  * step, not out of a fixture, so the Hermiticity and the parity being checked are the propagator's own.
  * Save → restore → save must be byte-identical, and each of the five named refusals must fire on its own defect.
  * The E_TRACE bound is ROUND 4 · OPUS §8's correction of Sol's flat 1e-12: max(1e-12, 3nε·steps).
- * §7 is THE CONTRACT RECORD (0.5.4 P1): identityOf's canonical form, the moved-H witness and E_IDENTITY.
+ * §7 is THE CONTRACT RECORD (0.5.4 P1): identityOf's canonical form, the moved-H witness, E_IDENTITY and CONVENTIONS.
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { moleculeRHF, registerRecord } from '../lab/rhf-molecule.js';
 import { createRTHF } from '../lab/density.js';
-import { serializeMolecule, restoreMolecule, MoleculeStateError, SCHEMA, COMPONENT_ORDER_LINE, CODES, identityOf } from '../lab/molecule-state.js';
+import { serializeMolecule, restoreMolecule, MoleculeStateError, SCHEMA, COMPONENT_ORDER_LINE, BASIS_KIND, CODES, identityOf, CONVENTIONS } from '../lab/molecule-state.js';
 import { decodeRecord, recordPath } from '../lab/library.js';
 import { moleculeAtoms } from '../lab/molecules.js';
-import { basisFrom } from '../lab/md.js';
+import { CONVENTION } from '../lab/names.js';
+import { basisFrom, rdOf } from '../lab/md.js';
 
 const record = JSON.parse(readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url), 'utf8'));
 registerRecord('sto-3g', record);
@@ -242,4 +243,24 @@ const loadRecord = (row) => JSON.parse(readFileSync(new URL('../lab/' + recordPa
   assert.deepEqual(CODES, ['E_SHAPE', 'E_BASIS_HASH', 'E_MMUT_HISTORY', 'E_TRACE', 'E_IDENTITY'], 'the five named refusals');
   console.log('PASS E_IDENTITY: C₆H₆ restores against its own record with no byte moved; a record with a hydrogen moved 0.01 bohr, and a moved hydrogen'
     + ' under the intact record\'s name, are both refused; with no library record nothing is claimed; CODES pinned at five.');
+}
+
+/* 7c. CONVENTIONS: the referenced members ARE the tree's constants; the declared ones equal the literals their proofs keep
+       (kernel: density.test §2; current: molecular-flow.test §5; rd: here, against md.js rdOf on a d shell). */
+{
+  assert.deepEqual(Object.keys(CONVENTIONS), ['basisKind', 'componentOrder', 'rd', 'axes', 'kernel', 'current', 'energyRef']);
+  assert.ok(Object.isFrozen(CONVENTIONS) && Object.isFrozen(CONVENTIONS.energyRef), 'the conventions are read, never written');
+  assert.equal(CONVENTIONS.basisKind, BASIS_KIND); assert.equal(CONVENTIONS.basisKind, 'cartesian');
+  assert.equal(CONVENTIONS.componentOrder, COMPONENT_ORDER_LINE); assert.equal(CONVENTIONS.componentOrder, 's; x,y,z; xx,xy,xz,yy,yz,zz');
+  assert.equal(CONVENTIONS.axes, CONVENTION, 'the point-group frames are names.js\' own object, not a copy');
+  assert.equal(CONVENTIONS.rd, 'M_pyscf = R_d M R_d; R_d = 1 on s and p, √(4π/5) on xx,yy,zz, √(4π/15) on xy,xz,yz');
+  const sixG = JSON.parse(readFileSync(new URL('../lab/vendor/bse/6-31+g-star-v1.json', import.meta.url), 'utf8'));
+  const b = basisFrom([{ Z: 8, x: 0, y: 0, z: 0 }], sixG, { cart: true }), rd = rdOf(b);
+  const want = (l) => (l[0] + l[1] + l[2] < 2 ? 1 : Math.max(...l) === 2 ? Math.sqrt(4 * Math.PI / 5) : Math.sqrt(4 * Math.PI / 15));
+  assert.ok(b.bfs.some((f) => f.shell === 2), 'oxygen 6-31+G* carries a d shell');
+  b.bfs.forEach((f, i) => assert.equal(rd[i], want(f.l), `R_d on ${b.order[i]}`));
+  assert.equal(CONVENTIONS.kernel, 'D = Σ f c c†; P = W D W'); assert.equal(CONVENTIONS.current, '−Im D, the transpose');
+  assert.deepEqual({ ...CONVENTIONS.energyRef }, { hydrogen: 'absolute', states: 'relative to ground', packet: 'absolute ε·t' });
+  console.log(`PASS CONVENTIONS: ${Object.keys(CONVENTIONS).length} members, frozen; basisKind, componentOrder and axes are the tree's own constants;`
+    + ` the R_d rule holds on all ${b.n} O 6-31+G* functions; kernel, current and energyRef equal their proofs' literals.`);
 }
