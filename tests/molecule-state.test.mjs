@@ -3,12 +3,17 @@
  * step, not out of a fixture, so the Hermiticity and the parity being checked are the propagator's own.
  * Save → restore → save must be byte-identical, and each of the four named refusals must fire on its own defect.
  * The E_TRACE bound is ROUND 4 · OPUS §8's correction of Sol's flat 1e-12: max(1e-12, 3nε·steps).
+ * §7 is THE CONTRACT RECORD (0.5.4 P1): identityOf's canonical form and the moved-H witness.
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { moleculeRHF, registerRecord } from '../lab/rhf-molecule.js';
 import { createRTHF } from '../lab/density.js';
-import { serializeMolecule, restoreMolecule, MoleculeStateError, SCHEMA, COMPONENT_ORDER_LINE } from '../lab/molecule-state.js';
+import { serializeMolecule, restoreMolecule, MoleculeStateError, SCHEMA, COMPONENT_ORDER_LINE, identityOf } from '../lab/molecule-state.js';
+import { recordPath } from '../lab/library.js';
+import { moleculeAtoms } from '../lab/molecules.js';
+import { basisFrom } from '../lab/md.js';
 
 const record = JSON.parse(readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url), 'utf8'));
 registerRecord('sto-3g', record);
@@ -188,4 +193,35 @@ const rec1 = serializeMolecule(state);
   console.log(`PASS the MMUT restart policy: 0 and null are unrestarted (${STEPS - 1} MMUT steps, no restart) and 50 restarts inside its cycle`
     + ` — two different dipoles (${dNever.toExponential(9)} against ${dFifty.toExponential(9)}); the record carries the policy and the cycle position,`
     + ` and a record written without them restores as "${old.rt.restartPolicy}" labelled "${old.rt.restartPolicySource}".`);
+}
+
+/* 7. THE CONTRACT RECORD (0.5.4 P1, R13): identity and conventions are DATA, never a stamp.  Neither enters
+      serializeMolecule's record — §1 pins its nine keys and its bytes.
+   7a. THE IDENTITY: one sha-256 over a canonical form whose atoms line is the library's own key. */
+const hex = (t) => createHash('sha256').update(t).digest('hex');
+const atomsLine = (A) => 'atoms ' + hex(JSON.stringify(A.map((a) => [a.Z, a.x, a.y, a.z])));
+const CAT = JSON.parse(readFileSync(new URL('../lab/library.json', import.meta.url), 'utf8'));
+const loadRecord = (row) => JSON.parse(readFileSync(new URL('../lab/' + recordPath(row.hash), import.meta.url), 'utf8'));
+{
+  const water = { atoms, basisHash: sol.hash, charge: 0, multiplicity: 1, model: 'RHF' }, id0 = identityOf(water);
+  assert.equal(id0, hex(['identity 1', atomsLine(atoms), 'basis ' + sol.hash, 'charge 0', 'multiplicity 1', 'model RHF'].join('\n')),
+    'the identity is the sha-256 of the six canonical lines the header states');
+  assert.match(id0, /^[0-9a-f]{64}$/);
+  /* THE WITNESS: one hydrogen moved 0.01 bohr is a new solve in the same basis — the basis hash stays, the identity moves */
+  const movedAtoms = clone(atoms); movedAtoms[1].z += 0.01;
+  const moved = moleculeRHF({ atoms: movedAtoms, basis: 'sto-3g' });
+  assert.equal(moved.hash, sol.hash, 'a moved hydrogen must NOT move the basis hash (sol.hash is the basis, never the geometry)');
+  const id1 = identityOf({ ...water, atoms: movedAtoms, basisHash: moved.hash });
+  assert.notEqual(id1, id0, 'a moved hydrogen must move the identity');
+  const sixG = JSON.parse(readFileSync(new URL('../lab/vendor/bse/6-31+g-star-v1.json', import.meta.url), 'utf8'));
+  for (const [k, v] of [['charge', 1], ['multiplicity', 3], ['model', 'UHF'], ['basisHash', basisFrom(atoms, sixG, { cart: true }).hash]])
+    assert.notEqual(identityOf({ ...water, [k]: v }), id0, `the identity must move with ${k}`);
+  /* the record road and the live road hash the same atoms the same way: every catalogue row's input.atomsSha256 is the key of
+     the atoms a live solve of that molecule is handed (lab/molecules.js), so the identity's atoms line can be read off a record */
+  let same = 0;
+  for (const row of CAT.rows) if ('atoms ' + loadRecord(row).input.atomsSha256 === atomsLine(moleculeAtoms(row.id))) same++;
+  assert.equal(same, CAT.rows.length, `a record's input.atomsSha256 and the live atoms must agree on every row: ${same}/${CAT.rows.length}`);
+  console.log(`PASS the identity: ${id0.slice(0, 12)}… = sha-256 of the six canonical lines; a hydrogen moved 0.01 bohr keeps the basis hash`
+    + ` ${sol.hash.slice(0, 12)}… and moves the identity to ${id1.slice(0, 12)}…; charge, multiplicity, model and basis each move it;`
+    + ` record and live atoms agree on ${same}/${CAT.rows.length} catalogue rows.`);
 }

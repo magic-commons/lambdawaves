@@ -22,11 +22,17 @@
  *                    1e-12: at 120,000 steps the measured drift law (1.6e-15 electrons per step, a defect of
  *                    S^{±1/2} and never of the unitary integrator) puts the honest value at 10.00000000019.
  *
+ * THE CONTRACT RECORD (0.5.4 P1, R13: identity and conventions are DATA, never a stamp — sol.hash stays the basis hash).
+ * identityOf's canonical form: the six lines 'identity 1', 'atoms <library.js atomsKey>', 'basis <basis hash>', 'charge <c>',
+ * 'multiplicity <m>', 'model <name>' joined by '\n', and its sha-256 in lowercase hex.  atomsKey is the library's own key
+ * (sha-256 of JSON [[Z, x, y, z], …] in bohr), so a record's input.atomsSha256 and a live solve's atoms hash the same way.
+ *
  * MUST NOT CLAIM: forward compatibility without a migration, physical reproducibility after a hash mismatch, or
  * that cached integrals belong in the record.
  */
-import { basisFrom, COMPONENT_ORDER } from './md.js';
+import { basisFrom, COMPONENT_ORDER, sha256Hex } from './md.js';
 import { BASIS_FILES } from './rhf-molecule.js';
+import { atomsKey } from './library.js';
 
 export const SCHEMA = 1;
 export const BASIS_KIND = 'cartesian';
@@ -117,6 +123,11 @@ const hasPolicy = (rt) => !!rt && rt.restartEvery !== undefined && rt.restartEve
 const restartLabels = (every, fromRecord) => ({
   restartPolicy: every === 0 ? 'unrestarted' : `restart every ${every}`,
   restartPolicySource: fromRecord ? 'record' : `legacy default (no field in the record; the worker default before 2026-09-18 was ${LEGACY_RESTART})` });
+
+/* ── the contract record (0.5.4 P1) — read by statusOf and the export, never by a stamp, a producer or a frame ──────── */
+/** the molecule's identity: one sha-256 over the canonical form in the header.  Pure, and it judges nothing. */
+export const identityOf = ({ atoms, basisHash, charge, multiplicity, model }) => sha256Hex(['identity 1', 'atoms ' + atomsKey(atoms),
+  'basis ' + basisHash, 'charge ' + charge, 'multiplicity ' + multiplicity, 'model ' + model].join('\n'));
 
 /* ── serialise ──────────────────────────────────────────────────────────────────────────────────────────────────── */
 /**
