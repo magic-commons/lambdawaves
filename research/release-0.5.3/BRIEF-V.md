@@ -12,7 +12,7 @@ its standing reds), `research/release-0.4.0/HANDOFF.md` §2's 0.5.3 blocks (the 
 - **The base** is `v0.5.2-alpha` = `bb764a4`. Make its export once: `git archive bb764a4 | tar -x -C .tmp/base-052` and serve it on your SECOND port. Every red you
   find is read ONCE against that base before it is judged (RIG · PRE-EXISTING · DEFECT).
 - **Known before you start:** `tests/current.browser-test.mjs` is RED at :138 on the base (the audio card's `followsPalette` / `longMeters`) — confirm on the base once
-  and say so; B149 is the boot suite's standing law red and B6/B69 its known flakes (R-V-REPORT); `tools/stylehash.mjs` named in three briefs is MIR's tool, not the
+  and say so; B149 is the boot suite's standing law red and B6/B69 its known flakes (R-V-REPORT); `tools/stylehash.mjs` named in three briefs is MIR's tool (`~/Documents/MIR/tools/stylehash.mjs`), not the
   tree's — if it does not run on this rig (B-PAL: its headless Chromium found no WebGPU adapter) say so ONCE and move on, never loop on it.
 
 ## The estate (PLAN §2 — every gate, in this order; one browser suite at a time; `node research/release-0.5.2/r2b-measure/rigfree.mjs` before EVERY browser run — the
