@@ -6,8 +6,11 @@
  * and a single wall interval is capped (MAX_WALL_STEP) so a background tab cannot lurch.
  * Scrub and step set/advance t directly.  Wall scheduling (which frame runs when) lives in
  * the scheduler in rack.js — the renderer never owns physical time (§12, §25).
+ * THE HORIZON, T_MAX (0.5.4 P7b · R9: declared; nothing clamps, refuses or branches on it): t is one f64, so at t = T_MAX·dt a step t += dt is
+ * no longer dt and from 2·T_MAX·dt on it is lost — dt is `rate` × the wall interval advance() took (≤ MAX_WALL_STEP) or step(dt)'s own.
  */
 export const MAX_WALL_STEP = 0.1;   // seconds
+export const T_MAX = 2 ** 53;       // steps: the f64 significand's reach — 2⁵³ frames are ≈ 4.7 million years of play at 60 Hz
 
 export class Clock {
   constructor() {
