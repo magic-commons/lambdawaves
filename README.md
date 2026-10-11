@@ -48,7 +48,7 @@ truth, and he would like to hear about it.
   stayed; none of it was typed by him.
 - **What was verified, and how.** The physics is checked by the Node suites in `tests/`, which compare the
   reconstruction against closed forms (norms to 3e-9, revival times, GPU voxels against the CPU
-  to 2e-5). The interface is checked by a real headless Firefox with WebGPU (`./test.sh`). He has
+  to 3e-6 RMS, 2e-4 at the worst voxel). The interface is checked by a real headless Firefox with WebGPU (`./test.sh`). He has
   used the app on an RTX 3070 desktop and an iPad, daily, for weeks. He has not read the code.
 - **What was not verified.** No one with a computer-science background has reviewed this code.
   It has not been tested with a real screen reader, on a phone in the wild, or by anyone but him
@@ -76,7 +76,8 @@ presenter draws density, phase, Re ψ, Im ψ or a difference. Measured on an RTX
 takes 3.25 ms per frame in the phase view and 2.10 ms for density, and reconstructing it 0.1 ms;
 reconstructing all 91 labels takes 1.43 ms at 96³ and 3.40 ms at 128³
 (`research/optimization-2026-09-24/probes/K/k2-present.out.json`, `k9-throughput.out.json`,
-`k1-time.out.json`). GPU voxels agree with the CPU closed form to 2e-5.
+`k1-time.out.json`). GPU voxels agree with the CPU closed form to 3e-6 RMS (2e-5 in 99.8 % of voxels; the worst
+voxel is off by 2e-4, within one rgba16float step — `tests/field-law.browser-test.mjs`).
 
 Around that sits an instrument: a rack of windows (STATE, SPECTRUM, ORBIT, SLICE,
 KEPLER, VORTEX, MOLECULES, MO-REGISTRY, WIGNER, RADIATION, …), a transport with one clock, a

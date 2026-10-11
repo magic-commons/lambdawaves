@@ -152,7 +152,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
  * A SIGNED MATRIX (kind 3) is the density's own contraction with the square root left off: the texel is (Σ M_μν
  * χ_μ χ_ν, 0) with its sign, so 'real' shows two-colour lobes normalised by max |value|.  It exists because a
  * difference of densities is not a density — ΔD = Re D(t) − D_ref has both signs — and because subtracting two
- * rgba16float volumes of √ρ cannot see a weak kick at all: an 11-bit mantissa on √ρ is ≈ 1e-3 relative on ρ, and
+ * rgba16float volumes of √ρ cannot see a weak kick at all: an 11-bit mantissa on √ρ is ≈ 1e-3 RMS relative on ρ, and
  * a κ = 1e-3 kick moves ρ by about that much.  The difference is formed in f64 on the CPU and quantised ONCE.
  * ONE exp per primitive per EXPONENTIAL GROUP.  Two things share: every Cartesian component of a shell (they carry
  * the same exponents by construction), and every shell on one centre with one exponent list — which is what makes
@@ -161,8 +161,8 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
  * such a shell `share` and the kernel keeps the previous group's exponentials in a register array.
  * f32 THROUGHOUT, and the O 1s hazard stated: the cusp sums three primitives of weight ≈ 4.25 against a total
  * ρ(O) = 193.31, so the density at a nucleus is f32-accurate to about 1e-6 relative.  The rgba16float texel is the
- * coarser number by three orders (an 11-bit mantissa on √ρ ⇒ ≈ 1e-3 relative on ρ) and it, not this sum, sets the
- * tolerance any gate on a read-back voxel may ask for.  Sorting the small terms first is not required.
+ * coarser number by three orders — within one f16 ulp on √ρ, rounded toward zero on the rig: ρ to 3e-4 of ρmax, 2e-3 relative at the worst voxel
+ * (≈ 1e-3 RMS; tests/helpers/field-law.mjs, water at 64³) — and it, not this sum, sets any read-back gate's tolerance.  Sorting small terms first is not required.
  */
 /** ONE source, two knobs: `cap` is the AO ceiling this pipeline's χ tile holds (MOL_CAPS) and `wg` its lanes — 32 (4 × 4 × 2) for
     the cap-128 tier on a 16 KiB device (0.4.0 S4c); at 64 the text is the pre-S4c source byte for byte (the lock's program) */
