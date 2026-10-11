@@ -74,12 +74,12 @@
   border-radius: 9px; font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wide);
   color: var(--ink-faint); background: transparent; border: var(--glass-border) solid transparent; }
 #transport.mini .tbtn.modb.on { background: transparent; border-color: transparent; }
-#transport.mini .fd { height: 24px; border: 0; background: transparent; box-shadow: none; border-radius: 0; cursor: ew-resize; overflow: visible; }  /* the value pill rides above the line */
-#transport.mini .fd::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -.5px; background: hsl(0 0% 100% / .14); }  /* the line */
-#transport.mini .fd-fill { top: 50%; bottom: auto; height: 2px; margin-top: -1px; border-radius: 1px; background: var(--acc); opacity: .85; }
-#transport.mini .fd-edge { top: 50%; bottom: auto; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--fg); box-shadow: var(--neu-raise); }
-#transport.mini .fd-lbl { display: none; }                                    /* the bar's own place says "scrub" */
-#transport.mini .fd-val { right: 0; top: -14px; bottom: auto; font-size: var(--fs-micro); padding: 0 5px; border-radius: var(--r-pill); background: hsl(var(--glass-tint) / .96); }
+#transport:is(.mini, .docked) .fd { height: 24px; border: 0; background: transparent; box-shadow: none; border-radius: 0; cursor: ew-resize; overflow: visible; }  /* the value pill rides above the line */
+#transport:is(.mini, .docked) .fd::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -.5px; background: hsl(0 0% 100% / .14); }  /* the line */
+#transport:is(.mini, .docked) .fd-fill { top: 50%; bottom: auto; height: 2px; margin-top: -1px; border-radius: 1px; background: var(--acc); opacity: .85; }
+#transport:is(.mini, .docked) .fd-edge { top: 50%; bottom: auto; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--fg); box-shadow: var(--neu-raise); }
+#transport:is(.mini, .docked) .fd-lbl { display: none; }                                    /* the bar's own place says "scrub" */
+#transport:is(.mini, .docked) .fd-val { right: 0; top: -14px; bottom: auto; font-size: var(--fs-micro); padding: 0 5px; border-radius: var(--r-pill); background: hsl(var(--glass-tint) / .96); }
 
 
 #transport.mini .k { width: 34px; gap: 0; flex: 0 0 auto; }
@@ -359,7 +359,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .tempo-tile [hidden] { display: none !important; }
 #transport .native-tempo { position: relative; }
 .tempo-info { position: absolute; top: 6px; right: 6px; }
-.tempo-empty { font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.4; }
 .tempo-empty { grid-column: 1 / -1; font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.4; }
 .tempo-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 4px; }   /* 0.5.0 C4: eight tiles (LINKED and MOD ▶ retired), two rows of four */
 #transport.tempo-open { flex-wrap: wrap; }
@@ -442,26 +441,36 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="camera"] .camera-motion { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center;row-gap:12px; }
 #transport .native-info { display:inline-flex;position:relative;align-items:center;flex:0 0 24px;order:7; }
 #transport .native-info-content:popover-open { display:block !important; }
-#transport.docked .native-play-row { display:grid;gap:5px; }
-#transport.docked .native-play-row > .tbtn { min-width:0;width:100%;height:34px; }
-#transport.docked .native-play-row > .fd { min-width:0;width:100%; }
+/* ═══ 0.5.3 M13b · THE DOCKED BAR, IN THE KIT'S WORK-BAR IDIOM ═══════════════════════════════════════════════════════
+ * Josh: "Transport docked window needs a new look".  Read from mir/shell/transport.css (§ the seats, § IN A WORK BAR, § DOCKED), not
+ * imported: a seat is FLAT until hovered, play and the MOD power are ink that lights (accent A / B), the to-start, dock and logo
+ * seats are the bar's own 34-px, radius-8 buttons with a hairline and the raised relief, the BPM pill is RAISED (the kit's ruling:
+ * a well reads as already pressed), the scrub is the thin line, the readouts are plain.  CSS only; every part keeps its grid cell
+ * and every height, so the card's rect (the stage probe's guard) does not move. */
+#transport.docked .native-play-row { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px; }
+#transport.docked .native-play-row > .tbtn { min-width:0;width:100%;height:34px;border-radius:8px; }
+#transport.docked .tbtn:not(.transport-home,.tempo-expand) { border:0;background:transparent;box-shadow:none;color:var(--ink-key); }
+#transport.docked .tbtn:not(.transport-home,.tempo-expand):hover { color:var(--fg);background:var(--state-hover,var(--glass-raise)); }
+#transport.docked .tbtn.play { color:var(--fg-soft);font-size:22px; }
+#transport.docked .tbtn.play:is(.on,:hover) { color:var(--acc);background:transparent; }
+#transport.docked .tbtn.modb.on { color:var(--acc2);background:transparent; }
+#transport.docked :is(.tbtn.transport-home,.dock-btn,.mod-exp) { border:var(--glass-border) solid var(--glass-hairline);border-radius:8px;background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise,var(--neu-raise)); }
+#transport.docked .native-play-row > .fd { min-width:0;width:100%;height:44px; }
+#transport.docked .fd::before { background:color-mix(in srgb,var(--fg) 16%,transparent); }   /* the line reads on both themes (the bar's white .14 is invisible on light) */
 #transport.docked .native-play-row > .k { width:auto;min-width:0; }
-#transport.docked .native-play-row > .ro { min-width:0;width:auto;height:42px;padding:4px;overflow:hidden; }
+#transport.docked .native-play-row > .ro { min-width:0;width:auto;height:42px;padding:4px;overflow:hidden;background:transparent;box-shadow:none; }
 #transport.docked .native-play-row .ro-sub { display:none; }
 #transport.docked .native-play-row .ro-val { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 #transport.docked .native-play-row .k-val { position:absolute;top:100%;left:50%;transform:translateX(-50%); }
 #transport .native-tempo .trig { min-width:0;height:44px;min-height:44px;padding:0 3px;justify-content:center;font-size:8.5px;letter-spacing:.04em; }   /* the window's seats are 44 px; the clock tiles match */
 #transport .k-val { display:none; }
 #transport .k:hover .k-val, #transport .k:focus-within .k-val, #transport .k.drag .k-val { display:block; }
-#transport.docked .native-play-row { grid-template-columns:repeat(5,minmax(0,1fr)); }
-#transport.docked .native-play-row > .fd { grid-column:1/5; }
-#transport.docked .native-play-row > .ro { grid-column:span 2; }
-#transport.docked .native-play-row > .ro.period { grid-column:span 3; }
 #transport.docked .native-play-row .k-lbl { display:none; }
-#transport .native-tempo .trig { min-height:44px; }
 #transport.docked .native-play-row .fd-val { display:none; }
 #transport.docked .native-play-row .fd:focus-visible .fd-val, #transport.docked .native-play-row .fd:hover .fd-val { display:block; }
-#transport.docked .tempo-expand { grid-column:span 2;width:100%; }
+#transport.docked .tempo-expand { width:100%;background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise,var(--neu-raise)); }
+#transport.docked .tempo-number { font-size:16px; }
+#transport.docked :is(.tempo-unit,.tempo-hz) { font-size:8px; }
 #transport.docked .native-tempo { width:100%;grid-template-columns:minmax(0,1fr); }
 #transport.docked .play { grid-area:1/1; }
 #transport.docked .modb { grid-area:1/2; }
@@ -555,7 +564,6 @@ body.window-info-off .settings-help { display:none; }
 .dev .shadow-controls .seg { width:100%;height:100%;box-sizing:border-box; }
 .dev .shadow-controls .seg-b { flex:1 1 0;padding:0 4px; }
 .dev .shadow-controls > .shadow-details-toggle { width:32px;min-width:32px; }
-#transport.docked .native-play-row > .dock-btn { order:-1; }
 
 /* ═══ 0.5.1 D10-F · THE PHONE'S 44 PX, RESTORED (B70 / B71) ═══════════════════════════════════════════
  * The wave-51 block above is "the LAST one in the LAST stylesheet"; the native rules written after it
