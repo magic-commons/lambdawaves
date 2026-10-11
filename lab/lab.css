@@ -790,7 +790,15 @@ body[data-theme="dark"] .km-key-unbound {
 .mol-pick select.sel:hover { background: var(--state-hover, var(--glass-raise)); }
 .mol-section > .sw { flex: 0 1 auto; }
 
-/* THE STAGE TEXT (Settings › Display; 0.5.1 D1: one block of the kit's INFORMATIONAL layer, rack.js initStageText) wears the kit's ink,
+/* 0.5.3 M11 · STATE's A / B is ONE row (R7): STORE A · A · STORE B · B, built in that order by state.js, skin.css's .native-ab the four
+   columns.  A stored slot is lit by a CLASS, never a child text node (current.browser-test finds the buttons by exact textContent): the
+   A and B recall triggers wear the kit's lamp (skin.css's 5 px aria-pressed dot) — the well's tint while empty, the accent once stored.
+   STORE A keeps one line in its share of 246 px: the A and B seats take the trigger's own 48 px minimum, the row's padding 6 px. */
+.native-ab .trig { padding: 0 6px; }
+.native-ab .ab-slot::after { content: ''; flex: 0 0 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--glass-press); }
+.native-ab .ab-slot.stored::after { background: var(--acc); box-shadow: 0 0 6px color-mix(in srgb, var(--acc) 70%, transparent); }
+
+/* THE STAGE TEXT (INFORMATIONAL since 0.5.3 M9; 0.5.1 D1: one block of the kit's INFORMATIONAL layer, rack.js initStageText) wears the kit's ink,
    shade and serif at the kit's seat; beneath every window (z 20 < rack 30 < #floats 32: the kit's root has none), never a pointer
    target, never in the occlusion mask.  The type is the notebook's × SIZE (--lw-stage-size): the formula its title (34 px), an
    announcement ([data-fade]) its heading (22 px), each held to 8 % of the window's width and at least 16 px, KaTeX at .nb-view's 1.08em. */
@@ -799,7 +807,7 @@ body[data-theme="dark"] .km-key-unbound {
 .mir-info.lw-stage .katex { font-size: 1.08em; }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
 .dev .mol-more-toggle { flex: 0 0 30px; padding: 0; }
-/* ATOM LABELS (Settings › Display; rack.js initStageText atomLabels): each nucleus's element symbol, small, at its projected
+/* ATOM LABELS (INFORMATIONAL since 0.5.3 M9; stage-words.js atomLabels): each nucleus's element symbol, small, at its projected
    position.  White under `difference`, so each glyph INVERTS what it sits on — dark over a light cloud or stage, light
    over a dark one.  Transparent, never a pointer target, beneath every window, never in the occlusion mask. */
 #atomLabels { position: fixed; inset: 0; z-index: 9; pointer-events: none; user-select: none; -webkit-user-select: none;

@@ -75,8 +75,6 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   rotations.classList.add('native-rotors');
   const turn=rotations.querySelector('.k');
   for(const k of [turn,ui.kzKnob.root,ui.defKnob.root,ui.rotZRate.root,ui.kzRate.root,ui.defRate.root])rotations.appendChild(k);
-  const ab=ui.abSw.root.closest('.grp'),abRow=ab.querySelector('.row');abRow.classList.add('native-ab');
-  const buttons=[...abRow.children];if(buttons.length===4)abRow.replaceChildren(buttons[0],buttons[2],buttons[1],buttons[3]);
   const tr=document.getElementById('transport');
   const main=el('div','native-play-row');main.append(...tr.children);tr.appendChild(main);
   const repeatInfo=infoPanel(ui.periodFx.root,'Repeat mathematics');
