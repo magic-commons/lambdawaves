@@ -37,17 +37,12 @@ a restored project whose field owner is MOLECULES brings them back onto the rack
 (MO-REGISTRY too when that file's register is on). MOLECULES OFF never hides or
 closes MO-REGISTRY: its switch stands down (it must release the field) and the
 ladder stays painted and editable. Its MO-REGISTRY ON switch sits beside the
-ORBITAL | STATES seg (registerview.js). MOLECULES' first row is the SECTION
-header, which is the library's page turner (0.4.0 S4b): PALETTE's ◂ ▸, a
-readout naming the section (it survives LEAN), and INSTALLED, whose lamp says
-every record of the section is on this device and whose press installs or
-removes them all; the MOLECULE dropdown below holds that one section
+ORBITAL | STATES seg (registerview.js). MOLECULES' first row is the SECTION header, which is the library's page turner (0.4.0 S4b; 0.5.3 M8, as Josh drew it): the kit's `stepper` in PALETTE's preset look (‹ NAME ›, a whole line; its name opens the kit's list, its hover carries the section's record line, `__LW.chem.section().sub`), then INSTALLED, whose lamp says every record of the section is on this device and whose press installs or removes them all (shown only for a section with records), beside MOLECULES ON; the MOLECULE picker below is a second stepper whose name IS the `<select>` (optgroups, disabled reasons and native keys kept; ‹ › and ← → walk the page's enabled rows as a hand pick) and holds that one section
 (DIATOMICS · HYDRIDES · ORGANIC · BIO · LATTICE · HEAVY, `lab/molecules.js`
 SECTIONS), a pick elsewhere turns the page, and the page is never saved. A
 library record ships only through `tools/orbital-library.mjs`'s diversity
 gate, and a molecule past the live cap opens only from its record (DOWNLOAD,
-never DISABLED). Below the header and the top rows (ON, MOLECULE, BASIS,
-VIEW + ORBITAL — VALENCE takes the dial's seat under DENSITY, 0.4.0 S4c)
+never DISABLED). Below the header and the rows ‹ MOLECULE ›, BASIS · ORBITAL (VALENCE takes the dial's seat under DENSITY, 0.4.0 S4c) and VIEW · the fold's chevron (five lines at 300 px and at phone width, 0.5.3 M8)
 MOLECULES keeps KICK / RUN / TDA / the spectra in the `.mol-more` fold: open
 on a desktop, folded on a phone or tablet, its state in the card's WORKSPACE
 record (`more`); its `Aa` stays visible with HELP off.
@@ -87,18 +82,16 @@ METERS keeps the GOVERNOR readout and FRAME PROFILE.
 
 THE STAGE FORMULA (the INFORMATIONAL window since 0.5.3 M9: its own rack card, `lab/informational.js`, closed on a first run and for a
 profile older than it, seated under SETTINGS when opened, listed in + and WINDOW; PREFERENCE `molFormula` / `molFormulaSize`, on by default,
-50–300 %) writes what is playing on the stage as ONE block of the kit's INFORMATIONAL layer (`createInfoLayer` in `lab/shell/stage-words.js` `initStageText`
-`initStageText`, 0.5.1 D1; `lab/stage-text.js` is gone): the MOLECULES formula ($\mathrm{H_{2}O}$) while MOLECULES is on,
+50–300 %) writes what is playing on the stage as ONE block of the kit's INFORMATIONAL layer (`createInfoLayer` in `lab/shell/stage-words.js` `initStageText`, 0.5.1 D1; `lab/stage-text.js` is gone): the MOLECULES formula ($\mathrm{H_{2}O}$) while MOLECULES is on,
 otherwise SPECTRUM's populated states in `stateLatex`'s prose ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION) — never a
 live coefficient. The layer has no subject, no features and no labels, parallax, drift and following off, and is NEVER told of a
 camera move (`viewChanged()` only when the racks hide or slide, the transport docks or moves, or the TIMELINE opens or docks; the
 kit's ResizeObserver covers a size): idle it writes nothing (D1-BUILD U2: 0 records over AUTO-ROTATE and a pointer sweep).
 Its key is the string it would render: a changed string is `remove()` + `addBlock({ md })` (the kit's exit and entrance), KaTeX
-runs at most four times a second, and nothing is added while the switch is off (the root `hidden`). It wears the kit's look —
+runs at most four times a second, and nothing is added while STAGE FORMULA is off (the root `hidden`). It wears the kit's look —
 ink, the feathered shade, the serif face — at the kit's seat: the free stage's top + 12 %, between the racks, clear of the
 undocked transport and an open TIMELINE (`avoid`); under every window (`.mir-info.lw-stage` z 20 < the racks' 30, `lab.css`),
-never a pointer target, never in the occlusion mask. THE FADE: a HAND's preset (STATE's PRESET and RELOAD, MO-REGISTRY's WINDING
-/ HOMO + LUMO and STATES presets) is announced as the block (`data-fade`, the heading size) for 2.4 s — the formula leaves and
+never a pointer target, never in the occlusion mask. THE FADE: a HAND's preset (STATE's PRESET and RELOAD, MO-REGISTRY's eight ORBITAL presets — HOMO · LUMO · HOMO + LUMO · FRONTIER FOUR · HOMO SET · LUMO SET · WINDING · OCCUPIED, one table in `lab/orbitalsview.js` since 0.5.3 M10 — and its STATES presets) is announced as the block (`data-fade`, the heading size) for 2.4 s — the formula leaves and
 returns, and the kit's exit is the fade — `WINDING · $1e_{1g}$ (a) + (b)`, the names from `lab/names.js`; the press threads
 `{ hand: true }`, so a restore, an undo, a project or link open never announces (`tests/stage-text.browser-test.mjs`). THE HEAD (0.5.1 D2): a HAND pick of a molecule — the MOLECULE dropdown,
 MOLECULES ON, a notebook `lw:molecule=` link (chemview's `hand`) — shows its head in THE FADE's seat once that molecule's solve
@@ -110,11 +103,11 @@ pick, and a restore, an undo, a project, link or demo open never shows it (`__LW
 `tests/molecule-head.browser-test.mjs`). HOLD (I,
 the kit's `infoActions` row; `lab/key-table.js` carries a row's `up`) holds the words still while the key is down. Its second
 row governs the ATOM LABELS (PREFERENCE `atomLabels` / `atomLabelsSize`, on by default, split from the formula's at 0.5.3 M9), λWAVES' own letters (R6-L; kit labels are D1b, Group II): each MOLECULES nucleus marked
-with its element symbol at its projected position (`toScreen`, written only when the camera, molecule, size or canvas changed),
+with its element symbol at its projected position (`lab/shell/stage-words.js` `atomLabels` through `field.js` `toScreen`, written only when the camera, molecule, size or canvas changed),
 white under `mix-blend-mode: difference` so they invert whatever is beneath them. An absent `atomLabels` / `atomLabelsSize`
 takes the stored `molFormula` / `molFormulaSize` once (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); the next save writes all four. The type scale is the notebook's three sizes: the formula
 its title (34 px), an announcement its heading (22 px) — the kit's `--info-size-body` overridden in `lab.css`, each held to 8 vw
-and at least 16 px — an atom label its body (14 px), each × SIZE. It never reaches an export: a picture, a loop and a video carry
+and at least 16 px — an atom label its body (14 px); the formula and an announcement × STAGE FORMULA's SIZE, an atom label × ATOM LABELS' SIZE. It never reaches an export: a picture, a loop and a video carry
 instead its one plain-Unicode CAPTION (`H₂O · 1b1 HOMO · STO-3G`, or the states), drawn by `lab/capture.js` `drawCaption` and
 following STAGE FORMULA (D5, Group II, replaces it).
 While a molecule owns the field SPECTRUM is FOLDED, not hidden

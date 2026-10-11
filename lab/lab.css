@@ -464,14 +464,6 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 .slice-c { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline);
   background: var(--glass-well); touch-action: none; cursor: grab; image-rendering: auto; }
 .slice-c:active { cursor: grabbing; }
-/* WAVE 101 · the palette's two step chips: a fixed seat that does not take a share of the row, and
-   the drawn glyph at the size every other header chip in this lab uses (§55b). */
-.row > .trig.pal-nav { flex: 0 0 auto; min-width: 34px; width: 34px; padding: 0; position: relative; }
-
-
-.row > .trig.pal-nav::before {
-  content: ""; position: absolute; top: 0; bottom: 0; left: -6px; right: -6px; }
-.pal-nav > svg { width: 13px; height: 13px; display: block; margin: auto; }
 /* 0.5.3 M12 · PALETTE, SHORTER (material.js): no −π…π ticks, the ARG ψ field hidden, the reader under ROTATE in place of its "turn", the float over the selected stop, INVERT's half disk turned over when ON */
 .native-clean[data-id="palette"] .mir-ramp-ticks:empty, .native-clean[data-id="palette"] .mir-ramp-at { display: none; }
 .native-clean[data-id="palette"] .mir-ramp-verbs .k > .k-val, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-lbl, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-sub { display: none; }
@@ -798,7 +790,7 @@ body[data-theme="dark"] .km-key-unbound {
 .native-ab .ab-slot::after { content: ''; flex: 0 0 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--glass-press); }
 .native-ab .ab-slot.stored::after { background: var(--acc); box-shadow: 0 0 6px color-mix(in srgb, var(--acc) 70%, transparent); }
 
-/* THE STAGE TEXT (INFORMATIONAL since 0.5.3 M9; 0.5.1 D1: one block of the kit's INFORMATIONAL layer, rack.js initStageText) wears the kit's ink,
+/* THE STAGE TEXT (INFORMATIONAL since 0.5.3 M9; 0.5.1 D1: one block of the kit's INFORMATIONAL layer, lab/shell/stage-words.js initStageText) wears the kit's ink,
    shade and serif at the kit's seat; beneath every window (z 20 < rack 30 < #floats 32: the kit's root has none), never a pointer
    target, never in the occlusion mask.  The type is the notebook's × SIZE (--lw-stage-size): the formula its title (34 px), an
    announcement ([data-fade]) its heading (22 px), each held to 8 % of the window's width and at least 16 px, KaTeX at .nb-view's 1.08em. */

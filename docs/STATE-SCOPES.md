@@ -109,7 +109,7 @@ Two measurements show this (`research/release-0.3.1/probes/S1/scope-keys.*.json`
   that its angles describe. A FREE reader would draw a different shot: the camera basis moved 0.323.
 - A FREE loop leaves roll (|right·ẑ| = 0.568), and a TURNTABLE reading of that record moved the basis 0.685.
 
-The camera feel (friction, spin, drag gain, fling) stays PREFERENCE.
+The camera feel (friction, spin, drag gain, fling, and since 0.5.3 the LOCK `camLock`) stays PREFERENCE.
 
 ## Known edges
 

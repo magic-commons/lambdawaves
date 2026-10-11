@@ -1944,7 +1944,7 @@ try {
     const C = __LW.camera, nap = (ms) => new Promise((r) => setTimeout(r, ms));
     C.setAutoRotate(false); C.setFriction(2.5); C.reset(); await __LW.settle();
     const cv = document.getElementById('field'), r = cv.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    const ev = (type, x, y, o) => cv.dispatchEvent(new PointerEvent(type, Object.assign({ clientX: x, clientY: y, bubbles: true, cancelable: true, pointerId: 7, isPrimary: true, pointerType: 'mouse' }, o || {})));
+    const ev = (type, x, y, o) => cv.dispatchEvent(new PointerEvent(type, Object.assign({ clientX: x, clientY: y, bubbles: true, cancelable: true, pointerId: 7, isPrimary: true, pointerType: 'mouse', buttons: type === 'pointerup' ? 0 : 1 }, o || {})));   /* 0.5.3 re-aim (M4): a real mouse drag carries buttons: 1; a buttonless mouse move now ENDS a held drag (stage-gestures.js, the heal), so the law's moves say what a mouse says */
     const SENS = 0.0065, FINE = 0.25;
     const v0 = __LW.reg.version, dig0 = __LW.stateDigest();
     /* 1 — THE GAIN IS A CLOSED FORM and SHIFT is a quarter of it: one drag, default → SHIFT → default, 6 moves of
@@ -5504,8 +5504,8 @@ try {
       && canvasT.density.indexOf('density') >= 0 && canvasT.grain.indexOf('grain') >= 0
       && canvasT.during === 0 && canvasT.tMoved === true && canvasT.onPause === 1
       && canvasT.paused.indexOf('paused at t =') >= 0
-      && canvasT.live === 7 && canvasT.liveBad === 0 && canvasT.overlays === 3
-      && canvasT.liveKinds === 'DIV.km-status DIV.m2hint DIV.mir-banner DIV.tl-status SPAN.mir-step-text SPAN.mir-step-text SPAN.mir-step-text' && canvasT.liveSpoke === 0   /* 0.5.0 re-aim (C7b): four became six (the TIMELINE's status line and stepper), named, and silent while playing */
+      && canvasT.live === 8 && canvasT.liveBad === 0 && canvasT.overlays === 3
+      && canvasT.liveKinds === 'DIV.km-status DIV.m2hint DIV.mir-banner DIV.tl-status SPAN.mir-step-text SPAN.mir-step-text SPAN.mir-step-text SPAN.mir-step-text' && canvasT.liveSpoke === 0   /* 0.5.3 re-aim (M8): seven became eight — MOLECULES' SECTION stepper, the same admitted kind (a user step's words), as PALETTE's, TIMELINE's and CURVES' */   /* 0.5.0 re-aim (C7b): four became six (the TIMELINE's status line and stepper), named, and silent while playing */
       && canvasT.liveCurves.join() === 'SPAN.mir-step-text'   /* 0.5.1 re-aim (D10-24): six became seven — the CURVES card's PRESET stepper, named by its card (the same admitted kind, a user act's words) */
       && chatterT.focused === true && chatterT.tab === 0 && chatterT.during === 0
       && chatterAfterT.after === 1 && chatterAfterT.text !== chatterT.text

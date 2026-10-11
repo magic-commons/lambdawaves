@@ -6,7 +6,7 @@ export function createSettings(app) {
   const { ui, mat, settingsStore, useCompactDefaults, FIRST_RUN, appleDevice } = app; const { readSettings } = app.sh;
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
-  app.state.molFormulaScale = 1;                         // the STAGE TEXT's SIZE knob (Settings › Display): × the notebook's sizes (lab.css .lw-stage), a PREFERENCE
+  app.state.molFormulaScale = 1;                         // the STAGE FORMULA's SIZE knob (INFORMATIONAL, 0.5.3 M9): × the notebook's sizes (lab.css .lw-stage), a PREFERENCE
   function saveSettings() {
     if (!settingsLoaded) return;
     try {
