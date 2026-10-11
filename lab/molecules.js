@@ -6,6 +6,8 @@
  * (d) the counts the engine will find (Cartesian AOs, shells, electrons).  lab/chemview.js reads it for the MOLECULE
  * dropdown; research/h2o-2026-09-11/scratch/fix-molecules.py reads it to write the PySCF oracle; tests/molecules.
  * test.mjs holds every count against lab/md.js's own basis and every energy against that oracle.
+ * ENERGY REFERENCE AND KERNEL: PySCF's energy (STO-3G `oracle.delta`, tests/fixtures/oracles/sto-3g-v1.json; 6-31+G* against
+ * 6-31+g-star-v1.json); kernel S (shells + a coefficient buffer). The four roads M · S · W · RU: research/release-0.6.0/PLAN.md §B.
  *
  * RHF IS CLOSED-SHELL ONLY, so every entry here is a closed-shell singlet and the electron count is even.  The
  * famous open-shell species CANNOT be in this list and are not:

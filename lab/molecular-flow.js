@@ -13,7 +13,8 @@
  * WHAT IS NOT CLAIMED.  ∂ρ/∂t + ∇·j = 0 is exact in a complete basis and is VIOLATED in a finite one; the defect in
  * STO-3G is measured by tests/molecular-flow.test.mjs and reported, never asserted as an identity.  The tracers are
  * a reading of the current, not a claim that the molecule contains particles, and within one frame they ride a
- * frozen field (D(t) is rebuilt once a frame).
+ * frozen field (D(t) is rebuilt once a frame): THE FROZEN-FRAME STEP ERROR and THE SPEED CAP (`step`'s `cap`) are covered by NO oracle.
+ * ENERGY REFERENCE AND KERNEL: none of its own; the TD-CIS pair density it reads is cited to PySCF's transition RDMs (proving/LEDGER.md, not in this tree) and no test here checks it; kernel W (tracers are lines from f64).
  */
 import { evaluator, shellsFromField } from './molecular-field.js';
 

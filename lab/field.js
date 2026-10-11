@@ -10,6 +10,7 @@
  * hydrogen.js (no basis textures, no memory per mode): each voxel evaluates
  *     φ = norm · e^{-ρ/2} ρ^l L(ρ) · sin^{|m|}θ D(cosθ) · e^{imφ},   ρ = 2r/n.
  * A 96³ grid × 16 modes is ~14 M evaluations — well under a millisecond on an RTX 3070.
+ * ENERGY REFERENCE AND KERNEL (hydrogen): the closed form, hydrogen.js `energy` = −1/(2n²) Eh; kernel M (Mode records, closed forms in-kernel).
  */
 import { modeTable } from './hydrogen.js';
 import { qmul, qnormalize, adjoint, expPure } from './rotor4.js';

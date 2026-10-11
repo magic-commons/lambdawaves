@@ -79,7 +79,7 @@ reconstructing all 91 labels takes 1.43 ms at 96³ and 3.40 ms at 128³
 `k1-time.out.json`). GPU voxels agree with the CPU closed form to 2e-5.
 
 Around that sits an instrument: a rack of windows (STATE, SPECTRUM, ORBIT, SLICE,
-KEPLER, VORTEX, MOLECULES, MO-REGISTRY, WIGNER, RADIATION, …), a transport with four clocks, a
+KEPLER, VORTEX, MOLECULES, MO-REGISTRY, WIGNER, RADIATION, …), a transport with one clock, a
 modulation plug-in with drag-to-patch macros, presets, projects, shareable state links,
 FILE › EXPORT SHAPE (GLB · OBJ · STL, the density isosurface on screen for Blender or Cinema 4D) and
 EXPORT GRID (NPZ · Gaussian cube, ψ on the grid for NumPy or a chemistry viewer) — see
@@ -147,7 +147,7 @@ why `html_handling` is `"none"`, and what the build refuses to let you do.
 |---|---|
 | **Needs** | A browser with WebGPU in a secure context (https or localhost). Chrome/Edge 113+, Firefox 141+, Safari 26 / iPadOS 26. No WebGL fallback: without WebGPU you get a banner, not a lab. |
 | **Runs well on** | A desktop GPU (measured on an RTX 3070: about 3 ms per frame at 96³) and an M-series iPad (the quality governor drops ray steps, then the grid, under load). |
-| **Physics (the release)** | Exact hydrogen (n ≤ 6), plus MOLECULES: restricted Hartree–Fock with vendored Gaussian bases (STO-3G for H–Kr; 6-31+G\* for small H, C, N, O, F molecules), 54 library entries with 52 enabled, RPA and TDA spectra, and real-time TDHF. MO-REGISTRY plays orbital packets or many-electron TD-CIS states, drives them with a field, and shows their current. Closed shells and fixed nuclei only; no correlation beyond singles. The earlier H₂⁺, H₂, HELIUM, ATOMS, QCD and ELECTROSTATICS windows are hidden as legacy (`docs/LEGACY-WINDOWS.md`); a project that uses one still brings it back. See `REPORT.md`, 2026-09-18. |
+| **Physics (the release)** | Exact hydrogen (n ≤ 6), plus MOLECULES: restricted Hartree–Fock with vendored Gaussian bases (STO-3G for H–Kr; 6-31+G\* for small H, C, N, O, F molecules), 54 catalogue entries with 52 enabled (38 library records, each with a PySCF oracle), RPA and TDA spectra, and real-time TDHF. MO-REGISTRY plays orbital packets or many-electron TD-CIS states, drives them with a field, and shows their current. Closed shells and fixed nuclei only; no correlation beyond singles. The earlier H₂⁺, H₂, HELIUM, ATOMS, QCD and ELECTROSTATICS windows are hidden as legacy (`docs/LEGACY-WINDOWS.md`); a project that uses one still brings it back. See `REPORT.md`, 2026-09-18. |
 | **Not yet** | A real device matrix, an installed-PWA update test, a screen-reader pass — see `docs/SHIPPING-READINESS.md`. |
 
 ## Accessibility
