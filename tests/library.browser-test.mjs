@@ -147,7 +147,7 @@ try {
   const six = await g.ev(`await __w(4000); __offline(false);
     const card = document.querySelector('.dev[data-id="chem"]'), sel = card.querySelector('.mol-pick select');
     const dia = __LW.chem.section('DIATOMICS');
-    const prev = card.querySelectorAll('.mol-section > .trig.mol-turn')[0], next = card.querySelectorAll('.mol-section > .trig.mol-turn')[1];
+    const prev = card.querySelector('.mol-section .mir-step-b[data-step="-1"]'), next = card.querySelector('.mol-section .mir-step-b[data-step="1"]');   // 0.5.3 M8: the kit's stepper, PALETTE's look
     next.click(); const turned = __LW.chem.section().name; prev.click(); const back = __LW.chem.section().name;
     const before = __LW.chem.section('LATTICE'), opts = [...sel.options].map((o) => o.value), c0 = await __calls();
     const kept = await __LW.chem.keep(true), on = __LW.chem.section('LATTICE');

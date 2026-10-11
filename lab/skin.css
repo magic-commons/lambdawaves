@@ -436,7 +436,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 #transport.mini .tbtn.modb { min-width:38px;width:38px;padding:0 5px; }
 #transport.mini .tbtn.modb.on { color:var(--acc2); }
 .native-clean .native-rotors { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));justify-items:center;row-gap:14px; }
-.native-clean .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); }
+.native-clean .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr) 48px); }
 .plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--neu-inset);border-radius:8px; }
 .native-clean[data-id="camera"] .camera-motion { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center;row-gap:12px; }
 #transport .native-info { display:inline-flex;position:relative;align-items:center;flex:0 0 24px;order:7; }

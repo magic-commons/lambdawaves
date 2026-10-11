@@ -85,7 +85,8 @@ SLICE / CLIP): the ids `slice` / `clip`, `slice.*` and the `material.slice.*`
 targets are unchanged. PERFORMANCE sits in SETTINGS › QUALITY beside GOVERNOR;
 METERS keeps the GOVERNOR readout and FRAME PROFILE.
 
-THE STAGE TEXT (Settings › Display, ONE row: the switch and its SIZE; PREFERENCE `molFormula` / `molFormulaSize`, on by default,
+THE STAGE FORMULA (the INFORMATIONAL window since 0.5.3 M9: its own rack card, `lab/informational.js`, closed on a first run and for a
+profile older than it, seated under SETTINGS when opened, listed in + and WINDOW; PREFERENCE `molFormula` / `molFormulaSize`, on by default,
 50–300 %) writes what is playing on the stage as ONE block of the kit's INFORMATIONAL layer (`createInfoLayer` in `lab/shell/stage-words.js` `initStageText`
 `initStageText`, 0.5.1 D1; `lab/stage-text.js` is gone): the MOLECULES formula ($\mathrm{H_{2}O}$) while MOLECULES is on,
 otherwise SPECTRUM's populated states in `stateLatex`'s prose ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION) — never a
@@ -107,15 +108,15 @@ where the record has none; the HOMO's name and the HOMO–LUMO gap), every numbe
 (`tests/molecule-head.test.mjs`). It is held (`announce(md, 0)`) until Escape, a press on the picture after 2.5 s, or the next
 pick, and a restore, an undo, a project, link or demo open never shows it (`__LW.head.shown`;
 `tests/molecule-head.browser-test.mjs`). HOLD (I,
-the kit's `infoActions` row; `lab/key-table.js` carries a row's `up`) holds the words still while the key is down. The same
-switch and SIZE govern the ATOM LABELS, λWAVES' own letters (R6-L; kit labels are D1b, Group II): each MOLECULES nucleus marked
+the kit's `infoActions` row; `lab/key-table.js` carries a row's `up`) holds the words still while the key is down. Its second
+row governs the ATOM LABELS (PREFERENCE `atomLabels` / `atomLabelsSize`, on by default, split from the formula's at 0.5.3 M9), λWAVES' own letters (R6-L; kit labels are D1b, Group II): each MOLECULES nucleus marked
 with its element symbol at its projected position (`toScreen`, written only when the camera, molecule, size or canvas changed),
-white under `mix-blend-mode: difference` so they invert whatever is beneath them. The older `atomLabels` key is read once
-(only where `molFormula` was never written) and dropped; `atomLabelsSize` is not read. The type scale is the notebook's three sizes: the formula
+white under `mix-blend-mode: difference` so they invert whatever is beneath them. An absent `atomLabels` / `atomLabelsSize`
+takes the stored `molFormula` / `molFormulaSize` once (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); the next save writes all four. The type scale is the notebook's three sizes: the formula
 its title (34 px), an announcement its heading (22 px) — the kit's `--info-size-body` overridden in `lab.css`, each held to 8 vw
 and at least 16 px — an atom label its body (14 px), each × SIZE. It never reaches an export: a picture, a loop and a video carry
 instead its one plain-Unicode CAPTION (`H₂O · 1b1 HOMO · STO-3G`, or the states), drawn by `lab/capture.js` `drawCaption` and
-following the same switch (D5, Group II, replaces it).
+following STAGE FORMULA (D5, Group II, replaces it).
 While a molecule owns the field SPECTRUM is FOLDED, not hidden
 (`moleculeMode`), and unfolds when the molecule lets go; EDIT › COPY then
 copies the molecule's page (`moleculeLatex`, `lab/latex-state.js`).
@@ -202,7 +203,7 @@ PROJECTS are MIR's FOLDERS over ONE project part (lab/projects.js,
 lab/project-store.js): `lambdawaves` = { data: projectSnapshot(), notebook } —
 the notebook is the project's page 0 — signed by projectKey();
 serialize({ scope: 'edit' }) bytes never move (tools/serialize-bytes.mjs); the full
-bytes gain one WORKSPACE layout row per new card (RENDER at C7b, CURVES at 0.5.1).
+bytes gain one WORKSPACE layout row per new card (RENDER at C7b, CURVES at 0.5.1, INFORMATIONAL at 0.5.3 M9).
 `lambdawaves.q0.projects` keeps λWAVES' { items, recent } through a byte-exact
 translator; an invalid collection is read-only, 8 MiB a project, 24 MiB the
 library (tests/project-formats.*). `__LW.projects` keeps every old verb

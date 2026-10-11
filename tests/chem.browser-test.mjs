@@ -196,14 +196,14 @@ try {
     for (const s of ${JSON.stringify(SECTIONS)}) {
       const h = __LW.chem.section(s); const here = sel ? [...sel.options] : [];
       for (const g of sel.querySelectorAll('optgroup')) groups.add(g.label);
-      pages.push({ s, name: h.name, n: here.length, ids: here.map((o) => o.value).join(), want: h.molecules.join(), head: card.querySelector('.mol-section .ro-val').textContent });
+      pages.push({ s, name: h.name, n: here.length, ids: here.map((o) => o.value).join(), want: h.molecules.join(), head: card.querySelector('.mol-section .mir-step-text').textContent });
       opts.push(...here.map((o) => ({ value: o.value, text: o.textContent, disabled: o.disabled, help: o.dataset.help || o.title || '' })));
     }
     __LW.chem.section('HYDRIDES');
     return { exists: !!sel, cls: sel && sel.className, tag: sel && sel.tagName, pages,
       count: opts.length, disabled: opts.filter((o) => o.disabled).length,
       disabledText: opts.filter((o) => o.disabled).map((o) => o.text + ' :: ' + o.help),
-      groups: [...groups], turners: card.querySelectorAll('.mol-section > .trig.mol-turn').length,
+      groups: [...groups], turners: card.querySelectorAll('.mol-section .mir-step-b').length,
       help: sel && (sel.dataset.help || sel.title) || '', aria: sel && sel.getAttribute('aria-label'),
       value: sel && sel.value, first: opts[0] && opts[0].text, benzene: opts.find((o) => o.value === 'C6H6')?.text,
       bad: opts.filter((o) => !/· [0-9]+ AO · (~([0-9]+ ms|[0-9]+[.][0-9] s)|record( · DOWNLOAD)?$)/.test(o.text)).map((o) => o.value + ' :: ' + JSON.stringify(o.text)),

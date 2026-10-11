@@ -63,7 +63,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   for(const id of ['appearance','display','quality']){pages[id]=el('div','settings-page',viewport);pages[id].hidden=id!=='display';}
   function row(page, names){const r=el('div','row tight',pages[page]);for(const name of names)if(ui[name]?.root)r.appendChild(ui[name].root);}
   row('appearance',['themeSeg']);row('appearance',['cardSeg']);row('appearance',['frostSeg']);row('appearance',['discSw','blurK']);row('appearance',['accA','accB','vivid']);
-  row('display',['badgesSw','controlHintsSw','capSw','windowInfoSw']);ui.windowInfoSw.root.parentElement.classList.add('settings-status-grid');row('display',['molFormulaSw','molFormulaK']);row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
+  row('display',['badgesSw','controlHintsSw','capSw','windowInfoSw']);ui.windowInfoSw.root.parentElement.classList.add('settings-status-grid');row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
   const quality=ui.gridSeg.root.closest('.grp');if(quality)pages.quality.appendChild(quality);
   const actions=el('div','row tight settings-actions',pages.appearance);
   for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig')){if(b.textContent.includes('SHOW THE WARNING'))b.querySelector('.trig-l').textContent='WARNING';actions.appendChild(b);}
@@ -75,8 +75,6 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   rotations.classList.add('native-rotors');
   const turn=rotations.querySelector('.k');
   for(const k of [turn,ui.kzKnob.root,ui.defKnob.root,ui.rotZRate.root,ui.kzRate.root,ui.defRate.root])rotations.appendChild(k);
-  const ab=ui.abSw.root.closest('.grp'),abRow=ab.querySelector('.row');abRow.classList.add('native-ab');
-  const buttons=[...abRow.children];if(buttons.length===4)abRow.replaceChildren(buttons[0],buttons[2],buttons[1],buttons[3]);
   const tr=document.getElementById('transport');
   const main=el('div','native-play-row');main.append(...tr.children);tr.appendChild(main);
   const repeatInfo=infoPanel(ui.periodFx.root,'Repeat mathematics');

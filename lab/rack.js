@@ -113,7 +113,7 @@ export async function boot(dom) {
     dom, ui, device, DEVICES, reg, hNote, clock, appPlay, obs, mat, FIELD_CHROME, rates, energyOf, sturm, labelExpect, settingsStore, useCompactDefaults, PAL_DEF, isPhone, isTablet, FIRST_RUN,
     appleDevice, LOOK_DEFAULTS,
     hooks: { theme: null, restage: null, setStageColour: null, setStageFollow: null, setStage: null, setGamut: null, setTheme: null, ab: null, slap: null, period: null, keys: null, warning: null },
-    state: { history: null, palette: null, molFormulaScale: 1, space: 'x', playedLast: false, uiHidden: false, pointerHeld: false, metersWall: 0, govVersion: -1, keplerDirty: true, badgesWall: 0,
+    state: { history: null, palette: null, molFormulaScale: 1, atomLabelsScale: 1, space: 'x', playedLast: false, uiHidden: false, pointerHeld: false, metersWall: 0, govVersion: -1, keplerDirty: true, badgesWall: 0,
       applyVisuals: true, modView: null, modHost: null, modWall: 0, tl: null, modExpOn: null, dodge: null, filmCard: null, feedMs: 0, rotMoved: false, rotTicking: false, audioCap: null, modArm: true,
       occludeDirty: true, occludeAt: 0, stageMix: 0.04, stageFollow: true, refSnapshot: null, pendingRef: null, warmTimer: 0, warmIdle: 0, dragging: false, cornerLayoutDirty: true,
       exportLocked: false, histShown: null, lastNmax: 1, capApi: null, camKnobs: {}, exporter3d: null, flowEpoch: null, chem: null, restampParams: null, molSession: null, register: null,
