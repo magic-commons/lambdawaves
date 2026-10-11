@@ -328,6 +328,7 @@ export function createChem(host, api) {
          ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
       const fill = () => {
         sol = r; sol.key = key; sol.seq = seq; sol.note = note; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
+        sol.identity = MS ? MS.identityOf({ atoms, basisHash: r.hash, charge, multiplicity: 1, model: 'RHF' }) : null;   // 0.5.4 P1: DATA, never a stamp (R13)
         const named = keyed(r.names, pendingKey);
         orbital = named ? named.k : (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
         pendingOrbital = pendingKey = null;
