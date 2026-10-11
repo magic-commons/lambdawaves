@@ -407,6 +407,23 @@ try {
   assert.equal(chrome.ok, true); assert.equal(chrome.same, true, 'an undo moved the field chrome: ' + chrome.set + ' → ' + chrome.after); assert.deepEqual(chrome.errs, []);
   pass('the chrome leaves the ring: after an undo and a redo, frame / axis / frameMode / axisMode / cornerSide / invert / axisInk are exactly what they were');
 
+  /* ── 5b · 0.5.3 M6 THE LOCK IS THE READER'S: a project that carries a shift opens CENTRED under the camera's LOCK (a PREFERENCE);
+     the record handed to restore is byte-identical after the open (nothing writes the file back), the settings outside the WORKSPACE
+     keys are byte-identical, the lock is still on, and an undo and a redo leave the lock and the centred pivot alone ── */
+  const lock = await ev(`const L = __LW, H = L.history, WS = ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack'];
+    const strip = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of WS) delete o[k]; return JSON.stringify(o); };
+    L.camera.reset(); L.camera.setShift(0.3, 0.2); const S = L.serialize(), bytes = JSON.stringify(S), carried = S.presentation.obs.shift.slice();
+    L.camera.setLock(true); L.saveSettings(); await __w(50); const before = strip(), settingsLock = JSON.parse(localStorage.getItem('lambdawaves.q0.settings')).camLock;
+    L.camera.setLock(false); L.camera.setShift(-0.4, 0.1); L.camera.setLock(true);
+    const ok = L.restore(S); await __w(400); const opened = L.obs.shift.slice(), after = strip(), untouched = JSON.stringify(S) === bytes;
+    H.flush(); L.setStage(0.17); H.flush(); H.undo(); const undone = [L.camera.lock, L.obs.shift.slice()]; H.redo();
+    const res = { ok, carried, opened, untouched, settings: before === after, settingsLock, lockAfter: L.camera.lock, undone, redone: [L.camera.lock, L.obs.shift.slice()], leaked: 'camLock' in L.serialize().presentation.camera, errs: __e.slice() };
+    L.camera.setLock(false); L.saveSettings(); L.camera.reset(); return res;`);
+  assert.equal(lock.ok, true); assert.deepEqual(lock.carried, [0.3, 0.2]); assert.deepEqual(lock.opened, [0, 0], 'the file\'s shift did not open centred under the LOCK: ' + JSON.stringify(lock.opened));
+  assert.equal(lock.untouched, true, 'the record handed to restore changed'); assert.equal(lock.settings, true, 'the open changed the settings'); assert.equal(lock.settingsLock, true, 'camLock is not in the settings');
+  assert.equal(lock.lockAfter, true); assert.deepEqual(lock.undone, [true, [0, 0]]); assert.deepEqual(lock.redone, [true, [0, 0]]); assert.equal(lock.leaked, false, 'camLock rode into a project'); assert.deepEqual(lock.errs, []);
+  pass('the LOCK is the reader\'s (0.5.3 M6): a project carrying a shift of (0.3, 0.2) opens centred under it, the record and the settings (outside WORKSPACE) are byte-identical, the lock stays on through the open, an undo and a redo, and serialize() carries no camLock');
+
   /* ── 6 · THE DEPTH: 61 distinct edits → 60 undos, the oldest fell off; HISTORY UNDO after a jump ── */
   const depth = await ev(`const H = __LW.history; H.clear(); const first = __ser();
     for (let i = 1; i <= 61; i++) { __LW.setStage(i / 100); H.flush(); }

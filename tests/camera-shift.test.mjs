@@ -187,3 +187,29 @@ pass('the camera port: get reads the law\'s numbers (12 ids, radians), set takes
   assert.deepEqual([P.ranges.spin.min, P.ranges.spin.max, P.ranges.spin.home, L.camera.speed], [...CAM.SPIN, CAM.SPIN_DEF, CAM.SPIN_DEF]);
 }
 pass('the port as the kit panel\'s: a dial is one axis (a routed PAN X keeps its base under a hand on PAN Y), the feel setters and notify are notices, PAN HOME is the port\'s verb, PAN reads NDC, SPIN\'s range is CAM\'s');
+
+/* 9 · THE LOCK (0.5.3 M6, R3: the classic camera holds the PAN only).  Engaged, the shift goes to 0 raw (a routed axis's base is
+   not written), and every road that moves the shift answers with a notice and moves nothing: setShift, panBy (Alt-drag, two fingers,
+   Alt+Arrows), PAN X / PAN Y / PAN HOME on the port, and the anchors of zoomAt (the wheel at the cursor, the pinch at the centroid)
+   and setFov — so every zoom is from the centre.  ZOOM, FOV, the mode and the turn stay live; released, the pan answers again. */
+{
+  const L = law(BOOT(), (id) => id === 'observer.panx'), P = L.port, o = L.obs; let told = 0; P.subscribe(() => told++);
+  assert.equal(L.camera.lock, false); assert.equal(P.get('lock'), false, 'off by default');
+  o.shift = [0.4, -0.3];   /* a project's shift, or a route's output */
+  P.set('lock', true); assert.deepEqual([L.camera.lock, P.get('lock'), o.shift], [true, true, [0, 0]], 'engaged: the pivot goes home');
+  assert.deepEqual(L.writes, [], 'raw: the routed PAN X keeps its base');
+  const n = told; L.setShift(0.5, 0.5); L.panBy(0.1, -0.1); P.set('panX', 0.7); P.set('panY', -0.2); P.verbs[0].run();
+  assert.deepEqual(o.shift, [0, 0], 'setShift, panBy and the PAN dials move nothing'); assert.deepEqual(L.writes, [], 'and write no base'); assert.ok(told >= n + 5, 'each answers with a notice (the PAN pad springs back)');
+  L.zoomAt([0.6, -0.4], 2.0); assert.deepEqual([o.shift, o.dist], [[0, 0], 2.0], 'the wheel at a cursor: the zoom is from the centre');
+  L.setFov(0.9, [-0.5, 0.5]); assert.deepEqual([o.shift, o.fov], [[0, 0], 0.9], 'an anchored FOV step: from the centre');
+  /* the dolly zoom (Ctrl+Shift+Q/E, shell/keys.js): setDist then setFov with d·tan(fov/2) held */
+  const inv = o.dist * Math.tan(o.fov / 2); L.setDist(o.dist * 1.1); L.setFov(2 * Math.atan(inv / o.dist));
+  assert.deepEqual(o.shift, [0, 0], 'the dolly zoom keeps the shift at 0'); assert.ok(Math.abs(o.dist * Math.tan(o.fov / 2) - inv) < 1e-12, 'and the size');
+  L.setCamMode('turntable', { now: true }); const y0 = o.yaw; P.turn(0.3, 0); assert.ok(Math.abs(o.yaw - y0 - 0.3) < 1e-9, 'the turn stays live');
+  P.set('mode', 'free'); assert.equal(o.mode, 'free', 'the mode stays live'); assert.deepEqual(o.shift, [0, 0]);
+  L.resetView(); assert.deepEqual(o.shift, [0, 0]); assert.equal(L.camera.lock, true, 'RESET VIEW is a pose, not the lock');
+  L.camera.setLock(false); L.setShift(0.25, 0.1); assert.deepEqual(o.shift, [0, 0.1], 'released: the pan answers again (the routed X writes its base, Y moves)');
+  assert.deepEqual(L.writes, [['observer.panx', 0.25]]);
+  const free = law(BOOT()); free.setShift(0.4, -0.3); free.zoomAt([0.6, -0.4], 2.0); assert.notDeepEqual(free.obs.shift, [0.4, -0.3], 'unlocked, the wheel still zooms at the cursor');
+}
+pass('the LOCK (0.5.3 M6): engaged it centres the pivot raw (a routed base untouched); setShift, panBy, PAN X / Y and PAN HOME move nothing and say so; the wheel, an anchored FOV and the dolly zoom are from the centre; the turn, ZOOM, FOV and the mode stay live; released, the pan answers');
