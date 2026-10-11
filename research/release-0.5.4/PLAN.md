@@ -142,3 +142,13 @@ with "whatever implementation is easier to layer in the architecture" as the tie
 - **The engine plan leans on this one:** `research/release-0.6.0/PLAN.md` D.0 says its rows "assume P4 `statusOf()`, P6 the worker refuses, P7 the field law; the first
   row that needs a missing one carries it" — so P4, P6 and P7 are the rows that must land before 0.6.0, the rest may slip to a later cut without moving the ladder.
 - Order unchanged: BRIEFs after 0.5.3 is cut and its INFORMATIONAL window and line count are read; the cap = 0.5.3's cut + 1 %. `PLAN-DRAFT-3.md` is kept unchanged as the record.
+
+**§J-2 · P7c RULING (the integrator, 2026-10-11 14:05, under Josh's deferral; the law behind it is this plan's own: every number read from its source constant, nothing sold as exact that is not).**
+PAIR B measured (`.tmp/fieldlaw-probe.mjs` in its worktree) that the f16 store rounds toward zero on this rig, so neither source number holds as a PER-VOXEL maximum:
+hydrogen's worst voxel at 64³ is 1.68e-4 against README's 2e-5 (RMS 2.3e-6; 99.8 % of voxels within 2e-5); water's worst relative error on ρ is 1.94e-3 against `field.js`'
+≈ 1e-3 (2.9e-4 against ρmax). RULED: (1) `tests/field-law.browser-test.mjs` asserts what the texel IS — each stored component within one f16 ulp of its f64 value (the
+rounding mode as measured) — and prints the two source figures as readings, each in its own metric (RMS · 99.8 %-of-voxels · worst voxel · relative-to-ρmax); (2) README's
+2e-5 line and `field.js`' ≈ 1e-3 comment are made TRUE in place (an RMS and a relative-to-ρmax figure, with the worst voxel beside each) — a P0-kind edit inside PAIR B's
+continuation; (3) P4's picture number reads the field-law constant and says its metric: `picture good to 2e-5 RMS (worst voxel 2e-4)` for hydrogen, `picture good to 0.03 %
+of ρmax` for a molecule's density — never a bare "good to 2e-5"; (4) this is the first row of THE ENGINE PLAN's "METERS shows the picture's own floor with its metric" (0.6.0
+N6), measured early; its 2.7–4.9e-4 floor and this 1.68e-4 worst voxel are the same fact seen on two grids and are recorded together in `PAIR-B-BUILD.md`.

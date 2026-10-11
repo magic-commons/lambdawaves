@@ -507,7 +507,7 @@ const CATALOGUE = await (async () => {
 export const RECORD_GROUP = { id: 'library', label: 'LIBRARY · FROM ITS RECORD' };
 export const RECORD_ONLY = CATALOGUE.rows.filter((r) => r.molecule && !RAW.some((m) => m.id === r.id))
   .map((r) => derive({ id: r.id, group: RECORD_GROUP.id, library: true, section: r.section, ...r.molecule }));
-for (const m of [...MOLECULES, ...RECORD_ONLY]) m.records = Object.fromEntries(CATALOGUE.rows.filter((r) => r.id === m.id).map((r) => [r.basis, r]));
+for (const m of [...MOLECULES, ...RECORD_ONLY]) { m.records = Object.fromEntries(CATALOGUE.rows.filter((r) => r.id === m.id).map((r) => [r.basis, r])); m.oracle = CATALOGUE.oracles?.[m.id] || m.records['sto-3g']?.oracle || null; }   // 0.5.4 P3: a live-only molecule's PySCF energy, or its row's {what, delta}
 export const MOLECULE_BY_ID = new Map([...MOLECULES, ...RECORD_ONLY].map((m) => [m.id, m]));
 /* ── THE LARGER BASIS (2026-09-18).  6-31+G* is vendored for H, C, N, O, F: 2 functions on hydrogen, 19 Cartesian ones on
  * a heavy atom.  It is offered where every atom is in the record AND the molecule stays near the benzene cap — MEASURED

@@ -17,7 +17,7 @@ basis states"), `lab/field.js` (the texel constant), `tests/molecule-head.browse
    same function → EXACT with the field law's 2e-5. The vocabulary map written ONCE here: MEASURED or IMPORTED → NUMERICAL, UNKNOWN or absent → UNCHECKED, a closed form →
    EXACT. Every number comes from the constant the tests already assert (`oracle.delta`, the texel constant in `field.js`, the field law's 2e-5) — never typed twice. The
    strings of PLAN §B are the targets: `DENSITY · NUMERICAL · energy agrees with PySCF to 7e-9 Eh · picture good to 0.1 %` · `ORBITAL · NUMERICAL · sign and phase are
-   arbitrary` · `FLOW · NUMERICAL · direction exact, size qualitative` · `1s+2pz · EXACT · picture good to 2e-5` · `· geometry computed, not measured` on the 36.
+   arbitrary` · `FLOW · NUMERICAL · direction exact, size qualitative` · `1s+2pz · EXACT · picture good to 2e-5 RMS (worst voxel 2e-4)` · `· geometry computed, not measured` on the 36. **PLAN §J-2 (the P7c ruling) governs every picture number: it is read from the field-law constant PAIR B ships and SAYS ITS METRIC (RMS · worst voxel · % of ρmax) — never a bare "good to 2e-5"; a molecule's density reads `picture good to 0.03 % of ρmax`.**
 2. **`chem.capability()`** a thin caller (no facade change — `lw-facade` 1/1 WITHOUT `--write`): `{ caps, observables, derivatives: 'UNKNOWN', limits { lmax 2, Z 36,
    densityAO 128, orbitalAO 768 }, precision, identity, online / cached / invalidates, status }`.
 3. **Three seats from the one string:** (a) THE HEAD's last line — molecule-level only (STATE word, oracle, geometry; held, so no per-VIEW word that could go stale), through
