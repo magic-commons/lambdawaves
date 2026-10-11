@@ -24,7 +24,8 @@
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
 import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
-import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631 } from './molecules.js';
+import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
+import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
 import { orbitalName, forms, coreCount } from './names.js';
 import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab } from './library.js';
 
@@ -59,7 +60,7 @@ export function createChem(host, api) {
   let on = false, active = api.active ? !!api.active() : true;
   let preset = 'H2O', basis = 'sto-3g', view = 'density', orbital = null, axis = 'y';
   let kappa = 1e-3, speed = 10, dt = 0.01, integrator = 'mmut', tda = false, core = false, valence = false;
-  let sol = null, rt = null, running = false, inflight = false;
+  let sol = null, rt = null, running = false, inflight = false, said = null;   // said: 0.5.4 P4's status of what is on stage (tell)
   let solveSeq = 0, specTask = 0, spec = null, fit = null, fitErr = null, lastSpec = 0, lastFit = 0, selected = null;
   let fieldHash = null, mBuf = null, oBuf = null, dRef = null, dBuf = null, statusText = 'no molecule solved yet', pending = null;
   /* THE RESTORED ORBITAL INDEX HAS TO SURVIVE THE RE-SOLVE THAT RESTORING IT CAUSES.  A solve sets `orbital` to
@@ -163,7 +164,7 @@ export function createChem(host, api) {
     { id: 'density', label: 'DENSITY', title: 'ρ(r) = Σ D_ij χ_i χ_j on the field' },
     { id: 'orbital', label: 'ORBITAL', title: 'ψ_k(r) = Σ C_ik χ_i — one molecular orbital' },
     { id: 'diff', label: '<m>Δρ</m>', title: 'The induced density against the reference stored at the kick — ΔD is formed in double precision and shown as a signed field, so a weak kick is not lost in the texture format' }],
-    onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
+    onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
   rV.appendChild(vSeg.root);
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
     fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); } });
@@ -323,7 +324,7 @@ export function createChem(host, api) {
       /* 0.5.3 M2 · a failed open (C₆₀'s record offline) gives the dropdown BACK before the solution goes: the last solved molecule
          is chosen again (or, with none, nothing), so a hand re-pick of the one that failed is a change and is answered */
       if (!r || r.error || !Number.isFinite(r.energy)) { if (sol) { preset = sol.key.split('|')[0]; mSeg.set(preset); } else mSel.selectedIndex = -1;
-        sol = null; status(why || 'solve failed: ' + ((r && r.error) || 'no answer'), 'warn'); refresh(); notify(); return null; }
+        sol = null; status(why || 'solve failed: ' + ((r && (r.refused || r.error)) || 'no answer'), 'warn'); refresh(); tell(); notify(); return null; }
       /* 0.3.1 · S4: the defaults this landing fills (the orbital, and through notify() the register's selection and the STATES
          ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
       const fill = () => {
@@ -332,7 +333,7 @@ export function createChem(host, api) {
         const named = keyed(r.names, pendingKey);
         orbital = named ? named.k : (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
         pendingOrbital = pendingKey = null;
-        rebuildOrbKnob(); pushField(); refresh(); notify();
+        rebuildOrbKnob(); pushField(); refresh(); tell(); notify();
       };
       if (api.derived) api.derived(fill); else fill();
       if (r.roots) return r;                                                 // the frame-thread fallback answers whole
@@ -519,7 +520,7 @@ export function createChem(host, api) {
     flowOn = !!v; if (flowSw) flowSw.set(flowOn);
     if (flowOn && !flowCreate) import('./molecular-flow.js').then((m) => { flowCreate = m.createFlow; if (flowOn) { feedFlow(); api.repaint(); } });
     else if (flowOn) feedFlow();
-    api.repaint(); return flowOn;
+    tell(); api.repaint(); return flowOn;
   }
   function densityRe() {
     const n = sol.nAO, src = (rt && rt.D_re) || sol.D, P = valence ? corePart() : null;
@@ -598,6 +599,8 @@ export function createChem(host, api) {
     paint();
   }
 
+  /* 0.5.4 P4 · THE STATUS of what this card puts on stage (lab/status.js): built on a landing, a VIEW change, a FLOW toggle or a load and KEPT — never in a frame */
+  function tell() { const P = PRESET_BY_ID.get(preset), row = (P.records || {})[basis] || null; said = sol ? statusOf({ record: row, sol, oracle: row || basis !== 'sto-3g' ? null : P.oracle, view: flowOn ? 'flow' : view }) : null; if (api.said) api.said(said); }
   /* ── the plot ─────────────────────────────────────────────────────────────────────────────────── */
   const bright = () => (sol && sol.roots ? sol.roots : []);
   /** the ladder on screen: the RPA roots, or the TDA ladder in its own order with its own strengths */
@@ -820,7 +823,7 @@ export function createChem(host, api) {
     setRun(false); rt = null; spec = null; fit = null; selected = null;
     if (resolve && sol) sol = null;
     if (sol && pendingKey) { const m = keyed(sol.names, pendingKey); if (m) orbital = m.k; pendingKey = null; }   // S2: the same molecule, already solved: the name lands now
-    seats();
+    seats(); tell();
     if (o.on !== undefined) setOn(!!o.on);
     else if (sol) { pushField(); refresh(); } else refresh();
     return save();
@@ -838,7 +841,7 @@ export function createChem(host, api) {
     setActive(v) { const next = !!v; if (next === active) return active; active = next; if (active) paint(); return active; },
     get on() { return on; }, setOn, get half() { return sol && Number.isFinite(sol.half) ? sol.half : 10.3; },
     /** what the worker needs to find this solution again — the STATES register asks it for the canonical ladder */
-    setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; },
+    setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; }, get said() { return said; },
     query() { return sol ? { atoms: chemAtoms(preset), basis, charge: chemCharge(preset) } : null; },
     /** the names an export carries (0.4.0 S1): the group and configuration, and the ORBITAL on the field when VIEW is one */
     exportNames() {
@@ -868,6 +871,12 @@ export function createChem(host, api) {
     storage: () => storageInfo(),
     /** the chem worker's own ledger — `solverCalls` counts every moleculeRHF and rpa it ran (a record's open adds none) */
     workerStat() { return call({ op: 'stat' }); },
+    /** 0.5.4 P4 · what is on stage and how far it goes (PLAN R8; R25 §12.5): a thin caller — tell()'s status, the engine's own limits; null before a solve; never a frame's call */
+    capability() { if (!sol) return null; const row = (PRESET_BY_ID.get(preset).records || {})[basis] || null;
+      return { caps: row ? row.caps : null, observables: { density: !!sol.D, orbital: true, flow: !!sol.D, states: !row || row.caps.states }, derivatives: 'UNKNOWN', identity: sol.identity, status: said,
+        limits: { lmax: COMPONENT_ORDER.length - 1, Z: MAX_Z, densityAO: MAX_MOL_AO, orbitalAO: MOL_LIMITS.ao }, precision: { path: 'f64 → f32 → f16 texel', law: FIELD_LAW },
+        online: 'the ground solve or the record\'s open; the spectrum; a kick\'s run; the field on the GPU', cached: 'the worker\'s solve on (atoms, basis, charge); a record on this device; the field per product',
+        invalidates: 'a new molecule, basis or charge: a new solve; a kick: the real-time density; VIEW, ORBITAL or VALENCE: the field only' }; },
     onPick(fn) { pickHook = typeof fn === 'function' ? fn : null; },
     setPopulations(fn) { popOf = typeof fn === 'function' ? fn : null; paint(); },
     solution() { return sol; }, subscribe(fn) { subs.add(fn); if (sol) fn(sol); return () => subs.delete(fn); },   // the register's road: the last ground state, and every new one
@@ -878,7 +887,7 @@ export function createChem(host, api) {
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
     solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); }, pick: handPick,
     preset() { return preset; },
-    setView(v) { if (!['density', 'orbital', 'diff'].includes(v) || (v !== 'orbital' && sol && !sol.D)) return view; view = v; vSeg.set(v); seats(); pushMatrix(v === 'diff' && !rt); refresh(); return view; },
+    setView(v) { if (!['density', 'orbital', 'diff'].includes(v) || (v !== 'orbital' && sol && !sol.D)) return view; view = v; vSeg.set(v); seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); return view; },
     orbital(k) { if (Number.isFinite(k)) { const [lo, hi] = span(); orbital = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
     setAxis(a) { if (!AXES.includes(a)) return axis; axis = a; aSeg.set(a); paint(); return axis; },
     setIntegrator(v) { if (v !== 'mmut' && v !== 'magnus2') return integrator; integrator = v; iSeg.set(v); reset(); return integrator; },

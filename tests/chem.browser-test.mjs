@@ -60,7 +60,16 @@ try {
       omega0: roots[0] && roots[0].omega, omegaTDA0: roots[0] && roots[0].omegaTDA, pol0: roots[0] && roots[0].pol,
       owner: st.fieldOwner, local: st.local, status: st.status,
       stats: { molAO: __LW.field.stats.molAO, molDispatches: __LW.field.stats.molDispatches },
-      res: __LW.field.resolution, domain: __LW.domain.half, errs: window.__e.slice() };`);
+      res: __LW.field.resolution, domain: __LW.domain.half, errs: window.__e.slice(),
+      cap: (() => { const c = __LW.chem.capability(); return c && { word: c.status.word, line: c.status.line, head: c.status.head, kept: c.status === __LW.chem.said,
+        identity: c.identity === __LW.chem.solution().identity && /^[0-9a-f]{64}$/.test(c.identity), limits: c.limits, derivatives: c.derivatives, caps: c.caps,
+        row: (document.querySelector('.dev[data-id="informational"] .ro .ro-val') || {}).textContent }; })() };`);
+  /* 0.5.4 P4 · chem.capability(), a thin caller: tell()'s kept status (water from its live solve against P3's PySCF energy — NUMERICAL, never
+     UNCHECKED), the solve's identity (P1), derivatives UNKNOWN, the engine's limits; the INFORMATIONAL STATUS row reads the same line */
+  judge('L1 chem.capability(): water NUMERICAL from its kept status, the solve\'s identity, derivatives UNKNOWN, limits 2 / 36 / 128 / 768, the STATUS row the same line',
+    !!l1.cap && l1.cap.kept && l1.cap.identity && l1.cap.word === 'NUMERICAL' && l1.cap.derivatives === 'UNKNOWN' && l1.cap.caps === null && l1.cap.row === l1.cap.line
+    && /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.2 % of ρmax$/.test(l1.cap.line)
+    && JSON.stringify(l1.cap.limits) === JSON.stringify({ lmax: 2, Z: 36, densityAO: 128, orbitalAO: 768 }), l1.cap);
   judge(`L1 H₂O energy = ${H2O.energy} within 1e-8`, near(l1.energy, H2O.energy, 1e-8), { energy: l1.energy, delta: l1.energy - H2O.energy });
   judge('L1 H₂O solve in ≤ 5 s off the frame thread', l1.ms <= 5000 && l1.local === false, { ms: +l1.ms.toFixed(0), local: l1.local, status: l1.status });
   judge('L1 Tr(DS) = 10 within 1e-10', near(l1.electrons, H2O.electrons, 1e-10), { electrons: l1.electrons, delta: l1.electrons - 10 });

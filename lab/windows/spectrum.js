@@ -134,7 +134,7 @@ export function createSpectrumCard(app) {
   }
   function switchHamiltonian(id) {
     if (!app.state.warmTimer && !app.state.warmIdle && !page.hidden) warmArm(120);       // LA5: the kick tables are keyed on the operator — warm the new one in idle slices
-    const H = setHamiltonian(id);
+    const H = setHamiltonian(id); if (app.hooks.status) app.hooks.status();   // 0.5.4 P4: the STATUS row speaks for the operator in force
     if (id !== 'well' && app.w.gas.on) { app.w.gas.off(); schedule(TIER.RECONSTRUCT); }
     reg.setEnergies(energyOf);
     if (!H.stark && reg.field.Fz !== 0) { reg.setField({ Fz: 0 }); if (ui.fz) ui.fz.set(0); }

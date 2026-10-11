@@ -296,6 +296,7 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 .native-clean .ro { min-width: 0; box-shadow:var(--neu-inset);border:0;background:var(--glass-well); }
 .native-clean .ro-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .native-clean .ro-sub { height: 2.6em; overflow: hidden; line-height: 1.3; }
+.native-clean .ro.lw-status .ro-val { white-space: normal; }   /* 0.5.4 P4's seat: INFORMATIONAL's STATUS is the kit's WIDE readout, two lines (base.css Final II) — the nowrap above would cut it mid-number */
 .native-clean .row > .k { flex: 0 0 64px; }
 .native-info { display: inline-flex; vertical-align: middle; position: relative; height: 28px; align-items: center; }
 .native-info-button { width: 28px; height: 28px; padding: 0; border: 1px solid transparent; border-radius: 50%; background: none; color: var(--dim); cursor: pointer; font: italic var(--w-bold) 12px Georgia, 'Times New Roman', serif; }

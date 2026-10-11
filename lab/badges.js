@@ -79,5 +79,5 @@ export function createBadges({ dom, accept, field, reg, mat, clock, domain, qual
     const say = canvasSentence(rs);
     if (say !== lastSay) { lastSay = say; dom.canvas.setAttribute('aria-label', say); }   // one string build and one !== per 100 ms, the same shape as the four writes above
   }
-  return { update, build: b5, say: () => lastSay };
+  return { update, build: b5, say: () => lastSay, sheet: sheetToggle };   // sheet: 0.5.4 P4's STATUS row opens the MODEL sheet the badges open
 }

@@ -55,7 +55,7 @@ export function createMolecules(app) {
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
-    setOn(v) { moleculeMode(v); app.w.stageTextTick(); },
+    setOn(v) { moleculeMode(v); app.w.stageTextTick(); if (app.hooks.status) app.hooks.status(); }, said: () => app.hooks.status && app.hooks.status(),   // 0.5.4 P4: the STATUS row (informational.js)
     hand: (id) => headPick(id),                                      // 0.5.1 D2: a HAND pick (the dropdown, ON, a notebook link)
     /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
        model is playing and which observable the field shows.  See molecular-session.js. */
@@ -74,7 +74,7 @@ export function createMolecules(app) {
     if (app.state.chem.preset() !== id) { head.want = null; return; }                      // the molecule changed first: nothing
     if (sol.key !== id + '|' + app.state.chem.basis + '|' + row.charge) return;             // chemview's solve key: this molecule's landing
     head.want = null;
-    const md = moleculeHead({ molecule: row, basis: app.state.chem.basis, ground: sol, stem: sol.stem });
+    const md = moleculeHead({ molecule: row, basis: app.state.chem.basis, ground: sol, stem: sol.stem, status: app.state.chem.said });   // 0.5.4 P4: tell() ran before notify()
     if (!md || !app.state.stageText.announce(md, 0)) return;
     head.shown++; head.md = md;
     const life = new AbortController(), until = performance.now() + 2500, bye = head.bye = () => { life.abort(); if (head.bye === bye) head.bye = null; app.state.stageText.dismiss(md); };
