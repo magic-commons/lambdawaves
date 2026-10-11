@@ -1,0 +1,75 @@
+{
+ "hydrogen": {
+  "A_numerov": {
+   "ms": 66.8,
+   "maxErr": 0.000016693972526127254
+  },
+  "B_logmesh": {
+   "ms": 37.7,
+   "maxErr": 4.439571046344071e-7
+  }
+ },
+ "confined": {
+  "B_logmesh": {
+   "Rc": 1.8352447176867503,
+   "err": 0.0000016125132495936612,
+   "E_R1": 2.3739837800385297,
+   "E_R1_textbook": 2.374,
+   "bisectMs": 104.3
+  }
+ },
+ "yukawa": {
+  "0.02": {
+   "A_bound": 21,
+   "A_ms": 149.3,
+   "B_bound": 21,
+   "B_ms": 34.7,
+   "dE1s": 0.00003932359650204997
+  },
+  "0.05": {
+   "A_bound": 9,
+   "A_ms": 145.5,
+   "B_bound": 9,
+   "B_ms": 32,
+   "dE1s": 0.00003920499009346656
+  },
+  "0.1": {
+   "A_bound": 5,
+   "A_ms": 140.3,
+   "B_bound": 5,
+   "B_ms": 32,
+   "dE1s": 0.00003880717847282167
+  },
+  "0.2": {
+   "A_bound": 3,
+   "A_ms": 137.8,
+   "B_bound": 3,
+   "B_ms": 31.9,
+   "dE1s": 0.000037374211754037656
+  },
+  "0.5": {
+   "A_bound": 1,
+   "A_ms": 139.4,
+   "B_bound": 1,
+   "B_ms": 32,
+   "dE1s": 0.000029389757883885315
+  }
+ },
+ "finiteWell": {
+  "exact": -16.353799211781578,
+  "A_numerov_err": 0.007912511273516998,
+  "B_logmesh_err": 0.0014014101650730026,
+  "note": "a step: both O(h) unless a grid point sits on r = a"
+ },
+ "lines": {
+  "exportSolveL": 1,
+  "exportTableWriter": 3,
+  "solveAll_on_B": 18,
+  "hamiltonianObject_like_cornell": 16,
+  "boundFlagAndLabel": 3,
+  "potentialsTable_5rows": 7,
+  "workerOp": 6,
+  "total": 54,
+  "note": "vs DRAFT 1 +90 (F5: 60–100 on numerov). The log-mesh road reuses atoms.js (the space-6 table writer, Richardson, the virtual flag) instead of a second numerov table builder."
+ }
+}

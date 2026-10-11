@@ -1,0 +1,81 @@
+{
+ "rows": [
+  [
+   "0.5.0 A7 occlusion",
+   "add",
+   25,
+   28,
+   "A7-BUILD.md: \"+28 … The design estimated +25\""
+  ],
+  [
+   "0.5.0 C6 project-store",
+   "add",
+   220,
+   436,
+   "C6-BUILD.md: \"436 lines against the 220 estimated\""
+  ],
+  [
+   "0.5.0 C6B step 3 session",
+   "add",
+   65,
+   38,
+   "C6B-BUILD.md: \"+38 … estimated step 3 at ≈ +65\""
+  ],
+  [
+   "0.5.0 C7B film card road",
+   "add",
+   45,
+   91,
+   "C7B-BUILD.md: \"card road cost +91 at step 1 where +45 was estimated\""
+  ],
+  [
+   "0.5.0 C7B whole",
+   "net",
+   -15,
+   40,
+   "C7B-BUILD.md: \"The design estimated −15 … It lands +40\""
+  ],
+  [
+   "0.5.0 C2 theme",
+   "subtract",
+   -160,
+   -124,
+   "C2-BUILD.md: \"−124 … The design estimated ≈ −160; the brief's −250 to −350\""
+  ],
+  [
+   "0.5.0 C7 render-exact",
+   "subtract",
+   -1500,
+   -716,
+   "C7-BUILD.md: \"C7's own −716 … The plan estimated 1,200–1,800\""
+  ],
+  [
+   "0.5.1 D1",
+   "subtract",
+   -70,
+   -35,
+   "D1-BUILD.md: \"The brief's estimate was ≈ −70: the block is ≈ 35 lines as planned\""
+  ]
+ ],
+ "addRatios": [
+  1.12,
+  1.98,
+  0.58,
+  2.02
+ ],
+ "addMedian": 1.98,
+ "subtractRatios": [
+  0.78,
+  0.48,
+  0.5
+ ],
+ "subtractMedian": 0.5,
+ "reading": "additions land at 0.6–2.0× (median ≈ 1.1, the two UI/road rows 2.0×); NAMED subtractions deliver 0.5–0.8× of their estimate (C7 0.48, D1 0.5, C2 0.78 vs design, 0.4–0.5 vs brief)",
+ "planConsequence": "DRAFT 1 names −275 over the ladder: at the tree's own 0.5–0.8× it yields ≈ −140…−220; the cuts that lean on a subtraction to fit (0.6.4 −85, 0.6.5 −90, 0.7.2 −70) are the ones at risk",
+ "period": {
+  "lcm2n2": 7200,
+  "T_au": 45238.93421169302,
+  "T_ps": 1.0943,
+  "planSays": "1.094 ps, T = 14400π"
+ }
+}
