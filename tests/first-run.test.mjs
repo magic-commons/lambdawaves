@@ -138,7 +138,7 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   /* 0.3.1 · S2: …AND NO PREFERENCE KEY AT ALL — the field chrome in mat too (S1's FIELD_CHROME, D1), which restore() now ignores:
      WAVE DANCER's dead frame / axis / invert / axisInk / cornerSide went.  tests/new-project.test.mjs holds the empty project to
      these same three lists. */
-  const LOOK = ['theme', 'card', 'frost', 'disc', 'accent'], FEEL = ['friction', 'spin', 'speed', 'autoRotate', 'dragGain', 'fling'],
+  const LOOK = ['theme', 'card', 'frost', 'disc', 'accent'], FEEL = ['friction', 'spin', 'speed', 'autoRotate', 'dragGain', 'fling', 'camLock'],   // 0.5.3 M6: the LOCK is feel too
     CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk'];
   const looks = demos.map((d) => { const P = d.data.presentation;
     return { name: d.name, ui: LOOK.filter((k) => P.ui && k in P.ui), camera: 'camera' in P, camFeel: FEEL.filter((k) => P.layout && P.layout.cam && k in P.layout.cam),

@@ -170,15 +170,15 @@ try {
  const scope=await g.ev(`const w=n=>new Promise(r=>setTimeout(r,n)),WS=['closed','nbW','nbH','abW','abH','modwin','layouts','phoneTr','phoneRack'];
   const raw=()=>JSON.parse(localStorage.getItem('lambdawaves.q0.settings')||'{}'),strip=()=>{const o=raw();for(const k of WS)delete o[k];return JSON.stringify(o);};
   const live=()=>({theme:document.body.dataset.theme,choice:__LW.themeChoice,card:__LW.cardStyle,frost:__LW.frost,disc:__LW.disconnected,accent:[__LW.accent.a,__LW.accent.b],
-    feel:[__LW.camera.friction,__LW.camera.speed,__LW.camera.dragGain,__LW.camera.flingGain],chrome:['frame','axis','frameMode','axisMode','cornerSide','invert','axisInk'].map(k=>__LW.mat[k])});
+    feel:[__LW.camera.friction,__LW.camera.speed,__LW.camera.dragGain,__LW.camera.flingGain,__LW.camera.lock],chrome:['frame','axis','frameMode','axisMode','cornerSide','invert','axisInk'].map(k=>__LW.mat[k])});
   __LW.saveSettings();await w(50);const before=strip(),live0=live(),mode0=__LW.camMode;
   const S=JSON.parse(JSON.stringify(__LW.serialize())),P=S.presentation;
   Object.assign(P.ui,{theme:live0.theme==='light'?'dark':'light',card:live0.card==='tinted'?'refractive':'tinted',frost:live0.frost==='off'?'always':'off',disc:!live0.disc,accent:{a:123,b:234,vivid:.9}});
-  Object.assign(P.camera,{friction:.31,speed:.9,dragGain:3.3,fling:1.7});
+  Object.assign(P.camera,{friction:.31,speed:.9,dragGain:3.3,fling:1.7,camLock:!live0.feel[4]});   /* 0.5.3 M6: a file that names the other LOCK changes nothing */
   Object.assign(P.mat,{frame:false,axis:false,frameMode:'dots',axisMode:'corner',cornerSide:'left',invert:true,axisInk:'rgb'});
   P.obs.mode=mode0==='free'?'turntable':'free';
   const ok=__LW.restore(S);await w(600);const after=strip(),live1=live(),mode1=__LW.camMode,settings=raw(),q=__LW.serialize().presentation;
-  const PREF={ui:['theme','card','frost','disc','accent'],camera:['friction','speed','dragGain','fling'],mat:['frame','axis','frameMode','axisMode','cornerSide','invert','axisInk']};
+  const PREF={ui:['theme','card','frost','disc','accent'],camera:['friction','speed','dragGain','fling','camLock'],mat:['frame','axis','frameMode','axisMode','cornerSide','invert','axisInk']};
   const leaked=Object.entries(PREF).flatMap(([s,ks])=>ks.filter(k=>q[s]&&k in q[s]).map(k=>s+'.'+k));
   __LW.setCamMode(mode0,true);
   return {ok,identical:before===after,bytes:[before.length,after.length],live0,live1,mode0,mode1,wantMode:P.obs.mode,settingsCam:'camMode' in settings,settingsPalette:'palette' in settings,

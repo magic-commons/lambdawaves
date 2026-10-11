@@ -36,13 +36,13 @@ assert.deepEqual(Object.keys(P.ui), ['stage'], 'ui carries a PREFERENCE key');
 assert.deepEqual(Object.keys(P.camera), ['autoRotate'], 'camera carries its feel');
 for (const k of ['bg', 'lightUI', 'stageCustom', 'frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk', 'steps'])
   assert.equal(k in P.mat, false, 'mat carries ' + k);
-const PREF = new Set(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'friction', 'spin', 'speed', 'dragGain', 'fling', 'camMode',
+const PREF = new Set(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'friction', 'spin', 'speed', 'dragGain', 'fling', 'camLock', 'camMode',   // 0.5.3 M6: camLock, the camera's LOCK
   'badges', 'controlHints', 'captions', 'molFormula', 'molFormulaSize', 'gamut', 'p3Mode', 'warned', 'audioDevice', 'nativeLayout', 'phoneTr', 'phoneRack',
   'auto', 'governor', 'keepFrames', 'perfMode', 'modCadence', 'modArm', 'clockLink',   // 0.5.0 C4: modArm / modCadence live in the kit's record `lambdawaves.q0.modulation` and clockLink is retired — all three still never ride in a project
   'disconnected', 'accentA', 'accentB', 'vivid', 'hints', 'help']);                        // 0.5.0 C2: the look's names in the kit's `mir.gui` — never in a project either
 /* the bundled demos' own law (tests/first-run.test.mjs, "A BUNDLED DEMO CARRIES NO LOOK"), with its same three lists — the
    camera block itself is allowed here: the empty project carries auto-rotate, which is PROJECT */
-const LOOK = ['theme', 'card', 'frost', 'disc', 'accent'], FEEL = ['friction', 'spin', 'speed', 'dragGain', 'fling'],
+const LOOK = ['theme', 'card', 'frost', 'disc', 'accent'], FEEL = ['friction', 'spin', 'speed', 'dragGain', 'fling', 'camLock'],
   CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk'];
 assert.deepEqual({ ui: LOOK.filter((k) => k in P.ui), camera: FEEL.filter((k) => k in P.camera), mat: CHROME.filter((k) => k in P.mat) },
   { ui: [], camera: [], mat: [] }, 'the empty project carries a look');

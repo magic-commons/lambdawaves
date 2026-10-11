@@ -183,6 +183,55 @@ try {
     }
   });
 
+  /* ── 5 · 0.5.3 M6 THE LOCK, the classic camera (R3: the pan only) — the switch, then every pan road with the real inputs ── */
+  const LOCKSW = `const card = document.querySelector('.dev[data-id="camera"]'); card.classList.remove('closed'); if (card.classList.contains('folded')) card.querySelector('.dev-fold').click();
+    const sw = [...card.querySelectorAll('button.sw')].find((b) => b.textContent.trim() === 'LOCK'), ref = [...card.querySelectorAll('button')].find((b) => /SET Δρ REF/.test(b.textContent)), pad = card.querySelector('.mir-camera .mir-xy');`;
+  await check('THE LOCK (0.5.3 M6): a LOCK switch beside SET Δρ REF; pressed, it centres the pivot, rests the PAN pad, is saved as the PREFERENCE camLock and is no history row', `
+    const LW = __LW; ${LOCKSW}
+    LW.camera.reset(); LW.camera.setShift(0.3, -0.2); await new Promise((r) => setTimeout(r, 150)); LW.history.flush(); const cursor = LW.history.cursor; sw.scrollIntoView({ block: 'center' });   /* the LINK check's edits are flushed first */
+    sw.click(); await new Promise((r) => setTimeout(r, 150)); LW.history.flush();
+    return { lock: LW.camera.lock, port: LW.camera.lock, shift: LW.obs.shift.slice(), pressed: sw.getAttribute('aria-pressed'), padOff: pad.classList.contains('disabled'), sameRow: !!ref && sw.parentElement === ref.parentElement,
+      saved: LW.settings.camLock, rows: LW.history.cursor - cursor, inProject: 'camLock' in LW.serialize().presentation.camera };`, (v) => {
+    assert.deepEqual([v.lock, v.pressed, v.padOff, v.sameRow, v.saved], [true, 'true', true, true, true]); assert.deepEqual(v.shift, [0, 0], 'engaged: PAN HOME');
+    assert.equal(v.rows, 0, 'a PREFERENCE is not an edit'); assert.equal(v.inProject, false, 'never in a project');
+  });
+  const CTRL = '', RIGHT = '';
+  await g.ev(`__LW.camera.reset(); window.__d0 = [__LW.obs.dist, __LW.obs.fov]; document.getElementById('field').focus(); return 1;`);
+  await actions(g.s, [
+    { type: 'key', id: 'lk', actions: [{ type: 'keyDown', value: ALT }, { type: 'pause', duration: 0 }, { type: 'pause', duration: 0 }, { type: 'pause', duration: 0 }, { type: 'pause', duration: 0 }, { type: 'keyUp', value: ALT }] },
+    { type: 'pointer', id: 'lm', parameters: { pointerType: 'mouse' }, actions: [{ type: 'pause', duration: 0 }, { type: 'pointerMove', duration: 0, origin: 'viewport', x: box.x, y: box.y },
+      { type: 'pointerDown', button: 0 }, { type: 'pointerMove', duration: 120, origin: 'viewport', x: box.x + 40, y: box.y - 30 }, { type: 'pointerUp', button: 0 }, { type: 'pause', duration: 0 }] },
+  ]);
+  await relActions(g.s);
+  await g.ev(`document.getElementById('field').focus(); return 1;`);
+  for (const keys of [[ALT, RIGHT], [CTRL, SHIFT, 'q'], [CTRL, SHIFT, 'q']]) {
+    await actions(g.s, [{ type: 'key', id: 'lkk', actions: [...keys.map((k) => ({ type: 'keyDown', value: k })), { type: 'pause', duration: 30 }, ...keys.slice().reverse().map((k) => ({ type: 'keyUp', value: k }))] }]);
+    await relActions(g.s);
+  }
+  await check('under the LOCK the real Alt-drag and Alt+→ slide nothing, and Ctrl+Shift+Q twice (the dolly zoom) keeps the shift at 0 and the size', `
+    await __LW.settle(); const o = __LW.obs; return { shift: o.shift.slice(), dist: o.dist, fov: o.fov, d0: window.__d0, yaw: o.yaw, inv: [o.dist * Math.tan(o.fov / 2), window.__d0[0] * Math.tan(window.__d0[1] / 2)] };`, (v) => {
+    assert.deepEqual(v.shift, [0, 0]); assert.equal(v.yaw, box.yaw, 'the Alt-drag did not orbit');
+    assert.ok(v.dist < v.d0[0] && v.fov > v.d0[1], 'the dolly zoom ran'); assert.ok(Math.abs(v.inv[0] - v.inv[1]) < 1e-9, 'd·tan(fov/2) held');
+  });
+  await check('under the LOCK a wheel at a cursor, a two-finger pinch about an off-centre point, an anchored FOV step, the PAN X dial and a route on observer.panx all leave the pivot centred, while the zoom answers from the centre', `
+    const LW = __LW, cv = document.getElementById('field'), r = cv.getBoundingClientRect(), R = LW.mod.registry, C = [0.62 * r.width, 0.58 * r.height], out = {};
+    const ptr = (type, id, x, y) => cv.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: id, pointerType: 'touch', button: 0, clientX: r.left + x, clientY: r.top + y }));
+    LW.camera.reset(); const d0 = LW.obs.dist;
+    cv.dispatchEvent(new WheelEvent('wheel', { deltaY: -120, deltaMode: 0, clientX: r.left + C[0], clientY: r.top + C[1], cancelable: true, bubbles: true })); out.wheel = [LW.obs.shift.slice(), LW.obs.dist < d0];
+    const d1 = LW.obs.dist; ptr('pointerdown', 71, C[0] - 60, C[1]); ptr('pointerdown', 72, C[0] + 60, C[1]); ptr('pointermove', 71, C[0] - 90, C[1] + 20); ptr('pointermove', 72, C[0] + 90, C[1] + 20); ptr('pointerup', 71, C[0] - 90, C[1] + 20); ptr('pointerup', 72, C[0] + 90, C[1] + 20);
+    out.pinch = [LW.obs.shift.slice(), LW.obs.dist < d1]; LW.camera.setFov(LW.obs.fov * 1.3, [0.5, -0.5]); out.fov = LW.obs.shift.slice();
+    const kx = document.querySelector('[data-param="observer.panx"]'); kx.focus(); kx.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', code: 'ArrowRight', bubbles: true, cancelable: true })); kx.blur(); out.dial = LW.obs.shift.slice();
+    R.applyModulated('observer.panx', 0.5); R.applyModulated('observer.pany', -0.5); out.route = LW.obs.shift.slice(); R.restoreBase('observer.panx'); R.restoreBase('observer.pany');
+    ${LOCKSW} sw.click(); await new Promise((q) => setTimeout(q, 100)); out.released = [LW.camera.lock, pad.classList.contains('disabled'), LW.settings.camLock];
+    R.applyModulated('observer.panx', 0.5); out.routeFree = LW.obs.shift.slice(); R.restoreBase('observer.panx'); LW.camera.reset();
+    cv.dispatchEvent(new WheelEvent('wheel', { deltaY: -120, deltaMode: 0, clientX: r.left + C[0], clientY: r.top + C[1], cancelable: true, bubbles: true })); out.wheelFree = LW.obs.shift.slice(); LW.camera.reset();
+    return out;`, (v) => {
+    for (const k of ['fov', 'dial', 'route']) assert.deepEqual(v[k], [0, 0], k);
+    assert.deepEqual(v.wheel, [[0, 0], true], 'the wheel zoomed from the centre'); assert.deepEqual(v.pinch, [[0, 0], true], 'the pinch zoomed, from the centre');
+    assert.deepEqual(v.released, [false, false, false], 'released: the pad answers, the settings say so');
+    assert.equal(v.routeFree[0], 0.5, 'and a route moves the pivot again'); assert.ok(v.wheelFree[0] !== 0 && v.wheelFree[1] !== 0, 'and the wheel zooms at the cursor again');
+  });
+
   const errs = await g.errors();
   if (errs.errs.length) { failed++; console.error('FAIL page errors', errs.errs); }
 } finally {

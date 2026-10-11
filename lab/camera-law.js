@@ -75,6 +75,7 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
     setSpeed(v) { this.speed = v; this.wake(); return v; },
     setDist(v) { return setDist(v); }, setFov(v, c) { return setFov(v, c); }, reset() { resetView(); },
     zoomAt(c, v) { return zoomAt(c, v); }, setShift(x, y) { return setShift(x, y); }, panBy(du, dv) { return panBy(du, dv); },   // 0.4.0 S2
+    get lock() { return locked; }, setLock(v) { return setLock(v); },   // 0.5.3 M6: THE LOCK, read nested (__LW.camera.lock), so the facade's own members stay as they were
   };
   const camTravel = { yaw: 0, pitch: 0 };     // the turn a drag has APPLIED, in the turntable's units — the FLING reads this in BOTH modes
   const camLevel = { from: null, to: null, t0: 0, ms: 150, yaw: 0, pitch: 0 };   // FREE → TURNTABLE levels the roll over 150 ms; it never snaps
@@ -162,18 +163,21 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
      (× aspect in x) from the axis, so holding it through D·tanH → D′·tanH′ moves the shift to p′ = c − (c − p)·k with
      k = D·tanH / (D′·tanH′).  The wheel and the pinch pass the cursor or the fingers' centroid; the dials and the keys
      anchor at the frame's centre (c = 0, p′ = p·k).  A modulated ZOOM or FOV leaves the shift alone. */
-  const CENTRE = Object.freeze([0, 0]);
-  const anchor = (c, k) => { if (k !== 1 && Number.isFinite(k)) { const p = obs.shift || CENTRE; setShift(c[0] - (c[0] - p[0]) * k, c[1] - (c[1] - p[1]) * k); } };
+  /* 0.5.3 M6 · THE LOCK, the classic camera (R3: the PAN only): the pivot stays at the frame's centre, so anchor adds no shift and every zoom
+     is from the centre; setShift and panBy answer with a notice and move nothing; FOV, the mode and the turn stay live.  PREFERENCE `camLock`. */
+  const CENTRE = Object.freeze([0, 0]); let locked = false;
+  const anchor = (c, k) => { if (!locked && k !== 1 && Number.isFinite(k)) { const p = obs.shift || CENTRE; setShift(c[0] - (c[0] - p[0]) * k, c[1] - (c[1] - p[1]) * k); } };
   function zoomAt(c, v) { const d0 = obs.dist; if (modHand('observer.dist', v)) return obs.dist; obs.dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], v)); anchor(c, d0 / obs.dist); present(); return obs.dist; }
   const setDist = (v) => zoomAt(CENTRE, v);
   function setFov(v, c = CENTRE) { const t0 = Math.tan(obs.fov / 2); if (modHand('observer.fov', v)) return obs.fov; obs.fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], v)); anchor(c, t0 / Math.tan(obs.fov / 2)); present(); return obs.fov; }
-  /** THE LENS SHIFT's one road: the PAN pad and its knobs, PAN HOME, Alt-drag, two fingers, the Alt+Arrows and the zooms above.
+  /** THE LENS SHIFT's one road: the PAN pad and its knobs, PAN HOME, Alt-drag, two fingers, the Alt+Arrows and the zooms above (the LOCK refuses them all).
    *  `axis` (0 · 1): a dial's road — that axis alone is the hand's, so a routed OTHER axis keeps its base (C1, brief 2) */
-  function setShift(x, y, axis) {
+  function setShift(x, y, axis) { if (locked) { tell(); return obs.shift; }   // M6: the LOCK holds the pan (the notice puts a dragged PAN pad back)
     const s = obs.shift || CENTRE, c = clampShift([x, y]), hx = axis !== 1 && modHand('observer.panx', c[0]), hy = axis !== 0 && modHand('observer.pany', c[1]);
     obs.shift = [hx ? s[0] : c[0], hy ? s[1] : c[1]]; present(); return obs.shift;
   }
   const panBy = (du, dv) => { const s = obs.shift || CENTRE; return setShift(s[0] + du, s[1] + dv); };
+  function setLock(v) { locked = !!v; if (locked) obs.shift = [0, 0]; present(); return locked; }   // M6: engaged, PAN HOME raw — a routed axis keeps its base, its route is clamped
   /** RESET VIEW (HOME, R, a double-click and a double-tap): the shipped pose and the motion with it —
       AUTO-ROTATE is a mode, not a pose, so the ambient drive is left exactly where the switch put it */
   function resetView() { const m = obs.mode; camLevel.from = null; Object.assign(obs, CAM.HOME); obs.mode = m; obs.quat = quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch); camera.stop(); present(); }   // wave 54: the pose is the same pose in either mode
@@ -188,7 +192,8 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
     panX: [() => sh()[0], (v) => setShift(v, sh()[1], 0)], panY: [() => sh()[1], (v) => setShift(sh()[0], v, 1)],
     yaw: [() => obs.yaw, (v) => modHand('observer.yaw', v) || turn(v - obs.yaw, 0)], pitch: [() => obs.pitch, (v) => modHand('observer.pitch', v) || turn(0, v - obs.pitch)],
     autoRotate: [() => camera.autoRotate, (v) => camera.setAutoRotate(v)], spin: [() => camera.speed, (v) => camera.setSpeed(v)],
-    friction: [() => camera.friction, (v) => camera.setFriction(v)], drag: [() => camera.dragGain, (v) => camera.setDragGain(v)], fling: [() => camera.flingGain, (v) => camera.setFling(v)] };
+    friction: [() => camera.friction, (v) => camera.setFriction(v)], drag: [() => camera.dragGain, (v) => camera.setDragGain(v)], fling: [() => camera.flingGain, (v) => camera.setFling(v)],
+    lock: [() => locked, setLock] };   // 0.5.3 M6: not in the kit's vocabulary, so the panel draws no control for it; the card's LOCK switch is λWAVES'
   const pan = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
   const port = { angle: 'rad', get: (id) => (ROADS[id] ? ROADS[id][0]() : undefined), set(id, v) { if (ROADS[id]) ROADS[id][1](v); },
     subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }, notify: tell, turn, home: () => resetView(), setShift, zoomAt, panBy,

@@ -121,7 +121,11 @@ export function createMaterial(app) {
     camPanel.spec.build(gc, null);
     const camView = camPanel.view(); camView.homeBtn.root.dataset.keyAction = 'camReset';
     app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
-    el('div', 'row tight', gc).appendChild(trig({ label: 'SET Δρ REF', title: 'Use the current density as the difference reference', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
+    const rRef = el('div', 'row tight', gc); rRef.appendChild(trig({ label: 'SET Δρ REF', title: 'Use the current density as the difference reference', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
+    /* 0.5.3 M6 · LOCK, the classic camera (a PREFERENCE, `camLock`): the pan held at the centre and every zoom from it; the PAN pad rests while it holds */
+    ui.camLockSw = sw({ label: 'LOCK', value: false, title: 'LOCK — the classic camera: the pan stays at the centre and every zoom is from the centre (CONTROL, the turn, ZOOM and FOV stay live)', onChange: (v) => { cameraPort.set('lock', v); saveSettings(); } });
+    rRef.appendChild(ui.camLockSw.root); let lockShown = false;
+    cameraPort.subscribe(() => { const on = cameraPort.get('lock'); if (on !== lockShown) { lockShown = on; ui.camLockSw.set(on); camView.pad.widget.setDisabled(on); } });   // every road (the switch, the settings, LW) is a notice
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt-drag, two fingers or the PAN pad slide the picture; the molecule stays the pivot. Double-click, double-tap or HOME restores the camera.';
   }
   return { wObs, wPal, wCam, wClip, createDrawClipPaletteCamera };

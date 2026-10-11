@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { bindStageGestures, STAGE_BINDINGS } from '../lab/stage-gestures.js';
+import { createCameraLaw } from '../lab/camera-law.js';
 
-function stage(bindings, ui) {
+function stage(bindings, ui, over = {}) {   // `over`: callbacks taken from a real camera law (0.5.3 M6)
   const canvas = new EventTarget(), doc = new EventTarget(), win = new EventTarget(), classes = new Set();
   canvas.ownerDocument = doc; doc.defaultView = win;
   canvas.classList = { add: name => classes.add(name), remove: name => classes.delete(name) };
@@ -20,7 +21,7 @@ function stage(bindings, ui) {
     pan: (du, dv) => result.pans.push([du, dv]),
     orbitBy: (yaw, pitch) => { travel.yaw += yaw; travel.pitch += pitch; },
     resetView: () => result.resets++, setDragging: v => { result.held = v; }, present() {}, hover() {}, now: () => time,
-    startSpecial: e => e.ctrlKey ? { move: () => result.moved++, end: () => result.ended++, cancel: () => result.canceled++ } : null, bindings, ui,
+    startSpecial: e => e.ctrlKey ? { move: () => result.moved++, end: () => result.ended++, cancel: () => result.canceled++ } : null, bindings, ui, ...over,
   });
   function send(type, id = 1, x = 100, y = 100, extra = {}) {
     const event = new Event(type, { cancelable: true });
@@ -179,3 +180,22 @@ console.log('PASS the scene guard (C9): a press, a tap, a double-click and a whe
   assert.equal(synthetic.result.distance, 1.5, 'a first finger the stage never held is not a lost one: the pinch still pinches');
 }
 console.log('PASS the live stage (0.5.3 M4): a lost pointerup, a lost special and a buttonless mouse move free the stage, cancelled; a lost touch then a new id orbits alone; a live pinch is untouched');
+// 0.5.3 M6 · THE LOCK on the stage's own roads, through the REAL camera law: the wheel's atCursor, the pinch (its two-finger slide and
+// its centroid) and the Alt-drag leave the shift at 0 under the lock, and the zoom still answers — from the centre.  Unlocked, the
+// same gestures move the shift (the wheel zooms at the cursor), so the cases are not vacuous.
+{
+  const lawStage = (lock) => { const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'turntable', shift: [0, 0] };
+    const L = createCameraLaw({ obs, present() {}, modHand: () => false, resetWall() {} }); L.camera.setLock(lock);
+    return { obs, s: stage(undefined, undefined, { getDistance: () => obs.dist, zoomAt: L.zoomAt, pan: L.panBy }) }; };
+  const wheel = () => Object.assign(new Event('wheel', { cancelable: true }), { deltaY: -100, deltaMode: 0, clientX: 750, clientY: 200 });
+  const u = lawStage(false), k = lawStage(true); u.s.canvas.dispatchEvent(wheel()); k.s.canvas.dispatchEvent(wheel());
+  assert.ok(u.obs.shift[0] !== 0 && u.obs.shift[1] !== 0 && u.obs.dist < 3.3, 'unlocked: the wheel zooms at the cursor (atCursor)');
+  assert.deepEqual(k.obs.shift, [0, 0], 'locked: atCursor is answered from the centre'); assert.equal(k.obs.dist, u.obs.dist, 'and the zoom is the same zoom');
+  for (const t of [u, k]) { t.s.send('pointerdown', 1, 100, 100); t.s.send('pointerdown', 2, 200, 100); t.s.send('pointermove', 2, 300, 140); t.s.send('pointerup', 1, 100, 100); t.s.send('pointerup', 2, 300, 140); }
+  assert.notDeepEqual(u.obs.shift, k.obs.shift, 'unlocked, the pinch slid and zoomed at its centroid');
+  assert.deepEqual(k.obs.shift, [0, 0], 'locked: the pinch neither slides nor anchors'); assert.equal(k.obs.dist, u.obs.dist, 'and zooms as far');
+  const mouse = { pointerType: 'mouse' }, d0 = k.obs.dist;
+  k.s.send('pointerdown', 3, 100, 100, { ...mouse, altKey: true }); k.s.send('pointermove', 3, 140, 70, mouse); k.s.send('pointerup', 3, 140, 70, mouse);
+  assert.deepEqual(k.obs.shift, [0, 0], 'locked: Alt-drag slides nothing'); assert.equal(k.obs.dist, d0); assert.equal(k.s.travel.yaw, 0, 'and does not orbit');
+}
+console.log('PASS the LOCK (0.5.3 M6) on the stage, through the real law: the wheel at the cursor, the pinch at its centroid (and its two-finger slide) and the Alt-drag keep the shift at 0, and the zoom answers from the centre');
