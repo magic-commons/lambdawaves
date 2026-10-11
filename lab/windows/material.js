@@ -1,7 +1,7 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, trig, group } from '../mir/kit.js'; import { VIEW, STYLE } from '../field.js'; import { planeModel } from '../native-ui.js';
+import { el, knob, sw, seg, trig, group, readout } from '../mir/kit.js'; import { VIEW, STYLE } from '../field.js'; import { planeModel } from '../native-ui.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field, setReference } = app.ctl;
@@ -93,21 +93,28 @@ export function createMaterial(app) {
     const gp = group(wPal.body, 'COLOUR');
     const palOn = (v) => { mat.paletteOn = v; applyAccent(); if (v) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } schedule(TIER.PRESENT); };
     const palSw = sw({ label: 'PALETTE', value: false, onChange: palOn });
-    el('div', 'row tight palette-enable', gp).appendChild(palSw.root).dataset.keyAction = 'palette';
+    const rowOn = el('div', 'row tight palette-enable', gp); rowOn.appendChild(palSw.root).dataset.keyAction = 'palette';
+    const ang = (u) => ((2 * u - 1) * Math.PI).toFixed(3) + ' rad';   // the ONE function that prints a stop's angle (the reader, the float, the stops' aria-valuetext)
     let palId = PAL_DEF, palStops = PALETTE_BY_ID.get(PAL_DEF).stops;
     const rv = createRampPanel({ parent: gp, cyclic: true, project: false, presets: PRESET_GROUPS.flatMap((g) => g.items),
-      labels: { ticks: [[0, '−π'], [0.25, '−π/2'], [0.5, '0'], [0.75, '+π/2'], [1, '+π']], seam: 'SEAM at ±π', seamWarn: 'a visible seam at arg ψ = ±π', at: 'ARG ψ', fmt: (u) => ((2 * u - 1) * Math.PI).toFixed(3) + ' rad' },
+      labels: { ticks: [], seam: 'SEAM at ±π', seamWarn: 'a visible seam at arg ψ = ±π', at: 'ARG ψ', fmt: ang },
       ramp: { get: () => ({ stops: palStops, preset: palId }), set: (s, o) => { palStops = s; if (o.preset) palId = o.preset; },
         lut: (lut) => { if (field.ok) field.setPalette(lut); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }).view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
+    /* 0.5.3 M12 · PALETTE, SHORTER: the kit's rows re-seated from outside (MIR briefs filed): RESET beside PALETTE ON, INVERT right of ROTATE as the kit's half disk,
+       and the selected stop's angle shown twice from showArg — a reader under ROTATE (CSS hides the knob's "turn") and a float over the stop (radians; degrees on hover).
+       It watches the ARG ψ field (hidden) because that field is repainted on every select, edit and app pull, which `ramp.set` alone does not see. */
+    const verbs = rv.root.querySelector('.mir-ramp-verbs'), argRo = readout({ label: 'STOP ANGLE' }), argFloat = el('i', 'pal-float', rv.strip);
+    rowOn.appendChild(rv.root.querySelector('.mir-ramp-reset')); verbs.querySelector('.k').appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
+    ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
+    verbs.appendChild(ui.invertSw.root);
+    const showArg = () => { const s = rv.stops()[rv.selected()]; if (!s) return; argRo.set(argFloat.textContent = ang(s.at)); argRo.root.title = argFloat.title = ((2 * s.at - 1) * 180).toFixed(1) + '°'; argFloat.style.setProperty('--at', s.at); };
+    new MutationObserver(showArg).observe(rv.root.querySelector('.mir-ramp-at'), { childList: true, characterData: true, subtree: true }); showArg();
     el('div', 'note', gp).innerHTML = '<b>Phase palette.</b> The strip runs from arg ψ = −π to +π and wraps at the seam. Tap the strip to add a stop, drag one to move it, drag it off the strip to remove it. OKLab blending keeps transitions perceptually even.';
     app.state.palette = { get stops() { return rv.stops(); }, get selected() { return rv.selected(); }, get on() { return palSw.get(); }, get id() { return palId; },
       get groups() { return PRESET_GROUPS.map((g) => ({ points: g.points, items: g.items.map((p) => p.id) })); },
       setOn(v) { palSw.set(!!v); palOn(!!v); }, select: (id) => rv.preset(id),
       /** the file's own stops under its name (the preset is kept when the file names none, so RESET still reloads it); `selected` is the stop the hand had */
       load(s, selected = 0, id) { rv.load(s, PALETTE_BY_ID.get(id) ? id : palId); const h = rv.handle(Math.max(0, Math.min(rv.stops().length - 1, Math.trunc(selected) || 0))); if (h) h.dispatchEvent(new FocusEvent('focus')); } };
-    const rInv = el('div', 'row tight', wPal.body);
-    ui.invertSw = sw({ label: 'INVERT', value: false, title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
-    rInv.appendChild(ui.invertSw.root);
     /* 0.5.0 C1 · THE CAMERA PANEL: MIR's createCameraPanel over A8's port, its rows built into this card now — HOME and the port's
        PAN HOME, CONTROL, the direction sphere (YAW · PITCH), the PAN pad (X · Y), ZOOM · FOV and the HAND (DRAG · FRICTION · FLING ·
        AUTO-ROTATE · SPIN).  No project part and no history: the pose rides λWAVES' own project and is no edit; the feel is a

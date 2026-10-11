@@ -472,9 +472,14 @@ body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 .row > .trig.pal-nav::before {
   content: ""; position: absolute; top: 0; bottom: 0; left: -6px; right: -6px; }
 .pal-nav > svg { width: 13px; height: 13px; display: block; margin: auto; }
-.pal-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 62px; gap: var(--sp-2); align-items: stretch; }
-.pal-strip { width: 100%; height: 54px; display: block; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-hairline); touch-action: none; cursor: crosshair; }
-.pal-ring { width: 62px; height: 54px; display: block; border-radius: var(--r-sm); border: var(--glass-border) solid var(--glass-hairline); background: hsl(0 0% 0% / .25); }
+/* 0.5.3 M12 · PALETTE, SHORTER (material.js): no −π…π ticks, the ARG ψ field hidden, the reader under ROTATE in place of its "turn", the float over the selected stop, INVERT's half disk turned over when ON */
+.native-clean[data-id="palette"] .mir-ramp-ticks:empty, .native-clean[data-id="palette"] .mir-ramp-at { display: none; }
+.native-clean[data-id="palette"] .mir-ramp-verbs .k > .k-val, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-lbl, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-sub { display: none; }
+.dev.lean .dev-body .mir-ramp-verbs .k > .ro, .native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro { display: block; padding: 0; background: none; border: 0; box-shadow: none; text-align: center; }   /* LEAN hides every .ro; this one is the reader that replaced "turn", so it stays */
+.native-clean[data-id="palette"] .mir-ramp-verbs .k > .ro .ro-val { font-size: var(--fs-micro); min-height: 0; }
+.native-clean[data-id="palette"] .pal-invert svg { transition: transform var(--motion-ui) var(--ease-out); }
+.native-clean[data-id="palette"] .pal-invert.on svg { transform: rotate(180deg); }
+.pal-float { position: absolute; bottom: 3px; left: clamp(36px, calc(var(--at, 0) * 100%), calc(100% - 36px)); transform: translateX(-50%); padding: 0 4px; border-radius: var(--r-sm); font-style: normal; font-size: var(--fs-micro); font-variant-numeric: tabular-nums; white-space: nowrap; color: hsl(0 0% 100%); background: hsl(0 0% 0% / .6); z-index: 3; cursor: default; }
 .pal-color { width: 46px; height: var(--touch); padding: 2px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-raise); }
 .ladder-c { position: relative; height: 96px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }
 .ladder-c canvas { width: 100%; height: 100%; display: block; }

@@ -2735,7 +2735,7 @@ try {
     const fb = frameSw.getBoundingClientRect(), ab = axisSw.getBoundingClientRect();
     R.sideBySide = ab.top > fb.top;   // the AXES row follows the FRAME row
     R.palSw = [...palW.querySelectorAll('.sw .sw-lbl')].map((e) => e.textContent.trim());
-    R.invertInPalette = R.palSw.indexOf('INVERT') >= 0;
+    R.invertInPalette = !!palW.querySelector('.mir-ramp-verbs .k + .sw-glyph.pal-invert[aria-label="INVERT"]');   // 0.5.3 M12: INVERT is the kit's half-disk glyph, right of ROTATE in the ramp's verbs row (no .sw-lbl any more)
     R.waveSw = [...obs.querySelectorAll('.sw .sw-lbl')].map((e) => e.textContent.trim());
     R.waveClean = R.waveSw.length === 0;
     const inkSeg = [...setW.querySelectorAll('.segw, .seg')].find((w) => (w.querySelector('.k-lbl') || {}).textContent === 'AXIS COLOUR');
@@ -4161,7 +4161,7 @@ try {
        cannot be set; what is kept is its OUTCOME: after REVERSE, RESET brings the catalogue colours back under the same name, and another preset loads */
     const sel = dev.querySelector('.mir-ramp-step');
     const rel = dev.querySelector('.mir-ramp-reset');
-    R.hasReload = !!rel; R.beside = !!(rel && sel && sel.parentElement === rel.parentElement);
+    R.hasReload = !!rel; R.beside = !!(rel && sel && rel.closest('.palette-enable') && rel.closest('.palette-enable').querySelector('.sw'));   // 0.5.3 M12: RESET sits in the PALETTE-ON row
     __LW.setPalette('twilight'); await nap(80);
     const s0 = JSON.stringify(__LW.palette.stops);
     const rev = [...dev.querySelectorAll('.trig')].find((t) => /REVERSE/.test(t.textContent));

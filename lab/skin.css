@@ -17,7 +17,7 @@
 .dev-stat.live { color: var(--acc); }
 
 /* ── 9. rails, rows, chips, canvases — the same two depths, nothing louder ── */
-.ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .qcd-c, .atm-c, .atm-r, .picker, .pal-ring { border-color: transparent; box-shadow: var(--neu-inset); }
+.ladder, .ladder-c, .dyn-c, .slice-c, .orbit-c, .shadow-c, .mol-c, .qcd-c, .atm-c, .atm-r, .picker { border-color: transparent; box-shadow: var(--neu-inset); }
 .sp-row, .orbit-row { border-color: transparent; background: hsl(0 0% 100% / .03); box-shadow: var(--neu-flat); }
 .sp-row.sel { background: var(--acc-soft); box-shadow: var(--neu-flat), 0 0 0 1px color-mix(in srgb, var(--acc) 40%, transparent); }
 .sp-b, .pk-c, .pal-color { border-color: transparent; background: hsl(var(--glass-tint) / 1); box-shadow: var(--neu-raise); color: var(--ink-key); }
@@ -322,7 +322,6 @@ body[data-theme="light"] .native-info .native-info-content, body[data-theme="lig
 .native-clean[data-id="settings"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="settings"] .sw { flex: 1 1 110px; }
 .native-clean[data-id="camera"] .row > .k { flex: 0 0 68px; }
-.native-clean[data-id="palette"] .pal-nav { flex: 0 0 32px; width: 32px; }
 .native-clean[data-id="palette"] .palette-action { flex: 1 1 90px; height: 34px; border-radius: 7px; justify-content: center; }
 .native-clean .bow-hint { text-align: center; font-size: var(--fs-micro); color: var(--dim); }
 .plane-model { display: block; width: 100%; height: 150px; touch-action: none; cursor: grab; }
@@ -377,8 +376,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="settings"] > .dev-body > .segw { margin-bottom: 12px; }
 .native-clean[data-id="settings"] .settings-page > .row { margin: 10px 0 14px; }
 .native-clean[data-id="settings"] .settings-help { display: flex; flex-wrap: wrap; }
-.native-clean[data-id="palette"] .palette-presets { display: grid; grid-template-columns: 30px minmax(0,1fr) 30px; gap: 5px; }
-.native-clean[data-id="palette"] .palette-presets .sel { width: 100%; min-width: 0; }
 .native-clean[data-id="observer"] .segw > .k-lbl { margin-bottom: 5px; }
 .native-clean[data-id="observer"] .row > .segw { width: 100%; flex: 1 1 100%; }
 .native-clean .segw { align-items: stretch; }
