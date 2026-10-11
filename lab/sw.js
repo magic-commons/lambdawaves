@@ -43,7 +43,7 @@ const PRECACHE = [
   ['./canon-gauge.js',                                              'e760a258cd23'],
   ['./capture.js',                                                  '78c25071f769'],
   ['./chemview.js',                                                 '3f573b7bbcf2'],
-  ['./clock.js',                                                    '3236b5da0825'],
+  ['./clock.js',                                                    '5a0a1e969b46'],
   ['./cornell.js',                                                  '7f60b582a663'],
   ['./demos/benzene.lambdawaves.json',                              '5d1e0eb31304'],
   ['./demos/covers/benzene.jpg',                                    '9c2d978c5a88'],
@@ -61,7 +61,7 @@ const PRECACHE = [
   ['./dynamics.js',                                                 'b8e251171697'],
   ['./edit-domain.js',                                              'f67311da8412'],
   ['./export3d.js',                                                 'c6e3391d751b'],
-  ['./field.js',                                                    '3f19d271583c'],
+  ['./field.js',                                                    '25e8436043cf'],
   ['./film-card.js',                                                '4dab4a1c1b07'],
   ['./first-run.js',                                                '29197e7919d4'],
   ['./fonts/LWTitle-title.woff2',                                   '8069abf19624'],
@@ -338,7 +338,7 @@ const PRECACHE = [
   ['./new-project.lambdawaves.json',                                '1134ce61cd21'],
   ['./occlusion.js',                                                'd9d6c6d5b7c6'],
   ['./orbit.js',                                                    '36a22179827b'],
-  ['./orbitalsview.js',                                             'ef964af203ec'],
+  ['./orbitalsview.js',                                             '03ef154b1320'],
   ['./paint-stroke.js',                                             'cbfdfa8270c5'],
   ['./palette-app.js',                                              '3d150ac4b027'],
   ['./particles.js',                                                '639d5fc3f9dd'],
@@ -399,7 +399,7 @@ const PRECACHE = [
   ['./windows/settings-card.js',                                    '4db046c6fdd7'],
   ['./windows/spectrum.js',                                         '29d1beb22cfd'],
   ['./windows/state.js',                                            '944cd6abbbb5'],
-  ['./worker-pool.js',                                              'd33b228069a0'],
+  ['./worker-pool.js',                                              'f31d5675dcae'],
 ];
 
 /* ── 1b. DATA — THE ONE PRECACHE EXEMPTION (0.4.0 S4a · PLAN B2) ──────────────────────────────────────────────────

@@ -43,7 +43,7 @@ export function createOrbitals(host, api) {
 
   let sol = null, on = false, active = api.active ? !!api.active() : true;
   let statusText = 'no molecule solved yet', unsub = null, wanted = null;
-  let re = null, im = null, pushedT = NaN, pushedV = -1, version = 0, selected = -1;
+  let re = null, im = null, re64 = null, im64 = null, pushedT = NaN, pushedV = -1, version = 0, selected = -1;
   const sel = new Map();                // k → { amp, phase } — the register's own coefficients
 
   /* ── the ladder ───────────────────────────────────────────────────────────────────────────────── */
@@ -275,18 +275,20 @@ export function createOrbitals(host, api) {
   }
   const vec = { re: null, im: null };                 // the pushed pair, reused: the frame loop allocates nothing
   const product = { kind: 'orbital', matrix: vec, view: 'phase', hash: null, solution: -1 };   // and so is the product record
-  /** ψ's complex AO vector at t: re/im = Σ_k |c_k| e^{i(arg c_k − ε_k t)} C[:, k] — nAO complex MACs a frame */
+  /** ψ's complex AO vector at t: re/im = Σ_k |c_k| e^{i(arg c_k − ε_k t)} C[:, k] — nAO complex MACs a frame, summed in f64 and cast
+   *  to the field's f32 ONCE (0.5.4 P7a; the reused scratch is the frame loop's one addition — tools/perf/packet-precision.mjs measures it) */
   function vectors(t) {
     const n = nAO();
-    if (!re || re.length !== n) { re = new Float32Array(n); im = new Float32Array(n); vec.re = re; vec.im = im; }
-    re.fill(0); im.fill(0);
+    if (!re || re.length !== n) { re = new Float32Array(n); im = new Float32Array(n); vec.re = re; vec.im = im; re64 = new Float64Array(n); im64 = new Float64Array(n); }
+    re64.fill(0); im64.fill(0);
     const add = (k, amp, phase) => {
       if (!(amp > 0) || !(k >= 0) || k >= n) return;
       const th = phase - sol.eps[k] * t, cr = amp * Math.cos(th), ci = amp * Math.sin(th);
-      for (let mu = 0; mu < n; mu++) { const w = sol.C[mu * n + k]; if (w === 0) continue; re[mu] += cr * w; im[mu] += ci * w; }
+      for (let mu = 0; mu < n; mu++) { const w = sol.C[mu * n + k]; if (w === 0) continue; re64[mu] += cr * w; im64[mu] += ci * w; }
     };
     if (morphOn && storeA && storeB) for (const [k, c] of slerpCoefficients(storeA, storeB, morphS)) add(k, Math.hypot(c.re, c.im), Math.atan2(c.im, c.re));
     else for (const [k, c] of sel) add(k, c.amp, c.phase);
+    re.set(re64); im.set(im64);
     return vec;
   }
   /** push ψ(t) — only when t or the register moved, so a paused transport does not chase its own repaint.
