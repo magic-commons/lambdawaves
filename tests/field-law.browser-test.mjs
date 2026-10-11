@@ -10,7 +10,10 @@
  * worker's).  The components past ONE ulp of the f64 value are counted and printed: the f32 term is all that carries them.  The ROUNDING MODE is measured, not assumed: of the components where rounding toward
  * zero and rounding to nearest disagree, the share the store matched (this rig: toward zero, so a full ulp, never half, is the bound).
  * THE READINGS are printed each in its own metric and held to the constants in tests/helpers/field-law.mjs — the numbers README's sentence
- * and field.js' texel comment state and P4's STATUS reads: RMS · the 99.8 %-of-voxels figure · the worst voxel · relative to the maximum. */
+ * and field.js' texel comment state and P4's STATUS reads: RMS · the 99.8 %-of-voxels figure · the worst voxel · relative to the maximum.
+ * THE VIEW-INVARIANCE GATE (0.5.4 P7d), on the water just read: exposure, ISO, palette, grid and quality are presentation, so none may move
+ * the solve (sol.seq), the chem worker's ledger (workerStat().solverCalls) or Tr(DS) (sol.electrons, the worker's own) — each change made
+ * on the hand's road and read back, so a change that did not happen cannot pass. */
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
 import { FIELD_LAW, f16, ulp16, toF16 } from './helpers/field-law.mjs';
 
@@ -89,5 +92,35 @@ try {
     w.rms <= DE.rms && w.p998 <= DE.p998 && w.worst <= DE.worst && w.relToRhoMax <= DE.relToRhoMax && w.errs.length === 0,
     { rms: w.rms, p998: w.p998, worst: w.worst, relToRhoMax: w.relToRhoMax, at: w.at, errs: w.errs });
   judge('F5 one rounding mode on both molecules', h.mode === w.mode && h.mode !== 'neither', { hydrogen: h.mode, density: w.mode });
+
+  /* ── P7d THE VIEW-INVARIANCE GATE: the modulation registry's base (the EXPOSURE and ISO knobs' road), the palette's select and switch,
+       the FIELD QUALITY segments (GRID, PERFORMANCE) and the AUTO SCALE switch pressed twice — after each, settled, the three readings ── */
+  const v = await g.ev(`${LIB}
+    const R = LW.mod.registry, sol0 = LW.chem.solution();
+    const seg = (label, text) => { const s = [...document.querySelectorAll('.segw')].find((x) => x.querySelector('.k-lbl') && x.querySelector('.k-lbl').textContent === label);
+      const b = s && [...s.querySelectorAll('.seg-b')].find((x) => x.textContent === text); if (b) b.click(); return !!b; };
+    const swi = (label) => { const b = [...document.querySelectorAll('button.sw')].find((x) => x.querySelector('.sw-lbl') && x.querySelector('.sw-lbl').textContent === label); if (b) b.click(); return !!b; };
+    const read = async () => { const s = LW.chem.solution(), st = await LW.chem.workerStat();
+      return { seq: s && s.seq, solverCalls: st && st.solverCalls, trDS: s && s.electrons, same: s === sol0, owner: LW.chem.state().on, res: F.stats.resolution,
+        exposure: LW.mat.exposure, iso: LW.mat.iso, palette: LW.paletteId, palOn: LW.palette.on, steps: LW.quality.steps, perf: LW.perf.mode, auto: LW.quality.auto }; };
+    const before = await read(), pal = LW.paletteGroups.flatMap((q) => q.items).find((id) => id !== LW.paletteId), rows = [];
+    const STEPS = [['EXPOSURE 2.3', () => R.setBase('material.exposure', 2.3)], ['ISO 0.2', () => R.setBase('material.iso', 0.2)],
+      ['PALETTE ' + pal, () => LW.setPalette(pal)], ['PALETTE switch', () => LW.palette.setOn(!LW.palette.on)],
+      ['GRID 96³', () => seg('GRID', '96³')], ['GRID 128³', () => seg('GRID', '128³')], ['GRID 64³', () => seg('GRID', '64³')],
+      ['PERFORMANCE FULL', () => seg('PERFORMANCE', 'FULL')], ['AUTO SCALE', () => swi('AUTO SCALE')], ['AUTO SCALE again', () => swi('AUTO SCALE')]];
+    for (const [name, f] of STEPS) { const did = f() !== false; await settle(3); await new Promise((r) => setTimeout(r, 250)); rows.push({ name, did, ...(await read()) }); }
+    return { before, pal, rows, errs: window.__e.slice() };`);
+  const row = (n) => v.rows.find((r) => r.name.startsWith(n)) || {}, b0 = v.before;
+  console.log(`READING invariance: sol.seq ${b0.seq} · solverCalls ${b0.solverCalls} · Tr(DS) ${b0.trDS} — then ` + v.rows.map((r) => `${r.name}: ${r.seq}/${r.solverCalls}/${r.trDS}`).join(' · '));
+  const moved = { exposure: Math.abs(row('EXPOSURE').exposure - 2.3) < 1e-9, iso: Math.abs(row('ISO').iso - 0.2) < 1e-9, palette: row('PALETTE ' + v.pal).palette === v.pal,
+    palOn: row('PALETTE switch').palOn !== b0.palOn, grid: [row('GRID 96').res, row('GRID 128').res, row('GRID 64').res].join() === '96,128,64',
+    steps: [row('GRID 96').steps, row('GRID 128').steps, row('GRID 64').steps].join() === '160,240,110', perf: row('PERFORMANCE').perf === 'full',
+    auto: row('AUTO SCALE again').auto !== v.rows.find((r) => r.name === 'AUTO SCALE').auto };
+  judge('V1 every presentation change took effect (read back): exposure, ISO, palette + its switch, GRID 96³ → 128³ → 64³ with its steps, PERFORMANCE, AUTO SCALE',
+    b0.owner && Object.values(moved).every(Boolean) && v.rows.every((r) => r.did), { moved, rows: v.rows.map((r) => [r.name, r.did, r.res, r.steps, r.perf, r.auto]) });
+  judge(`V2 THE VIEW-INVARIANCE GATE: across all ${v.rows.length} changes sol.seq (${b0.seq}), workerStat().solverCalls (${b0.solverCalls}) and Tr(DS) (${b0.trDS}) never move, the solution is the same object`,
+    Number.isFinite(b0.seq) && Number.isFinite(b0.solverCalls) && Number.isFinite(b0.trDS) && Math.abs(b0.trDS - 10) < 1e-9
+      && v.rows.every((r) => r.seq === b0.seq && r.solverCalls === b0.solverCalls && r.trDS === b0.trDS && r.same && r.owner) && v.errs.length === 0,
+    { before: b0, changed: v.rows.filter((r) => r.seq !== b0.seq || r.solverCalls !== b0.solverCalls || r.trDS !== b0.trDS || !r.same || !r.owner), errs: v.errs });
 } finally { await g.close(); }
 process.exit(done('field-law') ? 1 : 0);
