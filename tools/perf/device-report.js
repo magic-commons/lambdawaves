@@ -18,6 +18,17 @@
  *              (`display`, which carries whatever the boot is still doing) and again at the end (`displayEnd`).
  *   adapter    adapterInfo, limitsRequested, features (shader-f16 / timestamp-query / texture-formats-tier1 flagged),
  *              navigator.gpu.wgslLanguageFeatures, getPreferredCanvasFormat(), the limits the field leans on.
+ *   fingerprint (0.5.4 P11) THE FINGERPRINT ROW — what two machines are COMPARED by, and never a lock (PLAN R7; the digest lock stays SAME-MACHINE):
+ *              adapter (vendor, architecture, device, description), driver (GPUAdapterInfo.driver where the browser gives one, else its
+ *              description, and `driverFrom` says which), browser (UA + userAgentData brands), the adapter's FEATURE LIST with `shader-f16`
+ *              called out — OFFERED by the adapter, never REQUESTED (lab/gpu-boot.js requests limits only), GRANTED to the device or not —, the
+ *              adapter's LIMITS, the limits the device was granted, and `digests`: `fieldDigest` of TWO STATES at 64³ — 1s+2pz and MOLECULES ·
+ *              H₂O (density), each at t = 3.7, entered the way tools/perf/digest-lock.mjs enters them.  The facts are in every report.  The digests
+ *              REPLACE THE REGISTER AND THE MOLECULE, so they run only on `&only=fingerprint` / `__LW.report({ only: 'fingerprint' })` (or
+ *              `{ fingerprint: true }` beside the rest), skip over a current project or unsaved changes unless `force`, and put the state back through
+ *              __LW.restore(snapshot), the autosave (lambdawaves.q0.session) back byte for byte, the undo ring cleared to one row (it cannot be written
+ *              back; `restored.history` says so when it held more).  Equal hashes on two machines say
+ *              the f32→f16 texels agree there; unequal hashes say nothing is wrong (a different GPU may round differently) — the lock does not travel.
  *   settings   card · frost · blur · theme · quality {res, steps, scale, auto, autoScale} · governor — as found.
  *   scenes     plays at the CURRENT settings, each from the same t, each put back after: rAF fps, LW.perf.loopMedian, the
  *              worst gap, and a TIME SERIES — rAF frames binned per 250 ms, each bin carrying the state at its first frame
@@ -302,11 +313,93 @@ function gridProbe(LW) {
   };
 }
 
+/** THE FINGERPRINT's static half: the facts a machine is told apart by.  Nothing here changes anything. */
+function fingerprintFacts(LW, field) {
+  if (!field || !field.adapter) return { ok: false, error: safe(() => field.error), digests: { skipped: 'no WebGPU adapter' } };
+  const pick = (k) => safe(() => field.adapter.info[k]) ?? safe(() => field.adapterInfo[k]) ?? null;      // the adapter's own info first (field.adapterInfo keeps four members only)
+  const info = {}; for (const k of ['vendor', 'architecture', 'device', 'description', 'driver', 'subgroupMinSize', 'subgroupMaxSize']) info[k] = pick(k);
+  const num = (L) => { const o = {}; if (L) for (const k in L) { const v = safe(() => L[k]); if (typeof v === 'number') o[k] = v; } return o; };
+  const offered = safe(() => [...field.adapter.features].sort(), []), granted = safe(() => [...field.device.features].sort(), []);
+  const brands = safe(() => navigator.userAgentData.brands.map((b) => b.brand + ' ' + b.version), null);
+  return {
+    ok: true,
+    adapter: { vendor: info.vendor, architecture: info.architecture, device: info.device, description: info.description, subgroupMin: info.subgroupMinSize, subgroupMax: info.subgroupMaxSize, fallback: safe(() => field.adapter.isFallbackAdapter ?? (field.adapter.info && field.adapter.info.isFallbackAdapter), null) },
+    driver: info.driver || info.description || null, driverFrom: info.driver ? 'adapterInfo.driver' : info.description ? 'adapterInfo.description (the browser gives no separate driver string)' : null,
+    browser: { ua: navigator.userAgent, brands, vendor: navigator.vendor || null, platform: navigator.platform || null },
+    features: offered, featuresGranted: granted,
+    shaderF16: { offered: offered.includes('shader-f16'), requested: false, granted: granted.includes('shader-f16'), note: 'lab/gpu-boot.js requests limits only; shader-f16 is never requested, so no kernel can depend on it' },
+    limits: num(safe(() => field.adapter.limits)), limitsGranted: num(safe(() => field.device.limits)), limitsRequested: safe(() => field.limitsRequested),
+    format: safe(() => field.format), preferredFormat: safe(() => navigator.gpu.getPreferredCanvasFormat()),
+    digests: null,
+  };
+}
+
+/**
+ * THE FINGERPRINT's digest half: `fieldDigest` of two states at 64³, entered as tools/perf/digest-lock.mjs enters them (base() then 1s+2pz at
+ * t = 3.7; then MOLECULES · H₂O, density, t = 3.7), each digested twice with a reconstruct between so a kernel that is not a pure function of
+ * its inputs shows inside one run.  It REPLACES the register and the molecule: it is the last thing the report does, it skips over a current
+ * project or unsaved changes unless `force`, and the state as found goes back through __LW.restore(snapshot) (a second open, the project
+ * scene's road).  The undo ring is the one thing it cannot put back.  Compared across machines, never locked.
+ */
+async function runFingerprint(LW, found, say, err, force) {
+  const field = LW.field, q = LW.quality, TIER = LW.TIER, asFound = projectState(LW);
+  const why = !(field && field.ok) ? 'no WebGPU field'
+    : asFound && asFound.current && !force ? 'a project is current here (' + asFound.current + ') — the digests replace the register and the molecule; add &force=1 to run them over a current project (the undo ring is the one thing not put back)'
+    : asFound && asFound.dirty && !force ? 'the project has unsaved changes — add &force=1 to run the digests over them (the undo ring is the one thing not put back)'
+    : !(LW.chem && typeof LW.chem.solve === 'function') ? 'no MOLECULES in this page' : null;
+  if (why) return { skipped: why };
+  const snap = JSON.stringify(LW.serialize()), ringFound = historyState(LW), foundMat = safe(() => JSON.parse(snap).presentation.mat, {}) || {};
+  const SESSION = 'lambdawaves.q0.session', sessionFound = safe(() => localStorage.getItem(SESSION), null);     // the app's own autosave of the live project (mir core/session.js, 300 ms after a change)
+  const settle = async (n = 2) => { for (let i = 0; i < n; i++) await LW.settle(); };
+  const freeze = async (t) => { LW.pause(); if (LW.mod && LW.mod.running) LW.mod.stop(); LW.clock.scrub(t); LW.schedule(TIER.REBUILD); await settle(2); };
+  const base = async () => {
+    try { if (LW.chem.state && LW.chem.state().on) LW.chem.setOn(false); } catch (_) {}
+    if (LW.sturmian && LW.sturmian.on) LW.sturmian.set(false);
+    if (LW.space !== 'x') LW.setSpace('x');
+    LW.setGasBasis('reg');
+    if (LW.hamiltonian !== 'hydrogen') LW.setHamiltonian('hydrogen');
+    LW.pause(); LW.clock.scrub(0); LW.loadPreset('1s+2pz'); LW.pause(); LW.clock.scrub(0);
+  };
+  const digest = async (id, enter) => {
+    say('fingerprint · ' + id);
+    await base(); await enter();
+    q.res = 64; q.steps = PAIR[64].steps; q.scale = PAIR[64].scale; LW.schedule(TIER.REBUILD); await settle(3);
+    for (let i = 0; i < 20 && field.resolution !== 64; i++) await settle(1);
+    const dg = await field.fieldDigest(); LW.schedule(TIER.RECONSTRUCT); await settle(2); const dg2 = await field.fieldDigest();
+    return { id, grid: 64, t: LW.clock.t, hash: dg.hash, integral: dg.integral, maxRho: dg.maxRho, nan: dg.nan, half: dg.half, res: dg.res, repeat: dg2.hash === dg.hash };
+  };
+  const out = { grid: 64, states: [], force: !!force, residue: {} };
+  try {
+    out.states.push(await digest('1s+2pz', async () => { await freeze(3.7); }));
+    out.states.push(await digest('MOLECULES · H2O · density', async () => { await LW.chem.solve('H2O'); LW.chem.setOn(true); LW.chem.setView('density'); await settle(4); await freeze(3.7); }));
+  } catch (e) { err('fingerprint digests', e); out.error = String(e && e.message || e); }
+  finally {
+    try {
+      try { if (LW.chem.state && LW.chem.state().on) LW.chem.setOn(false); } catch (_) {}
+      const obj = JSON.parse(snap), ab = safe(() => LW.ab);
+      if (safe(() => LW.reg.transition) && ab && typeof ab.set === 'function') ab.set(false);       // the project scene's order: the A/B mix is stood down before the register is restored
+      out.residue.restore = LW.restore(obj) ? 'LW.restore(snapshot) ok' : 'LW.restore(snapshot) answered false';
+      if (!('finish' in foundMat) && LW.mat.finish === 'lit') delete LW.mat.finish;
+      await settle(3);
+    } catch (e) { err('fingerprint put-back', e); out.residue.restore = 'threw: ' + String(e && e.message || e); }
+    /* the two things a state change writes that restore() does not take back: the autosave (booked 300 ms after the LAST change — so it is put
+       back at the very end of the report, after putBack, in measure's finally) and the undo ring's rows.  The ring is cleared to one row, the
+       state as found, exactly as the project scene does, and says so when it held more. */
+    found.fingerprintSession = { key: SESSION, value: sessionFound };
+    if (LW.history) { try { LW.history.clear(); } catch (e) { err('fingerprint history', e); } }
+    out.residue.undoRing = { found: ringFound, after: historyState(LW), note: ringFound && ringFound.rows > 1 ? 'the ring held ' + ringFound.rows + ' rows; a state change cannot write them back — cleared to one row, the state as found' : 'cleared to one row, the state as found (the ring held one)' };
+    found.fingerprintScene = out.residue;
+  }
+  return out;
+}
+
 /**
  * deviceReport(LW, opts) → one JSON-safe object.
  *   opts.targetMs     the throughput batch floor (1500)          opts.sceneMs   one scene's play (3000)
  *   opts.grids        [64, 96, 128]                              opts.scenes / opts.gpu   false skips that part
  *   opts.only         'grid': the scenes are the two grid edges alone · 'project': the project open alone
+ *   opts.only         also 'fingerprint': the FINGERPRINT row alone (the facts + the two 64³ digests; no scenes, no GPU rows)
+ *   opts.fingerprint  true: the two digests beside the other parts (they run LAST); opts.force lets them run over a current project
  *   opts.force        true: the project open runs over a current project and unsaved changes (`&force=1`), and puts
  *                     the current project and the unsaved-changes mark back as found (runProjectOpen)
  *   opts.readyAt      performance.now() at __LW.ready (the flag's road passes it)
@@ -321,6 +414,7 @@ export function deviceReport(LW, opts = {}) {
 
 async function measure(LW, opts) {
   const o = { targetMs: 1500, sceneMs: 3000, longMs: 30000, grids: [64, 96, 128], scenes: true, gpu: true, ...opts };
+  if (o.only === 'fingerprint') { o.scenes = false; o.gpu = false; }                   // the FINGERPRINT row alone: the facts and the two digests
   const say = typeof o.onProgress === 'function' ? (t) => { try { o.onProgress(t); } catch (_) {} } : () => {};
   const skipEl = o.skipEl || null;
   const errors = [];
@@ -377,6 +471,7 @@ async function measure(LW, opts) {
       limits: safe(() => { const L = field.device.limits, o2 = {}; for (const k of ['maxTextureDimension2D', 'maxTextureDimension3D', 'maxStorageBufferBindingSize', 'maxBufferSize', 'maxComputeWorkgroupStorageSize', 'maxComputeInvocationsPerWorkgroup', 'maxStorageTexturesPerShaderStage']) o2[k] = L[k]; return o2; }),
       gamut: safe(() => LW.gamut.state()), ok: !!field.ok,
     } : { ok: false, error: safe(() => field.error) };
+    R.fingerprint = fingerprintFacts(LW, field);
     R.settings = {
       card: found.card, cardChosen: found.cardChosen, frost: found.frost, frostLive: safe(() => LW.frostLive), blur: safe(() => getComputedStyle(document.documentElement).getPropertyValue('--glass-blur').trim()),
       theme: safe(() => LW.theme), disconnected: safe(() => LW.disconnected), uiHidden: found.uiHidden,
@@ -462,10 +557,24 @@ async function measure(LW, opts) {
     say('the display cadence, again');
     R.displayEnd = await cadence();
     if (!found.uiHidden) { LW.keys.toggleUI(); try { await LW.settle(); R.displayEnd.uiHidden = await cadence(); } finally { LW.keys.toggleUI(); await LW.settle(); } }
+
+    /* ── THE FINGERPRINT's digests, LAST: they replace the register and the molecule, so nothing else is measured after them ── */
+    if (R.fingerprint && R.fingerprint.ok) {
+      if (o.only === 'fingerprint' || o.fingerprint === true) R.fingerprint.digests = await runFingerprint(LW, found, say, err, o.force === true);
+      else R.fingerprint.digests = { skipped: 'they replace the register and the molecule — run `&only=fingerprint` (or __LW.report({ only: "fingerprint" }))' };
+    }
   } catch (e) { err('report', e); }
   finally {
     /* ── put everything back, whatever threw; then let the page write again ── */
     try { await putBack(LW, found); } catch (e) { err('put-back', e); }
+    if (found.fingerprintSession && found.fingerprintScene) {      // the autosave the digests' state changes booked: back byte for byte (or gone) once the last booking has landed
+      try {
+        await sleep(900);
+        const { key, value } = found.fingerprintSession;
+        if (value === null) localStorage.removeItem(key); else localStorage.setItem(key, value);
+        found.fingerprintScene.session = value === null ? 'absent as found — removed again after the autosave landed' : 'put back byte for byte (' + value.length + ' B)';
+      } catch (e) { err('put-back session', e); found.fingerprintScene.session = 'could NOT be put back: ' + String(e && e.message || e); }
+    }
     hold.release();
   }
 
@@ -481,6 +590,7 @@ async function measure(LW, opts) {
     localStorage: changedKeys.length ? 'DIFFERENT: ' + changedKeys.join(', ') : 'identical',
     history: JSON.stringify(proofBefore.history) === JSON.stringify(proofAfter.history) ? 'identical'
       : found.projectScene ? 'CLEARED by the project open to one row (' + JSON.stringify(proofBefore.history) + ' → ' + JSON.stringify(proofAfter.history) + ') — the one thing that scene cannot put back'
+      : found.fingerprintScene ? 'CHANGED by the FINGERPRINT digests (' + JSON.stringify(proofBefore.history) + ' → ' + JSON.stringify(proofAfter.history) + ') — they replace the register and the molecule, and the ring is the one thing that scene cannot put back'
       : 'DIFFERENT',
     card: LW.cardStyle === found.card ? 'identical' : 'DIFFERENT',
     cardRoad: found.cardChosen ? 'setCardStyle (this browser had already chosen a card)' : 'the data-card attribute only (setCardStyle would have recorded a first choice)',
@@ -1089,6 +1199,7 @@ export function summaryLine(R, bytes) {
   return 'λWAVES device report · ' + R.device + ' · ' + a + ' · dpr ' + (R.platform && R.platform.dpr) + ' cap ' + (R.platform && R.platform.dprCap)
     + ' · display ' + (R.display ? R.display.rafHz : '?') + ' Hz · ' + s.res + '³/' + s.steps + '/' + s.scale + ' · paced ' + (R.pace ? R.pace.paced : '?')
     + (lp ? ' · long play ' + lp.rafFps + ' fps, ' + lp.presents + ' presents, ' + lp.skipped + ' held, queue ≤ ' + (lp.queueMsMax === null ? '—' : lp.queueMsMax + ' ms') : '') + ' · fps ' + sc + ' · gpu ms ' + g
+    + (R.fingerprint && R.fingerprint.digests && Array.isArray(R.fingerprint.digests.states) && R.fingerprint.digests.states.length ? ' · fp ' + R.fingerprint.digests.states.map((x) => x.hash).join('/') : '')
     + ' · ' + (R.backdrops ? R.backdrops.layers : '?') + ' backdrops · ' + (R.dom ? R.dom.elements : '?') + ' els · restored ' + (R.restored ? R.restored.serialize + '/' + R.restored.settingsKey : '?')
     + (bytes ? ' · ' + bytes + ' B' : '');
 }
@@ -1121,7 +1232,7 @@ async function runFromFlag(LW, qs, readyAt) {
   for (let i = 0; i < 600 && !LW.ready; i++) await sleep(50);
   await new Promise((r) => { try { LW.warning.onAccept(r); } catch (_) { r(); } });
   if (safe(() => LW.motion.reduced)) await toast.ask('reduced motion is on — the report plays the field for about a minute. Press RUN to measure.', 'RUN');
-  const only = ['grid', 'project'].includes(qs.get('only')) ? { only: qs.get('only'), gpu: false } : {};   // `&only=grid` (~25 s) · `&only=project` (~15 s): that scene alone, no GPU rows
+  const only = ['grid', 'project', 'fingerprint'].includes(qs.get('only')) ? { only: qs.get('only'), gpu: false } : {};   // `&only=grid` (~25 s) · `&only=project` (~15 s) · `&only=fingerprint` (~10 s): that part alone, no GPU rows
   if (qs.get('force') === '1') only.force = true;                                // `&force=1`: the project open runs over a current project and unsaved changes (runProjectOpen)
   toast.say('device report · measuring — hands off the screen for about ' + (only.only ? 'half a minute' : 'three minutes'));
   let R;
