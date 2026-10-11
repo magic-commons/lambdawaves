@@ -399,7 +399,7 @@ const PRECACHE = [
   ['./windows/settings-card.js',                                    '4db046c6fdd7'],
   ['./windows/spectrum.js',                                         '29d1beb22cfd'],
   ['./windows/state.js',                                            '944cd6abbbb5'],
-  ['./worker-pool.js',                                              'd33b228069a0'],
+  ['./worker-pool.js',                                              'f31d5675dcae'],
 ];
 
 /* ── 1b. DATA — THE ONE PRECACHE EXEMPTION (0.4.0 S4a · PLAN B2) ──────────────────────────────────────────────────
