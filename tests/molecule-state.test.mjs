@@ -1,14 +1,20 @@
 /* molecule-state.test.mjs — B-H2O-5's gate.  The saved molecule is H₂O/STO-3G at the pinned
  * E = −74.963023162862 with a REAL MMUT record: P(t) and P(t−Δt) come out of lab/density.js after a δ-kick and one
  * step, not out of a fixture, so the Hermiticity and the parity being checked are the propagator's own.
- * Save → restore → save must be byte-identical, and each of the four named refusals must fire on its own defect.
+ * Save → restore → save must be byte-identical, and each of the five named refusals must fire on its own defect.
  * The E_TRACE bound is ROUND 4 · OPUS §8's correction of Sol's flat 1e-12: max(1e-12, 3nε·steps).
+ * §7 is THE CONTRACT RECORD (0.5.4 P1): identityOf's canonical form, the moved-H witness, E_IDENTITY and CONVENTIONS.
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { moleculeRHF, registerRecord } from '../lab/rhf-molecule.js';
 import { createRTHF } from '../lab/density.js';
-import { serializeMolecule, restoreMolecule, MoleculeStateError, SCHEMA, COMPONENT_ORDER_LINE } from '../lab/molecule-state.js';
+import { serializeMolecule, restoreMolecule, MoleculeStateError, SCHEMA, COMPONENT_ORDER_LINE, BASIS_KIND, CODES, identityOf, CONVENTIONS } from '../lab/molecule-state.js';
+import { decodeRecord, recordPath } from '../lab/library.js';
+import { moleculeAtoms } from '../lab/molecules.js';
+import { CONVENTION } from '../lab/names.js';
+import { basisFrom, rdOf } from '../lab/md.js';
 
 const record = JSON.parse(readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url), 'utf8'));
 registerRecord('sto-3g', record);
@@ -188,4 +194,73 @@ const rec1 = serializeMolecule(state);
   console.log(`PASS the MMUT restart policy: 0 and null are unrestarted (${STEPS - 1} MMUT steps, no restart) and 50 restarts inside its cycle`
     + ` — two different dipoles (${dNever.toExponential(9)} against ${dFifty.toExponential(9)}); the record carries the policy and the cycle position,`
     + ` and a record written without them restores as "${old.rt.restartPolicy}" labelled "${old.rt.restartPolicySource}".`);
+}
+
+/* 7. THE CONTRACT RECORD (0.5.4 P1, R13): identity and conventions are DATA, never a stamp.  Neither enters
+      serializeMolecule's record — §1 pins its nine keys and its bytes.
+   7a. THE IDENTITY: one sha-256 over a canonical form whose atoms line is the library's own key. */
+const hex = (t) => createHash('sha256').update(t).digest('hex');
+const atomsLine = (A) => 'atoms ' + hex(JSON.stringify(A.map((a) => [a.Z, a.x, a.y, a.z])));
+const CAT = JSON.parse(readFileSync(new URL('../lab/library.json', import.meta.url), 'utf8'));
+const loadRecord = (row) => JSON.parse(readFileSync(new URL('../lab/' + recordPath(row.hash), import.meta.url), 'utf8'));
+{
+  const water = { atoms, basisHash: sol.hash, charge: 0, multiplicity: 1, model: 'RHF' }, id0 = identityOf(water);
+  assert.equal(id0, hex(['identity 1', atomsLine(atoms), 'basis ' + sol.hash, 'charge 0', 'multiplicity 1', 'model RHF'].join('\n')),
+    'the identity is the sha-256 of the six canonical lines the header states');
+  assert.match(id0, /^[0-9a-f]{64}$/);
+  /* THE WITNESS: one hydrogen moved 0.01 bohr is a new solve in the same basis — the basis hash stays, the identity moves */
+  const movedAtoms = clone(atoms); movedAtoms[1].z += 0.01;
+  const moved = moleculeRHF({ atoms: movedAtoms, basis: 'sto-3g' });
+  assert.equal(moved.hash, sol.hash, 'a moved hydrogen must NOT move the basis hash (sol.hash is the basis, never the geometry)');
+  const id1 = identityOf({ ...water, atoms: movedAtoms, basisHash: moved.hash });
+  assert.notEqual(id1, id0, 'a moved hydrogen must move the identity');
+  const sixG = JSON.parse(readFileSync(new URL('../lab/vendor/bse/6-31+g-star-v1.json', import.meta.url), 'utf8'));
+  for (const [k, v] of [['charge', 1], ['multiplicity', 3], ['model', 'UHF'], ['basisHash', basisFrom(atoms, sixG, { cart: true }).hash]])
+    assert.notEqual(identityOf({ ...water, [k]: v }), id0, `the identity must move with ${k}`);
+  /* the record road and the live road hash the same atoms the same way: every catalogue row's input.atomsSha256 is the key of
+     the atoms a live solve of that molecule is handed (lab/molecules.js), so the identity's atoms line can be read off a record */
+  let same = 0;
+  for (const row of CAT.rows) if ('atoms ' + loadRecord(row).input.atomsSha256 === atomsLine(moleculeAtoms(row.id))) same++;
+  assert.equal(same, CAT.rows.length, `a record's input.atomsSha256 and the live atoms must agree on every row: ${same}/${CAT.rows.length}`);
+  console.log(`PASS the identity: ${id0.slice(0, 12)}… = sha-256 of the six canonical lines; a hydrogen moved 0.01 bohr keeps the basis hash`
+    + ` ${sol.hash.slice(0, 12)}… and moves the identity to ${id1.slice(0, 12)}…; charge, multiplicity, model and basis each move it;`
+    + ` record and live atoms agree on ${same}/${CAT.rows.length} catalogue rows.`);
+}
+
+/* 7b. E_IDENTITY, the one case: restoreMolecule handed a library record whose input.atomsSha256 the atoms do not hash to. */
+{
+  const L = loadRecord(CAT.rows.find((r) => r.id === 'C6H6')), R = decodeRecord(L);
+  const stateOf = (A) => serializeMolecule({ atoms: A, charge: L.input.charge, basis: { name: L.input.basis, version: '1', hash: L.ground.hash },
+    rhf: { energy: L.ground.energy, eps: R.eps, C: R.C, D: R.D } });
+  const good = stateOf(L.input.atoms);
+  assert.equal(codeOf(() => restoreMolecule(good, { record, lib: L })), null, 'a state at its record\'s own geometry restores');
+  assert.equal(JSON.stringify(serializeMolecule(restoreMolecule(good, { record, lib: L }))), JSON.stringify(good), 'and the check moves no byte');
+  const tampered = clone(L); tampered.input.atoms[1].x += 0.01;                        // atom 1 of benzene is a hydrogen
+  assert.equal(tampered.input.atoms[1].Z, 1);
+  assert.equal(codeOf(() => restoreMolecule(stateOf(tampered.input.atoms), { record, lib: tampered })), 'E_IDENTITY', 'a record whose atoms do not hash to its input.atomsSha256');
+  assert.equal(codeOf(() => restoreMolecule(stateOf(tampered.input.atoms), { record, lib: L })), 'E_IDENTITY', 'a moved hydrogen restored under the record\'s name');
+  assert.equal(codeOf(() => restoreMolecule(stateOf(tampered.input.atoms), { record })), null, 'with no library record nothing is claimed');
+  assert.deepEqual(CODES, ['E_SHAPE', 'E_BASIS_HASH', 'E_MMUT_HISTORY', 'E_TRACE', 'E_IDENTITY'], 'the five named refusals');
+  console.log('PASS E_IDENTITY: C₆H₆ restores against its own record with no byte moved; a record with a hydrogen moved 0.01 bohr, and a moved hydrogen'
+    + ' under the intact record\'s name, are both refused; with no library record nothing is claimed; CODES pinned at five.');
+}
+
+/* 7c. CONVENTIONS: the referenced members ARE the tree's constants; the declared ones equal the literals their proofs keep
+       (kernel: density.test §2; current: molecular-flow.test §5; rd: here, against md.js rdOf on a d shell). */
+{
+  assert.deepEqual(Object.keys(CONVENTIONS), ['basisKind', 'componentOrder', 'rd', 'axes', 'kernel', 'current', 'energyRef']);
+  assert.ok(Object.isFrozen(CONVENTIONS) && Object.isFrozen(CONVENTIONS.energyRef), 'the conventions are read, never written');
+  assert.equal(CONVENTIONS.basisKind, BASIS_KIND); assert.equal(CONVENTIONS.basisKind, 'cartesian');
+  assert.equal(CONVENTIONS.componentOrder, COMPONENT_ORDER_LINE); assert.equal(CONVENTIONS.componentOrder, 's; x,y,z; xx,xy,xz,yy,yz,zz');
+  assert.equal(CONVENTIONS.axes, CONVENTION, 'the point-group frames are names.js\' own object, not a copy');
+  assert.equal(CONVENTIONS.rd, 'M_pyscf = R_d M R_d; R_d = 1 on s and p, √(4π/5) on xx,yy,zz, √(4π/15) on xy,xz,yz');
+  const sixG = JSON.parse(readFileSync(new URL('../lab/vendor/bse/6-31+g-star-v1.json', import.meta.url), 'utf8'));
+  const b = basisFrom([{ Z: 8, x: 0, y: 0, z: 0 }], sixG, { cart: true }), rd = rdOf(b);
+  const want = (l) => (l[0] + l[1] + l[2] < 2 ? 1 : Math.max(...l) === 2 ? Math.sqrt(4 * Math.PI / 5) : Math.sqrt(4 * Math.PI / 15));
+  assert.ok(b.bfs.some((f) => f.shell === 2), 'oxygen 6-31+G* carries a d shell');
+  b.bfs.forEach((f, i) => assert.equal(rd[i], want(f.l), `R_d on ${b.order[i]}`));
+  assert.equal(CONVENTIONS.kernel, 'D = Σ f c c†; P = W D W'); assert.equal(CONVENTIONS.current, '−Im D, the transpose');
+  assert.deepEqual({ ...CONVENTIONS.energyRef }, { hydrogen: 'absolute', states: 'relative to ground', packet: 'absolute ε·t' });
+  console.log(`PASS CONVENTIONS: ${Object.keys(CONVENTIONS).length} members, frozen; basisKind, componentOrder and axes are the tree's own constants;`
+    + ` the R_d rule holds on all ${b.n} O 6-31+G* functions; kernel, current and energyRef equal their proofs' literals.`);
 }
