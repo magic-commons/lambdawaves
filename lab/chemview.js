@@ -23,7 +23,7 @@
  * window is a collapsible inset, off by default, on its own amplitude scale, badged as a timestep diagnostic.
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
-import { el, seg, sw, knob, trig, readout, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
+import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631 } from './molecules.js';
 import { orbitalName, forms, coreCount } from './names.js';
 import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab } from './library.js';
@@ -78,30 +78,31 @@ export function createChem(host, api) {
      holds that one section; the name, its record count and bytes, how many are on this device, and INSTALLED — the switch's lamp
      is lit when every record of the section is kept here, and its press installs them all (persist() asked once) or removes
      them.  A section with no record solves live and offers nothing to keep; in a Safari tab nothing is offered to keep (S4a: the
-     M5 has not measured persist there).  The page is the molecule's own section, or the one the hand turned to — never saved. */
+     M5 has not measured persist there).  The page is the molecule's own section, or the one the hand turned to — never saved.
+     0.5.3 M8 (Josh: "section picker and molecules picker should look like palette window's selector"): both pickers are the kit's
+     stepper, PALETTE's preset look — SECTION's name opens the kit's list; the section's record line rides its hover. Josh's rows:
+     ‹ SECTION › · INSTALLED · MOLECULES ON, then the MOLECULE picker alone, then BASIS · ORBITAL, then VIEW · the chevron. */
+  let page = PRESET_BY_ID.get(preset).section, sub = '';
   const rH = el('div', 'row tight mol-section', host);
-  const pageBy = (d) => () => { page = SECTIONS[(SECTIONS.indexOf(page) + d + SECTIONS.length) % SECTIONS.length]; fillSel(); };
-  for (const [d, g, t] of [[-1, 'dirPrev', 'previous'], [1, 'dirNext', 'next']]) {             // PALETTE's own page-turner buttons
-    const b = trig({ label: '', cls: 'pal-nav mol-turn', title: `The ${t} section of the library`, onFire: pageBy(d) }); chip(b.root, g, t + ' section'); rH.appendChild(b.root);
-  }
-  const roSec = readout({ label: 'SECTION', value: '—', sub: '' }); rH.insertBefore(roSec.root, rH.lastChild);
+  const secStep = stepper({ aria: 'Library section', items: SECTIONS.map((id) => ({ id, label: id })), value: page, cls: 'mol-step', onChange: (id) => { page = id; fillSel(); } });
+  rH.appendChild(secStep.root);
   const keepSw = sw({ label: 'INSTALLED', value: false, title: 'Every record of this section kept on this device: press to install them all, press again to remove them', onChange: (v) => { keep(v); } });
   rH.appendChild(keepSw.root);
-  const r0 = el('div', 'row tight', host);
   const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule’s density', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
-  r0.appendChild(onSw.root);
+  rH.appendChild(onSw.root);
+  const r0 = el('div', 'row tight', host);
   /* ── THE MOLECULE DROPDOWN ────────────────────────────────────────────────────────────────────────────────
    * paletteview.js:22's node and class, and its lesson too: a `<select>` fires `change` only when the VALUE
    * changes, so re-picking what you are already on fires nothing.  Here that is correct rather than a trap —
    * `solve()` returns the cached answer for the molecule already up, so a re-pick would be a no-op anyway, and
    * the one road that must still work (force a re-solve) is `__LW.chem.solve(id, { force: true })`.
-   * A DISABLED option carries its reason in its own title, so the menu explains itself where it refuses. */
-  const mWrap = el('div', 'segw mol-pick', r0);
-  el('div', 'k-lbl', mWrap, 'MOLECULE');
-  const mSel = el('select', 'sel', mWrap);
+   * A DISABLED option carries its reason in its own title, so the menu explains itself where it refuses.
+   * 0.5.3 M8: the select IS the kit stepper's name (PALETTE's ‹ NAME ›): the arrows (and ← →) walk the page's enabled rows as a hand pick. */
+  const mStep = stepper({ aria: 'Molecule', list: false, items: [], value: preset, cls: 'mol-step mol-pick', onChange: (id) => { mSel.value = id; handPick(id); } });
+  r0.appendChild(mStep.root);
+  const mSel = el('select', 'sel'); mStep.name.replaceChildren(mSel);
   mSel.setAttribute('aria-label', 'molecule');
   mSel.title = CAP_RULE; mSel.dataset.help = CAP_RULE;
-  let page = PRESET_BY_ID.get(preset).section;
   /** the dropdown holds the page's section, in the table's groups; the molecule on screen stays chosen when it is on this page */
   function fillSel() {
     mSel.replaceChildren();
@@ -119,9 +120,10 @@ export function createChem(host, api) {
       }
     }
     mSel.value = preset; if (mSel.value !== preset) mSel.selectedIndex = -1;   // turned away from the molecule on screen: nothing chosen here yet
+    mStep.setItems([...mSel.options].filter((o) => !o.disabled).map((o) => ({ id: o.value, label: o.textContent })), mSel.value || null); secStep.set(page);
     header();
   }
-  mSel.addEventListener('change', () => { handPick(mSel.value); });   // a hand press: a DOWNLOAD row installs (and asks persist once)
+  mSel.addEventListener('change', () => { mStep.set(mSel.value); handPick(mSel.value); });   // a hand press: a DOWNLOAD row installs (and asks persist once)
   /** THE HAND'S PICK (the dropdown; a notebook link, 0.5.1 D8): the solve as a press, and the app told — its head waits for this solve (D2) */
   function handPick(id) { const p = solve(id, { press: true }); if (api.hand) api.hand(preset); return p; }
   /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
@@ -136,8 +138,8 @@ export function createChem(host, api) {
   function header() {
     const recs = sectionRecs(), on = recs.filter((r) => have.get(r.hash)).length, n = CHEM_PRESETS.filter((p) => p.section === page).length;
     const mb = (recs.reduce((s, r) => s + r.bytes, 0) / 1048576).toFixed(1);
-    roSec.set(page); roSec.setSub(recs.length ? `${recs.length} record${recs.length > 1 ? 's' : ''} · ${mb} MB · ${on} here` : `${n} molecules, all live`);
-    roSec.root.title = `${page}: ${n} molecules; ` + (recs.length ? `${recs.length} with a record (${mb} MB), ${on} of them on this device` : 'every one solves live, none has a record');
+    sub = recs.length ? `${recs.length} record${recs.length > 1 ? 's' : ''} · ${mb} MB · ${on} here` : `${n} molecules, all live`;
+    secStep.root.title = `${page} · ${sub}: ${n} molecules; ` + (recs.length ? `${recs.length} with a record (${mb} MB), ${on} of them on this device` : 'every one solves live, none has a record');
     keepSw.root.hidden = !recs.length || safariTab(); keepSw.set(recs.length > 0 && on === recs.length);
   }
   /** INSTALLED's press: the page's records fetched (each checked against its sha-256 name) and kept, or all removed */
@@ -150,20 +152,19 @@ export function createChem(host, api) {
     return { section: sec, records: recs.length, installed: on };
   }
   fillSel(); lamps(); mSel.addEventListener('focus', () => { lamps(); });
-  const mSeg = { root: mWrap, set(v) { const s = (PRESET_BY_ID.get(v) || {}).section; if (s && s !== page) { page = s; fillSel(); } if (mSel.value !== v) mSel.value = v; }, get() { return mSel.value; }, el: mSel };
+  const mSeg = { root: mStep.root, set(v) { const s = (PRESET_BY_ID.get(v) || {}).section; if (s && s !== page) { page = s; fillSel(); } if (mSel.value !== v) mSel.value = v; mStep.set(v); }, get() { return mSel.value; }, el: mSel };
   const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: [
     { id: 'sto-3g', label: 'STO-3G', title: 'The vendored minimal Cartesian basis; the oracle for all eight' },
     { id: '6-31+g-star', label: '6-31+G*', title: 'A split-valence basis with diffuse and polarisation functions, for H, C, N, O, F molecules up to 46 Cartesian AOs — water’s first root moves 0.483 → 0.341' }],
     onChange: (v) => { basis = v; solve(preset); } });
-  r0.appendChild(bSeg.root);
-
-  const r1 = el('div', 'row tight', host);
+  const r1 = el('div', 'row tight', host), rV = el('div', 'row tight', host);
+  r1.appendChild(bSeg.root);
   const vSeg = seg({ label: 'VIEW', value: 'density', options: [
     { id: 'density', label: 'DENSITY', title: 'ρ(r) = Σ D_ij χ_i χ_j on the field' },
     { id: 'orbital', label: 'ORBITAL', title: 'ψ_k(r) = Σ C_ik χ_i — one molecular orbital' },
     { id: 'diff', label: '<m>Δρ</m>', title: 'The induced density against the reference stored at the kick — ΔD is formed in double precision and shown as a signed field, so a weak kick is not lost in the texture format' }],
     onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
-  r1.appendChild(vSeg.root);
+  rV.appendChild(vSeg.root);
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
     fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); } });
   r1.appendChild(orbKnob.root);
@@ -231,7 +232,7 @@ export function createChem(host, api) {
   const more = el('div', 'mol-more', host); more.id = 'mol-more';
   const rTda = el('div', 'row tight', more); rTda.appendChild(tdaSw.root); rTda.appendChild(coreSw.root);
   for (const n of [r2, cv, cvCore, rr, note]) more.appendChild(n);
-  const moreToggle = el('button', 'trig mol-more-toggle', r1); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
+  const moreToggle = el('button', 'trig mol-more-toggle', rV); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
   chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
   const setMore = (open) => {
     more.hidden = !open; moreToggle.setAttribute('aria-expanded', String(open));
@@ -860,7 +861,7 @@ export function createChem(host, api) {
     /** THE PAGE TURNER (S4b): turn to a section by name (the hand's ‹ › road) and read its header back */
     section(s) { if (SECTIONS.includes(s) && s !== page) { page = s; fillSel(); } const recs = sectionRecs();
       return { name: page, molecules: CHEM_PRESETS.filter((p) => p.section === page).map((p) => p.id), records: recs.length, bytes: recs.reduce((t, r) => t + r.bytes, 0),
-        installed: recs.filter((r) => have.get(r.hash)).length, keepOffered: !keepSw.root.hidden, lamp: keepSw.get(), sub: roSec.root.querySelector('.ro-sub').textContent }; },
+        installed: recs.filter((r) => have.get(r.hash)).length, keepOffered: !keepSw.root.hidden, lamp: keepSw.get(), sub }; },
     /** INSTALLED pressed from outside: every record of the page's section kept (true) or removed (false) — the switch's own road */
     keep(v) { keepSw.set(!!v); return keep(!!v); },
     storage: () => storageInfo(),
