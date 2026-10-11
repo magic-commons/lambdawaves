@@ -411,3 +411,46 @@ is measured); the cyclotomic/DISK thread (closed 10-07 by Josh's ruling); the ar
 ## I · The record of the round (so far)
 NACRE.md `86c486c` → two censuses (Sonnet 5.5, read-only) → this PLAN-DRAFT-0 → REVIEW-SONNET-0 → PLAN-DRAFT-1 → AUDIT-OPUS-1 → PLAN-DRAFT-2 → REVIEW-SONNET-2
 → PLAN-DRAFT-3 (Josh) → PLAN.md.
+
+---
+
+## J · The censuses, folded — corrections to the text above (written after the censuses landed; the reviewer reads both)
+
+### J.1 From `census/REPRESENTATIONS.md` (Sonnet 5.5, 2026-10-11 09:36; every item KNOWN by file:line there)
+1. **The SIGNED view costs nothing** — C.5's "+40 presenter, once" and D.1's "(+40 presenter)" are WITHDRAWN. A signed quantity in `.r` with the producer saying
+   `view: 'real'` rides the molecule's kind-3 road today (field.js:1562; chemview.js:476); the equalizer's ρ′, a per-site density and Φ on a grid all reuse it at
+   zero presenter lines and no lock run. Two caveats the rows inherit: (a) view 2's transfer is `w = (v/ampMax)^(2·soft)` (field.js:421–422) — a 1/r tail (Φ)
+   fills the box unless EXPOSURE/KNEE/SOFT absorb it, else Φ needs its own transfer = one presenter branch (S, 0/0 owed); (b) hydrogen's COMPUTE_WGSL writes
+   only ψ, so the equalizer's signed ρ′ is a NEW SPACE in the hydrogen kernel (Round 1's design; the hydrogen path is locked wholesale, 432 values) — "THE LOCK
+   0/0 after the new space" is its precondition AND the ladder's first lock measurement (UNVERIFIED whether a new branch moves the other spaces' f32 order).
+   0.6.0's sum falls to ≈ +190.
+2. **A new VIEW or STYLE NAME turns `digest-lock --check` RED by key set alone** (digest-lock.mjs:174–175, :264–265 take the union of keys) — the remedy is a
+   `tools/` edit teaching `styles()` to skip keys the fixture lacks, as it already does for states (:255–262). Any row that adds a view/style name carries that
+   `tools/` line (B.5 amended). The Δρ branch is a bare `else` (field.js:435): a new view id must be placed BEFORE it.
+3. **No audio output of ψ exists** (only the kit's clip playback and the microphone analyser). M12 THE CHORD builds an oscillator bank (one partial per populated
+   lane, driven on change with `setValueAtTime`, never in the frame loop; the kit's context lifecycle reused): M–L, not S — §F-12's default becomes "build it";
+   0.6.0 carries it only if the cut's count allows after M2 is measured, else it moves to 0.6.4 beside the song (which needs the same bank for "tune to the tonic").
+4. **No 1-D system exists in the tree** ("every system is 3-D"; no 1-D Hamiltonian in hamiltonian.js). The potential lab (C.2, D.12) is therefore correctly
+   framed as 1-D eigenfunctions living in the 3-D box; its line-plot representation is a ray sample (`sampleVoxel`, field.js:1414, or `psiAndGrad` along a line;
+   S–M) — a new representation row in 0.8.0, +20.
+5. **"MAPS" is not a window or a file.** The "dissociation MAPS road" of C.3/D.8 means `h2ci.js`'s `h2CurveTable` (D6's road; LEGACY-WINDOWS); the row's wording
+   is corrected to "the H₂ curve table revived".
+6. **Representations the tree already has that §C under-credited:** CALCULUS tiles ⟨z⟩, ⟨p_z⟩, ⟨L_z⟩, ⟨L²⟩, ⟨r⟩, ⟨1/r⟩ with Ehrenfest residuals (calculus.js:78–93);
+   METERS' instantaneous AUTOCORR |⟨ψ(0)|ψ(t)⟩| (meters.js:10); the LADDER window (Rydberg revivals on its own register, A(t) with Airy predictions — a
+   representation of packets the FIELD cannot draw at n > 6, ladder.js); PLANE (a complex slice, hydrogen only); WIGNER (64×64 signed slice, hydrogenic Z = 1
+   only, the 1s negative lobe printed); RADIATION (the pair's A, τ, λ, the polar dP/dΩ); ORBIT (two SO(4) spheres — the Bloch sphere's painter exists);
+   SHADOW's and the STATES window's Lissajous (output only). C.5's rows are re-cut accordingly in DRAFT 1.
+7. **Cheap gaps the census priced, which the ladder takes:** the Bloch pair on ORBIT's painter (S–M; 0.8.0 Rabi row drops to +40); the expectation BEAD at
+   (⟨x⟩,⟨y⟩,⟨z⟩) from `dipoleMatrix` (M; the ellipsoid ⟨r_i r_j⟩ is L and waits — 0.8.0's bead row becomes +30 without the ellipsoid, the ellipsoid a 0.8.2 row);
+   current ARROWS and STREAMLINES as draw modes of `createParticles` (M each; a FLOW row in 0.6.2 if its count allows, else 0.8.2); the COHERENCE MAP |c_a c_b*|
+   (S–M; 0.8.2); the BEAT TABLE as a static canvas (M; it IS M2's grid mode, no new row); an A(t) trace over one REPEATS period (M; 0.8.2); the SYMMETRY tile
+   surfacing `names.js`' character test (S; 0.6.1 M10 reuses it); the TEXEL-FLOOR tile from `fieldDigest` (S; 0.6.x N6); the 1s Wigner negativity is already printed.
+8. **Molecular geometry is ABSENT as a picture** (balls, sticks, a dipole arrow; the molecule is a density plus element labels). Josh's "ball and joints" (A2)
+   and 0.7.0 VIBRATE (nuclei that move) want it: a KEPLER-style overlay through `toScreen` — M (+60), a new row **0.7.0 N3′ THE SKELETON** (atoms as beads,
+   bonds from the geometry, the dipole arrow; off by default under the cloud), Sonnet.
+9. **CLAUDE.md's LEGACY paragraph is stale** (all five windows deleted in 0.5.0): a doc fix, 0 `lab/` lines, in 0.6.0's P0-style truth row.
+10. **Any new CPU reader must be a `READERS` entry with a `may()` gate** (rack.js:148, :732) or it is not governed — a law for every W-road row (B.2 amended).
+11. **Currents: tracers only** — PARTICLES (hydrogen, Bohmian, seeded from |ψ|²) and FLOW (molecules, seeded by |j| — a tracer view, not an equilibrium ensemble);
+    the DEFECT view (0.6.2) and any arrows are new draw modes on the same five-member source contract (`{weight, step, speed, lifetime, stride}`).
+12. **Momentum space for molecules is ABSENT** (the SPACE seg serves hydrogen only; a molWgsl kind for the Fourier transform of contracted Gaussians is a closed
+    form, L) — a 0.8.2 lead, not a row.
