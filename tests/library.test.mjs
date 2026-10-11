@@ -134,6 +134,32 @@ for (const m of [...MOLECULES, ...RECORD_ONLY]) assert.ok(SECTIONS.includes(m.se
 for (const r of CAT.rows) assert.equal(MOLECULE_BY_ID.get(r.id).section, r.section, r.id + ': the catalogue and the table disagree on its section');
 assert.deepEqual(SECTIONS.map((s) => [...MOLECULES, ...RECORD_ONLY].filter((m) => m.section === s).length).reduce((a, b) => a + b, 0), MOLECULES.length + RECORD_ONLY.length);
 
+/* 8 · THE CONTRACT IN THE CATALOGUE (0.5.4 P3): every row carries its oracle, the class of its geometry and a per-quantity status, written by
+       tools/orbital-library.mjs from the record's own oracle and row.source; the app writes MEASURED or IMPORTED, never CERTIFIED */
+const CLASSES = ['experimental', 'optimised-here', 'computed-reference', 'draft'];
+for (const r of CAT.rows) {
+  assert.ok(typeof r.oracle.what === 'string' && r.oracle.what.length > 0, r.id + ': oracle.what');
+  assert.ok(Number.isFinite(r.oracle.delta) && Math.abs(r.oracle.delta) <= (r.id === 'C60' ? 0 : 1e-8), r.id + ': oracle.delta is finite and within 1e-8 Eh (C60: 0)');
+  assert.deepEqual(r.oracle, { what: load(r.id).oracle.what, delta: load(r.id).oracle.delta }, r.id + ': the row says what its record says');
+  assert.ok(CLASSES.includes(r.geometry), r.id + ': geometry is one of the four classes');
+  assert.deepEqual(r.status, { energy: r.id === 'C60' ? 'IMPORTED' : 'MEASURED', geometry: r.geometry, derivatives: 'UNKNOWN' }, r.id + ': status');
+  assert.ok(!/CERTIFIED/.test(JSON.stringify(r)), r.id + ': the app never writes CERTIFIED');
+}
+assert.ok(CAT.rows.every((r) => r.status.derivatives === 'UNKNOWN'), 'derivatives are UNKNOWN on every row');
+/* the COUNT: 2 / 26 / 9 / 1 — and the two experimental rows are the two the sources name */
+const count = (c) => CAT.rows.filter((r) => r.geometry === c).length;
+assert.deepEqual(CLASSES.map(count), [2, 26, 9, 1], 'geometry classes: experimental / optimised-here / computed-reference / draft');
+assert.deepEqual(CAT.rows.filter((r) => r.geometry === 'experimental').map((r) => r.id), ['C6H6', 'TiCl4']);
+assert.deepEqual(CAT.rows.filter((r) => r.geometry === 'draft').map((r) => r.id), ['C60']);
+/* the live-only molecules: an `oracles` member (not rows — molecule-head pins 38), by id, PySCF's energy from the fixture; none shadows a row */
+const SB = JSON.parse(readFileSync(at('./fixtures/oracles/sto-3g-v1.json'), 'utf8')).library;
+assert.equal(CAT.rows.length, 38);
+assert.ok(CAT.oracles.H2O && CAT.oracles.N2 && CAT.oracles.CH4, 'water, N2 and methane have an oracle');
+assert.equal(CAT.oracles.H2O.energy, SB.H2O.energy); assert.ok(/PySCF/.test(CAT.oracles.H2O.what));
+assert.deepEqual(MOLECULES.filter((m) => !CAT.rows.some((r) => r.id === m.id)).map((m) => m.id), Object.keys(CAT.oracles), 'every live-only molecule, and only those');
+assert.ok(Object.values(CAT.oracles).every((o) => Number.isFinite(o.energy) && o.energy < 0), 'every oracle energy is finite');
+assert.deepEqual(MOLECULE_BY_ID.get('H2O').oracle, CAT.oracles.H2O); assert.deepEqual(MOLECULE_BY_ID.get('C6H6').oracle, row('C6H6').oracle);
+
 console.log(`GREEN library: benzene opens from its ${(row('C6H6').bytes / 1024).toFixed(0)} KB record in ${openMs.toFixed(1)} ms with 0 solver calls `
   + `(fresh: 1 SCF + 1 RPA) and equals the fresh solve bit for bit — E, ε, nocc, C, D, ψ and ρ at ${pts.length} points, the names (D6h, HOMO 1e1g), `
   + `${sp.roots.length} RPA sticks, the TDA ladder, the STATES ladder and X (${st.count}²); a KICK solves live once; lysine (64 AO, past the cap) opens `
