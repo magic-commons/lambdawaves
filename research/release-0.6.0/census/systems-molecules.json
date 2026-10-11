@@ -1,0 +1,1302 @@
+{
+ "MOLECULES": [
+  {
+   "id": "H2",
+   "group": "diatomics",
+   "formula": "<m>H₂</m>",
+   "nAO": 2,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "LiH",
+   "group": "diatomics",
+   "formula": "LiH",
+   "nAO": 6,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "HF",
+   "group": "diatomics",
+   "formula": "HF",
+   "nAO": 6,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "N2",
+   "group": "diatomics",
+   "formula": "<m>N₂</m>",
+   "nAO": 10,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "CO",
+   "group": "diatomics",
+   "formula": "CO",
+   "nAO": 10,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "F2",
+   "group": "diatomics",
+   "formula": "<m>F₂</m>",
+   "nAO": 10,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "LiF",
+   "group": "diatomics",
+   "formula": "LiF",
+   "nAO": 10,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "NaH",
+   "group": "diatomics",
+   "formula": "NaH",
+   "nAO": 10,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "HCl",
+   "group": "diatomics",
+   "formula": "HCl",
+   "nAO": 10,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "Cl2",
+   "group": "diatomics",
+   "formula": "<m>Cl₂</m>",
+   "nAO": 18,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "NaCl",
+   "group": "diatomics",
+   "formula": "NaCl",
+   "nAO": 18,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "BeH2",
+   "group": "hydrides",
+   "formula": "<m>BeH₂</m>",
+   "nAO": 7,
+   "disabled": null,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "BH3",
+   "group": "hydrides",
+   "formula": "<m>BH₃</m>",
+   "nAO": 8,
+   "disabled": null,
+   "charge": 0,
+   "nat": 4,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "CH4",
+   "group": "hydrides",
+   "formula": "<m>CH₄</m>",
+   "nAO": 9,
+   "disabled": null,
+   "charge": 0,
+   "nat": 5,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "NH3",
+   "group": "hydrides",
+   "formula": "<m>NH₃</m>",
+   "nAO": 8,
+   "disabled": null,
+   "charge": 0,
+   "nat": 4,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "H2O",
+   "group": "hydrides",
+   "formula": "<m>H₂O</m>",
+   "nAO": 7,
+   "disabled": null,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "MgH2",
+   "group": "hydrides",
+   "formula": "<m>MgH₂</m>",
+   "nAO": 11,
+   "disabled": null,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "AlH3",
+   "group": "hydrides",
+   "formula": "<m>AlH₃</m>",
+   "nAO": 12,
+   "disabled": null,
+   "charge": 0,
+   "nat": 4,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "SiH4",
+   "group": "hydrides",
+   "formula": "<m>SiH₄</m>",
+   "nAO": 13,
+   "disabled": null,
+   "charge": 0,
+   "nat": 5,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "PH3",
+   "group": "hydrides",
+   "formula": "<m>PH₃</m>",
+   "nAO": 12,
+   "disabled": null,
+   "charge": 0,
+   "nat": 4,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "H2S",
+   "group": "hydrides",
+   "formula": "<m>H₂S</m>",
+   "nAO": 11,
+   "disabled": null,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "CO2",
+   "group": "triatomics",
+   "formula": "<m>CO₂</m>",
+   "nAO": 15,
+   "disabled": null,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "HCN",
+   "group": "triatomics",
+   "formula": "HCN",
+   "nAO": 11,
+   "disabled": null,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "N2O",
+   "group": "triatomics",
+   "formula": "<m>N₂O</m>",
+   "nAO": 15,
+   "disabled": null,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "O3",
+   "group": "triatomics",
+   "formula": "<m>O₃</m>",
+   "nAO": 15,
+   "disabled": null,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "SO2",
+   "group": "triatomics",
+   "formula": "<m>SO₂</m>",
+   "nAO": 19,
+   "disabled": null,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "BF3",
+   "group": "triatomics",
+   "formula": "<m>BF₃</m>",
+   "nAO": 20,
+   "disabled": null,
+   "charge": 0,
+   "nat": 4,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "CF4",
+   "group": "triatomics",
+   "formula": "<m>CF₄</m>",
+   "nAO": 25,
+   "disabled": null,
+   "charge": 0,
+   "nat": 5,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "H2O2",
+   "group": "triatomics",
+   "formula": "<m>H₂O₂</m>",
+   "nAO": 12,
+   "disabled": null,
+   "charge": 0,
+   "nat": 4,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "C2H2",
+   "group": "organics",
+   "formula": "<m>C₂H₂</m>",
+   "nAO": 12,
+   "disabled": null,
+   "charge": 0,
+   "nat": 4,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "C2H4",
+   "group": "organics",
+   "formula": "<m>C₂H₄</m>",
+   "nAO": 14,
+   "disabled": null,
+   "charge": 0,
+   "nat": 6,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "C2H6",
+   "group": "organics",
+   "formula": "<m>C₂H₆</m>",
+   "nAO": 16,
+   "disabled": null,
+   "charge": 0,
+   "nat": 8,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "H2CO",
+   "group": "organics",
+   "formula": "<m>H₂CO</m>",
+   "nAO": 12,
+   "disabled": null,
+   "charge": 0,
+   "nat": 4,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "CH3OH",
+   "group": "organics",
+   "formula": "<m>CH₃OH</m>",
+   "nAO": 14,
+   "disabled": null,
+   "charge": 0,
+   "nat": 6,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "HCOOH",
+   "group": "organics",
+   "formula": "HCOOH",
+   "nAO": 17,
+   "disabled": null,
+   "charge": 0,
+   "nat": 5,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "CH3CN",
+   "group": "organics",
+   "formula": "<m>CH₃CN</m>",
+   "nAO": 18,
+   "disabled": null,
+   "charge": 0,
+   "nat": 6,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "C3H6",
+   "group": "rings",
+   "formula": "<m>C₃H₆</m>",
+   "nAO": 21,
+   "disabled": null,
+   "charge": 0,
+   "nat": 9,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "C4H6",
+   "group": "rings",
+   "formula": "<m>C₄H₆</m>",
+   "nAO": 26,
+   "disabled": null,
+   "charge": 0,
+   "nat": 10,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "C4H4O",
+   "group": "rings",
+   "formula": "<m>C₄H₄O</m>",
+   "nAO": 29,
+   "disabled": null,
+   "charge": 0,
+   "nat": 9,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "C5H5N",
+   "group": "rings",
+   "formula": "<m>C₅H₅N</m>",
+   "nAO": 35,
+   "disabled": null,
+   "charge": 0,
+   "nat": 11,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "urea",
+   "group": "rings",
+   "formula": "<m>CO(NH₂)₂</m>",
+   "nAO": 24,
+   "disabled": null,
+   "charge": 0,
+   "nat": 8,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "glycine",
+   "group": "rings",
+   "formula": "<m>NH₂CH₂COOH</m>",
+   "nAO": 30,
+   "disabled": null,
+   "charge": 0,
+   "nat": 10,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "C6H6",
+   "group": "rings",
+   "formula": "<m>C₆H₆</m>",
+   "nAO": 36,
+   "disabled": null,
+   "charge": 0,
+   "nat": 12,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "NH4+",
+   "group": "ions",
+   "formula": "<m>NH₄⁺</m>",
+   "nAO": 9,
+   "disabled": null,
+   "charge": 1,
+   "nat": 5,
+   "keys": "id|name|formula|group|charge|ang|source|symmetry|section|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "H3O+",
+   "group": "ions",
+   "formula": "<m>H₃O⁺</m>",
+   "nAO": 8,
+   "disabled": null,
+   "charge": 1,
+   "nat": 4,
+   "keys": "id|name|formula|group|charge|ang|source|symmetry|section|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "OH-",
+   "group": "ions",
+   "formula": "<m>OH⁻</m>",
+   "nAO": 6,
+   "disabled": null,
+   "charge": -1,
+   "nat": 2,
+   "keys": "id|name|formula|group|charge|ang|source|symmetry|section|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "CN-",
+   "group": "ions",
+   "formula": "<m>CN⁻</m>",
+   "nAO": 10,
+   "disabled": null,
+   "charge": -1,
+   "nat": 2,
+   "keys": "id|name|formula|group|charge|ang|source|symmetry|section|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "CuH",
+   "group": "heavy",
+   "formula": "CuH",
+   "nAO": 20,
+   "disabled": true,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "ZnH2",
+   "group": "heavy",
+   "formula": "<m>ZnH₂</m>",
+   "nAO": 21,
+   "disabled": true,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "GeH4",
+   "group": "heavy",
+   "formula": "<m>GeH₄</m>",
+   "nAO": 23,
+   "disabled": null,
+   "charge": 0,
+   "nat": 5,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "AsH3",
+   "group": "heavy",
+   "formula": "<m>AsH₃</m>",
+   "nAO": 22,
+   "disabled": null,
+   "charge": 0,
+   "nat": 4,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "H2Se",
+   "group": "heavy",
+   "formula": "<m>H₂Se</m>",
+   "nAO": 21,
+   "disabled": null,
+   "charge": 0,
+   "nat": 3,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "HBr",
+   "group": "heavy",
+   "formula": "HBr",
+   "nAO": 20,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "Br2",
+   "group": "heavy",
+   "formula": "<m>Br₂</m>",
+   "nAO": 38,
+   "disabled": null,
+   "charge": 0,
+   "nat": 2,
+   "keys": "id|name|formula|group|ang|source|symmetry|section|charge|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  }
+ ],
+ "RECORD_ONLY": [
+  {
+   "id": "alanine",
+   "group": "library",
+   "formula": "<m>C₃H₇NO₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "serine",
+   "group": "library",
+   "formula": "<m>C₃H₇NO₃</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "cysteine",
+   "group": "library",
+   "formula": "<m>C₃H₇NO₂S</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "proline",
+   "group": "library",
+   "formula": "<m>C₅H₉NO₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "threonine",
+   "group": "library",
+   "formula": "<m>C₄H₉NO₃</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "valine",
+   "group": "library",
+   "formula": "<m>C₅H₁₁NO₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "aspartic-acid",
+   "group": "library",
+   "formula": "<m>C₄H₇NO₄</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "asparagine",
+   "group": "library",
+   "formula": "<m>C₄H₈N₂O₃</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "isoleucine",
+   "group": "library",
+   "formula": "<m>C₆H₁₃NO₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "leucine",
+   "group": "library",
+   "formula": "<m>C₆H₁₃NO₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "glutamic-acid",
+   "group": "library",
+   "formula": "<m>C₅H₉NO₄</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "glutamine",
+   "group": "library",
+   "formula": "<m>C₅H₁₀N₂O₃</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "methionine",
+   "group": "library",
+   "formula": "<m>C₅H₁₁NO₂S</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "histidine",
+   "group": "library",
+   "formula": "<m>C₆H₉N₃O₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "lysine",
+   "group": "library",
+   "formula": "<m>C₆H₁₄N₂O₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "phenylalanine",
+   "group": "library",
+   "formula": "<m>C₉H₁₁NO₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "arginine",
+   "group": "library",
+   "formula": "<m>C₆H₁₄N₄O₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "tyrosine",
+   "group": "library",
+   "formula": "<m>C₉H₁₁NO₃</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "tryptophan",
+   "group": "library",
+   "formula": "<m>C₁₁H₁₂N₂O₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "uracil",
+   "group": "library",
+   "formula": "<m>C₄H₄N₂O₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "cytosine",
+   "group": "library",
+   "formula": "<m>C₄H₅N₃O</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "thymine",
+   "group": "library",
+   "formula": "<m>C₅H₆N₂O₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "adenine",
+   "group": "library",
+   "formula": "<m>C₅H₅N₅</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "guanine",
+   "group": "library",
+   "formula": "<m>C₅H₅N₅O</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "N-methylacetamide",
+   "group": "library",
+   "formula": "<m>CH₃CONHCH₃</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "Li4F4",
+   "group": "library",
+   "formula": "<m>Li₄F₄</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "ice-hexamer",
+   "group": "library",
+   "formula": "<m>(H₂O)₆</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "adamantane",
+   "group": "library",
+   "formula": "<m>C₁₀H₁₆</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "cubane",
+   "group": "library",
+   "formula": "<m>C₈H₈</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "B12H12--",
+   "group": "library",
+   "formula": "<m>B₁₂H₁₂²⁻</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "C60",
+   "group": "library",
+   "formula": "<m>C₆₀</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "KrF2",
+   "group": "library",
+   "formula": "<m>KrF₂</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "KBr",
+   "group": "library",
+   "formula": "KBr",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "TiCl4",
+   "group": "library",
+   "formula": "<m>TiCl₄</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "NiCO4",
+   "group": "library",
+   "formula": "<m>Ni(CO)₄</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "FeCO5",
+   "group": "library",
+   "formula": "<m>Fe(CO)₅</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  },
+  {
+   "id": "CrCO6",
+   "group": "library",
+   "formula": "<m>Cr(CO)₆</m>",
+   "keys": "id|group|library|section|name|formula|charge|symmetry|source|ang|nAO|nShell|nElectrons|nocc|eriWork|rpaWork|predictedMs|instability|records|over|recordOnly|reason|shortReason|disabled"
+  }
+ ],
+ "rows": [
+  {
+   "id": "C6H6",
+   "basis": "sto-3g",
+   "section": "ORGANIC",
+   "nAO": 36,
+   "nocc": 21,
+   "caps": {
+    "orbitals": true,
+    "states": true,
+    "rpa": true,
+    "tdhf": true
+   },
+   "bytes": 1259886
+  },
+  {
+   "id": "alanine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 37,
+   "nocc": 24,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 128830
+  },
+  {
+   "id": "serine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 42,
+   "nocc": 28,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 159438
+  },
+  {
+   "id": "cysteine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 46,
+   "nocc": 32,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 182261
+  },
+  {
+   "id": "proline",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 49,
+   "nocc": 31,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 217030
+  },
+  {
+   "id": "threonine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 49,
+   "nocc": 32,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 213255
+  },
+  {
+   "id": "valine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 51,
+   "nocc": 32,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 234765
+  },
+  {
+   "id": "aspartic-acid",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 52,
+   "nocc": 35,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 233187
+  },
+  {
+   "id": "asparagine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 53,
+   "nocc": 35,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 244620
+  },
+  {
+   "id": "isoleucine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 58,
+   "nocc": 36,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 299145
+  },
+  {
+   "id": "leucine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 58,
+   "nocc": 36,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 299395
+  },
+  {
+   "id": "glutamic-acid",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 59,
+   "nocc": 39,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 298882
+  },
+  {
+   "id": "glutamine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 60,
+   "nocc": 39,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 311538
+  },
+  {
+   "id": "methionine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 60,
+   "nocc": 40,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 306473
+  },
+  {
+   "id": "histidine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 64,
+   "nocc": 41,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 353725
+  },
+  {
+   "id": "lysine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 64,
+   "nocc": 40,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 359231
+  },
+  {
+   "id": "phenylalanine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 71,
+   "nocc": 44,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 437332
+  },
+  {
+   "id": "arginine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 74,
+   "nocc": 47,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 469060
+  },
+  {
+   "id": "tyrosine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 76,
+   "nocc": 48,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 493805
+  },
+  {
+   "id": "tryptophan",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 87,
+   "nocc": 54,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 644039
+  },
+  {
+   "id": "uracil",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 44,
+   "nocc": 29,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 186204
+  },
+  {
+   "id": "cytosine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 45,
+   "nocc": 29,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 182854
+  },
+  {
+   "id": "thymine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 51,
+   "nocc": 33,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 229851
+  },
+  {
+   "id": "adenine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 55,
+   "nocc": 35,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 266442
+  },
+  {
+   "id": "guanine",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 60,
+   "nocc": 39,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 309956
+  },
+  {
+   "id": "N-methylacetamide",
+   "basis": "sto-3g",
+   "section": "BIO",
+   "nAO": 32,
+   "nocc": 20,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": true
+   },
+   "bytes": 101489
+  },
+  {
+   "id": "Li4F4",
+   "basis": "sto-3g",
+   "section": "LATTICE",
+   "nAO": 40,
+   "nocc": 24,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 156882
+  },
+  {
+   "id": "ice-hexamer",
+   "basis": "sto-3g",
+   "section": "LATTICE",
+   "nAO": 42,
+   "nocc": 30,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 157918
+  },
+  {
+   "id": "adamantane",
+   "basis": "sto-3g",
+   "section": "LATTICE",
+   "nAO": 66,
+   "nocc": 38,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 400474
+  },
+  {
+   "id": "cubane",
+   "basis": "sto-3g",
+   "section": "LATTICE",
+   "nAO": 48,
+   "nocc": 28,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 221963
+  },
+  {
+   "id": "B12H12--",
+   "basis": "sto-3g",
+   "section": "LATTICE",
+   "nAO": 72,
+   "nocc": 37,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 473837
+  },
+  {
+   "id": "C60",
+   "basis": "sto-3g",
+   "section": "LATTICE",
+   "nAO": 300,
+   "nocc": 180,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": false,
+    "tdhf": false
+   },
+   "bytes": 145328
+  },
+  {
+   "id": "KrF2",
+   "basis": "sto-3g",
+   "section": "HEAVY",
+   "nAO": 29,
+   "nocc": 27,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": true
+   },
+   "bytes": 55688
+  },
+  {
+   "id": "KBr",
+   "basis": "sto-3g",
+   "section": "HEAVY",
+   "nAO": 32,
+   "nocc": 27,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": true
+   },
+   "bytes": 81095
+  },
+  {
+   "id": "TiCl4",
+   "basis": "sto-3g",
+   "section": "HEAVY",
+   "nAO": 55,
+   "nocc": 45,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 211382
+  },
+  {
+   "id": "NiCO4",
+   "basis": "sto-3g",
+   "section": "HEAVY",
+   "nAO": 59,
+   "nocc": 42,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 289086
+  },
+  {
+   "id": "FeCO5",
+   "basis": "sto-3g",
+   "section": "HEAVY",
+   "nAO": 69,
+   "nocc": 48,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 400435
+  },
+  {
+   "id": "CrCO6",
+   "basis": "sto-3g",
+   "section": "HEAVY",
+   "nAO": 79,
+   "nocc": 54,
+   "caps": {
+    "orbitals": true,
+    "states": false,
+    "rpa": true,
+    "tdhf": false
+   },
+   "bytes": 515679
+  }
+ ]
+}

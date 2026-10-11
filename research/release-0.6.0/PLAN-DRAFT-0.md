@@ -454,3 +454,85 @@ NACRE.md `86c486c` → two censuses (Sonnet 5.5, read-only) → this PLAN-DRAFT-
     the DEFECT view (0.6.2) and any arrows are new draw modes on the same five-member source contract (`{weight, step, speed, lifetime, stride}`).
 12. **Momentum space for molecules is ABSENT** (the SPACE seg serves hydrogen only; a molWgsl kind for the Fourier transform of contracted Gaussians is a closed
     form, L) — a 0.8.2 lead, not a row.
+
+### J.2 From `census/SYSTEMS.md` (Sonnet 5.5, 2026-10-11 ≈ 09:40; KNOWN by file:line there unless tagged) — these RE-CUT §B.2, §C.2, §D.12–D.14, §E and §F
+1. **The kernel's only vocabulary is "radial function × spherical harmonic"** (`field.js:83–84`): five Hamiltonians exist (`hamiltonian.js:26, 38, 55, 74, 144` — hydrogen + Z,
+   QHO, BOX + the AXIAL gas, quarkonium [its button HIDDEN, `windows/spectrum.js:39`], ATOM), all central, over the same 91 labels. **B.2's "TABULATED ROAD for any
+   1-D potential" is WRONG as written**: the tabulated space 6 is RADIAL. The road that IS there — **RC: a central potential V(r) → `cornell.js`' Numerov → the
+   40×256 radial table → kernel space 6 (`hamiltonian.js:98–112`), no WGSL, THE LOCK untouched, ≈ S (≤ 30 lines) per system** — hosts a whole family: the finite
+   spherical well, Yukawa/screened Coulomb (critical screening λ_c ≈ 1.19 a known number), the soft-core Coulomb, the Gaussian well, the delta shell, power-law
+   and anharmonic r⁴, Coulomb + linear (quarkonium with its button un-hidden and an editor), a radial Morse, and the RIGID ROTOR / particle on a ring as a
+   narrow-shell radial row (E = l(l+1)/2I; exact revival T = 4πI). **D.12's POTENTIAL LAB becomes THE CENTRAL LAB** (≈ 10 systems ≈ +100 with a POTENTIAL picker);
+   the 1-D box/barrier/double well/Kronig–Penney/1-D Morse are NOT on this road — they go to J.2-4/5.
+2. **A new branch in COMPUTE_WGSL CAN move locked texels** — precedent: a driver-folding change moved 194 texels of the 96³ oscillator (`field.js:116–117`). So
+   Round 1's "a new space leaves THE LOCK ×2 unchanged" is a HOPE, not a construction. **The plan's law (B.5 amended): a new producer is a NEW COMPUTE PIPELINE
+   (its own shader module behind the same texel), never a branch in the locked text.** The equalizer's six-accumulator kernel (0.6.0) is a separate module (a copy
+   of the space-0 evaluation with the 6×6 form; ≈ +60 WGSL instead of +30 — the price of the lock; subtract-don't-add yields to the lock here, and the duplicate
+   is named in the BUILD); the separable-product space (cube, 2-D/anisotropic oscillator; L) and a log-space high-n module are likewise separate pipelines.
+   **Consequence: ZERO re-bakes on the ladder.** The dead spaces 4–5 and `Mode.ctr` STAY (≈ 40 lines, counted, accepted) — and two of them are wanted: `Mode.ctr`
+   (centre support in every space, `field.js:80`) is the hook for H₂⁺'s double well (J.2-5); space 4 (Hylleraas) is the hook for a helium revival. §F-3 is
+   re-asked accordingly; N5's "re-bake with the reason" is withdrawn.
+3. **Rydberg to n = 30: the kernel is not the limit, `ipow(ρ, l)` is** — f32 overflows at l ≥ 24 (MEASURED in node by the reader; GPU UNVERIFIED). Circular
+   packets |n, n−1, n−1⟩ to n = 24 ride K0 TODAY with no shader change (M, ≤ 320 modes); n ≥ 25 needs the product in logs = one WGSL line in the locked text, or
+   the separate log-space module of J.2-2. A n = 30 ring at 128³ is ≈ 4–6 texels wide (DERIVED, UNVERIFIED). **§F-3 becomes: stop at n = 24 at zero lock risk
+   ★, or n = 30 through a separate module (+30).**
+4. **There is NO CPU → texture upload path** (`field.js` has only `copyTextureToBuffer` read-backs at :1358, :1390, :1418, :1434, :1466; no `writeTexture`).
+   So B.2's "fourth road is NOT proposed" contradicts 0.6.5's CARD: **the Poisson cloud IS the fourth road (RU: a small compute pass storage-buffer → `outTex`,
+   leaving the locked text unchanged), and it is proposed — for CARDS and RECORDS only (built once, uploaded once), never a frame.** Its cost (≈ +35: the pass,
+   the binding, the upload) is added to 0.6.5 (N2 → ≈ +175; its subtraction becomes mandatory — `shadow.js` −90 if the census's "live 0.9 %, test path only"
+   holds, which J.1 and this census both say). Once RU exists, every NUMERICALLY EVOLVED 3-D system (barrier scattering, the double slit, two particles in 1-D as
+   a 2-D sheet, Gross–Pitaevskii) has a road as a RECORD or a worker CARD at a few Hz — they move from "leads with no road" to **0.8.2 candidates gated on a
+   profile of the upload** (64³ f16 = 1 MB; a 2–4 Hz refresh is a record-shaped picture, not a frame).
+5. **The deleted stock is exactly the non-central stock, and its mathematics survives** (≈ 1,430 lines in `tests/lib/mo.js` 602, `twocentre.js` 217,
+   `hellmann-feynman.js` 88, `h2ci.js` 349, `molecule.js` 83, `modrive.js` 93) with its kernel hooks compiled in. **Reviving one is cheaper than any new system
+   of its class:** H₂⁺ = the DOUBLE WELL with tunnelling (T = 2π/(E_u − E_g) = 16.0 a.u. at R = 2; `molecule.js:72 fieldModes` → K0 modes at ±R/2 through
+   `Mode.ctr`; M) — Josh's "ball and joints" made exact; the H₂ dissociation CURVE (`h2CurveTable`, `dissociation()` exist; a canvas; M — the MAPS window that was
+   never built); helium's conditional cloud (`helium.js` from git ≈ 215 + a producer on space 4; L; the spec's S:533 excluded it for QWAVE-0 — a §F question);
+   the tunable quarkonium (un-hide the button + an (α_s, σ) editor; S). The subtraction ledger B.6 is corrected: `molecule.js` and `modrive.js` are NOT free
+   minus signs if H₂⁺ is revived (the revival SPENDS them: −0 net, +M for the window) — the plan offers both readings in §F.
+6. **Coherent states EXIST** (a slap on |0⟩ is exactly a coherent state, `qho.js:14–19`; COHERENT BOUNCE `windows/spectrum.js:57`); squeezed = an operator
+   `applySqueeze(r, axis)` beside `applyKick` with lost norm reported (M); a cat = A/B store of two coherent states + a sum (S). D.12's row is re-cut to
+   "SQUEEZED + CAT" (+40). **Wigner for the QHO** (closed Laguerre forms; n = 1 Fock reads −1/π at the origin) is one more ψ table in `wigner.js` (M) — the
+   negativity row for 0.8.2.
+7. **Hydrogen has NO drive** (only the A/B Rabi mix — a TOY for composites, with NO node oracle — and the kick); the only periodic field acts on the TD-CIS
+   singles space; **no collision exists anywhere**. 0.6.4's song drive is therefore hydrogen's FIRST drive and gives the Rabi row (0.8.0) its oracle; LANDAU–ZENER
+   is a chirp ω(t) = ω₀ + βt on the molecule drive's E(t) (the worker already takes a function of t; S–M) — cheaper than a STARK sweep. A/B Rabi gains a node
+   oracle in 0.6.0's N6 (S).
+8. **Inter-shell STARK (field ionisation, the Rydberg Stark map) = the PROPAGATOR hook** (`state.js:106`; only the Sturmian uses it): H = diag(E) + F·z over the
+   91 labels (`kzElement`, the dipole matrix exist) — M, exact diagonalisation as its own oracle; and **Fock–Darwin / Landau levels = the QHO with ω_eff =
+   √(1 + B²/4) and E − mB/2** (a Z-like rescale; a faithful 2-D picture needs the separable module). Both 0.8.0 candidates; the plan takes STARK (M) and holds
+   Landau as a lead.
+9. **Tight-binding as "molecule-as-lattice" (RM):** one narrow s-shell per site through `molWgsl`/`ORB_WGSL` with the register as the kind-2 COMPLEX ORBITAL
+   (amplitude + phase as hue) — a VOLUME picture of a lattice state for zero kernel lines, IF a non-SCF (ε, C) can be injected (UNVERIFIED: the ladder is
+   "CHEMISTRY's canonical orbitals" and records must match `atomsSha256`). 0.7.2 LATTICE takes the W road (sites from a worker — certain) and names RM as its
+   picture if the audit's measurement says the injection works; graphene, Hückel/PPP benzene and C₆₀-as-Hückel ride the same window as presets.
+10. **UHF is a `uhf` beside `rhf` in `scf.js` (114 lines) with D = Dα + Dβ fed to the existing tile** — no kernel change; `multiplicity` is already in the record
+    schema (`molecule-state.js:137`) and unused. 0.7.1's class is L, and its subtraction can be named now (the brief's rule stands).
+11. **`fieldOf` drive shapes (step, ramp, wave, gaussian) exist for RT-TDHF and are UNWIRED** (`density.js:171`; the app's RT run takes a δ-kick only): a S–M row
+    "PULSES" in 0.6.2 or 0.7.0 gives molecules their first shaped field with `absorb`'s linear response as the oracle.
+12. **Zero locked states test a situation** (all 13 are still freezes). Every situation row (STARK sweeps, the drive, a squeeze) is outside the lock by
+    construction — and inherits no gate from it: each names its own oracle (B.3-i).
+13. **Status badges are file-header comments** in 12 of the relevant files there is none (every molecular window among them): 0.5.4 P4's `statusOf()` is the
+    first UI-visible status; until it lands, "STATUS word" in any row means the header line, and the plan says so.
+14. **Line classes:** the census prices the cheapest family (RC) at S each, RM at M–L, RU at L (with the pass), RK (separate module) at L; THE LINE LAW's 233 buys
+    one L without a subtraction — which is why 0.5.3 and 0.5.4 cut first and every cut below names its minus sign.
+
+### J.3 The ladder RE-CUT by J.1–J.2 (supersedes §A's table rows for 0.6.5 and 0.8.x, §D.12–D.14, §E-7/8 and §F-3/7/13)
+- **0.6.5 Electrostatics** = N2 + **THE UPLOAD PASS (RU)** ≈ +175; subtraction `shadow.js` → `tests/lib/` −90 (J.1, J.2); net ≈ +85.
+- **0.7.0 Vibrate** = N3 (+80) + **N3′ THE SKELETON** (+60; balls, bonds, the dipole arrow — the nuclei you can see move) + **PULSES** (`fieldOf` wired, +20) ≈ +160.
+- **0.7.2 Lattice** = N4 on the W road (+120) with RM as its picture if measured; − `absorb` (its brief); presets: chain, ring, square, Anderson, Aubry–André,
+  Peierls/AB, SSH, graphene, Hückel benzene (S each inside the window).
+- **0.8.0 Central Lab** (the diversity cut; ≈ +270, zero lock risk): THE CENTRAL FAMILY through RC (finite well · Yukawa · soft-core · Gaussian well · delta shell ·
+  anharmonic · Coulomb + linear with the quarkonium button un-hidden · radial Morse · the rigid rotor/ring; +100 with the picker) · SQUEEZED + CAT (+40) ·
+  INTER-SHELL STARK through the propagator hook (field ionisation; +50) · CIRCULAR RYDBERG to n = 24 (+30, no shader) · MASS SCALING μ (+10) · THE BEAD (+30) ·
+  the FREE PACKET as the box at its largest radius (the gas exists; raise the knob's max; +5) · A/B RABI's oracle (+5).
+- **0.8.1 Doubles** (the revivals; ≈ +200): **H₂⁺ THE DOUBLE WELL** (tunnelling, `Mode.ctr`; +80) · **THE H₂ CURVE** (RHF vs FCI dissociation on a canvas; +50) ·
+  **RABI + THE BLOCH SPHERE** on ORBIT's painter with the song drive's two-level reduction and Landau–Zener's chirp (+50) · Lattice II presets (+20).
+- **0.8.2 Phase Space + Records** (≈ +150): QHO Wigner (+40) · the coherence map (+30) · the A(t) trace (+30) · the ellipsoid (+50 or lead) · the SEPARABLE module
+  (cube, 2-D/anisotropic oscillator; a separate pipeline; L — gated on a brief) · RU records: barrier scattering, the double slit, two particles, GP (each a
+  `tools/` record + a card; gated on the upload profile) · the helium revival (L; §F).
+- **§F re-asked:** F-3 → "n = 24 at zero lock risk ★ or n = 30 through a separate module"; F-7 → the Central Lab's families ★; F-13 withdrawn (the TABULATED road is
+  radial — the Central Lab replaces it); **F-15 (new): the revivals — H₂⁺ double well and the H₂ curve in 0.8.1 ★, helium as a lead; or none (the deletions were
+  your 10-09 ruling "H2 and Electrostatics should go" — this plan brings back the PHYSICS, not the windows: a double well is a system, the H₂ curve a picture)**;
+  **F-16 (new): new producers as separate pipelines (zero re-bakes; the duplicated WGSL named and counted) ★ — or branches in the locked text with a re-bake
+  budget of one.**
