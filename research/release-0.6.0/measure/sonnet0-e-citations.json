@@ -1,0 +1,306 @@
+[
+ {
+  "ref": "hamiltonian.js:33",
+  "planLine": 68,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "kernelSpace: { x: 0, p: 1 },"
+ },
+ {
+  "ref": "hamiltonian.js:45",
+  "planLine": 68,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "kernelSpace: { x: 2, p: 2 },"
+ },
+ {
+  "ref": "hamiltonian.js:62",
+  "planLine": 68,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "kernelSpace: { x: 3, p: 3 },"
+ },
+ {
+  "ref": "hamiltonian.js:81",
+  "planLine": 68,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "kernelSpace: { x: 6, p: 6 },"
+ },
+ {
+  "ref": "hamiltonian.js:152",
+  "planLine": 68,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "kernelSpace: { x: 6, p: 6 },"
+ },
+ {
+  "ref": "REPORT.md:153",
+  "planLine": 69,
+  "file": "REPORT.md",
+  "fileLines": 5834,
+  "status": "in-range",
+  "text": "- **f16 cache** — fine for pictures (2·10⁻⁵ … 2·10⁻⁴), not for measurement; all meters come from the coefficie"
+ },
+ {
+  "ref": "field.js:25",
+  "planLine": 79,
+  "file": "lab/field.js",
+  "fileLines": 1714,
+  "status": "in-range",
+  "text": "const MODE_BYTES = 112;                                  // 7 vec4: nlm, c, lag0, lag1, leg0, leg1, ctr"
+ },
+ {
+  "ref": "state.js:24–33",
+  "planLine": 145,
+  "file": "lab/state.js",
+  "fileLines": 704,
+  "status": "in-range",
+  "text": "/* ── static external fields ────────────────────────────────────────────────"
+ },
+ {
+  "ref": "state.js:87",
+  "planLine": 145,
+  "file": "lab/state.js",
+  "fileLines": 704,
+  "status": "in-range",
+  "text": "Ediag(a) { return (this.P ? this.P.H[a * N + a] / this.P.S[a * N + a] : this.E[a]) + this.field.Bz * BASIS[a]."
+ },
+ {
+  "ref": "state.js:153",
+  "planLine": 145,
+  "file": "lab/state.js",
+  "fileLines": 704,
+  "status": "in-range",
+  "text": "const ph = dir * this.Ediag(a) * t, c = Math.cos(ph), s = Math.sin(ph);"
+ },
+ {
+  "ref": "state.js:186",
+  "planLine": 145,
+  "file": "lab/state.js",
+  "fileLines": 704,
+  "status": "in-range",
+  "text": "const ph = -P.E[k] * t, c = Math.cos(ph), s = Math.sin(ph), g = Math.exp(-this.damping * Math.max(0, P.E[k] - "
+ },
+ {
+  "ref": "field.js:1562",
+  "planLine": 421,
+  "file": "lab/field.js",
+  "fileLines": 1714,
+  "status": "in-range",
+  "text": "molMat = src; molKind = kind === 'orbital' ? 1 : kind === 'signed' ? 3 : 0; molKindName = kind; molDirty = tru"
+ },
+ {
+  "ref": "chemview.js:476",
+  "planLine": 421,
+  "file": "lab/chemview.js",
+  "fileLines": 946,
+  "status": "in-range",
+  "text": "const molView = () => (view === 'orbital' ? 'real' : view === 'diff' ? 'real' : 'density');   // a signed Δρ i"
+ },
+ {
+  "ref": "field.js:421–422",
+  "planLine": 422,
+  "file": "lab/field.js",
+  "fileLines": 1714,
+  "status": "in-range",
+  "text": "w = pow(v * v, soft);"
+ },
+ {
+  "ref": "digest-lock.mjs:174–175",
+  "planLine": 427,
+  "file": "tools/perf/digest-lock.mjs",
+  "fileLines": 276,
+  "status": "in-range",
+  "text": "const out = {}, VN = fm.VIEW_NAMES, SN = fm.STYLE_NAMES;"
+ },
+ {
+  "ref": "digest-lock.mjs:264–265",
+  "planLine": 427,
+  "file": "tools/perf/digest-lock.mjs",
+  "fileLines": 276,
+  "status": "in-range",
+  "text": "const diffs = [];"
+ },
+ {
+  "ref": "field.js:435",
+  "planLine": 429,
+  "file": "lab/field.js",
+  "fileLines": 1714,
+  "status": "in-range",
+  "text": "} else {"
+ },
+ {
+  "ref": "field.js:1414",
+  "planLine": 434,
+  "file": "lab/field.js",
+  "fileLines": 1714,
+  "status": "in-range",
+  "text": "async function sampleVoxel(i, j, k) {"
+ },
+ {
+  "ref": "calculus.js:78–93",
+  "planLine": 438,
+  "file": "lab/calculus.js",
+  "fileLines": 128,
+  "status": "in-range",
+  "text": "{ name: '⟨z⟩', formula: 'Σ c_a*c_b ⟨a|z|b⟩', value: z0, law: 'Ehrenfest I:  d⟨z⟩/dt = ⟨p_z⟩', predicted: p0, r"
+ },
+ {
+  "ref": "meters.js:10",
+  "planLine": 439,
+  "file": "lab/meters.js",
+  "fileLines": 42,
+  "status": "in-range",
+  "text": "const auto = readout({ label: '|⟨ψ(0)|ψ(t)⟩|  AUTOCORR', value: '—', cls: 'two' }); grid.appendChild(auto.root"
+ },
+ {
+  "ref": "rack.js:148",
+  "planLine": 452,
+  "file": "lab/mir/shell/rack.js",
+  "fileLines": 1197,
+  "status": "in-range",
+  "text": "return o;"
+ },
+ {
+  "ref": "rack.js:732",
+  "planLine": 452,
+  "file": "lab/mir/shell/rack.js",
+  "fileLines": 1197,
+  "status": "in-range",
+  "text": "if (m && m.captured) {"
+ },
+ {
+  "ref": "field.js:83–84",
+  "planLine": 459,
+  "file": "lab/field.js",
+  "fileLines": 1714,
+  "status": "in-range",
+  "text": "let D = M.leg0.x + ct * (M.leg0.y + ct * (M.leg0.z + ct * (M.leg0.w + ct * (M.leg1.x + ct * M.leg1.y))));"
+ },
+ {
+  "ref": "hamiltonian.js:26",
+  "planLine": 459,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "hydrogen: {"
+ },
+ {
+  "ref": "hamiltonian.js:38",
+  "planLine": 459,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "qho: {"
+ },
+ {
+  "ref": "hamiltonian.js:55",
+  "planLine": 459,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "HAMILTONIANS.well = {"
+ },
+ {
+  "ref": "hamiltonian.js:74",
+  "planLine": 459,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "HAMILTONIANS.cornell = {"
+ },
+ {
+  "ref": "hamiltonian.js:144",
+  "planLine": 459,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "HAMILTONIANS.atom = {"
+ },
+ {
+  "ref": "windows/spectrum.js:39",
+  "planLine": 460,
+  "file": "lab/windows/spectrum.js",
+  "fileLines": 265,
+  "status": "in-range",
+  "text": "ui.hamSeg.button('cornell').hidden = true;"
+ },
+ {
+  "ref": "hamiltonian.js:98–112",
+  "planLine": 462,
+  "file": "lab/hamiltonian.js",
+  "fileLines": 219,
+  "status": "in-range",
+  "text": "/** the solved atom, its table and its rows — one SCF (≈ 0.1 s) per element, then cached */"
+ },
+ {
+  "ref": "field.js:116–117",
+  "planLine": 467,
+  "file": "lab/field.js",
+  "fileLines": 1714,
+  "status": "in-range",
+  "text": "/* r is re-derived here, in the pre-memo form, on purpose: the driver folds length(q)² back to dot(q, q) only "
+ },
+ {
+  "ref": "field.js:80",
+  "planLine": 473,
+  "file": "lab/field.js",
+  "fileLines": 1714,
+  "status": "in-range",
+  "text": "if (a == 0u || any(M.ctr.xyz != gC)) { gC = M.ctr.xyz; gq = pos - gC; gr = length(gq); gct = select(gq.z / max"
+ },
+ {
+  "ref": "molecule.js:72",
+  "planLine": 488,
+  "file": "lab/molecule.js",
+  "fileLines": 84,
+  "status": "in-range",
+  "text": "export function fieldModes(state, R, t) {"
+ },
+ {
+  "ref": "qho.js:14–19",
+  "planLine": 493,
+  "file": "lab/qho.js",
+  "fileLines": 104,
+  "status": "in-range",
+  "text": "*"
+ },
+ {
+  "ref": "windows/spectrum.js:57",
+  "planLine": 493,
+  "file": "lab/windows/spectrum.js",
+  "fileLines": 265,
+  "status": "in-range",
+  "text": "rg.appendChild(trig({ label: 'COHERENT BOUNCE', title: 'Launch a non-spreading oscillator packet', onFire: () "
+ },
+ {
+  "ref": "state.js:106",
+  "planLine": 501,
+  "file": "lab/state.js",
+  "fileLines": 704,
+  "status": "in-range",
+  "text": "setPropagator(P) { this.P = P || null; if (this.P) this.field.Fz = 0; this.version++; }"
+ },
+ {
+  "ref": "molecule-state.js:137",
+  "planLine": 510,
+  "file": "lab/molecule-state.js",
+  "fileLines": 232,
+  "status": "in-range",
+  "text": "const multiplicity = s.multiplicity === undefined ? 1 : s.multiplicity;"
+ },
+ {
+  "ref": "density.js:171",
+  "planLine": 511,
+  "file": "lab/density.js",
+  "fileLines": 271,
+  "status": "in-range",
+  "text": "export function fieldOf({ shape = 'step', kappa = 0, omega = 0, tOn = 0, tOff = Infinity, alpha = 1, phase = 0"
+ }
+]
