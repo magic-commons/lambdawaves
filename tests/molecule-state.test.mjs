@@ -1,17 +1,17 @@
 /* molecule-state.test.mjs — B-H2O-5's gate.  The saved molecule is H₂O/STO-3G at the pinned
  * E = −74.963023162862 with a REAL MMUT record: P(t) and P(t−Δt) come out of lab/density.js after a δ-kick and one
  * step, not out of a fixture, so the Hermiticity and the parity being checked are the propagator's own.
- * Save → restore → save must be byte-identical, and each of the four named refusals must fire on its own defect.
+ * Save → restore → save must be byte-identical, and each of the five named refusals must fire on its own defect.
  * The E_TRACE bound is ROUND 4 · OPUS §8's correction of Sol's flat 1e-12: max(1e-12, 3nε·steps).
- * §7 is THE CONTRACT RECORD (0.5.4 P1): identityOf's canonical form and the moved-H witness.
+ * §7 is THE CONTRACT RECORD (0.5.4 P1): identityOf's canonical form, the moved-H witness and E_IDENTITY.
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { moleculeRHF, registerRecord } from '../lab/rhf-molecule.js';
 import { createRTHF } from '../lab/density.js';
-import { serializeMolecule, restoreMolecule, MoleculeStateError, SCHEMA, COMPONENT_ORDER_LINE, identityOf } from '../lab/molecule-state.js';
-import { recordPath } from '../lab/library.js';
+import { serializeMolecule, restoreMolecule, MoleculeStateError, SCHEMA, COMPONENT_ORDER_LINE, CODES, identityOf } from '../lab/molecule-state.js';
+import { decodeRecord, recordPath } from '../lab/library.js';
 import { moleculeAtoms } from '../lab/molecules.js';
 import { basisFrom } from '../lab/md.js';
 
@@ -224,4 +224,22 @@ const loadRecord = (row) => JSON.parse(readFileSync(new URL('../lab/' + recordPa
   console.log(`PASS the identity: ${id0.slice(0, 12)}… = sha-256 of the six canonical lines; a hydrogen moved 0.01 bohr keeps the basis hash`
     + ` ${sol.hash.slice(0, 12)}… and moves the identity to ${id1.slice(0, 12)}…; charge, multiplicity, model and basis each move it;`
     + ` record and live atoms agree on ${same}/${CAT.rows.length} catalogue rows.`);
+}
+
+/* 7b. E_IDENTITY, the one case: restoreMolecule handed a library record whose input.atomsSha256 the atoms do not hash to. */
+{
+  const L = loadRecord(CAT.rows.find((r) => r.id === 'C6H6')), R = decodeRecord(L);
+  const stateOf = (A) => serializeMolecule({ atoms: A, charge: L.input.charge, basis: { name: L.input.basis, version: '1', hash: L.ground.hash },
+    rhf: { energy: L.ground.energy, eps: R.eps, C: R.C, D: R.D } });
+  const good = stateOf(L.input.atoms);
+  assert.equal(codeOf(() => restoreMolecule(good, { record, lib: L })), null, 'a state at its record\'s own geometry restores');
+  assert.equal(JSON.stringify(serializeMolecule(restoreMolecule(good, { record, lib: L }))), JSON.stringify(good), 'and the check moves no byte');
+  const tampered = clone(L); tampered.input.atoms[1].x += 0.01;                        // atom 1 of benzene is a hydrogen
+  assert.equal(tampered.input.atoms[1].Z, 1);
+  assert.equal(codeOf(() => restoreMolecule(stateOf(tampered.input.atoms), { record, lib: tampered })), 'E_IDENTITY', 'a record whose atoms do not hash to its input.atomsSha256');
+  assert.equal(codeOf(() => restoreMolecule(stateOf(tampered.input.atoms), { record, lib: L })), 'E_IDENTITY', 'a moved hydrogen restored under the record\'s name');
+  assert.equal(codeOf(() => restoreMolecule(stateOf(tampered.input.atoms), { record })), null, 'with no library record nothing is claimed');
+  assert.deepEqual(CODES, ['E_SHAPE', 'E_BASIS_HASH', 'E_MMUT_HISTORY', 'E_TRACE', 'E_IDENTITY'], 'the five named refusals');
+  console.log('PASS E_IDENTITY: C₆H₆ restores against its own record with no byte moved; a record with a hydrogen moved 0.01 bohr, and a moved hydrogen'
+    + ' under the intact record\'s name, are both refused; with no library record nothing is claimed; CODES pinned at five.');
 }

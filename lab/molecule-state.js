@@ -5,7 +5,7 @@
  * its MMUT history, and the presentation.  NO DERIVED CACHES — S, h, (ij|kl), X = S^{−1/2}, the Fock matrix, the
  * dipole trace and the field's voxels are all recomputable from these numbers and none of them belongs here.
  *
- * The four named rejections, and why each is a refusal rather than a repair:
+ * The five named rejections, and why each is a refusal rather than a repair:
  *   E_SHAPE          a dimension, a schema version or a symmetry that does not hold.  D must be real symmetric and P
  *                    Hermitian; a record that is neither is not a one-particle density and cannot be propagated.
  *   E_BASIS_HASH     the vendored record's hash over its DECIMAL STRINGS has moved (ROUND 2 §6: never over parsed
@@ -21,6 +21,8 @@
  *   E_TRACE          |Tr(DS) − N_e| over max(1e-12, 3nε·steps).  The bound is ROUND 4 §8's correction of Sol's flat
  *                    1e-12: at 120,000 steps the measured drift law (1.6e-15 electrons per step, a defect of
  *                    S^{±1/2} and never of the unitary integrator) puts the honest value at 10.00000000019.
+ *   E_IDENTITY       restoreMolecule handed a LIBRARY record (`lib`) whose input.atomsSha256 the atoms do not hash to
+ *                    (0.5.4 P1).  A record's geometry is its name: a moved atom is another molecule under that name.
  *
  * THE CONTRACT RECORD (0.5.4 P1, R13: identity and conventions are DATA, never a stamp — sol.hash stays the basis hash).
  * identityOf's canonical form: the six lines 'identity 1', 'atoms <library.js atomsKey>', 'basis <basis hash>', 'charge <c>',
@@ -37,7 +39,7 @@ import { atomsKey } from './library.js';
 export const SCHEMA = 1;
 export const BASIS_KIND = 'cartesian';
 export const COMPONENT_ORDER_LINE = COMPONENT_ORDER.join('; ');            // 's; x,y,z; xx,xy,xz,yy,yz,zz'
-export const CODES = ['E_SHAPE', 'E_BASIS_HASH', 'E_MMUT_HISTORY', 'E_TRACE'];
+export const CODES = ['E_SHAPE', 'E_BASIS_HASH', 'E_MMUT_HISTORY', 'E_TRACE', 'E_IDENTITY'];
 export const INTEGRATORS = ['magnus2', 'mmut'];
 const AXES = ['x', 'y', 'z'];
 
@@ -197,8 +199,9 @@ function presentationOf(p = {}) {
  * `record`: the vendored lab/vendor/bse JSON, so the basis hash is RECOMPUTED here over its decimal strings rather
  * than trusted — omit it and the hash is not checked, and `checks.basisHash` says so.
  * `S`: the AO overlap matrix, so Tr(DS) can be held to max(1e-12, 3nε·steps) — omit it and `checks.trace` says so.
+ * `lib`: a LIBRARY record (lab/library.js) the state claims to be — atoms that do not hash to its input.atomsSha256 are E_IDENTITY.
  */
-export function restoreMolecule(rec, { record = null, S = null } = {}) {
+export function restoreMolecule(rec, { record = null, S = null, lib = null } = {}) {
   if (!rec || typeof rec !== 'object') fail('E_SHAPE', 'restoreMolecule needs a record object');
   if (rec.schema !== SCHEMA) fail('E_SHAPE', `schema ${JSON.stringify(rec.schema)} is not ${SCHEMA}; this record needs a migration`);
   if (rec.basis && rec.basis.kind !== undefined && rec.basis.kind !== BASIS_KIND) fail('E_SHAPE', `basis.kind must be '${BASIS_KIND}', got ${JSON.stringify(rec.basis.kind)}`);
@@ -209,6 +212,8 @@ export function restoreMolecule(rec, { record = null, S = null } = {}) {
   const policy = canon.rt ? restartLabels(canon.rt.restartEvery, hasPolicy(rec.rt)) : null;
   const n = canon.rhf.eps.length, checks = { n, basisHash: 'not checked (no vendored record supplied)', trace: 'not checked (no metric supplied)',
     mmut: canon.rt ? `${canon.rt.integrator}, ${policy.restartPolicy} (${policy.restartPolicySource})` : 'no rt block' };
+  const named = lib && String((lib.input || {}).atomsSha256), key = lib && atomsKey(canon.atoms);
+  if (lib && key !== named) fail('E_IDENTITY', `the atoms hash to ${key.slice(0, 12)}… and the library record ${lib.id} names ${named.slice(0, 12)}…; a moved atom is another molecule under its name`);
   if (record) {
     const built = basisFrom(canon.atoms.map((a) => ({ Z: a.Z, x: a.x, y: a.y, z: a.z })), record, { cart: true });
     if (built.n !== n) fail('E_SHAPE', `the vendored basis gives ${built.n} AOs, the record's C and D are ${n} × ${n}`);
