@@ -1,0 +1,5 @@
+# 0.5.4 Contract Layer — what changed (plain words; one line per merged row; the integrator appends at each merge)
+
+The seams an adapter plugs into — `research/release-0.5.4/PLAN.md` (defaults stand on Josh's "Let's excecute the master plan", 2026-10-11). Nothing pushed, nothing deployed; the cut is local.
+
+- **P0 TRUTH + THE CLAIMS INVENTORY (Haiku 5.5, `83fe9d0`).** Five sentences the tree said that its own facts contradicted, fixed where they stand: the session stamp IS the basis hash plus the solve sequence; one clock, not four (README and rack.js' header); the digest lock's scope is same-machine, 860 + 1004 values, at most 64 AO, no time-dependent molecular packet, STATES, FLOW or `record()` in it (NOTES and CLAUDE.md); FLOW is qualitative in STO-3G and 6-31+G*; the flow module's header says the frozen-frame step error and the speed cap are covered by no oracle; each producer's header names its energy reference and kernel letter. `CLAIMS.md`: eleven user-visible sentences the programme puts in doubt, listed, changed by nobody. +5 lines.
