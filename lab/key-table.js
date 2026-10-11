@@ -2,7 +2,7 @@
  * The table is the kit's: the one keydown listener, the chord spelling (`Mod` is Ctrl or ⌘, `Ctrl` the Control key alone), the
  * field and control laws, recording and saving the difference.  What stays λWAVES' is here:
  *   · the rows are rack.js ACTIONS (A9): `ctrl: true` → Mod, `ctrl: 'Ctrl'` → Ctrl (⌘⇧Q never runs the dolly zoom); a row with no
- *     `shift` answers its chord AND Shift+chord, and every run reads Shift as the fine step (0.25); held keys repeat; a `stage`
+ *     `shift` answers its chord AND Shift+chord, and every run reads Shift as the fine step (0.25), but the pan, Alt(+Shift)+Drag (stage-gestures.js, not a row), is 1:1, no fine step (0.5.3 R8); held keys repeat; a `stage`
  *     row runs only while the stage has the focus (THE TAB RULE); every row is `overControls`, so a focused control keeps a key only
  *     by acting on it (it prevents the default: a knob's arrows, a seg's arrows) and a control that will not act yields it (wave
  *     68), and Space is the transport's over any control and a focused <select> (wave 88);

@@ -42,7 +42,7 @@ this file.
 | the RENDER card's choices (`lambdawaves.q0.render.*`: motion, format, size, fps, duration, offset, modulation, timeline, the picture `scale`; R7's first-run seed is duration 6, size current, modulation ON when MOD is armed) and the kit recorder's measured speed `mir.render.calib` (0.5.0 C7b) | their own localStorage keys, never settings | PREFERENCE |
 | the CURVES card's screen grade (0.5.1 D10-24; `lambdawaves.q0.curves`: the kit curves model's `serialize()` — the points per channel MASTER · R · G · B and AMOUNT; absent = neutral, and neutral reads `filter: none` on the canvas): a screen calibration per device, graded on the screen only (the picture, the loop and the film never see it) | its own localStorage key (`lab/shell/controller.js` `curvesStore`), written 250 ms after a change, never settings, a project, a link or a history row; FORGET removes it | PREFERENCE |
 | `clockLink` (LINKED / SEPARATE) — RETIRED at 0.5.0 C4 (R-B1, the one clock: THE play plays the modulation, the power never plays). An older blob's key is never read and is dropped by the next save | — | — |
-| camera feel: `friction`, `spin` (speed), `dragGain`, `fling` | settings | PREFERENCE (D4) |
+| camera feel: `friction`, `spin` (speed), `dragGain`, `fling`, and the LOCK `camLock` (0.5.3: the classic camera; the pan is held at the centre and every zoom is from the centre) | settings | PREFERENCE (D4) |
 | field chrome: `frame`, `axis`, `frameMode`, `axisMode`, `cornerSide`, `invert`, `axisInk` | settings | PREFERENCE (D1) |
 | camera MODE, `presentation.obs.mode` (free / turntable) | project | PROJECT (D4's escape hatch, see below), not in history (it travels with the pose) |
 | palette: `paletteId`, `palette {on, selected, stops}` | project | PROJECT (D2) |

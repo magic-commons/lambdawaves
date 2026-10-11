@@ -112,8 +112,12 @@ for (const lifted of [1, 2]) {
   assert.deepEqual(s.result.pans, [[0.02, 0.025]]); assert.equal(s.travel.yaw, 0); assert.deepEqual(s.result.flings, []); assert.equal(s.result.held, false);
   s.send('pointerdown', 2, 100, 100, { altKey: true, ctrlKey: true }); s.send('pointermove', 2, 150); s.send('pointerup', 2, 150);
   assert.equal(s.result.moved, 1); assert.equal(s.result.ended, 1); assert.equal(s.result.pans.length, 1);
+  // 0.5.3 M7 (R8): Alt+Shift-drag is the same pan, one pixel per pixel — Shift is the orbit's fine step, never a fine pan.
+  const f = stage(), shift = { shiftKey: true, pointerType: 'mouse' }; f.send('pointerdown', 1, 100, 100, { ...shift, altKey: true }); f.advance(20);
+  f.send('pointermove', 1, 110, 90, shift); f.send('pointerup', 1, 110, 90, shift);
+  assert.deepEqual(f.result.pans, [[0.02, 0.025]], 'Alt+Shift-drag pans as Alt-drag does'); assert.equal(f.travel.yaw, 0); assert.deepEqual(f.result.flings, []); assert.equal(f.result.held, false);
 }
-console.log('PASS stage gestures: drag, fine gain, fling, interruption, special ownership, pinch handoff, deliberate double taps — and (S2) the wheel and the pinch zoom at the cursor / centroid, two fingers and Alt-drag slide the picture one pixel per pixel');
+console.log('PASS stage gestures: drag, fine gain, fling, interruption, special ownership, pinch handoff, deliberate double taps — and (S2) the wheel and the pinch zoom at the cursor / centroid, two fingers and Alt(+Shift)-drag slide the picture one pixel per pixel');
 // 0.5.0 A8 · THE BINDINGS ARE DATA: the table is today's (R5-C1), frozen, and an edited row is what the stage does.
 {
   assert.deepEqual(JSON.parse(JSON.stringify(STAGE_BINDINGS)), { pointer: { button: 0, slide: { altKey: true, ctrlKey: false }, fine: 'shiftKey' },
