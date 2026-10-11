@@ -1,7 +1,7 @@
 # BRIEF P-V · THE VERIFICATION ROUND (0.5.4 "Contract Layer"; a FRESH Opus verifier — reads, measures, judges; fixes nothing)
 
 **Read first, whole:** `research/release-0.5.4/PLAN.md` (§B what Josh sees; §E the rows; §F gates — your table of contents; §G what is not claimed; §J), `CHANGES-0.5.4.md`,
-every `*-BUILD.md` in the folder (P0, P3, P1, P4, PAIR-B, PAIR-C, P5 if it landed), `CLAIMS.md`, `research/release-0.5.3/BRIEF-V.md` + `M-V-REPORT.md` (the previous round's shape,
+every `*-BUILD.md` in the folder (P0, P3, P1, P4 incl. §2 (c′), PAIR-B, PAIR-C; P5 did NOT land — it waits on Josh's Q1 to the pilot, so 4(g) is skipped and said so), `CLAIMS.md`, `research/release-0.5.3/BRIEF-V.md` + `M-V-REPORT.md` (the previous round's shape,
 its standing reds — B149; `current:138` and `gpu-recovery` pre-existing — and its lesson N7: compare file CONTENT, not `git log`), `CLAUDE.md` whole, `docs/NOTES-FOR-AGENTS.md`,
 `docs/STATE-SCOPES.md`, `tools/perf/digest-lock.mjs`'s header, `tools/perf/main-thread.mjs`'s header + `research/release-0.5.2/R1-BUILD.md`'s pair recipe,
 `research/release-0.4.0/HANDOFF.md` §2's 0.5.4 blocks.
@@ -22,10 +22,10 @@ its standing reds — B149; `current:138` and `gpu-recovery` pre-existing — an
 4. **The contract rows, re-proven:** (a) `identityOf`: the moved-H witness from `molecule-state.test`; `git diff v0.5.3-alpha..HEAD -- lab/molecular-session.js lab/mathworker.js
    lab/statesview.js` touches NO stamp line (read the diff); (b) the catalogue: `node tools/orbital-library.mjs --check` byte-exact; the counts 2 / 26 / 9 / 1; water's id in
    `oracles`; no `CERTIFIED` anywhere in `lab/library.json`; precache ≤ 8 MiB; (c) `statusOf`: the table test; water never UNCHECKED; THE HEAD's fifth line at phone width
-   (open the PNG pair; measure once yourself); the INFORMATIONAL row present and the MODEL sheet's reworded sentence; `stage-text` UNCHANGED (its pinned caption); **the
+   (open the PNG pair; measure once yourself); the INFORMATIONAL row present and the MODEL sheet's reworded sentence; `stage-text`: its two caption pins RE-AIMED to the suffixed strings per PLAN §J-3 (P4c; `'… · EXACT'`, `'… · NUMERICAL'`) and every other assertion byte-identical to the base's; the export caption carries the STATE word, the STAGE's own words do not move; **the
    no-frame-call probe** re-run: 0 calls across 3 s of playback, 1 across a VIEW change; (d) the worker: the `worker-pool` suite's five cases; the browser case on the live
-   error road (fallback calls 0); a Worker-less run — MOLECULES still solves (the never-answered road) — say how you forced it; (e) precision: the field law 2/2 (hydrogen 2e-5,
-   water 1e-3); the invariance case; `T_MAX` declared and the clock test; PAIR-B-BUILD's two measured packet differences re-read, not re-measured; (f) P10's q-band anchor
+   error road (fallback calls 0); a Worker-less run — MOLECULES still solves (the never-answered road) — say how you forced it; (e) precision: the field law GREEN as RULED in §J-2 + its addendum (one f16 ulp + 1e-6·|f64|, toward zero; hydrogen 3e-6 RMS · 2e-4 worst,
+   water 1e-3 RMS · 3e-4 of ρmax — `tests/helpers/field-law.mjs` is the one source; the strict one-ulp count printed); the invariance case; `T_MAX` declared and the clock test; PAIR-B-BUILD's two measured packet differences re-read, not re-measured; (f) P10's q-band anchor
    message; P11's FINGERPRINT row on the rig once; (g) P5 if landed: the export parsed by the Python reader (`python3 -I`), H₂O's S/T/V/M equal the PySCF fixture under R_d.
 5. **G-M the pair:** `tools/perf/main-thread.mjs` by R1-BUILD's recipe — the 0.5.3 base vs the tip, the boot scene AND a MOLECULES scene, interleaved 5 + 5 on a quiet rig, the
    same-tree floor FIRST — |Δ median| ≤ 3.536 ms/s. THE STUTTER LAW: a gross Δ names a row.
