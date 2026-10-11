@@ -164,3 +164,39 @@ Subtracted: nothing could be — the row adds one function, one row and one capa
    through the same `fill()`/`tell()` — not probed. **The ms/s pair** is P-V's. stylehash ran in two of the eight theme × card × frost states.
 7. My servers 9033 (pid 2122515) and 9035 (pid 2122517) were killed by pid after the last run; no geckodriver, marionette Firefox or headless Chromium of mine
    was left. Nothing under `lab/mir/**` or `lab/fonts/**` was touched; no settings or stored key; nothing pushed.
+
+## §2 (c′) · THE EXPORT CAPTION — DONE in the fix round (P4c, PLAN §J-3)
+
+Builder: P4c (Opus 5.5). Worktree `.claude/worktrees/agent-aca59892097e97027`, branch `worktree-agent-aca59892097e97027`, reset to `1df7681` (the `sos-s0` tip
+carrying P0, P1, P3, PAIR B and P4). Commits: `f0673c5` (the `lab/` edit + `pwa --write`), `3de9bd8` (stage-text's re-aim), this section. No push.
+
+**The seat.** `lab/windows/film.js:7`: ONE `caption()` = `stageCaption()` + ` · ` + the STATE word — MOLECULES' kept `chem.said.word` while a molecule is on,
+else `statusOf({ owner: getHamiltonian().id }).word` — and it feeds BOTH export seats: the film's `road.pending` (`:9`) and the picture's `createCapture` caption
+option (`:11`, read by `capture.js` `captionOf`). The §2 (c) sketch was checked and not taken as written: it had no hydrogen word and was two inline copies; one
+helper serves both seats. `stageCaption` (`shell/stage-words.js`) and the stage's own words are untouched. STAGE FORMULA off: `stageCaption()` is `''`, so the
+caption stays `''` and `statusOf` is not called (Q15; stage-text's `swCaption === ''` and the clean-picture hash hold). An owner `statusOf` does not speak for
+(oscillator, well, quarkonium, ATOM: `null`) and a molecule switched on before its first landing (`said` null) export the stage's words unsuffixed — no word is
+claimed that was not built.
+**THE STUTTER LAW.** `caption()` runs once per take (`render-exact.js` `road.pending`, once per job) and once per picture (`captionOf`); a molecule's word costs
+no `statusOf` call (the kept `said`), hydrogen's costs one per export. No frame-loop call was added; `tools/status-probe.mjs` was not re-run (no frame-path edit).
+
+**The two strings as produced in the browser** (stage-text §4, Firefox headless): `1s₀, 2p₀ · EXACT` (preset 1s+2pz, hydrogen) and
+`H₂O · 1b1 HOMO · STO-3G · NUMERICAL` (water, ORBITAL; also the labels-off picture's caption, `split.labOff.caption`). `tests/stage-text.browser-test.mjs`: the
+two assertions re-aimed to exactly these, under one comment `0.5.4 P4c re-aim (§J-3)`; every other assertion byte-identical. No other suite pins the export
+caption (`grep caption` over `tests/` and `tools/`: menubar/official-defaults/new-project name the STAGE CAPTIONS preference; render-exact.test pins
+`captionOver`'s export, not a string; make-covers and film-probe pass `caption: ''`/`false`).
+
+**Suites** (gate server 9083 by pid, `LW_PORT=9083 GD_PORT=5553`; `rigfree.mjs` before every browser run, one at a time):
+- `node tests/pwa.test.mjs --write` after the `lab/` edit (`lab/sw.js` re-stamped). `bash test.sh node` **exit 0**, 1031 PASS/GREEN lines (rack-deps measures
+  `lab/windows/film.js → film`; `node tools/rack-deps.mjs --classes --no-write` exit 0). `node tools/new-project.mjs --check` **in step (16117 B)**.
+- `stage-text` **GREEN** (4 PASS; the formula KaTeX, the banners and the labels lines unchanged). `molecule-head.browser` **GREEN**. `chem.browser` **GREEN, 0
+  failing of 56**.
+- `tools/serialize-bytes.mjs` vs a `git archive 1df7681` export on 9085: **full 11/11 · edit 11/11 IDENTICAL**, 0 page errors.
+- **THE LOCK ×2**: `--check --query gastab=0` **860 values · 0 readback · 0 record-byte · page errors 0 · GREEN**; plus `--fixture
+  research/release-0.4.0/measure/digest-lock-s4a.json` **1004 values · 0 / 0 · page errors 0 · GREEN**. Not re-baked.
+
+**Lines.** `cat lab/*.js lab/shell/*.js lab/windows/*.js | wc -l`: **before 28,100 · after 28,101 · +1** (the helper; its two imports ride `film.js:3`, the
+two seats lose their own `stageCaption` calls). Estimate was +2 to +4, stop at +8. Outside the count: `tests/stage-text.browser-test.mjs` +1 (the comment).
+
+Servers 9083 (pid 2216781) and 9085 (pid 2217764) killed by pid; no geckodriver or marionette Firefox of mine left. Nothing under `lab/mir/**` or `lab/fonts/**`;
+no CSS, no UI, no settings or stored key; nothing pushed.

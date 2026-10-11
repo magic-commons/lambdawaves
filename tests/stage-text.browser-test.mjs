@@ -105,11 +105,12 @@ try {
     return { caption: on.caption, hOn: await hash(on), hOff: await hash(off), hOff2: await hash(off2), swCaption: swOff.caption, hSw: await hash(swOff), stageOff, hidden,
       mol: mol.caption, split: { both, labOff, fOff }, rows: Object.fromEntries(['settings', 'informational'].map((id) => [id, [...document.querySelectorAll('.dev[data-id="' + id + '"] .sw-lbl')].map((e) => e.textContent).filter((t) => /STAGE (TEXT|FORMULA)|ATOM/.test(t))])),
       info: (() => { const d = document.querySelector('.dev[data-id="informational"]'); return d && { k: d.querySelectorAll('.k').length, eyebrow: d.querySelector('.dev-eyebrow').textContent.trim() }; })(), errs: __e.slice() };`);
-  assert.equal(t4.caption, '1s₀, 2p₀', 'the caption: ' + JSON.stringify(t4));
+  /* 0.5.4 P4c re-aim (§J-3): the EXPORTED caption gains ` · <STATE word>` (hydrogen's statusOf, a molecule's chem.said); the stage's own words do not move */
+  assert.equal(t4.caption, '1s₀, 2p₀ · EXACT', 'the caption: ' + JSON.stringify(t4));
   assert.equal(t4.hOff, t4.hOff2, 'a captionless picture is not deterministic: ' + JSON.stringify(t4));
   assert.notEqual(t4.hOn, t4.hOff, 'the caption did not reach the picture\'s pixels: ' + JSON.stringify(t4));
   assert.ok(t4.stageOff && t4.hidden && t4.swCaption === '' && t4.hSw === t4.hOff, 'STAGE FORMULA off still captions: ' + JSON.stringify(t4));
-  assert.equal(t4.mol, 'H₂O · 1b1 HOMO · STO-3G');
+  assert.equal(t4.mol, 'H₂O · 1b1 HOMO · STO-3G · NUMERICAL');
   assert.deepEqual(t4.rows, { settings: [], informational: ['STAGE FORMULA', 'ATOM LABELS'] }, 'the two rows are not INFORMATIONAL\'s (and DISPLAY\'s none): ' + JSON.stringify(t4.rows));
   assert.deepEqual(t4.info, { k: 2, eyebrow: 'INFORMATIONAL' }, 'INFORMATIONAL is not two switches, each with its SIZE: ' + JSON.stringify(t4.info));
   assert.deepEqual(t4.split, { both: { labels: true, formula: true }, labOff: { labels: false, formula: true, caption: t4.mol }, fOff: { labels: true, formula: false } }, 'the two switches are not independent: ' + JSON.stringify(t4.split));

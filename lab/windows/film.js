@@ -1,13 +1,14 @@
 /* lab/windows/film.js — THE FILM's road (0.5.2 R2c; moved verbatim out of lab/rack.js boot()): film(), capture(), the facade's takes and app.state.capApi,
  * all lazy.  filmHold stays beside the loop in boot() (app.loop.hold, by value); LW, periodEnergies and stageCaption are read through their slots at use. */
-import { createFilm } from '../render-exact.js'; import { createCapture, maxPictureSize } from '../capture.js';
+import { createFilm } from '../render-exact.js'; import { createCapture, maxPictureSize } from '../capture.js'; import { statusOf } from '../status.js'; import { getHamiltonian } from '../hamiltonian.js';
 export function createFilmApi(app) {
   const { dom, obs } = app, { hold: filmHold } = app.loop, { camera } = app.host, { rotStep, rotDriving, field } = app.ctl;
     let exact = null, cap = null, facadeRun = null;
+    const caption = () => { const c = app.w.stageCaption(), ch = app.state.chem, s = c && (ch && ch.on ? ch.said : statusOf({ owner: getHamiltonian().id })); return s ? c + ' · ' + s.word : c; };   // 0.5.4 P4c (PLAN §J-3): the EXPORT caption is the stage's words + its STATE word (MOLECULES' kept status, else the owner's), read at the take, never in a frame; STAGE FORMULA off stays ''
     const film = () => exact || (exact = createFilm(app.sh.LW, { canvas: dom.canvas, energies: app.w.periodEnergies, canvasCap: 16384, host: () => app.state.modHost, hold: filmHold,
-      road: { pending: () => ({ caption: app.w.stageCaption(), spin: camera.ambient && obs.mode !== 'free' ? camera.ambient : 0, yaw0: obs.yaw }), step: rotStep, rotating: rotDriving,
+      road: { pending: () => ({ caption: caption(), spin: camera.ambient && obs.mode !== 'free' ? camera.ambient : 0, yaw0: obs.yaw }), step: rotStep, rotating: rotDriving,
         plan: (o) => capture().planLoop(o) } }));   // the rack's own for the film's three schedules (take) and the card's road
-    const capture = () => cap || (cap = createCapture(app.sh.LW, { canvas: dom.canvas, canvasCap: 16384, energies: app.w.periodEnergies, caption: () => app.w.stageCaption() }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩; 0.4.0 S3: and draws the STAGE TEXT's caption
+    const capture = () => cap || (cap = createCapture(app.sh.LW, { canvas: dom.canvas, canvasCap: 16384, energies: app.w.periodEnergies, caption }));   // wave 58: capture reads the SAME energies periodNow() does, never the labels' ⟨H⟩; 0.4.0 S3: and draws the STAGE TEXT's caption
     const take = async (kind, o, keep) => {
       if (facadeRun) { facadeRun.stop(); return null; }
       facadeRun = film().take(kind, { fps: 30, seconds: 6, scale: 2, drive: app.state.modArm, ...o });
