@@ -16,6 +16,16 @@
     "states": true,
     "rpa": true,
     "tdhf": true
+   },
+   "oracle": {
+    "what": "PySCF 2.14 RHF, cart=True, the vendored STO-3G decimals",
+    "delta": -2.5579538487363607e-13
+   },
+   "geometry": "experimental",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "experimental",
+    "derivatives": "UNKNOWN"
    }
   },
   {
@@ -31,6 +41,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -6.821210263296962e-13
+   },
+   "geometry": "computed-reference",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "computed-reference",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "alanine",
@@ -135,6 +155,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 3.3082869776990265e-11
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "serine",
@@ -246,6 +276,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 1.7905676941154525e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "cysteine",
     "formula": "<m>C₃H₇NO₂S</m>",
@@ -355,6 +395,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -1.0061285138363019e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "proline",
@@ -484,6 +534,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 3.951754479203373e-10
+   },
+   "geometry": "computed-reference",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "computed-reference",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "threonine",
     "formula": "<m>C₄H₉NO₃</m>",
@@ -611,6 +671,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 1.7564616427989677e-11
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "valine",
@@ -752,6 +822,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -4.2223291529808193e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "aspartic acid",
     "formula": "<m>C₄H₇NO₄</m>",
@@ -873,6 +953,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -1.624584911041893e-10
+   },
+   "geometry": "computed-reference",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "computed-reference",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "asparagine",
@@ -1001,6 +1091,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 4.925482244289014e-10
+   },
+   "geometry": "computed-reference",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "computed-reference",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "isoleucine",
@@ -1160,6 +1260,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -5.094307198305614e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "leucine",
     "formula": "<m>C₆H₁₃NO₂</m>",
@@ -1318,6 +1428,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 9.890754881780595e-11
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "glutamic acid",
     "formula": "<m>C₅H₉NO₄</m>",
@@ -1457,6 +1577,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 3.219611244276166e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "glutamine",
@@ -1604,6 +1734,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 3.5629454941954464e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "methionine",
     "formula": "<m>C₅H₁₁NO₂S</m>",
@@ -1750,6 +1890,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 1.8201262719230726e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "histidine",
     "formula": "<m>C₆H₉N₃O₂</m>",
@@ -1895,6 +2045,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 1.1471001926111057e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "lysine",
@@ -2066,6 +2226,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 2.9331204132176936e-10
+   },
+   "geometry": "computed-reference",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "computed-reference",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "phenylalanine",
     "formula": "<m>C₉H₁₁NO₂</m>",
@@ -2229,6 +2399,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 1.355147105641663e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "arginine",
@@ -2412,6 +2592,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 6.68251232127659e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "tyrosine",
     "formula": "<m>C₉H₁₁NO₃</m>",
@@ -2581,6 +2771,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -8.15703060652595e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "tryptophan",
@@ -2770,6 +2970,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -1.156195139628835e-10
+   },
+   "geometry": "computed-reference",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "computed-reference",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "uracil",
     "formula": "<m>C₄H₄N₂O₂</m>",
@@ -2867,6 +3077,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 4.246203388902359e-11
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "cytosine",
@@ -2971,6 +3191,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -9.265477274311706e-11
+   },
+   "geometry": "computed-reference",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "computed-reference",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "thymine",
@@ -3088,6 +3318,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -4.3712589103961363e-11
+   },
+   "geometry": "computed-reference",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "computed-reference",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "adenine",
     "formula": "<m>C₅H₅N₅</m>",
@@ -3203,6 +3443,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 7.541984814452007e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "guanine",
@@ -3326,6 +3576,16 @@
     "rpa": true,
     "tdhf": true
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -3.780087354243733e-12
+   },
+   "geometry": "computed-reference",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "computed-reference",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "N-methylacetamide",
     "formula": "<m>CH₃CONHCH₃</m>",
@@ -3424,6 +3684,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -1.9610979506978765e-11
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "lithium fluoride cube",
     "formula": "<m>Li₄F₄</m>",
@@ -3497,6 +3767,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -1.4301804185379297e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "water hexamer ring",
@@ -3631,6 +3911,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 4.547473508864641e-13
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "adamantane",
@@ -3814,6 +4104,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 1.057287590811029e-11
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "cubane",
     "formula": "<m>C₈H₈</m>",
@@ -3925,8 +4225,8 @@
   {
    "id": "B12H12--",
    "basis": "sto-3g",
-   "hash": "481379d5feac547c0006b1e1dc7ca24c532b7ed6c1c502590483acf58603ebb3",
-   "bytes": 473837,
+   "hash": "e192827783ac8a992cea288b3c5be9d711ee36dcf620557d88bdd1739ef545e0",
+   "bytes": 473836,
    "section": "LATTICE",
    "nAO": 72,
    "nocc": 37,
@@ -3935,6 +4235,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 1.1254996934439987e-11
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "closo-dodecaborate",
@@ -4105,6 +4415,16 @@
     "states": false,
     "rpa": false,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF 2.14.0 — the record IS PySCF's; its check is the field at Sol's 92 points",
+    "delta": 0
+   },
+   "geometry": "draft",
+   "status": {
+    "energy": "IMPORTED",
+    "geometry": "draft",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "buckminsterfullerene",
@@ -4492,6 +4812,16 @@
     "rpa": true,
     "tdhf": true
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 2.637534635141492e-11
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "krypton difluoride",
     "formula": "<m>KrF₂</m>",
@@ -4536,6 +4866,16 @@
     "rpa": true,
     "tdhf": true
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": -2.2737367544323206e-12
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "potassium bromide",
     "formula": "KBr",
@@ -4573,6 +4913,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 4.547473508864641e-12
+   },
+   "geometry": "experimental",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "experimental",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "titanium tetrachloride",
@@ -4629,6 +4979,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 8.431015885435045e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "nickel tetracarbonyl",
@@ -4709,6 +5069,16 @@
     "states": false,
     "rpa": true,
     "tdhf": false
+   },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 5.054516805103049e-10
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
    },
    "molecule": {
     "name": "iron pentacarbonyl",
@@ -4802,6 +5172,16 @@
     "rpa": true,
     "tdhf": false
    },
+   "oracle": {
+    "what": "PySCF RHF, cart=True, the vendored STO-3G decimals, on the record's own atoms in bohr",
+    "delta": 6.93012225383427e-9
+   },
+   "geometry": "optimised-here",
+   "status": {
+    "energy": "MEASURED",
+    "geometry": "optimised-here",
+    "derivatives": "UNKNOWN"
+   },
    "molecule": {
     "name": "chromium hexacarbonyl",
     "formula": "<m>Cr(CO)₆</m>",
@@ -4892,5 +5272,219 @@
     ]
    }
   }
- ]
+ ],
+ "oracles": {
+  "H2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -1.1167061373496687
+  },
+  "LiH": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -7.862023874015301
+  },
+  "HF": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -98.5707576634785
+  },
+  "N2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -107.49588788341214
+  },
+  "CO": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -111.22458955706387
+  },
+  "F2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -195.96746083720126
+  },
+  "LiF": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -105.36247144106767
+  },
+  "NaH": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -160.30218654395708
+  },
+  "HCl": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -455.1348097026879
+  },
+  "Cl2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -909.1116063077275
+  },
+  "NaCl": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -614.5241755564492
+  },
+  "BeH2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -15.560312316766892
+  },
+  "BH3": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -26.068995738523487
+  },
+  "CH4": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -39.72681011229935
+  },
+  "NH3": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -55.45403854435139
+  },
+  "H2O": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -74.96302316286221
+  },
+  "MgH2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -198.20077268831582
+  },
+  "AlH3": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -240.7284221741122
+  },
+  "SiH4": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -287.9102282076221
+  },
+  "PH3": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -338.63361631946407
+  },
+  "H2S": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -394.311556109671
+  },
+  "CO2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -185.06469572695954
+  },
+  "HCN": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -91.67519078743688
+  },
+  "N2O": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -181.19185582614418
+  },
+  "O3": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -221.28906435848083
+  },
+  "SO2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -540.6018797759014
+  },
+  "BF3": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -318.66192569719396
+  },
+  "CF4": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -429.56747366431136
+  },
+  "H2O2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -148.75736915510566
+  },
+  "C2H2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -75.85280597081353
+  },
+  "C2H4": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -77.07209020662677
+  },
+  "C2H6": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -78.30580841075891
+  },
+  "H2CO": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -112.3537331183951
+  },
+  "CH3OH": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -113.54457807851969
+  },
+  "HCOOH": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -186.20693726943273
+  },
+  "CH3CN": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -130.02862097332786
+  },
+  "C3H6": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -115.66595933028114
+  },
+  "C4H6": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -153.01187913500087
+  },
+  "C4H4O": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -225.74456598087633
+  },
+  "C5H5N": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -243.63748181925146
+  },
+  "urea": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -221.01318047198532
+  },
+  "glycine": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -279.08856218342737
+  },
+  "NH4+": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -55.866800273151156
+  },
+  "H3O+": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -75.32904700782314
+  },
+  "OH-": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -74.05632818927478
+  },
+  "CN-": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -90.93706489769323
+  },
+  "CuH": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -1620.945705377368
+  },
+  "ZnH2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -1758.3056136339196
+  },
+  "GeH4": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -2054.6098034983597
+  },
+  "AsH3": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -2211.6503169002226
+  },
+  "H2Se": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -2375.4347040673106
+  },
+  "HBr": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -2546.0970970902868
+  },
+  "Br2": {
+   "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -5091.063777547901
+  }
+ }
 }

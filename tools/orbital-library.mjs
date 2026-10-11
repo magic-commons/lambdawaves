@@ -384,11 +384,27 @@ function build(e) {
   /* the record opens through the worker's own chem.open with no solver call, and answers what it was made from */
   const before = chemSolverCalls(), lib = JSON.parse(text), t1 = performance.now(), o = chemOpen({ lib, hash, basis }), openMs = performance.now() - t1;
   if (chemSolverCalls() !== before || o.energy !== g.energy || o.C.some((v, i) => v !== g.C[i])) throw new Error(`orbital-library: ${e.id}'s record does not open to its own solve`);
-  const catalogue = { id: e.id, basis, hash, bytes: bytes.length, section: e.section, nAO: n, nocc, caps: record.caps,
+  const catalogue = { id: e.id, basis, hash, bytes: bytes.length, section: e.section, nAO: n, nocc, caps: record.caps, ...contract(row.source, record.oracle, 'MEASURED'),
     ...(e.live ? {} : { molecule: { name: row.name, formula: row.formula, charge, symmetry: sym, source: row.source, ang: row.ang } }) };
   return { text, hash, catalogue, ms, openMs, nAO: n, d, energy: g.energy, delta };
 }
 const pyGroup = (g) => ({ Dooh: 'Dinfh', Coov: 'Cinfv' }[g] || g);
+/* THE CONTRACT (0.5.4 P3 · PLAN §D-1): what a catalogue row says about itself without opening a 1.2 MB record — its oracle, the
+ * class of its geometry and a per-quantity status.  ONE classifier; the source strings it matches are written beside it (row.source,
+ * as the record's stem.geometrySource holds it), and an unmatched source THROWS — never a silent UNKNOWN.  The app writes MEASURED
+ * (its solve against PySCF, δ ≤ 1e-8 Eh) or IMPORTED (PySCF's own number, δ = 0 by construction: C₆₀); never CERTIFIED, which is a
+ * mathematical judgment only a pilot-signed member may carry.  derivatives are UNKNOWN: nothing here computes them.
+ *   experimental        'CCCBDB experimental …' (benzene) · 'NIST CCCBDB experimental …' (TiCl₄)                                    2
+ *   optimised-here      'optimised here, UNVERIFIED against experiment; …'                                                       26
+ *   computed-reference  'wwPDB Chemical Component Dictionary … ideal reference coordinates' · 'https://raw.githubusercontent.com/psi4/…'   9
+ *   draft               'DRAFT GEOMETRY, NOT A MEASUREMENT: …' (C₆₀)                                                              1 */
+const GEOMETRY_CLASSES = [['experimental', /^(NIST )?CCCBDB experimental /], ['optimised-here', /^optimised here, UNVERIFIED/],
+  ['computed-reference', /^(wwPDB Chemical Component Dictionary |https:\/\/raw\.githubusercontent\.com\/psi4\/)/], ['draft', /^DRAFT GEOMETRY/]];
+const contract = (source, o, energy) => {
+  const c = GEOMETRY_CLASSES.find(([, re]) => re.test(source));
+  if (!c) throw new Error(`orbital-library: no geometry class matches the source "${source.slice(0, 80)}…" — add it to GEOMETRY_CLASSES`);
+  return { oracle: { what: o.what, delta: o.delta }, geometry: c[0], status: { energy, geometry: c[0], derivatives: 'UNKNOWN' } };
+};
 /** the key the oracle file holds for the atoms it was computed on: a mismatch means the oracle is stale */
 function atomsKey(atoms) { return geometryKey(atoms).slice(0, 16); }
 /** the live-cost prediction for a molecule lab/molecules.js does not list (lab/molecules.js does the same for its rows) */
@@ -477,7 +493,7 @@ function buildFrontier(e) {
   if (bad.length) throw new Error(`orbital-library: ${e.id} fails validation — ${bad.join('; ')}`);
   const before = chemSolverCalls(), t1 = performance.now(), o = chemOpen({ lib: JSON.parse(text), hash, basis: e.basis }), openMs = performance.now() - t1;
   if (chemSolverCalls() !== before || o.energy !== ground.energy) throw new Error(`orbital-library: ${e.id}'s frontier record does not open to its own energy with 0 solver calls`);
-  const catalogue = { id: e.id, basis: e.basis, hash, bytes: bytes.length, section: e.section, nAO: n, nocc, caps: record.caps, molecule };
+  const catalogue = { id: e.id, basis: e.basis, hash, bytes: bytes.length, section: e.section, nAO: n, nocc, caps: record.caps, ...contract(source, record.oracle, 'IMPORTED'), molecule };
   return { text, hash, catalogue, ms: 0, openMs, nAO: n, d: 0, energy: ground.energy, delta: 0, fieldErr: worst };
 }
 if (FIX) {
@@ -501,8 +517,16 @@ for (const e of ENTRIES) {
   out.push(r); if (!CHECK) { mkdirSync(LAB + 'library', { recursive: true }); writeFileSync(LAB + recordPath(r.hash), r.text); }   // written as it lands
   console.log(`${e.id.padEnd(12)} ${e.section.padEnd(9)} ${r.nAO} AO · d ${r.d} · E ${r.energy.toFixed(12)} (oracle Δ ${r.delta.toExponential(1)}) · ${r.catalogue.bytes} B · caps ${Object.entries(r.catalogue.caps).filter(([, v]) => v).map(([k]) => k).join('+')} · generated in ${(r.ms / 1000).toFixed(2)} s · opened in ${r.openMs.toFixed(1)} ms · ${r.hash.slice(0, 12)}`);
 }
+/* THE LIVE-ONLY ORACLES (0.5.4 P3): a molecule MOLECULES solves live has no row, but PySCF's energy for it is in the fixture, inlined here by id so
+ * the app adds no request on boot (lab/molecules.js reads this file already).  Not rows: tests/molecule-head.test pins 38.  No delta — the live
+ * solve is what it is compared against, where it runs. */
+const SB = json('tests/fixtures/oracles/sto-3g-v1.json'), rowIds = new Set(out.map((r) => r.catalogue.id));
+const oracles = Object.fromEntries(MOLECULES.filter((m) => !rowIds.has(m.id)).map((m) => {
+  if (!SB.library[m.id]) throw new Error(`orbital-library: ${m.id} solves live and has no oracle in sto-3g-v1.json`);
+  return [m.id, { what: `PySCF ${SB.provenance.library.pyscf} RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms`, energy: SB.library[m.id].energy }];
+}));
 const catalogueText = JSON.stringify({ schema: SCHEMA, generator: 'tools/orbital-library.mjs', note: 'the catalogue lab/molecules.js reads; each row\'s record is lab/library/<hash>.json — deployed, never precached (sw.js DATA)',
-  rows: out.map((r) => r.catalogue) }, null, 1) + '\n';
+  rows: out.map((r) => r.catalogue), oracles }, null, 1) + '\n';
 const want = new Set(out.map((r) => recordPath(r.hash).slice('library/'.length)));
 const present = existsSync(LAB + 'library') ? readdirSync(LAB + 'library') : [];
 const sizes = SECTIONS.map((s) => { const rs = out.filter((r) => r.catalogue.section === s); return `${s} ${rs.length} records ${rs.reduce((t, r) => t + r.catalogue.bytes, 0)} B`; }).join(' · ');
