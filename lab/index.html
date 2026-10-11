@@ -126,7 +126,8 @@
     <div id="rackPeekL" aria-hidden="true"></div>
     <div id="sheet" class="glass" hidden>
       <h3>MODEL AND DISPLAY</h3>
-      <p><b>STATE</b> — The register contains the 91 hydrogen basis states with <m>n ≤ 6</m>. Norm, energy, and autocorrelation come from their coefficients.</p>
+      <p><b>STATE</b> — Hydrogen's register holds its 91 basis states with <m>n ≤ 6</m>; norm, energy, and autocorrelation come from their coefficients. While a molecule owns the field, the state is its solve in MOLECULES, not this register.</p>
+      <p><b>STATUS</b> — <b>EXACT</b>: a closed form. <b>NUMERICAL</b>: a solve checked against an oracle, PySCF's energy for the same molecule. <b>UNCHECKED</b>: no oracle. The picture's number says its metric: RMS, worst voxel, or a share of ρmax.</p>
       <p><b>SHADOW</b> — The same coefficients appear as <m>q = √2 Re c</m> and <m>p = √2 Im c</m>. This is another view of the quantum state.</p>
       <p><b>FIELD</b> — The renderer samples ψ on the selected 3D grid and ray-marches it. Grid size and quality change the picture, not the state.</p>
       <p><b>MASKS</b> — Mute and solo affect the reconstruction only. The state keeps every coefficient, and the status shows how much norm is visible.</p>

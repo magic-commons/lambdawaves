@@ -3,8 +3,8 @@
 // molecule with a catalogue row speaks from the row (oracle.delta, geometry, status); a live-only molecule from its own LIVE SOLVE here (the
 // worker's chemGround, the app's road) against the PySCF energy P3 attached (`m.oracle`).  Every string is held to the character budget (≤ 110:
 // three lines at 16 px on a 360-px phone, REVIEW-SONNET-2 #1 d); EVERY numeral in it is parsed back and held to its source — an energy agreement
-// to the measured |ΔE| rounded UP to one figure, a picture number to THE FIELD LAW's constant in tests/helpers/field-law.mjs (PROVISIONAL until
-// PAIR B2's lands), which lab/status.js' FIELD_LAW must equal; no other digit may appear.  A molecule with a fixture oracle is never UNCHECKED
+// to the measured |ΔE| rounded UP to one figure, a picture number to THE FIELD LAW's constant in tests/helpers/field-law.mjs (P7c, PAIR B2's), each
+// member of lab/status.js' FIELD_LAW equal to the member it comes from (the lab cannot import tests/); no other digit may appear.  A molecule with a fixture oracle is never UNCHECKED
 // (water!); the geometry classes come through 2 / 26 / 9 / 1 and 36 heads say "geometry computed, not measured".  Node only.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -31,23 +31,23 @@ function numerals(t, what) {
 }
 function budget(t, what) { strings++; if (t.length > longest.length) longest = t; assert.ok(t.length <= BUDGET, `${what}: ${t.length} > ${BUDGET} characters: "${t}"`); }
 
-/* 1 · THE FIELD LAW: the lab's constant IS the law's, member for member (the integrator's merge check), and each says its metric */
-assert.deepEqual(LAB_LAW, FIELD_LAW, 'lab/status.js FIELD_LAW is not tests/helpers/field-law.mjs — reconcile at the merge');
-assert.deepEqual(Object.keys(FIELD_LAW.hydrogen), ['rms', 'worstVoxel']); assert.deepEqual(Object.keys(FIELD_LAW.density), ['ofRhoMax']);
+/* 1 · THE FIELD LAW: every bound the lab quotes IS the law's member of the same name and metric (the lab keeps only those it quotes) */
+assert.deepEqual(LAB_LAW, { hydrogen: { rms: FIELD_LAW.hydrogen.rms, worst: FIELD_LAW.hydrogen.worst }, density: { worst: FIELD_LAW.density.worst } },
+  'lab/status.js FIELD_LAW is not tests/helpers/field-law.mjs\'s hydrogen.rms, hydrogen.worst, density.worst');
 
 /* 2 · THE VOCABULARY, written once: MEASURED or IMPORTED → NUMERICAL, UNKNOWN or absent → UNCHECKED, a closed form → EXACT; never CERTIFIED */
 assert.deepEqual({ ...STATE_WORD }, { MEASURED: 'NUMERICAL', IMPORTED: 'NUMERICAL', UNKNOWN: 'UNCHECKED' });
 assert.equal(statusOf({}).word, 'UNCHECKED', 'no record and no oracle is UNCHECKED');
 assert.equal(statusOf({ record: { status: { energy: 'UNKNOWN' } } }).word, 'UNCHECKED');
 assert.equal(statusOf({ record: { status: { energy: 'CERTIFIED' } } }).word, 'UNCHECKED', 'a word the map does not know is not promoted');
-assert.equal(statusOf({ sol: { energy: -76.02 }, oracle: null }).line, 'DENSITY · UNCHECKED · picture good to 0.03 % of ρmax', 'a 6-31+G* solve: the catalogue carries no oracle for it');
+assert.equal(statusOf({ sol: { energy: -76.02 }, oracle: null }).line, 'DENSITY · UNCHECKED · picture good to 0.2 % of ρmax', 'a 6-31+G* solve: the catalogue carries no oracle for it');
 assert.equal(statusOf({ owner: 'qho' }), null, 'an owner it cannot speak for gets no line');
 
-/* 3 · HYDROGEN (Q13): EXACT, its picture read from the law in its two metrics; PLAN §B's target with its state named */
+/* 3 · HYDROGEN (Q13): EXACT, its picture read from the law in its two metrics (§J-2: the RMS, not the 99.8 %-of-voxels 2e-5); PLAN §B's target, its state named */
 const h = statusOf({ owner: 'hydrogen', label: '1s+2pz' }), hn = numerals(h.line.slice('1s+2pz'.length), 'hydrogen');   // the label is the state's name
-assert.equal(h.line, '1s+2pz · EXACT · picture good to 2e-5 RMS (worst voxel 2e-4)');
-assert.equal(statusOf({ owner: 'hydrogen' }).line, 'HYDROGEN · EXACT · picture good to 2e-5 RMS (worst voxel 2e-4)');
-figure(hn.rms, FIELD_LAW.hydrogen.rms, 'hydrogen RMS'); figure(hn.worst, FIELD_LAW.hydrogen.worstVoxel, 'hydrogen worst voxel');
+assert.equal(h.line, '1s+2pz · EXACT · picture good to 3e-6 RMS (worst voxel 2e-4)'); assert.equal(FIELD_LAW.hydrogen.preset, '1s+2pz');
+assert.equal(statusOf({ owner: 'hydrogen' }).line, 'HYDROGEN · EXACT · picture good to 3e-6 RMS (worst voxel 2e-4)');
+assert.ok(hn.rms === FIELD_LAW.hydrogen.rms && hn.worst === FIELD_LAW.hydrogen.worst, 'hydrogen: the picture numbers are not the law\'s RMS and worst voxel');
 budget(h.line, 'hydrogen');
 
 /* 4 · THE TABLE */
@@ -66,7 +66,7 @@ for (const m of [...MOLECULES, ...RECORD_ONLY]) {
     budget(s.line, what); const n = numerals(s.line, what);
     assert.ok(s.line.startsWith({ density: 'DENSITY', orbital: 'ORBITAL', diff: 'Δρ', flow: 'FLOW' }[view] + ' · NUMERICAL'), what + ': ' + s.line);
     if (view === 'density') {
-      assert.ok(Math.abs(n.rho / 100 - FIELD_LAW.density.ofRhoMax) <= 1e-12 * FIELD_LAW.density.ofRhoMax, what + ': the picture number is not the law\'s');
+      assert.ok(Math.abs(n.rho / 100 - FIELD_LAW.density.worst) <= 1e-12 * FIELD_LAW.density.worst, what + ': the picture number is not the law\'s worst-voxel bound');
       if (src !== null && row?.status.energy !== 'IMPORTED') figure(n.dE, src, what);
     } else assert.deepEqual(n, {}, what + ': a number on a view that measured none');
     if (view === 'density') live[m.id] = s.line;
@@ -80,10 +80,10 @@ for (const m of [...MOLECULES, ...RECORD_ONLY]) {
 assert.deepEqual(geo, { experimental: 2, 'optimised-here': 26, 'computed-reference': 9, draft: 1 }, 'the geometry classes: ' + JSON.stringify(geo));
 assert.equal(computed, 36, 'the heads that say "geometry computed, not measured"'); assert.equal(imported, 1, 'C₆₀ alone is IMPORTED');
 assert.equal(MOLECULES.length + RECORD_ONLY.length, 91);
-assert.match(live.H2O, /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.03 % of ρmax$/, 'water: ' + live.H2O);
+assert.match(live.H2O, /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.2 % of ρmax$/, 'water: ' + live.H2O);
 assert.ok(statusCalls() > 0);
 
 console.log(`GREEN status: ${strings} strings (91 molecules × 4 views + 91 heads + hydrogen) within ${BUDGET} characters (longest ${longest.length}: "${longest}"); `
   + `every numeral parsed back to its source — ${solved.length} live solves against P3's PySCF energies (worst |ΔE| ${worstLive.toExponential(2)}, ${worstLiveId}), `
-  + `38 rows' oracle.delta, the field law's ${FIELD_LAW.hydrogen.rms.toExponential()} RMS / ${FIELD_LAW.hydrogen.worstVoxel.toExponential()} worst voxel / ${FIELD_LAW.density.ofRhoMax.toExponential()} of ρmax (PROVISIONAL); `
+  + `38 rows' oracle.delta, the field law's hydrogen ${FIELD_LAW.hydrogen.rms.toExponential()} RMS / ${FIELD_LAW.hydrogen.worst.toExponential()} worst voxel and density ${FIELD_LAW.density.worst.toExponential()} worst voxel (tests/helpers/field-law.mjs); `
   + `no molecule with an oracle reads UNCHECKED; geometry 2 / 26 / 9 / 1, ${computed} heads "computed, not measured", C₆₀'s energy PySCF's own. Water: "${live.H2O}"`);

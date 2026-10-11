@@ -112,7 +112,7 @@ export async function boot(dom) {
   const app = {
     dom, ui, device, DEVICES, reg, hNote, clock, appPlay, obs, mat, FIELD_CHROME, rates, energyOf, sturm, labelExpect, settingsStore, useCompactDefaults, PAL_DEF, isPhone, isTablet, FIRST_RUN,
     appleDevice, LOOK_DEFAULTS,
-    hooks: { theme: null, restage: null, setStageColour: null, setStageFollow: null, setStage: null, setGamut: null, setTheme: null, ab: null, slap: null, period: null, keys: null, warning: null },
+    hooks: { theme: null, restage: null, setStageColour: null, setStageFollow: null, setStage: null, setGamut: null, setTheme: null, ab: null, slap: null, period: null, keys: null, warning: null, sheet: null, status: null },   // sheet / status: 0.5.4 P4 (badges.js, informational.js)
     state: { history: null, palette: null, molFormulaScale: 1, atomLabelsScale: 1, space: 'x', playedLast: false, uiHidden: false, pointerHeld: false, metersWall: 0, govVersion: -1, keplerDirty: true, badgesWall: 0,
       applyVisuals: true, modView: null, modHost: null, modWall: 0, tl: null, modExpOn: null, dodge: null, filmCard: null, feedMs: 0, rotMoved: false, rotTicking: false, audioCap: null, modArm: true,
       occludeDirty: true, occludeAt: 0, stageMix: 0.04, stageFollow: true, refSnapshot: null, pendingRef: null, warmTimer: 0, warmIdle: 0, dragging: false, cornerLayoutDirty: true,
@@ -750,7 +750,7 @@ export async function boot(dom) {
 
   /* ── badges (§41) ─────────────────────────────────────────────────────── */
   const badges = createBadges({ dom, accept: () => swClient.accept(), field, reg, mat, clock, domain, quality,
-    getSpace: () => app.state.space, stateReaders, ui });   // N7 seam 6: lab/badges.js
+    getSpace: () => app.state.space, stateReaders, ui }); app.hooks.sheet = badges.sheet;   // N7 seam 6: lab/badges.js
 
   /* ── WAVE 56 · THE INSTALL LAYER'S INTERFACE HALF: lab/sw-client.js (N7 seam 5).  The tab that ASKED reloads; a tab that
      did not ask is told and keeps its work.  It is LW.sw. ── */

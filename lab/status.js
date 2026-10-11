@@ -3,9 +3,9 @@
  * (§J-2); VIEW adds its caveat.  Seats: THE HEAD's last line (word, oracle, geometry), INFORMATIONAL's STATUS row (per VIEW), chem.capability().  Built
  * on a landing, a VIEW change, a FLOW toggle or an owner change and kept, NEVER in a frame (`statusCalls`: the probe's witness).  Beside molecule-state.js,
  * not in it: that module's chemistry loads on the first solve (M8) and hydrogen's line is wanted before one.  tests/status.test.mjs is the table. */
-/** THE FIELD LAW, each constant named by its metric — PROVISIONAL until PAIR B2's lands (tests/status.test.mjs holds it equal to tests/helpers/field-law.mjs;
- *  the integrator reconciles at merge): hydrogen's |ψ_GPU − ψ| RMS and worst voxel; a density's worst voxel |ρ_GPU − ρ_f64| as a share of ρmax */
-export const FIELD_LAW = Object.freeze({ hydrogen: Object.freeze({ rms: 2e-5, worstVoxel: 2e-4 }), density: Object.freeze({ ofRhoMax: 3e-4 }) });
+/** THE FIELD LAW's bounds the picture quotes, named by metric: tests/helpers/field-law.mjs' members (P7c; tests/ is not served — tests/status.test.mjs holds
+ *  them equal).  hydrogen: |Δψ| RMS, worst voxel; density: the worst voxel's |Δρ|/ρ, the one-ulp law's bound for ANY molecule, so ≤ that share of ρmax */
+export const FIELD_LAW = Object.freeze({ hydrogen: Object.freeze({ rms: 3e-6, worst: 2e-4 }), density: Object.freeze({ worst: 2e-3 }) });
 /** the catalogue's words (P3's `status.energy`) → the face's, written ONCE; absent → UNCHECKED; a closed form → EXACT */
 export const STATE_WORD = Object.freeze({ MEASURED: 'NUMERICAL', IMPORTED: 'NUMERICAL', UNKNOWN: 'UNCHECKED' });
 const VIEW = { density: ['DENSITY'], orbital: ['ORBITAL', 'sign and phase are arbitrary'], diff: ['Δρ', 'formed in double precision against its reference'], flow: ['FLOW', 'direction exact, size qualitative'] };
@@ -17,11 +17,11 @@ let calls = 0; export const statusCalls = () => calls;
 export function statusOf({ owner = 'molecule', record = null, sol = null, oracle = null, view = 'density', label = '' } = {}) {
   calls++;
   const join = (...a) => a.filter(Boolean).join(' · '), said = (word, caveat, head, geometry = null) => ({ word, line: join(label || VIEW[view][0], word, caveat), head, geometry });
-  if (owner === 'hydrogen') { const H = FIELD_LAW.hydrogen, p = `picture good to ${up(H.rms)} RMS (worst voxel ${up(H.worstVoxel)})`; label = label || 'HYDROGEN'; return said('EXACT', p, join('EXACT', p)); }
+  if (owner === 'hydrogen') { const H = FIELD_LAW.hydrogen, p = `picture good to ${up(H.rms)} RMS (worst voxel ${up(H.worst)})`; label = label || 'HYDROGEN'; return said('EXACT', p, join('EXACT', p)); }
   if (owner !== 'molecule') return null;
   const o = oracle || (record && record.oracle) || null, st = record && record.status ? record.status.energy : o ? 'MEASURED' : 'UNKNOWN', word = STATE_WORD[st] || 'UNCHECKED';
   const d = o && Number.isFinite(o.delta) ? o.delta : o && sol ? Math.max(Math.abs(sol.energy - o.energy), Math.abs(o.energy) * Number.EPSILON) : NaN, geometry = (record && record.geometry) || null;
   const energy = st === 'IMPORTED' ? 'energy is PySCF\'s own' : Number.isFinite(d) ? `energy agrees with PySCF to ${up(Math.abs(d))} Eh` : '';
-  return said(word, view === 'density' ? join(energy, `picture good to ${+(FIELD_LAW.density.ofRhoMax * 100).toPrecision(1)} % of ρmax`) : VIEW[view][1],
+  return said(word, view === 'density' ? join(energy, `picture good to ${+(FIELD_LAW.density.worst * 100).toPrecision(1)} % of ρmax`) : VIEW[view][1],
     join(word, energy, geometry && geometry !== 'experimental' ? 'geometry computed, not measured' : ''), geometry);
 }
