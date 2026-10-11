@@ -217,7 +217,9 @@ export function createModSeam(app) {
           settingsStore.write({ ...S, audioDevice: id }); } },
       /* WAVE 65 · THE ARM'S OTHER DOOR: pressing the window's PLAY on a disarmed rack asks the host to arm, and the MOD lamp on
          the transport lights.  The host owns the flag, the glow and the persistence; the window only asks. */
-      armed: () => app.state.modArm, arm: (on) => app.sh.setModArm(!!on) }));
+      armed: () => app.state.modArm, arm: (on) => app.sh.setModArm(!!on),
+      /* 0.5.3 M13a · the kit's 3×3 mark on the window's foot: it swaps to the TIMELINE (the button alone; no lego stack, R11) */
+      switchWorkspace: () => { app.state.modView.close(); app.state.tl.open(); } }));
     app.state.modView.root.dataset.mirWindow = 'modulation';    // 0.5.0 A10's hook (the kit's controller sets the rail's, not the pane's)
     applyAccent();                                    // the two angles reach the window as soon as it exists
     app.state.modView.restore(readSettings().modwin);
