@@ -1,3 +1,7 @@
+# λWAVES checkpoint — Claude Sos (Fable 5.1), 2026-10-11 12:30 CDT — **THE ENGINE PLAN (0.6 → 1.0) COMPLETE: `research/release-0.6.0/PLAN-DRAFT-3.md` is the one Josh reads (§A one page, §F eight decisions, defaults starred).** The full chain (censuses → D0 → Sonnet → D1 → Opus@high → D2 → Sonnet junior → D3) and 21 measurements are in that folder; the vault pointer `for CLAUDE/LAMBDAWAVES CLAUDE SOS — THE ENGINE PLAN 0.6→1.0 FOR-JOSH 2026-10-11.md` carries §A + §F. HANDOFF §2's 12:30 block has the summary. NEXT: Josh's word on §F → `PLAN.md`; 0.5.3 resume + 0.5.4 cut first; 0.6.0's own BUILD PLAN by the same method. Baton: Sos. `sos-s0` clean. NO push, NO deploy.
+
+---
+
 # λWAVES checkpoint — Claude Sos (Fable 5.1), 2026-10-11 10:05 CDT — **THE ENGINE PLAN (0.6 → 1.0) nacre round OPEN** in `research/release-0.6.0/` (`NACRE.md`, `census/SYSTEMS.md`, `census/REPRESENTATIONS.md`, `PLAN-DRAFT-0.md` 69 KB with §J census corrections; tip `37b79d3`). STAGE: `REVIEW-SONNET-0` running (Sonnet 5.5 @ high, scratch `~/.config/claude-backup/jobs/8497d75b/tmp/plan-review/`) → DRAFT-1 → `AUDIT-OPUS-1` (Opus 5.5 @ high) → DRAFT-2 → `REVIEW-SONNET-2` (junior) → DRAFT-3 for Josh → `PLAN.md` on his word. If interrupted: relaunch the stage from its file (every reviewer writes its file in full; copy from scratch into the folder). HANDOFF §2's 10:05 block has the summary; the 00:40 block the reading order. Pending unchanged: 0.5.3 resume, 0.5.4 on Josh's word, both rounds' §F. NO push, NO deploy.
 
 ---

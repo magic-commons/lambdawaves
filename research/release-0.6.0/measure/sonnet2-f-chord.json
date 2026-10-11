@@ -1,0 +1,265 @@
+{
+ "tag": "DERIVED-HERE (arithmetic; frequency convention f = dE*RATE/2pi, RATE in a.u. per second: 3000 gives 72.6 fs/s, and 1s-2p = 179.05 Hz matches the plan's 179.049 Hz)",
+ "RATE": 3000,
+ "beats15": [
+  {
+   "pair": "5-6",
+   "Hz": 2.918
+  },
+  {
+   "pair": "4-5",
+   "Hz": 5.371
+  },
+  {
+   "pair": "4-6",
+   "Hz": 8.289
+  },
+  {
+   "pair": "3-4",
+   "Hz": 11.605
+  },
+  {
+   "pair": "3-5",
+   "Hz": 16.977
+  },
+  {
+   "pair": "3-6",
+   "Hz": 19.894
+  },
+  {
+   "pair": "2-3",
+   "Hz": 33.157
+  },
+  {
+   "pair": "2-4",
+   "Hz": 44.762
+  },
+  {
+   "pair": "2-5",
+   "Hz": 50.134
+  },
+  {
+   "pair": "2-6",
+   "Hz": 53.052
+  },
+  {
+   "pair": "1-2",
+   "Hz": 179.049
+  },
+  {
+   "pair": "1-3",
+   "Hz": 212.207
+  },
+  {
+   "pair": "1-4",
+   "Hz": 223.812
+  },
+  {
+   "pair": "1-5",
+   "Hz": 229.183
+  },
+  {
+   "pair": "1-6",
+   "Hz": 232.101
+  }
+ ],
+ "levels6": [
+  {
+   "n": 1,
+   "Hz": 238.732
+  },
+  {
+   "n": 2,
+   "Hz": 59.683
+  },
+  {
+   "n": 3,
+   "Hz": 26.526
+  },
+  {
+   "n": 4,
+   "Hz": 14.921
+  },
+  {
+   "n": 5,
+   "Hz": 9.549
+  },
+  {
+   "n": 6,
+   "Hz": 6.631
+  }
+ ],
+ "min": 2.918,
+ "max": 232.101,
+ "spanOctaves": 6.31,
+ "counts": {
+  "below3Hz": 1,
+  "below20Hz": 6,
+  "below50Hz": 8,
+  "below100Hz": 10,
+  "below200Hz": 11,
+  "above200Hz": 4
+ },
+ "fractionBelow20Hz": 0.4,
+ "fractionBelow200Hz": 0.733,
+ "above3Hz_round2_claim_13_of_15": 14,
+ "levelsBelow20": 3,
+ "levelsAbove200": 1,
+ "folded220": [
+  {
+   "pair": "5-6",
+   "f": 2.92,
+   "fold220": 373.5,
+   "note": "F#4+16c"
+  },
+  {
+   "pair": "4-5",
+   "f": 5.37,
+   "fold220": 343.8,
+   "note": "F4-27c"
+  },
+  {
+   "pair": "4-6",
+   "f": 8.29,
+   "fold220": 265.3,
+   "note": "C4+24c"
+  },
+  {
+   "pair": "3-4",
+   "f": 11.61,
+   "fold220": 371.4,
+   "note": "F#4+6c"
+  },
+  {
+   "pair": "3-5",
+   "f": 16.98,
+   "fold220": 271.6,
+   "note": "C#4-35c"
+  },
+  {
+   "pair": "3-6",
+   "f": 19.89,
+   "fold220": 318.3,
+   "note": "D#4+40c"
+  },
+  {
+   "pair": "2-3",
+   "f": 33.16,
+   "fold220": 265.3,
+   "note": "C4+24c"
+  },
+  {
+   "pair": "2-4",
+   "f": 44.76,
+   "fold220": 358.1,
+   "note": "F4+43c"
+  },
+  {
+   "pair": "2-5",
+   "f": 50.13,
+   "fold220": 401.1,
+   "note": "G4+40c"
+  },
+  {
+   "pair": "2-6",
+   "f": 53.05,
+   "fold220": 424.4,
+   "note": "G#4+38c"
+  },
+  {
+   "pair": "1-2",
+   "f": 179.05,
+   "fold220": 358.1,
+   "note": "F4+43c"
+  },
+  {
+   "pair": "1-3",
+   "f": 212.21,
+   "fold220": 424.4,
+   "note": "G#4+38c"
+  },
+  {
+   "pair": "1-4",
+   "f": 223.81,
+   "fold220": 223.8,
+   "note": "A3+30c"
+  },
+  {
+   "pair": "1-5",
+   "f": 229.18,
+   "fold220": 229.2,
+   "note": "A#3-29c"
+  },
+  {
+   "pair": "1-6",
+   "f": 232.1,
+   "fold220": 232.1,
+   "note": "A#3-7c"
+  }
+ ],
+ "foldedLevels": [
+  {
+   "n": 1,
+   "Hz": 238.732,
+   "fold220": 238.73,
+   "note": "A#3+41c"
+  },
+  {
+   "n": 2,
+   "Hz": 59.683,
+   "fold220": 238.73,
+   "note": "A#3+41c"
+  },
+  {
+   "n": 3,
+   "Hz": 26.526,
+   "fold220": 424.41,
+   "note": "G#4+38c"
+  },
+  {
+   "n": 4,
+   "Hz": 14.921,
+   "fold220": 238.73,
+   "note": "A#3+41c"
+  },
+  {
+   "n": 5,
+   "Hz": 9.549,
+   "fold220": 305.58,
+   "note": "D#4-31c"
+  },
+  {
+   "n": 6,
+   "Hz": 6.631,
+   "fold220": 424.41,
+   "note": "G#4+38c"
+  }
+ ],
+ "levelPitchClasses": {
+  "238.7": [
+   1,
+   2,
+   4
+  ],
+  "424.4": [
+   3,
+   6
+  ],
+  "305.6": [
+   5
+  ]
+ },
+ "distinctPitchClassNames": [
+  "F#+c",
+  "F-c",
+  "C+c",
+  "C#-c",
+  "D#+c",
+  "F+c",
+  "G+c",
+  "G#+c",
+  "A+c",
+  "A#-c"
+ ],
+ "note": "folding keeps ratios mod 2, so the chord is the same chord an octave-equivalence class; it is a CREATIVE map and must be captioned so"
+}

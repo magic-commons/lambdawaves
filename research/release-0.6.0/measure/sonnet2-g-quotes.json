@@ -1,0 +1,711 @@
+[
+ {
+  "line": 9,
+  "raw": "an ultrathink planning on the ultimate engine upgrade, feature additions, representations and diverse collections of quantum systems/situati",
+  "frags": [
+   {
+    "fr": "an ultrathink planning on the ultimate engine upgrade, feature additio",
+    "where": "CLAUDE YAN — NACRE RESEARCH RO/NACRE.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 11,
+  "raw": "*; S:267 *",
+  "frags": [
+   {
+    "fr": "*; S:267 *",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 25,
+  "raw": "The knob currently reads HOMO-1, HOMO-2 … let it read like 1a1, 1b2",
+  "frags": [
+   {
+    "fr": "The knob currently reads HOMO-1, HOMO-2",
+    "where": "survey/CHAT-AND-ASKS.md"
+   },
+   {
+    "fr": "let it read like 1a1, 1b2",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 26,
+  "raw": "repeats every 1.094 ps",
+  "frags": [
+   {
+    "fr": "repeats every 1.094 ps",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 29,
+  "raw": "my proposed organization, not … milestones Claude has already approved",
+  "frags": [
+   {
+    "fr": "my proposed organization, not",
+    "where": "survey/CHAT-AND-ASKS.md"
+   },
+   {
+    "fr": "milestones Claude has already approved",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 30,
+  "raw": "; names one or two words, no ",
+  "frags": [
+   {
+    "fr": "; names one or two words, no",
+    "where": "CLAUDE YAN — NACRE RESEARCH RO/DRAFT-3.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 37,
+  "raw": "repeats every 1.094 ps",
+  "frags": [
+   {
+    "fr": "repeats every 1.094 ps",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 37,
+  "raw": "this is what decoherence looks like",
+  "frags": [
+   {
+    "fr": "this is what decoherence looks like",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 38,
+  "raw": "maybe a bucky-ball as our next milestone",
+  "frags": [
+   {
+    "fr": "maybe a bucky-ball as our next milestone",
+    "where": "release-0.6.0/NACRE.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 38,
+  "raw": "symmetry: D₆h (still) · Cs while the RING plays",
+  "frags": [
+   {
+    "fr": "symmetry: D₆h (still) · Cs while the RING plays",
+    "where": "CLAUDE YAN — NACRE RESEARCH 0./DRAFT-3.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 39,
+  "raw": "two states share this density; their energies differ by 0.0725 Eh",
+  "frags": [
+   {
+    "fr": "two states share this density; their energies differ by 0.0725 Eh",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 43,
+  "raw": "ball and joints",
+  "frags": [
+   {
+    "fr": "ball and joints",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 45,
+  "raw": "molecule-as-lattice",
+  "frags": [
+   {
+    "fr": "molecule-as-lattice",
+    "where": "census/SYSTEMS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 55,
+  "raw": "ultimate engine upgrade",
+  "frags": [
+   {
+    "fr": "ultimate engine upgrade",
+    "where": "release-0.6.0/NACRE.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 57,
+  "raw": "a discovery in one could be relevant, perhaps computationally for another",
+  "frags": [
+   {
+    "fr": "a discovery in one could be relevant, perhaps computationally for anot",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 64,
+  "raw": "third basis",
+  "frags": [
+   {
+    "fr": "third basis",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 78,
+  "raw": "All meters come from the coefficients",
+  "frags": [
+   {
+    "fr": "All meters come from the coefficients",
+    "where": "CLAUDE YAN — NACRE RESEARCH RO/DRAFT-3.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 88,
+  "raw": "radial function × Y_lm",
+  "frags": [
+   {
+    "fr": "radial function × Y_lm",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 99,
+  "raw": "molecule-as-lattice",
+  "frags": [
+   {
+    "fr": "molecule-as-lattice",
+    "where": "census/SYSTEMS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 101,
+  "raw": "more than 256 shells",
+  "frags": [
+   {
+    "fr": "more than 256 shells",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 112,
+  "raw": "10⁻⁶ on the texel",
+  "frags": [
+   {
+    "fr": "10⁻⁶ on the texel",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 114,
+  "raw": "outside the lock, gated by X",
+  "frags": [
+   {
+    "fr": "outside the lock, gated by X",
+    "where": "CLAUDE YAN — NACRE RESEARCH RO/DRAFT-3.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 115,
+  "raw": "persists as …",
+  "frags": [
+   {
+    "fr": "persists as",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 118,
+  "raw": "the iPad report re-run, or UNVERIFIED",
+  "frags": [
+   {
+    "fr": "the iPad report re-run, or UNVERIFIED",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 120,
+  "raw": "don't over-verify",
+  "frags": [
+   {
+    "fr": "don't over-verify",
+    "where": "release-0.6.0/NACRE.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 172,
+  "raw": "signed-root",
+  "frags": [
+   {
+    "fr": "signed-root",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 175,
+  "raw": "the propagator disables RATE/K_z/DEFECT/A⇄B",
+  "frags": [
+   {
+    "fr": "the propagator disables RATE/K_z/DEFECT/A⇄B",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 177,
+  "raw": "in the two-level limit",
+  "frags": [
+   {
+    "fr": "in the two-level limit",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 184,
+  "raw": "free packet",
+  "frags": [
+   {
+    "fr": "free packet",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 186,
+  "raw": "ionise by a knob",
+  "frags": [
+   {
+    "fr": "ionise by a knob",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 186,
+  "raw": "rotor-like",
+  "frags": [
+   {
+    "fr": "rotor-like",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 207,
+  "raw": "the quasicrystal",
+  "frags": [
+   {
+    "fr": "the quasicrystal",
+    "where": "release-0.6.0/NACRE.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 224,
+  "raw": "run the lock ×2 + the fixtures on this machine",
+  "frags": [
+   {
+    "fr": "run the lock ×2 + the fixtures on this machine",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 229,
+  "raw": "merged/committed worktrees/Claude sessions that build into it",
+  "frags": [
+   {
+    "fr": "merged/committed worktrees/Claude sessions that build into it",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 234,
+  "raw": "benchmarks first",
+  "frags": [
+   {
+    "fr": "benchmarks first",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 246,
+  "raw": "repeats exactly every 1.094 ps",
+  "frags": [
+   {
+    "fr": "repeats exactly every 1.094 ps",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 249,
+  "raw": "79.7 % of the polarizability",
+  "frags": [
+   {
+    "fr": "79.7 % of the polarizability",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 250,
+  "raw": "the beats fade, the shells stay",
+  "frags": [
+   {
+    "fr": "the beats fade, the shells stay",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 253,
+  "raw": "equalizer: <preset>",
+  "frags": [
+   {
+    "fr": "equalizer: <preset>",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 258,
+  "raw": "maybe a bucky-ball as our next milestone (Remember how Benzene was the weird un-accomplish-able goal? We can do this!)",
+  "frags": [
+   {
+    "fr": "maybe a bucky-ball as our next milestone (Remember how Benzene was the",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 262,
+  "raw": "fix FLOW continuity",
+  "frags": [
+   {
+    "fr": "fix FLOW continuity",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 266,
+  "raw": "publication prerequisite",
+  "frags": [
+   {
+    "fr": "publication prerequisite",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 274,
+  "raw": "sounds at … Hz at this RATE",
+  "frags": [
+   {
+    "fr": "sounds at",
+    "where": "CLAUDE YAN — NACRE RESEARCH 0./DRAFT-3.md"
+   },
+   {
+    "fr": "Hz at this RATE",
+    "where": "CLAUDE YAN — NACRE RESEARCH 0./DRAFT-3.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 277,
+  "raw": "track missing",
+  "frags": [
+   {
+    "fr": "track missing",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 287,
+  "raw": "not harmonic here",
+  "frags": [
+   {
+    "fr": "not harmonic here",
+    "where": "CLAUDE YAN — NACRE RESEARCH RO/DRAFT-3.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 288,
+  "raw": "ball and joints",
+  "frags": [
+   {
+    "fr": "ball and joints",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 308,
+  "raw": "do not attempt to compete with Octopus/ChronusQ/RMT",
+  "frags": [
+   {
+    "fr": "do not attempt to compete with Octopus/ChronusQ/RMT",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 308,
+  "raw": "we should definitely go forward with it",
+  "frags": [
+   {
+    "fr": "we should definitely go forward with it",
+    "where": "release-0.6.0/NACRE.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 309,
+  "raw": "DFT-certified",
+  "frags": [
+   {
+    "fr": "DFT-certified",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 320,
+  "raw": "the propagator disables RATE/K_z/DEFECT/A⇄B",
+  "frags": [
+   {
+    "fr": "the propagator disables RATE/K_z/DEFECT/A⇄B",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 336,
+  "raw": " for a card or a record; ",
+  "frags": [
+   {
+    "fr": "for a card or a record;",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 337,
+  "raw": " if it returns; ",
+  "frags": [
+   {
+    "fr": "if it returns;",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 337,
+  "raw": " for a 256-vertex patch; ",
+  "frags": [
+   {
+    "fr": "for a 256-vertex patch;",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 371,
+  "raw": "third basis",
+  "frags": [
+   {
+    "fr": "third basis",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 371,
+  "raw": "doesn't guarantee a speedup",
+  "frags": [
+   {
+    "fr": "doesn't guarantee a speedup",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 371,
+  "raw": "a research proposal",
+  "frags": [
+   {
+    "fr": "a research proposal",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 381,
+  "raw": "maybe a bucky-ball as our next milestone (Remember how Benzene was the weird un-accomplish-able goal? We can do this!)",
+  "frags": [
+   {
+    "fr": "maybe a bucky-ball as our next milestone (Remember how Benzene was the",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 390,
+  "raw": "H2 and Electrostatics should go",
+  "frags": [
+   {
+    "fr": "H2 and Electrostatics should go",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 392,
+  "raw": "Two Levels",
+  "frags": [
+   {
+    "fr": "Two Levels",
+    "where": null
+   }
+  ],
+  "verbatim": false
+ },
+ {
+  "line": 393,
+  "raw": "third basis",
+  "frags": [
+   {
+    "fr": "third basis",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 396,
+  "raw": "Wave indexing the presolved orbitals … dynamic waves with true electrostatics like a higher level QHO but based on taylor 3D shells.",
+  "frags": [
+   {
+    "fr": "Wave indexing the presolved orbitals",
+    "where": "survey/CHAT-AND-ASKS.md"
+   },
+   {
+    "fr": "dynamic waves with true electrostatics like a higher level QHO but bas",
+    "where": "survey/CHAT-AND-ASKS.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 415,
+  "raw": "Wow, let's wrap up here. We will continue in this account session so don't worry about Yan but we will definitely compact to get ready for a",
+  "frags": [
+   {
+    "fr": "Wow, let's wrap up here. We will continue in this account session so d",
+    "where": "CLAUDE YAN — NACRE RESEARCH RO/NACRE.md"
+   }
+  ],
+  "verbatim": true
+ },
+ {
+  "line": 417,
+  "raw": "Good morning Claude! Let's continue where we left off",
+  "frags": [
+   {
+    "fr": "Good morning Claude! Let's continue where we left off",
+    "where": "release-0.6.0/NACRE.md"
+   }
+  ],
+  "verbatim": true
+ }
+]
