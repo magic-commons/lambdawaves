@@ -13,8 +13,9 @@
  *
  * THE RULES, which reproduce exactly what the two windows did before:
  *   · tdhf           rank 0 — CHEMISTRY's real-time run owns the field while it is propagating.
- *   · orbital-packet rank 1 — the ORBITALS register owns it while REGISTER ON is up and no run is live.
- *   · ground         rank 2 — otherwise the card's own view (density, one orbital, or the difference).
+ *   · states         rank 1 — the REGISTER's many-electron (TD-CIS) mode, while it claims the field.
+ *   · orbital-packet rank 2 — the ORBITALS register owns it while REGISTER ON is up and no run is live.
+ *   · ground         rank 3 — otherwise the card's own view (density, one orbital, or the difference).
  * Exactly one model is SELECTED: the claiming model of lowest rank, or none when nobody claims.  A product from
  * any other model is DROPPED AND COUNTED rather than silently overwritten a millisecond later.
  *
@@ -22,7 +23,7 @@
  * frame would never reach the volume anyway; it REPLACES the first and is counted (`replaced`), which is how a
  * producer that has started pushing twice a frame announces itself instead of hiding.
  *
- * THE STAMP.  Every product carries the molecule's basis+geometry hash and the producer's solve sequence.  A
+ * THE STAMP.  Every product carries the molecule's basis hash and the producer's solve sequence; geometry rides the sequence.  A
  * product stamped for a molecule the session has left behind, or for an older solve of the same one, cannot
  * paint — which is the guard a worker reply arriving late needs, independently of the producer's own seq check.
  *

@@ -95,7 +95,7 @@ and the code disagree, the code is right; please say so in an issue.
   and uses the GPU. Source: `test.sh`.
 - After any edit under `lab/`, run `node tests/pwa.test.mjs --write`: it re-stamps the service worker's precache
   hashes in `lab/sw.js`, or the pwa suite fails. Source: AI_POLICY.md, RELEASING.md.
-- The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines:
+- The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 860 values with `--query gastab=0`, 1004 with the s4a fixture; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
   `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --fixture
   research/optimization-2026-09-24/digest-lock-base-w125.json` against a tree served by `tools/gate/server.py`.
   Source: `tools/perf/digest-lock.mjs` (header).

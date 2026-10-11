@@ -1,7 +1,7 @@
 import { installWakeLock } from './mir/core/wakelock.js';   // 0.5.0 C6b: the screen stays on while THE play plays
 import { reworkNative } from './native-ui.js';
 import { firstRunMaterial, firstRunQuality } from './first-run.js';   // W125: the first-run material follows the device · PACE P2: so does the first-run quality, and a saved one keeps within the device
-/* rack.js — the instrument: the windows, the work-tier router, the four clocks, the transport.
+/* rack.js — the instrument: the windows, the work-tier router, one clock, the transport.
  *
  *   STATE → EVOLUTION → OBSERVABLE FIELD → OBSERVER → RENDER        (§52)
  *
