@@ -11,6 +11,70 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.5.4-alpha` — 2026-10-11
+
+Commit `9670adb` · no new waves · 51 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `83fe9d0` 2026-10-11 — P0: truth fixes in place + CLAIMS.md (11 rows, listed not changed)
+- `517c05b` 2026-10-11 — CHANGELOG for v0.5.3-alpha
+- `c7ac371` 2026-10-11 — merge P0 (83fe9d0): truth in place
+- `4e710cf` 2026-10-11 — HANDOFF §2 16:05 + checkpoint: v0.5.3-alpha cut locally; 0.5.4 building (P0 merged, P3 running)
+- `0591605` 2026-10-11 — 0.5.4 Contract Layer: STEP 2 briefs
+- `908dec4` 2026-10-11 — 0.5.4 Contract Layer: CHANGES-0.5.4.md opened (P0)
+- `4eccda8` 2026-10-11 — 0.5.4 Contract Layer: BRIEF-PAIR-C (P10 oracles described + node suites → P11 the lock's scope +…
+- `53b81f4` 2026-10-11 — P3: ORACLE + STATUS IN THE CATALOGUE
+- `7200dd7` 2026-10-11 — P3: library.test - a case per rule, the 2 / 26 / 9 / 1 count, water in oracles
+- `b97b8a4` 2026-10-11 — P1: identityOf
+- `70c27fe` 2026-10-11 — P1: sol.identity beside sol.key at chemview's solve landing (once per landing, never in a…
+- `ecb4e0d` 2026-10-11 — P1: E_IDENTITY joins CODES for one case
+- `0501c72` 2026-10-11 — P1: CONVENTIONS, one frozen object in molecule-state.js
+- `aef09dc` 2026-10-11 — P6: the worker refuses
+- `85d1f6d` 2026-10-11 — P1: P1-BUILD.md
+- `fb3edfb` 2026-10-11 — P7a: the ORBITAL packet accumulates in f64, casts once
+- `ba6bcc7` 2026-10-11 — merge P1 (85d1f6d): identityOf (sha-256 over atomsKey · basis hash · charge · multiplicity ·…
+- `a90355d` 2026-10-11 — merge P3 (7200dd7)
+- `2dcff19` 2026-10-11 — USAGE PAUSE checkpoint 14:15: HANDOFF §2 block + checkpoint heads (0.5.3 cut; 0.5.4 P0 P1…
+- `b238e5e` 2026-10-11 — checkpoint 14:25: P3's checks passed after the pause (--check in step, node gate 0, new-project…
+- `7fa47e0` 2026-10-11 — P3-BUILD.md (from the paused builder's notes + the merged tree's checks) and CHANGES-0.5.4 lines…
+- `81c07a4` 2026-10-11 — HANDOFF §2 17:20 resume block + checkpoint head: PAIR B2 ∥ P4 building
+- `cb123df` 2026-10-11 — P7b: T_MAX declared in lab/clock.js (R9: nothing clamps)
+- `a2ddd7a` 2026-10-11 — P4: statusOf (lab/status.js) and chem.capability()
+- `0b0a8f6` 2026-10-11 — P7c: the standing field law (PLAN.md §J-2 applied)
+- `88aa47a` 2026-10-11 — P4: THE HEAD's fifth line
+- `31328bf` 2026-10-11 — P7d: the view-invariance gate
+- `39dddb4` 2026-10-11 — PAIR-B-BUILD: P6, P7a-d written (0.5.4 Contract Layer, PAIR B + B2)
+- `fd1c10d` 2026-10-11 — merge PAIR B2 (39dddb4; PAIR B fb3edfb → P7b/c/d + PAIR-B-BUILD): worker refuses after its first…
+- `e3ae891` 2026-10-11 — P4: the STATUS row in INFORMATIONAL (the kit's wide readout, per VIEW), the MODEL sheet defines…
+- `7fae3dd` 2026-10-11 — P10: the oracles described (tests/fixtures/oracles/README.md) + three node suites (huge-time…
+- `23356f0` 2026-10-11 — P4: the no-frame-call probe and the hit-probe (tools/status-probe.mjs), the PNG pair, chem's…
+- `3676c2a` 2026-10-11 — P4: P4-BUILD.md
+- `4c6e89a` 2026-10-11 — merge P4 (3676c2a): one pure statusOf() in lab/status.js (EXACT · NUMERICAL · UNCHECKED + the…
+- `1df7681` 2026-10-11 — PLAN §J-3 stamp corrected to the clock (18:10)
+- `c610541` 2026-10-11 — BRIEF-P-V re-aimed to §J-2's addendum and §J-3 (stage-text's caption pins re-aimed; P5 not…
+- `1c36089` 2026-10-11 — P11: the lock's scope written (R7) at the top of digest-lock.mjs; the device report gains a…
+- `2c2fd52` 2026-10-11 — PAIR C BUILD note: P10 + P11 (README sources, three suites' readings, FINGERPRINT, lock x2,…
+- `f0673c5` 2026-10-11 — P4c: the export caption gains its STATE word (PLAN §J-3)
+- `3de9bd8` 2026-10-11 — P4c: stage-text's two caption pins re-aimed to the suffixed strings (§J-3)
+- `65efb18` 2026-10-11 — merge PAIR C (2c2fd52): oracles README, three node suites (huge-time phase 1e-13; q-band anchor…
+- `cc2d68c` 2026-10-11 — P4c: BUILD — P4-BUILD §2 (c′), the export caption's seat, strings, suites and lock
+- `59fe469` 2026-10-11 — merge P4c (cc2d68c): the export caption carries the STATE word (one caption() in windows/film.js…
+- `97254b7` 2026-10-11 — D.0 briefs: the SITUATION-FIXTURE LOCK (tools/, new fixture baked once) and the tools/perf base…
+- `bc1ce6a` 2026-10-11 — Sol's PRACTICAL UPGRADE SYNTHESIS judged (SOL-SYNTHESIS-JUDGEMENT.md): rows 1–3 fold into…
+- `a33cb5b` 2026-10-11 — stamps to the clock (19:30)
+- `794e100` 2026-10-11 — Josh 19:35 'Yes to all'
+- `2a25ef9` 2026-10-11 — P-V: 0.5.4 Contract Layer verification report
+- `f0c8e36` 2026-10-11 — merge P-V (2a25ef9): P-V-REPORT.md
+- `da9d260` 2026-10-11 — 0.5.4 fix round after P-V: E1–E9 applied (CLAUDE.md five-line head, STATUS row, captioned STATE…
+- `9670adb` 2026-10-11 — 0.5.4-alpha Contract Layer: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.5.3-alpha` — 2026-10-11
 
 Commit `aa83042` · no new waves · 93 commits.
