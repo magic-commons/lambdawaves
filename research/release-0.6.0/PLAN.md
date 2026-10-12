@@ -363,6 +363,8 @@ of Sol's, the pilot's or OpenAI's run; `lab/` untouched; no push, deploy or tag.
 
 - **2026-10-11 19:30 (the integrator):** Sol's `PRACTICAL UPGRADE SYNTHESIS — 2026-10-11` (read-only, against `main` 28fe445) judged in `SOL-SYNTHESIS-JUDGEMENT.md`: her items 1–3 are the factor road (0.6.1) and honest flow (0.6.2) — one row candidate (the packet's FLOW by one factor, with her sign gates) and four sentences owed to those briefs; item 4 (a wavefunction IMPORT) is new — a candidate for 0.7.4's round and a §F decision for Josh (★ yes, one format, snapshot-only); item 5 is 0.7.0 Vibrate (planned) and a DeepH residual backend (not taken). The ladder's order does not move.
 
+- **Josh, 2026-10-11 19:35, on the judgement: "Yes to all. I think this would be fun."** RULED: the import row is IN — one format, snapshot-only, a candidate for 0.7.4 Shelves' nacre round (★ stands); the packet's FLOW by one factor is a row candidate for 0.6.1; the four sentences and the fade law go to 0.6.1 / 0.6.2 / 0.7.0's briefs when those rounds open. Nothing moves before 0.6.0.
+
 ## J · RULINGS (Josh's words verbatim, and what they fix)
 > Hmm, I guess whatever implimentation is easier to layer in the architecture. I defer to your judgement. So is this plan ready for the long haul? Safe to compact? I'll stay in this session since we have 5hr usage left so we'll continue where we left off
 > — 2026-10-11, ≈ 12:40 CDT

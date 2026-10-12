@@ -21,3 +21,5 @@ equalizer is UI + a kernel on the existing tile and carries the lowest engine ri
 
 **Laws kept:** nothing of Sol's is run; the vault's `for CODEX/` is read-only; the acceptance fixtures she proposes are written by us, in `tests/`, in our idiom,
 when the row is built. Her note says itself that none of its benchmarks ran — every number above that is ours was measured in this tree.
+
+**Josh, 2026-10-11 19:35: "Yes to all. I think this would be fun."** — the §F decision is taken (import: yes, one format, snapshot-only, 0.7.4's round); every TAKEN line above stands as written.
