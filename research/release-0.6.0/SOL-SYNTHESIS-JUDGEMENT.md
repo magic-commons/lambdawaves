@@ -1,4 +1,4 @@
-# Sol's PRACTICAL UPGRADE SYNTHESIS (2026-10-11) — judged against THE ENGINE PLAN (the integrator, 2026-10-11 18:55)
+# Sol's PRACTICAL UPGRADE SYNTHESIS (2026-10-11) — judged against THE ENGINE PLAN (the integrator, 2026-10-11 19:30)
 
 Josh: "Check out Sol's work! Here's her suggestion to the build for you to judge but only take as a suggestion; I defer to your lead." The file
 is `~/Documents/OBSIDIAN/LAMB of WAVES/for CODEX/PRACTICAL UPGRADE SYNTHESIS — 2026-10-11.md` (read-only; nothing of Sol's is run). It reads
