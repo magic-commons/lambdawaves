@@ -1,4 +1,4 @@
-# 0.6.0 "Beat Equalizer" — THE BUILD PLAN, pre-draft (Fable 5.1 / Claude Sos, 2026-10-11 21:05 CDT; the nacre method's DRAFT 0)
+# 0.6.0 "Beat Equalizer" — THE BUILD PLAN, pre-draft (Fable 5.1 / Claude Sos, 2026-10-11 20:27 CDT; the nacre method's DRAFT 0)
 
 The first cut of THE ENGINE PLAN (`../PLAN.md` D.1; the method `../NACRE.md`; the build-plan precedent `../../release-0.5.4/PLAN.md`). Every seat below was
 re-found by words on `sos-s0` at v0.5.4-alpha (`49b167d`; 28,101 `lab/` lines; the seat census of 20:50, read-only). Nothing here is built. Josh's words that
