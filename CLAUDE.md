@@ -45,7 +45,10 @@ gate, and a molecule past the live cap opens only from its record (DOWNLOAD,
 never DISABLED). Below the header and the rows ‹ MOLECULE ›, BASIS · ORBITAL (VALENCE takes the dial's seat under DENSITY, 0.4.0 S4c) and VIEW · the fold's chevron (five lines at 300 px and at phone width, 0.5.3 M8)
 MOLECULES keeps KICK / RUN / TDA / the spectra in the `.mol-more` fold: open
 on a desktop, folded on a phone or tablet, its state in the card's WORKSPACE
-record (`more`); its `Aa` stays visible with HELP off.
+record (`more`); its `Aa` stays visible with HELP off. THE CHEM WORKER REFUSES (0.5.4 P6, `lab/worker-pool.js`): once it has answered, an error or a
+timeout is `{ error, refused }` ("pick the molecule again"), never re-run on the frame thread; it respawns once, then refuses; only a worker that never
+answered (no module Worker, a construction throw) keeps the frame-thread road (`tests/worker-pool.test.mjs`, `worker-refusal`). A solve's `sol.identity`
+(`molecule-state.js` `identityOf`, P1) is DATA, never a stamp — `sol.hash` stays the basis hash.
 
 THE PAINT GESTURE (`lab/paint-stroke.js`) is one law for the ORBITAL and STATES
 ladders and SPECTRUM's state grid: LEFT click adds one, LEFT drag adds every
@@ -95,8 +98,9 @@ never a pointer target, never in the occlusion mask. THE FADE: a HAND's preset (
 returns, and the kit's exit is the fade — `WINDING · $1e_{1g}$ (a) + (b)`, the names from `lab/names.js`; the press threads
 `{ hand: true }`, so a restore, an undo, a project or link open never announces (`tests/stage-text.browser-test.mjs`). THE HEAD (0.5.1 D2): a HAND pick of a molecule — the MOLECULE dropdown,
 MOLECULES ON, a notebook `lw:molecule=` link (chemview's `hand`) — shows its head in THE FADE's seat once that molecule's solve
-lands: four lines from `latex-state.js` `moleculeHead` (formula and name; RHF/basis and E; nocc of nAO and the point group, "—"
-where the record has none; the HOMO's name and the HOMO–LUMO gap), every number the record's `stem` or the live solve's through
+lands: five lines from `latex-state.js` `moleculeHead` (formula and name; RHF/basis and E; nocc of nAO and the point group, "—"
+where the record has none; the HOMO's name and the HOMO–LUMO gap; 0.5.4 P4's molecule-level STATUS, `lab/status.js` `head`: the
+STATE word, the agreement with PySCF's energy and, on the 36, "geometry computed, not measured"), every number the record's `stem` or the live solve's through
 `stemOf`, the composition `tools/orbital-library.mjs` writes into every stem — never the blurb, never CURATED_IE
 (`tests/molecule-head.test.mjs`). It is held (`announce(md, 0)`) until Escape, a press on the picture after 2.5 s, or the next
 pick, and a restore, an undo, a project, link or demo open never shows it (`__LW.head.shown`;
@@ -105,11 +109,15 @@ the kit's `infoActions` row; `lab/key-table.js` carries a row's `up`) holds the 
 row governs the ATOM LABELS (PREFERENCE `atomLabels` / `atomLabelsSize`, on by default, split from the formula's at 0.5.3 M9), λWAVES' own letters (R6-L; kit labels are D1b, Group II): each MOLECULES nucleus marked
 with its element symbol at its projected position (`lab/shell/stage-words.js` `atomLabels` through `field.js` `toScreen`, written only when the camera, molecule, size or canvas changed),
 white under `mix-blend-mode: difference` so they invert whatever is beneath them. An absent `atomLabels` / `atomLabelsSize`
-takes the stored `molFormula` / `molFormulaSize` once (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); the next save writes all four. The type scale is the notebook's three sizes: the formula
+takes the stored `molFormula` / `molFormulaSize` once (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); the next save writes all four. Its third row is STATUS (0.5.4 P4; no key, no window, no badge): the kit's wide readout of what the stage may claim, from
+`lab/status.js` `statusOf` (pure) — EXACT · NUMERICAL · UNCHECKED and the picture's number in its metric; MOLECULES' kept line per VIEW with its molecule-level
+line beneath, else the owner's — written on a landing, a VIEW or FLOW change or an owner change, never in a frame (`tools/status-probe.mjs`); a tap opens the
+MODEL sheet, which defines the words; LEAN leaves it alone (`window-chrome.js`). The type scale is the notebook's three sizes: the formula
 its title (34 px), an announcement its heading (22 px) — the kit's `--info-size-body` overridden in `lab.css`, each held to 8 vw
 and at least 16 px — an atom label its body (14 px); the formula and an announcement × STAGE FORMULA's SIZE, an atom label × ATOM LABELS' SIZE. It never reaches an export: a picture, a loop and a video carry
-instead its one plain-Unicode CAPTION (`H₂O · 1b1 HOMO · STO-3G`, or the states), drawn by `lab/capture.js` `drawCaption` and
-following STAGE FORMULA (D5, Group II, replaces it).
+instead its one plain-Unicode CAPTION — the stage's words, then ` · ` and the STATE word (`H₂O · 1b1 HOMO · STO-3G · NUMERICAL`, `1s₀, 2p₀ · EXACT`;
+0.5.4 P4c: `lab/windows/film.js` `caption()`, read at the take, one function for the film and the picture) — drawn by `lab/capture.js` `drawCaption` and
+following STAGE FORMULA: off, no caption and no word (D5, Group II, replaces it).
 While a molecule owns the field SPECTRUM is FOLDED, not hidden
 (`moleculeMode`), and unfolds when the molecule lets go; EDIT › COPY then
 copies the molecule's page (`moleculeLatex`, `lab/latex-state.js`).

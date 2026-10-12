@@ -8,7 +8,7 @@ import { firstRunMaterial, firstRunQuality } from './first-run.js';   // W125: t
  * Tiers (§13):  PRESENT < RECONSTRUCT < EVOLVE < REBUILD.  Every cause asks for a tier; one
  * animation frame coalesces to the strongest and does exactly that much.  Idle is ZERO work:
  * when nothing plays, nothing spins and nothing is pending, no frame is scheduled (§45).
- * Four clocks (§12): the physics clock is the Clock (exact logical time); the field clock is the
+ * Four time domains (§12), under ONE play clock (0.5.0 C4): the physics clock is the Clock (exact logical time); the field clock is the
  * reconstruction cadence (cappable, never alters c); the camera clock is observer motion; the
  * presentation clock is the display rate.  Observer controls never touch the register (§14).
  */

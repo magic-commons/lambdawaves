@@ -40,7 +40,7 @@
  * Every state@grid is digested twice with a forced reconstruct between (`repeat`), so a kernel that is not a pure
  * function of its inputs shows inside one run; `--check` run twice on an untouched tree is the cross-run proof.
  * Machine-specific (adapter, driver, browser build): a fixture recorded here is compared only on this machine.
- * THE LOCK'S SCOPE (0.5.4 R7, one sentence): it is SAME-MACHINE, holds the 860 + 1004 values (≤ 64 AO tile states, no packet, STATES, FLOW or
+ * THE LOCK'S SCOPE (0.5.4 R7, one sentence): it is SAME-MACHINE, holds the 860 + 1004 values (≤ 64 AO tile states, no time-dependent molecular packet, STATES run, FLOW or
  * `record()`), and is NEVER re-baked by a maths row — a moved digest is a defect to report; machines are COMPARED by the device report's
  * FINGERPRINT row (tools/perf/device-report.js), which is never a lock.
  */

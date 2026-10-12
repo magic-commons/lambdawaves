@@ -78,7 +78,7 @@ and the code disagree, the code is right; please say so in an issue.
   SCALE, style, view, hide, grid and project-open edges, with the pacing counters), a 30 s play, GPU throughput at
   the three grids and the page's backdrop-filter inventory. Source: the header of `tools/perf/device-report.js`.
 - It never saves and puts every setting back; `restored` in the JSON proves it. `&only=grid` or `&only=project`
-  runs one scene. The project-open scene skips over a current project or unsaved changes unless `&force=1`.
+  runs one scene; `&only=fingerprint` runs the FINGERPRINT row alone (0.5.4 P11: adapter, driver, browser, features — `shader-f16` offered, never requested — limits, and two 64³ digests); machines are compared by it, never locked. The project-open scene skips over a current project or unsaved changes unless `&force=1`.
   Source: same file (`runFromFlag`, "THE LAW").
 - With `post=1` the JSON is POSTed to `/report`; `serve-lan.py` writes it to
   `research/device-reports/<UTC time>-<device>.json` (at most 2 MB, never overwriting). Without a POST route the
@@ -96,8 +96,8 @@ and the code disagree, the code is right; please say so in an issue.
 - After any edit under `lab/`, run `node tests/pwa.test.mjs --write`: it re-stamps the service worker's precache
   hashes in `lab/sw.js`, or the pwa suite fails. Source: AI_POLICY.md, RELEASING.md.
 - The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 860 values with `--query gastab=0`, 1004 with the s4a fixture; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
-  `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --fixture
-  research/optimization-2026-09-24/digest-lock-base-w125.json` against a tree served by `tools/gate/server.py`.
+  `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --query gastab=0` (860) and the same with
+  `--fixture research/release-0.4.0/measure/digest-lock-s4a.json` (1004), against a tree served by `tools/gate/server.py`.
   Source: `tools/perf/digest-lock.mjs` (header).
 - A change to CSS or to what the page builds at boot is checked with MIR's `tools/stylehash.mjs` (computed
   styles and pixels, theme × card × frost, before and after). Source: `research/optimization-2026-09-24/BUILD-BRIEF.md`.
