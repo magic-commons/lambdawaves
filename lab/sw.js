@@ -32,6 +32,7 @@
  * [url relative to this worker, first 12 hex of the file's sha-256].  GENERATED — see the header. */
 const PRECACHE = [
   ['./absorb.js',                                                   '2eeb365fc087'],
+  ['./angular-nodes.js',                                            '945796c72ba8'],
   ['./atoms.js',                                                    '1bfbfc778e10'],
   ['./atomsview.js',                                                '677810d3126e'],
   ['./badges.js',                                                   '425093040e6d'],
@@ -394,7 +395,7 @@ const PRECACHE = [
   ['./vendor/bse/6-31+g-star-v1.json',                              'ddcbd84daf46'],
   ['./vendor/bse/index.json',                                       'ed5f82e3438e'],
   ['./vendor/bse/sto-3g-v1.json',                                   '22ce59b9ec99'],
-  ['./vortex.js',                                                   '78d3be4d24d3'],
+  ['./vortex.js',                                                   'ac9be4da361b'],
   ['./well.js',                                                     'fb6041eac116'],
   ['./wigner.js',                                                   '370c23027ea3'],
   ['./wignerview.js',                                               'e0a32cb0f767'],
