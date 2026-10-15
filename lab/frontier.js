@@ -16,7 +16,7 @@
  *   unimodular roots of P(w) = Σ g_m w^{m-m_min}; degree bound, dominance lemma; three stretched modes reconnect
  *   only at the roots of Φ(r) = Â₀² - 4|Â₊Â₋| with ξ = |Â₀|/2|Â₊| ≤ 1, at two phases of the discriminant beat.
  */
-import { BASIS, factorial, radial, ylm, energy, stateOf } from './hydrogen.js';
+import { BASIS, factorial, radial, ylm, energy, stateOf, psiAt } from './hydrogen.js';
 
 const PI = Math.PI, TWO_PI = 2 * Math.PI, SQRT_PI = Math.sqrt(Math.PI);
 
@@ -541,10 +541,35 @@ export function stretchedCensus(modes, rMax = 60) {
     // degenerate beats (2E₀ = E₊ + E₋, e.g. three modes of one shell): the discriminant's phase never turns, so
     // either the condition holds for all t or for none — there is no firing time, and t₀ is reported as null.
     let t0 = degenerate ? null : ((-arg / (2 * energy(Z.n) - energy(P.n) - energy(N.n)) % Td) + Td) % Td;
-    const th = adm ? Math.asin(Math.min(1, x)) : NaN;
-    points.push({ r, xi: x, admissible: adm, theta: th, rho: adm ? r * x : NaN, z: adm ? r * Math.cos(th) : NaN, t0, sign: Math.sign(ap * an) });
+    const th = adm ? Math.asin(Math.min(1, x)) : NaN, rot = (c, n) => { const a = -energy(n) * (t0 || 0); return { re: c.re * Math.cos(a) - c.im * Math.sin(a), im: c.re * Math.sin(a) + c.im * Math.cos(a) }; };
+    const zt = rot(cz, Z.n), pt = rot(cp, P.n), k = -az * ap;    // the double root w = −g₀/2g₊ at t₀: its azimuth φ (0.6.3 E1)
+    points.push({ r, xi: x, admissible: adm, theta: th, rho: adm ? r * x : NaN, z: adm ? r * Math.cos(th) : NaN, t0, sign: Math.sign(ap * an), phi: Math.atan2(k * (zt.im * pt.re - zt.re * pt.im), k * (zt.re * pt.re + zt.im * pt.im)) });
   }
   return { roots, points, admissible: points.filter((p) => p.admissible).length, count: 2 * points.filter((p) => p.admissible).length, Td, modes: sorted };
+}
+/**
+ * THE EVENT CLASSIFIER (0.6.3 E1): name the nodal event of the register at (x, y, z, t).  F = (Re ψ, Im ψ), c_a(t) = c_a(0)e^{−iE_a t}, so
+ * F_t = Σ(−iE_a)c_a(t)φ_a EXACTLY; J = ∇F and D²(λ·F) by centred f64 differences (h = 1e-5 and 2e-4 × (1 + |x|)).  rank J = 2 → 'line'
+ * (tangent ∇Re × ∇Im, node velocity V = −Jᵀ(JJᵀ)⁻¹F_t); rank 1 with λ·F_t ≠ 0 (λ ⊥ range J) → H = −Tᵀ D²(λ·F) T / λ·F_t on the plane T
+ * orthogonal to the live row: H ≻ 0 'birth', H ≺ 0 'death', indefinite 'saddle'; otherwise 'unclassified'.  opt swaps the basis (an oracle).
+ */
+export function classifyEvent(re0, im0, ids, x, y, z, t, { psi = psiAt, E = (a) => BASIS[a].E } = {}) {
+  const re = new Float64Array(re0.length), im = re.slice(), dre = re.slice(), dim = re.slice(), p = [x, y, z], h1 = 1e-5 * (1 + Math.hypot(x, y, z)), h2 = 20 * h1;
+  for (const a of ids) { const c = Math.cos(E(a) * t), s = Math.sin(E(a) * t); re[a] = re0[a] * c + im0[a] * s; im[a] = im0[a] * c - re0[a] * s; dre[a] = E(a) * im[a]; dim[a] = -E(a) * re[a]; }
+  const F = (q) => psi(re, im, q[0], q[1], q[2], ids), sh = (k, d) => p.map((v, i) => v + (i === k ? d : 0)), Jr = [], Ji = [];
+  for (let k = 0; k < 3; k++) { const u = F(sh(k, h1)), v = F(sh(k, -h1)); Jr.push((u.re - v.re) / (2 * h1)); Ji.push((u.im - v.im) / (2 * h1)); }
+  const Ft = psi(dre, dim, x, y, z, ids), dot = (u, v) => u[0] * v[0] + u[1] * v[1] + u[2] * v[2], a = dot(Jr, Jr), b = dot(Jr, Ji), c = dot(Ji, Ji);
+  const cross = (u, v) => [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]], tr = a + c, lo = (tr - Math.hypot(a - c, 2 * b)) / 2;
+  if (lo > 1e-14 * tr) { const det = a * c - b * b, w0 = (c * Ft.re - b * Ft.im) / det, w1 = (a * Ft.im - b * Ft.re) / det;     // σ₂ > 1e-7 ‖J‖: a regular line
+    return { kind: 'line', eig: null, V: [0, 1, 2].map((k) => -(Jr[k] * w0 + Ji[k] * w1)), tangent: cross(Jr, Ji) }; }
+  const th = Math.atan2(2 * b, a - c) / 2, mu = [Math.cos(th), Math.sin(th)], lam = [-mu[1], mu[0]], lf = lam[0] * Ft.re + lam[1] * Ft.im;
+  const n = [0, 1, 2].map((k) => mu[0] * Jr[k] + mu[1] * Ji[k]), nn = Math.hypot(...n), none = { kind: 'unclassified', eig: null, V: null, tangent: null };
+  if (!(nn > 0) || !(Math.abs(lf) > 1e-7 * Math.hypot(Ft.re, Ft.im))) return none;    // rank J = 0, or rank B < 2
+  const ax = n.map(Math.abs), k0 = ax.indexOf(Math.min(...ax)), e = [0, 1, 2].map((k) => +(k === k0)), t1 = cross(n, e).map((v, _, u) => v / Math.hypot(...u)), t2 = cross(n, t1).map((v) => v / nn);
+  const g = (u, v) => { const f = F(p.map((q, k) => q + h2 * (u * t1[k] + v * t2[k]))); return lam[0] * f.re + lam[1] * f.im; }, g0 = g(0, 0), s = -lf * h2 * h2;
+  const H11 = (g(1, 0) - 2 * g0 + g(-1, 0)) / s, H22 = (g(0, 1) - 2 * g0 + g(0, -1)) / s, H12 = (g(1, 1) - g(1, -1) - g(-1, 1) + g(-1, -1)) / (4 * s);
+  const m = (H11 + H22) / 2, d = Math.hypot((H11 - H22) / 2, H12), eig = [m - d, m + d];
+  return { kind: eig[0] > 0 ? 'birth' : eig[1] < 0 ? 'death' : 'saddle', eig, V: null, tangent: null };
 }
 /** convenience: the three-mode description of a register state at time t, for the census */
 export function threeModes(re, im, ids) {
