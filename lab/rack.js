@@ -476,7 +476,7 @@ export async function boot(dom) {
       if (may('shadow', wSh)) tick('shadow', () => { shadowView.update(c, clock.t, stateReaders().populated, spectrum.selected); if (ui.shadowDetails && !ui.shadowDetails.hidden) shadowFoot.update(reg, c, clock.t, stateReaders().populated); });
       if (may('orbit', wOrb)) tick('orbit', () => { orbit.update(obs); keplerRowSync(); });   // the Kepler knobs' own liveness rides the tick this window already pays for, keyed on reg.version like every other reader
     }
-    const overlayDomain = app.state.space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P && !(app.state.chem && app.state.chem.on);
+    const overlayDomain = app.state.space === 'x' && getHamiltonian().hydrogenTheorems && !sturm.P && !(app.state.chem && app.state.chem.on) && !app.state.eqNoNodes;
     if (overlayDomain) {
       const vortexVisible = canPresent(wVor);
       if (vortexVisible && may('vortex')) tick('vortex', () => vortex.update(reg, clock.t, obs, domain.half, clock.playing));

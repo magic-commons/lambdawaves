@@ -12,6 +12,7 @@ import { createSpectrum } from '../spectrum.js';
 import { MOLECULE_BY_ID } from '../molecules.js';
 import { stateLatex, moleculeLatex } from '../latex-state.js';
 import { createRegisterSturmian } from '../sturmianreg.js';
+const keepT = (elm, on, title) => { if (elm.dataset.title0 === undefined) elm.dataset.title0 = elm.title || ''; elm.title = on ? title : elm.dataset.title0; };
 export function createSpectrumCard(app) {
   const { ui, device, reg, hNote, clock, energyOf, sturm, labelExpect, mat, rates } = app, { schedule, page } = app.loop, { rack } = app.host, { wState } = app.w;   // backward
   const { rotRate, busy, busySync, warmArm, touchState, setReference, api, field } = app.ctl;   // the controller's, filled before its seat returned
@@ -121,7 +122,8 @@ export function createSpectrumCard(app) {
     gEq.classList.toggle('eq-off', !!why); gEq.title = why ? 'the equalizer is a hydrogen position-space feature: ' + why : ''; eqFd.forEach((f, i) => { f.setDisabled(!!why); f.set(eq.gains[i]); });
     eqStep.set(eq.preset); eqRo.set(G ? t.purity.toFixed(3) : '1.000'); eqRo.setSub(t && !G ? t.gate : G && t.repaired ? 'repaired' : ['pure', 'mixture · no phase', 'signed · relative floor 2·10⁻⁴'][m]);
     if (hand && m === 2 && eqMode !== 2) { mat.view = VIEW.real; ui.viewSeg.set('real'); wSpec.setStatus('a signed table: VIEW is Re ψ, its lobes in two colours', 'live'); }
-    eqMode = m;
+    eqMode = m; const nn = app.state.eqNoNodes = !!(G && m === 1 && t.lambdaMin > 1e-3 * t.lambda[5]);   // E4: a positive-definite mixture has no zeros
+    for (const b of [ui.vorOn, ui.pOn && ui.pOn.root]) if (b) { b.disabled = nn; b.classList.toggle('disabled', nn); keepT(b, nn, `the equalized picture has no nodes (λ_min = ${nn ? t.lambdaMin.toPrecision(3) : ''})`); }
     const cell = Array.from({ length: 36 }, (_, i) => (G ? Math.hypot(G[2 * i], G[2 * i + 1]) : 1) * Math.sqrt(w[i / 6 | 0] * w[i % 6])), top = Math.max(...cell) || 1;
     eqG.clearRect(0, 0, 6, 6);
     cell.forEach((s, i) => { const n = (i / 6 | 0) + 1, k = i % 6 + 1, dE = getZ() ** 2 * Math.abs(1 / (n * n) - 1 / (k * k)) / 2;
@@ -203,7 +205,7 @@ export function createSpectrumCard(app) {
     const on = !!sturm.P;
     if (ui.scaleSeg) ui.scaleSeg.set(sturm.on ? 'sturmian' : 'hydrogen');
     if (ui.lambdaKnob) { ui.lambdaKnob.set(sturm.lambda); ui.lambdaKnob.setDisabled(!on); }
-    const keep = (elm, title) => { if (elm.dataset.title0 === undefined) elm.dataset.title0 = elm.title || ''; elm.title = on ? title : elm.dataset.title0; };
+    const keep = (elm, title) => keepT(elm, on, title);
     if (ui.abSw) { ui.abSw.root.disabled = on; ui.abSw.root.classList.toggle('disabled', on); keep(ui.abSw.root, 'A / B TRANSITION is a diagonal-phase feature (two exact diagonal evolutions mixed): off under STURMIAN — switch SCALE back to HYDROGEN'); }
     if (ui.abOmega) ui.abOmega.setDisabled(on);
     if (ui.abRo && !on && /STURMIAN/.test(ui.abRo.root.textContent)) { ui.abRo.set('—  /  —', ''); ui.abRo.setSub('store two states, then TRANSITION plays A → B → A at Ω'); }
