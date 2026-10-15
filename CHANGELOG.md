@@ -11,6 +11,27 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.6.5-alpha` — 2026-10-15
+
+Commit `82a9316` · no new waves · 8 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `fdc3b49` 2026-10-15 — CHANGELOG for v0.6.4-alpha
+- `43ae589` 2026-10-15 — 0.6.6 'Ask Gemma' BUILD-PLAN.md: the verb table + inventory, the transport strip as the type…
+- `761f518` 2026-10-15 — 0.6.5 X2: THE CARD ROAD + THE VIEW (ESP), shadow.js to tests/lib
+- `2eaa9d2` 2026-10-15 — X1 THE POTENTIAL: rinvMatrix, THE PROBE, chem.esp (0.6.5 Electrostatics)
+- `055a07a` 2026-10-15 — merge X2 THE CARD ROAD + THE VIEW (761f518): field.setCard({N, half, data} | null) — a worker's…
+- `63baddc` 2026-10-15 — merge X1 THE POTENTIAL (2eaa9d2) + the wire: md.js rinvMatrix(basis, C) = ⟨p|1/|r−C||q⟩ (PySCF's…
+- `4b62ae2` 2026-10-15 — 0.6.5 CHANGES-0.6.5.md (X1, X2 in plain words; the measured potential; the load reds named as…
+- `82a9316` 2026-10-15 — 0.6.5-alpha Electrostatics: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.6.4-alpha` — 2026-10-15
 
 Commit `58edf73` · no new waves · 8 commits.
