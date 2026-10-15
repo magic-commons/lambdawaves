@@ -342,7 +342,7 @@ const PRECACHE = [
   ['./paint-stroke.js',                                             'cbfdfa8270c5'],
   ['./palette-app.js',                                              '3d150ac4b027'],
   ['./particles.js',                                                '639d5fc3f9dd'],
-  ['./period.js',                                                   'c04a731fcddd'],
+  ['./period.js',                                                   'd49fdce7b915'],
   ['./project-store.js',                                            '0a9b5c558738'],
   ['./projects.js',                                                 'd2af7358294d'],
   ['./qho.js',                                                      'dc55dfe4479f'],
