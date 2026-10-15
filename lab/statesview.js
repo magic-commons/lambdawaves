@@ -28,7 +28,7 @@
  */
 import { stateName } from './names.js';
 import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, label as lbl, hint } from './mir/kit.js';
-import { createFlow } from './molecular-flow.js';
+import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
 import { paintStroke } from './paint-stroke.js';
 import { GROUND, AU_TIME_AS, createStatesModel, slerpCoefficients, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 
@@ -56,7 +56,7 @@ export function createStates(host, api) {
   const evalList = [];                             // reused: what evaluate() is handed each frame
   const trail = new Float64Array(3 * 256); let trailN = 0, trailAt = 0, trailT = NaN;
   /* FLOW (stage 6): the current's source for the stage's tracers, rebuilt once a frame from the same (c₀, Z) */
-  let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0;
+  let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0, flowSrc = 'computed';
   /* the drive: its knobs, and the pump's one outstanding request */
   const drive = { on: false, pol: 'x', omega: 0.4, e0: 0.01, envelope: 'cw', duration: 400, phase: 0, ready: false, busy: false, dirty: false, last: null, seq: 0, sent: 0 };
 
@@ -112,6 +112,10 @@ export function createStates(host, api) {
   vr.appendChild(viewSeg.root); vr.appendChild(refSeg.root);
   const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage, riding the molecule’s current v = j/ρ — the many-electron carrier of phase. Its sense and symmetry are exact; its magnitude is qualitative in a minimal basis', onChange: (v) => setFlow(v) });
   vr.appendChild(flowSw.root);
+  const srcSeg = seg({ label: 'FLOW SOURCE', value: 'computed', options: [{ id: 'computed', label: 'AS COMPUTED', title: 'v = j/ρ, the basis’s own current' }, { id: 'balanced', label: 'BALANCED', title: 'v + ∇φ with −∇·(ρ∇φ) = ∂ρ/∂t + ∇·j: continuity closed on a 32³ grid, solved in a worker' }], onChange: (v) => setFlowSource(v) });
+  vr.appendChild(srcSeg.root);
+  const fr = el('div', 'row tight', host), roRep = readout({ label: 'REPAIR', cls: 'wide', value: '—' }), roGate = readout({ label: 'GATED', value: '—' }); fr.append(roRep.root, roGate.root); fr.hidden = true;
+  const paintFlow = () => { if (!flow) return; const w = flow.said(); roRep.set(w[0]); roRep.setSub(w[1]); roGate.set(w[2]); roGate.setSub(w[3]); srcSeg.root.title = FLOW_ORACLE[C() && C().preset()] || ''; };
 
   /* ── the drive ────────────────────────────────────────────────────────────────────────────────── */
   const dr = el('div', 'row tight reg-drive', host);
@@ -268,9 +272,17 @@ export function createStates(host, api) {
   }
   function setFlow(v) {
     flowOn = !!v && !!model && !!sol; flowSw.set(flowOn);
-    if (flowOn && !flow) { flow = createFlow(sol.shells); flowRe = new Float64Array(model.n * model.n); flowIm = new Float64Array(model.n * model.n); flowEpoch++; }
+    if (flowOn && !flow) { flow = createFlow(sol.shells, api.balance); flow.setSource(flowSrc); flowRe = new Float64Array(model.n * model.n); flowIm = new Float64Array(model.n * model.n); flowEpoch++; }
+    fr.hidden = !flowOn; paintFlow();
     if (flowOn) { pushedV = -1; if (on) push(now(), true); }
     api.repaint(); return flowOn;
+  }
+  function setFlowSource(v) { flowSrc = v === 'balanced' ? 'balanced' : 'computed'; srcSeg.set(flowSrc); if (flow) { flow.setSource(flowSrc); paintFlow(); } api.repaint(); return flowSrc; }
+  /** Re Ḋ_AO = (D(t + δ) − D(t − δ))/2δ, δ = 0.01 a.u., from the register's closed form; the frame's state is put back.  The DRIVE offers none. */
+  function flowDot(t) {
+    if (drive.on) return null; const L = playing(), A = new Float64Array(model.n * model.n), B = new Float64Array(A.length), I = new Float64Array(A.length);
+    model.evaluate(L, t + 0.01); model.flowMatrices(A, I); model.evaluate(L, t - 0.01); model.flowMatrices(B, I); model.evaluate(L, t, view === 'change' ? ref : 'ground');
+    return A.map((a, k) => (a - B[k]) / 0.02);
   }
   function setView(v) { view = v === 'density' ? 'density' : 'change'; viewSeg.set(view); refSeg.root.classList.toggle('off', view !== 'change'); touch(); if (on) push(now(), true); api.repaint(); return view; }
   function setRef(v) { ref = v === 'mean' ? 'mean' : 'ground'; refSeg.set(ref); touch(); if (on) push(now(), true); api.repaint(); return ref; }
@@ -304,6 +316,7 @@ export function createStates(host, api) {
     if (flowOn && flow) { model.flowMatrices(flowRe, flowIm); flow.set(flowRe, flowIm); }
     if (t !== trailT) { trail[3 * trailAt] = st.dipole[0]; trail[3 * trailAt + 1] = st.dipole[1]; trail[3 * trailAt + 2] = st.dipole[2]; trailAt = (trailAt + 1) % 256; if (trailN < 256) trailN++; trailT = t; }
     pushedT = t; pushedV = version;
+    if (flowOn && flow) flow.pump(C().half, () => flowDot(t), paintFlow);   // after the trail: flowDot re-evaluates the register
     return true;
   }
   function setOn(v, hand) {
@@ -638,7 +651,7 @@ export function createStates(host, api) {
     const fresh = !sol || !s || s.hash !== sol.hash || s.seq !== sol.seq;
     sol = s || null;
     if (!fresh) return;
-    ladder = null; model = null; flow = null; flowOn = false; flowSw.set(false); pending.clear(); rows.forEach((L) => L.root.remove()); rows.clear();
+    ladder = null; model = null; flow = null; flowOn = false; flowSw.set(false); fr.hidden = true; pending.clear(); rows.forEach((L) => L.root.remove()); rows.clear();
     lanes.clear(); lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false }); selected = GROUND;
     storeA = storeB = null; aBtn.classList.remove('on'); bBtn.classList.remove('on'); morphOn = false; morphSw.set(false); trailN = 0; trailAt = 0;
     pushedT = NaN; pushedV = -1; touch();
@@ -699,11 +712,12 @@ export function createStates(host, api) {
     view = r.view === 'density' ? 'density' : 'change'; ref = r.ref === 'mean' ? 'mean' : 'ground'; viewSeg.set(view); refSeg.set(ref);
     morphS = Math.min(1, Math.max(0, +r.morph || 0)); morphK.set(morphS); morphOn = !!r.morphOn && !!storeA && !!storeB; morphSw.set(morphOn);
     if (r.flow !== undefined) setFlow(!!r.flow);
+    setFlowSource(r.flowSource);
     if (r.drive) { for (const k of ['pol', 'envelope', 'duration', 'omega', 'e0', 'phase']) if (r.drive[k] !== undefined) setDriveParam(k, r.drive[k]); wK.set(drive.omega); eK.set(drive.e0); durK.set(drive.duration); }
     selected = GROUND;
   }
   function save() {
-    return { on, view, ref, flow: flowOn, morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB),
+    return { on, view, ref, flow: flowOn, ...(flowSrc === 'balanced' && { flowSource: flowSrc }), morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB),
       drive: { pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, phase: drive.phase },   // the knobs, never the run: a project opens paused and undriven
       lanes: keys().map((key) => { const c = lanes.get(key); return { key, omega: key === GROUND || !ladder ? 0 : ladder.omega[key], amp: c.amp, phase: c.phase, mute: c.mute, solo: c.solo }; }) };
   }
@@ -723,7 +737,7 @@ export function createStates(host, api) {
   return {
     update, setActive, setShown, paint, refresh, onSwitch: onSw.root,   // registerview.js seats it beside ORBITAL | STATES
     get on() { return on; }, setOn,
-    setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flow; },
+    setFlow, setFlowSource, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flow; },
     select, deselect, toggle, clear, norm, setAmp, setPhase, preset, play, store, setMorph, setView, setRef, setDrive, setDriveParam, tune,
     get drive() { return { on: drive.on, ready: drive.ready, pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, last: drive.last ? { t: drive.last.t, p0: drive.last.p0, norm: drive.last.norm, steps: drive.last.steps, lag: drive.last.lag, pops: drive.last.pops } : null }; },
     get view() { return view; }, get ref() { return ref; }, get morph() { return morphS; }, get morphOn() { return morphOn; },

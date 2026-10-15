@@ -10,6 +10,7 @@
  *   period  { energies, horizon }                  → the density's period / near-recurrence scan (period.js densityPeriod) for the transport's readout
  *   ladder  { params }                             → the revival packet, scan and asymptotic prediction
  *   gas.stats { radius, t, re0, im0, t0 }          → the AXIAL GAS's norm, ⟨z⟩, σ_z, ⟨r⟩ at t (gas.js stats) — SPECTRUM's readout (K5w)
+ *   flow.balance { shells, N, half, Re, Im, dRe, solve } → BALANCED FLOW's sampled defect and its repair ∇φ (flow-balance.js)
  *   export  { fmt, texels, N, half, rhoMax, … }    → FILE › EXPORT SHAPE / GRID (wave 134): the field's grid decoded, marched and written as
  *                                                  one file (export3d.js buildFile) — the bytes come back, transferred; asked for, so it finishes parked
  * The tabulated Hamiltonians (ATOM, QUARKONIUM) are not mirrored: the rack keeps their slap on the main thread.
@@ -50,6 +51,7 @@ import { createGas } from './gas.js';
 import { buildFile } from './export3d.js';
 import { namesOf } from './names.js';
 import { basisFrom } from './md.js';
+import { flowBalance } from './flow-balance.js';
 import { validateRecord, decodeRecord } from './library.js';
 
 function configure(m) {
@@ -146,6 +148,7 @@ function work(m) {
     else if (m.op === 'chem.rt.reset') { out = chemRtReset(); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.spectrum') { out = chemRtSpectrum(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.fit') { out = chemRtFit(m); }
+    else if (m.op === 'flow.balance') { out = flowBalance(m); transfer = out.gx ? [out.gx.buffer, out.gy.buffer, out.gz.buffer] : []; }   // BALANCED FLOW's repair (flow-balance.js), on the cards queue
     else out = { error: 'unknown op ' + m.op };
   } catch (err) { out = err instanceof Refused ? { refused: err.message } : { error: String(err && err.message || err) }; transfer = []; }
   return { out, transfer };

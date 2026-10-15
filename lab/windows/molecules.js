@@ -5,7 +5,7 @@ import { VIEW, VIEW_NAMES } from '../field.js'; import { MOLECULE_BY_ID } from '
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
   const { dom, ui, device, clock, mat, useCompactDefaults, FIRST_RUN } = app, { schedule, canPresent } = app.loop, { rack } = app.host,
-    { wState, wSpec, switchHamiltonian, wSh, wOrb, wVor, wSlice } = app.w, { cardLoading, field, solveChem } = app.ctl;
+    { wState, wSpec, switchHamiltonian, wSh, wOrb, wVor, wSlice } = app.w, { cardLoading, field, solveChem, solveCard } = app.ctl, balance = (msg) => solveCard(msg, () => null, (r) => r);   // BALANCED FLOW's repair: the cards queue, never the frame thread
   /* H₂⁺ · LEGACY (the `molecule` card, with W-MO and W-PULSE) was DELETED in 0.5.0 D9: restore opens a file it owned as MOLECULES · H₂ */
   app.state.chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
   app.state.restampParams = null;                                            // re-tag knobs as modulation targets: lanes built after boot call it (the REGISTER's phase needles)
@@ -52,7 +52,7 @@ export function createMolecules(app) {
   if (useCompactDefaults) wChem.root.classList.add('closed');   // built closed (chemview's N8 shown() guard); the first-run block opens it on the LEFT rack — still no solve until it is switched on
   rack.appendChild(wChem.root);
   app.state.chem = createChem(wChem.body, { active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
-    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),
+    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
     setOn(v) { moleculeMode(v); app.w.stageTextTick(); if (app.hooks.status) app.hooks.status(); }, said: () => app.hooks.status && app.hooks.status(),   // 0.5.4 P4: the STATUS row (informational.js)
@@ -89,7 +89,7 @@ export function createMolecules(app) {
   rack.appendChild(wOrbs.root);
   app.state.register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs),
     stamp: () => { if (app.state.restampParams) requestAnimationFrame(app.state.restampParams); },   // a lane built after boot becomes a drop target for a macro
-    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck),   // the STATES mode asks the chem worker for its canonical ladder and vectors
+    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wOrbs.setStatus(t, cls); },
     announce: (md) => app.state.stageText && app.state.stageText.announce(md),        // a HAND's preset only (orbitalsview / statesview presetSel)

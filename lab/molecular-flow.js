@@ -14,15 +14,19 @@
  * STO-3G is measured by tests/molecular-flow.test.mjs and reported, never asserted as an identity.  The tracers are
  * a reading of the current, not a claim that the molecule contains particles, and within one frame they ride a
  * frozen field (D(t) is rebuilt once a frame): THE FROZEN-FRAME STEP ERROR and THE SPEED CAP (`step`'s `cap`) are covered by NO oracle.
+ * BALANCED (0.6.2 H1): `setRepair(grid)` adds ρ∇φ to j, ∇φ the cards worker's face-flux repair (flow-balance.js) read trilinearly.
  * ENERGY REFERENCE AND KERNEL: none of its own; the TD-CIS pair density it reads is cited to PySCF's transition RDMs (proving/LEDGER.md, not in this tree) and no test here checks it; kernel W (tracers are lines from f64).
  */
 import { evaluator, shellsFromField } from './molecular-field.js';
 
-export function createFlow(fieldShellsList) {
+/** NACRE Round 1's oracle (RT-TDHF, 6-31+G*) as measured there, for the two molecules it ran */
+export const FLOW_ORACLE = { C6H6: 'NACRE Round 1 measured, the RING: real-time check (6-31+G*): BALANCED 0.92 · AS COMPUTED 0.85', H2O: 'NACRE Round 1 measured, the bright line: real-time check (6-31+G*): AS COMPUTED 1.00 · BALANCED 0.92' };
+
+export function createFlow(fieldShellsList, call = null) {
   const ev = evaluator(shellsFromField(fieldShellsList)), n = ev.n;
   const v = new Float64Array(n), gx = new Float64Array(n), gy = new Float64Array(n), gz = new Float64Array(n);
   const P = [0, 0, 0], M = [0, 0, 0], out = { rho: 0, j: [0, 0, 0] };
-  let Re = null, Im = null;
+  let Re = null, Im = null, rep = null, mode = 'computed', busy = false, last = -1e9, info = null, steps = 0, refused = 0;
   const RHO_FLOOR = 1e-7;                                   // below this the velocity j/ρ is noise over nothing
   /** ρ and j at one point, into the shared record */
   function at(x, y, z) {
@@ -34,6 +38,10 @@ export function createFlow(fieldShellsList) {
       for (let q = 0; q < n; q++) { u += Re[row + q] * v[q]; const m = Im[row + q]; if (m !== 0) { ax += m * gx[q]; ay += m * gy[q]; az += m * gz[q]; } }
       rho += vp * u; jx += vp * ax; jy += vp * ay; jz += vp * az;
     }
+    if (rep) { const { N, half, gx: Gx, gy: Gy, gz: Gz } = rep, s = N / (2 * half), fx = (x + half) * s - 0.5, fy = (y + half) * s - 0.5, fz = (z + half) * s - 0.5, bx = Math.floor(fx), by = Math.floor(fy), bz = Math.floor(fz);
+      for (let a = 0; a < 8; a++) { const i = bx + (a >> 2), j = by + (a >> 1 & 1), k = bz + (a & 1); if (i < 0 || j < 0 || k < 0 || i >= N || j >= N || k >= N) continue;
+        const w = (a & 4 ? fx - bx : 1 - fx + bx) * (a & 2 ? fy - by : 1 - fy + by) * (a & 1 ? fz - bz : 1 - fz + bz) * rho, c = (i * N + j) * N + k;
+        jx += w * Gx[c]; jy += w * Gy[c]; jz += w * Gz[c]; } }
     out.rho = rho; out.j[0] = jx; out.j[1] = jy; out.j[2] = jz; return out;
   }
   function velocity(x, y, z, cap, o) {
@@ -53,10 +61,31 @@ export function createFlow(fieldShellsList) {
     speed(p) { const s = at(p[0], p[1], p[2]); return s.rho > RHO_FLOOR ? Math.hypot(s.j[0], s.j[1], s.j[2]) / s.rho : 0; },
     /** one midpoint (RK2) step of length h along v = j/ρ, speed-capped; null where there is no density to carry a velocity */
     step(p, h, cap) {
-      if (!Re || !velocity(p[0], p[1], p[2], cap, M)) return null;
+      if (!Re) return null; steps++;
+      if (!velocity(p[0], p[1], p[2], cap, M)) { refused++; return null; }
       const mx = p[0] + 0.5 * h * M[0], my = p[1] + 0.5 * h * M[1], mz = p[2] + 0.5 * h * M[2];
-      if (!velocity(mx, my, mz, cap, M)) return null;
+      if (!velocity(mx, my, mz, cap, M)) { refused++; return null; }
       return [p[0] + h * M[0], p[1] + h * M[1], p[2] + h * M[2]];
+    },
+    setRepair(grid) { rep = grid; }, get balanced() { return !!rep; },
+    setSource(m) { mode = m === 'balanced' ? 'balanced' : 'computed'; if (mode === 'computed') rep = null; last = -1e9; },
+    /** the worker road: one request in flight, the newest D wins, ≤ 8 Hz BALANCED (2 Hz AS COMPUTED, the defect alone); dot() → Re Ḋ_AO or null */
+    pump(half, dot, done) {
+      if (!call || busy || !Re || performance.now() - last < (mode === 'balanced' ? 125 : 500)) return;
+      const dRe = dot(); if (!dRe) return;
+      busy = true; last = performance.now(); const want = mode;
+      Promise.resolve(call({ op: 'flow.balance', shells: fieldShellsList, half, Re, Im, dRe, solve: want === 'balanced' })).then((r) => {
+        busy = false; if (!r || r.error) return;
+        info = r; info.gated = steps ? refused / steps : 0; steps = refused = 0;
+        rep = want === 'balanced' && mode === 'balanced' && r.gx ? r : null; if (done) done();
+      }, () => { busy = false; });
+    },
+    /** the REPAIR and GATED readouts: [value, sub, value, sub] */
+    said() {
+      if (!info) return ['—', mode === 'balanced' ? 'BALANCED · solving' : 'AS COMPUTED', '—', ''];
+      const g = [Math.round(100 * info.gated) + ' %', 'of tracer steps refused by the floor ρ > 1e-7'];
+      return rep ? [(100 * info.kinetic).toFixed(1) + ' %', 'of the current’s kinetic energy · BALANCED · continuity closed on the grid · residual ' + info.residual.toExponential(1) + ' (relative)', ...g]
+        : [info.defect.toFixed(2), 'the finite-basis defect ‖∂ρ/∂t + ∇·j‖/‖∂ρ/∂t‖ on the grid (not an identity in a finite basis)', ...g];
     },
   };
 }

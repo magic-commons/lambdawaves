@@ -8,6 +8,7 @@
  *       and a linear slosh carries no angular momentum at all
  *   §4  THE CONTINUITY DEFECT, measured and reported, never asserted as an identity: ∂ρ/∂t + ∇·j is zero in a complete
  *       basis and is not in STO-3G (JUDGMENT.md §8.2)
+ *   §6  BALANCED's repair (lab/flow-balance.js) on the breathing Gaussian, whose ∇φ = −a′x/(2a) is exact
  */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -20,6 +21,7 @@ import { moleculeRHF } from '../lab/rhf-molecule.js';
 import { createRTHF } from '../lab/density.js';
 import { fieldShells } from '../lab/molecular-field.js';
 import { CONVENTIONS } from '../lab/molecule-state.js';
+import { balance } from '../lab/flow-balance.js';
 
 chemRegister('sto-3g', JSON.parse(fs.readFileSync(new URL('../lab/vendor/bse/sto-3g-v1.json', import.meta.url), 'utf8')));
 const msg = { atoms: moleculeAtoms('C6H6'), basis: 'sto-3g', charge: 0 }, g = chemGround(msg), st = chemStates(msg), n = st.n, nocc = st.nocc;
@@ -125,4 +127,16 @@ const toAO = (M) => { const half = new Float64Array(n * n), out = new Float64Arr
   assert(Math.sign(Jy) === Math.sign(rate) && Math.abs(Jy) > 10 * Math.hypot(Jx, Jz) && Number.isFinite(dMid), `TDHF flow: d(dipole)/dt = ${rate}, −∫ j_y dV = ${Jy}, off-axis ${Math.hypot(Jx, Jz)}`);
   assert.equal(CONVENTIONS.current, '−Im D, the transpose', '0.5.4 P1: the declared current is the −Im D this case proves (imNeg above)');
   console.log(`PASS TDHF flow: after a y kick the electron dipole moves at ${rate.toExponential(3)} and −∫ j_y dV = ${Jy.toExponential(3)} with −Im D (same sign, ratio ${(Jy / rate).toFixed(3)}; off-axis current ${Math.hypot(Jx, Jz).toExponential(1)}).`);
+}
+
+/* ── §6 · BALANCED's repair: ρ = π^{−3/2}e^{−r²} (a = 1), j = 0, ρ̇ = (3/2 − r²)ρ (a′ = 1), exact ∇φ = −x/2 ────────────── */
+for (const [N, bound] of [[32, 0.045], [48, 0.02]]) {
+  const half = 5, h = 2 * half / N, X = (i) => -half + (i + 0.5) * h, rho = new Float64Array(N ** 3), src = new Float64Array(N ** 3);
+  for (let c = 0; c < N ** 3; c++) { const x = X((c / (N * N)) | 0), y = X(((c / N) | 0) % N), z = X(c % N), r2 = x * x + y * y + z * z; rho[c] = Math.PI ** -1.5 * Math.exp(-r2); src[c] = (1.5 - r2) * rho[c]; }
+  const B = balance({ N, half, rho, src }); let num = 0, den = 0;
+  for (let c = 0; c < N ** 3; c++) { if (!(rho[c] > 1e-7)) continue; const e = [X((c / (N * N)) | 0), X(((c / N) | 0) % N), X(c % N)].map((u) => -u / 2);
+    num += rho[c] * ((B.gx[c] - e[0]) ** 2 + (B.gy[c] - e[1]) ** 2 + (B.gz[c] - e[2]) ** 2); den += rho[c] * (e[0] ** 2 + e[1] ** 2 + e[2] ** 2); }
+  const E = Math.sqrt(num / den);
+  assert(E < bound && B.residual < 1e-4, `breathing Gaussian at ${N}³: ρ-weighted ∇φ error ${E}, residual ${B.residual}`);
+  console.log(`PASS BALANCED on the breathing Gaussian at ${N}³: ρ-weighted ∇φ error ${(100 * E).toFixed(2)} % (face fluxes; Round 2 measured 1.75 % at 48³), PCG ${B.iterations} iterations to ${B.residual.toExponential(1)}.`);
 }
