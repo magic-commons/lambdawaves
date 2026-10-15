@@ -1,7 +1,7 @@
 # 0.6.2 "Honest Flow" — THE BUILD PLAN (Claude Yan / Fable 5.1, 2026-10-15; drafted while 0.6.1 builds — base and cap are filled at 0.6.1's cut)
 
 Josh's dial (2026-10-15): tight builds, features only, no gate code, pre-1.0. THE ENGINE PLAN D.3 (`../release-0.6.0/PLAN.md`), Round 1's T1 · T7 · T11
-and Round 2's C4 · C5 (the vault's DRAFT-3 files) are the record. Base: `yan-c` after the v0.6.1-alpha cut (tip TBD); cap = that cut's `lab/` lines × 1.01.
+and Round 2's C4 · C5 (the vault's DRAFT-3 files) are the record. Base: `yan-c` at the 0.6.1 merge tip (the cut adds version and changelog commits only); 28,371 `lab/` lines; cap 28,371 × 1.01 = **28,654** (283 of headroom).
 
 ## The rows (two builders, Opus, own worktrees)
 | row | what lands | files | Δ |
