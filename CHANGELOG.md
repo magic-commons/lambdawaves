@@ -11,6 +11,29 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.6.6-alpha` — 2026-10-15
+
+Commit `291c419` · no new waves · 10 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `3a86298` 2026-10-15 — CHANGELOG for v0.6.5-alpha
+- `70c21ed` 2026-10-15 — HANDOFF §2 17:05: v0.6.4 and v0.6.5 cut locally; 0.6.6 Ask Gemma building (G1 ∥ G2 ∥ G3 from…
+- `94140de` 2026-10-15 — G3 THE BROKER: a local Gemma 4 behind one HTTPS route (tools/gemma/, docs/GEMMA.md; 0 lab/…
+- `7d9a0e0` 2026-10-15 — merge G3 THE BROKER (94140de): tools/gemma/
+- `17b46d4` 2026-10-15 — G1 THE VERB TABLE + THE INVENTORY (0.6.6 "Ask Gemma")
+- `6c0655c` 2026-10-15 — G2 THE TYPE BOX + THE CLIENT: the transport strip asks Gemma (0.6.6)
+- `adb7294` 2026-10-15 — merge G1 THE VERB TABLE + THE INVENTORY (17b46d4): lab/verbs.js
+- `613e5bf` 2026-10-15 — merge G2 THE TYPE BOX + THE CLIENT (6c0655c): the transport strip is Gemma's type box — ASK…
+- `6c40d79` 2026-10-15 — 0.6.6 CHANGES-0.6.6.md (G1, G2, G3 in plain words; the live loop with gemma4:e4b as measured;…
+- `291c419` 2026-10-15 — 0.6.6-alpha Ask Gemma: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.6.5-alpha` — 2026-10-15
 
 Commit `82a9316` · no new waves · 8 commits.
