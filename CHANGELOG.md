@@ -11,6 +11,27 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.6.3-alpha` — 2026-10-15
+
+Commit `36ef0aa` · no new waves · 8 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `52543cc` 2026-10-15 — CHANGELOG for v0.6.2-alpha
+- `ad89819` 2026-10-15 — HANDOFF §2 + checkpoint 13:50: usage pause at a safe boundary
+- `0d768c1` 2026-10-15 — E2 ANGULAR NODES: Y_lm's nodal set on a sphere in VORTEX
+- `240435f` 2026-10-15 — E1 THE EVENT CLASSIFIER: VORTEX names each nodal event from exact f64 derivatives
+- `b53fbcf` 2026-10-15 — merge E1 THE EVENT CLASSIFIER (240435f): classifyEvent in lab/frontier.js (J = [∇Re ψ; ∇Im ψ],…
+- `eefe8c1` 2026-10-15 — merge E2 ANGULAR NODES (0d768c1): lab/angular-nodes.js (angularNodes
+- `111bee0` 2026-10-15 — 0.6.3 CHANGES-0.6.3.md (E1, E2 in plain words; the census as measured; the lock ×2 green at…
+- `36ef0aa` 2026-10-15 — 0.6.3-alpha Event Census: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.6.2-alpha` — 2026-10-15
 
 Commit `97be431` · no new waves · 12 commits.
