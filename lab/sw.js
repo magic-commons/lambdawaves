@@ -337,7 +337,7 @@ const PRECACHE = [
   ['./molecules.js',                                                '7c189834dd21'],
   ['./momentum.js',                                                 '0b32cc20e73a'],
   ['./motion-pref.js',                                              '34329c802c8b'],
-  ['./names.js',                                                    '1986af2ba341'],
+  ['./names.js',                                                    '126f99558a9f'],
   ['./native-ui.js',                                                'fdc6abf9e7aa'],
   ['./new-project.lambdawaves.json',                                '1134ce61cd21'],
   ['./occlusion.js',                                                'd9d6c6d5b7c6'],
