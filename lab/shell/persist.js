@@ -70,6 +70,7 @@ export function createPersist(app) {
         ab: ui.ab ? ui.ab.get() : null,
         notebook: !edit && layout.notebookSize ? (() => { const n = layout.notebookSize(); return n.custom ? { w: n.w, h: n.h } : null; })() : null } };
     const T = !edit && app.state.tl ? app.state.tl.model.serialize() : null; if (T && (T.clips.length || T.active)) S.presentation.timeline = T;   // 0.5.0 C7b: the arrangement, only when there is one (NEW and the demos stay byte-exact); never an undo row's
+    { const E = app.state.eq.serialize(); if (E) S.presentation.eq = E; }   // 0.6.0 B2: the BEAT EQUALIZER, PROJECT and default-absent (FLAT writes nothing)
     if (!edit) return S;
     const pr = S.presentation, R = app.state.modHost && app.state.modHost.registry;
     delete S.experiment.t; delete pr.mat.steps; if (pr.domain.auto) delete pr.domain.half;
@@ -272,6 +273,7 @@ export function createPersist(app) {
         stageTextTick();                                              // the STAGE TEXT follows whatever MOLECULES the file left
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
+        app.state.eq.restore(pr.eq);                                  // 0.6.0 B2: absent is FLAT; the loop's syncEq repaints the card and hands the field its table
         /* S3 · an UNDO's bases are its record's seats, never read back off a control the modulator is moving (an unseated target keeps
            its base; an unmodulated one is the control just written) */
         const histBases = {};
