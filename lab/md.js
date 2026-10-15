@@ -238,18 +238,32 @@ function oneElectron(basis, atoms) {
         }
         T[k] += w * t;
         let v = 0;
-        for (let ci = 0; ci < atoms.length; ci++) {
-          const { R, at } = rt[ci]; let acc = 0;
-          for (let tt = 0; tt <= la[0] + lb[0]; tt++) { const exv = ex.E[ex.at(la[0], lb[0], tt)]; if (exv === 0) continue;
-            for (let uu = 0; uu <= la[1] + lb[1]; uu++) { const eyv = ey.E[ey.at(la[1], lb[1], uu)]; if (eyv === 0) continue;
-              for (let vv = 0; vv <= la[2] + lb[2]; vv++) acc += exv * eyv * ez.E[ez.at(la[2], lb[2], vv)] * R[at(0, tt, uu, vv)]; } }
-          v += -atoms[ci].Z * (2 * Math.PI / p) * acc;
-        }
+        for (let ci = 0; ci < atoms.length; ci++) v += -atoms[ci].Z * (2 * Math.PI / p) * hermiteR(ex, ey, ez, la, lb, rt[ci]);
         V[k] += w * v;
       }
     }
   }
   return { S, T, V, M };
+}
+
+/** Σ_tuv E^x_t E^y_u E^z_v R⁰_tuv: one centre's Hermite contraction, V's core and rinvMatrix's (one function, so V is unchanged) */
+function hermiteR(ex, ey, ez, la, lb, { R, at }) {
+  let acc = 0;
+  for (let tt = 0; tt <= la[0] + lb[0]; tt++) { const exv = ex.E[ex.at(la[0], lb[0], tt)]; if (exv === 0) continue;
+    for (let uu = 0; uu <= la[1] + lb[1]; uu++) { const eyv = ey.E[ey.at(la[1], lb[1], uu)]; if (eyv === 0) continue;
+      for (let vv = 0; vv <= la[2] + lb[2]; vv++) acc += exv * eyv * ez.E[ez.at(la[2], lb[2], vv)] * R[at(0, tt, uu, vv)]; } }
+  return acc;
+}
+/** ⟨p| 1/|r − C| |q⟩ for one centre C = [x, y, z], Z = 1 (PySCF's int1e_rinv at set_rinv_origin(C)); E-tables per shell pair:
+    a handful of points (the nuclei), never a grid.  Φ_el(C) = −Σ_pq D_pq rinv_pq. */
+export function rinvMatrix(basis, C) {
+  const { shells, n } = basis, out = new Float64Array(n * n);
+  for (const sa of shells) for (const sb of shells) for (let ip = 0; ip < sa.exps.length; ip++) for (let jp = 0; jp < sb.exps.length; jp++) {
+    const a = sa.exps[ip], b = sb.exps[jp], p = a + b, E = [0, 1, 2].map((q) => etable(sa.l, sb.l, a, b, sa.c[q], sb.c[q]));
+    const rt = rtable(sa.l + sb.l, p, E[0].Px - C[0], E[1].Px - C[1], E[2].Px - C[2]);
+    for (const ba of sa.bfs) for (const bb of sb.bfs) out[ba.idx * n + bb.idx] += ba.d[ip] * bb.d[jp] * (2 * Math.PI / p) * hermiteR(E[0], E[1], E[2], ba.l, bb.l, rt);
+  }
+  return out;
 }
 
 /* ── two electrons: shell-pair tables built once, Schwarz screening, the 8-fold tensor filled per unique quartet ──

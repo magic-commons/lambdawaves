@@ -239,6 +239,7 @@ export function createChem(host, api) {
   const rTda = el('div', 'row tight', more); rTda.appendChild(tdaSw.root); rTda.appendChild(coreSw.root);
   for (const n of [r2, fr, cv, cvCore, rr, note]) more.appendChild(n);
   const h2Note = el('div', 'note', more); h2Note.hidden = true;   // 0.6.2 H2: H₂'s hidden correlation, STO-3G only
+  const probeLine = el('div', 'note', more); probeLine.hidden = true; probeLine.title = 'the electrons’ potential −Σ D_pq ⟨p|1/|r−R_A||q⟩ at each nucleus R_A (md.js rinvMatrix; PySCF int1e_rinv) — the ground state’s';   // 0.6.5 X1 THE PROBE
   const moreToggle = el('button', 'trig mol-more-toggle', rV); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
   chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
   const setMore = (open) => {
@@ -491,7 +492,8 @@ export function createChem(host, api) {
   const sgn = (x) => (x < 0 ? '−' : '+') + Math.abs(x).toFixed(2);
   function onEsp(r) {                                                     // the pump's consumer: the reply { N, half, phi, min, max, ms } becomes the card
     if (!r || !r.phi || view !== 'esp' || !sol) return false;
-    esp = { card: { N: r.N, half: r.half, data: r.phi }, N: r.N, min: r.min, max: r.max, ms: r.ms, of: sol };
+    const cap = 4 * Math.abs(r.min) || 1, data = r.max > cap ? Float32Array.from(r.phi, (v) => (v > cap ? cap : v)) : r.phi;   // the nuclei's Z/r peaks are tens of a.u.: shown clipped at +4|min| so the lone pairs read; the numbers are not
+    esp = { card: { N: r.N, half: r.half, data }, N: r.N, min: r.min, max: r.max, cap: r.max > cap ? cap : null, ms: r.ms, of: sol };
     pushMatrix(); refresh(); tell(); return true;
   }
   let scripted = false;                       // chem.run(n) is propagating: the tdhf model's products, whichever road asked
@@ -540,6 +542,16 @@ export function createChem(host, api) {
     flow.pump(Number.isFinite(sol.half) ? sol.half : 10.3, () => (dotOK ? flowDot : null), paintFlow);
   }
   let flowMod = null, flowHash = null;
+  /* 0.6.5 X1 · THE POTENTIAL's volume: one chem.esp in flight on the cards queue, the newest D asked next (H1's pump shape); only where THE PROBE is (≤ 46 AOs: the cost is nAO² × 64³) */
+  let espBusy = false, espD = null, espLast = null;
+  function espPump() {
+    const D = (rt && rt.D_re) || (sol && sol.D);
+    if (!D || espBusy || D === espD || !sol.probe) return;
+    espBusy = true; espD = D;
+    Promise.resolve(api.balance({ op: 'chem.esp', N: 64, half: Number.isFinite(sol.half) ? sol.half : 10.3, shells: sol.shells, D, atoms: sol.probe })).then((r) => {
+      espBusy = false; if (!r || r.error || !r.phi) return; espLast = r; onEsp(r);   // 0.6.5: the reply becomes the card (X2's consumer)
+    }, () => { espBusy = false; });
+  }
   function setFlow(v) {
     flowOn = !!v; if (flowSw) flowSw.set(flowOn); fr.hidden = !flowOn;
     if (flowOn && !flowMod) import('./molecular-flow.js').then((m) => { flowMod = m; if (flowOn) { feedFlow(); api.repaint(); } });
@@ -602,7 +614,9 @@ export function createChem(host, api) {
   const storageNote = (i) => { stored = !i ? '' : (i.persisted ? 'persisted' : i.safariTab ? 'a Safari tab: kept until the browser clears it — add λWAVES to the Home Screen to keep it' : 'not persisted')
     + (Number.isFinite(i.usage) && Number.isFinite(i.quota) ? ` · ${(i.usage / 1048576).toFixed(1)} of ${Math.round(i.quota / 1048576)} MB used` : ''); if (sol) refresh(); };
   function refresh() {
-    if (!sol) { for (const r of [roE, roEps, roTr, roIdem, roT, roSym]) r.set('—', ''); h2Note.hidden = true; paint(); return; }
+    if (!sol) { for (const r of [roE, roEps, roTr, roIdem, roT, roSym]) r.set('—', ''); h2Note.hidden = probeLine.hidden = true; paint(); return; }
+    const pr = (sol.probe || []).map((a) => a.sym + ' ' + a.phiEl.toFixed(2).replace('-', '−')), many = (t) => pr.filter((v) => v === t).length;   // THE PROBE: three or more alike are one ×n
+    probeLine.hidden = !pr.length; probeLine.textContent = 'Φ at nuclei · ' + [...new Set(pr)].map((t) => (many(t) > 2 ? t + ' ×' + many(t) : Array(many(t)).fill(t).join(' · '))).join(' · ') + ' a.u. · exact';
     /* Slater–Condon: σg² and σu² differ by two orbitals, so the 1-RDM has no cross term and ±b share it; ⟨H⟩ differs by 4abK */
     h2Note.hidden = !(preset === 'H2' && basis === 'sto-3g');
     if (!h2Note.hidden && h2Note.dataset.k !== sol.key) {
@@ -799,7 +813,7 @@ export function createChem(host, api) {
   }
 
   /* ── the frame, the field-owner switch, and the saved state ───────────────────────────────────── */
-  function update() { if (!on) return; pump(); }
+  function update() { if (!on) return; pump(); if (view === 'esp') espPump(); }
   function setOn(v) {
     on = !!v; if (onSw.get() !== on) onSw.set(on);
     if (!on) { setRun(false); if (S() && fieldHash !== null) { S().drop(); fieldHash = null; } }
@@ -906,7 +920,7 @@ export function createChem(host, api) {
     /** the chosen orbital as its S1 name { group, irrep, count, member } — what a link carries (0.4.0 S2); null when none is chosen or named */
     orbitalKey,
     /** 0.6.5 X2 · ESP: the pump's consumer (a `chem.esp` reply), and the caption a capture carries while its card is on the field */
-    onEsp, espCaption: () => (espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.` : ''),
+    onEsp, espCaption: () => (espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.${esp.cap ? ` · shown clipped at ${sgn(esp.cap)}` : ''}` : ''),
     /* THE LIBRARY (0.4.0 S4a): every record row with its installed lamp, and the INSTALL / REMOVE a section header (S4b) presses */
     async records() { await lamps(); return CHEM_PRESETS.flatMap((p) => Object.values(p.records || {}).map((r) => ({ id: p.id, basis: r.basis, hash: r.hash, bytes: r.bytes,
       caps: r.caps, recordOnly: !!p.recordOnly, installed: !!have.get(r.hash), label: optOf(p.id) ? optOf(p.id).textContent : null }))); },
@@ -934,6 +948,7 @@ export function createChem(host, api) {
         invalidates: 'a new molecule, basis or charge: a new solve; a kick: the real-time density; VIEW, ORBITAL or VALENCE: the field only' }; },
     onPick(fn) { pickHook = typeof fn === 'function' ? fn : null; },
     setPopulations(fn) { popOf = typeof fn === 'function' ? fn : null; paint(); },
+    get esp() { return espLast; }, espPump() { espPump(); return espLast; },   // 0.6.5 X1: the last chem.esp reply; VIEW ESP pumps from update()
     solution() { return sol; }, subscribe(fn) { subs.add(fn); if (sol) fn(sol); return () => subs.delete(fn); },   // the register's road: the last ground state, and every new one
     /* the modulation registry's two targets — PRESENT-only setters, and the dials they write */
     get kappa() { return kappa; }, setKappa(v) { if (!Number.isFinite(v)) return kappa; kappa = Math.min(1e-2, Math.max(1e-4, v)); return kappa; },

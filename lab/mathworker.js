@@ -11,6 +11,7 @@
  *   ladder  { params }                             → the revival packet, scan and asymptotic prediction
  *   gas.stats { radius, t, re0, im0, t0 }          → the AXIAL GAS's norm, ⟨z⟩, σ_z, ⟨r⟩ at t (gas.js stats) — SPECTRUM's readout (K5w)
  *   flow.balance { shells, N, half, Re, Im, dRe, solve } → BALANCED FLOW's sampled defect and its repair ∇φ (flow-balance.js)
+ *   chem.esp     { shells, N, half, D, atoms }   → THE POTENTIAL's N³ volume Φ(r) (0.6.5 X1, chemEsp below), on the cards queue
  *   export  { fmt, texels, N, half, rhoMax, … }    → FILE › EXPORT SHAPE / GRID (wave 134): the field's grid decoded, marched and written as
  *                                                  one file (export3d.js buildFile) — the bytes come back, transferred; asked for, so it finishes parked
  * The tabulated Hamiltonians (ATOM, QUARKONIUM) are not mirrored: the rack keeps their slap on the main thread.
@@ -50,8 +51,8 @@ import { fitPoles } from './response-fit.js';
 import { createGas } from './gas.js';
 import { buildFile } from './export3d.js';
 import { namesOf } from './names.js';
-import { basisFrom } from './md.js';
-import { flowBalance } from './flow-balance.js';
+import { basisFrom, rinvMatrix, ELEMENT } from './md.js';
+import { flowBalance } from './flow-balance.js'; import { createFlow } from './molecular-flow.js';
 import { validateRecord, decodeRecord } from './library.js';
 import { BASIS, radial } from './hydrogen.js';
 
@@ -150,6 +151,7 @@ function work(m) {
     else if (m.op === 'chem.rt.reset') { out = chemRtReset(); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.spectrum') { out = chemRtSpectrum(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.fit') { out = chemRtFit(m); }
+    else if (m.op === 'chem.esp') { out = chemEsp(m); transfer = [out.phi.buffer]; }   // THE POTENTIAL's volume (0.6.5 X1), on the cards queue
     else if (m.op === 'flow.balance') { out = flowBalance(m); transfer = out.gx ? [out.gx.buffer, out.gy.buffer, out.gz.buffer] : []; }   // BALANCED FLOW's repair (flow-balance.js), on the cards queue
     else out = { error: 'unknown op ' + m.op };
   } catch (err) { out = err instanceof Refused ? { refused: err.message } : { error: String(err && err.message || err) }; transfer = []; }
@@ -506,7 +508,56 @@ export function chemGround(m = {}) {
   const c = ensureSolve(m);
   return { ...c.ground, stage: 'ground', timings: { ...c.ground.timings },
     eps: Float64Array.from(c.sol.orbitalEnergies),
-    C: Float64Array.from(c.sol.C), D: c.sol.D && Float64Array.from(c.sol.D), shells: fieldShells(c.sol.basis) };   // D null: a frontier record (S4c)
+    C: Float64Array.from(c.sol.C), D: c.sol.D && Float64Array.from(c.sol.D), shells: fieldShells(c.sol.basis),   // D null: a frontier record (S4c)
+    probe: c.probe || (c.probe = probeOf(c)) };
+}
+/** THE PROBE (0.6.5 X1): Φ_el(R_A) = −Σ_pq D_pq ⟨p|1/|r−R_A||q⟩ at every nucleus, exact (md.js rinvMatrix); null without D or past 46 AOs
+    (C₆₀'s 300 would be 18 s: one rinvMatrix a nucleus), and chemview offers chem.esp only where it exists */
+const probeOf = (c) => c.sol.D && c.sol.basis.n <= 46 ? c.atoms.map((a) => { const C = [a.x, a.y, a.z], R = rinvMatrix(c.sol.basis, C); let s = 0;
+  for (let k = 0; k < R.length; k++) s -= c.sol.D[k] * R[k]; return { Z: a.Z, sym: ELEMENT[a.Z], c: C, phiEl: s }; }) : null;
+/* THE POTENTIAL's volume (0.6.5 X1): ρ at the N³ cell centres over [−half, half]³ from the f64 AOs by molecular-flow.js' sampler, each a CELL MEAN (within 3h of a nucleus its 5³
+   sub-cells', else the point + h²/24 ∇²ρ by the discrete Laplacian: water at 64³ holds 9.60 e point-sampled, the O 1s aliased), Φ_el = −G ⊛ ρh³ by
+   a free-space FFT Poisson (zero-padded to (2N)³, Hockney–Eastwood: no periodic image), G = 1/r at cell offsets with the self cell the cube's mean
+   ⟨1/r⟩ = (3 ln(2+√3) − π/2)/h = 2.3800774/h; the nuclei analytic, Σ Z_A / max(|r−R_A|, h/2).  `atoms` = the ground's probe, returned as atNuclei. */
+function fft(re, im, sign) {                                                     // radix-2, in place, unscaled; sign −1 forward
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b;
+    if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) { const hl = len >> 1, wr = Math.cos(sign * Math.PI / hl), wi = Math.sin(sign * Math.PI / hl);
+    for (let i = 0; i < n; i += len) for (let k = 0, cr = 1, ci = 0, t; k < hl; k++, t = cr * wr - ci * wi, ci = cr * wi + ci * wr, cr = t) {
+      const a = i + k, b = a + hl, xr = re[b] * cr - im[b] * ci, xi = re[b] * ci + im[b] * cr;
+      re[b] = re[a] - xr; im[b] = im[a] - xi; re[a] += xr; im[a] += xi; } }
+}
+function fft3(re, im, M, sign) {                                                 // an M³ volume, x fastest, line by line along each axis
+  const lr = new Float64Array(M), li = new Float64Array(M);
+  for (const s of [1, M, M * M]) for (let c = 0; c < M * M * M; c++) { if (((c / s) | 0) % M) continue;
+    for (let k = 0; k < M; k++) { lr[k] = re[c + k * s]; li[k] = im[c + k * s]; } fft(lr, li, sign);
+    for (let k = 0; k < M; k++) { re[c + k * s] = lr[k]; im[c + k * s] = li[k]; } }
+}
+let espG = null;                                                                 // Ĝ (real: G is even), kept per (N, h)
+export function chemEsp({ N = 64, half, shells, D, atoms }) {
+  const t0 = performance.now(), M = 2 * N, M3 = M * M * M, h = 2 * half / N, F = createFlow(shells), x = (u) => -half + (u + 0.5) * h;
+  F.set(D, new Float64Array(D.length));
+  const re = new Float64Array(M3), im = new Float64Array(M3), phi = new Float32Array(N * N * N); let charge = 0, min = Infinity, max = -Infinity;
+  const P = new Float64Array(N * N * N), dip = atoms.map(() => [0, 0, 0]), near = (X, Y, Z) => atoms.findIndex((a) => a.Z > 2 && Math.hypot(X - a.c[0], Y - a.c[1], Z - a.c[2]) < 3 * h);
+  for (let c = 0, k = 0; k < N; k++) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++, c++) P[c] = F.at(x(i), x(j), x(k)).rho;
+  for (let c = 0, k = 0; k < N; k++) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++, c++) { let v = 0; const A = near(x(i), x(j), x(k));
+    if (A >= 0) for (let q = 0; q < 125; q++) { const o = [q % 5 - 2, ((q / 5) | 0) % 5 - 2, ((q / 25) | 0) - 2].map((u) => u * h / 5), r = F.at(x(i) + o[0], x(j) + o[1], x(k) + o[2]).rho / 125;
+      v += r; for (let a = 0; a < 3; a++) dip[A][a] += r * o[a] * h * h * h; }   // the dipole a cell centre cannot hold, kept per nucleus
+    else v = P[c] + ((i ? P[c - 1] : 0) + (i < N - 1 ? P[c + 1] : 0) + (j ? P[c - N] : 0) + (j < N - 1 ? P[c + N] : 0) + (k ? P[c - N * N] : 0) + (k < N - 1 ? P[c + N * N] : 0) - 6 * P[c]) / 24;
+    charge += re[(k * M + j) * M + i] = v * h * h * h; }
+  if (!espG || espG.M !== M || espG.h !== h) {
+    const g = new Float64Array(M3), d = (u) => (u < N ? u : u - M) * h;
+    for (let k = 0; k < M; k++) for (let j = 0; j < M; j++) for (let i = 0; i < M; i++) { const r = Math.hypot(d(i), d(j), d(k)); g[(k * M + j) * M + i] = r ? 1 / r : (3 * Math.log(2 + Math.sqrt(3)) - Math.PI / 2) / h; }
+    fft3(g, new Float64Array(M3), M, -1); espG = { M, h, g };
+  }
+  fft3(re, im, M, -1); for (let c = 0; c < M3; c++) { re[c] *= espG.g[c]; im[c] *= espG.g[c]; } fft3(re, im, M, 1);
+  for (let k = 0; k < N; k++) for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    let v = -re[(k * M + j) * M + i] / M3;
+    atoms.forEach((a, A) => { const d = [x(i) - a.c[0], x(j) - a.c[1], x(k) - a.c[2]], r = Math.max(Math.hypot(...d), 0.5 * h); v += a.Z / r - (dip[A][0] * d[0] + dip[A][1] * d[1] + dip[A][2] * d[2]) / Math.max(r, 3 * h) ** 3; });
+    phi[(k * N + j) * N + i] = v; if (v < min) min = v; if (v > max) max = v;
+  }
+  return { N, half, phi, min, max, charge, atNuclei: atoms, ms: performance.now() - t0 };
 }
 /** chem.spectrum — STAGE TWO: the roots for the cached ground state (it is re-solved if the cache moved on) */
 export function chemSpectrum(m = {}) {
