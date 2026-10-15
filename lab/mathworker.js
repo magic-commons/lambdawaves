@@ -53,6 +53,7 @@ import { namesOf } from './names.js';
 import { basisFrom } from './md.js';
 import { flowBalance } from './flow-balance.js';
 import { validateRecord, decodeRecord } from './library.js';
+import { BASIS, radial } from './hydrogen.js';
 
 function configure(m) {
   if (m.radius) HAMILTONIANS.well.setRadius(m.radius);
@@ -81,7 +82,7 @@ function run(m) {
    frame thread when the worker fails; the message handler is installed ONLY inside a real worker, so importing
    this file on the main thread (or in node, where `self` does not exist) takes nothing over. */
 const IN_WORKER = typeof WorkerGlobalScope === 'function' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
-const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.drive.coupling', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum', 'chem.rt.fit']);
+const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.drive.coupling', 'h.drive.init', 'h.drive.run', 'h.drive.set', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum', 'chem.rt.fit']);
 const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.rt.init']);
 /** the vendored BSE record, fetched ONCE per basis inside the worker; the ops themselves stay synchronous */
 async function chemReady(m) {
@@ -143,6 +144,7 @@ function work(m) {
     else if (m.op === 'chem.drive.run') { out = chemDriveRun(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.drive.set') { out = chemDriveSet(m); }
     else if (m.op === 'chem.drive.coupling') { out = chemDriveCoupling(m); }
+    else if (m.op.startsWith('h.drive.')) { out = SONG[m.op.slice(8)](m); transfer = chemTransfer(out); }   // 0.6.4 S1 THE SONG: init · run · set
     else if (m.op === 'chem.rt.init') { out = chemRtInit(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.run') { out = chemRtRun(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.reset') { out = chemRtReset(); transfer = chemTransfer(out); }
@@ -391,8 +393,8 @@ export function chemDriveInit(m = {}) {
   const D = { pol: m.pol || 'x', axes: pol.slice(0, pol.length === 3 ? 2 : 1), sense: pol.length === 3 ? pol[2] : 0, ops: null,
     e0: +m.e0 || 0, omega: Math.max(0, +m.omega || 0), phase: +m.phase || 0, envelope: m.envelope === 'pulse' ? 'pulse' : 'cw',
     duration: Math.max(1e-6, +m.duration || 200), dt, t0: +m.t0 || 0, t: +m.t0 || 0, N, steps: 0,
-    br: new Float64Array(N), bi: new Float64Array(N), cr: new Float64Array(N), ci: new Float64Array(N), hash: chemSol.ground.hash };
-  D.ops = D.axes.map((q) => driveOperators(chemSol, q));
+    br: new Float64Array(N), bi: new Float64Array(N), cr: new Float64Array(N), ci: new Float64Array(N), hash: chemSol.ground.hash, w: new Float64Array(N) };
+  D.ops = D.axes.map((q) => driveOperators(chemSol, q)); D.w.set(st.omega, 1);   // the free phases: 0 for S₀, ω_K above it
   let n2 = 0;
   for (const l of (Array.isArray(m.lanes) ? m.lanes : [])) { const k = (l.key | 0) + 1; if (k < 0 || k >= N) continue; D.br[k] += +l.re || 0; D.bi[k] += +l.im || 0; }
   for (let k = 0; k < N; k++) n2 += D.br[k] ** 2 + D.bi[k] ** 2;
@@ -403,8 +405,8 @@ export function chemDriveInit(m = {}) {
   return driveReply(D, 0);
 }
 function driveStep(D, h) {
-  const { N, br, bi, cr, ci } = D, st = chemSol.states, tm = D.t + h / 2;
-  const free = (tau) => { for (let k = 1; k < N; k++) { const ph = -st.omega[k - 1] * tau, c = Math.cos(ph), sn = Math.sin(ph), x = br[k], y = bi[k]; br[k] = x * c - y * sn; bi[k] = x * sn + y * c; } };
+  const { N, br, bi, cr, ci } = D, tm = D.t + h / 2;
+  const free = (tau) => { for (let k = 0; k < N; k++) { if (!D.w[k]) continue; const ph = -D.w[k] * tau, c = Math.cos(ph), sn = Math.sin(ph), x = br[k], y = bi[k]; br[k] = x * c - y * sn; bi[k] = x * sn + y * c; } };
   const kick = (op, theta) => {
     if (theta === 0) return;
     const U = op.U, r = op.values;
@@ -440,6 +442,35 @@ export function chemDriveRun(m = {}) {
   if (Array.isArray(m.keys)) { out.laneRe = new Float64Array(m.keys.length); out.laneIm = new Float64Array(m.keys.length); m.keys.forEach((key, i) => { const k = (key | 0) + 1; if (k >= 0 && k < D.N) { out.laneRe[i] = D.br[k]; out.laneIm[i] = D.bi[k]; } }); }
   return out;
 }
+/* ── THE SONG (0.6.4 S1): hydrogen DRIVEN by a track, i ċ = (diag E_n + E_z(t)·z) c over the 91 labels by driveStep (D.w, the free phases, and D.ops are each drive's own).  z = δ_mm' ∫R_nl R_n'l' r³ dr
+ * (trapezoid, 20 000 points to r = 400) × √(((l+1)² − m²)/((2l+1)(2l+3))), eigensolved once.  The track (t_atom = RATE × t_audio) is low-passed at the stepper's Nyquist and
+ * decimated ONCE by a polyphase (64-phase) Blackman-windowed sinc to the steps' MIDPOINTS t0 + (j + ½)dt, peak-normalised; whole steps only (the rest is `lag`), 0 past the end. */
+let hzOp = null, song = null, songTrack = null;
+export function hydrogenZ() {
+  if (hzOp) return hzOp;
+  const N = BASIS.length, M = 20000, dr = 400 / M, Z = new Float64Array(N * N), R = new Map(), tab = (n, l) => R.get(n * 10 + l) || R.set(n * 10 + l, Float64Array.from({ length: M + 1 }, (_, i) => radial(n, l, i * dr))).get(n * 10 + l);
+  for (const a of BASIS) for (const b of BASIS) if (b.m === a.m && b.l === a.l + 1) { const A = tab(a.n, a.l), B = tab(b.n, b.l); let s = 0.5 * A[M] * B[M] * 400 ** 3; for (let i = 1; i < M; i++) s += A[i] * B[i] * (i * dr) ** 3; Z[a.index * N + b.index] = Z[b.index * N + a.index] = s * dr * Math.sqrt(((a.l + 1) ** 2 - a.m ** 2) / ((2 * a.l + 1) * (2 * a.l + 3))); }
+  const e = eigSym(Z, N); return (hzOp = { N, values: Float64Array.from(e.values), U: e.vectors, R: Z });
+}
+export function songResample(x, sr, rate) {   // → { dt, track, hash (FNV-1a of the decoded samples), omega (the zero-crossing rate, Eh) }
+  const dt = rate / sr > 0.5 ? 0.25 : 0.5, q = dt * sr / rate, fc = 0.5 / Math.max(1, q), K = Math.ceil(4 / fc), P = 64, g = new Float64Array(2 * K * P + 1), n = x.length, T = new Float32Array(Math.max(1, Math.floor((n - 1) / q - 0.5) + 1));
+  for (let k = 0; k < g.length; k++) { const d = k / P - K, u = Math.PI * d / K; g[k] = (d ? Math.sin(2 * Math.PI * fc * d) / (Math.PI * d) : 2 * fc) * (0.42 + 0.5 * Math.cos(u) + 0.08 * Math.cos(2 * u)); }
+  let peak = 0, zc = 0, h = 0x811c9dc5;
+  for (let j = 0; j < T.length; j++) { const c = (j + 0.5) * q; let a = 0, w = 0; for (let i = Math.max(0, Math.ceil(c - K)), i1 = Math.min(n - 1, Math.floor(c + K)); i <= i1; i++) { const v = g[Math.round((i - c + K) * P)]; a += v * x[i]; w += v; } T[j] = w ? a / w : 0; peak = Math.max(peak, Math.abs(T[j])); if (j && (T[j] < 0) !== (T[j - 1] < 0)) zc++; }
+  const u = new Uint32Array(x.buffer, x.byteOffset, n); for (let i = 0; i < n; i++) h = Math.imul(h ^ u[i], 16777619) >>> 0; if (peak > 0) for (let j = 0; j < T.length; j++) T[j] /= peak;
+  return { dt, track: T, hash: h.toString(16).padStart(8, '0') + ':' + n, omega: Math.PI * zc / (T.length * dt) };
+}
+const songReply = (D, taken) => { let n2 = 0; for (let k = 0; k < D.N; k++) n2 += D.br[k] ** 2 + D.bi[k] ** 2; return { t: D.t, re: Float64Array.from(D.br), im: Float64Array.from(D.bi), norm: n2, taken, steps: D.steps }; };
+export const SONG = {   // h.drive.init { e0, t0, re, im, samples?, sampleRate, rate } · h.drive.run { to, maxSteps } · h.drive.set { e0 }
+  init(m) {
+    if (m.samples) songTrack = songResample(m.samples, m.sampleRate, m.rate); if (!songTrack) throw new Error('song: no track in this worker — drop it again');
+    const N = BASIS.length, T = songTrack.track, D = song = { N, ops: [hydrogenZ()], w: Float64Array.from(BASIS, (s) => s.E), e0: +m.e0 || 0, dt: songTrack.dt, t0: +m.t0 || 0, t: +m.t0 || 0, steps: 0, br: Float64Array.from(m.re), bi: Float64Array.from(m.im), cr: new Float64Array(N), ci: new Float64Array(N) };
+    D.field = [(t) => D.e0 * (T[Math.round((t - D.t0) / D.dt - 0.5)] || 0)];
+    return Object.assign(songReply(D, 0), { hash: songTrack.hash, omega: songTrack.omega, dt: D.dt, length: T.length * D.dt });
+  },
+  run(m) { const D = song; if (!D) throw new Error('song: no drive in this worker — h.drive.init first'); const to = Number.isFinite(m.to) ? D.t0 + D.dt * Math.floor((m.to - D.t0) / D.dt + 1e-9) : D.t, cap = Math.max(1, (m.maxSteps | 0) || 4000); let taken = 0; while (taken < cap && Math.abs(to - D.t) > 1e-9) { driveStep(D, Math.sign(to - D.t) * D.dt); taken++; } const out = songReply(D, taken); out.lag = (Number.isFinite(m.to) ? m.to : to) - D.t; return out; },
+  set(m) { if (song && Number.isFinite(m.e0)) song.e0 = +m.e0; return { ok: !!song }; },
+};
 /** chem.drive.set — the live knobs: E₀, ω and the carrier phase of a running drive (the envelope's clock is kept) */
 export function chemDriveSet(m = {}) {
   const D = driveState; if (!D) return { ok: false };

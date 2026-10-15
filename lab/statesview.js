@@ -30,6 +30,7 @@ import { stateName } from './names.js';
 import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, label as lbl, hint } from './mir/kit.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
 import { paintStroke } from './paint-stroke.js';
+import { BASIS } from './hydrogen.js';
 import { GROUND, AU_TIME_AS, createStatesModel, slerpCoefficients, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 
 const TAU = 2 * Math.PI;
@@ -137,6 +138,15 @@ export function createStates(host, api) {
   dk.appendChild(wK.root); dk.appendChild(eK.root); dk.appendChild(durK.root); dk.appendChild(envSeg.root);
   const roDrive = readout({ label: 'DRIVE', cls: 'wide', value: 'off', sub: 'tune ω to a lane, then DRIVE: the population flops at Ω = E₀μ' });
   el('div', 'row tight', host).appendChild(roDrive.root);
+  /* ── THE SONG (0.6.4 S1): a track DRIVES hydrogen's register, E_z(t) = E₀·track(t) in i ċ = (diag E_n + E_z z) c, stepped in the chem worker (h.drive.*); each landing
+     is reg.anchorFrom(c, t) and the register free-evolves between them.  The track never leaves this page: a project keeps { hash, name, e0, rateAtDrop }. */
+  const song = { on: false, meta: null, samples: null, sr: 0, e0: 3e-3, ship: false, ready: false, busy: false, seq: 0, v: -1, last: null, omega: 0, dt: 0.5, speed: 0, wall: 0, paint: 0 };
+  const sg = el('div', 'row tight reg-drive', host), songSw = sw({ label: 'SONG', value: false, title: 'Drive hydrogen with the track: its waveform is the field E_z(t) on the 91 labels, and RATE maps its pitch onto their lines', onChange: (v) => setSong(v) });
+  const songIn = el('input', '', sg); songIn.type = 'file'; songIn.accept = 'audio/*'; songIn.hidden = true; songIn.addEventListener('change', () => { songFile(songIn.files[0]); songIn.value = ''; });
+  const fileBtn = el('button', 'trig', sg, 'FILE'); fileBtn.type = 'button'; fileBtn.title = 'Choose an audio file — or drop one on this row'; fileBtn.addEventListener('click', () => songIn.click());
+  const sE = knob({ label: '<m>E₀</m>', aria: 'song amplitude', min: 1e-4, max: 1e-2, value: song.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2), title: 'The field at the track’s peak, in atomic units', onInput: (v) => setSongE0(v) });
+  sg.prepend(songSw.root); sg.appendChild(sE.root); sg.addEventListener('dragover', (e) => e.preventDefault()); sg.addEventListener('drop', (e) => { e.preventDefault(); songFile(e.dataTransfer.files[0]); });
+  const roSong = readout({ label: 'SONG', cls: 'wide', value: 'no track' }); el('div', 'row tight', host).appendChild(roSong.root); const songNote = el('div', 'note', host); refreshSong();
 
   const rr = el('div', 'row tight', host);
   const roSum = readout({ label: '<m>Σ|b|²</m>', value: '—', sub: '' });
@@ -400,6 +410,39 @@ export function createStates(host, api) {
     } else driveSw.set(drive.on);
     refreshDrive();
     return drive.on;
+  }
+  async function songFile(file) {
+    if (!file) return;
+    try {
+      const A = new (window.AudioContext || window.webkitAudioContext)(), b = await A.decodeAudioData(await file.arrayBuffer()), x = new Float32Array(b.length); A.close();
+      for (let c = 0; c < b.numberOfChannels; c++) { const d = b.getChannelData(c); for (let i = 0; i < x.length; i++) x[i] += d[i] / b.numberOfChannels; }   // the mono mix
+      Object.assign(song, { samples: x, sr: b.sampleRate, ship: true, meta: { hash: null, name: file.name, e0: song.e0, rateAtDrop: api.rate ? api.rate() : 1 } }); setSong(true);
+    } catch (e) { status(`SONG: ${file.name} would not decode — ${e && e.message || e}`, 'warn'); }
+  }
+  function setSong(v) { song.on = !!v && !!song.samples; song.seq++; song.busy = song.ready = false; song.last = null; songSw.set(song.on); if (v && !song.on) status('SONG: ' + (song.meta ? 'track missing · drop it again' : 'FILE or drop an audio file first'), 'warn'); refreshSong(); api.repaint(); return song.on; }
+  function setSongE0(v) { song.e0 = Math.min(1e-2, Math.max(1e-4, +v || 3e-3)); if (song.meta) song.meta.e0 = song.e0; if (song.on && song.ready) Promise.resolve(api.solve({ op: 'h.drive.set', e0: song.e0 }, () => null, (r) => r)).catch(() => {}); refreshSong(); }
+  function pumpSong(t) {   // the drive's pump, again: one request in flight, newest wins; an edit of the register (its version) restarts the song from it
+    const H = api.song; if (!H || song.busy || H.filming()) return;
+    if (!H.hydrogen()) { setSong(false); status('SONG drives hydrogen’s 91 labels: switch the Hamiltonian to hydrogen', 'warn'); return; }
+    const init = !song.ready || H.reg.version !== song.v, seq = song.seq, v0 = H.reg.version; if (!init && Math.abs(t - song.last.t) < song.dt) return;
+    const c = init ? H.reg.at(t) : null; song.busy = true;
+    Promise.resolve(api.solve(init ? { op: 'h.drive.init', e0: song.e0, t0: t, re: c.re, im: c.im, ...(song.ship && { samples: song.samples, sampleRate: song.sr, rate: song.meta.rateAtDrop }) } : { op: 'h.drive.run', to: t, maxSteps: 4000 }, () => null, (r) => r)).then((r) => {
+      if (seq !== song.seq) return; song.busy = false;
+      if (!r || r.error) { song.ship = true; setSong(false); status('SONG: ' + (r && r.error || 'it needs the chemistry worker'), 'warn'); return; }
+      if (H.reg.version !== v0) { song.ready = false; return; }
+      if (init) { song.ship = false; song.ready = true; song.omega = r.omega; song.dt = r.dt; song.meta.hash = r.hash; }
+      const wall = performance.now(); if (song.last && r.t !== song.last.t) song.speed = Math.abs(r.t - song.last.t) / Math.max(1e-3, (wall - song.wall) / 1000);
+      song.wall = wall; song.last = r; H.land(r.re, r.im, r.t); song.v = H.reg.version; if (wall - song.paint > 250) { song.paint = wall; refreshSong(); }
+    }).catch(() => { if (seq === song.seq) { song.busy = false; setSong(false); } });
+  }
+  function refreshSong() {   // THE PITCH: f = ΔE·RATE/2π — the track's zero-crossing pitch against the nearest z-allowed line from a populated label
+    const m = song.meta, rate = api.rate ? api.rate() : 0, r = song.last, c = r || (api.song && api.song.reg.at(now())), hz = (w) => (w * m.rateAtDrop / TAU).toFixed(0);
+    songNote.textContent = `E₀ ${+song.e0.toPrecision(2)} a.u. = ${+(song.e0 * 514.22).toPrecision(2)} GV/m · a 91-level bound model — above the over-barrier field 1/16n⁴ of n ≥ 3 nothing ionises here · RATE ${rate.toFixed(0)} = ${(rate * AU_TIME_AS / 1000).toFixed(0)} fs of atom time per second`;
+    if (!song.samples) { roSong.set(m ? 'track missing · drop it again' : 'no track', m ? 'warn' : ''); roSong.setSub(m ? `${m.name} · the project keeps its name and hash, never the track` : 'FILE, or drop an audio file on this row: its waveform becomes the field E_z(t) on hydrogen'); return; }
+    let best = null;
+    if (c && song.omega > 0) for (const a of BASIS) if (c.re[a.index] ** 2 + c.im[a.index] ** 2 > 1e-3) for (const b of BASIS) if (b.m === a.m && Math.abs(b.l - a.l) === 1 && b.n !== a.n) { const dE = Math.abs(b.E - a.E); if (!best || Math.abs(dE - song.omega) < Math.abs(best.dE - song.omega)) best = { lo: a.E < b.E ? a : b, hi: a.E < b.E ? b : a, dE }; }
+    roSong.set(best ? `tuned: ${hz(song.omega)} Hz → ${best.lo.label}–${best.hi.label} (${song.omega >= best.dE ? '+' : ''}${((song.omega / best.dE - 1) * 100).toFixed(1)} %)` : m.name, song.on ? 'live' : '');
+    roSong.setSub(m.name + (r ? ` · ‖c‖² − 1 = ${(r.norm - 1).toExponential(0)}` + (r.lag > song.dt && song.speed > 0 && rate > song.speed ? ` · the song runs at 1/${(rate / song.speed).toFixed(1)} of real time` : '') : ''));
   }
   function setDriveParam(name, v) {
     if (name === 'pol') { drive.pol = String(v); polSel.value = drive.pol; if (drive.on) drive.dirty = true; }
@@ -681,6 +724,7 @@ export function createStates(host, api) {
 
   /* ── the frame ────────────────────────────────────────────────────────────────────────────────── */
   function update(t) {
+    if (song.on) pumpSong(t);
     if (!ensureSub()) return false;
     if (!on) return false;
     const why = refusal();
@@ -719,14 +763,20 @@ export function createStates(host, api) {
   function save() {
     return { on, view, ref, flow: flowOn, ...(flowSrc === 'balanced' && { flowSource: flowSrc }), morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB),
       drive: { pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, phase: drive.phase },   // the knobs, never the run: a project opens paused and undriven
-      lanes: keys().map((key) => { const c = lanes.get(key); return { key, omega: key === GROUND || !ladder ? 0 : ladder.omega[key], amp: c.amp, phase: c.phase, mute: c.mute, solo: c.solo }; }) };
+      lanes: keys().map((key) => { const c = lanes.get(key); return { key, omega: key === GROUND || !ladder ? 0 : ladder.omega[key], amp: c.amp, phase: c.phase, mute: c.mute, solo: c.solo }; }), ...(song.meta && { song: { ...song.meta } }) };
   }
   /* 0.3.1 · S4: a record whose lane list is EMPTY was written before a solution seeded the ground lane (NEW, a MOLECULES ON
      undone); on the ladder it was written beside it lands empty, and the ground lane is seeded again when the register next
      plays (setOn).  Parked for a ladder still to come, it is a record OLDER than that ladder: its solve seeds the ground lane. */
   const emptyLanes = (r) => Array.isArray(r.lanes) && r.lanes.length === 0;
+  function songLoad(m) {   // the same track still in memory stays; another hash says so on the row and leaves the register alone; none clears it
+    if (m && song.meta && m.hash === song.meta.hash) { setSongE0(m.e0); sE.set(song.e0); return; }
+    if (song.on) setSong(false); song.samples = null; song.meta = m ? { hash: m.hash, name: String(m.name || ''), e0: +m.e0 || 3e-3, rateAtDrop: +m.rateAtDrop || 1 } : null;
+    if (m) { song.e0 = song.meta.e0; sE.set(song.e0); } refreshSong();
+  }
   function load(r) {
     if (!r) return false;
+    songLoad(r.song);
     if (!ladder) { wanted = r; armed = 0; if (emptyLanes(r)) lanes.clear(); if (on) setOn(false); return true; }
     applyRecord(r); request(keys()); touch(); rebuild(); paint(); refresh();
     if (r.on && !on) setOn(true); else if (!r.on && on) setOn(false); else if (on) push(now(), true);
@@ -736,7 +786,7 @@ export function createStates(host, api) {
   const slotKey = (i) => keys()[i];
   return {
     update, setActive, setShown, paint, refresh, onSwitch: onSw.root,   // registerview.js seats it beside ORBITAL | STATES
-    get on() { return on; }, setOn,
+    get on() { return on; }, setOn, get songOn() { return song.on; },
     setFlow, setFlowSource, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flow; },
     select, deselect, toggle, clear, norm, setAmp, setPhase, preset, play, store, setMorph, setView, setRef, setDrive, setDriveParam, tune,
     get drive() { return { on: drive.on, ready: drive.ready, pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, last: drive.last ? { t: drive.last.t, p0: drive.last.p0, norm: drive.last.norm, steps: drive.last.steps, lag: drive.last.lag, pops: drive.last.pops } : null }; },

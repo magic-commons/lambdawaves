@@ -4,8 +4,8 @@ import { TIER } from '../rack.js';
 import { VIEW, VIEW_NAMES } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian } from '../hamiltonian.js';
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
-  const { dom, ui, device, clock, mat, useCompactDefaults, FIRST_RUN } = app, { schedule, canPresent } = app.loop, { rack } = app.host,
-    { wState, wSpec, switchHamiltonian, wSh, wOrb, wVor, wSlice } = app.w, { cardLoading, field, solveChem, solveCard } = app.ctl, balance = (msg) => solveCard(msg, () => null, (r) => r);   // BALANCED FLOW's repair: the cards queue, never the frame thread
+  const { dom, ui, device, clock, mat, useCompactDefaults, FIRST_RUN, reg } = app, { schedule, canPresent } = app.loop, { rack } = app.host,
+    { wState, wSpec, switchHamiltonian, wSh, wOrb, wVor, wSlice } = app.w, { cardLoading, field, solveChem, solveCard, touchState } = app.ctl, balance = (msg) => solveCard(msg, () => null, (r) => r);   // BALANCED FLOW's repair: the cards queue, never the frame thread
   /* H₂⁺ · LEGACY (the `molecule` card, with W-MO and W-PULSE) was DELETED in 0.5.0 D9: restore opens a file it owned as MOLECULES · H₂ */
   app.state.chem = null;                                                     // wave CHEMISTRY: the fifth field owner, assigned below
   app.state.restampParams = null;                                            // re-tag knobs as modulation targets: lanes built after boot call it (the REGISTER's phase needles)
@@ -93,7 +93,8 @@ export function createMolecules(app) {
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wOrbs.setStatus(t, cls); },
     announce: (md) => app.state.stageText && app.state.stageText.announce(md),        // a HAND's preset only (orbitalsview / statesview presetSel)
-    now: () => clock.t, rate: () => clock.rate, field: () => field, chem: () => app.state.chem, session: app.state.molSession });
+    now: () => clock.t, rate: () => clock.rate, field: () => field, chem: () => app.state.chem, session: app.state.molSession,
+    song: { reg, hydrogen: () => getHamiltonian().id === 'hydrogen', filming: () => app.state.exportLocked, land(re, im, t) { app.state.rotTicking = true; reg.anchorFrom(re, im, t); app.state.rotTicking = false; touchState(); } } });   // 0.6.4 S1: a landing notes no history row, as the rotation drive's ticks
   app.state.orbitals = app.state.register.orbitals; app.state.states = app.state.register.states;
   return { wOrbs }; }
   app.w.wChem = wChem; app.w.head = head; return { wChem, head, createMoRegistry };

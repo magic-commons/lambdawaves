@@ -511,7 +511,7 @@ export async function boot(dom) {
     app.state.molSession.tick();
     if (app.state.chem.on && powered(wChem)) app.state.chem.update(clock.t);   // the RT pump: one outstanding worker request, then an upload — no maths on this thread, so no tick()
     app.state.register.setActive(canPresent(wOrbs));
-    if ((app.state.orbitals.on || app.state.states.on) && powered(wOrbs)) app.state.register.update(clock.t);
+    if ((app.state.orbitals.on || app.state.states.on || app.state.states.songOn) && powered(wOrbs)) app.state.register.update(clock.t);
     if (flowTracers) {
       /* the source belongs to the model that is PLAYING: the STATES register, the ORBITAL packet, or CHEMISTRY's run */
       const playing = app.state.molSession ? app.state.molSession.selected : null;
