@@ -139,6 +139,26 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
   workgroupBarrier();
   if (lid == 0u) { atomicMax(&stats[P.slot], atomicLoad(&wmax)); }
 }`;
+/* THE BEAT EQUALIZER's kernel (0.6.0 B1), DERIVED from COMPUTE_WGSL, never a copy, so the locked text above stays byte for byte
+   what FLAT runs.  Position hydrogen only: six complex shell accumulators acc_n (shell n = c.w − 1, the exponent n + 1 that a Z
+   table keeps integer) and the incoherent sum inc = Σ|c_a ψ_a|²; then ρ′ = Σ_{nn′} Re Γ_{nn′} acc_n acc̄_{n′} + κ·inc from the
+   uniform G (lab/equalizer.js) and one of three stores: 0 a pure state Σ_n Γ̄_{0n} acc_n (the pulse: Γ = uu†), 1 a density
+   (√ρ′, 0), 2 signed (sign·√|ρ′|, 0), zero under the relative floor.  The presenter reads each as it reads today's texels. */
+const EQ_WGSL = (() => {
+  let c = once(COMPUTE_WGSL, 'var<workgroup> wmax', 'struct EQ { g: array<vec4<f32>, 18>, k: f32, mode: f32, floor: f32, pad: f32 };   // Γ row-major, (re, im) per entry\n@group(0) @binding(6) var<uniform> G: EQ;\nvar<workgroup> wmax');
+  c = once(c, 'var psiB = vec2<f32>(0.0, 0.0);', 'var psiB = vec2<f32>(0.0, 0.0); var acc: array<vec2<f32>, 6>; var inc = 0.0;');
+  c = once(c, 'if (P.space == 5u && M.ctr.w > 0.5) { psiB += f * ce; } else { psi += f * ce; }', '{ let s = min(u32(M.c.w) - 2u, 5u); acc[s] += f * ce; inc += f * f * dot(M.c.xy, M.c.xy); }');
+  c = once(c, 'if (P.space == 5u) { psi = vec2<f32>(sqrt(dot(psi, psi) + dot(psiB, psiB)), 0.0); }', `var rho = G.k * inc; var u = vec2<f32>(0.0); var s2 = 0.0;
+    for (var i = 0u; i < 6u; i++) {
+      let a = acc[i]; let g0 = select(G.g[i / 2u].xy, G.g[i / 2u].zw, (i & 1u) == 1u); s2 += dot(a, a);
+      u += vec2<f32>(g0.x * a.x + g0.y * a.y, g0.x * a.y - g0.y * a.x);
+      for (var j = 0u; j < 6u; j++) { let q = i * 6u + j; let g = select(G.g[q / 2u].xy, G.g[q / 2u].zw, (q & 1u) == 1u); let b = acc[j];
+        rho += g.x * (a.x * b.x + a.y * b.y) - g.y * (a.y * b.x - a.x * b.y); }
+    }
+    if (G.mode < 0.5) { psi = u; } else if (G.mode < 1.5) { psi = vec2<f32>(sqrt(max(rho, 0.0)), 0.0); }
+    else { psi = vec2<f32>(select(sign(rho) * sqrt(abs(rho)), 0.0, abs(rho) < G.floor * s2), 0.0); }`);
+  return c.split('P.space').join('0u');                       // the dead branches fold
+})();
 
 /* ── molWgsl — THE MOLECULAR VOLUME (wave: CHEMISTRY) ───────────────────────────────────────────────────────────
  * The SAME texel convention as COMPUTE_WGSL, so RENDER_WGSL presents this volume with no change at all:
@@ -548,9 +568,10 @@ const RENDER_GLASS_FINISH = `    if (V.p6.w > .5 && V.p6.w < 1.5 && style != 6u)
       if (wEff > 0.0) { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); }
     }`;
 export const SPEC_STYLES = Object.freeze([STYLE.cloud, STYLE.grain, STYLE.bands, STYLE.dust]);
+/** one anchored substitution: `from` must occur exactly once, or the derived text throws (a moved anchor never derives silently) */
+function once(src, from, to) { const i = src.indexOf(from); if (i < 0 || src.indexOf(from, i + 1) >= 0) throw new Error('field: a derived shader lost its anchor: ' + from.slice(0, 48)); return src.slice(0, i) + to + src.slice(i + from.length); }
 /** RENDER_WGSL for one (view, style) of the key; throws when an anchor has moved (the key then fails: generic forever) */
 export function specRenderWGSL(view, style) {
-  const once = (src, from, to) => { const i = src.indexOf(from); if (i < 0 || src.indexOf(from, i + 1) >= 0) throw new Error('field: the specialised present lost its anchor: ' + from.slice(0, 48)); return src.slice(0, i) + to + src.slice(i + from.length); };
   let code = once(RENDER_WGSL, 'let mode = u32(V.p0.x);', `let mode = ${view | 0}u;`);
   code = once(code, 'let style = u32(V.p3.x);', `let style = ${style | 0}u;`);
   const cut = (src, from) => { const e = src.indexOf('\n', src.indexOf(from) + from.length - 1); return once(src, src.slice(src.indexOf(from), e + 1), ''); };   // the anchor through the end of its line (the bow line carries a comment)
@@ -1027,12 +1048,26 @@ export async function createField(canvas, opts = {}) {
   /* K7: binding 5 is the gas table once uploaded, a 16-byte stand-in until then (the 'auto' layout needs the binding; no
      record reads it while every lag[3] is 0) */
   let gasTab = null, gasTabStandIn = null;
+  /* THE BEAT EQUALIZER (0.6.0 B1): its table, and EQ_WGSL's pipeline, compiled on the first frame that needs it (boot stays at 8) */
+  let eqTable = null, eqWritten = null, eqPipeline = null, eqBuf = null, eqBind = null; const EQ_F = new Float32Array(76);
   function bindCompute() {
     const tab = gasTab || gasTabStandIn || (gasTabStandIn = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE }));
-    computeBind = [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: computePipeline.getBindGroupLayout(0), entries: [
+    const entries = (tex, i) => [
       { binding: 0, resource: { buffer: paramsBuf[i] } }, { binding: 1, resource: { buffer: modesBuf[i] } },
       { binding: 2, resource: tex.createView({ dimension: '3d' }) }, { binding: 3, resource: { buffer: statsBuf } }, { binding: 4, resource: { buffer: radialBuf } },
-      { binding: 5, resource: { buffer: tab } }] }));
+      { binding: 5, resource: { buffer: tab } }];
+    computeBind = [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: computePipeline.getBindGroupLayout(0), entries: entries(tex, i) }));
+    eqBind = eqPipeline && [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: eqPipeline.getBindGroupLayout(0), entries: [...entries(tex, i), { binding: 6, resource: { buffer: eqBuf } }] }));
+  }
+  function eqReady() {
+    if (!eqPipeline) {
+      const module = device.createShaderModule({ code: EQ_WGSL });
+      module.getCompilationInfo().then((info) => { for (const m of info.messages) out.shaderMessages.push({ shader: 'equalizer', type: m.type, line: m.lineNum, col: m.linePos, text: m.message }); }, () => {});
+      eqPipeline = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } });
+      eqBuf = device.createBuffer({ size: EQ_F.byteLength, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }); bindCompute();
+    }
+    if (eqWritten !== eqTable) { eqWritten = eqTable; EQ_F.set(eqTable.gamma); EQ_F[72] = eqTable.kappa; EQ_F[73] = eqTable.mode; EQ_F[74] = 2e-4; device.queue.writeBuffer(eqBuf, 0, EQ_F); }   // floor: the signed view's 2·10⁻⁴ of the local within-shell ρ
+    return true;
   }
   function setResolution(n) {
     if (n === res) return;
@@ -1063,7 +1098,8 @@ export async function createField(canvas, opts = {}) {
     device.queue.writeBuffer(paramsBuf[slot], 0, PARAMS);
     device.queue.writeBuffer(statsBuf, slot * 4, ZERO_U32);
     const pass = enc.beginComputePass(tw ? { timestampWrites: tw } : {});
-    pass.setPipeline(computePipeline); pass.setBindGroup(0, computeBind[slot]);
+    const eq = slot === 0 && space === 0 && eqTable && eqReady();                                // the reference (slot 1) stays the plain state
+    pass.setPipeline(eq ? eqPipeline : computePipeline); pass.setBindGroup(0, (eq ? eqBind : computeBind)[slot]);
     const g = Math.ceil(res / 4); pass.dispatchWorkgroups(g, g, g);
     pass.end();
     return count;
@@ -1641,6 +1677,9 @@ export async function createField(canvas, opts = {}) {
       return true;
     },
     setSpace(s) { s = s | 0; if (s !== space) { space = s; refValid = false; } },
+    /** 0.6.0 B1: the equalizer's table (lab/equalizer.js `table()`), or null: FLAT, the locked kernel.  Position hydrogen only;
+     *  read on the next reconstruct, which the caller asks for. */
+    setEqualizer(t) { eqTable = t && t.gamma ? t : null; },
     /** upload a 256×RGBA phase palette (Float32Array(1024), values 0..1) — an OBSERVER product: ψ is untouched */
     setPalette(lut) { lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); uploadPalette(); },
     /* ── THE GAMUT (wave 54) ────────────────────────────────────────────────────────────────────────────────
