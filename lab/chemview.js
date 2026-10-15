@@ -26,7 +26,7 @@
 import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
-import { orbitalName, forms, coreCount } from './names.js';
+import { orbitalName, forms, coreCount, symmetryDefects } from './names.js';
 import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab } from './library.js';
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
@@ -219,7 +219,8 @@ export function createChem(host, api) {
   const roIdem = readout({ label: 'IDEMPOTENCY', value: '—', sub: '' });
   const roT = readout({ label: '<m>t</m>  (a.u.)', value: '—', sub: '' });
   const roPick = readout({ label: 'INSPECTOR', cls: 'wide', value: '—', sub: 'hover or click a stick' });
-  for (const r of [roE, roEps, roTr, roIdem, roT, roPick]) rr.appendChild(r.root);
+  const roSym = readout({ label: 'SYMMETRY', cls: 'wide', value: '—', sub: '' });   // 0.6.1 F2: symmetryLine
+  for (const r of [roE, roEps, roTr, roIdem, roT, roSym, roPick]) rr.appendChild(r.root);
   el('div', 'note', host).innerHTML = '<b>Model.</b> Restricted Hartree–Fock in a vendored Cartesian basis at a fixed experimental geometry — not the RHF minimum. Sticks are singlet RPA (or TDA) roots with height proportional to oscillator strength; the curve is Im α(ω) from the real-time δ-kick trace. Peaks are fitted poles with a 4ε/σ certificate: an uncertified reading is labelled as the raw maximum. The electron count is Tr(DS), never a voxel sum.';
   /* 2026-10 (Josh) · EVERYTHING BELOW VIEW + ORBITAL sits in `.mol-more`: TDA / CORE, the kick and run controls, the
      spectrum, the readouts and the note — every control keeps its state, save/load and API (__LW.chem.kick(), run, setTda …),
@@ -333,7 +334,7 @@ export function createChem(host, api) {
         const named = keyed(r.names, pendingKey);
         orbital = named ? named.k : (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
         pendingOrbital = pendingKey = null;
-        rebuildOrbKnob(); pushField(); refresh(); tell(); notify();
+        rebuildOrbKnob(); pushField(); refresh(); tell(); notify(); symmetryLine(sol.D, 'still');
       };
       if (api.derived) api.derived(fill); else fill();
       if (r.roots) return r;                                                 // the frame-thread fallback answers whole
@@ -383,12 +384,12 @@ export function createChem(host, api) {
         restartEvery: r.restartEvery, restartPolicy: r.restartPolicy, sinceRestart: r.sinceRestart || 0 };
       spec = null; fit = null; fitErr = null;
       pushMatrix(true);                                        // Δρ's reference IS the kicked t = 0
-      refresh(); return r;
+      refresh(); symmetryLine(rt.D_re, 'RUN'); return r;
     });
   }
   function reset() {
     setRun(false); rt = null; spec = null; fit = null; fitErr = null;
-    if (sol) call({ op: 'chem.rt.reset' }).then(() => { pushMatrix(); refresh(); });
+    if (sol) call({ op: 'chem.rt.reset' }).then(() => { pushMatrix(); refresh(); symmetryLine(sol && sol.D, 'still'); });
     else refresh();
   }
   function setRun(v) {
@@ -414,7 +415,7 @@ export function createChem(host, api) {
       if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
       if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im;
       rt.samples = r.samples || rt.samples; append(r.trace);
-      pushMatrix(); requestSpectrum(); refresh();
+      pushMatrix(); requestSpectrum(); refresh(); if (r.D_re && symDue()) symmetryLine(rt.D_re, 'RUN');
     }).catch(() => { inflight = false; });
   }
   /** the fit's own copy of the trace, capped at its window; the worker keeps the authoritative one */
@@ -569,7 +570,7 @@ export function createChem(host, api) {
   const storageNote = (i) => { stored = !i ? '' : (i.persisted ? 'persisted' : i.safariTab ? 'a Safari tab: kept until the browser clears it — add λWAVES to the Home Screen to keep it' : 'not persisted')
     + (Number.isFinite(i.usage) && Number.isFinite(i.quota) ? ` · ${(i.usage / 1048576).toFixed(1)} of ${Math.round(i.quota / 1048576)} MB used` : ''); if (sol) refresh(); };
   function refresh() {
-    if (!sol) { for (const r of [roE, roEps, roTr, roIdem, roT]) r.set('—', ''); paint(); return; }
+    if (!sol) { for (const r of [roE, roEps, roTr, roIdem, roT, roSym]) r.set('—', ''); paint(); return; }
     roE.set(sol.energy.toFixed(9), 'ok');
     const P = PRESET_BY_ID.get(preset) || {};
     roE.setSub(`${P.name} · ${basis.toUpperCase()} · E_nuc ${Number(sol.Enuc).toFixed(6)}` + (sol.local ? ' · on the frame thread (no worker)' : ''));
@@ -601,6 +602,20 @@ export function createChem(host, api) {
 
   /* 0.5.4 P4 · THE STATUS of what this card puts on stage (lab/status.js): built on a landing, a VIEW change, a FLOW toggle or a load and KEPT — never in a frame */
   function tell() { const P = PRESET_BY_ID.get(preset), row = (P.records || {})[basis] || null; said = sol ? statusOf({ record: row, sol, oracle: row ? null : basis === 'sto-3g' ? P.oracle : (P.oracle && P.oracle[basis]) || null, view: flowOn ? 'flow' : view }) : null; if (api.said) api.said(said); }
+  /* 0.6.1 F2 · THE SYMMETRY CERTIFICATE (names.js symmetryDefects) once per landing of a density — the still, the kick, RUN's D(t) and the
+     register's D₀ + ΔD (`certify`) at ≤ 5 Hz, never in a frame; kept ε < 1e-9 · broken > 1e-6 · nearly between; the catalogue's group and frame */
+  let symAt = 0; const symDue = () => { const t = performance.now(); return t - symAt >= 200 && !!(symAt = t); }, gsub = (g) => g.replace(/\d/g, (d) => '₀₁₂₃₄₅₆₇₈₉'[d]);
+  const num = (x) => (x >= 1e-3 ? String(+x.toPrecision(2)) : x.toExponential(0).replace(/e-(\d+)/, (_, e) => '·10⁻' + e.replace(/\d/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])));
+  function symmetryLine(D, src) {
+    const sym = PRESET_BY_ID.get(preset).symmetry, g = sym.group, say = (v, line, cls = '') => { roSym.set(v, cls); roSym.setSub(line); };
+    if (!sol || !D || g === 'C1') return say(sol && D ? 'C₁' : '—', sol && D ? 'C1 · no symmetry declared' : '');
+    let ops; try { ops = symmetryDefects({ atoms: chemAtoms(preset), shells: sol.shells, D, group: g, frame: sym.frame }); } catch (e) { return say(gsub(g), String(e.message || e), 'warn'); }
+    if (!ops.length) return say(gsub(g), 'declared · no table');
+    const kept = ops.filter((o) => o.eps < 1e-9), bad = ops.filter((o) => o.eps > 1e-6), h = ops.length, k = kept.length, o2 = k === 2 && kept[1].name;
+    const worst = Math.max(...ops.map((o) => o.eps)), lo = Math.min(...bad.map((o) => o.eps)), near = h - k - bad.length;
+    say(k === h ? gsub(g) : !bad.length ? `nearly ${gsub(g)} (ε = ${num(worst)})` : src === 'RUN' ? `broken by ${num(lo)} after the kick` : k === 1 ? 'C₁' : o2 ? (/σ/.test(o2) ? 'Cs' : o2 === 'i' ? 'Ci' : 'C₂') : `${k} of ${h} kept`,
+      `${src} · ` + (k === h ? `${h} of ${h} kept · worst ${num(worst)}` : `{${[...new Set(kept.map((o) => o.name))].join(', ')}} kept` + (bad.length ? ` · ${bad.length} broken ≥ ${num(lo)}` : '') + (near ? ` · ${near} nearly` : '')), k === h ? 'ok' : bad.length ? 'warn' : '');
+  }
   /* ── the plot ─────────────────────────────────────────────────────────────────────────────────── */
   const bright = () => (sol && sol.roots ? sol.roots : []);
   /** the ladder on screen: the RPA roots, or the TDA ladder in its own order with its own strengths */
@@ -896,6 +911,7 @@ export function createChem(host, api) {
     setCore(v) { core = !!v; coreSw.set(core); cvCore.hidden = !core; paint(); return core; },
     setValence(v) { valence = !!v; valSw.set(valence); pushMatrix(); refresh(); return valence; },
     kick() { return kick(); },
+    certify(dD) { if (sol && sol.D && symDue()) symmetryLine(sol.D.map((v, k) => v + dD[k]), 'STATES'); },   // the register's ΔD against the ground (statesview.js), at ≤ 5 Hz
     /** RUN n steps and settle — the gate's road, and it never leaves the switch on behind it */
     async run(n) {
       if (!sol) return null;
@@ -917,11 +933,11 @@ export function createChem(host, api) {
           rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep; if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im;
           if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
           rt.samples = r.samples || rt.samples; append(r.trace);
-          pushMatrix();
+          pushMatrix(); if (r.D_re && symDue()) symmetryLine(rt.D_re, 'RUN');
         } else await new Promise((res) => setTimeout(res, 8));
       }
       } finally { if (mine) { scripted = false; if (!running && S()) S().claim('tdhf', false, 'the scripted RT run has finished'); pushMatrix(); } }   // and the card's own model repaints the last density
-      refresh(); requestSpectrum(true);
+      refresh(); requestSpectrum(true); if (rt) symmetryLine(rt.D_re, 'RUN');
       return this.state();
     },
     /** the BASIS control from outside: the same road as the segment — it re-solves, and falls back with a sentence where 6-31+G* is not offered */

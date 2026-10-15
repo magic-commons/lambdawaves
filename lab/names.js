@@ -19,7 +19,7 @@
  * live here too: the four formatters the app had (orbitalsview `label`, chemview `orbFmt`, latex-state `frontier` /
  * `latexName`, hydrogen.js's `subscript`) read this file.
  */
-import { clusterRanges } from './canon-gauge.js';
+import { clusterRanges } from './canon-gauge.js'; import { etable, CART } from './md.js';
 
 /* ── 3 × 3 algebra, row-major ─────────────────────────────────────────────────────────────────────────────── */
 const mm3 = (A, B) => { const o = new Array(9).fill(0); for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) for (let k = 0; k < 3; k++) o[i * 3 + j] += A[i * 3 + k] * B[k * 3 + j]; return o; };
@@ -222,7 +222,22 @@ function overlapDefect({ start, row, val }, S, n) {
   }
   return worst;
 }
-
+/** THE SYMMETRY CERTIFICATE (0.6.1 F2): ε_g = max|M(g)ᵀ SDS M(g) − SDS| / max|SDS| per operation of a declared group → [{ R, col, name, eps }], [] for
+    C1 or no table.  S never leaves the worker: it is rebuilt from the wire's field shells (md.js's Hermite overlaps); DᵀSD = S accepts each M(g). */
+export function symmetryDefects({ atoms, shells, D, group, frame }) {
+  if (!GROUPS[group] || group === 'C1') return [];
+  const n = shells.reduce((s, sh) => s + sh.nc, 0), S = new Float64Array(n * n), dist = (a, c) => Math.hypot(a.x - c[0], a.y - c[1], a.z - c[2]);
+  const basis = { n, shells: shells.map((sh) => ({ atom: atoms.reduce((b, a, i) => (dist(a, sh.center) < dist(atoms[b], sh.center) ? i : b), 0), l: sh.l, bfs: Array.from({ length: sh.nc }, (_, i) => ({ idx: sh.ao + i })) })) };
+  for (const a of shells) for (const b of shells) for (const p of a.prims) for (const q of b.prims) {
+    const e = [0, 1, 2].map((x) => etable(a.l, b.l, p.alpha, q.alpha, a.center[x], b.center[x])), pre = (Math.PI / (p.alpha + q.alpha)) ** 1.5, E0 = (x, i, j) => e[x].E[e[x].at(i, j, 0)];
+    for (let i = 0; i < a.nc; i++) for (let j = 0; j < b.nc; j++) { const u = CART[a.l][i], v = CART[b.l][j]; S[(a.ao + i) * n + b.ao + j] += p.w[i] * q.w[j] * pre * E0(0, u[0], v[0]) * E0(1, u[1], v[1]) * E0(2, u[2], v[2]); } }
+  const mul = (A, B) => { const C = new Float64Array(n * n); for (let i = 0; i < n; i++) for (let k = 0; k < n; k++) { const v = A[i * n + k]; if (v) for (let j = 0; j < n; j++) C[i * n + j] += v * B[k * n + j]; } return C; };
+  const W = mul(mul(S, D), S), top = W.reduce((m, v) => Math.max(m, Math.abs(v)), 1e-300), fr = frameOf(atoms, frame);
+  return operations(group).map(({ R, col }) => {
+    const Rl = mm3(fr.F, mm3(R, tp3(fr.F))), fw = framework(atoms, fr.c, Rl), M = aoRep(basis, fw.perm, Rl), name = GROUPS[group].cols[col][0];
+    if (fw.worst <= GEOM_TOL && overlapDefect(M, S, n) > 1e-10) throw new Error(`${name}: DᵀSD ≠ S — the AO representation is not a symmetry of the overlap`); return { R, col, name, eps: overlapDefect(M, W, n) / top };
+  });
+}
 /* ── THE CORE ─────────────────────────────────────────────────────────────────────────────────────────────────
  * Frozen-core electrons per element: He for Li–Ne, Ne for Na–Ar, Ar for K–Ca, Ar for Sc–Zn (3d is valence), Ar + 3d¹⁰
  * for Ga–Kr.  coreCount(atoms) is the number of core ORBITALS (doubly occupied), what the ladder folds. */
