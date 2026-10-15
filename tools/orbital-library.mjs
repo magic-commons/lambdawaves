@@ -175,7 +175,8 @@ const CANDIDATES = [
      boron's), and the gate would refuse it on novelty (I_h, the cage and both ring sizes are in) — so it ships under a DECLARED
      allowance, the milestone Josh named, and its record is S4c's frontier record (PySCF's eight frontier columns, re-encoded) */
   { id: 'C60', census: 'C60', basis: S3, section: 'LATTICE', group: 'Ih', motifs: ['cage', 'ring:5', 'ring:6'], allowance: 'milestone', name: 'buckminsterfullerene', formula: '<m>C₆₀</m>',
-    frontier: { dump: 'research/release-0.4.0/library-census/c60-frontier.json', samples: 'research/release-0.4.0/library-census/c60-pyscf-samples.json' } },
+    frontier: { dump: 'research/release-0.4.0/library-census/c60-frontier.json', samples: 'research/release-0.4.0/library-census/c60-pyscf-samples.json',
+      occupied: 'research/release-0.4.0/library-census/c60-occupied.json' } },
   { id: 'neopentane', census: 'neopentane', section: 'LATTICE', group: 'C1' },
   { id: 'naphthalene', census: 'naphthalene', section: 'LATTICE', group: 'C1', motifs: ['ring:6'] },
   { id: 'Si5H12', census: 'Si5H12', section: 'LATTICE', group: 'C1' },
@@ -449,44 +450,51 @@ function fixtureEntry(id) {
  * UNVERIFIED) and the record says so; the I_h names are 0.4.1 BUCKYBALL, so the levels are named by energy only.
  * Checked here or there is no file: the basis file's sha-256 is the dump's, the app's own AOs (md.js basisFrom +
  * molecular-field.js evaluator) contracted with the columns answer PySCF's GTOval_cart at Sol's 92 points
- * (c60-pyscf-samples.json) to ≤ 1e-10, and every level's spread is under names.js's 2e-10 Eh. */
+ * (c60-pyscf-samples.json) to ≤ 1e-10, and every level's spread is under names.js's 2e-10 Eh.
+ * 0.6.1 F1: where the OCCUPIED dump is present (frontier.py --occupied: the same RHF re-run, its energy the dump's to 1e-9) the record
+ * carries ITS columns instead — every occupied index and the LUMO set, `cols` 0 … 182 — checked at the same 92 points on a sample of
+ * them, so MOLECULES draws the density through the field's FACTOR road (ρ = 2 Σ_k φ_k²), exactly, with no D. */
 function buildFrontier(e) {
   const read = (p) => JSON.parse(readFileSync(fileURLToPath(new URL('../' + p, import.meta.url)), 'utf8'));
-  const F = read(e.frontier.dump), P = read(e.frontier.samples), b0 = bse[e.basis || S3];
-  if (F.basis.sha256 !== sha(b0.text)) throw new Error(`orbital-library: ${e.id}'s dump was made on another basis file`);
+  const F = read(e.frontier.dump), O = e.frontier.occupied && existsSync(at(e.frontier.occupied)) ? read(e.frontier.occupied) : null, P = O ? O.samples : read(e.frontier.samples), b0 = bse[e.basis || S3];
+  if (F.basis.sha256 !== sha(b0.text) || (O && O.basisSha256 !== F.basis.sha256)) throw new Error(`orbital-library: ${e.id}'s dump was made on another basis file`);
+  if (O && !(Math.abs(O.solver.energyEh - F.solver.energyEh) < 1e-9 && O.solver.converged)) throw new Error(`orbital-library: ${e.id}'s occupied dump is not the frontier dump's calculation`);
   const ang = F.geometry.atomsAngstrom, atoms = ang.map(([Z, x, y, z]) => ({ Z, x: x * ANGSTROM, y: y * ANGSTROM, z: z * ANGSTROM }));
-  const b = basisFrom(atoms, JSON.parse(b0.text), { cart: true }), n = b.n, eps = F.solver.orbitalEnergiesEh, nocc = F.solver.occupations.filter((o) => o === 2).length;
-  const sets = [F.frontier.HOMO, F.frontier.LUMO], cols = sets.flatMap((s) => s.indices), cs = sets.flatMap((s) => s.coefficientColumns), m = cols.length;
+  const b = basisFrom(atoms, JSON.parse(b0.text), { cart: true }), n = b.n, Sv = (O || F).solver, eps = Sv.orbitalEnergiesEh, nocc = F.solver.occupations.filter((o) => o === 2).length;
+  const sets = [F.frontier.HOMO, F.frontier.LUMO], cols = O ? O.indices : sets.flatMap((s) => s.indices), cs = O ? O.coefficientColumns : sets.flatMap((s) => s.coefficientColumns), m = cols.length;
+  const checked = O ? O.samples.indices.map((k) => cs[cols.indexOf(k)]) : cs;
   if (eps.length !== n || cs.some((c) => c.length !== n) || !F.solver.converged) throw new Error(`orbital-library: ${e.id}'s dump does not fit ${n} AOs`);
   const ev = evaluator(b.shells); let worst = 0;
-  P.pointsBohr.forEach((p, q) => { const a = ev.ao(p); cs.forEach((c, j) => { let s = 0; for (let i = 0; i < n; i++) s += c[i] * a[i]; worst = Math.max(worst, Math.abs(s - P.signedValues[q][j])); }); });
+  P.pointsBohr.forEach((p, q) => { const a = ev.ao(p); checked.forEach((c, j) => { let s = 0; for (let i = 0; i < n; i++) s += c[i] * a[i]; worst = Math.max(worst, Math.abs(s - P.signedValues[q][j])); }); });
   if (!(worst <= 1e-10)) throw new Error(`orbital-library: ${e.id}'s columns on the app's AOs miss PySCF's orbital by ${worst} — the AO order or normalisation is not the app's`);
   const C = new Float64Array(n * m); cs.forEach((c, j) => { for (let i = 0; i < n; i++) C[i * m + j] = c[i]; });   // row-major n × m, as C is n × n
   const names = nameOrbitals({ atoms, eps, nocc, basis: b, converged: true }, null), ch = characters({ atoms, basis: b }, names);
   names.mos.forEach((mo, i) => { mo.character = ch[i]; }); names.core = Math.min(coreCount(atoms), nocc); delete names.axes; delete names.ms;
   names.reason = 'C₆₀\'s I_h names are 0.4.1 BUCKYBALL (Sol computed and checked them: HOMO 6h_u, LUMO 7t₁u); here the levels are named by energy';
-  for (const s of sets) if (!(s.energySpreadEh < 2e-10)) throw new Error(`orbital-library: ${e.id}'s ${s.irrep} set spreads ${s.energySpreadEh} Eh`);
+  for (const s of sets) { const e2 = s.indices.map((k) => eps[k]), w = Math.max(...e2) - Math.min(...e2); if (!(w < 2e-10)) throw new Error(`orbital-library: ${e.id}'s ${s.irrep} set spreads ${w} Eh`); }
   const ids = IDS[e.id] || null, half = atoms.reduce((s, a) => Math.max(s, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)), 0) + 6, gap = eps[nocc] - eps[nocc - 1];
   const source = `DRAFT GEOMETRY, NOT A MEASUREMENT: ${F.geometry.why} (${F.geometry.source}; experimental status ${F.geometry.experimentalStatus})`;
   const molecule = { name: e.name, formula: e.formula, charge: 0, symmetry: { group: 'C1' }, source, ang };
-  const ground = { energy: F.solver.energyEh, Enuc: nuclearRepulsion(atoms), nocc, nAO: n, order: b.order, hash: b.hash, basis: e.basis, charge: 0,
+  const ground = { energy: Sv.energyEh, Enuc: nuclearRepulsion(atoms), nocc, nAO: n, order: b.order, hash: b.hash, basis: e.basis, charge: 0,
     electrons: 2 * nocc, converged: true, dipole: [0, 0, 0], half, stability: null, solutions: [], names, cols };
   const record = {
     schema: SCHEMA, kind: 'lambdawaves.orbital-record', id: e.id, basis: e.basis, name: e.name, formula: e.formula,
-    generator: 'tools/orbital-library.mjs buildFrontier — PySCF\'s orbitals re-encoded (' + e.frontier.dump + '); no app solve: 300 AOs are past every live road',
+    generator: 'tools/orbital-library.mjs buildFrontier — PySCF\'s orbitals re-encoded (' + (O ? e.frontier.occupied : e.frontier.dump) + '); no app solve: 300 AOs are past every live road',
     input: { atoms, atomsSha256: geometryKey(atoms), charge: 0, multiplicity: 1, basis: e.basis, basisFile: b0.file, basisSha256: sha(b0.text), symmetry: molecule.symmetry },
     caps: { orbitals: true, states: false, rpa: false, tdhf: false },
     ground, orbitals: { eps: f64(eps), C: f64(C) },
     stem: { formula: e.formula, pointGroup: null, frame: null, approximate: false, mass: +atoms.reduce((s, a) => s + MASS[a.Z], 0).toFixed(3), massUnit: 'u (IUPAC conventional atomic weights)',
       charge: 0, multiplicity: 1, dipoleDebye: 0, gapEh: gap, gapEv: +(gap * EV).toFixed(4), homo: `HOMO (${F.frontier.HOMO.irrep} ×5) · LUMO (${F.frontier.LUMO.irrep} ×3)`, geometrySource: source,
       inchiKey: (ids && ids.inchiKey) || null, pubchemCid: (ids && ids.cid) || null, identifiers: ids ? ids.status || 'UNVERIFIED: not yet asked of PubChem' : 'UNVERIFIED: no PubChem identifiers recorded (tools/library/pubchem-ids.json)',
-      symmetry: { pointGroup: e.group, labelledIn: null, why: 'a FRONTIER record (S4c): its levels are named by energy only — C₆₀\'s I_h names are 0.4.1 BUCKYBALL (lab/names.js has the I_h table; this record carries 8 columns, not the whole C the projection needs)',
+      symmetry: { pointGroup: e.group, labelledIn: null, why: `a FRONTIER record (S4c): its levels are named by energy only — C₆₀\'s I_h names are 0.4.1 BUCKYBALL (lab/names.js has the I_h table; this record carries ${m} columns, not the whole C the projection needs)`,
         frame: CONVENTION.Ih, atomsInFrame: null, pyscf: null, allowance: GATE_ALLOWANCE[e.allowance] || null },
-      blurb: ['Sixty carbons on a truncated icosahedron: the HOMO a five-fold h_u set, the LUMO a three-fold t₁u set — eight orbitals drawn by the field\'s orbital-only kernel.',
+      blurb: O ? ['Sixty carbons on a truncated icosahedron: the HOMO a five-fold h_u set, the LUMO a three-fold t₁u set, and the density summed exactly over all 180 occupied orbitals.',
+        'The record carries every occupied orbital and the LUMO set, no density matrix: the field forms ρ = 2 Σ φ² on the GPU. Its I_h names and an experimental geometry are still to come.']
+        : ['Sixty carbons on a truncated icosahedron: the HOMO a five-fold h_u set, the LUMO a three-fold t₁u set — eight orbitals drawn by the field\'s orbital-only kernel.',
         'Its density, its I_h names and a geometry checked against experiment are 0.4.1 BUCKYBALL; this record carries the frontier orbitals only.'],
-      ies: null, sources: ['geometry: ' + source, 'orbitals and energy: ' + e.frontier.dump + ' (PySCF ' + F.solver.pyscf + ', ' + F.solver.method + ')', 'field check: ' + e.frontier.samples, 'basis: ' + b0.file + ' (Basis Set Exchange, vendored)'] },
+      ies: null, sources: ['geometry: ' + source, 'orbitals and energy: ' + (O ? e.frontier.occupied : e.frontier.dump) + ' (PySCF ' + F.solver.pyscf + ', ' + F.solver.method + ')', 'field check: ' + (O ? e.frontier.occupied + ' samples' : e.frontier.samples), 'basis: ' + b0.file + ' (Basis Set Exchange, vendored)'] },
     page: moleculeLatex({ molecule: { id: e.id, ...molecule }, basis: e.basis, charge: 0, ground: { energy: ground.energy, eps, nocc, nAO: n, names } }),
-    oracle: { energy: F.solver.energyEh, source: e.frontier.dump + ' solver.energyEh', what: 'PySCF ' + F.solver.pyscf + ' — the record IS PySCF\'s; its check is the field at Sol\'s 92 points', delta: 0, fieldMaxAbsErr: worst },
+    oracle: { energy: Sv.energyEh, source: (O ? e.frontier.occupied : e.frontier.dump) + ' solver.energyEh', what: 'PySCF ' + F.solver.pyscf + ' — the record IS PySCF\'s; its check is the field at Sol\'s 92 points', delta: 0, fieldMaxAbsErr: worst },
   };
   const text = JSON.stringify(record, null, 1) + '\n', bytes = Buffer.from(text), hash = sha(bytes);
   const bad = validateRecord(JSON.parse(text));

@@ -99,15 +99,15 @@ assert.equal(calls() - c0, 0, 'a cache miss on a record-only molecule ran the so
 W.chemOpen({ lib: L, hash: row('lysine').hash, basis: 'sto-3g' });           // opened again, it answers again, still with no solver call
 assert.equal(W.chemSpectrum(Lm).roots.length, 960); assert.equal(calls() - c0, 0);
 
-/* 5c · C₆₀, THE FRONTIER RECORD (0.4.0 S4c): PySCF's orbitals re-encoded — ε for all 300 and the HOMO and LUMO sets only (ground.cols);
+/* 5c · C₆₀, THE FRONTIER RECORD (0.4.0 S4c): PySCF's orbitals re-encoded — ε for all 300 and, since 0.6.1 F1, every occupied column and the LUMO set (ground.cols);
        it opens with no solver call, answers whole (no spectrum to wait for), has no density, refuses everything it does not carry,
        and its columns are the dump's, laid out n × n where every reader indexes them */
 const C60 = load('C60'), Cd = decodeRecord(C60), Cm = { atoms: Cd.atoms, basis: 'sto-3g', charge: 0 };
-const dump = JSON.parse(readFileSync(at('../research/release-0.4.0/library-census/c60-frontier.json'), 'utf8'));
-assert.deepEqual(Cd.cols, [175, 176, 177, 178, 179, 180, 181, 182]); assert.equal(Cd.D, null);
+const dump = JSON.parse(readFileSync(at('../research/release-0.4.0/library-census/c60-occupied.json'), 'utf8'));
+assert.deepEqual(Cd.cols, Array.from({ length: 183 }, (_, k) => k)); assert.equal(Cd.D, null);
 assert.deepEqual(C60.caps, { orbitals: true, states: false, rpa: false, tdhf: false });
 assert.ok(/DRAFT GEOMETRY/.test(C60.stem.geometrySource) && /UNVERIFIED/.test(C60.stem.geometrySource), 'the record says its geometry is a draft');
-[...dump.frontier.HOMO.coefficientColumns, ...dump.frontier.LUMO.coefficientColumns].forEach((c, j) => same(Float64Array.from({ length: 300 }, (_, i) => Cd.C[i * 300 + Cd.cols[j]]), Float64Array.from(c), 'C60 column ' + Cd.cols[j]));
+dump.coefficientColumns.forEach((c, j) => same(Float64Array.from({ length: 300 }, (_, i) => Cd.C[i * 300 + Cd.cols[j]]), Float64Array.from(c), 'C60 column ' + Cd.cols[j]));
 c0 = calls();
 const co = W.chemOpen({ lib: C60, hash: row('C60').hash, basis: 'sto-3g' });
 assert.ok(co.nAO === 300 && co.nocc === 180 && co.D === null && co.roots.length === 0 && co.energy === dump.solver.energyEh, 'C60 opens whole: 300 AO, 180 occupied, no D, PySCF\'s energy');
