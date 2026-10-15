@@ -11,6 +11,31 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.6.2-alpha` — 2026-10-15
+
+Commit `97be431` · no new waves · 12 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `f2c2391` 2026-10-15 — H1 (1) THE REPAIR: flow-balance.js balance() + the cards worker's flow.balance op
+- `11c4e48` 2026-10-15 — H1 (2) THE SOURCE'S HOOK: createFlow's setRepair (j += ρ∇φ, trilinear), the worker pump, GATED…
+- `f4f2703` 2026-10-15 — 0.6.2 H2a THE DRIVE'S PITCH: STATES' DRIVE sub-line names the nearest stick and its detuning, f…
+- `1209aa7` 2026-10-15 — 0.6.2 H2b H₂'S HIDDEN CORRELATION: on MOLECULES · H₂ (STO-3G) one note under the spectra —…
+- `95b0151` 2026-10-15 — H1 (3-5) THE SAMPLER, THE UI, PERSISTENCE: FLOW SOURCE AS COMPUTED · BALANCED, REPAIR + GATED,…
+- `d32cd4a` 2026-10-15 — 0.6.2 H2 build report: seats, the numbers (4|ab|K = 0.0812 Eh at the row's R, not Round 2's…
+- `278d8f3` 2026-10-15 — H1 BUILD note: research/release-0.6.2/H1-BUILD.md
+- `e5fbd35` 2026-10-15 — CHANGELOG for v0.6.1-alpha
+- `e066dd7` 2026-10-15 — merge H2 THE DRIVE'S PITCH + H₂'S HIDDEN CORRELATION (d32cd4a): the DRIVE readout names the…
+- `545a0f6` 2026-10-15 — merge H1 CONTINUITY (278d8f3): lab/flow-balance.js (Round 1's BALANCED solver with Round 2's…
+- `e32a594` 2026-10-15 — 0.6.2 CHANGES-0.6.2.md (H2, H1 in plain words; the H₂ gap corrected to 0.0812 Eh at the row's…
+- `97be431` 2026-10-15 — 0.6.2-alpha Honest Flow: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.6.1-alpha` — 2026-10-15
 
 Commit `ca16d8f` · no new waves · 18 commits.
