@@ -306,6 +306,23 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
     atomicMax(&stats[P.slot], bitcast<u32>(m));
   }
 }`;
+/* ── FACTOR_WGSL — THE FACTOR ROAD (0.6.1 F1), DERIVED from ORB_WGSL: a density from its occupied columns, ρ = 2 Σ_{k<K} φ_k²,
+ * φ_k = Σ_μ C_μk χ_μ — O(nAO·K) a voxel and no χ tile, so a record past MAX_MOL_AO draws its density (C₆₀: 300 AO × 180).
+ * K-BLOCKED: 32 φ's in registers (8 vec4, `mat` read as vec4), the screened shell loop re-run once a block (χ is cheap beside the MACs).  `mat` is row-major
+ * n × K (K = P.r0, padded to 32 with zero columns), so a block reads 32 contiguous floats, the same for every lane.  Texel (√ρ, 0),
+ * the density convention: the presenter is untouched.  Kind 4; compiled on the first factor matrix (`facReady`).  MEASURED (RTX 3070,
+ * headless Firefox): C₆₀ 12.5 ms at 64³, 40 ms at 96³ — at 96³ B = 16 took 72 ms (twice the passes) and B = 64 223 ms (it spills). */
+const FACTOR_WGSL = (() => {
+  let c = once(ORB_WGSL, 'var<storage, read> mat: array<f32>;', 'var<storage, read> mat: array<vec4<f32>>;');
+  c = once(c, '    for (var s = 0u; s < P.nShell; s++) {', '    var rho = 0.0;\n    for (var k0 = 0u; k0 < u32(P.r0); k0 += 32u) {\n    var phi: array<vec4<f32>, 8>;\n    for (var s = 0u; s < P.nShell; s++) {');
+  return once(c, `      for (var c = 0u; c < nc; c++) { amp += mat[sh.aOff + c] * acc[c]; }
+      if (P.kind == 2u) { for (var c = 0u; c < nc; c++) { ampIm += mat[P.nAO + sh.aOff + c] * acc[c]; } }
+    }`, `      for (var c = 0u; c < nc; c++) { let row = ((sh.aOff + c) * u32(P.r0) + k0) / 4u; let a = acc[c]; for (var j = 0u; j < 8u; j++) { phi[j] += mat[row + j] * a; } }
+    }
+    for (var j = 0u; j < 8u; j++) { rho += dot(phi[j], phi[j]); }
+    }
+    amp = sqrt(2.0 * rho);`);
+})();
 
 const RENDER_WGSL = /* wgsl */`
 struct View {
@@ -762,7 +779,7 @@ export function tableFor(s) {
  * not uniform arrays: f32 values with integer offsets, so 64 AOs and 256 shells cost nothing per frame.
  */
 export const MAX_MOL_AO = 128;                                // the widest χ tile: a density (n²) needs one, so this is the density's ceiling
-export const MOL_LIMITS = { shells: 256, prims: 2048, weights: 8192, ao: 768, prim: 32 };   // ao: the ORBITAL's ceiling (ORB_WGSL, no tile; C₆₀ is 300) · prim: the kernel's per-group register array
+export const MOL_LIMITS = { shells: 256, prims: 2048, weights: 8192, ao: 768, prim: 32, cols: 192 };   // ao: the ORBITAL's ceiling (ORB_WGSL, no tile; C₆₀ is 300) · prim: the kernel's per-group register array · cols: a FACTOR's K, padded
 /* THE AO TIERS.  The χ tile is cap × 64 × 4 bytes of WORKGROUP memory — 4, 10, 16, 32 KiB — so the SMALLEST tier a molecule
    fits sets how many workgroups an SM holds: water, benzene, lysine, then tryptophan (87) to C₂₀H₂₀ (120) in 32 KiB, which
    lab/gpu-boot.js asks for and, where it is not granted, is built with 32 lanes (16 KiB).  An ORBITAL past 64 AOs takes
@@ -893,7 +910,7 @@ export async function createField(canvas, opts = {}) {
   const lineModule = device.createShaderModule({ code: LINE_WGSL });
   /* the molecular volume (CHEMISTRY): one pipeline per AO tier, each tier's lanes set by the workgroup memory this device
      GRANTED (0.4.0 S4c: the cap-128 tile is 32 KiB at 64 lanes, 16 KiB at 32) — then the orbital-only kernel, index ORB */
-  const molWg = MOL_CAPS.map((cap) => (cap * 64 * 4 <= device.limits.maxComputeWorkgroupStorageSize ? 64 : 32)), ORB = MOL_CAPS.length;
+  const molWg = MOL_CAPS.map((cap) => (cap * 64 * 4 <= device.limits.maxComputeWorkgroupStorageSize ? 64 : 32)), ORB = MOL_CAPS.length, FAC = ORB + 1;
   const molModules = [...MOL_CAPS.map((cap, i) => device.createShaderModule({ code: molWgsl(cap, molWg[i]) })), device.createShaderModule({ code: ORB_WGSL })];
   /* compile messages are kept, never swallowed: a broken shader must say where */
   out.shaderMessages = [];
@@ -975,7 +992,7 @@ export async function createField(canvas, opts = {}) {
   const molShellBuf = device.createBuffer({ size: MOL_LIMITS.shells * 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
   const molAlphaBuf = device.createBuffer({ size: MOL_LIMITS.prims * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
   const molWBuf = device.createBuffer({ size: MOL_LIMITS.weights * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
-  const molMatBuf = device.createBuffer({ size: MAX_MOL_AO * MAX_MOL_AO * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });   // ≥ 2 × MOL_LIMITS.ao: a complex orbital's two vectors
+  const molMatBuf = device.createBuffer({ size: MOL_LIMITS.ao * MOL_LIMITS.cols * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });   // a FACTOR's n × K at the ceilings (576 KiB, fixed): ≥ 128² and 2 × ao
   const molCutBuf = device.createBuffer({ size: MOL_LIMITS.shells * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });            // ORB_WGSL's screen, r² per shell
   const MOL_PARAMS = new ArrayBuffer(32), MOL_PARAMS_U = new Uint32Array(MOL_PARAMS), MOL_PARAMS_F = new Float32Array(MOL_PARAMS);
   const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge' });
@@ -1029,7 +1046,7 @@ export async function createField(canvas, opts = {}) {
      the volume is static between updates, so it is re-dispatched on a DIRTY FLAG (matrix, spec, resolution or
      domain changed), never once per frame. */
   let molSpec = null, molPack = null, molMat = null, molKind = 0, molKindName = 'density', molDirty = false, molRefDirty = false;
-  let molCplx = null;                                          // the [re | im] staging vector a COMPLEX orbital is uploaded from (kind 2)
+  let molCplx = null, molK = 0;                                          // the [re | im] staging vector a COMPLEX orbital is uploaded from (kind 2)
   const molParamSig = ['', '']; let molTier = 0;
   let half = 7, space = 0, generation = 0, refGeneration = -1, refValid = false;
   const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0, molDispatches: 0, molAO: 0, molMs: 0 };
@@ -1080,13 +1097,20 @@ export async function createField(canvas, opts = {}) {
       { binding: 0, resource: { buffer: viewBuf } }, { binding: 1, resource: psiTex.createView({ dimension: '3d' }) },
       { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } },
       { binding: 5, resource: { buffer: palBuf } }] });
-    molBind = molPipelines.map((pl, p) => [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: pl.getBindGroupLayout(0), entries: [
+    molBind = molPipelines.map(molBindFor);
+    molDirty = molDirty || !!molSpec; stats.resolution = n;
+    refValid = false;
+  }
+  const molBindFor = (pl, p) => [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: pl.getBindGroupLayout(0), entries: [
       { binding: 0, resource: { buffer: molParamsBuf[i] } }, { binding: 1, resource: { buffer: molShellBuf } },
       { binding: 2, resource: { buffer: molAlphaBuf } }, { binding: 3, resource: { buffer: molWBuf } },
       { binding: 4, resource: { buffer: molMatBuf } }, { binding: 5, resource: tex.createView({ dimension: '3d' }) },
-      { binding: 6, resource: { buffer: statsBuf } }, ...(p === ORB ? [{ binding: 7, resource: { buffer: molCutBuf } }] : [])] })));
-    molDirty = molDirty || !!molSpec; stats.resolution = n;
-    refValid = false;
+      { binding: 6, resource: { buffer: statsBuf } }, ...(p >= ORB ? [{ binding: 7, resource: { buffer: molCutBuf } }] : [])] }));
+  function facReady() {                                        // the ninth module, compiled on the first factor matrix (boot stays at 8, as eqReady)
+    if (molPipelines[FAC]) return;
+    const module = device.createShaderModule({ code: FACTOR_WGSL });
+    module.getCompilationInfo().then((info) => { for (const m of info.messages) out.shaderMessages.push({ shader: 'factor', type: m.type, line: m.lineNum, col: m.linePos, text: m.message }); }, () => {});
+    molPipelines[FAC] = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } }); molBind[FAC] = molBindFor(molPipelines[FAC], FAC);
   }
   setResolution(opts.resolution || 96);
 
@@ -1108,15 +1132,15 @@ export async function createField(canvas, opts = {}) {
       the eigenmode kernel uses, and the same stats[slot] the presenter normalises by. */
   function writeMolParams(slot) {
     const u = MOL_PARAMS_U, f = MOL_PARAMS_F;
-    u[0] = res; u[1] = molPack.nAO; u[2] = molPack.nShell; u[3] = molKind; f[4] = half; u[5] = slot;
-    const sig = `${res}|${molPack.nAO}|${molPack.nShell}|${molKind}|${half}`;
+    u[0] = res; u[1] = molPack.nAO; u[2] = molPack.nShell; u[3] = molKind; f[4] = half; u[5] = slot; f[6] = molK;
+    const sig = `${res}|${molPack.nAO}|${molPack.nShell}|${molKind}|${half}|${molK}`;
     if (molParamSig[slot] === sig) return;                     // a queue.writeBuffer is ~2.5 ms of staging here
     molParamSig[slot] = sig; device.queue.writeBuffer(molParamsBuf[slot], 0, MOL_PARAMS);
   }
-  /** the road a dispatch takes: an orbital past MOL_ORB_FROM AOs takes ORB_WGSL, anything else its tier's χ tile */
-  const molRoad = () => ((molKind === 1 || molKind === 2) && molPack.nAO > MOL_ORB_FROM ? ORB : molTier);
+  /** the road a dispatch takes: a factor FACTOR_WGSL, an orbital past MOL_ORB_FROM AOs ORB_WGSL, anything else its tier's χ tile */
+  const molRoad = () => (molKind === 4 ? FAC : (molKind === 1 || molKind === 2) && molPack.nAO > MOL_ORB_FROM ? ORB : molTier);
   function dispatchMol(pass, slot, k = 1) {
-    const r = molRoad(), g = Math.ceil(res / 4), z = r === ORB ? g : Math.ceil(res / (molWg[r] / 16));   // a 32-lane tier is 4 × 4 × 2
+    const r = molRoad(), g = Math.ceil(res / 4), z = r >= ORB ? g : Math.ceil(res / (molWg[r] / 16));   // a 32-lane tier is 4 × 4 × 2
     pass.setPipeline(molPipelines[r]); pass.setBindGroup(0, molBind[r][slot]);
     for (let i = 0; i < k; i++) pass.dispatchWorkgroups(g, g, z);
   }
@@ -1565,7 +1589,7 @@ export async function createField(canvas, opts = {}) {
     device.queue.writeBuffer(molWBuf, 0, pack.weight, 0, pack.nWeight);
     device.queue.writeBuffer(molCutBuf, 0, pack.cut, 0, pack.nShell);
     molSpec = spec; molPack = pack; molDirty = true;
-    if (molTier < 0 && molMat && molKind !== 1 && molKind !== 2) molMat = null;   // a matrix kept from a smaller molecule cannot draw here
+    if (molTier < 0 && molMat && (molKind === 0 || molKind === 3)) molMat = null;   // a matrix kept from a smaller molecule cannot draw here
     if (spec.half !== undefined) { if (!(spec.half > 0)) throw new Error('field: a molecule spec half must be positive'); half = spec.half; }
     return { nAO: pack.nAO, nShell: pack.nShell, nPrim: pack.nPrim, nWeight: pack.nWeight, expsPerVoxel: pack.nExp, cap: MOL_CAPS[molTier] || null, half };
   }
@@ -1576,10 +1600,12 @@ export async function createField(canvas, opts = {}) {
       or M = { re, im } — two Float32Array(nAO) — for a COMPLEX orbital, whose texel is the full (ψ_re, ψ_im) so
       'phase' reads arg ψ over the whole turn (the ORBITALS register).  Both vectors ride in the one matrix buffer,
       the real part at 0 and the imaginary part at nAO, which is what the kernel's kind 2 reads.
+      'factor' (0.6.1 F1): M = { C: Float32Array(n·K) row-major, K ≤ MOL_LIMITS.cols } — the occupied columns, ρ = 2 Σ_k φ_k², texel (√ρ, 0)
+      at any nAO (FACTOR_WGSL), so a record past the χ tile draws its density exactly, with no D.
       `ref: true` also writes this volume into refTex, which is the ρ_ref view 'diff' subtracts. */
   function setMoleculeMatrix(M, { kind = 'density', ref = false } = {}) {
     if (!molSpec) throw new Error('field: setMoleculeMatrix before setMolecule');
-    if (kind !== 'density' && kind !== 'diff' && kind !== 'orbital' && kind !== 'signed') throw new Error(`field: unknown molecule matrix kind '${kind}'`);
+    if (kind !== 'density' && kind !== 'diff' && kind !== 'orbital' && kind !== 'signed' && kind !== 'factor') throw new Error(`field: unknown molecule matrix kind '${kind}'`);
     const n = molPack.nAO;
     const cplx = !!(kind === 'orbital' && M && !M.length && M.re && M.im);      // a bare array is still the real path, untouched
     if (cplx) {
@@ -1590,6 +1616,16 @@ export async function createField(canvas, opts = {}) {
       molMat = molCplx; molKind = 2; molKindName = kind; molDirty = true;
       if (ref) molRefDirty = true;
       return { kind, nAO: n, length: 2 * n, complex: true, ref: !!ref };
+    }
+    if (kind === 'factor') {
+      const K = M ? M.K | 0 : 0, Kp = Math.ceil(K / 32) * 32;
+      if (!(K > 0) || Kp > MOL_LIMITS.cols || !M.C || M.C.length !== n * K) throw new Error(`field: a factor needs { C: n·K, K ≤ ${MOL_LIMITS.cols} } at n = ${n}`);
+      const src = new Float32Array(n * Kp);                    // padded to the kernel's block of 32: the extra columns are zero
+      for (let i = 0; i < n; i++) for (let k = 0; k < K; k++) src[i * Kp + k] = M.C[i * K + k];
+      facReady(); device.queue.writeBuffer(molMatBuf, 0, src);
+      molMat = src; molKind = 4; molK = Kp; molKindName = kind; molDirty = true;
+      if (ref) molRefDirty = true;
+      return { kind, nAO: n, length: n * K, K, complex: false, ref: !!ref };
     }
     const want = kind === 'orbital' ? n : n * n;
     if (want > n && molTier < 0) throw new Error(`field: a ${kind} at ${n} AOs needs a χ tile and the widest holds ${MAX_MOL_AO} — past it only an ORBITAL draws`);
@@ -1632,7 +1668,7 @@ export async function createField(canvas, opts = {}) {
     return { msPerDispatch: +ms.toFixed(3), n, res, voxels: res ** 3, nAO: molPack.nAO, nShell: molPack.nShell, expsPerVoxel: molPack.nExp, ...molPath(), kind: molKindName };
   }
   /** which kernel the volume takes and its workgroup: { cap, wg, path: 'tile' | 'orbital' } — cap null on the orbital road */
-  const molPath = () => { const r = molRoad(); return r === ORB ? { cap: null, wg: 64, path: 'orbital' } : { cap: MOL_CAPS[r], wg: molWg[r], path: 'tile' }; };
+  const molPath = () => { const r = molRoad(); return r >= ORB ? { cap: null, wg: 64, path: r === FAC ? 'factor' : 'orbital' } : { cap: MOL_CAPS[r], wg: molWg[r], path: 'tile' }; };
   /* live getters (Object.assign would have copied their values once — and did, until B10 caught it) */
   Object.defineProperties(out, {
     resolution: { get: () => res, enumerable: true }, half: { get: () => half, enumerable: true }, space: { get: () => space, enumerable: true },
