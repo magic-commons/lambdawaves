@@ -1643,7 +1643,7 @@ export async function createField(canvas, opts = {}) {
     stepCap: { get: () => stepCap, enumerable: true },
     paced: { get: () => paced, enumerable: true }, inFlight: { get: () => inFlight, enumerable: true }, queueMs: { get: () => queueMs, enumerable: true },   // PACE (P1, P3): read-only
     /* …and so would it freeze THESE, which is exactly how `moleculeInfo` first came back null from a live molecule */
-    molecular: { get: () => !!molSpec, enumerable: true },
+    molecular: { get: () => !!molSpec, enumerable: true }, equalizer: { get: () => eqTable, enumerable: true },   // 0.6.0 B2: the badge reads the live table
     /* a CHEAP, allocation-free read of "is the volume a complex orbital right now" — `moleculeInfo` builds an
        object, and the ORBITALS register asks this once a frame to notice when another card took the matrix back */
     moleculeComplex: { get: () => molKind === 2, enumerable: true },
@@ -1679,7 +1679,7 @@ export async function createField(canvas, opts = {}) {
     setSpace(s) { s = s | 0; if (s !== space) { space = s; refValid = false; } },
     /** 0.6.0 B1: the equalizer's table (lab/equalizer.js `table()`), or null: FLAT, the locked kernel.  Position hydrogen only;
      *  read on the next reconstruct, which the caller asks for. */
-    setEqualizer(t) { eqTable = t && t.gamma ? t : null; }, get equalizer() { return eqTable; },
+    setEqualizer(t) { eqTable = t && t.gamma ? t : null; },
     /** upload a 256×RGBA phase palette (Float32Array(1024), values 0..1) — an OBSERVER product: ψ is untouched */
     setPalette(lut) { lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); uploadPalette(); },
     /* ── THE GAMUT (wave 54) ────────────────────────────────────────────────────────────────────────────────

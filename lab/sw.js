@@ -62,7 +62,7 @@ const PRECACHE = [
   ['./edit-domain.js',                                              'f67311da8412'],
   ['./equalizer.js',                                                '80e8af347668'],
   ['./export3d.js',                                                 'c6e3391d751b'],
-  ['./field.js',                                                    '4506fc69de6c'],
+  ['./field.js',                                                    'e2c474bed021'],
   ['./film-card.js',                                                '4dab4a1c1b07'],
   ['./first-run.js',                                                '29197e7919d4'],
   ['./fonts/LWTitle-title.woff2',                                   '8069abf19624'],
