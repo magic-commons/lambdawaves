@@ -11,6 +11,37 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.6.1-alpha` — 2026-10-15
+
+Commit `ca16d8f` · no new waves · 18 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `596868d` 2026-10-15 — CHANGELOG for v0.6.0-alpha
+- `612b409` 2026-10-15 — 0.6.1 Factor Road: BUILD-PLAN.md (F1 the factor road + frozen-core columns + BUCKY; F2 the…
+- `8d30bab` 2026-10-15 — HANDOFF §2 + checkpoint 11:50: v0.6.0-alpha cut locally; 0.6.1 Factor Road building (F1 ∥ F2);…
+- `bf06b1f` 2026-10-15 — 0.6.2 Honest Flow: BUILD-PLAN.md drafted (H1 continuity AS COMPUTED · BALANCED with the…
+- `04e9727` 2026-10-15 — F2 step 1: names.js symmetryDefects
+- `beed04a` 2026-10-15 — F2 step 2: MOLECULES' SYMMETRY readout
+- `50c7a57` 2026-10-15 — F2 step 3: research/release-0.6.1/F2-BUILD.md
+- `1040ab6` 2026-10-15 — merge F2 THE SYMMETRY CERTIFICATE (50c7a57): names.js symmetryDefects (ε_g = max|MᵀSDSM − SDS| /…
+- `7c22ae5` 2026-10-15 — 0.6.3 Event Census: BUILD-PLAN.md drafted (E1 the event classifier with Round 2's L-1′…
+- `73f78eb` 2026-10-15 — 0.6.1 F1 (1): C60's record carries every occupied column
+- `4c15d11` 2026-10-15 — 0.6.1 F1 (2): THE FACTOR ROAD
+- `67ae8f7` 2026-10-15 — 0.6.1 F1 (3): MOLECULES offers DENSITY for a record whose columns hold every occupied index —…
+- `19f6af8` 2026-10-15 — 0.6.1 F1 (4): the BUCKY demo
+- `22d4b51` 2026-10-15 — 0.6.1 F1: build note
+- `aa2343c` 2026-10-15 — merge F1 THE FACTOR ROAD + FROZEN-CORE COLUMNS + BUCKY (22d4b51): C₆₀'s record carries 183…
+- `1a9c3d8` 2026-10-15 — 0.6.1 CHANGES-0.6.1.md (F2, F1 in plain words); 0.6.2 BUILD-PLAN.md: base and cap filled (28,371…
+- `a98d8b3` 2026-10-15 — register suite R13 re-aimed to the 183-column C₆₀ record: OCCUPIED takes the 120 valence…
+- `ca16d8f` 2026-10-15 — 0.6.1-alpha Factor Road: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.6.0-alpha` — 2026-10-15
 
 Commit `d3dcb6b` · no new waves · 33 commits.
