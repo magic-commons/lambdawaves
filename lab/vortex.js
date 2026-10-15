@@ -6,12 +6,13 @@
  * at most M = m_max − m_min lines pierce any circle (degree bound), none where one |g_m| dominates the rest
  * (Rouché).  The locator tracks the roots across θ on each sphere and refines every crossing of |w| = 1 by
  * bisection, so every drawn point is an exact zero of the sampled polynomial; between samples nothing is claimed.
- * For a stretched three-mode state (m₀+1, m₀, m₀−1 with l = |m|) the reconnection census is the root set of
- * Φ(r) = Â₀² − 4|Â₊Â₋| (Theorem C.3) and every point fires at one of two phases of the discriminant beat.
+ * For a stretched three-mode state (m₀+1, m₀, m₀−1 with l = |m|) the event census is the root set of
+ * Φ(r) = Â₀² − 4|Â₊Â₋| (Theorem C.3), every point firing at one of two phases of the discriminant beat; each event is
+ * NAMED by `classifyEvent` (frontier.js, 0.6.3 E1) — regular line · birth · death · saddle — never by a stored word.
  * The overlay draws the points on the stage through the FIELD's own camera; it is an observer product.
  */
 import { BASIS } from './hydrogen.js';
-import { vortexPoints, stretchedCensus, threeModes } from './frontier.js';
+import { vortexPoints, stretchedCensus, threeModes, classifyEvent } from './frontier.js';
 import { cameraKey, toScreen } from './field.js';
 import { el, readout, sw, seg, trig } from './mir/kit.js';
 
@@ -24,10 +25,10 @@ export function createVortex(host, overlay, api) {
   const mRo = readout({ label: 'DEGREE BOUND  M = m_max − m_min', value: '—', sub: 'lines per coaxial circle ≤ M' }); r2.appendChild(mRo.root);
   const nRo = readout({ label: 'POINTS · CIRCLES · DOMINANT', value: '—', sub: '' }); r2.appendChild(nRo.root);
   const axRo = readout({ label: 'AXIS', value: '—', sub: '' }); r2.appendChild(axRo.root);
-  const cRo = readout({ label: 'RECONNECTION CENSUS', value: '—', cls: 'wide', sub: '' }); r2.appendChild(cRo.root);
+  const cRo = readout({ label: 'EVENT CENSUS', value: '—', cls: 'wide', sub: '' }); r2.appendChild(cRo.root);
   const r3 = el('div', 'row tight', host);
-  const jump = trig({ label: 'JUMP TO EVENT', title: 'Jump to the next reconnection time', onFire: () => { if (census && census.count && api.scrubTo) { const t = api.clock.t, Td = census.Td; const fires = [...new Set(census.points.filter((p) => p.admissible).map((p) => +p.t0.toFixed(6)))].sort((a, b) => a - b); let best = null; for (const f of fires) { let cand = f + Td * Math.floor((t - f) / Td + 1e-9) + Td; if (cand - t < 1e-6) cand += Td; if (best === null || cand < best) best = cand; } if (best !== null) api.scrubTo(best); } } }); r3.appendChild(jump.root);
-  el('div', 'note', host).innerHTML = '<b>The flow.</b> Roots of P(w) locate the nodal lines on sampled coaxial circles — where the current v = j/ρ is singular, and which the PARTICLES below never cross. A double root marks a reconnection. The three-mode test searches the corresponding beat phases directly.';
+  const jump = trig({ label: 'JUMP TO EVENT', title: 'Jump to the next event', onFire: () => { if (census && census.count && api.scrubTo) { const t = api.clock.t, Td = census.Td; const fires = [...new Set(census.points.filter((p) => p.admissible).map((p) => +p.t0.toFixed(6)))].sort((a, b) => a - b); let best = null; for (const f of fires) { let cand = f + Td * Math.floor((t - f) / Td + 1e-9) + Td; if (cand - t < 1e-6) cand += Td; if (best === null || cand < best) best = cand; } if (best !== null) api.scrubTo(best); } } }); r3.appendChild(jump.root);
+  el('div', 'note', host).innerHTML = '<b>The flow.</b> Roots of P(w) locate the nodal lines on sampled coaxial circles — where the current v = j/ρ is singular, and which the PARTICLES below never cross. A double root is a nodal event, named from exact derivatives: a regular line, a birth or death of a loop, or a saddle where two lines exchange partners. The three-mode test finds their beat phases directly.';
   const cv = overlay; const g = cv.getContext('2d');
   let dirty = true, last = null, census = null, lastKey = '', lastCensusVersion = -1, lastObs = '';
 
@@ -44,9 +45,12 @@ export function createVortex(host, overlay, api) {
       lastCensusVersion = reg.version;
       census = stretchedCensus(threeModes(reg.re0, reg.im0, reg.populated()), Math.max(20, half));
       if (census) {
-        const adm = census.points.filter((p) => p.admissible);
-        cRo.set(`${census.count} points · T_d = ${census.Td.toFixed(3)} a.u.`, 'ok');
-        cRo.setSub(adm.map((p) => `(ρ,±z) = (${p.rho.toFixed(3)}, ${p.z.toFixed(3)}) at t ≡ ${p.t0 == null ? "—" : p.t0.toFixed(2)}`).join(' · ') || 'none admissible');
+        const adm = census.points.filter((p) => p.admissible), ids = reg.populated(), tally = {}, at = (p, z) => (p.t0 == null ? { kind: 'unclassified', eig: null }    // the double root sits at φ = arg w, not φ = 0
+          : classifyEvent(reg.re0, reg.im0, ids, p.rho * Math.cos(p.phi), p.rho * Math.sin(p.phi), z, p.t0)), word = (e) => e.kind + (e.eig ? ` · H ${e.eig.map((v) => v.toFixed(1)).join(', ')}` : '');
+        census.events = adm.flatMap((p) => [p.z, -p.z].map((z) => ({ ...at(p, z), rho: p.rho, z, t0: p.t0 })));
+        for (const e of census.events) tally[e.kind] = (tally[e.kind] || 0) + 1;
+        cRo.set(`${Object.entries(tally).map(([k, n]) => `${n} ${n === 1 || k === 'unclassified' ? k : k + 's'}`).join(' · ') || '0 events'} · t₀ ∈ {${[...new Set(adm.map((p) => (p.t0 == null ? '—' : p.t0.toFixed(2))))].sort((a, b) => a - b).join(', ')}} of T_d = ${census.Td.toFixed(2)} a.u.`, 'ok');
+        cRo.setSub(adm.map((p, i) => { const u = word(census.events[2 * i]), v = word(census.events[2 * i + 1]); return `(ρ, ±z) = (${p.rho.toFixed(3)}, ±${p.z.toFixed(3)}) · ${u === v ? u : `${u} | −z ${v}`}`; }).join(' · ') || 'none admissible');
       } else { cRo.set('— (needs three stretched modes m₀+1, m₀, m₀−1 with l = |m|)', ''); cRo.setSub(''); }
     }
   }
