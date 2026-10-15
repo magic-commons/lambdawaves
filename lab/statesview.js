@@ -300,6 +300,7 @@ export function createStates(host, api) {
     product.view = view === 'density' ? 'density' : 'real';
     product.matrix = model.product(product.kind); product.hash = sol.hash; product.solution = Number.isFinite(sol.seq) ? sol.seq : 0;
     if (!s.publish('states', product)) return false;
+    if (view === 'density' || ref === 'ground' || drive.on) C().certify(model.deltaAO);   // 0.6.1 F2: the full ΔD against the ground, MOLECULES' certificate
     if (flowOn && flow) { model.flowMatrices(flowRe, flowIm); flow.set(flowRe, flowIm); }
     if (t !== trailT) { trail[3 * trailAt] = st.dipole[0]; trail[3 * trailAt + 1] = st.dipole[1]; trail[3 * trailAt + 2] = st.dipole[2]; trailAt = (trailAt + 1) % 256; if (trailN < 256) trailN++; trailT = t; }
     pushedT = t; pushedV = version;
