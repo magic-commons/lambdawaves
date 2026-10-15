@@ -6,7 +6,7 @@
 import { BASIS, energy, radial, ylm, orbital, orbitalFromTable, modeTable, HARTREE_EV, stateOf } from '../lab/hydrogen.js';
 import { Register, PRESETS, T_BEAT_12, N } from '../lab/state.js';
 import { Clock } from '../lab/clock.js';
-import { toQP, fromQP, diagonalSystem, realGenerator, classicalEnergy, integrateRK4, splitH } from '../lab/shadow.js';
+import { toQP, fromQP, diagonalSystem, realGenerator, classicalEnergy, integrateRK4, splitH } from './lib/shadow.js';
 
 let FAILED = 0, TOTAL = 0;
 function judge(name, ok, detail) {

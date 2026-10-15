@@ -323,6 +323,30 @@ const FACTOR_WGSL = (() => {
     }
     amp = sqrt(2.0 * rho);`);
 })();
+/* ── CARD_WGSL — THE CARD ROAD (0.6.5 X2), DERIVED from MOL_HEAD's params and bindings 0, 4, 5, 6: a worker's N³ f32 volume in `mat`
+ * (x fastest, cell centres over [−r1, r1]³, N = r0) sampled TRILINEARLY at each texel of the current res, written SIGNED (v, 0) and
+ * reduced as max v², so the 'real' view divides by max |v|.  Outside the card's box the edge cell holds.  Dispatched only on `cardDirty`. */
+const CARD_WGSL = MOL_HEAD.replace(/@group\(0\) @binding\([123]\).*\n/g, '') + /* wgsl */`
+var<workgroup> red: array<f32, 64>;
+@compute @workgroup_size(4, 4, 4)
+fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation_index) lid: u32) {
+  var dens = 0.0;
+  if (all(gid < vec3<u32>(P.n, P.n, P.n))) {
+    let pos = (vec3<f32>(gid) + vec3<f32>(0.5)) / f32(P.n) * (2.0 * P.half) - vec3<f32>(P.half);   // the domain, exactly as the kernels read it
+    let N = u32(P.r0); let g = clamp((pos / P.r1 + vec3<f32>(1.0)) * 0.5 * P.r0 - vec3<f32>(0.5), vec3<f32>(0.0), vec3<f32>(P.r0 - 1.0));
+    let i0 = min(vec3<u32>(floor(g)), vec3<u32>(N - 2u)); let f = g - vec3<f32>(i0);
+    var v = 0.0;
+    for (var c = 0u; c < 8u; c++) {
+      let o = vec3<u32>(c & 1u, (c >> 1u) & 1u, c >> 2u); let w = select(vec3<f32>(1.0) - f, f, o == vec3<u32>(1u)); let q = i0 + o;
+      v += w.x * w.y * w.z * mat[q.x + N * (q.y + N * q.z)];
+    }
+    textureStore(outTex, vec3<i32>(gid), vec4<f32>(v, 0.0, 0.0, 0.0));
+    dens = v * v;
+  }
+  red[lid] = dens;
+  workgroupBarrier();
+  if (lid == 0u) { var m = 0.0; for (var k = 0u; k < 64u; k++) { m = max(m, red[k]); } atomicMax(&stats[P.slot], bitcast<u32>(m)); }
+}`;
 
 const RENDER_WGSL = /* wgsl */`
 struct View {
@@ -1048,6 +1072,8 @@ export async function createField(canvas, opts = {}) {
   let molSpec = null, molPack = null, molMat = null, molKind = 0, molKindName = 'density', molDirty = false, molRefDirty = false;
   let molCplx = null, molK = 0;                                          // the [re | im] staging vector a COMPLEX orbital is uploaded from (kind 2)
   const molParamSig = ['', '']; let molTier = 0;
+  /* THE CARD (0.6.5 X2): a worker's volume OWNS the field while set — one storage buffer made on the first card and reused, CARD_WGSL compiled then */
+  let card = null, cardDirty = false, cardBuf = null, cardPipe = null, cardBind = null, cardParams = null;
   let half = 7, space = 0, generation = 0, refGeneration = -1, refValid = false;
   const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0, molDispatches: 0, molAO: 0, molMs: 0 };
   let dprCap = 2;                       // the device-pixel ceiling: 2 on a desktop, dropped at the phone breakpoint (wave 51)
@@ -1098,7 +1124,7 @@ export async function createField(canvas, opts = {}) {
       { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } },
       { binding: 5, resource: { buffer: palBuf } }] });
     molBind = molPipelines.map(molBindFor);
-    molDirty = molDirty || !!molSpec; stats.resolution = n;
+    molDirty = molDirty || !!molSpec; cardDirty = !!card; cardBind = null; stats.resolution = n;
     refValid = false;
   }
   const molBindFor = (pl, p) => [psiTex, refTex].map((tex, i) => device.createBindGroup({ layout: pl.getBindGroupLayout(0), entries: [
@@ -1151,6 +1177,14 @@ export async function createField(canvas, opts = {}) {
     dispatchMol(pass, slot);
     pass.end();
     return molPack.nAO;
+  }
+  function encodeCard(enc) {                                     // the card's ONE lazy pass into psiTex: MP's n, half, slot 0, r0 = N, r1 = the card's half
+    const u = MOL_PARAMS_U, f = MOL_PARAMS_F; u.fill(0); u[0] = res; f[4] = half; f[6] = card.N; f[7] = card.half;
+    device.queue.writeBuffer(cardParams, 0, MOL_PARAMS); device.queue.writeBuffer(statsBuf, 0, ZERO_U32);
+    cardBind = cardBind || device.createBindGroup({ layout: cardPipe.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: cardParams } },
+      { binding: 4, resource: { buffer: cardBuf } }, { binding: 5, resource: psiTex.createView({ dimension: '3d' }) }, { binding: 6, resource: { buffer: statsBuf } }] });
+    const pass = enc.beginComputePass(), g = Math.ceil(res / 4); pass.setPipeline(cardPipe); pass.setBindGroup(0, cardBind); pass.dispatchWorkgroups(g, g, g); pass.end();
+    cardDirty = false; generation++; stats.generation = generation; stats.reconstructs++;
   }
   function writeView(obs, mat, w, h) {
     const E = cameraEye(obs, half), B = E.basis, cam = E.eye, tanH = E.tanH, aspect = w / h;
@@ -1378,7 +1412,8 @@ export async function createField(canvas, opts = {}) {
     const t0 = performance.now();
     const enc = device.createCommandEncoder();
     const molOn = !!(molSpec && molMat) && molecule !== false;
-    if (molOn) {
+    if (card) { if (cardDirty) encodeCard(enc); }                // THE CARD owns the volume: one resample when dirty, else nothing — neither kernel runs
+    else if (molOn) {
       if (molDirty || molRefDirty) {
         if (molRefDirty) { encodeMolecule(enc, 1); refValid = true; refGeneration = generation + 1; molRefDirty = false; }
         if (molDirty) { stats.molAO = encodeMolecule(enc, 0); stats.molDispatches++; molDirty = false; generation++; stats.generation = generation; stats.reconstructs++; stats.lastReconstructWall = t0; }
@@ -1581,6 +1616,7 @@ export async function createField(canvas, opts = {}) {
      The call order is setMolecule → setMoleculeMatrix → frame({ molecule: true }) (or reconstructMolecule()). */
   /** upload the shells and mark the field molecular; `null` hands the volume back to the eigenmode kernel */
   function setMolecule(spec) {
+    card = null;                                                 // a card belongs to the molecule it was computed for: any (re)upload or drop lets it go
     if (!spec) { molSpec = null; molPack = null; molMat = null; molDirty = false; molRefDirty = false; refValid = false; return null; }
     const pack = packMolecule(spec);
     molTier = pack.nAO <= MAX_MOL_AO ? molTierFor(pack.nAO) : -1;                 // −1: no χ tile holds it — an ORBITAL only (ORB_WGSL)
@@ -1702,7 +1738,16 @@ export async function createField(canvas, opts = {}) {
       if (keys.some(([, k]) => !k)) return Promise.resolve(false);
       return Promise.all(keys.map(([f, k]) => specEntry(k, f, mat.view | 0, mat.style | 0).promise)).then((r) => r.every(Boolean));
     },
-    setDomain(h) { if (h !== half) { half = h; molDirty = !!molSpec; } },
+    setDomain(h) { if (h !== half) { half = h; molDirty = !!molSpec; cardDirty = !!card; } },
+    /** 0.6.5 X2 · THE CARD ROAD: { N, half, data: Float32Array(N³) } (x fastest, cell centres over [−half, half]³) owns the volume, resampled
+     *  once into psiTex as a signed field (the 'real' view); null hands it back to the molecular kernel.  A buffer write, never writeTexture. */
+    setCard(c) {
+      if (!c) { if (card) { card = null; molDirty = !!molSpec; } return null; }
+      const bytes = c.N ** 3 * 4; if (!(c.N >= 2) || !(c.half > 0) || !c.data || c.data.length !== c.N ** 3) throw new Error('field: a card needs { N ≥ 2, half > 0, data: N³ }');
+      if (!cardPipe) { const module = device.createShaderModule({ code: CARD_WGSL }); cardPipe = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } }); cardParams = device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }); }
+      if (!cardBuf || cardBuf.size < bytes) { if (cardBuf) cardBuf.destroy(); cardBuf = device.createBuffer({ size: bytes, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }); cardBind = null; }
+      device.queue.writeBuffer(cardBuf, 0, c.data, 0, c.N ** 3); card = { N: c.N, half: c.half }; cardDirty = true; return card;
+    },
     /** 0 = position space ψ(x), 1 = momentum space φ(p): the grid then holds the Fourier transform, exactly */
     setRadialTable(arr) { device.queue.writeBuffer(radialBuf, 0, arr instanceof Float32Array ? arr : new Float32Array(arr)); refValid = false; },
     /** K7 (opt-in): upload the axial gas's Hermite table (gas.js gasRadialTable: 256 rows × 256 × vec2) once, and bind it.
@@ -1749,7 +1794,7 @@ export async function createField(canvas, opts = {}) {
     dispose() {
       if (out.disposed) return; out.disposed = true; out.ok = false;
       try { if (psiTex) psiTex.destroy(); if (refTex) refTex.destroy(); } catch (_) {}
-      try { for (const b of paramsBuf) b.destroy(); statsBuf.destroy(); viewBuf.destroy(); palBuf.destroy(); } catch (_) {}
+      try { for (const b of paramsBuf) b.destroy(); statsBuf.destroy(); viewBuf.destroy(); cardBuf?.destroy(); palBuf.destroy(); } catch (_) {}
       try { for (const b of molParamsBuf) b.destroy(); molShellBuf.destroy(); molAlphaBuf.destroy(); molWBuf.destroy(); molMatBuf.destroy(); molCutBuf.destroy(); } catch (_) {}
       try { ctx.unconfigure(); } catch (_) {}
       try { device.destroy(); } catch (_) {}

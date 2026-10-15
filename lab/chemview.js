@@ -163,7 +163,8 @@ export function createChem(host, api) {
   const vSeg = seg({ label: 'VIEW', value: 'density', options: [
     { id: 'density', label: 'DENSITY', title: 'ρ(r) = Σ D_ij χ_i χ_j on the field' },
     { id: 'orbital', label: 'ORBITAL', title: 'ψ_k(r) = Σ C_ik χ_i — one molecular orbital' },
-    { id: 'diff', label: '<m>Δρ</m>', title: 'The induced density against the reference stored at the kick — ΔD is formed in double precision and shown as a signed field, so a weak kick is not lost in the texture format' }],
+    { id: 'diff', label: '<m>Δρ</m>', title: 'The induced density against the reference stored at the kick — ΔD is formed in double precision and shown as a signed field, so a weak kick is not lost in the texture format' },
+    { id: 'esp', label: 'ESP', title: 'Φ(r) = Σ Z_A/|r−R_A| − ∫ρ/|r−r′| on a 64³ grid' }],
     onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
   rV.appendChild(vSeg.root);
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
@@ -363,7 +364,7 @@ export function createChem(host, api) {
   const span = () => (sol && sol.cols ? [sol.cols[0] + 1, sol.cols[sol.cols.length - 1] + 1] : [1, sol ? sol.nAO : 7]);
   const noSpectrum = (r) => !!(r && r.record && !r.record.caps.rpa);
   const factor = () => !!(sol && !sol.D && sol.cols && sol.cols[sol.nocc - 1] === sol.nocc - 1);   // ascending, so cols[0 … nocc) = 0 … nocc − 1
-  const ORB_ONLY = 'this record carries orbital columns, not the density matrix this view needs', vTitle = new Map(['density', 'diff'].map((id) => [id, vSeg.button(id).title]));
+  const ORB_ONLY = 'this record carries orbital columns, not the density matrix this view needs', vTitle = new Map(['density', 'diff', 'esp'].map((id) => [id, vSeg.button(id).title]));
   function views() { for (const [id, t] of vTitle) { const d = !!(sol && (sol.D || (id === 'density' && factor()))), b = vSeg.button(id); b.disabled = !d; b.title = d ? t : ORB_ONLY;
     if (!d && view === id) { view = 'orbital'; vSeg.set(view); } } }
   function rebuildOrbKnob() {
@@ -482,7 +483,17 @@ export function createChem(host, api) {
    * Nothing in this file calls the field directly any more, so nothing here depends on when the frame loop runs it.
    */
   const S = () => api.session || null;
-  const molView = () => (view === 'orbital' ? 'real' : view === 'diff' ? 'real' : 'density');   // a signed Δρ is READ as 'real': two-colour lobes
+  /* 0.6.5 X2 · ESP: the worker's Φ volume (`chem.esp`, X1's pump) OWNS the field as a CARD once it lands — signed, so READ as 'real'; while it computes
+     the view drawn before stays (`was`).  The card goes when VIEW leaves ESP, another model publishes, or the molecule is re-uploaded or dropped. */
+  let esp = null, was = 'density';                                       // esp: { card, N, min, max, ms, of: the solve it was computed from }
+  const espOn = () => view === 'esp' && !!esp && esp.of === sol, drawn = () => (view !== 'esp' ? view : espOn() ? 'density' : was);
+  const molView = () => (espOn() || drawn() === 'orbital' || drawn() === 'diff' ? 'real' : 'density');   // a signed Δρ is READ as 'real': two-colour lobes
+  const sgn = (x) => (x < 0 ? '−' : '+') + Math.abs(x).toFixed(2);
+  function onEsp(r) {                                                     // the pump's consumer: the reply { N, half, phi, min, max, ms } becomes the card
+    if (!r || !r.phi || view !== 'esp' || !sol) return false;
+    esp = { card: { N: r.N, half: r.half, data: r.phi }, N: r.N, min: r.min, max: r.max, ms: r.ms, of: sol };
+    pushMatrix(); refresh(); tell(); return true;
+  }
   let scripted = false;                       // chem.run(n) is propagating: the tdhf model's products, whichever road asked
   const model = () => (running || scripted ? 'tdhf' : 'ground');
   const product = { kind: 'density', matrix: null, view: 'density', hash: null, solution: -1 };   // ONE record, reused: the frame loop allocates nothing
@@ -500,12 +511,15 @@ export function createChem(host, api) {
   function pushMatrix(ref) {
     const s = S(); if (!s || !on || !sol || fieldHash === null) return false;
     if (ref) captureRef();
+    if (view !== 'esp') was = view;
     product.hash = sol.hash; product.solution = sol.seq; product.view = molView();
-    if (view === 'orbital') { product.kind = 'orbital'; product.matrix = orbitalColumn(); }
-    else if (view === 'diff') { product.kind = 'signed'; product.matrix = deltaD(); }
+    const v = drawn();
+    if (v === 'orbital') { product.kind = 'orbital'; product.matrix = orbitalColumn(); }
+    else if (v === 'diff') { product.kind = 'signed'; product.matrix = deltaD(); }
     else if (!sol.D) { product.kind = 'factor'; product.matrix = factorCols(); }
     else { product.kind = 'density'; product.matrix = densityRe(); }
     const ok = s.publish(model(), product);
+    if (espOn()) s.card(esp.card); else if (view === 'esp') { if (typeof espPump === 'function') espPump(); } else if (esp) { s.card(null); esp = null; }   // espPump: X1's (0.6.5), its reply lands in onEsp
     if (ok && flowOn) feedFlow();
     return ok;
   }
@@ -620,12 +634,12 @@ export function createChem(host, api) {
       + (Number.isFinite(tm.integrals) ? ` (integrals ${Math.round(tm.integrals)} of it)` : '')
       + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : summed() ? ' · ' + summed() : noSpectrum(sol) ? ' · orbitals only' : sol.roots ? '' : ' · spectrum pending')
       + (sol.opened ? ` · from its record (${Math.round(sol.opened.bytes / 1024)} KB, ${sol.opened.from === 'device' ? 'on this device' : 'downloaded'}) in ${tm.open} ms, no solver call` + (stored ? ' · ' + stored : '') : '')
-      + (sol.note ? ' · ' + sol.note : '') + (running ? ' · running' : ''), running ? 'live' : 'ok');
+      + (sol.note ? ' · ' + sol.note : '') + (view !== 'esp' ? '' : espOn() ? ` · ESP ${esp.N}³ in ${Math.round(esp.ms)} ms` : ' · ESP computing…') + (running ? ' · running' : ''), running ? 'live' : 'ok');
     paint();
   }
 
   /* 0.5.4 P4 · THE STATUS of what this card puts on stage (lab/status.js): built on a landing, a VIEW change, a FLOW toggle or a load and KEPT — never in a frame */
-  function tell() { const P = PRESET_BY_ID.get(preset), row = (P.records || {})[basis] || null; said = sol ? statusOf({ record: row, sol, oracle: row ? null : basis === 'sto-3g' ? P.oracle : (P.oracle && P.oracle[basis]) || null, view: flowOn ? 'flow' : view, label: summed() && 'DENSITY · exact · ' + summed() }) : null; if (api.said) api.said(said); }
+  function tell() { const P = PRESET_BY_ID.get(preset), row = (P.records || {})[basis] || null; said = sol ? statusOf({ record: row, sol, oracle: row ? null : basis === 'sto-3g' ? P.oracle : (P.oracle && P.oracle[basis]) || null, view: flowOn ? 'flow' : view, esp: espOn() ? esp : null, label: summed() && 'DENSITY · exact · ' + summed() }) : null; if (api.said) api.said(said); }
   /* 0.6.1 F2 · THE SYMMETRY CERTIFICATE (names.js symmetryDefects) once per landing of a density — the still, the kick, RUN's D(t) and the
      register's D₀ + ΔD (`certify`) at ≤ 5 Hz, never in a frame; kept ε < 1e-9 · broken > 1e-6 · nearly between; the catalogue's group and frame */
   let symAt = 0; const symDue = () => { const t = performance.now(); return t - symAt >= 200 && !!(symAt = t); }, gsub = (g) => g.replace(/\d/g, (d) => '₀₁₂₃₄₅₆₇₈₉'[d]);
@@ -891,6 +905,8 @@ export function createChem(host, api) {
     },
     /** the chosen orbital as its S1 name { group, irrep, count, member } — what a link carries (0.4.0 S2); null when none is chosen or named */
     orbitalKey,
+    /** 0.6.5 X2 · ESP: the pump's consumer (a `chem.esp` reply), and the caption a capture carries while its card is on the field */
+    onEsp, espCaption: () => (espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.` : ''),
     /* THE LIBRARY (0.4.0 S4a): every record row with its installed lamp, and the INSTALL / REMOVE a section header (S4b) presses */
     async records() { await lamps(); return CHEM_PRESETS.flatMap((p) => Object.values(p.records || {}).map((r) => ({ id: p.id, basis: r.basis, hash: r.hash, bytes: r.bytes,
       caps: r.caps, recordOnly: !!p.recordOnly, installed: !!have.get(r.hash), label: optOf(p.id) ? optOf(p.id).textContent : null }))); },
@@ -926,7 +942,7 @@ export function createChem(host, api) {
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
     solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); }, pick: handPick,
     preset() { return preset; },
-    setView(v) { if (!['density', 'orbital', 'diff'].includes(v) || (v !== 'orbital' && sol && !sol.D && !(v === 'density' && factor()))) return view; view = v; vSeg.set(v); seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); return view; },
+    setView(v) { if (!['density', 'orbital', 'diff', 'esp'].includes(v) || (v !== 'orbital' && sol && !sol.D && !(v === 'density' && factor()))) return view; view = v; vSeg.set(v); seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); return view; },
     orbital(k) { if (Number.isFinite(k)) { const [lo, hi] = span(); orbital = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
     setAxis(a) { if (!AXES.includes(a)) return axis; axis = a; aSeg.set(a); paint(); return axis; },
     setIntegrator(v) { if (v !== 'mmut' && v !== 'magnus2') return integrator; integrator = v; iSeg.set(v); reset(); return integrator; },

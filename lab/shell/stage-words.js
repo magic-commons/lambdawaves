@@ -27,7 +27,7 @@ export function createStageWords(app) {
     const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null;
     if (!row) return stageStates(false);
     const o = app.state.chem.exportNames(), k = o && o.orbital;
-    return [mathPlain(row.formula), k && k.plain ? k.plain + (/^(HOMO|LUMO)$/.test(k.frontier) ? ' ' + k.frontier : '') : '', BASIS_LABEL[app.state.chem.basis] || ''].filter(Boolean).join(' · ');
+    return [mathPlain(row.formula), app.state.chem.espCaption(), k && k.plain ? k.plain + (/^(HOMO|LUMO)$/.test(k.frontier) ? ' ' + k.frontier : '') : '', BASIS_LABEL[app.state.chem.basis] || ''].filter(Boolean).join(' · ');
   }
   function stageTextTick() {
     if (!app.state.stageText) return;
