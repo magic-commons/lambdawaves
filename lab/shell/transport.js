@@ -2,10 +2,10 @@
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
 import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js';
-import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod } from '../period.js'; import { BASIS } from '../hydrogen.js';
+import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
-  const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames } = app.ctl;
+  const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames, stats } = app.ctl;
   /* ── transport strip (§25) ─────────────────────────────────────────────── */
   const transport = (() => {
     const T = dom.transport;
@@ -151,7 +151,15 @@ export function createTransport(app) {
     }
     /** paint the REPEATS readout now — a forced scan (LW.period, ⟳, the digest) and the worker's answer both call it, so a paused
         instrument shows the answer the moment it exists rather than on a frame it will not run (wave 45) */
-    function paintPeriod() { if (!ui.periodRo) return; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub); paintPeriodFx(); }
+    function paintPeriod() { if (!ui.periodRo) return; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub + flashSub()); paintPeriodFx(); }
+    /* 0.6.0 B3a · THE FLASH LAW (lab/flash-law.js) on the RATE knob and this sub, recomputed only when RATE or the register moves; it never changes RATE (the hand wins) */
+    const fk = { v: -1, r: -1, sub: '' }, rateTitle = ui.rateKnob.root.title;
+    function flashSub() {
+      if (fk.v === reg.version && fk.r === clock.rate) return fk.sub;
+      const w = aliasOf(periodEnergies(), fk.r = clock.rate, stats.fps >= 10 ? Math.round(stats.fps) : 60), on = !!w && w.alias > FLASH_HZ; fk.v = reg.version;
+      ui.rateKnob.root.title = on ? 'the fastest beat, ' + w.hz.toFixed(1) + ' Hz, shows at ' + w.alias.toFixed(1) + ' Hz on screen: above 3 a second it flashes' : rateTitle;
+      ui.rateKnob.root.classList.toggle('flash', on); return (fk.sub = on ? ' · beats alias at ' + w.alias.toFixed(1) + ' Hz on screen' : '');
+    }
     app.hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer
     const laps = () => Math.floor(clock.t / clock.window);
     const compactClock = (v, threshold, decimals) => Math.abs(v) < threshold
@@ -180,7 +188,7 @@ export function createTransport(app) {
         if (!ui.scrub.dragging()) ui.scrub.set(((clock.t % clock.window) + clock.window) % clock.window / clock.window);
         tro.set(clockText(), on ? 'live' : '');
       } else if (!on || now - troWall >= 200) { troWall = now; tro.set(clockText(), on ? 'live' : ''); }
-      if (ui.periodRo && (!on || keep.frames || now - periodWall >= 200)) { periodWall = now; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub); paintPeriodFx(); }   // periodNow() is cached on the register's version; the scan itself runs off the frame (wave 45) or waits out a live gesture (wave 44).  WAVE 69: the formula rides the SAME cadence law — every frame with KEEP FRAMES on, 5 Hz without — so a moving number obeys the readout law the transport already owns rather than inventing a second one
+      if (ui.periodRo && (!on || keep.frames || now - periodWall >= 200)) { periodWall = now; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub + flashSub()); paintPeriodFx(); }   // periodNow() is cached on the register's version; the scan itself runs off the frame (wave 45) or waits out a live gesture (wave 44).  WAVE 69: the formula rides the SAME cadence law — every frame with KEEP FRAMES on, 5 Hz without — so a moving number obeys the readout law the transport already owns rather than inventing a second one
     }
     setKeepFrames(keep.frames);                                // the shipped default: the bar disabled
     setModArm(app.state.modArm, { quiet: true });                        // wave 65: ONE writer paints the lamp, boot included
