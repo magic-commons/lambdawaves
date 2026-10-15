@@ -59,7 +59,7 @@ export function createMolecularSession(api = {}) {
   let solution = -1;                        // the producer's solve sequence the molecule was uploaded under
   let selected = null, reason = NO_CLAIM;
   let view = null, held = false;            // the observable this session has asked for, and whether it holds one
-  let frame = 0, frameOfLast = -1;
+  let frame = 0, frameOfLast = -1, carded = null, cardData = null;   // carded: the model whose worker volume (field.setCard, 0.6.5 X2) owns the field
   const last = { model: null, kind: null, view: null, hash: null, solution: -1 };
 
   /** a producer names its model once: `push()` is how the session asks it to paint, `view()` what it wants shown */
@@ -105,8 +105,8 @@ export function createMolecularSession(api = {}) {
     const f = fieldOf();
     if (!f || !spec || !spec.hash) return null;
     if (mol && mol.hash === spec.hash && solution === seq) return mol;
-    const info = f.setMolecule({ nAO: spec.nAO, half: spec.half, shells: spec.shells });
-    mol = { hash: spec.hash, nAO: info.nAO, half: info.half };
+    const info = f.setMolecule({ nAO: spec.nAO, half: spec.half, shells: spec.shells });   // which lets any card go
+    carded = null; mol = { hash: spec.hash, nAO: info.nAO, half: info.half };
     solution = seq;
     last.model = last.kind = last.view = last.hash = null; last.solution = -1;
     counters.molecules++;
@@ -118,7 +118,7 @@ export function createMolecularSession(api = {}) {
     const f = fieldOf();
     if (mol && f) f.setMolecule(null);
     if (mol) counters.drops++;
-    mol = null; solution = -1;
+    mol = null; solution = -1; carded = null;
     last.model = last.kind = last.view = last.hash = null; last.solution = -1;
     return null;
   }
@@ -138,6 +138,7 @@ export function createMolecularSession(api = {}) {
     if (p.hash !== mol.hash || !(p.solution >= solution)) { counters.stale++; return false; }
     if (frameOfLast === frame) counters.replaced++;
     OPT.kind = p.kind;
+    if (carded && carded !== id && f.setCard) { f.setCard(null); carded = null; }   // another model's product: the card hands the volume back
     f.setMoleculeMatrix(p.matrix, OPT);
     counters.published++; frameOfLast = frame;
     last.model = id; last.kind = p.kind; last.view = p.view || null; last.hash = p.hash; last.solution = p.solution;
@@ -148,6 +149,8 @@ export function createMolecularSession(api = {}) {
 
   return {
     register, claim, adopt, drop, publish,
+    /** 0.6.5 X2 · THE CARD: the selected model's worker volume { N, half, data } on the field, or null to hand it back */
+    card(c) { const f = fieldOf(); if (!f || !f.setCard || (c && (!mol || !selected))) return false; if (c !== cardData || carded !== selected) f.setCard(c); carded = c ? selected : null; cardData = c; return true; },
     /** the frame loop's one call: the boundary a second product in the same frame is measured against */
     tick() { frame++; return frame; },
     get selected() { return selected; },

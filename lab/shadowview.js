@@ -8,8 +8,8 @@
  */
 import { BASIS } from './hydrogen.js';
 import { el, readout, nRGB, themeInk, graphHover, fitText } from './mir/kit.js';
-import { SQRT2 } from './shadow.js';
 import { lagrangian, action } from './dynamics.js';
+const SQRT2 = Math.SQRT2;   // was shadow.js' one export here (0.6.5 X2: shadow.js moved to tests/lib)
 
 export function createShadowView(canvas, api) {
   const trail = [];            // Lissajous trace, in (q_a, q_b)
