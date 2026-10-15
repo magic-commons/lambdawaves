@@ -2,7 +2,9 @@
  * there.  §0's consts, schedule, page, the rack, wState and the controller's names are handed over (backward); the windows, the gas and the layout made
  * later in boot() are read through their slots inside callbacks (forward).  It registers on app.w what a moved reader needs; boot() destructures the return. */
 import { TIER } from '../rack.js';
-import { el, knob, seg, trig, readout, group, mathPlain } from '../mir/kit.js';
+import { el, knob, seg, trig, readout, group, mathPlain, fader, stepper } from '../mir/kit.js';
+import { createEqualizer, EQ_PRESETS } from '../equalizer.js';
+import { VIEW } from '../field.js';
 import { BASIS, stateOf } from '../hydrogen.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from '../hamiltonian.js';
 import { ATOMS, configOf } from '../atoms.js';
@@ -10,9 +12,10 @@ import { createSpectrum } from '../spectrum.js';
 import { MOLECULE_BY_ID } from '../molecules.js';
 import { stateLatex, moleculeLatex } from '../latex-state.js';
 import { createRegisterSturmian } from '../sturmianreg.js';
+const keepT = (elm, on, title) => { if (elm.dataset.title0 === undefined) elm.dataset.title0 = elm.title || ''; elm.title = on ? title : elm.dataset.title0; };
 export function createSpectrumCard(app) {
-  const { ui, device, reg, hNote, clock, energyOf, sturm, labelExpect } = app, { schedule, page } = app.loop, { rack } = app.host, { wState } = app.w;   // backward
-  const { rotRate, busy, busySync, warmArm, touchState, setReference, api } = app.ctl;   // the controller's, filled before its seat returned
+  const { ui, device, reg, hNote, clock, energyOf, sturm, labelExpect, mat, rates } = app, { schedule, page } = app.loop, { rack } = app.host, { wState } = app.w;   // backward
+  const { rotRate, busy, busySync, warmArm, touchState, setReference, api, field } = app.ctl;   // the controller's, filled before its seat returned
   const wSpec = device({ id: 'spectrum', eyebrow: 'SPECTRUM', status: '' });
   app.w.wSpec = wSpec;
   rack.appendChild(wSpec.root);
@@ -98,6 +101,34 @@ export function createSpectrumCard(app) {
   api.labelOf = (s) => getHamiltonian().labelOf(s);
   const spectrum = createSpectrum(wSpec.body, api);
   app.w.spectrum = spectrum; app.w.setSturmian = setSturmian; app.w.sturmEigen = sturmEigen; app.w.selectEigen = selectEigen;
+  /* 0.6.0 B2 · THE BEAT EQUALIZER (lab/equalizer.js) under the ladder.  Cell (n, n′) of the 6 × 6 grid is the pair's beat in the picture,
+     |Γ_nn′|·√(w_n w_n′) (w the shell populations), its colour the beat's log third — |ΔE| < 0.0263 Eh magenta, < 0.1130 orange, else yellow
+     (the chord's own thirds: a creative choice, not a law).  A gain decoheres its shell from the others, never dims it.  A hydrogen
+     position-space feature: anything else stands it down and clears the table.  syncEq() keys on what the table reads: cheap on a frame. */
+  const eq = app.state.eq = createEqualizer(), gEq = group(wSpec.body, 'BEAT EQUALIZER'), eqCv = el('canvas', 'eq-grid', gEq), eqG = eqCv.getContext('2d');
+  eqCv.width = eqCv.height = 6;
+  const eqStep = stepper({ aria: 'Equalizer preset', items: EQ_PRESETS.map((p) => ({ id: p.id, label: p.label })), value: eq.preset, cls: 'mol-step', onChange: (id) => { eq.setPreset(id); syncEq(true); hNote(); } });
+  const eqRo = readout({ label: 'PURITY', value: '1.000', sub: 'pure' }), rFd = el('div', 'row tight', gEq);
+  const eqFd = [0, 1, 2, 3, 4, 5].map((i) => fader({ label: String(i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + ' %', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
+  el('div', 'row tight', gEq).append(eqStep.root, eqRo.root); gEq.appendChild(rFd); for (const f of eqFd) rFd.appendChild(f.root);
+  el('div', 'note', gEq).textContent = 'the beats fade, the shells stay';
+  let eqKey = '', eqT = null, eqMode = 0;
+  function syncEq(hand) {
+    const H = getHamiltonian(), why = app.state.chem && app.state.chem.on ? 'MOLECULES owns the field' : sturm.P ? 'STURMIAN is on' : H.id !== 'hydrogen' ? 'the operator is not HYDROGEN' : app.state.space !== 'x' ? 'momentum space is on' : '';
+    const key = why + eq.preset + eq.gains.join() + reg.version; if (key === eqKey) return; eqKey = key;
+    const P = reg.populated(), pops = reg.re0.map((r, a) => r * r + reg.im0[a] ** 2), w = [0, 0, 0, 0, 0, 0]; for (const a of P) w[BASIS[a].n - 1] += pops[a];
+    const t = why ? null : eq.table({ Z: getZ(), rates, populated: P, pops }), G = t && t.gamma, m = G ? t.mode : 0;
+    if (t || eqT) { field.setEqualizer(t); schedule(TIER.RECONSTRUCT); } eqT = t;
+    gEq.classList.toggle('eq-off', !!why); gEq.title = why ? 'the equalizer is a hydrogen position-space feature: ' + why : ''; eqFd.forEach((f, i) => { f.setDisabled(!!why); f.set(eq.gains[i]); });
+    eqStep.set(eq.preset); eqRo.set(G ? t.purity.toFixed(3) : '1.000'); eqRo.setSub(t && !G ? t.gate : G && t.repaired ? 'repaired' : ['pure', 'mixture · no phase', 'signed · relative floor 2·10⁻⁴'][m]);
+    if (hand && m === 2 && eqMode !== 2) { mat.view = VIEW.real; ui.viewSeg.set('real'); wSpec.setStatus('a signed table: VIEW is Re ψ, its lobes in two colours', 'live'); }
+    eqMode = m; const nn = app.state.eqNoNodes = !!(G && m === 1 && t.lambdaMin > 1e-3 * t.lambda[5]);   // E4: a positive-definite mixture has no zeros
+    for (const b of [ui.vorOn, ui.pOn && ui.pOn.root]) if (b) { b.disabled = nn; b.classList.toggle('disabled', nn); keepT(b, nn, `the equalized picture has no nodes (λ_min = ${nn ? t.lambdaMin.toPrecision(3) : ''})`); }
+    const cell = Array.from({ length: 36 }, (_, i) => (G ? Math.hypot(G[2 * i], G[2 * i + 1]) : 1) * Math.sqrt(w[i / 6 | 0] * w[i % 6])), top = Math.max(...cell) || 1;
+    eqG.clearRect(0, 0, 6, 6);
+    cell.forEach((s, i) => { const n = (i / 6 | 0) + 1, k = i % 6 + 1, dE = getZ() ** 2 * Math.abs(1 / (n * n) - 1 / (k * k)) / 2;
+      eqG.globalAlpha = s / top; eqG.fillStyle = dE < 0.0263 ? '#e040fb' : dE < 0.113 ? '#ff9800' : '#ffd600'; eqG.fillRect(k - 1, n - 1, 1, 1); });
+  }
   { const kids = [...wSpec.body.children], i = kids.findIndex((k) => k.classList.contains('ladder')); const h=kids[0]; for(const k of kids.slice(1,Math.max(0,i)))h.appendChild(k); wSpec.body.appendChild(h); }
   /** NORMALIZE, and say what it did — a unit-norm state looks the same afterwards, which is why it seemed to do nothing */
   function toggleFullscreen() { const d = document; if (d.fullscreenElement) { if (d.exitFullscreen) d.exitFullscreen(); } else { const e = d.documentElement; const f = e.requestFullscreen || e.webkitRequestFullscreen; if (f) try { f.call(e); } catch (err) {} } }
@@ -174,7 +205,7 @@ export function createSpectrumCard(app) {
     const on = !!sturm.P;
     if (ui.scaleSeg) ui.scaleSeg.set(sturm.on ? 'sturmian' : 'hydrogen');
     if (ui.lambdaKnob) { ui.lambdaKnob.set(sturm.lambda); ui.lambdaKnob.setDisabled(!on); }
-    const keep = (elm, title) => { if (elm.dataset.title0 === undefined) elm.dataset.title0 = elm.title || ''; elm.title = on ? title : elm.dataset.title0; };
+    const keep = (elm, title) => keepT(elm, on, title);
     if (ui.abSw) { ui.abSw.root.disabled = on; ui.abSw.root.classList.toggle('disabled', on); keep(ui.abSw.root, 'A / B TRANSITION is a diagonal-phase feature (two exact diagonal evolutions mixed): off under STURMIAN — switch SCALE back to HYDROGEN'); }
     if (ui.abOmega) ui.abOmega.setDisabled(on);
     if (ui.abRo && !on && /STURMIAN/.test(ui.abRo.root.textContent)) { ui.abRo.set('—  /  —', ''); ui.abRo.setSub('store two states, then TRANSITION plays A → B → A at Ω'); }
@@ -260,5 +291,5 @@ export function createSpectrumCard(app) {
   }
   app.w.switchHamiltonian = switchHamiltonian; app.w.applySturmian = applySturmian; app.w.setElement = setElement; app.w.fillValence = fillValence; app.w.occupiedEigen = occupiedEigen;   // persist reads them (occupiedEigen: the transport)
   return { wSpec, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen, periodEnergies,
-    selectEigen, setElement, fillValence };
+    selectEigen, setElement, fillValence, syncEq };
 }

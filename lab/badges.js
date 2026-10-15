@@ -59,7 +59,7 @@ export function createBadges({ dom, accept, field, reg, mat, clock, domain, qual
     const law = reg.field.Fz !== 0 ? `${H.short} + F z, F = ${reg.field.Fz.toExponential(1)}, within each shell`
       : reg.field.Bz !== 0 ? `${H.short} + (B/2) L_z, B = ${reg.field.Bz.toFixed(4)}, diagonal` : H.label;
     const when = clock.playing ? 'playing' : `paused at t = ${clock.t.toFixed(2)} a.u.`;
-    return `${names ? names + '; ' : ''}${VIEW_SAY[mat.view] || VIEW_NAMES[mat.view]}, drawn as ${STYLE_NAMES[mat.style]}; ${where}; ${modes}; ${law}; ${when}`;
+    return `${names ? names + '; ' : ''}${VIEW_SAY[mat.view] || VIEW_NAMES[mat.view]}, drawn as ${STYLE_NAMES[mat.style]}; ${where}; ${modes}; ${law}; ${when}${field.equalizer && field.equalizer.mode ? '; equalized: a mixture, it has no phase' : ''}`;
   }
   function update() {
     const f = reg.field.Fz !== 0 ? `STARK F = ${reg.field.Fz.toExponential(1)} · shell model · use F ≪ ${reg.fieldValidUpTo().toExponential(1)}`

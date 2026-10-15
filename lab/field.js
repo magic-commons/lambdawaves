@@ -1643,7 +1643,7 @@ export async function createField(canvas, opts = {}) {
     stepCap: { get: () => stepCap, enumerable: true },
     paced: { get: () => paced, enumerable: true }, inFlight: { get: () => inFlight, enumerable: true }, queueMs: { get: () => queueMs, enumerable: true },   // PACE (P1, P3): read-only
     /* …and so would it freeze THESE, which is exactly how `moleculeInfo` first came back null from a live molecule */
-    molecular: { get: () => !!molSpec, enumerable: true },
+    molecular: { get: () => !!molSpec, enumerable: true }, equalizer: { get: () => eqTable, enumerable: true },   // 0.6.0 B2: the badge reads the live table
     /* a CHEAP, allocation-free read of "is the volume a complex orbital right now" — `moleculeInfo` builds an
        object, and the ORBITALS register asks this once a frame to notice when another card took the matrix back */
     moleculeComplex: { get: () => molKind === 2, enumerable: true },
