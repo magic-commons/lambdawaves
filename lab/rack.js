@@ -135,7 +135,7 @@ export async function boot(dom) {
       rotStep: null, modStore: null, saveMod: null, curvesStore: null, occlusion: null, look: null, applyAccent: null, paintMarks: null, markBatchBegin: null, markBatchEnd: null, wheelColor: null,
       accent: null, inkCtx: null, markInk: null, stageGround: null, busyWrap: null, busyFlash: null, busy: null, busySync: null, cardLoading: null, busyHost: null, field: null, maths: null,
       scan: null, cards: null, solveChem: null, solveCard: null, cancelWarm: null, warmArm: null, touchState: null, loadPreset: null, setReference: null, api: null },
-    sh: { readSettings, saveSettings: null, setCardStyle: null, setFrost: null, setDisconnected: null, lookSync: null, applySettings: null, KIND: null, RETIRED_WINDOWS: null, powered: null,
+    sh: { readSettings, ask: null, saveSettings: null, setCardStyle: null, setFrost: null, setDisconnected: null, lookSync: null, applySettings: null, KIND: null, RETIRED_WINDOWS: null, powered: null,
       DIGESTS: null, quality: null, transport: null, togglePlay: null, setModArm: null, barLock: null, refreshOcclusion: null, devById: null, rackCardWidth: null, popFace: null, rk: null,
       layout: null, winHint: null, wTr: null, phone: null, tablet: null, syncPhone: null, keyState: null, keyHelp: null, stageHasFocus: null, ACTIONS: null, kt: null, modSeats: null, serialize: null,
       restoreModulation: null, save: null, copyJSON: null, restore: null, notCarriedWords: null, esc: null, mintLink: null, copyLink: null, openLink: null, historyApi: null, LW: null },

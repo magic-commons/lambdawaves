@@ -306,6 +306,11 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport.mini .k-val, #transport.mini .ro-val { font-size: 9px; }
 /* docked into the rack as a card */
 #transport.docked { position: static; transform: none; width: auto; height: auto; flex-wrap: wrap; padding: 6px; gap: 6px; border: 0; box-shadow: none; background: transparent; }
+/* 0.6.6 G2 · THE TYPE BOX (lab/shell/transport.js): ASK swaps the centre for one line to Gemma; her answer echoes in the t readout's seat for 4 s */
+#transport:not(.asking) .ask-seat, .ask-seat [hidden], #transport.asking :is(.ro.time, .ro.period, .fx, .native-info), #transport.mini:is(.asking, .echo) .fd, #transport.consent .native-play-row > :not(.ask-seat, .ask), #transport.echo :is(.ro.period, .fx, .native-info) { display: none; }
+#transport .ask-seat, #transport.echo .native-play-row > .ro.time { display: flex; flex: 1 1 auto; align-items: center; gap: 6px; min-width: 0; order: 1; grid-area: 3 / 1 / 4 / 6; }
+.ask-line { flex: 1 1 auto; min-width: 0; height: 28px; box-sizing: border-box; padding: 0 10px; border: 1px solid var(--glass-hairline); border-radius: var(--r-pill); background: var(--glass-well); color: var(--fg); font: var(--w-med) var(--fs-small)/1.2 var(--font-ui); }
+.ask-line::placeholder, .ask-note, #transport .ask-seat > .tbtn.ask-ok, #transport .tbtn.ask { width: auto; min-width: 0; padding: 0 6px; border-radius: var(--r-pill); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--fs-small); }
 
 
 .dock-btn, .mod-exp { width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto; cursor: pointer;

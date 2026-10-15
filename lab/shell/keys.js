@@ -48,6 +48,7 @@ export function createKeys(app) {
     { id: 'home', group: KG.T, short: 'zero', label: 'time to zero', key: 'Home', run: () => { clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); schedule(TIER.EVOLVE); } },
     { id: 'stepBack', group: KG.T, short: 'step back', label: 'step time back (shift: fine)', key: 'ArrowLeft', run: (f) => { clock.step(-transport.stepDt() * f); schedule(TIER.EVOLVE); } },
     { id: 'stepFwd', group: KG.T, short: 'step fwd', label: 'step time forward (shift: fine)', key: 'ArrowRight', run: (f) => { clock.step(transport.stepDt() * f); schedule(TIER.EVOLVE); } },
+    { id: 'ask', group: KG.T, short: 'ask Gemma', label: 'ask Gemma — the transport strip becomes the type box', key: 'Slash', shift: false, inFields: false, run: () => transport.openAsk() },   // 0.6.6 G2
     { id: 'zoomIn', group: KG.C, short: 'zoom in', label: 'camera closer', key: 'ArrowUp', run: (f) => { setDist(obs.dist / (1 + 0.12 * f)); } },
     { id: 'zoomOut', group: KG.C, short: 'zoom out', label: 'camera farther', key: 'ArrowDown', run: (f) => { setDist(obs.dist * (1 + 0.12 * f)); } },
     { id: 'yawL', group: KG.C, short: 'yaw left', label: 'camera yaw left', key: 'KeyA', run: (f) => queueKeyOrbit(-0.12 * f, 0) },

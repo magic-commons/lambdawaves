@@ -148,3 +148,5 @@ layout record and the settings. No key belongs to two scopes.
 | Key (0.6.4) | Where | Scope |
 |---|---|---|
 | `audio` (S2 THE CHORD): SETTINGS › AUDIO, the consent switch for sound from this page, off by default; SPECTRUM's SOUND and LEVELS · BEATS are never saved (a hand press each session), never in a project, a link or a history row | settings | PREFERENCE |
+| `askOk` (0.6.6 G2 THE TYPE BOX): the first ASK press's consent ("sends your words and this project’s readouts to <askUrl> on your network · CONTINUE"); `true` once CONTINUE is pressed, absent before; never in a project, a link or a history row | settings | PREFERENCE |
+| `askUrl` (0.6.6 G2): SETTINGS › the GEMMA address beside AUDIO, where ASK posts; absent means this page's host at 9443 (`${location.protocol}//${location.hostname}:9443/ask`, computed, never stored); written only when the hand types one | settings | PREFERENCE |

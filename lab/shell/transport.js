@@ -2,7 +2,7 @@
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
 import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js';
-import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js';
+import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf } from '../ask.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
   const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames, stats } = app.ctl;
@@ -28,6 +28,9 @@ export function createTransport(app) {
     T.appendChild(ui.scrub.root);
     ui.rateKnob = knob({ label: 'RATE a.u./s', min: 0.1, max: 3000, value: 4, log: true, fmt: (v) => v >= 100 ? v.toFixed(0) : v.toFixed(1), onInput: (v) => { if (modHand('transport.rate', v)) return; clock.setRate(v); } });
     T.appendChild(ui.rateKnob.root);
+    /* 0.6.6 G2 · THE TYPE BOX: ASK (or /) swaps the centre — the t readout, REPEATS, the formula — for one line to Gemma (lab/ask.js); the first press ever asks consent */
+    const seat = el('span', 'ask-seat', T), line = el('input', 'ask-line', seat), note = el('span', 'ask-note', seat), okB = el('button', 'tbtn ask-ok', seat, 'CONTINUE');
+    line.type = 'text'; line.spellcheck = false; line.autocomplete = 'off'; line.placeholder = 'ask Gemma — what does benzene look like?'; line.setAttribute('aria-label', 'ask Gemma'); okB.type = 'button'; okB.style.flex = 'none';
     const tro = readout({ label: 't  a.u.  (lap)', value: '0.00', cls: 'time' });
     T.appendChild(tro.root);
     /* ── THE CLOCK's law: when does this density repeat?  T = 2π / gcd{|E_a − E_b|} over the populated labels (EXACT where the
@@ -44,6 +47,26 @@ export function createTransport(app) {
       ['<m>t = </m>', { s: 'lap' }, '<m> · T + </m>', { s: 'ph' }, '<m> · T</m>'] ] });
     T.appendChild(ui.periodFx.root);
     const jmp = el('button', 'tbtn jump', T, '⟳'); jmp.type = 'button'; jmp.title = 'jump to the next exact repeat of the density'; jmp.setAttribute('aria-label', 'jump to the next exact repeat of the density');
+    const askB = el('button', 'tbtn ask', T, 'ASK'); askB.type = 'button'; askB.title = 'ask Gemma  (/)'; askB.setAttribute('aria-label', 'ask Gemma');
+    const asker = createAsk(app), troLbl = tro.root.querySelector('.ro-lbl'); app.sh.ask = asker;
+    let echoOn = false, echoT = 0;
+    function showAsk(on) {
+      const first = on && !ui.askOk; T.classList.toggle('asking', on); T.classList.toggle('consent', first); if (!on) return;
+      note.title = note.textContent = 'sends your words and this project’s readouts to ' + askUrlOf(ui) + ' on your network ·';
+      note.hidden = okB.hidden = !first; line.hidden = first; (first ? okB : line).focus();
+    }
+    function echo(s) { endEcho(); if (!s) return; echoOn = true; T.classList.add('echo'); troLbl.textContent = 'GEMMA'; tro.set(s, ''); tro.root.title = s; echoT = setTimeout(endEcho, 4000); }
+    function endEcho() { clearTimeout(echoT); if (!echoOn) return; echoOn = false; T.classList.remove('echo'); troLbl.textContent = 't  a.u.  (lap)'; tro.root.title = ''; tro.set(clockText(), clock.playing ? 'live' : ''); }
+    const openAsk = () => { endEcho(); showAsk(true); };
+    askB.addEventListener('click', () => (T.classList.contains('asking') ? showAsk(false) : openAsk()));
+    okB.addEventListener('click', () => { ui.askOk = true; saveSettings(); showAsk(true); });
+    line.addEventListener('keydown', async (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); showAsk(false); return; }
+      const q = line.value.trim(); if (e.key !== 'Enter' || !q || asker.busy) return;
+      line.value = '…'; line.disabled = true; const r = await asker.ask(q); line.disabled = false; line.value = '';
+      showAsk(false); echo(r.error || r.echo);
+    });
+    document.addEventListener('pointerdown', (e) => { if (!T.contains(e.target)) endEcho(); }, true); addEventListener('keydown', (e) => { if (e.key === 'Escape') endEcho(); });
     jmp.addEventListener('click', () => { const P = periodNow(true); if (P && P.T > 0) { const t = clock.t, next = t + P.T - (((t % P.T) + P.T) % P.T); clock.scrub(next); shadowView.clearTrail(); schedule(TIER.EVOLVE); } });
     let lastPeriod = null, periodCostMs = 0, periodSettling = false, periodPending = null;
     /* LA6 · ONE SCAN IN FLIGHT, THE LATEST KEY WAITING.  Every new key used to post a fresh O(pairs × 2·10⁶) scan into a
@@ -186,13 +209,13 @@ export function createTransport(app) {
          disabled and never repainted, and the t readout runs at 5 Hz while playing (every paused frame, as before) */
       if (keep.frames) {
         if (!ui.scrub.dragging()) ui.scrub.set(((clock.t % clock.window) + clock.window) % clock.window / clock.window);
-        tro.set(clockText(), on ? 'live' : '');
-      } else if (!on || now - troWall >= 200) { troWall = now; tro.set(clockText(), on ? 'live' : ''); }
+        if (!echoOn) tro.set(clockText(), on ? 'live' : '');
+      } else if (!echoOn && (!on || now - troWall >= 200)) { troWall = now; tro.set(clockText(), on ? 'live' : ''); }
       if (ui.periodRo && (!on || keep.frames || now - periodWall >= 200)) { periodWall = now; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub + flashSub()); paintPeriodFx(); }   // periodNow() is cached on the register's version; the scan itself runs off the frame (wave 45) or waits out a live gesture (wave 44).  WAVE 69: the formula rides the SAME cadence law — every frame with KEEP FRAMES on, 5 Hz without — so a moving number obeys the readout law the transport already owns rather than inventing a second one
     }
     setKeepFrames(keep.frames);                                // the shipped default: the bar disabled
     setModArm(app.state.modArm, { quiet: true });                        // wave 65: ONE writer paints the lamp, boot included
-    return { update, stepDt };
+    return { update, stepDt, openAsk };
   })();
   /** THE PLAY (0.5.0 A6): the physics clock's toggle; its edge plays or pauses the modulation (C4: the one clock, always). */
   function togglePlay() { appPlay.toggle(); schedule(TIER.EVOLVE); }
