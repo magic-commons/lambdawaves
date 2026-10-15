@@ -42,8 +42,8 @@
 /** the selection order, and the whole of it: a producer names a model, the session owns its rank */
 export const MODEL_RANK = { tdhf: 0, states: 1, 'orbital-packet': 2, ground: 3 };   // `states` = the REGISTER's many-electron mode (stage 4); the window's switch lets only one register claim at a time
 export const MODEL_IDS = Object.keys(MODEL_RANK);
-/** what a product may be.  'orbital' is an AO vector (real or { re, im }); the other two are symmetric n × n */
-export const PRODUCT_KINDS = ['orbital', 'density', 'signed'];
+/** what a product may be.  'orbital' is an AO vector (real or { re, im }); 'factor' the occupied columns { C, K } (0.6.1 F1); the other two symmetric n × n */
+export const PRODUCT_KINDS = ['orbital', 'density', 'signed', 'factor'];
 const NO_CLAIM = 'no producer has claimed the field';
 
 export function createMolecularSession(api = {}) {
@@ -125,7 +125,7 @@ export function createMolecularSession(api = {}) {
 
   /**
    * ONE tagged product from the selected model.
-   * p = { kind: 'orbital' | 'density' | 'signed', matrix, view, hash, solution } — the record is READ and never
+   * p = { kind: 'orbital' | 'density' | 'signed' | 'factor', matrix, view, hash, solution } — the record is READ and never
    * kept, so a producer may (and should) reuse one object for every frame.
    */
   function publish(id, p) {
