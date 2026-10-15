@@ -2,9 +2,9 @@
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
 import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js';
-import { getHamiltonian } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod } from '../period.js';
+import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod } from '../period.js'; import { BASIS } from '../hydrogen.js';
 export function createTransport(app) {
-  const { dom, ui, reg, clock, appPlay, sturm } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
+  const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
   const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames } = app.ctl;
   /* ── transport strip (§25) ─────────────────────────────────────────────── */
   const transport = (() => {
@@ -131,8 +131,13 @@ export function createTransport(app) {
       if (P.stark) return ['— (Stark)', 'no exact period under a static field: the Stark energies are not commensurate', 'warn'];
       if (P.mix) return ['— (transition)', 'the A ↔ B mix has its own clock: the Rabi period', 'warn'];
       if (P.stationary) return ['stationary', 'one energy: the density never changes', ''];
-      if (P.exact) { const lap = Math.floor(clock.t / P.T), ph = clock.t - lap * P.T; return [fmtPeriod(P.T), P.count + ' energies · gcd ' + P.g.toPrecision(4) + ' Eh · lap ' + lap + ' · ' + (100 * ph / P.T).toFixed(0) + '%' + src, 'ok']; }
-      return ['≈ ' + fmtPeriod(P.T), 'nearest recurrence · error ' + (100 * P.err).toFixed(1) + '% of a beat' + src, 'warn'];
+      /* 0.6.0 B3a: the field-free hydrogen register says its closed form, T = 2π·7200/g′/Z² (hydrogenShellPeriod), where it equals the fit */
+      const pop = reg.populated(), unit = pop.every((a) => rates[a] === 1), Z = getZ();
+      const Th = unit && !sturm.P && getHamiltonian().id === 'hydrogen' && reg.field.Bz === 0 ? hydrogenShellPeriod(pop.map((a) => BASIS[a].n), Z) : 0, gp = Math.round(14400 * Math.PI / (Th * Z * Z));
+      if (P.exact) { const lap = Math.floor(clock.t / P.T), ph = clock.t - lap * P.T;
+        const head = Th && Math.abs(Th - P.T) < 1e-9 * P.T ? 'exactly · T = 14400π' + (gp > 1 ? '/' + gp : '') + (Z !== 1 ? '/Z²' : '') + ' a.u. · ' + fmtPeriod(P.T).split(' · ')[1] : P.count + ' energies · gcd ' + P.g.toPrecision(4) + ' Eh';
+        return [fmtPeriod(P.T), head + ' · lap ' + lap + ' · ' + (100 * ph / P.T).toFixed(0) + '%' + src, 'ok']; }
+      return ['≈ ' + fmtPeriod(P.T), (unit || sturm.P ? '' : 'no exact period under these per-label rates · ') + 'nearest recurrence · error ' + (100 * P.err).toFixed(1) + '% of a beat' + src, 'warn'];
     }
     /** the four slots of the REPEATS formula, from the SAME `periodNow()` the readout above reads — one
         expression for one quantity (ANTI-PATTERN 20).  A state with no exact period prints an em dash in
