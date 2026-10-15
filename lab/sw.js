@@ -44,7 +44,7 @@ const PRECACHE = [
   ['./camera-law.js',                                               'c46af991eb4d'],
   ['./canon-gauge.js',                                              'e760a258cd23'],
   ['./capture.js',                                                  '78c25071f769'],
-  ['./chemview.js',                                                 'bdef80bfe9ed'],
+  ['./chemview.js',                                                 '9c2268853a13'],
   ['./chord-audio.js',                                              '02e0021a1c14'],
   ['./clock.js',                                                    '5a0a1e969b46'],
   ['./cornell.js',                                                  '7f60b582a663'],
