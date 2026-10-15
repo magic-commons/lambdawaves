@@ -93,7 +93,7 @@ export function createMolecules(app) {
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wOrbs.setStatus(t, cls); },
     announce: (md) => app.state.stageText && app.state.stageText.announce(md),        // a HAND's preset only (orbitalsview / statesview presetSel)
-    now: () => clock.t, field: () => field, chem: () => app.state.chem, session: app.state.molSession });
+    now: () => clock.t, rate: () => clock.rate, field: () => field, chem: () => app.state.chem, session: app.state.molSession });
   app.state.orbitals = app.state.register.orbitals; app.state.states = app.state.register.states;
   return { wOrbs }; }
   app.w.wChem = wChem; app.w.head = head; return { wChem, head, createMoRegistry };

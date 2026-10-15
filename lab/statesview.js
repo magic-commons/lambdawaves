@@ -169,7 +169,7 @@ export function createStates(host, api) {
     const seq = ++ladderSeq, forSol = sol; ladderRefused = null;
     Promise.resolve(api.solve({ op: 'chem.states', atoms: q.atoms, basis: q.basis, charge: q.charge }, () => null, (r) => r)).then((r) => {
       if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { ladderRefused = (r && r.refused) || null; armed = 0; says(ladderRefused); status(ladderRefused || 'the state ladder needs the chemistry worker', 'warn'); } return; }   // 0.4.0 S4a: a record without its CIS ladder says so
-      ladder = r;
+      ladder = r; ladder.basis = q.basis;   // the pitch's tag: a line, and so its Hz, is the basis's
       model = createStatesModel({ n: r.n, nocc: r.nocc, C: sol.C, D0: sol.D, rMO: r.rMO });
       if (wanted) { applyRecord(wanted, true); armed = armed || (wanted.on ? 1 : 0); wanted = null; }
       request(keys().filter((k) => k !== GROUND));
@@ -343,7 +343,9 @@ export function createStates(host, api) {
       .catch(() => { if (seq === drive.seq) { drive.busy = false; setDrive(false); } });
   }
   function land(r) {
-    drive.last = r;
+    const wall = performance.now();   /* the a.u. the drive advanced per real second, for "1/x of real time" */
+    if (drive.last && r.t !== drive.last.t) drive.speed = Math.abs(r.t - drive.last.t) / Math.max(1e-3, (wall - drive.wall) / 1000);
+    drive.wall = wall; drive.last = r;
     model.evaluateZ(r.c0[0], r.c0[1], r.Zr, r.Zi);
     push(r.t, true);
     const ks = keys();
@@ -438,7 +440,12 @@ export function createStates(host, api) {
     const r = drive.last;
     roDrive.set(r ? `P₀ ${r.p0.toFixed(4)} · E ${(r.field[0]).toExponential(2)}` : 'preparing…', r ? 'live' : 'warn');
     const held = r && r.laneRe && drive.laneKeys ? drive.laneKeys.reduce((s0, key, i) => s0 + r.laneRe[i] ** 2 + r.laneIm[i] ** 2, 0) : 1;
-    roDrive.setSub(r ? `${rabi} · norm − 1 ${(r.norm - 1).toExponential(1)} · outside the lanes ${(100 * Math.max(0, 1 - held)).toFixed(2)} %` + (Math.abs(r.lag) > 1e-9 ? ` · catching up ${r.lag.toFixed(1)} a.u.` : '') : rabi);
+    /* THE PITCH (0.6.2 H2): the stick ω is nearest, and the carrier heard at this RATE, f = ω·RATE/2π */
+    let nk = -1; if (ladder) for (let k = 0; k < ladder.count; k++) if (isBright(k) && (nk < 0 || Math.abs(ladder.omega[k] - drive.omega) < Math.abs(ladder.omega[nk] - drive.omega))) nk = k;
+    const rate = api.rate ? api.rate() : 0, lag = r && Math.abs(r.lag) > 1e-9;
+    const pitch = (nk >= 0 ? ` · nearest ${label(nk)}, ${(drive.omega - ladder.omega[nk]).toFixed(4)} Eh off` : '') + ` · ${(drive.omega * rate / TAU).toFixed(0)} Hz · ${String(ladder && ladder.basis || '').toUpperCase().replace('-STAR', '*')}`
+      + (lag && drive.speed > 0 && rate > drive.speed ? ` · the drive runs at 1/${(rate / drive.speed).toFixed(1)} of real time` : '');
+    roDrive.setSub(r ? `${rabi} · norm − 1 ${(r.norm - 1).toExponential(1)} · outside the lanes ${(100 * Math.max(0, 1 - held)).toFixed(2)} %` + (lag ? ` · catching up ${r.lag.toFixed(1)} a.u.` : '') + pitch : rabi + pitch);
   }
 
   /* ── the lanes: hydrogen's .sp-row, over the same kit nodes ───────────────────────────────────── */
