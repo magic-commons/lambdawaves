@@ -5276,7 +5276,11 @@
  "oracles": {
   "H2": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -1.1167061373496687
+   "energy": -1.1167061373496687,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -1.126740337407633
+   }
   },
   "LiH": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
@@ -5284,19 +5288,35 @@
   },
   "HF": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -98.5707576634785
+   "energy": -98.5707576634785,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -100.01485739573144
+   }
   },
   "N2": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -107.49588788341214
+   "energy": -107.49588788341214,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -108.94572499706774
+   }
   },
   "CO": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -111.22458955706387
+   "energy": -111.22458955706387,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -112.7415387235556
+   }
   },
   "F2": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -195.96746083720126
+   "energy": -195.96746083720126,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -198.68096270349432
+   }
   },
   "LiF": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
@@ -5328,15 +5348,27 @@
   },
   "CH4": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -39.72681011229935
+   "energy": -39.72681011229935,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -40.19564278010024
+   }
   },
   "NH3": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -55.45403854435139
+   "energy": -55.45403854435139,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -56.18917398191083
+   }
   },
   "H2O": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -74.96302316286221
+   "energy": -74.96302316286221,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -76.01744137674835
+   }
   },
   "MgH2": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
@@ -5364,7 +5396,11 @@
   },
   "HCN": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -91.67519078743688
+   "energy": -91.67519078743688,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -92.87752312893467
+   }
   },
   "N2O": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
@@ -5388,27 +5424,51 @@
   },
   "H2O2": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -148.75736915510566
+   "energy": -148.75736915510566,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -150.76792166479075
+   }
   },
   "C2H2": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -75.85280597081353
+   "energy": -75.85280597081353,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -76.82254036751593
+   }
   },
   "C2H4": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -77.07209020662677
+   "energy": -77.07209020662677,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -78.0350326506241
+   }
   },
   "C2H6": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -78.30580841075891
+   "energy": -78.30580841075891,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -79.22914747415476
+   }
   },
   "H2CO": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -112.3537331183951
+   "energy": -112.3537331183951,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -113.86931463530775
+   }
   },
   "CH3OH": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -113.54457807851969
+   "energy": -113.54457807851969,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -115.03983111934497
+   }
   },
   "HCOOH": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
@@ -5444,19 +5504,35 @@
   },
   "NH4+": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -55.866800273151156
+   "energy": -55.866800273151156,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -56.53107631673711
+   }
   },
   "H3O+": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -75.32904700782314
+   "energy": -75.32904700782314,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -76.29037269849235
+   }
   },
   "OH-": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -74.05632818927478
+   "energy": -74.05632818927478,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -75.37629337598196
+   }
   },
   "CN-": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
-   "energy": -90.93706489769323
+   "energy": -90.93706489769323,
+   "6-31+g-star": {
+    "what": "PySCF 2.14.0 RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms",
+    "energy": -92.31432403709228
+   }
   },
   "CuH": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",

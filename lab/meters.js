@@ -1,6 +1,7 @@
-/* meters.js — METERS: norm, ⟨E⟩, autocorrelation, active modes, logical time, the badge (§10.6). */
+/* meters.js — METERS: norm, ⟨E⟩, autocorrelation, active modes, logical time, the badge (§10.6), the picture's f16 FLOOR. */
 import { AU_TIME_AS, HARTREE_EV } from './hydrogen.js';
 import { el, readout } from './mir/kit.js';
+import { FIELD_LAW as L } from './status.js';
 
 export function createMeters(host) {
   const grid = el('div', 'meters', host);
@@ -13,9 +14,11 @@ export function createMeters(host) {
   const field = readout({ label: 'FIELD CACHE', value: '—', sub: '' }); grid.appendChild(field.root);
   const rates = readout({ label: 'CLOCKS Hz  disp · field · phys', value: '—', sub: '' }); grid.appendChild(rates.root);
   const tier = readout({ label: 'LAST TIER', value: '—', sub: '' }); grid.appendChild(tier.root);
+  const e = (x) => x.toExponential(0); /* FLOOR: static, the field law's own constants (status.js), never typed */
+  const floor = readout({ label: 'FLOOR  f16 · the picture\'s own precision', value: '1 f16 ulp · toward zero', sub: `hydrogen ${e(L.hydrogen.rms)} RMS · ${e(L.hydrogen.worst)} worst voxel · density ${e(L.density.worst)} worst` }); grid.appendChild(floor.root);
   const status = readout({ label: 'STATUS', value: '—', cls: 'wide' }); grid.appendChild(status.root);
   const prof = readout({ label: 'FRAME PROFILE  ms · total · field · windows', value: '—', cls: 'wide', sub: '' }); grid.appendChild(prof.root);
-  for (const [k, r] of Object.entries({ norm, energy, tlog, auto, modes, field, rates, tier, status })) r.root.dataset.m = k;
+  for (const [k, r] of Object.entries({ norm, energy, tlog, auto, modes, field, rates, tier, floor, status })) r.root.dataset.m = k;
 
   let lastT = -1;
   function update(m) {

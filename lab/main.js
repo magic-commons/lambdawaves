@@ -4,7 +4,7 @@ import { createSession } from './mir/core/session.js';   // 0.5.0 C6b: THE SESSI
 import { createOpener } from './mir/shell/opener.js';   // 0.5.0 C6b: THE OPENER, the title screen over the six demos
 import { photosensitivityNotice } from './mir/shell/flash-guard.js';   // 0.5.0 C6b: the kit's notice, under λWAVES' law
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 C6b: the notice's seen-flag is the blob's `warned`
-import { STARTERS } from './project-store.js';   // 0.5.0 C6b: the six demos are the opener's covers
+import { STARTERS } from './project-store.js';   // 0.5.0 C6b: the seven demos are the opener's covers
 import { installBanner } from './mir/shell/banner.js';   // 0.5.0 C6b: THE BANNER is the kit's
 import { bootVeil } from './mir/shell/boot.js';   // 0.5.0 C6b: THE BOOT VEIL, down at the first real frame
 window.__e = window.__e || [];
@@ -40,7 +40,7 @@ const warning = (() => {
 })();
 /* THE START (C6-DESIGN §5).  A test driver (unless ?opener=1), a link in the fragment, ?preset= or ?view= go straight in: the choice is
    ?starter= or the boot (the session armed, nothing restored).  A reload of a tab that made nothing since NEW (rack.js remembers `home`
-   for this tab on pagehide) goes straight to NEW.  Otherwise the notice when it is needed, THEN the title screen: the six demos as covers,
+   for this tab on pagehide) goes straight to NEW.  Otherwise the notice when it is needed, THEN the title screen: the seven demos as covers,
    NEW, and RESUME when the session holds work.  The boot runs behind the opaque screen and awaits the choice before LW.ready; the
    notice never holds LW.ready (a given choice does not wait for it, which the CDP tools' `&starter=home` relies on). */
 const q = new URLSearchParams(location.search);

@@ -521,9 +521,13 @@ for (const e of ENTRIES) {
  * the app adds no request on boot (lab/molecules.js reads this file already).  Not rows: tests/molecule-head.test pins 38.  No delta — the live
  * solve is what it is compared against, where it runs. */
 const SB = json('tests/fixtures/oracles/sto-3g-v1.json'), rowIds = new Set(out.map((r) => r.catalogue.id));
+/* 0.6.0 B3b (0.5.4 §J-4 N4): the 6-31+G* fixture's energies nest under the app's basis id, so chemview reads `oracle[basis]`; STO-3G stays flat */
+const G6 = json('tests/fixtures/oracles/6-31+g-star-v1.json'), g6 = new Map(G6.molecules.filter((m) => m.converged).map((m) => [m.id, m.energy]));
 const oracles = Object.fromEntries(MOLECULES.filter((m) => !rowIds.has(m.id)).map((m) => {
   if (!SB.library[m.id]) throw new Error(`orbital-library: ${m.id} solves live and has no oracle in sto-3g-v1.json`);
-  return [m.id, { what: `PySCF ${SB.provenance.library.pyscf} RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms`, energy: SB.library[m.id].energy }];
+  const o = { what: `PySCF ${SB.provenance.library.pyscf} RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms`, energy: SB.library[m.id].energy };
+  if (g6.has(m.id)) o['6-31+g-star'] = { what: `PySCF ${G6.provenance.pyscf} RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms`, energy: g6.get(m.id) };
+  return [m.id, o];
 }));
 const catalogueText = JSON.stringify({ schema: SCHEMA, generator: 'tools/orbital-library.mjs', note: 'the catalogue lab/molecules.js reads; each row\'s record is lab/library/<hash>.json — deployed, never precached (sw.js DATA)',
   rows: out.map((r) => r.catalogue), oracles }, null, 1) + '\n';
