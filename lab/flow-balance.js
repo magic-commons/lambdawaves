@@ -25,16 +25,13 @@ export function balance({ N, half, rho, src, j = null, tol = 1e-4, cap = 4000 })
     for (let a = 0; a < 3; a++) { const w = W[a][c]; if (w) s -= w * p[c + S[a]]; if (c >= S[a] && W[a][c - S[a]]) s -= W[a][c - S[a]] * p[c - S[a]]; } o[c] = s; } };
   let sS = 0, sR = 0; for (let c = 0; c < N3; c++) if (M[c]) { sS += src[c]; sR += rho[c]; }
   const cc = sR > 0 ? sS / sR : 0, b = new Float64Array(N3); let bn = 0;
-  for (let c = 0; c < N3; c++) if (M[c]) { b[c] = src[c] - cc * rho[c]; bn += b[c] * b[c]; }
-  bn = Math.sqrt(bn);
+  for (let c = 0; c < N3; c++) if (M[c]) { b[c] = src[c] - cc * rho[c]; bn += b[c] * b[c]; } bn = Math.sqrt(bn);
   const phi = new Float64Array(N3), r = Float64Array.from(b), z = new Float64Array(N3), p = new Float64Array(N3), Ap = new Float64Array(N3);
-  let it = 0, rel = 0;
+  let it = 0, rel = bn > 0 ? 1 : 0;
   if (bn > 0) {                                                                      // the zero-RHS guard: nothing to repair is φ = 0, not 0/0
-    let rz = 0; for (let c = 0; c < N3; c++) if (M[c]) { z[c] = r[c] / (diag[c] || 1); rz += r[c] * z[c]; }
-    p.set(z); rel = 1;
+    let rz = 0; for (let c = 0; c < N3; c++) if (M[c]) { z[c] = r[c] / (diag[c] || 1); rz += r[c] * z[c]; } p.set(z);
     while (it < cap) {
-      Av(p, Ap); let pAp = 0; for (let c = 0; c < N3; c++) pAp += p[c] * Ap[c];
-      const al = rz / pAp; let rn = 0;
+      Av(p, Ap); let pAp = 0, rn = 0; for (let c = 0; c < N3; c++) pAp += p[c] * Ap[c]; const al = rz / pAp;
       for (let c = 0; c < N3; c++) { phi[c] += al * p[c]; r[c] -= al * Ap[c]; rn += r[c] * r[c]; }
       it++; rel = Math.sqrt(rn) / bn; if (rel < tol) break;
       let rz2 = 0; for (let c = 0; c < N3; c++) if (M[c]) { z[c] = r[c] / (diag[c] || 1); rz2 += r[c] * z[c]; }
@@ -42,10 +39,9 @@ export function balance({ N, half, rho, src, j = null, tol = 1e-4, cap = 4000 })
     }
   }
   const g = [0, 1, 2].map(() => new Float64Array(N3)); let kin = 0, ke = 0;
-  for (let c = 0; c < N3; c++) if (M[c]) {
-    for (let a = 0; a < 3; a++) { const s = S[a], w = W[a][c], wm = c >= s ? W[a][c - s] : 0;   // the cell current: its two faces' mean flux
-      const F = (w ? w * (phi[c + s] - phi[c]) : 0) + (wm ? wm * (phi[c] - phi[c - s]) : 0), nF = (w ? 1 : 0) + (wm ? 1 : 0);
-      g[a][c] = nF ? F * h / nF / rho[c] : 0; kin += rho[c] * g[a][c] * g[a][c]; if (j) ke += j[a][c] * j[a][c] / rho[c]; }
+  for (let c = 0; c < N3; c++) if (M[c]) for (let a = 0; a < 3; a++) { const s = S[a], w = W[a][c], wm = c >= s ? W[a][c - s] : 0;   // the cell current: its two faces' mean flux
+    const F = (w ? w * (phi[c + s] - phi[c]) : 0) + (wm ? wm * (phi[c] - phi[c - s]) : 0), nF = (w ? 1 : 0) + (wm ? 1 : 0);
+    g[a][c] = nF ? F * h / nF / rho[c] : 0; kin += rho[c] * g[a][c] * g[a][c]; if (j) ke += j[a][c] * j[a][c] / rho[c];
   }
   return { phi, gx: g[0], gy: g[1], gz: g[2], c: cc, iterations: it, residual: rel, kinetic: ke > 0 ? kin / ke : NaN, cells: most };
 }

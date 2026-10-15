@@ -19,9 +19,8 @@
  */
 import { evaluator, shellsFromField } from './molecular-field.js';
 
-/** Round 1's oracle (RT-TDHF, 6-31+G*), as measured there, for the two molecules it ran */
-export const FLOW_ORACLE = { C6H6: 'NACRE Round 1 measured, the RING: real-time check (6-31+G*): BALANCED 0.92 · AS COMPUTED 0.85',
-  H2O: 'NACRE Round 1 measured, the bright line: real-time check (6-31+G*): AS COMPUTED 1.00 · BALANCED 0.92' };
+/** NACRE Round 1's oracle (RT-TDHF, 6-31+G*) as measured there, for the two molecules it ran */
+export const FLOW_ORACLE = { C6H6: 'NACRE Round 1 measured, the RING: real-time check (6-31+G*): BALANCED 0.92 · AS COMPUTED 0.85', H2O: 'NACRE Round 1 measured, the bright line: real-time check (6-31+G*): AS COMPUTED 1.00 · BALANCED 0.92' };
 
 export function createFlow(fieldShellsList, call = null) {
   const ev = evaluator(shellsFromField(fieldShellsList)), n = ev.n;
@@ -68,8 +67,7 @@ export function createFlow(fieldShellsList, call = null) {
       if (!velocity(mx, my, mz, cap, M)) { refused++; return null; }
       return [p[0] + h * M[0], p[1] + h * M[1], p[2] + h * M[2]];
     },
-    setRepair(grid) { rep = grid; },
-    get balanced() { return !!rep; },
+    setRepair(grid) { rep = grid; }, get balanced() { return !!rep; },
     setSource(m) { mode = m === 'balanced' ? 'balanced' : 'computed'; if (mode === 'computed') rep = null; last = -1e9; },
     /** the worker road: one request in flight, the newest D wins, ≤ 8 Hz BALANCED (2 Hz AS COMPUTED, the defect alone); dot() → Re Ḋ_AO or null */
     pump(half, dot, done) {

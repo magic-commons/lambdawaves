@@ -197,6 +197,9 @@ export function createChem(host, api) {
   r2.appendChild(runSw.root);
   const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage riding the current of the real-time density matrix, v = j/ρ — kick and RUN first: a still molecule has no current', onChange: (v) => { setFlow(v); } });
   r2.appendChild(flowSw.root);
+  const srcSeg = seg({ label: 'FLOW SOURCE', value: 'computed', options: [{ id: 'computed', label: 'AS COMPUTED', title: 'v = j/ρ, the run’s own current' }, { id: 'balanced', label: 'BALANCED', title: 'v + ∇φ with −∇·(ρ∇φ) = ∂ρ/∂t + ∇·j: continuity closed on a 32³ grid, solved in a worker' }], onChange: (v) => { flowSrc = v; if (flow) { flow.setSource(v); paintFlow(); } api.repaint(); } });
+  r2.appendChild(srcSeg.root);
+  const fr = el('div', 'row tight', host), roRep = readout({ label: 'REPAIR', cls: 'wide', value: '—' }), roGate = readout({ label: 'GATED', value: '—' }); fr.append(roRep.root, roGate.root); fr.hidden = true;
   const spdKnob = knob({ label: 'SPEED', min: 1, max: 50, value: 10, title: 'Propagation steps per frame — one outstanding worker request at a time',
     fmt: (v) => Math.round(v) + '/frame', onInput: (v) => { speed = Math.max(1, Math.round(v)); } });
   r2.appendChild(spdKnob.root);
@@ -233,7 +236,7 @@ export function createChem(host, api) {
   const note = host.lastElementChild;
   const more = el('div', 'mol-more', host); more.id = 'mol-more';
   const rTda = el('div', 'row tight', more); rTda.appendChild(tdaSw.root); rTda.appendChild(coreSw.root);
-  for (const n of [r2, cv, cvCore, rr, note]) more.appendChild(n);
+  for (const n of [r2, fr, cv, cvCore, rr, note]) more.appendChild(n);
   const moreToggle = el('button', 'trig mol-more-toggle', rV); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
   chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
   const setMore = (open) => {
@@ -507,21 +510,24 @@ export function createChem(host, api) {
   }
   /* ── FLOW for the real-time run (stage 6): the TDHF density matrix carries a current too ───────────────────
      Re D is the whole density; Im D is NEGATED on the way in, because density.js keeps D_μν = Σ c_μ c̄_ν and the flow
-     evaluator is written for ⟨a†_μ a_ν⟩ = its transpose-conjugate.  A still molecule has Im D = 0 and no flow. */
-  let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0;
+     evaluator is written for ⟨a†_μ a_ν⟩ = its transpose-conjugate.  A still molecule has Im D = 0 and no flow.
+     BALANCED's Re Ḋ is the difference of the two latest landings over their Δt: centred half a landing behind the D it repairs. */
+  let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0, flowSrc = 'computed', flowDot = null, flowT = null, dotOK = false;
+  const paintFlow = () => { if (!flow) return; const w = flow.said(); roRep.set(w[0]); roRep.setSub(w[1]); roGate.set(w[2]); roGate.setSub(w[3]); srcSeg.root.title = flowMod.FLOW_ORACLE[preset] || ''; };
   function feedFlow() {
-    if (!sol || !flowCreate) return;
+    if (!sol || !flowMod) return;
     const n = sol.nAO;
-    if (!flow || flow.n !== n || flowHash !== sol.hash) { flow = flowCreate(sol.shells); flowRe = new Float64Array(n * n); flowIm = new Float64Array(n * n); flowHash = sol.hash; flowEpoch++; }
-    const re = (rt && rt.D_re) || sol.D, im = rt && rt.D_im;
-    for (let i = 0; i < n * n; i++) { flowRe[i] = re[i]; flowIm[i] = im ? -im[i] : 0; }
-    flow.set(flowRe, flowIm);
-    flow.time = rt ? rt.t : 0;                  // the run keeps its OWN clock: the tracers ride rt.t, not the transport's
+    if (!flow || flow.n !== n || flowHash !== sol.hash) { flow = flowMod.createFlow(sol.shells, api.balance); flow.setSource(flowSrc); flowRe = new Float64Array(n * n); flowIm = new Float64Array(n * n); flowDot = new Float64Array(n * n); flowT = null; dotOK = false; flowHash = sol.hash; flowEpoch++; }
+    const re = (rt && rt.D_re) || sol.D, im = rt && rt.D_im, t = rt ? rt.t : 0, dt = flowT === null ? 0 : t - flowT;
+    for (let i = 0; i < n * n; i++) { if (dt > 0) flowDot[i] = (re[i] - flowRe[i]) / dt; flowRe[i] = re[i]; flowIm[i] = im ? -im[i] : 0; }
+    if (dt) dotOK = dt > 0; if (dt || flowT === null) flowT = t; flow.set(flowRe, flowIm);
+    flow.time = t;                              // the run keeps its OWN clock: the tracers ride rt.t, not the transport's
+    flow.pump(Number.isFinite(sol.half) ? sol.half : 10.3, () => (dotOK ? flowDot : null), paintFlow);
   }
-  let flowCreate = null, flowHash = null;
+  let flowMod = null, flowHash = null;
   function setFlow(v) {
-    flowOn = !!v; if (flowSw) flowSw.set(flowOn);
-    if (flowOn && !flowCreate) import('./molecular-flow.js').then((m) => { flowCreate = m.createFlow; if (flowOn) { feedFlow(); api.repaint(); } });
+    flowOn = !!v; if (flowSw) flowSw.set(flowOn); fr.hidden = !flowOn;
+    if (flowOn && !flowMod) import('./molecular-flow.js').then((m) => { flowMod = m; if (flowOn) { feedFlow(); api.repaint(); } });
     else if (flowOn) feedFlow();
     tell(); api.repaint(); return flowOn;
   }
