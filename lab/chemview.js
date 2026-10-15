@@ -600,7 +600,7 @@ export function createChem(host, api) {
   }
 
   /* 0.5.4 P4 · THE STATUS of what this card puts on stage (lab/status.js): built on a landing, a VIEW change, a FLOW toggle or a load and KEPT — never in a frame */
-  function tell() { const P = PRESET_BY_ID.get(preset), row = (P.records || {})[basis] || null; said = sol ? statusOf({ record: row, sol, oracle: row || basis !== 'sto-3g' ? null : P.oracle, view: flowOn ? 'flow' : view }) : null; if (api.said) api.said(said); }
+  function tell() { const P = PRESET_BY_ID.get(preset), row = (P.records || {})[basis] || null; said = sol ? statusOf({ record: row, sol, oracle: row ? null : basis === 'sto-3g' ? P.oracle : (P.oracle && P.oracle[basis]) || null, view: flowOn ? 'flow' : view }) : null; if (api.said) api.said(said); }
   /* ── the plot ─────────────────────────────────────────────────────────────────────────────────── */
   const bright = () => (sol && sol.roots ? sol.roots : []);
   /** the ladder on screen: the RPA roots, or the TDA ladder in its own order with its own strengths */

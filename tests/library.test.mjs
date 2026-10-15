@@ -158,6 +158,8 @@ assert.ok(CAT.oracles.H2O && CAT.oracles.N2 && CAT.oracles.CH4, 'water, N2 and m
 assert.equal(CAT.oracles.H2O.energy, SB.H2O.energy); assert.ok(/PySCF/.test(CAT.oracles.H2O.what));
 assert.deepEqual(MOLECULES.filter((m) => !CAT.rows.some((r) => r.id === m.id)).map((m) => m.id), Object.keys(CAT.oracles), 'every live-only molecule, and only those');
 assert.ok(Object.values(CAT.oracles).every((o) => Number.isFinite(o.energy) && o.energy < 0), 'every oracle energy is finite');
+const G6 = JSON.parse(readFileSync(at('./fixtures/oracles/6-31+g-star-v1.json'), 'utf8')).molecules;   // 0.6.0 B3b: the 19 6-31+G* energies, nested by basis id
+assert.deepEqual(G6.map((m) => CAT.oracles[m.id]['6-31+g-star'].energy), G6.map((m) => m.energy)); assert.equal(Object.values(CAT.oracles).filter((o) => o['6-31+g-star']).length, 19);
 assert.deepEqual(MOLECULE_BY_ID.get('H2O').oracle, CAT.oracles.H2O); assert.deepEqual(MOLECULE_BY_ID.get('C6H6').oracle, row('C6H6').oracle);
 
 console.log(`GREEN library: benzene opens from its ${(row('C6H6').bytes / 1024).toFixed(0)} KB record in ${openMs.toFixed(1)} ms with 0 solver calls `
