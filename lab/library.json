@@ -4405,8 +4405,8 @@
   {
    "id": "C60",
    "basis": "sto-3g",
-   "hash": "a8166591591b0c9cc9af32be63499bb4a3805e96bf08910bb444094b4fbf7d8f",
-   "bytes": 145328,
+   "hash": "c2cefcaded6e16ced510244e666a726f37919e88fe830ed2a87c08bfb12e5e6b",
+   "bytes": 706671,
    "section": "LATTICE",
    "nAO": 300,
    "nocc": 180,

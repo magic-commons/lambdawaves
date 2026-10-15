@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """Pinned-decimal C60 frontier and independent water AO-conversion proof. Exclusive output.
 Run: ~/bin/scipython -I tools/library/frontier.py
+     ~/bin/scipython -I tools/library/frontier.py --occupied   (0.6.1 F1: the same C60 RHF, every occupied column + the LUMO set)
 """
-import json, math, time, hashlib, itertools, resource
+import json, math, time, hashlib, itertools, resource, sys
 from pathlib import Path
 import numpy as np
 import pyscf
@@ -31,6 +32,23 @@ def conversion(mol):
 def solve(mol,tol=1e-13,grad=1e-10):
     mf=scf.RHF(mol);mf.chkfile=None;mf.max_cycle=200;mf.conv_tol=tol;mf.conv_tol_grad=grad;mf.direct_scf_tol=1e-13;mf.max_memory=128
     t=time.perf_counter();mf.kernel();return mf,time.perf_counter()-t
+def occupied():
+    # 0.6.1 F1: re-run the frontier dump's C60 RHF (same geometry, basis, tolerances) on 12 threads and keep columns 0..182 in the
+    # app's AO order and normalisation, with PySCF's own GTOval_cart values of a sample of them at the frontier dump's 92 points.
+    lib.num_threads(12)
+    verts=np.array(json.loads((ROOT/'research/release-0.4.0/measure/round2-sol-exact.json').read_text())['directC60']['coordinatesAngstrom'])
+    mol=gto.M(atom=[('C',tuple(v)) for v in verts],unit='Angstrom',basis=basis([6]),cart=True,symmetry=True,verbose=0,max_memory=128)
+    mf,secs=solve(mol,1e-11,1e-8);assert mf.converged
+    ix,rd,labs=conversion(mol);C=rd[:,None]*mf.mo_coeff[ix];nocc=int(np.sum(mf.mo_occ==2));cols=list(range(nocc+3))
+    pts=np.array(json.loads((OUT/'c60-pyscf-samples.json').read_text())['pointsBohr']);sample=list(range(0,nocc,9))+[nocc-1,nocc,nocc+2]
+    vals=mol.eval_gto('GTOval_cart',pts)@mf.mo_coeff[:,sample]
+    S=mol.intor('int1e_ovlp')[np.ix_(ix,ix)]/rd[:,None]/rd[None,:];V=C[:,cols]
+    save('c60-occupied.json',{'status':'MEASURED','meaning':'C60 direct RHF re-run for 0.6.1 F1: every occupied column and the LUMO set, each nAO coefficients in the app AO order and normalisation (c60-frontier.json aoConversion); samples are PySCF GTOval_cart values in its own AO order, no conversion','basisSha256':hashlib.sha256((ROOT/'lab/vendor/bse/sto-3g-v1.json').read_bytes()).hexdigest(),
+      'solver':{'pyscf':pyscf.__version__,'threads':lib.num_threads(),'converged':bool(mf.converged),'energyEh':float(mf.e_tot),'wallSeconds':secs,'cycles':mf.cycles,'convTolEh':mf.conv_tol,'convTolGrad':mf.conv_tol_grad,'orbitalEnergiesEh':mf.mo_energy.tolist(),'nocc':nocc},
+      'indices':cols,'coefficientColumns':V.T.tolist(),'maxOrthonormalityError':float(np.max(abs(V.T@S@V-np.eye(len(cols))))),
+      'samples':{'pointsBohr':pts.tolist(),'indices':sample,'signedValues':vals.tolist(),'tolerance':1e-10}})
+    print(json.dumps({'energyEh':mf.e_tot,'wallSeconds':secs,'threads':lib.num_threads()}),flush=True)
+if '--occupied' in sys.argv: occupied(); sys.exit()
 water=json.loads((OUT/'water-app.json').read_text())
 atoms=[(gto.mole._symbol(a['Z']),(a['x'],a['y'],a['z'])) for a in water['atomsBohr']]
 mol=gto.M(atom=atoms,unit='Bohr',basis=basis([8,1]),cart=True,symmetry=True,verbose=0,max_memory=128)
