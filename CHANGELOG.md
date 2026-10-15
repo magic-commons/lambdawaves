@@ -11,6 +11,27 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.6.4-alpha` — 2026-10-15
+
+Commit `58edf73` · no new waves · 8 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `ece8308` 2026-10-15 — CHANGELOG for v0.6.3-alpha
+- `c8dca0d` 2026-10-15 — HANDOFF §2 15:05: v0.6.3-alpha cut locally (tag 36ef0aa); 0.6.4 Hydrogen Song building (S1 ∥ S2…
+- `aff6439` 2026-10-15 — S2 THE CHORD: the register sounds (0.6.4, PLAN §F-7 ★)
+- `4b6b32b` 2026-10-15 — merge S2 THE CHORD (aff6439): lab/chord-audio.js (a WebAudio sine bank on the populated levels —…
+- `d0f0f5e` 2026-10-15 — 0.6.4 S1 THE SONG DRIVE: a track drives hydrogen's register
+- `bd9f207` 2026-10-15 — merge S1 THE SONG DRIVE (d0f0f5e): hydrogen DRIVEN by a track
+- `03ca372` 2026-10-15 — 0.6.4 CHANGES-0.6.4.md (S1, S2 in plain words; the tone check and the folded notes as measured;…
+- `58edf73` 2026-10-15 — 0.6.4-alpha Hydrogen Song: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.6.3-alpha` — 2026-10-15
 
 Commit `36ef0aa` · no new waves · 8 commits.
