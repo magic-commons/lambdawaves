@@ -168,6 +168,7 @@
  ["session","value"],
  ["timeline","get"],
  ["render","get"],
+ ["verbs","value"],
  ["curves","value"],
  ["bootView","value"],
  ["bootVortex","value"],

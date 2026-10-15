@@ -27,7 +27,7 @@ import { calculusMarkdown } from './calculus.js';
 import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
 import { getHamiltonian, getZ } from './hamiltonian.js';
 import { createStateCard } from './windows/state.js';   // 0.5.2 R2a: the STATE card, out of boot()
-import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js'; import { createFacade } from './shell/facade.js';   // 0.5.2 R3a (edit-domain.js left with the history) · R5 the facade
+import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js'; import { createFacade } from './shell/facade.js'; import { createVerbs } from './verbs.js';   // 0.5.2 R3a (edit-domain.js left with the history) · R5 the facade
 import { createCameraLaw } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { createCurvesPanel } from './mir/panels/curves.js';     // 0.5.1 D10-24: the CURVES card's rows are the kit's panel over the stage canvas
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
@@ -138,7 +138,7 @@ export async function boot(dom) {
     sh: { readSettings, saveSettings: null, setCardStyle: null, setFrost: null, setDisconnected: null, lookSync: null, applySettings: null, KIND: null, RETIRED_WINDOWS: null, powered: null,
       DIGESTS: null, quality: null, transport: null, togglePlay: null, setModArm: null, barLock: null, refreshOcclusion: null, devById: null, rackCardWidth: null, popFace: null, rk: null,
       layout: null, winHint: null, wTr: null, phone: null, tablet: null, syncPhone: null, keyState: null, keyHelp: null, stageHasFocus: null, ACTIONS: null, kt: null, modSeats: null, serialize: null,
-      restoreModulation: null, save: null, copyJSON: null, restore: null, notCarriedWords: null, esc: null, mintLink: null, copyLink: null, openLink: null, historyApi: null, LW: null },
+      restoreModulation: null, save: null, copyJSON: null, restore: null, notCarriedWords: null, esc: null, mintLink: null, copyLink: null, openLink: null, historyApi: null, verbs: null, LW: null },
   };
   function readSettings() { return settingsStore.read(); }   // 0.5.2 R3a: §1's reader stays in the head — §0 calls it first (U1), app.sh holds it by value
   /* ── SETTINGS: what this browser remembers — lab/shell/settings.js (0.5.2 R3a), created here ── */
@@ -816,6 +816,7 @@ export async function boot(dom) {
   /* 0.3.1 · S3 THE TRUE HISTORY and its card: lab/shell/history.js (0.5.2 R3a), created here, so the card keeps its seat in the rack */
   const { historyApi } = createHistory(app); app.sh.historyApi = historyApi;
 
+  const verbs = createVerbs(app); app.sh.verbs = verbs;   // 0.6.6 G1: THE VERB TABLE + THE INVENTORY (lab/verbs.js), before the facade that carries it
   /* ── the diagnostics surface (tests and curiosity; one road) ──────────── */
   const LW = createFacade(app);   // 0.5.2 R5: lab/shell/facade.js — the literal, whole
   window.__LW = LW; app.sh.LW = LW;
