@@ -26,7 +26,7 @@
 import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
-import { orbitalName, forms, coreCount, symmetryDefects } from './names.js';
+import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js';
 import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab } from './library.js';
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
@@ -234,6 +234,7 @@ export function createChem(host, api) {
   const more = el('div', 'mol-more', host); more.id = 'mol-more';
   const rTda = el('div', 'row tight', more); rTda.appendChild(tdaSw.root); rTda.appendChild(coreSw.root);
   for (const n of [r2, cv, cvCore, rr, note]) more.appendChild(n);
+  const h2Note = el('div', 'note', more); h2Note.hidden = true;   // 0.6.2 H2: H₂'s hidden correlation, STO-3G only
   const moreToggle = el('button', 'trig mol-more-toggle', rV); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
   chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
   const setMore = (open) => {
@@ -581,7 +582,13 @@ export function createChem(host, api) {
   const storageNote = (i) => { stored = !i ? '' : (i.persisted ? 'persisted' : i.safariTab ? 'a Safari tab: kept until the browser clears it — add λWAVES to the Home Screen to keep it' : 'not persisted')
     + (Number.isFinite(i.usage) && Number.isFinite(i.quota) ? ` · ${(i.usage / 1048576).toFixed(1)} of ${Math.round(i.quota / 1048576)} MB used` : ''); if (sol) refresh(); };
   function refresh() {
-    if (!sol) { for (const r of [roE, roEps, roTr, roIdem, roT, roSym]) r.set('—', ''); paint(); return; }
+    if (!sol) { for (const r of [roE, roEps, roTr, roIdem, roT, roSym]) r.set('—', ''); h2Note.hidden = true; paint(); return; }
+    /* Slater–Condon: σg² and σu² differ by two orbitals, so the 1-RDM has no cross term and ±b share it; ⟨H⟩ differs by 4abK */
+    h2Note.hidden = !(preset === 'H2' && basis === 'sto-3g');
+    if (!h2Note.hidden && h2Note.dataset.k !== sol.key) {
+      const A = chemAtoms(preset), R = Math.hypot(A[1].x - A[0].x, A[1].y - A[0].y, A[1].z - A[0].z), m = sto3gH2(R), a = m.ciVector[0], b = m.ciVector[3], K = m.gMO[5], d = 4 * Math.abs(a * b) * K;   // gMO[5] = (σgσu|σgσu)
+      h2Note.dataset.k = sol.key; h2Note.innerHTML = `<b>Hidden correlation.</b> Two states share one density and one current: <m>a|σg²⟩ + b|σu²⟩</m> and <m>a|σg²⟩ − b|σu²⟩</m> differ by two orbitals, so every one-body observable is blind to the sign of <m>ab</m>; their energies differ by <m>4|ab|K</m> = ${d.toFixed(4)} Eh — ${m.fci.toFixed(6)} (the full CI) and ${(m.fci + d).toFixed(6)} Eh, with a ${a.toFixed(4)}, b ${b.toFixed(4)}, K ${K.toFixed(4)} at R ${R.toFixed(4)} bohr (lab/h2ci.js).`;
+    }
     roE.set(sol.energy.toFixed(9), 'ok');
     const P = PRESET_BY_ID.get(preset) || {};
     roE.setSub(`${P.name} · ${basis.toUpperCase()} · E_nuc ${Number(sol.Enuc).toFixed(6)}` + (sol.local ? ' · on the frame thread (no worker)' : ''));
