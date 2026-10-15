@@ -14,6 +14,7 @@ export function createSettingsCard(app) {
     ui.setWindowInfo = (v) => look.set({ help: v });   // the WINDOW menu's `notes` action calls it by this name
     ui.windowInfoSw = sw({ label: 'HELP', value: look.get('help'), title: 'Show window help buttons', onChange: ui.setWindowInfo }); ri.appendChild(ui.windowInfoSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
+    ui.audioSw = sw({ label: 'AUDIO', value: false, title: 'sound from this page: the populated levels as tones, off by default (SPECTRUM › BEAT EQUALIZER › SOUND)', onChange: (v) => { ui.setAudio(v); saveSettings(); } }); ri.appendChild(ui.audioSw.root);   // 0.6.4 S2: a PREFERENCE (`audio`), the consent
     createInformational(app);   // 0.5.3 M9: STAGE FORMULA and ATOM LABELS, each with its SIZE, left DISPLAY for their own window (lab/informational.js)
     ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => app.sh.layout.resetLayout() }).root);
     ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); look.prefs.forget(); modStore.write({ modArm: undefined, modCadence: undefined }); curvesStore.remove(); location.reload(); } }).root);
