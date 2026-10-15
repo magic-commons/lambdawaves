@@ -14,6 +14,7 @@ import { BASIS } from './hydrogen.js';
 import { vortexPoints, stretchedCensus, threeModes } from './frontier.js';
 import { cameraKey, toScreen } from './field.js';
 import { el, readout, sw, seg, trig } from './mir/kit.js';
+import { createAngularNodes } from './angular-nodes.js';
 
 export function createVortex(host, overlay, api) {
   const r1 = el('div', 'row tight', host);
@@ -90,6 +91,7 @@ export function createVortex(host, overlay, api) {
     const ok = `${cameraKey(obs)}|${obs.dist.toFixed(4)}|${obs.fov}|${cv.clientWidth}|${cv.clientHeight}|${show.get()}`;   // wave 54: the WHOLE orientation (a FREE camera rolls)
     if (ok !== lastObs) { lastObs = ok; drawOverlay(obs); }
   }
+  ({ update, suspend, drawOverlay } = createAngularNodes(r3, cv, { update, suspend, drawOverlay, locating: () => show.get() && !!last }));   // E2: ANGULAR NODES (third row) wraps the overlay pass
   return { update, suspend, get last() { return last; }, get census() { return census; }, locateNow(reg, t, half) { locate(reg, t, half); return last; },
     setOn(v) { on.set(v); dirty = true; }, setOverlay(v) { show.set(v); drawOverlay(); }, get on() { return on.get(); }, get overlay() { return show.get(); } };
 }
