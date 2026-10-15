@@ -157,7 +157,7 @@ export function createTransport(app) {
     function flashSub() {
       if (fk.v === reg.version && fk.r === clock.rate) return fk.sub;
       const w = aliasOf(periodEnergies(), fk.r = clock.rate, stats.fps >= 10 ? Math.round(stats.fps) : 60), on = !!w && w.alias > FLASH_HZ; fk.v = reg.version;
-      ui.rateKnob.root.title = on ? 'the fastest beat, ' + w.hz.toFixed(1) + ' Hz, shows at ' + w.alias.toFixed(1) + ' Hz on screen: above 3 a second it flashes' : rateTitle;
+      ui.rateKnob.root.title = on ? 'a beat of ' + w.hz.toFixed(1) + ' Hz shows at ' + w.alias.toFixed(1) + ' Hz on screen: above 3 a second it flashes' : rateTitle;
       ui.rateKnob.root.classList.toggle('flash', on); return (fk.sub = on ? ' · beats alias at ' + w.alias.toFixed(1) + ' Hz on screen' : '');
     }
     app.hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer

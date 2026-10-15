@@ -30,7 +30,7 @@ export function createPersist(app) {
       'material.hue': [pr.mat, 'hueShift'], 'material.iso': [pr.mat, 'iso'], 'material.grain': [pr.mat, 'grain'], 'material.knee': [pr.mat, 'knee'],
       'material.slice.pos': [pr.mat.slice, 'pos'], 'material.slice.thick': [pr.mat.slice, 'thick'], 'transport.rate': [data.experiment, 'rate'],
       'state.rot.z': [pr.rotationRates, 'z'], 'state.stark.kz': [pr.rotationRates, 'kz'], 'state.defect.l2': [pr.rotationRates, 'def'], 'state.rabi': [pr.ab, 'omega'],
-      ...Object.fromEntries([1, 2, 3, 4, 5, 6].map((n) => ['shell.rate.' + n, [shellSeat(pr.rates, n), 'v']])),
+      ...Object.fromEntries([1, 2, 3, 4, 5, 6].map((n) => ['shell.rate.n' + n, [shellSeat(pr.rates, n), 'v']])),
       'chem.kick': [I.chem, 'kappa'], 'chem.speed': [I.chem, 'speed'], 'reg.morph': [st, 'morph'], 'reg.e0': [st && st.drive, 'e0'], 'reg.w': [st && st.drive, 'omega'],
       ...Object.fromEntries(((st && st.lanes) || []).slice(0, 8).flatMap((L, i) => [['reg.amp' + (i + 1), [L, 'amp', Math.sqrt, (a) => a * a]], ['reg.ph' + (i + 1), [L, 'phase', (v) => ((v % T) + T) % T]]])) };
   }

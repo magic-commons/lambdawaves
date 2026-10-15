@@ -106,8 +106,8 @@ export function createModSeam(app) {
         hint: 'Set defect phase speed',
         get: () => rotRate.def,
         set: (v) => { setRotationRate('def', v); } },
-      /* 0.6.0 B3a · THE SHELL RATES: a shell's labels on the lanes' own road (api.setRate: rates, setEnergies, the ring, the lanes' knobs); no dial of their own */
-      ...Array.from({ length: 6 }, (_, i) => ({ id: `shell.rate.${i + 1}`, label: `SHELL ${i + 1} RATE`, unit: '×', map: 'log', min: 0.25, max: 4, def: 1, group: 'state', knob: () => null,
+      /* 0.6.0 B3a · THE SHELL RATES: a shell's labels on the lanes' own road (api.setRate: rates, setEnergies, the ring, the lanes' knobs); no dial of their own; `n1` because the kit's segment starts with a letter */
+      ...Array.from({ length: 6 }, (_, i) => ({ id: `shell.rate.n${i + 1}`, label: `SHELL ${i + 1} RATE`, unit: '×', map: 'log', min: 0.25, max: 4, def: 1, group: 'state', knob: () => null,
         hint: 'one shell’s per-label RATE (× its energies); a beat above 3 Hz on screen flashes — the RATE label says when',
         get: () => rates[reg.populated().find((b) => BASIS[b].n === i + 1) ?? BASIS.findIndex((s) => s.n === i + 1)],   // its first populated label, else its first
         set: (v) => { for (const s of BASIS) if (s.n === i + 1 && rates[s.index] !== v) api.setRate(s.index, v); } })),
@@ -151,7 +151,7 @@ export function createModSeam(app) {
        CHEMISTRY's two targets are `chem.kick` and `chem.speed`, and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
        sphere arcs, so they are drop targets now, like every observer.* dial. */
-    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg']);
+    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell']);
     app.state.restampParams = mod.stamp;
 
     let trSeat = 'bottom', trMoving = false;
