@@ -122,7 +122,7 @@ const PRECACHE = [
   ['./manifest.webmanifest',                                        '4771fb9dfe63'],
   ['./mathworker.js',                                               '42a33d614f3c'],
   ['./md.js',                                                       '63f8914d7dd3'],
-  ['./meters.js',                                                   '00159e6da1c3'],
+  ['./meters.js',                                                   '0998b81ccdb5'],
   ['./mir/control-help.js',                                         'a28d8922cdca'],
   ['./mir/controls/arc.js',                                         'e82dca6b6007'],
   ['./mir/controls/colour-controls.css',                            'c52f3f82f755'],
