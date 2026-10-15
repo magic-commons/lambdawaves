@@ -2,14 +2,14 @@
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
 import { TIER, BUILD_LINE } from '../rack.js'; import { el, chip } from '../mir/kit.js'; import { createMenubar } from '../mir/shell/menubar.js'; import { toLUT } from '../mir/palette.js';
-import { renderNotebook } from '../mir/shell/notebook-render.js'; import { VIEW, cameraEye } from '../field.js'; import { PRESET_BY_ID } from '../state.js'; import { getZ } from '../hamiltonian.js';
-import { MOLECULE_BY_ID } from '../molecules.js'; import { orbitalName } from '../names.js'; import { mdText } from '../latex-state.js'; import { paintedRect } from '../occlusion.js';
+import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye } from '../field.js'; import { getZ } from '../hamiltonian.js';
+import { paintedRect } from '../occlusion.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js';
 export function createNotebook(app) {
   const { dom, ui, reg, clock, obs, mat, settingsStore, isPhone } = app, { schedule } = app.loop, { floats, resetView, swClient } = app.host;
   const { KIND, layout, readSettings, rk, saveSettings, winHint } = app.sh, { clearRegister, copyLatex, normalizeNow, toggleFullscreen } = app.w;
-  const { busy, busySync, cards, field, loadPreset, modSyncBases, occlusion, paintMarks } = app.ctl;
+  const { busy, busySync, cards, field, modSyncBases, occlusion, paintMarks } = app.ctl;
   {
     /* WAVE 62 · THE SKIP LINKS MOVE FOCUS THEMSELVES.  The anchors are real anchors — without script
        the browser's own fragment jump still lands on a `tabindex="-1"` rack — but in THIS app the
@@ -177,33 +177,19 @@ export function createNotebook(app) {
          (the MOLECULE dropdown's pick, MOLECULES on), view (the V key's), orbital (the ORBITAL dial by name or number, VIEW orbital) — one
          ring row and one fade a press (a molecule's fade is its head, D2), the ring never cleared; any other key (a whole state `lw:s=…`,
          E9) is ignored and said on the foot.  Capture phase: the sanitiser sends every link to a new tab (notebook-render.js). */
-      const orbitalOf = (s, w) => { if (!s) return 0; if (/^\d+$/.test(w)) return +w >= 1 && +w <= s.nAO ? +w : 0;
-        for (let k = 0; k < s.nAO; k++) if (orbitalName(s.names, k, s.nocc).replace(/ \(\w\)/, '').split(' · ').some((x) => x.toLowerCase() === w.toLowerCase().replace('-', '−'))) return k + 1;
-        return 0; };
-      function lwLink(q) {
-        const kv = new Map(), bad = [];
+      function lwLink(q, name) {                                       // 0.6.6 G1: the four keys are rows of THE VERB TABLE (lab/verbs.js), run as one list
+        const kv = new Map(), bad = [], list = [];
         for (const p of q.split('&')) { const [k, v = ''] = p.split('='); try { kv.set(k, decodeURIComponent(v)); } catch (_) { bad.push(k); } }
-        const mol = [...MOLECULE_BY_ID.keys()].find((id) => id.toLowerCase() === String(kv.get('molecule')).toLowerCase());
-        const orb = () => { const s = app.state.chem.solution(), k = orbitalOf(s, kv.get('orbital')); if (k) { app.state.chem.setView('orbital'); app.state.chem.orbital(k); } return k ? orbitalName(s.names, k - 1, s.nocc, 'latex') : ''; };
-        let fade = '', own = false;                                    // own: the verb announces itself (a hand's preset; a molecule's head)
-        for (const [k, v] of kv) {
-          if (k === 'preset' && PRESET_BY_ID.has(v)) own = loadPreset(v, { hand: true });
-          else if (k === 'molecule' && mol) { own = true; const p = app.state.chem.pick(mol); app.state.chem.setOn(true); if (kv.has('orbital')) p.then(() => (app.state.history ? app.state.history.absorb(orb) : orb())); }
-          else if (k === 'view' && VIEW[v] !== undefined) { app.sh.LW.setView(v); fade = fade || 'VIEW · ' + mdText(v); }
-          else if (k === 'orbital' && !mol) { const n = orb(); if (n) fade = fade || 'ORBITAL · ' + n; else bad.push(k); }
-          else if (k !== 'orbital') bad.push(k);                       // with a molecule, the orbital waits for its solve (above)
-        }
-        if (fade && !own && app.state.stageText) app.state.stageText.announce(fade);
-        return bad.length ? 'ignored: ' + bad.join(', ') : '';
+        for (const [k, v] of kv) if (k === 'preset' || k === 'view') list.push({ verb: k, args: { id: v } });
+          else if (k === 'molecule') list.push({ verb: k, args: kv.has('orbital') ? { id: v, orbital: kv.get('orbital') } : { id: v } });
+          else if (k === 'orbital') { if (!kv.has('molecule')) list.push({ verb: 'view', args: { id: 'orbital', orbital: v } }); } else bad.push(k);
+        return app.sh.verbs.run(list, { name }).then((r) => [...bad, ...r.refused.map((x) => (x.verb === 'view' && !kv.has('view') ? 'orbital' : x.verb))]);
       }
       view.addEventListener('click', (e) => {
         const a = e.target.closest && e.target.closest('a[href^="lw:"]'); if (!a) return;
         e.preventDefault(); e.stopPropagation();
         const name = 'LINK · ' + (a.textContent.trim().slice(0, 32) || a.getAttribute('href'));
-        if (app.state.history && app.state.history.pendingLabel !== name) app.state.history.flush();
-        const said = lwLink(a.getAttribute('href').slice(3));
-        if (app.state.history) app.state.history.note(name);
-        const c = nb.querySelector('.nb-count'); if (c && said) { c.textContent = said; setTimeout(count, 2400); }
+        lwLink(a.getAttribute('href').slice(3), name).then((bad) => { const c = nb.querySelector('.nb-count'); if (c && bad.length) { c.textContent = 'ignored: ' + bad.join(', '); setTimeout(count, 2400); } });
       }, true);
       /* ── PROJECTS (0.5.0 C6): MIR's FOLDERS over ONE project part — this one, below; the notebook is its page 0 ── */
       /* The saved project is wider than undo: notebook, camera, palette, and modulation all

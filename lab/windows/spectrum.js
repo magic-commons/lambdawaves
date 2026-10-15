@@ -108,6 +108,7 @@ export function createSpectrumCard(app) {
   const eq = app.state.eq = createEqualizer(), gEq = group(wSpec.body, 'BEAT EQUALIZER'), eqCv = el('canvas', 'eq-grid', gEq), eqG = eqCv.getContext('2d');
   eqCv.width = eqCv.height = 6;
   const eqStep = stepper({ aria: 'Equalizer preset', items: EQ_PRESETS.map((p) => ({ id: p.id, label: p.label })), value: eq.preset, cls: 'mol-step', onChange: (id) => { eq.setPreset(id); syncEq(true); hNote(); } });
+  ui.eqPick = (id) => { eqStep.set(id); eq.setPreset(id); syncEq(true); hNote(); };   // 0.6.6 G1: the stepper's road for THE VERB TABLE's switch
   const eqRo = readout({ label: 'PURITY', value: '1.000', sub: 'pure' }), rFd = el('div', 'row tight', gEq);
   const eqFd = [0, 1, 2, 3, 4, 5].map((i) => fader({ label: String(i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + ' %', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
   el('div', 'row tight', gEq).append(eqStep.root, eqRo.root); gEq.appendChild(rFd); for (const f of eqFd) rFd.appendChild(f.root);
