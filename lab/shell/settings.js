@@ -34,7 +34,7 @@ export function createSettings(app) {
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
            belong beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
            when you open it is a surprise, not a setting. */
-        friction: app.host.camera.friction, spin: app.host.camera.speed, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod); 0.5.3 M6: the camera's LOCK too
+        friction: app.host.camera.friction, spin: app.host.camera.speed, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock, audio: !!(ui.audioSw && ui.audioSw.get()),   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod); 0.5.3 M6: the camera's LOCK too
         /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE, and it is the sixth of the six things
            host-contract.md says a host owes it: where the window sits, which lane the work bars are
            in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
@@ -101,6 +101,7 @@ export function createSettings(app) {
     if (typeof s.dragGain === 'number') app.host.camera.setDragGain(s.dragGain);   // wave 58: DRAG GAIN and FLING ride beside them
     if (typeof s.fling === 'number') app.host.camera.setFling(s.fling);
     if (typeof s.camLock === 'boolean') app.host.camera.setLock(s.camLock);       // 0.5.3 M6: the classic camera (pan held at the centre), off when nothing was said
+    if (s.audio === true && ui.audioSw) { ui.audioSw.set(true); ui.setAudio(true); }   // 0.6.4 S2: the AUDIO consent (SOUND itself is a hand press each session)
     /* 0.5.0 C4 · THE POWER AND THE CADENCE are this browser's (PREFERENCE) and live in the kit's modulation record, the one
        MIR's installModulation reads; an older blob's pair is read ONCE into it, and the blob drops it on its next save. */
     const mr = { modArm: s.modArm, modCadence: s.modCadence, ...app.ctl.modStore.read() };

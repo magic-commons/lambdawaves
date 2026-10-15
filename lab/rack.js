@@ -117,7 +117,7 @@ export async function boot(dom) {
       applyVisuals: true, modView: null, modHost: null, modWall: 0, tl: null, modExpOn: null, dodge: null, filmCard: null, feedMs: 0, rotMoved: false, rotTicking: false, audioCap: null, modArm: true,
       occludeDirty: true, occludeAt: 0, stageMix: 0.04, stageFollow: true, refSnapshot: null, pendingRef: null, warmTimer: 0, warmIdle: 0, dragging: false, cornerLayoutDirty: true,
       exportLocked: false, histShown: null, lastNmax: 1, capApi: null, camKnobs: {}, exporter3d: null, flowEpoch: null, chem: null, restampParams: null, molSession: null, register: null,
-      orbitals: null, states: null, stageText: null, bow: null, bowInFlight: 0, bowChain: null, kdrag: null, gasWidth: 1.8, gasAxial: false, lastLaunch: null, restoreNotice: '', linkLast: null, eq: null, eqNoNodes: false },
+      orbitals: null, states: null, stageText: null, bow: null, bowInFlight: 0, bowChain: null, kdrag: null, gasWidth: 1.8, gasAxial: false, lastLaunch: null, restoreNotice: '', linkLast: null, eq: null, eqNoNodes: false, chord: null },
     loop: { schedule, hold: filmHold, resetWall: () => { lastWall = performance.now() / 1000; }, page: null, loopRing: null, ringMedian: null, windowActivity: null, canPresent: null, modesAt, refModes,
       meterSnapshot, paceRate: null, MOTION: null },
     host: { camera: null, orbitBy: null, camTravel: null, queueKeyOrbit: null, camLevel: null, syncFreeAngles: null, setCamMode: null, cameraPort: null, resetView: null, zoomAt: null, panBy: null,
@@ -639,6 +639,7 @@ export async function boot(dom) {
   app.host.camTravel = camTravel; app.host.orbitBy = orbitBy; app.host.queueKeyOrbit = queueKeyOrbit; app.host.setDist = setDist; app.host.setFov = setFov; app.host.resetView = resetView; app.host.zoomAt = zoomAt; app.host.cameraPort = cameraPort;
 
   function filmHold(on) {
+    if (app.state.chord) app.state.chord[on ? 'suspend' : 'resume']();   // 0.6.4 S2: a film stays silent
     if (on) {
       filmBefore = { state: reg.serialize(clock.t), version: reg.version, mat: structuredClone(mat), obs: { ...obs }, rot: { ...rotRate } };
       app.state.exportLocked = true; if (rafId) cancelAnimationFrame(rafId); rafId = 0; stats.scheduled = false;

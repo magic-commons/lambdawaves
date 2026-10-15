@@ -143,3 +143,7 @@ LIBRARY: content-addressed under a DATA root (`lab/sw.js` §1b), never inside a 
 modulation record, `saveMod()`, read by `applySettings()`; a look option is a row of the kit's `mir.gui`, `lab/look.js` `LOOK_ROWS`). A PROJECT
 key goes in `serialize()` / `restore()` only, and joins the history unless it is a view. A WORKSPACE key goes in the
 layout record and the settings. No key belongs to two scopes.
+
+| Key (0.6.4) | Where | Scope |
+|---|---|---|
+| `audio` (S2 THE CHORD): SETTINGS › AUDIO, the consent switch for sound from this page, off by default; SPECTRUM's SOUND and LEVELS · BEATS are never saved (a hand press each session), never in a project, a link or a history row | settings | PREFERENCE |

@@ -2,8 +2,8 @@
  * there.  §0's consts, schedule, page, the rack, wState and the controller's names are handed over (backward); the windows, the gas and the layout made
  * later in boot() are read through their slots inside callbacks (forward).  It registers on app.w what a moved reader needs; boot() destructures the return. */
 import { TIER } from '../rack.js';
-import { el, knob, seg, trig, readout, group, mathPlain, fader, stepper } from '../mir/kit.js';
-import { createEqualizer, EQ_PRESETS } from '../equalizer.js';
+import { el, knob, seg, sw, trig, readout, group, mathPlain, fader, stepper } from '../mir/kit.js';
+import { createEqualizer, EQ_PRESETS } from '../equalizer.js'; import { createChord } from '../chord-audio.js';
 import { VIEW } from '../field.js';
 import { BASIS, stateOf } from '../hydrogen.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from '../hamiltonian.js';
@@ -14,7 +14,7 @@ import { stateLatex, moleculeLatex } from '../latex-state.js';
 import { createRegisterSturmian } from '../sturmianreg.js';
 const keepT = (elm, on, title) => { if (elm.dataset.title0 === undefined) elm.dataset.title0 = elm.title || ''; elm.title = on ? title : elm.dataset.title0; };
 export function createSpectrumCard(app) {
-  const { ui, device, reg, hNote, clock, energyOf, sturm, labelExpect, mat, rates } = app, { schedule, page } = app.loop, { rack } = app.host, { wState } = app.w;   // backward
+  const { ui, device, reg, hNote, clock, appPlay, energyOf, sturm, labelExpect, mat, rates } = app, { schedule, page, MOTION } = app.loop, { rack } = app.host, { wState } = app.w;   // backward
   const { rotRate, busy, busySync, warmArm, touchState, setReference, api, field } = app.ctl;   // the controller's, filled before its seat returned
   const wSpec = device({ id: 'spectrum', eyebrow: 'SPECTRUM', status: '' });
   app.w.wSpec = wSpec;
@@ -112,8 +112,14 @@ export function createSpectrumCard(app) {
   const eqFd = [0, 1, 2, 3, 4, 5].map((i) => fader({ label: String(i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + ' %', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
   el('div', 'row tight', gEq).append(eqStep.root, eqRo.root); gEq.appendChild(rFd); for (const f of eqFd) rFd.appendChild(f.root);
   el('div', 'note', gEq).textContent = 'the beats fade, the shells stay';
+  /* 0.6.4 S2 · THE CHORD (lab/chord-audio.js): SOUND and LEVELS · BEATS, shown only while SETTINGS › AUDIO is on; not saved (a hand press each session) */
+  const chord = app.state.chord = createChord({ reg, clock, motion: MOTION, onPlay: appPlay.onChange }), snd = el('div', null, gEq), sndCap = el('div', 'note', null), paintChord = () => { sndCap.textContent = chord.caption; };
+  const sndSw = sw({ label: 'SOUND', value: false, title: 'SOUND — the populated levels as tones while THE play runs (a film stays silent)', onChange: (v) => { chord.set({ on: v }); paintChord(); } });
+  el('div', 'row tight', snd).append(sndSw.root, seg({ label: '', value: 'levels', options: [{ id: 'levels', label: 'LEVELS' }, { id: 'beats', label: 'BEATS' }], onChange: (v) => { chord.set({ mode: v }); paintChord(); } }).root); snd.append(sndCap); snd.hidden = true;
+  ui.setAudio = (v) => { snd.hidden = !v; if (!v && sndSw.get()) { sndSw.set(false); chord.set({ on: false }); } chord.retune(); paintChord(); };
   let eqKey = '', eqT = null, eqMode = 0;
   function syncEq(hand) {
+    if (chord.retune() && !snd.hidden) paintChord();   // S2: keyed on version, RATE, mode — the bank moves only on change
     const H = getHamiltonian(), why = app.state.chem && app.state.chem.on ? 'MOLECULES owns the field' : sturm.P ? 'STURMIAN is on' : H.id !== 'hydrogen' ? 'the operator is not HYDROGEN' : app.state.space !== 'x' ? 'momentum space is on' : '';
     const key = why + eq.preset + eq.gains.join() + reg.version; if (key === eqKey) return; eqKey = key;
     const P = reg.populated(), pops = reg.re0.map((r, a) => r * r + reg.im0[a] ** 2), w = [0, 0, 0, 0, 0, 0]; for (const a of P) w[BASIS[a].n - 1] += pops[a];
