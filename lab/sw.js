@@ -354,7 +354,7 @@ const PRECACHE = [
   ['./project-store.js',                                            '1a20905be3c3'],
   ['./projects.js',                                                 'd2af7358294d'],
   ['./qho.js',                                                      'dc55dfe4479f'],
-  ['./rack.js',                                                     '11d08fda8291'],
+  ['./rack.js',                                                     'bf5e3fe961ae'],
   ['./radiation.js',                                                '3fdc3094e486'],
   ['./radiationview.js',                                            '9b6823ea41df'],
   ['./registerview.js',                                             'c990893a456b'],
