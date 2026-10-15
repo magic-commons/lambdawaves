@@ -6,7 +6,7 @@ import { TIER } from '../rack.js';
 import { VIEW_NAMES, STYLE_NAMES, quatFromYawPitch } from '../field.js';
 import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from '../hamiltonian.js';
-import { clampShift } from '../camera-law.js';
+import { clampShift } from '../camera-law.js'; import { BASIS } from '../hydrogen.js';
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
 export function createPersist(app) {
   const { ui, reg, clock, obs, mat, FIELD_CHROME, rates, energyOf, sturm, PAL_DEF } = app; const { schedule, paceRate } = app.loop; const { quality, layout, phone, tablet } = app.sh;
@@ -18,6 +18,8 @@ export function createPersist(app) {
      minus the view, quality, the notebook and the WORKSPACE (no DOM read), and minus what a clock or a modulator moves (experiment.t,
      a bound macro's value, a modulated target's output — its seat keeps the base —, mat.steps, domain.half under AUTO). */
   const EDIT_SKIP = ['obs', 'quality', 'layout', 'modwin', 'camera', 'notebook'];
+  const shellSeat = (R, n) => R && { get v() { return R[BASIS.findIndex((s) => s.n === n)]; },   // 0.6.0 B3a: a shell route's seat writes only a shell that shares one rate — a hand's per-label rates are never flattened
+    set v(x) { const sh = BASIS.filter((s) => s.n === n); if (sh.every((s) => R[s.index] === R[sh[0].index])) for (const s of sh) R[s.index] = x; } };
   /** where each modulation target's hand value sits in a serialize() record, [object, key, f, back]: a saved project and a history
    *  row keep the registry BASE there.  A STATES lane slot (f: its amplitude / wrapped phase) is seated by the edit scope only. */
   function modSeats(data) {
@@ -28,6 +30,7 @@ export function createPersist(app) {
       'material.hue': [pr.mat, 'hueShift'], 'material.iso': [pr.mat, 'iso'], 'material.grain': [pr.mat, 'grain'], 'material.knee': [pr.mat, 'knee'],
       'material.slice.pos': [pr.mat.slice, 'pos'], 'material.slice.thick': [pr.mat.slice, 'thick'], 'transport.rate': [data.experiment, 'rate'],
       'state.rot.z': [pr.rotationRates, 'z'], 'state.stark.kz': [pr.rotationRates, 'kz'], 'state.defect.l2': [pr.rotationRates, 'def'], 'state.rabi': [pr.ab, 'omega'],
+      ...Object.fromEntries([1, 2, 3, 4, 5, 6].map((n) => ['shell.rate.n' + n, [shellSeat(pr.rates, n), 'v']])),
       'chem.kick': [I.chem, 'kappa'], 'chem.speed': [I.chem, 'speed'], 'reg.morph': [st, 'morph'], 'reg.e0': [st && st.drive, 'e0'], 'reg.w': [st && st.drive, 'omega'],
       ...Object.fromEntries(((st && st.lanes) || []).slice(0, 8).flatMap((L, i) => [['reg.amp' + (i + 1), [L, 'amp', Math.sqrt, (a) => a * a]], ['reg.ph' + (i + 1), [L, 'phase', (v) => ((v % T) + T) % T]]])) };
   }

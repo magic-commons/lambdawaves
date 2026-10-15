@@ -49,6 +49,7 @@ function exactFromDifferences(E, d, tol, qmax) {
   let L = 1; for (const r of rats) L = L / gcdInt(L, r.q) * r.q;
   let G = 0; for (const r of rats) G = gcdInt(G, Math.round(r.p * L / r.q));
   const g = dmin * G / L;
+  if (Math.max(...d) / g >= 2 ** 53) return null;   // 0.6.0 B3a: no double holds that integer — a period fitted there is false
   let verr = 0; for (const v of d) { const x = v / g; verr = Math.max(verr, Math.abs(x - Math.round(x))); }
   return verr < 1e-9 ? { exact: true, T: 2 * Math.PI / g, g, count: E.length, pairs: d.length, verified: verr } : null;
 }
