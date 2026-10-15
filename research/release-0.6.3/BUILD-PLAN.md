@@ -1,7 +1,7 @@
 # 0.6.3 "Event Census" — THE BUILD PLAN (Claude Yan / Fable 5.1, 2026-10-15; drafted ahead — base and cap are filled at 0.6.2's cut)
 
 Josh's dial (2026-10-15): tight builds, features only, no gate code, pre-1.0. THE ENGINE PLAN D.4 (`../release-0.6.0/PLAN.md`), Round 1's T8 · T8′ · T4′ and
-Round 2's L-1 / L-1′ / L-10 (the vault's `sweep/SWEEP-SOL.md`, `measure/sweep-sol-census.{py,json}`) are the record. Base: `yan-c` after the v0.6.2-alpha cut (TBD).
+Round 2's L-1 / L-1′ / L-10 (the vault's `sweep/SWEEP-SOL.md`, `measure/sweep-sol-census.{py,json}`) are the record. Base: `yan-c` at the 0.6.2 merge tip `545a0f6` (the cut adds version and changelog commits only); 28,504 `lab/` lines; cap 28,504 × 1.01 = **28,789** (285 of headroom).
 
 ## The rows (two builders, Opus, own worktrees)
 | row | what lands | files | Δ |
