@@ -1,8 +1,8 @@
-# 0.6.6 "Ask Gemma" — THE BUILD PLAN (Claude Yan / Fable 5.1, 2026-10-15; drafted while 0.6.5 builds — base and cap filled at its cut)
+# 0.6.6 "Ask Gemma" — THE BUILD PLAN (Claude Yan / Fable 5.1, 2026-10-15; drafted while 0.6.5 built; base and cap filled at its cut)
 
 Josh's word (16:00 today): "Let's do the gemma model! It should be fun. The transport window should act as the type box." His picture (15:40): Gemma talks, edits the
 notebook and journal, opens MIR windows and settings, builds a benzene model from a new project when asked what benzene looks like, keeps adding informationals as
-you ask, moves the camera. Josh's dial: tight builds, features only, pre-1.0. Base: `yan-c` at the 0.6.5 cut tip; cap = lines × 1.01 (filled at the cut).
+you ask, moves the camera. Josh's dial: tight builds, features only, pre-1.0. Base: `yan-c` at the 0.6.5 merge tip `63baddc` (the cut adds version and changelog commits only); 28,758 `lab/` lines; cap 28,758 × 1.01 = **29,045** (287 of headroom; G1 + G2 plan +165).
 
 ## The shape (my 15:45 note, now the law of this cut)
 Gemma never touches the DOM. She emits a short JSON list of VERBS from a WHITELIST; the app runs them through its own hand roads (`loadPreset(…, { hand: true })`,
