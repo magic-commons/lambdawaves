@@ -776,6 +776,8 @@ body[data-theme="dark"] .km-key-unbound {
 .mol-step { flex: 1 1 100%; min-width: 0; align-items: stretch; }   /* a whole line each: INSTALLED · MOLECULES ON share the next (262 px of body cannot hold all three) */
 .mol-step .mir-step-row { width: 100%; justify-content: space-between; }
 .mol-step .mir-step-name { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eq-grid { display: block; width: 96px; height: 96px; margin: 4px 0; image-rendering: pixelated; border-radius: 4px; }   /* 0.6.0 B2: the BEAT EQUALIZER's 6 × 6 shell grid, one texel a cell */
+.grp.eq-off > :not(.grp-lbl) { opacity: var(--state-disabled, .38); pointer-events: none; }   /* stood down: the title on the group says why */
 .mol-pick .mir-step-name { padding: 0; }
 .mol-pick select.sel { width: 100%; min-height: var(--step-b); padding: 0 var(--sp-2); border: 0; background: transparent; box-shadow: none; appearance: none;
   font: inherit; color: var(--fg); letter-spacing: inherit; text-align: center; text-align-last: center; text-overflow: ellipsis; cursor: pointer; }

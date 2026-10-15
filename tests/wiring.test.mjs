@@ -61,7 +61,6 @@ const TODAY = new Date();
    file no root reaches is now §6b's to report, not this list's to excuse; the rows retire and the list is for λWAVES' own. */
 const ALLOWLIST = [
   // empty since 0.5.0 C0 — an app module staged for a named later wave is the only thing that may be named here
-  { file: 'lab/equalizer.js', date: '2026-10-15', reason: '0.6.0 B1 lands the table alone; B2 BEAT MODE (lab/windows/spectrum.js) imports createEqualizer and feeds field.setEqualizer — B2 deletes this row' },
 ]; // Wave 107 wired the deterministic renderer into CAPTURE; the ChronusQ ports and the H₂O modules were staged here 2026-09-11/12 and reached by mathworker.js + chemview.js on 2026-09-12.
 
 /* ══ 2.  A JAVASCRIPT SCANNER ════════════════════════════════════════════════════════════════════════════

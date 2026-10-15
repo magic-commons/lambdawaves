@@ -1679,7 +1679,7 @@ export async function createField(canvas, opts = {}) {
     setSpace(s) { s = s | 0; if (s !== space) { space = s; refValid = false; } },
     /** 0.6.0 B1: the equalizer's table (lab/equalizer.js `table()`), or null: FLAT, the locked kernel.  Position hydrogen only;
      *  read on the next reconstruct, which the caller asks for. */
-    setEqualizer(t) { eqTable = t && t.gamma ? t : null; },
+    setEqualizer(t) { eqTable = t && t.gamma ? t : null; }, get equalizer() { return eqTable; },
     /** upload a 256×RGBA phase palette (Float32Array(1024), values 0..1) — an OBSERVER product: ψ is untouched */
     setPalette(lut) { lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); uploadPalette(); },
     /* ── THE GAMUT (wave 54) ────────────────────────────────────────────────────────────────────────────────
