@@ -31,7 +31,7 @@
 /* ── 1. THE PRECACHE — every file under lab/ that the running lab actually loads ────────────────────────
  * [url relative to this worker, first 12 hex of the file's sha-256].  GENERATED — see the header. */
 const PRECACHE = [
-  ['./absorb.js',                                                   '2eeb365fc087'],
+  ['./absorb.js',                                                   '3b0857195bfa'],
   ['./angular-nodes.js',                                            '945796c72ba8'],
   ['./ask.js',                                                      'be69c1219826'],
   ['./atoms.js',                                                    '1bfbfc778e10'],

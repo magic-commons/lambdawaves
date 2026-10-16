@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { createMO } from './lib/mo.js';
 import { generalisedEigen } from '../lab/sturmian.js';
-import { kick, fieldFreeTrace, spectrum, peaks, integrate, kickSpectrum } from '../lab/absorb.js';
+import { kick, spectrum, peaks } from '../lab/absorb.js';
+import { fieldFreeTrace, integrate, kickSpectrum } from './lib/absorb-extra.js';
 
 const close = (a, b, tol, what) => assert.ok(Math.abs(a - b) < tol, `${what}: ${a} vs ${b} (tol ${tol})`);
 
