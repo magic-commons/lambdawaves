@@ -1,0 +1,21 @@
+/* tests/trace.test.mjs — 0.8.3 B2: THE A(t) TRACE |⟨ψ(0)|ψ(t)⟩|² over one REPEATS period, against closed forms.   node tests/trace.test.mjs */
+import { Register } from '../lab/state.js';
+import { BASIS, energy } from '../lab/hydrogen.js';
+import { setHamiltonian } from '../lab/hamiltonian.js';
+import { densityPeriod, traceOf } from '../lab/period.js';
+let FAILED = 0;
+const judge = (name, ok, d) => { if (!ok) FAILED++; console.log((ok ? 'GREEN ' : 'RED   ') + name + (d === undefined ? '' : '  ' + JSON.stringify(d))); };
+const idx = (n, l, m) => BASIS.findIndex((s) => s.n === n && s.l === l && s.m === m);
+setHamiltonian('hydrogen');
+const R = new Register(); R.set(idx(1, 0, 0), 1, 0); R.set(idx(2, 0, 0), 1, 0); R.normalize();
+const P = densityPeriod(R.populated().map((a) => R.Ediag(a))), dE = energy(2) - energy(1), Tx = 2 * Math.PI / dE, tr = traceOf(R, P);
+judge('A(0) = 1 to 1e-12', Math.abs(R.autocorrelation(0).abs ** 2 - 1) < 1e-12 && Math.abs(tr.A[0] - 1) < 1e-12, tr.A[0]);
+judge('the period of (1s + 2s)/√2 is T = 2π/(E₂ − E₁) = 16π/3 to 1e-10, and A(T) = 1 there to 1e-10', P.exact && Math.abs(P.T - Tx) < 1e-10 && Math.abs(R.autocorrelation(Tx).abs ** 2 - 1) < 1e-10 && Math.abs(tr.A[511] - 1) < 1e-10, { T: P.T, Tx, AT: tr.A[511] });
+const worst = Math.max(...tr.A.map((a, i) => Math.abs(a - Math.cos(dE * tr.t[i] / 2) ** 2)));
+judge('the equal-weight 1s + 2s trace is cos²((E₂ − E₁)t/2) at every sample to 1e-12', worst < 1e-12, { worst });
+judge('512 samples spanning [0, T], the source "REPEATS, exact"; the revivals at t = 0 and t = T only', tr.A.length === 512 && tr.t[511] === tr.T && tr.src === 'REPEATS, exact' && tr.peaks.join() === '0,511', { src: tr.src, peaks: tr.peaks });
+const half = traceOf(R, P, (a, b) => (BASIS[a].n === BASIS[b].n ? 1 : 0.25)), pur = 0.25 + 0.25 + 2 * 0.25 * 0.25;
+judge('damped |Γ₁₂|² = ¼: A(0) is the purity Σ p p |Γ|² = 0.625 and the trace is ½ + ⅛·cos(ΔE t) to 1e-12', Math.abs(half.A[0] - pur) < 1e-12 && Math.max(...half.A.map((a, i) => Math.abs(a - 0.5 - 0.125 * Math.cos(dE * half.t[i])))) < 1e-12, half.A[0]);
+const S = traceOf(R, null);
+judge('no period: the horizon 2e4 a.u., said', S.T === 2e4 && S.src === 'no period: the horizon 2e4 a.u.', S.src);
+if (FAILED) { console.log(FAILED + ' FAILED'); process.exit(1); } console.log('trace: all GREEN');

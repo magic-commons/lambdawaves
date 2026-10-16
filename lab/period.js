@@ -99,3 +99,12 @@ export function fmtPeriod(T) {
     : Math.abs(q) >= 100 ? q.toFixed(1) : Math.abs(q) >= 10 ? q.toFixed(2) : q.toFixed(3);
   return au + ' a.u. · ' + physical + ' ' + units[i][0];
 }
+/** 0.8.3 B2 · THE A(t) TRACE: |⟨ψ(0)|ψ(t)⟩|² at N samples over ONE period P (the transport's REPEATS; the horizon 2e4 a.u. when it has none), t = 0 the anchor.
+ *  g2(a, b) — the equalizer's |Γ_{n_a n_b}|² — makes it Tr ρ(0)ρ(t) = Σ p_a p_b |Γ_ab|² cos(ω_ab t): the model's coherences, a fixed factor on each beat, so A(0) is the PURITY. */
+export function traceOf(reg, P, g2 = null, N = 512) {
+  const T = P && P.T > 0 ? P.T : 2e4, src = P && P.stationary ? 'stationary: one energy, A ≡ 1 (the horizon drawn)' : !(P && P.T > 0) ? 'no period: the horizon 2e4 a.u.' : P.exact ? 'REPEATS, exact' : 'REPEATS, the nearest recurrence';
+  const ids = reg.populated(), p = ids.map((a) => reg.re0[a] ** 2 + reg.im0[a] ** 2), s = p.reduce((x, y) => x + y, 0) || 1, E = ids.map((a) => reg.Ediag(a)), t = Float64Array.from({ length: N }, (_, i) => i * T / (N - 1));
+  const A = t.map((x) => { if (!g2) return reg.autocorrelation(x).abs ** 2; let q = 0; for (let i = 0; i < ids.length; i++) for (let j = 0; j < ids.length; j++) q += p[i] * p[j] * g2(ids[i], ids[j]) * Math.cos((E[i] - E[j]) * x); return q / (s * s); });
+  const top = Math.max(...A), peaks = []; for (let i = 0; i < N; i++) if (A[i] > (i ? A[i - 1] : -1) && A[i] >= (i < N - 1 ? A[i + 1] : -1) && A[i] > top / 2) peaks.push(i);   // the revivals: local maxima above half the top
+  return { T, src, t, A, peaks, turns: ids.length ? (Math.max(...E) - Math.min(...E)) * T / (2 * Math.PI) : 0 };
+}
