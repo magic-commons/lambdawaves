@@ -11,6 +11,39 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.8.1-alpha` — 2026-10-16
+
+Commit `6e4af2d` · no new waves · 20 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `2861f81` 2026-10-16 — CHANGELOG for v0.8.0-alpha
+- `c383e8e` 2026-10-16 — 0.8.1 Two Levels: the plan's base and cap filled at the v0.8.0-alpha cut
+- `163b1fb` 2026-10-16 — checkpoint 06:20: v0.8.0-alpha Central Lab cut locally (9f5a592, snapshot 34); 0.8.1 Two Levels…
+- `49d93da` 2026-10-16 — 0.9.0 Certification: Z1 THE PUBLIC FACE · Z2 THE PROVENANCE REGISTRY + THE FINGERPRINT · Z3 THE…
+- `421cf90` 2026-10-16 — 0.9.1 Platform: H1 THE HOMECOMING · H2 THE ROWS RE-MEASURED briefs (corrected: worktree-hosts-m0…
+- `6cd7759` 2026-10-16 — 1.0.0 "λWAVES": the build plan
+- `c21b307` 2026-10-16 — 0.8.1 T3: LATTICE's HOFSTADTER · QUANTUM WALK · SPIN CHAIN presets
+- `1419e13` 2026-10-16 — 0.8.1 T3: the spin chain's bound reads '4 ln 2', not raw TeX braces
+- `7190aab` 2026-10-16 — 0.8.1 T3: the build note (T3-BUILD.md)
+- `c7a2cb4` 2026-10-16 — 0.8.1 T1 BLOCH: spin-½ · Rabi · Landau–Zener
+- `18a0f91` 2026-10-16 — 0.8.1 T1 BLOCH: the build note (seats, closed forms and gates, LZ against the asymptote, Δ +84)
+- `ed186fe` 2026-10-16 — merge T3 THE LATTICE PRESETS (7190aab): three rows in lattice-model.js' PRESETS — HOFSTADTER (an…
+- `15ae0b1` 2026-10-16 — merge T1 BLOCH: SPIN-½ · RABI · LANDAU–ZENER (18a0f91): lab/bloch-model.js (31 lines, DOM-free)…
+- `fa692af` 2026-10-16 — checkpoint 07:25: 0.8.1
+- `6d31a93` 2026-10-16 — 0.8.2 Phase Space: the CHANGES shape (rows and the deferred list; sections filled at each merge)
+- `efc3cd6` 2026-10-16 — 0.8.3 Breath: the CHANGES shape (rows and the deferred list; sections filled at each merge)
+- `d466a6a` 2026-10-16 — T2 THE BELL PAIR + MASS SCALING: BLOCH's PAIR mode (Φ± · Ψ± · PRODUCT, U_A ⊗ 1, S_A, CHSH) and…
+- `bc6cce0` 2026-10-16 — T2-BUILD: the build note (seats, entropy and CHSH table, μ powers, gates, corrections)
+- `a59e9a9` 2026-10-16 — merge T2 THE BELL PAIR + MASS SCALING (bc6cce0): BELL as BLOCH's second mode — a ONE · PAIR seg…
+- `6e4af2d` 2026-10-16 — 0.8.1-alpha Two Levels: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.8.0-alpha` — 2026-10-16
 
 Commit `9f5a592` · no new waves · 16 commits.
