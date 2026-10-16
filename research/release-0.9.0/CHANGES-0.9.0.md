@@ -12,8 +12,29 @@ generated from the catalogue and the fixtures — every record's source, licence
 device row, the FIELD LAW line. THE FIELD LAW ON A DEVICE: the standing browser test (0.5.4 P7c) prints one pasteable line for the acceptance matrix. The gated
 certificates where a number exists; L1's R_m caption on ATOMS.
 
-## Z1 · THE PUBLIC FACE
-(filled at Z1's merge)
+## Z1 · THE PUBLIC FACE (README.md, CITATION.cff, `docs/SHIPPING-READINESS.md`, `docs/NOTES-FOR-AGENTS.md` §6–§7; `lab/index.html:130–131`, `lab/windows/readouts.js:87`, `lab/statesview.js:114`, `lab/chemview.js:267` + `:711`, `lab/informational.js:12` — strings; `tools/pyscf-table.mjs` 38 lines; `CLAIMS-0.9.0.md`; branch `z1-face` tip `7769926`; 0 lab lines)
+- **README, sentence by sentence into the STATUS grammar:** "nothing drifts" is said of FIELD-FREE HYDROGEN only, followed by what does step in time — RUN, DRIVE, SONG, the
+  FLOW tracers, the STARK eigensolve, and VIBRATE's closed-form cos ωt with one linear McWeeny step (a correction: VIBRATE does not integrate); the field law is the
+  three-metric line for hydrogen and for water, each figure a gate bound from `tests/helpers/field-law.mjs`; the norm and anchor figures sit beside their bounds (the
+  anchor reads 3e-16 by `status.js`' round-up of the measured 2.22e-16 — the old "2e-16" was better than measured); SLICE → PLANE; the Physics row's counts read from
+  the tree today; the strobe sentence says what the flash guard does (four routes held to three flashes a second, partial, no off switch); ChronusQ is a reference
+  with its licence line (GPL v2 — the tree does not record "only" or "or later" — against GPL-3.0-only: cited, never merged); "Who made this, honestly" byte-identical.
+- **"## Against PySCF":** `tools/pyscf-table.mjs` rewrites a marked block — the 38 library records with E (app) · E (PySCF) · the signed Δ as stored, and the 61 live
+  molecules with PySCF's STO-3G, 6-31+G* and RKS LDA energies; the app's energy for a live molecule is computed on the device and stored nowhere (`orbital-library.mjs:528–530`
+  — no live app energies exist in the fixtures; the live closed shells' oracle is `sto-3g-v1.json`'s `library` block of 54 rows), so the prose names the test that
+  re-solves each kind; `--check` 11,136 bytes, in step. **Found and now in the table:** five open shells offered in 6-31+G* (O₂, NO, OH, NH₂, CH₃) have no PySCF UHF
+  number on file and the app correctly reads them UNCHECKED; 43 of the 51 closed shells offered LDA have no RKS oracle; **pyridine (C₅H₅N) is live but its PySCF
+  reference did not converge** (`sto-3g-v1.json`) while its STATUS line still says "agrees with PySCF to …" — a new fixture, not a string (for Josh).
+- **CLAIMS rows 6–11** (`CLAIMS-0.9.0.md`: row · seat · old · new · why): row 6 `readouts.js:87`; row 7 `statesview.js:114`; row 8 already true since 0.5.4 P4
+  (`index.html:130`); row 10 `chemview.js:267` and its twin `:711`; row 11 `informational.js:12`; the MODEL sheet's NUMERICAL definition `index.html:131`. **Row 9 stays
+  OPEN:** the EXACT badge over a molecule needs a molecule branch in `badges.js` — logic, not a string (STATUS TAGS is off by default, so the badge is hidden on a first
+  run); Josh's call: rename it `REGISTER · EVOLUTION · SHADOW`, a one-line branch in 0.9.x, or leave it. CITATION.cff: the title, `0.9.0-alpha` / 2026-10-16, the abstract
+  in the grammar. NOTES-FOR-AGENTS: the legacy windows were DELETED in 0.5.0 (not "hidden"), ATOMS is back, the `helium`/`h2` suites no longer exist. `notebook.js`
+  holds no copy of the ABOUT text. No priority claim was found anywhere in the public face, and none was written.
+- **Checked:** node 0; status.test GREEN (58 live re-solves, worst |ΔE| 9.69e-10 on Cl₂); status-probe 18 PASS; opener 7/7; serialize-bytes 11 identical against the
+  base; `pyscf-table --check` and `catalogue-table --check` in step; rack-deps holds; no test pinned any changed string (grepped first). **Questions for Josh:** ABOUT and
+  NOTICE keep his ChronusQ credit "for the Molecular Orbital Model" by his 09-11 ruling (REPORT.md:2475) — should they follow README's reference-and-licence line?
+  Row 9's three options. Re-run the pyridine oracle?
 
 ## Z2 · THE PROVENANCE REGISTRY + THE FINGERPRINT (`tools/provenance.mjs` 111 lines → `docs/PROVENANCE.md` 55,627 bytes, 186 rows; `tests/provenance.test.mjs` 21 lines; `docs/NOTES-FOR-AGENTS.md` one foot line; `research/release-0.9.0/z2-fingerprint.json`; branch `z2-provenance` tip `7a3f62c`; 0 lab lines)
 - **The registry,** generated and `--check` byte-exact (exit 1 on any byte difference, a row count unlike the catalogue's, or a molecule without a source or an oracle):
@@ -53,7 +74,18 @@ certificates where a number exists; L1's R_m caption on ATOMS.
   readings (no saved field touched); field-law GREEN 0 of 9 on 9561.
 
 ## The light check (existing gates only) and the cut
-(filled at the cut)
+- Node gate 0 after each merge; `pwa --write`; `new-project --check` in step; `rack-deps --classes` holds; status · provenance · catalogue · molecule-head tests green;
+  `tools/pyscf-table.mjs --check` (11,136 bytes, 38 records + 61 live molecules) and `tools/provenance.mjs --check` (55,899 bytes, 186 rows) in step on the merged tree;
+  `tests/field-law.browser-test.mjs` once on 9241 at Z2's merge tip `dfdd2b8` — its line pasted into `docs/PROVENANCE.md`'s head through the tool's literal and the
+  registry regenerated: "FIELD LAW · adapter info blank · Firefox/157.0 · dfdd2b8 · hydrogen RMS 2.34e-6 · 99.8 % 1.88e-5 · worst 1.68e-4 · water RMS 8.31e-4 ·
+  worst/ρmax 2.86e-4 · GREEN" (the hardware — the RTX 3070 rig — is the fingerprint row's, since Firefox 157 blanks the adapter info); `tests/opener.browser-test.mjs`
+  once on the merged tree (the ABOUT face and the MODEL sheet moved) GREEN 7 of 7; THE LOCK ×2 at the merge tip with `--query gastab=0` on BOTH runs: 860 values · 0
+  readback · 0 record-byte · 59 s, and the 1004-value fixture · 0 · 0 · 59 s — strings are not pixels.
+- **Lines:** 30,027 → 30,028 (+1: Z3's two certificate strings and the R_m caption net one line; Z1 and Z2 0; the law was ≤ +8). Merge order Z2 `dfdd2b8`, Z3 `1b99df7`,
+  Z1 (this commit). Only `lab/sw.js` conflicted at each merge (ours, then `pwa --write`); `docs/NOTES-FOR-AGENTS.md` auto-merged (Z2's foot line, Z1's body).
+- **For Josh, from this cut (each recorded above):** the BSE licence is stated nowhere in the tree (the registry says so — a line for `lab/vendor/bse/` and NOTICE);
+  pyridine is live with a non-converged PySCF reference (a new fixture); CLAIMS row 9, the EXACT badge over a molecule (three options); ABOUT's and NOTICE's ChronusQ
+  credit (follow README's reference line?); the s4a fixture does carry `gastab=0` in its url — the default fixture is the one that predates the gas table.
 
 ## Known, deferred (recorded)
 The library study (Sol's Experiment 2 — only after a profile wins a benchmark); A9's C++ clones (cited, never merged); the iPad's field-law row (Josh runs the test and

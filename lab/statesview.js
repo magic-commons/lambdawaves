@@ -111,7 +111,7 @@ export function createStates(host, api) {
   const refSeg = seg({ label: 'REF', value: 'ground', options: [{ id: 'ground', label: 'GROUND' }, { id: 'mean', label: 'MEAN' }],
     onChange: (v) => setRef(v) });
   vr.appendChild(viewSeg.root); vr.appendChild(refSeg.root);
-  const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage, riding the molecule’s current v = j/ρ — the many-electron carrier of phase. Its sense and symmetry are exact; its magnitude is qualitative in a minimal basis', onChange: (v) => setFlow(v) });
+  const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage, riding the molecule’s current v = j/ρ — the many-electron carrier of phase. Its direction is exact and its size qualitative, in STO-3G and in 6-31+G*; the tracers’ steps are checked by no oracle', onChange: (v) => setFlow(v) });
   vr.appendChild(flowSw.root);
   const srcSeg = seg({ label: 'FLOW SOURCE', value: 'computed', options: [{ id: 'computed', label: 'AS COMPUTED', title: 'v = j/ρ, the basis’s own current' }, { id: 'balanced', label: 'BALANCED', title: 'v + ∇φ with −∇·(ρ∇φ) = ∂ρ/∂t + ∇·j: continuity closed on a 32³ grid, solved in a worker' }], onChange: (v) => setFlowSource(v) });
   vr.appendChild(srcSeg.root);

@@ -264,7 +264,7 @@ export function createChem(host, api) {
   const roSym = readout({ label: 'SYMMETRY', cls: 'wide', value: '—', sub: '' });   // 0.6.1 F2: symmetryLine
   const roXc = readout({ label: '<m>E_xc · ∫ρ</m>', cls: 'wide', value: '—', sub: '' }); roXc.root.hidden = true;   // 0.7.3 K2: RKS LDA's own numbers, the reply's
   for (const r of [roE, roEps, roTr, roIdem, roT, roXc, roSym, roPick]) rr.appendChild(r.root);
-  el('div', 'note', host).innerHTML = '<b>Model.</b> Restricted Hartree–Fock in a vendored Cartesian basis at a fixed experimental geometry — not the RHF minimum. Sticks are singlet RPA (or TDA) roots with height proportional to oscillator strength; the curve is Im α(ω) from the real-time δ-kick trace. Peaks are fitted poles with a 4ε/σ certificate: an uncertified reading is labelled as the raw maximum. The electron count is Tr(DS), never a voxel sum.';
+  el('div', 'note', host).innerHTML = '<b>Model.</b> Hartree–Fock (RHF; UHF for an open shell) or, by METHOD, Kohn–Sham LDA, in a vendored Cartesian basis at a fixed geometry this window never optimises: measured for a molecule solved live (AlH₃’s is the RHF/STO-3G minimum: no gas-phase structure has been determined), computed for most library records (the head says which). Sticks are singlet RPA (or TDA) roots with height proportional to oscillator strength; the curve is Im α(ω) from the real-time δ-kick trace. Peaks are fitted poles with a 4ε/σ certificate: an uncertified reading is labelled as the raw maximum. The electron count is Tr(DS), never a voxel sum.';
   /* 2026-10 (Josh) · EVERYTHING BELOW VIEW + ORBITAL sits in `.mol-more`: TDA / CORE, the kick and run controls, the
      spectrum, the readouts and the note — every control keeps its state, save/load and API (__LW.chem.kick(), run, setTda …),
      and `shown()` makes a folded canvas's paint a no-op.
@@ -708,7 +708,7 @@ export function createChem(host, api) {
     roE.set(sol.energy.toFixed(9), 'ok');
     const P = PRESET_BY_ID.get(preset) || {};
     roE.setSub(`${P.name} · ${basis.toUpperCase()} · E_nuc ${Number(sol.Enuc).toFixed(6)}` + (sol.local ? ' · on the frame thread (no worker)' : ''));
-    roE.root.title = (P.source || '') + ' — a FIXED geometry, not the RHF/STO-3G minimum';
+    roE.root.title = (P.source || '') + ' — a FIXED geometry, never optimised by this window';
     const eH = sol.eps[sol.nocc - 1], eL = sol.eps[sol.nocc];
     roEps.set(`${eH.toFixed(6)} · ${Number.isFinite(eL) ? eL.toFixed(6) : '—'}`, '');
     const nmH = orbitalName(sol.names, sol.nocc - 1, sol.nocc), nmL = orbitalName(sol.names, sol.nocc, sol.nocc);

@@ -9,7 +9,7 @@ export function createInformational(app) {
   const { ui, device } = app, { schedule } = app.loop, save = () => app.sh.saveSettings(), T = () => app.state.stageText, pct = (v) => Math.round(v * 100) + '%';
   const w = device({ id: 'informational', eyebrow: 'INFORMATIONAL', title: 'what the stage writes', status: '' });
   w.root.classList.add('native-clean', 'closed'); app.host.rack.appendChild(w.root);
-  ui.molFormulaSw = sw({ label: 'STAGE FORMULA', value: true, title: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states, a preset\'s name as it is pressed — and caption a picture or a recording with it',
+  ui.molFormulaSw = sw({ label: 'STAGE FORMULA', value: true, title: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states, a preset\'s name as it is pressed — and caption a picture or a recording with it and its STATUS word; off, an export carries neither',
     onChange: (v) => { document.body.classList.toggle('no-mol-formula', !v); if (T()) T().setOn(v); schedule(TIER.PRESENT); save(); } });
   ui.molFormulaK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: pct, title: 'The STAGE FORMULA\'s size: 100% is the notebook\'s — the formula its title (34 px), an announcement its heading',
     onInput: (v) => { app.state.molFormulaScale = v; if (T()) T().setScale(v); schedule(TIER.PRESENT); }, onChange: save });
