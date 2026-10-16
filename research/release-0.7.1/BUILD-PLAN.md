@@ -3,7 +3,7 @@
 The engine plan's D.8 (`../release-0.6.0/PLAN.md` l.269; the ladder row l.38: "O₂, NO and the other open shells; the H₂ dissociation curve, RHF vs UHF vs
 FCI — the picture that explains why UHF exists; the spin density as a signed cloud; an entanglement number along the curve · MOLECULES › O₂ · CURVE · VIEW SPIN ·
 tap BREAK"). Josh's dial (09:35): tight builds, features only, pre-1.0; "continue with the next builds once it's done" (10:50).
-Base: `yan-c` at the v0.7.0-alpha cut tip (**TO FILL**); lines **TO FILL**; cap = lines × 1.01. Two builders (U1 Opus, U2 Sonnet or Opus); the integrator merges
+Base: `yan-c` at the commit that carries the two briefs (after the v0.7.0-alpha cut `d96c27a`; the sha is in the launch message); 29,056 `lab/` lines; cap 29,056 × 1.01 = **29,347** (291 of headroom; U1 + U2 plan +190). Two builders (U1 Opus, U2 Sonnet or Opus); the integrator merges
 U1 then U2, light check, cut `v0.7.1-alpha` "Open Shells".
 
 ## The shape (the law of this cut)
