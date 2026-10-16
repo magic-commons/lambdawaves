@@ -51,7 +51,7 @@ export function createMolecules(app) {
   const wChem = device({ id: 'chem', eyebrow: 'MOLECULES', title: 'RHF · real time', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // built closed (chemview's N8 shown() guard); the first-run block opens it on the LEFT rack — still no solve until it is switched on
   rack.appendChild(wChem.root);
-  ui.skeletonSw = sw({ label: 'SKELETON', value: false, title: 'The nuclei as beads (CPK colours, 0.28 × the covalent radius), the bonds within 1.2 × the radii, and the dipole arrow from the centre of nuclear charge — a PREFERENCE, off by default',
+  ui.skeletonSw = sw({ label: 'SKELETON', value: false, title: 'The nuclei as beads (CPK colours, 0.28 × the covalent radius), the bonds within 1.3 × the radii, and the dipole arrow from the centre of nuclear charge — a PREFERENCE, off by default',
     onChange: () => { app.sh.saveSettings(); schedule(TIER.PRESENT); } });   // 0.7.0 V2: rack.js draws it (lab/skeleton.js); chemview seats it after the VIEW row's chevron
   app.state.chem = createChem(wChem.body, { skeleton: ui.skeletonSw, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,

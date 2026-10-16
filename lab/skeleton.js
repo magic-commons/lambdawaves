@@ -1,6 +1,6 @@
 /* skeleton.js — THE SKELETON (0.7.0 V2): the nuclei as beads, the bonds and the dipole arrow on the stage's own #skeleton canvas, through the one eye
  * (field.js toScreen).  A bead is 0.28 × the element's covalent radius (Cordero et al., Dalton Trans. 2008, 2832: H–Kr, Å → bohr) projected, so it
- * shrinks with distance, in the Jmol CPK colour; a bond is every pair within 1.2 × (rᵢ + rⱼ) of the atoms AS PASSED, found again only when they move;
+ * shrinks with distance, in the Jmol CPK colour; a bond is every pair within 1.3 × (rᵢ + rⱼ) (1.2 drops F₂, at 1.24) of the atoms AS PASSED, found again only when they move;
  * the dipole (a.u.) runs from the centre of nuclear charge, 2 bohr per a.u., in the accent.  The far half (depth past the origin's) is dimmed, as
  * angular-nodes.js dims it.  Ink and accent are the kit's --fg / --acc, read when the theme changes.  Nothing changed: no paint; off: clear() once. */
 import { cameraKey, toScreen } from './field.js';
@@ -17,7 +17,7 @@ export function createSkeleton(cv) {
     if (!atoms || !atoms.length || W < 1 || H < 1) return clear();
     const ak = atoms.map((a) => `${a.Z},${a.x.toFixed(4)},${a.y.toFixed(4)},${a.z.toFixed(4)}`).join(';');
     const k = [ak, dipole ? dipole.map((v) => v.toFixed(4)).join() : '', cameraKey(obs), obs.dist.toFixed(4), obs.fov, half, W, H, dpr, th].join('|'); if (k === key) return; key = k;
-    if (ak !== atomsKey) { atomsKey = ak; bonds = []; for (let i = 0; i < atoms.length; i++) for (let j = i + 1; j < atoms.length; j++) { const a = atoms[i], b = atoms[j]; if (Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) < 1.2 * (RCOV[a.Z] + RCOV[b.Z])) bonds.push([i, j]); } }
+    if (ak !== atomsKey) { atomsKey = ak; bonds = []; for (let i = 0; i < atoms.length; i++) for (let j = i + 1; j < atoms.length; j++) { const a = atoms[i], b = atoms[j]; if (Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) < 1.3 * (RCOV[a.Z] + RCOV[b.Z])) bonds.push([i, j]); } }
     if (th !== theme) { theme = th; const cs = getComputedStyle(document.body); ink = cs.getPropertyValue('--fg').trim() || cs.color; acc = cs.getPropertyValue('--acc').trim() || ink; }
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); drawn = true;
