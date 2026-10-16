@@ -34,6 +34,14 @@ export function beadOf(reg, t, p = false) { const c = reg.at(t), ids = reg.popul
 /** ψ ALONG A RAY (0.8.2 P3): N samples of ψ (φ with `p`) from the origin along the unit u out to `half` — the Hamiltonian in force's closed forms */
 export function rayAt(re, im, ids, u, half, p = false, N = 128) { const H = getHamiltonian(), f = p ? H.phiAt : H.psiAt;
   return Array.from({ length: N }, (_, k) => { const s = half * k / (N - 1); return { s, ...f(re, im, s * u[0], s * u[1], s * u[2], ids) }; }); }
+/** THE RADIAL BREATH (0.8.3 B1): P(r, t) = r² Σ_{l,m} |Σ_n c_nlm(t) R_nl(r)|² (diagonal in (l, m): the Y_lm are orthonormal) on n nodes r = half·s²/(1 − s),
+ *  s ∈ [0, 1] (dense at the origin, the last node r = ∞), so the trapezoid in s takes ∫P dr (= Σ|c|²) and ∫rP dr (= ⟨r⟩, the second road) over the whole half-line */
+export function radialBreath(reg, t, half, n = 256) { const H = getHamiltonian(), c = reg.at(t), G = new Map(), r = new Float64Array(n), P = new Float64Array(n); let norm = 0, r1 = 0;
+  for (const a of reg.populated()) { const k = BASIS[a].l + ',' + BASIS[a].m; G.set(k, [...(G.get(k) || []), a]); }
+  for (let k = 0; k < n - 1; k++) { const s = k / (n - 1), x = r[k] = half * s * s / (1 - s), w = (k ? 1 : 0.5) / (n - 1) * half * s * (2 - s) / (1 - s) ** 2; let p = 0;
+    for (const L of G.values()) { let u = 0, v = 0; for (const a of L) { const R = H.radial(BASIS[a].n, BASIS[a].l, x); u += c.re[a] * R; v += c.im[a] * R; } p += u * u + v * v; }
+    P[k] = x * x * p; norm += w * P[k]; r1 += w * x * P[k]; }
+  r[n - 1] = Infinity; return { r, P, norm, rMean: r1 / norm }; }
 const FCACHE = new Map();
 /** ∫₀^∞ R_{n′l′} R_{nl} dr — the radial part of ⟨z/r³⟩ (z/r³ = cos θ / r²): NUMERICAL, cached per Hamiltonian */
 export function radialForce(np_, lp, n, l) {

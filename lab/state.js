@@ -468,6 +468,8 @@ export const PRESETS = [
   { id: 'rydberg', label: 'Rydberg packet n = 4…6', note: 'circular states |n,n−1,n−1⟩, Gaussian in n about n̄ = 5 · orbits in xy, T_cl = 2π n̄³ ≈ 785 a.u.', status: 'HYDROGEN',
     modes: gauss(5, 1, [4, 5, 6]).map(({ n, w }) => ({ n, l: n - 1, m: n - 1, amp: w })),
     visual: { rate: 160, window: 2 * Math.PI * 125, view: 'density' } },
+  { id: 'rydberg-s', label: 'Radial Rydberg packet ns, n = 4…6', note: 'the Rydberg packet\'s Gaussian on ns: it breathes, out and back each T_cl = 2π n̄³ (CALCULUS › BREATH; a circular packet\'s P(r) stands still) · REVIVAL', status: 'HYDROGEN',
+    modes: gauss(5, 1, [4, 5, 6]).map(({ n, w }) => ({ n, l: 0, m: 0, amp: w })), visual: { rate: 160, window: 2 * Math.PI * 125, view: 'density' } },   // 0.8.3 B1
   { id: 'shadow-pair', label: '1s + 2s + 3s  (shadow trio)', note: 'three uncoupled oscillators at ω = ½, ⅛, 1⁄18 — watch SHADOW', status: 'HYDROGEN',
     modes: [{ n: 1, l: 0, m: 0, amp: 1 }, { n: 2, l: 0, m: 0, amp: 1 }, { n: 3, l: 0, m: 0, amp: 1 }], visual: { rate: 4, window: 2 * Math.PI / (1 / 18 - 0) * 1, view: 'density' } },
 
