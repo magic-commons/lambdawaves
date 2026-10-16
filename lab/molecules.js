@@ -1,6 +1,6 @@
 /* molecules.js — THE LIBRARY: every molecule the CHEMISTRY window can offer, at a geometry with a named source.
  *
- * WHAT THIS FILE IS.  A table of closed-shell species, each with (a) a pinned geometry in ångström, (b) the SOURCE of
+ * WHAT THIS FILE IS.  A table of species — closed shells and, since 0.7.1, seven open shells — each with (a) a pinned geometry in ångström, (b) the SOURCE of
  * that geometry — a NIST CCCBDB experimental value, a named gas-phase measurement, or, for the three species that
  * have no measured structure, this repository's own RHF/STO-3G optimum, said in those words — (c) the charge, and
  * (d) the counts the engine will find (Cartesian AOs, shells, electrons).  lab/chemview.js reads it for the MOLECULE
@@ -9,14 +9,12 @@
  * ENERGY REFERENCE AND KERNEL: PySCF's energy (STO-3G `oracle.delta`, tests/fixtures/oracles/sto-3g-v1.json; 6-31+G* against
  * 6-31+g-star-v1.json); kernel S (shells + a coefficient buffer). The four roads M · S · W · RU: research/release-0.6.0/PLAN.md §B.
  *
- * RHF IS CLOSED-SHELL ONLY, so every entry here is a closed-shell singlet and the electron count is even.  The
- * famous open-shell species CANNOT be in this list and are not:
- *   · Fe (⁵D, 3d⁶4s²) and every bare transition-metal atom — Josh asked for "large atoms"; the heavy atoms here are
- *     in closed-shell HYDRIDES and halides (CuH, ZnH₂, GeH₄, AsH₃, H₂Se, HBr, Br₂), which is how a minimal-basis
- *     RHF can carry Z up to 35 honestly.
- *   · O₂ (³Σg⁻) and NO (²Π) — the two textbook open shells.  Both need ROHF or UHF, which this engine does not have.
- *     An RHF number for either would be a closed-shell singlet that is not the molecule's ground state.
- * lab/rhf-molecule.js refuses an odd electron count outright; this file's own gate refuses one too.
+ * MOST ENTRIES ARE CLOSED-SHELL SINGLETS, solved by RHF.  Seven are OPEN SHELLS (0.7.1): O₂ ³Σg⁻, NO ²Π, OH ²Π, B₂ ³Σg⁻, NH₂ ²B₁,
+ * CH₃ ²A₂″, NO₂ ²A₁ — each carries `multiplicity` (2S+1) and `term`, an odd electron count takes an even multiplicity, and
+ * lab/rhf-molecule.js solves them by UHF (lab/scf.js `uhf`, PySCF UHF the oracle: tests/fixtures/oracles/uhf-v1.json).  Still NOT here:
+ *   · Fe (⁵D, 3d⁶4s²) and every bare transition-metal atom — the heavy atoms here are in closed-shell HYDRIDES and halides
+ *     (CuH, ZnH₂, GeH₄, AsH₃, H₂Se, HBr, Br₂), which is how a minimal-basis RHF can carry Z up to 35 honestly.
+ *   · an RHF number for an open shell: a closed-shell singlet that is not the molecule's ground state.
  *
  * THE GEOMETRIES ARE FIXED, NOT OPTIMISED.  Nothing here is the RHF/STO-3G minimum (except the three that say they
  * are).  A fixed experimental geometry is the right thing for a window that shows a density and a spectrum: it is
@@ -260,6 +258,15 @@ const RAW = [
     source: 'CCCBDB experimental r(Cl–Cl) = 1.9878 Å' },
   { id: 'NaCl', name: 'sodium chloride', formula: 'NaCl', group: 'diatomics', ang: diatomic(11, 17, 2.3609),
     source: 'CCCBDB experimental r(Na–Cl) = 2.3609 Å' },
+  /* 0.7.1 OPEN SHELLS: `multiplicity` 2S+1 > 1 is solved by UHF (lab/scf.js uhf); `term` is the state's symbol */
+  { id: 'O2', name: 'dioxygen', formula: '<m>O₂</m>', group: 'diatomics', ang: diatomic(8, 8, 1.2075), multiplicity: 3, term: '³Σg⁻',
+    source: 'CCCBDB experimental r(O=O) = 1.2075 Å; the ground state is the triplet ³Σg⁻, an open shell solved by UHF' },
+  { id: 'NO', name: 'nitric oxide', formula: 'NO', group: 'diatomics', ang: diatomic(7, 8, 1.1508), multiplicity: 2, term: '²Π',
+    source: 'CCCBDB experimental r(N=O) = 1.1508 Å; the doublet ²Π, an open shell solved by UHF' },
+  { id: 'OH', name: 'hydroxyl radical', formula: 'OH', group: 'diatomics', ang: diatomic(8, 1, 0.9697), multiplicity: 2, term: '²Π',
+    source: 'CCCBDB experimental r(O–H) = 0.9697 Å; the doublet ²Π, an open shell solved by UHF' },
+  { id: 'B2', name: 'diboron', formula: '<m>B₂</m>', group: 'diatomics', ang: diatomic(5, 5, 1.590), multiplicity: 3, term: '³Σg⁻',
+    source: 'CCCBDB experimental r(B–B) = 1.590 Å; the triplet ³Σg⁻, an open shell solved by UHF' },
 
   /* hydrides — the ones with no stable gas-phase structure say so */
   { id: 'BeH2', name: 'beryllium dihydride', formula: '<m>BeH₂</m>', group: 'hydrides', ang: linear3(4, 1, 1.3264),
@@ -285,6 +292,10 @@ const RAW = [
     source: 'CCCBDB experimental r(P–H) = 1.420 Å, ∠HPH = 93.345°, C₃ᵥ' },
   { id: 'H2S', name: 'hydrogen sulfide', formula: '<m>H₂S</m>', group: 'hydrides', ang: bent(16, 1, 1.3356, 92.12),
     source: 'CCCBDB experimental r(S–H) = 1.3356 Å, ∠HSH = 92.12°' },
+  { id: 'NH2', name: 'amino radical', formula: '<m>NH₂</m>', group: 'hydrides', ang: bent(7, 1, 1.024, 103.4), multiplicity: 2, term: '²B₁',
+    source: 'CCCBDB experimental r(N–H) = 1.024 Å, ∠HNH = 103.4° (Herzberg 1966); the doublet ²B₁, an open shell solved by UHF' },
+  { id: 'CH3', name: 'methyl radical', formula: '<m>CH₃</m>', group: 'hydrides', ang: d3h(6, 1, 1.079), multiplicity: 2, term: '²A₂″',
+    source: 'CCCBDB experimental r(C–H) = 1.079 Å, planar D₃ₕ (Herzberg 1966); the doublet ²A₂″, an open shell solved by UHF' },
 
   /* triatomics and small closed shells */
   { id: 'CO2', name: 'carbon dioxide', formula: '<m>CO₂</m>', group: 'triatomics', ang: linear3(6, 8, 1.1600),
@@ -297,6 +308,8 @@ const RAW = [
     source: 'CCCBDB experimental r(O–O) = 1.2717 Å, ∠OOO = 116.78°' },
   { id: 'SO2', name: 'sulfur dioxide', formula: '<m>SO₂</m>', group: 'triatomics', ang: bent(16, 8, 1.4308, 119.33),
     source: 'CCCBDB experimental r(S=O) = 1.4308 Å, ∠OSO = 119.33°' },
+  { id: 'NO2', name: 'nitrogen dioxide', formula: '<m>NO₂</m>', group: 'triatomics', ang: bent(7, 8, 1.193, 134.1), multiplicity: 2, term: '²A₁',
+    source: 'CCCBDB experimental r(N–O) = 1.193 Å, ∠ONO = 134.1° (Herzberg 1966); the doublet ²A₁, an open shell solved by UHF' },
   { id: 'BF3', name: 'boron trifluoride', formula: '<m>BF₃</m>', group: 'triatomics', ang: d3h(5, 9, 1.3070),
     source: 'CCCBDB experimental r(B–F) = 1.307 Å, planar D₃ₕ' },
   { id: 'CF4', name: 'carbon tetrafluoride', formula: '<m>CF₄</m>', group: 'triatomics', ang: td(6, 9, 1.3150),
@@ -471,12 +484,12 @@ const UNSTABLE = {
 const PLANE_YZ = { z: [1, 0, 0], x: [0, 0, 1] };            // a planar yz molecule whose only symmetry element is ⟂ x
 const RING = { z: { atom: 0 }, x: [0, 0, 1] };              // a ring walk in xy: C₂ through the heteroatom, x ⟂ the ring
 const SYMMETRY = {
-  Dinfh: ['H2', 'N2', 'F2', 'Cl2', 'Br2', 'CO2', 'C2H2', 'BeH2', 'MgH2', 'ZnH2'],
-  Cinfv: ['LiH', 'HF', 'CO', 'LiF', 'NaH', 'HCl', 'NaCl', 'HCN', 'N2O', 'OH-', 'CN-', 'HBr', 'CuH'],
+  Dinfh: ['O2', 'B2', 'H2', 'N2', 'F2', 'Cl2', 'Br2', 'CO2', 'C2H2', 'BeH2', 'MgH2', 'ZnH2'],
+  Cinfv: ['NO', 'OH', 'LiH', 'HF', 'CO', 'LiF', 'NaH', 'HCl', 'NaCl', 'HCN', 'N2O', 'OH-', 'CN-', 'HBr', 'CuH'],
   Td: ['CH4', 'SiH4', 'GeH4', 'CF4', 'NH4+'], C3v: ['NH3', 'PH3', 'AsH3', 'H3O+', 'CH3CN'],
-  C2v: ['H2O', 'H2S', 'H2Se', 'O3', 'SO2', 'H2CO', 'urea', ['C4H6', { z: [0, 1, 0], x: [1, 0, 0] }],
+  C2v: ['NH2', 'NO2', 'H2O', 'H2S', 'H2Se', 'O3', 'SO2', 'H2CO', 'urea', ['C4H6', { z: [0, 1, 0], x: [1, 0, 0] }],
     ['C4H4O', RING, 1e-2, { group: 'Cs' }], ['C5H5N', RING, 1e-2, { group: 'Cs' }]],
-  D3h: ['BH3', 'AlH3', 'BF3', 'C3H6'], D2h: ['C2H4'], D3d: ['C2H6'], D6h: ['C6H6'],
+  D3h: ['CH3', 'BH3', 'AlH3', 'BF3', 'C3H6'], D2h: ['C2H4'], D3d: ['C2H6'], D6h: ['C6H6'],
   C2: [['H2O2', { z: [0, 1, 0], x: [1, 0, 0] }]],
   Cs: [['CH3OH', PLANE_YZ], ['HCOOH', PLANE_YZ], ['glycine', PLANE_YZ]],
 };
@@ -486,9 +499,9 @@ const SYMMETRY_OF = new Map(Object.entries(SYMMETRY).flatMap(([group, ids]) => i
 })));
 const derive = (m) => {
   const charge = m.charge || 0, c = counts(m.ang), work = eriWork(c.widths);
-  const nElec = c.nElec - charge, nocc = nElec / 2;
+  const multiplicity = m.multiplicity || 1, nElec = c.nElec - charge, nocc = (nElec + multiplicity - 1) / 2;   // nocc = nα
   const rw = rpaWork(c.nAO, nocc);
-  return { ...m, symmetry: m.symmetry || SYMMETRY_OF.get(m.id) || { group: 'C1' }, section: m.section || SECTION_OF[m.id] || SECTION_OF[m.group], charge, nAO: c.nAO, nShell: c.nShell, nElectrons: nElec, nocc,
+  return { ...m, multiplicity, symmetry: m.symmetry || SYMMETRY_OF.get(m.id) || { group: 'C1' }, section: m.section || SECTION_OF[m.id] || SECTION_OF[m.group], charge, nAO: c.nAO, nShell: c.nShell, nElectrons: nElec, nocc,
     eriWork: work, rpaWork: rw, predictedMs: Math.round(predictMs(work, rw)),
     instability: UNSTABLE[m.id] || null };
 };
@@ -498,7 +511,7 @@ export const MOLECULES = RAW.map(derive);
  * deployed and never precached (lab/library.js).  It is read ONCE, before this module finishes (a top-level await; node reads
  * the file), so every reader of this table — the menu, the atom labels, the copy, the stage text — meets a record's molecule
  * like any other.  A molecule listed above gains `records[basis]`; one past the cap that only its record opens (lysine) joins
- * MOLECULE_BY_ID as RECORD_ONLY, never MOLECULES, whose 54 entries the PySCF oracle file covers row for row. */
+ * MOLECULE_BY_ID as RECORD_ONLY, never MOLECULES, whose 54 closed shells the PySCF oracle file covers row for row (the 7 open shells: uhf-v1.json). */
 const CATALOGUE = await (async () => {
   const u = new URL('./library.json', import.meta.url);
   try { const fs = u.protocol === 'file:' && globalThis.process?.getBuiltinModule?.('fs');

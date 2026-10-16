@@ -5338,6 +5338,22 @@
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
    "energy": -614.5241755564492
   },
+  "O2": {
+   "what": "PySCF 2.14.0 UHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -147.6352300151407
+  },
+  "NO": {
+   "what": "PySCF 2.14.0 UHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -127.53039956873471
+  },
+  "OH": {
+   "what": "PySCF 2.14.0 UHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -74.3626375456123
+  },
+  "B2": {
+   "what": "PySCF 2.14.0 UHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -48.42116526893494
+  },
   "BeH2": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
    "energy": -15.560312316766892
@@ -5390,6 +5406,14 @@
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
    "energy": -394.311556109671
   },
+  "NH2": {
+   "what": "PySCF 2.14.0 UHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -54.83692442156896
+  },
+  "CH3": {
+   "what": "PySCF 2.14.0 UHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -39.07670885029181
+  },
   "CO2": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
    "energy": -185.06469572695954
@@ -5413,6 +5437,10 @@
   "SO2": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
    "energy": -540.6018797759014
+  },
+  "NO2": {
+   "what": "PySCF 2.14.0 UHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
+   "energy": -201.28618369480836
   },
   "BF3": {
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
