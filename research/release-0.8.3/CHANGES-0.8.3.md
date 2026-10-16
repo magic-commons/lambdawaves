@@ -13,8 +13,25 @@ CALCULUS tile with the cursor and a hover. THE UNCERTAINTY ELLIPSOID: the positi
 ## B1 · THE RADIAL BREATH + REVIVAL
 (filled at B1's merge)
 
-## B2 · THE A(t) TRACE
-(filled at B2's merge)
+## B2 · THE A(t) TRACE (`lab/calculusview.js` +19 — one import, the tile and its `trace()`, one call; `lab/period.js:102–110` `traceOf`; `lab/windows/readouts.js` +1 the source line; branch `b2-trace` tip `ca0bb45`; +29 of ≤ +30)
+- **The tile** A(t) = |⟨ψ(0)|ψ(t)⟩|² in CALCULUS from 512 samples of `reg.autocorrelation(t)` over ONE REPEATS period — the transport's own (`app.hooks.period()`, the value
+  REPEATS prints; the 2e4 a.u. horizon when there is none, and it says so); t = 0 is the anchor REPEATS counts its laps from, the cursor is `clock.t mod T`; revivals
+  (local maxima above half the top) are dots, the hover gives t (and t/T) and A and snaps to a revival within 6 px. Rebuilt only when the register version, Fz, Bz,
+  P.T, the operator or the equalizer table changes — never in a frame — under LIVE and the `may('calculus')` tick; nothing runs while CALCULUS is closed; no field
+  write. Stands down with one sentence for a molecule and for an A ↔ B transition; when the fastest beat turns more than 128 times over the span the sub says "512
+  samples alias it".
+- **The equalizer, corrected:** its table Γ does not decay the envelope in time — it is a fixed point, each pair's coherence scaled by a constant, and a spread of
+  clock offsets leaves the pure A(t) unchanged. So the tile draws the MIXED-STATE trace Tr ρ(0)ρ(t) = Σ p_a p_b |Γ_ab|² cos ω_ab t, which equals A(t) at Γ = 1: under a
+  mixture table (the jitters, COMB, gains below 1) the beats scale down and every revival reaches the PURITY the BEAT EQUALIZER card already prints ("coherences
+  damped: the envelope is the model's · A(0) = PURITY …"); PHASE PULSE keeps the state pure, so the pure trace; a signed table is not a state, so the register's own
+  trace, said. "exact" is said whenever no table damps the curve (the drawn curve is always the closed-form normal-mode sum; whether the period is exact rides in the
+  source string). The tile lives in `calculusview.js`, not `readouts.js` (as P3 found).
+- **Checked (`tests/trace.test.mjs`, 6 laws):** A(0) = 1 to 1e-12; 1s + 2s: T = 2π/(E₂ − E₁) = 16π/3 exactly, A(T) = 1 to 1e-10, the trace equals cos² pointwise (worst
+  6.7e-16); 512 samples, source 'REPEATS, exact', revivals at samples 0 and 511 only; the damped trace A(0) = purity 0.625 and ½ + ⅛cos(ΔE t) to 1e-12; the horizon
+  fallback says so. calculus 8 · period 11 · bead-ray green; rack-deps holds (SPECTRUM 25, readouts 9); new-project in step; serialize-bytes byte-identical against
+  `f3f4ccb` (no PROJECT key). Browser (CHORD, t = 600): "1810 a.u. · 43.8 fs" · "REPEATS, exact · exact |Σ p e^{−iEt}|² · now A = 0.2992 · 16 revivals" — A(600) = 0.2992
+  by a separate calculation; the hover at T "A = 1.000000 · a revival"; screenshot `.tmp/b2-chord-trace.png`. **Left out:** damping under Fz ≠ 0 (the pure trace is
+  drawn), per-label rates, molecules. The period read takes the transport's forced road (free when REPEATS is fresh; a scan once per rebuild key while settling).
 
 ## B3 · THE UNCERTAINTY ELLIPSOID (`lab/calculus.js:144–155` `covariance(reg, t)` + the `rotorsToZ` import; `lab/dynamics.js` `radialObservables` returns `r2`; `lab/skeleton.js:24, 46–47` the ellipses; `lab/calculusview.js:9, 44, 51–53` the readout; `lab/rack.js:27, 506–507`; the ELLIPSOID switch beside BEAD in `lab/windows/molecules.js:59–61`; PREFERENCE in `lab/shell/settings.js:37, 107`; `docs/STATE-SCOPES.md` one row; branch `b3-ellipsoid` tip `df9463b`; +21 of ≤ +50)
 - **The covariance** Σ = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ with its eigenvalues and principal axes (six Jacobi sweeps), the bead and an independently computed ⟨r²⟩, cached per

@@ -7,6 +7,7 @@
 import { stats, rayAt, expectR } from './calculus.js'; import { getHamiltonian } from './hamiltonian.js';
 import { el, readout, sw, mathText } from './mir/kit.js';
 import { covariance } from './calculus.js'; import { BASIS } from './hydrogen.js';   // 0.8.3 B3: THE ELLIPSOID's line
+import { traceOf, fmtPeriod } from './period.js';   // 0.8.3 B2: THE A(t) TRACE
 
 export function createCalculus(host) {
   let on = true, last = null, key = '';
@@ -18,6 +19,23 @@ export function createCalculus(host) {
   /* OPTIMIZATION 2026-09-24 · LA10 · THE TILES ARE KEPT: built once per set of rows (the names change only with the operator
      or a field), and each update writes only the strings that changed — the readouts' own dirty checks, and the class here. */
   let tiles = [], names = '', footS;
+  /* 0.8.3 B2 · THE A(t) TRACE (period.js traceOf): 512 samples over ONE REPEATS period, rebuilt only when its key moves (the register, the field, the operator, the period,
+     the equalizer's table; never in a frame); the clock's t the cursor, the revivals dots, the hover t and A.  Its source is readouts.js' `calculus.trace`. */
+  const at = readout({ label: 'A(t)  |⟨ψ(0)|ψ(t)⟩|²  over one REPEATS period · t = 0 the anchor, as REPEATS counts its laps', value: '—', cls: 'wide calc-ray' }), acv = el('canvas', '', at.root), ag = acv.getContext('2d');
+  host.insertBefore(at.root, foot); let tr = null, tk = '', dk = '', tG = null;
+  acv.addEventListener('pointermove', (e) => { if (!tr) return; const N = tr.A.length, w = acv.clientWidth || 1, i0 = Math.round(e.offsetX / w * (N - 1)), j = tr.peaks.find((q) => Math.abs(q - i0) * w / (N - 1) < 6), i = j ?? i0;
+    acv.title = `t = ${tr.t[i].toFixed(2)} a.u. (${(tr.t[i] / tr.T).toFixed(3)} T) · A = ${tr.A[i].toFixed(6)}${j === undefined ? '' : ' · a revival'}`; });
+  function trace(src, reg, t, mol) {
+    const S = src ? src() : {}, P = S.P, why = mol ? 'a molecule: the STATES register\'s autocorrelation is a later row' : reg.transition ? 'an A ↔ B transition: the mix has its own clock (the Rabi period)' : '';
+    if (why) { tr = null; tk = dk = ''; acv.width = 0; at.set('—'); return at.setSub(why); }
+    const k = `${reg.version}|${reg.field.Fz}|${reg.field.Bz}|${P && P.T}|${getHamiltonian().id}`, W = acv.clientWidth || 240;
+    if (k !== tk || S.T !== tG) { tk = k; tG = S.T; dk = ''; tr = traceOf(reg, P, S.g2); }
+    const T = tr.T, N = tr.A.length, c = ((t % T) + T) % T, d2 = `${t.toFixed(4)}|${W}`; if (d2 === dk) return; dk = d2;
+    const Hh = 56, d = Math.min(2, window.devicePixelRatio || 1), cs = getComputedStyle(document.body), ink = cs.getPropertyValue('--fg').trim() || cs.color, acc = cs.getPropertyValue('--acc').trim() || ink, x = (i) => i * W / (N - 1), y = (a) => Hh - 2 - a * (Hh - 4);
+    acv.width = Math.round(W * d); acv.height = Hh * d; ag.setTransform(d, 0, 0, d, 0, 0); ag.lineWidth = 1.25; ag.strokeStyle = ink; ag.beginPath(); tr.A.forEach((a, i) => ag[i ? 'lineTo' : 'moveTo'](x(i), y(a))); ag.stroke();
+    ag.fillStyle = ag.strokeStyle = acc; for (const i of tr.peaks) { ag.beginPath(); ag.arc(x(i), y(tr.A[i]), 2.5, 0, 7); ag.fill(); } ag.beginPath(); ag.moveTo(c / T * W, 0); ag.lineTo(c / T * W, Hh); ag.stroke();
+    at.set(fmtPeriod(T)); at.setSub(`${tr.src} · ${S.g2 ? 'coherences damped: the envelope is the model\'s · A(0) = PURITY ' + tr.A[0].toFixed(3) : S.signed ? 'a signed table is no state: the register\'s own trace' : 'exact |Σ p e^{−iEt}|²'} · now A = ${(S.g2 ? tr.A[Math.round(c / T * (N - 1))] : reg.autocorrelation(t).abs ** 2).toFixed(4)} · ${tr.peaks.length} revivals${tr.turns > 128 ? ` · the fastest beat turns ${tr.turns.toFixed(0)}×: 512 samples alias it` : ''}`);
+  }
   function render(S) {
     const sig = S.rows.map((r) => r.name).join('|');
     if (sig !== names) {
@@ -38,6 +56,7 @@ export function createCalculus(host) {
   /** the CPU tick, through the reader law (rack.js may): it skips if neither the register nor the clock moved */
   function update(reg, t, half = 1, p = false, mol = false) {
     if (!on) return;
+    trace(this && this.trace, reg, t, mol);   // 0.8.3 B2: A(t) on its own key; `this` is the object returned below, readouts.js sets its `trace`
     const k = `${reg.version}|${t.toFixed(4)}|${half}|${p}|${mol}`;
     if (k === key) return;
     key = k; const H = getHamiltonian(), why = mol ? 'a molecule: the ray stands down this cut (the AO evaluator is not free on the frame thread)' : p && H.phiAt === H.psiAt ? 'momentum space: this operator\'s φ(p) is not on the road (its ψ(x) without the phase)' : '';

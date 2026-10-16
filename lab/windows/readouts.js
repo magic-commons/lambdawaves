@@ -123,6 +123,7 @@ export function createReadouts(app) {
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
   const wLad = device({ id: 'ladder', eyebrow: 'LADDER', status: '' });
   app.w.wCalc = wCalc; app.w.wLad = wLad; app.w.calculus = calculus;
+  calculus.trace = () => { const T = app.state.eq.last, G = T && T.mode === 1 && !reg.field.Fz && T.gamma; return { P: app.hooks.period && app.hooks.period(), T, signed: !!(T && T.gamma && T.mode === 2), g2: G && ((a, b) => { const k = ((BASIS[a].n - 1) * 6 + BASIS[b].n - 1) * 2; return G[k] ** 2 + G[k + 1] ** 2; }) }; };   // 0.8.3 B2: the A(t) tile's source — the transport's REPEATS period and the equalizer's table in force
   if (useCompactDefaults) wLad.root.classList.add('closed');
   rack.appendChild(wLad.root);
   const ladder = createLadder(wLad.body, { active: () => canPresent(wLad), loading: cardLoading(wLad, 'revival'), solve: (params) => solveCard({ op: 'ladder', params }, () => solveLadder(params)) });
