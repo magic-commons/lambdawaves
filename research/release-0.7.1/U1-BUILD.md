@@ -105,4 +105,4 @@ rhf-molecules (the refusal's new words).
   reproduces the curve (Coulson–Fischer between 2.2 and 2.3 bohr: ⟨S²⟩ 0.036 at 2.2, 0.195 at 2.3).
 - `tests/fixtures/oracles/uhf-v1.json` `h2` carries PySCF UHF at 1.4 / 3.0 / 5.0 bohr and 0.74 / 3.00 Å.
 - `lab/chemview.js`: U1 touched VIEW (seg, views, molView, pushMatrix, setView), the solve message/identity/fill (`standDown()`), kick/query,
-  refresh's readouts, the caption and state(); the `h2Note` block (`refresh`, l.646) is untouched. A UHF ground has `sol.model`, `sol.Ds`, `sol.s2`.
+  refresh's readouts, the caption and state(); the `h2Note` block (`refresh`, l.640) is untouched. A UHF ground has `sol.model`, `sol.Ds`, `sol.s2`.
