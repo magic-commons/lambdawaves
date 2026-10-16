@@ -397,7 +397,7 @@ export function createChem(host, api) {
 
   /* ── the real-time run ────────────────────────────────────────────────────────────────────────── */
   function kick() {
-    if (!sol) return Promise.resolve(null);
+    if (!sol || sol.model) { if (sol) status(OPEN, 'warn'); return Promise.resolve(null); }   // 0.7.1: never a closed-shell RT run of an open shell
     const seq = solveSeq;
     /* SYNTHESIS decision 2: the card's MMUT is UNRESTARTED, and 0 is how that is spelled on the wire.  It was
        never sent before, so the engine took its own default of 50 while this window said "unrestarted". */
@@ -665,7 +665,7 @@ export function createChem(host, api) {
     status(`${sol.nAO} AOs · ${nel()} electrons` + (sol.model ? ' · UHF' : '')
       + (Number.isFinite(tm.scf) ? ` · ground ${Math.round(tm.scf)} ms` : '')
       + (Number.isFinite(tm.integrals) ? ` (integrals ${Math.round(tm.integrals)} of it)` : '')
-      + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : summed() ? ' · ' + summed() : noSpectrum(sol) ? ' · orbitals only' : sol.roots ? '' : ' · spectrum pending')
+      + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : summed() ? ' · ' + summed() : noSpectrum(sol) ? ' · orbitals only' : sol.model ? ' · no spectrum (open shell)' : sol.roots ? '' : ' · spectrum pending')
       + (sol.opened ? ` · from its record (${Math.round(sol.opened.bytes / 1024)} KB, ${sol.opened.from === 'device' ? 'on this device' : 'downloaded'}) in ${tm.open} ms, no solver call` + (stored ? ' · ' + stored : '') : '')
       + (sol.note ? ' · ' + sol.note : '') + (view !== 'esp' ? '' : espOn() ? ` · ESP ${esp.N}³ in ${Math.round(esp.ms)} ms` : ' · ESP computing…') + (running ? ' · running' : ''), running ? 'live' : 'ok');
     paint();
@@ -735,7 +735,7 @@ export function createChem(host, api) {
     const { W, H } = s, L = 42, Rt = W - 8, Tp = 12;
     g.font = '8px ui-monospace, monospace';
     const CAP = sol ? `${tda ? 'TDA' : 'RPA'} sticks, h ∝ f · Im α from the ${axis} kick`
-      + (noSpectrum(sol) ? ' · no spectrum in its record' : sol.roots ? '' : ' · spectrum pending')
+      + (noSpectrum(sol) ? ' · no spectrum in its record' : sol.model ? ' · no spectrum: an open shell' : sol.roots ? '' : ' · spectrum pending')
       + (fit ? (fit.certified ? ` · ▲ poles, 4ε/σ = ${fit.bound.toExponential(1)}` : ` · ▽ raw maxima, UNCERTIFIED`) : spec ? ' · fitting…' : ' · kick and RUN')
       : 'no molecule solved';
     const caps = wrap(g, CAP, Rt - L);
@@ -965,7 +965,7 @@ export function createChem(host, api) {
     get on() { return on; }, setOn, get half() { return sol && Number.isFinite(sol.half) ? sol.half : 10.3; },
     /** what the worker needs to find this solution again — the STATES register asks it for the canonical ladder */
     setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; }, get said() { return said; },
-    query() { return sol ? { atoms: chemAtoms(preset), basis, charge: chemCharge(preset) } : null; },
+    query() { return sol && !sol.model ? { atoms: chemAtoms(preset), basis, charge: chemCharge(preset) } : null; },   // 0.7.1: an open shell has no ladder to ask for
     /** the names an export carries (0.4.0 S1): the group and configuration, and the ORBITAL on the field when VIEW is one */
     exportNames() {
       if (!sol || !sol.names) return null;
