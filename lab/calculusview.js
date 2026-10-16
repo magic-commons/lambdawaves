@@ -5,7 +5,7 @@
  * number is computed from the register with exact matrix elements, the derivatives centred differences of the exact evolution.
  */
 import { stats, rayAt, expectR, radialBreath } from './calculus.js'; import { getHamiltonian } from './hamiltonian.js'; import { revivalClocks } from './frontier.js'; import { PRESET_BY_ID } from './state.js';
-import { el, readout, sw, mathText, trig } from './mir/kit.js';
+import { el, readout, sw, mathText, trig, label } from './mir/kit.js';
 import { covariance } from './calculus.js'; import { BASIS } from './hydrogen.js';   // 0.8.3 B3: THE ELLIPSOID's line
 import { traceOf, fmtPeriod } from './period.js';   // 0.8.3 B2: THE A(t) TRACE
 
@@ -17,7 +17,7 @@ export function createCalculus(host, opt = {}) {
   const cv = el('canvas', '', ray.root), g = cv.getContext('2d'); host.insertBefore(ray.root, foot);   // 0.8.2 P3: ψ ALONG A RAY, 128 closed-form samples, each curve over the ray's max |ψ|
   /* 0.8.3 B1 · THE BREATH: P(r, t) over [0, half] in the kit's ink, its scale the register version's running max, and its two integrals against stats' ⟨r⟩; REVIVAL (a hand press, never at boot) is
      ONE verb list, ONE history row: the radial packet `rydberg-s`, RATE = T_cl a.u. a second (the `rate` verb consults the flash law and says why it holds), play */
-  const br = readout({ label: 'BREATH  P(r, t) = r² Σ_lm |Σ_n c_nlm(t) R_nl(r)|²', value: '—', cls: 'wide calc-ray' }), bv = el('canvas', '', br.root), bg = bv.getContext('2d'), rv = el('div', 'row tight', br.root); host.insertBefore(br.root, foot); let bKey = -1, bMax = 0;
+  const BL = ['BREATH  P(r, t) = r² Σ_lm |Σ_n c_nlm(t) R_nl(r)|²', 'BREATH  P(p, t) = p² Σ_lm |Σ_n c_nlm(t) F_nl(p)|²'], br = readout({ label: BL[0], value: '—', cls: 'wide calc-ray' }), bv = el('canvas', '', br.root), bg = bv.getContext('2d'), rv = el('div', 'row tight', br.root); host.insertBefore(br.root, foot); let bKey = '', bMax = 0, bLab = false;
   const rvLine = el('span', 'calc-rev'); rv.append(trig({ label: 'REVIVAL', title: "STATE's radial Rydberg packet (ns, n = 4…6), RATE so one classical period T_cl = 2πn̄³ takes a second, the clock playing", onFire: async () => {
     const m = PRESET_BY_ID.get('rydberg-s').modes, w = m.reduce((s, q) => s + q.amp * q.amp, 0), nb = m.reduce((s, q) => s + q.n * q.amp * q.amp, 0) / w, { Tcl, Trev } = revivalClocks(nb);
     const r = opt.revival ? await opt.revival([{ verb: 'preset', args: { id: 'rydberg-s' } }, { verb: 'rate', args: { value: Tcl } }, { verb: 'play', args: { on: true } }]) : { refused: [] };
@@ -77,13 +77,15 @@ export function createCalculus(host, opt = {}) {
   const ell = readout({ label: 'ELLIPSOID  σ_k = √λ_k of Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩', value: '—', cls: 'wide calc-ray' }); host.insertBefore(ell.root, foot);   // 0.8.3 B3: tr Σ against ⟨r²⟩ − |⟨r⟩|² (⟨r²⟩ by its own road); one hydrogen label prints its exact n²(5n² + 1 − 3l(l + 1))/2Z²
   function ellLine(reg, t, p, mol, H) { const E = !mol && !p && covariance(reg, t), ids = reg.populated(), s = E && ids.length === 1 && H.id === 'hydrogen' && BASIS[ids[0]], tr = E && E.S[0][0] + E.S[1][1] + E.S[2][2], o = E && E.r2 - E.mean.reduce((q, v) => q + v * v, 0);
     ell.set(E ? `σ = (${[...E.lam].sort((a, b) => a - b).map((l) => Math.sqrt(Math.max(0, l)).toFixed(2)).join(', ')}) ${H.lengthUnit}` : '—'); ell.setSub(E ? `tr Σ = ${tr.toFixed(3)} ${Math.abs(tr - o) < 1e-8 ? '=' : '≠'} ⟨r²⟩ − |⟨r⟩|² = ${o.toFixed(3)} (Δ ${Math.abs(tr - o).toExponential(0)})` + (s ? ` · exact ${+(s.n * s.n * (5 * s.n * s.n + 1 - 3 * s.l * (s.l + 1)) / 2 / (H.k || 1) ** 2).toPrecision(6)}` : '') : mol ? 'a molecule: the ellipsoid stands down (its density\'s quadrupole is a later row)' : 'momentum space: the ellipsoid is the position\'s'); }
-  function breath(reg, t, half, p, mol) {   // 0.8.3 B1: a molecule and momentum space stand down with a sentence
-    if (mol || p) { br.set('—'); bv.width = 0; return br.setSub(mol ? 'a molecule: the breath reads the atom register' : 'momentum space: the breath is P(r, t); P(p, t) is a later row'); }
-    const B = radialBreath(reg, t, half), r0 = last.rows.find((q) => q.name === '⟨r⟩').value, W = bv.clientWidth || 240, Hh = 56, d = Math.min(2, window.devicePixelRatio || 1), cs = getComputedStyle(document.body);
-    if (reg.version !== bKey) { bKey = reg.version; bMax = 0; } for (let k = 0; B.r[k] <= half; k++) bMax = Math.max(bMax, B.P[k]);
+  function breath(reg, t, half, p, mol) {   // 0.8.3 B1 · 0.9.2 F2: momentum space draws P(p, t) for hydrogen and the oscillator; the box, ATOM and CENTRAL say so and draw P(r, t)
+    if (mol) { br.set('—'); bv.width = 0; return br.setSub('a molecule: the breath reads the atom register'); }
+    const H = getHamiltonian(), q = p && (H.id === 'hydrogen' || H.id === 'qho'), B = radialBreath(reg, t, half, 256, q), W = bv.clientWidth || 240, Hh = 56, d = Math.min(2, window.devicePixelRatio || 1), cs = getComputedStyle(document.body);
+    if (bLab !== q) label(br.root.firstChild, BL[+(bLab = q)]); if (reg.version + '|' + q !== bKey) { bKey = reg.version + '|' + q; bMax = 0; } for (let k = 0; B.r[k] <= half; k++) bMax = Math.max(bMax, B.P[k]);
     bv.width = Math.round(W * d); bv.height = Hh * d; bg.setTransform(d, 0, 0, d, 0, 0); bg.lineWidth = 1.25; bg.strokeStyle = cs.getPropertyValue('--fg').trim() || cs.color; bg.beginPath();
     for (let k = 0; B.r[k] <= half; k++) bg[k ? 'lineTo' : 'moveTo'](B.r[k] / half * W, Hh - 2 - B.P[k] / (bMax || 1) * (Hh - 4)); bg.stroke();
-    br.set(`0 → ${half.toFixed(1)} ${getHamiltonian().lengthUnit}`); br.setSub(`∫P = ${B.norm.toFixed(9)} · ∫rP/∫P = ${B.rMean.toFixed(4)} = ⟨r⟩ (Δ ${Math.abs(B.rMean - r0).toExponential(0)})`);
+    const ids = reg.populated(), s = q && H.id === 'hydrogen' && ids.length === 1 && BASIS[ids[0]], k = H.k || 1, r0 = !q && last.rows.find((x) => x.name === '⟨r⟩').value;
+    br.set(`0 → ${half.toFixed(1)} ${q ? 'a.u.' : H.lengthUnit}`); br.setSub(q ? `∫P = ${B.norm.toFixed(9)} · ⟨p²⟩ = ${B.m2.toFixed(4)}` + (s ? ` (exact ${k === 1 ? '1/n²' : '(Zμ/n)²'} = ${+(k * k / s.n / s.n).toPrecision(6)})` : '')
+      : (p ? 'momentum space: the breath is position\'s · ' : '') + `∫P = ${B.norm.toFixed(9)} · ∫rP/∫P = ${B.rMean.toFixed(4)} = ⟨r⟩ (Δ ${Math.abs(B.rMean - r0).toExponential(0)})`);
   }
   return { update, get last() { return last; } };
 }

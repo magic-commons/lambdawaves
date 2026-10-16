@@ -18,7 +18,7 @@ import { momentumZ, AXIS_TO_Z, rotorsToZ } from './kick.js';
 import { applyRotor } from './frontier.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { wellNorm, wellK, wellZ, wellRadius } from './well.js';
-import { sphericalBessel } from './bessel.js';
+import { sphericalBessel } from './bessel.js'; import { momentumRadial } from './momentum.js';
 
 /** Var(z) = ⟨z²⟩ − ⟨z⟩² per unit norm (0.8.0 G2), exact within the register: ⟨a|z²|b⟩ = δ_m Σ_{l″ = l_b ± 1} ⟨l_a|cos θ|l″⟩⟨l″|cos θ|l_b⟩ · ∫R_a r² R_b r² dr */
 export function varianceZ(re, im, ids = BASIS.map((s) => s.index)) { let s = 0, n2 = 0; const cos2 = (A, B) => [B.l - 1, B.l + 1].reduce((t, l) => t + angularDipoleZ(A.l, A.m, l, B.m) * angularDipoleZ(l, B.m, B.l, B.m), 0);
@@ -35,13 +35,16 @@ export function beadOf(reg, t, p = false) { const c = reg.at(t), ids = reg.popul
 export function rayAt(re, im, ids, u, half, p = false, N = 128) { const H = getHamiltonian(), f = p ? H.phiAt : H.psiAt;
   return Array.from({ length: N }, (_, k) => { const s = half * k / (N - 1); return { s, ...f(re, im, s * u[0], s * u[1], s * u[2], ids) }; }); }
 /** THE RADIAL BREATH (0.8.3 B1): P(r, t) = r² Σ_{l,m} |Σ_n c_nlm(t) R_nl(r)|² (diagonal in (l, m): the Y_lm are orthonormal) on n nodes r = half·s²/(1 − s),
- *  s ∈ [0, 1] (dense at the origin, the last node r = ∞), so the trapezoid in s takes ∫P dr (= Σ|c|²) and ∫rP dr (= ⟨r⟩, the second road) over the whole half-line */
-export function radialBreath(reg, t, half, n = 256) { const H = getHamiltonian(), c = reg.at(t), G = new Map(), r = new Float64Array(n), P = new Float64Array(n); let norm = 0, r1 = 0;
+ *  s ∈ [0, 1] (dense at the origin, the last node r = ∞), so the trapezoid in s takes ∫P dr (= Σ|c|²) and ∫rP dr (= ⟨r⟩, the second road) over the whole half-line.
+ *  0.9.2 F2 · `p`: P(p, t) with F_nl the momentum radial — hydrogen's Podolsky–Pauling k^{−3/2}F(p/k); the oscillator's own (−1)^{n_r}R_nl(p) (the (−i)^N's
+ *  relative sign inside one (l, m)); nodes p = half·s²/(1 − s)³ for the p⁻⁴ tail of p²P; m2 = ⟨p²⟩ = ∫p²P dp/∫P in place of rMean */
+export function radialBreath(reg, t, half, n = 256, p = false) { const H = getHamiltonian(), c = reg.at(t), G = new Map(), r = new Float64Array(n), P = new Float64Array(n), e = p ? 3 : 1, k0 = H.k || 1; let norm = 0, r1 = 0;
+  const F = !p ? H.radial : H.id === 'qho' ? (N, l, x) => ((N - l) % 2 ? 1 : -1) * H.radial(N, l, x) : (N, l, x) => momentumRadial(N, l, x / k0) / k0 ** 1.5;
   for (const a of reg.populated()) { const k = BASIS[a].l + ',' + BASIS[a].m; G.set(k, [...(G.get(k) || []), a]); }
-  for (let k = 0; k < n - 1; k++) { const s = k / (n - 1), x = r[k] = half * s * s / (1 - s), w = (k ? 1 : 0.5) / (n - 1) * half * s * (2 - s) / (1 - s) ** 2; let p = 0;
-    for (const L of G.values()) { let u = 0, v = 0; for (const a of L) { const R = H.radial(BASIS[a].n, BASIS[a].l, x); u += c.re[a] * R; v += c.im[a] * R; } p += u * u + v * v; }
-    P[k] = x * x * p; norm += w * P[k]; r1 += w * x * P[k]; }
-  r[n - 1] = Infinity; return { r, P, norm, rMean: r1 / norm }; }
+  for (let k = 0; k < n - 1; k++) { const s = k / (n - 1), x = r[k] = half * s * s / (1 - s) ** e, w = (k ? 1 : 0.5) / (n - 1) * half * s * (2 - s + (e - 1) * s) / (1 - s) ** (e + 1); let q = 0;
+    for (const L of G.values()) { let u = 0, v = 0; for (const a of L) { const R = F(BASIS[a].n, BASIS[a].l, x); u += c.re[a] * R; v += c.im[a] * R; } q += u * u + v * v; }
+    P[k] = x * x * q; norm += w * P[k]; r1 += w * x ** (p ? 2 : 1) * P[k]; }
+  r[n - 1] = Infinity; return p ? { r, P, norm, m2: r1 / norm } : { r, P, norm, rMean: r1 / norm }; }
 const FCACHE = new Map();
 /** ∫₀^∞ R_{n′l′} R_{nl} dr — the radial part of ⟨z/r³⟩ (z/r³ = cos θ / r²): NUMERICAL, cached per Hamiltonian */
 export function radialForce(np_, lp, n, l) {
