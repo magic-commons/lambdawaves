@@ -79,6 +79,17 @@ export function paintSlice(sample, img, { lut = null, gain = 1, knee = 0.6, cont
   }
   return img;
 }
+/** F1 · the current IN the plane, j_∥ = Im(ψ̄ ∇_∥ψ), by centred differences of a sample's re/im — no second evaluation of ψ.  The grid is
+ *  cell-centred (a_i = (2(i + ½)/N − 1)·scale), so h = 2·scale/N; i runs along e₁ (a), j along e₂ (b); the edge ring is dropped (0). */
+export function currentOf({ re, im, N, half, mode }) {
+  const h2 = 4 * (mode === 'ks' ? Math.sqrt(half) : half) / N, ja = new Float64Array(N * N), jb = new Float64Array(N * N); let max = 0, at = -1;
+  for (let j = 1; j < N - 1; j++) for (let i = 1; i < N - 1; i++) {
+    const k = j * N + i, a = (re[k] * (im[k + 1] - im[k - 1]) - im[k] * (re[k + 1] - re[k - 1])) / h2;
+    const b = (re[k] * (im[k + N] - im[k - N]) - im[k] * (re[k + N] - re[k - N])) / h2, m = Math.hypot(a, b);
+    ja[k] = a; jb[k] = b; if (m > max) { max = m; at = k; }
+  }
+  return { ja, jb, max, at, N };
+}
 /** a one-line description of where the plane is looking, for the readout */
 export function planeReport(rotor) {
   const { nP, nM } = spherePoint(rotor.qL, rotor.qR);

@@ -39,8 +39,8 @@ import { planeModel } from './native-ui.js';
  *               completion the TRUE absMax is known and the whole image is repainted through `paintSlice` itself,
  *               so a settled slice is bit-identical to what the unchunked code drew.
  */
-import { sampleSlice, paintSlice, planeReport, ksMap } from './slice.js';
-import { psiAndGrad } from './dynamics.js';
+import { sampleSlice, paintSlice, planeReport, ksMap, currentOf } from './slice.js';
+import { psiAndGrad } from './dynamics.js'; import { BASIS } from './hydrogen.js';
 import { IDENTITY, expPure, qmul, qnormalize, canonicaliseRotors, classifyManeuver, tourSegmentAt, projectToU2, isHolomorphic, visibleFrame, adjoint } from './rotor4.js';
 import { el, seg, sw, knob, trig, readout, themeInk, graphHover } from './mir/kit.js';
 
@@ -70,6 +70,7 @@ export function createSliceView(host, api) {
   const cRe = [new Float64Array(NBASIS), new Float64Array(NBASIS)], cIm = [new Float64Array(NBASIS), new Float64Array(NBASIS)];
   const bufRe = [null, null], bufIm = [null, null];             // ping-pong: a completed `sample` keeps its arrays while the next job fills the other pair
   let slot = 0;
+  let current = 'off', mir = null, one = null;                  // F1 CURRENT: the seg, the MIRROR of the rows on screen (what j is read from), the one label
 
   const rotorKey = () => rotor.qL.map((v) => v.toFixed(6)).join(',') + '/' + rotor.qR.map((v) => v.toFixed(6)).join(',');
   const sampleKey = (reg, t) => `${reg.version}|${t.toFixed(4)}|${mode}|${half}|${res}|${rotorKey()}`;
@@ -85,6 +86,9 @@ export function createSliceView(host, api) {
     { id: 'ks', label: 'KS ℝ⁴', title: 'Map a rotating four-dimensional plane into three dimensions' }],
     onChange: (v) => { mode = v; dirty = true; api.repaint(); } });
   r1.appendChild(modeSeg.root);
+  const curSeg = seg({ label: 'CURRENT', value: 'off', options: [{ id: 'off', label: 'OFF' }, { id: 'arrows', label: 'ARROWS', title: 'the probability current in the plane as a quiver' },
+    { id: 'lines', label: 'LINES', title: 'streamlines of the probability current in the plane' }], onChange: (v) => { current = v; jro.root.style.display = v === 'off' ? 'none' : ''; paint(); } });
+  r1.appendChild(curSeg.root);
   const extentK = knob({ label: 'EXTENT a₀', min: 1, max: 60, value: 8, log: true, fmt: (v) => '±' + v.toFixed(1), onInput: (v) => { half = v; dirty = true; api.repaint(); } });
   const gainK = knob({ label: 'GAIN', min: 0.1, max: 20, value: 1.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { gain = v; regain = true; api.repaint(); } });
   r1.appendChild(extentK.root);
@@ -102,7 +106,8 @@ export function createSliceView(host, api) {
   for (const p of NAMED.filter(p=>p.key==='iso')) r2.appendChild(trig({ label: p.label, onFire: () => { startTour(p); api.repaint(); } }).root);
   r2.appendChild(trig({ label: 'RESET', onFire: () => { rotor = { ...IDENTITY }; tour = null; res = 128; dirty = true; api.repaint(); } }).root);
   const ro = readout({ label: 'PLANE  n₊ · n₋', value: '—', cls: 'wide', sub: '' });
-  el('div', 'row tight', host).appendChild(ro.root);
+  const roRow = el('div', 'row tight', host), jro = readout({ label: 'CURRENT  j = Im(ψ̄ ∇ψ) in the plane', value: '—', cls: 'wide', sub: '' });
+  roRow.appendChild(ro.root); roRow.appendChild(jro.root); jro.root.style.display = 'none';
   el('div', 'note', host).innerHTML = '<b>Plane.</b> Hue shows arg ψ, brightness shows |ψ|, and faint bands trace |ψ| contours. Drag rotates the plane; Shift-drag rotates the other SO(4) factor. KS maps a plane in four dimensions into a cone-like surface in three dimensions.';
 
 
@@ -131,6 +136,8 @@ export function createSliceView(host, api) {
       mode, half, scale: mode === 'ks' ? Math.sqrt(half) : half,  // KS is quadratic: |x| = |u|², so sample √half
       start: nextStart % N, done: 0, mx: 0, norm: lastAbsMax };
     key = k; dirty = false; regain = false;
+    if (!mir || mir.N !== N) mir = { re: new Float64Array(N * N), im: new Float64Array(N * N), N };   // the F1 mirror: reset only by a res change
+    Object.assign(mir, { half, mode, e1: job.e1, e2: job.e2 });
   }
   /** ONE row of the grid, exactly slice.js's inner loop for that j (a null sample — the origin — writes 0, not stale data) */
   function sampleRow(J, j) {
@@ -180,11 +187,12 @@ export function createSliceView(host, api) {
       sample = { re: J.re, im: J.im, N, absMax: J.mx, mode: J.mode, half: J.half };   // image through paintSlice itself — a settled
       lastAbsMax = J.mx; sweepMax = 0; sweepRows = 0; nextStart = 0; job = null;      // slice is then bit-identical to the unchunked one
       paintSlice(sample, img, { lut: api.lut(), gain, knee: 0.6 });                    // (and the last band is not coloured twice)
+      mir.re.set(J.re); mir.im.set(J.im);
       return;
     }
     const norm = J.norm || J.mx;                                // the previous sweep's absMax; only the very first rows ever drawn fall back to the running one
     const lut = api.lut();
-    for (let k = first; k < J.done; k++) { const j = (J.start + k) % N; colourRows(J, j, j + 1, norm, lut); }
+    for (let k = first; k < J.done; k++) { const j = (J.start + k) % N; colourRows(J, j, j + 1, norm, lut); mir.re.set(J.re.subarray(j * N, j * N + N), j * N); mir.im.set(J.im.subarray(j * N, j * N + N), j * N); }
     nextStart = (J.start + J.done) % N;                         // dropped early → the next generation picks the scan up here
   }
   /* the crosshair answers for the frame: extent, sampling and the U(2) sheet */
@@ -206,12 +214,47 @@ export function createSliceView(host, api) {
     const T = themeInk(g);
     g.strokeStyle = T.ink(0.28); g.lineWidth = 1;
     g.beginPath(); g.moveTo(W / 2, 0); g.lineTo(W / 2, H); g.moveTo(0, H / 2); g.lineTo(W, H / 2); g.stroke();
+    if (current !== 'off') drawCurrent(T, W, H);                // F1: OFF never reaches the overlay, so the picture is today's byte for byte
     const frame = `${mode === 'ks' ? 'KS ℝ⁴' : 'ℝ³'}  ·  ±${half.toFixed(1)} a₀  ·  ${res}² samples${isHolomorphic(rotor.qL) ? '  ·  HOLOMORPHIC U(2): n₊ is fixed' : ''}`;
     hover.set([
       { kind: 'line', key: 'ax-v', points: [W / 2, 0, W / 2, H], lw: 1, colour: T.ink(0.9), info: `the plane's vertical axis  ·  ${frame}` },
       { kind: 'line', key: 'ax-h', points: [0, H / 2, W, H / 2], lw: 1, colour: T.ink(0.9), info: `the plane's horizontal axis  ·  ${frame}` },
       { kind: 'dot', key: 'origin', x: W / 2, y: H / 2, r: 5, colour: T.fg(1), info: `the origin  ·  ${frame}` },
     ], { x0: 0, y0: 0, x1: W, y1: H });
+  }
+  /* F1 · THE CURRENT over the phase image, read from the mirror (the rows on screen, so it moves with the played picture): ARROWS a ≈ 20 × 20 quiver, length ∝ √|j|
+     capped at one quiver cell; LINES 28 streamlines seeded by rejection on |j| from a FIXED sequence (a still sample redraws the same lines), RK2 on the bilinear j. */
+  function drawCurrent(T, W, H) {
+    const why = api.owner ? api.owner() : '';
+    if (why || !mir) { jro.set('—'); jro.setSub(why); return; }
+    const { ja, jb, max, at, N } = currentOf(mir), cx = W / N, cy = H / N, X = (i) => (i + 0.5) * cx, Y = (j) => (j + 0.5) * cy;
+    g.strokeStyle = T.ink(0.8); g.lineWidth = 1; g.beginPath();
+    if (max > 1e-12 && current === 'arrows') { const s = Math.max(1, Math.round(N / 20));
+      for (let j = s >> 1; j < N; j += s) for (let i = s >> 1; i < N; i += s) {
+        const k = j * N + i, m = Math.hypot(ja[k], jb[k]), L = s * Math.sqrt(m / max), ux = ja[k] / m * L * cx, uy = jb[k] / m * L * cy;
+        if (L < 0.2) continue; const x1 = X(i) + ux / 2, y1 = Y(j) + uy / 2;
+        g.moveTo(x1 - ux, y1 - uy); g.lineTo(x1, y1); g.moveTo(x1 - 0.35 * ux + 0.25 * uy, y1 - 0.35 * uy - 0.25 * ux); g.lineTo(x1, y1); g.lineTo(x1 - 0.35 * ux - 0.25 * uy, y1 - 0.35 * uy + 0.25 * ux);
+      }
+    } else if (max > 1e-12) {
+      const bil = (A, x, y) => { const i = Math.min(N - 2, x | 0), j = Math.min(N - 2, y | 0), fx = x - i, fy = y - j, k = j * N + i; return (A[k] * (1 - fx) + A[k + 1] * fx) * (1 - fy) + (A[k + N] * (1 - fx) + A[k + N + 1] * fx) * fy; };
+      const dir = (x, y) => { const a = bil(ja, x, y), b = bil(jb, x, y), m = Math.hypot(a, b); return m > 1e-3 * max ? [a / m, b / m] : null; };
+      let q = 20261016; const rnd = () => (q = (q * 16807) % 2147483647) / 2147483647;
+      for (let n = 0, tries = 0; n < 28 && tries < 4000; tries++) {
+        let x = 1 + rnd() * (N - 3), y = 1 + rnd() * (N - 3); const x0 = x, y0 = y;
+        if (Math.hypot(bil(ja, x, y), bil(jb, x, y)) < rnd() * max) continue;
+        n++; g.moveTo(X(x), Y(y));
+        for (let s = 0; s < 240; s++) { const d = dir(x, y), e = d && dir(x + 0.35 * d[0], y + 0.35 * d[1]); if (!e) break;
+          x += 0.7 * e[0]; y += 0.7 * e[1]; if (x < 1 || y < 1 || x > N - 2 || y > N - 2) break; g.lineTo(X(x), Y(y)); if (s > 12 && Math.hypot(x - x0, y - y0) < 0.7) break; }
+      }
+    }
+    g.stroke(); let sub = mir.mode === 'ks' ? 'KS: the current of the sampled function on its own plane, not a current of ℝ³' : '';
+    if (one && !sub) if (!one.m) sub = 'a real eigenstate carries no current'; else if (at >= 0) {
+      const i = at % N, j = (at / N) | 0, a = (2 * (i + 0.5) / N - 1) * mir.half, b = (2 * (j + 0.5) / N - 1) * mir.half, { e1, e2 } = mir;
+      const x = a * e1[0] + b * e2[0], y = a * e1[1] + b * e2[1], f = Math.abs(one.m) * (mir.re[at] ** 2 + mir.im[at] ** 2) / (x * x + y * y);
+      const ex = f * Math.hypot(x * e1[1] - y * e1[0], x * e2[1] - y * e2[0]);   // |m|ρ/(r sin θ) along φ̂, projected into the plane
+      sub = `exact |m|ρ/(r sin θ) = ${ex.toPrecision(3)} at the max · Δ ${Math.abs(max - ex).toExponential(0)}, the grid's difference`;
+    }
+    jro.set(`|j|max ${max.toPrecision(3)} a.u.`); jro.setSub(sub);
   }
   /* a TOUR turns the plane every frame, so every frame is a new generation: it runs at the drag resolution and
      lets the cyclic scan refresh the picture, exactly as a drag does — the old code recomputed 128² per tour step */
@@ -249,6 +292,7 @@ export function createSliceView(host, api) {
       api.repaint();
     }
     const visible = cv.clientWidth >= 32;
+    if (current !== 'off') { const ids = reg.renderSet().ids; one = ids.length === 1 ? BASIS[ids[0]] : null; }
     if (visible) {
       const k = sampleKey(reg, t);
       if (job && (dirty || k !== job.key)) job = null;           // the generation counter: the partial is dropped, not finished
@@ -283,10 +327,11 @@ export function createSliceView(host, api) {
   return { update, setActive, get rotor() { return rotor; }, setRotor(r) { rotor = canonicaliseRotors(r.qL, r.qR); tour = null; dirty = true; },
     get sample() { return sample; }, get mode() { return mode; }, setMode(m) { mode = m === 'ks' ? 'ks' : 'space'; modeSeg.set(mode); dirty = true; },
     get half() { return half; }, get gain() { return gain; },
-    save() { return { mode, half, gain, rotor: { qL: rotor.qL.slice(), qR: rotor.qR.slice() } }; },
+    save() { return { mode, half, gain, rotor: { qL: rotor.qL.slice(), qR: rotor.qR.slice() }, ...(current !== 'off' && { current }) }; },   // F1: OFF writes no key
     load(o) {
       if (!o || typeof o !== 'object') return false;
       mode = o.mode === 'ks' ? 'ks' : 'space'; modeSeg.set(mode);
+      current = o.current === 'arrows' || o.current === 'lines' ? o.current : 'off'; curSeg.set(current); jro.root.style.display = current === 'off' ? 'none' : '';
       if (Number.isFinite(o.half)) half = Math.max(1, Math.min(60, o.half));
       if (Number.isFinite(o.gain)) gain = Math.max(0.1, Math.min(20, o.gain));
       extentK.set(half); gainK.set(gain);
