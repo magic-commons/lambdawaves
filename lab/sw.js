@@ -31,6 +31,7 @@
 /* ── 1. THE PRECACHE — every file under lab/ that the running lab actually loads ────────────────────────
  * [url relative to this worker, first 12 hex of the file's sha-256].  GENERATED — see the header. */
 const PRECACHE = [
+  ['./ab-patch.json',                                               '5dd0e71d78bf'],
   ['./absorb.js',                                                   '3b0857195bfa'],
   ['./angular-nodes.js',                                            '945796c72ba8'],
   ['./ask.js',                                                      'be69c1219826'],
@@ -127,8 +128,8 @@ const PRECACHE = [
   ['./ladder-model.js',                                             '69199febdca1'],
   ['./ladder.js',                                                   'ab571c69fb38'],
   ['./latex-state.js',                                              '4ab3fd7b1394'],
-  ['./lattice-model.js',                                            '93aa2fdc9662'],
-  ['./lattice.js',                                                  '54b630cda34e'],
+  ['./lattice-model.js',                                            '7ace5ad620c7'],
+  ['./lattice.js',                                                  'b9f7e1d64238'],
   ['./library.js',                                                  '24cc656b9157'],
   ['./library.json',                                                '0a3531a7c866'],
   ['./linalg.js',                                                   'da2367cdcb97'],
