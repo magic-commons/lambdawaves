@@ -2,6 +2,7 @@
  * fieldFreeTrace (the closed-form μ(t) of a bound state), integrate (∫ S dω), kickSpectrum (the whole experiment). */
 import { kick, spectrum, peaks } from '../../lab/absorb.js';
 import { generalisedEigen } from '../../lab/sturmian.js';
+const dim = (S) => Math.round(Math.sqrt(S.length));   // copied from lab/absorb.js (a local helper there)
 /** the field-free electron-dipole trace μ(t) = −⟨z⟩(t) of a state c on the grid t = 0, Δt, …, steps·Δt (closed form) */
 export function fieldFreeTrace({ S, H, Z }, c, { dt, steps }) {
   const n = dim(S), { E, C, rank } = generalisedEigen(S, H);
