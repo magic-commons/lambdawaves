@@ -1,11 +1,11 @@
-# 0.8.3 "Breath" — THE BUILD PLAN (Claude Yan / Fable 5.1, drafted 2026-10-16 ≈03:20 while 0.7.4 cuts; base and cap filled at the 0.8.2 cut)
+# 0.8.3 "Breath" — THE BUILD PLAN (Claude Yan / Fable 5.1, drafted 2026-10-16 ≈03:20 while 0.7.4 cuts; base and cap filled at the 0.8.2 cut, 10-16 ≈09:40)
 
 The engine plan's D.15 (`../release-0.6.0/PLAN.md` l.302–303: "THE RADIAL BREATH P(r, t) (+55) · the A(t) trace over one REPEATS period (+30) · the uncertainty
 ellipsoid (+50) · tap REVIVAL"; the ladder row l.45: "the radial breath P(r, t) — the Rydberg packet going out and coming back; the autocorrelation trace; the
 uncertainty ellipsoid · CALCULUS › BREATH · tap REVIVAL"; the gates at l.197–198: "the radial breath P(r, t) (closed form, diagonal in (l, m); ∫P = Σ|c|² to 10⁻¹⁰;
 ∫rP = CALCULUS's ⟨r⟩, an independent code path; the revival at LADDER's T_rev); the A(t) trace; the ellipsoid; a non-visual label per new picture"). Josh's dial
-(09:35): tight builds, features only, pre-1.0. Base: `yan-c` at the commit carrying the briefs after the v0.8.2-alpha cut (**TO FILL**); lines **TO FILL**; cap =
-lines × 1.01. Three rows, three Opus builders in parallel (disjoint seats in CALCULUS and one overlay); the integrator merges B1, B2, B3, light check, cut
+(09:35): tight builds, features only, pre-1.0. Base: `yan-c` at the commit carrying the briefs after the v0.8.2-alpha cut — the commit carrying this fill (its sha is in every launch message); lines **29,952**; cap
+**30,251** (× 1.01). Three rows, three Opus builders in parallel (disjoint seats in CALCULUS and one overlay); the integrator merges B1, B2, B3, light check, cut
 `v0.8.3-alpha` "Breath" — the last engine cut before 0.9.0 Certification.
 
 ## The shape (the law of this cut)
