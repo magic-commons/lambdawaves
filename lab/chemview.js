@@ -26,7 +26,7 @@
 import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip } from './mir/kit.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
-import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js';
+import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
 import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
@@ -248,6 +248,18 @@ export function createChem(host, api) {
   const rTda = el('div', 'row tight', more); rTda.appendChild(tdaSw.root); rTda.appendChild(coreSw.root);
   for (const n of [r2, fr, cv, cvCore, rr, note]) more.appendChild(n);
   const h2Note = el('div', 'note', more); h2Note.hidden = true;   // 0.6.2 H2: H₂'s hidden correlation, STO-3G only
+  /* 0.7.1 U2 · THE CURVE under it (lab/h2curve.js): RHF · UHF · FCI along R against 2E(H); STRETCH re-poses H₂'s nuclei at ±R/2 on z and re-solves by the ordinary road
+     (h2R null = the row's own geometry, byte for byte); METHOD UHF asks moleculeRHF for model 'uhf' (U1's arg); PROJECT `h2 { R, method }`, absent by default */
+  let h2R = null, h2M = 'rhf', h2T = null; const R0 = moleculeAtoms('H2')[1].z, h2Box = el('div', 'mol-h2', more), h2Cv = el('canvas', 'mol-c mol-curve', h2Box), h2Row = el('div', 'row tight', h2Box);
+  const h2Key = () => (preset === 'H2' && basis === 'sto-3g' ? (h2R ? '|' + h2R : '') + (h2M === 'uhf' ? '|uhf' : '') : ''), eh = (x) => x.toFixed(2).replace('-', '−');
+  function chemAtoms(id) { return moleculeAtoms(id, id === 'H2' && basis === 'sto-3g' ? h2R : null); }   // the card's own: shadows the module's export with the STRETCH's pose
+  const h2K = knob({ label: 'STRETCH', min: 0.8, max: 6, value: R0, title: 'R(H–H) in bohr: the two nuclei re-posed at ±R/2 on z and re-solved; the row’s own 0.741 Å by default', fmt: (v) => v.toFixed(2) + ' bohr',
+    onInput: (v) => { h2Read(v); }, onChange: (v) => { h2R = Math.abs(v - R0) < 5e-3 ? null : v; solve(preset); } });
+  const h2S = seg({ label: 'METHOD', value: 'rhf', options: [{ id: 'rhf', label: 'RHF', title: 'The stage solves RHF: one spatial orbital for both spins' }, { id: 'uhf', label: 'UHF', title: 'The stage asks for UHF: α and β free to part past the Coulson–Fischer point' }], onChange: (v) => { h2M = v; solve(preset); } });
+  const roH2 = readout({ label: 'THE H₂ CURVE · STO-3G', cls: 'wide', value: '—', sub: '' }); h2Row.append(h2K.root, h2S.root, roH2.root);
+  function h2Read(R = h2K.get()) { h2T = h2T || h2Curve(Array.from({ length: 53 }, (_, i) => +(0.8 + 0.1 * i).toFixed(1))); const p = h2Point(R);
+    roH2.set(`R ${R.toFixed(2)} bohr · RHF ${eh(p.rhf)} · UHF ${eh(p.uhf)} · FCI ${eh(p.fci)} Eh · S ${p.S.toFixed(2)} of ln 2 · ⟨S²⟩ ${p.s2.toFixed(2)}`);
+    roH2.setSub(`UHF leaves RHF at the Coulson–Fischer point, ${h2T.cf.toFixed(3)} bohr · S: the one-orbital entanglement entropy of the FCI state, ln 2 = 0.693 at the break`); drawCurve(h2Cv, h2T, R); }
   const probeLine = el('div', 'note', more); probeLine.hidden = true; probeLine.title = 'the electrons’ potential −Σ D_pq ⟨p|1/|r−R_A||q⟩ at each nucleus R_A (md.js rinvMatrix; PySCF int1e_rinv) — the ground state’s';   // 0.6.5 X1 THE PROBE
   const moreToggle = el('button', 'trig mol-more-toggle', rV); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
   chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
@@ -290,7 +302,7 @@ export function createChem(host, api) {
        its report on (atoms, basis, charge) and TRANSFERS that report's typed arrays, so a second chem.solve for the
        same key posts detached buffers, throws inside the worker's own handler, and never replies at all — the call
        then sits until its timeout.  Re-solving is what changing the molecule or the basis does; asking twice is not. */
-    const key = preset + '|' + basis + '|' + chemCharge(preset);
+    const key = preset + '|' + basis + '|' + chemCharge(preset) + h2Key();
     if (!force && sol && sol.key === key) { refresh(); if (back) status(back, 'warn'); return Promise.resolve(sol); }
     if (!force && pending && pending.key === key) return back ? pending.p.then((r) => { status(back, 'warn'); return r; }) : pending.p;   // …and one IN FLIGHT is the same answer
     setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null; if (vibOn) setVib(false);
@@ -300,7 +312,7 @@ export function createChem(host, api) {
        that cost the seconds.  Both replies are guarded by the same `solveSeq`: a reply for a molecule the hand has
        already left behind must not publish.  `solve()` itself resolves only when the roots are in, so every caller
        that awaits it (the gate included) still gets the whole answer. */
-    const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge, symmetry: P.symmetry, ...(P.multiplicity > 1 ? { multiplicity: P.multiplicity } : {}) };
+    const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge, symmetry: P.symmetry, ...(P.multiplicity > 1 ? { multiplicity: P.multiplicity } : {}), ...(/uhf$/.test(key) ? { model: 'uhf' } : {}) };   // 0.7.1: U1's multiplicity, U2's METHOD UHF on H₂
     const rec = P.records && P.records[basis];
     status(rec && (P.recordOnly || wantRef || have.get(rec.hash)) ? `opening ${P.name} from its record… ${P.nAO} AOs, ${P.nElectrons} electrons`
       : basis === 'sto-3g' ? `solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`
@@ -637,10 +649,10 @@ export function createChem(host, api) {
     const pr = (sol.probe || []).map((a) => a.sym + ' ' + a.phiEl.toFixed(2).replace('-', '−')), many = (t) => pr.filter((v) => v === t).length;   // THE PROBE: three or more alike are one ×n
     probeLine.hidden = !pr.length; probeLine.textContent = 'Φ at nuclei · ' + [...new Set(pr)].map((t) => (many(t) > 2 ? t + ' ×' + many(t) : Array(many(t)).fill(t).join(' · '))).join(' · ') + ' a.u. · exact';
     /* Slater–Condon: σg² and σu² differ by two orbitals, so the 1-RDM has no cross term and ±b share it; ⟨H⟩ differs by 4abK */
-    h2Note.hidden = !(preset === 'H2' && basis === 'sto-3g');
+    h2Box.hidden = h2Note.hidden = !(preset === 'H2' && basis === 'sto-3g');
     if (!h2Note.hidden && h2Note.dataset.k !== sol.key) {
       const A = chemAtoms(preset), R = Math.hypot(A[1].x - A[0].x, A[1].y - A[0].y, A[1].z - A[0].z), m = sto3gH2(R), a = m.ciVector[0], b = m.ciVector[3], K = m.gMO[5], d = 4 * Math.abs(a * b) * K;   // gMO[5] = (σgσu|σgσu)
-      h2Note.dataset.k = sol.key; h2Note.innerHTML = `<b>Hidden correlation.</b> Two states share one density and one current: <m>a|σg²⟩ + b|σu²⟩</m> and <m>a|σg²⟩ − b|σu²⟩</m> differ by two orbitals, so every one-body observable is blind to the sign of <m>ab</m>; their energies differ by <m>4|ab|K</m> = ${d.toFixed(4)} Eh — ${m.fci.toFixed(6)} (the full CI) and ${(m.fci + d).toFixed(6)} Eh, with a ${a.toFixed(4)}, b ${b.toFixed(4)}, K ${K.toFixed(4)} at R ${R.toFixed(4)} bohr (lab/h2ci.js).`;
+      h2Note.dataset.k = sol.key; h2Note.innerHTML = `<b>Hidden correlation.</b> Two states share one density and one current: <m>a|σg²⟩ + b|σu²⟩</m> and <m>a|σg²⟩ − b|σu²⟩</m> differ by two orbitals, so every one-body observable is blind to the sign of <m>ab</m>; their energies differ by <m>4|ab|K</m> = ${d.toFixed(4)} Eh — ${m.fci.toFixed(6)} (the full CI) and ${(m.fci + d).toFixed(6)} Eh, with a ${a.toFixed(4)}, b ${b.toFixed(4)}, K ${K.toFixed(4)} at R ${R.toFixed(4)} bohr (lab/h2ci.js).`; h2Read();
     }
     roE.set(sol.energy.toFixed(9), 'ok');
     const P = PRESET_BY_ID.get(preset) || {};
@@ -729,7 +741,7 @@ export function createChem(host, api) {
      M measured.  The reveal road is unchanged: graphHover's ResizeObserver on each canvas repaints once it has a size,
      and setActive(true) paints. */
   const shown = () => cv.isConnected && !cv.closest('[hidden], .dev.closed');
-  function paint() { if (!shown()) return; paintMain(); if (core) paintCore(); }
+  function paint() { if (!shown()) return; paintMain(); if (core) paintCore(); if (h2T && !h2Box.hidden) drawCurve(h2Cv, h2T, h2K.get()); }
   function paintMain() {
     const s = size(cv, g); if (!s) return;
     const { W, H } = s, L = 42, Rt = W - 8, Tp = 12;
@@ -881,7 +893,7 @@ export function createChem(host, api) {
     else if (on) solve(preset);
     return on;
   }
-  const presentation = () => ({ preset, basis, view, orbital, axis, kappa, speed, dt, integrator, tda, core, valence, on, ...(vibOn ? { vibrate: { mode: vibK, amp: vibAmp } } : {}), ...(pulse !== 'none' ? { pulse } : {}) });
+  const presentation = () => ({ preset, basis, view, orbital, axis, kappa, speed, dt, integrator, tda, core, valence, on, ...(vibOn ? { vibrate: { mode: vibK, amp: vibAmp } } : {}), ...(pulse !== 'none' ? { pulse } : {}), ...(preset === 'H2' && (h2R || h2M !== 'rhf') ? { h2: { R: h2R || R0, method: h2M } } : {}) });
   /* ── THE SAVED STATE, and the one place this window departs from its commission ──────────────────────────────
    * save() returns THE PRESENTATION ONLY, not lab/molecule-state.js's record.  Two reasons, both in the tree:
    *   · rack.js:5048's law — "Solver caches, traces, collisions, particles and pulse runs do not [belong to the
@@ -928,6 +940,8 @@ export function createChem(host, api) {
     let resolve = false;
     if (typeof o.preset === 'string' && PRESET_BY_ID.has(o.preset)) { if (o.preset !== preset) resolve = true; preset = o.preset; mSeg.set(preset); }
     if (typeof o.basis === 'string') { if (o.basis !== basis) resolve = true; basis = o.basis; bSeg.set(basis); }
+    const h2 = (preset === 'H2' && o.h2) || {}, nR = h2.R > 0 && Math.abs(h2.R - R0) >= 5e-3 ? Math.min(6, Math.max(0.8, h2.R)) : null, nM = h2.method === 'uhf' ? 'uhf' : 'rhf';   // 0.7.1 U2: absent = the row's R, RHF
+    if (nR !== h2R || nM !== h2M) { resolve = true; h2R = nR; h2M = nM; } h2K.set(h2R || R0); h2S.set(h2M);
     const L = o.library;                                                          // 0.4.0 S4a: the record this file names, fetched on open if absent
     wantRef = L && L.id === preset && /^[0-9a-f]{64}$/.test(L.hash) ? { id: L.id, hash: L.hash, nameKey: L.nameKey || null } : null;
     if (typeof o.view === 'string') { view = o.view; vSeg.set(view); }

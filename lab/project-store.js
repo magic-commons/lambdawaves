@@ -154,9 +154,9 @@ export function projectFileText(it) {
   return JSON.stringify({ lambdawaves: 'project', version: 1, path, folder, name, saved, opened, data, notebook }, null, 1);
 }
 
-/** the eight bundled demos, FOLDERS' read-only starters in DEMOS; each one's revision is its file's own `saved` stamp.  BUCKY (0.6.1 F1) points at
-    C₆₀'s record: the open fetches it when the device does not hold it, and offline MOLECULES offers its DOWNLOAD, as for any record-only molecule */
-export const STARTERS = Object.freeze([['wave-dancer', 'WAVE DANCER'], ['water', 'WATER'], ['benzene', 'BENZENE'], ['n2', 'N₂'], ['h2-sigma-u', 'H₂ σu'], ['helium', 'HELIUM'], ['chord', 'CHORD'], ['bucky', 'BUCKY']]
+/** the nine bundled demos, FOLDERS' read-only starters in DEMOS; each one's revision is its file's own `saved` stamp.  BUCKY (0.6.1 F1) points at
+    C₆₀'s record: the open fetches it when the device does not hold it, and offline MOLECULES offers its DOWNLOAD, as for any record-only molecule; BREAK (0.7.1 U2) is H₂ at R 5 bohr, METHOD UHF */
+export const STARTERS = Object.freeze([['wave-dancer', 'WAVE DANCER'], ['water', 'WATER'], ['benzene', 'BENZENE'], ['n2', 'N₂'], ['h2-sigma-u', 'H₂ σu'], ['helium', 'HELIUM'], ['chord', 'CHORD'], ['bucky', 'BUCKY'], ['break', 'BREAK']]
   .map(([file, name]) => Object.freeze({ file, name, folder: 'DEMOS' })));
 /** starterOf(spec, text) → a folders/seed.js starter from the demo file's text */
 export function starterOf(s, text) {
