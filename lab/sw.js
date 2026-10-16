@@ -418,7 +418,7 @@ const PRECACHE = [
   ['./vortex.js',                                                   'ac9be4da361b'],
   ['./well.js',                                                     'fb6041eac116'],
   ['./wigner.js',                                                   '668d13ce809c'],
-  ['./wignerview.js',                                               '4ad6c705d6c4'],
+  ['./wignerview.js',                                               '1c7aad8eea42'],
   ['./window-chrome.js',                                            'd9970bf0ad11'],
   ['./windows/film.js',                                             'ec2b5d6ecb4c'],
   ['./windows/kepler.js',                                           'f6649cbfdab0'],

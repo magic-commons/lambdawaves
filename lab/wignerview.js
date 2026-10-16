@@ -174,7 +174,7 @@ export function createWigner(host, api = {}) {
     return cache;
   }
   function say() {
-    if (!cache) { for (const r of [roPeak, roMin, roMax, roMs, roNeg]) r.set('—', 'warn'); return; }
+    if (!cache) { for (const r of [roPeak, roMin, roMax, roMs, roNeg]) r.set('—', 'warn'); roNeg.setSub('over the drawn slice, normalised to ∫W = 1'); return; }
     const C = cache;
     roPeak.set(C.peak.toFixed(7), 'live');
     roPeak.setSub(`a.u.⁻³ · 1s reference 0.0322515 · norm ${norm2.toFixed(6)}`);
