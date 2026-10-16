@@ -11,6 +11,34 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.7.4-alpha` — 2026-10-16
+
+Commit `6fb0dc5` · no new waves · 15 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `d415be0` 2026-10-15 — CHANGELOG for v0.7.3-alpha
+- `dc88903` 2026-10-15 — HANDOFF §2 + checkpoint 01:10: v0.7.3-alpha Kohn–Sham cut locally (tag 10a5ebb, snapshot 32);…
+- `b9a884f` 2026-10-15 — 0.8.0 Central Lab: G1 THE CENTRAL HAMILTONIAN + FIVE, G2 SQUEEZED + CAT, G3 INTER-SHELL STARK…
+- `f080f42` 2026-10-16 — 0.7.4 C1 (a)(b): THE CATALOGUE
+- `1c5813e` 2026-10-16 — 0.7.4 C1 (c)(d)(e): THE PICKER (SPECTRUM ‹ SYSTEM › over the catalogue, QUARKONIUM listed…
+- `6de4f80` 2026-10-16 — 0.7.4 C1: the facade fixture re-captured (+catalogue) and the build note
+- `f6b8e01` 2026-10-16 — merge C1 THE CATALOGUE + THE PICKER (6de4f80): tools/catalogue-table.mjs writes lab/catalogue.js…
+- `aab8115` 2026-10-16 — 0.8.1 Two Levels: BUILD-PLAN.md drafted while 0.7.4 builds (T1 BLOCH spin-½ · Rabi ·…
+- `d171168` 2026-10-16 — checkpoint 02:05: C1 merged f6b8e01; C2 running; 0.8.0 briefed, 0.8.1 drafted
+- `7b60189` 2026-10-16 — 0.8.1 Two Levels: T1 BLOCH, T2 THE BELL PAIR + MASS SCALING, T3 THE LATTICE PRESETS briefs…
+- `61553a9` 2026-10-16 — 0.8.2 Phase Space: BUILD-PLAN.md drafted while 0.7.4 C2 builds (P1 the oscillator's Wigner with…
+- `12668de` 2026-10-16 — 0.7.4 C2 THE SHELVES: SECTION's name opens THE SHELF (tiles: formula, name, AOs, the catalogue's…
+- `570f75c` 2026-10-16 — 0.7.4 C2: the tiles' AO and word on their own lines; the build note
+- `5bec206` 2026-10-16 — merge C2 THE SHELVES (570f75c): the SECTION name opens THE SHELF
+- `6fb0dc5` 2026-10-16 — 0.7.4-alpha Shelves: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.7.3-alpha` — 2026-10-15
 
 Commit `10a5ebb` · no new waves · 13 commits.
