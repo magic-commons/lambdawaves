@@ -11,6 +11,42 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.7.0-alpha` — 2026-10-15
+
+Commit `21f5c4f` · no new waves · 23 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `f1b7a31` 2026-10-15 — CHANGELOG for v0.6.6-alpha
+- `aced369` 2026-10-15 — HANDOFF §2 17:50: v0.6.6-alpha Ask Gemma cut locally (tag 291c419); seven local cuts today;…
+- `a3fa8dc` 2026-10-15 — checkpoint 18:00: seven local cuts v0.6.0–v0.6.6, tree clean, servers 9241/9443 up for Josh's…
+- `ca00472` 2026-10-15 — 0.7.0 base: atomsNow/dipoleNow on the MOLECULES card (the two accessors V1 poses and V2 reads),…
+- `d6563e7` 2026-10-15 — checkpoint 18:35: 0.7.0 Vibrate planned (BUILD-PLAN + V1/V2 briefs committed), base ca00472;…
+- `3777012` 2026-10-15 — HANDOFF §2 + checkpoint 19:11: 0.7.0 Vibrate building
+- `50a7dd2` 2026-10-15 — 0.7.1 Open Shells: BUILD-PLAN.md drafted while 0.7.0 builds (U1 UHF + the open shells + VIEW…
+- `bd86892` 2026-10-15 — 0.7.0 V2 THE SKELETON: beads, bonds and the dipole arrow on #skeleton; the SKELETON switch on…
+- `e693f71` 2026-10-15 — V1 (a): the normal modes' PySCF oracle and its fixture
+- `69caba0` 2026-10-15 — 0.7.0 V2: bonds within 1.3 x the covalent radii (1.2 drops F2, whose ratio is 1.24; the nearest…
+- `72b6427` 2026-10-15 — 0.7.0 V2: the build note (seats, the benzene shot and draw ms, the tables' sources, the…
+- `31a8c5c` 2026-10-15 — merge V2 THE SKELETON (72b6427): lab/skeleton.js
+- `fd734bf` 2026-10-15 — checkpoint 19:35: V2 merged 31a8c5c, locks 860/1004 green; the lock recipe spelled with --query…
+- `9dbf8b0` 2026-10-15 — V1 (b): the generator (tools/vibrate-library.mjs) and nine normal-mode records + the catalogue's…
+- `85e45f3` 2026-10-15 — V1 (c)(d)(e): m.vibrate on the catalogue's molecules; the session's pose(id, shells)
+- `c1bbc4d` 2026-10-15 — V1 (f): the VIBRATE row at the top of the fold
+- `eb32a56` 2026-10-15 — V1 (i): tests/vibrate.test.mjs
+- `e3cebf0` 2026-10-15 — V1 (h): the vibrate verb and the inventory's vibrating line
+- `6ff777a` 2026-10-15 — V1 (g): PULSES' oracle
+- `96c5f7f` 2026-10-15 — V1: the build note (V1-BUILD.md) and the precache after the last lab edit
+- `96219bf` 2026-10-15 — merge V1 THE MODES + PULSES (96c5f7f): the normal modes as a RECORD KIND
+- `999b47e` 2026-10-15 — 0.7.0 CHANGES-0.7.0.md (V1, V2 in plain words; the measured numbers; the lock ×2 green at…
+- `21f5c4f` 2026-10-15 — 0.7.0-alpha Vibrate: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.6.6-alpha` — 2026-10-15
 
 Commit `291c419` · no new waves · 10 commits.
