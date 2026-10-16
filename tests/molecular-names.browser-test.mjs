@@ -55,12 +55,13 @@ try {
      value still restores; a press on ATOM opens ATOMS, the periodic table (0.4.0 S3) */
   const ops = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]');
-    const btns = [...card('spectrum').querySelectorAll('.segw')].find(s => (s.querySelector('.k-lbl') || {}).textContent === 'OPERATOR').querySelectorAll('.seg-b');
-    const b = (label) => [...btns].find(x => x.textContent === label);
-    const quarkHidden = b('QUARKONIUM').hidden && getComputedStyle(b('QUARKONIUM')).display === 'none';
+    /* 0.7.4 C1: OPERATOR is the catalogue's ‹ SYSTEM › stepper; QUARKONIUM is listed DISABLED with its reason, a pick is the kit's list */
+    const sys = [...card('spectrum').querySelectorAll('.mir-step')].find(s => (s.querySelector('.k-lbl') || {}).textContent === 'SYSTEM');
+    const row = (id) => { if (!document.querySelector('.mir-pick-i')) sys.querySelector('.mir-step-name').click(); return document.querySelector('.mir-pick-i[data-id="' + id + '"]'); };
+    const quarkHidden = row('cornell').classList.contains('coming') && /0\.8\.0/.test(row('cornell').title); sys.querySelector('.mir-step-name').click();
     __LW.setHamiltonian('cornell'); await __LW.settle(); const cornellRestores = __LW.hamiltonian === 'cornell';
     __LW.setHamiltonian('hydrogen'); await __LW.settle();
-    const atomsHidden = card('atoms').classList.contains('closed') && !card('atoms').hidden; b('ATOM').click(); await __LW.settle();
+    const atomsHidden = card('atoms').classList.contains('closed') && !card('atoms').hidden; row('atom').click(); await __LW.settle();
     const atomsBack = !card('atoms').hidden && !card('atoms').classList.contains('closed'), op = __LW.hamiltonian;
     /* 0.4.0 S3: the Z stepper is a periodic table — 36 cells in 4 periods; a press puts the element in force and lights its cell */
     const A = card('atoms'); if (A.classList.contains('folded')) A.querySelector('.dev-fold').click(); await __LW.settle();
@@ -71,7 +72,7 @@ try {
     return { quarkHidden, cornellRestores, atomsHidden, atomsBack, op, table, errors: __e.slice() };
   `);
   assert.deepEqual(ops, { quarkHidden: true, cornellRestores: true, atomsHidden: true, atomsBack: true, op: 'atom', table: { cells: 36, periods: [2, 8, 8, 18], Z: 11, lit: ['Na'], stepper: false }, errors: [] });
-  console.log('PASS SPECTRUM\'s QUARKONIUM button is hidden (the cornell value still restores) and ATOM opens the closed ATOMS window; its periodic table (2 · 8 · 8 · 18 cells) puts Na in force and lights it');
+  console.log('PASS SPECTRUM\'s ‹ SYSTEM › lists QUARKONIUM disabled (the cornell value still restores) and ATOM opens the closed ATOMS window; its periodic table (2 · 8 · 8 · 18 cells) puts Na in force and lights it');
 
   const added = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]'), on = id => !card(id).classList.contains('closed') && !!card(id).closest('#rack, #rackL');

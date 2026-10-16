@@ -264,6 +264,11 @@ body.phone #badges { left: var(--sp-3); right: var(--sp-3); top: 44px; }
 #sheet h3 { margin: 0 0 6px; font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); color: var(--acc); }
 #sheet p { margin: 0 0 8px; }
 #sheet b { color: var(--fg); }
+/* 0.7.4 C1 · THE CATALOGUE under the prose (badges.js): the sheet scrolls, the table is the notebook's small type */
+#sheet { max-height: calc(100% - 72px); overflow: auto; }
+#sheet table { width: 100%; margin-top: 4px; border-collapse: collapse; font-size: var(--fs-tiny); line-height: 1.35; }
+#sheet th, #sheet td { padding: 2px 8px 2px 0; text-align: left; vertical-align: top; }
+#sheet th { font-weight: var(--w-bold); letter-spacing: var(--tr-wider); color: var(--acc); }
 /* WAVE 133 · THE OFFER'S PANE (lab/sw-client.js): the sheet's glass and typography, on the stage's centre under the badge row,
    with a caret pointing up at the build badge — no colour, material, animation or transition of its own.  The caret is a 10 px
    square in the pane's own background and border, turned 45° and clipped to its upper half so only the point shows above the

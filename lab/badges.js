@@ -9,10 +9,16 @@ import { el } from './mir/kit.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { BASIS } from './hydrogen.js';
 import { VIEW_NAMES, STYLE_NAMES } from './field.js';
+import { CATALOGUE } from './catalogue.js';
 
 export function createBadges({ dom, accept, field, reg, mat, clock, domain, quality, getSpace, stateReaders, ui }) {
   const B = dom.badges; B.innerHTML = '';
-  const sheetToggle = () => { dom.sheet.hidden = !dom.sheet.hidden; for (const b of B.querySelectorAll('.badge[aria-controls]')) b.setAttribute('aria-expanded', String(!dom.sheet.hidden)); };
+  /* 0.7.4 C1 · THE CATALOGUE on the MODEL sheet, under the prose, built on its first open: every system, its word, its oracle, the cut that brought it */
+  const catalogue = () => { const t = el('table', 'cat', dom.sheet), tb = el('tbody', '', t); let shelf = '';
+    el('tr', '', el('thead', '', t)).append(...['SYSTEM', 'STATUS', 'ORACLE', 'SINCE'].map((h) => el('th', '', null, h)));
+    for (const r of CATALOGUE) { if (r.shelf !== shelf) el('th', '', el('tr', 'cat-shelf', tb), (shelf = r.shelf).toUpperCase()).colSpan = 4;
+      const tr = el('tr', '', tb); for (const c of [r.name, r.word, r.oracle.what + ' · ' + r.oracle.test, r.since]) el('td', '', tr, c); } };
+  const sheetToggle = () => { dom.sheet.hidden = !dom.sheet.hidden; if (!dom.sheet.hidden && !dom.sheet.querySelector('table')) catalogue(); for (const b of B.querySelectorAll('.badge[aria-controls]')) b.setAttribute('aria-expanded', String(!dom.sheet.hidden)); };
   const mk = (cls, text, onClick) => { const b = el('button', 'badge ' + cls, B); b.type = 'button'; el('i', '', b); el('span', '', b, text);
     if (!onClick) { b.setAttribute('aria-controls', 'sheet'); b.setAttribute('aria-expanded', String(!dom.sheet.hidden)); }
     b.addEventListener('click', onClick || sheetToggle); return b; };
