@@ -543,9 +543,9 @@ export const UNDER_CAP = MOLECULES.filter((m) => !m.over);
 export const OVER_CAP = MOLECULES.filter((m) => m.over);
 export const SOLVABLE = MOLECULES.filter((m) => !m.disabled);
 
-/** the entry's atoms in bohr, as lab/rhf-molecule.js and the worker want them */
-export const moleculeAtoms = (id) => {
-  const m = MOLECULE_BY_ID.get(id) || MOLECULES[0];
+/** the entry's atoms in bohr, as lab/rhf-molecule.js and the worker want them; H₂ with an R (bohr) is re-posed at ±R/2 on z (0.7.1 U2, the CURVE's STRETCH) */
+export const moleculeAtoms = (id, R = null) => {
+  const m = MOLECULE_BY_ID.get(id) || MOLECULES[0]; if (id === 'H2' && R > 0) return [-R / 2, R / 2].map((z) => ({ Z: 1, x: 0, y: 0, z }));
   return m.ang.map(([Z, x, y, z]) => ({ Z, x: x * ANGSTROM, y: y * ANGSTROM, z: z * ANGSTROM }));
 };
 /** the entry's charge, which chem.solve needs beside the atoms */
