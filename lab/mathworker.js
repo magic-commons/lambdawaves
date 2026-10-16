@@ -34,7 +34,7 @@
  * with, and the number is falsifiable in both directions (issue a warm while hidden and it does not move; resume
  * and it does).
  */
-import { setHamiltonian, setZ, HAMILTONIANS } from './hamiltonian.js';
+import { setHamiltonian, setZ, setMu, HAMILTONIANS } from './hamiltonian.js';
 import { applyKickAlong, momentumZ, warmStep } from './kick.js';
 import { applyRotor } from './frontier.js';
 import { rotorsToZ } from './kick.js';
@@ -61,7 +61,7 @@ import { BASIS, radial } from './hydrogen.js';
 function configure(m) {
   if (m.radius) HAMILTONIANS.well.setRadius(m.radius);
   if (m.ham) setHamiltonian(m.ham);
-  if (m.Z) setZ(m.Z);
+  if (m.Z) setZ(m.Z); if (m.mu) setMu(m.mu);
 }
 /** ⟨p⟩ along a unit direction: the register carried to z by the two rotors, then Heisenberg's p_z (as rack.js pAlongDir) */
 function pAlong(re, im, d) {

@@ -26,7 +26,7 @@
  */
 import { dipoleMatrix, einsteinA, lifetime, coherentPower, pattern, vec3c, C_AU, MU_H, AU_S } from './radiation.js';
 import { BASIS } from './hydrogen.js';
-import { dipoleLines } from './dynamics.js';
+import { dipoleLines } from './dynamics.js'; import { getHamiltonian } from './hamiltonian.js';
 import { el, readout, graphHover, fitText, cssRGB, accentRGB } from './mir/kit.js';
 
 const HARTREE_EV = 27.211386245988;          // CODATA 2018
@@ -188,7 +188,7 @@ export function createRadiation(host, api = {}) {
     roPair.set(`${C.la}  →  ${C.lb}    Δm = ${C.dm}`, 'live');
     roPair.setSub(`${C.src} · |c₁|² ${C.w1.toFixed(4)} · |c₂|² ${C.w2.toFixed(4)} · norm ${C.norm2.toFixed(6)}`);
     roA.set(sci(C.A, 4) + ' s⁻¹', 'ok');
-    roA.setSub(`μ/m = ${MU_H.toFixed(9)} · ${sci(C.A / MU_H, 4)} s⁻¹ at infinite nuclear mass`);
+    roA.setSub(getHamiltonian().mass ? `${getHamiltonian().mass} is the Hamiltonian’s: A ∝ μ (ω³ ∝ μ³, |d|² ∝ μ⁻²)` : `μ/m = ${MU_H.toFixed(9)} · ${sci(C.A / MU_H, 4)} s⁻¹ at infinite nuclear mass`);
     roTau.set((C.tau * 1e9).toFixed(3) + ' ns');
     roTau.setSub(`${sci(C.tau, 4)} s · selected channel`);
     roLam.set(C.lambda.toFixed(0) + ' a₀  ·  ' + (C.lambda * A0_NM).toFixed(1) + ' nm');

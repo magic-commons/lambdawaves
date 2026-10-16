@@ -2,7 +2,7 @@
  * verbs are registered on app.w for the cards that read them (SPECTRUM, ORBIT, persist); keyState is read through app.sh; boot() destructures the rest. */
 import { TIER } from '../rack.js';
 import { VIEW, VIEW_NAMES, cameraBasis, toScreen } from '../field.js';
-import { getHamiltonian, setHamiltonian, HAMILTONIANS, getZ } from '../hamiltonian.js';
+import { getHamiltonian, setHamiltonian, HAMILTONIANS, getZ, getMu } from '../hamiltonian.js';
 import { keplerOrbits } from '../kepler.js'; import { createGas } from '../gas.js'; import { wellPacket } from '../well.js';
 import { momentumZ, rotorsToZ } from '../kick.js'; import { applyRotor as rotorOnCopy } from '../frontier.js';
 export function createKeplerSurface(app) {
@@ -61,7 +61,7 @@ export function createKeplerSurface(app) {
     if (!maths.ok || !(H.id === 'hydrogen' || H.id === 'qho')) { slapAlong(k, dir); return; }
     if (!reg.populated().length) reg.set(0, 1, 0, clock.t);
     const t0 = clock.t, v0 = reg.version, c = reg.at(t0), n0 = reg.norm2();
-    const r = await maths.call({ op: 'kick', re: c.re, im: c.im, k, d: dir, ham: H.id, Z: getZ() }, [c.re.buffer, c.im.buffer]);
+    const r = await maths.call({ op: 'kick', re: c.re, im: c.im, k, d: dir, ham: H.id, Z: getZ(), mu: getMu() }, [c.re.buffer, c.im.buffer]);
     if (!r || r.error) { slapAlong(k, dir); return; }
     if (reg.version !== v0 || getHamiltonian() !== H) { slapAlong(k, dir); return; }     // the state moved under the bow: slap what is there now, synchronously
     reg.setAnchorAt(r.re, r.im, t0);

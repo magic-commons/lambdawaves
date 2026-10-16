@@ -54,11 +54,37 @@ with Jordan–Wigner as the oracle.
   `lattice` verb takes the three names from the preset table; three catalogue rows (185; `--check` green); screenshots `.tmp/t3-walk-t40*.png` (σ² 469.10 vs
   468.63), `.tmp/t3-spin-chain*.png` (S(t) 1.6669 at t = 30). **Dropped:** the butterfly over Φ (a record, deferred); a chooser for the walk's coin or start site.
 
-## T2 · THE BELL PAIR + MASS SCALING
-(filled at T2's merge)
+## T2 · THE BELL PAIR + MASS SCALING (`lab/bloch-model.js` +12, `lab/bloch.js` +13, `lab/hamiltonian.js` +3 — one `scale()` under `setZ` and `setMu`, `lab/windows/spectrum.js` +5 the μ knob, `lab/rack.js` +1; in place: `radiation.js`, `radiationview.js`, `dynamics.js`, `calculus.js`, `informational.js`, `verbs.js`, `status.js`, `mathworker.js`, `windows/kepler.js`, `shell/facade.js`, `shell/persist.js`; branch `t2-bell-mass` tip `bc6cce0`; +34 of ≤ +45)
+- **BELL, BLOCH's second mode:** a ONE · PAIR seg in the first row; presets Φ⁺ · Φ⁻ · Ψ⁺ · Ψ⁻ · PRODUCT (|↑↑⟩); θ₀ and φ₀ turn qubit A alone (U ⊗ 1, through T1's
+  exponential split out as `su2`; T1's numbers unchanged). ENTANGLEMENT S_A prints "ln 2" or "0" (ρ_A and ρ_B in its sub): ln 2 for all four Bell states (|S − ln 2| = 0
+  in double), held to 1e-12 under five local rotations; PRODUCT 0 with both vectors of length 1. CHSH on the drawn axes "2√2 PREDICTION · ≤ 2 classical" beside the
+  best value over all axes 2√(2 − |r|²) (a brute-force search agrees to 1e-5); B's axes are signed to the preset, so every Bell preset reads 2√2 at θ₀ = 0 and a local
+  rotation lowers the drawn-axes number while S_A holds (a correction: Φ⁺'s optimal axes read 0 for Φ⁻). Two spheres A and B with faint measurement axes and the
+  reduced vectors at their real length |r| = √(1 − C²) (the plan's "1 − 2·mixedness" corrected) — a Bell pair shows no arrows, the note says why in one sentence.
+- **MASS SCALING:** a μ/mₑ knob beside Z on SPECTRUM with presets 1 · POSITRONIUM (½) · MUONIC H (185.84082 from m_μ = 206.7683 mₑ, m_p = 1836.15 mₑ); `hamiltonian.js`
+  has ONE `scale()` that `setZ` and the new `setMu` both call — lengths by k = Zμ, energies by Z²μ; at Z = 1, μ = 1 it hands back hydrogen's own functions (no scale
+  applied: the 12 members are the very same objects before and after a round trip, the kernel's half and tables byte-identical — asserted in the test; THE LOCK
+  is untouched). Refused under another operator with one sentence. **Persists:** `hamiltonian.mu` PROJECT beside Z, absent at 1; the STATUS line "HYDROGEN · μ = 0.5 mₑ
+  (positronium) · EXACT · …"; the inventory gains `mu` off 1. The proved powers: E ∝ μ, lengths ∝ 1/μ, the 1s–2p period ∝ 1/μ (33.51 a.u. at positronium vs
+  16.76), |d|² ∝ 1/μ², A ∝ μ (ω³ ∝ μ³ × |d|² ∝ μ⁻²) — A(2p₀ → 1s): ¹H 6.2649e8 · positronium 3.1342e8 · muonic H 1.1649e11 s⁻¹, the rate checks to 1e-12.
+- **Corrections to the brief, each a fix:** the Sturmian is NOT one of `setZ`'s seams (scaling it needs a rebuild at λ/μ, outside λ's 0.25–3 for muonic H) — STURMIAN
+  stands down at μ ≠ 1 as it does off hydrogen; `einsteinA` already multiplied by ¹H's reduced-mass 0.99946 (the μ¹ law at ¹H) and would have counted μ twice —
+  it now applies that factor only at μ = 1; the radial-integral caches in `dynamics.js` and `calculus.js` keyed on `H.Z` and would have served stale values — they key
+  on `H.k || H.Z || 1` (unchanged at μ = 1); INFORMATIONAL's repaint key includes μ (else a μ change never repaints the STATUS line); WIGNER, the theorem windows
+  and the beat equalizer (its table is written at μ = mₑ) stand down at μ ≠ 1, RADIATION stays live so the A ∝ μ rates can be seen. Behaviour change: `setZ(1)` after
+  an ion restores hydrogen's own functions rather than Z = 1 wrappers (values identical; a table object no longer carries an `expo` key).
+- **Checked:** `tests/bell.test.mjs` 6/6, `tests/mass.test.mjs` 7/7, bloch 7/7; hydrogen 37 · radiation 18 · period 11 · status green; rack-deps holds (SPECTRUM at 25,
+  `app` 30); new-project in step; serialize-bytes 22/22 identical against `15ae0b1` (full and edit); screenshots `.tmp/t2-bell-phip.png` (Φ⁺: "ln 2", "2√2"),
+  `.tmp/t2-positronium.png`. **Dropped:** μ in `lw:`/statelink links (a link opens at the reader's μ), μ in the export caption, a PAIR argument for the `bloch` verb,
+  time evolution of the pair.
 
 ## The light check (existing gates only) and the cut
-(filled at the cut)
+- Node gate 0 after each merge; `pwa --write`; `new-project --check` in step; `rack-deps --classes` holds (SPECTRUM 25, `app` 30 keys); bloch 7/7 · bell 6/6 · mass 7/7 ·
+  lattice-presets 4/4 · hydrogen · radiation · period · status · catalogue + `catalogue-table --check` (185 rows) green on the merged tree; serialize-bytes identical
+  at each row (T1 +80 B full for the one layout row); `tests/keyboard-window.browser-test.mjs` once on the merged tree (the + list gained BLOCH) GREEN; THE LOCK ×2
+  at the merge tip with `--query gastab=0` on BOTH runs: 860 values · 0 readback · 0 record-byte · 62 s, and the 1004-value fixture · 0 · 0 · 60 s (BLOCH closed, μ = 1,
+  the lattice presets untouched: the picture byte for byte).
+- **Lines:** 29,707 → 29,863 (+156 = T3 +36, T1 +84, T2 +34; cap 30,004). Merge order T3 `ed186fe`, T1 `15ae0b1`, T2 (this commit).
 
 ## Known, deferred (recorded)
 The first RU record (the pass's profile first); Hofstadter's full butterfly as a record; spin chains past N = 8 and the XXZ/Heisenberg chain (Bethe ansatz the

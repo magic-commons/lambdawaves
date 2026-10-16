@@ -20,7 +20,7 @@ export function statusOf({ owner = 'molecule', record = null, sol = null, oracle
   const lda = !!sol && sol.model === 'RKS LDA';   // 0.7.3 K2: the method leads the line and ∫ρ (the grid's own quadrature error) rides with the energy
   const join = (...a) => a.filter(Boolean).join(' · '), said = (word, caveat, head, geometry = null) => ({ word, line: join(lda && 'RKS LDA', label || (lda && view === 'density' ? '' : VIEW[view][0]), s2 && 'UHF ' + s2, word, caveat),
     head: join(s2 && `${s2} (exact ${S * (S + 1)})`, head), geometry });   // the line keeps the 110-character budget; the head has room for S(S+1)
-  if (owner === 'hydrogen') { const H = FIELD_LAW.hydrogen, p = `picture good to ${up(H.rms)} RMS (worst voxel ${up(H.worst)})`; label = label || 'HYDROGEN'; return said('EXACT', p, join('EXACT', p)); }
+  if (owner === 'hydrogen') { const H = FIELD_LAW.hydrogen, p = `picture good to ${up(H.rms)} RMS (worst voxel ${up(H.worst)})`; label = label || 'HYDROGEN'; return said('EXACT', p, join(label !== 'HYDROGEN' && label, 'EXACT', p)); }   // 0.8.1 T2: a reduced mass rides in the label
   if (owner === 'stark') { label = label || 'HYDROGEN + F·z'; return said('NUMERICAL', 'eigensolve in the n ≤ 6 basis · no continuum: ionisation said, not simulated', join('NUMERICAL', 'INTER-SHELL STARK · eigensolve in the n ≤ 6 basis')); }   // 0.8.0 G3
   if (owner !== 'molecule') return null;
   const o = oracle || (record && record.oracle) || null, st = record && record.status ? record.status.energy : o ? 'MEASURED' : 'UNKNOWN', word = STATE_WORD[st] || 'UNCHECKED';

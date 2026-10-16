@@ -104,7 +104,7 @@ export function createVerbs(app) {
     const sol = mol && c.solution(), live = sol && sol.key.replace(/\|(uhf|lda)$/, '') === c.preset() + '|' + c.basis + '|' + mol.charge ? sol : null, s = live && (live.stem || stemOf(live)), cs = mol && c.state(), st = mol ? c.said : statusOf({ owner: reg.P && reg.P.stark ? 'stark' : H.id });
     const ro = (r) => (r ? [...r.root.querySelectorAll('.ro-val, .ro-sub')].map((e) => e.textContent).filter(Boolean).join(' · ') : '');
     const P0 = reg.populated(), lbl = (a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]));
-    return { owner: mol ? 'MOLECULES' : H.label.split(/\s{2,}/)[0],
+    return { owner: mol ? 'MOLECULES' : H.label.split(/\s{2,}/)[0], ...(!mol && H.mass ? { mu: H.mass } : {}),
       molecule: mol && (live ? { formula: mol.formula.replace(/<\/?m>/g, ''), name: mol.name, basis: BASIS_LABEL[c.basis], E: +live.energy.toFixed(6), nocc: live.nocc, nAO: live.nAO, group: s.pointGroup, homo: s.homo,
         gapEh: +s.gapEh.toFixed(4), gapEv: +s.gapEv.toFixed(2), orbital: cs.orbitalName, head: st && st.head, ...(live.model ? { model: live.model, ...(live.model === 'UHF' ? { s2: +live.s2.toFixed(4) } : { exc: +live.exc.toFixed(6), intRho: +live.intRho.toFixed(6) }) } : {}) } : { formula: mol.formula.replace(/<\/?m>/g, ''), name: mol.name, solving: true }),
       status: st ? st.line : null, ...(mol && c.vibLine() ? { vibrating: 'vibrating ' + c.vibLine() } : {}),
