@@ -1,0 +1,4 @@
+# Trailer drafts are large (the 43 s draft is ~63 MB); they live on disk only. See steam/ASSETS.md §Trailer.
+*.mp4
+# SteamPipe logs and chunk cache (app_build.vdf "BuildOutput")
+steam/steampipe/output/

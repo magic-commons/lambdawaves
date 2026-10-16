@@ -1,5 +1,7 @@
 # Releasing λWAVES
 
+> **0.9.1 (2026-10-16):** the engine's cuts since v0.5.3 are local on `yan-c` (tags, CHANGELOG and snapshots, nothing pushed or deployed); pushing them, and so moving `main` and the live site, is Josh's decision (0.9.0's law). The rule below is September's and stands for that day.
+
 Two branches, two addresses, one rule: **`main` is what is live, and it only moves when a release is cut.**
 
 | Branch | Address | What it is |

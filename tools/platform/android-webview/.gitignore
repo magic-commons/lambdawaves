@@ -1,0 +1,8 @@
+# generated: Gradle state, build outputs, the synced bundle, the APK
+build/
+.gradle/
+app/build/
+app/src/main/assets/
+out/
+local.properties
+*.apk

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>λWAVES host probe</title>
+<!-- probe.html — what this WebView offers λWAVES. Self-contained; copy it beside index.html (tools/platform/ios/README.md). -->
+<style>
+:root{--bg:#f3f4f6;--card:#fff;--fg:#15181c;--mute:#5d6570;--line:#d7dbe0;--ok:#1b7a3a;--bad:#b3261e;--acc:#2456c9}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1014;--card:#161a20;--fg:#e8ebef;--mute:#98a1ac;--line:#2a3038;--ok:#5fcf85;--bad:#ff8a80;--acc:#8fb0ff}}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 -apple-system,system-ui,sans-serif}
+body{padding:calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left))}
+h1{font-size:19px;margin:4px 0 12px}h1 small{color:var(--mute);font-weight:400;font-size:13px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;align-items:center}
+.btn,button{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--acc);font:600 15px -apple-system,system-ui,sans-serif;padding:10px 14px;border-radius:10px;text-decoration:none;cursor:pointer}
+.btn.main{background:var(--acc);color:var(--card);border-color:var(--acc)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+td{padding:7px 10px;border-top:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}tr:first-child td{border-top:0}
+td:first-child{color:var(--mute);width:38%}.ok{color:var(--ok)}.bad{color:var(--bad)}
+#out,#note{color:var(--mute);font-size:13px}
+pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;font:12px/1.35 ui-monospace,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;-webkit-user-select:text}
+#sa{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#frame{position:fixed;inset:0;background:#000;z-index:9}#frame iframe{width:100%;height:100%;border:0;display:block}
+#hud{position:fixed;left:calc(8px + env(safe-area-inset-left));bottom:calc(8px + env(safe-area-inset-bottom));max-width:min(560px,80vw);background:rgba(0,0,0,.72);color:#e8ffe8;font:11px/1.35 ui-monospace,Menlo,monospace;white-space:pre-wrap;padding:6px 8px;border-radius:8px;pointer-events:none;z-index:10}
+#shut{position:fixed;right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));z-index:11;background:rgba(0,0,0,.72);color:#fff;border:0;padding:8px 12px}
+</style>
+</head>
+<body>
+<h1>λWAVES host probe <small id="ver"></small></h1>
+<div class="bar">
+  <a class="btn main" id="go" href="./index.html?sw=0&amp;warn=0">open the app</a>
+  <a class="btn" href="#app">app + readout</a>
+  <button id="copy" type="button">copy JSON</button>
+  <button id="share" type="button" hidden>share JSON</button>
+  <span id="out"></span>
+</div>
+<table id="rows"></table>
+<div class="bar">
+  <button id="dl" type="button">download test</button>
+  <input id="file" type="file" accept="application/json,.json" aria-label="file input test">
+  <span id="note"></span>
+</div>
+<pre id="json">running…</pre>
+<div id="sa"></div>
+<div id="frame" hidden><iframe id="app" title="λWAVES"></iframe><div id="hud"></div><button id="shut" type="button">× probe</button></div>
+<script>
+'use strict';
+const VERSION = 'probe 1 · 2026-09-24';
+const $ = (id) => document.getElementById(id);
+const R = { probe: VERSION, at: new Date().toISOString(), errors: [] };
+addEventListener('error', (e) => R.errors.push('ERR ' + e.message));
+addEventListener('unhandledrejection', (e) => R.errors.push('REJ ' + String(e.reason && e.reason.message || e.reason)));
+const msg = (e) => String(e && e.message || e);
+const within = (p, ms, what) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error(what + ': no answer in ' + ms + ' ms')), ms))]);
+
+function env() {
+  const s = getComputedStyle($('sa'));
+  R.env = { userAgent: navigator.userAgent, isSecureContext: window.isSecureContext, origin: location.origin, href: location.href,
+    serviceWorker: 'serviceWorker' in navigator, coarse: matchMedia('(hover: none) and (pointer: coarse)').matches,
+    viewport: { w: innerWidth, h: innerHeight, dpr: devicePixelRatio, screen: [screen.width, screen.height] },
+    safeArea: { top: s.paddingTop, right: s.paddingRight, bottom: s.paddingBottom, left: s.paddingLeft },
+    clipboard: !!(navigator.clipboard && navigator.clipboard.writeText), share: !!navigator.share,
+    microphoneApi: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia), crossOriginIsolated: !!window.crossOriginIsolated };
+}
+
+async function gpu() {
+  const g = { present: !!navigator.gpu };
+  if (!g.present) return g;
+  try {
+    const a = await within(navigator.gpu.requestAdapter({ powerPreference: 'high-performance' }), 8000, 'requestAdapter');
+    if (!a) { g.adapter = null; return g; }
+    const i = a.info || (a.requestAdapterInfo ? await a.requestAdapterInfo() : {}) || {};
+    g.adapter = { vendor: i.vendor, architecture: i.architecture, device: i.device, description: i.description };
+    g.fallback = a.isFallbackAdapter !== undefined ? a.isFallbackAdapter : (i.isFallbackAdapter !== undefined ? i.isFallbackAdapter : null);
+    g.features = [...a.features].sort();
+    g.shaderF16 = a.features.has('shader-f16');
+    g.limits = { maxTextureDimension3D: a.limits.maxTextureDimension3D, maxStorageBufferBindingSize: a.limits.maxStorageBufferBindingSize,
+      maxComputeWorkgroupStorageSize: a.limits.maxComputeWorkgroupStorageSize };
+    g.preferredFormat = navigator.gpu.getPreferredCanvasFormat();
+    const d = await within(a.requestDevice(), 8000, 'requestDevice');
+    g.device = !!d; if (d && d.destroy) d.destroy();
+  } catch (e) { g.error = msg(e); }
+  return g;
+}
+
+function ping(make, send, good, ms) {
+  return new Promise((done) => {
+    let w; const end = (r) => { clearTimeout(t); try { w && w.terminate(); } catch (_) {} done(r); };
+    const t = setTimeout(() => end({ ok: false, error: 'no answer in ' + ms + ' ms' }), ms);
+    try { w = make(); } catch (e) { return end({ ok: false, error: 'construct: ' + msg(e) }); }
+    w.onmessage = (e) => end({ ok: good(e.data), reply: typeof e.data === 'object' && e.data ? Object.keys(e.data).slice(0, 6) : e.data });
+    w.onerror = (e) => { if (e.preventDefault) e.preventDefault(); end({ ok: false, error: 'error event: ' + (e.message || 'load failed') }); };
+    w.postMessage(send);
+  });
+}
+
+async function workers() {
+  const src = URL.createObjectURL(new Blob(['self.onmessage = (e) => self.postMessage(e.data * 2);'], { type: 'text/javascript' }));
+  const blob = await ping(() => new Worker(src, { type: 'module' }), 21, (d) => d === 42, 4000);
+  URL.revokeObjectURL(src);
+  const rel = await ping(() => new Worker('./mathworker.js', { type: 'module' }), { id: 1, op: 'stat' }, (d) => !!d && d.ok === true, 10000);
+  return { blobModule: blob, relativeModule: rel };
+}
+
+async function get(path) {
+  try {
+    const r = await within(fetch(path, { cache: 'no-store' }), 6000, 'fetch');
+    const t = await r.text();
+    return { ok: r.ok, status: r.status, type: r.headers.get('content-type'), bytes: t.length };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+async function storage() {
+  const s = {};
+  try {
+    const k = 'lw.hostprobe.visits', n = (parseInt(localStorage.getItem(k) || '0', 10) || 0) + 1;
+    localStorage.setItem(k, String(n));
+    s.visits = n; s.readBack = localStorage.getItem(k) === String(n); s.keys = localStorage.length;
+    s.appSettingsBytes = (localStorage.getItem('lambdawaves.q0.settings') || '').length;
+    s.appProjectsBytes = (localStorage.getItem('lambdawaves.q0.projects') || '').length;
+  } catch (e) { s.error = msg(e); }
+  try { if (navigator.storage && navigator.storage.persisted) s.persistedApi = await navigator.storage.persisted(); } catch (e) { s.persistedApi = 'error: ' + msg(e); }
+  return s;
+}
+
+const yes = (v) => (v ? 'ok' : 'bad');
+const sv = (v) => (v === undefined || v === null ? '—' : String(v));
+function rows() {
+  const g = R.gpu || {}, w = R.workers || {}, s = R.storage || {}, e = R.env, L = g.limits || {};
+  const list = [
+    ['isSecureContext', String(e.isSecureContext), yes(e.isSecureContext)],
+    ['origin', e.origin + '  (' + location.protocol + ')', ''],
+    ['navigator.gpu', String(g.present), yes(g.present)],
+    ['adapter', g.adapter ? [g.adapter.vendor, g.adapter.architecture, g.adapter.description].filter(Boolean).join(' · ') || '(no info strings)' : (g.error || 'none'), yes(g.adapter)],
+    ['fallback adapter?', sv(g.fallback), g.fallback ? 'bad' : ''],
+    ['device', g.device ? 'created' : (g.error || '—'), yes(g.device)],
+    ['shader-f16', sv(g.shaderF16), ''],
+    ['limits 3D · storage · wg', [L.maxTextureDimension3D, L.maxStorageBufferBindingSize, L.maxComputeWorkgroupStorageSize].map(sv).join(' · '), ''],
+    ['module worker (blob)', w.blobModule ? (w.blobModule.ok ? 'answered' : w.blobModule.error) : '…', yes(w.blobModule && w.blobModule.ok)],
+    ['module worker ./mathworker.js', w.relativeModule ? (w.relativeModule.ok ? 'answered' : w.relativeModule.error) : '…', yes(w.relativeModule && w.relativeModule.ok)],
+    ['fetch manifest', R.fetchManifest ? (R.fetchManifest.ok ? R.fetchManifest.status + ' · ' + R.fetchManifest.bytes + ' B' : R.fetchManifest.error || 'HTTP ' + R.fetchManifest.status) : '…', yes(R.fetchManifest && R.fetchManifest.ok)],
+    ['fetch Wave Dancer demo', R.fetchDemo ? (R.fetchDemo.ok ? R.fetchDemo.status + ' · ' + R.fetchDemo.bytes + ' B' : R.fetchDemo.error || 'HTTP ' + R.fetchDemo.status) : '…', yes(R.fetchDemo && R.fetchDemo.ok)],
+    ['localStorage', s.error ? s.error : 'visit #' + s.visits + (s.visits > 1 ? ' (persisted)' : ' (first visit)') + ' · ' + s.keys + ' keys', s.error ? 'bad' : (s.visits > 1 ? 'ok' : '')],
+    ['app settings / projects', (s.appSettingsBytes || 0) + ' B / ' + (s.appProjectsBytes || 0) + ' B', ''],
+    ['serviceWorker API', String(e.serviceWorker), ''],
+    ['coarse pointer', String(e.coarse), ''],
+    ['viewport', e.viewport.w + ' × ' + e.viewport.h + ' @' + e.viewport.dpr + '  screen ' + e.viewport.screen.join(' × '), ''],
+    ['safe area t r b l', [e.safeArea.top, e.safeArea.right, e.safeArea.bottom, e.safeArea.left].join(' '), ''],
+    ['page errors', String(R.errors.length) + (R.errors.length ? ' · ' + R.errors[R.errors.length - 1] : ''), R.errors.length ? 'bad' : 'ok'],
+  ];
+  const t = $('rows'); t.textContent = '';
+  for (const [k, v, c] of list) { const tr = t.insertRow(); tr.insertCell().textContent = k; const td = tr.insertCell(); td.textContent = v; if (c) td.className = c; }
+  $('json').textContent = JSON.stringify(R, null, 1);
+}
+
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return 'copied'; } catch (_) {}
+  const t = document.createElement('textarea'); t.value = text; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(t); t.select(); t.setSelectionRange(0, text.length);
+  let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
+  t.remove(); return ok ? 'copied (fallback)' : 'copy failed: select the JSON block by hand';
+}
+
+/* the app's own export road (rack.js): a detached <a download> of a JSON blob, revoked after 2 s */
+function downloadTest() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(R, null, 1)], { type: 'application/json' }));
+  a.download = 'lw-probe-' + Date.now() + '.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  $('note').textContent = 'download requested: did a share sheet or a Files save appear?';
+}
+
+/* #app: the real index.html in a frame, with __LW read out every 500 ms (same origin only) */
+let last = null, timer = 0;
+const f2 = (v) => (typeof v === 'number' && isFinite(v) ? v.toFixed(2) : '—');
+function hud() {
+  let s;
+  try {
+    const w = $('app').contentWindow, L = w.__LW, errs = w.__e || [];
+    if (!L) s = 'booting… (__LW not there yet)';
+    else {
+      const b = L.background || {}, m = b.mark, k = b.back, fr = L.stats ? L.stats.frames : NaN, now = performance.now();
+      const fps = last && now > last.t ? (fr - last.f) * 1000 / (now - last.t) : NaN; last = { f: fr, t: now };
+      s = 'ready ' + L.ready + ' · field.ok ' + !!(L.field && L.field.ok) + ' · sw ' + (L.sw && L.sw.mode) + '\n'
+        + 'clock.t ' + f2(L.clock && L.clock.t) + ' · frames ' + fr + ' · fps ' + (isFinite(fps) ? fps.toFixed(0) : '—') + '\n'
+        + 'hides ' + b.parks + ' · returns ' + b.resumes + ' · away ' + f2((b.hiddenMs || 0) / 1000) + ' s\n'
+        + 'clock.t at hide ' + f2(m && m.t) + ' · at return ' + f2(k && k.t) + ' · Δ ' + (m && k ? f2(k.t - m.t) : '—') + '\n'
+        + 'errors ' + errs.length + (errs.length ? ' · ' + String(errs[errs.length - 1]).slice(0, 160) : '');
+    }
+  } catch (e) { s = 'frame not readable: ' + msg(e); }
+  $('hud').textContent = s;
+}
+function route() {
+  const on = location.hash === '#app';
+  $('frame').hidden = !on; clearInterval(timer); last = null;
+  if (on) { $('app').src = './index.html?sw=0&warn=0'; timer = setInterval(hud, 500); hud(); }
+  else if ($('app').src) $('app').src = 'about:blank';   // closing the readout unloads the framed app
+}
+
+async function main() {
+  $('ver').textContent = VERSION;
+  env(); rows();
+  R.storage = await storage(); rows();
+  R.gpu = await gpu(); rows();
+  R.workers = await workers(); rows();
+  R.fetchManifest = await get('./manifest.webmanifest');
+  R.fetchDemo = await get('./demos/wave-dancer.lambdawaves.json'); rows();
+  R.done = true; rows();
+}
+
+$('copy').onclick = async () => { $('out').textContent = await copyText(JSON.stringify(R, null, 1)); };
+if (navigator.share) { $('share').hidden = false; $('share').onclick = () => navigator.share({ title: 'λWAVES probe', text: JSON.stringify(R, null, 1) }).catch((e) => { $('out').textContent = msg(e); }); }
+$('dl').onclick = downloadTest;
+$('file').onchange = (e) => { const f = e.target.files && e.target.files[0]; $('note').textContent = f ? 'chose ' + f.name + ' · ' + f.size + ' B · ' + (f.type || 'no type') : 'nothing chosen'; };
+$('shut').onclick = () => { location.hash = ''; };
+addEventListener('hashchange', route);
+addEventListener('resize', () => { env(); rows(); });
+route();
+main().catch((e) => { R.errors.push('PROBE ' + msg(e)); rows(); });
+</script>
+</body>
+</html>

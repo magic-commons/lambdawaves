@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lw_bg">#070A0F</color>
+    <!-- edge-to-edge, no action bar, dark field colour behind the WebView (no white flash) -->
+    <style name="LW" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/lw_bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
+    </style>
+</resources>

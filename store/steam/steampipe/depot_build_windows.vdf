@@ -1,0 +1,14 @@
+// depot_build_windows.vdf — the Windows x64 depot: the packaged Electron host exactly as tools/platform/electron/package.mjs wrote it.
+// ContentRoot = the main checkout's build output (out/ is gitignored; run `cd tools/platform/electron && npm ci && npm run package` there first).
+"DepotBuild"
+{
+	"DepotID" "<DEPOTID_WIN>"
+	"ContentRoot" "/home/joshua-hosain/Documents/LAMBDAWAVES/tools/platform/electron/out/lambdawaves-desktop-win32-x64/"
+	"FileMapping"
+	{
+		"LocalPath" "*"	// everything: lambdawaves-desktop.exe, resources/ (app.asar + dist/), LICENSE, LICENSES.chromium.html, the DLLs
+		"DepotPath" "."
+		"Recursive" "1"
+	}
+	// M3 adds SOURCE.md beside LICENSE (GPL corresponding-source notice); it is picked up by the "*" above, no edit needed.
+}

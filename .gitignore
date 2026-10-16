@@ -22,4 +22,8 @@ dist/
 *.p12
 *.pfx
 __pycache__/
-\nresearch/device-reports/inbox/\n
+research/device-reports/inbox/
+# 0.9.1 H1: the platform shells' build output (from worktree-hosts-m0; the shells moved under tools/platform/).
+tools/platform/electron/out/
+# Store trailer/screenshot raw material (21 MB of .mkv), kept beside the repo, never in it.
+LANDING PAGE VIDEOS/

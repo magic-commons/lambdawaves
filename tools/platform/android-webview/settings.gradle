@@ -1,0 +1,2 @@
+rootProject.name = 'lambdawaves-webview'
+include ':app'
