@@ -410,7 +410,7 @@ body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
    two columns on the card and three floating, and OUT of LEAN: the tiles are the window, not its commentary */
 .calc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .dev.floating .calc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.dev.lean .dev-body .calc-grid > .ro { display: flex; }
+.dev.lean .dev-body .calc-grid > .ro, .dev.lean .dev-body .ro.calc-ray { display: flex; }
 .calc-ray { margin-top: 6px; } .calc-ray canvas { display: block; width: 100%; height: 56px; margin-top: 4px; }   /* 0.8.2 P3: ψ ALONG A RAY */
 /* MO-REGISTRY (registerview.js + statesview.js): keep the stable reg-* hooks used by both modes. */
 .reg-mode { margin-bottom: var(--sp-2); }

@@ -42,7 +42,7 @@ export function createSkeleton(cv) {
     g.beginPath(); g.moveTo(q[0], q[1]); g.lineTo(bx - 3.5 * uy, by + 3.5 * ux); g.lineTo(bx + 3.5 * uy, by - 3.5 * ux); g.closePath(); g.fill(); } }
     if (!bead) return; const B = trail.map((r) => S.at(r[0], r[1], r[2])).filter(Boolean), b = S.at(bead.r[0], bead.r[1], bead.r[2]); g.strokeStyle = g.fillStyle = acc; g.lineWidth = 1.5; g.lineCap = 'round';   // THE BEAD, after the skeleton
     for (let i = 1; i < B.length; i++) { g.globalAlpha = 0.85 * i / B.length; g.beginPath(); g.moveTo(B[i - 1][0], B[i - 1][1]); g.lineTo(B[i][0], B[i][1]); g.stroke(); }
-    if (b) { g.globalAlpha = b[2] > zc ? 0.55 : 1; g.beginPath(); g.arc(b[0], b[1], 5, 0, 2 * Math.PI); g.fill(); g.strokeStyle = ink; g.lineWidth = 1; g.stroke(); }
+    if (b) { g.globalAlpha = b[2] > zc ? 0.8 : 1; g.beginPath(); g.arc(b[0], b[1], 6, 0, 2 * Math.PI); g.fill(); g.strokeStyle = ink; g.lineWidth = 1; g.stroke(); }
   }
   return { draw, clear };
 }
