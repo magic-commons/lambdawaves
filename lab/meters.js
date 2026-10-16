@@ -1,7 +1,7 @@
 /* meters.js — METERS: norm, ⟨E⟩, autocorrelation, active modes, logical time, the badge (§10.6), the picture's f16 FLOOR. */
 import { AU_TIME_AS, HARTREE_EV } from './hydrogen.js';
 import { el, readout } from './mir/kit.js';
-import { FIELD_LAW as L } from './status.js';
+import { FIELD_LAW as L } from './status.js'; import { SQUEEZE } from './kick.js';
 
 export function createMeters(host) {
   const grid = el('div', 'meters', host);
@@ -32,7 +32,7 @@ export function createMeters(host) {
     rates.set(`${m.fps.toFixed(0)} · ${m.reconPerSec.toFixed(0)} · ${m.stepsPerSec.toFixed(0)} Hz`, m.playing ? 'live' : '');
     rates.setSub(m.scheduled ? 'scheduled' : 'IDLE · zero work');
     tier.set(m.lastTier); tier.setSub(`P ${m.tiers.PRESENT} · R ${m.tiers.RECONSTRUCT} · E ${m.tiers.EVOLVE} · B ${m.tiers.REBUILD}`);
-    status.set(m.status, m.rendered < m.populated ? 'warn' : 'ok');
+    status.set(m.status, m.rendered < m.populated ? 'warn' : 'ok'); if (SQUEEZE.said) status.setSub(SQUEEZE.said);   // 0.8.0 G2: the last squeeze, its variance error beside its lost norm
     if (m.profile) {
       const p = m.profile, win = p.spectrum + p.shadow + p.orbit + p.slice + p.meters;
       prof.set(`${p.total.toFixed(2)} · ${p.field.toFixed(2)} · ${win.toFixed(2)}`, p.total < 8.3 ? 'ok' : 'warn');

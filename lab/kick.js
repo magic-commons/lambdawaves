@@ -22,6 +22,7 @@ import { getHamiltonian } from './hamiltonian.js';
 import { sphericalBessel } from './bessel.js';
 import { applyRotor } from './frontier.js';
 import { angularDipoleZ, radialDipole } from './dynamics.js';
+import { qhoTableFor, qhoFromTable } from './qho.js';
 
 const N = 91, LMAX = 10;
 export { sphericalBessel };                                   // lives in bessel.js (shared with the well; no import cycle)
@@ -193,3 +194,25 @@ export function momentumZ(re, im, ids) {
 }
 /** how much of the state the slap knocked out of the register */
 export function escaped(norm2Before, norm2After) { return norm2Before > 0 ? 1 - norm2After / norm2Before : 0; }
+/* THE SQUEEZE (0.8.0 G2), the OSCILLATOR's: S(r) = e^{r(a_z² − a_z†²)/2}, (Sψ)(x, y, z) = e^{r/2} ψ(x, y, e^r z), so Var(z) ↦ e^{−2r} Var(z).  At fixed ρ a register
+ * orbital is a polynomial of degree ≤ 10 in z times e^{−z²/2}, EXACTLY in span{h_0 … h_10(z)}: P_a[n](ρ) is built once (trapezoid in z and in u, ρ = ln(1 + e^u)),
+ * S_ab = 2π∫ρdρ Σ P_a[n] S1[n][n′] P_b[n′] with S1 = ⟨n|S|n′⟩ of the infinite operator — unitary on the product basis h_n ⊗ (2-D oscillator), not on n ≤ 6: `escaped` reads the loss. */
+export const SQUEEZE_REFUSAL = 'OSCILLATOR only: a squeeze needs the ladder a_z of −½∇² + ½r², which a Coulomb, a well or an atom does not have', SQUEEZE = { said: '' };   // said: METERS' line
+const SZ = Float64Array.from({ length: 121 }, (_, k) => (k - 60) * 0.15), NU = 120, RU = Array.from({ length: NU }, (_, j) => -14 + j * 0.2), RHO = RU.map((u) => Math.log1p(Math.exp(u))), WR = RU.map((u, j) => RHO[j] * 0.2 / (1 + Math.exp(-u)));
+const hermite = (zs, nmax) => { const H = [zs.map((z) => Math.PI ** -0.25 * Math.exp(-z * z / 2))]; for (let n = 0; n < nmax; n++) H.push(zs.map((z, k) => Math.sqrt(2 / (n + 1)) * z * H[n][k] - (n ? Math.sqrt(n / (n + 1)) * H[n - 1][k] : 0))); return H; };
+/** ⟨n|S(r)|n′⟩ for n, n′ ≤ nmax: e^{r/2} ∫ h_n(z) h_n′(e^r z) dz on the grid zs */
+export function squeeze1D(r, nmax = 10, zs = SZ) { const A = hermite(zs, nmax), B = hermite(zs.map((z) => z * Math.exp(r)), nmax), f = (zs[1] - zs[0]) * Math.exp(r / 2); return A.map((a) => B.map((b) => f * a.reduce((s, v, k) => s + v * b[k], 0))); }
+let SQP = null, SQM = null;   // the r-independent projections; the last S(r) built
+export function squeezeMatrix(r) {
+  if (SQM && SQM.r === r) return SQM.M;
+  if (!SQP) { const H = hermite(SZ, 10); SQP = BASIS.map((s) => { const T = qhoTableFor(s), P = H.map(() => new Float64Array(NU)); for (let j = 0; j < NU; j++) for (let k = 0; k < SZ.length; k++) { const f = qhoFromTable(T, RHO[j], 0, SZ[k]).re * 0.15; for (let n = 0; n <= 10; n++) P[n][j] += H[n][k] * f; } return P; }); }
+  const S1 = squeeze1D(r), M = new Float64Array(N * N), Q = SQP.map((P) => S1.map((row) => P[0].map((_, j) => row.reduce((s, v, p) => s + v * P[p][j], 0))));
+  for (let a = 0; a < N; a++) for (let b = 0; b < N; b++) if (BASIS[a].m === BASIS[b].m) { let s = 0; for (let j = 0; j < NU; j++) for (let n = 0; n <= 10; n++) s += WR[j] * SQP[a][n][j] * Q[b][n][j]; M[a * N + b] = 2 * Math.PI * s; }
+  SQM = { r, M }; return M; }
+/** c ↦ S(r) c in place along an axis (x and y: the z-squeeze between the slap's rotors); REFUSED off the OSCILLATOR */
+export function applySqueeze(re, im, r, axis = 'z') {
+  if (getHamiltonian().id !== 'qho') throw new Error(SQUEEZE_REFUSAL);
+  const R = AXIS_TO_Z[axis], M = squeezeMatrix(r), turn = (s) => R && applyRotor(re, im, { which: 'both', axis: R.axis, angle: s * R.angle });
+  turn(1); const c = [Float64Array.from(re), Float64Array.from(im)];
+  for (const [i, out] of [re, im].entries()) for (let a = 0; a < N; a++) { let s = 0; for (let b = 0; b < N; b++) s += M[a * N + b] * c[i][b]; out[a] = s; }
+  turn(-1); }

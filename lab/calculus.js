@@ -13,12 +13,16 @@
  *   the moments       d⟨L_z⟩/dt = 0, d⟨L²⟩/dt = 0 (a central H; the Stark field mixes l), and ⟨r⟩ (0.4.0 S3, from DYNAMICS)
  */
 import { BASIS } from './hydrogen.js';
-import { angularDipoleZ, radialDipole, dipoleZ, radialObservables, angularMoments } from './dynamics.js';
+import { angularDipoleZ, radialDipole, dipoleZ, radialObservables, angularMoments, radialMoment } from './dynamics.js';
 import { momentumZ } from './kick.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { wellNorm, wellK, wellZ, wellRadius } from './well.js';
 import { sphericalBessel } from './bessel.js';
 
+/** Var(z) = ⟨z²⟩ − ⟨z⟩² per unit norm (0.8.0 G2), exact within the register: ⟨a|z²|b⟩ = δ_m Σ_{l″ = l_b ± 1} ⟨l_a|cos θ|l″⟩⟨l″|cos θ|l_b⟩ · ∫R_a r² R_b r² dr */
+export function varianceZ(re, im, ids = BASIS.map((s) => s.index)) { let s = 0, n2 = 0; const cos2 = (A, B) => [B.l - 1, B.l + 1].reduce((t, l) => t + angularDipoleZ(A.l, A.m, l, B.m) * angularDipoleZ(l, B.m, B.l, B.m), 0);
+  for (const a of ids) { n2 += re[a] * re[a] + im[a] * im[a]; for (const b of ids) { const A = BASIS[a], B = BASIS[b], c = A.m === B.m ? cos2(A, B) : 0; if (c) s += (re[a] * re[b] + im[a] * im[b]) * c * radialMoment(2, A.n, A.l, B.n, B.l); } }
+  const z = dipoleZ(re, im, ids).value; return n2 > 0 ? s / n2 - z * z : 0; }
 const FCACHE = new Map();
 /** ∫₀^∞ R_{n′l′} R_{nl} dr — the radial part of ⟨z/r³⟩ (z/r³ = cos θ / r²): NUMERICAL, cached per Hamiltonian */
 export function radialForce(np_, lp, n, l) {
@@ -91,6 +95,7 @@ export function stats(reg, t, h = 1e-3) {
     tex: { name: '\\langle L^{2}\\rangle', law: Fz ? null : '\\frac{d}{dt}\\langle L^{2}\\rangle = 0', why: 'the Stark field mixes $l$' } });
   rows.push({ name: '⟨r⟩', formula: 'Σ c_a*c_b ⟨a|r|b⟩ (l = l′, m = m′)', value: ro.r, law: `⟨1/r⟩ = ${ro.rinv.toFixed(5)}`, predicted: NaN, residual: null, unit: H.lengthUnit, group: 'moment',
     tex: { name: '\\langle r\\rangle', note: `$\\langle 1/r\\rangle = ${texNum(ro.rinv)}$` } });
+  rows.push({ name: 'Var(z)', formula: '⟨z²⟩ − ⟨z⟩²', value: varianceZ(c.re, c.im, ids), law: 'a squeeze S(r) takes it to e^{−2r}·Var(z)', predicted: NaN, residual: null, unit: '', group: 'moment', tex: { name: '\\langle z^{2}\\rangle - \\langle z\\rangle^{2}' } });
   return { t, h, rows, ids: ids.length };
 }
 
