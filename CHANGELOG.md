@@ -11,6 +11,37 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.7.2-alpha` — 2026-10-15
+
+Commit `9856c4b` · no new waves · 18 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `a0df827` 2026-10-15 — CHANGELOG for v0.7.1-alpha
+- `22d1e66` 2026-10-15 — 0.7.2 L0: absorb.js's three test-only roads (fieldFreeTrace, integrate, kickSpectrum) move to…
+- `a8a138e` 2026-10-15 — 0.7.2 Lattice: base and cap filled after L0, L1-BRIEF.md and L2-BRIEF.md
+- `052f564` 2026-10-15 — 0.7.2 L0 fix: the moved roads carry absorb.js's local helper(s) they call; node gate 0
+- `625c6c9` 2026-10-15 — HANDOFF §2 + checkpoint 21:47: v0.7.1-alpha Open Shells cut locally (tag eda52b9, snapshot 30);…
+- `6a16fe7` 2026-10-15 — 0.7.3 Kohn–Sham: BUILD-PLAN.md drafted while 0.7.2 builds (K1 THE LDA ENGINE — Becke × Treutler…
+- `0b60c39` 2026-10-15 — USAGE PAUSE checkpoint 21:50: L1 builder paused empty by Agent Control (five_hour 94%); L1-BRIEF…
+- `2ad822e` 2026-10-15 — checkpoint 21:58: Yan resumed as integrator after Sos's 0.7.0 + 0.7.1 night; L1 THE LATTICE…
+- `259fee4` 2026-10-15 — 0.7.3 Kohn–Sham: K1 THE LDA ENGINE and K2 THE METHOD briefs (drafted while 0.7.2 L1 builds; base…
+- `e333938` 2026-10-15 — 0.7.2 L1: THE LATTICE WINDOW
+- `827a2a8` 2026-10-15 — 0.7.2 L1: build note (seats, the closed-form checks, solve/evolve ms, gates, dropped, L2's…
+- `ab367eb` 2026-10-15 — merge L1 THE LATTICE WINDOW (827a2a8): lab/lattice.js + lab/lattice-model.js — a window of the…
+- `7733775` 2026-10-15 — checkpoint 22:40: L1 merged ab367eb; L2 running from it; K1/K2 briefs in
+- `b2f8d4c` 2026-10-15 — L2: TUNNEL (barrier V on one or two centre sites, T · R once passed, the two-site resonance) and…
+- `3db44ea` 2026-10-15 — L2: the TUNNEL demo (DEMOS/TUNNEL by the app's own road, its cover by make-covers; STARTERS +1),…
+- `f080001` 2026-10-15 — L2: the build note
+- `3e6a93d` 2026-10-15 — merge L2 TUNNELLING + THE PATCH (f080001): the TUNNEL preset on the chain (BARRIER V · SITES…
+- `9856c4b` 2026-10-15 — 0.7.2-alpha Lattice: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.7.1-alpha` — 2026-10-15
 
 Commit `eda52b9` · no new waves · 24 commits.
