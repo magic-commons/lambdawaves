@@ -11,6 +11,35 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.8.0-alpha` — 2026-10-16
+
+Commit `9f5a592` · no new waves · 16 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `6bf32bf` 2026-10-16 — CHANGELOG for v0.7.4-alpha
+- `a2072ff` 2026-10-16 — HANDOFF §2 + checkpoint 03:10: v0.7.4-alpha Shelves cut locally (tag 6fb0dc5, snapshot 33);…
+- `4df7d00` 2026-10-16 — 0.8.2 Phase Space: P1 THE OSCILLATOR'S WIGNER, P2 THE COHERENCE MAP, P3 THE BEAD + ψ ALONG A RAY…
+- `9fdc9be` 2026-10-16 — 0.8.3 Breath: B1 THE RADIAL BREATH + REVIVAL, B2 THE A(t) TRACE, B3 THE UNCERTAINTY ELLIPSOID…
+- `e335e4d` 2026-10-16 — 0.9.0 Certification and 0.9.1 Platform: BUILD-PLAN.md drafted (Z1 the public face, Z2 the…
+- `994582c` 2026-10-16 — G3 INTER-SHELL STARK: lab/stark.js (H = diag(E) + F·z over the 91 labels, eigensolved once per…
+- `6b2c6ad` 2026-10-16 — G1 THE CENTRAL HAMILTONIAN + FIVE: lab/central.js (confined · yukawa · well · softcore ·…
+- `210323d` 2026-10-16 — G2 SQUEEZED + CAT: applySqueeze on the oscillator, SQUEEZE / SQUEEZE-IN / CAT on IMPULSE, Var(z)…
+- `9290e01` 2026-10-16 — G2 build note: seats, the re-measured Var(z) / lost-norm table, the cap at r = 0.33, the cat,…
+- `05788c0` 2026-10-16 — G3: the INTER-SHELL readout fits its card (no wrap; the full sentence on hover), the Fields note…
+- `96abdde` 2026-10-16 — merge G2 SQUEEZED + CAT (9290e01): applySqueeze(re, im, r, axis) beside the slap in kick.js —…
+- `9c75931` 2026-10-16 — merge G3 INTER-SHELL STARK (05788c0): lab/stark.js
+- `c47e2d7` 2026-10-16 — USAGE PAUSE checkpoint 04:55: 0.8.0 Central Lab
+- `f8500f2` 2026-10-16 — merge G1 THE CENTRAL HAMILTONIAN + FIVE (6b2c6ad): lab/central.js
+- `0c9ed0a` 2026-10-16 — 0.8.0 Central Lab: CHANGES-0.8.0.md complete
+- `9f5a592` 2026-10-16 — 0.8.0-alpha Central Lab: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.7.4-alpha` — 2026-10-16
 
 Commit `6fb0dc5` · no new waves · 15 commits.
