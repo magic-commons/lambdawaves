@@ -1,4 +1,4 @@
-# 0.8.2 "Phase Space" — THE BUILD PLAN (Claude Yan / Fable 5.1, drafted 2026-10-16 ≈02:30 while 0.7.4 C2 builds; base and cap filled at the 0.8.1 cut)
+# 0.8.2 "Phase Space" — THE BUILD PLAN (Claude Yan / Fable 5.1, drafted 2026-10-16 ≈02:30 while 0.7.4 C2 builds; base and cap filled at the 0.8.1 cut, 10-16 ≈08:20)
 
 The engine plan's D.14 (`../release-0.6.0/PLAN.md` l.299–300: "QHO Wigner with negativity (+40; W_n Laguerre closed forms; n = 1 reads −1/π) · the coherence map
 (+30) · the bead + ψ along a ray (+50) · gated: the LOG-SPACE module (+40, §F-2), the SEPARABLE module, FLOW arrows/streamlines, further RU records, helium"; the
@@ -6,7 +6,7 @@ ladder row l.44: "Wigner for the oscillator with its negativity; the coherence m
 WIGNER · METERS · CALCULUS"; PLAN-DRAFT-0 l.444 (the bead "(⟨x⟩,⟨y⟩,⟨z⟩) from `dipoleMatrix`"; the COHERENCE MAP |c_a c_b*|)). The census: `../release-0.6.0/census/
 SYSTEMS.md` §1 S24 (WIGNER: the slice, hydrogenic only; `wignerview.js:22` stands down off hydrogen) and §2 row 33 ("QHO Wigner (Gaussian, never negative for
 coherent, negative for Fock n = 1) does not run"). Josh's dial (09:35): tight builds, features only, pre-1.0. Base: `yan-c` at the commit carrying the briefs after
-the v0.8.1-alpha cut (**TO FILL**); lines **TO FILL**; cap = lines × 1.01. Three rows, three Opus builders in parallel (disjoint files); the integrator merges P1, P2,
+the v0.8.1-alpha cut — the commit carrying this fill, right after v0.8.1-alpha's CHANGELOG `8722f49` (its sha is in every launch message); lines **29,863**; cap **30,161** (× 1.01). Three rows, three Opus builders in parallel (disjoint files); the integrator merges P1, P2,
 P3, light check, cut `v0.8.2-alpha` "Phase Space". The gated rows (LOG-SPACE, SEPARABLE, FLOW arrows, RU records, helium) are NOT in this cut: each waits on
 Josh's word (§F-2) or a measurement that has not been made.
 
