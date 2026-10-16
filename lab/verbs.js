@@ -16,21 +16,22 @@ const flip = (s, on) => { if (s && s.get() !== on) s.root.click(); }; let sayBye
 export const VERBS = [
   { id: 'preset', args: { id: 'string' }, doc: "load one of STATE's PRESET hydrogen states by its id (1s+2pz, …), announced on the stage",
     run: (app, a) => (PRESET_BY_ID.has(a.id) ? { own: !!app.ctl.loadPreset(a.id, { hand: true }) } : `there is no preset "${a.id}"`) },
-  { id: 'molecule', args: { id: 'string', basis: '?enum sto-3g|6-31+g-star', view: '?enum density|orbital|diff|esp|spin', orbital: '?string|number' },
-    doc: 'pick a library molecule by id (H2O, NH3, C6H6, O2, NO, …; an open shell is UHF and has the spin view) and switch MOLECULES on; its head shows once solved; then the basis, the view and an orbital by number or name (HOMO, LUMO, 1b1)',
+  { id: 'molecule', args: { id: 'string', basis: '?enum sto-3g|6-31+g-star', method: '?enum rhf|uhf|lda', view: '?enum density|orbital|diff|esp|spin|dlda', orbital: '?string|number' },
+    doc: 'pick a library molecule by id (H2O, NH3, C6H6, O2, NO, …; an open shell is UHF and has the spin view) and switch MOLECULES on; its head shows once solved; then the basis, the method (lda: RKS LDA, closed shells up to benzene in STO-3G; uhf: H₂ only), the view (dlda = ρ_LDA − ρ_RHF, after method lda) and an orbital by number or name (HOMO, LUMO, 1b1)',
     async run(app, a) {
       const c = app.state.chem, id = [...MOLECULE_BY_ID.keys()].find((k) => k.toLowerCase() === a.id.toLowerCase()); if (!id) return `there is no molecule "${a.id}" in the library`;
       const p = c.pick(id); c.setOn(true); await p;
-      if (a.basis && a.basis !== c.basis) await c.setBasis(a.basis); if (a.view) c.setView(a.view);   // after the pick's solve (and the basis's)
+      if (a.basis && a.basis !== c.basis) await c.setBasis(a.basis); if (a.method && !(await c.setMethod(a.method))) return `${a.method.toUpperCase()} is not offered for ${id} here (the METHOD seg says why)`;
+      if (a.view) c.setView(a.view);   // after the pick's solve (and the basis's, and the method's)
       const r = a.orbital === undefined ? null : orb(c, a.orbital); return typeof r === 'string' ? r : { own: true };
     } },
   { id: 'vibrate', args: { on: 'bool', mode: '?number', amp: '?number', breathe: '?bool' }, doc: "MOLECULES' VIBRATE: the nuclei breathe in one normal mode (mode: its place in the MODE list from 0; amp 0…4 in Q₀, past 2 not harmonic); breathe: true presses BREATHE — RATE so one breath takes a second (\"make water breathe\")",
     async run(app, a) { const c = app.state.chem; if (!c.on) return 'VIBRATE needs MOLECULES on'; const line = await c.vibrate(a); return a.on && !line ? 'no modes recorded for this molecule (VIBRATE plays an STO-3G record of a solved molecule)' : { fade: line ? 'VIBRATE · ' + line : 'VIBRATE off' }; } },
-  { id: 'view', args: { id: 'enum density|phase|real|imag|diff|reim|orbital|esp|spin', orbital: '?string|number' },
+  { id: 'view', args: { id: 'enum density|phase|real|imag|diff|reim|orbital|esp|spin|dlda', orbital: '?string|number' },
     doc: 'the observable on the field: under MOLECULES density|orbital|diff|esp|spin (orbital by number or name; spin = ρα − ρβ of an open shell), otherwise density|phase|real|imag|diff|reim',
     run(app, a) {
       const c = app.state.chem;
-      if (c && c.on && ['density', 'orbital', 'diff', 'esp', 'spin'].includes(a.id)) { if (a.orbital !== undefined) return orb(c, a.orbital); c.setView(a.id); }
+      if (c && c.on && ['density', 'orbital', 'diff', 'esp', 'spin', 'dlda'].includes(a.id)) { if (a.orbital !== undefined) return orb(c, a.orbital); c.setView(a.id); }
       else if (VIEW[a.id] === undefined) return `${a.id} is a MOLECULES view and MOLECULES is off`; else app.sh.LW.setView(a.id);
       return { fade: 'VIEW · ' + mdText(a.id) };
     } },
@@ -98,12 +99,12 @@ export function createVerbs(app) {
   /** what the app already prints, as compact JSON for a reader with no eyes: nothing here is computed for her */
   function inventory() {
     const { clock, reg, ui, mat } = app, c = app.state.chem, H = getHamiltonian(), P = app.host.cameraPort, mol = c && c.on ? MOLECULE_BY_ID.get(c.preset()) : null;
-    const sol = mol && c.solution(), live = sol && sol.key === c.preset() + '|' + c.basis + '|' + mol.charge ? sol : null, s = live && (live.stem || stemOf(live)), cs = mol && c.state(), st = mol ? c.said : statusOf({ owner: H.id });
+    const sol = mol && c.solution(), live = sol && sol.key.replace(/\|(uhf|lda)$/, '') === c.preset() + '|' + c.basis + '|' + mol.charge ? sol : null, s = live && (live.stem || stemOf(live)), cs = mol && c.state(), st = mol ? c.said : statusOf({ owner: H.id });
     const ro = (r) => (r ? [...r.root.querySelectorAll('.ro-val, .ro-sub')].map((e) => e.textContent).filter(Boolean).join(' · ') : '');
     const P0 = reg.populated(), lbl = (a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]));
     return { owner: mol ? 'MOLECULES' : H.label.split(/\s{2,}/)[0],
       molecule: mol && (live ? { formula: mol.formula.replace(/<\/?m>/g, ''), name: mol.name, basis: BASIS_LABEL[c.basis], E: +live.energy.toFixed(6), nocc: live.nocc, nAO: live.nAO, group: s.pointGroup, homo: s.homo,
-        gapEh: +s.gapEh.toFixed(4), gapEv: +s.gapEv.toFixed(2), orbital: cs.orbitalName, head: st && st.head, ...(live.model ? { model: live.model, s2: +live.s2.toFixed(4) } : {}) } : { formula: mol.formula.replace(/<\/?m>/g, ''), name: mol.name, solving: true }),
+        gapEh: +s.gapEh.toFixed(4), gapEv: +s.gapEv.toFixed(2), orbital: cs.orbitalName, head: st && st.head, ...(live.model ? { model: live.model, ...(live.model === 'UHF' ? { s2: +live.s2.toFixed(4) } : { exc: +live.exc.toFixed(6), intRho: +live.intRho.toFixed(6) }) } : {}) } : { formula: mol.formula.replace(/<\/?m>/g, ''), name: mol.name, solving: true }),
       status: st ? st.line : null, ...(mol && c.vibLine() ? { vibrating: 'vibrating ' + c.vibLine() } : {}),
       states: mol ? null : { prose: stateLatex({ H, states: P0.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: reg.re0[a], im: reg.im0[a] })) }).split('\n')[0],
         populations: Object.fromEntries(P0.map((a) => [lbl(a), +(reg.re0[a] ** 2 + reg.im0[a] ** 2).toFixed(4)])) },

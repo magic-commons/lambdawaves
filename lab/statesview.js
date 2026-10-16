@@ -181,7 +181,7 @@ export function createStates(host, api) {
     const c = C(), q = c && c.query ? c.query() : null;
     if (!q || !api.solve) return;
     const seq = ++ladderSeq, forSol = sol; ladderRefused = null;
-    Promise.resolve(api.solve({ op: 'chem.states', atoms: q.atoms, basis: q.basis, charge: q.charge }, () => null, (r) => r)).then((r) => {
+    Promise.resolve(api.solve({ op: 'chem.states', atoms: q.atoms, basis: q.basis, charge: q.charge, model: q.model }, () => null, (r) => r)).then((r) => {
       if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { ladderRefused = (r && r.refused) || null; armed = 0; says(ladderRefused); status(ladderRefused || 'the state ladder needs the chemistry worker', 'warn'); } return; }   // 0.4.0 S4a: a record without its CIS ladder says so
       ladder = r; ladder.basis = q.basis;   // the pitch's tag: a line, and so its Hz, is the basis's
       model = createStatesModel({ n: r.n, nocc: r.nocc, C: sol.C, D0: sol.D, rMO: r.rMO });
