@@ -744,12 +744,12 @@ export async function boot(dom) {
       field.  Both windows integrate the SHIPPED closed-form radials, so anything else would be two operators in one
       number; they say which one stood them down, in the wave-39 voice. */
   function hydroReader(rad) {   // rad: RADIATION reads the rates, which follow μ (0.8.1 T2); the rest read the μ = mₑ closed forms
-    const H = getHamiltonian();
+    const H = getHamiltonian(), qho = !rad && H.id === 'qho';   // 0.8.2 P1: WIGNER (the one reader without rad) integrates the oscillator's closed radials too — no Z, no μ there
     if (sturm.P) return { on: false, status: 'hydrogen only: no closed form for the scaled radials',
       why: 'the STURMIAN scale is on: the scaled radials are not the ones this window integrates — switch SCALE back to HYDROGEN' };
-    if (H.id !== 'hydrogen') return { on: false, status: 'hydrogenic register only', why: 'hydrogenic register only — the operator in force is ' + H.label };
+    if (H.id !== 'hydrogen' && !qho) return { on: false, status: 'hydrogenic register only', why: 'hydrogenic register only — the operator in force is ' + H.label };
     if (!rad && H.mass) return { on: false, status: 'hydrogenic register only (μ = mₑ)', why: H.mass + ' scales every radial: this window reads the μ = mₑ closed forms' };
-    if (getZ() !== 1) return { on: false, status: 'hydrogenic register only (Z = 1)', why: 'the ion at Z = ' + getZ() + ' scales every radial: this window reads the Z = 1 closed forms' };
+    if (getZ() !== 1 && !qho) return { on: false, status: 'hydrogenic register only (Z = 1)', why: 'the ion at Z = ' + getZ() + ' scales every radial: this window reads the Z = 1 closed forms' };
     if (app.state.chem && app.state.chem.on) return { on: false, status: 'hydrogenic register only', why: 'another model holds the field — this window reads the hydrogenic register' };   // 0.4.0 S0 · wave 137: MOLECULES too
     return { on: true, status: null, why: '' };
   }

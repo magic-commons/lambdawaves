@@ -18,17 +18,25 @@
  * for the 1s, not 1, and the card says so in its own line, which the digest carries.
  *
  * STATUS: NUMERICAL (quadrature) on the register's EXACT analytic ψ — lab/wigner.js's status, unchanged; this file
- * is a view and computes no physics of its own.  Hydrogenic register only: under any other Hamiltonian, and under
- * the Sturmian scale, the closed-form radials the slice integrates are not the ones in force, so it stands down.
+ * is a view and computes no physics of its own.  Hydrogen's and the OSCILLATOR's registers (0.8.2 P1: qho.js's radials, the
+ * same Y_lm, the cap 21 = every m = 0 label so a slap along z is whole): under any other Hamiltonian, and under the
+ * Sturmian scale, the closed-form radials the slice integrates are not the ones in force, so it stands down (STAND).
+ * NEGATIVITY is ∫|W| − 1 over the drawn slice normalised to ∫W = 1 — 0 for a Gaussian, 4/√e − 2 for a 1-D |1⟩ (the slice
+ * through |0 0 1⟩ = 2p₀ is W_1(z, p)/π², the transverse |0⟩s giving W_0(0,0)² = 1/π², which the normalisation cancels).
  */
 import { wignerSlice, wignerAxial } from './wigner.js';
 import { BASIS } from './hydrogen.js';
+import { getHamiltonian } from './hamiltonian.js';
 import { el, knob, readout, graphHover, fitText, cssRGB, accentRGB } from './mir/kit.js';
 
 const NZ = 64, NP = 64;                 // the grid the window runs (the brief's 64 × 64)
 const GAMMA = 0.35;                     // the display law for the ink's opacity: |W/W_max|^γ, printed on the card
 const TERM_CAP = 6;                     // the most populated labels the map integrates (the cost is O(terms²))
 const LABEL = 'SLICE through x = y = 0, p_x = p_y = 0 — ∫∫ ≠ 1';
+const STAND = { well: 'BOX: the j_l radials stop dead at the wall r = a, and the chord rule here is written for functions that live on all of space',
+  cornell: 'QUARKONIUM: its radials are Numerov solutions on a grid, and this window integrates closed-form ψ only',
+  atom: 'ATOM: its Xα central-field radials are numerical, and this window integrates closed-form ψ only',
+  central: 'CENTRAL: its radials are Numerov solutions of the chosen V(r), and this window integrates closed-form ψ only' };
 
 /** a CSS colour token resolved through the canvas (so any colour form parses), as [r, g, b] — kit.js's reader (wave 57) */
 const readRGB = (g, name, fallback) => cssRGB(g, name, fallback);
@@ -38,14 +46,14 @@ const readRGB = (g, name, fallback) => cssRGB(g, name, fallback);
  * The rack drives it with update(reg, t, playing, on); everything else is this module's own.
  */
 export function createWigner(host, api = {}) {
-  let zmax = 8, pmax = 2, zTouched = false;                 // untouched, Z RANGE follows the stage's own domain half
+  let zmax = 8, pmax = 2, zTouched = false, pTouched = false;                 // untouched, Z RANGE follows the stage's own domain half
   let cache = null, key = '', lastWall = -1e9, capped = 0, terms = 0, norm2 = 1;
 
   const r0 = el('div', 'row tight', host);
   const kZ = knob({ label: 'Z RANGE  a₀', min: 2, max: 40, value: 8, fmt: (v) => '± ' + v.toFixed(1),
     onInput: (v) => { zmax = v; zTouched = true; key = ''; if (api.repaint) api.repaint(); } });
   const kP = knob({ label: 'P RANGE  a.u.', min: 0.5, max: 4, value: 2, fmt: (v) => '± ' + v.toFixed(2),
-    onInput: (v) => { pmax = v; key = ''; if (api.repaint) api.repaint(); } });
+    onInput: (v) => { pmax = v; pTouched = true; key = ''; if (api.repaint) api.repaint(); } });
   r0.appendChild(kZ.root); r0.appendChild(kP.root);
 
   const cv = el('canvas', 'wig-c', host);
@@ -66,9 +74,10 @@ export function createWigner(host, api = {}) {
   const roMin = readout({ label: 'MINIMUM  (z, p_z)', value: '—', cls: 'wide', sub: 'W is not positive: the negative lobe is the state\'s own non-classicality' });
   const roMax = readout({ label: 'MAXIMUM', value: '—', sub: 'on the 64 × 64 grid' });
   const roMs = readout({ label: 'COMPUTE', value: '—', sub: '64 × 64 · order normal · throttled to 2 Hz while playing' });
-  for (const r of [roPeak, roMin, roMax, roMs]) rr.appendChild(r.root);
+  const roNeg = readout({ label: 'NEGATIVITY  ∫|W| − 1', value: '—', sub: 'over the drawn slice, normalised to ∫W = 1' });
+  for (const r of [roPeak, roMin, roMax, roMs, roNeg]) rr.appendChild(r.root);
 
-  el('div', 'note', host).innerHTML = '<b>Phase-space slice.</b> This is W(z,p<sub>z</sub>) at x = y = p<sub>x</sub> = p<sub>y</sub> = 0, not a marginal distribution. Negative values use Accent B. Opacity is display-scaled; readouts retain the signed values. Hydrogenic position-space states only.';
+  el('div', 'note', host).innerHTML = '<b>Phase-space slice.</b> This is W(z,p<sub>z</sub>) at x = y = p<sub>x</sub> = p<sub>y</sub> = 0, not a marginal distribution. Negative values use Accent B. Opacity is display-scaled; readouts retain the signed values. Hydrogen and oscillator states only.';
 
   /* ── the map ─────────────────────────────────────────────────────────── */
   function clear() { const W = cv.clientWidth, H = cv.clientHeight; if (W > 0 && H > 0) { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); } }
@@ -127,14 +136,14 @@ export function createWigner(host, api = {}) {
   /* ── the minimum, refined off the grid (compass search on wignerAxial: the grid cannot see −3.097e-4).
      One evaluation costs about a z-row of the map, so the search carries a WALL BUDGET as well as a step
      tolerance: the 1s converges to its certified six digits inside it, and a six-label state stops early. ── */
-  function refine(tm, z0, p0, dz, dp) {
+  function refine(tm, z0, p0, dz, dp, o) {
     const T0 = performance.now();
-    let z = z0, p = p0, v = wignerAxial(tm, z, p), sz = dz, sp = dp, n = 1;
+    let z = z0, p = p0, v = wignerAxial(tm, z, p, o), sz = dz, sp = dp, n = 1;
     for (let it = 0; it < 60 && (sz > 1e-5 || sp > 1e-5); it++) {
       if (performance.now() - T0 > 80) break;
       let best = v, bz = z, bp = p;
       for (const [a, b] of [[sz, 0], [-sz, 0], [0, sp], [0, -sp], [sz, sp], [-sz, -sp], [sz, -sp], [-sz, sp]]) {
-        const w = wignerAxial(tm, z + a, p + b); n++;
+        const w = wignerAxial(tm, z + a, p + b, o); n++;
         if (w < best) { best = w; bz = z + a; bp = p + b; }
       }
       if (best < v) { v = best; z = bz; p = bp; } else { sz *= 0.5; sp *= 0.5; }
@@ -149,21 +158,23 @@ export function createWigner(host, api = {}) {
     const s = n2 > 0 ? 1 / Math.sqrt(n2) : 1;
     const all = ids.map((a) => ({ a, re: c.re[a] * s, im: c.im[a] * s }))
       .sort((x, y) => (y.re * y.re + y.im * y.im) - (x.re * x.re + x.im * x.im));
-    const tm = all.slice(0, TERM_CAP);
+    const H = getHamiltonian(), qho = H.id === 'qho', tm = all.slice(0, qho ? 21 : TERM_CAP);
     capped = all.length - tm.length; terms = tm.length; norm2 = n2;
     if (!tm.length) { cache = null; return null; }
-    const slice = wignerSlice(tm, { z: [-zmax, zmax, NZ], p: [-pmax, pmax, NP], order: 'normal' });
+    const slice = wignerSlice(tm, { z: [-zmax, zmax, NZ], p: [-pmax, pmax, NP], order: 'normal', qho });
     const t0 = performance.now();
-    const peak = wignerAxial(tm, 0, 0);                                   // an even grid has no point at the origin
+    const peak = wignerAxial(tm, 0, 0, { qho });                          // an even grid has no point at the origin
     const dz = 2 * zmax / (NZ - 1), dp = 2 * pmax / (NP - 1);
-    const min = refine(tm, slice.argmin.z, slice.argmin.p, dz, dp);
+    const min = refine(tm, slice.argmin.z, slice.argmin.p, dz, dp, { qho });
     const refineMs = performance.now() - t0;
-    cache = { slice, peak, min, terms: tm, ms: slice.ms, refineMs, zmax, pmax,
-      labels: tm.map((x) => BASIS[x.a].label).join(' ') };
+    let sa = 0, sw = 0; for (const v of slice.W) { sa += Math.abs(v); sw += v; }
+    const s0 = BASIS[tm[0].a], fock = qho && tm.length === 1 && s0.m === 0 && s0.l === s0.n - 1 && s0.n <= 2 ? s0.n - 1 : -1;   // 1s = |0⟩, 2p₀ = |1⟩ along z
+    cache = { slice, peak, min, terms: tm, ms: slice.ms, refineMs, zmax, pmax, qho, fock, neg: sw > 0 ? sa / sw - 1 : NaN,
+      labels: tm.map((x) => qho ? H.labelOf(BASIS[x.a]) : BASIS[x.a].label).join(' ') };
     return cache;
   }
   function say() {
-    if (!cache) { for (const r of [roPeak, roMin, roMax, roMs]) r.set('—', 'warn'); return; }
+    if (!cache) { for (const r of [roPeak, roMin, roMax, roMs, roNeg]) r.set('—', 'warn'); return; }
     const C = cache;
     roPeak.set(C.peak.toFixed(7), 'live');
     roPeak.setSub(`a.u.⁻³ · 1s reference 0.0322515 · norm ${norm2.toFixed(6)}`);
@@ -173,6 +184,9 @@ export function createWigner(host, api = {}) {
     roMax.setSub(`64 × 64 · ${C.labels}${capped ? ' · ' + capped + ' omitted' : ''}`);
     roMs.set(`${C.ms.toFixed(0)} ms  +  ${C.refineMs.toFixed(0)} ms`, C.ms > 400 ? 'warn' : '');
     roMs.setSub(`map and minimum · ${terms} label${terms > 1 ? 's' : ''} · 2 Hz while playing`);
+    roNeg.set(C.neg.toFixed(3), C.neg > 5e-4 ? 'ok' : '');
+    roNeg.setSub(C.fock === 1 ? 'Fock |1⟩ along z: W(0,0) = −1/π³ = (−1/π)·(1/π²) · the whole slice 4/√e − 2 = 0.4261'
+      : C.qho && C.neg < 5e-4 ? 'a Gaussian: classical' : 'over the drawn slice, normalised to ∫W = 1');
   }
 
   /**
@@ -184,7 +198,7 @@ export function createWigner(host, api = {}) {
     if (!on) {
       if (cache) { cache = null; clear(); say(); }
       key = '';
-      stand.hidden = false; stand.textContent = why || 'hydrogenic register only — the slice integrates the register\'s own closed-form ψ';
+      stand.hidden = false; stand.textContent = STAND[getHamiltonian().id] || why || 'hydrogen or oscillator register only — the slice integrates the register\'s own closed-form ψ';
       line.hidden = true;
       return;
     }
@@ -193,6 +207,8 @@ export function createWigner(host, api = {}) {
       const z = Math.max(2, Math.min(40, half));
       if (Math.abs(z - zmax) > 1e-9) { zmax = z; kZ.set(z); kZ.setDefault(z); key = ''; }
     }
+    const pa = getHamiltonian().id === 'qho' ? Math.max(0.5, Math.min(4, half || 4)) : 2;   // ħ = m = ω = 1: the oscillator's P RANGE follows its Z RANGE
+    if (!pTouched && pa !== pmax) { pmax = pa; kP.set(pa); kP.setDefault(pa); key = ''; }
     const k = `${reg.version}|${t.toFixed(6)}|${zmax.toFixed(4)}|${pmax.toFixed(4)}`;
     if (k === key) return;
     const now = performance.now();
@@ -203,28 +219,31 @@ export function createWigner(host, api = {}) {
 
   /** the digest's table — the law, the grid and the numbers, as text for the notebook */
   function table() {
-    if (!cache) return LABEL + '\n(the window is stood down: hydrogenic register only)';
+    if (!cache) return LABEL + '\n(the window is stood down: hydrogen or oscillator register only)';
     const C = cache;
     return [LABEL,
       `grid\t${NZ} × ${NP}\tz ∈ [${(-zmax).toFixed(2)}, ${zmax.toFixed(2)}] a₀\tp_z ∈ [${(-pmax).toFixed(2)}, ${pmax.toFixed(2)}] a.u.`,
-      `labels\t${C.labels}${capped ? ' (+' + capped + ' dropped, cap 6)' : ''}\t‖c‖² = ${norm2.toFixed(6)}`,
+      `labels\t${C.labels}${capped ? ' (+' + capped + ' dropped, cap ' + C.terms.length + ')' : ''}\t‖c‖² = ${norm2.toFixed(6)}`,
       `W(0, 0)\t${C.peak.toFixed(9)}\t1/π³ = 0.032251534 for the 1s`,
       `minimum\t${C.min.v.toExponential(4)}\tat z = ${C.min.z.toFixed(6)}, p_z = ${C.min.p.toFixed(6)} (refined off the grid)`,
       `maximum\t${C.slice.max.toExponential(4)}\ton the grid`,
       `∫∫ over the slice\tNOT 1\t1/π² = 0.101321 for the 1s — this is a SLICE, not a marginal`,
-      `compute\t${C.ms.toFixed(1)} ms + ${C.refineMs.toFixed(1)} ms\torder normal · ink opacity |W/W_max|^${GAMMA}`].join('\n');
+      `compute\t${C.ms.toFixed(1)} ms + ${C.refineMs.toFixed(1)} ms\torder normal · ink opacity |W/W_max|^${GAMMA}`,
+      `negativity\t${C.neg.toFixed(4)}\t∫|W| − 1 over the drawn slice normalised to ∫W = 1`].join('\n');
   }
 
   window.addEventListener('resize', () => paint());
   return {
     update, table, paint,
+    /** the export caption's tail while the window is open and live (film.js caption()) */
+    caption() { return cache && !host.closest('.closed') ? ' · WIGNER · ∫|W| − 1 = ' + cache.neg.toFixed(3) : ''; },
     get stats() { return cache ? { peak: cache.peak, min: cache.min.v, minAt: [cache.min.z, cache.min.p], max: cache.slice.max, ms: cache.ms, refineMs: cache.refineMs, terms, capped, norm2, zmax, pmax, nz: NZ, np: NP, label: LABEL } : null; },
     get cache() { return cache; },
     /** the slice itself (recomputed if the state has moved since the last frame) */
     slice(reg, t) { if (reg && (!cache || key !== `${reg.version}|${t.toFixed(6)}|${zmax.toFixed(4)}|${pmax.toFixed(4)}`)) { key = `${reg.version}|${t.toFixed(6)}|${zmax.toFixed(4)}|${pmax.toFixed(4)}`; build(reg, t); paint(); say(); } return cache ? cache.slice : null; },
     setRange(z, p) {
       if (z !== undefined && isFinite(z)) { zmax = Math.max(2, Math.min(40, +z)); kZ.set(zmax); zTouched = true; }
-      if (p !== undefined && isFinite(p)) { pmax = Math.max(0.5, Math.min(4, +p)); kP.set(pmax); }
+      if (p !== undefined && isFinite(p)) { pmax = Math.max(0.5, Math.min(4, +p)); kP.set(pmax); pTouched = true; }
       key = ''; if (api.repaint) api.repaint(); return { zmax, pmax };
     },
     setDefaultRange(z) { kZ.setDefault(z); },
