@@ -725,7 +725,7 @@ export function createChem(host, api) {
     roT.setSub(rt ? `${rt.samples || rt.trace.length} samples · E ${Number(rt.energy).toFixed(6)} · ΔE ${(rt.energy - rt.E0).toExponential(2)}` + (rt.msPerStep ? ` · ${Number(rt.msPerStep).toFixed(2)} ms/step` : '') : '');
     const tm = sol.timings || {};
     roXc.root.hidden = !lda(); if (lda()) { roXc.set(`${sol.exc.toFixed(6)} · ${sol.intRho.toFixed(6)}`, Math.abs(sol.intRho - nel()) < 1e-3 ? 'ok' : 'warn');
-      roXc.setSub(`E_xc (Eh) · ∫ρ on the grid, ${nel()} electrons · ${sol.gridPoints.toLocaleString('en')} points in ${Math.round(sol.gridMs)} ms · SCF ${sol.iterations} iterations, ${Math.round(tm.scf - tm.integrals - sol.gridMs)} ms`); }
+      roXc.setSub(`E_xc (Eh) · ∫ρ on the grid, ${nel()} electrons · ${sol.gridPoints.toLocaleString('en')} points in ${Math.round(sol.gridMs)} ms · SCF ${sol.converged ? `converged in ${sol.iterations} iterations to |ΔE| < 1e-10` : `not converged after ${sol.iterations} iterations`}, ${Math.round(tm.scf - tm.integrals - sol.gridMs)} ms`); }
     /* `ground` is the whole ground-state wall and `integrals` is the pass INSIDE it, measured by the pass itself */
     status(`${sol.nAO} AOs · ${nel()} electrons` + (sol.model ? ' · ' + sol.model : '')
       + (Number.isFinite(tm.scf) ? ` · ground ${Math.round(tm.scf)} ms` : '')

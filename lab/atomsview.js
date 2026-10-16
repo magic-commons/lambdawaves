@@ -68,7 +68,8 @@ export function createAtoms(host, api) {
   r2.appendChild(roScf.root);
 
   const alpha = el('div', 'note atm-alpha', host); alpha.hidden = true;
-  el('div', 'note', host).innerHTML = '<b>Model.</b> Uses one self-consistent Xα central field per element with α = 2/3 and a Latter tail. Δ-SCF estimates ionisation energy; −ε is shown separately. A ° marks a virtual shell with an energy but no drawable radial. Position space only.';
+  el('div', 'note', host).innerHTML = '<b>Model.</b> One self-consistent central field per element. Δ-SCF estimates ionisation energy; −ε is shown separately. A ° shell has an energy but no drawable radial. Position space only.';
+  el('div', 'note', host).textContent = `${EXCHANGE_MODEL} · SCF to ‖ΔV·r‖ < 1e-8 · virtual shells (°) in the frozen field`;   // 0.9.0 Z3 THE R_m CAPTION: atoms.js' EXCHANGE_MODEL and solveAtom's default tol
 
   /* ── the model, once per element (≈ 0.3 s for the neutral, the ion and the α = 1 comparison, then cached) ── */
   function compute() {
