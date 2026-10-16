@@ -6,7 +6,7 @@ import { TIER } from '../rack.js';
 import { VIEW_NAMES, STYLE_NAMES, quatFromYawPitch } from '../field.js';
 import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from '../hamiltonian.js';
-import { clampShift } from '../camera-law.js'; import { BASIS } from '../hydrogen.js';
+import { clampShift } from '../camera-law.js'; import { BASIS } from '../hydrogen.js'; import { LAT } from '../lattice.js';
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
 export function createPersist(app) {
   const { ui, reg, clock, obs, mat, FIELD_CHROME, rates, energyOf, sturm, PAL_DEF } = app; const { schedule, paceRate } = app.loop; const { quality, layout, phone, tablet } = app.sh;
@@ -56,7 +56,7 @@ export function createPersist(app) {
         /* Static instrument controls belong to the composition. Solver caches, traces, collisions,
            particles and pulse runs do not: every project still opens paused on its first frame. */
         instruments: { chem: app.state.chem.save(), orbitals: app.state.orbitals.save(), states: app.state.states.save(), register: { mode: app.state.register.mode }, qcd: quarkonium(),
-          ladder: { ...ladder.params },
+          ladder: { ...ladder.params }, lattice: LAT ? LAT.save() : undefined,   // 0.7.2 L1: absent at the defaults
           particles: { count: Math.round(ui.pN.get()), trail: particles.trailLen } },
         rates: Array.from(rates), rotationRates: { ...app.ctl.rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
         modulation: app.state.modHost ? modRackStamped() : null,
@@ -234,7 +234,8 @@ export function createPersist(app) {
           else if (fieldOwner === 'chem') app.state.chem.setOn(true);
           if (I.orbitals && I.orbitals.on && fieldOwner === 'chem') app.state.orbitals.setOn(true);
           if (I.states && I.states.on && fieldOwner === 'chem') app.state.states.setOn(true);   // parks itself until the ladder lands (statesview `wanted`)
-          if (I.ladder) ladder.load(I.ladder);                         // M2 (2026-09-24): lands the params, defers the scan (ladder.js load)
+          if (I.ladder) ladder.load(I.ladder);
+          if (LAT) LAT.load(I.lattice);                                 // 0.7.2 L1: an absent record is the defaults                         // M2 (2026-09-24): lands the params, defers the scan (ladder.js load)
           if (I.particles) {
             if (Number.isFinite(I.particles.count)) ui.pN.set(I.particles.count);
             if (Number.isFinite(I.particles.trail)) { particles.setTrail(I.particles.trail); ui.pTrail.set(I.particles.trail); }

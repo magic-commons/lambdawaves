@@ -9,6 +9,7 @@
  *   packet  { x0, k, sigma, radius }               → the BOX bow: the Gaussian projected on the well's 91 eigenstates (well.js wellPacket)
  *   period  { energies, horizon }                  → the density's period / near-recurrence scan (period.js densityPeriod) for the transport's readout
  *   ladder  { params }                             → the revival packet, scan and asymptotic prediction
+ *   lattice.solve { n, re, im }                    → LATTICE's eigenpairs { E, re, im } (lattice-model.js: real → eigSymQL, Hermitian → hermitianEigen)
  *   gas.stats { radius, t, re0, im0, t0 }          → the AXIAL GAS's norm, ⟨z⟩, σ_z, ⟨r⟩ at t (gas.js stats) — SPECTRUM's readout (K5w)
  *   flow.balance { shells, N, half, Re, Im, dRe, solve } → BALANCED FLOW's sampled defect and its repair ∇φ (flow-balance.js)
  *   chem.esp     { shells, N, half, D, atoms }   → THE POTENTIAL's N³ volume Φ(r) (0.6.5 X1, chemEsp below), on the cards queue
@@ -38,7 +39,7 @@ import { applyRotor } from './frontier.js';
 import { rotorsToZ } from './kick.js';
 import { wellPacket } from './well.js';
 import { densityPeriod } from './period.js';
-import { solveLadder } from './ladder-model.js';
+import { solveLadder } from './ladder-model.js'; import { solveLattice } from './lattice-model.js';
 import { moleculeRHF, registerRecord, BASIS_FILES } from './rhf-molecule.js';
 import { rpa } from './rpa-inspector.js';
 import { canonicaliseSpectrum, dipoleFamily, coordinateFamily } from './canon-gauge.js';
@@ -133,6 +134,7 @@ function work(m) {
       out = { re: P.re, im: P.im, captured: P.captured }; transfer = [P.re.buffer, P.im.buffer];
     } else if (m.op === 'period') { out = densityPeriod(m.energies, { horizon: m.horizon || 2e4 }); }
     else if (m.op === 'ladder') { out = { result: solveLadder(m.params || {}) }; }
+    else if (m.op === 'lattice.solve') { out = { result: solveLattice(m) }; }
     else if (m.op === 'gas.stats') { out = gasStats(m); }
     else if (m.op === 'export') { out = buildFile(m); transfer = out.bytes && out.bytes.buffer ? [out.bytes.buffer] : []; }   // an NPZ is a Blob (the kit's StoredZip): cloned, not transferred
     else if (m.op === 'chem.solve') { out = chemSolve(m); transfer = chemTransfer(out); }
