@@ -126,6 +126,8 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
            oscillator); no Y, no D, and m = 0 so the azimuthal phase below is 1 */
         let qs = (pos - M.ctr.xyz) * M.lag0.xyz;
         f = M.c.z * herm(u32(M.nlm.x), qs.x) * herm(u32(M.nlm.y), qs.y) * herm(u32(M.nlm.z), qs.z) * exp(-0.5 * dot(qs, qs));
+        /* THE CUBE (0.9.4 S2, c.w = 1): lag0 = (kᵢ = nᵢπ/L, L); ψ = norm · ∏ᵢ sin(kᵢ(qᵢ + L/2)) inside |qᵢ| < L/2, 0 outside — the walls are the envelope */
+        if (M.c.w > 0.5) { let h = 0.5 * M.lag0.w; let sv = sin(qs + M.lag0.xyz * h); f = select(0.0, M.c.z * sv.x * sv.y * sv.z, all(abs(pos - M.ctr.xyz) < vec3<f32>(h))); }
       } else {
         /* MOMENTUM  φ = norm · t^{l/2} P(t) (1+t)^{−(n+1)} · Y,  t = n²p²  (P = the Podolsky–Pauling numerator;
            the (−i)^l phase is folded into c on the CPU).  Same record, different envelope. */

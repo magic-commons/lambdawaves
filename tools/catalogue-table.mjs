@@ -35,7 +35,7 @@ const HAND = {
     atom: ['ATOM', 'NUMERICAL', [T('atoms'), 'HF limits He −2.86168, Ne −128.547, Ar −526.818'], '0.1.0'],                                // S08
     cornell: ['CENTRAL › QUARKONIUM', 'NUMERICAL', [T('cornell'), 'Numerov against the Airy spectrum of σr and the PDG levels'], '0.1.0'],   // S07
     central: ['CENTRAL', 'NUMERICAL', [T('central'), 'the confined 1s against M(1 − 1/κ, 2, 2κR_c) = 0; the well’s l = 0 law; Numerov at 2N'], '0.8.0'],   // 0.8.0 G1
-    separable: ['SEPARABLE', 'EXACT', [T('qho'), 'E = Σωᵢ(nᵢ + ½) closed; ISOTROPIC is the oscillator’s shells; the card prints E₀ and the degeneracies'], '0.9.4'] },   // 0.9.4 S1
+    separable: ['SEPARABLE', 'EXACT', [T('qho'), 'E = Σωᵢ(nᵢ + ½), the cube π²Σnᵢ²/(2L²), closed; ISOTROPIC is the oscillator’s shells; the card prints E₀ and the degeneracies'], '0.9.4'] },   // 0.9.4 S1
   gas: ['gas', 'GAS · AXIAL 256', 'ham:well', 'NUMERICAL', [T('gas'), 'energies z²/2a²; the projection reports its capture'], '0.1.0'],      // S06
   molecules: [['molecules', 'MOLECULES · RHF STO-3G', 'window:chem', 'NUMERICAL', [T('molecules'), 'PySCF 2.14 RHF energies (sto-3g-v1.json)'], '0.2.0'], // S17
     ['basis-631', '6-31+G*', 'basis:6-31+g-star', 'NUMERICAL', [T('basis-631'), '19 molecules against PySCF cart=True to 3e-12'], '0.2.0'],  // S18
