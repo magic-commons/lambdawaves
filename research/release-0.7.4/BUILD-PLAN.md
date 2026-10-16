@@ -5,7 +5,7 @@ special case subtracted at half) · the MOLECULES picker in shelves (+52)"; the 
 shelves (periodic table · heavy atoms · small biology · lattices) · SPECTRUM › OPERATOR · MOLECULES › SHELF"; §C l.158: `lab/catalogue.js` from 0.7.4, "the spine;
 the paper's table"; B.3's contract l.108). The census: `../release-0.6.0/census/SYSTEMS.md` §1 (S01–S30) and `measure/sonnet2-c-catalogue.json` (30 rows, every
 named oracle test found). Josh's dial (09:35): tight builds, features only, pre-1.0. Base: `yan-c` at the commit carrying the briefs after the v0.7.3-alpha cut
-(**TO FILL**); lines **TO FILL**; cap = lines × 1.01. Two rows; C2 after C1 merges (it reads the catalogue's rows).
+`d415be0` (the fill commit's sha is in the launch message); 29,479 `lab/` lines; cap 29,479 × 1.01 = **29,773** (294 of headroom; C1 + C2 plan +95). Two rows; C2 after C1 merges (it reads the catalogue's rows).
 
 ## The shape (the law of this cut)
 THE CATALOGUE is ONE table in `lab/catalogue.js` of every SYSTEM the instrument plays — hydrogen and its situations, the closed-form operators, ATOM,
