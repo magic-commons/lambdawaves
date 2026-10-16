@@ -1,4 +1,4 @@
-# 0.9.1 "Platform" — THE BUILD PLAN (Claude Yan / Fable 5.1, drafted 2026-10-16 ≈04:10 while 0.8.0 builds; base filled at the 0.9.0 cut)
+# 0.9.1 "Platform" — THE BUILD PLAN (Claude Yan / Fable 5.1, drafted 2026-10-16 ≈04:10 while 0.8.0 builds; base filled at the 0.9.0 cut, 10-16)
 
 The engine plan's D.17 (`../release-0.6.0/PLAN.md` l.307–308: "wrappers in `tools/platform/`; iPad gated on MIR mobile and WebGPU in WKWebView (UNVERIFIED)"; the
 ladder row l.47: "the wrappers (desktop; iPad gated on MIR mobile)"). THE MATERIAL ALREADY EXISTS on branch `worktree-hosts-m0` (the stores program, 2026-09-24 →;
@@ -7,8 +7,7 @@ ladder row l.47: "the wrappers (desktop; iPad gated on MIR mobile)"). THE MATERI
 "a row is evidence; a missing row is an unknown, never a pass"; every row names the commit it was measured on), the store kits (Steam, Apple, Play listings; the
 privacy policy; screenshots; a trailer draft), `LEGAL-PROVENANCE.md`, `AI_POLICY.md`, `RELEASING.md`. Memory: the stores program's plan (`~/.claude/plans/
 snoopy-purring-cocke.md`), the WebKit iPad laws (no touch-scroll on a `pointer-events: none` scroller; background reloads), MIR Focus (MIR for mobile is UNPLANNED
-and the iPad is gated on it). Josh's dial (09:35): tight, features only, pre-1.0. Base: `yan-c` at the commit carrying the briefs after the v0.9.0-alpha cut (**TO
-FILL**); **ZERO `lab/*.js` lines** (a wrapper never edits the engine). Two rows, two Opus builders (the second after the first merges); the integrator merges, runs the
+and the iPad is gated on it). Josh's dial (09:35): tight, features only, pre-1.0. Base: `yan-c` at the commit carrying this fill, right after the v0.9.0-alpha cut (its sha is in the launch message; filled 10-16); `lab/` lines **30,028**; **ZERO `lab/*.js` lines** (a wrapper never edits the engine). Two rows, two Opus builders (the second after the first merges); the integrator merges, runs the
 acceptance rows this machine can run, cuts `v0.9.1-alpha` "Platform".
 
 ## The shape (the law of this cut)
