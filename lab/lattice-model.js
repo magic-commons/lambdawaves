@@ -68,8 +68,8 @@ export function closed(p) {
     case 'aa': return { levels: null, line: `self-dual λ = 2J · Lyapunov γ = ln(λ/2J) = ${g > 0 ? g.toFixed(4) + ' (localised, ξ = ' + (1 / g).toFixed(1) + ' sites)' : '0 (extended)'}` };
     case 'anderson': return { levels: null, line: `1-D: every state localised · ξ(0) ≈ 105 J²/W² = ${p.W > 0 ? (105 / p.W ** 2).toFixed(1) : '∞'} sites (Kappus–Wegner)` };
     case 'tunnel': { const kr = Math.acos(-p.V / 2), sk = 1 / (p.sig * Math.SQRT2); let a = 0, w = 0; for (let k = 5e-4; k < Math.PI; k += 1e-3) { const g = Math.exp(-(((k - p.k0) / sk) ** 2) / 2); a += g * tunnelT(k, p.V, p.nb); w += g; }
-      return { levels: null, line: `T(k₀) = ${tunnelT(p.k0, p.V, p.nb).toFixed(4)} · the packet’s own ⟨T⟩ over its momenta (σ_k = ${sk.toFixed(3)}) ${(a / w).toFixed(4)}` + (p.nb !== 2 ? '' : p.V > 2 ? ' · no resonance in the band for V > 2J' : ` · resonance cos k = −V/2J at k = ${kr.toFixed(3)} (T = 1)${Math.abs(p.k0 - kr) < sk ? ' · ON IT' : ''}`) }; }
-    case 'patch': return { levels: null, line: `a patch of ${AB.n} vertices, 8-fold · as computed: the first Bragg orbit |q| = π(1 + √2) = ${AB.peaks[0].q.toFixed(4)}, S = ${AB.peaks[0].S.toFixed(3)}` };
+      return { levels: null, line: `T(k₀) = ${tunnelT(p.k0, p.V, p.nb).toFixed(4)} · the packet’s own ⟨T⟩ over its momenta (σ_k = ${sk.toFixed(3)}) ${(a / w).toFixed(4)}` + (p.nb !== 2 ? '' : p.V >= 2 ? ' · no resonance inside the band for V ≥ 2J' : ` · resonance cos k = −V/2J at k = ${kr.toFixed(3)} (T = 1)${Math.abs(p.k0 - kr) < sk ? ' · ON IT' : ''}`), sub: 'the prediction; T · R is the measurement' }; }
+    case 'patch': return { levels: null, line: `a patch of ${AB.n} vertices, 8-fold · as computed: the first Bragg orbit |q| = π(1 + √2) = ${AB.peaks[0].q.toFixed(4)}, S = ${AB.peaks[0].S.toFixed(3)}`, sub: 'lab/ab-patch.json, from tools/lattice/ammann-beenker.mjs' };
     default: return { levels: null, line: 'the sheet: E(k) = ±J|1 + e^{ik·a₁} + e^{ik·a₂}| ∈ [−3J, 3J] — the flake’s levels, not the sheet’s' };
   }
 }

@@ -14,7 +14,7 @@ const NOTE = { benzene: ' Hückel: the six π levels ±2β, ±β, ±β fall 1 + 
   patch: ' A patch of the Ammann–Beenker tiling, cut and projected from ℤ⁴ through the octagonal window (tools/lattice/ammann-beenker.mjs), never the quasicrystal.' };
 export function createLattice(host, api) {
   const P = { ...DEFAULTS }, ui = {}; let H = null, S = null, ev = null, t0 = 0, hit = -1, got = null, lastTT = 0, dirty = true, busy = false, gen = 0, lastT = NaN, lut = null, lutOf = null, geo = null;
-  const pre = stepper({ aria: 'Lattice preset', items: PRESETS.map(({ id, label }) => ({ id, label })), value: P.preset, cls: 'mol-step', onChange: (id) => set(id === 'tunnel' ? { preset: id, N: 256, state: 'packet', x0: 0.25, sig: 4 } : { preset: id }) });
+  const pre = stepper({ aria: 'Lattice preset', items: PRESETS.map(({ id, label }) => ({ id, label })), value: P.preset, cls: 'mol-step', onChange: (id) => set({ preset: id }) });
   const st = seg({ aria: 'Lattice state', value: P.state, options: Object.keys(SK).map((id) => ({ id, label: id === 'eigen' ? 'EIGEN m' : id === 'site' ? 'SITE n' : id.toUpperCase() })), onChange: (v) => set({ state: v }) });
   host.append(pre.root, st.root); const r1 = el('div', 'row', host);
   for (const [k, [label, min, max, step]] of Object.entries(KN)) r1.appendChild((ui[k] = knob({ label, min, max, value: P[k], step,
@@ -27,6 +27,7 @@ export function createLattice(host, api) {
     pre.set(P.preset); st.set(P.state); ro.tr.root.style.display = P.preset === 'tunnel' ? '' : 'none'; note.innerHTML = '<b>Units.</b> J = 1 is the energy unit and 1/J the time unit; t is the transport clock’s, from the moment the state is picked.' + (NOTE[P.preset] || '');
   }
   function set(p) {
+    if (p.preset === 'tunnel' && P.preset !== 'tunnel') p = { N: 256, state: 'packet', x0: 0.25, sig: 4, ...p };   // TUNNEL's packet from the left, unless a load or the verb says otherwise
     const was = { ...P }; Object.assign(P, p); sync();
     if (Object.keys(DEFAULTS).some((k) => !STK.includes(k) && P[k] !== was[k])) { dirty = true; gen++; if (api.active()) prepare(); }
     else if (S && STK.some((k) => P[k] !== was[k])) restate();
@@ -40,7 +41,7 @@ export function createLattice(host, api) {
     ev = evolver(S, psi0(P, S, H.xy)); t0 = api.t(); lastT = NaN; hit = -1; got = null;
     const c = closed(P), E = S.E, n = S.n, h = n >> 1; let d = 0; if (c.levels) for (let k = 0; k < n; k++) d = Math.max(d, Math.abs(E[k] - c.levels[k]));
     ro.lev.set(`${n} sites · ${E[0].toFixed(4)} … ${E[n - 1].toFixed(4)}`); ro.lev.setSub(`E₁ − E₀ = ${(E[1] - E[0]).toFixed(5)} · mid E_{N/2} − E_{N/2−1} = ${(E[h] - E[h - 1]).toFixed(5)}`);
-    ro.law.set(c.line); ro.law.setSub(c.levels ? `the measured levels agree to ${d.toExponential(1)}` : 'the prediction; the IPR is the measurement'); update(api.t());
+    ro.law.set(c.line); ro.law.setSub(c.levels ? `the measured levels agree to ${d.toExponential(1)}` : c.sub || 'the prediction; the IPR is the measurement'); update(api.t());
   }
   function update(t) { if (dirty) { prepare(); return; } if (!ev || t === lastT) return; lastT = t; paint(ev.at(t - t0)); }
   function paint(psi) {
@@ -55,7 +56,7 @@ export function createLattice(host, api) {
     const X = (x) => W / 2 + (x - (x0 + x1) / 2) * s, Y = (y) => (flat ? bot : (10 + bar + bot) / 2 + (y - (y0 + y1) / 2) * s), w = Math.max(1.5, Math.min(10, s * 0.6)); geo = { X, Y };
     if (P.preset === 'tunnel') { const tt = lastT - t0, sp = split(psi, P); if (tt < lastTT) { hit = -1; got = null; } lastTT = tt; if (sp.B > 1e-4) hit = tt; else if (hit >= 0 && !got && tt - hit >= 2) got = { ...sp, t: tt };   // passed: under 1e-4 for 2/J (the lattice's Airy tail rings through it)
       ro.tr.set(got ? `T ${got.T.toFixed(3)} measured · ${tunnelT(P.k0, P.V, P.nb).toFixed(4)} T(k₀) · R + T = ${(got.R + got.T).toFixed(9)}` : `on the barrier ${sp.B.toExponential(1)}`); ro.tr.setSub(got ? `R ${got.R.toFixed(3)} · read at t = ${got.t.toFixed(1)}/J` : 'waiting for the packet to pass');
-      g.fillStyle = T.ink(0.12); g.fillRect(X((n >> 1) - P.nb + 0.5), bot - bar * P.V / 4, s * P.nb, bar * P.V / 4); }   // the barrier, V/4J tall
+      g.fillStyle = T.ink(0.2); g.fillRect(X((n >> 1) - P.nb + 0.5), bot - bar * P.V / 4, Math.max(3, s * P.nb), bar * P.V / 4); }   // the barrier, V/4J tall
     g.strokeStyle = T.ink(0.3); g.lineWidth = 1; g.beginPath(); for (const [i, j] of H.hop) { g.moveTo(X(xy[i][0]), Y(xy[i][1])); g.lineTo(X(xy[j][0]), Y(xy[j][1])); } g.stroke();
     for (let i = 0; i < n; i++) { const q = (psi.re[i] ** 2 + psi.im[i] ** 2) / mx, u = Math.floor(((Math.atan2(psi.im[i], psi.re[i]) / (2 * Math.PI) + 0.5) % 1) * 256) % 256;
       g.fillStyle = `rgb(${lut[u * 4] * 255 | 0},${lut[u * 4 + 1] * 255 | 0},${lut[u * 4 + 2] * 255 | 0})`; g.fillRect(X(xy[i][0]) - w / 2, Y(xy[i][1]) - q * bar, w, Math.max(1, q * bar)); }

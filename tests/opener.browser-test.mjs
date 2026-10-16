@@ -1,9 +1,9 @@
-// 0.5.0 C6b · THE OPENER — a cold start opens on the kit's photosensitivity notice, then the kit's title screen: the nine demos as
+// 0.5.0 C6b · THE OPENER — a cold start opens on the kit's photosensitivity notice, then the kit's title screen: the ten demos as
 // covers, NEW, and RESUME when the session holds work.  A test driver gets neither; `?opener=1` makes a driven start a human one, which
 // is how this suite sees them.  Every press is a real pointer on a target elementFromPoint says is on top (gatekit tap); every key is
 // the driver's own.  Scenes, in one fresh profile, in order:
 //   1 the notice comes first (the lab boots behind it, LW.ready waits for the choice), keys do not reach the lab, CONTINUE writes `warned`
-//   2 the title screen: nine covers named for the demos, NEW, no RESUME on a first visit; keys do not reach the lab while it is up
+//   2 the title screen: ten covers named for the demos, NEW, no RESUME on a first visit; keys do not reach the lab while it is up
 //   3 NEW boots the shipped scene (ring [boot], clean, the session armed) and the keys are the lab's again
 //   4 a reload of a tab that made nothing since NEW shows neither the notice nor the title screen
 //   5 an edit, a reload: the title screen with RESUME; RESUME puts the edit back (ring [resume], unsaved) and is OFFERED a build
@@ -70,12 +70,12 @@ try {
 
   /* ── 2 · THE TITLE SCREEN ── */
   const s2 = await g.ev(`await __w(500); const v0 = __LW.mat.view; return { ...__screen(), v0 };`);
-  assert.deepEqual(s2.covers, ['wave-dancer=WAVE DANCER', 'water=WATER', 'benzene=BENZENE', 'n2=N₂', 'h2-sigma-u=H₂ σu', 'helium=HELIUM', 'chord=CHORD', 'bucky=BUCKY', 'break=BREAK']);
+  assert.deepEqual(s2.covers, ['wave-dancer=WAVE DANCER', 'water=WATER', 'benzene=BENZENE', 'n2=N₂', 'h2-sigma-u=H₂ σu', 'helium=HELIUM', 'chord=CHORD', 'bucky=BUCKY', 'break=BREAK', 'tunnel=TUNNEL']);
   assert.deepEqual([s2.home, s2.resume, s2.warned, s2.ready], [true, false, true, false], JSON.stringify(s2));
   await g.press(' '); await g.press('v');
   const s2k = await g.ev(`await __w(200); return { view: __LW.mat.view, playing: __LW.clock.playing, up: !!document.querySelector('.mir-opener') };`);
   assert.deepEqual(s2k, { view: s2.v0, playing: false, up: true }, 'a key reached the lab behind the title screen');
-  pass(`the title screen: nine covers (${s2.covers.map((c) => c.split('=')[1]).join(', ')}), NEW, no RESUME on a first visit; Space and V did not reach the lab behind it`);
+  pass(`the title screen: ten covers (${s2.covers.map((c) => c.split('=')[1]).join(', ')}), NEW, no RESUME on a first visit; Space and V did not reach the lab behind it`);
 
   /* ── 3 · NEW ── */
   assert.equal((await press('.mir-opener-home')).ok, 1, 'NEW was not pressable');
