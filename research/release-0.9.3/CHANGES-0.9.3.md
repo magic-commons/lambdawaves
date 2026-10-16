@@ -25,11 +25,21 @@ S_A · CNOT · SWAP · RESET applied in order and shown as a tape; from PRODUCT,
   step error, 16× smaller at dt/2; a road the app never takes there). Screenshot `.tmp/d1-damped.png` in the builder's worktree. Node 0 (bloch's halving law now
   covers the two presets), rack-deps 0, new-project in step, serialize-bytes 11 readings.
 
-## D2 · THE GATE SET
-(filled at D2's merge)
+## D2 · THE GATE SET (branch `d2-gates` tip `367f274`, merged `6d234c0`; `lab/bloch-model.js`, `lab/bloch.js`, `docs/STATE-SCOPES.md`; +8 lab lines → 30,118)
+- **The model:** `GATES` — H_A, X_A, Z_A, S_A as U ⊗ 1 on A's two amplitude pairs; CNOT (c↓↑ ↔ c↓↓) and SWAP (c↑↓ ↔ c↓↑) as index maps; `applyTape` in order;
+  `DEFAULTS.tape = []`; `pair` and `bell` take the tape (`bell` signs its axes to the state AFTER the tape — otherwise Ψ⁺ after X_A would read CHSH 0); an empty tape is
+  byte-identical to the base. **The window:** a trig row H_A · X_A · Z_A · S_A · CNOT · SWAP · RESET under the Bell seg (≤ 8 gates, the oldest dropped; hidden in ONE);
+  the ENTANGLEMENT sub opens "tape H_A · CNOT" or "no gates"; `BL.label` shows the tape; `save()` writes `tape` only when non-empty, `load()` keeps known ids; the
+  `instruments.bloch` row names it. **The local rotation acts after the tape** (the plan's reading, not the brief's "before"): θ₀, φ₀ never change S_A and the axes
+  stay fixed — θ₀ = 1.2 after the circuit leaves S_A at ln 2 and moves CHSH to 1.1617.
+- **Checked once:** H_A · CNOT on PRODUCT = Φ⁺ exactly ([0.7071…, 0, 0, 0, 0, 0, 0.7071…, 0]); then X_A → Ψ⁺, Z_A → Φ⁻, SWAP leaves Φ⁺, CNOT² = 1, all |Δ| = 0; in the
+  window S_A 0 → ln 2 and CHSH √2 → 2√2 (4.4e-16) — PRODUCT reads √2 on the drawn axes, not 2 (a correction to the brief). Screenshot `.tmp/d2-bell-circuit.png` in
+  the builder's worktree. Node 0 (bell 6 laws, bloch 7), rack-deps 0, new-project in step, serialize-bytes 11.
 
 ## The light check and the cut
-(filled at the cut)
+On the merged tree `6d234c0`: node 0, pwa in step, new-project in step, `lab/` 30,118 of the 30,391 cap; THE LOCK once on 9241 (`--query gastab=0`): 860 values, 0/0,
+58 s (BLOCH never writes the field); the visual check: D1's DAMPED RABI with the vector inside the sphere and its trail spiralling in, D2's Bell circuit (the
+builders' screenshots, read by the integrator). Then the local cut `v0.9.3-alpha` "Decohere", CHANGELOG, snapshot 41.
 
 ## Known, deferred (recorded)
 Decoherence on the pair (local dephasing killing CHSH); a chirped drive with damping as a closed form (none — RK4 serves); measurement (a projective click on A); a
