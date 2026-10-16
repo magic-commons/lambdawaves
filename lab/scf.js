@@ -112,3 +112,57 @@ export function rhf(basis, { nElectrons, diis = 8, damping = 0, maxIter = 200, t
   }
   return { energy, electronic: energy - Enuc, orbitalEnergies: eps, C, D, F, iterations, converged, history, diisUsed, error: errMax, floor, nocc };
 }
+
+/** the exchange matrix K[D]_ij = Σ_kl D_kl (il|kj) — fockReal(D) is h + J[D] − ½K[D], left as it was so every closed shell keeps its bits */
+export function exchange({ eri, n }, D) {
+  const K = new Float64Array(n * n);
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { let f = 0; for (let k = 0; k < n; k++) for (let l = 0; l < n; l++) f += D[k * n + l] * eri[((i * n + l) * n + k) * n + j]; K[i * n + j] = f; }
+  return K;
+}
+/**
+ * uhf(basis, { nAlpha, nBeta, diis = 8, maxIter = 200, tol = 1e-10, guess = 'core', mix = 0 }) — UNRESTRICTED HF (Pople–Nesbet 1954): rhf's loop with
+ * two densities.  Fσ = h + J[Dα + Dβ] − K[Dσ] = fockReal(D) ∓ ½K[Ds], D = Dα + Dβ (Tr DS = N, as rhf's), Ds = Dα − Dβ; one DIIS over the two error
+ * vectors end to end; rhf's round-off floor.  guess: 'core' or an n × n total density split nα : nβ.  mix: the α HOMO takes tan θ = mix of the α LUMO
+ * on the first build — the broken-symmetry seed a singlet needs to leave the RHF point, with DIIS held until ‖ẽ‖ < 1e-4 (sooner, it extrapolates back onto the RHF saddle: H₂ at 3 bohr).  ⟨S²⟩ = Sz(Sz + 1) + nβ − Σ_ij |Cαᵢᵀ S Cβⱼ|².
+ */
+export function uhf(basis, { nAlpha, nBeta, diis = 8, maxIter = 200, tol = 1e-10, guess = 'core', mix = 0 } = {}) {
+  const { n, S, h, Enuc = 0 } = basis, nn = n * n, { X } = loewdin(S, n), Xt = tr(X, n), N = nAlpha + nBeta, sp = [nAlpha, nBeta];
+  if (!(nAlpha >= nBeta && nBeta >= 0 && N > 0 && nAlpha <= n)) throw new Error('scf: uhf needs n ≥ nα ≥ nβ ≥ 0');
+  let Ds = sp.map((k) => (guess === 'core' ? new Float64Array(nn) : Float64Array.from(guess, (v) => v * k / N)));
+  let F = null, C = null, eps = null, energy = NaN, converged = false, iterations = 0, errMax = Infinity, best = Infinity, stall = 0, floor = null;
+  const Fs = [], Es = [];
+  for (let it = 0; it < maxIter; it++) {
+    const D = Ds[0].map((v, k) => v + Ds[1][k]), G = fockReal(basis, D), Kh = exchange(basis, Ds[0].map((v, k) => (v - Ds[1][k]) / 2));
+    F = [G.map((v, k) => v - Kh[k]), G.map((v, k) => v + Kh[k])];
+    let Enow = Enuc; for (let k = 0; k < nn; k++) Enow += 0.5 * (D[k] * h[k] + Ds[0][k] * F[0][k] + Ds[1][k] * F[1][k]);
+    const et = F.map((Fq, q) => { const e = mm(mm(Fq, Ds[q], n), S, n), e2 = mm(mm(S, Ds[q], n), Fq, n); for (let k = 0; k < nn; k++) e[k] -= e2[k]; return mm(mm(Xt, e, n), X, n); });
+    errMax = 0; for (const e of et) for (const v of e) errMax = Math.max(errMax, Math.abs(v));
+    if (it > 0 && errMax < tol && Math.abs(Enow - energy) < tol) { energy = Enow; converged = true; iterations = it; break; }
+    if (errMax < best * (1 - 1e-3)) { best = errMax; stall = 0; } else stall++;
+    if (it > 0 && stall >= 25 && best < 1e-6 && Math.abs(Enow - energy) < tol) { energy = Enow; converged = true; iterations = it; floor = best; break; }
+    energy = Enow; iterations = it + 1;
+    let Fuse = F;
+    if (diis > 0 && it > 0 && (!mix || errMax < 1e-4)) {
+      Fs.push(F); Es.push(et); if (Fs.length > diis) { Fs.shift(); Es.shift(); }
+      while (Fs.length >= 2) {
+        const m = Fs.length, B = new Float64Array((m + 1) * (m + 1)), rhs = new Float64Array(m + 1);
+        for (let i = 0; i < m; i++) for (let j = 0; j < m; j++) { let s = 0; for (let q = 0; q < 2; q++) for (let k = 0; k < nn; k++) s += Es[i][q][k] * Es[j][q][k]; B[i * (m + 1) + j] = s; }
+        for (let i = 0; i < m; i++) { B[i * (m + 1) + m] = -1; B[m * (m + 1) + i] = -1; }
+        rhs[m] = -1;
+        let c; try { c = solveLinear(B, rhs, m + 1); } catch { Fs.shift(); Es.shift(); continue; }
+        Fuse = [0, 1].map((q) => { const A = new Float64Array(nn); for (let i = 0; i < m; i++) for (let k = 0; k < nn; k++) A[k] += c[i] * Fs[i][q][k]; return A; });
+        break;
+      }
+    }
+    const eig = Fuse.map((Fq) => eigSym(mm(mm(X, Fq, n), X, n), n));
+    eps = eig.map((e) => e.values); C = eig.map((e) => mm(X, e.vectors, n));
+    if (it === 0 && mix && nAlpha < n) { const c = 1 / Math.hypot(1, mix), H = nAlpha - 1;      // the broken-symmetry seed, once
+      for (let i = 0; i < n; i++) { const a = C[0][i * n + H], b = C[0][i * n + H + 1]; C[0][i * n + H] = c * (a + mix * b); C[0][i * n + H + 1] = c * (b - mix * a); } }
+    Ds = C.map((Cq, q) => { const P = new Float64Array(nn); for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { let s = 0; for (let o = 0; o < sp[q]; o++) s += Cq[i * n + o] * Cq[j * n + o]; P[i * n + j] = s; } return P; });
+  }
+  const SCb = mm(S, C[1], n); let ov = 0;
+  for (let i = 0; i < nAlpha; i++) for (let j = 0; j < nBeta; j++) { let s = 0; for (let k = 0; k < n; k++) s += C[0][k * n + i] * SCb[k * n + j]; ov += s * s; }
+  const Sz = (nAlpha - nBeta) / 2;
+  return { energy, electronic: energy - Enuc, Calpha: C[0], Cbeta: C[1], epsAlpha: eps[0], epsBeta: eps[1], Dalpha: Ds[0], Dbeta: Ds[1], Falpha: F[0], Fbeta: F[1],
+    D: Ds[0].map((v, k) => v + Ds[1][k]), Ds: Ds[0].map((v, k) => v - Ds[1][k]), s2: Sz * (Sz + 1) + nBeta - ov, iterations, converged, floor, error: errMax, nAlpha, nBeta };
+}
