@@ -7,7 +7,7 @@ printed) · INTER-SHELL STARK (+50) · tap SQUEEZE-IN. Persists: potential id + 
 sphere and a screened Coulomb — turn the wall in or the screening up and watch states LEAVE the bound spectrum; a finite well; quarkonium back with its editor; a
 soft-core well; squeezed (to a stated limit) and cat oscillator states; a STARK field that ionises"). The census: `../release-0.6.0/census/SYSTEMS.md` §2 rows
 3, 6, 11 and `measure/sonnet2-e-squeeze` (the squeeze's truncation numbers). Josh's dial (09:35): tight builds, features only, pre-1.0. Base: `yan-c` at the
-commit carrying the briefs after the v0.7.4-alpha cut (**TO FILL**); lines **TO FILL**; cap = lines × 1.01. Three rows, three Opus builders in parallel (they
+commit carrying the briefs after the v0.7.4-alpha cut `6bf32bf` (the fill commit's sha is in the launch messages); 29,525 `lab/` lines; cap 29,525 × 1.01 = **29,820** (G1 + G2 + G3 plan +190). Three rows, three Opus builders in parallel (they
 touch disjoint files); the integrator merges G1, G3, G2, light check, cut `v0.8.0-alpha` "Central Lab".
 
 ## The shape (the law of this cut)
