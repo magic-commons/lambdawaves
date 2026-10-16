@@ -56,7 +56,9 @@ export function createMolecules(app) {
     onChange: () => { app.sh.saveSettings(); schedule(TIER.PRESENT); } });   // 0.7.0 V2: rack.js draws it (lab/skeleton.js); chemview seats it after the VIEW row's chevron
   ui.beadSw = sw({ label: 'BEAD', value: false, title: 'THE BEAD: the expectation point (⟨x⟩, ⟨y⟩, ⟨z⟩) on the stage with its trail over the last period (⟨p⟩ in momentum space; for a molecule the electron density\'s centroid (ΣZR − μ)/N_e) — a PREFERENCE, off by default',
     onChange: () => { app.sh.saveSettings(); schedule(TIER.PRESENT); } });   // 0.8.2 P3: rack.js draws it on the skeleton's canvas
-  app.state.chem = createChem(wChem.body, { skeleton: ui.skeletonSw, bead: ui.beadSw, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
+  ui.ellipsoidSw = sw({ label: 'ELLIPSOID', value: false, title: 'THE UNCERTAINTY ELLIPSOID: the position covariance Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ as its three principal circles, semi-axes √λ_k, about the bead (with it) — position space and a register only; a PREFERENCE, off by default',
+    onChange: () => { app.sh.saveSettings(); schedule(TIER.PRESENT); } });   // 0.8.3 B3: rack.js draws it after the bead
+  app.state.chem = createChem(wChem.body, { skeleton: ui.skeletonSw, bead: ui.beadSw, ellipsoid: ui.ellipsoidSw, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },

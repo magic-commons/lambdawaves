@@ -21,7 +21,7 @@ export function createSkeleton(cv) {
     if (!bead || bead.key !== trailKey || bead.t < trailT) { trail = []; trailKey = bead && bead.key; trailT = -Infinity; }   // a new state, or the clock run back: the trail starts again
     if (bead && bead.t - trailT >= bead.T / 64) { trail.push(bead.r); trailT = bead.t; if (trail.length > 64) trail.shift(); }
     const ak = atoms.map((a) => `${a.Z},${a.x.toFixed(4)},${a.y.toFixed(4)},${a.z.toFixed(4)}`).join(';');
-    const k = [ak, dipole ? dipole.map((v) => v.toFixed(4)).join() : '', cameraKey(obs), obs.dist.toFixed(4), obs.fov, half, W, H, dpr, th, bead ? bead.r.map((v) => v.toFixed(4)).join() + ':' + trail.length + ':' + trailT : ''].join('|'); if (k === key) return; key = k;
+    const k = [ak, dipole ? dipole.map((v) => v.toFixed(4)).join() : '', cameraKey(obs), obs.dist.toFixed(4), obs.fov, half, W, H, dpr, th, bead ? bead.r.map((v) => v.toFixed(4)).join() + ':' + trail.length + ':' + trailT : '', bead && bead.ell ? bead.ell.S.flat().map((v) => v.toFixed(4)).join() : ''].join('|'); if (k === key) return; key = k;
     if (ak !== atomsKey) { atomsKey = ak; bonds = []; for (let i = 0; i < atoms.length; i++) for (let j = i + 1; j < atoms.length; j++) { const a = atoms[i], b = atoms[j]; if (Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) < 1.3 * (RCOV[a.Z] + RCOV[b.Z])) bonds.push([i, j]); } }
     if (th !== theme) { theme = th; const cs = getComputedStyle(document.body); ink = cs.getPropertyValue('--fg').trim() || cs.color; acc = cs.getPropertyValue('--acc').trim() || ink; }
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
@@ -43,6 +43,8 @@ export function createSkeleton(cv) {
     if (!bead) return; const B = trail.map((r) => S.at(r[0], r[1], r[2])).filter(Boolean), b = S.at(bead.r[0], bead.r[1], bead.r[2]); g.strokeStyle = g.fillStyle = acc; g.lineWidth = 1.5; g.lineCap = 'round';   // THE BEAD, after the skeleton
     for (let i = 1; i < B.length; i++) { g.globalAlpha = 0.85 * i / B.length; g.beginPath(); g.moveTo(B[i - 1][0], B[i - 1][1]); g.lineTo(B[i][0], B[i][1]); g.stroke(); }
     if (b) { g.globalAlpha = b[2] > zc ? 0.8 : 1; g.beginPath(); g.arc(b[0], b[1], 6, 0, 2 * Math.PI); g.fill(); g.strokeStyle = ink; g.lineWidth = 1; g.stroke(); }
+    const E = b && bead.ell; if (!E) return; const L = E.lam.map((l) => Math.sqrt(Math.max(0, l))), at = (j, k, f) => S.at(...[0, 1, 2].map((q) => bead.r[q] + L[j] * Math.cos(f) * E.axes[j][q] + L[k] * Math.sin(f) * E.axes[k][q]));   // 0.8.3 B3 THE ELLIPSOID: its three principal circles, √λ_k about the bead
+    g.strokeStyle = acc; g.lineWidth = 1.25; for (const far of [true, false]) { g.globalAlpha = far ? 0.22 : 0.9; g.beginPath(); for (const [j, k] of [[0, 1], [0, 2], [1, 2]]) for (let i = 0, q = at(j, k, 0); i < 64; i++) { const p = at(j, k, (i + 1) * Math.PI / 32); if (p && q && (p[2] + q[2]) / 2 > b[2] === far) { g.moveTo(q[0], q[1]); g.lineTo(p[0], p[1]); } q = p; } g.stroke(); }   // the far half dimmed, as angular-nodes.js dims
   }
   return { draw, clear };
 }

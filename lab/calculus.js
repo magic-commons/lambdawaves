@@ -14,7 +14,7 @@
  */
 import { BASIS } from './hydrogen.js';
 import { angularDipoleZ, radialDipole, dipoleZ, radialObservables, angularMoments, radialMoment } from './dynamics.js';
-import { momentumZ, AXIS_TO_Z } from './kick.js';
+import { momentumZ, AXIS_TO_Z, rotorsToZ } from './kick.js';
 import { applyRotor } from './frontier.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { wellNorm, wellK, wellZ, wellRadius } from './well.js';
@@ -141,3 +141,15 @@ export function calculusMarkdown(S) {
   return `### CALCULUS · $t = ${S.t.toFixed(3)}$\n\nFigure. ${out.join(' ')} At $t = ${S.t.toFixed(3)}$ over ${S.ids} populated state${S.ids === 1 ? '' : 's'}, $h = ${texNum(S.h, 3)}$.\n\n`
     + laws.map((l) => `$$${l}$$`).join('\n\n') + '\n';
 }
+/* THE UNCERTAINTY ELLIPSOID (0.8.3 B3): Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ per unit norm, exact within the register.  Var along a unit d is varianceZ of the state
+ * turned by the slap's rotorsToZ(d) (⟨a|z²|b⟩: the l ± 1 insertion of cos θ — the rank-0 and rank-2 Gaunt pieces at once — times ∫R_aR_b r⁴dr), so x̂, ŷ, ẑ and the
+ * three diagonals give Σ (Σ_ij = Var((e_i + e_j)/√2) − (Σ_ii + Σ_jj)/2); the axes by six cyclic Jacobi sweeps; r2 is ⟨r²⟩ by its own road (l = l′, m = m′), the trace's oracle */
+let CV = null;
+export function covariance(reg, t) { const H = getHamiltonian(), k = `${reg.version}|${t}|${H.id}|${H.k || H.Z || 1}|${H.radius || 0}`; if (CV && CV.reg === reg && CV.k === k) return CV;
+  const c = reg.at(t), ids = reg.populated(), all = BASIS.map((s) => s.index), V = (d) => { const a = Float64Array.from(c.re), b = Float64Array.from(c.im); for (const R of rotorsToZ(d)) applyRotor(a, b, R); return varianceZ(a, b, all.filter((q) => a[q] || b[q])); };
+  const S = [0, 1, 2].map((i) => [0, 1, 2].map((j) => +(i === j))), E = S.map((r) => r.slice()); S.forEach((r, i) => { r[i] = V(r.slice()); });
+  for (const [i, j] of [[0, 1], [0, 2], [1, 2]]) S[i][j] = S[j][i] = V([0, 1, 2].map((q) => (q === i || q === j) / Math.SQRT2)) - (S[i][i] + S[j][j]) / 2;
+  const A = S.map((r) => r.slice()); for (let s = 0; s < 6; s++) for (const [p, q] of [[0, 1], [0, 2], [1, 2]]) { if (!A[p][q]) continue; const h = Math.atan2(2 * A[p][q], A[q][q] - A[p][p]) / 2, co = Math.cos(h), si = Math.sin(h);
+    for (const M of [A, E]) for (const r of M) { const x = r[p], y = r[q]; r[p] = co * x - si * y; r[q] = si * x + co * y; }   // the columns: A·J, and the axes V·J
+    for (let m = 0; m < 3; m++) { const x = A[p][m], y = A[q][m]; A[p][m] = co * x - si * y; A[q][m] = si * x + co * y; } }   // the rows: Jᵀ·(A·J)
+  return (CV = { reg, k, S, lam: [0, 1, 2].map((q) => A[q][q]), axes: [0, 1, 2].map((q) => E.map((r) => r[q])), mean: expectR(c.re, c.im, ids), r2: radialObservables(c.re, c.im, ids, 0).r2 }); }
