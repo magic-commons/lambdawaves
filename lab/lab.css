@@ -795,6 +795,13 @@ body[data-theme="dark"] .km-key-unbound {
   font: inherit; color: var(--fg); letter-spacing: inherit; text-align: center; text-align-last: center; text-overflow: ellipsis; cursor: pointer; }
 .mol-pick select.sel:hover { background: var(--state-hover, var(--glass-raise)); }
 .mol-section > .sw { flex: 0 1 auto; }
+/* 0.7.4 C2 · THE SHELF (chemview.js): the page as tiles under the picker, as many as fit (two a row on a phone); a tile wears ATOMS' cell (.pk-c), the current one lit */
+.mol-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 4px; margin: 2px 0 6px; --nc: var(--acc); }
+.mol-shelf[hidden] { display: none; }
+.mol-shelf .mol-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-width: 0; height: auto; padding: 4px 6px; text-align: left; line-height: 1.25; font-size: var(--fs-micro); }
+.mol-tile > * { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mol-tile > b { color: var(--fg); font-size: var(--fs-tiny); }
+body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 
 /* 0.5.3 M11 · STATE's A / B is ONE row (R7): STORE A · A · STORE B · B, built in that order by state.js, skin.css's .native-ab the four
    columns.  A stored slot is lit by a CLASS, never a child text node (current.browser-test finds the buttons by exact textContent): the

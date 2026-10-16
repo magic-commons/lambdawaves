@@ -29,11 +29,28 @@ you pick, the periodic table first.
   the 11 lattice presets present, `--check` in step; serialize-bytes 0 of 11 differ; `molecular-names.browser-test` adapted to the stepper (QUARKONIUM listed but
   unpickable) and green; the + list did not change shape. rack-deps holds with SPECTRUM at its limit 25 — no headroom for another crossing in that module.
 
-## C2 · THE SHELVES
-(filled at C2's merge)
+## C2 · THE SHELVES (`lab/chemview.js` +18 with one line in `lab/windows/molecules.js`, 7 lines in `lab.css`)
+- **The shelf.** Pressing the SECTION name opens a `.mol-shelf` panel under the MOLECULE picker and above BASIS (folded shut by default; `aria-controls` and
+  `aria-expanded` on the name — the chevron's ARIA idiom, no glyph: the kit sizes the name's seat to its longest word and a glyph would move the arrows; Alt+↓
+  still opens the kit's list). It shows the page's molecules as TILES in GROUPS order: the formula (`<m>`), the name, the AO count, the catalogue's word (read from
+  `CATALOGUE`, never a second table) and a lamp — LIVE · INSTALLED · DOWNLOAD · NOT A MINIMUM; the tooltip is the dropdown option's own text with the reason or
+  "past the cap". One tap folds the shelf and is `handPick(id)`; the dropdown and its arrows are unchanged; the shelf refreshes on a page or lamp change and on a pick.
+- **The periodic table.** ‹ ATOMS › is a new first page of the stepper's items (`SECTIONS` in `molecules.js` unchanged, so `__LW.chem.section`, INSTALLED and the
+  tests' page loops behave as before): 36 tiles H–Kr with the symbol, Z and ATOM's word (NUMERICAL — there are no per-element rows). A tap switches MOLECULES off if
+  it is on (else the molecule would keep the field), sets the element, sets the operator to ATOM, updates SPECTRUM's ‹ SYSTEM › and opens the ATOMS card — through
+  the chem `api`'s new `atomZ()` / `atom(z)` in `windows/molecules.js` (the ATOM road lives there, not in `atomsview.js` as the brief guessed). On the ATOMS page
+  the MOLECULE picker reads empty, as on any page not holding the molecule on screen.
+- **Layout.** CSS grid with `auto-fill`: three tiles a row in the card, two on a phone (`body.phone`); the tiles reuse ATOMS' `.pk-c` cell, no new colour; five
+  short lines a tile so nothing is cut at three a row. **Tiles per shelf:** ATOMS 36 · DIATOMICS 17 · HYDRIDES 23 · ORGANIC 12 · BIO 27 · LATTICE 6 · HEAVY 13 (the
+  98 molecules, the dropdown's pages).
+- **Checked:** chem.browser 0 failing of 56; serialize-bytes 0 of 22 shas differ against the base; rack-deps holds (SPECTRUM untouched at 25; molecules 13 → 14);
+  a throwaway probe: the name opened the shelf and no kit list, Ar set the operator to ATOM and Z = 18 and opened ATOMS, benzene set the preset and the dropdown; no
+  page errors; screenshots in the builder's `.tmp/` (c2-organic, c2-atoms).
 
 ## The light check (existing gates only) and the cut
-(filled at the cut)
+- Node gate 0 after each merge; `pwa --write`; `new-project --check` in step; `rack-deps --classes` holds; `tests/catalogue.test.mjs` + `tools/catalogue-table.mjs --check` green; lw-facade re-captured (+1 row) and
+  molecular-names green on C1's merge; `tests/chem.browser-test.mjs` once on the merged tree; THE LOCK ×2 at the merge tip with `--query gastab=0` on BOTH runs — results in the HANDOFF §2 block of the cut.
+- **Lines:** 29,479 → 29,525 (+46 = C1 +28, C2 +18; cap 29,773).
 
 ## Known, deferred (recorded)
 The paper's table rendered from `CATALOGUE` (a tools step when the paper is next touched); search in the shelf; covers on the tiles; per-element catalogue rows

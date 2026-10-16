@@ -28,6 +28,7 @@ import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, 
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
 import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
+import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -89,13 +90,29 @@ export function createChem(host, api) {
      ‹ SECTION › · INSTALLED · MOLECULES ON, then the MOLECULE picker alone, then BASIS · ORBITAL, then VIEW · the chevron. */
   let page = PRESET_BY_ID.get(preset).section, sub = '';
   const rH = el('div', 'row tight mol-section', host);
-  const secStep = stepper({ aria: 'Library section', items: SECTIONS.map((id) => ({ id, label: id })), value: page, cls: 'mol-step', onChange: (id) => { page = id; fillSel(); } });
+  const secStep = stepper({ aria: 'Library section', items: ['ATOMS', ...SECTIONS].map((id) => ({ id, label: id })), value: page, cls: 'mol-step', onChange: (id) => { page = id; fillSel(); if (id === 'ATOMS') setShelf(true); } });
   rH.appendChild(secStep.root);
   const keepSw = sw({ label: 'INSTALLED', value: false, title: 'Every record of this section kept on this device: press to install them all, press again to remove them', onChange: (v) => { keep(v); } });
   rH.appendChild(keepSw.root);
   const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule’s density', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
   rH.appendChild(onSw.root);
   const r0 = el('div', 'row tight', host);
+  /* 0.7.4 C2 · THE SHELF: SECTION's name opens the page as TILES under the picker (formula, name, AOs, the catalogue's word, the lamp); a tap is the hand's
+     pick and the shelf folds.  ‹ ATOMS ›, the first page, is the periodic table: a tile sets OPERATOR ATOM and its element (api.atom).  Alt+↓ keeps the kit's list. */
+  const shelf = el('div', 'mol-shelf', host), ATOM_W = CATALOGUE.find((r) => r.id === 'atom'); shelf.id = 'mol-shelf'; shelf.hidden = true;
+  secStep.name.setAttribute('aria-controls', shelf.id); secStep.root.addEventListener('click', (e) => { if (e.target.closest('.mir-step-name')) { e.stopPropagation(); setShelf(shelf.hidden); } }, true);
+  function setShelf(open) { shelf.hidden = !open; secStep.name.setAttribute('aria-expanded', String(open)); shelfFill(); }
+  function shelfFill() {
+    if (shelf.hidden) return; shelf.replaceChildren();
+    const tile = (title, lines, pick, here, off) => { const b = el('button', 'pk-c mol-tile' + (here ? ' on' : ''), shelf); b.type = 'button'; b.title = title; b.disabled = !!off;
+      lines.forEach((t, i) => el(i ? 'span' : 'b', '', b, t)); b.addEventListener('click', () => { setShelf(false); pick(); }); };
+    if (page === 'ATOMS') { ATOMS.forEach((a, i) => tile(`${a.name} · Z = ${a.Z} · ${a.term} · ${ATOM_W.word} · ${ATOM_W.oracle.what}`, [a.symbol, 'Z = ' + a.Z, ATOM_W.word],
+      () => { if (on) setOn(false); api.atom(a.Z); }, api.atomZ() === a.Z)); return; }
+    for (const g of [...GROUPS, RECORD_GROUP]) for (const p of CHEM_PRESETS.filter((q) => q.group === g.id && q.section === page)) {
+      const w = (CATALOGUE.find((r) => r.id === p.id && r.shelf === 'molecules') || {}).word || '—', lamp = p.disabled ? p.shortReason.toUpperCase() : !p.recordOnly ? 'LIVE' : have.get(p.records['sto-3g'].hash) ? 'INSTALLED' : 'DOWNLOAD';
+      tile(p.name + (p.disabled ? ' — ' + p.reason : p.over ? ' — past the cap: it opens from its record' : '') + ' · ' + p.source, [p.formula, p.name, `${p.nAO} AO`, w, lamp], () => { handPick(p.id); }, p.id === preset, p.disabled);
+    }
+  }
   /* ── THE MOLECULE DROPDOWN ────────────────────────────────────────────────────────────────────────────────
    * paletteview.js:22's node and class, and its lesson too: a `<select>` fires `change` only when the VALUE
    * changes, so re-picking what you are already on fires nothing.  Here that is correct rather than a trap —
@@ -143,9 +160,9 @@ export function createChem(host, api) {
   function header() {
     const recs = sectionRecs(), on = recs.filter((r) => have.get(r.hash)).length, n = CHEM_PRESETS.filter((p) => p.section === page).length;
     const mb = (recs.reduce((s, r) => s + r.bytes, 0) / 1048576).toFixed(1);
-    sub = recs.length ? `${recs.length} record${recs.length > 1 ? 's' : ''} · ${mb} MB · ${on} here` : `${n} molecules, all live`;
-    secStep.root.title = `${page} · ${sub}: ${n} molecules; ` + (recs.length ? `${recs.length} with a record (${mb} MB), ${on} of them on this device` : 'every one solves live, none has a record');
-    keepSw.root.hidden = !recs.length || safariTab(); keepSw.set(recs.length > 0 && on === recs.length);
+    sub = page === 'ATOMS' ? `${ATOMS.length} elements, H–Kr · ${ATOM_W.word}` : recs.length ? `${recs.length} record${recs.length > 1 ? 's' : ''} · ${mb} MB · ${on} here` : `${n} molecules, all live`;
+    secStep.root.title = page === 'ATOMS' ? `ATOMS · ${sub}: a tile sets OPERATOR ATOM and its element` : `${page} · ${sub}: ${n} molecules; ` + (recs.length ? `${recs.length} with a record (${mb} MB), ${on} of them on this device` : 'every one solves live, none has a record');
+    keepSw.root.hidden = !recs.length || safariTab(); keepSw.set(recs.length > 0 && on === recs.length); shelfFill();
   }
   /** INSTALLED's press: the page's records fetched (each checked against its sha-256 name) and kept, or all removed */
   async function keep(v) {
@@ -157,7 +174,7 @@ export function createChem(host, api) {
     return { section: sec, records: recs.length, installed: on };
   }
   fillSel(); lamps(); mSel.addEventListener('focus', () => { lamps(); });
-  const mSeg = { root: mStep.root, set(v) { const s = (PRESET_BY_ID.get(v) || {}).section; if (s && s !== page) { page = s; fillSel(); } if (mSel.value !== v) mSel.value = v; mStep.set(v); }, get() { return mSel.value; }, el: mSel };
+  const mSeg = { root: mStep.root, set(v) { const s = (PRESET_BY_ID.get(v) || {}).section; if (s && s !== page) { page = s; fillSel(); } if (mSel.value !== v) mSel.value = v; mStep.set(v); shelfFill(); }, get() { return mSel.value; }, el: mSel };
   const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: [
     { id: 'sto-3g', label: 'STO-3G', title: 'The vendored minimal Cartesian basis; the oracle for all eight' },
     { id: '6-31+g-star', label: '6-31+G*', title: 'A split-valence basis with diffuse and polarisation functions, for H, C, N, O, F molecules up to 46 Cartesian AOs — water’s first root moves 0.483 → 0.341' }],
