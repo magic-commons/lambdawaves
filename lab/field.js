@@ -60,6 +60,8 @@ fn legP(l: u32, x: f32) -> f32 {
   for (var k = 2u; k <= l; k++) { let p2 = (f32(2u * k - 1u) * x * p1 - f32(k - 1u) * p0) / f32(k); p0 = p1; p1 = p2; }
   return p1;
 }
+/* the physicists' Hermite H_n(x), n ≤ 5, by H_{k+1} = 2xH_k − 2kH_{k−1} — the SEPARABLE oscillator's factor (space 7, 0.9.4 S1) */
+fn herm(n: u32, x: f32) -> f32 { var a = 1.0; var b = 2.0 * x; if (n == 0u) { return a; } for (var k = 1u; k < n; k++) { let c = 2.0 * x * b - 2.0 * f32(k) * a; a = b; b = c; } return b; }
 
 @compute @workgroup_size(4, 4, 4)
 fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation_index) lid: u32) {
@@ -119,6 +121,11 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
         let qo = pos - M.ctr.xyz; let ro = length(qo); let t = ro * ro;
         let L = M.lag0.x + t * (M.lag0.y + t * (M.lag0.z + t * (M.lag0.w + t * (M.lag1.x + t * M.lag1.y))));
         f = M.c.z * ipow(ro, l) * L * exp(-0.5 * t) * ipow(st, am) * D;
+      } else if (P.space == 7u) {
+        /* SEPARABLE (0.9.4 S1)  ψ = norm · ∏ᵢ H_{nᵢ}(aᵢqᵢ) · e^{−½|a∘q|²}: nlm = (n_x, n_y, n_z, 0), lag0 = (a_x, a_y, a_z, ·), c.w = the form (0 the
+           oscillator); no Y, no D, and m = 0 so the azimuthal phase below is 1 */
+        let qs = (pos - M.ctr.xyz) * M.lag0.xyz;
+        f = M.c.z * herm(u32(M.nlm.x), qs.x) * herm(u32(M.nlm.y), qs.y) * herm(u32(M.nlm.z), qs.z) * exp(-0.5 * dot(qs, qs));
       } else {
         /* MOMENTUM  φ = norm · t^{l/2} P(t) (1+t)^{−(n+1)} · Y,  t = n²p²  (P = the Podolsky–Pauling numerator;
            the (−i)^l phase is folded into c on the CPU).  Same record, different envelope. */

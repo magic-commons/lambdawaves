@@ -5,7 +5,7 @@ import { TIER } from '../rack.js';
 import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js';
 import { PRESETS } from '../state.js';
 import { momentumZ, AXIS_TO_Z } from '../kick.js';
-import { applyKickAlong, escaped, SQUEEZE, SQUEEZE_REFUSAL } from '../kick.js'; import { varianceZ } from '../calculus.js'; import { onHamiltonian } from '../hamiltonian.js';   // 0.8.0 G2 · SQUEEZE + CAT
+import { applyKickAlong, escaped, SQUEEZE, SQUEEZE_REFUSAL, SLAP_REFUSAL } from '../kick.js'; import { varianceZ } from '../calculus.js'; import { onHamiltonian } from '../hamiltonian.js';   // 0.8.0 G2 · SQUEEZE + CAT
 import { applyRotor as rotorOnCopy } from '../frontier.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js';
 import { saddle, polarizability } from '../stark.js';
@@ -158,6 +158,7 @@ export function createStateCard(app) {
       return f(re, im);
     }
     function slap(k, axis) {
+      if (getHamiltonian().separable) return ui.kickRo.set('—', 'warn'), ui.kickRo.setSub(SLAP_REFUSAL);   // 0.9.4 S1
       const n0 = reg.norm2(), p0 = pAlong(axis);
       if (!reg.populated().length && getHamiltonian().id !== 'well') reg.set(0, 1, 0, clock.t);
       reg.kick(k, axis, clock.t);
