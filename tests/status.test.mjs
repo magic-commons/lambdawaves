@@ -87,7 +87,22 @@ assert.equal(MOLECULES.length + RECORD_ONLY.length, 98);   // 0.7.1: + the seven
 assert.match(live.H2O, /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.2 % of ρmax$/, 'water: ' + live.H2O);
 assert.ok(statusCalls() > 0);
 
+/* 5 · THE CERTIFICATES (0.9.0 Z3): a sentence the glass prints from a solve's own fields, its typed bound held to the tolerance that made the field.
+ *   LDA's SCF line (chemview.js, roXc): "SCF converged in <sol.iterations> iterations to |ΔE| < 1e-10" — rks' `converged` holds |ΔE| < tol on BOTH of
+ *   its exits (the residual test and the round-off floor), so the bound is |ΔE|'s, never the residual's; the tol is rks' default (moleculeRHF passes none).
+ *   ATOMS' R_m caption (atomsview.js): "<EXCHANGE_MODEL> · SCF to ‖ΔV·r‖ < 1e-8 · virtual shells (°) in the frozen field" — solveAtom's default tol.
+ *   VALENCE gains nothing: no share of ρ is computed in the tree (chemview.js' `summed()` counts orbitals), and a certificate is never a new computation. */
+const src = (f) => readFileSync(new URL('../lab/' + f, import.meta.url), 'utf8'), tolOf = (f, re) => Number(src(f).match(re)[1]);
+const ldaW = W.chemGround({ atoms: moleculeAtoms('H2O'), basis: 'sto-3g', model: 'lda' });
+assert.ok(ldaW.converged === true && Number.isInteger(ldaW.iterations) && ldaW.iterations > 0, 'the LDA ground carries the fields the SCF sentence reads: ' + JSON.stringify({ converged: ldaW.converged, iterations: ldaW.iterations }));
+const scfLine = src('chemview.js').match(/SCF \$\{sol\.converged \? `converged in \$\{sol\.iterations\} iterations to \|ΔE\| < (\de-\d+)` : `not converged after \$\{sol\.iterations\} iterations`\}/);
+assert.ok(scfLine && Number(scfLine[1]) === tolOf('scf.js', /export function rks\([^)]*tol = (\de-\d+)/), 'the SCF sentence\'s bound is rks\' own tol');
+assert.ok(!/rks\(args, \{[^}]*\btol\b/.test(src('rhf-molecule.js')), 'moleculeRHF passes no tol to rks: its default is the bound');
+const rmCap = src('atomsview.js').match(/`\$\{EXCHANGE_MODEL\} · SCF to ‖ΔV·r‖ < (\de-\d+) · virtual shells \(°\) in the frozen field`/);
+assert.ok(rmCap && Number(rmCap[1]) === tolOf('atoms.js', /const o = \{[^}]*\btol: (\de-\d+)/), 'the R_m caption\'s tolerance is solveAtom\'s default tol');
+
 console.log(`GREEN status: ${strings} strings (98 molecules × 4 views + 98 heads + hydrogen) within ${BUDGET} characters (longest ${longest.length}: "${longest}"); `
   + `every numeral parsed back to its source — ${solved.length} live solves against P3's PySCF energies (worst |ΔE| ${worstLive.toExponential(2)}, ${worstLiveId}), `
   + `38 rows' oracle.delta, the field law's hydrogen ${FIELD_LAW.hydrogen.rms.toExponential()} RMS / ${FIELD_LAW.hydrogen.worst.toExponential()} worst voxel and density ${FIELD_LAW.density.worst.toExponential()} worst voxel (tests/helpers/field-law.mjs); `
-  + `no molecule with an oracle reads UNCHECKED; geometry 2 / 26 / 9 / 1, ${computed} heads "computed, not measured", C₆₀'s energy PySCF's own. Water: "${live.H2O}"`);
+  + `no molecule with an oracle reads UNCHECKED; geometry 2 / 26 / 9 / 1, ${computed} heads "computed, not measured", C₆₀'s energy PySCF's own. Water: "${live.H2O}"; `
+  + `certificates: LDA water SCF converged in ${ldaW.iterations} iterations to |ΔE| < ${scfLine[1]} (rks' tol), the R_m caption's ‖ΔV·r‖ < ${rmCap[1]} (solveAtom's tol), VALENCE: no computed share, nothing added`);

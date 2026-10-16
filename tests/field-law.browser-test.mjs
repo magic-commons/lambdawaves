@@ -13,11 +13,16 @@
  * and field.js' texel comment state and P4's STATUS reads: RMS · the 99.8 %-of-voxels figure · the worst voxel · relative to the maximum.
  * THE VIEW-INVARIANCE GATE (0.5.4 P7d), on the water just read: exposure, ISO, palette, grid and quality are presentation, so none may move
  * the solve (sol.seq), the chem worker's ledger (workerStat().solverCalls) or Tr(DS) (sol.electrons, the worker's own) — each change made
- * on the hand's road and read back, so a change that did not happen cannot pass. */
+ * on the hand's road and read back, so a change that did not happen cannot pass.
+ * THE LINE (0.9.0 Z3, for the acceptance matrix): at its end, green or red, ONE pasteable line — `FIELD LAW · <adapter> · <browser> · <commit> ·
+ * hydrogen RMS · 99.8 % · worst · water RMS · worst/ρmax · GREEN|RED` — the adapter the field's own `adapterInfo` (lab/field.js), the browser the
+ * page's user agent, the commit `git rev-parse --short HEAD`, the readings the ones printed above (no second measurement). */
+import { execSync } from 'node:child_process';
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
 import { FIELD_LAW, f16, ulp16, toF16 } from './helpers/field-law.mjs';
 
 const PORT = process.env.LW_PORT || 8704, L = FIELD_LAW, HY = L.hydrogen, DE = L.density;
+let dev = null, h = null, w = null;
 const g = await open(`https://127.0.0.1:${PORT}/lab/?gastab=0`, { width: 1300, height: 900, script: 300000 });
 const LIB = `const f16 = ${f16}, ulp16 = ${ulp16}, toF16 = ${toF16}, LW = __LW, F = LW.field;
   const settle = async (n = 2) => { for (let i = 0; i < n; i++) await LW.settle(); };
@@ -32,11 +37,11 @@ const LIB = `const f16 = ${f16}, ulp16 = ${ulp16}, toF16 = ${toF16}, LW = __LW, 
 try {
   const ready = await g.waitFor('window.__LW&&__LW.ready', 400, 100);
   judge('F0 boot: __LW.ready', ready.ok === 1, ready);
-  await g.ev(`try { if (__LW.warning && __LW.warning.dismiss) __LW.warning.dismiss(); } catch (_) {}
-    __LW.governor.on = false; __LW.quality.auto = false; __LW.quality.autoScale = 1; return 1;`);
+  dev = await g.ev(`try { if (__LW.warning && __LW.warning.dismiss) __LW.warning.dismiss(); } catch (_) {}
+    __LW.governor.on = false; __LW.quality.auto = false; __LW.quality.autoScale = 1; return { info: __LW.field.adapterInfo || null, ua: navigator.userAgent };`);
 
   /* ── (i)+(ii) HYDROGEN: 1s+2pz at 64³, paused at t = 3.7 a.u., every voxel of the cache against the closed form ── */
-  const h = await g.ev(`${LIB}
+  h = await g.ev(`${LIB}
     LW.quality.res = ${HY.N}; LW.quality.steps = 110; LW.quality.scale = 1;
     LW.pause(); LW.clock.scrub(0); LW.loadPreset(${JSON.stringify(HY.preset)}); LW.pause(); LW.clock.scrub(${HY.t}); LW.schedule(4); await settle(3);
     const G = await F.readGrid(), N = G.N, H = G.half, A = ledger(), d = new Float64Array(N * N * N);
@@ -61,7 +66,7 @@ try {
     { rms: h.rms, p998: h.p998, worst: h.worst, relToMax: h.relToMax, at: h.at, errs: h.errs });
 
   /* ── (i)+(ii) WATER's density: H₂O STO-3G at 64³ on its own box, √ρ against the f64 evaluator of a CPU solve ── */
-  const w = await g.ev(`${LIB}
+  w = await g.ev(`${LIB}
     LW.quality.res = ${DE.N}; LW.quality.steps = 110; LW.schedule(4); await settle(3);
     await LW.chem.solve(${JSON.stringify(DE.molecule)}); LW.chem.setOn(true); LW.chem.setView('density'); await settle(4); LW.pause(); await settle(2);
     const sol = LW.chem.solution(), q = LW.chem.query();
@@ -122,5 +127,11 @@ try {
     Number.isFinite(b0.seq) && Number.isFinite(b0.solverCalls) && Number.isFinite(b0.trDS) && Math.abs(b0.trDS - 10) < 1e-9
       && v.rows.every((r) => r.seq === b0.seq && r.solverCalls === b0.solverCalls && r.trDS === b0.trDS && r.same && r.owner) && v.errs.length === 0,
     { before: b0, changed: v.rows.filter((r) => r.seq !== b0.seq || r.solverCalls !== b0.solverCalls || r.trDS !== b0.trDS || !r.same || !r.owner), errs: v.errs });
-} finally { await g.close(); }
-process.exit(done('field-law') ? 1 : 0);
+} catch (e) { judge('F! the gate threw', false, String(e && e.message || e)); } finally { await g.close(); }
+const failed = done('field-law'), x = (v) => (Number.isFinite(v) ? v.toExponential(2) : '—'), I = (dev && dev.info) || {};
+const adapter = I.description || [I.vendor, I.architecture, I.device].filter(Boolean).join(' ') || (dev && dev.info ? 'adapter info blank' : 'no adapter info');   // Firefox 157 gives every member ''
+const browser = ((dev && dev.ua) || '').match(/(Firefox|Edg|Chrome|Version)\/[\d.]+/g)?.pop()?.replace('Version', 'Safari') || 'unknown browser';
+let commit = '?'; try { commit = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim(); } catch (_) {}
+console.log(`FIELD LAW · ${adapter} · ${browser} · ${commit} · hydrogen RMS ${x(h && h.rms)} · 99.8 % ${x(h && h.p998)} · worst ${x(h && h.worst)}`
+  + ` · water RMS ${x(w && w.rms)} · worst/ρmax ${x(w && w.relToRhoMax)} · ${failed ? 'RED' : 'GREEN'}`);
+process.exit(failed ? 1 : 0);
