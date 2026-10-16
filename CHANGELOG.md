@@ -11,6 +11,32 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.7.3-alpha` — 2026-10-15
+
+Commit `10a5ebb` · no new waves · 13 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `5ab6404` 2026-10-15 — CHANGELOG for v0.7.2-alpha
+- `c61087b` 2026-10-15 — HANDOFF §2 + checkpoint 23:20: v0.7.2-alpha Lattice cut locally (tag 9856c4b, snapshot 31);…
+- `3deba2d` 2026-10-15 — K1 THE LDA ENGINE: RKS LDA (Slater + VWN5) on a Becke/TA/Lebedev-302 grid, PySCF to 1e-12
+- `2dc54fd` 2026-10-15 — K1-BUILD.md: the LDA engine's build note (PySCF to 1e-12 on eight, seats, corrections, K2's…
+- `9a0988f` 2026-10-15 — merge K1 THE LDA ENGINE (2dc54fd): scf.js gains slaterVwn (Slater α = 2/3 + VWN5) and rks — F =…
+- `dc0d03d` 2026-10-15 — checkpoint 23:55: K1 merged 9a0988f; K2 running from it
+- `4a2e2ba` 2026-10-15 — 0.7.4 Shelves: BUILD-PLAN.md drafted while 0.7.3 K2 builds (C1 THE CATALOGUE + THE PICKER, C2…
+- `d12e09d` 2026-10-15 — K2 THE METHOD: MOLECULES › METHOD RHF · LDA (UHF on H₂ folded in), LDA live and capped at…
+- `edaff75` 2026-10-15 — K2: the LDA demo (water, METHOD LDA, VIEW Δ LDA−RHF) by the app's own road, its cover by…
+- `3d94744` 2026-10-15 — K2-BUILD.md: THE METHOD's build note (seats, the water numbers, the Δ LDA−RHF range,…
+- `3d2469f` 2026-10-15 — merge K2 THE METHOD (3d94744): the card-level METHOD seg RHF · UHF · LDA beside BASIS (UHF on H₂…
+- `289fec9` 2026-10-15 — 0.7.4 Shelves: C1 THE CATALOGUE + THE PICKER and C2 THE SHELVES briefs (drafted while 0.7.3…
+- `10a5ebb` 2026-10-15 — 0.7.3-alpha Lattice: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.7.2-alpha` — 2026-10-15
 
 Commit `9856c4b` · no new waves · 18 commits.
