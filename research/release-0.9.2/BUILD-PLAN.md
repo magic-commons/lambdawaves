@@ -4,8 +4,8 @@ Josh, 2026-10-16 ≈11:30: "We are close to 1.0.0 and we'll spend most of our ti
 of your abilities and a light visual/functional check" · "Let's keep going all the way to 0.9.4. Then we shall begin iterative work till 1.0.0." So three feature cuts
 sit between 0.9.1 Platform and 1.0.0: **0.9.2 Flow · 0.9.3 Decohere · 0.9.4 Separable**, each from the deferred lists of 0.8.x (`../release-0.8.2/CHANGES-0.8.2.md`
 "FLOW arrows and streamlines"; `../release-0.8.3/CHANGES-0.8.3.md` "the momentum-space breath P(p, t)"). Standing dial (10-15 09:35): tight, features only, pre-1.0.
-Base: `yan-c` at the commit carrying the briefs after the v0.9.1-alpha cut (**TO FILL**; its sha is in every launch message); lines **30,028** (filled with the
-base); cap **× 1.01**. Two rows, two Opus builders in parallel (disjoint files); the integrator merges, a light visual check, cuts `v0.9.2-alpha` "Flow".
+Base: `yan-c` at the commit carrying this fill, right after the v0.9.1-alpha cut (`b43e438` + CHANGELOG `fd24eb1`; its sha is in every launch message); lines
+**30,028**; cap **30,328** (× 1.01). Two rows, two Opus builders in parallel (disjoint files); the integrator merges, a light visual check, cuts `v0.9.2-alpha` "Flow".
 
 ## The shape (the law of this cut)
 **THE CURRENT ON THE PLANE.** The PLANE window (`lab/sliceview.js`, id `slice`) already samples ψ on an N × N grid of a 2-plane (`sampleSlice` → `{ re, im }` over
