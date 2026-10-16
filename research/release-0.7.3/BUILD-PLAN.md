@@ -3,7 +3,7 @@
 The engine plan's D.10 (`../release-0.6.0/PLAN.md` l.281; the ladder row l.40: "the same molecules under LDA beside RHF, each with its PySCF number ·
 MOLECULES › METHOD · tap LDA"; l.61: "Kohn–Sham (0.7.3, LDA first, PySCF RKS the oracle, ChronusQ cited not merged; your A4 'we should definitely go forward
 with it')"; l.100: "Kohn–Sham = another D"). Josh's dial (09:35): tight builds, features only, pre-1.0. Base: `yan-c` at the commit carrying the briefs after
-the v0.7.2-alpha cut (**TO FILL**); lines **TO FILL**; cap = lines × 1.01. Two rows; K2 after K1 merges.
+the v0.7.2-alpha cut `5ab6404` (the fill commit's sha is in the launch message); 29,324 `lab/` lines; cap 29,324 × 1.01 = **29,617** (293 of headroom; K1 + K2 plan +185). Two rows; K2 after K1 merges.
 
 ## The shape (the law of this cut)
 Kohn–Sham is ANOTHER D. The RKS loop is `scf.js`' closed-shell loop with one change of Fock: F = h + J[D] + V_xc[ρ] (no exact exchange), built as
