@@ -4,7 +4,7 @@ import { TIER } from '../rack.js';
 import { VIEW, VIEW_NAMES, cameraBasis, toScreen } from '../field.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, getZ, getMu } from '../hamiltonian.js';
 import { keplerOrbits } from '../kepler.js'; import { createGas } from '../gas.js'; import { wellPacket } from '../well.js';
-import { momentumZ, rotorsToZ } from '../kick.js'; import { applyRotor as rotorOnCopy } from '../frontier.js';
+import { momentumZ, rotorsToZ, SLAP_REFUSAL } from '../kick.js'; import { applyRotor as rotorOnCopy } from '../frontier.js';
 export function createKeplerSurface(app) {
   const { dom, ui, reg, clock, obs, mat } = app, { schedule, canPresent } = app.loop, { camera } = app.host, { wState, wSpec, switchHamiltonian, kepler } = app.w,
     { domain, field, maths, touchState } = app.ctl;
@@ -291,6 +291,7 @@ export function createKeplerSurface(app) {
     return momentumZ(re, im);
   }
   function slapAlong(k, dir) {
+    if (getHamiltonian().separable) { if (ui.kickRo) { ui.kickRo.set('—', 'warn'); ui.kickRo.setSub(SLAP_REFUSAL); } return; }   // 0.9.4 S1
     if (!reg.populated().length && getHamiltonian().id !== 'well') { reg.set(0, 1, 0, clock.t); }
     const n0 = reg.norm2(), p0 = pAlongDir(dir);
     reg.kickAlong(k, dir, clock.t);

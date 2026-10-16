@@ -156,7 +156,10 @@ export function applyKickZ(re, im, k) {
 }
 /** rotations taking the axis to z, so that R⁻¹ e^{ikz} R kicks along the axis (sign fixed by the momentum oracle in the tests) */
 export const AXIS_TO_Z = { z: null, x: { axis: 'y', angle: -Math.PI / 2 }, y: { axis: 'x', angle: Math.PI / 2 } };
+/** 0.9.4 S1: a SEPARABLE system refuses the slap before any rotor moves the state — the multipole road above is spherical (the callers say so on the readout) */
+export const SLAP_REFUSAL = 'a separable system: the slap\'s radial integrals are spherical', slapOff = () => { if (getHamiltonian().separable) throw new Error(SLAP_REFUSAL); };
 export function applyKick(re, im, k, axis = 'z') {
+  slapOff();
   const R = AXIS_TO_Z[axis];
   if (!R) return applyKickZ(re, im, k);
   applyRotor(re, im, { which: 'both', axis: R.axis, angle: R.angle });
@@ -172,6 +175,7 @@ export function rotorsToZ(d) {
 }
 /** a kick of impulse k along ANY unit direction d: R⁻¹ e^{ikz} R with R the rotations above */
 export function applyKickAlong(re, im, k, d) {
+  slapOff();
   const n = Math.hypot(d[0], d[1], d[2]); if (n === 0 || k === 0) return;
   const R = rotorsToZ([d[0] / n, d[1] / n, d[2] / n]);
   for (const r of R) applyRotor(re, im, { which: 'both', axis: r.axis, angle: r.angle });

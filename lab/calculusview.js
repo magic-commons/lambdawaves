@@ -67,8 +67,9 @@ export function createCalculus(host, opt = {}) {
     const k = `${reg.version}|${t.toFixed(4)}|${half}|${p}|${mol}`;
     if (k === key) return;
     key = k; const H = getHamiltonian(), why = mol ? 'a molecule: the ray stands down this cut (the AO evaluator is not free on the frame thread)' : p && H.phiAt === H.psiAt ? 'momentum space: this operator\'s φ(p) is not on the road (its ψ(x) without the phase)' : '';
-    if (!mol) { last = stats(reg, t); render(last); } breath(reg, t, half, p, mol); ellLine(reg, t, p, mol, H); if (why) { ray.set('—'); cv.width = 0; return ray.setSub(why); }
-    const c = reg.at(t), ids = reg.populated(), r = p ? expectR(c.re, c.im, ids, true) : last.r, n = Math.hypot(...r), u = n < 1e-3 ? [0, 0, 1] : r.map((v) => v / n), S = rayAt(c.re, c.im, ids, u, half, p), m = Math.max(1e-300, ...S.map((q) => Math.hypot(q.re, q.im)));
+    const sep = H.separable && 'a separable system: its radial tiles stand down';   // 0.9.4 S1: the moments, the breath and the ellipsoid read H.radial; the ray reads ψ
+    if (sep) { last = null; for (const x of [...tiles, br, ell]) { x.set('—'); x.setSub(sep); } bv.width = 0; } else { if (!mol) { last = stats(reg, t); render(last); } breath(reg, t, half, p, mol); ellLine(reg, t, p, mol, H); } if (why) { ray.set('—'); cv.width = 0; return ray.setSub(why); }
+    const c = reg.at(t), ids = reg.populated(), r = p ? expectR(c.re, c.im, ids, true) : last ? last.r : [0, 0, 0], n = Math.hypot(...r), u = n < 1e-3 ? [0, 0, 1] : r.map((v) => v / n), S = rayAt(c.re, c.im, ids, u, half, p), m = Math.max(1e-300, ...S.map((q) => Math.hypot(q.re, q.im)));
     const W = cv.clientWidth || 240, Hh = 56, d = Math.min(2, window.devicePixelRatio || 1), cs = getComputedStyle(document.body), ink = cs.getPropertyValue('--fg').trim() || cs.color, acc = cs.getPropertyValue('--acc').trim() || ink;
     cv.width = Math.round(W * d); cv.height = Hh * d; g.setTransform(d, 0, 0, d, 0, 0); g.lineWidth = 1.25;
     for (const [f, col, a] of [[() => 0, ink, 0.15], [(q) => q.re / m, ink, 1], [(q) => q.im / m, ink, 0.4], [(q) => (q.re * q.re + q.im * q.im) / (m * m), acc, 1]]) { g.strokeStyle = col; g.globalAlpha = a; g.beginPath(); S.forEach((q, i) => g[i ? 'lineTo' : 'moveTo'](i * W / (S.length - 1), Hh / 2 - f(q) * (Hh / 2 - 2))); g.stroke(); }

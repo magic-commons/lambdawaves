@@ -6,7 +6,7 @@ import { toLUT } from '../mir/palette.js';
 import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js'; import { BASIS } from '../hydrogen.js';
 import { createShadowView, createShadowFoot } from '../shadowview.js'; import { createOrbit } from '../orbit.js'; import { createKepler } from '../keplerview.js';
 import { createVortex } from '../vortex.js'; import { createParticles } from '../particles.js'; import { createSliceView } from '../sliceview.js';
-import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { createBloch } from '../bloch.js'; import { solveLattice } from '../lattice-model.js'; import { createCentral, solveCentral } from '../central.js'; import { solveLadder } from '../ladder-model.js';
+import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { createBloch } from '../bloch.js'; import { solveLattice } from '../lattice-model.js'; import { createCentral, solveCentral } from '../central.js'; import { createSeparable } from '../separable.js'; import { solveLadder } from '../ladder-model.js';
 import { createAtoms } from '../atomsview.js'; import { createWigner } from '../wignerview.js'; import { createRadiation } from '../radiationview.js';
 export function createReadouts(app) {
   const { dom, ui, device, reg, clock, obs, useCompactDefaults } = app, { schedule, canPresent } = app.loop, { rack } = app.host, { setElement, fillValence, switchHamiltonian } = app.w,
@@ -142,7 +142,9 @@ export function createReadouts(app) {
   const bloch = createBloch(wBlo.body, { t: () => clock.t, obs }); wBlo.root.addEventListener('devopen', () => bloch.set({}));
   const wCen = device({ id: 'central', eyebrow: 'CENTRAL', status: '' }); wCen.root.classList.add('closed'); rack.appendChild(wCen.root);   // 0.8.0 G1: the generic central H's editor (lab/central.js); ships closed
   const central = createCentral(wCen.body, { solve: (w) => solveCard({ op: 'central.solve', ...w }, () => solveCentral(w.preset, w.params)), apply: (id) => { switchHamiltonian(id); ui.hamSeg.set(id); }, current: () => getHamiltonian().id, populated: () => reg.populated() }); wCen.root.addEventListener('devopen', () => central.prepare());
-  return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen }; }
+  const wSep = device({ id: 'separable', eyebrow: 'SEPARABLE', status: '' }); wSep.root.classList.add('closed'); rack.appendChild(wSep.root);   // 0.9.4 S1: the Cartesian oscillators' editor (lab/separable.js); ships closed
+  const sep = createSeparable(wSep.body, { apply: (id) => { switchHamiltonian(id); ui.hamSeg.set(id); } }); wSep.root.addEventListener('devopen', () => sep.prepare());
+  return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen, wSep }; }
   function createAtomsWignerRadiation() {   // the third seat: ATOMS · WIGNER · RADIATION
   const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack

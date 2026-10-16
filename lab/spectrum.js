@@ -159,7 +159,7 @@ export function createSpectrum(host, api) {
       was: { mute: null, solo: null, off: null, sel: null, label: nm.textContent, energy: esub.textContent } };
   }
   const labelText = (a) => api.labelOf ? api.labelOf(BASIS[a]) : BASIS[a].label;
-  const energyText = (a) => { const E = api.energyOf ? api.energyOf(a) : BASIS[a].E; return E === E ? `${E.toFixed(4)} ${api.unit ? api.unit() : 'Eh'}` : 'unbound here'; };   // 0.8.0 G1: NaN = a level CENTRAL leaves unbound
+  const energyText = (a) => { const E = api.energyOf ? api.energyOf(a) : BASIS[a].E; return E === E ? `${E.toFixed(4)} ${api.unit ? api.unit() : 'Eh'}` : ((api.hamiltonian && api.hamiltonian()) || {}).nan || 'unbound here'; };   // 0.8.0 G1: NaN = a level CENTRAL leaves unbound
   /** one lane's UPDATE: cheap reads, and only the DOM writes whose value moved since the last one */
   function refresh(L, a) {
     const reg = api.reg, w = L.was;
