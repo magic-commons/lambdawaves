@@ -149,6 +149,9 @@ export function createMolecularSession(api = {}) {
 
   return {
     register, claim, adopt, drop, publish,
+    /** 0.7.0 V1 · VIBRATE: the same molecule's shells at displaced centres, while model `id` owns the field — re-uploaded keeping mol.hash and the
+        solution, so the producer's next publish draws on them (a card, computed at the old centres, is let go) */
+    pose(id, shells) { const f = fieldOf(); if (!f || !mol || id !== selected || !shells) return false; f.setMolecule({ nAO: mol.nAO, half: mol.half, shells }); carded = cardData = null; return true; },
     /** 0.6.5 X2 · THE CARD: the selected model's worker volume { N, half, data } on the field, or null to hand it back */
     card(c) { const f = fieldOf(); if (!f || !f.setCard || (c && (!mol || !selected))) return false; if (c !== cardData || carded !== selected) f.setCard(c); carded = c ? selected : null; cardData = c; return true; },
     /** the frame loop's one call: the boundary a second product in the same frame is measured against */
