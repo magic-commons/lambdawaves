@@ -8,7 +8,7 @@ paper cannot say (l.308–310). The records this cut reads: `research/release-0.
 already gone from `vortex.js`/`state.js`; rows 6–11 are checked one by one), `CHANGES-0.5.4.md` (P11: THE LOCK's scope and the FINGERPRINT exist — `tools/perf/
 device-report.js`'s row), `lab/catalogue.js` (0.7.4 C1: 181 rows with status words and oracle tests — the spine of the registry), `tests/fixtures/oracles/README.md`
 (P10: every fixture's PySCF provenance). Josh's dial (09:35) and the paper's law: nothing called "novel" without prior-art review; every number with its metric.
-Base: `yan-c` at the commit carrying the briefs after the v0.8.3-alpha cut (**TO FILL**); `lab/` lines **TO FILL** — this cut adds **ZERO `lab/*.js` lines** (a
+Base: `yan-c` at the commit carrying this fill, right after the v0.8.3-alpha cut (its sha is in every launch message; filled 10-16 ≈11:00); `lab/` lines **30,027** — this cut adds **ZERO `lab/*.js` lines** (a
 reworded user-visible string is a string edit, counted; the budget is ≤ +5 for those). Three rows, three Opus builders in parallel (disjoint files); the integrator
 merges, light check, cut `v0.9.0-alpha` "Certification".
 
