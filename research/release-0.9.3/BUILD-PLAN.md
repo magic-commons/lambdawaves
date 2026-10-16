@@ -3,8 +3,8 @@
 Josh, 2026-10-16: "Let's keep going all the way to 0.9.4. Then we shall begin iterative work till 1.0.0" and the dial "don't over verify and bloat the code with
 tests. Just build to the best of your abilities and a light visual/functional check". The rows are 0.8.1's deferred list (`../release-0.8.1/CHANGES-0.8.1.md`:
 "a two-qubit gate set; decoherence on the Bloch sphere (T₁/T₂ — the Lindblad road)"). Everything lives in BLOCH (`lab/bloch.js`, `lab/bloch-model.js`, 0.8.1 T1/T2):
-nothing touches the main register, the field or the camera. Base: `yan-c` at the commit carrying the briefs after the v0.9.2-alpha cut (**TO FILL**); lines
-(**TO FILL**); cap × 1.01. Two rows, two Opus builders IN SEQUENCE (both edit the two Bloch files: D2 launches from D1's merge); the integrator merges, a light visual
+nothing touches the main register, the field or the camera. Base: `yan-c` at the commit carrying this fill, right after the v0.9.2-alpha cut (`65d8d62` + CHANGELOG
+`906b837`; its sha is in every launch message); lines **30,091**; cap **30,391** (× 1.01). Two rows, two Opus builders IN SEQUENCE (both edit the two Bloch files: D2 launches from D1's merge); the integrator merges, a light visual
 check, cuts `v0.9.3-alpha` "Decohere".
 
 ## The shape (the law of this cut)
