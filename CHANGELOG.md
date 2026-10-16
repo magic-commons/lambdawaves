@@ -11,6 +11,31 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.9.4-alpha` — 2026-10-16
+
+Commit `84855e0` · no new waves · 12 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `aee3151` 2026-10-16 — CHANGELOG for v0.9.3-alpha
+- `1e75234` 2026-10-16 — 0.9.4 Separable: the plan's base and cap filled at the v0.9.3-alpha cut
+- `0d5f4b1` 2026-10-16 — HANDOFF §2 + checkpoint 13:26: v0.9.3-alpha Decohere cut locally (fa85b51, snapshot 41); 0.9.4…
+- `587729b` 2026-10-16 — 0.9.4 S1: SEPARABLE
+- `c3b8e9d` 2026-10-16 — 0.9.4 S1: the build note
+- `f3e7440` 2026-10-16 — merge S1 THE CARTESIAN KERNEL + THE OSCILLATORS (c3b8e9d): field.js' space-7 CARTESIAN branch —…
+- `32bd082` 2026-10-16 — 0.9.4 Separable: CHANGES S1 section
+- `11e421c` 2026-10-16 — S2 THE CUBE: FORM CUBE in separable.js (knob L 4…30 a₀, the 54 whole-level triples nᵢ ≥ 1 with…
+- `f97abe7` 2026-10-16 — S2 THE CUBE: the build note
+- `dca4427` 2026-10-16 — merge S2 THE CUBE (f97abe7): separable.js' FORM CUBE
+- `7de9ac7` 2026-10-16 — 0.9.4 Separable: CHANGES-0.9.4.md complete (S2, the light check) and MAJOR-FEATURES.md's 0.9.4…
+- `84855e0` 2026-10-16 — 0.9.4-alpha Separable: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.9.3-alpha` — 2026-10-16
 
 Commit `fa85b51` · no new waves · 12 commits.
