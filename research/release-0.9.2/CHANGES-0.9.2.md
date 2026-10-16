@@ -25,11 +25,22 @@ oscillator its own radial; the box, ATOM and CENTRAL say "the breath is position
   is shown for any m ≠ 0 label, not only 2p₊. Screenshots `.tmp/f1-arrows.png`, `f1-lines.png`, `f1-off.png` in the builder's worktree. **Checked:** node 0,
   rack-deps 0, new-project in step, one headless run on 9591 (no page errors).
 
-## F2 · THE MOMENTUM BREATH
-(filled at F2's merge)
+## F2 · THE MOMENTUM BREATH (branch `f2-pbreath` tip `b265b22`, merged `0555e4f`; `lab/calculus.js`, `lab/calculusview.js`; +5 lab lines → 30,091)
+- **`radialBreath(reg, t, half, n, p)`** (`calculus.js` l.37–47): in momentum space P(p, t) = p² Σ_lm |Σ_n c_nlm(t) F_nl(p)|² with F_nl hydrogen's exact
+  `momentumRadial` (under Z and μ the scaled radial, the exact printing as (Zμ/n)²) and the oscillator's **(−1)^{n_r} R_nl(p)** — the brief said R_nl: the phase
+  cancels for one label but not between two labels in one (l, m), so (|0⟩ + |2s⟩) would have drawn wrong; a Hankel transform confirmed the sign — on its own
+  quadrature nodes (the p⁻⁴ tail makes B1's map O(h²) only); returns `{ r, P, norm, m2 }`, m2 = ⟨p²⟩ per unit norm (B1's `rMean` is ∫rP/∫P and is kept). The box,
+  ATOM and CENTRAL: "the breath is position's".
+- **The tile** (`calculusview.js` `breath()` l.80–90): in momentum space the label "P(p, t) = p² Σ_lm |Σ_n c_nlm(t) F_nl(p)|²", the p axis, the readout "∫P =
+  1.000000000 · ⟨p²⟩ = 0.0598" and the exact 1/n² for a one-label state; position space draws and reads bit for bit as before.
+- **Checked once** (the throwaway's numbers): 1s P(p) against 32p²/(π(1 + p²)⁴) to 3.3e-16; ∫P = 1 and ⟨p²⟩ = 1 (1s), 1/4 (2s, 2p₀, 2p₊₁), 1/9 (3d), 1/36 (6s) to
+  1e-12; the oscillator's |0⟩ self-dual exactly; (|0⟩ + |2s⟩)/√2's momentum breath at t = 0 equals its position breath at t = π/2 to 3e-16 (⟨p²⟩ = 5/2 + √(3/2)).
+  Screenshot `.tmp/f2-breath-p.png` in the builder's worktree (REVIVAL playing in momentum space, no page errors). Node 0, calculus.test 0/8, new-project in step.
 
 ## The light check and the cut
-(filled at the cut)
+On the merged tree `0555e4f`: node 0, pwa in step, new-project in step, calculus.test 0/8, `lab/` 30,091 of the 30,328 cap; THE LOCK once on 9241 (`--query
+gastab=0`): 860 values, 0/0, 59 s (no `field.js` line moved); the visual check: F1's 2p₊ arrows circulate about the vortex on the phase wheel, F2's momentum breath
+draws under REVIVAL (the builders' screenshots, read by the integrator). Then the local cut `v0.9.2-alpha` "Flow", CHANGELOG, snapshot 40.
 
 ## Known, deferred (recorded)
 The current for a molecule on the PLANE (a register's window; the molecular j lives in `molecular-flow.js`' tracers); streamlines in ℝ³ (the tracers are that); the
