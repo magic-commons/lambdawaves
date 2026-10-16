@@ -11,6 +11,42 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.9.1-alpha` — 2026-10-16
+
+Commit `b43e438` · no new waves · 23 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `97192cb` 2026-09-24 — M0 baseline: acceptance matrix row 0, rights inventory, ignore store media
+- `20f0abd` 2026-09-24 — P03: Electron desktop host around dist/, smoke-tested on Linux, win32 packaged
+- `b6f42b6` 2026-09-24 — P04: WKWebView host proof for iPad/iPhone, probe page and Xcode runbook
+- `1d74922` 2026-09-24 — P06: Android host as a Trusted Web Activity, built with Bubblewrap
+- `2ed832a` 2026-09-24 — Ship /.well-known/assetlinks.json in the deploy
+- `4a16b2b` 2026-09-24 — Acceptance matrix: Android row for the Pixel 10 Pro XL (WebGPU on Imagination)
+- `39c2fa7` 2026-09-24 — P08: Android WebView host proof (bundled, browser-free) for the WebGPU question
+- `ab2d450` 2026-09-24 — Store kits: Steam, Apple and Play listings, privacy policy, screenshots, trailer draft
+- `109f0db` 2026-10-16 — CHANGELOG for v0.9.0-alpha
+- `9f67db6` 2026-10-16 — 0.9.1 Platform: the plan's base filled at the v0.9.0-alpha cut
+- `a14bdb5` 2026-10-16 — checkpoint 12:40: v0.9.0-alpha Certification cut locally (c65a464, snapshot 38) — the public…
+- `49c1537` 2026-10-16 — merge H1 THE HOMECOMING (worktree-hosts-m0 @ ab2d450): the stores program's eight commits past…
+- `c4cb6c2` 2026-10-16 — H1 THE HOMECOMING: the build note
+- `c577a04` 2026-10-16 — merge H1 THE HOMECOMING (c4cb6c2): worktree-hosts-m0 (at ab2d450; eight commits past the merge…
+- `b420f60` 2026-10-16 — USAGE PAUSE checkpoint 13:05: 0.9.1 Platform
+- `cc89402` 2026-10-16 — 0.9.2 Flow: BUILD-PLAN drafted while 0.9.1 H2 builds (F1 THE CURRENT ON THE PLANE — j_∥ by…
+- `c2e4f54` 2026-10-16 — H2: the Electron smoke run meets today's start (notice CONTINUE, title screen NEW) and the…
+- `8713090` 2026-10-16 — 0.9.3 Decohere: BUILD-PLAN drafted while 0.9.1 H2 builds (D1 T₁ · T₂ ON THE SPHERE — the Bloch…
+- `12d7ffd` 2026-10-16 — 0.9.4 Separable: BUILD-PLAN drafted while 0.9.1 H2 builds (S1 THE CARTESIAN KERNEL + THE…
+- `d8c34fa` 2026-10-16 — H2: the acceptance rows re-measured on c577a04 (Electron linux-x64 dev + packaged PASS 17/17,…
+- `3a019f1` 2026-10-16 — merge H2 THE ROWS RE-MEASURED (d8c34fa): docs/ACCEPTANCE-MATRIX.md re-measured on c577a04 with…
+- `81376a7` 2026-10-16 — 0.9.1 Platform: CHANGES-0.9.1.md complete (H2's rows, the light check once per Josh's dial) and…
+- `b43e438` 2026-10-16 — 0.9.1-alpha Platform: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.9.0-alpha` — 2026-10-16
 
 Commit `c65a464` · no new waves · 18 commits.
