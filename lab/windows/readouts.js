@@ -103,7 +103,7 @@ export function createReadouts(app) {
   function createCalcMetersLadder() {   // the second seat: CALCULUS · METERS · LADDER
   const wCalc = device({ id: 'calculus', eyebrow: 'CALCULUS', status: '' });
   rack.appendChild(wCalc.root);
-  const calculus = createCalculus(wCalc.body, {});
+  const calculus = createCalculus(wCalc.body, { revival: (list) => app.sh.verbs.run(list, { name: 'REVIVAL' }) });   // 0.8.3 B1: REVIVAL is one verb list, one history row
 
   // METERS
   const wMet = device({ id: 'meters', eyebrow: 'METERS', status: '' });
