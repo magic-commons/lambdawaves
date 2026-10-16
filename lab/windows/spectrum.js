@@ -129,7 +129,7 @@ export function createSpectrumCard(app) {
     const key = why + eq.preset + eq.gains.join() + reg.version; if (key === eqKey) return; eqKey = key;
     const P = reg.populated(), pops = reg.re0.map((r, a) => r * r + reg.im0[a] ** 2), w = [0, 0, 0, 0, 0, 0]; for (const a of P) w[BASIS[a].n - 1] += pops[a];
     const t = why ? null : eq.table({ Z: getZ(), rates, populated: P, pops }), G = t && t.gamma, m = G ? t.mode : 0;
-    if (t || eqT) { field.setEqualizer(t); schedule(TIER.RECONSTRUCT); } eqT = t;
+    if (t || eqT) { field.setEqualizer(t); schedule(TIER.RECONSTRUCT); } eqT = eq.last = t;
     gEq.classList.toggle('eq-off', !!why); gEq.title = why ? 'the equalizer is a hydrogen position-space feature: ' + why : ''; eqFd.forEach((f, i) => { f.setDisabled(!!why); f.set(eq.gains[i]); });
     eqStep.set(eq.preset); eqRo.set(G ? t.purity.toFixed(3) : '1.000'); eqRo.setSub(t && !G ? t.gate : G && t.repaired ? 'repaired' : ['pure', 'mixture · no phase', 'signed · relative floor 2·10⁻⁴'][m]);
     if (hand && m === 2 && eqMode !== 2) { mat.view = VIEW.real; ui.viewSeg.set('real'); wSpec.setStatus('a signed table: VIEW is Re ψ, its lobes in two colours', 'live'); }
