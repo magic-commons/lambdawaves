@@ -166,3 +166,61 @@ export function uhf(basis, { nAlpha, nBeta, diis = 8, maxIter = 200, tol = 1e-10
   return { energy, electronic: energy - Enuc, Calpha: C[0], Cbeta: C[1], epsAlpha: eps[0], epsBeta: eps[1], Dalpha: Ds[0], Dbeta: Ds[1], Falpha: F[0], Fbeta: F[1],
     D: Ds[0].map((v, k) => v + Ds[1][k]), Ds: Ds[0].map((v, k) => v - Ds[1][k]), s2: Sz * (Sz + 1) + nBeta - ov, iterations, converged, floor, error: errMax, nAlpha, nBeta };
 }
+/** slaterVwn(ρ) → { exc, vxc }: ε_xc per electron and v_xc = d(ρε_xc)/dρ, paramagnetic.  Slater exchange, α = 2/3: ε_x = −¾(3ρ/π)^{1/3}, v_x = (4/3)ε_x.
+ *  VWN5 correlation (Vosko, Wilk & Nusair, Can. J. Phys. 58, 1200 (1980), the Ceperley–Alder fit; PySCF's 'vwn' = libxc LDA_C_VWN, not VWN3/RPA), x = √r_s:
+ *  A = 0.0310907, b = 3.72744, c = 12.9352, x₀ = −0.10498, Q = √(4c − b²), X(x) = x² + bx + c; v_c = ε_c − (x/6) dε_c/dx. */
+const VA = 0.0310907, VB = 3.72744, VC = 12.9352, V0 = -0.10498, VQ = Math.sqrt(4 * VC - VB * VB), VX0 = V0 * V0 + VB * V0 + VC;
+export function slaterVwn(rho) {
+  const ex = -0.75 * Math.cbrt(3 * rho / Math.PI), x = Math.sqrt(Math.cbrt(3 / (4 * Math.PI * rho))), X = x * x + VB * x + VC, t = 2 * x + VB, at = Math.atan(VQ / t), q = t * t + VQ * VQ;
+  const ec = VA * (Math.log(x * x / X) + 2 * VB / VQ * at - VB * V0 / VX0 * (Math.log((x - V0) ** 2 / X) + 2 * (VB + 2 * V0) / VQ * at));
+  const de = VA * (2 / x - t / X - 4 * VB / q - VB * V0 / VX0 * (2 / (x - V0) - t / X - 4 * (VB + 2 * V0) / q));
+  return { exc: ex + ec, vxc: 4 / 3 * ex + ec - x / 6 * de };
+}
+/**
+ * rks(basis, { nElectrons, grid, aoAt, xc = 'lda', diis = 8, maxIter = 200, tol = 1e-10, guess = 'core' }) — RESTRICTED KOHN–SHAM, LDA (0.7.3 K1): rhf's loop
+ * with one change of Fock, F = h + J[D] + V_xc[ρ] = fockReal(D) + ½K[D] + V_xc (no exact exchange; fockReal untouched), E = Σ D(h + J/2) + E_xc + E_nuc.
+ * grid = { w } (lab/dft-grid.js); aoAt[g·n + p] = χ_p at point g, built once per molecule; ρ_g = Σ D_pq χ_p χ_q, V_xc,pq = Σ_g w_g v_xc(ρ_g) χ_p χ_q.
+ */
+export function rks(basis, { nElectrons, grid, aoAt, xc = 'lda', diis = 8, maxIter = 200, tol = 1e-10, guess = 'core' } = {}) {
+  const { n, S, h, Enuc = 0 } = basis, nn = n * n, nocc = nElectrons / 2, { X } = loewdin(S, n), Xt = tr(X, n), w = grid.w, P = w.length;
+  if (xc !== 'lda' || !Number.isInteger(nocc) || nocc < 1) throw new Error('scf: rks is closed-shell LDA');
+  let D = guess === 'core' ? new Float64Array(nn) : Float64Array.from(guess), F, C, eps, energy = NaN, exc = 0, intRho = 0, converged = false, iterations = 0;
+  let errMax = Infinity, best = Infinity, stall = 0, floor = null;
+  const Fs = [], Es = [], V = new Float64Array(nn);
+  for (let it = 0; it < maxIter; it++) {
+    V.fill(0); exc = 0; intRho = 0;
+    for (let g = 0, o = 0; g < P; g++, o += n) {
+      let rho = 0;
+      for (let p = 0; p < n; p++) { const cp = aoAt[o + p]; let s = 0.5 * D[p * n + p] * cp; for (let q = 0; q < p; q++) s += D[p * n + q] * aoAt[o + q]; rho += 2 * cp * s; }
+      if (!(rho > 1e-30)) continue;
+      const { exc: e, vxc: v } = slaterVwn(rho), wv = w[g] * v; exc += w[g] * rho * e; intRho += w[g] * rho;
+      for (let p = 0; p < n; p++) { const a = wv * aoAt[o + p]; for (let q = 0; q <= p; q++) V[p * n + q] += a * aoAt[o + q]; }
+    }
+    for (let p = 0; p < n; p++) for (let q = 0; q < p; q++) V[q * n + p] = V[p * n + q];
+    const G = fockReal(basis, D), K = exchange(basis, D);
+    F = G.map((v, k) => v + 0.5 * K[k] + V[k]);
+    let Enow = Enuc + exc; for (let k = 0; k < nn; k++) Enow += 0.5 * D[k] * (h[k] + G[k] + 0.5 * K[k]);
+    const e = mm(mm(F, D, n), S, n), e2 = mm(mm(S, D, n), F, n); for (let k = 0; k < nn; k++) e[k] -= e2[k];
+    const et = mm(mm(Xt, e, n), X, n); errMax = 0; for (const v of et) errMax = Math.max(errMax, Math.abs(v));
+    if (it > 0 && errMax < tol && Math.abs(Enow - energy) < tol) { energy = Enow; converged = true; iterations = it; break; }
+    if (errMax < best * (1 - 1e-3)) { best = errMax; stall = 0; } else stall++;
+    if (it > 0 && stall >= 25 && best < 1e-6 && Math.abs(Enow - energy) < tol) { energy = Enow; converged = true; iterations = it; floor = best; break; }
+    energy = Enow; iterations = it + 1;
+    let Fuse = F;
+    if (diis > 0 && it > 0) {
+      Fs.push(F); Es.push(et); if (Fs.length > diis) { Fs.shift(); Es.shift(); }
+      while (Fs.length >= 2) {
+        const m = Fs.length, B = new Float64Array((m + 1) * (m + 1)), rhs = new Float64Array(m + 1);
+        for (let i = 0; i < m; i++) for (let j = 0; j < m; j++) { let s = 0; for (let k = 0; k < nn; k++) s += Es[i][k] * Es[j][k]; B[i * (m + 1) + j] = s; }
+        for (let i = 0; i < m; i++) { B[i * (m + 1) + m] = -1; B[m * (m + 1) + i] = -1; }
+        rhs[m] = -1;
+        let c; try { c = solveLinear(B, rhs, m + 1); } catch { Fs.shift(); Es.shift(); continue; }
+        Fuse = new Float64Array(nn); for (let i = 0; i < m; i++) for (let k = 0; k < nn; k++) Fuse[k] += c[i] * Fs[i][k];
+        break;
+      }
+    }
+    const eig = eigSym(mm(mm(X, Fuse, n), X, n), n); eps = eig.values; C = mm(X, eig.vectors, n);
+    D = new Float64Array(nn); for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { let s = 0; for (let o = 0; o < nocc; o++) s += C[i * n + o] * C[j * n + o]; D[i * n + j] = 2 * s; }
+  }
+  return { energy, electronic: energy - Enuc, exc, intRho, orbitalEnergies: eps, C, D, F, iterations, converged, floor, error: errMax, nocc };
+}
