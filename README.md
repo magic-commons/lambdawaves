@@ -164,7 +164,8 @@ why `html_handling` is `"none"`, and what the build refuses to let you do.
 A molecule's energy is NUMERICAL: checked against PySCF on the same atoms and the same basis decimals, never against
 experiment (`tests/fixtures/oracles/README.md` says what each fixture holds and which script wrote it). A library record
 is written only if the app's solve is within 1e-8 Eh of PySCF's (`tools/orbital-library.mjs`). A live molecule is
-compared on the device, and the node gate re-solves a subset: every enabled closed shell up to 14 STO-3G AOs plus HBr,
+compared on the device; the node gate re-solves every enabled one in STO-3G and reads its agreement back from the
+STATUS line (`tests/status.test.mjs`), and holds a bound on these: every enabled closed shell up to 14 STO-3G AOs plus HBr,
 Br₂, C₂H₄ and C₆H₆ at max(1e-9, 3e-12·|E|) Eh (`tests/molecules.test.mjs`, `tests/chem-sweep.test.mjs`), every open
 shell at 1e-8 Eh (`tests/uhf.test.mjs`), the 6-31+G\* molecules up to 27 AOs at 1e-9 Eh (`tests/basis-631.test.mjs`)
 and the LDA eight at 1e-6 Eh (`tests/rks.test.mjs`). The tables are written by `node tools/pyscf-table.mjs`.

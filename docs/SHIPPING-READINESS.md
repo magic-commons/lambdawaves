@@ -1,5 +1,17 @@
 # Shipping readiness
 
+## Status — 2026-10-16 (0.9.0 "Certification")
+
+- **The public face says what the tree measures.** README's field law gives three metrics each for hydrogen and
+  water, with their gate bounds (`tests/field-law.browser-test.mjs` against `tests/helpers/field-law.mjs`); its PySCF
+  table is generated (`node tools/pyscf-table.mjs --check`); every changed sentence is listed with its source in
+  `research/release-0.9.0/CLAIMS-0.9.0.md`.
+- **The gate has grown since the record below:** `./test.sh node` runs 109 suites (`tests/*.test.mjs`) and the
+  browser gate 37 (`tests/*.browser-test.mjs`).
+- **Still open:** a device matrix (the field law's bounds were read on one RTX 3070 in Firefox; the iPad's line is
+  Josh's to run), installed-PWA update and rollback, a real microphone for the AUDIO source, a screen-reader pass,
+  and the Cloudflare deployment.
+
 ## Status — 2026-09-10 (senior review pass)
 
 - **The gate is green.** `./test.sh` runs 58 node suites and the two shipped browser suites

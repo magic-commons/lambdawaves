@@ -95,7 +95,7 @@ and the code disagree, the code is right; please say so in an issue.
   and uses the GPU. Source: `test.sh`.
 - After any edit under `lab/`, run `node tests/pwa.test.mjs --write`: it re-stamps the service worker's precache
   hashes in `lab/sw.js`, or the pwa suite fails. Source: AI_POLICY.md, RELEASING.md.
-- The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 860 values with `--query gastab=0`, 1004 with the s4a fixture; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
+- The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 860 values, and 1004 with the s4a fixture — both runs with `--query gastab=0`; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
   `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --query gastab=0` (860) and the same with
   `--fixture research/release-0.4.0/measure/digest-lock-s4a.json` (1004), against a tree served by `tools/gate/server.py`.
   Source: `tools/perf/digest-lock.mjs` (header).
@@ -108,9 +108,15 @@ and the code disagree, the code is right; please say so in an issue.
 
 ## 7. Where things live
 
-- The physics proofs are the node suites: `tests/hydrogen.test.mjs`, `sturmian`, `helium`, `h2`, `scf`, `well`,
-  `momentum`, `wigner`, `qho`, `kepler`, `radiation`, `gas` and the rest of `tests/*.test.mjs`. Each checks the
-  code against an oracle outside it (tables, closed forms, quadrature). Derivations are under `research/`.
+- The physics proofs are the node suites: `tests/hydrogen.test.mjs`, `sturmian`, `scf`, `well`, `momentum`,
+  `wigner`, `qho`, `kepler`, `radiation`, `gas`, `molecules`, `uhf`, `rks` and the rest of `tests/*.test.mjs`. Each
+  checks the code against an oracle outside it (tables, closed forms, quadrature, and for the molecules PySCF's
+  fixtures in `tests/fixtures/oracles/`, described in its README). Every system and its oracle test is a row of
+  `lab/catalogue.js` (generated, `node tools/catalogue-table.mjs --check`). Derivations are under `research/`.
+- What the picture may claim is THE FIELD LAW: the GPU grid against the CPU in each picture's own metric (hydrogen
+  |Δψ| RMS, 99.8 % of voxels, worst voxel; water |Δρ|/ρ and the worst |Δρ| over ρmax), its bounds in
+  `tests/helpers/field-law.mjs`, asserted by `tests/field-law.browser-test.mjs`, quoted by README and by `lab/status.js`
+  (`tests/status.test.mjs` holds the two equal). README's PySCF table is `node tools/pyscf-table.mjs` (`--check`).
 - Every key is PREFERENCE (settings, never in a project or link), WORKSPACE (the window arrangement) or PROJECT (the work): `docs/STATE-SCOPES.md`.
 - NEW opens the hidden empty project `lab/new-project.lambdawaves.json` through the same restore-with-rollback road as any project; `node tools/new-project.mjs --check` proves the shipped file byte-exact against the modulation model and the boot defaults. The undo ring covers the whole PROJECT scope (not the camera pose, the notebook text or the quality hint): `serialize({ scope: 'edit' })` in, `restore(S, { history: true })` out; a project open, a link and NEW each start a new timeline whose bottom row is named for its origin.
 - The laws: CLAUDE.md (the standing rules for agents), REPORT.md (the notebook every session appends to), `docs/`

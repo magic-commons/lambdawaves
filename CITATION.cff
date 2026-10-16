@@ -1,24 +1,30 @@
 cff-version: 1.2.0
 message: "If you use λWAVES in a talk, a lesson or a paper, please cite it as below."
-title: "λWAVES — a real-time WebGPU instrument for the hydrogen eigenstates"
+title: "λWAVES — a real-time WebGPU instrument for the hydrogen eigenstates and small molecules"
 type: software
 authors:
   - family-names: Hosain
     given-names: Joshua
     affiliation: Magic Commons
-version: 0.1.0-alpha
-date-released: 2026-09-11
+version: 0.9.0-alpha
+date-released: 2026-10-16
 license: GPL-3.0-only
 repository-code: https://github.com/magic-commons/lambdawaves
 url: https://lambdawaves.magic-commons.com
 abstract: >-
-  λWAVES reconstructs the 91 exact hydrogen eigenstates with n ≤ 6 on the GPU as a playable wave
-  field: amplitudes, phases, couplings and observers assemble into an evolving quantum field,
-  with a modulation rack, projects and shareable state links. Built with AI coding agents under
-  the author's direction; see the README's disclosure.
+  λWAVES reconstructs the 91 hydrogen eigenstates with n ≤ 6 from their closed forms on the GPU as a
+  playable wave field, evolved field-free by their phases alone, and solves small molecules live
+  (Hartree–Fock and Kohn–Sham LDA in vendored Gaussian bases) or opens them from a library of
+  precomputed records, with a modulation rack, projects and shareable state links. Every system
+  carries a status word: EXACT (a closed form), NUMERICAL (a solve checked against an oracle; for a
+  molecule's energy, PySCF on the same atoms and basis) or UNCHECKED (no oracle). The GPU grid is
+  held to the CPU in its own metric: hydrogen's |Δψ| RMS ≤ 3e-6 and worst voxel ≤ 2e-4; a molecule's
+  density within 0.2 % of its maximum. Built with AI coding agents under the author's direction;
+  see the README's disclosure.
 keywords:
   - hydrogen
   - quantum mechanics
+  - quantum chemistry
   - WebGPU
   - visualisation
   - scientific instrument
