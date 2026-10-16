@@ -424,7 +424,7 @@ const PRECACHE = [
   ['./windows/readouts.js',                                         '60350baae815'],
   ['./windows/settings-card.js',                                    'b070593e7743'],
   ['./windows/spectrum.js',                                         '60305524440e'],
-  ['./windows/state.js',                                            '6bab8808265f'],
+  ['./windows/state.js',                                            '3ee8701cb2a6'],
   ['./worker-pool.js',                                              'f31d5675dcae'],
 ];
 
