@@ -165,7 +165,8 @@ export function createChem(host, api) {
     { id: 'density', label: 'DENSITY', title: 'ρ(r) = Σ D_ij χ_i χ_j on the field' },
     { id: 'orbital', label: 'ORBITAL', title: 'ψ_k(r) = Σ C_ik χ_i — one molecular orbital' },
     { id: 'diff', label: '<m>Δρ</m>', title: 'The induced density against the reference stored at the kick — ΔD is formed in double precision and shown as a signed field, so a weak kick is not lost in the texture format' },
-    { id: 'esp', label: 'ESP', title: 'Φ(r) = Σ Z_A/|r−R_A| − ∫ρ/|r−r′| on a 64³ grid' }],
+    { id: 'esp', label: 'ESP', title: 'Φ(r) = Σ Z_A/|r−R_A| − ∫ρ/|r−r′| on a 64³ grid' },
+    { id: 'spin', label: 'SPIN', title: 'ρα − ρβ, signed: the spin density of a UHF open shell (Dα − Dβ in double precision)' }],
     onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
   rV.appendChild(vSeg.root);
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
@@ -195,7 +196,7 @@ export function createChem(host, api) {
   const kapKnob = knob({ label: '<m>κ</m>', min: 1e-4, max: 1e-2, value: 1e-3, log: true, title: 'The δ-kick strength; linear response wants the smallest κ the trace can carry',
     fmt: (v) => v.toExponential(1), onInput: (v) => { kappa = v; } });
   r2.appendChild(kapKnob.root);
-  r2.appendChild(trig({ label: 'KICK', title: 'exp(−iκ q̂) on the converged density, then field-free propagation', onFire: () => { kick(); } }).root);
+  const kickT = trig({ label: 'KICK', title: 'exp(−iκ q̂) on the converged density, then field-free propagation', onFire: () => { kick(); } }); r2.appendChild(kickT.root);
   const runSw = sw({ label: 'RUN', value: false, title: 'Propagate the density in real time', onChange: (v) => { setRun(v); } });
   r2.appendChild(runSw.root);
   const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage riding the current of the real-time density matrix, v = j/ρ — kick and RUN first: a still molecule has no current', onChange: (v) => { setFlow(v); } });
@@ -267,7 +268,7 @@ export function createChem(host, api) {
      its own `half`).  It answers the GROUND stage with the spectrum attached, so the staged road skips stage two. */
   const here = (basis) => Promise.all([import('./mathworker.js'), import('./rhf-molecule.js')]).then(async ([W, R]) => { W.chemRegister(basis, await R.loadRecord(basis)); return W; });
   async function localSolve(msg) {
-    const W = await here(msg.basis), g = W.chemGround(msg), s = W.chemSpectrum(msg);
+    const W = await here(msg.basis), g = W.chemGround(msg), s = g.model ? {} : W.chemSpectrum(msg);   // 0.7.1: an open shell has no spectrum road
     return { ...g, roots: s.roots, tda: s.tda, timings: s.timings, stage: 'full', local: true };
   }
 
@@ -299,7 +300,7 @@ export function createChem(host, api) {
        that cost the seconds.  Both replies are guarded by the same `solveSeq`: a reply for a molecule the hand has
        already left behind must not publish.  `solve()` itself resolves only when the roots are in, so every caller
        that awaits it (the gate included) still gets the whole answer. */
-    const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge, symmetry: P.symmetry };
+    const seq = ++solveSeq, msg = { op: 'chem.ground', atoms, basis, charge, symmetry: P.symmetry, ...(P.multiplicity > 1 ? { multiplicity: P.multiplicity } : {}) };
     const rec = P.records && P.records[basis];
     status(rec && (P.recordOnly || wantRef || have.get(rec.hash)) ? `opening ${P.name} from its record… ${P.nAO} AOs, ${P.nElectrons} electrons`
       : basis === 'sto-3g' ? `solving ${P.name}… ${P.nAO} AOs, ${P.nElectrons} electrons, ~${showMs(P.predictedMs)} predicted`
@@ -345,14 +346,14 @@ export function createChem(host, api) {
          ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
       const fill = () => {
         sol = r; sol.key = key; sol.seq = seq; sol.note = note; mBuf = oBuf = dBuf = dRef = vibSh = null; fieldHash = null;
-        sol.identity = MS ? MS.identityOf({ atoms, basisHash: r.hash, charge, multiplicity: 1, model: 'RHF' }) : null;   // 0.5.4 P1: DATA, never a stamp (R13)
+        sol.identity = MS ? MS.identityOf({ atoms, basisHash: r.hash, charge, multiplicity: P.multiplicity || 1, model: r.model || 'RHF' }) : null;   // 0.5.4 P1: DATA, never a stamp (R13)
         const named = keyed(r.names, pendingKey);
         orbital = named ? named.k : (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
         pendingOrbital = pendingKey = null;
-        rebuildOrbKnob(); pushField(); refresh(); tell(); notify(); symmetryLine(sol.D, 'still'); vibSay(); vibLand();
+        rebuildOrbKnob(); standDown(); pushField(); refresh(); tell(); notify(); symmetryLine(sol.D, 'still'); vibSay(); vibLand();
       };
       if (api.derived) api.derived(fill); else fill();
-      if (r.roots) return r;                                                 // the frame-thread fallback answers whole
+      if (r.roots || r.model) return r;                                      // the frame-thread fallback answers whole; an open shell has no spectrum (0.7.1)
       if (seq !== solveSeq) return null;                                       // S4a-VERIFY B1: no stale spectrum post either
       return call({ op: 'chem.spectrum', atoms, basis, charge }, () => Promise.resolve(null)).then((s) => {
         if (seq !== solveSeq || sol !== r) return null;
@@ -374,9 +375,16 @@ export function createChem(host, api) {
   const span = () => (sol && sol.cols ? [sol.cols[0] + 1, sol.cols[sol.cols.length - 1] + 1] : [1, sol ? sol.nAO : 7]);
   const noSpectrum = (r) => !!(r && r.record && !r.record.caps.rpa);
   const factor = () => !!(sol && !sol.D && sol.cols && sol.cols[sol.nocc - 1] === sol.nocc - 1);   // ascending, so cols[0 … nocc) = 0 … nocc − 1
-  const ORB_ONLY = 'this record carries orbital columns, not the density matrix this view needs', vTitle = new Map(['density', 'diff', 'esp'].map((id) => [id, vSeg.button(id).title]));
-  function views() { for (const [id, t] of vTitle) { const d = !!(sol && (sol.D || (id === 'density' && factor()))), b = vSeg.button(id); b.disabled = !d; b.title = d ? t : ORB_ONLY;
-    if (!d && view === id) { view = 'orbital'; vSeg.set(view); } } }
+  const ORB_ONLY = 'this record carries orbital columns, not the density matrix this view needs', vTitle = new Map(['density', 'diff', 'esp', 'spin'].map((id) => [id, vSeg.button(id).title]));
+  function views() { for (const [id, t] of vTitle) { const d = id === 'spin' ? !!(sol && sol.Ds) : !!(sol && (sol.D || (id === 'density' && factor()))), b = vSeg.button(id); b.disabled = !d; b.title = d ? t : id === 'spin' ? 'a closed shell has no spin density: ρα = ρβ' : ORB_ONLY;
+    if (!d && view === id) { view = id === 'spin' ? 'density' : 'orbital'; vSeg.set(view); } } }
+  vSeg.button('spin').disabled = true;                                   // SPIN lights only on a UHF solve (views())
+  const nel = () => (sol.model ? sol.nocc + sol.nBeta : 2 * sol.nocc);   // UHF: nocc is nα
+  /* 0.7.1 · AN OPEN SHELL STANDS THE CLOSED-SHELL ROADS DOWN: KICK, RUN, FLOW, PULSE and TDA take the kit's disabled look and say why (the worker refuses them too) */
+  const OPEN = 'open shell (UHF): the real-time run, TDA, the drive and the register are closed-shell roads in this cut', openNote = el('div', 'note', more); openNote.hidden = true; openNote.textContent = OPEN; more.insertBefore(openNote, r2);
+  let stood = false;                                                      // a closed shell never touches a control's help
+  function standDown() { const o = !!sol.model; if (o === stood) return; stood = o; openNote.hidden = !o; if (o) { setRun(false); if (flowOn) setFlow(false); }
+    for (const b of [kickT.root, runSw.root, flowSw.root, tdaSw.root, ...pSeg.root.querySelectorAll('button')]) { b.dataset.help0 ??= b.dataset.help || b.title || ''; b.disabled = o; b.title = b.dataset.help = o ? OPEN : b.dataset.help0; } }
   function rebuildOrbKnob() {
     views();
     const [lo, n] = span(), k = Math.min(Math.max(lo, orbital || lo), n);
@@ -498,7 +506,7 @@ export function createChem(host, api) {
      the view drawn before stays (`was`).  The card goes when VIEW leaves ESP, another model publishes, or the molecule is re-uploaded or dropped. */
   let esp = null, was = 'density';                                       // esp: { card, N, min, max, ms, of: the solve it was computed from }
   const espOn = () => view === 'esp' && !!esp && esp.of === sol, drawn = () => (view !== 'esp' ? view : espOn() ? 'density' : was);
-  const molView = () => (espOn() || drawn() === 'orbital' || drawn() === 'diff' ? 'real' : 'density');   // a signed Δρ is READ as 'real': two-colour lobes
+  const molView = () => (espOn() || ['orbital', 'diff', 'spin'].includes(drawn()) ? 'real' : 'density');   // a signed Δρ (and SPIN's ρα − ρβ) is READ as 'real': two-colour lobes
   const sgn = (x) => (x < 0 ? '−' : '+') + Math.abs(x).toFixed(2);
   function onEsp(r) {                                                     // the pump's consumer: the reply { N, half, phi, min, max, ms } becomes the card
     if (!r || !r.phi || view !== 'esp' || !sol) return false;
@@ -528,6 +536,7 @@ export function createChem(host, api) {
     const v = drawn();
     if (v === 'orbital') { product.kind = 'orbital'; product.matrix = orbitalColumn(); }
     else if (v === 'diff') { product.kind = 'signed'; product.matrix = deltaD(); }
+    else if (v === 'spin') { product.kind = 'signed'; product.matrix = sol.ds32 || (sol.ds32 = Float32Array.from(sol.Ds)); }   // 0.7.1 VIEW SPIN: Dα − Dβ, the Δρ road
     else if (!sol.D) { product.kind = 'factor'; product.matrix = factorCols(); }
     else { product.kind = 'density'; product.matrix = densityRe(); }
     const ok = s.publish(model(), product);
@@ -640,11 +649,11 @@ export function createChem(host, api) {
     const eH = sol.eps[sol.nocc - 1], eL = sol.eps[sol.nocc];
     roEps.set(`${eH.toFixed(6)} · ${Number.isFinite(eL) ? eL.toFixed(6) : '—'}`, '');
     const nmH = orbitalName(sol.names, sol.nocc - 1, sol.nocc), nmL = orbitalName(sol.names, sol.nocc, sol.nocc);
-    roEps.setSub(`${nmH}${Number.isFinite(eL) ? ' · ' + nmL : ''} · gap ${Number.isFinite(eL) ? (eL - eH).toFixed(6) : '—'} hartree · ${sol.nocc} occupied of ${sol.nAO}`
+    roEps.setSub((sol.model ? 'the α set · ' : '') + `${nmH}${Number.isFinite(eL) ? ' · ' + nmL : ''} · gap ${Number.isFinite(eL) ? (eL - eH).toFixed(6) : '—'} hartree · ${sol.nocc} occupied of ${sol.nAO}`
       + (sol.names && sol.names.group ? ` · ${sol.names.reliable ? sol.names.group : 'no names: ' + sol.names.reason}` : ''));
-    const ne = rt ? rt.electrons : (Number.isFinite(sol.electrons) ? sol.electrons : 2 * sol.nocc);
-    roTr.set(Number(ne).toFixed(10), Math.abs(ne - 2 * sol.nocc) < 1e-8 ? 'ok' : 'warn');
-    roTr.setSub('Tr(DS), never a voxel sum · ' + (2 * sol.nocc) + ' electrons');
+    const ne = rt ? rt.electrons : (Number.isFinite(sol.electrons) ? sol.electrons : nel());
+    roTr.set(Number(ne).toFixed(10), Math.abs(ne - nel()) < 1e-8 ? 'ok' : 'warn');
+    roTr.setSub('Tr(DS), never a voxel sum · ' + nel() + ' electrons' + (sol.model ? ` · ${sol.nocc} α ${sol.nBeta} β · ⟨S²⟩ ${sol.s2.toFixed(4)}` : ''));
     roIdem.set(rt ? Number(rt.idempotency).toExponential(2) : '—', rt && rt.idempotency < 1e-8 ? 'ok' : rt ? 'warn' : '');
     /* THE POLICY IN FORCE, NOT THE ONE WE MEANT.  This line used to say "unrestarted MMUT" while the engine
        restarted every 50 steps, which is a different trajectory; it now prints what chem.rt.init came back with. */
@@ -653,7 +662,7 @@ export function createChem(host, api) {
     roT.setSub(rt ? `${rt.samples || rt.trace.length} samples · E ${Number(rt.energy).toFixed(6)} · ΔE ${(rt.energy - rt.E0).toExponential(2)}` + (rt.msPerStep ? ` · ${Number(rt.msPerStep).toFixed(2)} ms/step` : '') : '');
     const tm = sol.timings || {};
     /* `ground` is the whole ground-state wall and `integrals` is the pass INSIDE it, measured by the pass itself */
-    status(`${sol.nAO} AOs · ${2 * sol.nocc} electrons`
+    status(`${sol.nAO} AOs · ${nel()} electrons` + (sol.model ? ' · UHF' : '')
       + (Number.isFinite(tm.scf) ? ` · ground ${Math.round(tm.scf)} ms` : '')
       + (Number.isFinite(tm.integrals) ? ` (integrals ${Math.round(tm.integrals)} of it)` : '')
       + (Number.isFinite(tm.rpa) ? ` · rpa ${Math.round(tm.rpa)} ms` : summed() ? ' · ' + summed() : noSpectrum(sol) ? ' · orbitals only' : sol.roots ? '' : ' · spectrum pending')
@@ -967,7 +976,7 @@ export function createChem(host, api) {
     /** the chosen orbital as its S1 name { group, irrep, count, member } — what a link carries (0.4.0 S2); null when none is chosen or named */
     orbitalKey,
     /** 0.6.5 X2 · ESP: the pump's consumer (a `chem.esp` reply), and the caption a capture carries while its card is on the field */
-    onEsp, espCaption: () => [espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.${esp.cap ? ` · shown clipped at ${sgn(esp.cap)}` : ''}` : '', vibLine(' · STO-3G RHF harmonic, as computed')].filter(Boolean).join(' · '),   // 0.7.0 V1: and the mode while VIBRATE plays
+    onEsp, espCaption: () => [espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.${esp.cap ? ` · shown clipped at ${sgn(esp.cap)}` : ''}` : '', vibLine(' · STO-3G RHF harmonic, as computed'), drawn() === 'spin' && sol && sol.Ds ? 'SPIN · UHF' : ''].filter(Boolean).join(' · '),   // 0.7.0 V1: and the mode while VIBRATE plays
     /** 0.7.0 · the nuclei and the dipole AS DRAWN this frame (bohr, a.u.): the preset's atoms and the solve's dipole until VIBRATE poses them (V1); the skeleton and the atom labels read these, never moleculeAtoms */
     atomsNow: () => (vibFr && vibAt) || chemAtoms(preset), dipoleNow: () => (vibFr && vibJ >= 0 ? Array.from(vibFr.dipole.subarray(3 * vibJ, 3 * vibJ + 3)) : (sol && sol.dipole) || null),
     /** 0.7.0 V1 · VIBRATE from outside (the verb, __LW.chem): the row's own controls; `breathe` presses BREATHE; → the line while it plays, or null */
@@ -1009,7 +1018,7 @@ export function createChem(host, api) {
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
     solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); }, pick: handPick,
     preset() { return preset; },
-    setView(v) { if (!['density', 'orbital', 'diff', 'esp'].includes(v) || (v !== 'orbital' && sol && !sol.D && !(v === 'density' && factor()))) return view; view = v; vSeg.set(v); seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); return view; },
+    setView(v) { if (!['density', 'orbital', 'diff', 'esp', 'spin'].includes(v) || (v === 'spin' && !(sol && sol.Ds)) || (v !== 'orbital' && sol && !sol.D && !(v === 'density' && factor()))) return view; view = v; vSeg.set(v); seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); return view; },
     orbital(k) { if (Number.isFinite(k)) { const [lo, hi] = span(); orbital = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
     setAxis(a) { if (!AXES.includes(a)) return axis; axis = a; aSeg.set(a); paint(); return axis; },
     setIntegrator(v) { if (v !== 'mmut' && v !== 'magnus2') return integrator; integrator = v; iSeg.set(v); reset(); return integrator; },
@@ -1058,7 +1067,7 @@ export function createChem(host, api) {
         energy: sol ? sol.energy : null, epsHOMO: sol ? sol.eps[sol.nocc - 1] : null, epsLUMO: sol ? sol.eps[sol.nocc] : null,
         names: sol && sol.names ? { group: sol.names.group, reliable: sol.names.reliable, reason: sol.names.reason, config: sol.names.config, ms: sol.names.ms } : null,
         orbitalName: sol ? orbFmt(orbital || sol.nocc) : null,
-        electrons: rt ? rt.electrons : (sol ? 2 * sol.nocc : 0), idempotency: rt ? rt.idempotency : null,
+        electrons: rt ? rt.electrons : (sol ? nel() : 0), ...(sol && sol.model ? { model: sol.model, s2: sol.s2 } : {}), idempotency: rt ? rt.idempotency : null,
         t: rt ? rt.t : 0, steps: rt ? rt.steps : 0, trace: rt ? (rt.samples || rt.trace.length) : 0, fitWindow: rt ? rt.trace.length : 0, E0: rt ? rt.E0 : null,
         energyRT: rt ? rt.energy : null, half: sol ? sol.half : null, hash: sol ? sol.hash : null,
         record: sol && sol.record ? { ...sol.record, ...sol.opened, ms: sol.timings && sol.timings.open } : null, note: sol ? sol.note || null : null,
