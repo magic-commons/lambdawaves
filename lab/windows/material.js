@@ -106,9 +106,10 @@ export function createMaterial(app) {
     const verbs = rv.root.querySelector('.mir-ramp-verbs'), argRo = readout({ label: 'STOP ANGLE' }), argFloat = el('i', 'pal-float', rv.strip);
     rowOn.appendChild(rv.root.querySelector('.mir-ramp-reset'));
     /* iteration 001 (Josh): RESET is a glyph and the selected stop's swatch and × join this row — one row fewer */
-    chip(rowOn.lastElementChild, 'undo', 'RESET'); rowOn.appendChild(rv.root.querySelector('.mir-ramp-sel')); verbs.querySelector('.k').appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
+    chip(rowOn.lastElementChild, 'undo', 'RESET'); rowOn.appendChild(rv.root.querySelector('.mir-ramp-sel'));
+    const resetEl = rowOn.querySelector('.mir-ramp-reset'); verbs.querySelector('.k').appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
     ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
-    verbs.appendChild(ui.invertSw.root);
+    rowOn.insertBefore(ui.invertSw.root, resetEl); verbs.appendChild(resetEl);   // iteration 002 (Josh): INVERT in the PALETTE row, RESET where INVERT stood
     const showArg = () => { const s = rv.stops()[rv.selected()]; if (!s) return; argRo.set(argFloat.textContent = ang(s.at)); argRo.root.title = argFloat.title = ((2 * s.at - 1) * 180).toFixed(1) + '°'; argFloat.style.setProperty('--at', s.at); };
     new MutationObserver(showArg).observe(gp.querySelector('.mir-ramp-at'), { childList: true, characterData: true, subtree: true }); showArg();
     el('div', 'note', gp).innerHTML = '<b>Phase palette.</b> The strip runs from arg ψ = −π to +π and wraps at the seam. Tap the strip to add a stop, drag one to move it, drag it off the strip to remove it. OKLab blending keeps transitions perceptually even.';

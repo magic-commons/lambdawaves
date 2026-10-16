@@ -1,6 +1,6 @@
 /* lab/windows/molecules.js — MOLECULES, the molecular session, THE HEAD and MO-REGISTRY (0.5.2 R2d; moved verbatim out of lab/rack.js boot()) at TWO seats:
  * createMolecules(app) builds MOLECULES where the LEGACY note stands and returns createMoRegistry(), which boot() calls where ORBITALS stood (after the stage words). */
-import { TIER } from '../rack.js'; import { el, sw } from '../mir/kit.js';
+import { TIER } from '../rack.js'; import { el, sw, seg } from '../mir/kit.js';
 import { VIEW, VIEW_NAMES } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
@@ -11,16 +11,17 @@ export function createMolecules(app) {
   app.state.restampParams = null;                                            // re-tag knobs as modulation targets: lanes built after boot call it (the REGISTER's phase needles)
   app.state.molSession = null;                                               // the one owner of the molecular volume, assigned beside CHEMISTRY below (the frame loop reads it)
   app.state.orbitals = null; app.state.states = null; app.state.register = null;                 // REGISTER: the window (register) and its two modes, assigned beside CHEMISTRY below
-  let specFoldedByMol = false;           // 2026-10: SPECTRUM folded by a molecule taking the field (so the molecule's end unfolds it)
+  /* Iteration 002 (Josh, 2026-10-16) · TWO MODES.  ATOMS: the 91-label SPECTRUM, the hydrogen-orbital names, the EQUALIZER and the atomic
+     instruments.  MOLECULES: MOLECULES and MO-REGISTRY.  The mode IS MOLECULES ON — the switch under the title, the card's own switch, a project
+     and a link all say it by one road (chem.setOn → moleculeMode) — and each mode HIDES the other's windows (hidden, never closed or moved: the
+     arrangement waits for the mode to come back).  This replaces 2026-10's folded SPECTRUM under a molecule. */
+  const modeSeg = seg({ aria: 'Mode: atoms or molecules', value: 'atoms', options: [{ id: 'atoms', label: 'ATOMS', title: 'ATOMS — SPECTRUM\'s 91 hydrogen states, their names and the EQUALIZER' }, { id: 'molecules', label: 'MOLECULES', title: 'MOLECULES — MOLECULES and MO-REGISTRY' }],
+    onChange: (v) => { if (app.state.chem) app.state.chem.setOn(v === 'molecules'); } });
+  modeSeg.root.id = 'lwMode'; { const t = document.getElementById('title'); if (t) t.after(modeSeg.root); }
   function moleculeMode(v) {
-    for (const w of [wState, wSh, wOrb, wVor, wSlice, app.w.wLad, app.w.wCalc]) if (w) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
-    /* 2026-10 (Josh) · SPECTRUM is MINIMISED, not hidden: it stays on the rack, folded, while a molecule has the field, and
-       unfolds when the molecule lets go — unless the reader folded or unfolded it themselves in between. */
-    if (wSpec) {
-      const folded = wSpec.root.classList.contains('folded');
-      if (v && !folded) { wSpec.fold(true); specFoldedByMol = true; }
-      else if (!v && specFoldedByMol) { if (folded) wSpec.fold(false); specFoldedByMol = false; }
-    }
+    for (const w of [wState, wSh, wOrb, wVor, wSlice, app.w.wLad, app.w.wCalc, wSpec, { root: document.querySelector('.dev[data-id="equalizer"]') }]) if (w && w.root) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
+    for (const w of [wChem, app.w.wOrbs]) if (w) w.root.hidden = !v;
+    modeSeg.set(v ? 'molecules' : 'atoms');
     if (v && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
     if (!v) switchHamiltonian(getHamiltonian().id);                  // restore the atom's own hiding rules
     if (ui.hamSeg) ui.hamSeg.set(getHamiltonian().id);               // 0.7.4 C1: SPECTRUM's ‹ SYSTEM › reads back what owns the field
@@ -97,6 +98,7 @@ export function createMolecules(app) {
     now: () => clock.t, rate: () => clock.rate, field: () => field, chem: () => app.state.chem, session: app.state.molSession,
     song: { reg, hydrogen: () => getHamiltonian().id === 'hydrogen', filming: () => app.state.exportLocked, land(re, im, t) { app.state.rotTicking = true; reg.anchorFrom(re, im, t); app.state.rotTicking = false; touchState(); } } });   // 0.6.4 S1: a landing notes no history row, as the rotation drive's ticks
   app.state.orbitals = app.state.register.orbitals; app.state.states = app.state.register.states;
+  wChem.root.hidden = wOrbs.root.hidden = !app.state.chem.on;        // iteration 002: ATOMS is the boot's mode; MOLECULES ON shows the pair (moleculeMode)
   return { wOrbs }; }
   app.w.wChem = wChem; app.w.head = head; return { wChem, head, createMoRegistry };
 }

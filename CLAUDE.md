@@ -35,9 +35,11 @@ MOLECULES and MO-REGISTRY sit on the first-run LEFT rack under INFORMATIONAL and
 SPECTRUM; since iteration 001 (2026-10-16) EVERY first-run window arrives FOLDED
 (`lab/first-run.js` FOLD_ALL), unsolved until MOLECULES is switched on;
 a restored project whose field owner is MOLECULES brings them back onto the rack
-(MO-REGISTRY too when that file's register is on). MOLECULES OFF never hides or
-closes MO-REGISTRY: its switch stands down (it must release the field) and the
-ladder stays painted and editable. Its REGISTRY ON switch sits beside the
+(MO-REGISTRY too when that file's register is on). Since iteration 002 there are
+TWO MODES, ATOMS | MOLECULES (`#lwMode` under the title, windows/molecules.js
+`moleculeMode`): the mode IS MOLECULES ON, and each mode HIDES the other's
+windows — ATOMS: SPECTRUM, STATE, EQUALIZER and the atomic instruments;
+MOLECULES: MOLECULES and MO-REGISTRY (hidden, never closed or moved). Its REGISTRY ON switch sits beside the
 ORBITAL | STATES seg (registerview.js). Long windows fold their details behind
 one chevron (`lab/fold.js`, `.lw-fold`): MOLECULES, SHADOW, CAMERA, MO-REGISTRY. MOLECULES' first row is the SECTION header, which is the library's page turner (0.4.0 S4b; 0.5.3 M8, as Josh drew it): the kit's `stepper` in PALETTE's preset look (‹ NAME ›, a whole line; its name opens the kit's list, its hover carries the section's record line, `__LW.chem.section().sub`), then INSTALLED, whose lamp says every record of the section is on this device and whose press installs or removes them all (shown only for a section with records), beside MOLECULES ON; the MOLECULE picker below is a second stepper whose name IS the `<select>` (optgroups, disabled reasons and native keys kept; ‹ › and ← → walk the page's enabled rows as a hand pick) and holds that one section
 (DIATOMICS · HYDRIDES · ORGANIC · BIO · LATTICE · HEAVY, `lab/molecules.js`
@@ -120,8 +122,9 @@ and at least 16 px — an atom label its body (14 px); the formula and an announ
 instead its one plain-Unicode CAPTION — the stage's words, then ` · ` and the STATE word (`H₂O · 1b1 HOMO · STO-3G · NUMERICAL`, `1s₀, 2p₀ · EXACT`;
 0.5.4 P4c: `lab/windows/film.js` `caption()`, read at the take, one function for the film and the picture) — drawn by `lab/capture.js` `drawCaption` and
 following STAGE FORMULA: off, no caption and no word (D5, Group II, replaces it).
-While a molecule owns the field SPECTRUM is FOLDED, not hidden
-(`moleculeMode`), and unfolds when the molecule lets go; EDIT › COPY then
+While a molecule owns the field SPECTRUM is HIDDEN with the other ATOMS
+windows (`moleculeMode`, iteration 002; THE BEAT EQUALIZER is its own window,
+`equalizer`, whose AUDIO IN reads the modulation window's first AUDIO device); EDIT › COPY then
 copies the molecule's page (`moleculeLatex`, `lab/latex-state.js`).
 
 Jet Black is the app's palette row (`lab/palette-app.js`, appended to the kit's

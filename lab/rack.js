@@ -386,6 +386,7 @@ export async function boot(dom) {
         if (modRunning || (app.state.audioCap && app.state.audioCap.live) || rotDriving()) {
           feedAudio(feedHz);
           app.state.modHost.clock.advanceTo(now);
+          if (app.state.eq && app.state.eq.audioTick) app.state.eq.audioTick();   // iteration 002: the EQUALIZER's AUDIO IN reads the follower just fed
         }
         /* AFTER advanceTo AND NOT BEFORE: the macros have just written the rates, so the angle this
            tick applies is driven by the rate this tick asked for, with no one-frame lag between the

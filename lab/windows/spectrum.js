@@ -3,7 +3,7 @@
  * later in boot() are read through their slots inside callbacks (forward).  It registers on app.w what a moved reader needs; boot() destructures the return. */
 import { TIER } from '../rack.js';
 import { el, knob, seg, sw, trig, readout, group, mathPlain, fader, stepper } from '../mir/kit.js';
-import { createEqualizer, EQ_PRESETS } from '../equalizer.js'; import { createChord } from '../chord-audio.js';
+import { createEqualizer, EQ_PRESETS } from '../equalizer.js'; import { createEqAudio } from '../eq-audio.js'; import { createChord } from '../chord-audio.js';
 import { VIEW } from '../field.js';
 import { BASIS, stateOf } from '../hydrogen.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu, MASSES, onHamiltonian } from '../hamiltonian.js';
@@ -109,13 +109,19 @@ export function createSpectrumCard(app) {
      |Γ_nn′|·√(w_n w_n′) (w the shell populations), its colour the beat's log third — |ΔE| < 0.0263 Eh magenta, < 0.1130 orange, else yellow
      (the chord's own thirds: a creative choice, not a law).  A gain decoheres its shell from the others, never dims it.  A hydrogen
      position-space feature: anything else stands it down and clears the table.  syncEq() keys on what the table reads: cheap on a frame. */
-  const eq = app.state.eq = createEqualizer(), gEq = group(wSpec.body, 'BEAT EQUALIZER'), eqCv = el('canvas', 'eq-grid', gEq), eqG = eqCv.getContext('2d');
-  eqCv.width = eqCv.height = 6;
+  /* Iteration 002 (Josh, 2026-10-16): its OWN window, `equalizer` (an ATOMS window: MOLECULES mode hides it; closed until + or WINDOW opens it),
+     polished as one MIXER (the DESIGN BOOSTER habit — the house's tokens, nothing new to learn): the grid at the screen's own pixels on the left
+     (gapped cells, n along both edges, each shell's own diagonal ringed), each shell's fader on the row of its own n beside it; the colours are
+     skin.css tokens (--eq-near · --eq-mid · --eq-far) and the ink is the card's.  AUDIO IN takes the faders from the MODULATION window's first
+     AUDIO device (eq.audioTick, called by rack.js right after the model's feed). */
+  const wEq = device({ id: 'equalizer', eyebrow: 'EQUALIZER', title: 'beat equalizer', status: '' }); wEq.root.classList.add('closed'); rack.appendChild(wEq.root);
+  const eq = app.state.eq = createEqualizer(), gEq = group(wEq.body, ''), eqHead = el('div', 'row tight eq-head', gEq), mix = el('div', 'eq-mix', gEq), eqCv = el('canvas', 'eq-grid', mix), eqG = eqCv.getContext('2d');
   const eqStep = stepper({ aria: 'Equalizer preset', items: EQ_PRESETS.map((p) => ({ id: p.id, label: p.label })), value: eq.preset, cls: 'mol-step', onChange: (id) => { eq.setPreset(id); syncEq(true); hNote(); } });
   ui.eqPick = (id) => { eqStep.set(id); eq.setPreset(id); syncEq(true); hNote(); };   // 0.6.6 G1: the stepper's road for THE VERB TABLE's switch
-  const eqRo = readout({ label: 'PURITY', value: '1.000', sub: 'pure' }), rFd = el('div', 'row tight', gEq);
-  const eqFd = [0, 1, 2, 3, 4, 5].map((i) => fader({ label: String(i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + ' %', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
-  el('div', 'row tight', gEq).append(eqStep.root, eqRo.root); gEq.appendChild(rFd); for (const f of eqFd) rFd.appendChild(f.root);
+  const eqRo = readout({ label: 'PURITY', value: '1.000', sub: 'pure' }), rFd = el('div', 'eq-faders', mix);
+  const eqFd = [0, 1, 2, 3, 4, 5].map((i) => fader({ label: 'n ' + (i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + ' %', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
+  eqHead.append(eqStep.root, eqRo.root); for (const f of eqFd) rFd.appendChild(f.root);
+  const aud = createEqAudio(app, { eq, host: gEq, sync: () => { eqKey = ''; syncEq(false); } });   // iteration 002: AUDIO IN (lab/eq-audio.js)
   el('div', 'note', gEq).textContent = 'the beats fade, the shells stay';
   /* 0.6.4 S2 · THE CHORD (lab/chord-audio.js): SOUND and LEVELS · BEATS, shown only while SETTINGS › AUDIO is on; not saved (a hand press each session) */
   const chord = app.state.chord = createChord({ reg, clock, motion: MOTION, onPlay: appPlay.onChange }), snd = el('div', null, gEq), sndCap = el('div', 'note', null), paintChord = () => { sndCap.textContent = chord.caption; };
@@ -130,15 +136,27 @@ export function createSpectrumCard(app) {
     const P = reg.populated(), pops = reg.re0.map((r, a) => r * r + reg.im0[a] ** 2), w = [0, 0, 0, 0, 0, 0]; for (const a of P) w[BASIS[a].n - 1] += pops[a];
     const t = why ? null : eq.table({ Z: getZ(), rates, populated: P, pops }), G = t && t.gamma, m = G ? t.mode : 0;
     if (t || eqT) { field.setEqualizer(t); schedule(TIER.RECONSTRUCT); } eqT = eq.last = t;
-    gEq.classList.toggle('eq-off', !!why); gEq.title = why ? 'the equalizer is a hydrogen position-space feature: ' + why : ''; eqFd.forEach((f, i) => { f.setDisabled(!!why); f.set(eq.gains[i]); });
+    gEq.classList.toggle('eq-off', !!why); gEq.title = why ? 'the equalizer is a hydrogen position-space feature: ' + why : ''; eqFd.forEach((f, i) => { f.setDisabled(!!why || aud.on); f.set(eq.gains[i]); });
     eqStep.set(eq.preset); eqRo.set(G ? t.purity.toFixed(3) : '1.000'); eqRo.setSub(t && !G ? t.gate : G && t.repaired ? 'repaired' : ['pure', 'mixture · no phase', 'signed · relative floor 2·10⁻⁴'][m]);
     if (hand && m === 2 && eqMode !== 2) { mat.view = VIEW.real; ui.viewSeg.set('real'); wSpec.setStatus('a signed table: VIEW is Re ψ, its lobes in two colours', 'live'); }
     eqMode = m; const nn = app.state.eqNoNodes = !!(G && m === 1 && t.lambdaMin > 1e-3 * t.lambda[5]);   // E4: a positive-definite mixture has no zeros
     for (const b of [ui.vorOn, ui.pOn && ui.pOn.root]) if (b) { b.disabled = nn; b.classList.toggle('disabled', nn); keepT(b, nn, `the equalized picture has no nodes (λ_min = ${nn ? t.lambdaMin.toPrecision(3) : ''})`); }
     const cell = Array.from({ length: 36 }, (_, i) => (G ? Math.hypot(G[2 * i], G[2 * i + 1]) : 1) * Math.sqrt(w[i / 6 | 0] * w[i % 6])), top = Math.max(...cell) || 1;
-    eqG.clearRect(0, 0, 6, 6);
-    cell.forEach((s, i) => { const n = (i / 6 | 0) + 1, k = i % 6 + 1, dE = getZ() ** 2 * Math.abs(1 / (n * n) - 1 / (k * k)) / 2;
-      eqG.globalAlpha = s / top; eqG.fillStyle = dE < 0.0263 ? '#e040fb' : dE < 0.113 ? '#ff9800' : '#ffd600'; eqG.fillRect(k - 1, n - 1, 1, 1); });
+    drawGrid(cell, top);
+  }
+  /** the 6 × 6 grid at device pixels: n along the top and the left, a faint well per cell, the beat's third as its colour at |cell| / max, the diagonal ringed */
+  function drawGrid(cell, top) {
+    const css = eqCv.clientWidth || 132, dpr = Math.min(2, devicePixelRatio || 1), px = Math.round(css * dpr), cs = getComputedStyle(eqCv);
+    if (eqCv.width !== px) eqCv.width = eqCv.height = px;
+    const C = ['--eq-near', '--eq-mid', '--eq-far'].map((v) => cs.getPropertyValue(v).trim() || '#888'), pad = 14 * dpr, sz = (px - pad) / 6, gap = Math.max(1, 2 * dpr), r = 3 * dpr;
+    const box = (x, y, w, h) => { eqG.beginPath(); if (eqG.roundRect) eqG.roundRect(x, y, w, h, r); else eqG.rect(x, y, w, h); };
+    eqG.clearRect(0, 0, px, px); eqG.globalAlpha = 1; eqG.fillStyle = eqG.strokeStyle = cs.color; eqG.font = `${9 * dpr}px ${cs.fontFamily}`; eqG.textAlign = 'center'; eqG.textBaseline = 'middle';
+    for (let i = 0; i < 6; i++) { eqG.globalAlpha = 0.5; eqG.fillText(String(i + 1), pad + (i + 0.5) * sz, pad / 2); eqG.fillText(String(i + 1), pad / 2, pad + (i + 0.5) * sz); }
+    cell.forEach((s, i) => { const n = (i / 6 | 0) + 1, k = i % 6 + 1, dE = getZ() ** 2 * Math.abs(1 / (n * n) - 1 / (k * k)) / 2, x = pad + (k - 1) * sz + gap / 2, y = pad + (n - 1) * sz + gap / 2, w = sz - gap;
+      eqG.globalAlpha = 0.07; eqG.fillStyle = cs.color; box(x, y, w, w); eqG.fill();
+      if (s > 0) { eqG.globalAlpha = s / top; eqG.fillStyle = dE < 0.0263 ? C[0] : dE < 0.113 ? C[1] : C[2]; box(x, y, w, w); eqG.fill(); }
+      if (n === k) { eqG.globalAlpha = 0.35; eqG.lineWidth = dpr; box(x + dpr / 2, y + dpr / 2, w - dpr, w - dpr); eqG.stroke(); } });
+    eqG.globalAlpha = 1;
   }
   { const kids = [...wSpec.body.children], i = kids.findIndex((k) => k.classList.contains('ladder')); const h=kids[0]; for(const k of kids.slice(1,Math.max(0,i)))h.appendChild(k); wSpec.body.appendChild(h); }
   /** NORMALIZE, and say what it did — a unit-norm state looks the same afterwards, which is why it seemed to do nothing */

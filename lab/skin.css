@@ -604,7 +604,6 @@ body.window-info-off .settings-help { display:none; }
 .mir-camera .cam-more { display: flex; flex-direction: column; gap: var(--sp-2); }
 .palette-enable { flex-wrap: nowrap; align-items: center; }
 .palette-enable > .sw { flex: 1 1 auto; min-width: 0; }
-.palette-enable > .mir-ramp-reset { flex: 0 0 40px; min-width: 40px; padding: 0; }
 .palette-enable > .mir-ramp-sel { flex: 0 0 auto; }
 .palette-enable > .mir-ramp-sel > .mir-ramp-remove { margin-left: 0; }
 .lw-pop { position: fixed; left: 50%; top: 0; z-index: 21; pointer-events: none; user-select: none; white-space: nowrap; opacity: 0;
@@ -615,3 +614,22 @@ body.window-info-off .settings-help { display:none; }
 @keyframes lw-pop { 0% { opacity: 0; transform: translate(-50%, 6px); } 12% { opacity: 1; transform: translate(-50%, 0); } 65% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -4px); } }
 @media (prefers-reduced-motion: reduce) { .lw-pop.go { animation: lw-pop-still 1.6s linear forwards; } @keyframes lw-pop-still { 0%, 65% { opacity: 1; } 100% { opacity: 0; } } }
 body.no-mol-formula .lw-pop { display: none; }
+
+/* ═══ ITERATION 002 (Josh, 2026-10-16) · THE MODE SWITCH, THE EQUALIZER WINDOW ══════════════════════════════════════════════════
+ * #lwMode (windows/molecules.js): ATOMS | MOLECULES under the title, the kit's seg at the title's left edge.  THE EQUALIZER's mixer
+ * (windows/spectrum.js): the grid's canvas at device pixels beside its six faders, one per shell row; its colours are tokens here. */
+#lwMode { position: absolute; left: calc(var(--rack-w) + 24px); top: 46px; z-index: var(--z-chrome); width: auto; }
+#lwMode .seg { min-height: 0; }
+#lwMode .seg-b { min-height: 26px; padding: 0 10px; font-size: var(--fs-micro, 10px); letter-spacing: .1em; }
+body.ui-hidden #lwMode { display: none; }
+@media (hover: none) and (max-width: 700px), (hover: none) and (max-height: 520px) and (max-width: 1000px) {
+  #lwMode { left: max(env(safe-area-inset-left), 8px); top: calc(env(safe-area-inset-top) + 48px); } }
+.eq-grid { --eq-near: hsl(291 72% 56%); --eq-mid: hsl(33 100% 50%); --eq-far: hsl(48 100% 46%); width: 132px; height: 132px; margin: 0; image-rendering: auto; border-radius: 0; color: var(--ink-faint, currentColor); }
+body[data-theme="dark"] .eq-grid { --eq-near: hsl(291 85% 68%); --eq-mid: hsl(33 100% 60%); --eq-far: hsl(50 100% 58%); }
+.eq-mix { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 10px; align-items: start; }
+.eq-faders { display: grid; grid-template-rows: repeat(6, minmax(0, 1fr)); gap: 2px; height: 132px; padding-top: 14px; box-sizing: border-box; }
+.eq-faders > .fd { min-height: 0; height: auto; }
+.eq-head { flex-wrap: nowrap; align-items: center; }
+.eq-head > .mol-step { flex: 1 1 auto; min-width: 0; }
+.eq-audio { flex-wrap: nowrap; align-items: center; }
+.eq-audio > .ro { flex: 1 1 auto; min-width: 0; }
