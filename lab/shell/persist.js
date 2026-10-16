@@ -5,7 +5,7 @@
 import { TIER } from '../rack.js';
 import { VIEW_NAMES, STYLE_NAMES, quatFromYawPitch } from '../field.js';
 import { deviceQuality } from '../first-run.js';
-import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from '../hamiltonian.js';
+import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';
 import { clampShift } from '../camera-law.js'; import { BASIS } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js';
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
 export function createPersist(app) {
@@ -50,7 +50,7 @@ export function createPersist(app) {
       presentation: { obs: { ...obs, shift: [...obs.shift] }, mat: m, quality: { ...quality }, domain: { ...app.ctl.domain }, shadow: shadowView.mode,
         paletteId: app.state.palette ? app.state.palette.id : PAL_DEF,
         space: app.state.space, palette: app.state.palette ? { on: app.state.palette.on, selected: app.state.palette.selected, stops: app.state.palette.stops.map((s) => ({ at: s.at, rgb: Array.from(s.rgb) })) } : null,
-        hamiltonian: { id: H.id, Z: getZ(), atomZ: HAMILTONIANS.atom.Z, well: HAMILTONIANS.well.radius, gasBasis: app.state.gasAxial ? 'axial' : 'reg' },
+        hamiltonian: { id: H.id, Z: getZ(), ...(getMu() !== 1 && { mu: getMu() }), atomZ: HAMILTONIANS.atom.Z, well: HAMILTONIANS.well.radius, gasBasis: app.state.gasAxial ? 'axial' : 'reg' },
         wigner: { zmax: wignerView.zmax, pmax: wignerView.pmax },
         readers: { spectrum: { selected: app.w.spectrum.selected, dials: app.w.spectrum.dials }, slice: slice.save(), kepler: { shell: kepShell() } },
         /* Static instrument controls belong to the composition. Solver caches, traces, collisions,
@@ -201,7 +201,7 @@ export function createPersist(app) {
         if (!hist) app.ctl.modSyncBases(true);   // an UNDO's come from its record, below
         if (sturm.P) { sturm.on = false; sturm.P = null; sturm.rec = null; reg.setPropagator(null); reg.setEnergies(energyOf); }   // W-STURMIAN: stand the scale down silently (no re-anchoring) while the file's operator, Z and rates land; its own scale is applied below
         if (pr.instruments) centralConfigure(pr.instruments.central);   // 0.8.0 G1: CENTRAL's { preset, params } (absent = the defaults) before its operator is switched to
-        if (pr.hamiltonian) { const h = pr.hamiltonian; if (h.atomZ) setElement(h.atomZ); if (h.Z && h.Z !== getZ()) { setZ(h.Z); if (ui.zKnob) ui.zKnob.set(h.Z); } if (h.well && h.well !== HAMILTONIANS.well.radius) { HAMILTONIANS.well.setRadius(h.well); gas.setRadius(h.well); if (ui.wellKnob) ui.wellKnob.set(h.well); } if (h.id && HAMILTONIANS[h.id]) { setHamiltonian(h.id); switchHamiltonian(h.id); if (ui.hamSeg) ui.hamSeg.set(h.id); } app.state.gasAxial = h.gasBasis === 'axial'; if (ui.gasBasis) ui.gasBasis.set(app.state.gasAxial ? 'axial' : 'reg'); if (!app.state.gasAxial) gas.off(); }
+        if (pr.hamiltonian) { const h = pr.hamiltonian; if (h.atomZ) setElement(h.atomZ); if (h.Z && h.Z !== getZ()) { setZ(h.Z); if (ui.zKnob) ui.zKnob.set(h.Z); } setMu(h.mu || 1); if (h.well && h.well !== HAMILTONIANS.well.radius) { HAMILTONIANS.well.setRadius(h.well); gas.setRadius(h.well); if (ui.wellKnob) ui.wellKnob.set(h.well); } if (h.id && HAMILTONIANS[h.id]) { setHamiltonian(h.id); switchHamiltonian(h.id); if (ui.hamSeg) ui.hamSeg.set(h.id); } app.state.gasAxial = h.gasBasis === 'axial'; if (ui.gasBasis) ui.gasBasis.set(app.state.gasAxial ? 'axial' : 'reg'); if (!app.state.gasAxial) gas.off(); }
         if (pr.wigner) { const G = pr.wigner; wignerView.setRange(G.zmax, G.pmax); }
         if (pr.instruments) {
           const I = pr.instruments;

@@ -158,7 +158,7 @@ export function createFacade(app) {
       get stats() { return wignerView.stats; }, get zmax() { return wignerView.zmax; }, get pmax() { return wignerView.pmax; },
       get canvas() { return wignerView.canvas; }, table() { return wignerView.table(); } },
     /* W-RADIATION: the pair in force and what it radiates */
-    radiation: { pair() { return hydroReader().on ? radiationView.pair(reg, clock.t, app.hooks.ab) : null; },
+    radiation: { pair() { return hydroReader(true).on ? radiationView.pair(reg, clock.t, app.hooks.ab) : null; },
       get A() { const s = radiationView.stats; return s ? s.A : 0; }, get tau() { const s = radiationView.stats; return s ? s.tau : Infinity; },
       get power() { const s = radiationView.stats; return s ? s.P : 0; }, get stats() { return radiationView.stats; },
       get canvas() { return radiationView.canvas; }, table() { return radiationView.table(); } },

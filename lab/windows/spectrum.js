@@ -6,7 +6,7 @@ import { el, knob, seg, sw, trig, readout, group, mathPlain, fader, stepper } fr
 import { createEqualizer, EQ_PRESETS } from '../equalizer.js'; import { createChord } from '../chord-audio.js';
 import { VIEW } from '../field.js';
 import { BASIS, stateOf } from '../hydrogen.js';
-import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from '../hamiltonian.js';
+import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu, MASSES, onHamiltonian } from '../hamiltonian.js';
 import { ATOMS, configOf } from '../atoms.js';
 import { createSpectrum } from '../spectrum.js';
 import { MOLECULE_BY_ID } from '../molecules.js'; import { CATALOGUE } from '../catalogue.js';
@@ -66,6 +66,11 @@ export function createSpectrumCard(app) {
        cannot hold.  A dial whose `fmt` rounds has a lattice; the travel law has to know about it. */
     ui.zKnob = knob({ label: 'Z  (ion)', min: 1, max: 6, value: 1, step: 1, fmt: (v) => 'Z = ' + Math.round(v), onInput: (v) => { setZ(Math.round(v)); if (getHamiltonian().id === 'hydrogen') switchHamiltonian('hydrogen'); } });
     rh.appendChild(ui.zKnob.root);
+    /* 0.8.1 T2 · MASS: μ/mₑ, the reduced mass — hydrogen's E → μE and r → r/μ on setZ's road (hamiltonian.js setMu); refused under another operator */
+    const MASS = { 1: 1, ps: MASSES.positronium, muh: MASSES['muonic hydrogen'] }, setMass = (v) => { if (getHamiltonian().id === 'hydrogen') { setMu(v); hNote(); switchHamiltonian('hydrogen'); } else { ui.muKnob.set(getMu()); wSpec.setStatus('μ/mₑ scales hydrogen alone: the operator in force is ' + hamLabel(), 'warn'); } };
+    ui.muKnob = knob({ label: 'μ/mₑ  (mass)', min: 0.5, max: 200, log: true, value: 1, fmt: (v) => 'μ = ' + +v.toPrecision(5), title: 'The reduced mass in mₑ: E → μE, r → r/μ (hydrogen only); double-tap resets to 1', onInput: setMass });
+    const muSeg = seg({ aria: 'reduced mass', value: '1', options: [['1', '1'], ['ps', 'POSITRONIUM'], ['muh', 'MUONIC H']].map(([id, label]) => ({ id, label, title: `μ = ${+MASS[id].toPrecision(5)} mₑ` })), onChange: (id) => setMass(MASS[id]) });
+    rh.append(ui.muKnob.root, muSeg.root); onHamiltonian(() => { ui.muKnob.set(getMu()); muSeg.set(Object.keys(MASS).find((id) => MASS[id] === getMu()) || ''); });
     ui.elemKnob = knob({ label: 'ELEMENT  Z', min: 1, max: 36, value: 10, step: 1, fmt: (v) => 'Z = ' + Math.round(v) + '  ' + ATOMS[Math.max(0, Math.min(35, Math.round(v) - 1))].symbol, onChange: (v) => setElement(Math.round(v)) });
     rh.appendChild(ui.elemKnob.root);
     {
@@ -120,7 +125,7 @@ export function createSpectrumCard(app) {
   let eqKey = '', eqT = null, eqMode = 0;
   function syncEq(hand) {
     if (chord.retune() && !snd.hidden) paintChord();   // S2: keyed on version, RATE, mode — the bank moves only on change
-    const H = getHamiltonian(), why = app.state.chem && app.state.chem.on ? 'MOLECULES owns the field' : sturm.P ? 'STURMIAN is on' : H.id !== 'hydrogen' ? 'the operator is not HYDROGEN' : app.state.space !== 'x' ? 'momentum space is on' : '';
+    const H = getHamiltonian(), why = app.state.chem && app.state.chem.on ? 'MOLECULES owns the field' : sturm.P ? 'STURMIAN is on' : H.id !== 'hydrogen' ? 'the operator is not HYDROGEN' : H.mass ? H.mass + ' (its beats are written at μ = mₑ)' : app.state.space !== 'x' ? 'momentum space is on' : '';
     const key = why + eq.preset + eq.gains.join() + reg.version; if (key === eqKey) return; eqKey = key;
     const P = reg.populated(), pops = reg.re0.map((r, a) => r * r + reg.im0[a] ** 2), w = [0, 0, 0, 0, 0, 0]; for (const a of P) w[BASIS[a].n - 1] += pops[a];
     const t = why ? null : eq.table({ Z: getZ(), rates, populated: P, pops }), G = t && t.gamma, m = G ? t.mode : 0;
@@ -198,7 +203,7 @@ export function createSpectrumCard(app) {
     return { on: sturm.on, lambda: sturm.lambda, active: !!sturm.P };
   }
   function applySturmian(keepAnchor = false) {
-    const H = getHamiltonian(), want = sturm.on && H.id === 'hydrogen';
+    const H = getHamiltonian(), want = sturm.on && H.id === 'hydrogen' && getMu() === 1;   // 0.8.1 T2: the Sturmian register is built at μ = mₑ and stands down under a mass
     if (want && reg.transition) { reg.clearTransition(clock.t); if (ui.abSw) ui.abSw.set(false); }   // the mix is a diagonal-phase feature: frozen as the state
     const c = keepAnchor ? null : reg.at(clock.t);                                                     // the state NOW, continuous across the change
     if (want) {

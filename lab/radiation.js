@@ -119,7 +119,7 @@ export function einsteinA(a, b, { reducedMass = true } = {}) {
   const w = Math.abs(omegaOf(A, B));
   if (w === 0) return 0;
   const au = (4 / 3) * ALPHA ** 3 * w ** 3 * dipoleMatrix(A, B).abs2;
-  return au / AU_S * (reducedMass ? MU_H : 1);
+  return au / AU_S * (reducedMass && (getHamiltonian().mu || 1) === 1 ? MU_H : 1);   // at μ ≠ 1 (0.8.1 T2) the reduced mass is already the Hamiltonian's: A ∝ μ through ω³|d|²
 }
 /** the same in atomic units (1/t_au), the number the far-field law compares against */
 export function einsteinAtomic(a, b) {

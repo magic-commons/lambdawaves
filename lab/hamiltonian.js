@@ -182,30 +182,33 @@ HAMILTONIANS.central = CENTRAL;                                     // 0.8.0 G1:
    invariants are dimensionless and stay. ── */
 const H0 = HAMILTONIANS.hydrogen;
 const base = { energy: H0.energy, radial: H0.radial, tableFor: H0.tableFor, momentumTableFor: H0.momentumTableFor, psiAt: H0.psiAt, phiAt: H0.phiAt, domainFor: H0.domainFor, domainForP: H0.domainForP };
-let ZION = 1;
+let ZION = 1, MU = 1;
 const zTables = new Map(), zMomTables = new Map();
-export function setZ(Z) {
-  Z = Math.max(1, Math.round(Z)); if (Z === ZION) return ZION;
-  ZION = Z; zTables.clear(); zMomTables.clear();
-  const s32 = Math.pow(Z, 1.5);
-  H0.Z = Z;
-  H0.label = Z === 1 ? 'HYDROGEN  −½∇² − 1/r' : `HYDROGEN-LIKE ION  −½∇² − ${Z}/r  (Z = ${Z})`;
-  H0.energy = (a) => Z * Z * base.energy(a);
-  H0.radial = (n, l, r) => s32 * base.radial(n, l, Z * r);
-  H0.tableFor = (s) => { let T = zTables.get(s.id); if (!T) { const B = base.tableFor(s); T = { ...B, n: B.n / Z, norm: B.norm * s32, expo: B.n + 1 }; zTables.set(s.id, T); } return T; };
-  H0.momentumTableFor = (s) => { let T = zMomTables.get(s.id); if (!T) { const B = base.momentumTableFor(s); T = { ...B, n: B.n / Z, norm: B.norm / s32, expo: B.n + 1 }; zMomTables.set(s.id, T); } return T; };
-  H0.psiAt = (re, im, x, y, z, ids) => { const v = base.psiAt(re, im, Z * x, Z * y, Z * z, ids); return { re: s32 * v.re, im: s32 * v.im }; };
-  H0.phiAt = (re, im, px, py, pz, ids) => { const v = base.phiAt(re, im, px / Z, py / Z, pz / Z, ids); return { re: v.re / s32, im: v.im / s32 }; };
-  H0.domainFor = (nmax) => base.domainFor(nmax) / Z;
-  H0.domainForP = (nmin) => base.domainForP(nmin) * Z;
-  H0.stark = Z === 1; H0.hydrogenTheorems = Z === 1;
+/* ── μ: the reduced mass in mₑ (0.8.1 T2), on the same road: −∇²/2μ − Z/r is μ × the Z ion at lengths /μ, so the length scale is k = Zμ and the energy
+   scale Z²μ; at Z = 1, μ = 1 hydrogen's own functions come back (NO scale applied: THE LOCK).  Positronium mₑ/2; muonic H m_μm_p/(m_μ + m_p) = 185.84. ── */
+export const MASSES = { positronium: 0.5, 'muonic hydrogen': 206.7683 * 1836.15 / (206.7683 + 1836.15) };   // m_μ = 206.7683 mₑ, m_p = 1836.15 mₑ
+export function setZ(Z) { Z = Math.max(1, Math.round(Z)); if (Z === ZION) return ZION; ZION = Z; scale(); return ZION; }
+export function setMu(mu) { mu = +mu > 0 ? +mu : 1; if (mu !== MU) { MU = mu; scale(); } return MU; }
+function scale() {
+  const Z = ZION, k = Z * MU, e = Z * Z * MU, s32 = Math.pow(k, 1.5), name = Object.keys(MASSES).find((m) => MASSES[m] === MU), one = k === 1 && e === 1;
+  zTables.clear(); zMomTables.clear(); H0.Z = Z; H0.mu = MU; H0.k = k; H0.mass = MU === 1 ? '' : `μ = ${+MU.toPrecision(5)} mₑ` + (name ? ` (${name})` : '');
+  H0.label = (Z === 1 ? 'HYDROGEN  ' : 'HYDROGEN-LIKE ION  ') + (MU === 1 ? '−½∇²' : '−∇²/2μ') + ` − ${Z}/r` + (Z === 1 ? '' : `  (Z = ${Z})`) + (MU === 1 ? '' : `  (${H0.mass})`);
+  H0.energy = (a) => e * base.energy(a);
+  H0.radial = (n, l, r) => s32 * base.radial(n, l, k * r);
+  H0.tableFor = (s) => { let T = zTables.get(s.id); if (!T) { const B = base.tableFor(s); T = { ...B, n: B.n / k, norm: B.norm * s32, expo: B.n + 1 }; zTables.set(s.id, T); } return T; };
+  H0.momentumTableFor = (s) => { let T = zMomTables.get(s.id); if (!T) { const B = base.momentumTableFor(s); T = { ...B, n: B.n / k, norm: B.norm / s32, expo: B.n + 1 }; zMomTables.set(s.id, T); } return T; };
+  H0.psiAt = (re, im, x, y, z, ids) => { const v = base.psiAt(re, im, k * x, k * y, k * z, ids); return { re: s32 * v.re, im: s32 * v.im }; };
+  H0.phiAt = (re, im, px, py, pz, ids) => { const v = base.phiAt(re, im, px / k, py / k, pz / k, ids); return { re: v.re / s32, im: v.im / s32 }; };
+  H0.domainFor = (nmax) => base.domainFor(nmax) / k;
+  H0.domainForP = (nmin) => base.domainForP(nmin) * k;
+  if (one) Object.assign(H0, base);
+  H0.stark = one; H0.hydrogenTheorems = one;
   H0.lengthUnit = 'a₀';
-  H0.spectrum = Z === 1 ? null : { levels: [1, 2, 3, 4, 5, 6].map((n) => ({ key: n, E: Z * Z * hydrogenEnergy(n), label: 'n' + n, rgb: N_RGB[n] })), levelKey: (a) => BASIS[a].n, Emin: Z * Z * hydrogenEnergy(1), Etop: 0, topLabel: 'E = 0', footer: `EIGENVALUE  E_n = −Z²/(2n²) hartree, Z = ${Z}` };   // Round 11 A7
+  H0.spectrum = one ? null : { levels: [1, 2, 3, 4, 5, 6].map((n) => ({ key: n, E: e * hydrogenEnergy(n), label: 'n' + n, rgb: N_RGB[n] })), levelKey: (a) => BASIS[a].n, Emin: e * hydrogenEnergy(1), Etop: 0, topLabel: 'E = 0', footer: `EIGENVALUE  E_n = −${MU === 1 ? '' : 'μ'}Z²/(2n²) hartree, Z = ${Z}` + (MU === 1 ? '' : `, μ = ${+MU.toPrecision(5)} mₑ`) };   // Round 11 A7
   for (const fn of listeners) fn(H0);
-  return ZION;
 }
-export const getZ = () => ZION;
-H0.Z = 1;
+export const getZ = () => ZION, getMu = () => MU;
+H0.Z = 1; H0.mu = 1;
 let current = HAMILTONIANS.hydrogen;
 const listeners = new Set();
 export function getHamiltonian() { return current; }

@@ -26,9 +26,9 @@ export function varianceZ(re, im, ids = BASIS.map((s) => s.index)) { let s = 0, 
 const FCACHE = new Map();
 /** ∫₀^∞ R_{n′l′} R_{nl} dr — the radial part of ⟨z/r³⟩ (z/r³ = cos θ / r²): NUMERICAL, cached per Hamiltonian */
 export function radialForce(np_, lp, n, l) {
-  const H = getHamiltonian(), key = `${H.id}:${H.Z || 1}:${np_}:${lp}:${n}:${l}`;
+  const H = getHamiltonian(), key = `${H.id}:${H.k || H.Z || 1}:${np_}:${lp}:${n}:${l}`;
   if (FCACHE.has(key)) return FCACHE.get(key);
-  const R = H.id === 'hydrogen' ? 40 * Math.max(np_ * np_, n * n) / (H.Z || 1) : 14, N = 12000, h = R / N;
+  const R = H.id === 'hydrogen' ? 40 * Math.max(np_ * np_, n * n) / (H.k || H.Z || 1) : 14, N = 12000, h = R / N;
   let s = 0;
   for (let i = 0; i <= N; i++) { const r = i * h, w = (i === 0 || i === N) ? 1 : (i % 2 ? 4 : 2); s += w * H.radial(np_, lp, r) * H.radial(n, l, r); }
   const v = s * h / 3; FCACHE.set(key, v); return v;
