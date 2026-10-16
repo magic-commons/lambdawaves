@@ -110,7 +110,7 @@ export function createChem(host, api) {
       () => { if (on) setOn(false); api.atom(a.Z); }, api.atomZ() === a.Z)); return; }
     for (const g of [...GROUPS, RECORD_GROUP]) for (const p of CHEM_PRESETS.filter((q) => q.group === g.id && q.section === page)) {
       const w = (CATALOGUE.find((r) => r.id === p.id && r.shelf === 'molecules') || {}).word || '—', lamp = p.disabled ? p.shortReason.toUpperCase() : !p.recordOnly ? 'LIVE' : have.get(p.records['sto-3g'].hash) ? 'INSTALLED' : 'DOWNLOAD';
-      tile(p.name + (p.disabled ? ' — ' + p.reason : p.over ? ' — past the cap: it opens from its record' : '') + ' · ' + p.source, [p.formula, p.name, `${p.nAO} AO · ${w}`, lamp], () => { handPick(p.id); }, p.id === preset, p.disabled);
+      tile(p.name + (p.disabled ? ' — ' + p.reason : p.over ? ' — past the cap: it opens from its record' : '') + ' · ' + p.source, [p.formula, p.name, `${p.nAO} AO`, w, lamp], () => { handPick(p.id); }, p.id === preset, p.disabled);
     }
   }
   /* ── THE MOLECULE DROPDOWN ────────────────────────────────────────────────────────────────────────────────
