@@ -30,11 +30,30 @@ place; paste lines for Josh's devices; the store listings read against README wi
 - **Checked:** node 0; rack-deps 0; new-project in step; `provenance.mjs`, `pyscf-table.mjs`, `catalogue-table.mjs` `--check` in step; `tools/build-deploy.mjs --quiet`
   494 files verified (`/.well-known/assetlinks.json` among them), `dist/` deleted after; `lab/` 30,028 before and after.
 
-## H2 · THE ROWS RE-MEASURED
-(filled at H2's merge)
+## H2 · THE ROWS RE-MEASURED (branch `h2-rows` tip `d8c34fa`, merged `3a019f1`; `docs/ACCEPTANCE-MATRIX.md`, `tools/platform/electron/smoke-run.mjs` 5 lines, `tools/perf/bench-chromium.mjs`; 0 lab lines)
+- **Measured on this machine at `c577a04`** (Ryzen 5 5600G · RTX 3070; the rows carry the full fingerprint): `dist/` payload `c3f1cd76e54c`, 494 files. **Electron
+  linux-x64, packaged:** PASS 17/17 — first frame 1039 ms, the project round trip GREEN, 319.9 MB; **the dev tree:** PASS 17/17, first frame 1393 ms (the sandbox off
+  on both, the sudo line in the matrix). **The field law inside the package: NOT RUN** — `tools/gate/gatekit.mjs` drives Firefox through geckodriver only (no Electron
+  or CDP road); the shell's own smoke readback stands in, said in the row. **The field law in Firefox 157 on `c577a04`:** GREEN 9/9 with its pasteable line.
+  **win32-x64:** BUILT-NOT-RUN, 408.8 MB, the exe's sha in the row. **Android bundled WebView:** BUILT-NOT-RUN, APK 18.3 MB (`ANDROID_HOME` unset, `build.sh` falls back
+  to Bubblewrap's SDK and JDK); **Android TWA:** UNBUILT — its upload keystore exists only in the hosts-m0 worktree (`shells/android/local/`) and no signing key was
+  copied. **iOS:** UNBUILT (no Xcode: `xcodebuild`, `swift`, `swiftc` absent); the iPad M5 and iPhone rows stay UNVERIFIED on their two gates. Every September row is
+  HISTORICAL in place; "Rows Josh fills by hand" gives the thing to open and the line to paste per device.
+- **The September smoke run was RED 3/17 on today's engine** (the title screen holds startup until a choice; the old export button is gone): `smoke-run.mjs` now
+  presses CONTINUE then NEW and uses `__LW.projects.download()`/`pick()` — five lines. `package.mjs` builds linux-x64 and win32-x64 in one run; Electron 44 fetched its
+  binary once from the local cache. `bench-chromium.mjs` points at `tools/platform/electron/` (it needs `npm ci` there).
+- **The listings against the public face — 21 claims in 56 sentences without README/PROVENANCE backing**, listed in `H2-BUILD.md` for Josh, nothing changed: the
+  worst three are "54 small molecules, 52 playable, closed shells, fixed nuclei" in all three listings (README: 98 molecules, 61 solved live, UHF, LDA, nuclei that
+  move under VIBRATE); "uses no AI at runtime" (Steam) and "no network requests" (Apple, PRIVACY) against the shipped ASK strip (`lab/ask.js` sends the typed text to
+  the Gemma broker; README never mentions it); "Now on iPad" of an app never compiled; and Steam's "Storage 400 MB" against today's 408.8 MB Windows package.
+- **Also only in the hosts-m0 worktree:** `store/steam/trailer-draft.mp4` and `LANDING PAGE VIDEOS/`; the electron `package.json` version still reads `0.2.3-alpha.3`.
+- **Checked:** node 0; rack-deps 0; new-project in step; `lab/` 30,028 before and after; `git status` clean of build outputs, no `.gitignore` line needed.
 
 ## The light check (existing gates only) and the cut
-(filled at the cut)
+Sos integrated (Josh's dial of 10-16: "don't over verify and bloat the code with tests … a light visual/functional check"): on the merged tree `3a019f1` node 0, pwa
+in step, rack-deps 0, new-project in step, `lab/` 30,028; THE LOCK once on 9241 (`--query gastab=0`): 860 values, 0/0, 62 s — once, not twice, since no `lab/` line
+moved in this cut; the visual check on Josh's own 9261 (the tree boots clean, no console errors; the Electron smoke run is the functional check of this cut). Then the
+local cut `v0.9.1-alpha` "Platform", CHANGELOG, snapshot 39.
 
 ## Known, deferred (recorded)
 The iPad M5 and iPhone rows (WKWebView WebGPU — UNVERIFIED until Josh runs the shell and pastes the line); his Windows PC row; MIR mobile (unplanned); the store
