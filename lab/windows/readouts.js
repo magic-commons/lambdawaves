@@ -6,7 +6,7 @@ import { toLUT } from '../mir/palette.js';
 import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { createShadowView, createShadowFoot } from '../shadowview.js'; import { createOrbit } from '../orbit.js'; import { createKepler } from '../keplerview.js';
 import { createVortex } from '../vortex.js'; import { createParticles } from '../particles.js'; import { createSliceView } from '../sliceview.js';
-import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { solveLadder } from '../ladder-model.js';
+import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { solveLattice } from '../lattice-model.js'; import { solveLadder } from '../ladder-model.js';
 import { createAtoms } from '../atomsview.js'; import { createWigner } from '../wignerview.js'; import { createRadiation } from '../radiationview.js';
 export function createReadouts(app) {
   const { dom, ui, device, reg, clock, useCompactDefaults } = app, { schedule, canPresent } = app.loop, { rack } = app.host, { setElement, fillValence } = app.w,
@@ -128,7 +128,10 @@ export function createReadouts(app) {
   app.w.wChem.root.addEventListener('devopen', () => app.state.chem.prepare());
   app.w.wOrbs.root.addEventListener('devopen', () => { app.state.chem.prepare(); app.state.orbitals.paint(); app.state.orbitals.refresh(); });   // the register runs on CHEMISTRY's ladder: opening it asks for one
   wLad.root.addEventListener('devopen', () => ladder.prepare());
-  return { wCalc, calculus, wMet, meters, wLad, ladder }; }
+  const wLat = device({ id: 'lattice', eyebrow: 'LATTICE', status: '' }); wLat.root.classList.add('closed'); rack.appendChild(wLat.root);   // 0.7.2 L1: a tight-binding lattice, its own register (lab/lattice.js); ships closed
+  const lattice = createLattice(wLat.body, { active: () => canPresent(wLat), t: () => clock.t, palette: () => app.state.palette, solve: (H) => solveCard({ op: 'lattice.solve', ...H }, () => solveLattice(H)) });
+  wLat.root.addEventListener('devopen', () => lattice.prepare());
+  return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice }; }
   function createAtomsWignerRadiation() {   // the third seat: ATOMS · WIGNER · RADIATION
   const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack

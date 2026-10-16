@@ -133,7 +133,7 @@ export function createSettings(app) {
   }
 
 
-  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', orbit: 'control', atoms: 'info', chem: 'other', wigner: 'info', radiation: 'info' };
+  const KIND = { state: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', lattice: 'info', orbit: 'control', atoms: 'info', chem: 'other', wigner: 'info', radiation: 'info' };
   /* WAVE 56 · WINDOWS THAT NO LONGER EXIST, and the window that absorbed each of them.  A saved LAYOUT is
      a list of window ids and nothing else, so retiring an id would silently drop a seat out of every layout
      ever saved unless the id has somewhere to go.  `style` (DRAW STYLE) was merged into `observer` (WAVE) by
