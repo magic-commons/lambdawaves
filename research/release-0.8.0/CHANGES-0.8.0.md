@@ -1,7 +1,7 @@
 # 0.8.0-alpha "Central Lab" — what changed (Claude Yan / Fable 5.1, 2026-10-16)
 
 The engine plan's D.12. Plan `BUILD-PLAN.md` (Yan, drafted 10-16 01:00 while 0.7.3 cut; base `a2072ff`, 29,525 lines, cap 29,820). Three Opus builders in parallel
-from `a2072ff`: G1 `g1-central`, G2 `g2-squeeze`, G3 `g3-stark`; merged G1, G3, G2. Build notes: `G1-BUILD.md`, `G2-BUILD.md`, `G3-BUILD.md`. Josh 00:35: "Let's
+from `a2072ff`: G1 `g1-central`, G2 `g2-squeeze`, G3 `g3-stark`; merged G2, G3, G1. Build notes: `G1-BUILD.md`, `G2-BUILD.md`, `G3-BUILD.md`. Josh 00:35: "Let's
 continue onward with the rest of the build plans."
 
 ## The shape
@@ -75,7 +75,12 @@ over the 91 labels, eigensolved once per F; ionisation SAID, never simulated (th
   is not e^{−ikz}; the cat avoids it by slapping along ±d with k > 0.
 
 ## The light check (existing gates only) and the cut
-(filled at the cut)
+- Node gate 0 after each merge; `pwa --write`; `new-project --check` in step; `rack-deps --classes` holds (SPECTRUM 25, `app` 30 keys); central 8/8 · stark 11/11 ·
+  squeeze 5/5 · hydrogen · cornell · kick · qho · catalogue + `catalogue-table --check` green on the merged tree; `tests/keyboard-window.browser-test.mjs` once
+  (the + list gained CENTRAL) GREEN; THE LOCK ×2 at the merge tip `f8500f2` with `--query gastab=0` on BOTH runs: 860 values · 0 readback · 0 record-byte · 58 s, and
+  the 1004-value fixture · 0 · 0 · 58 s.
+- **Lines:** 29,525 → 29,707 (+182 = G2 +40, G3 +55, G1 +87 with the STATUS line; cap 29,820). Merge order G2, G3, G1 (G1's note was written by the integrator
+  after the builder was paused by the usage alarm; the merge spanned a USAGE PAUSE at `c47e2d7`).
 
 ## Known, deferred (recorded)
 The rotor-like narrow shell, the Gaussian well, the delta shell, power laws and the radial Morse as further presets; the separable module (0.8.2's gated row); a
