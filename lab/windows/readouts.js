@@ -92,7 +92,9 @@ export function createReadouts(app) {
   app.w.wSh = wSh; app.w.wOrb = wOrb; app.w.wVor = wVor; app.w.wSlice = wSlice; app.w.orbit = orbit; app.w.flowTracers = flowTracers;
   const slice = createSliceView(wSlice.body, {
     lut: () => (app.state.palette && app.state.palette.on ? toLUT(app.state.palette.stops) : null),
-    repaint() { schedule(TIER.PRESENT); }
+    repaint() { schedule(TIER.PRESENT); },
+    owner: () => (app.state.chem && app.state.chem.on ? 'a molecule holds the field: CURRENT stands down (the PLANE reads the hydrogenic register; the molecular current is FLOW\'s tracers)'
+      : app.sturm.P ? 'the STURMIAN scale is on: CURRENT stands down (the PLANE samples the unscaled closed forms)' : '')
   });
   app.w.shadowFoot = shadowFoot; app.w.kepler = kepler; app.w.vortex = vortex; app.w.particles = particles; app.w.slice = slice;
   /* OPTIMIZATION 2026-09-24 · M6(b): appended AFTER its view is built (in its old seat, so the rack order and
