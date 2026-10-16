@@ -11,6 +11,31 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.9.3-alpha` — 2026-10-16
+
+Commit `fa85b51` · no new waves · 12 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `906b837` 2026-10-16 — CHANGELOG for v0.9.2-alpha
+- `458752d` 2026-10-16 — 0.9.3 Decohere: the plan's base and cap filled at the v0.9.2-alpha cut
+- `f7baff2` 2026-10-16 — HANDOFF §2 + checkpoint 12:48: v0.9.2-alpha Flow cut locally (65d8d62, snapshot 40); 0.9.3…
+- `da1c2e2` 2026-10-16 — 0.9.3 D1 T1 · T2 on the sphere: the Bloch equations by RK4, DECAY and DAMPED RABI, purity and…
+- `2c6c945` 2026-10-16 — 0.9.3 D1: the build note (seats, closed forms against RK4, corrections, Δ +19)
+- `0f0d11f` 2026-10-16 — merge D1 T₁ · T₂ ON THE SPHERE (2c6c945): bloch-model.js' bloch(r, P, t, dt) — one RK4 step of ṙ…
+- `9606c68` 2026-10-16 — 0.9.3 Decohere: CHANGES D1 section
+- `3471b09` 2026-10-16 — D2 THE GATE SET: GATES (H_A X_A Z_A S_A as U ⊗ 1, CNOT and SWAP as index maps), applyTape, the…
+- `367f274` 2026-10-16 — D2 build note: seats, gate checks, the after-tape decision, Δ +8
+- `6d234c0` 2026-10-16 — merge D2 THE GATE SET (367f274): bloch-model.js' GATES
+- `09e92c6` 2026-10-16 — 0.9.3 Decohere: CHANGES-0.9.3.md complete (D2, the light check) and MAJOR-FEATURES.md's 0.9.3…
+- `fa85b51` 2026-10-16 — 0.9.3-alpha Decohere: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.9.2-alpha` — 2026-10-16
 
 Commit `65d8d62` · no new waves · 13 commits.
