@@ -3,7 +3,7 @@
 import { TIER } from '../rack.js';
 import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js';
 import { toLUT } from '../mir/palette.js';
-import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
+import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js'; import { BASIS } from '../hydrogen.js';
 import { createShadowView, createShadowFoot } from '../shadowview.js'; import { createOrbit } from '../orbit.js'; import { createKepler } from '../keplerview.js';
 import { createVortex } from '../vortex.js'; import { createParticles } from '../particles.js'; import { createSliceView } from '../sliceview.js';
 import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { createBloch } from '../bloch.js'; import { solveLattice } from '../lattice-model.js'; import { createCentral, solveCentral } from '../central.js'; import { solveLadder } from '../ladder-model.js';
@@ -109,7 +109,11 @@ export function createReadouts(app) {
   const wMet = device({ id: 'meters', eyebrow: 'METERS', status: '' });
   app.w.wMet = wMet;
   rack.appendChild(wMet.root);
-  const meters = createMeters(wMet.body);
+  const meters = createMeters(wMet.body, () => {   // 0.8.2 P2 · THE COHERENCE MAP's source: a molecule's STATES register (its b_K) while MOLECULES owns the field, else the register's c(0)
+    const S = app.state.chem && app.state.chem.on ? app.state.states : null, H = getHamiltonian(), pal = app.state.palette;
+    if (S) return S.on ? { c: S.state().lanes.filter((l) => l.amp > 1e-7).map((l) => ({ re: l.amp * Math.cos(l.phase), im: l.amp * Math.sin(l.phase), label: l.label, E: l.omega })), unit: 'hartree', pal } : { why: 'MOLECULES owns the field: the map reads its STATES register — switch STATES on in MO-REGISTRY', pal };
+    return { c: reg.populated().map((a) => ({ re: reg.re0[a], im: reg.im0[a], label: H.labelOf(BASIS[a]), E: reg.Ediag(a), n: BASIS[a].n })), T: app.state.eq.last, unit: H.unit, pal };
+  });
 
   {
     const rp = wMet.row('tight');                                     // 0.4.0 S3: PERFORMANCE moved to SETTINGS › QUALITY; the GOVERNOR's readout stays here

@@ -38,8 +38,15 @@ function jacobi(M, N) {
 const embed = (G) => { const M = new Float64Array(144); for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) { const re = G[(i * 6 + j) * 2], im = G[(i * 6 + j) * 2 + 1];
   M[i * 12 + j] = M[(i + 6) * 12 + j + 6] = re; M[(i + 6) * 12 + j] = im; M[i * 12 + j + 6] = -im; } return M; };
 
+/** THE COHERENCE MAP (0.8.2 P2): ρ_ab = c_a c̄_b / Σ|c|² over the twelve largest |c| (kept in their order), each off-diagonal × |Γ_{n_a n_b}| of the
+ *  table T (spectrum.js keeps the one in force as eq.last) — the expectation of e^{−iω_ab δt} over the preset's spread of clocks, what the picture applies */
+export function coherence(c, T = null) {
+  const G = T && T.gamma, s = c.reduce((q, x) => q + x.re ** 2 + x.im ** 2, 0) || 1, keep = new Set([...c].sort((a, b) => b.re ** 2 + b.im ** 2 - a.re ** 2 - a.im ** 2).slice(0, 12)), L = c.filter((x) => keep.has(x));
+  const f = (a, b) => { const k = ((a.n - 1) * 6 + b.n - 1) * 2; return G && a !== b && a.n ? Math.hypot(G[k], G[k + 1]) : 1; }, F = L.map((a) => L.map((b) => f(a, b)));
+  return { L, F, cut: c.length - L.length, M: L.map((a, i) => L.map((b, j) => Math.hypot(a.re, a.im) * Math.hypot(b.re, b.im) / s * F[i][j])) };
+}
 export function createEqualizer() {
-  const eq = { preset: 'flat', gains: new Float64Array(6).fill(1),
+  const eq = { preset: 'flat', gains: new Float64Array(6).fill(1), last: null,
     setPreset(id) { if (EQ_PRESETS.some((p) => p.id === id)) eq.preset = id; },
     setGain(i, v) { if (i >= 0 && i < 6) eq.gains[i] = Math.min(1, Math.max(0, +v || 0)); },
     birth: () => eq.preset === 'flat' && eq.gains.every((s) => s === 1),
