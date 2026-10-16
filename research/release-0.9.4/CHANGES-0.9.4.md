@@ -28,11 +28,25 @@ CENTRAL's kind opened from the picker; the radial readers (the slap, CALCULUS's 
   readouts 11, persist 24), new-project in step, catalogue/provenance `--check` in step, keyboard-window 8 PASS; THE LOCK on the builder's tree 860 0/0 and on 9241 at
   the merge 860 0/0 and 1004 0/0.
 
-## S2 · THE CUBE
-(filled at S2's merge)
+## S2 · THE CUBE (branch `s2-cube` tip `f97abe7`, merged `dca4427`; `lab/separable.js`, `lab/field.js` +2, `lab/catalogue.js` regenerated, `tools/catalogue-table.mjs`, `docs/STATE-SCOPES.md`; +7 lab lines → 30,209)
+- **FORM CUBE:** a knob L 4…30 a₀ (default 12; the ω knobs hidden under CUBE), energies E = π²Σnᵢ²/(2L²) in hartree (the entry's `unit` is a getter), norm
+  (2/L)^{3/2}, the record `c.w = 1` and `lag0 = (nᵢπ/L, L)`, `psiAt`'s sine twin zero outside the box, `domainFor` 0.525 L, level names from the computed groups —
+  "(1,1,2) ×3", "(1,2,3) ×6", and "Σn²27 ×4" where (1,1,5) and (3,3,3) coincide; **whole levels are filled up to Σn² = 29 — 54 labels, 37 unused** (the brief's 56
+  lowest would cut the Σn² = 30 sixfold level after two members and read "×2"; the count is computed); the saved record gains `L` (absent at the default); the card
+  note says the cube's gas is deferred. **`field.js` +2 lines** inside S1's branch: the sine form behind `M.c.w > 0.5` on the kᵢqᵢ S1 already forms (the oscillator's
+  line byte-identical; its value overwritten under the cube).
+- **Checked once:** ∫|ψ|² for (1,2,3) by a 64³ sum = 1 + 2e-14; E(1,1,1) = 3π²/(2L²) = 0.102808 hartree, as the window prints "E₀ = 0.1028 hartree"; the first six
+  levels (1,1,1) · (1,1,2) ×3 · (1,2,2) ×3 · (1,1,3) ×3 · (2,2,2) · (1,2,3) ×6, 15 levels in all; the kernel against the twin at ten voxels 1.31e-5 of a 0.0407 peak.
+  Screenshot `.tmp/s2-cube-123.png` (the cube's (1,2,3), the CUBE card at L = 12, the spectrum's "(1,2,3) ×6" lit). Node 0, rack-deps 0, new-project in step,
+  catalogue/provenance `--check` in step, serialize-bytes 11; THE LOCK on the builder's tree 860 0/0 and on 9241 at the merge 860 0/0 and 1004 0/0.
 
 ## The light check and the cut
-(filled at the cut)
+On the merged tree `dca4427`: node 0, pwa in step, new-project in step, catalogue/provenance `--check` in step, `lab/` 30,209 of the 30,419 cap, `lab/field.js` nine
+inserted lines in all and nothing removed; THE LOCK ×2 on 9241 at each merge (`--query gastab=0`; the second run with the s4a fixture): 860 0/0 and 1004 0/0 after
+S1, 860 0/0 and 1004 0/0 after S2 — the shader branch leaves every recorded texel untouched; the visual check: S1's |1 0 2⟩ under ANISOTROPIC with its three nodal
+planes and the SEPARABLE card, S2's cube (1,2,3) (the builders' screenshots, read by the integrator; S1 also ran `keyboard-window` 8 PASS for the + list). Then the
+local cut `v0.9.4-alpha` "Separable", CHANGELOG, snapshot 42. Known, visible: SPECTRUM's grid keeps hydrogen's n l m labels under SEPARABLE — the pressed slot reads
+as its triple in the stage formula and the window, not in the grid (deferred by name).
 
 ## Known, deferred (recorded)
 Momentum space of the separable oscillator (self-dual per axis); a displaced oscillator (Stark on it); the 2-D box and a cylinder; the gas in the cube (the well's
