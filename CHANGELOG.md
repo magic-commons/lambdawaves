@@ -11,6 +11,37 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.9.0-alpha` — 2026-10-16
+
+Commit `c65a464` · no new waves · 18 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `2494120` 2026-10-16 — CHANGELOG for v0.8.3-alpha
+- `3434be1` 2026-10-16 — 0.9.0 Certification: the plan's base filled at the v0.8.3-alpha cut
+- `a223849` 2026-10-16 — checkpoint 11:10: v0.8.3-alpha Breath cut locally (6bcb7c7, snapshot 37)
+- `37b22b2` 2026-10-16 — 1.0.0: W1 THE PAPER · W2 THE STANDALONE briefs and the CHANGES shape (the prior-art pass first;…
+- `1966706` 2026-10-16 — 1.0.0: MAJOR-FEATURES.md
+- `2f5b689` 2026-10-16 — 0.9.0 Z3: THE FIELD LAW's pasteable line, the LDA SCF certificate, the R_m caption on ATOMS
+- `53fd511` 2026-10-16 — 0.9.0 Z3: the FIELD LAW line says 'adapter info blank' when the browser gives every adapterInfo…
+- `573d6d1` 2026-10-16 — 0.9.0 Z2: THE PROVENANCE REGISTRY + THE FINGERPRINT
+- `7a3f62c` 2026-10-16 — 0.9.0 Z2: the build note
+- `21cb3b0` 2026-10-16 — 0.9.0 Z3: the build note (FIELD LAW line, certificates, R_m caption, gates, corrections)
+- `51e5de6` 2026-10-16 — Z1: README says what is measured
+- `dfdd2b8` 2026-10-16 — merge Z2 THE PROVENANCE REGISTRY + THE FINGERPRINT (7a3f62c): tools/provenance.mjs (111 lines) →…
+- `1b99df7` 2026-10-16 — merge Z3 THE FIELD LAW ON A DEVICE + THE GATED CERTIFICATES + R_m (21cb3b0):…
+- `8ba9b83` 2026-10-16 — Z1: CLAIMS rows 6, 7, 10, 11 and the MODEL sheet in the STATUS grammar (strings only, 0 lab…
+- `5f9bea2` 2026-10-16 — Z1: CITATION, SHIPPING-READINESS and NOTES-FOR-AGENTS against the same grammar; README names…
+- `7769926` 2026-10-16 — Z1: CLAIMS-0.9.0.md (rows 6-11 closed but 9; every public sentence changed) and Z1-BUILD.md
+- `073e2e0` 2026-10-16 — merge Z1 THE PUBLIC FACE (7769926): README reworded sentence by sentence into the STATUS grammar…
+- `c65a464` 2026-10-16 — 0.9.0-alpha Certification: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.8.3-alpha` — 2026-10-16
 
 Commit `6bcb7c7` · no new waves · 13 commits.
