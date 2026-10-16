@@ -7,7 +7,9 @@
  * re-convergence from a symmetrically perturbed density.
  */
 import { basisFrom, integrals } from './md.js';
-import { rhf, uhf, fockReal } from './scf.js';
+import { rhf, uhf, rks, fockReal } from './scf.js';
+import { molecularGrid } from './dft-grid.js';
+import { evaluator } from './molecular-field.js';
 import { loewdin } from './density.js';
 import { eigSym } from './h2ci.js';
 import { cholesky } from './linalg.js';
@@ -223,6 +225,16 @@ export function moleculeRHF({ atoms, basis = 'sto-3g', charge = 0, guess = 'sad'
      shakes and seeded by the α HOMO/LUMO mix (DIIS held until ‖ẽ‖ < 1e-4): the symmetric SAD start lands O₂, B₂ and NO₂ on a SADDLE 1–70 mEh up,
      the shaken one on PySCF's stable minimum (U1-BUILD.md).  C is Cα, canonical, so the ORBITAL view and the ladder show the α set; no second-
      solution search, no stability probe, no Hessian (null). */
+  /* 0.7.3 K1 KOHN–SHAM: model 'lda' is RKS LDA (lab/scf.js rks) from SAD on lab/dft-grid.js' grid, the AO values from the field's own f64 evaluator, built once per
+     molecule (tol 1e-10, rks' own: the grid's sums floor the residual near 1e-11); closed shells only; no second-solution search, no stability probe, no Hessian (an RHF Hessian is not the LDA one: null). */
+  if (model === 'lda') {
+    if (multiplicity !== 1) throw new Error('rhf-molecule: LDA is closed-shell in this cut (no UKS)');
+    const tg = performance.now(), grid = molecularGrid(atoms), ev = evaluator(b.shells), n = I.n, P = grid.w.length, aoAt = new Float64Array(P * n);
+    for (let g = 0; g < P; g++) ev.ao([grid.x[g], grid.y[g], grid.z[g]], aoAt.subarray(g * n, g * n + n));
+    const gridMs = +(performance.now() - tg).toFixed(2), r = rks(args, { nElectrons, grid, aoAt, diis, maxIter, guess: guess === 'sad' ? sadDensity(b.atoms, rec, b) : guess });
+    return { ...r, model: 'RKS LDA', C: canonicalOrbitals(I.S, r.C, r.orbitalEnergies, n), nElectrons, charge, basis: b, integrals: I, hash: b.hash, guess: typeof guess === 'string' ? guess : 'given',
+      solutionName: null, aufbau: null, solutions: [], timings: { integrals: integralMs }, gridPoints: P, gridMs, stability: null, hessian: null, ...moments(r.D) };
+  }
   if (multiplicity > 1 || model === 'uhf') {
     const nAlpha = (nElectrons + multiplicity - 1) / 2, nBeta = nElectrons - nAlpha;
     const u = uhf(args, { nAlpha, nBeta, diis, tol, maxIter: 10 * maxIter, mix: 0.1,

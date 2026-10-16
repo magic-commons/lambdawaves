@@ -204,6 +204,8 @@ const recordOnlyIds = new Map();   // S4a-VERIFY B1: key → record id for every
 /** a REFUSAL is an answer, `{ refused: sentence }`, never `error` (which would send rack.js to the frame thread's road) */
 class Refused extends Error {}
 const OPEN = 'open shell: RT, TDA, the drive and the register are closed-shell roads in this cut (0.7.1 UHF)';
+/** 0.7.3 K1: an open shell says OPEN; an RKS LDA solve says the road's own sentence (`lda`) — RT, TDA, the drive, the register and VIBRATE are RHF's operators */
+const standDown = (g, lda) => { if (g.model) throw new Refused(g.model === 'UHF' ? OPEN : lda); };
 export const chemSolverCalls = () => solverCalls;
 const keyOf = (basis, charge, atoms) => JSON.stringify([basis, charge, atoms.map((a) => [a.Z, a.x, a.y, a.z])]);
 
@@ -231,11 +233,13 @@ function ensureSolve(m = {}, live = false) {
   if (m.record) chemRegister(basis, m.record);
   if (!Array.isArray(m.atoms) || !m.atoms.length) throw new Error('chem: atoms = [{ Z, x, y, z }] in bohr');
   const atoms = m.atoms.map((a) => ({ Z: +a.Z, x: +a.x, y: +a.y, z: +a.z }));
-  const charge = m.charge || 0, mult = m.multiplicity || 1, uhf = mult > 1 || m.model === 'uhf', key = keyOf(basis, charge, atoms) + (uhf ? `|UHF ${mult}` : '');   // 0.7.1: an open shell is another key
+  const charge = m.charge || 0, mult = m.multiplicity || 1, uhf = mult > 1 || m.model === 'uhf', lda = m.model === 'lda', base = keyOf(basis, charge, atoms);
+  const key = base + (uhf ? `|UHF ${mult}` : lda ? '|LDA' : '');   // 0.7.1: an open shell is another key; 0.7.3: so is an RKS LDA solve, so RHF and LDA never share the cache
+  if (lda && uhf) throw new Refused('LDA is closed-shell in this cut: an open shell is UHF (no UKS until a later cut)');
   if (chemSol && chemKey === key && (chemSol.I || !live)) return chemSol;
   const from = chemSol && chemKey === key ? chemSol : null;
   if (from && !from.record.caps.tdhf) throw new Refused(`${from.record.id} is past the live cap: it opens only from its record, which stores no electron-repulsion integrals, so TDHF (KICK, RUN) cannot run on it`);
-  if (!from && (m.recordOnly || recordOnlyIds.has(key))) throw new Refused(`${recordOnlyIds.get(key) || 'this molecule'} is past the live cap and opens only from its record, which is no longer the worker's current molecule (another open replaced it) — open it again; nothing is solved live`);
+  if (!from && (m.recordOnly || recordOnlyIds.has(base))) throw new Refused(`${recordOnlyIds.get(base) || 'this molecule'} is past the live cap and opens only from its record, which is no longer the worker's current molecule (another open replaced it) — open it again; nothing is solved live`);
   const rec = recordOf(basis);
   solverCalls++;
   /* THERE IS ONE INTEGRAL PASS AND IT TIMES ITSELF.  The card used to send `split: true` and this function then ran
@@ -244,7 +248,7 @@ function ensureSolve(m = {}, live = false) {
      inside its own pass, and `ground` is the whole ground-state wall WITH that pass inside it: a subtracted timing
      is not a measurement, which is how the old split announced itself (the difference came out negative for H₂O). */
   const t = performance.now();
-  const sol = moleculeRHF({ atoms, basis, charge, record: rec, ...(uhf ? { multiplicity: mult, model: 'uhf' } : {}) });
+  const sol = moleculeRHF({ atoms, basis, charge, record: rec, ...(uhf ? { multiplicity: mult, model: 'uhf' } : lda ? { model: 'lda' } : {}) });
   const tGround = +(performance.now() - t).toFixed(2);
   const I = sol.integrals, n = I.n;
   const extent = atoms.reduce((s, a) => Math.max(s, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)), 0);
@@ -252,7 +256,8 @@ function ensureSolve(m = {}, live = false) {
     hash: sol.hash, basis, charge, electrons: sol.electrons, converged: sol.converged,
     dipole: sol.dipole, half: extent + 6,
     timings: { integrals: sol.timings.integrals, scf: tGround, rpa: null },
-    stability: wireStability(sol.stability), solutions: (sol.solutions || []).map(wireSolution), ...(uhf ? { model: 'UHF', multiplicity: mult, s2: sol.s2, nBeta: sol.nBeta } : {}) };
+    stability: wireStability(sol.stability), solutions: (sol.solutions || []).map(wireSolution), ...(uhf ? { model: 'UHF', multiplicity: mult, s2: sol.s2, nBeta: sol.nBeta } : {}),
+    ...(lda ? { model: 'RKS LDA', exc: sol.exc, intRho: sol.intRho, gridPoints: sol.gridPoints, gridMs: sol.gridMs, iterations: sol.iterations } : {}) };
   /* THE NAMES (0.4.0 S1) ride with the ground: computed HERE, from the solve's own S, C and ε (S never leaves the
      worker), against the library's declared group (`m.symmetry`); ≤ 10 ms for benzene, timed in the reply. */
   ground.names = namesOf(sol, atoms, m.symmetry); ground.timings.names = ground.names.ms;
@@ -286,7 +291,7 @@ const wireSolution = (s) => ({ ...s, hessian: wireHessian(s.hessian) });
 /** the RPA/TDA spectrum of the cached ground state, computed once and kept — X, Y and the TDA vectors stay HERE */
 function ensureSpectrum(m = {}) {
   const c = ensureSolve(m);
-  if (c.ground.model) throw new Refused(OPEN);
+  standDown(c.ground, "TDA and the register stand down under RKS LDA: their operators are RHF's");
   if (c.spectrum) return c;
   if (!c.I) throw new Refused(`${c.record.id}'s record carries its frontier orbitals only: it stores no spectrum, and past the cap none is solved`);
   const { sol, I } = c, t = performance.now(); solverCalls++;
@@ -393,7 +398,7 @@ function driveField(D) {
   return [(t) => e0 * Math.cos(omega * (t - t0) + phase), (t) => (D.sense || 0) * e0 * Math.sin(omega * (t - t0) + phase)];
 }
 export function chemDriveInit(m = {}) {
-  if (chemSol && chemSol.ground.model) throw new Refused(OPEN);
+  if (chemSol) standDown(chemSol.ground, "the drive stands down under RKS LDA: its operators are RHF's");
   if (!chemSol || !chemSol.states) throw new Error('chem: no states in this worker yet — chem.states first');
   const pol = POLS[m.pol || 'x']; if (!pol) throw new Error(`chem: drive polarisation must be one of ${Object.keys(POLS).join(', ')}`);
   const st = chemSol.states, N = st.d + 1, dt = m.dt === undefined ? 0.05 : +m.dt;
@@ -572,6 +577,7 @@ export function chemEsp({ N = 64, half, shells, D, atoms }) {
     basis, so `shells` stays null: the frame thread moves its own shells' centres.  An unsolved key is a refusal. */
 export function chemVibFrames({ vib, k = 0, amp = 1, K = 32 }) {
   const c = chemSol, at0 = vib.atoms, N = at0.length, n = c ? c.ground.nAO : 0, nn = n * n;
+  if (c && c.ground.model === 'RKS LDA') throw new Refused("VIBRATE stands down under RKS LDA: its modes and dD/dQ are RHF's");
   if (!c || !c.sol.D || c.key !== keyOf(vib.basis, vib.charge, at0)) throw new Refused('VIBRATE plays the molecule this worker has solved: solve it first');
   const L = vib.L.subarray(3 * N * k, 3 * N * (k + 1)), D1 = vib.D1.subarray(nn * k, nn * (k + 1)), D0 = c.sol.D, P = new Float64Array(nn);
   const D = new Float32Array(K * nn), dipole = new Float64Array(3 * K), q = new Float64Array(K);
@@ -602,7 +608,7 @@ export function chemRootVectors(k) {
 /** chem.rt.init — runs (or reuses) the solve, builds the propagator, applies the δ-kick along the chosen axis */
 export function chemRtInit(m = {}) {
   const { sol, I, ground } = ensureSolve(m, true), n = I.n;
-  if (ground.model) throw new Refused(OPEN);
+  standDown(ground, "RT stands down under RKS LDA: its operators (the TDHF Fock build) are RHF's");
   const kick = m.kick || {}, axis = kick.axis || 'z', kappa = kick.kappa === undefined ? 1e-3 : +kick.kappa;
   if (AXIS[axis] === undefined) throw new Error(`chem: kick axis must be 'x', 'y' or 'z', got '${axis}'`);
   const dt = m.dt === undefined ? 0.01 : +m.dt, integrator = m.integrator || 'mmut';
