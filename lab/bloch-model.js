@@ -1,8 +1,9 @@
 /* bloch-model.js — BLOCH's qubit (0.8.1 T1), DOM-free: |ψ⟩ = a|↑⟩ + b|↓⟩ under H(t) = (ω₀/2)σ_z + (Ω/2)(cos φ σ_x + sin φ σ_y), φ = ∫ω dt, ω = ω₀ + δ + βt.
  * The frame turning with the drive, |ψ⟩ = e^{−iφσ_z/2}|ψ′⟩, takes it EXACTLY (the drive is circular: no rotating-wave approximation) to H′ = −(δ + βt)/2 σ_z + (Ω/2)σ_x,
  * constant at β = 0, so one step e^{−iH′dt} = cos|n| − i sin|n| n̂·σ is exact over any t; at β ≠ 0 n is the fourth-order Magnus exponent of H′ (linear in t) over steps of dt. */
-export const PRESETS = { flop: { O: 0.2, d: 0, b: 0, th: 0, ph: 0 }, larmor: { O: 0, d: 0, b: 0, th: Math.PI / 2, ph: 0 }, rabi: { O: 0.2, d: 0, b: 0, th: 0, ph: 0 }, lz: { O: 0.3, d: -4.5, b: 0.05, th: 0, ph: 0 } };
-export const DEFAULTS = { preset: 'flop', w0: 1, ...PRESETS.flop, mode: 'one', bell: 'phip' }, DT = 0.05;
+export const PRESETS = { flop: { O: 0.2, d: 0, b: 0, th: 0, ph: 0 }, larmor: { O: 0, d: 0, b: 0, th: Math.PI / 2, ph: 0 }, rabi: { O: 0.2, d: 0, b: 0, th: 0, ph: 0 }, lz: { O: 0.3, d: -4.5, b: 0.05, th: 0, ph: 0 },
+  decay: { O: 0, d: 0, b: 0, th: Math.PI / 2, ph: 0, T1: 8, T2: 6 }, damped: { O: 0.5, d: 0, b: 0, th: 0, ph: 0, T1: 20, T2: 10 } };   // 0.9.3 D1: T₁ · T₂ (0 = none; a pick clears them)
+export const DEFAULTS = { preset: 'flop', w0: 1, T1: 0, T2: 0, ...PRESETS.flop, mode: 'one', bell: 'phip' }, DT = 0.05;
 export const pulse = (P) => (P.preset === 'flop' && P.O > 0 ? Math.PI / P.O : Infinity);   // FLOP: a π-pulse, Ω on for π/Ω and then off
 export const init = (P) => [Math.cos(P.th / 2), 0, Math.sin(P.th / 2) * Math.cos(P.ph), Math.sin(P.th / 2) * Math.sin(P.ph)];   // [Re a, Im a, Re b, Im b] = ψ′(0) = ψ(0)
 export function step(s, P, t, dt) { const O = t < pulse(P) ? P.O : 0; return su2(s, O * dt / 2, -P.b * O * dt ** 3 / 24, -(P.d + P.b * (t + dt / 2)) * dt / 2); }
@@ -29,7 +30,20 @@ export function closed(P, t) {   // β = 0: the Bloch vector by Rodrigues about 
 }
 export const lzP = (P) => 1 - Math.exp(-Math.PI * P.O ** 2 / (2 * Math.abs(P.b)));   // the Landau–Zener flip, swept from −∞ to +∞
 export const span = (P) => Math.min(2000, Math.max(2 * Math.PI, P.b ? -2 * P.d / P.b : 0));   // the re-solve's run: the sweep to resonance and as far past it (≤ 2000), else one turn
-export function halve(P) { const T = span(P), a = run(P, T).s, b = run(P, T, DT / 2).s; return { T, d: Math.hypot(...a.map((x, i) => x - b[i])) }; }
+export function halve(P) { const T = span(P), D = P.T1 || P.T2, a = D ? runR(P, T).r : run(P, T).s, b = D ? runR(P, T, DT / 2).r : run(P, T, DT / 2).s; return { T, d: Math.hypot(...a.map((x, i) => x - b[i])) }; }
+/* 0.9.3 D1 T₁ · T₂: the state ρ = ½(1 + r·σ) under amplitude damping to |↓⟩ (r_z = −1) and dephasing, 1/T₂ = 1/(2T₁) + γ_φ — the Bloch equations in the same turning frame,
+ * ṙ = 2h′ × r − (r_x/T₂, r_y/T₂, (r_z + 1)/T₁), 2h′ = (Ω, 0, −(δ + βt)), one RK4 step at a time (1/T = 0 at T = 0); the pure case stays on the spinor road above. */
+export function bloch(r, P, t, dt) {
+  const O = t < pulse(P) ? P.O : 0, a = P.T1 ? 1 / P.T1 : 0, c = P.T2 ? 1 / P.T2 : 0, add = (u, k, s) => u.map((x, i) => x + s * k[i]);
+  const f = (u, [x, y, z]) => { const w = -(P.d + P.b * u); return [-w * y - c * x, w * x - O * z - c * y, O * y - a * (z + 1)]; };
+  const k1 = f(t, r), k2 = f(t + dt / 2, add(r, k1, dt / 2)), k3 = f(t + dt / 2, add(r, k2, dt / 2)), k4 = f(t + dt, add(r, k3, dt)); return add(r, k1.map((x, i) => x + 2 * k2[i] + 2 * k3[i] + k4[i]), dt / 6);
+}
+export function runR(P, t, dt = DT, from = null) {   // the vector from init's, or onward from a kept { t, r }; v the lab frame's, turned by φ(t) as vec turns
+  let { t: u, r } = from || { t: 0, r: vec(P, init(P), 0) }; const tp = pulse(P); while (u < t) { const e = Math.min(t, u < tp ? tp : Infinity, u + dt); r = bloch(r, P, u, e - u); u = e; }
+  const f = phase(P, u), c = Math.cos(f), q = Math.sin(f); return { t: u, r, v: [c * r[0] - q * r[1], q * r[0] + c * r[1], r[2]] };
+}
+export function decayClosed(P, t) { const [x, y, z] = vec(P, init(P), 0); return { rz: P.T1 ? -1 + (z + 1) * Math.exp(-t / P.T1) : z, rp: Math.hypot(x, y) * (P.T2 ? Math.exp(-t / P.T2) : 1) }; }   // Ω = 0
+export const steadyZ = (P) => { const q = 1 + (P.d * P.T2) ** 2; return P.b || pulse(P) < Infinity ? NaN : P.T1 ? -q / (q + P.O ** 2 * P.T1 * P.T2) : 0; };   // r_z(∞) of a steady drive (T₁ = none: 0)
 /* THE BELL PAIR (0.8.1 T2): [c↑↑, c↑↓, c↓↑, c↓↓] as [Re, Im] pairs.  (θ₀, φ₀) turn qubit A alone, U ⊗ 1 with U = e^{−i(θ/2)(−sin φ σ_x + cos φ σ_y)} (↑ → (θ, φ));
  * ρ_A = ½(1 + r_A·σ), ρ_B likewise, S_A from |r| (a pure pair: |r_A| = |r_B| = √(1 − C²)); CHSH on the drawn axes: A ẑ, x̂ · B (±s_x x̂ + s_z ẑ)/√2, the preset's signs. */
 const h = Math.SQRT1_2, X = [1, 0], Zx = [0, 1], M = ([x, z]) => [[z, x], [x, -z]], H2 = (x) => (x > 0 ? -x * Math.log(x) : 0), r1 = (q) => vec(DEFAULTS, q, 0);
