@@ -3,7 +3,7 @@
 Josh, 2026-10-16: "Let's keep going all the way to 0.9.4. Then we shall begin iterative work till 1.0.0" and the dial "don't over verify and bloat the code with
 tests. Just build to the best of your abilities and a light visual/functional check". The row is the engine plan's gated SEPARABLE module (`../release-0.6.0/PLAN.md`
 l.300; 0.8.2's deferred list "the SEPARABLE module (cube, 2-D and anisotropic oscillators)"). Base: `yan-c` at the commit carrying the briefs after the v0.9.3-alpha
-cut (**TO FILL**); lines (**TO FILL**); cap × 1.01. Two rows, two Opus builders IN SEQUENCE (S2 extends S1's kernel branch and module); the integrator merges, THE
+cut — the commit carrying this fill (`fa85b51` + CHANGELOG `aee3151`; its sha is in every launch message); lines **30,118**; cap **30,419** (× 1.01). Two rows, two Opus builders IN SEQUENCE (S2 extends S1's kernel branch and module); the integrator merges, THE
 LOCK ×2 (this cut edits `lab/field.js` — the one cut since 0.7.0 that does), a light visual check, cuts `v0.9.4-alpha` "Separable" — the last feature cut before the
 iterative road to 1.0.0.
 
