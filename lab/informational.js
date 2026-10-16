@@ -4,7 +4,7 @@
  * docs/STATE-SCOPES.md), saved and applied by shell/settings.js.  The kit's card in the native skin; CLOSED on a first run (no first-run list names it);
  * in + and WINDOW as every rack card is; opened UNDER SETTINGS.  0.5.4 P4 seats its STATUS line here.  In lab/, not windows/: rack-deps admits only rack.js's planned modules there. */
 import { TIER } from './rack.js';
-import { el, knob, sw, readout } from './mir/kit.js'; import { statusOf } from './status.js'; import { getHamiltonian } from './hamiltonian.js';
+import { el, knob, sw, seg, readout } from './mir/kit.js'; import { statusOf } from './status.js'; import { getHamiltonian } from './hamiltonian.js';
 export function createInformational(app) {
   const { ui, device } = app, { schedule } = app.loop, save = () => app.sh.saveSettings(), T = () => app.state.stageText, pct = (v) => Math.round(v * 100) + '%';
   const w = device({ id: 'informational', eyebrow: 'INFORMATIONAL', title: 'what the stage writes', status: '' });
@@ -18,6 +18,13 @@ export function createInformational(app) {
   ui.atomLabelsK = knob({ label: 'SIZE', min: 0.5, max: 3, value: 1, fmt: pct, title: 'The ATOM LABELS\' size: 100% is the notebook\'s body (14 px)',
     onInput: (v) => { app.state.atomLabelsScale = v; if (T()) T().setLabelScale(v); schedule(TIER.PRESENT); }, onChange: save });
   el('div', 'row tight', w.body).append(ui.molFormulaSw.root, ui.molFormulaK.root); el('div', 'row tight', w.body).append(ui.atomLabelsSw.root, ui.atomLabelsK.root);
+  /* 2026-10-16 (Josh, iteration 001) · WHERE the formula sits: TOP or BOTTOM of the free stage, PAD its distance from that edge (a share of the free
+     height; 12 % is the kit's seat).  The pop-ups take the other side.  PREFERENCE `infoPos` / `infoPad` (shell/settings.js). */
+  ui.infoPosSeg = seg({ label: 'POSITION', value: 'top', options: [{ id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }],
+    onChange: (v) => { if (T()) T().setSeat(v === 'bottom'); save(); } });
+  ui.infoPadK = knob({ label: 'PAD', min: 0, max: 0.4, value: 0.12, fmt: pct, title: 'The formula\'s distance from its edge of the free stage, as a share of its height; the pop-ups keep the same distance on the other side',
+    onInput: (v) => { if (T()) T().setSeat(undefined, v); }, onChange: save });
+  el('div', 'row tight', w.body).append(ui.infoPosSeg.root, ui.infoPadK.root);
   /* 0.5.4 P4 · STATUS (PLAN R8, Q12): lab/status.js' line for what owns the field — MOLECULES' kept one (per VIEW; its molecule-level line beneath), else the
      operator's — written by app.hooks.status on a landing, a VIEW or FLOW change, an owner or operator change, NEVER in a frame.  A tap: the MODEL sheet, its words. */
   const st = readout({ label: 'STATUS', cls: 'wide lw-status', value: '—' }); let was; el('div', 'row tight', w.body).append(st.root);

@@ -28,7 +28,7 @@ export function createSettings(app) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: app.state.molFormulaScale, atomLabels: ui.atomLabelsSw.get(), atomLabelsSize: app.state.atomLabelsScale,
+      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: app.state.molFormulaScale, atomLabels: ui.atomLabelsSw.get(), atomLabelsSize: app.state.atomLabelsScale, infoPos: ui.infoPosSeg ? ui.infoPosSeg.get() : undefined, infoPad: ui.infoPadK ? ui.infoPadK.get() : undefined,
         auto: app.sh.quality.auto, governor: app.ctl.gov.on, keepFrames: app.ctl.keep.frames, perfMode: app.ctl.perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -92,6 +92,8 @@ export function createSettings(app) {
     app.state.atomLabelsScale = Number.isFinite(+s.atomLabelsSize) ? Math.max(0.5, Math.min(3, +s.atomLabelsSize)) : app.state.molFormulaScale;
     document.body.classList.toggle('no-mol-formula', !molFormula); ui.molFormulaSw.set(molFormula); ui.molFormulaK.set(app.state.molFormulaScale); ui.atomLabelsSw.set(labels); ui.atomLabelsK.set(app.state.atomLabelsScale);
     if (T) { T.setScale(app.state.molFormulaScale); T.setOn(molFormula); T.setLabelScale(app.state.atomLabelsScale); T.setLabels(labels); }
+    { const bottom = s.infoPos === 'bottom', pad = Number.isFinite(+s.infoPad) ? Math.max(0, Math.min(0.4, +s.infoPad)) : 0.12;   // iteration 001: INFORMATIONAL's seat, TOP at 12 % when nothing was said
+      if (ui.infoPosSeg) ui.infoPosSeg.set(bottom ? 'bottom' : 'top'); if (ui.infoPadK) ui.infoPadK.set(pad); if (T) T.setSeat(bottom, pad); }
     if (s.auto === false) { app.sh.quality.auto = false; if (ui.autoSw) ui.autoSw.set(false); }
     if (s.governor === false) app.ctl.setGovernor(false);                 // wave 45: the governor held off
     if (s.keepFrames === true) app.ctl.setKeepFrames(true);              // wave 45: the playhead follows every frame (off by default)

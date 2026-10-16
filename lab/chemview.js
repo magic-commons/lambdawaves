@@ -178,14 +178,14 @@ export function createChem(host, api) {
   const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: [
     { id: 'sto-3g', label: 'STO-3G', title: 'The vendored minimal Cartesian basis; the oracle for all eight' },
     { id: '6-31+g-star', label: '6-31+G*', title: 'A split-valence basis with diffuse and polarisation functions, for H, C, N, O, F molecules up to 46 Cartesian AOs — water’s first root moves 0.483 → 0.341' }],
-    onChange: (v) => { basis = v; solve(preset); } });
+    onChange: (v) => { basis = v; solve(preset); if (api.pop) api.pop('BASIS · ' + bSeg.button(v).textContent); } });
   const r1 = el('div', 'row tight', host), rV = el('div', 'row tight', host);
   r1.appendChild(bSeg.root);
   /* 0.7.3 K2 · METHOD beside BASIS: RHF · LDA, and U2's UHF on H₂ (folded in here); an open shell's RHF reads UHF and LDA waits for UKS. LDA always solves live
      (never a record), and only up to benzene's 36 STO-3G AOs: the grid's AO table is points × AOs (78 MB for benzene). A press is a hand pick (its head) */
   const LDA_T = 'Kohn–Sham, local density (Slater + VWN5) on a Becke × Treutler–Ahlrichs × Lebedev-302 grid, solved live — PySCF RKS lda,vwn the oracle';
   const mthS = seg({ label: 'METHOD', value: 'rhf', options: [{ id: 'rhf', label: 'RHF', title: 'Restricted Hartree–Fock: one spatial orbital for both spins' }, { id: 'uhf', label: 'UHF', title: 'H₂ by UHF: α and β free to part past the Coulson–Fischer point' }, { id: 'lda', label: 'LDA', title: LDA_T }],
-    onChange: (v) => { method = v; solve(preset).then((r) => { if (r && api.hand) api.hand(preset); }); } });
+    onChange: (v) => { method = v; if (api.pop) api.pop('METHOD · ' + mthS.button(v).textContent); solve(preset).then((r) => { if (r && api.hand) api.hand(preset); }); } });
   r1.appendChild(mthS.root);
   const ldaWhy = (P) => (P.multiplicity > 1 ? 'LDA is closed-shell in this cut: an open shell is UHF (no UKS until a later cut)' : basis !== 'sto-3g' ? 'LDA is STO-3G only in this cut'
     : P.recordOnly || P.nAO > 36 ? `LDA is offered up to benzene’s 36 STO-3G AOs (the grid’s AO table is points × AOs): ${P.name} has ${P.nAO}` : '');
@@ -202,7 +202,7 @@ export function createChem(host, api) {
     { id: 'esp', label: 'ESP', title: 'Φ(r) = Σ Z_A/|r−R_A| − ∫ρ/|r−r′| on a 64³ grid' },
     { id: 'spin', label: 'SPIN', title: 'ρα − ρβ, signed: the spin density of a UHF open shell (Dα − Dβ in double precision)' },
     { id: 'dlda', label: 'Δ LDA−RHF', title: 'ρ_LDA − ρ_RHF, signed: where LDA puts more density — D_LDA − D_RHF in double precision, the Δρ road' }],
-    onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
+    onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); if (api.pop) api.pop('VIEW · ' + vSeg.button(v).textContent); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
   rV.appendChild(vSeg.root);
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
     fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); } });
@@ -296,9 +296,8 @@ export function createChem(host, api) {
     roH2.set(`R ${R.toFixed(2)} bohr · RHF ${eh(p.rhf)} · UHF ${eh(p.uhf)} · FCI ${eh(p.fci)} Eh · S ${p.S.toFixed(2)} of ln 2 · ⟨S²⟩ ${p.s2.toFixed(2)}`);
     roH2.setSub(`UHF leaves RHF at the Coulson–Fischer point, ${h2T.cf.toFixed(3)} bohr · S: the one-orbital entanglement entropy of the FCI state, ln 2 = 0.693 at the break`); drawCurve(h2Cv, h2T, R); }
   const probeLine = el('div', 'note', more); probeLine.hidden = true; probeLine.title = 'the electrons’ potential −Σ D_pq ⟨p|1/|r−R_A||q⟩ at each nucleus R_A (md.js rinvMatrix; PySCF int1e_rinv) — the ground state’s';   // 0.6.5 X1 THE PROBE
-  const moreToggle = el('button', 'trig mol-more-toggle', rV); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
+  const moreToggle = el('button', 'trig mol-more-toggle lw-fold', r1); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
   chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
-  if (api.skeleton) rV.append(api.skeleton.root, ...[api.bead, api.ellipsoid].filter(Boolean).map((w) => w.root));   // 0.7.0 V2: SKELETON after the chevron (the switch is windows/molecules.js', a PREFERENCE)
   const setMore = (open) => {
     more.hidden = !open; moreToggle.setAttribute('aria-expanded', String(open));
     moreToggle.setAttribute('aria-label', open ? 'Hide the kick, run and spectrum controls' : 'Show the kick, run and spectrum controls');

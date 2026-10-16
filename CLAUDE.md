@@ -31,13 +31,15 @@ The 0.2.0 alpha molecular UI is MOLECULES (`chem`) and MO-REGISTRY
 and the `mol-*`/`reg-*` CSS hooks stable. The old H₂⁺ `molecule` card was DELETED
 in 0.5.0 D9: an older project whose field it owned opens as MOLECULES · H₂ on σg
 or σu (the minimal-basis shape of its orbital; RHF cannot hold one electron).
-MOLECULES and MO-REGISTRY start OPEN on the first-run LEFT rack directly under
-SPECTRUM (folded on a phone or tablet), unsolved until MOLECULES is switched on;
+MOLECULES and MO-REGISTRY sit on the first-run LEFT rack under INFORMATIONAL and
+SPECTRUM; since iteration 001 (2026-10-16) EVERY first-run window arrives FOLDED
+(`lab/first-run.js` FOLD_ALL), unsolved until MOLECULES is switched on;
 a restored project whose field owner is MOLECULES brings them back onto the rack
 (MO-REGISTRY too when that file's register is on). MOLECULES OFF never hides or
 closes MO-REGISTRY: its switch stands down (it must release the field) and the
-ladder stays painted and editable. Its MO-REGISTRY ON switch sits beside the
-ORBITAL | STATES seg (registerview.js). MOLECULES' first row is the SECTION header, which is the library's page turner (0.4.0 S4b; 0.5.3 M8, as Josh drew it): the kit's `stepper` in PALETTE's preset look (‹ NAME ›, a whole line; its name opens the kit's list, its hover carries the section's record line, `__LW.chem.section().sub`), then INSTALLED, whose lamp says every record of the section is on this device and whose press installs or removes them all (shown only for a section with records), beside MOLECULES ON; the MOLECULE picker below is a second stepper whose name IS the `<select>` (optgroups, disabled reasons and native keys kept; ‹ › and ← → walk the page's enabled rows as a hand pick) and holds that one section
+ladder stays painted and editable. Its REGISTRY ON switch sits beside the
+ORBITAL | STATES seg (registerview.js). Long windows fold their details behind
+one chevron (`lab/fold.js`, `.lw-fold`): MOLECULES, SHADOW, CAMERA, MO-REGISTRY. MOLECULES' first row is the SECTION header, which is the library's page turner (0.4.0 S4b; 0.5.3 M8, as Josh drew it): the kit's `stepper` in PALETTE's preset look (‹ NAME ›, a whole line; its name opens the kit's list, its hover carries the section's record line, `__LW.chem.section().sub`), then INSTALLED, whose lamp says every record of the section is on this device and whose press installs or removes them all (shown only for a section with records), beside MOLECULES ON; the MOLECULE picker below is a second stepper whose name IS the `<select>` (optgroups, disabled reasons and native keys kept; ‹ › and ← → walk the page's enabled rows as a hand pick) and holds that one section
 (DIATOMICS · HYDRIDES · ORGANIC · BIO · LATTICE · HEAVY, `lab/molecules.js`
 SECTIONS), a pick elsewhere turns the page, and the page is never saved. A
 library record ships only through `tools/orbital-library.mjs`'s diversity

@@ -554,9 +554,9 @@ body.window-info-off .settings-help { display:none; }
 .shadow-controls .seg { display:flex; }
 .shadow-controls .seg-b { min-width:0;padding:0 4px;flex:1; }
 .dev .shadow-controls > .shadow-details-toggle { flex:0 0 30px;padding:0; }
-.shadow-details-toggle::before, .mol-more-toggle::before { display:none !important; }
-.shadow-details-toggle svg, .mol-more-toggle svg { width:14px;height:14px;transform:rotate(-90deg); }
-.shadow-details-toggle[aria-expanded="true"] svg, .mol-more-toggle[aria-expanded="true"] svg { transform:none; }
+.lw-fold::before { display:none !important; }
+.lw-fold svg { width:14px;height:14px;transform:rotate(-90deg); }
+.lw-fold[aria-expanded="true"] svg { transform:none; }
 .shadow-details:not([hidden]) { display:flex;flex-direction:column;gap:8px; }
 
 .dev .shadow-controls { display:grid;grid-template-columns:minmax(0,1fr) 32px;align-items:stretch;gap:6px; }
@@ -586,3 +586,32 @@ body.window-info-off .settings-help { display:none; }
   .dev .shadow-controls > .shadow-details-toggle { width: var(--touch); min-width: var(--touch); }
   .stage-colour { width: var(--touch); height: var(--touch); }
 }
+
+/* ═══ ITERATION 001 (Josh, 2026-10-16) · THE FOLD, THE SHORTER CARDS, THE POP-UPS ═══════════════════════════════════════════════
+ * THE FOLD (lab/fold.js): one chevron idiom for every long window — SHADOW, MOLECULES, CAMERA, MO-REGISTRY; a fold body hides by the
+ * attribute whatever display its rows carry.  MO-REGISTRY's head is one row (DIALS · CLEAR · NORM · CORE · ⌄); CAMERA's CONTROL row
+ * carries its chevron; PALETTE's swatch and × sit in the PALETTE row.  THE POP-UP (stage-words.js pop): one short line on the side away
+ * from the formula, the kit's info ink and halo, fading out; a new one restarts the animation. */
+.dev .lw-fold { flex: 0 0 30px; min-width: 30px; padding: 0; }
+.lw-fold-body[hidden] { display: none !important; }
+.reg-more > * + * { margin-top: var(--sp-2); }
+.reg-pane .sp-head { display: flex; flex-wrap: nowrap; gap: 6px; }
+.reg-pane .sp-head > .trig { flex: 1 1 0; min-width: 0; padding: 0 4px; }
+.reg-pane .sp-head > .trig[hidden] { display: none; }
+.reg-pane .sp-head > .trig svg { width: 15px; height: 15px; }
+.reg-pane .sp-head > .lw-fold { flex: 0 0 30px; }
+.mir-camera .cam-mode:has(> .lw-fold) { grid-template-columns: minmax(0, 1fr) 30px; }
+.mir-camera .cam-more { display: flex; flex-direction: column; gap: var(--sp-2); }
+.palette-enable { flex-wrap: nowrap; align-items: center; }
+.palette-enable > .sw { flex: 1 1 auto; min-width: 0; }
+.palette-enable > .mir-ramp-reset { flex: 0 0 40px; min-width: 40px; padding: 0; }
+.palette-enable > .mir-ramp-sel { flex: 0 0 auto; }
+.palette-enable > .mir-ramp-sel > .mir-ramp-remove { margin-left: 0; }
+.lw-pop { position: fixed; left: 50%; top: 0; z-index: 21; pointer-events: none; user-select: none; white-space: nowrap; opacity: 0;
+  transform: translateX(-50%); font-size: calc(15px * var(--lw-stage-size, 1)); letter-spacing: .08em; font-weight: 600;
+  color: hsl(40 33% 96%); text-shadow: 0 0 8px hsl(228 40% 4% / .55), 0 0 2px hsl(228 40% 4% / .55); }
+[data-theme="light"] .lw-pop { color: hsl(232 22% 10%); text-shadow: 0 0 8px hsl(42 45% 97% / .85), 0 0 2px hsl(42 45% 97% / .85); }
+.lw-pop.go { animation: lw-pop 1.6s ease-out forwards; }
+@keyframes lw-pop { 0% { opacity: 0; transform: translate(-50%, 6px); } 12% { opacity: 1; transform: translate(-50%, 0); } 65% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -4px); } }
+@media (prefers-reduced-motion: reduce) { .lw-pop.go { animation: lw-pop-still 1.6s linear forwards; } @keyframes lw-pop-still { 0%, 65% { opacity: 1; } 100% { opacity: 0; } } }
+body.no-mol-formula .lw-pop { display: none; }

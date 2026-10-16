@@ -27,9 +27,9 @@
  * CHANGE: GROUND is D₀, MEAN is the stationary part, which leaves exactly the interference terms on screen.
  */
 import { stateName } from './names.js';
-import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, label as lbl, hint } from './mir/kit.js';
+import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, label as lbl, hint, chip } from './mir/kit.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
-import { paintStroke } from './paint-stroke.js';
+import { paintStroke } from './paint-stroke.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
 import { GROUND, AU_TIME_AS, createStatesModel, slerpCoefficients, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 
@@ -77,10 +77,10 @@ export function createStates(host, api) {
   const clrBtn = mk('CLEAR', 'Empty the register: S₀ alone');
   const nrmBtn = mk('NORM', 'Renormalise the register so Σ|b|² = 1');
   const SW_TITLE = 'Give the field this register’s many-electron state — MOLECULES must be ON and not running a real-time propagation';
-  const onSw = sw({ label: 'MO-REGISTRY ON', value: false, cls: 'orb-on', title: SW_TITLE, onChange: (v) => { setOn(v, true); } });
+  const onSw = sw({ label: 'REGISTRY ON', value: false, cls: 'orb-on', title: SW_TITLE, onChange: (v) => { setOn(v, true); } });
   head.appendChild(onSw.root);
   /* 0.5.3 M3 · a record with no CIS states says so ON THE SWITCH, the worker's own sentence its hover — not a status-line whisper */
-  const says = (why) => { lbl(onSw.root.querySelector('.sw-lbl'), why ? 'NO CIS STATES' : 'MO-REGISTRY ON'); hint(onSw.root, why ? why + ' — ORBITAL mode plays its orbitals' : SW_TITLE); };
+  const says = (why) => { lbl(onSw.root.querySelector('.sw-lbl'), why ? 'NO CIS STATES' : 'REGISTRY ON'); hint(onSw.root, why ? why + ' — ORBITAL mode plays its orbitals' : SW_TITLE); };
 
   const bar = el('div', 'row tight reg-bar', host);
   const presetSel = el('select', 'sel', bar); presetSel.title = 'Presets are rules, not indices: each one exists for every molecule or says why it does not';
@@ -148,6 +148,9 @@ export function createStates(host, api) {
   sg.prepend(songSw.root); sg.appendChild(sE.root); sg.addEventListener('dragover', (e) => e.preventDefault()); sg.addEventListener('drop', (e) => { e.preventDefault(); songFile(e.dataTransfer.files[0]); });
   const roSong = readout({ label: 'SONG', cls: 'wide', value: 'no track' }); el('div', 'row tight', host).appendChild(roSong.root); const songNote = el('div', 'note', host); refreshSong();
 
+  /* iteration 001 (Josh): the presets, A ↔ B, the drive and the song fold behind the head's chevron (lab/fold.js); HIDE and CLEAR are glyphs */
+  { const a = el('div', 'reg-more'), b = el('div', 'reg-more'); bar.before(a); a.append(bar, mrow); dr.before(b); b.append(dr, dk, roDrive.root.parentElement, sg, roSong.root.parentElement, songNote);
+    fold(head, [a, b], { what: 'presets, A ↔ B, drive and song' }); chip(hideBtn, 'eyeShut', 'HIDE'); chip(clrBtn, 'clear', 'CLEAR'); }
   const rr = el('div', 'row tight', host);
   const roSum = readout({ label: '<m>Σ|b|²</m>', value: '—', sub: '' });
   const roBeat = readout({ label: 'BEAT', value: '—', sub: '' });

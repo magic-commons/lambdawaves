@@ -1,7 +1,7 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, trig, group, readout } from '../mir/kit.js'; import { VIEW, STYLE } from '../field.js'; import { planeModel } from '../native-ui.js';
+import { el, knob, sw, seg, trig, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE } from '../field.js'; import { planeModel } from '../native-ui.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field, setReference } = app.ctl;
@@ -25,7 +25,7 @@ export function createMaterial(app) {
     ui.viewSeg = seg({ label: 'OBSERVABLE (colour is semantic)', value: 'phase', options: [
       { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density; palette θ = 0 when enabled, original blue when off' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
       { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: palette ±π/2 or original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>' }, { id: 'diff', label: '<m>Δρ</m>', title: 'ρ(t) − ρ_ref: palette −π/2 gain and +π/2 loss, or original yellow/blue' }, { id: 'reim', label: '<m>Re+Im</m>', title: 'Overlay real and imaginary parts in one volume' }],
-      onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); } });
+      onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.pop(ui.viewSeg.button(v).textContent); } });
     r1.appendChild(ui.viewSeg.root).dataset.keyAction = 'view';
     const r2 = el('div', 'row tight', gSpace);
     ui.expK = knob({ label: 'EXPOSURE', min: 0.08, max: 12, value: 1, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.exposure', v)) return; mat.exposure = v; schedule(TIER.PRESENT); } }); r2.appendChild(ui.expK.root);
@@ -104,11 +104,13 @@ export function createMaterial(app) {
        and the selected stop's angle shown twice from showArg — a reader under ROTATE (CSS hides the knob's "turn") and a float over the stop (radians; degrees on hover).
        It watches the ARG ψ field (hidden) because that field is repainted on every select, edit and app pull, which `ramp.set` alone does not see. */
     const verbs = rv.root.querySelector('.mir-ramp-verbs'), argRo = readout({ label: 'STOP ANGLE' }), argFloat = el('i', 'pal-float', rv.strip);
-    rowOn.appendChild(rv.root.querySelector('.mir-ramp-reset')); verbs.querySelector('.k').appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
+    rowOn.appendChild(rv.root.querySelector('.mir-ramp-reset'));
+    /* iteration 001 (Josh): RESET is a glyph and the selected stop's swatch and × join this row — one row fewer */
+    chip(rowOn.lastElementChild, 'undo', 'RESET'); rowOn.appendChild(rv.root.querySelector('.mir-ramp-sel')); verbs.querySelector('.k').appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
     ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
     verbs.appendChild(ui.invertSw.root);
     const showArg = () => { const s = rv.stops()[rv.selected()]; if (!s) return; argRo.set(argFloat.textContent = ang(s.at)); argRo.root.title = argFloat.title = ((2 * s.at - 1) * 180).toFixed(1) + '°'; argFloat.style.setProperty('--at', s.at); };
-    new MutationObserver(showArg).observe(rv.root.querySelector('.mir-ramp-at'), { childList: true, characterData: true, subtree: true }); showArg();
+    new MutationObserver(showArg).observe(gp.querySelector('.mir-ramp-at'), { childList: true, characterData: true, subtree: true }); showArg();
     el('div', 'note', gp).innerHTML = '<b>Phase palette.</b> The strip runs from arg ψ = −π to +π and wraps at the seam. Tap the strip to add a stop, drag one to move it, drag it off the strip to remove it. OKLab blending keeps transitions perceptually even.';
     app.state.palette = { get stops() { return rv.stops(); }, get selected() { return rv.selected(); }, get on() { return palSw.get(); }, get id() { return palId; },
       get groups() { return PRESET_GROUPS.map((g) => ({ points: g.points, items: g.items.map((p) => p.id) })); },
@@ -133,6 +135,12 @@ export function createMaterial(app) {
     ui.camLockSw = sw({ label: 'LOCK', value: false, title: 'LOCK — the classic camera: the pan stays at the centre and every zoom is from the centre (CONTROL, the turn, ZOOM and FOV stay live)', onChange: (v) => { cameraPort.set('lock', v); saveSettings(); } });
     rRef.appendChild(ui.camLockSw.root); let lockShown = false;
     cameraPort.subscribe(() => { const on = cameraPort.get('lock'); if (on !== lockShown) { lockShown = on; ui.camLockSw.set(on); camView.pad.widget.setDisabled(on); } });   // every road (the switch, the settings, LW) is a notice
+    /* iteration 001 (Josh): CAMERA, SHORTER — the group's CAMERA word goes (the window says it), LOCK joins HOME · PAN HOME, and the PAN pad,
+       the scales, the HAND and SET Δρ REF fold behind CONTROL's chevron (lab/fold.js): HOME, CONTROL, the sphere, ZOOM · FOV stay out */
+    { const R = gc.querySelector('.mir-camera'), q = (c) => R.querySelector(':scope > ' + c), more = el('div', 'cam-more', R);
+      gc.querySelector(':scope > .grp-lbl')?.remove();
+      for (const c of ['.cam-pan', '.cam-scales', '.cam-hand']) { const n = q(c); if (n) more.appendChild(n); }
+      more.appendChild(rRef); const v = q('.cam-verbs'); if (v) { v.appendChild(ui.camLockSw.root); v.dataset.n = String(v.children.length); } fold(q('.cam-mode') || R, more, { what: 'pan, hand and the Δρ reference' }); }
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt(+Shift)+Drag, two fingers or the PAN pad slide the picture 1:1 (Shift does not make the pan finer); the molecule stays the pivot. Double-click, double-tap or HOME restores the camera.';
   }
   return { wObs, wPal, wCam, wClip, createDrawClipPaletteCamera };

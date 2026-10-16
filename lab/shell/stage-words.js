@@ -1,6 +1,6 @@
 /* lab/shell/stage-words.js — THE STAGE TEXT and its CAPTION (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the source, the caption a capture draws,
  * the tick and the INFORMATIONAL layer (initStageText, called by boot() at the go).  stageTextTick and stageCaption are registered on app.w at creation. */
-import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { toScreen, cameraKey } from '../field.js';
+import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { toScreen, cameraKey } from '../field.js';
 import { BASIS } from '../hydrogen.js'; import { getHamiltonian } from '../hamiltonian.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { ELEMENT } from '../md.js';
 import { stateLatex, formulaLatex, BASIS_LABEL } from '../latex-state.js';
 export function createStageWords(app) {
@@ -51,11 +51,32 @@ export function createStageWords(app) {
      under `difference`, so each glyph inverts what it is on; the notebook's body (14 px) × SIZE. */
   function initStageText() {
     const KATEX_MS = 250, racks = () => [app.host.rackL, rack].filter((r) => r && r.querySelector('.dev:not(.closed):not([hidden])'));
+    /* 2026-10-16 (Josh, iteration 001) · THE SEAT: TOP or BOTTOM of the free stage, PAD its share of the free height from that edge (0.12 is the kit's
+       own seat).  The kit is not edited: two hair-thin bands in `avoid()` (mid-stage, never at an edge, so never read as a rack) pin the free stage
+       to exactly the block's height at the seat, so the kit's placeBlock lands it there.  THE POP-UPS sit on the OTHER side, at the same PAD. */
+    const seat = { bottom: false, pad: 0.12 }; let block = null;
+    const bars = () => [...racks(), app.sh.layout.docked ? null : document.getElementById('transport'), app.state.tl && app.state.tl.isOpen() ? app.state.tl.root : null].map((e) => paintedRect(e)).filter(Boolean);
+    function freeOf(rs, sb) {                                          // the kit's free() rule (info/layer.js), in stage px
+      const m = INFO.margin, vw = innerWidth; let L = m, R = sb.width - m, T = m, B = sb.height - m;
+      for (const r of rs) {
+        const x0 = r.left - sb.left, x1 = r.right - sb.left, y0 = r.top - sb.top, y1 = r.bottom - sb.top;
+        if (x1 <= 0 || x0 >= sb.width || y1 <= 0 || y0 >= sb.height) continue;
+        if (r.left <= 24) L = Math.max(L, x1 + m); else if (r.right >= vw - 24) R = Math.min(R, x0 - m);
+        else if ((y0 + y1) / 2 > sb.height / 2) B = Math.min(B, y0 - m); else T = Math.max(T, y1 + m);
+      }
+      return R - L < 120 ? { L: m, R: sb.width - m, T, B, m } : { L, R, T, B, m };
+    }
+    const at = (F, h, bottom) => (bottom ? F.B - seat.pad * (F.B - F.T) - h : F.T + seat.pad * (F.B - F.T));   // a body's top edge at its seat
     const layer = createInfoLayer({ stage: dom.stage, parallax: false, drift: false, follow: false,
-      avoid: () => [...racks(), app.sh.layout.docked ? null : document.getElementById('transport'), app.state.tl && app.state.tl.isOpen() ? app.state.tl.root : null].map((e) => paintedRect(e)).filter(Boolean) });
+      avoid: () => {
+        const rs = bars(), sb = dom.stage.getBoundingClientRect(), F = freeOf(rs, sb), h = block ? block.el.offsetHeight : 0, y = Math.max(F.T, at(F, h, seat.bottom)), x = sb.left + sb.width / 2;
+        const band = (y0, y1) => ({ left: x - 1, right: x + 1, top: sb.top + y0, bottom: sb.top + y1 });
+        return [...rs, band(0, y - F.m), band(y + h + F.m, sb.height)];
+      } });
+    const pop = el('div', 'lw-pop', dom.stage); pop.setAttribute('aria-hidden', 'true');
     layer.root.classList.add('lw-stage'); layer.root.setAttribute('aria-hidden', 'true');
     const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0 };   // the gate's witnesses: KaTeX runs, banners, re-placements asked, letter moves
-    let on = true, labelsOn = true, labelScale = 1, formula = '', banner = null, shown = '', block = null, lastRender = -1e9, wait = 0, fadeT = 0;
+    let on = true, labelsOn = true, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0;
     function show() {                                                // the markdown wanted now, as a new block if it changed and KaTeX's quarter second has passed
       if (!on) return;
       const md = banner !== null ? banner : formula;
@@ -113,11 +134,22 @@ export function createStageWords(app) {
         if (ttl) fadeT = setTimeout(() => { banner = null; show(); }, ttl);
         return true;
       },
-      dismiss(md) { if (banner !== md) return; clearTimeout(fadeT); banner = null; show(); },   // a later announcement has already taken the seat: nothing
+      dismiss(md) { if (banner !== md) return; clearTimeout(fadeT); banner = null; show(); },
+      /** a POP-UP: one short line on the side away from the formula that fades out; another press restarts it (iteration 001) */
+      pop(text) {
+        if (!on || !text) return false;
+        const sb = dom.stage.getBoundingClientRect(), F = freeOf(bars(), sb);
+        pop.textContent = text; pop.classList.remove('go');
+        pop.style.left = (sb.left + (F.L + F.R) / 2) + 'px'; pop.style.top = (sb.top + Math.max(F.T, at(F, pop.offsetHeight, !seat.bottom))) + 'px';
+        void pop.offsetWidth; pop.classList.add('go'); return true;
+      },
+      /** POSITION (bottom: true) and PAD (0–0.4 of the free height) */
+      setSeat(bottom, pad) { if (bottom !== undefined) seat.bottom = !!bottom; if (Number.isFinite(pad)) seat.pad = Math.max(0, Math.min(0.4, pad)); place(); },
+      get seat() { return { ...seat }; },   // a later announcement has already taken the seat: nothing
       /** STAGE FORMULA (the formula, the fade, the caption) and ATOM LABELS are two switches since 0.5.3 M9 (INFORMATIONAL) */
       setOn(v) { on = !!v; layer.root.hidden = !on; show(); }, setLabels(v) { labelsOn = !!v; }, setLabelScale(s) { labelScale = s; labelsKey = ''; },
       /** SIZE: the type × s (lab.css), then a re-measure — setPane(false) measures every bare block again (layer.js) */
-      setScale(s) { layer.root.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
+      setScale(s) { layer.root.style.setProperty('--lw-stage-size', String(s)); pop.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
       get on() { return on; }, get labelsOn() { return labelsOn; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
     };
     wChem.root.addEventListener('change', stageTextTick);           // the pick lands in `preset` at once; the solve comes later

@@ -24,8 +24,8 @@
  * a `refusal()` dance and a push ORDER in the frame loop; the refusal survives only as the sentence the interface
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
-import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText } from './mir/kit.js';
-import { paintStroke } from './paint-stroke.js';
+import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText, chip } from './mir/kit.js';
+import { paintStroke } from './paint-stroke.js'; import { fold } from './fold.js';
 import { slerpCoefficients } from './molecular-register.js';
 import { createFlow } from './molecular-flow.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
@@ -61,7 +61,7 @@ export function createOrbitals(host, api) {
   clrBtn.title = 'Empty the register (c ↦ 0 for every orbital)';
   const nrmBtn = el('button', 'trig', head); nrmBtn.type = 'button'; nrmBtn.textContent = 'NORM';
   nrmBtn.title = 'Renormalise the register so Σ|c|² = 1';
-  const onSw = sw({ label: 'MO-REGISTRY ON', value: false, cls: 'orb-on',
+  const onSw = sw({ label: 'REGISTRY ON', value: false, cls: 'orb-on',
     title: 'Give the field this register’s amplitude ψ(r, t) and set the observable to phase — MOLECULES must be ON and not running',
     onChange: (v) => { setOn(v); } });
   head.appendChild(onSw.root);
@@ -121,6 +121,9 @@ export function createOrbitals(host, api) {
   let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0;
   const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage riding this orbital’s current j = Im ψ̄∇ψ — the gradient of the phase you see', onChange: (v) => setFlow(v) });
   mrow.appendChild(flowSw.root);
+  /* iteration 001 (Josh): PRESET · → A · → B and MORPH · FLOW fold behind the head's chevron (lab/fold.js); DIALS and CLEAR are glyphs */
+  { const more = el('div', 'reg-more'); bar.before(more); more.append(bar, mrow); fold(head, more, { what: 'presets, A ↔ B and flow' });
+    chip(dialsBtn, 'sliders', 'DIALS'); chip(clrBtn, 'clear', 'CLEAR'); }
   function setFlow(v) {
     flowOn = !!v && !!sol; flowSw.set(flowOn);
     if (flowOn && (!flow || flow.n !== sol.nAO)) { flow = createFlow(sol.shells); flowRe = new Float64Array(sol.nAO ** 2); flowIm = new Float64Array(sol.nAO ** 2); flowEpoch++; }
@@ -221,6 +224,7 @@ export function createOrbitals(host, api) {
       else if (sel.delete(k)) { if (selected === k) selected = -1; n++; }
     }
     if (n) { touch(); rebuild(); paint(); refresh(); api.repaint(); }
+    if (n && on && api.pop) { const L = label(selected), fr = frontierOf(selected); api.pop((n > 1 ? '+' + n + ' · ' : '+ ') + (L.includes(fr) ? L : L + ' · ' + fr)); }   // iteration 001: the level a hand just added, on the stage
     return n;
   }
   function clear() { if (!sel.size) return false; sel.clear(); selected = -1; touch(); rebuild(); paint(); refresh(); api.repaint(); return true; }

@@ -1,6 +1,6 @@
 /* lab/windows/molecules.js — MOLECULES, the molecular session, THE HEAD and MO-REGISTRY (0.5.2 R2d; moved verbatim out of lab/rack.js boot()) at TWO seats:
  * createMolecules(app) builds MOLECULES where the LEGACY note stands and returns createMoRegistry(), which boot() calls where ORBITALS stood (after the stage words). */
-import { TIER } from '../rack.js'; import { sw } from '../mir/kit.js';
+import { TIER } from '../rack.js'; import { el, sw } from '../mir/kit.js';
 import { VIEW, VIEW_NAMES } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
@@ -58,7 +58,10 @@ export function createMolecules(app) {
     onChange: () => { app.sh.saveSettings(); schedule(TIER.PRESENT); } });   // 0.8.2 P3: rack.js draws it on the skeleton's canvas
   ui.ellipsoidSw = sw({ label: 'ELLIPSOID', value: false, title: 'THE UNCERTAINTY ELLIPSOID: the position covariance Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ as its three principal circles, semi-axes √λ_k, about the bead (with it) — position space and a register only; a PREFERENCE, off by default',
     onChange: () => { app.sh.saveSettings(); schedule(TIER.PRESENT); } });   // 0.8.3 B3: rack.js draws it after the bead
-  app.state.chem = createChem(wChem.body, { skeleton: ui.skeletonSw, bead: ui.beadSw, ellipsoid: ui.ellipsoidSw, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
+  /* 2026-10-16 (Josh, iteration 001): SKELETON · BEAD · ELLIPSOID draw ON the stage, so they sit in INFORMATIONAL (built before this card, settings-card.js) */
+  { const info = document.querySelector('.dev[data-id="informational"] .dev-body'); if (info) el('div', 'row tight info-marks', info).append(ui.skeletonSw.root, ui.beadSw.root, ui.ellipsoidSw.root); }
+  const pop = (t) => app.state.stageText && app.state.stageText.pop(t);   // iteration 001: INFORMATIONAL's pop-ups (shell/stage-words.js)
+  app.state.chem = createChem(wChem.body, { pop, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
@@ -77,19 +80,8 @@ export function createMolecules(app) {
      link or demo open never shows it — none comes through `hand`.  `head.shown` is the gate's witness (__LW.head). */
   const head = { shown: 0, md: null, want: null, bye: null };
   function headPick(id) { if (head.bye) head.bye(); head.want = id; headLand(app.state.chem.solution()); }
-  function headLand(sol) {
-    const id = head.want, row = id && MOLECULE_BY_ID.get(id);
-    if (!row || !sol || !app.state.stageText) return;
-    if (app.state.chem.preset() !== id) { head.want = null; return; }                      // the molecule changed first: nothing
-    if (sol.key.replace(/\|lda$/, '') !== id + '|' + app.state.chem.basis + '|' + row.charge) return;   // chemview's solve key: this molecule's landing (0.7.3: RKS LDA's too)
-    head.want = null;
-    const md = moleculeHead({ molecule: row, basis: app.state.chem.basis, ground: sol, stem: sol.stem, status: app.state.chem.said });   // 0.5.4 P4: tell() ran before notify()
-    if (!md || !app.state.stageText.announce(md, 0)) return;
-    head.shown++; head.md = md;
-    const life = new AbortController(), until = performance.now() + 2500, bye = head.bye = () => { life.abort(); if (head.bye === bye) head.bye = null; app.state.stageText.dismiss(md); };
-    addEventListener('keydown', (e) => { if (e.key === 'Escape' && !isField(e.target, true)) bye(); }, { signal: life.signal });
-    dom.canvas.addEventListener('pointerdown', () => { if (performance.now() >= until) bye(); }, { signal: life.signal, passive: true });
-  }
+  /* 2026-10-16 (Josh, iteration 001): the head is the NOTEBOOK's, never the stage's — the stage writes only INFORMATIONAL's formula and atoms */
+  function headLand() { head.want = null; }
   app.state.chem.subscribe(headLand);
   function createMoRegistry() {   // the second seat: MO-REGISTRY
   const wOrbs = device({ id: 'orbitals', eyebrow: 'MO-REGISTRY', title: 'molecular orbital registry', status: '' });   // the id stays `orbitals` so saved layouts survive the rename (REGISTER-WINDOW-SPEC §11.1)
@@ -101,7 +93,7 @@ export function createMolecules(app) {
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wOrbs.setStatus(t, cls); },
-    announce: (md) => app.state.stageText && app.state.stageText.announce(md),        // a HAND's preset only (orbitalsview / statesview presetSel)
+    announce: (md) => app.state.stageText && app.state.stageText.announce(md), pop,   // a HAND's preset only (orbitalsview / statesview presetSel)
     now: () => clock.t, rate: () => clock.rate, field: () => field, chem: () => app.state.chem, session: app.state.molSession,
     song: { reg, hydrogen: () => getHamiltonian().id === 'hydrogen', filming: () => app.state.exportLocked, land(re, im, t) { app.state.rotTicking = true; reg.anchorFrom(re, im, t); app.state.rotTicking = false; touchState(); } } });   // 0.6.4 S1: a landing notes no history row, as the rotation drive's ticks
   app.state.orbitals = app.state.register.orbitals; app.state.states = app.state.register.states;

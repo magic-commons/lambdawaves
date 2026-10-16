@@ -15,10 +15,13 @@
  * they arrive FOLDED, because enterPhone() puts the left rack's cards at the TOP of the one rack, above SETTINGS and STATE.
  * 0.4.0 S0 · `more`: MOLECULES' MORE fold (KICK / RUN / TDA / the spectra, chemview.js) is OPEN on a desktop and folded on a
  * phone or tablet; a project's or a ☆ layout's card record (`more`) wins when it loads.
+ * 2026-10-16 (Josh, iteration 001) · EVERY first-visit window arrives FOLDED (minimized) on every device, and MOLECULES' MORE fold too;
+ * INFORMATIONAL takes SHADOW's seat on the left rack (rack.js).
  * Node-testable: tests/first-run.test.mjs. */
+const FOLD_ALL = Object.freeze(['informational', 'spectrum', 'chem', 'orbitals', 'settings', 'state', 'palette', 'observer', 'camera', 'clip']);
 export const FIRST_RUN_MATERIAL = Object.freeze({
-  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: Object.freeze(['settings', 'state']), more: true }),
-  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: Object.freeze(['settings', 'state', 'shadow', 'chem', 'orbitals']), more: false }),
+  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: FOLD_ALL, more: false }),
+  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: FOLD_ALL, more: false }),
 });
 /** the material a browser that has never said anything gets on this device */
 export function firstRunMaterial(mobile) { return mobile ? FIRST_RUN_MATERIAL.mobile : FIRST_RUN_MATERIAL.desktop; }
