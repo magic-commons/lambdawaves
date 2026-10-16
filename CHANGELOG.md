@@ -11,6 +11,34 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.8.2-alpha` — 2026-10-16
+
+Commit `413d33b` · no new waves · 15 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `8722f49` 2026-10-16 — CHANGELOG for v0.8.1-alpha
+- `af2e84b` 2026-10-16 — 0.8.2 Phase Space: the plan's base and cap filled at the v0.8.1-alpha cut — base this commit…
+- `d1f6afb` 2026-10-16 — checkpoint 08:30: v0.8.1-alpha Two Levels cut locally (6e4af2d, snapshot 35); 0.8.2 Phase Space…
+- `ff2e222` 2026-10-16 — 0.8.2 P2 THE COHERENCE MAP: one METERS tile, |rho_ab| over the populated labels, the equalizer's…
+- `1121e76` 2026-10-16 — 0.8.2 P2: the build note and the tile's screenshot (CHORD and 1s + 2p0 under GAUSSIAN JITTER)
+- `13cf3f8` 2026-10-16 — 0.8.2 P1 THE OSCILLATOR'S WIGNER: the slice integrates qho.js's radials; NEGATIVITY readout; W_n…
+- `d21a94c` 2026-10-16 — merge P2 THE COHERENCE MAP (1121e76): METERS' COHERENCE tile
+- `dacce31` 2026-10-16 — 0.8.2 P3 THE BEAD + ψ ALONG A RAY: the expectation point with its trail on the skeleton's…
+- `cb5214a` 2026-10-16 — 0.8.2 P1: a stood-down WIGNER resets the NEGATIVITY line; the |1⟩ screenshot
+- `6e291b6` 2026-10-16 — 0.8.2 P1: the build note (seats, the closed-form table, the corrections)
+- `72f74ae` 2026-10-16 — 0.8.2 P3: the RAY tile shows under LEAN; the far bead at 0.8, 6 px
+- `8c9847d` 2026-10-16 — 0.8.2 P3: the build note
+- `cbee3bd` 2026-10-16 — merge P1 THE OSCILLATOR'S WIGNER (6e291b6): wigner.js' slice integral takes the oscillator's…
+- `fdf2635` 2026-10-16 — merge P3 THE BEAD + ψ ALONG A RAY (8c9847d): calculus.js' expectR (⟨x⟩, ⟨y⟩, ⟨z⟩ — x and y as…
+- `413d33b` 2026-10-16 — 0.8.2-alpha Phase Space: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.8.1-alpha` — 2026-10-16
 
 Commit `6e4af2d` · no new waves · 20 commits.
