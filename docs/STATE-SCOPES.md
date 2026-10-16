@@ -48,6 +48,7 @@ this file.
 | palette: `paletteId`, `palette {on, selected, stops}` | project | PROJECT (D2) |
 | `ui.stage {mix, custom, follow}` | project | PROJECT |
 | `experiment` (modes, preset, Bz/Fz, t, rate, window, damping) | project | PROJECT |
+| `experiment.field.inter` (0.8.0 G3, STATE › STATIC FIELD › INTER-SHELL) `true` — STARK F acts across shells (lab/stark.js' propagator, H = diag(E) + F·z over the 91 labels, engaged while F > 0); absent when off, so the edit bytes never move; dropped when another propagator (STURMIAN) engages | project | PROJECT |
 | `hamiltonian`, `rates`, `rotationRates`, `sturmian`, `wigner`, `instruments`, `readers`, `space`, `domain`, `shadow` | project | PROJECT (0.5.0 D9: `mo`, `instruments.molecule` and `instruments.pulse` left with the H₂⁺ card; an older file's are read only to open it as MOLECULES · H₂; `instruments.helium` left with HELIUM, read only to open the file as ATOM · He 1s. 0.5.0 D9b: `instruments.h2` left with H₂, read only to open the file as MOLECULES · H₂ on its density; `field` (ELECTROSTATICS' `overlay`, `lines`, `source`) left with ELECTROSTATICS, read only to say so) |
 | `mat` LOOK: view, style, exposure, softness, iso, grain, knee, dither, hueShift, boost, gamma, finish, bow, slice, steps, paletteOn | project | PROJECT |
 | `overlays` (vortex, kepler, particles, dials) | project | PROJECT |

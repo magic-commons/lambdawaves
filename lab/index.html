@@ -127,7 +127,7 @@
     <div id="rackPeekL" aria-hidden="true"></div>
     <div id="sheet" class="glass" hidden>
       <h3>MODEL AND DISPLAY</h3>
-      <p><b>STATE</b> — Hydrogen's register holds its 91 basis states with <m>n ≤ 6</m>; norm, energy, and autocorrelation come from their coefficients. While a molecule owns the field, the state is its solve in MOLECULES, not this register.</p>
+      <p><b>STATE</b> — Hydrogen's register holds its 91 basis states with <m>n ≤ 6</m>; norm, energy, and autocorrelation come from their coefficients. While a molecule owns the field, the state is its solve in MOLECULES, not this register. Under INTER-SHELL STARK the coefficients evolve by an eigensolve of <m>H = diag(E) + F z</m> over all 91 labels — NUMERICAL, with no continuum: a shell past its saddle would ionise, and this basis holds it.</p>
       <p><b>STATUS</b> — <b>EXACT</b>: a closed form. <b>NUMERICAL</b>: a solve checked against an oracle, PySCF's energy for the same molecule. <b>UNCHECKED</b>: no oracle. The picture's number says its metric: RMS, worst voxel, or a share of ρmax.</p>
       <p><b>SHADOW</b> — The same coefficients appear as <m>q = √2 Re c</m> and <m>p = √2 Im c</m>. This is another view of the quantum state.</p>
       <p><b>FIELD</b> — The renderer samples ψ on the selected 3D grid and ray-marches it. Grid size and quality change the picture, not the state.</p>

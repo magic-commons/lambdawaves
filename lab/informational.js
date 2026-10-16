@@ -22,7 +22,7 @@ export function createInformational(app) {
      operator's — written by app.hooks.status on a landing, a VIEW or FLOW change, an owner or operator change, NEVER in a frame.  A tap: the MODEL sheet, its words. */
   const st = readout({ label: 'STATUS', cls: 'wide lw-status', value: '—' }); let was; el('div', 'row tight', w.body).append(st.root);
   st.root.title = 'What EXACT, NUMERICAL and UNCHECKED mean: the MODEL sheet'; st.root.addEventListener('click', () => { if (app.hooks.sheet) app.hooks.sheet(); });
-  app.hooks.status = () => { const c = app.state.chem, k = c && c.on ? c.said : getHamiltonian().id, s = k === was ? undefined : typeof k === 'string' ? statusOf({ owner: k }) : k;
+  app.hooks.status = () => { const c = app.state.chem, k = c && c.on ? c.said : app.reg.P && app.reg.P.stark ? 'stark' : getHamiltonian().id, s = k === was ? undefined : typeof k === 'string' ? statusOf({ owner: k }) : k;
     if (s !== undefined) { was = k; st.set(s ? s.line : '—', s && s.word === 'UNCHECKED' ? 'warn' : ''); st.setSub(s && typeof k !== 'string' ? s.head : ''); } };
   app.hooks.status();
   /* UNDER SETTINGS: the kit opens a window at the top of its rack (and raise() puts it there after); once that press is done, the seat after

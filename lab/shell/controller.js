@@ -25,7 +25,7 @@ import { createWorkerPool } from '../worker-pool.js';    // N7 seam 3: the maths
 import { createLook } from '../look.js';    // 0.5.0 C2: the look is the kit's — mir.gui (createPrefs over LOOK_SCHEMA rows) and createAccent (once N7 seam 4, accent-wheel.js)
 
 export async function createController(app) {
-  const { dom, ui, reg, clock, appPlay, mat, rates, energyOf, sturm, settingsStore, PAL_DEF, LOOK_DEFAULTS } = app;   // §0, by value
+  const { dom, ui, reg, clock, appPlay, mat, rates, energyOf, settingsStore, PAL_DEF, LOOK_DEFAULTS } = app;   // §0, by value
   const { lookSync, quality } = app.sh;   // §1's, filled at their declarations
   const { schedule, refModes } = app.loop;   // the loop's hoisted functions, by value in the literal
   /* ── ONE CONTROLLER (wave 128; AUTO SCALE's one rule AS 2026-09-25 + the GOVERNOR of wave 45, merged) ─────────────────────
@@ -160,7 +160,7 @@ export async function createController(app) {
   app.state.rotMoved = false; app.state.rotTicking = false;
   function setRotationRate(key, value) {
     if (!(key in ROT_LIMIT) || !Number.isFinite(value)) return false;
-    const v = key !== 'z' && sturm.P ? 0 : Math.max(-ROT_LIMIT[key], Math.min(ROT_LIMIT[key], value));
+    const v = key !== 'z' && reg.P ? 0 : Math.max(-ROT_LIMIT[key], Math.min(ROT_LIMIT[key], value));
     if (rotRate[key] === v) return v;
     rotRate[key] = v;
     const k = key === 'z' ? ui.rotZRate : key === 'kz' ? ui.kzRate : ui.defRate;
@@ -178,7 +178,7 @@ export async function createController(app) {
        whose shells are not n²-fold degenerate — which is why the two jog wheels already stand down
        (applySturmian).  Their RATES stand down on the same line, in the SETTER as well as here, so
        a modulated rate cannot creep past a disabled dial.  ROTATE z survives: m is still m. */
-    const az = rotRate.z * dt, ak = sturm.P ? 0 : rotRate.kz * dt, ad = sturm.P ? 0 : rotRate.def * dt;
+    const az = rotRate.z * dt, ak = reg.P ? 0 : rotRate.kz * dt, ad = reg.P ? 0 : rotRate.def * dt;
     if (az === 0 && ak === 0 && ad === 0) return false;
     const d0 = reg.digest(); app.state.rotTicking = true;
     if (az !== 0) reg.rotateZ(az);
@@ -321,7 +321,7 @@ export async function createController(app) {
     normalize() { app.w.normalizeNow(); },
     rateOf(a) { return rates[a]; },
     setRate(a, r) {
-      if (sturm.P) return false;                                     // W-STURMIAN: RATE is a diagonal-phase feature — off under the scale
+      if (reg.P) return false;                                       // W-STURMIAN (and 0.8.0 INTER-SHELL, any propagator): RATE is a diagonal-phase feature — off under the scale
       const c = reg.coeffAt(a, clock.t); rates[a] = r; reg.setEnergies(energyOf); reg.set(a, c.re, c.im, clock.t); touchState();   // re-anchored: c(t) is continuous, only its speed changes
       const toy = rates.some((v) => Math.abs(v - 1) > 1e-9);
       app.w.wSpec.setStatus(toy ? 'CUSTOM RATES · H RESCALED' : getHamiltonian().label, toy ? 'warn' : (getHamiltonian().id === 'hydrogen' ? '' : 'live'));

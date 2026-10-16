@@ -458,13 +458,8 @@ export function chemDriveRun(m = {}) {
 /* ── THE SONG (0.6.4 S1): hydrogen DRIVEN by a track, i ċ = (diag E_n + E_z(t)·z) c over the 91 labels by driveStep (D.w, the free phases, and D.ops are each drive's own).  z = δ_mm' ∫R_nl R_n'l' r³ dr
  * (trapezoid, 20 000 points to r = 400) × √(((l+1)² − m²)/((2l+1)(2l+3))), eigensolved once.  The track (t_atom = RATE × t_audio) is low-passed at the stepper's Nyquist and
  * decimated ONCE by a polyphase (64-phase) Blackman-windowed sinc to the steps' MIDPOINTS t0 + (j + ½)dt, peak-normalised; whole steps only (the rest is `lag`), 0 past the end. */
-let hzOp = null, song = null, songTrack = null;
-export function hydrogenZ() {
-  if (hzOp) return hzOp;
-  const N = BASIS.length, M = 20000, dr = 400 / M, Z = new Float64Array(N * N), R = new Map(), tab = (n, l) => R.get(n * 10 + l) || R.set(n * 10 + l, Float64Array.from({ length: M + 1 }, (_, i) => radial(n, l, i * dr))).get(n * 10 + l);
-  for (const a of BASIS) for (const b of BASIS) if (b.m === a.m && b.l === a.l + 1) { const A = tab(a.n, a.l), B = tab(b.n, b.l); let s = 0.5 * A[M] * B[M] * 400 ** 3; for (let i = 1; i < M; i++) s += A[i] * B[i] * (i * dr) ** 3; Z[a.index * N + b.index] = Z[b.index * N + a.index] = s * dr * Math.sqrt(((a.l + 1) ** 2 - a.m ** 2) / ((2 * a.l + 1) * (2 * a.l + 3))); }
-  const e = eigSym(Z, N); return (hzOp = { N, values: Float64Array.from(e.values), U: e.vectors, R: Z });
-}
+let song = null, songTrack = null;
+import { hydrogenZ } from './stark.js'; export { hydrogenZ };   // 0.8.0 G3: z moved to lab/stark.js — ONE build for this worker and the frame thread's INTER-SHELL STARK
 export function songResample(x, sr, rate) {   // → { dt, track, hash (FNV-1a of the decoded samples), omega (the zero-crossing rate, Eh) }
   const dt = rate / sr > 0.5 ? 0.25 : 0.5, q = dt * sr / rate, fc = 0.5 / Math.max(1, q), K = Math.ceil(4 / fc), P = 64, g = new Float64Array(2 * K * P + 1), n = x.length, T = new Float32Array(Math.max(1, Math.floor((n - 1) / q - 0.5) + 1));
   for (let k = 0; k < g.length; k++) { const d = k / P - K, u = Math.PI * d / K; g[k] = (d ? Math.sin(2 * Math.PI * fc * d) / (Math.PI * d) : 2 * fc) * (0.42 + 0.5 * Math.cos(u) + 0.08 * Math.cos(2 * u)); }
