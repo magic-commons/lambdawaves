@@ -4,19 +4,24 @@
  * the dipole (a.u.) runs from the centre of nuclear charge, 2 bohr per a.u., in the accent.  The far half (depth past the origin's) is dimmed, as
  * angular-nodes.js dims it.  Ink and accent are the kit's --fg / --acc, read when the theme changes.  Nothing changed: no paint; off: clear() once. */
 import { cameraKey, toScreen } from './field.js';
-import { ANGSTROM } from './md.js';
+import { ANGSTROM } from './md.js'; import { moleculeCharge } from './molecules.js';
 
 const RCOV = [0, 0.31, 0.28, 1.28, 0.96, 0.84, 0.76, 0.71, 0.66, 0.57, 0.58, 1.66, 1.41, 1.21, 1.11, 1.07, 1.05, 1.02, 1.06, 2.03, 1.76, 1.70, 1.60, 1.53, 1.39, 1.39, 1.32, 1.26, 1.24, 1.32, 1.22, 1.22, 1.20, 1.19, 1.20, 1.20, 1.16].map((r) => r * ANGSTROM);
 const CPK = { 1: '#fff', 3: '#cc80ff', 4: '#c2ff00', 5: '#ffb5b5', 6: '#909090', 7: '#3050f8', 8: '#ff0d0d', 9: '#90e050', 11: '#ab5cf2', 12: '#8aff00', 13: '#bfa6a6', 14: '#f0c8a0', 15: '#ff8000', 16: '#ffff30', 17: '#1ff01f', 29: '#c88033', 30: '#7d80b0', 32: '#668f8f', 33: '#bd80e3', 34: '#ffa100', 35: '#a62929' };
 
+/** 0.8.2 P3 · a molecule's bead: the electron density's centroid (ΣZ_A R_A − μ)/N_e, N_e = ΣZ − q (μ is nuclear minus electronic, rhf-molecule.js) */
+export function centroid(atoms, mu, id) { if (!mu || !atoms.length) return null; let Z = 0; const C = [0, 0, 0]; for (const a of atoms) { Z += a.Z; C[0] += a.Z * a.x; C[1] += a.Z * a.y; C[2] += a.Z * a.z; }
+  const N = Z - moleculeCharge(id); return { r: C.map((v, q) => (v - mu[q]) / N), T: Infinity, key: id, t: 0 }; }
 export function createSkeleton(cv) {
-  const g = cv.getContext('2d'); let key = '', atomsKey = '', bonds = [], theme = null, ink = '', acc = '', drawn = false;
+  const g = cv.getContext('2d'); let key = '', atomsKey = '', bonds = [], theme = null, ink = '', acc = '', drawn = false, trail = [], trailKey = null, trailT = -Infinity;   // THE BEAD's trail (0.8.2 P3): 64 points over its last period
   function clear() { key = ''; if (!drawn) return; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); drawn = false; }
-  function draw(atoms, dipole, obs, half) {
-    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1), th = document.body.dataset.theme || 'dark';
-    if (!atoms || !atoms.length || W < 1 || H < 1) return clear();
+  function draw(atoms, dipole, obs, half, bead = null) {
+    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1), th = document.body.dataset.theme || 'dark'; atoms = atoms || [];
+    if ((!atoms.length && !bead) || W < 1 || H < 1) return clear();
+    if (!bead || bead.key !== trailKey || bead.t < trailT) { trail = []; trailKey = bead && bead.key; trailT = -Infinity; }   // a new state, or the clock run back: the trail starts again
+    if (bead && bead.t - trailT >= bead.T / 64) { trail.push(bead.r); trailT = bead.t; if (trail.length > 64) trail.shift(); }
     const ak = atoms.map((a) => `${a.Z},${a.x.toFixed(4)},${a.y.toFixed(4)},${a.z.toFixed(4)}`).join(';');
-    const k = [ak, dipole ? dipole.map((v) => v.toFixed(4)).join() : '', cameraKey(obs), obs.dist.toFixed(4), obs.fov, half, W, H, dpr, th].join('|'); if (k === key) return; key = k;
+    const k = [ak, dipole ? dipole.map((v) => v.toFixed(4)).join() : '', cameraKey(obs), obs.dist.toFixed(4), obs.fov, half, W, H, dpr, th, bead ? bead.r.map((v) => v.toFixed(4)).join() + ':' + trail.length + ':' + trailT : ''].join('|'); if (k === key) return; key = k;
     if (ak !== atomsKey) { atomsKey = ak; bonds = []; for (let i = 0; i < atoms.length; i++) for (let j = i + 1; j < atoms.length; j++) { const a = atoms[i], b = atoms[j]; if (Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) < 1.3 * (RCOV[a.Z] + RCOV[b.Z])) bonds.push([i, j]); } }
     if (th !== theme) { theme = th; const cs = getComputedStyle(document.body); ink = cs.getPropertyValue('--fg').trim() || cs.color; acc = cs.getPropertyValue('--acc').trim() || ink; }
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
@@ -29,12 +34,15 @@ export function createSkeleton(cv) {
       const a = atoms[i], p = P[i], R = 0.28 * (RCOV[a.Z] || 1.5 * ANGSTROM), e = S.at(a.x + R * rt[0], a.y + R * rt[1], a.z + R * rt[2]); if (!e) continue;
       g.globalAlpha = p[2] > zc ? 0.35 : 0.9; g.fillStyle = CPK[a.Z] || '#ff1493'; g.beginPath(); g.arc(p[0], p[1], Math.hypot(e[0] - p[0], e[1] - p[1]), 0, 2 * Math.PI); g.fill(); g.stroke();
     }
-    if (!dipole || Math.hypot(dipole[0], dipole[1], dipole[2]) < 0.01) return;
+    if (dipole && Math.hypot(dipole[0], dipole[1], dipole[2]) >= 0.01) {
     let Z = 0; const C = [0, 0, 0]; for (const a of atoms) { Z += a.Z; C[0] += a.Z * a.x; C[1] += a.Z * a.y; C[2] += a.Z * a.z; }
-    const p = S.at(C[0] / Z, C[1] / Z, C[2] / Z), q = S.at(C[0] / Z + 2 * dipole[0], C[1] / Z + 2 * dipole[1], C[2] / Z + 2 * dipole[2]); if (!p || !q) return;
+    const p = S.at(C[0] / Z, C[1] / Z, C[2] / Z), q = S.at(C[0] / Z + 2 * dipole[0], C[1] / Z + 2 * dipole[1], C[2] / Z + 2 * dipole[2]); if (p && q) {
     const L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1, ux = (q[0] - p[0]) / L, uy = (q[1] - p[1]) / L, bx = q[0] - 6 * ux, by = q[1] - 6 * uy;
     g.globalAlpha = 0.95; g.strokeStyle = g.fillStyle = acc; g.lineWidth = 2; g.lineCap = 'butt'; g.beginPath(); g.moveTo(p[0], p[1]); g.lineTo(bx, by); g.stroke();
-    g.beginPath(); g.moveTo(q[0], q[1]); g.lineTo(bx - 3.5 * uy, by + 3.5 * ux); g.lineTo(bx + 3.5 * uy, by - 3.5 * ux); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(q[0], q[1]); g.lineTo(bx - 3.5 * uy, by + 3.5 * ux); g.lineTo(bx + 3.5 * uy, by - 3.5 * ux); g.closePath(); g.fill(); } }
+    if (!bead) return; const B = trail.map((r) => S.at(r[0], r[1], r[2])).filter(Boolean), b = S.at(bead.r[0], bead.r[1], bead.r[2]); g.strokeStyle = g.fillStyle = acc; g.lineWidth = 1.5; g.lineCap = 'round';   // THE BEAD, after the skeleton
+    for (let i = 1; i < B.length; i++) { g.globalAlpha = 0.85 * i / B.length; g.beginPath(); g.moveTo(B[i - 1][0], B[i - 1][1]); g.lineTo(B[i][0], B[i][1]); g.stroke(); }
+    if (b) { g.globalAlpha = b[2] > zc ? 0.55 : 1; g.beginPath(); g.arc(b[0], b[1], 5, 0, 2 * Math.PI); g.fill(); g.strokeStyle = ink; g.lineWidth = 1; g.stroke(); }
   }
   return { draw, clear };
 }
