@@ -1,0 +1,7 @@
+# tools/platform/ios — the copied bundle and Xcode's per-user state never go in git
+www/
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+.DS_Store

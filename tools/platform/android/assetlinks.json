@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.magiccommons.lambdawaves",
+      "sha256_cert_fingerprints": [
+        "10:9E:4F:83:92:8D:F3:BE:C2:18:3C:19:FB:E4:44:18:19:44:D0:5F:A6:F0:AA:50:A6:DD:38:7B:E7:19:D9:29"
+      ]
+    }
+  }
+]
