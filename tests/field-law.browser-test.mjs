@@ -129,7 +129,7 @@ try {
     { before: b0, changed: v.rows.filter((r) => r.seq !== b0.seq || r.solverCalls !== b0.solverCalls || r.trDS !== b0.trDS || !r.same || !r.owner), errs: v.errs });
 } catch (e) { judge('F! the gate threw', false, String(e && e.message || e)); } finally { await g.close(); }
 const failed = done('field-law'), x = (v) => (Number.isFinite(v) ? v.toExponential(2) : '—'), I = (dev && dev.info) || {};
-const adapter = I.description || [I.vendor, I.architecture, I.device].filter(Boolean).join(' ') || 'no adapter info';
+const adapter = I.description || [I.vendor, I.architecture, I.device].filter(Boolean).join(' ') || (dev && dev.info ? 'adapter info blank' : 'no adapter info');   // Firefox 157 gives every member ''
 const browser = ((dev && dev.ua) || '').match(/(Firefox|Edg|Chrome|Version)\/[\d.]+/g)?.pop()?.replace('Version', 'Safari') || 'unknown browser';
 let commit = '?'; try { commit = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim(); } catch (_) {}
 console.log(`FIELD LAW · ${adapter} · ${browser} · ${commit} · hydrogen RMS ${x(h && h.rms)} · 99.8 % ${x(h && h.p998)} · worst ${x(h && h.worst)}`
