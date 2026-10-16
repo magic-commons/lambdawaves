@@ -11,6 +11,32 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.8.3-alpha` — 2026-10-16
+
+Commit `6bcb7c7` · no new waves · 13 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `bcf9659` 2026-10-16 — CHANGELOG for v0.8.2-alpha
+- `f3f4ccb` 2026-10-16 — 0.8.3 Breath: the plan's base and cap filled at the v0.8.2-alpha cut
+- `ba429f7` 2026-10-16 — checkpoint 09:50: v0.8.2-alpha Phase Space cut locally (413d33b, snapshot 36); 0.8.3 Breath…
+- `a0b1437` 2026-10-16 — B3 THE UNCERTAINTY ELLIPSOID: covariance(reg, t) by the slap's rotors on varianceZ, Jacobi axes,…
+- `674a1fd` 2026-10-16 — 0.8.3 B2 THE A(t) TRACE: CALCULUS tile |<psi(0)|psi(t)>|^2 over one REPEATS period (period.js…
+- `f1a91ec` 2026-10-16 — B1 THE RADIAL BREATH + REVIVAL: radialBreath P(r, t), CALCULUS's BREATH tile, REVIVAL on the…
+- `df9463b` 2026-10-16 — B3 build note: seats, the covariance table and its gates, the 2p₀ shot, corrections, Δ +21
+- `ca0bb45` 2026-10-16 — 0.8.3 B2 THE A(t) TRACE: build note
+- `fec7e98` 2026-10-16 — B1 build note: seats, the integrals against stats' ⟨r⟩, the revival's miss, three corrections to…
+- `a23974a` 2026-10-16 — merge B3 THE UNCERTAINTY ELLIPSOID (df9463b): calculus.js' covariance(reg, t) — Σ = ⟨r_i r_j⟩ −…
+- `c2ce980` 2026-10-16 — merge B2 THE A(t) TRACE (ca0bb45): CALCULUS's A(t) tile
+- `2d01588` 2026-10-16 — merge B1 THE RADIAL BREATH + REVIVAL (fec7e98): calculus.js' radialBreath(reg, t, half, n = 256)…
+- `6bcb7c7` 2026-10-16 — 0.8.3-alpha Breath: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.8.2-alpha` — 2026-10-16
 
 Commit `413d33b` · no new waves · 15 commits.
