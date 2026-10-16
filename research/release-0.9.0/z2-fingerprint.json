@@ -1,0 +1,514 @@
+{
+ "commit": "3434be1b7c64fc26a147f5a09e1e0ca28838b5fa",
+ "port": 9551,
+ "road": "__LW.report({ only: 'fingerprint' }) through tools/gate/gatekit.mjs open() on https://127.0.0.1:9551/lab/?sw=0&warn=0 (device-report-run.mjs's road; device-report.js header names the only=fingerprint call)",
+ "report": {
+  "v": 1,
+  "kind": "lambdawaves-device-report",
+  "device": "Linux-Firefox",
+  "at": "2026-10-16T15:03:36.140Z",
+  "build": "0.8.3-alpha · Breath · 2026-10-16",
+  "url": "https://127.0.0.1:9551/lab/?sw=0&warn=0",
+  "boot": {
+   "sinceReadyMs": null,
+   "sinceNavigationMs": 1761,
+   "playing": false,
+   "canvas": [
+    1600,
+    914
+   ],
+   "dprCap": 2,
+   "dpr": 1,
+   "tablet": false,
+   "phone": false,
+   "stepCap": "Infinity",
+   "autoScale": 1,
+   "scale": 1,
+   "auto": true,
+   "res": 64,
+   "field": 64,
+   "gov": "nominal",
+   "drop": 0,
+   "pipesPending": 0,
+   "view": "phase",
+   "style": "cloud",
+   "cls": "frost disconnected window-info-off no-badges no-captions rack-l",
+   "curves": "none"
+  },
+  "platform": {
+   "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+   "platform": "Linux x86_64",
+   "vendor": null,
+   "maxTouchPoints": 0,
+   "touch": false,
+   "hover": "none",
+   "pointer": "none",
+   "anyPointerCoarse": false,
+   "reducedMotion": false,
+   "reducedTransparency": false,
+   "gamutP3": false,
+   "hdr": false,
+   "standalone": false,
+   "dpr": 1,
+   "screen": [
+    1366,
+    768
+   ],
+   "avail": [
+    1366,
+    768
+   ],
+   "viewport": [
+    1600,
+    914
+   ],
+   "visualViewport": {
+    "w": 1600,
+    "h": 914,
+    "scale": 1
+   },
+   "orientation": "landscape-primary",
+   "cores": 12,
+   "memoryGB": null,
+   "phone": false,
+   "tablet": false,
+   "dprCap": 2,
+   "stepCapAtRest": "Infinity",
+   "motion": {
+    "reduced": false,
+    "source": "media",
+    "divisor": 4,
+    "autoplay": "not asked",
+    "rate": 4
+   },
+   "timerResolutionMs": 1,
+   "crossOriginIsolated": false,
+   "canvas": {
+    "css": [
+     1600,
+     914
+    ],
+    "px": [
+     1600,
+     914
+    ]
+   }
+  },
+  "adapter": {
+   "info": {
+    "vendor": "",
+    "architecture": "",
+    "device": "",
+    "description": ""
+   },
+   "limitsRequested": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767,
+    "maxComputeWorkgroupStorageSize": 32768
+   },
+   "format": "bgra8unorm",
+   "fallback": false,
+   "features": [
+    "bgra8unorm-storage",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "dual-source-blending",
+    "float32-filterable",
+    "indirect-first-instance",
+    "rg11b10ufloat-renderable",
+    "shader-f16",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "timestamp-query"
+   ],
+   "featureFlags": {
+    "shaderF16": true,
+    "timestampQuery": true,
+    "textureFormatsTier1": false,
+    "textureFormatsTier2": false
+   },
+   "wgslLanguageFeatures": [
+    "packed_4x8_integer_dot_product",
+    "pointer_composite_access",
+    "readonly_and_readwrite_storage_textures"
+   ],
+   "preferredFormat": "bgra8unorm",
+   "limits": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension3D": 2048,
+    "maxStorageBufferBindingSize": 134217728,
+    "maxBufferSize": 268435456,
+    "maxComputeWorkgroupStorageSize": 32768,
+    "maxComputeInvocationsPerWorkgroup": 256,
+    "maxStorageTexturesPerShaderStage": 4
+   },
+   "gamut": {
+    "canvas": "srgb",
+    "dom": "srgb",
+    "agree": true
+   },
+   "ok": true
+  },
+  "fingerprint": {
+   "ok": true,
+   "adapter": {
+    "vendor": "",
+    "architecture": "",
+    "device": "",
+    "description": "",
+    "subgroupMin": 4,
+    "subgroupMax": 128,
+    "fallback": false
+   },
+   "driver": null,
+   "driverFrom": null,
+   "browser": {
+    "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:157.0) Gecko/20100101 Firefox/157.0",
+    "brands": null,
+    "vendor": null,
+    "platform": "Linux x86_64"
+   },
+   "features": [
+    "bgra8unorm-storage",
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "dual-source-blending",
+    "float32-filterable",
+    "indirect-first-instance",
+    "rg11b10ufloat-renderable",
+    "shader-f16",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "timestamp-query"
+   ],
+   "featuresGranted": [
+    "core-features-and-limits"
+   ],
+   "shaderF16": {
+    "offered": true,
+    "requested": false,
+    "granted": false,
+    "note": "lab/gpu-boot.js requests limits only; shader-f16 is never requested, so no kernel can depend on it"
+   },
+   "limits": {
+    "maxTextureDimension1D": 32767,
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension3D": 16384,
+    "maxTextureArrayLayers": 2048,
+    "maxBindGroups": 8,
+    "maxBindGroupsPlusVertexBuffers": 24,
+    "maxBindingsPerBindGroup": 4294967295,
+    "maxDynamicUniformBuffersPerPipelineLayout": 15,
+    "maxDynamicStorageBuffersPerPipelineLayout": 16,
+    "maxSampledTexturesPerShaderStage": 64,
+    "maxSamplersPerShaderStage": 64,
+    "maxStorageBuffersInVertexStage": 64,
+    "maxStorageBuffersInFragmentStage": 64,
+    "maxStorageBuffersPerShaderStage": 64,
+    "maxStorageTexturesInVertexStage": 64,
+    "maxStorageTexturesInFragmentStage": 64,
+    "maxStorageTexturesPerShaderStage": 64,
+    "maxUniformBuffersPerShaderStage": 64,
+    "maxUniformBufferBindingSize": 65536,
+    "maxStorageBufferBindingSize": 2147483644,
+    "minUniformBufferOffsetAlignment": 64,
+    "minStorageBufferOffsetAlignment": 32,
+    "maxVertexBuffers": 16,
+    "maxBufferSize": 2147483644,
+    "maxVertexAttributes": 32,
+    "maxVertexBufferArrayStride": 2048,
+    "maxInterStageShaderVariables": 31,
+    "maxColorAttachments": 8,
+    "maxColorAttachmentBytesPerSample": 128,
+    "maxComputeWorkgroupStorageSize": 49152,
+    "maxComputeInvocationsPerWorkgroup": 1024,
+    "maxComputeWorkgroupSizeX": 1024,
+    "maxComputeWorkgroupSizeY": 1024,
+    "maxComputeWorkgroupSizeZ": 64,
+    "maxComputeWorkgroupsPerDimension": 65535
+   },
+   "limitsGranted": {
+    "maxTextureDimension1D": 32767,
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension3D": 2048,
+    "maxTextureArrayLayers": 256,
+    "maxBindGroups": 4,
+    "maxBindGroupsPlusVertexBuffers": 24,
+    "maxBindingsPerBindGroup": 1000,
+    "maxDynamicUniformBuffersPerPipelineLayout": 8,
+    "maxDynamicStorageBuffersPerPipelineLayout": 4,
+    "maxSampledTexturesPerShaderStage": 16,
+    "maxSamplersPerShaderStage": 16,
+    "maxStorageBuffersInVertexStage": 8,
+    "maxStorageBuffersInFragmentStage": 8,
+    "maxStorageBuffersPerShaderStage": 8,
+    "maxStorageTexturesInVertexStage": 4,
+    "maxStorageTexturesInFragmentStage": 4,
+    "maxStorageTexturesPerShaderStage": 4,
+    "maxUniformBuffersPerShaderStage": 12,
+    "maxUniformBufferBindingSize": 65536,
+    "maxStorageBufferBindingSize": 134217728,
+    "minUniformBufferOffsetAlignment": 256,
+    "minStorageBufferOffsetAlignment": 256,
+    "maxVertexBuffers": 8,
+    "maxBufferSize": 268435456,
+    "maxVertexAttributes": 16,
+    "maxVertexBufferArrayStride": 2048,
+    "maxInterStageShaderVariables": 16,
+    "maxColorAttachments": 8,
+    "maxColorAttachmentBytesPerSample": 32,
+    "maxComputeWorkgroupStorageSize": 32768,
+    "maxComputeInvocationsPerWorkgroup": 256,
+    "maxComputeWorkgroupSizeX": 256,
+    "maxComputeWorkgroupSizeY": 256,
+    "maxComputeWorkgroupSizeZ": 64,
+    "maxComputeWorkgroupsPerDimension": 65535
+   },
+   "limitsRequested": {
+    "maxTextureDimension2D": 32767,
+    "maxTextureDimension1D": 32767,
+    "maxComputeWorkgroupStorageSize": 32768
+   },
+   "format": "bgra8unorm",
+   "preferredFormat": "bgra8unorm",
+   "digests": {
+    "grid": 64,
+    "states": [
+     {
+      "id": "1s+2pz",
+      "grid": 64,
+      "t": 3.7,
+      "hash": "4d36a9a5",
+      "integral": 0.9980635588720155,
+      "maxRho": 0.06839847564697266,
+      "nan": 0,
+      "half": 16,
+      "res": 64,
+      "repeat": true
+     },
+     {
+      "id": "MOLECULES · H2O · density",
+      "grid": 64,
+      "t": 3.7,
+      "hash": "386430a4",
+      "integral": 9.595736937967278,
+      "maxRho": 15.06106948852539,
+      "nan": 0,
+      "half": 7.4309006215206646,
+      "res": 64,
+      "repeat": true
+     }
+    ],
+    "force": false,
+    "residue": {
+     "restore": "LW.restore(snapshot) ok",
+     "undoRing": {
+      "found": {
+       "cursor": 0,
+       "depth": 0,
+       "redoDepth": 0,
+       "rows": 1
+      },
+      "after": {
+       "cursor": 0,
+       "depth": 0,
+       "redoDepth": 0,
+       "rows": 1
+      },
+      "note": "cleared to one row, the state as found (the ring held one)"
+     },
+     "session": "absent as found — removed again after the autosave landed"
+    }
+   }
+  },
+  "settings": {
+   "card": "refractive",
+   "cardChosen": false,
+   "frost": "always",
+   "frostLive": true,
+   "blur": "22px",
+   "theme": "light",
+   "disconnected": true,
+   "uiHidden": false,
+   "quality": {
+    "res": 64,
+    "steps": 160,
+    "scale": 1,
+    "auto": true,
+    "autoScale": 1
+   },
+   "fieldResolution": 64,
+   "matSteps": 160,
+   "view": "phase",
+   "style": "cloud",
+   "renderPipelines": {
+    "ready": 1,
+    "pending": 0,
+    "failed": 0,
+    "pinned": false
+   },
+   "governor": {
+    "on": true,
+    "state": "nominal"
+   },
+   "perfMode": "120",
+   "modCadence": 60,
+   "modWindowOpen": false,
+   "gasTable": "building",
+   "hamiltonian": "hydrogen",
+   "gasOn": false,
+   "preset": "1s+2pz",
+   "modes": 2,
+   "playing": false,
+   "rate": 4,
+   "frame": true,
+   "frameMode": null,
+   "axis": true,
+   "openWindows": 10,
+   "floating": 0,
+   "palette": "prism"
+  },
+  "pace": {
+   "paced": false,
+   "inFlight": 0,
+   "skipped": 0,
+   "waits": [
+    [
+     365,
+     1
+    ],
+    [
+     124,
+     1
+    ],
+    [
+     15,
+     1
+    ],
+    [
+     172,
+     1
+    ],
+    [
+     47,
+     0
+    ],
+    [
+     100,
+     0
+    ],
+    [
+     100,
+     0
+    ],
+    [
+     104,
+     0
+    ],
+    [
+     96,
+     0
+    ],
+    [
+     100,
+     0
+    ],
+    [
+     101,
+     0
+    ],
+    [
+     100,
+     0
+    ],
+    [
+     100,
+     0
+    ]
+   ]
+  },
+  "dom": {
+   "elements": 5572
+  },
+  "backdrops": {
+   "layers": 33,
+   "elements": 32,
+   "pseudo": 1,
+   "declared": 114,
+   "offscreen": 12,
+   "areaPx": 987132,
+   "areaPct": 67.5,
+   "top": [
+    ".dev×10",
+    ".dev-head×10",
+    "#rackToggle×1",
+    "#rackAdd×1",
+    "#rackFav×1",
+    "#transport×1",
+    "#devb-shadow×1",
+    "#devb-spectrum×1",
+    "#devb-chem×1",
+    "#devb-orbitals×1",
+    "#devb-palette×1",
+    ".mir-chip::before×1"
+   ]
+  },
+  "display": {
+   "rafHz": 58.5,
+   "frames": 42,
+   "medianMs": 17.08,
+   "p95Ms": 49.32,
+   "maxMs": 83.58,
+   "uiHidden": {
+    "rafHz": 58.5,
+    "frames": 61,
+    "medianMs": 17.08,
+    "p95Ms": 17.1,
+    "maxMs": 17.14
+   }
+  },
+  "gpu": {
+   "skipped": "off"
+  },
+  "displayEnd": {
+   "rafHz": 58.5,
+   "frames": 49,
+   "medianMs": 17.1,
+   "p95Ms": 33.2,
+   "maxMs": 33.26,
+   "uiHidden": {
+    "rafHz": 58.5,
+    "frames": 60,
+    "medianMs": 17.08,
+    "p95Ms": 17.12,
+    "maxMs": 17.12
+   }
+  },
+  "held": {
+   "settingsWritesHeld": 2,
+   "otherWritesPassed": {
+    "lambdawaves.q0.session": 3
+   }
+  },
+  "restored": {
+   "serialize": "identical",
+   "camera": "identical",
+   "serializeBytes": 8965,
+   "settingsKey": "identical",
+   "localStorage": "identical",
+   "history": "identical",
+   "card": "identical",
+   "cardRoad": "the data-card attribute only (setCardStyle would have recorded a first choice)",
+   "frost": "identical",
+   "viewStyle": "identical",
+   "autoScaleSwitch": "identical",
+   "bodyClass": "identical",
+   "project": "identical (current null, dirty false)",
+   "traces": "a play advances the SHADOW trail, the dynamics history and particles; none is project state"
+  },
+  "errors": [],
+  "wallMs": 8263
+ }
+}
