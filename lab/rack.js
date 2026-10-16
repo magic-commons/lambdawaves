@@ -539,6 +539,7 @@ export async function boot(dom) {
       });
       if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P && !(app.state.chem && app.state.chem.on)) calculus.update(reg, clock.t); });
       if (may('lattice', wLat)) tick('lattice', () => lattice.update(clock.t));   // 0.7.2 L1: ψ(t) from LATTICE's eigenpairs, N² a frame, only while it can present
+      if (may('bloch', wBlo)) tick('bloch', () => bloch.update(clock.t));   // 0.8.1 T1: one 2 × 2 step a frame (a chirp's few), only while it can present
       if (canPresent(wSh)) ui.hc.set(reg.energy().toFixed(5));
       if (canPresent(wSpec) && sturm.P && ui.sturmRo && sturm.roVersion !== reg.version) paintSturmRo();   // W-STURMIAN: the scale's readout follows the state
       if (canPresent(wSpec) && gas && gas.on && ui.gasRo && (perf.counts.cpu % 6) === 0) gasReadout(clock.t);   // K5w: the maths worker's stats(), painted when it lands
@@ -705,7 +706,7 @@ export async function boot(dom) {
   const { wOrbs } = createMoRegistry();   // 0.5.2 R2d: molecules' second seat
 
   // CALCULUS — the stats, derived live, with their laws and residuals
-  const { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wCen } = createCalcMetersLadder();   // 0.5.2 R2b: readouts' second seat
+  const { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen } = createCalcMetersLadder();   // 0.5.2 R2b: readouts' second seat
 
   /* ── WAVE 52 · W-MODWINDOW: THE MODULATION RACK ────────────────────────────────────────────────
    * The model is lab/mir — vendored, headless, 53 gates green before a single pixel of this existed.
@@ -737,7 +738,7 @@ export async function boot(dom) {
   const { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, WIG_OK, RAD_OK } = createAtomsWignerRadiation();   // 0.5.2 R2b: readouts' third seat
   const skeleton = createSkeleton(document.getElementById('skeleton'));   // 0.7.0 V2: its switch is MOLECULES' (ui.skeletonSw, a PREFERENCE)
   Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wVor, kepler: wOrb,
-    slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc, skeleton: wChem, lattice: wLat, central: wCen });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
+    slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc, skeleton: wChem, lattice: wLat, bloch: wBlo, central: wCen });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
   for (const w of [...Object.values(READERS), wVor, wMet, wLad]) windowActivity.track(w);
   /** the guard the two hydrogenic readers share: hydrogen at Z = 1, no Sturmian scale, no other model holding the
       field.  Both windows integrate the SHIPPED closed-form radials, so anything else would be two operators in one

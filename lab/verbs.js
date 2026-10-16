@@ -5,7 +5,7 @@
 import { PRESET_BY_ID } from './state.js'; import { MOLECULE_BY_ID } from './molecules.js'; import { VIEW, VIEW_NAMES } from './field.js'; import { BASIS } from './hydrogen.js';
 import { orbitalName } from './names.js'; import { mdText, stateLatex, stemOf, BASIS_LABEL } from './latex-state.js'; import { statusOf } from './status.js';
 import { aliasOf, FLASH_HZ } from './flash-law.js'; import { EQ_PRESETS } from './equalizer.js'; import { getHamiltonian } from './hamiltonian.js'; import { isField } from './mir/core/pointer.js';
-import { LAT } from './lattice.js'; import { PRESETS as LATTICES } from './lattice-model.js';
+import { LAT } from './lattice.js'; import { BL } from './bloch.js'; import { PRESETS as LATTICES } from './lattice-model.js';
 /** an orbital by number (1…nAO) or by any of its names (HOMO, LUMO−1, 1b1) → its number; 0 for none (0.5.1 D8, from the notebook's link runner) */
 const orbitalOf = (s, w) => { if (!s) return 0; if (/^\d+$/.test(w)) return +w >= 1 && +w <= s.nAO ? +w : 0;
   for (let k = 0; k < s.nAO; k++) if (orbitalName(s.names, k, s.nocc).replace(/ \(\w\)/, '').split(' · ').some((x) => x.toLowerCase() === w.toLowerCase().replace('-', '−'))) return k + 1;
@@ -48,6 +48,8 @@ export const VERBS = [
       app.ui.rateKnob.set(v); if (!modHand('transport.rate', v)) app.clock.setRate(v); } },
   { id: 'lattice', args: { preset: '?enum ' + LATTICES.map((p) => p.id).join('|'), N: '?number', play: '?bool' }, doc: 'open LATTICE, a tight-binding lattice in its own window (J = 1 the energy unit): a preset (aa = Aubry–André, ab = the Aharonov–Bohm ring), N sites on a chain or ring (3…256), play runs the one clock',
     run(app, a) { app.sh.layout.reopen('lattice'); LAT.set({ ...(a.preset && { preset: a.preset }), ...(a.N !== undefined && { N: Math.min(256, Math.max(3, Math.round(a.N))) }) }); if (a.play !== undefined) { if (a.play) app.sh.LW.play(); else app.sh.LW.pause(); } return { fade: 'LATTICE · ' + LAT.label }; } },
+  { id: 'bloch', args: { preset: '?enum flop|larmor|rabi|lz', play: '?bool' }, doc: 'open BLOCH, one qubit on the Bloch sphere (ħ = 1, ω₀ = 1): a preset run from its start (flop = a π-pulse, larmor, rabi, lz = a Landau–Zener chirp), play runs the one clock',
+    run(app, a) { app.sh.layout.reopen('bloch'); BL.set(BL.pick(a.preset || BL.params.preset)); if (a.play !== undefined) { if (a.play) app.sh.LW.play(); else app.sh.LW.pause(); } return { fade: 'BLOCH · ' + BL.label }; } },
   { id: 'play', args: { on: 'bool' }, doc: 'play (true) or pause (false) the one clock', run(app, a) { if (a.on) app.sh.LW.play(); else app.sh.LW.pause(); } },
   { id: 'scrub', args: { t: 'number' }, doc: 'move the clock to time t (atomic units)', run(app, a) { app.sh.LW.scrub(a.t); } },
   { id: 'switch', args: { id: 'enum locate|particles|formula|labels|equalizer', on: 'bool|string' },
@@ -110,7 +112,7 @@ export function createVerbs(app) {
         populations: Object.fromEntries(P0.map((a) => [lbl(a), +(reg.re0[a] ** 2 + reg.im0[a] ** 2).toFixed(4)])) },
       repeats: ro(ui.periodRo), rate: clock.rate, t: +clock.t.toFixed(3), playing: !!clock.playing,
       camera: Object.fromEntries(['yaw', 'pitch', 'zoom', 'fov', 'autoRotate'].map((k) => { const v = P.get(k); return [k, typeof v === 'number' ? +v.toFixed(3) : v]; })),
-      windows: app.sh.rk.windows().filter((w) => w.open).map((w) => w.id), view: cs ? cs.view : VIEW_NAMES[mat.view], ...(LAT && app.sh.rk.windows().some((w) => w.id === 'lattice' && w.open) ? { lattice: [LAT.label, ...LAT.ro.map(ro)].join(' · ') } : {}), notebook: app.sh.layout.notebook.text.slice(-600) };
+      windows: app.sh.rk.windows().filter((w) => w.open).map((w) => w.id), view: cs ? cs.view : VIEW_NAMES[mat.view], ...(LAT && app.sh.rk.windows().some((w) => w.id === 'lattice' && w.open) ? { lattice: [LAT.label, ...LAT.ro.map(ro)].join(' · ') } : {}), ...(BL && app.sh.rk.windows().some((w) => w.id === 'bloch' && w.open) ? { bloch: [BL.label, ...BL.ro.map(ro)].join(' · ') } : {}), notebook: app.sh.layout.notebook.text.slice(-600) };
   }
   return { run, inventory, table: VERBS };
 }

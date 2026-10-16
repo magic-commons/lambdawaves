@@ -21,6 +21,13 @@ import { el, readout, sw, nRGB, themeInk, graphHover, fitText } from './mir/kit.
    saturates its ceiling (n−1)² to 1e-9 (frontier.js shellCharacter). */
 const characterLabel = (s) => s.coherent ? 'spin coherent · Kepler shadow' : s.separable ? 'rank one · not coherent' : 'entangled rotors';
 
+/* ORBIT's sphere painter, exported for BLOCH (0.8.1 T1): the camera's projection, the frame (a thin circle and the ẑ tick) and one arm with its tip */
+export function project(v, B) { return [v[0] * B.right[0] + v[1] * B.right[1] + v[2] * B.right[2], v[0] * B.up[0] + v[1] * B.up[1] + v[2] * B.up[2], v[0] * B.fwd[0] + v[1] * B.fwd[1] + v[2] * B.fwd[2]]; }
+export function sphereFrame(g, T, B, x, y, R) { g.strokeStyle = T.ink(0.30); g.lineWidth = 1; g.beginPath(); g.arc(x, y, R, 0, 2 * Math.PI); g.stroke();
+  const zt = project([0, 0, 1], B); g.strokeStyle = T.ink(0.45); g.beginPath(); g.moveTo(x, y); g.lineTo(x + zt[0] * R, y - zt[1] * R); g.stroke();
+  g.fillStyle = T.ink(0.75); g.textAlign = 'center'; g.fillText('ẑ', x + zt[0] * R * 1.12, y - zt[1] * R * 1.12); }
+export function arm(g, x0, y0, R, p, stroke, fill) { const x = x0 + p[0] * R, y = y0 - p[1] * R; g.strokeStyle = stroke; g.lineWidth = 2; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x, y); g.stroke();
+  g.fillStyle = fill; g.beginPath(); g.arc(x, y, p[2] > 0 ? 3.5 : 2.5, 0, 2 * Math.PI); g.fill(); return [x, y]; }
 export function createOrbit(host, api) {
   const cv = el('canvas', 'orbit-c', host);
   const bar = el('div', 'row tight', host);
@@ -75,7 +82,6 @@ export function createOrbit(host, api) {
       const lk = readout({ label: '|⟨L⟩| · |⟨K⟩| · e', cls: 'wide', value: `${s.absL.toFixed(3)} · ${s.absK.toFixed(3)} · ${s.e.toFixed(3)}`, sub: `⟨z⟩ = ${s.z.toFixed(3)} a₀ · |⟨L⟩|²+|⟨K⟩|² = ${s.casimir.toFixed(4)} of ${s.casimirMax} (coherent ⟺ equal)` }); row.appendChild(lk.root);
     }
   }
-  function project(v, B) { return [v[0] * B.right[0] + v[1] * B.right[1] + v[2] * B.right[2], v[0] * B.up[0] + v[1] * B.up[1] + v[2] * B.up[2], v[0] * B.fwd[0] + v[1] * B.fwd[1] + v[2] * B.fwd[2]]; }
   function paint(obs) {
     const dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
@@ -89,12 +95,7 @@ export function createOrbit(host, api) {
     centres = cx; radius = R; midY = cy;
     /* the frame: a thin low-alpha circle, the ẑ tick, and ONE short name per panel — measured and clamped into
        its own third, never over the next sphere (KEPLER's parenthetical is on the panel's hover now) */
-    const sphere = (k, label) => {
-      g.strokeStyle = T.ink(0.30); g.lineWidth = 1; g.beginPath(); g.arc(cx[k], cy, R, 0, 2 * Math.PI); g.stroke();
-      const zt = project([0, 0, 1], B); g.strokeStyle = T.ink(0.45); g.beginPath(); g.moveTo(cx[k], cy); g.lineTo(cx[k] + zt[0] * R, cy - zt[1] * R); g.stroke();
-      g.fillStyle = T.ink(0.75); g.textAlign = 'center'; g.fillText('ẑ', cx[k] + zt[0] * R * 1.12, cy - zt[1] * R * 1.12);
-      fitText(g, label, cx[k], cy + R + 10, { x0: k * W / 3 + 2, y0: 0, x1: (k + 1) * W / 3 - 2, y1: H }, 'center');
-    };
+    const sphere = (k, label) => { sphereFrame(g, T, B, cx[k], cy, R); fitText(g, label, cx[k], cy + R + 10, { x0: k * W / 3 + 2, y0: 0, x1: (k + 1) * W / 3 - 2, y1: H }, 'center'); };
     sphere(0, '⟨J₊⟩ / j'); sphere(1, '⟨J₋⟩ / j'); sphere(2, 'KEPLER');
     hovers.push({ kind: 'dot', key: 'kep', x: cx[2], y: cy + R + 10, r: 7, colour: T.ink(1), info: 'KEPLER — L̂ the orbit normal, K̂ the major axis; the panel drags both rotors together (an ordinary rotation)' });
     for (const s of shells) {
@@ -102,9 +103,7 @@ export function createOrbit(host, api) {
       const col = nRGB(s.n), rgba = (a) => `rgba(${col[0]},${col[1]},${col[2]},${a})`;
       const tail = `e = ${s.e.toFixed(3)}  ·  ${characterLabel(s)}`;
       for (const [k, v] of [[0, s.Jp], [1, s.Jm]]) {
-        const p = project([v[0] / s.j, v[1] / s.j, v[2] / s.j], B), x = cx[k] + p[0] * R, y = cy - p[1] * R;
-        g.strokeStyle = rgba(0.9); g.lineWidth = 2; g.beginPath(); g.moveTo(cx[k], cy); g.lineTo(x, y); g.stroke();
-        g.fillStyle = rgba(1); g.beginPath(); g.arc(x, y, p[2] > 0 ? 3.5 : 2.5, 0, 2 * Math.PI); g.fill();
+        const [x, y] = arm(g, cx[k], cy, R, project([v[0] / s.j, v[1] / s.j, v[2] / s.j], B), rgba(0.9), rgba(1));
         hovers.push({ kind: 'line', key: `n${s.n}J${k}`, points: [cx[k], cy, x, y], lw: 2, colour: rgba(1),
           info: `n${s.n}  ⟨J${k ? '₋' : '₊'}⟩ / j  ·  ${tail}` });
       }

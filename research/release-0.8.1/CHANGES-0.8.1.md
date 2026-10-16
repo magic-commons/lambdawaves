@@ -11,8 +11,29 @@ S_A = ln 2 exactly for a Bell state, 0 for a product; the CHSH value as the pred
 rescaling as Z does; μ = 1 byte-identical. Three lattice presets: HOFSTADTER at one flux, the Hadamard QUANTUM WALK, the XX SPIN CHAIN by exact diagonalisation
 with Jordan–Wigner as the oracle.
 
-## T1 · BLOCH: SPIN-½ · RABI · LANDAU–ZENER
-(filled at T1's merge)
+## T1 · BLOCH: SPIN-½ · RABI · LANDAU–ZENER (`lab/bloch-model.js` 31 lines new, `lab/bloch.js` 49 lines new; `lab/orbit.js` exports `project`, `sphereFrame`, `arm`; `lab/windows/readouts.js` the device beside LATTICE; `lab/rack.js` READERS + the governed tick; `lab/shell/persist.js` `instruments.bloch`; `lab/shell/settings.js` KIND; `lab/verbs.js` the `bloch` verb; `docs/STATE-SCOPES.md` one row; branch `t1-bloch` tip `18a0f91`; +84 of ≤ +85)
+- **The first non-spatial system.** One qubit `[Re a, Im a, Re b, Im b]` under H(t) = (ω₀/2)σ_z + (Ω/2)(cos φ σ_x + sin φ σ_y), φ = (ω₀ + δ)t + βt²/2. **The step
+  is the exact 2 × 2 exponential cos|n| − i sin|n| n̂·σ taken in the frame that turns with the drive** — for a circular drive that frame is exact (no rotating-wave
+  approximation) and there H′ = −(δ + βt)/2 σ_z + (Ω/2)σ_x; the brief's lab-frame step is wrong at O(dt²) because H(t) does not commute with itself at different
+  times and fails the Rabi 1e-10 gate (a correction). At β = 0 one step covers any t exactly; under a chirp, fourth-order Magnus steps of dt = 0.05 with the one extra
+  term n_y = −βΩdt³/24. `halve` is the dt-halving re-solve; an independent closed form rotates the Bloch vector by Rodrigues' formula with no spinor.
+- **The window BLOCH**, of the LADDER's kind beside LATTICE, closed by default, in + and WINDOW: presets FLOP (the π-pulse, τ = π/Ω) · LARMOR · RABI · LANDAU–ZENER
+  (a tap on the lit preset, or opening the window, runs it from the start); knobs ω₀ Ω δ β θ₀ φ₀; the picture on ORBIT's painter — the vector, its trail, the faint
+  effective-field axis (ORBIT unchanged on screen: the same 23 draw calls in a recording context); readouts P↓ measured · closed form, the LZ prediction beside
+  the measured flip, the step distance with "step too coarse" above 1e-6. Units: ħ = 1, the default ω₀ = 1 sets the unit, t is the transport clock's (the brief's
+  "t in 1/ω₀" cannot hold while ω₀ is a knob). **Persists:** `instruments.bloch` PROJECT, absent at the defaults; only the knobs save (a load runs the preset from
+  its start). The `bloch` verb with its inventory line.
+- **Landau–Zener, corrected:** the asymptote P = 1 − e^{−πΩ²/(2β)} assumes a sweep from −∞ to +∞; a finite sweep ±D leaves wiggles of order Ω/D that shrink only as
+  1/D. At β = 0.05, Ω = 0.3 (asymptote 0.940835): D = 4.5 → 0.927082 · D = 10 → 0.931506 · D = 40 → 0.943436; the step distance ≈ 1e-9 and a dt/10 reference agrees,
+  so the gap is the sweep's, not the step's. The gate is |P − P_LZ| < Ω/D at D = 10 and 40, step distance < 1e-6, the dt/10 error under twice the step distance;
+  the window says the finite-sweep sentence.
+- **Checked:** `tests/bloch.test.mjs` 7/7; node 0 (frontier 54, kepler 9 green); rack-deps holds (SPECTRUM 25 untouched, `app` 30, `w` 71); new-project in step;
+  serialize-bytes 11/11 edit hashes identical, full +80 B (the one layout row); keyboard-window GREEN; one 2 × 2 step 0.17 µs, the LZ re-solve 1.7 ms; screenshot
+  `.tmp/bloch-flop.png` (FLOP mid-pulse, P↓ 0.489483 measured = closed form, |Δr| 2.3e-16). **Dropped for budget:** a lab/rotating frame switch, a pulse-length
+  knob, saving the qubit's state.
+- **Seams T2 extends:** the MODE seg's seat `bloch.js:13` (prepend ONE · PAIR); the model's flat `P = { preset, w0, O, d, b, th, ph }` and `vec(P, s, t)`; `save()`
+  writes only non-default keys; the painter's call `sphereFrame(g, T, B, x, y, R)` then `arm(…)` — two spheres are two `sphereFrame` calls at W/4 and 3W/4 in
+  `paint` (`bloch.js:35`), and `arm` draws a reduced vector short.
 
 ## T3 · THE LATTICE PRESETS: HOFSTADTER · QUANTUM WALK · SPIN CHAIN (`lab/lattice-model.js` three PRESETS rows with their build branches and closed lines, `lab/lattice.js` the knobs p · q · N and the notes; branch `t3-presets` tip `7190aab`; +36)
 - **HOFSTADTER:** an L × L square (L ≤ 12; the pick sets L = 12) under flux Φ = p/q (two knobs), the Peierls phase e^{2πiΦx} on the y-bonds in the Landau gauge. The
