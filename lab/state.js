@@ -19,7 +19,7 @@
  */
 import { BASIS, BASIS_INDEX, energy, stateOf } from './hydrogen.js';
 import { applyRotateK, applyDefectWait, applyRotor, kzElement, symEig } from './frontier.js';
-import { applyKick, applyKickAlong } from './kick.js';
+import { applyKick, applyKickAlong, applySqueeze } from './kick.js';
 
 /* ── static external fields ────────────────────────────────────────────────
  * ZEEMAN  H = H₀ + (B/2)L_z  is still DIAGONAL: E_a → E_a + B·m_a/2.  Exact, no approximation, no caveat
@@ -314,6 +314,8 @@ export class Register {
   kick(k, axis = 'z', t = 0) { this._op((re, im) => applyKick(re, im, k, axis), t, false); }
   /** the same slap along any unit direction (the BOW) */
   kickAlong(k, d, t = 0) { this._op((re, im) => applyKickAlong(re, im, k, d), t, false); }
+  /** SQUEEZE (0.8.0 G2): S(r) along an axis, the OSCILLATOR's alone (kick.js applySqueeze); like the slap it does not commute with H and loses norm */
+  squeeze(r, axis = 'z', t = 0) { this._op((re, im) => applySqueeze(re, im, r, axis), t, false); }
   /** the DRAG toy: γ ≥ 0; NON-UNITARY, not physics — excited amplitudes decay as e^{−γ(E_a−E_0)t}, forward in time only, under no electric field */
   setDamping(g) { this.damping = Math.max(0, g || 0); this.version++; }
   /**

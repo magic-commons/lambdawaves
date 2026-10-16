@@ -5,6 +5,7 @@ import { TIER } from '../rack.js';
 import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js';
 import { PRESETS } from '../state.js';
 import { momentumZ, AXIS_TO_Z } from '../kick.js';
+import { applyKickAlong, escaped, SQUEEZE, SQUEEZE_REFUSAL } from '../kick.js'; import { varianceZ } from '../calculus.js'; import { onHamiltonian } from '../hamiltonian.js';   // 0.8.0 G2 · SQUEEZE + CAT
 import { applyRotor as rotorOnCopy } from '../frontier.js';
 import { getHamiltonian } from '../hamiltonian.js';
 export function createStateCard(app) {
@@ -138,13 +139,22 @@ export function createStateCard(app) {
     rk.appendChild(ui.dragKnob.root);
     ui.kickRo = readout({ label: 'LAST IMPULSE · escaped / momentum', value: '—', cls: 'two', sub: 'no impulse yet' });
     rk.appendChild(ui.kickRo.root);
-    el('div', 'note', gK).innerHTML = '<b>Impulse.</b> RELEASE applies e<sup>ik·x</sup> and keeps only the part represented by n ≤ 6; ESCAPED reports the omitted norm. Ctrl-drag on the field sets direction and strength. DRAG γ damps excited amplitudes as a display model and discards the lost norm.';
-    function pAlong(axis) {
+    const rq = el('div', 'row tight', gK);   // 0.8.0 G2 · SQUEEZE + CAT, the OSCILLATOR's: r rides in mat.bow.squeeze (PROJECT, absent until moved)
+    const sqK = knob({ label: 'SQUEEZE r', min: 0, max: 0.33, value: mat.bow.squeeze || 0, fmt: (v) => (+v || 0).toFixed(3), title: 'S(r) = e^{r(a² − a†²)/2} · capped at 0.33, where Var is still within 2e-3 of e^{−2r}·Var₀: past it the n ≤ 6 register keeps the norm and loses the variance (r = 0.5: 0.05 % lost, 2.1 % wrong)', onInput: (v) => { mat.bow.squeeze = v || undefined; } });
+    const osc = [['SQUEEZE-IN', 'S(r) along the IMPULSE axis', () => squeezeIn(sqK.get(), kickAxis)], ['CAT', 'two slaps ±k of |0⟩ into A and B; the register is their normalised sum |α⟩ + |−α⟩', () => cat(kickK, kickAxis)]].map(([label, t, onFire]) => trig({ label, title: t + ' · ' + SQUEEZE_REFUSAL, onFire }).root);
+    ui.bowKnobs.squeeze = { set: (x) => sqK.set(+x || 0) }; for (const e of [sqK.root, ...osc]) rq.appendChild(e);
+    const oscSync = () => { const off = getHamiltonian().id !== 'qho'; sqK.setDisabled(off); for (const b of osc) b.disabled = off; }; oscSync(); onHamiltonian(oscSync);
+    function squeezeIn(r, axis) { if (!reg.populated().length) reg.set(0, 1, 0, clock.t); const n0 = reg.norm2(), v0 = pAlong(axis, varianceZ); reg.squeeze(r, axis, clock.t); const v1 = pAlong(axis, varianceZ), want = Math.exp(-2 * r) * v0;
+      SQUEEZE.said = `Var(${axis}) ${v1.toFixed(4)} · e^{−2r}·Var₀ = ${want.toFixed(4)} · error ${Math.abs(v1 / want - 1).toExponential(1)} · lost norm ${escaped(n0, reg.norm2()).toExponential(1)}`; ui.kickRo.setSub(SQUEEZE.said); touchState(); }
+    function cat(k, axis) { const [A, B] = [1, -1].map((q) => { const s = { re: new Float64Array(91), im: new Float64Array(91) }; s.re[0] = 1; applyKickAlong(s.re, s.im, k, [...'xyz'].map((c) => c === axis ? q : 0)); return s; });   // ±d, k > 0: the boost's Bessel tables take k ≥ 0
+      app.hooks.ab.setStores(A, B); reg.anchorFrom(A.re.map((v, i) => v + B.re[i]), A.im.map((v, i) => v + B.im[i]), clock.t); reg.normalize(); touchState(); }
+    el('div', 'note', gK).innerHTML = '<b>Impulse.</b> RELEASE applies e<sup>ik·x</sup> and keeps only the part represented by n ≤ 6; ESCAPED reports the omitted norm. Ctrl-drag on the field sets direction and strength. DRAG γ damps excited amplitudes as a display model and discards the lost norm. On the OSCILLATOR, SQUEEZE-IN applies S(r) along the axis and METERS prints Var against e<sup>−2r</sup>·Var₀ beside the lost norm; CAT stores the ±k slaps of the ground state as A and B and sets their normalised sum.';
+    function pAlong(axis, f = momentumZ) {
       const c = reg.at(clock.t);                                  // sum over the WHOLE register: a rotation moves amplitude between m
-      if (axis === 'z') return momentumZ(c.re, c.im);
+      if (axis === 'z') return f(c.re, c.im);
       const R = AXIS_TO_Z[axis], re = Float64Array.from(c.re), im = Float64Array.from(c.im);
       rotorOnCopy(re, im, { which: 'both', axis: R.axis, angle: R.angle });
-      return momentumZ(re, im);
+      return f(re, im);
     }
     function slap(k, axis) {
       const n0 = reg.norm2(), p0 = pAlong(axis);
