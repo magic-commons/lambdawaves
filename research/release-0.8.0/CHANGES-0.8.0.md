@@ -11,8 +11,30 @@ spectrum", honestly: the register has no continuum). THE SQUEEZE beside the slap
 74 % variance error), the variance error printed beside the lost norm; a CAT = the A/B store + a sum. INTER-SHELL STARK through the propagator hook: H = diag(E) + F·z
 over the 91 labels, eigensolved once per F; ionisation SAID, never simulated (the saddle F_c = 1/(16n⁴) printed; the basis's share of α = 4.5 measured and shown).
 
-## G1 · THE CENTRAL HAMILTONIAN + FIVE
-(filled at G1's merge)
+## G1 · THE CENTRAL HAMILTONIAN + FIVE (`lab/central.js` 75 lines new; `lab/cornell.js` `tabRow` extracted; `lab/hamiltonian.js` +1, `lab/mathworker.js` the op, `lab/windows/readouts.js` the card, `lab/windows/spectrum.js` the picker items, `lab/spectrum.js` `energyText`, `lab/shell/persist.js` the record, `lab/rack.js` `energyOf`; branch `g1-central` tip `6b2c6ad`)
+- **The operator CENTRAL:** a preset V(r) with knobs — CONFINED (R_c, the hydrogen atom in a hard sphere) · YUKAWA (λ) · FINITE WELL (V₀, a) · SOFT-CORE (a) ·
+  QUARKONIUM (the existing `cornell` entry, back with its editor: CHARM | BOTTOM) — solved by `cornell.js`' Numerov (`tabRow`, extracted; QUARKONIUM
+  byte-identical, kernel hash `ff9e1d16…`) for the 21 (n_r, l) rows the n ≤ 6 labels name, not 36. A row is bound only if E < 0 (CONFINED: a level at E ≥ 0 is
+  held by the wall alone). **An UNBOUND label** has energy NaN, a zero table row and zero range, so it draws nothing, its lane reads "unbound here"
+  (`spectrum.js` `energyText`), its amplitude holds still (`rack.js` `energyOf` NaN → 0), and the card counts it: "n bound of 91 · <the 1s against its oracle> ·
+  k populated unbound here". At the defaults — bound rows / bound labels of 91 / solve: CONFINED R_c 25 11 / 39 / 90–126 ms · YUKAWA λ 25 12 / 34 / ≈ 250 ms ·
+  FINITE WELL V₀ 5, a 4 17 / 81 / ≈ 110 ms · SOFT-CORE a 0.5 21 / 91 / ≈ 160 ms. The generic presets solve in the worker (`central.solve`; the latest ask
+  wins); QUARKONIUM still solves on the frame thread through cornell.js.
+- **The card** CENTRAL after LATTICE, ships closed: the POTENTIAL stepper, the preset's knobs, the readout, a units note; it re-reads its record when opened. The
+  picker (SPECTRUM's ‹ SYSTEM ›) lists CENTRAL and "CENTRAL › QUARKONIUM" (0.7.4's "its editor returns in 0.8.0" kept), both switching the operator and
+  opening the card. The MODEL footer: "EIGENVALUE · <preset> · Numerov · n bound of 91 · a level at E ≥ 0 is no state here (no continuum)". **Persists:**
+  `instruments.central` `{ preset, params }` PROJECT, absent at the defaults (STATE-SCOPES one row), configured before the operator switches on restore;
+  `instruments.qcd` unchanged. The catalogue gains a `central` row (182 rows).
+- **Checked (`tests/central.test.mjs`, 8 laws):** the confined 1s against the zero of M(1 − 1/κ, 2, 2κR_c): 3.5e-11 · 1.1e-10 · 7.9e-10 at R_c 2 · 4 · 8 (the
+  critical radius by Numerov 1.8352463302566 against j²₁,₁/8 = 1.835246330265); YUKAWA 1s at N vs 2N ≤ 1.0e-5 (λ = 1e6 → −0.4999872; bound at λ 0.86, unbound
+  at 0.82); the finite well's s levels against k cos ka + κ sin ka = 0 to 2.3e-5 (its grid places a mid-cell at r = a — O(h²)); SOFT-CORE a 0.5 at 2N 5.2e-9,
+  E₁ₛ + ½ → 0 as a → 0 (2.6e-2 · 7.1e-4 · 1.2e-5 at a = 0.1 · 0.01 · 0.001). cornell 10/10 · hydrogen 37/37 · rack-deps holds (SPECTRUM 25, readouts 7) ·
+  serialize-bytes 11 edit hashes identical · keyboard-window green · screenshot `.tmp/g1-confined-rc3.png` (R_c = 3: the 1s lane −0.4240 Eh, the 2s "unbound here").
+- **Corrections to the brief:** λ_c(1s) = 0.839908 a₀ (δ_c = 1.190612 a₀⁻¹; the plan's "1/0.839908" was inverted); the ≤ 1e-10 fine-grid gate sits on the
+  solver's rounding floor, the test gates 1e-9; 21 rows, not 36. **Dropped:** the 15 rows outside n ≤ 6, `system`/`configure` on the CENTRAL entry, a live
+  readout tick (the unbound count updates per solve and on open).
+- **Found, not fixed (a standing bug):** `kick.js`' radial cache is keyed by the Hamiltonian's id — after CENTRAL re-solves with new knobs a slap uses the old
+  radials (ATOM's element change has the same problem).
 
 ## G3 · INTER-SHELL STARK (`lab/stark.js` 35 lines new; `lab/state.js` +4 and five in-line edits; `lab/windows/state.js` the STATIC FIELD row; one-line guards in `shell/controller.js`, `spectrum.js`, `status.js`, `informational.js`, `windows/film.js`, `verbs.js`, `badges.js`, `index.html`; branch `g3-stark` tip `05788c0`)
 - `starkPropagator(F, E)`: H = diag(E) + F·z over the 91 labels, eigensolved once per F (3.0–4.5 ms), the object `setPropagator` takes (S = I); `saddle(n) = 1/(16n⁴)`;

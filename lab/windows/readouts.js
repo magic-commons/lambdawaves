@@ -6,10 +6,10 @@ import { toLUT } from '../mir/palette.js';
 import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { createShadowView, createShadowFoot } from '../shadowview.js'; import { createOrbit } from '../orbit.js'; import { createKepler } from '../keplerview.js';
 import { createVortex } from '../vortex.js'; import { createParticles } from '../particles.js'; import { createSliceView } from '../sliceview.js';
-import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { solveLattice } from '../lattice-model.js'; import { solveLadder } from '../ladder-model.js';
+import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { solveLattice } from '../lattice-model.js'; import { createCentral, solveCentral } from '../central.js'; import { solveLadder } from '../ladder-model.js';
 import { createAtoms } from '../atomsview.js'; import { createWigner } from '../wignerview.js'; import { createRadiation } from '../radiationview.js';
 export function createReadouts(app) {
-  const { dom, ui, device, reg, clock, useCompactDefaults } = app, { schedule, canPresent } = app.loop, { rack } = app.host, { setElement, fillValence } = app.w,
+  const { dom, ui, device, reg, clock, useCompactDefaults } = app, { schedule, canPresent } = app.loop, { rack } = app.host, { setElement, fillValence, switchHamiltonian } = app.w,
     { domain, cardLoading, solveCard, touchState, api } = app.ctl;
   const wSh = device({ id: 'shadow', eyebrow: 'SHADOW', status: '' });
   rack.appendChild(wSh.root);
@@ -131,7 +131,9 @@ export function createReadouts(app) {
   const wLat = device({ id: 'lattice', eyebrow: 'LATTICE', status: '' }); wLat.root.classList.add('closed'); rack.appendChild(wLat.root);   // 0.7.2 L1: a tight-binding lattice, its own register (lab/lattice.js); ships closed
   const lattice = createLattice(wLat.body, { active: () => canPresent(wLat), t: () => clock.t, palette: () => app.state.palette, solve: (H) => solveCard({ op: 'lattice.solve', ...H }, () => solveLattice(H)) });
   wLat.root.addEventListener('devopen', () => lattice.prepare());
-  return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice }; }
+  const wCen = device({ id: 'central', eyebrow: 'CENTRAL', status: '' }); wCen.root.classList.add('closed'); rack.appendChild(wCen.root);   // 0.8.0 G1: the generic central H's editor (lab/central.js); ships closed
+  const central = createCentral(wCen.body, { solve: (w) => solveCard({ op: 'central.solve', ...w }, () => solveCentral(w.preset, w.params)), apply: (id) => { switchHamiltonian(id); ui.hamSeg.set(id); }, current: () => getHamiltonian().id, populated: () => reg.populated() }); wCen.root.addEventListener('devopen', () => central.prepare());
+  return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wCen }; }
   function createAtomsWignerRadiation() {   // the third seat: ATOMS · WIGNER · RADIATION
   const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack
