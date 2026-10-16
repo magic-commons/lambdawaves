@@ -207,7 +207,7 @@ export function basisFrom(atoms, record, { cart = true } = {}) {
 
 /* ── one- and two-electron integrals ──────────────────────────────────────────────────────────────────────────── */
 /** S, T, V and the three dipole matrices M^(q)_ab = ⟨χ_a| q |χ_b⟩ (position, not −position) */
-function oneElectron(basis, atoms) {
+export function oneElectron(basis, atoms) {
   const { shells, n } = basis;
   const S = new Float64Array(n * n), T = new Float64Array(n * n), V = new Float64Array(n * n);
   const M = [new Float64Array(n * n), new Float64Array(n * n), new Float64Array(n * n)];

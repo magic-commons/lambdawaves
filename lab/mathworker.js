@@ -45,13 +45,13 @@ import { canonicaliseSpectrum, dipoleFamily, coordinateFamily } from './canon-ga
 import { sin2Pulse } from './modrive.js';
 import { eigSym } from './h2ci.js';
 import { fieldShells } from './molecular-field.js';
-import { createRTHF } from './density.js';
+import { createRTHF, fieldOf } from './density.js';
 import { spectrum, peaks } from './absorb.js';
 import { fitPoles } from './response-fit.js';
 import { createGas } from './gas.js';
 import { buildFile } from './export3d.js';
 import { namesOf } from './names.js';
-import { basisFrom, rinvMatrix, ELEMENT } from './md.js';
+import { basisFrom, rinvMatrix, ELEMENT, oneElectron } from './md.js';
 import { flowBalance } from './flow-balance.js'; import { createFlow } from './molecular-flow.js';
 import { validateRecord, decodeRecord } from './library.js';
 import { BASIS, radial } from './hydrogen.js';
@@ -83,8 +83,8 @@ function run(m) {
    frame thread when the worker fails; the message handler is installed ONLY inside a real worker, so importing
    this file on the main thread (or in node, where `self` does not exist) takes nothing over. */
 const IN_WORKER = typeof WorkerGlobalScope === 'function' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
-const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.drive.coupling', 'h.drive.init', 'h.drive.run', 'h.drive.set', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum', 'chem.rt.fit']);
-const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.rt.init']);
+const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.drive.coupling', 'h.drive.init', 'h.drive.run', 'h.drive.set', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum', 'chem.rt.fit', 'chem.vib.frames']);
+const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.rt.init', 'chem.vib.frames']);
 /** the vendored BSE record, fetched ONCE per basis inside the worker; the ops themselves stay synchronous */
 async function chemReady(m) {
   const basis = m.basis || 'sto-3g';
@@ -151,6 +151,7 @@ function work(m) {
     else if (m.op === 'chem.rt.reset') { out = chemRtReset(); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.spectrum') { out = chemRtSpectrum(m); transfer = chemTransfer(out); }
     else if (m.op === 'chem.rt.fit') { out = chemRtFit(m); }
+    else if (m.op === 'chem.vib.frames') { out = chemVibFrames(m); transfer = chemTransfer(out); }   // 0.7.0 V1 THE MODES: K phase samples of one normal mode
     else if (m.op === 'chem.esp') { out = chemEsp(m); transfer = [out.phi.buffer]; }   // THE POTENTIAL's volume (0.6.5 X1), on the cards queue
     else if (m.op === 'flow.balance') { out = flowBalance(m); transfer = out.gx ? [out.gx.buffer, out.gy.buffer, out.gz.buffer] : []; }   // BALANCED FLOW's repair (flow-balance.js), on the cards queue
     else out = { error: 'unknown op ' + m.op };
@@ -559,6 +560,27 @@ export function chemEsp({ N = 64, half, shells, D, atoms }) {
   }
   return { N, half, phi, min, max, charge, atNuclei: atoms, ms: performance.now() - t0 };
 }
+/** chem.vib.frames (0.7.0 V1 THE MODES) { vib, k, amp, K = 32 } — K phase samples of one normal mode of the solve this worker holds (vib: library.js
+    decodeVibrate): Q_j = amp·q0ₖ·cos 2πj/K, the nuclei at R₀ + Q·Lₖ, D(Q) = ONE McWEENY STEP on D₀ + Q·D₁ₖ against the exact S(Q) — D is the RHF density
+    with Tr(DS) = N, so D/2 is the idempotent one and the step is 3/2·DSD − 1/2·DSDSD — and μ(Q) = Σ Z R − Tr(D M(Q)).  D₁ₖ is dD/dQ in the MOVING AO
+    basis, so `shells` stays null: the frame thread moves its own shells' centres.  An unsolved key is a refusal. */
+export function chemVibFrames({ vib, k = 0, amp = 1, K = 32 }) {
+  const c = chemSol, at0 = vib.atoms, N = at0.length, n = c ? c.ground.nAO : 0, nn = n * n;
+  if (!c || !c.sol.D || c.key !== keyOf(vib.basis, vib.charge, at0)) throw new Refused('VIBRATE plays the molecule this worker has solved: solve it first');
+  const L = vib.L.subarray(3 * N * k, 3 * N * (k + 1)), D1 = vib.D1.subarray(nn * k, nn * (k + 1)), D0 = c.sol.D, P = new Float64Array(nn);
+  const D = new Float32Array(K * nn), dipole = new Float64Array(3 * K), q = new Float64Array(K);
+  const mul = (A, B) => { const C = new Float64Array(nn); for (let i = 0; i < n; i++) for (let l = 0; l < n; l++) { const a = A[i * n + l]; if (a) for (let j = 0; j < n; j++) C[i * n + j] += a * B[l * n + j]; } return C; };
+  for (let j = 0; j < K; j++) {
+    if (j > K / 2) { q[j] = q[K - j]; D.copyWithin(j * nn, (K - j) * nn, (K - j + 1) * nn); dipole.copyWithin(3 * j, 3 * (K - j), 3 * (K - j + 1)); continue; }   // cos is even: the second half is the first
+    const Q = q[j] = amp * vib.q0[k] * Math.cos(2 * Math.PI * j / K), b = basisFrom(at0.map((a, i) => ({ Z: a.Z, x: a.x + Q * L[3 * i], y: a.y + Q * L[3 * i + 1], z: a.z + Q * L[3 * i + 2] })), recordOf(vib.basis));
+    const { S, M } = oneElectron(b, b.atoms);
+    for (let i = 0; i < nn; i++) P[i] = D0[i] + Q * D1[i];
+    const T = mul(P, S), U = mul(T, P), V = mul(T, U);
+    for (let a = 0; a < 3; a++) dipole[3 * j + a] = b.atoms.reduce((s, A) => s + A.Z * A.c[a], 0);
+    for (let i = 0; i < nn; i++) { const d = D[j * nn + i] = 1.5 * U[i] - 0.5 * V[i]; for (let a = 0; a < 3; a++) dipole[3 * j + a] -= d * M[a][i]; }
+  }
+  return { shells: null, D, dipole, q };
+}
 /** chem.spectrum — STAGE TWO: the roots for the cached ground state (it is re-solved if the cache moved on) */
 export function chemSpectrum(m = {}) {
   const c = ensureSpectrum(m);
@@ -582,13 +604,15 @@ export function chemRtInit(m = {}) {
   /* 0 or null on the wire is the UNRESTARTED leapfrog (lab/density.js normalises it, once).  The default here is
      still 50, because that is what an old caller that says nothing meant; the card asks for 0 and says so. */
   const restartEvery = m.restartEvery === undefined ? 50 : (m.restartEvery === null ? 0 : m.restartEvery | 0);
-  const engine = createRTHF({ n, S: I.S, h: I.h, eri: I.eri, Z: I.Z, mu: [I.X, I.Y, I.Z], Enuc: I.Enuc,
-    nuclearDipole: I.nuclearDipole[AXIS[axis]], nElectrons: sol.nElectrons, D0: sol.D, dt, integrator, restartEvery });
-  engine.kickAlong(axis, kappa);
+  /* 0.7.0 V1 · PULSES: { shape, omega, tOff = 40, alpha = 0.05 } drives κ·f(t) along the kick axis from t = 0 (density.js fieldOf) INSTEAD of the δ-kick */
+  const P = m.pulse || null, field = P ? fieldOf({ shape: P.shape, kappa, omega: +P.omega || 0, tOn: 0, tOff: P.tOff ?? 40, alpha: P.alpha ?? 0.05 }) : undefined;
+  const engine = createRTHF({ n, S: I.S, h: I.h, eri: I.eri, Z: P ? [I.X, I.Y, I.Z][AXIS[axis]] : I.Z, mu: [I.X, I.Y, I.Z], Enuc: I.Enuc,
+    nuclearDipole: I.nuclearDipole[AXIS[axis]], nElectrons: sol.nElectrons, D0: sol.D, dt, integrator, restartEvery, field });
+  if (!P) engine.kickAlong(axis, kappa);
   const trace = new Float64Array(4096); trace[0] = engine.dipoleAlong(axis);
   const ob = engine.observables();
   rtState = { engine, axis, kappa, dt, integrator, restartEvery: engine.restartEvery, n, trace, nTrace: 1, steps: 0, capped: false,
-    init: { atoms: m.atoms, basis: m.basis, charge: m.charge, dt, integrator, kick: { axis, kappa }, restartEvery },
+    init: { atoms: m.atoms, basis: m.basis, charge: m.charge, dt, integrator, kick: { axis, kappa }, restartEvery, pulse: P },
     E0: ob.fieldFreeTotal };
   return { ok: true, t: 0, ...bothD(engine), electrons: ob.electrons, idempotency: ob.idempotency,
     E0: ob.fieldFreeTotal, nAO: n, dt, integrator, kick: { axis, kappa },
