@@ -14,7 +14,8 @@
  */
 import { BASIS } from './hydrogen.js';
 import { angularDipoleZ, radialDipole, dipoleZ, radialObservables, angularMoments, radialMoment } from './dynamics.js';
-import { momentumZ } from './kick.js';
+import { momentumZ, AXIS_TO_Z } from './kick.js';
+import { applyRotor } from './frontier.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { wellNorm, wellK, wellZ, wellRadius } from './well.js';
 import { sphericalBessel } from './bessel.js';
@@ -23,6 +24,16 @@ import { sphericalBessel } from './bessel.js';
 export function varianceZ(re, im, ids = BASIS.map((s) => s.index)) { let s = 0, n2 = 0; const cos2 = (A, B) => [B.l - 1, B.l + 1].reduce((t, l) => t + angularDipoleZ(A.l, A.m, l, B.m) * angularDipoleZ(l, B.m, B.l, B.m), 0);
   for (const a of ids) { n2 += re[a] * re[a] + im[a] * im[a]; for (const b of ids) { const A = BASIS[a], B = BASIS[b], c = A.m === B.m ? cos2(A, B) : 0; if (c) s += (re[a] * re[b] + im[a] * im[b]) * c * radialMoment(2, A.n, A.l, B.n, B.l); } }
   const z = dipoleZ(re, im, ids).value; return n2 > 0 ? s / n2 - z * z : 0; }
+/** THE BEAD (0.8.2 P3): (⟨x⟩, ⟨y⟩, ⟨z⟩) per unit norm, or ⟨p⟩ with `p` — x and y are z after the slap's rotors (R⁻¹zR = x, so ⟨x⟩ = ⟨Rψ|z|Rψ⟩) */
+export function expectR(re, im, ids, p = false) { const f = p ? momentumZ : (a, b, i) => dipoleZ(a, b, i).value, all = BASIS.map((s) => s.index);
+  const turn = (R) => { const a = Float64Array.from(re), b = Float64Array.from(im); applyRotor(a, b, { axis: R.axis, angle: R.angle }); return f(a, b, all.filter((k) => a[k] || b[k])); };
+  return [turn(AXIS_TO_Z.x), turn(AXIS_TO_Z.y), f(re, im, ids)]; }
+/** the bead at t with its trail's period: the slowest beat 2π/min|E_a − E_b| of the populated set (∞ for one level: the bead stands) */
+export function beadOf(reg, t, p = false) { const c = reg.at(t), ids = reg.populated(); let w = Infinity; for (const a of ids) for (const b of ids) { const d = Math.abs(reg.E[a] - reg.E[b]); if (d > 1e-9 && d < w) w = d; }
+  return { r: expectR(c.re, c.im, ids, p), T: w < Infinity ? 2 * Math.PI / w : Infinity, key: reg.version, t }; }
+/** ψ ALONG A RAY (0.8.2 P3): N samples of ψ (φ with `p`) from the origin along the unit u out to `half` — the Hamiltonian in force's closed forms */
+export function rayAt(re, im, ids, u, half, p = false, N = 128) { const H = getHamiltonian(), f = p ? H.phiAt : H.psiAt;
+  return Array.from({ length: N }, (_, k) => { const s = half * k / (N - 1); return { s, ...f(re, im, s * u[0], s * u[1], s * u[2], ids) }; }); }
 const FCACHE = new Map();
 /** ∫₀^∞ R_{n′l′} R_{nl} dr — the radial part of ⟨z/r³⟩ (z/r³ = cos θ / r²): NUMERICAL, cached per Hamiltonian */
 export function radialForce(np_, lp, n, l) {
@@ -96,7 +107,7 @@ export function stats(reg, t, h = 1e-3) {
   rows.push({ name: '⟨r⟩', formula: 'Σ c_a*c_b ⟨a|r|b⟩ (l = l′, m = m′)', value: ro.r, law: `⟨1/r⟩ = ${ro.rinv.toFixed(5)}`, predicted: NaN, residual: null, unit: H.lengthUnit, group: 'moment',
     tex: { name: '\\langle r\\rangle', note: `$\\langle 1/r\\rangle = ${texNum(ro.rinv)}$` } });
   rows.push({ name: 'Var(z)', formula: '⟨z²⟩ − ⟨z⟩²', value: varianceZ(c.re, c.im, ids), law: 'a squeeze S(r) takes it to e^{−2r}·Var(z)', predicted: NaN, residual: null, unit: '', group: 'moment', tex: { name: '\\langle z^{2}\\rangle - \\langle z\\rangle^{2}' } });
-  return { t, h, rows, ids: ids.length };
+  return { t, h, rows, ids: ids.length, r: expectR(c.re, c.im, ids) };   // r: the bead (⟨x⟩, ⟨y⟩, ⟨z⟩), 0.8.2 P3
 }
 
 /* ── THE PROSE FIGURE (0.4.0 S3 · F3): what CALCULUS's ⧉ copies — a heading, then one paragraph that reads the tiles as

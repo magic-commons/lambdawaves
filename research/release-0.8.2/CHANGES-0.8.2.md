@@ -48,11 +48,38 @@ Im ψ, |ψ|² along the ray through the bead as a CALCULUS tile.
   `research/release-0.8.2/p2-coherence-tiles.png` (CHORD + GAUSSIAN JITTER; 1s + 2p₀ + GAUSSIAN JITTER). Under LEAN (the first-run default) METERS hides its readouts,
   this tile with them.
 
-## P3 · THE BEAD + ψ ALONG A RAY
-(filled at P3's merge)
+## P3 · THE BEAD + ψ ALONG A RAY (`lab/calculus.js` +11 — `expectR`, `beadOf`, `rayAt`, `stats.r`; `lab/skeleton.js` +8 — `draw(…, bead)`; `lab/calculusview.js` +7 — the RAY tile; `lab/windows/molecules.js` +2 the centroid; `lab/rack.js` +1 (:25/:27 imports, :506–507 the skeleton's tick, :541 CALCULUS's tick); `lab/shell/settings.js` +1; `docs/STATE-SCOPES.md` one PREFERENCE row; branch `p3-bead-ray` tip `8c9847d`; +30 of ≤ +60)
+- **THE BEAD:** `expectR` gives (⟨x⟩, ⟨y⟩, ⟨z⟩) — x and y as ⟨z⟩ of the state turned by the slap's rotors (`AXIS_TO_Z`, `applyRotor`, `dipoleZ`); in momentum space the
+  same road gives ⟨p⟩ through `momentumZ` (the bead is ⟨p⟩ there, a correction). `beadOf` adds the trail's period, 2π over the slowest beat (∞ for a single level) — the
+  bead's own clock, not the transport's density period, which can force a synchronous scan from the frame loop. `skeleton.js`' `draw(…, bead)` draws the bead and its
+  64-point trail after the skeleton on the shared `#skeleton` canvas (a fifth argument of `draw`, not a separate call: the skeleton's key decides both the clear and the
+  paint; the trail resets on a register version jump or when the clock runs back); the bead draws with SKELETON off, stands down under a Sturmian. A BEAD switch sits
+  beside SKELETON; PREFERENCE `bead`, off by default and absent while off. A molecule's bead is the electron centroid (ΣZ_A R_A − μ)/N_e with N_e = ΣZ − q (the solve's μ
+  is nuclear minus electronic — not "dipole / electron count").
+- **ψ ALONG A RAY:** CALCULUS's RAY tile — Re ψ in ink, Im ψ in the lighter tone, |ψ|² in the accent, each over the ray's max |ψ| with the scale printed, 128 samples
+  from the origin through the bead (along z at the origin); it stands down with a sentence for a molecule, and in momentum space for any operator whose `phiAt` aliases
+  `psiAt` (only hydrogen's φ(p) is a real momentum function). The tile lives in `calculusview.js`, not `readouts.js` — P3 and P2 share no file but `sw.js`.
+- **The sign convention, said:** the tree's radials are positive near the origin and its Y_lm are Condon–Shortley, so ⟨2s|z|2p₀⟩ = −3. Measured: 1s → (0, 0, 0); the
+  Stark state (2s + 2p₀)/√2 → (0, 0, −3) to 1e-12, turned to x̂ → (−3, 0, 0) with its density leaning to −x (the sign checked independently of convention);
+  (1s + 2p₀)/√2's trail period 2π/(3/8); the 1s ray matches e^{−r}/√π at all 128 points (worst 5.6e-17), its norm 1 to 1e-3; the oscillator's |0⟩ ray matches
+  π^{−3/4}e^{−r²/2} exactly.
+- **Checked:** `tests/bead-ray.test.mjs` 7/7; calculus 8 · dynamics 19 · kick 16 green; rack-deps holds (`app` unchanged, SPECTRUM 25); new-project in step;
+  serialize-bytes 11 identical against `af2e84b`; screenshots `.tmp/p3-stark-bead-ray.png` (the Stark state, BEAD on, CALCULUS floated: ⟨z⟩ = −3, the RAY tile drawn,
+  no page errors), `.tmp/p3-1s2p-trail.png` (the trail along z). THE LOCK: no field write; with BEAD off the canvas gets one `clear()`; `#skeleton` is outside the
+  capture's overlay list and the lock's readback. **Dropped:** the ray for a molecule, a molecular trail, a live TDHF bead, capturing `#skeleton`.
+- **Found at the base, not fixed (recorded):** `tools/settings-probe.mjs` reads 4 of 6 scenes RED on the base and on the branch alike (byte-identical `--out`): the
+  WORKSPACE `closed` order of lattice/bloch/central, and a `modwin.modes` row on WAVE DANCER — the integrator's item.
 
 ## The light check (existing gates only) and the cut
-(filled at the cut)
+- Node gate 0 after each merge; `pwa --write`; `new-project --check` in step; `rack-deps --classes` holds (SPECTRUM 25, readouts 9, `app` 30 keys); coherence · wigner-qho ·
+  bead-ray · wigner 16 · qho 11 · equalizer 11 · calculus 8 · dynamics 19 · kick 16 · render-exact green on the merged tree; serialize-bytes identical at each row; no
+  window was added, so no keyboard-window run (each builder's one headless screenshot stands); THE LOCK ×2 at the merge tip with `--query gastab=0` on BOTH runs:
+  860 values · 0 readback · 0 record-byte · 59 s, and the 1004-value fixture · 0 · 0 · 59 s (hydrogen's WIGNER byte for byte, the bead off, METERS a readout).
+- **Lines:** 29,863 → 29,952 (+89 = P2 +29, P1 +30, P3 +30; cap 30,161). Merge order P2 `d21a94c`, P1 `cbee3bd`, P3 (this commit).
+- **Standing, recorded (since 0.5.1's roadmap: "applySettings closed[] exact restoration"):** `tools/settings-probe.mjs` reads 4 of 6 scenes RED — WATER · BENZENE · N₂:
+  the WORKSPACE `closed[]` order differs after a reload because those demo layouts predate LATTICE · BLOCH · CENTRAL and the unlisted closed cards are re-seated;
+  WAVE DANCER: a `modwin.modes` row of a source the reloaded rack lacks. Byte-identical on the base and every 0.8.2 branch; cosmetic (the order of closed cards);
+  the fix is one seating rule for an unlisted closed card, or the demo layouts regenerated — a 0.9.x row if Josh wants it before 1.0.0.
 
 ## Known, deferred (recorded)
 The LOG-SPACE module (circular Rydberg to n = 30 — §F-2, Josh's word; it re-bakes THE LOCK once and is a cut of its own); the SEPARABLE module (cube, 2-D and

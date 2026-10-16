@@ -22,9 +22,9 @@ import { el, device as kitDevice } from './mir/kit.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
-import { createSkeleton } from './skeleton.js';   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
+import { createSkeleton, centroid } from './skeleton.js';   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
 import { createMolecules } from './windows/molecules.js'; import { createStageWords } from './shell/stage-words.js'; import { createModSeam } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
-import { calculusMarkdown } from './calculus.js';
+import { calculusMarkdown, beadOf } from './calculus.js';
 import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
 import { getHamiltonian, getZ } from './hamiltonian.js';
 import { createStateCard } from './windows/state.js';   // 0.5.2 R2a: the STATE card, out of boot()
@@ -503,7 +503,8 @@ export async function boot(dom) {
          its transparent canvas explicitly before bowFrame() paints the next arrow. */
       if (app.state.bow) kepler.clear(); else kepler.suspend();
     }
-    if (ui.skeletonSw && ui.skeletonSw.get() && app.state.chem.on) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), obs, domain.half)); } else skeleton.clear();   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
+    const mol = app.state.chem.on, skOn = !!(ui.skeletonSw && ui.skeletonSw.get() && mol), bdOn = !!(ui.beadSw && ui.beadSw.get()) && (mol || !sturm.P);   // 0.8.2 P3: THE BEAD shares the canvas, drawn after the skeleton, with SKELETON off too
+    if (skOn || bdOn) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(skOn ? app.state.chem.atomsNow() : null, skOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : beadOf(reg, clock.t, app.state.space === 'p'))); } else skeleton.clear();   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
 
     kepler.bowFrame();
     app.state.chem.setActive(canPresent(wChem));
@@ -537,7 +538,7 @@ export async function boot(dom) {
         const st = G.status !== null ? G.status : radiationView.cache ? RAD_OK : 'no dipole in this state';
         wRad.setStatus(st, st === RAD_OK ? '' : 'warn');
       });
-      if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P && !(app.state.chem && app.state.chem.on)) calculus.update(reg, clock.t); });
+      if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P) calculus.update(reg, clock.t, domain.half, app.state.space === 'p', !!(app.state.chem && app.state.chem.on)); });   // 0.8.2 P3: a molecule reads only the RAY's sentence
       if (may('lattice', wLat)) tick('lattice', () => lattice.update(clock.t));   // 0.7.2 L1: ψ(t) from LATTICE's eigenpairs, N² a frame, only while it can present
       if (may('bloch', wBlo)) tick('bloch', () => bloch.update(clock.t));   // 0.8.1 T1: one 2 × 2 step a frame (a chirp's few), only while it can present
       if (canPresent(wSh)) ui.hc.set(reg.energy().toFixed(5));
