@@ -1,11 +1,11 @@
 /* bloch.js — BLOCH (0.8.1 T1): ONE qubit in a window of LADDER's kind — its own register and canvas, nothing touching the main register, the field or the camera except
  * to read t and the camera's basis.  The Bloch vector (⟨σ_x⟩, ⟨σ_y⟩, ⟨σ_z⟩) on ORBIT's sphere painter in n = 2's colour (ORBIT's two spheres at n = 2 ARE Bloch spheres),
  * its trail over the last period, the drive's axis fainter; the qubit is bloch-model.js', its t the transport clock's from the moment a preset or a knob was set. */
-import { PRESETS, DEFAULTS, DT, run, vec, closed, lzP, halve, pulse, phase, BELL, pair, bell } from './bloch-model.js';
+import { PRESETS, DEFAULTS, DT, run, vec, closed, lzP, halve, pulse, phase, runR, decayClosed, steadyZ, BELL, pair, bell } from './bloch-model.js';
 import { cameraBasis, cameraKey } from './field.js'; import { project, sphereFrame, arm } from './orbit.js'; import { el, knob, readout, seg, themeInk, nRGB } from './mir/kit.js';
 export let BL = null;   // the one handle (persist, the verb): the app literal never gains a key
-const KN = { w0: ['ω₀', 0.2, 4], O: ['Ω', 0, 2], d: ['δ', -8, 8], b: ['β', -0.5, 0.5], th: ['θ₀', 0, Math.PI], ph: ['φ₀', 0, 2 * Math.PI] };
-const LABEL = { flop: 'FLOP', larmor: 'LARMOR', rabi: 'RABI', lz: 'LANDAU–ZENER' }, BLABEL = { phip: 'Φ⁺', phim: 'Φ⁻', psip: 'Ψ⁺', psim: 'Ψ⁻', prod: 'PRODUCT' }, pick = (id) => ({ w0: 1, ...PRESETS[id], preset: id });
+const KN = { w0: ['ω₀', 0.2, 4], O: ['Ω', 0, 2], d: ['δ', -8, 8], b: ['β', -0.5, 0.5], th: ['θ₀', 0, Math.PI], ph: ['φ₀', 0, 2 * Math.PI], T1: ['T₁', 0, 50], T2: ['T₂', 0, 100] };
+const LABEL = { flop: 'FLOP', larmor: 'LARMOR', rabi: 'RABI', lz: 'LANDAU–ZENER', decay: 'DECAY', damped: 'DAMPED RABI' }, BLABEL = { phip: 'Φ⁺', phim: 'Φ⁻', psip: 'Ψ⁺', psim: 'Ψ⁻', prod: 'PRODUCT' }, pick = (id) => ({ w0: 1, T1: 0, T2: 0, ...PRESETS[id], preset: id });
 export function createBloch(host, api) {
   const P = { ...DEFAULTS }, ui = {}; let t0 = 0, tt = 0, K = null, trail = [], lastKey = '';
   const pre = seg({ aria: 'Bloch preset', value: P.preset, options: Object.keys(PRESETS).map((id) => ({ id, label: LABEL[id] })), onChange: (id) => set(pick(id)) });
@@ -21,17 +21,20 @@ export function createBloch(host, api) {
   const n1 = el('div', 'note', host), n2 = el('div', 'note', host); n1.innerHTML = '<b>Units.</b> ħ = 1, and ω₀ = 1 sets the unit of t, the transport clock’s from the moment a preset or a knob was set. The picture is the lab frame; the faint axis is (Ω cos φ, Ω sin φ, ω₀ − ω), the field the spin turns about in the frame turning with the drive — an exact change of frame, the drive being circular (no rotating-wave approximation).';
   n2.innerHTML = '<b>The pair.</b> Two qubits on ↑↑, ↑↓, ↓↑, ↓↓; θ₀ and φ₀ turn qubit A alone (U ⊗ 1, ↑ → (θ₀, φ₀)), which moves the arrows and the CHSH number on the fixed axes (the faint arms) but never S_A. An entangled qubit has no arrow because its own state is the mixture ½(1 + r·σ) with |r| = √(1 − C²), zero for a Bell pair, where all it knows lies in the correlations.';
   function set(p) {
-    Object.assign(P, p); for (const k in KN) ui[k].set(P[k]); pre.set(P.preset); md.set(P.mode); bp.set(P.bell); const two = P.mode === 'pair';
-    for (const [e, on] of [[pre.root, !two], [bp.root, two], [ro.p.root, !two], [ro.st.root, !two], [ro.S.root, two], [ro.C.root, two], [n1, !two], [n2, two], ...['w0', 'O', 'd', 'b'].map((k) => [ui[k].root, !two])]) e.style.display = on ? '' : 'none'; t0 = api.t(); K = null; trail = []; lastKey = ''; const h = halve(P);
-    ro.st.set(h.d.toExponential(1), h.d > 1e-6 ? 'warn' : 'ok'); ro.st.setSub(h.d > 1e-6 ? 'step too coarse' : `dt = ${DT} · the run to t = ${h.T.toFixed(1)}`); ro.lz.root.style.display = P.b && !two ? '' : 'none'; update(api.t());
+    Object.assign(P, p); if (P.T1 && !(P.T2 > 0 && P.T2 <= 2 * P.T1)) P.T2 = 2 * P.T1; for (const k in KN) ui[k].set(P[k]); pre.set(P.preset); md.set(P.mode); bp.set(P.bell); const two = P.mode === 'pair';
+    for (const [e, on] of [[pre.root, !two], [bp.root, two], [ro.p.root, !two], [ro.st.root, !two], [ro.S.root, two], [ro.C.root, two], [n1, !two], [n2, two], ...['w0', 'O', 'd', 'b', 'T1', 'T2'].map((k) => [ui[k].root, !two])]) e.style.display = on ? '' : 'none'; t0 = api.t(); K = null; trail = []; lastKey = ''; const h = halve(P);
+    ro.st.set(h.d.toExponential(1), h.d > 1e-6 ? 'warn' : 'ok'); ro.st.setSub(h.d > 1e-6 ? 'step too coarse' : `${P.T1 || P.T2 ? 'RK4 · ' : ''}dt = ${DT} · the run to t = ${h.T.toFixed(1)}`); ro.lz.root.style.display = P.b && !two && !(P.T1 || P.T2) ? '' : 'none'; update(api.t());
   }
   function update(t) {
     tt = Math.max(0, t - t0); const B = cameraBasis(api.obs), key = `${P.mode === 'pair' ? '' : tt}|${cameraKey(api.obs)}|${hold.clientWidth}`; if (key === lastKey) return; lastKey = key;
     if (P.mode === 'pair') return duo(B);
-    let s; if (P.b) { const g = Math.floor(tt / DT) * DT; if (!K || K.t > g) K = null; K = run(P, g, DT, K); s = run(P, tt, DT, K).s; } else s = run(P, tt).s;   // a chirp steps on from the kept grid point
-    const v = vec(P, s, tt), pm = s[2] ** 2 + s[3] ** 2, per = 2 * Math.PI / Math.min(P.w0, Math.hypot(P.O, P.d) || P.w0), tp = pulse(P);
+    const D = P.T1 || P.T2, R = D ? runR : run; let s; if (P.b || D) { const g = Math.floor(tt / DT) * DT; if (!K || K.t > g) K = null; K = R(P, g, DT, K); s = R(P, tt, DT, K); } else s = run(P, tt);   // a chirp or a damped run steps on from the kept grid point
+    const v = D ? s.v : vec(P, s.s, tt), pm = D ? (1 - v[2]) / 2 : s.s[2] ** 2 + s.s[3] ** 2, per = 2 * Math.PI / Math.min(P.w0, Math.hypot(P.O, P.d) || P.w0), tp = pulse(P);
     if (trail.length && trail[trail.length - 1][0] > tt) trail = []; trail.push([tt, v]); while (trail.length > 900 || trail[0][0] < tt - per) trail.shift();
-    if (!P.b) { const c = closed(P, tt); ro.p.set(`${pm.toFixed(6)} · ${((1 - c[2]) / 2).toFixed(6)}`);
+    if (D) { const m = Math.hypot(...v), z = steadyZ(P), c = decayClosed(P, tt), lim = P.T1 && P.T2 >= 2 * P.T1 ? ' · T₂ ≤ 2T₁: held at 2T₁' : '';   // T₁ · T₂: the purity and the closed form in force
+      ro.p.set(`|r| ${m.toFixed(3)} · Tr ρ² = (1 + |r|²)/2 = ${((1 + m * m) / 2).toFixed(3)} · P↓ ${pm.toFixed(3)}`); ro.p.setSub((!P.O ? `free decay: r_z = −1 + (r_z(0) + 1)e^(−t/T₁), |r⊥| = |r⊥(0)|e^(−t/T₂) · |Δ| ${Math.abs(v[2] - c.rz).toExponential(1)}, ${Math.abs(Math.hypot(v[0], v[1]) - c.rp).toExponential(1)}`
+        : z !== z ? 'a chirp or a pulse: no closed steady state' : `steady P↓ = (1 − r_z(∞))/2 = ${((1 - z) / 2).toFixed(3)}, r_z(∞) = −(1 + δ²T₂²)/(1 + δ²T₂² + Ω²T₁T₂) = ${z.toFixed(4)}`) + lim); }
+    else if (!P.b) { const c = closed(P, tt); ro.p.set(`${pm.toFixed(6)} · ${((1 - c[2]) / 2).toFixed(6)}`);
       ro.p.setSub((tt < tp && P.O ? (P.th ? 'r₀ turned about (Ω, 0, −δ) by √(Ω²+δ²)·t' : 'Ω²/(Ω²+δ²)·sin²(√(Ω²+δ²)·t/2)') : `precession by ω₀t = ${(P.w0 * tt).toFixed(2)} rad · P↓ held`) + (tp < Infinity ? ` · π-pulse τ = π/Ω = ${tp.toFixed(2)}` : '') + ` · |Δr| = ${Math.hypot(v[0] - c[0], v[1] - c[1], v[2] - c[2]).toExponential(1)}`); }
     else { const x = -P.d / P.b, thru = x > 0 && tt >= 2 * x; ro.p.set(`${pm.toFixed(6)} · —`); ro.p.setSub(`a chirp has no closed form at finite t · ω − ω₀ = ${(P.d + P.b * tt).toFixed(2)}`);
       ro.lz.set(`${lzP(P).toFixed(4)} PREDICTION · ${thru ? pm.toFixed(4) + ' measured' : 'sweeping'}`, thru ? 'ok' : '');
@@ -50,6 +53,8 @@ export function createBloch(host, api) {
     const g = cv.getContext('2d'), T = themeInk(g), two = P.mode === 'pair', R = two ? Math.min(H / 2 - 16, W / 4 - 8) : H / 2 - 16, cx = two ? W / 4 : W / 2, cy = H / 2, f = phase(P, tt), a = [O * Math.cos(f), O * Math.sin(f), -(P.d + P.b * tt)], m = Math.hypot(...a), col = nRGB(2), rgba = (q) => `rgba(${col[0]},${col[1]},${col[2]},${q})`;
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); g.font = '9px ui-monospace, monospace'; g.textBaseline = 'middle'; sphereFrame(g, T, B, cx, cy, R);
     if (two) return v.forEach(([u, ax], i) => { const x = cx + i * W / 2; if (i) sphereFrame(g, T, B, x, cy, R); g.fillStyle = T.ink(0.6); g.fillText(i ? 'B' : 'A', x - R, cy - R + 4); ax.forEach((a) => arm(g, x, cy, R, project(a, B), T.ink(0.3), T.ink(0.3))); if (Math.hypot(...u) > 1e-9) arm(g, x, cy, R, project(u, B), rgba(0.9), rgba(1)); });
+    const zs = P.O && (P.T1 || P.T2) ? steadyZ(P) : NaN, rs = Math.sqrt(1 - zs * zs); if (zs === zs) { g.strokeStyle = T.ink(0.3); g.lineWidth = 1; g.beginPath();   // the saturation latitude z = r_z(∞)
+      for (let i = 0; i <= 64; i++) { const p = project([rs * Math.cos(i * Math.PI / 32), rs * Math.sin(i * Math.PI / 32), zs], B); g[i ? 'lineTo' : 'moveTo'](cx + p[0] * R, cy - p[1] * R); } g.stroke(); }
     if (m > 1e-12) arm(g, cx, cy, R, project(a.map((u) => u / m), B), T.ink(0.3), T.ink(0.3));
     g.strokeStyle = rgba(0.45); g.lineWidth = 1.25; g.beginPath(); trail.forEach(([, u], i) => { const p = project(u, B); g[i ? 'lineTo' : 'moveTo'](cx + p[0] * R, cy - p[1] * R); }); g.stroke();
     arm(g, cx, cy, R, project(v, B), rgba(0.9), rgba(1));
