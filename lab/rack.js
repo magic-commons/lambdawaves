@@ -41,7 +41,7 @@ import { readLink } from './statelink.js';   // wave 56: every state of this lab
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-export const BUILD_LINE = '0.8.1-alpha · Two Levels · 2026-10-16';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+export const BUILD_LINE = '0.8.2-alpha · Phase Space · 2026-10-16';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
