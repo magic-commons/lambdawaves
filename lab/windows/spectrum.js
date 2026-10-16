@@ -9,7 +9,7 @@ import { BASIS, stateOf } from '../hydrogen.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from '../hamiltonian.js';
 import { ATOMS, configOf } from '../atoms.js';
 import { createSpectrum } from '../spectrum.js';
-import { MOLECULE_BY_ID } from '../molecules.js';
+import { MOLECULE_BY_ID } from '../molecules.js'; import { CATALOGUE } from '../catalogue.js';
 import { stateLatex, moleculeLatex } from '../latex-state.js';
 import { createRegisterSturmian } from '../sturmianreg.js';
 const keepT = (elm, on, title) => { if (elm.dataset.title0 === undefined) elm.dataset.title0 = elm.title || ''; elm.title = on ? title : elm.dataset.title0; };
@@ -29,17 +29,16 @@ export function createSpectrumCard(app) {
   {
     const hamGroup = group(wSpec.body, 'HAMILTONIAN');
     const rh = el('div', 'row tight', hamGroup);
-    ui.hamSeg = seg({ label: 'OPERATOR', value: 'hydrogen', options: [
-      { id: 'hydrogen', label: 'HYDROGEN', title: 'E = −1/(2n²); every window is a theorem about it' },
-      { id: 'qho', label: 'OSCILLATOR', title: 'Harmonic oscillator levels with spacing ħω' },
-      { id: 'well', label: 'BOX', title: 'Infinite spherical well with a hard boundary' },
-      { id: 'atom', label: 'ATOM', title: 'Self-consistent Xα central-field atom from H to Kr' },
-      { id: 'cornell', label: 'QUARKONIUM', title: 'Solve heavy-quark levels with Numerov' }],
-      onChange: (v) => { switchHamiltonian(v); if (v === 'well') app.w.enterBox(); if (v === 'atom') { app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); } } });
-    /* 0.4.0 S0 · wave 136 (audit F6): the two operators whose only editors are LEGACY windows.  ATOM opens ATOMS again (its
-       element picker) by un-hiding it; QUARKONIUM's button is HIDDEN (its editor, QCD,
-       left in 0.5.0 D9) — the button, not the value: an older project restoring `cornell` still sets it (set() paints any id). */
-    ui.hamSeg.button('cornell').hidden = true;
+    /* 0.7.4 C1 · THE PICKER: ‹ SYSTEM ›, the kit's stepper over lab/catalogue.js — the operators with HYDROGEN, MOLECULES and LATTICE, each row's hover its
+       word · oracle.  A window opens and leaves the Hamiltonian alone; the name reads back what owns the field; QUARKONIUM is listed, never chosen (its editor,
+       QCD, left in 0.5.0 D9: an older project restoring `cornell` still sets it).  `ui.hamSeg` keeps its name and set(id): persist, the verbs and LAUNCH read it. */
+    const SYS = ['hydrogen', 'qho', 'well', 'atom', 'cornell', 'molecules', 'lattice'].map((id) => CATALOGUE.find((r) => r.id === id)), tip = (r) => (r.id === 'cornell' ? 'its editor returns in 0.8.0' : r.word + ' · ' + r.oracle.what);
+    const sys = stepper({ label: 'SYSTEM', items: SYS.map((r) => ({ id: r.id, label: r.name.split(' ·')[0], coming: r.id === 'cornell' })), value: 'hydrogen', cls: 'mol-step', onChange: (v) => {
+      if (v === 'molecules' || v === 'lattice') app.sh.layout.reopen(v === 'molecules' ? 'chem' : v); else { switchHamiltonian(v); if (v === 'well') app.w.enterBox(); if (v === 'atom') { app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); } }
+      ui.hamSeg.set(getHamiltonian().id); } });
+    sys.name.addEventListener('click', () => document.querySelectorAll('.mir-pick-i[data-id]').forEach((b) => { const r = SYS.find((x) => x.id === b.dataset.id); if (r) b.title = tip(r); }));
+    ui.hamSeg = { root: sys.root, get value() { return sys.get(); }, set(id) { sys.set(app.state.chem && app.state.chem.on ? 'molecules' : id); sys.root.title = tip(SYS.find((r) => r.id === sys.get()) || SYS[0]); } };
+    ui.hamSeg.set('hydrogen');
     rh.appendChild(ui.hamSeg.root);
     ui.wellKnob = knob({ label: 'WELL RADIUS <m>a</m>', min: 3, max: 30, value: 10, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => { HAMILTONIANS.well.setRadius(v); app.w.gas.setRadius(v); hNote(); if (getHamiltonian().id === 'well') { reg.setEnergies(energyOf); wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; }); schedule(TIER.REBUILD); } } });
     rh.appendChild(ui.wellKnob.root);
