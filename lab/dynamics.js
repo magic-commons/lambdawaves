@@ -193,19 +193,19 @@ export function radialMoment(k, np_, lp, n, l) {
  */
 export function radialObservables(re, im, ids, energy) {
   const list = ids || BASIS.map((s) => s.index);
-  let r1 = 0, rinv = 0, n2 = 0;
+  let r1 = 0, r2 = 0, rinv = 0, n2 = 0;
   for (const a of list) n2 += re[a] * re[a] + im[a] * im[a];
   for (const a of list) for (const b of list) {
     const A = BASIS[a], B = BASIS[b];
     if (A.l !== B.l || A.m !== B.m) continue;
     const w = re[a] * re[b] + im[a] * im[b];           // the imaginary parts cancel: r is Hermitian and real here
-    r1 += w * radialMoment(1, A.n, A.l, B.n, B.l);
+    r1 += w * radialMoment(1, A.n, A.l, B.n, B.l); r2 += w * radialMoment(2, A.n, A.l, B.n, B.l);   // r2: ⟨r²⟩ by its own bilinear form (0.8.3 B3, the ellipsoid's oracle)
     rinv += w * radialMoment(-1, A.n, A.l, B.n, B.l);
   }
-  if (n2 <= 0) return { r: 0, rinv: 0, V: 0, T: 0, virial: 0 };
-  r1 /= n2; rinv /= n2;
+  if (n2 <= 0) return { r: 0, r2: 0, rinv: 0, V: 0, T: 0, virial: 0 };
+  r1 /= n2; r2 /= n2; rinv /= n2;
   const Z = getHamiltonian().Z || 1, V = -Z * rinv, T = energy - V;              // V = −Z⟨1/r⟩ (Round 11 A1)
-  return { r: r1, rinv, V, T, virial: V !== 0 ? -T / V * 2 : 0 };   // 2T/(−V) = 1 exactly for a stationary state
+  return { r: r1, r2, rinv, V, T, virial: V !== 0 ? -T / V * 2 : 0 };   // 2T/(−V) = 1 exactly for a stationary state
 }
 
 /* ── the particle (Bohmian) velocity field: ∇ψ analytically ──────────────── */

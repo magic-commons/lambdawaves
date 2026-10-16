@@ -24,7 +24,7 @@ import { createReadouts } from './windows/readouts.js'; import { createKeplerSur
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
 import { createSkeleton, centroid } from './skeleton.js';   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
 import { createMolecules } from './windows/molecules.js'; import { createStageWords } from './shell/stage-words.js'; import { createModSeam } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
-import { calculusMarkdown, beadOf } from './calculus.js';
+import { calculusMarkdown, beadOf, covariance } from './calculus.js';
 import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
 import { getHamiltonian, getZ } from './hamiltonian.js';
 import { createStateCard } from './windows/state.js';   // 0.5.2 R2a: the STATE card, out of boot()
@@ -503,8 +503,8 @@ export async function boot(dom) {
          its transparent canvas explicitly before bowFrame() paints the next arrow. */
       if (app.state.bow) kepler.clear(); else kepler.suspend();
     }
-    const mol = app.state.chem.on, skOn = !!(ui.skeletonSw && ui.skeletonSw.get() && mol), bdOn = !!(ui.beadSw && ui.beadSw.get()) && (mol || !sturm.P);   // 0.8.2 P3: THE BEAD shares the canvas, drawn after the skeleton, with SKELETON off too
-    if (skOn || bdOn) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(skOn ? app.state.chem.atomsNow() : null, skOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : beadOf(reg, clock.t, app.state.space === 'p'))); } else skeleton.clear();   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
+    const mol = app.state.chem.on, skOn = !!(ui.skeletonSw && ui.skeletonSw.get() && mol), elOn = !!(ui.ellipsoidSw && ui.ellipsoidSw.get()) && !mol && !sturm.P && app.state.space !== 'p', bdOn = (!!(ui.beadSw && ui.beadSw.get()) && (mol || !sturm.P)) || elOn;   // 0.8.2 P3: THE BEAD shares the canvas, drawn after the skeleton, with SKELETON off too; 0.8.3 B3: THE ELLIPSOID rides it (position space, a register)
+    if (skOn || bdOn) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(skOn ? app.state.chem.atomsNow() : null, skOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : Object.assign(beadOf(reg, clock.t, app.state.space === 'p'), { ell: elOn ? covariance(reg, clock.t) : null }))); } else skeleton.clear();   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
 
     kepler.bowFrame();
     app.state.chem.setActive(canPresent(wChem));

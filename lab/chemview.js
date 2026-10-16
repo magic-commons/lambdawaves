@@ -298,7 +298,7 @@ export function createChem(host, api) {
   const probeLine = el('div', 'note', more); probeLine.hidden = true; probeLine.title = 'the electrons’ potential −Σ D_pq ⟨p|1/|r−R_A||q⟩ at each nucleus R_A (md.js rinvMatrix; PySCF int1e_rinv) — the ground state’s';   // 0.6.5 X1 THE PROBE
   const moreToggle = el('button', 'trig mol-more-toggle', rV); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
   chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
-  if (api.skeleton) rV.append(api.skeleton.root, ...(api.bead ? [api.bead.root] : []));   // 0.7.0 V2: SKELETON after the chevron (the switch is windows/molecules.js', a PREFERENCE)
+  if (api.skeleton) rV.append(api.skeleton.root, ...[api.bead, api.ellipsoid].filter(Boolean).map((w) => w.root));   // 0.7.0 V2: SKELETON after the chevron (the switch is windows/molecules.js', a PREFERENCE)
   const setMore = (open) => {
     more.hidden = !open; moreToggle.setAttribute('aria-expanded', String(open));
     moreToggle.setAttribute('aria-label', open ? 'Hide the kick, run and spectrum controls' : 'Show the kick, run and spectrum controls');

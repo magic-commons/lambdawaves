@@ -6,6 +6,7 @@
  */
 import { stats, rayAt, expectR } from './calculus.js'; import { getHamiltonian } from './hamiltonian.js';
 import { el, readout, sw, mathText } from './mir/kit.js';
+import { covariance } from './calculus.js'; import { BASIS } from './hydrogen.js';   // 0.8.3 B3: THE ELLIPSOID's line
 
 export function createCalculus(host) {
   let on = true, last = null, key = '';
@@ -40,12 +41,15 @@ export function createCalculus(host) {
     const k = `${reg.version}|${t.toFixed(4)}|${half}|${p}|${mol}`;
     if (k === key) return;
     key = k; const H = getHamiltonian(), why = mol ? 'a molecule: the ray stands down this cut (the AO evaluator is not free on the frame thread)' : p && H.phiAt === H.psiAt ? 'momentum space: this operator\'s φ(p) is not on the road (its ψ(x) without the phase)' : '';
-    if (!mol) { last = stats(reg, t); render(last); } if (why) { ray.set('—'); cv.width = 0; return ray.setSub(why); }
+    if (!mol) { last = stats(reg, t); render(last); } ellLine(reg, t, p, mol, H); if (why) { ray.set('—'); cv.width = 0; return ray.setSub(why); }
     const c = reg.at(t), ids = reg.populated(), r = p ? expectR(c.re, c.im, ids, true) : last.r, n = Math.hypot(...r), u = n < 1e-3 ? [0, 0, 1] : r.map((v) => v / n), S = rayAt(c.re, c.im, ids, u, half, p), m = Math.max(1e-300, ...S.map((q) => Math.hypot(q.re, q.im)));
     const W = cv.clientWidth || 240, Hh = 56, d = Math.min(2, window.devicePixelRatio || 1), cs = getComputedStyle(document.body), ink = cs.getPropertyValue('--fg').trim() || cs.color, acc = cs.getPropertyValue('--acc').trim() || ink;
     cv.width = Math.round(W * d); cv.height = Hh * d; g.setTransform(d, 0, 0, d, 0, 0); g.lineWidth = 1.25;
     for (const [f, col, a] of [[() => 0, ink, 0.15], [(q) => q.re / m, ink, 1], [(q) => q.im / m, ink, 0.4], [(q) => (q.re * q.re + q.im * q.im) / (m * m), acc, 1]]) { g.strokeStyle = col; g.globalAlpha = a; g.beginPath(); S.forEach((q, i) => g[i ? 'lineTo' : 'moveTo'](i * W / (S.length - 1), Hh / 2 - f(q) * (Hh / 2 - 2))); g.stroke(); }
     ray.set(`0 → ${half.toFixed(1)} ${p ? 'ħ/a₀' : H.lengthUnit}`); ray.setSub(`along (${u.map((v) => v.toFixed(2)).join(', ')}) · ${p ? '⟨p⟩' : '⟨r⟩'} = (${r.map((v) => v.toFixed(3)).join(', ')}) · max |ψ| ${m.toExponential(2)}`);
   }
+  const ell = readout({ label: 'ELLIPSOID  σ_k = √λ_k of Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩', value: '—', cls: 'wide calc-ray' }); host.insertBefore(ell.root, foot);   // 0.8.3 B3: tr Σ against ⟨r²⟩ − |⟨r⟩|² (⟨r²⟩ by its own road); one hydrogen label prints its exact n²(5n² + 1 − 3l(l + 1))/2Z²
+  function ellLine(reg, t, p, mol, H) { const E = !mol && !p && covariance(reg, t), ids = reg.populated(), s = E && ids.length === 1 && H.id === 'hydrogen' && BASIS[ids[0]], tr = E && E.S[0][0] + E.S[1][1] + E.S[2][2], o = E && E.r2 - E.mean.reduce((q, v) => q + v * v, 0);
+    ell.set(E ? `σ = (${[...E.lam].sort((a, b) => a - b).map((l) => Math.sqrt(Math.max(0, l)).toFixed(2)).join(', ')}) ${H.lengthUnit}` : '—'); ell.setSub(E ? `tr Σ = ${tr.toFixed(3)} ${Math.abs(tr - o) < 1e-8 ? '=' : '≠'} ⟨r²⟩ − |⟨r⟩|² = ${o.toFixed(3)} (Δ ${Math.abs(tr - o).toExponential(0)})` + (s ? ` · exact ${+(s.n * s.n * (5 * s.n * s.n + 1 - 3 * s.l * (s.l + 1)) / 2 / (H.k || 1) ** 2).toPrecision(6)}` : '') : mol ? 'a molecule: the ellipsoid stands down (its density\'s quadrupole is a later row)' : 'momentum space: the ellipsoid is the position\'s'); }
   return { update, get last() { return last; } };
 }
