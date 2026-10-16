@@ -1,4 +1,4 @@
-# 0.8.1 "Two Levels" — THE BUILD PLAN (Claude Yan / Fable 5.1, drafted 2026-10-16 ≈01:50 while 0.7.4 C1 merges; base and cap filled at the 0.8.0 cut)
+# 0.8.1 "Two Levels" — THE BUILD PLAN (Claude Yan / Fable 5.1, drafted 2026-10-16 ≈01:50 while 0.7.4 C1 merges; base and cap filled at the 0.8.0 cut, 10-16 ≈06:10)
 
 The engine plan's D.13 (`../release-0.6.0/PLAN.md` l.294–297: "SPIN-½ on ORBIT's painter (+25; Larmor and Rabi closed forms; the first non-spatial system) · RABI +
 LANDAU–ZENER on the Bloch sphere (+50; the song drive's two-level reduction; the chirp; the dt-halving re-solve the gate) · THE BELL PAIR + ENTANGLEMENT (+25; S = ln 2
@@ -7,7 +7,7 @@ exactly; a product state 0; the spin chain's half-chain entropy after a quench) 
 with its entanglement number; positronium and muonic hydrogen by one knob; Hofstadter, a quantum walk, a small spin chain · ORBIT › BLOCH · SPECTRUM › MASS · LATTICE
 presets · tap FLOP"). The census: `../release-0.6.0/census/SYSTEMS.md` §2 rows 13 (Rabi/LZ), 14 (the Bloch sphere: "ORBIT's two spheres for n = 2 are literally
 two Bloch spheres"), 15 (spin chains), 19 (Hofstadter), 27 (mass scaling), 31 (quantum walk). Josh's dial (09:35): tight builds, features only, pre-1.0. Base:
-`yan-c` at the commit carrying the briefs after the v0.8.0-alpha cut (**TO FILL**); lines **TO FILL**; cap = lines × 1.01. Three rows, three Opus builders in
+`yan-c` at the commit carrying this fill, right after v0.8.0-alpha's CHANGELOG `2861f81` (its sha is in every launch message); lines **29,707**; cap **30,004** (× 1.01). Three rows, three Opus builders in
 parallel (disjoint files); the integrator merges T1, T2, T3, light check, cut `v0.8.1-alpha` "Two Levels". The RU record (+50) is NOT in this cut (the pass's
 profile has not been measured; it stays a lead).
 
