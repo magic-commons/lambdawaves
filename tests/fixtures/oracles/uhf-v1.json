@@ -1,0 +1,344 @@
+{
+ "provenance": {
+  "written_by": "tools/library/uhf-oracle.py",
+  "pyscf": "2.14.0",
+  "method": "UHF",
+  "cart": true,
+  "unit": "bohr",
+  "basis": "lab/vendor/bse/sto-3g-v1.json",
+  "bse_sha256": "22ce59b9ec993c5b47b4349bb74f5efd372dab99afa4f427b374b8cdc3c0778b",
+  "conv_tol": 1e-13,
+  "conv_tol_grad": 1e-07,
+  "guess": "the lowest of minao, atom, 1e and huckel, each followed by the internal stability analysis to a minimum; H2 from the core orbitals, alpha on one atom and beta on the other"
+ },
+ "molecules": {
+  "O2": {
+   "term": "\u00b3\u03a3g\u207b",
+   "multiplicity": 3,
+   "charge": 0,
+   "atoms": [
+    {
+     "Z": 8,
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "Z": 8,
+     "x": 0,
+     "y": 0,
+     "z": 2.2818442954123124
+    }
+   ],
+   "energy": -147.6352300151407,
+   "s2": 2.003326030713133,
+   "nAlpha": 9,
+   "nBeta": 7,
+   "nao": 10,
+   "converged": true,
+   "stable": true
+  },
+  "NO": {
+   "term": "\u00b2\u03a0",
+   "multiplicity": 2,
+   "charge": 0,
+   "atoms": [
+    {
+     "Z": 7,
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "Z": 8,
+     "x": 0,
+     "y": 0,
+     "z": 2.174696824149473
+    }
+   ],
+   "energy": -127.53039956873471,
+   "s2": 0.9649980199888004,
+   "nAlpha": 8,
+   "nBeta": 7,
+   "nao": 10,
+   "converged": true,
+   "stable": true
+  },
+  "OH": {
+   "term": "\u00b2\u03a0",
+   "multiplicity": 2,
+   "charge": 0,
+   "atoms": [
+    {
+     "Z": 8,
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "Z": 1,
+     "x": 0,
+     "y": 0,
+     "z": 1.8324674229907405
+    }
+   ],
+   "energy": -74.3626375456123,
+   "s2": 0.7532558438285397,
+   "nAlpha": 5,
+   "nBeta": 4,
+   "nao": 6,
+   "converged": true,
+   "stable": true
+  },
+  "B2": {
+   "term": "\u00b3\u03a3g\u207b",
+   "multiplicity": 3,
+   "charge": 0,
+   "atoms": [
+    {
+     "Z": 5,
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "Z": 5,
+     "x": 0,
+     "y": 0,
+     "z": 3.0046645380584485
+    }
+   ],
+   "energy": -48.42116526893494,
+   "s2": 2.8966963884502315,
+   "nAlpha": 6,
+   "nBeta": 4,
+   "nao": 10,
+   "converged": true,
+   "stable": true
+  },
+  "NH2": {
+   "term": "\u00b2B\u2081",
+   "multiplicity": 2,
+   "charge": 0,
+   "atoms": [
+    {
+     "Z": 7,
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "Z": 1,
+     "x": 0,
+     "y": 1.518604707161823,
+     "z": -1.1993217309090984
+    },
+    {
+     "Z": 1,
+     "x": 0,
+     "y": -1.518604707161823,
+     "z": -1.1993217309090984
+    }
+   ],
+   "energy": -54.83692442156896,
+   "s2": 0.7572231105310179,
+   "nAlpha": 5,
+   "nBeta": 4,
+   "nao": 7,
+   "converged": true,
+   "stable": true
+  },
+  "CH3": {
+   "term": "\u00b2A\u2082\u2033",
+   "multiplicity": 2,
+   "charge": 0,
+   "atoms": [
+    {
+     "Z": 6,
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "Z": 1,
+     "x": 2.0390144884057015,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "Z": 1,
+     "x": -1.0195072442028503,
+     "y": 1.7658383456438684,
+     "z": 0
+    },
+    {
+     "Z": 1,
+     "x": -1.0195072442028517,
+     "y": -1.7658383456438682,
+     "z": 0
+    }
+   ],
+   "energy": -39.07670885029181,
+   "s2": 0.7652248394095365,
+   "nAlpha": 5,
+   "nBeta": 4,
+   "nao": 8,
+   "converged": true,
+   "stable": true
+  },
+  "NO2": {
+   "term": "\u00b2A\u2081",
+   "multiplicity": 2,
+   "charge": 0,
+   "atoms": [
+    {
+     "Z": 7,
+     "x": 0,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "Z": 8,
+     "x": 0,
+     "y": 2.0759938922886154,
+     "z": -0.8790698501973739
+    },
+    {
+     "Z": 8,
+     "x": 0,
+     "y": -2.0759938922886154,
+     "z": -0.8790698501973739
+    }
+   ],
+   "energy": -201.28618369480836,
+   "s2": 1.198546057627194,
+   "nAlpha": 12,
+   "nBeta": 11,
+   "nao": 15,
+   "converged": true,
+   "stable": true
+  }
+ },
+ "h2": {
+  "1.4": {
+   "R": 1.4,
+   "atoms": [
+    {
+     "Z": 1,
+     "x": 0.0,
+     "y": 0.0,
+     "z": -0.7
+    },
+    {
+     "Z": 1,
+     "x": 0.0,
+     "y": 0.0,
+     "z": 0.7
+    }
+   ],
+   "energy": -1.1167143251757508,
+   "s2": 1.3322676295501878e-15,
+   "nAlpha": 1,
+   "nBeta": 1,
+   "nao": 2,
+   "converged": true,
+   "stable": true
+  },
+  "3.0": {
+   "R": 3.0,
+   "atoms": [
+    {
+     "Z": 1,
+     "x": 0.0,
+     "y": 0.0,
+     "z": -1.5
+    },
+    {
+     "Z": 1,
+     "x": 0.0,
+     "y": 0.0,
+     "z": 1.5
+    }
+   ],
+   "energy": -0.9510179495999775,
+   "s2": 0.7742403770888104,
+   "nAlpha": 1,
+   "nBeta": 1,
+   "nao": 2,
+   "converged": true,
+   "stable": true
+  },
+  "5.0": {
+   "R": 5.0,
+   "atoms": [
+    {
+     "Z": 1,
+     "x": 0.0,
+     "y": 0.0,
+     "z": -2.5
+    },
+    {
+     "Z": 1,
+     "x": 0.0,
+     "y": 0.0,
+     "z": 2.5
+    }
+   ],
+   "energy": -0.9335875443917847,
+   "s2": 0.9945903891312858,
+   "nAlpha": 1,
+   "nBeta": 1,
+   "nao": 2,
+   "converged": true,
+   "stable": true
+  },
+  "0.74A": {
+   "R": 1.3983973321781458,
+   "atoms": [
+    {
+     "Z": 1,
+     "x": 0.0,
+     "y": 0.0,
+     "z": -0.6991986660890729
+    },
+    {
+     "Z": 1,
+     "x": 0.0,
+     "y": 0.0,
+     "z": 0.6991986660890729
+    }
+   ],
+   "energy": -1.116759307507584,
+   "s2": 4.440892098500626e-16,
+   "nAlpha": 1,
+   "nBeta": 1,
+   "nao": 2,
+   "converged": true,
+   "stable": true
+  },
+  "3.00A": {
+   "R": 5.6691783736951855,
+   "atoms": [
+    {
+     "Z": 1,
+     "x": 0.0,
+     "y": 0.0,
+     "z": -2.8345891868475928
+    },
+    {
+     "Z": 1,
+     "x": 0.0,
+     "y": 0.0,
+     "z": 2.8345891868475928
+    }
+   ],
+   "energy": -0.9332846599726148,
+   "s2": 0.9985907270892269,
+   "nAlpha": 1,
+   "nBeta": 1,
+   "nao": 2,
+   "converged": true,
+   "stable": true
+  }
+ }
+}
