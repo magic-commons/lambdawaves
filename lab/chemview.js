@@ -258,7 +258,7 @@ export function createChem(host, api) {
   const roH2 = readout({ label: 'THE H₂ CURVE · STO-3G', cls: 'wide', value: '—', sub: '' }); h2Row.append(h2K.root, h2S.root, roH2.root);
   function h2Read(R = h2K.get()) { h2T = h2T || h2Curve(Array.from({ length: 53 }, (_, i) => +(0.8 + 0.1 * i).toFixed(1))); const p = h2Point(R);
     roH2.set(`R ${R.toFixed(2)} bohr · RHF ${eh(p.rhf)} · UHF ${eh(p.uhf)} · FCI ${eh(p.fci)} Eh · S ${p.S.toFixed(2)} of ln 2 · ⟨S²⟩ ${p.s2.toFixed(2)}`);
-    roH2.setSub(`S: the one-orbital entanglement entropy of the FCI state · ln 2 = 0.693 at the break · UHF leaves RHF at the Coulson–Fischer point, ${h2T.cf.toFixed(3)} bohr`); drawCurve(h2Cv, h2T, R); }
+    roH2.setSub(`UHF leaves RHF at the Coulson–Fischer point, ${h2T.cf.toFixed(3)} bohr · S: the one-orbital entanglement entropy of the FCI state, ln 2 = 0.693 at the break`); drawCurve(h2Cv, h2T, R); }
   const probeLine = el('div', 'note', more); probeLine.hidden = true; probeLine.title = 'the electrons’ potential −Σ D_pq ⟨p|1/|r−R_A||q⟩ at each nucleus R_A (md.js rinvMatrix; PySCF int1e_rinv) — the ground state’s';   // 0.6.5 X1 THE PROBE
   const moreToggle = el('button', 'trig mol-more-toggle', rV); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
   chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
