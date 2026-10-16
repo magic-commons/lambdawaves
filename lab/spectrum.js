@@ -120,7 +120,7 @@ export function createSpectrum(host, api) {
   let n2 = 1, anySolo = false, rateOff = false;        // the snapshot the cheap half took, reused by lanes built later in the same state
   const RATE_TITLE = 'Set this state’s phase-rate multiplier; double-tap resets';
   /** W-STURMIAN: RATE is a diagonal-phase feature — disabled, with the note on it, while a propagator is in force */
-  function paintRate(L, off) { if (off === L.rateOff) return; L.rateOff = off; L.rate.setDisabled(off); L.rate.root.title = off ? (api.rateNote ? api.rateNote() : 'off') : RATE_TITLE; }
+  function paintRate(L, off) { if (off === L.rateOff) return; L.rateOff = off; L.rate.setDisabled(off); L.rate.root.title = off ? (api.reg.P && api.reg.P.stark ? 'RATE is a diagonal-phase feature: off under INTER-SHELL STARK' : api.rateNote ? api.rateNote() : 'off') : RATE_TITLE; }
 
   function lane(a) {
     const s = BASIS[a];
@@ -209,7 +209,7 @@ export function createSpectrum(host, api) {
     }
     n2 = reg.norm2() || 1;
     anySolo = want.some((a) => reg.solo[a]);
-    rateOff = !!(api.rateDisabled && api.rateDisabled());
+    rateOff = !!reg.P || !!(api.rateDisabled && api.rateDisabled());   // any propagator (STURMIAN, 0.8.0 INTER-SHELL STARK)
     for (const [a, L] of lanes) refresh(L, a);
     for (const [a, b] of chips) b.classList.toggle('on', keep.has(a));
     const rs = reg.renderSet();

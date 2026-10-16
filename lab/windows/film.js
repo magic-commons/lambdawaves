@@ -4,7 +4,7 @@ import { createFilm } from '../render-exact.js'; import { createCapture, maxPict
 export function createFilmApi(app) {
   const { dom, obs } = app, { hold: filmHold } = app.loop, { camera } = app.host, { rotStep, rotDriving, field } = app.ctl;
     let exact = null, cap = null, facadeRun = null;
-    const caption = () => { const c = app.w.stageCaption(), ch = app.state.chem, s = c && (ch && ch.on ? ch.said : statusOf({ owner: getHamiltonian().id })); return s ? c + ' · ' + s.word : c; };   // 0.5.4 P4c (PLAN §J-3): the EXPORT caption is the stage's words + its STATE word (MOLECULES' kept status, else the owner's), read at the take, never in a frame; STAGE FORMULA off stays ''
+    const caption = () => { const c = app.w.stageCaption(), ch = app.state.chem, s = c && (ch && ch.on ? ch.said : statusOf({ owner: app.reg.P && app.reg.P.stark ? 'stark' : getHamiltonian().id })); return s ? c + ' · ' + s.word : c; };   // 0.5.4 P4c (PLAN §J-3): the EXPORT caption is the stage's words + its STATE word (MOLECULES' kept status, else the owner's), read at the take, never in a frame; STAGE FORMULA off stays ''
     const film = () => exact || (exact = createFilm(app.sh.LW, { canvas: dom.canvas, energies: app.w.periodEnergies, canvasCap: 16384, host: () => app.state.modHost, hold: filmHold,
       road: { pending: () => ({ caption: caption(), spin: camera.ambient && obs.mode !== 'free' ? camera.ambient : 0, yaw0: obs.yaw }), step: rotStep, rotating: rotDriving,
         plan: (o) => capture().planLoop(o) } }));   // the rack's own for the film's three schedules (take) and the card's road

@@ -7,7 +7,8 @@ import { PRESETS } from '../state.js';
 import { momentumZ, AXIS_TO_Z } from '../kick.js';
 import { applyKickAlong, escaped, SQUEEZE, SQUEEZE_REFUSAL } from '../kick.js'; import { varianceZ } from '../calculus.js'; import { onHamiltonian } from '../hamiltonian.js';   // 0.8.0 G2 · SQUEEZE + CAT
 import { applyRotor as rotorOnCopy } from '../frontier.js';
-import { getHamiltonian } from '../hamiltonian.js';
+import { getHamiltonian, getZ } from '../hamiltonian.js';
+import { saddle, polarizability } from '../stark.js';
 export function createStateCard(app) {
   const { ui, device, reg, hNote, clock, mat, sturm } = app, { schedule } = app.loop, { rack } = app.host, { modHand, ROT_LIMIT, setRotationRate, touchState, loadPreset } = app.ctl;
   /* OPTIMIZATION 2026-09-24 · N1 · STATE's CLEAR, NAMED.  The menubar's "CLEAR the register" pressed the FIRST `.trig`
@@ -171,12 +172,30 @@ export function createStateCard(app) {
     const gF = group(wState.body, 'STATIC FIELD');
     const rf = el('div', 'row tight', gF);
     ui.bz = knob({ label: 'ZEEMAN B', min: 0, max: 0.05, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(4), onInput: (v) => { reg.setField({ Bz: v }); touchState(); } });
-    ui.fz = knob({ label: 'STARK F', min: 0, max: 0.01, value: 0, fmt: (v) => v === 0 ? 'off' : v.toExponential(1), onInput: (v) => { if (!getHamiltonian().stark || sturm.P) { ui.fz.set(0); return; } reg.setField({ Fz: v }); touchState(); } });
-    rf.appendChild(ui.bz.root); rf.appendChild(ui.fz.root);
+    ui.fz = knob({ label: 'STARK F', min: 0, max: 0.01, value: 0, fmt: (v) => v === 0 ? 'off' : v.toExponential(1), onInput: (v) => { if (!getHamiltonian().stark || sturm.P) { ui.fz.set(0); return; } const c = reg.field.inter && reg.at(clock.t); reg.setField({ Fz: v }); if (c) reg.anchorFrom(c.re, c.im, clock.t); interSync(); touchState(); } });
+    /* 0.8.0 G3 · INTER-SHELL: STARK F across shells — the register engages lab/stark.js' propagator (H = diag(E) + F·z over the 91 labels) at F > 0, c(t) continuous */
+    ui.interSw = sw({ label: 'INTER-SHELL', value: false, title: 'STARK F across shells: H = diag(E) + F·z over all 91 labels, eigensolved once per F', onChange: (v) => {
+      const why = !v ? '' : !getHamiltonian().stark ? 'hydrogen only' : sturm.P ? 'off under STURMIAN' : getZ() !== 1 ? 'Z = 1 only' : '';
+      if (why) { ui.interSw.set(false); ui.interRo.set('refused', 'warn'); ui.interRo.setSub(`INTER-SHELL is ${why}: z is hydrogen's own dipole matrix over the n ≤ 6 labels`); return; }
+      if (reg.transition && app.hooks.ab) app.hooks.ab.set(false);
+      const c = reg.at(clock.t); reg.setField({ inter: v }); reg.anchorFrom(c.re, c.im, clock.t); interSync(); touchState(); } });
+    rf.appendChild(ui.bz.root); rf.appendChild(ui.fz.root); rf.appendChild(ui.interSw.root);
     rf.appendChild(trig({ label: 'NO FIELD', onFire: () => { reg.setField({ Bz: 0, Fz: 0 }); ui.bz.set(0); ui.fz.set(0); touchState(); } }).root);
     ui.fieldRo = readout({ label: 'H IN FORCE', value: 'H₀ (bare Coulomb)', cls: 'two', sub: '' });
     rf.appendChild(ui.fieldRo.root);
-    el('div', 'note', gF).innerHTML = '<b>Fields.</b> ZEEMAN adds an orbital m-dependent phase. STARK mixes l within each shell and omits coupling between shells; keep F well below the limit shown in the readout.';
+    ui.interRo = readout({ label: 'INTER-SHELL', value: 'off', cls: 'wide', sub: 'STARK F acts within each shell' }); el('div', 'row tight', gF).appendChild(ui.interRo.root);
+    /* the propagator's stand-downs (the Sturmian's road: RATE · K_z · DEFECT · A⇄B) and the readout — every number computed; synced after any write of STARK F (a restore, an operator switch, NO FIELD) */
+    function interSync() { const P = reg.P, S = !!(P && P.stark), F = reg.field.Fz; ui.interSw.set(!!reg.field.inter); if (app.hooks.status) app.hooks.status();
+      for (const k of [ui.kzKnob, ui.defKnob, ui.kzRate, ui.defRate, ui.abOmega]) if (k) k.setDisabled(!!P);
+      if (ui.abSw) { ui.abSw.root.disabled = !!P; ui.abSw.root.classList.toggle('disabled', !!P); }
+      if (!S) { ui.interRo.set(reg.field.inter ? 'set STARK F' : 'off', ''); ui.interRo.setSub(reg.field.inter ? 'engages at F > 0' : 'STARK F acts within each shell'); ui.interRo.root.title = ''; return; }
+      ui.kzRate.set(0); ui.defRate.set(0); setRotationRate('kz', 0); setRotationRate('def', 0);
+      let k = 1, k1 = 0; while (k <= 6 && saddle(k) > F) k++; for (let j = 1; j < 91; j++) if (Math.abs(P.C[j]) > Math.abs(P.C[k1])) k1 = j;   // k1: the eigenvector carrying 1s
+      ui.interRo.set(`1s ${(P.E[k1] - P.H[0]).toExponential(1)} Eh · α(n ≤ 6) ${polarizability().toFixed(2)} of 4.5`, 'live');
+      ui.interRo.setSub(k > 6 ? 'every shell below its saddle' : `saddle n = ${k} at ${saddle(k).toExponential(1)}: ${reg.nmax() >= k ? 'would ionise — this basis holds it' : 'nothing populated past it'}`);
+      ui.interRo.root.title = `F = ${F} · NUMERICAL: eigensolve of diag(E) + F·z in the n ≤ 6 basis (${P.ms.toFixed(1)} ms), no continuum · RATE · K_z · DEFECT · A⇄B stand down`; }
+    const fzSet = ui.fz.set; ui.fz.set = (v, q) => { fzSet(v, q); queueMicrotask(interSync); };
+    el('div', 'note', gF).innerHTML = '<b>Fields.</b> ZEEMAN adds an orbital m-dependent phase. STARK mixes l within each shell and omits coupling between shells; keep F well below the limit shown in the readout. INTER-SHELL couples every shell (hydrogen only): an eigensolve in the n ≤ 6 basis, which has no continuum, so ionisation is said, never simulated.';
 
     const r3 = wState.row();
     r3.appendChild(trig({ label: 'SAVE', title: 'Save the experiment and presentation separately', onFire: () => { app.sh.save(); } }).root);

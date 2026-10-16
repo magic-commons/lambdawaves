@@ -99,7 +99,7 @@ export function createVerbs(app) {
   /** what the app already prints, as compact JSON for a reader with no eyes: nothing here is computed for her */
   function inventory() {
     const { clock, reg, ui, mat } = app, c = app.state.chem, H = getHamiltonian(), P = app.host.cameraPort, mol = c && c.on ? MOLECULE_BY_ID.get(c.preset()) : null;
-    const sol = mol && c.solution(), live = sol && sol.key.replace(/\|(uhf|lda)$/, '') === c.preset() + '|' + c.basis + '|' + mol.charge ? sol : null, s = live && (live.stem || stemOf(live)), cs = mol && c.state(), st = mol ? c.said : statusOf({ owner: H.id });
+    const sol = mol && c.solution(), live = sol && sol.key.replace(/\|(uhf|lda)$/, '') === c.preset() + '|' + c.basis + '|' + mol.charge ? sol : null, s = live && (live.stem || stemOf(live)), cs = mol && c.state(), st = mol ? c.said : statusOf({ owner: reg.P && reg.P.stark ? 'stark' : H.id });
     const ro = (r) => (r ? [...r.root.querySelectorAll('.ro-val, .ro-sub')].map((e) => e.textContent).filter(Boolean).join(' · ') : '');
     const P0 = reg.populated(), lbl = (a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]));
     return { owner: mol ? 'MOLECULES' : H.label.split(/\s{2,}/)[0],

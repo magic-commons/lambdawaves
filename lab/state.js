@@ -17,6 +17,7 @@
  *     setPropagator(null) restores the diagonal law — every line above is then the code path, unchanged.
  * Nothing in here knows about the DOM, the GPU or wall-clock time.
  */
+import { starkPropagator } from './stark.js';
 import { BASIS, BASIS_INDEX, energy, stateOf } from './hydrogen.js';
 import { applyRotateK, applyDefectWait, applyRotor, kzElement, symEig } from './frontier.js';
 import { applyKick, applyKickAlong, applySqueeze } from './kick.js';
@@ -86,13 +87,14 @@ export class Register {
   /** E_a + B m_a / 2 — the diagonal part, exact whatever the electric field is */
   Ediag(a) { return (this.P ? this.P.H[a * N + a] / this.P.S[a * N + a] : this.E[a]) + this.field.Bz * BASIS[a].m / 2; }   // under a PROPAGATOR: the label's ⟨a|H|a⟩/⟨a|S|a⟩, NOT an eigenvalue
   /** the HAMILTONIAN switch: refill the eigenvalues the 91 labels carry (hydrogen −1/2n², oscillator N + 3/2, …) */
-  setEnergies(fn) { for (const s of BASIS) this.E[s.index] = fn(s.index); this.version++; }
+  setEnergies(fn) { for (const s of BASIS) this.E[s.index] = fn(s.index); this._stark(true); this.version++; }
   /** the largest electric field for which neglecting inter-shell coupling is defensible: ≈ 1/(3n⁵) */
   fieldValidUpTo() { const n = this.nmax(); return 1 / (3 * Math.pow(Math.max(1, n), 5)); }
   setField(f) {
     if (f.Bz !== undefined) this.field.Bz = f.Bz;
-    if (f.Fz !== undefined) this.field.Fz = this.P ? 0 : f.Fz;   // the Stark field is a theorem about hydrogen's shells: refused under a PROPAGATOR
-    this.version++;
+    if (f.Fz !== undefined) this.field.Fz = this.P && !this.P.stark ? 0 : f.Fz;   // the Stark field is a theorem about hydrogen's shells: refused under a PROPAGATOR (not its own)
+    if (f.inter !== undefined) { if (f.inter && !(this.P && !this.P.stark)) this.field.inter = true; else delete this.field.inter; }   // 0.8.0 G3: INTER-SHELL, default-absent
+    this._stark(); this.version++;
   }
   /**
    * THE PROPAGATOR HOOK (W-STURMIAN).  P = null restores the diagonal law.  Otherwise P is an object over the 91 labels
@@ -103,7 +105,9 @@ export class Register {
    * applied after evolve, exactly; the Stark field is refused (it is a theorem about hydrogen's shells).  Nothing here
    * is Sturmian-specific: any propagator in a non-orthogonal basis with that interface plugs in.
    */
-  setPropagator(P) { this.P = P || null; if (this.P) this.field.Fz = 0; this.version++; }
+  setPropagator(P) { this.P = P || null; if (this.P) { this.field.Fz = 0; delete this.field.inter; } else this._stark(); this.version++; }
+  /** 0.8.0 G3 · INTER-SHELL STARK: the field record engages lab/stark.js' propagator (H = diag(E) + F·z, all 91 labels) while `inter` is on and F ≠ 0 */
+  _stark(force) { const on = this.field.inter && this.field.Fz !== 0 && (!this.P || this.P.stark); if (on && (force || !this.P || this.P.F !== this.field.Fz)) this.P = starkPropagator(this.field.Fz, this.E); else if (!on && this.P && this.P.stark) this.P = null; }
   /**
    * The normal modes of the Hamiltonian in force, with the state's amplitude in each, at time t.
    * With no electric field these ARE the register's modes; with one they are the Stark (parabolic) states —
@@ -420,7 +424,7 @@ export class Register {
       modes.push({ id: s.id, n: s.n, l: s.l, m: s.m, re: this.re0[a], im: this.im0[a], muted: !!this.muted[a], solo: !!this.solo[a] });
     }
     return { format: 'lambdawaves/qwave-0/state', system: 'hydrogen', basis: 'n<=6 complex Y_lm, Condon-Shortley', units: 'atomic', t, preset: this.preset, modes,
-      field: { ...this.field }, status: this.P ? 'STURMIAN BASIS' : this.field.Fz !== 0 ? 'STARK SHELL MODEL' : 'HYDROGEN' };
+      field: { ...this.field }, status: this.P ? (this.P.stark ? 'INTER-SHELL STARK' : 'STURMIAN BASIS') : this.field.Fz !== 0 ? 'STARK SHELL MODEL' : 'HYDROGEN' };
   }
   restore(obj) {
     this.clear();
@@ -431,7 +435,7 @@ export class Register {
       this.muted[a] = m.muted ? 1 : 0; this.solo[a] = m.solo ? 1 : 0;
     }
     this.preset = obj.preset || null;
-    this.field = { Bz: (obj.field && +obj.field.Bz) || 0, Fz: (obj.field && +obj.field.Fz) || 0 };
+    this.field = { Bz: (obj.field && +obj.field.Bz) || 0, Fz: (obj.field && +obj.field.Fz) || 0, ...(obj.field && obj.field.inter && { inter: true }) }; this._stark(true);
     this.version++;
     return +obj.t || 0;
   }
