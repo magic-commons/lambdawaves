@@ -11,6 +11,32 @@ measured numbers and the named proofs, for whoever builds next.  It is not relea
 
 ---
 
+## `v0.9.2-alpha` — 2026-10-16
+
+Commit `65d8d62` · no new waves · 13 commits.
+
+_No wave headings appeared for the first time in this release._
+
+<details><summary>commits</summary>
+
+- `fd24eb1` 2026-10-16 — CHANGELOG for v0.9.1-alpha
+- `d88365a` 2026-10-16 — HANDOFF §2 + checkpoint 11:52: v0.9.1-alpha Platform cut locally (b43e438, snapshot 39); 0.9.2…
+- `9aa8fb7` 2026-10-16 — 0.9.2 Flow: the plan's base and cap filled at the v0.9.1-alpha cut
+- `a087e5d` 2026-10-16 — 0.9.2 Flow: the CHANGES shape (rows and the deferred list; sections filled at each merge)
+- `ae8c123` 2026-10-16 — F2 the momentum breath: radialBreath takes p (hydrogen Podolsky-Pauling, the oscillator's…
+- `cda828c` 2026-10-16 — F1 the current on the plane: currentOf by centred differences, CURRENT seg OFF/ARROWS/LINES on…
+- `7ec08f8` 2026-10-16 — F1 build note: seats, oracle numbers, persistence, corrections
+- `3f2f6cf` 2026-10-16 — merge F1 THE CURRENT ON THE PLANE (7ec08f8): slice.js' currentOf(sample)
+- `cb5ca05` 2026-10-16 — 0.9.2 Flow: CHANGES F1 section
+- `b265b22` 2026-10-16 — F2 build note: seats, the one-time numbers, the momentum-space screenshot, the oscillator's…
+- `0555e4f` 2026-10-16 — merge F2 THE MOMENTUM BREATH (b265b22): calculus.js' radialBreath(reg, t, half, n, p) — in…
+- `e0b60ac` 2026-10-16 — 0.9.2 Flow: CHANGES-0.9.2.md complete (F2, the light check) and MAJOR-FEATURES.md's 0.9.2 line
+- `65d8d62` 2026-10-16 — 0.9.2-alpha Flow: the version line and the README status
+
+</details>
+
+---
+
 ## `v0.9.1-alpha` — 2026-10-16
 
 Commit `b43e438` · no new waves · 23 commits.
