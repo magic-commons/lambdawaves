@@ -1,28 +1,30 @@
 /* bloch.js — BLOCH (0.8.1 T1): ONE qubit in a window of LADDER's kind — its own register and canvas, nothing touching the main register, the field or the camera except
  * to read t and the camera's basis.  The Bloch vector (⟨σ_x⟩, ⟨σ_y⟩, ⟨σ_z⟩) on ORBIT's sphere painter in n = 2's colour (ORBIT's two spheres at n = 2 ARE Bloch spheres),
  * its trail over the last period, the drive's axis fainter; the qubit is bloch-model.js', its t the transport clock's from the moment a preset or a knob was set. */
-import { PRESETS, DEFAULTS, DT, run, vec, closed, lzP, halve, pulse, phase, runR, decayClosed, steadyZ, BELL, pair, bell } from './bloch-model.js';
-import { cameraBasis, cameraKey } from './field.js'; import { project, sphereFrame, arm } from './orbit.js'; import { el, knob, readout, seg, themeInk, nRGB } from './mir/kit.js';
+import { PRESETS, DEFAULTS, DT, run, vec, closed, lzP, halve, pulse, phase, runR, decayClosed, steadyZ, BELL, pair, bell, GATES } from './bloch-model.js';
+import { cameraBasis, cameraKey } from './field.js'; import { project, sphereFrame, arm } from './orbit.js'; import { el, knob, readout, seg, trig, themeInk, nRGB } from './mir/kit.js';
 export let BL = null;   // the one handle (persist, the verb): the app literal never gains a key
 const KN = { w0: ['ω₀', 0.2, 4], O: ['Ω', 0, 2], d: ['δ', -8, 8], b: ['β', -0.5, 0.5], th: ['θ₀', 0, Math.PI], ph: ['φ₀', 0, 2 * Math.PI], T1: ['T₁', 0, 50], T2: ['T₂', 0, 100] };
 const LABEL = { flop: 'FLOP', larmor: 'LARMOR', rabi: 'RABI', lz: 'LANDAU–ZENER', decay: 'DECAY', damped: 'DAMPED RABI' }, BLABEL = { phip: 'Φ⁺', phim: 'Φ⁻', psip: 'Ψ⁺', psim: 'Ψ⁻', prod: 'PRODUCT' }, pick = (id) => ({ w0: 1, T1: 0, T2: 0, ...PRESETS[id], preset: id });
+const GL = { hA: 'H_A', xA: 'X_A', zA: 'Z_A', sA: 'S_A', cnot: 'CNOT', swap: 'SWAP' }, tapeOf = (T) => (T.length ? 'tape ' + T.map((g) => GL[g]).join(' · ') : 'no gates');
 export function createBloch(host, api) {
   const P = { ...DEFAULTS }, ui = {}; let t0 = 0, tt = 0, K = null, trail = [], lastKey = '';
   const pre = seg({ aria: 'Bloch preset', value: P.preset, options: Object.keys(PRESETS).map((id) => ({ id, label: LABEL[id] })), onChange: (id) => set(pick(id)) });
   pre.root.addEventListener('click', (e) => { if (e.target.closest('.seg-b.on')) set(pick(P.preset)); }, true);   // a tap on the lit preset runs it again (tap FLOP)
   const md = seg({ aria: 'Bloch mode', value: P.mode, options: [{ id: 'one', label: 'ONE' }, { id: 'pair', label: 'PAIR' }], onChange: (m) => set({ mode: m }) });   // 0.8.1 T2: THE BELL PAIR
   const bp = seg({ aria: 'Bell preset', value: P.bell, options: Object.keys(BELL).map((id) => ({ id, label: BLABEL[id] })), onChange: (id) => set({ bell: id }) });
-  host.append(md.root, pre.root, bp.root); const r1 = el('div', 'row', host);
+  host.append(md.root, pre.root, bp.root); const gt = el('div', 'row tight', host), r1 = el('div', 'row', host);   // 0.9.3 D2: the circuit under the Bell seg, ≤ 8 gates, the oldest dropped
+  for (const [id, label] of [...Object.entries(GL), ['', 'RESET']]) gt.appendChild(trig({ label, title: id ? `Apply ${label} to the pair` : 'Clear the tape', onFire: () => set({ tape: id ? [...P.tape, id].slice(-8) : DEFAULTS.tape }) }).root);
   for (const [k, [label, min, max]] of Object.entries(KN)) r1.appendChild((ui[k] = knob({ label, min, max, value: P[k], fmt: (v) => v.toFixed(k === 'b' ? 3 : 2), onInput: (v) => set({ [k]: v }) })).root);
   const hold = el('div', 'ladder-c', host), cv = el('canvas', '', hold); hold.style.height = '180px';
   const ro = { p: readout({ label: 'P↓  measured · closed form', value: '—', cls: 'wide' }), lz: readout({ label: 'LANDAU–ZENER  1 − e^(−πΩ²/2β)', value: '—', cls: 'wide' }), st: readout({ label: 'STEP  dt against dt/2', value: '—' }) };
   Object.assign(ro, { S: readout({ label: 'ENTANGLEMENT  S_A = −Tr ρ_A ln ρ_A', value: '—', cls: 'wide' }), C: readout({ label: 'CHSH  on the drawn axes', value: '—', cls: 'wide' }) });
   const r2 = el('div', 'row tight', host); for (const r of Object.values(ro)) r2.appendChild(r.root);
   const n1 = el('div', 'note', host), n2 = el('div', 'note', host); n1.innerHTML = '<b>Units.</b> ħ = 1, and ω₀ = 1 sets the unit of t, the transport clock’s from the moment a preset or a knob was set. The picture is the lab frame; the faint axis is (Ω cos φ, Ω sin φ, ω₀ − ω), the field the spin turns about in the frame turning with the drive — an exact change of frame, the drive being circular (no rotating-wave approximation).';
-  n2.innerHTML = '<b>The pair.</b> Two qubits on ↑↑, ↑↓, ↓↑, ↓↓; θ₀ and φ₀ turn qubit A alone (U ⊗ 1, ↑ → (θ₀, φ₀)), which moves the arrows and the CHSH number on the fixed axes (the faint arms) but never S_A. An entangled qubit has no arrow because its own state is the mixture ½(1 + r·σ) with |r| = √(1 − C²), zero for a Bell pair, where all it knows lies in the correlations.';
+  n2.innerHTML = '<b>The pair.</b> Two qubits on ↑↑, ↑↓, ↓↑, ↓↓; θ₀ and φ₀ turn qubit A alone (U ⊗ 1, ↑ → (θ₀, φ₀)), which moves the arrows and the CHSH number on the fixed axes (the faint arms) but never S_A. An entangled qubit has no arrow because its own state is the mixture ½(1 + r·σ) with |r| = √(1 − C²), zero for a Bell pair, where all it knows lies in the correlations. The gates act on the preset in order and the knobs turn A after the tape: from PRODUCT, H_A then CNOT is the Bell circuit, ↑↑ → Φ⁺.';
   function set(p) {
     Object.assign(P, p); if (P.T1 && !(P.T2 > 0 && P.T2 <= 2 * P.T1)) P.T2 = 2 * P.T1; for (const k in KN) ui[k].set(P[k]); pre.set(P.preset); md.set(P.mode); bp.set(P.bell); const two = P.mode === 'pair';
-    for (const [e, on] of [[pre.root, !two], [bp.root, two], [ro.p.root, !two], [ro.st.root, !two], [ro.S.root, two], [ro.C.root, two], [n1, !two], [n2, two], ...['w0', 'O', 'd', 'b', 'T1', 'T2'].map((k) => [ui[k].root, !two])]) e.style.display = on ? '' : 'none'; t0 = api.t(); K = null; trail = []; lastKey = ''; const h = halve(P);
+    for (const [e, on] of [[pre.root, !two], [bp.root, two], [gt, two], [ro.p.root, !two], [ro.st.root, !two], [ro.S.root, two], [ro.C.root, two], [n1, !two], [n2, two], ...['w0', 'O', 'd', 'b', 'T1', 'T2'].map((k) => [ui[k].root, !two])]) e.style.display = on ? '' : 'none'; t0 = api.t(); K = null; trail = []; lastKey = ''; const h = halve(P);
     ro.st.set(h.d.toExponential(1), h.d > 1e-6 ? 'warn' : 'ok'); ro.st.setSub(h.d > 1e-6 ? 'step too coarse' : `${P.T1 || P.T2 ? 'RK4 · ' : ''}dt = ${DT} · the run to t = ${h.T.toFixed(1)}`); ro.lz.root.style.display = P.b && !two && !(P.T1 || P.T2) ? '' : 'none'; update(api.t());
   }
   function update(t) {
@@ -42,9 +44,9 @@ export function createBloch(host, api) {
     paint(v, B, tt < tp ? P.O : 0);
   }
   function duo(B) {   // PAIR: still under the clock — U_A ⊗ 1 on the preset, then ρ_A, ρ_B, S_A and CHSH read off it
-    const q = bell(pair(P.bell, P.th, P.ph), P.bell), f = (r) => `(${r.map((x) => (x + 0).toFixed(3)).join(', ')})`, ln2 = Math.abs(q.S - Math.LN2) < 1e-12, opt = Math.abs(q.chsh - 2 * Math.SQRT2) < 1e-10;
-    ro.S.set(ln2 ? 'ln 2' : q.S < 1e-12 ? '0' : q.S.toFixed(6), ln2 ? 'ok' : ''); ro.S.setSub(`ρ_A = ½(1 + r_A·σ), r_A = ${f(q.rA)} · ρ_B: r_B = ${f(q.rB)} · eigenvalues (1 ± |r|)/2, |r| = ${q.r.toFixed(6)}`);
-    ro.C.set(`${opt ? '2√2' : q.chsh.toFixed(6)} PREDICTION · ≤ 2 classical`, Math.abs(q.chsh) > 2 ? 'ok' : ''); ro.C.setSub(`A measures ẑ, x̂ · B (±x̂ + ẑ)/√2, signed to the preset · the best axes give 2√(2 − |r|²) = ${q.max.toFixed(6)}`);
+    const q = bell(pair(P.bell, P.th, P.ph, P.tape), P.bell, P.tape), f = (r) => `(${r.map((x) => (x + 0).toFixed(3)).join(', ')})`, ln2 = Math.abs(q.S - Math.LN2) < 1e-12, opt = Math.abs(q.chsh - 2 * Math.SQRT2) < 1e-10;
+    ro.S.set(ln2 ? 'ln 2' : q.S < 1e-12 ? '0' : q.S.toFixed(6), ln2 ? 'ok' : ''); ro.S.setSub(`${tapeOf(P.tape)} · ρ_A = ½(1 + r_A·σ), r_A = ${f(q.rA)} · ρ_B: r_B = ${f(q.rB)} · eigenvalues (1 ± |r|)/2, |r| = ${q.r.toFixed(6)}`);
+    ro.C.set(`${opt ? '2√2' : q.chsh.toFixed(6)} PREDICTION · ≤ 2 classical`, Math.abs(q.chsh) > 2 ? 'ok' : ''); ro.C.setSub(`A measures ẑ, x̂ · B (±x̂ + ẑ)/√2, signed to the preset${P.tape.length ? ' after the tape' : ''} · the best axes give 2√(2 − |r|²) = ${q.max.toFixed(6)}`);
     paint([[q.rA, q.axes.slice(0, 2)], [q.rB, q.axes.slice(2)]], B, 0);
   }
   function paint(v, B, O) {
@@ -61,7 +63,8 @@ export function createBloch(host, api) {
   }
   new ResizeObserver(() => { lastKey = ''; update(api.t()); }).observe(hold);
   set({});
-  return (BL = { update, set, pick, params: P, get ro() { return Object.values(ro).filter((r) => r.root.style.display !== 'none'); }, get label() { return P.mode === 'pair' ? BLABEL[P.bell] : LABEL[P.preset]; },
-    save() { const d = {}; for (const k in DEFAULTS) if (P[k] !== DEFAULTS[k]) d[k] = P[k]; return Object.keys(d).length ? d : undefined; },
-    load(I) { const q = { ...DEFAULTS }; for (const k in q) if (I && typeof I[k] === typeof q[k]) q[k] = I[k]; if (!PRESETS[q.preset]) q.preset = DEFAULTS.preset; if (!BELL[q.bell]) q.bell = DEFAULTS.bell; if (q.mode !== 'pair') q.mode = 'one'; set(q); } });
+  return (BL = { update, set, pick, params: P, get ro() { return Object.values(ro).filter((r) => r.root.style.display !== 'none'); }, get label() { return P.mode === 'pair' ? BLABEL[P.bell] + (P.tape.length ? ' · ' + tapeOf(P.tape) : '') : LABEL[P.preset]; },
+    save() { const d = {}; for (const k in DEFAULTS) if (P[k] !== DEFAULTS[k] && !(k === 'tape' && !P.tape.length)) d[k] = P[k]; return Object.keys(d).length ? d : undefined; },
+    load(I) { const q = { ...DEFAULTS }; for (const k in q) if (I && typeof I[k] === typeof q[k]) q[k] = I[k]; if (!PRESETS[q.preset]) q.preset = DEFAULTS.preset; if (!BELL[q.bell]) q.bell = DEFAULTS.bell; if (q.mode !== 'pair') q.mode = 'one';
+      q.tape = Array.isArray(q.tape) ? q.tape.filter((g) => Object.hasOwn(GATES, g)).slice(-8) : DEFAULTS.tape; set(q); } });   // 0.9.3 D2: known gate ids only
 }

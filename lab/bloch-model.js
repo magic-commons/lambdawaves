@@ -48,10 +48,15 @@ export const steadyZ = (P) => { const q = 1 + (P.d * P.T2) ** 2; return P.b || p
  * ρ_A = ½(1 + r_A·σ), ρ_B likewise, S_A from |r| (a pure pair: |r_A| = |r_B| = √(1 − C²)); CHSH on the drawn axes: A ẑ, x̂ · B (±s_x x̂ + s_z ẑ)/√2, the preset's signs. */
 const h = Math.SQRT1_2, X = [1, 0], Zx = [0, 1], M = ([x, z]) => [[z, x], [x, -z]], H2 = (x) => (x > 0 ? -x * Math.log(x) : 0), r1 = (q) => vec(DEFAULTS, q, 0);
 export const BELL = { phip: [h, 0, 0, h], phim: [h, 0, 0, -h], psip: [0, h, h, 0], psim: [0, h, -h, 0], prod: [1, 0, 0, 0] };
-export function pair(id, th, ph) { const c = BELL[id], u = (x) => su2([c[x], 0, c[2 + x], 0], -th / 2 * Math.sin(ph), th / 2 * Math.cos(ph), 0), p = u(0), q = u(1); return [p[0], p[1], q[0], q[1], p[2], p[3], q[2], q[3]]; }
+/* 0.9.3 D2 THE GATE SET on the 8-vector: A's gates as U ⊗ 1 on its two (c↑x, c↓x) pairs — H = (σ_x + σ_z)/√2, X = σ_x, Z = σ_z, S = diag(1, i) — CNOT (A controls B: c↓↑ ↔ c↓↓) and SWAP (c↑↓ ↔ c↓↑) as index maps */
+const onA = (f) => (s) => { const p = f(s[0], s[1], s[4], s[5]), q = f(s[2], s[3], s[6], s[7]); return [p[0], p[1], q[0], q[1], p[2], p[3], q[2], q[3]]; }, perm = (k) => (s) => k.map((i) => s[i]);
+export const GATES = { hA: onA((a, b, c, d) => [(a + c) * h, (b + d) * h, (a - c) * h, (b - d) * h]), xA: onA((a, b, c, d) => [c, d, a, b]), zA: onA((a, b, c, d) => [a, b, -c, -d]), sA: onA((a, b, c, d) => [a, b, -d, c]),
+  cnot: perm([0, 1, 2, 3, 6, 7, 4, 5]), swap: perm([0, 1, 4, 5, 2, 3, 6, 7]) };
+export const applyTape = (s, tape = []) => tape.reduce((v, g) => GATES[g](v), s); DEFAULTS.tape = [];
+export function pair(id, th, ph, tape = []) { return onA((...v) => su2(v, -th / 2 * Math.sin(ph), th / 2 * Math.cos(ph), 0))(applyTape(BELL[id].flatMap((x) => [x, 0]), tape)); }   // the tape, THEN U_A ⊗ 1
 export const corr = (s, a, b) => { let e = 0; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) e += M(a)[i >> 1][j >> 1] * M(b)[i & 1][j & 1] * (s[2 * i] * s[2 * j] + s[2 * i + 1] * s[2 * j + 1]); return e; };   // ⟨(a·σ) ⊗ (b·σ)⟩, a and b in the x–z plane
-export function bell(s, id) {
+export function bell(s, id, tape = []) {   // the axes signed to the preset's state after the tape, before the knobs
   const add = (u, v) => u.map((x, i) => x + v[i]), rA = add(r1([s[0], s[1], s[4], s[5]]), r1([s[2], s[3], s[6], s[7]])), rB = add(r1(s.slice(0, 4)), r1(s.slice(4))), r = Math.min(1, Math.hypot(...rA));
-  const c0 = pair(id, 0, 0), sx = corr(c0, X, X) < 0 ? -1 : 1, sz = corr(c0, Zx, Zx) < 0 ? -1 : 1, b = [sx * h, sz * h], b2 = [-sx * h, sz * h];
+  const c0 = pair(id, 0, 0, tape), sx = corr(c0, X, X) < 0 ? -1 : 1, sz = corr(c0, Zx, Zx) < 0 ? -1 : 1, b = [sx * h, sz * h], b2 = [-sx * h, sz * h];
   return { rA, rB, r, S: H2((1 + r) / 2) + H2((1 - r) / 2), chsh: corr(s, Zx, b) + corr(s, Zx, b2) + corr(s, X, b) - corr(s, X, b2), max: 2 * Math.sqrt(2 - r * r), axes: [Zx, X, b, b2].map(([x, z]) => [x, 0, z]) };
 }
