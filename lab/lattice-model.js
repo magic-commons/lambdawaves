@@ -96,7 +96,7 @@ export function closed(p, E) {
       return { levels: null, line: `Φ = ${p.fp / g}/${q} · Harper: ${q} band${q > 1 ? 's' : ''}${q > 1 && q % 2 === 0 ? ' (the middle two touch)' : ''} · ${L > 2 && (p.fp * L) % p.fq === 0 ? 'torus' : 'open edges: q ∤ L'}`, sub: G.length ? 'measured, the largest gaps ' + G.map(([w, e]) => `${w.toFixed(3)} at E = ${e.toFixed(2)}`).join(' · ') : 'no open gap' }; }
     case 'walk': return { levels: null, line: 'a map: σ² → (1 − 1/√2) t² ≈ 0.2929 t², the fronts at ±t/√2 (Konno 2002) · a coin-tossing walker σ² = t', sub: 'no levels: the step’s quasi-energies sin ω = sin k/√2 are a band' };
     case 'spin': { const N = p.ns, A = N >> 1, e = Array.from({ length: N }, (_, k) => 2 * Math.cos(Math.PI * (k + 1) / (N + 1)));
-      return { levels: Float64Array.from({ length: 1 << N }, (_, s) => e.reduce((a, x, k) => a + ((s >> k) & 1 ? x : 0), 0)).sort(), line: `Jordan–Wigner: E = Σ_occupied 2J cos(πk/(N+1)) · Page’s mean ${(A * Math.LN2 - 2 ** (2 * A - N - 1)).toFixed(3)} · the most ln 2^{${A}} = ${(A * Math.LN2).toFixed(3)}` }; }
+      return { levels: Float64Array.from({ length: 1 << N }, (_, s) => e.reduce((a, x, k) => a + ((s >> k) & 1 ? x : 0), 0)).sort(), line: `Jordan–Wigner: E = Σ_occupied 2J cos(πk/(N+1)) · Page’s mean ${(A * Math.LN2 - 2 ** (2 * A - N - 1)).toFixed(3)} · the most ${A} ln 2 = ${(A * Math.LN2).toFixed(3)}` }; }
     default: return { levels: null, line: 'the sheet: E(k) = ±J|1 + e^{ik·a₁} + e^{ik·a₂}| ∈ [−3J, 3J] — the flake’s levels, not the sheet’s' };
   }
 }
