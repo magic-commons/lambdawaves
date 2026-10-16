@@ -71,8 +71,9 @@ mark('navigator.gpu', a.gpu); mark('isSecureContext', a.secure === true); mark('
 
 // (b) the field
 const ff = await page.ev(`new Promise((r) => { const t = () => (window.__LW && __LW.stats && __LW.stats.frames > 0) ? r(Math.round(performance.now())) : performance.now() > 60000 ? r(-1) : setTimeout(t, 5); t(); })`);
-await until(() => page.ev('!!(window.__LW && __LW.ready === true)'), 30000);
-await page.ev(`(() => { const p = document.getElementById('warnPane'), b = p && p.querySelector('.warn-btn'); if (p && !p.hidden && b) b.click(); })()`, true);
+// the start by the hand's road: CONTINUE on the notice (Electron is not a webdriver), then NEW on the title screen (0.5.0 C6)
+await until(() => page.ev(`(() => { if (window.__LW && __LW.ready === true) return true;
+  const b = document.querySelector('.mir-dialog-actions [data-kind=primary]') || document.querySelector('.mir-opener-home:not([disabled])'); if (b) b.click(); return false; })()`, true), 30000);
 await page.ev('__LW.settle()');
 const b = await page.ev(`(async () => { const f = __LW.field, px = await __LW.readPixels(), ad = f.adapter;
   return { ready: __LW.ready === true, ok: f.ok, info: f.adapterInfo, fallback: ad && ((ad.info && ad.info.isFallbackAdapter) ?? ad.isFallbackAdapter), format: f.format,
@@ -86,11 +87,11 @@ mark('lwavesDesktop bridge', b.desktop === 'desktop'); console.log(`      first 
 let rt = false;
 try {
   const kept = await page.ev(`__LW.projects.save(${JSON.stringify(NAME)}) ? __LW.projects.exportText() : null`);
-  await page.ev(`document.querySelector('.pj-export').click()`, true);
+  await page.ev(`__LW.projects.download()`, true);
   await until(() => fs.existsSync(FILE) && fs.statSync(FILE).size === Buffer.byteLength(kept || ''));
   const disk = fs.existsSync(FILE) ? fs.readFileSync(FILE, 'utf8') : null;
   const gone = await page.ev(`__LW.projects.remove(${JSON.stringify(NAME)}) && !__LW.projects.list().some((p) => p.path === ${JSON.stringify(NAME)})`);
-  await page.ev(`document.querySelector('.pj-import input').click()`, true);
+  await page.ev(`__LW.projects.pick()`, true);
   const back = await until(() => page.ev(`__LW.projects.exportText(${JSON.stringify(NAME)})`));
   const same = !!(kept && back) && isDeepStrictEqual(JSON.parse(back).data, JSON.parse(kept).data) && isDeepStrictEqual(JSON.parse(back).notebook, JSON.parse(kept).notebook);
   rt = mark('export bytes on disk === exportText()', disk !== null && disk === kept, disk ? disk.length + ' B' : 'no file') & mark('removed', gone) & mark('re-imported data deep-equals original', same);

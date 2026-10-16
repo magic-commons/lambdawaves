@@ -1,7 +1,7 @@
 /* bench-chromium.mjs — the COMPOSITOR baseline: Chromium (Electron 44 / Chromium 152) with the real GPU on the session display.
  * Headless Chromium on this box composites in SwiftShader, so the frost / refractive / Frame costs can only be read here.
  *   LW_PORT=8721 node tools/perf/bench-chromium.mjs [out.json]
- * Needs an Electron binary: ELECTRON=/path/to/electron (default: the hosts-m0 worktree's node_modules/electron).
+ * Needs an Electron binary: ELECTRON=/path/to/electron (default: tools/platform/electron's, after `npm ci` there).
  * A window opens on the desktop for the run and closes itself. */
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
@@ -13,7 +13,7 @@ const PROFILE = fs.mkdtempSync(path.join(os.tmpdir(), 'lw-electron-'));
 const PORT = process.env.LW_PORT || '8721';
 const OUT = process.argv[2] || 'research/optimization-2026-09-24/baseline-chromium.json';
 const W = +(process.env.W || 1920), H = +(process.env.H || 1080);
-const ELECTRON = process.env.ELECTRON || createRequire('/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/hosts-m0/shells/electron/package.json')('electron');
+const ELECTRON = process.env.ELECTRON || createRequire(new URL('../platform/electron/package.json', import.meta.url))('electron');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const cdpPort = 9700 + Math.floor(Math.random() * 200);
 const R = { at: new Date().toISOString(), viewport: [W, H], host: 'electron', boot: null, scenes: [], notes: [] };
