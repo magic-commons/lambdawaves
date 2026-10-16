@@ -62,7 +62,7 @@ const T = {                                                    // the operation 
   at30: (R) => !T.at0(R),
 };
 const neg = (row) => row.map((v) => -v);
-const GROUPS = {
+export const GROUPS = {
   C1: { gens: [], cols: [['E', 1, 3]], irreps: { A: [1] } },
   Cs: { gens: [SH], cols: [['E', 1, 3], ['σh', -1, 1]], irreps: { "A'": [1, 1], "A''": [1, -1] } },
   C2: { gens: [Rz(Math.PI)], cols: [['E', 1, 3], ['C2', 1, -1]], irreps: { A: [1, 1], B: [1, -1] } },

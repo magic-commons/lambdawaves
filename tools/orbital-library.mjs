@@ -538,8 +538,8 @@ const oracles = Object.fromEntries(MOLECULES.filter((m) => !rowIds.has(m.id)).ma
   return [m.id, o];
 }));
 const catalogueText = JSON.stringify({ schema: SCHEMA, generator: 'tools/orbital-library.mjs', note: 'the catalogue lab/molecules.js reads; each row\'s record is lab/library/<hash>.json — deployed, never precached (sw.js DATA)',
-  rows: out.map((r) => r.catalogue), oracles }, null, 1) + '\n';
-const want = new Set(out.map((r) => recordPath(r.hash).slice('library/'.length)));
+  rows: out.map((r) => r.catalogue), oracles, ...(disk.vibrations ? { vibrations: disk.vibrations } : {}) }, null, 1) + '\n';   // 0.7.0 V1: tools/vibrate-library.mjs owns `vibrations`; carried through as it is
+const want = new Set([...out, ...(disk.vibrations || [])].map((r) => recordPath(r.hash).slice('library/'.length)));
 const present = existsSync(LAB + 'library') ? readdirSync(LAB + 'library') : [];
 const sizes = SECTIONS.map((s) => { const rs = out.filter((r) => r.catalogue.section === s); return `${s} ${rs.length} records ${rs.reduce((t, r) => t + r.catalogue.bytes, 0)} B`; }).join(' · ');
 if (CHECK) {

@@ -63,7 +63,8 @@ export function createMolecules(app) {
        model is playing and which observable the field shows.  See molecular-session.js. */
     session: app.state.molSession,
     derived: (fill) => (app.state.history ? app.state.history.absorb(fill) : fill()),   // S4 · a solve's derived defaults join the row that asked for it
-    now: () => clock.t });
+    now: () => clock.t, clock, fps: () => app.ctl.stats.fps,   // 0.7.0 V1 VIBRATE: the flash law reads RATE and the fps; BREATHE sets RATE (the knob's road) and plays
+    breathe(r) { ui.rateKnob.set(r); if (!app.ctl.modHand('transport.rate', r)) clock.setRate(r); clock.play(performance.now() / 1000); schedule(TIER.EVOLVE); } });
   /* 0.5.1 D2 · THE MOLECULE'S HEAD (R6-G): a HAND pick shows its head (latex-state.js moleculeHead: every number the record's stem or
      the live solve) in THE FADE's seat once THIS molecule's solve lands — held until Escape, a press on the picture after 2.5 s, or
      the next pick: the dismiss half of the kit's greet (info/page.js; λWAVES has no pages model).  A restore, an undo, a project,

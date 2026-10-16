@@ -15,7 +15,7 @@ export const recordPath = (hash) => 'library/' + hash + '.json';
 export const atomsKey = (atoms) => sha256Hex(JSON.stringify(atoms.map((a) => [a.Z, a.x, a.y, a.z])));
 
 /* ── the record ── a big array is { $f64 | $i32: base64 } (little-endian, exact); everything else is plain JSON */
-const TYPED = { $f64: Float64Array, $i32: Int32Array };
+const TYPED = { $f64: Float64Array, $i32: Int32Array, $f32: Float32Array };
 export function arr(v) {
   for (const k in TYPED) if (v && typeof v[k] === 'string') {
     const s = atob(v[k]), u = new Uint8Array(s.length);
@@ -24,7 +24,7 @@ export function arr(v) {
   }
   return null;
 }
-const len = (v) => (v && typeof (v.$f64 || v.$i32) === 'string' ? atob(v.$f64 || v.$i32).length / (v.$f64 ? 8 : 4) : -1);
+const len = (v) => (v && typeof (v.$f64 || v.$i32 || v.$f32) === 'string' ? atob(v.$f64 || v.$i32 || v.$f32).length / (v.$f64 ? 8 : 4) : -1);
 /** everything a reader needs before it trusts a record; [] is a valid one */
 export function validateRecord(r) {
   const bad = [], need = (ok, why) => { if (!ok) bad.push(why); return ok; };
@@ -35,6 +35,9 @@ export function validateRecord(r) {
   if (need(Array.isArray(I.atoms) && I.atoms.length > 0 && I.atoms.every((a) => Number.isInteger(a.Z) && [a.x, a.y, a.z].every(Number.isFinite)), 'input.atoms'))
     need(I.atomsSha256 === atomsKey(I.atoms), 'input.atoms: not the geometry the record was made at (atomsSha256)');
   need(typeof I.basis === 'string' && Number.isInteger(I.charge), 'input.basis / input.charge');
+  if (r.kind === 'vibrate') { const V = r.vibrate || {}, K = V.K, n = G.nAO, N = (I.atoms || []).length, fin = (a) => Array.isArray(a) && a.length === K && a.every(Number.isFinite);   // 0.7.0 V1 THE MODES
+    return need(Number.isInteger(K) && K > 0 && Number.isInteger(n) && typeof G.hash === 'string' && ['omega', 'mu', 'q0'].every((k) => fin(V[k])) && Array.isArray(V.irrep) && V.irrep.length === K
+      && len(V.L) === 3 * N * K && len(V.D1) === n * n * K && [arr(V.L), arr(V.D1)].every((a) => a.every(Number.isFinite)), 'vibrate: K modes — ω, μ, Q₀, irreps, L at 3N·K and D₁ at nAO²·K, finite'), bad; }
   for (const k of ['orbitals', 'states', 'rpa', 'tdhf']) need(typeof caps[k] === 'boolean', 'caps.' + k);
   /* 0.4.0 S4c: a FRONTIER record (C₆₀) carries ε and a few whole columns of C — `ground.cols`, ascending — and nothing else */
   const n = G.nAO, nocc = G.nocc, d = nocc * (n - nocc), cols = G.cols;
@@ -55,6 +58,8 @@ export function validateRecord(r) {
   }
   return bad;
 }
+/** a vibrate record (0.7.0 V1) as chem.vib.frames and the card read it: L (3N·K) and D₁ (nAO²·K) typed, the rest as written */
+export const decodeVibrate = (r) => ({ ...r.vibrate, id: r.id, atoms: r.input.atoms, basis: r.input.basis, charge: r.input.charge, nAO: r.ground.nAO, L: arr(r.vibrate.L), D1: arr(r.vibrate.D1), dipole1: arr(r.vibrate.dipole1) });
 /** the record as the worker's solve cache holds it: typed arrays, the RPA sticks and the TDA ladder as the wire's objects */
 export function decodeRecord(r) {
   const G = r.ground, n = G.nAO, nocc = G.nocc, d = nocc * (n - nocc);

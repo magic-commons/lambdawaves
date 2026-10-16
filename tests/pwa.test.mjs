@@ -335,13 +335,13 @@ assert.deepEqual(DATA, ['library/'], 'sw.js §1b: the DATA roots are exactly lib
 assert.ok(listed.includes('library.json'), 'sw.js: the catalogue lab/library.json must be precached — offline, the menu could not name a record');
 const CAT = JSON.parse(text('library.json')), dataFiles = onDisk.filter(IS_DATA);
 assert.ok(Array.isArray(CAT.rows) && CAT.rows.length >= 2, 'lab/library.json: no rows');
-for (const r of CAT.rows) {
+for (const r of [...CAT.rows, ...(CAT.vibrations || [])]) {   // 0.7.0 V1: the normal-mode records too
   const rel = 'library/' + r.hash + '.json';
   assert.ok(/^[0-9a-f]{64}$/.test(r.hash) && existsSync(path.join(LAB, rel)), `lab/library.json: ${r.id}'s record ${rel} is not on disk`);
   assert.equal(createHash('sha256').update(read(rel)).digest('hex'), r.hash, `lab/${rel} does not hash to its name`);
   assert.equal(statSync(path.join(LAB, rel)).size, r.bytes, `lab/library.json: ${r.id}'s byte count is stale`);
 }
-assert.deepEqual(dataFiles.filter((f) => !CAT.rows.some((r) => f === 'library/' + r.hash + '.json')), [], 'a file in lab/library/ that no catalogue row reaches');
+assert.deepEqual(dataFiles.filter((f) => ![...CAT.rows, ...(CAT.vibrations || [])].some((r) => f === 'library/' + r.hash + '.json')), [], 'a file in lab/library/ that no catalogue row reaches');
 assert.deepEqual(listed.filter(IS_DATA), [], 'a DATA file is in the precache');
 /* 0.5.0 A11 · THE KIT SKIP, proved on a fixture (on a 1.4 tree the paths do not exist) and on whatever is on disk: the packs and
    the token schema are skipped; the stylesheet and the pseudo-locale module beside them, and every other kit file, are not. */

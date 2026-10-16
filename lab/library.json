@@ -5562,5 +5562,70 @@
    "what": "PySCF 2.14.0 RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms",
    "energy": -5091.063777547901
   }
- }
+ },
+ "vibrations": [
+  {
+   "id": "H2O",
+   "basis": "sto-3g",
+   "hash": "6625ecd5d245b8833269f83338b4e815d837dfe8bd9e73a1e79a94dcbd1dac12",
+   "bytes": 2878,
+   "modes": 3
+  },
+  {
+   "id": "C6H6",
+   "basis": "sto-3g",
+   "hash": "fbd9c8e9901b775a4681e1ad4a7f6ea487386ff18d5fb16950429851d9c98f1a",
+   "bytes": 227210,
+   "modes": 30
+  },
+  {
+   "id": "N2",
+   "basis": "sto-3g",
+   "hash": "69a066c896ce6a366ef93eb1c804cfa0b7ec3a293969bccdc5164a89f7c5ec99",
+   "bytes": 1893,
+   "modes": 1
+  },
+  {
+   "id": "CO2",
+   "basis": "sto-3g",
+   "hash": "5e0d9447701998bfac2f78fc081b9942ebb8488cce40d3a1b1fe08c7df3a2bf7",
+   "bytes": 7150,
+   "modes": 4
+  },
+  {
+   "id": "NH3",
+   "basis": "sto-3g",
+   "hash": "f26e0575a62605c1a31854a3707ebc567b67bab3886e160c1d2f618fe6408d88",
+   "bytes": 5314,
+   "modes": 6
+  },
+  {
+   "id": "CH4",
+   "basis": "sto-3g",
+   "hash": "e02beb2c8e8427d0e061127d3a3b199232c0db5dcd563aa7f8960b2333322af7",
+   "bytes": 8585,
+   "modes": 9
+  },
+  {
+   "id": "HF",
+   "basis": "sto-3g",
+   "hash": "44bafaaffe610e9f0d04f89191a98b645b40ba0734543cc3f7bc6c28a65ac5a2",
+   "bytes": 1540,
+   "modes": 1
+  },
+  {
+   "id": "H2CO",
+   "basis": "sto-3g",
+   "hash": "19220a470ae79b1c96a33b1489ac84f9fb7aac6f45b86ec6c71b19ddc72b2671",
+   "bytes": 7846,
+   "modes": 6
+  },
+  {
+   "id": "C2H4",
+   "basis": "sto-3g",
+   "hash": "a2c8678e85a89f3a79a42a0af93c5f3664a1b21898221b8c070d4e3febcb2e7e",
+   "bytes": 18761,
+   "modes": 12
+  }
+ ]
 }

@@ -23,6 +23,8 @@ export const VERBS = [
       if (a.basis && a.basis !== c.basis) await c.setBasis(a.basis); if (a.view) c.setView(a.view);   // after the pick's solve (and the basis's)
       const r = a.orbital === undefined ? null : orb(c, a.orbital); return typeof r === 'string' ? r : { own: true };
     } },
+  { id: 'vibrate', args: { on: 'bool', mode: '?number', amp: '?number', breathe: '?bool' }, doc: "MOLECULES' VIBRATE: the nuclei breathe in one normal mode (mode: its place in the MODE list from 0; amp 0…4 in Q₀, past 2 not harmonic); breathe: true presses BREATHE — RATE so one breath takes a second (\"make water breathe\")",
+    async run(app, a) { const c = app.state.chem; if (!c.on) return 'VIBRATE needs MOLECULES on'; const line = await c.vibrate(a); return a.on && !line ? 'no modes recorded for this molecule (VIBRATE plays an STO-3G record of a solved molecule)' : { fade: line ? 'VIBRATE · ' + line : 'VIBRATE off' }; } },
   { id: 'view', args: { id: 'enum density|phase|real|imag|diff|reim|orbital|esp', orbital: '?string|number' },
     doc: 'the observable on the field: under MOLECULES density|orbital|diff|esp (orbital by number or name), otherwise density|phase|real|imag|diff|reim',
     run(app, a) {
@@ -99,7 +101,7 @@ export function createVerbs(app) {
     return { owner: mol ? 'MOLECULES' : H.label.split(/\s{2,}/)[0],
       molecule: mol && (live ? { formula: mol.formula.replace(/<\/?m>/g, ''), name: mol.name, basis: BASIS_LABEL[c.basis], E: +live.energy.toFixed(6), nocc: live.nocc, nAO: live.nAO, group: s.pointGroup, homo: s.homo,
         gapEh: +s.gapEh.toFixed(4), gapEv: +s.gapEv.toFixed(2), orbital: cs.orbitalName, head: st && st.head } : { formula: mol.formula.replace(/<\/?m>/g, ''), name: mol.name, solving: true }),
-      status: st ? st.line : null,
+      status: st ? st.line : null, ...(mol && c.vibLine() ? { vibrating: 'vibrating ' + c.vibLine() } : {}),
       states: mol ? null : { prose: stateLatex({ H, states: P0.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: reg.re0[a], im: reg.im0[a] })) }).split('\n')[0],
         populations: Object.fromEntries(P0.map((a) => [lbl(a), +(reg.re0[a] ** 2 + reg.im0[a] ** 2).toFixed(4)])) },
       repeats: ro(ui.periodRo), rate: clock.rate, t: +clock.t.toFixed(3), playing: !!clock.playing,

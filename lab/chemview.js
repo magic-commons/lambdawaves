@@ -27,7 +27,7 @@ import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitTex
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js';
-import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab } from './library.js';
+import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -59,10 +59,11 @@ const AO_GUESS = (atoms) => atoms.reduce((k, a) => k + (a.Z === 1 ? 1 : 5), 0); 
 export function createChem(host, api) {
   let on = false, active = api.active ? !!api.active() : true;
   let preset = 'H2O', basis = 'sto-3g', view = 'density', orbital = null, axis = 'y';
-  let kappa = 1e-3, speed = 10, dt = 0.01, integrator = 'mmut', tda = false, core = false, valence = false;
+  let kappa = 1e-3, speed = 10, dt = 0.01, integrator = 'mmut', tda = false, core = false, valence = false, pulse = 'none';
   let sol = null, rt = null, running = false, inflight = false, said = null;   // said: 0.5.4 P4's status of what is on stage (tell)
   let solveSeq = 0, specTask = 0, spec = null, fit = null, fitErr = null, lastSpec = 0, lastFit = 0, selected = null;
   let fieldHash = null, mBuf = null, oBuf = null, dRef = null, dBuf = null, statusText = 'no molecule solved yet', pending = null;
+  let vib = null, vibOn = false, vibK = 0, vibAmp = 1, vibFr = null, vibBusy = false, vibAgain = false, vibD = null, vibJ = -1, vibRate = 0, vibSh = null, vibAt = null, pendingVib = null;   // 0.7.0 V1 VIBRATE
   /* THE RESTORED ORBITAL INDEX HAS TO SURVIVE THE RE-SOLVE THAT RESTORING IT CAUSES.  A solve sets `orbital` to
      HOMO, which is right for a molecule the hand just picked and WRONG for one a file just reopened: load() puts a
      different molecule up, the solve that follows overwrote the saved index with nocc, and the round trip lost it.
@@ -189,7 +190,8 @@ export function createChem(host, api) {
   const r2 = el('div', 'row tight', host);
   const aSeg = seg({ label: 'KICK AXIS', value: 'y', options: AXES.map((a) => ({ id: a, label: a.toUpperCase(), title: 'Strike the density with exp(−iκ ' + a + ')' })),
     onChange: (v) => { axis = v; requestSpectrum(true); paint(); } });
-  r2.appendChild(aSeg.root);
+  r2.appendChild(aSeg.root); const PULSES = ['none', 'step', 'ramp', 'wave', 'gaussian'];   // 0.7.0 V1 · PULSES: κ·f(t) along the kick axis for 40 a.u. (density.js fieldOf), the WAVE at the first bright root — instead of the δ-kick
+  const pSeg = seg({ label: 'PULSE', value: 'none', options: PULSES.map((id) => ({ id, label: id.toUpperCase(), title: id === 'none' ? 'The δ-kick exp(−iκ q̂)' : 'κ·' + { step: '1', ramp: 't', wave: 'cos ωt, ω the first bright RPA root', gaussian: 'e^{−0.05 t²}' }[id] + ' along the kick axis, 0 ≤ t < 40 a.u., instead of the kick' })), onChange: (v) => { pulse = v; setRun(false); rt = spec = fit = null; pushMatrix(); refresh(); } }); r2.appendChild(pSeg.root);
   const kapKnob = knob({ label: '<m>κ</m>', min: 1e-4, max: 1e-2, value: 1e-3, log: true, title: 'The δ-kick strength; linear response wants the smallest κ the trace can carry',
     fmt: (v) => v.toExponential(1), onInput: (v) => { kappa = v; } });
   r2.appendChild(kapKnob.root);
@@ -236,6 +238,12 @@ export function createChem(host, api) {
      captureLayout `more`). */
   const note = host.lastElementChild;
   const more = el('div', 'mol-more', host); more.id = 'mol-more';
+  /* 0.7.0 V1 · VIBRATE, the fold's first row: the molecule's normal-mode record (tools/vibrate-library.mjs), fetched on the first press; the nuclei at
+     R₀ + A·Q₀·cos(ωt)·L and the density LINEAR + one McWeeny step — 32 phase samples from the worker (chem.vib.frames), posed per frame in update() */
+  const rVib = el('div', 'row tight mol-vib', more), vibSw = sw({ label: 'VIBRATE', value: false, title: 'The nuclei breathe in one normal mode and the density with them (LINEAR + one McWeeny step): STO-3G RHF harmonic, as computed', onChange: (v) => { setVib(v); } });
+  const modeStep = stepper({ aria: 'Normal mode', list: false, items: [], value: null, cls: 'mol-step', onChange: (id) => { setVib(vibOn, +id); } }), roVib = readout({ label: 'MODE', cls: 'wide', value: '—' });
+  const ampKnob = knob({ label: 'AMPLITUDE', min: 0, max: 4, value: 1, title: 'In units of Q₀ = √(ħ/μω), the zero-point turning point; past 2 Q₀ it is not harmonic here', fmt: (v) => v.toFixed(1) + ' Q₀', onInput: (v) => { setVib(vibOn, vibK, v); } });
+  rVib.append(vibSw.root, modeStep.root, ampKnob.root, trig({ label: 'BREATHE', title: 'RATE so one breath takes a second, the clock playing, VIBRATE on', onFire: () => { breathe(); } }).root, roVib.root);
   const rTda = el('div', 'row tight', more); rTda.appendChild(tdaSw.root); rTda.appendChild(coreSw.root);
   for (const n of [r2, fr, cv, cvCore, rr, note]) more.appendChild(n);
   const h2Note = el('div', 'note', more); h2Note.hidden = true;   // 0.6.2 H2: H₂'s hidden correlation, STO-3G only
@@ -284,7 +292,7 @@ export function createChem(host, api) {
     const key = preset + '|' + basis + '|' + chemCharge(preset);
     if (!force && sol && sol.key === key) { refresh(); if (back) status(back, 'warn'); return Promise.resolve(sol); }
     if (!force && pending && pending.key === key) return back ? pending.p.then((r) => { status(back, 'warn'); return r; }) : pending.p;   // …and one IN FLIGHT is the same answer
-    setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null;
+    setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null; if (vibOn) setVib(false);
     const atoms = chemAtoms(preset), charge = chemCharge(preset);
     /* TWO STAGES, ONE SEQUENCE NUMBER.  The ground state lands first — the molecule appears on the field, the
        ORBITALS register gets its ladder, the readouts fill — and the spectrum follows, because it is the roots
@@ -336,12 +344,12 @@ export function createChem(host, api) {
       /* 0.3.1 · S4: the defaults this landing fills (the orbital, and through notify() the register's selection and the STATES
          ground lane — one task, probes/S4/chem-fill-timing.js) belong to the history row that asked for the solve */
       const fill = () => {
-        sol = r; sol.key = key; sol.seq = seq; sol.note = note; mBuf = oBuf = dBuf = dRef = null; fieldHash = null;
+        sol = r; sol.key = key; sol.seq = seq; sol.note = note; mBuf = oBuf = dBuf = dRef = vibSh = null; fieldHash = null;
         sol.identity = MS ? MS.identityOf({ atoms, basisHash: r.hash, charge, multiplicity: 1, model: 'RHF' }) : null;   // 0.5.4 P1: DATA, never a stamp (R13)
         const named = keyed(r.names, pendingKey);
         orbital = named ? named.k : (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
         pendingOrbital = pendingKey = null;
-        rebuildOrbKnob(); pushField(); refresh(); tell(); notify(); symmetryLine(sol.D, 'still');
+        rebuildOrbKnob(); pushField(); refresh(); tell(); notify(); symmetryLine(sol.D, 'still'); vibSay(); vibLand();
       };
       if (api.derived) api.derived(fill); else fill();
       if (r.roots) return r;                                                 // the frame-thread fallback answers whole
@@ -385,7 +393,8 @@ export function createChem(host, api) {
     const seq = solveSeq;
     /* SYNTHESIS decision 2: the card's MMUT is UNRESTARTED, and 0 is how that is spelled on the wire.  It was
        never sent before, so the engine took its own default of 50 while this window said "unrestarted". */
-    return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa }, restartEvery: RESTART_EVERY }).then((r) => {
+    return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa }, restartEvery: RESTART_EVERY,
+      pulse: pulse === 'none' ? null : { shape: pulse, omega: (bright().find((k) => k.f > 1e-3) || {}).omega || 0 } }).then((r) => {   // 0.7.0 V1 PULSES
       if (seq !== solveSeq) return null;
       if (!r || r.error || !r.ok) { status('kick failed: ' + ((r && (r.refused || r.error)) || 'no real-time engine'), 'warn'); if (r && r.refused) setRun(false); return null; }
       rt = { t: r.t || 0, D_re: r.D_re || null, D_im: r.D_im || null, electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0,
@@ -403,7 +412,7 @@ export function createChem(host, api) {
   function setRun(v) {
     const next = !!v && !!sol;
     if (next === running) { if (runSw.get() !== next) runSw.set(next); return running; }
-    running = next; runSw.set(running);
+    running = next; runSw.set(running); if (running && vibOn) setVib(false);
     /* the RUN switch IS the tdhf model's claim: while it is up the run outranks the register and the still card,
        and when it goes down the session hands the field to whoever is next, in one place, by rank */
     if (S()) S().claim('tdhf', running, 'MOLECULES RT RUN is propagating the density');
@@ -560,7 +569,7 @@ export function createChem(host, api) {
     tell(); api.repaint(); return flowOn;
   }
   function densityRe() {
-    const n = sol.nAO, src = (rt && rt.D_re) || sol.D, P = valence ? corePart() : null;
+    const n = sol.nAO, src = vibD || (rt && rt.D_re) || sol.D, P = valence ? corePart() : null;
     if (!P && src instanceof Float32Array && src.length === n * n) return src;
     if (!mBuf || mBuf.length !== n * n) mBuf = new Float32Array(n * n);
     for (let i = 0; i < n * n; i++) mBuf[i] = P ? src[i] - P[i] : src[i];
@@ -590,12 +599,12 @@ export function createChem(host, api) {
    * on the difference itself and not on the two large numbers it came from.  The reference is the matrix at the
    * moment REF was taken (the kick, or switching to DIFF on a still molecule), kept in f64 beside it. */
   function captureRef() {
-    const n = sol.nAO, src = (rt && rt.D_re) || sol.D;
+    const n = sol.nAO, src = vibD || (rt && rt.D_re) || sol.D;
     if (!dRef || dRef.length !== n * n) dRef = new Float64Array(n * n);
     for (let i = 0; i < n * n; i++) dRef[i] = src[i];
   }
   function deltaD() {
-    const n = sol.nAO, src = (rt && rt.D_re) || sol.D;
+    const n = sol.nAO, src = vibD || (rt && rt.D_re) || sol.D;
     if (!dRef || dRef.length !== n * n) captureRef();                    // no reference yet: this instant IS the reference, Δ ≡ 0
     if (!dBuf || dBuf.length !== n * n) dBuf = new Float32Array(n * n);
     for (let i = 0; i < n * n; i++) dBuf[i] = src[i] - dRef[i];
@@ -814,10 +823,46 @@ export function createChem(host, api) {
   }
 
   /* ── the frame, the field-owner switch, and the saved state ───────────────────────────────────── */
-  function update() { if (!on) return; pump(); if (view === 'esp') espPump(); }
+  function update(t) { if (!on) return; pump(); if (view === 'esp') espPump(); if (vibFr && sol) vibPose(t); }
+  /* 0.7.0 V1 · VIBRATE: on/off, the mode, the amplitude (× Q₀); the record decoded once a molecule; ONE chem.vib.frames in flight, the newest asked next */
+  async function setVib(v, k = vibK, a = vibAmp) {
+    const row = PRESET_BY_ID.get(preset).vibrate, was = vibOn; vibK = k | 0; vibAmp = Math.min(4, Math.max(0, +a || 0));
+    vibOn = !!(v && row && sol && sol.D && basis === 'sto-3g'); vibSw.set(vibOn);
+    if (!vibOn) { vibFr = vibD = vibAt = null; vibJ = -1; if (was && S() && sol && S().pose(model(), sol.shells)) pushMatrix(); if (v) status(row ? 'VIBRATE plays the STO-3G record of a solved molecule' : 'no modes recorded for this molecule', 'warn'); vibSay(); tell(); return false; }
+    setRun(false);
+    if (!vib || vib.id !== preset) { const got = await fetchRecord(row.hash, { network: true }); if (!vibOn) return false; if (!got.record) { status('VIBRATE: the mode record did not open — ' + got.why, 'warn'); return setVib(false); }
+      vib = decodeVibrate(got.record); vibSh = null; modeStep.setItems(vib.name.map((nm, j) => ({ id: String(j), label: `${nm} ${Math.round(vib.omega[j])} cm⁻¹ · ${vib.irrep[j]}` }))); }
+    vibK = Math.min(vibK, vib.K - 1); modeStep.set(String(vibK)); vibAsk(); vibSay(); tell(); return true;
+  }
+  function vibAsk() {
+    if (!vibOn || !vib) return; if (vibBusy) { vibAgain = true; return; }
+    const k = vibK, seq = solveSeq; vibBusy = true;
+    call({ op: 'chem.vib.frames', basis, vib, k, amp: vibAmp, K: 32 }).then((r) => { vibBusy = false;
+      if (r && r.refused) status(r.refused, 'warn'); else if (r && r.D && seq === solveSeq && vibOn) { vibFr = { D: r.D, dipole: r.dipole, q: r.q, k }; vibJ = -1; api.repaint(); }
+      if (vibAgain) { vibAgain = false; vibAsk(); } }, () => { vibBusy = false; });
+  }
+  const vibW = () => vib.omega[vibK] / 219474.6313632, flash = () => { const fps = api.fps(), w = aliasOf([0, vibW()], api.clock.rate, fps >= 10 ? Math.round(fps) : 60); return w && w.alias > FLASH_HZ ? w : null; };
+  /** the frame: j = round(K·frac(ωt/2π)) — held at Q = 0 (j = K/4) when the breath would flash — the shells moved to R₀ + Q·L and D[j] published */
+  function vibPose(t) {
+    const K = vibFr.q.length, held = flash(), j = held ? K / 4 : Math.round(K * ((vibW() * t / (2 * Math.PI)) % 1 + 1)) % K;
+    if (j === vibJ && api.clock.rate === vibRate) return; vibJ = j; vibRate = api.clock.rate;
+    const Q = vibFr.q[j], o = 3 * vib.atoms.length * vibFr.k, n = sol.nAO, L = vib.L;
+    vibAt = vib.atoms.map((a, i) => ({ Z: a.Z, x: a.x + Q * L[o + 3 * i], y: a.y + Q * L[o + 3 * i + 1], z: a.z + Q * L[o + 3 * i + 2] }));
+    if (!vibSh) vibSh = sol.shells.map((s) => ({ ...s, center: s.center.slice(), at: vib.atoms.findIndex((a) => a.x === s.center[0] && a.y === s.center[1] && a.z === s.center[2]) }));
+    for (const s of vibSh) { const a = vibAt[s.at]; s.center[0] = a.x; s.center[1] = a.y; s.center[2] = a.z; }
+    vibD = vibFr.D.subarray(j * n * n, (j + 1) * n * n); if (S() && S().pose(model(), vibSh)) pushMatrix(); vibSay(held);
+  }
+  function vibSay(held = vibOn && vib && flash()) {
+    const row = PRESET_BY_ID.get(preset).vibrate, w = vibOn && vib ? vibW() : 0; rVib.classList.toggle('off', !row);
+    roVib.set(!w ? (row ? '—' : 'no modes recorded for this molecule') : `${vib.name[vibK]} ${Math.round(vib.omega[vibK])} cm⁻¹ · ${vib.irrep[vibK]} · ${vibAmp.toFixed(1)} Q₀ = ${(vibAmp * vib.q0[vibK]).toFixed(3)} bohr · T ${Math.round(2 * Math.PI / w)} a.u. · `
+      + (held ? `held: ${held.alias.toFixed(1)} Hz at this RATE, above ${FLASH_HZ} a second — RATE ≤ ${Math.floor(2 * Math.PI * FLASH_HZ / w)} breathes` : `${(w * api.clock.rate / (2 * Math.PI)).toFixed(1)} Hz on screen`) + (vibAmp > 2 ? ' · not harmonic here' : ''));
+  }
+  async function breathe() { if (!(await setVib(true))) return false; api.breathe(Math.min(3000, 2 * Math.PI / vibW())); return true; }   // one breath a second: always under the flash law
+  const vibLine = (tail = '') => (vibOn && vib ? `${vib.name[vibK]} ${Math.round(vib.omega[vibK])} cm⁻¹ · ${vib.irrep[vibK]} at ${vibAmp.toFixed(1)} Q₀${tail}` : null);
+  const vibLand = () => { const p = pendingVib; pendingVib = null; if (p && sol) { ampKnob.set(Math.min(4, Math.max(0, +p.amp || 0))); setVib(true, p.mode, p.amp); } };
   function setOn(v) {
     on = !!v; if (onSw.get() !== on) onSw.set(on);
-    if (!on) { setRun(false); if (S() && fieldHash !== null) { S().drop(); fieldHash = null; } }
+    if (!on) { setRun(false); if (vibOn) setVib(false); if (S() && fieldHash !== null) { S().drop(); fieldHash = null; } }
     api.setOn(on);
     /* the claim is the whole handover: ON asks the session for the field (and it asserts this card's observable
        even before the solve lands, as the old fieldView() call did), OFF lets go and the session restores the
@@ -827,7 +872,7 @@ export function createChem(host, api) {
     else if (on) solve(preset);
     return on;
   }
-  const presentation = () => ({ preset, basis, view, orbital, axis, kappa, speed, dt, integrator, tda, core, valence, on });
+  const presentation = () => ({ preset, basis, view, orbital, axis, kappa, speed, dt, integrator, tda, core, valence, on, ...(vibOn ? { vibrate: { mode: vibK, amp: vibAmp } } : {}), ...(pulse !== 'none' ? { pulse } : {}) });
   /* ── THE SAVED STATE, and the one place this window departs from its commission ──────────────────────────────
    * save() returns THE PRESENTATION ONLY, not lab/molecule-state.js's record.  Two reasons, both in the tree:
    *   · rack.js:5048's law — "Solver caches, traces, collisions, particles and pulse runs do not [belong to the
@@ -888,13 +933,14 @@ export function createChem(host, api) {
     if (o.tda !== undefined) { tda = !!o.tda; tdaSw.set(tda); }
     if (o.core !== undefined) { core = !!o.core; coreSw.set(core); cvCore.hidden = !core; }
     if (o.valence !== undefined) { valence = !!o.valence; valSw.set(valence); }
+    if (vibOn) setVib(false); pendingVib = o.vibrate && Number.isFinite(o.vibrate.mode) ? o.vibrate : null; pulse = PULSES.includes(o.pulse) ? o.pulse : 'none'; pSeg.set(pulse);   // 0.7.0 V1: VIBRATE plays once this molecule's solve is in (vibLand)
     setRun(false); rt = null; spec = null; fit = null; selected = null;
     if (resolve && sol) sol = null;
     if (sol && pendingKey) { const m = keyed(sol.names, pendingKey); if (m) orbital = m.k; pendingKey = null; }   // S2: the same molecule, already solved: the name lands now
     seats(); tell();
     if (o.on !== undefined) setOn(!!o.on);
     else if (sol) { pushField(); refresh(); } else refresh();
-    return save();
+    vibLand(); return save();
   }
 
   /* the two models this window produces, named to the session once.  `push` is how the session asks this card to
@@ -921,9 +967,12 @@ export function createChem(host, api) {
     /** the chosen orbital as its S1 name { group, irrep, count, member } — what a link carries (0.4.0 S2); null when none is chosen or named */
     orbitalKey,
     /** 0.6.5 X2 · ESP: the pump's consumer (a `chem.esp` reply), and the caption a capture carries while its card is on the field */
-    onEsp, espCaption: () => (espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.${esp.cap ? ` · shown clipped at ${sgn(esp.cap)}` : ''}` : ''),
+    onEsp, espCaption: () => [espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.${esp.cap ? ` · shown clipped at ${sgn(esp.cap)}` : ''}` : '', vibLine(' · STO-3G RHF harmonic, as computed')].filter(Boolean).join(' · '),   // 0.7.0 V1: and the mode while VIBRATE plays
     /** 0.7.0 · the nuclei and the dipole AS DRAWN this frame (bohr, a.u.): the preset's atoms and the solve's dipole until VIBRATE poses them (V1); the skeleton and the atom labels read these, never moleculeAtoms */
-    atomsNow: () => chemAtoms(preset), dipoleNow: () => (sol && sol.dipole) || null,
+    atomsNow: () => (vibFr && vibAt) || chemAtoms(preset), dipoleNow: () => (vibFr && vibJ >= 0 ? Array.from(vibFr.dipole.subarray(3 * vibJ, 3 * vibJ + 3)) : (sol && sol.dipole) || null),
+    /** 0.7.0 V1 · VIBRATE from outside (the verb, __LW.chem): the row's own controls; `breathe` presses BREATHE; → the line while it plays, or null */
+    async vibrate({ on: v = true, mode, amp, breathe: b } = {}) { if (Number.isFinite(amp)) ampKnob.set(Math.min(4, Math.max(0, amp))); await (b ? breathe() : setVib(v, Number.isFinite(mode) ? mode : vibK, Number.isFinite(amp) ? amp : vibAmp)); return vibLine(); },
+    vibLine,
     /* THE LIBRARY (0.4.0 S4a): every record row with its installed lamp, and the INSTALL / REMOVE a section header (S4b) presses */
     async records() { await lamps(); return CHEM_PRESETS.flatMap((p) => Object.values(p.records || {}).map((r) => ({ id: p.id, basis: r.basis, hash: r.hash, bytes: r.bytes,
       caps: r.caps, recordOnly: !!p.recordOnly, installed: !!have.get(r.hash), label: optOf(p.id) ? optOf(p.id).textContent : null }))); },
