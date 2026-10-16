@@ -1022,6 +1022,8 @@ volume — Josh's one focus folder, his flagship on his own interface kit MIR. L
 
 **UPDATE 12:48 CDT, 2026-10-16 (Sos) — v0.9.2-alpha "Flow" CUT LOCALLY (version `65d8d62`, CHANGELOG `906b837`, snapshot 40): F1 THE CURRENT ON THE PLANE merged `3f2f6cf` (+58; 2p₊ Δ 1.9e-6), F2 THE MOMENTUM BREATH merged `0555e4f` (+5; every closed form to 1e-12; the oscillator's momentum radial is (−1)^{n_r}R_nl — the brief corrected); lock once 860 0/0; 30,091 lines. 0.9.3 Decohere LAUNCHING: D1 T₁ · T₂ ON THE SPHERE from `458752d` (branch `d1-decay`, 9611), D2 THE GATE SET from D1's merge (9621); cut script `~/.config/claude-backup/jobs/8497d75b/tmp/cut-0.9.3-alpha.sh` ready; CHANGES shape committed. Then 0.9.4 Separable (fill base at the 0.9.3 cut; THE LOCK ×2 at its merges). NO push, NO deploy, NO gh release.**
 
+**UPDATE 13:26 CDT, 2026-10-16 (Sos) — v0.9.3-alpha "Decohere" CUT LOCALLY (version `fa85b51`, CHANGELOG `aee3151`, snapshot 41): D1 T₁ · T₂ ON THE SPHERE merged `0f0d11f` (+19; closed forms to 1e-11; P↓'s sign corrected), D2 THE GATE SET merged `6d234c0` (+8; the Bell circuit exact; the knobs act after the tape); lock once 860 0/0; 30,118 lines. 0.9.4 Separable LAUNCHING: S1 THE CARTESIAN KERNEL + THE OSCILLATORS from `1e75234` (branch `s1-cartesian`, 9631), S2 THE CUBE from S1's merge (9641); THE LOCK ×2 at each merge (the one `field.js` edit); cut script `~/.config/claude-backup/jobs/8497d75b/tmp/cut-0.9.4-alpha.sh` ready; CHANGES shape committed. After 0.9.4: Josh's iterative round, then 1.0.0 by Yan's plan. NO push, NO deploy, NO gh release.**
+
 ## 3 · What happens next, in order
 
 1. **S0-A lands → S0-V.** Spawn a FRESH Opus verifier (`isolation: worktree`, start = the merged tree's sha) on
