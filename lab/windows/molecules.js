@@ -1,6 +1,6 @@
 /* lab/windows/molecules.js — MOLECULES, the molecular session, THE HEAD and MO-REGISTRY (0.5.2 R2d; moved verbatim out of lab/rack.js boot()) at TWO seats:
  * createMolecules(app) builds MOLECULES where the LEGACY note stands and returns createMoRegistry(), which boot() calls where ORBITALS stood (after the stage words). */
-import { TIER } from '../rack.js';
+import { TIER } from '../rack.js'; import { sw } from '../mir/kit.js';
 import { VIEW, VIEW_NAMES } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian } from '../hamiltonian.js';
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
@@ -51,7 +51,9 @@ export function createMolecules(app) {
   const wChem = device({ id: 'chem', eyebrow: 'MOLECULES', title: 'RHF · real time', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // built closed (chemview's N8 shown() guard); the first-run block opens it on the LEFT rack — still no solve until it is switched on
   rack.appendChild(wChem.root);
-  app.state.chem = createChem(wChem.body, { active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
+  ui.skeletonSw = sw({ label: 'SKELETON', value: false, title: 'The nuclei as beads (CPK colours, 0.28 × the covalent radius), the bonds within 1.2 × the radii, and the dipole arrow from the centre of nuclear charge — a PREFERENCE, off by default',
+    onChange: () => { app.sh.saveSettings(); schedule(TIER.PRESENT); } });   // 0.7.0 V2: rack.js draws it (lab/skeleton.js); chemview seats it after the VIEW row's chevron
+  app.state.chem = createChem(wChem.body, { skeleton: ui.skeletonSw, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },

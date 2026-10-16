@@ -22,6 +22,7 @@ import { el, device as kitDevice } from './mir/kit.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
+import { createSkeleton } from './skeleton.js';   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
 import { createMolecules } from './windows/molecules.js'; import { createStageWords } from './shell/stage-words.js'; import { createModSeam } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
 import { calculusMarkdown } from './calculus.js';
 import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
@@ -502,6 +503,7 @@ export async function boot(dom) {
          its transparent canvas explicitly before bowFrame() paints the next arrow. */
       if (app.state.bow) kepler.clear(); else kepler.suspend();
     }
+    if (ui.skeletonSw && ui.skeletonSw.get() && app.state.chem.on) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), obs, domain.half)); } else skeleton.clear();   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
 
     kepler.bowFrame();
     app.state.chem.setActive(canPresent(wChem));
@@ -731,8 +733,9 @@ export async function boot(dom) {
   // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); it ships CLOSED.  0.4.0 S3 (R-A2):
   // no longer LEGACY — the periodic table of SPECTRUM's ATOM operator, with its own row in + and WINDOW
   const { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, WIG_OK, RAD_OK } = createAtomsWignerRadiation();   // 0.5.2 R2b: readouts' third seat
+  const skeleton = createSkeleton(document.getElementById('skeleton'));   // 0.7.0 V2: its switch is MOLECULES' (ui.skeletonSw, a PREFERENCE)
   Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wVor, kepler: wOrb,
-    slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
+    slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc, skeleton: wChem });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
   for (const w of [...Object.values(READERS), wVor, wMet, wLad]) windowActivity.track(w);
   /** the guard the two hydrogenic readers share: hydrogen at Z = 1, no Sturmian scale, no other model holding the
       field.  Both windows integrate the SHIPPED closed-form radials, so anything else would be two operators in one

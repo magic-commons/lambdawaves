@@ -1,7 +1,7 @@
 /* lab/shell/stage-words.js — THE STAGE TEXT and its CAPTION (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the source, the caption a capture draws,
  * the tick and the INFORMATIONAL layer (initStageText, called by boot() at the go).  stageTextTick and stageCaption are registered on app.w at creation. */
 import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { toScreen, cameraKey } from '../field.js';
-import { BASIS } from '../hydrogen.js'; import { getHamiltonian } from '../hamiltonian.js'; import { MOLECULE_BY_ID, moleculeAtoms } from '../molecules.js'; import { ELEMENT } from '../md.js';
+import { BASIS } from '../hydrogen.js'; import { getHamiltonian } from '../hamiltonian.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { ELEMENT } from '../md.js';
 import { stateLatex, formulaLatex, BASIS_LABEL } from '../latex-state.js';
 export function createStageWords(app) {
   const { dom, reg } = app, { rack } = app.host, { wChem } = app.w, { paintMarks } = app.ctl;
@@ -82,7 +82,8 @@ export function createStageWords(app) {
     let atomsId = '', atoms = [], spans = [], labelsKey = '', placeKey = '';
     function atomLabels(id, obs, half) {
       if (!id || !labelsOn) { if (!labels.hidden) labels.hidden = true; labelsKey = placeKey = ''; return; }
-      if (id !== atomsId) { atomsId = id; atoms = moleculeAtoms(id); labelsKey = ''; }
+      if (id !== atomsId) { atomsId = id; labelsKey = ''; }
+      atoms = app.state.chem.atomsNow(); const at = atoms.map((a) => `${a.x.toFixed(3)},${a.y.toFixed(3)},${a.z.toFixed(3)}`).join(';');   // 0.7.0 V2: the nuclei AS DRAWN (V1 poses them), so the labels follow
       if (labelsKey !== id + '|' + labelScale) {
         labelsKey = id + '|' + labelScale; placeKey = '';
         labels.textContent = ''; spans = atoms.map((a) => el('span', 'atom-label', labels, ELEMENT[a.Z] || '?'));
@@ -90,7 +91,7 @@ export function createStageWords(app) {
       }
       labels.hidden = false;
       if (cssW < 32 || cssH < 32) return;
-      const key = `${labelsKey}|${cameraKey(obs)}|${obs.dist}|${obs.fov}|${half}|${cssW}|${cssH}`;
+      const key = `${labelsKey}|${cameraKey(obs)}|${obs.dist}|${obs.fov}|${half}|${cssW}|${cssH}|${at}`;
       if (key === placeKey) return;
       placeKey = key; stats.labelWrites++;
       const S = toScreen(obs, half, cssW, cssH);
