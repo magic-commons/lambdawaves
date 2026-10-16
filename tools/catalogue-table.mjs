@@ -63,7 +63,8 @@ const all = [...MOLECULES, ...RECORD_ONLY], mol = (m) => { const rec = m.records
   return [m.id, plain(m.formula) + ' · ' + m.name, 'molecule:' + m.id, STATE_WORD[st] || 'UNCHECKED', [T(m.records['sto-3g'] ? 'library' : m.multiplicity > 1 ? 'uhf' : 'molecules'), m.oracle ? m.oracle.what : 'no oracle on file'], m.library ? '0.4.0' : m.multiplicity > 1 ? '0.7.1' : '0.2.0']; };
 const molLines = [HAND.molecules, ...SECTIONS.map((s) => all.filter((m) => m.section === s).map(mol))];
 shelves.registers = HAND.registers; shelves.readouts = HAND.readouts;
-shelves.lattice = [HAND.lattice, ...LATTICES.map((p) => ['lattice:' + p.id, p.label, 'lattice:' + p.id, 'NUMERICAL', p.id === 'tunnel' ? [T('tunnel'), 'the transmission against the closed-form barrier'] : HAND.lattice[4], '0.7.2'])];
+const T3 = { hofstadter: 'Φ = 1/2 against ±2J√(cos²k_x + cos²k_y) on the torus', walk: 'the Hadamard walk’s σ² against (1 − 1/√2)t² (Konno)', spin: 'the XX chain against Jordan–Wigner; S(t) ≤ ⌊N/2⌋ ln 2' };   // 0.8.1 T3
+shelves.lattice = [HAND.lattice, ...LATTICES.map((p) => ['lattice:' + p.id, p.label, 'lattice:' + p.id, 'NUMERICAL', p.id === 'tunnel' ? [T('tunnel'), 'the transmission against the closed-form barrier'] : T3[p.id] ? [T('lattice-presets'), T3[p.id]] : HAND.lattice[4], T3[p.id] ? '0.8.1' : '0.7.2'])];
 const byId = new Map([...Object.values(shelves).flat(), ...molLines.flat()].map((r) => [r[0], r]));
 shelves.demos = STARTERS.map((s) => { const [of, since] = HAND.demos[s.file], r = byId.get(of); if (!r) throw new Error('no row for demo ' + s.file); return ['demo:' + s.file, s.name, 'demo:' + s.file, r[3], r[4], since]; });
 
