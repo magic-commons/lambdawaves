@@ -27,11 +27,33 @@ come from the worker's f64 evaluator — the same AOs the field draws. The STATU
   plan's 40 ms; grid + table 479 ms). AO screening saved 15 % and point-blocking nothing — neither kept. The AO table is 3.8 MB for water and 78 MB for
   benzene (≈ 200 MB at 60 AOs), so K2 caps LDA by molecule size and never offers it on a record-only molecule.
 
-## K2 · THE METHOD
-(filled at K2's merge)
+## K2 · THE METHOD (`lab/chemview.js` +38, `lab/status.js` +3, `lab/verbs.js` +1; one-line seams in `statesview.js`, `windows/molecules.js`, `main.js`, `project-store.js`)
+- **METHOD seg RHF · UHF · LDA beside BASIS.** UHF shows only on H₂ in STO-3G (0.7.1 U2's H₂-only seg folded in); on an open shell the RHF button reads UHF
+  and LDA is disabled. LDA is offered only on closed shells, in STO-3G, never record-only, with nAO ≤ 36 (benzene and smaller: the AO table is 78 MB there and
+  the solve 4.8 s); otherwise its button is disabled with the reason as its tooltip and a held LDA falls back to RHF with the reason on the status line. LDA
+  always solves live (`chem.ground { model: 'lda' }`); the record road is RHF-only now (before, H₂'s UHF could in principle have answered from an RHF record).
+  A METHOD press is a hand pick: the head reads "RKS LDA/STO-3G · E = −74.732041".
+- **Both solves are kept**, so RHF ↔ LDA re-lands without a worker call. **VIEW Δ LDA−RHF**: a signed view, M = D_LDA − D_RHF from the two f64 density
+  matrices, lit only when both solves of the molecule are kept; a project, the demo or the verb opening on it with one half missing solves the other half
+  quietly (benzene blocks the worker ≈ 4.8 s there; where LDA is not offered the view falls back to DENSITY).
+- **Stand-downs under LDA:** KICK · RUN · FLOW · PULSE · TDA · VIBRATE disabled, each with the worker's own sentence as its tooltip; `kick()` and `vibrate()`
+  return null and print the sentence; MO-REGISTRY's ladder request carries the method and is refused with the TDA sentence; the drive needs the ladder, so it is
+  refused through it. VIBRATE stands down under UHF too (the worker already refused it).
+- **Status and caption:** "RKS LDA · NUMERICAL · energy agrees with PySCF to 3e-14 Eh · ∫ρ = 10.000001 · picture good to 0.2 % of ρmax" — the plan's "PySCF
+  4e-7" was a guess and is replaced by the measured agreement; a molecule outside K1's eight has no PySCF number in `lab/` and reads UNCHECKED with ∫ρ still
+  printed. Caption piece "Δ LDA−RHF · where LDA puts more density · RKS LDA · PySCF 3e-14". The fold's readout E_xc · ∫ρ with grid points, grid ms, SCF
+  iterations and ms.
+- **Saving:** `presentation()` writes `method: 'lda'` only for LDA (`load()` restores it; `docs/STATE-SCOPES.md` one row); H₂'s UHF stays in `h2.method`, so BREAK
+  and the 0.7.1 files keep their bytes. **Verb:** `molecule` gains `method` (rhf | uhf | lda) and `view: dlda`; the inventory prints the model, E_xc and ∫ρ.
+  **Demo LDA:** water, METHOD LDA, VIEW Δ LDA−RHF, saved by the app's own road, cover by `make-covers`; STARTERS eleven.
+- **Checked:** water in headless Firefox — LDA solve 215 ms wall (grid 66 ms over 67,950 points, SCF 128 ms in 7 iterations), E = −74.732041018 Eh vs PySCF
+  3e-14, E_xc = −8.875980; Δ LDA−RHF spans −0.00659 … +0.00996 a.u. (48³ cell centres). chem.browser 0 failing of 56; status-probe 18 PASS; project-formats green
+  with LDA seeded; molecule-head, status, uhf tests green; serialize-bytes 11/11 identical to the base. `molecular-session.js` needed no change.
 
 ## The light check (existing gates only) and the cut
-(filled at the cut)
+- Node gate 0 after each merge; `pwa --write`; `new-project --check` in step; `rack-deps --classes` holds; rks · uhf · scf · rhf-molecules · project-formats · molecule-head · status green;
+  `tests/opener.browser-test.mjs` once on the merged tree (eleven covers); THE LOCK ×2 at the merge tip with `--query gastab=0` on BOTH runs — results in the HANDOFF §2 block of the cut.
+- **Lines:** 29,324 → 29,479 (+155 = K1 +109, K2 +44, sw rows; cap 29,617).
 
 ## Known, deferred (recorded)
 GGA (PBE) and hybrids, TDDFT and RT-TDDFT, the LDA Hessian and vibrations under LDA, UKS for the open shells, 6-31+G* under LDA, a grid-level knob; the

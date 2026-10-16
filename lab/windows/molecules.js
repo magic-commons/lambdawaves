@@ -75,7 +75,7 @@ export function createMolecules(app) {
     const id = head.want, row = id && MOLECULE_BY_ID.get(id);
     if (!row || !sol || !app.state.stageText) return;
     if (app.state.chem.preset() !== id) { head.want = null; return; }                      // the molecule changed first: nothing
-    if (sol.key !== id + '|' + app.state.chem.basis + '|' + row.charge) return;             // chemview's solve key: this molecule's landing
+    if (sol.key.replace(/\|lda$/, '') !== id + '|' + app.state.chem.basis + '|' + row.charge) return;   // chemview's solve key: this molecule's landing (0.7.3: RKS LDA's too)
     head.want = null;
     const md = moleculeHead({ molecule: row, basis: app.state.chem.basis, ground: sol, stem: sol.stem, status: app.state.chem.said });   // 0.5.4 P4: tell() ran before notify()
     if (!md || !app.state.stageText.announce(md, 0)) return;
