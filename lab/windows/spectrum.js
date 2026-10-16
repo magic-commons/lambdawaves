@@ -30,17 +30,17 @@ export function createSpectrumCard(app) {
     const hamGroup = group(wSpec.body, 'HAMILTONIAN');
     const rh = el('div', 'row tight', hamGroup);
     /* 0.7.4 C1 · THE PICKER: ‹ SYSTEM ›, the kit's stepper over lab/catalogue.js — the operators with HYDROGEN, MOLECULES and LATTICE, each row's hover its
-       word · oracle.  A window opens and leaves the Hamiltonian alone; the name reads back what owns the field; QUARKONIUM is listed, never chosen (its editor,
-       QCD, left in 0.5.0 D9: an older project restoring `cornell` still sets it).  `ui.hamSeg` keeps its name and set(id): persist, the verbs and LAUNCH read it. */
-    const SYS = ['hydrogen', 'qho', 'well', 'atom', 'cornell', 'molecules', 'lattice'].map((id) => CATALOGUE.find((r) => r.id === id)), tip = (r) => (r.id === 'cornell' ? 'its editor returns in 0.8.0' : r.word + ' · ' + r.oracle.what);
-    const sys = stepper({ label: 'SYSTEM', items: SYS.map((r) => ({ id: r.id, label: r.name.split(' ·')[0], coming: r.id === 'cornell' })), value: 'hydrogen', cls: 'mol-step', onChange: (v) => {
-      if (v === 'molecules' || v === 'lattice') app.sh.layout.reopen(v === 'molecules' ? 'chem' : v); else { switchHamiltonian(v); if (v === 'well') app.w.enterBox(); if (v === 'atom') { app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); } }
+       word · oracle.  A window opens and leaves the Hamiltonian alone; the name reads back what owns the field; CENTRAL and CENTRAL › QUARKONIUM (0.8.0 G1)
+       set their operator and open CENTRAL, its editor (an older project restoring `cornell` still lands).  `ui.hamSeg` keeps its name and set(id): persist, the verbs and LAUNCH read it. */
+    const SYS = ['hydrogen', 'qho', 'well', 'atom', 'central', 'cornell', 'molecules', 'lattice'].map((id) => CATALOGUE.find((r) => r.id === id)), tip = (r) => r.word + ' · ' + r.oracle.what;
+    const sys = stepper({ label: 'SYSTEM', items: SYS.map((r) => ({ id: r.id, label: r.name.split(' ·')[0] })), value: 'hydrogen', cls: 'mol-step', onChange: (v) => {
+      if (v === 'molecules' || v === 'lattice') app.sh.layout.reopen(v === 'molecules' ? 'chem' : v); else { switchHamiltonian(v); if (v === 'central' || v === 'cornell') app.sh.layout.reopen('central'); if (v === 'well') app.w.enterBox(); if (v === 'atom') { app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); } }
       ui.hamSeg.set(getHamiltonian().id); } });
     sys.name.addEventListener('click', () => document.querySelectorAll('.mir-pick-i[data-id]').forEach((b) => { const r = SYS.find((x) => x.id === b.dataset.id); if (r) b.title = tip(r); }));
     ui.hamSeg = { root: sys.root, get value() { return sys.get(); }, set(id) { sys.set(app.state.chem && app.state.chem.on ? 'molecules' : id); sys.root.title = tip(SYS.find((r) => r.id === sys.get()) || SYS[0]); } };
     ui.hamSeg.set('hydrogen');
     rh.appendChild(ui.hamSeg.root);
-    ui.wellKnob = knob({ label: 'WELL RADIUS <m>a</m>', min: 3, max: 30, value: 10, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => { HAMILTONIANS.well.setRadius(v); app.w.gas.setRadius(v); hNote(); if (getHamiltonian().id === 'well') { reg.setEnergies(energyOf); wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; }); schedule(TIER.REBUILD); } } });
+    ui.wellKnob = knob({ label: 'WELL RADIUS <m>a</m>', min: 3, max: 30, value: 10, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => { HAMILTONIANS.well.setRadius(v); app.w.gas.setRadius(v); hNote(); if (getHamiltonian().id === 'well') { reg.setEnergies(energyOf); wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); }); schedule(TIER.REBUILD); } } });
     rh.appendChild(ui.wellKnob.root);
     {
       const rg = wSpec.row('tight');
@@ -92,7 +92,7 @@ export function createSpectrumCard(app) {
      the digests — returned H.energy(a) alone, so with any RATE ≠ 1 the card printed an energy the state was
      not moving with.  It is the same function now.  (Under STURMIAN the labels are not eigenstates, RATE is
      refused there, and the label's ⟨a|H|a⟩/⟨a|S|a⟩ stands.) */
-  api.energyOf = (a) => sturm.P ? labelExpect(a) : energyOf(a);
+  api.energyOf = (a) => sturm.P ? labelExpect(a) : Number.isNaN(getHamiltonian().energy(a)) ? NaN : energyOf(a);   // 0.8.0 G1: NaN, a level CENTRAL leaves unbound (the register holds it at 0)
   api.rateDisabled = () => !!sturm.P;
   api.rateNote = () => 'RATE is a diagonal-phase feature (a multiplier on one label\'s own E): off under STURMIAN, where the labels are not eigenstates — switch SCALE back to HYDROGEN';
   api.selectEigen = (k) => selectEigen(k);
@@ -178,7 +178,7 @@ export function createSpectrumCard(app) {
     if (H.noMomentum && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
     for (const w of [app.w.wOrb, app.w.wVor, app.w.wSlice, app.w.wLad]) if (w) w.root.hidden = !H.hydrogenTheorems;
     wSpec.setStatus(hamLabel(), H.id === 'hydrogen' ? '' : 'live');
-    wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; });   // wave 50: the API, so the RATE is in the number the card shows
+    wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); });   // wave 50: the API, so the RATE is in the number the card shows
     wSpec.body.querySelectorAll('.sp-nm[data-a]').forEach((e) => { e.textContent = H.labelOf(BASIS[+e.dataset.a]); });
     if (sturm.on) { applySturmian(); return; }                        // W-STURMIAN: re-arm (or stand down) the scale under the operator now in force
     app.state.refSnapshot = null; app.state.pendingRef = null;
@@ -232,7 +232,7 @@ export function createSpectrumCard(app) {
     for (const w of [app.w.wOrb, app.w.wVor, app.w.wSlice, app.w.wLad]) if (w) w.root.hidden = on || !H.hydrogenTheorems;
     if (app.w.wCalc) app.w.wCalc.root.hidden = on;   // theorems about hydrogen's eigenfunctions stand down
     wSpec.setStatus(...specStatus());
-    wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = `${api.energyOf(+e.dataset.a).toFixed(4)} ${api.unit()}`; });
+    wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); });
     if (ui.sturmRo) paintSturmRo();
     app.state.refSnapshot = null; app.state.pendingRef = null; app.state.lastNmax = -1;
     touchState(); schedule(TIER.REBUILD);

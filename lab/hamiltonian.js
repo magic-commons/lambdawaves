@@ -18,6 +18,7 @@ import { cornellEnergy, cornellRadial, cornellTableFor, cornellPsiAt, cornellDom
 import { qhoEnergy, qhoEnergyOf, qhoN, qhoRadial, qhoTableFor, qhoMomentumTableFor, qhoDomainFor, qhoPsiAt } from './qho.js';
 import { wellEnergy, wellEnergyOf, wellRadialFor, wellTableFor, wellDomainFor, wellPsiAt, wellRadius, setWellRadius } from './well.js';
 import { atom as atomOf, solveAtom, virtualEnergyOf, atomRadial, atomRadialTable, atomDomainFor, atomSpectrum, rowOf as atomRowOf, NR } from './atoms.js';
+import { CENTRAL } from './central.js';
 
 const N_RGB = { 1: [255, 255, 255], 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150] };
 const QHO_RGB = (N) => [[255, 255, 255], [255, 190, 90], [120, 225, 240], [200, 140, 255], [140, 240, 160], [255, 120, 150]][N % 6];
@@ -173,6 +174,7 @@ HAMILTONIANS.atom = {
   get Z() { return atomZ; }, get element() { return atomOf(atomZ); }, get system() { return atomState().S; },
 };
 
+HAMILTONIANS.central = CENTRAL;                                     // 0.8.0 G1: the generic central H (lab/central.js); its `cornell` preset IS the QUARKONIUM entry above
 /* ── Z: hydrogen-like ions by exact scaling.  Everything hydrogen knows transfers with lengths /Z, energies ×Z²,
    momenta ×Z: the tables keep their polynomials and change their scale (n → n/Z for ρ = 2Zr/n) and norm (×Z^{3/2});
    the momentum tables keep the exponent n+1 explicitly.  The hydrogen THEOREM windows are written for Z = 1
