@@ -101,3 +101,10 @@ export function coherentAlongZ(k, { half = 7, G = 64 } = {}) {
   let captured = 0; for (let a = 0; a < 91; a++) captured += re[a] * re[a] + im[a] * im[a];
   return { re, im, captured };
 }
+/** the 1-D Fock state's Wigner function W_n(z, p) = (−1)ⁿ/π · e^{−u} L_n(2u), u = z² + p² (ħ = 1), L_n by its recurrence; W_1(0, 0) = −1/π.
+ *  The register's |n_x n_y n_z⟩ = |0 0 n⟩ (n = 0: 1s, n = 1: 2p₀) slices to W_0(0,0)² · W_n(z, p) = W_n(z, p)/π² (0.8.2 P1, the WIGNER oracle) */
+export function wignerFock(n, z, p) {
+  const u = z * z + p * p; let a = 1, b = 1 - 2 * u;
+  for (let k = 1; k < n; k++) { const c = ((2 * k + 1 - 2 * u) * b - k * a) / (k + 1); a = b; b = c; }
+  return (n % 2 ? -1 : 1) * Math.exp(-u) * (n ? b : a) / Math.PI;
+}

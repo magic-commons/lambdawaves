@@ -58,6 +58,7 @@
  * invisible in ink, stated here, and judged in the tests.
  */
 import { BASIS, radialNorm, ylmNorm, laguerreCoeffs, legendreDerivCoeffs, modeTable, orbitalFromTable } from './hydrogen.js';
+import { qhoNorm, laguerreCoeffsReal } from './qho.js';
 
 const PI = Math.PI, PI3 = PI * PI * PI;
 
@@ -108,12 +109,14 @@ export function gaussLaguerre(n) {
 
 /* ── the register's functions, in the form the chord needs ──────────────────────────────────────────────── */
 /* ψ_a(P) = A_a(d, c) · s_ρ^{|m|} · e^{i m φ},   A = norm · (2/n)^l · d^{l−|m|} · L^{2l+1}_{n−l−1}(2d/n) · D_{l|m|}(c) · e^{−d/n},
-   with norm, L and D exactly hydrogen.js's modeTable record (Condon–Shortley folded into the sign). */
+   with norm, L and D exactly hydrogen.js's modeTable record (Condon–Shortley folded into the sign).
+   THE OSCILLATOR'S ROAD (0.8.2 P1): A = qhoNorm · d^{l−|m|} · L^{(l+½)}_{n_r}(d²) · D_{l|m|}(c) · e^{−d²/2} — the same Y_lm, qho.js's radial. */
 const REC = new Map();
-function recOf(a) {
-  let R = REC.get(a); if (R) return R;
+function recOf(a, qho) {
+  let R = REC.get(qho ? -1 - a : a); if (R) return R;
   const s = BASIS[a], am = Math.abs(s.m);
   const sign = (s.m >= 0 && (am % 2 === 1)) ? -1 : 1;
+  if (qho) { R = { a, n: 1, l: s.l, m: s.m, am, qho, norm: sign * qhoNorm(s.n - s.l - 1, s.l) * ylmNorm(s.l, am), lag: laguerreCoeffsReal(s.n - s.l - 1, s.l + 0.5), leg: legendreDerivCoeffs(s.l, am) }; REC.set(-1 - a, R); return R; }
   R = { a, n: s.n, l: s.l, m: s.m, am, inv: 1 / s.n,
         norm: sign * radialNorm(s.n, s.l) * ylmNorm(s.l, am) * Math.pow(2 / s.n, s.l),
         lag: laguerreCoeffs(s.n - s.l - 1, 2 * s.l + 1), leg: legendreDerivCoeffs(s.l, am) };
@@ -122,7 +125,7 @@ function recOf(a) {
 /** A_a(d, c) — the real amplitude with the azimuth and the s_ρ^{|m|} stripped off (see the header); e = e^{−d/n}, computed
  *  once per distinct n of the state and handed in (the chord's inner loop, wave 42) */
 function amp(R, d, c, e) {
-  const rho = 2 * d * R.inv;
+  const rho = R.qho ? d * d : 2 * d * R.inv;
   let L = 0, rp = 1; for (let j = 0; j < R.lag.length; j++) { L += R.lag[j] * rp; rp *= rho; }
   let D = 0, cp = 1; for (let j = 0; j < R.leg.length; j++) { D += R.leg[j] * cp; cp *= c; }
   const k = R.l - R.am;                                   // ≥ 0 always; d^{l−|m|} keeps the d → 0 limit finite
@@ -136,8 +139,8 @@ function amp(R, d, c, e) {
  * every ordered pair; `axial` is the sub-list with m_a = m_b, already multiplied by the analytic azimuth's
  * 2π(−1)^m/π³ = (2/π²)(−1)^m — every other pair is exactly zero on the slice.
  */
-function prepare(terms) {
-  const recs = terms.map((t) => recOf(t.a));
+function prepare(terms, qho) {
+  const recs = terms.map((t) => recOf(t.a, qho));
   const pairs = [], axial = [];
   let nmax = 1;
   const nset = [], ni = new Int32Array(recs.length);                      // the distinct n of the state: one e^{−d/n} per n per point
@@ -156,7 +159,7 @@ function prepare(terms) {
       }
     }
   }
-  return { recs, pairs, axial, lam: 2 / nmax, nset, ni };
+  return { recs, pairs, axial, lam: qho ? 2 : 2 / nmax, nset, ni, qho };   // the oscillator's chord is e^{−(z²+s_z²)}·poly: λ = 2 cuts it far below e^{−tail} in panels of 3
 }
 
 /* ── the chord g(z, s_z) = Σ_ab c_a* c_b g_ab, complex, for the AXIAL slice ─────────────────────────────── */
@@ -170,12 +173,13 @@ function chordAxial(S, z, sz, nd, out) {
   const Ap = S._Ap || (S._Ap = new Float64Array(k)), Am = S._Am || (S._Am = new Float64Array(k));
   const eP = S._eP || (S._eP = new Float64Array(nn)), eM = S._eM || (S._eM = new Float64Array(nn));
   for (let q = 0; q < nd; q++) {
-    const dN = wN + t[q] / lam, sr2 = Math.max(0, dN * dN - wN2), dF = Math.sqrt(sr2 + wF2);
+    /* the oscillator integrates in u = s_ρ² (s_ρ ds_ρ = du/2): the two Gaussians make e^{−u} × a polynomial of degree ≤ 10, so nd = 12 is EXACT */
+    const dN = S.qho ? Math.sqrt(wN2 + t[q]) : wN + t[q] / lam, sr2 = S.qho ? t[q] : Math.max(0, dN * dN - wN2), dF = Math.sqrt(sr2 + wF2);
     const dp = near ? dN : dF, dm = near ? dF : dN;
     const cp = dp > 0 ? wp / dp : 1, cm = dm > 0 ? wm / dm : 1;
-    for (let j = 0; j < nn; j++) { eP[j] = Math.exp(-dp / nset[j]); eM[j] = Math.exp(-dm / nset[j]); }
+    for (let j = 0; j < nn; j++) { eP[j] = S.qho ? Math.exp(-dp * dp / 2) : Math.exp(-dp / nset[j]); eM[j] = S.qho ? Math.exp(-dm * dm / 2) : Math.exp(-dm / nset[j]); }
     for (let a = 0; a < k; a++) { const ia = ni[a]; Ap[a] = amp(S.recs[a], dp, cp, eP[ia]); Am[a] = amp(S.recs[a], dm, cm, eM[ia]); }
-    const base = we[q] / lam * dN;
+    const base = S.qho ? we[q] / 2 : we[q] / lam * dN;
     for (let e = 0; e < S.axial.length; e++) {
       const P = S.axial[e];
       let sp = 1; for (let i = 0; i < P.am; i++) sp *= sr2;    // s_ρ^{2|m|}
@@ -233,7 +237,7 @@ function preset(o) { return typeof o === 'string' ? (PRESET[o] || PRESET.normal)
  * `opts.order` is 'fast' | 'normal' | 'fine' | 'ultra' or { nd, nIn, nOut }.
  */
 export function wignerAxial(terms, z, pz, opts = {}) {
-  const S = prepare(terms); if (!S.axial.length) return 0;
+  const S = prepare(terms, opts.qho); if (!S.axial.length) return 0;
   const o = preset(opts.order);
   const R = szRule(z, S.lam, Math.abs(pz), o), g = [0, 0];
   let acc = 0;
@@ -250,14 +254,14 @@ export function wignerAxial(terms, z, pz, opts = {}) {
  * Returns { W: Float32Array(nz·np) row-major in z (W[i·np + j] at zs[i], ps[j]), zs, ps, min, max, argmin, ms }.
  * One chord per (z, s_z) serves the whole momentum row: the p loop is a phase recurrence, no transcendentals.
  */
-export function wignerSlice(terms, { z = [-8, 8, 64], p = [-4, 4, 64], order = 'normal' } = {}) {
+export function wignerSlice(terms, { z = [-8, 8, 64], p = [-4, 4, 64], order = 'normal', qho = false } = {}) {   // qho: the oscillator's radials (0.8.2 P1)
   const t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
   const [z0, z1, nz] = z, [p0, p1, np] = p;
   const zs = new Float64Array(nz), ps = new Float64Array(np);
   for (let i = 0; i < nz; i++) zs[i] = nz > 1 ? z0 + (z1 - z0) * i / (nz - 1) : z0;
   for (let j = 0; j < np; j++) ps[j] = np > 1 ? p0 + (p1 - p0) * j / (np - 1) : p0;
   const W = new Float32Array(nz * np);
-  const S = prepare(terms);
+  const S = prepare(terms, qho);
   let min = Infinity, max = -Infinity, argmin = { i: 0, j: 0, z: 0, p: 0 };
   if (!S.axial.length) return { W, zs, ps, min: 0, max: 0, argmin, ms: 0 };
   const pmax = Math.max(Math.abs(p0), Math.abs(p1)), dp = np > 1 ? (p1 - p0) / (np - 1) : 0;
@@ -355,7 +359,7 @@ export function wignerAt(terms, r, p, opts = {}) {
  * e^{2ip_z s_z} to π δ(s_z), so this is π · g(z, 0), one chord.  For 1s it is e^{−2|z|}(1 + 2|z|)/(2π²).
  */
 export function sliceMomentumMarginal(terms, z, opts = {}) {
-  const S = prepare(terms); if (!S.axial.length) return 0;
+  const S = prepare(terms, opts.qho); if (!S.axial.length) return 0;
   const o = preset(opts.order), g = [0, 0];
   chordAxial(S, z, 0, o.nd, g);
   return PI * g[0];

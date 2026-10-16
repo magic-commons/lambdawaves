@@ -10,8 +10,25 @@ COHERENCE MAP: the register as a density matrix, |c_a c_b*| over the populated l
 BEAD: the expectation point (⟨x⟩, ⟨y⟩, ⟨z⟩) with its trail on the skeleton's canvas (Ehrenfest made visible), off by default, PREFERENCE; and ψ ALONG A RAY: Re ψ,
 Im ψ, |ψ|² along the ray through the bead as a CALCULUS tile.
 
-## P1 · THE OSCILLATOR'S WIGNER
-(filled at P1's merge)
+## P1 · THE OSCILLATOR'S WIGNER (`lab/wigner.js` the qho branch in `recOf`, `amp`, `prepare`, `chordAxial`; `lab/qho.js` `wignerFock`; `lab/wignerview.js` the NEGATIVITY readout, the stand-downs, the cap; `lab/rack.js` `hydroReader` three lines changed; `lab/windows/film.js` l.7 the caption tail; branch `p1-wigner-qho` tip `6e291b6`; +30 of ≤ +40)
+- **The slice learns the oscillator:** the same W(z, p_z) grid, the same Y_lm and s_z panels with λ = 2, the oscillator's radials in place of hydrogen's; the inner
+  integral runs in u = s_ρ², where the two Gaussians make the integrand e^{−u} × a polynomial of degree ≤ 10, so Gauss–Laguerre with nd = 12 is EXACT (a correction:
+  not hydrogen's d_N rule). `wignerFock(n, z, p)` = (−1)ⁿ/π · e^{−u} L_n(2u) is the oracle.
+- **NEGATIVITY** — new on every register, hydrogen included (the brief assumed it existed): ∫|W| − 1 over the drawn slice NORMALISED to ∫W = 1 (the brief's unnormalised
+  slice integrates to 1/π², not 1; for |0 0 n⟩ the normalised number equals the 1-D ∫|W_n| − 1), with the oracle lines "a Gaussian: classical" and "Fock |1⟩ along z:
+  W(0,0) = −1/π³ · 4/√e − 2 = 0.4261". Measured: |0⟩ (= 1s) matches W₀/π² to 4.4e-12, W(0,0) = +1/π³; |1⟩ along z (the register label 2p₀ — there is no n = 1, l = 1
+  label) matches W₁/π² to 8.3e-12, W(0,0) = −0.03225153 = −1/π³ (the 3-D slice's value; the brief's −1/π is the 1-D one — the Wigner function factorises over
+  Cartesian axes and the transverse factor is W₀(0,0)² = 1/π²); on the 64 × 64 grid NEGATIVITY reads 0.00000 for |0⟩ and 0.42600 for |1⟩ (whole slice 0.42612); a
+  slap at k = 1 on |0⟩ (21 labels, ‖c‖² = 0.999998829) reads 0.000 — minimum −3.92e-9, negativity 3.46e-8: a truncated coherent state (the register holds N ≤ 5
+  whole), so the gates are the measured truncation (min > −1e-8, negativity < 1e-7), not the brief's 1e-12 / 1e-9. Hydrogen 1s's own NEGATIVITY reads 0.019.
+- **The window under qho:** the cap is 21 labels (every m = 0; the old 6-label cap read the slap's negativity as 0.0094); P RANGE follows Z RANGE when untouched; the
+  labels come from `H.labelOf`; stand-down sentences for BOX · QUARKONIUM · ATOM · CENTRAL (the stand-down lives in `rack.js` `hydroReader` — `wignerview.js:22` is a
+  comment; WIGNER now accepts `qho`, RADIATION unchanged); a stood-down WIGNER resets the NEGATIVITY line; the export caption gains " · WIGNER · ∫|W| − 1 = …" while the
+  window is open (not exercised in the browser).
+- **Checked:** `tests/wigner-qho.test.mjs`; wigner 16/16; qho 11/11; rack-deps holds (SPECTRUM 25, film 8); new-project in step; serialize-bytes 11 identical against
+  `af2e84b`; hydrogen's Wigner digest `973d2905…` identical on base and branch (THE LOCK holds no Wigner digest — nothing to re-bake); screenshot
+  `research/release-0.8.2/P1-wigner-qho-1.png` (|1⟩'s slice W(0,0) −0.0322515, max 1.4387e-2, NEGATIVITY 0.426; BOX stood down; hydrogen 1s as before). **Dropped:**
+  `wignerAt` (off-axis) stays hydrogen-only — the window never calls it.
 
 ## P2 · THE COHERENCE MAP (`lab/meters.js` the tile, `createMeters` takes an optional `src`; `lab/equalizer.js` the pure `coherence()` and `eq.last`; `lab/windows/readouts.js` l.6 the BASIS import and l.112–116 METERS' source closure; `lab/windows/spectrum.js:132` `eqT = eq.last = t` (0 lines, no crossing); branch `p2-coherence` tip `1121e76`; +29 of ≤ +35)
 - **The tile** COHERENCE in METERS: an N × N heat image of |ρ_ab| = |c_a c̄_b|/Σ|c|² over the populated labels in the palette's ramp (at most 12 — the largest by |c|,
