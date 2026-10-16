@@ -531,7 +531,9 @@ for (const e of ENTRIES) {
 const SB = json('tests/fixtures/oracles/sto-3g-v1.json'), rowIds = new Set(out.map((r) => r.catalogue.id));
 /* 0.6.0 B3b (0.5.4 §J-4 N4): the 6-31+G* fixture's energies nest under the app's basis id, so chemview reads `oracle[basis]`; STO-3G stays flat */
 const G6 = json('tests/fixtures/oracles/6-31+g-star-v1.json'), g6 = new Map(G6.molecules.filter((m) => m.converged).map((m) => [m.id, m.energy]));
+const UHF = json('tests/fixtures/oracles/uhf-v1.json');   // 0.7.1: an open shell's oracle is PySCF UHF (tools/library/uhf-oracle.py)
 const oracles = Object.fromEntries(MOLECULES.filter((m) => !rowIds.has(m.id)).map((m) => {
+  if (m.multiplicity > 1) return [m.id, { what: `PySCF ${UHF.provenance.pyscf} UHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms`, energy: UHF.molecules[m.id].energy }];
   if (!SB.library[m.id]) throw new Error(`orbital-library: ${m.id} solves live and has no oracle in sto-3g-v1.json`);
   const o = { what: `PySCF ${SB.provenance.library.pyscf} RHF, cart=True, the vendored STO-3G decimals, on the menu's own atoms`, energy: SB.library[m.id].energy };
   if (g6.has(m.id)) o['6-31+g-star'] = { what: `PySCF ${G6.provenance.pyscf} RHF, cart=True, the vendored 6-31+G* decimals, on the menu's own atoms`, energy: g6.get(m.id) };

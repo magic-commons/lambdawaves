@@ -7,7 +7,7 @@
  * re-convergence from a symmetrically perturbed density.
  */
 import { basisFrom, integrals } from './md.js';
-import { rhf, fockReal } from './scf.js';
+import { rhf, uhf, fockReal } from './scf.js';
 import { loewdin } from './density.js';
 import { eigSym } from './h2ci.js';
 import { cholesky } from './linalg.js';
@@ -163,14 +163,17 @@ export function stabilityHessian(I, out, nocc) {
     get lowestAmB() { return loM === null ? (loM = lo(AmB)) : loM; } };
 }
 /** re-converge from a symmetrically perturbed density; the energy must come back */
-function stabilityProbe(basisArgs, opts, out, { seed = 20260912, amplitude = 0.05 } = {}) {
-  const n = out.D.length ** 0.5 | 0, rnd = mulberry32(seed), P = Float64Array.from(out.D);
-  let scale = 0; for (const v of out.D) scale = Math.max(scale, Math.abs(v));
+const perturbed = (D, seed, amplitude) => {
+  const n = D.length ** 0.5 | 0, rnd = mulberry32(seed), P = Float64Array.from(D);
+  let scale = 0; for (const v of D) scale = Math.max(scale, Math.abs(v));
   for (let i = 0; i < n; i++) for (let j = i; j < n; j++) {
     const d = amplitude * scale * (2 * rnd() - 1);
     P[i * n + j] += d; if (i !== j) P[j * n + i] += d;
   }
-  const re = rhf(basisArgs, { ...opts, guess: P });
+  return P;
+};
+function stabilityProbe(basisArgs, opts, out, { seed = 20260912, amplitude = 0.05 } = {}) {
+  const re = rhf(basisArgs, { ...opts, guess: perturbed(out.D, seed, amplitude) });
   return { seed, amplitude, energy: re.energy, delta: re.energy - out.energy, converged: re.converged,
     iterations: re.iterations, same: re.converged && Math.abs(re.energy - out.energy) < 1e-10 };
 }
@@ -203,7 +206,7 @@ export function canonicalOrbitals(S, C, eps, n) {
   return out;
 }
 export function moleculeRHF({ atoms, basis = 'sto-3g', charge = 0, guess = 'sad', record = null, detect = true,
-  diis = 8, damping = 0, tol = 1e-12, maxIter = 200, stability = true, hessian = true } = {}) {
+  diis = 8, damping = 0, tol = 1e-12, maxIter = 200, stability = true, hessian = true, multiplicity = 1, model = null } = {}) {
   if (!Array.isArray(atoms) || !atoms.length) throw new Error('rhf-molecule: atoms = [{ Z, x, y, z }] in bohr');
   const rec = recordFor(basis, record);
   /* THE INTEGRAL PASS TIMES ITSELF.  The card used to ask the worker for a SECOND pass purely to time one, and a
@@ -212,8 +215,22 @@ export function moleculeRHF({ atoms, basis = 'sto-3g', charge = 0, guess = 'sad'
   const b = basisFrom(atoms, rec, { cart: true }), I = integrals(b, atoms);
   const integralMs = +(performance.now() - tInt).toFixed(2);
   const nElectrons = atoms.reduce((s, a) => s + a.Z, 0) - charge;
-  if (nElectrons % 2 || nElectrons < 2) throw new Error(`rhf-molecule: RHF needs an even electron count ≥ 2, got ${nElectrons}`);
+  if ((nElectrons + multiplicity + 1) % 2 || nElectrons < 1 || multiplicity < 1 || multiplicity > nElectrons + 1) throw new Error(`rhf-molecule: ${nElectrons} electrons cannot be multiplicity ${multiplicity} — odd electrons need multiplicity 2, 4, …, even ones 1, 3, …`);
   const nocc = nElectrons / 2, args = { n: I.n, S: I.S, h: I.h, eri: I.eri, Enuc: I.Enuc };
+  const moments = (D) => { const n = I.n, tr = (A, B) => { let t = 0; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) t += A[j * n + i] * B[i * n + j]; return t; };
+    return { dipole: [0, 1, 2].map((q) => I.nuclearDipole[q] - tr(D, [I.X, I.Y, I.Z][q])), electrons: tr(I.S, D) }; };   // the sums in their old order, bit for bit
+  /* 0.7.1 THE OPEN SHELLS: multiplicity > 1 (or model 'uhf': the H₂ curve's singlet) is UHF from SAD split nα : nβ, shaken as the stability probe
+     shakes and seeded by the α HOMO/LUMO mix (DIIS held until ‖ẽ‖ < 1e-4): the symmetric SAD start lands O₂, B₂ and NO₂ on a SADDLE 1–70 mEh up,
+     the shaken one on PySCF's stable minimum (U1-BUILD.md).  C is Cα, canonical, so the ORBITAL view and the ladder show the α set; no second-
+     solution search, no stability probe, no Hessian (null). */
+  if (multiplicity > 1 || model === 'uhf') {
+    const nAlpha = (nElectrons + multiplicity - 1) / 2, nBeta = nElectrons - nAlpha;
+    const u = uhf(args, { nAlpha, nBeta, diis, tol, maxIter: 10 * maxIter, mix: 0.1,
+      guess: guess === 'core' ? 'core' : guess === 'sad' ? perturbed(sadDensity(b.atoms, rec, b), 20260912, 0.05) : guess });
+    return { ...u, model: 'UHF', multiplicity, orbitalEnergies: u.epsAlpha, C: canonicalOrbitals(I.S, u.Calpha, u.epsAlpha, I.n), F: u.Falpha, nElectrons, nocc: nAlpha, charge,
+      basis: b, integrals: I, hash: b.hash, guess: typeof guess === 'string' ? guess : 'given', solutionName: null, aufbau: null, solutions: [], timings: { integrals: integralMs },
+      stability: null, ...moments(u.D) };
+  }
   const opts = { nElectrons, diis, damping, tol, maxIter };
   const sad = () => sadDensity(b.atoms, rec, b);
   const runs = new Map();
@@ -246,10 +263,5 @@ export function moleculeRHF({ atoms, basis = 'sto-3g', charge = 0, guess = 'sad'
     basis: b, integrals: I, hash: b.hash, guess: primary.guess, solutionName: mine?.name ?? null,
     aufbau: primary.aufbau, solutions, timings: { integrals: integralMs },
     stability: stability ? { ...stabilityProbe(args, opts, out), hessian: primaryHessian,
-      minimum: primaryHessian ? primaryHessian.minimum : null } : null,
-    dipole: [0, 1, 2].map((q) => { const M = [I.X, I.Y, I.Z][q], n = I.n; let t = 0;
-      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) t += out.D[j * n + i] * M[i * n + j];
-      return I.nuclearDipole[q] - t; }),
-    electrons: (() => { const n = I.n; let t = 0;
-      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) t += out.D[i * n + j] * I.S[j * n + i]; return t; })() };
+      minimum: primaryHessian ? primaryHessian.minimum : null } : null, ...moments(out.D) };
 }

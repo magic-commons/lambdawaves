@@ -23,6 +23,8 @@ function figure(v, s, what) {
 /** every numeral of a string, parsed out of the phrases that may carry one; anything left with a digit fails */
 function numerals(t, what) {
   const out = {}; let rest = t;
+  rest = rest.replace(/^(\S+ · )?UHF ⟨S²⟩ (\d\.\d{3})/, (_, l, v) => { out.s2 = Number(v); return l || ''; });   // 0.7.1: the line's ⟨S²⟩ …
+  rest = rest.replace(/⟨S²⟩ (\d\.\d{3}) \(exact (\d+(?:\.\d+)?)\)/, (_, v, x) => { out.s2 = Number(v); out.exact = Number(x); return ''; });   // … and the head's, with S(S+1)
   rest = rest.replace(/energy agrees with PySCF to (\de-\d+) Eh/, (_, v) => { out.dE = Number(v); return ''; });
   rest = rest.replace(/picture good to (\d+(?:\.\d+)?) % of ρmax/, (_, v) => { out.rho = Number(v); return ''; });
   rest = rest.replace(/picture good to (\de-\d+) RMS \(worst voxel (\de-\d+)\)/, (_, a, b) => { out.rms = Number(a); out.worst = Number(b); return ''; });
@@ -57,14 +59,15 @@ let computed = 0, imported = 0, worstLive = 0, worstLiveId = '';
 for (const m of [...MOLECULES, ...RECORD_ONLY]) {
   const row = m.records['sto-3g'] || null, oracle = row ? null : m.oracle;   // chemview's choice: the row when there is one
   assert.ok(row || (m.oracle && Number.isFinite(m.oracle.energy)), m.id + ': neither a row nor a fixture oracle');
-  const sol = row || m.disabled ? null : W.chemGround({ atoms: moleculeAtoms(m.id), basis: 'sto-3g', charge: m.charge || 0, symmetry: m.symmetry });
+  const sol = row || m.disabled ? null : W.chemGround({ atoms: moleculeAtoms(m.id), basis: 'sto-3g', charge: m.charge || 0, symmetry: m.symmetry, multiplicity: m.multiplicity });
   if (sol) { solved.push(m.id); const d = Math.abs(sol.energy - m.oracle.energy); if (d > worstLive) { worstLive = d; worstLiveId = m.id; } }
   const src = row ? Math.abs(row.oracle.delta) : sol ? Math.max(Math.abs(sol.energy - m.oracle.energy), Math.abs(m.oracle.energy) * Number.EPSILON) : null;   // a bit-identical energy agrees to the double's |E|·ε
   for (const view of VIEWS) {
-    const s = statusOf({ record: row, sol, oracle, view }), what = `${m.id} ${view}`;
+    const s = statusOf({ record: row, sol, oracle, view }), what = `${m.id} ${view}`, uhf = m.multiplicity > 1;
     assert.equal(s.word, 'NUMERICAL', what + ': a molecule with an oracle reads ' + s.word);
     budget(s.line, what); const n = numerals(s.line, what);
-    assert.ok(s.line.startsWith({ density: 'DENSITY', orbital: 'ORBITAL', diff: 'Δρ', flow: 'FLOW' }[view] + ' · NUMERICAL'), what + ': ' + s.line);
+    assert.ok(s.line.startsWith({ density: 'DENSITY', orbital: 'ORBITAL', diff: 'Δρ', flow: 'FLOW' }[view] + (uhf ? ` · UHF ⟨S²⟩ ${sol.s2.toFixed(3)}` : '') + ' · NUMERICAL'), what + ': ' + s.line);
+    if (uhf) { assert.equal(n.s2, +sol.s2.toFixed(3), what + ': the ⟨S²⟩ printed is the solve\'s'); delete n.s2; }
     if (view === 'density') {
       assert.ok(Math.abs(n.rho / 100 - FIELD_LAW.density.worst) <= 1e-12 * FIELD_LAW.density.worst, what + ': the picture number is not the law\'s worst-voxel bound');
       if (src !== null && row?.status.energy !== 'IMPORTED') figure(n.dE, src, what);
@@ -72,6 +75,7 @@ for (const m of [...MOLECULES, ...RECORD_ONLY]) {
     if (view === 'density') live[m.id] = s.line;
   }
   const s = statusOf({ record: row, sol, oracle }); budget(s.head, m.id + ' head'); const n = numerals(s.head, m.id + ' head');
+  if (m.multiplicity > 1) { const S = (m.multiplicity - 1) / 2; assert.ok(n.s2 === +sol.s2.toFixed(3) && n.exact === S * (S + 1), m.id + ' head: ⟨S²⟩ and S(S + 1)'); }
   if (row) { geo[s.geometry] = (geo[s.geometry] || 0) + 1; if (/ · geometry computed, not measured$/.test(s.head)) computed++; else assert.equal(s.geometry, 'experimental', m.id); }
   else assert.equal(s.geometry, null);
   if (row?.status.energy === 'IMPORTED') { imported++; assert.equal(s.head, 'NUMERICAL · energy is PySCF\'s own · geometry computed, not measured'); assert.deepEqual(n, {}); }
@@ -79,11 +83,11 @@ for (const m of [...MOLECULES, ...RECORD_ONLY]) {
 }
 assert.deepEqual(geo, { experimental: 2, 'optimised-here': 26, 'computed-reference': 9, draft: 1 }, 'the geometry classes: ' + JSON.stringify(geo));
 assert.equal(computed, 36, 'the heads that say "geometry computed, not measured"'); assert.equal(imported, 1, 'C₆₀ alone is IMPORTED');
-assert.equal(MOLECULES.length + RECORD_ONLY.length, 91);
+assert.equal(MOLECULES.length + RECORD_ONLY.length, 98);   // 0.7.1: + the seven open shells
 assert.match(live.H2O, /^DENSITY · NUMERICAL · energy agrees with PySCF to \de-\d+ Eh · picture good to 0\.2 % of ρmax$/, 'water: ' + live.H2O);
 assert.ok(statusCalls() > 0);
 
-console.log(`GREEN status: ${strings} strings (91 molecules × 4 views + 91 heads + hydrogen) within ${BUDGET} characters (longest ${longest.length}: "${longest}"); `
+console.log(`GREEN status: ${strings} strings (98 molecules × 4 views + 98 heads + hydrogen) within ${BUDGET} characters (longest ${longest.length}: "${longest}"); `
   + `every numeral parsed back to its source — ${solved.length} live solves against P3's PySCF energies (worst |ΔE| ${worstLive.toExponential(2)}, ${worstLiveId}), `
   + `38 rows' oracle.delta, the field law's hydrogen ${FIELD_LAW.hydrogen.rms.toExponential()} RMS / ${FIELD_LAW.hydrogen.worst.toExponential()} worst voxel and density ${FIELD_LAW.density.worst.toExponential()} worst voxel (tests/helpers/field-law.mjs); `
   + `no molecule with an oracle reads UNCHECKED; geometry 2 / 26 / 9 / 1, ${computed} heads "computed, not measured", C₆₀'s energy PySCF's own. Water: "${live.H2O}"`);

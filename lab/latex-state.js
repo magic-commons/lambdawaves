@@ -134,7 +134,7 @@ export function moleculeHead({ molecule, basis, ground, stem, status } = {}) {
   if (!molecule || !ground || !Number.isFinite(ground.energy)) return '';
   const s = stem || stemOf(ground), g = s.pointGroup, h = /^(.+) · HOMO$/.exec(s.homo);
   return '**$' + formulaLatex(molecule.formula) + '$' + (molecule.name ? ' · ' + mdText(molecule.name) : '') + '**'
-    + '\nRHF/' + (BASIS_LABEL[basis] || String(basis || '').toUpperCase()) + ' · $E = ' + ground.energy.toFixed(6) + '\\,E_h$'
+    + '\n' + (molecule.term ? mdText(molecule.term) + ' · ' : '') + (ground.model || 'RHF') + '/' + (BASIS_LABEL[basis] || String(basis || '').toUpperCase()) + ' · $E = ' + ground.energy.toFixed(6) + '\\,E_h$'
     + '\n' + ground.nocc + ' occupied of ' + ground.nAO + ' AO · ' + (g ? '$' + g[0] + '_{' + g.slice(1).replace(/^inf/, '\\infty ') + '}$' : '—')
     + '\n' + (h ? 'HOMO ' + forms(h[1]).latex : mdText(s.homo)) + ' · gap $' + s.gapEh.toFixed(4) + '\\,E_h$ = ' + s.gapEv.toFixed(2) + ' eV' + (status ? '\n' + mdText(status.head) : '');
 }

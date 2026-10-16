@@ -8,7 +8,7 @@
 export const FIELD_LAW = Object.freeze({ hydrogen: Object.freeze({ rms: 3e-6, worst: 2e-4 }), density: Object.freeze({ worst: 2e-3 }) });
 /** the catalogue's words (P3's `status.energy`) → the face's, written ONCE; absent → UNCHECKED; a closed form → EXACT */
 export const STATE_WORD = Object.freeze({ MEASURED: 'NUMERICAL', IMPORTED: 'NUMERICAL', UNKNOWN: 'UNCHECKED' });
-const VIEW = { density: ['DENSITY'], orbital: ['ORBITAL', 'sign and phase are arbitrary'], diff: ['Δρ', 'formed in double precision against its reference'], flow: ['FLOW', 'direction exact, size qualitative'], esp: ['ESP', 'Φ at nuclei exact'] };
+const VIEW = { density: ['DENSITY'], orbital: ['ORBITAL', 'sign and phase are arbitrary'], diff: ['Δρ', 'formed in double precision against its reference'], flow: ['FLOW', 'direction exact, size qualitative'], esp: ['ESP', 'Φ at nuclei exact'], spin: ['SPIN', 'ρα − ρβ, signed'] };
 /** one figure, rounded UP: a number on the glass is never better than the one measured (a live |ΔE| never below the double's own |E|·ε) */
 const up = (x) => { let [m, e] = x.toExponential(0).split('e').map(Number); if (Number(m + 'e' + e) < x) m++; return m > 9 ? '1e' + (e + 1) : m + 'e' + e; };
 let calls = 0; export const statusCalls = () => calls;
@@ -16,7 +16,9 @@ let calls = 0; export const statusCalls = () => calls;
  *  catalogue row (oracle {what, delta}, geometry, status); `sol`: a live solve ({ energy }) checked against `oracle` ({ what, energy }). */
 export function statusOf({ owner = 'molecule', record = null, sol = null, oracle = null, view = 'density', label = '', esp = null } = {}) {   // esp: { N, min } once ESP's card landed
   calls++;
-  const join = (...a) => a.filter(Boolean).join(' · '), said = (word, caveat, head, geometry = null) => ({ word, line: join(label || VIEW[view][0], word, caveat), head, geometry });
+  const S = sol && sol.model === 'UHF' ? (sol.multiplicity - 1) / 2 : null, s2 = S === null ? '' : `⟨S²⟩ ${sol.s2.toFixed(3)}`;   // 0.7.1: the contamination printed, never hidden
+  const join = (...a) => a.filter(Boolean).join(' · '), said = (word, caveat, head, geometry = null) => ({ word, line: join(label || VIEW[view][0], s2 && 'UHF ' + s2, word, caveat),
+    head: join(s2 && `${s2} (exact ${S * (S + 1)})`, head), geometry });   // the line keeps the 110-character budget; the head has room for S(S+1)
   if (owner === 'hydrogen') { const H = FIELD_LAW.hydrogen, p = `picture good to ${up(H.rms)} RMS (worst voxel ${up(H.worst)})`; label = label || 'HYDROGEN'; return said('EXACT', p, join('EXACT', p)); }
   if (owner !== 'molecule') return null;
   const o = oracle || (record && record.oracle) || null, st = record && record.status ? record.status.energy : o ? 'MEASURED' : 'UNKNOWN', word = STATE_WORD[st] || 'UNCHECKED';

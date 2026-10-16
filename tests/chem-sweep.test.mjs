@@ -35,7 +35,7 @@ let fails = 0, checks = 0;
 const judge = (ok, what, detail) => { checks++; if (ok) console.log('GREEN ' + what); else { fails++; console.log('RED   ' + what + '\n      ' + JSON.stringify(detail)); } };
 const clock = (fn) => { const t = performance.now(), value = fn(); return { value, ms: performance.now() - t }; };
 
-const SWEPT = [...MOLECULES.filter((m) => !m.disabled && m.nAO <= 14).map((m) => m.id), 'C2H4', 'C6H6'];
+const SWEPT = [...MOLECULES.filter((m) => !m.disabled && m.nAO <= 14 && m.multiplicity === 1).map((m) => m.id), 'C2H4', 'C6H6'];   // 0.7.1: the RPA is a closed-shell road; the open shells are tests/uhf.test.mjs'
 const rows = [], timings = {};
 let worstE = 0, worstEid = '', worstW = 0, worstWid = '', worstF = 0, worstFid = '', worstNorm = 0, worstSum = 0;
 let totalRoots = 0;

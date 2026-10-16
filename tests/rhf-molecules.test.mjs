@@ -160,7 +160,7 @@ const runs = {};
 /* 5. The module refuses what it cannot do. */
 {
   const atoms = oracle.molecules.H2O.atoms_bohr.map(([Z, x, y, z]) => ({ Z, x, y, z }));
-  assert.throws(() => moleculeRHF({ atoms, basis: 'sto-3g', charge: 1 }), /even electron count/, 'an odd electron count is refused, not spin-averaged');
+  assert.throws(() => moleculeRHF({ atoms, basis: 'sto-3g', charge: 1 }), /odd electrons need multiplicity 2, 4/, 'an odd electron count at multiplicity 1 is refused, not spin-averaged (0.7.1: multiplicity 2 is UHF)');
   assert.throws(() => moleculeRHF({ atoms, basis: 'cc-pvdz' }), /unknown basis/, 'an unvendored basis is refused');
   assert.throws(() => moleculeRHF({ atoms: [] }), /atoms/, 'no atoms is refused');
   const cation = moleculeRHF({ atoms, basis: 'sto-3g', charge: 2 });

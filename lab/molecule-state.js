@@ -174,7 +174,7 @@ export function serializeMolecule(s) {
       url: b.url === undefined ? `./vendor/bse/${BASIS_FILES[b.name]}` : String(b.url),
       hash: b.hash, kind: BASIS_KIND, order: COMPONENT_ORDER_LINE },
     rhf: { energy: num(rhf.energy, 'rhf.energy'), eps: vec(rhf.eps, n, 'rhf.eps'),
-      C: vec(rhf.C, n * n, 'rhf.C'), D: vec(rhf.D, n * n, 'rhf.D') },
+      C: vec(rhf.C, n * n, 'rhf.C'), D: vec(rhf.D, n * n, 'rhf.D'), ...(rhf.Ds ? { Ds: vec(rhf.Ds, n * n, 'rhf.Ds') } : {}) },   // 0.7.1: a UHF solve's Dα − Dβ, absent for every closed shell
     rt: null,
     presentation: presentationOf(s.presentation),
   };
@@ -241,7 +241,7 @@ export function restoreMolecule(rec, { record = null, S = null, lib = null } = {
     record: canon,
     atoms: canon.atoms.map((a) => ({ ...a })), charge: canon.charge, multiplicity: canon.multiplicity, electrons: canon.electrons, n,
     basis: { ...canon.basis },
-    rhf: { energy: canon.rhf.energy, eps: f64(canon.rhf.eps), C: f64(canon.rhf.C), D: f64(canon.rhf.D) },
+    rhf: { energy: canon.rhf.energy, eps: f64(canon.rhf.eps), C: f64(canon.rhf.C), D: f64(canon.rhf.D), ...(canon.rhf.Ds ? { Ds: f64(canon.rhf.Ds) } : {}) },
     rt: canon.rt ? { t: canon.rt.t, dt: canon.rt.dt, integrator: canon.rt.integrator,
       kick: { ...canon.rt.kick }, P: { re: f64(canon.rt.P.re), im: f64(canon.rt.P.im) },
       Pprev: canon.rt.Pprev ? { re: f64(canon.rt.Pprev.re), im: f64(canon.rt.Pprev.im) } : null,

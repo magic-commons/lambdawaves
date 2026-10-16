@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { basisFrom, integrals, rdOf, ANGSTROM } from '../lab/md.js';
 import { moleculeRHF, registerRecord } from '../lab/rhf-molecule.js';
-import { MOLECULES, MOLECULE_BY_ID, GROUPS, LEGACY_PRESETS, CAP_ID, CAP_MS, COST, UNDER_CAP, OVER_CAP,
+import { MOLECULES as ALL, MOLECULE_BY_ID, GROUPS, LEGACY_PRESETS, CAP_ID, CAP_MS, COST, UNDER_CAP, OVER_CAP,
   SOLVABLE, counts, eriWork, rpaWork, predictMs, moleculeAtoms, moleculeCharge, optionLabel, RING_RESIDUALS,
   MAX_Z, PRIMITIVES } from '../lab/molecules.js';
 
@@ -31,6 +31,8 @@ registerRecord('sto-3g', record);
 const LIB = oracle.library;
 const ws = (s) => String(s).replace(/\s+/g, ' ').trim();
 const tolOf = (E) => Math.max(1e-9, 3e-12 * Math.abs(E));
+/* 0.7.1: THE CLOSED SHELLS are this file's (RHF against sto-3g-v1.json); the seven open shells are tests/uhf.test.mjs' (UHF against uhf-v1.json) */
+const MOLECULES = ALL.filter((m) => m.multiplicity === 1);
 
 /* 0. The oracle was written against these bytes, and it covers every entry. */
 {
@@ -73,9 +75,11 @@ const tolOf = (E) => Math.max(1e-9, 3e-12 * Math.abs(E));
   /* the four ions, and nothing else, carry a charge */
   assert.deepEqual(MOLECULES.filter((m) => m.charge !== 0).map((m) => `${m.id}${m.charge > 0 ? '+' : '-'}`),
     ['NH4++', 'H3O++', 'OH--', 'CN--'], 'the four charged entries');
-  const openShell = ['O2', 'NO', 'Fe', 'CH3', 'OH'];
-  for (const id of openShell) assert.ok(!MOLECULE_BY_ID.has(id), `${id} is open-shell and must not be offered by an RHF window`);
-  console.log(`PASS ${MOLECULES.length} entries well formed: every one sourced, every electron count even (${Math.min(...MOLECULES.map((m) => m.nElectrons))}–${Math.max(...MOLECULES.map((m) => m.nElectrons))}), 4 ions, no open shell, Z ≤ ${Math.max(...MOLECULES.flatMap((m) => m.ang.map((a) => a[0])))}.`);
+  assert.ok(!MOLECULE_BY_ID.has('Fe'), 'no bare transition-metal atom');
+  const open = ALL.filter((m) => m.multiplicity > 1);
+  assert.deepEqual(open.map((m) => m.id).sort(), ['B2', 'CH3', 'NH2', 'NO', 'NO2', 'O2', 'OH'], 'the seven open shells, solved by UHF');
+  for (const m of open) { assert.equal((m.nElectrons + m.multiplicity - 1) % 2, 0, `${m.id}: an odd count takes an even multiplicity`); assert.ok(m.term && m.source.length >= 24, `${m.id}: a term and a source`); }
+  console.log(`PASS ${MOLECULES.length} entries well formed: every one sourced, every electron count even (${Math.min(...MOLECULES.map((m) => m.nElectrons))}–${Math.max(...MOLECULES.map((m) => m.nElectrons))}), 4 ions, ${open.length} open shells beside them (${open.map((m) => m.id + ' ' + m.term).join(', ')}), Z ≤ ${Math.max(...MOLECULES.flatMap((m) => m.ang.map((a) => a[0])))}.`);
 }
 
 /* 2. The eight ids the laws pin are still here, with their frozen geometries. */
@@ -162,11 +166,11 @@ const tolOf = (E) => Math.max(1e-9, 3e-12 * Math.abs(E));
 /* 5. The dropdown's own contract: seven groups, ≥ 30 options, the option text, and the cap rule as help. */
 {
   let n = 0;
-  for (const g of GROUPS) { const rows = MOLECULES.filter((m) => m.group === g.id);
+  for (const g of GROUPS) { const rows = ALL.filter((m) => m.group === g.id);
     assert.ok(rows.length >= 2, `group ${g.id} carries at least two entries`);
     assert.ok(/^[A-Z0-9 ·]+$/.test(g.label), `group label ${g.label} is the lab's own upper-case idiom`);
     n += rows.length; }
-  assert.equal(n, MOLECULES.length, 'every entry lands in exactly one optgroup');
+  assert.equal(n, ALL.length, 'every entry lands in exactly one optgroup');
   assert.ok(MOLECULES.length >= 30, 'the dropdown offers at least 30 molecules');
   for (const m of MOLECULES) {
     const t = optionLabel(m);
