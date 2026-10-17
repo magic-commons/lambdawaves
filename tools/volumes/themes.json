@@ -1,0 +1,19 @@
+{
+ "schema": 1,
+ "note": "THE SHELF's themes (iteration 005 S). Ordered: a FINISHED molecule goes to the FIRST theme whose `any` it carries (a theme with `app` also takes every molecule of the app's own table); `rest` takes what is left. A theme is ordered by the catalogue's `priority` and continues as 'TITLE · 2' past 5 GB of .lwm + .webp, with the next numeral. Titles and blurbs are data: rename them here. `numeral` is the theme's numeral when nothing before it splits.",
+ "themes": [
+  { "id": "classics", "numeral": "I", "title": "The Classics", "app": true, "any": ["classic"],
+    "blurb": "The molecules every chemistry book opens with, and every molecule of the app's own table." },
+  { "id": "medicine", "numeral": "II", "title": "Medicine",
+    "any": ["medicine", "painkiller", "antibiotic", "antiviral", "heart", "mind", "cancer", "allergy", "anaesthetic", "vitamin", "hormone"],
+    "blurb": "Medicines and the molecules the body answers to: painkillers, antibiotics, heart and mind, hormones and vitamins." },
+  { "id": "life", "numeral": "III", "title": "Life and Food",
+    "any": ["life", "amino acid", "nucleobase", "sugar", "fat", "steroid", "neurotransmitter", "food", "flavour", "scent", "sweetener", "natural", "alkaloid"],
+    "blurb": "The chemistry of living things and of the kitchen: amino acids, sugars and fats, flavours and scents." },
+  { "id": "materials", "numeral": "IV", "title": "Materials, Atmosphere and Fuel",
+    "any": ["material", "metal", "plastic", "solvent", "fuel", "gas", "atmosphere", "pollutant", "toxin", "pesticide", "colour"],
+    "blurb": "What things are made of and what the air carries: metals, plastics, solvents, fuels, gases and dyes." },
+  { "id": "rest", "numeral": "V", "title": "The Rest", "rest": true,
+    "blurb": "Everything else the catalogue holds." }
+ ]
+}

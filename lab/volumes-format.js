@@ -11,8 +11,13 @@
  *   rungs(lwm)                → [{ basis, nAO, nocc, energy, gapEv }] in the header's (the ladder's) order
  *   rungRecord(lwm, basis)    → the schema-1 record the worker opens (chem.open), each placeholder → { $f64 | $f32: base64 }
  *   encodeLwm(header, data)   → Uint8Array: `data[basis][key]` a typed array; fills each rung's `blobs` (offsets) in the header
- * Typed arrays are little-endian; a big-endian host is refused by name rather than misread. */
-export const MAGIC = 'LWM1', LWM_SCHEMA = 1;
+ * Typed arrays are little-endian; a big-endian host is refused by name rather than misread.
+ *
+ * THE ARCHIVE (iteration 005 S): one volume in one file, LAMBDAWAVES-VOL-<numeral>.lwv (tools/volumes/pack.mjs --archive) —
+ *   'LWV1' · u32 H · H bytes of UTF-8 JSON { schema: 1, volume: <its shelf entry>, files: [{ path, offset, length, sha256 }] } · zero pad
+ *   to 8 · the files, each at its 8-aligned offset from the file's start (index.json first, then m/*.lwm, then t/*.webp; paths relative to
+ *   the volume's folder).  lwvIndexLength(first 8 bytes) → 8 + H; parseLwv(the first 8 + H bytes) → the index, checked. */
+export const MAGIC = 'LWM1', LWM_SCHEMA = 1, LWV_MAGIC = 'LWV1';
 const DTYPE = { f64: Float64Array, f32: Float32Array, i32: Int32Array };
 const LE = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 const pad8 = (n) => (n + 7) & ~7;
@@ -37,7 +42,8 @@ export function parseLwm(input) {
     const r = header.rungs && header.rungs[basis], d = r && r.blobs && r.blobs[key];
     if (!d) throw new Error(`volumes-format: no blob ${basis}/${key}`);
     const { T, bytes } = bytesOf(d);
-    return new T(bytes.slice().buffer);                            // a copy: aligned whatever the input's offset
+    const copy = new Uint8Array(bytes.length); copy.set(bytes);    // a copy: aligned whatever the input's offset (a node Buffer's slice is a view)
+    return new T(copy.buffer);
   };
   return { header, blob, bytesOf };
 }
@@ -83,4 +89,24 @@ export function encodeLwm(header, data) {
   out.set([...MAGIC].map((c) => c.charCodeAt(0)), 0); new DataView(out.buffer).setUint32(4, json.length, true); out.set(json, 8);
   for (const p of parts) out.set(p.bytes, base + p.at);
   return out;
+}
+
+const lwvHead = (u8) => {
+  if (u8.length < 8 || String.fromCharCode(u8[0], u8[1], u8[2], u8[3]) !== LWV_MAGIC) throw new Error('volumes-format: not a volume file (no LWV1 magic)');
+  return 8 + new DataView(u8.buffer, u8.byteOffset, 8).getUint32(4, true);
+};
+export const lwvIndexLength = (bytes) => lwvHead(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes));
+export function parseLwv(input) {
+  const u8 = input instanceof Uint8Array ? input : new Uint8Array(input), end = lwvHead(u8);
+  if (end > u8.length) throw new Error('volumes-format: the volume file\'s index runs past the bytes given');
+  const idx = JSON.parse(new TextDecoder().decode(u8.subarray(8, end)));
+  if (!idx || idx.schema !== 1 || !idx.volume || typeof idx.volume.id !== 'string' || !Array.isArray(idx.files) || !idx.files.length) throw new Error('volumes-format: the volume file\'s index is not schema 1');
+  let at = pad8(end);
+  for (const f of idx.files) {
+    if (!f || typeof f.path !== 'string' || !/^(?!\/)(?!.*\.\.)[A-Za-z0-9._+/-]{1,200}$/.test(f.path) || !/^[0-9a-f]{64}$/.test(f.sha256)
+      || !Number.isSafeInteger(f.offset) || !Number.isSafeInteger(f.length) || f.length < 0 || f.offset % 8 || f.offset < at) throw new Error('volumes-format: a malformed file entry in the volume file');
+    at = pad8(f.offset + f.length);
+  }
+  if (idx.files[0].path !== 'index.json') throw new Error('volumes-format: the volume file does not begin with its catalogue');
+  return idx;
 }

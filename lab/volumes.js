@@ -18,6 +18,10 @@
  *                                 cancellable (an AbortSignal); asks persist() once, on the first install press (library.js persistOnce);
  *                                 and the ladder's four basis records its rungs read (sw.js DATA) into lw-data-v1 when not there yet
  *                                 (iteration 005 A), so an installed volume opens offline at every rung
+ *   installFile(volId, file, { onProgress, signal })   THE FILE ROAD (iteration 005 S): a volume's one .lwv (lab/volumes-format.js THE
+ *                                 ARCHIVE), opened from this device's disk — every file's sha-256 checked, stored under EXACTLY the keys the
+ *                                 fetch road uses (so statusOf · file · picture · remove see no difference), one at a time, resumable, and
+ *                                 refused with a sentence when its volume is not on the shelf or the device has too little room
  *   remove(volId)                 the whole cache (the basis records stay: another volume may read them)
  *   file(volId, molId, { network })   the .lwm as an ArrayBuffer, from this device or (network, the default) the network, checked either way
  *   picture(volId, molId)         a URL for the molecule's picture: the device's copy (an object URL) when installed, else the network's
@@ -25,6 +29,7 @@
  * The reader (lab/volumes-format.js parseLwm · rungRecord) and the open (chemview.js openVolume, THE RECORD ROAD's chem.open) are row V2's. */
 import { persistOnce, storageInfo, keepData } from './library.js';
 import { BASIS_FILES } from './rhf-molecule.js';
+import { parseLwv, lwvIndexLength } from './volumes-format.js';
 export { storageInfo };
 export const VOLUME_BASE = new URL('./volumes/', import.meta.url).href;
 export const cacheOf = (volId) => 'lw-vol-' + volId;
@@ -39,9 +44,11 @@ async function store(volId, create = false) {
   if (!caching()) return null;
   try { return create || await caches.has(cacheOf(volId)) ? await caches.open(cacheOf(volId)) : null; } catch (_) { return null; }
 }
-const validVolume = (v) => v && SAFE.test(v.id) && typeof v.numeral === 'string' && typeof v.index === 'string' && RELATIVE.test(v.index);
+/* a volume is fetchable (its `index`, the dev link) or a file (its `archive`: opened from disk; its keys are the same folder's) */
+const validVolume = (v) => v && SAFE.test(v.id) && typeof v.numeral === 'string'
+  && (typeof v.index === 'string' ? RELATIVE.test(v.index) : !!(v.archive && typeof v.archive.name === 'string'));
 const validMolecule = (m) => m && SAFE.test(m.id) && typeof m.file === 'string' && RELATIVE.test(m.file) && (m.thumb == null || (typeof m.thumb === 'string' && RELATIVE.test(m.thumb)));
-const indexUrl = (v) => new URL(v.index, VOLUME_BASE).href;
+const indexUrl = (v) => new URL(v.index || v.id + '/index.json', VOLUME_BASE).href;
 const inVolume = (v, rel) => new URL(rel, indexUrl(v)).href;   // the catalogue's paths are relative to its own folder
 
 /* ── THE SHELF ── the network's, else (offline) the entries the installed volumes keep */
@@ -80,6 +87,7 @@ async function indexBytes(v) {
   const url = indexUrl(v), c = await store(v.id);
   const hit = c && await c.match(url).catch(() => null);
   if (hit) { const buf = await hit.arrayBuffer(); if (!v.indexSha256 || await hex(buf) === v.indexSha256) return buf; }
+  if (!v.index) throw new Error(volLabel(v) + ' is not on this device: open its file');
   let r; try { r = await fetch(url, { cache: 'no-cache' }); } catch (_) { throw new Error('the catalogue of ' + v.id + ' could not be fetched (offline?)'); }
   if (!r.ok) throw new Error('the catalogue of ' + v.id + ': the server answered ' + r.status);
   const buf = await r.arrayBuffer();
@@ -180,6 +188,50 @@ export function install(volId, { onProgress = null, signal = null } = {}) {
   return job;
 }
 export const installing = (volId) => running.has(volId);
+
+/* ── THE FILE ROAD ── a volume's .lwv from this device's disk: File.slice per entry, one at a time (one disk read), every sha-256 checked */
+const volLabel = (v) => 'VOL. ' + (v.numeral || v.id);
+const size = (b) => (b >= 1e9 ? (b / 1e9).toFixed(1) + ' GB' : Math.max(1, Math.round(b / 1e6)) + ' MB');
+export function installFile(volId, file, { onProgress = null, signal = null } = {}) {
+  if (running.has(volId)) return running.get(volId);
+  const asked = persistOnce().catch(() => null);
+  const job = (async () => {
+    let lwv;
+    try { lwv = parseLwv(await file.slice(0, lwvIndexLength(await file.slice(0, 8).arrayBuffer())).arrayBuffer()); }
+    catch (_) { return { ok: false, why: (file.name || 'this file') + ' is not a λWAVES volume file' }; }
+    const e = lwv.volume, vols = (await shelf({ fresh: true })).volumes, v = vols.find((x) => x.id === e.id), name = file.name || 'this file';
+    if (!v || !v.archive) return { ok: false, why: `${name} holds ${volLabel(e)}, which is not on this shelf` };
+    if (volId && e.id !== volId) return { ok: false, why: `${name} holds ${volLabel(e)}, not ${volLabel(vols.find((x) => x.id === volId) || { id: volId })}` };
+    if (lwv.files[0].sha256 !== v.indexSha256) return { ok: false, why: `${name} is another edition of ${volLabel(v)} than the one this app lists` };
+    const c = await store(v.id, true);
+    if (!c) return { ok: false, why: 'this browser has no Cache Storage' };
+    const keyOf = (f) => (f.path === 'index.json' ? indexUrl(v) : inVolume(v, f.path));
+    const kept = new Map((await Promise.all((await c.keys()).map(async (q) => [q.url, (await c.match(q).catch(() => null))?.headers.get('content-length')]))));
+    const todo = lwv.files.filter((f) => kept.get(keyOf(f)) !== String(f.length));   // resumable: a file kept at its length was checked when it was kept
+    const total = lwv.files.reduce((s, f) => s + f.length, 0), need = todo.reduce((s, f) => s + f.length, 0);
+    const est = await navigator.storage?.estimate?.().catch(() => null);
+    if (est && est.quota && est.quota - (est.usage || 0) < need) return { ok: false, why: `${volLabel(v)} needs ${size(need)} and this device has ${size(Math.max(0, est.quota - (est.usage || 0)))} free for it` };
+    const N = lwv.files.length;
+    let n = N - todo.length, bytes = total - need;
+    const tell = (url) => { if (onProgress) try { onProgress({ n, N, bytes, total, ratio: total ? bytes / total : 1, file: url }); } catch (_) { /* a listener's fault is its own */ } };
+    await c.put(SHELF_URL, new Response(JSON.stringify(v), { headers: { 'content-type': 'application/json' } }));
+    tell(null);
+    for (const f of todo) {
+      if (signal && signal.aborted) return { ok: false, cancelled: true, n, N, bytes, total };
+      const b = await file.slice(f.offset, f.offset + f.length).arrayBuffer();
+      if (b.byteLength !== f.length || await hex(b) !== f.sha256) return { ok: false, why: `${f.path} in ${name} does not match its index — the file is damaged; download it again`, n, N, bytes, total };
+      try { await c.put(keyOf(f), new Response(b, { headers: { 'content-type': f.path.endsWith('.json') ? 'application/json' : f.path.endsWith('.webp') ? 'image/webp' : 'application/octet-stream', 'content-length': String(b.byteLength) } })); }
+      catch (err) { return { ok: false, why: err && err.name === 'QuotaExceededError' ? 'this device is out of room for it' : String(err && err.message || err), n, N, bytes, total }; }
+      n++; bytes += f.length; tell(keyOf(f));
+    }
+    const failed = [];
+    for (const u of basesOf(v)) if (!await keepData(u)) failed.push({ id: 'basis', url: u, why: 'the basis record could not be kept' });
+    const storage = await asked.then(() => storageInfo()).catch(() => null);
+    return { ok: !failed.length, n, N, bytes, total, failed, storage, why: failed.length ? 'a basis record could not be kept — open the file again online' : '' };
+  })().finally(() => running.delete(volId));
+  running.set(volId, job);
+  return job;
+}
 
 export async function remove(volId) {
   if (!SAFE.test(volId) || !caching()) return false;

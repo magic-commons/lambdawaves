@@ -4,6 +4,8 @@
  *   node tools/build-deploy.mjs            assemble dist/, verify it, print the payload
  *   node tools/build-deploy.mjs --no-test  skip the tests/pwa.test.mjs subprocess (faster while iterating)
  *   node tools/build-deploy.mjs --quiet    the verdicts and the payload only, no per-file listing
+ *   node tools/build-deploy.mjs --shelf F  also ship THE SHELF F (a packer's volumes.json) as dist/volumes/volumes.json — each entry an
+ *                                          archive the reader opens from disk (iteration 005 S); no volume's bytes ever ship here
  *
  * Node stdlib only — this repo has no dependencies and the thing that ships it must not be the exception.
  * (`wrangler` is a devDependency of the DEPLOY, installed by npm and never imported here; the no-deps
@@ -93,6 +95,7 @@ const DIST = path.join(ROOT, 'dist');
 const ARGS = new Set(process.argv.slice(2));
 const RUN_TEST = !ARGS.has('--no-test');
 const QUIET    = ARGS.has('--quiet');
+const SHELF    = ARGS.has('--shelf') ? process.argv[process.argv.indexOf('--shelf') + 1] : null;
 
 const SEGS = BASE_PATH.split('/').filter(Boolean);
 const SITE = SEGS.length ? SEGS.join('/') + '/' : '';       // dist-relative prefix; '' at an origin root
@@ -214,6 +217,17 @@ for (const [file] of SHIP_EXTRA) {
 }
 mkdirSync(path.join(DIST, '.well-known'), { recursive: true });   // Android TWA: Digital Asset Links, origin root
 copyFileSync(path.join(ROOT, 'tools/platform/android/assetlinks.json'), path.join(DIST, '.well-known/assetlinks.json'));
+/* THE SHELF (iteration 005 S): the small same-origin volumes.json; a deploy holds no volume folder, so an entry keeps only its archive
+   (the reader downloads the .lwv and opens it in PICKER › LIBRARY) — `index` is dropped, and an entry without an archive is refused */
+if (SHELF) {
+  const shelf = JSON.parse(readFileSync(path.resolve(SHELF), 'utf8'));
+  const bad = !shelf || shelf.schema !== 1 || !Array.isArray(shelf.volumes) ? ['not a schema-1 shelf'] : shelf.volumes.filter((v) => !v.archive || !v.archive.name || !v.archive.sha256).map((v) => `${v.id} has no archive`);
+  if (bad.length) { console.error(`--shelf ${SHELF}: ${bad.join('; ')} (pack it with --archive)`); process.exit(2); }
+  for (const v of shelf.volumes) delete v.index;
+  mkdirSync(path.join(DIST, at('volumes')), { recursive: true });
+  writeFileSync(path.join(DIST, at('volumes/volumes.json')), JSON.stringify(shelf, null, 1) + '\n');
+  console.log(`  shelf    volumes/volumes.json  ${shelf.volumes.map((v) => 'VOL. ' + v.numeral + ' ' + v.archive.name).join(' · ')}`);
+}
 console.log(`lab/ → dist/${SITE} : ${labFiles.length - dropped.size} files`);
 for (const [f, why] of DROP)       console.log(`  dropped  ${f.padEnd(16)} ${QUIET ? '' : why}`);
 for (const [f, why] of SHIP_EXTRA) console.log(`  added    ${f.padEnd(16)} ${QUIET ? '' : why}`);

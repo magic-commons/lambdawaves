@@ -181,14 +181,29 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const sec = sections[2].sec, shelfEl = el('div', 'mm-shelf', sec), view = el('div', 'mm-volview', sec); view.hidden = true;
     const vhead = el('div', 'mm-vhead', view), tagsEl = el('div', 'mm-tags', view), group = el('div', 'mm-group', view), vdeck = deck(view);
     let woke = false, cur = null, mols = [], on = new Set(), query = '';
+    /* a volume with an `index` installs from the network (INSTALL); one without is a file the reader downloads once (OPEN FILE…, or a drop) */
     function installer(host, v) {
       const b = el('button', 'mm-install', host); b.type = 'button';
       const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost), word = el('span', 'mm-install-word', b);
+      const fromFile = !v.index, size = fromFile ? v.archive.bytes : v.bytes, pick = fromFile ? el('input', '', host) : null;
+      if (pick) { pick.type = 'file'; pick.accept = '.lwv'; pick.hidden = true; pick.addEventListener('change', () => { const f = pick.files && pick.files[0]; pick.value = ''; if (f) run(f); }); }
       let ctl = null, arm = 0;
       const paint = async () => {
         const s = await V.statusOf(v.id).catch(() => ({ state: 'absent', n: 0, N: v.count || 0 }));
+        const est = fromFile && s.state !== 'installed' ? await navigator.storage?.estimate?.().catch(() => null) : null;
+        const tight = est && est.quota && est.quota - (est.usage || 0) < size ? ' · TOO BIG FOR THIS DEVICE' : '';
         b.dataset.state = s.state; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle');
-        word.textContent = s.state === 'installed' ? 'INSTALLED · REMOVE' : s.state === 'partial' ? `RESUME · ${s.n.toLocaleString('en')} / ${s.N.toLocaleString('en')}` : 'INSTALL' + (v.bytes ? ' · ' + fmtBytes(v.bytes) : '');
+        word.textContent = s.state === 'installed' ? 'INSTALLED · REMOVE' : (s.state === 'partial' ? `RESUME · ${s.n.toLocaleString('en')} / ${s.N.toLocaleString('en')}` + (fromFile ? ' · OPEN FILE…' : '')
+          : (fromFile ? 'OPEN FILE…' : 'INSTALL') + (size ? ' · ' + fmtBytes(size) : '')) + tight;
+      };
+      const run = async (f) => {
+        if (ctl) return;
+        ctl = new AbortController(); b.dataset.state = 'busy';
+        const opts = { signal: ctl.signal, onProgress: (p) => { ring.set(p.ratio, 'busy'); word.textContent = Math.round(p.ratio * 100) + '% · ' + fmtBytes(p.bytes) + ' OF ' + fmtBytes(p.total) + ' · CANCEL'; } };
+        const r = await (f ? V.installFile(v.id, f, opts) : V.install(v.id, opts)).catch((err) => ({ ok: false, why: String(err && err.message || err) }));
+        ctl = null; await paint();
+        if (r && r.why && !r.cancelled) say({ formula: volName(v), name: v.title || '', sub: r.why });
+        else if (r && r.ok && f && cur === v) enter(v);
       };
       b.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -197,23 +212,27 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
           if (Date.now() - arm > 3000) { arm = Date.now(); word.textContent = 'REMOVE ' + volName(v) + '? PRESS AGAIN'; return; }
           arm = 0; await V.remove(v.id); await paint(); return;
         }
-        ctl = new AbortController(); b.dataset.state = 'busy';
-        const r = await V.install(v.id, { signal: ctl.signal, onProgress: (p) => { ring.set(p.ratio, 'busy'); word.textContent = Math.round(p.ratio * 100) + '% · ' + fmtBytes(p.bytes) + ' OF ' + fmtBytes(p.total) + ' · CANCEL'; } })
-          .catch((err) => ({ ok: false, why: String(err && err.message || err) }));
-        ctl = null; await paint();
-        if (r && r.why && !r.cancelled) say({ formula: volName(v), name: v.title || '', sub: r.why });
+        if (pick) pick.click(); else run(null);
       });
-      paint(); return { paint };
+      paint(); return { paint, run };
     }
     function card(v) {
       const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
       el('b', 'mm-vol-num', o, volName(v)); if (v.title) el('span', 'mm-vol-title', o, v.title);
-      const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', v.bytes ? fmtBytes(v.bytes) : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
+      const size = v.index ? v.bytes : v.archive.bytes;
+      const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', size ? fmtBytes(size) : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
       if (meta) el('span', 'mm-vol-meta', o, meta);
       if (v.blurb) el('span', 'mm-vol-blurb', o, v.blurb);
+      if (!v.index) el('span', 'mm-vol-blurb', o, 'A volume is a file you download once and open here.');
       o.addEventListener('pointerenter', () => say({ formula: volName(v), name: v.title || '', sub: meta }));
       o.addEventListener('click', () => enter(v));
-      installer(c, v);
+      const ins = installer(c, v);
+      if (!v.index) {   // the card takes a drop of its .lwv
+        const files = (e) => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+        c.addEventListener('dragover', (e) => { if (files(e)) { e.preventDefault(); c.classList.add('drop'); } });
+        c.addEventListener('dragleave', () => c.classList.remove('drop'));
+        c.addEventListener('drop', (e) => { if (!files(e)) return; e.preventDefault(); c.classList.remove('drop'); const f = e.dataTransfer.files[0]; if (f) ins.run(f); });
+      }
     }
     async function paintShelf() {
       shelfEl.textContent = ''; shelfEl.hidden = false; view.hidden = true; cur = null;
