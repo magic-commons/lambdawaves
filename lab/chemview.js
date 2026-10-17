@@ -716,7 +716,8 @@ export function createChem(host, api) {
   }
   /* ── FLOW for the real-time run (stage 6): the TDHF density matrix carries a current too ───────────────────
      Re D is the whole density; Im D is NEGATED on the way in, because density.js keeps D_μν = Σ c_μ c̄_ν and the flow
-     evaluator is written for ⟨a†_μ a_ν⟩ = its transpose-conjugate.  A still molecule has Im D = 0 and no flow.
+     evaluator is written for ⟨a†_μ a_ν⟩ = its transpose-conjugate.  (MO-REGISTRY's packet has no such seam: it hands ψ itself,
+     `setPacket`, and builds no D.)  A still molecule has Im D = 0 and no flow.
      BALANCED's Re Ḋ is the difference of the two latest landings over their Δt: centred half a landing behind the D it repairs. */
   let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0, flowSrc = 'computed', flowDot = null, flowT = null, dotOK = false;
   const paintFlow = () => { if (!flow) return; const w = flow.said(); roRep.set(w[0]); roRep.setSub(w[1]); roGate.set(w[2]); roGate.setSub(w[3]); srcSeg.root.title = flowMod.FLOW_ORACLE[preset] || ''; };
