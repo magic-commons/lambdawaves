@@ -3,9 +3,13 @@
 import { lstatSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-export function assertPublicTree(root) {
+/* `devLinks`: top-level names that may be a symbolic link and are then SKIPPED — never dereferenced, never shipped (iteration 004
+   V1: lab/volumes, the git-ignored dev link to the volumes' dist, gigabytes of DATA that ship on their own road).  A link anywhere
+   else, or under any other name, is still refused. */
+export function assertPublicTree(root, { devLinks = [] } = {}) {
   const visit = (file, relative) => {
     const stat = lstatSync(file);
+    if (stat.isSymbolicLink() && devLinks.includes(relative)) return;
     if (stat.isSymbolicLink() || (!stat.isFile() && !stat.isDirectory())) {
       throw new Error(`Unsafe release input: ${relative} (link or special file)`);
     }

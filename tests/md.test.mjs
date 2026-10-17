@@ -18,7 +18,7 @@ const maxAbs = (a, f) => { let w = 0; for (let k = 0; k < a.length; k++) w = Mat
 /* 0. The vendored records are the BSE bytes, and md.js's SHA-256 is node:crypto's. */
 {
   const index = read('../lab/vendor/bse/index.json');
-  assert.equal(index.records.length, 2, 'two vendored records');
+  assert.equal(index.records.length, 6, 'six vendored records: the basis ladder (iteration 004 V1)');
   for (const r of index.records) {
     const raw = bytes('../lab/vendor/bse/' + r.file);
     const ref = createHash('sha256').update(raw).digest('hex');
@@ -36,9 +36,11 @@ const maxAbs = (a, f) => { let w = 0; for (let k = 0; k < a.length; k++) w = Mat
   assert.deepEqual(index.records[0].elements, Array.from({ length: 36 }, (_, k) => k + 1), 'STO-3G v1 vendors elements 1–36');
   /* WIDENED 2026-09-18 from H, O to H, C, N, O, F, exactly as STO-3G was widened on 2026-09-12: the old hash is still
      named, and the H and O shells are byte-identical decimals, so nothing pinned before the widening moves. */
-  assert.equal(index.records[1].sha256, 'ddcbd84daf46557296a080db8a83087a2e63a99bc123cdcf8da69c8a0922d24d', '6-31+G* v1 (H, C, N, O, F) hash');
-  assert.equal(index.records[1].sha256_superseded, 'fee4f992bf8fe6a319350ff03a253d77004110eed0d34013b2af1fade4a71ac4', 'the superseded H, O hash of the ledger is still named');
-  assert.deepEqual(index.records[1].elements, [1, 6, 7, 8, 9], '6-31+G* v1 vendors H, C, N, O, F');
+  /* WIDENED AGAIN 2026-10-17 (iteration 004 V1, the basis ladder) to H–Ar, BSE's whole 6-31+G*: H, C, N, O, F byte-identical again. */
+  assert.equal(index.records[1].sha256, 'b38353af756b7b3ab156b3e5c182ccfdb45985911939154d76628eabd05ab149', '6-31+G* v1 (H–Ar) hash');
+  assert.equal(index.records[1].sha256_superseded, 'ddcbd84daf46557296a080db8a83087a2e63a99bc123cdcf8da69c8a0922d24d', 'the superseded H, C, N, O, F hash is still named');
+  assert.equal(index.records[1].sha256_superseded_earlier, 'fee4f992bf8fe6a319350ff03a253d77004110eed0d34013b2af1fade4a71ac4', 'the earlier H, O hash of the ledger is still named');
+  assert.deepEqual(index.records[1].elements, Array.from({ length: 18 }, (_, k) => k + 1), '6-31+G* v1 vendors H–Ar');
   assert.equal(ANGSTROM, 1 / 0.52917721092, 'ANGSTROM = 1/0.52917721092');
   close(ANGSTROM, 1.8897261245650618, 1e-16, 'ANGSTROM vs the oracle ang_to_bohr');
   console.log(`PASS vendored BSE records verbatim: STO-3G v1 ${index.records[0].sha256.slice(0, 8)}…, 6-31+G* v1 ${index.records[1].sha256.slice(0, 8)}… (node:crypto = md.js sha256Hex).`);

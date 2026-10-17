@@ -89,7 +89,7 @@ export function stateLatex(o) {
  * Every level carries its symmetry name when the worker named the solve (`ground.names`, lab/names.js) and its frontier tag
  * BY LEVEL (a degenerate HOMO is one HOMO): `\varepsilon_{5} = -0.3913\ (1b_{1},\ \mathrm{HOMO})`.  With no names the tag is
  * by level when the record has levels, by index otherwise.  '' when there is no ground. */
-export const BASIS_LABEL = { 'sto-3g': 'STO-3G', '6-31+g-star': '6-31+G*' };
+export const BASIS_LABEL = { 'sto-3g': 'STO-3G', 'sto-6g': 'STO-6G', '3-21g': '3-21G', '6-31g': '6-31G', '6-31g-star': '6-31G*', '6-31+g-star': '6-31+G*' };
 const SUB = '₀₁₂₃₄₅₆₇₈₉', SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻';
 /** a library formula ('<m>H₂O</m>', 'NH₄⁺', 'B₁₂H₁₂²⁻') as upright LaTeX: \mathrm{H_{2}O}.  A superscript RUN is one ^{…} (²⁻ → ^{2-}:
  *  two would be KaTeX's double superscript, the red B₁₂H₁₂²⁻ of 0.5.2); its class is spelled out, as ¹²³ are U+00B9/B2/B3, outside ⁰–⁹ */

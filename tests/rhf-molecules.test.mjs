@@ -23,7 +23,7 @@ registerRecord('sto-3g', record);
   assert.equal(oracle.provenance.unit, 'bohr'); assert.equal(oracle.provenance.geometry_role, 'experimental-fixed');
   close(oracle.provenance.ang_to_bohr, 1 / 0.52917721092, 0, 'ang_to_bohr');
   assert.deepEqual(Object.keys(oracle.molecules), ['H2O', 'LiH', 'HF', 'NH3', 'CH4', 'N2'], 'six fixtures');
-  assert.deepEqual(Object.keys(BASIS_FILES), ['sto-3g', '6-31+g-star'], 'the two shippable bases');
+  assert.deepEqual(Object.keys(BASIS_FILES), ['sto-3g', 'sto-6g', '3-21g', '6-31g', '6-31g-star', '6-31+g-star'], 'the basis ladder: six vendored bases (iteration 004 V1)');
   console.log(`PASS oracle provenance: PySCF ${oracle.provenance.pyscf}, STO-3G v1 ${oracle.provenance.bse_sha256.slice(0, 8)}…, six fixtures in bohr, geometry role ${oracle.provenance.geometry_role}.`);
 }
 

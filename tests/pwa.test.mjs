@@ -265,8 +265,12 @@ const KIT_SKIP = JSON.parse((text('sw.js').match(/\nconst SKIP = (\[[^\]]*\]);/)
 const skipRe = (p) => new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*') + (p.endsWith('/') ? '' : '$'));
 const IS_KIT_SKIP = (rel) => KIT_SKIP.some((p) => skipRe(p).test(rel));
 const SKIP = (rel) => rel === 'sw.js' || rel === 'smoke.html' || (/\.(md|txt)$/i.test(rel) && !LICENCE(rel)) || STAGED.has(rel) || KIT_UNREACHED.has(rel) || IS_DATA(rel) || IS_KIT_SKIP(rel);
+/* iteration 004 V1: a symbolic link to a DATA root (lab/volumes → ~/Documents/LAMBDAWAVES-VOLUMES/dist, git-ignored) is a dev link:
+   never followed, never listed — the volumes are DATA, and gigabytes of them are no business of the precache's walk. */
 const walk = (d, out = []) => { for (const e of readdirSync(d, { withFileTypes: true })) {
-  const f = path.join(d, e.name); if (e.isDirectory()) walk(f, out); else out.push(path.relative(LAB, f).split(path.sep).join('/')); } return out; };
+  const f = path.join(d, e.name), rel = path.relative(LAB, f).split(path.sep).join('/');
+  if (e.isSymbolicLink() && IS_DATA(rel + '/')) continue;
+  if (e.isDirectory()) walk(f, out); else out.push(rel); } return out; };
 const onDisk = walk(LAB).sort();
 const wanted = onDisk.filter((r) => !SKIP(r));
 const skipped = onDisk.filter(SKIP);
@@ -317,7 +321,7 @@ assert.ok(listed.includes('manifest.webmanifest'), 'sw.js: the manifest itself m
 
 /* The prose in sw.js must name every rule the walk actually applies, so the two cannot drift apart silently. */
 const never = SW.LW_SW.NEVER_PRECACHE.map(([k]) => k).join(' ');
-for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'an adopted kit module no root reaches (R5-W1)', 'a DATA root (§1b: library/)', 'a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)'])
+for (const rule of ['sw.js', 'smoke.html', '*.md, *.txt EXCEPT a LICENCE text', 'a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'an adopted kit module no root reaches (R5-W1)', 'a DATA root (§1b: library/, volumes/, the ladder\'s four basis records)', 'a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)'])
   assert.ok(never.includes(rule), `sw.js: NEVER_PRECACHE does not document the rule "${rule}" that the walk applies`);
 /* and the exception must be REAL, not merely written: every licence text in lab/ is in the precache list. */
 const licences = onDisk.filter(LICENCE);
@@ -331,9 +335,10 @@ console.log(`PASS precache list == lab/ on disk: ${listed.length} files, ${(byte
    lab/library.json — the catalogue lab/molecules.js reads — is precached like any file; each row names lab/library/<sha-256>.json,
    which must exist and hash to its name; and nothing sits in library/ that no row reaches (precache what a root reaches, and
    ship nothing a root does not).  tools/orbital-library.mjs --check proves the bytes are the solver's. */
-assert.deepEqual(DATA, ['library/'], 'sw.js §1b: the DATA roots are exactly library/ — a second exemption is a second rule');
+assert.deepEqual(DATA, ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json'],
+  'sw.js §1b: the DATA roots are exactly library/, volumes/ and the ladder\'s four basis records (iteration 004 V1) — one rule, these members');
 assert.ok(listed.includes('library.json'), 'sw.js: the catalogue lab/library.json must be precached — offline, the menu could not name a record');
-const CAT = JSON.parse(text('library.json')), dataFiles = onDisk.filter(IS_DATA);
+const CAT = JSON.parse(text('library.json')), dataFiles = onDisk.filter((f) => f.startsWith('library/'));
 assert.ok(Array.isArray(CAT.rows) && CAT.rows.length >= 2, 'lab/library.json: no rows');
 for (const r of [...CAT.rows, ...(CAT.vibrations || [])]) {   // 0.7.0 V1: the normal-mode records too
   const rel = 'library/' + r.hash + '.json';

@@ -29,6 +29,14 @@ try {
     assert.throws(() => assertPublicTree(root), /link or special file/);
     rmSync(link);
   }
+  // iteration 004 V1: a NAMED top-level dev link (lab/volumes) is skipped, never followed; the same name deeper, or another name, still fails.
+  symlinkSync(root, path.join(root, 'volumes'));
+  assert.doesNotThrow(() => assertPublicTree(root, { devLinks: ['volumes'] }));
+  assert.throws(() => assertPublicTree(root), /link or special file/);
+  rmSync(path.join(root, 'volumes'));
+  symlinkSync(root, path.join(root, 'vendor', 'volumes'));
+  assert.throws(() => assertPublicTree(root, { devLinks: ['volumes'] }), /link or special file/);
+  rmSync(path.join(root, 'vendor', 'volumes'));
   const disguised = path.join(root, 'asset.txt');
   writeFileSync(disguised, '-----BEGIN RSA PRIVATE KEY-----\nDO-NOT-PRINT-ME');
   assert.throws(() => assertPublicTree(root), error =>

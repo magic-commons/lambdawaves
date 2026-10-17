@@ -213,7 +213,7 @@ const keyOf = (basis, charge, atoms) => JSON.stringify([basis, charge, atoms.map
 
 /** hand a parsed lab/vendor/bse record to the chemistry ops once; every chem op is then synchronous */
 export function chemRegister(basis, record) {
-  if (!BASIS_FILES[basis]) throw new Error(`chem: unknown basis '${basis}' — only ${Object.keys(BASIS_FILES).join(' and ')} are vendored`);
+  if (!BASIS_FILES[basis]) throw new Error(`chem: unknown basis '${basis}' — only ${Object.keys(BASIS_FILES).join(', ')} are vendored`);
   chemRecords.set(basis, record); registerRecord(basis, record); return record;
 }
 const recordOf = (basis) => {

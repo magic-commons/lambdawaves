@@ -156,9 +156,13 @@ const problems = [];
 const notes    = [];
 const fail = (section, msg) => problems.push({ section, msg });
 const note = (msg) => notes.push(msg);
+/* iteration 004 V1: lab/volumes may be the git-ignored DEV LINK to ~/Documents/LAMBDAWAVES-VOLUMES/dist — never followed, never in
+   dist/ (the volumes are DATA that ship on their own road, not inside the app's deploy) */
+const DEV_LINKS = ['volumes'];
 const walk = (dir, base = dir, out = []) => {
   for (const e of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name < b.name ? -1 : 1)) {
     const f = path.join(dir, e.name);
+    if (e.isSymbolicLink() && dir === LAB && DEV_LINKS.includes(e.name)) continue;
     if (e.isDirectory()) walk(f, base, out);
     else out.push(path.relative(base, f).split(path.sep).join('/'));
   }
@@ -173,7 +177,7 @@ rule('1 · ASSEMBLE');
 if (!existsSync(LAB)) { console.error('no lab/ — run this from the λWAVES repo.'); process.exit(2); }
 // Validate before copying or removing the previous build. Never dereference a
 // source symlink or include local credentials in public static assets.
-try { assertPublicTree(LAB); } catch (error) { console.error(error.message); process.exit(2); }
+try { assertPublicTree(LAB, { devLinks: DEV_LINKS }); } catch (error) { console.error(error.message); process.exit(2); }
 if (existsSync(DIST)) {
   if (lstatSync(DIST).isSymbolicLink()) { console.error('dist/ is a symlink; refusing to touch it.'); process.exit(2); }
   rmSync(DIST, { recursive: true, force: true });

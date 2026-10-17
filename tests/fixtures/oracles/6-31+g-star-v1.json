@@ -2,7 +2,9 @@
  "provenance": {
   "pyscf": "2.14.0",
   "numpy": "2.4.6",
-  "bse_sha256": "ddcbd84daf46557296a080db8a83087a2e63a99bc123cdcf8da69c8a0922d24d",
+  "bse_sha256": "b38353af756b7b3ab156b3e5c182ccfdb45985911939154d76628eabd05ab149",
+  "bse_sha256_computed_on": "ddcbd84daf46557296a080db8a83087a2e63a99bc123cdcf8da69c8a0922d24d",
+  "widened": "2026-10-17 (iteration 004 V1): the vendored record widened from H, C, N, O, F (ddcbd84d…, the file these energies were computed on) to H–Ar (b38353af…); the H, C, N, O, F electron_shells are byte-identical decimals in both, so every energy here is the same calculation on either file (lab/vendor/bse/index.json).",
   "cart": true,
   "unit": "bohr",
   "written_by": "research/molecular-waves-2026-09-18/basis/oracle-631.py"
