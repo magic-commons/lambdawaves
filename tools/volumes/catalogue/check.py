@@ -1,16 +1,32 @@
 """check.py — the gate on <catalogue>/vol-1.candidates.json: it refuses a file the solver could not trust.
 
-  python -I tools/volumes/catalogue/check.py        (exit 0 = every row holds; it prints every complaint it has)
+  python -I tools/volumes/catalogue/check.py [FILE] [--against PREV] [--raw DIR] [--allow-moved]
+      (exit 0 = every row holds; it prints every complaint it has; FILE defaults to <catalogue>/vol-1.candidates.json)
 
 THE LAWS CHECKED, row by row: every field of PLAN.md's `meta` present and of the right kind · a unique id and a unique
-InChIKey · 1–4 tags, each from PLAN.md's vocabulary · every element H–Kr · an even electron count (a closed shell) and
-multiplicity 1 · ≤ 50 heavy atoms (an app molecule may be bigger and is listed as such) · the geometry: the stated element
-multiset, no two nuclei closer than 0.5 Å, every atom bonded to something within 2.6 Å (3.4 Å for a metal or a cluster),
-a finite coordinate · heavy and nAtoms agreeing with atomsAng · a blurb with a source · a unique priority, the app's own first.
+InChIKey · an id the solver takes as a file name ([A-Za-z0-9._+-], ≤ 80) · 1–4 tags, each from PLAN.md's vocabulary · every
+element H–Kr · an even electron count (a closed shell) and multiplicity 1 · ≤ 50 heavy atoms (an app molecule may be bigger and
+is listed as such) · the geometry: the stated element multiset, no two nuclei closer than 0.5 Å, every atom bonded to something
+within 2.6 Å (3.6 Å for a metal or a cluster), a finite coordinate · heavy and nAtoms agreeing with atomsAng · a blurb with a
+source · a unique priority, the app's own first.
+
+THE GUARDS (iteration 006 C2, guards.py), with --against PREV (the file the solvers run on now): every id of PREV present, naming
+the same InChIKey (a previous row a SAFETY SCREEN now refuses is named, not passed in silence) · no id pointing at a raw/<id>/ that
+holds another molecule's solve · every row with a converged rung in raw/ (--raw, default the catalogue's sibling raw/) at EXACTLY
+the atoms it was solved at — the solver's own test, float(Å) × ANGSTROM == meta.json's atomsBohr — unless --allow-moved (a
+--refresh-geometry build, whose moved rows will be solved again).
 """
 import collections, json, math, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
-from common import DATA, read_json
+from common import DATA, read_json, sibling
+import guards as GU
+
+def _arg(flag):
+    return next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == flag and i + 1 < len(sys.argv)), None)
+_flags = {'--against', '--raw'}
+_pos = [a for i, a in enumerate(sys.argv[1:], 1) if not a.startswith('--') and sys.argv[i - 1] not in _flags]
+FILE = os.path.expanduser(_pos[0]) if _pos else os.path.join(DATA, 'vol-1.candidates.json')
+AGAINST, RAW = _arg('--against'), _arg('--raw') or GU.raw_dir(DATA)
 
 VOCAB = set(['medicine', 'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic', 'vitamin',
              'hormone', 'neurotransmitter', 'amino acid', 'nucleobase', 'sugar', 'fat', 'steroid', 'alkaloid', 'food', 'flavour',
@@ -20,7 +36,7 @@ FIELDS = ['id', 'name', 'iupac', 'synonyms', 'formula', 'charge', 'multiplicity'
           'exactMass', 'heavy', 'nAtoms', 'xlogp', 'tpsa', 'hbd', 'hba', 'rotatable', 'complexity', 'tags', 'blurb', 'blurbSource',
           'atomsAng', 'geometrySource', 'sources', 'priority']
 METALS = {3, 4, 11, 12, 13, 19, 20, *range(21, 32)}
-doc = read_json(os.path.join(DATA, 'vol-1.candidates.json'))
+doc = read_json(FILE)
 bad = collections.Counter(); says = []
 def fail(row, what):
     bad[what] += 1
@@ -30,6 +46,7 @@ for m in doc['molecules']:
     for f in FIELDS:
         if f not in m: fail(m, f'missing field {f}')
     if m['id'] in ids: fail(m, 'a repeated id')
+    if not GU.ID_OK(m['id']): fail(m, 'an id the solver will not take as a file name')
     ids.add(m['id'])
     if m['inchikey']:
         if m['inchikey'] in keys: fail(m, 'a repeated InChIKey')
@@ -64,7 +81,19 @@ for m in doc['molecules']:
     prios.append(m['priority'])
 if len(set(prios)) != len(prios): bad['a repeated priority'] += 1
 if app_rows and sorted(app_rows) != list(range(len(app_rows))): bad["the app's own are not the first block of priorities"] += 1
-print(f'{len(doc["molecules"])} rows checked · {sum(bad.values())} complaints')
+guard_notes = []
+if AGAINST:                                                         # THE GUARDS: the new file against the one the solvers run on
+    prev_by_id = GU.previous(os.path.expanduser(AGAINST))[0]
+    ex_path = sibling(FILE, 'excluded')
+    excluded = read_json(ex_path)['rows'] if os.path.exists(ex_path) else []
+    S = GU.solved(RAW)
+    gbad, guard_notes = GU.verify(doc, prev_by_id, S, excluded, allow_moved='--allow-moved' in sys.argv)
+    guard_notes.append(f'{len(S)} ids with a converged rung in {RAW}')
+    for what, s in gbad:
+        bad[what] += 1
+        if bad[what] <= 8: says.append(f'  {what}: {s}')
+print(f'{FILE}: {len(doc["molecules"])} rows checked · {sum(bad.values())} complaints')
+for s in guard_notes: print('  guards: ' + s)
 for k, v in bad.most_common(): print(f'  {v:6d}  {k}')
 for s in says[:60]: print(s)
 sys.exit(1 if bad else 0)

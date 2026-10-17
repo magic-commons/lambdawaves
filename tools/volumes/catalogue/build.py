@@ -8,18 +8,26 @@ Run the six collectors first (each caches, so a re-run asks the network nothing)
   python -I tools/volumes/catalogue/fetch_wikidata.py  Wikidata: every compound with an English Wikipedia article
   python -I tools/volumes/catalogue/fetch_who_eml.py   the WHO Model List of Essential Medicines (names)
 then
-  python -I tools/volumes/catalogue/build.py [--limit N] [--no-geometry] [--refresh-geometry]
+  python -I tools/volumes/catalogue/build.py [--limit=N] [--no-geometry] [--refresh-geometry] [--out=FILE] [--prev=FILE] [--raw=DIR]
 
 Every nomination is resolved through PubChem (a name or an InChIKey → a CID → its record; a salt or a charged form → PubChem's
 own PARENT), merged by InChIKey (one entry per key, tags and sources from every nomination), filtered, given a geometry
 (geom.py) and tagged from PLAN.md's vocabulary ONLY.  The run's numbers go to <catalogue>/vol-1.stats.json, which report.py
 turns into research/iteration-004/CAT-BUILD.md.
+
+THE TWO GUARDS (iteration 006 C2; guards.py says why): (a) a row whose id has a converged rung under raw/<id>/ keeps the exact atoms
+it was solved at, even when PubChem's conformer has since arrived — --refresh-geometry lifts this, and every solved row that then
+moves is named in the log, because the solver will solve it again from STO-3G; (b) a row keeps the id the previous candidates file
+(--prev, default the current <catalogue>/vol-1.candidates.json) gave its InChIKey, and a new row's slug collision takes the suffix,
+never an old row.  --out writes the candidates (and its .stats/.excluded siblings) elsewhere — vol-1.candidates.next.json — so the
+running solvers' file is replaced only after check.py has passed the new one (check.py FILE --against PREV).
 """
 import collections, datetime, json, os, re, sys, time
 sys.path.insert(0, os.path.dirname(__file__))
-from common import DATA, CACHE, read_json, write_json
+from common import DATA, CACHE, read_json, write_json, sibling
 import pubchem as P
 import geom as G
+import guards as GU
 import curated as CUR
 from app_tags import APP, APP_REFUSED
 from rdkit import Chem, RDLogger
@@ -30,6 +38,13 @@ RDLogger.DisableLog('rdApp.*')
 VOL, TODAY = 'vol-1', datetime.date.today().isoformat()
 LIMIT = int(next((a.split('=')[1] for a in sys.argv if a.startswith('--limit=')), 0))
 GEOMETRY = '--no-geometry' not in sys.argv
+REFRESH = '--refresh-geometry' in sys.argv
+def _opt(name, default):
+    v = next((a.split('=', 1)[1] for a in sys.argv if a.startswith(f'--{name}=')), None)
+    return os.path.expanduser(v) if v else default
+OUT = _opt('out', os.path.join(DATA, f'{VOL}.candidates.json'))
+PREV = _opt('prev', os.path.join(DATA, f'{VOL}.candidates.json'))
+RAW = _opt('raw', GU.raw_dir(DATA))
 VOCAB = ['medicine', 'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic', 'vitamin', 'hormone',
          'neurotransmitter', 'amino acid', 'nucleobase', 'sugar', 'fat', 'steroid', 'alkaloid', 'food', 'flavour', 'scent', 'sweetener',
          'colour', 'solvent', 'fuel', 'plastic', 'material', 'metal', 'gas', 'atmosphere', 'pollutant', 'toxin', 'pesticide', 'acid',
@@ -118,6 +133,12 @@ wd_by_cid = {}
 for it in wd['items']:
     for c in it['cids']:
         if c not in wd_by_cid or it['sitelinks'] > wd_by_cid[c]['sitelinks']: wd_by_cid[c] = it
+# THE GUARDS' inputs: what the solver has solved (raw/<id>/meta.json) and the ids the previous candidates file gave
+SOLVED = GU.solved(RAW)
+prev_by_id, prev_id_by_key, prev_id_by_app = GU.previous(PREV)
+raw_id_by_key = GU.raw_ids_by_key(SOLVED, prev_by_id)
+log(f'guards: {len(prev_by_id)} rows in the previous file ({PREV}) · {len(SOLVED)} ids with a solved rung in {RAW} '
+    f'({sum(1 for s in SOLVED.values() if s["exact"])} reproducible exactly)' + (' · --refresh-geometry: guard (a) is OFF' if REFRESH else ''))
 
 # ── 1. NOMINATIONS ───────────────────────────────────────────────────────────────────────────────────────────────────
 noms = []
@@ -339,14 +360,14 @@ for key, e in entries.items():
     e['mol'], e['molH'] = mol, molH
     # the screens first, so a refused substance is never described further
     w = WEAPON_NAMED.get(skeleton(key)) or (weapon_class(mol) if mol is not None else None)
-    if w: exclude(nm, 'refused: on the Chemical Weapons Convention schedules or in a scheduled family — ' + w, src='/'.join(srcs), screen='CWC'); continue
+    if w: exclude(nm, 'refused: on the Chemical Weapons Convention schedules or in a scheduled family — ' + w, src='/'.join(srcs), screen='CWC', key=key); continue
     if any(u in WD_WEAPON_USES for n in e['noms'] for u in n.get('uses', [])):
-        exclude(nm, 'refused: Wikidata records it as a chemical warfare agent', src='/'.join(srcs), screen='CWC'); continue
+        exclude(nm, 'refused: Wikidata records it as a chemical warfare agent', src='/'.join(srcs), screen='CWC', key=key); continue
     if not e['approved']:
         il = ILLICIT_NAMED.get(skeleton(key))
         scr = {s for n in e['noms'] for s in n.get('screens', [])} & {'hallucinogen', 'opioid'}
         if il or scr or any(u in WD_ILLICIT_USES for n in e['noms'] for u in n.get('uses', [])):
-            exclude(nm, 'refused: a controlled psychoactive substance that is not an approved medicine', src='/'.join(srcs), screen='illicit'); continue
+            exclude(nm, 'refused: a controlled psychoactive substance that is not an approved medicine', src='/'.join(srcs), screen='illicit', key=key); continue
     Zs = [x.GetAtomicNum() for x in molH.GetAtoms()] if molH is not None else []
     heavy = p.get('HeavyAtomCount') or sum(1 for z in Zs if z > 1)
     why = None
@@ -373,8 +394,29 @@ need3d = sorted({e['cid'] for e in kept if not e['app'] and e['cid']})
 conf = P.conformers(need3d) if GEOMETRY else {}
 log(f'PubChem 3-D conformers: {len(conf)}/{len(need3d)}')
 def elements_agree(atoms, Zs): return collections.Counter(x[0] for x in atoms) == collections.Counter(Zs)
-geom_counts = collections.Counter()
+def gkind(src):
+    return ('app pinned' if src.startswith("the app's own") else 'PubChem 3-D conformer' if src.startswith('PubChem')
+            else 'GFN2-xTB' if 'GFN2-xTB' in src else 'RDKit ETKDGv3 + MMFF94')
+def row_key(e): return (props.get(e['cid']) or {}).get('InChIKey') if e['cid'] else None
+def solved_id(e):
+    """GUARD (a)'s question: the id guard (b) will give this entry, when raw/<that id>/ holds a converged rung of the same InChIKey
+    at atoms a candidate file can hand back exactly — else None"""
+    k = row_key(e)
+    i = e['app']['id'] if e['app'] else (prev_id_by_key.get(k) or raw_id_by_key.get(k))
+    s = SOLVED.get(i) if i else None
+    return i if s and s['exact'] and s['inchikey'] == k else None
+geom_counts, kept_solved, upgrade_waiting = collections.Counter(), collections.Counter(), []
 for i, e in enumerate(kept):
+    sid = solved_id(e)
+    if sid and not REFRESH and (e['app'] or elements_agree(SOLVED[sid]['atomsAng'], e['Zs'])):
+        # GUARD (a): a solved molecule keeps the atoms it was solved at — byte for byte, no rounding, the cache untouched
+        s = SOLVED[sid]
+        e['atoms'] = [[int(a[0]), a[1], a[2], a[3]] for a in s['atomsAng']]
+        e['gsource'] = s['geometrySource'] or f'the atoms raw/{sid}/ was solved at'
+        e['keptSolved'] = sid
+        k = gkind(e['gsource']); geom_counts[k] += 1; kept_solved[k] += 1
+        if not e['app'] and e['cid'] in conf and k != 'PubChem 3-D conformer': upgrade_waiting.append(sid)
+        continue
     if e['app']:
         e['atoms'] = [[int(z), x, y, zz] for z, x, y, zz in e['app']['ang']]
         e['gsource'] = 'the app\'s own pinned geometry (lab/molecules.js / lab/library.json): ' + (e['app']['source'] or 'see the module')
@@ -384,7 +426,7 @@ for i, e in enumerate(kept):
     hit = gcache.get(e['key'])
     # a cached geometry stands, EXCEPT a locally built one for a molecule whose PubChem conformer has since arrived: PubChem's
     # own 3-D conformer is the preferred source (PLAN.md step 1), so that row is built again rather than left as it was
-    if hit and '--refresh-geometry' not in sys.argv and (hit['kind'] == 'PubChem 3-D conformer' or e['cid'] not in conf):
+    if hit and not REFRESH and (hit['kind'] == 'PubChem 3-D conformer' or e['cid'] not in conf):
         e['atoms'], e['gsource'] = hit['atoms'], hit['source']
         geom_counts[hit['kind']] += 1
         continue
@@ -431,6 +473,15 @@ for i, e in enumerate(kept):
 if gdirty: write_json(GCACHE, gcache)
 kept = [e for e in kept if e.get('atoms')]
 log(f'with a geometry: {len(kept)} · ' + ' · '.join(f'{k} {v}' for k, v in geom_counts.most_common()))
+refreshed_solved = sorted(sid for e in kept for sid in [solved_id(e)] if sid and GU.bohr(e['atoms']) != SOLVED[sid]['atomsBohr'])
+if REFRESH:
+    log(f'GUARD (a) OFF (--refresh-geometry): {len(refreshed_solved)} rows that have solved rungs got a NEW geometry — the solver will '
+        f'solve each of them again from STO-3G (it sees "the atoms moved"): ' + ', '.join(refreshed_solved))
+else:
+    log(f'GUARD (a): {sum(kept_solved.values())} solved rows kept the exact atoms they were solved at (' +
+        ' · '.join(f'{k} {v}' for k, v in kept_solved.most_common()) + f'); {len(upgrade_waiting)} of them now have a PubChem 3-D '
+        f'conformer waiting — `build.py --refresh-geometry` would upgrade them, and those rows would then be solved again'
+        + (f' · ! {len(refreshed_solved)} solved rows moved anyway: ' + ', '.join(refreshed_solved) if refreshed_solved else ''))
 
 # ── 8. SYNONYMS, DESCRIPTIONS ────────────────────────────────────────────────────────────────────────────────────────
 live = sorted({e['cid'] for e in kept if e['cid']})
@@ -579,14 +630,30 @@ for e in kept:
     rows.append((e, row))
 log(f'rows: {len(rows)}')
 
-seen_ids = {}
+# GUARD (b): IDS ARE STABLE.  First every row the previous file (or raw/) already knows takes that id; then each new row takes its
+# slug, suffixed past every id ever given — the previous file's, raw/'s and this run's — so a collision moves the NEW row, never an old one
+reserved = set(prev_by_id) | set(SOLVED)
+seen_ids, id_from = {}, collections.Counter()
 for e, row in rows:
+    k = row['inchikey']
+    pinned = row['id'] if e['app'] else prev_id_by_key.get(k) or raw_id_by_key.get(k)
+    if pinned:
+        if pinned in seen_ids: raise SystemExit(f'guard (b): the id {pinned} is claimed twice ({seen_ids[pinned]} and {k}) — refusing to write')
+        row['id'] = pinned; seen_ids[pinned] = k; e['pinned'] = True
+        id_from['the app' if e['app'] else 'the previous file' if k in prev_id_by_key else 'raw/ (solved under it)'] += 1
+for e, row in rows:
+    if e.get('pinned'): continue
     base = row['id']
-    if base in seen_ids:
-        k = 2
-        while f'{base}-{k}' in seen_ids: k += 1
-        row['id'] = f'{base}-{k}'
-    seen_ids[row['id']] = True
+    if base in seen_ids or base in reserved:
+        n = 2
+        while f'{base}-{n}' in seen_ids or f'{base}-{n}' in reserved: n += 1
+        row['id'] = f'{base}-{n}'
+        id_from['new, suffixed past ' + ('an old id' if base in reserved else 'another new row')] += 1
+    else: id_from['new, its own slug'] += 1
+    seen_ids[row['id']] = row['inchikey']
+lost = sorted(set(prev_by_id) - set(seen_ids))
+log('GUARD (b): ids from ' + ' · '.join(f'{k} {v}' for k, v in id_from.most_common()) +
+    f' · {len(prev_by_id) - len(lost)}/{len(prev_by_id)} previous ids present' + (f' · ! MISSING: ' + ', '.join(lost) if lost else ''))
 def tier(e):
     if e['app']: return 0
     if any(n.get('who') for n in e['noms']): return 1
@@ -621,8 +688,8 @@ SOURCES = [
 out = {'schema': 1, 'built': datetime.datetime.now().astimezone().isoformat(timespec='seconds'), 'volume': VOL,
        'generator': 'tools/volumes/catalogue/build.py (iteration 004, row CAT)', 'count': len(molecules),
        'tagVocabulary': VOCAB, 'sources': SOURCES, 'molecules': molecules}
-os.makedirs(DATA, exist_ok=True)
-write_json(os.path.join(DATA, f'{VOL}.candidates.json'), out)
+os.makedirs(os.path.dirname(os.path.abspath(OUT)), exist_ok=True)
+write_json(OUT, out)
 
 bins = [('≤10', 0, 10), ('11–20', 11, 20), ('21–30', 21, 30), ('31–40', 31, 40), ('41–50', 41, 50), ('>50', 51, 10 ** 6)]
 def binned(h):
@@ -647,10 +714,18 @@ stats = {
              'namedScheduled': len(WEAPON_NAMED), 'namedControlled': len(ILLICIT_NAMED)},
  'sources': SOURCES, 'tagVocabulary': VOCAB,
  'samples': [{'id': m['id'], 'name': m['name'], 'tags': m['tags'], 'heavy': m['heavy'], 'priority': m['priority']} for m in molecules[:40]],
+ 'guards': {'previous': PREV, 'previousRows': len(prev_by_id), 'previousIdsPresent': len(prev_by_id) - len(lost), 'previousIdsMissing': lost,
+            'solvedInRaw': len(SOLVED), 'idsFrom': dict(id_from.most_common()), 'refreshGeometry': REFRESH,
+            'keptSolvedGeometry': dict(kept_solved.most_common()), 'keptSolvedWithConformerWaiting': len(upgrade_waiting),
+            'solvedRowsMoved': refreshed_solved},
 }
-write_json(os.path.join(DATA, f'{VOL}.stats.json'), stats, indent=1)
-write_json(os.path.join(DATA, f'{VOL}.excluded.json'), {'built': out['built'], 'count': len(excluded), 'rows': excluded}, indent=1)
-log(f'WROTE {os.path.join(DATA, VOL + ".candidates.json")} — {len(molecules)} molecules, {len(excluded)} exclusions')
+write_json(sibling(OUT, 'stats'), stats, indent=1)
+write_json(sibling(OUT, 'excluded'), {'built': out['built'], 'count': len(excluded), 'rows': excluded}, indent=1)
+log(f'WROTE {OUT} — {len(molecules)} molecules, {len(excluded)} exclusions (and {sibling(OUT, "stats")}, {sibling(OUT, "excluded")})')
+gbad, gnotes = GU.verify(out, prev_by_id, SOLVED, excluded, allow_moved=REFRESH)
+for s in gnotes: log('guards: ' + s)
+for what, s in gbad[:40]: log(f'guards: ! {what}: {s}')
+log(f'guards: {len(gbad)} complaints — check.py {OUT} --against {PREV} is the gate before the swap')
 print('by tag:', stats['byTag'])
 print('by heavy bin:', stats['byHeavyBin'])
 print('by geometry:', stats['byGeometry'])
