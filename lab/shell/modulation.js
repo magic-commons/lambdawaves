@@ -1,6 +1,6 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
-import { TIER } from '../rack.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { BASIS } from '../hydrogen.js';
+import { TIER } from '../rack.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { BASIS } from '../hydrogen.js'; import { dockSpan } from '../mir-gui.js';
 export function createModSeam(app) {
   const { ui, hNote, clock, obs, mat, settingsStore, reg, rates } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings } = app.sh,
     { mod, modHand, setKnob, ROT_LIMIT, rotRate, setRotationRate, occlusion, applyAccent, api } = app.ctl;
@@ -224,7 +224,11 @@ export function createModSeam(app) {
          the transport lights.  The host owns the flag, the glow and the persistence; the window only asks. */
       armed: () => app.state.modArm, arm: (on) => app.sh.setModArm(!!on),
       /* 0.5.3 M13a · the kit's 3×3 mark on the window's foot: it swaps to the TIMELINE (the button alone; no lego stack, R11) */
-      switchWorkspace: () => { app.state.modView.close(); app.state.tl.open(); } }));
+      switchWorkspace: () => { app.state.modView.close(); app.state.tl.open(); },
+      /* iteration 003 · IT DOCKS AT THE BOTTOM LIKE BASINS' (shell.js installModulation dock): dragged to the foot it lands full-width
+         between the racks, the kit's guide drawn while MIR OPTIONS' DROP GUIDES is on; dragged out, it floats.  The transport pill
+         gives way to its rect through modDodge (moved) and takes the top seat; a docked transport is a rack card and never meets it. */
+      dock: { span: dockSpan, guide: () => app.ctl.look.get('dropGuides') } }));
     app.state.modView.root.dataset.mirWindow = 'modulation';    // 0.5.0 A10's hook (the kit's controller sets the rail's, not the pane's)
     applyAccent();                                    // the two angles reach the window as soon as it exists
     app.state.modView.restore(readSettings().modwin);

@@ -1,22 +1,39 @@
-/* look.js — THE LOOK IS THE KIT'S (0.5.0 C2, R5-S1; this seam was accent-wheel.js, N7 seam 4).  MIR OPTIONS stays hidden and
- * SETTINGS stays the surface, but the look's STORE and its APPLICATION are the kit's: one localStorage key, `mir.gui`
- * (core/prefs.js createPrefs), whose rows are the kit's own LOOK_SCHEMA rows (shell/gui.js lookSchema) taken by key, so every
- * hook is the kit's spec and no other row is ever written.  λWAVES' home look is the `defaults` (createGui's word), the
- * device's first-run material (first-run.js: the phone law) among them.  createGui itself is not built (C2-DESIGN §1).
+/* look.js — THE LOOK IS THE KIT'S (0.5.0 C2, R5-S1; this seam was accent-wheel.js, N7 seam 4).  The look's STORE and its
+ * APPLICATION are the kit's: one localStorage key, `mir.gui` (core/prefs.js createPrefs), whose rows are the kit's own
+ * LOOK_SCHEMA rows (shell/gui.js lookSchema), so every hook is the kit's spec.  Iteration 003 (Josh: "Port and adopt the entire
+ * MIR 1.5 MIR Options loadout"): the store holds EVERY row now and is the `prefs` of the kit's MIR OPTIONS window (lab/mir-gui.js,
+ * createGui, as BASINS app/skin.js builds it).  λWAVES' home look is the `defaults` (createGui's word), the device's first-run
+ * material (first-run.js: the phone law) among them, over LOOK_HOME: each row the store gained is homed where it WRITES
+ * NOTHING (prefs.js rule 3), and four rows whose kit map writes even at home (TEXT · AUTO, SATURATION at blur 0, the CAST under
+ * DROP SHADOW, SPACING · DEFAULT) write nothing at λWAVES' home either (HOME_MAPS) — so no first-run or stored look moves.
  * THE ACCENTS are the kit's engine (shell/accent.js createAccent, the port of what this file was); λWAVES feeds it what it
  * holds apart — the HUE knob and the palette switch (applyAccent), the palette's stops, the live stage ground, the gamut,
  * the modulation window — and keeps its own the stage text's ink and M7's one paint per batch.
  * THE LIFT (once, forward only): an older settings blob's look keys (and HELP's own key) are set into `mir.gui` by the laws
  * rack.js read them by, and leave the blob.  A fresh profile never runs it.  Node-testable: liftLook (tests/first-run.test.mjs). */
 import { createPrefs } from './mir/core/prefs.js';
-import { lookSchema } from './mir/shell/gui.js';
+import { lookSchema, LOOK_PRESETS } from './mir/shell/gui.js';
+import { lightIsHome } from './mir/core/look.js';
 import { createAccent } from './mir/shell/accent.js';
 import { rgbToHex } from './mir/palette.js';
 export { CARD_GROUND } from './mir/shell/accent.js';   // the card the notebook's λ is corrected against (__LW.ink.ground)
 
 export const LOOK_KEY = 'mir.gui';
-/** the LOOK_SCHEMA rows SETTINGS reaches: the store holds these and nothing else */
-export const LOOK_ROWS = Object.freeze(['theme', 'accentA', 'accentB', 'vivid', 'card', 'frost', 'blur', 'disconnected', 'hints', 'help', 'badges']);
+/** the LOOK_SCHEMA rows the store holds: every one (MIR OPTIONS reaches them all; iteration 003) */
+export const LOOK_ROWS = Object.freeze(lookSchema().map((r) => r.key));
+/** λWAVES' home for the rows SETTINGS never had: the value at which each writes nothing, so the page looks as it did before
+ *  MIR OPTIONS (FULL tier, no benchmark; the kit's own faces, shadows, corners, veil and ink; no pointer glow or parallax) */
+export const LOOK_HOME = Object.freeze({ veil: 10, saturation: 1, corners: 14, faces: 'solid', text: 'theme', edge: true, shadow: 1,
+  glow: false, parallax: false, quality: 'full' });
+/** the kit maps that write at λWAVES' home, homed: AUTO ink is the theme's own ladder (a SOLID pane keeps the kit's), SATURATION
+ *  at 100 % is no filter at any blur, the CAST is drawn only off LIGHT_HOME (the kit sheet's own words), DEFAULT spacing is the
+ *  sheets' own air */
+const HOME_MAPS = {
+  text: (sp) => (v, s, e) => (v === 'theme' && s.card !== 'solid' ? null : sp.map(v, s, e)),
+  saturation: (sp) => (v, s, e) => (v === 1 ? null : sp.map(v, s, e)),
+  dropShadow: (sp) => (sp.attr === 'data-cast' ? (v, s, e) => (lightIsHome(s) ? null : sp.map(v, s, e)) : sp.map),
+  spacing: (sp) => (v, s, e) => (v === 'default' ? null : sp.map(v, s, e)),
+};
 /** what the look left the settings blob with; HELP had its own key */
 export const BLOB_LOOK = Object.freeze(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'badges', 'controlHints', 'hint']);
 export const HELP_KEY = 'lw-window-info';
@@ -46,10 +63,12 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
   const accent = createAccent({ model: 'palette', vivid: defaults.vivid, wheelStops, stageGround, gamut: (rgb) => gamutCss(rgb),
     onAccent: (A, B) => { const v = getModView(); if (v) v.setAccent(A, B); } });
   const ctx = { doc: document, accent, moving: false, lastAccent: null };
-  const schema = lookSchema().filter((r) => LOOK_ROWS.includes(r.key)).map((r) => ({ ...r, ...(r.key in defaults ? { default: defaults[r.key] } : {}),
+  const home = { ...LOOK_HOME, ...defaults };
+  const schema = lookSchema().map((r) => ({ ...r, ...(r.key in home ? { default: home[r.key] } : {}),
+    ...(HOME_MAPS[r.key] ? { apply: r.apply.map((sp) => (sp.map ? { ...sp, map: HOME_MAPS[r.key](sp) } : sp)) } : {}),
     ...(r.key === 'blur' ? { max: 30 } : r.key.startsWith('accent') ? { wrap: false } : {}),   // GLASS BLUR's travel (the kit's row stops at 24): no stored value moves; an ACCENT keeps END's 360° (wave 68: it renders as 0°, a fold left the eye at 0° and HOME dead)
     ...(r.key === 'theme' ? { apply: [...r.apply, { run: (v, s, e) => { if (seen !== v + e.theme) { seen = v + e.theme; onTheme(e.theme, v); } } }] } : {}) }));
-  const prefs = createPrefs({ key: LOOK_KEY, schema, context: ctx });
+  const prefs = createPrefs({ key: LOOK_KEY, schema, presets: LOOK_PRESETS, context: ctx });
   const blob = settings.read(), held = BLOB_LOOK.filter((k) => k in blob);
   let help = null; try { help = localStorage.getItem(HELP_KEY); localStorage.removeItem(HELP_KEY); } catch (_) {}
   if (held.length || help) prefs.set(liftLook(blob, help));

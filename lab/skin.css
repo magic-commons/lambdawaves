@@ -633,3 +633,8 @@ body[data-theme="dark"] .eq-grid { --eq-near: hsl(291 85% 68%); --eq-mid: hsl(33
 .eq-head > .mol-step { flex: 1 1 auto; min-width: 0; }
 .eq-audio { flex-wrap: nowrap; align-items: center; }
 .eq-audio > .ro { flex: 1 1 auto; min-width: 0; }
+/* ═══ ITERATION 003 (Josh, 2026-10-16) · MIR OPTIONS, MIR ABOUT (lab/mir-gui.js) ══════════════════════════════════════════════════
+   TRANSPORT BAR off hides λWAVES' own pill too (the kit's sheet hides .mir-transport and the docked card).  SAMPLING (SCRUB ·
+   AUTOMATION) reads the kit's timeline transport and installModulation's host, which λWAVES does not run: not shown, never dead. */
+body.no-transport-bar #transport { display: none; }
+.mir-gui [data-group="sampling"] { display: none; }

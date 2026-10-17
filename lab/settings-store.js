@@ -18,7 +18,10 @@ export const FAMILIES = Object.freeze({
   'lambdawaves.q0.keys': ['key-table.js (MIR createKeys)', 'PREFERENCE'], 'lw.keyboard.position.v1': ['the kit keyboard window (mir/keyboard)', 'PREFERENCE'], 'lw.lean.v1': ['window-chrome.js', 'PREFERENCE'],
   'lambdawaves.q0.library': ['library.js', 'LIBRARY'], 'lambdawaves.q0.modpresets': ['mir/modulation/mod.js PRESET_LS', 'PREFERENCE'],
   'lambdawaves.q0.modulation': ['rack.js modStore (mir/modulation/bind.js localStore): modArm, modCadence', 'PREFERENCE'],   // 0.5.0 C4
-  'mir.gui': ['look.js createLook (mir/core/prefs.js createPrefs over LOOK_SCHEMA rows)', 'PREFERENCE'],                     // 0.5.0 C2
+  'mir.gui': ['look.js createLook (mir/core/prefs.js createPrefs over LOOK_SCHEMA rows; MIR OPTIONS writes it, mir-gui.js)', 'PREFERENCE'],   // 0.5.0 C2 · iteration 003
+  'mir.gui.tab': ['the kit\'s MIR OPTIONS (mir/shell/gui.js TAB_KEY): the tab this device last showed', 'PREFERENCE'],   // iteration 003
+  'mir.pointer': ['the kit\'s input layer (mir/core/kbm.js): MIR OPTIONS › MOTION › POINTER, written only when picked', 'PREFERENCE'],   // iteration 003
+  'mir.tier': ['the kit\'s MIR OPTIONS (mir/shell/gui.js TIER_KEY): QUALITY · AUTO\'s device reading', 'PREFERENCE'],   // iteration 003
   'lambdawaves.q0.projects.window': ['projects.js FOLDERS (mir/folders/folders.js localPrefs): place, size, open, rail side, sort', 'WORKSPACE'],   // 0.5.0 C6
   'lambdawaves.q0.projects.seeded': ['projects.js FOLDERS (mir/folders/seed.js): the starters added once', 'PROJECT'],   // 0.5.0 C6
   'lambdawaves.q0.session': ['main.js createSession (mir/core/session.js): the live project, the one part as it stands', 'PROJECT'],   // 0.5.0 C6b
