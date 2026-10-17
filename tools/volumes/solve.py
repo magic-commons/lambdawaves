@@ -179,7 +179,7 @@ def solve_molecule(q):
         t0 = time.perf_counter(); mf, tries = converge(mol, dm0); sec = time.perf_counter() - t0
         base = {'basis': b, 'basisFile': file, 'basisSha256': sha, 'nAO': n, 'guess': guess, 'attempts': tries, 'seconds': round(sec, 3),
                 'solver': {'pyscf': pyscf.__version__, 'method': 'RHF', 'cart': True, 'convTol': CONV_TOL, 'convTolGrad': CONV_TOL_GRAD,
-                           'threads': lib.num_threads(), 'maxMemoryMB': args.max_memory, 'incoreERI': mf._eri is not None,
+                           'threads': lib.num_threads(), 'maxMemoryMB': args.max_memory, 'incoreERI': getattr(mf, '_eri', None) is not None,
                            'everyAO': 'scf.hf.remove_overlap_zero_eigenvalue = False'}, 'solved': now(), 'pid': PID, 'host': HOST}
         if not mf.converged:
             rungs[b] = {**base, 'status': 'failed', 'why': f'no convergence after {", ".join(a["method"] + " (" + str(a["cycles"]) + " cycles)" for a in tries)}'}
@@ -195,7 +195,8 @@ def solve_molecule(q):
                   ao=np.array(labs), perm=ix.astype('i4'), scale=rd.astype('f8'))
         study = None
         if args.guess_study and prev:
-            mfm, a = attempt(rhf(mol, max_cycle=200), None, 'diis from minao (guess study)')
+            sm = rhf(mol, max_cycle=200); sm._eri = getattr(mf, '_eri', None)         # the same incore ERIs (or direct): the clocks then differ by the cycles alone
+            mfm, a = attempt(sm, None, 'diis from minao (guess study)')
             study = {**a, 'sameState': bool(mfm.converged and abs(mfm.e_tot - mf.e_tot) < 1e-7), 'deltaE': float(mfm.e_tot - mf.e_tot) if mfm.converged else None}
         rungs[b] = {**base, 'status': 'converged', 'file': f'{b}.npz', 'energy': float(mf.e_tot), 'cycles': sum(a['cycles'] for a in tries),
                     'nocc': nocc, 'gapEh': float(mf.mo_energy[nocc] - mf.mo_energy[nocc - 1]), 'dipoleDebye': [float(v) for v in dip],

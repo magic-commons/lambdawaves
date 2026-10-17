@@ -7,6 +7,8 @@
  *        [--volume vol-1 --numeral I --title 'Volume I' --blurb '…'] [--only id,…] [--partial] [--out FILE.lwm --id H2O]
  *   --partial   also pack a molecule whose ladder is not finished (its converged rungs); by default only a finished one
  *   --out F     write ONE molecule's .lwm to F and nothing else (the test fixture: tests/fixtures/volumes/H2O.lwm)
+ *   --incremental  keep a molecule's .lwm when its header says it was packed from this raw/<id>/meta.json (its digest without the
+ *               solver's clocks) by this packer version (header.source) — a repack while the solver runs touches only what moved
  *
  * PER RUNG — or the rung is REFUSED, never shipped (an AO-order bug must be impossible to ship):
  *   the app's basis: lab/md.js basisFrom on the vendored file (cart); its nAO is the solver's and its hash is the record's ground.hash
@@ -38,7 +40,8 @@ const DATA = path.resolve(process.env.LW_VOLUMES || path.join(homedir(), 'Docume
 const RAW = path.join(DATA, 'raw'), DIST = path.join(DATA, 'dist');
 const VOL = argOf('--volume', 'vol-1'), NUMERAL = argOf('--numeral', 'I'), TITLE = argOf('--title', 'Volume ' + NUMERAL);
 const BLURB = argOf('--blurb', 'Named molecules, each solved in RHF up the whole basis ladder STO-3G → 6-31+G*, with its identifiers and properties.');
-const ONLY = argOf('--only') ? new Set(argOf('--only').split(',')) : null, PARTIAL = has('--partial'), OUT = argOf('--out');
+const ONLY = argOf('--only') ? new Set(argOf('--only').split(',')) : null, PARTIAL = has('--partial'), OUT = argOf('--out'), INCREMENTAL = has('--incremental');
+const PACKER = 'pack.mjs v1', CLOCKS = new Set(['updated', 'solved', 'pid', 'host', 'seconds']);                                      // bump when the packer's output changes, so --incremental repacks
 const LADDER = Object.keys(BASIS_FILES);
 const DEBYE = 2.541746473;                                         // debye per e·a₀ (tools/orbital-library.mjs)
 const MASS = [0, 1.008, 4.0026, 6.94, 9.0122, 10.81, 12.011, 14.007, 15.999, 18.998, 20.180, 22.990, 24.305, 26.982, 28.085, 30.974, 32.06,
@@ -131,6 +134,13 @@ function packMolecule(id) {
   const dir = path.join(RAW, id), mp = path.join(dir, 'meta.json');
   if (!existsSync(mp)) return { id, skip: 'not solved (no raw/' + id + '/meta.json)' };
   const meta = JSON.parse(readFileSync(mp, 'utf8')), cand = meta.candidate || {}, charge = meta.charge || 0;
+  const unclocked = (v) => (Array.isArray(v) ? v.map(unclocked) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([k]) => !CLOCKS.has(k)).map(([k, x]) => [k, unclocked(x)])) : v);
+  const metaSha = sha(JSON.stringify(unclocked(meta)));          // what the rungs ARE, not when or where they were solved
+  const have = path.join(DIST, VOL, 'm', id + '.lwm');
+  if (INCREMENTAL && !OUT && existsSync(have)) {
+    const old = readFileSync(have), h = parseLwm(old).header;
+    if (h.source && h.source.metaSha256 === metaSha && h.source.packer === PACKER) return { id, bytes: old, header: h, report: { id, heavy: h.meta.heavy, nAtoms: h.meta.nAtoms, rungs: {}, bytes: old.length, headerBytes: old.readUInt32LE(4), kept: true }, meta };
+  }
   const atoms = meta.atomsBohr.map(([Z, x, y, z]) => ({ Z, x, y, z })), zs = atoms.map((a) => a.Z), N = zs.reduce((s, z) => s + z, 0) - charge, nocc = N / 2;
   const rs = meta.rungs || {}, todo = LADDER.filter((b) => rs[b] && rs[b].status !== 'skipped');
   const unsolved = LADDER.filter((b) => !rs[b] || !rs[b].status);
@@ -139,7 +149,7 @@ function packMolecule(id) {
   const sym = cand.symmetry && cand.symmetry.group ? cand.symmetry : { group: 'C1' };
   const name = cand.name || id, mass = +atoms.reduce((s, a) => s + MASS[a.Z], 0).toFixed(3), half = atoms.reduce((s, a) => Math.max(s, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)), 0) + 6;
   const geometrySource = cand.geometrySource || (cand.cid ? `PubChem CID ${cand.cid}, its 3-D conformer (computed, not measured)` : 'the candidate\'s atoms');
-  const header = { schema: LWM_SCHEMA, id, volume: VOL, meta: {}, geometry: {}, rungs: {}, skipped: {}, failed: {} };
+  const header = { schema: LWM_SCHEMA, id, volume: VOL, meta: {}, geometry: {}, rungs: {}, skipped: {}, failed: {}, source: { metaSha256: metaSha, packer: PACKER } };
   const { atomsAng, atomsBohr, app, ...rest } = cand; void atomsAng; void atomsBohr;
   header.meta = { name, formula, formulaM, charge, multiplicity: 1, heavy: zs.filter((z) => z > 1).length, nAtoms: atoms.length, mass, massUnit: 'u (IUPAC conventional atomic weights)',
     pointGroup: sym.group !== 'C1' ? sym.group : ({ Dooh: 'Dinfh', Coov: 'Cinfv' }[meta.detectedGroup] || meta.detectedGroup || null), ...rest, ...(app ? { app } : {}),
