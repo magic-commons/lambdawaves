@@ -116,9 +116,10 @@ export function createOrbitals(host, api) {
   const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3),
     title: 'Where on the path from A (0) to B (1) the register plays', onInput: (v) => setMorph(morphOn, v) });
   mrow.appendChild(morphSw.root); mrow.appendChild(morphK.root);
-  /* FLOW for one orbital: D_μν = c̄_μ c_ν, so ρ = |ψ|² and j = Im ψ̄∇ψ = ρ ∇arg ψ — the tracers ride the gradient of the
-     very phase the field is coloured by.  A WINDING orbital circulates; a real orbital stands still. */
-  let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0;
+  /* FLOW for one orbital: ρ = |ψ|² and j = Im ψ̄∇ψ = ρ ∇arg ψ — the tracers ride the gradient of the very phase the field
+     is coloured by.  A WINDING orbital circulates; a real orbital stands still.  The packet IS ψ: its f64 AO vector goes to
+     the flow whole (`setPacket`, O(n) a point, any size), so there is no D_μν = c̄_μ c_ν to build and none to transpose. */
+  let flowOn = false, flow = null, flowEpoch = 0;
   const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage riding this orbital’s current j = Im ψ̄∇ψ — the gradient of the phase you see', onChange: (v) => setFlow(v) });
   mrow.appendChild(flowSw.root);
   /* iteration 001 (Josh): PRESET · → A · → B and MORPH · FLOW fold behind the head's chevron (lab/fold.js); DIALS and CLEAR are glyphs */
@@ -126,14 +127,9 @@ export function createOrbitals(host, api) {
     chip(dialsBtn, 'sliders', 'DIALS'); chip(clrBtn, 'clear', 'CLEAR'); }
   function setFlow(v) {
     flowOn = !!v && !!sol; flowSw.set(flowOn);
-    if (flowOn && (!flow || flow.n !== sol.nAO)) { flow = createFlow(sol.shells); flowRe = new Float64Array(sol.nAO ** 2); flowIm = new Float64Array(sol.nAO ** 2); flowEpoch++; }
+    if (flowOn && (!flow || flow.n !== sol.nAO)) { flow = createFlow(sol.shells); flowEpoch++; }
     if (flowOn) { pushedV = -1; if (on) push(now(), true); }
     api.repaint(); return flowOn;
-  }
-  function feedFlow(v) {
-    const n = sol.nAO, r = v.re, m = v.im;
-    for (let p = 0; p < n; p++) for (let q = 0; q < n; q++) { flowRe[p * n + q] = r[p] * r[q] + m[p] * m[q]; flowIm[p * n + q] = r[p] * m[q] - m[p] * r[q]; }
-    flow.set(flowRe, flowIm);
   }
 
   const rowsEl = el('div', 'sp-rows', host); rowsEl.hidden = true;
@@ -303,7 +299,7 @@ export function createOrbitals(host, api) {
     if (!force && t === pushedT && version === pushedV) return false;
     product.matrix = vectors(t); product.hash = sol.hash; product.solution = Number.isFinite(sol.seq) ? sol.seq : 0;
     if (!s.publish('orbital-packet', product)) return false;
-    if (flowOn && flow) feedFlow(product.matrix);
+    if (flowOn && flow) flow.setPacket(re64, im64);
     pushedT = t; pushedV = version;
     return true;
   }

@@ -26,13 +26,17 @@ export function createFlow(fieldShellsList, call = null) {
   const ev = evaluator(shellsFromField(fieldShellsList)), n = ev.n;
   const v = new Float64Array(n), gx = new Float64Array(n), gy = new Float64Array(n), gz = new Float64Array(n);
   const P = [0, 0, 0], M = [0, 0, 0], out = { rho: 0, j: [0, 0, 0] };
-  let Re = null, Im = null, rep = null, mode = 'computed', busy = false, last = -1e9, info = null, steps = 0, refused = 0;
+  let Re = null, Im = null, cr = null, ci = null, rep = null, mode = 'computed', busy = false, last = -1e9, info = null, steps = 0, refused = 0;
   const RHO_FLOOR = 1e-7;                                   // below this the velocity j/ρ is noise over nothing
   /** ρ and j at one point, into the shared record */
   function at(x, y, z) {
     P[0] = x; P[1] = y; P[2] = z; ev.aoGrad(P, v, gx, gy, gz);
     let rho = 0, jx = 0, jy = 0, jz = 0;
-    for (let p = 0; p < n; p++) {
+    if (cr) {                                               // THE DIRECT PACKET (iteration 005 P1): ψ = R + iM and ∇ψ in ONE O(n) pass, ρ = |ψ|², j = Im ψ̄∇ψ = R∇M − M∇R
+      let R = 0, M = 0, rx = 0, ry = 0, rz = 0, mx = 0, my = 0, mz = 0;
+      for (let p = 0; p < n; p++) { const a = cr[p], b = ci[p], vp = v[p], X = gx[p], Y = gy[p], Z = gz[p]; R += a * vp; M += b * vp; rx += a * X; ry += a * Y; rz += a * Z; mx += b * X; my += b * Y; mz += b * Z; }
+      rho = R * R + M * M; jx = R * mx - M * rx; jy = R * my - M * ry; jz = R * mz - M * rz;
+    } else for (let p = 0; p < n; p++) {
       const vp = v[p]; if (vp === 0) continue;
       const row = p * n; let u = 0, ax = 0, ay = 0, az = 0;
       for (let q = 0; q < n; q++) { u += Re[row + q] * v[q]; const m = Im[row + q]; if (m !== 0) { ax += m * gx[q]; ay += m * gy[q]; az += m * gz[q]; } }
@@ -53,15 +57,17 @@ export function createFlow(fieldShellsList, call = null) {
   return {
     n, lifetime: 900, stride: 4,                             // the current is slow beside the beat: a trail point every 4th frame, a tracer reborn after ~15 s
     /** the frame's matrices: Re D_AO (symmetric, the whole density) and Im D_AO (antisymmetric) */
-    set(re, im) { Re = re; Im = im; },
-    get ready() { return !!(Re && Im); },
+    set(re, im) { Re = re; Im = im; cr = ci = null; },
+    /** or one packet ψ = Σ_μ (re_μ + i im_μ) χ_μ, f64 n-vectors: D_pq = ψ̄_p ψ_q without the n² expansion — the same ρ, j and convention */
+    setPacket(re, im) { cr = re; ci = im; Re = Im = null; },
+    get ready() { return !!(Re && Im) || !!cr; },
     at,
     /** the seeding weight: |j|, so the tracers are born where the current runs */
-    weight(x, y, z) { if (!Re) return 0; const s = at(x, y, z); return Math.hypot(s.j[0], s.j[1], s.j[2]); },
+    weight(x, y, z) { if (!Re && !cr) return 0; const s = at(x, y, z); return Math.hypot(s.j[0], s.j[1], s.j[2]); },
     speed(p) { const s = at(p[0], p[1], p[2]); return s.rho > RHO_FLOOR ? Math.hypot(s.j[0], s.j[1], s.j[2]) / s.rho : 0; },
     /** one midpoint (RK2) step of length h along v = j/ρ, speed-capped; null where there is no density to carry a velocity */
     step(p, h, cap) {
-      if (!Re) return null; steps++;
+      if (!Re && !cr) return null; steps++;
       if (!velocity(p[0], p[1], p[2], cap, M)) { refused++; return null; }
       const mx = p[0] + 0.5 * h * M[0], my = p[1] + 0.5 * h * M[1], mz = p[2] + 0.5 * h * M[2];
       if (!velocity(mx, my, mz, cap, M)) { refused++; return null; }
