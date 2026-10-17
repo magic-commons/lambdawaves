@@ -35,6 +35,7 @@ import { registerProjectPart, restoreProject, projectSignature } from './mir/cor
 import { saveBlob } from './mir/folders/save-blob.js';
 import { notice } from './mir/shell/notice.js';
 import { coalesce } from './frame-coalescer.js';   // 0.5.0 C6b: the part's subscribe, once a frame
+import { keepData } from './library.js';   // iteration 005 A: the demo covers are DATA
 import { PJ_KEY, PART, MAX_PROJECT_BYTES, MAX_LIBRARY_CHARS, UNTOUCHED, pathOf, splitPath, readCollection, createProjectStore, touchRecent,
   parseProjectFile, projectFileText, STARTERS, starterOf } from './project-store.js';
 
@@ -123,7 +124,8 @@ export function createProjects(port) {
   /* THE DEMOS' PICTURES: the cover's 4:3 middle, made small for the library (a data URL: it survives EXPORT, the kit's toThumb) */
   async function coverOf(file) {
     try {
-      const r = await fetch('./demos/covers/' + file + '.jpg'); if (!r.ok) return '';
+      const url = './demos/covers/' + file + '.jpg', r = await fetch(url); if (!r.ok) return '';
+      keepData(url, r.clone());   // a cover is DATA (sw.js §1b): the device keeps it after its first answer
       const full = await createImageBitmap(await r.blob()), h = Math.min(full.height, Math.round(full.width * 3 / 4));
       const mid = await createImageBitmap(full, 0, Math.round((full.height - h) / 2), full.width, h);
       try { return await toThumb(mid); } finally { full.close(); mid.close(); }
