@@ -27,19 +27,24 @@
  *   setElement(Z), fillValence() (the outermost occupied shell of atoms.js' configuration, every m equal and in phase).
  * SUBSHELLS (orb-<nl>): the dimmed elements past Kr — hydrogen (n, l) with every m equal and in phase (amplitude 1/√(2l+1), phase 0), the
  *   subshells the table names past Kr up to n = 6 (the register ends there: 7s and 7p have no picture).
- * Writes lab/img/menu/<id>.webp, el-<sym>.webp, orb-<nl>.webp and lab/img/menu/manifest.json (what exists + these settings). */
+ * Writes lab/img/menu/<id>.webp, el-<sym>.webp, orb-<nl>.webp and lab/img/menu/manifest.json (what exists + these settings).
+ * A VOLUME (iteration 004 V2, `--volume vol-1`): each molecule of <LW_VOLUMES>/dist/<vol>/index.json opened by the card's own road
+ *   (__LW.chem.openVolume — the lowest rung, its record, no solve) at the HOME pose in the same look, into <dist>/<vol>/t/<id>.webp;
+ *   no manifest (the packer's index carries `thumb`: run tools/volumes/pack.mjs --incremental after).  The page must serve the volume
+ *   (the dev link lab/volumes). */
 import { open } from './gate/gatekit.mjs';
 import { writeFileSync, mkdirSync, statSync, existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
+import { tmpdir, homedir } from 'node:os';
 import { MOLECULES, RECORD_ONLY } from '../lab/molecules.js';
 import { ATOMS } from '../lab/atoms.js';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const ISO = +arg('iso', 0.03), SIZE = +arg('size', 200), Q = +arg('q', 0.64), AQ = +arg('aq', 50), RENDER = +arg('render', 640);
 const only = arg('only', '') ? arg('only', '').split(',') : null;
-const sets = arg('set', 'molecules,elements,orbitals').split(',');
-const OUT = new URL('../lab/img/menu/', import.meta.url).pathname; mkdirSync(OUT, { recursive: true });
+const VOL = arg('volume', null), VDIR = VOL && (process.env.LW_VOLUMES || homedir() + '/Documents/LAMBDAWAVES-VOLUMES') + '/dist/' + VOL + '/';
+const sets = VOL ? ['volume'] : arg('set', 'molecules,elements,orbitals').split(',');
+const OUT = VOL ? VDIR + 't/' : new URL('../lab/img/menu/', import.meta.url).pathname; mkdirSync(OUT, { recursive: true });
 const SUBSHELLS = [[5, 0], [4, 2], [5, 1], [6, 0], [4, 3], [5, 2], [6, 1], [5, 3], [6, 2]];   // the valence subshells of Rb … Og, n ≤ 6
 const nl = ([n, l]) => n + 'spdf'[l];
 const mols = [...MOLECULES, ...RECORD_ONLY].filter((m) => !m.disabled);
@@ -139,11 +144,24 @@ if (sets.includes('orbitals')) {
     if (save(name, r)) made.orbitals.push(nl(s));
   }
 }
+/* A VOLUME: each molecule by the card's openVolume (its lowest rung), waited until it is the field's; the HOME pose */
+if (VOL) {
+  await g.ev(`__pose(__home); return true;`);
+  for (const { id } of JSON.parse(readFileSync(VDIR + 'index.json', 'utf8')).molecules) {
+    if (only && !only.includes(id)) continue;
+    const r = await g.ev(`const LW = __LW; if (!(await LW.chem.openVolume(${JSON.stringify(VOL)}, ${JSON.stringify(id)}))) return { E: LW.chem.state().status };
+      for (let i = 0; i < 900; i++) { const c = LW.chem.state(), m = LW.molsession.state().molecule; if (m && m.nAO === c.nAO) break; await new Promise((r) => setTimeout(r, 100)); }
+      LW.setView('density'); LW.setStyle('signed'); LW.mat.iso = ${ISO}; __pose(__home);
+      await new Promise((r) => setTimeout(r, 300));
+      return await __thumb(${2 * SIZE}, ${Q});`);
+    if (save(id, r)) made.molecules.push(id);
+  }
+}
 await g.ev(`__pose(__home); return true;`);
 
 /* the manifest keeps what this run did not redo (a --set or --only run updates its own rows only) */
 const keepRows = (key, rows, id) => (sets.includes(key) && !only ? rows : [...(prior[key] || []).filter((p) => !rows.some((r) => id(r) === id(p))), ...rows]);
-writeFileSync(OUT + 'manifest.json', JSON.stringify({ tool: 'tools/menu-thumbs.mjs', size: SIZE, quality: Q, alphaQuality: AQ, render: RENDER,
+if (!VOL) writeFileSync(OUT + 'manifest.json', JSON.stringify({ tool: 'tools/menu-thumbs.mjs', size: SIZE, quality: Q, alphaQuality: AQ, render: RENDER,
   look: { view: 'density', style: 'signed', iso: ISO, palette: 'wheel', frame: false, axis: false, camera: { molecules: 'home', elements: 'corner (yaw 45°, pitch 35.26°)', orbitals: 'corner (yaw 45°, pitch 35.26°)' }, ground: 'none (two-ground matte)' },
   molecules: keepRows('molecules', made.molecules, (x) => x), elements: keepRows('elements', made.elements, (x) => x.sym), orbitals: keepRows('orbitals', made.orbitals, (x) => x) }, null, 1) + '\n');
 console.log(`${made.molecules.length} molecules, ${made.elements.length} elements, ${made.orbitals.length} subshells, ${(total / 1024).toFixed(1)} kB`, JSON.stringify((await g.errors()).errs.filter((e) => !/ResizeObserver/.test(e))));

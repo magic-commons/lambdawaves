@@ -1,7 +1,7 @@
 /* lab/shell/stage-words.js — THE STAGE TEXT and its CAPTION (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the source, the caption a capture draws,
  * the tick and the INFORMATIONAL layer (initStageText, called by boot() at the go).  stageTextTick and stageCaption are registered on app.w at creation. */
 import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { toScreen, cameraKey } from '../field.js';
-import { BASIS } from '../hydrogen.js'; import { getHamiltonian } from '../hamiltonian.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { ELEMENT } from '../md.js';
+import { BASIS } from '../hydrogen.js'; import { getHamiltonian } from '../hamiltonian.js'; import { ELEMENT } from '../md.js';
 import { stateLatex, formulaLatex, BASIS_LABEL } from '../latex-state.js';
 export function createStageWords(app) {
   const { dom, reg } = app, { rack } = app.host, { wChem } = app.w, { paintMarks } = app.ctl;
@@ -16,7 +16,7 @@ export function createStageWords(app) {
     return line(reg.populated());
   }
   function stageMd() {
-    const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null;
+    const row = app.state.chem && app.state.chem.on ? app.state.chem.row() : null;   // the catalogue's row or a volume molecule's (V2)
     return row ? '$' + formulaLatex(row.formula) + '$' : stageStates(true);
   }
   /** THE CAPTION a capture carries (T3): the same stage text as ONE plain-Unicode line — `H₂O · 1b1 HOMO · STO-3G` (the
@@ -24,10 +24,10 @@ export function createStageWords(app) {
    *  by capture.js, since the DOM formula never reaches an export.  It follows the STAGE FORMULA switch.  KIT BRIEF 6 replaces it. */
   function stageCaption() {
     if (!app.state.stageText || !app.state.stageText.on) return '';
-    const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null;
+    const row = app.state.chem && app.state.chem.on ? app.state.chem.row() : null;
     if (!row) return stageStates(false);
     const o = app.state.chem.exportNames(), k = o && o.orbital;
-    return [mathPlain(row.formula), app.state.chem.espCaption(), k && k.plain ? k.plain + (/^(HOMO|LUMO)$/.test(k.frontier) ? ' ' + k.frontier : '') : '', BASIS_LABEL[app.state.chem.basis] || ''].filter(Boolean).join(' · ');
+    return [mathPlain(row.formula), app.state.chem.espCaption(), k && k.plain ? k.plain + (/^(HOMO|LUMO)$/.test(k.frontier) ? ' ' + k.frontier : '') : '', BASIS_LABEL[app.state.chem.basis] || '', row.volume || ''].filter(Boolean).join(' · ');
   }
   function stageTextTick() {
     if (!app.state.stageText) return;

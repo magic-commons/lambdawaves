@@ -17,10 +17,10 @@
  *   install(volId, { onProgress, signal })   every file into 'lw-vol-<id>': six at a time, resumable (a file already kept is skipped),
  *                                 cancellable (an AbortSignal); asks persist() once, on the first install press (library.js persistOnce)
  *   remove(volId)                 the whole cache
- *   file(volId, molId)            the .lwm as an ArrayBuffer, from this device or the network (checked either way)
+ *   file(volId, molId, { network })   the .lwm as an ArrayBuffer, from this device or (network, the default) the network, checked either way
  *   picture(volId, molId)         a URL for the molecule's picture: the device's copy (an object URL) when installed, else the network's
  *   storageInfo()                 library.js': persisted, usage, quota
- * The reader that turns an .lwm rung into the record chem.open takes is row V2's (it will sit beside these). */
+ * The reader (lab/volumes-format.js parseLwm · rungRecord) and the open (chemview.js openVolume, THE RECORD ROAD's chem.open) are row V2's. */
 import { persistOnce, storageInfo } from './library.js';
 export { storageInfo };
 export const VOLUME_BASE = new URL('./volumes/', import.meta.url).href;
@@ -185,10 +185,11 @@ async function molecule(volId, molId) {
   if (!m) throw new Error('no molecule ' + molId + ' in ' + volId);
   return { v, m };
 }
-export async function file(volId, molId) {
+export async function file(volId, molId, { network = true } = {}) {   // network: false — this device's copy or nothing (a project's re-open)
   const { v, m } = await molecule(volId, molId), url = inVolume(v, m.file), c = await store(volId);
   const hit = c && await c.match(url).catch(() => null);
   if (hit) { const b = await hit.arrayBuffer(); if (!m.sha256 || await hex(b) === m.sha256) return b; await c.delete(url).catch(() => {}); }
+  if (!network) throw new Error(molId + ': not on this device');
   let r; try { r = await fetch(url); } catch (_) { throw new Error(molId + ': not on this device, and the network refused it (offline?)'); }
   if (!r.ok) throw new Error(molId + ': the server answered ' + r.status);
   const b = await r.arrayBuffer();

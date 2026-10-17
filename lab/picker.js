@@ -266,9 +266,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* ── going there ── */
   function goMolecule(id) { close(); const C = app.state.chem; if (!C) return; if (!C.on) C.setOn(true); C.pick(id); }
   function goVolume(v, m) {
-    close(); const C = app.state.chem;
-    if (C && C.openVolume) { C.openVolume(v.id, m.id); return; }
-    const W = app.state.stageText; if (W && W.pop) W.pop(cap(m.name) + ' · ' + volName(v) + ' — this build cannot open a volume’s molecule yet');
+    close(); if (app.state.chem) app.state.chem.openVolume(v.id, m.id);   // V2: its record, the lowest rung, MOLECULES on (chemview openVolume)
   }
   function goAtom(Z) {
     close(); const C = app.state.chem; if (C && C.on) C.setOn(false);

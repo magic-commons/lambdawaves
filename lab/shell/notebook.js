@@ -179,7 +179,8 @@ export function createNotebook(app) {
       ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setMode('view'); }
         if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation(); });
       /* 0.5.1 D8 · `lw:` LINKS in the VIEW (R6-K): `[water](lw:molecule=h2o)` runs a WHITELIST of hand verbs — preset (STATE's), molecule
-         (the MOLECULE dropdown's pick, MOLECULES on), view (the V key's), orbital (the ORBITAL dial by name or number, VIEW orbital) — one
+         (the MOLECULE dropdown's pick, MOLECULES on), view (the V key's), orbital (the ORBITAL dial by name or number, VIEW orbital), volume
+         (iteration 004 V2: `volume=vol-1&id=aspirin[&basis=6-31g]`, a volume's molecule on its record — chemview openVolume) — one
          ring row and one fade a press (a molecule's fade is its head, D2), the ring never cleared; any other key (a whole state `lw:s=…`,
          E9) is ignored and said on the foot.  Capture phase: the sanitiser sends every link to a new tab (notebook-render.js). */
       function lwLink(q, name) {                                       // 0.6.6 G1: the four keys are rows of THE VERB TABLE (lab/verbs.js), run as one list
@@ -187,7 +188,9 @@ export function createNotebook(app) {
         for (const p of q.split('&')) { const [k, v = ''] = p.split('='); try { kv.set(k, decodeURIComponent(v)); } catch (_) { bad.push(k); } }
         for (const [k, v] of kv) if (k === 'preset' || k === 'view') list.push({ verb: k, args: { id: v } });
           else if (k === 'molecule') list.push({ verb: k, args: kv.has('orbital') ? { id: v, orbital: kv.get('orbital') } : { id: v } });
-          else if (k === 'orbital') { if (!kv.has('molecule')) list.push({ verb: 'view', args: { id: 'orbital', orbital: v } }); } else bad.push(k);
+          else if (k === 'orbital') { if (!kv.has('molecule')) list.push({ verb: 'view', args: { id: 'orbital', orbital: v } }); }
+          else if (k === 'volume') list.push({ verb: k, args: { volume: v, id: kv.get('id') || '', ...(kv.has('basis') ? { basis: kv.get('basis') } : {}) } });   // iteration 004 V2: lw:volume=vol-1&id=aspirin[&basis=6-31g]
+          else if (!((k === 'id' || k === 'basis') && kv.has('volume'))) bad.push(k);
         return app.sh.verbs.run(list, { name }).then((r) => [...bad, ...r.refused.map((x) => (x.verb === 'view' && !kv.has('view') ? 'orbital' : x.verb))]);
       }
       view.addEventListener('click', (e) => {
