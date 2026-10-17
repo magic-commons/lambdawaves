@@ -53,12 +53,13 @@ to ρ_max, for the GRID in force — as a METERS tile GRID ERROR, computed on a 
 law (ρ̂ ≤ ρ) printed as measured on this device. For a molecule: ρ̂ against the CPU double evaluation at a 4 × 4 × 4 probe of voxel centres.
 Josh sees the number the field law certifies at every cut.
 
-## P4 · DISORDER (`it005-disorder`, from A's merge) — brief `P4-BRIEF.md`
-Sol's top new playable system on `lab/lattice-model.js` / `lab/lattice.js` (HOFSTADTER · QUANTUM WALK · SPIN CHAIN already): a DISORDER knob W
-adds seeded random on-site energies (the seed PROJECT) to the finite lattice Hamiltonian; its eigenvectors are the register's φ_k with exact
-phases e^{−iE_k t}, so nothing is integrated per frame; the IPR readout Σ|ψ|⁴ beside its two limits 1/N and 1; in 1-D the localisation length
-ξ from the fit of log|ψ_k| against the weak-disorder formula ξ ≈ 24(4 − E²)/W² (Thouless), printed not gated; the finite lattice says it is
-finite. ANGULAR NODES (the zero sets of real Y_lm on the sphere in VORTEX) is the small sibling if the row has room.
+## P4 · THE MOBILITY EDGE (`it005-disorder`, from A's merge) — brief `P4-BRIEF.md`
+Sol's top new playable system — and the plan's first draft had it wrong: ANDERSON is already a LATTICE preset (0.7.2 L1: W, seed, the IPR, the
+1-D closed line ξ(0) ≈ 105 J²/W²). What does not exist is the dimension where the transition lives: ANDERSON gains d = 1 · 2 · 3 (the cube up to
+6³ = 216 sites under the 256-site cap), THE LEVEL-SPACING RATIO ⟨r⟩ beside its GOE (0.5307) and Poisson (0.3863) limits, the band-centre IPR × N,
+seed averaging as a knob, and the closed line naming W_c ≈ 16.5 J in 3-D (Slevin–Ohtsuki) with "finite: 6³ sites" said. One-time check: ⟨r⟩ on
+the two sides of 0.46 at W = 4 and W = 30; the 1-D fitted ξ against 105/W². ANGULAR NODES (the zero sets of real Y_lm on the sphere in VORTEX)
+is the small sibling if the row has room.
 
 ## S · THE SHELF (`it005-shelf`, last; from the physics merges) — brief `S-BRIEF.md`
 THEMES: `tools/volumes/themes.json` (ordered: I THE CLASSICS · II MEDICINE · III LIFE AND FOOD · IV MATERIALS, ATMOSPHERE AND FUEL · V THE REST;
