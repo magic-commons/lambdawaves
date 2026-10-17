@@ -27,3 +27,6 @@ research/device-reports/inbox/
 tools/platform/electron/out/
 # Store trailer/screenshot raw material (21 MB of .mkv), kept beside the repo, never in it.
 LANDING PAGE VIDEOS/
+
+# iteration 004 V1: the dev link to the volumes (~/Documents/LAMBDAWAVES-VOLUMES/dist) — DATA, gigabytes, never in git.
+lab/volumes

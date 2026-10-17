@@ -10,6 +10,8 @@
  * tools/orbital-library.mjs writes the records and lab/library.json, the catalogue lab/molecules.js reads. */
 import { sha256Hex } from './md.js';
 export const SCHEMA = 1, DATA_CACHE = 'lw-data-v1';
+/** the widest frontier record decodeRecord gives a density matrix: lab/field.js MAX_MOL_AO, the χ tile a density needs (a worker-side copy: field.js is the GPU's) */
+export const DENSITY_AO = 128;
 export const recordPath = (hash) => 'library/' + hash + '.json';
 /** the geometry's own key (0.4.0 S4b): sha-256 of the atoms as [Z, x, y, z] in bohr — a moved atom is not the record it says it is */
 export const atomsKey = (atoms) => sha256Hex(JSON.stringify(atoms.map((a) => [a.Z, a.x, a.y, a.z])));
@@ -66,7 +68,15 @@ export function decodeRecord(r) {
   if (G.cols) {   // a FRONTIER record: C laid out n × n as every reader indexes it, the columns it does not carry zero (and never offered)
     const m = G.cols.length, c = arr(r.orbitals.C), C = new Float64Array(n * n);
     for (let i = 0; i < n; i++) G.cols.forEach((k, j) => { C[i * n + k] = c[i * m + j]; });
-    return { id: r.id, atoms: r.input.atoms, basis: r.input.basis, charge: r.input.charge, caps: r.caps, ground: G, eps: arr(r.orbitals.eps), C, D: null, spectrum: null, states: null, cols: G.cols };
+    /* iteration 004 V1: columns that cover the occupied set (ascending, so cols[nocc − 1] = nocc − 1) give the density D = 2 Σ_occ c cᵀ,
+       so DENSITY (and the views that read D) draw — a volume rung carries every column.  Up to DENSITY_AO only: past the χ tile a D
+       is a road the field cannot take (lab/field.js MAX_MOL_AO), and the FACTOR road already draws ρ = 2 Σ φ² exactly (C₆₀). */
+    let D = null;
+    if (n <= DENSITY_AO && G.cols[nocc - 1] === nocc - 1) {
+      D = new Float64Array(n * n);
+      for (let i = 0; i < n; i++) for (let j = i; j < n; j++) { let s = 0; for (let k = 0; k < nocc; k++) s += C[i * n + k] * C[j * n + k]; D[i * n + j] = D[j * n + i] = 2 * s; }
+    }
+    return { id: r.id, atoms: r.input.atoms, basis: r.input.basis, charge: r.input.charge, caps: r.caps, ground: G, eps: arr(r.orbitals.eps), C, D, spectrum: null, states: null, cols: G.cols };
   }
   const s = Object.fromEntries(Object.entries(r.spectrum).map(([k, v]) => [k, arr(v)]));
   const roots = [], tda = [];

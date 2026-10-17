@@ -253,18 +253,18 @@ const PRECACHE = [
   ['./lab.css',                                                     'e33635c61ab8'],
   ['./ladder-model.js',                                             '69199febdca1'],
   ['./ladder.js',                                                   'ab571c69fb38'],
-  ['./latex-state.js',                                              '4ab3fd7b1394'],
+  ['./latex-state.js',                                              '8f4f247a3ac3'],
   ['./lattice-model.js',                                            '32fddccdfe0e'],
   ['./lattice.js',                                                  'b5e9e81f3d77'],
   ['./lebedev-302.json',                                            '9b9b2215df5f'],
-  ['./library.js',                                                  '24cc656b9157'],
+  ['./library.js',                                                  'ff654fe2b628'],
   ['./library.json',                                                '0a3531a7c866'],
   ['./linalg.js',                                                   'da2367cdcb97'],
   ['./look.js',                                                     'b3d232becd4e'],
   ['./main-menu.js',                                                '6366ad27ec5d'],
   ['./main.js',                                                     '9afde87c5a4c'],
   ['./manifest.webmanifest',                                        '4771fb9dfe63'],
-  ['./mathworker.js',                                               '24be7393432f'],
+  ['./mathworker.js',                                               'acfe81b18572'],
   ['./md.js',                                                       'df8fbbb32009'],
   ['./meters.js',                                                   '227aa1cdb552'],
   ['./mir-gui.js',                                                  '66e1d38ded9a'],
@@ -497,7 +497,7 @@ const PRECACHE = [
   ['./registerview.js',                                             'bda848c349e4'],
   ['./render-exact.js',                                             'ba2c25105cb5'],
   ['./response-fit.js',                                             'fe7942d74051'],
-  ['./rhf-molecule.js',                                             '0f171d6be838'],
+  ['./rhf-molecule.js',                                             'dcf455482b26'],
   ['./rotor4.js',                                                   '074250aea7e6'],
   ['./rpa-inspector.js',                                            'baf1eaa062e7'],
   ['./scf.js',                                                      '3dc2b4957407'],
@@ -531,8 +531,8 @@ const PRECACHE = [
   ['./sturmian.js',                                                 '47ed5b7c81da'],
   ['./sturmianreg.js',                                              '1ce5f44b2fae'],
   ['./sw-client.js',                                                '0f1ffadd0978'],
-  ['./vendor/bse/6-31+g-star-v1.json',                              'ddcbd84daf46'],
-  ['./vendor/bse/index.json',                                       'ed5f82e3438e'],
+  ['./vendor/bse/6-31+g-star-v1.json',                              'b38353af756b'],
+  ['./vendor/bse/index.json',                                       'fc50107750ef'],
   ['./vendor/bse/sto-3g-v1.json',                                   '22ce59b9ec99'],
   ['./verbs.js',                                                    '38947225690e'],
   ['./vortex.js',                                                   'ac9be4da361b'],
@@ -561,8 +561,12 @@ const PRECACHE = [
  * (no cache of its own, no handler: §4 sends it to the network like any URL outside §1).  MIR 1.5's language packs (twelve
  * mir/locales/*.json, 2.24 MB with the token sheet; a pack the network cannot give leaves the words English, which is the kit's
  * own fallback) and mir/tokens.json (the token schema, read by tools, never by a page) took an adopted install from 4.6 to
- * 9.5 MiB, over the 8 MiB ceiling; without them it is 7.3.  `*` is one path segment.  On a 1.4 tree neither exists. */
-const DATA = ['library/'];
+ * 9.5 MiB, over the 8 MiB ceiling; without them it is 7.3.  `*` is one path segment.  On a 1.4 tree neither exists.
+ * THE VOLUMES (iteration 004 V1) are DATA by the same rule: volumes/ (the shelf volumes.json, each volume's index.json and its
+ * m/<id>.lwm molecules; in a checkout lab/volumes is the git-ignored dev link to ~/Documents/LAMBDAWAVES-VOLUMES/dist, which no
+ * walk follows) and the four basis records only a volume rung needs (STO-6G, 3-21G, 6-31G, 6-31G*: 675 KB the live card never
+ * asks for) — fetched with the volume that names them, kept by the page in DATA_CACHE beside it. */
+const DATA = ['library/', 'volumes/', 'vendor/bse/sto-6g-v1.json', 'vendor/bse/3-21g-v1.json', 'vendor/bse/6-31g-v1.json', 'vendor/bse/6-31g-star-v1.json'];
 const DATA_CACHE = 'lw-data-v1';
 const SKIP = ['mir/locales/*.json', 'mir/tokens.json'];
 
@@ -573,7 +577,7 @@ const NEVER_PRECACHE = [
   ['*.md, *.txt EXCEPT a LICENCE text',
                            'shipped documents (skin-notes, PORT-NOTES, the *-SOURCE.txt build records) are served, never loaded by the running lab — precaching them would make every prose edit a new build. THE LICENCES ARE THE EXCEPTION and they ARE precached (wave 59): the font binaries they cover are in this list, and OFL section 2 says each copy must CONTAIN the licence — an offline install that holds twenty-three fonts and cannot reach one licence is not that copy. It costs 22 KB and licence texts change approximately never.'],
   ['vendor/katex/LICENSE', 'NO LONGER SKIPPED, for the same reason: it is the MIT text for KaTeX\'s code and it is precached with vendor/katex/fonts/OFL.txt beside it.'],
-  ['a DATA root (§1b: library/)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install.'],
+  ['a DATA root (§1b: library/, volumes/, the ladder\'s four basis records)', 'an orbital record is content-addressed device content — installed on a press or by the open that names it, kept in lw-data-v1 across builds, and never a byte of every visitor\'s install; a volume (≈5 GB) and the bases only its rungs use are the same kind of content.'],
   ['a SKIP path (§1b: mir/locales/*.json, mir/tokens.json)', 'kit data an adoption brings that the running lab fetches only when a language is chosen, or never: deployed, never precached, never cached (offline, a language other than English stays English).'],
   ['a module STAGED in tests/wiring.test.mjs ALLOWLIST', 'OPTIMIZATION 2026-09-24 · M10: wiring proves no root reaches it, so no install should fetch it; tests/pwa.test.mjs and tools/build-deploy.mjs READ the set from that list, so a module rejoins this precache the day it is wired and its entry is forced out.'],
   ['an adopted kit module no root reaches (R5-W1)', '0.5.0 C0: MIR is adopted whole, so lab/mir/ holds modules for consumers λWAVES has not reached yet. tests/wiring.test.mjs walks the roots and names them (--unreached-kit); tests/pwa.test.mjs and tools/build-deploy.mjs READ that set, so a kit module joins this precache the day a consumer imports it. Deployed, never precached, never failed (PLAN §9).'],

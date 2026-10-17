@@ -13,7 +13,7 @@
  * Run:  node tests/field-owner.test.mjs
  */
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, lstatSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -26,7 +26,7 @@ const NAMES = ['setMolecule', 'setMoleculeMatrix'];
 function walk(dir, out = []) {
   for (const e of readdirSync(dir)) {
     const p = path.join(dir, e);
-    if (statSync(p).isDirectory()) walk(p, out);
+    if (lstatSync(p).isDirectory()) walk(p, out);                   // a link (lab/volumes, the dev link to the volumes) is never followed
     else if (e.endsWith('.js')) out.push(p);
   }
   return out;

@@ -8,7 +8,7 @@
  *
  * [module] defaults to lab/verbs.js (G1's table, importable in node without a DOM); while it is absent the stub beside this file
  * (tools/gemma/verbs.stub.mjs, the BUILD-PLAN's table) is read instead and a warning goes to stderr — stdout stays the payload. */
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync, lstatSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -93,7 +93,7 @@ function windows() {
   if (Array.isArray(mod.WINDOWS) && mod.WINDOWS.length) return mod.WINDOWS.map((w) => (typeof w === 'string' ? [w, ''] : [w.id, w.name || w.title || '']));
   const ids = new Map();
   const walk = (dir) => { for (const n of readdirSync(dir)) { const p = join(dir, n);
-    if (statSync(p).isDirectory()) { if (n !== 'mir' && n !== 'vendor') walk(p); }
+    if (lstatSync(p).isDirectory()) { if (n !== 'mir' && n !== 'vendor') walk(p); }
     else if (n.endsWith('.js')) for (const m of readFileSync(p, 'utf8').matchAll(/(?:device|register)\(\{\s*id:\s*'([a-z0-9-]+)'([^}]{0,200})/g)) {
       const name = (/eyebrow:\s*'([^']+)'/.exec(m[2]) || /title:\s*'([A-Z][A-Z0-9 -]+)'/.exec(m[2]) || [])[1];
       if (!ids.has(m[1]) || name) ids.set(m[1], name || ids.get(m[1]) || ''); } } };

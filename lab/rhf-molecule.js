@@ -16,7 +16,9 @@ import { cholesky } from './linalg.js';
 import { hessianBlocks } from './rpa-inspector.js';
 import { clusterRanges, canonicaliseCluster, coordinateFamily } from './canon-gauge.js';
 
-export const BASIS_FILES = { 'sto-3g': 'sto-3g-v1.json', '6-31+g-star': '6-31+g-star-v1.json' };
+/* THE BASIS LADDER (iteration 004 V1): the volumes solve every molecule in all six, smallest first; the live card offers sto-3g and 6-31+g-star */
+export const BASIS_FILES = { 'sto-3g': 'sto-3g-v1.json', 'sto-6g': 'sto-6g-v1.json', '3-21g': '3-21g-v1.json', '6-31g': '6-31g-v1.json',
+  '6-31g-star': '6-31g-star-v1.json', '6-31+g-star': '6-31+g-star-v1.json' };
 const REGISTRY = new Map();
 /** hand a parsed lab/vendor/bse record to the module once; moleculeRHF is then synchronous */
 export function registerRecord(name, record) {
@@ -32,7 +34,7 @@ export async function loadRecord(name, base = './vendor/bse/') {
   return registerRecord(name, await r.json());
 }
 const recordFor = (name, given) => {
-  if (!BASIS_FILES[name]) throw new Error(`rhf-molecule: unknown basis '${name}' — only ${Object.keys(BASIS_FILES).join(' and ')} are vendored`);
+  if (!BASIS_FILES[name]) throw new Error(`rhf-molecule: unknown basis '${name}' — only ${Object.keys(BASIS_FILES).join(', ')} are vendored`);
   if (given) return given;
   const r = REGISTRY.get(name);
   if (!r) throw new Error(`rhf-molecule: basis '${name}' not registered — call registerRecord or loadRecord first`);
