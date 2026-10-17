@@ -158,6 +158,9 @@ echo $! > ~/Documents/LAMBDAWAVES-VOLUMES/raw/solver.pid        # stop it with: 
 - **Watch:** `~/Documents/LAMBDAWAVES-VOLUMES/raw/STATUS.json` (done / failed / refused / remaining, per-rung seconds, `etaSeconds`
   from the measured rate) and `raw/solve.log`; `python tools/volumes/solve.py --candidates … --status` rewrites STATUS without solving.
 - **Stop / resume:** SIGTERM (or Ctrl-C) at any moment; the same command resumes at the next unfinished rung of the same molecule.
+- **THE GPU SOLVER** (iteration 005 G, `research/iteration-005/G-BUILD.md`): `tools/volumes/long-run-gpu.sh start | status | stop` runs
+  `solve.py --gpu --largest-first` on the same catalogue and `raw/` (pid in `raw/solver-gpu.pid`), the card taking the queue from its
+  costliest end; stop it with `kill -TERM` by that pid, never pkill.
 - **A second solver** on the same queue: the same command again (split the threads, e.g. `--threads 5` each — the machine is shared);
   the per-molecule lock keeps them apart.
 - **Pack** (any time, as often as wanted; only finished molecules unless `--partial`; `--incremental` keeps the untouched):
