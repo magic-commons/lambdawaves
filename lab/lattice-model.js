@@ -3,10 +3,10 @@
  * and the closed forms the window prints beside what it measures.  J = 1 is the energy unit and 1/J the time unit.  0.8.1 T3: HOFSTADTER (the Peierls phase
  * per bond), the QUANTUM WALK (a map: `walker`, no eigensolve) and the XX SPIN CHAIN (2^N basis states, `spinView` its ⟨σ_z⟩ and half-chain entropy). */
 import { eigSymQL } from './linalg.js'; import { hermitianEigen } from './density.js'; import AB from './ab-patch.json' with { type: 'json' };   // L2: tools/lattice/ammann-beenker.mjs
-export const PRESETS = [['chain', 'CHAIN', 'N'], ['ring', 'RING', 'N'], ['square', 'SQUARE', 'L'], ['ssh', 'SSH', 'N J1 J2'], ['anderson', 'ANDERSON', 'N W seed'], ['aa', 'AUBRY–ANDRÉ', 'N lam phi'],
+export const PRESETS = [['chain', 'CHAIN', 'N'], ['ring', 'RING', 'N'], ['square', 'SQUARE', 'L'], ['ssh', 'SSH', 'N J1 J2'], ['anderson', 'ANDERSON', 'N L W seed d seeds'], ['aa', 'AUBRY–ANDRÉ', 'N lam phi'],
   ['ab', 'AB RING', 'N Phi'], ['graphene', 'GRAPHENE', 'rings'], ['benzene', 'HÜCKEL BENZENE', ''], ['tunnel', 'TUNNEL', 'N V nb'], ['patch', 'AB PATCH', ''],
   ['hofstadter', 'HOFSTADTER', 'L fp fq'], ['walk', 'QUANTUM WALK', 'N'], ['spin', 'SPIN CHAIN', 'ns']].map(([id, label, k]) => ({ id, label, knobs: k ? k.split(' ') : [] }));
-export const DEFAULTS = { preset: 'chain', N: 64, L: 8, J1: 0.5, J2: 1, W: 2, seed: 1, lam: 1, phi: 0, Phi: 0, rings: 2, V: 1, nb: 1, fp: 1, fq: 3, ns: 8, state: 'packet', x0: 0.25, sig: 3, k0: 1.5708, idx: 0 }; export const BETA = (Math.sqrt(5) - 1) / 2;
+export const DEFAULTS = { preset: 'chain', N: 64, L: 8, J1: 0.5, J2: 1, W: 2, seed: 1, lam: 1, phi: 0, Phi: 0, rings: 2, V: 1, nb: 1, fp: 1, fq: 3, ns: 8, d: 1, seeds: 1, state: 'packet', x0: 0.25, sig: 3, k0: 1.5708, idx: 0 }; export const BETA = (Math.sqrt(5) - 1) / 2;
 /** the honeycomb flake of m rings of hexagons around one (6m² sites: benzene, coronene 24, circumcoronene 54, 96), bond length 1 */
 function flake(m, xy, hop) {
   const at = new Map(), s3 = Math.sqrt(3);
@@ -23,7 +23,8 @@ export function build(p) {
   else if (id === 'hofstadter') { const L = Math.min(12, p.L), per = L > 2 && (p.fp * L) % p.fq === 0;   // a torus when Φ·L is whole; the y-bond from (x, y) carries e^{2πiΦx}
     for (let a = 0; a < L; a++) for (let b = 0; b < L; b++) { const i = xy.push([b, a]) - 1; if (b || per) hop.push([b ? i - 1 : i + L - 1, i, 1]); if (a || per) hop.push([a ? i - L : i + L * (L - 1), i, 1, 2 * Math.PI * p.fp / p.fq * b]); } }
   else if (id === 'spin') for (let i = 0; i < p.ns; i++) { xy.push([i, 0]); if (i) hop.push([i - 1, i, 1]); }   // the picture's N spins; H lives on their 2^N states
-  else if (id === 'square') for (let a = 0; a < p.L; a++) for (let b = 0; b < p.L; b++) { const i = xy.push([b, a]) - 1; if (b) hop.push([i - 1, i, 1]); if (a) hop.push([i - p.L, i, 1]); }
+  else if (id === 'square' || (id === 'anderson' && p.d > 1)) { const L = id === 'square' ? p.L : Math.min(p.d > 2 ? 6 : 16, p.L), Z = id === 'square' || p.d < 3 ? 1 : L;   // it005 P4: ANDERSON's cube (L ≤ 6), its L layers side by side
+    for (let c = 0; c < Z; c++) for (let a = 0; a < L; a++) for (let b = 0; b < L; b++) { const i = xy.push([b + c * (L + 1), a]) - 1; if (b) hop.push([i - 1, i, 1]); if (a) hop.push([i - L, i, 1]); if (c) hop.push([i - L * L, i, 1]); } }
   else { const N = id === 'walk' ? Math.min(128, p.N) : p.N, R = N / (2 * Math.PI), round = id === 'ring' || id === 'ab';
     for (let i = 0; i < N; i++) { const th = 2 * Math.PI * i / N + Math.PI / 2; xy.push(round ? [R * Math.cos(th), R * Math.sin(th)] : [i, 0]); if (i) hop.push([i - 1, i, id === 'ssh' ? (i % 2 ? p.J1 : p.J2) : 1]); }
     if (round) hop.push([N - 1, 0, 1]); }
@@ -71,6 +72,11 @@ export function spinView({ re, im }, N) {
   for (let a = 0; a < d; a++) for (let c = 0; c < d; c++) { let x = 0, y = 0; for (let u = a, v = c; u < n; u += d, v += d) { x += re[u] * re[v] + im[u] * im[v]; y += im[u] * re[v] - re[u] * im[v]; } R[a * D + c] = R[(a + d) * D + c + d] = x; R[(a + d) * D + c] = y; R[a * D + c + d] = -y; }
   for (const l of eigSymQL(R, D).values) if (l > 1e-15) S -= l * Math.log(l) / 2;
   return { re: Float64Array.from(z, (v) => Math.sign(v) * Math.sqrt(Math.abs(v))), im: new Float64Array(N), z, S }; }
+/** THE MOBILITY EDGE's two statistics (it005 P4): ⟨r⟩ = ⟨min(s_k, s_{k+1})/max(s_k, s_{k+1})⟩ over the middle third of the levels (Oganesyan–Huse: GOE 0.5307
+ * extended, Poisson 0.3863 localised) and the band-centre eigenstate's (|E| least) IPR × N: 1 spread evenly, N on one site */
+export function levelStats({ n, E, re }) { let r = 0, m = 0, c = 0, a = 0, b = 0;
+  for (let k = (n / 3) | 0; k < ((2 * n / 3) | 0) - 1; k++) { const s1 = E[k + 1] - E[k], s2 = E[k + 2] - E[k + 1], M = Math.max(s1, s2); if (M > 1e-12) { r += Math.min(s1, s2) / M; m++; } }
+  for (let k = 1; k < n; k++) if (Math.abs(E[k]) < Math.abs(E[c])) c = k; for (let i = 0; i < n; i++) { const q = re[i * n + c] ** 2; a += q; b += q * q; } return { r: m ? r / m : NaN, iprN: n * b / (a * a) }; }
 /** the inverse participation ratio Σ|ψᵢ|⁴ / (Σ|ψᵢ|²)²: 1 on one site, 1/N spread evenly */
 export function ipr({ re, im }) { let a = 0, b = 0; for (let i = 0; i < re.length; i++) { const q = re[i] * re[i] + im[i] * im[i]; a += q; b += q * q; } return b / (a * a); }
 /** TUNNEL: T(k) = 4 sin²k / (4 sin²k + V²u²) through a barrier V on nb sites (u = 1; u = V + 2 cos k on two, T = 1 at cos k = −V/2), and the norm
@@ -88,7 +94,9 @@ export function closed(p, E) {
     case 'square': { const c = cs(p.L, (k) => Math.PI * (k + 1) / (p.L + 1)); return { levels: Float64Array.from([...c].flatMap((a) => [...c].map((b) => a + b))).sort(), line: 'E = −2J[cos(πa/(n+1)) + cos(πb/(n+1))]' }; }
     case 'ssh': return { levels: null, line: `bands ±|J₁ + J₂e^{ik}| · gap 2|J₁ − J₂| = ${(2 * Math.abs(p.J1 - p.J2)).toFixed(3)} J` + (p.J1 < p.J2 ? ' · two edge states' : '') };
     case 'aa': return { levels: null, line: `self-dual λ = 2J · Lyapunov γ = ln(λ/2J) = ${g > 0 ? g.toFixed(4) + ' (localised, ξ = ' + (1 / g).toFixed(1) + ' sites)' : '0 (extended)'}` };
-    case 'anderson': return { levels: null, line: `1-D: every state localised · ξ(0) ≈ 105 J²/W² = ${p.W > 0 ? (105 / p.W ** 2).toFixed(1) : '∞'} sites (Kappus–Wegner)` };
+    case 'anderson': if (p.d > 2) return { levels: null, line: `3-D: the mobility edge W_c ≈ 16.5 J at the band centre (box disorder; Slevin–Ohtsuki) · W = ${p.W.toFixed(1)} J, ${p.W < 16.5 ? 'below: extended' : p.W > 16.5 ? 'above: localised' : 'at it'}`,
+      sub: `finite: ${Math.min(6, p.L)}³ sites — the statistics drift toward the limits as L grows, the transition is the infinite lattice’s` };
+      if (p.d > 1) return { levels: null, line: '2-D: every state localised, ξ exponentially large at weak disorder' }; return { levels: null, line: `1-D: every state localised · ξ(0) ≈ 105 J²/W² = ${p.W > 0 ? (105 / p.W ** 2).toFixed(1) : '∞'} sites (Kappus–Wegner)` };
     case 'tunnel': { const kr = Math.acos(-p.V / 2), sk = 1 / (p.sig * Math.SQRT2); let a = 0, w = 0; for (let k = 5e-4; k < Math.PI; k += 1e-3) { const g = Math.exp(-(((k - p.k0) / sk) ** 2) / 2); a += g * tunnelT(k, p.V, p.nb); w += g; }
       return { levels: null, line: `T(k₀) = ${tunnelT(p.k0, p.V, p.nb).toFixed(4)} · the packet’s own ⟨T⟩ over its momenta (σ_k = ${sk.toFixed(3)}) ${(a / w).toFixed(4)}` + (p.nb !== 2 ? '' : p.V >= 2 ? ' · no resonance inside the band for V ≥ 2J' : ` · resonance cos k = −V/2J at k = ${kr.toFixed(3)} (T = 1)${Math.abs(p.k0 - kr) < sk ? ' · ON IT' : ''}`), sub: 'the prediction; T · R is the measurement' }; }
     case 'patch': return { levels: null, line: `a patch of ${AB.n} vertices, 8-fold · as computed: the first Bragg orbit |q| = π(1 + √2) = ${AB.peaks[0].q.toFixed(4)}, S = ${AB.peaks[0].S.toFixed(3)}`, sub: 'lab/ab-patch.json, from tools/lattice/ammann-beenker.mjs' };

@@ -2,11 +2,11 @@
  * nothing touching the main register, the field or the camera except to read t.  Site bars: |ψᵢ|² the height, arg ψᵢ the palette's phase hue, the
  * sites where the preset's geometry puts them; the eigen-ladder is the strip beneath (its brightness the state's weight |⟨k|ψ⟩|²; a click picks
  * EIGEN m, a click on a site SITE n).  ψ(t) = C e^{−iE(t−t₀)} C†ψ₀ is exact from the eigenpairs (lattice-model.js), t₀ the moment of the pick. */
-import { PRESETS, DEFAULTS, build, solveLattice, psi0, evolver, ipr, closed, tunnelT, split, walker, spinView } from './lattice-model.js';
+import { PRESETS, DEFAULTS, build, solveLattice, psi0, evolver, ipr, closed, tunnelT, split, walker, spinView, levelStats } from './lattice-model.js';
 import { el, knob, readout, seg, stepper, themeInk } from './mir/kit.js'; import { toLUT, hsvWheel } from './mir/palette.js';
 export let LAT = null;   // the one handle (persist, the verb): the app literal never gains a key
-const KN = { N: ['N', 3, 256, 1], L: ['n × n', 2, 16, 1], J1: ['J₁', 0, 2], J2: ['J₂', 0, 2], W: ['W', 0, 8], seed: ['SEED', 1, 99, 1], lam: ['λ', 0, 4], phi: ['φ', 0, 6.2832],
-  Phi: ['Φ', 0, 6.2832], rings: ['RINGS', 2, 4, 1], V: ['BARRIER V', 0, 4], nb: ['SITES', 1, 2, 1], fp: ['FLUX p', 0, 8, 1], fq: ['FLUX q', 1, 8, 1], ns: ['SPINS', 2, 8, 1], x0: ['CENTRE', 0, 1], sig: ['WIDTH σ', 0.5, 16], k0: ['k₀', 0, 3.1416], idx: ['n · m', 0, 255, 1] };
+const KN = { N: ['N', 3, 256, 1], L: ['n × n', 2, 16, 1], J1: ['J₁', 0, 2], J2: ['J₂', 0, 2], W: ['W', 0, 30], seed: ['SEED', 1, 99, 1], lam: ['λ', 0, 4], phi: ['φ', 0, 6.2832],
+  Phi: ['Φ', 0, 6.2832], rings: ['RINGS', 2, 4, 1], V: ['BARRIER V', 0, 4], nb: ['SITES', 1, 2, 1], fp: ['FLUX p', 0, 8, 1], fq: ['FLUX q', 1, 8, 1], ns: ['SPINS', 2, 8, 1], d: ['d', 1, 3, 1], seeds: ['SEEDS', 1, 16, 1], x0: ['CENTRE', 0, 1], sig: ['WIDTH σ', 0.5, 16], k0: ['k₀', 0, 3.1416], idx: ['n · m', 0, 255, 1] };
 const SK = { ground: [], packet: ['x0', 'sig', 'k0'], site: ['idx'], eigen: ['idx'] }, STK = ['state', 'idx', 'x0', 'sig', 'k0'], PRE = (id) => PRESETS.find((q) => q.id === id) || PRESETS[0];
 const ENTER = { tunnel: { N: 256, state: 'packet', x0: 0.25, sig: 4 }, hofstadter: { L: 12 }, walk: { N: 128 } };   // a preset's own start (TUNNEL's packet from the left), unless a load or the verb says otherwise
 const NOTE = { benzene: ' Hückel: the six π levels ±2β, ±β, ±β fall 1 + 2 + 2 + 1 (a₂u · e₁g · e₂u · b₂g); the degenerate e₁g pair is the HOMO that MOLECULES’ STO-3G benzene names in its stem.',
@@ -22,13 +22,13 @@ export function createLattice(host, api) {
   const st = seg({ aria: 'Lattice state', value: P.state, options: Object.keys(SK).map((id) => ({ id, label: id === 'eigen' ? 'EIGEN m' : id === 'site' ? 'SITE n' : id.toUpperCase() })), onChange: (v) => set({ state: v }) });
   host.append(pre.root, st.root); const r1 = el('div', 'row', host);
   for (const [k, [label, min, max, step]] of Object.entries(KN)) r1.appendChild((ui[k] = knob({ label, min, max, value: P[k], step,
-    fmt: (v) => (k === 'rings' ? `${6 * v * v} sites` : k === 'Phi' ? (v / 6.2832).toFixed(3) + ' Φ₀' : step ? String(Math.round(v)) : v.toFixed(2)), onInput: (v) => set({ [k]: step ? Math.round(v) : v }) })).root);
+    fmt: (v) => (k === 'L' && P.preset === 'anderson' && P.d > 1 ? `${(v = Math.min(P.d > 2 ? 6 : 16, Math.round(v)))}${P.d > 2 ? '³' : '²'} = ${v ** P.d} sites` : k === 'rings' ? `${6 * v * v} sites` : k === 'Phi' ? (v / 6.2832).toFixed(3) + ' Φ₀' : step ? String(Math.round(v)) : v.toFixed(2)), onInput: (v) => set({ [k]: step ? Math.round(v) : v }) })).root);
   const hold = el('div', 'ladder-c', host), cv = el('canvas', '', hold); hold.style.height = '180px';
   const ro = { ipr: readout({ label: 'IPR  Σ|ψ|⁴', value: '—' }), lev: readout({ label: 'LEVELS  in J', value: '—' }), law: readout({ label: 'CLOSED FORM · PREDICTION', value: '—', cls: 'wide' }), tr: readout({ label: 'T · R  once passed', value: '—', cls: 'wide' }) };
-  ro.run = readout({ label: 'THE RUN  measured · law', value: '—', cls: 'wide' }); const r2 = el('div', 'row tight', host); for (const r of Object.values(ro)) r2.appendChild(r.root); const note = el('div', 'note', host);
+  ro.run = readout({ label: 'THE RUN  measured · law', value: '—', cls: 'wide' }); ro.and = readout({ label: '⟨r⟩ · IPR × N  the transition', value: '—', cls: 'wide' }); const r2 = el('div', 'row tight', host); for (const r of Object.values(ro)) r2.appendChild(r.root); const note = el('div', 'note', host);
   function sync() {
-    const own = P.preset === 'walk' || P.preset === 'spin', show = new Set([...PRE(P.preset).knobs, ...(P.preset === 'walk' ? [] : SK[P.state] || [])]); for (const k in KN) { ui[k].root.style.display = show.has(k) ? '' : 'none'; ui[k].set(P[k]); }
-    pre.set(P.preset); st.set(P.state); st.root.style.display = own ? 'none' : ''; ro.tr.root.style.display = P.preset === 'tunnel' ? '' : 'none'; ro.run.root.style.display = own ? '' : 'none'; note.innerHTML = '<b>Units.</b> J = 1 is the energy unit and 1/J the time unit; t is the transport clock’s, from the moment the state is picked.' + (NOTE[P.preset] || '');
+    const own = P.preset === 'walk' || P.preset === 'spin', show = new Set([...PRE(P.preset).knobs, ...(P.preset === 'walk' ? [] : SK[P.state] || [])]); if (P.preset === 'anderson') show.delete(P.d > 1 ? 'N' : 'L'); for (const k in KN) { ui[k].root.style.display = show.has(k) ? '' : 'none'; ui[k].set(P[k]); }
+    pre.set(P.preset); st.set(P.state); st.root.style.display = own ? 'none' : ''; ro.tr.root.style.display = P.preset === 'tunnel' ? '' : 'none'; ro.run.root.style.display = own ? '' : 'none'; ro.and.root.style.display = P.preset === 'anderson' ? '' : 'none'; note.innerHTML = '<b>Units.</b> J = 1 is the energy unit and 1/J the time unit; t is the transport clock’s, from the moment the state is picked.' + (NOTE[P.preset] || '');
   }
   function set(p) {
     if (p.preset !== P.preset && ENTER[p.preset]) p = { ...ENTER[p.preset], ...p };
@@ -39,9 +39,13 @@ export function createLattice(host, api) {
   }
   function prepare() {
     if (!dirty || busy) return; dirty = false; busy = true; const mine = gen, Hm = build(P);
-    return Promise.resolve(P.preset === 'walk' ? { n: Hm.n, E: null } : api.solve ? api.solve({ n: Hm.n, re: Hm.re, im: Hm.im }) : solveLattice(Hm)).then((r) => { if (mine === gen && r && !r.error) { H = Hm; S = r; restate(); } })
+    const sv = (h) => (api.solve ? api.solve({ n: h.n, re: h.re, im: h.im }) : solveLattice(h)), more = P.preset === 'anderson' ? Array.from({ length: P.seeds - 1 }, (_, j) => sv(build({ ...P, seed: P.seed + j + 1 }))) : [];
+    return Promise.all([P.preset === 'walk' ? { n: Hm.n, E: null } : sv(Hm), ...more]).then(([r, ...rs]) => { if (mine === gen && r && !r.error) { H = Hm; S = r; if (P.preset === 'anderson') stats([r, ...rs]); restate(); } })
       .finally(() => { busy = false; if (dirty && api.active()) prepare(); });
   }
+  function stats(rs) {   // it005 P4: ⟨r⟩ and the band-centre IPR × N averaged over SEEDS seeds from `seed` up; the picture is the first seed's
+    const s = rs.filter((r) => r && !r.error).map(levelStats), av = (f) => s.reduce((a, x) => a + f(x), 0) / s.length, r = av((x) => x.r);
+    ro.and.set(`⟨r⟩ ${isFinite(r) ? r.toFixed(4) : '—'} · GOE 0.5307 extended · Poisson 0.3863 localised`); ro.and.setSub(`band-centre IPR × N ${av((x) => x.iprN).toFixed(1)} (1 spread · ${S.n} on one site) · ${s.length} seed${s.length > 1 ? 's' : ''} from ${P.seed}`); }
   function restate() {
     ev = S.E ? evolver(S, psi0(P, S, H.xy)) : walker(H.n); t0 = api.t(); lastT = NaN; hit = -1; got = null;
     const c = closed(P, S.E), E = S.E, n = S.n, h = n >> 1; let d = 0; if (c.levels) for (let k = 0; k < n; k++) d = Math.max(d, Math.abs(E[k] - c.levels[k]));
