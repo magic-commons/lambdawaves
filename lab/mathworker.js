@@ -12,7 +12,7 @@
  *   lattice.solve { n, re, im }                    → LATTICE's eigenpairs { E, re, im } (lattice-model.js: real → eigSymQL, Hermitian → hermitianEigen)
  *   central.solve { preset, params }               → CENTRAL's solve (central.js solveCentral): { E, rTab, r99, table, rows, bound, oracle, ms }
  *   gas.stats { radius, t, re0, im0, t0 }          → the AXIAL GAS's norm, ⟨z⟩, σ_z, ⟨r⟩ at t (gas.js stats) — SPECTRUM's readout (K5w)
- *   flow.balance { shells, N, half, Re, Im, dRe, solve } → BALANCED FLOW's sampled defect and its repair ∇φ (flow-balance.js)
+ *   flow.balance { shells, N, half, Re, Im, dRe, solve, plane } → BALANCED FLOW's sampled defect and its repair ∇φ (flow-balance.js); `plane` adds P2's CONTINUITY RECORD
  *   chem.esp     { shells, N, half, D, atoms }   → THE POTENTIAL's N³ volume Φ(r) (0.6.5 X1, chemEsp below), on the cards queue
  *   export  { fmt, texels, N, half, rhoMax, … }    → FILE › EXPORT SHAPE / GRID (wave 134): the field's grid decoded, marched and written as
  *                                                  one file (export3d.js buildFile) — the bytes come back, transferred; asked for, so it finishes parked
@@ -47,14 +47,14 @@ import { canonicaliseSpectrum, dipoleFamily, coordinateFamily } from './canon-ga
 import { sin2Pulse } from './modrive.js';
 import { eigSym } from './h2ci.js';
 import { fieldShells } from './molecular-field.js';
-import { createRTHF, fieldOf } from './density.js';
+import { createRTHF, fieldOf, hermitianEigen } from './density.js';
 import { spectrum, peaks } from './absorb.js';
 import { fitPoles } from './response-fit.js';
 import { createGas } from './gas.js';
 import { buildFile } from './export3d.js';
 import { namesOf } from './names.js';
 import { basisFrom, rinvMatrix, ELEMENT, oneElectron } from './md.js';
-import { flowBalance } from './flow-balance.js'; import { createFlow } from './molecular-flow.js';
+import { flowBalance } from './flow-balance.js'; import { createFlow, continuityOn } from './molecular-flow.js';
 import { validateRecord, decodeRecord } from './library.js';
 import { BASIS, radial } from './hydrogen.js';
 
@@ -157,7 +157,7 @@ function work(m) {
     else if (m.op === 'chem.rt.fit') { out = chemRtFit(m); }
     else if (m.op === 'chem.vib.frames') { out = chemVibFrames(m); transfer = chemTransfer(out); }   // 0.7.0 V1 THE MODES: K phase samples of one normal mode
     else if (m.op === 'chem.esp') { out = chemEsp(m); transfer = [out.phi.buffer]; }   // THE POTENTIAL's volume (0.6.5 X1), on the cards queue
-    else if (m.op === 'flow.balance') { out = flowBalance(m); transfer = out.gx ? [out.gx.buffer, out.gy.buffer, out.gz.buffer] : []; }   // BALANCED FLOW's repair (flow-balance.js), on the cards queue
+    else if (m.op === 'flow.balance') { out = flowBalance(m); transfer = out.gx ? [out.gx.buffer, out.gy.buffer, out.gz.buffer] : []; if (m.plane) { out.plane = continuityOn({ shells: m.shells, ...m.plane }); transfer.push(out.plane.r.buffer); } }   // BALANCED FLOW's repair (flow-balance.js) and P2's CONTINUITY RECORD, on the cards queue
     else out = { error: 'unknown op ' + m.op };
   } catch (err) { out = err instanceof Refused ? { refused: err.message } : { error: String(err && err.message || err) }; transfer = []; }
   return { out, transfer };
@@ -193,7 +193,7 @@ export function gasStats(m = {}) {
  *   chem.drive.run    { to, maxSteps }                                  → steps the driven state to clock time `to` (either direction): c₀, Z, populations, norm
  *   chem.drive.set    { e0, omega, phase }                              → the live knobs of a running drive — a modulation target must not cost a re-init
  *   chem.rt.init      { atoms, basis, charge, dt, integrator, kick: { axis, kappa }, restartEvery } → the kicked t = 0 state
- *   chem.rt.run       { steps }                                          → Re D, the dipole trace of those steps, invariants
+ *   chem.rt.run       { steps, factors }                                 → Re D, the dipole trace of those steps, invariants (+ F_w F_re F_im, P(t)'s factors, with `factors`)
  *   chem.rt.reset     {}                                                 → back to the kicked t = 0 state, trace cleared
  *   chem.rt.spectrum  { dt, kappa, tau, wMin, wMax }                     → absorb.js's transform of the ACCUMULATED trace
  *   chem.rt.fit       { trace, dt, kappa, tau, init, wMin, wMax, cert }  → response-fit.js's poles + certificate of the CARD's fit window
@@ -227,6 +227,19 @@ const reD = (engine) => { const D = engine.D; return Float32Array.from(D.re); };
    quantum chemist's D_μν = Σ c_μ c̄_ν, the TRANSPOSE-CONJUGATE of the ⟨a†_μ a_ν⟩ the flow evaluator is written in, so the
    card negates this imaginary part before handing it over (tests/molecular-flow.test.mjs holds the sign). */
 const bothD = (engine) => { const D = engine.D; return { D_re: Float32Array.from(D.re), D_im: Float32Array.from(D.im) }; };
+/* THE FACTORS (iteration 005 P2), asked only while FLOW is on: P(t) = Σ_a w_a u_a u_a† in the Löwdin frame (hermitianEigen) — w_a the occupations, 2 for a
+   pure Slater state, fractional where the integrator's idempotency defect leaves them, kept as weights and never rounded — and c_a = X u_a, so
+   D = X P X = Σ_a w_a c_a c_a†.  THE TRANSPOSE SEAM, covered here once: D_μν = Σ c_μ c̄_ν is the conjugate of the flow's ⟨a†_μ a_ν⟩ = Σ c̄_μ c_ν, which is
+   exactly the packet form D_pq = ψ̄_p ψ_q with ψ = c_a — so each factor goes over as it is, with no negation (bothD's −Im D is the dense road's).
+   A pair with |w| ≤ 1e-12 is dropped (an unoccupied direction); F_sum is Σ w over all n, said beside Tr P. */
+function factorsOf(engine) {
+  const Pm = engine.P, n = Pm.n, X = engine.X, { w, V } = hermitianEigen(Pm), keep = [];
+  let sum = 0; for (let a = 0; a < n; a++) { sum += w[a]; if (Math.abs(w[a]) > 1e-12) keep.push(a); }
+  const K = keep.length, F_w = new Float64Array(K), F_re = new Float64Array(K * n), F_im = new Float64Array(K * n);
+  keep.forEach((a, k) => { F_w[k] = w[a];
+    for (let u = 0; u < n; u++) { let r = 0, i = 0; for (let q = 0; q < n; q++) { const x = X[u * n + q]; r += x * V.re[q * n + a]; i += x * V.im[q * n + a]; } F_re[k * n + u] = r; F_im[k * n + u] = i; } });
+  return { F_w, F_re, F_im, F_sum: sum };
+}
 /** the converged ground state, its integrals and the report — cached on (atoms, basis, charge).  `live`: the caller needs the
     integrals (TDHF), which a library record never carries — where its caps say a live solve is offered that is THIS solve, now
     (the record's spectrum and states are kept: cached = fresh), and past the cap it is a sentence. */
@@ -624,7 +637,7 @@ export function chemRtInit(m = {}) {
   rtState = { engine, axis, kappa, dt, integrator, restartEvery: engine.restartEvery, n, trace, nTrace: 1, steps: 0, capped: false,
     init: { atoms: m.atoms, basis: m.basis, charge: m.charge, dt, integrator, kick: { axis, kappa }, restartEvery, pulse: P },
     E0: ob.fieldFreeTotal };
-  return { ok: true, t: 0, ...bothD(engine), electrons: ob.electrons, idempotency: ob.idempotency,
+  return { ok: true, t: 0, ...bothD(engine), ...(m.factors && factorsOf(engine)), electrons: ob.electrons, idempotency: ob.idempotency,
     E0: ob.fieldFreeTotal, nAO: n, dt, integrator, kick: { axis, kappa },
     /* the policy IN FORCE, from the engine, not the request: the card prints this and never its own intention */
     restartEvery: engine.restartEvery, restartPolicy: engine.restartPolicy, sinceRestart: engine.sinceRestart };
@@ -650,7 +663,7 @@ export function chemRtRun(m = {}) {
   }
   rtState.steps += steps;
   const ms = performance.now() - t0, ob = rtState.engine.observables();
-  return { t: rtState.engine.t, ...bothD(rtState.engine), trace: out, electrons: ob.electrons,
+  return { t: rtState.engine.t, ...bothD(rtState.engine), ...(m.factors && factorsOf(rtState.engine)), trace: out, electrons: ob.electrons,
     idempotency: ob.idempotency, energy: ob.fieldFreeTotal, steps: rtState.steps, samples: rtState.nTrace,
     capped: rtState.capped, msPerStep: +(ms / steps).toFixed(4),
     restartEvery: rtState.restartEvery, restartPolicy: ob.restartPolicy, sinceRestart: ob.sinceRestart };

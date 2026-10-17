@@ -35,24 +35,27 @@ export function ksMap(u) {
  * mode 'ks'   : u = a·f₁ + b·f₂ with the rotor's visible frame — a plane in the KS 4-space, then x = KS(u).
  */
 export function sampleSlice(reg, t, rotor, { mode = 'space', half = 8, N = 96, ids = null }) {
-  const c = reg.at(t), list = ids || reg.renderSet().ids;
+  const c = reg.at(t), list = ids || reg.renderSet().ids, X = planePoints(rotor, { mode, half, N });
   const re = new Float64Array(N * N), im = new Float64Array(N * N);
-  const { f1, f2 } = visibleFrame(rotor.qL, rotor.qR);
-  const e1 = adjoint(rotor.qL, [1, 0, 0]), e2 = adjoint(rotor.qL, [0, 1, 0]);
   let mx = 0;
-  const scale = mode === 'ks' ? Math.sqrt(half) : half;      // KS is quadratic: |x| = |u|², so sample √half
-  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
-    const a = (2 * (i + 0.5) / N - 1) * scale, b = (2 * (j + 0.5) / N - 1) * scale;
-    let x, y, z;
-    if (mode === 'ks') {
-      const u = [a * f1[0] + b * f2[0], a * f1[1] + b * f2[1], a * f1[2] + b * f2[2], a * f1[3] + b * f2[3]];
-      const X = ksMap(u); x = X[0]; y = X[1]; z = X[2];
-    } else { x = a * e1[0] + b * e2[0]; y = a * e1[1] + b * e2[1]; z = a * e1[2] + b * e2[2]; }
-    const s = psiAndGrad(c.re, c.im, list, x, y, z);
-    const k = j * N + i;
+  for (let k = 0; k < N * N; k++) {
+    const s = psiAndGrad(c.re, c.im, list, X[3 * k], X[3 * k + 1], X[3 * k + 2]);
     if (s) { re[k] = s.re; im[k] = s.im; const m = Math.hypot(s.re, s.im); if (m > mx) mx = m; }
   }
   return { re, im, N, absMax: mx, mode, half };
+}
+/** the sample's N² points in ℝ³ (3N² f64, row j along e₂, column i along e₁) — the ONE geometry of the plane, also MOLECULES' CONTINUITY RECORD's (iteration 005 P2) */
+export function planePoints(rotor, { mode = 'space', half = 8, N = 96 }) {
+  const { f1, f2 } = visibleFrame(rotor.qL, rotor.qR), out = new Float64Array(3 * N * N);
+  const e1 = adjoint(rotor.qL, [1, 0, 0]), e2 = adjoint(rotor.qL, [0, 1, 0]);
+  const scale = mode === 'ks' ? Math.sqrt(half) : half;      // KS is quadratic: |x| = |u|², so sample √half
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const a = (2 * (i + 0.5) / N - 1) * scale, b = (2 * (j + 0.5) / N - 1) * scale, k = 3 * (j * N + i);
+    if (mode === 'ks') {
+      const X = ksMap([a * f1[0] + b * f2[0], a * f1[1] + b * f2[1], a * f1[2] + b * f2[2], a * f1[3] + b * f2[3]]); out[k] = X[0]; out[k + 1] = X[1]; out[k + 2] = X[2];
+    } else { out[k] = a * e1[0] + b * e2[0]; out[k + 1] = a * e1[1] + b * e2[1]; out[k + 2] = a * e1[2] + b * e2[2]; }
+  }
+  return out;
 }
 /**
  * Domain-colour a sample into an ImageData: hue from arg ψ through the palette LUT (or the built-in wheel),

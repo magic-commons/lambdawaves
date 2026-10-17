@@ -63,7 +63,7 @@ export function createMolecules(app) {
   { const info = document.querySelector('.dev[data-id="informational"] .dev-body'); if (info) el('div', 'row tight info-marks', info).append(ui.skeletonSw.root, ui.beadSw.root, ui.ellipsoidSw.root); }
   const pop = (t) => app.state.stageText && app.state.stageText.pop(t);   // iteration 001: INFORMATIONAL's pop-ups (shell/stage-words.js)
   app.state.chem = createChem(wChem.body, { pop, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
-    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,
+    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance, plane: () => app.w.slice,   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
     setOn(v) { moleculeMode(v); app.w.stageTextTick(); if (app.hooks.status) app.hooks.status(); }, said: () => app.hooks.status && app.hooks.status(),   // 0.5.4 P4: the STATUS row (informational.js)

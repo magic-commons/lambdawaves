@@ -326,7 +326,7 @@ export function createSliceView(host, api) {
      it is slice.js's own sampleSlice, unchunked, and it is what the chunked job reproduces row by row. */
   return { update, setActive, get rotor() { return rotor; }, setRotor(r) { rotor = canonicaliseRotors(r.qL, r.qR); tour = null; dirty = true; },
     get sample() { return sample; }, get mode() { return mode; }, setMode(m) { mode = m === 'ks' ? 'ks' : 'space'; modeSeg.set(mode); dirty = true; },
-    get half() { return half; }, get gain() { return gain; },
+    get half() { return half; }, get res() { return res; }, get gain() { return gain; },
     save() { return { mode, half, gain, rotor: { qL: rotor.qL.slice(), qR: rotor.qR.slice() }, ...(current !== 'off' && { current }) }; },   // F1: OFF writes no key
     load(o) {
       if (!o || typeof o !== 'object') return false;
