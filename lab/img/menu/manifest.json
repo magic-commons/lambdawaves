@@ -1,8 +1,9 @@
 {
  "tool": "tools/menu-thumbs.mjs",
- "size": 160,
- "quality": 0.7,
- "render": 512,
+ "size": 240,
+ "quality": 0.62,
+ "alphaQuality": 50,
+ "render": 640,
  "look": {
   "view": "density",
   "style": "signed",
@@ -10,7 +11,11 @@
   "palette": "wheel",
   "frame": false,
   "axis": false,
-  "camera": "home",
+  "camera": {
+   "molecules": "home",
+   "elements": "corner (yaw 45°, pitch 35.26°)",
+   "orbitals": "corner (yaw 45°, pitch 35.26°)"
+  },
   "ground": "none (two-ground matte)"
  },
  "molecules": [
@@ -111,23 +116,197 @@
   "FeCO5",
   "CrCO6"
  ],
+ "elements": [
+  {
+   "sym": "H",
+   "Z": 1,
+   "shell": "1s"
+  },
+  {
+   "sym": "He",
+   "Z": 2,
+   "shell": "1s"
+  },
+  {
+   "sym": "Li",
+   "Z": 3,
+   "shell": "2s"
+  },
+  {
+   "sym": "Be",
+   "Z": 4,
+   "shell": "2s"
+  },
+  {
+   "sym": "B",
+   "Z": 5,
+   "shell": "2p"
+  },
+  {
+   "sym": "C",
+   "Z": 6,
+   "shell": "2p"
+  },
+  {
+   "sym": "N",
+   "Z": 7,
+   "shell": "2p"
+  },
+  {
+   "sym": "O",
+   "Z": 8,
+   "shell": "2p"
+  },
+  {
+   "sym": "F",
+   "Z": 9,
+   "shell": "2p"
+  },
+  {
+   "sym": "Ne",
+   "Z": 10,
+   "shell": "2p"
+  },
+  {
+   "sym": "Na",
+   "Z": 11,
+   "shell": "3s"
+  },
+  {
+   "sym": "Mg",
+   "Z": 12,
+   "shell": "3s"
+  },
+  {
+   "sym": "Al",
+   "Z": 13,
+   "shell": "3p"
+  },
+  {
+   "sym": "Si",
+   "Z": 14,
+   "shell": "3p"
+  },
+  {
+   "sym": "P",
+   "Z": 15,
+   "shell": "3p"
+  },
+  {
+   "sym": "S",
+   "Z": 16,
+   "shell": "3p"
+  },
+  {
+   "sym": "Cl",
+   "Z": 17,
+   "shell": "3p"
+  },
+  {
+   "sym": "Ar",
+   "Z": 18,
+   "shell": "3p"
+  },
+  {
+   "sym": "K",
+   "Z": 19,
+   "shell": "4s"
+  },
+  {
+   "sym": "Ca",
+   "Z": 20,
+   "shell": "4s"
+  },
+  {
+   "sym": "Sc",
+   "Z": 21,
+   "shell": "4s"
+  },
+  {
+   "sym": "Ti",
+   "Z": 22,
+   "shell": "4s"
+  },
+  {
+   "sym": "V",
+   "Z": 23,
+   "shell": "4s"
+  },
+  {
+   "sym": "Cr",
+   "Z": 24,
+   "shell": "4s"
+  },
+  {
+   "sym": "Mn",
+   "Z": 25,
+   "shell": "4s"
+  },
+  {
+   "sym": "Fe",
+   "Z": 26,
+   "shell": "4s"
+  },
+  {
+   "sym": "Co",
+   "Z": 27,
+   "shell": "4s"
+  },
+  {
+   "sym": "Ni",
+   "Z": 28,
+   "shell": "4s"
+  },
+  {
+   "sym": "Cu",
+   "Z": 29,
+   "shell": "4s"
+  },
+  {
+   "sym": "Zn",
+   "Z": 30,
+   "shell": "4s"
+  },
+  {
+   "sym": "Ga",
+   "Z": 31,
+   "shell": "4p"
+  },
+  {
+   "sym": "Ge",
+   "Z": 32,
+   "shell": "4p"
+  },
+  {
+   "sym": "As",
+   "Z": 33,
+   "shell": "4p"
+  },
+  {
+   "sym": "Se",
+   "Z": 34,
+   "shell": "4p"
+  },
+  {
+   "sym": "Br",
+   "Z": 35,
+   "shell": "4p"
+  },
+  {
+   "sym": "Kr",
+   "Z": 36,
+   "shell": "4p"
+  }
+ ],
  "orbitals": [
-  "1s",
-  "2s",
-  "2p",
-  "3s",
-  "3p",
-  "3d",
-  "4s",
-  "4p",
-  "4d",
-  "4f",
   "5s",
+  "4d",
   "5p",
-  "5d",
-  "5f",
   "6s",
+  "4f",
+  "5d",
   "6p",
+  "5f",
   "6d"
  ]
 }

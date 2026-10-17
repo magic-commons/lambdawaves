@@ -109,7 +109,7 @@ export function createKeys(app) {
     /* the kit's windows λWAVES has are rows with NO chord (MIR ADOPTING-1.5 §11: their keys are Josh's to give; bind one in the keyboard) */
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
-    { id: 'menu', short: 'menu', label: 'the main menu — open it, or back to the lab', key: 'KeyL', run: () => { if (app.state.mainMenu) app.state.mainMenu.toggle(); } },   // iteration 003
+    { id: 'menu', short: 'picker', label: 'the Picker — open it, or back to the lab', key: 'KeyL', run: () => { if (app.state.picker) app.state.picker.toggle(); } },   // iteration 003; iteration 004: THE PICKER (the id stays 'menu': saved bindings)
     { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', key: null, run: () => { if (app.state.tl) app.state.tl.toggle(); } },   // 0.5.0 C7b
     { id: 'gui', short: 'mir options', label: 'MIR OPTIONS — the interface’s look (BASINS’ GUI menu)', key: null, run: () => { const g = mirGui(); if (g) g.toggle(); } },   // iteration 003: lab/mir-gui.js
     { id: 'guiAbout', short: 'mir about', label: 'MIR ABOUT — what MIR is', key: null, run: () => { const g = mirGui(); if (g) g.toggle('about'); } },
