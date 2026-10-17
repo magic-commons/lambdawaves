@@ -78,14 +78,77 @@ node tools/volumes/measure.mjs --volume vol-1      # the tables below
 
 ## THE PILOT — measured
 
-PILOT_TABLES
+Finished by the integrator (Yan) 2026-10-17 15:22: 31 of 31 solved, every rung (β-carotene's 872-AO 6-31+G* in 870 s); packed by
+pack.mjs v2 into dist/vol-1 (29.80 MiB, 31 thumbnails); the tables are `node tools/volumes/measure.mjs --volume vol-1`'s output verbatim.
+
+### Per molecule (MEASURED: 31 molecules, vol-1)
+
+| molecule | heavy | H | nAO per rung (STO-3G · STO-6G · 3-21G · 6-31G · 6-31G* · 6-31+G*) | solve s per rung | total s | .lwm KB | header KB |
+|---|---|---|---|---|---|---|---|
+| CH4 | 1 | 4 | 9 · 9 · 17 · 17 · 23 · 27 | 0.1 · 0.0 · 0.2 · 0.2 · 0.4 · 0.2 | 1.1 | 60.6 | 51.8 |
+| H2O | 1 | 2 | 7 · 7 · 13 · 13 · 19 · 23 | 0.2 · 0.0 · 0.0 · 0.1 · 0.0 · 0.1 | 0.4 | 60.6 | 54.7 |
+| HBr | 1 | 1 | 20 · 20 · 25 · 31 · 37 · — | 0.1 · 0.1 · 0.1 · 0.1 · 0.2 · — | 0.6 | 78.4 | 62.6 |
+| NH3 | 1 | 3 | 8 · 8 · 15 · 15 · 21 · 25 | 0.0 · 0.0 · 0.1 · 0.1 · 0.3 · 0.5 | 1.0 | 59.0 | 51.8 |
+| ethanol | 3 | 6 | 21 · 21 · 39 · 39 · 57 · 69 | 0.1 · 0.1 · 0.0 · 0.1 · 0.1 · 0.2 | 0.5 | 120.5 | 71.7 |
+| acetone | 4 | 6 | 26 · 26 · 48 · 48 · 72 · 88 | 0.2 · 0.1 · 0.1 · 0.2 · 0.7 · 1.0 | 2.3 | 158.2 | 81.8 |
+| urea | 4 | 4 | 24 · 24 · 44 · 44 · 68 · 84 | 0.3 · 0.2 · 0.3 · 0.1 · 0.6 · 0.9 | 2.4 | 204.7 | 137.0 |
+| glycine | 5 | 5 | 30 · 30 · 55 · 55 · 85 · 105 | 0.2 · 0.1 · 0.1 · 0.1 · 0.9 · 2.4 | 3.8 | 265.7 | 160.7 |
+| TiCl4 | 5 | 0 | 55 · 55 · 81 · 81 · — · — | 0.2 · 1.2 · 1.0 · 1.3 · — · — | 3.7 | 168.7 | 91.6 |
+| alanine | 6 | 7 | 37 · 37 · 68 · 68 · 104 · 128 | 0.2 · 0.5 · 1.1 · 0.8 · 2.8 · 2.7 | 8.1 | 266.1 | 109.2 |
+| C5H5N | 6 | 5 | 35 · 35 · 64 · 64 · 100 · 124 | 0.3 · 0.3 · 0.7 · 0.8 · 1.6 · 3.8 | 7.6 | 330.4 | 186.1 |
+| C6H6 | 6 | 6 | 36 · 36 · 66 · 66 · 102 · 126 | 0.2 · 0.4 · 0.5 · 0.6 · 2.0 · 1.9 | 5.5 | 320.7 | 170.3 |
+| styrene | 8 | 8 | 48 · 48 · 88 · 88 · 136 · 168 | 0.3 · 1.0 · 1.0 · 1.9 · 3.4 · 4.4 | 12.0 | 399.5 | 133.6 |
+| limonene | 10 | 16 | 66 · 66 · 122 · 122 · 182 · 222 | 1.0 · 3.5 · 3.2 · 3.1 · 5.3 · 8.8 | 24.9 | 655.4 | 176.4 |
+| naphthalene | 10 | 8 | 58 · 58 · 106 · 106 · 166 · 206 | 0.7 · 1.6 · 2.5 · 2.2 · 3.7 · 6.0 | 16.7 | 549.8 | 156.5 |
+| dopamine | 11 | 11 | 66 · 66 · 121 · 121 · 187 · 231 | 0.3 · 2.2 · 1.8 · 2.1 · 4.7 · 7.3 | 18.5 | 677.8 | 177.6 |
+| menthol | 11 | 20 | 75 · 75 · 139 · 139 · 205 · 249 | 1.2 · 5.7 · 3.8 · 4.4 · 11.2 · 12.0 | 38.2 | 806.5 | 197.6 |
+| paracetamol | 11 | 9 | 64 · 64 · 117 · 117 · 183 · 227 | 0.8 · 2.9 · 3.3 · 3.3 · 5.4 · 7.4 | 23.1 | 650.5 | 173.0 |
+| vanillin | 11 | 8 | 63 · 63 · 115 · 115 · 181 · 225 | 0.4 · 2.2 · 4.3 · 4.2 · 10.8 · 9.6 | 31.5 | 636.0 | 169.5 |
+| glucose | 12 | 12 | 72 · 72 · 132 · 132 · 204 · 252 | 1.0 · 3.5 · 2.8 · 3.0 · 6.4 · 10.2 | 27.0 | 785.3 | 190.7 |
+| nicotine | 12 | 14 | 74 · 74 · 136 · 136 · 208 · 256 | 1.5 · 4.9 · 4.0 · 4.1 · 7.1 · 15.9 | 37.6 | 815.4 | 195.6 |
+| adrenaline | 13 | 13 | 78 · 78 · 143 · 143 · 221 · 273 | 1.3 · 4.5 · 3.5 · 4.0 · 8.4 · 17.8 | 39.6 | 902.0 | 204.8 |
+| aspirin | 13 | 8 | 73 · 73 · 133 · 133 · 211 · 263 | 1.3 · 4.1 · 4.7 · 5.9 · 12.9 · 12.9 | 41.7 | 825.4 | 194.0 |
+| citric-acid | 13 | 8 | 73 · 73 · 133 · 133 · 211 · 263 | 1.4 · 4.4 · 5.2 · 4.2 · 8.7 · 13.2 | 37.1 | 825.0 | 193.6 |
+| serotonin | 13 | 12 | 77 · 77 · 141 · 141 · 219 · 271 | 1.2 · 4.2 · 3.8 · 4.0 · 8.0 · 14.1 | 35.3 | 886.5 | 202.7 |
+| caffeine | 14 | 10 | 80 · 80 · 146 · 146 · 230 · 286 | 1.4 · 5.3 · 4.4 · 4.3 · 11.5 · 77.8 | 104.6 | 961.0 | 210.1 |
+| ibuprofen | 15 | 18 | 93 · 93 · 171 · 171 · 261 · 321 | 2.5 · 9.5 · 5.9 · 6.9 · 17.0 · 96.3 | 138.2 | 1215.3 | 241.2 |
+| testosterone | 21 | 28 | 133 · 133 · 245 · 245 · 371 · 455 | 6.8 · 33.5 · 12.1 · 15.0 · 128.9 · 321.5 | 517.9 | 2303.4 | 336.3 |
+| capsaicin | 22 | 27 | 137 · 137 · 252 · 252 · 384 · 472 | 6.9 · 26.2 · 15.6 · 52.4 · 90.0 · 244.8 | 435.8 | 2448.3 | 345.3 |
+| cholesterol | 28 | 46 | 186 · 186 · 344 · 344 · 512 · 624 | 11.0 · 80.5 · 56.7 · 150.2 · 201.2 · 573.2 | 1072.8 | 4221.4 | 462.7 |
+| beta-carotene | 40 | 56 | 256 · 256 · 472 · 472 · 712 · 872 | 12.7 · 75.9 · 73.7 · 143.0 · 276.9 · 869.9 | 1452.1 | 7859.2 | 630.2 |
+
+### Per rung (MEASURED, and a power-law fit of the time)
+
+| rung | nAO range | C + ε bytes, mean | solve s, mean (max) | time fit t = a·nAO^p (nAO ≥ 60) | cycles: projected guess | cycles: minao (guess study) | time: projected / minao |
+|---|---|---|---|---|---|---|---|
+| STO-3G | 7–256 | 28.6 KB | 1.80 (12.7) | a = 2.95e-5, p = 2.45 (17 molecules) | minao (first rung) | — | — |
+| STO-6G | 7–256 | 28.6 KB | 9.00 (80.5) | a = 2.75e-5, p = 2.78 (17 molecules) | 225 over 27 | 301 | 197.8 s / 204.3 s |
+| 3-21G | 13–472 | 95.6 KB | 6.98 (73.7) | a = 2.79e-5, p = 2.41 (23 molecules) | 319 over 27 | 333 | 137.5 s / 144.9 s |
+| 6-31G | 13–472 | 95.7 KB | 13.64 (150.2) | a = 4.11e-6, p = 2.84 (23 molecules) | 298 over 27 | 338 | 274.2 s / 271.1 s |
+| 6-31G* | 19–712 | 225.8 KB | 27.70 (276.9) | a = 4.50e-6, p = 2.75 (25 molecules) | 287 over 25 | 322 | 342.8 s / 391.7 s |
+| 6-31+G* | 23–872 | 351.7 KB | 80.58 (869.9) | a = 3.21e-7, p = 3.24 (26 molecules) | 258 over 24 | 315 | 878.9 s / 1264.9 s |
+
+### How many molecules fit in a 5 GB volume (MODEL from the measured pilot)
+
+.lwm bytes ≈ 86012 + 1580·h + 4998·h² (least squares over 26 organic pilot molecules, h = heavy atoms; the C blob is Σ_rungs 4·nAO² and nAO grows linearly with the atoms).
+Total solve time per molecule ≈ 1.55e-2·h^3.19 s (power law over the 22 organic pilot molecules with h ≥ 6; one solver, 10 threads, niced, on this Ryzen 5 5600G shared with other work).
+
+| population | heavy atoms | mean .lwm (model) | molecules in 5 GB (5×10⁹ B) | mean solve per molecule (model) | wall-clock to fill 5 GB, one solver |
+|---|---|---|---|---|---|
+| small | 3–10 | 0.32 MiB | 14,984 | 8.8 s | 1.5 days |
+| drug-like | 11–30 | 2.27 MiB | 2,096 | 5.1 min | 7.4 days |
+| large | 31–50 | 8.12 MiB | 587 | 37.6 min | 15.3 days |
+
+Large-population anchor (MEASURED): beta-carotene (40 heavy) 7.68 MiB, 24.2 min — model at the same h: 7.77 MiB, 33.7 min.
+
+Pilot volume (MEASURED): 31 molecules, 29.80 MiB, mean .lwm 0.961 MiB; headers 19.1 % of the bytes.
 
 ## The long run (the integrator starts it after the catalogue lands)
 
 Not started here (the brief: the integrator starts it once `catalogue/vol-1.candidates.json` has landed). From the checkout:
 
 ```
-cd /home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/optimization-2026-09-24/.claude/worktrees/it004-vol
+cd /home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/optimization-2026-09-24   # the integration checkout (started there 2026-10-17 15:23, 8 threads)
 nohup nice -n 19 ~/.local/share/lw-volumes/venv/bin/python tools/volumes/solve.py \
   --candidates ~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json --threads 10 --max-memory 12000 \
   >> ~/Documents/LAMBDAWAVES-VOLUMES/raw/solve.out 2>&1 &

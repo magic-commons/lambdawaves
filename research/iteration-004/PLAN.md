@@ -67,3 +67,27 @@ C is f32 (7 digits: the picture's precision, stated); ε and the energy are the 
 medicine · painkiller · antibiotic · antiviral · heart · mind · cancer · allergy · anaesthetic · vitamin · hormone · neurotransmitter ·
 amino acid · nucleobase · sugar · fat · steroid · alkaloid · food · flavour · scent · sweetener · colour · solvent · fuel · plastic ·
 material · metal · gas · atmosphere · pollutant · toxin · pesticide · acid · aromatic · ring · cage · classic · natural · life
+
+## Closed (Claude Yan, 2026-10-17 — the integration)
+| row | branch · tip | merge | note |
+|---|---|---|---|
+| R1 · R2 · R3 (the BASINS map, the MIR 1.5 gap, the effects) | research only | — | `DATABASE/CLAUDE/APPS/BASINS/MAP/`, `…/LAMBDAWAVES/PLANS/IT004-*.md` |
+| F THE FOLDER | `it004-folder` `22443b4` | `b511a93` | `F-BUILD.md` (Josh's calls at its foot) |
+| P THE PICKER | `it004-picker` `d5853f7` | `a78b73e` + `a095fe5` | written by the integrator (Sos) after the builder died twice on the content filter |
+| V1 THE VOLUME ENGINE | `it004-vol` `5ab7d5f` | `8ae9e94` | `V1-BUILD.md`; the pilot's 31 molecules solved and packed (the tables there) |
+| CAT THE CATALOGUE | `it004-cat` `e822b8c` | `52f34cd` | `CAT-BUILD.md`; 7,534 through the filters, 950 in the file (PubChem rate-blocked) |
+| V2 A VOLUME'S MOLECULE ON THE STAGE | `it004-v2` `d25b3ed` | `5ce3e76` | `V2-BUILD.md`, two screenshots |
+
+Lab lines 30,209 (v0.9.4-alpha) → 31,474. Gates at every merge: pwa, `./test.sh node` 0, rack-deps 0, new-project in step; one browser pass per
+builder. Pre-existing on the base and NOT touched: `history` (a ResizeObserver loop line) and `frame-occlusion` l.97 (both red at `6fb4e3b` too).
+THE LONG SOLVE over `vol-1.candidates.json` (950) started 15:23 at nice 19, 8 threads (`raw/solver.pid`; `raw/STATUS.json` has the ETA) — pack it
+into vol-1 any time with `node tools/volumes/pack.mjs --candidates …/vol-1.candidates.json --volume vol-1 --numeral I --incremental`, then
+`tools/menu-thumbs.mjs --volume vol-1`.
+
+**Left for #005 (recorded, not built):** the precache sits 3.3 kB under its 8 MiB ceiling (move the demo covers or the Picker's set to DATA, or
+raise it — Josh's call); `V.install` does not store the four ladder basis files in `lw-data-v1` (an installed volume opened OFFLINE at STO-6G …
+6-31G* lacks its basis file; online it works); the catalogue's full run once PubChem answers (`python -I tools/volumes/catalogue/build.py`,
+one fetcher at a time) — and a re-run replaces the 860 RDKit geometries with PubChem conformers, which would re-solve what the long run has
+done: decide whether build.py keeps a solved molecule's geometry; the eight tags the vocabulary lacks (CAT-BUILD.md); the project's volume
+reference is dropped after one failed open on a device without the volume; the two pre-existing reds; the F-BUILD.md calls (toolbar option,
+where FOLDERS lands, FOLDERS twice in WINDOW).
