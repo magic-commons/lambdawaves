@@ -261,7 +261,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   let current = sections[0];
   const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
-  { let rf = 0; new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; for (const d of decks) d.lay(); movePill(current.b); }); }).observe(scroller); }
+  let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); movePill(current.b); } }); });   // observed only while the Picker is open
 
   /* ── going there ── */
   function goMolecule(id) { close(); const C = app.state.chem; if (!C) return; if (!C.on) C.setOn(true); C.pick(id); }
@@ -280,11 +280,11 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (!root.hidden) return;
     const r = home.getBoundingClientRect();
     root.style.setProperty('--ox', r.width ? r.left + r.width / 2 + 'px' : '50%'); root.style.setProperty('--oy', r.width ? r.top + r.height / 2 + 'px' : '50%');
-    root.hidden = false; document.body.classList.add('menu-open'); said = null; say(null);
+    root.hidden = false; document.body.classList.add('menu-open'); said = null; say(null); ro.observe(scroller);
     for (const d of decks) d.lay();
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? [...table.children] : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  function close() { if (root.hidden) return; ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = () => (root.hidden ? open() : close());
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } });
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && !root.hidden) close(); });

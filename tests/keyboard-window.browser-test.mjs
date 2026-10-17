@@ -159,26 +159,26 @@ try {
   /* ── 7 · keys.bind's law (CLAUDE.md): an overlap is refused without an explicit steal, Tab and Escape never bind, a free chord saves ── */
   const law = await ev(`const k = __LW.keys, before = k.table.chords('camReset');
     const taken = k.bind('camReset', { key: 'KeyQ', shift: true }), tab = k.bind('camReset', { key: 'Tab' }), esc = k.bind('camReset', { key: 'Escape' }), stage = k.bind('nextWindow', { key: 'KeyL' });
-    const free = k.bind('camReset', { key: 'KeyL', shift: false }), saved = JSON.parse(localStorage.getItem('lambdawaves.q0.keys'));
+    const free = k.bind('camReset', { key: 'KeyU', shift: false }), saved = JSON.parse(localStorage.getItem('lambdawaves.q0.keys'));
     const steal = k.bind('camReset', { key: 'KeyQ', shift: true }, { steal: true }), pov = k.table.chords('povIn');
     k.reset(); return { taken, tab: tab.ok, esc: esc.ok, stage: stage.ok, free, saved, steal, pov, restored: k.table.chords('camReset'), before, errors: __e.slice() };`);
   assert.deepEqual(law.taken.conflicts, ['povIn']); assert.equal(law.taken.ok, false);
   assert.equal(law.tab, false); assert.equal(law.esc, false); assert.equal(law.stage, false, 'window cycling bound off Tab');
-  assert.equal(law.free.ok, true); assert.deepEqual(law.saved, { camReset: ['KeyL'] });
+  assert.equal(law.free.ok, true); assert.deepEqual(law.saved, { camReset: ['KeyU'] });
   assert.deepEqual(law.steal, { ok: true, conflicts: ['povIn'] }); assert.deepEqual(law.pov, []);
   assert.deepEqual(law.restored, law.before); assert.deepEqual(law.errors, []);
-  console.log('PASS keys.bind keeps the binding law: Shift+Q for cam reset is refused naming povIn, Tab / Escape / window cycling off Tab refused, KeyL saved in the kit\'s shape, an explicit steal unbinds the loser, reset restores');
+  console.log('PASS keys.bind keeps the binding law: Shift+Q for cam reset is refused naming povIn, Tab / Escape / window cycling off Tab refused, KeyU saved in the kit\'s shape, an explicit steal unbinds the loser, reset restores');
 
   /* ── 8 · A 0.4.0 SAVE LOADS: { play: { key, ctrl, alt, shift } } under the old id, read across a reload onto transport.play ── */
-  await ev(`localStorage.setItem('lambdawaves.q0.keys', JSON.stringify({ play: { key: 'KeyL', ctrl: false, alt: false, shift: false }, dollyZoomIn: { key: 'KeyX', ctrl: 'Ctrl', alt: false, shift: true } })); return 1;`);
+  await ev(`localStorage.setItem('lambdawaves.q0.keys', JSON.stringify({ play: { key: 'KeyU', ctrl: false, alt: false, shift: false }, dollyZoomIn: { key: 'KeyX', ctrl: 'Ctrl', alt: false, shift: true } })); return 1;`);
   await go(g.s, url);
   assert.equal((await g.waitFor('window.__LW?.ready', 200, 100)).ok, 1);
   const lifted = await ev(`const T = __LW.keys.table; __LW.pause(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return { play: T.chords('transport.play'), dz: T.chords('dollyZoomIn'), row: __LW.keys.actions.find((a) => a.id === 'transport.play').key };`);
-  await press('l');
+  await press('u');
   const played = await ev(`const out = { playing: __LW.clock.playing }; __LW.pause(); __LW.keys.reset(); out.stored = localStorage.getItem('lambdawaves.q0.keys'); out.errors = __e.slice(); return out;`);
-  assert.deepEqual(lifted.play, ['KeyL'], 'the 0.4.0 binding saved under "play" did not load onto transport.play');
-  assert.deepEqual(lifted.dz, ['Mod+Shift+KeyX']); assert.equal(lifted.row, 'KeyL');
-  assert.equal(played.playing, true, 'L does not play after the lift'); assert.equal(played.stored, null); assert.deepEqual(played.errors, []);
-  console.log('PASS a 0.4.0 save loads: { play: KeyL } under the old id plays on L after a reload, { dollyZoomIn: Ctrl+Shift+X } reads as Mod+Shift+KeyX');
+  assert.deepEqual(lifted.play, ['KeyU'], 'the 0.4.0 binding saved under "play" did not load onto transport.play');
+  assert.deepEqual(lifted.dz, ['Mod+Shift+KeyX']); assert.equal(lifted.row, 'KeyU');
+  assert.equal(played.playing, true, 'U does not play after the lift'); assert.equal(played.stored, null); assert.deepEqual(played.errors, []);
+  console.log('PASS a 0.4.0 save loads: { play: KeyU } under the old id plays on U after a reload, { dollyZoomIn: Ctrl+Shift+X } reads as Mod+Shift+KeyX');
   console.log('GREEN keyboard-window.browser-test');
 } finally { await g.close(); }

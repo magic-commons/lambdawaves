@@ -911,7 +911,7 @@ export async function boot(dom) {
   /* THE PICKER (iteration 004; iteration 003's main menu) is the front page unless something was opened — and it opens only once the
      photosensitivity notice is accepted: the notice (the kit's dialog, z 70) would sit UNDER the Picker (z 100000), and its CONTINUE
      could not be reached (IT004-MIR15-GAP §0 item 5).  `onAccept` runs at once when the notice is not up (a returning visitor, a driver). */
-  const pickerAtBoot = !linkAtBoot.opened && !q.get('preset') && q.get('menu') !== '0' && (navigator.webdriver !== true || q.get('menu') === '1');   // a test driver goes straight in (as the opener's law was); ?menu=1 shows it there
+  const pickerAtBoot = !linkAtBoot.opened && !q.get('preset') && q.get('menu') !== '0' && (navigator.webdriver !== true || q.get('menu') === '1' || q.get('opener') === '1' || q.get('warn') === '1');   // a test driver goes straight in (as the opener's law was); ?menu=1, ?opener=1 or ?warn=1 (a human start, played) shows it there
   createPicker(app, { open: false });
   dom.start.warning.onAccept(() => { if (pickerAtBoot && app.state.picker) app.state.picker.open(); });
   /* the fragment is a live address, not only a start.  WAVE 133 (found by its verifier; the hole is wave 56's): a link pasted
