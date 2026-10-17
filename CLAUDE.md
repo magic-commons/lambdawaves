@@ -175,9 +175,47 @@ catalogue (`catalogue/build.py` — six collectors, PubChem resolves, the two sc
 (`solve.py`: PySCF 2.14, every AO kept, the rung below's projected density as the guess, resumable,
 SIGTERM-safe, a flock queue), the packer (`pack.mjs`: CᵀSC = I, Tr DS = N, dipole and E_nuc
 against PySCF, `chem.open` with 0 solver calls, deterministic bytes, `--incremental`), the
-pictures. sw.js treats `volumes/` and the four ladder basis files as DATA, not precache — THE
-PRECACHE SITS A FEW kB UNDER ITS 8 MiB CEILING (`tests/pwa.test.mjs`): a lab row that adds code
-must move something to DATA first.
+pictures. sw.js treats `volumes/`, the four ladder basis files, the Picker's pictures (`img/menu/`)
+and the demo covers as DATA, not precache (iteration 005 A: `library.js` `keepData` stores a good
+answer on the device after its first fetch; a volume install keeps its basis files beside it, so
+an installed volume opens offline at every rung) — the precache sits ≈ 0.7 MiB under its 8 MiB
+ceiling (`tests/pwa.test.mjs`). THE SHELF (iteration 005 S, Josh: Google Drive after a donation):
+`tools/volumes/themes.json` sends each finished molecule to the first theme it matches (I THE
+CLASSICS · II MEDICINE · III LIFE AND FOOD · IV MATERIALS, ATMOSPHERE AND FUEL · THE REST; a theme
+past 5 GB continues as "· 2"); `pack.mjs --archive` writes one `LAMBDAWAVES-VOL-<numeral>.lwv`
+per volume ('LWV1' · a JSON index · the files; `volumes-format.js` `parseLwv`) that Josh hands out
+himself — the shelf entry carries `archive: { name, bytes, sha256 }` and no `index`, and the
+Picker's card shows OPEN FILE… (or takes a drop): `volumes.js` `installFile` slices the file per
+entry, hashes every file, stores under the fetch road's own cache keys, resumes, and refuses with
+a sentence when `navigator.storage.estimate()` says the device cannot hold it. No URL and no
+Drive name ever enters `lab/`; `build-deploy --shelf F` ships the small `volumes.json` with the
+site (`docs/VOLUMES-HOSTING.md`). The GPU solver (`tools/volumes/long-run-gpu.sh`, gpu4pyscf on
+the RTX 3070, 2.24× over this CPU on drug-size rungs, every energy within 1.2e-11 Eh of the CPU's)
+shares the CPU solver's flock queue.
+
+THE PHYSICS OF ITERATION 005 (Sol-6's engine seams, `research/iteration-005/PLAN.md`). THE FLOW
+IS FACTORS: `molecular-flow.js` `setFactors(w, re, im)` evaluates ρ = Σ_a w_a |φ_a|² and
+j = Σ_a w_a Im(φ̄_a ∇φ_a) in one O(n·K) pass over the AO values and gradients — the MO-REGISTRY's
+packet is the one-factor case (`setPacket`, P1: aspirin's 263-AO packet flows at 13.8 presents/s
+where the dense n² road gave 1.2), the kicked molecule's factors are the eigenpairs of the Löwdin
+P = S^½ D S^½ made in the chem worker in f64 on each landing (P2; D's eigenvalues are NOT
+occupations in a non-orthogonal basis; the transpose seam dies there with no negation); the dense
+`set(re, im)` road stays for REPAIR and the pump. THE CONTINUITY RECORD is a live tile in MOLECULES
+beside REPAIR and GATED (CALCULUS and PLANE are hidden in MOLECULES mode): ‖∂ρ/∂t + ∇·j‖/‖∂ρ/∂t‖
+on PLANE's own geometry (`slice.js` `planePoints`), the full 3-D divergence by centred differences
+— the finite-basis defect, an identity only in a complete basis, 0.6–1.3 for benzene/STO-3G with
+90–99.8 % of the residual within 0.3 a₀ of a nucleus. The tracer floor is `setFloor(err, what)`
+(max(1e-7, 10·err); GATED names it) and a trail fades over the decade above it. THE ERROR FIELD
+(P3): `field.js` `errorField()` reads the whole ψ texture back once (`readGrid`, the field-law
+test's road) and compares every voxel to the Hamiltonian's own CPU `psiAt` at the field's time
+(a molecule: the f32 matrix the field drew) — METERS' FLOOR · GRID ERROR tile measures on a press
+and re-measures when GRID changes, giving the field-law test's numbers digit for digit (hydrogen
+1s+2pz at 64³: RMS 2.34e-6, worst 1.68e-4, toward zero) beside the CERTIFIED constants; never on
+the frame path. THE MOBILITY EDGE (P4): LATTICE's ANDERSON has d = 1 · 2 · 3 (the cube L ≤ 6 =
+216 sites, drawn as its L layers), the level-spacing ratio ⟨r⟩ over the middle third beside its
+GOE 0.5307 and Poisson 0.3863 limits (limits, not bounds: a weakly disordered small cube reads
+above GOE), the band-centre IPR × N, SEEDS (1–16) averaging, W to 30; the closed line names
+W_c ≈ 16.5 J in 3-D and says "finite: 6³ sites". ANGULAR NODES exists since 0.6.3 (VORTEX).
 
 The stage frame/axis mask is built in `lab/shell/ink.js` `refreshOcclusion()` (`createInk` hands it to the loop) and
 consumed by the line shader in `lab/field.js`. Mask painted window surfaces,

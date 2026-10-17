@@ -74,6 +74,28 @@ shows OPEN FILE… and takes a drop. `docs/VOLUMES-HOSTING.md`: Josh's road and 
 A ∥ G → P1 ∥ P3 ∥ P4 (from A's merge) → P2 (from P1's merge) → S. Each merge: pwa --write, `./test.sh node` 0, rack-deps 0, new-project in step,
 the lab count printed; THE LOCK ×2 at any merge that touches `lab/field.js` (P3 may). No cut: the iterative round is commits and this plan.
 
+## Closed (Claude Yan, 2026-10-17 18:20 — the integration; seven rows in one afternoon)
+| row | branch · tip | merge | lab Δ | the number |
+|---|---|---|---|---|
+| A THE ROOM | `it005-room` `1893f60` | `a0a3fb3` | +29 (−153 precache rows) | precache 8.00 → 7.30 MiB |
+| G THE GPU SOLVER | `it005-gpu` `47f2eab` | `1ce972e` | 0 | **2.24×** (1.67–2.74; β-carotene 3.48×); oracle worst 1.2e-11 Eh |
+| P1 THE DIRECT PACKET | `it005-packet` `b195baf` | `70e073c` | +3 | aspirin FLOW 1.2 → 13.8 presents/s; 441 → 19 µs/pt |
+| P4 THE MOBILITY EDGE | `it005-disorder` `b618a78` | `b184f4d` | +12 | ⟨r⟩ 0.551 (W 2) → 0.408 (W 30); crosses 0.46 between 16.5 and 20 at L = 6 |
+| P3 THE ERROR FIELD | `it005-error` `83f8112` | `0cfc275` | +98 | the field-law numbers live, digit for digit; THE LOCK ×2 0/0 |
+| P2 THE FACTOR CURRENT + CONTINUITY | `it005-factor` `fa36b31` | `a33fce9` | +93 | benzene continuity 0.6–1.3 (plane) vs 0.6–1.25 (grid); factors to 1.3e-11 |
+| S THE SHELF | `it005-shelf` `866bcb6` | `7e7e68b` | +97 | VOL. II archive 17.6 MB opened from a file in 4.1 s |
+
+Lab lines 31,474 → 31,653. Gates at every merge: pwa, `./test.sh node` 0 (wigner W42-8, a 150 ms timing row, flaked under the two solvers' load
+16.7 and passed alone), rack-deps 0, new-project in step; THE LOCK ×2 at P3's merge. Build notes beside this file. THE GPU SOLVER runs on the
+shared queue since 17:55 (`tools/volumes/long-run-gpu.sh status | stop`) beside THE LONG SOLVE (CPU).
+
+**Left for #006 (recorded, not built):** STATES' FLOW still rides n² matrices (a TD-CIS pair density is not a positive factor set — its own row);
+analytic ∂ρ/∂t and ∇·j for the continuity tile; P3's measured error is not wired into the tracer floor (P2-BUILD.md decision 5 — Josh's call:
+the picture's f16 error is not the error of the f64 ρ the tracers read); the `lattice` verb takes only preset and N; 128³ in the GRID ERROR
+table; the themes' first-match rule sends 857 of the 950 to MEDICINE (reorder, or wait for the full catalogue); Josh's real dist not yet themed;
+the catalogue's full run (PubChem 503) and the geometry-keeping decision; the ResizeObserver page errors (pre-existing, the `history` red) now
+also redden field-law's F4/V2 — one fix would clear three reds; the two solvers' finish: pack vol-1 and the themes when STATUS reads remaining 0.
+
 ## Not in this iteration (recorded)
 RHF/6-31G* optimised geometries, a KS-B3LYP method per rung, TDA excitations per rung (affordable after G); wavefunction import (Sol's #4);
 f16 C or a frontier window of virtuals; the catalogue's full run (PubChem 503; the geometry-keeping decision is Josh's); the eight tags; the
