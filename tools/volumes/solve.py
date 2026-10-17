@@ -12,6 +12,16 @@ cart=True, every AO kept (lab/md.js keeps them; PySCF's default drops overlap ei
   … --guess-study          ALSO solve every projected rung from PySCF's minao guess, recording its cycles beside the projected
                            guess's (a measurement: V1-BUILD.md "the effect of the projected guess"); the minao run writes nothing else
   … --status               rewrite raw/STATUS.json from the queue and the metas on disk, and exit
+  … --raw DIR              write (and lock) the rungs in DIR instead of <data>/raw — a scratch catalogue for a measurement
+  … --gpu                  THE GPU SOLVER (iteration 005 G, research/iteration-005/G-BUILD.md): the same ladder in gpu4pyscf on the card,
+                           every AO kept (gpu4pyscf.scf.hf.remove_overlap_zero_eigenvalue = False, its own copy of PySCF's flag), the
+                           projected guess built on the CPU and handed over, DIIS → level shift → newton all on the card; a rung the card
+                           cannot finish (an exception: out of memory …) is solved on the CPU instead and says so (rung.gpu.fallback).
+                           The npz is the same fields in the same AO order; rung.solver.engine names the solver. --gpu-memory GB caps the
+                           CuPy pool (default 6: the card is shared).  The flock queue is the same, so a GPU and a CPU solver share one raw.
+  … --largest-first        take the queue from its costliest end (the GPU's half: the card is slower than the CPU on small molecules —
+                           the oracle's 7–37 AO rungs took 1.6–29 s against ≤ 0.2 s — and 1.7–2.7× faster at 371–624 AO, so the GPU
+                           works down from the top while the CPU works up from the bottom; they meet once)
 
 THE CONVERSION TRICK: a rung starts from the rung below's converged density, projected (scf.addons.project_dm_nr2nr) — the guess
 is recorded; STO-3G starts from minao.  Every rung is still its own converged RHF.  A rung whose basis lacks an element, or gives one
@@ -45,6 +55,10 @@ ap.add_argument('--limit', type=int, default=0, help='stop after this many molec
 ap.add_argument('--guess-study', action='store_true')
 ap.add_argument('--retry-failed', action='store_true', help='solve again a rung recorded as failed')
 ap.add_argument('--status', action='store_true', help='rewrite STATUS.json and exit')
+ap.add_argument('--raw', default='', help='the raw directory (default: <data>/raw)')
+ap.add_argument('--gpu', action='store_true', help='solve on the GPU (gpu4pyscf)')
+ap.add_argument('--largest-first', action='store_true', help='take the queue from its costliest end')
+ap.add_argument('--gpu-memory', type=float, default=6.0, help='GB: the CuPy memory pool limit')
 ap.add_argument('--data', default=os.environ.get('LW_VOLUMES', str(Path.home() / 'Documents/LAMBDAWAVES-VOLUMES')))
 args = ap.parse_args()
 args.threads = max(1, min(args.threads, 10)); args.max_memory = min(args.max_memory, 12000)
@@ -59,9 +73,24 @@ from pyscf import gto, scf, lib
 from lwbasis import ROOT, LADDER, record, coverage, pyscf_basis, conversion, nao_cart, SYMBOL, ANGSTROM
 lib.num_threads(args.threads)
 scf.hf.remove_overlap_zero_eigenvalue = False                    # THE WHOLE AO SPACE, as lab/md.js keeps it (lwbasis / oracle-ladder.py)
+ENGINE, GPU = f'PySCF {pyscf.__version__} (CPU)', None
+if args.gpu:
+    import ctypes, importlib.util
+    _ct = importlib.util.find_spec('cutensor')                     # the cutensor-cu12 wheel's libraries, which CuPy 14 does not find by itself
+    for _lib in ('libcutensor.so.2', 'libcutensorMg.so.2') if _ct else ():
+        try: ctypes.CDLL(str(Path(list(_ct.submodule_search_locations)[0]) / 'lib' / _lib), mode=ctypes.RTLD_GLOBAL)
+        except OSError: pass
+    import cupy, gpu4pyscf, gpu4pyscf.scf.hf
+    from gpu4pyscf import scf as gscf
+    gpu4pyscf.scf.hf.remove_overlap_zero_eigenvalue = False       # gpu4pyscf keeps its own copy of the flag (default True, 1e-6)
+    cupy.get_default_memory_pool().set_limit(size=int(args.gpu_memory * 2 ** 30))    # after gpu4pyscf's import, which sets 90 % of the card
+    _dev = cupy.cuda.runtime.getDeviceProperties(0)['name'].decode()
+    ENGINE = f'gpu4pyscf {gpu4pyscf.__version__} (CuPy {cupy.__version__}, CUDA runtime {cupy.cuda.runtime.runtimeGetVersion()}) on {_dev}'
+    GPU = {'device': _dev, 'gpu4pyscf': gpu4pyscf.__version__, 'cupy': cupy.__version__, 'memoryLimitGB': args.gpu_memory,
+           'contraction': 'cutensor' if gpu4pyscf.lib.cutensor.contract_engine is None else gpu4pyscf.lib.cutensor.contract_engine}
 
 CONV_TOL, CONV_TOL_GRAD = 1e-9, 1e-6
-DATA = Path(args.data); RAW = DATA / 'raw'; RAW.mkdir(parents=True, exist_ok=True)
+DATA = Path(args.data); RAW = Path(args.raw).expanduser() if args.raw else DATA / 'raw'; RAW.mkdir(parents=True, exist_ok=True)
 BASES = [b for b in LADDER if not args.bases or b in args.bases.split(',')]
 LOG = RAW / 'solve.log'
 PID, HOST = os.getpid(), socket.gethostname()
@@ -119,7 +148,7 @@ def queue():
         if not bad and args.max_nao and naos and max(naos) > args.max_nao: bad = f'its largest rung is {max(naos)} AOs, past --max-nao {args.max_nao}'
         out.append({'id': i, 'm': m, 'atoms': atoms, 'zs': zs, 'rungs': rungs, 'bad': bad,
                     'cost': sum(n ** 4 for n in naos) / 1e8, 'heavy': sum(1 for z in zs if z > 1)})
-    out.sort(key=lambda q: (q['cost'], q['id']))                  # smallest first, by the estimated cost (Σ nAO⁴ over the rungs)
+    out.sort(key=lambda q: (q['cost'], q['id']), reverse=args.largest_first)   # smallest first (or largest), by the estimated cost (Σ nAO⁴ over the rungs)
     return out
 
 # ── ONE RUNG ────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -127,25 +156,52 @@ def build(q, b):
     rec = record(b)[0]
     return gto.M(atom=[(SYMBOL[z], (x, y, w)) for z, x, y, w in q['atoms']], unit='Bohr', basis=pyscf_basis(rec, q['zs']), cart=True,
                  charge=int(q['m'].get('charge', 0)), spin=0, verbose=0, max_memory=args.max_memory)
-def rhf(mol, **kw):
-    mf = scf.RHF(mol); mf.chkfile = None; mf.conv_tol = CONV_TOL; mf.conv_tol_grad = CONV_TOL_GRAD
+def rhf(mol, h1e=None, **kw):
+    """h1e (a CuPy array): the rung is solved on the card, with the CPU's core Hamiltonian (see converge_gpu)"""
+    mf = scf.RHF(mol) if h1e is None else gscf.RHF(mol); mf.chkfile = None; mf.conv_tol = CONV_TOL; mf.conv_tol_grad = CONV_TOL_GRAD
+    if h1e is not None: mf.get_hcore = lambda *a, **k: h1e
     for k, v in kw.items(): setattr(mf, k, v)
     return mf
 def attempt(mf, dm0, method):
     t = time.perf_counter(); mf.kernel(dm0); s = time.perf_counter() - t
     return mf, {'method': method, 'converged': bool(mf.converged), 'cycles': int(getattr(mf, 'cycles', -1)), 'seconds': round(s, 3),
                 'energy': float(mf.e_tot) if np.isfinite(mf.e_tot) else None}
-def converge(mol, dm0):
+def converge(mol, dm0, h1e=None):
     """DIIS → DIIS + level shift → second order; the first that converges is the rung's solution"""
     tries = []
-    mf, a = attempt(rhf(mol, max_cycle=100), dm0, 'diis'); tries.append(a)
+    mf, a = attempt(rhf(mol, h1e, max_cycle=100), dm0, 'diis'); tries.append(a)
     if mf.converged: return mf, tries
-    mf, a = attempt(rhf(mol, max_cycle=150, level_shift=0.5), dm0, 'diis + level shift 0.5'); tries.append(a)
+    mf, a = attempt(rhf(mol, h1e, max_cycle=150, level_shift=0.5), dm0, 'diis + level shift 0.5'); tries.append(a)
     if mf.converged: return mf, tries
-    start = mf.make_rdm1() if np.all(np.isfinite(mf.mo_coeff)) else dm0
-    nt = rhf(mol, max_cycle=60).newton(); nt.conv_tol = CONV_TOL; nt.conv_tol_grad = CONV_TOL_GRAD
+    C = mf.mo_coeff if h1e is None else cupy.asnumpy(mf.mo_coeff)
+    start = mf.make_rdm1() if np.all(np.isfinite(C)) else dm0
+    nt = rhf(mol, h1e, max_cycle=60).newton(); nt.conv_tol = CONV_TOL; nt.conv_tol_grad = CONV_TOL_GRAD
     mf, a = attempt(nt, start, 'second order (newton)'); tries.append(a)
     return mf, tries
+def on_cpu(mol, g, h1e):
+    """the card's converged solution as a PySCF CPU RHF (no SCF is run): the rest of the rung — the npz, dipole, Mulliken — is the CPU's
+    code.  The energy is evaluated afresh at the final density (one full J/K build on the card): gpu4pyscf's SCF energy is built
+    incrementally (vhf += vhf(ΔD), each screened), and its sum drifts 1–2e-9 Eh from the density's own energy (G-BUILD.md)"""
+    mf = rhf(mol); mf.mo_coeff, mf.mo_energy, mf.mo_occ = (cupy.asnumpy(x).astype('f8') for x in (g.mo_coeff, g.mo_energy, g.mo_occ))
+    dm = cupy.asarray(mf.make_rdm1())
+    e = float(cupy.vdot(dm, h1e + .5 * gscf.hf.get_veff(g, mol, dm)).real) + mol.energy_nuc() if g.converged else float(g.e_tot)
+    mf.e_tot, mf.converged, mf.cycles = e, bool(g.converged), int(getattr(g, 'cycles', -1))
+    return mf
+def converge_gpu(mol, dm0):
+    """the ladder on the card; an exception (out of memory …) sends the rung to the CPU, recorded.  The core Hamiltonian is the CPU's
+    (PySCF's int1e, cheap): gpu4pyscf's nuclear attraction differs by up to 1.3e-10 per element on Br, 2.9e-10 Eh in HBr's energy"""
+    pool = cupy.get_default_memory_pool()
+    try:
+        h1e = cupy.asarray(scf.hf.get_hcore(mol))
+        mf, tries = converge(mol, dm0, h1e); peak = pool.total_bytes()
+        return on_cpu(mol, mf, h1e), tries, {**GPU, 'poolMB': round(peak / 2 ** 20)}
+    except Stop: raise
+    except Exception as e:
+        why = f'{type(e).__name__}: {str(e)[:200]}'; log(f'GPU → CPU for this rung: {why}')
+        pool.free_all_blocks()
+        mf, tries = converge(mol, dm0)
+        return mf, tries, {**GPU, 'fallback': why}
+    finally: pool.free_all_blocks()
 
 def solve_molecule(q):
     d = RAW / q['id']; d.mkdir(exist_ok=True)
@@ -176,11 +232,12 @@ def solve_molecule(q):
         if r.get('status') == 'failed' and not args.retry_failed: continue
         mol = build(q, b); n = mol.nao_nr()
         dm0, guess = (scf.addons.project_dm_nr2nr(prev[1], prev[2], mol), 'projected from ' + prev[0]) if prev else (None, 'minao')
-        t0 = time.perf_counter(); mf, tries = converge(mol, dm0); sec = time.perf_counter() - t0
+        t0 = time.perf_counter(); mf, tries, gpu = converge_gpu(mol, dm0) if args.gpu else (*converge(mol, dm0), None); sec = time.perf_counter() - t0
         base = {'basis': b, 'basisFile': file, 'basisSha256': sha, 'nAO': n, 'guess': guess, 'attempts': tries, 'seconds': round(sec, 3),
-                'solver': {'pyscf': pyscf.__version__, 'method': 'RHF', 'cart': True, 'convTol': CONV_TOL, 'convTolGrad': CONV_TOL_GRAD,
+                'solver': {'pyscf': pyscf.__version__, 'engine': ENGINE if not (gpu and gpu.get('fallback')) else f'PySCF {pyscf.__version__} (CPU, the GPU fell back)', 'method': 'RHF', 'cart': True, 'convTol': CONV_TOL, 'convTolGrad': CONV_TOL_GRAD,
                            'threads': lib.num_threads(), 'maxMemoryMB': args.max_memory, 'incoreERI': getattr(mf, '_eri', None) is not None,
-                           'everyAO': 'scf.hf.remove_overlap_zero_eigenvalue = False'}, 'solved': now(), 'pid': PID, 'host': HOST}
+                           'everyAO': 'scf.hf.remove_overlap_zero_eigenvalue = False' + (' (and gpu4pyscf\'s own)' if gpu else '')},
+                **({'gpu': gpu} if gpu else {}), 'solved': now(), 'pid': PID, 'host': HOST}
         if not mf.converged:
             rungs[b] = {**base, 'status': 'failed', 'why': f'no convergence after {", ".join(a["method"] + " (" + str(a["cycles"]) + " cycles)" for a in tries)}'}
             log(f'{q["id"]} {b} FAILED {rungs[b]["why"]}'); write_json(mp, meta); continue
@@ -201,7 +258,7 @@ def solve_molecule(q):
         rungs[b] = {**base, 'status': 'converged', 'file': f'{b}.npz', 'energy': float(mf.e_tot), 'cycles': sum(a['cycles'] for a in tries),
                     'nocc': nocc, 'gapEh': float(mf.mo_energy[nocc] - mf.mo_energy[nocc - 1]), 'dipoleDebye': [float(v) for v in dip],
                     'minEigS': smin, **({'guessStudy': study} if study else {})}
-        log(f'{q["id"]} {b} {n} AO E {mf.e_tot:.10f} {rungs[b]["cycles"]} cycles ({guess}) {sec:.1f} s' + (f' · minao {study["cycles"]} cycles {study["seconds"]:.1f} s' if study else ''))
+        log(f'{q["id"]} {b} {n} AO E {mf.e_tot:.10f} {rungs[b]["cycles"]} cycles ({guess}) {sec:.1f} s' + (' GPU' if gpu and not gpu.get('fallback') else '') + (f' · minao {study["cycles"]} cycles {study["seconds"]:.1f} s' if study else ''))
         write_json(mp, meta)
         prev = (b, mol, mf.make_rdm1())
     meta['updated'] = now(); write_json(mp, meta)
@@ -242,7 +299,7 @@ def status(Q, working=None):
 def main():
     Q = queue()
     if args.status: st = status(Q); print(json.dumps({k: st[k] for k in ('queue', 'done', 'failed', 'refused', 'remaining', 'etaSeconds')})); return
-    log(f'start: {len(Q)} molecules in the queue, rungs {",".join(BASES)}, {args.threads} threads, max_memory {args.max_memory} MB, PySCF {pyscf.__version__}')
+    log(f'start: {len(Q)} molecules in the queue, rungs {",".join(BASES)}, {args.threads} threads, max_memory {args.max_memory} MB, {ENGINE}' + (f', pool ≤ {args.gpu_memory} GB' if args.gpu else '') + f', raw {RAW}')
     solved = 0
     for q in Q:
         if q['bad']: continue
