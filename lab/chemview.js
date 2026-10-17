@@ -29,6 +29,7 @@ import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMI
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
 import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
+import { planePoints } from './slice.js';   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
 import * as V from './volumes.js'; import { parseLwm, rungRecord } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
@@ -284,6 +285,9 @@ export function createChem(host, api) {
   const srcSeg = seg({ label: 'FLOW SOURCE', value: 'computed', options: [{ id: 'computed', label: 'AS COMPUTED', title: 'v = j/ρ, the run’s own current' }, { id: 'balanced', label: 'BALANCED', title: 'v + ∇φ with −∇·(ρ∇φ) = ∂ρ/∂t + ∇·j: continuity closed on a 32³ grid, solved in a worker' }], onChange: (v) => { flowSrc = v; if (flow) { flow.setSource(v); paintFlow(); } api.repaint(); } });
   r2.appendChild(srcSeg.root);
   const fr = el('div', 'row tight', host), roRep = readout({ label: 'REPAIR', cls: 'wide', value: '—' }), roGate = readout({ label: 'GATED', value: '—' }); fr.append(roRep.root, roGate.root); fr.hidden = true;
+  /* iteration 005 P2 · THE CONTINUITY RECORD, CALCULUS's tile shape (readout + canvas) seated with FLOW — CALCULUS itself is hidden in MOLECULES mode (iteration 002) */
+  const roCon = readout({ label: 'CONTINUITY  ‖∂ρ/∂t + ∇·j‖₂ / ‖∂ρ/∂t‖₂ on PLANE\'s sample · ∇·j the full 3-D divergence (the in-plane one would miss ∂j⊥/∂n)', cls: 'wide calc-ray', value: '—' }), conCv = el('canvas', '', roCon.root), conG = conCv.getContext('2d');
+  conCv.style.height = '112px'; roCon.root.hidden = true;
   const spdKnob = knob({ label: 'SPEED', min: 1, max: 50, value: 10, title: 'Propagation steps per frame — one outstanding worker request at a time',
     fmt: (v) => Math.round(v) + '/frame', onInput: (v) => { speed = Math.max(1, Math.round(v)); } });
   r2.appendChild(spdKnob.root);
@@ -327,7 +331,7 @@ export function createChem(host, api) {
   const ampKnob = knob({ label: 'AMPLITUDE', min: 0, max: 4, value: 1, title: 'In units of Q₀ = √(ħ/μω), the zero-point turning point; past 2 Q₀ it is not harmonic here', fmt: (v) => v.toFixed(1) + ' Q₀', onInput: (v) => { setVib(vibOn, vibK, v); } });
   rVib.append(vibSw.root, modeStep.root, ampKnob.root, trig({ label: 'BREATHE', title: 'RATE so one breath takes a second, the clock playing, VIBRATE on', onFire: () => { breathe(); } }).root, roVib.root);
   const rTda = el('div', 'row tight', more); rTda.appendChild(tdaSw.root); rTda.appendChild(coreSw.root);
-  for (const n of [r2, fr, cv, cvCore, rr, note]) more.appendChild(n);
+  for (const n of [r2, fr, roCon.root, cv, cvCore, rr, note]) more.appendChild(n);
   const h2Note = el('div', 'note', more); h2Note.hidden = true;   // 0.6.2 H2: H₂'s hidden correlation, STO-3G only
   /* 0.7.1 U2 · THE CURVE under it (lab/h2curve.js): RHF · UHF · FCI along R against 2E(H); STRETCH re-poses H₂'s nuclei at ±R/2 on z and re-solves by the ordinary road
      (h2R null = the row's own geometry, byte for byte); METHOD UHF (the card's seg since 0.7.3) asks moleculeRHF for model 'uhf' (U1's arg); PROJECT `h2 { R, method }`, absent by default */
@@ -570,11 +574,11 @@ export function createChem(host, api) {
     const seq = solveSeq;
     /* SYNTHESIS decision 2: the card's MMUT is UNRESTARTED, and 0 is how that is spelled on the wire.  It was
        never sent before, so the engine took its own default of 50 while this window said "unrestarted". */
-    return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa }, restartEvery: RESTART_EVERY,
+    return call({ op: 'chem.rt.init', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), dt, integrator, kick: { axis, kappa }, restartEvery: RESTART_EVERY, factors: flowOn,
       pulse: pulse === 'none' ? null : { shape: pulse, omega: (bright().find((k) => k.f > 1e-3) || {}).omega || 0 } }).then((r) => {   // 0.7.0 V1 PULSES
       if (seq !== solveSeq) return null;
       if (!r || r.error || !r.ok) { status('kick failed: ' + ((r && (r.refused || r.error)) || 'no real-time engine'), 'warn'); if (r && r.refused) setRun(false); return null; }
-      rt = { t: r.t || 0, D_re: r.D_re || null, D_im: r.D_im || null, electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0,
+      rt = { t: r.t || 0, D_re: r.D_re || null, D_im: r.D_im || null, F: factorsOf(r), electrons: r.electrons, idempotency: r.idempotency || 0, energy: r.E0, E0: r.E0, trace: [], samples: 1, steps: 0, msPerStep: 0,
         restartEvery: r.restartEvery, restartPolicy: r.restartPolicy, sinceRestart: r.sinceRestart || 0 };
       spec = null; fit = null; fitErr = null;
       pushMatrix(true);                                        // Δρ's reference IS the kicked t = 0
@@ -600,14 +604,14 @@ export function createChem(host, api) {
   function pump() {
     if (!running || inflight || !rt || !sol) return;
     inflight = true; const seq = solveSeq;
-    call({ op: 'chem.rt.run', steps: speed }).then((r) => {
+    call({ op: 'chem.rt.run', steps: speed, factors: flowOn }).then((r) => {
       inflight = false;
       if (seq !== solveSeq || !rt) return;
       if (!r || r.error) { status('real time stopped: ' + ((r && r.error) || 'no answer'), 'warn'); setRun(false); return; }
       rt.t = r.t; rt.electrons = r.electrons; rt.idempotency = r.idempotency; rt.energy = r.energy;
       rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep;   // `steps` is the worker's CUMULATIVE count
       if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
-      if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im;
+      if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im; rt.F = factorsOf(r);
       rt.samples = r.samples || rt.samples; append(r.trace);
       pushMatrix(); requestSpectrum(); refresh(); if (r.D_re && symDue()) symmetryLine(rt.D_re, 'RUN');
     }).catch(() => { inflight = false; });
@@ -717,19 +721,51 @@ export function createChem(host, api) {
   /* ── FLOW for the real-time run (stage 6): the TDHF density matrix carries a current too ───────────────────
      Re D is the whole density; Im D is NEGATED on the way in, because density.js keeps D_μν = Σ c_μ c̄_ν and the flow
      evaluator is written for ⟨a†_μ a_ν⟩ = its transpose-conjugate.  (MO-REGISTRY's packet has no such seam: it hands ψ itself,
-     `setPacket`, and builds no D.)  A still molecule has Im D = 0 and no flow.
-     BALANCED's Re Ḋ is the difference of the two latest landings over their Δt: centred half a landing behind the D it repairs. */
-  let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0, flowSrc = 'computed', flowDot = null, flowT = null, dotOK = false;
-  const paintFlow = () => { if (!flow) return; const w = flow.said(); roRep.set(w[0]); roRep.setSub(w[1]); roGate.set(w[2]); roGate.setSub(w[3]); srcSeg.root.title = flowMod.FLOW_ORACLE[preset] || ''; };
+     `setPacket`, and builds no D.  Nor do THE FACTORS, iteration 005 P2: the worker's factorsOf covers the seam once, where they are made.)
+     A still molecule has Im D = 0 and no flow.
+     BALANCED's Re Ḋ is the difference of the two latest landings over their Δt: centred half a landing behind the D it repairs.
+     P2 · THE FACTORS: while FLOW is on each landing carries P(t)'s eigenpairs (mathworker factorsOf) and the tracers ride them, O(n·K) a point;
+     these dense matrices stay for `pump`, REPAIR's road.  The two latest landings' factors are THE CONTINUITY RECORD's (continuityOn, the
+     cards worker, ≤ 2 Hz): ∂ρ/∂t and the full 3-D ∇·j on PLANE's sample — every 4th point of its N², h its own spacing. */
+  let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0, flowSrc = 'computed', flowDot = null, flowT = null, dotOK = false, flowF = [], planeKey = '', planePts = null, conP = null;
+  const factorsOf = (r) => (r.F_w ? { w: r.F_w, re: r.F_re, im: r.F_im, sum: r.F_sum } : null);
+  const paintFlow = () => { if (!flow) return; const w = flow.said(); roRep.set(w[0]); roRep.setSub(w[1]); roGate.set(w[2]); roGate.setSub(w[3]); srcSeg.root.title = flowMod.FLOW_ORACLE[preset] || ''; paintContinuity(); };
+  /** the plane payload for the worker: PLANE's own geometry (rotor, mode, EXTENT) at a quarter of its N, h its own spacing, the two latest landings, the nuclei */
+  function planeOf() {
+    const S = api.plane && api.plane(), [a, b] = flowF;
+    if (!S || !b || !(b.t > a.t)) return null;
+    const N = Math.max(8, S.res >> 2), k = `${S.mode}|${S.half}|${N}|${S.rotor.qL}|${S.rotor.qR}|${sol.hash}`;
+    if (k !== planeKey) { planeKey = k; planePts = planePoints(S.rotor, { mode: S.mode, half: S.half, N }); }
+    return { pts: planePts, h: 2 * S.half / S.res, dt: b.t - a.t, F0: a, F1: b, nuclei: chemAtoms(preset).flatMap((q) => [q.x, q.y, q.z]) };
+  }
+  /** the tile: the number, its sub, and the residual's sign on the plane (ACCENT A where ∂ρ/∂t + ∇·j > 0, B where < 0, alpha √(|r|/max)) — or one sentence */
+  function paintContinuity() {
+    const P = flow && flow.plane, F = rt && rt.F, why = !sol ? '' : sol.volume ? 'a volume molecule has no run (its record carries no integrals): no current to check' : sol.model ? sol.model + ': no real-time run in this cut, so no current to check'
+      : !rt ? 'a still molecule: ∂ρ/∂t = 0 and j = 0 — KICK and RUN first' : !P ? 'RUN: the record needs two landings' : '';
+    roCon.root.hidden = !flowOn;
+    if (why || !flowOn) { conP = null; roCon.set('—'); roCon.setSub(why); conCv.width = 0; return; }
+    if (P === conP) return; conP = P;
+    roCon.set(P.defect.toFixed(3));
+    roCon.setSub(roCon.root.title = `the finite-basis defect — an identity only in a complete basis · ${P.M} points (PLANE's sample, every 4th) · ${Math.round(100 * P.core)} % of the residual² within 0.3 a₀ of a nucleus · ${P.ms.toFixed(0)} ms`
+      + (F ? ` · K ${F.w.length} factors, Σw ${F.sum.toFixed(6)} beside Tr(DS) ${(+rt.electrons).toFixed(6)}` : ''));
+    const N = Math.round(Math.sqrt(P.M)), W = conCv.clientWidth || 240, Hh = 112, d = Math.min(2, window.devicePixelRatio || 1), A = accentRGB(conG, 1), B = accentRGB(conG, 2);
+    let mx = 0; for (let k = 0; k < P.M; k++) mx = Math.max(mx, Math.abs(P.r[k]));
+    const img = new ImageData(N, N); for (let k = 0; k < P.M; k++) { const v = P.r[k], c = v > 0 ? A : B, i = ((N - 1 - Math.floor(k / N)) * N + (k % N)) * 4; img.data[i] = c[0]; img.data[i + 1] = c[1]; img.data[i + 2] = c[2]; img.data[i + 3] = Math.round(255 * Math.sqrt(Math.abs(v) / (mx || 1))); }
+    const tmp = document.createElement('canvas'); tmp.width = tmp.height = N; tmp.getContext('2d').putImageData(img, 0, 0);
+    conCv.width = Math.round(W * d); conCv.height = Hh * d; conG.setTransform(d, 0, 0, d, 0, 0); conG.imageSmoothingEnabled = false; conG.drawImage(tmp, (W - Hh) / 2, 0, Hh, Hh);
+  }
   function feedFlow() {
     if (!sol || !flowMod) return;
     const n = sol.nAO;
     if (!flow || flow.n !== n || flowHash !== sol.hash) { flow = flowMod.createFlow(sol.shells, api.balance); flow.setSource(flowSrc); flowRe = new Float64Array(n * n); flowIm = new Float64Array(n * n); flowDot = new Float64Array(n * n); flowT = null; dotOK = false; flowHash = sol.hash; flowEpoch++; }
-    const re = (rt && rt.D_re) || sol.D, im = rt && rt.D_im, t = rt ? rt.t : 0, dt = flowT === null ? 0 : t - flowT;
+    const re = (rt && rt.D_re) || sol.D, im = rt && rt.D_im, t = rt ? rt.t : 0, dt = flowT === null ? 0 : t - flowT, F = rt && rt.F;
     for (let i = 0; i < n * n; i++) { if (dt > 0) flowDot[i] = (re[i] - flowRe[i]) / dt; flowRe[i] = re[i]; flowIm[i] = im ? -im[i] : 0; }
     if (dt) dotOK = dt > 0; if (dt || flowT === null) flowT = t; flow.set(flowRe, flowIm);
+    if (F) { flow.setFactors(F.w, F.re, F.im); if (!flowF.length || flowF[flowF.length - 1].t !== t) { flowF.push({ ...F, t }); if (flowF.length > 2) flowF.shift(); } } else flowF = [];
+    flow.setFloor(0, F ? 'f64 factors' : 'f32 D');   // P2: max(1e-7, 10 × the measured error of the ρ the tracers read) — both roads' errors are relative (P2-BUILD.md), so neither raises it
     flow.time = t;                              // the run keeps its OWN clock: the tracers ride rt.t, not the transport's
-    flow.pump(Number.isFinite(sol.half) ? sol.half : 10.3, () => (dotOK ? flowDot : null), paintFlow);
+    flow.pump(Number.isFinite(sol.half) ? sol.half : 10.3, () => (dotOK ? flowDot : null), paintFlow, planeOf);
+    paintContinuity();
   }
   let flowMod = null, flowHash = null;
   /* 0.6.5 X1 · THE POTENTIAL's volume: one chem.esp in flight on the cards queue, the newest D asked next (H1's pump shape); only where THE PROBE is (≤ 46 AOs: the cost is nAO² × 64³) */
@@ -743,7 +779,7 @@ export function createChem(host, api) {
     }, () => { espBusy = false; });
   }
   function setFlow(v) {
-    flowOn = !!v; if (flowSw) flowSw.set(flowOn); fr.hidden = !flowOn;
+    flowOn = !!v; if (flowSw) flowSw.set(flowOn); fr.hidden = roCon.root.hidden = !flowOn;
     if (flowOn && !flowMod) import('./molecular-flow.js').then((m) => { flowMod = m; if (flowOn) { feedFlow(); api.repaint(); } });
     else if (flowOn) feedFlow();
     tell(); api.repaint(); return flowOn;
@@ -1232,11 +1268,11 @@ export function createChem(host, api) {
       while (rt && rt.steps < want && Date.now() - t0 < 120000) {
         if (!inflight) { const left = want - rt.steps; inflight = true;
           /* eslint-disable no-await-in-loop */
-          const r = await call({ op: 'chem.rt.run', steps: Math.min(left, Math.max(1, speed)) });
+          const r = await call({ op: 'chem.rt.run', steps: Math.min(left, Math.max(1, speed)), factors: flowOn });
           inflight = false;
           if (!r || r.error) return null;
           rt.t = r.t; rt.electrons = r.electrons; rt.idempotency = r.idempotency; rt.energy = r.energy;
-          rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep; if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im;
+          rt.steps = r.steps || rt.steps; rt.msPerStep = r.msPerStep; if (r.D_re) rt.D_re = r.D_re; if (r.D_im) rt.D_im = r.D_im; rt.F = factorsOf(r);
           if (r.restartPolicy) { rt.restartPolicy = r.restartPolicy; rt.sinceRestart = r.sinceRestart; }
           rt.samples = r.samples || rt.samples; append(r.trace);
           pushMatrix(); if (r.D_re && symDue()) symmetryLine(rt.D_re, 'RUN');

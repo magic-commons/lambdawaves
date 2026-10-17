@@ -19,7 +19,7 @@ import { toScreen } from './field.js';
 export function createParticles(canvas, api) {
   const g = canvas.getContext('2d');
   let pts = [], lastT = null, on = false, trailLen = 24, speedCap = 4;
-  let ring = new Float32Array(3), heads = new Int32Array(1), lens = new Int32Array(1);   // the trails: a ring per particle
+  let ring = new Float32Array(3), heads = new Int32Array(1), lens = new Int32Array(1), alphas = new Float32Array(1);   // the trails: a ring per particle, and each point's alpha (iteration 005 P2: a FLOW source's `fade`)
   const state = { count: 0, alive: 0, stalled: 0, maxSpeed: 0, seededAt: null };
   /* the register at the substep times: bohmStep asks for c(t), c(t + h/2) (twice) and c(t + h) — three distinct times per step */
   const memo = [0, 1, 2].map(() => ({ u: NaN, re: new Float64Array(91), im: new Float64Array(91) }));
@@ -31,8 +31,10 @@ export function createParticles(canvas, api) {
   };
 
   function psi2(re, im, ids, x, y, z) { const s = psiAndGrad(re, im, ids, x, y, z); return s ? s.re * s.re + s.im * s.im : 0; }
-  function allocTrails() { const n = Math.max(1, pts.length); ring = new Float32Array(n * trailLen * 3); heads = new Int32Array(n); lens = new Int32Array(n); }
-  function pushTrail(i, p) { const o = (i * trailLen + heads[i]) * 3; ring[o] = p[0]; ring[o + 1] = p[1]; ring[o + 2] = p[2]; heads[i] = (heads[i] + 1) % trailLen; if (lens[i] < trailLen) lens[i]++; }
+  function allocTrails() { const n = Math.max(1, pts.length); ring = new Float32Array(n * trailLen * 3); heads = new Int32Array(n); lens = new Int32Array(n); alphas = new Float32Array(n * trailLen); }
+  function pushTrail(i, p, a = 1) { const o = (i * trailLen + heads[i]) * 3; ring[o] = p[0]; ring[o + 1] = p[1]; ring[o + 2] = p[2]; alphas[i * trailLen + heads[i]] = a; heads[i] = (heads[i] + 1) % trailLen; if (lens[i] < trailLen) lens[i]++; }
+  /** the k-th oldest point's alpha */
+  const alphaAt = (i, k) => alphas[i * trailLen + ((heads[i] - lens[i] + k) % trailLen + trailLen) % trailLen];
   /** the k-th oldest point of particle i's trail (k = 0 … lens[i]−1), into out */
   function trailAt(i, k, out) { const j = ((heads[i] - lens[i] + k) % trailLen + trailLen) % trailLen, o = (i * trailLen + j) * 3; out[0] = ring[o]; out[1] = ring[o + 1]; out[2] = ring[o + 2]; return out; }
   /** seed n particles by rejection sampling from |ψ|² — the equilibrium distribution */
@@ -119,7 +121,7 @@ export function createParticles(canvas, api) {
     for (let i = 0; i < pts.length; i++) {
       let p = pts[i], ok = ++ages[i] < life;
       for (let s2 = 0; ok && s2 < sub; s2++) { const q = src.step(p, h, speedCap); if (!q || !isFinite(q[0]) || Math.hypot(q[0], q[1], q[2]) > half * 1.5) ok = false; else p = q; }
-      if (ok) { pts[i] = p; alive++; vmax = Math.max(vmax, src.speed(p)); if (state.frames % (src.stride || 1) === 0) pushTrail(i, p); }   // a slow current needs a trail that spans seconds, not frames
+      if (ok) { pts[i] = p; alive++; vmax = Math.max(vmax, src.speed(p)); if (state.frames % (src.stride || 1) === 0) pushTrail(i, p, src.fade ? src.fade() : 1); }   // a slow current needs a trail that spans seconds, not frames; P2: a point near the floor fades
       else { const q = srcPeak > 0 ? sampleFrom(src, half, srcPeak) : null; if (q) { pts[i] = q; ages[i] = 0; lens[i] = 0; heads[i] = 0; } stalled++; }
     }
     state.alive = alive; state.stalled = stalled; state.maxSpeed = vmax;
@@ -138,23 +140,30 @@ export function createParticles(canvas, api) {
     g.lineCap = 'round';
     const ink = api && api.ink ? api.ink() : null;
     g.strokeStyle = ink ? ink.trail : 'rgba(255,226,170,0.28)'; g.lineWidth = ink ? 1.3 : 1;
+    /* a segment takes its newer point's alpha in quarters (0 is not drawn), one stroke per run of one quarter — a trail at full alpha is one stroke, as before */
     for (let i = 0; i < pts.length; i++) {
       const n = lens[i];
       if (n > 1) {
-        g.beginPath(); let started = false;
+        g.beginPath(); let has = false, at = 0, mv = true, px = 0, py = 0;
         for (let k = 0; k < n; k++) {
-          if (!project(trailAt(i, k, P3))) { started = false; continue; }
-          if (!started) { g.moveTo(S3[0], S3[1]); started = true; } else g.lineTo(S3[0], S3[1]);
+          if (!project(trailAt(i, k, P3))) { has = false; continue; }
+          const L = Math.ceil(4 * alphaAt(i, k));
+          if (has && L > 0) {
+            if (L !== at) { if (at) { g.globalAlpha = at / 4; g.stroke(); g.beginPath(); } at = L; mv = true; }
+            if (mv) { g.moveTo(px, py); mv = false; } g.lineTo(S3[0], S3[1]);
+          } else mv = true;
+          px = S3[0]; py = S3[1]; has = true;
         }
-        g.stroke();
+        if (at) { g.globalAlpha = at / 4; g.stroke(); }
       }
     }
     g.fillStyle = ink ? ink.dot : 'rgba(255,240,210,0.95)';
     for (let i = 0; i < pts.length; i++) {
       if (!project(pts[i])) continue;
       const sz = Math.max(1, 2.1 * Math.sqrt(D / S3[2]));
-      g.beginPath(); g.arc(S3[0], S3[1], sz, 0, 2 * Math.PI); g.fill();
+      g.globalAlpha = lens[i] ? alphaAt(i, lens[i] - 1) : 1; g.beginPath(); g.arc(S3[0], S3[1], sz, 0, 2 * Math.PI); g.fill();
     }
+    g.globalAlpha = 1;
     g.fillStyle = ink ? ink.text : 'rgba(255,255,255,0.45)'; g.font = '9px ui-monospace, monospace'; g.textAlign = 'left';
     g.fillText(api && api.caption ? api.caption(state) : `PARTICLES · ${state.alive}/${state.count} on the exact field v = Im(∇ψ/ψ) · seeded from |ψ|²`, 12, H - 88);
   }
