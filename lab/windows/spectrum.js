@@ -9,7 +9,7 @@ import { BASIS, stateOf } from '../hydrogen.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu, MASSES, onHamiltonian } from '../hamiltonian.js';
 import { ATOMS, configOf } from '../atoms.js';
 import { createSpectrum } from '../spectrum.js';
-import { MOLECULE_BY_ID } from '../molecules.js'; import { CATALOGUE } from '../catalogue.js';
+import { CATALOGUE } from '../catalogue.js';
 import { stateLatex, moleculeLatex } from '../latex-state.js';
 import { createRegisterSturmian } from '../sturmianreg.js';
 const keepT = (elm, on, title) => { if (elm.dataset.title0 === undefined) elm.dataset.title0 = elm.title || ''; elm.title = on ? title : elm.dataset.title0; };
@@ -178,7 +178,7 @@ export function createSpectrumCard(app) {
   function copyLatex() {
     let text, said;
     if (app.state.chem && app.state.chem.on) {
-      const row = app.state.chem && app.state.chem.on ? MOLECULE_BY_ID.get(app.state.chem.preset()) : null, sol = row ? app.state.chem.solution() : null;
+      const row = app.state.chem && app.state.chem.on ? app.state.chem.row() : null, sol = row ? app.state.chem.solution() : null;
       const ground = sol && sol.key === app.state.chem.preset() + '|' + app.state.chem.basis + '|' + row.charge ? sol : null;   // chemview's own solve key: never the previous molecule's ladder
       text = moleculeLatex({ molecule: row, basis: app.state.chem && app.state.chem.basis, charge: row && row.charge, ground });
       said = text ? mathPlain(row.formula) + '’s page as LaTeX' : row ? 'nothing to copy — ' + mathPlain(row.formula) + ' is still solving' : 'nothing to copy — this molecule has no page';

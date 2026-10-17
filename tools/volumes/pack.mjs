@@ -32,6 +32,7 @@ import { stemOf, BASIS_LABEL } from '../../lab/latex-state.js';
 import { validateRecord, atomsKey, SCHEMA } from '../../lab/library.js';
 import { encodeLwm, parseLwm, rungRecord, LWM_SCHEMA } from '../../lab/volumes-format.js';
 import { chemRegister, chemOpen, chemSolverCalls } from '../../lab/mathworker.js';
+import { MOLECULE_BY_ID } from '../../lab/molecules.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2), has = (f) => args.includes(f), argOf = (f, d = null) => (has(f) ? args[args.indexOf(f) + 1] : d);
@@ -41,7 +42,7 @@ const RAW = path.join(DATA, 'raw'), DIST = path.join(DATA, 'dist');
 const VOL = argOf('--volume', 'vol-1'), NUMERAL = argOf('--numeral', 'I'), TITLE = argOf('--title', 'Volume ' + NUMERAL);
 const BLURB = argOf('--blurb', 'Named molecules, each solved in RHF up the whole basis ladder STO-3G → 6-31+G*, with its identifiers and properties.');
 const ONLY = argOf('--only') ? new Set(argOf('--only').split(',')) : null, PARTIAL = has('--partial'), OUT = argOf('--out'), INCREMENTAL = has('--incremental');
-const PACKER = 'pack.mjs v1', CLOCKS = new Set(['updated', 'solved', 'pid', 'host', 'seconds']);                                      // bump when the packer's output changes, so --incremental repacks
+const PACKER = 'pack.mjs v2', CLOCKS = new Set(['updated', 'solved', 'pid', 'host', 'seconds']);                                      // bump when the packer's output changes, so --incremental repacks
 const LADDER = Object.keys(BASIS_FILES);
 const DEBYE = 2.541746473;                                         // debye per e·a₀ (tools/orbital-library.mjs)
 const MASS = [0, 1.008, 4.0026, 6.94, 9.0122, 10.81, 12.011, 14.007, 15.999, 18.998, 20.180, 22.990, 24.305, 26.982, 28.085, 30.974, 32.06,
@@ -108,6 +109,7 @@ function hill(zs) {
   return Object.keys(n).map(Number).sort((a, b) => rank(a) - rank(b) || SYMBOL[a].localeCompare(SYMBOL[b])).map((Z) => [SYMBOL[Z], n[Z]]);
 }
 const plainFormula = (h, q) => h.map(([s, c]) => s + (c > 1 ? c : '')).join('') + (q ? (Math.abs(q) > 1 ? Math.abs(q) : '') + (q > 0 ? '+' : '-') : '');
+const plainOf = (m) => [...m.replace(/<\/?m>/g, '')].map((c) => (SUB.includes(c) ? SUB.indexOf(c) : SUP.includes(c) ? SUP.indexOf(c) : c === '⁺' ? '+' : c === '⁻' ? '-' : c)).join('');   // the app's markup → plain ASCII
 const mFormula = (h, q) => '<m>' + h.map(([s, c]) => s + (c > 1 ? [...String(c)].map((d) => SUB[+d]).join('') : '')).join('')
   + (q ? (Math.abs(q) > 1 ? [...String(Math.abs(q))].map((d) => SUP[+d]).join('') : '') + (q > 0 ? '⁺' : '⁻') : '') + '</m>';
 
@@ -145,14 +147,16 @@ function packMolecule(id) {
   const rs = meta.rungs || {}, todo = LADDER.filter((b) => rs[b] && rs[b].status !== 'skipped');
   const unsolved = LADDER.filter((b) => !rs[b] || !rs[b].status);
   if (unsolved.length && !PARTIAL) return { id, skip: 'its ladder is not finished (' + unsolved.join(', ') + ')' };
-  const h = hill(zs), formula = plainFormula(h, charge), formulaM = cand.formulaM || mFormula(h, charge);
+  /* an `app` candidate (the app's own molecule) takes the APP's formula (lab/molecules.js: NH₃, HBr, CO(NH₂)₂ — not Hill's H₃N, BrH); v2 */
+  const h = hill(zs), appRow = cand.app ? MOLECULE_BY_ID.get(cand.app) : null, appM = appRow && (appRow.formula.startsWith('<m>') ? appRow.formula : '<m>' + appRow.formula + '</m>');
+  const formula = appRow ? plainOf(appRow.formula) : plainFormula(h, charge), formulaM = appM || cand.formulaM || mFormula(h, charge);
   const sym = cand.symmetry && cand.symmetry.group ? cand.symmetry : { group: 'C1' };
   const name = cand.name || id, mass = +atoms.reduce((s, a) => s + MASS[a.Z], 0).toFixed(3), half = atoms.reduce((s, a) => Math.max(s, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)), 0) + 6;
   const geometrySource = cand.geometrySource || (cand.cid ? `PubChem CID ${cand.cid}, its 3-D conformer (computed, not measured)` : 'the candidate\'s atoms');
   const header = { schema: LWM_SCHEMA, id, volume: VOL, meta: {}, geometry: {}, rungs: {}, skipped: {}, failed: {}, source: { metaSha256: metaSha, packer: PACKER } };
   const { atomsAng, atomsBohr, app, ...rest } = cand; void atomsAng; void atomsBohr;
   header.meta = { name, formula, formulaM, charge, multiplicity: 1, heavy: zs.filter((z) => z > 1).length, nAtoms: atoms.length, mass, massUnit: 'u (IUPAC conventional atomic weights)',
-    pointGroup: sym.group !== 'C1' ? sym.group : ({ Dooh: 'Dinfh', Coov: 'Cinfv' }[meta.detectedGroup] || meta.detectedGroup || null), ...rest, ...(app ? { app } : {}),
+    pointGroup: sym.group !== 'C1' ? sym.group : ({ Dooh: 'Dinfh', Coov: 'Cinfv' }[meta.detectedGroup] || meta.detectedGroup || null), ...rest, formula, formulaM, ...(app ? { app } : {}),   // the packer's formula wins over the candidate's (PubChem's Hill)
     precision: 'ε and E: the solver\'s f64; C: f32 (7 significant digits: the picture\'s precision; CᵀSC = I was checked in f64 before the cast)' };
   header.geometry = { atoms, atomsSha256: atomsKey(atoms), source: geometrySource, method: cand.geometryMethod || null, unit: 'bohr' };
   const blobs = {}, report = { id, heavy: header.meta.heavy, nAtoms: atoms.length, rungs: {} };

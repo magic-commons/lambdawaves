@@ -25,6 +25,9 @@ export const VERBS = [
       if (a.view) c.setView(a.view);   // after the pick's solve (and the basis's, and the method's)
       const r = a.orbital === undefined ? null : orb(c, a.orbital); return typeof r === 'string' ? r : { own: true };
     } },
+  { id: 'volume', args: { volume: 'string', id: 'string', basis: '?enum ' + Object.keys(BASIS_LABEL).join('|') }, doc: "open a VOLUME's molecule (the PICKER's LIBRARY: volume vol-1, id aspirin) on its record — no solve — and switch MOLECULES on; basis one of its rungs (the lowest by default)",
+    async run(app, a) { const c = app.state.chem; if (!(await c.openVolume(a.volume, a.id, a.basis || null))) return `${a.id} in ${a.volume} did not open — ${c.state().status}`;
+      const v = c.volume; return { fade: mdText(`${v.name} · VOL. ${v.numeral} · ${BASIS_LABEL[v.basis]}`) }; } },
   { id: 'vibrate', args: { on: 'bool', mode: '?number', amp: '?number', breathe: '?bool' }, doc: "MOLECULES' VIBRATE: the nuclei breathe in one normal mode (mode: its place in the MODE list from 0; amp 0…4 in Q₀, past 2 not harmonic); breathe: true presses BREATHE — RATE so one breath takes a second (\"make water breathe\")",
     async run(app, a) { const c = app.state.chem; if (!c.on) return 'VIBRATE needs MOLECULES on'; const line = await c.vibrate(a); return a.on && !line ? 'no modes recorded for this molecule (VIBRATE plays an STO-3G record of a solved molecule)' : { fade: line ? 'VIBRATE · ' + line : 'VIBRATE off' }; } },
   { id: 'view', args: { id: 'enum density|phase|real|imag|diff|reim|orbital|esp|spin|dlda', orbital: '?string|number' },
@@ -100,7 +103,7 @@ export function createVerbs(app) {
   }
   /** what the app already prints, as compact JSON for a reader with no eyes: nothing here is computed for her */
   function inventory() {
-    const { clock, reg, ui, mat } = app, c = app.state.chem, H = getHamiltonian(), P = app.host.cameraPort, mol = c && c.on ? MOLECULE_BY_ID.get(c.preset()) : null;
+    const { clock, reg, ui, mat } = app, c = app.state.chem, H = getHamiltonian(), P = app.host.cameraPort, mol = c && c.on ? c.row() : null;
     const sol = mol && c.solution(), live = sol && sol.key.replace(/\|(uhf|lda)$/, '') === c.preset() + '|' + c.basis + '|' + mol.charge ? sol : null, s = live && (live.stem || stemOf(live)), cs = mol && c.state(), st = mol ? c.said : statusOf({ owner: reg.P && reg.P.stark ? 'stark' : H.id });
     const ro = (r) => (r ? [...r.root.querySelectorAll('.ro-val, .ro-sub')].map((e) => e.textContent).filter(Boolean).join(' · ') : '');
     const P0 = reg.populated(), lbl = (a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]));

@@ -21,8 +21,9 @@ const PREFIX = 'lambdawaves.q0.render.', SCALES = ['1', '2', '3', '4'];
 const atOf = (d) => { const P = (d && d.presentation) || {}, X = (d && d.experiment) || {}, C = P.instruments && P.instruments.chem;
   return { chem: C && C.on ? C : null, ham: P.hamiltonian && P.hamiltonian.id, preset: X.preset, view: P.mat && P.mat.view, t: X.t }; };
 function factsOf(x, e) {
-  const rows = [['SYSTEM', x.chem ? 'MOLECULE · ' + String(x.chem.preset || '—') : String(x.ham || '—').toUpperCase()], ['VIEW', String((x.chem && x.chem.view) || VIEW_NAMES[x.view] || '—').toUpperCase()]];
-  if (x.chem) rows.push(['BASIS', String(x.chem.basis || '—')]); else if (x.preset) rows.push(['PRESET', String(x.preset)]);
+  const vol = x.chem && x.chem.volume;   // iteration 004 V2: a volume's molecule names itself and its rung
+  const rows = [['SYSTEM', x.chem ? 'MOLECULE · ' + String(vol ? vol.id + ' · ' + vol.volume : x.chem.preset || '—') : String(x.ham || '—').toUpperCase()], ['VIEW', String((x.chem && x.chem.view) || VIEW_NAMES[x.view] || '—').toUpperCase()]];
+  if (x.chem) rows.push(['BASIS', String((vol || x.chem).basis || '—')]); else if (x.preset) rows.push(['PRESET', String(x.preset)]);
   if (e) rows.push(['FOLDER', e.folder || 'ROOT'], ['SAVED', new Date(e.at).toLocaleString()], ['SIZE', fmtBytes(e.bytes)]);
   else rows.push(['t', (+x.t || 0).toFixed(3) + ' a.u.']);
   return rows;

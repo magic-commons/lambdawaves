@@ -29,6 +29,7 @@ import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMI
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
 import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
+import * as V from './volumes.js'; import { parseLwm, rungRecord } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -55,9 +56,10 @@ const FIT_CAP = 30000;
    restart on the wire (lab/density.js normalises it); the worker's own default for a caller that says nothing is
    still 50, and what the readout prints is whatever chem.rt.init reports back, never this constant. */
 const RESTART_EVERY = 0;
-const AO_GUESS = (atoms) => atoms.reduce((k, a) => k + (a.Z === 1 ? 1 : 5), 0);   // STO-3G: H is one AO, first row is five
 /* 0.7.3 K2 · RKS LDA: PySCF's RKS lda,vwn energies on the same grid (tests/fixtures/oracles/rks-v1.json, K1's oracle), and the stand-downs' sentences (the worker's own) */
 const LDA_E = { H2O: -74.73204101826778, C6H6: -227.26271535054755, N2: -107.14784546338231, CH4: -39.61684762933404, NH3: -55.29017963855679, HF: -98.24584098961836, CO2: -184.5641630932059, C2H4: -76.85777172746918 };
+/* iteration 004 V2 · A VOLUME'S MOLECULE (lab/volumes.js, THE VOLUME FORMAT v1): its ladder is its record — every rung opens through chem.open, no solve */
+const VOL = 'a volume molecule is its record; the live roads are the catalogue’s', LIVE = new Set(['sto-3g', '6-31+g-star']);
 const LDA_RT = 'RT stands down under RKS LDA: its operators (the TDHF Fock build) are RHF\'s', LDA_TDA = 'TDA and the register stand down under RKS LDA: their operators are RHF\'s', LDA_VIB = 'VIBRATE stands down under RKS LDA: its modes and dD/dQ are RHF\'s';
 
 export function createChem(host, api) {
@@ -76,6 +78,15 @@ export function createChem(host, api) {
   let pendingOrbital = null, pendingKey = null, wantRef = null;               // 0.4.0 S4a: the { id, hash, nameKey } a project or link named                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
   const keyed = (N, K) => (K && N && N.reliable && N.group === K.group ? N.mos.find((m) => m.irrep === K.irrep && m.count === K.count && (m.member || null) === (K.member || null)) || null : null);
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
+  /* V2 · A VOLUME'S MOLECULE is not a preset: `volRef` holds the one on screen and `preset` is its key ('vol-1:aspirin'); `catPreset` the catalogue
+     molecule a project falls back to; `volKeep` the last opened (an undo re-opens it unread); `volWant` a project's, opened on the next solve;
+     `holds` the catalogue ids an INSTALLED volume carries */
+  let volRef = null, volKeep = null, volWant = null, volSeq = 0, catPreset = preset, holds = new Map();
+  const volName = (v) => `${String(v.name).toUpperCase()} · VOL. ${v.numeral}`;
+  const rungRec = () => volRef.lwm.header.rungs[basis].record;
+  function chemCharge(id) { return volRef && id === volRef.key ? volRef.charge : moleculeCharge(id); }   // the card's own: shadows the module's export with a volume molecule's
+  /** the molecule on screen as a row the stage words, the caption and EDIT › COPY read: the catalogue's, or a volume molecule's { id, name, formula, charge, volume } */
+  const row = () => (volRef ? { id: volRef.key, name: volRef.name, formula: volRef.meta.formulaM || volRef.meta.formula, charge: volRef.charge, volume: 'VOL. ' + volRef.numeral } : PRESET_BY_ID.get(preset) || null);
 
   /** the dial's own label: knob() paints on construction and calls fmt() at once, so this is HOISTED */
   function orbFmt(k) { return sol ? orbitalName(sol.names, k - 1, sol.nocc) : String(k); }   // lab/names.js: '1b1 · HOMO' (a dial's text takes the plain form)
@@ -141,6 +152,7 @@ export function createChem(host, api) {
         o.title = why; o.dataset.help = why;
       }
     }
+    if (volRef) { const og = el('optgroup', '', mSel), o = el('option', '', og, volName(volRef)); og.label = 'VOL. ' + volRef.numeral; o.value = volRef.key; o.title = o.dataset.help = volRef.name + ' · ' + volRef.geometry; }   // V2: the volume molecule on screen, until a catalogue pick
     mSel.value = preset; if (mSel.value !== preset) mSel.selectedIndex = -1;   // turned away from the molecule on screen: nothing chosen here yet
     mStep.setItems([...mSel.options].filter((o) => !o.disabled).map((o) => ({ id: o.value, label: o.textContent })), mSel.value || null); secStep.set(page);
     header();
@@ -175,10 +187,43 @@ export function createChem(host, api) {
   }
   fillSel(); lamps(); mSel.addEventListener('focus', () => { lamps(); });
   const mSeg = { root: mStep.root, set(v) { const s = (PRESET_BY_ID.get(v) || {}).section; if (s && s !== page) { page = s; fillSel(); } if (mSel.value !== v) mSel.value = v; mStep.set(v); shelfFill(); }, get() { return mSel.value; }, el: mSel };
-  const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: [
-    { id: 'sto-3g', label: 'STO-3G', title: 'The vendored minimal Cartesian basis; the oracle for all eight' },
-    { id: '6-31+g-star', label: '6-31+G*', title: 'A split-valence basis with diffuse and polarisation functions, for H, C, N, O, F molecules up to 46 Cartesian AOs — water’s first root moves 0.483 → 0.341' }],
-    onChange: (v) => { basis = v; solve(preset); if (api.pop) api.pop('BASIS · ' + bSeg.button(v).textContent); } });
+  /* V2 · THE BASIS SEG IS THE LADDER: a catalogue molecule keeps the live law (STO-3G; 6-31+G* under the cap), its other rungs from an INSTALLED volume
+     holding its id; a volume molecule's every rung is its record, a rung its file lacks disabled with the header's reason */
+  const B_TITLE = { 'sto-3g': 'The vendored minimal Cartesian basis; the oracle for all eight',
+    '6-31+g-star': 'A split-valence basis with diffuse and polarisation functions, for H, C, N, O, F molecules up to 46 Cartesian AOs — water’s first root moves 0.483 → 0.341' };
+  const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: Object.entries(BASIS_LABEL).map(([id, label]) => ({ id, label, title: B_TITLE[id] || label + ': in a volume' })),
+    onChange: (v) => { pressBasis(v); if (api.pop) api.pop('BASIS · ' + bSeg.button(v).textContent); } });
+  bSeg.root.addEventListener('pointerenter', () => { readHolds(); }); bSeg.root.addEventListener('focusin', () => { readHolds(); });   // the volumes are read when the hand comes near, never at boot
+  const liveOk = (P) => (P.recordOnly ? { ok: false, nAO: P.nAO, why: `${P.name} is past the live cap and opens only from its STO-3G record; another basis would be a live solve, which is not offered` } : basis631(P.id));
+  function paintBasis() {
+    const P = volRef ? null : PRESET_BY_ID.get(preset), big = P && liveOk(P), h = P && holds.get(P.id);
+    for (const b of Object.keys(BASIS_LABEL)) {
+      const btn = bSeg.button(b); let why = '';
+      if (volRef) why = volRef.rungs.includes(b) ? '' : volRef.why[b] || 'not in this file';
+      else if (b === 'sto-3g' || (b === '6-31+g-star' && big.ok)) why = '';
+      else if (h && h.rungs.includes(b)) why = '';
+      else why = b === '6-31+g-star' ? big.why : 'in a volume';
+      btn.disabled = !!why; btn.title = btn.dataset.help = why || (volRef ? `${BASIS_LABEL[b]} · ${volName(volRef)}'s record, no solve` : B_TITLE[b] && (b === 'sto-3g' || big.ok) ? B_TITLE[b] : `${BASIS_LABEL[b]} · from VOL. ${h.numeral}'s record, no solve`);
+    }
+  }
+  /** a press on the ladder: a volume molecule opens that rung; a catalogue molecule solves live where the law allows, else opens it from the volume that holds it */
+  function pressBasis(v) {
+    if (!BASIS_LABEL[v]) return Promise.resolve(null);
+    const P = volRef ? null : PRESET_BY_ID.get(preset), h = P && holds.get(P.id);
+    if (volRef ? volRef.rungs.includes(v) : v === 'sto-3g' || (v === '6-31+g-star' && liveOk(P).ok)) { basis = v; return solve(preset); }
+    if (h && h.rungs.includes(v)) return openVolume(h.volume, h.id, v);
+    bSeg.set(basis); return Promise.resolve(null);
+  }
+  /** the catalogue ids an INSTALLED volume holds, with their rungs (the index's) */
+  async function readHolds() {
+    const next = new Map(), s = await V.shelf().catch(() => ({ volumes: [] }));
+    for (const v of s.volumes) {
+      const st = await V.statusOf(v.id).catch(() => null), idx = st && st.state === 'installed' ? await V.index(v.id).catch(() => null) : null;
+      for (const m of (idx && idx.molecules) || []) if (PRESET_BY_ID.has(m.id) && !next.has(m.id)) next.set(m.id, { volume: v.id, numeral: v.numeral, id: m.id, rungs: Object.keys(m.rungs || {}) });
+    }
+    holds = next; paintBasis(); return holds;
+  }
+  paintBasis();
   const r1 = el('div', 'row tight', host), rV = el('div', 'row tight', host);
   r1.appendChild(bSeg.root);
   /* 0.7.3 K2 · METHOD beside BASIS: RHF · LDA, and U2's UHF on H₂ (folded in here); an open shell's RHF reads UHF and LDA waits for UKS. LDA always solves live
@@ -288,7 +333,7 @@ export function createChem(host, api) {
      (h2R null = the row's own geometry, byte for byte); METHOD UHF (the card's seg since 0.7.3) asks moleculeRHF for model 'uhf' (U1's arg); PROJECT `h2 { R, method }`, absent by default */
   let h2R = null, h2T = null; const R0 = moleculeAtoms('H2')[1].z, h2Box = el('div', 'mol-h2', more), h2Cv = el('canvas', 'mol-c mol-curve', h2Box), h2Row = el('div', 'row tight', h2Box);
   const h2Key = () => (preset === 'H2' && basis === 'sto-3g' && h2R ? '|' + h2R : '') + (method !== 'rhf' ? '|' + method : ''), eh = (x) => x.toFixed(2).replace('-', '−');   // and the METHOD (methods() keeps UHF to H₂)
-  function chemAtoms(id) { return moleculeAtoms(id, id === 'H2' && basis === 'sto-3g' ? h2R : null); }   // the card's own: shadows the module's export with the STRETCH's pose
+  function chemAtoms(id) { return volRef && id === volRef.key ? volRef.atoms : moleculeAtoms(id, id === 'H2' && basis === 'sto-3g' ? h2R : null); }   // the card's own: shadows the module's export with the STRETCH's pose (and V2's volume molecule)
   const h2K = knob({ label: 'STRETCH', min: 0.8, max: 6, value: R0, title: 'R(H–H) in bohr: the two nuclei re-posed at ±R/2 on z and re-solved; the row’s own 0.741 Å by default', fmt: (v) => v.toFixed(2) + ' bohr',
     onInput: (v) => { h2Read(v); }, onChange: (v) => { h2R = Math.abs(v - R0) < 5e-3 ? null : v; solve(preset); } });
   const roH2 = readout({ label: 'THE H₂ CURVE · STO-3G', cls: 'wide', value: '—', sub: '' }); h2Row.append(h2K.root, roH2.root);
@@ -320,7 +365,11 @@ export function createChem(host, api) {
 
   /* ── solve ────────────────────────────────────────────────────────────────────────────────────── */
   function solve(id = preset, { force = false, press = false } = {}) {
-    if (id !== preset) { preset = id; mSeg.set(id); }
+    if (volRef && id !== volRef.key) { volRef = null; volSeq++; fillSel(); }   // V2: a catalogue pick puts the volume molecule away (its option goes)
+    if (id !== preset) { volWant = null; preset = id; mSeg.set(id); }
+    if (volRef) return volSolve({ force, press });
+    if (volWant) { const w = volWant; volWant = null; return openVolume(w.volume, w.id, w.basis, { hand: false, network: false, on: false, sha: w.sha256 }); }   // a project's volume molecule, on its first solve
+    catPreset = preset;
     const P = PRESET_BY_ID.get(preset) || CHEM_PRESETS[0];
     if (wantRef && wantRef.id !== preset) wantRef = null;                   // a project's record reference lasts until the molecule changes
     /* A DISABLED ENTRY IS REFUSED HERE AND NOT SENT.  CuH and ZnH₂ converge to an RHF solution that is not a
@@ -328,10 +377,10 @@ export function createChem(host, api) {
        all — the refusal belongs in front of the worker, with the reason, rather than as a failed solve. */
     if (P.disabled) { status(P.name + ': ' + P.reason, 'warn'); return Promise.resolve(null); }
     /* THE BENZENE-CAP LAW (PLAN B2): a molecule past the cap opens only from its record — a basis change would be a solve */
-    const big = P.recordOnly ? { ok: false, nAO: P.nAO, why: `${P.name} is past the live cap and opens only from its STO-3G record; another basis would be a live solve, which is not offered` } : basis631(preset);
-    const back = !big.ok && basis !== 'sto-3g' ? `${P.name}: back to STO-3G — ${big.why}` : null;   // a refusal is a sentence, not a solve
+    const big = liveOk(P);
+    const back = !LIVE.has(basis) ? `${P.name}: back to STO-3G — ${BASIS_LABEL[basis]} opens from a volume (the BASIS seg)` : !big.ok && basis !== 'sto-3g' ? `${P.name}: back to STO-3G — ${big.why}` : null;   // a refusal is a sentence, not a solve
     if (back) { basis = 'sto-3g'; bSeg.set('sto-3g'); status(back, 'warn'); }
-    const b6 = bSeg.button('6-31+g-star'); if (b6) { b6.disabled = !big.ok; b6.title = big.why; }
+    paintBasis();
     /* THE ANSWER WE ALREADY HAVE IS THE ANSWER.  Beyond not paying twice, this is load-bearing: the worker caches
        its report on (atoms, basis, charge) and TRANSFERS that report's typed arrays, so a second chem.solve for the
        same key posts detached buffers, throws inside the worker's own handler, and never replies at all — the call
@@ -411,6 +460,65 @@ export function createChem(host, api) {
     pending = { key, p: task };
     return task;
   }
+  /* ── V2 · A VOLUME'S MOLECULE: the .lwm (lab/volumes.js, sha-256 checked) parsed once, each rung opened by THE RECORD ROAD's chem.open with its
+     ground.hash under the same `seq` law.  `network: false` is a project's road (installed only, else the sentence, no solve) ── */
+  async function openVolume(volId, molId, want = null, { hand = true, network = true, on: turnOn = true, sha = null } = {}) {
+    const seq0 = ++volSeq, same = (v) => v && v.volume === volId && v.id === molId;
+    let v = same(volRef) ? volRef : same(volKeep) ? volKeep : null;
+    if (!v) {
+      status(`opening ${molId} from ${volId}…`, 'warn'); if (api.loading) api.loading(true);
+      let idx = null, m = null;
+      try {
+        idx = await V.index(volId); m = idx.molecules.find((x) => x.id === molId);
+        if (!m) throw new Error(`there is no ${molId} in ${volId}`);
+        let buf = null, from = 'device';
+        try { buf = await V.file(volId, molId, { network: false }); } catch (e) { if (!network) throw e; buf = await V.file(volId, molId); from = 'network'; }
+        const lwm = parseLwm(buf), H = lwm.header;
+        v = { key: volId + ':' + molId, volume: volId, id: molId, numeral: idx.numeral, lwm, meta: H.meta, name: H.meta.name || molId, charge: H.meta.charge || 0,
+          atoms: H.geometry.atoms.map((a) => ({ Z: +a.Z, x: +a.x, y: +a.y, z: +a.z })), geometry: H.geometry.source || '', rungs: Object.keys(H.rungs),
+          why: { ...(H.skipped || {}), ...(H.failed || {}) }, sha256: m.sha256 || null, bytes: buf.byteLength, from };
+      } catch (e) {
+        if (seq0 === volSeq) { if (api.loading) api.loading(false);
+          status(network ? String(e && e.message || e) : `${String((m && m.name) || molId).toUpperCase()} · VOL. ${(idx && idx.numeral) || volId} is not on this device — install it in the PICKER's LIBRARY`, 'warn'); }
+        return null;
+      }
+      if (seq0 !== volSeq) return null;                                      // a later pick has moved on while the file was read
+    }
+    v.note = sha && v.sha256 && sha !== v.sha256 ? 'the project named an older file of this molecule; this is the current one' : null;
+    const b = want && v.rungs.includes(want) ? want : v.rungs[0];
+    if (want && b !== want) v.note = `${volName(v)} has no ${BASIS_LABEL[want] || want} rung (${v.why[want] || 'not in the file'}): opened at ${BASIS_LABEL[b]}`;
+    volRef = volKeep = v; volWant = null; preset = v.key; basis = b; bSeg.set(b); fillSel(); mSeg.set(v.key);
+    const p = solve(v.key, { press: hand });
+    if (turnOn && !on) setOn(true);
+    const r = await p; if (r && hand && api.hand) api.hand(preset);
+    readHolds(); return r;
+  }
+  /** the volume road of solve(): the rung's record through chem.open, kept and landed exactly as a library record is */
+  function volSolve({ force = false } = {}) {
+    const v = volRef;
+    if (!v.rungs.includes(basis)) basis = v.rungs[0];
+    bSeg.set(basis); paintBasis(); method = 'rhf'; methodsVol();
+    const key = v.key + '|' + basis + '|' + v.charge;
+    if (!force && sol && sol.key === key) { refresh(); return Promise.resolve(sol); }
+    if (!force && pending && pending.key === key) return pending.p;
+    setRun(false); rt = null; spec = null; fit = null; fitErr = null; selected = null; if (vibOn) setVib(false);
+    const seq = ++solveSeq, lib = rungRecord(v.lwm, basis), m = { op: 'chem.open', lib, hash: lib.ground.hash, basis };
+    status(`opening ${volName(v)} at ${BASIS_LABEL[basis]} from its record… ${lib.ground.nAO} AOs, ${lib.ground.electrons} electrons`, 'warn');
+    if (api.loading) api.loading(true);
+    const task = Promise.all([call(m, () => here(basis).then((W) => { try { return W.chemOpen(m); } catch (e) { return { refused: String(e && e.message || e) }; } })), loadMS()]).then(([r]) => {
+      if (seq !== solveSeq) return null;
+      if (!r || r.refused || r.error || !Number.isFinite(r.energy)) { sol = null; status(`${volName(v)} at ${BASIS_LABEL[basis]} did not open: ` + ((r && (r.refused || r.error)) || 'no answer'), 'warn'); refresh(); tell(); notify(); return null; }
+      r.opened = { bytes: v.bytes, from: v.from }; r.stem = lib.stem || null; r.volume = { volume: v.volume, id: v.id, numeral: v.numeral };
+      const fill = () => { r.key = key; r.seq = seq; r.note = v.note; v.note = null;
+        r.identity = MS ? MS.identityOf({ atoms: v.atoms, basisHash: r.hash, charge: v.charge, multiplicity: 1, model: 'RHF' }) : null; land(r); };
+      if (api.derived) api.derived(fill); else fill();
+      return r;
+    }).catch((e) => { if (seq === solveSeq) { sol = null; status('open failed: ' + String(e && e.message || e), 'warn'); refresh(); } return null; })
+      .finally(() => { if (pending && pending.key === key) pending = null; if (seq === solveSeq && api.loading) api.loading(false); });
+    pending = { key, p: task };
+    return task;
+  }
+  function methodsVol() { const b = mthS.button('lda'); mthS.button('uhf').style.display = 'none'; mthS.button('rhf').textContent = 'RHF'; b.disabled = true; b.title = b.dataset.help = VOL; mthS.set('rhf'); }
   const stem = (k) => k.replace(/\|(uhf|lda)$/, '');   // a solve's key without its METHOD: the molecule, basis, charge and H₂'s stretch
   /** a landing: `r` goes on stage and is kept beside this molecule's other solves (Δ LDA−RHF reads the pair) */
   function land(r) {
@@ -424,7 +532,7 @@ export function createChem(host, api) {
   /* Δ LDA−RHF: the pair [LDA, RHF] of this molecule when both are kept; asked for in VIEW (a project, a verb) with one missing, the other is solved quietly */
   const pair = () => { const s = sol && stem(sol.key), L = s && kept.get(s + '|lda'), R = s && kept.get(s); return L && R && L.D && R.D ? [L, R] : null; };
   let asked = null;
-  function partner() { const s = sol, k = stem(s.key) + (method === 'lda' ? '' : '|lda'); if (view !== 'dlda' || pair() || ldaWhy(PRESET_BY_ID.get(preset)) || s.model === 'UHF') return false; if (asked === s) return true; asked = s;
+  function partner() { const s = sol, k = stem(s.key) + (method === 'lda' ? '' : '|lda'); if (view !== 'dlda' || pair() || volRef || ldaWhy(PRESET_BY_ID.get(preset)) || s.model === 'UHF') return false; if (asked === s) return true; asked = s;
     return !!call({ op: 'chem.ground', atoms: chemAtoms(preset), basis, charge: chemCharge(preset), ...(method === 'lda' ? {} : { model: 'lda' }) }).then((r) => { if (r && r.D && sol === s) { r.key = k; kept.set(k, r); views(); pushMatrix(); refresh(); tell(); } }); }
   /* THE ORBITAL DIAL'S RANGE IS THE BASIS'S, so the dial is rebuilt with the molecule rather than clamped after
      the fact.  The handle is a `let` and is REASSIGNED: kit.js's knob() publishes `get shown()`, so copying the new
@@ -444,8 +552,8 @@ export function createChem(host, api) {
   /* 0.7.1 · AN OPEN SHELL STANDS THE CLOSED-SHELL ROADS DOWN: KICK, RUN, FLOW, PULSE, TDA and VIBRATE take the kit's disabled look and say why (the worker refuses them too); 0.7.3: so does RKS LDA, each with its sentence */
   const OPEN = 'open shell (UHF): the real-time run, TDA, the drive and the register are closed-shell roads in this cut', openNote = el('div', 'note', more); openNote.hidden = true; more.insertBefore(openNote, r2);
   let stood = '';                                                         // a closed shell never touches a control's help
-  function standDown() { const o = !sol.model ? '' : uhf() ? OPEN : 'RKS LDA: the real-time run, TDA, the drive, the register and VIBRATE stand down — their operators are RHF\'s'; if (o === stood) return; stood = o; openNote.hidden = !o; openNote.textContent = o; if (o) { setRun(false); if (flowOn) setFlow(false); if (vibOn) setVib(false); }
-    for (const b of [kickT.root, runSw.root, flowSw.root, tdaSw.root, vibSw.root, ...pSeg.root.querySelectorAll('button')]) { b.dataset.help0 ??= b.dataset.help || b.title || ''; b.disabled = !!o; b.title = b.dataset.help = !o ? b.dataset.help0 : uhf() ? OPEN : b === tdaSw.root ? LDA_TDA : b === vibSw.root ? LDA_VIB : LDA_RT; } }
+  function standDown() { const o = sol.volume ? VOL : !sol.model ? '' : uhf() ? OPEN : 'RKS LDA: the real-time run, TDA, the drive, the register and VIBRATE stand down — their operators are RHF\'s'; if (o === stood) return; stood = o; openNote.hidden = !o; openNote.textContent = o; if (o) { setRun(false); if (flowOn) setFlow(false); if (vibOn) setVib(false); }
+    for (const b of [kickT.root, runSw.root, flowSw.root, tdaSw.root, vibSw.root, ...pSeg.root.querySelectorAll('button')]) { b.dataset.help0 ??= b.dataset.help || b.title || ''; b.disabled = !!o; b.title = b.dataset.help = !o ? b.dataset.help0 : sol.volume ? VOL : uhf() ? OPEN : b === tdaSw.root ? LDA_TDA : b === vibSw.root ? LDA_VIB : LDA_RT; } }
   function rebuildOrbKnob() {
     views();
     const [lo, n] = span(), k = Math.min(Math.max(lo, orbital || lo), n);
@@ -458,7 +566,7 @@ export function createChem(host, api) {
 
   /* ── the real-time run ────────────────────────────────────────────────────────────────────────── */
   function kick() {
-    if (!sol || sol.model) { if (sol) status(uhf() ? OPEN : LDA_RT, 'warn'); return Promise.resolve(null); }   // 0.7.1: never a closed-shell RT run of an open shell (0.7.3: nor of an LDA solve)
+    if (!sol || sol.model || sol.volume) { if (sol) status(sol.volume ? VOL : uhf() ? OPEN : LDA_RT, 'warn'); return Promise.resolve(null); }   // 0.7.1: never a closed-shell RT run of an open shell (0.7.3: nor of an LDA solve)
     const seq = solveSeq;
     /* SYNTHESIS decision 2: the card's MMUT is UNRESTARTED, and 0 is how that is spelled on the wire.  It was
        never sent before, so the engine took its own default of 50 while this window said "unrestarted". */
@@ -705,8 +813,8 @@ export function createChem(host, api) {
       h2Note.dataset.k = sol.key; h2Note.innerHTML = `<b>Hidden correlation.</b> Two states share one density and one current: <m>a|σg²⟩ + b|σu²⟩</m> and <m>a|σg²⟩ − b|σu²⟩</m> differ by two orbitals, so every one-body observable is blind to the sign of <m>ab</m>; their energies differ by <m>4|ab|K</m> = ${d.toFixed(4)} Eh — ${m.fci.toFixed(6)} (the full CI) and ${(m.fci + d).toFixed(6)} Eh, with a ${a.toFixed(4)}, b ${b.toFixed(4)}, K ${K.toFixed(4)} at R ${R.toFixed(4)} bohr (lab/h2ci.js).`; h2Read();
     }
     roE.set(sol.energy.toFixed(9), 'ok');
-    const P = PRESET_BY_ID.get(preset) || {};
-    roE.setSub(`${P.name} · ${basis.toUpperCase()} · E_nuc ${Number(sol.Enuc).toFixed(6)}` + (sol.local ? ' · on the frame thread (no worker)' : ''));
+    const P = volRef ? { name: volName(volRef), source: volRef.geometry } : PRESET_BY_ID.get(preset) || {};
+    roE.setSub(`${P.name} · ${BASIS_LABEL[basis] || basis.toUpperCase()} · E_nuc ${Number(sol.Enuc).toFixed(6)}` + (sol.local ? ' · on the frame thread (no worker)' : ''));
     roE.root.title = (P.source || '') + ' — a FIXED geometry, never optimised by this window';
     const eH = sol.eps[sol.nocc - 1], eL = sol.eps[sol.nocc];
     roEps.set(`${eH.toFixed(6)} · ${Number.isFinite(eL) ? eL.toFixed(6) : '—'}`, '');
@@ -736,13 +844,13 @@ export function createChem(host, api) {
   }
 
   /* 0.5.4 P4 · THE STATUS of what this card puts on stage (lab/status.js): built on a landing, a VIEW change, a FLOW toggle or a load and KEPT — never in a frame */
-  function tell() { const P = PRESET_BY_ID.get(preset), row = (!lda() && (P.records || {})[basis]) || null; said = sol ? statusOf({ record: row, sol, oracle: lda() ? (LDA_E[preset] ? { what: 'PySCF RKS lda,vwn', energy: LDA_E[preset] } : null) : row ? null : basis === 'sto-3g' ? P.oracle : (P.oracle && P.oracle[basis]) || null, view: flowOn ? 'flow' : view, esp: espOn() ? esp : null, label: summed() && 'DENSITY · exact · ' + summed() }) : null; if (api.said) api.said(said); }
+  function tell() { const P = volRef ? { records: { [basis]: { oracle: rungRec().oracle, status: { energy: 'IMPORTED' }, geometry: volRef.meta.app ? null : 'computed' } } } : PRESET_BY_ID.get(preset), row = (!lda() && (P.records || {})[basis]) || null; said = sol ? statusOf({ record: row, sol, oracle: lda() ? (LDA_E[preset] ? { what: 'PySCF RKS lda,vwn', energy: LDA_E[preset] } : null) : row ? null : basis === 'sto-3g' ? P.oracle : (P.oracle && P.oracle[basis]) || null, view: flowOn ? 'flow' : view, esp: espOn() ? esp : null, label: summed() && 'DENSITY · exact · ' + summed() }) : null; if (api.said) api.said(said); }
   /* 0.6.1 F2 · THE SYMMETRY CERTIFICATE (names.js symmetryDefects) once per landing of a density — the still, the kick, RUN's D(t) and the
      register's D₀ + ΔD (`certify`) at ≤ 5 Hz, never in a frame; kept ε < 1e-9 · broken > 1e-6 · nearly between; the catalogue's group and frame */
   let symAt = 0; const symDue = () => { const t = performance.now(); return t - symAt >= 200 && !!(symAt = t); }, gsub = (g) => g.replace(/\d/g, (d) => '₀₁₂₃₄₅₆₇₈₉'[d]);
   const num = (x) => (x >= 1e-3 ? String(+x.toPrecision(2)) : x.toExponential(0).replace(/e-(\d+)/, (_, e) => '·10⁻' + e.replace(/\d/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])));
   function symmetryLine(D, src) {
-    const sym = PRESET_BY_ID.get(preset).symmetry, g = sym.group, say = (v, line, cls = '') => { roSym.set(v, cls); roSym.setSub(line); };
+    const sym = (volRef ? rungRec().input.symmetry : PRESET_BY_ID.get(preset).symmetry) || { group: 'C1' }, g = sym.group, say = (v, line, cls = '') => { roSym.set(v, cls); roSym.setSub(line); };
     if (!sol || !D || g === 'C1') return say(sol && D ? 'C₁' : '—', sol && D ? 'C1 · no symmetry declared' : '');
     let ops; try { ops = symmetryDefects({ atoms: chemAtoms(preset), shells: sol.shells, D, group: g, frame: sym.frame }); } catch (e) { return say(gsub(g), String(e.message || e), 'warn'); }
     if (!ops.length) return say(gsub(g), 'declared · no table');
@@ -899,8 +1007,8 @@ export function createChem(host, api) {
   function update(t) { if (!on) return; pump(); if (view === 'esp') espPump(); if (vibFr && sol) vibPose(t); }
   /* 0.7.0 V1 · VIBRATE: on/off, the mode, the amplitude (× Q₀); the record decoded once a molecule; ONE chem.vib.frames in flight, the newest asked next */
   async function setVib(v, k = vibK, a = vibAmp) {
-    const row = PRESET_BY_ID.get(preset).vibrate, was = vibOn; vibK = k | 0; vibAmp = Math.min(4, Math.max(0, +a || 0));
-    vibOn = !!(v && row && sol && sol.D && basis === 'sto-3g' && !sol.model); vibSw.set(vibOn); if (v && !vibOn && sol && sol.model) { status(uhf() ? OPEN : LDA_VIB, 'warn'); return false; }
+    const row = !volRef && PRESET_BY_ID.get(preset).vibrate, was = vibOn; vibK = k | 0; vibAmp = Math.min(4, Math.max(0, +a || 0));
+    vibOn = !!(v && row && sol && sol.D && basis === 'sto-3g' && !sol.model); vibSw.set(vibOn); if (v && !vibOn && sol && (sol.model || sol.volume)) { status(sol.volume ? VOL : uhf() ? OPEN : LDA_VIB, 'warn'); return false; }
     if (!vibOn) { vibFr = vibD = vibAt = null; vibJ = -1; if (was && S() && sol && S().pose(model(), sol.shells)) pushMatrix(); if (v) status(row ? 'VIBRATE plays the STO-3G record of a solved molecule' : 'no modes recorded for this molecule', 'warn'); vibSay(); tell(); return false; }
     setRun(false);
     if (!vib || vib.id !== preset) { const got = await fetchRecord(row.hash, { network: true }); if (!vibOn) return false; if (!got.record) { status('VIBRATE: the mode record did not open — ' + got.why, 'warn'); return setVib(false); }
@@ -926,8 +1034,8 @@ export function createChem(host, api) {
     vibD = vibFr.D.subarray(j * n * n, (j + 1) * n * n); if (S() && S().pose(model(), vibSh)) pushMatrix(); vibSay(held);
   }
   function vibSay(held = vibOn && vib && flash()) {
-    const row = PRESET_BY_ID.get(preset).vibrate, w = vibOn && vib ? vibW() : 0; rVib.classList.toggle('off', !row);
-    roVib.set(!w ? (row ? '—' : 'no modes recorded for this molecule') : `${vib.name[vibK]} ${Math.round(vib.omega[vibK])} cm⁻¹ · ${vib.irrep[vibK]} · ${vibAmp.toFixed(1)} Q₀ = ${(vibAmp * vib.q0[vibK]).toFixed(3)} bohr · T ${Math.round(2 * Math.PI / w)} a.u. · `
+    const row = !volRef && PRESET_BY_ID.get(preset).vibrate, w = vibOn && vib ? vibW() : 0; rVib.classList.toggle('off', !row);
+    roVib.set(!w ? (row ? '—' : volRef ? VOL : 'no modes recorded for this molecule') : `${vib.name[vibK]} ${Math.round(vib.omega[vibK])} cm⁻¹ · ${vib.irrep[vibK]} · ${vibAmp.toFixed(1)} Q₀ = ${(vibAmp * vib.q0[vibK]).toFixed(3)} bohr · T ${Math.round(2 * Math.PI / w)} a.u. · `
       + (held ? `held: ${held.alias.toFixed(1)} Hz at this RATE, above ${FLASH_HZ} a second — RATE ≤ ${Math.floor(2 * Math.PI * FLASH_HZ / w)} breathes` : `${(w * api.clock.rate / (2 * Math.PI)).toFixed(1)} Hz on screen`) + (vibAmp > 2 ? ' · not harmonic here' : ''));
   }
   async function breathe() { if (!(await setVib(true))) return false; api.breathe(Math.min(3000, 2 * Math.PI / vibW())); return true; }   // one breath a second: always under the flash law
@@ -945,7 +1053,7 @@ export function createChem(host, api) {
     else if (on) solve(preset);
     return on;
   }
-  const presentation = () => ({ preset, basis, view, orbital, axis, kappa, speed, dt, integrator, tda, core, valence, on, ...(vibOn ? { vibrate: { mode: vibK, amp: vibAmp } } : {}), ...(pulse !== 'none' ? { pulse } : {}), ...(preset === 'H2' && (h2R || method === 'uhf') ? { h2: { R: h2R || R0, method: method === 'uhf' ? 'uhf' : 'rhf' } } : {}), ...(method === 'lda' ? { method } : {}) });   // 0.7.3 K2: `method` only for LDA (UHF stays H₂'s h2.method)
+  const presentation = () => ({ preset: volRef ? catPreset : preset, basis: volRef && !LIVE.has(basis) ? 'sto-3g' : basis, view, orbital, axis, kappa, speed, dt, integrator, tda, core, valence, on, ...(vibOn ? { vibrate: { mode: vibK, amp: vibAmp } } : {}), ...(pulse !== 'none' ? { pulse } : {}), ...(preset === 'H2' && (h2R || method === 'uhf') ? { h2: { R: h2R || R0, method: method === 'uhf' ? 'uhf' : 'rhf' } } : {}), ...(method === 'lda' ? { method } : {}) });   // 0.7.3 K2: `method` only for LDA (UHF stays H₂'s h2.method)
   /* ── THE SAVED STATE, and the one place this window departs from its commission ──────────────────────────────
    * save() returns THE PRESENTATION ONLY, not lab/molecule-state.js's record.  Two reasons, both in the tree:
    *   · rack.js:5048's law — "Solver caches, traces, collisions, particles and pulse runs do not [belong to the
@@ -966,7 +1074,9 @@ export function createChem(host, api) {
       the record itself is device content and never rides in a file): the record in use, else the one the opened project named,
       else the catalogue's — and `nameKey` is the orbital's S1 name, the portable half for when the hash has moved on. */
   function save() {
-    const o = presentation(), P = PRESET_BY_ID.get(preset), rec = P && P.records && P.records[basis];
+    const o = presentation(), vw = volRef ? { volume: volRef.volume, id: volRef.id, basis, sha256: volRef.sha256 } : volWant;
+    if (vw) { o.volume = { ...vw }; return o; }                                   // V2: the volume molecule on screen (or the one a project named, still to open) — never `library`
+    const P = PRESET_BY_ID.get(preset), rec = P && P.records && P.records[basis];
     if (!rec) return o;
     const mine = sol && sol.key === preset + '|' + basis + '|' + chemCharge(preset);
     o.library = { id: preset, hash: mine && sol.record ? sol.record.hash : wantRef ? wantRef.hash : rec.hash,
@@ -990,8 +1100,16 @@ export function createChem(host, api) {
     if (o.molecule) loadMS();                                                     // M8: a file carrying a full record asks for the module too
     if (o.molecule && MS && typeof MS.restoreMolecule === 'function') { try { MS.restoreMolecule(o.molecule); } catch (_) {} }
     let resolve = false;
-    if (typeof o.preset === 'string' && PRESET_BY_ID.has(o.preset)) { if (o.preset !== preset) resolve = true; preset = o.preset; mSeg.set(preset); }
-    if (typeof o.basis === 'string') { if (o.basis !== basis) resolve = true; basis = o.basis; bSeg.set(basis); }
+    /* V2 · `volume`: the one on screen keeps its file; another opens on the next solve, from this device only (`preset` is what a missing one leaves) */
+    const W = o.volume, vw = W && typeof W.volume === 'string' && typeof W.id === 'string' && BASIS_LABEL[W.basis] ? { volume: W.volume, id: W.id, basis: W.basis, sha256: typeof W.sha256 === 'string' ? W.sha256 : null } : null;
+    const same = !!(vw && volRef && vw.volume === volRef.volume && vw.id === volRef.id);
+    if (volRef && !same) { volRef = null; volSeq++; preset = catPreset; resolve = true; fillSel(); }
+    if (same) { volWant = null; if (vw.basis !== basis) { basis = vw.basis; bSeg.set(basis); resolve = true; } }
+    else {
+      if ((volWant = vw)) resolve = true;
+      if (typeof o.preset === 'string' && PRESET_BY_ID.has(o.preset)) { if (o.preset !== preset) resolve = true; preset = catPreset = o.preset; mSeg.set(preset); }
+      if (typeof o.basis === 'string') { if (o.basis !== basis) resolve = true; basis = o.basis; bSeg.set(basis); }
+    }
     const h2 = (preset === 'H2' && o.h2) || {}, nR = h2.R > 0 && Math.abs(h2.R - R0) >= 5e-3 ? Math.min(6, Math.max(0.8, h2.R)) : null, nM = o.method === 'lda' ? 'lda' : h2.method === 'uhf' ? 'uhf' : 'rhf';   // 0.7.1 U2: absent = the row's R, RHF
     if (nR !== h2R || nM !== method) { resolve = true; h2R = nR; method = nM; } h2K.set(h2R || R0); mthS.set(method);
     const L = o.library;                                                          // 0.4.0 S4a: the record this file names, fetched on open if absent
@@ -1068,7 +1186,7 @@ export function createChem(host, api) {
     /** the chem worker's own ledger — `solverCalls` counts every moleculeRHF and rpa it ran (a record's open adds none) */
     workerStat() { return call({ op: 'stat' }); },
     /** 0.5.4 P4 · what is on stage and how far it goes (PLAN R8; R25 §12.5): a thin caller — tell()'s status, the engine's own limits; null before a solve; never a frame's call */
-    capability() { if (!sol) return null; const row = (PRESET_BY_ID.get(preset).records || {})[basis] || null;
+    capability() { if (!sol) return null; const row = volRef ? { caps: rungRec().caps } : (PRESET_BY_ID.get(preset).records || {})[basis] || null;
       return { caps: row ? row.caps : null, observables: { density: !!sol.D || factor(), orbital: true, flow: !!sol.D, states: !row || row.caps.states }, derivatives: 'UNKNOWN', identity: sol.identity, status: said,
         limits: { lmax: COMPONENT_ORDER.length - 1, Z: MAX_Z, densityAO: MAX_MOL_AO, orbitalAO: MOL_LIMITS.ao }, precision: { path: 'f64 → f32 → f16 texel', law: FIELD_LAW },
         online: 'the ground solve or the record\'s open; the spectrum; a kick\'s run; the field on the GPU', cached: 'the worker\'s solve on (atoms, basis, charge); a record on this device; the field per product',
@@ -1083,7 +1201,10 @@ export function createChem(host, api) {
     knobs: { kick: () => kapKnob, speed: () => spdKnob },
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
     solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); }, pick: handPick,
-    preset() { return preset; },
+    preset() { return preset; }, row,
+    /** V2 · a volume's molecule on the stage (the PICKER's LIBRARY, an `lw:volume=` link, __LW.chem): → the landing, or null with the reason on the status line */
+    openVolume(volId, molId, b = null, opts) { return openVolume(volId, molId, b, opts); },
+    get volume() { return volRef ? { volume: volRef.volume, id: volRef.id, numeral: volRef.numeral, name: volRef.name, basis, rungs: volRef.rungs.slice(), sha256: volRef.sha256 } : null; },
     /** 0.7.3 K2 · METHOD from outside (the verb, __LW.chem): the seg's own road, a hand press; → the solve, or null where it is not offered */
     setMethod(v) { const b = mthS.button(v); if (!b || b.disabled || b.style.display === 'none') return Promise.resolve(null); if (v === method) return solve(preset); mthS.set(v); method = v; return solve(preset).then((r) => { if (r && api.hand) api.hand(preset); return r; }); }, get method() { return method; },
     setView(v) { if (!['density', 'orbital', 'diff', 'esp', 'spin', 'dlda'].includes(v) || (v === 'spin' && !(sol && sol.Ds)) || (v === 'dlda' && !pair()) || (v !== 'orbital' && sol && !sol.D && !(v === 'density' && factor()))) return view; view = v; vSeg.set(v); seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); return view; },
@@ -1125,7 +1246,7 @@ export function createChem(host, api) {
       return this.state();
     },
     /** the BASIS control from outside: the same road as the segment — it re-solves, and falls back with a sentence where 6-31+G* is not offered */
-    setBasis(v) { basis = v === '6-31+g-star' ? v : 'sto-3g'; bSeg.set(basis); return solve(preset); }, get basis() { return basis; },
+    setBasis(v) { if (!BASIS_LABEL[v]) v = 'sto-3g'; if (!volRef && LIVE.has(v)) { basis = v; bSeg.set(basis); return solve(preset); } return readHolds().then(() => pressBasis(v)); }, get basis() { return basis; },   // V2: the ladder's other rungs are the seg's own road
     /** the RUN switch itself, from outside: the live pump (`run(n)` is the scripted, bounded road) */
     setRun(v) { return setRun(v); },
     stop() { setRun(false); return false; },
