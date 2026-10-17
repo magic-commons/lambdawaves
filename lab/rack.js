@@ -29,7 +29,7 @@ import { createMaterial } from './windows/material.js'; import { createSettingsC
 import { getHamiltonian, getZ } from './hamiltonian.js';
 import { createStateCard } from './windows/state.js';   // 0.5.2 R2a: the STATE card, out of boot()
 import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js'; import { createFacade } from './shell/facade.js'; import { createVerbs } from './verbs.js';   // 0.5.2 R3a (edit-domain.js left with the history) · R5 the facade
-import { createCameraLaw } from './camera-law.js';   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
+import { createCameraLaw } from './camera-law.js'; import { createMainMenu } from './main-menu.js';   // iteration 003: THE MAIN MENU   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { createCurvesPanel } from './mir/panels/curves.js';     // 0.5.1 D10-24: the CURVES card's rows are the kit's panel over the stage canvas
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
@@ -115,7 +115,7 @@ export async function boot(dom) {
     dom, ui, device, DEVICES, reg, hNote, clock, appPlay, obs, mat, FIELD_CHROME, rates, energyOf, sturm, labelExpect, settingsStore, useCompactDefaults, PAL_DEF, isPhone, isTablet, FIRST_RUN,
     appleDevice, LOOK_DEFAULTS,
     hooks: { theme: null, restage: null, setStageColour: null, setStageFollow: null, setStage: null, setGamut: null, setTheme: null, ab: null, slap: null, period: null, keys: null, warning: null, sheet: null, status: null },   // sheet / status: 0.5.4 P4 (badges.js, informational.js)
-    state: { history: null, palette: null, molFormulaScale: 1, atomLabelsScale: 1, space: 'x', playedLast: false, uiHidden: false, pointerHeld: false, metersWall: 0, govVersion: -1, keplerDirty: true, badgesWall: 0,
+    state: { history: null, palette: null, mainMenu: null, molFormulaScale: 1, atomLabelsScale: 1, space: 'x', playedLast: false, uiHidden: false, pointerHeld: false, metersWall: 0, govVersion: -1, keplerDirty: true, badgesWall: 0,
       applyVisuals: true, modView: null, modHost: null, modWall: 0, tl: null, modExpOn: null, dodge: null, filmCard: null, feedMs: 0, rotMoved: false, rotTicking: false, audioCap: null, modArm: true,
       occludeDirty: true, occludeAt: 0, stageMix: 0.04, stageFollow: true, refSnapshot: null, pendingRef: null, warmTimer: 0, warmIdle: 0, dragging: false, cornerLayoutDirty: true,
       exportLocked: false, histShown: null, lastNmax: 1, capApi: null, camKnobs: {}, exporter3d: null, flowEpoch: null, chem: null, restampParams: null, molSession: null, register: null,
@@ -896,6 +896,7 @@ export async function boot(dom) {
    * browser's preferences are the reader's furniture, and the picture goes on top.
    * It is also before `history.clear()` below, which is the law: a link is the BOTTOM of the stack. */
   const linkAtBoot = openLink();
+  createMainMenu(app, { open: !linkAtBoot.opened && !q.get('preset') && q.get('menu') !== '0' });   // iteration 003: the front page, unless something was opened
   /* the fragment is a live address, not only a start.  WAVE 133 (found by its verifier; the hole is wave 56's): a link pasted
      over an EDITED session replaced the edit and wiped the undo ring without a question, and over an unedited one left the page
      reading dirty although a reload brings the same scene back clean.  It now asks first, in the house's words, and a link
