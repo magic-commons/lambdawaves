@@ -1,0 +1,124 @@
+"""report.py — <catalogue>/vol-1.stats.json → research/iteration-004/CAT-BUILD.md (the committed report of row CAT).
+
+  python -I tools/volumes/catalogue/report.py [> research/iteration-004/CAT-BUILD.md]
+
+It prints the counts (by source, by tag, by heavy-atom bin, by geometry, by blurb source), the exclusions by reason and the
+licences, from the numbers build.py measured — nothing is typed by hand here, so the report cannot drift from the file.
+"""
+import collections, datetime, json, os, sys
+sys.path.insert(0, os.path.dirname(__file__))
+from common import DATA, read_json
+
+S = read_json(os.path.join(DATA, 'vol-1.stats.json'))
+C = read_json(os.path.join(DATA, 'vol-1.candidates.json'))
+EX = read_json(os.path.join(DATA, 'vol-1.excluded.json'))
+w = sys.stdout.write
+def table(head, rows):
+    w('| ' + ' | '.join(head) + ' |\n|' + '|'.join(['---'] * len(head)) + '|\n')
+    for r in rows: w('| ' + ' | '.join(str(x) for x in r) + ' |\n')
+    w('\n')
+
+NOTE = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--note=')), None)
+if NOTE: w(f'> **{NOTE}**\n\n')
+w(f"""# CAT · THE CANDIDATE LIST (iteration 004, row CAT THE CATALOGUE)
+
+`~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json` — **{S['count']} molecules**, built {S['built']}, schema 1.
+Scripts: `tools/volumes/catalogue/` (committed). Data, caches and the exclusion list: `~/Documents/LAMBDAWAVES-VOLUMES/catalogue/`
+(never in git; every network answer is cached in `catalogue/cache/http.sqlite`, so a re-run is offline and asks PubChem nothing).
+
+THE PIPELINE, step 1 of PLAN.md. Six collectors nominate, PubChem resolves, one entry survives per InChIKey:
+
+```
+node   tools/volumes/catalogue/app-own.mjs        the app's own 98, at their PINNED geometries (read from the module)
+python -I tools/volumes/catalogue/fetch_chembl.py   ChEMBL approved small molecules (max_phase 4) + ATC
+python -I tools/volumes/catalogue/fetch_atc.py      the WHO ATC classification's own words (for the blurbs)
+python -I tools/volumes/catalogue/chebi.py          ChEBI 3-star roles and structural classes + definitions
+python -I tools/volumes/catalogue/fetch_wikidata.py every compound with an English Wikipedia article (+ its sitelink count)
+python -I tools/volumes/catalogue/fetch_who_eml.py  the WHO Model List of Essential Medicines (names only)
+python -I tools/volumes/catalogue/build.py          resolve · screen · filter · geometry · tag · blurb · priority · write
+python -I tools/volumes/catalogue/report.py         this report
+```
+
+## THE COUNTS
+
+Rows per source (a molecule is counted once per source that nominates it; most carry several):
+
+""")
+table(['source', 'molecules'], sorted(S['bySource'].items(), key=lambda kv: -kv[1]))
+w('The combinations, most common first (PubChem is on every row and is left out of the key):\n\n')
+table(['sources', 'molecules'], list(S['bySourceSet'].items())[:18])
+w('By tag (PLAN.md\'s vocabulary only; a molecule carries 1–4):\n\n')
+table(['tag', 'molecules'], list(S['byTag'].items()))
+w('Tags per molecule: ' + ' · '.join(f'{k} tag{"s" if int(k) > 1 else ""}: {v}' for k, v in sorted(S['byTagCount'].items())) + '\n\n')
+w('By heavy atoms:\n\n')
+table(['heavy atoms', 'molecules'], list(S['byHeavyBin'].items()))
+w('By geometry:\n\n')
+table(['geometry', 'molecules'], list(S['byGeometry'].items()))
+w('By blurb:\n\n')
+table(['blurb written by', 'molecules'], list(S['byBlurbSource'].items()))
+
+w(f"""## THE EXCLUSIONS
+
+{S['excludedCount']} nominations were refused, and every one is written down with its reason in
+`~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.excluded.json`. By reason:
+
+""")
+table(['reason', 'count'], list(S['excludedByReason'].items())[:26])
+w('By the source that nominated it:\n\n')
+table(['source', 'refused'], list(S['excludedBySource'].items())[:12])
+w(f"""THE TWO SCREENS. **{S['screens']['cwc']}** nominations were refused as Chemical Weapons Convention scheduled chemicals, listed
+precursors or members of a scheduled family — by NAME ({S['screens']['namedScheduled']} of the Annex's own names resolved through
+PubChem to an InChIKey skeleton) and by CLASS (five coarse substructure families, so a congener under another name is refused too),
+and by Wikidata's own "chemical warfare agent" uses. **{S['screens']['illicit']}** were refused as controlled psychoactive
+substances that are not approved medicines ({S['screens']['namedControlled']} names resolved, plus ChEBI's hallucinogen and opioid
+roles and Wikidata's recreational-drug uses); an approved medicine passes the second screen, so morphine and fentanyl are in the
+library as medicines and nothing else of that kind is.
+
+## THE TEN FIRST ROWS (priority order: the app's own, then the WHO essential medicines and the most recognisable names, then small before large)
+
+""")
+table(['priority', 'id', 'name', 'tags', 'heavy'],
+      [[m['priority'], '`' + m['id'] + '`', m['name'], ' · '.join(m['tags']), m['heavy']] for m in C['molecules'][:10]])
+
+# ── what the vocabulary cannot say, measured ────────────────────────────────────────────────────────────────────────
+meds = [m for m in C['molecules'] if 'medicine' in m['tags']]
+only_med = [m for m in meds if m['tags'] == ['medicine']]
+atc_groups = collections.Counter()
+for m in meds:
+    for s in m['sources']:
+        for c in (s.get('atc') or []): atc_groups[c[:3]] += 1
+w(f"""## WHAT THE VOCABULARY CANNOT SAY YET (a proposal, NOT used in the file)
+
+{len(meds)} rows carry `medicine`, and **{len(only_med)}** of them carry nothing else, because PLAN.md's vocabulary has a word for
+only eight of the ATC's fourteen first letters. The eight plain words below would shelve most of that remainder; every one is a
+word a reader would use about themselves, and each maps to whole ATC groups already in the file. They are proposed here and are
+NOT in `vol-1.candidates.json` — the file uses PLAN.md's vocabulary and nothing else.
+
+""")
+table(['proposed word', 'what it would hold', 'ATC groups (rows carrying one)'],
+      [['`eye`', 'eye drops and eye medicines', f"S01 ({atc_groups['S01']})"],
+       ['`lung`', 'asthma and cough medicines', f"R03 ({atc_groups['R03']}), R05 ({atc_groups['R05']})"],
+       ['`skin`', 'creams, antifungals and acne medicines', f"D01/D06/D07/D10/D11 ({sum(atc_groups[g] for g in ('D01', 'D06', 'D07', 'D10', 'D11'))})"],
+       ['`stomach`', 'antacids, ulcer and gut medicines', f"A02/A03/A06/A07 ({sum(atc_groups[g] for g in ('A02', 'A03', 'A06', 'A07'))})"],
+       ['`diabetes`', 'insulin-sparing and blood-sugar medicines', f"A10 ({atc_groups['A10']})"],
+       ['`parasite`', 'malaria and worm medicines', f"P01/P02/P03 ({sum(atc_groups[g] for g in ('P01', 'P02', 'P03'))})"],
+       ['`immune`', 'immune suppressants and modifiers', f"L03/L04 ({sum(atc_groups[g] for g in ('L03', 'L04'))})"],
+       ['`explosive`', 'TNT, PETN, nitroglycerin and their kin', 'none — they sit under `material` and `fuel` today']])
+w("""Two more that would earn their place outside medicine, if Josh wants ten: `refrigerant` (the CFC, HCFC, HFC and HFO rows, which
+are `atmosphere` + `gas` today) and `battery` (the carbonate and nitrile electrolyte solvents, now `material` + `solvent`).
+
+## THE LICENCES
+
+""")
+table(['source', 'what it gave', 'licence'], [[s['name'], s['what'], s['licence']] for s in S['sources']])
+w(f"""Attribution the app must carry: ChEBI data from https://www.ebi.ac.uk/chebi (the release named above), CC BY 4.0 — every blurb
+marked `ChEBI definition (CC BY 4.0)` is ChEBI's own words, trimmed to one or two sentences. ChEMBL and the ATC words are CC BY-SA
+3.0 and are used as facts (a code, a group's name), not as text. PubChem is a U.S. Government work in the public domain. Wikidata
+is CC0. The WHO Model List enters as NAMES only. Every other blurb is λWAVES' own (`blurbSource: 'λWAVES'`).
+
+## WHAT A ROW CARRIES
+
+`id · name · iupac · synonyms (≤6) · formula (Hill) · charge · multiplicity (1) · cid · inchi · inchikey · smiles · mw · exactMass ·
+heavy · nAtoms · xlogp · tpsa · hbd · hba · rotatable · complexity · tags · blurb · blurbSource · atomsAng · geometrySource ·
+sources · priority` — PLAN.md's `meta` for the .lwm header, plus the geometry the solver needs.
+""")
