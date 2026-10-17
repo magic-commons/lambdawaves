@@ -8,7 +8,15 @@
  *   --partial   also pack a molecule whose ladder is not finished (its converged rungs); by default only a finished one
  *   --out F     write ONE molecule's .lwm to F and nothing else (the test fixture: tests/fixtures/volumes/H2O.lwm)
  *   --incremental  keep a molecule's .lwm when its header says it was packed from this raw/<id>/meta.json (its digest without the
- *               solver's clocks) by this packer version (header.source) — a repack while the solver runs touches only what moved
+ *               solver's clocks) by this packer version (header.source) — a repack while the solver runs touches only what moved;
+ *               a kept .lwm is looked for in every vol-<n>/ of the out dir, then of the data's dist (a theme may move a molecule)
+ *   --out-dir D the dist to write (default ~/Documents/LAMBDAWAVES-VOLUMES/dist); pack-report-<vol>.json goes beside it
+ * THE SHELF (iteration 005 S):
+ *   --themes F  tools/volumes/themes.json: every FINISHED molecule to the FIRST theme whose `any` it carries (`app`: also the app's own
+ *               table; `rest`: the rest), a theme ordered by the catalogue's `priority`, split past --cap bytes (5e9) of .lwm + .webp
+ *               into 'TITLE · 2' with the next numeral; writes dist/vol-<n>/ for each and ONE volumes.json (replacing the old one)
+ *   --archive   per volume, dist/LAMBDAWAVES-VOL-<numeral>.lwv (lab/volumes-format.js THE ARCHIVE) and its .sha256; the shelf entry gains
+ *               archive: { name, bytes, sha256 } and drops `index` unless --fetchable (the dev link; a Drive volume has no index)
  *
  * PER RUNG — or the rung is REFUSED, never shipped (an AO-order bug must be impossible to ship):
  *   the app's basis: lab/md.js basisFrom on the vendored file (cart); its nAO is the solver's and its hash is the record's ground.hash
@@ -19,7 +27,7 @@
  *   indices-only form; validateRecord(record) = [] and chem.open answers its energy with 0 solver calls, or no file.
  *   ε and the energy are the solver's f64; C is f32 (7 digits: the picture's precision, stated in the header); Mulliken f32.
  * Deterministic bytes: no clock enters a .lwm, index.json or volumes.json (the solver's clocks stay in raw/); sha-256 per file. */
-import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync, readdirSync, copyFileSync, openSync, writeSync, closeSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { homedir } from 'node:os';
@@ -30,7 +38,7 @@ import { BASIS_FILES } from '../../lab/rhf-molecule.js';
 import { nameOrbitals, characters, coreCount, CONVENTION } from '../../lab/names.js';
 import { stemOf, BASIS_LABEL } from '../../lab/latex-state.js';
 import { validateRecord, atomsKey, SCHEMA } from '../../lab/library.js';
-import { encodeLwm, parseLwm, rungRecord, LWM_SCHEMA } from '../../lab/volumes-format.js';
+import { encodeLwm, parseLwm, rungRecord, LWM_SCHEMA, LWV_MAGIC, parseLwv } from '../../lab/volumes-format.js';
 import { chemRegister, chemOpen, chemSolverCalls } from '../../lab/mathworker.js';
 import { MOLECULE_BY_ID } from '../../lab/molecules.js';
 
@@ -38,7 +46,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const args = process.argv.slice(2), has = (f) => args.includes(f), argOf = (f, d = null) => (has(f) ? args[args.indexOf(f) + 1] : d);
 const many = (f) => args.flatMap((a, i) => (a === f ? [args[i + 1]] : []));
 const DATA = path.resolve(process.env.LW_VOLUMES || path.join(homedir(), 'Documents/LAMBDAWAVES-VOLUMES'));
-const RAW = path.join(DATA, 'raw'), DIST = path.join(DATA, 'dist');
+const RAW = path.join(DATA, 'raw'), DIST = path.resolve((argOf('--out-dir') || path.join(DATA, 'dist')).replace(/^~/, homedir()));
+const LOOK = [...new Set([DIST, path.join(DATA, 'dist')])];
+const THEMES = argOf('--themes'), CAP = +argOf('--cap', 5e9), ARCHIVE = has('--archive'), FETCHABLE = has('--fetchable');
 const VOL = argOf('--volume', 'vol-1'), NUMERAL = argOf('--numeral', 'I'), TITLE = argOf('--title', 'Volume ' + NUMERAL);
 const BLURB = argOf('--blurb', 'Named molecules, each solved in RHF up the whole basis ladder STO-3G → 6-31+G*, with its identifiers and properties.');
 const ONLY = argOf('--only') ? new Set(argOf('--only').split(',')) : null, PARTIAL = has('--partial'), OUT = argOf('--out'), INCREMENTAL = has('--incremental');
@@ -95,9 +105,10 @@ function readNpy(b, name) {
 }
 
 /* ── the molecules: the candidates' ids, in their order ── */
+const CANDS = new Map();                                           // id → its catalogue row (tags, priority, sources: THE SHELF's themes)
 function members() {
   const ids = [];
-  for (const f of many('--candidates')) for (const m of JSON.parse(readFileSync(f.replace(/^~/, homedir()), 'utf8')).molecules) ids.push(m.id || m.app);
+  for (const f of many('--candidates')) for (const m of JSON.parse(readFileSync(f.replace(/^~/, homedir()), 'utf8')).molecules) { ids.push(m.id || m.app); if (!CANDS.has(m.id || m.app)) CANDS.set(m.id || m.app, m); }
   for (const s of (argOf('--app') || '').split(',').filter(Boolean)) ids.push(s);
   if (OUT) ids.push(argOf('--id'));
   return [...new Set(ids)].filter((id) => id && (!ONLY || ONLY.has(id)));
@@ -132,14 +143,22 @@ function appChecks(C, n, nocc, S, M, atoms) {
   return { orthonormality: worst, electrons: tr, dipole: dip };
 }
 
-function packMolecule(id) {
+/* a kept file: the target volume's folder, then every other vol-<n>/ of the out dir, then of the data's dist */
+function findKept(vol, sub, name) {
+  for (const d of LOOK) {
+    const dirs = [vol, ...(existsSync(d) ? readdirSync(d).filter((e) => /^vol-\d+$/.test(e) && e !== vol).sort() : [])];
+    for (const v of dirs) { const f = path.join(d, v, sub, name); if (existsSync(f)) return f; }
+  }
+  return null;
+}
+function packMolecule(id, vol = VOL) {
   const dir = path.join(RAW, id), mp = path.join(dir, 'meta.json');
   if (!existsSync(mp)) return { id, skip: 'not solved (no raw/' + id + '/meta.json)' };
   const meta = JSON.parse(readFileSync(mp, 'utf8')), cand = meta.candidate || {}, charge = meta.charge || 0;
   const unclocked = (v) => (Array.isArray(v) ? v.map(unclocked) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([k]) => !CLOCKS.has(k)).map(([k, x]) => [k, unclocked(x)])) : v);
   const metaSha = sha(JSON.stringify(unclocked(meta)));          // what the rungs ARE, not when or where they were solved
-  const have = path.join(DIST, VOL, 'm', id + '.lwm');
-  if (INCREMENTAL && !OUT && existsSync(have)) {
+  const have = INCREMENTAL && !OUT ? findKept(vol, 'm', id + '.lwm') : null;
+  if (have) {
     const old = readFileSync(have), h = parseLwm(old).header;
     if (h.source && h.source.metaSha256 === metaSha && h.source.packer === PACKER) return { id, bytes: old, header: h, report: { id, heavy: h.meta.heavy, nAtoms: h.meta.nAtoms, rungs: {}, bytes: old.length, headerBytes: old.readUInt32LE(4), kept: true }, meta };
   }
@@ -153,7 +172,7 @@ function packMolecule(id) {
   const sym = cand.symmetry && cand.symmetry.group ? cand.symmetry : { group: 'C1' };
   const name = cand.name || id, mass = +atoms.reduce((s, a) => s + MASS[a.Z], 0).toFixed(3), half = atoms.reduce((s, a) => Math.max(s, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)), 0) + 6;
   const geometrySource = cand.geometrySource || (cand.cid ? `PubChem CID ${cand.cid}, its 3-D conformer (computed, not measured)` : 'the candidate\'s atoms');
-  const header = { schema: LWM_SCHEMA, id, volume: VOL, meta: {}, geometry: {}, rungs: {}, skipped: {}, failed: {}, source: { metaSha256: metaSha, packer: PACKER } };
+  const header = { schema: LWM_SCHEMA, id, volume: vol, meta: {}, geometry: {}, rungs: {}, skipped: {}, failed: {}, source: { metaSha256: metaSha, packer: PACKER } };
   const { atomsAng, atomsBohr, app, ...rest } = cand; void atomsAng; void atomsBohr;
   header.meta = { name, formula, formulaM, charge, multiplicity: 1, heavy: zs.filter((z) => z > 1).length, nAtoms: atoms.length, mass, massUnit: 'u (IUPAC conventional atomic weights)',
     pointGroup: sym.group !== 'C1' ? sym.group : ({ Dooh: 'Dinfh', Coov: 'Cinfv' }[meta.detectedGroup] || meta.detectedGroup || null), ...rest, formula, formulaM, ...(app ? { app } : {}),   // the packer's formula wins over the candidate's (PubChem's Hill)
@@ -221,41 +240,119 @@ function packMolecule(id) {
   return { id, bytes, header, report, meta };
 }
 
+/* a kept or provisional .lwm moved to another volume: only its header's `volume` changes (the blobs keep their order, so the bytes are
+   exactly what packing it there would write) */
+function retarget(r, vol) {
+  if (r.header.volume === vol) return r;
+  const lwm = parseLwm(r.bytes), header = lwm.header; header.volume = vol;
+  const data = Object.fromEntries(Object.entries(header.rungs).map(([b, g]) => [b, Object.fromEntries(Object.keys(g.blobs).map((k) => [k, lwm.blob(b, k)]))]));
+  return { ...r, bytes: encodeLwm(header, data), header };
+}
+
+/* ── THE SHELF's themes (iteration 005 S): first match wins; an app molecule is one whose row says so (`app`, or a λWAVES source) ── */
+const fromApp = (c) => !!c.app || (c.sources || []).some((x) => x && (x.db === 'λWAVES' || x === 'λWAVES'));
+const themeOf = (T, c) => { const tags = c.tags || [], k = T.findIndex((t) => (t.app && fromApp(c)) || (t.any || []).some((x) => tags.includes(x)));
+  const rest = T.findIndex((t) => t.rest); return k >= 0 ? k : rest >= 0 ? rest : T.length - 1; };
+const roman = (n) => [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]
+  .reduce((s, [v, r]) => { while (n >= v) { s += r; n -= v; } return s; }, '');
+const pad8 = (n) => (n + 7) & ~7;
+
+/* ── THE ARCHIVE: 'LWV1' · u32 H · the index JSON · pad to 8 · every file 8-aligned; deterministic (no clock; the same dist → the same bytes) ── */
+function writeArchive(entry, rows, vdir) {
+  const files = [{ path: 'index.json' }, ...rows.map((r) => ({ path: r.file })), ...rows.filter((r) => r.thumb).map((r) => ({ path: r.thumb }))]
+    .map((f) => { const b = readFileSync(path.join(vdir, f.path)); return { path: f.path, offset: 0, length: b.length, sha256: sha(b) }; });
+  const volume = { ...entry };
+  let base = 0, text = '', end = 0;
+  for (;;) {                                                       // the offsets live in the index: iterate to its fixed point (its length only grows)
+    end = base; for (const f of files) { f.offset = end; end = f.offset + f.length; end = pad8(end); }
+    text = JSON.stringify({ schema: 1, volume, files });
+    const nb = pad8(8 + Buffer.byteLength(text)); if (nb === base) break; base = nb;
+  }
+  const name = `LAMBDAWAVES-VOL-${entry.numeral}.lwv`, out = path.join(DIST, name), tmp = out + '.tmp', hash = createHash('sha256');
+  const head = Buffer.alloc(base); head.write(LWV_MAGIC, 0, 'latin1'); head.writeUInt32LE(Buffer.byteLength(text), 4); head.write(text, 8, 'utf8');
+  const fd = openSync(tmp, 'w'); let at = 0;
+  const put = (b) => { writeSync(fd, b); hash.update(b); at += b.length; };
+  put(head);
+  for (const f of files) { if (f.offset > at) put(Buffer.alloc(f.offset - at)); put(readFileSync(path.join(vdir, f.path))); }
+  closeSync(fd); renameSync(tmp, out);
+  const digest = hash.digest('hex');
+  writeFileSync(out + '.sha256', `${digest}  ${name}\n`);
+  /* read back through the app's reader: the index parses and every file sits where it says, with its bytes */
+  const back = readFileSync(out), idx = parseLwv(back.subarray(0, base));
+  for (const f of idx.files) if (sha(back.subarray(f.offset, f.offset + f.length)) !== f.sha256) throw new Error(`${name}: ${f.path} does not read back`);
+  return { name, bytes: at, sha256: digest };
+}
+
 /* ── the run ── */
-const ids = members(), rows = [], reports = [], skipped = [];
+const ids = members(), packed = [], reports = [], skipped = [];
 if (OUT) {
   const r = packMolecule(argOf('--id'));
   if (!r.bytes) { console.log(`pack: ${r.id} — ${r.skip}`); process.exit(1); }
   mkdirSync(path.dirname(path.resolve(OUT)), { recursive: true }); writeFileSync(OUT, r.bytes);
   console.log(`pack: ${r.id} → ${OUT} · ${r.bytes.length} B · rungs ${Object.keys(r.header.rungs).join(', ')} · sha256 ${sha(r.bytes).slice(0, 16)}`); process.exit(0);
 }
-const VDIR = path.join(DIST, VOL); mkdirSync(path.join(VDIR, 'm'), { recursive: true });
-for (const id of ids) {
-  let r; try { r = packMolecule(id); } catch (e) { console.log(`FAILED ${id}: ${e.message}`); skipped.push({ id, why: e.message }); continue; }
-  if (!r.bytes) { console.log(`skip ${id}: ${r.skip}`); skipped.push({ id, why: r.skip }); continue; }
-  const file = path.join(VDIR, 'm', id + '.lwm'), tmp = file + '.tmp';
-  writeFileSync(tmp, r.bytes); renameSync(tmp, file);
-  const M = r.header.meta;
-  rows.push({ id, name: M.name, formula: M.formula, formulaM: M.formulaM, charge: M.charge, heavy: M.heavy, tags: M.tags || [], cid: M.cid || null, inchikey: M.inchikey || null,
-    mw: M.mw != null ? M.mw : M.mass, pg: M.pointGroup || null, file: 'm/' + id + '.lwm', bytes: r.bytes.length, sha256: sha(r.bytes),
-    thumb: existsSync(path.join(VDIR, 't', id + '.webp')) ? 't/' + id + '.webp' : null,
-    rungs: Object.fromEntries(Object.entries(r.header.rungs).map(([b, g]) => [b, { E: g.record.ground.energy, nAO: g.record.ground.nAO, gapEv: g.record.stem.gapEv }])),
-    ...(r.header.skipped ? { skipped: Object.keys(r.header.skipped) } : {}), ...(r.header.failed ? { failed: Object.keys(r.header.failed) } : {}) });
-  reports.push(r.report);
-  console.log(`${id.padEnd(16)} ${String(M.heavy).padStart(3)} heavy · ${Object.keys(r.header.rungs).length} rungs · ${(r.bytes.length / 1024).toFixed(1)} KB (header ${(r.report.headerBytes / 1024).toFixed(1)} KB)`);
+const T = THEMES ? JSON.parse(readFileSync(THEMES, 'utf8')).themes : null;
+ids.forEach((id, order) => {
+  const c = CANDS.get(id), guess = T && c ? 'vol-' + (themeOf(T, c) + 1) : VOL;   // the volume it most likely lands in (a split moves it: retarget)
+  let r; try { r = packMolecule(id, guess); } catch (e) { console.log(`FAILED ${id}: ${e.message}`); skipped.push({ id, why: e.message }); return; }
+  if (!r.bytes) { console.log(`skip ${id}: ${r.skip}`); skipped.push({ id, why: r.skip }); return; }
+  packed.push({ ...r, order, info: c || r.header.meta });
+});
+let plan;
+if (T) {
+  const byTheme = T.map(() => []);
+  for (const r of packed) byTheme[themeOf(T, r.info)].push(r);
+  plan = [];
+  T.forEach((t, k) => {
+    const list = byTheme[k].sort((a, b) => (a.info.priority ?? Infinity) - (b.info.priority ?? Infinity) || a.order - b.order);
+    let part = [], size = 0, n = 1;
+    const flush = () => { if (part.length) plan.push({ theme: t, part: n++, members: part }); part = []; size = 0; };
+    for (const r of list) {
+      const th = findKept('vol-' + (k + 1), 't', r.id + '.webp'), b = r.bytes.length + (th ? readFileSync(th).length : 0);
+      if (part.length && size + b > CAP) flush();
+      part.push(r); size += b;
+    }
+    flush();
+  });
+  plan.forEach((p, i) => Object.assign(p, { id: 'vol-' + (i + 1), numeral: roman(i + 1), title: p.theme.title + (p.part > 1 ? ' · ' + p.part : ''), blurb: p.theme.blurb || BLURB }));
+} else plan = [{ id: VOL, numeral: NUMERAL, title: TITLE, blurb: BLURB, members: packed }];
+
+const entries = [];
+for (const p of plan) {
+  const VDIR = path.join(DIST, p.id), rows = [], vreports = [];
+  mkdirSync(path.join(VDIR, 'm'), { recursive: true });
+  for (const r0 of p.members) {
+    const r = retarget(r0, p.id), id = r.id;
+    const file = path.join(VDIR, 'm', id + '.lwm'), tmp = file + '.tmp';
+    writeFileSync(tmp, r.bytes); renameSync(tmp, file);
+    const thumbAt = path.join(VDIR, 't', id + '.webp'), th = findKept(p.id, 't', id + '.webp');
+    if (th && path.resolve(th) !== thumbAt) { mkdirSync(path.dirname(thumbAt), { recursive: true }); copyFileSync(th, thumbAt); }
+    const M = r.header.meta;
+    rows.push({ id, name: M.name, formula: M.formula, formulaM: M.formulaM, charge: M.charge, heavy: M.heavy, tags: M.tags || [], cid: M.cid || null, inchikey: M.inchikey || null,
+      mw: M.mw != null ? M.mw : M.mass, pg: M.pointGroup || null, file: 'm/' + id + '.lwm', bytes: r.bytes.length, sha256: sha(r.bytes),
+      thumb: existsSync(thumbAt) ? 't/' + id + '.webp' : null,
+      rungs: Object.fromEntries(Object.entries(r.header.rungs).map(([b, g]) => [b, { E: g.record.ground.energy, nAO: g.record.ground.nAO, gapEv: g.record.stem.gapEv }])),
+      ...(r.header.skipped ? { skipped: Object.keys(r.header.skipped) } : {}), ...(r.header.failed ? { failed: Object.keys(r.header.failed) } : {}) });
+    vreports.push(r.report); reports.push(r.report);
+    console.log(`${p.id.padEnd(6)} ${id.padEnd(16)} ${String(M.heavy).padStart(3)} heavy · ${Object.keys(r.header.rungs).length} rungs · ${(r.bytes.length / 1024).toFixed(1)} KB (header ${(r.report.headerBytes / 1024).toFixed(1)} KB)`);
+  }
+  const stale = readdirSync(path.join(VDIR, 'm')).filter((f) => f.endsWith('.lwm') && !rows.some((r) => r.file === 'm/' + f));
+  const indexText = '{"schema":1,"id":' + JSON.stringify(p.id) + ',"numeral":' + JSON.stringify(p.numeral) + ',"title":' + JSON.stringify(p.title) + ',"bases":' + JSON.stringify(LADDER)
+    + ',"generator":' + JSON.stringify({ tool: 'tools/volumes/pack.mjs', commit: GENERATOR, format: 'THE VOLUME FORMAT v1 (lab/volumes-format.js)' }) + ',"molecules":[\n'
+    + rows.map((r) => JSON.stringify(r)).join(',\n') + '\n]}\n';
+  writeFileSync(path.join(VDIR, 'index.json'), indexText);
+  const tags = {}; for (const r of rows) for (const t of r.tags) tags[t] = (tags[t] || 0) + 1;
+  const entry = { id: p.id, numeral: p.numeral, title: p.title, blurb: p.blurb, count: rows.length, bytes: rows.reduce((s, r) => s + r.bytes, 0), bases: LADDER,
+    tags: Object.fromEntries(Object.entries(tags).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))), index: p.id + '/index.json', indexSha256: sha(indexText),
+    built: { generator: 'tools/volumes/pack.mjs', commit: GENERATOR } };
+  if (ARCHIVE) { if (!FETCHABLE) delete entry.index; entry.archive = writeArchive(entry, rows, VDIR); }
+  entries.push(entry);
+  writeFileSync(path.join(path.dirname(DIST), `pack-report-${p.id}.json`), JSON.stringify({ volume: p.id, molecules: vreports, skipped }, null, 1) + '\n');   // outside dist/: measurements, not content
+  console.log(`pack: ${p.id} ${p.numeral} ${p.title} — ${rows.length} molecules (${(entry.bytes / 1048576).toFixed(2)} MiB), index.json ${indexText.length} B`
+    + (entry.archive ? `, ${entry.archive.name} ${entry.archive.bytes} B sha256 ${entry.archive.sha256.slice(0, 16)}` : '')
+    + (stale.length ? `; ${stale.length} .lwm in m/ no row reaches: ${stale.join(', ')}` : ''));
 }
-const stale = readdirSync(path.join(VDIR, 'm')).filter((f) => f.endsWith('.lwm') && !rows.some((r) => r.file === 'm/' + f));
-const indexText = '{"schema":1,"id":' + JSON.stringify(VOL) + ',"numeral":' + JSON.stringify(NUMERAL) + ',"title":' + JSON.stringify(TITLE) + ',"bases":' + JSON.stringify(LADDER)
-  + ',"generator":' + JSON.stringify({ tool: 'tools/volumes/pack.mjs', commit: GENERATOR, format: 'THE VOLUME FORMAT v1 (lab/volumes-format.js)' }) + ',"molecules":[\n'
-  + rows.map((r) => JSON.stringify(r)).join(',\n') + '\n]}\n';
-writeFileSync(path.join(VDIR, 'index.json'), indexText);
-const tags = {}; for (const r of rows) for (const t of r.tags) tags[t] = (tags[t] || 0) + 1;
-const shelfFile = path.join(DIST, 'volumes.json'), shelf = existsSync(shelfFile) ? JSON.parse(readFileSync(shelfFile, 'utf8')) : { schema: 1, volumes: [] };
-const entry = { id: VOL, numeral: NUMERAL, title: TITLE, blurb: BLURB, count: rows.length, bytes: rows.reduce((s, r) => s + r.bytes, 0), bases: LADDER,
-  tags: Object.fromEntries(Object.entries(tags).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))), index: VOL + '/index.json', indexSha256: sha(indexText),
-  built: { generator: 'tools/volumes/pack.mjs', commit: GENERATOR } };
-shelf.volumes = [...shelf.volumes.filter((v) => v.id !== VOL), entry].sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
+const shelfFile = path.join(DIST, 'volumes.json'), shelf = !T && existsSync(shelfFile) ? JSON.parse(readFileSync(shelfFile, 'utf8')) : { schema: 1, volumes: [] };
+shelf.volumes = [...shelf.volumes.filter((v) => !entries.some((e) => e.id === v.id)), ...entries].sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
 writeFileSync(shelfFile, JSON.stringify(shelf, null, 1) + '\n');
-writeFileSync(path.join(DATA, `pack-report-${VOL}.json`), JSON.stringify({ volume: VOL, molecules: reports, skipped }, null, 1) + '\n');   // outside dist/: measurements, not content
-console.log(`pack: ${rows.length} molecules → ${path.relative(DATA, VDIR)}/ (${(entry.bytes / 1048576).toFixed(2)} MiB), index.json ${indexText.length} B, volumes.json; ${skipped.length} not packed`
-  + (stale.length ? `; ${stale.length} .lwm in m/ no row reaches: ${stale.join(', ')}` : ''));
+console.log(`pack: ${packed.length} molecules in ${entries.length} volume(s) → ${DIST}/volumes.json; ${skipped.length} not packed`);

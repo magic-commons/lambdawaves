@@ -716,6 +716,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-empty b { font-family: 'LW Title', var(--font-ui); font-size: clamp(44px, 7vw, 104px); font-weight: 400; letter-spacing: .04em; line-height: 1; }
 #lwMenu .mm-empty span { font-size: 14px; line-height: 1.6; opacity: .7; }
 #lwMenu .mm-vol { display: grid; gap: 16px; justify-items: center; width: min(400px, 86vw); padding: 28px 22px 22px; border-radius: 18px; background: color-mix(in srgb, var(--fg) 5%, transparent); }
+#lwMenu .mm-vol.drop { outline: 2px dashed var(--acc); outline-offset: 4px; }
 #lwMenu .mm-vol-open { display: grid; gap: 7px; justify-items: center; text-align: center; }
 #lwMenu .mm-vol-num { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(52px, 6.4vw, 96px); line-height: .95; letter-spacing: .02em; white-space: nowrap; transition: color 160ms; }
 #lwMenu .mm-vol-open:hover .mm-vol-num, #lwMenu .mm-vol-open:focus-visible .mm-vol-num { color: var(--acc); }
