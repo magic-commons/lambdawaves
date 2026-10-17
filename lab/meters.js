@@ -3,7 +3,7 @@ import { AU_TIME_AS, HARTREE_EV } from './hydrogen.js';
 import { el, readout } from './mir/kit.js';
 import { FIELD_LAW as L } from './status.js'; import { SQUEEZE } from './kick.js'; import { coherence } from './equalizer.js'; import { densityPeriod, fmtPeriod } from './period.js'; import { toLUT } from './mir/palette.js';
 
-export function createMeters(host, src = null) {
+export function createMeters(host, src = null, measure = null) {
   const grid = el('div', 'meters', host);
   const norm = readout({ label: 'NORM  ⟨ψ|ψ⟩^½', value: '—' }); grid.appendChild(norm.root);
   const energy = readout({ label: '⟨E⟩  hartree', value: '—', sub: '' }); grid.appendChild(energy.root);
@@ -14,8 +14,29 @@ export function createMeters(host, src = null) {
   const field = readout({ label: 'FIELD CACHE', value: '—', sub: '' }); grid.appendChild(field.root);
   const rates = readout({ label: 'CLOCKS Hz  disp · field · phys', value: '—', sub: '' }); grid.appendChild(rates.root);
   const tier = readout({ label: 'LAST TIER', value: '—', sub: '' }); grid.appendChild(tier.root);
-  const e = (x) => x.toExponential(0); /* FLOOR: static, the field law's own constants (status.js), never typed */
-  const floor = readout({ label: 'FLOOR  f16 · the picture\'s own precision', value: '1 f16 ulp · toward zero', sub: `hydrogen ${e(L.hydrogen.rms)} RMS · ${e(L.hydrogen.worst)} worst voxel · density ${e(L.density.worst)} worst` }); grid.appendChild(floor.root);
+  /* FLOOR · GRID ERROR (iteration 005 P3): the LIVE reading of the grid in force (a press, or GRID moving while METERS is open: `measure` is
+     readouts.js', field.js' errorField against the exact twin), then two sub lines — what the reading says, and the CERTIFIED constants
+     (status.js', never typed; P7c's commit).  Each line fits the card: the sub shows two lines and none wraps; a probe misses the peak, so it
+     prints no "of ρmax" from 64 voxels. */
+  const e = (x) => x.toExponential(0), x1 = (v) => (Number.isFinite(v) ? v.toExponential(1) : '—');
+  const CERT = `CERTIFIED 0b0a8f6 · 1 f16 ulp · ψ ${e(L.hydrogen.rms)} RMS, ${e(L.hydrogen.worst)} worst · ρ ${e(L.density.worst)}`;
+  const floor = readout({ label: 'FLOOR · GRID ERROR  f16 · press to measure', value: 'press to measure the grid in force', cls: 'wide', sub: 'one readback against the exact value at each voxel centre\n' + CERT }); grid.appendChild(floor.root);
+  const meas = { N: 0, res: 0, busy: false };
+  const TITLE = floor.root.title = 'The f16 grid read back once and set against the exact value at every voxel centre (a molecule: a 4 × 4 × 4 probe, its own matrix in double precision). Press to measure; GRID re-measures while METERS is open.';
+  floor.root.querySelector('.ro-sub').style.whiteSpace = 'pre-line'; floor.root.tabIndex = 0; floor.root.setAttribute('role', 'button'); floor.root.style.cursor = 'pointer';
+  floor.root.addEventListener('click', () => measureGrid()); floor.root.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); measureGrid(); } });
+  async function measureGrid() {
+    if (!measure || meas.busy) return; meas.busy = true; floor.set('MEASURING · the grid read back …', 'live');
+    let r; try { r = await measure(); } catch (err) { r = { why: String((err && err.message) || err) }; }
+    meas.busy = false; meas.N = (r && r.N) || meas.res || -1;
+    if (!r || r.why) { floor.set('— no reading', 'warn'); floor.setSub(((r && r.why) || '') + '\n' + CERT); floor.root.title = TITLE; return; }
+    const psi = r.metric === 'psi', ms = r.ms < 1000 ? Math.round(r.ms) + ' ms' : (r.ms / 1000).toFixed(1) + ' s', led = r.ledger, caught = r.t !== null && r.t !== undefined;
+    const side = r.above ? `ρ > exact at ${r.above} (${r.aboveF32 ? r.aboveF32 + ' past' : 'within'} f32)` : 'ρ ≤ exact everywhere';   // the one-sided law, as read
+    floor.set(psi ? `MEASURED ${r.N}³ · RMS ${x1(r.rms)} · worst ${x1(r.worst)}` : `PROBE ${r.probe} · ${r.N}³ · |Δρ|/ρ RMS ${x1(r.rms)} · worst ${x1(r.worst)}`, 'ok');
+    floor.setSub(`${psi ? x1(r.relToMax) + ' of max|ψ|' : caught ? `the frame it caught (t ${r.t.toFixed(2)})` : r.normal + ' f16-normal'} · ${r.mode} · ${side} · ${ms}\n${CERT}`);
+    floor.root.title = `${TITLE} — measured: ${r.voxels} voxels${psi ? '' : `, ${r.normal} with an f16-normal √ρ`} · 99.8 % ≤ ${x1(r.p998)} · rounding: of ${led.disc} components where the modes disagree, ${led.rtz} toward zero, ${led.rne} to nearest`
+      + ` · largest (ρ − stored ρ)/ρ ${x1(r.deficit)} where the components are f16-normal (the law: 2·2⁻¹⁰ = 2.0e-3)${caught ? ` · t ${r.t.toFixed(2)}` : ''} · readback ${r.readMs} ms of ${r.ms} ms`;
+  }
   const status = readout({ label: 'STATUS', value: '—', cls: 'wide' }); grid.appendChild(status.root);
   const prof = readout({ label: 'FRAME PROFILE  ms · total · field · windows', value: '—', cls: 'wide', sub: '' }); grid.appendChild(prof.root);
   for (const [k, r] of Object.entries({ norm, energy, tlog, auto, modes, field, rates, tier, floor, status })) r.root.dataset.m = k;
@@ -40,6 +61,7 @@ export function createMeters(host, src = null) {
   let lastT = -1;
   function update(m) {
     paintCoherence();
+    meas.res = m.res; if (meas.N && m.res && m.res !== meas.N && !meas.busy) measureGrid();   // the grid moved under a reading: measure the one in force
     norm.set(m.norm.toFixed(3), Math.abs(m.norm - 1) < 5e-4 ? 'ok' : 'warn');
     energy.set(m.energy.toFixed(5)); energy.setSub(m.unit === 'hartree' || !m.unit ? (m.energy * HARTREE_EV).toFixed(3) + ' eV' : 'in ' + m.unit + ' (no eV: ω is not set)');
     if (m.t !== lastT) { tlog.set(m.t.toFixed(2), m.playing ? 'live' : ''); tlog.setSub(m.unit === 'hartree' || !m.unit ? (m.t * AU_TIME_AS).toFixed(1) + ' as' : 'in 1/ω'); lastT = m.t; }
