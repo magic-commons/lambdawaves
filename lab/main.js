@@ -1,10 +1,9 @@
-/* main.js — decide the start (the notice, the title screen), boot the lab behind it, then arm the install layer. */
+/* main.js — decide the start (the notice, then the session or the boot), boot the lab behind it, then arm the install layer. */
 import { boot } from './rack.js';
 import { createSession } from './mir/core/session.js';   // 0.5.0 C6b: THE SESSION, the live project kept over the one part
-import { createOpener } from './mir/shell/opener.js';   // 0.5.0 C6b: THE OPENER, the title screen over the six demos
 import { photosensitivityNotice } from './mir/shell/flash-guard.js';   // 0.5.0 C6b: the kit's notice, under λWAVES' law
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 C6b: the notice's seen-flag is the blob's `warned`
-import { STARTERS } from './project-store.js';   // 0.5.0 C6b: the eleven demos are the opener's covers
+import { STARTERS } from './project-store.js';   // the eleven demos' ids are `?starter=`'s (their covers are FOLDERS' DEMOS pictures, iteration 004)
 import { installBanner } from './mir/shell/banner.js';   // 0.5.0 C6b: THE BANNER is the kit's
 import { bootVeil } from './mir/shell/boot.js';   // 0.5.0 C6b: THE BOOT VEIL, down at the first real frame
 window.__e = window.__e || [];
@@ -38,17 +37,16 @@ const warning = (() => {
     get seen() { return !!warned.getItem(); }, get remembered() { return !!warned.getItem(); }, get open() { return open; },
   };
 })();
-/* THE START (C6-DESIGN §5).  A test driver (unless ?opener=1), a link in the fragment, ?preset= or ?view= go straight in: the choice is
-   ?starter= or the boot (the session armed, nothing restored).  A reload of a tab that made nothing since NEW (rack.js remembers `home`
-   for this tab on pagehide) goes straight to NEW.  Otherwise the notice when it is needed, THEN the title screen: the eleven demos as covers,
-   NEW, and RESUME when the session holds work.  The boot runs behind the opaque screen and awaits the choice before LW.ready; the
-   notice never holds LW.ready (a given choice does not wait for it, which the CDP tools' `&starter=home` relies on). */
+/* THE START (C6-DESIGN §5; iteration 004: no title screen — Josh 2026-10-17, "Delete the original saves/preset thing in the beginning";
+   the demos and the saves are FOLDERS').  A test driver (unless ?opener=1), a link in the fragment, ?preset= or ?view= go straight in:
+   the choice is ?starter= (home · resume · a demo id) or the boot (the session armed, nothing restored).  A human start waits for the
+   notice when it is needed, then takes BASINS' no-pick rule (B:main.js, the kit's openerSwitches): RESUME when the session holds work,
+   else the boot — never `boot` over a saved session, whose next pagehide flush would overwrite it.  The boot runs behind and awaits the
+   choice before LW.ready; the notice never holds LW.ready for a given choice (the CDP tools' `&starter=home` relies on it). */
 const q = new URLSearchParams(location.search);
-const covers = STARTERS.map((s) => ({ id: s.file, name: s.name, art: './demos/covers/' + s.file + '.jpg' }));
-const remembered = (() => { try { return sessionStorage.getItem('lambdawaves.opener'); } catch (_) { return null; } })();
-const given = ['home', 'resume', ...covers.map((c) => c.id)].includes(q.get('starter')) ? q.get('starter')
-  : (navigator.webdriver === true && q.get('opener') !== '1') || /(^|&)s=/.test(location.hash.slice(1)) || q.has('preset') || q.has('view') ? 'boot'
-  : remembered === 'home' ? 'home' : null;
+const DEMO_IDS = STARTERS.map((s) => s.file);
+const given = ['home', 'resume', ...DEMO_IDS].includes(q.get('starter')) ? q.get('starter')
+  : (navigator.webdriver === true && q.get('opener') !== '1') || /(^|&)s=/.test(location.hash.slice(1)) || q.has('preset') || q.has('view') ? 'boot' : null;
 let pick; const choice = new Promise((r) => { pick = r; });
 /* 0.5.0 C6b · THE BANNER is the kit's (shell/banner.js: BASINS' maroon pane, role="alert", its own × and ink on both themes): the GPU
    and boot failures in λWAVES' words, nothing else (errors: false).  THE BOOT VEIL (bootVeil) hides the black of a configured WebGPU
@@ -58,16 +56,11 @@ bootVeil({ ready: () => !!(window.__LW && __LW.stats.presents) });
 boot({ canvas: $('field'), vortex: $('vortex'), particles: $('particles'), flow: $('flow'), kepler: $('kepler'), stage: $('stage'), rack: $('rack'), transport: $('transport'), badges: $('badges'), sheet: $('sheet'), banner, start: { session, warning, choice } })
   .then((LW) => { try { installLayer(LW); } catch (e) { if (LW && LW.sw) { LW.sw.mode = 'failed'; LW.sw.error = String(e && e.message || e); } } })
   .catch((e) => { __e.push('BOOT ' + (e && e.stack || e)); banner.fail('boot failed', String(e && e.message || e)); });
-/* the boot has run to its first await, so the look is on: the notice and the title screen wear this browser's glass.  While the screen
-   is up no key reaches the lab (stopped on the document, after the covers' own arrows and before the kit's key table on the window) */
+/* the boot has run to its first await, so the look is on: the notice wears this browser's glass.  While it is up no key reaches the
+   lab (the kit's dialog keeps its keys inside itself) and the front page waits for its CONTINUE (rack.js) */
 if (warning.needed()) warning.show();
 if (given) pick(given);
-else {
-  const stop = (e) => e.stopPropagation();
-  document.addEventListener('keydown', stop);
-  new Promise((r) => warning.onAccept(r)).then(() => createOpener({ covers, session, logo: 'λWAVES', warn: false, webdriver: false, search: '' }).start())
-    .then((id) => { document.removeEventListener('keydown', stop); pick(id); });
-}
+else warning.onAccept(() => pick(session.hasResume() ? 'resume' : 'boot'));
 
 /* ══ WAVE 56 · THE INSTALL LAYER (board #56) ══════════════════════════════════════════════════════════
  * lab/manifest.webmanifest, lab/sw.js, the icons and tests/pwa.test.mjs were all built and proved a wave

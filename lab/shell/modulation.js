@@ -1,6 +1,6 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
-import { TIER } from '../rack.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { BASIS } from '../hydrogen.js'; import { dockSpan } from '../mir-gui.js';
+import { TIER } from '../rack.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { dockSpan } from '../mir-gui.js';
 export function createModSeam(app) {
   const { ui, hNote, clock, obs, mat, settingsStore, reg, rates } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings } = app.sh,
     { mod, modHand, setKnob, ROT_LIMIT, rotRate, setRotationRate, occlusion, applyAccent, api } = app.ctl;
@@ -230,6 +230,10 @@ export function createModSeam(app) {
          gives way to its rect through modDodge (moved) and takes the top seat; a docked transport is a rack card and never meets it. */
       dock: { span: dockSpan, guide: () => app.ctl.look.get('dropGuides') } }));
     app.state.modView.root.dataset.mirWindow = 'modulation';    // 0.5.0 A10's hook (the kit's controller sets the rail's, not the pane's)
+    /* iteration 004 · ONE WINDOW STACK (MIR 1.5.0-alpha.15; BASINS shell.js registerWindow, the kit's bind.js for installModulation): a press
+       on the modulation window or its rail raises it over FOLDERS, the TIMELINE, the KEYBOARD and MIR OPTIONS, in one press order.  Its z is
+       all that moves: the mask is painted rects (shell/ink.js), never a stacking order */
+    registerWindow({ root: app.state.modView.root, rail: app.state.modView.rail });
     applyAccent();                                    // the two angles reach the window as soon as it exists
     app.state.modView.restore(readSettings().modwin);
     app.state.dodge = modDodge;                                 // 0.5.0 C7b: the TIMELINE's `moved` gives way through the same seat chooser

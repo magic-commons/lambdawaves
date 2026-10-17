@@ -16,12 +16,20 @@
  * facade's clean mark, so nothing done in between is marked clean by the telling.
  * THE VOICE is the kit's toast (BASINS'); `status` keeps the last line, the words the suites read.
  *
+ * ITERATION 004 · FOLDERS IS THE PROJECTS HOME, BASINS-shaped (Josh 2026-10-17: "I want BASINS folder system"; the title screen is gone):
+ * the DEMOS wear their covers (lab/demos/covers, a 4:3 middle crop, refreshed in place once by the starters' revision), the folder cards
+ * the kit's `folder` glyph (not BASINS' Mandelbrot), RESTORE THE DEMOS puts back a deleted demo (the kit's factory foot), the toolbar is
+ * BASINS' with λWAVES' SAVE in front (SAVE · PROJECT · DUPLICATE · NEW), ⓘ inspects a project for the RENDER card's SUBJECT, a project
+ * save also writes its modulation preset (port.saved), and every door that shows FOLDERS puts the front page away first (port.cover).
+ *
  * createProjects(port) → the facade: list recent current dirty markClean discard requestOpen requestFresh save open remove
  *   fresh exportText importText · demo(file) (a DEMOS press) · download() (EXPORT .json) · pick() (IMPORT) · seed() · status · folders
- *   · changed() (the part's subscribe hears it) · resume(session) (the opener's RESUME)
+ *   · changed() (the part's subscribe hears it) · resume(session) (the session's RESUME) · show({ folder, name }) · toggle()
+ *   · entryOf(path) · inspected (the RENDER card's gallery: the project ⓘ pointed at) · restoreDemos()
  *   port { host, part, snapshot(), rollback(S) → bool, busy(±1), opened(label), notice() → D9's line, thumbnail(), confirm(text),
- *          rack, onMoved(rect), titleAfterSave(name) → bool } */
-import { createFolders, FOLDERS_ACTIONS, toThumb } from './mir/folders/folders.js';
+ *          rack, onMoved(rect), titleAfterSave(name) → bool, cover() → the front page { shown, close } | null, saved(name),
+ *          inspect(entry | null, how) } */
+import { createFolders, toThumb } from './mir/folders/folders.js';
 import { createFiles } from './mir/folders/files.js';
 import { registerProjectPart, restoreProject, projectSignature } from './mir/core/project.js';
 import { saveBlob } from './mir/folders/save-blob.js';
@@ -107,10 +115,31 @@ export function createProjects(port) {
     return parseProjectFile(await r.text());
   }
 
+  /* the front page (THE PICKER) sits above every window: a door that shows FOLDERS puts it away first */
+  const cover = () => { const c = port.cover ? port.cover() : null; if (c && c.shown) c.close(); return c; };
+  /* Josh 10-01 · A PROJECT SAVE IS ALSO A PRESET (BASINS save-window.js presetOnSave, the kit's createApp onSaved): its rack in CAPS */
+  const presetOf = (name) => { try { if (port.saved) port.saved(name); } catch (_) {} };
+  let inspected = null;                                           // the entry id ⓘ last pointed at, or null (THIS VIEW)
+  /* THE DEMOS' PICTURES: the cover's 4:3 middle, made small for the library (a data URL: it survives EXPORT, the kit's toThumb) */
+  async function coverOf(file) {
+    try {
+      const r = await fetch('./demos/covers/' + file + '.jpg'); if (!r.ok) return '';
+      const full = await createImageBitmap(await r.blob()), h = Math.min(full.height, Math.round(full.width * 3 / 4));
+      const mid = await createImageBitmap(full, 0, Math.round((full.height - h) / 2), full.width, h);
+      try { return await toThumb(mid); } finally { full.close(); mid.close(); }
+    } catch (_) { return ''; }
+  }
+
   /* ── FOLDERS: the kit's window over the translator and the one part ── */
   const folders = createFolders({
     host: port.host, id: 'folders', title: 'FOLDERS', store: PJ_KEY, storage: store, files, app: PART, defaultName: 'UNTITLED',
-    actions: FOLDERS_ACTIONS, rack: port.rack, onMoved: port.onMoved,
+    /* BASINS' toolbar (DEFAULT_ACTIONS' PROJECT · DUPLICATE · NEW) with λWAVES' SAVE in front — the report's option B, Josh's to confirm.
+       OPEN FILE and EXPORT left the toolbar for FILE › IMPORT and FILE › EXPORT (.json · .mir · picture); a drop still opens a file */
+    actions: ['save', 'project', 'duplicate', 'fresh'], folderGlyph: 'folder', rack: port.rack, onMoved: port.onMoved,
+    factory: () => api.restoreDemos(),
+    galleryCopy: { factory: 'RESTORE THE DEMOS', factoryNote: 'puts back the demos λWAVES ships with — adds only what is missing, and never touches anything you saved' },
+    /* ⓘ (and a selection) names the project RENDER's SUBJECT describes; THIS VIEW when none */
+    onInspect: (e, how) => { inspected = e ? e.id : null; if (port.inspect) port.inspect(e || null, how || {}); },
     zip: { validate: (p) => !!valueOf(p) },                       // a project ZIP is taken only when it carries λWAVES' part
     say: (text, warn) => { if (!hush) toast(text, warn); },
     adapter: {
@@ -131,7 +160,7 @@ export function createProjects(port) {
     },
     /* FOLDERS' entrance is a motion (core/motion.js presence): the mask is taken again where it lands, paused or not (CLAUDE.md's
        mask law).  And opened over the current project, clean and still without a picture, it takes one then */
-    onOpen: () => { const { root, rail } = folders.win; Promise.all([root, rail.el].flatMap((el) => (el && el.getAnimations ? el.getAnimations() : [])).map((a) => a.finished.catch(() => null))).then(() => port.onMoved());
+    onOpen: () => { cover(); const { root, rail } = folders.win; Promise.all([root, rail.el].flatMap((el) => (el && el.getAnimations ? el.getAnimations() : [])).map((a) => a.finished.catch(() => null))).then(() => port.onMoved());
       const e = currentId && files.entry(currentId); if (e && !e.thumb && !dirty()) Promise.resolve(port.thumbnail()).then(toThumb)
       .then((thumb) => { if (thumb) files.overwrite(e.id, { payload: e.payload, thumb, facts: e.facts, at: e.at }); }).catch(() => {}); },
     onOpened: () => { if (echo) { toast(echo, true); echo = null; } },
@@ -140,7 +169,7 @@ export function createProjects(port) {
       currentId = e.id; touchRecent(ls, pathOf(e)); status = 'saved ' + pathOf(e);
       const v = valueOf(e.payload);
       if (port.titleAfterSave(e.name) && v) files.overwrite(e.id, { payload: payloadOf({ ...v, notebook: { ...v.notebook, title: e.name } }), thumb: e.thumb, facts: e.facts, at: e.at });
-      markClean();
+      markClean(); presetOf(e.name);
     },
   });
   /* THE DOORS a λWAVES file comes in by (the kit's intake takes only its own envelopes): a drop on the window, OPEN FILE, IMPORT.
@@ -175,6 +204,30 @@ export function createProjects(port) {
   const api = {
     folders, store, changed,
     get status() { return status; },
+    /** show({ folder, name }) — FOLDERS on screen, the front page put away; `folder` turns the explorer to it, `name` focuses NAME (SAVE AS) */
+    show(o = {}) {
+      cover(); folders.open();
+      if (o.folder != null) folders.gallery.go(o.folder);
+      if (o.name) { const n = folders.panels.get('gallery') && folders.panels.get('gallery').querySelector('.sv-name-input'); if (n) { n.focus({ preventScroll: true }); n.select(); } }
+      return true;
+    },
+    /** toggle() — the O key, WINDOW › FOLDERS, the notebook's ▤: shut when it is open and seen, else shown */
+    toggle() { const c = port.cover ? port.cover() : null; if (folders.isOpen() && !(c && c.shown)) { folders.close(); return false; } return api.show(); },
+    /** entryOf(path) → the FOLDERS entry stored at a λWAVES path (RECENT's rows), or null */
+    entryOf(path) { sync(); return entryAt(String(path || '')); },
+    /** the RENDER card's gallery: the project ⓘ pointed at (select(null) is its THIS VIEW) */
+    inspected: { selected: () => (inspected && files.entry(inspected)) || null, select(id) { inspected = id || null; return this.selected(); } },
+    /** restoreDemos() — RESTORE THE DEMOS (the kit's factory contract, gallery.js): a deleted demo is put back, nothing else is touched */
+    async restoreDemos() {
+      let seeded = []; try { seeded = JSON.parse(ls.getItem(PJ_KEY + '.seeded') || '[]'); } catch (_) {}
+      const here = new Set(files.entries().map((e) => e.facts && e.facts.seedId).filter(Boolean)), gone = STARTERS.map((s) => 'demos/' + s.file).filter((id) => !here.has(id));
+      const all = { ok: true, added: 0, total: STARTERS.length, complete: true, said: 'Every demo is here — nothing to restore.' };
+      if (!gone.length) return all;
+      try { ls.setItem(PJ_KEY + '.seeded', JSON.stringify((Array.isArray(seeded) ? seeded : []).filter((id) => !gone.includes(id)))); } catch (_) {}
+      const r = await api.seed();
+      if (!r || r.ok === false) return { ...(r || {}), ok: false, why: (r && r.why) || 'the demos could not be read' };
+      return r.added ? { ok: true, added: r.added, total: STARTERS.length, complete: false, said: 'Restored ' + r.added + ' of ' + STARTERS.length + ' demos to DEMOS.' } : all;
+    },
     list() { const C = collection(); return Object.values(C ? C.items : {}).sort((a, b) => (b.saved || '').localeCompare(a.saved || '')); },
     recent() { const C = collection(); return C ? (C.recent || []).filter((p) => Object.hasOwn(C.items, p)) : []; },
     get current() { const e = currentId && files.entry(currentId); return e ? pathOf(e) : null; },
@@ -193,7 +246,7 @@ export function createProjects(port) {
       const r = e && !ro(e) ? files.overwrite(e.id, { payload, thumb: e.thumb, facts: e.facts }) : files.save({ name, folder, payload });
       if (!r.ok) { pjStatus('save failed — ' + (r.why || 'unknown'), true); return false; }
       const saved = pathOf(r.entry);
-      currentId = r.entry.id; touchRecent(ls, saved); pjStatus('saved ' + saved); port.titleAfterSave(name); markClean(); tell(r.entry.id);
+      currentId = r.entry.id; touchRecent(ls, saved); pjStatus('saved ' + saved); port.titleAfterSave(name); markClean(); tell(r.entry.id); presetOf(r.entry.name);
       return true;
     },
     /** open(path, file) — a stored project, or (`file`, parsed) one that is not in the library: NEW's empty project (0.3.1 · S2: it
@@ -259,11 +312,13 @@ export function createProjects(port) {
     /** pick() — IMPORT: a file picker over the same door as a drop */
     pick() { const input = document.createElement('input'); input.type = 'file'; input.accept = 'application/json,.json,.mir,.png,image/png';
       input.addEventListener('change', () => { for (const f of input.files || []) take(f, 'picker'); }, { once: true }); input.click(); },
-    /** seed() — the six demos as FOLDERS' starters, added once (a changed demo file refreshed in place); awaited by the boot.
+    /** seed() — the eleven demos as FOLDERS' starters, added once (a changed demo file refreshed in place); awaited by the boot.
      *  AN OLDER BUILD'S DEMO PRESS STORED THE DEMO AT ITS PATH: an untouched copy becomes the starter where it stands; an edited one
-     *  stays the user's and keeps the path, and that starter waits (no "WATER 2" beside it) */
+     *  stays the user's and keeps the path, and that starter waits (no "WATER 2" beside it).
+     *  ITERATION 004 · EACH WEARS ITS COVER: only a starter about to be added or refreshed fetches its picture (nothing for one that is up
+     *  to date), and a refresh whose picture could not be made waits for the next boot — the kit writes `thumb: ''` otherwise */
     async seed() {
-      const got = await Promise.allSettled(STARTERS.map(async (s) => { const r = await fetch('./demos/' + s.file + '.lambdawaves.json'); if (!r.ok) throw new Error('HTTP ' + r.status); return starterOf(s, await r.text()); }));
+      const got = await Promise.allSettled(STARTERS.map(async (s) => { const r = await fetch('./demos/' + s.file + '.lambdawaves.json'); if (!r.ok) throw new Error('HTTP ' + r.status); return { ...starterOf(s, await r.text()), file: s.file }; }));
       const list = got.filter((g) => g.status === 'fulfilled').map((g) => g.value);
       if (!list.length || store.refusal) return { ok: false, added: 0 };
       sync();
@@ -275,7 +330,11 @@ export function createProjects(port) {
         files.overwrite(e.id, { payload: e.payload, thumb: e.thumb, facts: { ...e.facts, seedId: s.id, readOnly: true, seedRevision: String(s.revision) }, at: e.at });
         return true;
       });
-      return folders.seed(keep);
+      const mine = new Map(files.entries().filter((e) => e.facts && e.facts.seedId).map((e) => [String(e.facts.seedId), e]));
+      const due = keep.filter((s) => (mine.has(s.id) ? String(mine.get(s.id).facts.seedRevision ?? '') !== String(s.revision) : !known.has(s.id)));
+      const pics = await Promise.all(due.map((s) => coverOf(s.file)));
+      due.forEach((s, i) => { s.thumbnail = pics[i]; });
+      return folders.seed(keep.filter((s) => !(mine.has(s.id) && due.includes(s) && !s.thumbnail)));
     },
   };
   if (store.refusal) unavailable(store.refusal);

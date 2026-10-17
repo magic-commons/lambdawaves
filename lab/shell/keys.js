@@ -101,11 +101,11 @@ export function createKeys(app) {
     { id: 'historyUndo', group: KG.P, label: 'return from the last history jump', key: 'KeyZ', ctrl: true, alt: true, shift: false, run: () => app.sh.historyApi.historyUndo() },
     { id: 'settings', inFields: true, label: 'settings', key: 'Comma', ctrl: true, shift: false, run: () => layout.raise('settings') },
     { id: 'save', group: KG.P, short: 'save', inFields: true, label: 'save the open project (asks for a name when none is open)', key: 'KeyS', ctrl: true, shift: false,
-      run: () => { if (layout.projects && layout.projects.current) layout.projects.save(); else layout.notebook.open('projects'); } },
+      run: () => { if (layout.projects && layout.projects.current) layout.projects.save(); else layout.projects.show({ name: true }); } },
     { id: 'saveAs', group: KG.P, short: 'save as', inFields: true, label: 'save the project under a new name', key: 'KeyS', ctrl: true, shift: true,
-      run: () => layout.notebook.open('projects') },
+      run: () => layout.projects.show({ name: true }) },
     { id: 'folders', group: KG.P, short: 'folders', label: 'the projects — save, open, folders, recent (FOLDERS)', key: 'KeyO',
-      run: () => layout.projects.folders.toggle() },
+      run: () => layout.projects.toggle() },   // iteration 004: shown over the front page (it is put away first), shut when it is seen
     /* the kit's windows λWAVES has are rows with NO chord (MIR ADOPTING-1.5 §11: their keys are Josh's to give; bind one in the keyboard) */
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
@@ -161,7 +161,10 @@ export function createKeys(app) {
         play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
       dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, transport: false, audio: false,
       store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },
-      busy: () => app.state.capApi.busy, moved: (r) => app.state.dodge(r, 'tl'), onWindow: () => occlusion.dirty() });
+      busy: () => app.state.capApi.busy, moved: (r) => app.state.dodge(r, 'tl'), onWindow: () => occlusion.dirty(),
+      /* iteration 004 · MIR OPTIONS › SAMPLING › SCRUB is how a ruler drag seeks (BASINS shell.js: the kit's controller reads it at each
+         scrub's start): LIVE every move, LIGHT one in three, RELEASE when the hand lets go */
+      scrubLevel: () => { const g = mirGui(); return g ? g.sampling().scrub : 'live'; } });
     /* the window draws no pane of its own: its ruler, lanes and work bar are each a .glass pane (a lane clipped by the scroller), its rail chips */
     occlusion.register('timeline', () => app.state.tl.isOpen() ? [...app.state.tl.root.querySelectorAll('.glass'), ...(app.state.tl.rail.el ? app.state.tl.rail.el.querySelectorAll('.mir-chip') : [])].map((s) => paintedRect(s, s.closest('.tl-viewport'))) : []);
     for (const n of [app.state.tl.root, app.state.tl.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });

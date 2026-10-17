@@ -158,9 +158,10 @@ export function projectFileText(it) {
     C₆₀'s record: the open fetches it when the device does not hold it, and offline MOLECULES offers its DOWNLOAD, as for any record-only molecule; BREAK (0.7.1 U2) is H₂ at R 5 bohr, METHOD UHF; TUNNEL (0.7.2 L2) is LATTICE's packet at a barrier V = 2J; LDA (0.7.3 K2) is water under METHOD LDA on VIEW Δ LDA−RHF */
 export const STARTERS = Object.freeze([['wave-dancer', 'WAVE DANCER'], ['water', 'WATER'], ['benzene', 'BENZENE'], ['n2', 'N₂'], ['h2-sigma-u', 'H₂ σu'], ['helium', 'HELIUM'], ['chord', 'CHORD'], ['bucky', 'BUCKY'], ['break', 'BREAK'], ['tunnel', 'TUNNEL'], ['lda', 'LDA']]
   .map(([file, name]) => Object.freeze({ file, name, folder: 'DEMOS' })));
-/** starterOf(spec, text) → a folders/seed.js starter from the demo file's text */
+/** starterOf(spec, text) → a folders/seed.js starter from the demo file's text.  Its revision is the file's own `saved` stamp and the
+ *  picture's mark (`·cover`, iteration 004: the DEMOS took their covers as pictures), so every browser's DEMOS refresh in place once */
 export function starterOf(s, text) {
   const p = parseProjectFile(text);
-  return { id: 'demos/' + s.file, name: s.name, folder: s.folder, readOnly: true, revision: p.saved, at: Date.parse(p.saved) || undefined,
+  return { id: 'demos/' + s.file, name: s.name, folder: s.folder, readOnly: true, revision: p.saved + '·cover', at: Date.parse(p.saved) || undefined,
     data: { parts: { [PART]: { data: p.data, notebook: p.notebook } } } };
 }

@@ -770,16 +770,16 @@ export async function boot(dom) {
      and this browser's settings, so it loses nothing the reader made.  What a reload does NOT keep is the clock's position,
      a capture in flight and the AUTO-ROTATE switch; a capture is excluded here, and so, in the foreground, is a clock that
      has moved (played and paused, or scrubbed): that session is offered, not taken.  The take-on-hide road (ignorePlaying)
-     keeps ignoring the clock — it takes while nobody watches.  So: the ring holds only its origin row, named `boot` or `link`
-     (an `open · …`, `new project` or `resume` origin is a scene a reload would not bring back: the opener's covers and RESUME
-     are offered a build, never taken); nothing is pending or held; the project is clean; no pointer is down; the
-     photosensitivity notice is not up; nothing is being typed; no capture is running; and, unless the caller says playing is
-     fine, the transport is paused at t = 0.  Read only after boot (register waits ≥ 1.5 s past load).  0.5.0 C6b: the same
-     question, asked on pagehide, decides whether a reload of this tab skips the title screen (the boot tail). */
+     keeps ignoring the clock — it takes while nobody watches.  So: the ring holds only its origin row, named `boot`, `link` or
+     `resume` (iteration 004: with no title screen a reload of a resumed tab resumes the same session, flushed on pagehide; an
+     `open · …` or `new project` origin is a scene a reload would not bring back, and is offered a build, never taken); nothing
+     is pending or held; the project is clean; no pointer is down; the photosensitivity notice is not up; nothing is being
+     typed; no capture is running; and, unless the caller says playing is fine, the transport is paused at t = 0.  Read only
+     after boot (register waits ≥ 1.5 s past load). */
   const untouched = (ignorePlaying) => {
     const rows = app.state.history ? app.state.history.entries() : [];
     return rows.length === 1 && !app.state.history.canUndo && !app.state.history.pendingLabel && !app.state.history.holding
-      && (rows[0].label === 'boot' || rows[0].label === 'link')
+      && (rows[0].label === 'boot' || rows[0].label === 'link' || rows[0].label === 'resume')
       && !(layout.projects && layout.projects.dirty) && !app.state.pointerHeld
       && !(warning && warning.open)
       && !(document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName))
@@ -834,7 +834,10 @@ export async function boot(dom) {
   /* ── 0.5.0 C7b · THE RENDER CARD (lab/film-card.js): MIR's createRenderCard over the film's host recorder, built once LW exists (the film
      reads it) and registered closed on the right rack (R2), in + and WINDOW; its saves are the hand-over fix (capture.js handOver) ── */
   app.state.filmCard = createFilmCard({ film: app.state.capApi.exact, capture: app.state.capApi.capture, editor: () => app.state.tl && app.state.tl.editor, open: () => app.state.tl && app.state.tl.open(), armed: () => app.state.modArm,
-    digest: () => reg.digest(), key: () => [reg.version, mat.view, obs.yaw, obs.pitch, obs.dist, obs.fov, obs.shift.join(), clock.t].join('|') });
+    digest: () => reg.digest(), key: () => [reg.version, mat.view, obs.yaw, obs.pitch, obs.dist, obs.fov, obs.shift.join(), clock.t].join('|'),
+    /* iteration 004: FILES (FOLDERS' project zip) and the SUBJECT — THIS VIEW, or the project FOLDERS' ⓘ pointed at */
+    files: layout.projects ? layout.projects.folders.zip : null, gallery: layout.projects ? layout.projects.inspected : null,
+    here: () => { const C = app.state.chem; return { chem: C && C.on ? C.save() : null, ham: getHamiltonian().id, preset: reg.preset, view: mat.view, t: clock.t }; } });
   rack.prepend(app.state.filmCard.card.root);   // at the top, where a reopen puts it and a layout that does not list it (a demo's) leaves it: a reload saves the same `closed`
   rk.register({ id: 'render', el: app.state.filmCard.card, side: 'right', closed: true, title: 'RENDER', glyph: 'render', hint: 'the picture and the film' });
   /* 0.5.1 D10-24 · THE CURVES CARD: the kit's curves panel over the stage canvas (MASTER · R · G · B through its one SVG picture filter), so the SCREEN is
@@ -850,6 +853,15 @@ export async function boot(dom) {
   curves.onChange(() => { clearTimeout(curvesSave); curvesSave = setTimeout(() => curvesStore.set(curves.serialize()), 250); });
   app.state.filmCard.card.root.after(wCurves.root); rk.register({ id: 'curves', el: wCurves, side: 'right', closed: true, title: 'CURVES', glyph: 'curves', hint: 'grade the screen: a transfer curve per channel' });
   LW.curves = curves;
+  /* iteration 004 · THE FOLDERS CARD (BASINS' rackSave, save-window.js:380): the kit's mountGallery, a second live view of FOLDERS' one library,
+     8 a page — closed at the top of the LEFT rack, in + and WINDOW.  Built here, as BASINS builds it (a saved layout opens a card by its
+     class alone, shell/rack-wiring.js, so a first-open build would leave it empty); painted again when it opens.  The id `projects` is
+     permanent (a WORKSPACE layout row, Gemma's window list); a layout that does not list it leaves it where it is seated here */
+  const wFolders = device({ id: 'projects', eyebrow: 'FOLDERS', status: 'PROJECTS' });
+  const foldersView = layout.projects ? layout.projects.folders.mountGallery(wFolders.body, { pageSize: 8 }) : null;
+  (rackL || rack).prepend(wFolders.root);
+  rk.register({ id: 'projects', el: wFolders, side: 'left', closed: true, title: 'FOLDERS', glyph: 'folder', hint: 'your projects and the DEMOS',
+    onOpen: () => { if (foldersView) foldersView.paint(); } });
 
   /* ── go ───────────────────────────────────────────────────────────────── */
   LW.bootView = VIEW_NAMES[mat.view]; LW.bootVortex = vortex.on; LW.bootOrder = layout.orderAll(); LW.bootClosed = layout.closed();   // the shipped defaults, recorded before a URL preset's visuals apply
@@ -915,6 +927,9 @@ export async function boot(dom) {
 
   /* the photosensitivity notice is main.js' `warning` (0.5.0 C6b: λWAVES' law over the kit's notice, shown before the title screen) */
   const warning = dom.start.warning;
+  /* iteration 004 · THE NOTICE IS ON TOP.  The front page (above, z 100000, skin.css) would cover the kit's notice (z 70: --z-banner
+     + 10), whose dialog swallows a press outside it — a pointer could not reach CONTINUE.  While the notice is up, the page waits for it */
+  { const front = app.state.mainMenu; if (front && front.shown && warning.open) { front.close(); warning.onAccept(() => front.open()); } }
   ui.saveNative = saveSettings;
   reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost: app.state.modHost, modApi:()=>app.state.modView&&app.state.modView.api, cadence:()=>MOD.hz, setCadence:mod.setCadence });
   app.hooks.warning = warning;
@@ -942,16 +957,15 @@ export async function boot(dom) {
   if (layout.projects) { await Promise.race([layout.projects.seed().catch(() => null), new Promise((r) => setTimeout(r, 3000))]); layout.projects.markClean(); }   // 0.5.0 C6: the six demos are FOLDERS' starters before the lab says ready
   /* 0.5.0 C6b · THE SESSION hears the one part: the ring's moves and the notebook's input (projects.changed, the part's subscribe) */
   if (layout.projects) { app.state.history.subscribe(layout.projects.changed); const nbEl = document.getElementById('notebook'); if (nbEl) nbEl.addEventListener('input', layout.projects.changed); }
-  /* THE CHOICE (main.js: the title screen's pick, ?starter=, or `boot` for a driven or direct start).  NEW and the boot keep the shipped
-     scene and its `boot` / `link` origin; a cover opens its demo (origin `open · NAME`); RESUME puts the session back (origin `resume`).
-     NEW and a cover forget the session, the boot arms it.  ?play=1 waits for the choice and then for the notice (armAutoplay). */
+  /* THE CHOICE (main.js: ?starter=, `boot` for a driven or direct start, and for a human start RESUME when the session holds work, else
+     `boot` — iteration 004, no title screen).  `home` and the boot keep the shipped scene and its `boot` / `link` origin; a demo id opens
+     its demo (origin `open · NAME`); RESUME puts the session back (origin `resume`).  `home` and a demo forget the session, the boot arms
+     it.  ?play=1 waits for the choice and then for the notice (armAutoplay). */
   const S = LW.session, id = await dom.start.choice;
   if (id === 'boot') S.arm(); else if (id === 'resume') layout.projects.resume(S); else S.discard();
   if (!['home', 'boot', 'resume'].includes(id)) await layout.projects.demo(id);
   armAutoplay();
   installWakeLock({ clock: appPlay });   // ONE clock: the wake lock is held while THE play plays (asked inside a gesture, armed otherwise; no timer)
-  /* a reload of this tab skips the title screen only while a reload loses nothing (the quiet take's own question) */
-  addEventListener('pagehide', () => { try { if (untouched(true)) sessionStorage.setItem('lambdawaves.opener', 'home'); else sessionStorage.removeItem('lambdawaves.opener'); } catch (_) {} });
   LW.ready = true;
   LW.report = (o, t = performance.now()) => import('../tools/perf/device-report.js').then((m) => m.run(LW, o, t)); if (q.get('report') === '1') LW.report(q);   // THE DEVICE REPORT (2026-09-25): a diagnostic in tools/, never precached — `?report=1` or __LW.report() measures this device and puts every setting back
   return LW;
