@@ -6,7 +6,9 @@
  *                                  chem.open reads a record through these, and tools/orbital-library.mjs --check proves them;
  *                                  S4b: the atoms must hash to `input.atomsSha256` and ε, C, D must be finite (a moved atom
  *                                  or a NaN is refused, not opened);
- *   installed / fetchRecord / removeRecord / persistOnce / storageInfo   the store MOLECULES installs into and opens from.
+ *   installed / fetchRecord / removeRecord / persistOnce / storageInfo   the store MOLECULES installs into and opens from;
+ *   keepData                       the same store for a DATA file the lab only shows or reads as served (iteration 005 A: the
+ *                                  Picker's pictures, the demo covers, a volume's ladder bases) — kept after its first good answer.
  * tools/orbital-library.mjs writes the records and lab/library.json, the catalogue lab/molecules.js reads. */
 import { sha256Hex } from './md.js';
 export const SCHEMA = 1, DATA_CACHE = 'lw-data-v1';
@@ -128,6 +130,19 @@ export async function fetchRecord(hash, { network = false, onProgress = null } =
   const w = await store(true);
   if (w) await w.put(url, new Response(buf, { headers: { 'content-type': 'application/json' } })).catch(() => {});
   return { record: JSON.parse(new TextDecoder().decode(buf)), from: 'network', bytes: got };
+}
+
+/** a DATA file without a name to check (sw.js §1b: img/menu/, demos/covers/, the ladder's bases): kept in lw-data-v1 after its first
+    good answer — `res` that answer when the caller already holds it (a clone), else fetched (the worker answers from the device or
+    the network).  true when the device holds it afterwards. */
+export async function keepData(url, res = null) {
+  try {
+    const c = await store(true), key = new URL(url, location.href).href;
+    if (!c || await c.match(key)) return !!c;
+    const r = res || await fetch(key);
+    if (r.ok) await c.put(key, r);
+    return r.ok;
+  } catch (_) { return false; }
 }
 
 /* ── the iPad law (PLAN B2) ── persist() is asked on the user's FIRST install press, never at boot (Firefox prompts), and the

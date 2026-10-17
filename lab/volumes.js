@@ -15,13 +15,16 @@
  *   index(volId)                  the catalogue (from this device when installed, else the network), checked against the shelf's indexSha256
  *   status(volId)                 'absent' | 'partial n/N' | 'installed'   (statusOf: the same as { state, n, N, bytes, total })
  *   install(volId, { onProgress, signal })   every file into 'lw-vol-<id>': six at a time, resumable (a file already kept is skipped),
- *                                 cancellable (an AbortSignal); asks persist() once, on the first install press (library.js persistOnce)
- *   remove(volId)                 the whole cache
+ *                                 cancellable (an AbortSignal); asks persist() once, on the first install press (library.js persistOnce);
+ *                                 and the ladder's four basis records its rungs read (sw.js DATA) into lw-data-v1 when not there yet
+ *                                 (iteration 005 A), so an installed volume opens offline at every rung
+ *   remove(volId)                 the whole cache (the basis records stay: another volume may read them)
  *   file(volId, molId, { network })   the .lwm as an ArrayBuffer, from this device or (network, the default) the network, checked either way
  *   picture(volId, molId)         a URL for the molecule's picture: the device's copy (an object URL) when installed, else the network's
  *   storageInfo()                 library.js': persisted, usage, quota
  * The reader (lab/volumes-format.js parseLwm · rungRecord) and the open (chemview.js openVolume, THE RECORD ROAD's chem.open) are row V2's. */
-import { persistOnce, storageInfo } from './library.js';
+import { persistOnce, storageInfo, keepData } from './library.js';
+import { BASIS_FILES } from './rhf-molecule.js';
 export { storageInfo };
 export const VOLUME_BASE = new URL('./volumes/', import.meta.url).href;
 export const cacheOf = (volId) => 'lw-vol-' + volId;
@@ -92,6 +95,9 @@ export async function index(volId) {
   indexMemo.set(volId, { sha: v.indexSha256, idx });
   return idx;
 }
+/* the basis records only a volume's rungs read (sw.js §1b DATA; STO-3G and 6-31+G* are precached with the live card) */
+const LADDER = ['sto-6g', '3-21g', '6-31g', '6-31g-star'];
+const basesOf = (v) => LADDER.filter((b) => !Array.isArray(v.bases) || v.bases.includes(b)).map((b) => new URL('./vendor/bse/' + BASIS_FILES[b], import.meta.url).href);
 const filesOf = (v, m) => [{ url: inVolume(v, m.file), sha: m.sha256, bytes: m.bytes, type: 'application/octet-stream', lwm: true },
   ...(m.thumb ? [{ url: inVolume(v, m.thumb), sha: null, bytes: 0, type: 'image/webp', lwm: false }] : [])];
 
@@ -164,6 +170,7 @@ export function install(volId, { onProgress = null, signal = null } = {}) {
       }
     };
     await Promise.all(Array.from({ length: Math.min(6, Math.max(1, queue.length)) }, worker));
+    if (!stop) for (const u of basesOf(v)) if (!await keepData(u)) failed.push({ id: 'basis', url: u, why: 'the basis record could not be kept' });
     const storage = await asked.then(() => storageInfo()).catch(() => null);
     if (stop === 'cancelled') return { ok: false, cancelled: true, n, N, bytes, total, storage };
     if (stop) return { ok: false, why: stop, n, N, bytes, total, storage };

@@ -15,6 +15,7 @@ import { ATOMS } from './atoms.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { RM, animate, pointerFrame, tiltPictures, enterTiles, develop, swapLine, installRing, clamp } from './picker-fx.js';
 import * as V from './volumes.js';
+import { keepData } from './library.js';
 
 const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
   + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
@@ -76,7 +77,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     swapLine(caption, (line) => { if (!t) return; if (t.formula) el('b', 'mm-cap-f', line, t.formula); if (t.name) el('span', 'mm-cap-n', line, t.name); if (t.sub) el('i', 'mm-cap-s', line, t.sub); });
   };
   /* ── a tile: the picture moves, the name shows under it; nothing else changes on a hover ── */
-  const pic = (host, src) => { const i = el('img', 'mm-pic', host); i.alt = ''; i.decoding = 'async'; i.loading = 'lazy'; i.draggable = false; i.addEventListener('error', () => { i.remove(); }); if (src) { develop(i); i.src = src; } return i; };
+  /* a picture of ours (img/menu/, sw.js DATA) is kept on the device once it has loaded (library.js keepData); a volume's is its own */
+  const pic = (host, src) => { const i = el('img', 'mm-pic', host); i.alt = ''; i.decoding = 'async'; i.loading = 'lazy'; i.draggable = false; i.addEventListener('error', () => { i.remove(); }); if (src) { develop(i); i.addEventListener('load', () => keepData(src), { once: true }); i.src = src; } return i; };
   const tile = (host, cls, info, go, off) => {
     const b = el('button', 'mm-tile ' + cls, host); b.type = 'button';
     if (off) { b.classList.add('off'); b.setAttribute('aria-disabled', 'true'); }
