@@ -3,14 +3,14 @@
 import { TIER } from '../rack.js';
 import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js';
 import { toLUT } from '../mir/palette.js';
-import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js'; import { BASIS } from '../hydrogen.js';
+import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js'; import { BASIS, orbitalFromTable } from '../hydrogen.js'; import { RENDER_CAP } from '../state.js'; import { waitForPaint } from '../frame-settle.js';
 import { createShadowView, createShadowFoot } from '../shadowview.js'; import { createOrbit } from '../orbit.js'; import { createKepler } from '../keplerview.js';
 import { createVortex } from '../vortex.js'; import { createParticles } from '../particles.js'; import { createSliceView } from '../sliceview.js';
 import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { createBloch } from '../bloch.js'; import { solveLattice } from '../lattice-model.js'; import { createCentral, solveCentral } from '../central.js'; import { createSeparable } from '../separable.js'; import { solveLadder } from '../ladder-model.js';
 import { createAtoms } from '../atomsview.js'; import { createWigner } from '../wignerview.js'; import { createRadiation } from '../radiationview.js';
 export function createReadouts(app) {
   const { dom, ui, device, reg, clock, obs, useCompactDefaults } = app, { schedule, canPresent } = app.loop, { rack } = app.host, { setElement, fillValence, switchHamiltonian } = app.w,
-    { domain, cardLoading, solveCard, touchState, api } = app.ctl;
+    { domain, cardLoading, solveCard, touchState, api, field, stats } = app.ctl;
   const wSh = device({ id: 'shadow', eyebrow: 'SHADOW', status: '' });
   rack.appendChild(wSh.root);
   const shCanvas = el('canvas', 'shadow-c', wSh.body);
@@ -115,7 +115,20 @@ export function createReadouts(app) {
     const S = app.state.chem && app.state.chem.on ? app.state.states : null, H = getHamiltonian(), pal = app.state.palette;
     if (S) return S.on ? { c: S.state().lanes.filter((l) => l.amp > 1e-7).map((l) => ({ re: l.amp * Math.cos(l.phase), im: l.amp * Math.sin(l.phase), label: l.label, E: l.omega })), unit: 'hartree', pal } : { why: 'MOLECULES owns the field: the map reads its STATES register — switch STATES on in MO-REGISTRY', pal };
     return { c: reg.populated().map((a) => ({ re: reg.re0[a], im: reg.im0[a], label: H.labelOf(BASIS[a]), E: reg.Ediag(a), n: BASIS[a].n })), T: app.state.eq.last, unit: H.unit, pal };
-  });
+  }, gridError);
+  /* iteration 005 P3 · GRID ERROR's twin, settled first (a GRID change has landed): a molecule's own matrix (field.js keeps what it drew), else the
+     register at the field's own t (stats.fieldT) through the Hamiltonian's CPU twin — psiAt, phiAt in momentum space, the W-STURMIAN records as
+     cpuPsi reads them — captured in the task that submits the copy, so a playing clock cannot slip between the two */
+  async function gridError() {
+    if (!field.ok) return { why: 'no WebGPU device' };
+    for (let i = 0; i < 2; i++) { schedule(TIER.PRESENT); await waitForPaint(() => ({ frames: stats.frames, error: field.error, hidden: document.hidden })); }
+    const ch = app.state.chem;
+    if (ch && ch.on) { const s = ch.state(); return field.errorField(null, { t: s.steps ? s.t : null }); }
+    if (app.w.gas.on) return { why: 'the AXIAL GAS owns the box: its modes are not the register' };
+    const H = getHamiltonian(), t = stats.fieldT, c = reg.at(t), ids = reg.renderSet(RENDER_CAP).ids, P = app.sturm.P && app.sturm.rec, f = app.state.space === 'p' ? H.phiAt : H.psiAt;
+    return field.errorField(P ? (x, y, z) => { let R = 0, I = 0; for (const a of ids) { const v = orbitalFromTable(P[a], x, y, z); R += c.re[a] * v.re - c.im[a] * v.im; I += c.re[a] * v.im + c.im[a] * v.re; } return { re: R, im: I }; }
+      : (x, y, z) => f(c.re, c.im, x, y, z, ids), { t });
+  }
 
   {
     const rp = wMet.row('tight');                                     // 0.4.0 S3: PERFORMANCE moved to SETTINGS › QUALITY; the GOVERNOR's readout stays here

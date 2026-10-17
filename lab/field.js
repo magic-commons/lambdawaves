@@ -15,6 +15,7 @@
 import { modeTable } from './hydrogen.js';
 import { qmul, qnormalize, adjoint, expPure } from './rotor4.js';
 import { gpuBoot, requestGpu } from './gpu-boot.js';
+import { evaluator, shellsFromField } from './molecular-field.js';
 
 export const VIEW = { density: 0, phase: 1, real: 2, imag: 3, diff: 4, reim: 5 };
 export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff', 'reim'];
@@ -778,6 +779,13 @@ function f16(h) {
   if (e === 0) return s * Math.pow(2, -14) * (f / 1024);
   if (e === 31) return f ? NaN : s * Infinity;
   return s * Math.pow(2, e - 15) * (1 + f / 1024);
+}
+/** x's f16 value under 'rtz' (toward zero) or 'rne' (to nearest, ties to even): tests/helpers/field-law.mjs' toF16, which tests/ cannot serve */
+function toF16(x, mode) {
+  const a = Math.abs(x); if (!(a > 0) || !Number.isFinite(a)) return x;
+  let e = Math.floor(Math.log2(a)); if (2 ** e > a) e--; else if (2 ** (e + 1) <= a) e++;
+  const u = a < 2 ** -14 ? 2 ** -24 : 2 ** (e - 10); let q = Math.floor(a / u) * u; const r = a - q;
+  if (mode === 'rne' && (r > u / 2 || (r === u / 2 && Math.floor(q / u) % 2 === 1))) q += u; return Math.sign(x) * q;
 }
 
 /** pack the active modes into the kernel's record layout — into ONE persistent buffer (wave 45: this was a fresh
@@ -1577,6 +1585,61 @@ export async function createField(canvas, opts = {}) {
       return { texels, N: res, half, rhoMax, generation };
     } finally { buf.destroy(); }
   }
+  /** THE ERROR FIELD (iteration 005 P3): the display grid against its exact twin — on a press or a GRID change, never on the frame path.
+      ONE readback (readGrid's road); every voxel centre set against `psi(x, y, z) → { re, im }` in f64 (the caller's: the register at the
+      field's own t through the Hamiltonian's CPU twin), or — a molecule — the matrix this field drew (copied BEFORE the copy is submitted,
+      so a kicked density is the frame it caught) through molecular-field.js' f64 evaluator on a 4 × 4 × 4 probe of voxel centres (n² per
+      point on the main thread: the whole grid is too slow for a big molecule).  In the FIELD LAW's own metrics (tests/helpers/field-law.mjs,
+      the gate's ledger and quantile): 'psi' — |Δψ| RMS · 99.8 % · worst voxel · worst / max|ψ|; 'rho' — |Δρ|/ρ over the f16-normal √ρ ·
+      worst |Δρ| over the probe / ρ̂max (the texture's own maximum; a probe rarely holds the peak).  `mode`: of the components where toward-zero and to-nearest disagree, the one the store
+      matched.  `above`: voxels whose ρ̂ exceeds ρ (the one-sided law ρ̂ ≤ ρ), `aboveF32` those past the kernel's f32 (4e-6 relative),
+      `deficit` the largest (ρ − ρ̂)/ρ where every stored component is f16-normal or zero (the domain of the one-sided law's 2·2⁻¹⁰; a
+      subnormal component's ulp is 2⁻²⁴ absolute, so its relative deficit is larger, and is not the law's).  `{ why }` where there is no twin. */
+  async function errorField(psi = null, { t = null } = {}) {
+    const t0 = performance.now();
+    if (card) return { why: 'a card owns the volume' };
+    const mol = molSpec && molMat ? { M: molMat.slice(), kind: molKindName, cplx: molKind === 2, K: molK, shells: molSpec.shells } : null;
+    if (molSpec && !mol) return { why: 'the molecule has no matrix yet' };
+    if (mol && (mol.kind === 'diff' || mol.kind === 'signed')) return { why: 'Δρ is formed against a reference: no f64 twin here' };
+    if (!mol && space === 0 && eqTable) return { why: 'the BEAT EQUALIZER draws a mixed picture, not one ψ' };
+    if (!mol && !psi) return { why: 'no closed form for this volume' };
+    const G = await readGrid(), readMs = performance.now() - t0, N = G.N, H = G.half, u = G.texels, at = (i) => (i + 0.5) / N * 2 * H - H;
+    const L = { disc: 0, rtz: 0, rne: 0 }, law = (s, x) => { const z = toF16(x, 'rtz'), r = toF16(x, 'rne'); if (z !== r) { L.disc++; if (s === z) L.rtz++; else if (s === r) L.rne++; } };
+    const quant = (v) => { const s = Float64Array.from(v).sort(); return s[Math.min(s.length - 1, Math.ceil(0.998 * s.length) - 1)]; };
+    let above = 0, aboveF32 = 0, deficit = 0, yieldAt = performance.now();
+    const nrm = (s) => s === 0 || Math.abs(s) >= 2 ** -14;
+    const side = (r, x2, a, b) => { if (r > x2) { above++; if (r > x2 * (1 + 4e-6)) aboveF32++; } if (x2 >= 2 ** -28 && nrm(a) && nrm(b)) deficit = Math.max(deficit, (x2 - r) / x2); };
+    const done = (metric, o) => ({ N, half: H, t, metric, ...o, mode: !L.disc ? 'unread' : L.rtz >= 0.99 * L.disc ? 'toward zero' : L.rne >= 0.99 * L.disc ? 'to nearest' : 'neither',
+      ledger: L, above, aboveF32, deficit, generation: G.generation, readMs: +readMs.toFixed(1), ms: +(performance.now() - t0).toFixed(1) });
+    if (!mol) {
+      const d = new Float64Array(N * N * N); let s2 = 0, worst = 0, max2 = 0;
+      for (let k = 0; k < N; k++) {
+        if (performance.now() - yieldAt > 12) { await new Promise((r) => setTimeout(r)); yieldAt = performance.now(); }   // the page keeps its frames
+        for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+          const v = i + N * j + N * N * k, a = f16(u[v * 4]), b = f16(u[v * 4 + 1]), c = psi(at(i), at(j), at(k)), x2 = c.re * c.re + c.im * c.im;
+          law(a, c.re); law(b, c.im); side(a * a + b * b, x2, a, b);
+          const e = Math.hypot(a - c.re, b - c.im); d[v] = e; s2 += e * e; if (e > worst) worst = e; if (x2 > max2) max2 = x2;
+        }
+      }
+      return done('psi', { voxels: d.length, probe: 0, rms: Math.sqrt(s2 / d.length), p998: quant(d), worst, relToMax: worst / Math.sqrt(max2), rhoMax: max2 });
+    }
+    const ev = evaluator(shellsFromField(mol.shells)), n = ev.n, M = mol.M, K = mol.K, P = 4, idx = Array.from({ length: P }, (_, a) => Math.floor((2 * a + 1) * N / (2 * P))), rel = [];
+    let rhoHat = 0, dMax = 0; for (let v = 0; v < N * N * N; v++) { const a = f16(u[v * 4]), b = f16(u[v * 4 + 1]), r = a * a + b * b; if (r > rhoHat) rhoHat = r; }
+    for (const k of idx) for (const j of idx) for (const i of idx) {
+      const v = i + N * j + N * N * k, a = f16(u[v * 4]), b = f16(u[v * 4 + 1]), x = ev.ao([at(i), at(j), at(k)]);
+      let re = 0, im = 0, rho = 0;
+      if (mol.kind === 'orbital') { for (let q = 0; q < n; q++) { re += M[q] * x[q]; if (mol.cplx) im += M[n + q] * x[q]; } law(a, re); law(b, im); rho = re * re + im * im; }
+      else {
+        if (mol.kind === 'factor') for (let c = 0; c < K; c++) { let f = 0; for (let q = 0; q < n; q++) f += M[q * K + c] * x[q]; rho += 2 * f * f; }
+        else for (let p = 0; p < n; p++) { if (x[p] === 0) continue; let s = 0; for (let q = 0; q < n; q++) s += M[p * n + q] * x[q]; rho += x[p] * s; }
+        rho = Math.max(0, rho); law(a, Math.sqrt(rho)); law(b, 0);
+      }
+      const r = a * a + b * b, dr = Math.abs(r - rho); side(r, rho, a, b); if (dr > dMax) dMax = dr; if (rho >= 2 ** -28) rel.push(dr / rho);
+    }
+    const s2 = rel.reduce((s, e) => s + e * e, 0);
+    return done('rho', { voxels: P ** 3, probe: P ** 3, normal: rel.length, kind: mol.kind, rms: rel.length ? Math.sqrt(s2 / rel.length) : NaN, p998: rel.length ? quant(rel) : NaN,
+      worst: rel.length ? Math.max(...rel) : NaN, relToMax: dMax / rhoHat, rhoMax: rhoHat });
+  }
 
   /**
    * GPU THROUGHPUT, the honest number any browser gives (Firefox resolves completion on a ~100 ms tick; its timestamp
@@ -1734,7 +1797,7 @@ export async function createField(canvas, opts = {}) {
     moleculeTiers: { get: () => ({ granted: device.limits.maxComputeWorkgroupStorageSize, caps: MOL_CAPS, wg: molWg, orbitalFrom: MOL_ORB_FROM }), enumerable: true } });
   Object.assign(out, {
     ok: !b.lost, device, adapter, format, stats,
-    frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, lineColors, linePixels,
+    frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, errorField, lineColors, linePixels,
     setResolution, setMolecule, setMoleculeMatrix, reconstructMolecule, moleculeThroughput,
     /** K2 · THE EXPORT PIN: pinRenderPipeline(true) … (false), nested by depth — while held every draw takes the generic
      *  pipeline, so a specialised compile that resolves mid-run can never change an export's pipeline.  Returns the depth. */
