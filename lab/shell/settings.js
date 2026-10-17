@@ -72,16 +72,13 @@ export function createSettings(app) {
   function setCardStyle(id) { app.ctl.look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card }); return document.body.dataset.card; }
   function setFrost(mode) { app.ctl.look.set({ frost: mode === 'still' || mode === 'always' ? mode : 'off' }); return app.ctl.look.get('frost'); }
   function setDisconnected(v) { app.ctl.look.set({ disconnected: !!v }); return !!v; }
-  /** the SETTINGS controls the look store drives, repainted from it */
-  function lookSync(s, keys) {
-    const c = { theme: ui.themeSeg, card: ui.cardSeg, frost: ui.frostSeg, disconnected: ui.discSw, blur: ui.blurK, accentA: ui.accA, accentB: ui.accB, vivid: ui.vivid,
-      badges: ui.badgesSw, hints: ui.controlHintsSw, help: ui.windowInfoSw };
-    for (const k of keys) if (c[k]) c[k].set(s[k]);
-  }
+  /** the SETTINGS controls the look store drives, repainted from it — none since iteration 003: every look control is MIR OPTIONS'
+   *  (lab/mir-gui.js), and the kit's window follows the store itself (createGui sync).  Kept as the controller's subscriber seat. */
+  function lookSync() {}
   app.sh.lookSync = lookSync; app.sh.saveSettings = saveSettings; app.sh.setCardStyle = setCardStyle; app.sh.setFrost = setFrost; app.sh.setDisconnected = setDisconnected; app.sh.applySettings = applySettings;
   function applySettings() {
     const s = readSettings();
-    app.ctl.look.rerun(); lookSync(app.ctl.look.prefs.all(), Object.keys(app.ctl.look.prefs.all()));   // 0.5.0 C2: the look again, now that the theme's engine hooks exist
+    app.ctl.look.rerun();   // 0.5.0 C2: the look again, now that the theme's engine hooks exist (MIR OPTIONS follows the store itself, iteration 003)
     const captions = s.captions === true;
     document.body.classList.toggle('no-captions', !captions); if (ui.capSw) ui.capSw.set(captions);
     /* THE STAGE FORMULA and the ATOM LABELS (0.5.3 M9, the INFORMATIONAL window): two switches, two SIZEs; nothing said means ON.  0.4.0 S3–0.5.2

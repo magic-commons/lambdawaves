@@ -3,23 +3,20 @@
 import { TIER } from '../rack.js';
 import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf } from '../ask.js';
 export function createSettingsCard(app) {
-  const { ui, device, mat, settingsStore } = app, { schedule } = app.loop, { quality, saveSettings, setCardStyle, setFrost, setDisconnected } = app.sh,
-    { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, modHand, modStore, curvesStore, look, applyAccent, paintMarks, field } = app.ctl;
+  const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
+    { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, modHand, look, applyAccent, paintMarks, field } = app.ctl;
     ui.set = device({ id: 'settings', eyebrow: 'SETTINGS', status: '' });
     const gi = group(ui.set.body, 'INTERFACE');
     const ri = el('div', 'row tight', gi);
-    /* 0.5.0 C2: STATUS TAGS, CONTROL HINTS and HELP are the look store's (mir.gui); native-ui.js seats them on DISPLAY */
-    ui.badgesSw = sw({ label: 'STATUS TAGS', value: look.get('badges'), title: 'Show status tags at the top', onChange: (v) => look.set({ badges: v }) }); ri.appendChild(ui.badgesSw.root);
-    ui.controlHintsSw = sw({ label: 'CONTROL HINTS', value: look.get('hints'), title: 'Show control hints after a short hover', onChange: (v) => look.set({ hints: v }) }); ri.appendChild(ui.controlHintsSw.root);
+    /* iteration 003 · THE LOOK LEFT SETTINGS FOR MIR OPTIONS (lab/mir-gui.js, the kit's createGui; BASINS' split, app/settings-window.js):
+       STATUS TAGS, CONTROL HINTS (HINTS) and HELP are TEXT › SHOW there; THEME, CARD STYLE (PANE), FROST, GLASS BLUR (BLUR), DISCONNECTED,
+       ACCENT A / B, VIVID, RESET LAYOUT and FORGET too.  SETTINGS keeps λWAVES' own: the stage, its chrome, sound, Gemma, the gamut, quality. */
     ui.setWindowInfo = (v) => look.set({ help: v });   // the WINDOW menu's `notes` action calls it by this name
-    ui.windowInfoSw = sw({ label: 'HELP', value: look.get('help'), title: 'Show window help buttons', onChange: ui.setWindowInfo }); ri.appendChild(ui.windowInfoSw.root);
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
     ui.audioSw = sw({ label: 'AUDIO', value: false, title: 'sound from this page: the populated levels as tones, off by default (SPECTRUM › BEAT EQUALIZER › SOUND)', onChange: (v) => { ui.setAudio(v); saveSettings(); } }); ri.appendChild(ui.audioSw.root);   // 0.6.4 S2: a PREFERENCE (`audio`), the consent
     const au = ui.askUrlIn = el('input', 'ask-line', ri); au.type = 'url'; au.spellcheck = false; au.placeholder = askUrlOf({}); au.setAttribute('aria-label', 'Gemma’s address');
     au.title = 'GEMMA — where ASK sends your words (tools/gemma/broker.py); empty is this host at 9443'; au.addEventListener('change', saveSettings); ui.askUrl = { root: au };   // 0.6.6 G2: a PREFERENCE (`askUrl`)
     createInformational(app);   // 0.5.3 M9: STAGE FORMULA and ATOM LABELS, each with its SIZE, left DISPLAY for their own window (lab/informational.js)
-    ri.appendChild(trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => app.sh.layout.resetLayout() }).root);
-    ri.appendChild(trig({ label: 'FORGET', title: 'Clear saved interface settings and reload', onFire: () => { settingsStore.remove(); look.prefs.forget(); modStore.write({ modArm: undefined, modCadence: undefined }); curvesStore.remove(); location.reload(); } }).root);
     const rc = el('div', 'row tight', gi);
     ui.frameSw = sw({ label: 'FRAME', value: true, title: 'Show the field boundary', onChange: () => { const modes=['box','lattice','dots','off']; const current=mat.frame===false?'off':mat.frameMode||'box'; const next=modes[(modes.indexOf(current)+1)%modes.length]; mat.frame=next!=='off'; mat.frameMode=next==='off'?'box':next; ui.frameSw.set(mat.frame); ui.frameSw.root.title='FRAME · '+next.toUpperCase(); saveSettings(); schedule(TIER.PRESENT); } });
     rc.appendChild(ui.frameSw.root);
@@ -48,22 +45,6 @@ export function createSettingsCard(app) {
       mat.lightUI = theme === 'light';
       schedule(TIER.PRESENT);
     };
-    ui.themeSeg = seg({ label: 'THEME', value: look.get('theme'), options: [
-      { id: 'light', label: 'LIGHT', title: 'Use the light interface and stage' },
-      { id: 'dark', label: 'DARK', title: 'Use the dark interface and stage' },
-      { id: 'system', label: 'SYSTEM', title: 'Follow the operating system theme' }],
-      onChange: (v) => look.set({ theme: v }) });
-    rt.appendChild(ui.themeSeg.root);
-    ui.discSw = sw({ label: 'DISCONNECTED', value: look.get('disconnected'), title: 'Separate window headers from their bodies', onChange: (v) => setDisconnected(v) });
-    rt.appendChild(ui.discSw.root);
-    ui.frostSeg = seg({ label: 'FROST', value: look.get('frost'), options: [
-      { id: 'off', label: 'OFF', title: 'Disable backdrop filtering' },
-      { id: 'still', label: 'STILL', title: 'Apply frost while the field is paused' },
-      { id: 'always', label: 'ALWAYS', title: 'Apply frost continuously. This can reduce frame rate.' }],
-      onChange: (v) => setFrost(v) });
-    rt.appendChild(ui.frostSeg.root);
-    el('div', 'note', rt, 'Frost filters the field behind windows. STILL applies it while paused; ALWAYS keeps it during motion.');
-    ui.blurK = knob({ label: 'GLASS BLUR', min: 0, max: 30, value: look.get('blur'), fmt: (v) => v.toFixed(0) + ' px', title: 'the blur radius of the NOTEBOOK glass and of FROST', onInput: (v) => look.set({ blur: v }) }); rt.appendChild(ui.blurK.root);
     /* THE STAGE KNOB IS THE HEADER λ's GROUND (wave 59), which is why moving it repaints the mark: `#title`
        is `background: none` over `#field`, so `mat.bg` — this value — is the surface the λ is drawn on, and a
        correction against a ground the hand can drag is not a correction.  One named function, so the knob,
@@ -100,12 +81,6 @@ export function createSettingsCard(app) {
       ui.stageFollow.addEventListener('click', () => setStageFollow(!app.state.stageFollow));
       rt.appendChild(ui.stageK.root); setStageColour(mat.stageCustom); setStageFollow(true); }
     ui.gammaK = knob({ label: 'GAMMA', min: 0.5, max: 2.4, value: 1, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.gamma', v)) return; mat.gamma = v; schedule(TIER.PRESENT); } }); rt.appendChild(ui.gammaK.root);
-    ui.cardSeg = seg({ label: 'CARD STYLE', value: look.get('card'), options: [
-      { id: 'refractive', label: 'REFRACTIVE', title: 'Use transparent window surfaces' },
-      { id: 'tinted', label: 'TINTED', title: 'Add the theme tint behind window content' },
-    ], onChange: (v) => setCardStyle(v) });
-    rt.appendChild(ui.cardSeg.root);
-    el('div', 'note', gt, 'Refractive shows the field through the blur. Tinted adds the theme panel colour.');
     const gamutSup = field.ok && field.gamutSupport ? field.gamutSupport : { canvas: false, css: false, display: false, reason: 'no WebGPU device: the canvas has no colour space to set' };
     const gamutOK = !!(gamutSup.canvas && gamutSup.css);
     const rg = el('div', 'row tight', gt);
@@ -140,11 +115,7 @@ export function createSettingsCard(app) {
     }
     ui.gamutRo.set('sRGB'); ui.gamutRo.setSub(gamutOK ? 'the interface and the field are both sRGB' : gamutSup.reason);
     el('div', 'note', gt).innerHTML = '<b>Gamut.</b> Display P3 is available only when both CSS and the WebGPU canvas support it. CONVERT preserves authored colours; VIVID increases chroma. DITHER reduces visible 8-bit banding.';
-    const ra = el('div', 'row tight', gt);
-    ui.accA = knob({ label: 'ACCENT A', min: 0, max: 360, value: look.get('accentA'), wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'the first UI accent: an angle on the current palette wheel', onInput: (v) => look.set({ accentA: v }) }); ra.appendChild(ui.accA.root);
-    ui.accB = knob({ label: 'ACCENT B', min: 0, max: 360, value: look.get('accentB'), wrap: true, fmt: (v) => v.toFixed(0) + '°', title: 'Set Accent B', onInput: (v) => look.set({ accentB: v }) }); ra.appendChild(ui.accB.root);
-    ui.vivid = knob({ label: 'VIVID', min: 0, max: 1, value: look.get('vivid'), fmt: (v) => (v * 100).toFixed(0) + '%', title: 'Increase accent chroma and glow', onInput: (v) => look.set({ vivid: v }) }); ra.appendChild(ui.vivid.root);
-    el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Theme changes the interface and stage. Stage, gamma, accents, hue, exposure, and invert affect presentation without changing ψ. Frost may reduce frame rate while the field moves.';
+    el('div', 'note', gt).innerHTML = '<b>Appearance.</b> Stage, gamma, hue, exposure, and invert affect presentation without changing ψ. The theme, the accents, the glass and the frost are the interface’s look: GUI › MIR OPTIONS.';
     app.hooks.setTheme = (t) => look.set({ theme: t });
   function createFieldQuality() {   // the second seat: FIELD QUALITY
     const gq = group(ui.set.body, 'FIELD QUALITY');

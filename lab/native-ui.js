@@ -52,22 +52,18 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   gamut.root.replaceWith(p3.root);
   const setGamut=gamut.set;gamut.set=v=>{setGamut(v);p3.set(v==='p3');};
   ui.gamutToggle=p3;
-  for(const name of ['accA','accB']){const k=ui[name];k.root.classList.add('accent-dial');if(name==='accB')k.root.classList.add('accent-dial-b');
-    const paintArc=()=>k.root.style.setProperty('--accent-sweep',(k.get()/360*360)+'deg');paintArc();
-    new MutationObserver(paintArc).observe(k.root,{attributes:true,attributeFilter:['aria-valuenow']});
-  }
   const oldGroups=[...settings.children];
-  const tabs=seg({aria:'Settings category',value:'display',options:[{id:'display',label:'DISPLAY'},{id:'appearance',label:'LOOK'},{id:'quality',label:'QUALITY'}],onChange:id=>{for(const [key,p] of Object.entries(pages))p.hidden=key!==id;}});
+  // iteration 003: the LOOK page left for MIR OPTIONS (lab/mir-gui.js); SETTINGS is DISPLAY · QUALITY, BASINS' two (app/settings-window.js)
+  const tabs=seg({aria:'Settings category',value:'display',options:[{id:'display',label:'DISPLAY'},{id:'quality',label:'QUALITY'}],onChange:id=>{for(const [key,p] of Object.entries(pages))p.hidden=key!==id;}});
   settings.prepend(tabs.root);
   const viewport=el('div','settings-viewport',settings),pages={};
-  for(const id of ['appearance','display','quality']){pages[id]=el('div','settings-page',viewport);pages[id].hidden=id!=='display';}
+  for(const id of ['display','quality']){pages[id]=el('div','settings-page',viewport);pages[id].hidden=id!=='display';}
   function row(page, names){const r=el('div','row tight',pages[page]);for(const name of names)if(ui[name]?.root)r.appendChild(ui[name].root);}
-  row('appearance',['themeSeg']);row('appearance',['cardSeg']);row('appearance',['frostSeg']);row('appearance',['discSw','blurK']);row('appearance',['accA','accB','vivid']);
-  row('display',['badgesSw','controlHintsSw','capSw','windowInfoSw']);ui.windowInfoSw.root.parentElement.classList.add('settings-status-grid');row('display',['audioSw','askUrl']);row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
+  row('display',['capSw','audioSw']);ui.capSw.root.parentElement.classList.add('settings-status-grid');row('display',['askUrl']);row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
   const quality=ui.gridSeg.root.closest('.grp');if(quality)pages.quality.appendChild(quality);
-  const actions=el('div','row tight settings-actions',pages.appearance);
+  const actions=el('div','row tight settings-actions',pages.display);
   for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig')){if(b.textContent.includes('SHOW THE WARNING'))b.querySelector('.trig-l').textContent='WARNING';actions.appendChild(b);}
-  const help=el('div','settings-help',pages.appearance);
+  const help=el('div','settings-help',pages.display);
   for(const g of oldGroups){if(g===quality)continue;for(const n of g.querySelectorAll('.note:not(.link-note), .sturm-note'))help.appendChild(n);g.remove();}
   const rotations=ui.rotZRate.root.parentElement;
   const actionRow=el('div','row tight');rotations.before(actionRow);

@@ -3,7 +3,7 @@
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
 import { TIER } from '../rack.js'; import { VIEW, VIEW_NAMES, STYLE, STYLE_NAMES } from '../field.js'; import { CAM } from '../camera-law.js'; import { STAGE_BINDINGS } from '../stage-gestures.js';
 import { createKeyTable } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
-import { infoActions } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js';
+import { infoActions } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { mirGui } from '../mir-gui.js';
 export function createKeys(app) {
   const { dom, ui, reg, clock, appPlay, obs, mat, settingsStore } = app, { schedule } = app.loop, { floats, panBy, queueKeyOrbit, rack, rackL, resetView, setDist, setFov } = app.host;
   const { barLock, devById, layout, readSettings, rk, setModArm, togglePlay, transport } = app.sh, { particles, shadowView, toggleFullscreen, wState } = app.w;
@@ -110,6 +110,8 @@ export function createKeys(app) {
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
     { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', key: null, run: () => { if (app.state.tl) app.state.tl.toggle(); } },   // 0.5.0 C7b
+    { id: 'gui', short: 'mir options', label: 'MIR OPTIONS — the interface’s look (BASINS’ GUI menu)', key: null, run: () => { const g = mirGui(); if (g) g.toggle(); } },   // iteration 003: lab/mir-gui.js
+    { id: 'guiAbout', short: 'mir about', label: 'MIR ABOUT — what MIR is', key: null, run: () => { const g = mirGui(); if (g) g.toggle('about'); } },
   ];
   /* THE DISPATCHER (the saved chords, the one keydown listener, whose key a press is): lab/keys.js (wave 130 seam 10) */
   /* S4 · A KEY'S EDIT IS A ROW OF ITS OWN, named for its action: C / V / P changed the edit scope and armed nothing, so the row came

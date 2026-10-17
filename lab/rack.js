@@ -37,6 +37,7 @@ import { createController } from './shell/controller.js';   // 0.5.2 R1: ONE CON
 import { createSwClient } from './sw-client.js';        // N7 seam 5: the install layer's interface half, out of boot()
 import { createBadges } from './badges.js';             // N7 seam 6: the badges and the canvas's sentence, out of boot()
 import { createTransport } from './shell/transport.js'; import { createRackWiring } from './shell/rack-wiring.js'; import { createNotebook } from './shell/notebook.js'; import { createKeys } from './shell/keys.js';   // 0.5.2 R3b (createRack, createMenubar, installWindowChrome left with them)
+import { createMirGui } from './mir-gui.js';   // iteration 003: MIR OPTIONS and MIR ABOUT, the kit's createGui over the look store
 import { readLink } from './statelink.js';   // wave 56: every state of this lab is a LINK
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
@@ -812,6 +813,7 @@ export async function boot(dom) {
   const { refreshOcclusion } = createInk(app);   // 0.5.2 R2d: lab/shell/ink.js
   /* ── 0.5.0 C3 · THE RACK IS THE KIT'S: lab/shell/rack-wiring.js (0.5.2 R3b), created here; its second seat, wireStage(), follows the notebook's ── */
   const { rk, layout, wTr, tablet, syncPhone, wireStage } = createRackWiring(app);
+  createMirGui(app);   // iteration 003: after the rack, whose one dock span the modulation window docks in
   /* ── §19b the skip links · the dock chip · MENUS and the menubar · THE NOTEBOOK · PROJECTS: lab/shell/notebook.js (0.5.2 R3b), created here ── */
   createNotebook(app);
   wireStage();   // §19a's second seat (lab/shell/rack-wiring.js): the crossings' listeners and the stage gestures, after the notebook's, as they stood
