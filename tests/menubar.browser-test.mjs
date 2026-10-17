@@ -72,11 +72,12 @@ try {
   console.log('PASS EDIT › RESEED seeds 160 particles and leaves the orbited camera bit for bit where it was');
 
   /* ── 3 · RESET KEYS restores a rebound key and forgets the override ── */
-  const keys = await g.ev(`const b = __LW.keys.bind('transport.play', { key: 'KeyL' });
+  /* Digit9, a free key: L is the main menu's since iteration 003 (and 5 the timeline's zoom-selection), and an overlap binds only on an explicit steal */
+  const keys = await g.ev(`const b = __LW.keys.bind('transport.play', { key: 'Digit9' });
     const rebound = __LW.keys.actions.find((a) => a.id === 'transport.play').key, stored = localStorage.getItem('lambdawaves.q0.keys');
     const r = await __row('EDIT', 'RESET the key bindings');
     return { ok: b.ok, rebound, stored: !!stored && /transport\.play/.test(stored), r, after: __LW.keys.actions.find((a) => a.id === 'transport.play').key, storedAfter: localStorage.getItem('lambdawaves.q0.keys'), errors: __e.slice() };`);
-  assert.equal(keys.ok, true); assert.equal(keys.rebound, 'KeyL'); assert.equal(keys.stored, true);
+  assert.equal(keys.ok, true); assert.equal(keys.rebound, 'Digit9'); assert.equal(keys.stored, true);
   assert.equal(keys.r.found, true); assert.equal(keys.r.closed, true);
   assert.equal(keys.after, 'Space'); assert.equal(keys.storedAfter, null); assert.deepEqual(keys.errors, []);
   console.log('PASS EDIT › RESET the key bindings puts PLAY back on Space and removes the stored override');
@@ -196,7 +197,11 @@ try {
     { const r = await __row('FILE', 'EXPORT project'); R.exportP = ok(r) && /nothing to export/.test(__LW.projects.status); }
     { const r = await __row('FILE', 'IMPORT project'); R.importP = ok(r); }
     { __LW.loadPreset('1s+2pz'); const r = await __row('FILE', 'NEW project');   /* 0.3.1 · S2: NEW fetches the empty project before it opens it — wait for its status */
+      /* iteration 004: NEW goes through FOLDERS, which asks its own "Save this first?" over unsaved work (no window.confirm) */
+      for (let i = 0; i < 20 && !document.querySelector('#folders .sv-ask'); i++) await new Promise((q) => setTimeout(q, 50));
+      const nw = [...document.querySelectorAll('#folders .sv-ask .trig')].find((b) => /NEW WITHOUT SAVING/.test(b.textContent)); if (nw) nw.click();
       for (let i = 0; i < 60 && __LW.projects.status !== 'new'; i++) await new Promise((q) => setTimeout(q, 50));
+      __LW.projects.folders.close();
       R.fresh = ok(r) && __LW.reg.populated().length === 0 && __LW.layout.projects.current === null; __LW.layout.notebook.close(); }
     R.errors = __e.slice();
     return R;`);

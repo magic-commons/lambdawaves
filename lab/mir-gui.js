@@ -39,8 +39,13 @@ export function createMirGui(app) {
       gplLicence('λWAVES'),
       [{ t: 'Special thanks: Team @ Chronus Quantum for the Molecular Orbital Model (ChronusQ) · ‘Electron Orbitals’ by Brian Johnson · Paul Falstad’s Math & Physics Java Applets · Seth Shultz · Beatriz Erranté, independent research & assistance.' }],
       [{ t: 'Built by AI coding agents — Claude (Anthropic) · Gemini (Google) · GPT (OpenAI).' }]] },
-    rack: { resetLayout: () => app.sh.layout.resetLayout() } });
+    rack: { resetLayout: () => app.sh.layout.resetLayout() },
+    /* iteration 004 · SAMPLING's AUTOMATION reaches λWAVES' one modulation host (BASINS skin.js): the grid the TIMELINE's arrangement is
+       read on (FRAME · 1/32 · 1/16 · 1/8 beat); without it the kit's fallback asks installModulation, which λWAVES never runs.  SCRUB is
+       read by the TIMELINE (shell/keys.js scrubLevel).  The frame time is the GUI's own FRAME readout */
+    sampling: { automation: (g) => (app.state.modHost ? app.state.modHost.clock.setAutomationGrid(g) : null) } });
   if (!tablet) document.body.classList.remove('touch-tablet');
+  { const grid = gui.sampling().grid; if (grid && app.state.modHost) app.state.modHost.clock.setAutomationGrid(grid); }   // a stored AUTOMATION grid, once (FRAME, 0, is the host's own)
   look.ctx.fx = () => { gui.light.refresh(); gui.parallax.refresh(); };   // QUALITY's run (the kit's) refreshes the pointer effects
   const wins = [gui.window, gui.about];
   occlusion.register('gui', () => wins.filter((w) => w.isOpen()).map((w) => paintedRect(w.root)));

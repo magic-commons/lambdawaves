@@ -828,3 +828,9 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
   mix-blend-mode: difference; color: #fff; font-family: var(--font-math); font-style: normal; font-weight: 600; line-height: 1; }
 #atomLabels[hidden] { display: none; }
 #atomLabels .atom-label { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform; }
+
+/* iteration 004 · RENDER's SUBJECT on its rack card (FOLDERS' ⓘ names the project it describes).  The kit stacks the name and its verbs
+   under an `@container (max-width: 315px)` (render.css) whose container nothing declares, so on λWAVES' card the name (BENZENE) was
+   squeezed to one letter beside THIS VIEW · COPY · JSON.  The card is always that narrow: the stacked rows, unconditionally (a MIR issue) */
+.mir-render[data-seat="card"] .sr-subject-head, .mir-render[data-seat="card"] .sr-verbs { grid-column: 1 / -1; }
+.mir-render[data-seat="card"] .sr-verbs .trig { flex: 1 1 0; }

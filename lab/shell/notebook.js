@@ -94,10 +94,12 @@ export function createNotebook(app) {
       const runAction = (id) => { const a = app.sh.ACTIONS.find((x) => x.id === id); if (a) a.run(1); };
       const keyFor = (id) => app.sh.kt.keyText(id);
       const MENUS = {
-        FILE: () => [['NEW project', () => layout.projects.requestFresh()], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…') + '\t' + keyFor('save'), () => { if (layout.projects.current) layout.projects.save(); else { layout.notebook.open('projects'); } }], ['SAVE project AS…\t' + keyFor('saveAs'), () => layout.notebook.open('projects')], ['OPEN a project…', () => layout.notebook.open('projects')],
-          ...layout.projects.recent().slice(0, 5).map((p) => ['↺  ' + p, () => layout.projects.requestOpen(p), null, '', { raw: true }]),
+        /* iteration 004 · FILE GOES THROUGH FOLDERS (BASINS shell.js FILE): NEW, OPEN and a recent project open FOLDERS first and let it ask
+           "Save this first?" (SAVE & OPEN · OPEN WITHOUT SAVING, SAVE & NEW · NEW WITHOUT SAVING) — no window.confirm on these rows */
+        FILE: () => [['NEW project', () => { layout.projects.show(); layout.projects.folders.fresh(); }], ['SAVE project' + (layout.projects.current ? '  ' + layout.projects.current : '…') + '\t' + keyFor('save'), () => { if (layout.projects.current) layout.projects.save(); else layout.projects.show({ name: true }); }], ['SAVE project AS…\t' + keyFor('saveAs'), () => layout.projects.show({ name: true })], ['OPEN a project…', () => layout.projects.show()],
+          ...layout.projects.recent().slice(0, 5).map((p) => ['↺  ' + p, () => { const P = layout.projects, e = P.entryOf(p); P.show(e ? { folder: e.folder } : {}); if (e) P.folders.openEntry(e.id); }, null, '', { raw: true }]),
           null,
-          ['EXPORT project (.json)', () => layout.projects.download()], ['IMPORT project (.json)…', () => layout.projects.pick()],
+          ['EXPORT project (.json)', () => layout.projects.download()], ['EXPORT project (.mir)', () => layout.projects.folders.exportProject('mir'), null, 'the selected project in FOLDERS, else the open one, as the kit\'s .mir file'], ['EXPORT project as a PICTURE (.png)', () => layout.projects.folders.exportProject('png'), null, 'its picture, carrying the project inside it'], ['IMPORT project (.json · .mir · picture)…', () => layout.projects.pick()],
           null,
           ['SAVE the experiment (quick)', () => app.sh.save()], ['LOAD the last quick save', () => app.sh.restore()], ['COPY as JSON', () => app.sh.copyJSON()],
           ['COPY a LINK to this state', () => app.sh.copyLink(), null, 'a URL that reopens this exact state — the STATE card says how long it is and what format v1 could not carry (the MOLECULE panel and the MODULATION rack)'],
@@ -108,7 +110,7 @@ export function createNotebook(app) {
         VIEW: () => [['INVERT the cloud \u2014 ink, not light', () => app.sh.LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => app.sh.LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => app.sh.LW.setView('phase')], ['Re ψ', () => app.sh.LW.setView('real')], ['Im ψ', () => app.sh.LW.setView('imag')], ['Δρ  difference', () => app.sh.LW.setView('diff')], ['Re + Im  superposed (heuristic)', () => app.sh.LW.setView('reim')],
           ['— style: CLOUD\t' + keyFor('style') + ' cycles', () => app.sh.LW.setStyle('cloud')], ['— style: SOLID', () => app.sh.LW.setStyle('solid')], ['— style: GRAIN', () => app.sh.LW.setStyle('grain')], ['— style: SIGNED', () => app.sh.LW.setStyle('signed')], ['— style: BANDS', () => app.sh.LW.setStyle('bands')],
           ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE FORMULA  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['ATOM LABELS  on / off', () => ui.atomLabelsSw && ui.atomLabelsSw.root.click()], ['STATUS TAGS  on / off', () => app.ctl.look.set({ badges: !app.ctl.look.get('badges') })], ['CONTROL HINTS  on / off', () => app.ctl.look.set({ hints: !app.ctl.look.get('hints') })], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
-        WINDOW: () => [['MAIN MENU\t' + keyFor('menu'), () => runAction('menu')], ['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['TIMELINE', () => runAction('timeline')], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => app.hooks.setTheme && app.hooks.setTheme('light')], ['THEME · DARK', () => app.hooks.setTheme && app.hooks.setTheme('dark')], ['THEME · SYSTEM', () => app.hooks.setTheme && app.hooks.setTheme('system')], null,
+        WINDOW: () => [['MAIN MENU\t' + keyFor('menu'), () => runAction('menu')], ['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['FOLDERS\t' + keyFor('folders'), () => runAction('folders'), null, 'your projects and the DEMOS'], ['TIMELINE', () => runAction('timeline')], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => app.hooks.setTheme && app.hooks.setTheme('light')], ['THEME · DARK', () => app.hooks.setTheme && app.hooks.setTheme('dark')], ['THEME · SYSTEM', () => app.hooks.setTheme && app.hooks.setTheme('system')], null,
           ...[...document.querySelectorAll('.dev:not([hidden])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])],
         /* iteration 003 · BASINS' GUI menu (shell.js createMenubar): the kit's two windows, lab/mir-gui.js */
         GUI: () => [['MIR OPTIONS', () => mirGui().open('options'), null, 'the interface’s look: theme, accents, text, quality, material, controls, motion, light, windows'], ['MIR ABOUT', () => mirGui().open('about'), null, 'what MIR is']],
@@ -247,15 +249,25 @@ export function createNotebook(app) {
         },
         signature: () => projectKey(),
       };
+      /* RENDER's SUBJECT says THIS VIEW's system: an open card is painted again when a project lands or ⓘ points (iteration 004) */
+      const renderPaint = () => { const fc = app.state.filmCard; if (fc && !fc.card.root.classList.contains('closed')) fc.view.paint(); };
       const projects = createProjects({ host: floats || document.body, part,
         snapshot: () => JSON.parse(JSON.stringify(app.sh.serialize())), rollback: (S) => app.sh.restore(S) === true,   // M5b: the instrument as it stood, through the same road
         busy: (d) => { busy.n = Math.max(0, busy.n + d); busySync(); },   // wave 48: a project load rebuilds the register, the operator and the field — BUSY work
         notice: () => app.state.restoreNotice, thumbnail: () => app.sh.LW.thumbnail(), confirm: (text) => window.confirm(text), onMoved: () => occlusion.dirty(),
+        /* iteration 004 · the front page sits above every window (THE PICKER, z 100000): FOLDERS puts it away when it comes on screen */
+        cover: () => app.state.mainMenu,
+        /* Josh 10-01 · a project save writes its modulation as a preset named the project in CAPS (the kit's presetUpsertCaps, BASINS'
+           presetOnSave) — only a rack that routes something, so a plain save adds no empty preset */
+        saved(name) { const H = app.state.modHost; if (!H) return; const rack = H.model.serializeRack(); if (!rack || !Array.isArray(rack.routes) || !rack.routes.length) return;
+          const r = H.model.presetUpsertCaps(name, rack); if (r && r.ok && app.state.modView) app.state.modView.rebuild(); },
+        /* ⓘ on a tile: the RENDER card describes that project (its SUBJECT); a plain selection repaints it only when it is open */
+        inspect(e, how) { if (how.show && app.state.filmCard) layout.raise('render'); renderPaint(); },
         rack: { keepClear: () => ['rack', 'rackL', 'transport'].map((id) => paintedRect(document.getElementById(id))).filter(Boolean) },
         /* 0.3.1 · S2 THE NOTEBOOK LAW (PLAN §3.4): a project opens onto its notebook only when the notebook has text — the complete
            notebook, in its scrollable pane.  A blank one (NEW's included) opens nothing and closes nothing.  "Edited" is read off the
            text: no flag.  S3: the ring's bottom row is named for the file. */
-        opened(label) { count(); if (app.state.history) app.state.history.clear(label); if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; } render(); },
+        opened(label) { count(); if (app.state.history) app.state.history.clear(label); if (ta.value.trim()) { show('notes'); nb.dataset.mode = 'view'; } render(); renderPaint(); },
         titleAfterSave(name) { if (titleIn.value !== 'NOTEBOOK') return false; titleIn.value = name; return true; } });
       addEventListener('beforeunload', (e) => {
         if (!projects.dirty) return;
@@ -266,14 +278,14 @@ export function createNotebook(app) {
       { const { root, rail } = projects.folders.win;
         occlusion.register('folders', () => projects.folders.isOpen() ? [paintedRect(root), ...(rail.el ? [...rail.el.querySelectorAll('.mir-chip')].map((c) => paintedRect(c)) : [])] : []);
         for (const el of [root, rail.el]) occlusion.watch(el, { attributes: true, attributeFilter: ['hidden'] }); }
-      nb.querySelector('.nb-projects-btn').addEventListener('click', () => projects.folders.toggle());
+      nb.querySelector('.nb-projects-btn').addEventListener('click', () => projects.toggle());
       layout.projects = projects;
       const count = () => { const c = nb.querySelector('.nb-count'); if (c) c.textContent = ta.value.trim() ? ta.value.trim().split(/\s+/).length + ' words · kept in this browser' : 'empty · kept in this browser'; };
       ta.addEventListener('input', () => { nbStore(NB_KEY, ta.value); count(); });
       const ABOUT_DEF_W = 470, ABOUT_DEF_H = 670;
       const NOTES_DEF_W = 640, NOTES_DEF_H = 460;
       const show = (face) => {
-        if (face === 'projects') { projects.folders.open(); return; }   // 0.5.0 C6: the PROJECTS face left the notebook; its open is FOLDERS'
+        if (face === 'projects') { projects.show(); return; }   // 0.5.0 C6: the PROJECTS face left the notebook; its open is FOLDERS' (iteration 004: the front page put away first)
         nb.hidden = false; faces.notes.hidden = face !== 'notes'; faces.about.hidden = face !== 'about'; nb.dataset.face = face;
         const S = readSettings();
         if (face === 'about') {

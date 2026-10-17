@@ -171,6 +171,14 @@ from a text field; a control a row drives carries `data-key-action`. `ctrl:
 true` is the kit's `Mod` (Ctrl or ⌘); `ctrl: 'Ctrl'` is the Control key alone
 — Ctrl+Shift+Q/E and the MOD arm (Ctrl+Space) are spelled so, never `Mod` (⌘⇧Q
 logs a Mac out). S stays WASD's pitch-down; FOLDERS is O (R-K1). (0.5.0 A9)
+FOLDERS IS THE PROJECTS HOME (iteration 004, BASINS-shaped, `lab/projects.js`): the eleven DEMOS wear their covers (a 4:3 middle of
+`lab/demos/covers`, refreshed in place once by the starters' `·cover` revision; only a starter being added or refreshed fetches one),
+folder cards the kit's `folder` glyph, RESTORE THE DEMOS in the foot, the toolbar SAVE · PROJECT · DUPLICATE · NEW, ⓘ the RENDER card's
+SUBJECT, a save also its modulation preset in CAPS (a rack with routes). Its doors: O, WINDOW › FOLDERS, the notebook's ▤, FILE (NEW,
+OPEN, the recent rows ask FOLDERS' own "Save this first?"), and the FOLDERS rack card (`projects`, the kit's mountGallery, 8 a page,
+closed at the top of the LEFT rack, built at its first open); each puts the front page away first (the port's `cover`). RENDER carries
+FOLDERS' FILES (SAVE AS ZIP… · OPEN ZIP…); MIR OPTIONS › SAMPLING reaches the modulation host (AUTOMATION) and the TIMELINE (SCRUB); the
+modulation window is in the kit's one window stack (`registerWindow`).
 The CAMERA card's LOCK (PREFERENCE `camLock`, off by default) is the classic camera. It holds the pan only: the shift stays 0,
 every zoom (the wheel, the pinch, the dials, the dolly zoom) is from the centre, the PAN pad rests, and a route on observer.panx/pany
 or a project's shift opens centred without its record being written. FOV, CONTROL and the turn stay live (`lab/camera-law.js`
@@ -190,16 +198,18 @@ browser BEFORE anything animates, and NO query string silences it for a human
 (the kit's `?warn=0` is not honoured); only a test driver skips it (`?warn=1`
 forces it there). Its seen-flag is the settings blob's `warned`; `__LW.warning`
 keeps show dismiss needed onAccept reset seen remembered open; `?play=1` waits
-for it; `LW.ready` never does. Then MIR's title screen: the six demos as covers
-(`lab/demos/covers`, `tools/make-covers.mjs`), NEW and RESUME
-(`lambdawaves.q0.session`, MIR's `createSession` over the one part, PROJECT).
-The boot runs behind it and awaits the choice. A driver, a link, `?preset=` or
-`?view=` skip it (`?starter=` or the boot); `?opener=1` shows it under a driver
-(`tests/opener.browser-test.mjs`); CDP tools add `&starter=home`. STATUS TAGS
-off hides the four ψ-badges, never the build offer; an untouched session (ring
-origin boot/link) takes a waiting build itself (`lab/sw-client.js`, `rack.js`
-`untouched`) and its reload skips the title screen; RESUME and a cover are
-offered it, any other session only on a press. The banner is MIR's
+for it; `LW.ready` never does. THERE IS NO TITLE SCREEN (iteration 004, Josh: the
+demos and the saves are FOLDERS'): after the notice a human start takes BASINS'
+no-pick rule — RESUME when `lambdawaves.q0.session` holds work (MIR's
+`createSession` over the one part, PROJECT), else the boot — and the front page
+(THE PICKER) opens only after CONTINUE, so the notice is never under it. The
+boot awaits the choice. A driver, a link, `?preset=` or `?view=` start on
+`?starter=` (home · resume · a demo id) or the boot; `?opener=1` makes a driven
+start a human one (`tests/start.browser-test.mjs`); CDP tools add
+`&starter=home`. STATUS TAGS off hides the four ψ-badges, never the build offer;
+an untouched session (ring origin boot/link/resume) takes a waiting build itself
+(`lab/sw-client.js`, `rack.js` `untouched`), any other session only on a press.
+The banner is MIR's
 `installBanner`, the veil MIR's `bootVeil`, and the wake lock follows THE play.
 
 DOMAIN AUTO on is a project default, not a preference (see the scopes below). In
