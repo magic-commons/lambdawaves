@@ -347,9 +347,15 @@ for key, e in entries.items():
     srcs = sorted({n['src'] for n in e['noms']} | ({'app'} if a else set()))
     e['srcs'], e['approved'] = srcs, any(n.get('approved') for n in e['noms'])
     e['hand'] = any(n['src'] == 'curated' and n['name'] in HAND_GEOM for n in e['noms'])
-    nm = (a['name'] if a else None) or next((n.get('display') or n.get('name') for n in e['noms'] if n['src'] == 'curated'), None) \
-        or next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata'), None) \
-        or (p or {}).get('Title') or next((n['chembl_name'] for n in e['noms'] if n.get('chembl_name')), None) or key
+    # THE NAME: a nomination that reached this entry through a salt's PARENT (from_cid) names the salt — "Benzathine benzylpenicillin",
+    # "Dimenhydrinate", "Lithium diisopropylamide" — so it names the row only when nothing that IS this compound has a name (C2, 2026-10-17:
+    # the full run resolved those parents online and three old rows took their salt's name)
+    own = lambda n: not n.get('from_cid')
+    nm = (a['name'] if a else None) or next((n.get('display') or n.get('name') for n in e['noms'] if n['src'] == 'curated' and own(n)), None) \
+        or next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata' and own(n)), None) \
+        or (p or {}).get('Title') or next((n['chembl_name'] for n in e['noms'] if n.get('chembl_name')), None) \
+        or next((n.get('display') or n.get('name') for n in e['noms'] if n['src'] == 'curated'), None) \
+        or next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata'), None) or key
     e['nm'] = nm
     if a: kept.append(e); continue                                    # the app's own: kept at its pinned geometry, whatever its size
     ok, why = recognisable(e)
@@ -575,7 +581,7 @@ def blurb_for(e, name, tags):
     for d in desc.get(e['cid'], []):
         if d['source'] == 'ChEBI': return sentences(d['text']), 'ChEBI definition (CC BY 4.0)'
     for n in e['noms']:
-        if n['src'] == 'curated' and n.get('blurb'): return n['blurb'], 'λWAVES'
+        if n['src'] == 'curated' and n.get('blurb') and not n.get('from_cid'): return n['blurb'], 'λWAVES'   # a salt's blurb is the salt's
     if e['approved']:
         codes = [c for n in e['noms'] for c in (n.get('atc') or [])]
         words = next((atc_words[c]['l4'] for c in codes if c in atc_words and atc_words[c].get('l4')), None)
