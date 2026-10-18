@@ -13,8 +13,9 @@ source · a unique priority, the app's own first.
 THE GUARDS (iteration 006 C2, guards.py), with --against PREV (the file the solvers run on now): every id of PREV present, naming
 the same InChIKey (a previous row a SAFETY SCREEN now refuses is named, not passed in silence) · no id pointing at a raw/<id>/ that
 holds another molecule's solve · every row with a converged rung in raw/ (--raw, default the catalogue's sibling raw/) at EXACTLY
-the atoms it was solved at — the solver's own test, float(Å) × ANGSTROM == meta.json's atomsBohr — unless --allow-moved (a
---refresh-geometry build, whose moved rows will be solved again).
+the atoms it was solved at — the solver's own test, float(Å) × ANGSTROM == meta.json's atomsBohr — except, with --allow-moved, the
+rows a --refresh-geometry build LISTED in its stats (guards.solvedRowsMoved): each of them must have moved, onto a PubChem-based
+geometry, and none may be an app row; any other solved row that moved is still a complaint (iteration 006 C3).
 """
 import collections, json, math, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
@@ -31,7 +32,8 @@ AGAINST, RAW = _arg('--against'), _arg('--raw') or GU.raw_dir(DATA)
 VOCAB = set(['medicine', 'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic', 'vitamin',
              'hormone', 'neurotransmitter', 'amino acid', 'nucleobase', 'sugar', 'fat', 'steroid', 'alkaloid', 'food', 'flavour',
              'scent', 'sweetener', 'colour', 'solvent', 'fuel', 'plastic', 'material', 'metal', 'gas', 'atmosphere', 'pollutant',
-             'toxin', 'pesticide', 'acid', 'aromatic', 'ring', 'cage', 'classic', 'natural', 'life'])
+             'toxin', 'pesticide', 'acid', 'aromatic', 'ring', 'cage', 'classic', 'natural', 'life',
+             'eye', 'lung', 'skin', 'stomach', 'diabetes', 'parasite', 'immune', 'refrigerant', 'battery', 'explosive'])   # + iteration 006 C3
 FIELDS = ['id', 'name', 'iupac', 'synonyms', 'formula', 'charge', 'multiplicity', 'cid', 'inchi', 'inchikey', 'smiles', 'mw',
           'exactMass', 'heavy', 'nAtoms', 'xlogp', 'tpsa', 'hbd', 'hba', 'rotatable', 'complexity', 'tags', 'blurb', 'blurbSource',
           'atomsAng', 'geometrySource', 'sources', 'priority']
@@ -87,7 +89,12 @@ if AGAINST:                                                         # THE GUARDS
     ex_path = sibling(FILE, 'excluded')
     excluded = read_json(ex_path)['rows'] if os.path.exists(ex_path) else []
     S = GU.solved(RAW)
-    gbad, guard_notes = GU.verify(doc, prev_by_id, S, excluded, allow_moved='--allow-moved' in sys.argv)
+    chosen = []
+    if '--allow-moved' in sys.argv:                                # the rows the --refresh-geometry build itself listed, and only those
+        st_path = sibling(FILE, 'stats')
+        chosen = (read_json(st_path).get('guards') or {}).get('solvedRowsMoved', []) if os.path.exists(st_path) else []
+        if not chosen: bad['--allow-moved, but the build listed no moved row (its stats: guards.solvedRowsMoved)'] += 1
+    gbad, guard_notes = GU.verify(doc, prev_by_id, S, excluded, allow_moved=chosen)
     guard_notes.append(f'{len(S)} ids with a converged rung in {RAW}')
     for what, s in gbad:
         bad[what] += 1

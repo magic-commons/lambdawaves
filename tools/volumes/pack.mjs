@@ -8,12 +8,16 @@
  *   --partial   also pack a molecule whose ladder is not finished (its converged rungs); by default only a finished one
  *   --out F     write ONE molecule's .lwm to F and nothing else (the test fixture: tests/fixtures/volumes/H2O.lwm)
  *   --incremental  keep a molecule's .lwm when its header says it was packed from this raw/<id>/meta.json (its digest without the
- *               solver's clocks) by this packer version (header.source) — a repack while the solver runs touches only what moved;
- *               a kept .lwm is looked for in every vol-<n>/ of the out dir, then of the data's dist (a theme may move a molecule)
+ *               solver's clocks) and this catalogue row (its digest) by this packer version (header.source) — a repack while the solver
+ *               runs touches only what moved; a kept .lwm is looked for in every vol-<n>/ of the out dir, then of the data's dist (a
+ *               theme may move a molecule)
  *   --out-dir D the dist to write (default ~/Documents/LAMBDAWAVES-VOLUMES/dist); pack-report-<vol>.json goes beside it
- * THE SHELF (iteration 005 S):
- *   --themes F  tools/volumes/themes.json: every FINISHED molecule to the FIRST theme whose `any` it carries (`app`: also the app's own
- *               table; `rest`: the rest), a theme ordered by the catalogue's `priority`, split past --cap bytes (5e9) of .lwm + .webp
+ * THE METADATA (iteration 006 C3): a molecule's names, tags, synonyms, blurb and sources are its row in the CURRENT --candidates file by
+ *   id (meta.candidate — the row a rung was last solved from — only for an id the file no longer has); see candidateOf()
+ * THE SHELF (iteration 005 S; one primary theme, iteration 006 C3):
+ *   --themes F  tools/volumes/themes.json: every FINISHED molecule to ONE theme — the first of the file's `precedence` steps it meets
+ *               (`app`: the app's own table; `any`: a tag, `none`: … but not this one; no step: the `rest` theme; --count-themes: print the whole catalogue's
+ *               counts and stop), a theme ordered by the catalogue's `priority`, split past --cap bytes (5e9) of .lwm + .webp
  *               into 'TITLE · 2' with the next numeral; writes dist/vol-<n>/ for each and ONE volumes.json (replacing the old one)
  *   --archive   per volume, dist/LAMBDAWAVES-VOL-<numeral>.lwv (lab/volumes-format.js THE ARCHIVE) and its .sha256; the shelf entry gains
  *               archive: { name, bytes, sha256 } and drops `index` unless --fetchable (the dev link; a Drive volume has no index)
@@ -52,7 +56,7 @@ const THEMES = argOf('--themes'), CAP = +argOf('--cap', 5e9), ARCHIVE = has('--a
 const VOL = argOf('--volume', 'vol-1'), NUMERAL = argOf('--numeral', 'I'), TITLE = argOf('--title', 'Volume ' + NUMERAL);
 const BLURB = argOf('--blurb', 'Named molecules, each solved in RHF up the whole basis ladder STO-3G → 6-31+G*, with its identifiers and properties.');
 const ONLY = argOf('--only') ? new Set(argOf('--only').split(',')) : null, PARTIAL = has('--partial'), OUT = argOf('--out'), INCREMENTAL = has('--incremental');
-const PACKER = 'pack.mjs v2', CLOCKS = new Set(['updated', 'solved', 'pid', 'host', 'seconds']);                                      // bump when the packer's output changes, so --incremental repacks
+const PACKER = 'pack.mjs v3', CLOCKS = new Set(['updated', 'solved', 'pid', 'host', 'seconds']);                                      // bump when the packer's output changes, so --incremental repacks
 const LADDER = Object.keys(BASIS_FILES);
 const DEBYE = 2.541746473;                                         // debye per e·a₀ (tools/orbital-library.mjs)
 const MASS = [0, 1.008, 4.0026, 6.94, 9.0122, 10.81, 12.011, 14.007, 15.999, 18.998, 20.180, 22.990, 24.305, 26.982, 28.085, 30.974, 32.06,
@@ -151,28 +155,47 @@ function findKept(vol, sub, name) {
   }
   return null;
 }
+/* THE MOLECULE'S METADATA (iteration 006 C3): the CURRENT catalogue's row for this id (--candidates), so names, tags, synonyms, blurbs
+   and sources are always the catalogue's — meta.candidate is only the row the solver last solved a rung from (a finished molecule is
+   never touched again, so it kept the names and tags of its day).  meta.candidate is the fallback for an id the file no longer has.
+   A field only the solved row carries (the pilot's symmetry, geometryMethod, identifiersChecked) is kept: it describes the solve.  The
+   geometry's own words describe the ATOMS: when the catalogue has since moved this molecule's atoms (build.py --refresh-geometry; the
+   solver will solve it again) geometrySource comes from the row it was solved at, so a .lwm never names a geometry it does not carry. */
+const ANGSTROM = 1 / 0.52917721092;                                // tools/volumes/lwbasis.py's float: the solver's Å → bohr
+const sameAtoms = (ang, bohr) => Array.isArray(ang) && Array.isArray(bohr) && ang.length === bohr.length
+  && ang.every((a, i) => +a[0] === bohr[i][0] && a[1] * ANGSTROM === bohr[i][1] && a[2] * ANGSTROM === bohr[i][2] && a[3] * ANGSTROM === bohr[i][3]);
+const STALE = [], FALLBACK = [];                                   // packed at atoms the catalogue has since moved · not in the catalogue
+function candidateOf(id, meta) {
+  const solvedAt = meta.candidate || {}, row = CANDS.get(id);
+  if (!row) { FALLBACK.push(id); return solvedAt; }
+  const cand = { ...solvedAt, ...row };
+  if (row.atomsAng && !sameAtoms(row.atomsAng, meta.atomsBohr)) { STALE.push(id); cand.geometrySource = solvedAt.geometrySource; }
+  return cand;
+}
 function packMolecule(id, vol = VOL) {
   const dir = path.join(RAW, id), mp = path.join(dir, 'meta.json');
   if (!existsSync(mp)) return { id, skip: 'not solved (no raw/' + id + '/meta.json)' };
-  const meta = JSON.parse(readFileSync(mp, 'utf8')), cand = meta.candidate || {}, charge = meta.charge || 0;
+  const meta = JSON.parse(readFileSync(mp, 'utf8')), charge = meta.charge || 0;
+  const rs0 = meta.rungs || {};
+  if (!PARTIAL && LADDER.some((b) => !rs0[b] || !rs0[b].status)) return { id, skip: 'its ladder is not finished (' + LADDER.filter((b) => !rs0[b] || !rs0[b].status).join(', ') + ')' };
+  const cand = candidateOf(id, meta);
   const unclocked = (v) => (Array.isArray(v) ? v.map(unclocked) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([k]) => !CLOCKS.has(k)).map(([k, x]) => [k, unclocked(x)])) : v);
   const metaSha = sha(JSON.stringify(unclocked(meta)));          // what the rungs ARE, not when or where they were solved
+  const candSha = sha(JSON.stringify(cand));                      // and what the catalogue says the molecule is (names, tags …)
   const have = INCREMENTAL && !OUT ? findKept(vol, 'm', id + '.lwm') : null;
   if (have) {
     const old = readFileSync(have), h = parseLwm(old).header;
-    if (h.source && h.source.metaSha256 === metaSha && h.source.packer === PACKER) return { id, bytes: old, header: h, report: { id, heavy: h.meta.heavy, nAtoms: h.meta.nAtoms, rungs: {}, bytes: old.length, headerBytes: old.readUInt32LE(4), kept: true }, meta };
+    if (h.source && h.source.metaSha256 === metaSha && h.source.candSha256 === candSha && h.source.packer === PACKER) return { id, bytes: old, header: h, report: { id, heavy: h.meta.heavy, nAtoms: h.meta.nAtoms, rungs: {}, bytes: old.length, headerBytes: old.readUInt32LE(4), kept: true }, meta };
   }
   const atoms = meta.atomsBohr.map(([Z, x, y, z]) => ({ Z, x, y, z })), zs = atoms.map((a) => a.Z), N = zs.reduce((s, z) => s + z, 0) - charge, nocc = N / 2;
-  const rs = meta.rungs || {}, todo = LADDER.filter((b) => rs[b] && rs[b].status !== 'skipped');
-  const unsolved = LADDER.filter((b) => !rs[b] || !rs[b].status);
-  if (unsolved.length && !PARTIAL) return { id, skip: 'its ladder is not finished (' + unsolved.join(', ') + ')' };
+  const rs = rs0;
   /* an `app` candidate (the app's own molecule) takes the APP's formula (lab/molecules.js: NH₃, HBr, CO(NH₂)₂ — not Hill's H₃N, BrH); v2 */
   const h = hill(zs), appRow = cand.app ? MOLECULE_BY_ID.get(cand.app) : null, appM = appRow && (appRow.formula.startsWith('<m>') ? appRow.formula : '<m>' + appRow.formula + '</m>');
   const formula = appRow ? plainOf(appRow.formula) : plainFormula(h, charge), formulaM = appM || cand.formulaM || mFormula(h, charge);
   const sym = cand.symmetry && cand.symmetry.group ? cand.symmetry : { group: 'C1' };
   const name = cand.name || id, mass = +atoms.reduce((s, a) => s + MASS[a.Z], 0).toFixed(3), half = atoms.reduce((s, a) => Math.max(s, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)), 0) + 6;
   const geometrySource = cand.geometrySource || (cand.cid ? `PubChem CID ${cand.cid}, its 3-D conformer (computed, not measured)` : 'the candidate\'s atoms');
-  const header = { schema: LWM_SCHEMA, id, volume: vol, meta: {}, geometry: {}, rungs: {}, skipped: {}, failed: {}, source: { metaSha256: metaSha, packer: PACKER } };
+  const header = { schema: LWM_SCHEMA, id, volume: vol, meta: {}, geometry: {}, rungs: {}, skipped: {}, failed: {}, source: { metaSha256: metaSha, candSha256: candSha, packer: PACKER } };
   const { atomsAng, atomsBohr, app, ...rest } = cand; void atomsAng; void atomsBohr;
   header.meta = { name, formula, formulaM, charge, multiplicity: 1, heavy: zs.filter((z) => z > 1).length, nAtoms: atoms.length, mass, massUnit: 'u (IUPAC conventional atomic weights)',
     pointGroup: sym.group !== 'C1' ? sym.group : ({ Dooh: 'Dinfh', Coov: 'Cinfv' }[meta.detectedGroup] || meta.detectedGroup || null), ...rest, formula, formulaM, ...(app ? { app } : {}),   // the packer's formula wins over the candidate's (PubChem's Hill)
@@ -250,10 +273,15 @@ function retarget(r, vol) {
   return { ...r, bytes: encodeLwm(header, data), header };
 }
 
-/* ── THE SHELF's themes (iteration 005 S): first match wins; an app molecule is one whose row says so (`app`, or a λWAVES source) ── */
+/* ── THE SHELF's themes: ONE PRIMARY THEME PER MOLECULE (iteration 006 C3) — the file's `precedence` steps, read in order, the first
+   a molecule meets naming its theme (`app`: the app's own table; `any`: a tag, unless it also carries one of the step's `none`); a file without `precedence` keeps iteration 005 S's
+   first-match over the themes' own `any`.  An app molecule is one whose row says so (`app`, or a λWAVES source) ── */
 const fromApp = (c) => !!c.app || (c.sources || []).some((x) => x && (x.db === 'λWAVES' || x === 'λWAVES'));
-const themeOf = (T, c) => { const tags = c.tags || [], k = T.findIndex((t) => (t.app && fromApp(c)) || (t.any || []).some((x) => tags.includes(x)));
-  const rest = T.findIndex((t) => t.rest); return k >= 0 ? k : rest >= 0 ? rest : T.length - 1; };
+const meets = (s, c) => (s.app && fromApp(c)) || ((s.any || []).some((x) => (c.tags || []).includes(x)) && !(s.none || []).some((x) => (c.tags || []).includes(x)));
+const themeOf = (T, c) => {
+  const rest = T.findIndex((t) => t.rest), fallback = rest >= 0 ? rest : T.length - 1;
+  if (PRECEDENCE) { const s = PRECEDENCE.find((p) => meets(p, c)); const k = s ? T.findIndex((t) => t.id === s.theme) : -1; return k >= 0 ? k : fallback; }
+  const k = T.findIndex((t) => meets(t, c)); return k >= 0 ? k : fallback; };
 const roman = (n) => [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]
   .reduce((s, [v, r]) => { while (n >= v) { s += r; n -= v; } return s; }, '');
 const pad8 = (n) => (n + 7) & ~7;
@@ -292,7 +320,13 @@ if (OUT) {
   mkdirSync(path.dirname(path.resolve(OUT)), { recursive: true }); writeFileSync(OUT, r.bytes);
   console.log(`pack: ${r.id} → ${OUT} · ${r.bytes.length} B · rungs ${Object.keys(r.header.rungs).join(', ')} · sha256 ${sha(r.bytes).slice(0, 16)}`); process.exit(0);
 }
-const T = THEMES ? JSON.parse(readFileSync(THEMES, 'utf8')).themes : null;
+const SHELF_DOC = THEMES ? JSON.parse(readFileSync(THEMES, 'utf8')) : null, T = SHELF_DOC ? SHELF_DOC.themes : null;
+const PRECEDENCE = SHELF_DOC && SHELF_DOC.precedence;
+if (PRECEDENCE) for (const s of PRECEDENCE) if (!T.some((t) => t.id === s.theme)) throw new Error(`${THEMES}: a precedence step names no theme (${s.theme})`);
+if (T && has('--count-themes')) {                                  // the shelf the whole catalogue would make (finished or not), and stop
+  const n = T.map(() => 0); for (const id of ids) n[themeOf(T, CANDS.get(id) || {})]++;
+  console.log(`themes over ${ids.length} candidates: ` + T.map((t, k) => `${t.title} ${n[k]}`).join(' · ')); process.exit(0);
+}
 ids.forEach((id, order) => {
   const c = CANDS.get(id), guess = T && c ? 'vol-' + (themeOf(T, c) + 1) : VOL;   // the volume it most likely lands in (a split moves it: retarget)
   let r; try { r = packMolecule(id, guess); } catch (e) { console.log(`FAILED ${id}: ${e.message}`); skipped.push({ id, why: e.message }); return; }
@@ -356,4 +390,6 @@ for (const p of plan) {
 const shelfFile = path.join(DIST, 'volumes.json'), shelf = !T && existsSync(shelfFile) ? JSON.parse(readFileSync(shelfFile, 'utf8')) : { schema: 1, volumes: [] };
 shelf.volumes = [...shelf.volumes.filter((v) => !entries.some((e) => e.id === v.id)), ...entries].sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
 writeFileSync(shelfFile, JSON.stringify(shelf, null, 1) + '\n');
-console.log(`pack: ${packed.length} molecules in ${entries.length} volume(s) → ${DIST}/volumes.json; ${skipped.length} not packed`);
+console.log(`pack: ${packed.length} molecules in ${entries.length} volume(s) → ${DIST}/volumes.json; ${skipped.length} not packed`
+  + (STALE.length ? `; ${STALE.length} packed at solved atoms the catalogue has since moved (they will be solved again): ${STALE.join(', ')}` : '')
+  + (FALLBACK.length ? `; ${FALLBACK.length} not in --candidates, packed with meta.candidate: ${FALLBACK.join(', ')}` : ''));

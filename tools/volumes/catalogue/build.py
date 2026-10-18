@@ -8,7 +8,7 @@ Run the six collectors first (each caches, so a re-run asks the network nothing)
   python -I tools/volumes/catalogue/fetch_wikidata.py  Wikidata: every compound with an English Wikipedia article
   python -I tools/volumes/catalogue/fetch_who_eml.py   the WHO Model List of Essential Medicines (names)
 then
-  python -I tools/volumes/catalogue/build.py [--limit=N] [--no-geometry] [--refresh-geometry] [--out=FILE] [--prev=FILE] [--raw=DIR]
+  python -I tools/volumes/catalogue/build.py [--limit=N] [--no-geometry] [--refresh-geometry] [--rebuild-geometry] [--out=FILE] [--prev=FILE] [--raw=DIR]
 
 Every nomination is resolved through PubChem (a name or an InChIKey → a CID → its record; a salt or a charged form → PubChem's
 own PARENT), merged by InChIKey (one entry per key, tags and sources from every nomination), filtered, given a geometry
@@ -16,8 +16,13 @@ own PARENT), merged by InChIKey (one entry per key, tags and sources from every 
 turns into research/iteration-004/CAT-BUILD.md.
 
 THE TWO GUARDS (iteration 006 C2; guards.py says why): (a) a row whose id has a converged rung under raw/<id>/ keeps the exact atoms
-it was solved at, even when PubChem's conformer has since arrived — --refresh-geometry lifts this, and every solved row that then
-moves is named in the log, because the solver will solve it again from STO-3G; (b) a row keeps the id the previous candidates file
+it was solved at, even when PubChem's conformer has since arrived.  --refresh-geometry (narrowed in iteration 006 C3, Josh's yes) lifts
+it for ONE kind of row only: a solved row on a local geometry (RDKit, xTB; never the app's pinned atoms, never a hand-built framework)
+whose PubChem 3-D conformer exists and can be used, and only when the build's own rule then gives it a PubChem-based geometry that
+DIFFERS from the solved atoms.  The moved rows are named in the log and in the stats (guards.solvedRowsMoved, guards.upgraded: old and
+new source), because the solver will solve each again from STO-3G; any other solved row that moved stops the build.  The geometry
+cache is untouched by it for every other row (--rebuild-geometry ignores the cache for the UNSOLVED rows, the old full rebuild);
+(b) a row keeps the id the previous candidates file
 (--prev, default the current <catalogue>/vol-1.candidates.json) gave its InChIKey, and a new row's slug collision takes the suffix,
 never an old row.  --out writes the candidates (and its .stats/.excluded siblings) elsewhere — vol-1.candidates.next.json — so the
 running solvers' file is replaced only after check.py has passed the new one (check.py FILE --against PREV).
@@ -39,7 +44,8 @@ RDLogger.DisableLog('rdApp.*')
 VOL, TODAY = 'vol-1', datetime.date.today().isoformat()
 LIMIT = int(next((a.split('=')[1] for a in sys.argv if a.startswith('--limit=')), 0))
 GEOMETRY = '--no-geometry' not in sys.argv
-REFRESH = '--refresh-geometry' in sys.argv
+REFRESH = '--refresh-geometry' in sys.argv                         # move the waiting SOLVED rows onto PubChem's conformer (C3; see step 7)
+REBUILD = '--rebuild-geometry' in sys.argv                         # ignore the geometry cache for the UNSOLVED rows (guard (a) stays on)
 def _opt(name, default):
     v = next((a.split('=', 1)[1] for a in sys.argv if a.startswith(f'--{name}=')), None)
     return os.path.expanduser(v) if v else default
@@ -49,17 +55,29 @@ RAW = _opt('raw', GU.raw_dir(DATA))
 VOCAB = ['medicine', 'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic', 'vitamin', 'hormone',
          'neurotransmitter', 'amino acid', 'nucleobase', 'sugar', 'fat', 'steroid', 'alkaloid', 'food', 'flavour', 'scent', 'sweetener',
          'colour', 'solvent', 'fuel', 'plastic', 'material', 'metal', 'gas', 'atmosphere', 'pollutant', 'toxin', 'pesticide', 'acid',
-         'aromatic', 'ring', 'cage', 'classic', 'natural', 'life']
-# a tag's rank when a molecule carries more than four: what it IS FOR first, what it IS second, how it is BUILT last
+         'aromatic', 'ring', 'cage', 'classic', 'natural', 'life',
+         # iteration 006 C3 (Josh's yes, 2026-10-18): seven medicine words from the ATC map, three hand-list words outside medicine
+         'eye', 'lung', 'skin', 'stomach', 'diabetes', 'parasite', 'immune', 'refrigerant', 'battery', 'explosive']
+# a tag's rank when a molecule carries more than four: what it IS FOR first, what it IS second, how it is BUILT last.  The ten words of
+# iteration 006 are specific uses, so they rank with the uses and survive the cap ahead of every origin and structure word (amino
+# acid … fat, steroid, alkaloid, life, natural, metal, gas, acid, cage, aromatic, ring, classic): the three hand-list words right after
+# `medicine` (short exact lists — nitroglycerin keeps `explosive` beside its heart words); the seven ATC words after the uses already
+# there, so they never cut a food word (`food` · `flavour` · `sweetener` · `vitamin`: THE SHELF's Life and Food takes those rows even
+# when they are approved, and a cut word would send citric acid or sorbitol to Medicine) nor a drug class they only refine
 TAG_RANK = {t: i for i, t in enumerate([
-    'medicine', 'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic', 'vitamin', 'hormone',
-    'neurotransmitter', 'toxin', 'pesticide', 'pollutant', 'sweetener', 'flavour', 'scent', 'colour', 'food', 'fuel', 'solvent',
+    'medicine', 'explosive', 'refrigerant', 'battery', 'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy',
+    'anaesthetic', 'vitamin', 'hormone', 'neurotransmitter', 'toxin', 'pesticide', 'pollutant', 'sweetener', 'flavour', 'scent',
+    'colour', 'food', 'diabetes', 'parasite', 'immune', 'lung', 'stomach', 'eye', 'skin', 'fuel', 'solvent',
     'plastic', 'material', 'atmosphere', 'amino acid', 'nucleobase', 'sugar', 'fat', 'steroid', 'alkaloid', 'life', 'natural',
     'metal', 'gas', 'acid', 'cage', 'aromatic', 'ring', 'classic'])}
 ATC_TAGS = [('N02', 'painkiller'), ('M01', 'painkiller'), ('M02', 'painkiller'), ('N01', 'anaesthetic'), ('N03', 'mind'), ('N05', 'mind'),
             ('N06', 'mind'), ('N07', 'mind'), ('B01', 'heart'), ('C', 'heart'), ('J01', 'antibiotic'), ('J04', 'antibiotic'),
             ('J05', 'antiviral'), ('L01', 'cancer'), ('L02', 'cancer'), ('R06', 'allergy'), ('H', 'hormone'), ('G03', 'hormone'),
-            ('A11', 'vitamin')]
+            ('A11', 'vitamin'),
+            # iteration 006 C3: on the drug's OWN, non-combination codes (fetch_chembl.py's `atc`, as C2 fixed it), like the rest
+            ('S01', 'eye'), ('R03', 'lung'), ('R05', 'lung'), ('D01', 'skin'), ('D06', 'skin'), ('D07', 'skin'), ('D10', 'skin'),
+            ('D11', 'skin'), ('A02', 'stomach'), ('A03', 'stomach'), ('A06', 'stomach'), ('A07', 'stomach'), ('A10', 'diabetes'),
+            ('P01', 'parasite'), ('P02', 'parasite'), ('P03', 'parasite'), ('L03', 'immune'), ('L04', 'immune')]
 WD_USE_TAGS = {'insecticide': 'pesticide', 'herbicide': 'pesticide', 'fungicide': 'pesticide', 'rodenticide': 'pesticide',
                'acaricide': 'pesticide', 'pesticide': 'pesticide', 'nematicide': 'pesticide', 'molluscicide': 'pesticide',
                'industrial fungicides': 'pesticide', 'repellent': 'pesticide', 'food additive': 'food', 'acidity regulator': 'food',
@@ -413,44 +431,36 @@ def solved_id(e):
     i = e['app']['id'] if e['app'] else (prev_id_by_key.get(k) or raw_id_by_key.get(k))
     s = SOLVED.get(i) if i else None
     return i if s and s['exact'] and s['inchikey'] == k else None
-geom_counts, kept_solved, upgrade_waiting = collections.Counter(), collections.Counter(), []
-for i, e in enumerate(kept):
-    sid = solved_id(e)
-    if sid and not REFRESH and (e['app'] or elements_agree(SOLVED[sid]['atomsAng'], e['Zs'])):
-        # GUARD (a): a solved molecule keeps the atoms it was solved at — byte for byte, no rounding, the cache untouched
-        s = SOLVED[sid]
-        e['atoms'] = [[int(a[0]), a[1], a[2], a[3]] for a in s['atomsAng']]
-        e['gsource'] = s['geometrySource'] or f'the atoms raw/{sid}/ was solved at'
-        e['keptSolved'] = sid
-        k = gkind(e['gsource']); geom_counts[k] += 1; kept_solved[k] += 1
-        if not e['app'] and e['cid'] in conf and k != 'PubChem 3-D conformer':
-            got, _ = G.from_sdf(conf[e['cid']])                    # waiting = a conformer the build could actually use (its elements agree)
-            if got and elements_agree(got, e['Zs']): upgrade_waiting.append(sid)
-        continue
-    if e['app']:
-        e['atoms'] = [[int(z), x, y, zz] for z, x, y, zz in e['app']['ang']]
-        e['gsource'] = 'the app\'s own pinned geometry (lab/molecules.js / lab/library.json): ' + (e['app']['source'] or 'see the module')
-        geom_counts['app pinned'] += 1
-        continue
-    if not GEOMETRY: e['atoms'], e['gsource'] = None, None; continue
+geom_counts, kept_solved, upgrade_waiting, upgraded = collections.Counter(), collections.Counter(), [], {}
+def pubchem_based(src): return bool(src) and (src.startswith('PubChem') or "from PubChem's 3-D conformer" in src)
+def keep_solved(e, sid):
+    """GUARD (a): a solved molecule keeps the atoms it was solved at — byte for byte, no rounding, the cache untouched"""
+    s = SOLVED[sid]
+    e['atoms'] = [[int(a[0]), a[1], a[2], a[3]] for a in s['atomsAng']]
+    e['gsource'] = s['geometrySource'] or f'the atoms raw/{sid}/ was solved at'
+    e['keptSolved'] = sid
+    k = gkind(e['gsource']); geom_counts[k] += 1; kept_solved[k] += 1
+def usable_conformer(e):
+    """PubChem's 3-D conformer for this row when the build could actually use it (it exists and its elements agree), else None"""
+    if e['app'] or e['cid'] not in conf: return None
+    got, _ = G.from_sdf(conf[e['cid']])
+    return got if got and elements_agree(got, e['Zs']) else None
+def build_geometry(e):
+    """THE BUILD'S OWN RULE for one row → (atoms Å, source, kind), or (None, why, 'failed' | 'failed, cached'); it reads and writes
+    the geometry cache (keyed by InChIKey)"""
+    global gdirty
     hit = gcache.get(e['key'])
     # a cached geometry stands, EXCEPT a locally built one for a molecule whose PubChem conformer has since arrived: PubChem's
     # own 3-D conformer is the preferred source (PLAN.md step 1), so that row is built again rather than left as it was.  An xTB
     # relaxation that already STARTED from PubChem's conformer (the inorganic and hypervalent rows) is not "since arrived": it stands,
     # so a re-run does not relax it again.  A FAILURE is cached too (iteration 006 C2: the few molecules no method embeds cost many
-    # minutes of ETKDG each, every run) and is tried again only when a PubChem conformer has arrived since, or with --refresh-geometry
-    if hit and hit['kind'] == 'failed' and not REFRESH and (e['cid'] not in conf or hit.get('hadConformer')):
-        exclude(e['nm'], hit['source'], src='/'.join(e['srcs']), cid=e['cid'], cached=True)
-        e['atoms'] = None; continue
-    if hit and hit['kind'] != 'failed' and not REFRESH and (hit['kind'] == 'PubChem 3-D conformer' or e['cid'] not in conf or "from PubChem's 3-D conformer" in hit['source']):
-        e['atoms'], e['gsource'] = hit['atoms'], hit['source']
-        geom_counts[hit['kind']] += 1
-        continue
+    # minutes of ETKDG each, every run) and is tried again only when a PubChem conformer has arrived since, or with --rebuild-geometry
+    if hit and hit['kind'] == 'failed' and not REBUILD and (e['cid'] not in conf or hit.get('hadConformer')):
+        return None, hit['source'], 'failed, cached'
+    if hit and hit['kind'] != 'failed' and not REBUILD and (hit['kind'] == 'PubChem 3-D conformer' or e['cid'] not in conf or "from PubChem's 3-D conformer" in hit['source']):
+        return hit['atoms'], hit['source'], hit['kind']
     atoms = src = None
-    pub = None
-    if e['cid'] in conf:
-        got, _ = G.from_sdf(conf[e['cid']])
-        if got and elements_agree(got, e['Zs']): pub = got
+    pub = usable_conformer(e)
     hand = next((n['name'] for n in e['noms'] if n['src'] == 'curated' and n['name'] in HAND_GEOM), None)
     if hand:
         start = G.HAND[hand]()
@@ -478,28 +488,55 @@ for i, e in enumerate(kept):
             if out: atoms, src = out, f'RDKit ETKDGv3 embedding relaxed with GFN2-xTB (tblite 0.7.0){"" if ok is True else " — the relaxation did not converge"}'
     if atoms is None or not elements_agree(atoms, e['Zs']):
         why = 'no 3-D geometry: PubChem has no conformer and neither MMFF94 nor GFN2-xTB would build one'
-        exclude(e['nm'], why, src='/'.join(e['srcs']), cid=e['cid'])
         gcache[e['key']] = {'atoms': None, 'source': why, 'kind': 'failed', 'hadConformer': e['cid'] in conf}; gdirty += 1
-        e['atoms'] = None; continue
-    e['atoms'], e['gsource'] = [[int(z), round(x, 5), round(y, 5), round(zz, 5)] for z, x, y, zz in atoms], src
+        return None, why, 'failed'
+    atoms = [[int(z), round(x, 5), round(y, 5), round(zz, 5)] for z, x, y, zz in atoms]
     kind = 'PubChem 3-D conformer' if src.startswith('PubChem') else 'GFN2-xTB' if 'GFN2-xTB' in src else 'RDKit ETKDGv3 + MMFF94'
-    geom_counts[kind] += 1
-    gcache[e['key']] = {'atoms': e['atoms'], 'source': src, 'kind': kind}
+    gcache[e['key']] = {'atoms': atoms, 'source': src, 'kind': kind}
     gdirty += 1
     if gdirty % 200 == 0: write_json(GCACHE, gcache)
-    if i % 500 == 499: log(f'  geometry {i + 1}/{len(kept)} ({gdirty} built here)')
+    return atoms, src, kind
+for i, e in enumerate(kept):
+    sid = solved_id(e)
+    if sid and (e['app'] or elements_agree(SOLVED[sid]['atomsAng'], e['Zs'])):
+        # WAITING: a solved row on a LOCAL geometry (RDKit or xTB — never the app's pinned atoms, never a hand-built framework) whose
+        # PubChem 3-D conformer exists and could be used.  --refresh-geometry (iteration 006 C3) lifts guard (a) for exactly these rows,
+        # and keeps the new atoms only where the build's own rule gives a PubChem-based geometry (the conformer itself, or its GFN2-xTB
+        # relaxation where MMFF94 has no parameters) that DIFFERS from the solved atoms; every other row keeps its solved atoms
+        waiting = not e['app'] and not e['hand'] and gkind(SOLVED[sid]['geometrySource'] or '') != 'PubChem 3-D conformer' and usable_conformer(e) is not None
+        if waiting: upgrade_waiting.append(sid)
+        if REFRESH and waiting:
+            atoms, src, kind = build_geometry(e)
+            if atoms and pubchem_based(src) and GU.bohr(atoms) != SOLVED[sid]['atomsBohr']:
+                e['atoms'], e['gsource'] = atoms, src; geom_counts[kind] += 1
+                upgraded[sid] = {'from': SOLVED[sid]['geometrySource'], 'to': src, 'rungs': SOLVED[sid]['rungs']}
+                continue
+        keep_solved(e, sid); continue
+    if e['app']:
+        e['atoms'] = [[int(z), x, y, zz] for z, x, y, zz in e['app']['ang']]
+        e['gsource'] = 'the app\'s own pinned geometry (lab/molecules.js / lab/library.json): ' + (e['app']['source'] or 'see the module')
+        geom_counts['app pinned'] += 1
+        continue
+    if not GEOMETRY: e['atoms'], e['gsource'] = None, None; continue
+    atoms, src, kind = build_geometry(e)
+    if atoms is None:
+        exclude(e['nm'], src, src='/'.join(e['srcs']), cid=e['cid'], **({'cached': True} if kind == 'failed, cached' else {}))
+        e['atoms'] = None; continue
+    e['atoms'], e['gsource'] = atoms, src; geom_counts[kind] += 1
+    if gdirty and i % 500 == 499: log(f'  geometry {i + 1}/{len(kept)} ({gdirty} built here)')
 if gdirty: write_json(GCACHE, gcache)
 kept = [e for e in kept if e.get('atoms')]
 log(f'with a geometry: {len(kept)} · ' + ' · '.join(f'{k} {v}' for k, v in geom_counts.most_common()))
 refreshed_solved = sorted(sid for e in kept for sid in [solved_id(e)] if sid and GU.bohr(e['atoms']) != SOLVED[sid]['atomsBohr'])
-if REFRESH:
-    log(f'GUARD (a) OFF (--refresh-geometry): {len(refreshed_solved)} rows that have solved rungs got a NEW geometry — the solver will '
-        f'solve each of them again from STO-3G (it sees "the atoms moved"): ' + ', '.join(refreshed_solved))
-else:
-    log(f'GUARD (a): {sum(kept_solved.values())} solved rows kept the exact atoms they were solved at (' +
-        ' · '.join(f'{k} {v}' for k, v in kept_solved.most_common()) + f'); {len(upgrade_waiting)} of them now have a PubChem 3-D '
-        f'conformer waiting — `build.py --refresh-geometry` would upgrade them, and those rows would then be solved again'
-        + (f' · ! {len(refreshed_solved)} solved rows moved anyway: ' + ', '.join(refreshed_solved) if refreshed_solved else ''))
+log(f'GUARD (a): {sum(kept_solved.values())} solved rows kept the exact atoms they were solved at (' +
+    ' · '.join(f'{k} {v}' for k, v in kept_solved.most_common()) + f'); {len(upgrade_waiting)} solved rows sit on a local geometry with a '
+    'usable PubChem 3-D conformer waiting' + (f' — --refresh-geometry moved {len(upgraded)} of them onto it (each will be solved again '
+    f'from STO-3G: the solver sees "the atoms moved"); for the other {len(upgrade_waiting) - len(upgraded)} the build\'s own rule gives '
+    f'the atoms they were solved at, so they stay. Moved: ' + ', '.join(sorted(upgraded)) if REFRESH else ' — `build.py '
+    '--refresh-geometry` would move them onto it, and those rows would then be solved again'))
+if set(refreshed_solved) != set(upgraded):                          # the guard's own proof: nothing else moved
+    raise SystemExit('guard (a): solved rows moved that --refresh-geometry did not choose: '
+                     + ', '.join(sorted(set(refreshed_solved) ^ set(upgraded))) + ' — refusing to write')
 
 # ── 8. SYNONYMS, DESCRIPTIONS ────────────────────────────────────────────────────────────────────────────────────────
 live = sorted({e['cid'] for e in kept if e['cid']})
@@ -540,13 +577,16 @@ def pick_synonyms(e, name, iupac, n=6):
     return out
 
 # ── 9. TAGS ──────────────────────────────────────────────────────────────────────────────────────────────────────────
-DRUG_TAGS = {'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic'}
+DRUG_TAGS = {'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic',
+             'eye', 'lung', 'skin', 'stomach', 'diabetes', 'parasite', 'immune'}
+CAP_CUT = collections.Counter()                                    # which words the four-tag cap cut, and how often (the notes' table)
 def tags_for(e):
     if e['app']: return list(APP.get(e['app']['id'], (['classic'], ''))[0])
     t = set()
     for n in e['noms']:
         for x in n.get('tags', []):
             if x in VOCAB: t.add(x)
+    if e['key'] in CUR.EXPLOSIVES: t.add('explosive')              # a hand list of InChIKeys already in the catalogue: it adds no molecule
     if e['approved']: t.add('medicine')
     else: t -= DRUG_TAGS
     mol = e['mol']
@@ -560,6 +600,7 @@ def tags_for(e):
     if 'aromatic' in t: t.discard('ring')
     if len(t) > 4:
         keep = sorted(t, key=lambda x: TAG_RANK.get(x, 99))[:4]
+        CAP_CUT.update(t - set(keep))
         t = set(keep)
     return sorted(t, key=lambda x: TAG_RANK.get(x, 99))
 
@@ -572,7 +613,8 @@ TAG_PHRASE = {'medicine': 'a medicine', 'aromatic': 'an aromatic compound', 'rin
               'amino acid': 'an amino acid', 'nucleobase': 'a nucleobase', 'sugar': 'a sugar', 'fat': 'a fat or fatty acid',
               'steroid': 'a steroid', 'alkaloid': 'an alkaloid', 'life': 'a molecule of life', 'natural': 'a natural product',
               'vitamin': 'a vitamin', 'hormone': 'a hormone', 'neurotransmitter': 'a neurotransmitter', 'sweetener': 'a sweetener',
-              'classic': 'a classic of the chemistry course'}
+              'classic': 'a classic of the chemistry course', 'explosive': 'an explosive', 'refrigerant': 'a refrigerant',
+              'battery': 'a solvent of battery electrolytes'}
 def blurb_for(e, name, tags):
     if e['app']:
         b = APP.get(e['app']['id'], (None, None))[1]
@@ -744,15 +786,16 @@ stats = {
  'samples': [{'id': m['id'], 'name': m['name'], 'tags': m['tags'], 'heavy': m['heavy'], 'priority': m['priority']} for m in molecules[:40]],
  'guards': {'previous': PREV, 'previousRows': len(prev_by_id), 'previousIdsPresent': len(prev_by_id) - len(lost), 'previousIdsMissing': lost,
             'solvedInRaw': len(SOLVED), 'idsFrom': dict(id_from.most_common()), 'refreshGeometry': REFRESH,
-            'keptSolvedGeometry': dict(kept_solved.most_common()), 'keptSolvedWithConformerWaiting': len(upgrade_waiting),
-            'solvedRowsMoved': refreshed_solved},
+            'keptSolvedGeometry': dict(kept_solved.most_common()), 'keptSolvedWithConformerWaiting': len(upgrade_waiting) - len(upgraded),
+            'solvedRowsMoved': refreshed_solved, 'upgraded': upgraded},
+ 'tagCapCut': dict(CAP_CUT.most_common()),
  'pubchem': {'conformers': len(conf), 'conformersAsked': len(need3d), 'synonymsFor': len(syn), 'descriptionsFor': len(desc), 'live': len(live),
              'cacheOnly': bool(C.OFFLINE), 'stopped': PUBCHEM_STOPPED},
 }
 write_json(sibling(OUT, 'stats'), stats, indent=1)
 write_json(sibling(OUT, 'excluded'), {'built': out['built'], 'count': len(excluded), 'rows': excluded}, indent=1)
 log(f'WROTE {OUT} — {len(molecules)} molecules, {len(excluded)} exclusions (and {sibling(OUT, "stats")}, {sibling(OUT, "excluded")})')
-gbad, gnotes = GU.verify(out, prev_by_id, SOLVED, excluded, allow_moved=REFRESH)
+gbad, gnotes = GU.verify(out, prev_by_id, SOLVED, excluded, allow_moved=set(upgraded))
 for s in gnotes: log('guards: ' + s)
 for what, s in gbad[:40]: log(f'guards: ! {what}: {s}')
 log(f'guards: {len(gbad)} complaints — check.py {OUT} --against {PREV} is the gate before the swap')

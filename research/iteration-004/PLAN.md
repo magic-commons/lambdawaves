@@ -67,6 +67,8 @@ C is f32 (7 digits: the picture's precision, stated); ε and the energy are the 
 medicine · painkiller · antibiotic · antiviral · heart · mind · cancer · allergy · anaesthetic · vitamin · hormone · neurotransmitter ·
 amino acid · nucleobase · sugar · fat · steroid · alkaloid · food · flavour · scent · sweetener · colour · solvent · fuel · plastic ·
 material · metal · gas · atmosphere · pollutant · toxin · pesticide · acid · aromatic · ring · cage · classic · natural · life
+iteration 006 (C3, Josh's yes 2026-10-18): eye · lung · skin · stomach · diabetes · parasite · immune (the drug's own ATC codes:
+S01 · R03/R05 · D01/D06/D07/D10/D11 · A02/A03/A06/A07 · A10 · P01–P03 · L03/L04) · refrigerant · battery · explosive (hand lists)
 
 ## Closed (Claude Yan, 2026-10-17 — the integration)
 | row | branch · tip | merge | note |
