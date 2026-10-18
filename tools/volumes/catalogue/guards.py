@@ -136,7 +136,8 @@ def verify(doc, prev_by_id, S, excluded=None, allow_moved=False):
 
 if __name__ == '__main__':
     sys.path.insert(0, os.path.dirname(__file__))
-    from common import DATA, write_json
+    import collections
+    from common import DATA, write_json, sibling
     path = next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--pin' and i + 1 < len(sys.argv)), None)
     if not path: raise SystemExit(__doc__)
     raw = next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--raw' and i + 1 < len(sys.argv)), None) or raw_dir(DATA)
@@ -145,4 +146,12 @@ if __name__ == '__main__':
     moved = pin(doc, S)
     if moved:
         write_json(path, doc)
+        sp = sibling(path, 'stats')                                  # keep the report's geometry counts true to the pinned file
+        if os.path.exists(sp):
+            with open(sp) as f: st = json.load(f)
+            kind = lambda g: ('app pinned' if g.startswith("the app's own") else 'PubChem 3-D conformer' if g.startswith('PubChem')
+                              else 'GFN2-xTB' if 'GFN2-xTB' in g else 'RDKit ETKDGv3 + MMFF94')
+            st['byGeometry'] = dict(collections.Counter(kind(m['geometrySource']) for m in doc['molecules']).most_common())
+            st.setdefault('guards', {})['pinnedAtSwap'] = sorted(set(st.get('guards', {}).get('pinnedAtSwap', [])) | set(moved))
+            write_json(sp, st, indent=1)
     print(f'pin: {len(S)} molecules with a solved rung in {raw} · {len(moved)} rows put back to their solved atoms' + (': ' + ', '.join(moved) if moved else ''))

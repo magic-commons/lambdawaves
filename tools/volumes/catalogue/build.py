@@ -25,6 +25,7 @@ running solvers' file is replaced only after check.py has passed the new one (ch
 import collections, datetime, json, os, re, sys, time
 sys.path.insert(0, os.path.dirname(__file__))
 from common import DATA, CACHE, read_json, write_json, sibling
+import common as C
 import pubchem as P
 import geom as G
 import guards as GU
@@ -425,8 +426,14 @@ for i, e in enumerate(kept):
     if not GEOMETRY: e['atoms'], e['gsource'] = None, None; continue
     hit = gcache.get(e['key'])
     # a cached geometry stands, EXCEPT a locally built one for a molecule whose PubChem conformer has since arrived: PubChem's
-    # own 3-D conformer is the preferred source (PLAN.md step 1), so that row is built again rather than left as it was
-    if hit and not REFRESH and (hit['kind'] == 'PubChem 3-D conformer' or e['cid'] not in conf):
+    # own 3-D conformer is the preferred source (PLAN.md step 1), so that row is built again rather than left as it was.  An xTB
+    # relaxation that already STARTED from PubChem's conformer (the inorganic and hypervalent rows) is not "since arrived": it stands,
+    # so a re-run does not relax it again.  A FAILURE is cached too (iteration 006 C2: the few molecules no method embeds cost many
+    # minutes of ETKDG each, every run) and is tried again only when a PubChem conformer has arrived since, or with --refresh-geometry
+    if hit and hit['kind'] == 'failed' and not REFRESH and (e['cid'] not in conf or hit.get('hadConformer')):
+        exclude(e['nm'], hit['source'], src='/'.join(e['srcs']), cid=e['cid'], cached=True)
+        e['atoms'] = None; continue
+    if hit and hit['kind'] != 'failed' and not REFRESH and (hit['kind'] == 'PubChem 3-D conformer' or e['cid'] not in conf or "from PubChem's 3-D conformer" in hit['source']):
         e['atoms'], e['gsource'] = hit['atoms'], hit['source']
         geom_counts[hit['kind']] += 1
         continue
@@ -461,7 +468,9 @@ for i, e in enumerate(kept):
             out, _, ok = G.xtb_relax(start)
             if out: atoms, src = out, f'RDKit ETKDGv3 embedding relaxed with GFN2-xTB (tblite 0.7.0){"" if ok is True else " — the relaxation did not converge"}'
     if atoms is None or not elements_agree(atoms, e['Zs']):
-        exclude(e['nm'], 'no 3-D geometry: PubChem has no conformer and neither MMFF94 nor GFN2-xTB would build one', src='/'.join(e['srcs']), cid=e['cid'])
+        why = 'no 3-D geometry: PubChem has no conformer and neither MMFF94 nor GFN2-xTB would build one'
+        exclude(e['nm'], why, src='/'.join(e['srcs']), cid=e['cid'])
+        gcache[e['key']] = {'atoms': None, 'source': why, 'kind': 'failed', 'hadConformer': e['cid'] in conf}; gdirty += 1
         e['atoms'] = None; continue
     e['atoms'], e['gsource'] = [[int(z), round(x, 5), round(y, 5), round(zz, 5)] for z, x, y, zz in atoms], src
     kind = 'PubChem 3-D conformer' if src.startswith('PubChem') else 'GFN2-xTB' if 'GFN2-xTB' in src else 'RDKit ETKDGv3 + MMFF94'
@@ -485,8 +494,18 @@ else:
 
 # ── 8. SYNONYMS, DESCRIPTIONS ────────────────────────────────────────────────────────────────────────────────────────
 live = sorted({e['cid'] for e in kept if e['cid']})
-syn = P.synonyms(live) if GEOMETRY else {}
-desc = P.descriptions(live) if GEOMETRY else {}
+PUBCHEM_STOPPED = None
+def nicety(what, fn):
+    """synonyms and descriptions are niceties: if PubChem refuses during them (common.Blocked), the run stops ASKING — from here on
+    the cache is the whole world (a miss is "no answer") — and finishes, saying so; a calm re-run fills in the rest"""
+    global PUBCHEM_STOPPED
+    try: return fn(live)
+    except C.Blocked as b:
+        C.OFFLINE, PUBCHEM_STOPPED = True, f'{what}: {b}'
+        log(f'! PubChem refused during the {what} round ({b}) — nothing more is asked of it; the rest of the run reads the cache only')
+        return fn(live)
+syn = nicety('synonyms', P.synonyms) if GEOMETRY else {}
+desc = nicety('descriptions', P.descriptions) if GEOMETRY else {}
 log(f'synonyms for {len(syn)} · descriptions for {len(desc)}')
 CODEY = re.compile(r'^(?=.*\d)(?=.*[A-Z])[A-Z0-9][A-Z0-9\-\s/\.,\']{2,}$')
 def pick_synonyms(e, name, iupac, n=6):
@@ -718,6 +737,8 @@ stats = {
             'solvedInRaw': len(SOLVED), 'idsFrom': dict(id_from.most_common()), 'refreshGeometry': REFRESH,
             'keptSolvedGeometry': dict(kept_solved.most_common()), 'keptSolvedWithConformerWaiting': len(upgrade_waiting),
             'solvedRowsMoved': refreshed_solved},
+ 'pubchem': {'conformers': len(conf), 'conformersAsked': len(need3d), 'synonymsFor': len(syn), 'descriptionsFor': len(desc), 'live': len(live),
+             'cacheOnly': bool(C.OFFLINE), 'stopped': PUBCHEM_STOPPED},
 }
 write_json(sibling(OUT, 'stats'), stats, indent=1)
 write_json(sibling(OUT, 'excluded'), {'built': out['built'], 'count': len(excluded), 'rows': excluded}, indent=1)
