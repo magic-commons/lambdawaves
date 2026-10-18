@@ -293,7 +293,8 @@ export function createPersist(app) {
           app.state.modHost.registry.setBase(id, v);
         }
         if (pr.modulation === undefined) app.state.modHost.clock.applyAll(true);
-        if (pr.space && pr.space !== app.state.space && !getHamiltonian().noMomentum && !sturm.P) { app.state.space = pr.space; if (ui.spaceSeg) ui.spaceSeg.set(app.state.space); }
+        { const sp = pr.space === 'r' ? 'x' : pr.space;   // iteration 007 (MIR check, files B1): projects saved after an old link carry 'r' for position space
+          if (sp && sp !== app.state.space && !getHamiltonian().noMomentum && !sturm.P) { app.state.space = sp; if (ui.spaceSeg) ui.spaceSeg.set(app.state.space); } }
         if (pr.palette && app.state.palette) {
           if (Array.isArray(pr.palette.stops)) app.state.palette.load(pr.palette.stops, pr.palette.selected, pr.paletteId); else if (pr.paletteId) app.state.palette.select(pr.paletteId);   // wave 127: the file's own stops under its name — one push, not a catalogue read then a load
           app.state.palette.setOn(!!pr.palette.on); if (!pr.palette.on && mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);

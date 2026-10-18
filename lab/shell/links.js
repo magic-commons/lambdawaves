@@ -18,7 +18,8 @@ export function createLinks(app) {
    * The two keys serialize() gained above are applied HERE and nowhere else: restore() is the project
    * road and does not read them, so a link opening is the one place where somebody else's palette choice
    * and somebody else's DRAG γ land in this browser. */
-  const NOT_CARRIED_NAME = { mo: 'the MOLECULE panel', modulation: 'the MODULATION rack', rotationRates: 'the rotation and deflection rates' };
+  const NOT_CARRIED_NAME = { mo: 'the MOLECULE panel', modulation: 'the MODULATION rack', rotationRates: 'the rotation and deflection rates',
+    kepler: 'KEPLER ORBIT', vortex: 'VORTEX', particles: 'PARTICLES', dials: 'the DIALS' };   // iteration 007 (MIR check, files B2): the overlays, named when on
   const notCarriedWords = (keys) => keys.map((k) => NOT_CARRIED_NAME[k] || k).join(' · ');
   const esc = (t) => String(t).replace(/[&<>]/g, (c) => (c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'));
   app.state.linkLast = null;

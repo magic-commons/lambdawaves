@@ -50,7 +50,7 @@ function presentation(over = {}) {
       hueShift: 0.42, invert: false, frame: true, axis: true, axisInk: 'rgb', paletteOn: true, style: 2, iso: 0.061, grain: 0.35,
       knee: 0.6, dither: 0.5, boost: { k: [0.1, -0.2, 0.3], on: true } },
     quality: { res: 128, steps: 160, scale: 1, auto: true, autoScale: 1, minScale: 0.35 },
-    domain: { auto: false, half: 11.5 }, shadow: 'lissajous', space: 'r',
+    domain: { auto: false, half: 11.5 }, shadow: 'lissajous', space: 'x',   // iteration 007: position space is 'x' (the link decoded 'r' until the MIR check)
     palette: { on: true, stops: PALETTE_BY_ID.get('twilight').stops.map((s) => ({ at: s.at, rgb: s.rgb.slice() })) },
     hamiltonian: { id: 'hydrogen', Z: 2, atomZ: 3, well: 12.5, gasBasis: 'reg' },
     field: { overlay: 'E', lines: 14, source: 'rho' },

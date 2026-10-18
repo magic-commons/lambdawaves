@@ -384,6 +384,10 @@ export function encodeState(state, opts = {}) {
   for (const k of ['mo', 'modulation']) if (pr[k] !== undefined && pr[k] !== null) notCarried.push(k);
 
   if (pr.rotationRates && Object.values(pr.rotationRates).some((v) => v !== 0)) notCarried.push('rotationRates');
+  /* iteration 007 (MIR check, files B2): the overlays are not in v1 either — a link that dropped a reader's KEPLER ORBIT, VORTEX, PARTICLES
+     or DIALS without a word broke the SAY WHAT IS NOT CARRIED rule; named only when they are ON (persist.js serialize: `overlays`) */
+  { const ov = pr.overlays || {};
+    for (const k of [ov.kepler && 'kepler', ov.vortex && ov.vortex.on && 'vortex', ov.particles && ov.particles.on && 'particles', ov.dials && 'dials']) if (k) notCarried.push(k); }
   return { text, bytes: bytes.length, chars: text.length, mode, rates: ratesMode,
     populated, dropped, scale: s, fits: text.length <= LINK_CHAR_CEILING, notCarried };
 }
@@ -494,7 +498,7 @@ export function decodeState(text) {
       presentation.hamiltonian = { id: id || 'hydrogen', Z, atomZ, well, gasBasis: gas ? 'axial' : 'reg' };
     }
     if (f & 2) presentation.sturmian = { on: !!x.u8(), lambda: x.f32() };
-    if (f & 4) presentation.space = x.u8() ? 'p' : 'r';
+    if (f & 4) presentation.space = x.u8() ? 'p' : 'x';   // iteration 007 (MIR check, files B1): position space is 'x' everywhere else ('r' left the overlays' gate unmet and was then saved into the project)
   }
 
   /* CAMERA */
