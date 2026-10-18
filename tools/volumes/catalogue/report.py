@@ -1,17 +1,19 @@
 """report.py — <catalogue>/vol-1.stats.json → research/iteration-004/CAT-BUILD.md (the committed report of row CAT).
 
-  python -I tools/volumes/catalogue/report.py [> research/iteration-004/CAT-BUILD.md]
+  python -I tools/volumes/catalogue/report.py [--candidates=FILE] [--note=TEXT] [> research/iteration-004/CAT-BUILD.md]
 
 It prints the counts (by source, by tag, by heavy-atom bin, by geometry, by blurb source), the exclusions by reason and the
 licences, from the numbers build.py measured — nothing is typed by hand here, so the report cannot drift from the file.
+--candidates reads another build (vol-1.candidates.next.json and its .stats/.excluded siblings) before it is swapped in.
 """
 import collections, datetime, json, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
-from common import DATA, read_json
+from common import DATA, read_json, sibling
 
-S = read_json(os.path.join(DATA, 'vol-1.stats.json'))
-C = read_json(os.path.join(DATA, 'vol-1.candidates.json'))
-EX = read_json(os.path.join(DATA, 'vol-1.excluded.json'))
+CFILE = os.path.expanduser(next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--candidates=')), os.path.join(DATA, 'vol-1.candidates.json')))
+S = read_json(sibling(CFILE, 'stats'))
+C = read_json(CFILE)
+EX = read_json(sibling(CFILE, 'excluded'))
 w = sys.stdout.write
 def table(head, rows):
     w('| ' + ' | '.join(head) + ' |\n|' + '|'.join(['---'] * len(head)) + '|\n')
@@ -54,6 +56,14 @@ w('By heavy atoms:\n\n')
 table(['heavy atoms', 'molecules'], list(S['byHeavyBin'].items()))
 w('By geometry:\n\n')
 table(['geometry', 'molecules'], list(S['byGeometry'].items()))
+GD = S.get('guards')
+if GD:                                                               # iteration 006 C2: the two guards, as this build measured them
+    ks = GD['keptSolvedGeometry']
+    w(f"""THE GUARDS (guards.py). (a) {sum(ks.values())} rows already solved in `raw/` kept the exact atoms they were solved at
+({' · '.join(f'{k} {v}' for k, v in ks.items()) or 'none'}){'' if GD['refreshGeometry'] else f"; {GD['keptSolvedWithConformerWaiting']} of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again)"}.
+{f"At the swap (solvers stopped) `guards.py --pin` put back {len(GD['pinnedAtSwap'])} more rows solved after the build had read `raw/`: {', '.join(GD['pinnedAtSwap'])}." + chr(10) if GD.get('pinnedAtSwap') else ''}(b) {GD['previousIdsPresent']}/{GD['previousRows']} ids of the previous file kept; the ids came from {' · '.join(f'{k} {v}' for k, v in GD['idsFrom'].items())}{'; MISSING: ' + ', '.join(GD['previousIdsMissing']) if GD['previousIdsMissing'] else ''}.
+
+""")
 w('By blurb:\n\n')
 table(['blurb written by', 'molecules'], list(S['byBlurbSource'].items()))
 
