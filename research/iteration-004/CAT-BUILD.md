@@ -1,8 +1,8 @@
-> **FULL RUN, 2026-10-17 (iteration 006, row C2 THE FULL CATALOGUE; research/iteration-006/C2-BUILD.md has the guards, the swap and the solvers) — REBUILT FROM THE CACHE on 2026-10-18 by row C3 THE CATALOGUE'S YESES (research/iteration-006/C3-BUILD.md): the ten iteration-006 tags. No geometry upgrade (Josh held the compute): every solved row keeps the atoms it was solved at; 41 rows the solver re-solved at PubChem's conformer in the seven minutes the upgrade was live keep those. No PubChem request was sent and no id moved. Descriptions still exist for 1,101 CIDs only (PubChem went Black during C2's online run); a calm online re-run of build.py fills in the rest. The previous file is kept as vol-1.candidates.before-c3.json, the 950 as vol-1.candidates.950.json.**
+> **FULL RUN, 2026-10-17 (iteration 006, row C2 THE FULL CATALOGUE; research/iteration-006/C2-BUILD.md has the guards, the swap and the solvers) — REBUILT FROM THE CACHE on 2026-10-18 by row C3 THE CATALOGUE'S YESES (research/iteration-006/C3-BUILD.md: the ten iteration-006 tags) and again by row C4 THE SCREEN GAP AND THE STRAY TAGS (research/iteration-006/C4-BUILD.md): both screens match on the InChIKey's first block (10 rows refused: the methamphetamine racemate and nine other forms of controlled medicines), and the drug-class words come from evidence about the molecule itself (409 rows' tags changed: no salt's, mixture's, counter-ion's, inherited or SUBMITTED ChEBI role). No PubChem request was sent, no surviving id moved, every solved row keeps the atoms it was solved at. Descriptions still exist for 1,101 CIDs only (PubChem went Black during C2's online run); a calm online re-run of build.py fills in the rest. The previous file is kept as vol-1.candidates.before-c4.json (C3's), before-c3 (C2's) and the 950 as vol-1.candidates.950.json.**
 
 # CAT · THE CANDIDATE LIST (iteration 004, row CAT THE CATALOGUE)
 
-`~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json` — **7080 molecules**, built 2026-10-18T07:11:20-05:00, schema 1.
+`~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json` — **7070 molecules**, built 2026-10-18T08:53:00-05:00, schema 1.
 Scripts: `tools/volumes/catalogue/` (committed). Data, caches and the exclusion list: `~/Documents/LAMBDAWAVES-VOLUMES/catalogue/`
 (never in git; every network answer is cached in `catalogue/cache/http.sqlite`, so a re-run is offline and asks PubChem nothing).
 
@@ -25,9 +25,9 @@ Rows per source (a molecule is counted once per source that nominates it; most c
 
 | source | molecules |
 |---|---|
-| PubChem | 7076 |
-| Wikidata | 6553 |
-| ChEBI | 3868 |
+| PubChem | 7066 |
+| Wikidata | 6543 |
+| ChEBI | 3864 |
 | ChEMBL | 1940 |
 | curated | 1554 |
 | WHO EML | 320 |
@@ -37,8 +37,8 @@ The combinations, most common first (PubChem is on every row and is left out of 
 
 | sources | molecules |
 |---|---|
-| ChEBI + Wikidata | 2053 |
-| Wikidata | 1436 |
+| ChEBI + Wikidata | 2049 |
+| Wikidata | 1430 |
 | ChEMBL + Wikidata | 720 |
 | ChEBI + ChEMBL + Wikidata | 683 |
 | Wikidata + curated | 668 |
@@ -60,66 +60,66 @@ By tag (PLAN.md's vocabulary and its ten iteration-006 words only; a molecule ca
 
 | tag | molecules |
 |---|---|
-| aromatic | 3968 |
-| medicine | 2439 |
-| acid | 1429 |
-| natural | 1293 |
-| ring | 1261 |
-| classic | 624 |
-| pesticide | 579 |
-| cancer | 443 |
-| heart | 371 |
-| mind | 347 |
-| steroid | 319 |
-| life | 295 |
-| food | 294 |
-| pollutant | 250 |
-| amino acid | 222 |
-| painkiller | 218 |
-| hormone | 205 |
-| fat | 192 |
-| material | 185 |
-| antibiotic | 185 |
-| toxin | 183 |
-| colour | 175 |
-| alkaloid | 160 |
-| flavour | 143 |
+| aromatic | 4059 |
+| medicine | 2436 |
+| acid | 1460 |
+| natural | 1305 |
+| ring | 1293 |
+| classic | 627 |
+| pesticide | 582 |
+| steroid | 338 |
+| food | 310 |
+| life | 304 |
+| pollutant | 275 |
+| mind | 269 |
+| heart | 268 |
+| amino acid | 228 |
+| cancer | 221 |
+| fat | 194 |
+| material | 188 |
+| toxin | 184 |
+| hormone | 180 |
+| colour | 176 |
+| alkaloid | 161 |
+| antibiotic | 151 |
+| flavour | 146 |
 | scent | 135 |
-| cage | 127 |
-| solvent | 123 |
-| sugar | 121 |
+| cage | 129 |
+| painkiller | 126 |
+| solvent | 125 |
+| sugar | 123 |
+| eye | 116 |
 | metal | 108 |
-| gas | 105 |
-| eye | 102 |
-| plastic | 88 |
-| skin | 88 |
-| atmosphere | 72 |
+| gas | 107 |
+| skin | 97 |
+| plastic | 89 |
+| atmosphere | 73 |
 | fuel | 65 |
+| stomach | 63 |
 | antiviral | 61 |
-| allergy | 59 |
-| stomach | 58 |
-| parasite | 50 |
-| vitamin | 48 |
-| anaesthetic | 44 |
-| lung | 42 |
+| allergy | 57 |
+| anaesthetic | 55 |
+| vitamin | 52 |
+| parasite | 51 |
+| lung | 48 |
 | sweetener | 32 |
-| immune | 28 |
-| diabetes | 26 |
+| diabetes | 32 |
+| immune | 30 |
 | refrigerant | 23 |
-| neurotransmitter | 13 |
+| neurotransmitter | 16 |
 | nucleobase | 11 |
 | explosive | 11 |
 | battery | 10 |
 
-Tags per molecule: 1 tag: 1346 · 2 tags: 2431 · 3 tags: 1990 · 4 tags: 1313
+Tags per molecule: 1 tag: 1346 · 2 tags: 2474 · 3 tags: 2094 · 4 tags: 1156
 
 By heavy atoms:
 
 | heavy atoms | molecules |
 |---|---|
 | ≤10 | 1530 |
-| 11–20 | 2308 |
-| 21–30 | 2165 |
+| 11–20 | 2300 |
+| 21–30 | 2163 |
 | 31–40 | 816 |
 | 41–50 | 260 |
 | >50 | 1 |
@@ -128,25 +128,25 @@ By geometry:
 
 | geometry | molecules |
 |---|---|
-| PubChem 3-D conformer | 6394 |
+| PubChem 3-D conformer | 6384 |
 | RDKit ETKDGv3 + MMFF94 | 409 |
 | GFN2-xTB | 189 |
 | app pinned | 88 |
 
-THE GUARDS (guards.py). (a) 2593 rows already solved in `raw/` kept the exact atoms they were solved at
-(PubChem 3-D conformer 2128 · RDKit ETKDGv3 + MMFF94 214 · GFN2-xTB 173 · app pinned 78); 246 of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again).
-(b) 7080/7080 ids of the previous file kept; the ids came from the previous file 6992 · the app 88.
+THE GUARDS (guards.py). (a) 2665 rows already solved in `raw/` kept the exact atoms they were solved at
+(PubChem 3-D conformer 2194 · RDKit ETKDGv3 + MMFF94 220 · GFN2-xTB 173 · app pinned 78); 246 of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again).
+(b) 7070/7080 ids of the previous file kept; the ids came from the previous file 6982 · the app 88; MISSING: acetylmethadol, arketamine, esmodafinil, levofenfluramine, levomethamphetamine, methamphetamine-2, methorphan, pentazocine, tilidine, vinbarbital-2.
 
 By blurb:
 
 | blurb written by | molecules |
 |---|---|
-| λWAVES | 2392 |
-| ChEBI definition (CC BY 4.0) | 4688 |
+| λWAVES | 2386 |
+| ChEBI definition (CC BY 4.0) | 4684 |
 
 ## THE EXCLUSIONS
 
-27316 nominations were refused, and every one is written down with its reason in
+27326 nominations were refused, and every one is written down with its reason in
 `~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.excluded.json`. By reason:
 
 | reason | count |
@@ -160,8 +160,8 @@ By blurb:
 | PubChem has no compound under this name | 122 |
 | an element beyond krypton (I) | 116 |
 | refused: on the Chemical Weapons Convention schedules or in a scheduled family | 115 |
+| refused: a controlled psychoactive substance that is not an approved medicine | 93 |
 | an isotopically labelled compound | 84 |
-| refused: a controlled psychoactive substance that is not an approved medicine | 83 |
 | an odd electron count (N): an open shell, not an RHF molecule | 61 |
 | a radical (RDKit finds unpaired electrons): an open shell | 25 |
 | an ion (charge -N) with no neutral parent in PubChem | 20 |
@@ -182,9 +182,9 @@ By the source that nominated it:
 
 | source | refused |
 |---|---|
-| wikidata | 15339 |
+| wikidata | 15345 |
 | chebi | 11197 |
-| chebi/wikidata | 313 |
+| chebi/wikidata | 317 |
 | who | 114 |
 | curated | 90 |
 | chembl/wikidata | 65 |
@@ -198,10 +198,20 @@ By the source that nominated it:
 THE TWO SCREENS. **119** nominations were refused as Chemical Weapons Convention scheduled chemicals, listed
 precursors or members of a scheduled family — by NAME (64 of the Annex's own names resolved through
 PubChem to an InChIKey skeleton) and by CLASS (five coarse substructure families, so a congener under another name is refused too),
-and by Wikidata's own "chemical warfare agent" uses. **83** were refused as controlled psychoactive
+and by Wikidata's own "chemical warfare agent" uses. **93** were refused as controlled psychoactive
 substances that are not approved medicines (51 names resolved, plus ChEBI's hallucinogen and opioid
 roles and Wikidata's recreational-drug uses); an approved medicine passes the second screen, so morphine and fentanyl are in the
 library as medicines and nothing else of that kind is.
+
+Since iteration 006 C4 both screens match on the InChIKey's FIRST BLOCK (the connectivity skeleton): every signal — a name, a
+Wikidata use, a ChEBI role, and for the second screen an approved medicine whose own ATC code sits in a controlled-drug group
+(`curated.CONTROLLED_ATC`: opioids, central stimulants and anorectics, barbiturates, benzodiazepines and Z-drugs, ketamine) — screens
+its whole skeleton (racemate, enantiomers, isotopologues, protonated forms) and, for a salt, its neutral parent's. 29
+first blocks carry a CWC signal, 189 a controlled-substance signal; **10** rows were refused only
+through a skeleton-mate's signal. A row a screened skeleton holds stays only when it is ITSELF an approved drug by ChEMBL (max_phase 4:
+a ChEMBL approved parent whose structure is this row, never a salt folded onto it): 103 rows, 4
+of them beside another form's signal — menthol (beside Menthol), Dextromethorphan (beside Levomethorphan), Levoamphetamine (beside Amphetamine), Levopropoxyphene (beside Dextropropoxyphene). The CWC's Annex
+names and classes refuse outright, approved or not.
 
 ## THE TEN FIRST ROWS (priority order: the app's own, then the WHO essential medicines and the most recognisable names, then small before large)
 
@@ -222,17 +232,17 @@ library as medicines and nothing else of that kind is.
 
 Seven medicine words from the drug's OWN, non-combination ATC codes, and three hand-list words outside medicine. They rank with the
 uses, so the four-tag cap cuts a structure word (aromatic, ring, acid …) before any of them; they rank after the food words and the
-drug classes they refine, so they never send a food to Medicine. 2439 rows carry `medicine`; 24 carry nothing else.
+drug classes they refine, so they never send a food to Medicine. 2436 rows carry `medicine`; 29 carry nothing else.
 
 | word | what it holds | from (ATC codes on the medicine rows) | rows | cut by the cap |
 |---|---|---|---|---|
-| `eye` | eye drops and eye medicines | S01 (134) | 102 | 25 |
-| `lung` | asthma and cough medicines | R03 (44), R05 (18) | 42 | 10 |
-| `skin` | creams, antifungals and acne medicines | D01/D06/D07/D10/D11 (130) | 88 | 24 |
-| `stomach` | antacids, ulcer and gut medicines | A02/A03/A06/A07 (78) | 58 | 13 |
-| `diabetes` | insulin-sparing and blood-sugar medicines | A10 (33) | 26 | 7 |
-| `parasite` | malaria and worm medicines | P01/P02/P03 (53) | 50 | 3 |
-| `immune` | immune suppressants and modifiers | L03/L04 (31) | 28 | 3 |
+| `eye` | eye drops and eye medicines | S01 (134) | 116 | 11 |
+| `lung` | asthma and cough medicines | R03 (44), R05 (18) | 48 | 4 |
+| `skin` | creams, antifungals and acne medicines | D01/D06/D07/D10/D11 (130) | 97 | 14 |
+| `stomach` | antacids, ulcer and gut medicines | A02/A03/A06/A07 (78) | 63 | 5 |
+| `diabetes` | insulin-sparing and blood-sugar medicines | A10 (33) | 32 | 1 |
+| `parasite` | malaria and worm medicines | P01/P02/P03 (53) | 51 | 2 |
+| `immune` | immune suppressants and modifiers | L03/L04 (31) | 30 | 1 |
 | `refrigerant` | the curated CFC, HCFC, HFC and HFO rows | curated.py: the cfcs, hcfcs and hfcs lists | 23 | 0 |
 | `battery` | the carbonate and nitrile electrolyte solvents | curated.py: batteries and solvents (those items only) | 10 | 0 |
 | `explosive` | the classic textbook explosives already in the catalogue | curated.py EXPLOSIVES (InChIKeys; adds no molecule) | 11 | 0 |

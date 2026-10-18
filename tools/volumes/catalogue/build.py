@@ -26,6 +26,12 @@ cache is untouched by it for every other row (--rebuild-geometry ignores the cac
 (--prev, default the current <catalogue>/vol-1.candidates.json) gave its InChIKey, and a new row's slug collision takes the suffix,
 never an old row.  --out writes the candidates (and its .stats/.excluded siblings) elsewhere — vol-1.candidates.next.json — so the
 running solvers' file is replaced only after check.py has passed the new one (check.py FILE --against PREV).
+
+ITERATION 006 C4: THE SCREENS MATCH ON THE SKELETON (step 5: every signal screens its InChIKey first block, an approved medicine in a
+controlled ATC group screens its own; a skeleton-mate stays only when it is itself a ChEMBL approved drug) and THE DRUG-CLASS WORDS
+COME FROM THE MOLECULE ITSELF (step 9: its own ATC codes, ChEBI roles curators checked on its own entity — never a salt's, a mixture's,
+a counter-ion's, an is_a ancestor's or a SUBMITTED one).  Offline, a batched PubChem answer is found CID by CID (pubchem.py), so a
+catalogue that loses a row keeps every other row's synonyms and descriptions.
 """
 import collections, datetime, json, os, re, sys, time
 sys.path.insert(0, os.path.dirname(__file__))
@@ -169,7 +175,7 @@ for m in chembl['parents']:
     for code in m['atc']:
         for pre, t in ATC_TAGS:
             if code.startswith(pre) and t not in tags: tags.append(t)
-    nominate('chembl', inchikey=st['standard_inchi_key'], smiles=st.get('canonical_smiles'), tags=tags, approved=True,
+    nominate('chembl', inchikey=st['standard_inchi_key'], own_smiles=st.get('canonical_smiles'), smiles=st.get('canonical_smiles'), tags=tags, approved=True,
              ref={'db': 'ChEMBL', 'id': m['chembl'], **({'atc': m['atc']} if m['atc'] else {})}, chembl_name=m.get('pref_name'),
              synonyms=m.get('synonyms', []), withdrawn=m.get('withdrawn'), first_approval=m.get('first_approval'), atc=m['atc'])
 uncharger, chooser = rdMolStandardize.Uncharger(), rdMolStandardize.LargestFragmentChooser(preferOrganic=True)
@@ -183,7 +189,7 @@ for e in chebi['entities']:
     if '*' in e['smiles'] or re.search(r'\[R\]|\*', e['smiles']): continue
     k = parent_key(e['smiles'])
     if not k: continue
-    nominate('chebi', inchikey=k, tags=e['roleTags'] + e['classTags'], role_tags=e['roleTags'], class_tags=e['classTags'],
+    nominate('chebi', inchikey=k, own_smiles=e['smiles'], tags=e['roleTags'] + e['classTags'], role_tags=e['roleTags'], own_role_tags=e.get('ownRoleTags'), class_tags=e['classTags'],
              screens=e['screens'], ref={'db': 'ChEBI', 'id': f'CHEBI:{e["chebi"]}'}, chebi_name=e['name'], definition=e['definition'],
              wikipedia=e['wikipedia'], synonyms=e['synonyms'][:8], iupac=e.get('iupac'))
 for cat, spec in CUR.CATEGORIES.items():
@@ -301,6 +307,22 @@ for n in noms:
         exclude(n['name'], f'PubChem read the name as {p["MolecularFormula"]}, not the expected {n["formula"]}', src='curated'); continue
     entry_for(p['InChIKey'], c)['noms'].append(n)
 log(f'merged: {len(entries)} unique InChIKeys')
+# THE MOLECULE ITSELF (iteration 006 C4).  A nomination can reach an entry through a SALT or a MIXTURE folded onto one of its fragments:
+# ChEMBL keeps an inorganic or a mixed substance as its own "parent" (magnesium sulfate, lithium carbonate, calcium gluconate, the
+# omega-3 ethyl esters), ChEBI files its salts and hydrates as entities, and the build folds each onto its largest organic fragment,
+# neutralised (parent_key) or onto PubChem's parent of a salt (from_cid) — so magnesium sulfate's ChEBI roles (analgesic,
+# anticonvulsant …) and ChEMBL's six metal sulfates landed on sulfuric acid, lithium citrate's and sodium citrate's on citric acid.
+# A nomination is about the molecule ITSELF when its own structure is ONE molecule (a single component, water of crystallisation
+# aside — a charged form of it, an acid's conjugate base, is the same molecule) and, for a name, PubChem did not have to take a salt's
+# parent for it.  The test is the structure's, not the InChIKey's: ChEMBL draws tetracycline, minoxidil and chlordiazepoxide as other
+# tautomers than PubChem's record, and atropine with other stereo flags, and each is still that drug.  Only such a nomination gives a
+# row a drug-class word, and only a ChEMBL approved parent that IS the row makes it "itself an approved drug" for the screens below.
+def one_molecule(smiles):
+    parts = [s for s in (smiles or '').split('.') if s and s not in ('O', '[OH2]')]
+    return len(parts) == 1
+def is_own(n):
+    if n['src'] in ('chembl', 'chebi'): return one_molecule(n.get('own_smiles'))
+    return not n.get('from_cid')
 
 # ── 5. THE SCREENS ───────────────────────────────────────────────────────────────────────────────────────────────────
 # Chemical Weapons Convention: every scheduled chemical and listed precursor is refused outright — by NAME (the Annex's own
@@ -332,6 +354,16 @@ def weapon_class(mol):
             if len(cn) == 1 and alkyl_arm(mol, cn[0].GetIdx(), a.GetIdx()): return 'a phosphorus centre carrying one short alkyl group and no other carbon (CWC Schedule 2B family)'
     return None
 def skeleton(k): return k.split('-')[0]
+def skeletons_of(p):
+    """the InChIKey first block(s) a PubChem record stands for: its own and, for a salt or a charged form, its neutral parent's
+    (the largest organic fragment, neutralised — parent_key), so a screened salt screens the molecule it is a salt of"""
+    if not p or not p.get('InChIKey'): return []
+    out = [skeleton(p['InChIKey'])]
+    if (p.get('CovalentUnitCount', 1) or 1) > 1 or (p.get('Charge', 0) or 0) != 0:
+        sm = p.get('SMILES') or p.get('ConnectivitySMILES')
+        k = parent_key(sm) if sm else None
+        if k and skeleton(k) not in out: out.append(skeleton(k))
+    return out
 def block_list(names):
     out = {}
     for nm in names:
@@ -339,10 +371,49 @@ def block_list(names):
         if not cs: continue
         c = cs[0]
         if c not in props: props.update(P.properties([c]))
-        if props.get(c, {}).get('InChIKey'): out.setdefault(skeleton(props[c]['InChIKey']), nm)
+        for sk in skeletons_of(props.get(c)): out.setdefault(sk, nm)
     return out
 WEAPON_NAMED, ILLICIT_NAMED = block_list(CUR.CWC_NAMES), block_list(CUR.ILLICIT_NAMES)
 log(f'screens: {len(WEAPON_NAMED)} scheduled chemicals and {len(ILLICIT_NAMED)} controlled substances resolved by name')
+# THE SCREENS MATCH ON THE SKELETON (iteration 006 C4).  The Annex names and the illicit names always matched on the InChIKey's first
+# block (the connectivity skeleton), but every other signal was read off the one entry that carried it: Wikidata's weapon and
+# recreational-drug uses, ChEBI's hallucinogen and opioid roles — and nothing at all marked a controlled MEDICINE, so the racemate of
+# an approved d-methamphetamine (another InChIKey, nominated by Wikidata alone, approved by nobody) passed.  Now every signal screens
+# its whole skeleton — the racemate, the enantiomers, the isotopologues and protonated forms (one first block), and a salt's neutral
+# parent (skeletons_of) — and the controlled-substance screen has one more signal: an approved medicine whose OWN ATC code sits in a
+# controlled-drug group (curated.CONTROLLED_ATC: the opioids, the central stimulants, the barbiturates, benzodiazepines and
+# Z-drugs, the central anorectics, ketamine).  The medicine itself still passes (it is approved); a row that shares its skeleton passes
+# only when it is ITSELF an approved drug by ChEMBL (max_phase 4: a ChEMBL approved parent whose structure is this row — is_own()).
+# The class patterns are structural, so every member of a skeleton already meets them on its own; the CWC's Annex names and classes
+# refuse outright, approved or not (the law: every scheduled agent and precursor).
+def own_atc(e): return sorted({c for n in e['noms'] if n['src'] == 'chembl' and is_own(n) for c in (n.get('atc') or [])})
+def cwc_signal(e):
+    uses = sorted({u for n in e['noms'] for u in n.get('uses', []) if u in WD_WEAPON_USES})
+    return f'Wikidata records it as a chemical warfare agent ({", ".join(uses)})' if uses else None
+def illicit_signal(e):
+    il = ILLICIT_NAMED.get(skeleton(e['key']))
+    if il: return f'named on the controlled-substance list ({il})'
+    scr = sorted({s for n in e['noms'] for s in n.get('screens', [])} & {'hallucinogen', 'opioid'})
+    if scr: return f'ChEBI gives it the role {" and ".join(scr)}'
+    uses = sorted({u for n in e['noms'] for u in n.get('uses', []) if u in WD_ILLICIT_USES})
+    if uses: return f'Wikidata records it as a {", ".join(uses)}'
+    atc = [c for c in own_atc(e) if c.startswith(tuple(CUR.CONTROLLED_ATC))]
+    if atc: return f'a controlled medicine (ATC {", ".join(atc)}: {CUR.CONTROLLED_ATC[next(g for g in CUR.CONTROLLED_ATC if atc[0].startswith(g))]})'
+    return None
+def label(e):
+    """a readable name for an entry the screens talk about (the row name rule comes later, in the filters)"""
+    return (next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata'), None)
+            or next((n.get('display') or n['name'] for n in e['noms'] if n['src'] == 'curated'), None)
+            or (props.get(e['cid']) or {}).get('Title') or next((n['chebi_name'] for n in e['noms'] if n.get('chebi_name')), None)
+            or next((n['chembl_name'] for n in e['noms'] if n.get('chembl_name')), None) or e['key'])
+CWC_SKELETON, ILLICIT_SKELETON = {}, {}                             # first block → (the molecule that carries the signal, its key, the signal)
+for key, e in entries.items():
+    if e['app'] or not e['cid'] or key.startswith('APP-'): continue
+    p = props.get(e['cid'])
+    for table, sig in ((CWC_SKELETON, cwc_signal(e)), (ILLICIT_SKELETON, illicit_signal(e))):
+        if not sig: continue
+        for sk in skeletons_of(p): table.setdefault(sk, (label(e), key, sig))
+log(f'screens by skeleton: {len(CWC_SKELETON)} first blocks carry a CWC signal, {len(ILLICIT_SKELETON)} a controlled-substance signal')
 
 # ── 6. THE FILTERS ───────────────────────────────────────────────────────────────────────────────────────────────────
 ACID_PATTERNS = [Chem.MolFromSmarts(s) for s in ('[CX3](=O)[OX2H1]', '[#16,#15,#7,#17,#35,#5](=O)[OX2H1]', '[F,Cl,Br][H]',
@@ -359,7 +430,7 @@ def recognisable(e):
     return False, ('too obscure to be a library row: nominated only by ' + '/'.join(sorted(srcs)) +
                    (f' and in {links} Wikipedias' if links else ' and in no Wikipedia'))
 
-kept = []
+kept, SCREEN_KEPT = [], []                                          # SCREEN_KEPT: rows a screened skeleton holds, kept as approved drugs
 for key, e in entries.items():
     a, p = e['app'], (props.get(e['cid']) if e['cid'] else None)
     srcs = sorted({n['src'] for n in e['noms']} | ({'app'} if a else set()))
@@ -384,16 +455,29 @@ for key, e in entries.items():
     if mol is None and not e['hand']: exclude(nm, 'its PubChem structure does not parse', src='/'.join(srcs), cid=e['cid']); continue
     molH = Chem.AddHs(mol) if mol is not None else None
     e['mol'], e['molH'] = mol, molH
-    # the screens first, so a refused substance is never described further
-    w = WEAPON_NAMED.get(skeleton(key)) or (weapon_class(mol) if mol is not None else None)
+    # the screens first, so a refused substance is never described further (iteration 006 C4: on the skeleton; see THE SCREENS)
+    e['approvedSelf'] = any(n['src'] == 'chembl' and is_own(n) for n in e['noms'])
+    sk = skeleton(key)
+    w = WEAPON_NAMED.get(sk) or (weapon_class(mol) if mol is not None else None)
     if w: exclude(nm, 'refused: on the Chemical Weapons Convention schedules or in a scheduled family — ' + w, src='/'.join(srcs), screen='CWC', key=key); continue
-    if any(u in WD_WEAPON_USES for n in e['noms'] for u in n.get('uses', [])):
+    if cwc_signal(e):
         exclude(nm, 'refused: Wikidata records it as a chemical warfare agent', src='/'.join(srcs), screen='CWC', key=key); continue
-    if not e['approved']:
-        il = ILLICIT_NAMED.get(skeleton(key))
-        scr = {s for n in e['noms'] for s in n.get('screens', [])} & {'hallucinogen', 'opioid'}
-        if il or scr or any(u in WD_ILLICIT_USES for n in e['noms'] for u in n.get('uses', [])):
-            exclude(nm, 'refused: a controlled psychoactive substance that is not an approved medicine', src='/'.join(srcs), screen='illicit', key=key); continue
+    if sk in CWC_SKELETON and not e['approvedSelf']:
+        who_, k_, sig = CWC_SKELETON[sk]
+        exclude(nm, f'refused: it shares its connectivity skeleton with a molecule the CWC screen refuses, and is not itself an approved drug '
+                    f'— {who_} ({k_}): {sig}; InChIKey first block {sk}', src='/'.join(srcs), screen='CWC', key=key, skeleton=sk, via=k_); continue
+    if sk in CWC_SKELETON: SCREEN_KEPT.append({'name': nm, 'key': key, 'screen': 'CWC', 'via': CWC_SKELETON[sk][1], 'viaName': CWC_SKELETON[sk][0], 'signal': CWC_SKELETON[sk][2]})
+    own_sig = illicit_signal(e)
+    if (own_sig or sk in ILLICIT_SKELETON) and not e['approvedSelf']:
+        if own_sig: why = f'refused: a controlled psychoactive substance that is not an approved medicine — {own_sig}'
+        else:
+            who_, k_, sig = ILLICIT_SKELETON[sk]
+            why = (f'refused: a controlled psychoactive substance that is not an approved medicine — it shares its connectivity skeleton '
+                   f'with {who_} ({k_}): {sig}; this row is not itself an approved drug by ChEMBL (InChIKey first block {sk})')
+        exclude(nm, why, src='/'.join(srcs), screen='illicit', key=key, **({} if own_sig else {'skeleton': sk, 'via': ILLICIT_SKELETON[sk][1]})); continue
+    if own_sig or sk in ILLICIT_SKELETON:
+        via = (nm, key, own_sig) if own_sig else ILLICIT_SKELETON[sk]
+        SCREEN_KEPT.append({'name': nm, 'key': key, 'screen': 'illicit', 'via': via[1], 'viaName': via[0], 'signal': via[2]})
     Zs = [x.GetAtomicNum() for x in molH.GetAtoms()] if molH is not None else []
     heavy = p.get('HeavyAtomCount') or sum(1 for z in Zs if z > 1)
     why = None
@@ -580,12 +664,44 @@ def pick_synonyms(e, name, iupac, n=6):
 DRUG_TAGS = {'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic',
              'eye', 'lung', 'skin', 'stomach', 'diabetes', 'parasite', 'immune'}
 CAP_CUT = collections.Counter()                                    # which words the four-tag cap cut, and how often (the notes' table)
+# THE DRUG-CLASS WORDS (iteration 006 C4) come from evidence about THIS molecule: its own ATC codes (a ChEMBL approved parent that IS
+# this molecule — is_own(): one molecule, never a salt, a mixture or a counter-ion folded onto it), a ChEBI role its curators assert on
+# the ChEBI entity that IS this molecule (chebi.py's ownRoleTags: has_role CHECKED or OK on the entity itself — not inherited down
+# is_a, not SUBMITTED), or a hand list or a Wikidata statement naming the molecule itself.  Every other word keeps its old road — except
+# onto an INORGANIC molecule (no C–H and no C–C bond: sulfuric, carbonic, nitric acid …) from the salt of a metal that is not an
+# alkali metal: magnesium, calcium, zinc, thallium, copper, barium, lithium, silver … sulfate, carbonate or nitrate are that METAL's
+# compounds, and what they do (thallium sulfate's `pesticide`, copper carbonate's `colour`, barium carbonate's `pesticide`) is not the
+# anion's.  A sodium, potassium or ammonium salt still gives its anion its words (sodium nitrite, metabisulfite and the phosphates are
+# food additives BY their anion; potassium permanganate and sodium arsenite act by theirs), and so does any salt of an organic acid.
+CLASS_WORDS = DRUG_TAGS | {'hormone'}
+SPECTATOR_IONS = {'[Na+]', '[K+]', '[NH4+]', '[H+]', 'O'}          # the counter-cations with no chemistry of their own (and water)
+NONMETALS = {1, 2, 5, 6, 7, 8, 9, 10, 14, 15, 16, 17, 18, 33, 34, 35, 36, 52, 53, 54, 85, 86}
+def inorganic(molH):
+    return molH is not None and not any({b.GetBeginAtom().GetAtomicNum(), b.GetEndAtom().GetAtomicNum()} in ({6}, {1, 6}) for b in molH.GetBonds())
+def active_cation(n):
+    """the salt a nomination came from carries a cation that is its active part: any cation but H⁺, Na⁺, K⁺ and NH₄⁺ (Mg²⁺, Ca²⁺,
+    Zn²⁺, Li⁺, Tl⁺, Ag⁺, Cu²⁺, Ba²⁺ …), or a lone metal atom"""
+    smi = n.get('own_smiles') if n['src'] in ('chembl', 'chebi') else (props.get(n.get('from_cid')) or {}).get('SMILES')
+    m = Chem.MolFromSmiles(smi) if smi else None
+    if m is None: return False
+    for f in Chem.GetMolFrags(m, asMols=True, sanitizeFrags=False):
+        if Chem.MolToSmiles(f) in SPECTATOR_IONS: continue
+        if sum(a.GetFormalCharge() for a in f.GetAtoms()) > 0: return True
+        if f.GetNumAtoms() == 1 and f.GetAtomWithIdx(0).GetAtomicNum() not in NONMETALS: return True
+    return False
 def tags_for(e):
     if e['app']: return list(APP.get(e['app']['id'], (['classic'], ''))[0])
     t = set()
+    counter_ion = inorganic(e.get('molH'))
     for n in e['noms']:
+        mine = is_own(n)
+        if counter_ion and not mine and active_cation(n): continue     # a metal salt's evidence landing on its anion
         for x in n.get('tags', []):
-            if x in VOCAB: t.add(x)
+            if x not in VOCAB: continue
+            if x in CLASS_WORDS:
+                if not mine: continue                                   # a salt's, a mixture's or a counter-ion's evidence
+                if n['src'] == 'chebi' and x not in (n.get('own_role_tags') or []): continue   # inherited, or not checked by ChEBI
+            t.add(x)
     if e['key'] in CUR.EXPLOSIVES: t.add('explosive')              # a hand list of InChIKeys already in the catalogue: it adds no molecule
     if e['approved']: t.add('medicine')
     else: t -= DRUG_TAGS
@@ -761,6 +877,7 @@ out = {'schema': 1, 'built': datetime.datetime.now().astimezone().isoformat(time
 os.makedirs(os.path.dirname(os.path.abspath(OUT)), exist_ok=True)
 write_json(OUT, out)
 
+id_by_key = {m['inchikey']: m['id'] for m in molecules if m['inchikey']}
 bins = [('≤10', 0, 10), ('11–20', 11, 20), ('21–30', 21, 30), ('31–40', 31, 40), ('41–50', 41, 50), ('>50', 51, 10 ** 6)]
 def binned(h):
     for nm, lo, hi in bins:
@@ -781,7 +898,13 @@ stats = {
  'excludedByReason': dict(collections.Counter(re.sub(r'\d+', 'N', e['why'].split('—')[0].strip())[:110] for e in excluded).most_common()),
  'excludedBySource': dict(collections.Counter(e.get('src', '?') for e in excluded).most_common()),
  'screens': {'cwc': sum(1 for e in excluded if e.get('screen') == 'CWC'), 'illicit': sum(1 for e in excluded if e.get('screen') == 'illicit'),
-             'namedScheduled': len(WEAPON_NAMED), 'namedControlled': len(ILLICIT_NAMED)},
+             'namedScheduled': len(WEAPON_NAMED), 'namedControlled': len(ILLICIT_NAMED),
+             # iteration 006 C4: the screens on the skeleton — how many first blocks carry a signal, how many rows a skeleton-mate's
+             # signal refused, and the rows a screened skeleton holds that stay because each is ITSELF an approved drug by ChEMBL
+             'cwcSkeletons': len(CWC_SKELETON), 'illicitSkeletons': len(ILLICIT_SKELETON),
+             'bySkeleton': sum(1 for e in excluded if e.get('screen') and e.get('skeleton')),
+             'keptAsApprovedDrugs': sorted((dict(r, id=id_by_key[r['key']]) for r in SCREEN_KEPT if r['key'] in id_by_key),
+                                           key=lambda r: (r['screen'], r['name'].lower()))},
  'sources': SOURCES, 'tagVocabulary': VOCAB,
  'samples': [{'id': m['id'], 'name': m['name'], 'tags': m['tags'], 'heavy': m['heavy'], 'priority': m['priority']} for m in molecules[:40]],
  'guards': {'previous': PREV, 'previousRows': len(prev_by_id), 'previousIdsPresent': len(prev_by_id) - len(lost), 'previousIdsMissing': lost,

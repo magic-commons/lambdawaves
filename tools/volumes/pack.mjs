@@ -10,7 +10,9 @@
  *   --incremental  keep a molecule's .lwm when its header says it was packed from this raw/<id>/meta.json (its digest without the
  *               solver's clocks) and this catalogue row (its digest) by this packer version (header.source) — a repack while the solver
  *               runs touches only what moved; a kept .lwm is looked for in every vol-<n>/ of the out dir, then of the data's dist (a
- *               theme may move a molecule)
+ *               theme may move a molecule); and the shelf follows the catalogue (iteration 006 C4): once every volume is written, each
+ *               .lwm / .webp a volume's index no longer reaches is deleted (a refused molecule, one a theme moved, a pilot leftover), and
+ *               with --themes a vol-<n>/ the shelf no longer has is emptied — never with --only
  *   --out-dir D the dist to write (default ~/Documents/LAMBDAWAVES-VOLUMES/dist); pack-report-<vol>.json goes beside it
  * THE METADATA (iteration 006 C3): a molecule's names, tags, synonyms, blurb and sources are its row in the CURRENT --candidates file by
  *   id (meta.candidate — the row a rung was last solved from — only for an id the file no longer has); see candidateOf()
@@ -31,7 +33,7 @@
  *   indices-only form; validateRecord(record) = [] and chem.open answers its energy with 0 solver calls, or no file.
  *   ε and the energy are the solver's f64; C is f32 (7 digits: the picture's precision, stated in the header); Mulliken f32.
  * Deterministic bytes: no clock enters a .lwm, index.json or volumes.json (the solver's clocks stay in raw/); sha-256 per file. */
-import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync, readdirSync, copyFileSync, openSync, writeSync, closeSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync, readdirSync, copyFileSync, openSync, writeSync, closeSync, unlinkSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { homedir } from 'node:os';
@@ -352,7 +354,7 @@ if (T) {
   plan.forEach((p, i) => Object.assign(p, { id: 'vol-' + (i + 1), numeral: roman(i + 1), title: p.theme.title + (p.part > 1 ? ' · ' + p.part : ''), blurb: p.theme.blurb || BLURB }));
 } else plan = [{ id: VOL, numeral: NUMERAL, title: TITLE, blurb: BLURB, members: packed }];
 
-const entries = [];
+const entries = [], written = [];
 for (const p of plan) {
   const VDIR = path.join(DIST, p.id), rows = [], vreports = [];
   mkdirSync(path.join(VDIR, 'm'), { recursive: true });
@@ -371,6 +373,7 @@ for (const p of plan) {
     vreports.push(r.report); reports.push(r.report);
     console.log(`${p.id.padEnd(6)} ${id.padEnd(16)} ${String(M.heavy).padStart(3)} heavy · ${Object.keys(r.header.rungs).length} rungs · ${(r.bytes.length / 1024).toFixed(1)} KB (header ${(r.report.headerBytes / 1024).toFixed(1)} KB)`);
   }
+  written.push({ dir: VDIR, reach: new Set(rows.flatMap((r) => [r.file, r.thumb].filter(Boolean))) });
   const stale = readdirSync(path.join(VDIR, 'm')).filter((f) => f.endsWith('.lwm') && !rows.some((r) => r.file === 'm/' + f));
   const indexText = '{"schema":1,"id":' + JSON.stringify(p.id) + ',"numeral":' + JSON.stringify(p.numeral) + ',"title":' + JSON.stringify(p.title) + ',"bases":' + JSON.stringify(LADDER)
     + ',"generator":' + JSON.stringify({ tool: 'tools/volumes/pack.mjs', commit: GENERATOR, format: 'THE VOLUME FORMAT v1 (lab/volumes-format.js)' }) + ',"molecules":[\n'
@@ -390,6 +393,22 @@ for (const p of plan) {
 const shelfFile = path.join(DIST, 'volumes.json'), shelf = !T && existsSync(shelfFile) ? JSON.parse(readFileSync(shelfFile, 'utf8')) : { schema: 1, volumes: [] };
 shelf.volumes = [...shelf.volumes.filter((v) => !entries.some((e) => e.id === v.id)), ...entries].sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
 writeFileSync(shelfFile, JSON.stringify(shelf, null, 1) + '\n');
+/* THE SHELF MATCHES THE CATALOGUE (iteration 006 C4): with --incremental, a molecule no longer in the catalogue (a screen refused it),
+   or no longer in that volume's theme (its tags moved it), LEAVES the volume — every .lwm and .webp in a written volume's m/ and t/ that
+   its new index.json does not reach is deleted.  Only now, after every volume is written: a moved molecule's kept file and picture were
+   read from its old volume first.  With --themes the shelf is the whole of volumes.json, so a vol-<n>/ it no longer has is emptied the
+   same way.  Never with --only (that run writes a partial index) or --out. */
+if (INCREMENTAL && !ONLY) {
+  const pruned = [];
+  const prune = (dir, reach) => { for (const sub of ['m', 't']) { const d = path.join(dir, sub); if (!existsSync(d)) continue;
+    for (const f of readdirSync(d)) if (/\.(lwm|webp)$/.test(f) && !reach.has(sub + '/' + f)) { unlinkSync(path.join(d, f)); pruned.push(path.relative(DIST, path.join(d, f))); } } };
+  for (const w of written) prune(w.dir, w.reach);
+  if (T) for (const v of readdirSync(DIST).filter((e) => /^vol-\d+$/.test(e) && !plan.some((p) => p.id === e))) {
+    prune(path.join(DIST, v), new Set());
+    if (existsSync(path.join(DIST, v, 'index.json'))) { unlinkSync(path.join(DIST, v, 'index.json')); pruned.push(v + '/index.json'); }
+  }
+  console.log(`pack: --incremental pruned ${pruned.length} file(s) no index reaches any more` + (pruned.length ? ': ' + pruned.join(', ') : ''));
+}
 console.log(`pack: ${packed.length} molecules in ${entries.length} volume(s) → ${DIST}/volumes.json; ${skipped.length} not packed`
   + (STALE.length ? `; ${STALE.length} packed at solved atoms the catalogue has since moved (they will be solved again): ${STALE.join(', ')}` : '')
   + (FALLBACK.length ? `; ${FALLBACK.length} not in --candidates, packed with meta.candidate: ${FALLBACK.join(', ')}` : ''));

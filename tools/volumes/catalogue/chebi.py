@@ -4,6 +4,9 @@ Downloads (once, into catalogue/cache/chebi/) the TSV tables and computes, for e
 that has a structure:
   · its EFFECTIVE ROLES — the has_role targets of the entity and of every is_a ancestor (ChEBI's roles inherit down is_a),
     closed upward through the role ontology's own is_a — matched against the plain-tag map ROLE_TAGS;
+  · its ASSERTED ROLES (ownRoleTags, iteration 006 C4) — only the has_role relations ChEBI's curators CHECKED (or marked OK) on the
+    entity itself, not inherited and not SUBMITTED, closed upward through the role ontology — the only ChEBI evidence build.py
+    takes a drug-class word from;
   · its STRUCTURAL CLASSES — is_a ancestors matched against CLASS_TAGS;
   · its screen flags (SCREEN: nerve agents, vesicants, hallucinogens …) for build.py's exclusions.
 Writes cache/chebi/nominations.json (entities with ≥ 1 tag or flag) and cache/chebi/by-inchikey.json (every 3-star
@@ -56,10 +59,19 @@ for r in tsv('compounds.tsv.gz'):
                           'ascii': r['ascii_name']}
 isa, role = {}, {}
 conj = {}
+# iteration 006 C4: a has_role relation carries its own status (status.tsv: 1 CHECKED, 3 OK, 9 SUBMITTED).  A SUBMITTED one is a
+# submission ChEBI's curators have not checked — D-glucopyranose has 21 of them in one block (cardiovascular drug, antineoplastic
+# agent, anticonvulsant, antipsychotic agent, analgesic, anti-HIV agent …), which is how glucose became a painkiller, a heart drug and a
+# mind drug.  ROLE_ASSERTED keeps only the roles CHECKED or OK on the entity ITSELF (never inherited down is_a): build.py takes a
+# drug-class word from ChEBI only from those (ownRoleTags), every other word as before (roleTags)
+ROLE_ASSERTED = {}
+CURATED_STATUS = {'1', '3'}
 for r in tsv('relation.tsv.gz'):
     t, a, b = int(r['relation_type_id']), int(r['init_id']), int(r['final_id'])
     if t == 5: isa.setdefault(a, set()).add(b)
-    elif t == 4: role.setdefault(a, set()).add(b)
+    elif t == 4:
+        role.setdefault(a, set()).add(b)
+        if r.get('status_id') in CURATED_STATUS: ROLE_ASSERTED.setdefault(a, set()).add(b)
     elif t in (6, 7, 11): conj.setdefault(a, set()).add(b)
 memo = {}
 def ancestors(c):
@@ -105,12 +117,13 @@ for c, info in comp.items():
     effective_roles = set()
     for a in {c} | ancestors(c): effective_roles |= role.get(a, set())
     roles = target_hits(effective_roles, ROLE_TAGS)
+    asserted = target_hits(ROLE_ASSERTED.get(c, set()), ROLE_TAGS)   # the entity's OWN checked roles, closed up the role ontology only
     classes = {t: v for t, v in target_hits({c}, CLASS_TAGS).items()}
     screens = {SCREEN[j] for i in effective_roles for j in {i} | ancestors(i) if j in SCREEN}
     if not roles and not classes and not screens: continue
     noms.append({'chebi': c, 'name': info['name'], 'definition': info['definition'], 'smiles': s['smiles'], 'inchikey': s['inchikey'],
                  'formula': chem.get(c, {}).get('formula'), 'charge': chem.get(c, {}).get('charge'),
-                 'roleTags': sorted(roles), 'classTags': sorted(classes), 'screens': sorted(screens),
+                 'roleTags': sorted(roles), 'ownRoleTags': sorted(asserted), 'classTags': sorted(classes), 'screens': sorted(screens),
                  'roleIds': sorted({j for v in roles.values() for j in v}), 'wikipedia': wiki.get(c),
                  'synonyms': syn.get(c, [])[:20], 'iupac': iupac.get(c)})
 write_json(os.path.join(D, 'nominations.json'), {'release': release, 'licence': 'CC BY 4.0', 'entities': noms})
