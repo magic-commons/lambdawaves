@@ -555,3 +555,14 @@ ILLICIT_NAMES = [
  'carfentanil', 'furanylfentanyl', 'U-47700', 'etonitazene', 'isotonitazene', 'GHB', 'methaqualone', 'DET', 'DPT', 'harmaline', 'muscimol', 'ibotenic acid',
  'synthetic cathinone', 'parahexyl', 'tetrahydrocannabinol', 'cannabidiol', 'kratom', 'mitragynine', '7-hydroxymitragynine', 'MXE', 'methoxetamine', 'nitrous oxide inhalant',
 ]
+# CONTROLLED MEDICINES (iteration 006 C4): the ATC groups whose medicines are controlled psychoactive substances.  An approved drug whose
+# OWN ATC code (ChEMBL's, never a combination's) falls in one of them stays in the catalogue as a medicine, but it marks its skeleton
+# (the InChIKey's first block) for the controlled-substance screen: a racemate, an enantiomer or another form of it that is not itself
+# an approved drug is refused (d-methamphetamine N06BA03 is a medicine; its racemate, nominated by Wikidata alone, is not).
+CONTROLLED_ATC = {
+ 'N02A': 'opioids', 'N01AH': 'opioid anaesthetics', 'N07BC': 'drugs used in opioid dependence',
+ 'N06BA': 'centrally acting sympathomimetics', 'A08AA': 'centrally acting antiobesity products',
+ 'N05CA': 'barbiturates', 'N03AA': 'barbiturates and derivatives', 'N05BA': 'benzodiazepine derivatives',
+ 'N05CD': 'benzodiazepine derivatives', 'N05CF': 'benzodiazepine related drugs',
+ 'N01AX03': 'ketamine', 'N01AX14': 'esketamine',
+}

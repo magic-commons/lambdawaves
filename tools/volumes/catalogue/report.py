@@ -83,7 +83,23 @@ and by Wikidata's own "chemical warfare agent" uses. **{S['screens']['illicit']}
 substances that are not approved medicines ({S['screens']['namedControlled']} names resolved, plus ChEBI's hallucinogen and opioid
 roles and Wikidata's recreational-drug uses); an approved medicine passes the second screen, so morphine and fentanyl are in the
 library as medicines and nothing else of that kind is.
-
+""")
+SC = S['screens']
+if 'illicitSkeletons' in SC:                                         # iteration 006 C4: the screens on the skeleton
+    key_of = {m['id']: m['inchikey'] for m in C['molecules']}
+    mates = [r for r in SC['keptAsApprovedDrugs'] if r['via'] != key_of.get(r['id'])]
+    w(f"""
+Since iteration 006 C4 both screens match on the InChIKey's FIRST BLOCK (the connectivity skeleton): every signal — a name, a
+Wikidata use, a ChEBI role, and for the second screen an approved medicine whose own ATC code sits in a controlled-drug group
+(`curated.CONTROLLED_ATC`: opioids, central stimulants and anorectics, barbiturates, benzodiazepines and Z-drugs, ketamine) — screens
+its whole skeleton (racemate, enantiomers, isotopologues, protonated forms) and, for a salt, its neutral parent's. {SC['cwcSkeletons']}
+first blocks carry a CWC signal, {SC['illicitSkeletons']} a controlled-substance signal; **{SC['bySkeleton']}** rows were refused only
+through a skeleton-mate's signal. A row a screened skeleton holds stays only when it is ITSELF an approved drug by ChEMBL (max_phase 4:
+a ChEMBL approved parent whose structure is this row, never a salt folded onto it): {len(SC['keptAsApprovedDrugs'])} rows, {len(mates)}
+of them beside another form's signal — {', '.join(f"{r['name']} (beside {r['viaName']})" for r in mates) or 'none'}. The CWC's Annex
+names and classes refuse outright, approved or not.
+""")
+w("""
 ## THE TEN FIRST ROWS (priority order: the app's own, then the WHO essential medicines and the most recognisable names, then small before large)
 
 """)
