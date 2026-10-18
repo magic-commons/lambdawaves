@@ -64,11 +64,69 @@ C is f32 (7 digits: the picture's precision, stated); ε and the energy are the 
 4. thumbs (tools/menu-thumbs.mjs --volume vol-1) → `t/<id>.webp`.
 
 ## TAGS (plain words; a molecule carries 1–4)
-medicine · painkiller · antibiotic · antiviral · heart · mind · cancer · allergy · anaesthetic · vitamin · hormone · neurotransmitter ·
-amino acid · nucleobase · sugar · fat · steroid · alkaloid · food · flavour · scent · sweetener · colour · solvent · fuel · plastic ·
-material · metal · gas · atmosphere · pollutant · toxin · pesticide · acid · aromatic · ring · cage · classic · natural · life
-iteration 006 (C3, Josh's yes 2026-10-18): eye · lung · skin · stomach · diabetes · parasite · immune (the drug's own ATC codes:
-S01 · R03/R05 · D01/D06/D07/D10/D11 · A02/A03/A06/A07 · A10 · P01–P03 · L03/L04) · refrigerant · battery · explosive (hand lists)
+**iteration 006 (Josh: structure or class)** — C5, 2026-10-18: "it might be too many tags. I just wanted tags related to the
+molecules structure or class." A tag says what the molecule IS, never what it is for; `tools/volumes/catalogue/structure_tags.py`
+computes it from the row's OWN STRUCTURE (RDKit ring analysis and SMARTS on PubChem's SMILES; the row's own atoms through
+DetermineConnectivity where RDKit reads no SMILES) and its ChEBI STRUCTURAL CLASS (3-star entity of its InChIKey, else of its first
+block; CHECKED is_a relations only — `chebi.py` STRUCT_CLASSES → `cache/chebi/structure-classes.json`). 35 words, in RANK order (the
+four-tag cap keeps the earliest):
+
+peptide · nucleotide · nucleoside · nucleobase · steroid · amino acid · sugar · alkaloid · terpene · fat ·
+metal · ion · cage · inorganic ·
+nitro · nitrile · alkyne · aldehyde · phenol · ester · amide · ketone · acid · amine · alcohol · ether ·
+halogen · phosphorus · sulfur · alkene · alkane ·
+heterocycle · aromatic · ring · chain
+
+| word | what earns it |
+|---|---|
+| peptide | ChEBI peptide (CHEBI:16670) |
+| nucleotide | ChEBI nucleoside phosphate (CHEBI:25608: ATP, AMP, NAD …) |
+| nucleoside | ChEBI nucleoside (CHEBI:33838) |
+| nucleobase | ChEBI nucleobase (CHEBI:18282) |
+| steroid | ChEBI steroid (CHEBI:35341), or the cyclopenta[a]phenanthrene nucleus `[#6]1~[#6]~[#6]~[#6]2~[#6](~[#6]~1)~[#6]~[#6]~[#6;!a]1~[#6;!a]~2~[#6;!a]~[#6;!a]~[#6;!a]2~[#6;!a]~[#6;!a]~[#6;!a]~[#6;!a]~1~2` with no fifth all-carbon ring of ≥ 5 atoms fused onto it (a pentacyclic triterpenoid is not a steroid) |
+| amino acid | ChEBI α-, β-, γ-, δ-, ε-amino acid (CHEBI:33704, 33706, 33707, 35931, 35958), or `[NX3;H1,H2;!$(N~[!#6;!#1]);!$(N[#6,#16,#15]=[#7,#8,#16]);!$(N[#6]#[#7])][CX4]` + 0–4 × `[C]` + `[CX3](=O)[OX2H1,OX1-]` (a free amine α … ε to a carboxylic acid) |
+| sugar | ChEBI carbohydrate (CHEBI:16646: mono-, oligo-, polysaccharides, alditols, sugar acids) |
+| alkaloid | ChEBI alkaloid (CHEBI:22315) |
+| terpene | ChEBI terpenoid (CHEBI:26873) or terpene (CHEBI:35186) |
+| fat | ChEBI fatty acid (CHEBI:35366), glyceride (CHEBI:47778) or wax (CHEBI:73702) |
+| metal | an atom of Li, Be, Na, Mg, Al, K, Ca, Sc–Ga |
+| ion | a net charge |
+| cage | ≥ 3 rings, every ring atom in ≥ 2 of them (a closed polyhedron: adamantane, cubane, C₆₀, the boranes) |
+| inorganic | no carbon, or carbon only with no H and only O, S, B, Si or metal neighbours (CO, CO₂, CS₂, carbonic acid, carbonyls, carbides) or as a terminal C≡N with O, S or metal neighbours (cyanide, cyanate, thiocyanate) |
+| nitro | `[#6,#7,$([#8X2][#6])][$([NX3](=O)=O),$([NX3+](=O)[O-])]` (nitro on C or N, nitrate ester) |
+| nitrile | `[#6][CX2]#[NX1]` |
+| alkyne | `C#C` |
+| aldehyde | `[CX3H1](=O)[#6]` · `[CX3H2]=O` |
+| phenol | `[c][OX2H1]` |
+| ester | `[#6X3](=[OX1])[#8X2H0][#6]` (lactones, carbonates, carbamates too) |
+| amide | `[#7X3][#6X3]=[OX1]` · `[#7X3][#16X4](=[OX1])=[OX1]` (lactams, imides, ureas, carbamates, sulfonamides too) |
+| ketone | `[#6][#6X3](=[OX1])[#6]` |
+| acid | `[CX3](=O)[OX2H1,OX1-]` · `[#16,#15,#7,#17,#35,#5,#33,#34](=O)[OX2H1]` · `[OX2H1][#16,#15,#5,#33,#34,#14,#17,#35]` · `[F,Cl,Br;H1]` |
+| amine | `[NX3;!$(N~[!#6;!#1]);!$(N[#6,#16,#15]=[#7,#8,#16]);!$(N[#6]#[#7]);$(N[#6])]` · `[NX4+;!$(N~[!#6;!#1]);$(N[#6])]` |
+| alcohol | `[CX4][OX2H1]` |
+| ether | `[OX2;!$(O[#6]=[#7,#8,#16])]([#6])[#6]` |
+| halogen · phosphorus · sulfur | an atom of F/Cl/Br · P · S |
+| alkene | `C=C` (outside an aromatic ring) |
+| alkane | carbon and hydrogen only, every bond single |
+| heterocycle | a ring holding carbon and another element (organic rows) |
+| aromatic | an aromatic ring, RDKit's model (organic rows) |
+| ring | a ring, none aromatic, none a heterocycle |
+| chain | no ring, organic, ≥ 2 carbons (one carbon: only when nothing else fits) |
+
+A class word speaks for what it implies (SUBSUMES: peptide ⊃ amide, amine, acid, amino acid; nucleotide ⊃ nucleoside, nucleobase,
+sugar, phosphorus, acid, alcohol, ether, amine, amide; nucleoside ⊃ nucleobase, sugar, alcohol, ether, amine, amide; nucleobase ⊃
+amine, amide; amino acid ⊃ acid, amine; sugar ⊃ alcohol, ether, aldehyde, ketone; steroid ⊃ ring; fat ⊃ acid, ester, chain, alkane;
+alkaloid ⊃ amine; cage ⊃ ring), so steroid beats alcohol, alkaloid beats amine, sugar beats alcohol and amino acid beats acid + amine;
+then the four earliest by rank stay, and one shape word (cage · heterocycle · aromatic · ring · chain) always keeps a place. Every row
+earns at least one word. The catalogue's MEMBERSHIP is unchanged: the use words below are still computed (a row must earn one, as
+always) and a λWAVES blurb's last fallback still names the first of them — they are no longer written as tags.
+
+*Before C5 (iterations 004–006 C4; the tags of every file up to `vol-1.candidates.before-c5.json`):* medicine · painkiller ·
+antibiotic · antiviral · heart · mind · cancer · allergy · anaesthetic · vitamin · hormone · neurotransmitter · amino acid · nucleobase
+· sugar · fat · steroid · alkaloid · food · flavour · scent · sweetener · colour · solvent · fuel · plastic · material · metal · gas ·
+atmosphere · pollutant · toxin · pesticide · acid · aromatic · ring · cage · classic · natural · life; iteration 006 C3 (Josh's yes
+2026-10-18): eye · lung · skin · stomach · diabetes · parasite · immune (the drug's own ATC codes: S01 · R03/R05 ·
+D01/D06/D07/D10/D11 · A02/A03/A06/A07 · A10 · P01–P03 · L03/L04) · refrigerant · battery · explosive (hand lists)
 
 ## Closed (Claude Yan, 2026-10-17 — the integration)
 | row | branch · tip | merge | note |
