@@ -184,6 +184,7 @@ function packMolecule(id, vol = VOL) {
     if (!r) continue;
     if (r.status === 'skipped') { header.skipped[b] = r.why; continue; }
     if (r.status === 'failed') { header.failed[b] = r.why; continue; }
+    if (r.status === 'refused') { (header.refused ||= {})[b] = r.why; continue; }   // iteration 006: a linearly dependent rung (solve.py SMIN_REFUSE)
     if (r.status !== 'converged') continue;
     if (r.basisSha256 !== bse[b].sha) throw new Error(`${id}/${b}: solved on another basis file (${r.basisSha256.slice(0, 12)} ≠ ${bse[b].sha.slice(0, 12)})`);
     const z = readNpz(path.join(dir, r.file)), basis = basisFrom(atoms, bse[b].rec, { cart: true }), n = basis.n;
@@ -226,7 +227,7 @@ function packMolecule(id, vol = VOL) {
     report.rungs[b] = { nAO: n, Cbytes: n * n * 4, epsBytes: n * 8, orthonormality: ck.orthonormality, names: names.reliable ? names.group : 'indices' };
   }
   if (!Object.keys(header.rungs).length) return { id, skip: 'no rung converged' };
-  for (const k of ['skipped', 'failed']) if (!Object.keys(header[k]).length) delete header[k];
+  for (const k of ['skipped', 'failed', 'refused']) if (header[k] && !Object.keys(header[k]).length) delete header[k];
   const bytes = encodeLwm(header, blobs);
   /* read back through the reader the app uses: every rung validates and opens through chem.open, 0 solver calls, its own energy */
   const lwm = parseLwm(bytes);

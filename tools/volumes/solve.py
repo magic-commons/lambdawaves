@@ -90,6 +90,8 @@ if args.gpu:
            'contraction': 'cutensor' if gpu4pyscf.lib.cutensor.contract_engine is None else gpu4pyscf.lib.cutensor.contract_engine}
 
 CONV_TOL, CONV_TOL_GRAD = 1e-9, 1e-6
+SMIN_REFUSE = 1e-9   # iteration 006: a rung whose overlap has λmin(S) below this is REFUSED before any SCF — with every AO kept (the app's law) the basis
+                     # is linearly dependent there (C60 at 6-31+G*: 2.2e-10, cond 1.7e11 — the GPU ran 4 h without converging); β-carotene's 4.2e-8 converges
 DATA = Path(args.data); RAW = Path(args.raw).expanduser() if args.raw else DATA / 'raw'; RAW.mkdir(parents=True, exist_ok=True)
 BASES = [b for b in LADDER if not args.bases or b in args.bases.split(',')]
 LOG = RAW / 'solve.log'
@@ -230,7 +232,13 @@ def solve_molecule(q):
             C = np.zeros_like(z['C']); C[ix] = z['C'] / rd[:, None]      # back to PySCF's order and normalisation
             occ = z['occ']; prev = (b, mol, (C * occ) @ C.T); continue
         if r.get('status') == 'failed' and not args.retry_failed: continue
+        if r.get('status') == 'refused' and r.get('basisSha256') == sha: continue
         mol = build(q, b); n = mol.nao_nr()
+        smin0 = float(np.linalg.eigvalsh(mol.intor('int1e_ovlp'))[0])
+        if smin0 < SMIN_REFUSE:
+            rungs[b] = {'basis': b, 'basisFile': file, 'basisSha256': sha, 'nAO': n, 'status': 'refused', 'minEigS': smin0, 'solved': now(), 'pid': PID, 'host': HOST,
+                        'why': f'the basis is linearly dependent at this geometry with every AO kept: λmin(S) = {smin0:.2e} < {SMIN_REFUSE:.0e}, so no SCF is run (the app keeps every AO; no rung is made by dropping some)'}
+            log(f'{q["id"]} {b} REFUSED {rungs[b]["why"]}'); write_json(mp, meta); continue
         dm0, guess = (scf.addons.project_dm_nr2nr(prev[1], prev[2], mol), 'projected from ' + prev[0]) if prev else (None, 'minao')
         t0 = time.perf_counter(); mf, tries, gpu = converge_gpu(mol, dm0) if args.gpu else (*converge(mol, dm0), None); sec = time.perf_counter() - t0
         base = {'basis': b, 'basisFile': file, 'basisSha256': sha, 'nAO': n, 'guess': guess, 'attempts': tries, 'seconds': round(sec, 3),
@@ -256,7 +264,7 @@ def solve_molecule(q):
             mfm, a = attempt(sm, None, 'diis from minao (guess study)')
             study = {**a, 'sameState': bool(mfm.converged and abs(mfm.e_tot - mf.e_tot) < 1e-7), 'deltaE': float(mfm.e_tot - mf.e_tot) if mfm.converged else None}
         rungs[b] = {**base, 'status': 'converged', 'file': f'{b}.npz', 'energy': float(mf.e_tot), 'cycles': sum(a['cycles'] for a in tries),
-                    'nocc': nocc, 'gapEh': float(mf.mo_energy[nocc] - mf.mo_energy[nocc - 1]), 'dipoleDebye': [float(v) for v in dip],
+                    'nocc': nocc, 'gapEh': float(mf.mo_energy[nocc] - mf.mo_energy[nocc - 1]) if nocc < n else None, 'dipoleDebye': [float(v) for v in dip],
                     'minEigS': smin, **({'guessStudy': study} if study else {})}
         log(f'{q["id"]} {b} {n} AO E {mf.e_tot:.10f} {rungs[b]["cycles"]} cycles ({guess}) {sec:.1f} s' + (' GPU' if gpu and not gpu.get('fallback') else '') + (f' · minao {study["cycles"]} cycles {study["seconds"]:.1f} s' if study else ''))
         write_json(mp, meta)
@@ -277,7 +285,7 @@ def status(Q, working=None):
             else:
                 need = [b for b in BASES if 'skip' not in q['rungs'][b]]
                 got = [rs.get(b, {}).get('status') for b in need]
-                state = 'done' if all(s == 'converged' for s in got) else 'failed' if all(s in ('converged', 'failed') for s in got) else 'remaining'
+                state = 'done' if all(s in ('converged', 'refused') for s in got) else 'failed' if all(s in ('converged', 'failed', 'refused') for s in got) else 'remaining'
             counts[state] += 1
             row = {'state': state, 'cost': round(q['cost'], 6), 'heavy': q['heavy'],
                    'rungs': {b: {k: v for k, v in rs[b].items() if k in ('status', 'seconds', 'nAO', 'cycles', 'why', 'guess')} for b in rs}}
@@ -315,7 +323,7 @@ def main():
             if mp.exists():
                 meta = json.loads(mp.read_text()); rs = meta.get('rungs', {})
                 need = [b for b in BASES if 'skip' not in q['rungs'][b]]
-                if meta.get('atomsBohr') == q['atoms'] and all(rs.get(b, {}).get('status') == 'converged' or (rs.get(b, {}).get('status') == 'failed' and not args.retry_failed) for b in need):
+                if meta.get('atomsBohr') == q['atoms'] and all(rs.get(b, {}).get('status') in ('converged', 'refused') or (rs.get(b, {}).get('status') == 'failed' and not args.retry_failed) for b in need):
                     continue                                        # done (or failed and not retried)
             status(Q, {'id': q['id'], 'pid': PID, 'since': now()})
             solve_molecule(q); solved += 1
