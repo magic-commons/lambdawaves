@@ -348,14 +348,15 @@ for key, e in entries.items():
     e['srcs'], e['approved'] = srcs, any(n.get('approved') for n in e['noms'])
     e['hand'] = any(n['src'] == 'curated' and n['name'] in HAND_GEOM for n in e['noms'])
     # THE NAME: a nomination that reached this entry through a salt's PARENT (from_cid) names the salt — "Benzathine benzylpenicillin",
-    # "Dimenhydrinate", "Lithium diisopropylamide" — so it names the row only when nothing that IS this compound has a name (C2, 2026-10-17:
-    # the full run resolved those parents online and three old rows took their salt's name)
+    # "Dimenhydrinate", "Lithium diisopropylamide" — so a curated or Wikidata name of the compound ITSELF comes first (C2, 2026-10-17: the
+    # full run resolved those parents online and three old rows took their salt's name); the salt's name still beats PubChem's systematic
+    # title, so a dye whose acid has no name of its own stays "Methyl Orange" rather than "Benzenesulfonic acid, 4-(2-(4-…"
     own = lambda n: not n.get('from_cid')
     nm = (a['name'] if a else None) or next((n.get('display') or n.get('name') for n in e['noms'] if n['src'] == 'curated' and own(n)), None) \
         or next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata' and own(n)), None) \
-        or (p or {}).get('Title') or next((n['chembl_name'] for n in e['noms'] if n.get('chembl_name')), None) \
         or next((n.get('display') or n.get('name') for n in e['noms'] if n['src'] == 'curated'), None) \
-        or next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata'), None) or key
+        or next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata'), None) \
+        or (p or {}).get('Title') or next((n['chembl_name'] for n in e['noms'] if n.get('chembl_name')), None) or key
     e['nm'] = nm
     if a: kept.append(e); continue                                    # the app's own: kept at its pinned geometry, whatever its size
     ok, why = recognisable(e)
@@ -422,7 +423,9 @@ for i, e in enumerate(kept):
         e['gsource'] = s['geometrySource'] or f'the atoms raw/{sid}/ was solved at'
         e['keptSolved'] = sid
         k = gkind(e['gsource']); geom_counts[k] += 1; kept_solved[k] += 1
-        if not e['app'] and e['cid'] in conf and k != 'PubChem 3-D conformer': upgrade_waiting.append(sid)
+        if not e['app'] and e['cid'] in conf and k != 'PubChem 3-D conformer':
+            got, _ = G.from_sdf(conf[e['cid']])                    # waiting = a conformer the build could actually use (its elements agree)
+            if got and elements_agree(got, e['Zs']): upgrade_waiting.append(sid)
         continue
     if e['app']:
         e['atoms'] = [[int(z), x, y, zz] for z, x, y, zz in e['app']['ang']]
