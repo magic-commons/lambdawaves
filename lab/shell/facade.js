@@ -126,7 +126,11 @@ export function createFacade(app) {
         modEdited(); return app.state.modHost.model.macroOf(macroId).sourceId; },
       route(macroId, targetId, min, max) { const r = app.state.modHost.model.addRoute(macroId, targetId, min === undefined ? 0 : min, max === undefined ? 1 : max);
         app.state.modHost.clock.recomputeRunning(); modEdited(); return r && r.route ? r.route.id : null; },
-      unroute(id) { const ok = app.state.modHost.model.removeRoute(id); modEdited(); return ok; },
+      /* iteration 007 (the MIR check, B3): when the last route leaves a target the modulator has let go, so the dial returns to its
+         base — the kit's own remove() does the same (modulation/bind.js) */
+      unroute(id) { const M = app.state.modHost.model, r = M.routeOfId ? M.routeOfId(id) : null, tid = r ? r.targetId : null; const ok = M.removeRoute(id);
+        if (ok && tid && app.state.modHost.registry.has(tid) && !M.routeCountOfTarget(tid)) app.state.modHost.registry.restoreBase(tid);
+        modEdited(); return ok; },
       /** the runtime door: a control registered NOW is in the picker NOW, with no edit to modview.js */
       /* WAVE 61: a control registered at RUNTIME with a `knob` accessor is a drop target at runtime,
          with no edit anywhere — installOne still strips nothing it did not want, the accessor is kept

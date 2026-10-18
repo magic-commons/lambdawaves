@@ -118,7 +118,7 @@ export function createKeys(app) {
   /* S4 · A KEY'S EDIT IS A ROW OF ITS OWN, named for its action: C / V / P changed the edit scope and armed nothing, so the row came
      at the next commit under whatever name was standing (probes/S3-verify/edges*.mjs).  An edit still pending under another name
      commits first; a held key repeats under one name and stays one row; a key that changed nothing drops its name like any gesture. */
-  const TRAVELS = new Set(['undo', 'redo', 'redoY', 'historyUndo']);
+  const TRAVELS = new Set(['undo', 'redo', 'redoY', 'historyUndo', 'timeline.undo', 'timeline.redo']);
   const keyEdit = (a, run) => {
     if (!app.state.history || app.state.history.holding || TRAVELS.has(a.id)) return run();   // an undo is not an edit: noting its name lent it to the next unnamed edit
     const name = a.label + ' · ' + kt.keyText(a.id);
@@ -154,7 +154,7 @@ export function createKeys(app) {
      reads host, registry, play, arm, armed, onPlay, setTimeline), so it builds no second host and no tick.  Its play is THE play (clock.js
      onePlay), its playhead paints from loop()'s present, the arrangement is the host clock's automation and rides in serialize()
      (presentation.timeline) with its own undo; λWAVES' pill stays the one transport (R9), the window a WORKSPACE record (`tlwin`) that
-     ships closed (R1).  Its rows join the ONE KEY TABLE (undo/redo are λWAVES' own ids: its own are reachable from its ⋯ menu). */
+     ships closed (R1).  Its rows join the ONE KEY TABLE; its UNDO / REDO are the two rows added below it. */
   if (app.state.modHost && app.state.modView) {
     app.state.tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'),
       mod: { host: app.state.modHost, registry: app.state.modHost.registry, armed: () => app.state.modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => app.state.modView.setTimeline(x),
@@ -168,11 +168,25 @@ export function createKeys(app) {
     /* the window draws no pane of its own: its ruler, lanes and work bar are each a .glass pane (a lane clipped by the scroller), its rail chips */
     occlusion.register('timeline', () => app.state.tl.isOpen() ? [...app.state.tl.root.querySelectorAll('.glass'), ...(app.state.tl.rail.el ? app.state.tl.rail.el.querySelectorAll('.mir-chip') : [])].map((s) => paintedRect(s, s.closest('.tl-viewport'))) : []);
     for (const n of [app.state.tl.root, app.state.tl.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });
+    /* iteration 007 (the MIR check, B1) · THE TIMELINE'S OWN UNDO: without a `history` the kit offers its undo and redo as rows named
+       'undo' / 'redo' (timeline/shortcuts.js) — λWAVES' own ids, already in the table, so the kit's were dropped unheard and Ctrl+Z over a
+       focused timeline undid a λWAVES edit while the clip stayed.  These two carry the timeline's ids and its `when` (keysLive: the window
+       open, the focus in its surface), and THE FOCUS LAW (lab/key-table.js) hands them the chord for exactly that focus; everywhere
+       else Ctrl+Z is λWAVES' (T9: the two stacks stay apart). */
+    { const tl = app.state.tl, live = () => !!(tl.editor && tl.editor.keysLive());
+      kt.table.add([
+        { id: 'timeline.undo', label: 'UNDO', group: 'TIMELINE', hint: 'Undo the last timeline edit (the timeline’s own undo)', keys: ['Mod+Z'], when: live, run: () => tl.editor.act.undo() },
+        { id: 'timeline.redo', label: 'REDO', group: 'TIMELINE', hint: 'Redo the last undone timeline edit', keys: ['Mod+Shift+Z', 'Mod+Y'], when: live, run: () => tl.editor.act.redo() }]); }
     /* a ROUTED dial's hold and right-click stay its ring's (RANGE · REMOVE · RESET): the kit's TIMELINE CLIP (timeline/knobs.js, 500 ms,
        document capture) and the ring (600 ms) claim one gesture, so the window's capture hides that dial's id from the timeline for the
        one event and gives it back right after the timeline has looked (brief B13); an unrouted dial's hold is TIMELINE CLIP's */
     for (const type of ['pointerdown', 'contextmenu']) window.addEventListener(type, (e) => { const k = e.target.closest && e.target.closest('.k[data-param]');
-      if (!k || !app.state.modHost.model.routesOfTarget(k.dataset.param).some((r) => !r.dormant)) return; const id = k.dataset.param; k.removeAttribute('data-param');
+      /* iteration 007 (the MIR check, B1): only the DIAL BODY and the left button — what the kit's hold itself reads (`.k-dial`, button 0:
+         timeline/knobs.js) — so a press on the ring's badges (×, the RANGE dial) keeps the stamp that the window's focusAway reads to
+         keep the ring's focus; hidden there, × did nothing and the RANGE dial vanished under the hand */
+      const dial = e.target.closest && e.target.closest('.k-dial');   // the RANGE badge is a knob of its own inside the host: its dial is not the host's
+      if (!k || !dial || dial.closest('.k') !== k || (type === 'pointerdown' && e.button !== 0)) return;
+      if (!app.state.modHost.model.routesOfTarget(k.dataset.param).some((r) => !r.dormant)) return; const id = k.dataset.param; k.removeAttribute('data-param');
       document.addEventListener(type, () => { k.dataset.param = id; }, { capture: true, once: true }); }, true);
   }
   function toggleUI() {

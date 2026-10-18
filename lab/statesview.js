@@ -46,6 +46,11 @@ export function createStates(host, api) {
   const now = () => (api.now ? api.now() : 0);
   let statusText = 'no molecule solved yet';
   const status = (t, cls) => { statusText = t; if (api.status) api.status(t, cls === undefined ? '' : cls); };
+  /* iteration 007 (the MIR check, B2) · THE HAND LAW on this register's routed dials (shell/modulation.js defs reg.morph · reg.w · reg.e0 ·
+     reg.amp1-8 · reg.ph1-8): a hand on a ROUTED dial moves its BASE through the port (mod-port.js hand) and applies nothing itself, so the
+     next modulator write carries the edit instead of discarding it; unrouted, hand() is false and the dial's own road runs */
+  const hand = (id, v) => !!(api.modHand && api.modHand(id, v));
+  const slotId = (what, key) => { const i = keys().indexOf(key); return i < 0 ? null : 'reg.' + what + (i + 1); };   // the slot of a lane: lane order, S₀ is slot 1 (slotKey below)
 
   let sol = null, ladder = null, model = null, on = false, active = api.active ? !!api.active() : true, shown = true;
   let version = 0, pushedT = NaN, pushedV = -1, selected = GROUND, wanted = null, unsub = null, ladderSeq = 0, ladderRefused = null;   // S4c-VERIFY N5: the worker's refusal sentence outlives a press
@@ -94,7 +99,7 @@ export function createStates(host, api) {
   const mrow = el('div', 'row tight reg-morph', host); mrow.appendChild(morphSw.root);
   const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3),
     title: 'Where on the path from A (0) to B (1) the register plays; for orthogonal stores this is cos/sin, hydrogen’s TRANSITION envelope',
-    onInput: (v) => setMorph(morphOn, v) });
+    onInput: (v) => { if (hand('reg.morph', v)) return; setMorph(morphOn, v); } });   // iteration 007 (MIR check B2): routed, the hand moves the base
   mrow.appendChild(morphK.root);
 
   const rowsEl = el('div', 'sp-rows', host);
@@ -130,9 +135,9 @@ export function createStates(host, api) {
   const envSeg = seg({ label: 'ENVELOPE', value: 'cw', options: [{ id: 'cw', label: 'CW' }, { id: 'pulse', label: 'PULSE' }], onChange: (v) => setDriveParam('envelope', v) });
   const dk = el('div', 'row tight reg-drive', host);
   const wK = knob({ label: '<m>ω</m>', aria: 'drive frequency', min: 0.05, max: 3, value: drive.omega, log: true, unit: ' Eh', fmt: (v) => v.toFixed(4),
-    title: 'The drive’s carrier frequency in hartree — resonance is a stick of the ladder', onInput: (v) => setDriveParam('omega', v) });
+    title: 'The drive’s carrier frequency in hartree — resonance is a stick of the ladder', onInput: (v) => { if (hand('reg.w', v)) return; setDriveParam('omega', v); } });
   const eK = knob({ label: '<m>E₀</m>', aria: 'drive amplitude', min: 1e-4, max: 0.2, value: drive.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2),
-    title: 'The field amplitude in atomic units; on resonance the population flops at Ω = E₀μ', onInput: (v) => setDriveParam('e0', v) });
+    title: 'The field amplitude in atomic units; on resonance the population flops at Ω = E₀μ', onInput: (v) => { if (hand('reg.e0', v)) return; setDriveParam('e0', v); } });
   const durK = knob({ label: 'PULSE', aria: 'pulse duration', min: 10, max: 4000, value: drive.duration, log: true, unit: ' a.u.', fmt: (v) => v.toFixed(0),
     title: 'The sin² pulse’s duration — a π-pulse is π/Ω long', onInput: (v) => setDriveParam('duration', v) });
   dk.appendChild(wK.root); dk.appendChild(eK.root); dk.appendChild(durK.root); dk.appendChild(envSeg.root);
@@ -522,10 +527,10 @@ export function createStates(host, api) {
         + (ladder.size[key] > 1 ? ` · one of a ${ladder.size[key]}-fold level, canonical gauge (pivot ${ladder.pivot[key].toExponential(1)})` : '');
     id.addEventListener('click', () => { selected = key; paint(); markSel(); });
     const pop = fader({ label: '<m>|b|²</m>', aria: '|b|² ' + label(key), min: 0, max: 1, value: c.amp * c.amp, cls: 'pop', fmt: (v) => v.toFixed(3),
-      onInput: (v) => setAmp(key, Math.sqrt(Math.max(0, v))), onChange: (v) => setAmp(key, Math.sqrt(Math.max(0, v))) });
+      onInput: (v) => { if (hand(slotId('amp', key), v)) return; setAmp(key, Math.sqrt(Math.max(0, v))); }, onChange: (v) => { if (hand(slotId('amp', key), v)) return; setAmp(key, Math.sqrt(Math.max(0, v))); } });   // iteration 007 (MIR check B2)
     root.appendChild(pop.root);
     const ph = knob({ aria: 'phase ' + label(key), min: 0, max: TAU, value: c.phase, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
-      onDelta: (dv) => { const l = lanes.get(key); if (l) setPhase(key, l.phase + dv); }, onReset: () => setPhase(key, 0) });
+      onDelta: (dv) => { const l = lanes.get(key); if (!l) return; const w = ((l.phase + dv) % TAU + TAU) % TAU; if (hand(slotId('ph', key), w)) return; setPhase(key, w); }, onReset: () => { if (hand(slotId('ph', key), 0)) return; setPhase(key, 0); } });
     const kn = el('div', 'sp-knobs', root); kn.appendChild(ph.root);
     const mute = el('button', 'sp-b mute', root, 'M'); mute.type = 'button'; mute.title = 'mute: leave this state out of the FIELD (the register keeps b)';
     mute.setAttribute('aria-label', 'mute ' + label(key)); mute.setAttribute('aria-pressed', 'false');

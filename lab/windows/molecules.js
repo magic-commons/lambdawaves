@@ -62,7 +62,7 @@ export function createMolecules(app) {
   /* 2026-10-16 (Josh, iteration 001): SKELETON · BEAD · ELLIPSOID draw ON the stage, so they sit in INFORMATIONAL (built before this card, settings-card.js) */
   { const info = document.querySelector('.dev[data-id="informational"] .dev-body'); if (info) el('div', 'row tight info-marks', info).append(ui.skeletonSw.root, ui.beadSw.root, ui.ellipsoidSw.root); }
   const pop = (t) => app.state.stageText && app.state.stageText.pop(t);   // iteration 001: INFORMATIONAL's pop-ups (shell/stage-words.js)
-  app.state.chem = createChem(wChem.body, { pop, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more,   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
+  app.state.chem = createChem(wChem.body, { pop, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more, modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): a hand on a ROUTED dial moves its base   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance, plane: () => app.w.slice,   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
@@ -89,7 +89,7 @@ export function createMolecules(app) {
   app.w.wOrbs = wOrbs;
   if (useCompactDefaults) wOrbs.root.classList.add('closed');   // the same rule CHEMISTRY keeps; the first-run block opens it under MOLECULES
   rack.appendChild(wOrbs.root);
-  app.state.register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs),
+  app.state.register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs), modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): the STATES dials' hand law
     stamp: () => { if (app.state.restampParams) requestAnimationFrame(app.state.restampParams); },   // a lane built after boot becomes a drop target for a macro
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
