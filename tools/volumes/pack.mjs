@@ -14,6 +14,11 @@
  *               .lwm / .webp a volume's index no longer reaches is deleted (a refused molecule, one a theme moved, a pilot leftover), and
  *               with --themes a vol-<n>/ the shelf no longer has is emptied — never with --only
  *   --out-dir D the dist to write (default ~/Documents/LAMBDAWAVES-VOLUMES/dist); pack-report-<vol>.json goes beside it
+ *   --sole      (iteration 006 C5) the volume(s) this run writes ARE the shelf — volumes.json lists them alone, and with --incremental
+ *               every other vol-<n>/ of the out dir is emptied and removed (its pack-report-<vol>.json beside dist too), as --themes
+ *               always does.  Without it a --volume run adds or replaces its one volume and leaves the others on the shelf.
+ *               Josh, 2026-10-18 ("we can just mash them all up for now"): every finished molecule in ONE volume —
+ *               node tools/volumes/pack.mjs --candidates …/vol-1.candidates.json --volume vol-1 --numeral I --title 'All the Molecules' --sole --incremental
  * THE METADATA (iteration 006 C3): a molecule's names, tags, synonyms, blurb and sources are its row in the CURRENT --candidates file by
  *   id (meta.candidate — the row a rung was last solved from — only for an id the file no longer has); see candidateOf()
  * THE SHELF (iteration 005 S; one primary theme, iteration 006 C3):
@@ -33,7 +38,7 @@
  *   indices-only form; validateRecord(record) = [] and chem.open answers its energy with 0 solver calls, or no file.
  *   ε and the energy are the solver's f64; C is f32 (7 digits: the picture's precision, stated in the header); Mulliken f32.
  * Deterministic bytes: no clock enters a .lwm, index.json or volumes.json (the solver's clocks stay in raw/); sha-256 per file. */
-import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync, readdirSync, copyFileSync, openSync, writeSync, closeSync, unlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, renameSync, readdirSync, copyFileSync, openSync, writeSync, closeSync, unlinkSync, rmdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { homedir } from 'node:os';
@@ -324,6 +329,7 @@ if (OUT) {
 }
 const SHELF_DOC = THEMES ? JSON.parse(readFileSync(THEMES, 'utf8')) : null, T = SHELF_DOC ? SHELF_DOC.themes : null;
 const PRECEDENCE = SHELF_DOC && SHELF_DOC.precedence;
+const SOLE = !!T || has('--sole');                                 // this run's volumes are the whole shelf (iteration 006 C5)
 if (PRECEDENCE) for (const s of PRECEDENCE) if (!T.some((t) => t.id === s.theme)) throw new Error(`${THEMES}: a precedence step names no theme (${s.theme})`);
 if (T && has('--count-themes')) {                                  // the shelf the whole catalogue would make (finished or not), and stop
   const n = T.map(() => 0); for (const id of ids) n[themeOf(T, CANDS.get(id) || {})]++;
@@ -390,24 +396,35 @@ for (const p of plan) {
     + (entry.archive ? `, ${entry.archive.name} ${entry.archive.bytes} B sha256 ${entry.archive.sha256.slice(0, 16)}` : '')
     + (stale.length ? `; ${stale.length} .lwm in m/ no row reaches: ${stale.join(', ')}` : ''));
 }
-const shelfFile = path.join(DIST, 'volumes.json'), shelf = !T && existsSync(shelfFile) ? JSON.parse(readFileSync(shelfFile, 'utf8')) : { schema: 1, volumes: [] };
+const shelfFile = path.join(DIST, 'volumes.json'), shelf = !SOLE && existsSync(shelfFile) ? JSON.parse(readFileSync(shelfFile, 'utf8')) : { schema: 1, volumes: [] };
 shelf.volumes = [...shelf.volumes.filter((v) => !entries.some((e) => e.id === v.id)), ...entries].sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
 writeFileSync(shelfFile, JSON.stringify(shelf, null, 1) + '\n');
 /* THE SHELF MATCHES THE CATALOGUE (iteration 006 C4): with --incremental, a molecule no longer in the catalogue (a screen refused it),
    or no longer in that volume's theme (its tags moved it), LEAVES the volume — every .lwm and .webp in a written volume's m/ and t/ that
    its new index.json does not reach is deleted.  Only now, after every volume is written: a moved molecule's kept file and picture were
-   read from its old volume first.  With --themes the shelf is the whole of volumes.json, so a vol-<n>/ it no longer has is emptied the
-   same way.  Never with --only (that run writes a partial index) or --out. */
+   read from its old volume first.  With --themes or --sole the shelf is the whole of volumes.json, so a vol-<n>/ it no longer has is
+   emptied the same way and then removed (iteration 006 C5: its m/, t/ and the folder itself once empty — anything else left in it is
+   named, not deleted — and its pack-report-<vol>.json beside dist).  Never with --only (that run writes a partial index) or --out. */
 if (INCREMENTAL && !ONLY) {
-  const pruned = [];
+  const pruned = [], kept = [];
   const prune = (dir, reach) => { for (const sub of ['m', 't']) { const d = path.join(dir, sub); if (!existsSync(d)) continue;
     for (const f of readdirSync(d)) if (/\.(lwm|webp)$/.test(f) && !reach.has(sub + '/' + f)) { unlinkSync(path.join(d, f)); pruned.push(path.relative(DIST, path.join(d, f))); } } };
   for (const w of written) prune(w.dir, w.reach);
-  if (T) for (const v of readdirSync(DIST).filter((e) => /^vol-\d+$/.test(e) && !plan.some((p) => p.id === e))) {
-    prune(path.join(DIST, v), new Set());
-    if (existsSync(path.join(DIST, v, 'index.json'))) { unlinkSync(path.join(DIST, v, 'index.json')); pruned.push(v + '/index.json'); }
+  if (SOLE) for (const v of readdirSync(DIST).filter((e) => /^vol-\d+$/.test(e) && !plan.some((p) => p.id === e))) {
+    const vdir = path.join(DIST, v);
+    prune(vdir, new Set());
+    if (existsSync(path.join(vdir, 'index.json'))) { unlinkSync(path.join(vdir, 'index.json')); pruned.push(v + '/index.json'); }
+    for (const d of [path.join(vdir, 'm'), path.join(vdir, 't'), vdir]) {
+      if (!existsSync(d)) continue;
+      const left = readdirSync(d);
+      if (left.length) { kept.push(...left.map((f) => path.relative(DIST, path.join(d, f)))); continue; }
+      rmdirSync(d); pruned.push(path.relative(DIST, d) + '/');
+    }
+    const rep = path.join(path.dirname(DIST), `pack-report-${v}.json`);
+    if (existsSync(rep)) { unlinkSync(rep); pruned.push('../' + path.basename(rep)); }
   }
-  console.log(`pack: --incremental pruned ${pruned.length} file(s) no index reaches any more` + (pruned.length ? ': ' + pruned.join(', ') : ''));
+  console.log(`pack: --incremental pruned ${pruned.length} file(s) no index reaches any more` + (pruned.length ? ': ' + pruned.join(', ') : '')
+    + (kept.length ? `; left in place (not the packer's): ${kept.join(', ')}` : ''));
 }
 console.log(`pack: ${packed.length} molecules in ${entries.length} volume(s) → ${DIST}/volumes.json; ${skipped.length} not packed`
   + (STALE.length ? `; ${STALE.length} packed at solved atoms the catalogue has since moved (they will be solved again): ${STALE.join(', ')}` : '')

@@ -10,7 +10,13 @@ that has a structure:
   · its STRUCTURAL CLASSES — is_a ancestors matched against CLASS_TAGS;
   · its screen flags (SCREEN: nerve agents, vesicants, hallucinogens …) for build.py's exclusions.
 Writes cache/chebi/nominations.json (entities with ≥ 1 tag or flag) and cache/chebi/by-inchikey.json (every 3-star
-structure: id, name, definition, Wikipedia article) — the blurb and the recognisability lookup for every other source."""
+structure: id, name, definition, Wikipedia article) — the blurb and the recognisability lookup for every other source.
+
+ITERATION 006 C5 (Josh, 2026-10-18: the tags say what a molecule IS — its structure or its class).  The roles and classes above
+still decide which entities NOMINATE (so the catalogue's membership does not move), but no row's tag comes from them any more.  The
+tags' ChEBI half is cache/chebi/structure-classes.json: for every 3-star structure, the STRUCTURAL CLASSES of STRUCT_CLASSES its
+is_a ancestry reaches through CHECKED is_a relations only (status 1 — not OK, not SUBMITTED), keyed by InChIKey (the union over every
+3-star entity of that key).  build.py reads it through structure_tags.py."""
 import csv, gzip, html, json, os, re, sys, urllib.request
 sys.path.insert(0, os.path.dirname(__file__))
 from common import CACHE, write_json
@@ -45,6 +51,16 @@ CLASS_TAGS = {33709: 'amino acid', 18282: 'nucleobase', 16646: 'sugar', 35366: '
 # screens: roles that mark a substance build.py must refuse (CWC agents) or keep away unless approved (psychoactive)
 SCREEN = {140423: 'nerve agent', 140424: 'nerve agent', 140425: 'nerve agent', 140422: 'nerve agent', 136185: 'nerve agent',
           78592: 'vesicant', 74136: 'lachrymator', 35499: 'hallucinogen', 35482: 'opioid'}
+# iteration 006 C5: THE STRUCTURAL CLASSES a row's tags may name (structure_tags.py's vocabulary), each through CHECKED is_a only.
+# Chosen against the catalogue's rows (C5-BUILD.md): `carbohydrate` and not the wider `carbohydrates and carbohydrate derivatives`
+# (which takes in every glycoside drug); the α-, β-, γ-, δ- and ε-amino acids and not `amino acid` itself (ChEBI's "a carboxylic acid
+# containing one or more amino groups" takes in diclofenac, bumetanide, mesalazine, EDTA and the quinolones); `terpenoid` and
+# `terpene` (isoprenoids of biological origin; carotenoids are tetraterpenoids); `fatty acid`, `glyceride` and `wax` for `fat`; a
+# nucleoside's phosphate (ATP, AMP, the nucleotides) is its own word
+STRUCT_CLASSES = {35341: 'steroid', 26873: 'terpene', 35186: 'terpene', 22315: 'alkaloid', 16646: 'sugar',
+                  33704: 'amino acid', 33706: 'amino acid', 33707: 'amino acid', 35931: 'amino acid', 35958: 'amino acid',
+                  16670: 'peptide', 18282: 'nucleobase', 33838: 'nucleoside', 25608: 'nucleotide', 35366: 'fat', 47778: 'fat',
+                  73702: 'fat'}
 
 def tsv(name):
     f = gzip.open(os.path.join(D, name), 'rt', newline='', encoding='utf-8')
@@ -58,6 +74,7 @@ for r in tsv('compounds.tsv.gz'):
     comp[int(r['id'])] = {'name': clean(r['name']), 'stars': int(r['stars'] or 0), 'definition': clean(r['definition']),
                           'ascii': r['ascii_name']}
 isa, role = {}, {}
+isa_checked = {}                                                     # iteration 006 C5: the is_a relations ChEBI's curators CHECKED
 conj = {}
 # iteration 006 C4: a has_role relation carries its own status (status.tsv: 1 CHECKED, 3 OK, 9 SUBMITTED).  A SUBMITTED one is a
 # submission ChEBI's curators have not checked — D-glucopyranose has 21 of them in one block (cardiovascular drug, antineoplastic
@@ -68,7 +85,9 @@ ROLE_ASSERTED = {}
 CURATED_STATUS = {'1', '3'}
 for r in tsv('relation.tsv.gz'):
     t, a, b = int(r['relation_type_id']), int(r['init_id']), int(r['final_id'])
-    if t == 5: isa.setdefault(a, set()).add(b)
+    if t == 5:
+        isa.setdefault(a, set()).add(b)
+        if r.get('status_id') == '1': isa_checked.setdefault(a, set()).add(b)
     elif t == 4:
         role.setdefault(a, set()).add(b)
         if r.get('status_id') in CURATED_STATUS: ROLE_ASSERTED.setdefault(a, set()).add(b)
@@ -128,9 +147,34 @@ for c, info in comp.items():
                  'synonyms': syn.get(c, [])[:20], 'iupac': iupac.get(c)})
 write_json(os.path.join(D, 'nominations.json'), {'release': release, 'licence': 'CC BY 4.0', 'entities': noms})
 write_json(os.path.join(D, 'by-inchikey.json'), {'release': release, 'map': by_key})
+
+# iteration 006 C5: every 3-star structure's STRUCTURAL CLASSES, through CHECKED is_a only (a separate ancestry: `ancestors` above
+# walks every is_a, as the nominations always have)
+memo_checked = {}
+def ancestors_checked(c):
+    if c in memo_checked: return memo_checked[c]
+    memo_checked[c] = set()                  # cycle guard
+    out = set()
+    for p in isa_checked.get(c, ()):
+        out.add(p); out |= ancestors_checked(p)
+    memo_checked[c] = out
+    return out
+struct_by_key = {}
+for c, info in comp.items():
+    if info['stars'] != 3 or c not in struct: continue
+    hit = sorted({STRUCT_CLASSES[j] for j in {c} | ancestors_checked(c) if j in STRUCT_CLASSES})
+    if hit: struct_by_key.setdefault(struct[c]['inchikey'], set()).update(hit)
+write_json(os.path.join(D, 'structure-classes.json'),
+           {'release': release, 'licence': 'CC BY 4.0',
+            'rule': 'for every 3-star ChEBI structure, the classes below its is_a ancestry reaches through CHECKED is_a relations only '
+                    '(relation.tsv status 1), keyed by InChIKey (the union over the 3-star entities of that key); a key absent here has '
+                    'none of them (by-inchikey.json lists every 3-star key)',
+            'classes': {str(k): [comp[k]['name'], v] for k, v in STRUCT_CLASSES.items()},
+            'byInchikey': {k: sorted(v) for k, v in sorted(struct_by_key.items())}})
 from collections import Counter
 ct = Counter(t for n in noms for t in n['roleTags'] + n['classTags'])
 print(f'ChEBI release {release}: {len(noms)} 3-star entities nominated ({sum(1 for n in noms if n["wikipedia"])} with a Wikipedia article); '
       f'{len(by_key)} 3-star structures indexed by InChIKey')
 print(' '.join(f'{k}:{v}' for k, v in ct.most_common()))
 print('screens:', Counter(s for n in noms for s in n['screens']))
+print(f'structural classes (CHECKED is_a) for {len(struct_by_key)} InChIKeys:', Counter(t for v in struct_by_key.values() for t in v))

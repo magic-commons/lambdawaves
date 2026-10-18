@@ -1,6 +1,9 @@
 """app_tags.py — SOURCE 1's tags and blurbs: every closed-shell molecule of lab/molecules.js and lab/library.json, tagged by
 hand from PLAN.md's vocabulary and given a λWAVES blurb (one plain sentence).  The app's ids are the keys and are kept.
 The geometry, the name and the source sentence come from the module itself (app-own.mjs) and are never re-stated here.
+Since iteration 006 C5 an app row's TAGS are computed like every other row's (structure_tags.py: what the molecule IS); the word lists
+below are the use words of iterations 004–006 C4, which build.py no longer writes (use_words keeps them for a blurb's fallback only).
+The blurbs are still the app rows' own.
 """
 APP = {
  # ── diatomics ───────────────────────────────────────────────────────────────────────────────────────────────────────

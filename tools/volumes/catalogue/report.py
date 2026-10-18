@@ -49,7 +49,11 @@ Rows per source (a molecule is counted once per source that nominates it; most c
 table(['source', 'molecules'], sorted(S['bySource'].items(), key=lambda kv: -kv[1]))
 w('The combinations, most common first (PubChem is on every row and is left out of the key):\n\n')
 table(['sources', 'molecules'], list(S['bySourceSet'].items())[:18])
-w('By tag (PLAN.md\'s vocabulary and its ten iteration-006 words only; a molecule carries 1–4):\n\n')
+if S.get('tagRule'):                                                 # iteration 006 C5: the tags say what the molecule IS
+    w('By tag (PLAN.md\'s TAGS since iteration 006 C5 — what the molecule IS, from its structure and its ChEBI class; a molecule '
+      'carries 1–4; the vocabulary, its patterns and the cap: THE TAGS below):\n\n')
+else:
+    w('By tag (PLAN.md\'s vocabulary and its ten iteration-006 words only; a molecule carries 1–4):\n\n')
 table(['tag', 'molecules'], list(S['byTag'].items()))
 w('Tags per molecule: ' + ' · '.join(f'{k} tag{"s" if int(k) > 1 else ""}: {v}' for k, v in sorted(S['byTagCount'].items())) + '\n\n')
 w('By heavy atoms:\n\n')
@@ -106,33 +110,71 @@ w("""
 table(['priority', 'id', 'name', 'tags', 'heavy'],
       [[m['priority'], '`' + m['id'] + '`', m['name'], ' · '.join(m['tags']), m['heavy']] for m in C['molecules'][:10]])
 
-# ── the ten words of iteration 006 (proposed here by CAT, applied by C3 on Josh's yes) ──────────────────────────────────
-meds = [m for m in C['molecules'] if 'medicine' in m['tags']]
-only_med = [m for m in meds if m['tags'] == ['medicine']]
-atc_groups = collections.Counter()
-for m in meds:
-    for s in m['sources']:
-        for c in (s.get('atc') or []): atc_groups[c[:3]] += 1
-bt, cut = S['byTag'], S.get('tagCapCut', {})
-w(f"""## THE TEN WORDS OF ITERATION 006 (CAT's proposal; in the file since C3, Josh's yes of 2026-10-18)
+# ── iteration 006 C5: THE TAGS — what the molecule IS (structure_tags.py) ─────────────────────────────────────────────────
+if S.get('tagRule'):
+    import structure_tags as ST
+    bt, earned, sub, cut, cf = S['byTag'], S.get('tagEarned', {}), S.get('tagSubsumed', {}), S.get('tagCapCut', {}), S.get('tagClassFrom', {})
+    w(f"""## THE TAGS (iteration 006 C5: Josh, 2026-10-18 — "tags related to the molecules structure or class")
+
+Every tag says what the molecule IS, never what it is for. `tools/volumes/catalogue/structure_tags.py` reads it off the row's own
+structure (RDKit: PubChem's SMILES, or for the {S.get('tagStructureFrom', {}).get('its own atoms (DetermineConnectivity)', 0)} rows
+without a SMILES RDKit reads, the bonds DetermineConnectivity finds in their own atoms) and off its ChEBI structural class (CHECKED is_a relations only,
+`cache/chebi/structure-classes.json`). {len(ST.VOCAB)} words, in RANK order — the order the four-tag cap keeps them in: a class of
+molecules first, then what it is made of in kind, then its functional groups (rarest first), the elements, its carbon–carbon bonds,
+and its shape last. A class word speaks for what it implies (an amino acid is not also `acid` and `amine`; a sugar not `alcohol`; a
+steroid not `ring`; an alkaloid not `amine`: "subsumed"), and one shape word (cage, heterocycle, aromatic, ring, chain) always keeps a
+place. "earned" = rows the word fits before either rule; "kept" = rows that carry it.
+
+""")
+    pat = {}
+    for t, s, what in ST.PATTERNS: pat.setdefault(t, []).append(what)
+    how = {'metal': 'an atom of Li, Be, Na, Mg, Al, K, Ca or Sc–Ga', 'ion': 'a net charge', 'cage': 'three rings or more, every ring atom in two of them (a closed polyhedron)',
+           'inorganic': 'no carbon, or carbon only as CO, CO₂, CS₂, carbonic acid, a cyanide, a metal carbonyl or a carbide',
+           'halogen': 'an atom of F, Cl or Br', 'phosphorus': 'an atom of P', 'sulfur': 'an atom of S',
+           'alkane': 'carbon and hydrogen only, every bond single', 'heterocycle': 'a ring holding carbon and another element (organic rows)',
+           'aromatic': 'an aromatic ring (RDKit\'s model; organic rows)', 'ring': 'a ring, none aromatic and none a heterocycle',
+           'chain': 'no ring, organic, two carbons or more (one carbon: only when nothing else fits)'}
+    chebi_names = {}
+    try:
+        for cid, (nm, tag) in read_json(os.path.join(DATA, 'cache', 'chebi', 'structure-classes.json'))['classes'].items(): chebi_names.setdefault(tag, []).append(f'{nm} (CHEBI:{cid})')
+    except Exception: pass
+    rows_t = []
+    for t in ST.VOCAB:
+        src = []
+        if t in chebi_names: src.append('ChEBI ' + ', '.join(chebi_names[t]))
+        if t in pat: src.append('; '.join(pat[t]))
+        if t in how: src.append(how[t])
+        f = cf.get(t)
+        rows_t.append([f'`{t}`', bt.get(t, 0), earned.get(t, 0), sub.get(t, 0), cut.get(t, 0),
+                       (' · '.join(f'{k} {v}' for k, v in f.items()) + ' — ' if f else '') + ' · '.join(src)])
+    table(['tag', 'kept', 'earned', 'subsumed', 'cut by the cap', 'from'], rows_t)
+else:                                                                # a stats file from before C5: the ten use words of C3
+    meds = [m for m in C['molecules'] if 'medicine' in m['tags']]
+    only_med = [m for m in meds if m['tags'] == ['medicine']]
+    atc_groups = collections.Counter()
+    for m in meds:
+        for s in m['sources']:
+            for c in (s.get('atc') or []): atc_groups[c[:3]] += 1
+    bt, cut = S['byTag'], S.get('tagCapCut', {})
+    w(f"""## THE TEN WORDS OF ITERATION 006 (CAT's proposal; in the file since C3, Josh's yes of 2026-10-18)
 
 Seven medicine words from the drug's OWN, non-combination ATC codes, and three hand-list words outside medicine. They rank with the
 uses, so the four-tag cap cuts a structure word (aromatic, ring, acid …) before any of them; they rank after the food words and the
 drug classes they refine, so they never send a food to Medicine. {len(meds)} rows carry `medicine`; {len(only_med)} carry nothing else.
 
 """)
-words = [['`eye`', 'eye drops and eye medicines', f"S01 ({atc_groups['S01']})"],
-         ['`lung`', 'asthma and cough medicines', f"R03 ({atc_groups['R03']}), R05 ({atc_groups['R05']})"],
-         ['`skin`', 'creams, antifungals and acne medicines', f"D01/D06/D07/D10/D11 ({sum(atc_groups[g] for g in ('D01', 'D06', 'D07', 'D10', 'D11'))})"],
-         ['`stomach`', 'antacids, ulcer and gut medicines', f"A02/A03/A06/A07 ({sum(atc_groups[g] for g in ('A02', 'A03', 'A06', 'A07'))})"],
-         ['`diabetes`', 'insulin-sparing and blood-sugar medicines', f"A10 ({atc_groups['A10']})"],
-         ['`parasite`', 'malaria and worm medicines', f"P01/P02/P03 ({sum(atc_groups[g] for g in ('P01', 'P02', 'P03'))})"],
-         ['`immune`', 'immune suppressants and modifiers', f"L03/L04 ({sum(atc_groups[g] for g in ('L03', 'L04'))})"],
-         ['`refrigerant`', 'the curated CFC, HCFC, HFC and HFO rows', 'curated.py: the cfcs, hcfcs and hfcs lists'],
-         ['`battery`', 'the carbonate and nitrile electrolyte solvents', 'curated.py: batteries and solvents (those items only)'],
-         ['`explosive`', 'the classic textbook explosives already in the catalogue', 'curated.py EXPLOSIVES (InChIKeys; adds no molecule)']]
-table(['word', 'what it holds', 'from (ATC codes on the medicine rows)', 'rows', 'cut by the cap'],
-      [r + [bt.get(r[0].strip('`'), 0), cut.get(r[0].strip('`'), 0)] for r in words])
+    words = [['`eye`', 'eye drops and eye medicines', f"S01 ({atc_groups['S01']})"],
+             ['`lung`', 'asthma and cough medicines', f"R03 ({atc_groups['R03']}), R05 ({atc_groups['R05']})"],
+             ['`skin`', 'creams, antifungals and acne medicines', f"D01/D06/D07/D10/D11 ({sum(atc_groups[g] for g in ('D01', 'D06', 'D07', 'D10', 'D11'))})"],
+             ['`stomach`', 'antacids, ulcer and gut medicines', f"A02/A03/A06/A07 ({sum(atc_groups[g] for g in ('A02', 'A03', 'A06', 'A07'))})"],
+             ['`diabetes`', 'insulin-sparing and blood-sugar medicines', f"A10 ({atc_groups['A10']})"],
+             ['`parasite`', 'malaria and worm medicines', f"P01/P02/P03 ({sum(atc_groups[g] for g in ('P01', 'P02', 'P03'))})"],
+             ['`immune`', 'immune suppressants and modifiers', f"L03/L04 ({sum(atc_groups[g] for g in ('L03', 'L04'))})"],
+             ['`refrigerant`', 'the curated CFC, HCFC, HFC and HFO rows', 'curated.py: the cfcs, hcfcs and hfcs lists'],
+             ['`battery`', 'the carbonate and nitrile electrolyte solvents', 'curated.py: batteries and solvents (those items only)'],
+             ['`explosive`', 'the classic textbook explosives already in the catalogue', 'curated.py EXPLOSIVES (InChIKeys; adds no molecule)']]
+    table(['word', 'what it holds', 'from (ATC codes on the medicine rows)', 'rows', 'cut by the cap'],
+          [r + [bt.get(r[0].strip('`'), 0), cut.get(r[0].strip('`'), 0)] for r in words])
 w("""## THE LICENCES
 
 """)

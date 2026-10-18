@@ -32,6 +32,13 @@ controlled ATC group screens its own; a skeleton-mate stays only when it is itse
 COME FROM THE MOLECULE ITSELF (step 9: its own ATC codes, ChEBI roles curators checked on its own entity — never a salt's, a mixture's,
 a counter-ion's, an is_a ancestor's or a SUBMITTED one).  Offline, a batched PubChem answer is found CID by CID (pubchem.py), so a
 catalogue that loses a row keeps every other row's synonyms and descriptions.
+
+ITERATION 006 C5: THE TAGS SAY WHAT THE MOLECULE IS (Josh, 2026-10-18: "I just wanted tags related to the molecules structure or
+class").  A row's tags come from structure_tags.py only — its own structure (RDKit ring analysis and documented SMARTS) and its ChEBI
+structural class (CHECKED is_a only, chebi.py's structure-classes.json) — never from a use (medicine, food, fuel …).  The use words
+of iterations 004–006 C4 (USE_VOCAB) are still COMPUTED, never written: the catalogue's membership has always required a row to earn
+one of them (425 nominations are refused for having none), and that test is kept so no molecule enters or leaves; and the last
+fallback of a λWAVES blurb still names the first of them, so no blurb changes.
 """
 import collections, datetime, json, os, re, sys, time
 sys.path.insert(0, os.path.dirname(__file__))
@@ -41,6 +48,7 @@ import pubchem as P
 import geom as G
 import guards as GU
 import curated as CUR
+import structure_tags as ST
 from app_tags import APP, APP_REFUSED
 from rdkit import Chem, RDLogger
 from rdkit.Chem import rdMolDescriptors as RD
@@ -58,19 +66,19 @@ def _opt(name, default):
 OUT = _opt('out', os.path.join(DATA, f'{VOL}.candidates.json'))
 PREV = _opt('prev', os.path.join(DATA, f'{VOL}.candidates.json'))
 RAW = _opt('raw', GU.raw_dir(DATA))
-VOCAB = ['medicine', 'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic', 'vitamin', 'hormone',
+VOCAB = ST.VOCAB                                                   # iteration 006 C5: THE TAGS — what the molecule IS (structure_tags.py)
+# THE USE WORDS of iterations 004–006 C4 — no longer any row's tags (C5).  They are still computed (use_words, step 9): the
+# catalogue's membership requires a row to earn one (it always has: "no plain tag of the vocabulary fits it"), and a λWAVES blurb's
+# last fallback names the first of them by USE_RANK.  Kept exactly as they were, so neither the rows nor the blurbs move.
+USE_VOCAB = ['medicine', 'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic', 'vitamin', 'hormone',
          'neurotransmitter', 'amino acid', 'nucleobase', 'sugar', 'fat', 'steroid', 'alkaloid', 'food', 'flavour', 'scent', 'sweetener',
          'colour', 'solvent', 'fuel', 'plastic', 'material', 'metal', 'gas', 'atmosphere', 'pollutant', 'toxin', 'pesticide', 'acid',
          'aromatic', 'ring', 'cage', 'classic', 'natural', 'life',
          # iteration 006 C3 (Josh's yes, 2026-10-18): seven medicine words from the ATC map, three hand-list words outside medicine
          'eye', 'lung', 'skin', 'stomach', 'diabetes', 'parasite', 'immune', 'refrigerant', 'battery', 'explosive']
-# a tag's rank when a molecule carries more than four: what it IS FOR first, what it IS second, how it is BUILT last.  The ten words of
-# iteration 006 are specific uses, so they rank with the uses and survive the cap ahead of every origin and structure word (amino
-# acid … fat, steroid, alkaloid, life, natural, metal, gas, acid, cage, aromatic, ring, classic): the three hand-list words right after
-# `medicine` (short exact lists — nitroglycerin keeps `explosive` beside its heart words); the seven ATC words after the uses already
-# there, so they never cut a food word (`food` · `flavour` · `sweetener` · `vitamin`: THE SHELF's Life and Food takes those rows even
-# when they are approved, and a cut word would send citric acid or sorbitol to Medicine) nor a drug class they only refine
-TAG_RANK = {t: i for i, t in enumerate([
+# a use word's rank (iteration 006 C3): what it IS FOR first, what it IS second, how it is BUILT last — now only the order in which a
+# blurb's last fallback picks its word
+USE_RANK = {t: i for i, t in enumerate([
     'medicine', 'explosive', 'refrigerant', 'battery', 'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy',
     'anaesthetic', 'vitamin', 'hormone', 'neurotransmitter', 'toxin', 'pesticide', 'pollutant', 'sweetener', 'flavour', 'scent',
     'colour', 'food', 'diabetes', 'parasite', 'immune', 'lung', 'stomach', 'eye', 'skin', 'fuel', 'solvent',
@@ -197,7 +205,7 @@ for cat, spec in CUR.CATEGORIES.items():
         name, extra, opts = (it, [], {}) if isinstance(it, str) else (it[0], it[1], it[2] if len(it) > 2 else {})
         if opts.get('skip'): nominate('curated-skip', name=name, why=opts['skip'], cat=cat); continue
         nominate('curated', name=name, query=opts.get('query', name), smiles=opts.get('smiles'), formula=opts.get('formula'),
-                 tags=[t for t in spec['tags'] + extra if t in VOCAB], display=opts.get('display'), blurb=opts.get('blurb'),
+                 tags=[t for t in spec['tags'] + extra if t in USE_VOCAB], display=opts.get('display'), blurb=opts.get('blurb'),
                  cat_blurb=spec.get('blurb'), cat=cat, ref={'db': 'curated', 'list': cat})
 for it in who['items']:
     n = re.sub(r'\s*\((?:medication|medical use|pharmacology|drug)\)$', '', it['name']).strip()
@@ -660,10 +668,51 @@ def pick_synonyms(e, name, iupac, n=6):
         if len(out) >= n: break
     return out
 
-# ── 9. TAGS ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+# ── 9. TAGS: WHAT THE MOLECULE IS (iteration 006 C5) ─────────────────────────────────────────────────────────────────
+# structure_tags.py on the row's own structure — PubChem's SMILES (the app rows: the matched record's), or, for a row with no SMILES
+# RDKit reads (four app rows have none; RDKit refuses KrF₂'s), the bonds DetermineConnectivity reads off its own atoms — and the
+# ChEBI structural classes (CHECKED is_a only) of the
+# 3-star entity of its InChIKey, or, when ChEBI has no entity of that key, of every entity of its first block (another stereo,
+# isotope or protonation form of the same skeleton).  The numbers go to the stats: what each word was earned by, what a class word
+# subsumed, what the four-tag cap cut.
+SCLASS = read_json(os.path.join(CACHE, 'chebi', 'structure-classes.json'))['byInchikey']
+SCLASS_BLOCK = {}
+for _k, _v in SCLASS.items(): SCLASS_BLOCK.setdefault(_k.split('-')[0], set()).update(_v)
+def chebi_classes(key):
+    if not key: return []
+    if key in chebi_key: return SCLASS.get(key, [])
+    return sorted(SCLASS_BLOCK.get(key.split('-')[0], ()))
+TAG_EARNED, TAG_SUBSUMED, CAP_CUT, TAG_FROM = collections.Counter(), collections.Counter(), collections.Counter(), collections.Counter()
+STRUCTURE_FROM = collections.Counter()
+def structure_of(e, charge):
+    """the row's own structure as RDKit reads it: PubChem's SMILES, else its atoms"""
+    p = props.get(e['cid']) if e['cid'] else None
+    mol = e.get('mol')
+    if mol is None and p:
+        sm = p.get('SMILES') or p.get('ConnectivitySMILES')
+        mol = Chem.MolFromSmiles(sm) if sm else None
+    if mol is not None: STRUCTURE_FROM['PubChem SMILES'] += 1; return mol
+    STRUCTURE_FROM['its own atoms (DetermineConnectivity)'] += 1
+    return ST.mol_from_atoms(e['atoms'], charge)
+def tags_for(e, charge):
+    mol = structure_of(e, charge)
+    chebi = chebi_classes(row_key(e))
+    kept, earned = ST.tags(mol, charge, chebi)
+    TAG_EARNED.update(earned)
+    after = set(earned)
+    for w in earned:
+        if w in ST.SUBSUMES: after -= ST.SUBSUMES[w]
+    TAG_SUBSUMED.update(earned - after); CAP_CUT.update(after - set(kept))
+    for w in kept:
+        if w in ST.CHEBI_WORDS: TAG_FROM[(w, 'ChEBI' if w in chebi else 'structure')] += 1
+    return kept
+
+# ── 9a. THE USE WORDS (iterations 004–006 C4): computed, never written ───────────────────────────────────────────────────────
+# use_words() is the tagger every earlier catalogue wrote.  Since C5 its words are no row's tags, but a row must still earn one to be
+# in the catalogue (the 425 nominations "no plain tag of the vocabulary fits it" stay refused, and nothing new enters), and the last
+# fallback of a λWAVES blurb names its first word.  Unchanged but for the names of its two constants.
 DRUG_TAGS = {'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic',
              'eye', 'lung', 'skin', 'stomach', 'diabetes', 'parasite', 'immune'}
-CAP_CUT = collections.Counter()                                    # which words the four-tag cap cut, and how often (the notes' table)
 # THE DRUG-CLASS WORDS (iteration 006 C4) come from evidence about THIS molecule: its own ATC codes (a ChEMBL approved parent that IS
 # this molecule — is_own(): one molecule, never a salt, a mixture or a counter-ion folded onto it), a ChEBI role its curators assert on
 # the ChEBI entity that IS this molecule (chebi.py's ownRoleTags: has_role CHECKED or OK on the entity itself — not inherited down
@@ -689,7 +738,7 @@ def active_cation(n):
         if sum(a.GetFormalCharge() for a in f.GetAtoms()) > 0: return True
         if f.GetNumAtoms() == 1 and f.GetAtomWithIdx(0).GetAtomicNum() not in NONMETALS: return True
     return False
-def tags_for(e):
+def use_words(e):
     if e['app']: return list(APP.get(e['app']['id'], (['classic'], ''))[0])
     t = set()
     counter_ion = inorganic(e.get('molH'))
@@ -697,7 +746,7 @@ def tags_for(e):
         mine = is_own(n)
         if counter_ion and not mine and active_cation(n): continue     # a metal salt's evidence landing on its anion
         for x in n.get('tags', []):
-            if x not in VOCAB: continue
+            if x not in USE_VOCAB: continue
             if x in CLASS_WORDS:
                 if not mine: continue                                   # a salt's, a mixture's or a counter-ion's evidence
                 if n['src'] == 'chebi' and x not in (n.get('own_role_tags') or []): continue   # inherited, or not checked by ChEBI
@@ -714,11 +763,8 @@ def tags_for(e):
         if any(a.GetAtomicNum() in G.METALS for a in mol.GetAtoms()): t.add('metal')
         if any(p is not None and mol.HasSubstructMatch(p) for p in ACID_PATTERNS): t.add('acid')
     if 'aromatic' in t: t.discard('ring')
-    if len(t) > 4:
-        keep = sorted(t, key=lambda x: TAG_RANK.get(x, 99))[:4]
-        CAP_CUT.update(t - set(keep))
-        t = set(keep)
-    return sorted(t, key=lambda x: TAG_RANK.get(x, 99))
+    if len(t) > 4: t = set(sorted(t, key=lambda x: USE_RANK.get(x, 99))[:4])
+    return sorted(t, key=lambda x: USE_RANK.get(x, 99))
 
 # ── 10. BLURBS ───────────────────────────────────────────────────────────────────────────────────────────────────────
 TAG_PHRASE = {'medicine': 'a medicine', 'aromatic': 'an aromatic compound', 'ring': 'a ring compound', 'cage': 'a cage molecule',
@@ -779,9 +825,10 @@ rows = []
 for e in kept:
     p = props.get(e['cid']) if e['cid'] else None
     a = e['app']
-    tags = tags_for(e)
-    if not tags:
+    uses = use_words(e)                                              # membership and the blurb's fallback only (step 9a), never written
+    if not uses:
         exclude(e['nm'], 'no plain tag of the vocabulary fits it, so the library could not shelve it', src='/'.join(e['srcs']), cid=e['cid']); continue
+    tags = tags_for(e, (a['charge'] if a else 0 if e['hand'] else (p or {}).get('Charge', 0)) or 0)
     iupac = (p or {}).get('IUPACName') or next((n.get('iupac') for n in e['noms'] if n.get('iupac')), None)
     name = title_case(clean_wiki_title(e['nm']))
     atoms = e['atoms']
@@ -799,7 +846,7 @@ for e in kept:
            'complexity': (p or {}).get('Complexity'), 'tags': tags, 'blurb': None, 'blurbSource': None,
            'atomsAng': atoms, 'geometrySource': e['gsource'], 'sources': [], 'priority': None, **({'app': a['id'], 'section': a['section']} if a else {})}
     row['synonyms'] = pick_synonyms(e, name, iupac)
-    row['blurb'], row['blurbSource'] = blurb_for(e, name, tags)
+    row['blurb'], row['blurbSource'] = blurb_for(e, name, uses)     # the use words' first, as before C5: no blurb moves
     srcs = []
     if a:
         srcs.append({'db': 'λWAVES', 'id': a['id'], 'what': 'lab/library.json record row' if a['library'] or a['recordOnly'] else 'lab/molecules.js MOLECULES',
@@ -911,7 +958,13 @@ stats = {
             'solvedInRaw': len(SOLVED), 'idsFrom': dict(id_from.most_common()), 'refreshGeometry': REFRESH,
             'keptSolvedGeometry': dict(kept_solved.most_common()), 'keptSolvedWithConformerWaiting': len(upgrade_waiting) - len(upgraded),
             'solvedRowsMoved': refreshed_solved, 'upgraded': upgraded},
- 'tagCapCut': dict(CAP_CUT.most_common()),
+ # iteration 006 C5: what the tags are made of — every word each row EARNED (structure_tags.raw_tags), the words a class word
+ # SUBSUMED (an amino acid's acid and amine …), the words the four-tag cap then CUT, which source gave each kept class word, and where
+ # each row's structure was read
+ 'tagRule': 'iteration 006 C5 (Josh: structure or class) — tools/volumes/catalogue/structure_tags.py',
+ 'tagEarned': dict(TAG_EARNED.most_common()), 'tagSubsumed': dict(TAG_SUBSUMED.most_common()), 'tagCapCut': dict(CAP_CUT.most_common()),
+ 'tagClassFrom': {w: {s: TAG_FROM[(w, s)] for s in ('ChEBI', 'structure') if TAG_FROM[(w, s)]} for w in VOCAB if w in ST.CHEBI_WORDS},
+ 'tagStructureFrom': dict(STRUCTURE_FROM.most_common()),
  'pubchem': {'conformers': len(conf), 'conformersAsked': len(need3d), 'synonymsFor': len(syn), 'descriptionsFor': len(desc), 'live': len(live),
              'cacheOnly': bool(C.OFFLINE), 'stopped': PUBCHEM_STOPPED},
 }

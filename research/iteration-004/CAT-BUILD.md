@@ -1,8 +1,8 @@
-> **FULL RUN, 2026-10-17 (iteration 006, row C2 THE FULL CATALOGUE; research/iteration-006/C2-BUILD.md has the guards, the swap and the solvers) — REBUILT FROM THE CACHE on 2026-10-18 by row C3 THE CATALOGUE'S YESES (research/iteration-006/C3-BUILD.md: the ten iteration-006 tags) and again by row C4 THE SCREEN GAP AND THE STRAY TAGS (research/iteration-006/C4-BUILD.md): both screens match on the InChIKey's first block (10 rows refused: the methamphetamine racemate and nine other forms of controlled medicines), and the drug-class words come from evidence about the molecule itself (409 rows' tags changed: no salt's, mixture's, counter-ion's, inherited or SUBMITTED ChEBI role). No PubChem request was sent, no surviving id moved, every solved row keeps the atoms it was solved at. Descriptions still exist for 1,101 CIDs only (PubChem went Black during C2's online run); a calm online re-run of build.py fills in the rest. The previous file is kept as vol-1.candidates.before-c4.json (C3's), before-c3 (C2's) and the 950 as vol-1.candidates.950.json.**
+> **FULL RUN, 2026-10-17 (iteration 006, row C2 THE FULL CATALOGUE; research/iteration-006/C2-BUILD.md has the guards, the swap and the solvers) — REBUILT FROM THE CACHE on 2026-10-18 by row C3 THE CATALOGUE'S YESES (research/iteration-006/C3-BUILD.md: the ten iteration-006 tags), by row C4 THE SCREEN GAP AND THE STRAY TAGS (research/iteration-006/C4-BUILD.md: both screens match on the InChIKey's first block, 10 rows refused; the drug-class words from evidence about the molecule itself) and by row C5 WHAT A MOLECULE IS (research/iteration-006/C5-BUILD.md; Josh: tags of structure or class only): every tag now says what the molecule IS — 35 words read off its own structure and its ChEBI structural class (THE TAGS below); no use word is a tag any more. 7,030 rows' tags changed and nothing else in any row: the same 7,070 ids, atoms, blurbs and priorities, the same 27,326 exclusions. No PubChem request was sent, no id moved, every solved row keeps the atoms it was solved at. Descriptions still exist for 1,101 CIDs only (PubChem went Black during C2's online run); a calm online re-run of build.py fills in the rest. The previous file is kept as vol-1.candidates.before-c5.json (C4's), before-c4 (C3's), before-c3 (C2's) and the 950 as vol-1.candidates.950.json.**
 
 # CAT · THE CANDIDATE LIST (iteration 004, row CAT THE CATALOGUE)
 
-`~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json` — **7070 molecules**, built 2026-10-18T08:53:00-05:00, schema 1.
+`~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json` — **7070 molecules**, built 2026-10-18T11:27:15-05:00, schema 1.
 Scripts: `tools/volumes/catalogue/` (committed). Data, caches and the exclusion list: `~/Documents/LAMBDAWAVES-VOLUMES/catalogue/`
 (never in git; every network answer is cached in `catalogue/cache/http.sqlite`, so a re-run is offline and asks PubChem nothing).
 
@@ -56,62 +56,47 @@ The combinations, most common first (PubChem is on every row and is left out of 
 | ChEBI + Wikidata + λWAVES | 17 |
 | ChEMBL + Wikidata + curated | 16 |
 
-By tag (PLAN.md's vocabulary and its ten iteration-006 words only; a molecule carries 1–4):
+By tag (PLAN.md's TAGS since iteration 006 C5 — what the molecule IS, from its structure and its ChEBI class; a molecule carries 1–4; the vocabulary, its patterns and the cap: THE TAGS below):
 
 | tag | molecules |
 |---|---|
-| aromatic | 4059 |
-| medicine | 2436 |
-| acid | 1460 |
-| natural | 1305 |
-| ring | 1293 |
-| classic | 627 |
-| pesticide | 582 |
-| steroid | 338 |
-| food | 310 |
-| life | 304 |
-| pollutant | 275 |
-| mind | 269 |
-| heart | 268 |
-| amino acid | 228 |
-| cancer | 221 |
-| fat | 194 |
-| material | 188 |
-| toxin | 184 |
-| hormone | 180 |
-| colour | 176 |
-| alkaloid | 161 |
-| antibiotic | 151 |
-| flavour | 146 |
-| scent | 135 |
-| cage | 129 |
-| painkiller | 126 |
-| solvent | 125 |
-| sugar | 123 |
-| eye | 116 |
-| metal | 108 |
-| gas | 107 |
-| skin | 97 |
-| plastic | 89 |
-| atmosphere | 73 |
-| fuel | 65 |
-| stomach | 63 |
-| antiviral | 61 |
-| allergy | 57 |
-| anaesthetic | 55 |
-| vitamin | 52 |
-| parasite | 51 |
-| lung | 48 |
-| sweetener | 32 |
-| diabetes | 32 |
-| immune | 30 |
-| refrigerant | 23 |
-| neurotransmitter | 16 |
-| nucleobase | 11 |
-| explosive | 11 |
-| battery | 10 |
+| heterocycle | 3464 |
+| aromatic | 2641 |
+| amine | 1627 |
+| amide | 1581 |
+| alcohol | 1361 |
+| ether | 1245 |
+| acid | 1068 |
+| halogen | 1058 |
+| ketone | 1058 |
+| ester | 1007 |
+| chain | 984 |
+| alkene | 970 |
+| phenol | 867 |
+| sulfur | 714 |
+| steroid | 445 |
+| ring | 347 |
+| inorganic | 247 |
+| amino acid | 246 |
+| terpene | 230 |
+| alkaloid | 193 |
+| nitro | 193 |
+| phosphorus | 191 |
+| fat | 173 |
+| nitrile | 151 |
+| aldehyde | 127 |
+| sugar | 117 |
+| alkane | 106 |
+| metal | 98 |
+| alkyne | 85 |
+| cage | 63 |
+| nucleotide | 62 |
+| nucleoside | 51 |
+| peptide | 35 |
+| nucleobase | 8 |
+| ion | 5 |
 
-Tags per molecule: 1 tag: 1346 · 2 tags: 2474 · 3 tags: 2094 · 4 tags: 1156
+Tags per molecule: 1 tag: 289 · 2 tags: 1440 · 3 tags: 1715 · 4 tags: 3626
 
 By heavy atoms:
 
@@ -133,9 +118,9 @@ By geometry:
 | GFN2-xTB | 189 |
 | app pinned | 88 |
 
-THE GUARDS (guards.py). (a) 2665 rows already solved in `raw/` kept the exact atoms they were solved at
-(PubChem 3-D conformer 2194 · RDKit ETKDGv3 + MMFF94 220 · GFN2-xTB 173 · app pinned 78); 246 of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again).
-(b) 7070/7080 ids of the previous file kept; the ids came from the previous file 6982 · the app 88; MISSING: acetylmethadol, arketamine, esmodafinil, levofenfluramine, levomethamphetamine, methamphetamine-2, methorphan, pentazocine, tilidine, vinbarbital-2.
+THE GUARDS (guards.py). (a) 2783 rows already solved in `raw/` kept the exact atoms they were solved at
+(PubChem 3-D conformer 2310 · RDKit ETKDGv3 + MMFF94 221 · GFN2-xTB 174 · app pinned 78); 246 of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again).
+(b) 7070/7070 ids of the previous file kept; the ids came from the previous file 6982 · the app 88.
 
 By blurb:
 
@@ -217,35 +202,65 @@ names and classes refuse outright, approved or not.
 
 | priority | id | name | tags | heavy |
 |---|---|---|---|---|
-| 0 | `H2O` | Water | classic · life · solvent | 1 |
-| 1 | `NH3` | Ammonia | gas · classic · material | 1 |
-| 2 | `urea` | Urea | classic · life · material | 4 |
-| 3 | `N2O` | Nitrous Oxide | gas · atmosphere · anaesthetic | 3 |
-| 4 | `CO2` | Carbon Dioxide | gas · atmosphere · classic | 3 |
-| 5 | `CH4` | Methane | gas · fuel · atmosphere · classic | 1 |
-| 6 | `glycine` | Glycine | amino acid · life · classic | 5 |
-| 7 | `CO` | Carbon Monoxide | gas · toxin · classic | 2 |
-| 8 | `HCl` | Hydrogen Chloride | acid · gas · classic | 1 |
-| 9 | `H2O2` | Hydrogen Peroxide | classic · medicine | 2 |
+| 0 | `H2O` | Water | inorganic | 1 |
+| 1 | `NH3` | Ammonia | inorganic | 1 |
+| 2 | `urea` | Urea | amide | 4 |
+| 3 | `N2O` | Nitrous Oxide | inorganic | 3 |
+| 4 | `CO2` | Carbon Dioxide | inorganic | 3 |
+| 5 | `CH4` | Methane | alkane | 1 |
+| 6 | `glycine` | Glycine | amino acid · chain | 5 |
+| 7 | `CO` | Carbon Monoxide | inorganic | 2 |
+| 8 | `HCl` | Hydrogen Chloride | inorganic · acid · halogen | 1 |
+| 9 | `H2O2` | Hydrogen Peroxide | inorganic | 2 |
 
-## THE TEN WORDS OF ITERATION 006 (CAT's proposal; in the file since C3, Josh's yes of 2026-10-18)
+## THE TAGS (iteration 006 C5: Josh, 2026-10-18 — "tags related to the molecules structure or class")
 
-Seven medicine words from the drug's OWN, non-combination ATC codes, and three hand-list words outside medicine. They rank with the
-uses, so the four-tag cap cuts a structure word (aromatic, ring, acid …) before any of them; they rank after the food words and the
-drug classes they refine, so they never send a food to Medicine. 2436 rows carry `medicine`; 29 carry nothing else.
+Every tag says what the molecule IS, never what it is for. `tools/volumes/catalogue/structure_tags.py` reads it off the row's own
+structure (RDKit: PubChem's SMILES, or for the 5 rows
+without a SMILES RDKit reads, the bonds DetermineConnectivity finds in their own atoms) and off its ChEBI structural class (CHECKED is_a relations only,
+`cache/chebi/structure-classes.json`). 35 words, in RANK order — the order the four-tag cap keeps them in: a class of
+molecules first, then what it is made of in kind, then its functional groups (rarest first), the elements, its carbon–carbon bonds,
+and its shape last. A class word speaks for what it implies (an amino acid is not also `acid` and `amine`; a sugar not `alcohol`; a
+steroid not `ring`; an alkaloid not `amine`: "subsumed"), and one shape word (cage, heterocycle, aromatic, ring, chain) always keeps a
+place. "earned" = rows the word fits before either rule; "kept" = rows that carry it.
 
-| word | what it holds | from (ATC codes on the medicine rows) | rows | cut by the cap |
-|---|---|---|---|---|
-| `eye` | eye drops and eye medicines | S01 (134) | 116 | 11 |
-| `lung` | asthma and cough medicines | R03 (44), R05 (18) | 48 | 4 |
-| `skin` | creams, antifungals and acne medicines | D01/D06/D07/D10/D11 (130) | 97 | 14 |
-| `stomach` | antacids, ulcer and gut medicines | A02/A03/A06/A07 (78) | 63 | 5 |
-| `diabetes` | insulin-sparing and blood-sugar medicines | A10 (33) | 32 | 1 |
-| `parasite` | malaria and worm medicines | P01/P02/P03 (53) | 51 | 2 |
-| `immune` | immune suppressants and modifiers | L03/L04 (31) | 30 | 1 |
-| `refrigerant` | the curated CFC, HCFC, HFC and HFO rows | curated.py: the cfcs, hcfcs and hfcs lists | 23 | 0 |
-| `battery` | the carbonate and nitrile electrolyte solvents | curated.py: batteries and solvents (those items only) | 10 | 0 |
-| `explosive` | the classic textbook explosives already in the catalogue | curated.py EXPLOSIVES (InChIKeys; adds no molecule) | 11 | 0 |
+| tag | kept | earned | subsumed | cut by the cap | from |
+|---|---|---|---|---|---|
+| `peptide` | 35 | 35 | 0 | 0 | ChEBI 35 — ChEBI peptide (CHEBI:16670) |
+| `nucleotide` | 62 | 62 | 0 | 0 | ChEBI 62 — ChEBI nucleoside phosphate (CHEBI:25608) |
+| `nucleoside` | 51 | 51 | 0 | 0 | ChEBI 51 — ChEBI nucleoside (CHEBI:33838) |
+| `nucleobase` | 8 | 8 | 0 | 0 | ChEBI 8 — ChEBI nucleobase (CHEBI:18282) |
+| `steroid` | 445 | 445 | 0 | 0 | ChEBI 350 · structure 95 — ChEBI steroid (CHEBI:35341) · the cyclopenta[a]phenanthrene nucleus, rings C and D not aromatic, no fifth all-carbon ring of ≥ 5 atoms fused onto it |
+| `amino acid` | 246 | 253 | 7 | 0 | ChEBI 189 · structure 57 — ChEBI α-amino acid (CHEBI:33704), β-amino acid (CHEBI:33706), γ-amino acid (CHEBI:33707), δ-amino acid (CHEBI:35931), ε-amino acid (CHEBI:35958) · an α-amino acid: a free amine (with H) on the carbon next to a carboxylic acid; a β-amino acid; a γ-amino acid (GABA, gabapentin, baclofen); a δ-amino acid (5-aminolevulinic acid); an ε-amino acid (aminocaproic acid, tranexamic acid) |
+| `sugar` | 117 | 117 | 0 | 0 | ChEBI 117 — ChEBI carbohydrate (CHEBI:16646) |
+| `alkaloid` | 193 | 193 | 0 | 0 | ChEBI 193 — ChEBI alkaloid (CHEBI:22315) |
+| `terpene` | 230 | 230 | 0 | 0 | ChEBI 230 — ChEBI terpenoid (CHEBI:26873), terpene (CHEBI:35186) |
+| `fat` | 173 | 173 | 0 | 0 | ChEBI 173 — ChEBI fatty acid (CHEBI:35366), glyceride (CHEBI:47778), wax (CHEBI:73702) |
+| `metal` | 98 | 98 | 0 | 0 | an atom of Li, Be, Na, Mg, Al, K, Ca or Sc–Ga |
+| `ion` | 5 | 5 | 0 | 0 | a net charge |
+| `cage` | 63 | 63 | 0 | 0 | three rings or more, every ring atom in two of them (a closed polyhedron) |
+| `inorganic` | 247 | 247 | 0 | 0 | no carbon, or carbon only as CO, CO₂, CS₂, carbonic acid, a cyanide, a metal carbonyl or a carbide |
+| `nitro` | 193 | 193 | 0 | 0 | a nitro group on carbon or nitrogen, or a nitrate ester |
+| `nitrile` | 151 | 151 | 0 | 0 | a nitrile: C≡N on carbon |
+| `alkyne` | 85 | 85 | 0 | 0 | a carbon–carbon triple bond |
+| `aldehyde` | 127 | 144 | 17 | 0 | an aldehyde: CHO on carbon; formaldehyde |
+| `phenol` | 867 | 867 | 0 | 0 | an OH on an aromatic ring |
+| `ester` | 1007 | 1024 | 17 | 0 | an ester (a lactone, a carbonate or a carbamate too): C(=O)–O–C |
+| `amide` | 1581 | 1702 | 118 | 3 | an amide (a lactam, an imide, a urea, a carbamate too): N–C(=O); a sulfonamide: N–S(=O)₂ |
+| `ketone` | 1058 | 1083 | 15 | 10 | a ketone: C=O between two carbons (a quinone too) |
+| `acid` | 1068 | 1558 | 484 | 6 | a carboxylic acid; an oxoacid group: sulfonic, sulfuric, phosphoric, phosphonic, nitric, nitrous, chloric …; an OH on S, P, B, As, Se, Si, Cl or Br (sulfurous, boric, silicic, hypochlorous acid …); a hydrogen halide |
+| `amine` | 1627 | 2182 | 494 | 61 | an amine nitrogen (primary, secondary or tertiary; an aniline too); a quaternary ammonium on carbon |
+| `alcohol` | 1361 | 1783 | 226 | 196 | an OH on an sp³ carbon |
+| `ether` | 1245 | 1824 | 180 | 399 | an ether: C–O–C, neither carbon a carbonyl (an epoxide, an acetal too) |
+| `halogen` | 1058 | 1399 | 0 | 341 | an atom of F, Cl or Br |
+| `phosphorus` | 191 | 331 | 62 | 78 | an atom of P |
+| `sulfur` | 714 | 1070 | 0 | 356 | an atom of S |
+| `alkene` | 970 | 1674 | 0 | 704 | a carbon–carbon double bond outside an aromatic ring |
+| `alkane` | 106 | 106 | 0 | 0 | carbon and hydrogen only, every bond single |
+| `heterocycle` | 3464 | 3465 | 0 | 1 | a ring holding carbon and another element (organic rows) |
+| `aromatic` | 2641 | 4236 | 0 | 1595 | an aromatic ring (RDKit's model; organic rows) |
+| `ring` | 347 | 716 | 369 | 0 | a ring, none aromatic and none a heterocycle |
+| `chain` | 984 | 1140 | 156 | 0 | no ring, organic, two carbons or more (one carbon: only when nothing else fits) |
 
 ## THE LICENCES
 

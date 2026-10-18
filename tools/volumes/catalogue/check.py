@@ -29,11 +29,13 @@ _pos = [a for i, a in enumerate(sys.argv[1:], 1) if not a.startswith('--') and s
 FILE = os.path.expanduser(_pos[0]) if _pos else os.path.join(DATA, 'vol-1.candidates.json')
 AGAINST, RAW = _arg('--against'), _arg('--raw') or GU.raw_dir(DATA)
 
-VOCAB = set(['medicine', 'painkiller', 'antibiotic', 'antiviral', 'heart', 'mind', 'cancer', 'allergy', 'anaesthetic', 'vitamin',
-             'hormone', 'neurotransmitter', 'amino acid', 'nucleobase', 'sugar', 'fat', 'steroid', 'alkaloid', 'food', 'flavour',
-             'scent', 'sweetener', 'colour', 'solvent', 'fuel', 'plastic', 'material', 'metal', 'gas', 'atmosphere', 'pollutant',
-             'toxin', 'pesticide', 'acid', 'aromatic', 'ring', 'cage', 'classic', 'natural', 'life',
-             'eye', 'lung', 'skin', 'stomach', 'diabetes', 'parasite', 'immune', 'refrigerant', 'battery', 'explosive'])   # + iteration 006 C3
+# iteration 006 C5 (Josh, 2026-10-18: "tags related to the molecules structure or class"): WHAT THE MOLECULE IS — PLAN.md's TAGS,
+# structure_tags.py's VOCAB (written out here again on purpose: the gate does not take the build's word for its own vocabulary)
+VOCAB = set(['peptide', 'nucleotide', 'nucleoside', 'nucleobase', 'steroid', 'amino acid', 'sugar', 'alkaloid', 'terpene', 'fat',
+             'metal', 'ion', 'cage', 'inorganic',
+             'nitro', 'nitrile', 'alkyne', 'aldehyde', 'phenol', 'ester', 'amide', 'ketone', 'acid', 'amine', 'alcohol', 'ether',
+             'halogen', 'phosphorus', 'sulfur', 'alkene', 'alkane',
+             'heterocycle', 'aromatic', 'ring', 'chain'])
 FIELDS = ['id', 'name', 'iupac', 'synonyms', 'formula', 'charge', 'multiplicity', 'cid', 'inchi', 'inchikey', 'smiles', 'mw',
           'exactMass', 'heavy', 'nAtoms', 'xlogp', 'tpsa', 'hbd', 'hba', 'rotatable', 'complexity', 'tags', 'blurb', 'blurbSource',
           'atomsAng', 'geometrySource', 'sources', 'priority']
