@@ -185,17 +185,17 @@ CATEGORIES = {
    ('scandium triflate', [], {'skip': 'a salt'}), ('zinc diethyldithiocarbamate', ['material']),
  ]},
  # ── ATMOSPHERE AND ENVIRONMENT ─────────────────────────────────────────────────────────────────────────────────────────
- 'cfcs': {'tags': ['atmosphere', 'pollutant', 'gas'], 'blurb': 'A chlorofluorocarbon: once a refrigerant and spray propellant, now banned under the Montreal Protocol because it destroys the ozone layer.', 'items': [
+ 'cfcs': {'tags': ['refrigerant', 'atmosphere', 'pollutant', 'gas'], 'blurb': 'A chlorofluorocarbon: once a refrigerant and spray propellant, now banned under the Montreal Protocol because it destroys the ozone layer.', 'items': [
    ('trichlorofluoromethane', [], {'display': 'CFC-11'}), ('dichlorodifluoromethane', [], {'display': 'CFC-12'}),
    ('1,1,2-trichloro-1,2,2-trifluoroethane', [], {'display': 'CFC-113'}), ('1,2-dichlorotetrafluoroethane', [], {'display': 'CFC-114'}),
    ('chloropentafluoroethane', [], {'display': 'CFC-115'}), ('chlorotrifluoromethane', [], {'display': 'CFC-13'}),
  ]},
- 'hcfcs': {'tags': ['atmosphere', 'gas'], 'blurb': 'A hydrochlorofluorocarbon: the transitional replacement for CFCs, still mildly ozone-depleting and being phased out.', 'items': [
+ 'hcfcs': {'tags': ['refrigerant', 'atmosphere', 'gas'], 'blurb': 'A hydrochlorofluorocarbon: the transitional replacement for CFCs, still mildly ozone-depleting and being phased out.', 'items': [
    ('chlorodifluoromethane', [], {'display': 'HCFC-22'}), ('1,1-dichloro-1-fluoroethane', [], {'display': 'HCFC-141b'}),
    ('1-chloro-1,1-difluoroethane', [], {'display': 'HCFC-142b'}), ('2,2-dichloro-1,1,1-trifluoroethane', [], {'display': 'HCFC-123'}),
    ('dichlorofluoromethane', [], {'display': 'HCFC-21'}), ('2-chloro-1,1,1,2-tetrafluoroethane', [], {'display': 'HCFC-124'}),
  ]},
- 'hfcs': {'tags': ['atmosphere', 'gas'], 'blurb': 'A hydrofluorocarbon refrigerant: harmless to the ozone layer but a potent greenhouse gas (Kigali Amendment).', 'items': [
+ 'hfcs': {'tags': ['refrigerant', 'atmosphere', 'gas'], 'blurb': 'A hydrofluorocarbon refrigerant: harmless to the ozone layer but a potent greenhouse gas (Kigali Amendment).', 'items': [
    ('1,1,1,2-tetrafluoroethane', [], {'display': 'HFC-134a'}), ('pentafluoroethane', [], {'display': 'HFC-125'}), ('difluoromethane', [], {'display': 'HFC-32'}),
    ('fluoroform', [], {'display': 'HFC-23'}), ('1,1-difluoroethane', [], {'display': 'HFC-152a'}), ('1,1,1-trifluoroethane', [], {'display': 'HFC-143a'}),
    ('1,1,1,2,3,3,3-heptafluoropropane', [], {'display': 'HFC-227ea'}), ('1,1,1,3,3-pentafluoropropane', [], {'display': 'HFC-245fa'}),
@@ -252,8 +252,10 @@ CATEGORIES = {
    ('dibutyltin dilaurate', [], {'skip': 'Sn is Z 50'}), ('hexamethylene diamine adipate', [], {'skip': 'a salt (nylon salt)'}),
  ]},
  'batteries and solvents': {'tags': ['material', 'solvent'], 'blurb': 'A solvent or electrolyte component of lithium-ion batteries.', 'items': [
-   'ethylene carbonate', 'propylene carbonate', 'dimethyl carbonate', 'diethyl carbonate', 'ethyl methyl carbonate', 'fluoroethylene carbonate',
-   'vinylene carbonate', '1,2-dimethoxyethane', 'gamma-butyrolactone', 'adiponitrile', 'succinonitrile', 'glutaronitrile', 'sulfolane',
+   # `battery` (iteration 006 C3, Josh's yes): the carbonate and nitrile electrolyte solvents only
+   ('ethylene carbonate', ['battery']), ('propylene carbonate', ['battery']), ('dimethyl carbonate', ['battery']), ('diethyl carbonate', ['battery']),
+   ('ethyl methyl carbonate', ['battery']), ('fluoroethylene carbonate', ['battery']), ('vinylene carbonate', ['battery']), '1,2-dimethoxyethane',
+   'gamma-butyrolactone', ('adiponitrile', ['battery']), ('succinonitrile', ['battery']), ('glutaronitrile', ['battery']), 'sulfolane',
    ('bis(trifluoromethane)sulfonimide', ['acid'], {'display': 'Bistriflimide (HTFSI)'}), 'ethylene sulfite', '1,3-propane sultone', 'tris(trimethylsilyl) phosphate',
    'lithium bis(oxalato)borate', 'fluorobenzene', 'triethyl phosphate', 'dimethyl sulfite', '2-methyltetrahydrofuran', 'methyl propionate', 'ethyl propionate',
  ]},
@@ -530,6 +532,21 @@ CWC_NAMES = [
  'trimethyl phosphite', 'triethyl phosphite', 'dimethyl phosphite', 'diethyl phosphite', 'sulfur monochloride', 'sulfur dichloride', 'thionyl chloride',
  'ethyldiethanolamine', 'methyldiethanolamine', 'triethanolamine',
 ]
+# `explosive` (iteration 006 C3, Josh's yes): the classic textbook explosives ALREADY in the catalogue, by InChIKey — build.py adds the
+# word to the row of that key and nothing else, so this list can never bring a molecule in (a key no row carries is simply unused).
+EXPLOSIVES = {
+ 'SPSSULHKWOKEEL-UHFFFAOYSA-N': 'TNT (2,4,6-trinitrotoluene)',
+ 'SNIOPGDIGTZGOP-UHFFFAOYSA-N': 'nitroglycerin',
+ 'TZRXHJWUDPFEEY-UHFFFAOYSA-N': 'PETN',
+ 'OXNIZHLAWKMVMX-UHFFFAOYSA-N': 'picric acid',
+ 'XTFIVUDBNACUBN-UHFFFAOYSA-N': 'RDX',
+ 'UZGLIIJVICEWHF-UHFFFAOYSA-N': 'HMX',
+ 'AGUIVNYEYSCPNI-UHFFFAOYSA-N': 'tetryl',
+ 'JDFUJAMTCCQARF-UHFFFAOYSA-N': 'TATB',
+ 'YSIBQULRFXITSW-UHFFFAOYSA-N': 'hexanitrostilbene (HNS)',
+ 'NDYLCHGXSQOGMS-UHFFFAOYSA-N': 'CL-20 (hexanitrohexaazaisowurtzitane)',
+ 'UATJOMSPNYCXIX-UHFFFAOYSA-N': '1,3,5-trinitrobenzene',
+}
 # Illicit psychoactive substances (UN 1971 Schedule I and the commonest designer drugs): refused unless ChEMBL calls them approved medicines.
 ILLICIT_NAMES = [
  'lysergide', 'MDMA', 'MDA', 'MDEA', 'mescaline', 'psilocybin', 'psilocin', 'N,N-dimethyltryptamine', '5-MeO-DMT', 'bufotenine', 'ibogaine', 'cathinone',

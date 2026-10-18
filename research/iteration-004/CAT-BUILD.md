@@ -1,8 +1,8 @@
-> **FULL RUN, 2026-10-17 (iteration 006, row C2 THE FULL CATALOGUE; research/iteration-006/C2-BUILD.md has the guards, the swap and the solvers). Every nomination was resolved online through PubChem (≤ 2.2 req/s); every count below is the whole file's. PubChem's Service status went Black at 20:10 in the descriptions round, so the file was finished from the cache (descriptions for 1,101 CIDs — blurbs fall back to ChEBI's own definitions or λWAVES' lines); a calm re-run of build.py fills in the rest and moves no id and no solved geometry. It replaced the partial 950 at 21:01:54 and was rebuilt from the cache with the salt-name rule at 21:58 (9 names corrected, nothing else moved); the 950 is kept as vol-1.candidates.950.json.**
+> **FULL RUN, 2026-10-17 (iteration 006, row C2 THE FULL CATALOGUE; research/iteration-006/C2-BUILD.md has the guards, the swap and the solvers) — REBUILT FROM THE CACHE on 2026-10-18 by row C3 THE CATALOGUE'S YESES (research/iteration-006/C3-BUILD.md): the ten iteration-006 tags. No geometry upgrade (Josh held the compute): every solved row keeps the atoms it was solved at; 41 rows the solver re-solved at PubChem's conformer in the seven minutes the upgrade was live keep those. No PubChem request was sent and no id moved. Descriptions still exist for 1,101 CIDs only (PubChem went Black during C2's online run); a calm online re-run of build.py fills in the rest. The previous file is kept as vol-1.candidates.before-c3.json, the 950 as vol-1.candidates.950.json.**
 
 # CAT · THE CANDIDATE LIST (iteration 004, row CAT THE CATALOGUE)
 
-`~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json` — **7080 molecules**, built 2026-10-17T21:57:31-05:00, schema 1.
+`~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json` — **7080 molecules**, built 2026-10-18T07:11:20-05:00, schema 1.
 Scripts: `tools/volumes/catalogue/` (committed). Data, caches and the exclusion list: `~/Documents/LAMBDAWAVES-VOLUMES/catalogue/`
 (never in git; every network answer is cached in `catalogue/cache/http.sqlite`, so a re-run is offline and asks PubChem nothing).
 
@@ -56,25 +56,25 @@ The combinations, most common first (PubChem is on every row and is left out of 
 | ChEBI + Wikidata + λWAVES | 17 |
 | ChEMBL + Wikidata + curated | 16 |
 
-By tag (PLAN.md's vocabulary only; a molecule carries 1–4):
+By tag (PLAN.md's vocabulary and its ten iteration-006 words only; a molecule carries 1–4):
 
 | tag | molecules |
 |---|---|
-| aromatic | 4019 |
+| aromatic | 3968 |
 | medicine | 2439 |
-| acid | 1438 |
-| natural | 1303 |
-| ring | 1275 |
-| classic | 626 |
+| acid | 1429 |
+| natural | 1293 |
+| ring | 1261 |
+| classic | 624 |
 | pesticide | 579 |
-| cancer | 444 |
+| cancer | 443 |
 | heart | 371 |
 | mind | 347 |
-| steroid | 327 |
-| life | 297 |
+| steroid | 319 |
+| life | 295 |
 | food | 294 |
 | pollutant | 250 |
-| amino acid | 223 |
+| amino acid | 222 |
 | painkiller | 218 |
 | hormone | 205 |
 | fat | 192 |
@@ -82,26 +82,36 @@ By tag (PLAN.md's vocabulary only; a molecule carries 1–4):
 | antibiotic | 185 |
 | toxin | 183 |
 | colour | 175 |
-| alkaloid | 165 |
+| alkaloid | 160 |
 | flavour | 143 |
 | scent | 135 |
-| cage | 128 |
+| cage | 127 |
 | solvent | 123 |
-| sugar | 123 |
+| sugar | 121 |
 | metal | 108 |
-| gas | 106 |
+| gas | 105 |
+| eye | 102 |
 | plastic | 88 |
+| skin | 88 |
 | atmosphere | 72 |
 | fuel | 65 |
 | antiviral | 61 |
 | allergy | 59 |
+| stomach | 58 |
+| parasite | 50 |
 | vitamin | 48 |
 | anaesthetic | 44 |
+| lung | 42 |
 | sweetener | 32 |
+| immune | 28 |
+| diabetes | 26 |
+| refrigerant | 23 |
 | neurotransmitter | 13 |
 | nucleobase | 11 |
+| explosive | 11 |
+| battery | 10 |
 
-Tags per molecule: 1 tag: 1355 · 2 tags: 2604 · 3 tags: 1948 · 4 tags: 1173
+Tags per molecule: 1 tag: 1346 · 2 tags: 2431 · 3 tags: 1990 · 4 tags: 1313
 
 By heavy atoms:
 
@@ -118,13 +128,13 @@ By geometry:
 
 | geometry | molecules |
 |---|---|
-| PubChem 3-D conformer | 6354 |
-| RDKit ETKDGv3 + MMFF94 | 450 |
-| GFN2-xTB | 188 |
+| PubChem 3-D conformer | 6394 |
+| RDKit ETKDGv3 + MMFF94 | 409 |
+| GFN2-xTB | 189 |
 | app pinned | 88 |
 
-THE GUARDS (guards.py). (a) 1105 rows already solved in `raw/` kept the exact atoms they were solved at
-(PubChem 3-D conformer 636 · RDKit ETKDGv3 + MMFF94 249 · GFN2-xTB 142 · app pinned 78); 277 of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again).
+THE GUARDS (guards.py). (a) 2593 rows already solved in `raw/` kept the exact atoms they were solved at
+(PubChem 3-D conformer 2128 · RDKit ETKDGv3 + MMFF94 214 · GFN2-xTB 173 · app pinned 78); 246 of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again).
 (b) 7080/7080 ids of the previous file kept; the ids came from the previous file 6992 · the app 88.
 
 By blurb:
@@ -208,26 +218,24 @@ library as medicines and nothing else of that kind is.
 | 8 | `HCl` | Hydrogen Chloride | acid · gas · classic | 1 |
 | 9 | `H2O2` | Hydrogen Peroxide | classic · medicine | 2 |
 
-## WHAT THE VOCABULARY CANNOT SAY YET (a proposal, NOT used in the file)
+## THE TEN WORDS OF ITERATION 006 (CAT's proposal; in the file since C3, Josh's yes of 2026-10-18)
 
-2439 rows carry `medicine`, and **28** of them carry nothing else, because PLAN.md's vocabulary has a word for
-only eight of the ATC's fourteen first letters. The eight plain words below would shelve most of that remainder; every one is a
-word a reader would use about themselves, and each maps to whole ATC groups already in the file. They are proposed here and are
-NOT in `vol-1.candidates.json` — the file uses PLAN.md's vocabulary and nothing else.
+Seven medicine words from the drug's OWN, non-combination ATC codes, and three hand-list words outside medicine. They rank with the
+uses, so the four-tag cap cuts a structure word (aromatic, ring, acid …) before any of them; they rank after the food words and the
+drug classes they refine, so they never send a food to Medicine. 2439 rows carry `medicine`; 24 carry nothing else.
 
-| proposed word | what it would hold | ATC groups (rows carrying one) |
-|---|---|---|
-| `eye` | eye drops and eye medicines | S01 (134) |
-| `lung` | asthma and cough medicines | R03 (44), R05 (18) |
-| `skin` | creams, antifungals and acne medicines | D01/D06/D07/D10/D11 (130) |
-| `stomach` | antacids, ulcer and gut medicines | A02/A03/A06/A07 (78) |
-| `diabetes` | insulin-sparing and blood-sugar medicines | A10 (33) |
-| `parasite` | malaria and worm medicines | P01/P02/P03 (53) |
-| `immune` | immune suppressants and modifiers | L03/L04 (31) |
-| `explosive` | TNT, PETN, nitroglycerin and their kin | none — they sit under `material` and `fuel` today |
-
-Two more that would earn their place outside medicine, if Josh wants ten: `refrigerant` (the CFC, HCFC, HFC and HFO rows, which
-are `atmosphere` + `gas` today) and `battery` (the carbonate and nitrile electrolyte solvents, now `material` + `solvent`).
+| word | what it holds | from (ATC codes on the medicine rows) | rows | cut by the cap |
+|---|---|---|---|---|
+| `eye` | eye drops and eye medicines | S01 (134) | 102 | 25 |
+| `lung` | asthma and cough medicines | R03 (44), R05 (18) | 42 | 10 |
+| `skin` | creams, antifungals and acne medicines | D01/D06/D07/D10/D11 (130) | 88 | 24 |
+| `stomach` | antacids, ulcer and gut medicines | A02/A03/A06/A07 (78) | 58 | 13 |
+| `diabetes` | insulin-sparing and blood-sugar medicines | A10 (33) | 26 | 7 |
+| `parasite` | malaria and worm medicines | P01/P02/P03 (53) | 50 | 3 |
+| `immune` | immune suppressants and modifiers | L03/L04 (31) | 28 | 3 |
+| `refrigerant` | the curated CFC, HCFC, HFC and HFO rows | curated.py: the cfcs, hcfcs and hfcs lists | 23 | 0 |
+| `battery` | the carbonate and nitrile electrolyte solvents | curated.py: batteries and solvents (those items only) | 10 | 0 |
+| `explosive` | the classic textbook explosives already in the catalogue | curated.py EXPLOSIVES (InChIKeys; adds no molecule) | 11 | 0 |
 
 ## THE LICENCES
 

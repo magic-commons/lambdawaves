@@ -49,7 +49,7 @@ Rows per source (a molecule is counted once per source that nominates it; most c
 table(['source', 'molecules'], sorted(S['bySource'].items(), key=lambda kv: -kv[1]))
 w('The combinations, most common first (PubChem is on every row and is left out of the key):\n\n')
 table(['sources', 'molecules'], list(S['bySourceSet'].items())[:18])
-w('By tag (PLAN.md\'s vocabulary only; a molecule carries 1–4):\n\n')
+w('By tag (PLAN.md\'s vocabulary and its ten iteration-006 words only; a molecule carries 1–4):\n\n')
 table(['tag', 'molecules'], list(S['byTag'].items()))
 w('Tags per molecule: ' + ' · '.join(f'{k} tag{"s" if int(k) > 1 else ""}: {v}' for k, v in sorted(S['byTagCount'].items())) + '\n\n')
 w('By heavy atoms:\n\n')
@@ -60,7 +60,7 @@ GD = S.get('guards')
 if GD:                                                               # iteration 006 C2: the two guards, as this build measured them
     ks = GD['keptSolvedGeometry']
     w(f"""THE GUARDS (guards.py). (a) {sum(ks.values())} rows already solved in `raw/` kept the exact atoms they were solved at
-({' · '.join(f'{k} {v}' for k, v in ks.items()) or 'none'}){'' if GD['refreshGeometry'] else f"; {GD['keptSolvedWithConformerWaiting']} of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again)"}.
+({' · '.join(f'{k} {v}' for k, v in ks.items()) or 'none'}){f"; `--refresh-geometry` (iteration 006 C3) moved {len(GD.get('solvedRowsMoved', []))} solved rows from a local geometry onto PubChem's conformer — each is solved again — and {GD['keptSolvedWithConformerWaiting']} rows whose conformer gives their solved atoms stay (the list, old and new source: the stats' guards.upgraded)" if GD['refreshGeometry'] else f"; {GD['keptSolvedWithConformerWaiting']} of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again)"}.
 {f"At the swap (solvers stopped) `guards.py --pin` put back {len(GD['pinnedAtSwap'])} more rows solved after the build had read `raw/`: {', '.join(GD['pinnedAtSwap'])}." + chr(10) if GD.get('pinnedAtSwap') else ''}(b) {GD['previousIdsPresent']}/{GD['previousRows']} ids of the previous file kept; the ids came from {' · '.join(f'{k} {v}' for k, v in GD['idsFrom'].items())}{'; MISSING: ' + ', '.join(GD['previousIdsMissing']) if GD['previousIdsMissing'] else ''}.
 
 """)
@@ -90,34 +90,34 @@ library as medicines and nothing else of that kind is.
 table(['priority', 'id', 'name', 'tags', 'heavy'],
       [[m['priority'], '`' + m['id'] + '`', m['name'], ' · '.join(m['tags']), m['heavy']] for m in C['molecules'][:10]])
 
-# ── what the vocabulary cannot say, measured ────────────────────────────────────────────────────────────────────────
+# ── the ten words of iteration 006 (proposed here by CAT, applied by C3 on Josh's yes) ──────────────────────────────────
 meds = [m for m in C['molecules'] if 'medicine' in m['tags']]
 only_med = [m for m in meds if m['tags'] == ['medicine']]
 atc_groups = collections.Counter()
 for m in meds:
     for s in m['sources']:
         for c in (s.get('atc') or []): atc_groups[c[:3]] += 1
-w(f"""## WHAT THE VOCABULARY CANNOT SAY YET (a proposal, NOT used in the file)
+bt, cut = S['byTag'], S.get('tagCapCut', {})
+w(f"""## THE TEN WORDS OF ITERATION 006 (CAT's proposal; in the file since C3, Josh's yes of 2026-10-18)
 
-{len(meds)} rows carry `medicine`, and **{len(only_med)}** of them carry nothing else, because PLAN.md's vocabulary has a word for
-only eight of the ATC's fourteen first letters. The eight plain words below would shelve most of that remainder; every one is a
-word a reader would use about themselves, and each maps to whole ATC groups already in the file. They are proposed here and are
-NOT in `vol-1.candidates.json` — the file uses PLAN.md's vocabulary and nothing else.
+Seven medicine words from the drug's OWN, non-combination ATC codes, and three hand-list words outside medicine. They rank with the
+uses, so the four-tag cap cuts a structure word (aromatic, ring, acid …) before any of them; they rank after the food words and the
+drug classes they refine, so they never send a food to Medicine. {len(meds)} rows carry `medicine`; {len(only_med)} carry nothing else.
 
 """)
-table(['proposed word', 'what it would hold', 'ATC groups (rows carrying one)'],
-      [['`eye`', 'eye drops and eye medicines', f"S01 ({atc_groups['S01']})"],
-       ['`lung`', 'asthma and cough medicines', f"R03 ({atc_groups['R03']}), R05 ({atc_groups['R05']})"],
-       ['`skin`', 'creams, antifungals and acne medicines', f"D01/D06/D07/D10/D11 ({sum(atc_groups[g] for g in ('D01', 'D06', 'D07', 'D10', 'D11'))})"],
-       ['`stomach`', 'antacids, ulcer and gut medicines', f"A02/A03/A06/A07 ({sum(atc_groups[g] for g in ('A02', 'A03', 'A06', 'A07'))})"],
-       ['`diabetes`', 'insulin-sparing and blood-sugar medicines', f"A10 ({atc_groups['A10']})"],
-       ['`parasite`', 'malaria and worm medicines', f"P01/P02/P03 ({sum(atc_groups[g] for g in ('P01', 'P02', 'P03'))})"],
-       ['`immune`', 'immune suppressants and modifiers', f"L03/L04 ({sum(atc_groups[g] for g in ('L03', 'L04'))})"],
-       ['`explosive`', 'TNT, PETN, nitroglycerin and their kin', 'none — they sit under `material` and `fuel` today']])
-w("""Two more that would earn their place outside medicine, if Josh wants ten: `refrigerant` (the CFC, HCFC, HFC and HFO rows, which
-are `atmosphere` + `gas` today) and `battery` (the carbonate and nitrile electrolyte solvents, now `material` + `solvent`).
-
-## THE LICENCES
+words = [['`eye`', 'eye drops and eye medicines', f"S01 ({atc_groups['S01']})"],
+         ['`lung`', 'asthma and cough medicines', f"R03 ({atc_groups['R03']}), R05 ({atc_groups['R05']})"],
+         ['`skin`', 'creams, antifungals and acne medicines', f"D01/D06/D07/D10/D11 ({sum(atc_groups[g] for g in ('D01', 'D06', 'D07', 'D10', 'D11'))})"],
+         ['`stomach`', 'antacids, ulcer and gut medicines', f"A02/A03/A06/A07 ({sum(atc_groups[g] for g in ('A02', 'A03', 'A06', 'A07'))})"],
+         ['`diabetes`', 'insulin-sparing and blood-sugar medicines', f"A10 ({atc_groups['A10']})"],
+         ['`parasite`', 'malaria and worm medicines', f"P01/P02/P03 ({sum(atc_groups[g] for g in ('P01', 'P02', 'P03'))})"],
+         ['`immune`', 'immune suppressants and modifiers', f"L03/L04 ({sum(atc_groups[g] for g in ('L03', 'L04'))})"],
+         ['`refrigerant`', 'the curated CFC, HCFC, HFC and HFO rows', 'curated.py: the cfcs, hcfcs and hfcs lists'],
+         ['`battery`', 'the carbonate and nitrile electrolyte solvents', 'curated.py: batteries and solvents (those items only)'],
+         ['`explosive`', 'the classic textbook explosives already in the catalogue', 'curated.py EXPLOSIVES (InChIKeys; adds no molecule)']]
+table(['word', 'what it holds', 'from (ATC codes on the medicine rows)', 'rows', 'cut by the cap'],
+      [r + [bt.get(r[0].strip('`'), 0), cut.get(r[0].strip('`'), 0)] for r in words])
+w("""## THE LICENCES
 
 """)
 table(['source', 'what it gave', 'licence'], [[s['name'], s['what'], s['licence']] for s in S['sources']])

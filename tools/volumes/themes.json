@@ -1,18 +1,29 @@
 {
- "schema": 1,
- "note": "THE SHELF's themes (iteration 005 S). Ordered: a FINISHED molecule goes to the FIRST theme whose `any` it carries (a theme with `app` also takes every molecule of the app's own table); `rest` takes what is left. A theme is ordered by the catalogue's `priority` and continues as 'TITLE · 2' past 5 GB of .lwm + .webp, with the next numeral. Titles and blurbs are data: rename them here. `numeral` is the theme's numeral when nothing before it splits.",
+ "schema": 2,
+ "note": "THE SHELF's themes (iteration 005 S; ONE PRIMARY THEME, iteration 006 C3). A theme is ordered by the catalogue's `priority` and continues as 'TITLE · 2' past 5 GB of .lwm + .webp, with the next numeral; `numeral` is the theme's numeral when nothing before it splits. Titles and blurbs are data: rename them here.",
+ "rule": "EVERY FINISHED MOLECULE GOES TO EXACTLY ONE THEME: the steps of `precedence` are read in order and the FIRST step the molecule meets names its theme (`app`: a molecule of the app's own table; `any`: it carries one of these tags — unless it also carries one of the step's `none`); a molecule that meets none goes to `rest`. In words (Josh, 2026-10-18): the app's own table is THE CLASSICS; nutrients and foods are LIFE AND FOOD even when they are approved medicines — vitamin, nucleobase, food, flavour and sweetener always, and amino acid, sugar and fat unless the row also names a drug class (painkiller … immune: ChEBI calls many drugs an 'amino acid' or a 'fat' by structure alone — mefenamic acid, enoxacin, valproate — and those stay medicines); every other approved drug or medicine word is MEDICINE; the textbook molecules (`classic`) are THE CLASSICS; materials, atmosphere, fuel, refrigerant, battery, explosive, plastic, solvent, gas and metal are MATERIALS, ATMOSPHERE AND FUEL; then the rest of life's words (life, steroid, neurotransmitter, scent, natural, alkaloid) are LIFE AND FOOD; then pollutant, toxin, pesticide and colour are MATERIALS; everything else is THE REST. Reorder the steps here to change it; tools/volumes/pack.mjs reads nothing else (`pack.mjs --candidates … --themes … --count-themes` prints the counts).",
+ "precedence": [
+  { "theme": "classics", "app": true },
+  { "theme": "life", "any": ["vitamin", "nucleobase", "food", "flavour", "sweetener"] },
+  { "theme": "life", "any": ["amino acid", "sugar", "fat"],
+    "none": ["painkiller", "antibiotic", "antiviral", "heart", "mind", "cancer", "allergy", "anaesthetic", "hormone",
+             "eye", "lung", "skin", "stomach", "diabetes", "parasite", "immune"] },
+  { "theme": "medicine", "any": ["medicine", "painkiller", "antibiotic", "antiviral", "heart", "mind", "cancer", "allergy", "anaesthetic", "hormone",
+                                 "eye", "lung", "skin", "stomach", "diabetes", "parasite", "immune"] },
+  { "theme": "classics", "any": ["classic"] },
+  { "theme": "materials", "any": ["material", "atmosphere", "fuel", "refrigerant", "battery", "explosive", "plastic", "solvent", "gas", "metal"] },
+  { "theme": "life", "any": ["life", "steroid", "neurotransmitter", "scent", "natural", "alkaloid"] },
+  { "theme": "materials", "any": ["pollutant", "toxin", "pesticide", "colour"] }
+ ],
  "themes": [
-  { "id": "classics", "numeral": "I", "title": "The Classics", "app": true, "any": ["classic"],
+  { "id": "classics", "numeral": "I", "title": "The Classics",
     "blurb": "The molecules every chemistry book opens with, and every molecule of the app's own table." },
   { "id": "medicine", "numeral": "II", "title": "Medicine",
-    "any": ["medicine", "painkiller", "antibiotic", "antiviral", "heart", "mind", "cancer", "allergy", "anaesthetic", "vitamin", "hormone"],
-    "blurb": "Medicines and the molecules the body answers to: painkillers, antibiotics, heart and mind, hormones and vitamins." },
+    "blurb": "Medicines and the molecules the body answers to: painkillers, antibiotics, heart and mind, hormones, and the medicines of the eye, lung, skin and gut." },
   { "id": "life", "numeral": "III", "title": "Life and Food",
-    "any": ["life", "amino acid", "nucleobase", "sugar", "fat", "steroid", "neurotransmitter", "food", "flavour", "scent", "sweetener", "natural", "alkaloid"],
-    "blurb": "The chemistry of living things and of the kitchen: amino acids, sugars and fats, flavours and scents." },
+    "blurb": "The chemistry of living things and of the kitchen: vitamins, amino acids, sugars and fats, flavours and scents." },
   { "id": "materials", "numeral": "IV", "title": "Materials, Atmosphere and Fuel",
-    "any": ["material", "metal", "plastic", "solvent", "fuel", "gas", "atmosphere", "pollutant", "toxin", "pesticide", "colour"],
-    "blurb": "What things are made of and what the air carries: metals, plastics, solvents, fuels, gases and dyes." },
+    "blurb": "What things are made of and what the air carries: metals, plastics, solvents, fuels, refrigerants, explosives, gases and dyes." },
   { "id": "rest", "numeral": "V", "title": "The Rest", "rest": true,
     "blurb": "Everything else the catalogue holds." }
  ]

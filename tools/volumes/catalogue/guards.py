@@ -7,8 +7,9 @@ and never re-point an id at another molecule:
 (a) A SOLVED MOLECULE KEEPS ITS GEOMETRY.  A row whose id has a converged rung under raw/<id>/ keeps the exact atoms it was solved
     at — raw/<id>/meta.json's candidate.atomsAng, accepted only when it reproduces the solver's own atomsBohr bit for bit (the
     solver's test: float(Å) × ANGSTROM == atomsBohr) and only for the same InChIKey — even when PubChem's conformer has since
-    arrived.  This is the cheap, reversible default of Josh's open decision ("should a solved molecule keep its geometry?"):
-    build.py --refresh-geometry turns it off, and every solved row that then moves is solved again from STO-3G (build.py logs them).
+    arrived.  build.py --refresh-geometry (iteration 006 C3, Josh's yes to the upgrade) lifts it for exactly one kind of row — a
+    solved row on a local geometry (never an app row) whose PubChem conformer exists and gives atoms that differ — and lists them in
+    its stats (guards.solvedRowsMoved); verify() and pin() take that list, so nothing else may move and those rows stay moved.
 (b) IDS ARE STABLE.  A row keeps the id the previous candidates file gave its InChIKey (the app's own: its app id); a new row whose
     InChIKey was solved under some id in raw/ takes that id; every other new row takes its slug, suffixed (-2, -3 …) past every id
     already taken — the previous file's, raw/'s and this run's — so an old id never moves and never names another molecule.
@@ -77,12 +78,13 @@ def raw_ids_by_key(S, prev_by_id):
     return out
 
 
-def pin(doc, S):
-    """apply (a) to a built candidates doc in place; returns the ids whose atoms were put back"""
-    moved = []
+def pin(doc, S, chosen=()):
+    """apply (a) to a built candidates doc in place; returns the ids whose atoms were put back.  `chosen`: the rows a
+    --refresh-geometry build moved on purpose (its stats' guards.solvedRowsMoved) — they are left where the build put them"""
+    moved, chosen = [], set(chosen or ())
     for m in doc['molecules']:
         s = S.get(m['id'])
-        if not s or not s['exact'] or s['inchikey'] != m.get('inchikey'): continue
+        if not s or not s['exact'] or s['inchikey'] != m.get('inchikey') or m['id'] in chosen: continue
         if bohr(m['atomsAng']) == s['atomsBohr']: continue
         m['atomsAng'] = s['atomsAng']
         if s['geometrySource']: m['geometrySource'] = s['geometrySource']
@@ -91,9 +93,17 @@ def pin(doc, S):
     return moved
 
 
-def verify(doc, prev_by_id, S, excluded=None, allow_moved=False):
+def pubchem_based(src):
+    """a geometry source that is PubChem's 3-D conformer, or a GFN2-xTB relaxation started from it (build.py's own words)"""
+    return bool(src) and (src.startswith('PubChem') or "from PubChem's 3-D conformer" in src)
+
+
+def verify(doc, prev_by_id, S, excluded=None, allow_moved=()):
     """the proof of both guards: ([(kind, complaint)], [note]).  `excluded`: the new build's exclusion rows, so a previous row that
-    a SAFETY SCREEN now refuses is named as such (the screen wins over the id guard) instead of passing unremarked"""
+    a SAFETY SCREEN now refuses is named as such (the screen wins over the id guard) instead of passing unremarked.
+    `allow_moved`: the ids a --refresh-geometry build chose to move (its stats' guards.solvedRowsMoved) — each must have moved, onto
+    a PubChem-based geometry, and must not be an app row; a solved row that moved and is NOT listed is still a complaint"""
+    allow_moved = set(allow_moved or ())
     bad, notes = [], []
     rows = {m['id']: m for m in doc['molecules']}
     screened = {}
@@ -118,10 +128,17 @@ def verify(doc, prev_by_id, S, excluded=None, allow_moved=False):
         if not s: continue
         if s['inchikey'] != m.get('inchikey'):
             bad.append(("guard (b): an id points at another molecule's solve in raw/", f'{i} names {m.get("inchikey")}, raw/{i}/ holds {s["inchikey"]}')); continue
-        if bohr(m['atomsAng']) == s['atomsBohr']: kept += 1
-        elif allow_moved: moved += 1
+        if bohr(m['atomsAng']) == s['atomsBohr']:
+            kept += 1
+            if i in allow_moved: bad.append(('--refresh-geometry: a listed row did not move', i))
+        elif i in allow_moved:
+            moved += 1
+            if m.get('app'): bad.append(('--refresh-geometry: an app-pinned row moved', i))
+            if not pubchem_based(m.get('geometrySource')): bad.append(('--refresh-geometry: a moved row is not on PubChem\'s conformer', f'{i}: {str(m.get("geometrySource"))[:80]}'))
         elif s['exact']: bad.append(('guard (a): a solved row moved (the solver would start it over)', f'{i} ({",".join(s["rungs"])})'))
         else: notes.append(f'{i}: solved, but its solved atoms are not reproducible from any Å list on record, so it will be solved again')
+    for i in sorted(allow_moved - set(rows)): bad.append(('--refresh-geometry: a listed row is not in the file', i))
+    for i in sorted(allow_moved & set(rows) - set(S)): bad.append(('--refresh-geometry: a listed row has no solve in raw/', i))
     seen = {}
     for m in doc['molecules']:
         k = m.get('inchikey')
@@ -129,7 +146,7 @@ def verify(doc, prev_by_id, S, excluded=None, allow_moved=False):
         if k: seen[k] = m['id']
     orphans = sorted(set(S) - set(rows))
     notes.insert(0, f'{same}/{len(prev_by_id)} previous ids present with the same InChIKey · {kept}/{sum(1 for i in rows if i in S)} rows '
-                    f'solved in raw/ at exactly their solved atoms' + (f' · {moved} solved rows MOVED (--allow-moved)' if allow_moved else '')
+                    f'solved in raw/ at exactly their solved atoms' + (f' · {moved}/{len(allow_moved)} listed solved rows MOVED onto PubChem\'s conformer (--refresh-geometry)' if allow_moved else '')
                     + (f' · {len(orphans)} solved ids in raw/ the file does not carry: ' + ', '.join(orphans[:20]) if orphans else ''))
     return bad, notes
 
@@ -143,7 +160,9 @@ if __name__ == '__main__':
     raw = next((sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--raw' and i + 1 < len(sys.argv)), None) or raw_dir(DATA)
     with open(path) as f: doc = json.load(f)
     S = solved(raw)
-    moved = pin(doc, S)
+    sp0 = sibling(path, 'stats')                                     # a --refresh-geometry build's chosen rows stay moved
+    chosen = (json.load(open(sp0)).get('guards') or {}).get('solvedRowsMoved', []) if os.path.exists(sp0) else []
+    moved = pin(doc, S, chosen)
     if moved:
         write_json(path, doc)
         sp = sibling(path, 'stats')                                  # keep the report's geometry counts true to the pinned file
@@ -154,4 +173,5 @@ if __name__ == '__main__':
             st['byGeometry'] = dict(collections.Counter(kind(m['geometrySource']) for m in doc['molecules']).most_common())
             st.setdefault('guards', {})['pinnedAtSwap'] = sorted(set(st.get('guards', {}).get('pinnedAtSwap', [])) | set(moved))
             write_json(sp, st, indent=1)
-    print(f'pin: {len(S)} molecules with a solved rung in {raw} · {len(moved)} rows put back to their solved atoms' + (': ' + ', '.join(moved) if moved else ''))
+    print(f'pin: {len(S)} molecules with a solved rung in {raw} · {len(moved)} rows put back to their solved atoms' + (': ' + ', '.join(moved) if moved else '')
+          + (f' · {len(chosen)} rows --refresh-geometry moved on purpose left as built' if chosen else ''))
