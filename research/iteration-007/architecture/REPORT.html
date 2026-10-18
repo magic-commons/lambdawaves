@@ -1,0 +1,485 @@
+<title>λWAVES Architecture Scan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,700;1,500&family=Public+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one editorial column (≈ 62 rem), each candidate an <article> with a two-up before/after plate that stacks at phone width.
+   Palette: a cool instrument-panel neutral biased toward the phase-wheel teal; one accent (teal), red = leak, amber = warning, emerald = Strong. */
+:root {
+  --bg: #f3f6f7; --panel: #ffffff; --ink: #14212b; --muted: #546572; --hair: #d5dee3;
+  --accent: #0e7c86; --accent-soft: #d9eff0; --deep: #13232e; --deep-ink: #e6f1f3;
+  --leak: #c62f2f; --warn: #a86400; --warn-soft: #fbefd9; --good: #1d7a4e; --good-soft: #dcf1e5; --slate-soft: #e4e9ec;
+  --f-display: "Spectral", "Iowan Old Style", Georgia, serif;
+  --f-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --s1: .25rem; --s2: .5rem; --s3: .75rem; --s4: 1rem; --s5: 1.5rem; --s6: 2.25rem; --s7: 3.5rem;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d1418; --panel: #142027; --ink: #e2ebef; --muted: #93a6b1; --hair: #26363f;
+  --accent: #4cc3cb; --accent-soft: #123a3e; --deep: #04090c; --deep-ink: #d8eef1;
+  --leak: #ff6b6b; --warn: #f0b54a; --warn-soft: #3a2c12; --good: #5fd39a; --good-soft: #123426; --slate-soft: #1d2a31; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d1418; --panel: #142027; --ink: #e2ebef; --muted: #93a6b1; --hair: #26363f;
+  --accent: #4cc3cb; --accent-soft: #123a3e; --deep: #04090c; --deep-ink: #d8eef1;
+  --leak: #ff6b6b; --warn: #f0b54a; --warn-soft: #3a2c12; --good: #5fd39a; --good-soft: #123426; --slate-soft: #1d2a31; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 1rem/1.6 var(--f-body); }
+main { max-width: 62rem; margin: 0 auto; padding-block: var(--s6) var(--s7);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: var(--s7); }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.01em; }
+h2 { font-size: clamp(1.5rem, 3.4vw, 2rem); }
+h3 { font-size: 1.15rem; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--f-mono); font-size: .86em; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.eyebrow { font: 600 .72rem/1 var(--f-body); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+header { display: flex; flex-direction: column; gap: var(--s4); }
+.meta { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s5); color: var(--muted); font-size: .9rem; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; font-size: .82rem; color: var(--muted); }
+.legend span { display: inline-flex; gap: var(--s2); align-items: center; }
+.lg-mod { width: 22px; height: 14px; border: 1.5px solid var(--ink); border-radius: 2px; }
+.lg-deep { width: 22px; height: 14px; background: var(--deep); border: 3px solid var(--deep); border-radius: 2px; }
+.lg-seam { width: 26px; border-top: 2px dashed var(--accent); }
+.lg-leak { width: 26px; border-top: 2px solid var(--leak); position: relative; }
+.lg-leak::after { content: ""; position: absolute; right: -2px; top: -5px; border: 4px solid transparent; border-left: 6px solid var(--leak); }
+
+.asks { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--s3); }
+.ask { background: var(--panel); border: 1px solid var(--hair); border-radius: 6px; padding: var(--s3) var(--s4); display: flex; flex-direction: column; gap: var(--s1); min-width: 0; }
+.ask b { font-family: var(--f-display); font-size: 1.02rem; }
+.ask .who { font-size: .82rem; color: var(--muted); }
+
+article { display: flex; flex-direction: column; gap: var(--s4); border-top: 1px solid var(--hair); padding-top: var(--s5); }
+.badges { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.badge { font: 600 .72rem/1 var(--f-body); letter-spacing: .08em; text-transform: uppercase; padding: .38rem .55rem; border-radius: 3px; border: 1px solid transparent; }
+.b-strong { background: var(--good-soft); color: var(--good); border-color: var(--good); }
+.b-explore { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+.b-cat { background: var(--slate-soft); color: var(--muted); }
+.b-rank { background: var(--accent-soft); color: var(--accent); }
+.files { font: .8rem/1.55 var(--f-mono); color: var(--muted); margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: .1rem 1rem; }
+.files li { min-width: 0; overflow-wrap: anywhere; }
+
+.plate { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+.pane { background: var(--panel); border: 1px solid var(--hair); border-radius: 6px; padding: var(--s3); min-width: 0; display: flex; flex-direction: column; gap: var(--s2); }
+.pane .eyebrow { color: var(--muted); }
+.pane svg { width: 100%; height: auto; max-height: 340px; display: block; }
+@media (max-width: 720px) { .plate { grid-template-columns: 1fr; } }
+
+/* svg schematic vocabulary, all from tokens */
+.m { fill: var(--panel); stroke: var(--ink); stroke-width: 1.4; }
+.mf { fill: var(--slate-soft); stroke: var(--muted); stroke-width: 1; }
+.dp { fill: var(--deep); stroke: var(--deep); stroke-width: 3; }
+.ghost { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; opacity: .7; }
+.t { fill: var(--ink); font: 600 10.5px var(--f-body); letter-spacing: .06em; text-transform: uppercase; }
+.ts { fill: var(--muted); font: 400 9.5px var(--f-mono); }
+.td { fill: var(--deep-ink); font: 600 10.5px var(--f-body); letter-spacing: .06em; text-transform: uppercase; }
+.tds { fill: var(--deep-ink); opacity: .72; font: 400 9.5px var(--f-mono); }
+.e { stroke: var(--muted); stroke-width: 1.2; fill: none; }
+.lk { stroke: var(--leak); stroke-width: 1.8; fill: none; }
+.lkt { fill: var(--leak); font: 600 9.5px var(--f-mono); }
+.sm { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5 4; fill: none; }
+.ac { stroke: var(--accent); stroke-width: 1.6; fill: none; }
+.act { fill: var(--accent); font: 600 9.5px var(--f-mono); }
+.x { stroke: var(--leak); stroke-width: 2.2; }
+
+.prose { display: grid; grid-template-columns: 8.5rem 1fr; gap: var(--s2) var(--s4); align-items: baseline; }
+.prose dt { font: 600 .72rem/1.6 var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.prose dd { margin: 0; min-width: 0; }
+.prose ul { margin: 0; padding-left: 1.1rem; }
+@media (max-width: 560px) { .prose { grid-template-columns: 1fr; } .prose dd { margin-bottom: var(--s2); } }
+.adr { background: var(--warn-soft); border: 1px solid var(--warn); border-radius: 4px; padding: var(--s2) var(--s3); font-size: .9rem; color: var(--ink); }
+.adr b { color: var(--warn); }
+.cite { font: .78rem/1.5 var(--f-mono); color: var(--muted); }
+
+/* design it twice */
+.twice { display: flex; flex-direction: column; gap: var(--s5); }
+.frame { background: var(--panel); border: 1px solid var(--hair); border-radius: 6px; padding: var(--s4); display: flex; flex-direction: column; gap: var(--s3); }
+.designs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
+@media (max-width: 860px) { .designs { grid-template-columns: 1fr; } }
+.design { border: 1px solid var(--hair); border-radius: 6px; padding: var(--s3); display: flex; flex-direction: column; gap: var(--s2); background: var(--panel); min-width: 0; }
+.design h4 { margin: 0; font: 700 1rem/1.25 var(--f-display); }
+.design .k { font: 600 .7rem/1 var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.design ul { margin: 0; padding-left: 1rem; font-size: .9rem; }
+pre.sig { margin: 0; background: var(--slate-soft); border-radius: 4px; padding: var(--s2) var(--s3); overflow-x: auto; font: .76rem/1.5 var(--f-mono); color: var(--ink); }
+.cmp { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; min-width: 34rem; }
+th, td { text-align: left; vertical-align: top; padding: var(--s2) var(--s3); border-bottom: 1px solid var(--hair); }
+th { font: 600 .72rem/1.3 var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.verdict { border-left: 4px solid var(--accent); padding: var(--s2) var(--s4); background: var(--accent-soft); border-radius: 0 6px 6px 0; display: flex; flex-direction: column; gap: var(--s2); }
+.verdict p { max-width: 74ch; }
+
+#top-recommendation { background: var(--deep); color: var(--deep-ink); border-radius: 8px; padding: var(--s5); display: flex; flex-direction: column; gap: var(--s3); }
+#top-recommendation h2 { color: var(--deep-ink); }
+#top-recommendation a { color: var(--deep-ink); }
+#top-recommendation .eyebrow { color: var(--deep-ink); opacity: .7; }
+.ask-next { font-family: var(--f-display); font-size: 1.25rem; font-style: italic; }
+@media (prefers-reduced-motion: no-preference) { article { scroll-margin-top: 1rem; } }
+</style>
+
+<main>
+<header>
+  <span class="eyebrow">improve-codebase-architecture · scan, report, then grilling</span>
+  <h1>λWAVES · deepening the molecular windows</h1>
+  <div class="meta">
+    <span class="mono">worktree optimization-2026-09-24 · yan-c @ 81625da</span>
+    <span>2026-10-18</span>
+    <span>scope: MOLECULES · MO-REGISTRY · INFORMATIONAL · the modulation seam</span>
+  </div>
+  <div class="legend" aria-label="Diagram legend">
+    <span><i class="lg-mod"></i>module</span>
+    <span><i class="lg-seam"></i>seam</span>
+    <span><i class="lg-leak"></i>leakage across a seam</span>
+    <span><i class="lg-deep"></i>deep module</span>
+  </div>
+</header>
+
+<section aria-labelledby="asks-h" style="display:flex;flex-direction:column;gap:var(--s3)">
+  <h2 id="asks-h" class="eyebrow" style="font-size:.78rem">What the rework asks (research/iteration-007/JOSH-PROMPT.md), and which deepening pays for it</h2>
+  <div class="asks">
+    <div class="ask"><b>ORBITAL dial as a target, with a lane</b><span class="who">pays: <a href="#c1">1</a> · ADR-draft-0001</span></div>
+    <div class="ask"><b>ORBITAL register's A ↔ B as a target, with a lane</b><span class="who">pays: <a href="#c1">1</a> + <a href="#c3">3</a> · ADR-draft-0002</span></div>
+    <div class="ask"><b>INFORMATIONAL: many toggles, sizes and seats, rebuilt from MIR</b><span class="who">pays: <a href="#c2">2</a> · ADR-draft-0003</span></div>
+    <div class="ask"><b>MOLECULES card re-laid</b><span class="who">pays: <a href="#c4">4</a></span></div>
+  </div>
+</section>
+
+<section id="candidates" style="display:flex;flex-direction:column;gap:var(--s7)">
+
+<!-- ═══════════════ 1 ═══════════════ -->
+<article id="c1">
+  <span class="eyebrow">Candidate 1</span>
+  <h2>A target is declared once, by the window that owns its dial</h2>
+  <div class="badges"><span class="badge b-rank">rank 1</span><span class="badge b-strong">Strong</span><span class="badge b-cat">in-process</span></div>
+  <ul class="files"><li>lab/shell/modulation.js</li><li>lab/shell/persist.js</li><li>lab/mod-port.js</li><li>lab/shell/facade.js</li><li>lab/chemview.js</li><li>lab/statesview.js</li><li>lab/orbitalsview.js</li></ul>
+  <div class="plate">
+    <figure class="pane" style="margin:0">
+      <figcaption class="eyebrow">Before · one target, four places</figcaption>
+      <svg viewBox="0 0 360 300" role="img" aria-label="Before: the defs table, modSeats, the window's three members and the facade door each know chem.kick">
+        <rect class="m" x="12" y="18" width="150" height="66" rx="3"/><text class="t" x="22" y="36">defs table</text><text class="ts" x="22" y="52">shell/modulation.js:29-149</text><text class="ts" x="22" y="66">install once · :154</text>
+        <rect class="m" x="12" y="108" width="150" height="54" rx="3"/><text class="t" x="22" y="126">modSeats</text><text class="ts" x="22" y="142">shell/persist.js:25-36</text>
+        <rect class="m" x="12" y="186" width="150" height="54" rx="3"/><text class="t" x="22" y="204">__LW.mod.register</text><text class="ts" x="22" y="220">facade.js:135-138</text>
+        <rect class="m" x="208" y="18" width="140" height="222" rx="3"/><text class="t" x="218" y="36">MOLECULES</text><text class="ts" x="218" y="50">chemview.js</text>
+        <rect class="mf" x="218" y="62" width="120" height="24"/><text class="ts" x="224" y="78">kappa · setKappa</text>
+        <rect class="mf" x="218" y="92" width="120" height="24"/><text class="ts" x="224" y="108">knobs.kick()</text>
+        <rect class="mf" x="218" y="122" width="120" height="24"/><text class="ts" x="224" y="138">presentation().kappa</text>
+        <rect class="mf" x="218" y="152" width="120" height="42"/><text class="ts" x="224" y="168">orbKnob replaced</text><text class="ts" x="224" y="182">:561-568 · no target</text>
+        <line class="x" x1="306" y1="200" x2="330" y2="224"/><line class="x" x1="330" y1="200" x2="306" y2="224"/>
+        <path class="lk" d="M162 40 C190 40 190 74 216 74"/><path class="lk" d="M162 56 C192 56 192 104 216 104"/>
+        <path class="lk" d="M162 134 C190 134 190 134 216 134"/>
+        <path class="lk" d="M162 212 C190 212 196 180 216 172"/>
+        <text class="lkt" x="12" y="268">null-guards on every row · :120-143</text>
+        <text class="lkt" x="12" y="284">replaceWith drops data-param · mod-port.js:66 cache</text>
+      </svg>
+    </figure>
+    <figure class="pane" style="margin:0">
+      <figcaption class="eyebrow">After · the window says it once</figcaption>
+      <svg viewBox="0 0 360 300" role="img" aria-label="After: each window declares target rows; one deep target seam installs, re-registers, stamps and derives seats">
+        <rect class="m" x="12" y="18" width="104" height="70" rx="3"/><text class="t" x="20" y="36">MOLECULES</text><text class="ts" x="20" y="54">chem.kick</text><text class="ts" x="20" y="68">chem.speed</text><text class="ts" x="20" y="82">chem.orbital ✦</text>
+        <rect class="m" x="128" y="18" width="104" height="70" rx="3"/><text class="t" x="136" y="36">ORBITAL pane</text><text class="ts" x="136" y="54">reg.orb.morph ✦</text>
+        <rect class="m" x="244" y="18" width="104" height="70" rx="3"/><text class="t" x="252" y="36">STATES pane</text><text class="ts" x="252" y="54">reg.morph e0 w</text><text class="ts" x="252" y="68">reg.amp/ph 1-8</text>
+        <path class="sm" d="M8 112 H352"/><text class="act" x="12" y="106">target(id, spec)</text>
+        <rect class="dp" x="24" y="124" width="312" height="110" rx="4"/>
+        <text class="td" x="38" y="146">the target seam (mod port)</text>
+        <text class="tds" x="38" y="166">queue → install · hot re-register on a new range</text>
+        <text class="tds" x="38" y="182">stamp + restamp data-param · held class</text>
+        <text class="tds" x="38" y="198">echo the dial (setKnob) · flash guard per def</text>
+        <text class="tds" x="38" y="214">seats(data) → modSeats derived</text>
+        <line class="e" x1="64" y1="88" x2="64" y2="112"/><line class="e" x1="180" y1="88" x2="180" y2="112"/><line class="e" x1="296" y1="88" x2="296" y2="112"/>
+        <rect class="m" x="40" y="252" width="130" height="34" rx="3"/><text class="t" x="50" y="273">registry</text>
+        <rect class="m" x="190" y="252" width="130" height="34" rx="3"/><text class="t" x="200" y="273">timeline lanes</text>
+        <line class="e" x1="105" y1="234" x2="105" y2="252"/><line class="e" x1="255" y1="234" x2="255" y2="252"/>
+      </svg>
+    </figure>
+  </div>
+  <dl class="prose">
+    <dt>Problem</dt><dd>One target is spread over four places: the <code>defs</code> row, the <code>modSeats</code> row, three members on the window, and the <code>setKnob</code> echo. The table is installed once, so the ORBITAL dial's range, which depends on the molecule, cannot be said at all.</dd>
+    <dt>Solution</dt><dd>Each window declares <code>target(id, spec)</code> beside the dial. The mod port installs it, re-registers it with a new range, stamps it and derives the seat.</dd>
+    <dt>Wins</dt><dd><ul>
+      <li>leverage: one row gives route, lane and save</li>
+      <li>locality: ORBITAL's range change stays in MOLECULES</li>
+      <li>two registration doors become one</li>
+      <li>interface shrinks: <code>knobs</code>, <code>setKappa</code> and <code>setSpeed</code> go</li>
+      <li>a rebuilt dial keeps its stamp</li>
+    </ul></dd>
+    <dt>Evidence</dt><dd class="cite">modulation.js:115-119 (orbital index deliberately out), :120-143 (reach-ins) · persist.js:25-36 · chemview.js:547, 561-568, 1236-1238 · statesview.js:796-803 · facade.js:135-138 · mod-port.js:66-68 (the <code>idOf</code> cache is built once, so a rebuilt or late dial falls back to <code>k.set</code> under a route, by reading) · kit: registry.js:107, 160-165, 252-256; timeline/bind.js:2-3; timeline/knobs.js:18-22</dd>
+  </dl>
+  <p class="adr"><b>Contradicts an in-code rule</b> (modulation.js:115-119: the orbital index is "a rebuild of the picture's subject"). Josh's rework overrules it, so it is worth reopening. Recorded as ADR-draft-0001.</p>
+</article>
+
+<!-- ═══════════════ 2 ═══════════════ -->
+<article id="c2">
+  <span class="eyebrow">Candidate 2</span>
+  <h2>The stage words are one deep module, and INFORMATIONAL renders its options</h2>
+  <div class="badges"><span class="badge b-rank">rank 2</span><span class="badge b-strong">Strong</span><span class="badge b-cat">in-process · prefs local-substitutable</span></div>
+  <ul class="files"><li>lab/informational.js</li><li>lab/shell/stage-words.js</li><li>lab/shell/settings.js</li><li>docs/STATE-SCOPES.md</li><li>lab/chemview.js</li><li>lab/orbitalsview.js</li><li>lab/windows/material.js</li><li>lab/windows/molecules.js</li></ul>
+  <div class="plate">
+    <figure class="pane" style="margin:0">
+      <figcaption class="eyebrow">Before · untyped words, hand-wired options</figcaption>
+      <svg viewBox="0 0 360 300" role="img" aria-label="Before: five emitters send untyped strings to pop; each INFORMATIONAL option crosses the settings literal; MOLECULES reaches into INFORMATIONAL's DOM">
+        <g>
+          <rect class="m" x="10" y="14" width="122" height="26" rx="3"/><text class="ts" x="16" y="31">chemview :196 BASIS</text>
+          <rect class="m" x="10" y="46" width="122" height="26" rx="3"/><text class="ts" x="16" y="63">chemview :234 METHOD</text>
+          <rect class="m" x="10" y="78" width="122" height="26" rx="3"/><text class="ts" x="16" y="95">chemview :251 VIEW</text>
+          <rect class="m" x="10" y="110" width="122" height="26" rx="3"/><text class="ts" x="16" y="127">orbitals :223 add</text>
+          <rect class="m" x="10" y="142" width="122" height="26" rx="3"/><text class="ts" x="16" y="159">material :28 WAVE</text>
+        </g>
+        <rect class="m" x="160" y="54" width="86" height="60" rx="3"/><text class="t" x="168" y="74">pop(text)</text><text class="ts" x="168" y="90">no kind</text><text class="ts" x="168" y="104">:139</text>
+        <path class="e" d="M132 27 L160 70"/><path class="e" d="M132 59 L160 76"/><path class="e" d="M132 91 L160 84"/><path class="e" d="M132 123 L160 94"/><path class="e" d="M132 155 L160 104"/>
+        <rect class="m" x="8" y="196" width="110" height="40" rx="3"/><text class="t" x="14" y="214">INFORMATIONAL</text><text class="ts" x="14" y="228">:12-27 by hand</text>
+        <rect class="m" x="126" y="196" width="110" height="40" rx="3"/><text class="t" x="132" y="214">settings blob</text><text class="ts" x="132" y="228">:31 · :85-93</text>
+        <rect class="m" x="244" y="196" width="108" height="40" rx="3"/><text class="t" x="250" y="214">setters</text><text class="ts" x="250" y="228">:125-153</text>
+        <path class="e" d="M118 216 H126"/><path class="e" d="M236 216 H244"/>
+        <rect class="m" x="262" y="40" width="88" height="56" rx="3"/><text class="t" x="270" y="58">MOLECULES</text><text class="ts" x="270" y="74">7 members read</text><text class="ts" x="270" y="88">:19-34</text>
+        <path class="lk" d="M262 80 C254 80 254 84 246 84"/>
+        <path class="lk" d="M300 96 C300 150 90 160 62 196"/><text class="lkt" x="160" y="182">querySelector · molecules.js:63</text>
+        <text class="lkt" x="10" y="262">a key dropped from :31 four times · settings.js:27-30</text>
+        <text class="lkt" x="10" y="280">"show registry adds": no place to live</text>
+      </svg>
+    </figure>
+    <figure class="pane" style="margin:0">
+      <figcaption class="eyebrow">After · say(kind, line) and a row table</figcaption>
+      <svg viewBox="0 0 360 300" role="img" aria-label="After: emitters call say with a kind; one deep stage words module owns kinds, the preference record, the layer and the caption; INFORMATIONAL mounts its rows">
+        <rect class="m" x="10" y="16" width="140" height="56" rx="3"/><text class="t" x="18" y="34">emitters</text><text class="ts" x="18" y="50">say('basis', …)</text><text class="ts" x="18" y="64">say('orbital-add', …)</text>
+        <rect class="m" x="230" y="16" width="120" height="56" rx="3"/><text class="t" x="238" y="34">INFORMATIONAL</text><text class="ts" x="238" y="50">mount(body)</text><text class="ts" x="238" y="64">+ STATUS row</text>
+        <path class="sm" d="M8 92 H352"/>
+        <line class="e" x1="80" y1="72" x2="80" y2="92"/><line class="e" x1="290" y1="72" x2="290" y2="92"/>
+        <rect class="dp" x="24" y="104" width="312" height="132" rx="4"/>
+        <text class="td" x="38" y="126">stage words</text>
+        <text class="tds" x="38" y="146">KINDS + ROWS: one table → prefs schema,</text>
+        <text class="tds" x="38" y="160">  control(descriptor), the say filter</text>
+        <text class="tds" x="38" y="176">createPrefs record · one-time lift of 6 keys</text>
+        <text class="tds" x="38" y="192">layer: follow / parallax / drift · seat · size</text>
+        <text class="tds" x="38" y="208">KaTeX ≤ 4/s · scene() from chem.stage()</text>
+        <text class="tds" x="38" y="224">caption() for the capture</text>
+        <rect class="m" x="40" y="252" width="130" height="34" rx="3"/><text class="t" x="50" y="273">kit info layer</text>
+        <rect class="m" x="190" y="252" width="130" height="34" rx="3"/><text class="t" x="200" y="273">kit createPrefs</text>
+        <line class="e" x1="105" y1="236" x2="105" y2="252"/><line class="e" x1="255" y1="236" x2="255" y2="252"/>
+      </svg>
+    </figure>
+  </div>
+  <dl class="prose">
+    <dt>Problem</dt><dd>Each option is wired through four places. Announcements carry no kind, so a per-kind toggle has nowhere to live. MOLECULES reaches into INFORMATIONAL's DOM.</dd>
+    <dt>Solution</dt><dd>Emitters call <code>say(kind, line)</code>. One table of rows feeds the kit's <code>createPrefs</code>, the kit's <code>control()</code> and the filter. INFORMATIONAL calls <code>mount()</code>.</dd>
+    <dt>Wins</dt><dd><ul>
+      <li>leverage: a new toggle is one row</li>
+      <li>locality: the filter sits in one place</li>
+      <li>the blob literal stops growing</li>
+      <li>cursor dynamics: the kit's own setters</li>
+      <li>the DOM reach-in is deleted</li>
+    </ul></dd>
+    <dt>Evidence</dt><dd class="cite">informational.js:12-27 · settings.js:27-31, 85-93, 104-106, 124 · stage-words.js:19, 27-34, 70, 84-89, 107, 125-153 · chemview.js:196, 234, 251 · orbitalsview.js:104, 223 · material.js:28 · windows/molecules.js:63-64 · kit: core/prefs.js:19-36; controls/factory.js:1-27; info/layer.js:726-788 · seat order: INFORMATIONAL rack.js:664 &lt; stage words :702 &lt; initStageText :898</dd>
+  </dl>
+  <p class="adr"><b>Proposes a scope change</b>: INFORMATIONAL's six blob keys move to their own PREFERENCE family, with a one-time lift. This follows the <code>mir.gui</code> and <code>lambdawaves.q0.curves</code> precedents. Recorded as ADR-draft-0003.</p>
+</article>
+
+<!-- ═══════════════ 3 ═══════════════ -->
+<article id="c3">
+  <span class="eyebrow">Candidate 3</span>
+  <h2>One A ↔ B morph module for both MO-REGISTRY registers</h2>
+  <div class="badges"><span class="badge b-rank">rank 3</span><span class="badge b-strong">Strong</span><span class="badge b-cat">in-process</span></div>
+  <ul class="files"><li>lab/orbitalsview.js</li><li>lab/statesview.js</li><li>lab/molecular-register.js</li></ul>
+  <div class="plate">
+    <figure class="pane" style="margin:0">
+      <figcaption class="eyebrow">Before · two copies, one half-finished</figcaption>
+      <svg viewBox="0 0 360 280" role="img" aria-label="Before: ORBITAL and STATES each keep stores, position, switch, knob and setMorph; only STATES saves and is a target">
+        <rect class="m" x="12" y="14" width="160" height="210" rx="3"/><text class="t" x="22" y="32">ORBITAL pane</text>
+        <rect class="m" x="188" y="14" width="160" height="210" rx="3"/><text class="t" x="198" y="32">STATES pane</text>
+        <g>
+          <rect class="mf" x="22" y="44" width="140" height="22"/><text class="ts" x="28" y="59">storeA · storeB · :96</text>
+          <rect class="mf" x="22" y="72" width="140" height="22"/><text class="ts" x="28" y="87">MORPH sw · A↔B · :115</text>
+          <rect class="mf" x="22" y="100" width="140" height="22"/><text class="ts" x="28" y="115">setMorph · :248-254</text>
+          <rect class="mf" x="22" y="128" width="140" height="22"/><text class="ts" x="28" y="143">slerp · :289</text>
+          <rect class="mf" x="22" y="156" width="140" height="22"/><text class="ts" x="28" y="171">save {on, selection}</text>
+          <rect class="mf" x="22" y="184" width="140" height="22"/><text class="ts" x="28" y="199">target: none</text>
+        </g>
+        <g>
+          <rect class="mf" x="198" y="44" width="140" height="22"/><text class="ts" x="204" y="59">storeA · storeB · :53</text>
+          <rect class="mf" x="198" y="72" width="140" height="22"/><text class="ts" x="204" y="87">MORPH sw · A↔B · :95</text>
+          <rect class="mf" x="198" y="100" width="140" height="22"/><text class="ts" x="204" y="115">setMorph · :279-285</text>
+          <rect class="mf" x="198" y="128" width="140" height="22"/><text class="ts" x="204" y="143">slerp · :264, :580</text>
+          <rect class="mf" x="198" y="156" width="140" height="22"/><text class="ts" x="204" y="171">save A, B, morph · :767</text>
+          <rect class="mf" x="198" y="184" width="140" height="22"/><text class="ts" x="204" y="199">target reg.morph</text>
+        </g>
+        <line class="x" x1="142" y1="158" x2="160" y2="176"/><line class="x" x1="160" y1="158" x2="142" y2="176"/>
+        <line class="x" x1="142" y1="186" x2="160" y2="204"/><line class="x" x1="160" y1="186" x2="142" y2="204"/>
+        <text class="lkt" x="12" y="248">a lane on ORBITAL A↔B reopens with no stores</text>
+        <text class="lkt" x="12" y="264">orbitalsview.js:595</text>
+      </svg>
+    </figure>
+    <figure class="pane" style="margin:0">
+      <figcaption class="eyebrow">After · one morph, two hosts</figcaption>
+      <svg viewBox="0 0 360 280" role="img" aria-label="After: one deep morph module owns stores, position, switch, knob, save, load and target; each pane passes a snapshot and an apply function">
+        <rect class="m" x="12" y="14" width="150" height="50" rx="3"/><text class="t" x="22" y="34">ORBITAL pane</text><text class="ts" x="22" y="50">snapshot · keys by k</text>
+        <rect class="m" x="198" y="14" width="150" height="50" rx="3"/><text class="t" x="208" y="34">STATES pane</text><text class="ts" x="208" y="50">snapshot · keys by lane</text>
+        <path class="sm" d="M8 84 H352"/><text class="act" x="12" y="78">createMorph({ snapshot, request, target })</text>
+        <line class="e" x1="87" y1="64" x2="87" y2="84"/><line class="e" x1="273" y1="64" x2="273" y2="84"/>
+        <rect class="dp" x="40" y="96" width="280" height="120" rx="4"/>
+        <text class="td" x="54" y="118">A ↔ B morph</text>
+        <text class="tds" x="54" y="138">stores A · B · position s · on</text>
+        <text class="tds" x="54" y="154">the → A · → B · MORPH · A ↔ B controls</text>
+        <text class="tds" x="54" y="170">coefficients(s) via slerpCoefficients</text>
+        <text class="tds" x="54" y="186">save / load { A, B, morph, morphOn }</text>
+        <text class="tds" x="54" y="202">its target row (candidate 1)</text>
+        <text class="ts" x="54" y="244">reg.morph (STATES, unchanged) · reg.orb.morph (new)</text>
+      </svg>
+    </figure>
+  </div>
+  <dl class="prose">
+    <dt>Problem</dt><dd>The MORPH is written twice, nearly line for line. Only the STATES copy is a target and is saved, so an ORBITAL A ↔ B lane would reopen onto a MORPH with no stores.</dd>
+    <dt>Solution</dt><dd>One morph module holds the stores, the position, the controls, save and load, and the target row. Each pane hands it a snapshot.</dd>
+    <dt>Wins</dt><dd><ul>
+      <li>locality: one copy, one save shape</li>
+      <li>the ORBITAL persistence gap closes</li>
+      <li>the new target is one row</li>
+      <li>one interface for tests</li>
+    </ul></dd>
+    <dt>Evidence</dt><dd class="cite">orbitalsview.js:96, 111-118, 242-254, 289, 595 · statesview.js:53, 95-98, 264, 272-285, 580, 702, 757-767, 796-803 · molecular-register.js:41 · modulation.js:129-131 · <code>setMorph</code> calls <code>morphK.set</code> (orbitalsview.js:252), so a target's <code>set</code> must not route through it. STATES has <code>setMorphValue</code> (statesview.js:803) for exactly that reason.</dd>
+  </dl>
+  <p class="adr"><b>Saved id</b>: <code>reg.morph</code> stays the STATES register's. The ORBITAL register's A ↔ B takes a new id under <code>reg</code>, named by Josh (<code>reg.orb.morph</code> is proposed). ADR-draft-0002.</p>
+</article>
+
+<!-- ═══════════════ 4 ═══════════════ -->
+<article id="c4">
+  <span class="eyebrow">Candidate 4</span>
+  <h2>MOLECULES' layout is a declared row list, not construction order</h2>
+  <div class="badges"><span class="badge b-rank">rank 4</span><span class="badge b-explore">Worth exploring</span><span class="badge b-cat">in-process</span></div>
+  <ul class="files"><li>lab/chemview.js:94-357</li><li>lab/lab.css:792-826</li></ul>
+  <div class="plate">
+    <figure class="pane" style="margin:0">
+      <figcaption class="eyebrow">Before · where a control sits = when it was built, then patched</figcaption>
+      <svg viewBox="0 0 360 290" role="img" aria-label="Before: rows built in construction order with controls moved afterwards">
+        <g>
+          <rect class="m" x="12" y="12" width="230" height="26"/><text class="ts" x="18" y="29">rH · ‹SECTION› · INSTALLED · ON  :104</text>
+          <rect class="m" x="12" y="42" width="230" height="26"/><text class="ts" x="18" y="59">r0 · ‹MOLECULE›  :111</text>
+          <rect class="m" x="12" y="72" width="230" height="26"/><text class="ts" x="18" y="89">r1 · BASIS · METHOD · VAL/ORB · ⌄  :228</text>
+          <rect class="m" x="12" y="102" width="230" height="26"/><text class="ts" x="18" y="119">rV · VIEW (6 options)  :252</text>
+          <rect class="mf" x="12" y="140" width="230" height="110"/><text class="ts" x="18" y="158">.mol-more  :325-334</text>
+          <text class="ts" x="18" y="176">VIBRATE · TDA/CORE · r2 KICK…</text><text class="ts" x="18" y="192">readouts · note · H₂ curve</text>
+        </g>
+        <path class="lk" d="M244 85 C300 85 300 175 244 175"/><text class="lkt" x="252" y="122">TDA, CORE</text><text class="lkt" x="252" y="134">:268 → :333</text>
+        <path class="lk" d="M244 80 C280 70 280 60 244 62"/><text class="lkt" x="250" y="50">insertBefore :260</text>
+        <path class="lk" d="M244 205 C290 205 290 230 244 236"/><text class="lkt" x="252" y="230">openNote :557</text>
+        <text class="lkt" x="12" y="272">seats() toggles inline display · :261</text>
+      </svg>
+    </figure>
+    <figure class="pane" style="margin:0">
+      <figcaption class="eyebrow">After · build into a map, place from one list</figcaption>
+      <svg viewBox="0 0 360 290" role="img" aria-label="After: one LAYOUT list places controls built into a map">
+        <rect class="dp" x="12" y="12" width="336" height="180" rx="4"/>
+        <text class="td" x="26" y="34">LAYOUT</text>
+        <text class="tds" x="26" y="56">['installed', 'on']</text>
+        <text class="tds" x="26" y="74">['section']</text>
+        <text class="tds" x="26" y="92">['molecule']</text>
+        <text class="tds" x="26" y="110">['basis', 'orbital|valence']</text>
+        <text class="tds" x="26" y="128">['view']        ← stepper or two rows</text>
+        <text class="tds" x="26" y="146">['method', 'more']</text>
+        <text class="tds" x="26" y="164">more: ['vibrate'], ['tda','core'], ['kick',…]</text>
+        <rect class="m" x="12" y="212" width="336" height="40" rx="3"/><text class="t" x="22" y="230">controls { id → widget }</text><text class="ts" x="22" y="245">built once; solve road and producer untouched</text>
+        <line class="e" x1="180" y1="192" x2="180" y2="212"/>
+      </svg>
+    </figure>
+  </div>
+  <dl class="prose">
+    <dt>Problem</dt><dd>The re-lay means reading about 250 lines of a 1,314-line closure. Controls are moved after they are built. VIEW is one seg of six options, which is what makes the card top-heavy.</dd>
+    <dt>Solution</dt><dd>Build the controls into a map, then place them from one <code>LAYOUT</code> list.</dd>
+    <dt>Wins</dt><dd><ul>
+      <li>locality: the layout in one list</li>
+      <li>the next re-lay is a one-list diff</li>
+      <li><code>seats()</code> becomes a row rule</li>
+    </ul></dd>
+    <dt>Why not Strong</dt><dd>The re-lay itself is about ten line moves. This pays only if more re-lays follow, and the card has already been re-laid four times (0.4.0 S4b/S4c, 0.5.3 M8, 0.7.3 K2, iteration 001). CLAUDE.md's row text is already stale: METHOD and the chevron sit in r1 (chemview.js:228-255, 348). The kit's rule sends five or more ordered options to a stepper (controls/factory.js:11-12).</dd>
+  </dl>
+</article>
+</section>
+
+<!-- ═══════════════ design it twice ═══════════════ -->
+<section class="twice" aria-labelledby="twice-h">
+  <span class="eyebrow">Design it twice · six parallel designers, three constraints each</span>
+  <h2 id="twice-h">Candidate 1: the target seam</h2>
+  <div class="frame">
+    <span class="eyebrow">The problem space</span>
+    <p><b>The constraints.</b> Saved ids stay stable (<code>chem.kick</code>, <code>chem.speed</code>, <code>reg.*</code>). The <code>app</code> literal is never extended. <code>lab/mir</code> is never edited. Each window seat keeps its rack-deps hinge at 25 or below. The windows are built (rack.js:695, :709) before the seam installs (:737), so a declaration made at creation must be queued. The kit has two facts that make it possible: an <code>integer</code> map, and hot re-registration that keeps the base and the routes. Dependency: in-process.</p>
+    <pre class="sig">// illustrative only: what a window must be able to say
+target('chem.orbital', { map: 'integer', min: 1, max: sol.nAO, get: () =&gt; orbital, set: (v) =&gt; { orbital = v; pushMatrix(); }, dial: () =&gt; orbKnob });</pre>
+  </div>
+  <div class="designs">
+    <div class="design"><span class="k">A1 · minimise the interface</span><h4>One verb, re-declare to change</h4>
+      <pre class="sig">target(id, spec) → descriptor
+spec = registry spec + dial(), seat, echo</pre>
+      <ul><li>A window knows one call. The shell keeps <code>install</code> and gains <code>seats(data)</code>.</li><li>Re-declaring is the only gesture, both for a new range and for a rebuilt dial.</li><li>The facade door becomes <code>register = mod.target</code>.</li><li>Thin: about 14 spec fields, and a <code>seat</code> path that knows <code>instruments.chem</code>.</li></ul></div>
+    <div class="design"><span class="k">A2 · maximise flexibility</span><h4>declare() with a live handle</h4>
+      <pre class="sig">declare(spec | control() | spec[]) → Handle
+Handle { refresh, redial, retire, live }
+spec.range(), present(), flash: 'step'</pre>
+      <ul><li>It accepts the kit's <code>control()</code> output, so the plain spec and <code>control()</code> are two real adapters.</li><li>Live ranges come through <code>range()</code>; <code>present()</code> sends routes dormant.</li><li><code>flash: 'step'</code> caps how fast an integer target can strobe.</li><li>Thin: a lifecycle (present, retire) that every reader must follow.</li></ul></div>
+    <div class="design"><span class="k">A3 · the common caller</span><h4>A one-liner bound to the record</h4>
+      <pre class="sig">api.target(id, knob, { min, max, get, set })
+  → { rebind(knob, [lo, hi]), drop() }
+group = root · seat = leaf · set gets a clamped v</pre>
+      <ul><li>The default case is one line. A <code>declarer('chem')</code> binds the record, so the seat comes from the id.</li><li>The seam echoes the dial, so <code>set</code> just stores.</li><li>It found that the port's <code>idOf</code> cache is built once (mod-port.js:66).</li><li>Thin: forgetting <code>rebind</code> after <code>replaceWith</code> leaves the dial dead without a word.</li></ul></div>
+  </div>
+  <div class="cmp"><table>
+    <thead><tr><th></th><th>A1 minimal</th><th>A2 flexible</th><th>A3 common caller</th></tr></thead>
+    <tbody>
+      <tr><th>Depth</th><td>High: one verb hides install, queue, stamp, echo and seat</td><td>Highest behind the seam, but the widest interface</td><td>High for the 90 % case, through defaults</td></tr>
+      <tr><th>Locality</th><td>The target lives beside the dial; the seat is a path</td><td>The same, plus lifecycle states</td><td>The same; the seat is derived from the id</td></tr>
+      <tr><th>Seam placement</th><td>Mod port <code>target</code>, reached through window api</td><td>Mod port <code>declare</code></td><td>Mod port <code>declarer(record)</code></td></tr>
+      <tr><th>Dynamic range</th><td>Re-declare</td><td><code>range()</code> plus <code>refresh()</code></td><td><code>rebind(knob, span)</code></td></tr>
+      <tr><th>Risk</th><td>The seat path leaks the record tree</td><td>Lifecycle surface</td><td>A silent rebind omission</td></tr>
+    </tbody></table></div>
+  <div class="verdict">
+    <span class="eyebrow">Recommendation · a hybrid, mostly A1</span>
+    <p>Take A1's single verb, <code>target(id, spec)</code>, where calling it again is the hot re-registration. That makes a new range and a rebuilt dial the same gesture, and leaves the window no handle to forget. Add A3's two defaults: a <code>declarer('chem')</code> binds the record, so <code>seat</code> defaults to the id's leaf and the path never leaks; and the seam does the echo, so <code>set</code> only stores. From A2, take only the per-def flash guard and a step-rate cap on integer targets. Leave out <code>present</code>, <code>retire</code> and <code>range()</code>; the kit's dormant routes already cover a molecule that has not landed yet. Fix the <code>idOf</code> cache inside the same change. The camera, material and transport rows stay in the shell's table, because the shell owns those dials.</p>
+  </div>
+
+  <h2 style="margin-top:var(--s5)">Candidate 2: the stage words</h2>
+  <div class="frame">
+    <span class="eyebrow">The problem space</span>
+    <p><b>The constraints.</b> Only a hand announces: a restore, an undo, a link or a demo never does (THE FADE law). Turning the formula off costs nothing. KaTeX runs at most four times a second. The capture caption stays one plain line. Everything here is PREFERENCE, and a project open must leave the settings blob byte-identical. The seat order matters: INFORMATIONAL is built at rack.js:664, the stage words at :702, and the layer only at :898. Dependency: in-process; the kit's <code>createPrefs</code> takes a <code>storage</code>, so the store is local-substitutable.</p>
+    <pre class="sig">// illustrative only: an emitter should write no more than this
+say('basis', 'BASIS · 6-31G*');</pre>
+  </div>
+  <div class="designs">
+    <div class="design"><span class="k">B1 · minimise the interface</span><h4>say · mount · prefs</h4>
+      <pre class="sig">say(kind, text, { ttl }) → bool
+mount(body)        // INFORMATIONAL, once
+prefs              // the kit's createPrefs</pre>
+      <ul><li>A closed KINDS table; each row says whether it fades or pops.</li><li>One row table feeds the schema, <code>control()</code> and the filter.</li><li>SKELETON, BEAD and ELLIPSOID join a MARKS group, so the DOM reach-in is gone.</li><li>Thin: kind names are strings, checked only at run time.</li></ul></div>
+    <div class="design"><span class="k">B2 · maximise flexibility</span><h4>Declared kinds, many seats</h4>
+      <pre class="sig">kind(def) · say(kind, payload)
+seat(id, {edge, pad, size}) · options()
+caption({ kinds }) · slot(group, nodes)</pre>
+      <ul><li>A window declares its own kinds, including state kinds with <code>key()</code> and <code>md()</code>.</li><li>Several blocks, each on its own kit layer.</li><li>Modulator-driven events are off by default and folded into one.</li><li>Thin: a schema built at run time, extra layers and observers, and an INFORMATIONAL that has gone generic.</li></ul></div>
+    <div class="design"><span class="k">B3 · the common caller</span><h4>import { say }, hand law inside</h4>
+      <pre class="sig">import { say } from './stage-say.js'
+say(kind, text)   // no hand flag
+chem.stage() → { key, md, plain, name, atoms }</pre>
+      <ul><li>A leaf module, so emitters need no relay.</li><li>The hand test is a trusted-event token plus <code>quiet(restore)</code>.</li><li><code>chem.stage()</code> replaces seven reads of MOLECULES.</li><li>Thin: the implicit hand test is lost after an <code>await</code>.</li></ul></div>
+  </div>
+  <div class="cmp"><table>
+    <thead><tr><th></th><th>B1 minimal</th><th>B2 flexible</th><th>B3 common caller</th></tr></thead>
+    <tbody>
+      <tr><th>Depth</th><td>High: three entries hide the filter, record, lift, layer and caption</td><td>High behind the seam; wide interface</td><td>Highest for emitters</td></tr>
+      <tr><th>Locality</th><td>The kinds table is one place</td><td>Kinds spread across the windows that declare them</td><td>KINDS in the leaf module</td></tr>
+      <tr><th>Seam placement</th><td><code>app.state.stageText</code></td><td><code>app.state.stageText</code></td><td>A leaf import, plus the slot</td></tr>
+      <tr><th>The hand law</th><td>The caller's (say from hand callbacks)</td><td><code>from: 'hand' | 'mod'</code></td><td>Implicit token</td></tr>
+      <tr><th>Risk</th><td>String kinds</td><td>YAGNI surface</td><td>Magic timing</td></tr>
+    </tbody></table></div>
+  <div class="verdict">
+    <span class="eyebrow">Recommendation · B1, with B3's source port</span>
+    <p>Take B1's three entries, <code>say</code>, <code>mount</code> and <code>prefs</code>, over one closed table of rows. Put the table in a leaf module that INFORMATIONAL (rack.js:664) and the stage words (:702) both import, so the seat order stops mattering. Add B3's <code>chem.stage()</code>: one record from MOLECULES in place of seven member reads, and it carries the NAME. Keep the hand law plain: <code>say</code> is called only from a control's hand callback (<code>onInput</code> or <code>onChange</code>), never from a target's <code>set</code>. A modulated ORBITAL dial is then silent with no token and no flag. Leave out B2's per-window kinds and extra seats until a second seat is actually wanted.</p>
+  </div>
+</section>
+
+<section id="top-recommendation" aria-labelledby="top-h">
+  <span class="eyebrow">Top recommendation</span>
+  <h2 id="top-h"><a href="#c1">Candidate 1: a target is declared once, by the window that owns its dial</a></h2>
+  <p>Two of Josh's four asks are "make this dial a target with a lane". This change turns each of them into one row in the window that owns the dial. It also absorbs Candidate 3's target row, and it fixes the rebuilt-dial stamp and the <code>idOf</code> cache that a stepped ORBITAL dial would otherwise hit. Do Candidate 3 inside the same change, since the ORBITAL A ↔ B lane needs its save. Candidate 2 comes next, with the INFORMATIONAL rebuild.</p>
+  <p class="ask-next">Which of these would you like to explore?</p>
+</section>
+</main>
