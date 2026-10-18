@@ -60,7 +60,7 @@ GD = S.get('guards')
 if GD:                                                               # iteration 006 C2: the two guards, as this build measured them
     ks = GD['keptSolvedGeometry']
     w(f"""THE GUARDS (guards.py). (a) {sum(ks.values())} rows already solved in `raw/` kept the exact atoms they were solved at
-({' · '.join(f'{k} {v}' for k, v in ks.items()) or 'none'}){'' if GD['refreshGeometry'] else f"; {GD['keptSolvedWithConformerWaiting']} of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again)"}.
+({' · '.join(f'{k} {v}' for k, v in ks.items()) or 'none'}){f"; `--refresh-geometry` (iteration 006 C3) moved {len(GD.get('solvedRowsMoved', []))} solved rows from a local geometry onto PubChem's conformer — each is solved again — and {GD['keptSolvedWithConformerWaiting']} rows whose conformer gives their solved atoms stay (the list, old and new source: the stats' guards.upgraded)" if GD['refreshGeometry'] else f"; {GD['keptSolvedWithConformerWaiting']} of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again)"}.
 {f"At the swap (solvers stopped) `guards.py --pin` put back {len(GD['pinnedAtSwap'])} more rows solved after the build had read `raw/`: {', '.join(GD['pinnedAtSwap'])}." + chr(10) if GD.get('pinnedAtSwap') else ''}(b) {GD['previousIdsPresent']}/{GD['previousRows']} ids of the previous file kept; the ids came from {' · '.join(f'{k} {v}' for k, v in GD['idsFrom'].items())}{'; MISSING: ' + ', '.join(GD['previousIdsMissing']) if GD['previousIdsMissing'] else ''}.
 
 """)
@@ -115,7 +115,7 @@ words = [['`eye`', 'eye drops and eye medicines', f"S01 ({atc_groups['S01']})"],
          ['`refrigerant`', 'the curated CFC, HCFC, HFC and HFO rows', 'curated.py: the cfcs, hcfcs and hfcs lists'],
          ['`battery`', 'the carbonate and nitrile electrolyte solvents', 'curated.py: batteries and solvents (those items only)'],
          ['`explosive`', 'the classic textbook explosives already in the catalogue', 'curated.py EXPLOSIVES (InChIKeys; adds no molecule)']]
-table(['word', 'what it holds', 'from', 'rows', 'cut by the cap'],
+table(['word', 'what it holds', 'from (ATC codes on the medicine rows)', 'rows', 'cut by the cap'],
       [r + [bt.get(r[0].strip('`'), 0), cut.get(r[0].strip('`'), 0)] for r in words])
 w("""## THE LICENCES
 

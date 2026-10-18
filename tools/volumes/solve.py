@@ -97,7 +97,8 @@ BASES = [b for b in LADDER if not args.bases or b in args.bases.split(',')]
 LOG = RAW / 'solve.log'
 PID, HOST = os.getpid(), socket.gethostname()
 
-class Stop(Exception): pass
+class Stop(BaseException): pass   # NOT an Exception (iteration 006 C3): a TERM that lands in a guarded call (the point-group detection's
+                                  # `except Exception`) was swallowed there, and the solver ran on; only main()'s `except Stop` catches it
 def _stop(signum, frame): raise Stop(signal.Signals(signum).name)
 signal.signal(signal.SIGTERM, _stop); signal.signal(signal.SIGINT, _stop)
 
