@@ -81,7 +81,9 @@ try {
   assert.equal(scrolled.updated, true); assert.deepEqual(scrolled.overshoot, []);
   console.log('PASS scrolled-away modulation cards do not cut the stage outside their viewport');
 
-  await g.ev(`__LW.layout.modulation.collapse();__LW.layout.popOut('shadow',{x:700,y:160,w:280});
+  /* SHADOW is closed on the first run since iteration 001 (INFORMATIONAL took its seat): open it before it is popped out, or the
+     floated card is 0×0 and this row measures nothing (iteration 006 R) */
+  await g.ev(`__LW.layout.modulation.collapse();__LW.layout.reopen('shadow');__LW.layout.popOut('shadow',{x:700,y:160,w:280});
     await __LW.settle();return true;`);
   const detached = await g.ev(`
     const card=document.querySelector('.dev[data-id="shadow"]'),h=card.querySelector('.dev-head'),v=card.querySelector('.dev-body');

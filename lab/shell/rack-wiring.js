@@ -42,6 +42,29 @@ export function createRackWiring(app) {
     onChange: () => occlusion.dirty() });   // a kit-side act moved a window: the mask follows (what is remembered is saveSettings', on its own edges)
   const devTitle = (d) => ((d.querySelector('.dev-eyebrow') || {}).textContent || d.dataset.id).trim();
   for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, title: devTitle(d), hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
+  /* ── iteration 006 R · A RACK'S SCROLLBAR ANSWERS ITS CONTENT, NEVER ITS MOTION ─────────────────────────────────────────────
+   * Both racks are content-sized scrollers (lab.css: bottom auto, max-height 100%, overflow-y auto).  The kit's motion (mir/shell/
+   * rack.js createRackMotion) FLIPs every card that moves UP when one above it hides, folds or leaves: for 320 ms it is drawn by a
+   * transform where it WAS, below the column's new bottom.  That is scrollable overflow, so the thin bar came up, the column
+   * narrowed 6 px, every card's width changed, the motion's own ResizeObserver re-ran its refresh inside the delivery (cancel: the
+   * bar goes; restart: it comes back) and the dock's observer on the rack (mir/window/dock.js observeSpan) was left holding a size
+   * it could not be told — Firefox's "ResizeObserver loop completed with undelivered notifications".  MOLECULES ON stands STATE
+   * down above four folded cards (history: NEW → MOLECULES ON → Ctrl+Z; field-law F4, V2); red since every first-run window
+   * arrived folded (503997b).  So a rack whose IN-FLOW content fits wears .rack-fits (overflow-y: hidden — the same picture at
+   * rest, where there was no bar to lose, and a transform can no longer raise one); content past its height takes the class off
+   * and the bar back.  Read, then written only on a change, in an animation frame — never inside a delivery; booked by a
+   * ResizeObserver on the racks and on their cards' heads and bodies (the very boxes the dock and the motion already observe, so it
+   * adds no new way to leave a notification undelivered) and by the racks' membership. */
+  { const cols = [rack, rackL].filter(Boolean), seen = new WeakSet(); let booked = 0;
+    /** the column's content bottom AS LAID OUT: offsetTop/offsetHeight ignore the motion's transforms; a hidden card has no offsetParent */
+    const contentBottom = (r) => { let b = 0; for (const c of r.children) if (c.offsetParent === r) b = Math.max(b, c.offsetTop + c.offsetHeight); return b + (parseFloat(getComputedStyle(r).paddingBottom) || 0); };
+    const fit = () => { booked = 0; const fits = cols.map((r) => contentBottom(r) <= r.clientHeight + 1);
+      cols.forEach((r, i) => { if (r.classList.contains('rack-fits') !== fits[i]) r.classList.toggle('rack-fits', fits[i]); }); };
+    const book = () => { if (!booked) booked = requestAnimationFrame(fit); };
+    const fitRO = new ResizeObserver(book), see = (n) => { if (!seen.has(n)) { seen.add(n); fitRO.observe(n); } };
+    const watch = () => { for (const r of cols) { see(r); for (const c of r.children) if (c.classList.contains('dev')) for (const n of c.children) if (n.matches('.dev-head, .dev-body')) see(n); } book(); };
+    const members = new MutationObserver(watch); for (const r of cols) members.observe(r, { childList: true });
+    watch(); }
   /* the kit's + list knows nothing of `hidden` (a legacy card, or one a molecule stood down): those rows go (BRIEF R5) */
   if (rk.el.add) rk.el.add.addEventListener('click', () => { for (const it of rk.el.addList.querySelectorAll('.mb-item[data-win]')) { const d = devById(it.dataset.win); if (d && d.hidden) it.remove(); } });
   if (rk.el.toggle) rk.el.toggle.addEventListener('click', () => saveSettings());   // wave 59 (B111): the kit's ◧ hides by setHidden alone; on a phone the press IS the browser saying which it wants, stored as the B key stores it
