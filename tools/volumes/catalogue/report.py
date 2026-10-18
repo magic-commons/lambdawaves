@@ -61,8 +61,7 @@ if GD:                                                               # iteration
     ks = GD['keptSolvedGeometry']
     w(f"""THE GUARDS (guards.py). (a) {sum(ks.values())} rows already solved in `raw/` kept the exact atoms they were solved at
 ({' · '.join(f'{k} {v}' for k, v in ks.items()) or 'none'}){'' if GD['refreshGeometry'] else f"; {GD['keptSolvedWithConformerWaiting']} of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again)"}.
-{f"At the swap (solvers stopped) `guards.py --pin` put back {len(GD['pinnedAtSwap'])} more rows solved after the build had read `raw/`: {', '.join(GD['pinnedAtSwap'])}." if GD.get('pinnedAtSwap') else ''}
-(b) {GD['previousIdsPresent']}/{GD['previousRows']} ids of the previous file kept; the ids came from {' · '.join(f'{k} {v}' for k, v in GD['idsFrom'].items())}{'; MISSING: ' + ', '.join(GD['previousIdsMissing']) if GD['previousIdsMissing'] else ''}.
+{f"At the swap (solvers stopped) `guards.py --pin` put back {len(GD['pinnedAtSwap'])} more rows solved after the build had read `raw/`: {', '.join(GD['pinnedAtSwap'])}." + chr(10) if GD.get('pinnedAtSwap') else ''}(b) {GD['previousIdsPresent']}/{GD['previousRows']} ids of the previous file kept; the ids came from {' · '.join(f'{k} {v}' for k, v in GD['idsFrom'].items())}{'; MISSING: ' + ', '.join(GD['previousIdsMissing']) if GD['previousIdsMissing'] else ''}.
 
 """)
 w('By blurb:\n\n')
