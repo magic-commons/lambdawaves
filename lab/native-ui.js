@@ -7,7 +7,7 @@ import { buildMacroSlot } from './mir/modulation/modwindow/modwindow.js';   // t
 
 
 export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCadence }) {
-  const ids=['spectrum','state','palette','observer','camera','clip','slice','settings'];
+  const ids=['spectrum','state','staticfield','palette','observer','camera','clip','slice','settings'];
   for(const id of ids){const d=document.querySelector(`.dev[data-id="${id}"]`);if(!d)continue;d.classList.add('native-clean');
     for(const l of d.querySelectorAll('.grp-lbl')) { l.title=l.textContent;l.textContent=l.textContent.split(/·|  |\(/)[0].trim(); }
   }
@@ -65,12 +65,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig')){if(b.textContent.includes('SHOW THE WARNING'))b.querySelector('.trig-l').textContent='WARNING';actions.appendChild(b);}
   const help=el('div','settings-help',pages.display);
   for(const g of oldGroups){if(g===quality)continue;for(const n of g.querySelectorAll('.note:not(.link-note), .sturm-note'))help.appendChild(n);g.remove();}
-  const rotations=ui.rotZRate.root.parentElement;
-  const actionRow=el('div','row tight');rotations.before(actionRow);
-  for(const t of [...rotations.querySelectorAll(':scope > .trig')])actionRow.appendChild(t);
-  rotations.classList.add('native-rotors');
-  const turn=rotations.querySelector('.k');
-  for(const k of [turn,ui.kzKnob.root,ui.defKnob.root,ui.rotZRate.root,ui.kzRate.root,ui.defRate.root])rotations.appendChild(k);
+  // iteration 008 S: the rotor grid (ROTATE z · STARK K_z · DEFECT L² over the three SPINs) is FIELD's DRIVES row, built in that order with .native-rotors
   const tr=document.getElementById('transport');
   const main=el('div','native-play-row');main.append(...tr.children);tr.appendChild(main);
   const repeatInfo=infoPanel(ui.periodFx.root,'Repeat mathematics');

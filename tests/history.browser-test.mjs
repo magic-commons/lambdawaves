@@ -157,10 +157,10 @@ try {
     `const k = __show(__knob('EXPOSURE')); await __w(80); await __drag(k.querySelector('.k-dial'), 0, -48, 12, 50);`, 'EXPOSURE · WAVE')).undoMs;
   await scene('the stage colour (its colour well)', `await __field(__show(document.querySelector('.stage-colour')), '#305070');`, 'STAGE COLOUR · SETTINGS');
   await scene('an overlay switch (KEPLER ORBIT)', `const s = __show(__sw('KEPLER ORBIT')); await __w(50); await __press(s.querySelector('button') || s);`, 'KEPLER ORBIT · ORBIT');
-  undoMs.preset = (await scene('a preset (its select → loadPreset)', `await __field(__show(document.querySelector('select[aria-label="preset superposition"]')), '2p+');`, 'PRESET SUPERPOSITION · STATE')).undoMs;
+  undoMs.preset = (await scene('a preset (SPECTRUM\'s ‹ PRESET › stepper → loadPreset; iteration 008 S: it left STATE)', `await __press(__show(document.querySelector('.dev[data-id="spectrum"] .sp-preset [aria-label="next"]')));`, 'edit')).undoMs;   // the kit's stepper names no row yet (the palette's RAMP stepper below is 'edit' too)
   undoMs.element = (await scene('an element change (ELEMENT Z dragged)', `const k = __show(__knob('ELEMENT Z')); await __w(80); await __drag(k.querySelector('.k-dial'), 0, -30);`, 'ELEMENT Z · SPECTRUM')).undoMs;
   await scene('A/B · STORE A', `await __press(__show(__trig('STORE A')));`, 'STORE A · STATE');
-  await g.ev(`await __field(document.querySelector('select[aria-label="preset superposition"]'), '1s+2pz'); await __w(500); __LW.history.flush(); return 1;`);
+  await g.ev(`__LW.loadPreset('1s+2pz'); await __w(500); __LW.history.flush(); return 1;`);
   await scene('A/B · STORE B', `await __press(__show(__trig('STORE B')));`, 'STORE B · STATE');
   await scene('A/B · the transition on', `const s = __show(__sw('TRANSITION')); await __press(s.querySelector('button') || s);`, 'TRANSITION · STATE');
   await g.ev(`const s = __sw('TRANSITION'); await __press(s.querySelector('button') || s); await __w(500); __LW.history.flush(); return 1;`);   /* stood down again: the scenes below need a still register */

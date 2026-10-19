@@ -68,7 +68,7 @@ export function createKeplerSurface(app) {
     const n1 = reg.norm2(), esc = n0 > 0 ? 1 - n1 / n0 : 0;
     if (ui.kickRo) {
       ui.kickRo.set(`${(100 * esc).toFixed(2)}% · ${(r.p1 - r.p0).toFixed(4)}`, esc > 0.2 ? 'warn' : 'ok');
-      ui.kickRo.setSub(`impulse vector: <m>k</m> = ${k.toFixed(3)} along (${dir.map((v) => v.toFixed(2)).join(', ')}) · Ehrenfest would give ${k.toFixed(3)} · <m>‖ψ‖</m> now ${Math.sqrt(n1).toFixed(4)}`);
+      ui.kickRo.setSub(`<m>k</m> = ${k.toFixed(3)} · <m>λ</m> = ${(2 * Math.PI / k).toFixed(1)} a₀ along (${dir.map((v) => v.toFixed(2)).join(', ')}) · Ehrenfest would give ${k.toFixed(3)} · <m>‖ψ‖</m> now ${Math.sqrt(n1).toFixed(4)}`);
     }
     touchState();
   }
@@ -298,7 +298,7 @@ export function createKeplerSurface(app) {
     const n1 = reg.norm2(), p1 = pAlongDir(dir), esc = n0 > 0 ? 1 - n1 / n0 : 0;
     if (ui.kickRo) {
       ui.kickRo.set(`${(100 * esc).toFixed(2)}% · ${(p1 - p0).toFixed(4)}`, esc > 0.2 ? 'warn' : 'ok');
-      ui.kickRo.setSub(`impulse vector: <m>k</m> = ${k.toFixed(3)} along (${dir.map((v) => v.toFixed(2)).join(', ')}) · Ehrenfest would give ${k.toFixed(3)} · <m>‖ψ‖</m> now ${Math.sqrt(n1).toFixed(4)}`);
+      ui.kickRo.setSub(`<m>k</m> = ${k.toFixed(3)} · <m>λ</m> = ${(2 * Math.PI / k).toFixed(1)} a₀ along (${dir.map((v) => v.toFixed(2)).join(', ')}) · Ehrenfest would give ${k.toFixed(3)} · <m>‖ψ‖</m> now ${Math.sqrt(n1).toFixed(4)}`);
     }
     touchState();
   }

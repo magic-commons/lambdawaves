@@ -1,50 +1,23 @@
-/* lab/windows/state.js — the STATE card and its CLEAR (0.5.2 R2a; moved verbatim out of lab/rack.js boot()), created at the card's seat.  §0's consts,
- * the loop's schedule, the rack and the controller's names are handed over (backward); normalizeNow, shadowView and the persistence and link verbs are
- * read through their slots inside callbacks (forward).  It registers app.w.wState; boot() destructures the return. */
+/* lab/windows/state.js — the STATE card (0.5.2 R2a; moved verbatim out of lab/rack.js boot()), created at the card's seat.
+ * Iteration 008 S (Josh, 2026-10-18: "States should simply be the A to B and Store A/B with transition on and 'rabi' knob"): the card is
+ * STORE A · A · STORE B · B, TRANSITION and RABI with the A / B readout, and nothing else.  Its other rows went home (research/iteration-008/
+ * S-BUILD.md): the PRESET stepper to SPECTRUM's head, EMPTY ↔ FILL ALL to SPECTRUM's grid (a hand stroke normalises at its end), the static
+ * field, the drives and the impulse's knobs to FIELD (lab/windows/static-field.js), LAST IMPULSE to METERS, SAVE / LOAD to FILE and FOLDERS,
+ * COPY JSON / COPY LINK to EDIT.  The id `state`, its WORKSPACE seat, `ui.ab`, `app.hooks.ab` and `state.rabi` are unchanged; the card's status
+ * line stays the lab's one sink (keys, links, undo, restore) and the link's note stays under it.  CLEAR the register (the menubar's row and
+ * SPECTRUM's EMPTY) stays this module's function.  It registers app.w.wState; boot() destructures the return. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js';
-import { PRESETS } from '../state.js';
-import { momentumZ, AXIS_TO_Z } from '../kick.js';
-import { applyKickAlong, escaped, SQUEEZE, SQUEEZE_REFUSAL, SLAP_REFUSAL } from '../kick.js'; import { varianceZ } from '../calculus.js'; import { onHamiltonian } from '../hamiltonian.js';   // 0.8.0 G2 · SQUEEZE + CAT
-import { applyRotor as rotorOnCopy } from '../frontier.js';
-import { getHamiltonian, getZ } from '../hamiltonian.js';
-import { saddle, polarizability } from '../stark.js';
+import { el, knob, sw, trig, readout, group } from '../mir/kit.js';
 export function createStateCard(app) {
-  const { ui, device, reg, hNote, clock, mat, sturm } = app, { schedule } = app.loop, { rack } = app.host, { modHand, ROT_LIMIT, setRotationRate, touchState, loadPreset } = app.ctl;
-  /* OPTIMIZATION 2026-09-24 · N1 · STATE's CLEAR, NAMED.  The menubar's "CLEAR the register" pressed the FIRST `.trig`
+  const { ui, device, reg, hNote, clock, sturm } = app, { schedule } = app.loop, { rack } = app.host, { touchState } = app.ctl;
+  /* OPTIMIZATION 2026-09-24 · N1 · THE REGISTER'S CLEAR, NAMED.  The menubar's "CLEAR the register" pressed the FIRST `.trig`
      reading CLEAR in document order — SPECTRUM's head row on a first visit (c ↦ 0, no clock reset), the undo ring's own
-     CLEAR once HISTORY floated (AUDIT-E FE1).  The register's CLEAR is this one function now, and both the STATE trigger
-     and the menu row call it (the lead's ruling: STATE's CLEAR; Josh may reverse it). */
+     CLEAR once HISTORY floated (AUDIT-E FE1).  The register's CLEAR is this one function: the menu row and SPECTRUM's EMPTY call it. */
   function clearRegister() { reg.clear(); app.state.refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); app.w.shadowView.clearTrail(); touchState(); }
   const wState = device({ id: 'state', eyebrow: 'STATE', status: '' });
   app.w.wState = wState;
   rack.appendChild(wState.root);
   {
-    const r1 = wState.row();
-    ui.presetSel = el('select', 'sel', r1); ui.presetSel.setAttribute('aria-label', 'preset superposition');
-    for (const p of PRESETS) { const o = el('option', '', ui.presetSel, p.label); o.value = p.id; }
-    ui.presetSel.addEventListener('change', () => loadPreset(ui.presetSel.value, { hand: true }));
-    ui.presetSel.style.flex = '1 1 160px';
-
-
-    r1.appendChild(trig({ label: 'RELOAD', title: 'Reload the selected preset and reset time', onFire: () => loadPreset(ui.presetSel.value, { hand: true }) }).root);
-    r1.appendChild(sw({ label: 'PRESET VISUALS', value: true, onChange: (v) => { app.state.applyVisuals = v; } }).root);
-    ui.presetNote = el('div', 'note', wState.body, '');
-    const r2 = wState.row();
-    r2.appendChild(trig({ label: 'NORMALIZE', title: 'Normalize the state coefficients', onFire: () => app.w.normalizeNow() }).root);
-
-
-    r2.appendChild(trig({ label: 'CLEAR', onFire: () => clearRegister() }).root);
-    r2.appendChild(knob({ label: 'ROTATE z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)', onDelta: (d) => { reg.rotateZ(d); touchState(); } }).root);
-    /* THE JOG WHEEL ABOVE AND THE DIAL BELOW ARE NOT TWO TRUTHS.  The wheel is a DELTA — one shove,
-       applied and forgotten, holding nothing (mir/kit.js knob, `onDelta`).  This is a RATE, in rad/s, and it is a
-       real stored number: rotRate.z IS what the registry reads and writes, so `get` cannot lie and
-       modSyncBases cannot fight it.  Nothing anywhere accumulates the angle the two of them make. */
-    ui.rotZRate = knob({ label: 'SPIN z', min: -ROT_LIMIT.z, max: ROT_LIMIT.z, value: 0, cls: 'rot',
-      title: 'Continuous state rotation about z. Double-click to stop.',
-      fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
-      onInput: (v) => { if (modHand('state.rot.z', v)) return; setRotationRate('z', v); } });
-    r2.appendChild(ui.rotZRate.root);
     {
       const gab = group(wState.body, 'A / B  ·  TRANSITION  (Rabi)');
       const rab = el('div', 'row tight native-ab', gab);   // 0.5.3 M11 (R7): ONE row STORE A · A · STORE B · B, a stored slot lit by `.stored` (lab.css ::after)
@@ -64,7 +37,7 @@ export function createStateCard(app) {
         touchState(); abStatus();
       } });
       rab2.appendChild(ui.abSw.root);
-      ui.abOmega = knob({ label: 'Ω  RABI', min: 0.005, max: 1, value: 0.05, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (reg.transition) { const th = reg.mixAngle(clock.t); reg.transition.omega = v; reg.transition.t0 = clock.t - 2 * th / v; } abOmega = v; } });
+      ui.abOmega = knob({ label: 'RABI  Ω', min: 0.005, max: 1, value: 0.05, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (reg.transition) { const th = reg.mixAngle(clock.t); reg.transition.omega = v; reg.transition.t0 = clock.t - 2 * th / v; } abOmega = v; } });
       rab2.appendChild(ui.abOmega.root);
       rab2.appendChild(ui.abRo.root);
       /* THE PROJECT'S ROAD (Josh, 2026-09-10: "state transitions don't keep"): both stores, Ω and whether the
@@ -100,111 +73,6 @@ export function createStateCard(app) {
           abOmega = w; return w; } };
       el('div', 'note', gab).innerHTML = '<b>A / B.</b> STORE A and STORE B capture two states. TRANSITION mixes them at Ω; composite states use the same envelope as an illustrative model. Turning the transition off keeps the current mix.';
     }
-    ui.kzKnob = knob({ label: 'STARK K_z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{−iθK_z}', onDelta: (d) => { reg.rotateK(d); touchState(); } });
-    r2.appendChild(ui.kzKnob.root);
-    ui.defKnob = knob({ label: 'DEFECT L²', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{iαL²}', onDelta: (d) => { reg.defectWait(d); touchState(); } });
-    r2.appendChild(ui.defKnob.root);
-    /* THE TWO DEFLECTION RATES.  Both setters CLAMP TO ZERO under STURMIAN rather than trusting the
-       disable, because a modulated base survives a setDisabled(): the dial would sit dead while an
-       LFO went on writing behind it.  A guard in rotStep alone would be worse — the dial would then
-       read a rate that does nothing, and a knob that does not follow the value it owns is a knob
-       that lies.  So: clamped here, zeroed and disabled in applySturmian, and ignored in rotStep. */
-    ui.kzRate = knob({ label: 'SPIN K_z', min: -ROT_LIMIT.kz, max: ROT_LIMIT.kz, value: 0, cls: 'rot',
-      title: 'Continuous Stark rotation. Double-click to stop.',
-      fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
-      onInput: (v) => { const w = sturm.P ? 0 : v; if (w !== v) ui.kzRate.set(w); if (modHand('state.stark.kz', w)) return; setRotationRate('kz', w); } });
-    r2.appendChild(ui.kzRate.root);
-    ui.defRate = knob({ label: 'SPIN L²', min: -ROT_LIMIT.def, max: ROT_LIMIT.def, value: 0, cls: 'rot',
-      title: 'Continuous l-dependent phase. Double-click to stop.',
-      fmt: (v) => v === 0 ? '· still ·' : v.toFixed(3) + ' rad/s',
-      onInput: (v) => { const w = sturm.P ? 0 : v; if (w !== v) ui.defRate.set(w); if (modHand('state.defect.l2', w)) return; setRotationRate('def', w); } });
-    r2.appendChild(ui.defRate.root);
-    el('div', 'note', wState.body).innerHTML = '<b>State transforms.</b> STATE ROTATE changes m phase. STARK ROTATE mixes l within each (n,m) shell. DEFECT WAIT adds an l-dependent phase. Camera rotation changes only the view.';
-
-
-    const gK = group(wState.body, 'IMPULSE  ·  a sudden momentum kick  <m>ψ ↦ e^{ik·x}ψ</m>');
-    mat.bow = { gain: 1, curve: 1, limit: 3, ...(mat.bow || {}) };
-    const feel = el('div', 'row tight bow-feel', gK);
-    ui.bowKnobs = {};
-    for (const [key,label,min,max] of [['gain','PULL',.25,4],['curve','RESPONSE',.25,3],['limit','LIMIT',.1,3]]) {
-      const k = knob({ label, min, max, value:mat.bow[key], fmt:v=>v.toFixed(2), title: key==='curve'?'Shape the response around linear':'Impulse '+label.toLowerCase(), onInput:v=>{mat.bow[key]=v;} }); ui.bowKnobs[key]=k; feel.appendChild(k.root);
-    }
-    el('div','bow-hint',gK,'Ctrl + drag · release to fire');
-    const rk = el('div', 'row tight', gK);
-    let kickK = 0.2, kickAxis = 'z';
-    rk.appendChild(knob({ label: 'STRENGTH', min: 0.01, max: 1.5, value: 0.2, log: true, fmt: (v) => v.toFixed(3) + ' a.u.', onInput: (v) => { kickK = v; } }).root);
-    ui.kickAxis = seg({ label: 'ALONG', value: 'z', options: [{ id: 'x', label: 'x' }, { id: 'y', label: 'y' }, { id: 'z', label: 'z' }], onChange: (v) => { kickAxis = v; } });
-    rk.appendChild(ui.kickAxis.root);
-    rk.appendChild(trig({ label: 'RELEASE', title: 'Apply ψ ↦ e^{ik·x}ψ on the selected axis', onFire: () => slap(kickK, kickAxis) }).root);
-    ui.dragKnob = knob({ label: 'DRAG <m>γ</m>', min: 0, max: 0.5, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(3), onInput: (v) => { reg.setDamping(v); touchState(); } });
-    rk.appendChild(ui.dragKnob.root);
-    ui.kickRo = readout({ label: 'LAST IMPULSE · escaped / momentum', value: '—', cls: 'two', sub: 'no impulse yet' });
-    rk.appendChild(ui.kickRo.root);
-    const rq = el('div', 'row tight', gK);   // 0.8.0 G2 · SQUEEZE + CAT, the OSCILLATOR's: r rides in mat.bow.squeeze (PROJECT, absent until moved)
-    const sqK = knob({ label: 'SQUEEZE r', min: 0, max: 0.33, value: mat.bow.squeeze || 0, fmt: (v) => (+v || 0).toFixed(3), title: 'S(r) = e^{r(a² − a†²)/2} · capped at 0.33, where Var is still within 2e-3 of e^{−2r}·Var₀: past it the n ≤ 6 register keeps the norm and loses the variance (r = 0.5: 0.05 % lost, 2.1 % wrong)', onInput: (v) => { mat.bow.squeeze = v || undefined; } });
-    const osc = [['SQUEEZE-IN', 'S(r) along the IMPULSE axis', () => squeezeIn(sqK.get(), kickAxis)], ['CAT', 'two slaps ±k of |0⟩ into A and B; the register is their normalised sum |α⟩ + |−α⟩', () => cat(kickK, kickAxis)]].map(([label, t, onFire]) => trig({ label, title: t + ' · ' + SQUEEZE_REFUSAL, onFire }).root);
-    ui.bowKnobs.squeeze = { set: (x) => sqK.set(+x || 0) }; for (const e of [sqK.root, ...osc]) rq.appendChild(e);
-    const oscSync = () => { const off = getHamiltonian().id !== 'qho'; sqK.setDisabled(off); for (const b of osc) b.disabled = off; }; oscSync(); onHamiltonian(oscSync);
-    function squeezeIn(r, axis) { if (!reg.populated().length) reg.set(0, 1, 0, clock.t); const n0 = reg.norm2(), v0 = pAlong(axis, varianceZ); reg.squeeze(r, axis, clock.t); const v1 = pAlong(axis, varianceZ), want = Math.exp(-2 * r) * v0;
-      SQUEEZE.said = `Var(${axis}) ${v1.toFixed(4)} · e^{−2r}·Var₀ = ${want.toFixed(4)} · error ${Math.abs(v1 / want - 1).toExponential(1)} · lost norm ${escaped(n0, reg.norm2()).toExponential(1)}`; ui.kickRo.setSub(SQUEEZE.said); touchState(); }
-    function cat(k, axis) { const [A, B] = [1, -1].map((q) => { const s = { re: new Float64Array(91), im: new Float64Array(91) }; s.re[0] = 1; applyKickAlong(s.re, s.im, k, [...'xyz'].map((c) => c === axis ? q : 0)); return s; });   // ±d, k > 0: the boost's Bessel tables take k ≥ 0
-      app.hooks.ab.setStores(A, B); reg.anchorFrom(A.re.map((v, i) => v + B.re[i]), A.im.map((v, i) => v + B.im[i]), clock.t); reg.normalize(); touchState(); }
-    el('div', 'note', gK).innerHTML = '<b>Impulse.</b> RELEASE applies e<sup>ik·x</sup> and keeps only the part represented by n ≤ 6; ESCAPED reports the omitted norm. Ctrl-drag on the field sets direction and strength. DRAG γ damps excited amplitudes as a display model and discards the lost norm. On the OSCILLATOR, SQUEEZE-IN applies S(r) along the axis and METERS prints Var against e<sup>−2r</sup>·Var₀ beside the lost norm; CAT stores the ±k slaps of the ground state as A and B and sets their normalised sum.';
-    function pAlong(axis, f = momentumZ) {
-      const c = reg.at(clock.t);                                  // sum over the WHOLE register: a rotation moves amplitude between m
-      if (axis === 'z') return f(c.re, c.im);
-      const R = AXIS_TO_Z[axis], re = Float64Array.from(c.re), im = Float64Array.from(c.im);
-      rotorOnCopy(re, im, { which: 'both', axis: R.axis, angle: R.angle });
-      return f(re, im);
-    }
-    function slap(k, axis) {
-      if (getHamiltonian().separable) return ui.kickRo.set('—', 'warn'), ui.kickRo.setSub(SLAP_REFUSAL);   // 0.9.4 S1
-      const n0 = reg.norm2(), p0 = pAlong(axis);
-      if (!reg.populated().length && getHamiltonian().id !== 'well') reg.set(0, 1, 0, clock.t);
-      reg.kick(k, axis, clock.t);
-      const n1 = reg.norm2(), p1 = pAlong(axis);
-      const esc = n0 > 0 ? 1 - n1 / n0 : 0;
-      ui.kickRo.set(`${(100 * esc).toFixed(2)}% · ${(p1 - p0).toFixed(4)}`, esc > 0.2 ? 'warn' : 'ok');
-      ui.kickRo.setSub(`<m>k</m> = ${k.toFixed(3)} along ${axis} · Ehrenfest would give ${k.toFixed(3)}; the deficit is the continuum · <m>‖ψ‖</m> now ${Math.sqrt(n1).toFixed(4)}`);
-      touchState();
-    }
-    app.hooks.slap = slap;
-
-    const gF = group(wState.body, 'STATIC FIELD');
-    const rf = el('div', 'row tight', gF);
-    ui.bz = knob({ label: 'ZEEMAN B', min: 0, max: 0.05, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(4), onInput: (v) => { reg.setField({ Bz: v }); touchState(); } });
-    ui.fz = knob({ label: 'STARK F', min: 0, max: 0.01, value: 0, fmt: (v) => v === 0 ? 'off' : v.toExponential(1), onInput: (v) => { if (!getHamiltonian().stark || sturm.P) { ui.fz.set(0); return; } const c = reg.field.inter && reg.at(clock.t); reg.setField({ Fz: v }); if (c) reg.anchorFrom(c.re, c.im, clock.t); interSync(); touchState(); } });
-    /* 0.8.0 G3 · INTER-SHELL: STARK F across shells — the register engages lab/stark.js' propagator (H = diag(E) + F·z over the 91 labels) at F > 0, c(t) continuous */
-    ui.interSw = sw({ label: 'INTER-SHELL', value: false, title: 'STARK F across shells: H = diag(E) + F·z over all 91 labels, eigensolved once per F', onChange: (v) => {
-      const why = !v ? '' : !getHamiltonian().stark ? 'hydrogen only' : sturm.P ? 'off under STURMIAN' : getZ() !== 1 ? 'Z = 1 only' : '';
-      if (why) { ui.interSw.set(false); ui.interRo.set('refused', 'warn'); ui.interRo.setSub(`INTER-SHELL is ${why}: z is hydrogen's own dipole matrix over the n ≤ 6 labels`); return; }
-      if (reg.transition && app.hooks.ab) app.hooks.ab.set(false);
-      const c = reg.at(clock.t); reg.setField({ inter: v }); reg.anchorFrom(c.re, c.im, clock.t); interSync(); touchState(); } });
-    rf.appendChild(ui.bz.root); rf.appendChild(ui.fz.root); rf.appendChild(ui.interSw.root);
-    rf.appendChild(trig({ label: 'NO FIELD', onFire: () => { reg.setField({ Bz: 0, Fz: 0 }); ui.bz.set(0); ui.fz.set(0); touchState(); } }).root);
-    ui.fieldRo = readout({ label: 'H IN FORCE', value: 'H₀ (bare Coulomb)', cls: 'two', sub: '' });
-    rf.appendChild(ui.fieldRo.root);
-    ui.interRo = readout({ label: 'INTER-SHELL', value: 'off', cls: 'wide', sub: 'STARK F acts within each shell' }); el('div', 'row tight', gF).appendChild(ui.interRo.root);
-    /* the propagator's stand-downs (the Sturmian's road: RATE · K_z · DEFECT · A⇄B) and the readout — every number computed; synced after any write of STARK F (a restore, an operator switch, NO FIELD) */
-    function interSync() { const P = reg.P, S = !!(P && P.stark), F = reg.field.Fz; ui.interSw.set(!!reg.field.inter); if (app.hooks.status) app.hooks.status();
-      for (const k of [ui.kzKnob, ui.defKnob, ui.kzRate, ui.defRate, ui.abOmega]) if (k) k.setDisabled(!!P);
-      if (ui.abSw) { ui.abSw.root.disabled = !!P; ui.abSw.root.classList.toggle('disabled', !!P); }
-      if (!S) { ui.interRo.set(reg.field.inter ? 'set STARK F' : 'off', ''); ui.interRo.setSub(reg.field.inter ? 'engages at F > 0' : 'STARK F acts within each shell'); ui.interRo.root.title = ''; return; }
-      ui.kzRate.set(0); ui.defRate.set(0); setRotationRate('kz', 0); setRotationRate('def', 0);
-      let k = 1, k1 = 0; while (k <= 6 && saddle(k) > F) k++; for (let j = 1; j < 91; j++) if (Math.abs(P.C[j]) > Math.abs(P.C[k1])) k1 = j;   // k1: the eigenvector carrying 1s
-      ui.interRo.set(`1s ${(P.E[k1] - P.H[0]).toExponential(1)} Eh · α(n ≤ 6) ${polarizability().toFixed(2)} of 4.5`, 'live');
-      ui.interRo.setSub(k > 6 ? 'every shell below its saddle' : `saddle n = ${k} at ${saddle(k).toExponential(1)}: ${reg.nmax() >= k ? 'would ionise — this basis holds it' : 'nothing populated past it'}`);
-      ui.interRo.root.title = `F = ${F} · NUMERICAL: eigensolve of diag(E) + F·z in the n ≤ 6 basis (${P.ms.toFixed(1)} ms), no continuum · RATE · K_z · DEFECT · A⇄B stand down`; }
-    const fzSet = ui.fz.set; ui.fz.set = (v, q) => { fzSet(v, q); queueMicrotask(interSync); };
-    el('div', 'note', gF).innerHTML = '<b>Fields.</b> ZEEMAN adds an orbital m-dependent phase. STARK mixes l within each shell and omits coupling between shells; keep F well below the limit shown in the readout. INTER-SHELL couples every shell (hydrogen only): an eigensolve in the n ≤ 6 basis, which has no continuum, so ionisation is said, never simulated.';
-
-    const r3 = wState.row();
-    r3.appendChild(trig({ label: 'SAVE', title: 'Save the experiment and presentation separately', onFire: () => { app.sh.save(); } }).root);
-    r3.appendChild(trig({ label: 'LOAD', onFire: () => { app.sh.restore(); } }).root);
-    r3.appendChild(trig({ label: 'COPY JSON', onFire: () => app.sh.copyJSON() }).root);
-    /* WAVE 56 (board #55): the whole session as a URL.  Its seat is beside SAVE / LOAD / COPY JSON because
-       that is where "this state, made portable" already lives — and the FILE menu names it too. */
-    r3.appendChild(trig({ label: 'COPY LINK', title: 'Copy a link to the current state and presentation', onFire: () => app.sh.copyLink() }).root);
     /* THE PLACE THE LINK SPEAKS.  A `.note` and not a hover: what a link dropped is information, and
        information reachable only by hover is unreachable on the iPad (ANTI-PATTERNS 4). */
     ui.linkNote = el('div', 'note link-note', wState.body, ''); ui.linkNote.hidden = true;

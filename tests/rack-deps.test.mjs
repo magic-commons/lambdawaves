@@ -10,7 +10,7 @@
  *    a key of the literal, no bare cross-module write, the hinge (forward + shared ≤ 25) — and G-A read statically; the app-source helper.
  * §5 (0.5.2 R1) a module that has left rack.js is measured from its file (lab/shell/, lab/windows/) as a piece of its planned module:
  *    a fixture boot + controller file (handed names by key, app chains, the file's seats at its call, a module's fill of its own name
- *    not a crossing, a null slot destructured is a stray, an unplanned file refused), then the real tree keeps its 23 rows.
+ *    not a crossing, a null slot destructured is a stray, an unplanned file refused), then the real tree keeps its 24 rows (23 until iteration 008 S added FIELD).
  *
  * Run:  node tests/rack-deps.test.mjs
  */
@@ -254,8 +254,8 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const src = readFileSync(new URL('../lab/rack.js', import.meta.url), 'utf8');
   let R = null; err = '';
   try { R = classes(src); } catch (e) { err = e.message; }
-  check(!!R && R.modules.length === Object.keys(PLANNED).length && R.modules.length === 23 && R.files.every((F) => R.modules.find((m) => m.id === F.module).files.some((x) => x.rel === F.rel)),
-    `the real tree: ${R ? R.files.length : '?'} module file(s) measured as their planned modules (${R ? R.files.map((F) => F.rel + ' → ' + F.module).join(', ') || 'none yet' : err}); the table keeps its 23 rows`, err);
+  check(!!R && R.modules.length === Object.keys(PLANNED).length && R.modules.length === 24 && R.files.every((F) => R.modules.find((m) => m.id === F.module).files.some((x) => x.rel === F.rel)),
+    `the real tree: ${R ? R.files.length : '?'} module file(s) measured as their planned modules (${R ? R.files.map((F) => F.rel + ' → ' + F.module).join(', ') || 'none yet' : err}); the table keeps its 24 rows (iteration 008 S: FIELD)`, err);
 }
 
 if (red) { console.log(`RED ${red} rack-deps check(s)`); process.exit(1); }
