@@ -21,7 +21,7 @@ import { atom as atomOf, solveAtom, virtualEnergyOf, atomRadial, atomRadialTable
 import { CENTRAL } from './central.js';
 import { SEPARABLE } from './separable.js';
 
-const N_RGB = { 1: [255, 255, 255], 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150], 7: [255, 236, 110] };   // n = 7: the yellow the six left free (iteration 008 A7)
+const N_RGB = { 1: [255, 255, 255], 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150], 7: [246, 142, 159] };   // n = 7: the kit's seventh-shell rose (palette-app.js, hue 350; iteration 010 X2 — A7's yellow here disagreed with SPECTRUM's own n7 at Z = 1)
 const QHO_RGB = (N) => [[255, 255, 255], [255, 190, 90], [120, 225, 240], [200, 140, 255], [140, 240, 160], [255, 120, 150]][N % 6];
 
 export const HAMILTONIANS = {

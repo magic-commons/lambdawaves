@@ -6,7 +6,7 @@ import { TIER } from '../rack.js';
 import { VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, quatFromYawPitch, waveView, drawStyle } from '../field.js';
 import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';
-import { clampShift } from '../camera-law.js'; import { BASIS } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
+import { clampShift } from '../camera-law.js'; import { clampLambda } from '../sturmianreg.js'; import { BASIS } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
 export function createPersist(app) {
   const { ui, reg, clock, obs, mat, FIELD_CHROME, rates, energyOf, sturm, PAL_DEF } = app; const { schedule, paceRate } = app.loop; const { quality, layout, phone, tablet } = app.sh;
@@ -284,7 +284,7 @@ export function createPersist(app) {
         if (!hist && pr.layout && Array.isArray(pr.layout.cards) && pr.layout.cards.some((c) => c && c.id === 'qcd' && !c.closed)) gone.push('QCD (QUARKONIUM keeps its parameters)');
         said = [gone.length ? 'retired in 0.5.0: ' + gone.join(' · ') : '', ...cut].filter(Boolean).join(' · '); if (said) app.state.restoreNotice = said;
         stageTextTick();                                              // the STAGE TEXT follows whatever MOLECULES the file left
-        if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
+        if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = clampLambda(pr.sturmian.lambda); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
         app.state.eq.restore(pr.eq);                                  // 0.6.0 B2: absent is FLAT; the loop's syncEq repaints the card and hands the field its table
         /* S3 · an UNDO's bases are its record's seats, never read back off a control the modulator is moving (an unseated target keeps
