@@ -24,3 +24,4 @@ Yan's (`~/.claude/jobs/2ea66c54/tmp/gate-it004.sh`, `gate-lock.sh` on 9241): `gi
 | row | merged | note |
 |---|---|---|
 | X5 THE REVIEW ROUND OF 009 | `ce9b5e9` (reports only) | +80 lines, +10 branches, no file past 1k; the register-width rule written six ways (a possible NaN base on undo at persist.js:21 — traced, not reproduced); the orbital-letter table copied 12×; seven retyped; MV's loop and name; seed()'s guard. Next row X6 THE DELETION PASS OF 009 from the reviews' ordered brief, after X1 / X2 / X4 merge |
+| X2 THE REACH OF n = 7 | `a615a73` (branch tip `4a68de1`) | λ 1/7 … 3 (log, one clamp); saddle readout k > 7; n = 7 rose under Z ≠ 1; words 140 / n ≤ 7; the fold rule proven (A7's code); serialize-bytes 8/8 identical; LOCK green once. Decision taken: NEW keeps a hand's unfolded n = 7 (WORKSPACE law) |
