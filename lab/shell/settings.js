@@ -2,7 +2,8 @@
  * createSettings(app) runs at §1's seat, BEFORE the controller's, so a controller name is read as app.ctl.x inside a callback, never at
  * creation — as are app.host.camera, app.sh.setModArm and app.sh.quality, which boot() fills later.  readSettings stays in rack.js' head
  * (§0 calls it first, U1) and comes by value; lookSync is registered for the controller; boot() destructures the rest. */
-import { infoKnown } from './stage-words.js';
+import { infoKnown } from './stage-words.js'; import { readSession } from '../mir/core/session.js';
+const SESSION_KEY = 'lambdawaves.q0.session';   // main.js createSession's key (settings-store.js FAMILIES)
 export function createSettings(app) {
   const { ui, mat, settingsStore, useCompactDefaults, FIRST_RUN, appleDevice } = app; const { readSettings } = app.sh;
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
@@ -52,7 +53,7 @@ export function createSettings(app) {
            *is* a choice, and it is remembered here.  0.3.1 · S1 (D1): the whole field chrome — frame, axis,
            their modes, the corner, invert, axis colour — is this browser's alone; serialize() strips it and
            restore() ignores it in an older file, so no project or link can change a reader's axes. */
-        invert: !!mat.invert, axisInk: mat.axisInk || 'theme', dither: +mat.dither || 0,   // iteration 008 W: DITHER is this display's (SETTINGS › QUALITY), always written, so a profile older than it is known by its absence
+        invert: !!mat.invert, axisInk: mat.axisInk || 'theme', dither: +mat.dither || 0,   // iteration 008 W: DITHER is this display's (SETTINGS › QUALITY), always written, so a profile older than it is known by its absence (the lift below)
                // wave 53: the two chrome objects are this browser's, like FROST and the tags
         phoneTr: !!document.querySelector('.dev[data-id="transport"].folded'),
         /* WAVE 59 · WHICH WAY THE PHONE'S RACK WAS LEFT, on exactly phoneTr's pattern — a phone-only chrome
@@ -126,6 +127,10 @@ export function createSettings(app) {
     if (wantP3 && ui.gamutSeg) ui.gamutSeg.set(app.ctl.field.ok && app.ctl.field.setGamut ? (app.ctl.field.setGamut(s.p3Mode === 'vivid' ? 'p3-vivid' : 'p3') === 'srgb' ? 'srgb' : 'p3') : 'srgb');   // it can only come back if the canvas can honour it
     document.body.dataset.gamut = app.ctl.field.ok && app.ctl.field.gamut !== 'srgb' ? 'p3' : 'srgb';
     settingsLoaded = true;
+    /* iteration 008 W · DITHER WAS A PROJECT KEY, and a profile older than the move (no `dither` here) takes the one its live session carried — read
+       ONCE, here at the boot's settings read, never at a project open (STATE-SCOPES: an open leaves this blob byte-identical outside WORKSPACE) */
+    if (!('dither' in s)) { let d = 0; try { const r = readSession(globalThis.localStorage, SESSION_KEY), L = r && r.parts && r.parts.lambdawaves; d = +(L && L.data && L.data.presentation && L.data.presentation.mat && L.data.presentation.mat.dither) || 0; } catch (_) {}
+      if (d > 0) { mat.dither = Math.max(0.25, Math.min(2, d)); if (ui.showDither) ui.showDither(mat.dither); saveSettings(); } }
   }
 
 
