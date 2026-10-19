@@ -129,7 +129,7 @@ export async function boot(dom) {
     w: { wObs: null, wPal: null, wCam: null, wClip: null, clearRegister: null, wState: null, wSpec: null, spectrum: null, toggleFullscreen: null, normalizeNow: null, copyLatex: null,
       switchHamiltonian: null, setSturmian: null, applySturmian: null, paintSturmRo: null, sturmEigen: null, occupiedEigen: null, periodEnergies: null, selectEigen: null, setElement: null,
       fillValence: null, wSh: null, shadowView: null, shadowFoot: null, wOrb: null, orbit: null, kepler: null, wVor: null, vortex: null, particles: null, flowTracers: null, wSlice: null, slice: null,
-      wChem: null, head: null, stageCaption: null, stageTextTick: null, initStageText: null, wOrbs: null, wCalc: null, calculus: null, wMet: null, meters: null, wLad: null, ladder: null, wAtoms: null,
+      wChem: null, head: null, stageCaption: null, stageTextTick: null, initStageText: null, wCalc: null, calculus: null, wMet: null, meters: null, wLad: null, ladder: null, wAtoms: null,
       atomsView: null, wWig: null, wignerView: null, wRad: null, radiationView: null, WIG_OK: null, RAD_OK: null, bowStart: null, bowMove: null, bowRelease: null, orbitOfShell: null, kepShell: null,
       keplerTurn: null, keplerDragToPoint: null, keplerDragTo: null, keplerRowSync: null, gas: null, gasReadout: null, gasTableOn: null, gasSigma: null, launchPacket: null, enterBox: null,
       coherentBounce: null, bowCancel: null, slapAlong: null },
@@ -517,8 +517,8 @@ export async function boot(dom) {
        what the unselected ones offer — where this used to be "whoever writes the matrix last owns the frame". */
     app.state.molSession.tick();
     if (app.state.chem.on && powered(wChem)) app.state.chem.update(clock.t);   // the RT pump: one outstanding worker request, then an upload — no maths on this thread, so no tick()
-    app.state.register.setActive(canPresent(wOrbs));
-    if ((app.state.orbitals.on || app.state.states.on || app.state.states.songOn) && powered(wOrbs)) app.state.register.update(clock.t);
+    app.state.register.setActive(canPresent(wChem));
+    if ((app.state.orbitals.on || app.state.states.on || app.state.states.songOn) && powered(wChem)) app.state.register.update(clock.t);
     if (flowTracers) {
       /* the source belongs to the model that is PLAYING: the STATES register, the ORBITAL packet, or CHEMISTRY's run */
       const playing = app.state.molSession ? app.state.molSession.selected : null;
@@ -697,7 +697,7 @@ export async function boot(dom) {
 
   /* ── LEGACY WINDOWS (2026-10, Josh): all five are gone — QCD, H₂⁺ and HELIUM in 0.5.0 D9, H₂ and ELECTROSTATICS in D9b
      (R5-L1; ATOMS came back in 0.4.0 S3).  An older file that used one opens on its shim in restore and says so in one line. */
-  const { wChem, head, createMoRegistry } = createMolecules(app);   // 0.5.2 R2d: lab/windows/molecules.js, two seats (MO-REGISTRY's below the stage words)
+  const { wChem, head } = createMolecules(app);   // 0.5.2 R2d: lab/windows/molecules.js (iteration 008 U: the register lives in the card; F5: one seat)
 
   /* THE STAGE TEXT (Settings › Display; 0.4.0 S3 · F2; 0.5.1 D1 below) — its SOURCE: what is playing, as markdown — the MOLECULES formula
      ($\mathrm{H_{2}O}$, latex-state.js formulaLatex) while MOLECULES is on, else SPECTRUM's populated states in stateLatex's
@@ -705,13 +705,6 @@ export async function boot(dom) {
      depends on which labels are populated, never on c — so no live coefficient can reach the stage.  The source is asked
      only when one of its inputs moved (the register's version, the pick, a legacy owner): one compare a CPU tick. */
   const { stageTextTick, initStageText } = createStageWords(app);   // 0.5.2 R2d: lab/shell/stage-words.js
-
-  /* ORBITALS — the MOLECULAR REGISTER: ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k over CHEMISTRY's canonical orbitals, which
-     is where a molecule's `arg` lives (MATH-H2O-2026-09-11, Proposition 1).  It is NOT a sixth field owner: it does
-     not upload a molecule and it does not touch moleculeMode() — CHEMISTRY owns the shells and this window owns the
-     matrix while REGISTER ON is up.  2026-10 (Josh): it STAYS on the rack whatever MOLECULES does — MOLECULES OFF only stands its
-     switch down (orbitalsview.js update), and the ladder stays painted and editable. */
-  const { wOrbs } = createMoRegistry();   // 0.5.2 R2d: molecules' second seat
 
   // CALCULUS — the stats, derived live, with their laws and residuals
   const { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen, wSep } = createCalcMetersLadder();   // 0.5.2 R2b: readouts' second seat

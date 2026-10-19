@@ -66,9 +66,6 @@ export function createOrbitals(host, api) {
      other shows EMPTY.  NORM is gone: a HAND stroke on the ladder normalises at its end (the stroke's one undo row), and nothing else does */
   const fillB = fillButton(head, { fill: 'Fill the register: every orbital of the ladder, equal and in phase', empty: 'Empty the register (c ↦ 0 for every orbital)' },
     (empty) => (empty ? fill() : clear()));
-  /* the pane's own switch is retired (MOLECULES ON is REGISTRY ON, VIEW REGISTRY puts the packet on the field): `onSw` is kept unseated, the
-     claim's own mirror, so setOn below reads as it always did */
-  const onSw = sw({ label: 'REGISTRY ON', value: false, cls: 'orb-on', onChange: (v) => { setOn(v); } });
   /* THE CORE FOLD (0.4.0 S1): the frozen-core levels (lab/names.js coreCount — He for Li–Ne, Ne for Na–Ar, Ar for K–Zn,
      Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;
      the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */
@@ -314,23 +311,24 @@ export function createOrbitals(host, api) {
     pushedT = t; pushedV = version;
     return true;
   }
-  function setOn(v) {
+  /** the CLAIM: take (true) or release the field — registerview's follow() is its only caller from outside (ON is the one switch's, api.one) */
+  function claim(v) {
     const want = !!v;
     if (want && !on) {
       const why = refusal();
-      if (why) { onSw.set(false); status('REGISTRY off — ' + why, 'warn'); return false; }
-      on = true; onSw.set(true);
+      if (why) { status('REGISTRY off — ' + why, 'warn'); return false; }
+      on = true;
       pushedT = NaN; pushedV = -1;
       /* the claim is the whole handover: the session selects this model, asks for `phase`, and calls push() */
       if (S()) S().claim('orbital-packet', true, 'the ORBITALS register has the field');
     } else if (!want && on) {
-      on = false; onSw.set(false);
+      on = false;
       pushedT = NaN; pushedV = -1;
       /* and letting go is the same act in reverse: the session hands the field to the next model by RANK — the
          card if it is on, the user's own observable if nothing claims it — never by guessing a view here */
       if (S()) S().claim('orbital-packet', false, 'MO-REGISTRY OFF');
       api.repaint();
-    } else { onSw.set(on); }
+    }
     refresh();
     return on;
   }
@@ -560,7 +558,7 @@ export function createOrbitals(host, api) {
       else { sel.set(sol.nocc - 1, { amp: 1, phase: 0 }); selected = sol.nocc - 1; }   // a new solve resets the register to HOMO alone
     }
     touch(); rebuild(); paint(); refresh();
-    if (on) { const why = refusal(); if (why) setOn(false); else push(now(), true); }
+    if (on) { const why = refusal(); if (why) claim(false); else push(now(), true); }
     api.repaint();
   }
   function ensureSub() {
@@ -580,7 +578,7 @@ export function createOrbitals(host, api) {
     if (!ensureSub()) return false;
     if (!on) { if (active) paintPsi(t); return false; }
     const why = refusal();
-    if (why) { if (!C() || !C().on) { setOn(false); return false; }   // MOLECULES went off: stand down (refresh() says 'standing by'); the window stays
+    if (why) { if (!C() || !C().on) { claim(false); return false; }   // MOLECULES went off: stand down (refresh() says 'standing by'); the window stays
       status('REGISTRY off — ' + why, 'warn'); return false; }
     const moved = push(t);
     if (active) paintPsi(t);
@@ -608,22 +606,21 @@ export function createOrbitals(host, api) {
     for (const e of a) { const k = Math.round(e && e.k); if (Number.isFinite(k) && k >= 0 && k < sol.nAO) M.set(k, { re: +e.re || 0, im: +e.im || 0 }); } return M.size ? M : null; };
   /* the stores, A ↔ B and MORPH are written only while a store exists (no store, no path: MORPH cannot be on) — a register that never
      stored keeps its bytes; a ROUTED A ↔ B's base is seated by persist.js modSeats whatever this writes */
-  function save() { return { on, selection: keys().map((k) => ({ k, amp: sel.get(k).amp, phase: sel.get(k).phase })),
+  function save() { return { on: api.want(), selection: keys().map((k) => ({ k, amp: sel.get(k).amp, phase: sel.get(k).phase })),
     ...((storeA || storeB) && { morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB) }) }; }
-  /** the register is a selection over a LADDER, so a record landing before the molecule waits for it (see adopt) */
+  /** the register is a selection over a LADDER, so a record landing before the molecule waits for it (see adopt).  Its own claim is let go;
+   *  a record that says ON is the one switch's ON (api.one), never a claim whatever VIEW reads */
   function load(r) {
     if (!r) return false;
-    if (!sol) { wanted = { selection: r.selection, A: r.A, B: r.B, morph: r.morph, morphOn: r.morphOn }; if (on) setOn(false); return true; }
-    applyRecord(r); touch(); rebuild(); paint(); refresh();
-    if (r.on && !on) setOn(true); else if (!r.on && on) setOn(false);
-    else if (on) push(now(), true);
-    api.repaint();
+    if (!sol) { wanted = { selection: r.selection, A: r.A, B: r.B, morph: r.morph, morphOn: r.morphOn }; if (on) claim(false); }
+    else { applyRecord(r); touch(); rebuild(); paint(); refresh(); if (on) claim(false); api.repaint(); }
+    if (r.on) api.one(true);
     return true;
   }
 
   return {
-    update, setActive, paint, refresh, onSwitch: onSw.root,   // registerview.js seats it beside ORBITAL | STATES
-    get on() { return on; }, setOn,
+    update, setActive, paint, refresh, claim,
+    get on() { return on; }, setOn: (v) => api.one(v),   // the ONE switch (registerview), never this pane's claim
     get active() { return active; },
     get dials() { return !rowsEl.hidden; }, setDials,
     solution() { return sol; },

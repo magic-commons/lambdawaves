@@ -931,7 +931,6 @@ export const PLANNED_CUT = [
   [/^ {2}\/\/ SHADOW$/, 'readouts'],
   [/^ {2}\/\* ── LEGACY WINDOWS/, 'molecules'],                                       // §9: the seat (0.5.2 R2d: lab/windows/molecules.js)
   [/^ {2}\/\* THE STAGE TEXT \(Settings › Display;/, 'stage-words'],                    // the seat (0.5.2 R2d: lab/shell/stage-words.js)
-  [/^ {2}\/\* ORBITALS — the MOLECULAR REGISTER/, 'molecules'],                       // MO-REGISTRY: molecules' second seat, createMoRegistry()
   [/^ {2}\/\/ CALCULUS — the stats/, 'readouts'],                                     // CALC · METERS · LADDER
   [/^ {2}\/\* ── WAVE 52 · W-MODWINDOW/, 'modulation'],                               // §10–§11 the seam: the seat (0.5.2 R2d: lab/shell/modulation.js)
   [/^ {2}\/\/ ATOMS — the periodic table/, 'readouts'],                               // ATOMS · WIGNER · RADIATION

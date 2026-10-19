@@ -27,7 +27,7 @@
  * CHANGE: GROUND is D₀, MEAN is the stationary part, which leaves exactly the interference terms on screen.
  */
 import { stateName } from './names.js';
-import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, label as lbl, hint, chip } from './mir/kit.js';
+import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, chip } from './mir/kit.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
 import { paintStroke, fillButton } from './paint-stroke.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
@@ -83,11 +83,6 @@ export function createStates(host, api) {
      lanes, equal and in phase — anything more shows EMPTY.  NORM is gone: a HAND stroke normalises at its end */
   const fillB = fillButton(head, { fill: 'Fill the register: S₀ and every state the ladder shows (up to ' + LANE_CAP + ' lanes), equal and in phase', empty: 'Empty the register: S₀ alone' },
     (empty) => (empty ? fill() : clear()));
-  const SW_TITLE = 'Give the field this register’s many-electron state — MOLECULES must be ON and not running a real-time propagation';
-  /* the pane's switch is retired (MOLECULES ON is REGISTRY ON; VIEW REGISTRY with this pane puts the state on the field): kept unseated as the claim's mirror */
-  const onSw = sw({ label: 'REGISTRY ON', value: false, cls: 'orb-on', title: SW_TITLE, onChange: (v) => { setOn(v, true); } });
-  /* 0.5.3 M3 · a record with no CIS states says so — iteration 008: on the pane's FILL ALL hover and the status line, the switch being gone */
-  const says = (why) => { lbl(onSw.root.querySelector('.sw-lbl'), why ? 'NO CIS STATES' : 'REGISTRY ON'); hint(onSw.root, why ? why + ' — ORBITAL mode plays its orbitals' : SW_TITLE); if (why) fillB.root.title = why + ' — ORBITAL plays its orbitals'; };
 
   const bar = el('div', 'row tight reg-bar', host);
   const presetSel = el('select', 'sel', bar); presetSel.title = 'Presets are rules, not indices: each one exists for every molecule or says why it does not';
@@ -193,13 +188,13 @@ export function createStates(host, api) {
     if (!q || !api.solve) return;
     const seq = ++ladderSeq, forSol = sol; ladderRefused = null;
     Promise.resolve(api.solve({ op: 'chem.states', atoms: q.atoms, basis: q.basis, charge: q.charge, model: q.model }, () => null, (r) => r)).then((r) => {
-      if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { ladderRefused = (r && r.refused) || null; armed = 0; says(ladderRefused); status(ladderRefused || 'the state ladder needs the chemistry worker', 'warn'); } return; }   // 0.4.0 S4a: a record without its CIS ladder says so
+      if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { ladderRefused = (r && r.refused) || null; armed = 0; if (ladderRefused) fillB.root.title = ladderRefused + ' — ORBITAL plays its orbitals'; status(ladderRefused || 'the state ladder needs the chemistry worker', 'warn'); } return; }   // 0.4.0 S4a: a record without its CIS ladder says so
       ladder = r; ladder.basis = q.basis;   // the pitch's tag: a line, and so its Hz, is the basis's
       model = createStatesModel({ n: r.n, nocc: r.nocc, C: sol.C, D0: sol.D, rMO: r.rMO });
-      if (wanted) { applyRecord(wanted, true); armed = armed || (wanted.on ? 1 : 0); wanted = null; }
+      if (wanted) { applyRecord(wanted, true); wanted = null; }   // a parked record's ON is the one switch's (load), already armed by its refusal
       request(keys().filter((k) => k !== GROUND));
       touch(); rebuild(); paint(); refresh(); publishPopulations();
-      if (armed) { const hand = armed === 2; armed = 0; setOn(true, hand); }   // THE ONE RE-ARM SEAT: a parked record's ON, a refused ON, a re-solve under ON
+      if (armed) { const hand = armed === 2; armed = 0; claim(true, hand); }   // THE ONE RE-ARM SEAT: a parked record's ON, a refused ON, a re-solve under ON
     }).catch(() => { if (seq === ladderSeq) status('the state ladder failed to arrive', 'warn'); });
   }
   function request(ks) {
@@ -350,22 +345,23 @@ export function createStates(host, api) {
     if (flowOn && flow) flow.pump(C().half, () => flowDot(t), paintFlow);   // after the trail: flowDot re-evaluates the register
     return true;
   }
-  function setOn(v, hand) {
+  /** the CLAIM: take (true) or release the field — registerview's follow() and this pane's re-arm seat call it (ON is the one switch's, api.one) */
+  function claim(v, hand) {
     const want = !!v;
     if (want && !on) {
       const why = refusal();
-      if (why) { armed = !ladder && !ladderRefused && C() && C().on ? (hand ? 2 : 1) : 0; onSw.set(false); status('REGISTRY off — ' + why + (armed ? ' · ON when it lands' : ''), 'warn'); return false; }
+      if (why) { armed = !ladder && !ladderRefused && C() && C().on ? (hand ? 2 : 1) : 0; status('REGISTRY off — ' + why + (armed ? ' · ON when it lands' : ''), 'warn'); return false; }
       if (hand && lanes.size < 2 && preset('BEAT') && api.announce) api.announce('BEAT');   // 0.5.3 M3: a hand's ON over S₀ alone plays BEAT, so the stage shows something
       if (!lanes.size) { lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false }); selected = GROUND; touch(); rebuild(); }   // S4: seeded where an empty record left none
-      on = true; onSw.set(true); pushedT = NaN; pushedV = -1; trailN = 0; trailAt = 0;
+      on = true; pushedT = NaN; pushedV = -1; trailN = 0; trailAt = 0;
       const c = C(); if (c && c.setTda) c.setTda(true);                            // the sticks on screen belong to the model that is playing
       if (S()) S().claim('states', true, 'the STATES register has the field');
     } else if (!want && on) {
       if (drive.on) setDrive(false);
-      on = false; armed = 0; onSw.set(false); pushedT = NaN; pushedV = -1;
+      on = false; armed = 0; pushedT = NaN; pushedV = -1;
       if (S()) S().claim('states', false, 'MO-REGISTRY OFF');
       api.repaint();
-    } else { if (!want) armed = 0; onSw.set(on); }   // iteration 008 U: OFF while parked disarms too (VIEW left REGISTRY before the ladder landed)
+    } else if (!want) armed = 0;   // iteration 008 U: OFF while parked disarms too (VIEW left REGISTRY before the ladder landed)
     refresh(); publishPopulations();
     return on;
   }
@@ -410,8 +406,8 @@ export function createStates(host, api) {
   function setDrive(v) {
     const want = !!v;
     if (want && !drive.on) {
-      if (!on && api.claim) api.claim();
-      if (!on && !setOn(true)) { driveSw.set(false); return false; }
+      if (!on) api.one(true, true);                        // a hand asking for this register: the one switch, VIEW REGISTRY, this pane
+      if (!on && !claim(true)) { driveSw.set(false); return false; }
       if (morphOn) setMorph(false, morphS);
       drive.on = true; drive.last = null; drive.ready = false; drive.dirty = false; driveSw.set(true);
       rowsEl.classList.add('reg-driven'); refSeg.root.classList.add('off');
@@ -716,8 +712,8 @@ export function createStates(host, api) {
     storeA = storeB = null; aBtn.classList.remove('on'); bBtn.classList.remove('on'); morphOn = false; morphSw.set(false); trailN = 0; trailAt = 0;
     pushedT = NaN; pushedV = -1; touch();
     if (drive.on) { drive.on = false; drive.seq++; drive.busy = false; drive.last = null; driveSw.set(false); rowsEl.classList.remove('reg-driven'); }
-    if (on) { setOn(false); armed = 2; }                                         // 0.5.3 M3: no auto-off — it stands by for the new ladder, which re-arms it
-    says(null); paint(); paintScope(); refresh();
+    if (on) { claim(false); armed = 2; }                                         // 0.5.3 M3: no auto-off — it stands by for the new ladder, which re-arms it
+    paint(); paintScope(); refresh();
     if (sol) fetchLadder();
   }
   function ensureSub() {
@@ -733,7 +729,7 @@ export function createStates(host, api) {
     if (api.show) api.show('states');
     if (!lanes.has(k)) { const g0 = lanes.get(GROUND); if (lanes.size === 1 && g0) g0.amp = 0.8; if (!select(k, 0.45, 0)) return false; }
     selected = k; markSel(); paint();
-    if (!on) { if (api.claim) api.claim(); else setOn(true); }   // iteration 008 U: a stick's press is a hand asking for this register — the one switch, VIEW REGISTRY, this pane
+    if (!on) api.one(true, true);   // iteration 008 U: a stick's press is a hand asking for this register — the one switch, VIEW REGISTRY, this pane
     return true;
   }
   if (S()) S().register('states', { push: () => push(now(), true), view: () => (view === 'density' ? 'density' : 'real') });
@@ -745,7 +741,7 @@ export function createStates(host, api) {
     if (!ensureSub()) return false;
     if (!on) return false;
     const why = refusal();
-    if (why) { if (!C() || !C().on) { setOn(false); status('the register stands by — MOLECULES ON, then VIEW REGISTRY', ''); return false; }   // MOLECULES went off: the window stays
+    if (why) { if (!C() || !C().on) { claim(false); status('the register stands by — MOLECULES ON, then VIEW REGISTRY', ''); return false; }   // MOLECULES went off: the window stays
       status('REGISTRY off — ' + why, 'warn'); return false; }
     if (!Number.isFinite(t)) t = 0;
     if (drive.on) { pumpDrive(t); if (active && shown) { paintScope(); paintMu(t); refreshDrive(); } return true; }
@@ -778,32 +774,32 @@ export function createStates(host, api) {
     selected = GROUND;
   }
   function save() {
-    return { on, view, ref, flow: flowOn, ...(flowSrc === 'balanced' && { flowSource: flowSrc }), morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB),
+    return { on: api.want(), view, ref, flow: flowOn, ...(flowSrc === 'balanced' && { flowSource: flowSrc }), morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB),
       drive: { pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, phase: drive.phase },   // the knobs, never the run: a project opens paused and undriven
       lanes: keys().map((key) => { const c = lanes.get(key); return { key, omega: key === GROUND || !ladder ? 0 : ladder.omega[key], amp: c.amp, phase: c.phase, mute: c.mute, solo: c.solo }; }), ...(song.meta && { song: { ...song.meta } }) };
   }
   /* 0.3.1 · S4: a record whose lane list is EMPTY was written before a solution seeded the ground lane (NEW, a MOLECULES ON
      undone); on the ladder it was written beside it lands empty, and the ground lane is seeded again when the register next
-     plays (setOn).  Parked for a ladder still to come, it is a record OLDER than that ladder: its solve seeds the ground lane. */
+     plays (claim).  Parked for a ladder still to come, it is a record OLDER than that ladder: its solve seeds the ground lane. */
   const emptyLanes = (r) => Array.isArray(r.lanes) && r.lanes.length === 0;
   function songLoad(m) {   // the same track still in memory stays; another hash says so on the row and leaves the register alone; none clears it
     if (m && song.meta && m.hash === song.meta.hash) { setSongE0(m.e0); sE.set(song.e0); return; }
     if (song.on) setSong(false); song.samples = null; song.meta = m ? { hash: m.hash, name: String(m.name || ''), e0: +m.e0 || 3e-3, rateAtDrop: +m.rateAtDrop || 1 } : null;
     if (m) { song.e0 = song.meta.e0; sE.set(song.e0); } refreshSong();
   }
+  /** its own claim is let go; a record that says ON is the one switch's ON (api.one), never a claim whatever VIEW reads */
   function load(r) {
     if (!r) return false;
     songLoad(r.song);
-    if (!ladder) { wanted = r; armed = 0; if (emptyLanes(r)) lanes.clear(); if (on) setOn(false); return true; }
-    applyRecord(r); request(keys()); touch(); rebuild(); paint(); refresh();
-    if (r.on && !on) setOn(true); else if (!r.on && on) setOn(false); else if (on) push(now(), true);
-    publishPopulations(); api.repaint();
+    if (!ladder) { wanted = r; armed = 0; if (emptyLanes(r)) lanes.clear(); if (on) claim(false); }
+    else { applyRecord(r); request(keys()); touch(); rebuild(); paint(); refresh(); if (on) claim(false); publishPopulations(); api.repaint(); }
+    if (r.on) api.one(true);
     return true;
   }
   const slotKey = (i) => keys()[i];
   return {
-    update, setActive, setShown, paint, refresh, onSwitch: onSw.root,   // registerview.js seats it beside ORBITAL | STATES
-    get on() { return on; }, setOn, get songOn() { return song.on; },
+    update, setActive, setShown, paint, refresh, claim,
+    get on() { return on; }, setOn: (v, hand) => api.one(v, hand), get songOn() { return song.on; },
     setFlow, setFlowSource, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flow; },
     select, deselect, toggle, clear, fill, norm, setAmp, setPhase, preset, play, store, setMorph, setView, setRef, setDrive, setDriveParam, tune,
     get drive() { return { on: drive.on, ready: drive.ready, pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, last: drive.last ? { t: drive.last.t, p0: drive.last.p0, norm: drive.last.norm, steps: drive.last.steps, lag: drive.last.lag, pops: drive.last.pops } : null }; },
