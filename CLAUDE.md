@@ -46,7 +46,9 @@ one chevron (`lab/fold.js`, `.lw-fold`): MOLECULES, SHADOW, CAMERA, MO-REGISTRY.
 SECTIONS), a pick elsewhere turns the page, and the page is never saved. A
 library record ships only through `tools/orbital-library.mjs`'s diversity
 gate, and a molecule past the live cap opens only from its record (DOWNLOAD,
-never DISABLED). Below the header and the rows ‹ MOLECULE ›, BASIS · ORBITAL (VALENCE takes the dial's seat under DENSITY, 0.4.0 S4c) and VIEW · the fold's chevron (five lines at 300 px and at phone width, 0.5.3 M8)
+never DISABLED). Since iteration 007 M the card reads top to bottom INSTALLED · MOLECULES ON (`.mol-top`), ‹ SECTION ›, ‹ MOLECULE ›,
+BASIS, VIEW in two rows of three (`.mol-view`), then METHOD · VALENCE or the ORBITAL dial (one seat, 0.4.0 S4c) · the fold's chevron
+(five lines at 300 px and at phone width, 0.5.3 M8; INSTALLED and MOLECULES ON head the card, no longer between the steppers)
 MOLECULES keeps KICK / RUN / TDA / the spectra in the `.mol-more` fold: open
 on a desktop, folded on a phone or tablet, its state in the card's WORKSPACE
 record (`more`); its `Aa` stays visible with HELP off. THE CHEM WORKER REFUSES (0.5.4 P6, `lab/worker-pool.js`): once it has answered, an error or a

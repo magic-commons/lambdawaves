@@ -100,15 +100,18 @@ export function createChem(host, api) {
      M5 has not measured persist there).  The page is the molecule's own section, or the one the hand turned to — never saved.
      0.5.3 M8 (Josh: "section picker and molecules picker should look like palette window's selector"): both pickers are the kit's
      stepper, PALETTE's preset look — SECTION's name opens the kit's list; the section's record line rides its hover. Josh's rows:
-     ‹ SECTION › · INSTALLED · MOLECULES ON, then the MOLECULE picker alone, then BASIS · ORBITAL, then VIEW · the chevron. */
+     ‹ SECTION › · INSTALLED · MOLECULES ON, then the MOLECULE picker alone, then BASIS · ORBITAL, then VIEW · the chevron.
+     Iteration 007 M (Josh: "move 'installed' and 'molecules on' to the top … the two pickers on top of each other … basis, view, then
+     method"): INSTALLED · MOLECULES ON (`.mol-top`), then ‹ SECTION › and ‹ MOLECULE › stacked, then BASIS, VIEW (three and three),
+     METHOD · VALENCE or the ORBITAL dial · the chevron. */
   let page = PRESET_BY_ID.get(preset).section, sub = '';
-  const rH = el('div', 'row tight mol-section', host);
+  const rTop = el('div', 'row tight mol-top', host), rH = el('div', 'row tight mol-section', host);
   const secStep = stepper({ aria: 'Library section', items: ['ATOMS', ...SECTIONS].map((id) => ({ id, label: id })), value: page, cls: 'mol-step', onChange: (id) => { page = id; fillSel(); if (id === 'ATOMS') setShelf(true); } });
   rH.appendChild(secStep.root);
   const keepSw = sw({ label: 'INSTALLED', value: false, title: 'Every record of this section kept on this device: press to install them all, press again to remove them', onChange: (v) => { keep(v); } });
-  rH.appendChild(keepSw.root);
+  rTop.appendChild(keepSw.root);
   const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule’s density', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
-  rH.appendChild(onSw.root);
+  rTop.appendChild(onSw.root);
   const r0 = el('div', 'row tight', host);
   /* 0.7.4 C2 · THE SHELF: SECTION's name opens the page as TILES under the picker (formula, name, AOs, the catalogue's word, the lamp); a tap is the hand's
      pick and the shelf folds.  ‹ ATOMS ›, the first page, is the periodic table: a tile sets OPERATOR ATOM and its element (api.atom).  Alt+↓ keeps the kit's list. */
@@ -226,14 +229,14 @@ export function createChem(host, api) {
     holds = next; paintBasis(); return holds;
   }
   paintBasis();
-  const r1 = el('div', 'row tight', host), rV = el('div', 'row tight', host);
+  const r1 = el('div', 'row tight', host), rV = el('div', 'row tight', host), rM = el('div', 'row tight', host);   // iteration 007 M: BASIS, VIEW, then METHOD with the dial's seat and the chevron
   r1.appendChild(bSeg.root);
   /* 0.7.3 K2 · METHOD beside BASIS: RHF · LDA, and U2's UHF on H₂ (folded in here); an open shell's RHF reads UHF and LDA waits for UKS. LDA always solves live
      (never a record), and only up to benzene's 36 STO-3G AOs: the grid's AO table is points × AOs (78 MB for benzene). A press is a hand pick (its head) */
   const LDA_T = 'Kohn–Sham, local density (Slater + VWN5) on a Becke × Treutler–Ahlrichs × Lebedev-302 grid, solved live — PySCF RKS lda,vwn the oracle';
   const mthS = seg({ label: 'METHOD', value: 'rhf', options: [{ id: 'rhf', label: 'RHF', title: 'Restricted Hartree–Fock: one spatial orbital for both spins' }, { id: 'uhf', label: 'UHF', title: 'H₂ by UHF: α and β free to part past the Coulson–Fischer point' }, { id: 'lda', label: 'LDA', title: LDA_T }],
     onChange: (v) => { method = v; if (api.say) api.say('basis', 'METHOD · ' + mthS.button(v).textContent); solve(preset).then((r) => { if (r && api.hand) api.hand(preset); }); } });
-  r1.appendChild(mthS.root);
+  rM.appendChild(mthS.root);
   const ldaWhy = (P) => (P.multiplicity > 1 ? 'LDA is closed-shell in this cut: an open shell is UHF (no UKS until a later cut)' : basis !== 'sto-3g' ? 'LDA is STO-3G only in this cut'
     : P.recordOnly || P.nAO > 36 ? `LDA is offered up to benzene’s 36 STO-3G AOs (the grid’s AO table is points × AOs): ${P.name} has ${P.nAO}` : '');
   function methods(P) {   // the seg for this molecule and basis; a method it cannot offer falls back to RHF, said on the status line
@@ -242,7 +245,7 @@ export function createChem(host, api) {
     mthS.button('uhf').style.display = h2 ? '' : 'none'; mthS.button('rhf').textContent = P.multiplicity > 1 ? 'UHF' : 'RHF'; b.disabled = !!why; b.title = b.dataset.help = why || LDA_T; mthS.set(method);
     return fell && why ? why + ': solved by RHF' : '';
   }
-  const vSeg = seg({ label: 'VIEW', value: 'density', options: [
+  const vSeg = seg({ label: 'VIEW', value: 'density', cls: 'mol-view', options: [   // iteration 007 M: two rows of three (lab.css .mol-view), never five over one
     { id: 'density', label: 'DENSITY', title: 'ρ(r) = Σ D_ij χ_i χ_j on the field' },
     { id: 'orbital', label: 'ORBITAL', title: 'ψ_k(r) = Σ C_ik χ_i — one molecular orbital' },
     { id: 'diff', label: '<m>Δρ</m>', title: 'The induced density against the reference stored at the kick — ΔD is formed in double precision and shown as a signed field, so a weak kick is not lost in the texture format' },
@@ -253,12 +256,12 @@ export function createChem(host, api) {
   rV.appendChild(vSeg.root);
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
     fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); sayOrbital(); } });
-  r1.appendChild(orbKnob.root);
+  rM.appendChild(orbKnob.root);
   /* 0.4.0 S4c · VALENCE, A SWITCH ON DENSITY (PLAN F5 iii): D − 2 Σ_core C_c C_cᵀ in f64, drawn by the density kind; the core is S1's
      coreCount(atoms).  It takes the ORBITAL dial's seat while DENSITY is the view (the dial reads nothing there): no wider row. */
   const valSw = sw({ label: 'VALENCE', value: false, title: 'The valence density: D − 2 Σ C_c C_cᵀ over the frozen-core orbitals (He for Li–Ne, Ne for Na–Ar, Ar for K–Zn …) — the core no longer drowns the bonds',
     onChange: (v) => { valence = v; pushMatrix(); refresh(); tell(); } });
-  r1.insertBefore(valSw.root, orbKnob.root);
+  rM.insertBefore(valSw.root, orbKnob.root);
   function seats() { valSw.root.style.display = view === 'density' ? '' : 'none'; orbKnob.root.style.display = view === 'density' ? 'none' : ''; orbKnob.root.classList.toggle('off', view !== 'orbital'); }
   seats();
   /* THE TDA TOGGLE SWAPS THE WHOLE LADDER, positions AND strengths.  It used to draw each RPA root's height and
@@ -266,9 +269,9 @@ export function createChem(host, api) {
      while TDA root 2 is dark, its bright pair sitting at roots 3 and 4.  The TDA ladder is its own ascending list
      now (lab/rpa-inspector.js `tda`), and this switch shows that list, with ITS f and ITS μ. */
   const tdaSw = sw({ label: 'TDA', value: false, title: 'Draw the TDA ladder — its own ω, f and polarisation, never relabelled as RPA', onChange: (v) => { tda = v; selected = null; paint(); } });
-  r1.appendChild(tdaSw.root);
+  rM.appendChild(tdaSw.root);
   const coreSw = sw({ label: 'CORE', value: false, title: 'The O 1s window, 19–21 hartree: a timestep diagnostic, not X-ray spectroscopy', onChange: (v) => { core = v; cvCore.hidden = !core; paint(); } });
-  r1.appendChild(coreSw.root);
+  rM.appendChild(coreSw.root);
 
   const r2 = el('div', 'row tight', host);
   const aSeg = seg({ label: 'KICK AXIS', value: 'y', options: AXES.map((a) => ({ id: a, label: a.toUpperCase(), title: 'Strike the density with exp(−iκ ' + a + ')' })),
@@ -346,7 +349,7 @@ export function createChem(host, api) {
     roH2.set(`R ${R.toFixed(2)} bohr · RHF ${eh(p.rhf)} · UHF ${eh(p.uhf)} · FCI ${eh(p.fci)} Eh · S ${p.S.toFixed(2)} of ln 2 · ⟨S²⟩ ${p.s2.toFixed(2)}`);
     roH2.setSub(`UHF leaves RHF at the Coulson–Fischer point, ${h2T.cf.toFixed(3)} bohr · S: the one-orbital entanglement entropy of the FCI state, ln 2 = 0.693 at the break`); drawCurve(h2Cv, h2T, R); }
   const probeLine = el('div', 'note', more); probeLine.hidden = true; probeLine.title = 'the electrons’ potential −Σ D_pq ⟨p|1/|r−R_A||q⟩ at each nucleus R_A (md.js rinvMatrix; PySCF int1e_rinv) — the ground state’s';   // 0.6.5 X1 THE PROBE
-  const moreToggle = el('button', 'trig mol-more-toggle lw-fold', r1); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
+  const moreToggle = el('button', 'trig mol-more-toggle lw-fold', rM); moreToggle.type = 'button'; moreToggle.setAttribute('aria-controls', more.id);
   chip(moreToggle, 'chevronDown', 'Show the kick, run and spectrum controls');
   const setMore = (open) => {
     more.hidden = !open; moreToggle.setAttribute('aria-expanded', String(open));
