@@ -340,10 +340,10 @@ export function createProjects(port) {
       /* ITERATION 009 · A RENAMED STARTER RIDES ITS REFRESH (WAVE DANCER → WAVE DANCER PROTOTYPE): the kit's refresh keeps an entry's name,
          so once the entry carries the starter's revision (refreshed just now, or at an earlier boot whose rename did not land) it takes
          the starter's name, in place — its id, folder, place and RECENT row kept (fromFiles follows the id).  A refresh that waits (its
-         cover could not be made) waits with its name; a name the reader's own project already holds leaves the starter `… 2`, never renamed again */
+         cover could not be made) waits with its name; a taken name leaves the starter `… 2` (the kit's uniqueName), never renamed again (X6: literally, not a prefix) */
       for (const s of list) {
         const e = files.entries().find((x) => x.facts && String(x.facts.seedId) === s.id);
-        if (e && String(e.facts.seedRevision ?? '') === String(s.revision) && !e.name.startsWith(s.name)) files.rename(e.id, s.name);
+        if (e && String(e.facts.seedRevision ?? '') === String(s.revision) && e.name !== s.name && e.name.replace(/ \d+$/, '') !== s.name) files.rename(e.id, s.name);
       }
       return r;
     },

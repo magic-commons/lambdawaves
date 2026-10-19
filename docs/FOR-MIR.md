@@ -3,6 +3,10 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## From iteration 010 (X6, the deletion pass)
+- **A starter's refresh carries its name.** `folders/seed.js` refreshes a starter in place but keeps the entry's old name, so λWAVES renames
+  a refreshed starter itself (`lab/projects.js` `seed()`, WAVE DANCER → WAVE DANCER PROTOTYPE). When the kit carries the name, that loop goes.
+
 ## Josh's ruling the kit should carry (2026-10-18)
 - **A target carries a MODULATION route OR a TIMELINE lane, never both.** Josh: "the timeline and routed dial is either-or, because modulation is
   essentially a locked timeline and a timeline is essentially a free modulation. User can pick either but not both, clips will have an error and
