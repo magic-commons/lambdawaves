@@ -1,10 +1,10 @@
 /* tools/serialize-bytes.mjs — THE SERIALIZE-BYTES PROBE (0.5.0 C6, BRIEF-C6 §4 commit 2's gate).  FOLDERS took the projects road;
- * `serialize()` must not have moved by one byte.  One fresh Firefox profile, eleven readings in order, each the bytes of
+ * `serialize()` must not have moved by one byte.  One fresh Firefox profile, eight readings in order, each the bytes of
  * JSON.stringify(serialize()) and of JSON.stringify(serialize({ scope: 'edit' })) (the undo ring's record) with their sha-256:
- *   1–4   the four demos (WAVE DANCER, WATER, BENZENE, N₂), each opened by the road both builds have: fetch the bundled file,
- *         projects.importText, projects.open — then paused and settled;
- *   5     the empty project (projects.fresh(), NEW's road);
- *   6–11  six history snapshots: from that NEW, six hand edits through __LW (preset, stage, style, palette, Hamiltonian, rate),
+ *   1     the demo (WAVE DANCER PROTOTYPE; iteration 009 deleted WATER, BENZENE and N₂ with the other seven), opened by the road both
+ *         builds have: fetch the bundled file, projects.importText, projects.open — then paused and settled;
+ *   2     the empty project (projects.fresh(), NEW's road);
+ *   3–8   six history snapshots: from that NEW, six hand edits through __LW (preset, stage, style, palette, Hamiltonian, rate),
  *         each flushed into the ring as one row, read where it stands.
  * Two numbers a device computes are left as they are: they are this machine's on both trees.  `presentation.layout.at` (a time
  * stamp, when a layout carries one) is zeroed.  Run it on two trees and compare the --out files: every sha must agree.
@@ -16,7 +16,7 @@ import { open } from './gate/gatekit.mjs';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
 const argv = process.argv.slice(2), OUT = argv.includes('--out') ? argv[argv.indexOf('--out') + 1] : null, TEXTS = argv.includes('--texts');
-const DEMOS = [['WAVE DANCER', 'wave-dancer'], ['WATER', 'water'], ['BENZENE', 'benzene'], ['N₂', 'n2']];
+const DEMOS = [['WAVE DANCER PROTOTYPE', 'wave-dancer']];   // iteration 009: the one demo
 const EDITS = [['preset 1s+2pz', "__LW.loadPreset('1s+2pz')"], ['stage 0.30', '__LW.setStage(0.3)'], ['style solid', "__LW.setStyle('solid')"],
   ['palette on', '__LW.palette.setOn(true)'], ['hamiltonian qho', "__LW.setHamiltonian('qho')"], ['rate 0 → 1.7', '__LW.setRate(0, 1.7)']];
 const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;

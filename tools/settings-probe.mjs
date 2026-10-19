@@ -1,5 +1,6 @@
-/* tools/settings-probe.mjs — THE SETTINGS PROBE (0.5.0 A1, PLAN §2 A1's closer; C2 widens it).  One fresh Firefox profile, six
- * scenes in order: the boot, the four bundled demos through their PROJECTS buttons (WAVE DANCER, WATER, BENZENE, N₂) and NEW.
+/* tools/settings-probe.mjs — THE SETTINGS PROBE (0.5.0 A1, PLAN §2 A1's closer; C2 widens it).  One fresh Firefox profile, three
+ * scenes in order: the boot, the bundled demo through its DEMOS press (WAVE DANCER PROTOTYPE; iteration 009 deleted WATER, BENZENE
+ * and N₂ with the other seven) and NEW.
  *   1 · THE WHOLE-localStorage DIFF around each open: a snapshot after a saveSettings, the open, a snapshot (what the open wrote),
  *       a saveSettings and a third snapshot (what the live state now says).  Every changed key is classified by
  *       lab/settings-store.js — the blob's own keys by WORKSPACE (else PREFERENCE), the rest by FAMILIES — and a change outside
@@ -19,7 +20,7 @@ import { BLOB_LOOK } from '../lab/look.js';
 
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
 const OUT = process.argv.includes('--out') ? process.argv[process.argv.indexOf('--out') + 1] : null;
-const SCENES = [['boot'], ['WAVE DANCER', 'wave-dancer'], ['WATER', 'water'], ['BENZENE', 'benzene'], ['N₂', 'n2'], ['NEW']];
+const SCENES = [['boot'], ['WAVE DANCER PROTOTYPE', 'wave-dancer'], ['NEW']];   // iteration 009: the one demo
 const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
   const md = navigator.mediaDevices; if (md) md.getUserMedia = () => Promise.reject(new Error('probe: no microphone'));
   window.__snap = () => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); } return o; };

@@ -7,6 +7,9 @@
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
+import { readFileSync } from 'node:fs';
+/* iteration 009: the WATER demo left lab/demos/ — its file as it shipped is the fixture a demo open is read from */
+const WATER = readFileSync(new URL('./fixtures/retired-demos/water.lambdawaves.json', import.meta.url), 'utf8');
 
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz`, { width: 1500, height: 1000, script: 120000 });
 let failed = false;
@@ -76,7 +79,7 @@ try {
     await __until(() => { const s = c.solution(); return s && s.key === 'H2O|sto-3g|0'; }); await __w(900);
     const undo = { preset: c.preset(), undos, shown: Hd.shown - n0, fades: __fades() };
     const link = __LW.link.open(__LW.link.mint().href); await __w(900);
-    const r = await fetch('./demos/water.lambdawaves.json', { cache: 'no-cache' }); const path = P.importText(await r.text()); P.open(path);
+    const path = P.importText(${JSON.stringify(WATER)}); P.open(path);
     await __until(() => c.solution() && c.preset() === 'H2O' && c.on); await __w(1500);
     const demo = { on: c.on, shown: Hd.shown - n0, fades: __fades() };
     const sw = [...document.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === 'STAGE FORMULA');   // 0.5.3 M9: the INFORMATIONAL window's

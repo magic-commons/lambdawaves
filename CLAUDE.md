@@ -261,7 +261,13 @@ from a text field; a control a row drives carries `data-key-action`. `ctrl:
 true` is the kit's `Mod` (Ctrl or ⌘); `ctrl: 'Ctrl'` is the Control key alone
 — Ctrl+Shift+Q/E and the MOD arm (Ctrl+Space) are spelled so, never `Mod` (⌘⇧Q
 logs a Mac out). S stays WASD's pitch-down; FOLDERS is O (R-K1). (0.5.0 A9)
-FOLDERS IS THE PROJECTS HOME (iteration 004, BASINS-shaped, `lab/projects.js`): the eleven DEMOS wear their covers (a 4:3 middle of
+FOLDERS IS THE PROJECTS HOME (iteration 004, BASINS-shaped, `lab/projects.js`): THE ONE DEMO (iteration 009, Josh 10-19) is WAVE DANCER PROTOTYPE
+(`lab/project-store.js` STARTERS: file id `wave-dancer`, seedId `demos/wave-dancer`, re-saved at KNEE 3 by the app's own road; the ten others
+— WATER · BENZENE · N₂ · H₂ σu · HELIUM · CHORD · BUCKY · BREAK · TUNNEL · LDA — deleted with their covers, their files kept as
+`tests/fixtures/retired-demos/`; Josh's new demos will be made on the timeline and the molecules). A reader's entry seeded from WAVE DANCER is
+refreshed AND renamed in place (`seed()` renames a seeded entry once it carries its starter's revision — the kit's refresh keeps a name); an entry
+seeded from a deleted demo stays the reader's, opens from their store (the DEMOS press finds it by seedId) and is never re-seeded
+(`tests/molecule-demos.browser-test.mjs`, re-aimed). The DEMOS wear their covers (a 4:3 middle of
 `lab/demos/covers`, refreshed in place once by the starters' `·cover` revision; only a starter being added or refreshed fetches one),
 folder cards the kit's `folder` glyph, RESTORE THE DEMOS in the foot, the toolbar SAVE · PROJECT · DUPLICATE · NEW, ⓘ the RENDER card's
 SUBJECT, a save also its modulation preset in CAPS (a rack with routes). Its doors: O, WINDOW › FOLDERS, the notebook's ▤, FILE (NEW,

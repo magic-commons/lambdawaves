@@ -19,7 +19,11 @@ export function createPersist(app) {
      a bound macro's value, a modulated target's output — its seat keeps the base —, mat.steps, domain.half under AUTO). */
   const EDIT_SKIP = ['obs', 'quality', 'layout', 'modwin', 'camera', 'notebook'];
   const shellSeat = (R, n) => R && { get v() { return R[BASIS.findIndex((s) => s.n === n)]; },   // 0.6.0 B3a: a shell route's seat writes only a shell that shares one rate — a hand's per-label rates are never flattened
-    set v(x) { const sh = BASIS.filter((s) => s.n === n); if (sh.every((s) => R[s.index] === R[sh[0].index])) for (const s of sh) R[s.index] = x; } };
+    set v(x) { const sh = BASIS.filter((s) => s.n === n);
+      /* iteration 009 DEMOS: a 91-wide record's n = 7 is at 1 by absence — its base seat (projectSnapshot's table) writes 1 into nothing, so
+         an n ≤ 6 file stays 91 wide (A7's law); any other rate there widens the record to the 140, the rest of n = 7 at 1 */
+      if (sh[0].index >= R.length) { if (x === 1) return; for (let i = R.length; i < BASIS.length; i++) R[i] = 1; }
+      if (sh.every((s) => R[s.index] === R[sh[0].index])) for (const s of sh) R[s.index] = x; } };
   /** where each modulation target's hand value sits in a serialize() record, [object, key, f, back]: a saved project and a history
    *  row keep the registry BASE there.  A STATES lane slot (f: its amplitude / wrapped phase) is seated by the edit scope only. */
   function modSeats(data) {

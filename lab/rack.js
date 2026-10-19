@@ -954,7 +954,7 @@ export async function boot(dom) {
   accent.turn();
   busyHost();                         // the mark is cloned and painted before anything can need it
   markBatchEnd();                     // M7: …painted here, once, every copy of it (the clones included)
-  if (layout.projects) { await Promise.race([layout.projects.seed().catch(() => null), new Promise((r) => setTimeout(r, 3000))]); layout.projects.markClean(); }   // 0.5.0 C6: the six demos are FOLDERS' starters before the lab says ready
+  if (layout.projects) { await Promise.race([layout.projects.seed().catch(() => null), new Promise((r) => setTimeout(r, 3000))]); layout.projects.markClean(); }   // 0.5.0 C6: the demos are FOLDERS' starters before the lab says ready (iteration 009: one, WAVE DANCER PROTOTYPE)
   /* 0.5.0 C6b · THE SESSION hears the one part: the ring's moves and the notebook's input (projects.changed, the part's subscribe) */
   if (layout.projects) { app.state.history.subscribe(layout.projects.changed); const nbEl = document.getElementById('notebook'); if (nbEl) nbEl.addEventListener('input', layout.projects.changed); }
   /* THE CHOICE (main.js: ?starter=, `boot` for a driven or direct start, and for a human start RESUME when the session holds work, else

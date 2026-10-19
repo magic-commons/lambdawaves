@@ -493,13 +493,13 @@ try {
     window.confirm = c0;
     return { link: link.opened && link.ok, afterLink, openMs, afterOpen, openLater, demoBytes, demoUndo: u, fresh, afterNew, newLater, cardNew, errs: __e.slice() };`);
   assert.equal(origins.link, true); assert.deepEqual(origins.afterLink, { rows: ['link'], depth: 0 });
-  assert.deepEqual(origins.afterOpen, { rows: ['open · WAVE DANCER'], depth: 0 }); assert.deepEqual(origins.openLater, { rows: ['open · WAVE DANCER'], depth: 0 }, 'a row appeared after the demo opened');
+  assert.deepEqual(origins.afterOpen, { rows: ['open · WAVE DANCER PROTOTYPE'], depth: 0 }); assert.deepEqual(origins.openLater, { rows: ['open · WAVE DANCER PROTOTYPE'], depth: 0 }, 'a row appeared after the demo opened');
   assert.equal(origins.demoUndo.added, 1); assert.equal(origins.demoUndo.undoSame, true); assert.equal(origins.demoUndo.redoSame, true); assert.equal(origins.demoUndo.rebuilds, 0);
   assert.equal(origins.fresh, true); assert.deepEqual(origins.afterNew, { rows: ['new project'], depth: 0 }); assert.deepEqual(origins.newLater, { rows: ['new project'], depth: 0 }, 'a row appeared after NEW');
   assert.deepEqual(origins.cardNew, ['new project ·current'], 'the HISTORY card after NEW: ' + JSON.stringify(origins.cardNew));
   assert.deepEqual(origins.errs, []);
   undoMs.demo = origins.demoUndo.undoMs;
-  pass(`the origin names the bottom row: a link → [link], WAVE DANCER → [open · WAVE DANCER], NEW → [new project], each depth 0 and still depth 0 1.5 s later; the demo undoes byte for byte in ${origins.demoUndo.undoMs} ms with no rebuild; ${origins.demoBytes} bytes per demo row`);
+  pass(`the origin names the bottom row: a link → [link], WAVE DANCER PROTOTYPE → [open · WAVE DANCER PROTOTYPE], NEW → [new project], each depth 0 and still depth 0 1.5 s later; the demo undoes byte for byte in ${origins.demoUndo.undoMs} ms with no rebuild; ${origins.demoBytes} bytes per demo row`);
 
   const worst = Math.max(...Object.values(undoMs));
   assert.ok(worst < 150, 'an undo took ' + worst + ' ms: ' + JSON.stringify(undoMs));

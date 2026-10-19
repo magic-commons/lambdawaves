@@ -3,7 +3,7 @@ import { boot } from './rack.js';
 import { createSession } from './mir/core/session.js';   // 0.5.0 C6b: THE SESSION, the live project kept over the one part
 import { photosensitivityNotice } from './mir/shell/flash-guard.js';   // 0.5.0 C6b: the kit's notice, under λWAVES' law
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 C6b: the notice's seen-flag is the blob's `warned`
-import { STARTERS } from './project-store.js';   // the eleven demos' ids are `?starter=`'s (their covers are FOLDERS' DEMOS pictures, iteration 004)
+import { STARTERS } from './project-store.js';   // the demos' ids are `?starter=`'s (iteration 009: one, wave-dancer) (their covers are FOLDERS' DEMOS pictures, iteration 004)
 import { installBanner } from './mir/shell/banner.js';   // 0.5.0 C6b: THE BANNER is the kit's
 import { bootVeil } from './mir/shell/boot.js';   // 0.5.0 C6b: THE BOOT VEIL, down at the first real frame
 window.__e = window.__e || [];

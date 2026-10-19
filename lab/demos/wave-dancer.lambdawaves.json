@@ -1,18 +1,18 @@
 {
  "lambdawaves": "project",
  "version": 1,
- "path": "DEMOS/WAVE DANCER",
+ "path": "DEMOS/WAVE DANCER PROTOTYPE",
  "folder": "DEMOS",
- "name": "WAVE DANCER",
- "saved": "2026-09-10T21:18:35.342Z",
- "opened": "2026-09-10T20:42:35.402Z",
+ "name": "WAVE DANCER PROTOTYPE",
+ "saved": "2026-10-19T15:13:36.792Z",
+ "opened": "2026-10-19T15:13:36.792Z",
  "data": {
   "experiment": {
    "format": "lambdawaves/qwave-0/state",
    "system": "hydrogen",
    "basis": "n<=6 complex Y_lm, Condon-Shortley",
    "units": "atomic",
-   "t": 225354.0871997584,
+   "t": 0,
    "preset": "1s+2pz",
    "modes": [
     {
@@ -107,7 +107,7 @@
   },
   "presentation": {
    "obs": {
-    "yaw": 1405.5176067747307,
+    "yaw": 4.3672832736828555,
     "pitch": 0.6446697696623438,
     "dist": 1.9327398088638708,
     "fov": 1.2,
@@ -117,13 +117,17 @@
      -0.14143432014691718,
      0.4237087132790336,
      -0.7027864149778662
+    ],
+    "shift": [
+     0,
+     0
     ]
    },
    "mat": {
     "view": 1,
     "exposure": 1.365423162256938,
     "softness": 1.0805469387058584,
-    "steps": 240,
+    "steps": 160,
     "slice": {
      "mode": 0,
      "axis": 2,
@@ -140,8 +144,7 @@
     "style": 3,
     "iso": 0.017767288986038646,
     "grain": 0.35,
-    "knee": 0.6,
-    "dither": 0,
+    "knee": 3,
     "boost": {
      "k": [
       0,
@@ -150,12 +153,13 @@
      ],
      "on": false
     },
+    "gamma": 1,
+    "finish": "lit",
     "bow": {
      "gain": 1,
      "curve": 1,
      "limit": 3
-    },
-    "finish": "lit"
+    }
    },
    "domain": {
     "auto": true,
@@ -166,6 +170,7 @@
    "space": "x",
    "palette": {
     "on": true,
+    "selected": 0,
     "stops": [
      {
       "at": 0,
@@ -216,23 +221,100 @@
     "well": 10,
     "gasBasis": "reg"
    },
-   "field": {
-    "overlay": "off",
-    "lines": 10,
-    "source": "total"
-   },
    "wigner": {
     "zmax": 8,
     "pmax": 2
    },
-   "mo": {
-    "kind": "lcao1s",
-    "lambda": 1.7611,
-    "R": 2,
-    "electron": "hold",
-    "force": "exact",
-    "connection": true,
-    "dt": 5
+   "readers": {
+    "spectrum": {
+     "selected": -1,
+     "dials": false
+    },
+    "slice": {
+     "mode": "space",
+     "half": 8,
+     "gain": 1.6,
+     "rotor": {
+      "qL": [
+       1,
+       0,
+       0,
+       0
+      ],
+      "qR": [
+       1,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "kepler": {
+     "shell": 3
+    }
+   },
+   "instruments": {
+    "chem": {
+     "preset": "H2O",
+     "basis": "sto-3g",
+     "view": "density",
+     "orbital": null,
+     "axis": "y",
+     "kappa": 0.001,
+     "speed": 10,
+     "dt": 0.01,
+     "integrator": "mmut",
+     "tda": false,
+     "core": false,
+     "valence": false,
+     "on": false
+    },
+    "orbitals": {
+     "on": false,
+     "selection": [],
+     "morph": 0
+    },
+    "states": {
+     "on": false,
+     "view": "change",
+     "ref": "ground",
+     "flow": false,
+     "morph": 0,
+     "morphOn": false,
+     "A": null,
+     "B": null,
+     "drive": {
+      "pol": "x",
+      "omega": 0.4,
+      "e0": 0.01,
+      "envelope": "cw",
+      "duration": 400,
+      "phase": 0
+     },
+     "lanes": []
+    },
+    "register": {
+     "mode": "orbital"
+    },
+    "qcd": {
+     "kind": "charm",
+     "potential": "cornell",
+     "params": {
+      "alphaS": 0.39,
+      "sigma": 0.18,
+      "C": 0.733
+     }
+    },
+    "ladder": {
+     "nbar": 30,
+     "sigma": 2,
+     "d": 0,
+     "teeth": 8
+    },
+    "particles": {
+     "count": 160,
+     "trail": 24
+    }
    },
    "rates": [
     1,
@@ -350,7 +432,7 @@
       "id": "m1",
       "name": "Audio",
       "named": 1,
-      "value": 0.381857338774537,
+      "value": 0,
       "masterDepth": 1,
       "sourceId": "s3:low"
      },
@@ -358,7 +440,7 @@
       "id": "m2",
       "name": "Stage",
       "named": 1,
-      "value": 0.3501502661533806,
+      "value": 0,
       "masterDepth": 1,
       "sourceId": "s3:high"
      },
@@ -366,7 +448,7 @@
       "id": "m3",
       "name": "Cam POV",
       "named": 1,
-      "value": 0.6819744316334886,
+      "value": 0,
       "masterDepth": 1,
       "sourceId": "s1"
      }
@@ -606,6 +688,12 @@
          "hysteresisDb": 3,
          "holdMs": 83,
          "fluxFloor": 0.02,
+         "levelMix": {
+          "level": 1,
+          "low": 1,
+          "mid": 1,
+          "high": 1
+         },
          "outs": {
           "level": {
            "floorDb": -60,
@@ -718,6 +806,12 @@
          "hysteresisDb": 3,
          "holdMs": 83,
          "fluxFloor": 0.02,
+         "levelMix": {
+          "level": 1,
+          "low": 1,
+          "mid": 1,
+          "high": 1
+         },
          "outs": {
           "level": {
            "floorDb": -60,
@@ -779,6 +873,12 @@
        "hysteresisDb": 3,
        "holdMs": 83,
        "fluxFloor": 0.02,
+       "levelMix": {
+        "level": 1,
+        "low": 1,
+        "mid": 1,
+        "high": 1
+       },
        "outs": {
         "level": {
          "floorDb": -60,
@@ -870,7 +970,7 @@
       "max": 0.15454545454545454
      }
     ],
-    "v": 107
+    "v": 108
    },
    "ui": {
     "stage": {
@@ -879,13 +979,40 @@
       0.023529411764705882,
       0.00392156862745098,
       0.023529411764705882
-     ]
+     ],
+     "follow": false
     }
    },
    "layout": {
     "v": 3,
-    "at": 1789075115343,
+    "at": 1792422816783,
     "cards": [
+     {
+      "id": "projects",
+      "side": "L",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "informational",
+      "side": "L",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "chem",
+      "side": "L",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null,
+      "more": false,
+      "core": false
+     },
      {
       "id": "transport",
       "side": "L",
@@ -907,6 +1034,70 @@
       "side": "L",
       "folded": false,
       "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "render",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "curves",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "equalizer",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "staticfield",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "lattice",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "bloch",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "central",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "separable",
+      "side": "R",
+      "folded": true,
+      "closed": true,
       "off": false,
       "float": null
      },
@@ -935,49 +1126,9 @@
       "float": null
      },
      {
-      "id": "dynamics",
-      "side": "R",
-      "folded": true,
-      "closed": true,
-      "off": false,
-      "float": null
-     },
-     {
       "id": "slice",
       "side": "R",
       "folded": false,
-      "closed": true,
-      "off": false,
-      "float": null
-     },
-     {
-      "id": "qcd",
-      "side": "R",
-      "folded": false,
-      "closed": true,
-      "off": false,
-      "float": null
-     },
-     {
-      "id": "molecule",
-      "side": "R",
-      "folded": true,
-      "closed": true,
-      "off": false,
-      "float": null
-     },
-     {
-      "id": "helium",
-      "side": "R",
-      "folded": true,
-      "closed": true,
-      "off": false,
-      "float": null
-     },
-     {
-      "id": "h2",
-      "side": "R",
-      "folded": true,
       "closed": true,
       "off": false,
       "float": null
@@ -1010,14 +1161,6 @@
       "id": "atoms",
       "side": "R",
       "folded": false,
-      "closed": true,
-      "off": false,
-      "float": null
-     },
-     {
-      "id": "field",
-      "side": "R",
-      "folded": true,
       "closed": true,
       "off": false,
       "float": null
@@ -1092,33 +1235,7 @@
     "nb": [
      470,
      670
-    ],
-    "look": {
-     "palette": "phosphor",
-     "accA": 30,
-     "accB": 300,
-     "hue": 0,
-     "style": 3,
-     "dither": 0,
-     "invert": false,
-     "frame": false,
-     "axis": false,
-     "cornerSide": "right",
-     "axisInk": "theme"
-    },
-    "cam": {
-     "yaw": 1405.5176067747307,
-     "pitch": 0.6446697696623438,
-     "dist": 1.9327398088638708,
-     "fov": 1.2,
-     "mode": "free",
-     "quat": [
-      -0.5536772654702047,
-      -0.14143432014691718,
-      0.4237087132790336,
-      -0.7027864149778662
-     ]
-    }
+    ]
    },
    "modwin": {
     "x": 468,
@@ -1129,10 +1246,18 @@
      "s1": "F",
      "s3": "F"
     },
+    "audioMini": {},
     "open": true,
     "folder": {},
     "macroSide": "left",
-    "macroMin": false
+    "macroMin": false,
+    "compactMode": "F",
+    "selectedMacro": "m1",
+    "selectedSource": null,
+    "audioBands": {},
+    "audioRoutes": {},
+    "dock": null,
+    "chipSide": "auto"
    },
    "overlays": {
     "vortex": {
@@ -1529,11 +1654,64 @@
    "notebook": {
     "w": 470,
     "h": 670
+   },
+   "modulationBases": {
+    "observer.yaw": 4.3672832736828555,
+    "observer.pitch": 0.6446697696623438,
+    "observer.dist": 1.9327398088638708,
+    "observer.fov": 1.2,
+    "observer.panx": 0,
+    "observer.pany": 0,
+    "material.stage": 0.05411413204188609,
+    "material.gamma": 1,
+    "material.exposure": 1.365423162256938,
+    "material.softness": 1.0805469387058584,
+    "material.hue": 0,
+    "material.iso": 0.017767288986038646,
+    "material.grain": 0.35,
+    "material.knee": 3,
+    "transport.rate": 111.41640045359902,
+    "material.slice.pos": 0,
+    "material.slice.thick": 0.03,
+    "state.rot.z": 0,
+    "state.stark.kz": 0,
+    "state.defect.l2": 0,
+    "shell.rate.n1": 1,
+    "shell.rate.n2": 1,
+    "shell.rate.n3": 1,
+    "shell.rate.n4": 1,
+    "shell.rate.n5": 1,
+    "shell.rate.n6": 1,
+    "shell.rate.n7": 1,
+    "chem.kick": 0.001,
+    "chem.speed": 10,
+    "chem.orbital": 1,
+    "reg.morph": 0,
+    "reg.omorph": 0,
+    "reg.e0": 0.01,
+    "reg.w": 0.4,
+    "reg.amp1": 0,
+    "reg.amp2": 0,
+    "reg.amp3": 0,
+    "reg.amp4": 0,
+    "reg.amp5": 0,
+    "reg.amp6": 0,
+    "reg.amp7": 0,
+    "reg.amp8": 0,
+    "reg.ph1": 0,
+    "reg.ph2": 0,
+    "reg.ph3": 0,
+    "reg.ph4": 0,
+    "reg.ph5": 0,
+    "reg.ph6": 0,
+    "reg.ph7": 0,
+    "reg.ph8": 0,
+    "state.rabi": 0.14993758507139276
    }
   }
  },
  "notebook": {
-  "title": "WAVE DANCER",
+  "title": "WAVE DANCER PROTOTYPE",
   "subtitle": "",
   "text": "# What's going on?\nCurrently there's a transition from the 'State' window that's running $2p_{-1}$, $2p_{1}$, $4p_{-1}$, and $4d_{2}$ in STATE-A and $2s_{0}$, $2p_{0}$, $4p_{1}$, and $4d_{-2}$ in STATE-B. The level 2 and 4 shells make for some interesting geometries tri-bubbles from the center. STATE-A and B's level 4 orbitals\n\nNot to be confused with actual hybridized orbitals btw.\n\n# Styling\nBest in Dark Mode imo. This is a good time to test out palettes and see what kind of designs ya'll can do. I think the demo goes for 'signed' by default but I've set an inverse automation for 'exposure' and 'soft' so that if you want to switch to 'ADD' or 'CLOUD' styles, they go along with da beat.\n\nIf you're not into the flickering background, it can be disabled removing the macro in Settings > Display > Stage and then remove the macro by click and holding the knob's label. It looks sick with the 'ADD' wave style though.\n\n_- Josh_\n"
  }
