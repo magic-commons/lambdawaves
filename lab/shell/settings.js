@@ -2,11 +2,11 @@
  * createSettings(app) runs at §1's seat, BEFORE the controller's, so a controller name is read as app.ctl.x inside a callback, never at
  * creation — as are app.host.camera, app.sh.setModArm and app.sh.quality, which boot() fills later.  readSettings stays in rack.js' head
  * (§0 calls it first, U1) and comes by value; lookSync is registered for the controller; boot() destructures the rest. */
+import { infoKnown } from './stage-words.js';
 export function createSettings(app) {
   const { ui, mat, settingsStore, useCompactDefaults, FIRST_RUN, appleDevice } = app; const { readSettings } = app.sh;
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
   let settingsLoaded = false;
-  app.state.molFormulaScale = 1;                         // the STAGE FORMULA's SIZE knob (INFORMATIONAL, 0.5.3 M9): × the notebook's sizes (lab.css .lw-stage), a PREFERENCE
   function saveSettings() {
     if (!settingsLoaded) return;
     try {
@@ -28,7 +28,7 @@ export function createSettings(app) {
          found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'), molFormula: !document.body.classList.contains('no-mol-formula'), molFormulaSize: app.state.molFormulaScale, atomLabels: ui.atomLabelsSw.get(), atomLabelsSize: app.state.atomLabelsScale, infoPos: ui.infoPosSeg ? ui.infoPosSeg.get() : undefined, infoPad: ui.infoPadK ? ui.infoPadK.get() : undefined,
+      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'),   // iteration 007: INFORMATIONAL's six keys left for their own record, lambdawaves.q0.info (shell/stage-words.js)
         auto: app.sh.quality.auto, governor: app.ctl.gov.on, keepFrames: app.ctl.keep.frames, perfMode: app.ctl.perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
@@ -81,16 +81,9 @@ export function createSettings(app) {
     app.ctl.look.rerun();   // 0.5.0 C2: the look again, now that the theme's engine hooks exist (MIR OPTIONS follows the store itself, iteration 003)
     const captions = s.captions === true;
     document.body.classList.toggle('no-captions', !captions); if (ui.capSw) ui.capSw.set(captions);
-    /* THE STAGE FORMULA and the ATOM LABELS (0.5.3 M9, the INFORMATIONAL window): two switches, two SIZEs; nothing said means ON.  0.4.0 S3–0.5.2
-       kept ONE switch and one SIZE (molFormula / molFormulaSize) for both, so an absent atomLabels / atomLabelsSize takes the stored pair ONCE —
-       a profile with STAGE TEXT off keeps its labels off — and the next save writes all four. */
-    const molFormula = s.molFormula !== undefined ? s.molFormula !== false : s.atomLabels !== false, labels = s.atomLabels !== undefined ? s.atomLabels !== false : molFormula, T = app.state.stageText;
-    app.state.molFormulaScale = Number.isFinite(+s.molFormulaSize) ? Math.max(0.5, Math.min(3, +s.molFormulaSize)) : 1;
-    app.state.atomLabelsScale = Number.isFinite(+s.atomLabelsSize) ? Math.max(0.5, Math.min(3, +s.atomLabelsSize)) : app.state.molFormulaScale;
-    document.body.classList.toggle('no-mol-formula', !molFormula); ui.molFormulaSw.set(molFormula); ui.molFormulaK.set(app.state.molFormulaScale); ui.atomLabelsSw.set(labels); ui.atomLabelsK.set(app.state.atomLabelsScale);
-    if (T) { T.setScale(app.state.molFormulaScale); T.setOn(molFormula); T.setLabelScale(app.state.atomLabelsScale); T.setLabels(labels); }
-    { const bottom = s.infoPos === 'bottom', pad = Number.isFinite(+s.infoPad) ? Math.max(0, Math.min(0.4, +s.infoPad)) : 0.12;   // iteration 001: INFORMATIONAL's seat, TOP at 12 % when nothing was said
-      if (ui.infoPosSeg) ui.infoPosSeg.set(bottom ? 'bottom' : 'top'); if (ui.infoPadK) ui.infoPadK.set(pad); if (T) T.setSeat(bottom, pad); }
+    /* THE STAGE FORMULA, the ATOM LABELS, their SIZEs, POSITION and PAD left this blob at iteration 007 for INFORMATIONAL's own record
+       (`lambdawaves.q0.info`, shell/stage-words.js infoPrefs: the lift reads the six keys once by the laws this block read them by, and
+       initStageText applies the record) */
     if (s.auto === false) { app.sh.quality.auto = false; if (ui.autoSw) ui.autoSw.set(false); }
     if (s.governor === false) app.ctl.setGovernor(false);                 // wave 45: the governor held off
     if (s.keepFrames === true) app.ctl.setKeepFrames(true);              // wave 45: the playhead follows every frame (off by default)
@@ -121,7 +114,7 @@ export function createSettings(app) {
        before this wave opens as it always did instead of inheriting a default nobody chose. */
     if (s.invert === true) { mat.invert = true; if (ui.invertSw) ui.invertSw.set(true); }
     if (s.axisInk === 'cmy' || s.axisInk === 'rgb') { mat.axisInk = s.axisInk; if (ui.axisInkSeg) ui.axisInkSeg.set(s.axisInk); }
-    if (Array.isArray(s.closed)) for (const d of document.querySelectorAll('.dev')) d.classList.toggle('closed', s.closed.includes(d.dataset.id) || (d.dataset.id === 'informational' && s.atomLabels === undefined));   // the remembered set, exactly (0.5.3 M9: a profile older than INFORMATIONAL — no atomLabels — keeps it closed, as a first run does)
+    if (Array.isArray(s.closed)) for (const d of document.querySelectorAll('.dev')) d.classList.toggle('closed', s.closed.includes(d.dataset.id) || (d.dataset.id === 'informational' && !infoKnown()));   // the remembered set, exactly (0.5.3 M9: a profile older than INFORMATIONAL keeps it closed, as a first run does — iteration 007: no record and no atomLabels in the blob)
     /* 0.3.1 · S1 (D4's escape hatch): the camera MODE is the project's, like the pose it is needed to read, so a `camMode`
        an older build left here is not read — the boot is FREE (the shipped seed) and a project brings its own. */
     if (s.p3Mode === 'vivid' && ui.p3Seg) ui.p3Seg.set('vivid');

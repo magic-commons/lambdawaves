@@ -15,6 +15,7 @@ import { open, judge, done } from '../tools/gate/gatekit.mjs';
 const PORT = process.env.LW_PORT || 8706;
 const g = await open(`https://127.0.0.1:${PORT}/lab/`, { width: 1500, height: 1150, script: 300000 });
 const HELP = `
+  if (window.__LW && __LW.stageText) __LW.stageText.prefs.set({ sayPreset: true });   /* iteration 007 I: THE FADE is the preset kind, off on a first run */
   const wait = (f, n = 400) => new Promise((res) => { let i = 0; const tick = () => { let v = null; try { v = f(); } catch (e) { v = null; } if (v || ++i > n) res(v); else setTimeout(tick, 50); }; tick(); });
   const frames = async (n = 8) => { for (let i = 0; i < n; i++) await new Promise((r) => requestAnimationFrame(r)); await new Promise((r) => setTimeout(r, 120)); };
   const ready = () => wait(() => __LW.states.ladder() && __LW.states.state().lanes.every((l) => l.ready) && __LW.states.state().pending === 0);

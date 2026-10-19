@@ -273,7 +273,7 @@ export async function createController(app) {
    *  announced on the stage (0.4.0 S3 · F2) — the boot, a URL preset, a test, a restore or an undo say nothing */
   function loadPreset(id, opt) {
     const p = PRESET_BY_ID.get(id); if (!p) return false;
-    if (opt && opt.hand && app.state.stageText) app.state.stageText.announce(mdText(p.label));   // the label as text: markdown's specials escaped
+    if (opt && opt.hand && app.state.stageText) app.state.stageText.say('preset', mdText(p.label));   // the label as text: markdown's specials escaped
     for (const key of Object.keys(rotRate)) setRotationRate(key, 0);
     reg.load(p); clock.reset(); app.state.lastNmax = -1;
     clock.window = p.visual.window;

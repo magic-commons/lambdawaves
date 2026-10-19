@@ -90,6 +90,7 @@ export function createChem(host, api) {
   const row = () => (volRef ? { id: volRef.key, name: volRef.name, formula: volRef.meta.formulaM || volRef.meta.formula, charge: volRef.charge, volume: 'VOL. ' + volRef.numeral } : PRESET_BY_ID.get(preset) || null);
 
   /** the dial's own label: knob() paints on construction and calls fmt() at once, so this is HOISTED */
+  const sayOrbital = () => { if (api.say && sol) api.say('orbital', 'ORBITAL · ' + orbFmt(orbital), { hold: true }); };   // iteration 007: the dial under the hand, on the stage while INFORMATIONAL › ORBITAL DIAL is on
   function orbFmt(k) { return sol ? orbitalName(sol.names, k - 1, sol.nocc) : String(k); }   // lab/names.js: '1b1 · HOMO' (a dial's text takes the plain form)
   /* ── the rows ─────────────────────────────────────────────────────────────────────────────────── */
   /* THE SECTION HEADER IS THE PAGE TURNER (0.4.0 S4b · PLAN F5, the expansion seat): ‹ SECTION › above the dropdown, which then
@@ -193,7 +194,7 @@ export function createChem(host, api) {
   const B_TITLE = { 'sto-3g': 'The vendored minimal Cartesian basis; the oracle for all eight',
     '6-31+g-star': 'A split-valence basis with diffuse and polarisation functions, for H, C, N, O, F molecules up to 46 Cartesian AOs — water’s first root moves 0.483 → 0.341' };
   const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: Object.entries(BASIS_LABEL).map(([id, label]) => ({ id, label, title: B_TITLE[id] || label + ': in a volume' })),
-    onChange: (v) => { pressBasis(v); if (api.pop) api.pop('BASIS · ' + bSeg.button(v).textContent); } });
+    onChange: (v) => { pressBasis(v); if (api.say) api.say('basis', 'BASIS · ' + bSeg.button(v).textContent); } });
   bSeg.root.addEventListener('pointerenter', () => { readHolds(); }); bSeg.root.addEventListener('focusin', () => { readHolds(); });   // the volumes are read when the hand comes near, never at boot
   const liveOk = (P) => (P.recordOnly ? { ok: false, nAO: P.nAO, why: `${P.name} is past the live cap and opens only from its STO-3G record; another basis would be a live solve, which is not offered` } : basis631(P.id));
   function paintBasis() {
@@ -231,7 +232,7 @@ export function createChem(host, api) {
      (never a record), and only up to benzene's 36 STO-3G AOs: the grid's AO table is points × AOs (78 MB for benzene). A press is a hand pick (its head) */
   const LDA_T = 'Kohn–Sham, local density (Slater + VWN5) on a Becke × Treutler–Ahlrichs × Lebedev-302 grid, solved live — PySCF RKS lda,vwn the oracle';
   const mthS = seg({ label: 'METHOD', value: 'rhf', options: [{ id: 'rhf', label: 'RHF', title: 'Restricted Hartree–Fock: one spatial orbital for both spins' }, { id: 'uhf', label: 'UHF', title: 'H₂ by UHF: α and β free to part past the Coulson–Fischer point' }, { id: 'lda', label: 'LDA', title: LDA_T }],
-    onChange: (v) => { method = v; if (api.pop) api.pop('METHOD · ' + mthS.button(v).textContent); solve(preset).then((r) => { if (r && api.hand) api.hand(preset); }); } });
+    onChange: (v) => { method = v; if (api.say) api.say('basis', 'METHOD · ' + mthS.button(v).textContent); solve(preset).then((r) => { if (r && api.hand) api.hand(preset); }); } });
   r1.appendChild(mthS.root);
   const ldaWhy = (P) => (P.multiplicity > 1 ? 'LDA is closed-shell in this cut: an open shell is UHF (no UKS until a later cut)' : basis !== 'sto-3g' ? 'LDA is STO-3G only in this cut'
     : P.recordOnly || P.nAO > 36 ? `LDA is offered up to benzene’s 36 STO-3G AOs (the grid’s AO table is points × AOs): ${P.name} has ${P.nAO}` : '');
@@ -248,10 +249,10 @@ export function createChem(host, api) {
     { id: 'esp', label: 'ESP', title: 'Φ(r) = Σ Z_A/|r−R_A| − ∫ρ/|r−r′| on a 64³ grid' },
     { id: 'spin', label: 'SPIN', title: 'ρα − ρβ, signed: the spin density of a UHF open shell (Dα − Dβ in double precision)' },
     { id: 'dlda', label: 'Δ LDA−RHF', title: 'ρ_LDA − ρ_RHF, signed: where LDA puts more density — D_LDA − D_RHF in double precision, the Δρ road' }],
-    onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); if (api.pop) api.pop('VIEW · ' + vSeg.button(v).textContent); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
+    onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); if (api.say) api.say('view', 'VIEW · ' + vSeg.button(v).textContent); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
   rV.appendChild(vSeg.root);
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
-    fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); } });
+    fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); sayOrbital(); } });
   r1.appendChild(orbKnob.root);
   /* 0.4.0 S4c · VALENCE, A SWITCH ON DENSITY (PLAN F5 iii): D − 2 Σ_core C_c C_cᵀ in f64, drawn by the density kind; the core is S1's
      coreCount(atoms).  It takes the ORBITAL dial's seat while DENSITY is the view (the dial reads nothing there): no wider row. */
@@ -563,7 +564,7 @@ export function createChem(host, api) {
     const [lo, n] = span(), k = Math.min(Math.max(lo, orbital || lo), n);
     const help = orbKnob.root.dataset.help || 'The molecular orbital index, ascending in ε; HOMO by default';
     const next = knob({ label: 'ORBITAL', min: lo, max: n, value: k, title: help,
-      fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); } });
+      fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); sayOrbital(); } });
     orbKnob.root.replaceWith(next.root); orbKnob = next;
     seats();
   }

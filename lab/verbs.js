@@ -98,7 +98,7 @@ export function createVerbs(app) {
       for (const v of todo) { keep(); let r; try { r = await BY_ID.get(v.verb).run(app, v.args || {}); } catch (e) { r = String((e && e.message) || e); }
         if (typeof r === 'string') refused.push({ verb: v.verb, why: r }); else { ran.push(v); own = own || !!(r && r.own); fade = fade || (r && r.fade) || ''; } }
     } finally { if (H) H.release(); }
-    if (fade && !own && app.state.stageText) app.state.stageText.announce(fade);
+    if (fade && !own && app.state.stageText) app.state.stageText.say('preset', fade);   // iteration 007: THE FADE is the `preset` kind (INFORMATIONAL › PRESETS); `say` is its own ask, written while STAGE FORMULA is on
     return { ran, refused };
   }
   /** what the app already prints, as compact JSON for a reader with no eyes: nothing here is computed for her */

@@ -14,7 +14,8 @@ const pass = (m) => console.log('PASS ' + m);
 const ev = async (body) => { const r = await g.ev(body); assert.ok(r !== undefined && r !== null && !r.E, 'page threw: ' + JSON.stringify(r)); return r; };
 try {
   assert.equal((await g.waitFor('window.__LW&&__LW.ready', 200, 100)).ok, 1);
-  await g.ev(`window.__w = (n) => new Promise((r) => setTimeout(r, n));
+  /* iteration 007 I: THE HEAD on the stage is INFORMATIONAL › ANNOUNCE › MOLECULE HEAD, off on a first run; switched on in the record first */
+  await g.ev(`__LW.stageText.prefs.set({ sayHead: true }); window.__w = (n) => new Promise((r) => setTimeout(r, n));
     window.__fades = () => __LW.stageText.layer.root.querySelectorAll('.mir-info-block[data-fade]').length;
     /* the hand's road: the page turner to the molecule's section (the dropdown holds one), then the dropdown's own change */
     window.__pick = (id) => { const s = document.querySelector('.dev[data-id="chem"] .mol-pick select.sel');

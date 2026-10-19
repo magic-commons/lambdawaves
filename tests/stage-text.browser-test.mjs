@@ -17,7 +17,9 @@ const pass = (m) => console.log('PASS ' + m);
 const ev = async (body) => { const r = await g.ev(body); assert.ok(r !== undefined && r !== null && !r.E, 'page threw: ' + JSON.stringify(r)); return r; };
 try {
   assert.equal((await g.waitFor('window.__LW&&__LW.ready', 200, 100)).ok, 1);
-  await g.ev(`window.__w = (n) => new Promise((r) => setTimeout(r, n));
+  /* iteration 007 I: every announcement kind is OFF on a first run (Josh 10-18: "default to formula and atoms on.  Everything else off"); the
+     sections below speak THE FADE, so its kind (INFORMATIONAL › ANNOUNCE › PRESETS) is switched on in the record first */
+  await g.ev(`__LW.stageText.prefs.set({ sayPreset: true }); window.__w = (n) => new Promise((r) => setTimeout(r, n));
     window.__node = () => [...__LW.stageText.layer.root.querySelectorAll('.mir-info-block')].pop() || null;
     window.__field = (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); };
     return 1;`);
@@ -112,7 +114,7 @@ try {
   assert.ok(t4.stageOff && t4.hidden && t4.swCaption === '' && t4.hSw === t4.hOff, 'STAGE FORMULA off still captions: ' + JSON.stringify(t4));
   assert.equal(t4.mol, 'H₂O · 1b1 HOMO · STO-3G · NUMERICAL');
   assert.deepEqual(t4.rows, { settings: [], informational: ['STAGE FORMULA', 'ATOM LABELS'] }, 'the two rows are not INFORMATIONAL\'s (and DISPLAY\'s none): ' + JSON.stringify(t4.rows));
-  assert.deepEqual(t4.info, { k: 2, eyebrow: 'INFORMATIONAL' }, 'INFORMATIONAL is not two switches, each with its SIZE: ' + JSON.stringify(t4.info));
+  assert.deepEqual(t4.info, { k: 4, eyebrow: 'INFORMATIONAL' }, 'INFORMATIONAL is not its four dials (the formula\'s and the labels\' SIZE, PAD, the pop-ups\' SIZE; iteration 007): ' + JSON.stringify(t4.info));
   assert.deepEqual(t4.split, { both: { labels: true, formula: true }, labOff: { labels: false, formula: true, caption: t4.mol }, fOff: { labels: true, formula: false } }, 'the two switches are not independent: ' + JSON.stringify(t4.split));
   assert.deepEqual(t4.errs, []);
   pass(`the picture carries "${t4.caption}" (its bytes differ from the captionless picture, which is byte-identical twice); STAGE TEXT off hides the text and takes a clean picture; MOLECULES captions "${t4.mol}"; INFORMATIONAL holds STAGE FORMULA and ATOM LABELS, each its own switch (labels off keep the formula and its caption; formula off keeps the labels), and DISPLAY neither`);
