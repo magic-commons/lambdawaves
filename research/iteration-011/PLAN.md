@@ -25,3 +25,7 @@
 ## Closed
 | row | merged | note |
 |---|---|---|
+| Q2 MINIMIZED BY DEFAULT | `11cb3bd` (tip `744044e`) | every inner fold closed on a first visit (INFORMATIONAL's was the one still open on a desktop); open folds remembered as WORKSPACE `folds`; 18 suites green |
+| Q1 THE QUIET STAGE | `32a1e0f` (tip `45e21c1`) | the stage draws no status sentence — the "extra status thingy" is INFORMATIONAL's own STATUS readout → one switch (off on a first run, on for an older record); LIST CAP default 16 (the longest LOAD VALENCE; 12 would collapse Au); SKELETON row, flat disks, default 1.6× (water's O 20 → 34 px); bonds stay 2 px. Calls for Josh: cap 16 or 12; older profiles keep STATUS on; bonds with SIZE? |
+| Q4 THE LIBRARY OWNS THE INSTALLS | `9ff2406` (tip `0a93020`) | no heading tiles in the deck (the section in the hover caption); LIBRARY › RECORDS + THIS DEVICE; an installed set survives; three HEAVY tiles have no visible picture (CuH, ZnH₂, GeH₄) → Q3 / thumbnails |
+| Q6 GEMMA, HIDDEN | (this merge) | ASK_ENABLED = false in lab/ask.js; Gemma = gemma4:e4b (6.6 GB) through a local Ollama broker; a built-in assistant = a 0.5–1.5 B model on WebGPU, downloaded on demand; `latex-copy` §8 is a STALE row (expects SPECTRUM folded under MOLECULES) → next sweep with take-in-bugs :87 and official-defaults-palette (VIVID moved to MIR OPTIONS in iteration 003) |
