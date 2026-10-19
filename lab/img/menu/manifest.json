@@ -138,6 +138,26 @@
  ],
  "elements": [
   {
+   "sym": "H",
+   "Z": 1,
+   "orbital": "1s_0"
+  },
+  {
+   "sym": "He",
+   "Z": 2,
+   "orbital": "1s_0"
+  },
+  {
+   "sym": "Li",
+   "Z": 3,
+   "orbital": "2s_0"
+  },
+  {
+   "sym": "Be",
+   "Z": 4,
+   "orbital": "2s_0"
+  },
+  {
    "sym": "B",
    "Z": 5,
    "orbital": "2p_-1"
@@ -168,6 +188,16 @@
    "orbital": "2p_1"
   },
   {
+   "sym": "Na",
+   "Z": 11,
+   "orbital": "3s_0"
+  },
+  {
+   "sym": "Mg",
+   "Z": 12,
+   "orbital": "3s_0"
+  },
+  {
    "sym": "Al",
    "Z": 13,
    "orbital": "3p_-1"
@@ -196,6 +226,16 @@
    "sym": "Ar",
    "Z": 18,
    "orbital": "3p_1"
+  },
+  {
+   "sym": "K",
+   "Z": 19,
+   "orbital": "4s_0"
+  },
+  {
+   "sym": "Ca",
+   "Z": 20,
+   "orbital": "4s_0"
   },
   {
    "sym": "Sc",
@@ -238,6 +278,11 @@
    "orbital": "3d_0"
   },
   {
+   "sym": "Cu",
+   "Z": 29,
+   "orbital": "4s_0"
+  },
+  {
    "sym": "Zn",
    "Z": 30,
    "orbital": "3d_2"
@@ -273,49 +318,254 @@
    "orbital": "4p_1"
   },
   {
-   "sym": "H",
-   "Z": 1,
-   "orbital": "1s_0"
+   "sym": "Rb",
+   "Z": 37,
+   "orbital": "5s_0"
   },
   {
-   "sym": "He",
-   "Z": 2,
-   "orbital": "1s_0"
+   "sym": "Sr",
+   "Z": 38,
+   "orbital": "5s_0"
   },
   {
-   "sym": "Li",
-   "Z": 3,
-   "orbital": "2s_0"
+   "sym": "Y",
+   "Z": 39,
+   "orbital": "4d_-2"
   },
   {
-   "sym": "Be",
-   "Z": 4,
-   "orbital": "2s_0"
+   "sym": "Zr",
+   "Z": 40,
+   "orbital": "4d_-1"
   },
   {
-   "sym": "Na",
-   "Z": 11,
-   "orbital": "3s_0"
+   "sym": "Nb",
+   "Z": 41,
+   "orbital": "4d_1"
   },
   {
-   "sym": "Mg",
-   "Z": 12,
-   "orbital": "3s_0"
+   "sym": "Mo",
+   "Z": 42,
+   "orbital": "4d_2"
   },
   {
-   "sym": "K",
-   "Z": 19,
-   "orbital": "4s_0"
+   "sym": "Tc",
+   "Z": 43,
+   "orbital": "4d_2"
   },
   {
-   "sym": "Ca",
-   "Z": 20,
-   "orbital": "4s_0"
+   "sym": "Ru",
+   "Z": 44,
+   "orbital": "4d_-1"
   },
   {
-   "sym": "Cu",
-   "Z": 29,
-   "orbital": "4s_0"
+   "sym": "Rh",
+   "Z": 45,
+   "orbital": "4d_0"
+  },
+  {
+   "sym": "Pd",
+   "Z": 46,
+   "orbital": "4d_2"
+  },
+  {
+   "sym": "Ag",
+   "Z": 47,
+   "orbital": "5s_0"
+  },
+  {
+   "sym": "Cd",
+   "Z": 48,
+   "orbital": "4d_2"
+  },
+  {
+   "sym": "In",
+   "Z": 49,
+   "orbital": "5p_-1"
+  },
+  {
+   "sym": "Sn",
+   "Z": 50,
+   "orbital": "5p_0"
+  },
+  {
+   "sym": "Sb",
+   "Z": 51,
+   "orbital": "5p_1"
+  },
+  {
+   "sym": "Te",
+   "Z": 52,
+   "orbital": "5p_-1"
+  },
+  {
+   "sym": "I",
+   "Z": 53,
+   "orbital": "5p_0"
+  },
+  {
+   "sym": "Xe",
+   "Z": 54,
+   "orbital": "5p_1"
+  },
+  {
+   "sym": "Cs",
+   "Z": 55,
+   "orbital": "6s_0"
+  },
+  {
+   "sym": "Ba",
+   "Z": 56,
+   "orbital": "6s_0"
+  },
+  {
+   "sym": "La",
+   "Z": 57,
+   "orbital": "5d_-2"
+  },
+  {
+   "sym": "Ce",
+   "Z": 58,
+   "orbital": "4f_-3"
+  },
+  {
+   "sym": "Pr",
+   "Z": 59,
+   "orbital": "4f_-1"
+  },
+  {
+   "sym": "Nd",
+   "Z": 60,
+   "orbital": "4f_0"
+  },
+  {
+   "sym": "Pm",
+   "Z": 61,
+   "orbital": "4f_1"
+  },
+  {
+   "sym": "Sm",
+   "Z": 62,
+   "orbital": "4f_2"
+  },
+  {
+   "sym": "Eu",
+   "Z": 63,
+   "orbital": "4f_3"
+  },
+  {
+   "sym": "Gd",
+   "Z": 64,
+   "orbital": "4f_3"
+  },
+  {
+   "sym": "Tb",
+   "Z": 65,
+   "orbital": "4f_-2"
+  },
+  {
+   "sym": "Dy",
+   "Z": 66,
+   "orbital": "4f_-1"
+  },
+  {
+   "sym": "Ho",
+   "Z": 67,
+   "orbital": "4f_0"
+  },
+  {
+   "sym": "Er",
+   "Z": 68,
+   "orbital": "4f_1"
+  },
+  {
+   "sym": "Tm",
+   "Z": 69,
+   "orbital": "4f_2"
+  },
+  {
+   "sym": "Yb",
+   "Z": 70,
+   "orbital": "4f_3"
+  },
+  {
+   "sym": "Lu",
+   "Z": 71,
+   "orbital": "5d_-2"
+  },
+  {
+   "sym": "Hf",
+   "Z": 72,
+   "orbital": "5d_-1"
+  },
+  {
+   "sym": "Ta",
+   "Z": 73,
+   "orbital": "5d_0"
+  },
+  {
+   "sym": "W",
+   "Z": 74,
+   "orbital": "5d_1"
+  },
+  {
+   "sym": "Re",
+   "Z": 75,
+   "orbital": "5d_2"
+  },
+  {
+   "sym": "Os",
+   "Z": 76,
+   "orbital": "5d_-2"
+  },
+  {
+   "sym": "Ir",
+   "Z": 77,
+   "orbital": "5d_-1"
+  },
+  {
+   "sym": "Pt",
+   "Z": 78,
+   "orbital": "5d_1"
+  },
+  {
+   "sym": "Au",
+   "Z": 79,
+   "orbital": "6s_0"
+  },
+  {
+   "sym": "Hg",
+   "Z": 80,
+   "orbital": "5d_2"
+  },
+  {
+   "sym": "Tl",
+   "Z": 81,
+   "orbital": "6p_-1"
+  },
+  {
+   "sym": "Pb",
+   "Z": 82,
+   "orbital": "6p_0"
+  },
+  {
+   "sym": "Bi",
+   "Z": 83,
+   "orbital": "6p_1"
+  },
+  {
+   "sym": "Po",
+   "Z": 84,
+   "orbital": "6p_-1"
+  },
+  {
+   "sym": "At",
+   "Z": 85,
+   "orbital": "6p_0"
+  },
+  {
+   "sym": "Rn",
+   "Z": 86,
+   "orbital": "6p_1"
   }
  ],
  "orbitals": [
