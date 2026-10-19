@@ -93,3 +93,64 @@ at 19:31 (15 failed, 9 of them stopped past 6 min; 17,719 PubChem conformers alr
 7. `python report.py > research/iteration-004/CAT-BUILD.md`; `/tmp/c7/returned.py` on the live file (the ten C4 refusals back under
    their ids); repack `node tools/volumes/pack.mjs --candidates $V/catalogue/vol-1.candidates.json --volume vol-1 --numeral I --title
    'All the Molecules' --blurb '…(C5's)…' --sole --incremental`; finish this note; commit.
+
+## 2 · RESUMED 2026-10-19: THE GEOMETRY, THE ONE BUILD, THE GATE — STOPPED BEFORE THE SWAP
+
+The coordinator's brief for the resume: steps 1 and 2 only, then `guards.py --pin` and the gate; **no swap, no queue file, no
+solver signal, no `dist/`** (Claude Yan had merged this branch's tool rules into `yan-c` and repacked VOL. I overnight). Josh
+decides whether the solvers restart on the wider queue.
+
+**The geometry.** The 19:31 pass had in fact run to its end before the pause took it (`/tmp/c7/geo4.log`: 2,092/2,092 hard builds
+in 6,932 s, 31 failed, 19 of them stopped past 6 minutes), so every geometry was already in `cache/geometry.json`.
+
+**One fix found by the scratch build's own guard** (`build.py`, `HAND_CIDS`): ferrocene's and bis(benzene)chromium's ids went missing.
+PubChem draws a sandwich as a metal cation and two ring anions (three units), so C7's new rule folded ferrocene's Wikidata article onto
+a "parent" — and the hand-built nomination of the same record with it. No nomination of a hand-built molecule's record is folded now;
+both rows are back at their solved atoms, and diborane was never touched.
+
+**The build** (`LW_OFFLINE=1 … build.py --jobs=4 --geometry-minutes=6 --out=…/vol-1.candidates.next.json`, 79 s from the cache, log
+`catalogue/build-c7.log`): **29,509 molecules** (live 7,070) · 3,003 exclusions · guards 0 complaints. `guards.py --pin`: 0 rows.
+`check.py vol-1.candidates.next.json --against vol-1.candidates.json` (`catalogue/check-c7.log`): **29509 rows checked · 0
+complaints** — 7070/7070 previous ids with the same InChIKey · 3497/3497 rows solved in `raw/` at exactly their solved atoms (adrenaline
+and menthol, the pilot's, are carried by no row, as before). The live files are untouched; `.next` waits beside them.
+
+**New rows: 22,439**, by why the previous build refused them:
+
+| why | rows |
+|---|---|
+| recognisability no longer a filter: only ChEBI, in no Wikipedia | 10,703 |
+| recognisability no longer a filter: only Wikidata, in < 12 Wikipedias | 10,311 |
+| a salt or a mixture, as its neutral parent | 516 |
+| the use-word gate is gone | 425 |
+| heavy 51–70 (the cap rose from 50) | 205 |
+| a closed-shell ion, kept with its charge | 158 |
+| returned: the controlled-substance screen is removed | 91 |
+| new this run (PubChem answered a name, a key or a parent) | 29 |
+| a hand skip lifted | 1 |
+
+(heavy 51–70 rows in all: 1,129 — most came in as obscure rows.) The ten C4 refusals are back **under their old ids**: methamphetamine-2,
+levomethamphetamine, methorphan, levofenfluramine, arketamine, tilidine and vinbarbital-2 (all seven solved in `raw/`, the two
+methamphetamine solves untouched), esmodafinil, acetylmethadol, pentazocine. Of the 93 rows the controlled-substance screen refused in
+C5, 91 are back; 25I-NBOMe and 2C-I contain iodine (past krypton).
+
+**Still out: 3,003**, by reason: an element past krypton 1,140 · past 70 heavy atoms 732 · isotopically labelled 332 · **the CWC screen
+250** (unchanged rules; 29 skeletons carry a signal, as in C4/C5 — the screen now also meets the obscure rows) · odd electron count 175
+· PubChem has no compound under the name 125 · not one molecule (a salt whose neutral parent PubChem does not carry) 83 · a radical
+53 · no 3-D geometry 46 (19 of them stopped past 6 minutes) · hand skips that stand 26 · structure does not parse 17 · PubChem record
+with no InChIKey/formula 9 · open shell in the app 7 · no heavy atom 3 · disabled in the app 2 · 2 more. No row lacks a structure tag.
+
+Heavy atoms: ≤10 4,101 · 11–20 8,721 · 21–30 9,860 · 31–40 4,143 · 41–50 1,555 · 51–60 707 · 61–70 422. Geometry: PubChem 3-D
+conformer 26,064 · RDKit ETKDGv3 + MMFF94 2,789 · GFN2-xTB 568 · app pinned 88. **PubChem pending: descriptions only, 25,616 CIDs**
+(blurbs fall back to ChEBI's definitions and λWAVES' own lines; a calm run fills them — PubChem went Black four times on 10-18).
+
+**THE QUEUES, DRY** (`/tmp/c7/queues_dry.py`: queues.py's own `state()` and split on `.next`, writing nothing): finished 3,494 ·
+**finish 9,338** (8,984 not in today's 1,242-row `vol-1.finish.json`; cost 1,602,087 units) · **gpu-day 16,677** (13,447 new; 1,128 of
+51–70 heavy atoms; cost 96,385,819 units). Time for the finish queue: one solver at STATUS's 0.974 s/unit ≈ 18.1 days; **the three
+solvers at what they finished in the last 8 h** (10,375 units/h · 30.1 molecules/h) **≈ 6.4 days by cost, ≈ 12.9 days by count** (the
+count clock is the truer for small molecules).
+
+**What is left (after Josh's word):** stop the three solvers (TERM the recorded pids), `guards.py --pin` + `check.py` again on `.next`,
+hard-link `vol-1.{candidates,stats,excluded}.json` → `*.before-c7.json` and rename the `.next` files in, hard-link the queue files →
+`*.before-c7.json`, `queues.py`, restart (`long-run-finish.sh`, `long-run-gpu-finish.sh 1 3` / `2 3`), `report.py` →
+`research/iteration-004/CAT-BUILD.md`, repack `--sole --incremental`. (If the solvers finish more molecules first, the pin and the gate
+before the swap carry them.)
