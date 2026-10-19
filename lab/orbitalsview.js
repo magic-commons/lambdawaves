@@ -33,6 +33,9 @@ import { forms, frontierName, ionisation, orbitalName } from './names.js';
 const DEG = 1e-6;                       // |Δε| below this is one degenerate row, drawn side by side
 const TAU = 2 * Math.PI;
 const LAW = 'frozen orbitals · beats at Δε, not at ω_RPA';
+/* iteration 007 B (ADR-0002) · THE ORBITAL REGISTER's A ↔ B IS ITS OWN TARGET.  Its id lives here, once: shell/modulation.js registers it
+   (a `defs` row), shell/persist.js seats its base (modSeats), and the knob's hand law below asks it.  `reg.morph` stays the STATES register's. */
+export const OMORPH = 'reg.omorph';
 
 export function createOrbitals(host, api) {
   const F = () => (api.field ? api.field() : null);
@@ -40,6 +43,8 @@ export function createOrbitals(host, api) {
   const S = () => api.session || null;
   const now = () => (api.now ? api.now() : 0);
   const status = (t, cls) => { statusText = t; if (api.status) api.status(t, cls === undefined ? '' : cls); };
+  /* THE HAND LAW (the MIR check's B2, as statesview.js): a hand on the ROUTED A ↔ B moves its BASE through the port and applies nothing itself */
+  const hand = (id, v) => !!(api.modHand && api.modHand(id, v));
 
   let sol = null, on = false, active = api.active ? !!api.active() : true;
   let statusText = 'no molecule solved yet', unsub = null, wanted = null;
@@ -114,7 +119,7 @@ export function createOrbitals(host, api) {
   const mrow = el('div', 'row tight reg-morph', host);
   const morphSw = sw({ label: 'MORPH', value: false, title: 'Play the normalised path from A to B instead of the dials — a performance path, not dynamics', onChange: (v) => setMorph(v, morphS) });
   const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3),
-    title: 'Where on the path from A (0) to B (1) the register plays', onInput: (v) => setMorph(morphOn, v) });
+    title: 'Where on the path from A (0) to B (1) the register plays', onInput: (v) => { if (hand(OMORPH, v)) return; setMorph(morphOn, v); } });
   mrow.appendChild(morphSw.root); mrow.appendChild(morphK.root);
   /* FLOW for one orbital: ρ = |ψ|² and j = Im ψ̄∇ψ = ρ ∇arg ψ — the tracers ride the gradient of the very phase the field
      is coloured by.  A WINDING orbital circulates; a real orbital stands still.  The packet IS ψ: its f64 AO vector goes to
@@ -591,12 +596,22 @@ export function createOrbitals(host, api) {
       sel.set(k, { amp: Math.max(0, Math.min(1, Number.isFinite(e.amp) ? e.amp : 1)), phase: ((((+e.phase || 0) % TAU) + TAU) % TAU) });
       if (selected < 0) selected = k;
     }
+    /* ADR-0002: the stores and the position travel with the selection (absent in a record that holds no store: an older file, NEW, the demos) */
+    storeA = unpackStore(r && r.A); storeB = unpackStore(r && r.B); aBtn.classList.toggle('on', !!storeA); bBtn.classList.toggle('on', !!storeB);
+    morphS = Math.min(1, Math.max(0, +(r && r.morph) || 0)); morphK.set(morphS);
+    morphOn = !!(r && r.morphOn) && !!storeA && !!storeB; morphSw.set(morphOn); rowsEl.classList.toggle('reg-morphing', morphOn);
   }
-  function save() { return { on, selection: keys().map((k) => ({ k, amp: sel.get(k).amp, phase: sel.get(k).phase })) }; }
+  const packStore = (M) => (M ? [...M].map(([k, c]) => ({ k, re: c.re, im: c.im })) : null);
+  const unpackStore = (a) => { if (!Array.isArray(a) || !sol) return null; const M = new Map();
+    for (const e of a) { const k = Math.round(e && e.k); if (Number.isFinite(k) && k >= 0 && k < sol.nAO) M.set(k, { re: +e.re || 0, im: +e.im || 0 }); } return M.size ? M : null; };
+  /* the stores, A ↔ B and MORPH are written only while a store exists (no store, no path: MORPH cannot be on) — a register that never
+     stored keeps its bytes; a ROUTED A ↔ B's base is seated by persist.js modSeats whatever this writes */
+  function save() { return { on, selection: keys().map((k) => ({ k, amp: sel.get(k).amp, phase: sel.get(k).phase })),
+    ...((storeA || storeB) && { morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB) }) }; }
   /** the register is a selection over a LADDER, so a record landing before the molecule waits for it (see adopt) */
   function load(r) {
     if (!r) return false;
-    if (!sol) { wanted = { selection: r.selection }; if (on) setOn(false); return true; }
+    if (!sol) { wanted = { selection: r.selection, A: r.A, B: r.B, morph: r.morph, morphOn: r.morphOn }; if (on) setOn(false); return true; }
     applyRecord(r); touch(); rebuild(); paint(); refresh();
     if (r.on && !on) setOn(true); else if (!r.on && on) setOn(false);
     else if (on) push(now(), true);
@@ -613,6 +628,9 @@ export function createOrbitals(host, api) {
     setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; },
     select, deselect, toggle, clear, norm, setAmp, setPhase, preset, store, setMorph,
     get morphOn() { return morphOn; }, get morph() { return morphS; },
+    knobs: { morph: () => morphK },                                   // ADR-0002: the dial the `reg.omorph` row stamps and the TIMELINE lanes
+    /** the modulator's road (a route, a TIMELINE lane): store the position; the picture moves only while MORPH plays */
+    setMorphValue(v) { const s = Math.min(1, Math.max(0, +v || 0)); if (s === morphS) return; morphS = s; if (morphOn) { touch(); api.repaint(); } },
     get selected() { return selected; },
     ladder() { return sol ? Array.from({ length: sol.nAO }, (_, k) => ({ k, eps: sol.eps[k], occ: k < sol.nocc ? 2 : 0, name: label(k), about: about(k) })) : []; },
 
