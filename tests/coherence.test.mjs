@@ -4,7 +4,7 @@ import { coherence, createEqualizer, EQ_PRESETS } from '../lab/equalizer.js';
 import { BASIS, BASIS_INDEX } from '../lab/hydrogen.js';
 let FAILED = 0; const judge = (name, ok, d) => { if (!ok) FAILED++; console.log((ok ? 'GREEN ' : 'RED   ') + name + (d === undefined ? '' : '  ' + JSON.stringify(d))); };
 const lab = (id, w = 1) => { const a = BASIS_INDEX.get(id); return { re: Math.sqrt(w), im: 0, label: id, E: BASIS[a].E, n: BASIS[a].n }; };
-const c = [lab('h:1:0:0'), lab('h:2:1:0')], P = c.map((x) => BASIS_INDEX.get(x.label)), pops = new Float64Array(91); for (const a of P) pops[a] = 1;
+const c = [lab('h:1:0:0'), lab('h:2:1:0')], P = c.map((x) => BASIS_INDEX.get(x.label)), pops = new Float64Array(BASIS.length); for (const a of P) pops[a] = 1;
 const plain = coherence(c), d = plain.M[0][0] + plain.M[1][1];
 judge('1s + 2p₀: one off-diagonal pair of 0.5, the populations sum to 1', Math.abs(plain.M[0][1] - 0.5) < 1e-12 && plain.M[1][0] === plain.M[0][1] && Math.abs(d - 1) < 1e-12, plain.M);
 const eq = createEqualizer(); eq.setPreset('flat');

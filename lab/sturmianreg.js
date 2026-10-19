@@ -1,18 +1,18 @@
-/* sturmianreg.js — THE SCALE on the register: the Sturmian propagator over the 91 labels of n ≤ 6, assembled block by block.
+/* sturmianreg.js — THE SCALE on the register: the Sturmian propagator over the 140 labels of n ≤ 7, assembled block by block.
  *
- * THE SCALE STAYS n ≤ 6 (iteration 008 A7).  The register grew to 140 labels (n = 7 appended); the propagator's objects are
- * 140 wide so the register reads them by its own index, but only the 91 labels of n ≤ 6 enter the (l, m) blocks: n = 7's
- * rows and columns are zero (no eigenvector carries one), so under the scale an n = 7 coefficient has no column and evolves
- * to nothing — the scale says so.  Every block, eigenvalue and evolution of the 91 is unchanged to the bit (THE LOCK's
- * sturmian rows), which a seven-label block would not be (one more Sturmian moves every variational eigenvalue).
+ * THE SCALE TOOK n = 7 (iteration 009 N7; at 008 A7 it had stayed at the 91 with zero rows for n = 7).  Every (l, m) block now
+ * holds its n = 7 label — 49 blocks of ≤ 7 labels, the new (6, m) blocks one label each — so an n = 7 coefficient has its own
+ * column and evolves under the scale.  One more Sturmian in a block moves every variational eigenvalue of that block DOWN
+ * (Hylleraas–Undheim–MacDonald interlacing: E_k(n ≤ 7) ≤ E_k(n ≤ 6) ≤ E_{k+1}(n ≤ 7)), or holds it where it is exact (the label
+ * n₀ at λ = Z/n₀); THE LOCK's sturmian rows were re-captured by name for it (research/iteration-009/N7-BUILD.md holds the table).
  *
  * sturmian.js gives S, H and the generalised eigenproblem H C = S C E, CᵀSC = I on ANY label set (closed forms, EXACT;
  * eigenvalues VARIATIONAL).  On the whole register the (l, m) blocks are exactly degenerate in ±m pairs (neither H nor
- * S sees the sign of m) and, at λ = 1/n, across l as well — and an eigen-solver handed all 91 labels at once is free to
+ * S sees the sign of m) and, at λ = 1/n, across l as well — and an eigen-solver handed all 140 labels at once is free to
  * return any orthonormal basis of a degenerate eigenspace, mixing blocks.  The instrument needs every eigenvector to
  * carry ONE (l, m): then the Zeeman term is the exact shift E_k + B m_k/2, the SPECTRUM ladder can name its levels, and
  * "load eigenstate k" loads a state of definite m.  So the register's propagator is built one (l, m) block at a time
- * (36 blocks of ≤ 6 labels, each through createSturmian) and assembled into the 91 × 91 objects the register and the
+ * (49 blocks of ≤ 7 labels, each through createSturmian) and assembled into the 140 × 140 objects the register and the
  * SPECTRUM read:
  *     c(t) = C e^{−iEt} CᵀS c(0),      populations |⟨C_k|S|c⟩|² / ⟨c|S|c⟩,      norm ⟨c|S|c⟩
  * — the same law as sturmian.js's evolve (the assembled C is block-diagonal, so exp(−iS⁻¹Ht) is unchanged).  E is
@@ -23,26 +23,26 @@
  * The interface is what Register.setPropagator() reads — evolve, norm, populations, energyOf, eigenstate, E, C, CtS,
  * H, S, rank, mK — and nothing in it is Sturmian-specific: any propagator in a non-orthogonal basis plugs in.
  *
- * STATUS: EXACT (bookkeeping over sturmian.js's closed forms; judged against the unblocked 91 × 91 solve to 1e-10 in
+ * STATUS: EXACT (bookkeeping over sturmian.js's closed forms; judged against the unblocked 140 × 140 solve to 1e-10 in
  * tests/sturmianreg.test.mjs: same eigenvalues, same evolution, CᵀSC = I, block purity), VARIATIONAL (the eigenvalues).
  */
-import { BASIS, N6 } from './hydrogen.js';
+import { BASIS } from './hydrogen.js';
 import { createSturmian, sturmianRecord } from './sturmian.js';
 
-export const N = BASIS.length;                                      // 140: the register's width (the blocks hold its first 91)
+export const N = BASIS.length;                                      // 140: the register's width, every label in a block
 
 /**
- * createRegisterSturmian(λ, { Z }) → the block-pure propagator over the 91 labels in BASIS order.
- *   evolve(c0, t)     c(t) = C e^{−iEt} CᵀS c0,  c0 = { re, im } Float64Array(91) (a new { re, im })
+ * createRegisterSturmian(λ, { Z }) → the block-pure propagator over the 140 labels in BASIS order.
+ *   evolve(c0, t)     c(t) = C e^{−iEt} CᵀS c0,  c0 = { re, im } Float64Array(140) (a new { re, im })
  *   populations(c)    the S-metric projections onto the eigenvectors, as fractions of ⟨c|S|c⟩ (Σ = 1)
  *   energyOf(c)       ⟨c|H|c⟩ / ⟨c|S|c⟩          norm(c)  ⟨c|S|c⟩          eigenstate(k)  { re, im } (real, S-normalised)
  *   records()         sturmianRecord(n, l, m, λ) for every label, in BASIS order
- *   E, C, CtS, S, H   the assembled objects (Float64Array; C is 91 × rank row-major, CtS rank × 91)
+ *   E, C, CtS, S, H   the assembled objects (Float64Array; C is 140 × rank row-major, CtS rank × 140)
  *   lK, mK, nK        per eigenvector: its block's l and m, and the n of its dominant label
  */
 export function createRegisterSturmian(lambda, { Z = 1 } = {}) {
   const blocks = new Map();
-  for (const s of BASIS) { if (s.index >= N6) continue; const key = s.l + ':' + s.m; if (!blocks.has(key)) blocks.set(key, []); blocks.get(key).push(s.index); }   // n ≤ 6 only (the header)
+  for (const s of BASIS) { const key = s.l + ':' + s.m; if (!blocks.has(key)) blocks.set(key, []); blocks.get(key).push(s.index); }   // every label, n = 7 included (the header)
   const S = new Float64Array(N * N), H = new Float64Array(N * N), cols = [];
   for (const idx of blocks.values()) {
     const P = createSturmian(idx, lambda, { Z }), B = idx.length;

@@ -74,7 +74,7 @@ export function createBadges({ dom, accept, field, reg, mat, clock, domain, qual
     b1.lastChild.textContent = reg.field.Fz !== 0 ? 'STATE · SHADOW · SHELL EVOLUTION' : 'STATE · EVOLUTION · SHADOW';
     if (ui.fieldRo) {
       ui.fieldRo.set(reg.field.Fz !== 0 ? 'H₀ + F z' : reg.field.Bz !== 0 ? 'H₀ + (B/2)L_z' : 'H₀ (bare Coulomb)', reg.field.Fz !== 0 ? 'warn' : reg.field.Bz !== 0 ? 'live' : '');
-      ui.fieldRo.setSub(S ? 'across shells · all 91 labels' : reg.field.Fz !== 0 ? `within-shell model · use F ≪ ${reg.fieldValidUpTo().toExponential(1)}` : reg.field.Bz !== 0 ? 'diagonal in this basis' : 'current Hamiltonian');
+      ui.fieldRo.setSub(S ? 'across shells · all 140 labels' : reg.field.Fz !== 0 ? `within-shell model · use F ≪ ${reg.fieldValidUpTo().toExponential(1)}` : reg.field.Bz !== 0 ? 'diagonal in this basis' : 'current Hamiltonian');
     }
     const rs = stateReaders().rendered;
     const t2 = field.ok ? `FIELD ${field.resolution}³ · ±${Number.isInteger(domain.half) ? domain.half : domain.half.toFixed(2)} ${getHamiltonian().lengthUnit}${getSpace() === 'p' ? '⁻¹ · MOMENTUM' : ''} · f16` : 'NO FIELD · WebGPU unavailable';

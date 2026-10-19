@@ -1,6 +1,6 @@
 /* tests/sturmianreg.test.mjs — the node proof of THE SCALE on the register (W-STURMIAN, the UI wave's maths).
  *   node tests/sturmianreg.test.mjs
- * Oracles: the unblocked 91 × 91 createSturmian (the same law, mixed degenerate blocks allowed), the register's own
+ * Oracles: the unblocked 140 × 140 createSturmian (the same law, mixed degenerate blocks allowed), the register's own
  * diagonal law at λ = 1/n, and identities that must hold to rounding (CᵀSC = I, S-norm conservation, Σ populations = 1).
  */
 import { createRegisterSturmian } from '../lab/sturmianreg.js';
@@ -14,30 +14,31 @@ function judge(name, ok, detail) {
   console.log((ok ? 'GREEN ' : 'RED   ') + name + (detail === undefined ? '' : '\n      ' + JSON.stringify(detail).slice(0, 300)));
 }
 const t0 = performance.now();
-const N = 91, W = BASIS.length, maxAbs = (a) => { let m = 0; for (const v of a) m = Math.max(m, Math.abs(v)); return m; };
+const N = BASIS.length, W = BASIS.length, maxAbs = (a) => { let m = 0; for (const v of a) m = Math.max(m, Math.abs(v)); return m; };
 const rnd = (seed) => () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296 - 0.5; };
-/* iteration 008 A7: the register is W = 140 wide and THE SCALE holds its first N = 91 (n ≤ 6): a state is 140 wide, n = 7 at 0 */
-const randomState = (seed) => { const r = rnd(seed), re = new Float64Array(W), im = new Float64Array(W); for (let a = 0; a < N; a++) { re[a] = r(); im[a] = r(); } return { re, im }; };
+/* iteration 009 N7: THE SCALE holds the whole register, N = W = 140 (n ≤ 7; at 008 A7 it held the first 91 and n = 7's rows were zero) */
+const randomState = (seed) => { const r = rnd(seed), re = new Float64Array(W), im = new Float64Array(W); for (let a = 0; a < W; a++) { re[a] = r(); im[a] = r(); } return { re, im }; };
 
 {
   /* 1. the assembly against the unblocked solve: same eigenvalues (sorted), CᵀSC = I, every column block-pure */
   const lam = 1.4, R = createRegisterSturmian(lam, { Z: 1 }), U = createSturmian(undefined, lam, { Z: 1 });
   let dE = 0; for (let k = 0; k < N; k++) dE = Math.max(dE, Math.abs(R.E[k] - U.E[k]));
   let orth = 0; for (let k = 0; k < N; k++) for (let q = 0; q < N; q++) { let s = 0; for (let i = 0; i < W; i++) s += R.C[i * N + k] * R.CtS[q * W + i]; orth = Math.max(orth, Math.abs(s - (k === q ? 1 : 0))); }
-  let impure = 0; for (let k = 0; k < N; k++) for (let i = 0; i < W; i++) if (R.C[i * N + k] !== 0 && (i >= N || BASIS[i].l !== R.lK[k] || BASIS[i].m !== R.mK[k])) impure++;   // an n = 7 row is never in a column
-  let dS = 0, dH = 0, d7 = 0; for (let i = 0; i < W; i++) for (let j = 0; j < W; j++) { if (i < N && j < N) { dS = Math.max(dS, Math.abs(R.S[i * W + j] - U.S[i * N + j])); dH = Math.max(dH, Math.abs(R.H[i * W + j] - U.H[i * N + j])); } else d7 = Math.max(d7, Math.abs(R.S[i * W + j]), Math.abs(R.H[i * W + j])); }
-  judge('ASSEMBLY: at λ = 1.4 the block-pure propagator has the unblocked 91 × 91 solve\'s eigenvalues (1e-10), CᵀSC = I (1e-12), the same S and H (1e-14), 36 blocks, rank 91, and every eigenvector carries ONE (l, m); the objects are the register\'s 140 wide and n = 7\'s rows and columns are zero (THE SCALE is n ≤ 6)',
-    dE < 1e-10 && orth < 1e-12 && dS < 1e-14 && dH < 1e-14 && R.blocks === 36 && R.rank === 91 && impure === 0 && d7 === 0 && R.n === W, { dE, orth, dS, dH, d7, blocks: R.blocks, rank: R.rank, impure, E0: R.E[0] });
+  let impure = 0; for (let k = 0; k < N; k++) for (let i = 0; i < W; i++) if (R.C[i * N + k] !== 0 && (BASIS[i].l !== R.lK[k] || BASIS[i].m !== R.mK[k])) impure++;
+  let dS = 0, dH = 0, n7 = 0; for (let i = 0; i < W; i++) for (let j = 0; j < W; j++) { dS = Math.max(dS, Math.abs(R.S[i * W + j] - U.S[i * N + j])); dH = Math.max(dH, Math.abs(R.H[i * W + j] - U.H[i * N + j])); }
+  for (let k = 0; k < N; k++) if (R.nK[k] === 7) n7++;   // n = 7 is in the scale: eigenvectors whose dominant label is n = 7
+  judge('ASSEMBLY: at λ = 1.4 the block-pure propagator has the unblocked 140 × 140 solve\'s eigenvalues (1e-10), CᵀSC = I (1e-12), the same S and H (1e-14), 49 blocks, rank 140, and every eigenvector carries ONE (l, m); n = 7 is in the scale (iteration 009 N7: some eigenvectors are dominated by an n = 7 label)',
+    dE < 1e-10 && orth < 1e-12 && dS < 1e-14 && dH < 1e-14 && R.blocks === 49 && R.rank === 140 && impure === 0 && n7 > 0 && R.n === W, { dE, orth, dS, dH, n7, blocks: R.blocks, rank: R.rank, impure, E0: R.E[0] });
   /* the same evolution: a random complex state to t = 7.3 by both, and the S-norm conserved */
   const c = randomState(7), a = R.evolve(c, 7.3), b = U.evolve(c, 7.3);
-  let dc = 0; for (let i = 0; i < N; i++) dc = Math.max(dc, Math.abs(a.re[i] - b.re[i]), Math.abs(a.im[i] - b.im[i])); for (let i = N; i < W; i++) dc = Math.max(dc, Math.abs(a.re[i]), Math.abs(a.im[i]));
+  let dc = 0; for (let i = 0; i < N; i++) dc = Math.max(dc, Math.abs(a.re[i] - b.re[i]), Math.abs(a.im[i] - b.im[i]));
   const n0 = R.norm(c), n1 = R.norm(a), p = R.populations(c); let sum = 0; for (const v of p) sum += v;
-  judge('THE LAW: the assembled C e^{−iEt} CᵀS agrees with the unblocked evolve on a random 91-vector at t = 7.3 (1e-10); ⟨c|S|c⟩ is conserved (1e-12 relative) and the populations sum to 1 (1e-12)',
+  judge('THE LAW: the assembled C e^{−iEt} CᵀS agrees with the unblocked evolve on a random 140-vector at t = 7.3 (1e-10); ⟨c|S|c⟩ is conserved (1e-12 relative) and the populations sum to 1 (1e-12)',
     dc < 1e-10 && Math.abs(n1 - n0) < 1e-12 * n0 && Math.abs(sum - 1) < 1e-12, { dc, n0, n1, sum });
   /* ±m degeneracy: every eigenvalue with m ≠ 0 appears in an exactly degenerate pair, and the pair is m-pure */
   let pairs = 0, bad = 0;
   for (let k = 0; k < N; k++) if (R.mK[k] > 0) { const q = R.E.findIndex((E, j) => j !== k && R.lK[j] === R.lK[k] && R.mK[j] === -R.mK[k] && Math.abs(E - R.E[k]) < 1e-12); if (q < 0) bad++; else pairs++; }
-  judge('±m: every m > 0 eigenvalue has its exact m < 0 twin (1e-12) and each column keeps its own sign of m — the purity the unblocked solver need not give', bad === 0 && pairs === 35, { pairs, bad });   // 35 labels have m > 0: Σ_l l(6 − l)
+  judge('±m: every m > 0 eigenvalue has its exact m < 0 twin (1e-12) and each column keeps its own sign of m — the purity the unblocked solver need not give', bad === 0 && pairs === 56, { pairs, bad });   // 56 labels have m > 0: Σ_l l(7 − l)
 }
 {
   /* 2. the hydrogen limit through the assembly: at λ = 1/2 the 2p₀ label is an exact eigenvector at −1/8 with population 1 */
@@ -89,7 +90,7 @@ const randomState = (seed) => { const r = rnd(seed), re = new Float64Array(W), i
   judge('HOOK DRAG: with γ = 0.5 the S-norm at t = 20 has decayed (never grown) and the ground eigen-component\'s absolute weight is unchanged (1e-12) — the toy acts in the eigenbasis as it does in the diagonal one', nd < nd0 && Math.abs(p20[0] * nd - pk0[0] * nd0) < 1e-12, { nd0, nd, g0: pk0[0] * nd0, g20: p20[0] * nd });
 }
 {
-  /* 4. wall time: the assembly (36 blocks) is cheaper than the 91 × 91 solve */
+  /* 4. wall time: the assembly (49 blocks) is cheaper than the 140 × 140 solve */
   const times = []; for (let i = 0; i < 7; i++) { const a = performance.now(); createRegisterSturmian(1 + 0.1 * i, { Z: 1 }); times.push(performance.now() - a); }
   times.sort((x, y) => x - y);
   judge('WALL TIME: the block-pure build + solve + projector, median of 7 runs < 20 ms', times[3] < 20, { medianMs: +times[3].toFixed(2), minMs: +times[0].toFixed(2) });

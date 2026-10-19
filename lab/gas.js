@@ -1,7 +1,8 @@
 /* gas.js — THE AXIAL GAS: a second register for the BOX.
  *
- * The instrument's register holds the 91 hydrogen labels, l ≤ 5 — and no reinterpretation of those labels can put
- * more than six angular waves into the box, so a packet there is never smaller than about a/6.  This register is
+ * The instrument's register holds the 140 hydrogen labels, l ≤ 6 (n ≤ 7 since iteration 008 A7; the BOX packet uses all 140
+ * since 009 N7) — and no reinterpretation of those labels can put more than seven angular waves into the box, so a packet
+ * there is never smaller than about a/7.  This register is
  * built for the box alone: the well's eigenstates with m = 0 about the z axis, n_r ≤ 15 and l ≤ 15 — 256 modes.
  * A packet is the NUMERICAL projection of a Gaussian (centre z₀ on the axis, momentum k along it, width σ) on a
  * (r, θ) quadrature grid; the capture is reported.  Its evolution is EXACT in the well's own basis:

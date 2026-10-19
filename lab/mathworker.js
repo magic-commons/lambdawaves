@@ -6,7 +6,7 @@
  *   config  { id, ham, Z, radius }                 → the Hamiltonian selector mirrored (hydrogen with its Z, the oscillator, the BOX with its radius)
  *   warm    {}                                     → the SLAP tables built here, once, so the first bow pays nothing anywhere
  *   kick    { re, im, k, d, ham, Z, radius }       → the bow's slap e^{ik·x} on a snapshot of c(t): the kicked vector, ⟨p⟩ along d before and after
- *   packet  { x0, k, sigma, radius }               → the BOX bow: the Gaussian projected on the well's 91 eigenstates of n ≤ 6 (well.js wellPacket; 140-wide arrays)
+ *   packet  { x0, k, sigma, radius }               → the BOX bow: the Gaussian projected on the well's 140 eigenstates of n ≤ 7 (well.js wellPacket; iteration 009 N7)
  *   period  { energies, horizon }                  → the density's period / near-recurrence scan (period.js densityPeriod) for the transport's readout
  *   ladder  { params }                             → the revival packet, scan and asymptotic prediction
  *   lattice.solve { n, re, im }                    → LATTICE's eigenpairs { E, re, im } (lattice-model.js: real → eigSymQL, Hermitian → hermitianEigen)

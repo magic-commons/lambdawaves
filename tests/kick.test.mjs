@@ -74,7 +74,7 @@ const N = BASIS.length;
   const esc = escaped(1, n2);
   /* the bound oscillator strengths 1s→np, n ≤ 6 (KNOWN: 0.4162, 0.0791, 0.0290, 0.0139, 0.0078) give Σ|z|² = 0.697 of ⟨z²⟩ = 1 */
   judge('K a slap of k = 0.1 on 1s knocks 0.30% of the electron OUT of the register — k²(⟨z²⟩ − Σ_{n≤6}|⟨np|z|1s⟩|²) = k² · 0.303, the continuum plus n > 6 share of the sum rule', esc > 0.0027 && esc < 0.0034, { escaped: esc, secondOrder: 0.01 * 0.303 });
-  /* Ehrenfest with a deficit: ⟨p_z⟩ = k · Σ_bound f = 0.546 k, because the register holds only the bound part of the TRK sum */
+  /* Ehrenfest with a deficit: ⟨p_z⟩ = k · Σ_bound f = 0.5494 k (n ≤ 7), because the register holds only the bound part of the TRK sum */
   const re2 = new Float64Array(N), im2 = new Float64Array(N); re2[a1] = 1; applyKickZ(re2, im2, 0.05);
   const pz = momentumZ(re2, im2);
   judge('K EHRENFEST WITH A DEFICIT: after a slap of k = 0.05 the register\'s ⟨p_z⟩ is 0.5494 k (±0.3%), the bound share of the Thomas–Reiche–Kuhn sum rule (Σ f_{1s→np}, n ≤ 7: n ≤ 6 read 0.5446, and the step is f(1s→7p) = 0.0048) — the missing 45% is the continuum a seven-shell register cannot hold', Math.abs(pz / 0.05 - 0.5494) < 0.003, { pzOverK: pz / 0.05 });
@@ -100,7 +100,7 @@ const N = BASIS.length;
     nx += px * d; nz += pz * d; den += d;
   }
   const px = nx / den, pz = nz / den;
-  judge('K a slap along x: ⟨p_x⟩ = +0.5446·k = 0.1089 (the 40³ momentum grid reads it within 5%; the rotation conjugation has the right sign) and ⟨p_z⟩ = 0', Math.abs(px - 0.1089) < 0.006 && Math.abs(pz) < 0.005, { px, pz, expected: 0.546 * 0.2, rot: AXIS_TO_Z.x });
+  judge('K a slap along x: ⟨p_x⟩ = +0.5494·k = 0.1099 (the n ≤ 7 bound share, iteration 009 N7: n ≤ 6 read 0.5446·k = 0.1089; the 40³ momentum grid reads it within 5%; the rotation conjugation has the right sign) and ⟨p_z⟩ = 0', Math.abs(px - 0.1099) < 0.006 && Math.abs(pz) < 0.005, { px, pz, expected: 0.5494 * 0.2, rot: AXIS_TO_Z.x });
   /* it jiggles: the dipole after a z-slap is not constant — a superposition rings at the Lyman-α beat */
   const rz = new Float64Array(N), iz = new Float64Array(N); rz[a1] = 1; applyKickZ(rz, iz, 0.05);
   const b2 = idx(2, 1, 0);
@@ -118,7 +118,7 @@ const N = BASIS.length;
   const c = R.at(t);
   const pAt = momentumZ(c.re, c.im);
   const c0 = R.at(0), pAt0 = momentumZ(c0.re, c0.im);
-  judge('K a slap at logical time t = 4 acts on c(t), not on the anchor: right after it ⟨p_z⟩ = 0.546k (the bound share), and read back at t = 0 the same state has a different ⟨p_z⟩ — the kick is not a commuting operator', Math.abs(pAt / 0.1 - 0.546) < 0.02 && Math.abs(pAt0 - pAt) > 0.01, { pAt, pAt0 });
+  judge('K a slap at logical time t = 4 acts on c(t), not on the anchor: right after it ⟨p_z⟩ = 0.549k (the n ≤ 7 bound share; n ≤ 6 read 0.546k), and read back at t = 0 the same state has a different ⟨p_z⟩ — the kick is not a commuting operator', Math.abs(pAt / 0.1 - 0.5494) < 0.02 && Math.abs(pAt0 - pAt) > 0.01, { pAt, pAt0 });
 }
 /* A KICK ALONG ANY DIRECTION (the bow): rotate the direction onto ẑ, kick, rotate back — and the DRAG toy */
 {
@@ -136,7 +136,7 @@ const N = BASIS.length;
     sx += px * w; sy += py * w; sz += pz * w; den += w;
   }
   const p = [sx / den, sy / den, sz / den], mag = Math.hypot(...p), cosang = (p[0] * d[0] + p[1] * d[1] + p[2] * d[2]) / mag;
-  judge('K a kick along the diagonal (1,1,1)/√3 gives ⟨p⟩ ALONG that direction (cos > 0.999) with |⟨p⟩| = 0.5446k by the momentum-space integral (40³ grid, within 5%) — the bow can aim anywhere', cosang > 0.999 && Math.abs(mag / k - 0.5446) < 0.03, { p, mag, cosang });
+  judge('K a kick along the diagonal (1,1,1)/√3 gives ⟨p⟩ ALONG that direction (cos > 0.999) with |⟨p⟩| = 0.5494k (the n ≤ 7 bound share; n ≤ 6 read 0.5446k) by the momentum-space integral (40³ grid, within 5%) — the bow can aim anywhere', cosang > 0.999 && Math.abs(mag / k - 0.5494) < 0.03, { p, mag, cosang });
 }
 {
   const { Register } = await import('../lab/state.js');

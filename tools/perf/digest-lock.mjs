@@ -22,6 +22,9 @@
  *             that composites the volume was re-captured by name — states' rp / rpL, every style and flag row but ADD's, the line rows' rp
  *             (175 in the 843, 193 in the 987); every field digest, record byte, ADD row and linePixels hash held to the bit, and with the
  *             default put back to 0.6 the tree read 843/0 and 987/0 before the re-capture.
+ *             ITERATION 009 N7: THE SCALE's Sturmian blocks and the BOX packet took n = 7 (140 labels), so the two states that read them —
+ *             `sturmian` (digest · integral · maxRho · pack · rp · rpL) and `box` (the same and count: 27 → 40 modes) — were re-captured by
+ *             name in both fixtures, 39 leaves each (research/iteration-009/N7-BUILD.md); a fresh capture of the tree moved no other leaf.
  *
  * What it locks, every number read from the SHIPPED pipelines through the booted app (window.__LW, __LW.field) —
  * no replica, no copied WGSL:

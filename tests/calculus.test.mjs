@@ -80,7 +80,7 @@ const idx = (n, l, m) => BASIS.findIndex((s) => s.n === n && s.l === l && s.m ==
   setWellRadius(10);
   const R = new Register(); R.setEnergies(wellEnergy); R.clear();
   const P = wellPacket([0, 0, -4], [0, 0, 0.8], 1.6);
-  for (let a = 0; a < 91; a++) if (P.re[a] || P.im[a]) R.set(a, P.re[a], P.im[a], 0);
+  for (let a = 0; a < BASIS.length; a++) if (P.re[a] || P.im[a]) R.set(a, P.re[a], P.im[a], 0);   // iteration 009 N7: the packet holds n = 7 too
   const ids = R.populated();
   let worstExact = 0, worstFD = 0, peak = 0;
   for (const t of [0, 3, 10, 14, 20]) {

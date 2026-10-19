@@ -73,7 +73,7 @@ export class Register {
     this.damping = 0;                   // the DRAG toy (see setDamping): 0 = off = the exact unitary register
     this.P = null;                      // the PROPAGATOR (W-STURMIAN, see setPropagator): null = the diagonal law above
     /* scratch for the per-frame observables (wave 45): energy(), autocorrelation() and normalAmplitudes() used to
-       allocate two Float64Array(91) and four arrays per call, several times a frame — the meters, the badges and the
+       allocate two Float64Array(140) and four arrays per call, several times a frame — the meters, the badges and the
        SHADOW readout — so the frame loop was a steady allocator.  They read c(t) into these instead. */
     this._sr = new Float64Array(N); this._si = new Float64Array(N);
     this._na = { E: [], re: [], im: [], label: [] };
@@ -86,7 +86,7 @@ export class Register {
   /* ── the Hamiltonian in force ────────────────────────────────────────── */
   /** E_a + B m_a / 2 — the diagonal part, exact whatever the electric field is */
   Ediag(a) { return (this.P ? this.P.H[a * N + a] / this.P.S[a * N + a] : this.E[a]) + this.field.Bz * BASIS[a].m / 2; }   // under a PROPAGATOR: the label's ⟨a|H|a⟩/⟨a|S|a⟩, NOT an eigenvalue
-  /** the HAMILTONIAN switch: refill the eigenvalues the 91 labels carry (hydrogen −1/2n², oscillator N + 3/2, …) */
+  /** the HAMILTONIAN switch: refill the eigenvalues the 140 labels carry (hydrogen −1/2n², oscillator N + 3/2, …) */
   setEnergies(fn) { for (const s of BASIS) this.E[s.index] = fn(s.index); this._stark(true); this.version++; }
   /** the largest electric field for which neglecting inter-shell coupling is defensible: ≈ 1/(3n⁵) */
   fieldValidUpTo() { const n = this.nmax(); return 1 / (3 * Math.pow(Math.max(1, n), 5)); }
@@ -97,7 +97,7 @@ export class Register {
     this._stark(); this.version++;
   }
   /**
-   * THE PROPAGATOR HOOK (W-STURMIAN).  P = null restores the diagonal law.  Otherwise P is an object over the 91 labels
+   * THE PROPAGATOR HOOK (W-STURMIAN).  P = null restores the diagonal law.  Otherwise P is an object over the register's 140 labels
    * with evolve(c, t) = C e^{−iEt} CᵀS c, norm(c) = ⟨c|S|c⟩, populations(c), eigenstate(k), E, C, CtS, rank, H, S and
    * mK (the m of eigenvector k): at(t) becomes P.evolve(anchor, t); edits still happen AT the current logical time
    * (set / anchorFrom re-anchor by P.evolve(·, −t)); the norm is the S-norm; the normal modes are P's eigenvectors;
@@ -106,7 +106,7 @@ export class Register {
    * is Sturmian-specific: any propagator in a non-orthogonal basis with that interface plugs in.
    */
   setPropagator(P) { this.P = P || null; if (this.P) { this.field.Fz = 0; delete this.field.inter; } else this._stark(); this.version++; }
-  /** 0.8.0 G3 · INTER-SHELL STARK: the field record engages lab/stark.js' propagator (H = diag(E) + F·z, all 91 labels) while `inter` is on and F ≠ 0 */
+  /** 0.8.0 G3 · INTER-SHELL STARK: the field record engages lab/stark.js' propagator (H = diag(E) + F·z, all 140 labels) while `inter` is on and F ≠ 0 */
   _stark(force) { const on = this.field.inter && this.field.Fz !== 0 && (!this.P || this.P.stark); if (on && (force || !this.P || this.P.F !== this.field.Fz)) this.P = starkPropagator(this.field.Fz, this.E); else if (!on && this.P && this.P.stark) this.P = null; }
   /**
    * The normal modes of the Hamiltonian in force, with the state's amplitude in each, at time t.

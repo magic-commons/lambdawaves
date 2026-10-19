@@ -99,7 +99,7 @@ judge('Q0 Lyman-α energy 0.375 a.u. = 10.204 eV', Math.abs((energy(2) - energy(
   }
   judge('Q0 angular anchors Y_00…Y_33 with Condon–Shortley phase (table-typed) agree to 1e-12', worst < 1e-12, { worst, which });
 }
-/* the GPU's polynomial tables against the recurrence oracle, all 91 states, holdout points */
+/* the GPU's polynomial tables against the recurrence oracle, all 140 states (n ≤ 7), holdout points */
 {
   let worst = 0, which = '';
   for (const s of BASIS) {
@@ -112,7 +112,7 @@ judge('Q0 Lyman-α energy 0.375 a.u. = 10.204 eV', Math.abs((energy(2) - energy(
       if (d > worst) { worst = d; which = s.id; }
     }
   }
-  judge('Q3 polynomial tables (GPU path) = recurrence oracle for all 91 states, 1e-9 rel', worst < 1e-9, { worst, which });
+  judge('Q3 polynomial tables (GPU path) = recurrence oracle for all 140 states, 1e-9 rel', worst < 1e-9, { worst, which });
 }
 /* nodal structure: 2p_z vanishes on z = 0, 2s vanishes at r = 2, 3d_z² on cos²θ = 1/3 */
 {
