@@ -5,6 +5,8 @@
 
 > (≈ 13:10, with a screenshot of the MOLECULAR deck showing LATTICE and HEAVY install cards among the molecule tiles — `josh-molecular-deck-installs-2026-10-19.png`) ooh another thing while you're at it, remove those 'lattice' and 'heavy' and other downloadable stuff from the molecular system, let that be it's own UI system for handling saved/stored/unsaved molecules in the library section
 
+> (≈ 13:20, with a screenshot of the timeline over a molecule — `josh-rogue-blur-2026-10-19.png`) whoops, sorry another side thing; there appears to be a rogue blurring that's on in any of the UI elements, the blur should only apply to the work bars, the timeline bar and scrubber and the chips. Also Gemma doesn't seem to appear to work. Isn't she built into the app? Or if not can we just hide the feature for now until we find out our own lightweight AI assistant in the app?
+
 ## Sos's reading (to confirm by the builds' screenshots)
 - "The extra status thingy" = the status sentence(s) the stage words draw beside the formula (the atom's STATUS line past Kr is the long one); the "ultra large lists" = the populated-state list the stage writes when SPECTRUM owns the field (140 entries after FILL ALL at n = 7 or a Hamiltonian switch). Both are INFORMATIONAL's business (iteration 007 I: every announcement has a kind; its own preference record).
 - The SKELETON row joins STAGE FORMULA and ATOM LABELS (each ON + SIZE), leaving BEAD and ELLIPSOID in MARKS.
@@ -16,6 +18,8 @@
 | Q1 | THE QUIET STAGE | INFORMATIONAL: a STATUS switch (off by default) for the status sentence(s); a LIST CAP knob — a populated list longer than the cap collapses to a count line automatically; the SKELETON row (ON + SIZE; flat disks, no outline, a bigger default) beside STAGE FORMULA and ATOM LABELS | 9401 |
 | Q2 | MINIMIZED BY DEFAULT | the first-run sweep: every fold and expandable in every window closed on a first run unless an earlier ruling says open; a table of each with its ruling; stored choices win; `new-project --check` in step | 9411 |
 | Q4 | THE LIBRARY OWNS THE INSTALLS | the section-install cards (LATTICE, HEAVY, …) leave the MOLECULAR deck — it shows molecules only; the LIBRARY section gets the one UI for installed / stored / not-yet-downloaded molecules and sections (install, remove, sizes, what is here) | 9431 |
+| Q5 | THE BLUR, ONLY WHERE IT BELONGS | every backdrop blur inventoried; kept only on the work bars, the timeline's bar and scrubber, and the chips; everything else keeps its tint without blur | 9441 |
+| Q6 | GEMMA, HIDDEN | ASK posts to an external broker (tools/gemma, `askUrl`), not built in — the feature hidden behind one flag (the / key, the transport's type box, Settings' ASK rows), nothing deleted, the verb table kept for the notebook's lw: links | 9451 |
 | Q3 | THE ATOMIC TILES' n | every el-*.webp's (n, l) checked against groundConfig; the tiles (and the ATOMIC deck's orb-*s tiles) re-rendered with a half-cut so the radial layers read; a programmatic count of the visible layers on s tiles | 9421 |
 
 ## Closed
