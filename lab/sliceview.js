@@ -57,7 +57,7 @@ const BUDGET_MS = 2.2;      // ms of sampling per update — the ONE number, and
                             // the same PAUSED: a big paused pass would leave an 18 ms EMA behind, the law would park the
                             // window on the first played frame, and — parked, never re-measured — it would stay parked
                             // for ever.  That deadlock is exactly what the browser gate caught, and one budget kills it.
-const NBASIS = 91;          // the register's width (state.js): the job's own coefficient buffers, allocated once
+const NBASIS = BASIS.length;   // the register's width (state.js): 140: the job's own coefficient buffers, allocated once
 
 export function createSliceView(host, api) {
   let rotor = { ...IDENTITY }, mode = 'space', half = 8, gain = 1.6, res = 128, dirty = true, tour = null;

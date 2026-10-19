@@ -12,6 +12,7 @@
  * is not built for this Hamiltonian: the selector forces position space, as it does for the box.
  */
 import { BASIS, ylmNorm, legendreDerivCoeffs } from './hydrogen.js';
+import { rowOfNr } from './atoms.js';
 
 /** the standard potential models, all in GeV / GeV⁻¹ (moved from qcd.js, 0.5.0 D9) */
 export const POTENTIALS = {
@@ -78,13 +79,13 @@ export function fitOffset(kind, potential, params) {
 }
 
 export const NR = 256;                       // samples per tabulated radial row
-export const ROWS = 36;                      // (n_r, l) pairs
-export const L_RGB = [[255, 226, 170], [120, 225, 240], [230, 160, 240], [255, 150, 90], [140, 220, 140], [180, 160, 255]];
+export const ROWS = 43;                      // the 6 × 6 (n_r, l) grid and n = 7's (6, 0) and (0, 6) at 36 + l (atoms.js rowOfNr)
+export const L_RGB = [[255, 226, 170], [120, 225, 240], [230, 160, 240], [255, 150, 90], [140, 220, 140], [180, 160, 255], [246, 142, 159]];
 
 let kind = 'charm', pot = 'cornell', params = { ...DEFAULTS };
 let cache = null;
 const tcache = new Map();
-const rowOf = (nr, l) => l * 6 + nr;
+const rowOf = rowOfNr;
 
 /** set the system (charm | bottom), the potential id and the parameters; returns true when something changed */
 export function configure(k, p, potential) {
@@ -124,20 +125,22 @@ function solveAll() {
   const V0 = fitOffset(kind, pot, params);
   const P = { ...params, V0 }, V = (r) => POTENTIALS[pot].f(r, P);
   const rmax = 40 / Math.sqrt(mu), N = 4000;
-  const rows = [], E = new Float64Array(ROWS), M = new Float64Array(ROWS), r99 = new Float64Array(ROWS), nodes = new Int32Array(ROWS), rTab = new Float64Array(ROWS);
+  const rows = [], byRow = [], E = new Float64Array(ROWS), M = new Float64Array(ROWS), r99 = new Float64Array(ROWS), nodes = new Int32Array(ROWS), rTab = new Float64Array(ROWS);
   const table = new Float32Array(ROWS * NR);
-  for (let l = 0; l <= 5; l++) for (let nr = 0; nr <= 5; nr++) {
+  const pairs = []; for (let l = 0; l <= 5; l++) for (let nr = 0; nr <= 5; nr++) pairs.push([nr, l]);
+  pairs.push([6, 0], [0, 6]);                                          // n = 7's two pairs outside the grid (7S, 1I), solved after it so no row before moves
+  for (const [nr, l] of pairs) {
     const R = tabRow(V, mu, l, nr, { rmax, N }, table, rowOf(nr, l)), row = R.row;
     E[row] = R.E; M[row] = 2 * sys.m + R.E; nodes[row] = R.nodes; r99[row] = R.r99; rTab[row] = R.rTab;
-    rows.push({ nr, l, row, E: R.E, M: M[row], r: R.r, u: R.u, h: R.h, cut: R.cut });
+    rows.push(byRow[row] = { nr, l, row, E: R.E, M: M[row], r: R.r, u: R.u, h: R.h, cut: R.cut });   // rows in solve order, byRow by the table's row
   }
-  return { kind, pot, params: P, mu, m: sys.m, rows, E, M, r99, nodes, table, rTab };
+  return { kind, pot, params: P, mu, m: sys.m, rows, byRow, E, M, r99, nodes, table, rTab };
 }
 export function solved() { if (!cache) cache = solveAll(); return cache; }
 
 /** R_{n_r l}(r) = u(r)/r from the fine Numerov grid (∫ R² r² dr = 1) */
 export function radialAt(nr, l, r, S = solved()) {
-  const R = S.rows[rowOf(nr, l)];
+  const R = (S.byRow || S.rows)[rowOf(nr, l)];                       // cornell's byRow; central.js keeps its rows by row
   if (r <= 0) return l === 0 ? R.u[1] / R.r[1] : 0;
   const x = r / R.h; if (x >= R.u.length - 1) return 0;
   const i0 = Math.floor(x), f = x - i0;
@@ -153,14 +156,14 @@ export function cornellTable(n, l, m, S = solved()) {
   const am = Math.abs(m), leg = legendreDerivCoeffs(l, am);
   const sign = (m >= 0 && (am % 2 === 1)) ? -1 : 1;
   const norm = sign * ylmNorm(l, am);
-  const pad = (v) => { const o = new Float64Array(6); for (let i = 0; i < v.length && i < 6; i++) o[i] = v[i]; return o; };
+  const pad = (v) => { const o = new Float64Array(7); for (let i = 0; i < v.length && i < 7; i++) o[i] = v[i]; return o; };
   return { n, l, m, am, norm, lag: pad([row, S.rTab[row] ? 1 / S.rTab[row] : 0, S.rTab[row], 0, 0, 0]), leg: pad(leg), space: 'cornell', row };
 }
 export function cornellTableFor(s) { let T = tcache.get(s.id); if (!T) { T = cornellTable(s.n, s.l, s.m); tcache.set(s.id, T); } return T; }
 export function cornellFromTable(T, x, y, z, S) {
   const r = Math.hypot(x, y, z); if (r >= T.lag[2]) return { re: 0, im: 0 };
   const ct = r < 1e-300 ? 1 : z / r, st = Math.sqrt(Math.max(0, 1 - ct * ct)), phi = Math.atan2(y, x);
-  let D = 0, xp = 1; for (let j = 0; j < 6; j++) { D += T.leg[j] * xp; xp *= ct; }
+  let D = 0, xp = 1; for (let j = 0; j < T.leg.length; j++) { D += T.leg[j] * xp; xp *= ct; }
   let stm = 1; for (let i = 0; i < T.am; i++) stm *= st;
   const f = T.norm * radialAt(T.n - T.l - 1, T.l, r, S) * stm * D;
   return { re: f * Math.cos(T.m * phi), im: f * Math.sin(T.m * phi) };
@@ -173,10 +176,10 @@ export function cornellPsiAt(re, im, x, y, z, indices, tf = cornellTableFor, S) 
 /** the half-width the field needs: the largest r₉₉ among the shells up to nmax, with margin (GeV⁻¹) */
 export function cornellDomainFor(nmax) { const S = solved(); let r = 0; for (const R of S.rows) if (R.nr + R.l + 1 <= nmax) r = Math.max(r, S.r99[R.row]); return Math.max(r * 1.15, 1.0); }
 export const cornellRadialTable = () => solved().table;
-export const cornellLabelOf = (s) => `${s.n - s.l}${'SPDFGH'[s.l]} ${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`;
+export const cornellLabelOf = (s) => `${s.n - s.l}${'SPDFGHI'[s.l]} ${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`;
 export function cornellSpectrum() {
   const S = solved();
-  const levels = S.rows.map((R) => ({ key: (R.nr + R.l + 1) + ':' + R.l, E: R.M, label: `${R.nr + 1}${'SPDFGH'[R.l]}`, rgb: L_RGB[R.l] })).sort((p, q) => p.E - q.E);
+  const levels = S.rows.map((R) => ({ key: (R.nr + R.l + 1) + ':' + R.l, E: R.M, label: `${R.nr + 1}${'SPDFGHI'[R.l]}`, rgb: L_RGB[R.l] })).sort((p, q) => p.E - q.E);
   return { levels, levelKey: (i) => BASIS[i].n + ':' + BASIS[i].l, Emin: levels[0].E - 0.15, Etop: levels[levels.length - 1].E + 0.15, topLabel: '',
     footer: `MASS  M = 2m_q + E_{n_r l} · ${POTENTIALS[pot].label} · V₀ fitted to the 1S · ${MEASURED[kind].label} · Numerov` };
 }

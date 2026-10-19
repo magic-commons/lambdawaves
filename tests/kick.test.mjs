@@ -14,7 +14,7 @@ function judge(name, ok, detail) {
   console.log((ok ? 'GREEN ' : 'RED   ') + name + (detail === undefined ? '' : '\n      ' + JSON.stringify(detail).slice(0, 300)));
 }
 const idx = (n, l, m) => BASIS.findIndex((s) => s.n === n && s.l === l && s.m === m);
-const N = 91;
+const N = BASIS.length;
 /* spherical Bessel */
 {
   const j2 = (x) => (3 / (x * x * x) - 1 / x) * Math.sin(x) - 3 * Math.cos(x) / (x * x);
@@ -77,7 +77,7 @@ const N = 91;
   /* Ehrenfest with a deficit: ⟨p_z⟩ = k · Σ_bound f = 0.546 k, because the register holds only the bound part of the TRK sum */
   const re2 = new Float64Array(N), im2 = new Float64Array(N); re2[a1] = 1; applyKickZ(re2, im2, 0.05);
   const pz = momentumZ(re2, im2);
-  judge('K EHRENFEST WITH A DEFICIT: after a slap of k = 0.05 the register\'s ⟨p_z⟩ is 0.5446 k (±0.3%), the bound share of the Thomas–Reiche–Kuhn sum rule (Σ f_{1s→np}, n ≤ 6) — the missing 45% is the continuum a six-shell register cannot hold', Math.abs(pz / 0.05 - 0.5446) < 0.003, { pzOverK: pz / 0.05 });
+  judge('K EHRENFEST WITH A DEFICIT: after a slap of k = 0.05 the register\'s ⟨p_z⟩ is 0.5494 k (±0.3%), the bound share of the Thomas–Reiche–Kuhn sum rule (Σ f_{1s→np}, n ≤ 7: n ≤ 6 read 0.5446, and the step is f(1s→7p) = 0.0048) — the missing 45% is the continuum a seven-shell register cannot hold', Math.abs(pz / 0.05 - 0.5494) < 0.003, { pzOverK: pz / 0.05 });
   /* the same ⟨p_z⟩ by the direct momentum-space integral ∫ p_z |φ|² d³p — a second route */
   const ids = []; for (let a = 0; a < N; a++) if (Math.hypot(re2[a], im2[a]) > 1e-12) ids.push(a);
   const G = 44, P = 5, h = 2 * P / G; let num = 0, den = 0;

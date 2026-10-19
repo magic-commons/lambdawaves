@@ -34,9 +34,9 @@ const T0 = performance.now();
   while (!warmStep(0)) steps++;
   const wall = performance.now() - t0;
   const M0 = kickMatrixZ(0); let offDiag = 0, diag = 0;
-  for (let a = 0; a < 91; a++) for (let b = 0; b < 91; b++) { if (a === b) diag = Math.max(diag, Math.abs(M0.re[a * 91 + b] - 1) + Math.abs(M0.im[a * 91 + b])); else offDiag = Math.max(offDiag, Math.abs(M0.re[a * 91 + b]) + Math.abs(M0.im[a * 91 + b])); }
+  for (let a = 0; a < BASIS.length; a++) for (let b = 0; b < BASIS.length; b++) { if (a === b) diag = Math.max(diag, Math.abs(M0.re[a * BASIS.length + b] - 1) + Math.abs(M0.im[a * BASIS.length + b])); else offDiag = Math.max(offDiag, Math.abs(M0.re[a * BASIS.length + b]) + Math.abs(M0.im[a * BASIS.length + b])); }
   const k = 1e-3, M = kickMatrixZ(k), a = idx(1, 0, 0), b = idx(2, 1, 0);
-  const dip = M.im[a * 91 + b] / k, exact = 128 * Math.SQRT2 / 243;
+  const dip = M.im[a * BASIS.length + b] / k, exact = 128 * Math.SQRT2 / 243;
   judge(`P the SLAP tables built one unit of work at a time — ${steps} resumed slices at a budget of 0 ms, so every resumption point in the build is crossed and the count is a property of the BUILD and not of the clock (${wall.toFixed(0)} ms in all, floor 1, margin ${steps}×) — are ready, give the identity at k = 0 (1e-12) and the 1s→2p dipole 128√2/243 = ${exact.toFixed(6)} from M(k)/ik at k = 1e-3 (1e-5): the incremental build is the one-shot build. The arm was 'steps > 3' at a 2 ms budget — an assertion that this machine is slow, with the inequality pointing the wrong way; what it meant to say is that warmStep RESUMES rather than doing the whole build in one call, which is 'steps > 1'`,
     tablesReady() && steps > 1 && diag < 1e-12 && offDiag < 1e-12 && Math.abs(dip - exact) < 1e-5, { steps, floor: 1, wall: +wall.toFixed(1), diag, offDiag, dip, exact });
 }
@@ -75,11 +75,11 @@ const T0 = performance.now();
   const d = [0.6, 0, 0.8];
   A.kickAlong(0.4, d, 0);
   const c0 = B.at(0); applyKickAlong(c0.re, c0.im, 0.4, d); B.setAnchorAt(c0.re, c0.im, 0);
-  let w0 = 0; for (let a = 0; a < 91; a++) w0 = Math.max(w0, Math.abs(A.re0[a] - B.re0[a]), Math.abs(A.im0[a] - B.im0[a]));
+  let w0 = 0; for (let a = 0; a < BASIS.length; a++) w0 = Math.max(w0, Math.abs(A.re0[a] - B.re0[a]), Math.abs(A.im0[a] - B.im0[a]));
   const A2 = new Register(); A2.load(PRESET_BY_ID.get('1s+2pz')); const B2 = new Register(); B2.load(PRESET_BY_ID.get('1s+2pz'));
   const t = 2.3; A2.kickAlong(0.4, d, t);
   const ct = B2.at(t); applyKickAlong(ct.re, ct.im, 0.4, d); B2.setAnchorAt(ct.re, ct.im, t);
-  let wt = 0; for (let a = 0; a < 91; a++) wt = Math.max(wt, Math.abs(A2.re0[a] - B2.re0[a]), Math.abs(A2.im0[a] - B2.im0[a]));
+  let wt = 0; for (let a = 0; a < BASIS.length; a++) wt = Math.max(wt, Math.abs(A2.re0[a] - B2.re0[a]), Math.abs(A2.im0[a] - B2.im0[a]));
   judge('P Register.setAnchorAt(kicked c(t), t) — the bow\'s landing — reproduces reg.kickAlong(k, d, t) on the anchor to 1e-13 at t = 0 (the anchor itself) and at t = 2.3 (carried back), with the version bumped', w0 < 1e-13 && wt < 1e-13 && B.version > 1 && B2.version > 1, { w0, wt });
 }
 /* ── the particles' ring trails and their canvas ────────────────────────────── */

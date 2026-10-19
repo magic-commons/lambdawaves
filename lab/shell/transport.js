@@ -2,7 +2,7 @@
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
 import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js';
-import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf } from '../ask.js';
+import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf } from '../ask.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
   const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames, stats } = app.ctl;
@@ -126,7 +126,8 @@ export function createTransport(app) {
       const Es = periodEnergies();          // W-STURMIAN: the OCCUPIED eigenvalues (populations > 1e-6), never the labels' ⟨H⟩ — and wave 58 hands the SAME expression to capture.js
       /* Hydrogen, ions and the oscillator normally prove commensurate in microseconds. Answer that exact half here;
          only an actually incommensurate spectrum pays module-worker startup and the bounded two-million-step scan. */
-      const exact = densityPeriodExact(Es);
+      const deep = getHamiltonian().id === 'hydrogen' && !sturm.P;   // iteration 008 A7: n = 7's ratios need the deep pass (period.js)
+      const exact = densityPeriodExact(Es, { deep });
       if (exact) { Object.assign(pk, key); periodCostMs = 0; periodSettling = false; periodPending = null; lastPeriod = exact; return lastPeriod; }
       if (!force && scan.ok) {
         /* THE FRAME PATH (wave 45): the scan runs in the maths worker and the readout says it is settling until the
@@ -138,7 +139,7 @@ export function createTransport(app) {
       const wasSettling = periodSettling;
       Object.assign(pk, key); periodSettling = false; periodPending = null;
       const t0 = performance.now();
-      lastPeriod = densityPeriod(Es, { horizon: 2e4 });
+      lastPeriod = densityPeriod(Es, { horizon: 2e4, deep });
       periodCostMs = performance.now() - t0;
       if (force && wasSettling) paintPeriod();                                 // the readout said "settling": it has the answer now
       return lastPeriod;
@@ -154,11 +155,11 @@ export function createTransport(app) {
       if (P.stark) return ['— (Stark)', 'no exact period under a static field: the Stark energies are not commensurate', 'warn'];
       if (P.mix) return ['— (transition)', 'the A ↔ B mix has its own clock: the Rabi period', 'warn'];
       if (P.stationary) return ['stationary', 'one energy: the density never changes', ''];
-      /* 0.6.0 B3a: the field-free hydrogen register says its closed form, T = 2π·7200/g′/Z² (hydrogenShellPeriod), where it equals the fit */
+      /* 0.6.0 B3a: the field-free hydrogen register says its closed form, T = 2π·7200/g′/Z² (hydrogenShellPeriod; 2π·352 800 with n = 7), where it equals the fit */
       const pop = reg.populated(), unit = pop.every((a) => rates[a] === 1), Z = getZ();
-      const Th = unit && !sturm.P && getHamiltonian().id === 'hydrogen' && reg.field.Bz === 0 ? hydrogenShellPeriod(pop.map((a) => BASIS[a].n), Z) : 0, gp = Math.round(14400 * Math.PI / (Th * Z * Z));
+      const Th = unit && !sturm.P && getHamiltonian().id === 'hydrogen' && reg.field.Bz === 0 ? hydrogenShellPeriod(pop.map((a) => BASIS[a].n), Z) : 0, B2 = Th ? 2 * hydrogenShellBase(pop.map((a) => BASIS[a].n)) : 14400, gp = Math.round(B2 * Math.PI / (Th * Z * Z));
       if (P.exact) { const lap = Math.floor(clock.t / P.T), ph = clock.t - lap * P.T;
-        const head = Th && Math.abs(Th - P.T) < 1e-9 * P.T ? 'exactly · T = 14400π' + (gp > 1 ? '/' + gp : '') + (Z !== 1 ? '/Z²' : '') + ' a.u. · ' + fmtPeriod(P.T).split(' · ')[1] : P.count + ' energies · gcd ' + P.g.toPrecision(4) + ' Eh';
+        const head = Th && Math.abs(Th - P.T) < 1e-9 * P.T ? 'exactly · T = ' + B2 + 'π' + (gp > 1 ? '/' + gp : '') + (Z !== 1 ? '/Z²' : '') + ' a.u. · ' + fmtPeriod(P.T).split(' · ')[1] : P.count + ' energies · gcd ' + P.g.toPrecision(4) + ' Eh';
         return [fmtPeriod(P.T), head + ' · lap ' + lap + ' · ' + (100 * ph / P.T).toFixed(0) + '%' + src, 'ok']; }
       return ['≈ ' + fmtPeriod(P.T), (unit || sturm.P ? '' : 'no exact period under these per-label rates · ') + 'nearest recurrence · error ' + (100 * P.err).toFixed(1) + '% of a beat' + src, 'warn'];
     }

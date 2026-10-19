@@ -25,12 +25,12 @@ const C = (R) => (r) => -1 / r, fine = (V, R, N = 48000) => numerov(V, 1, 0, 1, 
 { const d = solveCentral('softcore', { a: 0.5 }).oracle.d, lim = [0.1, 0.01, 0.001].map((a) => fine((r) => -1 / Math.sqrt(r * r + a * a), 30, 60000) + 0.5);
   judge('SOFT-CORE a = 0.5 vs Numerov at 2N within 1e-6; a → 0 is hydrogen: E₁ₛ + ½ falls with a, below 1e-4 at a = 10⁻³', d < 1e-6 && lim[0] > lim[1] && lim[1] > lim[2] && lim[2] < 1e-4 && lim[2] > 0, { d, lim }); }
 { const n = Object.entries(DEFAULTS).map(([k, p]) => { const S = solveCentral(k, p); return [k, Array.from(S.E).filter((E) => E < 0).length, S.bound, S.ms]; });
-  judge('≥ 10 bound rows at every preset\'s defaults (rows · labels of 91 · solve ms)', n.every((r) => r[1] >= 10), n); }
-{ configure({ preset: 'confined', params: { Rc: 3 } }); const a2s = BASIS.findIndex((s) => s.n === 2 && s.l === 0), a1s = 0, re = new Float64Array(91), im = new Float64Array(91); re[a2s] = 1; re[a1s] = 0.5;
+  judge('≥ 10 bound rows at every preset\'s defaults (rows · labels of 140 · solve ms)', n.every((r) => r[1] >= 10), n); }
+{ configure({ preset: 'confined', params: { Rc: 3 } }); const a2s = BASIS.findIndex((s) => s.n === 2 && s.l === 0), a1s = 0, re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length); re[a2s] = 1; re[a1s] = 0.5;
   const T = CENTRAL.tableFor(BASIS[a2s]), row = Array.from(CENTRAL.radialTable().subarray(T.row * 256, T.row * 256 + 256)), psi = CENTRAL.psiAt(re, im, 0, 0, 0.5, [a2s]), saved = save();
   judge('UNBOUND at R_c = 3: the 2s has no energy (NaN), a zero row and lag, ψ ≡ 0, the spectrum lists only the 1s; saved as { preset, params }, absent at the defaults',
     Number.isNaN(CENTRAL.energy(a2s)) && CENTRAL.energy(a1s) < 0 && row.every((v) => v === 0) && T.lag[2] === 0 && psi.re === 0 && CENTRAL.spectrum.levels.length === 1 && saved.params.Rc === 3 && configure({}) && save() === undefined, { saved, levels: CENTRAL.spectrum.levels }); }
-{ const h = createHash('sha256'); for (const k of ['charm', 'bottom']) { qq(k); const S = qqSolved(); h.update(Buffer.from(S.M.buffer)); h.update(Buffer.from(S.table.buffer)); } qq('charm');
+{ const h = createHash('sha256'); for (const k of ['charm', 'bottom']) { qq(k); const S = qqSolved(); h.update(Buffer.from(S.M.buffer, 0, 36 * 8)); h.update(Buffer.from(S.table.buffer, 0, 36 * 256 * 4)); }   /* the 6 × 6 grid's rows: iteration 008 A7 appended n = 7's two (36 + l) after them */ qq('charm');
   const hex = h.digest('hex');
   judge('QUARKONIUM byte-identical to cornell.js before G1 (masses and the kernel table, cc̄ and bb̄); the `cornell` preset has no generic solve — the table the kernel receives while QQ̄ is in force is cornell.js\' own',
     hex === 'ff9e1d16e73c1c05f1249dbda5dd10b5563a758ea0deddf22128471fd7a3a90a' && !POTENTIALS.cornell.V && HAMILTONIANS.cornell.radialTable() === cornellRadialTable() && HAMILTONIANS.central === CENTRAL, hex); }

@@ -5,8 +5,8 @@
  * a polynomial in t = r² times a Gaussian envelope times the SAME spherical harmonics hydrogen uses — the record
  * shape the GPU kernel already evaluates, with a third envelope (e^{−t/2}) beside e^{−ρ/2} and (1+t)^{−(n+1)}.
  *
- * THE BASIS.  The register's 91 labels (n, l, m), n ≤ 6, are reused through n_r = n − l − 1: the same states, now
- * with energy N + 3/2, N = 2n_r + l = 2n − l − 2.  It is a truncation of the oscillator (n_r + l ≤ 5), complete in m
+ * THE BASIS.  The register's 140 labels (n, l, m), n ≤ 7, are reused through n_r = n − l − 1: the same states, now
+ * with energy N + 3/2, N = 2n_r + l = 2n − l − 2.  It is a truncation of the oscillator (n_r + l ≤ 6), complete in m
  * for every (n_r, l), which is what every SO(3)-covariant statement needs.
  *
  * MOMENTUM SPACE is the same picture: the oscillator's eigenfunctions are eigenfunctions of the Fourier transform,
@@ -50,7 +50,7 @@ export function qhoTable(n, l, m) {
   const leg = legendreDerivCoeffs(l, am);
   const sign = (m >= 0 && (am % 2 === 1)) ? -1 : 1;
   const norm = sign * qhoNorm(nr, l) * ylmNorm(l, am);
-  const pad = (a) => { const out = new Float64Array(6); for (let i = 0; i < a.length && i < 6; i++) out[i] = a[i]; return out; };
+  const pad = (a) => { const out = new Float64Array(7); for (let i = 0; i < a.length && i < 7; i++) out[i] = a[i]; return out; };
   const ph = [[1, 0], [0, -1], [-1, 0], [0, 1]][N % 4];
   return { n, l, m, am, nr, N, norm, lag: pad(laguerreCoeffsReal(nr, l + 0.5)), leg: pad(leg), space: 'qho', momentumPhase: { re: ph[0], im: ph[1] } };
 }
@@ -58,8 +58,8 @@ export function qhoTable(n, l, m) {
 export function qhoFromTable(T, x, y, z) {
   const r = Math.hypot(x, y, z);
   const ct = r < 1e-300 ? 1 : z / r, st = Math.sqrt(Math.max(0, 1 - ct * ct)), phi = Math.atan2(y, x), t = r * r;
-  let L = 0, tp = 1; for (let j = 0; j < 6; j++) { L += T.lag[j] * tp; tp *= t; }
-  let D = 0, xp = 1; for (let j = 0; j < 6; j++) { D += T.leg[j] * xp; xp *= ct; }
+  let L = 0, tp = 1; for (let j = 0; j < T.lag.length; j++) { L += T.lag[j] * tp; tp *= t; }
+  let D = 0, xp = 1; for (let j = 0; j < T.leg.length; j++) { D += T.leg[j] * xp; xp *= ct; }
   let stm = 1; for (let i = 0; i < T.am; i++) stm *= st;
   const f = T.norm * Math.pow(r, T.l) * Math.exp(-t / 2) * L * stm * D;
   return { re: f * Math.cos(T.m * phi), im: f * Math.sin(T.m * phi) };
@@ -83,22 +83,22 @@ export function qhoPsiAt(re, im, x, y, z, indices) {
 export function qhoDomainFor(nmax) { let N = 0; for (const s of BASIS) if (s.n <= nmax) N = Math.max(N, qhoN(s.n, s.l)); return Math.sqrt(2 * (N + 1.5)) + 3; }
 /**
  * the coherent state of momentum k along z, e^{ikz}|0⟩: its coefficients on the register, by projecting the closed
- * form ψ(x) = π^{−3/4} e^{−r²/2} e^{ikz} onto the basis on a grid (the truncation beyond n_r + l ≤ 5 is the
+ * form ψ(x) = π^{−3/4} e^{−r²/2} e^{ikz} onto the basis on a grid (the truncation beyond n_r + l ≤ 6 is the
  * Poisson tail of |α|² = k²/2 — negligible for k ≲ 1).  Returns { re, im, captured } with captured = Σ|c|².
  */
 export function coherentAlongZ(k, { half = 7, G = 64 } = {}) {
-  const re = new Float64Array(91), im = new Float64Array(91), h = 2 * half / G, w = h * h * h, A = Math.pow(Math.PI, -0.75);
+  const NB = BASIS.length, re = new Float64Array(NB), im = new Float64Array(NB), h = 2 * half / G, w = h * h * h, A = Math.pow(Math.PI, -0.75);
   const tabs = BASIS.map((s) => qhoTableFor(s));
   for (let i = 0; i < G; i++) for (let j = 0; j < G; j++) for (let l = 0; l < G; l++) {
     const x = -half + (i + 0.5) * h, y = -half + (j + 0.5) * h, z = -half + (l + 0.5) * h;
     const g = A * Math.exp(-(x * x + y * y + z * z) / 2), pr = g * Math.cos(k * z), pi = g * Math.sin(k * z);
-    for (let a = 0; a < 91; a++) {
+    for (let a = 0; a < NB; a++) {
       if (BASIS[a].m !== 0) continue;                               // e^{ikz} keeps m = 0
       const v = qhoFromTable(tabs[a], x, y, z);                     // real for m = 0
       re[a] += w * v.re * pr; im[a] += w * v.re * pi;
     }
   }
-  let captured = 0; for (let a = 0; a < 91; a++) captured += re[a] * re[a] + im[a] * im[a];
+  let captured = 0; for (let a = 0; a < NB; a++) captured += re[a] * re[a] + im[a] * im[a];
   return { re, im, captured };
 }
 /** the 1-D Fock state's Wigner function W_n(z, p) = (−1)ⁿ/π · e^{−u} L_n(2u), u = z² + p² (ħ = 1), L_n by its recurrence; W_1(0, 0) = −1/π.

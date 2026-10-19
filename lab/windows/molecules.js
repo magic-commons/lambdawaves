@@ -12,11 +12,11 @@ export function createMolecules(app) {
   app.state.restampParams = null;                                            // re-tag knobs as modulation targets: lanes built after boot call it (the REGISTER's phase needles)
   app.state.molSession = null;                                               // the one owner of the molecular volume, assigned beside CHEMISTRY below (the frame loop reads it)
   app.state.orbitals = null; app.state.states = null; app.state.register = null;                 // REGISTER: the window (register) and its two modes, assigned beside CHEMISTRY below
-  /* Iteration 002 (Josh, 2026-10-16) · TWO MODES.  ATOMS: the 91-label SPECTRUM, the hydrogen-orbital names, the EQUALIZER and the atomic
+  /* Iteration 002 (Josh, 2026-10-16) · TWO MODES.  ATOMS: the 140-label SPECTRUM, the hydrogen-orbital names, the EQUALIZER and the atomic
      instruments.  MOLECULES: MOLECULES and MO-REGISTRY.  The mode IS MOLECULES ON — the switch under the title, the card's own switch, a project
      and a link all say it by one road (chem.setOn → moleculeMode) — and each mode HIDES the other's windows (hidden, never closed or moved: the
      arrangement waits for the mode to come back).  This replaces 2026-10's folded SPECTRUM under a molecule. */
-  const modeSeg = seg({ aria: 'Mode: atoms or molecules', value: 'atoms', options: [{ id: 'atoms', label: 'ATOMS', title: 'ATOMS — SPECTRUM\'s 91 hydrogen states, their names and the EQUALIZER' }, { id: 'molecules', label: 'MOLECULES', title: 'MOLECULES — the molecule and its register, one window' }],
+  const modeSeg = seg({ aria: 'Mode: atoms or molecules', value: 'atoms', options: [{ id: 'atoms', label: 'ATOMS', title: 'ATOMS — SPECTRUM\'s 140 hydrogen states, their names and the EQUALIZER' }, { id: 'molecules', label: 'MOLECULES', title: 'MOLECULES — the molecule and its register, one window' }],
     onChange: (v) => { if (app.state.chem) app.state.chem.setOn(v === 'molecules'); } });
   modeSeg.root.id = 'lwMode'; { const t = document.getElementById('title'); if (t) t.after(modeSeg.root); }
   function moleculeMode(v) {

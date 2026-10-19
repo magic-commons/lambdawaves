@@ -24,8 +24,8 @@ let seed = 20260902;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 
 /* ── Q0 BASIS ─────────────────────────────────────────────────────────────── */
-judge('Q0 register holds exactly 91 states', BASIS.length === 91 && N === 91, BASIS.length);
-judge('Q0 ids are unique and stable', new Set(BASIS.map((s) => s.id)).size === 91, BASIS[0].id + ' … ' + BASIS[90].id);
+judge('Q0 register holds exactly 140 states (n ≤ 7), the 91 of n ≤ 6 first at their old indices', BASIS.length === 140 && N === 140 && BASIS.slice(0, 91).every((s) => s.n <= 6) && BASIS.slice(91).every((s) => s.n === 7), BASIS.length);
+judge('Q0 ids are unique and stable', new Set(BASIS.map((s) => s.id)).size === 140 && BASIS[90].id === 'h:6:5:5' && BASIS[91].id === 'h:7:0:0', BASIS[0].id + ' … ' + BASIS[90].id + ' … ' + BASIS[139].id);
 judge('Q0 energies E_n = −1/(2n²)', energy(1) === -0.5 && energy(2) === -0.125 && Math.abs(energy(6) + 1 / 72) < 1e-16);
 judge('Q0 Lyman-α energy 0.375 a.u. = 10.204 eV', Math.abs((energy(2) - energy(1)) * HARTREE_EV - 10.2043) < 2e-3, (energy(2) - energy(1)) * HARTREE_EV);
 

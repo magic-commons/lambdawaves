@@ -66,7 +66,7 @@ export function momentumTable(n, l, m) {
   const leg = legendreDerivCoeffs(l, am);
   const sign = (m >= 0 && (am % 2 === 1)) ? -1 : 1;
   const norm = sign * momentumNorm(n, l) * ylmNorm(l, am);
-  const pad = (a) => { const out = new Float64Array(6); for (let i = 0; i < a.length && i < 6; i++) out[i] = a[i]; return out; };
+  const pad = (a) => { const out = new Float64Array(7); for (let i = 0; i < a.length && i < 7; i++) out[i] = a[i]; return out; };
   const ph = [[1, 0], [0, -1], [-1, 0], [0, 1]][l % 4];            // (−i)^l
   return { n, l, m, am, norm, lag: pad(momentumPoly(n, l)), leg: pad(leg), phase: { re: ph[0], im: ph[1] }, space: 'p' };
 }
@@ -77,8 +77,8 @@ export function momentumFromTable(T, px, py, pz) {
   const st = Math.sqrt(Math.max(0, 1 - ct * ct));
   const phi = Math.atan2(py, px);
   const t = T.n * T.n * p * p;
-  let L = 0, tp = 1; for (let j = 0; j < 6; j++) { L += T.lag[j] * tp; tp *= t; }
-  let D = 0, xp = 1; for (let j = 0; j < 6; j++) { D += T.leg[j] * xp; xp *= ct; }
+  let L = 0, tp = 1; for (let j = 0; j < T.lag.length; j++) { L += T.lag[j] * tp; tp *= t; }
+  let D = 0, xp = 1; for (let j = 0; j < T.leg.length; j++) { D += T.leg[j] * xp; xp *= ct; }
   let stm = 1; for (let i = 0; i < T.am; i++) stm *= st;
   const f = T.norm * Math.pow(t, T.l / 2) * L / Math.pow(1 + t, T.expo !== undefined ? T.expo : T.n + 1) * stm * D;
   const re0 = f * Math.cos(T.m * phi), im0 = f * Math.sin(T.m * phi);

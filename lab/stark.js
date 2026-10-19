@@ -1,11 +1,11 @@
-/* stark.js — INTER-SHELL STARK (0.8.0 G3): H = diag(E) + F·z over the register's 91 labels, eigensolved once per F, as the propagator
+/* stark.js — INTER-SHELL STARK (0.8.0 G3): H = diag(E) + F·z over the register's 140 labels, eigensolved once per F, as the propagator
  * Register.setPropagator takes (S = I: the labels are orthonormal, so evolve(c, t) = C e^{−iEt} Cᵀ c and the S-norm is ‖c‖²).  z couples every
- * shell, so it is exact WITHIN the n ≤ 6 basis; the continuum is absent, so ionisation is SAID: the classical saddle F_c = 1/(16 n⁴) is printed
+ * shell, so it is exact WITHIN the n ≤ 7 basis; the continuum is absent, so ionisation is SAID: the classical saddle F_c = 1/(16 n⁴) is printed
  * and a shell past it would ionise — this basis holds it.  The basis's polarizability is its own sum over states (≈ 81 % of the exact 9/2). */
 import { BASIS, radial } from './hydrogen.js';
 import { eigSymQL } from './linalg.js';
 /* THE SONG's z (0.6.4 S1, moved here from mathworker.js, which re-exports it: ONE build for the frame thread and the worker).  z = δ_mm' ∫R_nl R_n'l' r³ dr
- * (trapezoid, 20 000 points to r = 400) × √(((l+1)² − m²)/((2l+1)(2l+3))), eigensolved once (eigSymQL — what the tree's eigSym runs at n = 91). */
+ * (trapezoid, 20 000 points to r = 400) × √(((l+1)² − m²)/((2l+1)(2l+3))), eigensolved once (eigSymQL — what the tree's eigSym runs at n = 140). */
 let hzOp = null;
 export function hydrogenZ() {
   if (hzOp) return hzOp;
@@ -15,7 +15,7 @@ export function hydrogenZ() {
 }
 /** the classical saddle: past F_c = 1/(16 n⁴) shell n would field-ionise */
 export const saddle = (n) => 1 / (16 * n ** 4);
-/** α of the basis: 2 Σ_k |⟨1s|z|k⟩|² / (E_k − E_1s), the n ≤ 6 sum over states (every number computed; the exact hydrogen α is 9/2) */
+/** α of the basis: 2 Σ_k |⟨1s|z|k⟩|² / (E_k − E_1s), the n ≤ 7 sum over states (every number computed; the exact hydrogen α is 9/2) */
 export function polarizability(E = Float64Array.from(BASIS, (s) => s.E)) { const z = hydrogenZ().R; let a = 0; for (let k = 1; k < BASIS.length; k++) a += 2 * z[k] ** 2 / (E[k] - E[0]); return a; }
 /** starkPropagator(F, E) → the object Register.setPropagator takes: H = diag(E) + F·z, its eigenpairs, evolve, norm (S = I) */
 export function starkPropagator(F, E = Float64Array.from(BASIS, (s) => s.E)) {

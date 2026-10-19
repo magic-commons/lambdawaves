@@ -49,7 +49,7 @@ export function createKeplerSurface(app) {
     const r = await maths.call({ op: 'packet', x0, k: kvec, sigma, radius: HAMILTONIANS.well.radius });
     if (!r || r.error) { launchPacket(x0, kvec, sigma); return; }
     if (getHamiltonian().id !== 'well' || app.state.gasAxial) return;                             // the box was left while the packet was in flight
-    reg.clear(); for (let a = 0; a < 91; a++) if (r.re[a] || r.im[a]) reg.set(a, r.re[a], r.im[a], clock.t);
+    reg.clear(); for (let a = 0; a < r.re.length; a++) if (r.re[a] || r.im[a]) reg.set(a, r.re[a], r.im[a], clock.t);
     app.state.lastLaunch = { x0, k: kvec, sigma, captured: r.captured };
     if (ui.gasRo) { ui.gasRo.set(`${(100 * r.captured).toFixed(1)}% held`, r.captured > 0.85 ? 'ok' : 'warn'); ui.gasRo.setSub(`σ = ${sigma.toFixed(2)} a₀ at (${x0.map((v) => v.toFixed(1)).join(', ')}) · |k| = ${Math.hypot(...kvec).toFixed(2)} · the box resolves ≈ a/6 = ${(HAMILTONIANS.well.radius / 6).toFixed(1)} a₀`); }
     touchState();
@@ -256,7 +256,7 @@ export function createKeplerSurface(app) {
       touchState(); return;
     }
     const P = wellPacket(x0, kvec, sigma);
-    reg.clear(); for (let a = 0; a < 91; a++) if (P.re[a] || P.im[a]) reg.set(a, P.re[a], P.im[a], clock.t);
+    reg.clear(); for (let a = 0; a < P.re.length; a++) if (P.re[a] || P.im[a]) reg.set(a, P.re[a], P.im[a], clock.t);
     app.state.lastLaunch = { x0, k: kvec, sigma, captured: P.captured };
     if (ui.gasRo) { ui.gasRo.set(`${(100 * P.captured).toFixed(1)}% held`, P.captured > 0.85 ? 'ok' : 'warn'); ui.gasRo.setSub(`σ = ${sigma.toFixed(2)} a₀ at (${x0.map((v) => v.toFixed(1)).join(', ')}) · |k| = ${Math.hypot(...kvec).toFixed(2)} · the box resolves ≈ a/6 = ${(HAMILTONIANS.well.radius / 6).toFixed(1)} a₀`); }
     touchState();

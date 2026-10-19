@@ -11,7 +11,7 @@
  *
  * (the plane wave's multipole expansion), so every element is a k-independent angular integral times a radial
  * integral, both one-dimensional.  The boost is unitary on the full Hilbert space but the register holds only
- * n ≤ 6, so |Mc|² < |c|²: the lost norm is the probability the electron was knocked out of the first six shells
+ * n ≤ 7, so |Mc|² < |c|²: the lost norm is the probability the electron was knocked out of the first seven shells
  * or ionised — reported, never renormalised away ("cull the observation, never the state").  After the slap the
  * state is a superposition and JIGGLES by the exact evolution; the dipole shows the ringing.
  *
@@ -24,7 +24,7 @@ import { applyRotor } from './frontier.js';
 import { angularDipoleZ, radialDipole } from './dynamics.js';
 import { qhoTableFor, qhoFromTable } from './qho.js';
 
-const N = 91, LMAX = 10;
+const N = BASIS.length, LMAX = 12;                              // 140 labels, l ≤ 6: L ≤ l_a + l_b = 12 (iteration 008 A7)
 export { sphericalBessel };                                   // lives in bessel.js (shared with the well; no import cycle)
 /** Legendre P_L(x) for all L ≤ LMAX by the recurrence */
 function legendreAll(x) { const P = new Float64Array(LMAX + 1); P[0] = 1; P[1] = x; for (let l = 1; l < LMAX; l++) P[l + 1] = ((2 * l + 1) * x * P[l] - l * P[l - 1]) / (l + 1); return P; }
@@ -56,7 +56,7 @@ export function warmStep(budgetMs = 8) {
       W.PL = []; for (let i = 0; i <= NT; i++) W.PL.push(legendreAll(-1 + 2 * i / NT));
       if (over()) return false;
     }
-    while (W.a < N) {                                                // the 91 rows Θ_a
+    while (W.a < N) {                                                // the 140 rows Θ_a
       const s = BASIS[W.a], T = modeTable(s.n, s.l, s.m);
       let r0 = 0.7; if (Math.abs(radial(s.n, s.l, r0)) < 1e-6) r0 = 1.3;
       const Rr = radial(s.n, s.l, r0), row = new Float64Array(NT + 1);
@@ -106,7 +106,7 @@ export function warmStep(budgetMs = 8) {
  * m-matched pairs reuse it; (2) the last matrix built is kept, keyed on (k, the radial table, the angular table), so a
  * repeated press of the same impulse — the K key, x, y or z (a kick along x or y is the z-boost between two rotors) —
  * does not rebuild it.  kickMatrixZ still hands every caller arrays of its own. */
-const IKEYS = 7 * 6 * 7 * 6 * (LMAX + 1);                       // n ≤ 6, l ≤ 5, L ≤ LMAX
+const IKEYS = 8 * 7 * 8 * 7 * (LMAX + 1);                       // n ≤ 7, l ≤ 6, L ≤ LMAX
 let MZ = null;                                                   // { k, rad, ang, re, im }: the last boost built (read-only)
 function boostZ(k) {
   buildTables();
@@ -120,7 +120,7 @@ function boostZ(k) {
     const A = ANG[a * N + b]; if (!A) continue;
     let sr = 0, si = 0;
     const ra = RAD.tab[a], rb = RAD.tab[b], Ba = BASIS[a], Bb = BASIS[b];
-    const lo = Math.abs(Ba.l - Bb.l), hi = Ba.l + Bb.l, base = (((Ba.n * 6 + Ba.l) * 7 + Bb.n) * 6 + Bb.l) * (LMAX + 1);
+    const lo = Math.abs(Ba.l - Bb.l), hi = Ba.l + Bb.l, base = (((Ba.n * 7 + Ba.l) * 8 + Bb.n) * 7 + Bb.l) * (LMAX + 1);
     for (let L = lo; L <= hi; L++) {
       if (Math.abs(A[L]) < 1e-14) continue;
       let I;
@@ -199,19 +199,20 @@ export function momentumZ(re, im, ids) {
 /** how much of the state the slap knocked out of the register */
 export function escaped(norm2Before, norm2After) { return norm2Before > 0 ? 1 - norm2After / norm2Before : 0; }
 /* THE SQUEEZE (0.8.0 G2), the OSCILLATOR's: S(r) = e^{r(a_z² − a_z†²)/2}, (Sψ)(x, y, z) = e^{r/2} ψ(x, y, e^r z), so Var(z) ↦ e^{−2r} Var(z).  At fixed ρ a register
- * orbital is a polynomial of degree ≤ 10 in z times e^{−z²/2}, EXACTLY in span{h_0 … h_10(z)}: P_a[n](ρ) is built once (trapezoid in z and in u, ρ = ln(1 + e^u)),
- * S_ab = 2π∫ρdρ Σ P_a[n] S1[n][n′] P_b[n′] with S1 = ⟨n|S|n′⟩ of the infinite operator — unitary on the product basis h_n ⊗ (2-D oscillator), not on n ≤ 6: `escaped` reads the loss. */
+ * orbital is a polynomial of degree ≤ 12 in z times e^{−z²/2} (N ≤ 12 since n = 7), EXACTLY in span{h_0 … h_12(z)}: P_a[n](ρ) is built once (trapezoid in z and in u, ρ = ln(1 + e^u)),
+ * S_ab = 2π∫ρdρ Σ P_a[n] S1[n][n′] P_b[n′] with S1 = ⟨n|S|n′⟩ of the infinite operator — unitary on the product basis h_n ⊗ (2-D oscillator), not on n ≤ 7: `escaped` reads the loss. */
 export const SQUEEZE_REFUSAL = 'OSCILLATOR only: a squeeze needs the ladder a_z of −½∇² + ½r², which a Coulomb, a well or an atom does not have', SQUEEZE = { said: '' };   // said: METERS' line
 const SZ = Float64Array.from({ length: 121 }, (_, k) => (k - 60) * 0.15), NU = 120, RU = Array.from({ length: NU }, (_, j) => -14 + j * 0.2), RHO = RU.map((u) => Math.log1p(Math.exp(u))), WR = RU.map((u, j) => RHO[j] * 0.2 / (1 + Math.exp(-u)));
 const hermite = (zs, nmax) => { const H = [zs.map((z) => Math.PI ** -0.25 * Math.exp(-z * z / 2))]; for (let n = 0; n < nmax; n++) H.push(zs.map((z, k) => Math.sqrt(2 / (n + 1)) * z * H[n][k] - (n ? Math.sqrt(n / (n + 1)) * H[n - 1][k] : 0))); return H; };
+const SQN = 12;   // the Hermite span the squeeze needs: N = 2n_r + l ≤ 12 on n ≤ 7
 /** ⟨n|S(r)|n′⟩ for n, n′ ≤ nmax: e^{r/2} ∫ h_n(z) h_n′(e^r z) dz on the grid zs */
-export function squeeze1D(r, nmax = 10, zs = SZ) { const A = hermite(zs, nmax), B = hermite(zs.map((z) => z * Math.exp(r)), nmax), f = (zs[1] - zs[0]) * Math.exp(r / 2); return A.map((a) => B.map((b) => f * a.reduce((s, v, k) => s + v * b[k], 0))); }
+export function squeeze1D(r, nmax = SQN, zs = SZ) { const A = hermite(zs, nmax), B = hermite(zs.map((z) => z * Math.exp(r)), nmax), f = (zs[1] - zs[0]) * Math.exp(r / 2); return A.map((a) => B.map((b) => f * a.reduce((s, v, k) => s + v * b[k], 0))); }
 let SQP = null, SQM = null;   // the r-independent projections; the last S(r) built
 export function squeezeMatrix(r) {
   if (SQM && SQM.r === r) return SQM.M;
-  if (!SQP) { const H = hermite(SZ, 10); SQP = BASIS.map((s) => { const T = qhoTableFor(s), P = H.map(() => new Float64Array(NU)); for (let j = 0; j < NU; j++) for (let k = 0; k < SZ.length; k++) { const f = qhoFromTable(T, RHO[j], 0, SZ[k]).re * 0.15; for (let n = 0; n <= 10; n++) P[n][j] += H[n][k] * f; } return P; }); }
+  if (!SQP) { const H = hermite(SZ, SQN); SQP = BASIS.map((s) => { const T = qhoTableFor(s), P = H.map(() => new Float64Array(NU)); for (let j = 0; j < NU; j++) for (let k = 0; k < SZ.length; k++) { const f = qhoFromTable(T, RHO[j], 0, SZ[k]).re * 0.15; for (let n = 0; n <= SQN; n++) P[n][j] += H[n][k] * f; } return P; }); }
   const S1 = squeeze1D(r), M = new Float64Array(N * N), Q = SQP.map((P) => S1.map((row) => P[0].map((_, j) => row.reduce((s, v, p) => s + v * P[p][j], 0))));
-  for (let a = 0; a < N; a++) for (let b = 0; b < N; b++) if (BASIS[a].m === BASIS[b].m) { let s = 0; for (let j = 0; j < NU; j++) for (let n = 0; n <= 10; n++) s += WR[j] * SQP[a][n][j] * Q[b][n][j]; M[a * N + b] = 2 * Math.PI * s; }
+  for (let a = 0; a < N; a++) for (let b = 0; b < N; b++) if (BASIS[a].m === BASIS[b].m) { let s = 0; for (let j = 0; j < NU; j++) for (let n = 0; n <= SQN; n++) s += WR[j] * SQP[a][n][j] * Q[b][n][j]; M[a * N + b] = 2 * Math.PI * s; }
   SQM = { r, M }; return M; }
 /** c ↦ S(r) c in place along an axis (x and y: the z-squeeze between the slap's rotors); REFUSED off the OSCILLATOR */
 export function applySqueeze(re, im, r, axis = 'z') {

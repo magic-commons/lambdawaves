@@ -1,5 +1,5 @@
 /* tools/menu-thumbs.mjs — THE PICKER'S PICTURES (iteration 003, Josh 2026-10-16; iteration 004 2026-10-17): one square thumbnail per
- * molecule in the store, one per live element H–Kr and one per hydrogen subshell the dimmed elements past Kr name, rendered BY THE APP in
+ * molecule in the store, one per live element (H–Og since iteration 008 A7) and one per hydrogen subshell a dimmed element names, rendered BY THE APP in
  * headless Firefox (the gate kit) and written to lab/img/menu/.
  *
  *   python3 tools/gate/server.py . 9671 &                                   # serve this checkout
@@ -56,7 +56,7 @@ const only = arg('only', '') ? arg('only', '').split(',') : null;
 const VOL = arg('volume', null), VDIR = VOL && (process.env.LW_VOLUMES || homedir() + '/Documents/LAMBDAWAVES-VOLUMES') + '/dist/' + VOL + '/';
 const sets = VOL ? ['volume'] : arg('set', 'molecules,elements,orbitals').split(',');
 const OUT = VOL ? VDIR + 't/' : new URL('../lab/img/menu/', import.meta.url).pathname; mkdirSync(OUT, { recursive: true });
-const SUBSHELLS = [[5, 0], [4, 2], [5, 1], [6, 0], [4, 3], [5, 2], [6, 1], [5, 3], [6, 2]];   // the valence subshells of Rb … Og, n ≤ 6
+const SUBSHELLS = [[5, 0], [4, 2], [5, 1], [6, 0], [4, 3], [5, 2], [6, 1], [5, 3], [6, 2]];   // the valence subshells of Rb … Og, n ≤ 6 — since iteration 008 A7 every element H–Og is live (el-), so no tile shows these; 7s and 7p are not rendered (no dimmed element names them)
 const nl = ([n, l]) => n + 'spdf'[l];
 const mols = [...MOLECULES, ...RECORD_ONLY].filter((m) => !m.disabled);
 const CORNER = { yaw: Math.PI / 4, pitch: Math.asin(1 / Math.sqrt(3)) };

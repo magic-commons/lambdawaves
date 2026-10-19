@@ -46,7 +46,7 @@ configure('charm', { ...DEFAULTS }, 'cornell');
   const o = cornellPsiAt(re, im, 0, 0, 0.01, [a1s]), far = cornellPsiAt(re, im, 0, 0, 30, [a1s]);
   const lbl = cornellLabelOf(BASIS[a2p]);
   judge('ψ AT A POINT: the 1S is positive near the origin and zero far out; the label of (n = 2, l = 1, m = 0) reads 1P ₊0 (quarkonium counts n_r + 1)', o.re > 0 && Math.abs(far.re) < 1e-12 && lbl === '1P ₊0', { o, far, lbl });
-  judge('DOMAIN grows with the shell and the ladder lists 36 levels in GeV between its Emin and Etop', cornellDomainFor(1) < cornellDomainFor(6) && cornellSpectrum().levels.length === 36 && cornellSpectrum().levels.every((L) => L.E > cornellSpectrum().Emin && L.E < cornellSpectrum().Etop), { d1: cornellDomainFor(1), d6: cornellDomainFor(6) });
+  judge('DOMAIN grows with the shell and the ladder lists 38 levels in GeV between its Emin and Etop (the 6 × 6 grid and the 7S and 1I of n = 7)', cornellDomainFor(1) < cornellDomainFor(6) && cornellSpectrum().levels.length === 38 && cornellSpectrum().levels.every((L) => L.E > cornellSpectrum().Emin && L.E < cornellSpectrum().Etop), { d1: cornellDomainFor(1), d6: cornellDomainFor(6) });
 }
 {
   configure('bottom');

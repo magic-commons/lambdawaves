@@ -42,9 +42,11 @@ export function createStateCard(app) {
       rab2.appendChild(ui.abRo.root);
       /* THE PROJECT'S ROAD (Josh, 2026-09-10: "state transitions don't keep"): both stores, Ω and whether the
          transition is running — plain arrays in the file, typed arrays in the block. */
+      /* iteration 008 A7: a store is written 91 wide while its n = 7 part is zero, so an older file's bytes never move */
+      const cut = (S) => { const w = S.re.subarray(91).some(Boolean) || S.im.subarray(91).some(Boolean) ? S.re.length : 91; return { re: Array.from(S.re.subarray(0, w)), im: Array.from(S.im.subarray(0, w)) }; };
       ui.ab = {
-        get: () => ({ a: abA ? { re: Array.from(abA.re), im: Array.from(abA.im) } : null, b: abB ? { re: Array.from(abB.re), im: Array.from(abB.im) } : null, omega: abOmega, on: !!reg.transition }),
-        set(o) { if (!o) return; const take = (S) => (S && Array.isArray(S.re) && S.re.length === 91 && Array.isArray(S.im)) ? { re: Float64Array.from(S.re), im: Float64Array.from(S.im) } : null;
+        get: () => ({ a: abA ? cut(abA) : null, b: abB ? cut(abB) : null, omega: abOmega, on: !!reg.transition }),
+        set(o) { if (!o) return; const W = reg.re0.length, pad = (v) => { const o2 = new Float64Array(W); o2.set(v.slice(0, W)); return o2; }, take = (S) => (S && Array.isArray(S.re) && (S.re.length === 91 || S.re.length === W) && Array.isArray(S.im)) ? { re: pad(S.re), im: pad(S.im) } : null;   // a 91-wide store (an older file) pads n = 7 with zeros
           abA = take(o.a); abB = take(o.b); if (Number.isFinite(o.omega)) { abOmega = Math.max(0.005, Math.min(1, o.omega)); if (ui.abOmega) ui.abOmega.set(abOmega); }
           if (reg.transition) reg.clearTransition(clock.t);
           if (o.on && abA && abB && !sturm.P) { reg.setTransition(abA, abB, abOmega, clock.t); ui.abSw.set(true); } else ui.abSw.set(false);
@@ -53,7 +55,7 @@ export function createStateCard(app) {
       function abStatus() {
         slotA.classList.toggle('stored', !!abA); slotB.classList.toggle('stored', !!abB);
         const count = (S) => S ? S.re.reduce((k, v, i) => k + ((v || S.im[i]) ? 1 : 0), 0) : 0, nA = count(abA), nB = count(abB);
-        let ov = 0; if (abA && abB) { let r = 0, im = 0; for (let a = 0; a < 91; a++) { r += abA.re[a] * abB.re[a] + abA.im[a] * abB.im[a]; im += abA.re[a] * abB.im[a] - abA.im[a] * abB.re[a]; } ov = Math.hypot(r, im); }
+        let ov = 0; if (abA && abB) { let r = 0, im = 0; for (let a = 0; a < abA.re.length; a++) { r += abA.re[a] * abB.re[a] + abA.im[a] * abB.im[a]; im += abA.re[a] * abB.im[a] - abA.im[a] * abB.re[a]; } ov = Math.hypot(r, im); }
         const exact = nA === 1 && nB === 1 && ov < 1e-9;
         ui.abRo.set((abA ? nA + (nA === 1 ? ' mode' : ' modes') : '—') + '  /  ' + (abB ? nB + (nB === 1 ? ' mode' : ' modes') : '—'), reg.transition ? (exact ? 'ok' : 'warn') : '');
         ui.abRo.setSub(reg.transition ? (exact ? 'two-level Rabi drive · |⟨A|B⟩| = ' + ov.toFixed(3) : 'composite-state envelope · |⟨A|B⟩| = ' + ov.toFixed(3)) : 'store two states, then TRANSITION plays A → B → A at Ω');

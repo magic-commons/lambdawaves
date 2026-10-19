@@ -888,3 +888,12 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .native-clean .row > .trig.lw-fold { flex: 0 0 30px; }
 .sp-preset > .mir-step { flex: 1 1 auto; }
 .native-clean .sp-head > .sw { padding: 0 3px; font-size: 9px; min-width: 0; gap: 4px; justify-content: center; }
+
+/* § iteration 008 A7 · THE SEVENTH SHELL's ink (palette-app.js appends n = 7 to the kit's N_COLOR / N_RGB / N_RGB_LIGHT): hue 350, dark and light */
+body { --n7: hsl(350 85% 76%); }
+body[data-theme="light"] { --n7: hsl(350 97% 47%); }
+/* § iteration 008 A7 · THE SHELL FOLD (spectrum.js): the coloured `n` number is the press, no chevron; a folded row keeps the number and counts its populated labels */
+.picker .pk-n > button.pk-nl { font: inherit; font-size: var(--fs-small); color: var(--nc); background: none; border: 0; box-shadow: none; padding: 9px 0 0; margin: 0; min-width: 0; min-height: 0; height: auto; cursor: pointer; border-radius: 4px; }
+.picker .pk-n > button.pk-nl:hover, .picker .pk-n > button.pk-nl:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+.picker .pk-n.folded > button.pk-nl { padding-top: 2px; opacity: .78; }
+.picker .pk-count { font-size: var(--fs-tiny); color: var(--dim); padding-top: 2px; }

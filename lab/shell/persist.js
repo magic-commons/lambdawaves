@@ -30,7 +30,7 @@ export function createPersist(app) {
       'material.hue': [pr.mat, 'hueShift'], 'material.iso': [pr.mat, 'iso'], 'material.grain': [pr.mat, 'grain'], 'material.knee': [pr.mat, 'knee'],
       'material.slice.pos': [pr.mat.slice, 'pos'], 'material.slice.thick': [pr.mat.slice, 'thick'], 'transport.rate': [data.experiment, 'rate'],
       'state.rot.z': [pr.rotationRates, 'z'], 'state.stark.kz': [pr.rotationRates, 'kz'], 'state.defect.l2': [pr.rotationRates, 'def'], 'state.rabi': [pr.ab, 'omega'],
-      ...Object.fromEntries([1, 2, 3, 4, 5, 6].map((n) => ['shell.rate.n' + n, [shellSeat(pr.rates, n), 'v']])),
+      ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7].map((n) => ['shell.rate.n' + n, [shellSeat(pr.rates, n), 'v']])),
       'chem.kick': [I.chem, 'kappa'], 'chem.speed': [I.chem, 'speed'], 'chem.orbital': [I.chem && Number.isFinite(I.chem.orbital) ? I.chem : null, 'orbital'],   // iteration 007 O: an orbital not yet chosen (null, HOMO by default) is never seated
       'reg.morph': [st, 'morph'], [OMORPH]: [I.orbitals, 'morph'], 'reg.e0': [st && st.drive, 'e0'], 'reg.w': [st && st.drive, 'omega'],
       ...Object.fromEntries(((st && st.lanes) || []).slice(0, 8).flatMap((L, i) => [['reg.amp' + (i + 1), [L, 'amp', Math.sqrt, (a) => a * a]], ['reg.ph' + (i + 1), [L, 'phase', (v) => ((v % T) + T) % T]]])) };
@@ -59,7 +59,7 @@ export function createPersist(app) {
         instruments: { chem: app.state.chem.save(), orbitals: app.state.orbitals.save(), states: app.state.states.save(), register: { mode: app.state.register.mode }, qcd: quarkonium(),
           ladder: { ...ladder.params }, lattice: LAT ? LAT.save() : undefined, bloch: BL ? BL.save() : undefined, central: centralSave(), separable: sepSave(),   // 0.7.2 L1, 0.8.1 T1, 0.8.0 G1, 0.9.4 S1: absent at the defaults
           particles: { count: Math.round(ui.pN.get()), trail: particles.trailLen } },
-        rates: Array.from(rates), rotationRates: { ...app.ctl.rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
+        rates: Array.from(rates.subarray(91).every((v) => v === 1) ? rates.subarray(0, 91) : rates), rotationRates:   /* iteration 008 A7: 91 wide while n = 7's rates are all 1, so an older file's bytes never move */ { ...app.ctl.rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
         modulation: app.state.modHost ? modRackStamped() : null,
         /* 2026-09-10 (Josh): A PROJECT IS A DAW PROJECT — the stage, the window arrangement (every window as it stands,
            floats included), the modulation window's placement, auto-rotate, the overlays, SPECTRUM's DIALS fold, the A/B
@@ -248,7 +248,7 @@ export function createPersist(app) {
         }
         /* D9b · THE ELECTROSTATICS SHIM: a file whose overlay the retired window drew opens without it and says so; nothing is drawn */
         if (pr.field && pr.field.overlay && pr.field.overlay !== 'off') gone.push('ELECTROSTATICS');
-        if (Array.isArray(pr.rates) && pr.rates.length === 91) { rates.set(pr.rates); reg.setEnergies(energyOf); }
+        if (Array.isArray(pr.rates) && (pr.rates.length === 91 || pr.rates.length === rates.length)) { if (pr.rates.length === 91) rates.fill(1, 91); rates.set(pr.rates); reg.setEnergies(energyOf); }   // a 91-wide record: n = 7 at 1
         /* 2026-09-10 · THE DAW KEYS, each only when the file carries it (see serialize).  0.3.1 · S1: of `ui` only the STAGE
            is read; an older file's theme / card / frost / disc / accent, and its camera feel, are the sender's preferences
            and are ignored — opening a project never changes this browser's settings (docs/STATE-SCOPES.md). */

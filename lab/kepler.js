@@ -22,6 +22,7 @@
  * (n − (n−1) = 1 for the circular state).  The gap is returned and printed (Round 11 §3.2).
  */
 import { shellMatrix, rotorExpectations } from './frontier.js';
+import { NMAX } from './hydrogen.js';
 
 const unit = (v) => { const n = Math.hypot(v[0], v[1], v[2]); return n > 0 ? [v[0] / n, v[1] / n, v[2] / n] : [0, 0, 0]; };
 const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
@@ -73,7 +74,7 @@ export function timeAveragedPosition(orb, N = 4000) {
 export function keplerOrbits(re, im, minShare = 0.01) {
   let total = 0; for (let a = 0; a < re.length; a++) total += re[a] * re[a] + im[a] * im[a];
   const out = [];
-  for (let n = 2; n <= 6; n++) {
+  for (let n = 2; n <= NMAX; n++) {
     const M = shellMatrix(re, im, n);
     const share = total > 0 ? (M.norm2 || 0) / total : 0;
     if (share < minShare) continue;

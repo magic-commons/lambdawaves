@@ -1,4 +1,4 @@
-/* hamiltonian.js — the HAMILTONIAN in force: which eigenproblem the register's 91 labels refer to.
+/* hamiltonian.js — the HAMILTONIAN in force: which eigenproblem the register's 140 labels refer to.
  *
  * The instrument was built on hydrogen; the eigen-selector in SPECTRUM now chooses the operator, and everything
  * that depends on it — energies, the kernel's radial tables and envelope, the box, momentum space, the slap's
@@ -11,7 +11,7 @@
  *             momentum space = the same picture with the phase (−i)^N ·  a slap makes an exact coherent state
  */
 import { atomForms } from './names.js';
-import { BASIS, energy as hydrogenEnergy, radial as hydrogenRadial, domainFor as hydrogenDomainFor, psiAt as hydrogenPsiAt, ylmNorm, legendreDerivCoeffs } from './hydrogen.js';
+import { BASIS, NMAX, energy as hydrogenEnergy, radial as hydrogenRadial, domainFor as hydrogenDomainFor, psiAt as hydrogenPsiAt, ylmNorm, legendreDerivCoeffs } from './hydrogen.js';
 import { tableFor as hydrogenTableFor } from './field.js';
 import { momentumTableFor as hydrogenMomentumTableFor, domainForP as hydrogenDomainForP, phiAt as hydrogenPhiAt } from './momentum.js';
 import { cornellEnergy, cornellRadial, cornellTableFor, cornellPsiAt, cornellDomainFor, cornellLabelOf, cornellSpectrum, cornellRadialTable, configure as cornellConfigure, system as cornellSystem } from './cornell.js';
@@ -21,7 +21,7 @@ import { atom as atomOf, solveAtom, virtualEnergyOf, atomRadial, atomRadialTable
 import { CENTRAL } from './central.js';
 import { SEPARABLE } from './separable.js';
 
-const N_RGB = { 1: [255, 255, 255], 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150] };
+const N_RGB = { 1: [255, 255, 255], 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150], 7: [255, 236, 110] };   // n = 7: the yellow the six left free (iteration 008 A7)
 const QHO_RGB = (N) => [[255, 255, 255], [255, 190, 90], [120, 225, 240], [200, 140, 255], [140, 240, 160], [255, 120, 150]][N % 6];
 
 export const HAMILTONIANS = {
@@ -43,14 +43,14 @@ export const HAMILTONIANS = {
     radial: qhoRadial,
     tableFor: qhoTableFor, momentumTableFor: qhoMomentumTableFor,
     psiAt: qhoPsiAt, phiAt: qhoPsiAt,                                // φ(p) has the same form — the phase is on the table
-    domainFor: qhoDomainFor, domainForP: () => qhoDomainFor(6),
+    domainFor: qhoDomainFor, domainForP: () => qhoDomainFor(NMAX),
     kernelSpace: { x: 2, p: 2 },
     stark: false, hydrogenTheorems: false,
-    labelOf: (s) => `N${qhoN(s.n, s.l)} n_r${s.n - s.l - 1} ${'spdfgh'[s.l]}${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
+    labelOf: (s) => `N${qhoN(s.n, s.l)} n_r${s.n - s.l - 1} ${'spdfghi'[s.l]}${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
     spectrum: {
-      levels: Array.from({ length: 11 }, (_, N) => ({ key: N, E: N + 1.5, label: `N${N}`, rgb: QHO_RGB(N) })),
+      levels: Array.from({ length: 2 * NMAX - 1 }, (_, N) => ({ key: N, E: N + 1.5, label: `N${N}`, rgb: QHO_RGB(N) })),   // N = 0 … 12 since n = 7
       levelKey: (a) => qhoN(BASIS[a].n, BASIS[a].l),
-      Emin: 1.5, Etop: 12.5, topLabel: '', footer: 'EIGENVALUE  E = ħω(N + 3/2), N = 2n_r + l  (no continuum)',
+      Emin: 1.5, Etop: 2 * NMAX + 0.5, topLabel: '', footer: 'EIGENVALUE  E = ħω(N + 3/2), N = 2n_r + l  (no continuum)',
     },
   },
 };
@@ -63,10 +63,10 @@ HAMILTONIANS.well = {
   domainFor: wellDomainFor, domainForP: wellDomainFor,
   kernelSpace: { x: 3, p: 3 },
   stark: false, hydrogenTheorems: false, noMomentum: true,
-  labelOf: (s) => `${s.n - s.l}${'spdfgh'[s.l]} well ${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
+  labelOf: (s) => `${s.n - s.l}${'spdfghi'[s.l]} well ${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
   get spectrum() {
     const a = wellRadius(), levels = [];
-    for (let n = 1; n <= 6; n++) for (let l = 0; l < n; l++) levels.push({ key: n + ':' + l, E: wellEnergyOf(n, l, a), label: `${n - l}${'spdfgh'[l]}`, rgb: QHO_RGB(n - 1) });
+    for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) levels.push({ key: n + ':' + l, E: wellEnergyOf(n, l, a), label: `${n - l}${'spdfghi'[l]}`, rgb: QHO_RGB(n - 1) });
     levels.sort((p, q) => p.E - q.E);
     const Etop = levels[levels.length - 1].E * 1.08;
     return { levels, levelKey: (i) => BASIS[i].n + ':' + BASIS[i].l, Emin: 0, Etop, topLabel: '', footer: `EIGENVALUE  E = z²_{n_r+1,l}/(2a²), hard wall at a = ${a.toFixed(1)} a₀  (no continuum)` };
@@ -86,14 +86,14 @@ HAMILTONIANS.cornell = {
   get spectrum() { return cornellSpectrum(); },
   radialTable: cornellRadialTable, configure: cornellConfigure, get system() { return cornellSystem(); },
 };
-/* ── ATOM: the periodic table as ONE self-consistent central field (lab/atoms.js).  The 91 labels become the shells
+/* ── ATOM: the periodic table as ONE self-consistent central field (lab/atoms.js).  The 140 labels become the shells
    of a NEUTRAL atom in its own Xα(2/3) + Latter-tail potential: the SCF eigenvalue where the ground configuration
    occupies the shell, and the SAME frozen field's eigenvalue where it does not (a VIRTUAL shell, marked ° — every
-   label keeps an energy AND a radial now: atoms.js solves the unoccupied shell in the frozen potential, so all 91
+   label keeps an energy AND a radial now: atoms.js solves the unoccupied shell in the frozen potential, so all 140
    labels hand the kernel a real row; ° still means exactly "not in the ground configuration", never "no state").
-   The kernel reads the 40 × 256 table atoms.js builds with cornell's own row map,
-   row = 6l + n − l − 1, through kernel space 6; momentum space is not built, as for the box and quarkonium. ── */
-const A_RGB = [[255, 226, 170], [120, 225, 240], [230, 160, 240], [255, 150, 90], [140, 220, 140], [180, 160, 255]];
+   The kernel reads the 43 × 256 table atoms.js builds with cornell's own row map,
+   row = 6l + n − l − 1 (n = 7's (n_r, l) = (6, 0) and (0, 6) at 36 + l), through kernel space 6; momentum space is not built, as for the box and quarkonium. ── */
+const A_RGB = [[255, 226, 170], [120, 225, 240], [230, 160, 240], [255, 150, 90], [140, 220, 140], [180, 160, 255], [246, 142, 159]];   // l = 6 (7i, n = 7): the seventh shell's rose
 let atomZ = 10;                                                    // Ne is the shipped element: a closed 2p shell to look at
 const atomEps = new Map(), atomTabs = new Map();
 let atomBuilt = null, atomSpec = null;
@@ -102,9 +102,9 @@ function atomState() {
   if (atomBuilt && atomBuilt.Z === atomZ) return atomBuilt;
   const S = solveAtom(atomZ), first = S.orbitals[0], T = atomRadialTable(atomZ, first.n, first.l);
   const rows = new Map(T.rows.map((r) => [r.n + ':' + r.l, r]));
-  /* every (n, l) with n ≤ 6 gets a row in the SAME table the kernel is handed: the unoccupied ones are the frozen
+  /* every (n, l) with n ≤ 7 gets a row in the SAME table the kernel is handed: the unoccupied ones are the frozen
      field's own orbitals (one solveL per l channel inside atoms.js, then cached), so no label draws nothing */
-  for (let n = 1; n <= 6; n++) for (let l = 0; l < n; l++) {
+  for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) {
     const k = n + ':' + l; if (rows.has(k)) continue;
     const V = atomRadialTable(atomZ, n, l);
     T.table.set(V.table.subarray(V.row * NR, (V.row + 1) * NR), V.row * NR);
@@ -121,19 +121,19 @@ function atomEpsOf(n, l) {
   if (e === undefined) { const r = atomState().rows.get(n + ':' + l); e = r ? r.eps : virtualEnergyOf(atomZ, n, l); atomEps.set(k, e); }
   return e;
 }
-const pad6 = (v) => { const o = new Float64Array(6); for (let i = 0; i < v.length && i < 6; i++) o[i] = v[i]; return o; };
-/** the kernel record, cornell's exactly: lag0 = (row, 1/r_tab, r_tab) — a real row for every one of the 91 labels */
+const pad7 = (v) => { const o = new Float64Array(7); for (let i = 0; i < v.length && i < 7; i++) o[i] = v[i]; return o; };
+/** the kernel record, cornell's exactly: lag0 = (row, 1/r_tab, r_tab) — a real row for every one of the 140 labels */
 function atomTable(n, l, m) {
   const r = atomState().rows.get(n + ':' + l), am = Math.abs(m);
   const sign = (m >= 0 && (am % 2 === 1)) ? -1 : 1;
   return { n, l, m, am, norm: sign * ylmNorm(l, am), virtual: !r || !!r.virtual, row: r ? r.row : 0, space: 'atom',
-    lag: pad6(r ? [atomRowOf(n, l), 1 / r.rTab, r.rTab] : [0, 0, 0]), leg: pad6(legendreDerivCoeffs(l, am)) };
+    lag: pad7(r ? [atomRowOf(n, l), 1 / r.rTab, r.rTab] : [0, 0, 0]), leg: pad7(legendreDerivCoeffs(l, am)) };
 }
 function atomTableFor(s) { const k = atomZ + ':' + s.id; let T = atomTabs.get(k); if (!T) { T = atomTable(s.n, s.l, s.m); atomTabs.set(k, T); } return T; }
 function atomFromTable(T, x, y, z) {
   const r = Math.hypot(x, y, z); if (!(T.lag[2] > 0) || r >= T.lag[2]) return { re: 0, im: 0 };
   const ct = r < 1e-300 ? 1 : z / r, st = Math.sqrt(Math.max(0, 1 - ct * ct)), phi = Math.atan2(y, x);
-  let D = 0, xp = 1; for (let j = 0; j < 6; j++) { D += T.leg[j] * xp; xp *= ct; }
+  let D = 0, xp = 1; for (let j = 0; j < T.leg.length; j++) { D += T.leg[j] * xp; xp *= ct; }
   let stm = 1; for (let i = 0; i < T.am; i++) stm *= st;
   const f = T.norm * atomRadial(atomZ, T.n, T.l, r) * stm * D;
   return { re: f * Math.cos(T.m * phi), im: f * Math.sin(T.m * phi) };
@@ -157,14 +157,14 @@ HAMILTONIANS.atom = {
   get spectrum() {
     if (atomSpec && atomSpec.Z === atomZ) return atomSpec;
     const levels = [];
-    for (let n = 1; n <= 6; n++) for (let l = 0; l < n; l++) { const occ = atomOcc(n, l); levels.push({ key: n + ':' + l, E: atomEpsOf(n, l), label: `${n}${'spdfgh'[l]}${occ ? '' : '°'}`, rgb: A_RGB[l], occ }); }
+    for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) { const occ = atomOcc(n, l); levels.push({ key: n + ':' + l, E: atomEpsOf(n, l), label: `${n}${'spdfghi'[l]}${occ ? '' : '°'}`, rgb: A_RGB[l], occ }); }
     levels.sort((p, q) => p.E - q.E);
     atomSpec = { Z: atomZ, levels, levelKey: (a) => BASIS[a].n + ':' + BASIS[a].l, Emin: levels[0].E * 1.02, Etop: 0, topLabel: 'E = 0',
       footer: atomSpectrum(atomZ).footer + ' · ° = VIRTUAL (a shell of the frozen field — not in the ground configuration) · the core sets this linear scale: the log ladder is in ATOMS' };
     return atomSpec;
   },
   radialTable: () => atomState().table,
-  /** choose the element, Z = 1 … 86 (ZMAX: every shell of Rn is one of the 91 labels); true when it changed, and the caller re-runs switchHamiltonian */
+  /** choose the element, Z = 1 … 118 (ZMAX: every shell of Og is one of the 140 labels); true when it changed, and the caller re-runs switchHamiltonian */
   configure(Z) {
     Z = Math.max(1, Math.min(ZMAX, Math.round(Z) || 1));
     if (Z === atomZ) return false;
@@ -206,7 +206,7 @@ function scale() {
   if (one) Object.assign(H0, base);
   H0.stark = one; H0.hydrogenTheorems = one;
   H0.lengthUnit = 'a₀';
-  H0.spectrum = one ? null : { levels: [1, 2, 3, 4, 5, 6].map((n) => ({ key: n, E: e * hydrogenEnergy(n), label: 'n' + n, rgb: N_RGB[n] })), levelKey: (a) => BASIS[a].n, Emin: e * hydrogenEnergy(1), Etop: 0, topLabel: 'E = 0', footer: `EIGENVALUE  E_n = −${MU === 1 ? '' : 'μ'}Z²/(2n²) hartree, Z = ${Z}` + (MU === 1 ? '' : `, μ = ${+MU.toPrecision(5)} mₑ`) };   // Round 11 A7
+  H0.spectrum = one ? null : { levels: Array.from({ length: NMAX }, (_, i) => i + 1).map((n) => ({ key: n, E: e * hydrogenEnergy(n), label: 'n' + n, rgb: N_RGB[n] })), levelKey: (a) => BASIS[a].n, Emin: e * hydrogenEnergy(1), Etop: 0, topLabel: 'E = 0', footer: `EIGENVALUE  E_n = −${MU === 1 ? '' : 'μ'}Z²/(2n²) hartree, Z = ${Z}` + (MU === 1 ? '' : `, μ = ${+MU.toPrecision(5)} mₑ`) };   // Round 11 A7
   for (const fn of listeners) fn(H0);
 }
 export const getZ = () => ZION, getMu = () => MU;

@@ -3,6 +3,7 @@
  * createRackWiring(app) at §19a's, wireStage() after the notebook's.  rk, layout, phone, tablet, winHint and devById are registered on app.sh at creation. */
 import { TIER } from '../rack.js'; import { chip } from '../mir/kit.js'; import { createRack, readLayout, layoutLabel as rackLayoutLabel } from '../mir/shell/rack.js';
 import { uiSpace } from '../mir/shell/scene-guard.js'; import { bindStageGestures } from '../stage-gestures.js'; import { CAM } from '../camera-law.js'; import { paintedRect } from '../occlusion.js';
+const SHELLS_FOLDED = [7];   // iteration 008 A7: SPECTRUM's shells folded by default (spectrum.js FOLD_DEFAULT)
 export function createRackWiring(app) {
   const { dom, ui, device, DEVICES, clock, obs, settingsStore, isPhone, isTablet } = app, { schedule, windowActivity } = app.loop;
   const { camera, camTravel, floats, LAYOUT_SLOTS, orbitBy, panBy, rack, rackL, resetView, zoomAt } = app.host, { DIGESTS, quality, readSettings, RETIRED_WINDOWS, saveSettings, setFrost } = app.sh;
@@ -87,6 +88,10 @@ export function createRackWiring(app) {
       if (mt && (mt.getAttribute('aria-expanded') === 'true') !== c.more) mt.click();
       const ct = typeof c.core === 'boolean' ? d.querySelector('.orb-core-toggle') : null;   // likewise MO-REGISTRY's CORE fold
       if (ct && (ct.getAttribute('aria-expanded') === 'true') !== c.core) ct.click();
+      /* iteration 008 A7 · SPECTRUM's folded shells (spectrum.js): `shells` is written only when it is not the default, so a record without it
+         (an older one, or the default) folds n = 7 alone */
+      if (c.id === 'spectrum') { const want = Array.isArray(c.shells) ? c.shells : SHELLS_FOLDED;
+        for (const g of d.querySelectorAll('.picker .pk-n')) if (g.classList.contains('folded') !== want.includes(+g.dataset.n)) g.querySelector('.pk-nl').click(); }
     }
   }
   const layout = {
@@ -169,10 +174,12 @@ export function createRackWiring(app) {
              press ☆, rotate back, load — and the mirror rack is empty for ever. */
           const st = rk.floatOf(d.dataset.id), mt = d.querySelector('.mol-more-toggle');   // 0.4.0 S0: MOLECULES' MORE fold is the card's own WORKSPACE key
           const ct = d.querySelector('.orb-core-toggle');                                      // 0.4.0 S1: MO-REGISTRY's CORE fold, the same kind of key
+          const sh = d.dataset.id === 'spectrum' ? [...d.querySelectorAll('.picker .pk-n.folded')].map((g) => +g.dataset.n) : null;   // iteration 008 A7: the folded shells
           return { id: d.dataset.id, side: st ? sideLR(st.home.side) : (d.dataset.phoneFrom === 'left' || d.parentElement === rackL ? 'L' : 'R'),
             folded: d.classList.contains('folded'), closed: d.classList.contains('closed'), off: d.classList.contains('off'),
             float: st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: rk.floating().indexOf(d.dataset.id), index: st.home.index } : null,
-            ...(mt ? { more: mt.getAttribute('aria-expanded') === 'true' } : {}), ...(ct ? { core: ct.getAttribute('aria-expanded') === 'true' } : {}) };
+            ...(mt ? { more: mt.getAttribute('aria-expanded') === 'true' } : {}), ...(ct ? { core: ct.getAttribute('aria-expanded') === 'true' } : {}),
+            ...(sh && sh.join() !== SHELLS_FOLDED.join() ? { shells: sh } : {}) };
         }),
         docked: !!layout.docked, rackHidden: document.body.classList.contains('rack-hidden'),
         /* 0.3.1 · S1: the `look` and `cam` blocks this record carried are gone — applyLayout never read either, and between

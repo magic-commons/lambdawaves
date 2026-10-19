@@ -1,7 +1,7 @@
 /* atomsview.js — the ATOMS window: which atom the register is in, and everything that model owes the reader.
  *
  * The maths is lab/atoms.js: one self-consistent CENTRAL field per element (Xα, α = 2/3, plus the Latter tail),
- * solved live on a logarithmic mesh — twice, and Richardson-extrapolated in dx² — for Z = 1 … 86 (H … Rn), with the scalar ZORA kinetic
+ * solved live on a logarithmic mesh — twice, and Richardson-extrapolated in dx² — for Z = 1 … 118 (H … Og), with the scalar ZORA kinetic
  * operator (iteration 008 Z; spin–orbit not included, said past Kr in the MODEL readout and in STATUS).  RELATIVITY Δ solves the same atom
  * once more without relativity, on a press and under the busy mark, never in a frame, and writes ε_ZORA − ε_NR beside every shell.  This window
  * prints what the model says and, as loudly, what it does NOT say:
@@ -60,7 +60,7 @@ export function createAtoms(host, api) {
      periods, each a `.pk-chips` of `.pk-c` buttons (once columns on the card; 86 cells do not fit columns, lab.css .atm-table); the
      element in force is `.on`.  At 0.5.0 it becomes the kit's `cells` (KIT BRIEF 4). */
   const table = el('div', 'picker atm-table', host), cells = [];
-  for (const [p, z0, z1] of [[1, 1, 2], [2, 3, 10], [3, 11, 18], [4, 19, 36], [5, 37, 54], [6, 55, 86]]) {
+  for (const [p, z0, z1] of [[1, 1, 2], [2, 3, 10], [3, 11, 18], [4, 19, 36], [5, 37, 54], [6, 55, 86], [7, 87, 118]]) {   // period 7: Fr … Og (iteration 008 A7)
     const g = el('div', 'pk-n', table); g.style.setProperty('--nc', N_COLOR[p]); el('div', 'pk-nl', g, String(p));
     const cs = el('div', 'pk-chips', g);
     for (let z = z0; z <= z1; z++) { const b = el('button', 'pk-c', cs, ATOMS[z - 1].symbol); b.type = 'button'; b.title = `${ATOMS[z - 1].name} · Z = ${z} · ${z > 36 ? ATOMS[z - 1].core : ATOMS[z - 1].term}`; b.addEventListener('click', () => api.select(z)); cells[z] = b; }

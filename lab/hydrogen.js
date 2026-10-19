@@ -1,4 +1,4 @@
-/* hydrogen.js — the bound states of hydrogen in closed form, n ≤ 6, atomic units.
+/* hydrogen.js — the bound states of hydrogen in closed form, n ≤ 7, atomic units.
  *
  * STATUS: EXACT ANALYTIC.  Everything here is a closed-form expression of the
  * non-relativistic Coulomb problem (infinite nuclear mass, ħ = m_e = e = a₀ = 1).
@@ -22,7 +22,11 @@
 
 import { atomForms } from './names.js';   // the one n l m name (0.4.0 S1): BASIS[a].label is its typeset form
 
-export const NMAX = 6;
+export const NMAX = 7;                       // iteration 008 A7: n = 7 (140 labels); the 49 of n = 7 are APPENDED after the 91 of n ≤ 6
+/** the n ≤ 6 register every older file, link and project names: indices 0 … 90 keep their place for ever */
+export const N6 = 91;
+/** the coefficient slots of a mode table (lag, leg): n = 7 needs seven (L^1_6 for 7s, d⁰P_6 for 7i); the kernel's lag1.z / leg1.z */
+export const NCOEF = 7;
 export const HARTREE_EV = 27.211386245988;
 export const AU_TIME_AS = 24.188843265857;
 
@@ -33,7 +37,7 @@ for (let i = 1; i <= 24; i++) FACT[i] = FACT[i - 1] * i;
 export function factorial(k) { return FACT[k]; }
 function binom(a, b) { if (b < 0 || b > a) return 0; return FACT[a] / (FACT[b] * FACT[a - b]); }
 
-/* ── the register: 91 states, stable ids "h:n:l:m", ordered by (n, l, m) ─────── */
+/* ── the register: 140 states, stable ids "h:n:l:m", ordered by (n, l, m) — so n = 7's 49 come after the 91 ─────── */
 export const BASIS = [];
 for (let n = 1; n <= NMAX; n++)
   for (let l = 0; l < n; l++)
@@ -146,7 +150,7 @@ export function modeTable(n, l, m) {
   const leg = legendreDerivCoeffs(l, am);
   const sign = (m >= 0 && (am % 2 === 1)) ? -1 : 1;
   const norm = sign * radialNorm(n, l) * ylmNorm(l, am);
-  const pad = (a) => { const out = new Float64Array(6); for (let i = 0; i < a.length && i < 6; i++) out[i] = a[i]; return out; };
+  const pad = (a) => { const out = new Float64Array(NCOEF); for (let i = 0; i < a.length && i < NCOEF; i++) out[i] = a[i]; return out; };
   return { n, l, m, am, norm, lag: pad(lag), leg: pad(leg) };
 }
 /** evaluate ψ_{nlm} from its table — the CPU twin of the WGSL kernel */
@@ -157,16 +161,16 @@ export function orbitalFromTable(T, x, y, z) {
   const phi = Math.atan2(y, x);
   const rho = 2 * r / T.n;
   let L = 0, rp = 1;
-  for (let j = 0; j < 6; j++) { L += T.lag[j] * rp; rp *= rho; }
+  for (let j = 0; j < T.lag.length; j++) { L += T.lag[j] * rp; rp *= rho; }
   let D = 0, xp = 1;
-  for (let j = 0; j < 6; j++) { D += T.leg[j] * xp; xp *= ct; }
+  for (let j = 0; j < T.leg.length; j++) { D += T.leg[j] * xp; xp *= ct; }
   let stm = 1; for (let i = 0; i < T.am; i++) stm *= st;
   let rl = 1; for (let i = 0; i < T.l; i++) rl *= rho;
   const f = T.norm * Math.exp(-rho / 2) * rl * L * stm * D;
   return { re: f * Math.cos(T.m * phi), im: f * Math.sin(T.m * phi) };
 }
 
-/** ψ(x,y,z) = Σ_a c_a φ_a — `re`/`im` are Float64Array(91) coefficient arrays. */
+/** ψ(x,y,z) = Σ_a c_a φ_a — `re`/`im` are Float64Array(140) coefficient arrays (a 91-array reads as n ≤ 6). */
 export function psiAt(re, im, x, y, z, indices) {
   let pr = 0, pi = 0;
   const idx = indices || BASIS.map((s) => s.index);

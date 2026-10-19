@@ -14,7 +14,7 @@
  * and the canvas is sized only while the view is on — off, it is a 1 × 1 bitmap, not a full-stage one at the DPR.
  */
 import { bohmStep, bohmVelocity, psiAndGrad } from './dynamics.js';
-import { toScreen } from './field.js';
+import { toScreen } from './field.js'; import { BASIS } from './hydrogen.js';
 
 export function createParticles(canvas, api) {
   const g = canvas.getContext('2d');
@@ -22,7 +22,7 @@ export function createParticles(canvas, api) {
   let ring = new Float32Array(3), heads = new Int32Array(1), lens = new Int32Array(1), alphas = new Float32Array(1);   // the trails: a ring per particle, and each point's alpha (iteration 005 P2: a FLOW source's `fade`)
   const state = { count: 0, alive: 0, stalled: 0, maxSpeed: 0, seededAt: null };
   /* the register at the substep times: bohmStep asks for c(t), c(t + h/2) (twice) and c(t + h) — three distinct times per step */
-  const memo = [0, 1, 2].map(() => ({ u: NaN, re: new Float64Array(91), im: new Float64Array(91) }));
+  const memo = [0, 1, 2].map(() => ({ u: NaN, re: new Float64Array(BASIS.length), im: new Float64Array(BASIS.length) }));
   let memoN = 0, memoReg = null;
   const coeffsAt = (u) => {
     for (let i = 0; i < memoN; i++) if (memo[i].u === u) return memo[i];

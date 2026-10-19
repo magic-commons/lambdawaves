@@ -9,7 +9,7 @@ import { keplerOrbits, orbitPoints } from './kepler.js';
 import { vividInk, showGraphTip, hideGraphTip, fitText } from './mir/kit.js';
 import { HELP_CLASSES, HELP_HOVER_DELAY } from './mir/control-help.js';
 
-const N_RGB = { 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150] };
+const N_RGB = { 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150], 7: [246, 142, 159] };
 
 export function createKepler(canvas) {
   const cv = canvas, g = cv.getContext('2d');

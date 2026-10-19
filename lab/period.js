@@ -4,7 +4,10 @@
  * ΔE_ab · T is a multiple of 2π — i.e. when the differences are commensurate, T = 2π / gcd{|ΔE_ab|}.  For hydrogen
  * (E_n = −1/2n², n ≤ 6, Z = 1) every difference is an integer multiple of 1/7200 (lcm(1…6)² = 3600), so the period is
  * exact and at most 2π·7200 = 45 238.93 a.u. = 1.094 ps (any set of shells whose differences have no common factor,
- * e.g. {3, 4, 5}); {2, 4} gives 64π/3 = 67.021, {1, 2} gives 16π/3 = 16.755 (the Lyman-α beat).  For Z ≠ 1 the
+ * e.g. {3, 4, 5}); {2, 4} gives 64π/3 = 67.021, {1, 2} gives 16π/3 = 16.755 (the Lyman-α beat).  With n = 7 (iteration 008 A7)
+ * the unit is 1/352 800 (lcm(1…7)² = 176 400) and the longest period 2π·352 800 a.u. = 53.6 ps; its ratios need denominators past
+ * the default 2·10⁴, so a hydrogen caller asks `deep` — a second pass at q ≤ 4·10⁵ judged to 1e-13 (Dirichlet would match a random
+ * ratio only to ~6e-12 there), run only where the first pass found nothing, so every n ≤ 6 answer is the one it was.  For Z ≠ 1 the
  * energies scale by Z² and the period by 1/Z².  For the oscillator the differences are integers, T = 2π/gcd.  For
  * the box, the quarkonium and any state under a Stark field the differences are in general incommensurate: there is no
  * exact period, and this says so — with the best near-recurrence it can find within a horizon, and its error.
@@ -37,9 +40,10 @@ function periodDifferences(energies) {
 /* The exact/commensurate half is quick even for a full register. Exposing it lets
    the UI answer common hydrogen and oscillator states without starting a worker;
    null means the bounded near-recurrence scan is genuinely needed. */
-export function densityPeriodExact(energies, { tol = 1e-10, qmax = 20000 } = {}) {
+const DEEP = { tol: 1e-13, qmax: 4e5 };
+export function densityPeriodExact(energies, { tol = 1e-10, qmax = 20000, deep = false } = {}) {
   const { E, d } = periodDifferences(energies);
-  return exactFromDifferences(E, d, tol, qmax);
+  return exactFromDifferences(E, d, tol, qmax) || (deep ? exactFromDifferences(E, d, DEEP.tol, DEEP.qmax) : null);
 }
 function exactFromDifferences(E, d, tol, qmax) {
   if (E.length < 2 || !d.length) return { exact: true, T: 0, g: 0, stationary: true };
@@ -59,12 +63,12 @@ function exactFromDifferences(E, d, tol, qmax) {
  * near-recurrence within `horizon` a.u. (max over pairs of the distance of ΔE·T/2π from an integer), or { exact: true,
  * T: 0 } for a single energy (a stationary state).
  */
-export function densityPeriod(energies, { horizon = 2e4, tol = 1e-10, qmax = 20000 } = {}) {
+export function densityPeriod(energies, { horizon = 2e4, tol = 1e-10, qmax = 20000, deep = false } = {}) {
   /* the commensurability test must be STRICTER than Dirichlet: any real is within 1/q² of some p/q, so at q ≤ 2·10⁴ a
      random ratio is matched to ~1e-9; a true rational of the register (denominators ≤ 7200) is matched to 1e-15.
      The energies are NOT rounded before the test (a 12-digit rounding once perturbed the {3,4,5} ratios past 1e-11) */
   const { E, d } = periodDifferences(energies);
-  const exact = exactFromDifferences(E, d, tol, qmax);
+  const exact = exactFromDifferences(E, d, tol, qmax) || (deep ? exactFromDifferences(E, d, DEEP.tol, DEEP.qmax) : null);
   if (exact) return exact;
   /* incommensurate: the best near-recurrence up to the horizon (a scan on the finest beat, refined).
      THE SCAN STARTS AT ONE FULL TURN OF THE FASTEST BEAT (k = 64 · step = 2π/max ΔE), never at its own first step:
@@ -78,11 +82,14 @@ export function densityPeriod(energies, { horizon = 2e4, tol = 1e-10, qmax = 200
   for (let k = 64; k <= N; k++) { const T = k * step; let e = 0; for (const v of d) { const x = v * T / (2 * Math.PI); const f = Math.abs(x - Math.round(x)); if (f > e) e = f; } if (e < best.err) best = { T, err: e }; if (best.err < 1e-4) break; }
   return { exact: false, T: best.T, err: best.err, count: E.length, pairs: d.length };
 }
-/** the hydrogen shells' law, closed form: T = 2π·7200/gcd for shells n ⊂ {1…6} at Z = 1 — the table's oracle */
+/** the unit of the shell law: 7200 for shells ⊂ {1…6} (lcm² = 3600), 352 800 once n = 7 is among them (lcm(1…7)² = 176 400) */
+export const hydrogenShellBase = (shells) => (Math.max(...shells) > 6 ? 352800 : 7200);
+/** the hydrogen shells' law, closed form: T = 2π·B/gcd for shells n ⊂ {1…7} at Z = 1, B = hydrogenShellBase — the table's oracle */
 export function hydrogenShellPeriod(shells, Z = 1) {
   const S = [...new Set(shells)].sort((a, b) => a - b); if (S.length < 2) return 0;
-  let g = 0; for (let i = 0; i < S.length; i++) for (let j = i + 1; j < S.length; j++) g = gcdInt(g, Math.round(3600 / (S[i] * S[i]) - 3600 / (S[j] * S[j])));
-  return 2 * Math.PI * 7200 / g / (Z * Z);
+  const B = hydrogenShellBase(S), L = B / 2;
+  let g = 0; for (let i = 0; i < S.length; i++) for (let j = i + 1; j < S.length; j++) g = gcdInt(g, Math.round(L / (S[i] * S[i]) - L / (S[j] * S[j])));
+  return 2 * Math.PI * B / g / (Z * Z);
 }
 export const AU_FS = 0.02418884326;
 export function fmtPeriod(T) {
