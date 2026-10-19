@@ -28,3 +28,4 @@ The nine calls are Yan's (`LAMBDAWAVES CLAUDE YAN FOR-JOSH 2026-10-19.md` § You
 | row | merged | note |
 |---|---|---|
 | D THE PAIR | `51c407d` (branch tip `be702ee`) | one file, lab/orbitalsview.js; register 22/22, orbitals 24/24; chem L5 pre-existing; `molecular-names` :32 is a STALE row (expects the MO-REGISTRY card row U removed) |
+| F2 THE THREE LEFTOVERS | `461674e` (branch tip `22b67e0`) | fill glyph one source; levelLine shared in paint-stroke.js (ORBITAL unlit 0.26→0.42, 1.5→1 px; lit 2.5→2 px); MORPH restore dims lanes; orbitalsview.js hunk resolved by hand (D's cursor + F2's line) |
