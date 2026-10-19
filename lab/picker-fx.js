@@ -3,14 +3,14 @@
  *   R0  the kernel — ONE pointer frame per root (one pointermove, one rAF, mouse only), ONE cancellable WAAPI animation per element;
  *   R2  the spring tilt (k 640, c 34, 120 Hz substeps, 8°), applied to a tile's PICTURE only (no spotlight, no lit edge, no tint);
  *   R3  the staggered entrance and the "develop" of a lazy picture;
- *   R6  the caption swap (the old line leaves up 18 px / 220 ms, the new rises 14 px / 280 ms);
+ *   R6  the caption swap (the old line leaves up 18 px / 120 ms and is gone, then the newest rises 14 px / 280 ms: one line in flight);
  *   R7  the install ring (an SVG circle, pathLength 100, the dash its progress).
  * Every effect honours prefers-reduced-motion: animate() does nothing under it, the pointer frame never fires, the CSS has its own block.
  * A plain module: no app, no state outside the elements it is handed. */
 export const RM = matchMedia('(prefers-reduced-motion: reduce)');
 export const FINE = matchMedia('(hover: hover) and (pointer: fine)');
 export const EASE = 'cubic-bezier(.22,.7,.25,1)';
-export const T = { response: 170, enter: 280, leave: 200, titleLeave: 220, reorder: 340 };
+export const T = { response: 170, enter: 280, leave: 200, titleLeave: 220, titleSwap: 120, reorder: 340 };
 export const clamp = (v, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, v));
 export const calm = () => RM.matches || document.hidden;
 
@@ -84,15 +84,27 @@ export function develop(img) {
   img.addEventListener('load', () => { if (performance.now() - t0 > 60) animate(img, [{ opacity: 0.3, scale: '.988' }], 500); }, { once: true });
 }
 
-/* ── R6 · the caption line swap: one ghost at a time ── */
+/* ── R6 · the caption line swap — ONE LINE IN FLIGHT (iteration 008 P: a fast sweep across the tiles stacked an exit per hover, and the foot
+   stuttered or showed two names).  The swap is sequential: the line on show leaves (up 18 px, 120 ms), is REMOVED, and only then the newest
+   line asked for is built and rises (14 px, 280 ms).  A call while a line is leaving only replaces what will be built — so a sweep of twenty
+   tiles in 400 ms builds a handful of lines, never two at once, and the last name asked for is the one standing.  A blank line leaves at once;
+   under reduced motion (animate() → null) the new line simply replaces the old. ── */
+const swaps = new WeakMap();
 export function swapLine(host, make) {
-  for (const g of host.querySelectorAll('.out')) g.remove();
-  const prev = host.querySelector('.mm-line'), line = document.createElement('div'); line.className = 'mm-line'; make(line); host.append(line);
-  if (prev) {
-    prev.classList.add('out');
-    const a = animate(prev, [{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '0 -18px' }], T.titleLeave);
-    if (a) a.finished.then(() => prev.remove(), () => prev.remove()); else prev.remove();
-  }
+  let w = swaps.get(host); if (!w) swaps.set(host, w = { make: null, leaving: false });
+  w.make = make;
+  if (w.leaving) return null;                                            // the line on show is leaving: the newest make is taken when it has gone
+  const prev = host.querySelector('.mm-line');
+  const a = prev && prev.childNodes.length ? animate(prev, [{ opacity: 0, translate: '0 -18px' }], T.titleSwap) : null;
+  if (!a) { if (prev) prev.remove(); return build(host, w); }
+  w.leaving = true; prev.classList.add('out');
+  const next = () => { prev.remove(); w.leaving = false; build(host, w); };
+  a.finished.then(next, next);
+  return null;
+}
+function build(host, w) {
+  const make = w.make; w.make = null;
+  const line = document.createElement('div'); line.className = 'mm-line'; make(line); host.append(line);
   if (line.childNodes.length) animate(line, [{ opacity: 0, translate: '0 14px' }], T.enter);
   return line;
 }
