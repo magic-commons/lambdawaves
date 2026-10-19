@@ -23,3 +23,4 @@ Yan's (`~/.claude/jobs/2ea66c54/tmp/gate-it004.sh`, `gate-lock.sh` on 9241): `gi
 ## Closed
 | row | merged | note |
 |---|---|---|
+| X5 THE REVIEW ROUND OF 009 | `ce9b5e9` (reports only) | +80 lines, +10 branches, no file past 1k; the register-width rule written six ways (a possible NaN base on undo at persist.js:21 — traced, not reproduced); the orbital-letter table copied 12×; seven retyped; MV's loop and name; seed()'s guard. Next row X6 THE DELETION PASS OF 009 from the reviews' ordered brief, after X1 / X2 / X4 merge |
