@@ -29,3 +29,5 @@ The nine calls are Yan's (`LAMBDAWAVES CLAUDE YAN FOR-JOSH 2026-10-19.md` § You
 |---|---|---|
 | D THE PAIR | `51c407d` (branch tip `be702ee`) | one file, lab/orbitalsview.js; register 22/22, orbitals 24/24; chem L5 pre-existing; `molecular-names` :32 is a STALE row (expects the MO-REGISTRY card row U removed) |
 | F2 THE THREE LEFTOVERS | `461674e` (branch tip `22b67e0`) | fill glyph one source; levelLine shared in paint-stroke.js (ORBITAL unlit 0.26→0.42, 1.5→1 px; lit 2.5→2 px); MORPH restore dims lanes; orbitalsview.js hunk resolved by hand (D's cursor + F2's line) |
+| MV MACDONALD–VOSKO | `ac87ff0` (branch tip `1eab041`) | relativistic exchange on the ZORA road; light 1s shifts to ×0.60–0.97 of NIST's, totals to 0.1 %; Au 6s 8.65 eV (0.04 eV further — Josh's call to keep); THE LOCK untouched; pictures not re-rendered (one-pixel ring) |
+| DEMOS WAVE DANCER PROTOTYPE | `5b19dfc` (branch tip `33d302b`) | ten demos gone, one starter renamed and at KNEE 3; persist.js rates fix; THE LOCK 843/0 + 987/0 |
