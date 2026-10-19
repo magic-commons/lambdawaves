@@ -7,6 +7,8 @@ assumptions, stated so Josh can overrule: MacDonald–Vosko stays (merged on the
 solvers stay paused for the night shift; SEPARABLE stays at 91 slots (N7: adding N = 6 triples would move a saved slot's meaning and it is not one
 of the physics ambitions); spin–orbit is the next relativistic ambition and is NOT in this iteration (labels in j — Josh's word first).
 
+Josh, 11:2x: "make n=7 minimized by default in the spectrum window, users can discover n=7 if they want to jam the whole rack lane with orbital options haha" → row X2 (SPECTRUM's n = 7 fold CLOSED in every default case; a reader's own choice kept as WORKSPACE).
+
 ## Rows (each an Opus builder in its own worktree, branch `it010-<row>` from BASE = this plan's commit; gate server per row; merged by Sos with Yan's recipe, THE LOCK ×2 when the field or the fixtures move)
 | row | name | what | port |
 |---|---|---|---|
