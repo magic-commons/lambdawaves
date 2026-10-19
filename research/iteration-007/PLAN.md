@@ -30,3 +30,15 @@ two skills, `skills/`), not per row.
 
 ## Not in this iteration (recorded)
 The MIR check's polish for Josh's call (`mir-check/FIXES.md`); the 3-codon project (`codon/VERDICT.md`); a cross-fade between orbitals.
+
+## Closed (Claude Yan, 2026-10-18 night → 10-19; every row merged on `yan-c`, NOT pushed)
+| row | merge | the numbers (from `<ROW>-BUILD.md`) | for Josh |
+|---|---|---|---|
+| **M · THE MOLECULES CARD** | `39abd1f` | INSTALLED · MOLECULES ON on `.mol-top`; the steppers stacked; VIEW 3 + 3; the card 280 / 262 px before and after, 8 lines above the fold both ways | — |
+| **B · A ↔ B AS AN AUTOMATION CLIP** | `43cc176` | `reg.omorph` (ORBITAL MORPH, 0..1, group `state`), a `modSeats` row, a PROJECT row in STATE-SCOPES; measured: a lane and a route ADD in the kit (not either-or) | the kit fact → a MIR issue |
+| **I · THE INFORMATIONAL** | `6e1cd07` | eight kinds through `say(kind)`; the record `lambdawaves.q0.info` (createPrefs; the blob's six keys lifted once); the window built from `INFO_ROWS`; Josh 10-18: formula + atom labels ON, every kind OFF on a first run | the preset fade OFF by default (as asked) |
+| **O · THE ORBITAL DIAL AS A STEPPED TARGET** | `d3d266a` | `chem.orbital` integer 1..768, re-registered per molecule; a step 40 ms median at 36–211 AO; STEP_MS 334 (≤ 3 steps/s, the photosensitivity law) | — |
+| **L · THE LIBRARY PICTURES** | tools, no commit of data | `menu-thumbs --volume vol-1`: 2,811 of 2,815 (9.4 MB) into `dist/vol-1/t/`; the 4 that refused (K > 192) open since 008 V | the index names 28 pictures until `pack.mjs --incremental` |
+| **C7 · MORE MOLECULES** | `b6c2f19` | Sos's `it006-more` tools only; no solver restart (the compute hold) | the data steps on Rent-A-GPU day |
+
+The review round ran once over 007 + 008 together (`../iteration-008/REVIEW-QUALITY.md`, `REVIEW-ARCHITECTURE.md`); its deletion pass is 008's row F.
