@@ -35,9 +35,15 @@ export const INFO_ROWS = Object.freeze([
   { key: 'popSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'announce', label: 'SIZE', fmt: pct, hint: 'The pop-ups\' size: 100% is 15 px' },
   { key: 'cursorAway', type: 'bool', default: false, group: 'cursor', label: 'AWAY', hint: 'The words lean away from the pointer as it crosses the stage (the kit layer\'s follow and parallax)' },
   { key: 'cursorDrift', type: 'bool', default: false, group: 'cursor', label: 'DRIFT', hint: 'The words bob slowly while they are on the stage (the kit layer\'s drift; it keeps a frame booked)' },
+  /* MARKS draw ON the stage (rack.js' frame reads ui.skeletonSw · beadSw · ellipsoidSw, these rows' widgets): the record's since the fix round (C6) */
+  { key: 'skeleton', type: 'bool', default: false, group: 'marks', label: 'SKELETON', hint: 'The nuclei as beads (CPK colours, 0.28 × the covalent radius), the bonds within 1.3 × the radii, and the dipole arrow from the centre of nuclear charge — a PREFERENCE, off by default' },   // 0.7.0 V2: rack.js draws it (lab/skeleton.js)
+  { key: 'bead', type: 'bool', default: false, group: 'marks', label: 'BEAD', hint: 'THE BEAD: the expectation point (⟨x⟩, ⟨y⟩, ⟨z⟩) on the stage with its trail over the last period (⟨p⟩ in momentum space; for a molecule the electron density\'s centroid (ΣZR − μ)/N_e) — a PREFERENCE, off by default' },   // 0.8.2 P3: on the skeleton's canvas
+  { key: 'ellipsoid', type: 'bool', default: false, group: 'marks', label: 'UNCERTAINTY', hint: 'THE UNCERTAINTY ELLIPSOID: the position covariance Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ as its three principal circles, semi-axes √λ_k, about the bead (with it) — position space and a register only; a PREFERENCE, off by default' },   // 0.8.3 B3 · iteration 008 P: the switch says what it draws; the key stays `ellipsoid`
 ]);
 /** the six keys the settings blob held (0.5.3 M9, iteration 001): read once into the record, never written again */
 export const BLOB_INFO = Object.freeze(['molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'infoPos', 'infoPad']);
+/** …and the three MARKS it held until the fix round (C6), each written only while on: read once into the record, whenever they are found */
+const BLOB_MARKS = Object.freeze(['skeleton', 'bead', 'ellipsoid']);
 /** liftInfo(blob) → the record's patch, by the laws shell/settings.js read them by: nothing said is ON at 100 %; an absent atomLabels /
  *  atomLabelsSize takes the stored molFormula / molFormulaSize (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); TOP at 12 % */
 export function liftInfo(s = {}) {
@@ -64,6 +70,8 @@ export function infoPrefs() {
     try { if (ls && !has()) ls.setItem(INFO_KEY, JSON.stringify(infoStore.all())); } catch (_) {}
     if (held.length) { for (const k of held) delete blob[k]; settings.write(blob); }
   }
+  const marks = BLOB_MARKS.filter((k) => k in blob);
+  if (marks.length) { infoStore.set(Object.fromEntries(marks.map((k) => [k, blob[k] === true]))); for (const k of marks) delete blob[k]; settings.write(blob); }
   return infoStore;
 }
 /** has this profile met INFORMATIONAL (a record, or a blob that held atomLabels)?  Read at infoPrefs()'s first call */
