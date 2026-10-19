@@ -109,7 +109,7 @@ export function modelName(alpha, latter, sic) {
   return (alpha ? `Xα(${a})` : 'Hartree (no exchange)') + (latter ? ' + Latter tail' : ', no tail');
 }
 const sup = (k) => (k > 1 ? String(k).replace(/./g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]) : '');
-const NOBLE = [[2, 'He'], [10, 'Ne'], [18, 'Ar'], [36, 'Kr'], [54, 'Xe']];
+const NOBLE = [[2, 'He'], [10, 'Ne'], [18, 'Ar'], [36, 'Kr'], [54, 'Xe'], [86, 'Rn']];
 /** ATOMS[i] is the atom of Z = i + 1 (H … Rn): { Z, symbol, name, config: [{n, l, occ}], term, core, exception, model } — `term` every
  *  shell written out, `core` the noble-gas shorthand ([Xe] 4f¹⁴ 5d¹⁰ 6s¹) a readout has room for, `exception` a MOVES row */
 export const ATOMS = NAMES.map(([symbol, name], i) => {
@@ -118,6 +118,13 @@ export const ATOMS = NAMES.map(([symbol, name], i) => {
   const core = ng ? `[${ng[1]}] ` + config.filter((c) => !inner.some((s) => s.n === c.n && s.l === c.l && s.occ === c.occ)).map(shell).join(' ') : term;
   return { Z, symbol, name, config, model: EXCHANGE_MODEL, term, core, exception: !!MOVES[Z] };
 });
+/** the valence of Z (1 … 118): every subshell outside the noble-gas core (the last noble gas below Z; H and He have none), in the
+ *  Madelung order (n + l, then n) — Fe 4s² 3d⁶, Au 6s¹ 4f¹⁴ 5d¹⁰.  LOAD VALENCE loads them all (008 Q); valence.js' one HIGHEST orbital
+ *  (the Picker's tile) is its own rule. */
+export function valenceShells(Z) {
+  const ng = NOBLE.filter(([z]) => z < Z).at(-1), inner = ng ? groundConfig(ng[0]) : [];
+  return groundConfig(Z).filter((c) => !inner.some((s) => s.n === c.n && s.l === c.l && s.occ === c.occ)).sort((a, b) => a.n + a.l - b.n - b.l || a.n - b.n);
+}
 export const atom = (Z) => ATOMS[Z - 1];
 export const configOf = (Z) => atom(Z).config.map((c) => ({ ...c }));
 

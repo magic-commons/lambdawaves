@@ -962,7 +962,7 @@ try {
     const ink = (sel) => { const c = document.querySelector('.dev[data-id="atoms"] ' + sel); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let k = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 8) k++; return k; };
     const inkLad = ink('.atm-c'), inkRad = ink('.atm-r');
     const dNe = __LW.layout.digest('atoms');
-    /* FILL THE VALENCE: the outermost occupied shell, every m of it */
+    /* FILL THE VALENCE (008 Q: every subshell outside the core): Ne's 2s and 2p, every m */
     const fill = __LW.fillValence(); await __LW.settle();
     const pop = __LW.reg.populated().length, norm = __LW.reg.norm();
     /* Na: the quantum defect, with the α it belongs to.  Sc: an order this model must not assert */
@@ -990,12 +990,12 @@ try {
       scAlpha: dSc.indexOf('α-DEPENDENT') >= 0 && dSc.indexOf('4s') >= 0 && dSc.indexOf('3d') >= 0,
       errs: window.__e.length, e0: window.__e[0] || null, gpu: __LW.field.lastGpuError || null };
   } catch (e) { return { error: String(e && e.message ? e.message + ' @ ' + e.stack : e) }; }`) || { error: 'no result' };
-  judge('B54 THE ATOM: ATOM Z = 10 makes the 91 labels the shells of Ne in one self-consistent Xα(2/3) + Latter-tail central field — every 2p label carries atoms.js\'s own ε to 1e-9 (and an unoccupied 3d carries the frozen field\'s, marked °), the kernel switches to the tabulated radial path and momentum space is forced off, a 2p_z cloud renders lit with no NaN on the grid and unit norm; the ATOMS window ships CLOSED and is the first of the four that do, with ELECTROSTATICS, then WIGNER and RADIATION consecutive behind it and HISTORY closing the rack (wave 106 appended HISTORY after RADIATION, which is why FOURTH FROM LAST is no longer the address — the RUN, not the index, is the law), draws its shell ladder and its radials, and its digest carries Ne, the Δ-SCF 21.088 eV beside Koopmans 15.078 eV labelled NOT the IP, and Xα; FILL THE VALENCE puts the three 2p labels in the register at unit norm; Na\'s digest carries δ = 1.32656 at α = 2/3 and 1.37323 at α = 1; Sc says the 3d/4s order is α-dependent instead of asserting one; the project file carries atomZ and restores it into the knob; and hydrogen comes back to E(1s) = −0.5 on the closed-form path',
+  judge('B54 THE ATOM: ATOM Z = 10 makes the 91 labels the shells of Ne in one self-consistent Xα(2/3) + Latter-tail central field — every 2p label carries atoms.js\'s own ε to 1e-9 (and an unoccupied 3d carries the frozen field\'s, marked °), the kernel switches to the tabulated radial path and momentum space is forced off, a 2p_z cloud renders lit with no NaN on the grid and unit norm; the ATOMS window ships CLOSED and is the first of the four that do, with ELECTROSTATICS, then WIGNER and RADIATION consecutive behind it and HISTORY closing the rack (wave 106 appended HISTORY after RADIATION, which is why FOURTH FROM LAST is no longer the address — the RUN, not the index, is the law), draws its shell ladder and its radials, and its digest carries Ne, the Δ-SCF 21.088 eV beside Koopmans 15.078 eV labelled NOT the IP, and Xα; FILL THE VALENCE puts the 2s and the three 2p labels in the register at unit norm; Na\'s digest carries δ = 1.32656 at α = 2/3 and 1.37323 at α = 1; Sc says the 3d/4s order is α-dependent instead of asserting one; the project file carries atomZ and restores it into the knob; and hydrogen comes back to E(1s) = −0.5 on the closed-form path',
     !atT.error && atT.shipsClosed && atT.shipsLast && atT.hasCopy && atT.ham === 'atom' && atT.sym === 'Ne' && atT.kspace === 6 && atT.pBefore === 'p' && atT.forcedX === 'x'
     && atT.dE < 1e-9 && Math.abs(atT.eps + 0.5540927689) < 1e-6 && atT.dVirt < 1e-9 && atT.labels === '2p₋1 2p₊0 2p₊1' && atT.virtLabel === '3d₊0°' && atT.finite
     && /Z = 10  Ne/.test(atT.knob) && atT.nonBlack > 500 && atT.nan === 0 && Math.abs(atT.integral - 1) < 0.05 && atT.inkLad > 400 && atT.inkRad > 200
     && atT.neNe && atT.neIP && atT.neXa && atT.neKo && atT.neLen > 600
-    && atT.fill.labels === 3 && atT.pop === 3 && Math.abs(atT.norm - 1) < 1e-9
+    && atT.fill.labels === 4 && atT.pop === 4 && Math.abs(atT.norm - 1) < 1e-9
     && atT.naQD && Math.abs(atT.qd - 1.3265641585) < 1e-6 && Math.abs(atT.qd1 - 1.3732338053) < 1e-6 && atT.scAlpha
     && atT.savedZ === 11 && atT.noTheme && atT.movedZ === 18 && atT.backZ === 11 && atT.backHam === 'atom' && /Z = 11  Na/.test(atT.knobBack)
     && Math.abs(atT.E1s + 0.5) < 1e-12 && atT.hSpace === 0 && atT.hLabel === '1s₊0' && atT.errs === 0 && !atT.gpu, atT);

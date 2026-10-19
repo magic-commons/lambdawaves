@@ -338,7 +338,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function goAtom(Z) {
     close(); const C = app.state.chem; if (C && C.on) C.setOn(false);
     app.w.setElement(Z); if (getHamiltonian().id !== 'atom') app.w.switchHamiltonian('atom'); if (app.ui.hamSeg) app.ui.hamSeg.set('atom');
-    if (app.w.fillValence) app.w.fillValence();                         // the valence shell that makes the atom, every m equal and in phase (SPECTRUM's own road)
+    if (app.w.fillValence) app.w.fillValence();                         // every valence subshell (outside the noble-gas core), every m, in phase (SPECTRUM's own road); the tile shows the highest alone
   }
   /* ── open / close: shown or hidden, nothing rebuilt; the iris opens from the home button (R8), the way back is instant ── */
   function open() {
