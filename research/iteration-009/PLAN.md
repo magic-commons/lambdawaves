@@ -25,4 +25,6 @@ The nine calls are Yan's (`LAMBDAWAVES CLAUDE YAN FOR-JOSH 2026-10-19.md` § You
 `git merge --no-ff --no-commit it009-<row>` → `--ours lab/sw.js` if it conflicts → `node tests/pwa.test.mjs --write` → the gate (pwa · `./test.sh node` · rack-deps · new-project) → THE LOCK ×2 when `lab/field.js` or the fixtures move → commit with the row's sentences for CLAUDE.md.
 
 ## Closed
-(filled as rows land)
+| row | merged | note |
+|---|---|---|
+| D THE PAIR | `51c407d` (branch tip `be702ee`) | one file, lab/orbitalsview.js; register 22/22, orbitals 24/24; chem L5 pre-existing; `molecular-names` :32 is a STALE row (expects the MO-REGISTRY card row U removed) |
