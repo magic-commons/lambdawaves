@@ -9,9 +9,9 @@
  * are the old ones to the bit (row and column 7 are the identity's, and acc₇ = 0 multiplies them) — seven once one is.  A saved table keeps
  * six gains while the seventh is 1, so an n ≤ 6 project's bytes never move.
  */
-import { BASIS, narrow } from './hydrogen.js';
+import { BASIS, NMAX, narrow } from './hydrogen.js';
 /** the shell table's width: the register's n ≤ 7 (the kernel's accumulators, the grid, the faders) */
-export const EQ_SHELLS = 7;
+export const EQ_SHELLS = NMAX;
 /** Γ_{nn′}'s place in a table's gamma (7 × 7, (re, im) per entry), n and n′ from 1; |Γ_{nn′}|² */
 const gk = (n, n2) => ((n - 1) * EQ_SHELLS + n2 - 1) * 2;
 export const gammaAbs2 = (G, n, n2) => { const k = gk(n, n2); return G[k] ** 2 + G[k + 1] ** 2; };
@@ -61,7 +61,7 @@ export function createEqualizer() {
     setGain(i, v) { if (i >= 0 && i < EQ_SHELLS) eq.gains[i] = Math.min(1, Math.max(0, +v || 0)); },
     birth: () => eq.preset === 'flat' && eq.gains.every((s) => s === 1),
     /* six gains while the seventh is 1 (an n ≤ 6 project's bytes never move; an older tree reads the six it knows) */
-    serialize: () => (eq.birth() ? null : { preset: eq.preset, gains: [...narrow(eq.gains, 1, 6)] }),
+    serialize: () => (eq.birth() ? null : { preset: eq.preset, gains: [...narrow(eq.gains, 1, EQ_SHELLS - 1)] }),
     restore(o) { eq.preset = 'flat'; eq.gains.fill(1); if (!o) return; eq.setPreset(o.preset); (o.gains || []).slice(0, EQ_SHELLS).forEach((v, i) => eq.setGain(i, v)); },
     table({ Z = 1, rates = null, populated = [], pops = null } = {}) {
       if (eq.birth()) return null;
@@ -70,7 +70,7 @@ export function createEqualizer() {
         if (shell.has(n) && shell.get(n) !== r) return { gate: 'one rate per shell for the equalizer', gamma: null };
         shell.set(n, r); if (pops) w[n - 1] += pops[a]; else w[n - 1] = 1; }
       /* D: the shells the table is solved over — six while n = 7 is empty (the six-shell arithmetic, to the bit), seven once it is populated (the header) */
-      const D = shell.has(7) ? 7 : 6, D2 = 2 * D;
+      const D = shell.has(EQ_SHELLS) ? EQ_SHELLS : EQ_SHELLS - 1, D2 = 2 * D;
       const E = (n) => -Z * Z / (2 * n * n), p = eq.preset, s = eq.gains, k = p === 'within' || p === 'interference' ? -1 : 0;
       let G = new Float64Array(2 * D * D);
       for (let i = 0; i < D; i++) for (let j = 0; j < D; j++) {

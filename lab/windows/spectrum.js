@@ -5,7 +5,7 @@ import { TIER } from '../rack.js';
 import { el, knob, seg, sw, trig, readout, group, mathPlain, fader, stepper } from '../mir/kit.js';
 import { createEqualizer, EQ_PRESETS, EQ_SHELLS } from '../equalizer.js'; import { createEqAudio } from '../eq-audio.js'; import { createChord } from '../chord-audio.js';
 import { VIEW } from '../field.js';
-import { BASIS, stateOf } from '../hydrogen.js'; import { L_LETTERS } from '../names.js';
+import { BASIS, NMAX, stateOf } from '../hydrogen.js'; import { L_LETTERS } from '../names.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu, MASSES, onHamiltonian } from '../hamiltonian.js';
 import { ATOMS, valenceShells, ZMAX } from '../atoms.js';
 import { createSpectrum } from '../spectrum.js';
@@ -45,7 +45,7 @@ export function createSpectrumCard(app) {
     {
       const rg = wSpec.row('tight');
       rg.appendChild(knob({ label: 'GAS  σ', min: 0.5, max: 3, value: 1.8, fmt: (v) => v.toFixed(2) + ' a₀', onInput: (v) => { app.state.gasWidth = v; } }).root);
-      ui.gasBasis = seg({ label: 'GAS BASIS', value: 'reg', options: [{ id: 'reg', label: '140', title: 'the register\'s 140 labels (l ≤ 6): a packet no smaller than about a/7, launched on any axis' }, { id: 'axial', label: 'AXIAL 256', title: 'Use the larger axial box basis for narrower z packets' }], onChange: (v) => { app.state.gasAxial = v === 'axial'; if (!app.state.gasAxial) app.w.gas.off(); hNote(); schedule(TIER.RECONSTRUCT); } });
+      ui.gasBasis = seg({ label: 'GAS BASIS', value: 'reg', options: [{ id: 'reg', label: String(BASIS.length), title: `the register's ${BASIS.length} labels (l ≤ ${NMAX - 1}): a packet no smaller than about a/${NMAX}, launched on any axis` }, { id: 'axial', label: 'AXIAL 256', title: 'Use the larger axial box basis for narrower z packets' }], onChange: (v) => { app.state.gasAxial = v === 'axial'; if (!app.state.gasAxial) app.w.gas.off(); hNote(); schedule(TIER.RECONSTRUCT); } });
       rg.appendChild(ui.gasBasis.root);
       ui.gasSpeed = knob({ label: 'GAS  |k|', min: 0.1, max: 2.5, value: 0.8, log: true, fmt: (v) => v.toFixed(2), onInput: () => {} });
       rg.appendChild(ui.gasSpeed.root);
@@ -75,7 +75,7 @@ export function createSpectrumCard(app) {
     rh.appendChild(ui.elemKnob.root);
     {
       const rs = wSpec.row('tight');
-      ui.scaleSeg = seg({ label: 'SCALE  ·  the exponent of the 140 radials  (hydrogen operator only)', value: 'hydrogen', options: [
+      ui.scaleSeg = seg({ label: `SCALE  ·  the exponent of the ${BASIS.length} radials  (hydrogen operator only)`, value: 'hydrogen', options: [
         { id: 'hydrogen', label: 'HYDROGEN  1/n', title: 'Use standard hydrogen radial functions' },
         { id: 'sturmian', label: 'STURMIAN  λ', title: 'Use one common radial exponent λ for every label' }],
         onChange: (v) => setSturmian({ on: v === 'sturmian' }) });
@@ -151,7 +151,7 @@ export function createSpectrumCard(app) {
   }
   /** the 7 × 7 grid at device pixels: n along the top and the left, a faint well per cell, the beat's third as its colour at |cell| / max, the diagonal ringed */
   function drawGrid(cell, top) {
-    const css = eqCv.clientWidth || 152, dpr = Math.min(2, devicePixelRatio || 1), px = Math.round(css * dpr), cs = getComputedStyle(eqCv);
+    const cs = getComputedStyle(eqCv), css = eqCv.clientWidth || parseFloat(cs.getPropertyValue('--eq-size')), dpr = Math.min(2, devicePixelRatio || 1), px = Math.round(css * dpr);
     if (eqCv.width !== px) eqCv.width = eqCv.height = px;
     const C = ['--eq-near', '--eq-mid', '--eq-far'].map((v) => cs.getPropertyValue(v).trim() || '#888'), pad = 14 * dpr, K = EQ_SHELLS, sz = (px - pad) / K, gap = Math.max(1, 2 * dpr), r = 3 * dpr;
     const box = (x, y, w, h) => { eqG.beginPath(); if (eqG.roundRect) eqG.roundRect(x, y, w, h, r); else eqG.rect(x, y, w, h); };
@@ -214,7 +214,7 @@ export function createSpectrumCard(app) {
   }
 
 
-  const sturmLabel = () => `STURMIAN · λ ${sturm.lambda.toFixed(3)} · Z ${getZ()} · 140 labels`;   // iteration 009 N7: the scale holds n = 7
+  const sturmLabel = () => `STURMIAN · λ ${sturm.lambda.toFixed(3)} · Z ${getZ()} · ${BASIS.length} labels`;   // iteration 009 N7: the scale holds n = 7
   /* the SAME sentence switchHamiltonian writes (wave 44): it used to drop the element, so an UNDO of an ELEMENT
      change or of FILL THE VALENCE left the status reading "ATOM  Xα(2/3) + Latter tail" with no atom named */
   const hamLabel = () => { const H = getHamiltonian(); return H.id === 'atom' ? H.label + '  ·  ' + H.short : H.label; };
@@ -325,7 +325,7 @@ export function createSpectrumCard(app) {
     touchState(); schedule(TIER.REBUILD);
     const sup = (k) => String(k).replace(/./g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]), name = (c) => `${c.n}${L_LETTERS[c.l]}${sup(c.occ)}`;
     const msg = `${HAMILTONIANS.atom.short} · ${held.map(name).join(' ')} loaded · ${labels} label${labels === 1 ? '' : 's'}, in phase`
-      + (gone.length ? ` · ${gone.map(name).join(' ')} past the basis (n ≤ 7), not loaded` : '');
+      + (gone.length ? ` · ${gone.map(name).join(' ')} past the basis (n ≤ ${NMAX}), not loaded` : '');
     wState.setStatus(msg, 'live'); if (app.w.wAtoms) app.w.wAtoms.setStatus(msg, 'live');
     return { n: top.n, l: top.l, labels, shells: held.map((c) => ({ n: c.n, l: c.l, occ: c.occ })), past: gone.map((c) => ({ n: c.n, l: c.l, occ: c.occ })) };
   }

@@ -137,7 +137,7 @@ export function createStates(host, api) {
   /* ── THE SONG (0.6.4 S1): a track DRIVES hydrogen's register, E_z(t) = E₀·track(t) in i ċ = (diag E_n + E_z z) c, stepped in the chem worker (h.drive.*); each landing
      is reg.anchorFrom(c, t) and the register free-evolves between them.  The track never leaves this page: a project keeps { hash, name, e0, rateAtDrop }. */
   const song = { on: false, meta: null, samples: null, sr: 0, e0: 3e-3, ship: false, ready: false, busy: false, seq: 0, v: -1, last: null, omega: 0, dt: 0.5, speed: 0, wall: 0, paint: 0 };
-  const sg = el('div', 'row tight reg-drive', host), songSw = sw({ label: 'SONG', value: false, title: 'Drive hydrogen with the track: its waveform is the field E_z(t) on the 140 labels, and RATE maps its pitch onto their lines', onChange: (v) => setSong(v) });
+  const sg = el('div', 'row tight reg-drive', host), songSw = sw({ label: 'SONG', value: false, title: `Drive hydrogen with the track: its waveform is the field E_z(t) on the ${BASIS.length} labels, and RATE maps its pitch onto their lines`, onChange: (v) => setSong(v) });
   const songIn = el('input', '', sg); songIn.type = 'file'; songIn.accept = 'audio/*'; songIn.hidden = true; songIn.addEventListener('change', () => { songFile(songIn.files[0]); songIn.value = ''; });
   const fileBtn = el('button', 'trig', sg, 'FILE'); fileBtn.type = 'button'; fileBtn.title = 'Choose an audio file — or drop one on this row'; fileBtn.addEventListener('click', () => songIn.click());
   const sE = knob({ label: '<m>E₀</m>', aria: 'song amplitude', min: 1e-4, max: 1e-2, value: song.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2), title: 'The field at the track’s peak, in atomic units', onInput: (v) => setSongE0(v) });
@@ -424,7 +424,7 @@ export function createStates(host, api) {
   function setSongE0(v) { song.e0 = Math.min(1e-2, Math.max(1e-4, +v || 3e-3)); if (song.meta) song.meta.e0 = song.e0; if (song.on && song.ready) Promise.resolve(api.solve({ op: 'h.drive.set', e0: song.e0 }, () => null, (r) => r)).catch(() => {}); refreshSong(); }
   function pumpSong(t) {   // the drive's pump, again: one request in flight, newest wins; an edit of the register (its version) restarts the song from it
     const H = api.song; if (!H || song.busy || H.filming()) return;
-    if (!H.hydrogen()) { setSong(false); status('SONG drives hydrogen’s 140 labels: switch the Hamiltonian to hydrogen', 'warn'); return; }
+    if (!H.hydrogen()) { setSong(false); status(`SONG drives hydrogen’s ${BASIS.length} labels: switch the Hamiltonian to hydrogen`, 'warn'); return; }
     const init = !song.ready || H.reg.version !== song.v, seq = song.seq, v0 = H.reg.version; if (!init && Math.abs(t - song.last.t) < song.dt) return;
     const c = init ? H.reg.at(t) : null; song.busy = true;
     Promise.resolve(api.solve(init ? { op: 'h.drive.init', e0: song.e0, t0: t, re: c.re, im: c.im, ...(song.ship && { samples: song.samples, sampleRate: song.sr, rate: song.meta.rateAtDrop }) } : { op: 'h.drive.run', to: t, maxSteps: 4000 }, () => null, (r) => r)).then((r) => {
@@ -438,7 +438,7 @@ export function createStates(host, api) {
   }
   function refreshSong() {   // THE PITCH: f = ΔE·RATE/2π — the track's zero-crossing pitch against the nearest z-allowed line from a populated label
     const m = song.meta, rate = api.rate ? api.rate() : 0, r = song.last, c = r || (api.song && api.song.reg.at(now())), hz = (w) => (w * m.rateAtDrop / TAU).toFixed(0);
-    songNote.textContent = `E₀ ${+song.e0.toPrecision(2)} a.u. = ${+(song.e0 * 514.22).toPrecision(2)} GV/m · a 140-level bound model — above the over-barrier field 1/16n⁴ of n ≥ 3 nothing ionises here · RATE ${rate.toFixed(0)} = ${(rate * AU_TIME_AS / 1000).toFixed(0)} fs of atom time per second`;
+    songNote.textContent = `E₀ ${+song.e0.toPrecision(2)} a.u. = ${+(song.e0 * 514.22).toPrecision(2)} GV/m · a ${BASIS.length}-level bound model — above the over-barrier field 1/16n⁴ of n ≥ 3 nothing ionises here · RATE ${rate.toFixed(0)} = ${(rate * AU_TIME_AS / 1000).toFixed(0)} fs of atom time per second`;
     if (!song.samples) { roSong.set(m ? 'track missing · drop it again' : 'no track', m ? 'warn' : ''); roSong.setSub(m ? `${m.name} · the project keeps its name and hash, never the track` : 'FILE, or drop an audio file on this row: its waveform becomes the field E_z(t) on hydrogen'); return; }
     let best = null;
     if (c && song.omega > 0) for (const a of BASIS) if (c.re[a.index] ** 2 + c.im[a.index] ** 2 > 1e-3) for (const b of BASIS) if (b.m === a.m && Math.abs(b.l - a.l) === 1 && b.n !== a.n) { const dE = Math.abs(b.E - a.E); if (!best || Math.abs(dE - song.omega) < Math.abs(best.dE - song.omega)) best = { lo: a.E < b.E ? a : b, hi: a.E < b.E ? b : a, dE }; }
