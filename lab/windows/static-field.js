@@ -105,7 +105,7 @@ export function createStaticField(app) {
   ui.bowKnobs.squeeze = { set: (x) => sqK.set(+x || 0) }; for (const e of [sqK.root, catKnob.root, ...osc]) rq.appendChild(e);
   const oscSync = () => { const off = getHamiltonian().id !== 'qho'; sqK.setDisabled(off); catKnob.setDisabled(off); for (const b of osc) b.disabled = off; }; oscSync(); onHamiltonian(oscSync);
   function squeezeIn(r, axis) { if (!reg.populated().length) reg.set(0, 1, 0, clock.t); const n0 = reg.norm2(), v0 = pAlong(axis, varianceZ); reg.squeeze(r, axis, clock.t); const v1 = pAlong(axis, varianceZ), want = Math.exp(-2 * r) * v0;
-    SQUEEZE.said = `Var(${axis}) ${v1.toFixed(4)} · e^{−2r}·Var₀ = ${want.toFixed(4)} · error ${Math.abs(v1 / want - 1).toExponential(1)} · lost norm ${escaped(n0, reg.norm2()).toExponential(1)}`; if (ui.kickRo) ui.kickRo.setSub(SQUEEZE.said); touchState(); }
+    SQUEEZE.said = `Var(${axis}) ${v1.toFixed(4)} · e^{−2r}·Var₀ = ${want.toFixed(4)} · error ${Math.abs(v1 / want - 1).toExponential(1)} · lost norm ${escaped(n0, reg.norm2()).toExponential(1)}`; ui.kickRo.setSub(SQUEEZE.said); touchState(); }
   function cat(k, axis) { const [A, B] = [1, -1].map((q) => { const s = { re: new Float64Array(91), im: new Float64Array(91) }; s.re[0] = 1; applyKickAlong(s.re, s.im, k, [...'xyz'].map((c) => c === axis ? q : 0)); return s; });   // ±d, k > 0: the boost's Bessel tables take k ≥ 0
     app.hooks.ab.setStores(A, B); reg.anchorFrom(A.re.map((v, i) => v + B.re[i]), A.im.map((v, i) => v + B.im[i]), clock.t); reg.normalize(); touchState(); }
   el('div', 'note', kBody).innerHTML = '<b>Impulse.</b> Ctrl-drag on the field sets direction and strength (PULL, RESPONSE and LIMIT shape that pull); K applies e<sup>ik·x</sup> with k = 0.2 along the axis X, Y or Z picked, and keeps only the part represented by n ≤ 6 — METERS\' IMPULSE line reports k, λ, the escaped norm and the momentum. DRAG γ damps excited amplitudes as a display model and discards the lost norm. On the OSCILLATOR, SQUEEZE-IN applies S(r) along the axis and METERS prints Var against e<sup>−2r</sup>·Var₀ beside the lost norm; CAT stores the ±k slaps of the ground state as A and B and sets their normalised sum.';
@@ -118,16 +118,14 @@ export function createStaticField(app) {
   }
   /** the keyboard's impulse (the K key: app.hooks.slap(0.2 · fine, axis)) — STATE's RELEASE along ALONG, said in METERS' IMPULSE line */
   function slap(k, axis) {
-    if (getHamiltonian().separable) { if (ui.kickRo) { ui.kickRo.set('—', 'warn'); ui.kickRo.setSub(SLAP_REFUSAL); } return; }   // 0.9.4 S1
+    if (getHamiltonian().separable) { ui.kickRo.set('—', 'warn'); ui.kickRo.setSub(SLAP_REFUSAL); return; }   // 0.9.4 S1
     const n0 = reg.norm2(), p0 = pAlong(axis);
     if (!reg.populated().length && getHamiltonian().id !== 'well') reg.set(0, 1, 0, clock.t);
     reg.kick(k, axis, clock.t);
     const n1 = reg.norm2(), p1 = pAlong(axis);
     const esc = n0 > 0 ? 1 - n1 / n0 : 0;
-    if (ui.kickRo) {
-      ui.kickRo.set(`${(100 * esc).toFixed(2)}% · ${(p1 - p0).toFixed(4)}`, esc > 0.2 ? 'warn' : 'ok');
-      ui.kickRo.setSub(`<m>k</m> = ${k.toFixed(3)} · <m>λ</m> = ${(2 * Math.PI / k).toFixed(1)} a₀ along ${axis} · Ehrenfest would give ${k.toFixed(3)}; the deficit is the continuum · <m>‖ψ‖</m> now ${Math.sqrt(n1).toFixed(4)}`);
-    }
+    ui.kickRo.set(`${(100 * esc).toFixed(2)}% · ${(p1 - p0).toFixed(4)}`, esc > 0.2 ? 'warn' : 'ok');
+    ui.kickRo.setSub(`<m>k</m> = ${k.toFixed(3)} · <m>λ</m> = ${(2 * Math.PI / k).toFixed(1)} a₀ along ${axis} · Ehrenfest would give ${k.toFixed(3)}; the deficit is the continuum · <m>‖ψ‖</m> now ${Math.sqrt(n1).toFixed(4)}`);
     touchState();
   }
   app.hooks.slap = slap;

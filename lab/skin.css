@@ -323,7 +323,6 @@ body[data-theme="light"] .native-info .native-info-content, body[data-theme="lig
 .native-clean[data-id="settings"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="settings"] .sw { flex: 1 1 110px; }
 .native-clean[data-id="camera"] .row > .k { flex: 0 0 68px; }
-.native-clean .bow-hint { text-align: center; font-size: var(--fs-micro); color: var(--dim); }
 .plane-model { display: block; width: 100%; height: 150px; touch-action: none; cursor: grab; }
 .plane-model:active { cursor: grabbing; }
 .plane-model:focus-visible { outline: 1px solid var(--acc); outline-offset: -2px; }

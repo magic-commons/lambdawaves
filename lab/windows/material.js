@@ -133,17 +133,16 @@ export function createMaterial(app) {
     camPanel.spec.build(gc, null);
     const camView = camPanel.view(); camView.homeBtn.root.dataset.keyAction = 'camReset';
     app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
-    const rRef = el('div', 'row tight', gc);   // iteration 008 W: SET Δρ REF left with WAVE's Δρ (MOLECULES' Δ stores its own reference at the kick)
     /* 0.5.3 M6 · LOCK, the classic camera (a PREFERENCE, `camLock`): the pan held at the centre and every zoom from it; the PAN pad rests while it holds */
     ui.camLockSw = sw({ label: 'LOCK', value: false, title: 'LOCK — the classic camera: the pan stays at the centre and every zoom is from the centre (CONTROL, the turn, ZOOM and FOV stay live)', onChange: (v) => { cameraPort.set('lock', v); saveSettings(); } });
-    rRef.appendChild(ui.camLockSw.root); let lockShown = false;
+    let lockShown = false;
     cameraPort.subscribe(() => { const on = cameraPort.get('lock'); if (on !== lockShown) { lockShown = on; ui.camLockSw.set(on); camView.pad.widget.setDisabled(on); } });   // every road (the switch, the settings, LW) is a notice
     /* iteration 001 (Josh): CAMERA, SHORTER — the group's CAMERA word goes (the window says it), LOCK joins HOME · PAN HOME, and the PAN pad,
        the scales and the HAND fold behind (SET Δρ REF left at iteration 008) CONTROL's chevron (lab/fold.js): HOME, CONTROL, the sphere, ZOOM · FOV stay out */
     { const R = gc.querySelector('.mir-camera'), q = (c) => R.querySelector(':scope > ' + c), more = el('div', 'cam-more', R);
       gc.querySelector(':scope > .grp-lbl')?.remove();
       for (const c of ['.cam-pan', '.cam-scales', '.cam-hand']) { const n = q(c); if (n) more.appendChild(n); }
-      const v = q('.cam-verbs'); if (v) { v.appendChild(ui.camLockSw.root); v.dataset.n = String(v.children.length); } if (rRef.children.length) more.appendChild(rRef); else rRef.remove(); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
+      const v = q('.cam-verbs'); (v || more).appendChild(ui.camLockSw.root); if (v) v.dataset.n = String(v.children.length); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt(+Shift)+Drag, two fingers or the PAN pad slide the picture 1:1 (Shift does not make the pan finer); the molecule stays the pivot. Double-click, double-tap or HOME restores the camera.';
   }
   return { wObs, wPal, wCam, wClip, createDrawClipPaletteCamera };

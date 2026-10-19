@@ -141,7 +141,8 @@ export function createModSeam(app) {
         get: () => (app.state.states ? app.state.states.morph : 0), set: (v) => { if (app.state.states) { app.state.states.setMorphValue(v); setKnob(app.state.states.knobs.morph(), app.state.states.morph); } } },
       /* iteration 007 B (ADR-0002): the ORBITAL register's A ↔ B is its OWN target (`reg.omorph`, the id in orbitalsview.js) — a route that
          followed whichever pane is showing would change a saved route's meaning with the pane.  Its knob carries the stamp, so the TIMELINE
-         lanes it like any registered dial (a lane OR a route: the kit's either-or, the top-most wins). */
+         lanes it like any registered dial (a lane AND a route ADD: the kit's host.js livePos samples the lane as the moving base and the
+         routes modulate around it — B-BUILD measured their sum). */
       { id: OMORPH, label: 'ORBITAL MORPH', map: 'linear', min: 0, max: 1, def: 0, group: 'state', knob: () => (app.state.orbitals ? app.state.orbitals.knobs.morph() : null),
         hint: 'where the ORBITAL register plays on the path from store A to store B (MORPH must be on)',
         get: () => (app.state.orbitals ? app.state.orbitals.morph : 0), set: (v) => { if (app.state.orbitals) { app.state.orbitals.setMorphValue(v); setKnob(app.state.orbitals.knobs.morph(), app.state.orbitals.morph); } } },

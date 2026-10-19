@@ -11,9 +11,9 @@ import { createPrefs } from '../mir/core/prefs.js'; import { createSettingsStore
    atoms on.  Everything else off."  A HAND speaks; a restore, an undo, a project or link open never does (each emitter's own law, unchanged). */
 export const INFO_KEY = 'lambdawaves.q0.info';
 export const KINDS = Object.freeze([
-  { id: 'preset', key: 'sayPreset', seat: 'fade', label: 'PRESETS', hint: 'A hand\'s preset — STATE\'s PRESET and RELOAD, MO-REGISTRY\'s ORBITAL and STATES presets, a notebook link — named in the formula\'s seat for 2.4 s' },
+  { id: 'preset', key: 'sayPreset', seat: 'fade', label: 'PRESETS', hint: 'A hand\'s preset — SPECTRUM\'s PRESET (a pick of the one shown reloads it), the register\'s ORBITAL and STATES presets in MOLECULES, a notebook link — named in the formula\'s seat for 2.4 s' },
   { id: 'head', key: 'sayHead', seat: 'head', label: 'MOLECULE HEAD', hint: 'A hand pick of a molecule shows its head once the solve lands — formula and name, method and E, the HOMO and the gap, its STATUS — held until Escape or a press on the picture' },
-  { id: 'registry', key: 'sayRegistry', seat: 'pop', label: 'REGISTRY ADDS', hint: 'The orbital a hand just added to MO-REGISTRY' },
+  { id: 'registry', key: 'sayRegistry', seat: 'pop', label: 'REGISTRY ADDS', hint: 'The orbital a hand just added to MOLECULES\' register' },
   { id: 'view', key: 'sayView', seat: 'pop', label: 'WAVE VIEW', hint: 'WAVE\'s OBSERVABLE and MOLECULES\' VIEW, as a hand changes them' },
   { id: 'orbital', key: 'sayOrbital', seat: 'pop', label: 'ORBITAL DIAL', hint: 'The orbital MOLECULES\' ORBITAL dial lands on, while a hand turns it' },
   { id: 'basis', key: 'sayBasis', seat: 'pop', label: 'BASIS · METHOD', hint: 'MOLECULES\' BASIS and METHOD, as a hand picks them' },
@@ -239,9 +239,9 @@ export function createStageWords(app) {
     const applyInfo = (st, changed) => {
       const all = !changed, ch = (k) => all || changed.includes(k);
       if (ch('molFormula')) { document.body.classList.toggle('no-mol-formula', !st.molFormula); api.setOn(st.molFormula); }
-      if (ch('molFormulaSize')) { app.state.molFormulaScale = st.molFormulaSize; api.setScale(st.molFormulaSize); }
+      if (ch('molFormulaSize')) api.setScale(st.molFormulaSize);
       if (ch('atomLabels')) api.setLabels(st.atomLabels);
-      if (ch('atomLabelsSize')) { app.state.atomLabelsScale = st.atomLabelsSize; api.setLabelScale(st.atomLabelsSize); }
+      if (ch('atomLabelsSize')) api.setLabelScale(st.atomLabelsSize);
       if (all || ch('infoPos') || ch('infoPad')) api.setSeat(st.infoPos === 'bottom', st.infoPad);
       if (ch('popSize')) api.setPopScale(st.popSize);
       if (!all && ch('cursorAway')) { layer.setFollow(st.cursorAway); layer.setParallax(st.cursorAway); }
