@@ -11,6 +11,17 @@
   "palette": "wheel",
   "frame": false,
   "axis": false,
+  "atoms": {
+   "view": "imag",
+   "exposure": 0.5,
+   "hueByL": [
+    0,
+    0.125,
+    0.25,
+    0.375
+   ],
+   "phase": "m = 0 imaginary, else real"
+  },
   "camera": {
    "molecules": "home",
    "elements": "corner (yaw 45°, pitch 35.26°)",

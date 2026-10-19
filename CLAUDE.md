@@ -145,7 +145,9 @@ HOME pose) and LIBRARY — THE VOLUMES. A hover moves only the picture (`lab/pic
 SynchroSpectre's motion) and names a molecule's tile beneath it (an element's tile names nothing);
 the caption is large (LW Title + STIX): for an element the name alone over its subshell alone
 (`3d²`, STIX), never the symbol or Z. Pictures: `tools/menu-thumbs.mjs`
-into `lab/img/menu/` (density · SIGNED · ISO 0.03 · the HSV wheel, the field alone via a
+into `lab/img/menu/` (a molecule: density · SIGNED · ISO 0.03 · the HSV wheel; an atom, Josh 10-18: the
+signed Im view of its one state — m = 0 held imaginary so the view holds it, m ≠ 0 real so Im ψ is the real orbital's
+lobes — the wheel turned by l, s 0° · p 45° · d 90° · f 135°, EXPOSURE 0.5 so a shell is see-through; the field alone via a
 two-ground alpha matte; rerun it after a molecule is added) and `--volume vol-1` into a
 volume's `t/<id>.webp`. The way back: the grid button by the title, L, WINDOW › PICKER. The
 look controls live in the kit's MIR OPTIONS (`lab/mir-gui.js` over the `mir.gui` look store);
