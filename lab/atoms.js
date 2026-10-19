@@ -1,4 +1,4 @@
-/* atoms.js — THE PERIODIC TABLE as a central field: Z = 1…36 by Xα(2/3) + the Latter tail.
+/* atoms.js — THE PERIODIC TABLE as a central field: Z = 1…86 (H … Rn) by Xα(2/3) + the Latter tail.
  *
  * Every atom in this file is one self-consistent CENTRAL potential shared by all its shells (Herman–Skillman /
  * Hartree–Fock–Slater, but with Kohn–Sham–Gáspár–Dirac exchange α = 2/3, not Slater's α = 1):
@@ -43,6 +43,14 @@
  * A shell the ground configuration does not occupy (virtualOrbital, virtualEnergyOf, the ° labels) is an
  * eigenstate of the FROZEN field, not of the atom: it is not an excitation energy, not an affinity, and a high
  * one may be a state of the r_max box rather than of the atom — ε ≥ 0 says exactly that.
+ *
+ * PAST KRYPTON (iteration 008 A, research/iteration-008/A-BUILD.md).  Rb … Rn are the SAME solve on the SAME mesh (r₀ = 10⁻⁶/Z keeps the
+ * Rn 1s resolved: M → 2M → 4M moves its ε by 6e-6 Eh, r_max 60 → 90 by 1e-5), every one of the 50 converging below 1e-8 with every orbital
+ * bound, normalised and of n − l − 1 nodes; a 5d atom costs ≈ 0.3 s (both meshes and Richardson), solved when first asked, never at boot.
+ * Rn's 1s lies 0.053 Eh (17 ppm) above NIST's non-relativistic LDA (Kotochigova et al., Phys. Rev. A 55, 191 (1997): −3204.756288 Eh),
+ * the same share as Kr's (33 ppm): VWN correlation and the Latter tail, not the grid.  The model is NON-RELATIVISTIC, and past Kr that is
+ * the dominant error: the same table's scalar-relativistic Rn 1s is 394 Eh deeper, and Au's 6s contracts — its −ε 1.62 eV and its Δ-SCF
+ * ionisation 2.11 eV deeper (Au here 6.70 eV, measured 9.23).  STATUS says so for every atom past Kr (lab/status.js).
  */
 
 const HARTREE_EV = 27.211386245988;                      // CODATA 2018
@@ -52,6 +60,8 @@ export const ROWS = 40;                                  // rows in the GPU's ra
 export const rowOf = (n, l) => l * 6 + (n - l - 1);      // the same (n_r, l) row map cornell.js uses
 
 /* ══ the ground configurations ══════════════════════════════════════════════════════════════════════════════ */
+/* iteration 008 A: H … Rn, every shell through 6p — exactly what hydrogen.js' 91 labels (n ≤ 6, l ≤ 5) can hold; Fr upward needs
+   7s and is its own row (a register of n = 7).  THE ONE SOURCE of the ground configurations: lab/valence.js reads groundConfig. */
 const NAMES = [
   ['H', 'Hydrogen'], ['He', 'Helium'], ['Li', 'Lithium'], ['Be', 'Beryllium'], ['B', 'Boron'], ['C', 'Carbon'],
   ['N', 'Nitrogen'], ['O', 'Oxygen'], ['F', 'Fluorine'], ['Ne', 'Neon'], ['Na', 'Sodium'], ['Mg', 'Magnesium'],
@@ -59,17 +69,38 @@ const NAMES = [
   ['K', 'Potassium'], ['Ca', 'Calcium'], ['Sc', 'Scandium'], ['Ti', 'Titanium'], ['V', 'Vanadium'], ['Cr', 'Chromium'],
   ['Mn', 'Manganese'], ['Fe', 'Iron'], ['Co', 'Cobalt'], ['Ni', 'Nickel'], ['Cu', 'Copper'], ['Zn', 'Zinc'],
   ['Ga', 'Gallium'], ['Ge', 'Germanium'], ['As', 'Arsenic'], ['Se', 'Selenium'], ['Br', 'Bromine'], ['Kr', 'Krypton'],
+  ['Rb', 'Rubidium'], ['Sr', 'Strontium'], ['Y', 'Yttrium'], ['Zr', 'Zirconium'], ['Nb', 'Niobium'], ['Mo', 'Molybdenum'],
+  ['Tc', 'Technetium'], ['Ru', 'Ruthenium'], ['Rh', 'Rhodium'], ['Pd', 'Palladium'], ['Ag', 'Silver'], ['Cd', 'Cadmium'],
+  ['In', 'Indium'], ['Sn', 'Tin'], ['Sb', 'Antimony'], ['Te', 'Tellurium'], ['I', 'Iodine'], ['Xe', 'Xenon'],
+  ['Cs', 'Caesium'], ['Ba', 'Barium'], ['La', 'Lanthanum'], ['Ce', 'Cerium'], ['Pr', 'Praseodymium'], ['Nd', 'Neodymium'],
+  ['Pm', 'Promethium'], ['Sm', 'Samarium'], ['Eu', 'Europium'], ['Gd', 'Gadolinium'], ['Tb', 'Terbium'], ['Dy', 'Dysprosium'],
+  ['Ho', 'Holmium'], ['Er', 'Erbium'], ['Tm', 'Thulium'], ['Yb', 'Ytterbium'], ['Lu', 'Lutetium'], ['Hf', 'Hafnium'],
+  ['Ta', 'Tantalum'], ['W', 'Tungsten'], ['Re', 'Rhenium'], ['Os', 'Osmium'], ['Ir', 'Iridium'], ['Pt', 'Platinum'],
+  ['Au', 'Gold'], ['Hg', 'Mercury'], ['Tl', 'Thallium'], ['Pb', 'Lead'], ['Bi', 'Bismuth'], ['Po', 'Polonium'],
+  ['At', 'Astatine'], ['Rn', 'Radon'],
 ];
-const MADELUNG = [[1, 0], [2, 0], [2, 1], [3, 0], [3, 1], [4, 0], [3, 2], [4, 1]];   // n + l, then n — enough for Z ≤ 36
-/** the Aufbau filling of N electrons, as [{n, l, occ}] sorted by (n, l) */
-function aufbau(N) {
-  const cfg = [];
-  for (const [n, l] of MADELUNG) { if (N <= 0) break; const o = Math.min(N, 2 * (2 * l + 1)); cfg.push({ n, l, occ: o }); N -= o; }
-  return cfg.sort((a, b) => a.n - b.n || a.l - b.l);
+export const ZMAX = NAMES.length;                          // 86: the last atom whose every shell is one of the 91 labels
+const CAP = [2, 6, 10, 14];
+/** the Madelung order (n + l, then n), l ≤ 3, through n + l = 8 — enough to fill Z = 118 (valence.js reads past Rn) */
+const MADELUNG = []; for (let s = 1; s <= 8; s++) for (let n = 1; n <= s; n++) { const l = s - n; if (l < n && l <= 3) MADELUNG.push([n, l]); }
+/** the standard ground-state exceptions (NIST ASD): Z → [from, to, k] moves k electrons from one subshell of the Madelung filling to
+ *  another.  Cr and Cu are the two below Z = 37 (a half- and a wholly-filled 3d each buy one 4s electron); 41–79 their 4d / 5d / 4f
+ *  twins (Nb Mo Ru Rh Pd Ag, La Ce Gd, Pt Au); 89–103 the actinides, which only valence.js reads. */
+const MOVES = { 24: ['4s', '3d', 1], 29: ['4s', '3d', 1],
+  41: ['5s', '4d', 1], 42: ['5s', '4d', 1], 44: ['5s', '4d', 1], 45: ['5s', '4d', 1], 46: ['5s', '4d', 2], 47: ['5s', '4d', 1],
+  57: ['4f', '5d', 1], 58: ['4f', '5d', 1], 64: ['4f', '5d', 1], 78: ['6s', '5d', 1], 79: ['6s', '5d', 1],
+  89: ['5f', '6d', 1], 90: ['5f', '6d', 2], 91: ['5f', '6d', 1], 92: ['5f', '6d', 1], 93: ['5f', '6d', 1], 96: ['5f', '6d', 1], 103: ['6d', '7p', 1] };
+/** the ground configuration of Z (1 … 118) as [{n, l, occ}] sorted by (n, l): the Madelung filling, then the exception's move */
+export function groundConfig(Z) {
+  const cfg = []; let N = Z;
+  for (const [n, l] of MADELUNG) { if (N <= 0) break; const o = Math.min(N, CAP[l]); cfg.push({ n, l, occ: o }); N -= o; }
+  const mv = MOVES[Z];
+  if (mv) {
+    const at = (t) => { const n = +t[0], l = SPD.indexOf(t[1]); let c = cfg.find((s) => s.n === n && s.l === l); if (!c) { c = { n, l, occ: 0 }; cfg.push(c); } return c; };
+    at(mv[0]).occ -= mv[2]; at(mv[1]).occ += mv[2];
+  }
+  return cfg.filter((c) => c.occ > 0).sort((a, b) => a.n - b.n || a.l - b.l);
 }
-/* the two exceptions below Z = 37: a half- and a wholly-filled d shell each buy one 4s electron */
-const EXCEPTIONS = { 24: [[1, 0, 2], [2, 0, 2], [2, 1, 6], [3, 0, 2], [3, 1, 6], [3, 2, 5], [4, 0, 1]],
-                     29: [[1, 0, 2], [2, 0, 2], [2, 1, 6], [3, 0, 2], [3, 1, 6], [3, 2, 10], [4, 0, 1]] };
 export const EXCHANGE_MODEL = 'Xα(2/3) + Latter tail';
 /** the model string that travels with every number: α and the tail, always named (Sol's model-identity rule) */
 export function modelName(alpha, latter, sic) {
@@ -77,12 +108,15 @@ export function modelName(alpha, latter, sic) {
   const a = alpha === 2 / 3 ? '2/3' : alpha === 1 ? '1' : (+alpha.toFixed(4)).toString();
   return (alpha ? `Xα(${a})` : 'Hartree (no exchange)') + (latter ? ' + Latter tail' : ', no tail');
 }
-/** ATOMS[i] is the atom of Z = i + 1 (H … Kr): { Z, symbol, name, config: [{n, l, occ}], term, model } */
+const sup = (k) => (k > 1 ? String(k).replace(/./g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]) : '');
+const NOBLE = [[2, 'He'], [10, 'Ne'], [18, 'Ar'], [36, 'Kr'], [54, 'Xe']];
+/** ATOMS[i] is the atom of Z = i + 1 (H … Rn): { Z, symbol, name, config: [{n, l, occ}], term, core, exception, model } — `term` every
+ *  shell written out, `core` the noble-gas shorthand ([Xe] 4f¹⁴ 5d¹⁰ 6s¹) a readout has room for, `exception` a MOVES row */
 export const ATOMS = NAMES.map(([symbol, name], i) => {
-  const Z = i + 1;
-  const config = EXCEPTIONS[Z] ? EXCEPTIONS[Z].map(([n, l, occ]) => ({ n, l, occ })) : aufbau(Z);
-  return { Z, symbol, name, config, model: EXCHANGE_MODEL,
-    term: config.map((c) => `${c.n}${SPD[c.l]}${c.occ > 1 ? String(c.occ).replace(/./g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]) : ''}`).join(' ') };
+  const Z = i + 1, config = groundConfig(Z), shell = (c) => `${c.n}${SPD[c.l]}${sup(c.occ)}`, term = config.map(shell).join(' ');
+  const ng = NOBLE.filter(([z]) => z < Z).at(-1), inner = ng ? groundConfig(ng[0]) : [];
+  const core = ng ? `[${ng[1]}] ` + config.filter((c) => !inner.some((s) => s.n === c.n && s.l === c.l && s.occ === c.occ)).map(shell).join(' ') : term;
+  return { Z, symbol, name, config, model: EXCHANGE_MODEL, term, core, exception: !!MOVES[Z] };
 });
 export const atom = (Z) => ATOMS[Z - 1];
 export const configOf = (Z) => atom(Z).config.map((c) => ({ ...c }));

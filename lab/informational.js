@@ -53,8 +53,9 @@ export function createInformational(app) {
      operator's — written by app.hooks.status on a landing, a VIEW or FLOW change, an owner or operator change, NEVER in a frame.  A tap: the MODEL sheet, its words. */
   const st = readout({ label: 'STATUS', cls: 'wide lw-status', value: '—' }); let was; el('div', 'row tight', w.body).append(st.root);
   st.root.title = 'What EXACT, NUMERICAL and UNCHECKED mean: the MODEL sheet'; st.root.addEventListener('click', () => { if (app.hooks.sheet) app.hooks.sheet(); });
-  app.hooks.status = () => { const c = app.state.chem, k = c && c.on ? c.said : app.reg.P && app.reg.P.stark ? 'stark' : getHamiltonian().id, m = k === 'hydrogen' && getHamiltonian().mass, key = m ? k + m : k, s = key === was ? undefined : typeof k === 'string' ? statusOf({ owner: k, label: m && 'HYDROGEN · ' + m }) : k;
-    if (s !== undefined) { was = key; st.set(s ? s.line : '—', s && s.word === 'UNCHECKED' ? 'warn' : ''); st.setSub(s && typeof k !== 'string' ? s.head : ''); } };
+  app.hooks.status = () => { const c = app.state.chem, k = c && c.on ? c.said : app.reg.P && app.reg.P.stark ? 'stark' : getHamiltonian().id, m = k === 'hydrogen' && getHamiltonian().mass, A = k === 'atom' && getHamiltonian().element,   // iteration 008 A: the ATOM speaks per element (past Kr)
+      key = m ? k + m : A ? k + A.Z : k, s = key === was ? undefined : typeof k === 'string' ? statusOf({ owner: k, label: m ? 'HYDROGEN · ' + m : A ? A.symbol : '', Z: A ? A.Z : 0 }) : k;
+    if (s !== undefined) { was = key; st.set(s ? s.line : '—', s && s.word === 'UNCHECKED' ? 'warn' : ''); st.setSub(s && (typeof k !== 'string' || s.atom) ? s.head : ''); } };
   app.hooks.status();
   /* UNDER SETTINGS: the kit opens a window at the top of its rack (and raise() puts it there after); once that press is done, the seat after
      SETTINGS — by the kit's own move(), so the rack's motion and its save follow — while SETTINGS stands open in a rack and this card is not floating */

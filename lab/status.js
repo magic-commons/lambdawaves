@@ -14,7 +14,7 @@ const up = (x) => { let [m, e] = x.toExponential(0).split('e').map(Number); if (
 let calls = 0; export const statusCalls = () => calls;
 /** statusOf({ owner, record | sol, oracle, view, label }) → { word, line, head, geometry }, or null for an owner it cannot speak for.  `record`: the
  *  catalogue row (oracle {what, delta}, geometry, status); `sol`: a live solve ({ energy }) checked against `oracle` ({ what, energy }). */
-export function statusOf({ owner = 'molecule', record = null, sol = null, oracle = null, view = 'density', label = '', esp = null } = {}) {   // esp: { N, min } once ESP's card landed
+export function statusOf({ owner = 'molecule', record = null, sol = null, oracle = null, view = 'density', label = '', esp = null, Z = 0 } = {}) {   // esp: { N, min } once ESP's card landed · Z: the ATOM's element
   calls++;
   const S = sol && sol.model === 'UHF' ? (sol.multiplicity - 1) / 2 : null, s2 = S === null ? '' : `⟨S²⟩ ${sol.s2.toFixed(3)}`;   // 0.7.1: the contamination printed, never hidden
   const lda = !!sol && sol.model === 'RKS LDA';   // 0.7.3 K2: the method leads the line and ∫ρ (the grid's own quadrature error) rides with the energy
@@ -22,6 +22,12 @@ export function statusOf({ owner = 'molecule', record = null, sol = null, oracle
     head: join(s2 && `${s2} (exact ${S * (S + 1)})`, head), geometry });   // the line keeps the 110-character budget; the head has room for S(S+1)
   if (owner === 'hydrogen') { const H = FIELD_LAW.hydrogen, p = `picture good to ${up(H.rms)} RMS (worst voxel ${up(H.worst)})`; label = label || 'HYDROGEN'; return said('EXACT', p, join(label !== 'HYDROGEN' && label, 'EXACT', p)); }   // 0.8.1 T2: a reduced mass rides in the label
   if (owner === 'stark') { label = label || 'HYDROGEN + F·z'; return said('NUMERICAL', 'eigensolve in the n ≤ 6 basis · no continuum: ionisation said, not simulated', join('NUMERICAL', 'INTER-SHELL STARK · eigensolve in the n ≤ 6 basis')); }   // 0.8.0 G3
+  if (owner === 'atom') {   // iteration 008 A: past Kr the central field says it is non-relativistic (atoms.js' header has the numbers); H–Kr keep no line
+    if (!(Z > 36)) return null;
+    const why = 'non-relativistic Xα: the valence levels drift from measurement with Z (the 6s contraction)';
+    const o = said('NUMERICAL', why, join('NUMERICAL', 'ATOM · ' + (label || 'Z = ' + Z), 'one Xα(2/3) + Latter-tail central field', 'no mass–velocity, no spin–orbit: the core and the 6s sit too shallow'));
+    o.line = join(label, 'NUMERICAL', why); o.atom = true; return o;
+  }
   if (owner !== 'molecule') return null;
   const o = oracle || (record && record.oracle) || null, st = record && record.status ? record.status.energy : o ? 'MEASURED' : 'UNKNOWN', word = STATE_WORD[st] || 'UNCHECKED';
   const d = o && Number.isFinite(o.delta) ? o.delta : o && sol ? Math.max(Math.abs(sol.energy - o.energy), Math.abs(o.energy) * Number.EPSILON) : NaN, geometry = (record && record.geometry) || null;

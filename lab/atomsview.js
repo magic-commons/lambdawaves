@@ -1,7 +1,8 @@
 /* atomsview.js — the ATOMS window: which atom the register is in, and everything that model owes the reader.
  *
  * The maths is lab/atoms.js: one self-consistent CENTRAL field per element (Xα, α = 2/3, plus the Latter tail),
- * solved live on a logarithmic mesh — twice, and Richardson-extrapolated in dx² — for Z = 1 … 36.  This window
+ * solved live on a logarithmic mesh — twice, and Richardson-extrapolated in dx² — for Z = 1 … 86 (H … Rn; non-relativistic, said
+ * past Kr in the MODEL readout and in STATUS).  This window
  * prints what the model says and, as loudly, what it does NOT say:
  *
  *   · an Xα eigenvalue is not a Koopmans energy, so −ε and the Δ-SCF ionisation stand SIDE BY SIDE and only the
@@ -53,17 +54,17 @@ export function createAtoms(host, api) {
   const ladHover = graphHover(lad, { repaint: () => paintLadder() });
   const radHover = graphHover(rad, { repaint: () => paintRadial() });
 
-  /* THE PERIODIC TABLE (0.4.0 S3 · R-A2), where the Z stepper was: H–Kr in SPECTRUM's own picker — a `.picker` of `.pk-n`
-     periods, each a `.pk-chips` of `.pk-c` buttons — with the periods as columns on the card and on a phone and rows when the
-     window floats (lab.css .atm-table); the element in force is `.on`.  At 0.5.0 it becomes the kit's `cells` (KIT BRIEF 4). */
+  /* THE PERIODIC TABLE (0.4.0 S3 · R-A2; to Rn at iteration 008 A, every period a ROW of small wrapping cells), where the Z stepper was: H–Rn in SPECTRUM's own picker — a `.picker` of `.pk-n`
+     periods, each a `.pk-chips` of `.pk-c` buttons (once columns on the card; 86 cells do not fit columns, lab.css .atm-table); the
+     element in force is `.on`.  At 0.5.0 it becomes the kit's `cells` (KIT BRIEF 4). */
   const table = el('div', 'picker atm-table', host), cells = [];
-  for (const [p, z0, z1] of [[1, 1, 2], [2, 3, 10], [3, 11, 18], [4, 19, 36]]) {
+  for (const [p, z0, z1] of [[1, 1, 2], [2, 3, 10], [3, 11, 18], [4, 19, 36], [5, 37, 54], [6, 55, 86]]) {
     const g = el('div', 'pk-n', table); g.style.setProperty('--nc', N_COLOR[p]); el('div', 'pk-nl', g, String(p));
     const cs = el('div', 'pk-chips', g);
-    for (let z = z0; z <= z1; z++) { const b = el('button', 'pk-c', cs, ATOMS[z - 1].symbol); b.type = 'button'; b.title = `${ATOMS[z - 1].name} · Z = ${z} · ${ATOMS[z - 1].term}`; b.addEventListener('click', () => api.select(z)); cells[z] = b; }
+    for (let z = z0; z <= z1; z++) { const b = el('button', 'pk-c', cs, ATOMS[z - 1].symbol); b.type = 'button'; b.title = `${ATOMS[z - 1].name} · Z = ${z} · ${z > 36 ? ATOMS[z - 1].core : ATOMS[z - 1].term}`; b.addEventListener('click', () => api.select(z)); cells[z] = b; }
   }
   const r2 = el('div', 'row tight', host);
-  r2.appendChild(trig({ label: 'FILL THE VALENCE', title: 'Load the outer occupied shell into the register', onFire: () => api.fill() }).root);
+  r2.appendChild(trig({ label: 'LOAD VALENCE', title: 'Load the outer occupied shell into the register, every m equal and in phase', onFire: () => api.fill() }).root);
   const roScf = readout({ label: 'SCF', value: '—', sub: '' });
   r2.appendChild(roScf.root);
 
@@ -78,8 +79,9 @@ export function createAtoms(host, api) {
     const shells = S.orbitals.map((o) => ({ n: o.n, l: o.l, occ: o.occ, eps: o.eps, nodes: o.nodes })).sort((a, b) => a.eps - b.eps);
     const outer = cfg[cfg.length - 1];                                  // atoms.js's own default for the Δ-SCF
     const val = [...cfg].reverse().find((c) => c.l <= 1) || outer;      // the valence s or p, which is what δ_l is for
+    const noVal = cfg.some((c) => c.l >= 2 && c.n >= val.n);            // Pd (4d¹⁰, no 5s): the last s or p is core — never true for Z ≤ 36
     const top = shells.slice(-2);
-    cache = { A, S, shells, outer, val, top, half: atomDomainFor(Z),
+    cache = { A, S, shells, outer, val, noVal, top, half: atomDomainFor(Z),
       ip: ionisation(Z, { n: outer.n, l: outer.l }), koop: -atomEnergyOf(Z, outer.n, outer.l) * HARTREE_EV,
       d23: quantumDefect(Z, val.n, val.l), d1: quantumDefect(Z, val.n, val.l, { alpha: 1 }),
       gap: top.length === 2 ? Math.abs(top[1].eps - top[0].eps) : Infinity };
@@ -91,15 +93,15 @@ export function createAtoms(host, api) {
   function write() {
     const C = cache, A = C.A, S = C.S;
     for (let z = 1; z < cells.length; z++) cells[z].classList.toggle('on', z === A.Z);
-    roEl.set(`${A.symbol} · ${A.name} · Z = ${A.Z}`); roEl.setSub(A.term + (Z === 24 || Z === 29 ? '  · an Aufbau exception' : ''));
-    roModel.set(S.model); roModel.setSub(`central field · one potential for every shell · ${api.active() ? 'IN FORCE on the register' : 'not the operator in force'}`);
+    roEl.set(`${A.symbol} · ${A.name} · Z = ${A.Z}`); roEl.setSub((A.Z > 36 ? A.core : A.term) + (A.exception ? '  · an Aufbau exception' : ''));
+    roModel.set(S.model); roModel.setSub(`central field · one potential for every shell · ${api.active() ? 'IN FORCE on the register' : 'not the operator in force'}${A.Z > 36 ? ' · NON-RELATIVISTIC: past Kr the valence drifts from measurement with Z (the 6s contraction is missing)' : ''}`);
     roE.set(S.E.toFixed(5) + ' Eh'); roE.setSub(`${(S.E * HARTREE_EV).toFixed(2)} eV · Slater\'s functional with the α-fraction restored · ${S.electrons.toFixed(4)} electrons on the mesh`);
     roIP.set(C.ip.toFixed(3) + ' eV', 'ok');
     roIP.setSub(`Δ-SCF of the ${C.outer.n}${SPD[C.outer.l]} shell: E(ion) − E(neutral), the same functional both sides`);
     roKo.set('−ε = ' + C.koop.toFixed(3) + ' eV', 'warn');
     roKo.setSub(`the ${C.outer.n}${SPD[C.outer.l]} eigenvalue negated — an Xα eigenvalue is NOT an ionisation potential`);
-    roQD.set(Number.isFinite(C.d23) ? `δ_${SPD[C.val.l]} = ${C.d23.toFixed(4)}` : '—');
-    roQD.setSub(`${C.val.n}${SPD[C.val.l]} at α = 2/3 · at α = 1: ${C.d1.toFixed(4)}${Z === 11 ? ' · from spectra: 1.3730' : ''} · δ = n − 1/√(−2ε)`);
+    roQD.set(Number.isFinite(C.d23) && !C.noVal ? `δ_${SPD[C.val.l]} = ${C.d23.toFixed(4)}` : '—');
+    if (C.noVal) roQD.setSub(`${A.symbol} has no valence s or p outside its d shell (${A.core}): δ_l belongs to a Rydberg series, and ${C.val.n}${SPD[C.val.l]} is core`); else roQD.setSub(`${C.val.n}${SPD[C.val.l]} at α = 2/3 · at α = 1: ${C.d1.toFixed(4)}${Z === 11 ? ' · from spectra: 1.3730' : ''} · δ = n − 1/√(−2ε)`);
     roScf.set(`${S.iterations} iterations · ‖ΔV·r‖ ${S.residual.toExponential(1)}`, S.residual < 1e-7 ? 'ok' : 'warn');
     roScf.setSub(`two meshes, Richardson in dx² · half-width ${C.half.toFixed(2)} a₀ · ${C.shells.length} occupied shells`);
     const near = C.gap < 0.1 && C.top.length === 2;

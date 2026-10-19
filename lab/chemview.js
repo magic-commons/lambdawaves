@@ -185,7 +185,7 @@ export function createChem(host, api) {
   function header() {
     const recs = sectionRecs(), on = recs.filter((r) => have.get(r.hash)).length, n = CHEM_PRESETS.filter((p) => p.section === page).length;
     const mb = (recs.reduce((s, r) => s + r.bytes, 0) / 1048576).toFixed(1);
-    sub = page === 'ATOMS' ? `${ATOMS.length} elements, H–Kr · ${ATOM_W.word}` : recs.length ? `${recs.length} record${recs.length > 1 ? 's' : ''} · ${mb} MB · ${on} here` : `${n} molecules, all live`;
+    sub = page === 'ATOMS' ? `${ATOMS.length} elements, H–${ATOMS.at(-1).symbol} · ${ATOM_W.word}` : recs.length ? `${recs.length} record${recs.length > 1 ? 's' : ''} · ${mb} MB · ${on} here` : `${n} molecules, all live`;
     secStep.root.title = page === 'ATOMS' ? `ATOMS · ${sub}: a tile sets OPERATOR ATOM and its element` : `${page} · ${sub}: ${n} molecules; ` + (recs.length ? `${recs.length} with a record (${mb} MB), ${on} of them on this device` : 'every one solves live, none has a record');
     keepSw.root.hidden = !recs.length || safariTab(); keepSw.set(recs.length > 0 && on === recs.length); shelfFill();
   }
