@@ -25,7 +25,7 @@
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
 import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText, chip } from './mir/kit.js';
-import { paintStroke, fillButton } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton, levelLine } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { createFlow } from './molecular-flow.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
 
@@ -479,12 +479,12 @@ export function createOrbitals(host, api) {
         const lv = row.items[j], x0 = left + j * seg + 1, x1 = x0 + seg - 2;
         const c = sel.get(lv.k), lit = !!c, ink = lv.occ ? occInk : virInk, dim = !carried(lv.k);
         /* iteration 008 U (Josh: "simple lines that's dark when off and full vivid color when on") · PLAIN LINES: one stroke a level — dark
-           when off, the level's full vivid ink when on — and no band, bar, box or glow beside it (the dials carry |c|; occupied A, virtual B) */
+           when off, the level's full vivid ink when on — and no band, bar, box or glow beside it (the dials carry |c|; occupied A, virtual B).
+           Iteration 009 F2: SPECTRUM's levelLine (paint-stroke.js) draws it — off 0.42 at 1 px, on full at 2 px — and its fade steps a mark back */
         const cur = lead && lv.k === kc;                                       // VIEW ORBITAL: the dial's line is what the field draws — lit
-        g.strokeStyle = cur ? ink(1) : lit ? ink(lead ? 0.5 : 1) : ink(dim ? 0.1 : 0.26); g.lineWidth = cur || (lit && !lead) ? 2.5 : lit ? 2 : 1.5;
-        g.beginPath(); g.moveTo(x0, yy); g.lineTo(x1, yy); g.stroke();
+        levelLine(g, x0, x1, yy, cur || lit ? (lv.occ ? A : B) : null, lv.occ ? A : B, 1, cur ? 1 : lit ? (lead ? 0.5 : 1) : dim ? 0.25 : 1);
         hits.push({ y: yy, x0, x1, k: lv.k });
-        hovers.push({ kind: 'line', key: 'L' + lv.k, points: [x0, yy, x1, yy], lw: lit ? 2 : 1, colour: ink(1),
+        hovers.push({ kind: 'line', key: 'L' + lv.k, points: [x0, yy, x1, yy], lw: cur || lit ? 2 : 1, colour: ink(1),
           info: `${label(lv.k)}  ·  k${lv.k + 1}  ·  ε = ${lv.eps.toFixed(6)} Eh  ·  ${lv.occ ? lv.occ + ' electrons' : 'virtual, 0 electrons'}`
             + (sol.names ? '  ·  ' + about(lv.k) : '')
             + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : dim ? '  ·  not carried by this record' : '  ·  click to add')
@@ -554,7 +554,7 @@ export function createOrbitals(host, api) {
     sol = s || null; coreBtn.hidden = !nCore();
     re = im = null; pushedT = NaN; pushedV = -1; selected = -1;
     flow = null; flowOn = false; flowSw.set(false);
-    sel.clear(); M.reset(); rowsEl.classList.remove('reg-morphing');
+    sel.clear(); M.reset();
     if (sol) {
       if (wanted) { applyRecord(wanted); wanted = null; }
       else { sel.set(sol.nocc - 1, { amp: 1, phase: 0 }); selected = sol.nocc - 1; }   // a new solve resets the register to HOMO alone
@@ -599,7 +599,7 @@ export function createOrbitals(host, api) {
       if (selected < 0) selected = k;
     }
     /* ADR-0002: the stores and the position travel with the selection (absent in a record that holds no store: an older file, NEW, the demos) */
-    M.load(r); rowsEl.classList.toggle('reg-morphing', M.on);
+    M.load(r);
   }
   /* the stores, A ↔ B and MORPH are written only while a store exists (no store, no path: MORPH cannot be on) — a register that never
      stored keeps its bytes; a ROUTED A ↔ B's base is seated by persist.js modSeats whatever this writes */

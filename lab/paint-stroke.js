@@ -1,5 +1,6 @@
 /* paint-stroke.js — THE PAINT GESTURE (2026-10, Josh), one law for every register ladder: MOLECULES' ORBITAL and STATES
- * ladders (canvases) and SPECTRUM's state grid (buttons) — and the EMPTY ↔ FILL ALL button the three heads share (fillButton).
+ * ladders (canvases) and SPECTRUM's state grid (buttons) — and the EMPTY ↔ FILL ALL button the three heads share (fillButton) and the
+ * plain level line the three ladders draw (levelLine).
  *
  *   LEFT press  ADDS:    a click adds the item under the pointer; a drag adds every item it crosses.
  *   RIGHT press REMOVES: a right-click removes the item under the pointer; a right-drag removes every item it crosses.
@@ -67,20 +68,31 @@ export function paintStroke(surface, o) {
 /* iteration 008 U · EMPTY <-> FILL ALL, the one two-state button the three ladders' heads carry (SPECTRUM, ORBITAL, STATES): an empty register
    shows FILL ALL, any other EMPTY.  The glyphs are 24-unit outline drawings in the kit's hand (glyph.js: stroke 1.9, round caps; the kit's
    registry is not ours to extend, so they are drawn here), designed by Gemini 3.8 Flash (High) — the prompt and its answer are in
-   research/iteration-008/U-BUILD.md.  `words` keeps SPECTRUM's look (its head row's words, as DIALS and + MODE). */
+   research/iteration-008/U-BUILD.md.  Iteration 009 F2 (Josh, Yan's call 8): SPECTRUM wears the glyph too — one look, no words mode. */
 const GS = 'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
 const GLYPH = {   // Gemini's answer, verbatim but for the kit's stroke block on each element: a register frame and three rungs, whole or broken
   fill: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8"/>',
   empty: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8" stroke-dasharray="2 4"/>',
 };
-export function fillButton(row, titles, onPress, words = false) {
+export function fillButton(row, titles, onPress) {
   const b = el('button', 'trig reg-fill', row); b.type = 'button';
   let empty = null;
   const draw = (v) => {
-    if (words) b.textContent = v ? 'FILL ALL' : 'EMPTY';
-    else b.innerHTML = '<svg class="gly" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">' + GLYPH[v ? 'fill' : 'empty'] + '</svg>';
+    b.innerHTML = '<svg class="gly" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">' + GLYPH[v ? 'fill' : 'empty'] + '</svg>';
     b.setAttribute('aria-label', v ? 'FILL ALL' : 'EMPTY'); b.title = v ? titles.fill : titles.empty; b.dataset.state = v ? 'fill' : 'empty';
   };
   b.addEventListener('click', () => onPress(empty));
   return { root: b, set(v, ok = true) { const e = !!v; if (e !== empty) { empty = e; draw(e); } b.disabled = !ok; }, get empty() { return empty; } };
+}
+
+/* iteration 008 A (Josh: "simple lines that's dark when off and full vivid color when on") · THE LEVEL LINE, written once for the three
+   ladders (iteration 009 F2 lifted it here from spectrum.js, Yan's call 8): an empty level is `off` at 0.42 and `w` px; a populated one is
+   `on` at full strength and `w + 1` px — no population bar, no halo, no glow (the share is the line's hover).  `on` null = off; both are
+   [r, g, b].  SPECTRUM: on = the shell's colour, off = the theme's ink, w = 1.  ORBITAL: the level's accent (A occupied, B virtual) both ways.
+   STATES: w is the oscillator strength's weight (1–3 px, S₀ 2), the colour its axis's.  `fade` steps a mark back (it multiplies the alpha):
+   ORBITAL's register under VIEW ORBITAL 0.5, a level this record does not carry 0.25; STATES' dark states 0.7. */
+export function levelLine(g, x0, x1, y, on, off, w = 1, fade = 1) {
+  const c = on || off;
+  g.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},${(on ? 1 : 0.42) * fade})`; g.lineWidth = on ? w + 1 : w;
+  g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
 }

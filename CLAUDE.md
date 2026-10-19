@@ -62,7 +62,13 @@ THE PAINT GESTURE (`lab/paint-stroke.js`) is one law for the ORBITAL and STATES
 ladders and SPECTRUM's state grid: LEFT click adds one, LEFT drag adds every
 item it crosses; RIGHT click removes one, RIGHT drag removes every item it
 crosses (Alt/Option+left = right; a finger = left). A crossed degenerate row is
-taken whole. One stroke is one undo row.
+taken whole. One stroke is one undo row. The same module holds what the three
+ladders share (iteration 009 F2): EMPTY ↔ FILL ALL (`fillButton`, one glyph,
+SPECTRUM's head too) and THE LEVEL LINE (`levelLine`: off at α 0.42 and w px,
+on at full strength and w + 1 px; SPECTRUM and ORBITAL w = 1, STATES w = the
+oscillator weight; `fade` steps a mark back). The register's A ↔ B MORPH is
+`lab/register-morph.js`: its `load` and `reset` set `.reg-morphing`, so a
+restored MORPH dims the lanes exactly as a hand-set one, in both panes.
 
 The five LEGACY windows are DELETED (0.5.0, R5-L1): QCD, H₂⁺ and HELIUM in D9,
 H₂ and ELECTROSTATICS in D9b. An older file that used one opens on its shim and

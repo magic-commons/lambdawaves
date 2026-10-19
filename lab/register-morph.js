@@ -43,11 +43,12 @@ export function createMorph(o) {
     },
     /** the modulator's road (a route, a TIMELINE lane): store the position; true when it moved — what follows is the pane's */
     setValue(v) { const x = Math.min(1, Math.max(0, +v || 0)); if (x === s) return false; s = x; return true; },
-    /** a new solve: no stores, no path */
-    reset() { A = B = null; lamps(); on = false; morphSw.set(false); },
+    /** a new solve: no stores, no path (and the lanes undimmed) */
+    reset() { A = B = null; lamps(); on = false; morphSw.set(false); o.rows().classList.remove('reg-morphing'); },
     /** the stores, the position and MORPH as a record carries them (each pane decides when it writes them) */
     save() { return { morph: s, morphOn: on, A: pack(A), B: pack(B) }; },
-    load(r) { A = unpack(r && r.A); B = unpack(r && r.B); lamps(); s = Math.min(1, Math.max(0, +(r && r.morph) || 0)); morphK.set(s); on = !!(r && r.morphOn) && !!A && !!B; morphSw.set(on); },
+    load(r) { A = unpack(r && r.A); B = unpack(r && r.B); lamps(); s = Math.min(1, Math.max(0, +(r && r.morph) || 0)); morphK.set(s); on = !!(r && r.morphOn) && !!A && !!B; morphSw.set(on);
+      o.rows().classList.toggle('reg-morphing', on); },   // iteration 009 F2: a restored MORPH dims the lanes / dials exactly as a hand-set one (both panes)
   };
   return api;
 }
