@@ -51,15 +51,15 @@ try {
   const ready = await g.waitFor('window.__LW&&__LW.ready', 400, 100);
   judge('L0 boot: __LW.ready', ready.ok === 1, ready);
   const boot = await g.ev(`return { errs: window.__e.slice(), gpu: __LW.field.error || null,
-    card: !!document.querySelector('.dev[data-id="orbitals"]'),
-    eyebrow: (document.querySelector('.dev[data-id="orbitals"] .dev-eyebrow') || {}).textContent,
-    title: (document.querySelector('.dev[data-id="orbitals"] .dev-title') || {}).textContent,
+    card: !!document.querySelector('.dev[data-id="chem"] .mol-reg .reg-pane canvas.mol-c'),
+    eyebrow: (document.querySelector('.dev[data-id="chem"] .dev-eyebrow') || {}).textContent,
+    title: (document.querySelector('.dev[data-id="chem"] .dev-title') || {}).textContent,
     inMenu: [...document.querySelectorAll('.dev')].map((d) => d.dataset.id).includes('orbitals'),
     handle: typeof __LW.orbitals === 'object' && typeof __LW.orbitals.select === 'function',
     ladder0: __LW.orbitals.ladder().length, on0: __LW.orbitals.on };`);
-  /* The saved id stays orbitals while the visible window is named MO-REGISTRY. */
-  judge('L0 boot: no page error, the MO-REGISTRY window is on the rack and __LW.orbitals is wired',
-    boot.errs.length === 0 && boot.card && boot.eyebrow === 'MO-REGISTRY' && boot.inMenu && boot.handle && boot.on0 === false, boot);
+  /* iteration 008 U: MO-REGISTRY lives INSIDE MOLECULES (its panes under the ON row); the `orbitals` window is retired (a saved seat opens `chem`) */
+  judge('L0 boot: no page error, the register is inside MOLECULES (no `orbitals` window) and __LW.orbitals is wired',
+    boot.errs.length === 0 && boot.card && boot.eyebrow === 'MOLECULES' && !boot.inMenu && boot.handle && boot.on0 === false, boot);
   if (boot.gpu) judge('L0 a WebGPU device is required for this gate', false, { gpu: boot.gpu });
 
   /* ── L1 · CHEMISTRY solves the ladder the register runs on ───────────────────────────────────────── */
@@ -76,12 +76,12 @@ try {
     { energy: l1.energy, delta: l1.energy - H2O.energy, owner: l1.owner, molecular: l1.molecular, half: l1.half, res: l1.res });
 
   /* ── L2 · the ladder: seven levels, five occupied, HOMO 5 and LUMO 6, and the gap ─────────────────── */
-  const l2 = await g.ev(`__LW.layout.reopen('orbitals', 'R');
-    const d = document.querySelector('.dev[data-id="orbitals"]');
+  const l2 = await g.ev(`__LW.layout.reopen('chem', 'R');
+    const d = document.querySelector('.dev[data-id="chem"]');
     if (d.classList.contains('folded')) d.querySelector('.dev-fold').click();
     await new Promise((r) => setTimeout(r, 220));
     const L = __LW.orbitals.ladder(), s = __LW.orbitals.state();
-    const cv = d.querySelector('canvas.mol-c'), b = cv && cv.getBoundingClientRect();
+    const cv = d.querySelector('.mol-reg canvas.mol-c'), b = cv && cv.getBoundingClientRect();
     return { levels: L.length, occupied: L.filter((x) => x.occ > 0).length, ladder: L,
       homo: s.homo, lumo: s.lumo, epsHOMO: s.epsHOMO, epsLUMO: s.epsLUMO, gap: s.gap, law: s.law,
       selection: s.selection, canvas: !!cv, painted: !!(b && b.width > 100 && b.height > 40),
@@ -106,7 +106,7 @@ try {
     const after = O.state();
     O.setDials(true);
     await new Promise((r) => setTimeout(r, 150));
-    const d = document.querySelector('.dev[data-id="orbitals"]');
+    const d = document.querySelector('.dev[data-id="chem"]');
     return { before: { sum: before.sum, n: before.selection.length }, after,
       lanes: d.querySelectorAll('.orb-lane').length, knobs: d.querySelectorAll('.orb-lane .k').length,
       errs: window.__e.slice() };`);
@@ -201,26 +201,27 @@ try {
     && l6.A.selection.every((c) => Object.keys(c).sort().join(',') === 'amp,k,phase')
     && l6.errs.length === 0, { keys: l6.keys, selection: l6.A.selection, errs: l6.errs });
 
-  /* ── the screenshot, with both windows open ──────────────────────────────────────────────────────── */
+  /* ── the screenshot, with the one card open (iteration 008 U: the register is inside MOLECULES) ──────── */
   fs.mkdirSync(path.dirname(SHOT), { recursive: true });
-  await g.ev(`for (const id of ['chem', 'orbitals']) { const d = document.querySelector('.dev[data-id="' + id + '"]');
+  await g.ev(`for (const id of ['chem']) { const d = document.querySelector('.dev[data-id="' + id + '"]');
       d.classList.remove('closed'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click(); }
     if (!__LW.orbitals.on) __LW.orbitals.setOn(true);
-    document.querySelector('.dev[data-id="orbitals"]').scrollIntoView({ block: 'center' });
+    document.querySelector('.dev[data-id="chem"] .mol-reg').scrollIntoView({ block: 'center' });
     await new Promise((r) => setTimeout(r, 600)); return 1;`);
   fs.writeFileSync(SHOT, Buffer.from(await g.snap(), 'base64'));
   const bytes = fs.statSync(SHOT).size;
-  judge('SHOT .tmp/orbitals-h2o.png exists and is over 50 kB, both windows open', bytes > 50 * 1024, { file: SHOT, bytes });
+  judge('SHOT .tmp/orbitals-h2o.png exists and is over 50 kB, the card open', bytes > 50 * 1024, { file: SHOT, bytes });
 
-  /* ── L7 · REGISTER OFF hands the field back to the card that owns the molecule ────────────────────── */
+  /* ── L7 · VIEW off REGISTRY hands the field back to the card's own view (iteration 008 U: there is no REGISTRY OFF — the register's
+     OFF is MOLECULES OFF, one switch; the card keeps the field when VIEW leaves REGISTRY) ─────────────────────────────────────────── */
   const l7 = await g.ev(`const O = __LW.orbitals;
-    O.setOn(false);
+    __LW.chem.setView('density');
     __LW.schedule(__LW.TIER.PRESENT);
     for (let i = 0; i < 10; i++) await new Promise((r) => requestAnimationFrame(r));
     await new Promise((r) => setTimeout(r, 200));
     return { on: O.on, view: __LW.mat.view, chemView: __LW.chem.state().view, info: __LW.field.moleculeInfo,
       owner: __LW.chem.state().fieldOwner, errs: window.__e.slice() };`);
-  judge(`L7 REGISTER OFF returns the observable (phase ${VIEW.phase} → density ${VIEW.density}) and the card's own density matrix`,
+  judge(`L7 VIEW DENSITY takes the field from the register: the observable returns (phase ${VIEW.phase} → density ${VIEW.density}) with the card's own density matrix`,
     l7.on === false && l7.view === VIEW.density && l7.chemView === 'density'
     && l7.info && l7.info.kind === 'density' && l7.info.complex === false && l7.owner === true,
     { on: l7.on, view: l7.view, chemView: l7.chemView, kind: l7.info && l7.info.kind, complex: l7.info && l7.info.complex });
@@ -230,7 +231,7 @@ try {
     await __LW.chem.kick();
     const k = await __LW.chem.run(20);
     const stopped = O.setOn(true);            // not running any more: this one must SUCCEED
-    O.setOn(false);
+    __LW.chem.setView('density');             // iteration 008 U: the register leaves the field by VIEW (its OFF is MOLECULES OFF)
     /* and with the run actually live, the register must refuse and say why */
     __LW.chem.setDt(0.01); await __LW.chem.kick();
     const sw = [...document.querySelectorAll('.dev[data-id="chem"] .sw')].find((b) => /RUN/.test(b.textContent));

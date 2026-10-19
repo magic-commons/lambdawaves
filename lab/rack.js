@@ -893,10 +893,10 @@ export async function boot(dom) {
   });
   layout.moveToRack('spectrum', 'L'); spectrum.openPicker(true);
   // First-visit furniture. Existing saved visibility and layouts are restored below.
-  // 2026-10 (Josh): MOLECULES and MO-REGISTRY open on the LEFT rack under SPECTRUM.  No `devopen` fires here, so neither
+  // 2026-10 (Josh): MOLECULES (with its register since iteration 008 U) opens on the LEFT rack under SPECTRUM.  No `devopen` fires here, so neither
   // solves at boot — MOLECULES pays its solve when it is switched on or a molecule is picked.
   if(useCompactDefaults) {
-    const left=['informational','spectrum','chem','orbitals'],right=['settings','state','palette','observer','camera','clip'];
+    const left=['informational','spectrum','chem'],right=['settings','state','palette','observer','camera','clip'];
     for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',![...left,...right].includes(d.dataset.id));
     for(const [host,ids] of [[rackL,left],[rack,right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
   }

@@ -602,6 +602,7 @@ body.window-info-off .settings-help { display:none; }
 .reg-pane .sp-head > .trig { flex: 1 1 0; min-width: 0; padding: 0 4px; }
 .reg-pane .sp-head > .trig[hidden] { display: none; }
 .reg-pane .sp-head > .trig svg { width: 15px; height: 15px; }
+.reg-pane .sp-head > .trig.reg-fill svg { width: 18px; height: 18px; }   /* iteration 008 U: EMPTY ↔ FILL ALL (Gemini's rungs) needs three more px to tell whole rungs from broken ones */
 .reg-pane .sp-head > .lw-fold { flex: 0 0 30px; }
 .mir-camera .cam-mode:has(> .lw-fold) { grid-template-columns: minmax(0, 1fr) 30px; }
 .mir-camera .cam-more { display: flex; flex-direction: column; gap: var(--sp-2); }

@@ -8,6 +8,8 @@
  * 0.5.3 M2 · R11 drives C₆₀'s ladder by hand: a pick of C₆₀ under the browser's change rule after a failed record open, the
  * driver's real clicks and a real drag down the ladder, a real press of ON.  M3 · R12: the sentence on the STATES switch, a real press
  * of ON over S₀ alone, and the one re-arm seat.  M10 · R13: the eight ORBITAL presets on water and on C₆₀.
+ * Iteration 008 U: the register lives INSIDE MOLECULES (`chem`): ORBITAL | STATES rides the ON row, there is no REGISTRY ON — a register
+ * has the field under MOLECULES ON + VIEW REGISTRY + its pane — so "off the field" is VIEW DENSITY here, and the real presses are VIEW REGISTRY's.
  */
 import http from 'node:http';
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
@@ -24,17 +26,17 @@ try {
   const boot = await g.waitFor('window.__LW&&__LW.ready', 400, 100);
   judge('R0 boot: __LW.ready', boot.ok === 1, boot);
   const r0 = await g.ev(`return { errs: window.__e.slice(),
-    eyebrow: (document.querySelector('.dev[data-id="orbitals"] .dev-eyebrow') || {}).textContent,
-    seg: [...document.querySelectorAll('.dev[data-id="orbitals"] .reg-mode .seg-b')].map((b) => b.textContent),
+    eyebrow: (document.querySelector('.dev[data-id="chem"] .dev-eyebrow') || {}).textContent, gone: !document.querySelector('.dev[data-id="orbitals"]'),
+    seg: [...document.querySelectorAll('.dev[data-id="chem"] .mol-top .reg-mode .seg-b')].map((b) => b.textContent),
     mode: __LW.register.mode, handles: typeof __LW.states.preset === 'function' && typeof __LW.register.setMode === 'function',
     rank: __LW.molsession.state().models.map((m) => m.id) };`);
-  judge('R0 the window is MO-REGISTRY (id still `orbitals`), with an ORBITAL | STATES switch that opens on ORBITAL, and the session knows the `states` model',
-    r0.errs.length === 0 && r0.eyebrow === 'MO-REGISTRY' && r0.seg.join('|') === 'ORBITAL|STATES' && r0.mode === 'orbital' && r0.handles && r0.rank.includes('states'), r0);
+  judge('R0 the register is inside MOLECULES (no `orbitals` window), its ORBITAL | STATES seg on the ON row opens on ORBITAL, and the session knows the `states` model',
+    r0.errs.length === 0 && r0.eyebrow === 'MOLECULES' && r0.gone && r0.seg.join('|') === 'ORBITAL|STATES' && r0.mode === 'orbital' && r0.handles && r0.rank.includes('states'), r0);
 
   /* ── R1 · water: the ladder arrives, a preset is a rule, the session hands over the field ─────────────── */
   const r1 = await g.ev(`${HELP}
     __LW.chem.setOn(true); await __LW.chem.solve('H2O');
-    document.querySelector('.dev[data-id="orbitals"]').classList.remove('closed', 'folded');   // the window's own repaint paths run only while it can be seen: gate them too
+    document.querySelector('.dev[data-id="chem"]').classList.remove('closed', 'folded');   // the window's own repaint paths run only while it can be seen: gate them too
     const lad = await wait(() => __LW.states.ladder());
     __LW.register.setMode('states');
     const ring = __LW.states.preset('RING'), ringStatus = __LW.states.state().status;
@@ -108,10 +110,10 @@ try {
 
   /* ── R6 · a stick is PLAYED; the ORBITAL mode has its presets too ────────────────────────────────────── */
   const r6 = await g.ev(`${HELP}
-    __LW.states.setOn(false); __LW.states.clear(); __LW.register.setMode('orbital');
+    __LW.chem.setView('density'); __LW.states.clear(); __LW.register.setMode('orbital');
     const played = __LW.states.play(3); await ready(); await frames();
     const st = __LW.states.state(), mode = __LW.register.mode;
-    __LW.states.setOn(false); __LW.register.setMode('orbital');
+    __LW.chem.setView('density'); __LW.register.setMode('orbital');
     const wind = __LW.orbitals.preset('WINDING'), sel = __LW.orbitals.state().selection.map((s) => [s.k, +s.phase.toFixed(4)]);
     const hl = __LW.orbitals.preset('HOMO + LUMO'), sel2 = __LW.orbitals.state().selection.map((s) => s.k);
     return { played, mode, on: st.on, lanes: st.lanes.map((l) => l.label), wind, sel, hl, sel2, homo: __LW.orbitals.state().homo, errs: window.__e.slice() };`);
@@ -121,7 +123,7 @@ try {
 
   /* ── R7 · THE DRIVE: a resonant field moves population, the lanes read it out, a scrub back un-propagates ─ */
   const r7 = await g.ev(`${HELP}
-    __LW.states.setOn(false); await __LW.chem.solve('H2O'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 10);
+    __LW.chem.setView('density'); await __LW.chem.solve('H2O'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 10);
     __LW.register.setMode('states'); __LW.states.preset('BEAT'); await ready();
     __LW.states.clear(); const L = __LW.states.ladder(); let K = 0; for (let k = 0; k < L.count; k++) if (L.omega[k] < 3 && L.f[k] > L.f[K]) K = k;
     __LW.states.select(K, 0, 0); await ready();                                   // S₀ = 1, the bright lane empty: the drive must fill it
@@ -130,7 +132,7 @@ try {
     __LW.clock.scrub(0); __LW.schedule(__LW.TIER.EVOLVE); await frames(3);
     const onD = __LW.states.setDrive(true); await wait(() => __LW.states.drive.ready && __LW.states.drive.last);
     const goto = async (t) => { __LW.clock.scrub(t); for (let i = 0; i < 40; i++) { __LW.schedule(__LW.TIER.EVOLVE); await frames(2); const d = __LW.states.drive.last; if (d && Math.abs(d.t - t) < 1e-9) return d; } return __LW.states.drive.last; };
-    const half = await goto(Math.PI / 0.02 / 2), full = await goto(Math.PI / 0.02), fader = +document.querySelectorAll('.dev[data-id="orbitals"] .reg-pane:not([hidden]) .sp-row .fd')[1].getAttribute('aria-valuenow');
+    const half = await goto(Math.PI / 0.02 / 2), full = await goto(Math.PI / 0.02), fader = +document.querySelectorAll('.dev[data-id="chem"] .reg-pane:not([hidden]) .sp-row .fd')[1].getAttribute('aria-valuenow');
     const back = await goto(0);
     const ids = ['reg.e0', 'reg.w'].map((id) => __LW.mod.registry.has(id));
     const off = __LW.states.setDrive(false), st = __LW.states.state();
@@ -158,10 +160,10 @@ try {
 
   /* ── R9 · FLOW follows the model that is playing: the ORBITAL packet's WINDING, then CHEMISTRY's real-time run ─ */
   const r9 = await g.ev(`${HELP}
-    __LW.states.setOn(false); __LW.register.setMode('orbital'); __LW.orbitals.preset('WINDING'); __LW.orbitals.setOn(true); const fo = __LW.orbitals.setFlow(true);
+    __LW.chem.setView('density'); __LW.register.setMode('orbital'); __LW.orbitals.preset('WINDING'); __LW.orbitals.setOn(true); const fo = __LW.orbitals.setFlow(true);
     for (let k = 1; k <= 24; k++) { __LW.clock.scrub(0.3 * k); __LW.schedule(__LW.TIER.EVOLVE); await frames(2); }
     const orb = { sel: __LW.molsession.state().selected, flow: __LW.states.flowState() };
-    __LW.orbitals.setOn(false); __LW.orbitals.setFlow(false);
+    __LW.chem.setView('density'); __LW.orbitals.setFlow(false);
     await __LW.chem.solve('H2O'); __LW.chem.setAxis('y'); __LW.chem.setFlow(true); await __LW.chem.kick(); await frames(3);
     const still = __LW.states.flowState();
     __LW.chem.setRun(true); await wait(() => __LW.chem.state().steps > 150, 600); await frames(6);
@@ -212,8 +214,8 @@ try {
   judge('R11 C₆₀ offline: the failed record open gives the dropdown back (the last solved molecule chosen again, no solution), so a hand re-pick of C₆₀ is a change and opens it',
     r11a.before !== 'C60' && pick1 && r11b.preset === r11a.before && r11b.value === r11a.before && !r11b.sol && pick2 && r11c.ok && r11c.preset === 'C60', { r11a, pick1, r11b, pick2, r11c });
   const geo = await g.ev(`${HELP}
-    __LW.register.setMode('orbital'); const d = document.querySelector('.dev[data-id="orbitals"]'); d.classList.remove('closed', 'folded'); d.scrollIntoView({ block: 'start' });
-    await frames(); __LW.orbitals.clear(); await frames(2);
+    __LW.register.setMode('orbital'); const d = document.querySelector('.dev[data-id="chem"]'); d.classList.remove('closed', 'folded'); d.scrollIntoView({ block: 'start' });
+    await frames(); __LW.chem.setView('density'); __LW.orbitals.clear(); await frames(2);
     const b = d.querySelector('.reg-pane:not([hidden]) canvas.mol-c').getBoundingClientRect();
     return { x: Math.round(b.left + b.width * 0.6), y0: Math.round(b.top + 14), y1: Math.round(b.bottom - 30) };`);
   const clicks = [];
@@ -227,44 +229,45 @@ try {
   await wd('POST', `/session/${g.s}/actions`, { actions: [{ type: 'pointer', id: 'r11d', parameters: { pointerType: 'mouse' }, actions: drag }] });
   await wd('DELETE', `/session/${g.s}/actions`);
   const r11d = await g.ev(`${HELP} await frames(2); const st = __LW.orbitals.state(); return { sel: st.selection.map((q) => q.k), cols: __LW.orbitals.solution().cols.slice(), refusal: st.refusal, rungs: st.rungs.length };`);
-  const tapOn = await g.tap('.dev[data-id="orbitals"] .reg-mode > .sw.orb-on:not([hidden])');
-  const r11e = await g.ev(`${HELP} await frames(4); const st = __LW.orbitals.state(); const out = { on: __LW.orbitals.on, refusal: st.refusal, status: st.status, sel: __LW.molsession.state().selected, errs: window.__e.slice() };
-    __LW.orbitals.setOn(false); return out;`);
-  judge('R11 C₆₀ by hand: ' + clicks.length / 4 + ' clicks and a drag down the whole ladder put only carried levels (cols 175–182) in the register, and a real press of ON is answered, not refused',
-    afterClicks.every((k) => r11d.cols.includes(k)) && r11d.sel.length > 0 && r11d.sel.every((k) => r11d.cols.includes(k)) && r11d.refusal === null
-      && tapOn.ok === 1 && r11e.on === true && r11e.refusal === null && r11e.sel === 'orbital-packet' && r11e.errs.length === 0, { afterClicks, r11d, tapOn, r11e });
+  const r11v = await g.ev(`${HELP} const v = __LW.chem.state().view; __LW.chem.setView('density'); await frames(2); document.querySelector('.dev[data-id="chem"] .mol-view').scrollIntoView({ block: 'center' }); await frames(2); return v;`);
+  const tapOn = await g.tap('.dev[data-id="chem"] .mol-view .seg-b:nth-child(3)');   // VIEW REGISTRY, a real press
+  const r11e = await g.ev(`${HELP} await frames(4); const st = __LW.orbitals.state(); const out = { view: __LW.chem.state().view, on: __LW.orbitals.on, refusal: st.refusal, status: st.status, sel: __LW.molsession.state().selected, errs: window.__e.slice() };
+    __LW.chem.setView('density'); return out;`);
+  judge('R11 C₆₀ by hand: ' + clicks.length / 4 + ' clicks and a drag down the whole ladder put only carried levels (cols 175–182) in the register (the strokes picked VIEW REGISTRY), and a real press of VIEW REGISTRY is answered, not refused',
+    afterClicks.every((k) => r11d.cols.includes(k)) && r11d.sel.length > 0 && r11d.sel.every((k) => r11d.cols.includes(k)) && r11d.refusal === null && r11v === 'registry'
+      && tapOn.ok === 1 && r11e.view === 'registry' && r11e.on === true && r11e.refusal === null && r11e.sel === 'orbital-packet' && r11e.errs.length === 0, { afterClicks, r11d, r11v, tapOn, r11e });
 
   /* ── R12 · STATES ANSWERS (0.5.3 M3): the sentence on the switch, a hand's ON over S₀ alone plays BEAT, and ONE re-arm seat — the
          ladder's landing — for a re-solve under ON, an ON refused while the ladder is out, and a parked record that was ON ──────────── */
-  const SWQ = `.dev[data-id="orbitals"] .reg-mode > .sw.orb-on:not([hidden])`;
+  const SWQ = `.dev[data-id="chem"] .mol-view .seg-b:nth-child(3)`;   // VIEW REGISTRY (iteration 008 U: the register's ON)
   const r12a = await g.ev(`${HELP}
-    __LW.register.setMode('states'); await wait(() => __LW.states.state().refusal && /frontier orbitals only/.test(__LW.states.state().refusal));
-    const sw = document.querySelector('${SWQ}'), says = { label: sw.querySelector('.sw-lbl').textContent, help: sw.dataset.help || sw.title || '' };
+    __LW.chem.setView('density'); __LW.register.setMode('states'); await wait(() => __LW.states.state().refusal && /frontier orbitals only/.test(__LW.states.state().refusal));
+    const fb = document.querySelector('.dev[data-id="chem"] .reg-pane:not([hidden]) .reg-fill'), says = { status: __LW.states.state().status, fill: !!(fb && fb.disabled) };
     await __LW.chem.solve('H2O'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 10); await frames(2);
-    __LW.states.clear(); await frames(2); sw.scrollIntoView({ block: 'center' });
-    return { says, back: document.querySelector('${SWQ} .sw-lbl').textContent, lanes0: __LW.states.state().lanes.length };`);
+    __LW.states.clear(); await frames(2); document.querySelector('${SWQ}').scrollIntoView({ block: 'center' });
+    return { says, back: !fb.disabled && fb.getAttribute('aria-label'), lanes0: __LW.states.state().lanes.length };`);
   const tapStates = await g.tap(SWQ);
   const r12b = await g.ev(`${HELP} await frames(2); const banner = __LW.stageText.banner; await ready(); await frames(2);
     const st = __LW.states.state(); return { on: st.on, lanes: st.lanes.map((l) => l.label), banner, sel: __LW.molsession.state().selected };`);
-  judge('R12 STATES says why ON ITS SWITCH (C₆₀: "NO CIS STATES", the worker\'s sentence its hover; water: MO-REGISTRY ON again), and a hand\'s ON over S₀ alone plays BEAT',
-    r12a.says.label === 'NO CIS STATES' && /frontier orbitals only/.test(r12a.says.help) && r12a.back === 'MO-REGISTRY ON' && r12a.lanes0 === 1
+  judge('R12 STATES says why (C₆₀: the worker\'s sentence on its status line, FILL ALL stood down; water: FILL ALL again), and a hand\'s VIEW REGISTRY over S₀ alone plays BEAT',
+    /frontier orbitals only/.test(r12a.says.status) && r12a.says.fill === true && r12a.back === 'FILL ALL' && r12a.lanes0 === 1
       && tapStates.ok === 1 && r12b.on === true && r12b.lanes.length === 2 && r12b.lanes[0] === 'S₀' && r12b.banner === 'BEAT' && r12b.sel === 'states', { r12a, tapStates, r12b });
   const r12c = await g.ev(`${HELP}
     const L0 = __LW.states.ladder().count; await __LW.chem.solve('NH3');
     const back = await wait(() => __LW.states.ladder() && __LW.states.ladder().count !== L0 && __LW.states.on && __LW.states.state().lanes.length === 2); await ready();
     const re = { on: __LW.states.on, lanes: __LW.states.state().lanes.map((l) => l.label), sel: __LW.molsession.state().selected };
-    __LW.states.setOn(false); let hit = null;
+    __LW.chem.setView('density'); let hit = null;
     const un = __LW.chem.subscribe((s) => { if (s && /^C6H6\\|/.test(s.key) && !hit) hit = { ladder: !!__LW.states.ladder(), on: __LW.states.setOn(true), status: __LW.states.state().status }; });
     await __LW.chem.solve('C6H6'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 315 && __LW.states.on); un();
     const refused = { hit, on: __LW.states.on, lanes: __LW.states.state().lanes.map((l) => l.label) };
     await __LW.chem.solve('H2O'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count === 10);
-    __LW.states.setOn(false); __LW.states.preset('BEAT'); await ready(); const rec = __LW.states.save(); let parked = null;
+    __LW.chem.setView('density'); __LW.states.preset('BEAT'); await ready(); const rec = __LW.states.save(); let parked = null;
     await __LW.chem.solve('NH3'); await wait(() => __LW.states.ladder() && __LW.states.ladder().count !== 10);
     const un2 = __LW.chem.subscribe((s) => { if (s && /^H2O\\|/.test(s.key) && !parked) parked = { ladder: !!__LW.states.ladder(), load: __LW.states.load({ ...rec, on: true }), on: __LW.states.on }; });
     await __LW.chem.solve('H2O');
     await wait(() => __LW.states.ladder() && __LW.states.on); await ready(); un2();
     const loaded = { parked, on: __LW.states.on, lanes: JSON.stringify(__LW.states.save().lanes) === JSON.stringify(rec.lanes) };
-    __LW.states.setOn(false);
+    __LW.chem.setView('density');
     return { back: !!back, re, refused, loaded, errs: window.__e.slice() };`);
   judge('R12 ONE re-arm seat: a re-solve under ON comes back ON (BEAT on the new ladder); an ON refused while the ladder is out, and a parked record that was ON, come ON when it lands',
     r12c.back && r12c.re.on && r12c.re.lanes.length === 2 && r12c.re.sel === 'states'
@@ -274,12 +277,12 @@ try {
   /* ── R13 · THE EIGHT ORBITAL PRESETS (0.5.3 M10), one table: on water each takes its levels or refuses with its sentence; on C₆₀
          every one stays inside the record's columns (0.6.1 F1: the 180 occupied + the LUMO set, so OCCUPIED works there too) ─────────────────────────────── */
   const r13 = await g.ev(`${HELP}
-    __LW.register.setMode('orbital'); const opts = [...document.querySelector('.dev[data-id="orbitals"] .reg-bar select.sel').options].map((o) => o.value).filter(Boolean);
+    __LW.register.setMode('orbital'); const opts = [...document.querySelector('.dev[data-id="chem"] .reg-bar select.sel').options].map((o) => o.value).filter(Boolean);
     const run = () => Object.fromEntries(opts.map((p) => { const ok = __LW.orbitals.preset(p), st = __LW.orbitals.state();
       return [p, ok ? st.selection.map((q) => q.k + ':' + q.amp.toFixed(4) + (q.phase ? '@' + q.phase.toFixed(4) : '')).join(' ') : 'refused · ' + st.status]; }));
     await __LW.chem.solve('H2O'); await wait(() => __LW.orbitals.solution() && __LW.orbitals.solution().nAO === 7); const water = run();
     await __LW.chem.solve('C60'); await wait(() => __LW.orbitals.solution() && __LW.orbitals.solution().cols); const c60 = run(), cols = __LW.orbitals.solution().cols.slice();
-    const on = __LW.orbitals.preset('FRONTIER FOUR') && __LW.orbitals.setOn(true); await frames(3); const st = __LW.orbitals.state(); __LW.orbitals.setOn(false);
+    const on = __LW.orbitals.preset('FRONTIER FOUR') && __LW.orbitals.setOn(true); await frames(3); const st = __LW.orbitals.state(); __LW.chem.setView('density');
     return { opts, water, c60, cols, on, refusal: st.refusal, errs: window.__e.slice() };`);
   const ks = (v) => (v.startsWith('refused') ? null : v.split(' ').map((t) => +t.split(':')[0]));
   const inCols = Object.values(r13.c60).filter((v) => !v.startsWith('refused')).every((v) => ks(v).every((k) => r13.cols.includes(k)));

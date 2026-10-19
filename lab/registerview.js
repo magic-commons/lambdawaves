@@ -1,13 +1,17 @@
-/* registerview.js — THE REGISTER WINDOW: one window, two registers, one switch (REGISTER-WINDOW-SPEC-2026-09-18 §0).
+/* registerview.js — THE REGISTER: two registers, one pane seg, inside MOLECULES (REGISTER-WINDOW-SPEC-2026-09-18 §0; iteration 008 U).
  *
  *   ORBITAL   the one-electron packet over CHEMISTRY's canonical orbitals (orbitalsview.js): it has a phase, it
  *             beats at orbital gaps Δε, and it says so.
  *   STATES    the many-electron register over S₀ and the singlet CIS states (statesview.js): it beats where the
  *             spectrum's sticks stand, and it is a valid N-electron state at any amplitude.
  *
- * Each mode keeps its own register and its own record; the switch chooses which pane is shown, and turning one
- * register ON turns the other OFF — the molecular session would rank them anyway (states over orbital-packet),
- * but two lit REGISTER ON switches in one window would be a lie about which one the field is showing.
+ * ITERATION 008 U (Josh: "Molecules On and Registry On will be the same function … make it so that 'view' in the molecules window shifts
+ * into registry mode") · MO-REGISTRY is no longer a window: its panes sit in MOLECULES under the ON row, the ORBITAL | STATES seg rides
+ * that row (`api.bar`), and there is no REGISTRY ON.  A register HAS the field exactly when MOLECULES is ON, MOLECULES' VIEW reads
+ * REGISTRY and its pane is the one shown — one state, read here (`want`) and followed (`follow`) whenever any of the three moves.  Each
+ * pane keeps its own claim machinery (setOn, its refusals, STATES' parking for a ladder still to land); `follow` is its only caller from
+ * outside, and the panes' public setOn verbs (__LW.orbitals.setOn, a stick's press) reach the ONE switch through `api.one`.
+ * Each mode keeps its own register and its own record; a saved `on` is the derived state, so a file means what it meant.
  */
 import { el, seg } from './mir/kit.js';
 import { createOrbitals } from './orbitalsview.js';
@@ -15,49 +19,73 @@ import { createStates } from './statesview.js';
 
 export function createRegister(host, api) {
   let mode = 'orbital';
-  const bar = el('div', 'row tight reg-mode', host);
-  const modeSeg = seg({ aria: 'Register mode', value: mode, options: [{ id: 'orbital', label: 'ORBITAL' }, { id: 'states', label: 'STATES' }],
-    onChange: (v) => setMode(v) });
+  const C = () => (api.chem ? api.chem() : null);
+  /** the one state: MOLECULES ON, VIEW REGISTRY, and this pane shown */
+  const drawn = () => { const c = C(); return !!(c && c.on && c.view === 'registry'); };
+  const want = (m) => drawn() && mode === m;
+  const modeSeg = seg({ aria: 'Register pane', value: mode, cls: 'reg-mode', options: [{ id: 'orbital', label: 'ORBITAL' }, { id: 'states', label: 'STATES' }],
+    onChange: (v) => setMode(v, true) });
   modeSeg.root.title = 'ORBITAL: one electron over the molecule’s orbitals — it has a phase, and beats at orbital gaps. '
-    + 'STATES: the whole molecule over its ground and excited states — it beats where the spectrum’s sticks stand.';
-  bar.appendChild(modeSeg.root);
+    + 'STATES: the whole molecule over its ground and excited states — it beats where the spectrum’s sticks stand. VIEW REGISTRY draws the pane shown.';
+  (api.bar || host).appendChild(modeSeg.root);
   const paneO = el('div', 'reg-pane', host), paneS = el('div', 'reg-pane', host); paneS.hidden = true;
 
+  /* one status line (the card's): a register speaks there only while it is what the field draws */
   const statusOf = { orbital: ['', ''], states: ['', ''] };
-  const relay = (m) => (t, cls) => { statusOf[m] = [t, cls]; if (mode === m && api.status) api.status(t, cls); };
+  const relay = (m) => (t, cls) => { statusOf[m] = [t, cls]; if (mode === m && drawn() && api.status) api.status(t, cls); };
+  /* a hand that painted a pane picked that register: VIEW REGISTRY (api.stroked, molecules.js), this pane */
+  const stroked = (m) => { if (m !== mode) setMode(m); if (api.stroked) api.stroked(m); };
   let orbitals = null, states = null;
-  orbitals = createOrbitals(paneO, { ...api, status: relay('orbital') });
-  states = createStates(paneS, { ...api, status: relay('states'), show: (m) => setMode(m) });
+  orbitals = createOrbitals(paneO, { ...api, status: relay('orbital'), stroked });
+  states = createStates(paneS, { ...api, status: relay('states'), show: (m) => setMode(m), stroked, claim: () => one(true, 'states', true) });
 
-  /* one register at a time: the wrapped setOn of each turns the other off first */
+  /* the panes' own claims (their setOn) — `follow` and nothing else from outside calls them */
   const onO = orbitals.setOn, onS = states.setOn;
-  orbitals.setOn = (v) => { if (v && states.on) onS(false); return onO(v); };
-  states.setOn = (v) => { if (v && orbitals.on) onO(false); return onS(v); };
+  function follow(hand) {
+    const o = want('orbital'), s = want('states');
+    if (!o && orbitals.on) onO(false);
+    if (!s) onS(false);                                     // OFF also disarms a STATES pane still parked for its ladder
+    if (o && !orbitals.on) onO(true);
+    if (s && !states.on) onS(true, !!hand);                 // a hand's ON over S₀ alone plays BEAT (statesview)
+    const st = statusOf[mode]; if (drawn() && api.status && st[0]) api.status(st[0], st[1]);
+    return o || s;
+  }
+  /** the panes' public ON: the one switch (api.one: MOLECULES ON and VIEW REGISTRY, or MOLECULES OFF), this pane shown */
+  function one(v, m, hand) {
+    if (v && m !== mode) setMode(m);
+    if (api.one) api.one(!!v, !!hand); else follow(hand);
+    return m === 'states' ? states.on : orbitals.on;      // as it always answered: does this register hold the field now (a solve in flight: not yet)
+  }
+  orbitals.setOn = (v) => one(v, 'orbital');
+  states.setOn = (v, hand) => one(v, 'states', hand);
+  /* the saved `on` is the DERIVED state (a hand's, never a landing's), so a file and an undo row mean what they meant before the merge */
+  const saveO = orbitals.save, saveS = states.save;
+  orbitals.save = () => ({ ...saveO(), on: want('orbital') });
+  states.save = () => ({ ...saveS(), on: want('states') });
+  /* …and a record that says ON is the one switch's ON too (a pane's own load would claim the field whatever VIEW reads) */
+  const loadO = orbitals.load, loadS = states.load;
+  orbitals.load = (r) => { const x = loadO(r && { ...r, on: false }); if (r && r.on) one(true, 'orbital'); return x; };
+  states.load = (r) => { const x = loadS(r && { ...r, on: false }); if (r && r.on) one(true, 'states'); return x; };
+  /* a landing can make a refused ORBITAL claim good (the field turns molecular once the solve is in): claim it after the pane's own adopt.
+     STATES needs no help: a refused ON arms its own one re-arm seat, the ladder's landing (statesview fetchLadder), keeping a hand's BEAT */
+  { const c = C(); if (c && c.subscribe) c.subscribe(() => { if (want('orbital') && !orbitals.on) onO(true); }); }
 
-  function setMode(v) {
+  function setMode(v, hand) {
     const next = v === 'states' ? 'states' : 'orbital';
     if (next === mode) { modeSeg.set(mode); return mode; }
     mode = next; modeSeg.set(mode);
-    paneO.hidden = mode !== 'orbital'; paneS.hidden = mode !== 'states'; seatSwitches();
+    paneO.hidden = mode !== 'orbital'; paneS.hidden = mode !== 'states';
     states.setShown(mode === 'states');
     if (mode === 'orbital') { orbitals.paint(); orbitals.refresh(); }
-    const st = statusOf[mode]; if (api.status && st[0]) api.status(st[0], st[1]);
+    follow(hand);
     return mode;
   }
   states.setShown(false);
-  /* 2026-10 (Josh) · ONE ROW SAVED: each pane's MO-REGISTRY ON switch sits to the RIGHT of ORBITAL | STATES, the current
-     mode's one shown.  They stay each pane's own (their onChange and set() are untouched); only their seat moved. */
-  bar.appendChild(orbitals.onSwitch); bar.appendChild(states.onSwitch);
-  const seatSwitches = () => { orbitals.onSwitch.hidden = mode !== 'orbital'; states.onSwitch.hidden = mode !== 'states'; };
-  seatSwitches();
 
   return {
-    orbitals, states,
+    orbitals, states, follow,
     get mode() { return mode; }, setMode,
     update(t) {
-      /* a switch pressed inside a pane calls that pane's own setOn, not the wrapped one: settle it here, in favour
-         of the pane the hand is in, before either register asks the session for the field */
-      if (orbitals.on && states.on) (mode === 'states' ? onO : onS)(false);
       const a = orbitals.update(t), b = states.update(t); return a || b;
     },
     setActive(v) { orbitals.setActive(v && mode === 'orbital'); states.setActive(v && mode === 'states'); },

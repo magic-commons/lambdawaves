@@ -416,14 +416,24 @@ body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .dev.lean .dev-body .calc-grid > .ro, .dev.lean .dev-body .ro.calc-ray { display: flex; }
 .calc-ray { margin-top: 6px; } .calc-ray canvas { display: block; width: 100%; height: 56px; margin-top: 4px; }   /* 0.8.2 P3: ψ ALONG A RAY */
 /* MO-REGISTRY (registerview.js + statesview.js): keep the stable reg-* hooks used by both modes. */
-.reg-mode { margin-bottom: var(--sp-2); }
-.reg-mode .segw { flex: 1 1 auto; }
 .reg-pane[hidden] { display: none; }
 .reg-pane > * + * { margin-top: var(--sp-2); }
 .reg-pane .sp-head { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.reg-mode { flex-wrap: nowrap; align-items: flex-end; }
-.reg-mode > .sw.orb-on { flex: 0 0 auto; white-space: nowrap; }   /* 2026-10: MO-REGISTRY ON beside ORBITAL | STATES (registerview.js) */
-.reg-mode > .sw[hidden] { display: none; }
+/* iteration 008 U · THE ONE CARD: MOLECULES ON · ORBITAL | STATES on one line (.mol-top; the seg is the register's, `.reg-mode`), the panes
+   right under it (.mol-reg), then the pickers.  The ON switch keeps its words; the seg takes the rest of the line, its two cells equal */
+.mol-top { flex-wrap: nowrap; align-items: stretch; }
+.mol-top > .sw { flex: 0 0 auto; white-space: nowrap; }
+.mol-top > .reg-mode { flex: 1 1 0; min-width: 0; }
+.mol-top > .reg-mode .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; box-sizing: border-box; }
+.mol-top > .reg-mode .seg-b { min-width: 0; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mol-reg { margin: var(--sp-2) 0; }
+.mol-reg:empty { display: none; }
+/* the record-only molecule's download glyph, in the MOLECULE stepper's name beside the <select> (chemview.js dlB) */
+.mol-pick .mir-step-name { display: flex; align-items: center; }
+.mol-pick .mir-step-name > select.sel { flex: 1 1 0; min-width: 0; }
+.mol-pick .mol-dl { flex: 0 0 26px; width: 26px; min-width: 26px; height: 26px; min-height: 26px; padding: 0; }
+.mol-pick .mol-dl[hidden] { display: none; }
+.mol-pick .mol-dl svg { width: 16px; height: 16px; }
 .reg-top { align-items: stretch; flex-wrap: nowrap; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
 .reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }
@@ -787,7 +797,7 @@ body[data-theme="dark"] .km-key-unbound {
 /* 0.5.3 M8 · MOLECULES' TWO PICKERS are PALETTE's preset selector (Josh, §11 answer 5): the kit's stepper ‹ NAME › with ramp.css'
    own seat — the arrows at the ends, the name the slack, ellipsised.  SECTION's name opens the kit's list; MOLECULE's name IS the
    <select> (54 entries in seven optgroups, each disabled one with its reason), drawn flat as the stepper's name: no well, centred. */
-.mol-step { flex: 1 1 100%; min-width: 0; align-items: stretch; }   /* a whole line each; iteration 007 M: INSTALLED · MOLECULES ON share the line above them (.mol-top) */
+.mol-step { flex: 1 1 100%; min-width: 0; align-items: stretch; }   /* a whole line each; iteration 008 U: MOLECULES ON · ORBITAL | STATES share the line above them (.mol-top), the register under it */
 .mol-step .mir-step-row { width: 100%; justify-content: space-between; }
 .mol-step .mir-step-name { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .eq-grid { display: block; width: 96px; height: 96px; margin: 4px 0; image-rendering: pixelated; border-radius: 4px; }   /* 0.6.0 B2: the BEAT EQUALIZER's 6 × 6 shell grid, one texel a cell */
@@ -796,7 +806,6 @@ body[data-theme="dark"] .km-key-unbound {
 .mol-pick select.sel { width: 100%; min-height: var(--step-b); padding: 0 var(--sp-2); border: 0; background: transparent; box-shadow: none; appearance: none;
   font: inherit; color: var(--fg); letter-spacing: inherit; text-align: center; text-align-last: center; text-overflow: ellipsis; cursor: pointer; }
 .mol-pick select.sel:hover { background: var(--state-hover, var(--glass-raise)); }
-.mol-top > .sw { flex: 0 1 auto; }
 /* iteration 007 M · VIEW in two balanced rows (Josh: "not so top-heavy"): DENSITY · ORBITAL · Δρ over ESP · SPIN · Δ LDA−RHF, three equal
    columns across the card's body — the kit's render card's grid-on-.seg idiom (render.css), one word a cell, never wrapped */
 .mol-view { flex: 1 1 100%; align-items: stretch; }

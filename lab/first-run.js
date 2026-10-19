@@ -18,7 +18,7 @@
  * 2026-10-16 (Josh, iteration 001) · EVERY first-visit window arrives FOLDED (minimized) on every device, and MOLECULES' MORE fold too;
  * INFORMATIONAL takes SHADOW's seat on the left rack (rack.js).
  * Node-testable: tests/first-run.test.mjs. */
-const FOLD_ALL = Object.freeze(['informational', 'spectrum', 'chem', 'orbitals', 'settings', 'state', 'palette', 'observer', 'camera', 'clip']);
+const FOLD_ALL = Object.freeze(['informational', 'spectrum', 'chem', 'settings', 'state', 'palette', 'observer', 'camera', 'clip']);
 export const FIRST_RUN_MATERIAL = Object.freeze({
   desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: FOLD_ALL, more: false }),
   mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: FOLD_ALL, more: false }),

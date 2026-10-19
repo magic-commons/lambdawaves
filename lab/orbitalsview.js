@@ -37,6 +37,25 @@ const LAW = 'frozen orbitals · beats at Δε, not at ω_RPA';
    (a `defs` row), shell/persist.js seats its base (modSeats), and the knob's hand law below asks it.  `reg.morph` stays the STATES register's. */
 export const OMORPH = 'reg.omorph';
 
+/* iteration 008 U · EMPTY <-> FILL ALL, the one two-state button both register panes carry.  The glyphs are 24-unit outline drawings in the
+   kit's hand (glyph.js: stroke 1.9, round caps; the kit's registry is not ours to extend, so they are drawn here).  Designed by Gemini 3.8 Flash
+   (High) through agy — the prompt and its answer are in research/iteration-008/U-BUILD.md. */
+const GS = 'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+const GLYPH = {   // Gemini's answer, verbatim but for the kit's stroke block on each element: a register frame and three rungs, whole or broken
+  fill: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8"/>',
+  empty: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8" stroke-dasharray="2 4"/>',
+};
+export function fillButton(row, titles, onPress) {
+  const b = el('button', 'trig reg-fill', row); b.type = 'button';
+  let empty = null;
+  const draw = (v) => {
+    b.innerHTML = '<svg class="gly" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">' + GLYPH[v ? 'fill' : 'empty'] + '</svg>';
+    b.setAttribute('aria-label', v ? 'FILL ALL' : 'EMPTY'); b.title = v ? titles.fill : titles.empty; b.dataset.state = v ? 'fill' : 'empty';
+  };
+  b.addEventListener('click', () => onPress(empty));
+  return { root: b, set(v, ok = true) { const e = !!v; if (e !== empty) { empty = e; draw(e); } b.disabled = !ok; }, get empty() { return empty; } };
+}
+
 export function createOrbitals(host, api) {
   const F = () => (api.field ? api.field() : null);
   const C = () => (api.chem ? api.chem() : null);
@@ -62,14 +81,13 @@ export function createOrbitals(host, api) {
   const dialsBtn = el('button', 'trig', head); dialsBtn.type = 'button'; dialsBtn.textContent = 'DIALS';
   dialsBtn.title = 'Show or hide the amplitude and phase dials for the selected orbitals';
   dialsBtn.setAttribute('aria-expanded', 'false');
-  const clrBtn = el('button', 'trig', head); clrBtn.type = 'button'; clrBtn.textContent = 'CLEAR';
-  clrBtn.title = 'Empty the register (c ↦ 0 for every orbital)';
-  const nrmBtn = el('button', 'trig', head); nrmBtn.type = 'button'; nrmBtn.textContent = 'NORM';
-  nrmBtn.title = 'Renormalise the register so Σ|c|² = 1';
-  const onSw = sw({ label: 'REGISTRY ON', value: false, cls: 'orb-on',
-    title: 'Give the field this register’s amplitude ψ(r, t) and set the observable to phase — MOLECULES must be ON and not running',
-    onChange: (v) => { setOn(v); } });
-  head.appendChild(onSw.root);
+  /* iteration 008 U (Josh: "can it become the 'fill all registers' button?") · ONE two-state button: an empty register shows FILL ALL, any
+     other shows EMPTY.  NORM is gone: a HAND stroke on the ladder normalises at its end (the stroke's one undo row), and nothing else does */
+  const fillB = fillButton(head, { fill: 'Fill the register: every orbital of the ladder, equal and in phase', empty: 'Empty the register (c ↦ 0 for every orbital)' },
+    (empty) => (empty ? fill() : clear()));
+  /* the pane's own switch is retired (MOLECULES ON is REGISTRY ON, VIEW REGISTRY puts the packet on the field): `onSw` is kept unseated, the
+     claim's own mirror, so setOn below reads as it always did */
+  const onSw = sw({ label: 'REGISTRY ON', value: false, cls: 'orb-on', onChange: (v) => { setOn(v); } });
   /* THE CORE FOLD (0.4.0 S1): the frozen-core levels (lab/names.js coreCount — He for Li–Ne, Ne for Na–Ar, Ar for K–Zn,
      Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;
      the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */
@@ -129,7 +147,7 @@ export function createOrbitals(host, api) {
   mrow.appendChild(flowSw.root);
   /* iteration 001 (Josh): PRESET · → A · → B and MORPH · FLOW fold behind the head's chevron (lab/fold.js); DIALS and CLEAR are glyphs */
   { const more = el('div', 'reg-more'); bar.before(more); more.append(bar, mrow); fold(head, more, { what: 'presets, A ↔ B and flow' });
-    chip(dialsBtn, 'sliders', 'DIALS'); chip(clrBtn, 'clear', 'CLEAR'); }
+    chip(dialsBtn, 'sliders', 'DIALS'); }
   function setFlow(v) {
     flowOn = !!v && !!sol; flowSw.set(flowOn);
     if (flowOn && (!flow || flow.n !== sol.nAO)) { flow = createFlow(sol.shells); flowEpoch++; }
@@ -139,8 +157,6 @@ export function createOrbitals(host, api) {
 
   const rowsEl = el('div', 'sp-rows', host); rowsEl.hidden = true;
   dialsBtn.addEventListener('click', () => setDials(rowsEl.hidden));
-  clrBtn.addEventListener('click', () => { clear(); });
-  nrmBtn.addEventListener('click', () => { norm(); });
 
   /* ── the readouts ─────────────────────────────────────────────────────────────────────────────── */
   const rr = el('div', 'row tight', host);
@@ -214,14 +230,15 @@ export function createOrbitals(host, api) {
   }
   function deselect(k) { if (!sel.delete(k | 0)) return false; if (selected === (k | 0)) selected = -1; touch(); rebuild(); paint(); refresh(); api.repaint(); return true; }
   function toggle(k) { return sel.has(k | 0) ? deselect(k) : select(k, 1, 0); }
-  /** a PAINT stroke's levels in one pass: on ⇒ every level not already in the register joins at |c| 1, arg 0 (a level
-   *  already there keeps its dials); off ⇒ each leaves.  One rebuild / paint / repaint however many levels it covers. */
+  /** a PAINT stroke's levels in one pass: on ⇒ every level not already in the register joins at the register's mean |c| (1 when empty),
+   *  arg 0, so the stroke's closing normalisation keeps an even register even (a level already there keeps its dials); off ⇒ each leaves.
+   *  One rebuild / paint / repaint however many levels it covers. */
   function paintLevels(ks, on) {
     if (!sol || !ks.length) return 0;
-    let n = 0;
+    let n = 0, mean = 0; for (const c of sel.values()) mean += c.amp; mean = sel.size ? mean / sel.size || 1 : 1;
     for (const k0 of ks) {
       const k = k0 | 0; if (!carried(k)) continue;
-      if (on) { if (sel.has(k)) continue; sel.set(k, { amp: 1, phase: 0 }); selected = k; n++; }
+      if (on) { if (sel.has(k)) continue; sel.set(k, { amp: mean, phase: 0 }); selected = k; n++; }
       else if (sel.delete(k)) { if (selected === k) selected = -1; n++; }
     }
     if (n) { touch(); rebuild(); paint(); refresh(); api.repaint(); }
@@ -229,7 +246,15 @@ export function createOrbitals(host, api) {
     return n;
   }
   function clear() { if (!sel.size) return false; sel.clear(); selected = -1; touch(); rebuild(); paint(); refresh(); api.repaint(); return true; }
-  /** NORM is an explicit act, exactly as it is in the hydrogen register: nothing here renormalises on its own */
+  /** FILL ALL: every orbital the ladder carries, |c| = 1/√n, arg 0 — the OCCUPIED / virtual split is the ladder's own order */
+  function fill() {
+    if (!sol) return false;
+    const ks = []; for (let k = 0; k < sol.nAO; k++) if (carried(k)) ks.push(k);
+    if (!ks.length) return false;
+    sel.clear(); for (const k of ks) sel.set(k, { amp: Math.sqrt(1 / ks.length), phase: 0 }); selected = sol.nocc - 1;
+    touch(); rebuild(); paint(); refresh(); api.repaint(); return true;
+  }
+  /** Σ|c|² ↦ 1: the END of a hand's paint stroke (iteration 008 U), and the API's `norm` — never a modulator's write, never on its own */
   function norm() {
     const s = Math.sqrt(sum2());
     if (!(s > 0)) return false;
@@ -312,7 +337,7 @@ export function createOrbitals(host, api) {
     const want = !!v;
     if (want && !on) {
       const why = refusal();
-      if (why) { onSw.set(false); status('MO-REGISTRY off — ' + why, 'warn'); return false; }
+      if (why) { onSw.set(false); status('REGISTRY off — ' + why, 'warn'); return false; }
       on = true; onSw.set(true);
       pushedT = NaN; pushedV = -1;
       /* the claim is the whole handover: the session selects this model, asks for `phase`, and calls push() */
@@ -339,7 +364,7 @@ export function createOrbitals(host, api) {
     const es = el('div', 'sp-sub sp-e', id, `k${k + 1} · ${sol.eps[k].toFixed(6)} Eh · ${k < nocc() ? '2 e⁻' : 'virtual'}`);
     id.addEventListener('click', () => { selected = k; paint(); markSel(); });
     const amp = knob({ label: '<m>|c|</m>', aria: 'amplitude ' + label(k), min: 0, max: 1, value: c.amp,
-      title: 'The amplitude |c_k| of this orbital in the register; NORM makes Σ|c|² = 1',
+      title: 'The amplitude |c_k| of this orbital in the register; a stroke on the ladder makes Σ|c|² = 1',
       fmt: (v) => v.toFixed(3), onInput: (v) => setAmp(k, v) });
     const ph = knob({ label: '<m>arg c</m>', aria: 'phase ' + label(k), min: 0, max: TAU, value: c.phase, wrap: true,
       title: 'The phase arg c_k at t = 0; the register turns it by −ε_k t on its own',
@@ -368,6 +393,7 @@ export function createOrbitals(host, api) {
 
   /* ── the readouts, and the header ─────────────────────────────────────────────────────────────── */
   function refresh() {
+    fillB.set(!sel.size, !!sol);
     if (!sol) {
       for (const r of [roGap, roBeat, roSum, roPsi]) { r.set('—', ''); }
       roPsi.setSub(LAW);
@@ -383,14 +409,14 @@ export function createOrbitals(host, api) {
     roBeat.setSub(p ? `${label(p.a)} × ${label(p.b)} · Δε ${p.dE.toFixed(6)} · ${LAW}` : 'select two orbitals to beat');
     const s = sum2();
     roSum.set(sel.size ? s.toFixed(6) : '—', sel.size ? (Math.abs(s - 1) < 1e-9 ? 'ok' : 'warn') : '');
-    roSum.setSub(`${sel.size} of ${sol.nAO} orbitals · ${sol.nocc} occupied · NORM sets this to 1`);
+    roSum.setSub(`${sel.size} of ${sol.nAO} orbitals · ${sol.nocc} occupied · a stroke on the ladder sets this to 1`);
     const why = refusal();
     /* 2026-10 (Josh) · MOLECULES OFF IS NOT A FAULT.  The window stays on the rack with its ladder painted and editable;
        only the switch stands down (it must let go of the field), and the status says how to bring it back. */
     const standby = !on && (!C() || !C().on);
-    status(on ? `MO-REGISTRY ON · ${sel.size} orbital${sel.size === 1 ? '' : 's'} · ${LAW}`
-      : standby ? `MO-REGISTRY standing by · ${sol.nAO} orbitals · turn MOLECULES on, then MO-REGISTRY ON`
-      : why ? 'MO-REGISTRY off — ' + why : `${sol.nAO} orbitals · gap ${Number.isFinite(gap) ? gap.toFixed(6) : '—'} · MO-REGISTRY ON gives the field arg ψ`,
+    status(on ? `REGISTRY · ${sel.size} orbital${sel.size === 1 ? '' : 's'} · ${LAW}`
+      : standby ? `the register stands by · ${sol.nAO} orbitals · MOLECULES ON, then VIEW REGISTRY`
+      : why ? 'REGISTRY off — ' + why : `${sol.nAO} orbitals · gap ${Number.isFinite(gap) ? gap.toFixed(6) : '—'} · VIEW REGISTRY gives the field arg ψ`,
       on ? 'live' : standby ? '' : why ? 'warn' : 'ok');
     paintPsi(pushedT);
   }
@@ -479,11 +505,10 @@ export function createOrbitals(host, api) {
       for (let j = 0; j < row.items.length; j++) {
         const lv = row.items[j], x0 = left + j * seg + 1, x1 = x0 + seg - 2;
         const c = sel.get(lv.k), lit = !!c, ink = lv.occ ? occInk : virInk, dim = !carried(lv.k);
-        g.strokeStyle = lit ? ink(1) : ink(dim ? 0.14 : lv.occ ? 0.6 : 0.4); g.lineWidth = lit ? 2 : 1;
+        /* iteration 008 U (Josh: "simple lines that's dark when off and full vivid color when on") · PLAIN LINES: one stroke a level — dark
+           when off, the level's full vivid ink when on — and no band, bar, box or glow beside it (the dials carry |c|; occupied A, virtual B) */
+        g.strokeStyle = lit ? ink(1) : ink(dim ? 0.1 : 0.26); g.lineWidth = lit ? 2.5 : 1.5;
         g.beginPath(); g.moveTo(x0, yy); g.lineTo(x1, yy); g.stroke();
-        if (lv.occ) { g.fillStyle = ink(lit ? 0.34 : dim ? 0.04 : 0.16); g.fillRect(x0, yy - 3, x1 - x0, 6); }   // occupied: filled; virtual: hollow; uncarried: dim
-        if (lit && c.amp > 0) { g.fillStyle = ink(0.72); g.fillRect(x0, yy - 4, Math.max(3, (x1 - x0) * c.amp), 8); }   // the register's own |c|
-        if (lv.k === selected) { g.strokeStyle = T.fg(0.9); g.lineWidth = 1; g.strokeRect(x0 - 1, yy - 5, x1 - x0 + 2, 10); }
         hits.push({ y: yy, x0, x1, k: lv.k });
         hovers.push({ kind: 'line', key: 'L' + lv.k, points: [x0, yy, x1, yy], lw: lit ? 2 : 1, colour: ink(1),
           info: `${label(lv.k)}  ·  k${lv.k + 1}  ·  ε = ${lv.eps.toFixed(6)} Eh  ·  ${lv.occ ? lv.occ + ' electrons' : 'virtual, 0 electrons'}`
@@ -532,18 +557,22 @@ export function createOrbitals(host, api) {
     const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y);
     return hi - lo < 0.5 ? [] : hits.filter((h) => !h.core && h.y > lo && h.y < hi && carried(h.k)).map((h) => h.k);
   }
+  let stroked = 0;                                                          // levels this stroke changed: its end normalises only a stroke that painted
   const stroke = paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(),
     at: (p) => { const h = nearestHit(p, 8); return h ? [h.core ? 'core' : h.k] : []; }, across: crossed,
     apply: (ks, add) => {                                                   // a TAP on the folded core opens it; a stroke paints past it
       if (ks.includes('core')) { if (!stroke.painting) setCoreOpen(true); ks = ks.filter((k) => k !== 'core'); }
-      if (ks.length) paintLevels(ks, add);
-    } });
+      if (ks.length) stroked += paintLevels(ks, add);
+    },
+    /* iteration 008 U · THE STROKE'S END (still inside its pointerup, so the same undo row): the sum of |c|^2 goes to 1, and a hand that
+       painted the ladder picked the register — VIEW REGISTRY (api.stroked).  A modulator's write never comes here */
+    onEnd: () => { const n = stroked; stroked = 0; if (!n) return; norm(); if (api.stroked) api.stroked('orbital'); } });
   /* a click no pointer made (none can reach a canvas today, but the law is kept): the nearest level joins */
   cv.addEventListener('click', (e) => {
     if (!hits.length) return;
     let best = null;
     for (const h of hits) { if (h.core || e.offsetX < h.x0 - 2 || e.offsetX > h.x1 + 2) continue; const d = Math.abs(h.y - e.offsetY); if (d <= 8 && (!best || d < best.d)) best = { d, k: h.k }; }
-    if (best) paintLevels([best.k], true);
+    if (best && paintLevels([best.k], true)) { norm(); if (api.stroked) api.stroked('orbital'); }
   });
   window.addEventListener('resize', () => paint());
 
@@ -579,7 +608,7 @@ export function createOrbitals(host, api) {
     if (!on) { if (active) paintPsi(t); return false; }
     const why = refusal();
     if (why) { if (!C() || !C().on) { setOn(false); return false; }   // MOLECULES went off: stand down (refresh() says 'standing by'); the window stays
-      status('MO-REGISTRY off — ' + why, 'warn'); return false; }
+      status('REGISTRY off — ' + why, 'warn'); return false; }
     const moved = push(t);
     if (active) paintPsi(t);
     return moved;
@@ -626,7 +655,7 @@ export function createOrbitals(host, api) {
     get dials() { return !rowsEl.hidden; }, setDials,
     solution() { return sol; },
     setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; },
-    select, deselect, toggle, clear, norm, setAmp, setPhase, preset, store, setMorph,
+    select, deselect, toggle, clear, fill, norm, setAmp, setPhase, preset, store, setMorph,
     get morphOn() { return morphOn; }, get morph() { return morphS; },
     knobs: { morph: () => morphK },                                   // ADR-0002: the dial the `reg.omorph` row stamps and the TIMELINE lanes
     /** the modulator's road (a route, a TIMELINE lane): store the position; the picture moves only while MORPH plays */

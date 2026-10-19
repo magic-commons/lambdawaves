@@ -1,5 +1,7 @@
 /* lab/windows/molecules.js — MOLECULES, the molecular session, THE HEAD and MO-REGISTRY (0.5.2 R2d; moved verbatim out of lab/rack.js boot()) at TWO seats:
- * createMolecules(app) builds MOLECULES where the LEGACY note stands and returns createMoRegistry(), which boot() calls where ORBITALS stood (after the stage words). */
+ * createMolecules(app) builds MOLECULES where the LEGACY note stands and returns createMoRegistry(), which boot() calls where ORBITALS stood (after the stage words).
+ * Iteration 008 U: MO-REGISTRY is no longer a window — the second seat builds the register INTO the MOLECULES card (chemview's `slots`), and a saved
+ * `orbitals` seat opens MOLECULES (settings.js RETIRED_WINDOWS).  `app.w.wOrbs` names the card the register lives in, which is wChem. */
 import { TIER } from '../rack.js'; import { seg } from '../mir/kit.js';
 import { VIEW, VIEW_NAMES } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
@@ -15,12 +17,12 @@ export function createMolecules(app) {
      instruments.  MOLECULES: MOLECULES and MO-REGISTRY.  The mode IS MOLECULES ON — the switch under the title, the card's own switch, a project
      and a link all say it by one road (chem.setOn → moleculeMode) — and each mode HIDES the other's windows (hidden, never closed or moved: the
      arrangement waits for the mode to come back).  This replaces 2026-10's folded SPECTRUM under a molecule. */
-  const modeSeg = seg({ aria: 'Mode: atoms or molecules', value: 'atoms', options: [{ id: 'atoms', label: 'ATOMS', title: 'ATOMS — SPECTRUM\'s 91 hydrogen states, their names and the EQUALIZER' }, { id: 'molecules', label: 'MOLECULES', title: 'MOLECULES — MOLECULES and MO-REGISTRY' }],
+  const modeSeg = seg({ aria: 'Mode: atoms or molecules', value: 'atoms', options: [{ id: 'atoms', label: 'ATOMS', title: 'ATOMS — SPECTRUM\'s 91 hydrogen states, their names and the EQUALIZER' }, { id: 'molecules', label: 'MOLECULES', title: 'MOLECULES — the molecule and its register, one window' }],
     onChange: (v) => { if (app.state.chem) app.state.chem.setOn(v === 'molecules'); } });
   modeSeg.root.id = 'lwMode'; { const t = document.getElementById('title'); if (t) t.after(modeSeg.root); }
   function moleculeMode(v) {
     for (const w of [wState, wSh, wOrb, wVor, wSlice, app.w.wLad, app.w.wCalc, wSpec, { root: document.querySelector('.dev[data-id="equalizer"]') }, { root: document.querySelector('.dev[data-id="staticfield"]') }]) if (w && w.root) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
-    for (const w of [wChem, app.w.wOrbs]) if (w) w.root.hidden = !v;
+    wChem.root.hidden = !v;                                          // iteration 008 U: the one card (the register lives in it)
     modeSeg.set(v ? 'molecules' : 'atoms');
     if (v && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
     if (!v) switchHamiltonian(getHamiltonian().id);                  // restore the atom's own hiding rules
@@ -62,6 +64,7 @@ export function createMolecules(app) {
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
     setOn(v) { moleculeMode(v); app.w.stageTextTick(); if (app.hooks.status) app.hooks.status(); }, said: () => app.hooks.status && app.hooks.status(),   // 0.5.4 P4: the STATUS row (informational.js)
+    viewed: (hand) => { if (app.state.register) app.state.register.follow(hand); },   // iteration 008 U: ON, VIEW or a file moved — the register follows the one state
     hand: (id) => headPick(id),                                      // 0.5.1 D2: a HAND pick (the dropdown, ON, a notebook link)
     atomZ: () => HAMILTONIANS.atom.Z, atom(z) { setElement(z); if (getHamiltonian().id !== 'atom') switchHamiltonian('atom'); ui.hamSeg.set('atom'); app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); },   // 0.7.4 C2: ‹ ATOMS ›' tile, SPECTRUM's ATOM road
     /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
@@ -96,12 +99,13 @@ export function createMolecules(app) {
   /* iteration 007 O · a file's ORBITAL index this molecule does not hold is clamped to its span (chemview land), and STATE says so, never throws */
   app.state.chem.subscribe((sol) => { const c = app.state.chem.clamped, row = app.state.chem.row();
     if (c && sol && c.key === sol.key) wState.setStatus(`ORBITAL ${c.asked} is past ${row ? row.name : 'this molecule'}’s orbitals ${c.lo}–${c.hi}: clamped to ${c.k}`, 'warn'); });
-  function createMoRegistry() {   // the second seat: MO-REGISTRY
-  const wOrbs = device({ id: 'orbitals', eyebrow: 'MO-REGISTRY', title: 'molecular orbital registry', status: '' });   // the id stays `orbitals` so saved layouts survive the rename (REGISTER-WINDOW-SPEC §11.1)
+  function createMoRegistry() {   // the second seat: the register, INTO the MOLECULES card (iteration 008 U: Josh, "MERGE Molecules with MO-registry")
+  const wOrbs = wChem, C = app.state.chem;
   app.w.wOrbs = wOrbs;
-  if (useCompactDefaults) wOrbs.root.classList.add('closed');   // the same rule CHEMISTRY keeps; the first-run block opens it under MOLECULES
-  rack.appendChild(wOrbs.root);
-  app.state.register = createRegister(wOrbs.body, { active: () => canPresent(wOrbs), modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): the STATES dials' hand law
+  /* THE ONE SWITCH: a pane's public ON (a verb, a stick's press, a file) is MOLECULES ON with VIEW REGISTRY; its OFF is MOLECULES OFF */
+  const one = (v, hand) => { if (!v) { C.setOn(false); return; } if (C.view !== 'registry') C.setView('registry', hand); if (!C.on) C.setOn(true); else app.state.register.follow(hand); };
+  app.state.register = createRegister(C.slots.register, { bar: C.slots.top, one, stroked: () => { C.setView('registry', true); },   // a hand that painted the ladder picked VIEW REGISTRY
+    active: () => canPresent(wOrbs), modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): the STATES dials' hand law
     stamp: () => { if (app.state.restampParams) requestAnimationFrame(app.state.restampParams); },   // a lane built after boot becomes a drop target for a macro
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
@@ -110,7 +114,7 @@ export function createMolecules(app) {
     now: () => clock.t, rate: () => clock.rate, field: () => field, chem: () => app.state.chem, session: app.state.molSession,
     song: { reg, hydrogen: () => getHamiltonian().id === 'hydrogen', filming: () => app.state.exportLocked, land(re, im, t) { app.state.rotTicking = true; reg.anchorFrom(re, im, t); app.state.rotTicking = false; touchState(); } } });   // 0.6.4 S1: a landing notes no history row, as the rotation drive's ticks
   app.state.orbitals = app.state.register.orbitals; app.state.states = app.state.register.states;
-  wChem.root.hidden = wOrbs.root.hidden = !app.state.chem.on;        // iteration 002: ATOMS is the boot's mode; MOLECULES ON shows the pair (moleculeMode)
+  wChem.root.hidden = !C.on;                                         // iteration 002: ATOMS is the boot's mode; MOLECULES ON shows the card (moleculeMode)
   return { wOrbs }; }
   app.w.wChem = wChem; app.w.head = head; return { wChem, head, createMoRegistry };
 }

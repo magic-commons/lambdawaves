@@ -148,8 +148,7 @@ export function createReadouts(app) {
   app.w.ladder = ladder;
   /* Shift multi-add reopens several cards in one gesture. Each explicit request enters the card worker queue even
      if later cards land below the rack clip; the single worker keeps those solves from competing with the field. */
-  app.w.wChem.root.addEventListener('devopen', () => app.state.chem.prepare());
-  app.w.wOrbs.root.addEventListener('devopen', () => { app.state.chem.prepare(); app.state.orbitals.paint(); app.state.orbitals.refresh(); });   // the register runs on CHEMISTRY's ladder: opening it asks for one
+  app.w.wChem.root.addEventListener('devopen', () => { app.state.chem.prepare(); app.state.orbitals.paint(); app.state.orbitals.refresh(); });   // the register (iteration 008 U: in this card) runs on CHEMISTRY's ladder: opening it asks for one
   wLad.root.addEventListener('devopen', () => ladder.prepare());
   const wLat = device({ id: 'lattice', eyebrow: 'LATTICE', status: '' }); wLat.root.classList.add('closed'); rack.appendChild(wLat.root);   // 0.7.2 L1: a tight-binding lattice, its own register (lab/lattice.js); ships closed
   const lattice = createLattice(wLat.body, { active: () => canPresent(wLat), t: () => clock.t, palette: () => app.state.palette, solve: (H) => solveCard({ op: 'lattice.solve', ...H }, () => solveLattice(H)) });
