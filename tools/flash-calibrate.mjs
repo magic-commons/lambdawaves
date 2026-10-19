@@ -20,21 +20,23 @@
  *              it.  dL/dmix = Y(custom) − Y(ground); the LIGHT ground (L ≈ 0.92) is where a stage swing is a flash — the dark
  *              ground's whole range is ΔL = 0.10, so 10 % of its own L is 0.004 and can never be one.  Linear route.
  *   knee       iteration 008 G — THE KNEE is on the ACCUMULATED opacity (field.js kneeT): a ray's transmittance is the q-exponential
- *              T_q(τ) = (1 + qτ)^(−1/q), q = ln(knee/0.6), so a step in ln(knee) is the same step in q, and the default (q = 0)
- *              is exp(−τ).  L = 1 − T_q(τ) for a unit-colour cloud over a black ground; the step is the smallest |Δq| that moves
- *              L by 10 % of itself on SOME ray (the worst τ, searched), the smaller of the soft (+) and hard (−) side.  The old
- *              per-step knee w/(1 + knee·w) is fixed at 0.6 now and moves nothing.  Log route.
+ *              T_q(τ) = (1 + qτ)^(−1/q), q = ln(knee/0.6), so a step in ln(knee) is the same step in q; 0.6 (q = 0) is exp(−τ), and the
+ *              default (008 Q: KNEE 3, q0 = ln 5, the soft shoulder) is the operating point the step is taken at.  L = 1 − T_q(τ) for a
+ *              unit-colour cloud over a black ground; the step is the smallest |Δq| from q0 that moves L by 10 % of itself on SOME
+ *              ray (the worst τ, searched), the smaller of the soft (+) and hard (−) side.  The old per-step knee w/(1 + knee·w) is
+ *              fixed at 0.6 (STEP_KNEE, the formula) and moves nothing.  Log route.
  */
 import { pathToFileURL } from 'node:url';
 
 const Y = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
 const DARK = [0.028, 0.038, 0.058], LIGHT = [0.93, 0.95, 0.975], CUSTOM = [0.12, 0.14, 0.18];   // rack.js THEMES.bg, mat.stageCustom
-const STAGE0 = 0.04, KNEE0 = 0.6, GAMMA0 = 1, MID = 0.5, REL = 0.1;                              // rack.js: stageMix, mat.knee, mat.gamma
+const STAGE0 = 0.04, KNEE0 = 3, GAMMA0 = 1, MID = 0.5, REL = 0.1;                                // rack.js: stageMix, mat.knee (field.js KNEE_DEFAULT, 008 Q), mat.gamma
+const Q0 = Math.log(KNEE0 / 0.6), STEP_KNEE = 0.6;                                            // the default's q; the shader's fixed per-step bound
 /** field.js kneeT, in f64 */
 export function kneeT(tau, q) { const x = q * tau; if (Math.abs(x) < 1e-9) return Math.exp(-tau); if (x <= -1) return 0; return Math.exp(-Math.log1p(x) / q); }
 const TAUS = Array.from({ length: 400 }, (_, i) => 1e-4 * Math.pow(6e5, i / 399));             // 1e-4 … 60, the optical depths a ray can hold
-/** the largest relative move of L = 1 − T over every τ when q goes 0 → dq */
-const kneeMove = (dq) => Math.max(...TAUS.map((t) => Math.abs((1 - kneeT(t, dq)) / (1 - Math.exp(-t)) - 1)));
+/** the largest relative move of L = 1 − T over every τ when q goes q0 → q0 + dq */
+const kneeMove = (dq) => Math.max(...TAUS.map((t) => Math.abs((1 - kneeT(t, Q0 + dq)) / (1 - kneeT(t, Q0)) - 1)));
 /** the |dq| on one side (sign ±1) where that move first reaches REL: bisection */
 function kneeSide(sign) { let lo = 0, hi = 3; for (let i = 0; i < 80; i++) { const m = (lo + hi) / 2; if (kneeMove(sign * m) < REL) lo = m; else hi = m; } return (lo + hi) / 2; }
 
@@ -55,11 +57,11 @@ export function checks() {
   let expMax = 0; for (let tau = 1e-6; tau < 40; tau *= 1.25) expMax = Math.max(expMax, L(tau * 1.1) / L(tau) - 1);
   const S = steps(), kd = S['material.knee'];
   /* a Gaussian ray through the box: w = pow(rho, soft) along 160 steps, tau = 96·exposure·Σ wEff·stepN (the per-step bound fixed at 0.6);
-     the knee moved by ±kd bends the ray's transmittance exp(−τ) → T_q(τ) */
-  const tau = (e, soft, peak) => { let s = 0; for (let i = 0; i < 160; i++) { const x = (i + 0.5) / 160 * 6 - 3, w = Math.pow(peak * Math.exp(-x * x), soft); s += w / (1 + KNEE0 * w) / 160; } return 96 * e * s; };
+     the knee moved by ±kd from the default bends the ray's transmittance T_q0(τ) → T_(q0±kd)(τ) */
+  const tau = (e, soft, peak) => { let s = 0; for (let i = 0; i < 160; i++) { const x = (i + 0.5) / 160 * 6 - 3, w = Math.pow(peak * Math.exp(-x * x), soft); s += w / (1 + STEP_KNEE * w) / 160; } return 96 * e * s; };
   let kneeMax = 0;
   for (const e of [0.08, 0.3, 1, 3, 12]) for (const soft of [0.5, 0.7, 1.5]) for (const peak of [1, 0.3, 0.05]) for (const sgn of [1, -1]) {
-    const t = tau(e, soft, peak), a = L(t), b = 1 - kneeT(t, sgn * kd);
+    const t = tau(e, soft, peak), a = 1 - kneeT(t, Q0), b = 1 - kneeT(t, Q0 + sgn * kd);
     kneeMax = Math.max(kneeMax, Math.abs(b / a - 1));
   }
   const gamma = (g) => Math.pow(MID, 1 / g);

@@ -63,8 +63,8 @@ for (const id of ['observer.yaw', 'observer.dist', 'reg.morph', 'chem.kick']) {
   const R = rig(), seam = (k) => (k % 2 ? 0.99 : 0.01), out = run(R, 'material.hue', 3, seam);
   assert.ok(out.every(([, v], k) => v === seam(k)), 'HUE across the 1 → 0 seam is untouched'); assert.deepEqual(R.said, []);
 }
-/* 5 · the other three whitelisted routes are guarded in their own space: a 10 Hz square one step wide trips; a half-step wide does not */
-for (const [id, wide, narrow] of [['material.gamma', [1.2, 0.9], [1.03, 0.97]], ['material.stage', [0.4, 0.2], [0.34, 0.3]], ['material.knee', [0.8, 0.5], [0.62, 0.58]]]) {
+/* 5 · the other three whitelisted routes are guarded in their own space: a 10 Hz square one step wide trips; a half-step wide does not (008 Q: KNEE's pair sits at its new default 3, its step ln-wide 0.4902) */
+for (const [id, wide, narrow] of [['material.gamma', [1.2, 0.9], [1.03, 0.97]], ['material.stage', [0.4, 0.2], [0.34, 0.3]], ['material.knee', [4.2, 2.1], [3.1, 2.9]]]) {
   const hot = rig(), cool = rig();
   assert.ok(reversals(run(hot, id, 3, (k) => wide[k % 2])).perSecond <= 6 && hot.said.length === 1 && hot.said[0].includes(CAT[id][0]), id + ' trips: ' + JSON.stringify(hot.said));
   const out = run(cool, id, 3, (k) => narrow[k % 2]); assert.ok(out.every(([, v], k) => v === narrow[k % 2]) && !cool.said.length, id + ' below the step passes');

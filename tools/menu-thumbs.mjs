@@ -26,7 +26,7 @@
  *   RHF minimum) have no picture: the Picker shows them dimmed with the reason.
  * ELEMENTS (el-<symbol>): H–Kr — ATOMS mode, the ATOM system, setElement(Z), and THE HIGHEST ORBITAL alone (Josh 10-18): the valence
  *   subshell's last electron, (n, l, m) from lab/valence.js (the same rule the Picker's caption line reads), amplitude 1, phase 0.
- *   A press on the tile still opens goAtom's fillValence (every m of the shell, equal and in phase).
+ *   A press on the tile still opens goAtom's fillValence (every valence subshell, every m, in phase; 008 Q).
  * SUBSHELLS (orb-<nl>_<m>): the dimmed elements past Kr — hydrogen's one state (n, l, m) for every m of each valence subshell, the
  *   subshells the table names past Kr up to n = 6 (the register ends there: 7s and 7p have no picture).
  * Writes lab/img/menu/<id>.webp, el-<sym>.webp, orb-<nl>.webp and lab/img/menu/manifest.json (what exists + these settings).

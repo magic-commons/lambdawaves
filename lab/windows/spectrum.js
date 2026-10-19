@@ -7,7 +7,7 @@ import { createEqualizer, EQ_PRESETS } from '../equalizer.js'; import { createEq
 import { VIEW } from '../field.js';
 import { BASIS, stateOf } from '../hydrogen.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu, MASSES, onHamiltonian } from '../hamiltonian.js';
-import { ATOMS, configOf, ZMAX } from '../atoms.js';
+import { ATOMS, valenceShells, ZMAX } from '../atoms.js';
 import { createSpectrum } from '../spectrum.js';
 import { CATALOGUE } from '../catalogue.js';
 import { stateLatex, moleculeLatex } from '../latex-state.js';
@@ -308,16 +308,22 @@ export function createSpectrumCard(app) {
     if (changed) { if (app.w.atomsView) app.w.atomsView.invalidate(); hNote(); if (getHamiltonian().id === 'atom') switchHamiltonian('atom'); else schedule(TIER.PRESENT); }
     return Z;
   }
-  /** LOAD VALENCE (iteration 008; once FILL THE VALENCE — the verb keeps its name): the outermost occupied shell of the atom in force, every m of it equally and in phase */
+  /** LOAD VALENCE (iteration 008; once FILL THE VALENCE — the verb keeps its name; 008 Q: every subshell outside the noble-gas core, Josh
+   *  10-19 "load all the subshells, the thumbnail only shows the highest orbital"): each valence subshell (`valenceShells`: Fe 4s and 3d,
+   *  Au 6s, 4f and 5d) at the weight of its electrons, every m of it equal and all in phase — the spherical average of the valence density.
+   *  A shell the basis does not hold (n = 7 before A7) is left out and said. */
   function fillValence() {
     if (getHamiltonian().id !== 'atom') { switchHamiltonian('atom'); if (ui.hamSeg) ui.hamSeg.set('atom'); }
-    const cfg = configOf(HAMILTONIANS.atom.Z), sh = cfg[cfg.length - 1], amp = 1 / Math.sqrt(2 * sh.l + 1);
-    reg.clear();
-    for (let m = -sh.l; m <= sh.l; m++) reg.set(stateOf(sh.n, sh.l, m).index, amp, 0, clock.t);
+    const shells = valenceShells(HAMILTONIANS.atom.Z), held = shells.filter((c) => stateOf(c.n, c.l, 0)), gone = shells.filter((c) => !held.includes(c));
+    const N = held.reduce((a, c) => a + c.occ, 0), top = held[held.length - 1] || shells[shells.length - 1];
+    reg.clear(); let labels = 0;
+    for (const c of held) { const amp = Math.sqrt(c.occ / N / (2 * c.l + 1)); for (let m = -c.l; m <= c.l; m++) { reg.set(stateOf(c.n, c.l, m).index, amp, 0, clock.t); labels++; } }
     touchState(); schedule(TIER.REBUILD);
-    const msg = `${HAMILTONIANS.atom.short} ${sh.n}${'spdfgh'[sh.l]} loaded · ${2 * sh.l + 1} label${sh.l ? 's' : ''}, equal and in phase`;
+    const sup = (k) => String(k).replace(/./g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]), name = (c) => `${c.n}${'spdfgh'[c.l]}${sup(c.occ)}`;
+    const msg = `${HAMILTONIANS.atom.short} · ${held.map(name).join(' ')} loaded · ${labels} label${labels === 1 ? '' : 's'}, in phase`
+      + (gone.length ? ` · ${gone.map(name).join(' ')} past the basis (n ≤ 6), not loaded` : '');
     wState.setStatus(msg, 'live'); if (app.w.wAtoms) app.w.wAtoms.setStatus(msg, 'live');
-    return { n: sh.n, l: sh.l, labels: 2 * sh.l + 1 };
+    return { n: top.n, l: top.l, labels, shells: held.map((c) => ({ n: c.n, l: c.l, occ: c.occ })), past: gone.map((c) => ({ n: c.n, l: c.l, occ: c.occ })) };
   }
   app.w.switchHamiltonian = switchHamiltonian; app.w.applySturmian = applySturmian; app.w.setElement = setElement; app.w.fillValence = fillValence; app.w.occupiedEigen = occupiedEigen;   // persist reads them (occupiedEigen: the transport)
   return { wSpec, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen, periodEnergies,

@@ -18,6 +18,10 @@
  *             ITERATION 008 G: GRAIN joined DUST (world-locked grains) and BANDS became octave bands, so the 15 particle-style rows
  *             (density · phase · real · imag · diff × grain · dust · bands) were re-captured in both fixtures by name; every CLOUD, iso-style,
  *             flag, line and state row held to the bit (KNEE 0.6 draws the old arithmetic).
+ *             ITERATION 008 Q: the default KNEE 0.6 → 3 (field.js KNEE_DEFAULT), and THE KNEE bends every compositing style, so every readback
+ *             that composites the volume was re-captured by name — states' rp / rpL, every style and flag row but ADD's, the line rows' rp
+ *             (175 in the 843, 193 in the 987); every field digest, record byte, ADD row and linePixels hash held to the bit, and with the
+ *             default put back to 0.6 the tree read 843/0 and 987/0 before the re-capture.
  *
  * What it locks, every number read from the SHIPPED pipelines through the booted app (window.__LW, __LW.field) —
  * no replica, no copied WGSL:

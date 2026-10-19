@@ -64,7 +64,7 @@ export function createAtoms(host, api) {
     for (let z = z0; z <= z1; z++) { const b = el('button', 'pk-c', cs, ATOMS[z - 1].symbol); b.type = 'button'; b.title = `${ATOMS[z - 1].name} · Z = ${z} · ${z > 36 ? ATOMS[z - 1].core : ATOMS[z - 1].term}`; b.addEventListener('click', () => api.select(z)); cells[z] = b; }
   }
   const r2 = el('div', 'row tight', host);
-  r2.appendChild(trig({ label: 'LOAD VALENCE', title: 'Load the outer occupied shell into the register, every m equal and in phase', onFire: () => api.fill() }).root);
+  r2.appendChild(trig({ label: 'LOAD VALENCE', title: 'Load every subshell outside the noble-gas core into the register, each at its electrons’ weight, every m equal and in phase', onFire: () => api.fill() }).root);
   const roScf = readout({ label: 'SCF', value: '—', sub: '' });
   r2.appendChild(roScf.root);
 

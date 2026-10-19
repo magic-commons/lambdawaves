@@ -59,7 +59,7 @@
     "style": 0,
     "iso": 0.06,
     "grain": 0.35,
-    "knee": 0.6,
+    "knee": 3,
     "boost": {
      "k": [
       0,

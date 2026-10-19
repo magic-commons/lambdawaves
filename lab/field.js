@@ -33,8 +33,13 @@ export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4, dust: 
 export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust', 'glass', 'additive'];
 /** a saved or named style (an index or a name) → the style it opens as: GRAIN → DUST, an unknown one → CLOUD */
 export function drawStyle(v) { const n = typeof v === 'number' ? STYLE_NAMES[v] : String(v); return n === 'grain' ? 'dust' : STYLE[n] === undefined ? 'cloud' : n; }
-/** THE KNEE's q (iteration 008 G, field.js kneeT): ln(KNEE / 0.6) — exactly 0 at the shipped 0.6, where the present draws the old arithmetic */
-export function kneeQ(k) { return Number.isFinite(k) && k > 0 ? Math.log(k / 0.6) : 0; }
+/** THE KNEE's default (008 Q, Josh 10-19: "somewhat opaque but slightly see-through"): 3, a soft shoulder — measured at EXPOSURE 1, the
+ *  densest rays through H 2pz keep 12.3 % of the ground and benzene's HOMO 14.6 % (0.7 % and 0.8 % at the plain exponential 0.6).  The
+ *  boot's mat, the KNEE knob, a new project and an absent knee read it; a saved project keeps its own (every demo says 0.6). */
+export const KNEE_DEFAULT = 3;
+/** THE KNEE's q (iteration 008 G, field.js kneeT): ln(KNEE / 0.6) — the formula's pivot 0.6 is the plain exponential (q = 0, the old
+ *  arithmetic drawn bit for bit); an absent knee is the default's q */
+export function kneeQ(k) { return Math.log((Number.isFinite(k) && k > 0 ? k : KNEE_DEFAULT) / 0.6); }
 export const SLICE = { off: 0, clip: 1, slab: 2 };
 export const MAX_MODES = 320;                                 // the whole 91-state register fits (a gas packet populates every m)
 const MODE_BYTES = 112;                                  // 7 vec4: nlm, c, lag0, lag1, leg0, leg1, ctr

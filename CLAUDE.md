@@ -144,7 +144,7 @@ AND more columns, ≥ 8 across on a desktop; ‹ › beside the pages, dots unde
 118-square periodic table: each tile's symbol in STIX, its picture THE HIGHEST ORBITAL of the atom
 from the CORNER pose — the valence subshell's last electron, (n, l, m) by `lab/valence.js` (H–Kr the
 atom's own state, past Kr hydrogen's `orb-<nl>_<m>`), while a press still opens goAtom's
-fillValence, every m of the shell; Josh 10-18), MOLECULAR (every molecule of the catalogue at the
+fillValence — every subshell outside the noble-gas core (atoms.js `valenceShells`: Fe 4s and 3d, Au 6s, 4f and 5d), each at its electrons' weight, every m, in phase, the status line naming them, a shell past the basis said and not loaded (008 Q); Josh 10-18), MOLECULAR (every molecule of the catalogue at the
 HOME pose) and LIBRARY — THE VOLUMES. A hover moves only the picture (`lab/picker-fx.js`,
 SynchroSpectre's motion) and names a molecule's tile beneath it (an element's tile names nothing);
 the caption is large (LW Title + STIX): for an element the name alone over its subshell alone
@@ -303,7 +303,7 @@ Re/Im; palette OFF retains the old colors. Keep
 `tests/official-defaults-palette.browser-test.mjs` green when editing either. Since iteration 008 (W) WAVE's OBSERVABLE is
 DENSITY · PHASE · RE · IM (`field.js` `WAVE_VIEWS`; `waveView()` maps a saved Re+Im (index 5, gone from the shader) to PHASE and a
 saved Δρ (4, kept in the shader) to DENSITY, said once in STATE's status); DITHER is a PREFERENCE under SETTINGS › QUALITY (FIELD_CHROME);
-CLIP is an ON switch with its lamp and the kind CLIP | SLAB (`mat.slice.mode` 0 · 1 · 2 unchanged). Since iteration 008 G DRAW's styles are CLOUD · SOLID · SIGNED · DUST · BANDS: DUST is the one world-locked particle style (a lattice of n³ cells, n = 128·GRAIN^⅓ — GRAIN is the grain count and nothing else — one grain per cell met by exact distance, so neither the jitter seed nor a camera turn moves the pattern), GRAIN is retired (`field.js` `drawStyle()` maps its saved index 2 to DUST on every road in, said once), BANDS is one level surface per octave of the density anchored at ISO, and KNEE shapes the ray's accumulated opacity T_q(τ) = (1+qτ)^(−1/q) with q = ln(KNEE/0.6) — at the default 0.6 the old lines run and the shipped picture is bit-identical; `FLASH_STEP`'s knee step is 0.2723 from `tools/flash-calibrate.mjs`.
+CLIP is an ON switch with its lamp and the kind CLIP | SLAB (`mat.slice.mode` 0 · 1 · 2 unchanged). FIELD (`staticfield`, 008 S) is closed on a first run and for a profile older than it by INFORMATIONAL's road — `applySettings`' one `older` table (`lab/shell/settings.js`): a profile is older when a key its generation always writes is missing, for FIELD the blob's `dither`, written on every save since 008 W (008 Q). Since iteration 008 G DRAW's styles are CLOUD · SOLID · SIGNED · DUST · BANDS: DUST is the one world-locked particle style (a lattice of n³ cells, n = 128·GRAIN^⅓ — GRAIN is the grain count and nothing else — one grain per cell met by exact distance, so neither the jitter seed nor a camera turn moves the pattern), GRAIN is retired (`field.js` `drawStyle()` maps its saved index 2 to DUST on every road in, said once), BANDS is one level surface per octave of the density anchored at ISO, and KNEE shapes the ray's accumulated opacity T_q(τ) = (1+qτ)^(−1/q) with q = ln(KNEE/0.6) — at the default 0.6 the old lines run and the shipped picture is bit-identical; `FLASH_STEP`'s knee step is 0.2723 from `tools/flash-calibrate.mjs`.
 
 Every stored key lives in exactly one of three scopes (`docs/STATE-SCOPES.md`,
 0.3.1): PREFERENCE (the reader's furniture: theme, glass, hints, keys, the
@@ -400,7 +400,7 @@ digest lock, `tools/perf/film-probe.mjs`, `tests/film-handover.browser-test.mjs`
 touching any of it.
 
 THE FLASH GUARD's LIMITER (0.5.1 D10-19, PARTIAL) is `guardRoutes` in `lab/mod-port.js`: the kit's `createFlashGuard` on exactly
-four routes — `material.exposure`, `material.gamma`, `material.stage`, `material.knee`, each in its map's own space (`FLASH_STEP`,
+four routes — `material.exposure`, `material.gamma`, `material.stage`, `material.knee`, each in its map's own space (`FLASH_STEP`, `material.knee`'s step taken at the default KNEE 3 — 0.4902 in ln KNEE, 0.2723 at 0.6 (008 Q);
 derived by `tools/flash-calibrate.mjs` from `field.js`' tone formulas and held to it by `tests/flash-routes.test.mjs`) — holding a
 route a MODULATOR drives to 3 flashes a second on the modulation clock's own seconds (a hand on an UNROUTED dial and a stop's
 restore are never held; a hand on a ROUTED dial moves the BASE and the modulator's next output carries it through the guard, so that
@@ -432,7 +432,7 @@ cross-module writes, forward + shared ≤ 25 per moving module; the loop and the
 `appFiles()` fetched in the page: rack.js, then every module under `lab/windows/` and `lab/shell/`), never `lab/rack.js` alone.
 `tests/lw-facade.browser-test.mjs` pins `window.__LW` — names, kinds (get / method / value) and order — against
 `research/release-0.5.2/lw-facade.json`; a row that changes the facade re-captures it with `--write` and says the diff. THE LOCK is SAME-MACHINE
-(843 + 987 values since iteration 008 W took Re+Im's 17 style rows out of each fixture — once 860 + 1004; iteration 008 G re-captured the 15 particle rows `styles.{density,phase,real,imag,diff}/{grain,dust,bands}` by name, the counts unchanged; ≤ 64 AO tile states; no time-dependent molecular packet, STATES run, FLOW or `record()` is in it). Its 1004-value
+(843 + 987 values since iteration 008 W took Re+Im's 17 style rows out of each fixture — once 860 + 1004; iteration 008 G re-captured the 15 particle rows `styles.{density,phase,real,imag,diff}/{grain,dust,bands}` by name, the counts unchanged; iteration 008 Q moved the default KNEE 0.6 → 3 (`field.js` `KNEE_DEFAULT`), so every readback that composites the volume was re-captured by name (175 + 193 leaves: the states' rp/rpL, every style and flag row but ADD's, the line rows' rp) — the field digests, record bytes, ADD rows and linePixels held, and the tree at KNEE 0.6 read 843/0 and 987/0; ≤ 64 AO tile states; no time-dependent molecular packet, STATES run, FLOW or `record()` is in it). Its 1004-value
 fixture (`research/release-0.4.0/measure/digest-lock-s4a.json`) predates the gas table and is checked WITH `--query gastab=0`, as the tool's
 header says; without it the gas states read red at every grid.
 

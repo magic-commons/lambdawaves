@@ -115,7 +115,11 @@ export function createSettings(app) {
     if (s.invert === true) { mat.invert = true; if (ui.invertSw) ui.invertSw.set(true); }
     if (+s.dither > 0) { mat.dither = Math.max(0.25, Math.min(2, +s.dither)); if (ui.showDither) ui.showDither(mat.dither); }   // iteration 008 W: nothing said means OFF
     if (s.axisInk === 'cmy' || s.axisInk === 'rgb') { mat.axisInk = s.axisInk; if (ui.axisInkSeg) ui.axisInkSeg.set(s.axisInk); }
-    if (Array.isArray(s.closed)) for (const d of document.querySelectorAll('.dev')) d.classList.toggle('closed', s.closed.includes(d.dataset.id) || (d.dataset.id === 'informational' && !infoKnown()));   // the remembered set, exactly (0.5.3 M9: a profile older than INFORMATIONAL keeps it closed, as a first run does — iteration 007: no record and no atomLabels in the blob)
+    /* the remembered set, exactly — and a card the profile is older than stays closed, as a first run has it (0.5.3 M9: INFORMATIONAL, no record and no
+       atomLabels in the blob; iteration 008 Q: FIELD, no `dither` here — saveSettings has written `dither` on every save since 008 W, which merged after
+       FIELD (S), so its absence is a blob no FIELD build ever saved, exactly as `atomLabels`' absence once said older than INFORMATIONAL) */
+    const older = { informational: !infoKnown(), staticfield: !('dither' in s) };
+    if (Array.isArray(s.closed)) for (const d of document.querySelectorAll('.dev')) d.classList.toggle('closed', s.closed.includes(d.dataset.id) || older[d.dataset.id] === true);
     /* 0.3.1 · S1 (D4's escape hatch): the camera MODE is the project's, like the pose it is needed to read, so a `camMode`
        an older build left here is not read — the boot is FREE (the shipped seed) and a project brings its own. */
     if (s.p3Mode === 'vivid' && ui.p3Seg) ui.p3Seg.set('vivid');
