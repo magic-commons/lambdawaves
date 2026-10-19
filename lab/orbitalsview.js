@@ -25,7 +25,7 @@
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
 import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText, chip } from './mir/kit.js';
-import { paintStroke } from './paint-stroke.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton } from './paint-stroke.js'; import { fold } from './fold.js';
 import { slerpCoefficients } from './molecular-register.js';
 import { createFlow } from './molecular-flow.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
@@ -36,25 +36,6 @@ const LAW = 'frozen orbitals · beats at Δε, not at ω_RPA';
 /* iteration 007 B (ADR-0002) · THE ORBITAL REGISTER's A ↔ B IS ITS OWN TARGET.  Its id lives here, once: shell/modulation.js registers it
    (a `defs` row), shell/persist.js seats its base (modSeats), and the knob's hand law below asks it.  `reg.morph` stays the STATES register's. */
 export const OMORPH = 'reg.omorph';
-
-/* iteration 008 U · EMPTY <-> FILL ALL, the one two-state button both register panes carry.  The glyphs are 24-unit outline drawings in the
-   kit's hand (glyph.js: stroke 1.9, round caps; the kit's registry is not ours to extend, so they are drawn here).  Designed by Gemini 3.8 Flash
-   (High) through agy — the prompt and its answer are in research/iteration-008/U-BUILD.md. */
-const GS = 'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
-const GLYPH = {   // Gemini's answer, verbatim but for the kit's stroke block on each element: a register frame and three rungs, whole or broken
-  fill: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8"/>',
-  empty: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8" stroke-dasharray="2 4"/>',
-};
-export function fillButton(row, titles, onPress) {
-  const b = el('button', 'trig reg-fill', row); b.type = 'button';
-  let empty = null;
-  const draw = (v) => {
-    b.innerHTML = '<svg class="gly" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">' + GLYPH[v ? 'fill' : 'empty'] + '</svg>';
-    b.setAttribute('aria-label', v ? 'FILL ALL' : 'EMPTY'); b.title = v ? titles.fill : titles.empty; b.dataset.state = v ? 'fill' : 'empty';
-  };
-  b.addEventListener('click', () => onPress(empty));
-  return { root: b, set(v, ok = true) { const e = !!v; if (e !== empty) { empty = e; draw(e); } b.disabled = !ok; }, get empty() { return empty; } };
-}
 
 export function createOrbitals(host, api) {
   const F = () => (api.field ? api.field() : null);
@@ -557,23 +538,15 @@ export function createOrbitals(host, api) {
     const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y);
     return hi - lo < 0.5 ? [] : hits.filter((h) => !h.core && h.y > lo && h.y < hi && carried(h.k)).map((h) => h.k);
   }
-  let stroked = 0;                                                          // levels this stroke changed: its end normalises only a stroke that painted
   const stroke = paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(),
     at: (p) => { const h = nearestHit(p, 8); return h ? [h.core ? 'core' : h.k] : []; }, across: crossed,
     apply: (ks, add) => {                                                   // a TAP on the folded core opens it; a stroke paints past it
       if (ks.includes('core')) { if (!stroke.painting) setCoreOpen(true); ks = ks.filter((k) => k !== 'core'); }
-      if (ks.length) stroked += paintLevels(ks, add);
+      return ks.length ? paintLevels(ks, add) : 0;
     },
     /* iteration 008 U · THE STROKE'S END (still inside its pointerup, so the same undo row): the sum of |c|^2 goes to 1, and a hand that
        painted the ladder picked the register — VIEW REGISTRY (api.stroked).  A modulator's write never comes here */
-    onEnd: () => { const n = stroked; stroked = 0; if (!n) return; norm(); if (api.stroked) api.stroked('orbital'); } });
-  /* a click no pointer made (none can reach a canvas today, but the law is kept): the nearest level joins */
-  cv.addEventListener('click', (e) => {
-    if (!hits.length) return;
-    let best = null;
-    for (const h of hits) { if (h.core || e.offsetX < h.x0 - 2 || e.offsetX > h.x1 + 2) continue; const d = Math.abs(h.y - e.offsetY); if (d <= 8 && (!best || d < best.d)) best = { d, k: h.k }; }
-    if (best && paintLevels([best.k], true)) { norm(); if (api.stroked) api.stroked('orbital'); }
-  });
+    onEnd: () => { norm(); if (api.stroked) api.stroked('orbital'); } });
   window.addEventListener('resize', () => paint());
 
   /* ── CHEMISTRY's road: the last ground state, and every new one ───────────────────────────────── */

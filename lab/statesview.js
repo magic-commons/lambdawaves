@@ -29,10 +29,9 @@
 import { stateName } from './names.js';
 import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, label as lbl, hint, chip } from './mir/kit.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
-import { paintStroke } from './paint-stroke.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton } from './paint-stroke.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
 import { GROUND, AU_TIME_AS, createStatesModel, slerpCoefficients, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
-import { fillButton } from './orbitalsview.js';   // iteration 008 U: EMPTY ↔ FILL ALL, one button for both panes
 
 const TAU = 2 * Math.PI;
 export const LANE_CAP = 8;                         // eight modulation slots (reg.amp1…8, reg.ph1…8): S₀ + seven states
@@ -80,7 +79,7 @@ export function createStates(host, api) {
   const head = el('div', 'row tight sp-head', host);
   const mk = (txt, title) => { const b = el('button', 'trig', head); b.type = 'button'; b.textContent = txt; b.title = title; return b; };
   const hideBtn = mk('HIDE', 'Hide or show the lanes');
-  /* iteration 008 U · EMPTY <-> FILL ALL (orbitalsview.js fillButton): S₀ alone shows FILL ALL — every state the ladder shows, up to the eight
+  /* iteration 008 U · EMPTY <-> FILL ALL (paint-stroke.js fillButton): S₀ alone shows FILL ALL — every state the ladder shows, up to the eight
      lanes, equal and in phase — anything more shows EMPTY.  NORM is gone: a HAND stroke normalises at its end */
   const fillB = fillButton(head, { fill: 'Fill the register: S₀ and every state the ladder shows (up to ' + LANE_CAP + ' lanes), equal and in phase', empty: 'Empty the register: S₀ alone' },
     (empty) => (empty ? fill() : clear()));
@@ -672,19 +671,11 @@ export function createStates(host, api) {
     return { x: (e.clientX - r.left) * sx - cv.clientLeft, y: (e.clientY - r.top) * sy - cv.clientTop };
   };
   const nearest = (p) => { let best = null, bd = Infinity; for (const h of hits) { const dy = Math.abs(h.y - p.y); if (dy > 8) continue; const dx = p.x < h.x0 ? h.x0 - p.x : p.x > h.x1 ? p.x - h.x1 : 0, d = dy * 1e4 + dx; if (d < bd) { bd = d; best = h; } } return best; };
-  let stroked = 0;                                   // states this stroke changed: its end (iteration 008 U) normalises and picks VIEW REGISTRY
   paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(),
     at: (p) => { const h = nearest(p); return h ? [h.key] : []; },
     across: (a, b) => { const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y); return hi - lo < 0.5 ? [] : hits.filter((h) => h.y > lo && h.y < hi).map((h) => h.key); },
-    apply: (keys, add) => { if (keys.length === 1 && keys[0] === GROUND) { selected = GROUND; paint(); markSel(); return; } stroked += paintStates(keys, add); },
-    onEnd: () => { const n = stroked; stroked = 0; if (!n) return; norm(); if (api.stroked) api.stroked('states'); } });
-  /* a click no pointer made: the old law, minus the toggle-off (removal is a right press now) */
-  cv.addEventListener('click', (e) => {
-    let best = null;
-    for (const h of hits) { if (e.offsetX < h.x0 - 2 || e.offsetX > h.x1 + 2) continue; const dd = Math.abs(h.y - e.offsetY); if (dd <= 8 && (!best || dd < best.d)) best = { d: dd, key: h.key }; }
-    if (!best) return;
-    if (best.key === GROUND) { selected = GROUND; paint(); markSel(); } else if (paintStates([best.key], true)) { norm(); if (api.stroked) api.stroked('states'); }
-  });
+    apply: (keys, add) => { if (keys.length === 1 && keys[0] === GROUND) { selected = GROUND; paint(); markSel(); return 0; } return paintStates(keys, add); },
+    onEnd: () => { norm(); if (api.stroked) api.stroked('states'); } });
 
   /* ── THE DIPOLE SCOPE ─────────────────────────────────────────────────────────────────────────── */
   function paintScope() {

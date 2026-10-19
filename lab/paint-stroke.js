@@ -1,5 +1,5 @@
-/* paint-stroke.js — THE PAINT GESTURE (2026-10, Josh), one law for every register ladder: MO-REGISTRY's ORBITAL and STATES
- * ladders (canvases) and SPECTRUM's state grid (buttons).
+/* paint-stroke.js — THE PAINT GESTURE (2026-10, Josh), one law for every register ladder: MOLECULES' ORBITAL and STATES
+ * ladders (canvases) and SPECTRUM's state grid (buttons) — and the EMPTY ↔ FILL ALL button the three heads share (fillButton).
  *
  *   LEFT press  ADDS:    a click adds the item under the pointer; a drag adds every item it crosses.
  *   RIGHT press REMOVES: a right-click removes the item under the pointer; a right-drag removes every item it crosses.
@@ -14,11 +14,12 @@
  *   local(e)       → p        the pointer in whatever space `at` and `across` read (default: client px)
  *   at(p)          → keys[]   the item(s) under p (usually zero or one)
  *   across(a, b)   → keys[]   every item the segment a→b crosses (it need not repeat at(b))
- *   apply(keys, add)          add or remove them, in ONE pass (one rebuild, one repaint)
+ *   apply(keys, add) → n      add or remove them, in ONE pass (one rebuild, one repaint); n = how many it changed
  *   ready()        → bool     optional: false ignores the press (nothing to paint yet)
- *   onEnd(add)               optional: the stroke is over and painted something — still inside the pointerup, so whatever it
- *                            does (iteration 008: MOLECULES' register normalises here) joins the stroke's one undo row
+ *   onEnd(add)               optional: the stroke is over and CHANGED something (the applies' n summed > 0) — still inside the
+ *                            pointerup, so whatever it does (iteration 008: every ladder normalises here) joins the stroke's one undo row
  */
+import { el } from './mir/kit.js';
 export function paintStroke(surface, o) {
   const local = o.local || ((e) => ({ x: e.clientX, y: e.clientY }));
   let stroke = null, eatUntil = 0;
@@ -30,7 +31,7 @@ export function paintStroke(surface, o) {
     const right = e.pointerType === 'mouse' ? e.button === 2 || (e.button === 0 && e.altKey) : false;
     if (e.pointerType === 'mouse' && e.button !== 0 && e.button !== 2) return;
     const p = local(e);
-    stroke = { id: e.pointerId, start: p, last: p, cx: e.clientX, cy: e.clientY, add: !right, moved: false, hit: false };
+    stroke = { id: e.pointerId, start: p, last: p, cx: e.clientX, cy: e.clientY, add: !right, moved: false, n: 0 };
     try { surface.setPointerCapture(e.pointerId); } catch (_) {}
     if (right) e.preventDefault();
   });
@@ -42,18 +43,18 @@ export function paintStroke(surface, o) {
       if (Math.hypot(e.clientX - stroke.cx, e.clientY - stroke.cy) < 4) return;
       stroke.moved = true;
       if (o.onStart) o.onStart();
-      const k0 = o.at(stroke.start); if (k0.length) { stroke.hit = true; o.apply(k0, stroke.add); }
+      const k0 = o.at(stroke.start); if (k0.length) stroke.n += +o.apply(k0, stroke.add) || 0;
     }
     e.stopImmediatePropagation();
     const keys = o.across(stroke.last, p).concat(o.at(p));
     stroke.last = p;
-    if (keys.length) { stroke.hit = true; o.apply(keys, stroke.add); }
+    if (keys.length) stroke.n += +o.apply(keys, stroke.add) || 0;
   }, { capture: true });
   const end = (e, tap) => {
     if (!stroke || (e && e.pointerId !== stroke.id)) return;
     const s = stroke; stroke = null; eatUntil = performance.now() + 500;
-    if (tap && !s.moved) { const k = o.at(s.start); if (k.length) { s.hit = true; o.apply(k, s.add); } }
-    if (s.hit && o.onEnd) o.onEnd(s.add);
+    if (tap && !s.moved) { const k = o.at(s.start); if (k.length) s.n += +o.apply(k, s.add) || 0; }
+    if (s.n > 0 && o.onEnd) o.onEnd(s.add);
   };
   surface.addEventListener('pointerup', (e) => end(e, true));
   surface.addEventListener('pointercancel', (e) => end(e, false));
@@ -61,4 +62,25 @@ export function paintStroke(surface, o) {
   /* the click a pointer press leaves behind has already been answered */
   surface.addEventListener('click', (e) => { if (performance.now() < eatUntil) { eatUntil = 0; e.stopImmediatePropagation(); e.preventDefault(); } }, { capture: true });
   return { get painting() { return !!(stroke && stroke.moved); } };
+}
+
+/* iteration 008 U · EMPTY <-> FILL ALL, the one two-state button the three ladders' heads carry (SPECTRUM, ORBITAL, STATES): an empty register
+   shows FILL ALL, any other EMPTY.  The glyphs are 24-unit outline drawings in the kit's hand (glyph.js: stroke 1.9, round caps; the kit's
+   registry is not ours to extend, so they are drawn here), designed by Gemini 3.8 Flash (High) — the prompt and its answer are in
+   research/iteration-008/U-BUILD.md.  `words` keeps SPECTRUM's look (its head row's words, as DIALS and + MODE). */
+const GS = 'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+const GLYPH = {   // Gemini's answer, verbatim but for the kit's stroke block on each element: a register frame and three rungs, whole or broken
+  fill: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8"/>',
+  empty: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8" stroke-dasharray="2 4"/>',
+};
+export function fillButton(row, titles, onPress, words = false) {
+  const b = el('button', 'trig reg-fill', row); b.type = 'button';
+  let empty = null;
+  const draw = (v) => {
+    if (words) b.textContent = v ? 'FILL ALL' : 'EMPTY';
+    else b.innerHTML = '<svg class="gly" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">' + GLYPH[v ? 'fill' : 'empty'] + '</svg>';
+    b.setAttribute('aria-label', v ? 'FILL ALL' : 'EMPTY'); b.title = v ? titles.fill : titles.empty; b.dataset.state = v ? 'fill' : 'empty';
+  };
+  b.addEventListener('click', () => onPress(empty));
+  return { root: b, set(v, ok = true) { const e = !!v; if (e !== empty) { empty = e; draw(e); } b.disabled = !ok; }, get empty() { return empty; } };
 }
