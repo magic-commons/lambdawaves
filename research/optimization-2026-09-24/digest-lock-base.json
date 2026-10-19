@@ -12,7 +12,7 @@
    },
    "darkest": 88,
    "line": "867e3750",
-   "rp": "25864b33"
+   "rp": "cabb771b"
   },
   "box+corner": {
    "buckets": {
@@ -26,7 +26,7 @@
    },
    "darkest": 88,
    "line": "4acaac27",
-   "rp": "a2415fd7"
+   "rp": "46fb1b02"
   },
   "box+corner@occ": {
    "buckets": {
@@ -40,7 +40,7 @@
    },
    "darkest": 88,
    "line": "9f9f8895",
-   "rp": "a44d6bab"
+   "rp": "fedfbc36"
   },
   "box+ink": {
    "buckets": {
@@ -54,7 +54,7 @@
    },
    "darkest": 177,
    "line": "8d60442b",
-   "rp": "d8f83de4"
+   "rp": "bbac8638"
   },
   "box+ink@occ": {
    "buckets": {
@@ -68,7 +68,7 @@
    },
    "darkest": 177,
    "line": "3acddcb7",
-   "rp": "844a4ee1"
+   "rp": "65a59d7b"
   },
   "box+slice": {
    "buckets": {
@@ -82,7 +82,7 @@
    },
    "darkest": 88,
    "line": "cc4bc34f",
-   "rp": "87308529"
+   "rp": "becaba54"
   },
   "box+slice@occ": {
    "buckets": {
@@ -96,7 +96,7 @@
    },
    "darkest": 88,
    "line": "af62444b",
-   "rp": "523be5e2"
+   "rp": "21c56c83"
   },
   "box-axisoff": {
    "buckets": {
@@ -110,7 +110,7 @@
    },
    "darkest": 88,
    "line": "82ae6aa7",
-   "rp": "c3d833bb"
+   "rp": "fcecfdfa"
   },
   "box-axisoff@occ": {
    "buckets": {
@@ -124,7 +124,7 @@
    },
    "darkest": 88,
    "line": "d4c45cc7",
-   "rp": "af7897a1"
+   "rp": "4d98d63c"
   },
   "box@occ": {
    "buckets": {
@@ -138,7 +138,7 @@
    },
    "darkest": 88,
    "line": "add63110",
-   "rp": "569ea085"
+   "rp": "94c9a069"
   },
   "dots": {
    "buckets": {
@@ -152,7 +152,7 @@
    },
    "darkest": 152,
    "line": "d1ce64b6",
-   "rp": "2adc0d8c"
+   "rp": "2e500db0"
   },
   "dots+corner": {
    "buckets": {
@@ -166,7 +166,7 @@
    },
    "darkest": 152,
    "line": "7c1bbb86",
-   "rp": "2bd8db26"
+   "rp": "7f10bacb"
   },
   "dots+corner@occ": {
    "buckets": {
@@ -180,7 +180,7 @@
    },
    "darkest": 152,
    "line": "a49bff8e",
-   "rp": "b585a4de"
+   "rp": "76060a56"
   },
   "dots+ink": {
    "buckets": {
@@ -194,7 +194,7 @@
    },
    "darkest": 177,
    "line": "76ca4610",
-   "rp": "817b9222"
+   "rp": "564be639"
   },
   "dots+ink@occ": {
    "buckets": {
@@ -208,7 +208,7 @@
    },
    "darkest": 177,
    "line": "714610c0",
-   "rp": "648acccf"
+   "rp": "51ff2458"
   },
   "dots@occ": {
    "buckets": {
@@ -222,7 +222,7 @@
    },
    "darkest": 152,
    "line": "f19fd9da",
-   "rp": "93050d3c"
+   "rp": "7dd22981"
   },
   "lattice": {
    "buckets": {
@@ -236,7 +236,7 @@
    },
    "darkest": 138,
    "line": "9c3095c5",
-   "rp": "6c76f2c8"
+   "rp": "4e8b294f"
   },
   "lattice+corner": {
    "buckets": {
@@ -250,7 +250,7 @@
    },
    "darkest": 138,
    "line": "542c9ade",
-   "rp": "e853d9f4"
+   "rp": "a54e1819"
   },
   "lattice+corner@occ": {
    "buckets": {
@@ -264,7 +264,7 @@
    },
    "darkest": 138,
    "line": "a24bfd33",
-   "rp": "d95f13ea"
+   "rp": "afdc1673"
   },
   "lattice+ink": {
    "buckets": {
@@ -278,7 +278,7 @@
    },
    "darkest": 176,
    "line": "4fd723fd",
-   "rp": "982f812a"
+   "rp": "fa6c2473"
   },
   "lattice+ink@occ": {
    "buckets": {
@@ -292,7 +292,7 @@
    },
    "darkest": 176,
    "line": "41284a4c",
-   "rp": "3582007f"
+   "rp": "fea2077b"
   },
   "lattice@occ": {
    "buckets": {
@@ -306,7 +306,7 @@
    },
    "darkest": 138,
    "line": "db9dd153",
-   "rp": "2d84dec1"
+   "rp": "988fdfc6"
   },
   "off": {
    "buckets": {
@@ -320,7 +320,7 @@
    },
    "darkest": 202,
    "line": "4cb55a4a",
-   "rp": "943709fc"
+   "rp": "189ce387"
   },
   "off+corner": {
    "buckets": {
@@ -334,7 +334,7 @@
    },
    "darkest": 202,
    "line": "6f74980b",
-   "rp": "70876dd5"
+   "rp": "9b47d18"
   },
   "off+corner@occ": {
    "buckets": {
@@ -348,7 +348,7 @@
    },
    "darkest": 202,
    "line": "6f74980b",
-   "rp": "70876dd5"
+   "rp": "9b47d18"
   },
   "off@occ": {
    "buckets": {
@@ -362,7 +362,7 @@
    },
    "darkest": 202,
    "line": "4cb55a4a",
-   "rp": "943709fc"
+   "rp": "189ce387"
   }
  },
  "made": "2026-09-25T04:01:50.657Z",
@@ -415,8 +415,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 64,
-    "rp": "40a88dc0",
-    "rpL": "9b6994a4",
+    "rp": "91d42f3d",
+    "rpL": "dcef8aaa",
     "space": 0,
     "t": 3.7
    },
@@ -433,8 +433,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 96,
-    "rp": "538d6df6",
-    "rpL": "c992cc47",
+    "rp": "54f1ffeb",
+    "rpL": "fb0ce971",
     "space": 0,
     "t": 3.7
    },
@@ -451,8 +451,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 128,
-    "rp": "8832c1b9",
-    "rpL": "e9c90d91",
+    "rp": "8a3b019c",
+    "rpL": "e710ae53",
     "space": 0,
     "t": 3.7
    }
@@ -471,8 +471,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 64,
-    "rp": "d900ccd2",
-    "rpL": "52c2c9d5",
+    "rp": "8f5758f0",
+    "rpL": "9b1a3e7c",
     "space": 3,
     "t": 2
    },
@@ -489,8 +489,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 96,
-    "rp": "d4f438e0",
-    "rpL": "55abd4e9",
+    "rp": "cb3bfa37",
+    "rpL": "7b97503a",
     "space": 3,
     "t": 2
    },
@@ -507,8 +507,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 128,
-    "rp": "fe28dab5",
-    "rpL": "fe6078e0",
+    "rp": "e57380e6",
+    "rpL": "e6ffd8db",
     "space": 3,
     "t": 2
    }
@@ -527,8 +527,8 @@
     "reconstructed": false,
     "repeat": true,
     "res": 64,
-    "rp": "e7768e74",
-    "rpL": "42b53c82",
+    "rp": "f0e77b6e",
+    "rpL": "314fc857",
     "space": 0,
     "t": 3.7
    },
@@ -545,8 +545,8 @@
     "reconstructed": false,
     "repeat": true,
     "res": 96,
-    "rp": "9c9960e9",
-    "rpL": "f0f21d08",
+    "rp": "4d472df4",
+    "rpL": "99302dac",
     "space": 0,
     "t": 3.7
    },
@@ -563,8 +563,8 @@
     "reconstructed": false,
     "repeat": true,
     "res": 128,
-    "rp": "3f808d83",
-    "rpL": "809f4850",
+    "rp": "9885bbec",
+    "rpL": "3c01d9ff",
     "space": 0,
     "t": 3.7
    }
@@ -583,8 +583,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 64,
-    "rp": "6612aa5b",
-    "rpL": "6b16184b",
+    "rp": "5f361977",
+    "rpL": "cbe3bbd8",
     "space": 3,
     "t": 2
    },
@@ -601,8 +601,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 96,
-    "rp": "2878900c",
-    "rpL": "cd2e20d6",
+    "rp": "c06c4bbb",
+    "rpL": "63b3140b",
     "space": 3,
     "t": 2
    },
@@ -619,8 +619,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 128,
-    "rp": "ddcf44a7",
-    "rpL": "fcfeeafd",
+    "rp": "8e4a8c4c",
+    "rpL": "5868ee84",
     "space": 3,
     "t": 2
    }
@@ -751,8 +751,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 64,
-    "rp": "b126fa6",
-    "rpL": "5f44ce31",
+    "rp": "8e61da98",
+    "rpL": "405dfb25",
     "space": 0,
     "t": 3.7
    },
@@ -769,8 +769,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 96,
-    "rp": "b9b290e9",
-    "rpL": "a55294ae",
+    "rp": "9c518797",
+    "rpL": "64c8c03f",
     "space": 0,
     "t": 3.7
    },
@@ -787,8 +787,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 128,
-    "rp": "16c610d5",
-    "rpL": "68e9903e",
+    "rp": "9abdf9f6",
+    "rpL": "9a0ffd1b",
     "space": 0,
     "t": 3.7
    }
@@ -863,8 +863,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 64,
-    "rp": "ff004ca3",
-    "rpL": "fa2b9b17",
+    "rp": "67a4e474",
+    "rpL": "d02a91b3",
     "space": 1,
     "t": 3.7
    },
@@ -881,8 +881,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 96,
-    "rp": "6146fc79",
-    "rpL": "5447ba88",
+    "rp": "81b07212",
+    "rpL": "7b6dfc6c",
     "space": 1,
     "t": 3.7
    },
@@ -899,8 +899,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 128,
-    "rp": "c82f9dc5",
-    "rpL": "f577be66",
+    "rp": "9dcc27ae",
+    "rpL": "65b9ee92",
     "space": 1,
     "t": 3.7
    }
@@ -919,8 +919,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 64,
-    "rp": "a5c5fb7f",
-    "rpL": "9c61da08",
+    "rp": "be5105d",
+    "rpL": "2c4419cc",
     "space": 2,
     "t": 1.3
    },
@@ -937,8 +937,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 96,
-    "rp": "a9ebe14c",
-    "rpL": "6154846e",
+    "rp": "21046d40",
+    "rpL": "2a01a254",
     "space": 2,
     "t": 1.3
    },
@@ -955,8 +955,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 128,
-    "rp": "e83b41e9",
-    "rpL": "f81797b2",
+    "rp": "d935d836",
+    "rpL": "e09aa58f",
     "space": 2,
     "t": 1.3
    }
@@ -975,8 +975,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 64,
-    "rp": "4259685",
-    "rpL": "4cfac7d2",
+    "rp": "43fcf9c6",
+    "rpL": "63e5f67b",
     "space": 6,
     "t": 3.7
    },
@@ -993,8 +993,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 96,
-    "rp": "a7cd3c99",
-    "rpL": "2609484d",
+    "rp": "7113ec",
+    "rpL": "fab9847",
     "space": 6,
     "t": 3.7
    },
@@ -1011,8 +1011,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 128,
-    "rp": "c5c5e807",
-    "rpL": "aaf4bf23",
+    "rp": "51303166",
+    "rpL": "c97dd3c9",
     "space": 6,
     "t": 3.7
    }
@@ -1031,8 +1031,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 64,
-    "rp": "d522eb8a",
-    "rpL": "7c480fca",
+    "rp": "c2fbce15",
+    "rpL": "85132fb6",
     "space": 0,
     "t": 3.7
    },
@@ -1049,8 +1049,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 96,
-    "rp": "793027a5",
-    "rpL": "e010da5",
+    "rp": "492b9260",
+    "rpL": "fe1173bd",
     "space": 0,
     "t": 3.7
    },
@@ -1067,8 +1067,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 128,
-    "rp": "ed21b952",
-    "rpL": "bfd3c560",
+    "rp": "180eb9bd",
+    "rpL": "963d3560",
     "space": 0,
     "t": 3.7
    }
@@ -1087,8 +1087,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 64,
-    "rp": "8d80bbc2",
-    "rpL": "831d1cab",
+    "rp": "d76bafee",
+    "rpL": "c940dc88",
     "space": 0,
     "t": 3.7
    },
@@ -1105,8 +1105,8 @@
     "reconstructed": true,
     "repeat": true,
     "res": 96,
-    "rp": "17b8424b",
-    "rpL": "59c46e54",
+    "rp": "7ff05afb",
+    "rpL": "99632214",
     "space": 0,
     "t": 3.7
    },
@@ -1123,117 +1123,117 @@
     "reconstructed": true,
     "repeat": true,
     "res": 128,
-    "rp": "a2312568",
-    "rpL": "bee217fb",
+    "rp": "375e5c1e",
+    "rpL": "6d26d4b2",
     "space": 0,
     "t": 3.7
    }
   }
  },
  "styles": {
-  "bow:density/cloud": "efcc7963",
-  "bow:density/signed": "e2b200ad",
-  "bow:diff/cloud": "20fc1643",
+  "bow:density/cloud": "34366dcc",
+  "bow:density/signed": "ff7fd397",
+  "bow:diff/cloud": "6587a5de",
   "bow:imag/additive": "b32b5f8b",
-  "bow:phase/cloud": "227316ef",
-  "bow:phase/solid": "3ce01402",
-  "bow:real/cloud": "898845df",
+  "bow:phase/cloud": "1e7f478b",
+  "bow:phase/solid": "d66d0e56",
+  "bow:real/cloud": "6c9e8ad9",
   "density/additive": "cfa03b01",
-  "density/bands": "aa9883bb",
-  "density/cloud": "6ae56a63",
-  "density/dust": "75f261a3",
-  "density/glass": "30fd3ce7",
-  "density/grain": "75f261a3",
-  "density/signed": "e2b200ad",
-  "density/solid": "35cc1eaf",
+  "density/bands": "9698c80b",
+  "density/cloud": "186ee64d",
+  "density/dust": "84a08c9f",
+  "density/glass": "a18cc08f",
+  "density/grain": "84a08c9f",
+  "density/signed": "99c2bf6",
+  "density/solid": "479a2c7c",
   "diff/additive": "13802a05",
-  "diff/bands": "8ec69c3",
-  "diff/cloud": "9f87c4fe",
-  "diff/dust": "7c0c3543",
-  "diff/glass": "5a161853",
-  "diff/grain": "7c0c3543",
-  "diff/signed": "c19b97cd",
-  "diff/solid": "df05cafd",
-  "dither:density/cloud": "6ed74f02",
-  "dither:density/signed": "79e65cb7",
-  "dither:diff/cloud": "4333d9eb",
+  "diff/bands": "f858093",
+  "diff/cloud": "b129aeb7",
+  "diff/dust": "6e093592",
+  "diff/glass": "e2d8f68a",
+  "diff/grain": "6e093592",
+  "diff/signed": "9a1ec700",
+  "diff/solid": "2e0d18c0",
+  "dither:density/cloud": "d437b86f",
+  "dither:density/signed": "1883aeab",
+  "dither:diff/cloud": "6e2390b9",
   "dither:imag/additive": "e4677f78",
-  "dither:phase/cloud": "1fc9b0b9",
-  "dither:phase/solid": "9ace2346",
-  "dither:real/cloud": "3981c96",
-  "finish-glass:density/cloud": "49fcc163",
-  "finish-glass:density/signed": "3cfbf421",
-  "finish-glass:diff/cloud": "29804e58",
+  "dither:phase/cloud": "cb319b89",
+  "dither:phase/solid": "ab3c468c",
+  "dither:real/cloud": "76d41d71",
+  "finish-glass:density/cloud": "3031c39f",
+  "finish-glass:density/signed": "cb3b4c63",
+  "finish-glass:diff/cloud": "23f9fab4",
   "finish-glass:imag/additive": "de374a44",
-  "finish-glass:phase/cloud": "1e8c3d77",
-  "finish-glass:phase/solid": "fb5abf56",
-  "finish-glass:real/cloud": "e5d1390c",
-  "finish-matte:density/cloud": "6ae56a63",
-  "finish-matte:density/signed": "15f84e8f",
-  "finish-matte:diff/cloud": "9f87c4fe",
+  "finish-glass:phase/cloud": "4cd40af5",
+  "finish-glass:phase/solid": "1e165fa0",
+  "finish-glass:real/cloud": "36d62a73",
+  "finish-matte:density/cloud": "186ee64d",
+  "finish-matte:density/signed": "28408abc",
+  "finish-matte:diff/cloud": "b129aeb7",
   "finish-matte:imag/additive": "13792d8d",
-  "finish-matte:phase/cloud": "c992cc47",
-  "finish-matte:phase/solid": "4fcaef77",
-  "finish-matte:real/cloud": "1ecf5f4e",
+  "finish-matte:phase/cloud": "fb0ce971",
+  "finish-matte:phase/solid": "6caafeb9",
+  "finish-matte:real/cloud": "f93e0899",
   "imag/additive": "13792d8d",
-  "imag/bands": "defe638a",
-  "imag/cloud": "bac0161c",
-  "imag/dust": "15bbd7c9",
-  "imag/glass": "68e20908",
-  "imag/grain": "15bbd7c9",
-  "imag/signed": "b86c6515",
-  "imag/solid": "61af339b",
-  "invert:density/cloud": "2e3fc2d6",
-  "invert:density/signed": "75ff7981",
-  "invert:diff/cloud": "fa3a458a",
+  "imag/bands": "e73332d1",
+  "imag/cloud": "f950ddb1",
+  "imag/dust": "8cc0e639",
+  "imag/glass": "12091b9a",
+  "imag/grain": "8cc0e639",
+  "imag/signed": "3e7f48ca",
+  "imag/solid": "5332f6b9",
+  "invert:density/cloud": "6f11d239",
+  "invert:density/signed": "668817fb",
+  "invert:diff/cloud": "6a33fbae",
   "invert:imag/additive": "339d5781",
-  "invert:phase/cloud": "37fe2725",
-  "invert:phase/solid": "78ce1fa0",
-  "invert:real/cloud": "4115df47",
-  "palette-off:density/cloud": "6ae56a63",
-  "palette-off:density/signed": "e2b200ad",
-  "palette-off:diff/cloud": "9f87c4fe",
+  "invert:phase/cloud": "6a336fb8",
+  "invert:phase/solid": "cab4adb1",
+  "invert:real/cloud": "f45adcf2",
+  "palette-off:density/cloud": "186ee64d",
+  "palette-off:density/signed": "99c2bf6",
+  "palette-off:diff/cloud": "b129aeb7",
   "palette-off:imag/additive": "13792d8d",
-  "palette-off:phase/cloud": "c992cc47",
-  "palette-off:phase/solid": "a89466cb",
-  "palette-off:real/cloud": "1ecf5f4e",
-  "palette-on:density/cloud": "a90341f3",
-  "palette-on:density/signed": "588347b",
-  "palette-on:diff/cloud": "8c6ba11e",
+  "palette-off:phase/cloud": "fb0ce971",
+  "palette-off:phase/solid": "8ac8e653",
+  "palette-off:real/cloud": "f93e0899",
+  "palette-on:density/cloud": "6400416f",
+  "palette-on:density/signed": "ec603ad6",
+  "palette-on:diff/cloud": "a567ce41",
   "palette-on:imag/additive": "a3f04b16",
-  "palette-on:phase/cloud": "54fba227",
-  "palette-on:phase/solid": "7acf4316",
-  "palette-on:real/cloud": "2e660271",
+  "palette-on:phase/cloud": "310166a7",
+  "palette-on:phase/solid": "25c36987",
+  "palette-on:real/cloud": "20cdc5ff",
   "phase/additive": "b0673de8",
-  "phase/bands": "318aa282",
-  "phase/cloud": "c992cc47",
-  "phase/dust": "16d41c7b",
-  "phase/glass": "9d361522",
-  "phase/grain": "16d41c7b",
-  "phase/signed": "ba1bca",
-  "phase/solid": "a89466cb",
+  "phase/bands": "c1681688",
+  "phase/cloud": "fb0ce971",
+  "phase/dust": "b2c1cde8",
+  "phase/glass": "f70e19c1",
+  "phase/grain": "b2c1cde8",
+  "phase/signed": "812d34ae",
+  "phase/solid": "8ac8e653",
   "real/additive": "133b3a06",
-  "real/bands": "647d16e6",
-  "real/cloud": "1ecf5f4e",
-  "real/dust": "47f1cb30",
-  "real/glass": "365711e9",
-  "real/grain": "47f1cb30",
-  "real/signed": "40f5d11f",
-  "real/solid": "7fc817c0",
-  "slice-clip:density/cloud": "abda8106",
-  "slice-clip:density/signed": "6a5b3123",
-  "slice-clip:diff/cloud": "34f2531",
+  "real/bands": "f2381161",
+  "real/cloud": "f93e0899",
+  "real/dust": "c741a2ad",
+  "real/glass": "33bf73c6",
+  "real/grain": "c741a2ad",
+  "real/signed": "12b28afd",
+  "real/solid": "53f8c380",
+  "slice-clip:density/cloud": "760201d",
+  "slice-clip:density/signed": "bd334646",
+  "slice-clip:diff/cloud": "c2bd9d14",
   "slice-clip:imag/additive": "d93488a0",
-  "slice-clip:phase/cloud": "c6e8499f",
-  "slice-clip:phase/solid": "1c5237d",
-  "slice-clip:real/cloud": "c52aadee",
-  "slice-slab:density/cloud": "14654502",
-  "slice-slab:density/signed": "9ec55150",
-  "slice-slab:diff/cloud": "48cc89b9",
+  "slice-clip:phase/cloud": "2770da98",
+  "slice-clip:phase/solid": "908b3162",
+  "slice-clip:real/cloud": "59a0d978",
+  "slice-slab:density/cloud": "529c77ae",
+  "slice-slab:density/signed": "946dc7fa",
+  "slice-slab:diff/cloud": "367d5586",
   "slice-slab:imag/additive": "86a1e0d5",
-  "slice-slab:phase/cloud": "8aeef2e5",
-  "slice-slab:phase/solid": "647c9e2a",
-  "slice-slab:real/cloud": "3c4e4d4e"
+  "slice-slab:phase/cloud": "4f474fa1",
+  "slice-slab:phase/solid": "54606e2a",
+  "slice-slab:real/cloud": "8816a8c8"
  },
  "url": "https://127.0.0.1:8722/lab/?preset=1s%2B2pz&sw=0"
 }

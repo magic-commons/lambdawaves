@@ -34,7 +34,7 @@ import { createFlashGuard, WCAG } from './mir/shell/flash-guard.js';
  *  A hand on a ROUTED dial moves the BASE (registry.setBase publishes nothing under a modulator) and the modulator's next output carries
  *  it, a write no different from the modulator's own, so that picture IS held (D-V N3: a flash is a flash whoever makes it, and a bypass
  *  that resets the guard would let a wiggled dial through a 10 Hz strobe). */
-export const FLASH_STEP = { 'material.exposure': 0.0953, 'material.gamma': 0.1319, 'material.stage': 0.1131, 'material.knee': 0.2723 };   // iteration 008 G: THE KNEE on the ray (was 0.2595 on the step)
+export const FLASH_STEP = { 'material.exposure': 0.0953, 'material.gamma': 0.1319, 'material.stage': 0.1131, 'material.knee': 0.4902 };   // 008 Q: taken at the new default KNEE 3 (q0 = ln 5; 0.2723 at 0.6) · iteration 008 G: THE KNEE on the ray (was 0.2595 on the step)
 export function guardRoutes(defs, { driven, now, say, read, onAdvance }) {
   const on = defs.filter((d) => d.id in FLASH_STEP), lastWrite = new Map();   // a HELD def → the modulation-second its last write came
   const guard = createFlashGuard({ now, ranges: Object.fromEntries(on.map((d) => [d.label, [0, FLASH_STEP[d.id] / WCAG.delta]])),

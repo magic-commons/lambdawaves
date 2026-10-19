@@ -1,7 +1,7 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle } from '../field.js'; import { planeModel } from '../native-ui.js';
+import { el, knob, sw, seg, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT } from '../field.js'; import { planeModel } from '../native-ui.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
@@ -50,8 +50,8 @@ export function createMaterial(app) {
        material row above STYLE — instead of a second row below the style seg. */
     ui.isoK = knob({ label: 'ISO', min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.isoK.root);
     ui.grainK = knob({ label: 'GRAIN', min: 0.02, max: 1, value: 0.35, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.grain', v)) return; mat.grain = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.grainK.root);
-    ui.kneeK = knob({ label: 'KNEE', min: 0.02, max: 8, value: 0.6, log: true, fmt: (v) => v.toFixed(2), title: 'KNEE bends the ray’s opacity: 0.6 is the plain exponential, above it a soft shoulder (dense cores show through), below it a hard knee (the silhouette closes sooner)', onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.kneeK.root);
-    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through, lower a hard knee. ISO sets the SOLID, SHELL and SIGNED surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
+    ui.kneeK = knob({ label: 'KNEE', min: 0.02, max: 8, value: KNEE_DEFAULT, log: true, fmt: (v) => v.toFixed(2), title: 'KNEE bends the ray’s opacity: 0.6 is the plain exponential, above it a soft shoulder (dense cores show through; the default 3 is somewhat opaque, slightly see-through), below it a hard knee (the silhouette closes sooner)', onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.kneeK.root);
+    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL and SIGNED surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
 
     const gs = group(wClip.body, 'observer only');
     const r3 = el('div', 'row', gs);
