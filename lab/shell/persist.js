@@ -31,7 +31,8 @@ export function createPersist(app) {
       'material.slice.pos': [pr.mat.slice, 'pos'], 'material.slice.thick': [pr.mat.slice, 'thick'], 'transport.rate': [data.experiment, 'rate'],
       'state.rot.z': [pr.rotationRates, 'z'], 'state.stark.kz': [pr.rotationRates, 'kz'], 'state.defect.l2': [pr.rotationRates, 'def'], 'state.rabi': [pr.ab, 'omega'],
       ...Object.fromEntries([1, 2, 3, 4, 5, 6].map((n) => ['shell.rate.n' + n, [shellSeat(pr.rates, n), 'v']])),
-      'chem.kick': [I.chem, 'kappa'], 'chem.speed': [I.chem, 'speed'], 'reg.morph': [st, 'morph'], [OMORPH]: [I.orbitals, 'morph'], 'reg.e0': [st && st.drive, 'e0'], 'reg.w': [st && st.drive, 'omega'],
+      'chem.kick': [I.chem, 'kappa'], 'chem.speed': [I.chem, 'speed'], 'chem.orbital': [I.chem && Number.isFinite(I.chem.orbital) ? I.chem : null, 'orbital'],   // iteration 007 O: an orbital not yet chosen (null, HOMO by default) is never seated
+      'reg.morph': [st, 'morph'], [OMORPH]: [I.orbitals, 'morph'], 'reg.e0': [st && st.drive, 'e0'], 'reg.w': [st && st.drive, 'omega'],
       ...Object.fromEntries(((st && st.lanes) || []).slice(0, 8).flatMap((L, i) => [['reg.amp' + (i + 1), [L, 'amp', Math.sqrt, (a) => a * a]], ['reg.ph' + (i + 1), [L, 'phase', (v) => ((v % T) + T) % T]]])) };
   }
   /* 0.5.0 D9 · QCD's window is deleted; its record `instruments.qcd` stays as QUARKONIUM's parameters (the key and shape it had) */

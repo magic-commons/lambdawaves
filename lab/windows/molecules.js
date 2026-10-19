@@ -57,7 +57,8 @@ export function createMolecules(app) {
      MOLECULES no longer reaches into that card's body.  The stage words are spoken through ONE verb, stageText.say(kind, text) (shell/stage-words.js) */
   const say = (kind, t, o) => !!app.state.stageText && app.state.stageText.say(kind, t, o);
   app.state.chem = createChem(wChem.body, { say, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more, modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): a hand on a ROUTED dial moves its base   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
-    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance, plane: () => app.w.slice,   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
+    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance, plane: () => app.w.slice, field: () => field,   // iteration 007 O: the ORBITAL step's rebuild is timed on the field's own generation
+    modBase: (id, v) => { const H = app.state.modHost; if (H && H.registry.has(id)) H.registry.setBase(id, v); },   // iteration 007 O: an UNROUTED hand on the ORBITAL is its base at once (syncBases runs only while the modulation clock does)   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
     setOn(v) { moleculeMode(v); app.w.stageTextTick(); if (app.hooks.status) app.hooks.status(); }, said: () => app.hooks.status && app.hooks.status(),   // 0.5.4 P4: the STATUS row (informational.js)
@@ -92,6 +93,9 @@ export function createMolecules(app) {
     dom.canvas.addEventListener('pointerdown', () => { if (performance.now() >= until) bye(); }, { signal: life.signal, passive: true });
   }
   app.state.chem.subscribe(headLand);
+  /* iteration 007 O · a file's ORBITAL index this molecule does not hold is clamped to its span (chemview land), and STATE says so, never throws */
+  app.state.chem.subscribe((sol) => { const c = app.state.chem.clamped, row = app.state.chem.row();
+    if (c && sol && c.key === sol.key) wState.setStatus(`ORBITAL ${c.asked} is past ${row ? row.name : 'this molecule'}’s orbitals ${c.lo}–${c.hi}: clamped to ${c.k}`, 'warn'); });
   function createMoRegistry() {   // the second seat: MO-REGISTRY
   const wOrbs = device({ id: 'orbitals', eyebrow: 'MO-REGISTRY', title: 'molecular orbital registry', status: '' });   // the id stays `orbitals` so saved layouts survive the rename (REGISTER-WINDOW-SPEC §11.1)
   app.w.wOrbs = wOrbs;
