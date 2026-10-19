@@ -15,6 +15,10 @@
 import { ATOMS, atom, solveAtom, ionisation, quantumDefect, atomRadialTable, atomEnergyOf, shellEnergyOf,
   virtualEnergyOf, virtualOrbital, atomRadial, rowOf, NR, ROWS, EXCHANGE_MODEL, clearAtomCache, HARTREE_EV } from '../lab/atoms.js';
 
+/* iteration 008 Z: the atom's model is scalar ZORA (lab/atoms.js' header).  A judge whose oracle is NON-RELATIVISTIC — the bare Coulomb −Z²/2n², the
+   Hartree–Fock limits, the ported Python solve, the numbers pinned from it — judges the non-relativistic road (`NRO`, the same mesh, eigensolver and mixer,
+   kept for the ATOMS window's RELATIVITY Δ); the measured-oracle gates (Ne Δ-SCF, Na δ_s) and the per-atom sweep judge the model itself. */
+const NRO = { zora: false };
 let FAILED = 0, TOTAL = 0;
 const T0 = Date.now();
 function judge(name, ok, detail) {
@@ -59,14 +63,14 @@ function quad(r, f) {
     occ(cr, 3, 2) === 5 && occ(cr, 4, 0) === 1 && occ(cu, 3, 2) === 10 && occ(cu, 4, 0) === 1 && occ(v, 3, 2) === 3 && occ(v, 4, 0) === 2,
     { Cr: atom(24).term, Cu: atom(29).term, V: atom(23).term });
   judge("THE MODEL IS NAMED on every number: EXCHANGE_MODEL is 'Xα(2/3) + Latter tail' and a solve carries it",
-    EXCHANGE_MODEL === 'Xα(2/3) + Latter tail' && solveAtom(10).model === 'Xα(2/3) + Latter tail' && solveAtom(10, { alpha: 1 }).model === 'Xα(1) + Latter tail'
-    && solveAtom(2, { alpha: 0 }).model.startsWith('Hartree, self-interaction-free'),
-    { xa: solveAtom(10).model, slater: solveAtom(10, { alpha: 1 }).model, sic: solveAtom(2, { alpha: 0 }).model });
+    EXCHANGE_MODEL === 'Xα(2/3) + Latter tail' && solveAtom(10).model === 'Xα(2/3) + Latter tail · scalar ZORA' && solveAtom(10, { alpha: 1 }).model === 'Xα(1) + Latter tail · scalar ZORA'
+    && solveAtom(10, NRO).model === 'Xα(2/3) + Latter tail' && solveAtom(2, { alpha: 0 }).model.startsWith('Hartree, self-interaction-free'),
+    { xa: solveAtom(10).model, slater: solveAtom(10, { alpha: 1 }).model, nr: solveAtom(10, NRO).model, sic: solveAtom(2, { alpha: 0 }).model });
 }
 
 /* ══ 2. the two total-energy gates ═════════════════════════════════════════════════════════════════════════ */
 {
-  const ne = solveAtom(10), ar = solveAtom(18);
+  const ne = solveAtom(10, NRO), ar = solveAtom(18, NRO);           // the ported Python solve and the HF limits are non-relativistic
   judge('GATE Ne: E = −127.476 ± 0.03 Eh for Xα(2/3) + Latter tail (SYNTHESIS W-ATOMS; the old E.2 gate "within 0.5 % of HF −128.54710" is DEAD and is re-checked as a failure below)',
     near(ne.E, -127.476, 0.03), { E: f5(ne.E), ported: -127.47595, HF: -128.54710, percentOfHF: +(100 * Math.abs(ne.E + 128.54710) / 128.54710).toFixed(3) });
   judge('GATE Ar: E = −524.506 ± 0.08 Eh',
@@ -120,7 +124,7 @@ function quad(r, f) {
 
 /* ══ 6. the 3d/4s order: α-dependent, and never asserted ═══════════════════════════════════════════════════ */
 {
-  const sc = (a) => ({ d: shellEnergyOf(21, 3, 2, { alpha: a }), s: shellEnergyOf(21, 4, 0, { alpha: a }) });
+  const sc = (a) => ({ d: shellEnergyOf(21, 3, 2, { alpha: a, ...NRO }), s: shellEnergyOf(21, 4, 0, { alpha: a, ...NRO }) });   // the pinned numbers and α* are the non-relativistic solve's
   const a23 = sc(2 / 3), a07 = sc(0.7), a10 = sc(1);
   const order = (x) => (x.d < x.s ? '3d below 4s' : '4s below 3d');
   judge('GATE Sc: the 3d/4s order is α-DEPENDENT — at α = 2/3 it is 4s below 3d (−0.18487 < −0.13963) and at α = 1 it is 3d below 4s (−0.26585 < −0.21557).  The order is reported, never asserted; the ledger\'s "Sc flips with α" is the claim, and it holds',
@@ -162,7 +166,7 @@ function quad(r, f) {
   judge('AND ALL 36 CONVERGE: ∫q dr = Z to 1e-7 for every atom and every SCF residual max|ΔV·r| is below 1e-8',
     worstCharge < 1e-7 && worstRes < 1e-8, { worstCharge: worstCharge.toExponential(2), worstResidual: worstRes.toExponential(2), meanIterations: Math.round(totalIt / 36), slowestAtomMs: slow });
   judge('THE TOTALS FALL MONOTONICALLY WITH Z (a shell added is never a bond broken) and Kr lands at −2746.855 Eh',
-    ATOMS.slice(0, 36).every((A, i) => i === 0 || solveAtom(A.Z).E < solveAtom(A.Z - 1).E) && near(solveAtom(36).E, -2746.855, 0.01),
+    ATOMS.slice(0, 36).every((A, i) => i === 0 || solveAtom(A.Z, NRO).E < solveAtom(A.Z - 1, NRO).E) && near(solveAtom(36, NRO).E, -2746.855, 0.01),
     { first: totals.slice(0, 3), last: totals.slice(-3) });
 }
 
@@ -183,30 +187,31 @@ function quad(r, f) {
     { rows: Tk.rows.map((x) => [`${x.n}${'spdf'[x.l]}`, x.row, +x.rTab.toFixed(3)]),
       ne3d: [Tv.row, +Tv.rTab.toFixed(3), f5(Tv.eps), Tv.virtual] });
   /* and the unoccupied shell is a real orbital of the frozen field, not a stub */
-  const V = virtualOrbital(10, 3, 0);
+  const V = virtualOrbital(10, 3, 0, NRO);                         // −0.1623602 is the non-relativistic solve's (ZORA: −0.1625223)
   const vNorm = quad(V.r, (j) => V.u[j] * V.u[j]);
   let vNodes = 0; for (let j = 2; j + 1 < V.r.length; j++) if (V.u[j] * V.u[j - 1] < 0) vNodes++;
   judge('THE VIRTUAL SHELL IS A STATE, NOT A STUB: Ne 3s° solved in the FROZEN Xα(2/3) + Latter field is normalised (∫u² dr = 1 to 1e-8, by this file\'s own Simpson), carries exactly n − l − 1 = 2 nodes, is bound (ε = −0.16236 < 0), and its ε is virtualEnergyOf\'s to the last bit — so every one of the 91 labels has a radial and ° keeps meaning "not in the ground configuration", never "no state"',
-    near(vNorm, 1, 1e-8) && vNodes === 2 && V.eps < 0 && V.eps === virtualEnergyOf(10, 3, 0)
+    near(vNorm, 1, 1e-8) && vNodes === 2 && V.eps < 0 && V.eps === virtualEnergyOf(10, 3, 0, NRO)
     && V.u.length === V.r.length && near(V.eps, -0.1623602, 1e-6),
-    { eps: V.eps, norm: vNorm, nodes: vNodes, mesh: V.r.length, sameAsVirtualEnergyOf: V.eps === virtualEnergyOf(10, 3, 0) });
+    { eps: V.eps, norm: vNorm, nodes: vNodes, mesh: V.r.length, sameAsVirtualEnergyOf: V.eps === virtualEnergyOf(10, 3, 0, NRO) });
 }
 
 /* ══ 10. the benchmark the SYNTHESIS demanded before a build ═══════════════════════════════════════════════ */
 {
   clearAtomCache();
-  const t = Date.now(), S = solveAtom(36), ms = Date.now() - t;
+  const t = Date.now(), Sz = solveAtom(36), ms = Date.now() - t, S = solveAtom(36, NRO);   // timed: the model the app solves (ZORA); E: the non-relativistic road's pinned total
   judge(`BENCHMARK (SYNTHESIS "the Xα solver's wall time for Z = 36 in JS (node) — if it exceeds 2 s the atoms are precomputed tables shipped with the lab"): solveAtom(36) takes ${ms} ms, both meshes and the Richardson limit included, so the atoms are SOLVED LIVE and no precomputed table is shipped`,
-    ms < 2000 && near(S.E, -2746.855, 0.01), { ms, budget: 2000, E: f5(S.E), iterations: S.iterations, orbitals: S.orbitals.length });
+    ms < 2000 && near(S.E, -2746.855, 0.01), { ms, budget: 2000, E: f5(S.E), Ezora: f5(Sz.E), iterations: Sz.iterations, orbitals: Sz.orbitals.length });
 }
 
 /* ══ 11. wave 42, the reviewer's finding 6: the one-bin hole at the nucleus ════════════════════════════════ */
 {
   /* atomRadial read s.u[0]/g.r0 for r ≤ r₀, and solveL never wrote u[0]: R_1s(0) = 0, and sample 0 of every s-row of the
      GPU table was 0.  u₀ = u₁ e^{−(l+1)dx} is the wall's own law now, so R_1s(0) = u₁/r₁. */
-  const S1 = solveAtom(1), g1 = S1.mesh, r0 = atomRadial(1, 1, 0, 0), u1r1 = S1.orbitals[0].u[1] / g1.r[1];
-  const Kr = atomRadialTable(36, 1, 0), s0 = Kr.table[Kr.row * NR], s1 = Kr.table[Kr.row * NR + 1];
-  const SKr = solveAtom(36), kr0 = SKr.orbitals[0].u[1] / SKr.mesh.r[1];
+  /* the wall law u ∼ r^{l+1} is the non-relativistic operator's (ZORA's is u ∼ r^s, s² = 1 + l(l+1) − Z²/c², and its s shells peak at the nucleus) */
+  const S1 = solveAtom(1, NRO), g1 = S1.mesh, r0 = atomRadial(1, 1, 0, 0, NRO), u1r1 = S1.orbitals[0].u[1] / g1.r[1];
+  const Kr = atomRadialTable(36, 1, 0, NRO), s0 = Kr.table[Kr.row * NR], s1 = Kr.table[Kr.row * NR + 1];
+  const SKr = solveAtom(36, NRO), kr0 = SKr.orbitals[0].u[1] / SKr.mesh.r[1];
   judge('THE NUCLEUS IS NOT A HOLE: atomRadial(Z = 1, 1s, r = 0) = 2.0000 (1e-3 of the hydrogenic 2Z^{3/2}; it read 0), equal to u₁/r₁ to 1e-12; the Kr 1s table\'s sample 0 is 425.40 > 0 (u₁/r₁ = ' + kr0.toFixed(2) + ', to float32) and its sample 1 is within 3 % of it (the cusp, not a cliff); and u₀ = u₁ e^{−dx} to 1e-15 on the fine mesh',
     near(r0, 2.0, 1e-3) && near(r0, u1r1, 1e-12) && s0 > 0 && near(s0, kr0, 1e-3 * kr0) && Math.abs(s1 - s0) < 0.03 * s0 && near(S1.orbitals[0].u[0], S1.orbitals[0].u[1] * Math.exp(-g1.dx), 1e-15),
     { R1s0: r0, u1r1, KrSample0: s0, KrSample1: s1, Kr_u1r1: kr0, u0: S1.orbitals[0].u[0], u1: S1.orbitals[0].u[1] });

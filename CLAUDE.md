@@ -72,7 +72,7 @@ H₂ σg/σu, HELIUM as ATOM · He 1s, H₂ as MOLECULES · H₂ density, an ELE
 overlay as nothing drawn (`docs/LEGACY-WINDOWS.md`; `tests/fixtures/legacy-*`).
 ATOMS left that list in 0.4.0 (R-A2): it is the periodic-table window — H–Kr
 cells in SPECTRUM's own picker, periods as columns on the card and a phone and
-rows floating, its Δ-SCF / quantum-defect / α-order readouts kept — opened by
+rows floating, its Δ-SCF / quantum-defect / α-order readouts kept — since iteration 008 Z the ATOM's central field is SCALAR ZORA (`lab/atoms.js` `zoraKinetic`: −½(K u′)′ + [K′/2r + K l(l+1)/2r² + V] u = λ u, K = 2c²/(2c² − V); the scaled eigenvalue reported, the Δ-SCF ion in the neutral's K, spin–orbit not included; Au's 6s ionisation 8.71 eV against the measured 9.23), the non-relativistic solve `{ zora: false }` byte-identical to A's and read only by the window's RELATIVITY Δ (a press under the busy mark, never a frame) and `tests/atoms.test.mjs`' non-relativistic oracles; past Kr the atom's STATUS reads `<sym> · NUMERICAL · scalar-relativistic (ZORA) Xα; spin–orbit not included`, H–Kr no line — opened by
 SPECTRUM's ATOM and listed in + and WINDOW (it ships closed).
 
 DYNAMICS is RETIRED (0.4.0 S3): `RETIRED_WINDOWS` maps a saved `dynamics` seat
