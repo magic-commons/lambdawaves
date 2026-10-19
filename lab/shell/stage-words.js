@@ -26,6 +26,11 @@ const pct = (v) => Math.round(v * 100) + '%';
 export const INFO_ROWS = Object.freeze([
   { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'STAGE FORMULA', hint: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states — and caption a picture or a recording with it and its STATUS word; off, an export carries neither and the stage announces nothing' },
   { key: 'molName', type: 'bool', default: false, group: 'words', label: 'NAME', hint: 'The molecule\'s name under its formula (water under H₂O)' },
+  /* iteration 011 Q1 · THE LIST CAP (Josh 10-19: "have the informational automatically hide ultra large lists so it doesn't fight the screen and users don't
+     have to keep toggling it on and off just because a certain mode uses an obscene amount of 140 levels"): SPECTRUM's populated list longer than the cap is
+     written as its count — "140 levels · 7 shells" (capLine) — on the stage and in an export's caption; at or under the cap it is the list, as before.
+     16 = the longest LOAD VALENCE (4f 5d 6s 6p, 5f 6d 7s 7p: 16 labels), so every atom's valence still reads as its subshells; a molecule's formula is untouched */
+  { key: 'listCap', type: 'number', min: 4, max: 140, step: 1, log: true, default: 16, group: 'words', label: 'LIST CAP', fmt: (v) => String(Math.round(v)), hint: 'The longest populated-state list the stage writes in full: a longer one (FILL ALL, a Hamiltonian that fills many levels) is written as its count, "140 levels · 7 shells", and returns as a list once it fits again' },
   { key: 'molFormulaSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'words', label: 'SIZE', fmt: pct, hint: 'The STAGE FORMULA\'s size: 100% is the notebook\'s — the formula its title (34 px), THE FADE its heading' },
   { key: 'atomLabels', type: 'bool', default: true, group: 'labels', label: 'ATOM LABELS', hint: 'Mark each MOLECULES nucleus with its element symbol, inverting whatever is beneath it' },
   { key: 'atomLabelsSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'labels', label: 'SIZE', fmt: pct, hint: 'The ATOM LABELS\' size: 100% is the notebook\'s body (14 px)' },
@@ -35,10 +40,17 @@ export const INFO_ROWS = Object.freeze([
   { key: 'popSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'announce', label: 'SIZE', fmt: pct, hint: 'The pop-ups\' size: 100% is 15 px' },
   { key: 'cursorAway', type: 'bool', default: false, group: 'cursor', label: 'AWAY', hint: 'The words lean away from the pointer as it crosses the stage (the kit layer\'s follow and parallax)' },
   { key: 'cursorDrift', type: 'bool', default: false, group: 'cursor', label: 'DRIFT', hint: 'The words bob slowly while they are on the stage (the kit layer\'s drift; it keeps a frame booked)' },
-  /* MARKS draw ON the stage (rack.js' frame reads ui.skeletonSw · beadSw · ellipsoidSw, these rows' widgets): the record's since the fix round (C6) */
-  { key: 'skeleton', type: 'bool', default: false, group: 'marks', label: 'SKELETON', hint: 'The nuclei as beads (CPK colours, 0.28 × the covalent radius), the bonds within 1.3 × the radii, and the dipole arrow from the centre of nuclear charge — a PREFERENCE, off by default' },   // 0.7.0 V2: rack.js draws it (lab/skeleton.js)
+  /* MARKS draw ON the stage (rack.js' frame reads ui.skeletonSw · beadSw · ellipsoidSw, these rows' widgets): the record's since the fix round (C6).
+     Iteration 011 Q1 (Josh 10-19: "move skeleton into it's own row amongst stage formula and atom labels with a size knob to increase the disk size"):
+     SKELETON is THE WORDS' third ON + SIZE row; its disks are flat (no outline) and SIZE scales them — 100 % is the old 0.28 × the covalent radius,
+     the default 160 %; the bonds and the dipole keep their 2 px.  BEAD and UNCERTAINTY stay in MARKS. */
+  { key: 'skeleton', type: 'bool', default: false, group: 'skeleton', label: 'SKELETON', hint: 'The nuclei as flat disks in their CPK colours, the bonds within 1.3 × the covalent radii, and the dipole arrow from the centre of nuclear charge — a PREFERENCE, off by default' },   // 0.7.0 V2: rack.js draws it (lab/skeleton.js)
+  { key: 'skeletonSize', type: 'number', min: 0.5, max: 4, step: 0.01, default: 1.6, group: 'skeleton', label: 'SIZE', fmt: pct, hint: 'The SKELETON\'s disks: 100% is 0.28 × the element\'s covalent radius (the size before iteration 011), 160% the default; the bonds and the dipole arrow keep their width' },
   { key: 'bead', type: 'bool', default: false, group: 'marks', label: 'BEAD', hint: 'THE BEAD: the expectation point (⟨x⟩, ⟨y⟩, ⟨z⟩) on the stage with its trail over the last period (⟨p⟩ in momentum space; for a molecule the electron density\'s centroid (ΣZR − μ)/N_e) — a PREFERENCE, off by default' },   // 0.8.2 P3: on the skeleton's canvas
   { key: 'ellipsoid', type: 'bool', default: false, group: 'marks', label: 'UNCERTAINTY', hint: 'THE UNCERTAINTY ELLIPSOID: the position covariance Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ as its three principal circles, semi-axes √λ_k, about the bead (with it) — position space and a register only; a PREFERENCE, off by default' },   // 0.8.3 B3 · iteration 008 P: the switch says what it draws; the key stays `ellipsoid`
+  /* iteration 011 Q1 · STATUS (Josh 10-19: "a button that hides the extra status thingy"): INFORMATIONAL's STATUS readout — the only status block the
+     stage words own (research/iteration-011/q1-shots/before-*.png) — shown or hidden.  Off on a first run; a record older than it opens ON, as it was (infoPrefs) */
+  { key: 'status', type: 'bool', default: false, group: 'status', label: 'STATUS', hint: 'Show the STATUS readout below: EXACT · NUMERICAL · UNCHECKED and how good the picture is, for what owns the field (a tap on it opens the MODEL sheet).  An export caption\'s STATE word is not this switch\'s' },
 ]);
 /** the six keys the settings blob held (0.5.3 M9, iteration 001): read once into the record, never written again */
 export const BLOB_INFO = Object.freeze(['molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'infoPos', 'infoPad']);
@@ -63,6 +75,7 @@ export function infoPrefs() {
   const has = () => { try { return !!(ls && ls.getItem(INFO_KEY)); } catch (_) { return false; } };
   const settings = createSettingsStore(), blob = settings.read();
   infoSeen = has() || blob.atomLabels !== undefined;
+  let rawInfo = {}; try { rawInfo = (ls && JSON.parse(ls.getItem(INFO_KEY) || '{}')) || {}; } catch (_) {}
   infoStore = createPrefs({ key: INFO_KEY, schema: INFO_ROWS.map(({ key, type, values, min, max, step, default: d }) => ({ key, type, values, min, max, step, default: d })), storage: ls });
   if (!has()) {
     const held = BLOB_INFO.filter((k) => k in blob);
@@ -70,12 +83,20 @@ export function infoPrefs() {
     try { if (ls && !has()) ls.setItem(INFO_KEY, JSON.stringify(infoStore.all())); } catch (_) {}
     if (held.length) { for (const k of held) delete blob[k]; settings.write(blob); }
   }
+  /* iteration 011 Q1: STATUS is new and off on a first run — a profile that met INFORMATIONAL before it (a record without the key, or a blob the lift
+     read) saw the readout, so it opens ON, as it was; the write carries the key, and the hand's choice is kept from then on */
+  if (infoSeen && !('status' in rawInfo)) infoStore.set({ status: true });
   const marks = BLOB_MARKS.filter((k) => k in blob);
   if (marks.length) { infoStore.set(Object.fromEntries(marks.map((k) => [k, blob[k] === true]))); for (const k of marks) delete blob[k]; settings.write(blob); }
   return infoStore;
 }
 /** has this profile met INFORMATIONAL (a record, or a blob that held atomLabels)?  Read at infoPrefs()'s first call */
 export const infoKnown = () => (infoPrefs(), infoSeen);
+/** THE LIST CAP's count line (iteration 011 Q1): `140 levels · 7 shells` — the populated labels and the distinct n among them */
+export function capLine(ids) {
+  const k = ids.length, s = new Set(ids.map((a) => BASIS[a].n)).size;
+  return `${k} level${k === 1 ? '' : 's'} · ${s} shell${s === 1 ? '' : 's'}`;
+}
 export function createStageWords(app) {
   const { dom, reg } = app, { rack } = app.host, { wChem } = app.w, { paintMarks, look } = app.ctl, { schedule } = app.loop, P = infoPrefs();
   const stageSrc = { v: -1, id: null };
@@ -85,8 +106,9 @@ export function createStageWords(app) {
     const line = md ? (ids) => stateLatex({ H, states: ids.map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, re: 1, im: 0 })) }).split('\n')[0]
       : (ids) => ids.map((a) => (H.id === 'hydrogen' ? BASIS[a].label : H.labelOf(BASIS[a]))).join(', ');
     const live = (re, im) => BASIS.filter((s) => re[s.index] * re[s.index] + im[s.index] * im[s.index] > 1e-12).map((s) => s.index);
-    if (mix) { const A = line(live(mix.reA, mix.imA)), B = line(live(mix.reB, mix.imB)); return A && B ? A + '  ↔  ' + B : A || B; }
-    return line(reg.populated());
+    const say = (ids) => (ids.length > P.get('listCap') ? capLine(ids) : line(ids));   // iteration 011 Q1 · THE LIST CAP: a list longer than the cap is its count
+    if (mix) { const A = say(live(mix.reA, mix.imA)), B = say(live(mix.reB, mix.imB)); return A && B ? A + '  ↔  ' + B : A || B; }
+    return say(reg.populated());
   }
   function stageMd() {
     const row = app.state.chem && app.state.chem.on ? app.state.chem.row() : null;   // the catalogue's row or a volume molecule's (V2)
@@ -254,7 +276,7 @@ export function createStageWords(app) {
       if (ch('popSize')) api.setPopScale(st.popSize);
       if (!all && ch('cursorAway')) { layer.setFollow(st.cursorAway); layer.setParallax(st.cursorAway); }
       if (!all && ch('cursorDrift')) layer.setDrift(st.cursorDrift);
-      if (!all && ch('molName')) { stageSrc.v = -1; stageTextTick(); }
+      if (!all && (ch('molName') || ch('listCap'))) { stageSrc.v = -1; stageTextTick(); }   // iteration 011 Q1: the cap re-writes the list at once
       if (!all) { look.prefs.apply(); schedule(TIER.PRESENT); }   // the atom labels are the frame's
     };
     applyInfo(P.all()); P.subscribe(applyInfo);

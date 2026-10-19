@@ -4,7 +4,7 @@
  * Iteration 007 I (Josh, JOSH-PROMPT items 8–10; ADR-0003): THE WINDOW IS BUILT FROM THE RECORD'S ROWS.  shell/stage-words.js owns the rows
  * (INFO_ROWS) and the one PREFERENCE record `lambdawaves.q0.info`; each row here is the kit's control(descriptor) — a switch, a seg, a knob, as the
  * kind of value chooses — grouped under short headings: THE WORDS (the formula, its NAME and SIZE; the ATOM LABELS and theirs; POSITION · PAD),
- * ANNOUNCE (one switch per kind and the pop-ups' SIZE), CURSOR (AWAY · DRIFT), MARKS (SKELETON · BEAD · UNCERTAINTY, which draw on the stage; the
+ * ANNOUNCE (one switch per kind and the pop-ups' SIZE), CURSOR (AWAY · DRIFT), MARKS (BEAD · UNCERTAINTY — SKELETON is THE WORDS' since 011 Q1 — which draw on the stage; the
  * record's since the fix round, C6, their blob keys lifted once) — and STATUS.  A hand writes the record and nothing else; the record repaints the controls (FORGET, a verb's flip). */
 import { el, readout, group } from './mir/kit.js'; import { control } from './mir/controls/factory.js'; import { fold } from './fold.js';
 import { statusOf } from './status.js'; import { getHamiltonian } from './hamiltonian.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
@@ -18,7 +18,7 @@ export function createInformational(app) {
     const d = { id: 'info.' + r.key, label: r.label, hint: r.hint, value: P.get(r.key) };
     if (r.type === 'bool') d.type = 'boolean';
     else if (r.type === 'enum') d.options = r.options;
-    else Object.assign(d, { min: r.min, max: r.max, step: r.step, fmt: r.fmt, home: r.default, onInput: (v) => P.set(r.key, v) });
+    else Object.assign(d, { min: r.min, max: r.max, step: r.step, log: r.log, fmt: r.fmt, home: r.default, onInput: (v) => P.set(r.key, v) });
     d.onChange = (v) => P.set(r.key, v);
     ctl[r.key] = control(d);
   }
@@ -28,26 +28,32 @@ export function createInformational(app) {
   const row = (parent, keys, cls = '') => { const r = el('div', 'row tight' + (cls ? ' ' + cls : ''), parent); for (const k of keys) r.appendChild(ctl[k].root); return r; };
   const words = group(w.body, 'THE WORDS');
   row(words, ['molFormula', 'molFormulaSize'], 'info-words');
-  row(words, ['molName'], 'info-words');
+  row(words, ['molName', 'listCap'], 'info-words');   // iteration 011 Q1: THE LIST CAP beside NAME — both say what the formula writes
   row(words, ['atomLabels', 'atomLabelsSize'], 'info-words');
+  row(words, ['skeleton', 'skeletonSize'], 'info-words');   // iteration 011 Q1: SKELETON left MARKS for its own ON + SIZE row (Josh 10-19)
   row(words, ['infoPos', 'infoPad'], 'info-seat');
   const announce = group(w.body, 'ANNOUNCE');
   row(announce, INFO_ROWS.filter((r) => r.group === 'announce' && r.type === 'bool').map((r) => r.key), 'info-grid');
   row(announce, ['popSize'], 'info-size');
   const cursor = group(w.body, 'CURSOR');
   row(cursor, ['cursorAway', 'cursorDrift'], 'info-grid');
-  /* MARKS: SKELETON · BEAD · UNCERTAINTY draw ON the stage (2026-10-16, Josh, iteration 001), so they are INFORMATIONAL's — rows of its record since the
-     fix round (C6); the frame reads their widgets, and a change repaints by the record's own subscriber (stage-words.js applyInfo) */
+  /* MARKS: BEAD · UNCERTAINTY draw ON the stage (2026-10-16, Josh, iteration 001), so they are INFORMATIONAL's — rows of its record since the
+     fix round (C6); the frame reads their widgets (and SKELETON's, in THE WORDS since iteration 011 Q1, with its SIZE knob's), and a change repaints by the
+     record's own subscriber (stage-words.js applyInfo) */
   const marks = group(w.body, 'MARKS');
-  row(marks, ['skeleton', 'bead', 'ellipsoid'], 'info-grid info-marks');
-  ui.skeletonSw = ctl.skeleton.widget; ui.beadSw = ctl.bead.widget; ui.ellipsoidSw = ctl.ellipsoid.widget;
+  row(marks, ['bead', 'ellipsoid'], 'info-grid info-marks');
+  ui.skeletonSw = ctl.skeleton.widget; ui.skeletonSize = ctl.skeletonSize.widget; ui.beadSw = ctl.bead.widget; ui.ellipsoidSw = ctl.ellipsoid.widget;
   /* THE FOLD (lab/fold.js): ANNOUNCE · CURSOR · MARKS behind one chevron on its own line under THE WORDS — open on a desktop, folded on a phone
      (as MOLECULES' MORE) */
   const more = el('div', 'row tight info-more'); words.after(more); el('span', 'grp-lbl', more, 'ANNOUNCE · CURSOR · MARKS');
   fold(more, [announce, cursor, marks], { what: 'announcements, cursor and marks', open: !isPhone() });
   /* 0.5.4 P4 · STATUS (PLAN R8, Q12): lab/status.js' line for what owns the field — MOLECULES' kept one (per VIEW; its molecule-level line beneath), else the
      operator's — written by app.hooks.status on a landing, a VIEW or FLOW change, an owner or operator change, NEVER in a frame.  A tap: the MODEL sheet, its words. */
-  const st = readout({ label: 'STATUS', cls: 'wide lw-status', value: '—' }); let was; el('div', 'row tight', w.body).append(st.root);
+  /* iteration 011 Q1 (Josh 10-19: "a button that hides the extra status thingy"): the STATUS switch above it shows or hides the readout's row — the record's
+     `status`, off on a first run; hidden, the line is still kept current, so it is right the moment it is shown */
+  row(w.body, ['status'], 'info-words info-status');
+  const st = readout({ label: 'STATUS', cls: 'wide lw-status', value: '—' }); let was; const stRow = el('div', 'row tight', w.body); stRow.append(st.root);
+  const showStatus = () => { stRow.hidden = !P.get('status'); }; showStatus(); P.subscribe((_, changed) => { if (changed.includes('status')) showStatus(); });
   st.root.title = 'What EXACT, NUMERICAL and UNCHECKED mean: the MODEL sheet'; st.root.addEventListener('click', () => { if (app.hooks.sheet) app.hooks.sheet(); });
   app.hooks.status = () => { const c = app.state.chem, k = c && c.on ? c.said : app.reg.P && app.reg.P.stark ? 'stark' : getHamiltonian().id, m = k === 'hydrogen' && getHamiltonian().mass, A = k === 'atom' && getHamiltonian().element,   // iteration 008 A: the ATOM speaks per element (past Kr)
       key = m ? k + m : A ? k + A.Z : k, s = key === was ? undefined : typeof k === 'string' ? statusOf({ owner: k, label: m ? 'HYDROGEN · ' + m : A ? A.symbol : '', Z: A ? A.Z : 0 }) : k;
