@@ -223,8 +223,7 @@ export function createKeplerSurface(app) {
      LAUNCH, the 140 basis) or for a window that can no longer present is dropped.  `raw`, not `call`: this readout never
      raised the busy mark and must not flash it at 2.5 Hz.  With no worker the old synchronous road runs, as it did. */
   let gasAsk = null, gasNext = null;
-  function gasSay(c, x0, kvec, sigma) {   // a register launch's GAS line (the async and the frame-thread road), written once
-    if (ui.gasRo) { ui.gasRo.set(`${(100 * c).toFixed(1)}% held`, c > 0.85 ? 'ok' : 'warn'); ui.gasRo.setSub(`σ = ${sigma.toFixed(2)} a₀ at (${x0.map((v) => v.toFixed(1)).join(', ')}) · |k| = ${Math.hypot(...kvec).toFixed(2)} · the box resolves ≈ a/${NMAX} = ${(HAMILTONIANS.well.radius / NMAX).toFixed(1)} a₀`); } }
+  function gasSay(c, x0, kvec, sigma) { if (ui.gasRo) { ui.gasRo.set(`${(100 * c).toFixed(1)}% held`, c > 0.85 ? 'ok' : 'warn'); ui.gasRo.setSub(`σ = ${sigma.toFixed(2)} a₀ at (${x0.map((v) => v.toFixed(1)).join(', ')}) · |k| = ${Math.hypot(...kvec).toFixed(2)} · the box resolves ≈ a/${NMAX} = ${(HAMILTONIANS.well.radius / NMAX).toFixed(1)} a₀`); } }   // a register launch's GAS line (both roads), once
   const gasPaint = (s) => ui.gasRo.set(`${(100 * gas.captured).toFixed(1)}% held · ⟨z⟩ ${s.z.toFixed(2)} · σ_z ${s.sz.toFixed(2)}`, gas.captured > 0.85 ? 'ok' : 'warn');
   const gasCurrent = (q) => { const R = gas.register; return !!(canPresent(wSpec) && gas.on && ui.gasRo && R && R.re0 === q.re0 && gas.radius === q.radius); };
   function gasAskWorker(q) {

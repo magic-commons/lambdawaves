@@ -48,8 +48,7 @@ for (let n = 1; n <= NMAX; n++)
       }));
 Object.freeze(BASIS);
 export const BASIS_INDEX = new Map(BASIS.map((s) => [s.id, s.index]));
-/** A7's WIDTH LAW, one pair (iteration 010 X6): a record is written `short` wide while its tail is at its identity `id` (rates 1, A ↔ B
- *  stores 0, the equalizer's seventh gain 1), so an n ≤ 6 file's bytes never move; `widen` pads an older record back with that identity */
+/** A7's WIDTH LAW (X6): a record is `short` wide while its tail is its identity `id` (rates 1, A ↔ B stores 0, the 7th gain 1); `widen` pads it back */
 export const narrow = (a, id, short = N6) => { for (let i = short; i < a.length; i++) if (a[i] !== id) return a; return a.slice(0, short); };
 export const widen = (a, id, full = BASIS.length) => Array.from({ length: full }, (_, i) => (i < a.length ? a[i] : id));
 export function stateOf(n, l, m) { return BASIS[BASIS_INDEX.get(`h:${n}:${l}:${m}`)]; }
