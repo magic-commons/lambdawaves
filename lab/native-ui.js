@@ -59,7 +59,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   const viewport=el('div','settings-viewport',settings),pages={};
   for(const id of ['display','quality']){pages[id]=el('div','settings-page',viewport);pages[id].hidden=id!=='display';}
   function row(page, names){const r=el('div','row tight',pages[page]);for(const name of names)if(ui[name]?.root)r.appendChild(ui[name].root);}
-  row('display',['capSw','audioSw']);ui.capSw.root.parentElement.classList.add('settings-status-grid');row('display',['askUrl']);row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
+  row('display',['capSw','audioSw']);ui.capSw.root.parentElement.classList.add('settings-status-grid');if(ui.askUrl)row('display',['askUrl']);row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
   const quality=ui.gridSeg.root.closest('.grp');if(quality)pages.quality.appendChild(quality);
   const actions=el('div','row tight settings-actions',pages.display);
   for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig')){if(b.textContent.includes('SHOW THE WARNING'))b.querySelector('.trig-l').textContent='WARNING';actions.appendChild(b);}

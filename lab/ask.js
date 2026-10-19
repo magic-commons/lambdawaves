@@ -1,6 +1,13 @@
 /* lab/ask.js — 0.6.6 G2 THE CLIENT.  ask(text) posts { text, inventory, history } to askUrl (PREFERENCE; tools/gemma/broker.py), runs her
  * verbs — and her notebook block as one more verb — through the verb table as ONE run (who GEMMA: one history row), holds her `say` on
  * the stage until Escape or the next ask, and never throws: a broker that is not there is one line, in the strip and in METERS. */
+/* iteration 011 Q6 · GEMMA, HIDDEN (Josh 10-19: "Also Gemma doesn't seem to appear to work. Isn't she built into the app? Or if not can we just hide
+ * the feature for now until we find out our own lightweight AI assistant in the app?").  She is not built in: ASK posts to a broker on Josh's machine
+ * (tools/gemma, docs/GEMMA.md).  THE ONE FLAG lives here, in the client, because this module is the one road to the network and every door
+ * (transport.js THE TYPE BOX, keys.js the / row, settings-card.js the address, settings.js the save) already imports it or sits beside it.
+ * Off: no door mounts, no key row, no Settings row, no request; `askOk` / `askUrl` are read and carried as stored, never written by a hand;
+ * the verb table (lab/verbs.js) and the notebook's `lw:` links are untouched.  On: everything as 0.6.6 G2 built it. */
+export const ASK_ENABLED = false;
 export const askUrlOf = (ui) => (ui.askUrlIn && ui.askUrlIn.value.trim()) || `${location.protocol}//${location.hostname}:9443/ask`;   // the page’s own scheme (an HTTPS page fetches HTTPS)
 export function createAsk(app) {
   const { ui } = app, turns = [], api = { busy: false, last: null, ask };

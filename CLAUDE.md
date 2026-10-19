@@ -380,6 +380,15 @@ PRESET), `molecule` (the MOLECULE dropdown's pick, and MOLECULES on; its head is
 (the ORBITAL dial by name or number, VIEW orbital) — one history row (`LINK · <text>`) and one fade a press, the ring never cleared; any
 other key is ignored and said on the notebook's foot, and a whole state (`lw:s=`) is never a verb. A capture-phase click on `.nb-view`
 stops the sanitiser's `target=_blank`; nothing on the stage takes a link (D8′, Group II). Run `tests/lw-links.browser-test.mjs`.
+GEMMA IS HIDDEN (iteration 011 Q6). Josh 10-19: "Also Gemma doesn't seem to appear to work. Isn't she built into the app? Or if not can we
+just hide the feature for now until we find out our own lightweight AI assistant in the app?" She was never built in: ASK posts to a
+local broker (`tools/gemma`, Ollama's `gemma4:e4b`, `docs/GEMMA.md`). ONE flag, `ASK_ENABLED = false` in `lab/ask.js`, closes every
+door, and nothing is deleted. With the flag off, the transport's ASK button and THE TYPE BOX do not mount (`shell/transport.js`), and the
+/ row is not in ACTIONS (`shell/keys.js`), so the KEYBOARD window does not list it. A saved `ask` chord is carried, inert, through every
+save (`key-table.js` `keep`). SETTINGS does not build the GEMMA address (`windows/settings-card.js`, `native-ui.js`). A stored `askOk` or
+`askUrl` is carried by `saveSettings` as it was stored and never written. `createAsk` is never made, so no request can leave. THE VERB
+TABLE and the `lw:` links do not read the flag. To bring her back, flip the flag and run `pwa.test.mjs --write`. The proof is
+`research/iteration-011/q6-proof.mjs off|on`.
 
 Every read and write of `lambdawaves.q0.settings` goes through
 `lab/settings-store.js` (`createSettingsStore`; `WORKSPACE` and `FAMILIES` are

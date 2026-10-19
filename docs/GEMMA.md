@@ -1,5 +1,13 @@
 # Ask Gemma (0.6.6)
 
+## Hidden since iteration 011 (Q6)
+Josh, 2026-10-19: "Also Gemma doesn't seem to appear to work. Isn't she built into the app? Or if not can we just hide the feature for
+now until we find out our own lightweight AI assistant in the app?" She is not built in, so ASK is hidden behind one flag,
+`ASK_ENABLED = false` in `lab/ask.js`. While it is off, the ASK button and the type box do not mount, the / key row is not in the key table,
+and SETTINGS does not build the GEMMA address. The page never calls the broker. A stored `askOk` or `askUrl` and a saved `ask` chord are
+kept as they were. The verb table (`lab/verbs.js`) and the notebook's `lw:` links work as before. To bring her back, set the flag to
+`true` and run `node tests/pwa.test.mjs --write`. Everything below describes her as she works with the flag on.
+
 ## What she is
 Gemma is a local Gemma 4 model that drives λWAVES through a table of verbs. She runs outside the browser, in Josh's userspace
 Ollama (`~/ollama`), behind a small HTTPS broker on the workstation (`tools/gemma/broker.py`). The page sends her your words and the
