@@ -302,9 +302,13 @@ props = P.properties(cids)
 log(f'PubChem records: {len(props)}')
 parent_of, want_parent = {}, []
 def several_units(p): return (p.get('CovalentUnitCount', 1) or 1) > 1
+# the records of the hand-built molecules (ferrocene, bis(benzene)chromium, diborane): PubChem draws a sandwich as a metal cation and
+# two ring anions — several units — but the molecule IS the sandwich, so no nomination of such a record is ever folded onto a "parent"
+# (C7: a Wikidata article of ferrocene would otherwise carry the record, and the hand-built nomination with it, onto cyclopentadiene)
+HAND_CIDS = {n.get('cid') for n in noms if n['src'] == 'curated' and n['name'] in HAND_GEOM and n.get('cid')}
 for n in noms:
     c, p = n.get('cid'), props.get(n.get('cid'))
-    if not p: continue
+    if not p or c in HAND_CIDS: continue
     # a Wikidata nomination is the article's own compound — an ion's article is about the ion, kept with its charge — except a salt
     # or a mixture (several units), which is folded onto its neutral parent like every other source's (iteration 006 C7)
     if n['src'] == 'wikidata' and not several_units(p): continue
