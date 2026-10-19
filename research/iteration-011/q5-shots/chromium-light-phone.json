@@ -1,0 +1,124 @@
+{
+ "theme": "light",
+ "device": "phone",
+ "at": "2026-10-19T22:55:09.162Z",
+ "shots": [
+  {
+   "scene": "josh",
+   "mode": "after",
+   "name": "after-light-phone-josh.png",
+   "blurred": []
+  },
+  {
+   "scene": "josh",
+   "mode": "before",
+   "name": "before-light-phone-josh.png",
+   "blurred": []
+  },
+  {
+   "scene": "timeline",
+   "mode": "after",
+   "name": "after-light-phone-timeline.png",
+   "blurred": []
+  },
+  {
+   "scene": "timeline",
+   "mode": "before",
+   "name": "before-light-phone-timeline.png",
+   "blurred": []
+  },
+  {
+   "scene": "rack",
+   "mode": "after",
+   "name": "after-light-phone-rack.png",
+   "blurred": []
+  },
+  {
+   "scene": "rack",
+   "mode": "before",
+   "name": "before-light-phone-rack.png",
+   "blurred": []
+  },
+  {
+   "scene": "menu",
+   "mode": "after",
+   "name": "after-light-phone-menu.png",
+   "blurred": []
+  },
+  {
+   "scene": "menu",
+   "mode": "before",
+   "name": "before-light-phone-menu.png",
+   "blurred": [
+    "div.mb-list"
+   ]
+  },
+  {
+   "scene": "picker",
+   "mode": "after",
+   "name": "after-light-phone-picker.png",
+   "blurred": []
+  },
+  {
+   "scene": "picker",
+   "mode": "before",
+   "name": "before-light-phone-picker.png",
+   "blurred": []
+  },
+  {
+   "scene": "modwin",
+   "mode": "after",
+   "name": "after-light-phone-modwin.png",
+   "blurred": []
+  },
+  {
+   "scene": "modwin",
+   "mode": "before",
+   "name": "before-light-phone-modwin.png",
+   "blurred": []
+  },
+  {
+   "scene": "keyboard",
+   "mode": "after",
+   "name": "after-light-phone-keyboard.png",
+   "blurred": []
+  },
+  {
+   "scene": "keyboard",
+   "mode": "before",
+   "name": "before-light-phone-keyboard.png",
+   "blurred": []
+  },
+  {
+   "scene": "notebook",
+   "mode": "after",
+   "name": "after-light-phone-notebook.png",
+   "blurred": []
+  },
+  {
+   "scene": "notebook",
+   "mode": "before",
+   "name": "before-light-phone-notebook.png",
+   "blurred": []
+  }
+ ],
+ "perf": [],
+ "boot": {
+  "ok": true,
+  "adapter": {
+   "vendor": "nvidia",
+   "architecture": "ampere",
+   "device": "",
+   "description": ""
+  },
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+  "w": 390,
+  "h": 844,
+  "phone": true,
+  "body": "disconnected window-info-off no-badges no-captions phone rack-hidden",
+  "card": "tinted",
+  "frostLive": false,
+  "rule": 474
+ },
+ "errs": []
+}

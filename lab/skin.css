@@ -812,3 +812,25 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
 .lw-info-card .info-more > .grp-lbl { margin: 0; }
 .lw-info-card .info-status { display: grid; gap: 6px 8px; align-items: center; margin: 4px 0; }   /* iteration 011 Q1: the STATUS switch over its readout, on THE WORDS' grid */
 .lw-info-card .info-more > .lw-fold { flex: 0 0 30px; height: 26px; min-height: 26px; }
+
+/* ═══ iteration 011 Q5 · THE BLUR, ONLY WHERE IT BELONGS (Josh 2026-10-19: "there appears to be a rogue blurring that's on in
+   any of the UI elements, the blur should only apply to the work bars, the timeline bar and scrubber and the chips") ═══════
+   ONE LAW, LAST IN THE APP'S SHEETS: no surface paints a backdrop-filter except
+     the WORK BARS     the timeline's tool strip `.tl-toolbar` (SLICE · CLIPS · POINTS · SNAP · STEP · SLIDE · ACTIVE) and the
+                       modulation window's `.m2workbar`s (the PRESET bar and the BPM bar);
+     the TIMELINE BAR  the ruler `.tl-ruler` — the strip the playhead's flag rides and the scrubber drags (the playhead is a line,
+     AND SCRUBBER      it never carried glass);
+     the CHIPS         the kit's `.mir-chip` and the modulation rail's `.crail-chip` (both paint their disc, and its blur, on
+                       ::before), and the rack's chip stack #rackToggle · #rackAdd · #rackFav (round glass buttons, the rack's chips).
+   Everything else — the rack cards (head and body), the timeline's window and lanes, the menus, the Picker and its arrows, the
+   transport, the notebook, the keyboard pane, the modulation window's panes, every popover — keeps its tint, sheen and border
+   exactly and paints NO backdrop (a refractive pane now always looks as FROST · STILL's hold already painted it).  The kit's 38 rules
+   (lab/mir/**) and the app's own rules above still compute; this one rule overrules every one of them outside the list.
+   The three places that keep it keep THE FROST PREFERENCE's rules unchanged: they blur only under `body.frost`, stop under
+   `frost-hold`, and a phone (frost OFF, rack-wiring.js) paints no backdrop at all.  `!important` because the kit's are
+   layered and the app's are unlayered and specific; `:not(:where(…))` adds no specificity, so a later !important wins over it.
+   The occlusion mask (lab/shell/ink.js refreshOcclusion) reads painted rects, not filters: it does not move.
+   research/iteration-011/Q5-BUILD.md has the inventory, the cost and the proof. */
+:not(:where(.tl-toolbar, .tl-ruler, .m2workbar, #rackToggle, #rackAdd, #rackFav)),
+:not(:where(.mir-chip, .crail-chip))::before,
+::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
