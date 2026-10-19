@@ -7,6 +7,7 @@
 import { toScreen } from './field.js';
 import { keplerOrbits, orbitPoints } from './kepler.js';
 import { vividInk, showGraphTip, hideGraphTip, fitText } from './mir/kit.js';
+import { HELP_CLASSES, HELP_HOVER_DELAY } from './mir/control-help.js';
 
 const N_RGB = { 2: [255, 190, 90], 3: [120, 225, 240], 4: [200, 140, 255], 5: [140, 240, 160], 6: [255, 120, 150] };
 
@@ -70,25 +71,84 @@ export function createKepler(canvas) {
     g.clearRect(0, 0, W, H);
     handles = [];
   }
-  /* ── the IMPULSE VECTOR (wave 53; `bow` is still its name in the code): drawn over everything while ctrl+drag is held ── */
-  let bow = null;
-  function setBow(b) { bow = b; }
+  /* ── THE IMPULSE VECTOR (wave 53; `bow` is still its name in the code), redrawn at iteration 008 K (Josh: "remove the verbosity
+     and obvious controls and instead show k = and λ = in a math font, improve the dotted line and arrow look").
+     It is NOT drawn on this canvas any more: a picture composites #kepler (capture.js `overlays`), and a held gesture must never
+     reach a picture or a film.  It is its own DOM layer beside the canvas, built at the first hold and written only while one is
+     held: the GUIDE (the pull, origin → pointer) an even dash in the ink's weight, fitted to its own length so it starts and ends
+     on a dash; the HUB at the origin; both in the ink, white under `mix-blend-mode: difference` as the ATOM LABELS are, so they
+     invert whatever is beneath them.  The ARROW (origin → away from the pull, its length k's as before) is the kit's accent, a
+     solid shaft and a swept filled head, no glow.  THE WORDS are two short lines in the math face at the arrow's head —
+     `k = 0.123 a.u.` and `λ = 51.2 a₀` — anchored on the side the arrow points to, so they sit across the origin from the
+     pointer, clamped into the stage and moved off the pointer if the clamp put them under it.  The instructions left the stage:
+     the window's HELP text says Ctrl-drag (STATE's Impulse note), and the hover hint — the kit's tip, after the hand rests
+     HELP_HOVER_DELAY ms during a hold, never with CONTROL HINTS off — says how to apply and how to cancel. */
+  let bow = null, imp = null, impKey = '', restTimer = 0, restAt = '';
+  const SVG = 'http://www.w3.org/2000/svg', svgEl = (tag, cls, parent) => { const n = document.createElementNS(SVG, tag); n.setAttribute('class', cls); parent.appendChild(n); return n; };
+  const DASH = 5, GAP = 4, HUB = 3, HEAD_L = 11, HEAD_W = 5;       // the ink's dash, the hub's radius, the head's length and half-width (px)
+  const HINT = 'release to apply · release Ctrl first to cancel';
+  function impLayer() {
+    if (imp && imp.root.isConnected) return imp;
+    const root = document.createElement('div'); root.id = 'impulse'; root.className = 'lw-impulse'; root.setAttribute('aria-hidden', 'true'); root.hidden = true;
+    const ink = svgEl('svg', 'imp-ink', root), acc = svgEl('svg', 'imp-acc', root);
+    const guide = svgEl('line', 'imp-guide', ink), hub = svgEl('circle', 'imp-hub', ink); hub.setAttribute('r', HUB);
+    const shaft = svgEl('line', 'imp-shaft', acc), head = svgEl('path', 'imp-head', acc);
+    const words = document.createElement('div'); words.className = 'imp-words'; root.appendChild(words);
+    const kLine = document.createElement('div'), lLine = document.createElement('div'); kLine.className = lLine.className = 'imp-line'; words.append(kLine, lLine);
+    cv.after(root);
+    return (imp = { root, guide, hub, shaft, head, words, kLine, lLine, text: '', ww: 0, wh: 0 });
+  }
+  const lambdaOf = (k) => { if (!(k > 0.001)) return '∞'; const l = 2 * Math.PI / k; return l >= 1000 ? l.toFixed(0) : l.toPrecision(3); };
+  function restHint(on) {
+    clearTimeout(restTimer); restTimer = 0;
+    if (!imp) return;
+    hideGraphTip(imp.root);
+    if (!on || document.body.classList.contains(HELP_CLASSES.hintsOff)) return;
+    restTimer = setTimeout(() => { restTimer = 0; if (!bow || !imp) return; const r = cv.getBoundingClientRect(); showGraphTip(imp.root, HINT, r.left + bow.x1, r.top + bow.y1); }, HELP_HOVER_DELAY);
+  }
+  function setBow(b) {
+    bow = b;
+    if (!b) { impKey = ''; restAt = ''; restHint(false); if (imp && !imp.root.hidden) imp.root.hidden = true; return; }
+    impLayer();
+    const at = `${b.x1}|${b.y1}`; if (at !== restAt) { restAt = at; restHint(true); }   // the hand moved: the hint steps aside and waits for it to rest
+  }
   function bowFrame() {
-    if (!bow) return;
-    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (!bow) { if (imp && !imp.root.hidden) imp.root.hidden = true; return; }
+    const W = cv.clientWidth, H = cv.clientHeight;
     if (W < 32 || H < 32) return;
-    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-    g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    g.strokeStyle = 'rgba(255,255,255,0.8)'; g.lineWidth = 1.5; g.setLineDash([6, 4]); g.beginPath(); g.moveTo(bow.x0, bow.y0); g.lineTo(bow.x1, bow.y1); g.stroke(); g.setLineDash([]);
-    const dx = bow.x0 - bow.x1, dy = bow.y0 - bow.y1, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, len = Math.min(160, 30 + 70 * bow.k);
-    const ax = bow.x0 + ux * len, ay = bow.y0 + uy * len;
-    g.strokeStyle = 'rgba(120,225,240,0.95)'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(bow.x0, bow.y0); g.lineTo(ax, ay); g.stroke();
-    g.beginPath(); g.moveTo(ax, ay); g.lineTo(ax - ux * 11 - uy * 6, ay - uy * 11 + ux * 6); g.lineTo(ax - ux * 11 + uy * 6, ay - uy * 11 - ux * 6); g.closePath(); g.fillStyle = 'rgba(120,225,240,0.95)'; g.fill();
-    g.beginPath(); g.arc(bow.x0, bow.y0, 4, 0, 2 * Math.PI); g.fillStyle = 'rgba(255,255,255,0.9)'; g.fill();
-    g.fillStyle = 'rgba(255,255,255,0.92)'; g.font = '11px ui-monospace, monospace';
-    /* the gesture's own readout, clamped into the stage: it used to run off the right edge from a bow drawn there */
-    fitText(g, `IMPULSE VECTOR  k = ${bow.k.toFixed(3)} a.u. · λ = 2π/k = ${bow.k > 0.001 ? (2 * Math.PI / bow.k).toFixed(1) : '∞'} · release to apply · release CTRL to cancel`,
-      bow.x1 + 12, bow.y1 - 10, { x0: 10, y0: 0, x1: W - 10, y1: H }, 'left', true);
+    const I = impLayer(), { x0, y0, x1, y1, k } = bow;
+    const key = `${x0}|${y0}|${x1}|${y1}|${k}|${W}|${H}`;
+    if (key === impKey && !I.root.hidden) return;                     // written only when the hold moved: the loop calls this every frame
+    impKey = key; I.root.hidden = false;
+    const f = (v) => v.toFixed(1);
+    /* the GUIDE: origin → pointer, clear of the hub, an integer number of dash periods (a dash at each end) */
+    const gx = x1 - x0, gy = y1 - y0, gl = Math.hypot(gx, gy), gs = HUB + 3;
+    if (gl > gs + 2) {
+      const ex = gx / gl, ey = gy / gl, L = gl - gs, n = Math.max(1, Math.round((L + GAP) / (DASH + GAP))), sc = (L + GAP) / (n * (DASH + GAP));
+      I.guide.setAttribute('x1', f(x0 + ex * gs)); I.guide.setAttribute('y1', f(y0 + ey * gs)); I.guide.setAttribute('x2', f(x1)); I.guide.setAttribute('y2', f(y1));
+      I.guide.setAttribute('stroke-dasharray', L < DASH * 1.5 ? 'none' : `${(DASH * sc).toFixed(2)} ${(GAP * sc).toFixed(2)}`);
+      I.guide.removeAttribute('visibility');
+    } else I.guide.setAttribute('visibility', 'hidden');
+    I.hub.setAttribute('cx', f(x0)); I.hub.setAttribute('cy', f(y0));
+    /* the ARROW: away from the pull, its length k's (as before: 30 px + 70 px per a.u., at most 160); straight up before any pull */
+    const ux = gl > 0.5 ? -gx / gl : 0, uy = gl > 0.5 ? -gy / gl : -1, len = Math.min(160, 30 + 70 * k);
+    const ax = x0 + ux * len, ay = y0 + uy * len, bx = ax - ux * HEAD_L, by = ay - uy * HEAD_L, nx = ax - ux * HEAD_L * 0.72, ny = ay - uy * HEAD_L * 0.72;
+    I.shaft.setAttribute('x1', f(x0 + ux * (HUB + 2))); I.shaft.setAttribute('y1', f(y0 + uy * (HUB + 2))); I.shaft.setAttribute('x2', f(nx)); I.shaft.setAttribute('y2', f(ny));
+    I.head.setAttribute('d', `M${f(ax)} ${f(ay)}L${f(bx - uy * HEAD_W)} ${f(by + ux * HEAD_W)}L${f(nx)} ${f(ny)}L${f(bx + uy * HEAD_W)} ${f(by - ux * HEAD_W)}Z`);
+    /* THE WORDS: the numbers only, in the math face; measured when the string changes */
+    const kt = `k = ${k.toFixed(3)} a.u.`, lt = `λ = ${lambdaOf(k)} a₀`;
+    if (kt + lt !== I.text) { I.text = kt + lt; I.kLine.textContent = kt; I.lLine.textContent = lt; I.ww = I.words.offsetWidth; I.wh = I.words.offsetHeight; }
+    const ww = I.ww, wh = I.wh, gap = 10, px = ax + ux * gap, py = ay + uy * gap;
+    /* the anchor follows the arrow's compass: start / centre / end across, top / middle / bottom down */
+    let lx = Math.abs(ux) < 0.38 ? px - ww / 2 : ux > 0 ? px : px - ww, ly = Math.abs(uy) < 0.38 ? py - wh / 2 : uy > 0 ? py : py - wh;
+    const M = 8, clampX = (v) => Math.max(M, Math.min(W - M - ww, v)), clampY = (v) => Math.max(M, Math.min(H - M - wh, v));
+    lx = clampX(lx); ly = clampY(ly);
+    const under = (x, y) => x1 > x - 12 && x1 < x + ww + 12 && y1 > y - 12 && y1 < y + wh + 12;
+    if (under(lx, ly)) {                                               // the clamp pushed them under the hand: beside the shaft instead
+      const mx = (x0 + ax) / 2, my = (y0 + ay) / 2, off = Math.max(ww, wh) / 2 + gap + 6;
+      for (const s of [1, -1]) { const cx = clampX(mx - uy * s * off - ww / 2), cy = clampY(my + ux * s * off - wh / 2); if (!under(cx, cy)) { lx = cx; ly = cy; break; } }
+    }
+    I.words.style.transform = `translate(${f(lx)}px, ${f(ly)}px)`;
   }
   function update(reg, t, obs, half) { recompute(reg, t); draw(obs, half); }
   function suspend() {

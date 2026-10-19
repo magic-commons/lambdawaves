@@ -838,6 +838,22 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
   mix-blend-mode: difference; color: #fff; font-family: var(--font-math); font-style: normal; font-weight: 600; line-height: 1; }
 #atomLabels[hidden] { display: none; }
 #atomLabels .atom-label { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform; }
+/* THE IMPULSE VECTOR (iteration 008 K; keplerview.js setBow/bowFrame): its own layer beside #kepler, shown only while Ctrl+drag is held —
+   never on a canvas a picture composites, never a pointer target, beneath every window, never in the occlusion mask.  The ink (the guide's
+   even dash, the hub, the words) is white under `difference` as the ATOM LABELS are; the arrow is the kit's accent, unblended; no glow.
+   The root makes no stacking context (no z-index), so each child blends with the stage itself.  The words are the math face at the kit's
+   INFORMATIONAL body size (info.css --info-size-body, read against the window: 14–18 px). */
+#impulse { position: absolute; inset: 0; pointer-events: none; user-select: none; -webkit-user-select: none; }
+#impulse[hidden] { display: none; }
+#impulse > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; z-index: 8; }
+#impulse .imp-ink { mix-blend-mode: difference; }
+#impulse .imp-guide { stroke: #fff; stroke-width: 1.5; stroke-linecap: butt; fill: none; }
+#impulse .imp-hub { fill: #fff; }
+#impulse .imp-shaft { stroke: var(--acc); stroke-width: 2; stroke-linecap: butt; }
+#impulse .imp-head { fill: var(--acc); stroke: none; }
+#impulse .imp-words { position: absolute; left: 0; top: 0; z-index: 8; mix-blend-mode: difference; color: #fff; will-change: transform;
+  font-family: var(--font-math); font-style: normal; font-weight: 400; font-size: clamp(14px, 8px + .68vw, 18px); line-height: 1.2;
+  font-variant-numeric: tabular-nums; white-space: nowrap; text-shadow: none; }
 
 /* iteration 004 · RENDER's SUBJECT on its rack card (FOLDERS' ⓘ names the project it describes).  The kit stacks the name and its verbs
    under an `@container (max-width: 315px)` (render.css) whose container nothing declares, so on λWAVES' card the name (BENZENE) was
