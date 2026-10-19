@@ -1,0 +1,23 @@
+# Iteration 010 — THE INTEGRATION OF n = 7 AND THE FINDS (Josh, 2026-10-19 ≈ 11:10; planned by Claude Sos)
+
+Josh: "Let's continue with our next iteration. I think it has to do with the integration of n=7 and other things."
+
+What 009 left (research/iteration-009/PLAN.md Closed, N7-BUILD.md § Found, not built; the FOR-JOSH 10-19 calls) becomes the rows. Standing
+assumptions, stated so Josh can overrule: MacDonald–Vosko stays (merged on the physics); the wider catalogue's swap waits for his word; the
+solvers stay paused for the night shift; SEPARABLE stays at 91 slots (N7: adding N = 6 triples would move a saved slot's meaning and it is not one
+of the physics ambitions); spin–orbit is the next relativistic ambition and is NOT in this iteration (labels in j — Josh's word first).
+
+## Rows (each an Opus builder in its own worktree, branch `it010-<row>` from BASE = this plan's commit; gate server per row; merged by Sos with Yan's recipe, THE LOCK ×2 when the field or the fixtures move)
+| row | name | what | port |
+|---|---|---|---|
+| X1 | THE BLOCKS' SUPPORT | N7's find: under a propagator (THE SCALE; the inter-shell Stark — check it) the field draws only the labels populated at the ANCHOR (`rack.js modesAt` / `renderSet()`), while the evolution spreads c(t) across each (l, m) block — THE LOCK's sturmian row draws 30 % of its S-norm at t = 3.7 (50 % at n ≤ 6). Draw the blocks' support; THE LOCK's moved rows re-captured by name; prove the drawn S-norm | 9351 |
+| X2 | THE REACH OF n = 7 | the λ knob's floor 0.25 → 1/7 (the n = 7 hydrogen limit; the default and THE LOCK unchanged) and every other range, fold or readout that still stops at six shells (the seventh shell's ink in `palette-app.js` is A7's; find the rest: SPECTRUM's folds, the ATOMS window, the Picker's atomic deck, STATUS, the badges) | 9361 |
+| X4 | THE STALE ROWS | the gate's standing reds judged one by one — a real bug is fixed, a stale expectation is re-aimed to the law that replaced it, a dead row retired with its reason: `molecular-names` :32, `lw-links` WATER, `molecule-head` (the head left the stage by Josh's iteration-001 ruling — assumed to stand), `chem` L5 (MOLECULES' MORE fold on a desktop first run — is it a bug?), `menubar`'s styles row, `library` step 5, `stage-text` §3, `orbitals` L9, `tools/settings-probe.mjs` 4 of 6 (WORKSPACE `closed` / `modwin` differ on a reload after a demo open — a real WORKSPACE bug?) | 9371 |
+| X5 | THE REVIEW ROUND OF 009 | both skills (research/iteration-007/skills/: Cursor's thermo-nuclear review, Pocock's architecture) once over iteration 009's diff (`033424d..e64b372`: D, F2, MV, DEMOS, N7) — reports only (REVIEW-QUALITY-009.md, REVIEW-ARCHITECTURE-009.md + HTML); the deletion pass is the next row, after Josh reads them | — |
+
+## Merge recipe
+Yan's (`~/.claude/jobs/2ea66c54/tmp/gate-it004.sh`, `gate-lock.sh` on 9241): `git merge --no-ff --no-commit` → `--ours lab/sw.js` → `pwa --write` → the gate → THE LOCK ×2 if `lab/field.js` or the fixtures moved → commit with the row's CLAUDE.md sentences.
+
+## Closed
+| row | merged | note |
+|---|---|---|
