@@ -168,6 +168,7 @@ export function createReadouts(app) {
     select: (z) => setElement(z),
     fill: () => fillValence(),
     active: () => getHamiltonian().id === 'atom',
+    busy: cardLoading(wAtoms, 'relativity'),   // iteration 008 Z: RELATIVITY Δ's second solve wears the card's busy mark
   });
   app.w.wAtoms = wAtoms; app.w.atomsView = atomsView;
 

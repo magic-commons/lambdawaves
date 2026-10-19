@@ -1,4 +1,4 @@
-/* atoms.js — THE PERIODIC TABLE as a central field: Z = 1…86 (H … Rn) by Xα(2/3) + the Latter tail.
+/* atoms.js — THE PERIODIC TABLE as a central field: Z = 1…86 (H … Rn) by Xα(2/3) + the Latter tail, scalar-relativistic (ZORA).
  *
  * Every atom in this file is one self-consistent CENTRAL potential shared by all its shells (Herman–Skillman /
  * Hartree–Fock–Slater, but with Kohn–Sham–Gáspár–Dirac exchange α = 2/3, not Slater's α = 1):
@@ -28,7 +28,7 @@
  * meshes (M and 2M points, the coarse points being the even fine ones) and RICHARDSON-extrapolated, (4E_2M − E_M)/3.
  * Self-consistency is by ANDERSON/Pulay mixing (depth 6) on the residual V_out − V_in.
  *
- * STATUS: NUMERICAL, and the numbers are DERIVED-HERE against a KNOWN port.  Certified in tests/atoms.test.mjs:
+ * STATUS: NUMERICAL, and the numbers are DERIVED-HERE against a KNOWN port.  Certified in tests/atoms.test.mjs (the non-relativistic road, `zora: false`):
  * bare Coulomb Z = 18 to 1e-7 Eh after Richardson; Ne −127.476 and Ar −524.506 (Opus Q2 of the FIELDS AND MOLECULES
  * round, research/MATH-FIELDS-AND-MOLECULES-2026-09-04.md, ported from research/probes-fields/opus-q2-atoms.py);
  * He by self-interaction-free Hartree = −2.8616800 = the Hartree–Fock limit (E.1, corrected by Opus with Simpson);
@@ -50,7 +50,32 @@
  * Rn's 1s lies 0.053 Eh (17 ppm) above NIST's non-relativistic LDA (Kotochigova et al., Phys. Rev. A 55, 191 (1997): −3204.756288 Eh),
  * the same share as Kr's (33 ppm): VWN correlation and the Latter tail, not the grid.  The model is NON-RELATIVISTIC, and past Kr that is
  * the dominant error: the same table's scalar-relativistic Rn 1s is 394 Eh deeper, and Au's 6s contracts — its −ε 1.62 eV and its Δ-SCF
- * ionisation 2.11 eV deeper (Au here 6.70 eV, measured 9.23).  STATUS says so for every atom past Kr (lab/status.js).
+ * ionisation 2.11 eV deeper (Au here 6.70 eV, measured 9.23).  (Those were the numbers of the non-relativistic solve, now the `zora: false` road.)
+ *
+ * THE MODEL IS SCALAR-RELATIVISTIC (iteration 008 Z, research/iteration-008/Z-BUILD.md), every Z, no switch.  ZORA (van Lenthe, Baerends &
+ * Snijders, J. Chem. Phys. 99, 4597 (1993); 101, 9783 (1994)) replaces p²/2 by p·(K/2)p, K = 2c²/(2c² − V), c = 137.035999084: the mass grows
+ * where V is deep.  Without spin–orbit, on ψ = (u/r)Y_lm the quadratic form ½∫K|∇ψ|²d³r is, after one integration by parts,
+ *
+ *     ½∫ [ K u′² + (K′/r) u² + K l(l+1) u²/r² ] dr ,   so   −½(K u′)′ + [ K′/2r + K l(l+1)/2r² + V ] u = λ u .
+ *
+ * K′/2r is the Darwin-like piece (left out, hydrogen's 1s shift reads −8.5/c² instead of −0.25/c²).  In x = ln r with u = √r v the form is
+ * ½∫K v_x² dx + ∫[½K(l+½)² + ¼K_x] v² dx against ∫r²v² dx, discretised with K at the half-points (zoraKinetic): the matrix stays symmetric
+ * tridiagonal and one Sturm bisection still gives every shell of an l.  At the nucleus K → 2c²r/Z, so u ∼ r^s, s² = 1 + l(l+1) − Z²/c² (for
+ * s shells the Dirac γ), and that is the wall's law.  THE SCALED ENERGY: expanding the exact c²/(2c² + E − V) to first order in E gives
+ * E = λ/(1 + θ), θ = ⟨u|p·c²/(2c² − V)² p|u⟩ (the small component's norm, on the same stencil); `eps` is that, `lam` runs the SCF and the
+ * total-energy functional.  CHECKED (hand runs in the build note): a one-electron ion's scaled 1s is Dirac's c²(√(1 − Z²/c²) − 1) to 1e-9 at
+ * Z = 10 … 86 and does not move when a constant is added to V; at Z = 1 every shell's shift is the Pauli mass-velocity + Darwin value to 1e-5.
+ * K is the solve's own potential's (V → 0 at infinity: no gauge is chosen); the ion of a Δ-SCF keeps the NEUTRAL's K (`neutralK`), so both
+ * sides of the difference have one kinetic operator and no gauge term.  E is that functional (the Δ-SCF reads it); `Escaled` = E − Σf(λ − ε)
+ * removes the deep core's ZORA excess (Kr −2783.55 Eh against NIST's ScRLDA −2783.99; Au −18 992.5 against −18 963.1; unscaled −19 664.7).
+ * THE ORACLE IS THE SHIFT (ours ZORA − NR against NIST's ScRLDA − LDA, Kotochigova et al.): the Δ-SCF ionisation of Au +2.00 eV (+2.11),
+ * Hg +1.94 (+1.98), Ag +0.54 (+0.57), Cs +0.13 (+0.15), Pb −0.11 (−0.11), Rn −0.02 (−0.02); Au's 6s ionisation is now 8.71 eV (measured
+ * 9.23).  Rn 1s −409.1 Eh (−394.1, ×1.04); the valence ε shifts within 0.12 eV except Au 6s (−1.36 eV against −1.62) and 5d (0.16 eV off).
+ * The light 1s shifts are larger than NIST's (Kr ×1.19, Ne ×3.9) because NIST's relativistic columns carry MacDonald–Vosko's relativistic
+ * exchange, which this model does not (with it, a hand run gives Kr ×0.95, Ar ×0.89).  H … Kr move: H's 1s by −1.8e-4 eV (13 ppm — the
+ * Latter tail makes its potential exactly −1/r), Kr's 4p by +0.019 eV, a 3d-row 4s by up to −0.16 eV.  SPIN–ORBIT IS NOT INCLUDED: a p or d
+ * level is the average of its j = l ± ½ pair (NIST's Dirac LDA splits Rn 6p by 3.6 eV) — the next step, which needs labels in j.  The
+ * self-interaction-free Hartree branch stays non-relativistic, as its oracles (He's HF limit, hydrogen's −½) are.  STATUS says it past Kr.
  */
 
 const HARTREE_EV = 27.211386245988;                      // CODATA 2018
@@ -102,11 +127,13 @@ export function groundConfig(Z) {
   return cfg.filter((c) => c.occ > 0).sort((a, b) => a.n - b.n || a.l - b.l);
 }
 export const EXCHANGE_MODEL = 'Xα(2/3) + Latter tail';
+/** what every relativistic number's model string ends with (the exchange model stays EXCHANGE_MODEL) */
+export const RELATIVITY = ' · scalar ZORA';
 /** the model string that travels with every number: α and the tail, always named (Sol's model-identity rule) */
-export function modelName(alpha, latter, sic) {
+export function modelName(alpha, latter, sic, zora) {
   if (sic) return 'Hartree, self-interaction-free' + (latter ? ' + Latter tail' : '');
   const a = alpha === 2 / 3 ? '2/3' : alpha === 1 ? '1' : (+alpha.toFixed(4)).toString();
-  return (alpha ? `Xα(${a})` : 'Hartree (no exchange)') + (latter ? ' + Latter tail' : ', no tail');
+  return (alpha ? `Xα(${a})` : 'Hartree (no exchange)') + (latter ? ' + Latter tail' : ', no tail') + (zora ? RELATIVITY : '');
 }
 const sup = (k) => (k > 1 ? String(k).replace(/./g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]) : '');
 const NOBLE = [[2, 'He'], [10, 'Ne'], [18, 'Ar'], [36, 'Kr'], [54, 'Xe']];
@@ -203,12 +230,42 @@ function hartree(g, q, out) {
 }
 
 /* ══ the l-channel: every shell of one l from one matrix ════════════════════════════════════════════════════ */
-function solveL(g, V, l, k, guess) {
+const C_LIGHT = 137.035999084, C2 = 2 * C_LIGHT * C_LIGHT;    // c in atomic units (CODATA 2018, 1/α); 2c²
+/** THE ZORA OPERATOR's pieces on mesh g: K = 2c²/(2c² − V_K) at the nodes and its mean at the half-points, from the potential V_K that
+ *  defines it (the solve's own V, Anderson-mixed with it to self-consistency; the neutral's for the ion of a Δ-SCF, `neutralK`) */
+function zoraOf(g, VK, Z) {
+  const { n } = g, K = new Float64Array(n), Kh = new Float64Array(n - 1);
+  for (let j = 0; j < n; j++) K[j] = C2 / (C2 - VK[j]);
+  for (let j = 0; j < n - 1; j++) Kh[j] = 0.5 * (K[j] + K[j + 1]);
+  return { K, Kh, Z };
+}
+/** the tridiagonal of the kinetic form ½∫K v_x² dx + ∫[½K(l+½)² + ¼K_x] v² dx in the code's scaling (C = B^{−½}AB^{−½}, B = 2r²), the wall folded in */
+function zoraKinetic(g, l, K, Kh, s, d, e) {
+  const { M, dx, r } = g, c = (l + 0.5) * (l + 0.5) / 2, id = 1 / (dx * dx);
+  for (let i = 0; i < M; i++) { const j = i + 1, rr = r[j] * r[j]; d[i] = 0.5 * id * (Kh[j - 1] + Kh[j]) / rr + K[j] * c / rr + 0.25 * (Kh[j] - Kh[j - 1]) / (dx * rr); }
+  for (let i = 0; i < M - 1; i++) e[i] = -0.5 * id * Kh[i + 1] / (r[i + 1] * r[i + 2]);
+  d[0] += Math.exp(-(s + 0.5) * dx) * (-0.5 * id * Kh[0] / (r[0] * r[1]));        // u ∼ r^s at r₀ (the ZORA indicial law): y = √2 √r u ∼ r^{s+½}
+}
+/** every shell of one l: [{ eps, lam, theta, u, nodes }] — `lam` the operator's eigenvalue, `eps` the one reported (scaled ZORA lam/(1 + θ),
+ *  θ = ⟨u| p·(c²/(2c² − V_K)²) p |u⟩ on the same stencil; non-relativistic: eps = lam, θ = 0).  zr: zoraOf(…), or null for p²/2 */
+function solveL(g, V, l, k, guess, zr) {
   const { n, M, dx, r } = g, d = new Float64Array(M), e = new Float64Array(M - 1);
-  const c = (l + 0.5) * (l + 0.5) / 2, id = 1 / (dx * dx);
-  for (let i = 0; i < M; i++) { const j = i + 1, rr = r[j] * r[j]; d[i] = id / rr + c / rr + V[j]; }
-  for (let i = 0; i < M - 1; i++) e[i] = -0.5 * id / (r[i + 1] * r[i + 2]);
-  d[0] += Math.exp(-(l + 1.5) * dx) * (-0.5 * id / (r[0] * r[1]));      // u ∼ r^{l+1} at r₀, not the hard wall u(r₀) = 0
+  let s = l + 1, dW = null, eW = null;
+  if (!zr) {
+    const c = (l + 0.5) * (l + 0.5) / 2, id = 1 / (dx * dx);
+    for (let i = 0; i < M; i++) { const j = i + 1, rr = r[j] * r[j]; d[i] = id / rr + c / rr + V[j]; }
+    for (let i = 0; i < M - 1; i++) e[i] = -0.5 * id / (r[i + 1] * r[i + 2]);
+    d[0] += Math.exp(-(l + 1.5) * dx) * (-0.5 * id / (r[0] * r[1]));      // u ∼ r^{l+1} at r₀, not the hard wall u(r₀) = 0
+  } else {
+    s = Math.sqrt(1 + l * (l + 1) - (zr.Z / C_LIGHT) ** 2);                 // K → 2c²r/Z at the nucleus: u ∼ r^s, s² = 1 + l(l+1) − Z²/c²
+    zoraKinetic(g, l, zr.K, zr.Kh, s, d, e);
+    for (let i = 0; i < M; i++) d[i] += V[i + 1];
+    const W = new Float64Array(n), Wh = new Float64Array(n - 1);             // the scaling's 2W = K²/2c², so ⟨T[2W]⟩ = ⟨p W p⟩
+    for (let j = 0; j < n; j++) W[j] = zr.K[j] * zr.K[j] / C2;
+    for (let j = 0; j < n - 1; j++) Wh[j] = zr.Kh[j] * zr.Kh[j] / C2;
+    dW = new Float64Array(M); eW = new Float64Array(M - 1);
+    zoraKinetic(g, l, W, Wh, s, dW, eW);
+  }
   let glo = Infinity, ghi = -Infinity;
   for (let i = 0; i < M; i++) { const a = (i > 0 ? Math.abs(e[i - 1]) : 0) + (i < M - 1 ? Math.abs(e[i]) : 0); glo = Math.min(glo, d[i] - a); ghi = Math.max(ghi, d[i] + a); }
   const out = [], x = new Float64Array(M);
@@ -221,9 +278,11 @@ function solveL(g, V, l, k, guess) {
     const lam = eigenvalue(d, e, M, q, lo, hi);
     for (let i = 0; i < M; i++) x[i] = Math.sin((q + 1) * Math.PI * (i + 1) / (M + 1)) + 1e-6;
     invIter(d, e, M, lam, x);
+    let theta = 0;
+    if (dW) { for (let i = 0; i < M; i++) theta += dW[i] * x[i] * x[i]; for (let i = 0; i < M - 1; i++) theta += 2 * eW[i] * x[i] * x[i + 1]; }
     const u = new Float64Array(n);
     for (let i = 0; i < M; i++) u[i + 1] = x[i] / Math.sqrt(2 * r[i + 1]);      // y = √2 √r u
-    u[0] = u[1] * Math.exp(-(l + 1) * dx);                                      // the wall's own law u ∼ r^{l+1}: u₀ = u₁(r₀/r₁)^{l+1} — it was left 0, a one-bin hole at the nucleus (wave 42)
+    u[0] = u[1] * Math.exp(-s * dx);                                            // the wall's own law u ∼ r^s (s = l + 1 without ZORA): u₀ = u₁(r₀/r₁)^s — it was left 0, a one-bin hole at the nucleus (wave 42)
     let nrm = u[0] * u[0] * r[0] + u[n - 1] * u[n - 1] * r[n - 1];
     for (let j = 1; j < n - 1; j++) nrm += (j % 2 ? 4 : 2) * u[j] * u[j] * r[j];
     nrm *= dx / 3;
@@ -232,7 +291,7 @@ function solveL(g, V, l, k, guess) {
     if (u[mi] < 0) sc = -sc;
     for (let j = 0; j < n; j++) u[j] *= sc;
     let nodes = 0; for (let j = 2; j < n - 1; j++) if (u[j] * u[j - 1] < 0) nodes++;
-    out.push({ eps: lam, u, nodes });
+    out.push({ eps: dW ? lam / (1 + theta) : lam, lam, theta, u, nodes });
   }
   return out;
 }
@@ -289,11 +348,11 @@ function scf(Z, config, g, o) {
   let V = o.V0 ? Float64Array.from(o.V0) : Float64Array.from(nuc);
   const mixer = new Anderson(n, o.depth, o.beta, w), guess = need.map(() => []);
   const solveAll = () => {
-    const orbs = new Map();
+    const orbs = new Map(), zr = o.zora ? zoraOf(g, o.Kpot || V, Z) : null;   // K follows the potential being diagonalised, unless it is the neutral's
     for (let l = 0; l <= lmax; l++) {
       if (!need[l]) continue;
-      const s = solveL(g, V, l, need[l], guess[l]);
-      for (let i = 0; i < need[l]; i++) { guess[l][i] = s[i].eps; orbs.set((i + l + 1) + ':' + l, s[i]); }
+      const s = solveL(g, V, l, need[l], guess[l], zr);
+      for (let i = 0; i < need[l]; i++) { guess[l][i] = s[i].lam; orbs.set((i + l + 1) + ':' + l, s[i]); }
     }
     const q = new Float64Array(n);
     for (const c of config) { const u = orbs.get(shellKey(c)).u; for (let j = 0; j < n; j++) q[j] += c.occ * u[j] * u[j]; }
@@ -315,14 +374,14 @@ function scf(Z, config, g, o) {
   const rho = new Float64Array(n); for (let j = 0; j < n; j++) rho[j] = q[j] / (4 * Math.PI * r[j] * r[j]);
   const VH = hartree(g, q), t = new Float64Array(n);
   let T = 0;
-  for (const c of config) { const s = orbs.get(shellKey(c)); for (let j = 0; j < n; j++) t[j] = s.u[j] * s.u[j] * V[j]; T += c.occ * (s.eps - integ(g, t)); }
+  for (const c of config) { const s = orbs.get(shellKey(c)); for (let j = 0; j < n; j++) t[j] = s.u[j] * s.u[j] * V[j]; T += c.occ * (s.lam - integ(g, t)); }
   for (let j = 0; j < n; j++) t[j] = q[j] * nuc[j];
   const Ene = integ(g, t);
   for (let j = 0; j < n; j++) t[j] = q[j] * VH[j];
   const EH = 0.5 * integ(g, t);
   for (let j = 0; j < n; j++) t[j] = 4 * Math.PI * r[j] * r[j] * Math.pow(rho[j], 4 / 3);
   const Ex = 1.5 * o.alpha * CX * integ(g, t);              // = −(9α/8)(3/π)^{1/3}∫ρ^{4/3}d³r
-  return { E: T + Ene + EH + Ex, T, Ene, EH, Ex, orbs, q, rho, V, VH, g, r, iterations: it, dV, Nel, electrons: integ(g, q) };
+  return { E: T + Ene + EH + Ex, T, Ene, EH, Ex, orbs, q, rho, V, VH, g, r, iterations: it, dV, Nel, electrons: integ(g, q), Kpot: o.zora ? (o.Kpot || V) : null };
 }
 /**
  * the self-interaction-free HARTREE: each shell moves in −Z/r + V_H[q_total] − V_H[q_nl]/f_nl, so no electron sees
@@ -385,15 +444,17 @@ function maxdiff(a, b, r) { let m = 0; for (let j = 0; j < a.length; j++) { cons
 
 /* ══ solveAtom — the two meshes and the Richardson limit ════════════════════════════════════════════════════ */
 const CACHE = new Map();
-const key = (Z, o) => [Z, o.alpha, o.latter ? 1 : 0, o.sic ? 1 : 0, o.M, o.rmax, o.richardson ? 1 : 0,
+const key = (Z, o) => [Z, o.alpha, o.latter ? 1 : 0, o.sic ? 1 : 0, o.zora ? 1 : 0, o.neutralK ? 1 : 0, o.M, o.rmax, o.richardson ? 1 : 0,
   o.config.map((c) => `${c.n}${c.l}:${c.occ}`).join(',')].join('|');
 
 /**
  * solveAtom(Z, opts) — the self-consistent central field of atom Z, in hartree on a logarithmic mesh.
  *   opts: alpha = 2/3 (Xα; 0 = no exchange), config (default the ground configuration), tol = 1e-8 on max|ΔV·r|,
  *         latter = true, sic = false (self-interaction-free Hartree: a potential per shell, α ignored),
- *         richardson = true (solve on M and 2M points and extrapolate ε and E), M = 999, rmax = 60.
- * → { Z, E, orbitals: [{n, l, occ, eps, nodes, r, u}], iterations, model, alpha, config, r, ... }
+ *         richardson = true (solve on M and 2M points and extrapolate ε and E), M = 999, rmax = 60,
+ *         zora = true (THE MODEL: scalar ZORA, ε reported scaled; false = the non-relativistic p²/2, kept for the RELATIVITY Δ readout
+ *         and the non-relativistic oracles; the self-interaction-free branch is always non-relativistic, its oracles are).
+ * → { Z, E, orbitals: [{n, l, occ, eps, lam, theta, nodes, r, u}], iterations, model, alpha, config, r, zora, ... }
  */
 export function solveAtom(Z, opts = {}) {
   const o = { alpha: 2 / 3, latter: true, sic: false, tol: 1e-8, richardson: true, M: 999, rmax: 60,
@@ -401,9 +462,16 @@ export function solveAtom(Z, opts = {}) {
   o.config = (opts.config || configOf(Z)).filter((c) => c.occ > 0).map((c) => ({ n: c.n, l: c.l, occ: c.occ })).sort((a, b) => a.n - b.n || a.l - b.l);
   if (o.sic) o.alpha = 0;
   if (o.alpha === 0 && !opts.sic && opts.alpha === 0) o.sic = true;      // α = 0 means the self-interaction-free Hartree
+  o.zora = opts.zora !== false && !o.sic;
+  o.neutralK = !!opts.neutralK && o.zora;
   const kk = key(Z, o), hit = CACHE.get(kk); if (hit) return hit;
+  let KF = null;                                            // neutralK: this configuration keeps THE NEUTRAL'S K — one fixed kinetic operator on both sides of a Δ-SCF, so no gauge term
+  if (o.neutralK) {
+    const { config, neutralK, ...rest } = opts, G = solveAtom(Z, rest);
+    KF = { coarse: o.richardson ? G.coarse.Kpot : G.Kpot, fine: G.Kpot };
+  }
   const r0 = 1e-6 / Z, run = o.sic ? scfSic : scf;
-  const gc = mesh(o.M, r0, o.rmax), A = run(Z, o.config, gc, o);
+  const gc = mesh(o.M, r0, o.rmax), A = run(Z, o.config, gc, KF ? { ...o, Kpot: KF.coarse } : o);
   let out = A, gf = gc;
   if (o.richardson) {
     gf = mesh(2 * o.M + 1, r0, o.rmax);                     // the coarse points are the even fine ones: x_i = x_{2i}
@@ -412,19 +480,20 @@ export function solveAtom(Z, opts = {}) {
       const V0 = new Float64Array(gf.n);
       for (let i = 0; i < gc.n; i++) V0[2 * i] = A.V[i];
       for (let i = 0; i + 1 < gc.n; i++) { const W = 0.5 * ((A.V[i] * gc.r[i] + Z) + (A.V[i + 1] * gc.r[i + 1] + Z)); V0[2 * i + 1] = (W - Z) / gf.r[2 * i + 1]; }
-      oF = { ...o, V0 };
+      oF = { ...o, V0, Kpot: KF ? KF.fine : null };
     }
     const B = run(Z, o.config, gf, oF);
     out = B; out.coarse = A;
     out.E = (4 * B.E - A.E) / 3;
-    for (const [k, s] of B.orbs) { const a = A.orbs.get(k); if (a) s.eps = (4 * s.eps - a.eps) / 3; }
+    for (const [k, s] of B.orbs) { const a = A.orbs.get(k); if (a) { s.eps = (4 * s.eps - a.eps) / 3; s.lam = (4 * s.lam - a.lam) / 3; } }
     out.iterations = A.iterations + B.iterations;
   }
-  const orbitals = o.config.map((c) => { const s = out.orbs.get(c.n + ':' + c.l); return { n: c.n, l: c.l, occ: c.occ, eps: s.eps, nodes: s.nodes, r: gf.r, u: s.u, label: `${c.n}${SPD[c.l]}` }; });
-  const res = { Z, symbol: (atom(Z) || {}).symbol, E: out.E, orbitals, iterations: out.iterations, alpha: o.alpha,
-    model: modelName(o.alpha, o.latter, o.sic), config: o.config, r: gf.r, mesh: gf, q: out.q, rho: out.rho, V: out.V,
+  const orbitals = o.config.map((c) => { const s = out.orbs.get(c.n + ':' + c.l); return { n: c.n, l: c.l, occ: c.occ, eps: s.eps, lam: s.lam, theta: s.theta, nodes: s.nodes, r: gf.r, u: s.u, label: `${c.n}${SPD[c.l]}` }; });
+  const Escaled = out.E - orbitals.reduce((t, c) => t + c.occ * (c.lam - c.eps), 0);   // scaled ZORA total (van Lenthe et al. 1994): E − Σ f λθ/(1+θ); = E without ZORA
+  const res = { Z, symbol: (atom(Z) || {}).symbol, E: out.E, Escaled, orbitals, iterations: out.iterations, alpha: o.alpha,
+    model: modelName(o.alpha, o.latter, o.sic, o.zora), zora: o.zora, Kpot: out.Kpot, config: o.config, r: gf.r, mesh: gf, q: out.q, rho: out.rho, V: out.V,
     T: out.T, Ene: out.Ene, EH: out.EH, Ex: out.Ex, electrons: out.electrons, residual: out.dV, Nel: out.Nel,
-    Vorb: out.Vorb, coarse: out.coarse && { V: out.coarse.V, mesh: out.coarse.g } };
+    Vorb: out.Vorb, coarse: out.coarse && { V: out.coarse.V, mesh: out.coarse.g, Kpot: out.coarse.Kpot } };
   CACHE.set(kk, res);
   return res;
 }
@@ -443,7 +512,8 @@ function frozenChannel(S, l, k) {
   let c = S.frozen.get(l);
   if (!c || c.length < k) {
     const kk = Math.max(k, 6 - l);                                      // the register's 91 labels stop at n = 6
-    const f = solveL(S.mesh, S.V, l, kk), co = S.coarse ? solveL(S.coarse.mesh, S.coarse.V, l, kk) : null;
+    const zr = (G, K) => (S.zora ? zoraOf(G, K, S.Z) : null);             // the solve's own K: a virtual shell sees the operator the occupied ones did
+    const f = solveL(S.mesh, S.V, l, kk, undefined, zr(S.mesh, S.Kpot)), co = S.coarse ? solveL(S.coarse.mesh, S.coarse.V, l, kk, undefined, zr(S.coarse.mesh, S.coarse.Kpot)) : null;
     c = f.map((s, i) => ({ n: l + 1 + i, l, occ: 0, eps: co ? (4 * s.eps - co[i].eps) / 3 : s.eps, epsFine: s.eps, u: s.u, nodes: s.nodes, virtual: true }));
     S.frozen.set(l, c);
   }
@@ -480,7 +550,7 @@ export function ionisation(Z, shell = {}, opts = {}) {
   const cfg = configOf(Z), sh = shell.n === undefined ? cfg[cfg.length - 1] : cfg.find((c) => c.n === shell.n && c.l === shell.l);
   if (!sh) throw new Error(`Z = ${Z} has no ${shell.n}${SPD[shell.l]} shell`);
   const ion = cfg.map((c) => (c === sh ? { ...c, occ: c.occ - 1 } : { ...c })).filter((c) => c.occ > 0);
-  const A = solveAtom(Z, opts), B = solveAtom(Z, { ...opts, config: ion });
+  const A = solveAtom(Z, opts), B = solveAtom(Z, { ...opts, config: ion, neutralK: true });   // the ion in the neutral's ZORA operator (a no-op without ZORA)
   return (B.E - A.E) * HARTREE_EV;
 }
 
