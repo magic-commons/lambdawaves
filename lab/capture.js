@@ -64,7 +64,7 @@
  *        phase     d chroma 1.04 of 11.7 - a 120-degree      BIT-IDENTICAL   d chroma 1.04 - THE SAME SIZE:
  *                  hue turn on the whole picture                             the seam would read as a jump
  *
- *     So `planLoop` reads `LW.mat.view` and uses T_psi = 2 pi / gcd{|E_a|} for the four phase-carrying views.
+ *     So `planLoop` reads `LW.mat.view` and uses T_psi = 2 pi / gcd{|E_a|} for the three phase-carrying views (Re+Im left at iteration 008).
  *     For the density it keeps T_rho — the shortest true loop of that picture — and SAYS what the residue is: a
  *     couple of parts in 10^7, the f16 cache rounding a globally-rotated psi differently, not the physics.
  *     `{ pixelExact: true }` buys the bit-identical T_psi there too, at three laps of physics for the same frames.
@@ -239,8 +239,8 @@ export function wavePeriod(energies, opts) {
 }
 
 /** the views whose picture carries the GLOBAL phase of psi, and so repeat at T_psi rather than T_rho */
-export const PHASE_VIEWS = ['phase', 'real', 'imag', 'reim'];
-export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff', 'reim'];   // field.js' VIEW, by index
+export const PHASE_VIEWS = ['phase', 'real', 'imag'];   // iteration 008 W: Re+Im left
+export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff'];   // field.js' VIEW, by index
 export function viewCarriesGlobalPhase(view) {
   const name = typeof view === 'number' ? VIEW_NAMES[view] : String(view);
   return PHASE_VIEWS.indexOf(name) >= 0;

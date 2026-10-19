@@ -135,6 +135,20 @@ export function createSettingsCard(app) {
     r5b.appendChild(ui.perfSeg.root);
     ui.scaleRo = readout({ label: 'RENDER SCALE', value: '100%', sub: 'canvas pixels per CSS pixel × DPR' });
     r5b.appendChild(ui.scaleRo.root);
+    /* iteration 008 W (Josh: "Remove dithering row from wave and move it to quality in settings"): DITHER is this display's, a PREFERENCE
+       (`dither` in the settings blob, the amplitude in LSB, 0 = OFF), no longer a project's (FIELD_CHROME: serialize strips it, restore ignores it) */
+    const r5c = el('div', 'row tight lw-dither', gq);
+    const setDither = (v) => { mat.dither = v; ui.ditherK.setDisabled(!v); schedule(TIER.PRESENT); saveSettings(); };
+    ui.ditherSeg = seg({ label: 'DITHER', value: 'off', options: [
+      { id: 'off', label: 'OFF', title: 'the colour goes to the 8-bit swapchain as it is' },
+      { id: 'ordered', label: 'ORDERED 8×8', title: 'Apply ordered dithering to reduce 8-bit colour bands' }],
+      onChange: (v) => setDither(v === 'off' ? 0 : ui.ditherK.get()) });
+    r5c.appendChild(ui.ditherSeg.root);
+    ui.ditherK = knob({ label: 'STRENGTH', min: 0.25, max: 2, value: 1, fmt: (v) => '±' + (v / 2).toFixed(2) + ' LSB', onInput: (v) => { if (ui.ditherSeg.get() !== 'off') setDither(v); } });
+    ui.ditherK.root.title = 'Dither strength in 8-bit output levels; 1 is ±½ level';
+    ui.ditherK.setDisabled(true);
+    r5c.appendChild(ui.ditherK.root);
+    ui.showDither = (k) => { ui.ditherSeg.set(k ? 'ordered' : 'off'); ui.ditherK.setDisabled(!k); if (k) ui.ditherK.set(Math.max(0.25, Math.min(2, k))); };   // the controls repainted from mat.dither (the settings, a lift, LW)
     const r6 = el('div', 'row', gq);
     ui.domainAuto = sw({ label: 'DOMAIN AUTO', value: true, onChange: (v) => { domain.auto = v; ui.domainKnob.setDisabled(v); schedule(TIER.REBUILD); } });
     r6.appendChild(ui.domainAuto.root);
@@ -143,7 +157,7 @@ export function createSettingsCard(app) {
     r6.appendChild(ui.domainKnob.root);
     const r7 = el('div', 'row tight', gq);
     ui.keepSw = sw({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
-    el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. KEEP FRAMES updates the playhead every frame and may cost performance.';
+    el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH 1 is ±½ output level. KEEP FRAMES updates the playhead every frame and may cost performance.';
   }
   return { createFieldQuality };
 }

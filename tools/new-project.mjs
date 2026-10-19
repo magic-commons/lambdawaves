@@ -64,7 +64,7 @@ function presentation() {
     /* rack.js:105 minus bg / lightUI / stageCustom and the FIELD_CHROME (S1), plus bow (rack.js:1837) and finish (restore() writes
        'lit' where a file has none).  NOT steps: applyRebuild writes mat.steps from quality.steps — the device's, like quality. */
     mat: { view: VIEW.phase, exposure: 1, softness: 0.7, slice: { mode: 0, axis: 2, pos: 0, thick: 0.03 }, hueShift: 0, paletteOn: false,
-      style: STYLE.cloud, iso: 0.06, grain: 0.35, knee: 0.6, dither: 0, boost: { k: [0, 0, 0], on: false }, gamma: 1,
+      style: STYLE.cloud, iso: 0.06, grain: 0.35, knee: 0.6, boost: { k: [0, 0, 0], on: false }, gamma: 1,
       bow: { gain: 1, curve: 1, limit: 3 }, finish: 'lit' },
     domain: { auto: true },                                           // rack.js:370; `half` under AUTO is computed at the rebuild, never a project value
     shadow: 'phasors',                                                // shadowview.js:16

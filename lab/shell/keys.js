@@ -1,7 +1,7 @@
 /* lab/shell/keys.js — §20–§23 (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): keyState, the ACTIONS rows on MIR's ONE KEY TABLE (lab/key-table.js), the
  * KEYBOARD window and THE TIMELINE (the kit's; THE FOCUS LAW's scoped rows), toggleUI and THE TAB ORDER.  createKeys(app) runs at its seat; keyState, ACTIONS
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
-import { TIER } from '../rack.js'; import { VIEW, VIEW_NAMES, STYLE, STYLE_NAMES } from '../field.js'; import { CAM } from '../camera-law.js'; import { STAGE_BINDINGS } from '../stage-gestures.js';
+import { TIER } from '../rack.js'; import { VIEW, VIEW_NAMES, WAVE_VIEWS, STYLE, STYLE_NAMES } from '../field.js'; import { CAM } from '../camera-law.js'; import { STAGE_BINDINGS } from '../stage-gestures.js';
 import { createKeyTable } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
 import { infoActions } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { mirGui } from '../mir-gui.js';
 export function createKeys(app) {
@@ -77,7 +77,7 @@ export function createKeys(app) {
     { id: 'turnPos', group: KG.S, short: 'turn +', label: 'turn ψ about the axis, +', key: 'BracketRight', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: 0.12 * f, t: clock.t }); touchState(); } },
     { id: 'slap', group: KG.S, short: 'impulse', label: 'impulse along the axis (k = 0.2)', key: 'KeyK', run: (f) => { if (app.hooks.slap) app.hooks.slap(0.2 * f, keyState.axis); } },
     { id: 'style', short: 'style', label: 'cycle the draw style', key: 'KeyC', run: () => { const order = ['cloud', 'solid', 'grain', 'signed', 'bands']; const nx = order[(order.indexOf(STYLE_NAMES[mat.style]) + 1) % 5]; mat.style = STYLE[nx]; ui.styleSeg.set(nx); schedule(TIER.PRESENT); } },
-    { id: 'view', short: 'view', label: 'cycle the observable', key: 'KeyV', run: () => { const order = ['density', 'phase', 'real', 'imag', 'diff', 'reim']; const nx = order[(order.indexOf(VIEW_NAMES[mat.view]) + 1) % 6]; mat.view = VIEW[nx]; ui.viewSeg.set(nx); schedule(TIER.PRESENT); } },
+    { id: 'view', short: 'view', label: 'cycle the observable', key: 'KeyV', run: () => { const order = WAVE_VIEWS; const nx = order[(order.indexOf(VIEW_NAMES[mat.view]) + 1) % order.length]; mat.view = VIEW[nx]; ui.viewSeg.set(nx); schedule(TIER.PRESENT); } },
     { id: 'palette', short: 'palette', label: 'toggle the phase palette', key: 'KeyP', run: () => { if (app.state.palette) app.state.palette.setOn(!app.state.palette.on); } },
     { id: 'hide', was: 'hideUI', short: 'hide UI', label: 'hide / show the interface (the frame and the axes with it)', key: 'KeyH', run: () => toggleUI() },
     { id: 'nextWindow', short: 'next win', label: 'next window to the top of the rack (from the stage)', key: 'Tab', shift: false, stage: true, run: () => cycleWindow(1) },

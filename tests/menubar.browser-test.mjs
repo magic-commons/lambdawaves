@@ -165,7 +165,7 @@ try {
     { __LW.api.setPopulation(0, 0.5); __LW.history.flush(); const u = await __row('EDIT', 'UNDO'); const d = __LW.history.redoDepth; const re = await __row('EDIT', 'REDO'); R.undoRedo = ok(u) && ok(re) && d >= 1 && __LW.history.redoDepth === d - 1; }
     /* VIEW */
     { const i0 = __LW.mat.invert; const r = await __row('VIEW', 'INVERT the cloud'); R.invert = ok(r) && __LW.mat.invert === !i0; __LW.setInvert(i0); }
-    { const views = [['ρ = |ψ|²', 0], ['arg ψ', 1], ['Re ψ', 2], ['Im ψ', 3], ['Δρ', 4], ['Re + Im', 5]]; R.views = true;
+    { const views = [['ρ = |ψ|²', 0], ['arg ψ', 1], ['Re ψ', 2], ['Im ψ', 3]]; R.views = true;   /* iteration 008 W: Δρ and Re + Im left WAVE */
       for (const [l, v] of views) { const r = await __row('VIEW', l); R.views = R.views && ok(r) && __LW.mat.view === v; } __LW.setView('phase'); }
     { const styles = ['CLOUD', 'SOLID', 'GRAIN', 'SIGNED', 'BANDS']; R.styles = true;
       for (const s of styles) { const r = await __row('VIEW', '— style: ' + s); R.styles = R.styles && ok(r) && __LW.mat.style === ({ CLOUD: 0, SOLID: 1, GRAIN: 2, SIGNED: 3, BANDS: 4 })[s]; } __LW.setStyle('cloud'); }

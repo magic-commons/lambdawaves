@@ -17,7 +17,7 @@ import { BASIS, domainFor } from './hydrogen.js';
 import { Register, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock, onePlay } from './clock.js';
 import { createWindowActivity } from './mir/window-activity.js';
-import { VIEW, VIEW_NAMES, STYLE, quatFromYawPitch } from './field.js';
+import { VIEW, VIEW_NAMES, STYLE, quatFromYawPitch, waveView } from './field.js';
 import { el, device as kitDevice } from './mir/kit.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
@@ -58,7 +58,8 @@ export async function boot(dom) {
 
   const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, mode: 'free', quat: quatFromYawPitch(0.65, 0.38), shift: [0, 0] };   // wave 54: TURNTABLE reads (yaw, pitch); FREE reads `quat` and the angles become a READOUT; 0.4.0 S2: `shift`, the pivot's place on the frame (NDC)
   const mat = { view: VIEW.phase, exposure: 1, softness: 0.7, steps: 160, slice: { mode: 0, axis: 2, pos: 0, thick: 0.03 }, hueShift: 0, invert: false, frame: true, axis: true, axisInk: 'theme', paletteOn: false, style: STYLE.cloud, iso: 0.06, grain: 0.35, knee: 0.6, dither: 0, boost: { k: [0, 0, 0], on: false }, bg: [0.028, 0.038, 0.058], gamma: 1, lightUI: false, finish: 'lit' };   // S3: 'lit' from the boot, as restore() writes it
-  const FIELD_CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk'];   // 0.3.1 · S1 (D1): the reader's measurement furniture — PREFERENCE, never in a project or a link (docs/STATE-SCOPES.md)
+  const FIELD_CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk', 'dither'];   // iteration 008 W: DITHER joined them (this display's, SETTINGS › QUALITY)
+    // 0.3.1 · S1 (D1): the reader's measurement furniture — PREFERENCE, never in a project or a link (docs/STATE-SCOPES.md)
 
   const rates = new Float64Array(91).fill(1);
   const energyOf = (a) => (getHamiltonian().energy(a) || 0) * rates[a];   // 0.8.0 G1: a label CENTRAL leaves unbound (NaN) holds its c, still
@@ -868,7 +869,7 @@ export async function boot(dom) {
   const q = new URLSearchParams(location.search);
   loadPreset(q.get('preset') && PRESET_BY_ID.has(q.get('preset')) ? q.get('preset') : '1s+2pz');
   mat.view = VIEW.phase; if (ui.viewSeg) ui.viewSeg.set('phase'); schedule(TIER.PRESENT);
-  if (q.get('view') && VIEW[q.get('view')] !== undefined) { mat.view = VIEW[q.get('view')]; ui.viewSeg.set(q.get('view')); }
+  if (q.get('view') && (VIEW[q.get('view')] !== undefined || q.get('view') === 'reim')) { const w = waveView(q.get('view')); mat.view = VIEW[w]; ui.viewSeg.set(w); }   // iteration 008 W: an old link's reim / diff opens as PHASE / DENSITY
   if (q.get('gastab') !== '0') gasTableOn(true);   // K7 → W125: the axial gas's Hermite table is ARMED by default (built at the first AXIAL launch); `?gastab=0` opts out (never saved, never linked)
   /* WAVE 57 · `?play=1` USED TO BE HERE, seventy-five lines above the photosensitivity notice — so a shared
      link animated the field underneath the warning while it was being read, which is exactly the thing the

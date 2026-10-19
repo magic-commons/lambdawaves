@@ -1,7 +1,7 @@
 /* lab/shell/facade.js — §26 THE DIAGNOSTICS SURFACE (0.5.2 R5; moved whole out of lab/rack.js boot()): createFacade(app) returns the one `__LW` literal,
  * key for key and getter for getter; boot() keeps the window.__LW / app.sh.LW line and the members it adds later (curves, bootView … ready, report) at their seats. */
 import { TIER, BUILD_LINE } from '../rack.js'; import { PRESETS, RENDER_CAP } from '../state.js'; import { psiAt, orbitalFromTable } from '../hydrogen.js'; import { waitForPaint } from '../frame-settle.js';
-import { VIEW, STYLE, cameraBasis, quatFromYawPitch } from '../field.js'; import { parseCssColor, cssRGB, accentRGB } from '../mir/kit.js'; import { rgbToHex, contrastRatio } from '../mir/palette.js';
+import { VIEW, STYLE, cameraBasis, quatFromYawPitch, waveView } from '../field.js'; import { parseCssColor, cssRGB, accentRGB } from '../mir/kit.js'; import { rgbToHex, contrastRatio } from '../mir/palette.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from '../hamiltonian.js'; import { wellCentroid } from '../well.js'; import { CARD_GROUND } from '../look.js';
 import { readLink, LINK_CHAR_CEILING } from '../statelink.js'; import { CATALOGUE } from '../catalogue.js';
 export function createFacade(app) {
@@ -176,7 +176,7 @@ export function createFacade(app) {
     seedParticles(n = 160) { particles.setOn(true); const k = particles.seed(n, reg, clock.t, domain.half); schedule(TIER.PRESENT); return k; },
     play() { clock.play(performance.now() / 1000); schedule(TIER.EVOLVE); }, pause() { clock.pause(); schedule(TIER.PRESENT); },
     scrub(t) { clock.scrub(t); schedule(TIER.EVOLVE); }, step(dt) { clock.step(dt); schedule(TIER.EVOLVE); },
-    setMute(a, on) { reg.setMute(a, on); touchState(); }, setView(v) { mat.view = VIEW[v]; ui.viewSeg.set(v); schedule(TIER.PRESENT); },
+    setMute(a, on) { reg.setMute(a, on); touchState(); }, setView(v) { const w = waveView(v); mat.view = VIEW[w]; ui.viewSeg.set(w); schedule(TIER.PRESENT); return w; },   // iteration 008 W: 'reim' → phase, 'diff' → density
     orbit(dy, dp) { orbitBy(dy, dp); schedule(TIER.PRESENT); },
     setShadowMode(m) { shadowView.setMode(m); ui.shadowSeg.set(m); schedule(TIER.PRESENT); },
     /** GPU throughput at the current settings: ms per frame for reconstruct+present, reconstruct, present (n back-to-back frames) */

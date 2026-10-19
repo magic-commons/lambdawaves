@@ -31,11 +31,11 @@ export const VERBS = [
   { id: 'vibrate', args: { on: 'bool', mode: '?number', amp: '?number', breathe: '?bool' }, doc: "MOLECULES' VIBRATE: the nuclei breathe in one normal mode (mode: its place in the MODE list from 0; amp 0…4 in Q₀, past 2 not harmonic); breathe: true presses BREATHE — RATE so one breath takes a second (\"make water breathe\")",
     async run(app, a) { const c = app.state.chem; if (!c.on) return 'VIBRATE needs MOLECULES on'; const line = await c.vibrate(a); return a.on && !line ? 'no modes recorded for this molecule (VIBRATE plays an STO-3G record of a solved molecule)' : { fade: line ? 'VIBRATE · ' + line : 'VIBRATE off' }; } },
   { id: 'view', args: { id: 'enum density|phase|real|imag|diff|reim|orbital|esp|spin|dlda', orbital: '?string|number' },
-    doc: 'the observable on the field: under MOLECULES density|orbital|diff|esp|spin (orbital by number or name; spin = ρα − ρβ of an open shell), otherwise density|phase|real|imag|diff|reim',
+    doc: 'the observable on the field: under MOLECULES density|orbital|diff|esp|spin (orbital by number or name; spin = ρα − ρβ of an open shell), otherwise density|phase|real|imag (iteration 008: an old reim opens as phase, diff as density)',
     run(app, a) {
       const c = app.state.chem;
       if (c && c.on && ['density', 'orbital', 'diff', 'esp', 'spin', 'dlda'].includes(a.id)) { if (a.orbital !== undefined) return orb(c, a.orbital); c.setView(a.id); }
-      else if (VIEW[a.id] === undefined) return `${a.id} is a MOLECULES view and MOLECULES is off`; else app.sh.LW.setView(a.id);
+      else if (VIEW[a.id] === undefined && a.id !== 'reim') return `${a.id} is a MOLECULES view and MOLECULES is off`; else return { fade: 'VIEW · ' + mdText(app.sh.LW.setView(a.id)) };   // iteration 008 W: setView maps reim / diff
       return { fade: 'VIEW · ' + mdText(a.id) };
     } },
   { id: 'window', args: { id: 'string', open: 'bool', side: '?enum L|R' }, doc: 'open or close a window by its id (spectrum, chem, orbitals, camera, settings, informational, render, …), onto the left (L) or right (R) rack',

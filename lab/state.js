@@ -650,7 +650,7 @@ export const PRESETS = [
       { n: 4, l: 2, m: 2, amp: 1 },
       { n: 6, l: 2, m: 2, amp: 1 }
     ],
-    visual: { rate: 60, window: 576 * Math.PI, view: 'diff' }
+    visual: { rate: 60, window: 576 * Math.PI, view: 'density' }
   },
   /* Physics justification: Mixing adjacent shells n=4 and n=5 with mixed m values breaks azimuthal symmetry, creating an eccentric, banana-shaped Keplerian wavepacket that orbits the nucleus. Because E₄ = −25/800 and E₅ = −16/800, the energy difference between the two populated shells is ΔE = 9/800 a.u., giving a rigorous density recurrence period T = 2π/(9/800) = 1600π/9 ≈ 558.505 a.u. */
   {
@@ -684,7 +684,7 @@ export const PRESETS = [
       { n: 2, l: 0, m: 0, amp: 1 },
       { n: 4, l: 0, m: 0, amp: 1 }
     ],
-    visual: { rate: 6.70206432766, window: 64 * Math.PI / 3, view: 'diff' }
+    visual: { rate: 6.70206432766, window: 64 * Math.PI / 3, view: 'density' }
   },
   /* Physics justification: Diagnostic for raymarching isosurface precision and nodal topology. With n = 5, l = 2, m = 0, the state possesses exactly n − l − 1 = 2 radial spherical nodes (at r = 5(3 ± √3) ≈ 6.34 a.u. and 23.66 a.u.) and l − |m| = 2 angular conical nodes (cos²θ = 1/3, θ ≈ 54.74° and 125.26°). The volume is partitioned into 9 sign-alternating domains; any nodal fuzziness or dislocation flags raymarcher step inaccuracy. */
   {
@@ -705,7 +705,7 @@ export const PRESETS = [
       { n: 1, l: 0, m: 0, amp: 1 },
       { n: 3, l: 0, m: 0, amp: 1 }
     ],
-    visual: { rate: 4, window: 4.5 * Math.PI, view: 'diff' }
+    visual: { rate: 4, window: 4.5 * Math.PI, view: 'density' }
   },
 ];
 export const PRESET_BY_ID = new Map(PRESETS.map((p) => [p.id, p]));

@@ -52,7 +52,8 @@ export function createSettings(app) {
            *is* a choice, and it is remembered here.  0.3.1 · S1 (D1): the whole field chrome — frame, axis,
            their modes, the corner, invert, axis colour — is this browser's alone; serialize() strips it and
            restore() ignores it in an older file, so no project or link can change a reader's axes. */
-        invert: !!mat.invert, axisInk: mat.axisInk || 'theme',        // wave 53: the two chrome objects are this browser's, like FROST and the tags
+        invert: !!mat.invert, axisInk: mat.axisInk || 'theme', dither: +mat.dither || 0,   // iteration 008 W: DITHER is this display's (SETTINGS › QUALITY), always written, so a profile older than it is known by its absence
+               // wave 53: the two chrome objects are this browser's, like FROST and the tags
         phoneTr: !!document.querySelector('.dev[data-id="transport"].folded'),
         /* WAVE 59 · WHICH WAY THE PHONE'S RACK WAS LEFT, on exactly phoneTr's pattern — a phone-only chrome
            preference, derived from the DOM rather than tracked in a second place.  The DEFAULT (nothing said)
@@ -113,6 +114,7 @@ export function createSettings(app) {
        the law of the two lines above: NOTHING SAID MEANS THE SHIPPED VALUE, so a profile written
        before this wave opens as it always did instead of inheriting a default nobody chose. */
     if (s.invert === true) { mat.invert = true; if (ui.invertSw) ui.invertSw.set(true); }
+    if (+s.dither > 0) { mat.dither = Math.max(0.25, Math.min(2, +s.dither)); if (ui.showDither) ui.showDither(mat.dither); }   // iteration 008 W: nothing said means OFF
     if (s.axisInk === 'cmy' || s.axisInk === 'rgb') { mat.axisInk = s.axisInk; if (ui.axisInkSeg) ui.axisInkSeg.set(s.axisInk); }
     if (Array.isArray(s.closed)) for (const d of document.querySelectorAll('.dev')) d.classList.toggle('closed', s.closed.includes(d.dataset.id) || (d.dataset.id === 'informational' && !infoKnown()));   // the remembered set, exactly (0.5.3 M9: a profile older than INFORMATIONAL keeps it closed, as a first run does — iteration 007: no record and no atomLabels in the blob)
     /* 0.3.1 · S1 (D4's escape hatch): the camera MODE is the project's, like the pose it is needed to read, so a `camMode`

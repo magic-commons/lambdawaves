@@ -185,12 +185,12 @@ try {
 
   /* ── 5 · 0.5.3 M6 THE LOCK, the classic camera (R3: the pan only) — the switch, then every pan road with the real inputs ── */
   const LOCKSW = `const card = document.querySelector('.dev[data-id="camera"]'); card.classList.remove('closed'); if (card.classList.contains('folded')) card.querySelector('.dev-fold').click();
-    const sw = [...card.querySelectorAll('button.sw')].find((b) => b.textContent.trim() === 'LOCK'), ref = [...card.querySelectorAll('button')].find((b) => /SET Δρ REF/.test(b.textContent)), pad = card.querySelector('.mir-camera .mir-xy');`;
-  await check('THE LOCK (0.5.3 M6): a LOCK switch beside SET Δρ REF; pressed, it centres the pivot, rests the PAN pad, is saved as the PREFERENCE camLock and is no history row', `
+    const sw = [...card.querySelectorAll('button.sw')].find((b) => b.textContent.trim() === 'LOCK'), pad = card.querySelector('.mir-camera .mir-xy');`;
+  await check('THE LOCK (0.5.3 M6): a LOCK switch among the CAMERA verbs (SET Δρ REF left with the WAVE Δρ at iteration 008); pressed, it centres the pivot, rests the PAN pad, is saved as the PREFERENCE camLock and is no history row', `
     const LW = __LW; ${LOCKSW}
     LW.camera.reset(); LW.camera.setShift(0.3, -0.2); await new Promise((r) => setTimeout(r, 150)); LW.history.flush(); const cursor = LW.history.cursor; sw.scrollIntoView({ block: 'center' });   /* the LINK check's edits are flushed first */
     sw.click(); await new Promise((r) => setTimeout(r, 150)); LW.history.flush();
-    return { lock: LW.camera.lock, port: LW.camera.lock, shift: LW.obs.shift.slice(), pressed: sw.getAttribute('aria-pressed'), padOff: pad.classList.contains('disabled'), sameRow: !!ref && sw.parentElement === ref.parentElement,
+    return { lock: LW.camera.lock, port: LW.camera.lock, shift: LW.obs.shift.slice(), pressed: sw.getAttribute('aria-pressed'), padOff: pad.classList.contains('disabled'), sameRow: !!sw.closest('.cam-verbs'),
       saved: LW.settings.camLock, rows: LW.history.cursor - cursor, inProject: 'camLock' in LW.serialize().presentation.camera };`, (v) => {
     assert.deepEqual([v.lock, v.pressed, v.padOff, v.sameRow, v.saved], [true, 'true', true, true, true]); assert.deepEqual(v.shift, [0, 0], 'engaged: PAN HOME');
     assert.equal(v.rows, 0, 'a PREFERENCE is not an edit'); assert.equal(v.inProject, false, 'never in a project');

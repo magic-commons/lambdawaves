@@ -1,10 +1,10 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, trig, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE } from '../field.js'; import { planeModel } from '../native-ui.js';
+import { el, knob, sw, seg, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE } from '../field.js'; import { planeModel } from '../native-ui.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS } from '../mir/palette.js';
 export function createMaterial(app) {
-  const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field, setReference } = app.ctl;
+  const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
   const wPal = device({ id: 'palette', eyebrow: 'PALETTE', status: '' });
   const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
@@ -22,9 +22,11 @@ export function createMaterial(app) {
       ui.spaceNote.innerHTML = '<b>STURMIAN:</b> momentum space is not built for the scaled radials (the Podolsky–Pauling transform would need its own table) — position space only until SCALE is back on HYDROGEN.';
     }
     const r1 = el('div', 'row', gSpace);
+    /* iteration 008 W (Josh: "delta p AND Re+Im … where is this different from the other viewpoints other than color?"): FOUR observables.
+       Re+Im was two pictures in one volume (PHASE carries both as hue); Δρ is MOLECULES' Δ beside KICK.  A saved one maps by waveView. */
     ui.viewSeg = seg({ label: 'OBSERVABLE (colour is semantic)', value: 'phase', options: [
       { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density; palette θ = 0 when enabled, original blue when off' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
-      { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: palette ±π/2 or original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>' }, { id: 'diff', label: '<m>Δρ</m>', title: 'ρ(t) − ρ_ref: palette −π/2 gain and +π/2 loss, or original yellow/blue' }, { id: 'reim', label: '<m>Re+Im</m>', title: 'Overlay real and imaginary parts in one volume' }],
+      { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: palette ±π/2 or original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>' }],
       onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('view', ui.viewSeg.button(v).textContent); } });
     r1.appendChild(ui.viewSeg.root).dataset.keyAction = 'view';
     const r2 = el('div', 'row tight', gSpace);
@@ -50,24 +52,23 @@ export function createMaterial(app) {
     ui.isoK = knob({ label: 'ISO', min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.isoK.root);
     ui.grainK = knob({ label: 'GRAIN', min: 0.02, max: 1, value: 0.35, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.grain', v)) return; mat.grain = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.grainK.root);
     ui.kneeK = knob({ label: 'KNEE', min: 0.02, max: 8, value: 0.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.kneeK.root);
-    const rdd = el('div', 'row tight', gd);
-    ui.ditherSeg = seg({ label: 'DITHER', value: 'off', options: [
-      { id: 'off', label: 'OFF', title: 'the colour goes to the 8-bit swapchain as it is' },
-      { id: 'ordered', label: 'ORDERED 8×8', title: 'Apply ordered dithering to reduce 8-bit colour bands' }],
-      onChange: (v) => { mat.dither = v === 'off' ? 0 : (ui.ditherK ? ui.ditherK.get() : 1); if (ui.ditherK) ui.ditherK.setDisabled(v === 'off'); schedule(TIER.PRESENT); } });
-    rdd.appendChild(ui.ditherSeg.root);
-    ui.ditherK = knob({ label: 'STRENGTH', min: 0.25, max: 2, value: 1, fmt: (v) => '±' + (v / 2).toFixed(2) + ' LSB', onInput: (v) => { if (ui.ditherSeg.get() !== 'off') { mat.dither = v; schedule(TIER.PRESENT); } } });
-    ui.ditherK.root.title = 'Dither strength in 8-bit output levels; 1 is ±½ level';
-    ui.ditherK.setDisabled(true);
-    rdd.appendChild(ui.ditherK.root);
-    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE limits opacity growth. ISO sets the solid or shell threshold; GRAIN controls particle density or band count. Ordered dithering reduces colour steps; strength 1 is ±½ output level.';
+    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE limits opacity growth. ISO sets the solid or shell threshold; GRAIN controls particle density or band count.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY
 
     const gs = group(wClip.body, 'observer only');
     const r3 = el('div', 'row', gs);
     /* wave 106: these two keep their handles for the same reason POS and THICK now do — an undo has to
        be able to MOVE a control, and a control nothing holds cannot be moved. */
-    ui.sliceModeSeg = seg({ aria: 'slice mode', value: 'off', options: [{ id: 'off', label: 'VOLUME' }, { id: 'clip', label: 'CLIP' }, { id: 'slab', label: 'SLAB' }], onChange: (v) => { mat.slice.mode = { off: 0, clip: 1, slab: 2 }[v]; schedule(TIER.PRESENT); } });
-    r3.appendChild(ui.sliceModeSeg.root);
+    /* iteration 008 W (Josh: "Rename 'Volume' in the clip window to 'Full' or 'OFF/ON' with a light indicator"): VOLUME | CLIP | SLAB is an ON
+       switch with its lamp (off = the full volume) and the kind CLIP | SLAB beside it, shown while on; the kind is remembered across an off.
+       `mat.slice.mode` keeps 0 · 1 · 2, and `ui.sliceModeSeg` keeps the seg's get / set ('off' · 'clip' · 'slab') for restore and undo. */
+    const SLICE_MODE = { off: 0, clip: 1, slab: 2 }; let sliceKind = 'clip';
+    const sliceShow = (v) => { if (v !== 'off') sliceKind = v; clipSw.set(v !== 'off'); kindSeg.set(sliceKind); kindSeg.root.style.visibility = v === 'off' ? 'hidden' : ''; kindSeg.root.inert = v === 'off'; };   // hidden in its seat: the row never moves
+    const clipSw = sw({ label: 'ON', value: false, cls: 'clip-on', title: 'CLIP on: cut the volume by the plane (CLIP) or keep a slab about it (SLAB); off draws the full volume',
+      onChange: (on) => { const v = on ? sliceKind : 'off'; sliceShow(v); mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
+    const kindSeg = seg({ aria: 'clip kind', value: 'clip', options: [{ id: 'clip', label: 'CLIP', title: 'draw the half of the volume beyond the plane' }, { id: 'slab', label: 'SLAB', title: 'draw a slab THICK wide about the plane' }],
+      onChange: (v) => { sliceKind = v; mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
+    ui.sliceModeSeg = { root: clipSw.root, kind: kindSeg, get: () => (clipSw.get() ? sliceKind : 'off'), set: sliceShow };
+    r3.appendChild(clipSw.root); r3.appendChild(kindSeg.root); sliceShow('off');
     ui.sliceAxisSeg = seg({ aria: 'slice axis', value: 'z', options: [{ id: 'x', label: 'X' }, { id: 'y', label: 'Y' }, { id: 'z', label: 'Z' }], onChange: (v) => { mat.slice.axis = { x: 0, y: 1, z: 2 }[v]; delete mat.slice.normal; schedule(TIER.PRESENT); } });
     r3.appendChild(ui.sliceAxisSeg.root);
     const sliceNormals = [[1,0,0],[0,1,0],[0,0,1]];
@@ -133,17 +134,17 @@ export function createMaterial(app) {
     camPanel.spec.build(gc, null);
     const camView = camPanel.view(); camView.homeBtn.root.dataset.keyAction = 'camReset';
     app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
-    const rRef = el('div', 'row tight', gc); rRef.appendChild(trig({ label: 'SET Δρ REF', title: 'Use the current density as the difference reference', onFire: () => { setReference(); ui.viewSeg.set('diff'); mat.view = VIEW.diff; } }).root);
+    const rRef = el('div', 'row tight', gc);   // iteration 008 W: SET Δρ REF left with WAVE's Δρ (MOLECULES' Δ stores its own reference at the kick)
     /* 0.5.3 M6 · LOCK, the classic camera (a PREFERENCE, `camLock`): the pan held at the centre and every zoom from it; the PAN pad rests while it holds */
     ui.camLockSw = sw({ label: 'LOCK', value: false, title: 'LOCK — the classic camera: the pan stays at the centre and every zoom is from the centre (CONTROL, the turn, ZOOM and FOV stay live)', onChange: (v) => { cameraPort.set('lock', v); saveSettings(); } });
     rRef.appendChild(ui.camLockSw.root); let lockShown = false;
     cameraPort.subscribe(() => { const on = cameraPort.get('lock'); if (on !== lockShown) { lockShown = on; ui.camLockSw.set(on); camView.pad.widget.setDisabled(on); } });   // every road (the switch, the settings, LW) is a notice
     /* iteration 001 (Josh): CAMERA, SHORTER — the group's CAMERA word goes (the window says it), LOCK joins HOME · PAN HOME, and the PAN pad,
-       the scales, the HAND and SET Δρ REF fold behind CONTROL's chevron (lab/fold.js): HOME, CONTROL, the sphere, ZOOM · FOV stay out */
+       the scales and the HAND fold behind (SET Δρ REF left at iteration 008) CONTROL's chevron (lab/fold.js): HOME, CONTROL, the sphere, ZOOM · FOV stay out */
     { const R = gc.querySelector('.mir-camera'), q = (c) => R.querySelector(':scope > ' + c), more = el('div', 'cam-more', R);
       gc.querySelector(':scope > .grp-lbl')?.remove();
       for (const c of ['.cam-pan', '.cam-scales', '.cam-hand']) { const n = q(c); if (n) more.appendChild(n); }
-      more.appendChild(rRef); const v = q('.cam-verbs'); if (v) { v.appendChild(ui.camLockSw.root); v.dataset.n = String(v.children.length); } fold(q('.cam-mode') || R, more, { what: 'pan, hand and the Δρ reference' }); }
+      const v = q('.cam-verbs'); if (v) { v.appendChild(ui.camLockSw.root); v.dataset.n = String(v.children.length); } if (rRef.children.length) more.appendChild(rRef); else rRef.remove(); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt(+Shift)+Drag, two fingers or the PAN pad slide the picture 1:1 (Shift does not make the pan finer); the molecule stays the pivot. Double-click, double-tap or HOME restores the camera.';
   }
   return { wObs, wPal, wCam, wClip, createDrawClipPaletteCamera };
