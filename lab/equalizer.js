@@ -9,7 +9,7 @@
  * are the old ones to the bit (row and column 7 are the identity's, and acc₇ = 0 multiplies them) — seven once one is.  A saved table keeps
  * six gains while the seventh is 1, so an n ≤ 6 project's bytes never move.
  */
-import { BASIS } from './hydrogen.js';
+import { BASIS, narrow } from './hydrogen.js';
 /** the shell table's width: the register's n ≤ 7 (the kernel's accumulators, the grid, the faders) */
 export const EQ_SHELLS = 7;
 /** |Γ_{nn′}|² of a table's gamma (7 × 7, (re, im) per entry), n and n′ from 1 */
@@ -60,7 +60,7 @@ export function createEqualizer() {
     setGain(i, v) { if (i >= 0 && i < EQ_SHELLS) eq.gains[i] = Math.min(1, Math.max(0, +v || 0)); },
     birth: () => eq.preset === 'flat' && eq.gains.every((s) => s === 1),
     /* six gains while the seventh is 1 (an n ≤ 6 project's bytes never move; an older tree reads the six it knows) */
-    serialize: () => (eq.birth() ? null : { preset: eq.preset, gains: [...eq.gains].slice(0, eq.gains[6] === 1 ? 6 : EQ_SHELLS) }),
+    serialize: () => (eq.birth() ? null : { preset: eq.preset, gains: [...narrow(eq.gains, 1, 6)] }),
     restore(o) { eq.preset = 'flat'; eq.gains.fill(1); if (!o) return; eq.setPreset(o.preset); (o.gains || []).slice(0, EQ_SHELLS).forEach((v, i) => eq.setGain(i, v)); },
     table({ Z = 1, rates = null, populated = [], pops = null } = {}) {
       if (eq.birth()) return null;

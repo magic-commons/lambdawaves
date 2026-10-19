@@ -53,7 +53,7 @@
  *   would say nothing — an empty mute/solo mask, 91 rates that are all 1 — are not written at all.
  */
 
-import { BASIS, BASIS_INDEX, N6 } from './hydrogen.js';
+import { BASIS, BASIS_INDEX, N6, widen } from './hydrogen.js';
 import { PRESET_BY_ID as PALETTE_BY_ID } from './mir/palette.js';
 
 export const LINK_VERSION = 1;
@@ -376,7 +376,7 @@ export function encodeState(state, opts = {}) {
   });
 
   let ratesMode = 'omitted';
-  const rates = (Array.isArray(pr.rates) || ArrayBuffer.isView(pr.rates)) && (pr.rates.length === N || pr.rates.length === N6) ? Array.from({ length: N }, (_, a) => (a < pr.rates.length ? pr.rates[a] : 1)) : null;   // a 91-wide record (an older project) is n = 7 at 1
+  const rates = (Array.isArray(pr.rates) || ArrayBuffer.isView(pr.rates)) && (pr.rates.length === N || pr.rates.length === N6) ? widen(pr.rates, 1) : null;   // a 91-wide record (an older project) is n = 7 at 1
   /* THE RATES are written whenever the state carries them, EVEN WHEN ALL 91 ARE 1 — because
      "everything at 1" is a state somebody chose, and a visitor whose own knobs are off 1 must land on
      the link's rates and not keep their own.  All-ones costs four bytes: a sparse list of length nil. */

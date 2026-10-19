@@ -6,7 +6,7 @@ import { TIER } from '../rack.js';
 import { VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, quatFromYawPitch, waveView, drawStyle } from '../field.js';
 import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';
-import { clampShift } from '../camera-law.js'; import { clampLambda } from '../sturmianreg.js'; import { BASIS } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
+import { clampShift } from '../camera-law.js'; import { clampLambda } from '../sturmianreg.js'; import { BASIS, N6, narrow, widen } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
 export function createPersist(app) {
   const { ui, reg, clock, obs, mat, FIELD_CHROME, rates, energyOf, sturm, PAL_DEF } = app; const { schedule, paceRate } = app.loop; const { quality, layout, phone, tablet } = app.sh;
@@ -18,9 +18,9 @@ export function createPersist(app) {
      minus the view, quality, the notebook and the WORKSPACE (no DOM read), and minus what a clock or a modulator moves (experiment.t,
      a bound macro's value, a modulated target's output — its seat keeps the base —, mat.steps, domain.half under AUTO). */
   const EDIT_SKIP = ['obs', 'quality', 'layout', 'modwin', 'camera', 'notebook'];
-  const shellSeat = (R, n) => R && { get v() { return R[BASIS.findIndex((s) => s.n === n)]; },   // 0.6.0 B3a: a shell route's seat writes only a shell that shares one rate — a hand's per-label rates are never flattened
+  const shellSeat = (R, n) => R && { get v() { return R[BASIS.findIndex((s) => s.n === n)] ?? 1; },   // 0.6.0 B3a: a shell route's seat writes only a shell that shares one rate — a hand's per-label rates are never flattened
     set v(x) { const sh = BASIS.filter((s) => s.n === n);
-      /* iteration 009 DEMOS: a 91-wide record's n = 7 is at 1 by absence — its base seat (projectSnapshot's table) writes 1 into nothing, so
+      /* iteration 009 DEMOS: a 91-wide record's n = 7 is at 1 by absence (the getter reads it so, X6) — its base seat writes 1 into nothing, so
          an n ≤ 6 file stays 91 wide (A7's law); any other rate there widens the record to the 140, the rest of n = 7 at 1 */
       if (sh[0].index >= R.length) { if (x === 1) return; for (let i = R.length; i < BASIS.length; i++) R[i] = 1; }
       if (sh.every((s) => R[s.index] === R[sh[0].index])) for (const s of sh) R[s.index] = x; } };
@@ -63,7 +63,7 @@ export function createPersist(app) {
         instruments: { chem: app.state.chem.save(), orbitals: app.state.orbitals.save(), states: app.state.states.save(), register: { mode: app.state.register.mode }, qcd: quarkonium(),
           ladder: { ...ladder.params }, lattice: LAT ? LAT.save() : undefined, bloch: BL ? BL.save() : undefined, central: centralSave(), separable: sepSave(),   // 0.7.2 L1, 0.8.1 T1, 0.8.0 G1, 0.9.4 S1: absent at the defaults
           particles: { count: Math.round(ui.pN.get()), trail: particles.trailLen } },
-        rates: Array.from(rates.subarray(91).every((v) => v === 1) ? rates.subarray(0, 91) : rates), rotationRates:   /* iteration 008 A7: 91 wide while n = 7's rates are all 1, so an older file's bytes never move */ { ...app.ctl.rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
+        rates: Array.from(narrow(rates, 1)), rotationRates:   /* iteration 008 A7: 91 wide while n = 7's rates are all 1, so an older file's bytes never move */ { ...app.ctl.rotRate }, sturmian: { on: sturm.on, lambda: sturm.lambda },
         modulation: app.state.modHost ? modRackStamped() : null,
         /* 2026-09-10 (Josh): A PROJECT IS A DAW PROJECT — the stage, the window arrangement (every window as it stands,
            floats included), the modulation window's placement, auto-rotate, the overlays, SPECTRUM's DIALS fold, the A/B
@@ -252,7 +252,7 @@ export function createPersist(app) {
         }
         /* D9b · THE ELECTROSTATICS SHIM: a file whose overlay the retired window drew opens without it and says so; nothing is drawn */
         if (pr.field && pr.field.overlay && pr.field.overlay !== 'off') gone.push('ELECTROSTATICS');
-        if (Array.isArray(pr.rates) && (pr.rates.length === 91 || pr.rates.length === rates.length)) { if (pr.rates.length === 91) rates.fill(1, 91); rates.set(pr.rates); reg.setEnergies(energyOf); }   // a 91-wide record: n = 7 at 1
+        if (Array.isArray(pr.rates) && (pr.rates.length === N6 || pr.rates.length === rates.length)) { rates.set(widen(pr.rates, 1)); reg.setEnergies(energyOf); }   // a 91-wide record: n = 7 at 1
         /* 2026-09-10 · THE DAW KEYS, each only when the file carries it (see serialize).  0.3.1 · S1: of `ui` only the STAGE
            is read; an older file's theme / card / frost / disc / accent, and its camera feel, are the sender's preferences
            and are ignored — opening a project never changes this browser's settings (docs/STATE-SCOPES.md). */
