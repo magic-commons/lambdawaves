@@ -6,7 +6,7 @@
  * (`app.hooks.slap`, the K key along the X · Y · Z axis) lives here too: RELEASE and ALONG were its buttons, and K is the road now.  LAST IMPULSE is
  * a METERS line (`ui.kickRo`, readouts.js).  Every PROJECT key is the one STATE wrote (`field.Bz/Fz/inter`, `mat.bow`, `damping`), every `ui.*` name
  * persist.js and the modulation seam read is the one STATE made, and the targets `state.rot.z` · `state.stark.kz` · `state.defect.l2` are unchanged.
- * Closed on a first run (rack.js' first-visit furniture lists it nowhere), listed in + and WINDOW like every card; an ATOMS window (MOLECULES hides it). */
+ * Closed on a first run (rack.js' first-visit furniture lists it nowhere) and for a profile older than it (008 Q, settings.js applySettings: no `dither` in the blob, INFORMATIONAL's road), listed in + and WINDOW like every card; an ATOMS window (MOLECULES hides it). */
 import { el, knob, sw, trig, readout, group, label } from '../mir/kit.js';
 import { fold } from '../fold.js';
 import { momentumZ, AXIS_TO_Z } from '../kick.js';
