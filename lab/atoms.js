@@ -160,7 +160,7 @@ export function groundConfig(Z) {
 }
 export const EXCHANGE_MODEL = 'Xα(2/3) + Latter tail';
 /** what every relativistic number's model string ends with: the ZORA kinetic operator and MacDonald–Vosko's exchange factor (009 MV; the exchange model stays EXCHANGE_MODEL) */
-export const RELATIVITY = ' · scalar ZORA · MV';
+export const RELATIVITY_SHORT = 'ZORA · MV', RELATIVITY = ' · scalar ' + RELATIVITY_SHORT;
 /** the model string that travels with every number: α and the tail, always named (Sol's model-identity rule) */
 export function modelName(alpha, latter, sic, zora) {
   if (sic) return 'Hartree, self-interaction-free' + (latter ? ' + Latter tail' : '');
@@ -415,11 +415,12 @@ function scf(Z, config, g, o) {
   };
   let orbs = null, q = null, it = 0, dV = 1;
   const k13 = 1.5 * o.alpha * Math.cbrt(3 / Math.PI), Vout = new Float64Array(n), F = new Float64Array(n);
+  /* the exchange factor (MacDonald–Vosko on the ZORA road: V_x·R, E_x·Φ); the plain road's × 1 is exact, so it is A's to the bit */
+  const xR = o.zora ? (c3) => mvR(MV_K * c3) : () => 1, xPhi = o.zora ? (p) => mvPhi(MV_K * Math.cbrt(p)) : () => 1;
   for (it = 1; it <= o.maxIter; it++) {
     ({ orbs, q } = solveAll());
     const VH = hartree(g, q);
-    if (!o.zora) for (let j = 0; j < n; j++) Vout[j] = nuc[j] + VH[j] - k13 * Math.cbrt(q[j] / (4 * Math.PI * r[j] * r[j]));
-    else for (let j = 0; j < n; j++) { const c3 = Math.cbrt(q[j] / (4 * Math.PI * r[j] * r[j])); Vout[j] = nuc[j] + VH[j] - k13 * c3 * mvR(MV_K * c3); }   // MacDonald–Vosko: the relativistic model's exchange
+    for (let j = 0; j < n; j++) { const c3 = Math.cbrt(q[j] / (4 * Math.PI * r[j] * r[j])); Vout[j] = nuc[j] + VH[j] - k13 * c3 * xR(c3); }
     if (o.latter) for (let j = 0; j < n; j++) Vout[j] = Math.min(Vout[j], tail[j]);
     dV = maxdiff(Vout, V, r);
     if (dV < o.tol) break;
@@ -435,8 +436,7 @@ function scf(Z, config, g, o) {
   const Ene = integ(g, t);
   for (let j = 0; j < n; j++) t[j] = q[j] * VH[j];
   const EH = 0.5 * integ(g, t);
-  for (let j = 0; j < n; j++) t[j] = 4 * Math.PI * r[j] * r[j] * Math.pow(rho[j], 4 / 3);
-  if (o.zora) for (let j = 0; j < n; j++) t[j] *= mvPhi(MV_K * Math.cbrt(rho[j]));         // MacDonald–Vosko's Φ: the energy whose derivative is the R-scaled V_x
+  for (let j = 0; j < n; j++) t[j] = 4 * Math.PI * r[j] * r[j] * Math.pow(rho[j], 4 / 3) * xPhi(rho[j]);   // Φ: the energy whose derivative is the R-scaled V_x
   const Ex = 1.5 * o.alpha * CX * integ(g, t);              // = −(9α/8)(3/π)^{1/3}∫ρ^{4/3}d³r
   return { E: T + Ene + EH + Ex, T, Ene, EH, Ex, orbs, q, rho, V, VH, g, r, iterations: it, dV, Nel, electrons: integ(g, q), Kpot: o.zora ? (o.Kpot || V) : null };
 }
