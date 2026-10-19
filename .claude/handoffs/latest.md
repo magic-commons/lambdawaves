@@ -1,4 +1,5 @@
 # PAUSE ADDENDUM (Claude Yan, 2026-10-19) — the volume picture round FINISHED before the switch: VOL. I reads 3,465 molecules, 3,458 pictures named, 7 without a picture (molecules the solvers finished during the round — the next pack day's, not a task); the 9243 server stopped by pid; NO running task of mine remains, only the three solvers (not mine).
+- **Sos, 2026-10-19 09:4x (after Yan's night):** C7's remainder merged tools-only at `d9a7393` (build.py: hand-built sandwich compounds never folded; C7-BUILD.md §2 = the swap steps). The wider catalogue is READY as `~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.next.json` (29,509 rows vs 7,070 live; pin 0, check 0; dry-run queues: finish ≤ 20 heavy = 9,338 molecules ≈ 13 days on the three solvers, gpu-day 16,677). NOT swapped; solvers untouched on the old queue (889/1,248 at 09:10, ≈ 1.5 days). **Waiting on Josh:** (a) swap + restart on the wider cheap queue now, or after the old queue finishes (Sos recommends after); (b) Yan's nine calls → iteration 009 rows. No agent running.
 
 ---
 
