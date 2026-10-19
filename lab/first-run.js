@@ -17,11 +17,16 @@
  * phone or tablet; a project's or a ☆ layout's card record (`more`) wins when it loads.
  * 2026-10-16 (Josh, iteration 001) · EVERY first-visit window arrives FOLDED (minimized) on every device, and MOLECULES' MORE fold too;
  * INFORMATIONAL takes SHADOW's seat on the left rack (rack.js).
+ * 2026-10-19 (Josh, iteration 011 Q2: "By default make most of the hidable texts and expandable windows minimized for default users") · `inner`:
+ * EVERY fold INSIDE a window (lab/fold.js' presses, `data-fold`: INFORMATIONAL's ANNOUNCE · CURSOR · MARKS — open on a desktop until now — the
+ * register's PRESET · A ↔ B · FLOW folds, FIELD's impulse knobs, SHADOW's details, CAMERA's pan and hand) arrives CLOSED on every device; a
+ * project's, a ☆ layout's or the resumed session's card record (`folds`, rack-wiring.js) wins when it loads.  SPECTRUM's shells keep their own law
+ * (n ≤ 6 open, n = 7 folded: they are what the window is for).
  * Node-testable: tests/first-run.test.mjs. */
 const FOLD_ALL = Object.freeze(['informational', 'spectrum', 'chem', 'settings', 'state', 'palette', 'observer', 'camera', 'clip']);
 export const FIRST_RUN_MATERIAL = Object.freeze({
-  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: FOLD_ALL, more: false }),
-  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: FOLD_ALL, more: false }),
+  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: FOLD_ALL, more: false, inner: false }),
+  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: FOLD_ALL, more: false, inner: false }),
 });
 /** the material a browser that has never said anything gets on this device */
 export function firstRunMaterial(mobile) { return mobile ? FIRST_RUN_MATERIAL.mobile : FIRST_RUN_MATERIAL.desktop; }

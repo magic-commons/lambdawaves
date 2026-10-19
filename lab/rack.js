@@ -892,6 +892,8 @@ export async function boot(dom) {
     const left=['informational','spectrum','chem'],right=['settings','state','palette','observer','camera','clip'];
     for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',![...left,...right].includes(d.dataset.id));
     for(const [host,ids] of [[rackL,left],[rack,right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
+    /* iteration 011 Q2 (Josh: "make most of the hidable texts and expandable windows minimized"): every fold inside every window closed (first-run.js `inner`); a record that loads after (rack-wiring.js `folds`) wins */
+    if(FIRST_RUN.inner===false)for(const b of document.querySelectorAll('.dev .lw-fold[data-fold][aria-expanded="true"]'))b.click();
   }
   initStageText(); LW.stageText = app.state.stageText;   // the gate reads its string, its render count and its announcements
   applySettings();

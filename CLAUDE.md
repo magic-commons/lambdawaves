@@ -288,6 +288,14 @@ hints on, tags and Help off; on a phone or tablet (`lab/first-run.js`, rack.js' 
 and window notes off, AUTO SCALE and governor on stay the blob's. A stored choice wins; an older blob's look (and `lw-window-info`) is
 lifted once by `liftLook`; the phone's frost override stays the app's. Never add a look key to `saveSettings`.
 
+MINIMIZED BY DEFAULT (iteration 011 Q2; Josh: "By default make most of the hidable texts and exandable windows minimized for default
+users"): every first-visit window arrives folded (iteration 001, FOLD_ALL) and every fold INSIDE a window (`lab/fold.js`' presses, keyed by
+`data-fold`; SHADOW's details too) arrives closed on every device (`lab/first-run.js` `inner`, closed by rack.js' first-visit block). The
+open ones are WORKSPACE: a card record's `folds` names them (`lab/shell/rack-wiring.js`, written only when one is open), so a resumed
+session, a project or a ☆ layout that names a fold opens it, and a record without `folds` closes them. What stays open is ruled: SPECTRUM's
+shells n ≤ 6 (n = 7 folded), MOLECULES' top rows, the register ladder, hints on, the formula and atom labels (007 I), the phone's
+TRANSPORT card. The table: `research/iteration-011/Q2-BUILD.md`.
+
 THE START (0.5.0 C6b, `lab/main.js`). THE PHOTOSENSITIVITY LAW is λWAVES', not
 the kit's: a human visitor reads the kit's photosensitivity notice once per
 browser BEFORE anything animates, and NO query string silences it for a human

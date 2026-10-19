@@ -1,0 +1,933 @@
+{
+ "w": 500,
+ "h": 758,
+ "body": [
+  "disconnected",
+  "window-info-off",
+  "no-badges",
+  "no-captions",
+  "phone",
+  "rack-hidden"
+ ],
+ "cards": [
+  {
+   "id": "transport",
+   "rack": "rack",
+   "folded": false
+  },
+  {
+   "id": "informational",
+   "rack": "rack",
+   "folded": true
+  },
+  {
+   "id": "spectrum",
+   "rack": "rack",
+   "folded": true
+  },
+  {
+   "id": "settings",
+   "rack": "rack",
+   "folded": true
+  },
+  {
+   "id": "state",
+   "rack": "rack",
+   "folded": true
+  },
+  {
+   "id": "palette",
+   "rack": "rack",
+   "folded": true
+  },
+  {
+   "id": "observer",
+   "rack": "rack",
+   "folded": true
+  },
+  {
+   "id": "camera",
+   "rack": "rack",
+   "folded": true
+  },
+  {
+   "id": "clip",
+   "rack": "rack",
+   "folded": true
+  }
+ ],
+ "disc": [
+  {
+   "dev": "title",
+   "cls": "menu-open",
+   "fold": null,
+   "label": "λWAVES — the FILE, EDIT, VIEW, WINDOW, GUI and ABO",
+   "open": true,
+   "shown": true
+  },
+  {
+   "dev": "badges",
+   "cls": "badge.exact",
+   "fold": null,
+   "label": "STATE · EVOLUTION · SHADOW",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "badges",
+   "cls": "badge.numerical",
+   "fold": null,
+   "label": "FIELD",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "badges",
+   "cls": "badge.warn",
+   "fold": null,
+   "label": "",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "badges",
+   "cls": "badge.warn",
+   "fold": null,
+   "label": "",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "modpanel",
+   "cls": "m2railhead",
+   "fold": null,
+   "label": "MACROS⠿",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "modpanel",
+   "cls": "m2macadd",
+   "fold": null,
+   "label": "ADD MACRO",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "modpanel",
+   "cls": "m2devadd",
+   "fold": null,
+   "label": "ADD DEVICE",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "modpanel",
+   "cls": "m2fold",
+   "fold": null,
+   "label": "LFOFULL",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "modpanel",
+   "cls": "m2fold",
+   "fold": null,
+   "label": "ENVFULL",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "modpanel",
+   "cls": "m2prenav.m2preopen",
+   "fold": null,
+   "label": "Open the preset list — FACTORY ships with the app,",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "m2-dead-send-warning",
+   "cls": "m2predead.off",
+   "fold": null,
+   "label": "Sends that are dead until their controls come back",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "floats",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "CUSTOM",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "floats",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "—",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "floats",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "QUARTER",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "transport",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "transport",
+   "cls": "tbtn.tempo-expand",
+   "fold": null,
+   "label": "30.0 beats per minute. Drag vertically to change; ",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "transport",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "Repeat mathematics",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "projects",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "informational",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "informational",
+   "cls": "lw-fold",
+   "fold": "announcements, cursor and marks",
+   "label": "Show announcements, cursor and marks",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "SPECTRUM help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "1s + 2p_z  dipole",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "",
+   "fold": null,
+   "label": "DIALS",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "pk-nl",
+   "fold": null,
+   "label": "n1",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "pk-nl",
+   "fold": null,
+   "label": "n2",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "pk-nl",
+   "fold": null,
+   "label": "n3",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "pk-nl",
+   "fold": null,
+   "label": "n4",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "pk-nl",
+   "fold": null,
+   "label": "n5",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "pk-nl",
+   "fold": null,
+   "label": "n6",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "pk-nl",
+   "fold": null,
+   "label": "n7",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "spectrum",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "HYDROGEN",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "chem",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "MOLECULES help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "chem",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "chem",
+   "cls": "",
+   "fold": null,
+   "label": "DIALS",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "chem",
+   "cls": "orb-core-toggle",
+   "fold": null,
+   "label": "CORE",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "chem",
+   "cls": "lw-fold",
+   "fold": "presets, A ↔ B and flow",
+   "label": "Show presets, A ↔ B and flow",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "chem",
+   "cls": "lw-fold",
+   "fold": "presets, A ↔ B, view, flow, drive and song",
+   "label": "Show presets, A ↔ B, view, flow, drive and song",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "chem",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "HYDRIDES",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "chem",
+   "cls": "mol-more-toggle.lw-fold",
+   "fold": null,
+   "label": "Show the kick, run and spectrum controls",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "render",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "render",
+   "cls": "mir-sel-b",
+   "fold": null,
+   "label": "Recording motion",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "render",
+   "cls": "mir-sel-b",
+   "fold": null,
+   "label": "Recording format",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "render",
+   "cls": "mir-sel-b",
+   "fold": null,
+   "label": "Recording resolution",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "render",
+   "cls": "mir-sel-b",
+   "fold": null,
+   "label": "Recording modulation",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "render",
+   "cls": "mir-sel-b",
+   "fold": null,
+   "label": "Recording Timeline automation",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "curves",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "CURVES help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "curves",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "curves",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "LINEAR",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "equalizer",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "EQUALIZER help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "equalizer",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "equalizer",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "FLAT",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "staticfield",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "FIELD help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "staticfield",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "staticfield",
+   "cls": "lw-fold",
+   "fold": "the impulse's knobs",
+   "label": "Show the impulse's knobs",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "shadow",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "SHADOW help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "shadow",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "shadow",
+   "cls": "shadow-details-toggle.lw-fold",
+   "fold": "shadow details",
+   "label": "Show shadow details",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "orbit",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "ORBIT help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "orbit",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "vortex",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "VORTEX help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "vortex",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "slice",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "PLANE help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "slice",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "calculus",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "CALCULUS help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "calculus",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "meters",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "METERS help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "meters",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "ladder",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "LADDER help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "ladder",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "lattice",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "LATTICE help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "lattice",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "lattice",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "CHAIN",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "bloch",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "BLOCH help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "bloch",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "central",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "CENTRAL help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "central",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "central",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "CONFINED",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "separable",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "SEPARABLE help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "separable",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "separable",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "ISOTROPIC",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "atoms",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "ATOMS help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "atoms",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "wigner",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "WIGNER help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "wigner",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "radiation",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "RADIATION help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "radiation",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "history",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "HISTORY help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "history",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": true,
+   "shown": false
+  },
+  {
+   "dev": "settings",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "SETTINGS help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "settings",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "state",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "STATE help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "state",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "palette",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "PALETTE help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "palette",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "palette",
+   "cls": "mir-step-name",
+   "fold": null,
+   "label": "prism",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "observer",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "WAVE help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "observer",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "camera",
+   "cls": "native-info-button",
+   "fold": null,
+   "label": "CAMERA help",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "camera",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "camera",
+   "cls": "lw-fold",
+   "fold": "pan and hand",
+   "label": "Show pan and hand",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "clip",
+   "cls": "dev-fold",
+   "fold": null,
+   "label": "fold or unfold this window",
+   "open": false,
+   "shown": false
+  },
+  {
+   "dev": "menubar",
+   "cls": "mb-btn",
+   "fold": null,
+   "label": "FILE",
+   "open": false,
+   "shown": true
+  },
+  {
+   "dev": "menubar",
+   "cls": "mb-btn",
+   "fold": null,
+   "label": "EDIT",
+   "open": false,
+   "shown": true
+  },
+  {
+   "dev": "menubar",
+   "cls": "mb-btn",
+   "fold": null,
+   "label": "VIEW",
+   "open": false,
+   "shown": true
+  },
+  {
+   "dev": "menubar",
+   "cls": "mb-btn",
+   "fold": null,
+   "label": "WINDOW",
+   "open": false,
+   "shown": true
+  },
+  {
+   "dev": "menubar",
+   "cls": "mb-btn",
+   "fold": null,
+   "label": "GUI",
+   "open": false,
+   "shown": true
+  },
+  {
+   "dev": "menubar",
+   "cls": "mb-btn",
+   "fold": null,
+   "label": "ABOUT",
+   "open": false,
+   "shown": true
+  }
+ ]
+}
