@@ -817,7 +817,7 @@ export function tableFor(s) {
  * not uniform arrays: f32 values with integer offsets, so 64 AOs and 256 shells cost nothing per frame.
  */
 export const MAX_MOL_AO = 128;                                // the widest χ tile: a density (n²) needs one, so this is the density's ceiling
-export const MOL_LIMITS = { shells: 256, prims: 2048, weights: 8192, ao: 768, prim: 32, cols: 192 };   // ao: the ORBITAL's ceiling (ORB_WGSL, no tile; C₆₀ is 300) · prim: the kernel's per-group register array · cols: a FACTOR's K, padded
+export const MOL_LIMITS = { shells: 256, prims: 2048, weights: 8192, ao: 768, prim: 32, cols: 192 };   // ao: the ORBITAL's ceiling (ORB_WGSL, no tile; C₆₀ is 300) · prim: the kernel's per-group register array · cols: a FACTOR's K, padded; the factor buffer is ao × cols (a factor fits when n × K ≤ it, iteration 008 V)
 /* THE AO TIERS.  The χ tile is cap × 64 × 4 bytes of WORKGROUP memory — 4, 10, 16, 32 KiB — so the SMALLEST tier a molecule
    fits sets how many workgroups an SM holds: water, benzene, lysine, then tryptophan (87) to C₂₀H₂₀ (120) in 32 KiB, which
    lab/gpu-boot.js asks for and, where it is not granted, is built with 32 lanes (16 KiB).  An ORBITAL past 64 AOs takes
@@ -1724,7 +1724,9 @@ export async function createField(canvas, opts = {}) {
     }
     if (kind === 'factor') {
       const K = M ? M.K | 0 : 0, Kp = Math.ceil(K / 32) * 32;
-      if (!(K > 0) || Kp > MOL_LIMITS.cols || !M.C || M.C.length !== n * K) throw new Error(`field: a factor needs { C: n·K, K ≤ ${MOL_LIMITS.cols} } at n = ${n}`);
+      /* iteration 008 V: the bound is the matrix buffer's room (n × K padded ≤ ao × cols, 576 KiB), not K alone — the kernel walks K in blocks of 32
+         with no ceiling of its own, so a 334-AO record with 203 occupied columns (VOL. I's colfosceril palmitate, 334 × 224) draws; C₆₀ is 300 × 192 */
+      if (!(K > 0) || n * Kp > MOL_LIMITS.ao * MOL_LIMITS.cols || !M.C || M.C.length !== n * K) throw new Error(`field: a factor needs { C: n·K, n·K padded to 32 ≤ ${MOL_LIMITS.ao * MOL_LIMITS.cols} } at n = ${n}, K = ${K}`);
       const src = new Float32Array(n * Kp);                    // padded to the kernel's block of 32: the extra columns are zero
       for (let i = 0; i < n; i++) for (let k = 0; k < K; k++) src[i * Kp + k] = M.C[i * K + k];
       facReady(); device.queue.writeBuffer(molMatBuf, 0, src);

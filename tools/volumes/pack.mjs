@@ -29,6 +29,7 @@
  *   --archive   per volume, dist/LAMBDAWAVES-VOL-<numeral>.lwv (lab/volumes-format.js THE ARCHIVE) and its .sha256; the shelf entry gains
  *               archive: { name, bytes, sha256 } and drops `index` unless --fetchable (the dev link; a Drive volume has no index)
  *
+ * ONE-ATOM ENTRIES (iteration 008 V): a candidate whose raw meta holds one atom is skipped ("one atom: …"): atoms are the ATOMS road's.
  * PER RUNG — or the rung is REFUSED, never shipped (an AO-order bug must be impossible to ship):
  *   the app's basis: lab/md.js basisFrom on the vendored file (cart); its nAO is the solver's and its hash is the record's ground.hash
  *   the app's overlap S (md.js oneElectron): max|CᵀSC − I| ≤ 1e-8 in f64, BEFORE C is cast to f32; Tr(DS) = N_electrons (≤ 1e-8·N);
@@ -183,6 +184,9 @@ function packMolecule(id, vol = VOL) {
   const dir = path.join(RAW, id), mp = path.join(dir, 'meta.json');
   if (!existsSync(mp)) return { id, skip: 'not solved (no raw/' + id + '/meta.json)' };
   const meta = JSON.parse(readFileSync(mp, 'utf8')), charge = meta.charge || 0;
+  /* iteration 008 V (Josh: "Atoms should not be in the molecules window"): a ONE-ATOM entry (VOL. I's Fe · Kr · Zn · Cr · Ni · Ti, PubChem compounds)
+     is an atom — the ATOMS road's (the Picker's ATOMIC deck, goAtom) — and never ships in a volume; it is skipped with this sentence in the report */
+  if (Array.isArray(meta.atomsBohr) && meta.atomsBohr.length === 1) return { id, skip: 'one atom: an atom is the ATOMS road\'s, not a volume molecule (iteration 008 V)' };
   const rs0 = meta.rungs || {};
   if (!PARTIAL && LADDER.some((b) => !rs0[b] || !rs0[b].status)) return { id, skip: 'its ladder is not finished (' + LADDER.filter((b) => !rs0[b] || !rs0[b].status).join(', ') + ')' };
   const cand = candidateOf(id, meta);

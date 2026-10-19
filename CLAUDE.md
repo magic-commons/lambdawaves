@@ -41,7 +41,7 @@ TWO MODES, ATOMS | MOLECULES (`#lwMode` under the title, windows/molecules.js
 windows — ATOMS: SPECTRUM, STATE, EQUALIZER and the atomic instruments;
 MOLECULES: the one MOLECULES card (hidden, never closed or moved). Its REGISTRY ON switch sits beside the
 ORBITAL | STATES seg (registerview.js). Long windows fold their details behind
-one chevron (`lab/fold.js`, `.lw-fold`): MOLECULES, SHADOW, CAMERA, MO-REGISTRY. MOLECULES' first row is the SECTION header, which is the library's page turner (0.4.0 S4b; 0.5.3 M8, as Josh drew it): the kit's `stepper` in PALETTE's preset look (‹ NAME ›, a whole line; its name opens the kit's list, its hover carries the section's record line, `__LW.chem.section().sub`), then INSTALLED, whose lamp says every record of the section is on this device and whose press installs or removes them all (shown only for a section with records), beside MOLECULES ON; the MOLECULE picker below is a second stepper whose name IS the `<select>` (optgroups, disabled reasons and native keys kept; ‹ › and ← → walk the page's enabled rows as a hand pick) and holds that one section
+one chevron (`lab/fold.js`, `.lw-fold`): MOLECULES, SHADOW, CAMERA, MO-REGISTRY. MOLECULES' first row is the SECTION header, which is the library's page turner (0.4.0 S4b; 0.5.3 M8, as Josh drew it): the kit's `stepper` in PALETTE's preset look (‹ NAME ›, a whole line; its name opens the kit's list, its hover carries the section's record line, `__LW.chem.section().sub`), and since iteration 008 V ‹ SECTION › turns, after the six, every readable volume's pages — one per primary tag (‹ VOL. I · AMIDE ›; a one-atom entry on none; read when the hand nears the pickers, never at boot) — and the MOLECULE stepper's name carries the molecule's picture or, off the device, the kit's download glyph whose press keeps THAT molecule with the kit's ring (`volumes.js` `installMolecule`, `statusOf` partial; a pick opens through `openVolume` without keeping); `volumes.js` `watch` tells the card of the Picker's INSTALL / REMOVE (INSTALLED left the card); the MOLECULE picker below is a second stepper whose name IS the `<select>` (optgroups, disabled reasons and native keys kept; ‹ › and ← → walk the page's enabled rows as a hand pick) and holds that one section
 (DIATOMICS · HYDRIDES · ORGANIC · BIO · LATTICE · HEAVY, `lab/molecules.js`
 SECTIONS), a pick elsewhere turns the page, and the page is never saved. A
 library record ships only through `tools/orbital-library.mjs`'s diversity
@@ -171,7 +171,7 @@ column and `{ $blob }` placeholders · the f64 ε and f32 C blobs; `lab/volumes-
 volume's bytes). `VOLUME_BASE` is `./volumes/` beside `lab/index.html`; in dev `lab/volumes` is a
 git-ignored link to `~/Documents/LAMBDAWAVES-VOLUMES/dist` that no walker follows (pwa, build-deploy,
 release-inputs, field-owner, verb-doc, the DATABASE map). The store is `lab/volumes.js` (`shelf ·
-index · statusOf · install · remove · file · picture` over Cache Storage `lw-vol-<id>`); the
+index · statusOf · install · remove · file · picture · installMolecule · kept · watch` over Cache Storage `lw-vol-<id>`); the
 Picker's LIBRARY installs a volume with one press and its ring; a volume molecule opens through
 chemview's `openVolume(volId, molId, basis)` — each rung is `rungRecord` → the worker's
 `chem.open`, ZERO solver calls, the live roads (KICK · RUN · TDA · VIBRATE · LDA) standing down
