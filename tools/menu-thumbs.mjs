@@ -45,11 +45,13 @@ import { valenceOf } from '../lab/valence.js';
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const ISO = +arg('iso', 0.03), SIZE = +arg('size', 200), Q = +arg('q', 0.64), AQ = +arg('aq', 50), RENDER = +arg('render', 640);
 const EXPOSURE = +arg('exposure', 0.5);                      // the atoms: half the dial's 1, so a shell is a little see-through (Josh 10-18)
+const CUT = (arg('cut', '0,0,1')).split(',').map(Number);   // an s orbital is cut in half through the centre so its shells show (Josh 10-18): the clip plane's normal
 const HUE_BY_L = [0, 0.125, 0.25, 0.375];                    // the atoms: the HSV wheel turned by l — every s at 0°, p 45°, d 90°, f 135° (SIGNED paints ± at hue ± 90°, so quarter turns would pair s with d and p with f)
 /* an atom's one state (n, l, m) in the register at amplitude 1 (reg.set is re, im): m = 0 purely imaginary so the Im view holds R·Y_l0 (real,
    it would draw nothing); m ≠ 0 real, so Im ψ = R·P_lm·sin(mφ) — the real orbital's lobes, not the torus |ψ|² makes */
 const ATOM_LOOK = (n, l, m) => `const i = H.stateOf(${n}, ${l}, ${m}).index; LW.reg.clear(); LW.reg.set(i, ${m === 0 ? '0, 1' : '1, 0'}); LW.setMute(i, false);
-      LW.setView('imag'); LW.setStyle('signed'); LW.mat.iso = ${ISO}; LW.mat.exposure = ${EXPOSURE}; LW.mat.hueShift = ${HUE_BY_L[l]};`;
+      LW.setView('imag'); LW.setStyle('signed'); LW.mat.iso = ${ISO}; LW.mat.exposure = ${EXPOSURE}; LW.mat.hueShift = ${HUE_BY_L[l]};
+      LW.mat.slice = Object.assign(LW.mat.slice || {}, { mode: ${l === 0 ? 1 : 0}, pos: 0 }); ${l === 0 ? `LW.mat.slice.normal = ${JSON.stringify(CUT)};` : 'delete LW.mat.slice.normal;'}`;
 const only = arg('only', '') ? arg('only', '').split(',') : null;
 const VOL = arg('volume', null), VDIR = VOL && (process.env.LW_VOLUMES || homedir() + '/Documents/LAMBDAWAVES-VOLUMES') + '/dist/' + VOL + '/';
 const sets = VOL ? ['volume'] : arg('set', 'molecules,elements,orbitals').split(',');
@@ -166,12 +168,12 @@ if (VOL) {
     if (save(id, r)) made.molecules.push(id);
   }
 }
-await g.ev(`__LW.mat.exposure = 1; __LW.mat.hueShift = 0; __LW.setView('density'); __pose(__home); return true;`);
+await g.ev(`__LW.mat.exposure = 1; __LW.mat.hueShift = 0; if (__LW.mat.slice) { __LW.mat.slice.mode = 0; delete __LW.mat.slice.normal; } __LW.setView('density'); __pose(__home); return true;`);
 
 /* the manifest keeps what this run did not redo (a --set or --only run updates its own rows only) */
 const keepRows = (key, rows, id) => (sets.includes(key) && !only ? rows : [...(prior[key] || []).filter((p) => !rows.some((r) => id(r) === id(p))), ...rows]);
 if (!VOL) writeFileSync(OUT + 'manifest.json', JSON.stringify({ tool: 'tools/menu-thumbs.mjs', size: SIZE, quality: Q, alphaQuality: AQ, render: RENDER,
-  look: { view: 'density', style: 'signed', iso: ISO, palette: 'wheel', frame: false, axis: false, atoms: { view: 'imag', exposure: EXPOSURE, hueByL: HUE_BY_L, phase: 'm = 0 imaginary, else real' }, camera: { molecules: 'home', elements: 'corner (yaw 45°, pitch 35.26°)', orbitals: 'corner (yaw 45°, pitch 35.26°)' }, ground: 'none (two-ground matte)' },
+  look: { view: 'density', style: 'signed', iso: ISO, palette: 'wheel', frame: false, axis: false, atoms: { view: 'imag', exposure: EXPOSURE, hueByL: HUE_BY_L, phase: 'm = 0 imaginary, else real', cut: { l: 0, normal: CUT, pos: 0 } }, camera: { molecules: 'home', elements: 'corner (yaw 45°, pitch 35.26°)', orbitals: 'corner (yaw 45°, pitch 35.26°)' }, ground: 'none (two-ground matte)' },
   molecules: keepRows('molecules', made.molecules, (x) => x), elements: keepRows('elements', made.elements, (x) => x.sym), orbitals: keepRows('orbitals', made.orbitals, (x) => x) }, null, 1) + '\n');
 console.log(`${made.molecules.length} molecules, ${made.elements.length} elements, ${made.orbitals.length} subshells, ${(total / 1024).toFixed(1)} kB`, JSON.stringify((await g.errors()).errs.filter((e) => !/ResizeObserver/.test(e))));
 await g.close(); process.exit(0);

@@ -20,7 +20,16 @@
     0.25,
     0.375
    ],
-   "phase": "m = 0 imaginary, else real"
+   "phase": "m = 0 imaginary, else real",
+   "cut": {
+    "l": 0,
+    "normal": [
+     0,
+     0,
+     1
+    ],
+    "pos": 0
+   }
   },
   "camera": {
    "molecules": "home",
@@ -129,26 +138,6 @@
  ],
  "elements": [
   {
-   "sym": "H",
-   "Z": 1,
-   "orbital": "1s_0"
-  },
-  {
-   "sym": "He",
-   "Z": 2,
-   "orbital": "1s_0"
-  },
-  {
-   "sym": "Li",
-   "Z": 3,
-   "orbital": "2s_0"
-  },
-  {
-   "sym": "Be",
-   "Z": 4,
-   "orbital": "2s_0"
-  },
-  {
    "sym": "B",
    "Z": 5,
    "orbital": "2p_-1"
@@ -179,16 +168,6 @@
    "orbital": "2p_1"
   },
   {
-   "sym": "Na",
-   "Z": 11,
-   "orbital": "3s_0"
-  },
-  {
-   "sym": "Mg",
-   "Z": 12,
-   "orbital": "3s_0"
-  },
-  {
    "sym": "Al",
    "Z": 13,
    "orbital": "3p_-1"
@@ -217,16 +196,6 @@
    "sym": "Ar",
    "Z": 18,
    "orbital": "3p_1"
-  },
-  {
-   "sym": "K",
-   "Z": 19,
-   "orbital": "4s_0"
-  },
-  {
-   "sym": "Ca",
-   "Z": 20,
-   "orbital": "4s_0"
   },
   {
    "sym": "Sc",
@@ -269,11 +238,6 @@
    "orbital": "3d_0"
   },
   {
-   "sym": "Cu",
-   "Z": 29,
-   "orbital": "4s_0"
-  },
-  {
    "sym": "Zn",
    "Z": 30,
    "orbital": "3d_2"
@@ -307,10 +271,54 @@
    "sym": "Kr",
    "Z": 36,
    "orbital": "4p_1"
+  },
+  {
+   "sym": "H",
+   "Z": 1,
+   "orbital": "1s_0"
+  },
+  {
+   "sym": "He",
+   "Z": 2,
+   "orbital": "1s_0"
+  },
+  {
+   "sym": "Li",
+   "Z": 3,
+   "orbital": "2s_0"
+  },
+  {
+   "sym": "Be",
+   "Z": 4,
+   "orbital": "2s_0"
+  },
+  {
+   "sym": "Na",
+   "Z": 11,
+   "orbital": "3s_0"
+  },
+  {
+   "sym": "Mg",
+   "Z": 12,
+   "orbital": "3s_0"
+  },
+  {
+   "sym": "K",
+   "Z": 19,
+   "orbital": "4s_0"
+  },
+  {
+   "sym": "Ca",
+   "Z": 20,
+   "orbital": "4s_0"
+  },
+  {
+   "sym": "Cu",
+   "Z": 29,
+   "orbital": "4s_0"
   }
  ],
  "orbitals": [
-  "5s_0",
   "4d_-2",
   "4d_-1",
   "4d_0",
@@ -319,7 +327,6 @@
   "5p_-1",
   "5p_0",
   "5p_1",
-  "6s_0",
   "4f_-3",
   "4f_-2",
   "4f_-1",
@@ -346,6 +353,8 @@
   "6d_-1",
   "6d_0",
   "6d_1",
-  "6d_2"
+  "6d_2",
+  "5s_0",
+  "6s_0"
  ]
 }
