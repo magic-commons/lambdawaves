@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>λWAVES Architecture 009</title>
+<meta name="description" content="Architecture review of λWAVES iteration 009 (033424d..e64b372): five deepening candidates in the seams D, F2, MV, DEMOS and N7 touched." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<style>
+  :root {
+    --bg: #f7f5f1; --surface: #ffffff; --surface-2: #f1eee8; --ink: #1c2230; --ink-2: #5a6372; --ink-3: #8a92a0;
+    --line: #dcd7cd; --seam: #9aa3b0; --accent: #0f7a5a; --accent-bg: #dcf2e9; --warn: #9a5b00; --warn-bg: #fbedd3;
+    --leak: #c42b2b; --leak-bg: #fbe3e1; --slate-bg: #e9ecf1; --slate-ink: #3f4a5a; --deep: #172033; --deep-2: #24304a; --deep-ink: #eef2f8; --deep-dim: #9fb0cc;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151b; --surface: #1a1f28; --surface-2: #212734; --ink: #e7eaf0; --ink-2: #a9b1be; --ink-3: #7b8494;
+      --line: #313a49; --seam: #6d7889; --accent: #4fd1a5; --accent-bg: #133a2f; --warn: #f0b75a; --warn-bg: #3a2c12;
+      --leak: #ff7b72; --leak-bg: #3d1c1c; --slate-bg: #262d3a; --slate-ink: #c3cbd8; --deep: #0b0f17; --deep-2: #1c2638; --deep-ink: #eef2f8; --deep-dim: #8e9fbd;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151b; --surface: #1a1f28; --surface-2: #212734; --ink: #e7eaf0; --ink-2: #a9b1be; --ink-3: #7b8494;
+    --line: #313a49; --seam: #6d7889; --accent: #4fd1a5; --accent-bg: #133a2f; --warn: #f0b75a; --warn-bg: #3a2c12;
+    --leak: #ff7b72; --leak-bg: #3d1c1c; --slate-bg: #262d3a; --slate-ink: #c3cbd8; --deep: #0b0f17; --deep-2: #1c2638; --deep-ink: #eef2f8; --deep-dim: #8e9fbd;
+    color-scheme: dark;
+  }
+  html, body { background: var(--bg); color: var(--ink); }
+  body { font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.55; overflow-x: hidden; }
+  h1, h2, h3 { font-family: "Source Serif 4", Georgia, serif; font-weight: 600; letter-spacing: -0.01em; }
+  code, .mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .86em; }
+  code { background: var(--surface-2); padding: 0 .3em; border-radius: 4px; overflow-wrap: anywhere; }
+  a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+  .wrap { max-width: 64rem; margin: 0 auto; padding: 40px 16px 64px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  @media (min-width: 640px) { .card { padding: 26px; } }
+  .muted { color: var(--ink-2); }
+  .faint { color: var(--ink-3); }
+  .lbl { font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .b-strong { background: var(--accent-bg); color: var(--accent); }
+  .b-explore { background: var(--warn-bg); color: var(--warn); }
+  .b-spec, .b-tag { background: var(--slate-bg); color: var(--slate-ink); font-weight: 500; }
+  .files { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--ink-2); overflow-wrap: anywhere; }
+  .grid2 { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 820px) { .grid2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  .diag { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--surface); min-height: 240px; min-width: 0; }
+  .mod { border: 1.5px solid var(--seam); border-radius: 7px; background: var(--surface); padding: 6px 8px; font-size: 12px; min-width: 0; overflow-wrap: anywhere; }
+  .mod .lbl { color: var(--ink-2); }
+  .leaky { border-color: var(--leak); background: var(--leak-bg); }
+  .leaktxt { color: var(--leak); }
+  .deep { background: linear-gradient(135deg, var(--deep), var(--deep-2)); color: var(--deep-ink); border-radius: 10px; padding: 12px 14px; font-size: 12.5px; }
+  .deep .lbl { color: var(--deep-dim); }
+  .deep .dim { color: var(--deep-dim); }
+  .seamline { border-top: 2px dashed var(--seam); margin: 12px 0; }
+  .chip { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 11px; padding: 1px 6px; border-radius: 5px; border: 1px solid var(--line); background: var(--surface-2); margin: 2px; }
+  .chip.bad { border-color: var(--leak); color: var(--leak); background: var(--leak-bg); }
+  .band { border-left: 4px solid var(--seam); background: var(--surface-2); padding: 6px 10px; margin: 6px 0; font-size: 12.5px; border-radius: 0 6px 6px 0; }
+  .band.thick { border-left-color: var(--accent); padding: 14px 10px; }
+  .band.dup { border-left-color: var(--leak); }
+  .law { background: var(--warn-bg); color: var(--ink); border-radius: 8px; padding: 9px 12px; font-size: 13px; }
+  .law b { color: var(--warn); }
+  ul.wins { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  ul.wins li { font-size: 12.5px; background: var(--accent-bg); color: var(--accent); padding: 3px 9px; border-radius: 6px; }
+  .q { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; font-size: 13.5px; }
+  .q p { margin: 6px 0; }
+  .q .rec { color: var(--accent); font-weight: 500; }
+  .scan { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .scan > div { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+  @media (min-width: 700px) { .scan > div { grid-template-columns: 15rem minmax(0, 1fr); gap: 14px; } }
+  .ok { color: var(--accent); font-weight: 600; } .no { color: var(--leak); font-weight: 600; } .mid { color: var(--warn); font-weight: 600; }
+  pre.mermaid { background: transparent; margin: 0; overflow-x: auto; max-width: 100%; font-size: 12px; color: var(--ink); }
+  pre.mermaid svg { max-width: 100%; height: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; font-size: 12px; color: var(--ink-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw-mod { width: 20px; height: 12px; border: 1.5px solid var(--seam); border-radius: 3px; background: var(--surface); }
+  .sw-deep { width: 20px; height: 12px; border-radius: 3px; background: linear-gradient(135deg, var(--deep), var(--deep-2)); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .stack > * + * { margin-top: 14px; }
+  .top { border: 2px solid var(--accent); }
+</style>
+</head>
+<body>
+<main class="wrap stack">
+
+<header class="stack">
+  <h1 class="text-3xl sm:text-4xl">Architecture review · λWAVES · iteration 009</h1>
+  <p class="muted text-sm"><code>033424d..e64b372</code> · 17 commits · rows D · F2 · MV · DEMOS · N7 · 2026-10-19 · Opus reviewer (X5), read-only at <code>43d1e44</code> · rack-deps <b>HOLDS</b> (spectrum 25/25, persist 24, notebook 23, molecules 15, modulation 12) · no LOCK or browser run</p>
+  <div class="legend">
+    <span><i class="sw-mod"></i>module</span>
+    <span><svg width="28" height="6" aria-hidden="true"><line x1="0" y1="3" x2="28" y2="3" stroke="var(--seam)" stroke-width="2" stroke-dasharray="4 4"/></svg>seam</span>
+    <span><svg width="28" height="8" aria-hidden="true"><line x1="0" y1="4" x2="22" y2="4" stroke="var(--leak)" stroke-width="2"/><polygon points="22,0 28,4 22,8" fill="var(--leak)"/></svg>leakage</span>
+    <span><i class="sw-deep"></i>deep module</span>
+    <span class="faint">Ranked: deepening that deletes above deepening that adds. Each card carries the deletion pass's kind and size.</span>
+  </div>
+</header>
+
+<section class="card stack" aria-labelledby="scan">
+  <h2 id="scan" class="text-2xl">Yan's scan (iteration 008), after 009</h2>
+  <div class="scan">
+    <div><span>C1 · one ladder law</span><span><span class="ok">Resolved</span> by 008 F + 009 F2: counted <code>onEnd</code>, one fill glyph, <code>levelLine</code> in <code>paint-stroke.js</code>. Residual: SPECTRUM's <code>pointerenter</code> resync (<code>spectrum.js:63</code>)</span></div>
+    <div><span>C2 · one A ↔ B morph</span><span><span class="ok">Resolved</span> by F (<code>register-morph.js</code>); F2 put the dim class in it. Residual: the panes' modulator roads still differ → <a href="#c5">C5</a></span></div>
+    <div><span>C3 · the register owns ON</span><span><span class="ok">Resolved</span> by F</span></div>
+    <div><span>C4 · the valence subshell</span><span><span class="mid">Open, Josh's call</span>; 009 did not touch it</span></div>
+    <div><span>C5 · one section install</span><span><span class="ok">Resolved</span> by F (<code>library.js keepSection</code>)</span></div>
+    <div><span>C6 · MARKS into the record</span><span><span class="ok">Resolved</span> by F</span></div>
+    <div><span>C7 · target declared by its window</span><span><span class="mid">Not taken</span>; 009 added no target</span></div>
+    <div><span>C8 · MOLECULES' rows as a list</span><span><span class="mid">Not taken</span>; 009 did not touch <code>chemview.js</code></span></div>
+  </div>
+  <p class="muted text-sm">The 008 seams held. 009's friction is the register's width that A7 opened and N7 carried through the app, and the two rows that met it in parallel.</p>
+</section>
+
+<section id="candidates" class="stack">
+
+<!-- ───────── C1 ───────── -->
+<article id="c1" class="card stack">
+  <h2 class="text-2xl">C1 · One width law</h2>
+  <div class="row"><span class="badge b-strong">Strong</span><span class="badge b-tag">in-process</span><span class="badge b-tag">DEEPENING · M</span><span class="badge b-tag">getter fix · S</span></div>
+  <div class="files">lab/hydrogen.js (N6 :27) · lab/shell/persist.js (21-25, 66, 255, 294) · lab/windows/state.js (46, 49) · lab/equalizer.js (63) · lab/statelink.js (379, 386)</div>
+  <div class="grid2">
+    <div class="diag">
+      <div class="lbl mb-2">Before · one law, six idioms</div>
+      <pre class="mermaid">
+flowchart LR
+  L(["n ≤ 6 file's bytes never move"])
+  P1["persist :66 · narrow rates"]
+  P2["persist :255 · pad rates"]
+  S["persist :21-25 · shellSeat (DEMOS)"]
+  W["state.js :46/:49 · stores"]
+  E["equalizer :63 · gains[6] (N7)"]
+  K["statelink :379/:386 · link rates"]
+  N(["NaN base"])
+  L --- P1 & P2 & S & W & E & K
+  S -. "get v reads R[91]: undefined" .-> N
+  classDef leak stroke:#c42b2b,stroke-width:2px;
+  class S,N,E leak
+      </pre>
+    </div>
+    <div class="diag">
+      <div class="lbl mb-2">After · the width lives with N6</div>
+      <div class="deep stack">
+        <div class="lbl">hydrogen.js · the register's width</div>
+        <div>N6 · NMAX · <b>narrow</b>(arr, id, short = N6) · <b>widen</b>(arr, id, full = N)</div>
+        <div class="dim">one sentence of law, one place to test</div>
+      </div>
+      <div class="seamline"></div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div class="mod"><div class="lbl">persist</div>write · read</div>
+        <div class="mod"><div class="lbl">shellSeat</div>get = widen's id</div>
+        <div class="mod"><div class="lbl">state.js</div>A / B stores</div>
+        <div class="mod"><div class="lbl">equalizer</div>6 of 7 shells</div>
+        <div class="mod"><div class="lbl">statelink</div>rates arrays only</div>
+      </div>
+    </div>
+  </div>
+  <p><b>Problem.</b> A7's width law is six hand-written idioms in four modules. 009's parallel rows added two, and the seat's getter now disagrees with its setter: a NaN reaches <code>R.setBase</code> on an undo through a routed <code>shell.rate.n7</code> at output 1. This is reasoned from the code and was not reproduced.</p>
+  <p><b>Solution.</b> <code>hydrogen.js</code> owns the law as one <code>narrow</code> / <code>widen</code> pair. Every record site and the seat call it.</p>
+  <ul class="wins"><li>Delete six width idioms</li><li>Delete nine literal 91s</li><li>Getter and setter agree</li><li>project-formats.test reaches it</li><li>locality: one law, one place</li></ul>
+  <div class="law"><b>Inside the laws:</b> the bytes are identical by construction (serialize-bytes on both trees, new-project --check). statelink's binary REGISTER section (REG7) is untouched. persist stays at 24 crossings. No slot, id or pixel moves.</div>
+  <div class="q">
+    <p><b>Q1</b> Do the shells (6 of 7) and the labels (91 of 140) share one module? <span class="rec">Yes: one function, the width as its argument.</span></p>
+    <p><b>Q2</b> Should a narrow record's seat widen on a write other than 1, or refuse it? <span class="rec">Widen, as today; the undo row must hold it.</span></p>
+    <p><b>Q3</b> Should statelink's sparse and dense sections join? <span class="rec">No: they are a byte format. Only the arrays join.</span></p>
+  </div>
+</article>
+
+<!-- ───────── C2 ───────── -->
+<article id="c2" class="card stack">
+  <h2 class="text-2xl">C2 · The register's size is spoken once</h2>
+  <div class="row"><span class="badge b-strong">Strong</span><span class="badge b-tag">in-process</span><span class="badge b-tag">DELETION · S (letters)</span><span class="badge b-tag">MOVE · S (count, words)</span></div>
+  <div class="files">lab/names.js (430-432) · lab/hydrogen.js (25) · lab/equalizer.js (14, 63, 69, 73) · lab/field.js (176-184, 1223, 1240) · lab/skin.css (633-636) · lab/windows/spectrum.js (48, 78, 150, 213, 287, 298, 322, 324) · lab/rack.js (881) · lab/radiation.js (61) · lab/central.js (51) · lab/hamiltonian.js (49, 66) · lab/windows/kepler.js (54, 261) · lab/badges.js (77) · lab/eq-audio.js (13-14)</div>
+  <div class="grid2">
+    <div class="diag">
+      <div class="lbl mb-2">Before · what N7 edited by hand to say "seven"</div>
+      <div class="mod mb-2"><div class="lbl">names.js</div>L = 'spdfghik' (private) · atomForms</div>
+      <div class="mb-2">
+        <span class="chip">central :51</span><span class="chip">hamiltonian :49</span><span class="chip">hamiltonian :66</span><span class="chip">spectrum-card :287</span><span class="chip">:298</span><span class="chip">:322</span><span class="chip">rack :881</span><span class="chip bad">radiation :61 → 7undefined0</span><span class="chip">atoms :106</span><span class="chip">atomsview :25</span>
+      </div>
+      <div class="mod mb-2"><div class="lbl">hydrogen.js</div>NMAX = 7</div>
+      <div>
+        <span class="chip bad">EQ_SHELLS = 7</span><span class="chip">WGSL 25 · 7 · 6u · 7u · 7u</span><span class="chip">EQ_F 104 · 100/101/102</span><span class="chip">CSS 152 ×3</span><span class="chip">"140" ×5</span><span class="chip">"a/7" ×2</span><span class="chip">"n 5–7" ×2</span>
+      </div>
+    </div>
+    <div class="diag">
+      <div class="lbl mb-2">After · the owners say it, the copies import</div>
+      <div class="deep stack">
+        <div class="lbl">names.js</div>
+        <div>L_LETTERS · atomForms <span class="dim">→ 12 sites import</span></div>
+      </div>
+      <div class="deep stack mt-3">
+        <div class="lbl">hydrogen.js</div>
+        <div>NMAX · N6 · BASIS.length <span class="dim">→ equalizer, EQ_WGSL, EQ_F layout, --eq-size, the readout words</span></div>
+      </div>
+      <p class="faint text-xs mt-3">EQ_WGSL is derived and THE LOCK never runs the equalizer, so a template yielding the same string moves no locked byte.</p>
+    </div>
+  </div>
+  <p><b>Problem.</b> The register's size already has owners, yet N7 hand-edited about 25 places to carry n = 7, and one copy was a live bug.</p>
+  <p><b>Solution.</b> The copies import what <code>names.js</code> and <code>hydrogen.js</code> know. The equalizer, its kernel and its uniform layout derive from <code>NMAX</code>.</p>
+  <ul class="wins"><li>Delete 12 letter tables</li><li>EQ_SHELLS stops aliasing NMAX</li><li>Delete a never-reached gate</li><li>leverage: one constant, ~25 sites</li><li>X2 starts from one road</li></ul>
+  <div class="law"><b>Inside the laws:</b> assert EQ_WGSL's string equality once. field.js moves, so run THE LOCK ×2 per the recipe (expect 843/0, 987/0). The GAS seg's id <code>reg</code> stays. rack-deps is unchanged; SPECTRUM stays 25/25.</div>
+  <div class="q">
+    <p><b>Q1</b> Computed words or literal ones? <span class="rec">Computed: the reader sees the same text, and the next edit happens once.</span></p>
+    <p><b>Q2</b> Template the WGSL, or leave it literal? <span class="rec">Template it, with a string-equality check. Literal offsets keep the trap for the next width.</span></p>
+    <p><b>Q3</b> Is this X2? <span class="rec">It overlaps: X2 lands after it, or takes it as its first commit.</span></p>
+  </div>
+</article>
+
+<!-- ───────── C3 ───────── -->
+<article id="c3" class="card stack">
+  <h2 class="text-2xl">C3 · The atom's exchange: one factor, two adapters</h2>
+  <div class="row"><span class="badge b-explore">Worth exploring</span><span class="badge b-tag">in-process</span><span class="badge b-tag">DELETION · S (loop)</span><span class="badge b-tag">MOVE · S (words)</span></div>
+  <div class="files">lab/atoms.js (163-168, 378-390, 418-441) · lab/status.js (26-29) · lab/atomsview.js (70, 76, 115, 161)</div>
+  <div class="grid2">
+    <div class="diag">
+      <div class="lbl mb-2">Before · the choice at every loop</div>
+      <div class="band">if (!o.zora) loop V_x</div>
+      <div class="band dup">else loop V_x · mvR(β) <span class="leaktxt">the same line</span></div>
+      <div class="band dup">if (o.zora) loop t · mvPhi(β) <span class="leaktxt">a third loop</span></div>
+      <div class="seamline"></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="mod leaky"><div class="lbl">status.js</div>"ZORA · MV" typed</div>
+        <div class="mod leaky"><div class="lbl">atomsview.js</div>"ZORA · MV" ×4 typed</div>
+      </div>
+    </div>
+    <div class="diag">
+      <div class="lbl mb-2">After · chosen once per solve</div>
+      <div class="band thick">X = o.zora ? <b>MV</b> : <b>PLAIN</b> &nbsp;·&nbsp; loop V_x · X.R(β) &nbsp;·&nbsp; loop E_x · X.Φ(β)</div>
+      <p class="faint text-xs">PLAIN.R = 1: <code>k13·c3·1 = k13·c3</code> exactly, so the NR road stays byte-identical</p>
+      <div class="deep mt-2"><div class="lbl">atoms.js</div>RELATIVITY · RELATIVITY_SHORT · modelName <span class="dim">→ status.js, atomsview.js</span></div>
+    </div>
+  </div>
+  <p><b>Problem.</b> Two loops differ by one factor, a third applies Φ, and the model's name is retyped beside <code>modelName</code>. MV edited seven strings in three files.</p>
+  <p><b>Solution.</b> An exchange factor <code>{ R, Φ }</code> with two shipped adapters (PLAIN for the oracles and RELATIVITY Δ, and MV), and one exported short name.</p>
+  <ul class="wins"><li>Two adapters: a real seam</li><li>Delete one loop and its branch</li><li>The model's name: one edit</li><li>atoms.test unchanged</li></ul>
+  <div class="law"><b>Inside the laws:</b> re-run MV's NR sha check over Z = 1…118 (it lives in <code>.tmp/</code>). Atoms are not in THE LOCK. STATUS keeps its 110-character budget.</div>
+  <div class="q">
+    <p><b>Q1</b> A seam or a branch? <span class="rec">A seam: both adapters ship.</span></p>
+    <p><b>Q2</b> Do it before spin–orbit? <span class="rec">Only the loop deletion. Spin–orbit is kinetic and labels, not exchange; the factor object waits for a functional that asks for it.</span></p>
+    <p><b>Q3</b> Should STATUS read the full <code>modelName()</code>? <span class="rec">No: within 110 characters, read the short form.</span></p>
+  </div>
+</article>
+
+<!-- ───────── C4 ───────── -->
+<article id="c4" class="card stack">
+  <h2 class="text-2xl">C4 · The starters road reads STARTERS</h2>
+  <div class="row"><span class="badge b-explore">Worth exploring</span><span class="badge b-tag">local-substitutable</span><span class="badge b-tag">DELETION · S</span><span class="badge b-tag">MOVE · S</span></div>
+  <div class="files">lab/project-store.js (STARTERS :157-163) · lab/projects.js (318-348) · tools/serialize-bytes.mjs (19) · tools/settings-probe.mjs (23) · tools/camera-routes.mjs (20) · tools/catalogue-table.mjs (58) · docs/FOR-MIR.md</div>
+  <div class="grid2">
+    <div class="diag">
+      <div class="lbl mb-2">Before</div>
+      <pre class="mermaid">
+flowchart TB
+  ST["project-store · STARTERS"]
+  T1["serialize-bytes · own list"]
+  T2["settings-probe · own list"]
+  T3["camera-routes · own list"]
+  CT["catalogue-table · own demos table"]
+  SD["seed() · rename unless startsWith"]
+  AD["adoption road · dead path"]
+  KIT["MIR seed.js · refresh keeps name"]
+  ST -.-> SD
+  KIT -. "app patches it" .-> SD
+  SD --- AD
+  classDef leak stroke:#c42b2b,stroke-width:2px;
+  class T1,T2,T3,CT,AD leak
+      </pre>
+    </div>
+    <div class="diag">
+      <div class="lbl mb-2">After</div>
+      <div class="deep"><div class="lbl">project-store.js</div>STARTERS <span class="dim">→ seed(), the three probes, catalogue-table (names)</span></div>
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <div class="mod"><div class="lbl">probes</div>STARTERS + retired fixtures (molecules again)</div>
+        <div class="mod"><div class="lbl">seed()</div>rename iff the name differs and is free</div>
+      </div>
+      <div class="seamline"></div>
+      <div class="mod"><div class="lbl">MIR folders/seed.js</div>refresh carries the starter's name (a FOR-MIR line)</div>
+    </div>
+  </div>
+  <p><b>Problem.</b> The demo list is retyped in four tools and the probes lost their molecule projects. A prefix heuristic would block the likely next rename (PROTOTYPE → WAVE DANCER), and the adoption road is dead.</p>
+  <p><b>Solution.</b> Every reader imports <code>STARTERS</code>, and the probes add the retired fixtures. The rename takes the literal condition until the kit carries it.</p>
+  <ul class="wins"><li>New demos: zero tool edits</li><li>Byte probes read a molecule</li><li>Delete the dead adoption road</li><li>The heuristic becomes the literal condition</li></ul>
+  <div class="law"><b>Inside the laws:</b> <code>lab/mir/**</code> is not edited (a FOR-MIR line). The seedId and file id stay. Tools only, no gate added. molecule-demos (re-aimed) covers the rename.</div>
+  <div class="q">
+    <p><b>Q1</b> Should catalogue-table read STARTERS? <span class="rec">For the names; it keeps its own physics tag per file.</span></p>
+    <p><b>Q2</b> Is the rename the app's or the kit's? <span class="rec">The kit's. File it, and keep the app loop until MIR ships it.</span></p>
+    <p><b>Q3</b> Delete the adoption road now? <span class="rec">Yes: its one remaining case silently drops the starter.</span></p>
+  </div>
+</article>
+
+<!-- ───────── C5 ───────── -->
+<article id="c5" class="card stack">
+  <h2 class="text-2xl">C5 · The morph owns its ON and its modulator road</h2>
+  <div class="row"><span class="badge b-explore">Worth exploring</span><span class="badge b-tag">in-process</span><span class="badge b-tag">DELETION · S</span><span class="badge b-tag">one question for Josh</span></div>
+  <div class="files">lab/register-morph.js (36-51) · lab/orbitalsview.js (114-116, 636) · lab/statesview.js (95-98, 177, 793)</div>
+  <div class="grid2">
+    <div class="diag">
+      <div class="lbl mb-2">Before · ON painted three times, two modulator roads</div>
+      <div class="mod mb-2"><div class="lbl">register-morph.js</div>
+        <div>set: on · switch · class</div><div>reset: on · switch · class</div><div class="leaktxt">load: on · switch · class (F2 added the missing one)</div></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="mod"><div class="lbl">orbitalsview :636</div>repaint iff MORPH plays</div>
+        <div class="mod leaky"><div class="lbl">statesview :793</div>touch() always → drive.dirty</div>
+      </div>
+    </div>
+    <div class="diag">
+      <div class="lbl mb-2">After</div>
+      <div class="deep stack">
+        <div class="lbl">register-morph.js · A ↔ B</div>
+        <div>show(v): on · switch · .reg-morphing <span class="dim">(internal, once)</span></div>
+        <div>setValue(v): moved and on → changed()</div>
+      </div>
+      <div class="seamline"></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="mod faint"><div class="lbl">orbitals</div>setMorphValue = M.setValue</div>
+        <div class="mod faint"><div class="lbl">states</div>setMorphValue = M.setValue</div>
+      </div>
+    </div>
+  </div>
+  <p><b>Problem.</b> <code>on</code> is painted in three hand-written places (the shape of F2's bug), and the panes still differ on a modulator's write (Yan's C2 Q2).</p>
+  <p><b>Solution.</b> The module paints <code>on</code> once and owns what a modulator's write means: <code>changed()</code> only while MORPH plays.</p>
+  <ul class="wins"><li>The class follows on by construction</li><li>One modulator road</li><li>Delete two pane bodies</li><li>locality: MORPH's law in one file</li></ul>
+  <div class="law"><b>Behaviour question:</b> today an LFO on STATES' A ↔ B restarts a running drive while MORPH is off (<code>statesview.js:177</code>). Recommended: it should not. This is Josh's call. Ids <code>reg.morph</code> and <code>reg.omorph</code> stay (ADR-0002).</div>
+  <div class="q">
+    <p><b>Q1</b> Should a modulator's write touch STATES while MORPH is off? <span class="rec">No (Josh decides).</span></p>
+    <p><b>Q2</b> Does <code>show(v)</code> join the interface? <span class="rec">No, it is internal.</span></p>
+    <p><b>Q3</b> Which tests survive? <span class="rec">register 22/22, orbitals 24/24, F2's probe: all through the panes.</span></p>
+  </div>
+</article>
+
+</section>
+
+<section class="card stack" aria-labelledby="noted">
+  <h2 id="noted" class="text-xl">Noted, not carded</h2>
+  <ul class="list-disc pl-5 text-sm muted space-y-1">
+    <li><b>N7's anchor-only draw.</b> <code>rack.js modesAt</code> / <code>renderSet()</code> draws the anchor's labels while THE SCALE spreads c(t) across each block. The propagator should say its own support. This is already iteration 010's X1.</li>
+    <li><b><code>orbitals.state().cursor</code>.</b> CLAUDE.md names it, but no committed test reads it, and its <code>lit</code> is derivable.</li>
+    <li><b><code>levelLine(on, off)</code>.</b> Null-for-off serves one caller's difference; <code>(rgb, lit)</code> gives the same pixels. Speculative.</li>
+    <li><b>SPECTRUM at 25/25.</b> N7 edited it in eleven places without a new crossing. The next feature must shed one first.</li>
+    <li><b>Inherited files past 1k.</b> chemview.js first, rack.js's boot one-liners second, and from field.js only the equalizer pipeline.</li>
+  </ul>
+</section>
+
+<section id="top-recommendation" class="card top stack">
+  <div class="lbl">Top recommendation</div>
+  <h2 class="text-2xl"><a href="#c1">C1 · One width law</a></h2>
+  <p>009's two parallel rows met one law and wrote it two new ways at the merge seam. The pair gives that law a home, and the one-token getter fix closes the NaN path first. It is in-process, behind existing byte gates, and moves no byte, slot or pixel. Then <a href="#c2">C2</a> before X2 builds.</p>
+</section>
+
+</main>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";
+  const css = getComputedStyle(document.documentElement), v = (n) => css.getPropertyValue(n).trim();
+  mermaid.initialize({
+    startOnLoad: true, theme: "base", securityLevel: "strict",
+    flowchart: { htmlLabels: true, curve: "basis" },
+    themeVariables: {
+      background: v("--surface"), primaryColor: v("--surface-2"), primaryTextColor: v("--ink"), primaryBorderColor: v("--seam"),
+      lineColor: v("--seam"), secondaryColor: v("--surface-2"), tertiaryColor: v("--surface"), fontFamily: "Inter, system-ui, sans-serif", fontSize: "12px",
+      edgeLabelBackground: v("--surface"), textColor: v("--ink-2")
+    }
+  });
+</script>
+</body>
+</html>
