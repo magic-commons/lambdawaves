@@ -682,7 +682,7 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 /* the periodic table: 18 columns, 7 periods, a gap row, the two f rows; the picture full, the symbol and Z in its corners */
 #lwMenu .mm-table { --t: min(calc((100vw - 64px) / 18.6), calc((100dvh - 270px) / 10.3)); display: grid; grid-template-columns: repeat(18, var(--t)); grid-template-rows: repeat(7, var(--t)) calc(var(--t) * .35) repeat(2, var(--t)); gap: 2px; }
 #lwMenu .mm-el { border-radius: 6px; } #lwMenu .mm-el .mm-pic { inset: 6%; width: 88%; height: 88%; }
-#lwMenu .mm-sym { position: absolute; left: 7%; bottom: 4%; font-size: calc(var(--t) * .26); font-weight: 600; line-height: 1; text-shadow: 0 0 5px hsl(var(--glass-tint)); }
+#lwMenu .mm-sym { position: absolute; left: 7%; bottom: 4%; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: calc(var(--t) * .3); font-weight: 400; line-height: 1; text-shadow: 0 0 5px hsl(var(--glass-tint)); }
 #lwMenu .mm-z { position: absolute; left: 7%; top: 5%; font-size: calc(var(--t) * .14); font-style: normal; opacity: .6; line-height: 1; }
 #lwMenu .mm-el .mm-under { font-size: 11px; }
 /* the deck: pages sized by picker.js (--t, --cols, --gap), ‹ › beside them (R4), dots or a count under */
@@ -709,6 +709,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-cap-f { font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: clamp(24px, 3.1vw, 36px); font-weight: 400; }
 #lwMenu .mm-cap-n { font-family: 'LW Title', var(--font-ui); font-size: clamp(26px, 3.7vw, 46px); letter-spacing: .04em; line-height: 1.05; }
 #lwMenu .mm-cap-s { flex-basis: 100%; font-style: normal; font-size: clamp(12px, 1.25vw, 16px); letter-spacing: .12em; opacity: .65; }
+#lwMenu .mm-cap-m { font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: clamp(16px, 1.7vw, 22px); letter-spacing: .02em; opacity: .8; }   /* an element's subshell, 3d² */
 /* LIBRARY: the shelf of volumes (the numeral huge in LW Title), the install ring (R7), a volume's tags, its group line, its deck */
 #lwMenu .mm-shelf { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; align-items: stretch; max-width: 1240px; }
 #lwMenu .mm-shelf[hidden], #lwMenu .mm-volview[hidden] { display: none; }

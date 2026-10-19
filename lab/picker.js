@@ -20,6 +20,7 @@ import { keepData } from './library.js';
 const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
   + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
   + 'Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og').split(' ');
+const NAMES = 'Hydrogen Helium Lithium Beryllium Boron Carbon Nitrogen Oxygen Fluorine Neon Sodium Magnesium Aluminium Silicon Phosphorus Sulfur Chlorine Argon Potassium Calcium Scandium Titanium Vanadium Chromium Manganese Iron Cobalt Nickel Copper Zinc Gallium Germanium Arsenic Selenium Bromine Krypton Rubidium Strontium Yttrium Zirconium Niobium Molybdenum Technetium Ruthenium Rhodium Palladium Silver Cadmium Indium Tin Antimony Tellurium Iodine Xenon Caesium Barium Lanthanum Cerium Praseodymium Neodymium Promethium Samarium Europium Gadolinium Terbium Dysprosium Holmium Erbium Thulium Ytterbium Lutetium Hafnium Tantalum Tungsten Rhenium Osmium Iridium Platinum Gold Mercury Thallium Lead Bismuth Polonium Astatine Radon Francium Radium Actinium Thorium Protactinium Uranium Neptunium Plutonium Americium Curium Berkelium Californium Einsteinium Fermium Mendelevium Nobelium Lawrencium Rutherfordium Dubnium Seaborgium Bohrium Hassium Meitnerium Darmastadtium Roentgenium Copernicium Nihonium Flerovium Moscovium Livermorium Tennessine Oganesson'.split(' ');   /* the 118 names (ASE's table), the caption's word for an element */
 const L = 'spdf', CAP = [2, 6, 10, 14], SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
 const sup = (k) => String(k).split('').map((d) => SUP[d]).join('');
 /* the Madelung order (n + l, then n), filled to Z; past Kr the standard ground-state exceptions move k electrons from one subshell to
@@ -69,12 +70,12 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const tabs = el('div', 'mm-tabs', top), pill = el('i', 'mm-pill', tabs), scroller = el('div', 'mm-scroll', root), caption = el('div', 'mm-caption', root);
   caption.setAttribute('aria-live', 'polite');
 
-  /* ── the caption: the formula (STIX), the name (LW Title), the line under them; R6's swap ── */
+  /* ── the caption: the formula (STIX), the name (LW Title), the line under them (an element: its name alone, its valence subshell alone in STIX); R6's swap ── */
   let said = null;
   const say = (t) => {
     const key = t ? [t.formula, t.name, t.sub].join('|') : '';
     if (key === said) return; said = key;
-    swapLine(caption, (line) => { if (!t) return; if (t.formula) el('b', 'mm-cap-f', line, t.formula); if (t.name) el('span', 'mm-cap-n', line, t.name); if (t.sub) el('i', 'mm-cap-s', line, t.sub); });
+    swapLine(caption, (line) => { if (!t) return; if (t.formula) el('b', 'mm-cap-f', line, t.formula); if (t.name) el('span', 'mm-cap-n', line, t.name); if (t.sub) el('i', 'mm-cap-s' + (t.math ? ' mm-cap-m' : ''), line, t.sub); });
   };
   /* ── a tile: the picture moves, the name shows under it; nothing else changes on a hover ── */
   /* a picture of ours (img/menu/, sw.js DATA) is kept on the device once it has loaded (library.js keepData); a volume's is its own */
@@ -82,7 +83,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const tile = (host, cls, info, go, off) => {
     const b = el('button', 'mm-tile ' + cls, host); b.type = 'button';
     if (off) { b.classList.add('off'); b.setAttribute('aria-disabled', 'true'); }
-    b.setAttribute('aria-label', [info.name, info.formula, info.sub].filter(Boolean).join(' — '));
+    b.setAttribute('aria-label', [info.name, info.formula, info.sub, info.note].filter(Boolean).join(' — '));
     el('span', 'mm-under', b, info.under || info.name);
     const hi = () => say(info); b.addEventListener('pointerenter', hi); b.addEventListener('focus', hi);
     b.addEventListener('click', () => { if (!off) go(); });
@@ -164,7 +165,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const table = el('div', 'mm-table', sections[0].sec);
   for (let Z = 1; Z <= 118; Z++) {
     const [r, c] = seatOf(Z), v = valenceOf(Z), a = ATOMS.find((x) => x.Z === Z), live = !!a, sym = SYM[Z - 1];
-    const t = tile(table, 'mm-el', { formula: sym, name: a ? cap(a.name) : '', sub: 'Z ' + Z + ' · ' + v.label + (live ? '' : ' · past krypton: not in the ATOM system yet'), under: a ? cap(a.name) : sym + ' · Z ' + Z }, () => goAtom(Z), !live);
+    const t = tile(table, 'mm-el', { name: NAMES[Z - 1], sub: v.label, math: true, note: live ? '' : 'past krypton: not in the ATOM system yet' }, () => goAtom(Z), !live);
     t.style.gridRow = String(r); t.style.gridColumn = String(c);
     pic(t, './img/menu/' + (live ? 'el-' + sym : 'orb-' + v.nl) + '.webp');
     el('i', 'mm-z', t, String(Z)); el('b', 'mm-sym', t, sym);
