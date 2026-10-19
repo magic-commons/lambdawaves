@@ -27,7 +27,7 @@ export function createRegister(host, api) {
   const modeSeg = seg({ aria: 'Register pane', value: mode, cls: 'reg-mode', options: [{ id: 'orbital', label: 'ORBITAL' }, { id: 'states', label: 'STATES' }],
     onChange: (v) => setMode(v, true) });
   modeSeg.root.title = 'ORBITAL: one electron over the molecule’s orbitals — it has a phase, and beats at orbital gaps. '
-    + 'STATES: the whole molecule over its ground and excited states — it beats where the spectrum’s sticks stand. VIEW REGISTRY draws the pane shown.';
+    + 'STATES: the whole molecule over its ground and excited states — it beats where the spectrum’s sticks stand. VIEW MIX draws the pane shown; the bracket on the ORBITAL ladder is the ORBITAL dial’s orbital.';
   (api.bar || host).appendChild(modeSeg.root);
   const paneO = el('div', 'reg-pane', host), paneS = el('div', 'reg-pane', host); paneS.hidden = true;
 

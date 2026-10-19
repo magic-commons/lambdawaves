@@ -63,7 +63,8 @@ export function createMolecules(app) {
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
     setOn(v) { moleculeMode(v); app.w.stageTextTick(); if (app.hooks.status) app.hooks.status(); }, said: () => app.hooks.status && app.hooks.status(),   // 0.5.4 P4: the STATUS row (informational.js)
-    viewed: (hand) => { if (app.state.register) app.state.register.follow(hand); },   // iteration 008 U: ON, VIEW or a file moved — the register follows the one state
+    viewed: (hand) => { const R = app.state.register; if (!R) return; if (hand && app.state.chem.view === 'orbital') R.setMode('orbital'); R.follow(hand); },   // iteration 008 U: ON, VIEW or a file moved — the register follows the one state; R: a HAND's VIEW ORBITAL shows the ladder its cursor stands on
+    cursor: () => { if (app.state.register) app.state.register.orbitals.paint(); },   // iteration 008 R: the ORBITAL dial's orbital, the VIEW or ON moved — the ladder redraws its cursor
     hand: (id) => headPick(id),                                      // 0.5.1 D2: a HAND pick (the dropdown, ON, a notebook link)
     atomZ: () => HAMILTONIANS.atom.Z, atom(z) { setElement(z); if (getHamiltonian().id !== 'atom') switchHamiltonian('atom'); ui.hamSeg.set('atom'); app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); },   // 0.7.4 C2: ‹ ATOMS ›' tile, SPECTRUM's ATOM road
     /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
@@ -100,9 +101,9 @@ export function createMolecules(app) {
     if (c && sol && c.key === sol.key) wState.setStatus(`ORBITAL ${c.asked} is past ${row ? row.name : 'this molecule'}’s orbitals ${c.lo}–${c.hi}: clamped to ${c.k}`, 'warn'); });
   /* THE REGISTER, INTO the MOLECULES card (iteration 008 U: Josh, "MERGE Molecules with MO-registry"); `say` is lazy, so it need not wait for the stage words */
   const C = app.state.chem;
-  /* THE ONE SWITCH: a pane's public ON (a verb, a stick's press, a file) is MOLECULES ON with VIEW REGISTRY; its OFF is MOLECULES OFF */
+  /* THE ONE SWITCH: a pane's public ON (a verb, a stick's press, a file) is MOLECULES ON with VIEW MIX (id `registry`); its OFF is MOLECULES OFF */
   const one = (v, hand) => { if (!v) { C.setOn(false); return; } if (C.view !== 'registry') C.setView('registry', hand); if (!C.on) C.setOn(true); else app.state.register.follow(hand); };
-  app.state.register = createRegister(C.slots.register, { bar: C.slots.top, one, stroked: () => { C.setView('registry', true); },   // a hand that painted the ladder picked VIEW REGISTRY
+  app.state.register = createRegister(C.slots.register, { bar: C.slots.top, one, stroked: () => { C.setView('registry', true); },   // a hand that painted the ladder picked VIEW MIX
     active: () => canPresent(wChem), modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): the STATES dials' hand law
     stamp: () => { if (app.state.restampParams) requestAnimationFrame(app.state.restampParams); },   // a lane built after boot becomes a drop target for a macro
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,   // the STATES mode asks the chem worker for its canonical ladder and vectors

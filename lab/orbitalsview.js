@@ -54,7 +54,9 @@ export function createOrbitals(host, api) {
   const cv = el('canvas', 'mol-c', host);
   cv.title = 'The molecular orbital ladder: ε_k in hartree, occupied levels filled and virtual ones hollow, degenerate levels side by side. '
     + 'Left-click a level to put it in the register, right-click to take it out; left-drag paints every level you cross in, right-drag paints them out — a stroke down the ladder takes them all, one along a degenerate row takes its levels one by one. The axis is order-exact but not linear: every gap is drawn to scale '
-    + 'up to three times the median gap and compressed beyond it, because H₂O’s O 1s at −20.24 would otherwise put the whole valence inside four pixels.';
+    + 'up to three times the median gap and compressed beyond it, because H₂O’s O 1s at −20.24 would otherwise put the whole valence inside four pixels. '
+    + 'The bracket is the ORBITAL dial’s orbital: the dial counts these same lines, k1 at the bottom up to the last, so it always stands on one (a degenerate row bracketed whole, the line it draws lit) — '
+    + 'turn the dial and VIEW goes to ORBITAL, which draws the bracketed line; paint the ladder and VIEW goes to MIX, which draws the lines lit here.';
 
   /* ── the head: the same four controls SPECTRUM's head carries, in the same order ──────────────── */
   const head = el('div', 'row tight sp-head', host);
@@ -376,8 +378,8 @@ export function createOrbitals(host, api) {
        only the switch stands down (it must let go of the field), and the status says how to bring it back. */
     const standby = !on && (!C() || !C().on);
     status(on ? `REGISTRY · ${sel.size} orbital${sel.size === 1 ? '' : 's'} · ${LAW}`
-      : standby ? `the register stands by · ${sol.nAO} orbitals · MOLECULES ON, then VIEW REGISTRY`
-      : why ? 'REGISTRY off — ' + why : `${sol.nAO} orbitals · gap ${Number.isFinite(gap) ? gap.toFixed(6) : '—'} · VIEW REGISTRY gives the field arg ψ`,
+      : standby ? `the register stands by · ${sol.nAO} orbitals · MOLECULES ON, then VIEW MIX`
+      : why ? 'REGISTRY off — ' + why : `${sol.nAO} orbitals · gap ${Number.isFinite(gap) ? gap.toFixed(6) : '—'} · VIEW MIX gives the field arg ψ`,
       on ? 'live' : standby ? '' : why ? 'warn' : 'ok');
     paintPsi(pushedT);
   }
@@ -451,16 +453,26 @@ export function createOrbitals(host, api) {
     for (let i = 0; i < m - 1; i++) ys.push(ys[i] - (tot > 0 ? w[i] / tot : 1 / Math.max(1, m - 1)) * (bot - top));
     const yOf = (i) => (m === 1 ? (top + bot) / 2 : ys[i]);
     const eH = sol.eps[sol.nocc - 1], eL = sol.eps[sol.nocc];
+    /* iteration 008 R · TWO MARKS ON ONE LADDER (Josh: "it should show on the register each orbital lighting up one of the horizontal lines"):
+       the register's lit levels, and the ORBITAL dial's CURSOR — chem.orbital, 1-based over these same MOs, so it is always a real line.
+       The cursor is a BRACKET round its row in the theme's ink (never an accent: A and B already say occupied and virtual, and an accent
+       cursor would vanish on its own kind of level; no glow), a degenerate row bracketed whole, a folded core's rung when the dial is in it.
+       Under VIEW ORBITAL the cursor leads — its line lit, the bracket full ink, the register's marks stepped back; under every other VIEW
+       (MIX first) the register leads and the bracket steps back.  Never a saved key: it IS chem.orbital */
+    const ch = C(), kc = ch && Number.isFinite(ch.orbital()) ? ch.orbital() - 1 : -1, lead = !!ch && ch.view === 'orbital';
+    const fold = rows[0] && rows[0].core ? rows[0].core : 0;
+    let curRow = -1;
     const names = [];
     for (let i = 0; i < m; i++) {
       const row = rows[i], yy = yOf(i), seg = (right - left) / Math.max(1, row.items.length);
+      if (kc >= 0 && (row.core ? kc < fold : row.items.some((lv) => lv.k === kc))) curRow = i;
       if (row.core) {                                                       // the folded core: one dashed rung, a click opens it
         g.strokeStyle = occInk(0.6); g.lineWidth = 1; g.setLineDash([3, 3]);
         g.beginPath(); g.moveTo(left + 1, yy); g.lineTo(right - 1, yy); g.stroke(); g.setLineDash([]);
         hits.push({ y: yy, x0: left, x1: right, core: true });
         hovers.push({ kind: 'line', key: 'core', points: [left + 1, yy, right - 1, yy], lw: 1, colour: occInk(1),
           info: `core ×${row.core}: the frozen-core levels (k1–k${row.core}, ε ≤ ${row.eps.toFixed(3)} Eh) · click to unfold` });
-        names.push({ y: yy, txt: `core ×${row.core}`, col: occInk(0.8), rank: 1 });
+        names.push({ y: yy, txt: `core ×${row.core}`, col: occInk(0.8), rank: i === curRow ? -1 : 1 });
         continue;
       }
       for (let j = 0; j < row.items.length; j++) {
@@ -468,18 +480,26 @@ export function createOrbitals(host, api) {
         const c = sel.get(lv.k), lit = !!c, ink = lv.occ ? occInk : virInk, dim = !carried(lv.k);
         /* iteration 008 U (Josh: "simple lines that's dark when off and full vivid color when on") · PLAIN LINES: one stroke a level — dark
            when off, the level's full vivid ink when on — and no band, bar, box or glow beside it (the dials carry |c|; occupied A, virtual B) */
-        g.strokeStyle = lit ? ink(1) : ink(dim ? 0.1 : 0.26); g.lineWidth = lit ? 2.5 : 1.5;
+        const cur = lead && lv.k === kc;                                       // VIEW ORBITAL: the dial's line is what the field draws — lit
+        g.strokeStyle = cur ? ink(1) : lit ? ink(lead ? 0.5 : 1) : ink(dim ? 0.1 : 0.26); g.lineWidth = cur || (lit && !lead) ? 2.5 : lit ? 2 : 1.5;
         g.beginPath(); g.moveTo(x0, yy); g.lineTo(x1, yy); g.stroke();
         hits.push({ y: yy, x0, x1, k: lv.k });
         hovers.push({ kind: 'line', key: 'L' + lv.k, points: [x0, yy, x1, yy], lw: lit ? 2 : 1, colour: ink(1),
           info: `${label(lv.k)}  ·  k${lv.k + 1}  ·  ε = ${lv.eps.toFixed(6)} Eh  ·  ${lv.occ ? lv.occ + ' electrons' : 'virtual, 0 electrons'}`
             + (sol.names ? '  ·  ' + about(lv.k) : '')
-            + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : dim ? '  ·  not carried by this record' : '  ·  click to add') });
+            + (lit ? `  ·  in the register: |c| ${c.amp.toFixed(3)}, arg c ${(c.phase * 180 / Math.PI).toFixed(0)}°` : dim ? '  ·  not carried by this record' : '  ·  click to add')
+            + (lv.k === kc ? '  ·  the ORBITAL dial’s orbital' + (lead ? ' — VIEW ORBITAL draws it' : ' — turn the dial for VIEW ORBITAL') : '') });
       }
       /* the gutter: the level's plain name (no component tag: a row IS the level), with HOMO / LUMO beside it */
       const mo0 = moOf(row.items[0].k), fr = frontierOf(row.items[0].k), edge = fr === 'HOMO' || fr === 'LUMO';
       const nm = mo0 && mo0.label ? forms(mo0.label).plain + (edge ? ' ' + fr : '') : edge ? fr : 'k' + (row.items[0].k + 1);
-      names.push({ y: yy, txt: nm, col: row.items[0].occ ? occInk(fr === 'HOMO' ? 1 : 0.8) : virInk(fr === 'LUMO' ? 1 : 0.75), rank: edge ? 0 : 1 });
+      names.push({ y: yy, txt: nm, col: row.items[0].occ ? occInk(fr === 'HOMO' ? 1 : 0.8) : virInk(fr === 'LUMO' ? 1 : 0.75), rank: i === curRow ? -1 : edge ? 0 : 1 });
+    }
+    if (curRow >= 0) {                                                         // the cursor's bracket: [ at the row's start, ] at its end
+      const y = yOf(curRow), h = 5, a = left - 1, b = right + 1;
+      g.strokeStyle = T.ink(lead ? 0.95 : 0.4); g.lineWidth = lead ? 1.5 : 1;
+      g.beginPath(); g.moveTo(a + 3, y - h); g.lineTo(a, y - h); g.lineTo(a, y + h); g.lineTo(a + 3, y + h);
+      g.moveTo(b - 3, y - h); g.lineTo(b, y - h); g.lineTo(b, y + h); g.lineTo(b - 3, y + h); g.stroke();
     }
     /* the 50 px gutter, one name a row and NOTHING NUDGED: a name away from its own level would lie (spectrum's law) */
     const used = [];
@@ -525,7 +545,7 @@ export function createOrbitals(host, api) {
       return ks.length ? paintLevels(ks, add) : 0;
     },
     /* iteration 008 U · THE STROKE'S END (still inside its pointerup, so the same undo row): the sum of |c|^2 goes to 1, and a hand that
-       painted the ladder picked the register — VIEW REGISTRY (api.stroked).  A modulator's write never comes here */
+       painted the ladder picked the register — VIEW MIX (api.stroked).  A modulator's write never comes here */
     onEnd: () => { norm(); if (api.stroked) api.stroked('orbital'); } });
   window.addEventListener('resize', () => paint());
 
