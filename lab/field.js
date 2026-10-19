@@ -17,8 +17,14 @@ import { qmul, qnormalize, adjoint, expPure } from './rotor4.js';
 import { gpuBoot, requestGpu } from './gpu-boot.js';
 import { evaluator, shellsFromField } from './molecular-field.js';
 
-export const VIEW = { density: 0, phase: 1, real: 2, imag: 3, diff: 4, reim: 5 };
-export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff', 'reim'];
+/* iteration 008 W: WAVE's OBSERVABLE is DENSITY · PHASE · RE · IM (WAVE_VIEWS).  Re+Im (index 5, two pictures in one volume) left the
+   shader; its index stays retired, never reused, and a saved one opens as PHASE.  Δρ (4) stays in the shader (the reference volume
+   and MOLECULES' kick) but left WAVE's seg: a saved one opens as DENSITY.  waveView() is that one mapping, for every road in. */
+export const VIEW = { density: 0, phase: 1, real: 2, imag: 3, diff: 4 };
+export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff'];
+export const WAVE_VIEWS = Object.freeze(['density', 'phase', 'real', 'imag']);
+/** a saved or named view (an index or a name, `reim` = 5 included) → the WAVE observable it opens as */
+export function waveView(v) { const n = typeof v === 'number' ? (v === 5 ? 'reim' : VIEW_NAMES[v]) : String(v); return WAVE_VIEWS.includes(n) ? n : n === 'reim' ? 'phase' : 'density'; }
 /** how the same observable is DRAWN: a cloud, a bounded plateau (lit surface), or noisy particles */
 export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4, dust: 5, glass: 6, additive: 7 };
 export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust', 'glass', 'additive'];
@@ -495,15 +501,6 @@ fn bayer8(px: vec2<f32>) -> f32 {
         let i0 = u32(fract(0.25 + V.p2.x) * 256.0) % 256u; let i1 = u32(fract(0.75 + V.p2.x) * 256.0) % 256u;
         c = select(pal[i1].rgb, pal[i0].rgb, v > 0.0);
       } else { c = select(vec3<f32>(0.22, 0.50, 1.0), vec3<f32>(1.0, 0.58, 0.16), v > 0.0); }
-    } else if (mode == 5u) {
-      /* Re + Im SUPERPOSED — a heuristic placement (two pictures in one volume, not a joint observable): Re keeps its
-         orange/blue pair, Im takes green/violet; each part's own transfer, summed, colour-weighted by the parts */
-      let vr = s.x / ampMax; let vi = s.y / ampMax;
-      let wr = pow(vr * vr, soft); let wi = pow(vi * vi, soft);
-      let cr = select(vec3<f32>(0.22, 0.50, 1.0), vec3<f32>(1.0, 0.58, 0.16), vr > 0.0);
-      let ci = select(vec3<f32>(0.55, 0.20, 0.85), vec3<f32>(0.25, 0.85, 0.35), vi > 0.0);
-      w = wr + wi;
-      c = (wr * cr + wi * ci) / max(w, 1e-9);
     } else {
       let rf = textureSampleLevel(refTex, samp, uvw, 0.0).rg;
       let d = (dot(s, s) - dot(rf, rf)) / max(rhoMax, refMax);
@@ -603,12 +600,12 @@ fn bayer8(px: vec2<f32>) -> f32 {
 }`;
 
 /* ── THE SPECIALISED PRESENT (optimization 2026-09-24, K2 · AUDIT-A FA3, REFUTE-E/F, PLAN §0) ─────────────────────────
- * The present pass is ALU-bound, and RENDER_WGSL carries 6 views × 8 styles × finish × palette × invert × bow as uniform
+ * The present pass is ALU-bound, and RENDER_WGSL carries 5 views × 8 styles × finish × palette × invert × bow as uniform
  * branches inside a 110–240-step march that the compiler cannot drop.  A copy with the VIEW and the STYLE folded to
  * constants, the bow's phase line deleted and the glass-FINISH block deleted renders the same bytes 30–40 % faster
  * (probes/K/k2-variants: FF phase/cloud 4.93 → 3.26 ms at 96³, 0 bytes differ on all 24 (view, style) of the set in
  * Firefox and Chromium).  THE KEY decides when that copy is the same program: style ∈ {cloud, grain, bands, dust} (the
- * lit and additive styles stay generic: their compiler-dependent last bits), view 0…5, the bow OFF (writeView's p4.w = 0,
+ * lit and additive styles stay generic: their compiler-dependent last bits), view 0…4, the bow OFF (writeView's p4.w = 0,
  * so the deleted line was a no-op) and finish ≠ glass (p6.w ∉ (½, 1½), so the deleted block was a no-op); palette,
  * invert, matte and dither stay runtime.  A copy is compiled on first use with createRenderPipelineAsync — the generic
  * pipeline draws until it resolves (the same pixels) — and a rejected compile marks its key failed for good. */
@@ -988,7 +985,7 @@ export async function createField(canvas, opts = {}) {
   function specKey(fmt, mat) {
     if (mat.finish === 'glass' || (mat.boost && mat.boost.on)) return null;       // writeView's p6.w = 1 / p4.w = 1: the deleted code would run
     const v = mat.view | 0, st = mat.style | 0;                                   // exactly the words writeView writes into p0.x and p3.x
-    return v >= 0 && v <= 5 && SPEC_STYLES.includes(st) ? fmt + '|' + v + '|' + st : null;
+    return v >= 0 && v <= 4 && SPEC_STYLES.includes(st) ? fmt + '|' + v + '|' + st : null;
   }
   function specEntry(key, fmt, v, st) {
     let e = specCache.get(key);

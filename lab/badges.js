@@ -49,7 +49,7 @@ export function createBadges({ dom, accept, field, reg, mat, clock, domain, qual
    * READABLE; THE RENDERING IS NOT.
    * And the mechanism cannot become a live region by accident: an `aria-label` on a non-live,
    * tabIndex = -1 node is read on demand and never announced spontaneously. */
-  const VIEW_SAY = ['ρ = |ψ|² — density', 'arg ψ — phase', 'Re ψ', 'Im ψ', 'Δρ — difference', 'Re + Im superposed'];
+  const VIEW_SAY = ['ρ = |ψ|² — density', 'arg ψ — phase', 'Re ψ', 'Im ψ', 'Δρ — difference'];
   function canvasSentence(rs) {
     if (!field.ok) return 'no field — WebGPU unavailable';
     const H = getHamiltonian(), who = stateReaders().populated;

@@ -12,7 +12,7 @@ import { BASIS } from '../hydrogen.js';
 import { PRESET_BY_ID, PRESETS } from '../state.js';
 import { createFrameBudget } from '../frame-budget.js';
 import { createOcclusion } from '../occlusion.js';   // 0.5.0 A7: the occlusion providers (KIT BRIEF 8's twin)
-import { createField, VIEW } from '../field.js';
+import { createField, VIEW, waveView } from '../field.js';
 import { PRESET_BY_ID as PALETTE_BY_ID, rgbToHex } from '../mir/palette.js';
 import { warmStep as kickWarm, tablesReady as kickReady } from '../kick.js';
 import { getHamiltonian } from '../hamiltonian.js';
@@ -277,7 +277,7 @@ export async function createController(app) {
     for (const key of Object.keys(rotRate)) setRotationRate(key, 0);
     reg.load(p); clock.reset(); app.state.lastNmax = -1;
     clock.window = p.visual.window;
-    if (app.state.applyVisuals) { clock.setRate(app.loop.paceRate(p.visual.rate)); mat.view = VIEW[p.visual.view]; ui.viewSeg.set(p.visual.view); ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
+    if (app.state.applyVisuals) { clock.setRate(app.loop.paceRate(p.visual.rate)); { const w = waveView(p.visual.view); mat.view = VIEW[w]; ui.viewSeg.set(w); } ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
     ui.presetSel.value = id; ui.presetSel.note = p.note;
     setReference();
     app.w.spectrum.select(-1);

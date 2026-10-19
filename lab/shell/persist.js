@@ -3,13 +3,13 @@
  * from app (boot() fills each slot after its declaration), the controller's and SPECTRUM's are read live at use (app.ctl.x, app.w.spectrum).
  * serialize / restore / save / copyJSON are registered on app.sh for the modules that read them (the links, the history, STATE). */
 import { TIER } from '../rack.js';
-import { VIEW_NAMES, STYLE_NAMES, quatFromYawPitch } from '../field.js';
+import { VIEW, VIEW_NAMES, STYLE_NAMES, quatFromYawPitch, waveView } from '../field.js';
 import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';
 import { clampShift } from '../camera-law.js'; import { BASIS } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
 export function createPersist(app) {
-  const { ui, reg, clock, obs, mat, FIELD_CHROME, rates, energyOf, sturm, PAL_DEF } = app; const { schedule, paceRate } = app.loop; const { quality, layout, phone, tablet } = app.sh;
+  const { ui, reg, clock, obs, mat, FIELD_CHROME, rates, energyOf, sturm, PAL_DEF, settingsStore } = app; const { schedule, paceRate } = app.loop; const { quality, layout, phone, tablet, saveSettings } = app.sh;
   const { camera, camLevel, syncFreeAngles, syncCamUI } = app.host;
   const { wState, switchHamiltonian, applySturmian, setElement, fillValence, shadowView, shadowFoot, kepler, vortex, particles, slice, wChem, wOrbs, ladder, wAtoms, wignerView, kepShell,
     keplerRowSync, gas, stageTextTick } = app.w;
@@ -141,7 +141,7 @@ export function createPersist(app) {
    *  only moves if the coefficients did) and the ring, notebook, view and arrangement are left alone.  opt.project: a file opens at
    *  t = 0.  Neither clears the history: the road that opened the file does, naming it (boot, link, open · …). */
   function restore(obj, opt) {
-    const hist = !!(opt && opt.history), gone = [];                  // D9: the retired legacy windows this file used, named once below
+    const hist = !!(opt && opt.history), gone = [], cut = [];   // cut: iteration 008 W's views that left WAVE (Re+Im, Δρ), named once below                  // D9: the retired legacy windows this file used, named once below
     if (!hist) app.state.restoreNotice = '';
     app.ctl.markBatchBegin();                                                // M7: released in the finally below
     try {
@@ -173,7 +173,7 @@ export function createPersist(app) {
       the ones it carried; anything that genuinely disagrees is still re-derived, which is what an old favourite
       carrying no quaternion needs. */
       const y0 = obs.yaw, p0 = obs.pitch; syncFreeAngles();
-      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } camera.stop(); syncCamUI(); } const pm = { ...(pr.mat || {}) }; for (const k of ['bg', 'lightUI', ...FIELD_CHROME]) delete pm[k]; Object.assign(mat, pm);   /* S1: an older file's chrome is the sender's preference — ignored, so the reader's frame, axes and invert stand */ if (Number.isFinite(pm.gamma) && ui.gammaK) ui.gammaK.set(pm.gamma); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); if (ui.ditherSeg) { mat.dither = +mat.dither || 0; ui.ditherSeg.set(mat.dither ? 'ordered' : 'off'); ui.ditherK.setDisabled(!mat.dither); if (mat.dither) ui.ditherK.set(Math.max(0.25, Math.min(2, mat.dither))); } Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));   /* PACE P2: within the device's grid ceiling, and never AUTO SCALE (the device's switch) */ Object.assign(app.ctl.domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(app.ctl.domain.auto); ui.domainKnob.setDisabled(app.ctl.domain.auto); }
+      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } camera.stop(); syncCamUI(); } const pm = { ...(pr.mat || {}) }; if (!hist && +pm.dither > 0 && !('dither' in settingsStore.read())) { mat.dither = Math.max(0.25, Math.min(2, +pm.dither)); ui.showDither(mat.dither); saveSettings(); }   /* iteration 008 W: DITHER is a PREFERENCE (FIELD_CHROME) — a profile older than that takes an older file's DITHER once; no file moves it again */ for (const k of ['bg', 'lightUI', ...FIELD_CHROME]) delete pm[k]; if (pm.view !== undefined) { const wv = VIEW[waveView(pm.view)]; if (wv !== pm.view && !hist) cut.push(pm.view === 5 ? 'Re+Im left WAVE: opened as PHASE' : 'Δρ left WAVE: opened as DENSITY'); pm.view = wv; }   /* iteration 008 W: a saved Re+Im opens as PHASE, a saved Δρ as DENSITY */ Object.assign(mat, pm);   /* S1: an older file's chrome is the sender's preference — ignored, so the reader's frame, axes and invert stand */ if (Number.isFinite(pm.gamma) && ui.gammaK) ui.gammaK.set(pm.gamma); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));   /* PACE P2: within the device's grid ceiling, and never AUTO SCALE (the device's switch) */ Object.assign(app.ctl.domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(app.ctl.domain.auto); ui.domainKnob.setDisabled(app.ctl.domain.auto); }
       /* A restored number and the control that owns it are one state. Keep every Wave, Clip,
          field and quality control on the value that was just loaded before modulation reads it. */
       if (pr) {
@@ -276,6 +276,7 @@ export function createPersist(app) {
            layout seat is skipped by applyLayout (no such card), nothing throws.  QCD counts as used when its seat was open. */
         if (!hist && pr.layout && Array.isArray(pr.layout.cards) && pr.layout.cards.some((c) => c && c.id === 'qcd' && !c.closed)) gone.push('QCD (QUARKONIUM keeps its parameters)');
         if (gone.length) app.state.restoreNotice = 'retired in 0.5.0: ' + gone.join(' · ');
+        if (cut.length) app.state.restoreNotice = [app.state.restoreNotice, ...cut].filter(Boolean).join(' · ');
         stageTextTick();                                              // the STAGE TEXT follows whatever MOLECULES the file left
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
@@ -308,7 +309,7 @@ export function createPersist(app) {
         if (pr.modwin && app.state.modView) app.state.modView.restore(pr.modwin);
         if (!hist && app.state.tl) app.state.tl.model.restore(pr.timeline || null);           // 0.5.0 C7b: an open replaces the arrangement (NEW clears it); an undo leaves it — it keeps its own
       }
-      schedule(TIER.REBUILD); wState.setStatus(gone.length ? app.state.restoreNotice : 'restored', gone.length ? 'warn' : 'live');
+      schedule(TIER.REBUILD); wState.setStatus(gone.length || cut.length ? app.state.restoreNotice : 'restored', gone.length || cut.length ? 'warn' : 'live');
       return true;
     } catch (e) { console.warn('restore failed', e); wState.setStatus('restore failed', 'warn'); return false; }   // say WHY in the console too: a silent catch hid a scope error for an afternoon
     /* OPTIMIZATION 2026-09-24 · M5: a restore that throws half-way has still moved state, and an early throw left it

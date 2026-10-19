@@ -13,6 +13,8 @@
  *   THE COUNTS ON THE 0.5.0 TREE (each retired state is 48 values: 3 grids × 16; the fixtures are never re-baked):
  *             `--check --query gastab=0` compares 860 values, and the same plus `--fixture research/release-0.4.0/measure/
  *             digest-lock-s4a.json` 1004, both 0/0, since D9b retired `h2` (908 / 1052 after D9's h2plus and helium).
+ *             ITERATION 008 W: Re+Im left the shader, and its 17 style rows (8 VIEW × STYLE, 9 flags on reim/glass) left both fixtures
+ *             by name — nothing else re-baked — so the counts are 843 and 987.
  *
  * What it locks, every number read from the SHIPPED pipelines through the booted app (window.__LW, __LW.field) —
  * no replica, no copied WGSL:
@@ -40,7 +42,7 @@
  * Every state@grid is digested twice with a forced reconstruct between (`repeat`), so a kernel that is not a pure
  * function of its inputs shows inside one run; `--check` run twice on an untouched tree is the cross-run proof.
  * Machine-specific (adapter, driver, browser build): a fixture recorded here is compared only on this machine.
- * THE LOCK'S SCOPE (0.5.4 R7, one sentence): it is SAME-MACHINE, holds the 860 + 1004 values (≤ 64 AO tile states, no time-dependent molecular packet, STATES run, FLOW or
+ * THE LOCK'S SCOPE (0.5.4 R7, one sentence): it is SAME-MACHINE, holds the 843 + 987 values (once 860 + 1004; ≤ 64 AO tile states, no time-dependent molecular packet, STATES run, FLOW or
  * `record()`), and is NEVER re-baked by a maths row — a moved digest is a defect to report; machines are COMPARED by the device report's
  * FINGERPRINT row (tools/perf/device-report.js), which is never a lock.
  */
@@ -183,7 +185,7 @@ async function styles() {
     bow: { boost: { on: true, k: [0, 0.4, 1.2] } },
     'slice-clip': { slice: { mode: 1, axis: 2, pos: 0.1, thick: 0.03 } }, 'slice-slab': { slice: { mode: 2, axis: 0, pos: -0.2, thick: 0.08 } },
   };
-  const FV = [[0, 0], [1, 0], [2, 0], [4, 0], [1, 1], [0, 3], [5, 6], [3, 7]];      // view/style pairs each flag is read on
+  const FV = [[0, 0], [1, 0], [2, 0], [4, 0], [1, 1], [0, 3], [3, 7]];      // view/style pairs each flag is read on (iteration 008 W: [5, 6], reim/glass, left with Re+Im)
   for (const [fk, fo] of Object.entries(FL)) for (const [v, s] of FV) await cap(fk + ':' + VN[v] + '/' + SN[s], () => { Object.assign(LW.mat, JSON.parse(JSON.stringify(fo))); LW.mat.view = v; LW.mat.style = s; });
   restoreMat();
   return out;

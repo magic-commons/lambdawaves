@@ -298,7 +298,10 @@ The banner is MIR's
 DOMAIN AUTO on is a project default, not a preference (see the scopes below). In
 `lab/field.js`, WAVE density uses palette θ=0; Δρ uses the same ±π/2 pair as
 Re/Im; palette OFF retains the old colors. Keep
-`tests/official-defaults-palette.browser-test.mjs` green when editing either.
+`tests/official-defaults-palette.browser-test.mjs` green when editing either. Since iteration 008 (W) WAVE's OBSERVABLE is
+DENSITY · PHASE · RE · IM (`field.js` `WAVE_VIEWS`; `waveView()` maps a saved Re+Im (index 5, gone from the shader) to PHASE and a
+saved Δρ (4, kept in the shader) to DENSITY, said once in STATE's status); DITHER is a PREFERENCE under SETTINGS › QUALITY (FIELD_CHROME);
+CLIP is an ON switch with its lamp and the kind CLIP | SLAB (`mat.slice.mode` 0 · 1 · 2 unchanged).
 
 Every stored key lives in exactly one of three scopes (`docs/STATE-SCOPES.md`,
 0.3.1): PREFERENCE (the reader's furniture: theme, glass, hints, keys, the
@@ -427,7 +430,7 @@ cross-module writes, forward + shared ≤ 25 per moving module; the loop and the
 `appFiles()` fetched in the page: rack.js, then every module under `lab/windows/` and `lab/shell/`), never `lab/rack.js` alone.
 `tests/lw-facade.browser-test.mjs` pins `window.__LW` — names, kinds (get / method / value) and order — against
 `research/release-0.5.2/lw-facade.json`; a row that changes the facade re-captures it with `--write` and says the diff. THE LOCK is SAME-MACHINE
-(860 + 1004 values, ≤ 64 AO tile states; no time-dependent molecular packet, STATES run, FLOW or `record()` is in it). Its 1004-value
+(843 + 987 values since iteration 008 W took Re+Im's 17 style rows out of each fixture — once 860 + 1004; ≤ 64 AO tile states; no time-dependent molecular packet, STATES run, FLOW or `record()` is in it). Its 1004-value
 fixture (`research/release-0.4.0/measure/digest-lock-s4a.json`) predates the gas table and is checked WITH `--query gastab=0`, as the tool's
 header says; without it the gas states read red at every grid.
 

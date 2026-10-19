@@ -34,7 +34,7 @@ const P = parsed.data.presentation;
 for (const k of ['quality', 'layout', 'modwin', 'notebook', 'modulationBases']) assert.equal(k in P, false, 'the empty project carries ' + k);
 assert.deepEqual(Object.keys(P.ui), ['stage'], 'ui carries a PREFERENCE key');
 assert.deepEqual(Object.keys(P.camera), ['autoRotate'], 'camera carries its feel');
-for (const k of ['bg', 'lightUI', 'stageCustom', 'frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk', 'steps'])
+for (const k of ['bg', 'lightUI', 'stageCustom', 'frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk', 'dither', 'steps'])   // iteration 008 W: DITHER is this display's
   assert.equal(k in P.mat, false, 'mat carries ' + k);
 const PREF = new Set(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'friction', 'spin', 'speed', 'dragGain', 'fling', 'camLock', 'camMode',   // 0.5.3 M6: camLock, the camera's LOCK
   'badges', 'controlHints', 'captions', 'molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'gamut', 'p3Mode', 'warned', 'audioDevice', 'nativeLayout', 'phoneTr', 'phoneRack',

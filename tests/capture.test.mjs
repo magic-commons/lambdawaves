@@ -357,9 +357,9 @@ function decodePNG(buf) {
     Math.abs(wavePeriod(six).T - densityPeriod(six).T) < 1e-6 && wavePeriod(six).exact,
     { Trho: densityPeriod(six).T, Tpsi: wavePeriod(six).T });
 
-  judge('THE VIEW TABLE IS field.js\' OWN: the six observables in the same order, and exactly the four that paint arg/Re/Im psi are the ones that carry the global phase (density and the Delta-rho difference do not)',
+  judge('THE VIEW TABLE IS field.js\' OWN: the five observables in the same order (iteration 008: Re+Im left), and exactly the three that paint arg/Re/Im psi are the ones that carry the global phase (density and the Delta-rho difference do not)',
     VIEW_NAMES.join(',') === FIELD_VIEW_NAMES.join(',') && VIEW_NAMES.every((n, i) => FIELD_VIEW[n] === i)
-    && !viewCarriesGlobalPhase('density') && !viewCarriesGlobalPhase(FIELD_VIEW.diff) && viewCarriesGlobalPhase('phase') && viewCarriesGlobalPhase(FIELD_VIEW.phase) && viewCarriesGlobalPhase('real') && viewCarriesGlobalPhase('imag') && viewCarriesGlobalPhase('reim'),
+    && !viewCarriesGlobalPhase('density') && !viewCarriesGlobalPhase(FIELD_VIEW.diff) && viewCarriesGlobalPhase('phase') && viewCarriesGlobalPhase(FIELD_VIEW.phase) && viewCarriesGlobalPhase('real') && viewCarriesGlobalPhase('imag') && !viewCarriesGlobalPhase('reim'),
     { capture: VIEW_NAMES, field: FIELD_VIEW_NAMES, carry: VIEW_NAMES.filter(viewCarriesGlobalPhase) });
 
   /* and the plan uses it */

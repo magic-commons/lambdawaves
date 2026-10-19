@@ -60,7 +60,6 @@
     "iso": 0.06,
     "grain": 0.35,
     "knee": 0.6,
-    "dither": 0,
     "boost": {
      "k": [
       0,

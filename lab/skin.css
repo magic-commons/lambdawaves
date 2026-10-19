@@ -384,9 +384,10 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean .grp > .row { padding: 0; }
 .native-clean[data-id="palette"] .grp-lbl, .native-clean[data-id="clip"] .grp-lbl { display: none; }
 .native-clean[data-id="observer"] .wave-row > .segw > .seg { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%; }
-.native-clean[data-id="observer"] .wave-row-0 > .segw > .seg, .native-clean[data-id="observer"] .wave-row-6 > .segw > .seg { grid-template-columns:repeat(2,minmax(0,1fr)); }
-.native-clean[data-id="observer"] .wave-row-6 > .segw { flex:1 1 150px;width:auto; }
-.native-clean[data-id="observer"] .wave-row-6 > .k { flex:0 0 64px; }
+.native-clean[data-id="observer"] .wave-row-0 > .segw > .seg, .lw-dither > .segw > .seg { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.native-clean[data-id="observer"] .wave-row-1 > .segw > .seg { grid-template-columns:repeat(4,minmax(0,1fr)); }   /* iteration 008 W: the four observables on one line */
+.lw-dither > .segw { flex:1 1 150px;width:auto; }   /* iteration 008 W: wave-row-6's DITHER row, now under SETTINGS › QUALITY */
+.lw-dither > .k { flex:0 0 64px; }
 .native-clean[data-id="observer"] .wave-row { margin: 0 0 10px; }
 .native-clean[data-id="observer"] .wave-row-2 { margin-bottom:14px; }
 .native-clean[data-id="observer"] .seg button { min-height:32px; padding:0 4px; }
@@ -407,6 +408,8 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="clip"] .grp > .row { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center; }
 .native-clean[data-id="clip"] .grp > .row > .segw { grid-column:1/-1;width:100%; }
 .native-clean[data-id="clip"] .grp > .row > .segw .seg { justify-content:center; }
+/* iteration 008 W: CLIP's ON switch (its lamp) and the kind CLIP | SLAB share the first line; the kind keeps its seat while off (hidden, never moved) */
+.native-clean[data-id="clip"] .grp > .row > .clip-on, .native-clean[data-id="clip"] .grp > .row > .clip-on + .segw { grid-column:auto; }
 @media (pointer:coarse) { .native-clean[data-id="observer"] .seg button { min-height:44px; }
 }
 .plane-model[aria-disabled="true"] { opacity:.35;cursor:default; }
