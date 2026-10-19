@@ -1424,7 +1424,7 @@ export function createChem(host, api) {
     section(s) { if ((SECTIONS.includes(s) || vByPage.has(s)) && s !== page) { page = s; fillSel(); } const recs = sectionRecs(), VP = vByPage.get(page);
       return { name: page, molecules: VP ? VP.mols.map((m) => VP.vol.id + ':' + m.id) : CHEM_PRESETS.filter((p) => p.section === page).map((p) => p.id), records: recs.length, bytes: recs.reduce((t, r) => t + r.bytes, 0),
         installed: recs.filter((r) => have.get(r.hash)).length, keepOffered: recs.length > 0 && !safariTab(), lamp: recs.length > 0 && recs.every((r) => have.get(r.hash)), sub }; },
-    /** a section's records kept (true) or removed (false) — INSTALLED's road, a verb since iteration 008 V (the switch left the card; the Picker's MOLECULAR deck installs a section) */
+    /** a section's records kept (true) or removed (false) — INSTALLED's road, a verb since iteration 008 V (the switch left the card; the Picker's LIBRARY installs a section since iteration 011 Q4, once its MOLECULAR deck) */
     keep(v) { return keep(!!v); },
     /** iteration 008 V · THE LIBRARY ROAD: the volumes' pages (read now if they were not); one volume molecule kept as the glyph's press keeps it; the name row's picture */
     async library() { await readPages(); return vPages.map((p) => { const kept = vKept.get(p.vol.id) || new Set(); return { id: p.id, label: p.label, volume: p.vol.id, tag: p.tag, molecules: p.mols.length, kept: p.mols.filter((m) => kept.has(m.id)).length }; }); },

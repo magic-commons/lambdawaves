@@ -8,7 +8,8 @@
  *                                  or a NaN is refused, not opened);
  *   installed / fetchRecord / removeRecord / persistOnce / storageInfo   the store MOLECULES installs into and opens from;
  *   keepData                       the same store for a DATA file the lab only shows or reads as served (iteration 005 A: the
- *                                  Picker's pictures, the demo covers, a volume's ladder bases) — kept after its first good answer.
+ *                                  Picker's pictures, the demo covers, a volume's ladder bases) — kept after its first good answer;
+ *   keptSummary                    what the store holds, records and DATA apart (the Picker's LIBRARY, iteration 011 Q4).
  * tools/orbital-library.mjs writes the records and lab/library.json, the catalogue lab/molecules.js reads. */
 import { sha256Hex } from './md.js';
 export const SCHEMA = 1, DATA_CACHE = 'lw-data-v1';
@@ -133,7 +134,7 @@ export async function fetchRecord(hash, { network = false, onProgress = null } =
 }
 
 /** a SECTION's records kept on this device (`v` true: each fetched where absent, checked against its name; persist() asked once) or removed
-    (`v` false) — the one road for the Picker's heading tile and __LW.chem.keep (iteration 008 P · V; the fix round's F4).  `stop()` true ends
+    (`v` false) — the one road for the Picker's LIBRARY section cards (iteration 011 Q4; once the MOLECULAR deck's heading tile, 008 P) and __LW.chem.keep (iteration 008 V; the fix round's F4).  `stop()` true ends
     the install after the record in hand; `onStep(k, n)` follows it.  → persist()'s answer for an install, null for a removal */
 export async function keepSection(recs, v, { onStep = null, stop = null } = {}) {
   if (!v) { for (const r of recs) await removeRecord(r.hash).catch(() => false); return null; }
@@ -158,6 +159,18 @@ export async function keepData(url, res = null) {
     if (r.ok) await c.put(key, r);
     return r.ok;
   } catch (_) { return false; }
+}
+
+/** what lw-data-v1 holds (iteration 011 Q4, the Picker's LIBRARY): the records keepSection / fetchRecord kept (library/<sha-256>.json) and the
+    DATA files keepData kept (pictures, covers, ladder bases) — { records: { n, bytes }, data: { n, bytes } }.  A read: never creates the store. */
+export async function keptSummary() {
+  const out = { records: { n: 0, bytes: 0 }, data: { n: 0, bytes: 0 } }, c = await store();
+  if (!c) return out;
+  for (const req of await c.keys().catch(() => [])) {
+    const r = await c.match(req).catch(() => null), b = r ? (await r.blob().catch(() => null)) : null, k = /\/library\/[0-9a-f]{64}\.json$/.test(req.url) ? out.records : out.data;
+    k.n++; k.bytes += b ? b.size : 0;
+  }
+  return out;
 }
 
 /* ── the iPad law (PLAN B2) ── persist() is asked on the user's FIRST install press, never at boot (Firefox prompts), and the

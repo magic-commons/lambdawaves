@@ -1,15 +1,18 @@
 /* lab/picker.js — THE PICKER (iteration 004, Josh 2026-10-17; iteration 003's MAIN MENU): λWAVES' front page, over the stage.  Three
  * sections in one vertical snap — ATOMIC (the periodic table: each live element H–Kr its own picture, exactly what a press opens, seen
- * from the corner; the elements past Kr their valence subshell's), MOLECULAR (every molecule in the store by its section, each section
- * opened by a heading tile that installs the section's records — iteration 008 P; the pages sized to the screen, ‹ › beside them) and
- * LIBRARY (THE VOLUMES, lab/volumes.js: VOL. I, VOL. II … — each a card that installs with one press; inside a volume ONE head row — the
- * volume's stepper, the count, its plain tags (two intersect), a search, INSTALL — over its molecules; a one-atom entry opens the ATOM).  The pictures are tools/menu-thumbs.mjs' and each
+ * from the corner; the elements past Kr their valence subshell's), MOLECULAR (MOLECULES ONLY since iteration 011 Q4: every molecule of
+ * the catalogue in its sections' order, one not yet on this device wearing the kit's download glyph; the pages sized to the screen, ‹ ›
+ * beside them) and LIBRARY — the one place for what is kept: THE VOLUMES (lab/volumes.js: VOL. I, VOL. II … — each a card that installs
+ * with one press; inside a volume ONE head row — the volume's stepper, the count, its plain tags (two intersect), a search, INSTALL — over
+ * its molecules; a one-atom entry opens the ATOM), the catalogue's RECORDS (a card per section — THE SECTION INSTALL, iteration 008 P's,
+ * moved out of the MOLECULAR deck) and THIS DEVICE (use, quota, what is kept, persisted).  The pictures are tools/menu-thumbs.mjs' and each
  * volume's own (t/<id>.webp).  A hover or a focus moves ONLY the picture (lab/picker-fx.js: the spring tilt and a zoom — no background,
  * no tint), writes the name under the tile, and swaps the large caption at the foot.  A press goes there: ATOMS mode and the element
  * (goAtom), MOLECULES mode and the molecule (chem.pick), or a volume's molecule (chem.openVolume).  THE WAY BACK is instant: the DOM is
  * built once and only shown or hidden — the home button (the iris opens from it), L (keys.js `menu`), WINDOW › PICKER; Escape leaves.
  * FOLDERS (the projects and the demos) has its door at the top left.  It opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
+import { keptSummary, storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
 import { el, chip, mathPlain, stepper } from './mir/kit.js';
 import { CHEM_PRESETS } from './chemview.js';
 import { SECTIONS, GROUPS, RECORD_GROUP } from './molecules.js';
@@ -154,59 +157,98 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     pic(t, './img/menu/' + (live ? 'el-' + sym : 'orb-' + v.nl + '_' + v.m) + '.webp');   // the atom's highest orbital: its own past H–Kr hydrogen's (n, l, m)
     el('i', 'mm-z', t, String(Z)); el('b', 'mm-sym', t, sym);
   }
-  /* ── MOLECULAR: the catalogue by its SECTIONS (lab/molecules.js), each opened by its HEADING tile — the section's name, its count and, for a
-     section with records, THE SECTION INSTALL (iteration 008 P: MOLECULES' INSTALLED moved here): the lamp lit when every record of the section is
-     on this device, the press installs them all (persist() asked once) or, pressed twice, removes them, the ring their share.  The records' road
-     (library.js keepSection, chemview's road too: each record checked against its sha-256 name), and the card's lamps re-read after (chem.records()).  Within a
-     section, the dropdown's order (its groups).  A one-atom entry is never listed here: an atom is the ATOMIC table's. ── */
+  /* ── MOLECULAR: MOLECULES ONLY (iteration 011 Q4, Josh: "remove those 'lattice' and 'heavy' and other downloadable stuff from the molecular
+     system, let that be it's own UI system for handling saved/stored/unsaved molecules in the library section").  The catalogue in its
+     SECTIONS' order (lab/molecules.js), within a section the dropdown's order (its groups); no heading tile — a heading broke the picture grid,
+     so the section rides in the caption's line under a hover instead.  A record-only molecule not yet on this device keeps its picture and
+     wears the kit's download glyph (row V's law, the card's glyph); its press opens it, which fetches that one record (chemview's record road).
+     A one-atom entry is never listed here: an atom is the ATOMIC table's.  THE SECTION INSTALL (iteration 008 P) lives in the LIBRARY below. ── */
   const GROUP_AT = new Map([...GROUPS, RECORD_GROUP].map((g, i) => [g.id, i])), rank = (p) => (GROUP_AT.has(p.group) ? GROUP_AT.get(p.group) : GROUP_AT.size);
   const secRows = (sec) => CHEM_PRESETS.filter((p) => p.section === sec && !atomZ(p.formula)).sort((a, b) => rank(a) - rank(b));
   const secs = new Map(SECTIONS.map((sec) => { const rows = secRows(sec), recs = rows.flatMap((p) => Object.values(p.records || {}));
     return [sec, { sec, rows, recs, bytes: recs.reduce((t, r) => t + r.bytes, 0), n: 0, busy: false, stop: false, arm: 0, view: null }]; }));
+  const have = new Map(), away = new Map();   // a record's hash → on this device; a deck tile's molecule → its glyph and caption
+  const dlRec = (m) => (m.recordOnly && m.records && m.records['sto-3g']) || null;   // the record a press must fetch (chemview's own test)
+  function paintAway(m) {
+    const a = away.get(m.id); if (!a || !a.t.isConnected) return;
+    const r = dlRec(m), off = !!r && !have.get(r.hash) && !safariTab();
+    a.t.classList.toggle('away', off); a.g.hidden = !off;
+    a.info.sub = off ? `${m.section} · not on this device — a press downloads it (${fmtBytes(r.bytes)})` : m.section;
+  }
+  const molDeck = deck(sections[1].sec);
+  molDeck.set(SECTIONS.flatMap((sec) => secs.get(sec).rows), (m, host) => {
+    const info = { formula: mathPlain(m.formula), name: cap(m.name), sub: m.disabled ? m.reason : m.section };
+    const t = tile(host, 'mm-mol', info, () => goMolecule(m.id), !!m.disabled);
+    pic(t, './img/menu/' + m.id + '.webp');
+    if (!m.disabled && dlRec(m)) { const g = el('i', 'mm-dl', t); chip(g, 'download', 'not on this device'); g.hidden = true; away.set(m.id, { t, g, info }); paintAway(m); }
+  });
+
+  /* ── THE SECTION INSTALL (iteration 008 P; in the LIBRARY since iteration 011 Q4): a card per catalogue section with records — its name, its
+     count, its bytes, "n here", and the install: the lamp lit when every record of the section is on this device, the press installs them all
+     (persist() asked once; `n / N · CANCEL` and the ring while it runs, a press then stops after the record in hand) or, pressed twice, removes
+     them.  The records' road is library.js keepSection (chemview's too: each record checked against its sha-256 name), and MOLECULES' lamps
+     are re-read after (chem.records()). ── */
   const secLine = (S) => `${S.rows.length} molecules · ` + (S.recs.length ? `${S.recs.length} record${S.recs.length > 1 ? 's' : ''} · ${fmtBytes(S.bytes)} · ${S.n} here` : 'all live');
+  const cardLine = (S) => `${S.rows.length} molecules · ${S.recs.length} record${S.recs.length > 1 ? 's' : ''}\n${fmtBytes(S.bytes)} · ${S.n} here`;   // the card's two lines
   function paintSec(S) {
     const v = S.view; if (!v || !v.b.isConnected) return;
     const N = S.recs.length, all = N > 0 && S.n === N;
-    v.meta.textContent = secLine(S); if (S.busy) return;
+    v.meta.textContent = cardLine(S); if (S.busy) return;
     v.b.dataset.state = all ? 'installed' : S.n ? 'partial' : 'absent'; v.b.setAttribute('aria-pressed', String(all)); v.ring.set(N ? S.n / N : 0, all ? 'done' : 'idle');
-    v.word.textContent = all ? 'INSTALLED' : S.n ? `${S.n} / ${N} · INSTALL` : 'INSTALL · ' + fmtBytes(S.bytes);
+    v.word.textContent = all ? 'INSTALLED · REMOVE' : S.n ? `${S.n} / ${N} · INSTALL` : 'INSTALL · ' + fmtBytes(S.bytes);
   }
-  async function countSec(S) { let n = 0; for (const r of S.recs) if (await installed(r.hash).catch(() => false)) n++; S.n = n; paintSec(S); }
+  /* the store read each time the MOLECULAR deck or the LIBRARY comes into view (the card, a press or the browser may have changed it) */
+  async function readStore() {
+    for (const S of secs.values()) for (const r of S.recs) have.set(r.hash, await installed(r.hash).catch(() => false));
+    for (const S of secs.values()) { if (!S.busy) S.n = S.recs.filter((r) => have.get(r.hash)).length; paintSec(S); for (const m of S.rows) paintAway(m); }
+    library.paintDevice();
+  }
   async function pressSec(S) {
     if (S.busy) { S.stop = true; return; }   // a press while installing: stop after the record in hand
     if (S.n === S.recs.length) {             // two presses remove: no window.confirm (the volume's law)
       if (Date.now() - S.arm > 3000) { S.arm = Date.now(); S.view.word.textContent = 'REMOVE ' + S.sec + '? PRESS AGAIN'; return; }
       S.arm = 0; await keepSection(S.recs, false);
     } else {
-      S.busy = true; S.stop = false; S.view.b.dataset.state = 'busy';
+      S.busy = true; S.stop = false; S.view.b.dataset.state = 'busy'; S.view.ring.set(0, 'busy'); S.view.word.textContent = `0 / ${S.recs.length} · CANCEL`;
       await keepSection(S.recs, true, { stop: () => S.stop, onStep: (k, n) => { const w = S.view; if (w && w.b.isConnected) { w.ring.set(k / n, 'busy'); w.word.textContent = `${k} / ${n} · CANCEL`; } } });
       S.busy = false;
     }
-    await countSec(S);
-    if (app.state.chem && app.state.chem.records) app.state.chem.records().catch(() => {});   // MOLECULES' lamps (DOWNLOAD / INSTALLED) read the store again
+    await readStore();
+    if (app.state.chem && app.state.chem.records) app.state.chem.records().catch(() => {});   // MOLECULES' lamps and its download glyph read the store again
     if (!S.stop && S.n && S.n < S.recs.length) say({ name: S.sec, sub: `${S.n} of ${S.recs.length} records on this device — the rest did not download (offline?)` });
   }
-  function secHead(S, host) {
-    const h = el('div', 'mm-tile mm-shead', host); h.setAttribute('role', 'group'); h.setAttribute('aria-label', S.sec + ' — ' + secLine(S));
-    el('b', 'mm-shead-n', h, S.sec); const meta = el('span', 'mm-shead-m', h, secLine(S));
-    h.addEventListener('pointerenter', () => say({ name: S.sec, sub: secLine(S) }));
-    if (!S.recs.length || safariTab()) return;   // a live-only section keeps nothing; a Safari tab is offered nothing to keep (chemview's own rule)
-    const b = el('button', 'mm-install mm-sinstall', h); b.type = 'button'; b.title = `Every record of ${S.sec} kept on this device: press to install them all, press twice to remove them`;
+  function secCard(S, host) {
+    const c = el('div', 'mm-vol mm-scard', host); c.dataset.section = S.sec; c.setAttribute('role', 'group'); c.setAttribute('aria-label', S.sec + ' — ' + secLine(S));
+    const h = el('div', 'mm-vol-open', c); el('b', 'mm-scard-n', h, S.sec); const meta = el('span', 'mm-vol-meta', h, cardLine(S));
+    c.addEventListener('pointerenter', () => say({ name: S.sec, sub: secLine(S) }));
+    if (safariTab()) return;   // a Safari tab is offered nothing to keep (chemview's own rule)
+    const b = el('button', 'mm-install mm-sinstall', c); b.type = 'button'; b.title = `Every record of ${S.sec} kept on this device: press to install them all, press twice to remove them`;
     const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost); el('i', 'mm-lamp', b); const word = el('span', 'mm-install-word', b);
-    S.view = { b, ring, word, meta }; paintSec(S); if (S.busy) { ring.set(0, 'busy'); b.dataset.state = 'busy'; word.textContent = 'INSTALLING · CANCEL'; }
+    S.view = { b, ring, word, meta }; paintSec(S);
     b.addEventListener('click', (e) => { e.stopPropagation(); pressSec(S); });
   }
-  const molDeck = deck(sections[1].sec);
-  molDeck.set(SECTIONS.flatMap((sec) => [{ head: secs.get(sec) }, ...secs.get(sec).rows]), (m, host) => {
-    if (m.head) { secHead(m.head, host); return; }
-    const t = tile(host, 'mm-mol', { formula: mathPlain(m.formula), name: cap(m.name), sub: m.disabled ? m.reason : '' }, () => goMolecule(m.id), !!m.disabled);
-    pic(t, './img/menu/' + m.id + '.webp');
-  });
-  const countSecs = () => { for (const S of secs.values()) if (S.recs.length && !S.busy) countSec(S); };   // the store read each time the deck comes into view (the card or the browser may have changed it)
 
   /* ── LIBRARY: the shelf of volumes; a volume's molecules by their tags ── */
   const library = (() => {
-    const sec = sections[2].sec, shelfEl = el('div', 'mm-shelf', sec), view = el('div', 'mm-volview', sec); view.hidden = true;
+    const sec = sections[2].sec, shelfEl = el('div', 'mm-shelf', sec), catEl = el('div', 'mm-cat', sec), devEl = el('div', 'mm-dev', sec), view = el('div', 'mm-volview', sec); view.hidden = true;
+    /* iteration 011 Q4: under the shelf, THE CATALOGUE'S RECORDS (a card per section that keeps any — THE SECTION INSTALL) and THIS DEVICE (the
+       store's use and quota, what keepSection and keepData hold, persisted or not); both stand aside while a volume is open */
+    catEl.hidden = devEl.hidden = true;
+    function paintCat() {
+      catEl.textContent = ''; const live = [...secs.values()].filter((S) => !S.recs.length).map((S) => S.sec);
+      const h = el('div', 'mm-cat-h', catEl); el('b', '', h, 'RECORDS'); el('span', '', h, 'the catalogue’s molecules that open from a file, kept a section at a time' + (live.length ? ' · ' + live.join(' and ') + ' solve live' : ''));
+      const row = el('div', 'mm-cat-row', catEl); for (const S of secs.values()) if (S.recs.length) secCard(S, row);
+    }
+    async function paintDevice() {
+      if (!woke) return;
+      const [k, i] = await Promise.all([keptSummary().catch(() => null), storageInfo().catch(() => null)]), size = (b) => (b ? fmtBytes(b) : '0 kB');
+      devEl.textContent = ''; el('b', '', devEl, 'THIS DEVICE');
+      const part = (t) => { if (t) el('span', '', devEl, t); };
+      part(i && i.usage != null && i.quota ? `${size(i.usage)} of ${size(i.quota)} in use` : '');
+      part(k ? `${k.records.n} record${k.records.n === 1 ? '' : 's'} kept · ${size(k.records.bytes)}` : '');
+      part(k ? `${k.data.n} picture${k.data.n === 1 ? '' : 's'} and files kept · ${size(k.data.bytes)}` : '');
+      part(!i ? '' : i.persisted ? 'persisted: the browser keeps it' : i.safariTab ? 'a Safari tab: kept until the browser clears it — add λWAVES to the Home Screen to keep it' : i.persisted === false ? 'not persisted: the browser may clear it under pressure' : '');
+    }
     /* iteration 008 P (Josh: "less of the stuff on top … much tighter, and more molecules shown per page"): the volume's head is ONE row —
        ‹ LIBRARY · the kit's stepper ‹ VOL. I › (its title and size on its hover) · the count · the tags on one line that scrolls sideways
        (the wheel turns it) · the search · INSTALL / OPEN FILE… with its ring — and the deck below measures its tile from what is left */
@@ -266,7 +308,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       }
     }
     async function paintShelf() {
-      shelfEl.textContent = ''; shelfEl.hidden = false; view.hidden = true; cur = null;
+      shelfEl.textContent = ''; shelfEl.hidden = catEl.hidden = devEl.hidden = false; view.hidden = true; cur = null;
       let s = { volumes: [] }; try { s = await V.shelf({ fresh: true }); } catch (_) { /* no shelf: said below */ }
       if (!s.volumes.length) {
         const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'LIBRARY');
@@ -277,7 +319,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       enterTiles([...shelfEl.children]);
     }
     async function enter(v) {
-      cur = v; on.clear(); query = ''; shelfEl.hidden = true; view.hidden = false; vhead.textContent = '';
+      cur = v; on.clear(); query = ''; shelfEl.hidden = catEl.hidden = devEl.hidden = true; view.hidden = false; vhead.textContent = '';
       const back = el('button', 'mm-back', vhead, '‹ LIBRARY'); back.type = 'button'; back.addEventListener('click', () => paintShelf());
       const size = v.index ? v.bytes : v.archive && v.archive.bytes;
       const step = stepper({ aria: 'volume', items: (vols.length ? vols : [v]).map((x) => ({ id: x.id, label: volName(x) })), value: v.id, list: false, cls: 'mm-vstep',
@@ -321,12 +363,12 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         if (!m.thumb) ph(); else V.picture(cur.id, m.id).then((u) => { if (u) { develop(i); i.src = u; } else ph(); }, ph);
       });
     }
-    return { wake() { if (!woke) { woke = true; paintShelf(); } } };
+    return { wake() { if (!woke) { woke = true; paintCat(); paintShelf(); } }, paintDevice };
   })();
 
   /* ── the tab under the reader's eye ── */
   let current = sections[0];
-  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id === 'molecular') countSecs(); };
+  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
   let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); movePill(current.b); } }); });   // observed only while the Picker is open
 
@@ -347,7 +389,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     root.style.setProperty('--ox', r.width ? r.left + r.width / 2 + 'px' : '50%'); root.style.setProperty('--oy', r.width ? r.top + r.height / 2 + 'px' : '50%');
     root.hidden = false; document.body.classList.add('menu-open'); said = null; say(null); ro.observe(scroller);
     for (const d of decks) d.lay();
-    if (current.id === 'molecular') countSecs();
+    if (current.id !== 'atomic') readStore();
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? [...table.children] : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
   function close() { if (root.hidden) return; ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }

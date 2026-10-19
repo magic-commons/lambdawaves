@@ -756,12 +756,23 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-tag { flex: none; white-space: nowrap; font-size: 12px; letter-spacing: .06em; padding: 5px 10px; border-radius: 999px; opacity: .6; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 120ms, color 120ms, background-color 120ms; }
 #lwMenu .mm-tag i { font-style: normal; opacity: .6; margin-left: 5px; font-variant-numeric: tabular-nums; }
 #lwMenu .mm-tag:hover, #lwMenu .mm-tag:focus-visible { opacity: .95; } #lwMenu .mm-tag.on { opacity: 1; color: var(--acc); background: color-mix(in srgb, var(--acc) 16%, transparent); }
-/* iteration 008 P: the MOLECULAR deck's section HEADING tile — the name, its count, and THE SECTION INSTALL (ring · lamp · word), moved from MOLECULES */
-#lwMenu .mm-shead { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 6px; padding: 10%; box-sizing: border-box; text-align: left; background: color-mix(in srgb, var(--fg) 5%, transparent); }
-#lwMenu .mm-shead-n { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(16px, calc(var(--t) * .15), 30px); letter-spacing: .04em; line-height: 1; }
-#lwMenu .mm-shead-m { font-size: clamp(9px, calc(var(--t) * .068), 12px); letter-spacing: .04em; line-height: 1.4; opacity: .65; font-variant-numeric: tabular-nums; }
-#lwMenu .mm-sinstall { position: relative; margin-top: auto; gap: 7px; padding: 2px 4px 2px 2px; font-size: clamp(9px, calc(var(--t) * .062), 11px); letter-spacing: .08em; text-align: left; }
+/* iteration 011 Q4: the MOLECULAR deck is molecules only — a record not yet on this device keeps its picture and wears the kit's download glyph */
+#lwMenu .mm-dl { position: absolute; right: 5%; bottom: 5%; width: clamp(20px, calc(var(--t) * .15), 32px); height: clamp(20px, calc(var(--t) * .15), 32px); display: grid; place-items: center; border-radius: 50%; color: var(--fg); background: hsl(var(--glass-tint) / .7); pointer-events: none; }
+#lwMenu .mm-dl svg { width: 62%; height: 62%; } #lwMenu .mm-dl[hidden] { display: none; }
+/* … and the LIBRARY owns what is kept: under the shelf, RECORDS (a card per catalogue section in the volume card's look — THE SECTION INSTALL,
+   iteration 008 P's ring · lamp · word, once the deck's heading tile) and THIS DEVICE */
+#lwMenu .mm-cat { display: grid; gap: 14px; justify-items: center; max-width: 1240px; margin-top: 10px; }
+#lwMenu .mm-cat[hidden], #lwMenu .mm-dev[hidden] { display: none; }
+#lwMenu .mm-cat-h { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 14px; text-align: center; }
+#lwMenu .mm-cat-h b, #lwMenu .mm-dev b { font-weight: 400; font-size: 11px; letter-spacing: .22em; opacity: .55; }
+#lwMenu .mm-cat-h span { font-size: 12px; letter-spacing: .04em; opacity: .5; }
+#lwMenu .mm-cat-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+#lwMenu .mm-scard { width: 220px; gap: 12px; padding: 22px 16px 16px; box-sizing: border-box; } #lwMenu .mm-scard .mm-vol-meta { white-space: pre-line; line-height: 1.5; }
+#lwMenu .mm-scard-n { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(30px, 2.8vw, 44px); line-height: 1; letter-spacing: .04em; white-space: nowrap; }
+#lwMenu .mm-sinstall { position: relative; max-width: 100%; gap: 8px; padding: 2px 6px 2px 2px; font-size: 11px; letter-spacing: .14em; text-align: left; line-height: 1.35; }   /* the armed REMOVE … ? PRESS AGAIN wraps inside the card */
 #lwMenu .mm-sinstall .mm-ring-host { width: 24px; height: 24px; }
+#lwMenu .mm-dev { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 16px; max-width: 1000px; text-align: center; font-size: 12px; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+#lwMenu .mm-dev span { opacity: .6; }
 #lwMenu .mm-lamp { position: absolute; left: 12px; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -1px; border-radius: 50%; background: currentColor; opacity: .25; pointer-events: none; transition: background-color 160ms, opacity 160ms; }   /* the lamp sits in the ring's eye */
 #lwMenu .mm-sinstall[data-state="installed"] .mm-lamp { background: var(--acc); opacity: 1; box-shadow: 0 0 6px color-mix(in srgb, var(--acc) 70%, transparent); }
 #lwMenu .mm-ph { position: absolute; inset: 0; display: grid; place-items: center; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: calc(var(--t) * .17); opacity: .75; transition: scale 280ms var(--ease); }
@@ -769,7 +780,8 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 @media (max-width: 700px) {
   #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; } #lwMenu .mm-search { width: 120px; }
   #lwMenu .mm-door span { display: none; } #lwMenu .mm-door { left: 14px; top: 16px; } #lwMenu .mm-tabs { gap: 14px; }
-  #lwMenu .mm-prev { right: auto; left: 2px; } #lwMenu .mm-next { left: auto; right: 2px; } #lwMenu .mm-caption { min-height: 76px; } }
+  #lwMenu .mm-prev { right: auto; left: 2px; } #lwMenu .mm-next { left: auto; right: 2px; } #lwMenu .mm-caption { min-height: 76px; }
+  #lwMenu .mm-cat-row { gap: 10px; } #lwMenu .mm-scard { width: calc(50vw - 26px); padding: 16px 10px 12px; } #lwMenu .mm-scard-n { font-size: 26px; } }
 @media (prefers-reduced-motion: reduce) {
   #lwMenu { clip-path: none; transition: none; } #lwMenu .mm-pic, #lwMenu .mm-pill, #lwMenu .mm-under, #lwMenu .mm-ring-ink, #lwMenu .mm-arrow, #lwMenu .mm-arrow svg { transition: none; }
   #lwMenu .mm-pic[data-tilt] { transform: none; } #lwMenu .mm-arrow { scale: 1 !important; } }

@@ -208,6 +208,20 @@ site (`docs/VOLUMES-HOSTING.md`). The GPU solver (`tools/volumes/long-run-gpu.sh
 the RTX 3070, 2.24× over this CPU on drug-size rungs, every energy within 1.2e-11 Eh of the CPU's)
 shares the CPU solver's flock queue.
 
+THE LIBRARY OWNS THE INSTALLS (iteration 011 Q4; Josh 10-19: "remove those 'lattice' and 'heavy' and other downloadable stuff
+from the molecular system, let that be it's own UI system for handling saved/stored/unsaved molecules in the library section";
+`research/iteration-011/Q4-BUILD.md`). The Picker's MOLECULAR deck is MOLECULES ONLY: the catalogue in its SECTIONS' order (a
+section's rows in the dropdown's group order), no heading tile and no install card in the grid — the section rides in the
+caption's line under a hover; a record-only molecule not on this device keeps its picture and wears the kit's download glyph
+(`.mm-dl`, row V's law), and its press opens it, which fetches that one record (chemview's record road). THE SECTION INSTALL
+(iteration 008 P: the ring, the lamp, `INSTALL · 2 MB`, `n / N · CANCEL`, the two-press REMOVE — the installed word now
+`INSTALLED · REMOVE`, the volume's) lives in the LIBRARY under the volume shelf: RECORDS, a card per catalogue section that keeps
+any (ORGANIC · BIO · LATTICE · HEAVY; DIATOMICS and HYDRIDES solve live), in the volume card's look (LW Title, the 5 % ground),
+over THIS DEVICE (`storageInfo`'s use and quota, `library.js keptSummary`: the records keepSection kept and the pictures and
+files keepData kept, persisted or not); both stand aside while a volume is open. The store is read each time the MOLECULAR deck
+or the LIBRARY comes into view (`picker.js readStore`). `__LW.chem.section()` / `keep()` / `install()` and the cache names
+(`lw-data-v1`, `lw-vol-<id>`) are unchanged — a section installed by the old heading tile reads INSTALLED here.
+
 THE PHYSICS OF ITERATION 005 (Sol-6's engine seams, `research/iteration-005/PLAN.md`). THE FLOW
 IS FACTORS: `molecular-flow.js` `setFactors(w, re, im)` evaluates ρ = Σ_a w_a |φ_a|² and
 j = Σ_a w_a Im(φ̄_a ∇φ_a) in one O(n·K) pass over the AO values and gradients — the MO-REGISTRY's
