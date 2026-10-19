@@ -32,10 +32,14 @@ export function liftSaved(o, rows) {
   return out;
 }
 
-export function createKeyTable({ rows, edit = (a, run) => run(), stageHasFocus = () => false, storage = local, platform, target } = {}) {
+export function createKeyTable({ rows, edit = (a, run) => run(), stageHasFocus = () => false, storage = local, platform, target, keep = [] } = {}) {
+  /* iteration 011 Q6 · `keep`: ids of rows hidden for now (ASK while ASK_ENABLED is off) — the kit drops a saved chord for an id it does not hold
+     on its next save; a kept id's saved chords are carried through that save as they were stored, inert (no row runs them, no row is blocked) */
+  const carry = (o) => { if (!keep.length) return o; const s = storage.get(), out = { ...(o || {}) };
+    if (s && typeof s === 'object') for (const id of keep) if (s[id] !== undefined && !(id in out)) out[id] = s[id]; return out; };
   const byId = new Map(rows.map((a) => [a.id, a])), declared = new Map(rows.map((a) => [a.id, { key: a.key, ctrl: a.ctrl, alt: a.alt, shift: a.shift }]));
   const group = (a) => a.group || ORDER[3];
-  const table = createKeys({ platform, target, storage: { get: () => liftSaved(storage.get(), rows), set: (o) => storage.set(o) },
+  const table = createKeys({ platform, target, storage: { get: () => liftSaved(storage.get(), rows), set: (o) => storage.set(carry(o)) },
     actions: [...rows].sort((x, y) => ORDER.indexOf(group(x)) - ORDER.indexOf(group(y))).map((a) => ({ id: a.id, label: a.label, group: group(a), short: a.short,
       keys: chordsOf(a), inFields: !!a.inFields, repeat: true, overControls: true, when: a.stage ? stageHasFocus : undefined,
       run: (e) => edit(a, () => a.run(e && e.shiftKey ? 0.25 : 1)), up: a.up && (() => a.up()) })) });   // `up`: a HELD row (the kit's: its release, or leaving the page, runs it)

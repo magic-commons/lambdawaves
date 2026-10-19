@@ -3,7 +3,7 @@
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
 import { TIER } from '../rack.js'; import { VIEW, VIEW_NAMES, WAVE_VIEWS, STYLE, drawStyle } from '../field.js'; import { CAM } from '../camera-law.js'; import { STAGE_BINDINGS } from '../stage-gestures.js';
 import { createKeyTable } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
-import { infoActions } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { mirGui } from '../mir-gui.js';
+import { infoActions } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js';
 export function createKeys(app) {
   const { dom, ui, reg, clock, appPlay, obs, mat, settingsStore } = app, { schedule } = app.loop, { floats, panBy, queueKeyOrbit, rack, rackL, resetView, setDist, setFov } = app.host;
   const { barLock, devById, layout, readSettings, rk, setModArm, togglePlay, transport } = app.sh, { particles, shadowView, toggleFullscreen, wState } = app.w;
@@ -48,7 +48,7 @@ export function createKeys(app) {
     { id: 'home', group: KG.T, short: 'zero', label: 'time to zero', key: 'Home', run: () => { clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); schedule(TIER.EVOLVE); } },
     { id: 'stepBack', group: KG.T, short: 'step back', label: 'step time back (shift: fine)', key: 'ArrowLeft', run: (f) => { clock.step(-transport.stepDt() * f); schedule(TIER.EVOLVE); } },
     { id: 'stepFwd', group: KG.T, short: 'step fwd', label: 'step time forward (shift: fine)', key: 'ArrowRight', run: (f) => { clock.step(transport.stepDt() * f); schedule(TIER.EVOLVE); } },
-    { id: 'ask', group: KG.T, short: 'ask Gemma', label: 'ask Gemma — the transport strip becomes the type box', key: 'Slash', shift: false, inFields: false, run: () => transport.openAsk() },   // 0.6.6 G2
+    ...(ASK_ENABLED ? [{ id: 'ask', group: KG.T, short: 'ask Gemma', label: 'ask Gemma — the transport strip becomes the type box', key: 'Slash', shift: false, inFields: false, run: () => transport.openAsk() }] : []),   // 0.6.6 G2; iteration 011 Q6: the row only under ASK_ENABLED (lab/ask.js) — off, a saved `ask` chord is kept, inert (createKeyTable's `keep`)
     { id: 'zoomIn', group: KG.C, short: 'zoom in', label: 'camera closer', key: 'ArrowUp', run: (f) => { setDist(obs.dist / (1 + 0.12 * f)); } },
     { id: 'zoomOut', group: KG.C, short: 'zoom out', label: 'camera farther', key: 'ArrowDown', run: (f) => { setDist(obs.dist * (1 + 0.12 * f)); } },
     { id: 'yawL', group: KG.C, short: 'yaw left', label: 'camera yaw left', key: 'KeyA', run: (f) => queueKeyOrbit(-0.12 * f, 0) },
@@ -125,7 +125,7 @@ export function createKeys(app) {
     if (app.state.history.pendingLabel !== name) app.state.history.flush();
     run(); app.state.history.note(name);
   };
-  const kt = createKeyTable({ rows: ACTIONS, stageHasFocus, edit: keyEdit });   // 0.5.0 C3: the one listener, the save, the binding law (lab/key-table.js)
+  const kt = createKeyTable({ rows: ACTIONS, stageHasFocus, edit: keyEdit, keep: ASK_ENABLED ? [] : ['ask'] });   // 0.5.0 C3: the one listener, the save, the binding law (lab/key-table.js)
   /* ── 0.5.0 C3 · THE KEYBOARD WINDOW is the kit's createKeyboardWindow (keymap.js left): the drawn board, the platform switch, RECORD /
      RESET, the search and the list, the steal on a second press, Escape's three steps, the drag — on the float layer (UI space for the
      scene guard), its move telling the occlusion (CLAUDE.md).  Its paint is λWAVES' charcoal-blue skin (lab.css §KEYBOARD, R5-S3).  Its

@@ -3,6 +3,7 @@
  * creation — as are app.host.camera, app.sh.setModArm and app.sh.quality, which boot() fills later.  readSettings stays in rack.js' head
  * (§0 calls it first, U1) and comes by value; lookSync is registered for the controller; boot() destructures the rest. */
 import { infoKnown } from './stage-words.js'; import { readSession } from '../mir/core/session.js';
+import { ASK_ENABLED } from '../ask.js';   // iteration 011 Q6: the one flag (ASK hidden: the stored askOk / askUrl carried, never written)
 const SESSION_KEY = 'lambdawaves.q0.session';   // main.js createSession's key (settings-store.js FAMILIES)
 export function createSettings(app) {
   const { ui, mat, settingsStore, useCompactDefaults, FIRST_RUN, appleDevice } = app; const { readSettings } = app.sh;
@@ -35,7 +36,7 @@ export function createSettings(app) {
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
            belong beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
            when you open it is a surprise, not a setting. */
-        friction: app.host.camera.friction, spin: app.host.camera.speed, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock, audio: !!(ui.audioSw && ui.audioSw.get()), askOk: ui.askOk || undefined, askUrl: (ui.askUrlIn && ui.askUrlIn.value.trim()) || undefined,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod); 0.5.3 M6: the camera's LOCK too
+        friction: app.host.camera.friction, spin: app.host.camera.speed, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock, audio: !!(ui.audioSw && ui.audioSw.get()), askOk: ASK_ENABLED ? ui.askOk || undefined : S0.askOk, askUrl: ASK_ENABLED ? (ui.askUrlIn && ui.askUrlIn.value.trim()) || undefined : S0.askUrl,   /* iteration 011 Q6: ASK hidden → the stored pair carried as it was */   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod); 0.5.3 M6: the camera's LOCK too
         /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE, and it is the sixth of the six things
            host-contract.md says a host owes it: where the window sits, which lane the work bars are
            in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
