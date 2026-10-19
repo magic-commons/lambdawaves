@@ -566,6 +566,166 @@
    "sym": "Rn",
    "Z": 86,
    "orbital": "6p_1"
+  },
+  {
+   "sym": "Fr",
+   "Z": 87,
+   "orbital": "7s_0"
+  },
+  {
+   "sym": "Ra",
+   "Z": 88,
+   "orbital": "7s_0"
+  },
+  {
+   "sym": "Ac",
+   "Z": 89,
+   "orbital": "6d_-2"
+  },
+  {
+   "sym": "Th",
+   "Z": 90,
+   "orbital": "6d_-1"
+  },
+  {
+   "sym": "Pa",
+   "Z": 91,
+   "orbital": "5f_-2"
+  },
+  {
+   "sym": "U",
+   "Z": 92,
+   "orbital": "5f_-1"
+  },
+  {
+   "sym": "Np",
+   "Z": 93,
+   "orbital": "5f_0"
+  },
+  {
+   "sym": "Pu",
+   "Z": 94,
+   "orbital": "5f_2"
+  },
+  {
+   "sym": "Am",
+   "Z": 95,
+   "orbital": "5f_3"
+  },
+  {
+   "sym": "Cm",
+   "Z": 96,
+   "orbital": "5f_3"
+  },
+  {
+   "sym": "Bk",
+   "Z": 97,
+   "orbital": "5f_-2"
+  },
+  {
+   "sym": "Cf",
+   "Z": 98,
+   "orbital": "5f_-1"
+  },
+  {
+   "sym": "Es",
+   "Z": 99,
+   "orbital": "5f_0"
+  },
+  {
+   "sym": "Fm",
+   "Z": 100,
+   "orbital": "5f_1"
+  },
+  {
+   "sym": "Md",
+   "Z": 101,
+   "orbital": "5f_2"
+  },
+  {
+   "sym": "No",
+   "Z": 102,
+   "orbital": "5f_3"
+  },
+  {
+   "sym": "Lr",
+   "Z": 103,
+   "orbital": "7p_-1"
+  },
+  {
+   "sym": "Rf",
+   "Z": 104,
+   "orbital": "6d_-1"
+  },
+  {
+   "sym": "Db",
+   "Z": 105,
+   "orbital": "6d_0"
+  },
+  {
+   "sym": "Sg",
+   "Z": 106,
+   "orbital": "6d_1"
+  },
+  {
+   "sym": "Bh",
+   "Z": 107,
+   "orbital": "6d_2"
+  },
+  {
+   "sym": "Hs",
+   "Z": 108,
+   "orbital": "6d_-2"
+  },
+  {
+   "sym": "Mt",
+   "Z": 109,
+   "orbital": "6d_-1"
+  },
+  {
+   "sym": "Ds",
+   "Z": 110,
+   "orbital": "6d_0"
+  },
+  {
+   "sym": "Rg",
+   "Z": 111,
+   "orbital": "6d_1"
+  },
+  {
+   "sym": "Cn",
+   "Z": 112,
+   "orbital": "6d_2"
+  },
+  {
+   "sym": "Nh",
+   "Z": 113,
+   "orbital": "7p_-1"
+  },
+  {
+   "sym": "Fl",
+   "Z": 114,
+   "orbital": "7p_0"
+  },
+  {
+   "sym": "Mc",
+   "Z": 115,
+   "orbital": "7p_1"
+  },
+  {
+   "sym": "Lv",
+   "Z": 116,
+   "orbital": "7p_-1"
+  },
+  {
+   "sym": "Ts",
+   "Z": 117,
+   "orbital": "7p_0"
+  },
+  {
+   "sym": "Og",
+   "Z": 118,
+   "orbital": "7p_1"
   }
  ],
  "orbitals": [
