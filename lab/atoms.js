@@ -1,4 +1,4 @@
-/* atoms.js — THE PERIODIC TABLE as a central field: Z = 1…86 (H … Rn) by Xα(2/3) + the Latter tail.
+/* atoms.js — THE PERIODIC TABLE as a central field: Z = 1…118 (H … Og) by Xα(2/3) + the Latter tail.
  *
  * Every atom in this file is one self-consistent CENTRAL potential shared by all its shells (Herman–Skillman /
  * Hartree–Fock–Slater, but with Kohn–Sham–Gáspár–Dirac exchange α = 2/3, not Slater's α = 1):
@@ -51,17 +51,29 @@
  * the same share as Kr's (33 ppm): VWN correlation and the Latter tail, not the grid.  The model is NON-RELATIVISTIC, and past Kr that is
  * the dominant error: the same table's scalar-relativistic Rn 1s is 394 Eh deeper, and Au's 6s contracts — its −ε 1.62 eV and its Δ-SCF
  * ionisation 2.11 eV deeper (Au here 6.70 eV, measured 9.23).  STATUS says so for every atom past Kr (lab/status.js).
+ *
+ * PAST RADON (iteration 008 A7, research/iteration-008/A7-BUILD.md).  The register reached n = 7, so Fr … Og (7s, 5f, 6d, 7p; the actinide
+ * exceptions Ac Th Pa U Np Cm and Lr's 7p¹ from MOVES) are the same solve on the same mesh: all 32 converge below 1e-8 (worst 4.7e-9), every
+ * orbital bound, normalised and of n − l − 1 nodes, ∫q = Z to 2e-13, the totals monotone; ≈ 0.35 s each, solved when first asked.  The node
+ * count reads only crossings above 1e-12 of the peak (Nh … Og's 6s tail flips sign at 1e-25 of it near 25 a₀ — noise, not a node).  Against
+ * NIST's non-relativistic LDA (the same table, 87Fr and 92U; it stops at U): the 1s 26 ppm (Fr) and 18 ppm (U) above it, the share Kr … Rn
+ * keep; the 7s −ε 3.12 eV (Fr) and 4.04 eV (U) against LDA's 2.07 and 3.56 — the Latter tail binds an s valence harder.  Relativity is the
+ * whole story there: the scalar-relativistic 1s is 12.7 % (Fr) and 14.8 % (U) deeper, and Og's 7p splits (7p₁/₂ deep, 7p₃/₂ shallow) where
+ * this field has one 7p.  Z ≤ 86 is bit-identical to iteration 008 A (every E, ε, u and table row; the snapshot in A7-BUILD.md).
  */
 
 const HARTREE_EV = 27.211386245988;                      // CODATA 2018
 const SPD = 'spdfgh';
 export const NR = 256;                                   // samples per tabulated radial row (space 6)
-export const ROWS = 40;                                  // rows in the GPU's radial buffer (field.js: 40 × 256 f32)
-export const rowOf = (n, l) => l * 6 + (n - l - 1);      // the same (n_r, l) row map cornell.js uses
+export const ROWS = 43;                                  // rows in use in the GPU's radial buffer (field.js: 48 × 256 f32)
+/** the (n_r, l) row map cornell.js and central.js use: the 6 × 6 grid 6l + n_r, and the two n = 7 pairs outside it — (6, 0) the 7s and
+ *  (0, 6) the 7i — at 36 + l (iteration 008 A7; every n ≤ 6 row keeps its place, and 7p … 7h land on free grid rows) */
+export const rowOfNr = (nr, l) => (nr <= 5 && l <= 5 ? l * 6 + nr : 36 + l);
+export const rowOf = (n, l) => rowOfNr(n - l - 1, l);
 
 /* ══ the ground configurations ══════════════════════════════════════════════════════════════════════════════ */
-/* iteration 008 A: H … Rn, every shell through 6p — exactly what hydrogen.js' 91 labels (n ≤ 6, l ≤ 5) can hold; Fr upward needs
-   7s and is its own row (a register of n = 7).  THE ONE SOURCE of the ground configurations: lab/valence.js reads groundConfig. */
+/* iteration 008 A: H … Rn, every shell through 6p — exactly what hydrogen.js' 91 labels (n ≤ 6, l ≤ 5) can hold; iteration 008 A7: Fr … Og,
+   the register's n = 7.  THE ONE SOURCE of the ground configurations: lab/valence.js reads groundConfig. */
 const NAMES = [
   ['H', 'Hydrogen'], ['He', 'Helium'], ['Li', 'Lithium'], ['Be', 'Beryllium'], ['B', 'Boron'], ['C', 'Carbon'],
   ['N', 'Nitrogen'], ['O', 'Oxygen'], ['F', 'Fluorine'], ['Ne', 'Neon'], ['Na', 'Sodium'], ['Mg', 'Magnesium'],
@@ -77,15 +89,20 @@ const NAMES = [
   ['Ho', 'Holmium'], ['Er', 'Erbium'], ['Tm', 'Thulium'], ['Yb', 'Ytterbium'], ['Lu', 'Lutetium'], ['Hf', 'Hafnium'],
   ['Ta', 'Tantalum'], ['W', 'Tungsten'], ['Re', 'Rhenium'], ['Os', 'Osmium'], ['Ir', 'Iridium'], ['Pt', 'Platinum'],
   ['Au', 'Gold'], ['Hg', 'Mercury'], ['Tl', 'Thallium'], ['Pb', 'Lead'], ['Bi', 'Bismuth'], ['Po', 'Polonium'],
-  ['At', 'Astatine'], ['Rn', 'Radon'],
+  ['At', 'Astatine'], ['Rn', 'Radon'], ['Fr', 'Francium'], ['Ra', 'Radium'], ['Ac', 'Actinium'], ['Th', 'Thorium'],
+  ['Pa', 'Protactinium'], ['U', 'Uranium'], ['Np', 'Neptunium'], ['Pu', 'Plutonium'], ['Am', 'Americium'], ['Cm', 'Curium'],
+  ['Bk', 'Berkelium'], ['Cf', 'Californium'], ['Es', 'Einsteinium'], ['Fm', 'Fermium'], ['Md', 'Mendelevium'], ['No', 'Nobelium'],
+  ['Lr', 'Lawrencium'], ['Rf', 'Rutherfordium'], ['Db', 'Dubnium'], ['Sg', 'Seaborgium'], ['Bh', 'Bohrium'], ['Hs', 'Hassium'],
+  ['Mt', 'Meitnerium'], ['Ds', 'Darmstadtium'], ['Rg', 'Roentgenium'], ['Cn', 'Copernicium'], ['Nh', 'Nihonium'], ['Fl', 'Flerovium'],
+  ['Mc', 'Moscovium'], ['Lv', 'Livermorium'], ['Ts', 'Tennessine'], ['Og', 'Oganesson'],
 ];
-export const ZMAX = NAMES.length;                          // 86: the last atom whose every shell is one of the 91 labels
+export const ZMAX = NAMES.length;                          // 118: every shell of Og is one of the 140 labels
 const CAP = [2, 6, 10, 14];
 /** the Madelung order (n + l, then n), l ≤ 3, through n + l = 8 — enough to fill Z = 118 (valence.js reads past Rn) */
 const MADELUNG = []; for (let s = 1; s <= 8; s++) for (let n = 1; n <= s; n++) { const l = s - n; if (l < n && l <= 3) MADELUNG.push([n, l]); }
 /** the standard ground-state exceptions (NIST ASD): Z → [from, to, k] moves k electrons from one subshell of the Madelung filling to
  *  another.  Cr and Cu are the two below Z = 37 (a half- and a wholly-filled 3d each buy one 4s electron); 41–79 their 4d / 5d / 4f
- *  twins (Nb Mo Ru Rh Pd Ag, La Ce Gd, Pt Au); 89–103 the actinides, which only valence.js reads. */
+ *  twins (Nb Mo Ru Rh Pd Ag, La Ce Gd, Pt Au); 89–103 the actinides (Ac Th Pa U Np Cm) and Lr's 7p¹. */
 const MOVES = { 24: ['4s', '3d', 1], 29: ['4s', '3d', 1],
   41: ['5s', '4d', 1], 42: ['5s', '4d', 1], 44: ['5s', '4d', 1], 45: ['5s', '4d', 1], 46: ['5s', '4d', 2], 47: ['5s', '4d', 1],
   57: ['4f', '5d', 1], 58: ['4f', '5d', 1], 64: ['4f', '5d', 1], 78: ['6s', '5d', 1], 79: ['6s', '5d', 1],
@@ -109,8 +126,8 @@ export function modelName(alpha, latter, sic) {
   return (alpha ? `Xα(${a})` : 'Hartree (no exchange)') + (latter ? ' + Latter tail' : ', no tail');
 }
 const sup = (k) => (k > 1 ? String(k).replace(/./g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]) : '');
-const NOBLE = [[2, 'He'], [10, 'Ne'], [18, 'Ar'], [36, 'Kr'], [54, 'Xe']];
-/** ATOMS[i] is the atom of Z = i + 1 (H … Rn): { Z, symbol, name, config: [{n, l, occ}], term, core, exception, model } — `term` every
+const NOBLE = [[2, 'He'], [10, 'Ne'], [18, 'Ar'], [36, 'Kr'], [54, 'Xe'], [86, 'Rn']];
+/** ATOMS[i] is the atom of Z = i + 1 (H … Og): { Z, symbol, name, config: [{n, l, occ}], term, core, exception, model } — `term` every
  *  shell written out, `core` the noble-gas shorthand ([Xe] 4f¹⁴ 5d¹⁰ 6s¹) a readout has room for, `exception` a MOVES row */
 export const ATOMS = NAMES.map(([symbol, name], i) => {
   const Z = i + 1, config = groundConfig(Z), shell = (c) => `${c.n}${SPD[c.l]}${sup(c.occ)}`, term = config.map(shell).join(' ');
@@ -231,7 +248,10 @@ function solveL(g, V, l, k, guess) {
     for (let j = 0; j < n; j++) if (Math.abs(u[j]) > mx) { mx = Math.abs(u[j]); mi = j; }
     if (u[mi] < 0) sc = -sc;
     for (let j = 0; j < n; j++) u[j] *= sc;
-    let nodes = 0; for (let j = 2; j < n - 1; j++) if (u[j] * u[j - 1] < 0) nodes++;
+    /* a node is a sign change where u is not noise: past the last physical node the tail falls below the solve's own floor and may flip sign at
+       |u| ~ 1e-25 of its peak (Nh … Og's 6s at r ≈ 25 a₀, iteration 008 A7) — a count, never used, so it reads only crossings above 1e-12 of the peak */
+    const floor = 1e-12 * mx * Math.abs(sc);                                // u is scaled now: its peak is mx·|sc|
+    let nodes = 0; for (let j = 2; j < n - 1; j++) if (u[j] * u[j - 1] < 0 && Math.max(Math.abs(u[j]), Math.abs(u[j - 1])) > floor) nodes++;
     out.push({ eps: lam, u, nodes });
   }
   return out;
@@ -437,12 +457,12 @@ export function atomEnergyOf(Z, n, l, opts) {
 /** the total energy of atom Z (hartree) */
 export const atomTotalEnergy = (Z, opts) => solveAtom(Z, opts).E;
 /** every shell of one l in the FROZEN converged field, fine mesh + the coarse one's Richardson partner — one
- *  solveL per channel (the matrix gives them all at once), cached on the solved atom.  n ≤ 6 comes for free. */
+ *  solveL per channel (the matrix gives them all at once), cached on the solved atom.  n ≤ 7 comes for free. */
 function frozenChannel(S, l, k) {
   if (!S.frozen) S.frozen = new Map();
   let c = S.frozen.get(l);
   if (!c || c.length < k) {
-    const kk = Math.max(k, 6 - l);                                      // the register's 91 labels stop at n = 6
+    const kk = Math.max(k, 7 - l);                                      // the register's 140 labels stop at n = 7 (each eigenvalue is its own bisection: asking for one more moves none)
     const f = solveL(S.mesh, S.V, l, kk), co = S.coarse ? solveL(S.coarse.mesh, S.coarse.V, l, kk) : null;
     c = f.map((s, i) => ({ n: l + 1 + i, l, occ: 0, eps: co ? (4 * s.eps - co[i].eps) / 3 : s.eps, epsFine: s.eps, u: s.u, nodes: s.nodes, virtual: true }));
     S.frozen.set(l, c);
@@ -527,7 +547,7 @@ function domainOf(S, s) {
   return Math.min(g.rmax, g.r[i] * 1.25);
 }
 /**
- * atomRadialTable(Z, n, l) — the 40 × 256 space-6 table (Float32Array, row = l·6 + n − l − 1, 256 samples of
+ * atomRadialTable(Z, n, l) — the 43 × 256 space-6 table (Float32Array, row = rowOf(n, l), 256 samples of
  * R_nl(r) = u/r linear in r from 0 to rTab) with EVERY occupied shell of the atom filled in, plus the domain
  * radius of the shell asked for.  The same shape and row map cornellRadialTable() hands field.js.
  * A shell the ground configuration does NOT occupy gets its own row too — the frozen field's orbital

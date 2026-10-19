@@ -1,5 +1,5 @@
 /* equalizer.js — THE BEAT EQUALIZER's table (0.6.0 B1).  Pure, DOM-free.
- * Γ is a 6 × 6 complex Hermitian SHELL TABLE with unit diagonal: the field kernel draws ρ′ = Σ_{nn′} Re Γ_{nn′} acc_n acc̄_{n′} + κ·inc,
+ * Γ is a 6 × 6 complex Hermitian SHELL TABLE with unit diagonal (n ≤ 6: a populated n = 7 gates it, iteration 008 A7): the field kernel draws ρ′ = Σ_{nn′} Re Γ_{nn′} acc_n acc̄_{n′} + κ·inc,
  * acc_n = Σ_{a∈n} c_a e^{−iE_a t} ψ_a and inc = Σ_a |c_a ψ_a|².  Γ ⪰ 0 with κ = 0 is a density for every state (Schur); the three
  * splits (κ = −1, or BEATS ONLY) are signed by design.  FLAT with every gain 1 is no table at all: the locked kernel runs.
  * The gains decohere a shell from the others, never dim it: S = ssᵀ + diag(1 − s²), Γ = B∘S.
@@ -56,6 +56,7 @@ export function createEqualizer() {
       if (eq.birth()) return null;
       const shell = new Map(), w = new Float64Array(6);                              // the labels gate: one rate per populated shell
       for (const a of populated) { const n = BASIS[a].n, r = rates ? rates[a] : 1;    // w: the shell populations, else equal over the populated shells
+        if (n > 6) return { gate: 'the equalizer’s table is six shells: n = 7 is populated', gamma: null };   // iteration 008 A7: the kernel's six accumulators (field.js EQ_WGSL) — n = 7 stands it down, never folds into n = 6
         if (shell.has(n) && shell.get(n) !== r) return { gate: 'one rate per shell for the equalizer', gamma: null };
         shell.set(n, r); if (pops) w[n - 1] += pops[a]; else w[n - 1] = 1; }
       const E = (n) => -Z * Z / (2 * n * n), p = eq.preset, s = eq.gains, k = p === 'within' || p === 'interference' ? -1 : 0;

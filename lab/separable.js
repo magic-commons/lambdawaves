@@ -50,7 +50,7 @@ export const SEPARABLE = {
   energy, radial: () => 0, tableFor, momentumTableFor: tableFor, psiAt, phiAt: psiAt, domainFor, domainForP: domainFor,   // radial 0: the spherical readers stand down (separable)
   kernelSpace: { x: 7, p: 7 }, stark: false, hydrogenTheorems: false, noMomentum: true, separable: true, labelOf,
   get spectrum() { return { levels: GROUPS.map((g, k) => ({ key: k, E: g.E, label: levelName(g), rgb: RGB[(form === 'cube' ? k : sum(g.t)) % 6] })), levelKey: (a) => (a < NL ? KEY[a] : -1),
-    Emin: 0, Etop: GROUPS[GROUPS.length - 1].E * 1.08, topLabel: '', nan: 'unused here', footer: `EIGENVALUE  E = ${form === 'cube' ? 'π²Σnᵢ²/(2L²)' : 'Σ ωᵢ(nᵢ + ½)'} · ${NL} of 91 labels · ${91 - NL} unused here` }; },
+    Emin: 0, Etop: GROUPS[GROUPS.length - 1].E * 1.08, topLabel: '', nan: 'unused here', footer: `EIGENVALUE  E = ${form === 'cube' ? 'π²Σnᵢ²/(2L²)' : 'Σ ωᵢ(nᵢ + ½)'} · ${NL} of ${BASIS.length} labels · ${BASIS.length - NL} unused here` }; },
 };
 /** THE CARD: the FORM stepper, ω_x ω_y ω_z (the cube: L), the readout.  api = { apply(id) } — a change reconfigures and re-applies, so the register re-reads its energies */
 export function createSeparable(host, api) {
@@ -63,7 +63,7 @@ export function createSeparable(host, api) {
     + ' <b>Cube.</b> A box of side L with hard walls: ψ ∝ ∏ sin(n<sub>i</sub>π(x<sub>i</sub>/L + ½)), n<sub>i</sub> ≥ 1, E = π²Σn<sub>i</sub>²/(2L²) — the whole levels to Σn<sub>i</sub>² = 29 (54 labels), the (1,1,2) threefold and the (1,2,3) sixfold among them. Its own gas is deferred: SPECTRUM\'s GAS launches into the spherical well.';
   function pick(f, w, l) { configure(f, w, l ?? L); api.apply('separable'); }
   function sync() { step.set(form); kn.forEach((k, i) => { if (k.get() !== W[i]) k.set(W[i]); k.root.style.display = form === 'cube' ? 'none' : ''; }); if (kL.get() !== L) kL.set(L); kL.root.style.display = form === 'cube' ? '' : 'none';
-    ro.set(`E₀ = ${+GROUPS[0].E.toFixed(4)} ${SEPARABLE.unit} · ${GROUPS.length} levels of ${NL} labels · lowest shell ×${GROUPS[0].deg} · ${91 - NL} unused here`);
+    ro.set(`E₀ = ${+GROUPS[0].E.toFixed(4)} ${SEPARABLE.unit} · ${GROUPS.length} levels of ${NL} labels · lowest shell ×${GROUPS[0].deg} · ${BASIS.length - NL} unused here`);
     ro.setSub(GROUPS.slice(0, 8).map((g) => `${+g.E.toPrecision(4)} ${levelName(g)}`).join(' · ') + (GROUPS.length > 8 ? ' · …' : '')); }
   sync();
   return (SEP = { prepare: sync, sync });

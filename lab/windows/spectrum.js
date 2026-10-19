@@ -299,7 +299,7 @@ export function createSpectrumCard(app) {
     return true;
   }
 
-  /** the ELEMENT knob: which atom the ATOM Hamiltonian solves (Z = 1 … 86, H … Rn); the register is re-read in it */
+  /** the ELEMENT knob: which atom the ATOM Hamiltonian solves (Z = 1 … 118, H … Og); the register is re-read in it */
   function setElement(Z) {
     Z = Math.max(1, Math.min(ZMAX, Math.round(Z) || 1));
     busy.n++; busySync();                                              // wave 48: the atom is re-solved on a log mesh, twice, and Richardson-extrapolated — the mark says so

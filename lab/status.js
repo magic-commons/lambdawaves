@@ -21,11 +21,12 @@ export function statusOf({ owner = 'molecule', record = null, sol = null, oracle
   const join = (...a) => a.filter(Boolean).join(' · '), said = (word, caveat, head, geometry = null) => ({ word, line: join(lda && 'RKS LDA', label || (lda && view === 'density' ? '' : VIEW[view][0]), s2 && 'UHF ' + s2, word, caveat),
     head: join(s2 && `${s2} (exact ${S * (S + 1)})`, head), geometry });   // the line keeps the 110-character budget; the head has room for S(S+1)
   if (owner === 'hydrogen') { const H = FIELD_LAW.hydrogen, p = `picture good to ${up(H.rms)} RMS (worst voxel ${up(H.worst)})`; label = label || 'HYDROGEN'; return said('EXACT', p, join(label !== 'HYDROGEN' && label, 'EXACT', p)); }   // 0.8.1 T2: a reduced mass rides in the label
-  if (owner === 'stark') { label = label || 'HYDROGEN + F·z'; return said('NUMERICAL', 'eigensolve in the n ≤ 6 basis · no continuum: ionisation said, not simulated', join('NUMERICAL', 'INTER-SHELL STARK · eigensolve in the n ≤ 6 basis')); }   // 0.8.0 G3
+  if (owner === 'stark') { label = label || 'HYDROGEN + F·z'; return said('NUMERICAL', 'eigensolve in the n ≤ 7 basis · no continuum: ionisation said, not simulated', join('NUMERICAL', 'INTER-SHELL STARK · eigensolve in the n ≤ 7 basis')); }   // 0.8.0 G3
   if (owner === 'atom') {   // iteration 008 A: past Kr the central field says it is non-relativistic (atoms.js' header has the numbers); H–Kr keep no line
     if (!(Z > 36)) return null;
-    const why = 'non-relativistic Xα: the valence levels drift from measurement with Z (the 6s contraction)';
-    const o = said('NUMERICAL', why, join('NUMERICAL', 'ATOM · ' + (label || 'Z = ' + Z), 'one Xα(2/3) + Latter-tail central field', 'no mass–velocity, no spin–orbit: the core and the 6s sit too shallow'));
+    const past = Z > 86;   // iteration 008 A7: Fr … Og, the 7s and 7p
+    const why = past ? 'non-relativistic Xα: the 7s/7p levels are a relativistic story (Og’s 7p₃/₂)' : 'non-relativistic Xα: the valence levels drift from measurement with Z (the 6s contraction)';
+    const o = said('NUMERICAL', why, join('NUMERICAL', 'ATOM · ' + (label || 'Z = ' + Z), 'one Xα(2/3) + Latter-tail central field', past ? 'no mass–velocity, no spin–orbit: the core and the 7s sit too shallow, the 7p is not split' : 'no mass–velocity, no spin–orbit: the core and the 6s sit too shallow'));
     o.line = join(label, 'NUMERICAL', why); o.atom = true; return o;
   }
   if (owner !== 'molecule') return null;

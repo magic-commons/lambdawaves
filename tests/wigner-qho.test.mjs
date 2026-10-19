@@ -21,9 +21,9 @@ for (const [name, a, n] of [['|0⟩ = 1s', idx(1, 0, 0), 0], ['|1⟩ along z = 2
   judge(`NEGATIVITY ${name} on the window's 64 × 64 grid: ${ng.toFixed(5)} against the whole slice ${want.toFixed(5)} (3 decimals)`, Math.abs(ng - want) < 5e-4);
 }
 setHamiltonian('qho');
-const re = new Float64Array(91), im = new Float64Array(91); re[idx(1, 0, 0)] = 1; applyKickZ(re, im, 1);
-let n2 = 0; for (let a = 0; a < 91; a++) n2 += re[a] * re[a] + im[a] * im[a];
-const T = []; for (let a = 0; a < 91; a++) if (re[a] || im[a]) T.push({ a, re: re[a] / Math.sqrt(n2), im: im[a] / Math.sqrt(n2) });
+const re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length); re[idx(1, 0, 0)] = 1; applyKickZ(re, im, 1);
+let n2 = 0; for (let a = 0; a < BASIS.length; a++) n2 += re[a] * re[a] + im[a] * im[a];
+const T = []; for (let a = 0; a < BASIS.length; a++) if (re[a] || im[a]) T.push({ a, re: re[a] / Math.sqrt(n2), im: im[a] / Math.sqrt(n2) });
 const S = wignerSlice(T, { z: [-5.6, 5.6, 64], p: [-4, 4, 64], qho: true }), ng = negativity(S);
-judge(`a slap k = 1 on |0⟩ (${T.length} labels, ‖c‖² = ${n2.toFixed(9)}): min ${S.min.toExponential(2)} > −1e-8 (peak 1/π³), negativity ${ng.toExponential(2)} < 1e-7 — reads 0.000`, S.min > -1e-8 && ng < 1e-7 && T.length <= 21);
+judge(`a slap k = 1 on |0⟩ (${T.length} labels, ‖c‖² = ${n2.toFixed(9)}): min ${S.min.toExponential(2)} > −1e-8 (peak 1/π³), negativity ${ng.toExponential(2)} < 1e-7 — reads 0.000`, S.min > -1e-8 && ng < 1e-7 && T.length <= 28);   // the m = 0 labels: 21 on n ≤ 6, 28 on n ≤ 7
 console.log(FAILED ? `\n${FAILED} RED` : '\nALL GREEN'); if (FAILED) process.exit(1);

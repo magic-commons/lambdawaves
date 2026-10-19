@@ -4,13 +4,14 @@
  * population |c_a|² (a fader that sets |c_a| at the current time), the phase arg c_a(t) as a
  * live free-spinning needle (drag adds a phase; the needle keeps turning while playing),
  * MUTE / SOLO (a reconstruction mask, not an edit) and remove.  Touching a lane selects it.
- * The picker exposes all 91 states grouped by n.  Editing goes through api.* (one road).
+ * The picker exposes all 140 states grouped by n (n = 7 since iteration 008 A7), each shell folded by its coloured `n` number.
+ * Editing goes through api.* (one road).
  * W-STURMIAN: when api.hamiltonian() carries `eigen` (the SCALE is on) the ladder shows the eigen-decomposition —
  * the rank eigenvalues of S⁻¹H, each with the state's population (its S-metric projection), unoccupied ones dim,
  * E > 0 in a compressed band above the E = 0 line — and a click loads that eigenvector (api.selectEigen); the lanes
  * keep the labels' coefficients under a caption, and the RATE knobs stand down (api.rateDisabled) with a note.
  */
-import { BASIS, energy, HARTREE_EV } from './hydrogen.js';
+import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
 import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, sw } from './mir/kit.js';
 import { paintStroke, fillButton } from './paint-stroke.js';
 
@@ -60,7 +61,7 @@ export function createSpectrum(host, api) {
   const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'Hide or show the channels';
   const addBtn = el('button', 'trig', head); addBtn.type = 'button'; addBtn.innerHTML = '<span class="trig-g">+</span><span class="trig-l">MODE</span>';
   /* iteration 008 S · EMPTY ↔ FILL ALL (paint-stroke.js fillButton, in its words): a register with anything in it shows EMPTY (c ↦ 0, SPECTRUM's
-     old CLEAR), an empty one FILL ALL (all 91 labels, equal and in phase, normalised); one undo row each.  NORM went: a HAND stroke on the grid
+     old CLEAR), an empty one FILL ALL (all 140 labels, equal and in phase, normalised); one undo row each.  NORM went: a HAND stroke on the grid
      normalises at its end (below), a modulator never does.  The press reads the register itself (the label is repainted by rebuild(), which a
      folded or paused card may not have run yet), and so does a hover. */
   const fillSync = () => fillB.set(!api.reg.populated().length);
@@ -89,10 +90,21 @@ export function createSpectrum(host, api) {
   host.appendChild(psiFx.root);                                                     // the live coefficient readout follows the scale/state controls
   addBtn.addEventListener('click', () => { picker.hidden = !picker.hidden; addBtn.classList.toggle('on', !picker.hidden); });
   const chips = new Map();
-  for (let n = 1; n <= 6; n++) {
-    const g = el('div', 'pk-n', picker); g.style.setProperty('--nc', N_COLOR[n]);
-    el('div', 'pk-nl', g, 'n' + n);
-    const cs = el('div', 'pk-chips', g);
+  /* iteration 008 A7 · THE SHELL FOLD (Josh: "clicking on the colored 'n=' number … should be able to hide section of all 1, 2, 3, all the way
+     to 7").  The number IS the handle — the kit's fold (lab/fold.js: `.lw-fold-body` hidden by the attribute, aria-expanded on the press), no
+     chevron; a folded shell keeps its row, and a populated label inside it is counted on that row so nothing is hidden.  A folded chip is
+     display:none, so THE PAINT GESTURE (elementFromPoint) crosses only the open rows; the ladder is not touched.  The folded set is WORKSPACE
+     (rack-wiring.js captureLayout reads the presses' aria-expanded as the card's `shells`, written only when it is not the default): n = 7
+     ships folded, on a first run and for a record older than this build. */
+  const FOLD_DEFAULT = [7], shellRows = new Map();
+  for (let n = 1; n <= NMAX; n++) {
+    const g = el('div', 'pk-n', picker); g.style.setProperty('--nc', N_COLOR[n]); g.dataset.n = String(n);
+    const nl = el('button', 'pk-nl', g, 'n' + n); nl.type = 'button';
+    const cs = el('div', 'pk-chips lw-fold-body', g); cs.id = 'pk-shell-' + n; nl.setAttribute('aria-controls', cs.id);
+    const cnt = el('div', 'pk-count', g); cnt.hidden = true;
+    shellRows.set(n, { g, nl, cs, cnt });
+    nl.addEventListener('pointerdown', (e) => e.stopPropagation());   // the handle is no paint stroke (paint-stroke.js would swallow its click)
+    nl.addEventListener('click', () => { setShellFold(n, !cs.hidden); });
     for (const s of BASIS) if (s.n === n) {
       const b = el('button', 'pk-c', cs, s.label); b.type = 'button'; b.title = `${s.id}  E = ${s.E.toFixed(5)}`;
       b.dataset.a = String(s.index);
@@ -100,6 +112,20 @@ export function createSpectrum(host, api) {
       chips.set(s.index, b);
     }
   }
+  /** fold (true) or open shell n's row; the count on its line follows */
+  function setShellFold(n, v) {
+    const R = shellRows.get(n); if (!R) return;
+    R.cs.hidden = !!v; R.nl.setAttribute('aria-expanded', String(!v)); R.nl.title = (v ? 'unfold' : 'fold') + ' n = ' + n; R.g.classList.toggle('folded', !!v);
+    paintCounts();
+  }
+  /** a folded shell's populated labels, counted on its row (so a folded state is never out of sight) */
+  function paintCounts() {
+    for (const [n, R] of shellRows) {
+      let k = 0; if (R.cs.hidden) for (const s of BASIS) if (s.n === n && chips.get(s.index).classList.contains('on')) k++;
+      const t = R.cs.hidden && k ? `${k} populated` : ''; if (R.cnt.textContent !== t) R.cnt.textContent = t; R.cnt.hidden = !t;
+    }
+  }
+  for (let n = 1; n <= NMAX; n++) setShellFold(n, FOLD_DEFAULT.includes(n));
   /* 2026-10 (Josh) · PAINT THE GRID (lab/paint-stroke.js): LEFT adds a state, RIGHT removes it; a drag takes every chip it
      crosses.  The chips are DOM, so the stroke is sampled every 6 px and asked of elementFromPoint. */
   const chipAt = (p) => { const c = document.elementFromPoint(p.x, p.y), b = c && c.closest ? c.closest('.pk-c') : null; return b && picker.contains(b) ? [+b.dataset.a] : []; };
@@ -237,6 +263,7 @@ export function createSpectrum(host, api) {
     rateOff = !!reg.P || !!(api.rateDisabled && api.rateDisabled());   // any propagator (STURMIAN, 0.8.0 INTER-SHELL STARK)
     for (const [a, L] of lanes) refresh(L, a);
     for (const [a, b] of chips) b.classList.toggle('on', keep.has(a));
+    paintCounts();
     const rs = reg.renderSet();
     const levels = Object.keys(groupByN(want)).length;
     fillB.set(!want.length);
@@ -284,7 +311,7 @@ export function createSpectrum(host, api) {
     if (!HS) { g.strokeStyle = ink(0.35); g.setLineDash([2, 3]); g.beginPath(); g.moveTo(left, y(0)); g.lineTo(right, y(0)); g.stroke(); g.setLineDash([]); }
     const n2 = reg.norm2() || 1;
     const pops = {}; for (const a of reg.populated()) { const k = HS ? HS.levelKey(a) : BASIS[a].n; pops[k] = (pops[k] || 0) + reg.population(a) / n2; }
-    const LEVELS = HS ? HS.levels : [1, 2, 3, 4, 5, 6].map((n) => ({ key: n, E: energy(n), label: 'n' + n, rgb: nRGB(n) }));
+    const LEVELS = HS ? HS.levels : Array.from({ length: NMAX }, (_, i) => i + 1).map((n) => ({ key: n, E: energy(n), label: 'n' + n, rgb: nRGB(n) }));
     const names = [];                                    // (the Rydberg bunching crowds the gutter: see the placement below)
     for (const lv of LEVELS) {
       const n = lv.key, yy = y(lv.E), c = vividInk(lv.rgb), lit = pops[n] > 0;
@@ -392,5 +419,7 @@ export function createSpectrum(host, api) {
   const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); };
   return { update, rebuild, select, energyText, preset, get selected() { return selected; }, lanes, get building() { return pending.length; },
     get dials() { return !rowsEl.hidden; }, setDials,
-    openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; } };
+    openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; },
+    /** iteration 008 A7: the folded shells (WORKSPACE, read and written by rack-wiring.js through the presses' aria-expanded) */
+    get folded() { return [...shellRows].filter(([, R]) => R.cs.hidden).map(([n]) => n); }, setFolded(list) { for (const n of shellRows.keys()) setShellFold(n, list.includes(n)); } };
 }

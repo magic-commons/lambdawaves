@@ -6,7 +6,7 @@
  *   config  { id, ham, Z, radius }                 → the Hamiltonian selector mirrored (hydrogen with its Z, the oscillator, the BOX with its radius)
  *   warm    {}                                     → the SLAP tables built here, once, so the first bow pays nothing anywhere
  *   kick    { re, im, k, d, ham, Z, radius }       → the bow's slap e^{ik·x} on a snapshot of c(t): the kicked vector, ⟨p⟩ along d before and after
- *   packet  { x0, k, sigma, radius }               → the BOX bow: the Gaussian projected on the well's 91 eigenstates (well.js wellPacket)
+ *   packet  { x0, k, sigma, radius }               → the BOX bow: the Gaussian projected on the well's 91 eigenstates of n ≤ 6 (well.js wellPacket; 140-wide arrays)
  *   period  { energies, horizon }                  → the density's period / near-recurrence scan (period.js densityPeriod) for the transport's readout
  *   ladder  { params }                             → the revival packet, scan and asymptotic prediction
  *   lattice.solve { n, re, im }                    → LATTICE's eigenpairs { E, re, im } (lattice-model.js: real → eigSymQL, Hermitian → hermitianEigen)
@@ -121,7 +121,7 @@ function work(m) {
   let out = {}, transfer = [];
   try {
     if (m.op === 'config') { configure(m); out = { ok: true }; }
-    else if (m.op === 'warm') { configure(m); while (!warmStep(1e9)) { /* to the end */ } const one = new Float64Array(91).fill(0.1), zero = new Float64Array(91); pAlong(one, zero, [0, 0, 1]); out = { ok: true }; }   // the tables AND the dipole quadratures momentumZ caches (the first bow's other 100 ms)
+    else if (m.op === 'warm') { configure(m); while (!warmStep(1e9)) { /* to the end */ } const one = new Float64Array(BASIS.length).fill(0.1), zero = new Float64Array(BASIS.length); pAlong(one, zero, [0, 0, 1]); out = { ok: true }; }   // the tables AND the dipole quadratures momentumZ caches (the first bow's other 100 ms)
     else if (m.op === 'kick') {
       configure(m);
       const re = Float64Array.from(m.re), im = Float64Array.from(m.im);
@@ -470,7 +470,7 @@ export function chemDriveRun(m = {}) {
   if (Array.isArray(m.keys)) { out.laneRe = new Float64Array(m.keys.length); out.laneIm = new Float64Array(m.keys.length); m.keys.forEach((key, i) => { const k = (key | 0) + 1; if (k >= 0 && k < D.N) { out.laneRe[i] = D.br[k]; out.laneIm[i] = D.bi[k]; } }); }
   return out;
 }
-/* ── THE SONG (0.6.4 S1): hydrogen DRIVEN by a track, i ċ = (diag E_n + E_z(t)·z) c over the 91 labels by driveStep (D.w, the free phases, and D.ops are each drive's own).  z = δ_mm' ∫R_nl R_n'l' r³ dr
+/* ── THE SONG (0.6.4 S1): hydrogen DRIVEN by a track, i ċ = (diag E_n + E_z(t)·z) c over the 140 labels by driveStep (D.w, the free phases, and D.ops are each drive's own).  z = δ_mm' ∫R_nl R_n'l' r³ dr
  * (trapezoid, 20 000 points to r = 400) × √(((l+1)² − m²)/((2l+1)(2l+3))), eigensolved once.  The track (t_atom = RATE × t_audio) is low-passed at the stepper's Nyquist and
  * decimated ONCE by a polyphase (64-phase) Blackman-windowed sinc to the steps' MIDPOINTS t0 + (j + ½)dt, peak-normalised; whole steps only (the rest is `lag`), 0 past the end. */
 let song = null, songTrack = null;

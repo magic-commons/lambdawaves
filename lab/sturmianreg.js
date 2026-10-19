@@ -1,4 +1,10 @@
-/* sturmianreg.js — THE SCALE on the register: the Sturmian propagator over the 91 labels, assembled block by block.
+/* sturmianreg.js — THE SCALE on the register: the Sturmian propagator over the 91 labels of n ≤ 6, assembled block by block.
+ *
+ * THE SCALE STAYS n ≤ 6 (iteration 008 A7).  The register grew to 140 labels (n = 7 appended); the propagator's objects are
+ * 140 wide so the register reads them by its own index, but only the 91 labels of n ≤ 6 enter the (l, m) blocks: n = 7's
+ * rows and columns are zero (no eigenvector carries one), so under the scale an n = 7 coefficient has no column and evolves
+ * to nothing — the scale says so.  Every block, eigenvalue and evolution of the 91 is unchanged to the bit (THE LOCK's
+ * sturmian rows), which a seven-label block would not be (one more Sturmian moves every variational eigenvalue).
  *
  * sturmian.js gives S, H and the generalised eigenproblem H C = S C E, CᵀSC = I on ANY label set (closed forms, EXACT;
  * eigenvalues VARIATIONAL).  On the whole register the (l, m) blocks are exactly degenerate in ±m pairs (neither H nor
@@ -20,10 +26,10 @@
  * STATUS: EXACT (bookkeeping over sturmian.js's closed forms; judged against the unblocked 91 × 91 solve to 1e-10 in
  * tests/sturmianreg.test.mjs: same eigenvalues, same evolution, CᵀSC = I, block purity), VARIATIONAL (the eigenvalues).
  */
-import { BASIS } from './hydrogen.js';
+import { BASIS, N6 } from './hydrogen.js';
 import { createSturmian, sturmianRecord } from './sturmian.js';
 
-export const N = BASIS.length;                                      // 91
+export const N = BASIS.length;                                      // 140: the register's width (the blocks hold its first 91)
 
 /**
  * createRegisterSturmian(λ, { Z }) → the block-pure propagator over the 91 labels in BASIS order.
@@ -36,7 +42,7 @@ export const N = BASIS.length;                                      // 91
  */
 export function createRegisterSturmian(lambda, { Z = 1 } = {}) {
   const blocks = new Map();
-  for (const s of BASIS) { const key = s.l + ':' + s.m; if (!blocks.has(key)) blocks.set(key, []); blocks.get(key).push(s.index); }
+  for (const s of BASIS) { if (s.index >= N6) continue; const key = s.l + ':' + s.m; if (!blocks.has(key)) blocks.set(key, []); blocks.get(key).push(s.index); }   // n ≤ 6 only (the header)
   const S = new Float64Array(N * N), H = new Float64Array(N * N), cols = [];
   for (const idx of blocks.values()) {
     const P = createSturmian(idx, lambda, { Z }), B = idx.length;

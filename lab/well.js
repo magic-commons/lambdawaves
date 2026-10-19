@@ -7,11 +7,11 @@
  *     k a = z_{n_r+1, l}  (the (n_r+1)-th zero of j_l),   E = k²/2 = z²/(2a²),
  *     N² = 2 / (a³ j_{l+1}(z)²).
  *
- * The register's 91 labels are reused through n_r = n − l − 1.  The wall is hard: ψ vanishes at r = a and the
+ * The register's 140 labels are reused through n_r = n − l − 1.  The wall is hard: ψ vanishes at r = a and the
  * kernel draws nothing outside.  A slap on the ground state makes a packet that BOUNCES off the wall and
  * disperses (no Ehrenfest miracle here — the box is not quadratic), and with the DRAG toy it settles.
  */
-import { BASIS, ylmNorm, legendreDerivCoeffs } from './hydrogen.js';
+import { BASIS, N6, ylmNorm, legendreDerivCoeffs } from './hydrogen.js';
 import { sphericalBessel } from './bessel.js';
 
 const ZEROS = new Map();
@@ -40,14 +40,14 @@ export function wellTable(n, l, m, a) {
   const am = Math.abs(m), leg = legendreDerivCoeffs(l, am);
   const sign = (m >= 0 && (am % 2 === 1)) ? -1 : 1;
   const norm = sign * wellNorm(n, l, a) * ylmNorm(l, am);
-  const pad = (v) => { const o = new Float64Array(6); for (let i = 0; i < v.length && i < 6; i++) o[i] = v[i]; return o; };
+  const pad = (v) => { const o = new Float64Array(7); for (let i = 0; i < v.length && i < 7; i++) o[i] = v[i]; return o; };
   return { n, l, m, am, norm, lag: pad([wellK(n, l, a), a, 0, 0, 0, 0]), leg: pad(leg), space: 'well', a };
 }
 export function wellFromTable(T, x, y, z) {
   const r = Math.hypot(x, y, z);
   if (r >= T.lag[1]) return { re: 0, im: 0 };
   const ct = r < 1e-300 ? 1 : z / r, st = Math.sqrt(Math.max(0, 1 - ct * ct)), phi = Math.atan2(y, x);
-  let D = 0, xp = 1; for (let j = 0; j < 6; j++) { D += T.leg[j] * xp; xp *= ct; }
+  let D = 0, xp = 1; for (let j = 0; j < T.leg.length; j++) { D += T.leg[j] * xp; xp *= ct; }
   let stm = 1; for (let i = 0; i < T.am; i++) stm *= st;
   const f = T.norm * sphericalBessel(T.l, T.lag[0] * r) * stm * D;
   return { re: f * Math.cos(T.m * phi), im: f * Math.sin(T.m * phi) };
@@ -67,14 +67,15 @@ export function wellPsiAt(re, im, x, y, z, indices) {
 export const wellDomainFor = () => RADIUS * 1.08;
 export const wellRadialFor = (n, l, r) => wellRadial(n, l, r, RADIUS);
 /* ── THE GAS: a localised packet in the box.  A Gaussian of width σ at x₀ with momentum k, projected onto the well's
-   91 eigenstates on a grid; `captured` is how much of it the register can hold (the box resolves nothing sharper
+   91 eigenstates of n ≤ 6 on a grid (iteration 008 A7: the register is 140 wide and n = 7's 49 stay 0 — the BOX packet keeps its
+   91-state resolution, every coefficient and `captured` the same double, THE LOCK's box rows; the AXIAL gas is the box's fine road); `captured` is how much of it the register can hold (the box resolves nothing sharper
    than ≈ a/6, the wavelength of its highest state).  The packet is a NEW state — normalised — and it moves and
    bounces by the exact evolution of the truncated register. ── */
 export function wellPacket(x0, k, sigma, { G = 36 } = {}) {
   const a = RADIUS, h = 2 * a / G, w = h * h * h;
-  const re = new Float64Array(91), im = new Float64Array(91);
+  const re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length);
   const A = Math.pow(2 * Math.PI * sigma * sigma, -0.75);
-  const tabs = BASIS.map((s) => wellTableFor(s));
+  const tabs = BASIS.slice(0, N6).map((s) => wellTableFor(s));
   /* THE FACTORS ONCE PER POINT (optimization 2026-09-24, K11 · REFUTE-A's answer to F7).  wellFromTable(tabs[q], …) for
      all 91 labels re-derived the same geometry 91 times, a spherical Bessel per label where only 21 (l, k, a) exist, a
      Legendre polynomial and st^|m| per label where only 21 (|m|, coefficients) exist, and e^{imφ} where only 11 m do.
@@ -82,9 +83,9 @@ export function wellPacket(x0, k, sigma, { G = 36 } = {}) {
      products keep its order (norm · j · st^|m| · D, then · cos/sin(mφ)), so every coefficient is the same double
      (probes/K/k11-wellpacket: Object.is on all 91 re/im and `captured`).  The worker's `packet` op is this function. */
   const kz = (v) => (Object.is(v, -0) ? '-0' : String(v));
-  const radKey = new Map(), angKey = new Map(), mKey = new Map(), radOf = new Int32Array(91), angOf = new Int32Array(91), mOf = new Int32Array(91);
+  const radKey = new Map(), angKey = new Map(), mKey = new Map(), radOf = new Int32Array(N6), angOf = new Int32Array(N6), mOf = new Int32Array(N6);
   const radT = [], angT = [], mT = [];
-  for (let q = 0; q < 91; q++) {
+  for (let q = 0; q < N6; q++) {
     const T = tabs[q];
     const rk = T.l + ':' + kz(T.lag[0]) + ':' + kz(T.lag[1]); if (!radKey.has(rk)) { radKey.set(rk, radT.length); radT.push(T); } radOf[q] = radKey.get(rk);
     const ak = T.am + ':' + Array.from(T.leg, kz).join(','); if (!angKey.has(ak)) { angKey.set(ak, angT.length); angT.push(T); } angOf[q] = angKey.get(ak);
@@ -100,9 +101,9 @@ export function wellPacket(x0, k, sigma, { G = 36 } = {}) {
     const r = Math.hypot(x, y, z);                                  // wellFromTable's geometry, once
     const ct = r < 1e-300 ? 1 : z / r, st = Math.sqrt(Math.max(0, 1 - ct * ct)), phi = Math.atan2(y, x);
     for (let u = 0; u < radT.length; u++) { const T = radT[u]; J[u] = r >= T.lag[1] ? 0 : sphericalBessel(T.l, T.lag[0] * r); }
-    for (let u = 0; u < angT.length; u++) { const T = angT[u]; let D = 0, xp = 1; for (let jj = 0; jj < 6; jj++) { D += T.leg[jj] * xp; xp *= ct; } DV[u] = D; let stm = 1; for (let s = 0; s < T.am; s++) stm *= st; SM[u] = stm; }
+    for (let u = 0; u < angT.length; u++) { const T = angT[u]; let D = 0, xp = 1; for (let jj = 0; jj < T.leg.length; jj++) { D += T.leg[jj] * xp; xp *= ct; } DV[u] = D; let stm = 1; for (let s = 0; s < T.am; s++) stm *= st; SM[u] = stm; }
     for (let u = 0; u < mT.length; u++) { EC[u] = Math.cos(mT[u] * phi); ES[u] = Math.sin(mT[u] * phi); }
-    for (let q = 0; q < 91; q++) {                                  // ⟨q|packet⟩ = ∫ ψ_q* packet
+    for (let q = 0; q < N6; q++) {                                  // ⟨q|packet⟩ = ∫ ψ_q* packet
       const T = tabs[q];
       if (r >= T.lag[1]) continue;                                  // wellFromTable's { 0, 0 } outside the wall: the same `continue`
       const f = T.norm * J[radOf[q]] * SM[angOf[q]] * DV[angOf[q]];
@@ -111,9 +112,9 @@ export function wellPacket(x0, k, sigma, { G = 36 } = {}) {
       re[q] += w * (vre * pr + vim * pi); im[q] += w * (vre * pi - vim * pr);
     }
   }
-  let captured = 0; for (let q = 0; q < 91; q++) captured += re[q] * re[q] + im[q] * im[q];
+  let captured = 0; for (let q = 0; q < N6; q++) captured += re[q] * re[q] + im[q] * im[q];
   const s = captured > 0 ? 1 / Math.sqrt(captured) : 0;
-  for (let q = 0; q < 91; q++) { re[q] *= s; im[q] *= s; }
+  for (let q = 0; q < N6; q++) { re[q] *= s; im[q] *= s; }
   return { re, im, captured };
 }
 /** the centroid ⟨x⟩ of a coefficient vector on the well, by a grid — for the tests and the readouts */

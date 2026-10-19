@@ -69,12 +69,12 @@ function stateOfPreset(id, t = 16.755, over = {}) {
 /** a state with `k` populated labels, random complex, normalised — the fixture for the sparse/dense law */
 function stateOfK(k, seed = 7, t = 0) {
   const rnd = mulberry32(seed), reg = new Register();
-  const idx = BASIS.map((s) => s.index); for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  const idx = BASIS.slice(0, 91).map((s) => s.index); for (let i = idx.length - 1;   /* the REGISTER section's 91 (n ≤ 6); n = 7 rides REG7, judged in §11 */ i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
   for (const a of idx.slice(0, k)) { reg.re0[a] = rnd() * 2 - 1; reg.im0[a] = rnd() * 2 - 1; }
   if (k) reg.normalize();
   return { reg, state: { experiment: Object.assign(reg.serialize(t), { rate: 4, window: 0 }), presentation: presentation() } };
 }
-const vec = (modes) => { const re = new Float64Array(91), im = new Float64Array(91);
+const vec = (modes) => { const re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length);
   for (const m of modes) { const a = BASIS_INDEX.get(m.id); re[a] = m.re; im[a] = m.im; } return { re, im }; };
 
 /* ── the picture oracle: is anything you could SEE different? ──────────────────────────────────── */
@@ -454,6 +454,22 @@ const SIZES = [];
   judge('THE SIZE LEDGER: a shipped preset is ' + smallest + '–' + biggest + ' characters of state (' + (base.length + biggest) + ' of href); the WORST case the format can produce — 91 dense coefficients, a full mute/solo mask, 91 rates off 1 and an eight-stop edited palette — is ' + W.chars + ' characters, ' + worstHref + ' of href, which is ' + Math.round(100 * worstHref / LINK_CHAR_CEILING) + '% of the ' + LINK_CHAR_CEILING + '-character practical ceiling. It round-trips, and encodeState().fits says so',
     W.fits && worstHref < LINK_CHAR_CEILING && dW.state.experiment.modes.length === 91 && dW.state.presentation.rates.length === 91,
     { worstChars: W.chars, worstHref, ceiling: LINK_CHAR_CEILING, fits: W.fits });
+}
+
+/* ══ 11 · n = 7 (iteration 008 A7): the 49 ride REG7, the REGISTER section is the 91 it was ══════════════════════════════════ */
+{
+  const st = stateOfPreset('1s+2pz'), w0 = encodeState(st);
+  st.experiment.modes.push({ id: 'h:7:6:6', n: 7, l: 6, m: 6, re: 0.3, im: -0.2, muted: false, solo: true }, { id: 'h:7:0:0', n: 7, l: 0, m: 0, re: 0, im: 0.1, muted: true, solo: false });
+  st.presentation.rates = Array.from({ length: 140 }, (_, a) => (a === 139 ? 2.5 : 1));
+  const e = encodeState(st), d = decodeState(e.text), g = (id) => d.state.experiment.modes.find((z) => z.id === id);
+  const ok7 = g('h:7:6:6') && Math.abs(g('h:7:6:6').re - 0.3) < e.scale * TOL.coeffStep && g('h:7:6:6').solo && g('h:7:0:0').muted && d.state.presentation.rates.length === 140 && d.state.presentation.rates[139] === 2.5;
+  const { state: worst } = stateOfK(91, 17, 12345.6789); const rnd = mulberry32(3);
+  for (const s7 of BASIS.slice(91)) worst.experiment.modes.push({ id: s7.id, n: s7.n, l: s7.l, m: s7.m, re: rnd() - 0.5, im: rnd() - 0.5, muted: true, solo: true });
+  for (const m of worst.experiment.modes) { m.muted = true; m.solo = true; }
+  worst.presentation.rates = Array.from({ length: 140 }, (_, a) => 0.5 + a / 140);
+  const W = encodeState(worst), dW = decodeState(W.text);
+  judge('n = 7 RIDES ITS OWN SECTION: an n ≤ 6 state encodes byte for byte as before (' + w0.chars + ' chars); 7i₆ and 7s₀ with their mask bits and an n = 7 rate round-trip (REG7, the mask\'s six extra bytes, the 140-wide rates); the WORST 140-label case is ' + W.chars + ' chars (fits ' + W.fits + ' — the link says so past the ceiling) and decodes all 140',
+    !!ok7 && dW.state.experiment.modes.length === 140 && dW.state.presentation.rates.length === 140, { chars: e.chars, worst: W.chars, fits: W.fits });
 }
 
 console.log('      wall time ' + ((Date.now() - T0) / 1000).toFixed(1) + ' s');

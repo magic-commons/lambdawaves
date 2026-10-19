@@ -32,7 +32,7 @@
  *     cannot go stale.  That is why a palette or a preset added next year still rides in a v1 link.
  *
  * THE PRECISION — stated, and proved in tests/statelink.test.mjs.
- *   The 91 complex coefficients are quantised to SIGNED 16-BIT against ONE shared float32 scale s,
+ *   The 140 complex coefficients (91 + n = 7's 49) are quantised to SIGNED 16-BIT against ONE shared float32 scale s,
  *   s ≥ max_a max(|Re c_a|, |Im c_a|):  q = round(v/s · 32767),  v' = q·s/32767.
  *   THE BOUND:  |v' − v| ≤ s/65534 = 1.5259e-5 · s  per component, and hence
  *               ‖c' − c‖₂ ≤ √182 · s/65534 = 2.06e-4 · s  for the whole vector.
@@ -53,7 +53,7 @@
  *   would say nothing — an empty mute/solo mask, 91 rates that are all 1 — are not written at all.
  */
 
-import { BASIS, BASIS_INDEX } from './hydrogen.js';
+import { BASIS, BASIS_INDEX, N6 } from './hydrogen.js';
 import { PRESET_BY_ID as PALETTE_BY_ID } from './mir/palette.js';
 
 export const LINK_VERSION = 1;
@@ -62,9 +62,15 @@ export const LINK_CHAR_CEILING = 2000;
 /** the fragment key: `#s=…` (other keys may sit beside it) */
 export const LINK_KEY = 's';
 
-const N = 91;
+/* N = 7 (iteration 008 A7) WITHOUT A NEW VERSION.  The register is 140 labels; the REGISTER section keeps holding exactly the 91 of n ≤ 6
+   (sparse or dense, byte for byte what it was), and n = 7's 49 ride a NEW section, REG7 (0x0B), written only when one is populated — so an
+   older build skips it and says so (THE VERSION POLICY), opening the n ≤ 6 part.  The mask's 12 bytes already hold bits 91 … 95; bits 96 …
+   139 follow as 6 + 6 bytes only when one is set (an older reader stops at its 24).  RATES go dense over all 140 only when an n = 7 rate is
+   off 1 (an older dense reader takes its 91 and ignores the rest); otherwise the section is the 91-wide one it was. */
+const N = BASIS.length;                // 140
 const Q = 32767;                       // the signed-16-bit half-range
-const MASK_BYTES = 12;                 // 91 bits
+const MASK_BYTES = 12;                 // bits 0 … 95: the 91 of n ≤ 6 and n = 7's first five
+const MASK_EXT = Math.ceil((N - 8 * MASK_BYTES) / 8);   // 6: bits 96 … 139, appended only when one is set
 
 /** every failure of this codec is one of these, and it always says which kind */
 export class LinkError extends Error {
@@ -89,8 +95,8 @@ const T_SOURCE  = ['total', 'rho'];
    place.  Index 3 is unused and reads as 'theme'. */
 const AXIS_INK = ['theme', 'cmy', 'rgb'];
 
-const TAG = { REG: 0x01, MASK: 0x02, EXP: 0x03, CAM: 0x04, MAT: 0x05, STAGE: 0x06, PAL: 0x07, RATES: 0x08, NATIVE: 0x09, MOL: 0x0A };
-const TAG_NAME = { 1: 'register', 2: 'mask', 3: 'experiment', 4: 'camera', 5: 'material', 6: 'stage', 7: 'palette', 8: 'rates', 9: 'native material', 10: 'molecule' };
+const TAG = { REG: 0x01, MASK: 0x02, EXP: 0x03, CAM: 0x04, MAT: 0x05, STAGE: 0x06, PAL: 0x07, RATES: 0x08, NATIVE: 0x09, MOL: 0x0A, REG7: 0x0B };
+const TAG_NAME = { 1: 'register', 2: 'mask', 3: 'experiment', 4: 'camera', 5: 'material', 6: 'stage', 7: 'palette', 8: 'rates', 9: 'native material', 10: 'molecule', 11: 'register, n = 7' };
 const LITERAL = [];                    // 0.4.0 S2: no table — the molecule's names always travel as literal strings (THE VERSION POLICY)
 
 /* ── base64url, no padding (portable: no Buffer, no btoa) ──────────────────────────────────── */
@@ -239,13 +245,23 @@ export function encodeState(state, opts = {}) {
     else if (re[a] !== 0 || im[a] !== 0) dropped++;      // below the quantisation floor: say so, never hide it
   }
 
-  /* BOTH shapes, then the shorter — the decision is measured, not asserted */
-  const sparse = new Writer(); sparse.u8(0x00).f32(s).varint(populated);
-  for (let a = 0; a < N; a++) if (qr[a] !== 0 || qi[a] !== 0) sparse.u8(a).i16(qr[a]).i16(qi[a]);
+  /* BOTH shapes, then the shorter — the decision is measured, not asserted.  The REGISTER section is the 91 of n ≤ 6 (the header above) */
+  let pop6 = 0; for (let a = 0; a < N6; a++) if (qr[a] !== 0 || qi[a] !== 0) pop6++;
+  const sparse = new Writer(); sparse.u8(0x00).f32(s).varint(pop6);
+  for (let a = 0; a < N6; a++) if (qr[a] !== 0 || qi[a] !== 0) sparse.u8(a).i16(qr[a]).i16(qi[a]);
   const dense = new Writer(); dense.u8(0x01).f32(s);
-  for (let a = 0; a < N; a++) dense.i16(qr[a]).i16(qi[a]);
+  for (let a = 0; a < N6; a++) dense.i16(qr[a]).i16(qi[a]);
   const regBody = sparse.n <= dense.n ? sparse : dense;
   const mode = sparse.n <= dense.n ? 'sparse' : 'dense';
+  /* REG7: n = 7's 49 against the SAME scale, sparse (u8 offset from 91) or dense, the shorter; absent when none is populated */
+  let reg7 = null;
+  if (populated > pop6) {
+    const sp7 = new Writer(); sp7.u8(0x00).varint(populated - pop6);
+    for (let a = N6; a < N; a++) if (qr[a] !== 0 || qi[a] !== 0) sp7.u8(a - N6).i16(qr[a]).i16(qi[a]);
+    const dn7 = new Writer(); dn7.u8(0x01);
+    for (let a = N6; a < N; a++) dn7.i16(qr[a]).i16(qi[a]);
+    reg7 = sp7.n <= dn7.n ? sp7 : dn7;
+  }
 
   const w = new Writer();
   w.u8(LINK_VERSION);
@@ -254,13 +270,15 @@ export function encodeState(state, opts = {}) {
   const section = (tag, fill) => { const sub = new Writer(); fill(sub); body.u8(tag).varint(sub.n).raw(sub.bytes()); };
 
   body.u8(TAG.REG).varint(regBody.n).raw(regBody.bytes());
+  if (reg7) body.u8(TAG.REG7).varint(reg7.n).raw(reg7.bytes());
 
   let anyMask = false;
   for (let a = 0; a < N; a++) if (muted[a] || solo[a]) { anyMask = true; break; }
   if (anyMask) section(TAG.MASK, (x) => {
-    const mb = new Uint8Array(MASK_BYTES), sb = new Uint8Array(MASK_BYTES);
+    const W = MASK_BYTES + MASK_EXT, mb = new Uint8Array(W), sb = new Uint8Array(W);
     for (let a = 0; a < N; a++) { if (muted[a]) mb[a >> 3] |= 1 << (a & 7); if (solo[a]) sb[a >> 3] |= 1 << (a & 7); }
-    x.raw(mb).raw(sb);
+    x.raw(mb.subarray(0, MASK_BYTES)).raw(sb.subarray(0, MASK_BYTES));
+    if (mb.subarray(MASK_BYTES).some(Boolean) || sb.subarray(MASK_BYTES).some(Boolean)) x.raw(mb.subarray(MASK_BYTES)).raw(sb.subarray(MASK_BYTES));   // bits 96 … 139
   });
 
   const H = pr.hamiltonian || {}, SU = pr.sturmian || {};
@@ -358,19 +376,20 @@ export function encodeState(state, opts = {}) {
   });
 
   let ratesMode = 'omitted';
-  const rates = Array.isArray(pr.rates) && pr.rates.length === N ? pr.rates : (ArrayBuffer.isView(pr.rates) && pr.rates.length === N ? Array.from(pr.rates) : null);
-  /* THE 91 RATES are written whenever the state carries them, EVEN WHEN ALL 91 ARE 1 — because
+  const rates = (Array.isArray(pr.rates) || ArrayBuffer.isView(pr.rates)) && (pr.rates.length === N || pr.rates.length === N6) ? Array.from({ length: N }, (_, a) => (a < pr.rates.length ? pr.rates[a] : 1)) : null;   // a 91-wide record (an older project) is n = 7 at 1
+  /* THE RATES are written whenever the state carries them, EVEN WHEN ALL 91 ARE 1 — because
      "everything at 1" is a state somebody chose, and a visitor whose own knobs are off 1 must land on
      the link's rates and not keep their own.  All-ones costs four bytes: a sparse list of length nil. */
   if (rates) {
     const off = [];
     for (let a = 0; a < N; a++) if (Math.fround(num(rates[a], 1)) !== 1) off.push(a);
+    const wide = off.some((a) => a >= N6), W = wide ? N : N6;                // an n = 7 rate off 1: dense over all 140 (the header)
     const sp = new Writer(); sp.u8(0x00).varint(off.length);
     for (const a of off) sp.u8(a).f32(rates[a]);
     const dn = new Writer(); dn.u8(0x01);
-    for (let a = 0; a < N; a++) dn.f32(num(rates[a], 1));
-    const pick = sp.n <= dn.n ? sp : dn;
-    ratesMode = sp.n <= dn.n ? 'sparse' : 'dense';
+    for (let a = 0; a < W; a++) dn.f32(num(rates[a], 1));
+    const pick = !wide && sp.n <= dn.n ? sp : dn;
+    ratesMode = pick === sp ? 'sparse' : 'dense';
     body.u8(TAG.RATES).varint(pick.n).raw(pick.bytes());
   }
 
@@ -454,12 +473,21 @@ export function decodeState(text) {
     const put = (a, qr, qi) => { re[a] = (qr * scale) / Q; im[a] = (qi * scale) / Q; };
     if ((sub & 0x0f) === 0) {
       const k = x.varint();
-      if (k > N) throw new LinkError('corrupt', 'the register in this link claims ' + k + ' populated labels; there are only ' + N);
-      for (let j = 0; j < k; j++) { const a = x.u8(); if (a >= N) throw new LinkError('corrupt', 'the register in this link names label ' + a + ', which is outside the 91'); put(a, x.i16(), x.i16()); }
+      if (k > N6) throw new LinkError('corrupt', 'the register in this link claims ' + k + ' populated labels; there are only ' + N6);
+      for (let j = 0; j < k; j++) { const a = x.u8(); if (a >= N6) throw new LinkError('corrupt', 'the register in this link names label ' + a + ', which is outside the 91'); put(a, x.i16(), x.i16()); }
     } else if ((sub & 0x0f) === 1) {
-      for (let a = 0; a < N; a++) put(a, x.i16(), x.i16());
+      for (let a = 0; a < N6; a++) put(a, x.i16(), x.i16());
     } else {
       throw new LinkError('corrupt', 'the register in this link is written in a shape this build does not know (0x' + sub.toString(16) + ')');
+    }
+    if (sec.has(TAG.REG7)) {                                         // n = 7, against the register's own scale
+      const y = new Reader(sec.get(TAG.REG7), 'the register\'s n = 7'), sub7 = y.u8();
+      if (sub7 === 0) {
+        const k = y.varint();
+        if (k > N - N6) throw new LinkError('corrupt', 'the register in this link claims ' + k + ' populated n = 7 labels; there are only ' + (N - N6));
+        for (let j = 0; j < k; j++) { const a = N6 + y.u8(); if (a >= N) throw new LinkError('corrupt', 'the register in this link names label ' + a + ', which is outside the 140'); put(a, y.i16(), y.i16()); }
+      } else if (sub7 === 1) { for (let a = N6; a < N; a++) put(a, y.i16(), y.i16()); }
+      else throw new LinkError('corrupt', 'the register\'s n = 7 in this link is written in a shape this build does not know (0x' + sub7.toString(16) + ')');
     }
   }
 
@@ -467,7 +495,9 @@ export function decodeState(text) {
   const muted = new Uint8Array(N), solo = new Uint8Array(N);
   if (sec.has(TAG.MASK)) {
     const x = new Reader(sec.get(TAG.MASK), 'the mute/solo mask');
-    const mb = x.raw(MASK_BYTES), sb = x.raw(MASK_BYTES);
+    const W = MASK_BYTES + MASK_EXT, mb = new Uint8Array(W), sb = new Uint8Array(W);
+    mb.set(x.raw(MASK_BYTES)); sb.set(x.raw(MASK_BYTES));
+    if (x.left >= 2 * MASK_EXT) { mb.set(x.raw(MASK_EXT), MASK_BYTES); sb.set(x.raw(MASK_EXT), MASK_BYTES); }   // bits 96 … 139 (n = 7), when written
     for (let a = 0; a < N; a++) { muted[a] = (mb[a >> 3] >> (a & 7)) & 1; solo[a] = (sb[a >> 3] >> (a & 7)) & 1; }
   }
 
@@ -582,13 +612,15 @@ export function decodeState(text) {
   /* RATES */
   if (sec.has(TAG.RATES)) {
     const x = new Reader(sec.get(TAG.RATES), 'the rates');
-    const sub = x.u8(), rates = new Array(N).fill(1);
+    const sub = x.u8(), rates = new Array(N6).fill(1);                 // 91 wide, as written, unless an n = 7 rate rides it (the app pads n = 7 with 1)
     if (sub === 0) {
       const k = x.varint();
       if (k > N) throw new LinkError('corrupt', 'the rates in this link claim ' + k + ' entries; there are only ' + N);
-      for (let j = 0; j < k; j++) { const a = x.u8(); if (a >= N) throw new LinkError('corrupt', 'the rates in this link name label ' + a + ', which is outside the 91'); rates[a] = x.f32(); }
+      for (let j = 0; j < k; j++) { const a = x.u8(); if (a >= N) throw new LinkError('corrupt', 'the rates in this link name label ' + a + ', which is outside the 140'); while (rates.length <= a) rates.push(1); rates[a] = x.f32(); }
+      if (rates.length > N6) while (rates.length < N) rates.push(1);
     } else if (sub === 1) {
-      for (let a = 0; a < N; a++) rates[a] = x.f32();
+      for (let a = 0; a < N6; a++) rates[a] = x.f32();
+      if (x.left >= 4 * (N - N6)) for (let a = N6; a < N; a++) rates[a] = x.f32();   // 140 wide: an n = 7 rate was off 1
     } else {
       throw new LinkError('corrupt', 'the rates in this link are written in a shape this build does not know (0x' + sub.toString(16) + ')');
     }

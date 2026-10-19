@@ -87,7 +87,7 @@ const block = (l, m) => { const out = []; for (let n = l + 1; n <= 6; n++) out.p
 /* ── Q4 the hydrogen limit label by label ── */
 {
   let worstE = 0, worstC = 0, worstZ = 0, which = '';
-  for (const s of BASIS) {
+  for (const s of BASIS.slice(0, 91)) {   // THE SCALE is the n ≤ 6 register (iteration 008 A7)
     const B = block(s.l, s.m), St = createSturmian(B, 1 / s.n), pos = B.findIndex((b) => b.n === s.n);
     let k = 0; for (let q = 1; q < St.E.length; q++) if (Math.abs(St.E[q] - energy(s.n)) < Math.abs(St.E[k] - energy(s.n))) k = q;
     const dE = Math.abs(St.E[k] - energy(s.n)); if (dE > worstE) { worstE = dE; which = s.label; }

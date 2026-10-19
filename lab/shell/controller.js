@@ -136,7 +136,7 @@ export async function createController(app) {
     if (ui.perfSeg) ui.perfSeg.set(perf.mode);
   }
   const stats = { frames: 0, presents: 0, skipped: 0, reconstructs: 0, evolves: 0, rebuilds: 0, tiers: { PRESENT: 0, RECONSTRUCT: 0, EVOLVE: 0, REBUILD: 0 }, lastTier: 'NONE', scheduled: false, fps: 0, reconPerSec: 0, stepsPerSec: 0, lastEncodeMs: 0, fieldT: 0 };
-  const cRe = new Float64Array(91), cIm = new Float64Array(91);
+  const cRe = new Float64Array(BASIS.length), cIm = new Float64Array(BASIS.length);   // the register's width: 140 since iteration 008 A7
   app.state.pointerHeld = false;       // a gesture is in flight: the expensive per-frame readouts wait it out (see periodNow)
   app.state.keplerDirty = true; app.state.govVersion = -1; app.state.metersWall = 0; app.state.badgesWall = 0;   // wave 45: the KEPLER canvas is drawn only while on (one clearing draw after), the parked readers re-run on an edit, METERS repaints at 10 Hz while playing
   app.state.applyVisuals = true;

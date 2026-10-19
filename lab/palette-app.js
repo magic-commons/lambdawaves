@@ -11,6 +11,7 @@
  * file and its two imports (rack.js, tests/palette.test.mjs).
  */
 import { PRESETS, PRESET_BY_ID, PRESET_GROUPS, hexToRgb } from './mir/palette.js';
+import { N_COLOR, N_RGB, N_RGB_LIGHT } from './mir/kit.js';
 
 /** the palette a boot and the empty project wear (0.5.0 C1: it lived in paletteview.js, which left; tools/new-project.mjs reads it) */
 export const DEFAULT_PALETTE = 'prism';
@@ -26,3 +27,8 @@ if (!PRESET_BY_ID.has(JET_BLACK.id)) {   // silent once the kit carries the row 
   PRESET_BY_ID.set(JET_BLACK.id, JET_BLACK);
   PRESET_GROUPS.find((g) => g.points === JET_BLACK.points).items.push(JET_BLACK);   // the kit has four 3-point rows
 }
+
+/* THE SEVENTH SHELL (iteration 008 A7): the register reaches n = 7 and the kit's shell set has six.  Appended here, as JET BLACK is, until
+   MIR carries it (a KIT BRIEF line): hue 350 (the rose the six leave free), dark hsl(350 85% 76%), light hsl(350 97% 47%) — 3.46 : 1 on the
+   well (220,225,232) and 3.94 : 1 on the light card, the wave-46 rule.  lab.css defines --n7 for both themes. */
+if (N_COLOR.length === 7) { N_COLOR.push('var(--n7)'); N_RGB.push([246, 142, 159]); N_RGB_LIGHT.push([236, 4, 42]); }

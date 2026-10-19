@@ -26,15 +26,16 @@
  * occupied when its cross term is not cancelled to rounding, |Σ a·conj(b)| > 1e-9·Σ|a||b|.  Two rings are counted. */
 import assert from 'node:assert/strict';
 import { coaxialPolynomial } from '../lab/frontier.js';
-import { BASIS, NMAX, energy } from '../lab/hydrogen.js';
+import { BASIS, N6, energy } from '../lab/hydrogen.js';
+const NMAX = 6;   // iteration 008 A7: the register reaches n = 7; Sol's count is of its n ≤ 6 part, the 91 labels at their old indices — counted there
 
 /** Sol's side, as stated in the ledger; each is also re-derived from our side below, never from this table */
 const SOL = Object.freeze({ nmax: 6, modes: 91, labels: 36, rectangular: 651, channels: 351, atZeroOmega: 21, positiveGaps: 15,
   positiveChannels: 165 /* channels = 21 + 2·165: Σ_{n<n′} [2(n + n′ − 2) + 1] */, largestGapQmax: 5 /* shells 1 and 6: 35/72 a.u., |q| ≤ 5 */,
   largestGap: 3500, gaps: [44, 81, 125, 175, 256, 300, 500, 675, 756, 800, 2700, 3200, 3375, 3456, 3500] /* units of 1/7200 a.u., Sol's list */ });
 
-assert.equal(NMAX, SOL.nmax, `our register's NMAX is ${NMAX}; Sol's count is for n ≤ ${SOL.nmax} — not comparable`);
-assert.equal(BASIS.length, SOL.modes, `our register has ${BASIS.length} modes; Sol's count is for ${SOL.modes}`);
+assert.equal(NMAX, SOL.nmax, `the counted sub-register is n ≤ ${NMAX}; Sol's count is for n ≤ ${SOL.nmax} — not comparable`);
+assert.equal(N6, SOL.modes, `the n ≤ 6 part has ${N6} modes; Sol's count is for ${SOL.modes}`);
 
 /* generic coefficients on all 91 modes (seeded; every mode non-zero) */
 let seed = 20261009; const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
@@ -91,7 +92,7 @@ for (const [R, THETA] of [[10, 1.0719], [20, 0.6]]) {          // r in bohr, θ 
   assert.equal(c.channels, c.atZero + 2 * shellPairBins, `channels = (ω = 0 bins) + 2·Σ_{n<n′}(2(n + n′ − 2) + 1): ${c.channels} vs ${c.atZero + 2 * shellPairBins}`);
   lines.push(`ring r = ${R}, θ = ${THETA}: ${table}`);
 }
-console.log(`PASS THE q-BAND ANCHOR (ours counted from coaxialPolynomial, Sol's from the ledger; a difference would be REPORTED, never fixed) — ${lines.join('\n  ')}\n  Generic seeded coefficients on all ${BASIS.length} modes; the ${SOL.channels} occupied bins are the non-cancelled cross terms of the per-shell polynomials.`);
+console.log(`PASS THE q-BAND ANCHOR (ours counted from coaxialPolynomial, Sol's from the ledger; a difference would be REPORTED, never fixed) — ${lines.join('\n  ')}\n  Generic seeded coefficients on all ${N6} modes of n ≤ 6; the ${SOL.channels} occupied bins are the non-cancelled cross terms of the per-shell polynomials.`);
 
 /* ── a sparse preparation occupies FEWER bins, never more (Sol: "poles, zeros, cancellation, mute/solo … reduce actual occupancy") ─────── */
 {

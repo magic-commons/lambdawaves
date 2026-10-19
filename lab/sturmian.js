@@ -1,4 +1,4 @@
-/* sturmian.js — THE SCALE λ: the Coulomb Sturmians on the register's 91 labels, and the eigen-selector.  Atomic units.
+/* sturmian.js — THE SCALE λ: the Coulomb Sturmians on the register's 91 labels of n ≤ 6, and the eigen-selector.  Atomic units.
  *
  * The register's radial functions are hydrogen's bound states, each with its own exponent 1/n; that set is NOT complete
  * (the continuum is missing — 23.4 % of He⁺ 1s lives there: the −1.5585 floor of the FIELDS AND MOLECULES round).  The
@@ -44,7 +44,7 @@
  * and Atomic Spectra (2006); the tridiagonal overlap DERIVED-HERE from the Laguerre recurrence), VARIATIONAL (the
  * eigenvalues, upper bounds), NUMERICAL only in the eigen-solver (residuals judged to 1e-12 on the 91 × 91 problem).
  */
-import { BASIS, BASIS_INDEX, factorial, laguerre, laguerreCoeffs, legendreDerivCoeffs, ylmNorm } from './hydrogen.js';
+import { BASIS, BASIS_INDEX, N6, factorial, laguerre, laguerreCoeffs, legendreDerivCoeffs, ylmNorm } from './hydrogen.js';
 
 /* ── the functions ───────────────────────────────────────────────────────────── */
 /** N_nl(λ): the L² normalisation of the Sturmian; equals hydrogen.js radialNorm(n, l) at λ = 1/n */
@@ -66,7 +66,7 @@ export function sturmianRecord(n, l, m, lambda) {
   const lag = laguerreCoeffs(n - l - 1, 2 * l + 1), leg = legendreDerivCoeffs(l, am);
   const sign = (m >= 0 && (am % 2 === 1)) ? -1 : 1;
   const norm = sign * sturmianNorm(n, l, lambda) * ylmNorm(l, am);
-  const pad = (a) => { const out = new Float64Array(6); for (let i = 0; i < a.length && i < 6; i++) out[i] = a[i]; return out; };
+  const pad = (a) => { const out = new Float64Array(7); for (let i = 0; i < a.length && i < 7; i++) out[i] = a[i]; return out; };
   return { n: 1 / lambda, l, m, am, norm, lag: pad(lag), leg: pad(leg), lambda, label: { n, l, m }, sturmian: true };
 }
 
@@ -78,9 +78,10 @@ export function sturmianOverlap(n1, n2, l) {
   const n = Math.min(n1, n2);
   return -0.5 * Math.sqrt((n - l) * (n + l + 1) / (n * (n + 1)));
 }
-/** labels: BASIS entries, BASIS indices, ids "h:n:l:m", or plain {n, l, m}; undefined → all 91 */
+/** labels: BASIS entries, BASIS indices, ids "h:n:l:m", or plain {n, l, m}; undefined → the 91 of n ≤ 6 (THE SCALE's register: the
+ *  register grew to n = 7 at iteration 008 A7, the scale did not — sturmianreg.js says why) */
 export function resolveLabels(labels) {
-  if (!labels) return BASIS.slice();
+  if (!labels) return BASIS.slice(0, N6);
   return labels.map((x) => typeof x === 'number' ? BASIS[x] : typeof x === 'string' ? BASIS[BASIS_INDEX.get(x)] : x);
 }
 /**

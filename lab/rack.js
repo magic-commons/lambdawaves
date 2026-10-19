@@ -62,12 +62,12 @@ export async function boot(dom) {
   const FIELD_CHROME = ['frame', 'axis', 'frameMode', 'axisMode', 'cornerSide', 'invert', 'axisInk', 'dither'];   // iteration 008 W: DITHER joined them (this display's, SETTINGS › QUALITY)
     // 0.3.1 · S1 (D1): the reader's measurement furniture — PREFERENCE, never in a project or a link (docs/STATE-SCOPES.md)
 
-  const rates = new Float64Array(91).fill(1);
+  const rates = new Float64Array(BASIS.length).fill(1);   // one per label, 140 since iteration 008 A7
   const energyOf = (a) => (getHamiltonian().energy(a) || 0) * rates[a];   // 0.8.0 G1: a label CENTRAL leaves unbound (NaN) holds its c, still
 
 
   const sturm = { on: false, lambda: 1, P: null, rec: null, buildMs: 0, roVersion: -1 };
-  const labelExpect = (a) => sturm.P.H[a * 91 + a] / sturm.P.S[a * 91 + a];          // a label's ⟨a|H|a⟩/⟨a|S|a⟩ under the scale — NOT an eigenvalue
+  const labelExpect = (a) => sturm.P.H[a * BASIS.length + a] / sturm.P.S[a * BASIS.length + a];          // a label's ⟨a|H|a⟩/⟨a|S|a⟩ under the scale — NOT an eigenvalue
   /* WAVE 54 · THE KEY MOVED UP, and it had to.  readSettings() is a function declaration and hoists, but the
      const it reads did NOT — it sat 90 lines below this and every early call fell into readSettings' own catch and
      came back {}.  A silent {} is exactly the shape of "this browser has never said anything", so the palette this
@@ -309,11 +309,11 @@ export async function boot(dom) {
     if (app.state.chem && app.state.chem.on) return null;                                      // CHEMISTRY: the field reads an AO density matrix, not a mode list — packModes is skipped entirely
     if (gas && gas.on) return gas.fieldModes(t);                           // the AXIAL GAS: the box's second register
     const c = reg.at(t, cRe, cIm), ids = stateReaders().rendered.ids; modeStateT = t; modeStateVersion = reg.version;
-    modeList.length = ids.length;                                        // wave 45: the same 91 records, rewritten in place (was 1–91 fresh objects per reconstruct)
+    modeList.length = ids.length;                                        // wave 45: the same records, rewritten in place (was 1–91 fresh objects per reconstruct)
     for (let i = 0; i < ids.length; i++) { const a = ids[i], m = modeRecs[i]; m.table = tableOf(a); m.re = c.re[a]; m.im = c.im[a]; modeList[i] = m; }
     return modeList;
   }
-  const modeRecs = Array.from({ length: 91 }, () => ({ table: null, re: 0, im: 0 })), modeList = [];
+  const modeRecs = Array.from({ length: BASIS.length }, () => ({ table: null, re: 0, im: 0 })), modeList = [];
   function refModes() {
     if (!app.state.refSnapshot) return null;
     return app.state.refSnapshot.ids.map((a) => ({ table: tableOf(a), re: app.state.refSnapshot.re[a], im: app.state.refSnapshot.im[a] }));

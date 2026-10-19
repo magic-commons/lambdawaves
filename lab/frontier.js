@@ -16,7 +16,7 @@
  *   unimodular roots of P(w) = Σ g_m w^{m-m_min}; degree bound, dominance lemma; three stretched modes reconnect
  *   only at the roots of Φ(r) = Â₀² - 4|Â₊Â₋| with ξ = |Â₀|/2|Â₊| ≤ 1, at two phases of the discriminant beat.
  */
-import { BASIS, factorial, radial, ylm, energy, stateOf, psiAt } from './hydrogen.js';
+import { BASIS, NMAX, factorial, radial, ylm, energy, stateOf, psiAt } from './hydrogen.js';
 
 const PI = Math.PI, TWO_PI = 2 * Math.PI, SQRT_PI = Math.sqrt(Math.PI);
 
@@ -254,7 +254,7 @@ export function kzElement(n, l, m) {
 }
 /* the l-phases η_{n,l} that align the coupled (CG) basis with the hydrogen |nlm⟩, fixed by the sign of K_z's m = 0 element */
 const ETA = [], CGT = [];
-for (let n = 1; n <= 6; n++) {
+for (let n = 1; n <= NMAX; n++) {
   const j = (n - 1) / 2, eta = [1];
   const cg = (l, m, p, q) => clebsch(j, j - p, j, j - q, l, m);        // p, q index m₊ = j-p, m₋ = j-q
   for (let l = 0; l < n - 1; l++) {
@@ -271,7 +271,7 @@ export function kzElementCG(n, l) {
   return s;
 }
 /**
- * The Clebsch matrix of shell n at coefficients (re, im) (Float64Array(91)): M[p][q] = Σ_{l,m} η_{nl} c_{nlm} ⟨j m₊ j m₋ | l m⟩,
+ * The Clebsch matrix of shell n at coefficients (re, im) (Float64Array(140)): M[p][q] = Σ_{l,m} η_{nl} c_{nlm} ⟨j m₊ j m₋ | l m⟩,
  * m₊ = j - p, m₋ = j - q.  Returns { n, re, im } (n×n, row-major) and the shell norm².
  */
 export function shellMatrix(re, im, n) {
@@ -369,7 +369,7 @@ export function shellCharacter(M, tolerance = 1e-9) {
  * an SO(4) rotation — the Schmidt spectrum is invariant.  Exact by eigendecomposition of the tridiagonal block.
  */
 export function applyRotateK(re, im, theta) {
-  for (let n = 2; n <= 6; n++) for (let m = -(n - 1); m <= n - 1; m++) {
+  for (let n = 2; n <= NMAX; n++) for (let m = -(n - 1); m <= n - 1; m++) {
     const ls = []; for (let l = Math.abs(m); l < n; l++) ls.push(l);
     const B = ls.length, K = new Float64Array(B * B);
     for (let i = 0; i + 1 < B; i++) { const k = kzElement(n, ls[i], m); K[i * B + i + 1] = k; K[(i + 1) * B + i] = k; }
@@ -641,7 +641,7 @@ export function applyShellRotors(re, im, n, U, V) {
  *   '+' / '−' → one rotor alone: a genuine SO(4) element that is NOT a spatial rotation (it moves ⟨L⟩ and ⟨K⟩ apart).
  */
 export function applyRotor(re, im, { which = 'both', axis = 'z', angle = 0 }) {
-  for (let n = 2; n <= 6; n++) {
+  for (let n = 2; n <= NMAX; n++) {
     let any = false;
     for (const s of BASIS) if (s.n === n && (re[s.index] !== 0 || im[s.index] !== 0)) { any = true; break; }
     if (!any) continue;

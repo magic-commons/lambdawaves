@@ -38,7 +38,7 @@ const sci = (v, d = 4) => (v === 0 ? '0' : v.toExponential(d).replace('e+', 'e')
 
 /** a CSS colour token resolved through the canvas, as [r, g, b] — kit.js's one reader (wave 57) */
 const readRGB = (g, name, fallback) => cssRGB(g, name, fallback);
-const dominant = (S) => { let k = -1, best = 0; for (let a = 0; a < 91; a++) { const v = S.re[a] * S.re[a] + S.im[a] * S.im[a]; if (v > best) { best = v; k = a; } } return k; };
+const dominant = (S) => { let k = -1, best = 0; for (let a = 0; a < S.re.length; a++) { const v = S.re[a] * S.re[a] + S.im[a] * S.im[a]; if (v > best) { best = v; k = a; } } return k; };
 
 /**
  * createRadiation(host, api) — api: { ab() → the A/B hook (or null), repaint() }.

@@ -228,9 +228,9 @@ export function psiAndGrad(re, im, ids, x, y, z) {
     const T = tableOf(a), n = T.n, l = T.l, m = T.m, am = T.am;
     const rho = 2 * r / n;
     let L = 0, Lp = 0, rp = 1, rpm = 0;                    // rp = ρ^j, rpm = ρ^{j−1} (no division anywhere)
-    for (let j = 0; j < 6; j++) { L += T.lag[j] * rp; if (j > 0) Lp += j * T.lag[j] * rpm; rpm = rp; rp *= rho; }
+    for (let j = 0; j < T.lag.length; j++) { L += T.lag[j] * rp; if (j > 0) Lp += j * T.lag[j] * rpm; rpm = rp; rp *= rho; }
     let D = 0, Dp = 0, xp = 1, xpm = 0;                    // xp = cosθ^j, xpm = cosθ^{j−1}
-    for (let j = 0; j < 6; j++) { D += T.leg[j] * xp; if (j > 0) Dp += j * T.leg[j] * xpm; xpm = xp; xp *= ct; }
+    for (let j = 0; j < T.leg.length; j++) { D += T.leg[j] * xp; if (j > 0) Dp += j * T.leg[j] * xpm; xpm = xp; xp *= ct; }
     const e = Math.exp(-rho / 2), rl = Math.pow(rho, l), rl1 = l > 0 ? Math.pow(rho, l - 1) : 0;
     const stm = Math.pow(st, am), stm1 = am > 0 ? Math.pow(st, am - 1) : 0;
     const f = T.norm * e * rl * L * stm * D;                                   // the real radial×angular factor

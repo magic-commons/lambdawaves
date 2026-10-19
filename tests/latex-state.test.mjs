@@ -95,13 +95,13 @@ check('BOX and QUARKONIUM labels, whose m follows a space, keep the subscript on
 check('ATOM names its shells as hydrogen does (the notebook spelling, chemistry order)', () => {
   assert.equal(lines(copy([st(3, 2, 0, 1), st(4, 0, 0, 1)], HAMILTONIANS.atom))[0], '$4s_{0}$ and $3d_{0}$');
 });
-check('all 91 labels at once: 91 names, Madelung-ordered, the whole list one line', () => {
+check('all 140 labels at once: 140 names, Madelung-ordered, the whole list one line (n = 7 since iteration 008 A7: 7i is the last)', () => {
   const t = copy(BASIS.map((s) => st(s.n, s.l, s.m, 1)));
   assert.equal(lines(t).length, 2);
-  assert.equal((lines(t)[0].match(/\$/g) || []).length, 182);
+  assert.equal((lines(t)[0].match(/\$/g) || []).length, 280);
   assert.ok(lines(t)[0].startsWith('$1s_{0}$, $2s_{0}$, $2p_{-1}$, $2p_{0}$, $2p_{1}$, $3s_{0}$, $3p_{-1}$'));
-  assert.ok(lines(t)[0].endsWith(', and $6h_{5}$'));
-  assert.ok(stateOf(6, 5, 5));
+  assert.ok(lines(t)[0].endsWith(', and $7i_{6}$'));
+  assert.ok(stateOf(7, 6, 6));
 });
 /* THE MOLECULE'S PAGE (0.4.0 S0 · wave 136): a real STO-3G water solve, through the same function EDIT › COPY calls */
 check('the molecule\'s page: water RHF/STO-3G — formula and name, 5 occupied of 7 AO, the ε ladder with HOMO and LUMO marked by index', () => {

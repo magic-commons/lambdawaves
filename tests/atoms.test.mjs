@@ -45,14 +45,14 @@ function quad(r, f) {
     worst < 1e-6 && rows.every((r) => r.nodes === r.want), { worst: worst.toExponential(2), rows: rows.map((r) => [r.nl, r.err.toExponential(1), r.nodes]) });
 }
 
-/* ══ 1. the table: Z = 1…86 (iteration 008 A: to Rn), Aufbau with the two exceptions below Kr ════════════════════════════════════════════════ */
+/* ══ 1. the table: Z = 1…118 (iteration 008 A: to Rn; A7: to Og), Aufbau with the two exceptions below Kr ════════════════════════════════════════════════ */
 {
-  const okLen = ATOMS.length === 86 && ATOMS.every((a, i) => a.Z === i + 1);
+  const okLen = ATOMS.length === 118 && ATOMS.every((a, i) => a.Z === i + 1);
   const okSum = ATOMS.every((a) => a.config.reduce((s, c) => s + c.occ, 0) === a.Z);
   const okCap = ATOMS.every((a) => a.config.every((c) => c.occ > 0 && c.occ <= 2 * (2 * c.l + 1) && c.l < c.n));
-  const sym = [1, 2, 10, 18, 21, 24, 29, 36, 47, 79, 86].map((Z) => atom(Z).symbol).join(' ');
-  judge('THE TABLE: 86 atoms H…Rn, every configuration sums to Z, no shell over 2(2l+1), l < n',
-    okLen && okSum && okCap && sym === 'H He Ne Ar Sc Cr Cu Kr Ag Au Rn', { sym, len: ATOMS.length });
+  const sym = [1, 2, 10, 18, 21, 24, 29, 36, 47, 79, 86, 87, 92, 103, 118].map((Z) => atom(Z).symbol).join(' ');
+  judge('THE TABLE: 118 atoms H…Og, every configuration sums to Z, no shell over 2(2l+1), l < n',
+    okLen && okSum && okCap && sym === 'H He Ne Ar Sc Cr Cu Kr Ag Au Rn Fr U Lr Og', { sym, len: ATOMS.length });
   const cr = atom(24).config, cu = atom(29).config, v = atom(23).config;
   const occ = (cfg, n, l) => (cfg.find((c) => c.n === n && c.l === l) || { occ: 0 }).occ;
   judge('THE TWO EXCEPTIONS: Cr is 3d⁵ 4s¹ and Cu is 3d¹⁰ 4s¹ (not 3d⁴4s² / 3d⁹4s²), while V between them stays plain Aufbau 3d³ 4s²',

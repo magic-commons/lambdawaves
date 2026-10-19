@@ -1,7 +1,7 @@
 /* atomsview.js — the ATOMS window: which atom the register is in, and everything that model owes the reader.
  *
  * The maths is lab/atoms.js: one self-consistent CENTRAL field per element (Xα, α = 2/3, plus the Latter tail),
- * solved live on a logarithmic mesh — twice, and Richardson-extrapolated in dx² — for Z = 1 … 86 (H … Rn; non-relativistic, said
+ * solved live on a logarithmic mesh — twice, and Richardson-extrapolated in dx² — for Z = 1 … 118 (H … Og; non-relativistic, said
  * past Kr in the MODEL readout and in STATUS).  This window
  * prints what the model says and, as loudly, what it does NOT say:
  *
@@ -58,7 +58,7 @@ export function createAtoms(host, api) {
      periods, each a `.pk-chips` of `.pk-c` buttons (once columns on the card; 86 cells do not fit columns, lab.css .atm-table); the
      element in force is `.on`.  At 0.5.0 it becomes the kit's `cells` (KIT BRIEF 4). */
   const table = el('div', 'picker atm-table', host), cells = [];
-  for (const [p, z0, z1] of [[1, 1, 2], [2, 3, 10], [3, 11, 18], [4, 19, 36], [5, 37, 54], [6, 55, 86]]) {
+  for (const [p, z0, z1] of [[1, 1, 2], [2, 3, 10], [3, 11, 18], [4, 19, 36], [5, 37, 54], [6, 55, 86], [7, 87, 118]]) {   // period 7: Fr … Og (iteration 008 A7)
     const g = el('div', 'pk-n', table); g.style.setProperty('--nc', N_COLOR[p]); el('div', 'pk-nl', g, String(p));
     const cs = el('div', 'pk-chips', g);
     for (let z = z0; z <= z1; z++) { const b = el('button', 'pk-c', cs, ATOMS[z - 1].symbol); b.type = 'button'; b.title = `${ATOMS[z - 1].name} · Z = ${z} · ${z > 36 ? ATOMS[z - 1].core : ATOMS[z - 1].term}`; b.addEventListener('click', () => api.select(z)); cells[z] = b; }
@@ -94,7 +94,7 @@ export function createAtoms(host, api) {
     const C = cache, A = C.A, S = C.S;
     for (let z = 1; z < cells.length; z++) cells[z].classList.toggle('on', z === A.Z);
     roEl.set(`${A.symbol} · ${A.name} · Z = ${A.Z}`); roEl.setSub((A.Z > 36 ? A.core : A.term) + (A.exception ? '  · an Aufbau exception' : ''));
-    roModel.set(S.model); roModel.setSub(`central field · one potential for every shell · ${api.active() ? 'IN FORCE on the register' : 'not the operator in force'}${A.Z > 36 ? ' · NON-RELATIVISTIC: past Kr the valence drifts from measurement with Z (the 6s contraction is missing)' : ''}`);
+    roModel.set(S.model); roModel.setSub(`central field · one potential for every shell · ${api.active() ? 'IN FORCE on the register' : 'not the operator in force'}${A.Z > 86 ? ' · NON-RELATIVISTIC: past Rn the 7s and 7p are a relativistic story (no 7s contraction, no 7p₁/₂ · 7p₃/₂ split)' : A.Z > 36 ? ' · NON-RELATIVISTIC: past Kr the valence drifts from measurement with Z (the 6s contraction is missing)' : ''}`);
     roE.set(S.E.toFixed(5) + ' Eh'); roE.setSub(`${(S.E * HARTREE_EV).toFixed(2)} eV · Slater\'s functional with the α-fraction restored · ${S.electrons.toFixed(4)} electrons on the mesh`);
     roIP.set(C.ip.toFixed(3) + ' eV', 'ok');
     roIP.setSub(`Δ-SCF of the ${C.outer.n}${SPD[C.outer.l]} shell: E(ion) − E(neutral), the same functional both sides`);

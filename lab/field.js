@@ -36,7 +36,7 @@ export function drawStyle(v) { const n = typeof v === 'number' ? STYLE_NAMES[v] 
 /** THE KNEE's q (iteration 008 G, field.js kneeT): ln(KNEE / 0.6) — exactly 0 at the shipped 0.6, where the present draws the old arithmetic */
 export function kneeQ(k) { return Number.isFinite(k) && k > 0 ? Math.log(k / 0.6) : 0; }
 export const SLICE = { off: 0, clip: 1, slab: 2 };
-export const MAX_MODES = 320;                                 // the whole 91-state register fits (a gas packet populates every m)
+export const MAX_MODES = 320;                                 // the whole 140-state register fits (a gas packet populates every m)
 const MODE_BYTES = 112;                                  // 7 vec4: nlm, c, lag0, lag1, leg0, leg1, ctr
 
 const COMPUTE_WGSL = /* wgsl */`
@@ -97,12 +97,12 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
       if (a == 0u || any(M.ctr.xyz != gC)) { gC = M.ctr.xyz; gq = pos - gC; gr = length(gq); gct = select(gq.z / max(gr, 1e-12), 1.0, gr < 1e-9); gst = sqrt(max(0.0, 1.0 - gct * gct)); gphi = atan2(gq.y, gq.x); gL = 999u; gMM = -1e30; }
       let q = gq; let r = gr; let ct = gct; let st = gst; let phi = gphi;   // geometry relative to the mode's centre
       let n = M.nlm.x; let l = u32(M.nlm.y); let am = u32(M.nlm.z); let m = M.nlm.w;
-      let D = M.leg0.x + ct * (M.leg0.y + ct * (M.leg0.z + ct * (M.leg0.w + ct * (M.leg1.x + ct * M.leg1.y))));
+      let D = M.leg0.x + ct * (M.leg0.y + ct * (M.leg0.z + ct * (M.leg0.w + ct * (M.leg1.x + ct * (M.leg1.y + ct * M.leg1.z)))));   // leg1.z: d^m P_6, n = 7's i shell (iteration 008 A7); 0 for every other record, so ct·0 adds nothing
       var f = 0.0;
       if (P.space == 0u || P.space == 5u) {
         /* POSITION  ψ = norm · e^{−ρ/2} ρ^l L(ρ) · Y,  ρ = 2r/n  (L = Laguerre) */
         let rho = 2.0 * r / n;
-        let L = M.lag0.x + rho * (M.lag0.y + rho * (M.lag0.z + rho * (M.lag0.w + rho * (M.lag1.x + rho * M.lag1.y))));
+        let L = M.lag0.x + rho * (M.lag0.y + rho * (M.lag0.z + rho * (M.lag0.w + rho * (M.lag1.x + rho * (M.lag1.y + rho * M.lag1.z)))));
         f = M.c.z * exp(-0.5 * rho) * ipow(rho, l) * L * ipow(st, am) * D;
       } else if (P.space == 4u) {
         /* TWO ELECTRONS: the conditional amplitude ψ(x | x₁) of a Hylleraas term  c · s^a t^b u^c e^{−ζs},
@@ -133,7 +133,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
         /* r is re-derived here, in the pre-memo form, on purpose: the driver folds length(q)² back to dot(q, q) only when
            it can see the length, and through the memo it cannot — 194 texels of the 96³ oscillator moved (probes/K/k1-osc) */
         let qo = pos - M.ctr.xyz; let ro = length(qo); let t = ro * ro;
-        let L = M.lag0.x + t * (M.lag0.y + t * (M.lag0.z + t * (M.lag0.w + t * (M.lag1.x + t * M.lag1.y))));
+        let L = M.lag0.x + t * (M.lag0.y + t * (M.lag0.z + t * (M.lag0.w + t * (M.lag1.x + t * (M.lag1.y + t * M.lag1.z)))));
         f = M.c.z * ipow(ro, l) * L * exp(-0.5 * t) * ipow(st, am) * D;
       } else if (P.space == 7u) {
         /* SEPARABLE (0.9.4 S1)  ψ = norm · ∏ᵢ H_{nᵢ}(aᵢqᵢ) · e^{−½|a∘q|²}: nlm = (n_x, n_y, n_z, 0), lag0 = (a_x, a_y, a_z, ·), c.w = the form (0 the
@@ -146,7 +146,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
         /* MOMENTUM  φ = norm · t^{l/2} P(t) (1+t)^{−(n+1)} · Y,  t = n²p²  (P = the Podolsky–Pauling numerator;
            the (−i)^l phase is folded into c on the CPU).  Same record, different envelope. */
         let q = n * r; let t = q * q;
-        let L = M.lag0.x + t * (M.lag0.y + t * (M.lag0.z + t * (M.lag0.w + t * (M.lag1.x + t * M.lag1.y))));
+        let L = M.lag0.x + t * (M.lag0.y + t * (M.lag0.z + t * (M.lag0.w + t * (M.lag1.x + t * (M.lag1.y + t * M.lag1.z)))));
         f = M.c.z * ipow(q, l) * L / pow(1.0 + t, M.c.w) * ipow(st, am) * D;     // c.w = the exponent n+1 (kept integer when the ρ-scale is n/Z)
       }
       let mm = select(m, 0.0, P.space == 4u);                // the pair branch keeps ζ in the m slot: no azimuthal phase
@@ -907,6 +907,7 @@ export function packModes(modes) {
     if (T.phase) { cre = re * T.phase.re - im * T.phase.im; cim = re * T.phase.im + im * T.phase.re; }   // momentum tables carry (−i)^l
     buf[o + 4] = cre; buf[o + 5] = cim; buf[o + 6] = T.norm; buf[o + 7] = T.expo !== undefined ? T.expo : T.n + 1;
     for (let j = 0; j < 6; j++) { buf[o + 8 + j] = T.lag[j]; buf[o + 16 + j] = T.leg[j]; }
+    buf[o + 14] = T.lag[6] || 0; buf[o + 22] = T.leg[6] || 0;   // lag1.z / leg1.z: the seventh coefficient (n = 7, iteration 008 A7); a six-slot record reads 0
     const cc = center || ORIGIN; buf[o + 24] = cc[0]; buf[o + 25] = cc[1]; buf[o + 26] = cc[2]; buf[o + 27] = modes[i].group || 0;
   }
   return { buf, count };
@@ -1126,7 +1127,7 @@ export async function createField(canvas, opts = {}) {
 
   const paramsBuf = [0, 1].map(() => device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }));
   const modesBuf = [0, 1].map(() => device.createBuffer({ size: MAX_MODES * MODE_BYTES, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }));
-  const radialBuf = device.createBuffer({ size: 40 * 256 * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });   // 36 rows in use
+  const radialBuf = device.createBuffer({ size: 48 * 256 * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });   // 43 rows in use: the 6 × 6 (n_r, l) grid and n = 7's (6, 0) and (0, 6) at 36 + l (atoms.js rowOf)
   const statsBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC });
   const viewBuf = device.createBuffer({ size: 11 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   const vpBuf = device.createBuffer({ size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });

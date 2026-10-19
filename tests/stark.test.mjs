@@ -7,7 +7,7 @@ import { createRegisterSturmian } from '../lab/sturmianreg.js';
 import { BASIS } from '../lab/hydrogen.js';
 let FAILED = 0;
 const judge = (name, ok, detail) => { if (!ok) FAILED++; console.log((ok ? 'GREEN ' : 'RED   ') + name + (detail === undefined ? '' : '  ' + JSON.stringify(detail))); };
-const N = 91, idx = (n, l, m) => BASIS.findIndex((s) => s.n === n && s.l === l && s.m === m), z = hydrogenZ().R;
+const N = BASIS.length, idx = (n, l, m) => BASIS.findIndex((s) => s.n === n && s.l === l && s.m === m), z = hydrogenZ().R;
 let asym = 0; for (let a = 0; a < N; a++) for (let b = 0; b < N; b++) asym = Math.max(asym, Math.abs(z[a * N + b] - z[b * N + a]));
 judge('z is symmetric', asym === 0, asym);
 const z12 = z[idx(1, 0, 0) * N + idx(2, 1, 0)]; judge('⟨1s|z|2p₀⟩ = 128√2/243 to 1e-12', Math.abs(z12 - 128 * Math.SQRT2 / 243) < 1e-12, z12);

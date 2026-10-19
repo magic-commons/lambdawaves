@@ -22,7 +22,7 @@ function simpson(f, a, b, n) { const h = (b - a) / n; let s = f(a) + f(b); for (
 /* ── wave 42, the reviewer's finding 5 — FIRST, so the caches are cold: the uniform Simpson with 12000·⌈n_max²/n_min²⌉
    panels cost a 16-label hydrogen state 1.4 s on its first frame (dipoleZ 418 ms + radialObservables 1009 ms) ── */
 {
-  const re = new Float64Array(91), im = new Float64Array(91);
+  const re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length);
   for (const [n, l, m] of [[1, 0, 0], [2, 0, 0], [2, 1, 0], [2, 1, 1], [3, 1, 0], [3, 2, -2], [4, 1, -1], [4, 2, 2], [4, 3, 3], [5, 4, -4], [6, 0, 0], [6, 5, 5], [6, 1, 0], [5, 0, 0], [6, 2, 0], [5, 1, 0]]) re[stateOf(n, l, m).index] = 0.25;
   const ids = BASIS.filter((s) => re[s.index]).map((s) => s.index);
   const t0 = performance.now(); const dz = dipoleZ(re, im, ids); const t1 = performance.now(); const ro = radialObservables(re, im, ids, -0.1); const t2 = performance.now();
@@ -70,7 +70,7 @@ function simpson(f, a, b, n) { const h = (b - a) / n; let s = f(a) + f(b); for (
 }
 /* ── exact angular moments and the rotor entropy ──────────────────────────── */
 {
-  const mk = (list) => { const re = new Float64Array(91), im = new Float64Array(91); for (const [n, l, m, r, i] of list) { re[stateOf(n, l, m).index] = r; im[stateOf(n, l, m).index] = i || 0; } return { re, im }; };
+  const mk = (list) => { const re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length); for (const [n, l, m, r, i] of list) { re[stateOf(n, l, m).index] = r; im[stateOf(n, l, m).index] = i || 0; } return { re, im }; };
   const circ = mk([[2, 1, 1, 1]]), mix = mk([[2, 1, 1, S2], [2, 1, -1, S2]]), s2 = mk([[2, 0, 0, 1]]), stark = mk([[2, 0, 0, S2], [2, 1, 0, S2]]);
   const A = angularMoments(circ.re, circ.im), B = angularMoments(mix.re, mix.im), C = angularMoments(stark.re, stark.im);
   judge('D ⟨L_z⟩ and ⟨L²⟩ are exact and diagonal: 2p₊ gives (1, 2); (2p₊ + 2p₋)/√2 gives (0, 2); the Stark state gives (0, 1)',
@@ -99,7 +99,7 @@ function simpson(f, a, b, n) { const h = (b - a) / n; let s = f(a) + f(b); for (
 }
 /* ── radial moments and the atom's own virial theorem ─────────────────────── */
 {
-  const mk = (list) => { const re = new Float64Array(91), im = new Float64Array(91), ids = []; for (const [n, l, m, r] of list) { const a = stateOf(n, l, m).index; re[a] = r; ids.push(a); } return { re, im, ids }; };
+  const mk = (list) => { const re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length), ids = []; for (const [n, l, m, r] of list) { const a = stateOf(n, l, m).index; re[a] = r; ids.push(a); } return { re, im, ids }; };
   let wr = 0, wi = 0;
   for (const [n, l] of [[1, 0], [2, 0], [2, 1], [3, 1], [4, 2], [6, 5]]) {
     const s = mk([[n, l, 0, 1]]);
@@ -116,7 +116,7 @@ function simpson(f, a, b, n) { const h = (b - a) / n; let s = f(a) + f(b); for (
 
 /* ── the particle velocity field ──────────────────────────────────────────── */
 {
-  const mk = (list) => { const re = new Float64Array(91), im = new Float64Array(91), ids = []; for (const [n, l, m, r, i] of list) { const a = stateOf(n, l, m).index; re[a] = r; im[a] = i || 0; ids.push(a); } return { re, im, ids }; };
+  const mk = (list) => { const re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length), ids = []; for (const [n, l, m, r, i] of list) { const a = stateOf(n, l, m).index; re[a] = r; im[a] = i || 0; ids.push(a); } return { re, im, ids }; };
   /* ∇ψ analytically against central differences on the independent closed form `orbital` */
   const st = mk([[1, 0, 0, 0.6], [2, 1, 0, 0.5], [3, 2, 2, 0.4], [4, 1, -1, 0.3]]);
   let worst = 0, at = null;
@@ -178,7 +178,7 @@ function simpson(f, a, b, n) { const h = (b - a) / n; let s = f(a) + f(b); for (
 
 /* ── wave 42, the reviewer's finding 10: the φ-gradient was dropped on the axis (sin θ < 1e-9 → 0/0 → 0) ── */
 {
-  const mk = (n, l, m) => { const re = new Float64Array(91), im = new Float64Array(91), a = stateOf(n, l, m).index; re[a] = 1; return { re, im, ids: [a] }; };
+  const mk = (n, l, m) => { const re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length), a = stateOf(n, l, m).index; re[a] = 1; return { re, im, ids: [a] }; };
   const p1 = mk(2, 1, 1), on = psiAndGrad(p1.re, p1.im, p1.ids, 0, 0, 1), off = psiAndGrad(p1.re, p1.im, p1.ids, 1e-8, 0, 1);   // 1e-8 off: the second derivative moves g by ~2e-10 there
   const exact = -Math.exp(-0.5) / (8 * Math.sqrt(PI));                                     // ∂_y[−(x+iy)e^{−r/2}/(8√π)] at (0,0,1) = −i e^{−1/2}/(8√π)
   const d1 = mk(3, 2, 1), on3 = psiAndGrad(d1.re, d1.im, d1.ids, 0, 0, -2), off3 = psiAndGrad(d1.re, d1.im, d1.ids, 0, 1e-8, -2);

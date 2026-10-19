@@ -1,4 +1,4 @@
-/* state.js — the 91-mode register: THE authoritative quantum state.
+/* state.js — the 140-mode register (n ≤ 7; the 91 of n ≤ 6 first, at their old indices): THE authoritative quantum state.
  *
  * STATUS: EXACT ANALYTIC (DIAGONAL MODE).  Field-free hydrogen has a diagonal H, so
  *   c_a(t) = e^{-iE_a t} c_a(0).
@@ -18,7 +18,7 @@
  * Nothing in here knows about the DOM, the GPU or wall-clock time.
  */
 import { starkPropagator } from './stark.js';
-import { BASIS, BASIS_INDEX, energy, stateOf } from './hydrogen.js';
+import { BASIS, BASIS_INDEX, energy, stateOf, NMAX } from './hydrogen.js';
 import { applyRotateK, applyDefectWait, applyRotor, kzElement, symEig } from './frontier.js';
 import { applyKick, applyKickAlong, applySqueeze } from './kick.js';
 
@@ -50,13 +50,13 @@ function starkBlock(n, m) {
 function allBlocks() {
   if (allBlocks._c) return allBlocks._c;
   const out = [];
-  for (let n = 1; n <= 6; n++) for (let m = -(n - 1); m <= n - 1; m++) out.push({ n, m, ...starkBlock(n, m) });
+  for (let n = 1; n <= NMAX; n++) for (let m = -(n - 1); m <= n - 1; m++) out.push({ n, m, ...starkBlock(n, m) });
   allBlocks._c = out;
   return out;
 }
 
-export const N = BASIS.length;          // 91
-export const RENDER_CAP = 91;           // the WGSL kernel's mode-array capacity
+export const N = BASIS.length;          // 140
+export const RENDER_CAP = N;            // the whole register (the kernel holds MAX_MODES = 320)
 export const EPS_POP = 1e-14;
 
 export class Register {
@@ -312,8 +312,8 @@ export class Register {
   rotor({ which = 'both', axis = 'z', angle = 0, t = 0 }) { this._op((re, im) => applyRotor(re, im, { which, axis, angle }), t); }
   /**
    * SLAP: a sudden momentum impulse k along an axis — ψ ↦ e^{ik·x}ψ, the impulsive Stark limit (Δp = −∫E dt).  Exact
-   * as an operator; the register keeps only its n ≤ 6 image, so the norm DROPS by the probability the electron was
-   * knocked out of the first six shells or ionised.  That loss is physics and is never renormalised away here.
+   * as an operator; the register keeps only its n ≤ 7 image, so the norm DROPS by the probability the electron was
+   * knocked out of the first seven shells or ionised.  That loss is physics and is never renormalised away here.
    */
   kick(k, axis = 'z', t = 0) { this._op((re, im) => applyKick(re, im, k, axis), t, false); }
   /** the same slap along any unit direction (the BOW) */
@@ -337,7 +337,7 @@ export class Register {
     this.clear();
     for (const m of preset.modes) {
       const a = BASIS_INDEX.get(`h:${m.n}:${m.l}:${m.m}`);
-      if (a === undefined) throw new Error('preset mode outside the n ≤ 6 register: ' + JSON.stringify(m));
+      if (a === undefined) throw new Error('preset mode outside the n ≤ 7 register: ' + JSON.stringify(m));
       const ph = m.phase || 0;
       this.re0[a] += m.amp * Math.cos(ph);
       this.im0[a] += m.amp * Math.sin(ph);
@@ -423,7 +423,8 @@ export class Register {
       const s = BASIS[a];
       modes.push({ id: s.id, n: s.n, l: s.l, m: s.m, re: this.re0[a], im: this.im0[a], muted: !!this.muted[a], solo: !!this.solo[a] });
     }
-    return { format: 'lambdawaves/qwave-0/state', system: 'hydrogen', basis: 'n<=6 complex Y_lm, Condon-Shortley', units: 'atomic', t, preset: this.preset, modes,
+    /* the basis word names n ≤ 6 while no n = 7 label is in the record, so an older state's bytes never move; an older tree restores by id and drops n = 7 */
+    return { format: 'lambdawaves/qwave-0/state', system: 'hydrogen', basis: modes.some((q) => q.n > 6) ? 'n<=7 complex Y_lm, Condon-Shortley' : 'n<=6 complex Y_lm, Condon-Shortley', units: 'atomic', t, preset: this.preset, modes,
       field: { ...this.field }, status: this.P ? (this.P.stark ? 'INTER-SHELL STARK' : 'STURMIAN BASIS') : this.field.Fz !== 0 ? 'STARK SHELL MODEL' : 'HYDROGEN' };
   }
   restore(obj) {
