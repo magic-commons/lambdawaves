@@ -23,7 +23,7 @@
  * window is a collapsible inset, off by default, on its own amplitude scale, badged as a timestep diagnostic.
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
-import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip, hint } from './mir/kit.js';
+import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip, hint, mathPlain, arcRing } from './mir/kit.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
@@ -118,9 +118,23 @@ export function createChem(host, api) {
      the kit's download glyph in the MOLECULE stepper's name, and a press fetches it (the DOWNLOAD road that exists). */
   let page = PRESET_BY_ID.get(preset).section, sub = '';
   const rTop = el('div', 'row tight mol-top', host), regHost = el('div', 'mol-reg', host), rH = el('div', 'row tight mol-section', host);
-  const secStep = stepper({ aria: 'Library section', items: ['ATOMS', ...SECTIONS].map((id) => ({ id, label: id })), value: page, cls: 'mol-step', onChange: (id) => { page = id; fillSel(); if (id === 'ATOMS') setShelf(true); } });
+  /* iteration 008 V · THE LIBRARY ROAD (Josh: "upgrade the molecules picker and selector thing to make it much more elegant and feel satisfying for
+     a user to load up a downloaded library").  A VOLUME IS A SHELF OF SECTIONS: after the catalogue's six, ‹ SECTION › turns the pages of every
+     volume whose catalogue this device can read (on the device, or fetchable) — one page per tag, the molecule's PRIMARY tag (the catalogue's
+     first), ‹ VOL. I · AMIDE ›, so a page is a shelf (≤ 252 rows today) and never the whole 2,809; a one-atom entry is an atom (the Picker's
+     ATOMIC deck) and is on no page.  The MOLECULE stepper's name carries the molecule's small picture (t/<id>.webp, read only for the molecule
+     chosen; a shelf tile's when it scrolls into view) and the option its formula; a molecule not on this device wears the kit's download glyph
+     in the picture's seat, and a press keeps THAT molecule (volumes.js installMolecule: the fetch road's own keys, statusOf then partial) with
+     the kit's ring round the glyph.  A pick opens the molecule (from this device, else the network) through openVolume, unchanged.  INSTALLED
+     has left the card: the whole volume is the Picker's, a section's records too (keep() stays a verb).  The pages are read when the hand comes
+     near the pickers, never at boot, and again when volumes.js says a volume changed (the Picker's INSTALL / REMOVE); the page is never saved. */
+  let vPages = [], vByPage = new Map(), vMolPage = new Map(), vMols = new Map(), vKept = new Map(), vShelf = new Map(), vRead = null;
+  const ONE_ATOM = /^[A-Z][a-z]?$/, plainF = (m) => mathPlain(m.formulaM || m.formula || ''), capName = (s) => (s ? String(s)[0].toUpperCase() + String(s).slice(1) : '');
+  const volLabelOf = (v) => 'VOL. ' + (v.numeral || v.id), molOf = (k) => vMols.get(k.volume + ':' + k.id) || {};
+  const vKey = (id) => { const i = typeof id === 'string' ? id.indexOf(':') : -1; return i > 0 ? { volume: id.slice(0, i), id: id.slice(i + 1) } : null; };   // a catalogue id never holds ':'
+  const secItems = () => [...['ATOMS', ...SECTIONS].map((id) => ({ id, label: id })), ...vPages.map((p) => ({ id: p.id, label: p.label }))];
+  const secStep = stepper({ aria: 'Library section', items: secItems(), value: page, cls: 'mol-step', onChange: (id) => { page = id; fillSel(); if (id === 'ATOMS') setShelf(true); } });
   rH.appendChild(secStep.root);
-  const keepSw = sw({ label: 'INSTALLED', value: false, title: 'Every record of this section kept on this device: press to install them all, press again to remove them', onChange: (v) => { keep(v); } });   // iteration 008 U: unseated (keep() stays the verb); row V brings the library road
   const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule — and its register, under VIEW REGISTRY: one switch', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
   rTop.appendChild(onSw.root);
   const r0 = el('div', 'row tight', host);
@@ -128,11 +142,27 @@ export function createChem(host, api) {
      pick and the shelf folds.  ‹ ATOMS ›, the first page, is the periodic table: a tile sets OPERATOR ATOM and its element (api.atom).  Alt+↓ keeps the kit's list. */
   const shelf = el('div', 'mol-shelf', host), ATOM_W = CATALOGUE.find((r) => r.id === 'atom'); shelf.id = 'mol-shelf'; shelf.hidden = true;
   secStep.name.setAttribute('aria-controls', shelf.id); secStep.root.addEventListener('click', (e) => { if (e.target.closest('.mir-step-name')) { e.stopPropagation(); setShelf(shelf.hidden); } }, true);
-  function setShelf(open) { shelf.hidden = !open; secStep.name.setAttribute('aria-expanded', String(open)); shelfFill(); }
+  function setShelf(open) { shelf.hidden = !open; secStep.name.setAttribute('aria-expanded', String(open)); shelfFill();
+    const here = open && shelf.classList.contains('mol-shelf-vol') && shelf.querySelector('.mol-tile.on');   // iteration 008 V: a volume page's shelf scrolls, opened at the molecule on screen
+    if (here) shelf.scrollTop += here.getBoundingClientRect().top - shelf.getBoundingClientRect().top - 8; }
+  let shelfUrls = [], shelfSeen = null;
   function shelfFill() {
     if (shelf.hidden) return; shelf.replaceChildren();
+    for (const u of shelfUrls) URL.revokeObjectURL(u); shelfUrls = []; if (shelfSeen) { shelfSeen.disconnect(); shelfSeen = null; }
+    const VP = vByPage.get(page); shelf.classList.toggle('mol-shelf-vol', !!VP);
     const tile = (title, lines, pick, here, off) => { const b = el('button', 'pk-c mol-tile' + (here ? ' on' : ''), shelf); b.type = 'button'; b.title = title; b.disabled = !!off;
-      lines.forEach((t, i) => el(i ? 'span' : 'b', '', b, t)); b.addEventListener('click', () => { setShelf(false); pick(); }); };
+      lines.forEach((t, i) => el(i ? 'span' : 'b', '', b, t)); b.addEventListener('click', () => { setShelf(false); pick(); }); return b; };
+    if (VP) {   // iteration 008 V: a volume's page — each tile its picture (read as it scrolls into view), formula, name, tags and its lamp
+      const kept = vKept.get(VP.vol.id) || new Set();
+      shelfSeen = typeof IntersectionObserver === 'function' ? new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { const i = e.target; shelfSeen.unobserve(i);
+        V.picture(VP.vol.id, i.dataset.mol).then((u) => { if (!u) return; if (!i.isConnected) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) shelfUrls.push(u); i.src = u; }, () => {}); } }, { root: shelf, rootMargin: '120px' }) : null;
+      for (const m of VP.mols) {
+        const key = VP.vol.id + ':' + m.id, b = tile(`${capName(m.name)} · ${volLabelOf(VP.vol)} · ${(m.tags || []).join(' · ') || 'untagged'}`,
+          [plainF(m), capName(m.name), (m.tags || []).join(' · ') || '—', kept.has(m.id) ? 'INSTALLED' : 'DOWNLOAD'], () => { handPick(key); }, key === preset, false);
+        if (m.thumb) { const i = el('img', 'mol-tile-pic'); i.alt = ''; i.decoding = 'async'; i.dataset.mol = m.id; b.prepend(i); if (shelfSeen) shelfSeen.observe(i); }
+      }
+      return;
+    }
     if (page === 'ATOMS') { ATOMS.forEach((a, i) => tile(`${a.name} · Z = ${a.Z} · ${a.term} · ${ATOM_W.word} · ${ATOM_W.oracle.what}`, [a.symbol, 'Z = ' + a.Z, ATOM_W.word],
       () => { if (on) setOn(false); api.atom(a.Z); }, api.atomZ() === a.Z)); return; }
     for (const g of [...GROUPS, RECORD_GROUP]) for (const p of CHEM_PRESETS.filter((q) => q.group === g.id && q.section === page)) {
@@ -152,16 +182,51 @@ export function createChem(host, api) {
   const mSel = el('select', 'sel'); mStep.name.replaceChildren(mSel);
   /* iteration 008 U · THE DOWNLOAD GLYPH: the molecule chosen is a record not yet on this device — the kit's `download` beside its name, a press fetches
      it (checked against its sha-256 name, persist asked once) and opens it: the same road a DOWNLOAD row's pick takes */
-  const dlB = el('button', 'trig mol-dl', mStep.name); dlB.type = 'button'; chip(dlB, 'download', 'Download this molecule’s record'); dlB.hidden = true;
-  dlB.addEventListener('click', (e) => { e.stopPropagation(); const id = mSel.value; if (!id) return; dlB.disabled = true; handPick(id); Promise.resolve(lamps()).finally(() => { dlB.disabled = false; }); });
-  function dlShow() { const P = PRESET_BY_ID.get(mSel.value), r = P && P.recordOnly && P.records && P.records['sto-3g'];
-    dlB.hidden = !r || !!have.get(r.hash) || safariTab(); if (r) hint(dlB, `${P.name} opens only from its record (${(r.bytes / 1048576).toFixed(1)} MB): press to download it to this device and open it`); }
+  const dlB = el('button', 'trig mol-dl'); dlB.type = 'button'; chip(dlB, 'download', 'Download this molecule’s record'); dlB.hidden = true;
+  /* iteration 008 V: the glyph sits in the PICTURE's seat (left of the name) and wears the kit's ring (arcRing) while a molecule is kept; the
+     picture is the molecule's own (a volume's t/<id>.webp, the catalogue's img/menu/<id>.webp), read for the molecule chosen only */
+  const pic = el('img', 'mol-thumb'); pic.alt = ''; pic.decoding = 'async'; pic.hidden = true;
+  const ring = arcRing(dlB); mStep.name.replaceChildren(pic, dlB, mSel);
+  let picFor = null, picUrl = null, dlBusy = false, near = false;   // near: the hand has come to the pickers (or picked) — no picture is fetched before, so a boot reads nothing (a DATA fetch would make lw-data-v1)
+  pic.addEventListener('load', () => { if (pic.getAttribute('src')) pic.hidden = false; }); pic.addEventListener('error', () => { pic.hidden = true; });
+  const ringTo = (r) => { if (r === null) { delete dlB.dataset.busy; ring.set(0); return; } dlB.dataset.busy = ''; ring.set(360 * Math.min(1, Math.max(0.02, r))); };
+  dlB.addEventListener('click', (e) => { e.stopPropagation(); const id = mSel.value; if (!id || dlBusy) return; const k = vKey(id);
+    if (k) { keepMolecule(k); return; }
+    dlBusy = true; dlB.disabled = true; ringTo(0); Promise.resolve(handPick(id)).then(() => lamps()).finally(() => { dlBusy = false; dlB.disabled = false; ringTo(null); rowPic(); }); });
+  function rowPic() {
+    const id = mSel.value, k = vKey(id), P = !k && id ? PRESET_BY_ID.get(id) : null;
+    let glyph = false, src = null;
+    if (k) {
+      const v = vShelf.get(k.volume), kept = vKept.get(k.volume);
+      if (!v || !kept) ensureVol(k.volume);
+      else if (kept.has(k.id)) src = 'vol';
+      else if (v.index && !safariTab()) { glyph = true; hint(dlB, `${capName(molOf(k).name || k.id)} is not on this device (${((molOf(k).bytes || 0) / 1048576).toFixed(1)} MB): press to keep it here — the whole of ${volLabelOf(v)} installs from the Picker's LIBRARY`); }
+    } else if (P) {
+      const r = P.recordOnly && P.records && P.records['sto-3g'];
+      if (r && !have.get(r.hash) && !safariTab()) { glyph = true; hint(dlB, `${P.name} opens only from its record (${(r.bytes / 1048576).toFixed(1)} MB): press to download it to this device and open it`); }
+      else src = './img/menu/' + P.id + '.webp';
+    }
+    dlB.hidden = !glyph && !dlBusy;
+    if (!src || glyph || !near) { pic.hidden = true; picFor = null; return; }
+    if (picFor === id) return;
+    picFor = id; pic.hidden = true; pic.removeAttribute('src'); if (picUrl) { URL.revokeObjectURL(picUrl); picUrl = null; }
+    if (src !== 'vol') { pic.src = src; return; }
+    V.picture(k.volume, k.id).then((u) => { if (!u) return; if (picFor !== id) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) picUrl = u; pic.src = u; }, () => {});
+  }
+  const dlShow = rowPic;
   mSel.setAttribute('aria-label', 'molecule');
   mSel.title = CAP_RULE; mSel.dataset.help = CAP_RULE;
   /** the dropdown holds the page's section, in the table's groups; the molecule on screen stays chosen when it is on this page */
   function fillSel() {
     mSel.replaceChildren();
-    for (const g of [...GROUPS, RECORD_GROUP]) {
+    const VP = vByPage.get(page);
+    if (VP) {   // iteration 008 V: a volume's page — its molecules by name, each option its formula; the title its tags, point group and size
+      const og = el('optgroup', '', mSel); og.label = VP.label;
+      for (const m of VP.mols) { const o = el('option', '', og, `${capName(m.name)} · ${plainF(m)}`); o.value = VP.vol.id + ':' + m.id;
+        const r0 = m.rungs && m.rungs['sto-3g'], why = `${capName(m.name)} · ${volLabelOf(VP.vol)} · ${(m.tags || []).join(' · ') || 'untagged'}` + (m.pg ? ' · ' + m.pg : '') + (r0 ? ` · ${r0.nAO} AO at STO-3G` : '') + ` · ${Object.keys(m.rungs || {}).length} rungs`;
+        o.title = why; o.dataset.help = why; }
+    }
+    for (const g of VP ? [] : [...GROUPS, RECORD_GROUP]) {
       const rows = CHEM_PRESETS.filter((p) => p.group === g.id && p.section === page);
       if (!rows.length) continue;
       const og = el('optgroup', '', mSel); og.label = g.label;
@@ -174,14 +239,15 @@ export function createChem(host, api) {
         o.title = why; o.dataset.help = why;
       }
     }
-    if (volRef) { const og = el('optgroup', '', mSel), o = el('option', '', og, volName(volRef)); og.label = 'VOL. ' + volRef.numeral; o.value = volRef.key; o.title = o.dataset.help = volRef.name + ' · ' + volRef.geometry; }   // V2: the volume molecule on screen, until a catalogue pick
+    if (volRef && !(VP && vMolPage.get(volRef.key) === page)) { const og = el('optgroup', '', mSel), o = el('option', '', og, volName(volRef)); og.label = 'VOL. ' + volRef.numeral; o.value = volRef.key; o.title = o.dataset.help = volRef.name + ' · ' + volRef.geometry; }   // V2: the volume molecule on screen, until a catalogue pick
     mSel.value = preset; if (mSel.value !== preset) mSel.selectedIndex = -1;   // turned away from the molecule on screen: nothing chosen here yet
     mStep.setItems([...mSel.options].filter((o) => !o.disabled).map((o) => ({ id: o.value, label: o.textContent })), mSel.value || null); secStep.set(page);
     header();
   }
   mSel.addEventListener('change', () => { mStep.set(mSel.value); dlShow(); handPick(mSel.value); });   // a hand press: a DOWNLOAD row installs (and asks persist once)
   /** THE HAND'S PICK (the dropdown; a notebook link, 0.5.1 D8): the solve as a press, and the app told — its head waits for this solve (D2) */
-  function handPick(id) { const p = solve(id, { press: true }); if (api.hand) api.hand(preset); return p; }
+  function handPick(id) { near = true; const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app)
+    const p = solve(id, { press: true }); if (api.hand) api.hand(preset); return p; }
   /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
      the store is re-read when the menu is opened (the browser may have evicted it: then the row says DOWNLOAD again, never broken) */
   const have = new Map(), optOf = (id) => [...mSel.options].find((o) => o.value === id);
@@ -192,11 +258,16 @@ export function createChem(host, api) {
     header(); return have;
   }
   function header() {
+    const VP = vByPage.get(page);
+    if (VP) { const kept = vKept.get(VP.vol.id) || new Set(), here = VP.mols.filter((m) => kept.has(m.id)).length;
+      sub = `${VP.mols.length} molecules · ${here} on this device · ${volLabelOf(VP.vol)}` + (VP.vol.title ? ' · ' + VP.vol.title : '');
+      secStep.root.title = `${VP.label} · ${sub}: a pick opens the molecule from this device or the network; the download glyph keeps it here; the whole volume installs from the Picker's LIBRARY`;
+      shelfFill(); rowPic(); return; }
     const recs = sectionRecs(), on = recs.filter((r) => have.get(r.hash)).length, n = CHEM_PRESETS.filter((p) => p.section === page).length;
     const mb = (recs.reduce((s, r) => s + r.bytes, 0) / 1048576).toFixed(1);
     sub = page === 'ATOMS' ? `${ATOMS.length} elements, H–${ATOMS.at(-1).symbol} · ${ATOM_W.word}` : recs.length ? `${recs.length} record${recs.length > 1 ? 's' : ''} · ${mb} MB · ${on} here` : `${n} molecules, all live`;
     secStep.root.title = page === 'ATOMS' ? `ATOMS · ${sub}: a tile sets OPERATOR ATOM and its element` : `${page} · ${sub}: ${n} molecules; ` + (recs.length ? `${recs.length} with a record (${mb} MB), ${on} of them on this device` : 'every one solves live, none has a record');
-    keepSw.root.hidden = !recs.length || safariTab(); keepSw.set(recs.length > 0 && on === recs.length); shelfFill(); dlShow();
+    shelfFill(); rowPic();
   }
   /** INSTALLED's press: the page's records fetched (each checked against its sha-256 name) and kept, or all removed */
   async function keep(v) {
@@ -208,7 +279,58 @@ export function createChem(host, api) {
     return { section: sec, records: recs.length, installed: on };
   }
   fillSel(); lamps(); mSel.addEventListener('focus', () => { lamps(); });
-  const mSeg = { root: mStep.root, set(v) { const s = (PRESET_BY_ID.get(v) || {}).section; if (s && s !== page) { page = s; fillSel(); } if (mSel.value !== v) mSel.value = v; mStep.set(v); shelfFill(); dlShow(); }, get() { return mSel.value; }, el: mSel };
+  /* iteration 008 V · THE PAGES: every shelf volume whose catalogue this device can read, its molecules (never a one-atom entry) by PRIMARY tag,
+     alphabetical, each page's rows by name.  Read once when the hand comes near the pickers (or a hand opens a volume molecule), again after a change */
+  function readPages() {
+    return vRead || (vRead = (async () => {
+      const s = await V.shelf().catch(() => ({ volumes: [] })), pages = [], molPage = new Map(), mols = new Map(), shelfBy = new Map(), keptBy = new Map();
+      for (const v of s.volumes) {
+        const idx = await V.index(v.id).catch(() => null); if (!idx) continue;   // an archive volume not on this device: no page (its file is the Picker's)
+        shelfBy.set(v.id, v); keptBy.set(v.id, await V.kept(v.id).catch(() => new Set()));
+        const byTag = new Map();
+        for (const m of idx.molecules) { if (ONE_ATOM.test(plainF(m).trim())) continue; const t = (m.tags && m.tags[0]) || 'untagged'; if (!byTag.has(t)) byTag.set(t, []); byTag.get(t).push(m); mols.set(v.id + ':' + m.id, m); }
+        for (const t of [...byTag.keys()].sort((a, b) => a.localeCompare(b, 'en'))) {
+          const id = v.id + '/' + t, list = byTag.get(t).sort((a, b) => String(a.name).localeCompare(String(b.name), 'en', { sensitivity: 'base' }));
+          pages.push({ id, vol: v, tag: t, label: `${volLabelOf(v)} · ${t.toUpperCase()}`, mols: list });
+          for (const m of list) molPage.set(v.id + ':' + m.id, id);
+        }
+      }
+      vPages = pages; vByPage = new Map(pages.map((p) => [p.id, p])); vMolPage = molPage; vMols = mols; vShelf = shelfBy; vKept = keptBy;
+      applyPages(); return vPages;
+    })().catch((e) => { vRead = null; console.warn('volume pages', e); return vPages; }));
+  }
+  function applyPages() {   // the pages into ‹ SECTION ›; the molecule on screen turns to its own page, a page that has gone turns back to the catalogue
+    const onScreen = volRef && mSel.value === volRef.key && vMolPage.get(volRef.key);
+    if (onScreen) page = onScreen;
+    else if (!(page === 'ATOMS' || SECTIONS.includes(page) || vByPage.has(page))) page = (PRESET_BY_ID.get(catPreset) || CHEM_PRESETS[0]).section;
+    secStep.setItems(secItems(), page); fillSel();
+  }
+  function ensureVol(volId) { readPages().then(() => { if (vShelf.has(volId) && vKept.has(volId)) rowPic(); }); }
+  const approach = () => { if (!near) { near = true; rowPic(); } readPages(); };
+  for (const r of [rH, r0]) { r.addEventListener('pointerenter', approach); r.addEventListener('focusin', approach); }
+  /** THE GLYPH's press on a volume molecule: THAT molecule kept on this device, the kit's ring round the glyph following its bytes */
+  async function keepMolecule(k) {
+    if (dlBusy) return { ok: false, why: 'a molecule is being kept already' };
+    const m = molOf(k), v = vShelf.get(k.volume) || { id: k.volume }, name = capName(m.name || k.id), key = k.volume + ':' + k.id;
+    dlBusy = true; dlB.disabled = true; ringTo(0); if (mSel.value === key) { dlB.hidden = false; pic.hidden = true; }
+    status(`keeping ${name} · ${volLabelOf(v)} on this device…`, 'warn');
+    const r = await V.installMolecule(k.volume, k.id, { onProgress: (p) => { ringTo(p.ratio); } });
+    if (r.ok) { ringTo(1); await new Promise((f) => setTimeout(f, 240)); }   // the full ring a beat before the picture takes the seat
+    vKept.set(k.volume, await V.kept(k.volume).catch(() => vKept.get(k.volume) || new Set()));
+    const st = r.ok ? await V.statusOf(k.volume).catch(() => null) : null;
+    dlBusy = false; dlB.disabled = false; ringTo(null); header();
+    status(r.ok ? `${name} is on this device` + (st ? ` — ${volLabelOf(v)}: ${st.n.toLocaleString('en')} of ${st.N.toLocaleString('en')} molecules here (${st.state})` : '') : `${name} was not kept: ${r.why || 'cancelled'}`, r.ok ? 'ok' : 'warn');
+    return { ...r, status: st };
+  }
+  /* the Picker's INSTALL / REMOVE (and a molecule kept anywhere) reach the card through volumes.js' watchers: the lamps, the pages, and a removal said */
+  V.watch((e) => {
+    if (e.what === 'molecule') { V.kept(e.volume).then((k) => { if (vShelf.has(e.volume)) { vKept.set(e.volume, k); header(); } }, () => {}); return; }
+    const was = !!vRead, mine = !!(volRef && volRef.volume === e.volume); vRead = null;
+    const done = was || mine ? readPages() : Promise.resolve();
+    if (e.what === 'remove' && (was || mine)) done.then(() => { const v = vShelf.get(e.volume) || { id: e.volume, numeral: mine ? volRef.numeral : null }, paged = vPages.some((p) => p.vol.id === e.volume);
+      status(`${volLabelOf(v)} was removed from this device — ` + (paged ? 'its molecules wear the download glyph and open from the network' : 'its pages have left ‹ SECTION ›') + (mine ? `; ${capName(volRef.name)} stays on the stage until the next pick` : ''), 'warn'); });
+  });
+  const mSeg = { root: mStep.root, set(v) { const s = (PRESET_BY_ID.get(v) || {}).section || vMolPage.get(v); if (s && s !== page) { page = s; fillSel(); } if (mSel.value !== v) mSel.value = v; mStep.set(v); shelfFill(); dlShow(); }, get() { return mSel.value; }, el: mSel };
   /* V2 · THE BASIS SEG IS THE LADDER: a catalogue molecule keeps the live law (STO-3G; 6-31+G* under the cap), its other rungs from an INSTALLED volume
      holding its id; a volume molecule's every rung is its record, a rung its file lacks disabled with the header's reason */
   const B_TITLE = { 'sto-3g': 'The vendored minimal Cartesian basis; the oracle for all eight',
@@ -454,6 +576,7 @@ export function createChem(host, api) {
       const got = await fetchRecord(hash, { network: net, onProgress: (n, t) => {
         const pc = t ? Math.round(100 * n / t) + ' %' : Math.round(n / 1024) + ' KB';
         if (seq === solveSeq) status(`downloading ${P.name}'s record… ${pc}`, 'warn');
+        if (dlBusy) ringTo(t ? n / t : 0.5);   // iteration 008 V: the glyph's press — the kit's ring follows the record's bytes
         if (o) o.textContent = optionLabel(P, false).replace('DOWNLOAD', 'downloading ' + pc); } });
       if (!got.record) { why = `${P.name}'s record is not open: ${got.why}` + (P.recordOnly ? ' — it opens only from its record (DOWNLOAD when the network is back)' : ''); lamps(); return null; }
       if (got.from === 'network') lamps();
@@ -525,7 +648,9 @@ export function createChem(host, api) {
     v.note = sha && v.sha256 && sha !== v.sha256 ? 'the project named an older file of this molecule; this is the current one' : null;
     const b = want && v.rungs.includes(want) ? want : v.rungs[0];
     if (want && b !== want) v.note = `${volName(v)} has no ${BASIS_LABEL[want] || want} rung (${v.why[want] || 'not in the file'}): opened at ${BASIS_LABEL[b]}`;
-    volRef = volKeep = v; volWant = null; preset = v.key; basis = b; bSeg.set(b); fillSel(); mSeg.set(v.key);
+    volRef = volKeep = v; volWant = null; preset = v.key; basis = b; bSeg.set(b);
+    if (vMolPage.has(v.key)) page = vMolPage.get(v.key);   // iteration 008 V: the stepper turns to the molecule's own page (never saved)
+    if (hand) near = true; fillSel(); mSeg.set(v.key); if (hand && !vRead) readPages();
     const p = solve(v.key, { press: hand });
     if (turnOn && !on) setOn(true);
     const r = await p; if (r && hand && api.hand) api.hand(preset);
@@ -1286,11 +1411,15 @@ export function createChem(host, api) {
     },
     async remove(id, b = 'sto-3g') { const r = ((PRESET_BY_ID.get(id) || {}).records || {})[b]; const ok = !!r && await removeRecord(r.hash); await lamps(); return ok; },
     /** THE PAGE TURNER (S4b): turn to a section by name (the hand's ‹ › road) and read its header back */
-    section(s) { if (SECTIONS.includes(s) && s !== page) { page = s; fillSel(); } const recs = sectionRecs();
-      return { name: page, molecules: CHEM_PRESETS.filter((p) => p.section === page).map((p) => p.id), records: recs.length, bytes: recs.reduce((t, r) => t + r.bytes, 0),
-        installed: recs.filter((r) => have.get(r.hash)).length, keepOffered: !keepSw.root.hidden, lamp: keepSw.get(), sub }; },
-    /** INSTALLED pressed from outside: every record of the page's section kept (true) or removed (false) — the switch's own road */
-    keep(v) { keepSw.set(!!v); return keep(!!v); },
+    section(s) { if ((SECTIONS.includes(s) || vByPage.has(s)) && s !== page) { page = s; fillSel(); } const recs = sectionRecs(), VP = vByPage.get(page);
+      return { name: page, molecules: VP ? VP.mols.map((m) => VP.vol.id + ':' + m.id) : CHEM_PRESETS.filter((p) => p.section === page).map((p) => p.id), records: recs.length, bytes: recs.reduce((t, r) => t + r.bytes, 0),
+        installed: recs.filter((r) => have.get(r.hash)).length, keepOffered: recs.length > 0 && !safariTab(), lamp: recs.length > 0 && recs.every((r) => have.get(r.hash)), sub }; },
+    /** a section's records kept (true) or removed (false) — INSTALLED's road, a verb since iteration 008 V (the switch left the card; the Picker's MOLECULAR deck installs a section) */
+    keep(v) { return keep(!!v); },
+    /** iteration 008 V · THE LIBRARY ROAD: the volumes' pages (read now if they were not); one volume molecule kept as the glyph's press keeps it; the name row's picture */
+    async library() { await readPages(); return vPages.map((p) => { const kept = vKept.get(p.vol.id) || new Set(); return { id: p.id, label: p.label, volume: p.vol.id, tag: p.tag, molecules: p.mols.length, kept: p.mols.filter((m) => kept.has(m.id)).length }; }); },
+    keepMolecule(key) { const k = vKey(key); return k ? keepMolecule(k) : Promise.resolve({ ok: false, why: 'not a volume molecule: ' + key }); },
+    get picture() { return { src: pic.hidden ? null : pic.getAttribute('src'), glyph: !dlB.hidden, busy: dlBusy }; },
     storage: () => storageInfo(),
     /** the chem worker's own ledger — `solverCalls` counts every moleculeRHF and rpa it ran (a record's open adds none) */
     workerStat() { return call({ op: 'stat' }); },

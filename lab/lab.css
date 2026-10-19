@@ -433,7 +433,15 @@ body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .mol-pick .mir-step-name > select.sel { flex: 1 1 0; min-width: 0; }
 .mol-pick .mol-dl { flex: 0 0 26px; width: 26px; min-width: 26px; height: 26px; min-height: 26px; padding: 0; }
 .mol-pick .mol-dl[hidden] { display: none; }
-.mol-pick .mol-dl svg { width: 16px; height: 16px; }
+.mol-pick .mol-dl svg:not(.k-arc) { width: 16px; height: 16px; }
+/* iteration 008 V · THE LIBRARY ROAD: the molecule's small picture in the same seat, left of the name; the glyph wears the kit's ring (arcRing,
+   colour-controls.css' .k-arc) only while a molecule is being kept — its three seat values, nothing redrawn; a volume page's shelf scrolls */
+.mol-pick .mol-thumb { flex: 0 0 28px; width: 28px; height: 28px; object-fit: contain; }
+.mol-pick .mol-thumb[hidden] { display: none; }
+.mol-pick .mol-dl { position: relative; --arc-pad: 1px; --arc-stroke: 4; --arc-groove: hsl(0 0% 50% / .25); }
+.mol-pick .mol-dl:not([data-busy]) .k-arc { display: none; }
+.mol-shelf.mol-shelf-vol { max-height: 340px; overflow-y: auto; }
+.mol-tile > img.mol-tile-pic { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; }
 .reg-top { align-items: stretch; flex-wrap: nowrap; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
 .reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }

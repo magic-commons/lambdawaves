@@ -22,6 +22,13 @@
  *                                 ARCHIVE), opened from this device's disk — every file's sha-256 checked, stored under EXACTLY the keys the
  *                                 fetch road uses (so statusOf · file · picture · remove see no difference), one at a time, resumable, and
  *                                 refused with a sentence when its volume is not on the shelf or the device has too little room
+ *   installMolecule(volId, molId, { onProgress, signal })   iteration 008 V · ONE MOLECULE kept in place (MOLECULES' download glyph and its
+ *                                 ring): its .lwm (sha-256 checked) and picture under EXACTLY the keys the whole install uses, the catalogue
+ *                                 and the shelf entry beside them (so it reads offline), and the ladder's basis records — statusOf then says
+ *                                 partial; only a fetchable volume (an archive volume is its file's)
+ *   kept(volId)                   the ids of the molecules whose every file is on this device (a Set; empty when none is)
+ *   watch(fn)                     fn({ volume, what: 'install' | 'file' | 'molecule' | 'remove', id }) after anything here changed a volume's
+ *                                 cache — MOLECULES' pages and lamps follow the Picker's INSTALL / REMOVE without a poll; → unwatch
  *   remove(volId)                 the whole cache (the basis records stay: another volume may read them)
  *   file(volId, molId, { network })   the .lwm as an ArrayBuffer, from this device or (network, the default) the network, checked either way
  *   picture(volId, molId)         a URL for the molecule's picture: the device's copy (an object URL) when installed, else the network's
@@ -37,6 +44,10 @@ const SHELF_URL = VOLUME_BASE + 'volumes.json';
 const SAFE = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,95}$/;   // an id goes into a URL: no slash, no dot-dot
 const RELATIVE = /^(?!\/)(?!.*\.\.)[A-Za-z0-9._+/-]{1,200}$/;   // a path inside the volume (m/<id>.lwm, t/<id>.webp, vol-1/index.json)
 
+/* iteration 008 V · THE WATCHERS: one listener set, told after an install, a file, a molecule or a remove changed a volume's cache */
+const watchers = new Set();
+export function watch(fn) { if (typeof fn === 'function') watchers.add(fn); return () => watchers.delete(fn); }
+const changed = (volume, what, id = null) => { for (const f of watchers) { try { f({ volume, what, id }); } catch (_) { /* a watcher's fault is its own */ } } };
 const hex = async (buf) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map((b) => b.toString(16).padStart(2, '0')).join('');
 const caching = () => typeof caches !== 'undefined';
 /* a READ never creates a volume's cache (a look writes nothing); the first install does */
@@ -183,7 +194,7 @@ export function install(volId, { onProgress = null, signal = null } = {}) {
     if (stop === 'cancelled') return { ok: false, cancelled: true, n, N, bytes, total, storage };
     if (stop) return { ok: false, why: stop, n, N, bytes, total, storage };
     return { ok: !failed.length, n, N, bytes, total, failed, storage, why: failed.length ? failed.length + ' file(s) failed — press again to resume' : '' };
-  })().finally(() => running.delete(volId));
+  })().finally(() => { running.delete(volId); changed(volId, 'install'); });
   running.set(volId, job);
   return job;
 }
@@ -228,14 +239,65 @@ export function installFile(volId, file, { onProgress = null, signal = null } = 
     for (const u of basesOf(v)) if (!await keepData(u)) failed.push({ id: 'basis', url: u, why: 'the basis record could not be kept' });
     const storage = await asked.then(() => storageInfo()).catch(() => null);
     return { ok: !failed.length, n, N, bytes, total, failed, storage, why: failed.length ? 'a basis record could not be kept — open the file again online' : '' };
-  })().finally(() => running.delete(volId));
+  })().finally(() => { running.delete(volId); changed(volId, 'file'); });
   running.set(volId, job);
   return job;
 }
 
 export async function remove(volId) {
   if (!SAFE.test(volId) || !caching()) return false;
-  return caches.delete(cacheOf(volId)).catch(() => false);
+  const ok = await caches.delete(cacheOf(volId)).catch(() => false);
+  changed(volId, 'remove'); return ok;
+}
+
+/* ── iteration 008 V · ONE MOLECULE IN PLACE ── the fetch road's own keys, so the whole install, statusOf, file, picture and remove see no
+   difference; the catalogue and the shelf entry are kept beside it (the first molecule makes the cache), and the ladder's basis records */
+export async function kept(volId) {
+  const c = await store(volId), out = new Set();
+  if (!c) return out;
+  let v, idx; try { v = await volume(volId); idx = await index(volId); } catch (_) { return out; }
+  const keys = new Set((await c.keys().catch(() => [])).map((r) => r.url));
+  for (const m of idx.molecules) if (filesOf(v, m).every((f) => keys.has(f.url))) out.add(m.id);
+  return out;
+}
+const runningOne = new Map();
+export function installMolecule(volId, molId, { onProgress = null, signal = null } = {}) {
+  const key = volId + ':' + molId;
+  if (runningOne.has(key)) return runningOne.get(key);
+  const asked = persistOnce().catch(() => null);   // the iPad law: asked on the press, inside the gesture, never awaited here
+  const job = (async () => {
+    const { v, m } = await molecule(volId, molId);
+    if (!v.index) return { ok: false, why: volLabel(v) + ' installs from its file (the PICKER\'s LIBRARY: OPEN FILE…)' };
+    const c = await store(volId, true);
+    if (!c) return { ok: false, why: 'this browser has no Cache Storage' };
+    const keys = new Set((await c.keys().catch(() => [])).map((r) => r.url));
+    if (!keys.has(indexUrl(v))) await c.put(indexUrl(v), new Response((await indexBytes(v)).slice(0), { headers: { 'content-type': 'application/json' } }));
+    if (!keys.has(SHELF_URL)) await c.put(SHELF_URL, new Response(JSON.stringify(v), { headers: { 'content-type': 'application/json' } }));
+    const fs = filesOf(v, m).filter((f) => !keys.has(f.url)), total = fs.reduce((s, f) => s + (f.lwm ? m.bytes || 0 : 0), 0) || 1;
+    let got = 0;
+    const tell = () => { if (onProgress) try { onProgress({ bytes: got, total, ratio: Math.min(1, got / total) }); } catch (_) { /* a listener's fault is its own */ } };
+    tell();
+    for (const f of fs) {
+      if (signal && signal.aborted) return { ok: false, cancelled: true };
+      let r; try { r = await fetch(f.url, { signal, cache: 'no-cache' }); } catch (e) { return { ok: false, why: signal && signal.aborted ? 'cancelled' : 'the network refused it (offline?)' }; }
+      if (!r.ok) return { ok: false, why: 'the server answered ' + r.status };
+      let b;
+      if (f.lwm && r.body && r.body.getReader) {   // the ring follows the bytes as they come
+        const rd = r.body.getReader(), parts = []; let n = 0;
+        for (;;) { const { done, value } = await rd.read(); if (done) break; parts.push(value); n += value.byteLength; got = n; tell(); }
+        const u = new Uint8Array(n); let o = 0; for (const p of parts) { u.set(p, o); o += p.byteLength; } b = u.buffer;
+      } else b = await r.arrayBuffer();
+      if (f.sha && await hex(b) !== f.sha) return { ok: false, why: 'its bytes do not match the catalogue' };
+      try { await c.put(f.url, new Response(b, { headers: { 'content-type': f.type, 'content-length': String(b.byteLength) } })); }
+      catch (e) { return { ok: false, why: e && e.name === 'QuotaExceededError' ? 'this device is out of room for it' : String(e && e.message || e) }; }
+      if (f.lwm) { got = total; tell(); }
+    }
+    for (const u of basesOf(v)) await keepData(u);   // the rungs open offline (a basis record already kept is not fetched again)
+    const storage = await asked.then(() => storageInfo()).catch(() => null);
+    return { ok: true, id: molId, bytes: m.bytes || 0, storage };
+  })().catch((e) => ({ ok: false, why: String(e && e.message || e) })).finally(() => { runningOne.delete(key); changed(volId, 'molecule', molId); });
+  runningOne.set(key, job);
+  return job;
 }
 
 /* ── ONE MOLECULE ── the .lwm's bytes, checked against the catalogue wherever they came from */
