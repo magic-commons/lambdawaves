@@ -4,7 +4,9 @@ we have left and then save up the rest for Rent-A-GPU day").  The catalogue itse
   python -I tools/volumes/catalogue/queues.py [--max-heavy=20] [--raw=DIR]
       → <catalogue>/vol-1.finish.json   every NOT-finished molecule with heavy ≤ --max-heavy, plus every not-finished molecule that
                                         already has a converged rung at its current atoms (a ladder half climbed is finished first)
-      → <catalogue>/vol-1.gpu-day.json  every other not-finished molecule (heavy 21–50 …), for Rent-A-GPU day
+      → <catalogue>/vol-1.gpu-day.json  every other not-finished molecule (heavy 21–70 — iteration 006 C7 raised the cap from 50, and
+                                        a row of 51–70 heavy atoms is only ever here), for Rent-A-GPU day
+      [--window-hours=8]                (C7) also tells (a)'s time on the solvers together, by what they finished in that window
 
 Rows are the catalogue's own, byte for byte (ids unchanged); the files have the catalogue's shape ({ …, count, molecules }).
 FINISHED is the solver's own test (tools/volumes/solve.py main): raw/<id>/meta.json at exactly the row's atoms (float(Å) × ANGSTROM)
@@ -52,9 +54,36 @@ for name, rows, what in (('finish', finish, f'every not-finished molecule with h
                 'count': len(rows), 'molecules': rows})
 st = read_json(os.path.join(RAW, 'STATUS.json')) if os.path.exists(os.path.join(RAW, 'STATUS.json')) else {}
 rate = ((st.get('rate') or {}).get('secondsPerCostUnit'))
+
+# THE THREE SOLVERS' OWN CLOCK (iteration 006 C7): what every solver together finished in the last --window-hours (default 8) —
+# cost units (Σ (nAO/100)⁴ over the rungs solved in the window, any pid) and molecules (a ladder whose last rung was solved in the
+# window) per hour — so the finish queue's time is told for the CPU and the two GPU processes at once, both ways
+import datetime
+WINDOW_H = float(next((a.split('=')[1] for a in sys.argv if a.startswith('--window-hours=')), 8))
+now = datetime.datetime.now().astimezone()
+w_units, w_mols, pids = 0.0, 0, set()
+for d in os.listdir(RAW):
+    mp = os.path.join(RAW, d, 'meta.json')
+    if not os.path.isfile(mp): continue
+    try: rs = (read_json(mp).get('rungs') or {})
+    except ValueError: continue
+    last = None
+    for b, r in rs.items():
+        t = r.get('solved')
+        if not t or r.get('status') != 'converged': continue
+        age = (now - datetime.datetime.fromisoformat(t)).total_seconds() / 3600
+        if age <= WINDOW_H:
+            w_units += (r.get('nAO') or 0) ** 4 / 1e8; pids.add(r.get('pid'))
+            if b == LADDER[-1]: last = b
+    if last: w_mols += 1
+three = (w_units / WINDOW_H, w_mols / WINDOW_H)
 print(f'catalogue {len(doc["molecules"])} · finished {n_done} · not finished {len(finish) + len(gpu)} '
       f'(half-climbed: {len(partial)}: {", ".join(partial)})')
 print(f'(a) vol-1.finish.json  {len(finish)} molecules · cost {cost_a:.1f} units' +
       (f' · ≈ {cost_a * rate / 3600:.1f} h = {cost_a * rate / 86400:.2f} days for ONE solver at STATUS\'s {rate:.3f} s/unit' if rate else ''))
 print(f'(b) vol-1.gpu-day.json {len(gpu)} molecules · cost {cost_b:.1f} units' +
       (f' · ≈ {cost_b * rate / 86400:.1f} days for one solver at that rate' if rate else ''))
+if three[0] and three[1]:
+    print(f'(a) on the solvers together (pids {", ".join(str(p) for p in sorted(x for x in pids if x))}), by what they finished in the last '
+          f'{WINDOW_H:g} h — {three[0]:.0f} cost units/h · {three[1]:.1f} molecules/h: ≈ {cost_a / three[0]:.0f} h = {cost_a / three[0] / 24:.1f} days '
+          f'by cost · ≈ {len(finish) / three[1]:.0f} h = {len(finish) / three[1] / 24:.1f} days by count')

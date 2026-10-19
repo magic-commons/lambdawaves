@@ -7,14 +7,21 @@ errors).  A BLOCK stops the run (iteration 006 C2): PubChem's blacklist answer, 
 requests in a row that exhaust their tries raise Blocked, so a blocked machine is never asked again in a loop; every answer
 already received is in the cache, so the next run resumes from it.  Data lives in ~/Documents/LAMBDAWAVES-VOLUMES/catalogue/
 and never in git.
+
+ITERATION 006 C7: ≤ 2.2 requests/s to PubChem (MIN_GAP 0.46 s), and PubChem's OWN state ends the asking: when the 'Service status'
+of X-Throttling-Control reads Red or Black (PubChem as a whole overloaded — not this machine's own request count, which only
+pauses it) or any part reads Black, the answer in hand is cached and kept, and from then on the run is cache-only (OFFLINE, with
+the reason in STOPPED): every later fetch answers "no answer" at once, so the build finishes from the cache and pubchem.py names
+what is left pending for a calm run.
 """
-import gzip, hashlib, json, os, sqlite3, sys, time, urllib.error, urllib.parse, urllib.request
+import gzip, hashlib, json, os, re, sqlite3, sys, time, urllib.error, urllib.parse, urllib.request
 
 DATA = os.path.expanduser(os.environ.get('LW_CATALOGUE', '~/Documents/LAMBDAWAVES-VOLUMES/catalogue'))
 CACHE = os.path.join(DATA, 'cache')
 os.makedirs(CACHE, exist_ok=True)
 UA = 'lambdawaves-catalogue/1 (offline research cache; https://github.com/)'
 OFFLINE = os.environ.get('LW_OFFLINE') == '1'                     # a cache-only run: it asks nothing and never waits
+STOPPED = None                                                    # why an online run turned cache-only (C7: PubChem Red/Black, a block)
 PUG = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug'
 
 _db = None
@@ -28,8 +35,14 @@ def db():
 class Blocked(RuntimeError):
     """PubChem has blocked (or is refusing) this machine: stop asking, report, and let the cache carry what was received"""
 
-_last, _throttle, _exhausted = {}, {'note': None, 'pauses': 0}, {}
-MIN_GAP = {'pubchem.ncbi.nlm.nih.gov': 0.45, 'www.ebi.ac.uk': 0.15, 'default': 0.3}
+_last, _throttle, _exhausted = {}, {'note': None, 'pauses': 0, 'requests': 0}, {}
+MIN_GAP = {'pubchem.ncbi.nlm.nih.gov': 0.46, 'www.ebi.ac.uk': 0.15, 'default': 0.3}   # PubChem: ≤ 2.2 requests a second (C7)
+
+def stop(reason):
+    """turn the run cache-only from here on (C7): nothing more is asked of the network; the cache answers, a miss is pending"""
+    global OFFLINE, STOPPED
+    if not STOPPED: print(f'  ! {time.strftime("%H:%M:%S")} PubChem: no more asking this run — {reason}', file=sys.stderr, flush=True)
+    OFFLINE, STOPPED = True, STOPPED or reason
 def _pace(host):
     gap = MIN_GAP.get(host, MIN_GAP['default'])
     dt = time.time() - _last.get(host, 0)
@@ -37,10 +50,14 @@ def _pace(host):
     _last[host] = time.time()
 
 def _obey_throttle(headers):
-    """PubChem states its own load in X-Throttling-Control; when it says Yellow or Red, wait before asking again."""
+    """PubChem states its own load in X-Throttling-Control ('Request Count status: Green (4%), Request Time status: Green (3%),
+    Service status: Green (20%)').  Black anywhere, or a Red SERVICE status (PubChem itself overloaded), stops the asking (C7: the
+    answer in hand is still kept); this machine's own counts Red or Yellow only pause it."""
     note = headers.get('X-Throttling-Control') or ''
     _throttle['note'] = note or _throttle['note']
-    if 'Black' in note: raise Blocked(f'PubChem says Black: {note}')
+    service = re.search(r'Service status:\s*(\w+)', note)
+    if 'Black' in note or (service and service.group(1) in ('Red', 'Black')):
+        stop(f'PubChem says {service.group(1) if service else "Black"}: {note}'); return
     if 'Red' in note: _throttle['pauses'] += 1; time.sleep(20)
     elif 'Yellow' in note: time.sleep(2)
 
@@ -56,7 +73,9 @@ def fetch(url, body=None, refresh=False, tries=10, timeout=180, accept=None, sof
     host = urllib.parse.urlparse(url).netloc
     status, data = 0, b''
     for attempt in range(tries):
+        if OFFLINE: return 0, b''                                     # stopped meanwhile (C7): nothing more is asked
         _pace(host)
+        _throttle['requests'] += 1
         req = urllib.request.Request(url, data=body.encode() if body else None, headers={'User-Agent': UA, **({'Accept': accept} if accept else {})})
         if body: req.add_header('Content-Type', 'application/x-www-form-urlencoded')
         try:
@@ -66,9 +85,9 @@ def fetch(url, body=None, refresh=False, tries=10, timeout=180, accept=None, sof
         except urllib.error.HTTPError as e:
             status, data = e.code, e.read()
             try: _obey_throttle(e.headers)
-            except Blocked: raise
             except Exception: pass
             if status in (429, 503) and b'blacklist' in data.lower():
+                stop(f'PubChem blocked this machine ({status})')
                 raise Blocked(f'PubChem blocked this machine ({status}): {data[:200]!r}')
             if status in (429, 500, 502, 503, 504):
                 # a plain busy answer: back off and ask again (a blacklist answer has already stopped the run above)
@@ -83,7 +102,9 @@ def fetch(url, body=None, refresh=False, tries=10, timeout=180, accept=None, sof
         _exhausted[host] = 0
         return status, data
     _exhausted[host] = _exhausted.get(host, 0) + 1
-    if _exhausted[host] >= 3: raise Blocked(f'{host}: three requests in a row gave up after {tries} tries ({status}) — treated as a block')
+    if _exhausted[host] >= 3:
+        stop(f'{host}: three requests in a row gave up after {tries} tries ({status})')
+        raise Blocked(f'{host}: three requests in a row gave up after {tries} tries ({status}) — treated as a block')
     if soft: return status or 503, data
     raise RuntimeError(f'gave up after {tries} tries ({status}): {url}')
 

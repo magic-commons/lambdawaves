@@ -5,8 +5,8 @@
 
 THE LAWS CHECKED, row by row: every field of PLAN.md's `meta` present and of the right kind · a unique id and a unique
 InChIKey · an id the solver takes as a file name ([A-Za-z0-9._+-], ≤ 80) · 1–4 tags, each from PLAN.md's vocabulary · every
-element H–Kr · an even electron count (a closed shell) and multiplicity 1 · ≤ 50 heavy atoms (an app molecule may be bigger and
-is listed as such) · the geometry: the stated element multiset, no two nuclei closer than 0.5 Å, every atom bonded to something
+element H–Kr · an even electron count, Σ Z − charge (a closed shell), and multiplicity 1 · ≤ 70 heavy atoms (iteration 006 C7;
+it was 50 — an app molecule may be bigger and is listed as such) · the geometry: the stated element multiset, no two nuclei closer than 0.5 Å, every atom bonded to something
 within 2.6 Å (3.6 Å for a metal or a cluster), a finite coordinate · heavy and nAtoms agreeing with atomsAng · a blurb with a
 source · a unique priority, the app's own first.
 
@@ -40,6 +40,7 @@ FIELDS = ['id', 'name', 'iupac', 'synonyms', 'formula', 'charge', 'multiplicity'
           'exactMass', 'heavy', 'nAtoms', 'xlogp', 'tpsa', 'hbd', 'hba', 'rotatable', 'complexity', 'tags', 'blurb', 'blurbSource',
           'atomsAng', 'geometrySource', 'sources', 'priority']
 METALS = {3, 4, 11, 12, 13, 19, 20, *range(21, 32)}
+MAX_HEAVY = 70                                                      # iteration 006 C7 (was 50): 51–70 wait for the Rent-A-GPU-day queue
 doc = read_json(FILE)
 bad = collections.Counter(); says = []
 def fail(row, what):
@@ -72,7 +73,7 @@ for m in doc['molecules']:
     if m['heavy'] != sum(1 for z in Z if z > 1): fail(m, 'heavy disagrees with atomsAng')
     is_app = any(s.get('db') == 'λWAVES' for s in m['sources'])
     if is_app: app_rows.append(m['priority'])
-    if m['heavy'] > 50 and not is_app: fail(m, 'more than 50 heavy atoms')
+    if m['heavy'] > MAX_HEAVY and not is_app: fail(m, f'more than {MAX_HEAVY} heavy atoms')
     if any(not all(isinstance(v, (int, float)) and math.isfinite(v) for v in a[1:]) for a in A): fail(m, 'a coordinate that is not finite'); continue
     far, near = 0, 0
     for i in range(len(A)):

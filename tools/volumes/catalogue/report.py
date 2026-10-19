@@ -80,29 +80,51 @@ w(f"""## THE EXCLUSIONS
 table(['reason', 'count'], list(S['excludedByReason'].items())[:26])
 w('By the source that nominated it:\n\n')
 table(['source', 'refused'], list(S['excludedBySource'].items())[:12])
-w(f"""THE TWO SCREENS. **{S['screens']['cwc']}** nominations were refused as Chemical Weapons Convention scheduled chemicals, listed
-precursors or members of a scheduled family — by NAME ({S['screens']['namedScheduled']} of the Annex's own names resolved through
-PubChem to an InChIKey skeleton) and by CLASS (five coarse substructure families, so a congener under another name is refused too),
-and by Wikidata's own "chemical warfare agent" uses. **{S['screens']['illicit']}** were refused as controlled psychoactive
-substances that are not approved medicines ({S['screens']['namedControlled']} names resolved, plus ChEBI's hallucinogen and opioid
-roles and Wikidata's recreational-drug uses); an approved medicine passes the second screen, so morphine and fentanyl are in the
-library as medicines and nothing else of that kind is.
-""")
 SC = S['screens']
-if 'illicitSkeletons' in SC:                                         # iteration 006 C4: the screens on the skeleton
+if 'illicit' in SC:                                                  # before iteration 006 C7: two screens
+    w(f"""THE TWO SCREENS. **{SC['cwc']}** nominations were refused as Chemical Weapons Convention scheduled chemicals, listed
+precursors or members of a scheduled family — by NAME ({SC['namedScheduled']} of the Annex's own names resolved through
+PubChem to an InChIKey skeleton) and by CLASS (five coarse substructure families, so a congener under another name is refused too),
+and by Wikidata's own "chemical warfare agent" uses. **{SC['illicit']}** were refused as controlled psychoactive
+substances that are not approved medicines ({SC.get('namedControlled')} names resolved, plus ChEBI's hallucinogen and opioid
+roles and Wikidata's recreational-drug uses); an approved medicine passes the second screen.
+""")
+else:                                                                # iteration 006 C7: the CWC screen alone
     key_of = {m['id']: m['inchikey'] for m in C['molecules']}
     mates = [r for r in SC['keptAsApprovedDrugs'] if r['via'] != key_of.get(r['id'])]
-    w(f"""
-Since iteration 006 C4 both screens match on the InChIKey's FIRST BLOCK (the connectivity skeleton): every signal — a name, a
-Wikidata use, a ChEBI role, and for the second screen an approved medicine whose own ATC code sits in a controlled-drug group
-(`curated.CONTROLLED_ATC`: opioids, central stimulants and anorectics, barbiturates, benzodiazepines and Z-drugs, ketamine) — screens
-its whole skeleton (racemate, enantiomers, isotopologues, protonated forms) and, for a salt, its neutral parent's. {SC['cwcSkeletons']}
-first blocks carry a CWC signal, {SC['illicitSkeletons']} a controlled-substance signal; **{SC['bySkeleton']}** rows were refused only
-through a skeleton-mate's signal. A row a screened skeleton holds stays only when it is ITSELF an approved drug by ChEMBL (max_phase 4:
-a ChEMBL approved parent whose structure is this row, never a salt folded onto it): {len(SC['keptAsApprovedDrugs'])} rows, {len(mates)}
-of them beside another form's signal — {', '.join(f"{r['name']} (beside {r['viaName']})" for r in mates) or 'none'}. The CWC's Annex
-names and classes refuse outright, approved or not.
+    w(f"""THE SCREEN. **{SC['cwc']}** nominations were refused as Chemical Weapons Convention scheduled chemicals, listed precursors
+or members of a scheduled family — by NAME ({SC['namedScheduled']} of the Annex's own names resolved through PubChem to an InChIKey
+skeleton), by CLASS (five coarse substructure families, so a congener under another name is refused too) and by Wikidata's own
+"chemical warfare agent" uses; each signal screens its whole connectivity skeleton (the InChIKey's FIRST BLOCK: racemate,
+enantiomers, isotopologues, protonated forms) and, for a salt, its neutral parent's ({SC['cwcSkeletons']} first blocks carry a
+signal; **{SC['bySkeleton']}** rows were refused only through a skeleton-mate's). A row a screened skeleton holds stays only when it
+is ITSELF an approved drug by ChEMBL: {len(SC['keptAsApprovedDrugs'])} rows{', ' + ', '.join(f"{r['name']} (beside {r['viaName']})" for r in mates) if mates else ''}.
+The Annex names and classes refuse outright, approved or not. This screen is unchanged since iteration 006 C4.
+
+**The controlled-substance screen is removed** (iteration 006 C7, Josh's decision, 2026-10-18: "That's only the human's relation
+with the molecule that's the problem"): the illicit-names list, ChEBI's hallucinogen and opioid roles, Wikidata's recreational-drug
+uses and the controlled-medicine ATC groups refuse nothing now; those molecules are ordinary rows.
 """)
+X = S.get('c7')
+if X:                                                                # iteration 006 C7: MORE MOLECULES
+    w(f"""
+## MORE MOLECULES (iteration 006 C7: Josh, 2026-10-18 — "add in whatever molecules you can")
+
+Recognisability no longer refuses a row (it orders the rows: the recognisable first in each tier); the use-word gate is gone; a
+Wikidata article's salt or mixture is folded onto its neutral parent; a closed-shell ion is a row with its charge; the heavy-atom
+cap is {X['maxHeavy']} (was 50; the rows of 51–{X['maxHeavy']} wait for the Rent-A-GPU-day queue); the controlled-substance screen is
+gone. **{X['newRows']}** rows are new against the previous file, by why the previous build refused them (or what this build does
+differently):
+
+""")
+    table(['why the row is new', 'rows', 'for example'], [[k, v, ', '.join(X['newSamples'].get(k, [])[:6])] for k, v in X['newByReason'].items()])
+    if X.get('returnedUnderEarlierIds'):
+        w('The rows the controlled-substance screen had refused since C4 came back under the ids an earlier file gave them: '
+          + ', '.join(f"`{r['id']}` ({r['name']})" for r in X['returnedUnderEarlierIds']) + '.\n\n')
+    pend = (S.get('pubchem') or {}).get('pending') or {}
+    w(f"PubChem: {S['pubchem'].get('requests', 0)} requests this run" + (f"; it stopped asking — {S['pubchem']['stopped']}" if S['pubchem'].get('stopped') else '')
+      + (f"; PENDING (never asked; a calm run fills them): {', '.join(f'{k} {v}' for k, v in pend.items())} — {X['pendingRows']} rows held back" if pend else '; nothing pending')
+      + f". Local geometries built this run: {X['localGeometriesBuilt']} ({X['jobs']} worker processes).\n")
 w("""
 ## THE TEN FIRST ROWS (priority order: the app's own, then the WHO essential medicines and the most recognisable names, then small before large)
 
