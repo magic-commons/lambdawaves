@@ -154,7 +154,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const [r, c] = seatOf(Z), v = valenceOf(Z), a = ATOMS.find((x) => x.Z === Z), live = !!a, sym = SYM[Z - 1];
     const t = tile(table, 'mm-el', { name: NAMES[Z - 1], sub: v.label, math: true, under: false, note: live ? '' : 'past krypton: not in the ATOM system yet' }, () => goAtom(Z), !live);
     t.style.gridRow = String(r); t.style.gridColumn = String(c);
-    pic(t, './img/menu/' + (live ? 'el-' + sym : 'orb-' + v.nl + '_' + v.m) + '.webp');   // the atom's highest orbital: its own past H–Kr hydrogen's (n, l, m)
+    pic(t, './img/menu/' + (live ? 'el-' + sym : 'orb-' + v.nl + '_' + v.m) + '.webp');   // the atom's highest orbital (011 Q3: the pure orbital of its (n, l, m), cut to show its layers)
     el('i', 'mm-z', t, String(Z)); el('b', 'mm-sym', t, sym);
   }
   /* ── MOLECULAR: MOLECULES ONLY (iteration 011 Q4, Josh: "remove those 'lattice' and 'heavy' and other downloadable stuff from the molecular
