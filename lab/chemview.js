@@ -76,6 +76,14 @@ export function createChem(host, api) {
      different molecule up, the solve that follows overwrote the saved index with nocc, and the round trip lost it.
      (Invisible while there were eight presets and the laws only ever restored H₂O onto H₂O.)  One pending value,
      consumed by the next solve and then cleared. */
+  /* iteration 007 O (ADR-0001) · THE ORBITAL DIAL IS A STEPPED TARGET, `chem.orbital` (lab/shell/modulation.js registers it and re-registers its
+     range on every landing).  `handK` is the index the HAND owns — the dial, a landing, a file, a verb; a modulator never writes it — so a
+     saved orbital's name (orbitalKey) is the base's, never wherever an LFO stood at SAVE.  THE STEP-RATE CAP (Josh 10-18: "Orbitals should be
+     steps and I think it could handle it at lower frequencies"): every step rebuilds the volume, so a modulator's writes coalesce — the latest
+     value wins, applied at most once per STEP_MS or per the measured rebuild (apply → the GPU done with the frame that drew it, an EMA),
+     whichever is slower.  An LFO at 20 Hz steps at the cap; a lane at 0.5 Hz steps every orbital it crosses. */
+  const STEP_MS = 120;
+  let handK = null, stepWant = null, stepHeld = false, stepTimer = 0, stepAt = -Infinity, stepMs = 0, stepN = 0, clamped = null;
   let pendingOrbital = null, pendingKey = null, wantRef = null;               // 0.4.0 S4a: the { id, hash, nameKey } a project or link named                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
   const keyed = (N, K) => (K && N && N.reliable && N.group === K.group ? N.mos.find((m) => m.irrep === K.irrep && m.count === K.count && (m.member || null) === (K.member || null)) || null : null);
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
@@ -254,8 +262,14 @@ export function createChem(host, api) {
     { id: 'dlda', label: 'Δ LDA−RHF', title: 'ρ_LDA − ρ_RHF, signed: where LDA puts more density — D_LDA − D_RHF in double precision, the Δρ road' }],
     onChange: (v) => { view = v; seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); if (api.say) api.say('view', 'VIEW · ' + vSeg.button(v).textContent); } });   // a run already HAS its t = 0 reference; only a still molecule needs one stored now
   rV.appendChild(vSeg.root);
+  /** the hand on the ORBITAL dial: routed, it moves the BASE (the modulator keeps the picture); else it is the orbital, said on the stage */
+  function orbInput(v) { const k = Math.round(v); handK = k; if (api.modHand && api.modHand('chem.orbital', k)) return; orbital = k; if (view === 'orbital') pushMatrix(); refresh(); sayOrbital(); baseHand(); }
+  /** the hand's index is the registry's base at once, routed or not — so a route added while paused rides on it, and a file's name for it (orbitalKey)
+      is the base's.  An orbital not chosen (null: HOMO on the next landing) has the placeholder base 1, so a project's base table reads the same
+      after an undo of MOLECULES ON as before it; stepApply never lets that placeholder choose an orbital */
+  function baseHand() { if (api.modBase) api.modBase('chem.orbital', Number.isFinite(handK) ? handK : 1); }
   let orbKnob = knob({ label: 'ORBITAL', min: 1, max: 7, value: 5, title: 'The molecular orbital index, ascending in ε; HOMO by default',
-    fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); sayOrbital(); } });
+    fmt: (v) => orbFmt(Math.round(v)), onInput: orbInput });
   rM.appendChild(orbKnob.root);
   /* 0.4.0 S4c · VALENCE, A SWITCH ON DENSITY (PLAN F5 iii): D − 2 Σ_core C_c C_cᵀ in f64, drawn by the density kind; the core is S1's
      coreCount(atoms).  It takes the ORBITAL dial's seat while DENSITY is the view (the dial reads nothing there): no wider row. */
@@ -532,9 +546,12 @@ export function createChem(host, api) {
   function land(r) {
     kept = new Map([...kept].filter(([k]) => stem(k) === stem(r.key))); kept.set(r.key, r);
     sol = r; mBuf = oBuf = dBuf = dRef = vibSh = null; fieldHash = null;
-    const named = keyed(r.names, pendingKey);
-    orbital = named ? named.k : (Number.isFinite(pendingOrbital) && pendingOrbital >= 1 && pendingOrbital <= r.nAO) ? pendingOrbital : r.nocc;
-    pendingOrbital = pendingKey = null;
+    const named = keyed(r.names, pendingKey), [lo, hi] = span(), P = pendingOrbital;
+    /* iteration 007 O: a file's index the molecule does not have CLAMPS to its span (was: HOMO) — a route or a lane saved on chem.orbital reopens
+       on the nearest orbital the molecule holds, and STATE says so (modulation.js reads `clamped`); a step still in flight is the old molecule's */
+    orbital = handK = named ? named.k : Number.isFinite(P) ? Math.min(hi, Math.max(lo, Math.round(P))) : r.nocc;
+    clamped = !named && Number.isFinite(P) && orbital !== P ? { asked: P, lo, hi, k: orbital, key: r.key } : null;
+    pendingOrbital = pendingKey = null; clearTimeout(stepTimer); stepTimer = 0; stepWant = null;
     rebuildOrbKnob(); standDown(); pushField(); refresh(); tell(); notify(); symmetryLine(sol.D, 'still'); vibSay(); vibLand();
   }
   /* Δ LDA−RHF: the pair [LDA, RHF] of this molecule when both are kept; asked for in VIEW (a project, a verb) with one missing, the other is solved quietly */
@@ -567,9 +584,39 @@ export function createChem(host, api) {
     const [lo, n] = span(), k = Math.min(Math.max(lo, orbital || lo), n);
     const help = orbKnob.root.dataset.help || 'The molecular orbital index, ascending in ε; HOMO by default';
     const next = knob({ label: 'ORBITAL', min: lo, max: n, value: k, title: help,
-      fmt: (v) => orbFmt(Math.round(v)), onInput: (v) => { orbital = Math.round(v); if (view === 'orbital') pushMatrix(); refresh(); sayOrbital(); } });
+      fmt: (v) => orbFmt(Math.round(v)), onInput: orbInput });
+    /* iteration 007 O: the rebuilt dial keeps its target — the `data-param` stamp the TIMELINE and the drop read, and the held look (the
+       port's restamp, after the re-registration this landing triggers, hands the new dial its base road) */
+    if (orbKnob.root.dataset.param) next.root.dataset.param = orbKnob.root.dataset.param;
+    next.root.classList.toggle('mod-held', orbKnob.root.classList.contains('mod-held'));
     orbKnob.root.replaceWith(next.root); orbKnob = next;
     seats();
+  }
+  /** the modulator's road (chem.orbital's set): coalesced, the latest value wins; `held` paints the dial over the base (show), else sets it */
+  function stepOrbital(v, held) {
+    stepWant = v; stepHeld = !!held;
+    if (stepTimer) return;
+    const wait = stepAt + stepGap() - performance.now();
+    if (wait <= 0) stepApply(); else stepTimer = setTimeout(stepApply, wait);
+  }
+  const stepGap = () => Math.max(STEP_MS, Math.round(stepMs));
+  function stepApply() {
+    stepTimer = 0; const v = stepWant; stepWant = null;
+    if (!Number.isFinite(v) || !sol || (!stepHeld && !Number.isFinite(handK))) return;   // the registry writing back a not-chosen orbital's placeholder base chooses nothing
+    const [lo, hi] = span(), k = Math.min(hi, Math.max(lo, Math.round(v)));
+    if (stepHeld && orbKnob.show) orbKnob.show(k); else orbKnob.set(k);
+    if (k === orbital) return;
+    orbital = k; stepAt = performance.now(); stepN++;
+    if (view === 'orbital' && pushMatrix()) stepClock(stepAt);
+    refresh();
+  }
+  /** the rebuild a step costs, measured: from the apply to the GPU done with the frame whose generation drew it (≤ 2 s, else unmeasured) */
+  function stepClock(t0) {
+    const F = api.field && api.field(); if (!F || !F.device || !F.stats) return;
+    const g0 = F.stats.generation;
+    const wait = () => { if (F.stats.generation === g0) { if (performance.now() - t0 < 2000) requestAnimationFrame(wait); return; }
+      F.device.queue.onSubmittedWorkDone().then(() => { const ms = performance.now() - t0; stepMs = stepMs ? stepMs * 0.7 + ms * 0.3 : ms; }, () => {}); };
+    requestAnimationFrame(wait);
   }
 
   /* ── the real-time run ────────────────────────────────────────────────────────────────────────── */
@@ -1125,7 +1172,7 @@ export function createChem(host, api) {
     return o;
   }
   /** the chosen orbital as its S1 name { group, irrep, count, member }; null when none is chosen or named */
-  function orbitalKey() { const N = sol && sol.names, mo = N && N.reliable && Number.isFinite(orbital) ? N.mos[orbital - 1] : null; return mo && mo.irrep ? { group: N.group, irrep: mo.irrep, count: mo.count, member: mo.member || null } : null; }
+  function orbitalKey() { const K = Number.isFinite(handK) ? handK : orbital, N = sol && sol.names, mo = N && N.reliable && Number.isFinite(K) ? N.mos[K - 1] : null; return mo && mo.irrep ? { group: N.group, irrep: mo.irrep, count: mo.count, member: mo.member || null } : null; }
   /** the canonical lab/molecule-state.js record of what is on screen — validated by serializeMolecule, or null */
   function record() {
     if (!MS || typeof MS.serializeMolecule !== 'function' || !sol) return null;
@@ -1157,8 +1204,8 @@ export function createChem(host, api) {
     wantRef = L && L.id === preset && /^[0-9a-f]{64}$/.test(L.hash) ? { id: L.id, hash: L.hash, nameKey: L.nameKey || null } : null;
     if (typeof o.view === 'string') { view = o.view; vSeg.set(view); }
     pendingKey = o.orbitalKey || null;                                            // 0.4.0 S2: a link's orbital by its S1 name, resolved when the solve lands
-    if (Number.isFinite(o.orbital)) { orbital = Math.round(o.orbital); pendingOrbital = orbital; }
-    else if (o.orbital === null) orbital = pendingOrbital = null;   // 0.3.1 · S4: the record's "not chosen" (HOMO by default) lands too — an undo of ON and NEW clear the fill
+    if (Number.isFinite(o.orbital)) { orbital = handK = Math.round(o.orbital); pendingOrbital = orbital; }
+    else if (o.orbital === null) orbital = handK = pendingOrbital = null;   // 0.3.1 · S4: the record's "not chosen" (HOMO by default) lands too — an undo of ON and NEW clear the fill
     if (typeof o.axis === 'string' && AXES.includes(o.axis)) { axis = o.axis; aSeg.set(axis); }
     if (Number.isFinite(o.kappa)) { kappa = o.kappa; kapKnob.set(kappa); }
     if (Number.isFinite(o.speed)) { speed = Math.max(1, Math.round(o.speed)); spdKnob.set(speed); }
@@ -1170,7 +1217,8 @@ export function createChem(host, api) {
     if (vibOn) setVib(false); pendingVib = o.vibrate && Number.isFinite(o.vibrate.mode) ? o.vibrate : null; pulse = PULSES.includes(o.pulse) ? o.pulse : 'none'; pSeg.set(pulse);   // 0.7.0 V1: VIBRATE plays once this molecule's solve is in (vibLand)
     setRun(false); rt = null; spec = null; fit = null; selected = null;
     if (resolve && sol) sol = null;
-    if (sol && pendingKey) { const m = keyed(sol.names, pendingKey); if (m) orbital = m.k; pendingKey = null; }   // S2: the same molecule, already solved: the name lands now
+    if (sol && pendingKey) { const m = keyed(sol.names, pendingKey); if (m) orbital = handK = m.k; pendingKey = null; }
+    if (Number.isFinite(o.orbital) || o.orbital === null) baseHand();   // iteration 007 O: the file's index is chem.orbital's base (a route restored after this re-bases it from the file's table)   // S2: the same molecule, already solved: the name lands now
     seats(); tell();
     if (o.on !== undefined) setOn(!!o.on);
     else if (sol) { pushField(); refresh(); } else refresh();
@@ -1236,10 +1284,12 @@ export function createChem(host, api) {
     setPopulations(fn) { popOf = typeof fn === 'function' ? fn : null; paint(); },
     get esp() { return espLast; }, espPump() { espPump(); return espLast; },   // 0.6.5 X1: the last chem.esp reply; VIEW ESP pumps from update()
     solution() { return sol; }, subscribe(fn) { subs.add(fn); if (sol) fn(sol); return () => subs.delete(fn); },   // the register's road: the last ground state, and every new one
-    /* the modulation registry's two targets — PRESENT-only setters, and the dials they write */
+    /* the modulation registry's targets — chem.kick and chem.speed (PRESENT-only setters) and their dials; chem.orbital's capped road is above */
     get kappa() { return kappa; }, setKappa(v) { if (!Number.isFinite(v)) return kappa; kappa = Math.min(1e-2, Math.max(1e-4, v)); return kappa; },
     get speed() { return speed; }, setSpeed(v) { if (!Number.isFinite(v)) return speed; speed = Math.min(50, Math.max(1, Math.round(v))); return speed; },
-    knobs: { kick: () => kapKnob, speed: () => spdKnob },
+    knobs: { kick: () => kapKnob, speed: () => spdKnob, orbital: () => orbKnob },
+    /* iteration 007 O · chem.orbital: the range a landing re-registers, the capped modulator road, the cap's witness, and a file's clamp */
+    span() { return span(); }, stepOrbital, get orbitalStep() { return { ms: +stepMs.toFixed(1), gap: stepGap(), steps: stepN, pending: stepWant }; }, get clamped() { return clamped; },
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
     solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); }, pick: handPick,
     preset() { return preset; }, row,
@@ -1249,7 +1299,7 @@ export function createChem(host, api) {
     /** 0.7.3 K2 · METHOD from outside (the verb, __LW.chem): the seg's own road, a hand press; → the solve, or null where it is not offered */
     setMethod(v) { const b = mthS.button(v); if (!b || b.disabled || b.style.display === 'none') return Promise.resolve(null); if (v === method) return solve(preset); mthS.set(v); method = v; return solve(preset).then((r) => { if (r && api.hand) api.hand(preset); return r; }); }, get method() { return method; },
     setView(v) { if (!['density', 'orbital', 'diff', 'esp', 'spin', 'dlda'].includes(v) || (v === 'spin' && !(sol && sol.Ds)) || (v === 'dlda' && !pair()) || (v !== 'orbital' && sol && !sol.D && !(v === 'density' && factor()))) return view; view = v; vSeg.set(v); seats(); pushMatrix(v === 'diff' && !rt); refresh(); tell(); return view; },
-    orbital(k) { if (Number.isFinite(k)) { const [lo, hi] = span(); orbital = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
+    orbital(k) { if (Number.isFinite(k)) { const [lo, hi] = span(); orbital = handK = Math.min(hi, Math.max(lo, Math.round(k))); orbKnob.set(orbital); baseHand(); if (view === 'orbital') pushMatrix(); refresh(); } return orbital; },
     setAxis(a) { if (!AXES.includes(a)) return axis; axis = a; aSeg.set(a); paint(); return axis; },
     setIntegrator(v) { if (v !== 'mmut' && v !== 'magnus2') return integrator; integrator = v; iSeg.set(v); reset(); return integrator; },
     setDt(v) { if (!DTS.includes(String(v))) return dt; dt = Number(v); dSeg.set(String(v)); reset(); return dt; },

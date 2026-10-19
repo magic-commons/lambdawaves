@@ -1,6 +1,6 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
-import { TIER } from '../rack.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js';
+import { TIER } from '../rack.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS } from '../field.js';
 export function createModSeam(app) {
   const { ui, hNote, clock, obs, mat, settingsStore, reg, rates } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings } = app.sh,
     { mod, modHand, setKnob, ROT_LIMIT, rotRate, setRotationRate, occlusion, applyAccent, api } = app.ctl;
@@ -112,17 +112,27 @@ export function createModSeam(app) {
         get: () => rates[reg.populated().find((b) => BASIS[b].n === i + 1) ?? BASIS.findIndex((s) => s.n === i + 1)],   // its first populated label, else its first
         set: (v) => { for (const s of BASIS) if (s.n === i + 1 && rates[s.index] !== v) api.setRate(s.index, v); } })),
 
-      /* CHEMISTRY offers exactly TWO targets and the choice is the same law as everywhere above: a κ and a
-         RATE, both PRESENT-only setters that store a number and schedule nothing (the RT pump is already
-         running a frame of its own when either matters).  The ORBITAL INDEX is deliberately NOT registered:
-         it changes WHICH quantity the volume means, which is a rebuild of the picture's subject rather than
-         a value to sweep — the same line that keeps FIELD RESOLUTION and STEPS out of this array. */
+      /* CHEMISTRY's targets: a κ and a RATE, both PRESENT-only setters that store a number and schedule nothing (the RT pump is
+         already running a frame of its own when either matters) — and, since iteration 007 O, THE ORBITAL INDEX.
+         ADR-0001 (research/iteration-007/architecture/ADR-draft-0001-orbital-index-is-a-stepped-target.md, ACCEPTED; Josh 10-18:
+         "Orbitals should be steps and I think it could handle it at lower frequencies"): this array used to keep the index out because
+         it changes WHICH quantity the volume means — a rebuild of the picture's subject, not a value to sweep.  That is still true, and
+         it is answered rather than refused: `chem.orbital` is an INTEGER target (every value a route or a lane writes is a whole
+         orbital, never a cross-fade), and its setter is CAPPED (chemview stepOrbital: the latest value wins, at most one step per
+         120 ms or per the measured rebuild, whichever is slower).  Its range is the MOLECULE's, so this row only holds the id, the
+         adapters and the field's orbital ceiling until the first landing; every landing re-registers it by id with the molecule's
+         span (below the install: the kit's HOT RE-REGISTRATION keeps the base and the routes).  Do not move it back out: saved
+         projects carry routes and TIMELINE clips on this id.  FIELD RESOLUTION and STEPS stay out — they rebuild the field itself. */
       { id: 'chem.kick', label: 'κ KICK', map: 'log', min: 1e-4, max: 1e-2, def: 1e-3, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.kick() : null),
         hint: 'the δ-kick strength the next KICK will use — linear response wants the smallest κ the trace can carry',
         get: () => (app.state.chem ? app.state.chem.kappa : 1e-3), set: (v) => { if (app.state.chem) { app.state.chem.setKappa(v); setKnob(app.state.chem.knobs.kick(), app.state.chem.kappa); } } },
       { id: 'chem.speed', label: 'MOLECULES SPEED', unit: ' steps/frame', map: 'linear', min: 1, max: 50, def: 10, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.speed() : null),
         hint: 'real-time propagation steps asked of the worker each frame',
         get: () => (app.state.chem ? app.state.chem.speed : 10), set: (v) => { if (app.state.chem) { app.state.chem.setSpeed(v); setKnob(app.state.chem.knobs.speed(), app.state.chem.speed); } } },
+      { id: 'chem.orbital', label: 'MOLECULES ORBITAL', map: 'integer', min: 1, max: MOL_LIMITS.ao, step: 1, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.orbital() : null),
+        hint: 'which molecular orbital VIEW ORBITAL draws, ascending in ε — whole orbitals, one step per volume rebuild at most (≥ 120 ms)',
+        get: () => { const k = app.state.chem ? app.state.chem.orbital() : null; return Number.isFinite(k) ? k : NaN; },   // NaN before a molecule: the base is not synced from nothing
+        set: (v) => { if (app.state.chem) app.state.chem.stepOrbital(v, app.state.modHost.registry.isModulated('chem.orbital')); } },
       /* THE REGISTER's SLOTS (REGISTER-WINDOW-SPEC §6): MORPH, and eight lane slots in lane order — S₀ is slot 1.
          PRESENT-only like every target here: a setter stores a number and the register's own frame push reads it.
          A slot with no lane behind it is a no-op, which is the present-only law for a lane that is not there. */
@@ -154,11 +164,21 @@ export function createModSeam(app) {
         set: (v) => { app.hooks.ab.setOmega(v); setKnob(ui.abOmega, v); schedule(TIER.PRESENT); } },
     ];
     /* THE SIXTH ROOT, through mir/registry's own documented extension point rather than by editing the vendored module:
-       CHEMISTRY's two targets are `chem.kick` and `chem.speed`, and an id's root is what a saved route is addressed by — so it
+       CHEMISTRY's targets are `chem.kick`, `chem.speed` and `chem.orbital` (iteration 007 O), and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
        sphere arcs, so they are drop targets now, like every observer.* dial. */
     app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell']);
     app.state.restampParams = mod.stamp;
+    /* iteration 007 O (ADR-0001) · chem.orbital's RANGE IS THE MOLECULE'S: every landing re-registers it by id (the kit keeps the base and
+       the routes; a lane's 0..1 curve spans the new molecule), hands the base the landing's orbital (the HOMO, or the index a file named),
+       re-asserts a routed target at once, and restamps the dial chemview rebuilt (its stamp was copied; the base road is the port's) */
+    { const { knob: _k, id: _i, ...orbSpec } = defs.find((d) => d.id === 'chem.orbital'), H = app.state.modHost;
+      app.state.chem.subscribe((sol) => { if (!sol) return;
+        const [lo, hi] = app.state.chem.span(), k = app.state.chem.orbital();
+        H.targets.installOne('chem.orbital', { ...orbSpec, min: lo, max: Math.max(hi, lo + 1) });   // integer needs min < max: a one-column record keeps a dead top step
+        if (Number.isFinite(k)) H.registry.setBase('chem.orbital', k);
+        if (H.registry.isModulated('chem.orbital')) H.clock.applyAll(true);
+        mod.stamp(); if (app.state.modView) app.state.modView.rebuild(); }); }
 
     let trSeat = 'bottom', trMoving = false;
     function seatRect(where, w, h) {
