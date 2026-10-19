@@ -88,17 +88,17 @@ targets are unchanged. PERFORMANCE sits in SETTINGS › QUALITY beside GOVERNOR;
 METERS keeps the GOVERNOR readout and FRAME PROFILE.
 
 THE STAGE FORMULA (the INFORMATIONAL window since 0.5.3 M9: its own rack card, `lab/informational.js`, closed on a first run and for a
-profile older than it, seated under SETTINGS when opened, listed in + and WINDOW; PREFERENCE `molFormula` / `molFormulaSize`, on by default,
+profile older than it, seated under SETTINGS when opened, listed in + and WINDOW; PREFERENCE `molFormula` / `molFormulaSize` in INFORMATIONAL's own record `lambdawaves.q0.info` since iteration 007 I (`lab/shell/stage-words.js` `INFO_ROWS` · `infoPrefs`, the kit's createPrefs; the window is built from those rows with the kit's `control()`; the blob's six keys lifted once), on by default,
 50–300 %) writes what is playing on the stage as ONE block of the kit's INFORMATIONAL layer (`createInfoLayer` in `lab/shell/stage-words.js` `initStageText`, 0.5.1 D1; `lab/stage-text.js` is gone): the MOLECULES formula ($\mathrm{H_{2}O}$) while MOLECULES is on,
 otherwise SPECTRUM's populated states in `stateLatex`'s prose ("$2s_{0}$ and $2p_{-1}$"; A ↔ B under a TRANSITION) — never a
-live coefficient. The layer has no subject, no features and no labels, parallax, drift and following off, and is NEVER told of a
+live coefficient. The layer has no subject, no features and no labels; parallax, drift and following are off unless INFORMATIONAL › CURSOR (AWAY · DRIFT, off on a first run) turns them on, and is NEVER told of a
 camera move (`viewChanged()` only when the racks hide or slide, the transport docks or moves, or the TIMELINE opens or docks; the
 kit's ResizeObserver covers a size): idle it writes nothing (D1-BUILD U2: 0 records over AUTO-ROTATE and a pointer sweep).
 Its key is the string it would render: a changed string is `remove()` + `addBlock({ md })` (the kit's exit and entrance), KaTeX
 runs at most four times a second, and nothing is added while STAGE FORMULA is off (the root `hidden`). It wears the kit's look —
 ink, the feathered shade, the serif face — at the kit's seat: the free stage's top + 12 %, between the racks, clear of the
 undocked transport and an open TIMELINE (`avoid`); under every window (`.mir-info.lw-stage` z 20 < the racks' 30, `lab.css`),
-never a pointer target, never in the occlusion mask. THE FADE: a HAND's preset (STATE's PRESET and RELOAD, MO-REGISTRY's eight ORBITAL presets — HOMO · LUMO · HOMO + LUMO · FRONTIER FOUR · HOMO SET · LUMO SET · WINDING · OCCUPIED, one table in `lab/orbitalsview.js` since 0.5.3 M10 — and its STATES presets) is announced as the block (`data-fade`, the heading size) for 2.4 s — the formula leaves and
+never a pointer target, never in the occlusion mask. THE KINDS (iteration 007 I): every announcement is `stageText.say(kind, text)` — `preset` (THE FADE), `head` (THE HEAD), `registry`, `view`, `orbital`, `basis`, `rate`, `style` (pop-ups) — and is written only while INFORMATIONAL › ANNOUNCE has that kind on; Josh 10-18: the formula and the atom labels ON, every kind and NAME OFF on a first run (the say verb and ASK stay raw `announce`). THE FADE: a HAND's preset (STATE's PRESET and RELOAD, MO-REGISTRY's eight ORBITAL presets — HOMO · LUMO · HOMO + LUMO · FRONTIER FOUR · HOMO SET · LUMO SET · WINDING · OCCUPIED, one table in `lab/orbitalsview.js` since 0.5.3 M10 — and its STATES presets) is announced as the block (`data-fade`, the heading size) for 2.4 s — the formula leaves and
 returns, and the kit's exit is the fade — `WINDING · $1e_{1g}$ (a) + (b)`, the names from `lab/names.js`; the press threads
 `{ hand: true }`, so a restore, an undo, a project or link open never announces (`tests/stage-text.browser-test.mjs`). THE HEAD (0.5.1 D2): a HAND pick of a molecule — the MOLECULE dropdown,
 MOLECULES ON, a notebook `lw:molecule=` link (chemview's `hand`) — shows its head in THE FADE's seat once that molecule's solve

@@ -40,7 +40,8 @@ try {
   assert.equal((await g.waitFor('window.__LW&&__LW.ready', 200, 100)).ok, 1);
   /* the notes, typed into the notebook, then its ◐ pressed to the view */
   const md = ['[density](lw:view=density)', '[water](lw:molecule=h2o)', '[lumo](lw:molecule=nh3&orbital=lumo)', '[x](lw:s=abc)', `[here](https://127.0.0.1:${PORT}/lab/manifest.webmanifest)`].join('\n\n');
-  const t0 = await ev(`window.__w = (n) => new Promise((r) => setTimeout(r, n));
+  /* iteration 007 I: THE FADE and THE HEAD are INFORMATIONAL › ANNOUNCE kinds, off on a first run; switched on in the record first */
+  const t0 = await ev(`__LW.stageText.prefs.set({ sayPreset: true, sayHead: true }); window.__w = (n) => new Promise((r) => setTimeout(r, n));
     window.__opens = 0; window.open = () => { window.__opens++; return null; };
     __LW.layout.notebook.open('notes'); await __w(200);
     const ta = document.querySelector('#notebook .nb-text'); ta.focus(); ta.value = ${JSON.stringify(md)}; ta.dispatchEvent(new Event('input', { bubbles: true }));

@@ -1,10 +1,75 @@
 /* lab/shell/stage-words.js — THE STAGE TEXT and its CAPTION (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the source, the caption a capture draws,
  * the tick and the INFORMATIONAL layer (initStageText, called by boot() at the go).  stageTextTick and stageCaption are registered on app.w at creation. */
-import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { toScreen, cameraKey } from '../field.js';
+import { TIER } from '../rack.js'; import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { toScreen, cameraKey } from '../field.js';
 import { BASIS } from '../hydrogen.js'; import { getHamiltonian } from '../hamiltonian.js'; import { ELEMENT } from '../md.js';
-import { stateLatex, formulaLatex, BASIS_LABEL } from '../latex-state.js';
+import { stateLatex, formulaLatex, BASIS_LABEL, mdText } from '../latex-state.js';
+import { createPrefs } from '../mir/core/prefs.js'; import { createSettingsStore } from '../settings-store.js';
+/* ── iteration 007 I · THE STAGE WORDS' PREFERENCES ARE ONE RECORD OF THEIR OWN (ADR-0003): `lambdawaves.q0.info`, the kit's createPrefs over
+   the declarative rows below (no `apply` spec: initStageText applies them, and INFORMATIONAL builds its controls from them with the kit's control()).
+   THE KINDS: every announcement says what it is, and the stage writes it only while that kind's switch is on.  `fade` is THE FADE (the formula's seat,
+   2.4 s), `pop` the short line on the other side (iteration 001), `head` THE HEAD (held until Escape or a press).  Josh 10-18: "default to formula and
+   atoms on.  Everything else off."  A HAND speaks; a restore, an undo, a project or link open never does (each emitter's own law, unchanged). */
+export const INFO_KEY = 'lambdawaves.q0.info';
+export const KINDS = Object.freeze([
+  { id: 'preset', key: 'sayPreset', seat: 'fade', label: 'PRESETS', hint: 'A hand\'s preset — STATE\'s PRESET and RELOAD, MO-REGISTRY\'s ORBITAL and STATES presets, a notebook link — named in the formula\'s seat for 2.4 s' },
+  { id: 'head', key: 'sayHead', seat: 'head', label: 'MOLECULE HEAD', hint: 'A hand pick of a molecule shows its head once the solve lands — formula and name, method and E, the HOMO and the gap, its STATUS — held until Escape or a press on the picture' },
+  { id: 'registry', key: 'sayRegistry', seat: 'pop', label: 'REGISTRY ADDS', hint: 'The orbital a hand just added to MO-REGISTRY' },
+  { id: 'view', key: 'sayView', seat: 'pop', label: 'WAVE VIEW', hint: 'WAVE\'s OBSERVABLE and MOLECULES\' VIEW, as a hand changes them' },
+  { id: 'orbital', key: 'sayOrbital', seat: 'pop', label: 'ORBITAL DIAL', hint: 'The orbital MOLECULES\' ORBITAL dial lands on, while a hand turns it' },
+  { id: 'basis', key: 'sayBasis', seat: 'pop', label: 'BASIS · METHOD', hint: 'MOLECULES\' BASIS and METHOD, as a hand picks them' },
+  { id: 'rate', key: 'sayRate', seat: 'pop', label: 'RATE', hint: 'The time multiplier (the transport\'s RATE), while a hand turns it' },
+  { id: 'style', key: 'sayStyle', seat: 'pop', label: 'STYLE · PALETTE', hint: 'WAVE\'s draw STYLE, PALETTE on or off and a palette preset, as a hand picks them' },
+]);
+const KIND = new Map(KINDS.map((k) => [k.id, k]));
+const pct = (v) => Math.round(v * 100) + '%';
+/** the rows: { key, type, default, … } is the kit's prefs schema; group · label · hint · options · fmt are the window's (informational.js) */
+export const INFO_ROWS = Object.freeze([
+  { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'STAGE FORMULA', hint: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states — and caption a picture or a recording with it and its STATUS word; off, an export carries neither and the stage announces nothing' },
+  { key: 'molName', type: 'bool', default: false, group: 'words', label: 'NAME', hint: 'The molecule\'s name under its formula (water under H₂O)' },
+  { key: 'molFormulaSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'words', label: 'SIZE', fmt: pct, hint: 'The STAGE FORMULA\'s size: 100% is the notebook\'s — the formula its title (34 px), THE FADE its heading' },
+  { key: 'atomLabels', type: 'bool', default: true, group: 'labels', label: 'ATOM LABELS', hint: 'Mark each MOLECULES nucleus with its element symbol, inverting whatever is beneath it' },
+  { key: 'atomLabelsSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'labels', label: 'SIZE', fmt: pct, hint: 'The ATOM LABELS\' size: 100% is the notebook\'s body (14 px)' },
+  { key: 'infoPos', type: 'enum', values: ['top', 'bottom'], default: 'top', group: 'seat', label: 'POSITION', options: [{ id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'The formula at the top or the bottom of the free stage; the pop-ups take the other side' },
+  { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0.12, group: 'seat', label: 'PAD', fmt: pct, hint: 'The formula\'s distance from its edge of the free stage, as a share of its height; the pop-ups keep the same distance on the other side' },
+  ...KINDS.map((k) => ({ key: k.key, type: 'bool', default: false, group: 'announce', label: k.label, hint: k.hint })),
+  { key: 'popSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'announce', label: 'SIZE', fmt: pct, hint: 'The pop-ups\' size: 100% is 15 px' },
+  { key: 'cursorAway', type: 'bool', default: false, group: 'cursor', label: 'AWAY', hint: 'The words lean away from the pointer as it crosses the stage (the kit layer\'s follow and parallax)' },
+  { key: 'cursorDrift', type: 'bool', default: false, group: 'cursor', label: 'DRIFT', hint: 'The words bob slowly while they are on the stage (the kit layer\'s drift; it keeps a frame booked)' },
+]);
+/** the six keys the settings blob held (0.5.3 M9, iteration 001): read once into the record, never written again */
+export const BLOB_INFO = Object.freeze(['molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'infoPos', 'infoPad']);
+/** liftInfo(blob) → the record's patch, by the laws shell/settings.js read them by: nothing said is ON at 100 %; an absent atomLabels /
+ *  atomLabelsSize takes the stored molFormula / molFormulaSize (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); TOP at 12 % */
+export function liftInfo(s = {}) {
+  if (!BLOB_INFO.some((k) => s[k] !== undefined)) return {};
+  const num = (v) => (v === undefined || v === null ? NaN : +v), clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const molFormula = s.molFormula !== undefined ? s.molFormula !== false : s.atomLabels !== false, atomLabels = s.atomLabels !== undefined ? s.atomLabels !== false : molFormula;
+  const molFormulaSize = Number.isFinite(num(s.molFormulaSize)) ? clamp(num(s.molFormulaSize), 0.5, 3) : 1, atomLabelsSize = Number.isFinite(num(s.atomLabelsSize)) ? clamp(num(s.atomLabelsSize), 0.5, 3) : molFormulaSize;
+  return { molFormula, atomLabels, molFormulaSize, atomLabelsSize, infoPos: s.infoPos === 'bottom' ? 'bottom' : 'top', infoPad: Number.isFinite(num(s.infoPad)) ? clamp(num(s.infoPad), 0, 0.4) : 0.12 };
+}
+let infoStore = null, infoSeen = false;
+/** infoPrefs() — the one record (made at its first call: INFORMATIONAL's seat or applySettings', whichever comes first).  THE LIFT runs here, once:
+ *  a blob holding the six keys and no record → the record, and the keys leave the blob.  The record is written once if absent, so a profile that has
+ *  met INFORMATIONAL says so (infoKnown — the closed-card rule's "older than INFORMATIONAL" was `atomLabels === undefined`). */
+export function infoPrefs() {
+  if (infoStore) return infoStore;
+  let ls = null; try { ls = globalThis.localStorage || null; } catch (_) {}
+  const has = () => { try { return !!(ls && ls.getItem(INFO_KEY)); } catch (_) { return false; } };
+  const settings = createSettingsStore(), blob = settings.read();
+  infoSeen = has() || blob.atomLabels !== undefined;
+  infoStore = createPrefs({ key: INFO_KEY, schema: INFO_ROWS.map(({ key, type, values, min, max, step, default: d }) => ({ key, type, values, min, max, step, default: d })), storage: ls });
+  if (!has()) {
+    const held = BLOB_INFO.filter((k) => k in blob);
+    infoStore.set(liftInfo(blob));
+    try { if (ls && !has()) ls.setItem(INFO_KEY, JSON.stringify(infoStore.all())); } catch (_) {}
+    if (held.length) { for (const k of held) delete blob[k]; settings.write(blob); }
+  }
+  return infoStore;
+}
+/** has this profile met INFORMATIONAL (a record, or a blob that held atomLabels)?  Read at infoPrefs()'s first call */
+export const infoKnown = () => (infoPrefs(), infoSeen);
 export function createStageWords(app) {
-  const { dom, reg } = app, { rack } = app.host, { wChem } = app.w, { paintMarks } = app.ctl;
+  const { dom, reg } = app, { rack } = app.host, { wChem } = app.w, { paintMarks, look } = app.ctl, { schedule } = app.loop, P = infoPrefs();
   const stageSrc = { v: -1, id: null };
   /** the states that play, as stateLatex's prose with UNIT coefficients (md) or as their plain labels, comma-separated */
   function stageStates(md) {
@@ -17,7 +82,7 @@ export function createStageWords(app) {
   }
   function stageMd() {
     const row = app.state.chem && app.state.chem.on ? app.state.chem.row() : null;   // the catalogue's row or a volume molecule's (V2)
-    return row ? '$' + formulaLatex(row.formula) + '$' : stageStates(true);
+    return row ? '$' + formulaLatex(row.formula) + '$' + (P.get('molName') && row.name ? '\n\n' + mdText(row.name) : '') : stageStates(true);   // NAME: the molecule's name under its formula
   }
   /** THE CAPTION a capture carries (T3): the same stage text as ONE plain-Unicode line — `H₂O · 1b1 HOMO · STO-3G` (the
    *  formula, the ORBITAL on the field in names.js's plain form, the basis) or SPECTRUM's states ("2s₀, 2p₋₁"; A ↔ B) — drawn
@@ -39,7 +104,8 @@ export function createStageWords(app) {
   app.w.stageTextTick = stageTextTick; app.w.stageCaption = stageCaption;
   /* 0.5.1 D1 · THE STAGE TEXT IS ONE BLOCK of the kit's INFORMATIONAL layer (mir/info/layer.js; stage-text.js left): the kit's ink,
      shade and serif at the kit's seat — the free stage's top + 12 %, between the racks, clear of the transport and a docked TIMELINE —
-     and STILL: no subject, no labels, no parallax, no drift, no following, and never told of a camera move (a block with no subject
+     and STILL: no subject, no labels, no parallax, no drift, no following (iteration 007: INFORMATIONAL › CURSOR may turn the kit's follow ·
+     parallax · drift on), and never told of a camera move (a block with no subject
      depends on no view; the layer's own ResizeObserver and `resize` cover a size, and the racks and the transport are told below);
      only a pointer passing within the kit's reach (260 px) parts it, and HOLD (I) freezes even that.
      THE LAWS kept: the key is the STRING — a changed one is remove() + addBlock(), the kit's exit and entrance — and KaTeX runs at
@@ -67,7 +133,7 @@ export function createStageWords(app) {
       return R - L < 120 ? { L: m, R: sb.width - m, T, B, m } : { L, R, T, B, m };
     }
     const at = (F, h, bottom) => (bottom ? F.B - seat.pad * (F.B - F.T) - h : F.T + seat.pad * (F.B - F.T));   // a body's top edge at its seat
-    const layer = createInfoLayer({ stage: dom.stage, parallax: false, drift: false, follow: false,
+    const layer = createInfoLayer({ stage: dom.stage, parallax: P.get('cursorAway'), drift: P.get('cursorDrift'), follow: P.get('cursorAway'),   // the CURSOR rows (off by default): the kit's own follow · parallax · drift
       avoid: () => {
         const rs = bars(), sb = dom.stage.getBoundingClientRect(), F = freeOf(rs, sb), h = block ? block.el.offsetHeight : 0, y = Math.max(F.T, at(F, h, seat.bottom)), x = sb.left + sb.width / 2;
         const band = (y0, y1) => ({ left: x - 1, right: x + 1, top: sb.top + y0, bottom: sb.top + y1 });
@@ -76,7 +142,7 @@ export function createStageWords(app) {
     const pop = el('div', 'lw-pop', dom.stage); pop.setAttribute('aria-hidden', 'true');
     layer.root.classList.add('lw-stage'); layer.root.setAttribute('aria-hidden', 'true');
     const stats = { renders: 0, announced: 0, places: 0, labelWrites: 0 };   // the gate's witnesses: KaTeX runs, banners, re-placements asked, letter moves
-    let on = true, labelsOn = true, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0;
+    let on = true, labelsOn = true, labelScale = 1, formula = '', banner = null, shown = '', lastRender = -1e9, wait = 0, fadeT = 0, popHold = 0;
     function show() {                                                // the markdown wanted now, as a new block if it changed and KaTeX's quarter second has passed
       if (!on) return;
       const md = banner !== null ? banner : formula;
@@ -122,7 +188,7 @@ export function createStageWords(app) {
         sp.style.display = ''; sp.style.transform = `translate(${q[0].toFixed(1)}px, ${q[1].toFixed(1)}px) translate(-50%, -50%)`;
       }
     }
-    app.state.stageText = {
+    const api = app.state.stageText = {
       layer, stats, atomLabels,
       /** the formula's markdown ('' for none); the DOM moves only if the string did */
       setFormula(md) { formula = md || ''; if (banner === null) show(); },
@@ -135,23 +201,55 @@ export function createStageWords(app) {
         return true;
       },
       dismiss(md) { if (banner !== md) return; clearTimeout(fadeT); banner = null; show(); },
-      /** a POP-UP: one short line on the side away from the formula that fades out; another press restarts it (iteration 001) */
-      pop(text) {
+      /** a POP-UP: one short line on the side away from the formula that fades out; another press restarts it (iteration 001).
+       *  { hold: true } (a dial under the hand, iteration 007): the line stays lit and follows the number, and fades 1.2 s after the last held one */
+      pop(text, { hold = false } = {}) {
         if (!on || !text) return false;
+        clearTimeout(popHold);
+        const letGo = () => { popHold = setTimeout(() => pop.classList.replace('hold', 'out'), 1200); };   // the hand let go: the held line fades from where it is
+        if (hold && pop.classList.contains('hold')) { if (pop.textContent !== text) pop.textContent = text; letGo(); return true; }
         const sb = dom.stage.getBoundingClientRect(), F = freeOf(bars(), sb);
-        pop.textContent = text; pop.classList.remove('go');
+        pop.textContent = text; pop.classList.remove('go', 'hold', 'out');
         pop.style.left = (sb.left + (F.L + F.R) / 2) + 'px'; pop.style.top = (sb.top + Math.max(F.T, at(F, pop.offsetHeight, !seat.bottom))) + 'px';
-        void pop.offsetWidth; pop.classList.add('go'); return true;
+        void pop.offsetWidth; pop.classList.add(hold ? 'hold' : 'go'); if (hold) letGo(); return true;
       },
+      /** THE ONE VERB an emitter speaks through (iteration 007): `kind` is a row of KINDS; nothing is written while that kind's switch is off */
+      say(kind, text, o = {}) {
+        const k = KIND.get(kind); if (!k || !P.get(k.key)) return false;
+        return k.seat === 'fade' ? api.announce(text, o.ttl) : k.seat === 'pop' ? api.pop(text, o) : false;
+      },
+      /** is this kind on? (THE HEAD asks before it waits for a landing) */
+      wants: (kind) => { const k = KIND.get(kind); return !!(k && on && P.get(k.key)); },
+      /** the record (lambdawaves.q0.info): INFORMATIONAL writes it, the gate may */
+      prefs: P,
       /** POSITION (bottom: true) and PAD (0–0.4 of the free height) */
       setSeat(bottom, pad) { if (bottom !== undefined) seat.bottom = !!bottom; if (Number.isFinite(pad)) seat.pad = Math.max(0, Math.min(0.4, pad)); place(); },
       get seat() { return { ...seat }; },   // a later announcement has already taken the seat: nothing
       /** STAGE FORMULA (the formula, the fade, the caption) and ATOM LABELS are two switches since 0.5.3 M9 (INFORMATIONAL) */
       setOn(v) { on = !!v; layer.root.hidden = !on; show(); }, setLabels(v) { labelsOn = !!v; }, setLabelScale(s) { labelScale = s; labelsKey = ''; },
       /** SIZE: the type × s (lab.css), then a re-measure — setPane(false) measures every bare block again (layer.js) */
-      setScale(s) { layer.root.style.setProperty('--lw-stage-size', String(s)); pop.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
+      setScale(s) { layer.root.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
+      /** the pop-ups' SIZE (× 15 px), apart from the formula's since iteration 007 */
+      setPopScale(s) { pop.style.setProperty('--lw-pop-size', String(s)); },
       get on() { return on; }, get labelsOn() { return labelsOn; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
     };
+    /* THE RECORD APPLIED: every row at the go, then each change (INFORMATIONAL, FORGET).  The kit's createPrefs coalesces its page writes under ONE
+       frame key ('mir.prefs') whatever the store, so a set here could take the look's pending job; this record writes nothing to the page, and the
+       look's job is booked again after it (a MIR issue, filed in I-BUILD.md) */
+    const applyInfo = (st, changed) => {
+      const all = !changed, ch = (k) => all || changed.includes(k);
+      if (ch('molFormula')) { document.body.classList.toggle('no-mol-formula', !st.molFormula); api.setOn(st.molFormula); }
+      if (ch('molFormulaSize')) { app.state.molFormulaScale = st.molFormulaSize; api.setScale(st.molFormulaSize); }
+      if (ch('atomLabels')) api.setLabels(st.atomLabels);
+      if (ch('atomLabelsSize')) { app.state.atomLabelsScale = st.atomLabelsSize; api.setLabelScale(st.atomLabelsSize); }
+      if (all || ch('infoPos') || ch('infoPad')) api.setSeat(st.infoPos === 'bottom', st.infoPad);
+      if (ch('popSize')) api.setPopScale(st.popSize);
+      if (!all && ch('cursorAway')) { layer.setFollow(st.cursorAway); layer.setParallax(st.cursorAway); }
+      if (!all && ch('cursorDrift')) layer.setDrift(st.cursorDrift);
+      if (!all && ch('molName')) { stageSrc.v = -1; stageTextTick(); }
+      if (!all) { look.prefs.apply(); schedule(TIER.PRESENT); }   // the atom labels are the frame's
+    };
+    applyInfo(P.all()); P.subscribe(applyInfo);
     wChem.root.addEventListener('change', stageTextTick);           // the pick lands in `preset` at once; the solve comes later
     app.state.chem.subscribe(() => stageTextTick());                         // … and a restore / undo / link that re-solves
     paintMarks(); stageTextTick();

@@ -14,6 +14,7 @@ import { gplLicence } from './mir/shell/about.js';
 import { DOCK } from './mir/window/dock.js';
 import { paintedRect } from './occlusion.js';
 import { BUILD_LINE } from './rack.js';
+import { infoPrefs } from './shell/stage-words.js';   // iteration 007: INFORMATIONAL's own record, which FORGET wipes too
 
 let gui = null, span = null;
 const subs = new Map();
@@ -30,7 +31,7 @@ export function createMirGui(app) {
   span = rk.span();
   for (const fn of subs.keys()) { subs.set(fn, span.subscribe(fn)); fn(span.read()); }
   /* FORGET is the one SETTINGS had: createGui wipes the look through prefs.forget(), then reloads */
-  const prefs = { ...look.prefs, forget() { settingsStore.remove(); look.prefs.forget(); modStore.write({ modArm: undefined, modCadence: undefined }); curvesStore.remove(); } };
+  const prefs = { ...look.prefs, forget() { settingsStore.remove(); look.prefs.forget(); modStore.write({ modArm: undefined, modCadence: undefined }); curvesStore.remove(); infoPrefs().forget(); } };
   const tablet = document.body.classList.contains('touch-tablet');
   gui = createGui({ host: document.getElementById('floats') || document.getElementById('lab'), prefs, accent: look.accent, projectAccent: false,
     app: { name: 'λWAVES', version: BUILD_LINE },

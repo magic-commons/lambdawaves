@@ -821,6 +821,8 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
    announcement ([data-fade]) its heading (22 px), each held to 8 % of the window's width and at least 16 px, KaTeX at .nb-view's 1.08em. */
 .mir-info.lw-stage { z-index: 20; --info-size-body: calc(clamp(16px, 8vw, 34px) * var(--lw-stage-size, 1)); }
 .mir-info.lw-stage .mir-info-block[data-fade] { font-size: calc(clamp(16px, 8vw, 22px) * var(--lw-stage-size, 1)); }
+/* iteration 007 I · NAME: the molecule's name is the formula block's second paragraph, at the notebook's heading (22 px of the title's 34) and close under it */
+.mir-info.lw-stage .mir-info-block:not([data-fade]) .mir-info-text > p + p { font-size: 0.65em; margin-top: 0.15em; }
 .mir-info.lw-stage .katex { font-size: 1.08em; }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
 .dev .mol-more-toggle { flex: 0 0 30px; padding: 0; }
