@@ -20,6 +20,7 @@ export function createMorph(o) {
     onInput: (v) => { if (o.hand(o.id, v)) return; api.set(on, v); } });   // iteration 007 (MIR check B2): routed, the hand moves the base
   o.row.appendChild(morphSw.root); o.row.appendChild(morphK.root);
   const lamps = () => { aBtn.classList.toggle('on', !!A); bBtn.classList.toggle('on', !!B); };
+  const show = (v) => { on = v; morphSw.set(v); o.rows().classList.toggle('reg-morphing', v); };   // MORPH, its switch and the dimmed lanes: one place (X6)
   const pack = (M) => (M ? [...M].map(([k, c]) => ({ [o.key]: k, re: c.re, im: c.im })) : null);
   const unpack = (a) => { if (!Array.isArray(a)) return null; const M = new Map();
     for (const e of a) { const k = Math.round(e && e[o.key]); if (Number.isFinite(k) && o.valid(k)) M.set(k, { re: +e.re || 0, im: +e.im || 0 }); } return M.size ? M : null; };
@@ -37,18 +38,16 @@ export function createMorph(o) {
       s = Math.min(1, Math.max(0, Number.isFinite(sv) ? sv : s));
       const want = !!v && !!A && !!B;
       if (v && !want) o.status('MORPH needs both stores: → A, change the register, → B', 'warn');
-      on = want; morphSw.set(on); if (morphK.get() !== s) morphK.set(s);
-      o.rows().classList.toggle('reg-morphing', on);
+      show(want); if (morphK.get() !== s) morphK.set(s);
       o.changed(); return on;
     },
     /** the modulator's road (a route, a TIMELINE lane): store the position; true when it moved — what follows is the pane's */
     setValue(v) { const x = Math.min(1, Math.max(0, +v || 0)); if (x === s) return false; s = x; return true; },
     /** a new solve: no stores, no path (and the lanes undimmed) */
-    reset() { A = B = null; lamps(); on = false; morphSw.set(false); o.rows().classList.remove('reg-morphing'); },
+    reset() { A = B = null; lamps(); show(false); },
     /** the stores, the position and MORPH as a record carries them (each pane decides when it writes them) */
     save() { return { morph: s, morphOn: on, A: pack(A), B: pack(B) }; },
-    load(r) { A = unpack(r && r.A); B = unpack(r && r.B); lamps(); s = Math.min(1, Math.max(0, +(r && r.morph) || 0)); morphK.set(s); on = !!(r && r.morphOn) && !!A && !!B; morphSw.set(on);
-      o.rows().classList.toggle('reg-morphing', on); },   // iteration 009 F2: a restored MORPH dims the lanes / dials exactly as a hand-set one (both panes)
+    load(r) { A = unpack(r && r.A); B = unpack(r && r.B); lamps(); s = Math.min(1, Math.max(0, +(r && r.morph) || 0)); morphK.set(s); show(!!(r && r.morphOn) && !!A && !!B); },   // F2: a restored MORPH dims as a hand-set one
   };
   return api;
 }

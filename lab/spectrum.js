@@ -308,7 +308,7 @@ export function createSpectrum(host, api) {
     const names = [];                                    // (the Rydberg bunching crowds the gutter: see the placement below)
     for (const lv of LEVELS) {
       const n = lv.key, yy = y(lv.E), c = vividInk(lv.rgb), lit = pops[n] > 0;
-      levelLine(g, left, right, yy, lit ? c : null, INK);
+      levelLine(g, left, right, yy, lit ? c : INK, lit);
       if (n <= 2 || lit) names.push({ y: yy, txt: lv.label, col: lit ? `rgba(${c[0]},${c[1]},${c[2]},1)` : ink(0.75), lit, n, pop: pops[n] || 0 });
       hovers.push({ kind: 'line', key: 'L' + n, points: [left, yy, right, yy], lw: lit ? 2 : 1, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
         info: `${lv.label}  ·  ${lit ? (pops[n] * 100).toFixed(1) + ' %' : 'empty'}  ·  E = ${lv.E.toFixed(4)} Eh` });
@@ -342,7 +342,7 @@ export function createSpectrum(host, api) {
     const usedTy = [];                                    // 'E = 0' shares the 44 px gutter with the level names: it is drawn last, and only if its row is free
     const lit = HS.eigen.filter((lv) => lv.pop > 1e-6).sort((a, b) => a.E - b.E), dim = HS.eigen.filter((lv) => !(lv.pop > 1e-6));
     const INK = readRGB(g, '--dim', '#b8b8b8');
-    for (const lv of dim) { const yy = y(lv.E); levelLine(g, left, right, yy, null, INK); eigenHits.push({ y: yy, k: lv.k, pop: 0 });
+    for (const lv of dim) { const yy = y(lv.E); levelLine(g, left, right, yy, INK, false); eigenHits.push({ y: yy, k: lv.k, pop: 0 });
       hovers.push({ kind: 'line', key: 'D' + lv.k, points: [left, yy, right, yy], lw: 1, colour: ink(0.7), info: `${lv.label}  ·  empty  ·  λ = ${lv.E.toFixed(4)} Eh` }); }
     /* THE DECLUTTER (wave 44).  Lit levels run upward (E ascending — sorted here, since the propagator is assembled
        block by block in (l, m) and hands its eigenvalues over in BLOCK order, not energy order), so a text within
@@ -356,7 +356,7 @@ export function createSpectrum(host, api) {
     let lastTy = 1e9;
     for (const lv of lit) {
       const yy = y(lv.E), c = vividInk(nRGB(lv.n)), faint = lv.pop < 0.005;          // occupied below ½ %: its line, no name (the clock still counts it)
-      levelLine(g, left, right, yy, c, INK);
+      levelLine(g, left, right, yy, c, true);
       eigenHits.push({ y: yy, k: lv.k, pop: lv.pop });
       hovers.push({ kind: 'line', key: 'E' + lv.k, points: [left, yy, right, yy], lw: 2, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
         info: `${lv.label}  ·  ${(lv.pop * 100).toFixed(lv.pop < 0.1 ? 1 : 0)} %  ·  λ = ${lv.E.toFixed(4)} Eh` });

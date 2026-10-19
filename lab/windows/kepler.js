@@ -3,7 +3,7 @@
 import { TIER } from '../rack.js';
 import { VIEW, VIEW_NAMES, cameraBasis, toScreen } from '../field.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, getZ, getMu } from '../hamiltonian.js';
-import { keplerOrbits } from '../kepler.js'; import { createGas } from '../gas.js'; import { wellPacket } from '../well.js';
+import { NMAX } from '../hydrogen.js'; import { keplerOrbits } from '../kepler.js'; import { createGas } from '../gas.js'; import { wellPacket } from '../well.js';
 import { momentumZ, rotorsToZ, SLAP_REFUSAL } from '../kick.js'; import { applyRotor as rotorOnCopy } from '../frontier.js';
 export function createKeplerSurface(app) {
   const { dom, ui, reg, clock, obs, mat } = app, { schedule, canPresent } = app.loop, { camera } = app.host, { wState, wSpec, switchHamiltonian, kepler } = app.w,
@@ -51,7 +51,7 @@ export function createKeplerSurface(app) {
     if (getHamiltonian().id !== 'well' || app.state.gasAxial) return;                             // the box was left while the packet was in flight
     reg.clear(); for (let a = 0; a < r.re.length; a++) if (r.re[a] || r.im[a]) reg.set(a, r.re[a], r.im[a], clock.t);
     app.state.lastLaunch = { x0, k: kvec, sigma, captured: r.captured };
-    if (ui.gasRo) { ui.gasRo.set(`${(100 * r.captured).toFixed(1)}% held`, r.captured > 0.85 ? 'ok' : 'warn'); ui.gasRo.setSub(`σ = ${sigma.toFixed(2)} a₀ at (${x0.map((v) => v.toFixed(1)).join(', ')}) · |k| = ${Math.hypot(...kvec).toFixed(2)} · the box resolves ≈ a/7 = ${(HAMILTONIANS.well.radius / 7).toFixed(1)} a₀`); }
+    gasSay(r.captured, x0, kvec, sigma);
     touchState();
   }
   /** the hydrogen / oscillator bow: the slap on a snapshot of c(t) in the worker, set back at that time on landing —
@@ -223,6 +223,7 @@ export function createKeplerSurface(app) {
      LAUNCH, the 140 basis) or for a window that can no longer present is dropped.  `raw`, not `call`: this readout never
      raised the busy mark and must not flash it at 2.5 Hz.  With no worker the old synchronous road runs, as it did. */
   let gasAsk = null, gasNext = null;
+  function gasSay(c, x0, kvec, sigma) { if (ui.gasRo) { ui.gasRo.set(`${(100 * c).toFixed(1)}% held`, c > 0.85 ? 'ok' : 'warn'); ui.gasRo.setSub(`σ = ${sigma.toFixed(2)} a₀ at (${x0.map((v) => v.toFixed(1)).join(', ')}) · |k| = ${Math.hypot(...kvec).toFixed(2)} · the box resolves ≈ a/${NMAX} = ${(HAMILTONIANS.well.radius / NMAX).toFixed(1)} a₀`); } }   // a register launch's GAS line (both roads), once
   const gasPaint = (s) => ui.gasRo.set(`${(100 * gas.captured).toFixed(1)}% held · ⟨z⟩ ${s.z.toFixed(2)} · σ_z ${s.sz.toFixed(2)}`, gas.captured > 0.85 ? 'ok' : 'warn');
   const gasCurrent = (q) => { const R = gas.register; return !!(canPresent(wSpec) && gas.on && ui.gasRo && R && R.re0 === q.re0 && gas.radius === q.radius); };
   function gasAskWorker(q) {
@@ -258,7 +259,7 @@ export function createKeplerSurface(app) {
     const P = wellPacket(x0, kvec, sigma);
     reg.clear(); for (let a = 0; a < P.re.length; a++) if (P.re[a] || P.im[a]) reg.set(a, P.re[a], P.im[a], clock.t);
     app.state.lastLaunch = { x0, k: kvec, sigma, captured: P.captured };
-    if (ui.gasRo) { ui.gasRo.set(`${(100 * P.captured).toFixed(1)}% held`, P.captured > 0.85 ? 'ok' : 'warn'); ui.gasRo.setSub(`σ = ${sigma.toFixed(2)} a₀ at (${x0.map((v) => v.toFixed(1)).join(', ')}) · |k| = ${Math.hypot(...kvec).toFixed(2)} · the box resolves ≈ a/7 = ${(HAMILTONIANS.well.radius / 7).toFixed(1)} a₀`); }
+    gasSay(P.captured, x0, kvec, sigma);
     touchState();
   }
   app.state.lastLaunch = null;

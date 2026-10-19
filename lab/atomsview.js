@@ -20,9 +20,9 @@
  */
 import { el, readout, trig, graphHover, fitText, cssRGB, accentRGB, N_COLOR } from './mir/kit.js';
 import { ATOMS, atom, configOf, solveAtom, atomEnergyOf, ionisation, quantumDefect, atomRadial, atomDomainFor,
-  EXCHANGE_MODEL, HARTREE_EV } from './atoms.js';
+  EXCHANGE_MODEL, HARTREE_EV, RELATIVITY_SHORT } from './atoms.js';
 
-const SPD = 'spdfgh';
+import { L_LETTERS as SPD } from './names.js';
 /* WAVE 57 · the reader moved to kit.js — one copy, and it knows color(display-p3 …); the accents come
    from the WHEEL itself (kit's setAccentRGB), so this canvas draws the array the DOM was painted from. */
 const readRGB = (g, name, fallback) => cssRGB(g, name, fallback);
@@ -112,7 +112,7 @@ export function createAtoms(host, api) {
     const C = cache, A = C.A, S = C.S;
     for (let z = 1; z < cells.length; z++) cells[z].classList.toggle('on', z === A.Z);
     roEl.set(`${A.symbol} · ${A.name} · Z = ${A.Z}`); roEl.setSub((A.Z > 36 ? A.core : A.term) + (A.exception ? '  · an Aufbau exception' : ''));
-    roModel.set(S.model); roModel.setSub(`central field · one potential for every shell · ${api.active() ? 'IN FORCE on the register' : 'not the operator in force'} · scalar-relativistic (ZORA · MV), spin–orbit not included${A.Z > 36 ? ': past Kr the p and d levels miss their j = l ± ½ splitting' : ''}`);
+    roModel.set(S.model); roModel.setSub(`central field · one potential for every shell · ${api.active() ? 'IN FORCE on the register' : 'not the operator in force'} · scalar-relativistic (${RELATIVITY_SHORT}), spin–orbit not included${A.Z > 36 ? ': past Kr the p and d levels miss their j = l ± ½ splitting' : ''}`);
     roE.set(S.Escaled.toFixed(5) + ' Eh'); roE.setSub(`${(S.Escaled * HARTREE_EV).toFixed(2)} eV · scaled ZORA: the functional's ${S.E.toFixed(3)} Eh less Σ f(λ − ε), the deep core's ZORA excess · ${S.electrons.toFixed(4)} electrons on the mesh`);
     roIP.set(C.ip.toFixed(3) + ' eV', 'ok');
     roIP.setSub(`Δ-SCF of the ${C.outer.n}${SPD[C.outer.l]} shell: E(ion) − E(neutral), the same functional and the neutral's ZORA operator both sides`);

@@ -409,7 +409,7 @@ export function createOrbitals(host, api) {
    * H₂O/STO-3G that is five of the six gaps, and the HOMO/LUMO gap gets 31 % of the plot instead of 5 %.
    * A cap on the FRACTION OF THE PLOT cannot do this: one gap at 90 % of the span swamps any such cap. */
   let hovers = [], hits = [];
-  let marks = { k: -1, row: [], lit: [], lead: false };   // iteration 009 D: the cursor's last paint — the dial's orbital, its row, the lines it lit
+  let marks = { k: -1, row: [], lead: false };   // iteration 009 D: the cursor's last paint — the dial's orbital, its row, whether it leads (lit = row when it leads)
   const hover = graphHover(cv, { repaint: () => paint() });
   function rowsOf() {
     const out = [];
@@ -486,7 +486,7 @@ export function createOrbitals(host, api) {
            when off, the level's full vivid ink when on — and no band, bar, box or glow beside it (the dials carry |c|; occupied A, virtual B).
            Iteration 009 F2: SPECTRUM's levelLine (paint-stroke.js) draws it — off 0.42 at 1 px, on full at 2 px — and its fade steps a mark back */
         const cur = lead && i === curRow;                                      // VIEW ORBITAL: the dial's level lit whole (009 D: a degenerate pair, both lines)
-        levelLine(g, x0, x1, yy, cur || lit ? (lv.occ ? A : B) : null, lv.occ ? A : B, 1, cur ? 1 : lit ? (lead ? 0.5 : 1) : dim ? 0.25 : 1);
+        levelLine(g, x0, x1, yy, lv.occ ? A : B, cur || lit, 1, cur ? 1 : lit ? (lead ? 0.5 : 1) : dim ? 0.25 : 1);
         hits.push({ y: yy, x0, x1, k: lv.k });
         hovers.push({ kind: 'line', key: 'L' + lv.k, points: [x0, yy, x1, yy], lw: cur || lit ? 2 : 1, colour: ink(1),
           info: `${label(lv.k)}  ·  k${lv.k + 1}  ·  ε = ${lv.eps.toFixed(6)} Eh  ·  ${lv.occ ? lv.occ + ' electrons' : 'virtual, 0 electrons'}`
@@ -501,7 +501,7 @@ export function createOrbitals(host, api) {
       names.push({ y: yy, txt: nm, col: row.items[0].occ ? occInk(fr === 'HOMO' ? 1 : 0.8) : virInk(fr === 'LUMO' ? 1 : 0.75), rank: i === curRow ? -1 : edge ? 0 : 1 });
     }
     const rowKs = curRow >= 0 && !rows[curRow].core ? rows[curRow].items.map((lv) => lv.k) : [];
-    marks = { k: kc, row: rowKs, lit: lead ? rowKs : [], lead };
+    marks = { k: kc, row: rowKs, lead };
     if (curRow >= 0) {                                                         // the cursor's bracket: [ at the row's start, ] at its end
       const y = yOf(curRow), h = 5, a = left - 1, b = right + 1;
       g.strokeStyle = T.ink(lead ? 0.95 : 0.4); g.lineWidth = lead ? 1.5 : 1;
@@ -645,7 +645,7 @@ export function createOrbitals(host, api) {
         sum: sum2(), period: p ? p.period : null, dE: p ? p.dE : null, t: pushedT, law: LAW,
         refusal: refusal(), status: statusText, hash: sol ? sol.hash : null,
         coreOpen, rungs: rowsOf().map((r) => (r.core ? `core ×${r.core}` : label(r.items[0].k))),
-        cursor: { ...marks, row: marks.row.slice(), lit: marks.lit.slice() } };   // iteration 009 D: the cursor as last painted — the dial's k, its level's members, the lines it lit
+        cursor: { ...marks, row: marks.row.slice() } };   // iteration 009 D: the cursor as last painted — the dial's k, its level's members, whether it leads
     },
     save, load,
     dispose() { if (unsub) { unsub(); unsub = null; } },

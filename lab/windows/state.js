@@ -8,6 +8,7 @@
  * SPECTRUM's EMPTY) stays this module's function.  It registers app.w.wState; boot() destructures the return. */
 import { TIER } from '../rack.js';
 import { el, knob, sw, trig, readout, group } from '../mir/kit.js';
+import { N6, widen } from '../hydrogen.js';
 export function createStateCard(app) {
   const { ui, device, reg, hNote, clock, sturm } = app, { schedule } = app.loop, { rack } = app.host, { touchState } = app.ctl;
   /* OPTIMIZATION 2026-09-24 · N1 · THE REGISTER'S CLEAR, NAMED.  The menubar's "CLEAR the register" pressed the FIRST `.trig`
@@ -43,10 +44,10 @@ export function createStateCard(app) {
       /* THE PROJECT'S ROAD (Josh, 2026-09-10: "state transitions don't keep"): both stores, Ω and whether the
          transition is running — plain arrays in the file, typed arrays in the block. */
       /* iteration 008 A7: a store is written 91 wide while its n = 7 part is zero, so an older file's bytes never move */
-      const cut = (S) => { const w = S.re.subarray(91).some(Boolean) || S.im.subarray(91).some(Boolean) ? S.re.length : 91; return { re: Array.from(S.re.subarray(0, w)), im: Array.from(S.im.subarray(0, w)) }; };
+      const cut = (S) => { const w = S.re.subarray(N6).some(Boolean) || S.im.subarray(N6).some(Boolean) ? S.re.length : N6; return { re: Array.from(S.re.subarray(0, w)), im: Array.from(S.im.subarray(0, w)) }; };
       ui.ab = {
         get: () => ({ a: abA ? cut(abA) : null, b: abB ? cut(abB) : null, omega: abOmega, on: !!reg.transition }),
-        set(o) { if (!o) return; const W = reg.re0.length, pad = (v) => { const o2 = new Float64Array(W); o2.set(v.slice(0, W)); return o2; }, take = (S) => (S && Array.isArray(S.re) && (S.re.length === 91 || S.re.length === W) && Array.isArray(S.im)) ? { re: pad(S.re), im: pad(S.im) } : null;   // a 91-wide store (an older file) pads n = 7 with zeros
+        set(o) { if (!o) return; const W = reg.re0.length, pad = (v) => Float64Array.from(widen(v, 0, W)), take = (S) => (S && Array.isArray(S.re) && (S.re.length === N6 || S.re.length === W) && Array.isArray(S.im)) ? { re: pad(S.re), im: pad(S.im) } : null;   // a 91-wide store (an older file) pads n = 7 with zeros
           abA = take(o.a); abB = take(o.b); if (Number.isFinite(o.omega)) { abOmega = Math.max(0.005, Math.min(1, o.omega)); if (ui.abOmega) ui.abOmega.set(abOmega); }
           if (reg.transition) reg.clearTransition(clock.t);
           if (o.on && abA && abB && !sturm.P) { reg.setTransition(abA, abB, abOmega, clock.t); ui.abSw.set(true); } else ui.abSw.set(false);

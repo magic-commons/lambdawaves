@@ -5,6 +5,7 @@
  * not in it: that module's chemistry loads on the first solve (M8) and hydrogen's line is wanted before one.  tests/status.test.mjs is the table. */
 /** THE FIELD LAW's bounds the picture quotes, named by metric: tests/helpers/field-law.mjs' members (P7c; tests/ is not served — tests/status.test.mjs holds
  *  them equal).  hydrogen: |Δψ| RMS, worst voxel; density: the worst voxel's |Δρ|/ρ, the one-ulp law's bound for ANY molecule, so ≤ that share of ρmax */
+import { RELATIVITY_SHORT } from './atoms.js';   // the atom model's short name, typed once (009 MV, X6)
 export const FIELD_LAW = Object.freeze({ hydrogen: Object.freeze({ rms: 3e-6, worst: 2e-4 }), density: Object.freeze({ worst: 2e-3 }) });
 /** the catalogue's words (P3's `status.energy`) → the face's, written ONCE; absent → UNCHECKED; a closed form → EXACT */
 export const STATE_WORD = Object.freeze({ MEASURED: 'NUMERICAL', IMPORTED: 'NUMERICAL', UNKNOWN: 'UNCHECKED' });
@@ -24,7 +25,7 @@ export function statusOf({ owner = 'molecule', record = null, sol = null, oracle
   if (owner === 'stark') { label = label || 'HYDROGEN + F·z'; return said('NUMERICAL', 'eigensolve in the n ≤ 7 basis · no continuum: ionisation said, not simulated', join('NUMERICAL', 'INTER-SHELL STARK · eigensolve in the n ≤ 7 basis')); }   // 0.8.0 G3
   if (owner === 'atom') {   // iteration 008 A, A7, Z, 009 MV: past Kr the central field says it is scalar-relativistic without spin–orbit (atoms.js' header has the numbers); H–Kr keep no line
     if (!(Z > 36)) return null;
-    const why = 'scalar-relativistic (ZORA · MV) Xα; spin–orbit not included';
+    const why = `scalar-relativistic (${RELATIVITY_SHORT}) Xα; spin–orbit not included`;
     const o = said('NUMERICAL', why, join('NUMERICAL', 'ATOM · ' + (label || 'Z = ' + Z), 'one Xα(2/3) + Latter-tail central field, scalar ZORA, MacDonald–Vosko exchange', 'no spin–orbit: a p or d level is its j = l ± ½ pair\'s average (Rn 6p splits by 3.6 eV)'));
     o.line = join(label, 'NUMERICAL', why); o.atom = true; return o;
   }
