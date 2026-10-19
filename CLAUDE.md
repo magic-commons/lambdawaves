@@ -287,6 +287,14 @@ first run is the store's `defaults` (`LOOK_DEFAULTS`, `lab/rack.js`): light/refr
 hints on, tags and Help off; on a phone or tablet (`lab/first-run.js`, rack.js' own `isPhone()`/`isTablet()`) frost OFF, tinted. Captions
 and window notes off, AUTO SCALE and governor on stay the blob's. A stored choice wins; an older blob's look (and `lw-window-info`) is
 lifted once by `liftLook`; the phone's frost override stays the app's. Never add a look key to `saveSettings`.
+THE BLUR, ONLY WHERE IT BELONGS (iteration 011 Q5, Josh 10-19: "there appears to be a rogue blurring that's on in any of the UI
+elements, the blur should only apply to the work bars, the timeline bar and scrubber and the chips"): that first-run 22 px frost now
+paints ONLY on the work bars (the timeline's tool strip `.tl-toolbar`, the modulation window's `.m2workbar`s), the timeline's ruler
+`.tl-ruler` (its bar and scrubber) and the chips (`.mir-chip`, `.crail-chip`, the rack's ◧ + ☆ stack); every other surface — rack
+cards, timeline window and lanes, menus, the Picker, transport, notebook, keyboard pane, the modulation window's panes, popovers, the
+photosensitivity notice — keeps its tint, sheen and border with NO backdrop-filter. One `!important` rule, last in `lab/skin.css`,
+overrules the kit's 38 rules (never edit `lab/mir/**`) and the app's own; the FROST preference, `frost-hold` and the phone's frost OFF
+still govern the three places that keep it. A new blurred surface is added to that rule's allow-list or it does not blur.
 
 THE START (0.5.0 C6b, `lab/main.js`). THE PHOTOSENSITIVITY LAW is λWAVES', not
 the kit's: a human visitor reads the kit's photosensitivity notice once per
