@@ -4,13 +4,12 @@
  * Iteration 007 I (Josh, JOSH-PROMPT items 8–10; ADR-0003): THE WINDOW IS BUILT FROM THE RECORD'S ROWS.  shell/stage-words.js owns the rows
  * (INFO_ROWS) and the one PREFERENCE record `lambdawaves.q0.info`; each row here is the kit's control(descriptor) — a switch, a seg, a knob, as the
  * kind of value chooses — grouped under short headings: THE WORDS (the formula, its NAME and SIZE; the ATOM LABELS and theirs; POSITION · PAD),
- * ANNOUNCE (one switch per kind and the pop-ups' SIZE), CURSOR (AWAY · DRIFT), MARKS (SKELETON · BEAD · UNCERTAINTY, which draw on the stage and keep
- * their blob keys) — and STATUS.  A hand writes the record and nothing else; the record repaints the controls (FORGET, a verb's flip). */
-import { el, sw, readout, group } from './mir/kit.js'; import { control } from './mir/controls/factory.js'; import { fold } from './fold.js';
+ * ANNOUNCE (one switch per kind and the pop-ups' SIZE), CURSOR (AWAY · DRIFT), MARKS (SKELETON · BEAD · UNCERTAINTY, which draw on the stage; the
+ * record's since the fix round, C6, their blob keys lifted once) — and STATUS.  A hand writes the record and nothing else; the record repaints the controls (FORGET, a verb's flip). */
+import { el, readout, group } from './mir/kit.js'; import { control } from './mir/controls/factory.js'; import { fold } from './fold.js';
 import { statusOf } from './status.js'; import { getHamiltonian } from './hamiltonian.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
-import { TIER } from './rack.js';
 export function createInformational(app) {
-  const { ui, device, isPhone } = app, { schedule } = app.loop, P = infoPrefs();
+  const { ui, device, isPhone } = app, P = infoPrefs();
   const w = device({ id: 'informational', eyebrow: 'INFORMATIONAL', title: 'what the stage writes', status: '' });
   w.root.classList.add('native-clean', 'closed', 'lw-info-card'); app.host.rack.appendChild(w.root);
   /* one control per row, its value the record's: a hand sets the row (a dial live, as before), nothing else is written */
@@ -37,14 +36,11 @@ export function createInformational(app) {
   row(announce, ['popSize'], 'info-size');
   const cursor = group(w.body, 'CURSOR');
   row(cursor, ['cursorAway', 'cursorDrift'], 'info-grid');
-  /* MARKS: SKELETON · BEAD · ELLIPSOID draw ON the stage (2026-10-16, Josh, iteration 001), so they are INFORMATIONAL's — built here since iteration 007,
-     where MOLECULES used to reach into this card's body.  Each stays its blob key (skeleton / bead / ellipsoid, settings.js), off when nothing was said */
-  const marks = group(w.body, 'MARKS'), save = () => { app.sh.saveSettings(); schedule(TIER.PRESENT); };
-  ui.skeletonSw = sw({ label: 'SKELETON', value: false, title: 'The nuclei as beads (CPK colours, 0.28 × the covalent radius), the bonds within 1.3 × the radii, and the dipole arrow from the centre of nuclear charge — a PREFERENCE, off by default', onChange: save });   // 0.7.0 V2: rack.js draws it (lab/skeleton.js)
-  ui.beadSw = sw({ label: 'BEAD', value: false, title: 'THE BEAD: the expectation point (⟨x⟩, ⟨y⟩, ⟨z⟩) on the stage with its trail over the last period (⟨p⟩ in momentum space; for a molecule the electron density\'s centroid (ΣZR − μ)/N_e) — a PREFERENCE, off by default', onChange: save });   // 0.8.2 P3: rack.js draws it on the skeleton's canvas
-  /* iteration 008 P (Josh: "another mystery is the ellipsoid button"): the switch says what it draws — UNCERTAINTY; its blob key stays `ellipsoid` */
-  ui.ellipsoidSw = sw({ label: 'UNCERTAINTY', value: false, title: 'THE UNCERTAINTY ELLIPSOID: the position covariance Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ as its three principal circles, semi-axes √λ_k, about the bead (with it) — position space and a register only; a PREFERENCE, off by default', onChange: save });   // 0.8.3 B3: rack.js draws it after the bead
-  el('div', 'row tight info-grid info-marks', marks).append(ui.skeletonSw.root, ui.beadSw.root, ui.ellipsoidSw.root);
+  /* MARKS: SKELETON · BEAD · UNCERTAINTY draw ON the stage (2026-10-16, Josh, iteration 001), so they are INFORMATIONAL's — rows of its record since the
+     fix round (C6); the frame reads their widgets, and a change repaints by the record's own subscriber (stage-words.js applyInfo) */
+  const marks = group(w.body, 'MARKS');
+  row(marks, ['skeleton', 'bead', 'ellipsoid'], 'info-grid info-marks');
+  ui.skeletonSw = ctl.skeleton.widget; ui.beadSw = ctl.bead.widget; ui.ellipsoidSw = ctl.ellipsoid.widget;
   /* THE FOLD (lab/fold.js): ANNOUNCE · CURSOR · MARKS behind one chevron on its own line under THE WORDS — open on a desktop, folded on a phone
      (as MOLECULES' MORE) */
   const more = el('div', 'row tight info-more'); words.after(more); el('span', 'grp-lbl', more, 'ANNOUNCE · CURSOR · MARKS');

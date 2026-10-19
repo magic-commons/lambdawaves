@@ -25,8 +25,7 @@
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
 import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText, chip } from './mir/kit.js';
-import { paintStroke } from './paint-stroke.js'; import { fold } from './fold.js';
-import { slerpCoefficients } from './molecular-register.js';
+import { paintStroke, fillButton } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { createFlow } from './molecular-flow.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
 
@@ -36,25 +35,6 @@ const LAW = 'frozen orbitals · beats at Δε, not at ω_RPA';
 /* iteration 007 B (ADR-0002) · THE ORBITAL REGISTER's A ↔ B IS ITS OWN TARGET.  Its id lives here, once: shell/modulation.js registers it
    (a `defs` row), shell/persist.js seats its base (modSeats), and the knob's hand law below asks it.  `reg.morph` stays the STATES register's. */
 export const OMORPH = 'reg.omorph';
-
-/* iteration 008 U · EMPTY <-> FILL ALL, the one two-state button both register panes carry.  The glyphs are 24-unit outline drawings in the
-   kit's hand (glyph.js: stroke 1.9, round caps; the kit's registry is not ours to extend, so they are drawn here).  Designed by Gemini 3.8 Flash
-   (High) through agy — the prompt and its answer are in research/iteration-008/U-BUILD.md. */
-const GS = 'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
-const GLYPH = {   // Gemini's answer, verbatim but for the kit's stroke block on each element: a register frame and three rungs, whole or broken
-  fill: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8"/>',
-  empty: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8" stroke-dasharray="2 4"/>',
-};
-export function fillButton(row, titles, onPress) {
-  const b = el('button', 'trig reg-fill', row); b.type = 'button';
-  let empty = null;
-  const draw = (v) => {
-    b.innerHTML = '<svg class="gly" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">' + GLYPH[v ? 'fill' : 'empty'] + '</svg>';
-    b.setAttribute('aria-label', v ? 'FILL ALL' : 'EMPTY'); b.title = v ? titles.fill : titles.empty; b.dataset.state = v ? 'fill' : 'empty';
-  };
-  b.addEventListener('click', () => onPress(empty));
-  return { root: b, set(v, ok = true) { const e = !!v; if (e !== empty) { empty = e; draw(e); } b.disabled = !ok; }, get empty() { return empty; } };
-}
 
 export function createOrbitals(host, api) {
   const F = () => (api.field ? api.field() : null);
@@ -85,9 +65,6 @@ export function createOrbitals(host, api) {
      other shows EMPTY.  NORM is gone: a HAND stroke on the ladder normalises at its end (the stroke's one undo row), and nothing else does */
   const fillB = fillButton(head, { fill: 'Fill the register: every orbital of the ladder, equal and in phase', empty: 'Empty the register (c ↦ 0 for every orbital)' },
     (empty) => (empty ? fill() : clear()));
-  /* the pane's own switch is retired (MOLECULES ON is REGISTRY ON, VIEW REGISTRY puts the packet on the field): `onSw` is kept unseated, the
-     claim's own mirror, so setOn below reads as it always did */
-  const onSw = sw({ label: 'REGISTRY ON', value: false, cls: 'orb-on', onChange: (v) => { setOn(v); } });
   /* THE CORE FOLD (0.4.0 S1): the frozen-core levels (lab/names.js coreCount — He for Li–Ne, Ne for Na–Ar, Ar for K–Zn,
      Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;
      the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */
@@ -116,7 +93,6 @@ export function createOrbitals(host, api) {
       'no degenerate orbital pair in this molecule — a winding phase needs a twofold level', [0, Math.PI / 2]],
     'OCCUPIED': [(h) => { const c = Math.min(nCore(), h); return Array.from({ length: h + 1 - c }, (_, i) => c + i); }, ''],
   };
-  let storeA = null, storeB = null, morphOn = false, morphS = 0;
   const bar = el('div', 'row tight reg-bar', host);
   const presetSel = el('select', 'sel', bar); presetSel.setAttribute('aria-label', 'register preset');
   presetSel.title = 'HOMO, LUMO: one orbital. HOMO + LUMO: the frozen-orbital beat. FRONTIER FOUR: HOMO−1 to LUMO+1, four orbitals. HOMO SET, LUMO SET: the whole degenerate level. '
@@ -131,14 +107,11 @@ export function createOrbitals(host, api) {
     const set = mos.length > 1 && mos.every((m) => m.label === mos[0].label && m.member);   // one degenerate level: its name once, then its members
     return name + ' · ' + (set ? `${forms(mos[0].label).latex} ` + mos.map((m) => `(${m.member})`).join(' + ') : mos.length > 4 ? mos.length + ' orbitals' : mos.map((m) => forms(m).latex).join(' + '));
   }
-  const aBtn = el('button', 'trig', bar); aBtn.type = 'button'; aBtn.textContent = '→ A'; aBtn.title = 'Store this register as A';
-  const bBtn = el('button', 'trig', bar); bBtn.type = 'button'; bBtn.textContent = '→ B'; bBtn.title = 'Store this register as B';
-  aBtn.addEventListener('click', () => store('A')); bBtn.addEventListener('click', () => store('B'));
   const mrow = el('div', 'row tight reg-morph', host);
-  const morphSw = sw({ label: 'MORPH', value: false, title: 'Play the normalised path from A to B instead of the dials — a performance path, not dynamics', onChange: (v) => setMorph(v, morphS) });
-  const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3),
-    title: 'Where on the path from A (0) to B (1) the register plays', onInput: (v) => { if (hand(OMORPH, v)) return; setMorph(morphOn, v); } });
-  mrow.appendChild(morphSw.root); mrow.appendChild(morphK.root);
+  /* A ↔ B (register-morph.js, one for both panes): its own target OMORPH; a store marks the register, a MORPH change repaints */
+  const M = createMorph({ bar, row: mrow, id: OMORPH, key: 'k', lanes: 'dials', knobTitle: 'Where on the path from A (0) to B (1) the register plays', hand, status,
+    rows: () => rowsEl, valid: (k) => !!sol && k >= 0 && k < sol.nAO, snapshot: () => { const S = new Map(); for (const [k, c] of sel) if (c.amp > 0) S.set(k, { re: c.amp * Math.cos(c.phase), im: c.amp * Math.sin(c.phase) }); return S; },
+    stored: () => touch(), changed: () => { touch(); api.repaint(); } });
   /* FLOW for one orbital: ρ = |ψ|² and j = Im ψ̄∇ψ = ρ ∇arg ψ — the tracers ride the gradient of the very phase the field
      is coloured by.  A WINDING orbital circulates; a real orbital stands still.  The packet IS ψ: its f64 AO vector goes to
      the flow whole (`setPacket`, O(n) a point, any size), so there is no D_μν = c̄_μ c_ν to build and none to transpose. */
@@ -269,20 +242,6 @@ export function createOrbitals(host, api) {
     sel.clear(); for (const [i, k] of ks.entries()) sel.set(k, { amp: Math.sqrt(1 / ks.length), phase: P[2] ? P[2][i] : 0 }); selected = ks[0];
     touch(); rebuild(); paint(); refresh(); api.repaint(); return true;
   }
-  function store(which) {
-    const M = new Map(); for (const [k, c] of sel) if (c.amp > 0) M.set(k, { re: c.amp * Math.cos(c.phase), im: c.amp * Math.sin(c.phase) });
-    if (!M.size) return false;
-    if (which === 'A') { storeA = M; aBtn.classList.add('on'); } else { storeB = M; bBtn.classList.add('on'); }
-    touch(); return true;
-  }
-  function setMorph(v, sv) {
-    morphS = Math.min(1, Math.max(0, Number.isFinite(sv) ? sv : morphS));
-    const want = !!v && !!storeA && !!storeB;
-    if (v && !want) status('MORPH needs both stores: → A, change the register, → B', 'warn');
-    morphOn = want; morphSw.set(morphOn); if (morphK.get() !== morphS) morphK.set(morphS);
-    rowsEl.classList.toggle('reg-morphing', morphOn);
-    touch(); api.repaint(); return morphOn;
-  }
   function setAmp(k, v) { const c = sel.get(k); if (!c) return; c.amp = Math.max(0, Math.min(1, v)); touch(); paint(); refresh(); api.repaint(); }
   function setPhase(k, v) { const c = sel.get(k); if (!c) return; c.phase = ((v % TAU) + TAU) % TAU; touch(); paint(); refresh(); api.repaint(); }
 
@@ -316,7 +275,8 @@ export function createOrbitals(host, api) {
       const th = phase - sol.eps[k] * t, cr = amp * Math.cos(th), ci = amp * Math.sin(th);
       for (let mu = 0; mu < n; mu++) { const w = sol.C[mu * n + k]; if (w === 0) continue; re64[mu] += cr * w; im64[mu] += ci * w; }
     };
-    if (morphOn && storeA && storeB) for (const [k, c] of slerpCoefficients(storeA, storeB, morphS)) add(k, Math.hypot(c.re, c.im), Math.atan2(c.im, c.re));
+    const path = M.path();
+    if (path) for (const [k, c] of path) add(k, Math.hypot(c.re, c.im), Math.atan2(c.im, c.re));
     else for (const [k, c] of sel) add(k, c.amp, c.phase);
     re.set(re64); im.set(im64);
     return vec;
@@ -333,23 +293,24 @@ export function createOrbitals(host, api) {
     pushedT = t; pushedV = version;
     return true;
   }
-  function setOn(v) {
+  /** the CLAIM: take (true) or release the field — registerview's follow() is its only caller from outside (ON is the one switch's, api.one) */
+  function claim(v) {
     const want = !!v;
     if (want && !on) {
       const why = refusal();
-      if (why) { onSw.set(false); status('REGISTRY off — ' + why, 'warn'); return false; }
-      on = true; onSw.set(true);
+      if (why) { status('REGISTRY off — ' + why, 'warn'); return false; }
+      on = true;
       pushedT = NaN; pushedV = -1;
       /* the claim is the whole handover: the session selects this model, asks for `phase`, and calls push() */
       if (S()) S().claim('orbital-packet', true, 'the ORBITALS register has the field');
     } else if (!want && on) {
-      on = false; onSw.set(false);
+      on = false;
       pushedT = NaN; pushedV = -1;
       /* and letting go is the same act in reverse: the session hands the field to the next model by RANK — the
          card if it is on, the user's own observable if nothing claims it — never by guessing a view here */
       if (S()) S().claim('orbital-packet', false, 'MO-REGISTRY OFF');
       api.repaint();
-    } else { onSw.set(on); }
+    }
     refresh();
     return on;
   }
@@ -557,23 +518,15 @@ export function createOrbitals(host, api) {
     const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y);
     return hi - lo < 0.5 ? [] : hits.filter((h) => !h.core && h.y > lo && h.y < hi && carried(h.k)).map((h) => h.k);
   }
-  let stroked = 0;                                                          // levels this stroke changed: its end normalises only a stroke that painted
   const stroke = paintStroke(cv, { local, ready: () => hits.length > 0, onStart: () => hover.clear(),
     at: (p) => { const h = nearestHit(p, 8); return h ? [h.core ? 'core' : h.k] : []; }, across: crossed,
     apply: (ks, add) => {                                                   // a TAP on the folded core opens it; a stroke paints past it
       if (ks.includes('core')) { if (!stroke.painting) setCoreOpen(true); ks = ks.filter((k) => k !== 'core'); }
-      if (ks.length) stroked += paintLevels(ks, add);
+      return ks.length ? paintLevels(ks, add) : 0;
     },
     /* iteration 008 U · THE STROKE'S END (still inside its pointerup, so the same undo row): the sum of |c|^2 goes to 1, and a hand that
        painted the ladder picked the register — VIEW REGISTRY (api.stroked).  A modulator's write never comes here */
-    onEnd: () => { const n = stroked; stroked = 0; if (!n) return; norm(); if (api.stroked) api.stroked('orbital'); } });
-  /* a click no pointer made (none can reach a canvas today, but the law is kept): the nearest level joins */
-  cv.addEventListener('click', (e) => {
-    if (!hits.length) return;
-    let best = null;
-    for (const h of hits) { if (h.core || e.offsetX < h.x0 - 2 || e.offsetX > h.x1 + 2) continue; const d = Math.abs(h.y - e.offsetY); if (d <= 8 && (!best || d < best.d)) best = { d, k: h.k }; }
-    if (best && paintLevels([best.k], true)) { norm(); if (api.stroked) api.stroked('orbital'); }
-  });
+    onEnd: () => { norm(); if (api.stroked) api.stroked('orbital'); } });
   window.addEventListener('resize', () => paint());
 
   /* ── CHEMISTRY's road: the last ground state, and every new one ───────────────────────────────── */
@@ -581,13 +534,13 @@ export function createOrbitals(host, api) {
     sol = s || null; coreBtn.hidden = !nCore();
     re = im = null; pushedT = NaN; pushedV = -1; selected = -1;
     flow = null; flowOn = false; flowSw.set(false);
-    sel.clear(); storeA = storeB = null; aBtn.classList.remove('on'); bBtn.classList.remove('on'); morphOn = false; morphSw.set(false); rowsEl.classList.remove('reg-morphing');
+    sel.clear(); M.reset(); rowsEl.classList.remove('reg-morphing');
     if (sol) {
       if (wanted) { applyRecord(wanted); wanted = null; }
       else { sel.set(sol.nocc - 1, { amp: 1, phase: 0 }); selected = sol.nocc - 1; }   // a new solve resets the register to HOMO alone
     }
     touch(); rebuild(); paint(); refresh();
-    if (on) { const why = refusal(); if (why) setOn(false); else push(now(), true); }
+    if (on) { const why = refusal(); if (why) claim(false); else push(now(), true); }
     api.repaint();
   }
   function ensureSub() {
@@ -607,7 +560,7 @@ export function createOrbitals(host, api) {
     if (!ensureSub()) return false;
     if (!on) { if (active) paintPsi(t); return false; }
     const why = refusal();
-    if (why) { if (!C() || !C().on) { setOn(false); return false; }   // MOLECULES went off: stand down (refresh() says 'standing by'); the window stays
+    if (why) { if (!C() || !C().on) { claim(false); return false; }   // MOLECULES went off: stand down (refresh() says 'standing by'); the window stays
       status('REGISTRY off — ' + why, 'warn'); return false; }
     const moved = push(t);
     if (active) paintPsi(t);
@@ -626,40 +579,34 @@ export function createOrbitals(host, api) {
       if (selected < 0) selected = k;
     }
     /* ADR-0002: the stores and the position travel with the selection (absent in a record that holds no store: an older file, NEW, the demos) */
-    storeA = unpackStore(r && r.A); storeB = unpackStore(r && r.B); aBtn.classList.toggle('on', !!storeA); bBtn.classList.toggle('on', !!storeB);
-    morphS = Math.min(1, Math.max(0, +(r && r.morph) || 0)); morphK.set(morphS);
-    morphOn = !!(r && r.morphOn) && !!storeA && !!storeB; morphSw.set(morphOn); rowsEl.classList.toggle('reg-morphing', morphOn);
+    M.load(r); rowsEl.classList.toggle('reg-morphing', M.on);
   }
-  const packStore = (M) => (M ? [...M].map(([k, c]) => ({ k, re: c.re, im: c.im })) : null);
-  const unpackStore = (a) => { if (!Array.isArray(a) || !sol) return null; const M = new Map();
-    for (const e of a) { const k = Math.round(e && e.k); if (Number.isFinite(k) && k >= 0 && k < sol.nAO) M.set(k, { re: +e.re || 0, im: +e.im || 0 }); } return M.size ? M : null; };
   /* the stores, A ↔ B and MORPH are written only while a store exists (no store, no path: MORPH cannot be on) — a register that never
      stored keeps its bytes; a ROUTED A ↔ B's base is seated by persist.js modSeats whatever this writes */
-  function save() { return { on, selection: keys().map((k) => ({ k, amp: sel.get(k).amp, phase: sel.get(k).phase })),
-    ...((storeA || storeB) && { morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB) }) }; }
-  /** the register is a selection over a LADDER, so a record landing before the molecule waits for it (see adopt) */
+  function save() { return { on: api.want(), selection: keys().map((k) => ({ k, amp: sel.get(k).amp, phase: sel.get(k).phase })),
+    ...((M.A || M.B) && M.save()) }; }
+  /** the register is a selection over a LADDER, so a record landing before the molecule waits for it (see adopt).  Its own claim is let go;
+   *  a record that says ON is the one switch's ON (api.one), never a claim whatever VIEW reads */
   function load(r) {
     if (!r) return false;
-    if (!sol) { wanted = { selection: r.selection, A: r.A, B: r.B, morph: r.morph, morphOn: r.morphOn }; if (on) setOn(false); return true; }
-    applyRecord(r); touch(); rebuild(); paint(); refresh();
-    if (r.on && !on) setOn(true); else if (!r.on && on) setOn(false);
-    else if (on) push(now(), true);
-    api.repaint();
+    if (!sol) { wanted = { selection: r.selection, A: r.A, B: r.B, morph: r.morph, morphOn: r.morphOn }; if (on) claim(false); }
+    else { applyRecord(r); touch(); rebuild(); paint(); refresh(); if (on) claim(false); api.repaint(); }
+    if (r.on) api.one(true);
     return true;
   }
 
   return {
-    update, setActive, paint, refresh, onSwitch: onSw.root,   // registerview.js seats it beside ORBITAL | STATES
-    get on() { return on; }, setOn,
+    update, setActive, paint, refresh, claim,
+    get on() { return on; }, setOn: (v) => api.one(v),   // the ONE switch (registerview), never this pane's claim
     get active() { return active; },
     get dials() { return !rowsEl.hidden; }, setDials,
     solution() { return sol; },
     setFlow, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flowOn ? flow : null; },
-    select, deselect, toggle, clear, fill, norm, setAmp, setPhase, preset, store, setMorph,
-    get morphOn() { return morphOn; }, get morph() { return morphS; },
-    knobs: { morph: () => morphK },                                   // ADR-0002: the dial the `reg.omorph` row stamps and the TIMELINE lanes
+    select, deselect, toggle, clear, fill, norm, setAmp, setPhase, preset, store: (w) => !!M.store(w), setMorph: (v, s) => M.set(v, s),
+    get morphOn() { return M.on; }, get morph() { return M.s; },
+    knobs: { morph: () => M.knob },                                   // ADR-0002: the dial the `reg.omorph` row stamps and the TIMELINE lanes
     /** the modulator's road (a route, a TIMELINE lane): store the position; the picture moves only while MORPH plays */
-    setMorphValue(v) { const s = Math.min(1, Math.max(0, +v || 0)); if (s === morphS) return; morphS = s; if (morphOn) { touch(); api.repaint(); } },
+    setMorphValue(v) { if (M.setValue(v) && M.on) { touch(); api.repaint(); } },
     get selected() { return selected; },
     ladder() { return sol ? Array.from({ length: sol.nAO }, (_, k) => ({ k, eps: sol.eps[k], occ: k < sol.nocc ? 2 : 0, name: label(k), about: about(k) })) : []; },
 

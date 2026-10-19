@@ -103,7 +103,7 @@ Its key is the string it would render: a changed string is `remove()` + `addBloc
 runs at most four times a second, and nothing is added while STAGE FORMULA is off (the root `hidden`). It wears the kit's look —
 ink, the feathered shade, the serif face — at the kit's seat: the free stage's top + 12 %, between the racks, clear of the
 undocked transport and an open TIMELINE (`avoid`); under every window (`.mir-info.lw-stage` z 20 < the racks' 30, `lab.css`),
-never a pointer target, never in the occlusion mask. THE KINDS (iteration 007 I): every announcement is `stageText.say(kind, text)` — `preset` (THE FADE), `head` (THE HEAD), `registry`, `view`, `orbital`, `basis`, `rate`, `style` (pop-ups) — and is written only while INFORMATIONAL › ANNOUNCE has that kind on; Josh 10-18: the formula and the atom labels ON, every kind and NAME OFF on a first run (the say verb and ASK stay raw `announce`). THE FADE: a HAND's preset (STATE's PRESET and RELOAD, MO-REGISTRY's eight ORBITAL presets — HOMO · LUMO · HOMO + LUMO · FRONTIER FOUR · HOMO SET · LUMO SET · WINDING · OCCUPIED, one table in `lab/orbitalsview.js` since 0.5.3 M10 — and its STATES presets) is announced as the block (`data-fade`, the heading size) for 2.4 s — the formula leaves and
+never a pointer target, never in the occlusion mask. THE KINDS (iteration 007 I): every announcement is `stageText.say(kind, text)` — `preset` (THE FADE), `head` (THE HEAD), `registry`, `view`, `orbital`, `basis`, `rate`, `style` (pop-ups) — and is written only while INFORMATIONAL › ANNOUNCE has that kind on; Josh 10-18: the formula and the atom labels ON, every kind and NAME OFF on a first run (the say verb and ASK stay raw `announce`). THE FADE: a HAND's preset (SPECTRUM's PRESET — a pick of the one shown reloads it — the register's eight ORBITAL presets — HOMO · LUMO · HOMO + LUMO · FRONTIER FOUR · HOMO SET · LUMO SET · WINDING · OCCUPIED, one table in `lab/orbitalsview.js` since 0.5.3 M10 — and its STATES presets) is announced as the block (`data-fade`, the heading size) for 2.4 s — the formula leaves and
 returns, and the kit's exit is the fade — `WINDING · $1e_{1g}$ (a) + (b)`, the names from `lab/names.js`; the press threads
 `{ hand: true }`, so a restore, an undo, a project or link open never announces (`tests/stage-text.browser-test.mjs`). THE HEAD (0.5.1 D2): a HAND pick of a molecule — the MOLECULE dropdown,
 MOLECULES ON, a notebook `lw:molecule=` link (chemview's `hand`) — shows its head in THE FADE's seat once that molecule's solve
@@ -497,9 +497,9 @@ FILM's road (`film()`, `capture()`, the takes, `app.state.capApi`) is `lab/windo
 literal holds by value under another key as backward), and `LW`, `periodEnergies` and `stageCaption` are read through `app.sh` / `app.w` at use.
 
 THE MOLECULES, THE STAGE WORDS, THE MODULATION SEAM AND INK (0.5.2 R2d): MOLECULES with the molecular session and THE HEAD's seat, and
-MO-REGISTRY, are `lab/windows/molecules.js` `createMolecules(app)` at TWO seats — the root builds MOLECULES where the LEGACY note stands and
-returns `createMoRegistry()`, which `boot()` calls where ORBITALS stood, below the stage words (`app.w.wChem` is registered at the end of the
-first span, `app.w.wOrbs` at the second); THE STAGE TEXT with its caption is `lab/shell/stage-words.js` `createStageWords(app)` (it registers
+the register, are `lab/windows/molecules.js` `createMolecules(app)` at ONE seat, where the LEGACY note stands (iteration 008's fix round folded
+MO-REGISTRY's second seat, which no longer made a device, into it: no `createMoRegistry`, no `app.w.wOrbs`; `app.w.wChem` is registered at its
+end); THE STAGE TEXT with its caption is `lab/shell/stage-words.js` `createStageWords(app)` (it registers
 `app.w.stageTextTick` and `app.w.stageCaption` at creation and returns `initStageText` for `go`; `app.state.stageText` is the literal's, assigned
 live), the ONE `defs` table, `mod.install`, the pill's seat and dodge and `app.state.modView` are `lab/shell/modulation.js` `createModSeam(app)`,
 and §18 INK is `lab/shell/ink.js` `createInk(app)` (it returns `refreshOcclusion` for the loop) — all moved verbatim and called at their seats under

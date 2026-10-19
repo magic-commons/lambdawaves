@@ -1,7 +1,6 @@
-/* lab/windows/molecules.js — MOLECULES, the molecular session, THE HEAD and MO-REGISTRY (0.5.2 R2d; moved verbatim out of lab/rack.js boot()) at TWO seats:
- * createMolecules(app) builds MOLECULES where the LEGACY note stands and returns createMoRegistry(), which boot() calls where ORBITALS stood (after the stage words).
- * Iteration 008 U: MO-REGISTRY is no longer a window — the second seat builds the register INTO the MOLECULES card (chemview's `slots`), and a saved
- * `orbitals` seat opens MOLECULES (settings.js RETIRED_WINDOWS).  `app.w.wOrbs` names the card the register lives in, which is wChem. */
+/* lab/windows/molecules.js — MOLECULES, the molecular session, THE HEAD and the register (0.5.2 R2d; moved verbatim out of lab/rack.js boot()) at ONE seat,
+ * where the LEGACY note stands.  Iteration 008 U: MO-REGISTRY is no longer a window — the register is built INTO the MOLECULES card (chemview's `slots`)
+ * and a saved `orbitals` seat opens MOLECULES (settings.js RETIRED_WINDOWS); the fix round (F5) folded its second seat, which no longer made a device, into this one. */
 import { TIER } from '../rack.js'; import { seg } from '../mir/kit.js';
 import { VIEW, VIEW_NAMES } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
@@ -59,7 +58,7 @@ export function createMolecules(app) {
      MOLECULES no longer reaches into that card's body.  The stage words are spoken through ONE verb, stageText.say(kind, text) (shell/stage-words.js) */
   const say = (kind, t, o) => !!app.state.stageText && app.state.stageText.say(kind, t, o);
   app.state.chem = createChem(wChem.body, { say, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more, modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): a hand on a ROUTED dial moves its base   // 0.4.0 S0: the MORE fold opens on a desktop, folds on a phone or tablet
-    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance, plane: () => app.w.slice, field: () => field,   // iteration 007 O: the ORBITAL step's rebuild is timed on the field's own generation
+    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance, plane: () => app.w.slice,
     modBase: (id, v) => { const H = app.state.modHost; if (H && H.registry.has(id)) H.registry.setBase(id, v); },   // iteration 007 O: an UNROUTED hand on the ORBITAL is its base at once (syncBases runs only while the modulation clock does)   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
@@ -99,22 +98,20 @@ export function createMolecules(app) {
   /* iteration 007 O · a file's ORBITAL index this molecule does not hold is clamped to its span (chemview land), and STATE says so, never throws */
   app.state.chem.subscribe((sol) => { const c = app.state.chem.clamped, row = app.state.chem.row();
     if (c && sol && c.key === sol.key) wState.setStatus(`ORBITAL ${c.asked} is past ${row ? row.name : 'this molecule'}’s orbitals ${c.lo}–${c.hi}: clamped to ${c.k}`, 'warn'); });
-  function createMoRegistry() {   // the second seat: the register, INTO the MOLECULES card (iteration 008 U: Josh, "MERGE Molecules with MO-registry")
-  const wOrbs = wChem, C = app.state.chem;
-  app.w.wOrbs = wOrbs;
+  /* THE REGISTER, INTO the MOLECULES card (iteration 008 U: Josh, "MERGE Molecules with MO-registry"); `say` is lazy, so it need not wait for the stage words */
+  const C = app.state.chem;
   /* THE ONE SWITCH: a pane's public ON (a verb, a stick's press, a file) is MOLECULES ON with VIEW REGISTRY; its OFF is MOLECULES OFF */
   const one = (v, hand) => { if (!v) { C.setOn(false); return; } if (C.view !== 'registry') C.setView('registry', hand); if (!C.on) C.setOn(true); else app.state.register.follow(hand); };
   app.state.register = createRegister(C.slots.register, { bar: C.slots.top, one, stroked: () => { C.setView('registry', true); },   // a hand that painted the ladder picked VIEW REGISTRY
-    active: () => canPresent(wOrbs), modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): the STATES dials' hand law
+    active: () => canPresent(wChem), modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): the STATES dials' hand law
     stamp: () => { if (app.state.restampParams) requestAnimationFrame(app.state.restampParams); },   // a lane built after boot becomes a drop target for a macro
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
-    status(t, cls) { wOrbs.setStatus(t, cls); },
+    status(t, cls) { wChem.setStatus(t, cls); },
     announce: (md) => say('preset', md), pop: (t) => say('registry', t),   // a HAND's preset only (orbitalsview / statesview presetSel); the orbital a hand added (orbitalsview)
     now: () => clock.t, rate: () => clock.rate, field: () => field, chem: () => app.state.chem, session: app.state.molSession,
     song: { reg, hydrogen: () => getHamiltonian().id === 'hydrogen', filming: () => app.state.exportLocked, land(re, im, t) { app.state.rotTicking = true; reg.anchorFrom(re, im, t); app.state.rotTicking = false; touchState(); } } });   // 0.6.4 S1: a landing notes no history row, as the rotation drive's ticks
   app.state.orbitals = app.state.register.orbitals; app.state.states = app.state.register.states;
   wChem.root.hidden = !C.on;                                         // iteration 002: ATOMS is the boot's mode; MOLECULES ON shows the card (moleculeMode)
-  return { wOrbs }; }
-  app.w.wChem = wChem; app.w.head = head; return { wChem, head, createMoRegistry };
+  app.w.wChem = wChem; app.w.head = head; return { wChem, head };
 }

@@ -12,7 +12,7 @@
  */
 import { BASIS, energy, HARTREE_EV } from './hydrogen.js';
 import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, sw } from './mir/kit.js';
-import { paintStroke } from './paint-stroke.js';
+import { paintStroke, fillButton } from './paint-stroke.js';
 
 /* THE LADDER IS A CANVAS, AND A CANVAS HAS NO THEME (wave 44).  Every rule here was written in
    rgba(255,255,255,…) — right on the dark theme, WHITE ON WHITE on the light one, where "E = 0", the footer and
@@ -34,8 +34,8 @@ function readRGB(g, name, fallback) {
 }
 /* iteration 008 A (Josh: "simple lines that's dark when off and full vivid color when on") · THE LEVEL LINE, written once: an empty level
    is the theme's ink, thin and dark; a populated one is its shell's colour at full strength — no population bar, no halo, no glow (the
-   share is the line's hover).  `rgb` null = off.  Exported so a ladder elsewhere (MO-REGISTRY's) can draw the same line. */
-export function levelLine(g, x0, x1, y, rgb, ink) {
+   share is the line's hover).  `rgb` null = off.  (MOLECULES' two ladders keep their own alphas — the register's rule, U's measure.) */
+function levelLine(g, x0, x1, y, rgb, ink) {
   g.strokeStyle = rgb ? `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` : `rgba(${ink[0]},${ink[1]},${ink[2]},0.42)`; g.lineWidth = rgb ? 2 : 1;
   g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
 }
@@ -59,13 +59,14 @@ export function createSpectrum(host, api) {
   const head = el('div', 'row tight sp-head', host);
   const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'Hide or show the channels';
   const addBtn = el('button', 'trig', head); addBtn.type = 'button'; addBtn.innerHTML = '<span class="trig-g">+</span><span class="trig-l">MODE</span>';
-  /* iteration 008 S · EMPTY ↔ FILL ALL (row U's pattern for the registry): ONE two-state button — a register with anything in it shows EMPTY
-     (c ↦ 0, SPECTRUM's old CLEAR), an empty one FILL ALL (all 91 labels, equal and in phase, normalised); one undo row each.  NORM went: a
-     HAND stroke on the grid normalises at its end (below), a modulator never does. */
-  const fillBtn = el('button', 'trig sp-fill', head); fillBtn.type = 'button';
-  const paintFill = (n) => { const empty = !n; if (fillBtn.dataset.empty === String(empty)) return; fillBtn.dataset.empty = String(empty);
-    fillBtn.textContent = empty ? 'FILL ALL' : 'EMPTY'; fillBtn.title = empty ? 'every label on, equal and in phase, normalised' : 'c ↦ 0 for every label'; };
-  paintFill(0); head.appendChild(preVis.root);
+  /* iteration 008 S · EMPTY ↔ FILL ALL (paint-stroke.js fillButton, in its words): a register with anything in it shows EMPTY (c ↦ 0, SPECTRUM's
+     old CLEAR), an empty one FILL ALL (all 91 labels, equal and in phase, normalised); one undo row each.  NORM went: a HAND stroke on the grid
+     normalises at its end (below), a modulator never does.  The press reads the register itself (the label is repainted by rebuild(), which a
+     folded or paused card may not have run yet), and so does a hover. */
+  const fillSync = () => fillB.set(!api.reg.populated().length);
+  const fillB = fillButton(head, { fill: 'every label on, equal and in phase, normalised', empty: 'c ↦ 0 for every label' },
+    () => { if (api.reg.populated().length) { if (api.clear) api.clear(); } else if (api.fillAll) api.fillAll(); fillSync(); }, true);
+  fillB.set(true); fillB.root.addEventListener('pointerenter', fillSync); head.appendChild(preVis.root);
   const info = el('div', 'note', head);
   /* ── WAVE 69 · THE REGISTER'S OWN LAW, LIVE ────────────────────────────────────────────────────
    * `c(t) = e^{−iE t} c(0)` is not a caption here, it is what the evolution IS — one phase per mode,
@@ -79,9 +80,6 @@ export function createSpectrum(host, api) {
     ['<m>E = </m>', { s: 'E' }, '<m>   t = </m>', { s: 't' }, '<m>   arg c = </m>', { s: 'arg' }, '<m>   |c| = </m>', { s: 'mag' }] ] });
   const cap = el('div', 'sp-cap', host); cap.hidden = true;                          // W-STURMIAN: the caption over the lanes when the basis is not orthogonal (its own class: the ⓘ sweep folds every .note away)
   hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); });
-  /* the press reads the register itself (the label is repainted by rebuild(), which a folded or paused card may not have run yet) */
-  fillBtn.addEventListener('click', () => { if (api.reg.populated().length) { if (api.clear) api.clear(); } else if (api.fillAll) api.fillAll(); paintFill(api.reg.populated().length); });
-  fillBtn.addEventListener('pointerenter', () => paintFill(api.reg.populated().length));
   const rowsEl = el('div', 'sp-rows', host);
 
 
@@ -105,12 +103,9 @@ export function createSpectrum(host, api) {
   /* 2026-10 (Josh) · PAINT THE GRID (lab/paint-stroke.js): LEFT adds a state, RIGHT removes it; a drag takes every chip it
      crosses.  The chips are DOM, so the stroke is sampled every 6 px and asked of elementFromPoint. */
   const chipAt = (p) => { const c = document.elementFromPoint(p.x, p.y), b = c && c.closest ? c.closest('.pk-c') : null; return b && picker.contains(b) ? [+b.dataset.a] : []; };
-  let painted = false;
-  paintStroke(picker, { at: chipAt, apply: (as, add) => { if (api.paintModes && api.paintModes(as, add)) painted = true; },
+  /* iteration 008 S · A HAND STROKE NORMALISES AT ITS END (paintStroke's onEnd, inside its pointerup and the undo hold: one row); a modulator never does */
+  paintStroke(picker, { at: chipAt, apply: (as, add) => (api.paintModes ? api.paintModes(as, add) : 0), onEnd: () => { if (api.settle) api.settle(); },
     across: (a, b) => { const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 6), out = []; for (let i = 1; i < n; i++) out.push(...chipAt({ x: a.x + (b.x - a.x) * i / n, y: a.y + (b.y - a.y) * i / n })); return out; } });
-  /* iteration 008 S · A HAND STROKE NORMALISES AT ITS END: after paintStroke's own pointerup (registered first, so it has applied the tap), inside
-     the undo hold (history.js commits on the next task), so the stroke and its normalisation are one row; a modulator's write never comes here */
-  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) picker.addEventListener(type, () => { if (!painted) return; painted = false; if (api.settle) api.settle(); });
   const lanes = new Map();     // index → the lane that IS built and in the DOM
   let selected = -1, lastVersion = -1;
   /* ── THE REBUILD IS INCREMENTAL, AND THE BOOKKEEPING IS NOT (wave 49) ────────────────────────────────
@@ -244,7 +239,7 @@ export function createSpectrum(host, api) {
     for (const [a, b] of chips) b.classList.toggle('on', keep.has(a));
     const rs = reg.renderSet();
     const levels = Object.keys(groupByN(want)).length;
-    paintFill(want.length);
+    fillB.set(!want.length);
     info.textContent = `${want.length} populated · ${rs.rendered} rendered · ${levels} level${levels === 1 ? '' : 's'}`;
     { const HS = api.hamiltonian ? api.hamiltonian() : null, eig = !!(HS && HS.eigen);                          // W-STURMIAN: the caption and the ladder's affordance
       cap.hidden = !eig; if (eig) cap.textContent = HS.caption || 'non-orthogonal basis: populations are projections';

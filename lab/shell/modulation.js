@@ -119,7 +119,7 @@ export function createModSeam(app) {
          it changes WHICH quantity the volume means — a rebuild of the picture's subject, not a value to sweep.  That is still true, and
          it is answered rather than refused: `chem.orbital` is an INTEGER target (every value a route or a lane writes is a whole
          orbital, never a cross-fade), and its setter is CAPPED (chemview stepOrbital: the latest value wins, at most one step per
-         120 ms or per the measured rebuild, whichever is slower).  Its range is the MOLECULE's, so this row only holds the id, the
+         334 ms — three a second, THE PHOTOSENSITIVITY LAW's flashes).  Its range is the MOLECULE's, so this row only holds the id, the
          adapters and the field's orbital ceiling until the first landing; every landing re-registers it by id with the molecule's
          span (below the install: the kit's HOT RE-REGISTRATION keeps the base and the routes).  Do not move it back out: saved
          projects carry routes and TIMELINE clips on this id.  FIELD RESOLUTION and STEPS stay out — they rebuild the field itself. */
@@ -130,7 +130,7 @@ export function createModSeam(app) {
         hint: 'real-time propagation steps asked of the worker each frame',
         get: () => (app.state.chem ? app.state.chem.speed : 10), set: (v) => { if (app.state.chem) { app.state.chem.setSpeed(v); setKnob(app.state.chem.knobs.speed(), app.state.chem.speed); } } },
       { id: 'chem.orbital', label: 'MOLECULES ORBITAL', map: 'integer', min: 1, max: MOL_LIMITS.ao, step: 1, group: 'state', knob: () => (app.state.chem ? app.state.chem.knobs.orbital() : null),
-        hint: 'which molecular orbital VIEW ORBITAL draws, ascending in ε — whole orbitals, one step per volume rebuild at most (≥ 120 ms)',
+        hint: 'which molecular orbital VIEW ORBITAL draws, ascending in ε — whole orbitals, three steps a second at most (one per 334 ms)',
         get: () => { const k = app.state.chem ? app.state.chem.orbital() : null; return Number.isFinite(k) ? k : NaN; },   // NaN before a molecule: the base is not synced from nothing
         set: (v) => { if (app.state.chem) app.state.chem.stepOrbital(v, app.state.modHost.registry.isModulated('chem.orbital')); } },
       /* THE REGISTER's SLOTS (REGISTER-WINDOW-SPEC §6): MORPH, and eight lane slots in lane order — S₀ is slot 1.
@@ -141,7 +141,8 @@ export function createModSeam(app) {
         get: () => (app.state.states ? app.state.states.morph : 0), set: (v) => { if (app.state.states) { app.state.states.setMorphValue(v); setKnob(app.state.states.knobs.morph(), app.state.states.morph); } } },
       /* iteration 007 B (ADR-0002): the ORBITAL register's A ↔ B is its OWN target (`reg.omorph`, the id in orbitalsview.js) — a route that
          followed whichever pane is showing would change a saved route's meaning with the pane.  Its knob carries the stamp, so the TIMELINE
-         lanes it like any registered dial (a lane OR a route: the kit's either-or, the top-most wins). */
+         lanes it like any registered dial (a lane AND a route ADD: the kit's host.js livePos samples the lane as the moving base and the
+         routes modulate around it — B-BUILD measured their sum). */
       { id: OMORPH, label: 'ORBITAL MORPH', map: 'linear', min: 0, max: 1, def: 0, group: 'state', knob: () => (app.state.orbitals ? app.state.orbitals.knobs.morph() : null),
         hint: 'where the ORBITAL register plays on the path from store A to store B (MORPH must be on)',
         get: () => (app.state.orbitals ? app.state.orbitals.morph : 0), set: (v) => { if (app.state.orbitals) { app.state.orbitals.setMorphValue(v); setKnob(app.state.orbitals.knobs.morph(), app.state.orbitals.morph); } } },

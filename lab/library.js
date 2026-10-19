@@ -132,6 +132,21 @@ export async function fetchRecord(hash, { network = false, onProgress = null } =
   return { record: JSON.parse(new TextDecoder().decode(buf)), from: 'network', bytes: got };
 }
 
+/** a SECTION's records kept on this device (`v` true: each fetched where absent, checked against its name; persist() asked once) or removed
+    (`v` false) — the one road for the Picker's heading tile and __LW.chem.keep (iteration 008 P · V; the fix round's F4).  `stop()` true ends
+    the install after the record in hand; `onStep(k, n)` follows it.  → persist()'s answer for an install, null for a removal */
+export async function keepSection(recs, v, { onStep = null, stop = null } = {}) {
+  if (!v) { for (const r of recs) await removeRecord(r.hash).catch(() => false); return null; }
+  const info = await persistOnce().catch(() => null);
+  let k = 0;
+  for (const r of recs) {
+    if (stop && stop()) break;
+    if (!(await installed(r.hash).catch(() => false))) await fetchRecord(r.hash, { network: true }).catch(() => null);
+    if (onStep) onStep(++k, recs.length);
+  }
+  return info;
+}
+
 /** a DATA file without a name to check (sw.js §1b: img/menu/, demos/covers/, the ladder's bases): kept in lw-data-v1 after its first
     good answer — `res` that answer when the caller already holds it (a clone), else fetched (the worker answers from the device or
     the network).  true when the device holds it afterwards. */

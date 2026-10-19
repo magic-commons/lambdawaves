@@ -27,7 +27,7 @@ import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitTex
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
-import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
+import { fetchRecord, installed, removeRecord, persistOnce, keepSection, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
 import { planePoints } from './slice.js';   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
 import * as V from './volumes.js'; import { parseLwm, rungRecord } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
@@ -80,10 +80,10 @@ export function createChem(host, api) {
      range on every landing).  `handK` is the index the HAND owns — the dial, a landing, a file, a verb; a modulator never writes it — so a
      saved orbital's name (orbitalKey) is the base's, never wherever an LFO stood at SAVE.  THE STEP-RATE CAP (Josh 10-18: "Orbitals should be
      steps and I think it could handle it at lower frequencies"): every step rebuilds the volume, so a modulator's writes coalesce — the latest
-     value wins, applied at most once per STEP_MS or per the measured rebuild (apply → the GPU done with the frame that drew it, an EMA),
-     whichever is slower.  An LFO at 20 Hz steps at the cap; a lane at 0.5 Hz steps every orbital it crosses. */
+     value wins, applied at most once per STEP_MS (O-BUILD measured a rebuild at 40 ms median, 104 ms worst — far under the cap, so the cap
+     is the whole rule).  An LFO at 20 Hz steps at the cap; a lane at 0.5 Hz steps every orbital it crosses. */
   const STEP_MS = 334;   // ≤ 3 steps a second: THE PHOTOSENSITIVITY LAW's 3 flashes a second (the flash guard does not see chem.orbital); the builder's 120 ms allowed 8.3 (Yan at the merge, 10-18)
-  let handK = null, stepWant = null, stepHeld = false, stepTimer = 0, stepAt = -Infinity, stepMs = 0, stepN = 0, clamped = null;
+  let handK = null, stepWant = null, stepHeld = false, stepTimer = 0, stepAt = -Infinity, clamped = null;
   let pendingOrbital = null, pendingKey = null, wantRef = null;               // 0.4.0 S4a: the { id, hash, nameKey } a project or link named                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
   const keyed = (N, K) => (K && N && N.reliable && N.group === K.group ? N.mos.find((m) => m.irrep === K.irrep && m.count === K.count && (m.member || null) === (K.member || null)) || null : null);
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
@@ -269,11 +269,10 @@ export function createChem(host, api) {
     secStep.root.title = page === 'ATOMS' ? `ATOMS · ${sub}: a tile sets OPERATOR ATOM and its element` : `${page} · ${sub}: ${n} molecules; ` + (recs.length ? `${recs.length} with a record (${mb} MB), ${on} of them on this device` : 'every one solves live, none has a record');
     shelfFill(); rowPic();
   }
-  /** INSTALLED's press: the page's records fetched (each checked against its sha-256 name) and kept, or all removed */
+  /** a section kept or removed (library.js keepSection, the Picker's road too): the page's records fetched (each checked against its sha-256 name) and kept, or all removed */
   async function keep(v) {
     const recs = sectionRecs(), sec = page;
-    if (v) { storageNote(await persistOnce()); let k = 0; for (const r of recs) { status(`installing ${sec}… ${++k} of ${recs.length}`, 'warn'); if (!have.get(r.hash)) await fetchRecord(r.hash, { network: true }); } }
-    else for (const r of recs) await removeRecord(r.hash);
+    const info = await keepSection(recs, v, { onStep: (k, n) => status(`installing ${sec}… ${k} of ${n}`, 'warn') }); if (info) storageNote(info);
     await lamps(); const on = recs.filter((r) => have.get(r.hash)).length;
     status(`${sec}: ${on} of ${recs.length} records on this device` + (v && on < recs.length ? ' — the rest did not download (offline?)' : ''), on === (v ? recs.length : 0) ? 'ok' : 'warn');
     return { section: sec, records: recs.length, installed: on };
@@ -739,27 +738,18 @@ export function createChem(host, api) {
   function stepOrbital(v, held) {
     stepWant = v; stepHeld = !!held;
     if (stepTimer) return;
-    const wait = stepAt + stepGap() - performance.now();
+    const wait = stepAt + STEP_MS - performance.now();
     if (wait <= 0) stepApply(); else stepTimer = setTimeout(stepApply, wait);
   }
-  const stepGap = () => Math.max(STEP_MS, Math.round(stepMs));
   function stepApply() {
     stepTimer = 0; const v = stepWant; stepWant = null;
     if (!Number.isFinite(v) || !sol || (!stepHeld && !Number.isFinite(handK))) return;   // the registry writing back a not-chosen orbital's placeholder base chooses nothing
     const [lo, hi] = span(), k = Math.min(hi, Math.max(lo, Math.round(v)));
     if (stepHeld && orbKnob.show) orbKnob.show(k); else orbKnob.set(k);
     if (k === orbital) return;
-    orbital = k; stepAt = performance.now(); stepN++;
-    if (view === 'orbital' && pushMatrix()) stepClock(stepAt);
+    orbital = k; stepAt = performance.now();
+    if (view === 'orbital') pushMatrix();
     refresh();
-  }
-  /** the rebuild a step costs, measured: from the apply to the GPU done with the frame whose generation drew it (≤ 2 s, else unmeasured) */
-  function stepClock(t0) {
-    const F = api.field && api.field(); if (!F || !F.device || !F.stats) return;
-    const g0 = F.stats.generation;
-    const wait = () => { if (F.stats.generation === g0) { if (performance.now() - t0 < 2000) requestAnimationFrame(wait); return; }
-      F.device.queue.onSubmittedWorkDone().then(() => { const ms = performance.now() - t0; stepMs = stepMs ? stepMs * 0.7 + ms * 0.3 : ms; }, () => {}); };
-    requestAnimationFrame(wait);
   }
 
   /* ── the real-time run ────────────────────────────────────────────────────────────────────────── */
@@ -1438,7 +1428,7 @@ export function createChem(host, api) {
     get speed() { return speed; }, setSpeed(v) { if (!Number.isFinite(v)) return speed; speed = Math.min(50, Math.max(1, Math.round(v))); return speed; },
     knobs: { kick: () => kapKnob, speed: () => spdKnob, orbital: () => orbKnob },
     /* iteration 007 O · chem.orbital: the range a landing re-registers, the capped modulator road, the cap's witness, and a file's clamp */
-    span() { return span(); }, stepOrbital, get orbitalStep() { return { ms: +stepMs.toFixed(1), gap: stepGap(), steps: stepN, pending: stepWant }; }, get clamped() { return clamped; },
+    span() { return span(); }, stepOrbital, get clamped() { return clamped; },
     /* ── __LW.chem ─────────────────────────────────────────────────────────────────────────────── */
     solve(id, opts) { return solve(id === undefined ? preset : id, opts || {}); }, pick: handPick,
     preset() { return preset; }, row,

@@ -113,7 +113,7 @@ export function createReadouts(app) {
   rack.appendChild(wMet.root);
   const meters = createMeters(wMet.body, () => {   // 0.8.2 P2 · THE COHERENCE MAP's source: a molecule's STATES register (its b_K) while MOLECULES owns the field, else the register's c(0)
     const S = app.state.chem && app.state.chem.on ? app.state.states : null, H = getHamiltonian(), pal = app.state.palette;
-    if (S) return S.on ? { c: S.state().lanes.filter((l) => l.amp > 1e-7).map((l) => ({ re: l.amp * Math.cos(l.phase), im: l.amp * Math.sin(l.phase), label: l.label, E: l.omega })), unit: 'hartree', pal } : { why: 'MOLECULES owns the field: the map reads its STATES register — switch STATES on in MO-REGISTRY', pal };
+    if (S) return S.on ? { c: S.state().lanes.filter((l) => l.amp > 1e-7).map((l) => ({ re: l.amp * Math.cos(l.phase), im: l.amp * Math.sin(l.phase), label: l.label, E: l.omega })), unit: 'hartree', pal } : { why: 'MOLECULES owns the field: the map reads its STATES register — pick STATES and VIEW REGISTRY in MOLECULES', pal };
     return { c: reg.populated().map((a) => ({ re: reg.re0[a], im: reg.im0[a], label: H.labelOf(BASIS[a]), E: reg.Ediag(a), n: BASIS[a].n })), T: app.state.eq.last, unit: H.unit, pal };
   }, gridError);
   /* iteration 005 P3 · GRID ERROR's twin, settled first (a GRID change has landed): a molecule's own matrix (field.js keeps what it drew), else the

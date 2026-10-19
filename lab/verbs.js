@@ -2,7 +2,7 @@
  * list or a notebook `lw:` link as ONE history row a list; `inventory()` is only what the app already prints.  DOM-free at its top (tools/gemma imports VERBS
  * in node).  An arg spec: 'string' | 'number' | 'bool' (a '|' union) or 'enum a|b|c', '?' first when optional.  A row's run(app, a) returns nothing,
  * { own } (it announced itself), { fade } (THE FADE, said when no row of the list announced itself) or a string: the sentence it was refused with. */
-import { PRESET_BY_ID } from './state.js'; import { MOLECULE_BY_ID } from './molecules.js'; import { VIEW, VIEW_NAMES } from './field.js'; import { BASIS } from './hydrogen.js';
+import { PRESET_BY_ID } from './state.js'; import { MOLECULE_BY_ID } from './molecules.js'; import { VIEW_NAMES, waveView } from './field.js'; import { BASIS } from './hydrogen.js';
 import { orbitalName } from './names.js'; import { mdText, stateLatex, stemOf, BASIS_LABEL } from './latex-state.js'; import { statusOf } from './status.js';
 import { aliasOf, FLASH_HZ } from './flash-law.js'; import { EQ_PRESETS } from './equalizer.js'; import { getHamiltonian } from './hamiltonian.js'; import { isField } from './mir/core/pointer.js';
 import { LAT } from './lattice.js'; import { BL } from './bloch.js'; import { PRESETS as LATTICES } from './lattice-model.js';
@@ -35,7 +35,7 @@ export const VERBS = [
     run(app, a) {
       const c = app.state.chem;
       if (c && c.on && ['density', 'orbital', 'registry', 'diff', 'esp', 'spin', 'dlda'].includes(a.id)) { if (a.orbital !== undefined) return orb(c, a.orbital); c.setView(a.id); }
-      else if (VIEW[a.id] === undefined && a.id !== 'reim') return `${a.id} is a MOLECULES view and MOLECULES is off`; else return { fade: 'VIEW · ' + mdText(app.sh.LW.setView(a.id)) };   // iteration 008 W: setView maps reim / diff
+      else if (!waveView(a.id)) return `${a.id} is a MOLECULES view and MOLECULES is off`; else return { fade: 'VIEW · ' + mdText(app.sh.LW.setView(a.id)) };   // iteration 008 W: setView maps reim / diff
       return { fade: 'VIEW · ' + mdText(a.id) };
     } },
   { id: 'window', args: { id: 'string', open: 'bool', side: '?enum L|R' }, doc: 'open or close a window by its id (spectrum, chem, orbitals, camera, settings, informational, render, …), onto the left (L) or right (R) rack',

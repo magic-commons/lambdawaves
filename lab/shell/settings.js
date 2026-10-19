@@ -2,7 +2,8 @@
  * createSettings(app) runs at §1's seat, BEFORE the controller's, so a controller name is read as app.ctl.x inside a callback, never at
  * creation — as are app.host.camera, app.sh.setModArm and app.sh.quality, which boot() fills later.  readSettings stays in rack.js' head
  * (§0 calls it first, U1) and comes by value; lookSync is registered for the controller; boot() destructures the rest. */
-import { infoKnown } from './stage-words.js';
+import { infoKnown } from './stage-words.js'; import { readSession } from '../mir/core/session.js';
+const SESSION_KEY = 'lambdawaves.q0.session';   // main.js createSession's key (settings-store.js FAMILIES)
 export function createSettings(app) {
   const { ui, mat, settingsStore, useCompactDefaults, FIRST_RUN, appleDevice } = app; const { readSettings } = app.sh;
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
@@ -34,7 +35,7 @@ export function createSettings(app) {
            none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
            belong beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
            when you open it is a surprise, not a setting. */
-        friction: app.host.camera.friction, spin: app.host.camera.speed, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock, audio: !!(ui.audioSw && ui.audioSw.get()), skeleton: (ui.skeletonSw && ui.skeletonSw.get()) || undefined, bead: (ui.beadSw && ui.beadSw.get()) || undefined, ellipsoid: (ui.ellipsoidSw && ui.ellipsoidSw.get()) || undefined, askOk: ui.askOk || undefined, askUrl: (ui.askUrlIn && ui.askUrlIn.value.trim()) || undefined,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod); 0.5.3 M6: the camera's LOCK too
+        friction: app.host.camera.friction, spin: app.host.camera.speed, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock, audio: !!(ui.audioSw && ui.audioSw.get()), askOk: ui.askOk || undefined, askUrl: (ui.askUrlIn && ui.askUrlIn.value.trim()) || undefined,   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod); 0.5.3 M6: the camera's LOCK too
         /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE, and it is the sixth of the six things
            host-contract.md says a host owes it: where the window sits, which lane the work bars are
            in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
@@ -52,7 +53,7 @@ export function createSettings(app) {
            *is* a choice, and it is remembered here.  0.3.1 · S1 (D1): the whole field chrome — frame, axis,
            their modes, the corner, invert, axis colour — is this browser's alone; serialize() strips it and
            restore() ignores it in an older file, so no project or link can change a reader's axes. */
-        invert: !!mat.invert, axisInk: mat.axisInk || 'theme', dither: +mat.dither || 0,   // iteration 008 W: DITHER is this display's (SETTINGS › QUALITY), always written, so a profile older than it is known by its absence
+        invert: !!mat.invert, axisInk: mat.axisInk || 'theme', dither: +mat.dither || 0,   // iteration 008 W: DITHER is this display's (SETTINGS › QUALITY), always written, so a profile older than it is known by its absence (the lift below)
                // wave 53: the two chrome objects are this browser's, like FROST and the tags
         phoneTr: !!document.querySelector('.dev[data-id="transport"].folded'),
         /* WAVE 59 · WHICH WAY THE PHONE'S RACK WAS LEFT, on exactly phoneTr's pattern — a phone-only chrome
@@ -95,9 +96,7 @@ export function createSettings(app) {
     if (typeof s.fling === 'number') app.host.camera.setFling(s.fling);
     if (typeof s.camLock === 'boolean') app.host.camera.setLock(s.camLock);       // 0.5.3 M6: the classic camera (pan held at the centre), off when nothing was said
     if (s.audio === true && ui.audioSw) { ui.audioSw.set(true); ui.setAudio(true); }   // 0.6.4 S2: the AUDIO consent (SOUND itself is a hand press each session)
-    if (ui.skeletonSw) ui.skeletonSw.set(s.skeleton === true);   // 0.7.0 V2: MOLECULES' SKELETON, off when nothing was said (absent while off)
-    if (ui.beadSw) ui.beadSw.set(s.bead === true);   // 0.8.2 P3: THE BEAD beside it, the same law
-    if (ui.ellipsoidSw) ui.ellipsoidSw.set(s.ellipsoid === true);   // 0.8.3 B3: THE ELLIPSOID beside it, the same law
+    /* SKELETON · BEAD · UNCERTAINTY left this blob for INFORMATIONAL's record in the fix round (C6: shell/stage-words.js lifts them once) */
     if (s.askOk === true) ui.askOk = true; if (typeof s.askUrl === 'string' && ui.askUrlIn) ui.askUrlIn.value = s.askUrl;   // 0.6.6 G2: ASK's consent and Gemma's address (absent: this host at 9443)
     /* 0.5.0 C4 · THE POWER AND THE CADENCE are this browser's (PREFERENCE) and live in the kit's modulation record, the one
        MIR's installModulation reads; an older blob's pair is read ONCE into it, and the blob drops it on its next save. */
@@ -126,6 +125,10 @@ export function createSettings(app) {
     if (wantP3 && ui.gamutSeg) ui.gamutSeg.set(app.ctl.field.ok && app.ctl.field.setGamut ? (app.ctl.field.setGamut(s.p3Mode === 'vivid' ? 'p3-vivid' : 'p3') === 'srgb' ? 'srgb' : 'p3') : 'srgb');   // it can only come back if the canvas can honour it
     document.body.dataset.gamut = app.ctl.field.ok && app.ctl.field.gamut !== 'srgb' ? 'p3' : 'srgb';
     settingsLoaded = true;
+    /* iteration 008 W · DITHER WAS A PROJECT KEY, and a profile older than the move (no `dither` here) takes the one its live session carried — read
+       ONCE, here at the boot's settings read, never at a project open (STATE-SCOPES: an open leaves this blob byte-identical outside WORKSPACE) */
+    if (!('dither' in s)) { let d = 0; try { const r = readSession(globalThis.localStorage, SESSION_KEY), L = r && r.parts && r.parts.lambdawaves; d = +(L && L.data && L.data.presentation && L.data.presentation.mat && L.data.presentation.mat.dither) || 0; } catch (_) {}
+      if (d > 0) { mat.dither = Math.max(0.25, Math.min(2, d)); if (ui.showDither) ui.showDither(mat.dither); saveSettings(); } }
   }
 
 
