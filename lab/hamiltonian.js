@@ -10,7 +10,7 @@
  *   qho       E = N + 3/2  ·  ψ = e^{−r²/2} r^l L^{(l+½)}(r²) Y ·  no Stark (a displaced oscillator: not yet) ·
  *             momentum space = the same picture with the phase (−i)^N ·  a slap makes an exact coherent state
  */
-import { atomForms } from './names.js';
+import { atomForms, L_LETTERS } from './names.js';
 import { BASIS, NMAX, energy as hydrogenEnergy, radial as hydrogenRadial, domainFor as hydrogenDomainFor, psiAt as hydrogenPsiAt, ylmNorm, legendreDerivCoeffs } from './hydrogen.js';
 import { tableFor as hydrogenTableFor } from './field.js';
 import { momentumTableFor as hydrogenMomentumTableFor, domainForP as hydrogenDomainForP, phiAt as hydrogenPhiAt } from './momentum.js';
@@ -46,7 +46,7 @@ export const HAMILTONIANS = {
     domainFor: qhoDomainFor, domainForP: () => qhoDomainFor(NMAX),
     kernelSpace: { x: 2, p: 2 },
     stark: false, hydrogenTheorems: false,
-    labelOf: (s) => `N${qhoN(s.n, s.l)} n_r${s.n - s.l - 1} ${'spdfghi'[s.l]}${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
+    labelOf: (s) => `N${qhoN(s.n, s.l)} n_r${s.n - s.l - 1} ${L_LETTERS[s.l]}${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
     spectrum: {
       levels: Array.from({ length: 2 * NMAX - 1 }, (_, N) => ({ key: N, E: N + 1.5, label: `N${N}`, rgb: QHO_RGB(N) })),   // N = 0 … 12 since n = 7
       levelKey: (a) => qhoN(BASIS[a].n, BASIS[a].l),
@@ -63,10 +63,10 @@ HAMILTONIANS.well = {
   domainFor: wellDomainFor, domainForP: wellDomainFor,
   kernelSpace: { x: 3, p: 3 },
   stark: false, hydrogenTheorems: false, noMomentum: true,
-  labelOf: (s) => `${s.n - s.l}${'spdfghi'[s.l]} well ${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
+  labelOf: (s) => `${s.n - s.l}${L_LETTERS[s.l]} well ${s.m >= 0 ? '₊' : '₋'}${Math.abs(s.m)}`,
   get spectrum() {
     const a = wellRadius(), levels = [];
-    for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) levels.push({ key: n + ':' + l, E: wellEnergyOf(n, l, a), label: `${n - l}${'spdfghi'[l]}`, rgb: QHO_RGB(n - 1) });
+    for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) levels.push({ key: n + ':' + l, E: wellEnergyOf(n, l, a), label: `${n - l}${L_LETTERS[l]}`, rgb: QHO_RGB(n - 1) });
     levels.sort((p, q) => p.E - q.E);
     const Etop = levels[levels.length - 1].E * 1.08;
     return { levels, levelKey: (i) => BASIS[i].n + ':' + BASIS[i].l, Emin: 0, Etop, topLabel: '', footer: `EIGENVALUE  E = z²_{n_r+1,l}/(2a²), hard wall at a = ${a.toFixed(1)} a₀  (no continuum)` };
@@ -157,7 +157,7 @@ HAMILTONIANS.atom = {
   get spectrum() {
     if (atomSpec && atomSpec.Z === atomZ) return atomSpec;
     const levels = [];
-    for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) { const occ = atomOcc(n, l); levels.push({ key: n + ':' + l, E: atomEpsOf(n, l), label: `${n}${'spdfghi'[l]}${occ ? '' : '°'}`, rgb: A_RGB[l], occ }); }
+    for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) { const occ = atomOcc(n, l); levels.push({ key: n + ':' + l, E: atomEpsOf(n, l), label: `${n}${L_LETTERS[l]}${occ ? '' : '°'}`, rgb: A_RGB[l], occ }); }
     levels.sort((p, q) => p.E - q.E);
     atomSpec = { Z: atomZ, levels, levelKey: (a) => BASIS[a].n + ':' + BASIS[a].l, Emin: levels[0].E * 1.02, Etop: 0, topLabel: 'E = 0',
       footer: atomSpectrum(atomZ).footer + ' · ° = VIRTUAL (a shell of the frozen field — not in the ground configuration) · the core sets this linear scale: the log ladder is in ATOMS' };

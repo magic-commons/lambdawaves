@@ -22,7 +22,7 @@ import { el, readout, trig, graphHover, fitText, cssRGB, accentRGB, N_COLOR } fr
 import { ATOMS, atom, configOf, solveAtom, atomEnergyOf, ionisation, quantumDefect, atomRadial, atomDomainFor,
   EXCHANGE_MODEL, HARTREE_EV } from './atoms.js';
 
-const SPD = 'spdfgh';
+import { L_LETTERS as SPD } from './names.js';
 /* WAVE 57 · the reader moved to kit.js — one copy, and it knows color(display-p3 …); the accents come
    from the WHEEL itself (kit's setAccentRGB), so this canvas draws the array the DOM was painted from. */
 const readRGB = (g, name, fallback) => cssRGB(g, name, fallback);

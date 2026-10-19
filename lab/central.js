@@ -4,7 +4,7 @@
  * continuum, so an UNBOUND label has no energy (NaN), a zero row (drawn as nothing) and reads "unbound here" in its lane.  QUARKONIUM is the preset `cornell`:
  * it IS HAMILTONIANS.cornell (cornell.js, GeV, `instruments.qcd`), so nothing here writes while QQ̄ is in force.  The oracle in force is printed beside the 1s.  STATUS: NUMERICAL. */
 import { numerov, tabRow, NR, ROWS, L_RGB, radialAt, cornellTable, cornellPsiAt, configure as qqConfigure, system as qqSystem, solved as qqSolved, MEASURED } from './cornell.js';
-import { BASIS, NMAX } from './hydrogen.js'; import { rowOf } from './atoms.js'; import { atomForms } from './names.js'; import { el, knob, readout, seg, stepper } from './mir/kit.js';
+import { BASIS, NMAX } from './hydrogen.js'; import { rowOf } from './atoms.js'; import { atomForms, L_LETTERS } from './names.js'; import { el, knob, readout, seg, stepper } from './mir/kit.js';
 export const POTENTIALS = {
   confined: { label: 'CONFINED  −1/r inside a hard sphere R_c', V: () => (r) => -1 / r, knobs: { Rc: ['R_c', 1, 30, 'a₀'] } },
   yukawa: { label: 'YUKAWA  −e^(−r/λ)/r', V: (p) => (r) => -Math.exp(-r / p.lam) / r, knobs: { lam: ['λ', 0.5, 50, 'a₀'] } },
@@ -49,7 +49,7 @@ export const CENTRAL = {
   energy: (a) => S_().E[rowOf(BASIS[a].n, BASIS[a].l)], radial: (n, l, r) => (bnd(n, l) ? radialAt(n - l - 1, l, r, S) : 0),
   tableFor, momentumTableFor: tableFor, psiAt, phiAt: psiAt, domainFor, domainForP: domainFor,   // momentum space is not built: the selector forces position space
   kernelSpace: { x: 6, p: 6 }, stark: false, hydrogenTheorems: false, noMomentum: true, labelOf: (s) => atomForms(s).plain,
-  get spectrum() { const levels = []; for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) if (bnd(n, l)) levels.push({ key: n + ':' + l, E: S.E[rowOf(n, l)], label: n + 'spdfghi'[l], rgb: L_RGB[l] });
+  get spectrum() { const levels = []; for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) if (bnd(n, l)) levels.push({ key: n + ':' + l, E: S.E[rowOf(n, l)], label: n + L_LETTERS[l], rgb: L_RGB[l] });
     return { levels: levels.sort((p, q) => p.E - q.E), levelKey: (a) => BASIS[a].n + ':' + BASIS[a].l, Emin: (levels.length ? levels[0].E : -0.5) * 1.05, Etop: 0, topLabel: 'E = 0',
       footer: `EIGENVALUE · ${POTENTIALS[cur.preset].label} · Numerov · ${S_().bound} bound of ${BASIS.length} · a level at E ≥ 0 is no state here (no continuum)` }; },
 };

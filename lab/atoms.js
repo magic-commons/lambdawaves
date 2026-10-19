@@ -102,8 +102,8 @@
  *  for the `{ zora: false }` road, which is what A7's snapshot measured.)
  */
 
+import { L_LETTERS as SPD } from './names.js';   // the l letters, one table (iteration 010 X6)
 const HARTREE_EV = 27.211386245988;                      // CODATA 2018
-const SPD = 'spdfgh';
 export const NR = 256;                                   // samples per tabulated radial row (space 6)
 export const ROWS = 43;                                  // rows in use in the GPU's radial buffer (field.js: 48 × 256 f32)
 /** the (n_r, l) row map cornell.js and central.js use: the 6 × 6 grid 6l + n_r, and the two n = 7 pairs outside it — (6, 0) the 7s and

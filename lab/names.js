@@ -427,15 +427,15 @@ export function orbitalName(names, k, nocc, form = 'plain') {
 export const stateName = (level, tag = '') => 'S' + subDigits(String(level)) + tag;
 
 /* ── THE ATOMS: one n l m name, four forms (hydrogen.js's label, hamiltonian.js's labelOf, latex-state's latexName) ── */
-const L = 'spdfghik';
+export const L_LETTERS = 'spdfghik';   // the l letters (j skipped): the one table every n l name in the app reads
 /** { n, l, m } → { plain '2p₋1', typeset '2p₋₁', latex '2p_{-1}', ascii '2p-1', speech 'two p minus one' } */
 export function atomForms({ n, l, m }) {
   return {
-    plain: `${n}${L[l]}${m >= 0 ? '₊' : '₋'}${Math.abs(m)}`,
-    typeset: `${n}${L[l]}${String(m).split('').map((c) => (c === '-' ? '₋' : SUBD[+c])).join('')}`,
-    latex: `${n}${L[l]}_{${m}}`,
-    ascii: `${n}${L[l]}${m}`,
-    speech: `${sayNum(n)} ${L[l]} ${m < 0 ? 'minus ' : ''}${sayNum(Math.abs(m))}`,
+    plain: `${n}${L_LETTERS[l]}${m >= 0 ? '₊' : '₋'}${Math.abs(m)}`,
+    typeset: `${n}${L_LETTERS[l]}${String(m).split('').map((c) => (c === '-' ? '₋' : SUBD[+c])).join('')}`,
+    latex: `${n}${L_LETTERS[l]}_{${m}}`,
+    ascii: `${n}${L_LETTERS[l]}${m}`,
+    speech: `${sayNum(n)} ${L_LETTERS[l]} ${m < 0 ? 'minus ' : ''}${sayNum(Math.abs(m))}`,
   };
 }
 

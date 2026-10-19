@@ -5,7 +5,7 @@ import { TIER } from '../rack.js';
 import { el, knob, seg, sw, trig, readout, group, mathPlain, fader, stepper } from '../mir/kit.js';
 import { createEqualizer, EQ_PRESETS, EQ_SHELLS } from '../equalizer.js'; import { createEqAudio } from '../eq-audio.js'; import { createChord } from '../chord-audio.js';
 import { VIEW } from '../field.js';
-import { BASIS, stateOf } from '../hydrogen.js';
+import { BASIS, stateOf } from '../hydrogen.js'; import { L_LETTERS } from '../names.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu, MASSES, onHamiltonian } from '../hamiltonian.js';
 import { ATOMS, valenceShells, ZMAX } from '../atoms.js';
 import { createSpectrum } from '../spectrum.js';
@@ -288,7 +288,7 @@ export function createSpectrumCard(app) {
   /** the ladder's descriptor under the scale (spectrum.js paints `eigen`) */
   function sturmSpectrum() {
     const e = sturmEigen(), Z = getZ();
-    const eigen = e.E.map((E, k) => ({ k, E, pop: e.pop[k], n: e.n[k], label: `${'spdfghi'[e.l[k]]}${e.m[k] >= 0 ? '₊' : '₋'}${Math.abs(e.m[k])}` }));
+    const eigen = e.E.map((E, k) => ({ k, E, pop: e.pop[k], n: e.n[k], label: `${L_LETTERS[e.l[k]]}${e.m[k] >= 0 ? '₊' : '₋'}${Math.abs(e.m[k])}` }));
     return { eigen, Emin: Math.min(e.E[0], -0.5 * Z * Z) * 1.02, Etop: 0, Emax: e.E[e.rank - 1], levels: [], levelKey: () => 0,
       footer: `S⁻¹H · λ ${sturm.lambda.toFixed(3)} · rank ${e.rank} · E > 0 pseudo-continuum`,
       caption: 'non-orthogonal basis: populations are projections ⟨C_k|S|c⟩ (the ladder) · a lane\'s energy is the label\'s ⟨H⟩, not an eigenvalue' };
@@ -299,7 +299,7 @@ export function createSpectrumCard(app) {
     const e = P.eigenstate(k);
     reg.clear(); reg.anchorFrom(e.re, e.im, clock.t); app.state.lastNmax = -1;
     spectrum.select(-1); setReference(); app.w.shadowView.clearTrail(); touchState(); schedule(TIER.REBUILD);
-    wSpec.setStatus(`eigenstate ${k} · E = ${P.E[k].toFixed(6)} Eh · ${'spdfghi'[P.lK[k]]}${P.mK[k] >= 0 ? '₊' : '₋'}${Math.abs(P.mK[k])} · stationary`, 'live');
+    wSpec.setStatus(`eigenstate ${k} · E = ${P.E[k].toFixed(6)} Eh · ${L_LETTERS[P.lK[k]]}${P.mK[k] >= 0 ? '₊' : '₋'}${Math.abs(P.mK[k])} · stationary`, 'live');
     return true;
   }
 
@@ -323,7 +323,7 @@ export function createSpectrumCard(app) {
     reg.clear(); let labels = 0;
     for (const c of held) { const amp = Math.sqrt(c.occ / N / (2 * c.l + 1)); for (let m = -c.l; m <= c.l; m++) { reg.set(stateOf(c.n, c.l, m).index, amp, 0, clock.t); labels++; } }
     touchState(); schedule(TIER.REBUILD);
-    const sup = (k) => String(k).replace(/./g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]), name = (c) => `${c.n}${'spdfghi'[c.l]}${sup(c.occ)}`;
+    const sup = (k) => String(k).replace(/./g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]), name = (c) => `${c.n}${L_LETTERS[c.l]}${sup(c.occ)}`;
     const msg = `${HAMILTONIANS.atom.short} · ${held.map(name).join(' ')} loaded · ${labels} label${labels === 1 ? '' : 's'}, in phase`
       + (gone.length ? ` · ${gone.map(name).join(' ')} past the basis (n ≤ 7), not loaded` : '');
     wState.setStatus(msg, 'live'); if (app.w.wAtoms) app.w.wAtoms.setStatus(msg, 'live');

@@ -39,7 +39,7 @@
  * the radial integrals are NUMERICAL (dynamics.js's Simpson, 2 × 10⁻¹³ against the closed form for 1s–2p); the
  * closed form A_au(2p→1s) = (2/3)^8 α³, the reduced-mass exponent and the Poynting certification are DERIVED-HERE.
  */
-import { BASIS, AU_TIME_AS } from './hydrogen.js';
+import { BASIS, AU_TIME_AS } from './hydrogen.js'; import { atomForms } from './names.js';
 import { angularDipoleZ, radialDipole } from './dynamics.js';
 import { getHamiltonian } from './hamiltonian.js';
 /** ω = |E_a − E_b| of the HAMILTONIAN IN FORCE — the same operator the dipole's radial integral follows.  Read from the
@@ -57,8 +57,7 @@ export const FIELD_AU_T = 1715.2553;               // the same unit read as a ma
 
 /* ── resolving a BASIS label ────────────────────────────────────────────────────────────────────────────── */
 const BY_NAME = new Map();
-for (const s of BASIS) { BY_NAME.set(s.id, s.index); BY_NAME.set(s.label, s.index);
-  BY_NAME.set(`${s.n}${'spdfghi'[s.l]}${s.m}`, s.index); }
+for (const s of BASIS) { BY_NAME.set(s.id, s.index); BY_NAME.set(s.label, s.index); BY_NAME.set(atomForms(s).ascii, s.index); }
 /** a BASIS index, id "h:n:l:m", label "2p₀", plain "2p0", or the state object itself → the BASIS entry */
 export function stateFor(x) {
   if (typeof x === 'number') return BASIS[x];
