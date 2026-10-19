@@ -18,7 +18,7 @@ import { valenceOf } from './valence.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { RM, animate, pointerFrame, tiltPictures, enterTiles, develop, swapLine, installRing, clamp } from './picker-fx.js';
 import * as V from './volumes.js';
-import { keepData, fetchRecord, installed, persistOnce, removeRecord, safariTab } from './library.js';
+import { keepData, keepSection, installed, safariTab } from './library.js';
 
 const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe '
   + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
@@ -157,7 +157,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* ── MOLECULAR: the catalogue by its SECTIONS (lab/molecules.js), each opened by its HEADING tile — the section's name, its count and, for a
      section with records, THE SECTION INSTALL (iteration 008 P: MOLECULES' INSTALLED moved here): the lamp lit when every record of the section is
      on this device, the press installs them all (persist() asked once) or, pressed twice, removes them, the ring their share.  The records' road
-     (library.js fetchRecord · removeRecord, each checked against its sha-256 name), and the card's lamps re-read after (chem.records()).  Within a
+     (library.js keepSection, chemview's road too: each record checked against its sha-256 name), and the card's lamps re-read after (chem.records()).  Within a
      section, the dropdown's order (its groups).  A one-atom entry is never listed here: an atom is the ATOMIC table's. ── */
   const GROUP_AT = new Map([...GROUPS, RECORD_GROUP].map((g, i) => [g.id, i])), rank = (p) => (GROUP_AT.has(p.group) ? GROUP_AT.get(p.group) : GROUP_AT.size);
   const secRows = (sec) => CHEM_PRESETS.filter((p) => p.section === sec && !atomZ(p.formula)).sort((a, b) => rank(a) - rank(b));
@@ -176,15 +176,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (S.busy) { S.stop = true; return; }   // a press while installing: stop after the record in hand
     if (S.n === S.recs.length) {             // two presses remove: no window.confirm (the volume's law)
       if (Date.now() - S.arm > 3000) { S.arm = Date.now(); S.view.word.textContent = 'REMOVE ' + S.sec + '? PRESS AGAIN'; return; }
-      S.arm = 0; for (const r of S.recs) await removeRecord(r.hash).catch(() => false);
+      S.arm = 0; await keepSection(S.recs, false);
     } else {
-      S.busy = true; S.stop = false; S.view.b.dataset.state = 'busy'; await persistOnce().catch(() => null);
-      let k = 0;
-      for (const r of S.recs) {
-        if (S.stop) break;
-        if (!(await installed(r.hash).catch(() => false))) await fetchRecord(r.hash, { network: true }).catch(() => null);
-        k++; const w = S.view; if (w && w.b.isConnected) { w.ring.set(k / S.recs.length, 'busy'); w.word.textContent = `${k} / ${S.recs.length} · CANCEL`; }
-      }
+      S.busy = true; S.stop = false; S.view.b.dataset.state = 'busy';
+      await keepSection(S.recs, true, { stop: () => S.stop, onStep: (k, n) => { const w = S.view; if (w && w.b.isConnected) { w.ring.set(k / n, 'busy'); w.word.textContent = `${k} / ${n} · CANCEL`; } } });
       S.busy = false;
     }
     await countSec(S);

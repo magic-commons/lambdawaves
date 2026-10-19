@@ -27,7 +27,7 @@ import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitTex
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
-import { fetchRecord, installed, removeRecord, persistOnce, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
+import { fetchRecord, installed, removeRecord, persistOnce, keepSection, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
 import { planePoints } from './slice.js';   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
 import * as V from './volumes.js'; import { parseLwm, rungRecord } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
@@ -269,11 +269,10 @@ export function createChem(host, api) {
     secStep.root.title = page === 'ATOMS' ? `ATOMS · ${sub}: a tile sets OPERATOR ATOM and its element` : `${page} · ${sub}: ${n} molecules; ` + (recs.length ? `${recs.length} with a record (${mb} MB), ${on} of them on this device` : 'every one solves live, none has a record');
     shelfFill(); rowPic();
   }
-  /** INSTALLED's press: the page's records fetched (each checked against its sha-256 name) and kept, or all removed */
+  /** a section kept or removed (library.js keepSection, the Picker's road too): the page's records fetched (each checked against its sha-256 name) and kept, or all removed */
   async function keep(v) {
     const recs = sectionRecs(), sec = page;
-    if (v) { storageNote(await persistOnce()); let k = 0; for (const r of recs) { status(`installing ${sec}… ${++k} of ${recs.length}`, 'warn'); if (!have.get(r.hash)) await fetchRecord(r.hash, { network: true }); } }
-    else for (const r of recs) await removeRecord(r.hash);
+    const info = await keepSection(recs, v, { onStep: (k, n) => status(`installing ${sec}… ${k} of ${n}`, 'warn') }); if (info) storageNote(info);
     await lamps(); const on = recs.filter((r) => have.get(r.hash)).length;
     status(`${sec}: ${on} of ${recs.length} records on this device` + (v && on < recs.length ? ' — the rest did not download (offline?)' : ''), on === (v ? recs.length : 0) ? 'ok' : 'warn');
     return { section: sec, records: recs.length, installed: on };
