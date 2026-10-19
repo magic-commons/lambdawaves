@@ -5,8 +5,12 @@
  *       a saveSettings and a third snapshot (what the live state now says).  Every changed key is classified by
  *       lab/settings-store.js — the blob's own keys by WORKSPACE (else PREFERENCE), the rest by FAMILIES — and a change outside
  *       WORKSPACE and PROJECT is RED.
- *   2 · THE BLOB ROUND TRIP: saveSettings → B1; reload → B2 (what the boot left) → saveSettings → B3.  B1 and B3 must be the
- *       same bytes (less the modwin.modes rows of sources the reloaded, shipped rack lacks — named); B2 is reported.
+ *   2 · THE BLOB ROUND TRIP: saveSettings → B1; reload → B2 (what the start left) → saveSettings → B3.  B1 and B3 must be the
+ *       same bytes; B2 is reported.  THE RELOAD IS A HUMAN'S (iteration 010 X4): `?starter=resume`, the road a person's reload
+ *       takes (THE START, 0.5.0 C6b: RESUME when the session holds work, else the boot).  A driven start is a BOOT of the shipped
+ *       rack, which never re-reads the arrangement the session carries, so the demo scene read red for days on `closed` (one set,
+ *       saved in the boot's card order, not the demo's) and `modwin.modes` (the demo's own device s3) — the probe's road, not a
+ *       WORKSPACE breach: on the resume road the blob comes back byte-identical, s3 and the order with it.
  *   3 · THE LOOK IS THE KIT'S (0.5.0 C2): `mir.gui` is PREFERENCE (FAMILIES), and a B3 that still holds a look key (lab/look.js
  *       BLOB_LOOK: the keys the lift moves out of the blob) is RED.
  *   python3 tools/gate/server.py <root> <LW_PORT>   (stop it by pid)
@@ -43,11 +47,6 @@ function diff(a, b) {
   return out;
 }
 const bad = (d) => d.filter((x) => x.scope !== 'WORKSPACE' && x.scope !== 'PROJECT');
-/* 0.5.0 C4 · a reload boots the SHIPPED rack (there is no reopen-last-project), and the window keeps `modwin.modes` rows only for
-   sources that exist (window.js, and modwindow.js before it): a demo's own device (WAVE DANCER's s3) cannot survive the reload,
-   and its file brings the row back.  Those rows are compared only for the sources live after the reload, and named. */
-const unseat = (blob, ids) => { const o = JSON.parse(blob || '{}'), m = o.modwin && o.modwin.modes; const gone = m ? Object.keys(m).filter((k) => !ids.includes(k)) : [];
-  for (const k of gone) delete m[k]; return { json: JSON.stringify(o), gone }; };
 const g = await open(LAB, { width: 1500, height: 1000, script: 180000 });
 const dump = { lab: LAB, scenes: [] };
 let red = 0;
@@ -69,18 +68,17 @@ try {
       r.outside = [...bad(r.wrote), ...bad(r.live)];
     }
     r.B1 = await g.ev(`__LW.saveSettings(); await __w(50); return localStorage.getItem(${JSON.stringify(SETTINGS_KEY)});`);
-    await go(g.s, LAB);
+    await go(g.s, LAB + '?starter=resume');   // a human's reload (see 2 above)
     if ((await g.waitFor('window.__LW&&__LW.ready', 300, 100)).ok !== 1) throw new Error(name + ': the reload never became ready');
     await g.armErrors(); await g.ev(HELP); await g.ev('return __quiet();');
     r.B2 = await g.ev(`return localStorage.getItem(${JSON.stringify(SETTINGS_KEY)});`);
     r.B3 = await g.ev(`__LW.saveSettings(); await __w(50); return localStorage.getItem(${JSON.stringify(SETTINGS_KEY)});`);
-    const ids = await g.ev('return __LW.mod.model.sourceList().map((s) => s.id);'), u1 = unseat(r.B1, ids);
-    r.unseated = u1.gone; r.roundTrip = r.B1 === r.B3 || u1.json === unseat(r.B3, ids).json; r.bootLeft = r.B2 === r.B1;
+    r.roundTrip = r.B1 === r.B3; r.bootLeft = r.B2 === r.B1;
     r.reloadErrs = (await g.ev('return __e.slice();'));
     r.lookLeft = BLOB_LOOK.filter((k) => k in JSON.parse(r.B3 || '{}'));
     const ok = r.roundTrip && !r.lookLeft.length && !(r.outside || []).length && !(r.errs || []).length && !r.reloadErrs.length && (name === 'boot' || /^(opened demo|new)/.test(r.status));
     if (!ok) red++;
-    console.log((ok ? 'GREEN ' : 'RED   ') + name.padEnd(12) + ' blob ' + r.B1.length + ' B, reload ' + (r.roundTrip ? (r.B1 === r.B3 ? 'byte-identical' : 'byte-identical but modwin.modes ' + r.unseated.join(', ') + ' (no such source after the reload)') : 'DIFFERS: ' + JSON.stringify(diff({ [SETTINGS_KEY]: r.B1 }, { [SETTINGS_KEY]: r.B3 })))
+    console.log((ok ? 'GREEN ' : 'RED   ') + name.padEnd(12) + ' blob ' + r.B1.length + ' B, reload ' + (r.roundTrip ? 'byte-identical' : 'DIFFERS: ' + JSON.stringify(diff({ [SETTINGS_KEY]: r.B1 }, { [SETTINGS_KEY]: r.B3 })))
       + (r.bootLeft ? '' : ' (the boot left ' + (r.B2 ? r.B2.length + ' B' : 'no blob') + ' before its save)')
       + (r.wrote ? ' · the open wrote ' + (r.wrote.map((d) => d.sub ? 'settings.' + d.sub : d.key).join(', ') || 'nothing') + ' · after a save ' + (r.live.map((d) => d.sub ? 'settings.' + d.sub : d.key).join(', ') || 'nothing') : '')
       + (r.lookLeft.length ? ' · LOOK KEYS STILL IN THE BLOB: ' + r.lookLeft.join(', ') : '')

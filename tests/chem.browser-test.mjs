@@ -15,6 +15,10 @@
  * law is gated as what it is actually asking — THE KERNEL IS RIGHT — by reading the GPU texel and lab/molecular-
  * field.js's CPU evaluator AT THE SAME VOXEL CENTRE, to 2 % (the rgba16float figure).  Both pinned numbers are
  * still measured and printed, from the CPU evaluator at the exact sites, so the substitution is visible.
+ *
+ * L5 RE-AIMED (iteration 010 X4): it asked for the MORE fold "open (the desktop default)" — 0.4.0 S0's law, which Josh's iteration 001
+ * replaced (503997b: every first-run window and MOLECULES' MORE fold arrive folded, lab/first-run.js `more: false` on both devices).
+ * L5 now reads the fold folded on the first run and opens it by its chevron before it reads the plot.
  */
 import { open, judge, done } from '../tools/gate/gatekit.mjs';
 import fs from 'node:fs';
@@ -134,21 +138,24 @@ try {
     /* KIND 'other' starts folded (rack.js:4081), like MOLECULE, HELIUM and H₂ — a photograph of the window
        needs it unfolded, and the chevron is the only road that keeps aria-expanded honest. */
     if (d.classList.contains('folded')) d.querySelector('.dev-fold').click();
+    /* the MORE fold arrives FOLDED on every first run (iteration 001, Josh: lab/first-run.js \`more: false\`); its chevron opens it */
+    const tog = d.querySelector('.mol-more-toggle'); window.__moreFirst = !!tog && tog.getAttribute('aria-expanded') === 'false' && d.querySelector('.mol-more').hidden;
+    if (tog && tog.getAttribute('aria-expanded') !== 'true') tog.click();
     d.scrollIntoView({ block: 'center' });
     await new Promise((r) => setTimeout(r, 500)); return 1;`);
   fs.writeFileSync(SHOT, Buffer.from(await g.snap(), 'base64'));
   const bytes = fs.statSync(SHOT).size;
   judge('L5 .tmp/chem-benzene.png exists and is over 50 kB', bytes > 50 * 1024, { file: SHOT, bytes });
   const l5 = await g.ev(`const d = document.querySelector('.dev[data-id="chem"]');
-    /* 0.4.0 S0: the plot lives in the MORE fold, OPEN by default on a desktop — reached through the UI a user has */
-    const tog = d.querySelector('.mol-more-toggle'), moreOpen = !!tog && tog.getAttribute('aria-expanded') === 'true' && !d.querySelector('.mol-more').hidden;
+    /* 0.4.0 S0: the plot lives in the MORE fold — folded on a first run since iteration 001, opened above by its chevron, the UI a user has */
+    const tog = d.querySelector('.mol-more-toggle'), moreOpen = !!tog && tog.getAttribute('aria-expanded') === 'true' && !d.querySelector('.mol-more').hidden, moreFirst = window.__moreFirst;
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     const c = d.querySelector('canvas.mol-c'), b = c && c.getBoundingClientRect();
     const aa = d.querySelector('.dev-lean'), helpOff = document.body.classList.contains('window-info-off'), aaShown = !!aa && getComputedStyle(aa).display !== 'none';
-    return { moreOpen, helpOff, aaShown, canvas: !!c, painted: !!(b && b.width > 100 && b.height > 40), folded: d.classList.contains('folded'),
+    return { moreFirst, moreOpen, helpOff, aaShown, canvas: !!c, painted: !!(b && b.width > 100 && b.height > 40), folded: d.classList.contains('folded'),
       rows: d.querySelectorAll('.row').length, controls: d.querySelectorAll('.k, .segw, .sw, .trig').length,
       view: __LW.chem.state().view, preset: __LW.chem.preset(), errs: window.__e.slice() };`);
-  judge('L5 the window is UNFOLDED on benzene in DENSITY view, its MORE fold open (the desktop default), its Aa shown with HELP off, its plot laid out', l5.moreOpen && l5.helpOff && l5.aaShown && l5.canvas && l5.painted && !l5.folded
+  judge('L5 the window is UNFOLDED on benzene in DENSITY view, its MORE fold folded on the first run (iteration 001) and open by its chevron, its Aa shown with HELP off, its plot laid out', l5.moreFirst && l5.moreOpen && l5.helpOff && l5.aaShown && l5.canvas && l5.painted && !l5.folded
     && l5.preset === 'C6H6' && l5.view === 'density' && l5.rows >= 4 && l5.controls >= 12 && l5.errs.length === 0, l5);
 
   /* ── LAW 3 · the δ-kick and 200 MMUT steps at Δt = 0.01 ──────────────────────────────────────── */

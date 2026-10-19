@@ -490,8 +490,8 @@ export function createChem(host, api) {
      and `shown()` makes a folded canvas's paint a no-op.
      0.4.0 S0 · wave 136: it is a FOLD, not a permanently hidden div — the README's KICK / RUN / TDA / RPA spectra were
      unreachable on a first run.  The chevron at the end of the VIEW row is the in-card details idiom SHADOW and CAMERA
-     already use (a trig with the kit's chevronDown, aria-expanded); OPEN by default on a desktop, folded on a phone or
-     tablet (`api.moreOpen`, first-run.js), and the open state rides in the window's WORKSPACE record (rack.js
+     already use (a trig with the kit's chevronDown, aria-expanded); FOLDED on every first run since iteration 001 (Josh;
+     `api.moreOpen`, first-run.js), and the open state rides in the window's WORKSPACE record (rack.js
      captureLayout `more`). */
   const note = host.lastElementChild;
   const more = el('div', 'mol-more', host); more.id = 'mol-more';
