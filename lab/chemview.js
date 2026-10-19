@@ -83,7 +83,7 @@ export function createChem(host, api) {
      value wins, applied at most once per STEP_MS (O-BUILD measured a rebuild at 40 ms median, 104 ms worst — far under the cap, so the cap
      is the whole rule).  An LFO at 20 Hz steps at the cap; a lane at 0.5 Hz steps every orbital it crosses. */
   const STEP_MS = 334;   // ≤ 3 steps a second: THE PHOTOSENSITIVITY LAW's 3 flashes a second (the flash guard does not see chem.orbital); the builder's 120 ms allowed 8.3 (Yan at the merge, 10-18)
-  let handK = null, stepWant = null, stepHeld = false, stepTimer = 0, stepAt = -Infinity, clamped = null;
+  let curKey = '', handK = null, stepWant = null, stepHeld = false, stepTimer = 0, stepAt = -Infinity, clamped = null;
   let pendingOrbital = null, pendingKey = null, wantRef = null;               // 0.4.0 S4a: the { id, hash, nameKey } a project or link named                                   // 0.4.0 S2: and a link's orbital by its S1 name, which wins over the index when the solve names it
   const keyed = (N, K) => (K && N && N.reliable && N.group === K.group ? N.mos.find((m) => m.irrep === K.irrep && m.count === K.count && (m.member || null) === (K.member || null)) || null : null);
   const subs = new Set(), notify = () => { for (const f of subs) { try { f(sol); } catch (e) { console.warn('chem subscriber', e); } } };   // the ORBITALS register listens here
@@ -135,7 +135,7 @@ export function createChem(host, api) {
   const secItems = () => [...['ATOMS', ...SECTIONS].map((id) => ({ id, label: id })), ...vPages.map((p) => ({ id: p.id, label: p.label }))];
   const secStep = stepper({ aria: 'Library section', items: secItems(), value: page, cls: 'mol-step', onChange: (id) => { page = id; fillSel(); if (id === 'ATOMS') setShelf(true); } });
   rH.appendChild(secStep.root);
-  const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule — and its register, under VIEW REGISTRY: one switch', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
+  const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule — and its register, under VIEW MIX: one switch', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
   rTop.appendChild(onSw.root);
   const r0 = el('div', 'row tight', host);
   /* 0.7.4 C2 · THE SHELF: SECTION's name opens the page as TILES under the picker (formula, name, AOs, the catalogue's word, the lamp); a tap is the hand's
@@ -385,18 +385,34 @@ export function createChem(host, api) {
   }
   /* iteration 008 U (Josh: "make it so that 'view' in the molecules window shifts into registry mode (replacing delta p?)") · REGISTRY takes Δρ's
      seat: the register's packet (the ORBITAL or STATES pane shown) is what the field draws — ORBITAL draws the dial's one orbital whatever the
-     ladder holds, and a stroke on the ladder turns VIEW to REGISTRY.  Δρ is the Δρ switch beside KICK in the fold (`delta`, the same signed road) */
+     ladder holds, and a stroke on the ladder turns VIEW to REGISTRY.  Δρ is the Δρ switch beside KICK in the fold (`delta`, the same signed road).
+     Iteration 008 R (Josh: "'registry' … needs a better name … 'orbital' and 'registry' needs to be unified"): the option READS MIX — the register's
+     superposition mixed on the field — and its id stays `registry` (projects, lw:view=registry, the view verb, LW.setView).  THE HAND DECIDES THE
+     VIEW: a stroke on the ladder → MIX (molecules.js `stroked`), a HAND turn of the ORBITAL dial → ORBITAL (orbInput); a modulator stepping
+     chem.orbital (stepApply), an undo, a restore, a project or a link move neither.  The dial's orbital is the ladder's CURSOR (orbitalsview.js
+     paint): the same MOs, so it always lands on a line */
   const vSeg = seg({ label: 'VIEW', value: 'density', cls: 'mol-view', options: [   // iteration 007 M: two rows of three (lab.css .mol-view), never five over one
     { id: 'density', label: 'DENSITY', title: 'ρ(r) = Σ D_ij χ_i χ_j on the field' },
     { id: 'orbital', label: 'ORBITAL', title: 'ψ_k(r) = Σ C_ik χ_i — one molecular orbital, the ORBITAL dial’s' },
-    { id: 'registry', label: 'REGISTRY', title: 'The register on the field: the ladder above — ORBITAL its one-electron packet ψ(r, t) in phase, STATES its many-electron state' },
+    { id: 'registry', label: 'MIX', title: 'MIX — the register on the field: the lines lit on the ladder above, mixed in phase (ORBITAL pane: one electron’s ψ(r, t); STATES: the many-electron state)' },
     { id: 'esp', label: 'ESP', title: 'Φ(r) = Σ Z_A/|r−R_A| − ∫ρ/|r−r′| on a 64³ grid' },
     { id: 'spin', label: 'SPIN', title: 'ρα − ρβ, signed: the spin density of a UHF open shell (Dα − Dβ in double precision)' },
     { id: 'dlda', label: 'Δ LDA−RHF', title: 'ρ_LDA − ρ_RHF, signed: where LDA puts more density — D_LDA − D_RHF in double precision, the Δρ road' }],
     onChange: (v) => { view = v; seats(); pushMatrix(); refresh(); tell(); if (api.say) api.say('view', 'VIEW · ' + vSeg.button(v).textContent); if (api.viewed) api.viewed(true); } });
   rV.appendChild(vSeg.root);
   /** the hand on the ORBITAL dial: routed, it moves the BASE (the modulator keeps the picture); else it is the orbital, said on the stage */
-  function orbInput(v) { const k = Math.round(v); handK = k; if (api.modHand && api.modHand('chem.orbital', k)) return; orbital = k; if (view === 'orbital') pushMatrix(); refresh(); sayOrbital(); baseHand(); }
+  function orbInput(v) {
+    const k = Math.round(v), routed = !!(api.modHand && api.modHand('chem.orbital', k)); handK = k;
+    if (!routed) { orbital = k; baseHand(); }
+    if (view !== 'orbital') toView('orbital', true);                 // iteration 008 R: the HAND on the dial picks VIEW ORBITAL (and the ladder's ORBITAL pane)
+    else { if (!routed) pushMatrix(); if (api.viewed) api.viewed(true); }
+    if (!routed) { refresh(); sayOrbital(); }
+  }
+  /** VIEW from a road that is not the seg (a verb, the register's ON, a stroke, the dial): `hand` says it on the stage as the seg does; 'diff' is the Δρ switch */
+  function toView(v, hand) { if (v === 'diff') { setDelta(true); return view; }
+    if (!['density', 'orbital', 'registry', 'esp', 'spin', 'dlda'].includes(v) || (v === 'spin' && !(sol && sol.Ds)) || (v === 'dlda' && !pair()) || (v !== 'orbital' && v !== 'registry' && sol && !sol.D && !(v === 'density' && factor()))) return view;
+    if (v === view) { if (api.viewed) api.viewed(hand); return view; }
+    view = v; vSeg.set(v); seats(); pushMatrix(); refresh(); tell(); if (hand && api.say) api.say('view', 'VIEW · ' + vSeg.button(v).textContent); if (api.viewed) api.viewed(hand); return view; }
   /** the hand's index is the registry's base at once, routed or not — so a route added while paused rides on it, and a file's name for it (orbitalKey)
       is the base's.  An orbital not chosen (null: HOMO on the next landing) has the placeholder base 1, so a project's base table reads the same
       after an undo of MOLECULES ON as before it; stepApply never lets that placeholder choose an orbital */
@@ -409,7 +425,7 @@ export function createChem(host, api) {
   const valSw = sw({ label: 'VALENCE', value: false, title: 'The valence density: D − 2 Σ C_c C_cᵀ over the frozen-core orbitals (He for Li–Ne, Ne for Na–Ar, Ar for K–Zn …) — the core no longer drowns the bonds',
     onChange: (v) => { valence = v; pushMatrix(); refresh(); tell(); } });
   rM.insertBefore(valSw.root, orbKnob.root);
-  function seats() { valSw.root.style.display = view === 'density' ? '' : 'none'; orbKnob.root.style.display = view === 'density' ? 'none' : ''; orbKnob.root.classList.toggle('off', view !== 'orbital'); }
+  function seats() { valSw.root.style.display = view === 'density' ? '' : 'none'; orbKnob.root.style.display = view === 'density' ? 'none' : ''; orbKnob.root.classList.toggle('off', view !== 'orbital' && view !== 'registry'); }   // iteration 008 R: under MIX the dial moves the ladder's cursor
   seats();
   /* THE TDA TOGGLE SWAPS THE WHOLE LADDER, positions AND strengths.  It used to draw each RPA root's height and
      polarisation at the k-th TDA root's ω — and the two ladders CROSS: for benzene RPA root 2 is the bright line
@@ -1023,7 +1039,11 @@ export function createChem(host, api) {
   let stored = '';
   const storageNote = (i) => { stored = !i ? '' : (i.persisted ? 'persisted' : i.safariTab ? 'a Safari tab: kept until the browser clears it — add λWAVES to the Home Screen to keep it' : 'not persisted')
     + (Number.isFinite(i.usage) && Number.isFinite(i.quota) ? ` · ${(i.usage / 1048576).toFixed(1)} of ${Math.round(i.quota / 1048576)} MB used` : ''); if (sol) refresh(); };
+  /** iteration 008 R · THE CURSOR: the ladder (orbitalsview.js) marks the dial's orbital, prominent under VIEW ORBITAL — told when the orbital,
+      the VIEW or ON moved (every road to them ends in refresh() or setOn), never in a frame; MOLECULES OFF dims the ladder as an inert control */
+  function cursor() { const c = view + ':' + orbital + ':' + on; if (c === curKey) return; curKey = c; regHost.classList.toggle('mol-reg-off', !on); if (api.cursor) api.cursor(); }
   function refresh() {
+    cursor();
     if (!sol) { for (const r of [roE, roEps, roTr, roIdem, roT, roSym]) r.set('—', ''); h2Note.hidden = probeLine.hidden = roXc.root.hidden = true; paint(); return; }
     const pr = (sol.probe || []).map((a) => a.sym + ' ' + a.phiEl.toFixed(2).replace('-', '−')), many = (t) => pr.filter((v) => v === t).length;   // THE PROBE: three or more alike are one ×n
     probeLine.hidden = !pr.length; probeLine.textContent = 'Φ at nuclei · ' + [...new Set(pr)].map((t) => (many(t) > 2 ? t + ' ×' + many(t) : Array(many(t)).fill(t).join(' · '))).join(' · ') + ' a.u. · exact';
@@ -1273,7 +1293,7 @@ export function createChem(host, api) {
     if (on && sol) pushField();
     else if (on) solve(preset);
     if (api.viewed) api.viewed();   // iteration 008 U: the register follows the one switch — after the field holds the molecule, so its claim can land
-    return on;
+    cursor(); return on;
   }
   const presentation = () => ({ preset: volRef ? catPreset : preset, basis: volRef && !LIVE.has(basis) ? 'sto-3g' : basis, view, orbital, axis, kappa, speed, dt, integrator, tda, core, valence, on, ...(delta ? { delta } : {}), ...(vibOn ? { vibrate: { mode: vibK, amp: vibAmp } } : {}), ...(pulse !== 'none' ? { pulse } : {}), ...(preset === 'H2' && (h2R || method === 'uhf') ? { h2: { R: h2R || R0, method: method === 'uhf' ? 'uhf' : 'rhf' } } : {}), ...(method === 'lda' ? { method } : {}) });   // 0.7.3 K2: `method` only for LDA (UHF stays H₂'s h2.method)
   /* ── THE SAVED STATE, and the one place this window departs from its commission ──────────────────────────────
@@ -1437,11 +1457,8 @@ export function createChem(host, api) {
     get volume() { return volRef ? { volume: volRef.volume, id: volRef.id, numeral: volRef.numeral, name: volRef.name, basis, rungs: volRef.rungs.slice(), sha256: volRef.sha256 } : null; },
     /** 0.7.3 K2 · METHOD from outside (the verb, __LW.chem): the seg's own road, a hand press; → the solve, or null where it is not offered */
     setMethod(v) { const b = mthS.button(v); if (!b || b.disabled || b.style.display === 'none') return Promise.resolve(null); if (v === method) return solve(preset); mthS.set(v); method = v; return solve(preset).then((r) => { if (r && api.hand) api.hand(preset); return r; }); }, get method() { return method; },
-    /** VIEW from outside (a verb, the register's ON, a stroke on the ladder): `hand` says it on the stage as the seg does; 'diff' is the Δρ switch since iteration 008 */
-    setView(v, hand) { if (v === 'diff') { setDelta(true); return view; }
-      if (!['density', 'orbital', 'registry', 'esp', 'spin', 'dlda'].includes(v) || (v === 'spin' && !(sol && sol.Ds)) || (v === 'dlda' && !pair()) || (v !== 'orbital' && v !== 'registry' && sol && !sol.D && !(v === 'density' && factor()))) return view;
-      if (v === view) { if (api.viewed) api.viewed(hand); return view; }
-      view = v; vSeg.set(v); seats(); pushMatrix(); refresh(); tell(); if (hand && api.say) api.say('view', 'VIEW · ' + vSeg.button(v).textContent); if (api.viewed) api.viewed(hand); return view; },
+    /** VIEW from outside (a verb, the register's ON, a stroke on the ladder): toView, above */
+    setView: toView,
     get view() { return view; }, get delta() { return delta; }, setDelta,
     /** iteration 008 U · the card's two seats the register fills: the ON row (its ORBITAL | STATES seg) and the panes under it */
     slots: { top: rTop, register: regHost },

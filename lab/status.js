@@ -8,7 +8,7 @@
 export const FIELD_LAW = Object.freeze({ hydrogen: Object.freeze({ rms: 3e-6, worst: 2e-4 }), density: Object.freeze({ worst: 2e-3 }) });
 /** the catalogue's words (P3's `status.energy`) → the face's, written ONCE; absent → UNCHECKED; a closed form → EXACT */
 export const STATE_WORD = Object.freeze({ MEASURED: 'NUMERICAL', IMPORTED: 'NUMERICAL', UNKNOWN: 'UNCHECKED' });
-const VIEW = { density: ['DENSITY'], orbital: ['ORBITAL', 'sign and phase are arbitrary'], diff: ['Δρ', 'formed in double precision against its reference'], registry: ['REGISTRY', 'a chosen superposition over the solve’s ladder, frozen'], flow: ['FLOW', 'direction exact, size qualitative'], esp: ['ESP', 'Φ at nuclei exact'], spin: ['SPIN', 'ρα − ρβ, signed'], dlda: ['Δ LDA−RHF', 'where LDA puts more density, D_LDA − D_RHF in double precision'] };
+const VIEW = { density: ['DENSITY'], orbital: ['ORBITAL', 'sign and phase are arbitrary'], diff: ['Δρ', 'formed in double precision against its reference'], registry: ['MIX', 'a chosen superposition over the solve’s ladder, frozen'], flow: ['FLOW', 'direction exact, size qualitative'], esp: ['ESP', 'Φ at nuclei exact'], spin: ['SPIN', 'ρα − ρβ, signed'], dlda: ['Δ LDA−RHF', 'where LDA puts more density, D_LDA − D_RHF in double precision'] };
 /** one figure, rounded UP: a number on the glass is never better than the one measured (a live |ΔE| never below the double's own |E|·ε) */
 const up = (x) => { let [m, e] = x.toExponential(0).split('e').map(Number); if (Number(m + 'e' + e) < x) m++; return m > 9 ? '1e' + (e + 1) : m + 'e' + e; };
 let calls = 0; export const statusCalls = () => calls;

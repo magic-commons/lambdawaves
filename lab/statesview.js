@@ -583,7 +583,7 @@ export function createStates(host, api) {
     roBeat.setSub(b ? `${label(b.a)} × ${label(b.b)} · ΔE ${b.dE.toFixed(6)} Eh` + (beats.length > 1 ? ` · ${beats.length - 1} more beat${beats.length > 2 ? 's' : ''}` : '') : 'one level has no beat: add a state');
     const why = refusal();
     status(on ? `REGISTRY · STATES · ${M.on ? 'MORPH A ↔ B' : lanes.size + ' lane' + (lanes.size === 1 ? '' : 's')} · ${LAW}`
-      : why ? 'REGISTRY off — ' + why : `${ladder.count} states · VIEW REGISTRY plays the many-electron state`, on ? 'live' : why ? 'warn' : 'ok');
+      : why ? 'REGISTRY off — ' + why : `${ladder.count} states · VIEW MIX plays the many-electron state`, on ? 'live' : why ? 'warn' : 'ok');
   }
   function paintMu(t) {
     const ms = performance.now(); if (ms - roWall < 200) return; roWall = ms;
@@ -724,7 +724,7 @@ export function createStates(host, api) {
     if (!ensureSub()) return false;
     if (!on) return false;
     const why = refusal();
-    if (why) { if (!C() || !C().on) { claim(false); status('the register stands by — MOLECULES ON, then VIEW REGISTRY', ''); return false; }   // MOLECULES went off: the window stays
+    if (why) { if (!C() || !C().on) { claim(false); status('the register stands by — MOLECULES ON, then VIEW MIX', ''); return false; }   // MOLECULES went off: the window stays
       status('REGISTRY off — ' + why, 'warn'); return false; }
     if (!Number.isFinite(t)) t = 0;
     if (drive.on) { pumpDrive(t); if (active && shown) { paintScope(); paintMu(t); refreshDrive(); } return true; }

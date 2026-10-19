@@ -428,6 +428,7 @@ body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
 .mol-top > .reg-mode .seg-b { min-width: 0; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mol-reg { margin: var(--sp-2) 0; }
 .mol-reg:empty { display: none; }
+.mol-reg.mol-reg-off { opacity: var(--state-disabled, .38); }   /* iteration 008 R: MOLECULES OFF keeps the last solve's ladder on the card, dimmed as the kit dims an inert control (still paintable) */
 /* the record-only molecule's download glyph, in the MOLECULE stepper's name beside the <select> (chemview.js dlB) */
 .mol-pick .mir-step-name { display: flex; align-items: center; }
 .mol-pick .mir-step-name > select.sel { flex: 1 1 0; min-width: 0; }

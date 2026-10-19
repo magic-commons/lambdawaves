@@ -30,13 +30,13 @@ export const VERBS = [
       const v = c.volume; return { fade: mdText(`${v.name} · VOL. ${v.numeral} · ${BASIS_LABEL[v.basis]}`) }; } },
   { id: 'vibrate', args: { on: 'bool', mode: '?number', amp: '?number', breathe: '?bool' }, doc: "MOLECULES' VIBRATE: the nuclei breathe in one normal mode (mode: its place in the MODE list from 0; amp 0…4 in Q₀, past 2 not harmonic); breathe: true presses BREATHE — RATE so one breath takes a second (\"make water breathe\")",
     async run(app, a) { const c = app.state.chem; if (!c.on) return 'VIBRATE needs MOLECULES on'; const line = await c.vibrate(a); return a.on && !line ? 'no modes recorded for this molecule (VIBRATE plays an STO-3G record of a solved molecule)' : { fade: line ? 'VIBRATE · ' + line : 'VIBRATE off' }; } },
-  { id: 'view', args: { id: 'enum density|phase|real|imag|diff|reim|orbital|esp|spin|dlda', orbital: '?string|number' },
-    doc: 'the observable on the field: under MOLECULES density|orbital|diff|esp|spin (orbital by number or name; spin = ρα − ρβ of an open shell), otherwise density|phase|real|imag (iteration 008: an old reim opens as phase, diff as density)',
+  { id: 'view', args: { id: 'enum density|phase|real|imag|diff|reim|orbital|registry|esp|spin|dlda', orbital: '?string|number' },
+    doc: 'the observable on the field: under MOLECULES density|orbital|registry|diff|esp|spin (registry is VIEW MIX, the register on the field; orbital by number or name; spin = ρα − ρβ of an open shell), otherwise density|phase|real|imag (iteration 008: an old reim opens as phase, diff as density)',
     run(app, a) {
       const c = app.state.chem;
       if (c && c.on && ['density', 'orbital', 'registry', 'diff', 'esp', 'spin', 'dlda'].includes(a.id)) { if (a.orbital !== undefined) return orb(c, a.orbital); c.setView(a.id); }
       else if (!waveView(a.id)) return `${a.id} is a MOLECULES view and MOLECULES is off`; else return { fade: 'VIEW · ' + mdText(app.sh.LW.setView(a.id)) };   // iteration 008 W: setView maps reim / diff
-      return { fade: 'VIEW · ' + mdText(a.id) };
+      return { fade: 'VIEW · ' + mdText(a.id === 'registry' ? 'MIX' : a.id) };   // iteration 008 R: the id stays, the word is MIX
     } },
   { id: 'window', args: { id: 'string', open: 'bool', side: '?enum L|R' }, doc: 'open or close a window by its id (spectrum, chem, orbitals, camera, settings, informational, render, …), onto the left (L) or right (R) rack',
     run(app, a) { const { rk, layout } = app.sh; if (!rk.windows().some((w) => w.id === a.id)) return `there is no window "${a.id}"`; if (a.open) layout.reopen(a.id, a.side); else rk.close(a.id); } },
