@@ -29,7 +29,7 @@
 import { stateName } from './names.js';
 import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, chip } from './mir/kit.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
-import { paintStroke, fillButton } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton, levelLine } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
 import { GROUND, AU_TIME_AS, createStatesModel, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 
@@ -627,9 +627,10 @@ export function createStates(host, api) {
         const ink = (a) => (rgb ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})` : T.ink(a * 0.7));
         const wgt = key === GROUND ? 2 : 1 + 2 * Math.sqrt(fMax > 0 ? ladder.f[key] / fMax : 0);
         /* iteration 008 U · PLAIN LINES (the ORBITAL ladder's law): dark when off, the full vivid ink when on — the weight is still the
-           oscillator strength, and no population bar, box or glow is drawn beside a line (the lanes carry |b|) */
-        g.strokeStyle = ink(lit ? 1 : 0.26); g.lineWidth = lit ? wgt + 1 : wgt;
-        g.beginPath(); g.moveTo(x0, yy); g.lineTo(x1, yy); g.stroke();
+           oscillator strength, and no population bar, box or glow is drawn beside a line (the lanes carry |b|).  Iteration 009 F2: SPECTRUM's
+           levelLine (paint-stroke.js) draws it — off 0.42, on full, w / w + 1 px — a dark state in the theme's ink at 0.7 of that */
+        const lc = rgb || T.INK;
+        levelLine(g, x0, x1, yy, lit ? lc : null, lc, wgt, rgb ? 1 : 0.7);
         hits.push({ y: yy, x0, x1, key });
         hovers.push({ kind: 'line', key: 'S' + key, points: [x0, yy, x1, yy], lw: wgt, colour: ink(1),
           info: key === GROUND ? 'S₀ · the RHF ground determinant · pinned' + (lit ? ` · |b|² ${(c.amp * c.amp / n2).toFixed(3)}` : '')

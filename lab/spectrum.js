@@ -13,7 +13,7 @@
  */
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
 import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, sw } from './mir/kit.js';
-import { paintStroke, fillButton } from './paint-stroke.js';
+import { paintStroke, fillButton, levelLine } from './paint-stroke.js';
 
 /* THE LADDER IS A CANVAS, AND A CANVAS HAS NO THEME (wave 44).  Every rule here was written in
    rgba(255,255,255,…) — right on the dark theme, WHITE ON WHITE on the light one, where "E = 0", the footer and
@@ -32,13 +32,6 @@ function readRGB(g, name, fallback) {
   m = /rgba?\(([^)]+)\)/i.exec(t);
   if (m) { const p = m[1].split(',').map((x) => parseFloat(x)); return [p[0] | 0, p[1] | 0, p[2] | 0]; }
   return [255, 255, 255];
-}
-/* iteration 008 A (Josh: "simple lines that's dark when off and full vivid color when on") · THE LEVEL LINE, written once: an empty level
-   is the theme's ink, thin and dark; a populated one is its shell's colour at full strength — no population bar, no halo, no glow (the
-   share is the line's hover).  `rgb` null = off.  (MOLECULES' two ladders keep their own alphas — the register's rule, U's measure.) */
-function levelLine(g, x0, x1, y, rgb, ink) {
-  g.strokeStyle = rgb ? `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` : `rgba(${ink[0]},${ink[1]},${ink[2]},0.42)`; g.lineWidth = rgb ? 2 : 1;
-  g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
 }
 
 export function createSpectrum(host, api) {
@@ -60,13 +53,13 @@ export function createSpectrum(host, api) {
   const head = el('div', 'row tight sp-head', host);
   const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'Hide or show the channels';
   const addBtn = el('button', 'trig', head); addBtn.type = 'button'; addBtn.innerHTML = '<span class="trig-g">+</span><span class="trig-l">MODE</span>';
-  /* iteration 008 S · EMPTY ↔ FILL ALL (paint-stroke.js fillButton, in its words): a register with anything in it shows EMPTY (c ↦ 0, SPECTRUM's
+  /* iteration 008 S · EMPTY ↔ FILL ALL (paint-stroke.js fillButton; the register's glyph since iteration 009 F2): a register with anything in it shows EMPTY (c ↦ 0, SPECTRUM's
      old CLEAR), an empty one FILL ALL (all 140 labels, equal and in phase, normalised); one undo row each.  NORM went: a HAND stroke on the grid
      normalises at its end (below), a modulator never does.  The press reads the register itself (the label is repainted by rebuild(), which a
      folded or paused card may not have run yet), and so does a hover. */
   const fillSync = () => fillB.set(!api.reg.populated().length);
   const fillB = fillButton(head, { fill: 'every label on, equal and in phase, normalised', empty: 'c ↦ 0 for every label' },
-    () => { if (api.reg.populated().length) { if (api.clear) api.clear(); } else if (api.fillAll) api.fillAll(); fillSync(); }, true);
+    () => { if (api.reg.populated().length) { if (api.clear) api.clear(); } else if (api.fillAll) api.fillAll(); fillSync(); });
   fillB.set(true); fillB.root.addEventListener('pointerenter', fillSync); head.appendChild(preVis.root);
   const info = el('div', 'note', head);
   /* ── WAVE 69 · THE REGISTER'S OWN LAW, LIVE ────────────────────────────────────────────────────
