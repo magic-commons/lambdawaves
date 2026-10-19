@@ -25,6 +25,10 @@
  *             ITERATION 009 N7: THE SCALE's Sturmian blocks and the BOX packet took n = 7 (140 labels), so the two states that read them —
  *             `sturmian` (digest · integral · maxRho · pack · rp · rpL) and `box` (the same and count: 27 → 40 modes) — were re-captured by
  *             name in both fixtures, 39 leaves each (research/iteration-009/N7-BUILD.md); a fresh capture of the tree moved no other leaf.
+ *             ITERATION 010 X1: under a propagator the field draws the REACH of the evolution (state.js reach()), not the anchor's labels,
+ *             and THE SCALE's AUTO box follows it, so `sturmian` (count 2 → 13 · digest · half 5.714 → 12.347 · integral 0.304 → 0.999 ·
+ *             maxRho · pack · rp · rpL) was re-captured by name in both fixtures, 24 leaves each (research/iteration-010/X1-BUILD.md); the
+ *             lock holds no Stark state, and a fresh capture of the tree moved no other leaf.
  *
  * What it locks, every number read from the SHIPPED pipelines through the booted app (window.__LW, __LW.field) —
  * no replica, no copied WGSL:

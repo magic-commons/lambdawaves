@@ -289,7 +289,7 @@ export async function boot(dom) {
   const canPresentTransport = () => !app.state.uiHidden && (layout.docked ? canPresent(wTr)
     : (!document.body.classList.contains('rack-hidden') || document.body.classList.contains('transport-peek')));
   const tableOf = (a) => sturm.P ? sturm.rec[a] : (app.state.space === 'p' ? getHamiltonian().momentumTableFor(BASIS[a]) : getHamiltonian().tableFor(BASIS[a]));   // W-STURMIAN: the scaled record, else the operator's
-  const sturmHalf = () => { const nm = reg.nmax(1e-3); return domainFor(nm) / (nm * sturm.lambda); };   // a Sturmian's extent is hydrogen's for n over nλ (ρ = 2λr against 2r/n)
+  const sturmHalf = () => { const nm = reg.reachNmax(1e-3); return domainFor(nm) / (nm * sturm.lambda); };   // a Sturmian's extent is hydrogen's for n over nλ (ρ = 2λr against 2r/n); iteration 010 X1: over the REACH the field draws (state.js reach), not the anchor
   /* Population membership, mute/solo eligibility and ordering change only with register.version. During exact
      time evolution the coefficients rotate but these lists do not; rebuilding and sorting them each frame was
      pure allocation. The returned records are read-only inside the rack. */

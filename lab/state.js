@@ -12,6 +12,8 @@
  *     rebuilt from the unmuted set, and the meters report the rendered fraction of the norm.
  *   • The render set is capped (RENDER_CAP); when the populated set exceeds it the largest
  *     populations are rendered and the truncation is reported, never hidden.
+ *   • THE BLOCKS' SUPPORT (iteration 010 X1): under a non-diagonal H (a PROPAGATOR, or the within-shell Stark field) the render
+ *     set is the REACH — every label the evolution of the anchor reaches (reach(), below) — not the anchor's labels.
  *   • THE PROPAGATOR HOOK (W-STURMIAN): setPropagator(P) swaps the diagonal law for c(t) = P.evolve(c(0), t) in a
  *     non-orthogonal basis (the norm is ⟨c|S|c⟩, the normal modes P's eigenvectors, edits still happen AT time t);
  *     setPropagator(null) restores the diagonal law — every line above is then the code path, unchanged.
@@ -395,6 +397,7 @@ export class Register {
    * population, capped.  Reports what was left out so the UI can say so.
    */
   renderSet(cap = RENDER_CAP, knownPopulated = null) {
+    if (this.driven()) return this._renderReach(cap);                  // iteration 010 X1: a non-diagonal H draws what the evolution REACHES
     const pop = knownPopulated || this.populated();
     const anySolo = pop.some((a) => this.solo[a]);
     const eligible = pop.filter((a) => anySolo ? this.solo[a] : !this.muted[a]);
@@ -405,6 +408,62 @@ export class Register {
     return {
       ids, populated: pop.length, rendered: ids.length, masked: pop.length - eligible.length,
       truncated: eligible.length - ids.length, coveredFraction: total > 0 ? covered / total : 0
+    };
+  }
+  /**
+   * THE BLOCKS' SUPPORT (iteration 010 X1).  Under a non-diagonal H — a PROPAGATOR (THE SCALE, the INTER-SHELL Stark) or the
+   * within-shell Stark field — c(t) leaves the anchor's labels and spreads through every block the anchor touches, so the
+   * field draws the REACH: every label whose dephased weight w_a = Σ_k |C_ak|² |d_k|² (d = the anchor's normal-mode amplitudes,
+   * CᵀS c(0) or the block's Vᵀ c(0); w_a is the long-time mean of |c_a(t)|² over a non-degenerate block) exceeds EPS_POP, the
+   * floor populated() applies to the anchor.  It is a function of the anchor and H only — not of t — so the drawn set is fixed
+   * between edits (no mode pops in or out as t moves), and it is exactly the touched blocks with the rounding (≈ 1e-32) and an
+   * exact eigenstate's untouched partners (≈ 1e-32) left out.  With no field and no propagator nothing here runs.
+   */
+  driven() { return !!this.P || this.field.Fz !== 0; }
+  reach() {
+    if (this._rc && this._rc.version === this.version && this._rc.P === this.P && this._rc.Fz === this.field.Fz) return this._rc;
+    const w = new Float64Array(N);
+    const add = (re, im) => {
+      if (this.P) {
+        const P = this.P, M = P.rank;
+        for (let k = 0; k < M; k++) {
+          let r = 0, i = 0;
+          for (let a = 0; a < N; a++) { const x = P.CtS[k * N + a]; if (x === 0) continue; r += x * re[a]; i += x * im[a]; }
+          const d2 = r * r + i * i; if (d2 === 0) continue;
+          for (let a = 0; a < N; a++) { const x = P.C[a * M + k]; if (x !== 0) w[a] += x * x * d2; }
+        }
+        return;
+      }
+      for (const b of allBlocks()) {                                   // the within-shell Stark: the (n, m) blocks' parabolic states
+        let any = false; for (const a of b.idx) if (re[a] || im[a]) { any = true; break; }
+        if (!any) continue;
+        for (let k = 0; k < b.B; k++) {
+          let r = 0, i = 0; for (let j = 0; j < b.B; j++) { const v = b.V[j * b.B + k]; r += v * re[b.idx[j]]; i += v * im[b.idx[j]]; }
+          const d2 = r * r + i * i; if (d2 === 0) continue;
+          for (let j = 0; j < b.B; j++) { const v = b.V[j * b.B + k]; w[b.idx[j]] += v * v * d2; }
+        }
+      }
+    };
+    if (this.mix) { add(this.mix.reA, this.mix.imA); add(this.mix.reB, this.mix.imB); } else add(this.re0, this.im0);
+    const ids = []; let W = 0;
+    for (let a = 0; a < N; a++) { W += w[a]; if (w[a] > EPS_POP) ids.push(a); }
+    this._rc = { version: this.version, P: this.P, Fz: this.field.Fz, ids, w, W };
+    return this._rc;
+  }
+  /** the largest n the reach holds at least minFrac of its dephased weight in (THE SCALE's AUTO box reads it: rack.js sturmHalf) */
+  reachNmax(minFrac = 0) { const r = this.reach(); let n = 1; for (const a of r.ids) if (r.w[a] >= minFrac * r.W) n = Math.max(n, BASIS[a].n); return n; }
+  /** renderSet under a non-diagonal H: the reach, unmuted (solo wins), heaviest first, capped; `populated` counts the reach and
+   *  `anchored` the anchor's labels; coveredFraction is the drawn share of the dephased weight */
+  _renderReach(cap) {
+    const r = this.reach(), pop = r.ids;
+    const anySolo = pop.some((a) => this.solo[a]);
+    const eligible = pop.filter((a) => anySolo ? this.solo[a] : !this.muted[a]);
+    eligible.sort((x, y) => r.w[y] - r.w[x]);
+    const ids = eligible.slice(0, cap);
+    let covered = 0; for (const a of ids) covered += r.w[a];
+    return {
+      ids, populated: pop.length, rendered: ids.length, masked: pop.length - eligible.length,
+      truncated: eligible.length - ids.length, coveredFraction: r.W > 0 ? covered / r.W : 0, reach: true, anchored: this.populated().length
     };
   }
   /** a stable digest of the PHYSICAL state (the anchor coefficients) — neither time nor the render mask is part of it */
