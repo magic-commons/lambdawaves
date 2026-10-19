@@ -132,6 +132,19 @@ and at least 16 px — an atom label its body (14 px); the formula and an announ
 instead its one plain-Unicode CAPTION — the stage's words, then ` · ` and the STATE word (`H₂O · 1b1 HOMO · STO-3G · NUMERICAL`, `1s₀, 2p₀ · EXACT`;
 0.5.4 P4c: `lab/windows/film.js` `caption()`, read at the take, one function for the film and the picture) — drawn by `lab/capture.js` `drawCaption` and
 following STAGE FORMULA: off, no caption and no word (D5, Group II, replaces it).
+THE QUIET STAGE (iteration 011 Q1; Josh 10-19: "For the informational, also include a button that hides the extra status thingy. When switching
+between different hamiltonian systems (which usually adds a lot of different orbitals), have the informational automatically hide ultra large lists so
+it doesn't fight the screen and users don't have to keep toggling it on and off just because a certain mode uses an obscene amount of 140 levels." …
+"move skeleton into it's own row amongst stage formula and atom labels with a size knob to increase the disk size"): three rows of the same record,
+`lambdawaves.q0.info`. STATUS (`status`) shows or hides INFORMATIONAL's STATUS readout — the only status block the stage words draw (the stage
+itself writes the formula, the atom labels and, opt-in, the pop-ups, THE FADE and THE HEAD; research/iteration-011/q1-shots/before-*.png) — OFF on a
+first run, ON for a record older than the key (it saw the readout); hidden, the line is still kept current; the export caption's STATE word is not
+its. THE LIST CAP (`listCap`, NAME's row, 4 … 140, LOG, 16 by default = the longest LOAD VALENCE): a SPECTRUM list (either side of A ↔ B) longer than
+the cap is written as its count — `stage-words.js` `capLine`, "140 levels · 7 shells" (labels · distinct n) — on the stage and in the caption, and
+returns as the list once it fits; nobody toggles anything; a molecule's formula is untouched. SKELETON (`skeleton` · `skeletonSize`) is THE WORDS'
+third ON + SIZE row (BEAD and UNCERTAINTY stay in MARKS): FLAT disks, no outline (`lab/skeleton.js`), radius SIZE × 0.28 × r_cov — 100 % is the old
+disk (water's O 20.5 px at the first-run camera), the default 160 % (33.6 px), 50 … 400 %; the bonds and the dipole keep their 2 px. The frame reads
+the knob's widget (`ui.skeletonSize`), as it reads `ui.skeletonSw`; SKELETON stays off by default, so THE LOCK cannot move.
 While a molecule owns the field SPECTRUM is HIDDEN with the other ATOMS
 windows (`moleculeMode`, iteration 002; THE BEAT EQUALIZER is its own window,
 `equalizer`, whose AUDIO IN reads the modulation window's first AUDIO device); EDIT › COPY then

@@ -508,7 +508,7 @@ export async function boot(dom) {
       if (app.state.bow) kepler.clear(); else kepler.suspend();
     }
     const mol = app.state.chem.on, skOn = !!(ui.skeletonSw && ui.skeletonSw.get() && mol), elOn = !!(ui.ellipsoidSw && ui.ellipsoidSw.get()) && !mol && !sturm.P && app.state.space !== 'p', bdOn = (!!(ui.beadSw && ui.beadSw.get()) && (mol || !sturm.P)) || elOn;   // 0.8.2 P3: THE BEAD shares the canvas, drawn after the skeleton, with SKELETON off too; 0.8.3 B3: THE ELLIPSOID rides it (position space, a register)
-    if (skOn || bdOn) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(skOn ? app.state.chem.atomsNow() : null, skOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : Object.assign(beadOf(reg, clock.t, app.state.space === 'p'), { ell: elOn ? covariance(reg, clock.t) : null }))); } else skeleton.clear();   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
+    if (skOn || bdOn) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(skOn ? app.state.chem.atomsNow() : null, skOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : Object.assign(beadOf(reg, clock.t, app.state.space === 'p'), { ell: elOn ? covariance(reg, clock.t) : null }), ui.skeletonSize ? ui.skeletonSize.get() : 1.6)); } else skeleton.clear();   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
 
     kepler.bowFrame();
     app.state.chem.setActive(canPresent(wChem));
