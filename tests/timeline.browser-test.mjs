@@ -131,13 +131,13 @@ try {
     P.open('tl-suite/arrangement'); await __w(500); const back = JSON.stringify(M.state()) === sig; P.save('tl-suite/arrangement'); const again = P.exportText('tl-suite/arrangement');
     const strip = (t) => { const o = JSON.parse(t); delete o.saved; delete o.opened; delete o.data.presentation.layout.at; return JSON.stringify(o); };   // the three stamps a save writes
     const carry = [];
-    for (const f of ['new-project', 'demos/wave-dancer', 'demos/water', 'demos/benzene', 'demos/n2', 'demos/h2-sigma-u', 'demos/helium']) {
-      const t = await (await fetch('./' + f + '.lambdawaves.json', { cache: 'no-cache' })).text(); if (/"timeline"/.test(t)) carry.push(f); }
+    for (const f of ['new-project', 'demos/wave-dancer']) {   // iteration 009: the one demo, WAVE DANCER PROTOTYPE (a missing file reads as carrying one)
+      const r = await fetch('./' + f + '.lambdawaves.json', { cache: 'no-cache' }), t = await r.text(); if (!r.ok || /"timeline"/.test(t)) carry.push(f); }
     const diff = []; const walk = (x, y, p) => { if (JSON.stringify(x) === JSON.stringify(y)) return; if (x && y && typeof x === 'object' && typeof y === 'object') { for (const k of new Set([...Object.keys(x), ...Object.keys(y)])) walk(x[k], y[k], p + '.' + k); } else diff.push(p); };
     walk(JSON.parse(strip(text)), JSON.parse(strip(again)), '');
     P.remove('tl-suite/arrangement');
     return { inFile: JSON.parse(text).data.presentation.timeline ? JSON.parse(text).data.presentation.timeline.clips.length : -1, empty, emptyKey, back, same: strip(text) === strip(again), diff: diff.slice(0, 12), carry, errs: __e.slice() };`);
-  judge('T10 a project with an arrangement saves it (presentation.timeline), NEW empties it with no key, the open brings it back, and a re-save is byte-identical; NEW and the six demos carry none',
+  judge('T10 a project with an arrangement saves it (presentation.timeline), NEW empties it with no key, the open brings it back, and a re-save is byte-identical; NEW and the demo (WAVE DANCER PROTOTYPE) carry none',
     t10.inFile === 1 && t10.empty === 0 && !t10.emptyKey && t10.back && t10.same && !t10.carry.length && !t10.errs.length, t10);
 
   /* ── the RENDER card's roads (C7B-DESIGN §5.2 4–8): a card film is the facade's film, digest for digest, when the take is the same ── */

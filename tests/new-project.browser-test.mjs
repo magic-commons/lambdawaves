@@ -39,7 +39,7 @@ try {
   console.log('PASS the empty project is the shipped default: a fresh boot serialises to the file on all ' + drift.keys + ' non-modulation presentation keys (no quality, layout, modwin or notebook size in it)');
 
   /* ── 2 · THE DEMO PRESS (0.5.0 C6: P.demo, the alias of the old DEMOS button) ASKS before it discards unsaved changes (the stored open's question), then opens — and an untouched
-         open stays CLEAN: WAVE DANCER's mat.steps 240 becomes this device's quality.steps a frame later, which is not an edit
+         open stays CLEAN: WAVE DANCER PROTOTYPE's mat.steps (160, the rig it was re-saved on) becomes this device's quality.steps a frame later, which is not an edit
          (projectKey() drops quality and mat.steps); the stage colour is the work and dirties it ── */
   const demo = await g.ev(`const P = __LW.layout.projects; let asked = 0; const c0 = window.confirm;
     __LW.layout.notebook.open('projects'); await __w(150);
@@ -55,7 +55,7 @@ try {
     return { dirty, refused, asked, current: P.current, status: __st(), modes: __LW.serialize().experiment.modes.length, nbOpen: __LW.layout.notebook.isOpen, clean, errs: __e.slice() };`);
   assert.equal(demo.dirty, true); assert.deepEqual(demo.refused, { asked: 1, current: null, list: 0, status: demo.refused.status });
   assert.doesNotMatch(demo.refused.status, /opened demo/);
-  assert.equal(demo.asked, 2); assert.equal(demo.current, 'DEMOS/WAVE DANCER'); assert.match(demo.status, /opened demo DEMOS\/WAVE DANCER/);
+  assert.equal(demo.asked, 2); assert.equal(demo.current, 'DEMOS/WAVE DANCER PROTOTYPE'); assert.match(demo.status, /opened demo DEMOS\/WAVE DANCER PROTOTYPE/);
   assert.equal(demo.modes, 8); assert.equal(demo.nbOpen, true, 'WAVE DANCER has notebook text: it opens onto its notebook'); assert.deepEqual(demo.errs, []);
   assert.equal(demo.clean.dirty, false, 'the untouched demo reads as edited 1 s after its open (steps ' + demo.clean.steps.join(' → ') + ')');
   assert.equal(demo.clean.colourDirty, true, 'a stage colour change did not dirty the project');
@@ -169,7 +169,7 @@ try {
          the playing demo gives 0.2, and so does NEW after a play with the modulation window folded and then a pause ── */
   const held = await g.ev(`const P = __LW.layout.projects, R = __LW.mod.registry, c0 = window.confirm; window.confirm = () => true;
     const mix = () => __LW.serialize().presentation.ui.stage.mix;
-    const playDemo = async () => { P.open('DEMOS/WAVE DANCER'); await __LW.settle(); __LW.play(); await __w(1200); return { held: R.isModulated('material.stage'), playing: __LW.mod.playing, mix: mix() }; };
+    const playDemo = async () => { P.open('DEMOS/WAVE DANCER PROTOTYPE'); await __LW.settle(); __LW.play(); await __w(1200); return { held: R.isModulated('material.stage'), playing: __LW.mod.playing, mix: mix() }; };
     const out = {};
     await P.requestFresh(); await __LW.settle(); __LW.setStage(0.2); out.saved = P.save('probe/stage02'); out.savedMix = mix();
     out.a = await playDemo(); out.a.ok = await P.requestFresh(); await __LW.settle(); await __w(300); out.a.after = mix();
@@ -179,7 +179,7 @@ try {
     const d2 = JSON.parse(JSON.stringify(__LW.serialize())); d2.presentation.ui.stage.mix = 0.2; delete d2.presentation.modulationBases;
     const imp = P.importText(JSON.stringify({ lambdawaves: 'project', version: 1, path: 'probe/stage02-nobases', data: d2, notebook: { title: 'x', text: '' } }));
     out.b2 = await playDemo(); out.b2.ok = P.requestOpen(imp); await __LW.settle(); await __w(300); out.b2.after = mix();
-    P.open('DEMOS/WAVE DANCER'); await __LW.settle(); __LW.layout.modulation.expand(); await __w(300); __LW.layout.modulation.collapse();
+    P.open('DEMOS/WAVE DANCER PROTOTYPE'); await __LW.settle(); __LW.layout.modulation.expand(); await __w(300); __LW.layout.modulation.collapse();
     __LW.play(); await __w(1200); out.c = { held: R.isModulated('material.stage'), folded: !__LW.mod.expanded }; __LW.pause(); await __w(300);
     out.c.ok = await P.requestFresh(); await __LW.settle(); await __w(300); out.c.after = mix();
     __LW.pause(); window.confirm = c0; out.errs = __e.slice(); return out;`);

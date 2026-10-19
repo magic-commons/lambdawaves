@@ -1,6 +1,6 @@
 /* tools/camera-routes.mjs — THE CAMERA ROUTES (0.5.0 C1's closer, NEW): the saved observer.* modulation routes still resolve after
- * MIR's CAMERA panel took the CAMERA card.  One fresh Firefox, five scenes in order: the four bundled demos through their PROJECTS
- * buttons (WAVE DANCER, WATER, BENZENE, N₂) and NEW (the empty project).  For each, against the FILE it opened:
+ * MIR's CAMERA panel took the CAMERA card.  One fresh Firefox, two scenes in order: the bundled demo through its DEMOS press
+ * (WAVE DANCER PROTOTYPE; iteration 009 deleted WATER, BENZENE and N₂ with the other seven) and NEW (the empty project).  For each, against the FILE it opened:
  *   1 · every saved route on an observer.* target is live with the same id, target, macro, min and max, and the registry has it;
  *   2 · every observer.* base is the file's: its `modulationBases` entry, else its pose (yaw modulo 2π) — a routed one too;
  *   3 · the six observer.* targets are registered under the saved-route law below (map, min, max: a changed range re-means a depth);
@@ -17,7 +17,7 @@ import { open } from './gate/gatekit.mjs';
 const LAB = `https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/`;
 const arg = (k) => (process.argv.includes(k) ? process.argv[process.argv.indexOf(k) + 1] : null);
 const OUT = arg('--out'), AGAINST = arg('--against');
-const SCENES = [['WAVE DANCER', 'wave-dancer'], ['WATER', 'water'], ['BENZENE', 'benzene'], ['N₂', 'n2'], ['NEW']];
+const SCENES = [['WAVE DANCER PROTOTYPE', 'wave-dancer'], ['NEW']];   // iteration 009: the one demo
 /** the saved-route law of the six observer.* targets (rack.js' defs; CAM in lab/camera-law.js) */
 const LAW = { 'observer.yaw': ['wrap', 0, 2 * Math.PI], 'observer.pitch': ['bipolar', -1.52, 1.52], 'observer.dist': ['log', 1.2, 8],
   'observer.fov': ['linear', 0.25, 1.2], 'observer.panx': ['bipolar', -1, 1], 'observer.pany': ['bipolar', -1, 1] };

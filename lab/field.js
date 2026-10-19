@@ -35,7 +35,7 @@ export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust'
 export function drawStyle(v) { const n = typeof v === 'number' ? STYLE_NAMES[v] : String(v); return n === 'grain' ? 'dust' : STYLE[n] === undefined ? 'cloud' : n; }
 /** THE KNEE's default (008 Q, Josh 10-19: "somewhat opaque but slightly see-through"): 3, a soft shoulder — measured at EXPOSURE 1, the
  *  densest rays through H 2pz keep 12.3 % of the ground and benzene's HOMO 14.6 % (0.7 % and 0.8 % at the plain exponential 0.6).  The
- *  boot's mat, the KNEE knob, a new project and an absent knee read it; a saved project keeps its own (every demo says 0.6). */
+ *  boot's mat, the KNEE knob, a new project and an absent knee read it; a saved project keeps its own (the one demo, WAVE DANCER PROTOTYPE, says 3 since iteration 009). */
 export const KNEE_DEFAULT = 3;
 /** THE KNEE's q (iteration 008 G, field.js kneeT): ln(KNEE / 0.6) — the formula's pivot 0.6 is the plain exponential (q = 0, the old
  *  arithmetic drawn bit for bit); an absent knee is the default's q */

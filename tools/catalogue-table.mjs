@@ -53,8 +53,9 @@ const HAND = {
     ['ladder', 'LADDER', 'window:ladder', 'EXACT', [T('frontier'), 'the Poisson–Airy revival laws'], '0.1.0']],                              // S10
   lattice: ['lattice', 'LATTICE · TIGHT BINDING', 'window:lattice', 'NUMERICAL', [T('lattice'), 'the eigensolve against the closed forms it prints'], '0.7.2'],
   /* a demo plays a system: its word and oracle are that row's (S30) */
-  demos: { 'wave-dancer': ['hydrogen', '0.5.0'], water: ['H2O', '0.5.0'], benzene: ['C6H6', '0.5.0'], n2: ['N2', '0.5.0'], 'h2-sigma-u': ['H2', '0.5.0'], helium: ['atom', '0.5.0'],
-    chord: ['hydrogen', '0.6.0'], bucky: ['C60', '0.6.1'], break: ['uhf', '0.7.1'], tunnel: ['lattice:tunnel', '0.7.2'], lda: ['lda', '0.7.3'] },
+  /* iteration 009: the ten others left (WATER · BENZENE · N₂ · H₂ σu · HELIUM 0.5.0, CHORD 0.6.0, BUCKY 0.6.1, BREAK 0.7.1, TUNNEL 0.7.2, LDA 0.7.3);
+     WAVE DANCER is WAVE DANCER PROTOTYPE, its row's id `demo:wave-dancer` kept */
+  demos: { 'wave-dancer': ['hydrogen', '0.5.0'] },
 };
 
 const plain = (s) => s.replace(/<\/?m>/g, '');

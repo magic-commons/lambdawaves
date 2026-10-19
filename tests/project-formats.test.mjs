@@ -40,7 +40,8 @@ function library(ls, capChars = MAX_LIBRARY_CHARS) {
   return { store, wrote, files: createFiles({ key: PJ_KEY, storage: spy, capChars, defaultName: 'UNTITLED' }) };
 }
 const part = (data, notebook = { title: 'T', subtitle: '', text: '' }) => ({ parts: { [PART]: { data, notebook } } });
-const demo = (file) => parseProjectFile(read('../lab/demos/' + file + '.lambdawaves.json'));
+/* iteration 009: WATER and N₂ left lab/demos/ — an older store's items are their files as they shipped (tests/fixtures/retired-demos) */
+const demo = (file) => parseProjectFile(read('./fixtures/retired-demos/' + file + '.lambdawaves.json'));
 /* what a 0.4 build stored: its import (storeProjectImport) and its save wrote exactly these seven keys, in this order */
 const item04 = (p, saved = p.saved) => ({ path: p.path, folder: p.folder, name: p.name, saved, opened: saved, data: p.data, notebook: p.notebook });
 
@@ -116,7 +117,7 @@ green('R10 a6 · a valid 0.4 collection (WATER, N₂ and a saved study, RECENT o
     validateProjectCollection(JSON.parse(ls.getItem(PJ_KEY)));
   }
   const C = JSON.parse(ls.getItem(PJ_KEY));
-  assert.deepEqual(Object.keys(C.items), ['DEMOS/N₂', 'studies/alpha', 'BETA', 'DEMOS/WAVE DANCER']);
+  assert.deepEqual(Object.keys(C.items), ['DEMOS/N₂', 'studies/alpha', 'BETA', 'DEMOS/WAVE DANCER PROTOTYPE']);
   assert.deepEqual(C.folders, { studies: { pictureId: 'f3' } });
   /* two stored paths that are ONE name to the kit ('a//b' and 'a/b'; 'X' and 'x') are told apart, not folded onto one another */
   const two = { items: { 'a//b': { path: 'a//b', folder: 'a/', name: 'b', data: { n: 1 }, notebook: {} }, 'a/b': { path: 'a/b', folder: 'a', name: 'b', data: { n: 2 }, notebook: {} },
@@ -171,7 +172,7 @@ green('R10 b2 · 8 MiB an entry at the store: a FOLDERS save of 8 MiB + is refus
   assert.equal(r.ok, false); assert.match(r.why, /8 MiB/); assert.equal(ls.getItem(PJ_KEY), raw);
   const theirs = await readInput(new File([env('basins', { parts: { fractal: {} } })], 'p.mir'), { accept: ['project'], check: { app: PART } });
   assert.equal(theirs.ok, false); assert.match(theirs.errors[0].why, /this project is basins's; this is lambdawaves/);
-  const none = await readInput(new File([read('../lab/demos/water.lambdawaves.json')], 'water.mir'), { accept: ['project'], check: { app: PART } });
+  const none = await readInput(new File([read('./fixtures/retired-demos/water.lambdawaves.json')], 'water.mir'), { accept: ['project'], check: { app: PART } });
   assert.equal(none.ok, false, 'a .lambdawaves.json passed as a MIR envelope');
 }
 green('R10 b3–b4 · the 8 vs 24 MB cap: the kit\'s intake takes a 10 MiB λWAVES .mir (its project limit is ' + (LIMITS.project >> 20) + ' MiB) and the store refuses to keep it (8 MiB, nothing written); a BASINS project is refused by name ("this project is basins\'s; this is lambdawaves"), and a .lambdawaves.json is not a MIR envelope (projects.js\' door takes it, capped at 8 MiB before it is read)');
@@ -192,7 +193,7 @@ green('R10 b3–b4 · the 8 vs 24 MB cap: the kit\'s intake takes a 10 MiB λWAV
   for (const s of STARTERS) { const st = starterOf(s, read('../lab/demos/' + s.file + '.lambdawaves.json')), pg = pageFromNotebook(st.data.parts[PART].notebook);
     assert.ok(pg && /^# /.test(pg.md.replace(/^\*[^*]*\*\n\n/, '')), s.file + ': no page 0'); assert.equal(st.readOnly, true); assert.equal(st.folder, 'DEMOS'); }
 }
-green('R10 c · a 1.4 notebook is page 0: the kit\'s pageFromNotebook reads λWAVES\' { title, subtitle, text } as { title, md } with the subtitle as the first italic line (an empty notebook is no page); a 0.4 item\'s notebook rides in the ONE part unchanged — the same page out of the FOLDERS entry and out of its .mir; the six bundled demos are read-only DEMOS starters, each with its page 0');
+green('R10 c · a 1.4 notebook is page 0: the kit\'s pageFromNotebook reads λWAVES\' { title, subtitle, text } as { title, md } with the subtitle as the first italic line (an empty notebook is no page); a 0.4 item\'s notebook rides in the ONE part unchanged — the same page out of the FOLDERS entry and out of its .mir; the bundled demo (iteration 009: WAVE DANCER PROTOTYPE alone) is a read-only DEMOS starter with its page 0');
 
 /* ── THE UNSAVED MARK (the part's signature, projectKey()), sliced out of rack.js as project-storage.test did ── */
 {

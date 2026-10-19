@@ -314,7 +314,7 @@ export function createProjects(port) {
     /** pick() — IMPORT: a file picker over the same door as a drop */
     pick() { const input = document.createElement('input'); input.type = 'file'; input.accept = 'application/json,.json,.mir,.png,image/png';
       input.addEventListener('change', () => { for (const f of input.files || []) take(f, 'picker'); }, { once: true }); input.click(); },
-    /** seed() — the eleven demos as FOLDERS' starters, added once (a changed demo file refreshed in place); awaited by the boot.
+    /** seed() — the demos (iteration 009: one, WAVE DANCER PROTOTYPE) as FOLDERS' starters, added once (a changed demo file refreshed in place); awaited by the boot.
      *  AN OLDER BUILD'S DEMO PRESS STORED THE DEMO AT ITS PATH: an untouched copy becomes the starter where it stands; an edited one
      *  stays the user's and keeps the path, and that starter waits (no "WATER 2" beside it).
      *  ITERATION 004 · EACH WEARS ITS COVER: only a starter about to be added or refreshed fetches its picture (nothing for one that is up
@@ -336,7 +336,16 @@ export function createProjects(port) {
       const due = keep.filter((s) => (mine.has(s.id) ? String(mine.get(s.id).facts.seedRevision ?? '') !== String(s.revision) : !known.has(s.id)));
       const pics = await Promise.all(due.map((s) => coverOf(s.file)));
       due.forEach((s, i) => { s.thumbnail = pics[i]; });
-      return folders.seed(keep.filter((s) => !(mine.has(s.id) && due.includes(s) && !s.thumbnail)));
+      const r = folders.seed(keep.filter((s) => !(mine.has(s.id) && due.includes(s) && !s.thumbnail)));
+      /* ITERATION 009 · A RENAMED STARTER RIDES ITS REFRESH (WAVE DANCER → WAVE DANCER PROTOTYPE): the kit's refresh keeps an entry's name,
+         so once the entry carries the starter's revision (refreshed just now, or at an earlier boot whose rename did not land) it takes
+         the starter's name, in place — its id, folder, place and RECENT row kept (fromFiles follows the id).  A refresh that waits (its
+         cover could not be made) waits with its name; a name the reader's own project already holds leaves the starter `… 2`, never renamed again */
+      for (const s of list) {
+        const e = files.entries().find((x) => x.facts && String(x.facts.seedId) === s.id);
+        if (e && String(e.facts.seedRevision ?? '') === String(s.revision) && !e.name.startsWith(s.name)) files.rename(e.id, s.name);
+      }
+      return r;
     },
   };
   if (store.refusal) unavailable(store.refusal);

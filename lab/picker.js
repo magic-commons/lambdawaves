@@ -46,7 +46,7 @@ const ARROW = (dir) => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hid
 export function createPicker(app, { open: openAtBoot = true } = {}) {
   const root = el('div', 'lw-menu', document.body); root.id = 'lwMenu'; root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'the Picker');
   const top = el('div', 'mm-top', root);
-  /* FOLDERS' door (iteration 004 · F: the projects and the eleven demos live there now) */
+  /* FOLDERS' door (iteration 004 · F: the projects and the demos live there now; iteration 009: one demo, WAVE DANCER PROTOTYPE) */
   const door = el('button', 'mm-door', top); door.type = 'button'; chip(door, 'folder', 'Folders'); el('span', '', door, 'FOLDERS'); door.title = 'your projects and the demos — FOLDERS';
   door.addEventListener('click', () => { close(); const P = app.sh.layout && app.sh.layout.projects; if (P) (P.show || P.toggle).call(P); });
   const logo = el('div', 'mm-logo', top);

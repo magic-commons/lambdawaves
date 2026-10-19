@@ -154,9 +154,12 @@ export function projectFileText(it) {
   return JSON.stringify({ lambdawaves: 'project', version: 1, path, folder, name, saved, opened, data, notebook }, null, 1);
 }
 
-/** the eleven bundled demos, FOLDERS' read-only starters in DEMOS; each one's revision is its file's own `saved` stamp.  BUCKY (0.6.1 F1) points at
-    C₆₀'s record: the open fetches it when the device does not hold it, and offline MOLECULES offers its DOWNLOAD, as for any record-only molecule; BREAK (0.7.1 U2) is H₂ at R 5 bohr, METHOD UHF; TUNNEL (0.7.2 L2) is LATTICE's packet at a barrier V = 2J; LDA (0.7.3 K2) is water under METHOD LDA on VIEW Δ LDA−RHF */
-export const STARTERS = Object.freeze([['wave-dancer', 'WAVE DANCER'], ['water', 'WATER'], ['benzene', 'BENZENE'], ['n2', 'N₂'], ['h2-sigma-u', 'H₂ σu'], ['helium', 'HELIUM'], ['chord', 'CHORD'], ['bucky', 'BUCKY'], ['break', 'BREAK'], ['tunnel', 'TUNNEL'], ['lda', 'LDA']]
+/** the bundled demo, FOLDERS' one read-only starter in DEMOS; its revision is its file's own `saved` stamp.  ITERATION 009 (Josh 2026-10-19):
+    the ten others (WATER, BENZENE, N₂, H₂ σu, HELIUM, CHORD, BUCKY, BREAK, TUNNEL, LDA) are deleted — the new demos will be made on the
+    app's newer systems (the timeline, the molecules) — and WAVE DANCER is WAVE DANCER PROTOTYPE, re-saved at KNEE 3.  The FILE id
+    `wave-dancer` and the seedId `demos/wave-dancer` stay, so a reader's entry seeded from it is refreshed AND renamed in place
+    (lab/projects.js seed()); an entry seeded from a deleted demo stays the reader's (it opens from their store, and no starter names it) */
+export const STARTERS = Object.freeze([['wave-dancer', 'WAVE DANCER PROTOTYPE']]
   .map(([file, name]) => Object.freeze({ file, name, folder: 'DEMOS' })));
 /** starterOf(spec, text) → a folders/seed.js starter from the demo file's text.  Its revision is the file's own `saved` stamp and the
  *  picture's mark (`·cover`, iteration 004: the DEMOS took their covers as pictures), so every browser's DEMOS refresh in place once */

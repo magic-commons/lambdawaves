@@ -3,7 +3,7 @@
  * (capture.picture({ width: 540, height: 960, caption: '' }): a real render at that size, no caption) re-encoded as a JPEG into
  * lab/demos/covers/<file>.jpg.  Run it after a demo changes, then `node tests/pwa.test.mjs --write`.
  *   python3 tools/gate/server.py <root> <LW_PORT>   (stop it by pid)
- *   LW_PORT=… GD_PORT=… node tools/make-covers.mjs [file …]   (default: the six STARTERS) */
+ *   LW_PORT=… GD_PORT=… node tools/make-covers.mjs [file …]   (default: the STARTERS — iteration 009: wave-dancer alone) */
 import fs from 'node:fs';
 import { open } from './gate/gatekit.mjs';
 import { STARTERS } from '../lab/project-store.js';
