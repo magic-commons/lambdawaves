@@ -828,6 +828,10 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .mir-info.lw-stage .mir-info-block[data-fade] { font-size: calc(clamp(16px, 8vw, 22px) * var(--lw-stage-size, 1)); }
 /* iteration 007 I · NAME: the molecule's name is the formula block's second paragraph, at the notebook's heading (22 px of the title's 34) and close under it */
 .mir-info.lw-stage .mir-info-block:not([data-fade]) .mir-info-text > p + p { font-size: 0.65em; margin-top: 0.15em; }
+/* iteration 008 P (Josh: "the name of the molecule should be centered, not aligned left to the formula"): the formula block's lines are centred
+   on one axis — the block is max-content wide and the kit seats it centred, so a name shorter than the formula sits centred under it, and a longer one
+   leaves the formula on the same axis it holds alone.  THE FADE's and THE HEAD's blocks ([data-fade]) keep the kit's left edge. */
+.mir-info.lw-stage .mir-info-block:not([data-fade]) .mir-info-text > p { text-align: center; transform-origin: center; }
 .mir-info.lw-stage .katex { font-size: 1.08em; }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
 .dev .mol-more-toggle { flex: 0 0 30px; padding: 0; margin-left: auto; }   /* iteration 007 M: the row's end under VALENCE and under the ORBITAL dial alike — one seat */

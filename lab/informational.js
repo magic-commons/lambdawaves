@@ -4,7 +4,7 @@
  * Iteration 007 I (Josh, JOSH-PROMPT items 8–10; ADR-0003): THE WINDOW IS BUILT FROM THE RECORD'S ROWS.  shell/stage-words.js owns the rows
  * (INFO_ROWS) and the one PREFERENCE record `lambdawaves.q0.info`; each row here is the kit's control(descriptor) — a switch, a seg, a knob, as the
  * kind of value chooses — grouped under short headings: THE WORDS (the formula, its NAME and SIZE; the ATOM LABELS and theirs; POSITION · PAD),
- * ANNOUNCE (one switch per kind and the pop-ups' SIZE), CURSOR (AWAY · DRIFT), MARKS (SKELETON · BEAD · ELLIPSOID, which draw on the stage and keep
+ * ANNOUNCE (one switch per kind and the pop-ups' SIZE), CURSOR (AWAY · DRIFT), MARKS (SKELETON · BEAD · UNCERTAINTY, which draw on the stage and keep
  * their blob keys) — and STATUS.  A hand writes the record and nothing else; the record repaints the controls (FORGET, a verb's flip). */
 import { el, sw, readout, group } from './mir/kit.js'; import { control } from './mir/controls/factory.js'; import { fold } from './fold.js';
 import { statusOf } from './status.js'; import { getHamiltonian } from './hamiltonian.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
@@ -42,7 +42,8 @@ export function createInformational(app) {
   const marks = group(w.body, 'MARKS'), save = () => { app.sh.saveSettings(); schedule(TIER.PRESENT); };
   ui.skeletonSw = sw({ label: 'SKELETON', value: false, title: 'The nuclei as beads (CPK colours, 0.28 × the covalent radius), the bonds within 1.3 × the radii, and the dipole arrow from the centre of nuclear charge — a PREFERENCE, off by default', onChange: save });   // 0.7.0 V2: rack.js draws it (lab/skeleton.js)
   ui.beadSw = sw({ label: 'BEAD', value: false, title: 'THE BEAD: the expectation point (⟨x⟩, ⟨y⟩, ⟨z⟩) on the stage with its trail over the last period (⟨p⟩ in momentum space; for a molecule the electron density\'s centroid (ΣZR − μ)/N_e) — a PREFERENCE, off by default', onChange: save });   // 0.8.2 P3: rack.js draws it on the skeleton's canvas
-  ui.ellipsoidSw = sw({ label: 'ELLIPSOID', value: false, title: 'THE UNCERTAINTY ELLIPSOID: the position covariance Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ as its three principal circles, semi-axes √λ_k, about the bead (with it) — position space and a register only; a PREFERENCE, off by default', onChange: save });   // 0.8.3 B3: rack.js draws it after the bead
+  /* iteration 008 P (Josh: "another mystery is the ellipsoid button"): the switch says what it draws — UNCERTAINTY; its blob key stays `ellipsoid` */
+  ui.ellipsoidSw = sw({ label: 'UNCERTAINTY', value: false, title: 'THE UNCERTAINTY ELLIPSOID: the position covariance Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ as its three principal circles, semi-axes √λ_k, about the bead (with it) — position space and a register only; a PREFERENCE, off by default', onChange: save });   // 0.8.3 B3: rack.js draws it after the bead
   el('div', 'row tight info-grid info-marks', marks).append(ui.skeletonSw.root, ui.beadSw.root, ui.ellipsoidSw.root);
   /* THE FOLD (lab/fold.js): ANNOUNCE · CURSOR · MARKS behind one chevron on its own line under THE WORDS — open on a desktop, folded on a phone
      (as MOLECULES' MORE) */
