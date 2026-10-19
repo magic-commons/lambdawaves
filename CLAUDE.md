@@ -49,9 +49,8 @@ gate, and a molecule past the live cap opens only from its record (DOWNLOAD,
 never DISABLED). Since iteration 008 U MOLECULES is THE ONE CARD: MOLECULES ON · ORBITAL | STATES (`.mol-top`), the register's ladder right
 under it (`.mol-reg`; MO-REGISTRY's `orbitals` seat retired through RETIRED_WINDOWS, its ids and `reg.*` targets kept), then ‹ SECTION ›,
 ‹ MOLECULE › (a record-only molecule's download glyph in its name), BASIS, VIEW in two rows of three (`.mol-view`: DENSITY · ORBITAL ·
-REGISTRY / ESP · SPIN · Δ LDA−RHF), METHOD · VALENCE or the ORBITAL dial (one seat, 0.4.0 S4c) and the fold (five lines at 300 px and at
-phone width, 0.5.3 M8). MOLECULES ON IS REGISTRY ON: a register has the field under VIEW REGISTRY and its pane; Δρ is a switch beside
-KICK; a hand stroke normalises the register at its end and picks VIEW REGISTRY; EMPTY ↔ FILL ALL is one button; NORM is gone
+MIX / ESP · SPIN · Δ LDA−RHF; MIX's id is `registry`), METHOD · VALENCE or the ORBITAL dial (one seat, 0.4.0 S4c) and the fold (five lines at 300 px and at
+phone width, 0.5.3 M8). MOLECULES ON IS REGISTRY ON: a register has the field under VIEW MIX (the saved id stays `registry`: projects, `lw:view=registry`, the verb, `LW.setView`) and its pane. THE ONE LADDER (iteration 008 R): the ladder carries two marks — the register's lit levels and the ORBITAL dial's CURSOR, a bracket round its row in the theme's ink (a degenerate row bracketed whole, the line the dial names lit), never a saved key (it IS `chem.orbital`); under VIEW ORBITAL the cursor leads and the register's marks step back, under every other VIEW the reverse. THE HAND DECIDES THE VIEW: a stroke → MIX (normalised at its end); a HAND turn of the dial (drag, keys, routed or not) → ORBITAL and the ORBITAL pane; a modulator stepping `chem.orbital` moves the cursor, never the VIEW; an undo, a restore, a project or link open move neither. MOLECULES OFF dims the ladder (`.mol-reg-off`); Δρ is a switch beside KICK; EMPTY ↔ FILL ALL is one button; NORM is gone
 MOLECULES keeps KICK / RUN / TDA / the spectra in the `.mol-more` fold: open
 on a desktop, folded on a phone or tablet, its state in the card's WORKSPACE
 record (`more`); its `Aa` stays visible with HELP off. THE CHEM WORKER REFUSES (0.5.4 P6, `lab/worker-pool.js`): once it has answered, an error or a
