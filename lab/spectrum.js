@@ -32,6 +32,13 @@ function readRGB(g, name, fallback) {
   if (m) { const p = m[1].split(',').map((x) => parseFloat(x)); return [p[0] | 0, p[1] | 0, p[2] | 0]; }
   return [255, 255, 255];
 }
+/* iteration 008 A (Josh: "simple lines that's dark when off and full vivid color when on") · THE LEVEL LINE, written once: an empty level
+   is the theme's ink, thin and dark; a populated one is its shell's colour at full strength — no population bar, no halo, no glow (the
+   share is the line's hover).  `rgb` null = off.  Exported so a ladder elsewhere (MO-REGISTRY's) can draw the same line. */
+export function levelLine(g, x0, x1, y, rgb, ink) {
+  g.strokeStyle = rgb ? `rgb(${rgb[0]},${rgb[1]},${rgb[2]})` : `rgba(${ink[0]},${ink[1]},${ink[2]},0.42)`; g.lineWidth = rgb ? 2 : 1;
+  g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+}
 
 export function createSpectrum(host, api) {
   const ladder = el('div', 'ladder', host);
@@ -227,7 +234,7 @@ export function createSpectrum(host, api) {
   const hover = graphHover(lcv, { repaint: () => paintLadder() });
 
   /* the eigenvalue ladder: E_n drawn at physical height (the Rydberg bunching is the point),
-     populated levels lit with their fraction of the norm */
+     populated levels lit in their shell colour (levelLine: plain, no bar since iteration 008), the fraction of the norm in the hover */
   function paintLadder() {
     const reg = api.reg;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -262,9 +269,7 @@ export function createSpectrum(host, api) {
     const names = [];                                    // (the Rydberg bunching crowds the gutter: see the placement below)
     for (const lv of LEVELS) {
       const n = lv.key, yy = y(lv.E), c = vividInk(lv.rgb), lit = pops[n] > 0;
-      g.strokeStyle = lit ? `rgba(${c[0]},${c[1]},${c[2]},0.95)` : ink(0.30); g.lineWidth = lit ? 2 : 1;
-      g.beginPath(); g.moveTo(left, yy); g.lineTo(right, yy); g.stroke();
-      if (lit) { const w = Math.max(6, (right - left) * pops[n]); g.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.35)`; g.fillRect(left, yy - 3, w, 6); }
+      levelLine(g, left, right, yy, lit ? c : null, INK);
       if (n <= 2 || lit) names.push({ y: yy, txt: lv.label, col: lit ? `rgba(${c[0]},${c[1]},${c[2]},1)` : ink(0.75), lit, n, pop: pops[n] || 0 });
       hovers.push({ kind: 'line', key: 'L' + n, points: [left, yy, right, yy], lw: lit ? 2 : 1, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
         info: `${lv.label}  ·  ${lit ? (pops[n] * 100).toFixed(1) + ' %' : 'empty'}  ·  E = ${lv.E.toFixed(4)} Eh` });
@@ -297,8 +302,8 @@ export function createSpectrum(host, api) {
     g.strokeStyle = ink(0.35); g.setLineDash([2, 3]); g.beginPath(); g.moveTo(left, y(0)); g.lineTo(right, y(0)); g.stroke(); g.setLineDash([]);
     const usedTy = [];                                    // 'E = 0' shares the 44 px gutter with the level names: it is drawn last, and only if its row is free
     const lit = HS.eigen.filter((lv) => lv.pop > 1e-6).sort((a, b) => a.E - b.E), dim = HS.eigen.filter((lv) => !(lv.pop > 1e-6));
-    g.strokeStyle = ink(0.24); g.lineWidth = 1;
-    for (const lv of dim) { const yy = y(lv.E); g.beginPath(); g.moveTo(left, yy); g.lineTo(right, yy); g.stroke(); eigenHits.push({ y: yy, k: lv.k, pop: 0 });
+    const INK = readRGB(g, '--dim', '#b8b8b8');
+    for (const lv of dim) { const yy = y(lv.E); levelLine(g, left, right, yy, null, INK); eigenHits.push({ y: yy, k: lv.k, pop: 0 });
       hovers.push({ kind: 'line', key: 'D' + lv.k, points: [left, yy, right, yy], lw: 1, colour: ink(0.7), info: `${lv.label}  ·  empty  ·  λ = ${lv.E.toFixed(4)} Eh` }); }
     /* THE DECLUTTER (wave 44).  Lit levels run upward (E ascending — sorted here, since the propagator is assembled
        block by block in (l, m) and hands its eigenvalues over in BLOCK order, not energy order), so a text within
@@ -311,19 +316,17 @@ export function createSpectrum(host, api) {
     const LEAD = 11, TOP = top + 3;
     let lastTy = 1e9;
     for (const lv of lit) {
-      const yy = y(lv.E), c = nRGB(lv.n), faint = lv.pop < 0.005;          // occupied below ½ %: a coloured hairline, no name (the clock still counts it)
-      g.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},${faint ? 0.6 : 0.95})`; g.lineWidth = faint ? 1 : 2; g.beginPath(); g.moveTo(left, yy); g.lineTo(right, yy); g.stroke();
+      const yy = y(lv.E), c = vividInk(nRGB(lv.n)), faint = lv.pop < 0.005;          // occupied below ½ %: its line, no name (the clock still counts it)
+      levelLine(g, left, right, yy, c, INK);
       eigenHits.push({ y: yy, k: lv.k, pop: lv.pop });
-      hovers.push({ kind: 'line', key: 'E' + lv.k, points: [left, yy, right, yy], lw: faint ? 1 : 2, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
+      hovers.push({ kind: 'line', key: 'E' + lv.k, points: [left, yy, right, yy], lw: 2, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
         info: `${lv.label}  ·  ${(lv.pop * 100).toFixed(lv.pop < 0.1 ? 1 : 0)} %  ·  λ = ${lv.E.toFixed(4)} Eh` });
       if (faint) continue;
       const ty = (lastTy - yy < LEAD) ? lastTy - LEAD : yy;
-      const w0 = Math.max(6, (right - left) * lv.pop);
-      if (ty < TOP) { g.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.35)`; g.fillRect(left, yy - 3, w0, 6); continue; }   // out of room: the line and the bar still say it
+      if (ty < TOP) continue;                                                // out of room: the line still says it
       lastTy = ty;
       if (ty !== yy) { g.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},0.45)`; g.lineWidth = 1; g.beginPath(); g.moveTo(left - 3, ty); g.lineTo(left - 1, yy); g.stroke(); }   // the leader back to its own level
       g.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},1)`; g.textAlign = 'right'; g.fillText(lv.label, left - 4, ty); usedTy.push(ty);   // the gutter, not the plot
-      g.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.35)`; g.fillRect(left, yy - 3, w0, 6);
     }
     if (!usedTy.some((t) => Math.abs(t - y(0)) < 9)) { g.fillStyle = ink(0.75); g.textAlign = 'right'; g.fillText('E = 0', left - 4, y(0)); }
     g.fillStyle = ink(0.75); g.textAlign = 'left'; g.fillText(HS.footer || '', left, H - 5);
