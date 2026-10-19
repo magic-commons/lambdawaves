@@ -789,7 +789,7 @@ body[data-theme="dark"] .km-key-unbound {
 /* 0.5.3 M8 · MOLECULES' TWO PICKERS are PALETTE's preset selector (Josh, §11 answer 5): the kit's stepper ‹ NAME › with ramp.css'
    own seat — the arrows at the ends, the name the slack, ellipsised.  SECTION's name opens the kit's list; MOLECULE's name IS the
    <select> (54 entries in seven optgroups, each disabled one with its reason), drawn flat as the stepper's name: no well, centred. */
-.mol-step { flex: 1 1 100%; min-width: 0; align-items: stretch; }   /* a whole line each: INSTALLED · MOLECULES ON share the next (262 px of body cannot hold all three) */
+.mol-step { flex: 1 1 100%; min-width: 0; align-items: stretch; }   /* a whole line each; iteration 007 M: INSTALLED · MOLECULES ON share the line above them (.mol-top) */
 .mol-step .mir-step-row { width: 100%; justify-content: space-between; }
 .mol-step .mir-step-name { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .eq-grid { display: block; width: 96px; height: 96px; margin: 4px 0; image-rendering: pixelated; border-radius: 4px; }   /* 0.6.0 B2: the BEAT EQUALIZER's 6 × 6 shell grid, one texel a cell */
@@ -798,7 +798,12 @@ body[data-theme="dark"] .km-key-unbound {
 .mol-pick select.sel { width: 100%; min-height: var(--step-b); padding: 0 var(--sp-2); border: 0; background: transparent; box-shadow: none; appearance: none;
   font: inherit; color: var(--fg); letter-spacing: inherit; text-align: center; text-align-last: center; text-overflow: ellipsis; cursor: pointer; }
 .mol-pick select.sel:hover { background: var(--state-hover, var(--glass-raise)); }
-.mol-section > .sw { flex: 0 1 auto; }
+.mol-top > .sw { flex: 0 1 auto; }
+/* iteration 007 M · VIEW in two balanced rows (Josh: "not so top-heavy"): DENSITY · ORBITAL · Δρ over ESP · SPIN · Δ LDA−RHF, three equal
+   columns across the card's body — the kit's render card's grid-on-.seg idiom (render.css), one word a cell, never wrapped */
+.mol-view { flex: 1 1 100%; align-items: stretch; }
+.mol-view .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; box-sizing: border-box; }
+.mol-view .seg-b { min-width: 0; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* 0.7.4 C2 · THE SHELF (chemview.js): the page as tiles under the picker, as many as fit (two a row on a phone); a tile wears ATOMS' cell (.pk-c), the current one lit */
 .mol-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 4px; margin: 2px 0 6px; --nc: var(--acc); }
 .mol-shelf[hidden] { display: none; }
@@ -823,7 +828,7 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .mir-info.lw-stage .mir-info-block[data-fade] { font-size: calc(clamp(16px, 8vw, 22px) * var(--lw-stage-size, 1)); }
 .mir-info.lw-stage .katex { font-size: 1.08em; }
 .mol-more[hidden] { display: none; }   /* 2026-10: MOLECULES below VIEW + ORBITAL (chemview.js); 0.4.0 S0: a fold, its chevron the SHADOW details idiom (skin.css) */
-.dev .mol-more-toggle { flex: 0 0 30px; padding: 0; }
+.dev .mol-more-toggle { flex: 0 0 30px; padding: 0; margin-left: auto; }   /* iteration 007 M: the row's end under VALENCE and under the ORBITAL dial alike — one seat */
 /* ATOM LABELS (INFORMATIONAL since 0.5.3 M9; stage-words.js atomLabels): each nucleus's element symbol, small, at its projected
    position.  White under `difference`, so each glyph INVERTS what it sits on — dark over a light cloud or stage, light
    over a dark one.  Transparent, never a pointer target, beneath every window, never in the occlusion mask. */
