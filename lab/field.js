@@ -25,9 +25,15 @@ export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff'];
 export const WAVE_VIEWS = Object.freeze(['density', 'phase', 'real', 'imag']);
 /** a saved or named view (an index or a name, `reim` = 5 included) → the WAVE observable it opens as */
 export function waveView(v) { const n = typeof v === 'number' ? (v === 5 ? 'reim' : VIEW_NAMES[v]) : String(v); return WAVE_VIEWS.includes(n) ? n : n === 'reim' ? 'phase' : 'density'; }
-/** how the same observable is DRAWN: a cloud, a bounded plateau (lit surface), or noisy particles */
+/** how the same observable is DRAWN: a cloud, a bounded plateau (lit surface), world-locked grains (DUST), octave bands …
+ *  iteration 008 G: GRAIN (2) joined DUST — its index stays retired, never reused (the shader draws a stray 2 as DUST) and a saved one
+ *  opens as DUST; drawStyle() is that one mapping, for every road in. */
 export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4, dust: 5, glass: 6, additive: 7 };
 export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust', 'glass', 'additive'];
+/** a saved or named style (an index or a name) → the style it opens as: GRAIN → DUST, an unknown one → CLOUD */
+export function drawStyle(v) { const n = typeof v === 'number' ? STYLE_NAMES[v] : String(v); return n === 'grain' ? 'dust' : STYLE[n] === undefined ? 'cloud' : n; }
+/** THE KNEE's q (iteration 008 G, field.js kneeT): ln(KNEE / 0.6) — exactly 0 at the shipped 0.6, where the present draws the old arithmetic */
+export function kneeQ(k) { return Number.isFinite(k) && k > 0 ? Math.log(k / 0.6) : 0; }
 export const SLICE = { off: 0, clip: 1, slab: 2 };
 export const MAX_MODES = 320;                                 // the whole 91-state register fits (a gas packet populates every m)
 const MODE_BYTES = 112;                                  // 7 vec4: nlm, c, lag0, lag1, leg0, leg1, ctr
@@ -373,7 +379,7 @@ struct View {
   p0: vec4<f32>,     // view mode, exposure, softness, dither
   p1: vec4<f32>,     // slice mode, slice axis, slice pos (-1..1 of half), slab thickness (fraction of half)
   p2: vec4<f32>,     // hue shift, invert, palette on, DITHER strength in LSB (wave 54 — p0.w stays the ray-march jitter seed)
-  p3: vec4<f32>,     // draw style, iso level (fraction of ρmax), grain, saturation knee
+  p3: vec4<f32>,     // draw style, iso level (fraction of ρmax), grain (DUST's density), THE KNEE's q = ln(KNEE/0.6)
   p4: vec4<f32>,     // PREVIEW BOOST: k (xyz) and on (w) — while the bow is drawn the field is shown multiplied by e^{ik·x}, the exact boosted state
   p6: vec4<f32>,     // arbitrary slice normal (xyz), finish (w)
   p5: vec4<f32>,     // SURFACE: the stage background colour (xyz) and the output gamma (w) — the theme lives here
@@ -399,7 +405,6 @@ fn hsv(h: f32, s: f32, v: f32) -> vec3<f32> {
   return v * mix(vec3<f32>(1.0), c, s);
 }
 fn hash(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(12.9898, 78.233))) * 43758.5453); }
-fn hash3(p: vec3<f32>) -> f32 { return fract(sin(dot(p, vec3<f32>(127.1, 311.7, 74.7))) * 43758.5453); }
 /* the local density, for the SOLID mode's surface normal */
 fn rhoAt(psiTex: texture_3d<f32>, samp: sampler, uvw: vec3<f32>) -> f32 {
   let s = textureSampleLevel(psiTex, samp, uvw, 0.0).rg; return dot(s, s);
@@ -438,7 +443,104 @@ fn bayer8(px: vec2<f32>) -> f32 {
         | (((a >> 1u) & 1u) << 3u) | ((y & 1u) << 4u) | ((a & 1u) << 5u);
   return (f32(v) + 0.5) / 64.0 - 0.5;
 }
+/* THE KNEE (iteration 008 G): a shoulder on the ACCUMULATED opacity.  A ray's transmittance is exp(−τ) for the optical depth τ it has
+ * crossed; THE KNEE replaces it by the q-exponential T_q(τ) = (1 + qτ)^(−1/q), q = ln(KNEE / 0.6) (V.p3.w, made in writeView), which is
+ * exp(−τ) at q = 0 — the shipped KNEE 0.6, drawn by the old arithmetic bit for bit — a SOFT shoulder above it (q > 0: T falls as a power
+ * of τ, so a dense core stays see-through and the lobes behind it show) and a HARD knee below it (q < 0: T reaches 0 at τ = 1/|q|, the
+ * silhouette closes sooner).  The slope at τ = 0 is 1 for every q, so a faint wisp is never touched; only how the opacity saturates moves. */
+fn kneeT(tau: f32, q: f32) -> f32 {
+  let x = q * tau;
+  if (abs(x) < 1e-3) { return exp(-tau * (1.0 - 0.5 * x)); }      // ln(1 + x)/q to second order: no cancellation near q = 0
+  if (x <= -1.0) { return 0.0; }                                   // the hard knee closed the ray
+  return exp(-log(1.0 + x) / q);
+}
+/* DUST's candidates (iteration 008 G).  PCG3D (Jarzynski & Olano 2020, "Hash functions for GPU rendering") turns a cell's integer index
+ * into its grain's offset; u32 arithmetic wraps by definition, so the set is the same on every adapter and in every frame. */
+fn dustHash(c: vec3<u32>) -> vec3<f32> {
+  var v = c * 1664525u + vec3<u32>(1013904223u);
+  v.x += v.y * v.z; v.y += v.z * v.x; v.z += v.x * v.y;
+  v = v ^ (v >> vec3<u32>(16u));
+  v.x += v.y * v.z; v.y += v.z * v.x; v.z += v.x * v.y;
+  return vec3<f32>(v >> vec3<u32>(8u)) * (1.0 / 16777216.0);
+}
+/* the view's own colour and weight at a point — the march's VIEW block, restated for DUST alone (the march keeps its inline text: THE LOCK) */
+fn dustTint(s: vec2<f32>, uvw: vec3<f32>, mode: u32, rhoMax: f32, ampMax: f32, refMax: f32, soft: f32) -> vec4<f32> {
+  var w = 0.0; var c = vec3<f32>(0.0);
+  if (mode == 0u) {
+    let rho = dot(s, s) / rhoMax; w = pow(rho, soft);
+    if (V.p2.z > 0.5) { c = pal[u32(fract(0.5 + V.p2.x) * 256.0) % 256u].rgb; } else { c = mix(vec3<f32>(0.08, 0.45, 0.62), vec3<f32>(1.0, 1.0, 1.0), pow(rho, 0.45)); }
+  } else if (mode == 1u) {
+    w = pow(dot(s, s) / rhoMax, soft);
+    let h = select(0.0, atan2(s.y, s.x), dot(s, s) > 1e-30) / 6.283185307 + 0.5 + V.p2.x;
+    if (V.p2.z > 0.5) { let u = fract(h) * 256.0; let i0 = u32(floor(u)) % 256u; c = mix(pal[i0].rgb, pal[(i0 + 1u) % 256u].rgb, fract(u)); } else { c = hsv(h, 0.85, 1.0); }
+  } else if (mode == 2u || mode == 3u) {
+    let v = select(s.y, s.x, mode == 2u) / ampMax; w = pow(v * v, soft);
+    if (V.p2.z > 0.5) { c = select(pal[u32(fract(0.75 + V.p2.x) * 256.0) % 256u].rgb, pal[u32(fract(0.25 + V.p2.x) * 256.0) % 256u].rgb, v > 0.0); }
+    else { c = select(vec3<f32>(0.22, 0.50, 1.0), vec3<f32>(1.0, 0.58, 0.16), v > 0.0); }
+  } else {
+    let rf = textureSampleLevel(refTex, samp, uvw, 0.0).rg;
+    let d = (dot(s, s) - dot(rf, rf)) / max(rhoMax, refMax); w = pow(abs(d), soft);
+    if (V.p2.z > 0.5) { c = select(pal[u32(fract(0.75 + V.p2.x) * 256.0) % 256u].rgb, pal[u32(fract(0.25 + V.p2.x) * 256.0) % 256u].rgb, d > 0.0); }
+    else { c = select(vec3<f32>(0.25, 0.48, 1.0), vec3<f32>(1.0, 0.86, 0.22), d > 0.0); }
+  }
+  if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
+  return vec4<f32>(c, w);
+}
+/* DUST (iteration 008 G; GRAIN, its old twin, opens as it).  The field drawn as GRAINS FIXED IN THE WORLD.  The box is cut into an
+ * n³ lattice, n = 128·GRAIN^⅓ (so GRAIN is the candidates' density, as a fraction of 128³, and nothing else); each cell holds ONE
+ * candidate, jittered inside the cell's middle 60 % by dustHash — so no two candidates are closer than 0.4 of a cell, the minimum-distance
+ * property that makes a point set BLUE (no clumps, no holes).  A candidate shows with the probability CLOUD's own weight w gives its
+ * point (ρ^SOFT, or (Re ψ)²^SOFT, (Im ψ)²^SOFT, |Δρ|^SOFT under those views) times EXPOSURE, against its own threshold (a second,
+ * decorrelated dustHash draw: the R3 Kronecker lattice was tried and drew planar streaks across the thin tail).  The ray walks every cell it crosses (Amanatides–Woo) and meets each grain ANALYTICALLY — its distance
+ * to the grain's centre, not whether a march step happened to land inside — so nothing depends on the march, the jitter seed or the
+ * present count: a still clock draws still dust, a camera turn moves every grain rigidly, and only the field's own time can make one
+ * come or go (it fades over a narrow band as w crosses its threshold).  A grain's radius is fixed in the world (a fifth of the finest
+ * cell, so GRAIN never changes its size), widened to one pixel at its own depth when it is smaller than that on the screen, its peak
+ * lowered by the area ratio (floored at ½) — a far grain is a dim pixel, never a flicker — and held inside the cell's guard band (⅕ cell)
+ * so the walk sees all of it.  Composited front to back through THE KNEE. */
+fn dustPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, mode: u32, soft: f32, rhoMax: f32, ampMax: f32, refMax: f32, pxA: f32) -> vec4<f32> {
+  let n = clamp(round(128.0 * pow(clamp(V.p3.z, 0.0, 1.0), 1.0 / 3.0)), 8.0, 128.0);
+  let h = 2.0 * half / n;
+  let r0 = 0.2 * (2.0 * half / 128.0);                           // the grain's world radius: fixed (GRAIN moves the count, never the size)
+  let q = V.p3.w;
+  let p0 = ro + rd * t0;
+  var cell = clamp(floor((p0 + vec3<f32>(half)) / h), vec3<f32>(0.0), vec3<f32>(n - 1.0));
+  let stp = select(vec3<f32>(-1.0), vec3<f32>(1.0), rd >= vec3<f32>(0.0));
+  let ird = vec3<f32>(select(1.0 / rd.x, 1e30, abs(rd.x) < 1e-9), select(1.0 / rd.y, 1e30, abs(rd.y) < 1e-9), select(1.0 / rd.z, 1e30, abs(rd.z) < 1e-9));
+  var tNext = ((cell + max(stp, vec3<f32>(0.0))) * h - vec3<f32>(half) - ro) * ird;
+  let tDel = abs(h * ird);
+  var col = vec3<f32>(0.0); var tau = 0.0; var T = 1.0;
+  for (var i = 0u; i < 400u; i++) {
+    let P = (cell + vec3<f32>(0.2) + 0.6 * dustHash(vec3<u32>(cell))) * h - vec3<f32>(half);
+    let qv = P - ro; let tq = dot(qv, rd);
+    if (tq > t0 && tq < tf) {
+      let re = clamp(tq * pxA, r0, 0.2 * h);                    // one pixel at the grain's depth, never past the guard band
+      let d2 = max(dot(qv, qv) - tq * tq, 0.0);
+      if (d2 < re * re) {
+        let uvw = (P + vec3<f32>(half)) / (2.0 * half);
+        var s = textureSampleLevel(psiTex, samp, uvw, 0.0).rg;
+        if (V.p4.w > 0.5) { let ph = dot(V.p4.xyz, P); s = vec2<f32>(s.x * cos(ph) - s.y * sin(ph), s.x * sin(ph) + s.y * cos(ph)); }   // the bow, e^{ik·x}ψ at the grain
+        let tw = dustTint(s, uvw, mode, rhoMax, ampMax, refMax, soft);
+        let u = dustHash(vec3<u32>(cell) + vec3<u32>(7919u, 104729u, 1299709u)).x;   // the candidate's own threshold (a second, decorrelated draw)
+        let show = clamp((min(tw.w * V.p0.y, 1.0) - u) * 16.0, 0.0, 1.0);
+        let k = 1.0 - d2 / (re * re);
+        let a = min(show * k * k * max((r0 * r0) / (re * re), 0.5), 0.98);   // the area ratio, floored at ½ so a lone grain still reads
+        if (a > 0.0) {
+          tau += -log(1.0 - a); let T1 = kneeT(tau, q);
+          col += (T - T1) * tw.rgb; T = T1;
+          if (T < 0.015) { break; }
+        }
+      }
+    }
+    let m = min(min(tNext.x, tNext.y), tNext.z);
+    if (m > tf) { break; }
+    if (tNext.x <= m) { cell.x += stp.x; tNext.x += tDel.x; } else if (tNext.y <= m) { cell.y += stp.y; tNext.y += tDel.y; } else { cell.z += stp.z; tNext.z += tDel.z; }
+    if (any(cell < vec3<f32>(0.0)) || any(cell > vec3<f32>(n - 1.0))) { break; }
+  }
+  return vec4<f32>(col, 1.0 - T);
+}
 @fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
+  let pxA = abs(dpdy(in.uv.y)) * V.up.w;                          // DUST: one pixel's angle (uniform control flow: before any branch)
   let half = V.cam.w;
   let ro = V.cam.xyz;
   let rd = normalize(V.fwd.xyz + in.uv.x * V.right.w * V.right.xyz + in.uv.y * V.up.w * V.up.xyz);
@@ -468,6 +570,14 @@ fn bayer8(px: vec2<f32>) -> f32 {
   let rhoMax = max(bitcast<f32>(stats[0]), 1e-30);
   let ampMax = sqrt(rhoMax);
   let refMax = max(bitcast<f32>(stats[1]), 1e-30);
+  if (style == 2u || style == 5u) {                               // DUST (a retired GRAIN, 2, draws as DUST)
+    let d = dustPixel(ro, rd, t0, tf, half, mode, soft, rhoMax, ampMax, refMax, pxA);
+    var od = pow(max(d.rgb + bg * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
+    od = select(od, bg, od != od);
+    return vec4<f32>(od + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
+  }
+  let kq = V.p3.w;                                                // THE KNEE's q (0 at the shipped 0.6: the old compositing, untouched)
+  var tau = 0.0;
   var col = vec3<f32>(0.0); var alpha = 0.0;
   var t = t0 + ds * hash(in.pos.xy + vec2<f32>(V.p0.w));
   let stepN = ds / (2.0 * half);        // step as a fraction of the box
@@ -516,11 +626,11 @@ fn bayer8(px: vec2<f32>) -> f32 {
        1 SOLID  a bounded plateau: opacity is a smooth band about the iso level, so turning EXPOSURE up moves the
                 surface inward instead of filling the box — the blob has an asymptotic limit and never glows the
                 whole field.  Shaded by the density gradient, so it reads as a lit surface.
-       2 GRAIN  the same field drawn as noisy particles: a per-voxel hash keeps a fraction of the samples, so the
-                cloud is stippled rather than smooth.  Bounded the same way.
-       In every style the accumulated weight passes through a SATURATION KNEE w ↦ w/(1+kw), which is what makes
-       the limit asymptotic: as exposure → ∞ the opacity of a step tends to a finite ceiling, not to 1. */
-    let knee = max(V.p3.w, 1e-4);
+       2 GRAIN  retired (iteration 008 G): it opens as DUST, which returned before this march (dustPixel).
+       Each step's weight passes through the bounded transfer w ↦ w/(1 + 0.6w), a step's own ceiling.  Its 0.6 was KNEE's seat until
+       iteration 008 G, and is now fixed: it bounded the step and never the ray (a dense core still saturated), so turning it did
+       nothing the eye could see.  KNEE is now THE KNEE on the accumulated opacity, below (kneeT). */
+    let knee = 0.6;
     let baseColour = c;
     var wEff = w / (1.0 + knee * w);                       // the bounded transfer: wEff < 1/knee always
     if (style == 1u) {
@@ -538,25 +648,17 @@ fn bayer8(px: vec2<f32>) -> f32 {
       wEff = smoothstep(iso * 1.5, iso * 5.0, mag) * 2.2;
       if (wEff > 0.02) { if (V.p6.w < 1.5) { c = overlay(c, litAt(uvw)); } }
     } else if (style == 4u) {
-      /* BANDS: the wave's own level lines — a cosine comb on |ψ| (or |Re ψ|, |Im ψ|), 2–16 bands set by the GRAIN
-         knob; the stripes are where the amplitude crosses each level, an interference-fringe reading of the field */
+      /* BANDS (iteration 008 G): the field's own level surfaces, ONE PER OCTAVE of the density (ρ, or (Re ψ)², (Im ψ)² under
+         the signed views) and anchored at ISO — a line at ρ = ISO·2^k for every k — so the band SOLID and SHELL draw is one of
+         them and an exponential tail reads as evenly spaced shells: the falloff made countable, which no other style shows.
+         Seven octaves below ISO fade out (the comb would only alias toward a node).  GRAIN no longer sets their count. */
       let sv = select(s.y, s.x, mode == 2u) / ampMax;
-      let mag = select(dot(s, s) / rhoMax, abs(sv), mode == 2u || mode == 3u);
-      let nb = 2.0 + 14.0 * clamp(V.p3.z, 0.0, 1.0);
-      let band = 0.5 + 0.5 * cos(6.283185307 * nb * mag);
-      wEff = wEff * pow(band, 3.0) * 2.0;
-    } else if (style == 2u) {
-      let keep = clamp(V.p3.z, 0.0, 1.0);
-      let cell = floor(uvw * 96.0 + vec3<f32>(V.p0.w * 7.0));
-      if (hash3(cell) > keep) { wEff = 0.0; } else { wEff = wEff * (1.0 / max(keep, 0.02)); }
+      let mag = select(dot(s, s) / rhoMax, sv * sv, mode == 2u || mode == 3u);
+      let oct = log2(max(mag, 1e-30) / max(V.p3.y, 1e-6));
+      let band = 0.5 + 0.5 * cos(6.283185307 * oct);
+      wEff = wEff * pow(band, 4.0) * 2.0 * smoothstep(-7.0, -5.0, oct);
     }
-    if (style == 5u) {
-      // World-locked grains: the paused cloud and a deterministic export share the same dust.
-      let cell = floor(uvw * 144.0);
-      let keep = max(.02, V.p3.z * .25);
-      let delta = fract(uvw * 144.0) - vec3<f32>(.5);
-      wEff *= select(0.0, 1.0 / keep, hash3(cell) < keep && dot(delta,delta) < .16);
-    } else if (style == 6u) {
+    if (style == 6u) {
       let rho = dot(s,s) / rhoMax;
       let iso = max(V.p3.y, .000001);
       let shell = exp(-pow((rho - iso) / (iso * .32), 2.0));
@@ -579,9 +681,14 @@ fn bayer8(px: vec2<f32>) -> f32 {
       col += a * c;
       // Do not terminate on one saturated channel: the remaining samples
       // can still change the other channels, including after gamma/dither.
-    } else {
+    } else if (kq == 0.0) {
       col += (1.0 - alpha) * a * c;
       alpha += (1.0 - alpha) * a;
+      if (alpha > 0.985) { break; }
+    } else {                                                      // THE KNEE: the transmittance is T_q(τ), not exp(−τ)
+      let T0 = kneeT(tau, kq); tau += wEff * sigma * stepN * 4.0; let T1 = kneeT(tau, kq);
+      col += (T0 - T1) * c;
+      alpha = 1.0 - T1;
       if (alpha > 0.985) { break; }
     }
     t += ds;
@@ -1210,7 +1317,7 @@ export async function createField(canvas, opts = {}) {
     v[16] = mat.view | 0; v[17] = mat.exposure; v[18] = mat.softness; v[19] = (stats.presents % 97) / 97;
     v[20] = mat.slice ? mat.slice.mode | 0 : 0; v[21] = mat.slice ? mat.slice.axis | 0 : 2; v[22] = mat.slice ? mat.slice.pos : 0; v[23] = mat.slice ? mat.slice.thick : 0.03;
     v[24] = mat.hueShift || 0; v[25] = mat.invert ? 1 : 0; v[26] = mat.paletteOn ? 1 : 0; v[27] = mat.dither || 0;   // wave 54: the DITHER amplitude in LSB (p0.w keeps the ray-march jitter seed)
-    v[28] = mat.style | 0; v[29] = mat.iso === undefined ? 0.06 : mat.iso; v[30] = mat.grain === undefined ? 0.35 : mat.grain; v[31] = mat.knee === undefined ? 0.6 : mat.knee;
+    v[28] = mat.style | 0; v[29] = mat.iso === undefined ? 0.06 : mat.iso; v[30] = mat.grain === undefined ? 0.35 : mat.grain; v[31] = kneeQ(mat.knee);   // iteration 008 G: THE KNEE's q, 0 at 0.6
     const bon = mat.boost && mat.boost.on, bk = bon ? mat.boost.k : null;
     v[32] = bon ? bk[0] : 0; v[33] = bon ? bk[1] : 0; v[34] = bon ? bk[2] : 0; v[35] = bon ? 1 : 0;
     const bgc = mat.bg || DEFAULT_BG;

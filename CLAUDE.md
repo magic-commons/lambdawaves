@@ -304,7 +304,7 @@ Re/Im; palette OFF retains the old colors. Keep
 `tests/official-defaults-palette.browser-test.mjs` green when editing either. Since iteration 008 (W) WAVE's OBSERVABLE is
 DENSITY · PHASE · RE · IM (`field.js` `WAVE_VIEWS`; `waveView()` maps a saved Re+Im (index 5, gone from the shader) to PHASE and a
 saved Δρ (4, kept in the shader) to DENSITY, said once in STATE's status); DITHER is a PREFERENCE under SETTINGS › QUALITY (FIELD_CHROME);
-CLIP is an ON switch with its lamp and the kind CLIP | SLAB (`mat.slice.mode` 0 · 1 · 2 unchanged).
+CLIP is an ON switch with its lamp and the kind CLIP | SLAB (`mat.slice.mode` 0 · 1 · 2 unchanged). Since iteration 008 G DRAW's styles are CLOUD · SOLID · SIGNED · DUST · BANDS: DUST is the one world-locked particle style (a lattice of n³ cells, n = 128·GRAIN^⅓ — GRAIN is the grain count and nothing else — one grain per cell met by exact distance, so neither the jitter seed nor a camera turn moves the pattern), GRAIN is retired (`field.js` `drawStyle()` maps its saved index 2 to DUST on every road in, said once), BANDS is one level surface per octave of the density anchored at ISO, and KNEE shapes the ray's accumulated opacity T_q(τ) = (1+qτ)^(−1/q) with q = ln(KNEE/0.6) — at the default 0.6 the old lines run and the shipped picture is bit-identical; `FLASH_STEP`'s knee step is 0.2723 from `tools/flash-calibrate.mjs`.
 
 Every stored key lives in exactly one of three scopes (`docs/STATE-SCOPES.md`,
 0.3.1): PREFERENCE (the reader's furniture: theme, glass, hints, keys, the
@@ -433,7 +433,7 @@ cross-module writes, forward + shared ≤ 25 per moving module; the loop and the
 `appFiles()` fetched in the page: rack.js, then every module under `lab/windows/` and `lab/shell/`), never `lab/rack.js` alone.
 `tests/lw-facade.browser-test.mjs` pins `window.__LW` — names, kinds (get / method / value) and order — against
 `research/release-0.5.2/lw-facade.json`; a row that changes the facade re-captures it with `--write` and says the diff. THE LOCK is SAME-MACHINE
-(843 + 987 values since iteration 008 W took Re+Im's 17 style rows out of each fixture — once 860 + 1004; ≤ 64 AO tile states; no time-dependent molecular packet, STATES run, FLOW or `record()` is in it). Its 1004-value
+(843 + 987 values since iteration 008 W took Re+Im's 17 style rows out of each fixture — once 860 + 1004; iteration 008 G re-captured the 15 particle rows `styles.{density,phase,real,imag,diff}/{grain,dust,bands}` by name, the counts unchanged; ≤ 64 AO tile states; no time-dependent molecular packet, STATES run, FLOW or `record()` is in it). Its 1004-value
 fixture (`research/release-0.4.0/measure/digest-lock-s4a.json`) predates the gas table and is checked WITH `--query gastab=0`, as the tool's
 header says; without it the gas states read red at every grid.
 
