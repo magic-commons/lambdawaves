@@ -39,16 +39,19 @@ a restored project whose field owner is MOLECULES brings them back onto the rack
 TWO MODES, ATOMS | MOLECULES (`#lwMode` under the title, windows/molecules.js
 `moleculeMode`): the mode IS MOLECULES ON, and each mode HIDES the other's
 windows — ATOMS: SPECTRUM, STATE, EQUALIZER and the atomic instruments;
-MOLECULES: MOLECULES and MO-REGISTRY (hidden, never closed or moved). Its REGISTRY ON switch sits beside the
+MOLECULES: the one MOLECULES card (hidden, never closed or moved). Its REGISTRY ON switch sits beside the
 ORBITAL | STATES seg (registerview.js). Long windows fold their details behind
 one chevron (`lab/fold.js`, `.lw-fold`): MOLECULES, SHADOW, CAMERA, MO-REGISTRY. MOLECULES' first row is the SECTION header, which is the library's page turner (0.4.0 S4b; 0.5.3 M8, as Josh drew it): the kit's `stepper` in PALETTE's preset look (‹ NAME ›, a whole line; its name opens the kit's list, its hover carries the section's record line, `__LW.chem.section().sub`), then INSTALLED, whose lamp says every record of the section is on this device and whose press installs or removes them all (shown only for a section with records), beside MOLECULES ON; the MOLECULE picker below is a second stepper whose name IS the `<select>` (optgroups, disabled reasons and native keys kept; ‹ › and ← → walk the page's enabled rows as a hand pick) and holds that one section
 (DIATOMICS · HYDRIDES · ORGANIC · BIO · LATTICE · HEAVY, `lab/molecules.js`
 SECTIONS), a pick elsewhere turns the page, and the page is never saved. A
 library record ships only through `tools/orbital-library.mjs`'s diversity
 gate, and a molecule past the live cap opens only from its record (DOWNLOAD,
-never DISABLED). Since iteration 007 M the card reads top to bottom INSTALLED · MOLECULES ON (`.mol-top`), ‹ SECTION ›, ‹ MOLECULE ›,
-BASIS, VIEW in two rows of three (`.mol-view`), then METHOD · VALENCE or the ORBITAL dial (one seat, 0.4.0 S4c) · the fold's chevron
-(five lines at 300 px and at phone width, 0.5.3 M8; INSTALLED and MOLECULES ON head the card, no longer between the steppers)
+never DISABLED). Since iteration 008 U MOLECULES is THE ONE CARD: MOLECULES ON · ORBITAL | STATES (`.mol-top`), the register's ladder right
+under it (`.mol-reg`; MO-REGISTRY's `orbitals` seat retired through RETIRED_WINDOWS, its ids and `reg.*` targets kept), then ‹ SECTION ›,
+‹ MOLECULE › (a record-only molecule's download glyph in its name), BASIS, VIEW in two rows of three (`.mol-view`: DENSITY · ORBITAL ·
+REGISTRY / ESP · SPIN · Δ LDA−RHF), METHOD · VALENCE or the ORBITAL dial (one seat, 0.4.0 S4c) and the fold (five lines at 300 px and at
+phone width, 0.5.3 M8). MOLECULES ON IS REGISTRY ON: a register has the field under VIEW REGISTRY and its pane; Δρ is a switch beside
+KICK; a hand stroke normalises the register at its end and picks VIEW REGISTRY; EMPTY ↔ FILL ALL is one button; NORM is gone
 MOLECULES keeps KICK / RUN / TDA / the spectra in the `.mol-more` fold: open
 on a desktop, folded on a phone or tablet, its state in the card's WORKSPACE
 record (`more`); its `Aa` stays visible with HELP off. THE CHEM WORKER REFUSES (0.5.4 P6, `lab/worker-pool.js`): once it has answered, an error or a
