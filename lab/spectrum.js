@@ -11,7 +11,7 @@
  * keep the labels' coefficients under a caption, and the RATE knobs stand down (api.rateDisabled) with a note.
  */
 import { BASIS, energy, HARTREE_EV } from './hydrogen.js';
-import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover } from './mir/kit.js';
+import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, sw } from './mir/kit.js';
 import { paintStroke } from './paint-stroke.js';
 
 /* THE LADDER IS A CANVAS, AND A CANVAS HAS NO THEME (wave 44).  Every rule here was written in
@@ -36,11 +36,29 @@ function readRGB(g, name, fallback) {
 export function createSpectrum(host, api) {
   const ladder = el('div', 'ladder', host);
   const lcv = el('canvas', '', ladder);
+  /* iteration 008 S · THE PRESET, at the head (it left STATE): the kit's stepper in PALETTE's preset look over the same list; ← → and a pick
+     load a preset by the hand's road (api.loadPreset: THE FADE announces it), a pick of the preset already shown is RELOAD; VISUALS is STATE's
+     PRESET VISUALS (a preset also sets its view, rate and window).  A register that is no preset reads '—' (the select's blank). */
+  const pre = el('div', 'row tight sp-preset', host), DASH = { id: '', label: '—', coming: true }, PRE = (api.presets || []).map((p) => ({ id: p.id, label: p.label }));
+  const preStep = stepper({ aria: 'preset superposition', items: [...PRE, DASH], value: '', cls: 'mol-step', onChange: (id) => { if (id && api.loadPreset) api.loadPreset(id); } });
+  preStep.name.title = 'the preset superpositions — a pick of the one shown reloads it and resets time';
+  preStep.name.addEventListener('click', () => { const pane = [...document.querySelectorAll('.mir-pick')].pop(), on = pane && pane.querySelector('.mir-pick-i.on');
+    if (on) on.addEventListener('click', () => { if (preStep.get() && api.loadPreset) api.loadPreset(preStep.get()); }); });   // RELOAD: the stepper ignores a pick of its own value
+  const preVis = sw({ label: 'VISUALS', value: true, title: 'PRESET VISUALS — a preset also sets its view, its rate and its window', onChange: (v) => { api.visuals = v; } });
+  pre.append(preStep.root);
+  /** `ui.presetSel` keeps the select's two words (persist.js and the one road write `.value`, the old note is the hover) */
+  const preset = { root: preStep.root, get value() { return preStep.get(); }, set value(id) { const v = PRE.some((p) => p.id === id) ? id : ''; preStep.setItems(v ? PRE : [...PRE, DASH], v); },
+    set note(t) { preStep.name.title = t || ''; } };
   const head = el('div', 'row tight sp-head', host);
   const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'Hide or show the channels';
   const addBtn = el('button', 'trig', head); addBtn.type = 'button'; addBtn.innerHTML = '<span class="trig-g">+</span><span class="trig-l">MODE</span>';
-  const clrBtn = el('button', 'trig', head); clrBtn.type = 'button'; clrBtn.textContent = 'CLEAR'; clrBtn.title = 'c ↦ 0 for every label';
-  const nrmBtn = el('button', 'trig', head); nrmBtn.type = 'button'; nrmBtn.textContent = 'NORM'; nrmBtn.title = 'Normalize';
+  /* iteration 008 S · EMPTY ↔ FILL ALL (row U's pattern for the registry): ONE two-state button — a register with anything in it shows EMPTY
+     (c ↦ 0, SPECTRUM's old CLEAR), an empty one FILL ALL (all 91 labels, equal and in phase, normalised); one undo row each.  NORM went: a
+     HAND stroke on the grid normalises at its end (below), a modulator never does. */
+  const fillBtn = el('button', 'trig sp-fill', head); fillBtn.type = 'button';
+  const paintFill = (n) => { const empty = !n; if (fillBtn.dataset.empty === String(empty)) return; fillBtn.dataset.empty = String(empty);
+    fillBtn.textContent = empty ? 'FILL ALL' : 'EMPTY'; fillBtn.title = empty ? 'every label on, equal and in phase, normalised' : 'c ↦ 0 for every label'; };
+  paintFill(0); head.appendChild(preVis.root);
   const info = el('div', 'note', head);
   /* ── WAVE 69 · THE REGISTER'S OWN LAW, LIVE ────────────────────────────────────────────────────
    * `c(t) = e^{−iE t} c(0)` is not a caption here, it is what the evolution IS — one phase per mode,
@@ -54,8 +72,9 @@ export function createSpectrum(host, api) {
     ['<m>E = </m>', { s: 'E' }, '<m>   t = </m>', { s: 't' }, '<m>   arg c = </m>', { s: 'arg' }, '<m>   |c| = </m>', { s: 'mag' }] ] });
   const cap = el('div', 'sp-cap', host); cap.hidden = true;                          // W-STURMIAN: the caption over the lanes when the basis is not orthogonal (its own class: the ⓘ sweep folds every .note away)
   hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', !rowsEl.hidden); hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', String(!rowsEl.hidden)); });
-  clrBtn.addEventListener('click', () => { if (api.clear) api.clear(); });
-  nrmBtn.addEventListener('click', () => { if (api.normalize) api.normalize(); });
+  /* the press reads the register itself (the label is repainted by rebuild(), which a folded or paused card may not have run yet) */
+  fillBtn.addEventListener('click', () => { if (api.reg.populated().length) { if (api.clear) api.clear(); } else if (api.fillAll) api.fillAll(); paintFill(api.reg.populated().length); });
+  fillBtn.addEventListener('pointerenter', () => paintFill(api.reg.populated().length));
   const rowsEl = el('div', 'sp-rows', host);
 
 
@@ -72,15 +91,19 @@ export function createSpectrum(host, api) {
     for (const s of BASIS) if (s.n === n) {
       const b = el('button', 'pk-c', cs, s.label); b.type = 'button'; b.title = `${s.id}  E = ${s.E.toFixed(5)}`;
       b.dataset.a = String(s.index);
-      b.addEventListener('click', () => api.toggleMode(s.index));       // the keyboard's road; a pointer is answered by the paint stroke below
+      b.addEventListener('click', () => { api.toggleMode(s.index); if (api.settle) api.settle(); });       // the keyboard's road (a hand: normalised); a pointer is answered by the paint stroke below
       chips.set(s.index, b);
     }
   }
   /* 2026-10 (Josh) · PAINT THE GRID (lab/paint-stroke.js): LEFT adds a state, RIGHT removes it; a drag takes every chip it
      crosses.  The chips are DOM, so the stroke is sampled every 6 px and asked of elementFromPoint. */
   const chipAt = (p) => { const c = document.elementFromPoint(p.x, p.y), b = c && c.closest ? c.closest('.pk-c') : null; return b && picker.contains(b) ? [+b.dataset.a] : []; };
-  paintStroke(picker, { at: chipAt, apply: (as, add) => { if (api.paintModes) api.paintModes(as, add); },
+  let painted = false;
+  paintStroke(picker, { at: chipAt, apply: (as, add) => { if (api.paintModes && api.paintModes(as, add)) painted = true; },
     across: (a, b) => { const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 6), out = []; for (let i = 1; i < n; i++) out.push(...chipAt({ x: a.x + (b.x - a.x) * i / n, y: a.y + (b.y - a.y) * i / n })); return out; } });
+  /* iteration 008 S · A HAND STROKE NORMALISES AT ITS END: after paintStroke's own pointerup (registered first, so it has applied the tap), inside
+     the undo hold (history.js commits on the next task), so the stroke and its normalisation are one row; a modulator's write never comes here */
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) picker.addEventListener(type, () => { if (!painted) return; painted = false; if (api.settle) api.settle(); });
   const lanes = new Map();     // index → the lane that IS built and in the DOM
   let selected = -1, lastVersion = -1;
   /* ── THE REBUILD IS INCREMENTAL, AND THE BOOKKEEPING IS NOT (wave 49) ────────────────────────────────
@@ -214,6 +237,7 @@ export function createSpectrum(host, api) {
     for (const [a, b] of chips) b.classList.toggle('on', keep.has(a));
     const rs = reg.renderSet();
     const levels = Object.keys(groupByN(want)).length;
+    paintFill(want.length);
     info.textContent = `${want.length} populated · ${rs.rendered} rendered · ${levels} level${levels === 1 ? '' : 's'}`;
     { const HS = api.hamiltonian ? api.hamiltonian() : null, eig = !!(HS && HS.eigen);                          // W-STURMIAN: the caption and the ladder's affordance
       cap.hidden = !eig; if (eig) cap.textContent = HS.caption || 'non-orthogonal basis: populations are projections';
@@ -368,7 +392,7 @@ export function createSpectrum(host, api) {
   window.addEventListener('resize', () => paintLadder());
   /* the DIALS fold is project state (a demo opens with its lanes shown or folded as it was saved) */
   const setDials = (on) => { rowsEl.hidden = !on; hideBtn.classList.toggle('on', !!on); hideBtn.setAttribute('aria-expanded', String(!!on)); };
-  return { update, rebuild, select, energyText, get selected() { return selected; }, lanes, get building() { return pending.length; },
+  return { update, rebuild, select, energyText, preset, get selected() { return selected; }, lanes, get building() { return pending.length; },
     get dials() { return !rowsEl.hidden; }, setDials,
     openPicker(v = true) { picker.hidden = !v; addBtn.classList.toggle('on', v); }, get pickerOpen() { return !picker.hidden; } };
 }

@@ -49,9 +49,9 @@ try {
 
   /* ── 2 · ONE BANNER, NOT THREE: a hand's preset announces; the undo, a project open and a link open do not ── */
   const t2 = await ev(`const S = __LW.stageText, H = __LW.history, P = __LW.layout.projects, c0 = window.confirm; window.confirm = () => true;
-    const sel = document.querySelector('.dev[data-id="state"] select.sel'); H.flush(); await __w(450); H.flush();
+    const sel = document.querySelector('.dev[data-id="spectrum"] .sp-preset .mir-step-name'); H.flush(); await __w(450); H.flush();   // iteration 008 S: SPECTRUM's ‹ PRESET ›
     const a0 = S.stats.announced;
-    __field(sel, '1s+2s'); await __w(80);
+    sel.click(); await __w(30); document.querySelector('.mir-pick-i[data-id="1s+2s"]').click(); await __w(80);
     const pressed = { banner: S.banner, md: S.md, n: S.stats.announced - a0, heading: getComputedStyle(__node()).fontSize, fades: S.layer.root.querySelectorAll('.mir-info-block[data-fade]').length };
     await __w(520); H.flush();
     const undid = H.undo(); await __w(400);

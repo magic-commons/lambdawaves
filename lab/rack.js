@@ -28,6 +28,7 @@ import { calculusMarkdown, beadOf, covariance } from './calculus.js';
 import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
 import { getHamiltonian, getZ } from './hamiltonian.js';
 import { createStateCard } from './windows/state.js';   // 0.5.2 R2a: the STATE card, out of boot()
+import { createStaticField } from './windows/static-field.js';   // iteration 008 S: the FIELD card (STATE's static field, drives and impulse knobs)
 import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js'; import { createFacade } from './shell/facade.js'; import { createVerbs } from './verbs.js';   // 0.5.2 R3a (edit-domain.js left with the history) · R5 the facade
 import { createCameraLaw } from './camera-law.js'; import { createPicker } from './picker.js';   // iteration 003: THE MAIN MENU; iteration 004: THE PICKER   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
 import { createCurvesPanel } from './mir/panels/curves.js';     // 0.5.1 D10-24: the CURVES card's rows are the kit's panel over the stage canvas
@@ -677,6 +678,9 @@ export async function boot(dom) {
   // SPECTRUM
   const { wSpec, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen,
     periodEnergies, selectEigen, setElement, fillValence, syncEq } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
+
+  // FIELD — the static field, the drives and the impulse's knobs, out of STATE (iteration 008 S)
+  createStaticField(app);   // lab/windows/static-field.js: closed on a first run, an ATOMS window
 
   rack.appendChild(wPal.root); rack.appendChild(wObs.root); rack.appendChild(wCam.root); rack.appendChild(wClip.root);
   rack.appendChild(ui.set.root);

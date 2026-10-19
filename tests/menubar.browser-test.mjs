@@ -133,10 +133,10 @@ try {
     const loaded = __LW.stateDigest() === digest, quickKeysKept = localStorage.getItem(LS_EXP) === beforeLoad[LS_EXP] && localStorage.getItem(LS_PRES) === beforeLoad[LS_PRES];
     /* the clipboard, stubbed: a synthetic click is not a trusted gesture, and what is judged is WHAT the row copies */
     let clip = null; const cb = navigator.clipboard; const orig = cb.writeText; cb.writeText = async (t) => { clip = t; };
-    const rj = await __row('FILE', 'COPY as JSON'); await new Promise((r) => setTimeout(r, 30));
+    const rj = await __row('EDIT', 'COPY as JSON'); await new Promise((r) => setTimeout(r, 30));
     const json = clip; const jsonSame = !!json && JSON.stringify(mask(JSON.parse(json).presentation)) === JSON.stringify(mask(__LW.serialize().presentation)) && JSON.stringify(JSON.parse(json).experiment) === JSON.stringify(__LW.serialize().experiment);
     clip = null;
-    const rk = await __row('FILE', 'COPY a LINK'); await new Promise((r) => setTimeout(r, 30));
+    const rk = await __row('EDIT', 'COPY a LINK'); await new Promise((r) => setTimeout(r, 30));
     const linkSame = !!clip && !!__LW.link.last && clip === __LW.link.last.href && /#s=/.test(clip);
     cb.writeText = orig;
     return { rows: [rs, rl, rj, rk].map((r) => r.found && r.closed && r.listsDown), changed, expSame, presSame, moved, loaded, quickKeysKept, jsonSame, linkSame, errors: __e.slice() };`);

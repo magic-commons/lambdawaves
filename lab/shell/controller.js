@@ -9,7 +9,7 @@
  * long after both modules have run. */
 import { TIER } from '../rack.js';
 import { BASIS } from '../hydrogen.js';
-import { PRESET_BY_ID } from '../state.js';
+import { PRESET_BY_ID, PRESETS } from '../state.js';
 import { createFrameBudget } from '../frame-budget.js';
 import { createOcclusion } from '../occlusion.js';   // 0.5.0 A7: the occlusion providers (KIT BRIEF 8's twin)
 import { createField, VIEW } from '../field.js';
@@ -269,7 +269,7 @@ export async function createController(app) {
     if (domain.auto && nm !== app.state.lastNmax) { app.state.lastNmax = nm; schedule(TIER.REBUILD); }
     else schedule(TIER.RECONSTRUCT);
   }
-  /** a preset into the atom register.  `opt.hand` is the PRESS (the STATE select and RELOAD): only a hand's preset is
+  /** a preset into the atom register.  `opt.hand` is the PRESS (SPECTRUM's ‹ PRESET › and its re-pick, iteration 008 S): only a hand's preset is
    *  announced on the stage (0.4.0 S3 · F2) — the boot, a URL preset, a test, a restore or an undo say nothing */
   function loadPreset(id, opt) {
     const p = PRESET_BY_ID.get(id); if (!p) return false;
@@ -278,7 +278,7 @@ export async function createController(app) {
     reg.load(p); clock.reset(); app.state.lastNmax = -1;
     clock.window = p.visual.window;
     if (app.state.applyVisuals) { clock.setRate(app.loop.paceRate(p.visual.rate)); mat.view = VIEW[p.visual.view]; ui.viewSeg.set(p.visual.view); ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
-    ui.presetSel.value = id; ui.presetNote.textContent = p.note;
+    ui.presetSel.value = id; ui.presetSel.note = p.note;
     setReference();
     app.w.spectrum.select(-1);
     app.w.shadowView.clearTrail();
@@ -319,6 +319,13 @@ export async function createController(app) {
     },
     clear() { reg.clear(); app.state.refSnapshot = null; touchState(); },
     normalize() { app.w.normalizeNow(); },
+    /* iteration 008 S · SPECTRUM's head and grid (they left STATE): the preset list, a HAND's preset, PRESET VISUALS; FILL ALL (every label at
+       clock.t, equal and in phase, normalised — the norm the metric in force reads); settle(), the quiet normalisation a hand stroke ends with */
+    presets: PRESETS.map((p) => ({ id: p.id, label: p.label })),
+    loadPreset(id) { return loadPreset(id, { hand: true }); },
+    get visuals() { return app.state.applyVisuals; }, set visuals(v) { app.state.applyVisuals = !!v; },
+    fillAll() { for (let a = 0; a < BASIS.length; a++) reg.set(a, 1, 0, clock.t); reg.normalize(); touchState(); },
+    settle() { if (!reg.populated().length) return; reg.normalize(); touchState(); },
     rateOf(a) { return rates[a]; },
     setRate(a, r) {
       if (reg.P) return false;                                       // W-STURMIAN (and 0.8.0 INTER-SHELL, any propagator): RATE is a diagonal-phase feature — off under the scale

@@ -894,6 +894,7 @@ export const PLANNED = {
   film: { title: 'FILM / capture (filmHold stays)', row: 'R2c', file: 'lab/windows/film.js' },
   state: { title: 'STATE', row: 'R2a', file: 'lab/windows/state.js' },
   spectrum: { title: 'SPECTRUM (the five appends stay)', row: 'R2a', file: 'lab/windows/spectrum.js' },
+  staticfield: { title: 'FIELD (STATE\'s static field, drives and impulse knobs)', row: 'it008 S', file: 'lab/windows/static-field.js' },
   readouts: { title: 'SHADOW·ORBIT·VORTEX·PLANE + CALC·METERS·LADDER + ATOMS·WIGNER·RADIATION', row: 'R2b', file: 'lab/windows/readouts.js' },
   molecules: { title: 'MOLECULES · session · head + MO-REGISTRY', row: 'R2d', file: 'lab/windows/molecules.js' },
   'stage-words': { title: 'the stage text + the caption', row: 'R2d', file: 'lab/shell/stage-words.js' },
@@ -924,6 +925,7 @@ export const PLANNED_CUT = [
   [/^ {2}createFieldQuality\(\);/, 'settings-card'],                                 // the SETTINGS card's second seat: FIELD QUALITY
   [/^ {2}\/\/ STATE — preparation/, 'state'],                                       // the seat (0.5.2 R2a: the card and its CLEAR are lab/windows/state.js)
   [/^ {2}\/\/ SPECTRUM$/, 'spectrum'],                                              // the seat (0.5.2 R2a: lab/windows/spectrum.js)
+  [/^ {2}\/\/ FIELD — the static field/, 'staticfield'],                            // the seat (iteration 008 S: lab/windows/static-field.js)
   [/^ {2}rack\.appendChild\(wPal\.root\); rack\.appendChild\(wObs\.root\)/, 'boot'],   // the five appends stay at their seat
   [/^ {2}\/\* THE ABOUT FACE LIVES IN THE NOTEBOOK GLASS/, 'spectrum'],
   [/^ {2}\/\/ SHADOW$/, 'readouts'],

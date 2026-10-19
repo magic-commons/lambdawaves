@@ -104,6 +104,7 @@ export function createSpectrumCard(app) {
   api.unit = () => (getHamiltonian().unit === 'hartree' ? 'Eh' : getHamiltonian().unit);
   api.labelOf = (s) => getHamiltonian().labelOf(s);
   const spectrum = createSpectrum(wSpec.body, api);
+  ui.presetSel = spectrum.preset;   // iteration 008 S: the ‹ PRESET › stepper at the head (it left STATE); persist.js and the one road write its .value
   app.w.spectrum = spectrum; app.w.setSturmian = setSturmian; app.w.sturmEigen = sturmEigen; app.w.selectEigen = selectEigen;
   /* 0.6.0 B2 · THE BEAT EQUALIZER (lab/equalizer.js) under the ladder.  Cell (n, n′) of the 6 × 6 grid is the pair's beat in the picture,
      |Γ_nn′|·√(w_n w_n′) (w the shell populations), its colour the beat's log third — |ΔE| < 0.0263 Eh magenta, < 0.1130 orange, else yellow

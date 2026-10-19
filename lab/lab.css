@@ -844,3 +844,11 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
    squeezed to one letter beside THIS VIEW · COPY · JSON.  The card is always that narrow: the stacked rows, unconditionally (a MIR issue) */
 .mir-render[data-seat="card"] .sr-subject-head, .mir-render[data-seat="card"] .sr-verbs { grid-column: 1 / -1; }
 .mir-render[data-seat="card"] .sr-verbs .trig { flex: 1 1 0; }
+
+/* iteration 008 S · FIELD (lab/windows/static-field.js): the IMPULSE fold's head is its label and the one chevron (a native-clean row would
+   stretch the chevron like a trigger); SPECTRUM's ‹ PRESET › head is one whole line */
+.lw-field-head { justify-content: space-between; }
+.lw-field-head > .grp-lbl { flex: 1 1 auto; margin: 0; }
+.native-clean .row > .trig.lw-fold { flex: 0 0 30px; }
+.sp-preset > .mir-step { flex: 1 1 auto; }
+.native-clean .sp-head > .sw { padding: 0 3px; font-size: 9px; min-width: 0; gap: 4px; justify-content: center; }
