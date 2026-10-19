@@ -28,9 +28,11 @@ export const WAVE_VIEWS = Object.freeze(['density', 'phase', 'real', 'imag']);
 export function waveView(v) { const n = typeof v === 'number' ? (v === 5 ? 'reim' : VIEW_NAMES[v]) : String(v); return WAVE_VIEWS.includes(n) ? n : n === 'reim' ? 'phase' : n === 'diff' ? 'density' : null; }
 /** how the same observable is DRAWN: a cloud, a bounded plateau (lit surface), world-locked grains (DUST), octave bands …
  *  iteration 008 G: GRAIN (2) joined DUST — its index stays retired, never reused (the shader draws a stray 2 as DUST) and a saved one
- *  opens as DUST; drawStyle() is that one mapping, for every road in. */
-export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4, dust: 5, glass: 6, additive: 7 };
-export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust', 'glass', 'additive'];
+ *  opens as DUST; drawStyle() is that one mapping, for every road in.
+ *  iteration 010 X7: SHELL ± (`glassSigned`, 8) is APPENDED — never renumber — SIGNED's lobes through SHELL's transfer; a build older
+ *  than it reads a saved 8 as an unknown style, so drawStyle() opens it as CLOUD there. */
+export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4, dust: 5, glass: 6, additive: 7, glassSigned: 8 };
+export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust', 'glass', 'additive', 'glassSigned'];
 /** a saved or named style (an index or a name) → the style it opens as: GRAIN → DUST, an unknown one → CLOUD */
 export function drawStyle(v) { const n = typeof v === 'number' ? STYLE_NAMES[v] : String(v); return n === 'grain' ? 'dust' : STYLE[n] === undefined ? 'cloud' : n; }
 /** THE KNEE's default (008 Q, Josh 10-19: "somewhat opaque but slightly see-through"): 3, a soft shoulder — measured at EXPOSURE 1, the
@@ -681,6 +683,22 @@ fn dustPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, mode: u3
       // A glass finish on the selected shape, including signed nodal lobes.
       wEff *= .22;
       if (wEff > 0.0) { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .45, 0.0, .65)); }
+    }
+    if (style == 8u) {
+      /* SHELL ± (iteration 010 X7, Josh 10-19: "Shell look with the Signed geometry"): SIGNED's measure — |ψ| under DENSITY and
+         PHASE, |Re ψ| or |Im ψ| under RE and IM, so each signed lobe is its own body and the nodal surfaces stay open between them —
+         through SHELL's transfer: SHELL's Gaussian (relative width 0.32, read on the measure squared as SHELL reads ρ), its 0.7 weight,
+         its light toward white, no glass finish and the matte drop (both below).  The level is SIGNED's visible surface: 2.5·ISO on
+         the amplitude (inside its smoothstep(1.5·ISO, 5·ISO)), where the shell's silhouette met SIGNED's within 4 px on 2p₀ and 3d₂
+         (research/iteration-010/X7-BUILD.md).  Inserted here, after the glass finish, so no line of another style moved. */
+      let sv = select(s.y, s.x, mode == 2u) / ampMax;
+      let mag = select(sqrt(dot(s, s) / rhoMax), abs(sv), mode == 2u || mode == 3u);
+      let lvl = max(V.p3.y, 1e-6) * 2.5;
+      let l2 = lvl * lvl;
+      let shell = exp(-pow((mag * mag - l2) / (l2 * .32), 2.0));
+      wEff = shell * .7;
+      c = baseColour;
+      if (shell > 0.0) { c = mix(c, vec3<f32>(1.0), clamp(litAt(uvw) * .65, 0.0, 1.0)); }
     }
     if (V.p6.w > 1.5) { c = baseColour; }
     let a = 1.0 - exp(-wEff * sigma * stepN * 4.0);

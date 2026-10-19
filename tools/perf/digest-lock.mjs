@@ -190,7 +190,7 @@ async function state(name, grids) {
 }
 async function styles() {
   await base(); await freeze(3.7); await atGrid(96);
-  const out = {}, VN = fm.VIEW_NAMES, SN = fm.STYLE_NAMES;
+  const out = {}, VN = fm.VIEW_NAMES, SN = fm.STYLE_NAMES.slice(0, 8);   // iteration 010 X7: the eight styles the lock was captured on; a style appended later (SHELL ±, 8) adds no leaf
   const cap = async (key, set) => { restoreMat(); set(); out[key] = (await rp(1024, 640)).hash; };
   for (let v = 0; v < VN.length; v++) for (let s = 0; s < SN.length; s++) await cap(VN[v] + '/' + SN[s], () => { LW.mat.view = v; LW.mat.style = s; });
   const FL = {
