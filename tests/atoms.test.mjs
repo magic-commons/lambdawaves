@@ -45,14 +45,14 @@ function quad(r, f) {
     worst < 1e-6 && rows.every((r) => r.nodes === r.want), { worst: worst.toExponential(2), rows: rows.map((r) => [r.nl, r.err.toExponential(1), r.nodes]) });
 }
 
-/* ══ 1. the table: Z = 1…36, Aufbau with the two exceptions ════════════════════════════════════════════════ */
+/* ══ 1. the table: Z = 1…86 (iteration 008 A: to Rn), Aufbau with the two exceptions below Kr ════════════════════════════════════════════════ */
 {
-  const okLen = ATOMS.length === 36 && ATOMS.every((a, i) => a.Z === i + 1);
+  const okLen = ATOMS.length === 86 && ATOMS.every((a, i) => a.Z === i + 1);
   const okSum = ATOMS.every((a) => a.config.reduce((s, c) => s + c.occ, 0) === a.Z);
   const okCap = ATOMS.every((a) => a.config.every((c) => c.occ > 0 && c.occ <= 2 * (2 * c.l + 1) && c.l < c.n));
-  const sym = [1, 2, 10, 18, 21, 24, 29, 36].map((Z) => atom(Z).symbol).join(' ');
-  judge('THE TABLE: 36 atoms H…Kr, every configuration sums to Z, no shell over 2(2l+1), l < n',
-    okLen && okSum && okCap && sym === 'H He Ne Ar Sc Cr Cu Kr', { sym, len: ATOMS.length });
+  const sym = [1, 2, 10, 18, 21, 24, 29, 36, 47, 79, 86].map((Z) => atom(Z).symbol).join(' ');
+  judge('THE TABLE: 86 atoms H…Rn, every configuration sums to Z, no shell over 2(2l+1), l < n',
+    okLen && okSum && okCap && sym === 'H He Ne Ar Sc Cr Cu Kr Ag Au Rn', { sym, len: ATOMS.length });
   const cr = atom(24).config, cu = atom(29).config, v = atom(23).config;
   const occ = (cfg, n, l) => (cfg.find((c) => c.n === n && c.l === l) || { occ: 0 }).occ;
   judge('THE TWO EXCEPTIONS: Cr is 3d⁵ 4s¹ and Cu is 3d¹⁰ 4s¹ (not 3d⁴4s² / 3d⁹4s²), while V between them stays plain Aufbau 3d³ 4s²',
@@ -145,7 +145,7 @@ function quad(r, f) {
 {
   let worstNorm = 0, worstCharge = 0, worstRes = 0, bad = [], slow = 0, totalIt = 0;
   const totals = [];
-  for (const A of ATOMS) {
+  for (const A of ATOMS.slice(0, 36)) {                 // H…Kr: the past-Kr sweep is a hand run (research/iteration-008/A-BUILD.md), 12 s here
     const t = Date.now(), S = solveAtom(A.Z);
     slow = Math.max(slow, Date.now() - t); totalIt += S.iterations;
     worstCharge = Math.max(worstCharge, Math.abs(S.electrons - A.Z));
@@ -162,7 +162,7 @@ function quad(r, f) {
   judge('AND ALL 36 CONVERGE: ∫q dr = Z to 1e-7 for every atom and every SCF residual max|ΔV·r| is below 1e-8',
     worstCharge < 1e-7 && worstRes < 1e-8, { worstCharge: worstCharge.toExponential(2), worstResidual: worstRes.toExponential(2), meanIterations: Math.round(totalIt / 36), slowestAtomMs: slow });
   judge('THE TOTALS FALL MONOTONICALLY WITH Z (a shell added is never a bond broken) and Kr lands at −2746.855 Eh',
-    ATOMS.every((A, i) => i === 0 || solveAtom(A.Z).E < solveAtom(A.Z - 1).E) && near(solveAtom(36).E, -2746.855, 0.01),
+    ATOMS.slice(0, 36).every((A, i) => i === 0 || solveAtom(A.Z).E < solveAtom(A.Z - 1).E) && near(solveAtom(36).E, -2746.855, 0.01),
     { first: totals.slice(0, 3), last: totals.slice(-3) });
 }
 

@@ -7,7 +7,7 @@ import { createEqualizer, EQ_PRESETS } from '../equalizer.js'; import { createEq
 import { VIEW } from '../field.js';
 import { BASIS, stateOf } from '../hydrogen.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu, MASSES, onHamiltonian } from '../hamiltonian.js';
-import { ATOMS, configOf } from '../atoms.js';
+import { ATOMS, configOf, ZMAX } from '../atoms.js';
 import { createSpectrum } from '../spectrum.js';
 import { CATALOGUE } from '../catalogue.js';
 import { stateLatex, moleculeLatex } from '../latex-state.js';
@@ -71,7 +71,7 @@ export function createSpectrumCard(app) {
     ui.muKnob = knob({ label: 'μ/mₑ  (mass)', min: 0.5, max: 200, log: true, value: 1, fmt: (v) => 'μ = ' + +v.toPrecision(5), title: 'The reduced mass in mₑ: E → μE, r → r/μ (hydrogen only); double-tap resets to 1', onInput: setMass });
     const muSeg = seg({ aria: 'reduced mass', value: '1', options: [['1', '1'], ['ps', 'POSITRONIUM'], ['muh', 'MUONIC H']].map(([id, label]) => ({ id, label, title: `μ = ${+MASS[id].toPrecision(5)} mₑ` })), onChange: (id) => setMass(MASS[id]) });
     rh.append(ui.muKnob.root, muSeg.root); onHamiltonian(() => { ui.muKnob.set(getMu()); muSeg.set(Object.keys(MASS).find((id) => MASS[id] === getMu()) || ''); });
-    ui.elemKnob = knob({ label: 'ELEMENT  Z', min: 1, max: 36, value: 10, step: 1, fmt: (v) => 'Z = ' + Math.round(v) + '  ' + ATOMS[Math.max(0, Math.min(35, Math.round(v) - 1))].symbol, onChange: (v) => setElement(Math.round(v)) });
+    ui.elemKnob = knob({ label: 'ELEMENT  Z', min: 1, max: ZMAX, value: 10, step: 1, fmt: (v) => 'Z = ' + Math.round(v) + '  ' + ATOMS[Math.max(0, Math.min(ZMAX - 1, Math.round(v) - 1))].symbol, onChange: (v) => setElement(Math.round(v)) });
     rh.appendChild(ui.elemKnob.root);
     {
       const rs = wSpec.row('tight');
@@ -298,23 +298,23 @@ export function createSpectrumCard(app) {
     return true;
   }
 
-  /** the ELEMENT knob: which atom the ATOM Hamiltonian solves (Z = 1 … 36); the register is re-read in it */
+  /** the ELEMENT knob: which atom the ATOM Hamiltonian solves (Z = 1 … 86, H … Rn); the register is re-read in it */
   function setElement(Z) {
-    Z = Math.max(1, Math.min(36, Math.round(Z) || 1));
+    Z = Math.max(1, Math.min(ZMAX, Math.round(Z) || 1));
     busy.n++; busySync();                                              // wave 48: the atom is re-solved on a log mesh, twice, and Richardson-extrapolated — the mark says so
     let changed; try { changed = HAMILTONIANS.atom.configure(Z); } finally { busy.n = Math.max(0, busy.n - 1); busySync(); }
     if (ui.elemKnob) ui.elemKnob.set(Z);
     if (changed) { if (app.w.atomsView) app.w.atomsView.invalidate(); hNote(); if (getHamiltonian().id === 'atom') switchHamiltonian('atom'); else schedule(TIER.PRESENT); }
     return Z;
   }
-  /** FILL THE VALENCE: the outermost occupied shell of the atom in force, every m of it equally and in phase */
+  /** LOAD VALENCE (iteration 008; once FILL THE VALENCE — the verb keeps its name): the outermost occupied shell of the atom in force, every m of it equally and in phase */
   function fillValence() {
     if (getHamiltonian().id !== 'atom') { switchHamiltonian('atom'); if (ui.hamSeg) ui.hamSeg.set('atom'); }
     const cfg = configOf(HAMILTONIANS.atom.Z), sh = cfg[cfg.length - 1], amp = 1 / Math.sqrt(2 * sh.l + 1);
     reg.clear();
     for (let m = -sh.l; m <= sh.l; m++) reg.set(stateOf(sh.n, sh.l, m).index, amp, 0, clock.t);
     touchState(); schedule(TIER.REBUILD);
-    const msg = `${HAMILTONIANS.atom.short} ${sh.n}${'spdfgh'[sh.l]} · ${2 * sh.l + 1} label${sh.l ? 's' : ''}, equal and in phase`;
+    const msg = `${HAMILTONIANS.atom.short} ${sh.n}${'spdfgh'[sh.l]} loaded · ${2 * sh.l + 1} label${sh.l ? 's' : ''}, equal and in phase`;
     wState.setStatus(msg, 'live'); if (app.w.wAtoms) app.w.wAtoms.setStatus(msg, 'live');
     return { n: sh.n, l: sh.l, labels: 2 * sh.l + 1 };
   }

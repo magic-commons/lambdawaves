@@ -17,7 +17,7 @@ import { momentumTableFor as hydrogenMomentumTableFor, domainForP as hydrogenDom
 import { cornellEnergy, cornellRadial, cornellTableFor, cornellPsiAt, cornellDomainFor, cornellLabelOf, cornellSpectrum, cornellRadialTable, configure as cornellConfigure, system as cornellSystem } from './cornell.js';
 import { qhoEnergy, qhoEnergyOf, qhoN, qhoRadial, qhoTableFor, qhoMomentumTableFor, qhoDomainFor, qhoPsiAt } from './qho.js';
 import { wellEnergy, wellEnergyOf, wellRadialFor, wellTableFor, wellDomainFor, wellPsiAt, wellRadius, setWellRadius } from './well.js';
-import { atom as atomOf, solveAtom, virtualEnergyOf, atomRadial, atomRadialTable, atomDomainFor, atomSpectrum, rowOf as atomRowOf, NR } from './atoms.js';
+import { atom as atomOf, solveAtom, virtualEnergyOf, atomRadial, atomRadialTable, atomDomainFor, atomSpectrum, rowOf as atomRowOf, NR, ZMAX } from './atoms.js';
 import { CENTRAL } from './central.js';
 import { SEPARABLE } from './separable.js';
 
@@ -164,9 +164,9 @@ HAMILTONIANS.atom = {
     return atomSpec;
   },
   radialTable: () => atomState().table,
-  /** choose the element, Z = 1 … 36; true when it changed, and the caller re-runs switchHamiltonian */
+  /** choose the element, Z = 1 … 86 (ZMAX: every shell of Rn is one of the 91 labels); true when it changed, and the caller re-runs switchHamiltonian */
   configure(Z) {
-    Z = Math.max(1, Math.min(36, Math.round(Z) || 1));
+    Z = Math.max(1, Math.min(ZMAX, Math.round(Z) || 1));
     if (Z === atomZ) return false;
     atomZ = Z; atomBuilt = null; atomSpec = null; atomEps.clear(); atomTabs.clear();
     for (const fn of listeners) fn(HAMILTONIANS.atom);
