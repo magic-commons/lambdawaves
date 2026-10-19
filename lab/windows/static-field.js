@@ -44,7 +44,7 @@ export function createStaticField(app) {
     ui.kzRate.set(0); ui.defRate.set(0); setRotationRate('kz', 0); setRotationRate('def', 0);
     let k = 1, k1 = 0; while (k <= 7 && saddle(k) > F) k++; for (let j = 1; j < P.n; j++) if (Math.abs(P.C[j]) > Math.abs(P.C[k1])) k1 = j;   // k1: the eigenvector carrying 1s
     ui.interRo.set(`1s ${(P.E[k1] - P.H[0]).toExponential(1)} Eh · α(n ≤ 7) ${polarizability().toFixed(2)} of 4.5`, 'live');
-    ui.interRo.setSub(k > 6 ? 'every shell below its saddle' : `saddle n = ${k} at ${saddle(k).toExponential(1)}: ${reg.nmax() >= k ? 'would ionise — this basis holds it' : 'nothing populated past it'}`);
+    ui.interRo.setSub(k > 7 ? 'every shell below its saddle' : `saddle n = ${k} at ${saddle(k).toExponential(1)}: ${reg.nmax() >= k ? 'would ionise — this basis holds it' : 'nothing populated past it'}`);
     ui.interRo.root.title = `F = ${F} · NUMERICAL: eigensolve of diag(E) + F·z in the n ≤ 7 basis (${P.ms.toFixed(1)} ms), no continuum · RATE · K_z · DEFECT · A⇄B stand down`; }
   const fzSet = ui.fz.set; ui.fz.set = (v, q) => { fzSet(v, q); queueMicrotask(interSync); };
   el('div', 'note', gF).innerHTML = '<b>Fields.</b> ZEEMAN adds an orbital m-dependent phase. STARK mixes l within each shell and omits coupling between shells; keep F well below the limit shown in the readout. INTER-SHELL couples every shell (hydrogen only): an eigensolve in the n ≤ 7 basis, which has no continuum, so ionisation is said, never simulated.';

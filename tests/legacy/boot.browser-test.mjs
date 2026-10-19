@@ -1655,7 +1655,7 @@ try {
     /* THE ABOUT FACE carries what Josh wrote */
     const ab = document.querySelector('.nb-aboutface'), t = ab.innerText;
     R.magic = t.indexOf('Magic Commons') >= 0; R.gpl = t.indexOf('GNU GPL v3.0 only') >= 0; R.made = t.indexOf('Built by AI coding agents') >= 0;   // 0.5.0 re-aim: the credits line says 'Built by AI coding agents' where it once said 'Made with'
-    R.blurb = t.indexOf('A playable hydrogen shadow where 91 nlm states become heuristics for classical waves.') >= 0;
+    R.blurb = t.indexOf('A playable hydrogen shadow where 140 nlm states become heuristics for classical waves.') >= 0;
     R.chronus = !!ab.querySelector('a[href="https://github.com/xsligroup/chronusq_public"]');
     R.chronusTxt = (ab.querySelector('a[href="https://github.com/xsligroup/chronusq_public"]') || {}).textContent;
     R.build = (document.querySelector('.ab-version') || {}).textContent;

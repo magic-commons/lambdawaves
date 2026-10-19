@@ -11,7 +11,7 @@ import { ATOMS, valenceShells, ZMAX } from '../atoms.js';
 import { createSpectrum } from '../spectrum.js';
 import { CATALOGUE } from '../catalogue.js';
 import { stateLatex, moleculeLatex } from '../latex-state.js';
-import { createRegisterSturmian } from '../sturmianreg.js';
+import { createRegisterSturmian, LAMBDA_MIN, LAMBDA_MAX, clampLambda } from '../sturmianreg.js';
 const keepT = (elm, on, title) => { if (elm.dataset.title0 === undefined) elm.dataset.title0 = elm.title || ''; elm.title = on ? title : elm.dataset.title0; };
 export function createSpectrumCard(app) {
   const { ui, device, reg, hNote, clock, appPlay, energyOf, sturm, labelExpect, mat, rates } = app, { schedule, page, MOTION } = app.loop, { rack } = app.host, { wState } = app.w;   // backward
@@ -80,7 +80,11 @@ export function createSpectrumCard(app) {
         { id: 'sturmian', label: 'STURMIAN  λ', title: 'Use one common radial exponent λ for every label' }],
         onChange: (v) => setSturmian({ on: v === 'sturmian' }) });
       rs.appendChild(ui.scaleSeg.root);
-      ui.lambdaKnob = knob({ label: 'λ  SCALE', min: 0.25, max: 3, value: 1, fmt: (v) => 'λ = ' + v.toFixed(3), onInput: (v) => { if (sturm.on) setSturmian({ lambda: v }); else sturm.lambda = Math.max(0.25, Math.min(3, v)); } });
+      /* iteration 010 X2 · THE REACH OF n = 7: the floor is 1/7 (sturmianreg.js LAMBDA_MIN, the hydrogen limit of n = 7; it was 0.25) and the
+         map is LOG, so the seven limits 1, ½ … 1/7 sit 64 · 41 · 28 · 18 · 11 · 5 · 0 % up the travel instead of crowding its first eighth;
+         the readout names a limit it stands on ("λ = 0.143 · 1/7"). */
+      const lamFmt = (v) => { const n = Math.round(1 / v); return 'λ = ' + v.toFixed(3) + (n >= 2 && n <= 7 && Math.abs(v * n - 1) < 2e-3 ? ' · 1/' + n : ''); };
+      ui.lambdaKnob = knob({ label: 'λ  SCALE', min: LAMBDA_MIN, max: LAMBDA_MAX, value: 1, log: true, fmt: lamFmt, onInput: (v) => { if (sturm.on) setSturmian({ lambda: v }); else sturm.lambda = clampLambda(v); } });
       ui.lambdaKnob.root.title = 'Set the Sturmian exponent; Shift is finer; double-tap resets';
       ui.lambdaKnob.setDisabled(true);
       rs.appendChild(ui.lambdaKnob.root);
@@ -217,7 +221,7 @@ export function createSpectrumCard(app) {
   const specStatus = () => sturm.P ? [sturmLabel(), 'live'] : [hamLabel(), getHamiltonian().id === 'hydrogen' ? '' : 'live'];
   function setSturmian(o = {}) {
     if (o.on !== undefined) sturm.on = !!o.on;
-    if (o.lambda !== undefined) sturm.lambda = Math.max(0.25, Math.min(3, +o.lambda || 1));
+    if (o.lambda !== undefined) sturm.lambda = clampLambda(o.lambda);   // iteration 010 X2: [1/7, 3]
     applySturmian();
     return { on: sturm.on, lambda: sturm.lambda, active: !!sturm.P };
   }

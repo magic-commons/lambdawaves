@@ -28,7 +28,8 @@
  *   subshell's last electron, (n, l, m) from lab/valence.js (the same rule the Picker's caption line reads), amplitude 1, phase 0.
  *   A press on the tile still opens goAtom's fillValence (every valence subshell, every m, in phase; 008 Q).
  * SUBSHELLS (orb-<nl>_<m>): the dimmed elements past Kr — hydrogen's one state (n, l, m) for every m of each valence subshell, the
- *   subshells the table names past Kr up to n = 6 (the register ends there: 7s and 7p have no picture).
+ *   subshells the table names past Kr up to n = 6.  Since iteration 008 A7 every element H–Og is live (el-<sym>), so no tile shows these
+ *   and the deck wants no orb-7s / orb-7p (iteration 010 X2 checked: Fr … Og wear their own el- pictures).
  * Writes lab/img/menu/<id>.webp, el-<sym>.webp, orb-<nl>.webp and lab/img/menu/manifest.json (what exists + these settings).
  * A VOLUME (iteration 004 V2, `--volume vol-1`): each molecule of <LW_VOLUMES>/dist/<vol>/index.json opened by the card's own road
  *   (__LW.chem.openVolume — the lowest rung, its record, no solve) at the HOME pose in the same look, into <dist>/<vol>/t/<id>.webp;
