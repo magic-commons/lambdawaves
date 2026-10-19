@@ -167,8 +167,8 @@ try {
     { const i0 = __LW.mat.invert; const r = await __row('VIEW', 'INVERT the cloud'); R.invert = ok(r) && __LW.mat.invert === !i0; __LW.setInvert(i0); }
     { const views = [['ρ = |ψ|²', 0], ['arg ψ', 1], ['Re ψ', 2], ['Im ψ', 3]]; R.views = true;   /* iteration 008 W: Δρ and Re + Im left WAVE */
       for (const [l, v] of views) { const r = await __row('VIEW', l); R.views = R.views && ok(r) && __LW.mat.view === v; } __LW.setView('phase'); }
-    { const styles = ['CLOUD', 'SOLID', 'GRAIN', 'SIGNED', 'BANDS']; R.styles = true;
-      for (const s of styles) { const r = await __row('VIEW', '— style: ' + s); R.styles = R.styles && ok(r) && __LW.mat.style === ({ CLOUD: 0, SOLID: 1, GRAIN: 2, SIGNED: 3, BANDS: 4 })[s]; } __LW.setStyle('cloud'); }
+    { const styles = ['CLOUD', 'SOLID', 'SIGNED', 'DUST', 'BANDS']; R.styles = true;   /* iteration 008 G: GRAIN joined DUST (its index 2 retired; DUST is 5) */
+      for (const s of styles) { const r = await __row('VIEW', '— style: ' + s); R.styles = R.styles && ok(r) && __LW.mat.style === ({ CLOUD: 0, SOLID: 1, SIGNED: 3, DUST: 5, BANDS: 4 })[s]; } __LW.setStyle('cloud'); }
     { const c0 = document.body.classList.contains('no-captions'); const r = await __row('VIEW', 'STAGE CAPTIONS'); R.captions = ok(r) && document.body.classList.contains('no-captions') === !c0; await __row('VIEW', 'STAGE CAPTIONS'); }
     { const b0 = document.body.classList.contains('no-badges'); const r = await __row('VIEW', 'STATUS TAGS'); R.badges = ok(r) && document.body.classList.contains('no-badges') === !b0; await __row('VIEW', 'STATUS TAGS'); }
     { const h0 = document.body.classList.contains('control-hints-off'); const r = await __row('VIEW', 'CONTROL HINTS'); R.hints = ok(r) && document.body.classList.contains('control-hints-off') === !h0; await __row('VIEW', 'CONTROL HINTS'); }

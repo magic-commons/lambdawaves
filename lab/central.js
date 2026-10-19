@@ -36,8 +36,9 @@ export function solveCentral(preset, p) {
 }
 let cur = { preset: 'confined', params: { ...DEFAULTS.confined } }, S = null;
 const tabs = new Map(), S_ = () => S || (S = solveCentral(cur.preset, cur.params)), bnd = (n, l) => S_().E[rowOf(n, l)] < 0;
-/** the record { preset, params } (persist, the tests), solved on the frame thread at its next read; true when it changed */
-export function configure(rec = {}) { const preset = DEFAULTS[rec.preset] ? rec.preset : 'confined', next = { preset, params: { ...DEFAULTS[preset], ...rec.params } }; if (JSON.stringify(next) === JSON.stringify(cur)) return false; cur = next; S = null; tabs.clear(); return true; }
+/** the record { preset, params } (persist, the tests), solved on the frame thread at its next read; true when it changed.  Absent OR null is
+ *  the defaults, as SEPARABLE's, LATTICE's and BLOCH's loads read it (iteration 010 X4: a null threw inside restore() and rolled the whole open back) */
+export function configure(rec) { rec = rec || {}; const preset = DEFAULTS[rec.preset] ? rec.preset : 'confined', next = { preset, params: { ...DEFAULTS[preset], ...rec.params } }; if (JSON.stringify(next) === JSON.stringify(cur)) return false; cur = next; S = null; tabs.clear(); return true; }
 /** a solve the worker answered becomes the Hamiltonian's data */
 export function install(res) { cur = { preset: res.preset, params: res.params }; S = res; tabs.clear(); }
 export const save = () => (JSON.stringify(cur) === JSON.stringify({ preset: 'confined', params: DEFAULTS.confined }) ? undefined : { preset: cur.preset, params: { ...cur.params } });
