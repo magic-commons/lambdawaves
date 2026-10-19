@@ -95,6 +95,46 @@ const randomState = (seed) => { const r = rnd(seed), re = new Float64Array(W), i
   times.sort((x, y) => x - y);
   judge('WALL TIME: the block-pure build + solve + projector, median of 7 runs < 20 ms', times[3] < 20, { medianMs: +times[3].toFixed(2), minMs: +times[0].toFixed(2) });
 }
+{
+  /* 5. THE BLOCKS' SUPPORT (iteration 010 X1): under THE SCALE the field draws the labels the evolution REACHES (state.js reach()),
+     not the anchor's.  THE LOCK's sturmian row is 1s + 2p₀ (1/√2 each) at λ 1.4, read at t = 3.7.  The drawn fraction of the
+     S-norm is c_R† S_RR c_R / c† S c over the drawn set R (the field is Σ_{a∈R} c_a S_a; ∫|ψ_R|² is that quadratic form). */
+  const { EPS_POP } = await import('../lab/state.js');
+  const drawn = (reg, ids, t) => { const c = reg.at(t), S = reg.P.S, inR = new Uint8Array(W); for (const a of ids) inR[a] = 1;
+    let num = 0, den = 0; for (let a = 0; a < W; a++) for (let b = 0; b < W; b++) { const s = S[a * W + b]; if (s === 0) continue; const v = s * (c.re[a] * c.re[b] + c.im[a] * c.im[b]); den += v; if (inR[a] && inR[b]) num += v; } return num / den; };
+  const reg = new Register(); reg.set(stateOf(1, 0, 0).index, Math.SQRT1_2, 0, 0); reg.set(stateOf(2, 1, 0).index, Math.SQRT1_2, 0, 0);
+  reg.setPropagator(createRegisterSturmian(1.4, { Z: 1 }));
+  const rs = reg.renderSet(), want = BASIS.filter((s) => s.m === 0 && s.l <= 1).map((s) => s.index).sort((x, y) => x - y);
+  const got = [...rs.ids].sort((x, y) => x - y), anchor = reg.populated();
+  const fA = drawn(reg, anchor, 3.7), fR = drawn(reg, rs.ids, 3.7);
+  let worst = 1; for (let i = 0; i <= 50; i++) worst = Math.min(worst, drawn(reg, rs.ids, i * 10.3));
+  judge('SUPPORT: THE LOCK\'s row (1s + 2p₀, λ 1.4) draws its REACH — the whole s₀ and p₀ blocks, 13 labels (the anchor holds 2) — and the drawn S-norm at t = 3.7 is 100 % (1e-12; 30.45 % with the anchor\'s two, N7\'s find), at every one of 51 times to t = 515',
+    JSON.stringify(got) === JSON.stringify(want) && rs.rendered === 13 && rs.populated === 13 && rs.anchored === 2 && rs.reach === true && Math.abs(fA - 0.3045) < 5e-4 && fR > 1 - 1e-12 && worst > 1 - 1e-12 && Math.abs(rs.coveredFraction - 1) < 1e-15,
+    { rendered: rs.rendered, anchored: rs.anchored, anchorFrac: fA, reachFrac: fR, worst });
+  /* the second road (brute force over time): no label outside the reach ever carries |c_a(t)|² above the floor, and every label in it does */
+  const inR = new Uint8Array(W); for (const a of rs.ids) inR[a] = 1;
+  let outside = 0, insideMin = Infinity; const peak = new Float64Array(W);
+  for (let i = 0; i < 400; i++) { const c = reg.at(i * 5.17); for (let a = 0; a < W; a++) peak[a] = Math.max(peak[a], c.re[a] ** 2 + c.im[a] ** 2); }
+  for (let a = 0; a < W; a++) if (inR[a]) insideMin = Math.min(insideMin, peak[a]); else outside = Math.max(outside, peak[a]);
+  judge('SUPPORT, by brute force: over 400 times to t = 2063 no label outside the reach rises above EPS_POP (max |c_a(t)|² read) and every label inside it rises past 1e-4 — the reach is the support, neither narrower nor wider',
+    outside <= EPS_POP && insideMin > 1e-4, { outside, insideMin });
+  /* an exact eigenstate does not spread: 1s at λ = 1 draws the one label; THE SCALE's AUTO box follows the reach (rack.js sturmHalf) */
+  const reg1 = new Register(); reg1.set(0, 1, 0, 0); reg1.setPropagator(createRegisterSturmian(1, { Z: 1 }));
+  judge('SUPPORT: the exact eigenstate (1s at λ = 1) reaches only itself — its partners\' dephased weights are rounding (< EPS_POP) — and the reach\'s n for the box is 1; the LOCK row\'s is 7',
+    JSON.stringify(reg1.renderSet().ids) === '[0]' && reg1.reachNmax(1e-3) === 1 && reg.reachNmax(1e-3) === 7, { ids: reg1.renderSet().ids, n1: reg1.reachNmax(1e-3), n7: reg.reachNmax(1e-3) });
+  /* THE UNDRIVEN IDENTITY: with no propagator and no electric field renderSet is today's law, byte for byte (the oracle is that law, inlined) */
+  const oracle = (R, cap = 140) => { const pop = R.populated(), anySolo = pop.some((a) => R.solo[a]), el = pop.filter((a) => anySolo ? R.solo[a] : !R.muted[a]);
+    el.sort((x, y) => R.population(y) - R.population(x)); const ids = el.slice(0, cap), total = R.norm2(); let cov = 0; for (const a of ids) cov += R.population(a);
+    return { ids, populated: pop.length, rendered: ids.length, masked: pop.length - el.length, truncated: el.length - ids.length, coveredFraction: total > 0 ? cov / total : 0 }; };
+  let same = 0, cases = 0;
+  for (let s = 1; s <= 40; s++) {
+    const r = rnd(s * 7919), R = new Register(); for (let a = 0; a < W; a++) if (r() > 0.2 * (s % 5)) R.set(a, r(), r(), 0);
+    if (s % 3 === 0) R.setMute(Math.floor((r() + 0.5) * W) % W, true); if (s % 7 === 0) R.setSolo(Math.floor((r() + 0.5) * W) % W, true);
+    if (s % 4 === 0) R.setField({ Bz: 0.01 }); if (s % 9 === 0) { R.setPropagator(createRegisterSturmian(1.2)); R.setPropagator(null); }
+    for (const cap of [140, 91, 7]) { cases++; if (JSON.stringify(R.renderSet(cap)) === JSON.stringify(oracle(R, cap)) && !R.driven()) same++; }
+  }
+  judge('SUPPORT, the undriven identity: with no propagator and F = 0 (Zeeman on or off, mutes and solos, a propagator set and cleared) renderSet is today\'s law byte for byte — 120 of 120 cases (40 random states × caps 140 / 91 / 7)', same === cases, { same, cases });
+}
 console.log('wall ' + ((performance.now() - t0) / 1000).toFixed(2) + ' s');
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'sturmianreg.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);
