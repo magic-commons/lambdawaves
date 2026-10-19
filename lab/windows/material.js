@@ -42,6 +42,7 @@ export function createMaterial(app) {
       { id: 'signed', label: 'SIGNED', title: 'Render signed lobes and nodal surfaces' },
       { id: 'dust', label: 'DUST', title: 'Grains fixed in the world, shown where the field is: GRAIN sets how many, nothing else' },
       { id:'glass',label:'SHELL',title:'Render a translucent density shell' },
+      { id: 'glassSigned', label: 'SHELL ±', title: 'Render the signed lobes as a translucent shell: SHELL’s look on SIGNED’s geometry' },   // iteration 010 X7 (STYLE 8)
       { id:'additive',label:'ADD',title:'Additive emission through the field' },
       { id: 'bands', label: 'BANDS', title: 'One level surface per octave of the density, anchored at ISO' }],
       onChange: (v) => { mat.style = STYLE[drawStyle(v)]; schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE
@@ -51,7 +52,7 @@ export function createMaterial(app) {
     ui.isoK = knob({ label: 'ISO', min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.isoK.root);
     ui.grainK = knob({ label: 'GRAIN', min: 0.02, max: 1, value: 0.35, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.grain', v)) return; mat.grain = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.grainK.root);
     ui.kneeK = knob({ label: 'KNEE', min: 0.02, max: 8, value: KNEE_DEFAULT, log: true, fmt: (v) => v.toFixed(2), title: 'KNEE bends the ray’s opacity: 0.6 is the plain exponential, above it a soft shoulder (dense cores show through; the default 3 is somewhat opaque, slightly see-through), below it a hard knee (the silhouette closes sooner)', onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.kneeK.root);
-    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL and SIGNED surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
+    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL, SIGNED and SHELL ± surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
 
     const gs = group(wClip.body, 'observer only');
     const r3 = el('div', 'row', gs);
