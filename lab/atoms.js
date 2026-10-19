@@ -1,4 +1,4 @@
-/* atoms.js — THE PERIODIC TABLE as a central field: Z = 1…118 (H … Og) by Xα(2/3) + the Latter tail, scalar-relativistic (ZORA).
+/* atoms.js — THE PERIODIC TABLE as a central field: Z = 1…118 (H … Og) by Xα(2/3) + the Latter tail, scalar-relativistic (ZORA, MacDonald–Vosko exchange).
  *
  * Every atom in this file is one self-consistent CENTRAL potential shared by all its shells (Herman–Skillman /
  * Hartree–Fock–Slater, but with Kohn–Sham–Gáspár–Dirac exchange α = 2/3, not Slater's α = 1):
@@ -67,15 +67,28 @@
  * Z = 10 … 86 and does not move when a constant is added to V; at Z = 1 every shell's shift is the Pauli mass-velocity + Darwin value to 1e-5.
  * K is the solve's own potential's (V → 0 at infinity: no gauge is chosen); the ion of a Δ-SCF keeps the NEUTRAL's K (`neutralK`), so both
  * sides of the difference have one kinetic operator and no gauge term.  E is that functional (the Δ-SCF reads it); `Escaled` = E − Σf(λ − ε)
- * removes the deep core's ZORA excess (Kr −2783.55 Eh against NIST's ScRLDA −2783.99; Au −18 992.5 against −18 963.1; unscaled −19 664.7).
+ * removes the deep core's ZORA excess (Z's numbers, before MV: Kr −2783.55 Eh against NIST's ScRLDA −2783.99; Au −18 992.5 against −18 963.1).
  * THE ORACLE IS THE SHIFT (ours ZORA − NR against NIST's ScRLDA − LDA, Kotochigova et al.): the Δ-SCF ionisation of Au +2.00 eV (+2.11),
  * Hg +1.94 (+1.98), Ag +0.54 (+0.57), Cs +0.13 (+0.15), Pb −0.11 (−0.11), Rn −0.02 (−0.02); Au's 6s ionisation is now 8.71 eV (measured
  * 9.23).  Rn 1s −409.1 Eh (−394.1, ×1.04); the valence ε shifts within 0.12 eV except Au 6s (−1.36 eV against −1.62) and 5d (0.16 eV off).
- * The light 1s shifts are larger than NIST's (Kr ×1.19, Ne ×3.9) because NIST's relativistic columns carry MacDonald–Vosko's relativistic
- * exchange, which this model does not (with it, a hand run gives Kr ×0.95, Ar ×0.89).  H … Kr move: H's 1s by −1.8e-4 eV (13 ppm — the
+ * The light 1s shifts were larger than NIST's (Kr ×1.19, Ne ×3.9) because NIST's relativistic columns carry MacDonald–Vosko's relativistic
+ * exchange — which the model now does (the next paragraph).  H … Kr move: H's 1s by −1.8e-4 eV (13 ppm — the
  * Latter tail makes its potential exactly −1/r), Kr's 4p by +0.019 eV, a 3d-row 4s by up to −0.16 eV.  SPIN–ORBIT IS NOT INCLUDED: a p or d
  * level is the average of its j = l ± ½ pair (NIST's Dirac LDA splits Rn 6p by 3.6 eV) — the next step, which needs labels in j.  The
  * self-interaction-free Hartree branch stays non-relativistic, as its oracles (He's HF limit, hydrogen's −½) are.  STATUS says it past Kr.
+ *
+ * RELATIVISTIC EXCHANGE (iteration 009 MV, research/iteration-009/MV-BUILD.md), every Z with ZORA, no switch.  MacDonald & Vosko (J. Phys. C
+ * 12, 2977 (1979)) give the exchange energy of the relativistic electron gas as the non-relativistic one times Φ(β), β = p_F/mc = (3π²ρ)^{1/3}/c,
+ * η = √(1 + β²):  Φ = 1 − (3/2)[(βη − asinh β)/β²]².  With E_x = α·CX∫ρ^{4/3}Φ d³r and dβ/dρ = β/3ρ, the potential is δE_x/δρ =
+ * V_x^{NR}·[Φ + βΦ′/4], and with A = (βη − asinh β)/β², βA′ = 2β/η − 2A, so Φ + βΦ′/4 = 1 − (3/2)Aβ/η = −½ + 3 asinh β/(2βη) = R(β) — MacDonald
+ * –Vosko's potential factor, derived here (sympy: identically; mpmath: 2e-38 at β = 10⁻³ … 20).  R = 1 − β² + ⅘β⁴ and Φ = 1 − ⅔β² + ⅖β⁴ near
+ * 0, both → −½ as β → ∞: V_x changes sign past β = 1.946 (inside r = 8e-7 at Xe, 3e-3 at Rn — the ZORA s-cusp's density).  CHECKED: Janak's
+ * dE/df = λ holds to 2e-6 Eh with Φ in E and R in V, as it did before MV (Ne, Kr, Au 1s, Kr 4p; with R alone it misses Au 1s by 21 Eh).  THE ORACLE, now: the 1s shift
+ * against NIST's ScRLDA − LDA is ×0.60 Ne, ×0.89 Ar, ×0.95 Kr, ×0.96 Xe, ×0.97 Rn (was ×3.9, 1.62, 1.19, 1.10, 1.04), and the scaled total's
+ * shift is NIST's to 0.04–0.13 % from Ne to Rn (was 3–41 % over): Kr −2780.68 Eh, Au −18 954.26, Rn −23 482.88.  The cost: MV lifts the core,
+ * which screens the valence more — Au's Δ-SCF ionisation 8.71 → 8.65 eV, and the 4d/5d metals' valence shifts drift 0.015–0.04 eV further from
+ * NIST's (Au 6s ×0.84 → 0.81).  Hydrogen's potential is the Latter tail's −1/r with or without MV, so its ε and u are bit-identical; its
+ * E carries Φ on Xα's self-exchange and moves by +1.0e-5 Eh (−(2/3)CX(3π²)^{2/3}c⁻²∫ρ² d³r = 9.98e-6, the leading order).
  *
  * PAST RADON (iteration 008 A7, research/iteration-008/A7-BUILD.md).  The register reached n = 7, so Fr … Og (7s, 5f, 6d, 7p; the actinide
  * exceptions Ac Th Pa U Np Cm and Lr's 7p¹ from MOVES) are the same solve on the same mesh: all 32 converge below 1e-8 (worst 4.7e-9), every
@@ -146,8 +159,8 @@ export function groundConfig(Z) {
   return cfg.filter((c) => c.occ > 0).sort((a, b) => a.n - b.n || a.l - b.l);
 }
 export const EXCHANGE_MODEL = 'Xα(2/3) + Latter tail';
-/** what every relativistic number's model string ends with (the exchange model stays EXCHANGE_MODEL) */
-export const RELATIVITY = ' · scalar ZORA';
+/** what every relativistic number's model string ends with: the ZORA kinetic operator and MacDonald–Vosko's exchange factor (009 MV; the exchange model stays EXCHANGE_MODEL) */
+export const RELATIVITY = ' · scalar ZORA · MV';
 /** the model string that travels with every number: α and the tail, always named (Sol's model-identity rule) */
 export function modelName(alpha, latter, sic, zora) {
   if (sic) return 'Hartree, self-interaction-free' + (latter ? ' + Latter tail' : '');
@@ -361,6 +374,19 @@ function gauss(A, N) {
 
 /* ══ one self-consistent field on one mesh ══════════════════════════════════════════════════════════════════ */
 const CX = -0.75 * Math.cbrt(3 / Math.PI);                 // E_x = α·CX·∫ρ^{4/3}d³r ; V_x = −(3α/2)(3ρ/π)^{1/3}
+/** MACDONALD–VOSKO (J. Phys. C 12, 2977 (1979); iteration 009 MV): the relativistic electron gas's exchange, e_x → e_x Φ(β) and V_x → V_x R(β),
+ *  β = (3π²ρ)^{1/3}/c the Fermi momentum over mc, η = √(1 + β²); R = Φ + βΦ′/4 = d(ρ^{4/3}Φ)/dρ ÷ (4/3)ρ^{1/3} (the header).  Below β = 10⁻³ the
+ *  series (R = 1 − β² + ⅘β⁴, Φ = 1 − ⅔β² + ⅖β⁴; the next terms are 7e-19) — the closed forms are 0/0 at ρ = 0 */
+const MV_K = Math.cbrt(3 * Math.PI * Math.PI) / C_LIGHT;          // β = MV_K ρ^{1/3}
+function mvR(b) {
+  if (b < 1e-3) { const b2 = b * b; return 1 - b2 + 0.8 * b2 * b2; }
+  return -0.5 + 1.5 * Math.asinh(b) / (b * Math.sqrt(1 + b * b));
+}
+function mvPhi(b) {
+  if (b < 1e-3) { const b2 = b * b; return 1 - b2 * 2 / 3 + 0.4 * b2 * b2; }
+  const a = (b * Math.sqrt(1 + b * b) - Math.asinh(b)) / (b * b);
+  return 1 - 1.5 * a * a;
+}
 /** the pieces every SCF needs: the bare nucleus, the Latter ceiling, the l-channel demand, the mixer's measure */
 function frame(Z, config, g) {
   const { n, r } = g, Nel = config.reduce((s, c) => s + c.occ, 0), lmax = config.reduce((m, c) => Math.max(m, c.l), 0);
@@ -392,7 +418,8 @@ function scf(Z, config, g, o) {
   for (it = 1; it <= o.maxIter; it++) {
     ({ orbs, q } = solveAll());
     const VH = hartree(g, q);
-    for (let j = 0; j < n; j++) Vout[j] = nuc[j] + VH[j] - k13 * Math.cbrt(q[j] / (4 * Math.PI * r[j] * r[j]));
+    if (!o.zora) for (let j = 0; j < n; j++) Vout[j] = nuc[j] + VH[j] - k13 * Math.cbrt(q[j] / (4 * Math.PI * r[j] * r[j]));
+    else for (let j = 0; j < n; j++) { const c3 = Math.cbrt(q[j] / (4 * Math.PI * r[j] * r[j])); Vout[j] = nuc[j] + VH[j] - k13 * c3 * mvR(MV_K * c3); }   // MacDonald–Vosko: the relativistic model's exchange
     if (o.latter) for (let j = 0; j < n; j++) Vout[j] = Math.min(Vout[j], tail[j]);
     dV = maxdiff(Vout, V, r);
     if (dV < o.tol) break;
@@ -409,6 +436,7 @@ function scf(Z, config, g, o) {
   for (let j = 0; j < n; j++) t[j] = q[j] * VH[j];
   const EH = 0.5 * integ(g, t);
   for (let j = 0; j < n; j++) t[j] = 4 * Math.PI * r[j] * r[j] * Math.pow(rho[j], 4 / 3);
+  if (o.zora) for (let j = 0; j < n; j++) t[j] *= mvPhi(MV_K * Math.cbrt(rho[j]));         // MacDonald–Vosko's Φ: the energy whose derivative is the R-scaled V_x
   const Ex = 1.5 * o.alpha * CX * integ(g, t);              // = −(9α/8)(3/π)^{1/3}∫ρ^{4/3}d³r
   return { E: T + Ene + EH + Ex, T, Ene, EH, Ex, orbs, q, rho, V, VH, g, r, iterations: it, dV, Nel, electrons: integ(g, q), Kpot: o.zora ? (o.Kpot || V) : null };
 }
@@ -481,7 +509,7 @@ const key = (Z, o) => [Z, o.alpha, o.latter ? 1 : 0, o.sic ? 1 : 0, o.zora ? 1 :
  *   opts: alpha = 2/3 (Xα; 0 = no exchange), config (default the ground configuration), tol = 1e-8 on max|ΔV·r|,
  *         latter = true, sic = false (self-interaction-free Hartree: a potential per shell, α ignored),
  *         richardson = true (solve on M and 2M points and extrapolate ε and E), M = 999, rmax = 60,
- *         zora = true (THE MODEL: scalar ZORA, ε reported scaled; false = the non-relativistic p²/2, kept for the RELATIVITY Δ readout
+ *         zora = true (THE MODEL: scalar ZORA, ε reported scaled, the exchange MacDonald–Vosko's; false = the non-relativistic p²/2 and plain exchange, kept for the RELATIVITY Δ readout
  *         and the non-relativistic oracles; the self-interaction-free branch is always non-relativistic, its oracles are).
  * → { Z, E, orbitals: [{n, l, occ, eps, lam, theta, nodes, r, u}], iterations, model, alpha, config, r, zora, ... }
  */

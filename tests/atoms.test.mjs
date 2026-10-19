@@ -63,7 +63,7 @@ function quad(r, f) {
     occ(cr, 3, 2) === 5 && occ(cr, 4, 0) === 1 && occ(cu, 3, 2) === 10 && occ(cu, 4, 0) === 1 && occ(v, 3, 2) === 3 && occ(v, 4, 0) === 2,
     { Cr: atom(24).term, Cu: atom(29).term, V: atom(23).term });
   judge("THE MODEL IS NAMED on every number: EXCHANGE_MODEL is 'Xα(2/3) + Latter tail' and a solve carries it",
-    EXCHANGE_MODEL === 'Xα(2/3) + Latter tail' && solveAtom(10).model === 'Xα(2/3) + Latter tail · scalar ZORA' && solveAtom(10, { alpha: 1 }).model === 'Xα(1) + Latter tail · scalar ZORA'
+    EXCHANGE_MODEL === 'Xα(2/3) + Latter tail' && solveAtom(10).model === 'Xα(2/3) + Latter tail · scalar ZORA · MV' && solveAtom(10, { alpha: 1 }).model === 'Xα(1) + Latter tail · scalar ZORA · MV'
     && solveAtom(10, NRO).model === 'Xα(2/3) + Latter tail' && solveAtom(2, { alpha: 0 }).model.startsWith('Hartree, self-interaction-free'),
     { xa: solveAtom(10).model, slater: solveAtom(10, { alpha: 1 }).model, nr: solveAtom(10, NRO).model, sic: solveAtom(2, { alpha: 0 }).model });
 }
