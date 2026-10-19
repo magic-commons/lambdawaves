@@ -547,22 +547,25 @@ EXPLOSIVES = {
  'NDYLCHGXSQOGMS-UHFFFAOYSA-N': 'CL-20 (hexanitrohexaazaisowurtzitane)',
  'UATJOMSPNYCXIX-UHFFFAOYSA-N': '1,3,5-trinitrobenzene',
 }
-# Illicit psychoactive substances (UN 1971 Schedule I and the commonest designer drugs): refused unless ChEMBL calls them approved medicines.
-ILLICIT_NAMES = [
- 'lysergide', 'MDMA', 'MDA', 'MDEA', 'mescaline', 'psilocybin', 'psilocin', 'N,N-dimethyltryptamine', '5-MeO-DMT', 'bufotenine', 'ibogaine', 'cathinone',
- 'methcathinone', 'mephedrone', 'methylone', 'MDPV', 'alpha-PVP', '2C-B', '2C-I', '25I-NBOMe', 'DOM', 'DOB', 'PMA', 'PMMA', '4-MTA', 'TMA', 'phencyclidine',
- 'eticyclidine', 'rolicyclidine', 'tenocyclidine', 'JWH-018', 'JWH-073', 'CP 47,497', 'AM-2201', 'salvinorin A', 'heroin', 'desomorphine', 'acetylfentanyl',
- 'carfentanil', 'furanylfentanyl', 'U-47700', 'etonitazene', 'isotonitazene', 'GHB', 'methaqualone', 'DET', 'DPT', 'harmaline', 'muscimol', 'ibotenic acid',
- 'synthetic cathinone', 'parahexyl', 'tetrahydrocannabinol', 'cannabidiol', 'kratom', 'mitragynine', '7-hydroxymitragynine', 'MXE', 'methoxetamine', 'nitrous oxide inhalant',
-]
-# CONTROLLED MEDICINES (iteration 006 C4): the ATC groups whose medicines are controlled psychoactive substances.  An approved drug whose
-# OWN ATC code (ChEMBL's, never a combination's) falls in one of them stays in the catalogue as a medicine, but it marks its skeleton
-# (the InChIKey's first block) for the controlled-substance screen: a racemate, an enantiomer or another form of it that is not itself
-# an approved drug is refused (d-methamphetamine N06BA03 is a medicine; its racemate, nominated by Wikidata alone, is not).
-CONTROLLED_ATC = {
- 'N02A': 'opioids', 'N01AH': 'opioid anaesthetics', 'N07BC': 'drugs used in opioid dependence',
- 'N06BA': 'centrally acting sympathomimetics', 'A08AA': 'centrally acting antiobesity products',
- 'N05CA': 'barbiturates', 'N03AA': 'barbiturates and derivatives', 'N05BA': 'benzodiazepine derivatives',
- 'N05CD': 'benzodiazepine derivatives', 'N05CF': 'benzodiazepine related drugs',
- 'N01AX03': 'ketamine', 'N01AX14': 'esketamine',
+# THE CONTROLLED-SUBSTANCE SCREEN — ILLICIT_NAMES (UN 1971 Schedule I and the commonest designer drugs) and CONTROLLED_ATC (iteration
+# 006 C4: the ATC groups of the controlled medicines) — IS REMOVED in iteration 006 C7 (Josh, 2026-10-18: "That's only the human's
+# relation with the molecule that's the problem"): those molecules are ordinary rows.  The CWC lists above are unchanged.
+#
+# HAND SKIPS LIFTED in iteration 006 C7 (build.py nominates these as if their `skip` were not written; the reason stays above as the
+# record of why it was there): the heavy-atom cap rose from 50 to 70; a salt is folded onto its neutral parent; a closed-shell ion is
+# a row with its charge; the controlled-substance screen is gone.  Every other skip stands — an element past krypton, an open shell
+# (Cu(II) d9, high-spin Fe(II), a biradical), a mixture, an oligomer or a polymer, a class, a peptide of 34 residues, past 70 heavy
+# atoms, a duplicate of a listed row, and the CWC skips.
+C7_LIFTED = {
+ # the cap is 70 heavy atoms
+ 'glycyrrhizin', 'crocin', 'plastoquinone', 'chlorophyll a', 'pheophytin a', 'tripalmitin', 'triolein', 'alpha-amanitin', 'microcystin-LR',
+ 'spinosyn A', 'abamectin', 'brevetoxin', 'mycolic acid',
+ # a salt is its neutral parent
+ 'scandium triflate', 'hexamethylene diamine adipate', 'hydroxylammonium nitrate', 'monosodium glutamate', 'sodium cyclamate',
+ 'sodium stearoyl lactylate', 'potassium bromate', 'calcium propanoate', 'murexide', 'sodium fluoroacetate', 'copper sulfate',
+ # a closed-shell ion keeps its charge
+ 'mauveine', 'cyanidin', '7-methylguanosine', 'thiamine pyrophosphate', 'phosphocholine', 'choline', 'platelet-activating factor',
+ 'sanguinarine', 'berberine', 'chlormequat',
+ # the controlled-substance screen is gone
+ 'ibotenic acid', 'muscimol',
 }

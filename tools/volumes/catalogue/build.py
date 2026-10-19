@@ -9,6 +9,7 @@ Run the six collectors first (each caches, so a re-run asks the network nothing)
   python -I tools/volumes/catalogue/fetch_who_eml.py   the WHO Model List of Essential Medicines (names)
 then
   python -I tools/volumes/catalogue/build.py [--limit=N] [--no-geometry] [--refresh-geometry] [--rebuild-geometry] [--out=FILE] [--prev=FILE] [--raw=DIR]
+                                             [--older=FILE,…] [--jobs=N] [--fetch-only]      (the last three: iteration 006 C7)
 
 Every nomination is resolved through PubChem (a name or an InChIKey → a CID → its record; a salt or a charged form → PubChem's
 own PARENT), merged by InChIKey (one entry per key, tags and sources from every nomination), filtered, given a geometry
@@ -39,6 +40,29 @@ structural class (CHECKED is_a only, chebi.py's structure-classes.json) — neve
 of iterations 004–006 C4 (USE_VOCAB) are still COMPUTED, never written: the catalogue's membership has always required a row to earn
 one of them (425 nominations are refused for having none), and that test is kept so no molecule enters or leaves; and the last
 fallback of a λWAVES blurb still names the first of them, so no blurb changes.
+
+ITERATION 006 C7: MORE MOLECULES (Josh, 2026-10-18: "add in whatever molecules you can.  If it's not allowed by the safeguards then
+exclude it").  One rebuild widens the catalogue; nothing already in it moves (the two guards):
+  · RECOGNISABILITY IS NO LONGER A FILTER — a named compound only Wikidata (in < 12 Wikipedias) or only ChEBI (no Wikipedia) nominates
+    is a row; recognisable() now only ORDERS the rows (the recognisable first in each tier, then small before large);
+  · THE USE-WORD GATE IS GONE — a row no longer has to earn a use word (every row has a structure tag since C5); a row with no
+    structure tag stays out;
+  · A SALT OR A MIXTURE IS ITS NEUTRAL PARENT — a Wikidata article's compound that PubChem counts as several units is folded onto its
+    largest organic (else covalent) fragment, neutralised, as every other source's always was, and merged by InChIKey; a row that
+    exists only through salts is named by PubChem's title of the parent (the salt's name only when that title is systematic);
+  · A CLOSED-SHELL ION KEEPS ITS CHARGE — an ion with no neutral parent (and a Wikidata article about the ion itself) is a row with its
+    charge (RHF holds it; the electron count is Σ Z − charge, and an xTB relaxation is told the charge);
+  · THE HEAVY-ATOM CAP IS 70 (was 50) — the rows of 51–70 heavy atoms go to the Rent-A-GPU-day queue only (queues.py);
+  · THE CONTROLLED-SUBSTANCE SCREEN IS REMOVED (Josh's decision): a controlled medicine, a racemate beside one, a substance on the old
+    illicit list are ordinary rows; the rows it refused come back under the ids an earlier file gave them (--older, guard (b)).  THE
+    CWC SCREEN IS UNCHANGED, word for word.
+  · Still out: the CWC screen's rows, an element past krypton, an odd electron count or a radical, an isotopically labelled compound,
+    a row with no geometry or no structure tag.  A PubChem answer a cache-only run could not have (pubchem.PENDING) holds its row back
+    as "pending", never as missing, and never builds a local geometry in place of a conformer not yet asked for.
+  · --jobs=N (default 2): the local geometries (RDKit, xTB) are built by N worker processes, each one thread at the build's niceness.
+  · --fetch-only: ask PubChem for what the rows that pass the filters want (records, parents, 3-D conformers, synonyms, descriptions)
+    and stop, writing nothing — the asking can be spread over PubChem's calm hours (common.py stops at its Red or Black service
+    status) and the one real build runs from the cache.
 """
 import collections, datetime, json, os, re, sys, time
 sys.path.insert(0, os.path.dirname(__file__))
@@ -58,6 +82,7 @@ RDLogger.DisableLog('rdApp.*')
 VOL, TODAY = 'vol-1', datetime.date.today().isoformat()
 LIMIT = int(next((a.split('=')[1] for a in sys.argv if a.startswith('--limit=')), 0))
 GEOMETRY = '--no-geometry' not in sys.argv
+FETCH_ONLY = '--fetch-only' in sys.argv                            # C7: fill the PubChem cache for every row that passes, then stop
 REFRESH = '--refresh-geometry' in sys.argv                         # move the waiting SOLVED rows onto PubChem's conformer (C3; see step 7)
 REBUILD = '--rebuild-geometry' in sys.argv                         # ignore the geometry cache for the UNSOLVED rows (guard (a) stays on)
 def _opt(name, default):
@@ -66,6 +91,16 @@ def _opt(name, default):
 OUT = _opt('out', os.path.join(DATA, f'{VOL}.candidates.json'))
 PREV = _opt('prev', os.path.join(DATA, f'{VOL}.candidates.json'))
 RAW = _opt('raw', GU.raw_dir(DATA))
+# iteration 006 C7: the EARLIER candidates files whose ids still hold for their InChIKeys (a row a screen once refused comes back
+# under its old id); default every vol-1.candidates.<tag>.json kept beside the live file, newest first
+def _older_default():
+    import glob
+    fs = [f for f in glob.glob(os.path.join(DATA, f'{VOL}.candidates.*.json')) if '.next' not in os.path.basename(f)]
+    fs = [f for f in fs if os.path.abspath(f) not in (os.path.abspath(OUT), os.path.abspath(PREV))]
+    return sorted(fs, key=os.path.getmtime, reverse=True)
+OLDER = [os.path.expanduser(f) for f in _opt('older', '').split(',') if f] or _older_default()
+JOBS = int(_opt('jobs', '2'))
+MAX_HEAVY = 70                                                     # iteration 006 C7 (was 50): 51–70 go to the Rent-A-GPU-day queue
 VOCAB = ST.VOCAB                                                   # iteration 006 C5: THE TAGS — what the molecule IS (structure_tags.py)
 # THE USE WORDS of iterations 004–006 C4 — no longer any row's tags (C5).  They are still computed (use_words, step 9): the
 # catalogue's membership requires a row to earn one (it always has: "no plain tag of the vocabulary fits it"), and a λWAVES blurb's
@@ -105,7 +140,6 @@ WD_USE_TAGS = {'insecticide': 'pesticide', 'herbicide': 'pesticide', 'fungicide'
                'nuclear reactor coolant': 'material', 'fertilizer': 'material', 'nitrogen fertilizer': 'material'}
 WD_WEAPON_USES = {'nerve agent', 'V-agents', 'blister agent', 'chemical warfare agent', 'lachrymatory agent', 'incapacitating agent',
                   'vomiting agent', 'chemical weapon', 'riot control agent'}
-WD_ILLICIT_USES = {'designer drug', 'recreational drug', 'entheogen', 'hallucinogen', 'drug of abuse', 'psychedelic drug'}
 WIKIDATA_ONLY_MIN_SITELINKS = 12     # a molecule only Wikidata nominates must be in this many Wikipedias to count as recognisable
 HAND_GEOM = set(G.HAND)              # the three the catalogue builds by hand (a sandwich, the bridged hydride)
 
@@ -170,8 +204,19 @@ for it in wd['items']:
 SOLVED = GU.solved(RAW)
 prev_by_id, prev_id_by_key, prev_id_by_app = GU.previous(PREV)
 raw_id_by_key = GU.raw_ids_by_key(SOLVED, prev_by_id)
+# iteration 006 C7: the ids the EARLIER files gave (newest file first): a key's earlier id, when no later file and no solve in raw/
+# gave that id to another molecule — so a row a screen refused in between comes back under its own id
+older_id_by_key, older_ids = {}, set()
+for _f in OLDER:
+    _by_id, _by_key, _ = GU.previous(_f)
+    older_ids |= set(_by_id)
+    for _k, _i in _by_key.items():
+        if _k in older_id_by_key: continue
+        if (_i in prev_by_id and prev_by_id[_i].get('inchikey') != _k) or (_i in SOLVED and SOLVED[_i]['inchikey'] not in (None, _k)): continue
+        older_id_by_key[_k] = _i
 log(f'guards: {len(prev_by_id)} rows in the previous file ({PREV}) · {len(SOLVED)} ids with a solved rung in {RAW} '
-    f'({sum(1 for s in SOLVED.values() if s["exact"])} reproducible exactly)' + (' · --refresh-geometry: guard (a) is OFF' if REFRESH else ''))
+    f'({sum(1 for s in SOLVED.values() if s["exact"])} reproducible exactly) · {len(older_ids)} ids in {len(OLDER)} earlier files'
+    + (' · --refresh-geometry: guard (a) is OFF' if REFRESH else ''))
 
 # ── 1. NOMINATIONS ───────────────────────────────────────────────────────────────────────────────────────────────────
 noms = []
@@ -203,7 +248,7 @@ for e in chebi['entities']:
 for cat, spec in CUR.CATEGORIES.items():
     for it in spec['items']:
         name, extra, opts = (it, [], {}) if isinstance(it, str) else (it[0], it[1], it[2] if len(it) > 2 else {})
-        if opts.get('skip'): nominate('curated-skip', name=name, why=opts['skip'], cat=cat); continue
+        if opts.get('skip') and name not in CUR.C7_LIFTED: nominate('curated-skip', name=name, why=opts['skip'], cat=cat); continue
         nominate('curated', name=name, query=opts.get('query', name), smiles=opts.get('smiles'), formula=opts.get('formula'),
                  tags=[t for t in spec['tags'] + extra if t in USE_VOCAB], display=opts.get('display'), blurb=opts.get('blurb'),
                  cat_blurb=spec.get('blurb'), cat=cat, ref={'db': 'curated', 'list': cat})
@@ -256,11 +301,15 @@ for a in app:
 props = P.properties(cids)
 log(f'PubChem records: {len(props)}')
 parent_of, want_parent = {}, []
+def several_units(p): return (p.get('CovalentUnitCount', 1) or 1) > 1
 for n in noms:
     c, p = n.get('cid'), props.get(n.get('cid'))
-    if not p or n['src'] == 'wikidata': continue                       # a Wikidata nomination is already the article's own compound
+    if not p: continue
+    # a Wikidata nomination is the article's own compound — an ion's article is about the ion, kept with its charge — except a salt
+    # or a mixture (several units), which is folded onto its neutral parent like every other source's (iteration 006 C7)
+    if n['src'] == 'wikidata' and not several_units(p): continue
     if n['src'] == 'curated' and n['name'] in HAND_GEOM: continue
-    if (p.get('CovalentUnitCount', 1) or 1) > 1 or (p.get('Charge', 0) or 0) != 0:
+    if several_units(p) or (p.get('Charge', 0) or 0) != 0:
         if c not in parent_of: want_parent.append(c)
 want_parent = sorted(set(want_parent))
 # first, locally: the largest organic fragment, neutralised, looked up by InChIKey in ONE batched call per hundred —
@@ -281,9 +330,16 @@ for i, c in enumerate(rest):
 new_cids = {v for v in parent_of.values() if v and v not in props}
 props.update(P.properties(new_cids))
 log(f'parents resolved: {sum(1 for v in parent_of.values() if v)} · new records {len(new_cids)}')
+OLD_WANT = {n.get('cid') for n in noms if n['src'] != 'wikidata' and props.get(n.get('cid'))
+            and not (n['src'] == 'curated' and n['name'] in HAND_GEOM)
+            and (several_units(props[n['cid']]) or (props[n['cid']].get('Charge', 0) or 0) != 0)}
 for n in noms:
     c = n.get('cid')
-    if parent_of.get(c) and parent_of[c] != c: n['from_cid'], n['cid'] = c, parent_of[c]
+    if parent_of.get(c) and parent_of[c] != c:
+        n['from_cid'], n['cid'] = c, parent_of[c]
+        # a Wikidata article folded onto a parent only because it is a SALT (C7) — before C7 a Wikidata nomination was folded only
+        # when another source's nomination of the same record asked for its parent
+        if n['src'] == 'wikidata' and c not in OLD_WANT: n['c7_salt'] = True
 
 # ── 4. MERGE by InChIKey ─────────────────────────────────────────────────────────────────────────────────────────────
 entries, excluded = {}, []
@@ -306,7 +362,12 @@ for n in noms:
     if n['src'] == 'curated-skip': exclude(n['name'], 'left out by hand: ' + n['why'], src='curated', cat=n['cat']); continue
     c, p = n.get('cid'), props.get(n.get('cid'))
     if not c or not p:
-        if n['src'] in ('curated', 'who'): exclude(n['name'], 'PubChem has no compound under this name', src=n['src'])
+        # iteration 006 C7: what a cache-only run could not ask is PENDING, not missing (pubchem.PENDING)
+        pend = (c and c in P.PENDING['properties']) or (not c and (n.get('query') in P.PENDING['names'] or n.get('name') in P.PENDING['names']
+                                                                   or n.get('inchikey') in P.PENDING['inchikeys'] or n.get('smiles') in P.PENDING['smiles']))
+        if pend: exclude(n.get('name') or n.get('chembl_name') or n.get('wd_title') or n.get('chebi_name') or str(c),
+                         'pending: PubChem was not asked for its record (the run was cache-only) — a calm run fills it', src=n['src'], cid=c)
+        elif n['src'] in ('curated', 'who'): exclude(n['name'], 'PubChem has no compound under this name', src=n['src'])
         elif n['src'] == 'chembl': exclude(n.get('chembl_name') or n['ref']['id'], 'PubChem does not carry this InChIKey', src='chembl')
         continue
     if not p.get('InChIKey') or not p.get('MolecularFormula'):
@@ -381,47 +442,44 @@ def block_list(names):
         if c not in props: props.update(P.properties([c]))
         for sk in skeletons_of(props.get(c)): out.setdefault(sk, nm)
     return out
-WEAPON_NAMED, ILLICIT_NAMED = block_list(CUR.CWC_NAMES), block_list(CUR.ILLICIT_NAMES)
-log(f'screens: {len(WEAPON_NAMED)} scheduled chemicals and {len(ILLICIT_NAMED)} controlled substances resolved by name')
-# THE SCREENS MATCH ON THE SKELETON (iteration 006 C4).  The Annex names and the illicit names always matched on the InChIKey's first
-# block (the connectivity skeleton), but every other signal was read off the one entry that carried it: Wikidata's weapon and
-# recreational-drug uses, ChEBI's hallucinogen and opioid roles — and nothing at all marked a controlled MEDICINE, so the racemate of
-# an approved d-methamphetamine (another InChIKey, nominated by Wikidata alone, approved by nobody) passed.  Now every signal screens
-# its whole skeleton — the racemate, the enantiomers, the isotopologues and protonated forms (one first block), and a salt's neutral
-# parent (skeletons_of) — and the controlled-substance screen has one more signal: an approved medicine whose OWN ATC code sits in a
-# controlled-drug group (curated.CONTROLLED_ATC: the opioids, the central stimulants, the barbiturates, benzodiazepines and
-# Z-drugs, the central anorectics, ketamine).  The medicine itself still passes (it is approved); a row that shares its skeleton passes
-# only when it is ITSELF an approved drug by ChEMBL (max_phase 4: a ChEMBL approved parent whose structure is this row — is_own()).
-# The class patterns are structural, so every member of a skeleton already meets them on its own; the CWC's Annex names and classes
-# refuse outright, approved or not (the law: every scheduled agent and precursor).
-def own_atc(e): return sorted({c for n in e['noms'] if n['src'] == 'chembl' and is_own(n) for c in (n.get('atc') or [])})
+WEAPON_NAMED = block_list(CUR.CWC_NAMES)
+log(f'screens: {len(WEAPON_NAMED)} scheduled chemicals resolved by name (the controlled-substance screen is removed: iteration 006 C7)')
+# THE SCREEN MATCHES ON THE SKELETON (iteration 006 C4).  The Annex names always matched on the InChIKey's first block (the
+# connectivity skeleton); every other signal (Wikidata's weapon uses) screens its whole skeleton too — the racemate, the enantiomers,
+# the isotopologues and protonated forms (one first block), and a salt's neutral parent (skeletons_of).  A row that shares a
+# screened skeleton passes only when it is ITSELF an approved drug by ChEMBL (max_phase 4: a ChEMBL approved parent whose structure is
+# this row — is_own()).  The class patterns are structural, so every member of a skeleton already meets them on its own; the CWC's
+# Annex names and classes refuse outright, approved or not (the law: every scheduled agent and precursor).
+# THE CONTROLLED-SUBSTANCE SCREEN (iterations 004–006 C4: the illicit names, ChEBI's hallucinogen and opioid roles, Wikidata's
+# recreational-drug uses, the controlled-medicine ATC groups) IS REMOVED in iteration 006 C7, Josh's decision ("That's only the
+# human's relation with the molecule that's the problem"): those molecules are ordinary rows.  The CWC screen is unchanged.
 def cwc_signal(e):
-    uses = sorted({u for n in e['noms'] for u in n.get('uses', []) if u in WD_WEAPON_USES})
+    # (C7: a Wikidata SALT folded onto this entry carries its signal through the skeleton table below, exactly as the salt's own
+    # entry did before C7 — so the screen refuses what it refused, no more and no less)
+    uses = sorted({u for n in e['noms'] if not n.get('c7_salt') for u in n.get('uses', []) if u in WD_WEAPON_USES})
     return f'Wikidata records it as a chemical warfare agent ({", ".join(uses)})' if uses else None
-def illicit_signal(e):
-    il = ILLICIT_NAMED.get(skeleton(e['key']))
-    if il: return f'named on the controlled-substance list ({il})'
-    scr = sorted({s for n in e['noms'] for s in n.get('screens', [])} & {'hallucinogen', 'opioid'})
-    if scr: return f'ChEBI gives it the role {" and ".join(scr)}'
-    uses = sorted({u for n in e['noms'] for u in n.get('uses', []) if u in WD_ILLICIT_USES})
-    if uses: return f'Wikidata records it as a {", ".join(uses)}'
-    atc = [c for c in own_atc(e) if c.startswith(tuple(CUR.CONTROLLED_ATC))]
-    if atc: return f'a controlled medicine (ATC {", ".join(atc)}: {CUR.CONTROLLED_ATC[next(g for g in CUR.CONTROLLED_ATC if atc[0].startswith(g))]})'
-    return None
 def label(e):
-    """a readable name for an entry the screens talk about (the row name rule comes later, in the filters)"""
+    """a readable name for an entry the screen talks about (the row name rule comes later, in the filters)"""
     return (next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata'), None)
             or next((n.get('display') or n['name'] for n in e['noms'] if n['src'] == 'curated'), None)
             or (props.get(e['cid']) or {}).get('Title') or next((n['chebi_name'] for n in e['noms'] if n.get('chebi_name')), None)
             or next((n['chembl_name'] for n in e['noms'] if n.get('chembl_name')), None) or e['key'])
-CWC_SKELETON, ILLICIT_SKELETON = {}, {}                             # first block → (the molecule that carries the signal, its key, the signal)
+CWC_SKELETON = {}                                                   # first block → (the molecule that carries the signal, its key, the signal)
 for key, e in entries.items():
     if e['app'] or not e['cid'] or key.startswith('APP-'): continue
     p = props.get(e['cid'])
-    for table, sig in ((CWC_SKELETON, cwc_signal(e)), (ILLICIT_SKELETON, illicit_signal(e))):
-        if not sig: continue
-        for sk in skeletons_of(p): table.setdefault(sk, (label(e), key, sig))
-log(f'screens by skeleton: {len(CWC_SKELETON)} first blocks carry a CWC signal, {len(ILLICIT_SKELETON)} a controlled-substance signal')
+    sig = cwc_signal(e)
+    if sig:
+        for sk in skeletons_of(p): CWC_SKELETON.setdefault(sk, (label(e), key, sig))
+    # a Wikidata salt's own signal, as the salt's own entry gave it before C7: its skeleton and its neutral parent's (skeletons_of)
+    for n in e['noms']:
+        if not n.get('c7_salt'): continue
+        uses = sorted({u for u in n.get('uses', []) if u in WD_WEAPON_USES})
+        sp = props.get(n['from_cid'])
+        if uses and sp:
+            for sk in skeletons_of(sp):
+                CWC_SKELETON.setdefault(sk, (clean_wiki_title(n['wd_title']), sp['InChIKey'], f'Wikidata records it as a chemical warfare agent ({", ".join(uses)})'))
+log(f'screen by skeleton: {len(CWC_SKELETON)} first blocks carry a CWC signal')
 
 # ── 6. THE FILTERS ───────────────────────────────────────────────────────────────────────────────────────────────────
 ACID_PATTERNS = [Chem.MolFromSmarts(s) for s in ('[CX3](=O)[OX2H1]', '[#16,#15,#7,#17,#35,#5](=O)[OX2H1]', '[F,Cl,Br][H]',
@@ -439,6 +497,10 @@ def recognisable(e):
                    (f' and in {links} Wikipedias' if links else ' and in no Wikipedia'))
 
 kept, SCREEN_KEPT = [], []                                          # SCREEN_KEPT: rows a screened skeleton holds, kept as approved drugs
+PARENT_PENDING = {c for c in want_parent if not parent_of.get(c) and c in P.PENDING['parents']}
+def systematic(t):
+    """a PubChem title that reads as a systematic name rather than a name people use (C7: a salt-only row's name rule)"""
+    return not t or len(t) > 40 or '[' in t or t.count('-') >= 3 or bool(re.match(r'^[\d(]', t))
 for key, e in entries.items():
     a, p = e['app'], (props.get(e['cid']) if e['cid'] else None)
     srcs = sorted({n['src'] for n in e['noms']} | ({'app'} if a else set()))
@@ -447,17 +509,23 @@ for key, e in entries.items():
     # THE NAME: a nomination that reached this entry through a salt's PARENT (from_cid) names the salt — "Benzathine benzylpenicillin",
     # "Dimenhydrinate", "Lithium diisopropylamide" — so a curated or Wikidata name of the compound ITSELF comes first (C2, 2026-10-17: the
     # full run resolved those parents online and three old rows took their salt's name); the salt's name still beats PubChem's systematic
-    # title, so a dye whose acid has no name of its own stays "Methyl Orange" rather than "Benzenesulfonic acid, 4-(2-(4-…"
+    # title, so a dye whose acid has no name of its own stays "Methyl Orange" rather than "Benzenesulfonic acid, 4-(2-(4-…".
+    # Iteration 006 C7: a Wikidata article's SALT now reaches its parent too (c7_salt), and its title names the salt ("Sodium
+    # valproate"): it comes after PubChem's own title of the parent — before it only when that title is systematic and the row is new
+    # (a row of the previous file keeps the name the earlier rule gave it)
     own = lambda n: not n.get('from_cid')
+    title = (p or {}).get('Title')
+    salt_wd = next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata' and n.get('c7_salt')), None)
     nm = (a['name'] if a else None) or next((n.get('display') or n.get('name') for n in e['noms'] if n['src'] == 'curated' and own(n)), None) \
         or next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata' and own(n)), None) \
         or next((n.get('display') or n.get('name') for n in e['noms'] if n['src'] == 'curated'), None) \
-        or next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata'), None) \
-        or (p or {}).get('Title') or next((n['chembl_name'] for n in e['noms'] if n.get('chembl_name')), None) or key
+        or next((clean_wiki_title(n['wd_title']) for n in e['noms'] if n['src'] == 'wikidata' and not n.get('c7_salt')), None) \
+        or (salt_wd if salt_wd and systematic(title) and key not in prev_id_by_key else None) \
+        or title or next((n['chembl_name'] for n in e['noms'] if n.get('chembl_name')), None) or salt_wd or key
     e['nm'] = nm
     if a: kept.append(e); continue                                    # the app's own: kept at its pinned geometry, whatever its size
-    ok, why = recognisable(e)
-    if not ok: exclude(nm, why, src='/'.join(srcs), cid=e['cid']); continue
+    # RECOGNISABILITY (iteration 006 C7) no longer refuses a row: it orders the rows (step 11), the recognisable first
+    e['recognisable'], e['obscure'] = recognisable(e)
     smiles = p.get('SMILES') or p.get('ConnectivitySMILES')
     mol = Chem.MolFromSmiles(smiles) if smiles else None
     if mol is None and not e['hand']: exclude(nm, 'its PubChem structure does not parse', src='/'.join(srcs), cid=e['cid']); continue
@@ -475,30 +543,24 @@ for key, e in entries.items():
         exclude(nm, f'refused: it shares its connectivity skeleton with a molecule the CWC screen refuses, and is not itself an approved drug '
                     f'— {who_} ({k_}): {sig}; InChIKey first block {sk}', src='/'.join(srcs), screen='CWC', key=key, skeleton=sk, via=k_); continue
     if sk in CWC_SKELETON: SCREEN_KEPT.append({'name': nm, 'key': key, 'screen': 'CWC', 'via': CWC_SKELETON[sk][1], 'viaName': CWC_SKELETON[sk][0], 'signal': CWC_SKELETON[sk][2]})
-    own_sig = illicit_signal(e)
-    if (own_sig or sk in ILLICIT_SKELETON) and not e['approvedSelf']:
-        if own_sig: why = f'refused: a controlled psychoactive substance that is not an approved medicine — {own_sig}'
-        else:
-            who_, k_, sig = ILLICIT_SKELETON[sk]
-            why = (f'refused: a controlled psychoactive substance that is not an approved medicine — it shares its connectivity skeleton '
-                   f'with {who_} ({k_}): {sig}; this row is not itself an approved drug by ChEMBL (InChIKey first block {sk})')
-        exclude(nm, why, src='/'.join(srcs), screen='illicit', key=key, **({} if own_sig else {'skeleton': sk, 'via': ILLICIT_SKELETON[sk][1]})); continue
-    if own_sig or sk in ILLICIT_SKELETON:
-        via = (nm, key, own_sig) if own_sig else ILLICIT_SKELETON[sk]
-        SCREEN_KEPT.append({'name': nm, 'key': key, 'screen': 'illicit', 'via': via[1], 'viaName': via[0], 'signal': via[2]})
     Zs = [x.GetAtomicNum() for x in molH.GetAtoms()] if molH is not None else []
     heavy = p.get('HeavyAtomCount') or sum(1 for z in Zs if z > 1)
+    # iteration 006 C7: a closed-shell ION is a row with its charge (an ion whose neutral parent PubChem carries was folded onto it in
+    # step 3, as always); the electron count is Σ Z − charge
+    charge = 0 if e['hand'] else int(p.get('Charge', 0) or 0)
+    nelec = sum(Zs) - charge
     why = None
     if p.get('IsotopeAtomCount'): why = 'an isotopically labelled compound'
-    elif not e['hand'] and (p.get('CovalentUnitCount', 1) or 1) > 1: why = f'not one molecule: PubChem counts {p["CovalentUnitCount"]} separate units, and it has no neutral parent'
-    elif not e['hand'] and (p.get('Charge', 0) or 0) != 0: why = f'an ion (charge {p["Charge"]}) with no neutral parent in PubChem'
+    elif not e['hand'] and several_units(p) and e['cid'] in PARENT_PENDING:
+        why = 'pending: a salt or a mixture whose neutral parent PubChem was not asked for (the run was cache-only) — a calm run fills it'
+    elif not e['hand'] and several_units(p): why = f'not one molecule: PubChem counts {p["CovalentUnitCount"]} separate units, and it has no neutral parent'
     elif any(z > 36 for z in Zs): why = 'an element beyond krypton (' + ', '.join(sorted({PTS.GetElementSymbol(z) for z in Zs if z > 36})) + ')'
-    elif heavy > 50: why = f'{heavy} heavy atoms, past the 50 the volume allows'
+    elif heavy > MAX_HEAVY: why = f'{heavy} heavy atoms, past the {MAX_HEAVY} the volume allows'
     elif heavy < 1: why = 'no heavy atom'
-    elif sum(Zs) % 2: why = f'an odd electron count ({sum(Zs)}): an open shell, not an RHF molecule'
+    elif nelec % 2: why = f'an odd electron count ({nelec}): an open shell, not an RHF molecule'
     elif mol is not None and not e['hand'] and sum(x.GetNumRadicalElectrons() for x in molH.GetAtoms()): why = 'a radical (RDKit finds unpaired electrons): an open shell'
     if why: exclude(nm, why, src='/'.join(srcs), cid=e['cid']); continue
-    e['heavy'], e['Zs'] = heavy, Zs
+    e['heavy'], e['Zs'], e['charge'] = heavy, Zs, charge
     kept.append(e)
 log(f'through the filters: {len(kept)} (excluded so far {len(excluded)})')
 if LIMIT: kept = kept[:LIMIT]
@@ -509,8 +571,18 @@ GCACHE = os.path.join(CACHE, 'geometry.json')                       # keyed by I
 gcache = read_json(GCACHE) if os.path.exists(GCACHE) else {}
 gdirty = 0
 need3d = sorted({e['cid'] for e in kept if not e['app'] and e['cid']})
-conf = P.conformers(need3d) if GEOMETRY else {}
+conf = P.conformers(need3d) if GEOMETRY or FETCH_ONLY else {}
 log(f'PubChem 3-D conformers: {len(conf)}/{len(need3d)}')
+if FETCH_ONLY:
+    # --fetch-only (iteration 006 C7): ask PubChem for everything the rows that passed the filters will want — their 3-D conformers,
+    # synonyms and descriptions — into the cache, and stop: no geometry is built and nothing is written, so the asking can be spread over
+    # PubChem's calm hours and the one real build then runs from the cache
+    _cids = sorted({e['cid'] for e in kept if e['cid']})
+    _syn, _desc = P.synonyms(_cids), P.descriptions(_cids)
+    log(f'--fetch-only: conformers {len(conf)}/{len(need3d)} · synonyms {len(_syn)} · descriptions {len(_desc)} of {len(_cids)} CIDs · '
+        f'{C._throttle["requests"]} requests · ' + (f'STOPPED: {C.STOPPED}' if C.STOPPED else 'PubChem never stopped us')
+        + ' · pending ' + (', '.join(f'{k} {len(v)}' for k, v in sorted(P.PENDING.items()) if v) or 'nothing'))
+    raise SystemExit(0)
 def elements_agree(atoms, Zs): return collections.Counter(x[0] for x in atoms) == collections.Counter(Zs)
 def gkind(src):
     return ('app pinned' if src.startswith("the app's own") else 'PubChem 3-D conformer' if src.startswith('PubChem')
@@ -537,10 +609,9 @@ def usable_conformer(e):
     if e['app'] or e['cid'] not in conf: return None
     got, _ = G.from_sdf(conf[e['cid']])
     return got if got and elements_agree(got, e['Zs']) else None
-def build_geometry(e):
-    """THE BUILD'S OWN RULE for one row → (atoms Å, source, kind), or (None, why, 'failed' | 'failed, cached'); it reads and writes
-    the geometry cache (keyed by InChIKey)"""
-    global gdirty
+def cached_geometry(e):
+    """the geometry cache's answer for a row when it STANDS → (atoms, source, kind) or (None, why, 'failed, cached'); None when the
+    row must be built (again)"""
     hit = gcache.get(e['key'])
     # a cached geometry stands, EXCEPT a locally built one for a molecule whose PubChem conformer has since arrived: PubChem's
     # own 3-D conformer is the preferred source (PLAN.md step 1), so that row is built again rather than left as it was.  An xTB
@@ -551,43 +622,140 @@ def build_geometry(e):
         return None, hit['source'], 'failed, cached'
     if hit and hit['kind'] != 'failed' and not REBUILD and (hit['kind'] == 'PubChem 3-D conformer' or e['cid'] not in conf or "from PubChem's 3-D conformer" in hit['source']):
         return hit['atoms'], hit['source'], hit['kind']
+    return None
+def geometry_job(e):
+    """what THE BUILD'S OWN RULE needs of a row, picklable, so a worker process can build it (iteration 006 C7: --jobs)"""
+    return {'key': e['key'], 'mol': e['mol'], 'molH': e['molH'], 'Zs': e['Zs'], 'pub': usable_conformer(e), 'charge': e.get('charge', 0),
+            'hand': next((n['name'] for n in e['noms'] if n['src'] == 'curated' and n['name'] in HAND_GEOM), None),
+            'hadConformer': e['cid'] in conf}
+def compute_geometry(j):
+    """THE BUILD'S OWN RULE for one row (no cache; a worker may run it) → (key, atoms Å, source, kind) or (key, None, why, 'failed').
+    An ion is relaxed at its own charge (C7; every earlier row had charge 0)"""
     atoms = src = None
-    pub = usable_conformer(e)
-    hand = next((n['name'] for n in e['noms'] if n['src'] == 'curated' and n['name'] in HAND_GEOM), None)
+    pub, hand, mol, molH, q = j['pub'], j['hand'], j['mol'], j['molH'], j['charge']
     if hand:
         start = G.HAND[hand]()
         out, _, ok = G.xtb_relax(start)
         if out: atoms, src = out, f'built here as the known {hand} framework, then relaxed with GFN2-xTB (tblite 0.7.0){"" if ok is True else " — the relaxation did not converge"}'
-    elif e['mol'] is not None and G.needs_xtb(e['molH']):
-        start = pub or G.vsepr_star(e['mol']) or G.embed_any(Chem.MolToSmiles(e['mol']))
+    elif mol is not None and G.needs_xtb(molH):
+        start = pub or G.vsepr_star(mol) or G.embed_any(Chem.MolToSmiles(mol))
         if start is not None:
-            out, _, ok = G.xtb_relax(start, charge=0)
-            if out and elements_agree(out, e['Zs']):
+            out, _, ok = G.xtb_relax(start, charge=q)
+            if out and elements_agree(out, j['Zs']):
                 if pub is not None and G.kabsch_rmsd(out, pub) <= 0.10: atoms, src = pub, OMEGA + ' — checked against a GFN2-xTB relaxation, which agrees within 0.10 Å'
                 else:
                     atoms = out
                     src = ('GFN2-xTB relaxation (tblite 0.7.0) from ' +
-                           ('PubChem\'s 3-D conformer' if pub is not None else 'a VSEPR start built here' if G.vsepr_star(e['mol']) else 'an RDKit ETKDGv3 embedding') +
+                           ('PubChem\'s 3-D conformer' if pub is not None else 'a VSEPR start built here' if G.vsepr_star(mol) else 'an RDKit ETKDGv3 embedding') +
                            '; MMFF94 has no parameters for this centre' + ('' if ok is True else ' — the relaxation did not converge'))
     if atoms is None and pub is not None: atoms, src = pub, OMEGA
-    if atoms is None and e['mol'] is not None:
-        got = G.etkdg_mmff(Chem.MolToSmiles(e['mol']))
+    if atoms is None and mol is not None:
+        got = G.etkdg_mmff(Chem.MolToSmiles(mol))
         if got: atoms, src = got[0], f'RDKit ETKDGv3 + MMFF94, the lowest of ten embeddings, seed {G.SEED}'
-    if atoms is None and e['mol'] is not None:
-        start = G.embed_any(Chem.MolToSmiles(e['mol']))
+    if atoms is None and mol is not None:
+        start = G.embed_any(Chem.MolToSmiles(mol))
         if start is not None:
-            out, _, ok = G.xtb_relax(start)
+            out, _, ok = G.xtb_relax(start, charge=q)
             if out: atoms, src = out, f'RDKit ETKDGv3 embedding relaxed with GFN2-xTB (tblite 0.7.0){"" if ok is True else " — the relaxation did not converge"}'
-    if atoms is None or not elements_agree(atoms, e['Zs']):
-        why = 'no 3-D geometry: PubChem has no conformer and neither MMFF94 nor GFN2-xTB would build one'
-        gcache[e['key']] = {'atoms': None, 'source': why, 'kind': 'failed', 'hadConformer': e['cid'] in conf}; gdirty += 1
-        return None, why, 'failed'
+    if atoms is None or not elements_agree(atoms, j['Zs']):
+        return j['key'], None, 'no 3-D geometry: PubChem has no conformer and neither MMFF94 nor GFN2-xTB would build one', 'failed'
     atoms = [[int(z), round(x, 5), round(y, 5), round(zz, 5)] for z, x, y, zz in atoms]
     kind = 'PubChem 3-D conformer' if src.startswith('PubChem') else 'GFN2-xTB' if 'GFN2-xTB' in src else 'RDKit ETKDGv3 + MMFF94'
-    gcache[e['key']] = {'atoms': atoms, 'source': src, 'kind': kind}
+    return j['key'], atoms, src, kind
+def remember_geometry(key, atoms, src, kind, had_conformer):
+    global gdirty
+    gcache[key] = ({'atoms': None, 'source': src, 'kind': 'failed', 'hadConformer': had_conformer} if atoms is None
+                   else {'atoms': atoms, 'source': src, 'kind': kind})
     gdirty += 1
     if gdirty % 200 == 0: write_json(GCACHE, gcache)
+def build_geometry(e):
+    """THE BUILD'S OWN RULE for one row → (atoms Å, source, kind), or (None, why, 'failed' | 'failed, cached'); it reads and writes
+    the geometry cache (keyed by InChIKey)"""
+    got = cached_geometry(e)
+    if got: return got
+    j = geometry_job(e)
+    _, atoms, src, kind = compute_geometry(j)
+    remember_geometry(e['key'], atoms, src, kind, j['hadConformer'])
     return atoms, src, kind
+# THE LOCAL BUILDS IN PARALLEL (iteration 006 C7).  The rows the cache has no standing geometry for — not solved, not the app's,
+# not waiting on a conformer PubChem was not yet asked for — are built first by --jobs worker processes (fork; one thread each at the
+# build's own niceness), the rule being compute_geometry itself; each answer goes to the cache, so the pass below finds it there.
+def _to_build(e):
+    if e['app'] or not GEOMETRY or e['cid'] in P.PENDING['conformers']: return False
+    sid = solved_id(e)
+    if sid and elements_agree(SOLVED[sid]['atomsAng'], e['Zs']): return False
+    return cached_geometry(e) is None
+JOBS_TODO = [geometry_job(e) for e in kept if _to_build(e)]
+GEOM_BUILT = len(JOBS_TODO)
+GEOM_LIMIT_S = int(float(_opt('geometry-minutes', '6')) * 60)          # C7: a molecule's build that runs past this is stopped (--geometry-minutes)
+GEOM_STOPPED = []
+def _geometry_worker(conn):
+    """one worker process: build each job it is sent, send the answer back; None ends it"""
+    while True:
+        try: j = conn.recv()
+        except EOFError: return
+        if j is None: return
+        try: r = compute_geometry(j)
+        except Exception as ex: r = (j['key'], None, f'no 3-D geometry: the build raised {type(ex).__name__}', 'failed')
+        conn.send(r)
+def build_in_workers(jobs, n, limit_s, recycle=40):
+    """THE LOCAL BUILDS, n at a time (iteration 006 C7): one forked worker per pipe, each sent one job at a time; a job that runs past
+    limit_s is stopped — its worker killed and replaced — and answered "no 3-D geometry" (cached as a failure, as every failure is: an
+    RDKit embedding has no time bound of its own, and a few molecules never finish one); a worker is replaced after `recycle` jobs.
+    Yields (key, atoms, source, kind) as compute_geometry does."""
+    import multiprocessing as mp
+    from multiprocessing.connection import wait
+    ctx = mp.get_context('fork')
+    todo, workers = list(reversed(jobs)), {}                       # workers: conn → [process, job, started, jobs done]
+    def spawn():
+        a, b = ctx.Pipe()
+        p = ctx.Process(target=_geometry_worker, args=(b,), daemon=True); p.start(); b.close()
+        workers[a] = [p, None, 0.0, 0]
+        return a
+    def retire(c):
+        try: c.send(None)
+        except (OSError, ValueError): pass
+        workers[c][0].join(10); workers[c][0].kill(); c.close(); del workers[c]
+    def feed(c):
+        if not todo: retire(c); return
+        j = todo.pop(); workers[c][1], workers[c][2] = j, time.time(); c.send(j)
+    for _ in range(min(n, len(todo))): feed(spawn())
+    while workers:
+        for c in wait(list(workers), timeout=10):
+            p, j, t, k = workers[c]
+            try: r = c.recv()
+            except (EOFError, OSError):
+                p.kill(); p.join(); c.close(); del workers[c]
+                yield (j['key'], None, 'no 3-D geometry: the worker building it died', 'failed')
+                if todo: feed(spawn())
+                continue
+            workers[c][1], workers[c][3] = None, k + 1
+            if time.time() - t > 120:
+                log(f'    slow: {j["key"]} · {sum(1 for z in j["Zs"] if z > 1)} heavy · {time.time() - t:.0f} s · {(r[2] or "")[:70]}')
+            yield r
+            if k + 1 >= recycle: retire(c); c = spawn() if todo else None
+            if c is not None: feed(c)
+        now = time.time()
+        for c, (p, j, t, k) in list(workers.items()):
+            if j is not None and now - t > limit_s:
+                p.kill(); p.join(); c.close(); del workers[c]; GEOM_STOPPED.append(j['key'])
+                yield (j['key'], None, f'no 3-D geometry: its build ran past {limit_s // 60} minutes and was stopped', 'failed')
+                if todo: feed(spawn())
+if JOBS_TODO:
+    # the quick ones in this process — PubChem's conformer as it is (no xTB check, no hand-built framework) — the rest in workers
+    _quick = [j for j in JOBS_TODO if j['pub'] is not None and not j['hand'] and (j['mol'] is None or not G.needs_xtb(j['molH']))]
+    _hard = [j for j in JOBS_TODO if not (j['pub'] is not None and not j['hand'] and (j['mol'] is None or not G.needs_xtb(j['molH'])))]
+    for j in _quick: remember_geometry(*compute_geometry(j), j['hadConformer'])
+    log(f'local geometries: {len(_quick)} PubChem conformers taken as they are · {len(_hard)} to build, by {max(1, JOBS)} worker processes')
+    _had = {j['key']: j['hadConformer'] for j in _hard}
+    _tg, _nf = time.time(), 0
+    for _n, (_k, _a, _s, _kd) in enumerate(build_in_workers(_hard, max(1, JOBS), GEOM_LIMIT_S), 1):
+        remember_geometry(_k, _a, _s, _kd, _had[_k]); _nf += _a is None
+        if _n % 25 == 0: write_json(GCACHE, gcache)                  # a hard build is minutes of work: keep it on disk soon
+        if _n % 100 == 0 or _n == len(_hard):
+            log(f'  built {_n}/{len(_hard)} ({time.time() - _tg:.0f} s; failed {_nf}, of them stopped past {GEOM_LIMIT_S // 60} min {len(GEOM_STOPPED)})')
+    write_json(GCACHE, gcache)
+JOBS_TODO = None
 for i, e in enumerate(kept):
     sid = solved_id(e)
     if sid and (e['app'] or elements_agree(SOLVED[sid]['atomsAng'], e['Zs'])):
@@ -610,6 +778,12 @@ for i, e in enumerate(kept):
         geom_counts['app pinned'] += 1
         continue
     if not GEOMETRY: e['atoms'], e['gsource'] = None, None; continue
+    if e['cid'] in P.PENDING['conformers'] and (cached_geometry(e) or (None,))[0] is None:
+        # iteration 006 C7: PubChem's conformer was never asked for (the run was cache-only) — the row waits; a local geometry built
+        # now would be thrown away (and the row solved twice) once the conformer arrives
+        exclude(e['nm'], 'pending: PubChem was not asked for its 3-D conformer (the run was cache-only) — a calm run fills it',
+                src='/'.join(e['srcs']), cid=e['cid'])
+        e['atoms'] = None; continue
     atoms, src, kind = build_geometry(e)
     if atoms is None:
         exclude(e['nm'], src, src='/'.join(e['srcs']), cid=e['cid'], **({'cached': True} if kind == 'failed, cached' else {}))
@@ -743,6 +917,7 @@ def use_words(e):
     t = set()
     counter_ion = inorganic(e.get('molH'))
     for n in e['noms']:
+        if n.get('c7_salt'): continue                                 # C7: a Wikidata salt's article says what the SALT is for
         mine = is_own(n)
         if counter_ion and not mine and active_cation(n): continue     # a metal salt's evidence landing on its anion
         for x in n.get('tags', []):
@@ -776,7 +951,14 @@ TAG_PHRASE = {'medicine': 'a medicine', 'aromatic': 'an aromatic compound', 'rin
               'steroid': 'a steroid', 'alkaloid': 'an alkaloid', 'life': 'a molecule of life', 'natural': 'a natural product',
               'vitamin': 'a vitamin', 'hormone': 'a hormone', 'neurotransmitter': 'a neurotransmitter', 'sweetener': 'a sweetener',
               'classic': 'a classic of the chemistry course', 'explosive': 'an explosive', 'refrigerant': 'a refrigerant',
-              'battery': 'a solvent of battery electrolytes'}
+              'battery': 'a solvent of battery electrolytes',
+              # iteration 006 C7: a row that earns no use word (the gate is gone) falls back to its first STRUCTURE word
+              'peptide': 'a peptide', 'nucleotide': 'a nucleotide', 'nucleoside': 'a nucleoside', 'terpene': 'a terpene or terpenoid',
+              'ion': 'an ion', 'inorganic': 'an inorganic compound', 'nitro': 'a nitro compound', 'nitrile': 'a nitrile',
+              'alkyne': 'an alkyne', 'aldehyde': 'an aldehyde', 'phenol': 'a phenol', 'ester': 'an ester', 'amide': 'an amide',
+              'ketone': 'a ketone', 'amine': 'an amine', 'alcohol': 'an alcohol', 'ether': 'an ether', 'halogen': 'a halogen compound',
+              'phosphorus': 'a phosphorus compound', 'sulfur': 'a sulfur compound', 'alkene': 'an alkene', 'alkane': 'an alkane',
+              'heterocycle': 'a heterocyclic compound', 'chain': 'an open-chain compound'}
 def blurb_for(e, name, tags):
     if e['app']:
         b = APP.get(e['app']['id'], (None, None))[1]
@@ -799,7 +981,7 @@ def blurb_for(e, name, tags):
         return s + '.', 'λWAVES'
     for n in e['noms']:
         if n['src'] == 'curated' and n.get('cat_blurb'): return n['cat_blurb'], 'λWAVES'
-    uses = [u for n in e['noms'] for u in n.get('uses', []) if u in WD_USE_TAGS]
+    uses = [u for n in e['noms'] if not n.get('c7_salt') for u in n.get('uses', []) if u in WD_USE_TAGS]   # never a salt's use (C7)
     if uses: return f'{name}: used as a {uses[0]}.', 'λWAVES'
     if tags: return f'{name}: {TAG_PHRASE.get(tags[0], "a molecule of the catalogue")}.', 'λWAVES'
     return f'{name}: a molecule of the catalogue.', 'λWAVES'
@@ -825,10 +1007,12 @@ rows = []
 for e in kept:
     p = props.get(e['cid']) if e['cid'] else None
     a = e['app']
-    uses = use_words(e)                                              # membership and the blurb's fallback only (step 9a), never written
-    if not uses:
-        exclude(e['nm'], 'no plain tag of the vocabulary fits it, so the library could not shelve it', src='/'.join(e['srcs']), cid=e['cid']); continue
+    uses = use_words(e)                                              # the blurb's fallback only (step 9a), never written
+    # iteration 006 C7: a row no longer has to earn a use word (that gate refused 425); it must earn a STRUCTURE word
     tags = tags_for(e, (a['charge'] if a else 0 if e['hand'] else (p or {}).get('Charge', 0)) or 0)
+    if not tags:
+        exclude(e['nm'], 'no structure tag: neither its structure nor its ChEBI class earns a word of the vocabulary', src='/'.join(e['srcs']), cid=e['cid']); continue
+    e['uses'] = uses
     iupac = (p or {}).get('IUPACName') or next((n.get('iupac') for n in e['noms'] if n.get('iupac')), None)
     name = title_case(clean_wiki_title(e['nm']))
     atoms = e['atoms']
@@ -846,7 +1030,7 @@ for e in kept:
            'complexity': (p or {}).get('Complexity'), 'tags': tags, 'blurb': None, 'blurbSource': None,
            'atomsAng': atoms, 'geometrySource': e['gsource'], 'sources': [], 'priority': None, **({'app': a['id'], 'section': a['section']} if a else {})}
     row['synonyms'] = pick_synonyms(e, name, iupac)
-    row['blurb'], row['blurbSource'] = blurb_for(e, name, uses)     # the use words' first, as before C5: no blurb moves
+    row['blurb'], row['blurbSource'] = blurb_for(e, name, uses or tags)   # the use words' first, as before C5: no blurb moves
     srcs = []
     if a:
         srcs.append({'db': 'λWAVES', 'id': a['id'], 'what': 'lab/library.json record row' if a['library'] or a['recordOnly'] else 'lab/molecules.js MOLECULES',
@@ -865,8 +1049,8 @@ log(f'rows: {len(rows)}')
 
 # GUARD (b): IDS ARE STABLE.  First every row the previous file (or raw/) already knows takes that id; then each new row takes its
 # slug, suffixed past every id ever given — the previous file's, raw/'s and this run's — so a collision moves the NEW row, never an old one
-reserved = set(prev_by_id) | set(SOLVED)
-seen_ids, id_from = {}, collections.Counter()
+reserved = set(prev_by_id) | set(SOLVED) | older_ids                # iteration 006 C7: an earlier file's id is never a new row's slug
+seen_ids, id_from, RETURNED = {}, collections.Counter(), []
 for e, row in rows:
     k = row['inchikey']
     pinned = row['id'] if e['app'] else prev_id_by_key.get(k) or raw_id_by_key.get(k)
@@ -874,6 +1058,14 @@ for e, row in rows:
         if pinned in seen_ids: raise SystemExit(f'guard (b): the id {pinned} is claimed twice ({seen_ids[pinned]} and {k}) — refusing to write')
         row['id'] = pinned; seen_ids[pinned] = k; e['pinned'] = True
         id_from['the app' if e['app'] else 'the previous file' if k in prev_id_by_key else 'raw/ (solved under it)'] += 1
+        if not e['app'] and k not in prev_id_by_key and older_id_by_key.get(k) == pinned: RETURNED.append({'id': pinned, 'name': row['name'], 'inchikey': k, 'from': 'raw/'})
+# iteration 006 C7: a row an EARLIER file carried (a screen refused it in between) takes the id that file gave it, when it is free
+for e, row in rows:
+    if e.get('pinned'): continue
+    k = row['inchikey']; old = older_id_by_key.get(k)
+    if old and old not in seen_ids:
+        row['id'] = old; seen_ids[old] = k; e['pinned'] = True; id_from['an earlier file (it returns)'] += 1
+        RETURNED.append({'id': old, 'name': row['name'], 'inchikey': k, 'from': 'an earlier candidates file'})
 for e, row in rows:
     if e.get('pinned'): continue
     base = row['id']
@@ -891,7 +1083,9 @@ def tier(e):
     if e['app']: return 0
     if any(n.get('who') for n in e['noms']): return 1
     return 2
-rows.sort(key=lambda er: (tier(er[0]), -(score(er[0]) // 10), er[1]['heavy'], er[1]['name'].lower()))
+# iteration 006 C7: in each tier the RECOGNISABLE rows come first (what used to be the whole catalogue), then the rows only an
+# obscure Wikidata or ChEBI entry names; within each, the most recognisable and then the smallest first
+rows.sort(key=lambda er: (tier(er[0]), 0 if er[0]['app'] or er[0].get('recognisable', True) else 1, -(score(er[0]) // 10), er[1]['heavy'], er[1]['name'].lower()))
 for i, (e, row) in enumerate(rows): row['priority'] = i
 molecules = [row for _, row in rows]
 
@@ -925,7 +1119,37 @@ os.makedirs(os.path.dirname(os.path.abspath(OUT)), exist_ok=True)
 write_json(OUT, out)
 
 id_by_key = {m['inchikey']: m['id'] for m in molecules if m['inchikey']}
-bins = [('≤10', 0, 10), ('11–20', 11, 20), ('21–30', 21, 30), ('31–40', 31, 40), ('41–50', 41, 50), ('>50', 51, 10 ** 6)]
+bins = [('≤10', 0, 10), ('11–20', 11, 20), ('21–30', 21, 30), ('31–40', 31, 40), ('41–50', 41, 50), ('51–60', 51, 60), ('61–70', 61, 70),
+        ('>70', 71, 10 ** 6)]
+# ITERATION 006 C7: WHY EACH NEW ROW IS NEW — the reason the previous build refused it (its exclusion, found by the row's CID, or by
+# InChIKey for a screened one), else what this build does differently (a salt's parent, an ion, the cap)
+_pex_path = sibling(PREV, 'excluded')
+_pex = read_json(_pex_path)['rows'] if os.path.exists(_pex_path) else []
+_pex_by_cid, _pex_screen = {}, {}
+for _x in _pex:
+    if _x.get('cid') is not None: _pex_by_cid.setdefault(_x['cid'], _x['why'])
+    if _x.get('screen') and _x.get('key'): _pex_screen.setdefault(_x['key'], _x['screen'])
+def why_new(e, row):
+    k = row['inchikey']
+    if _pex_screen.get(k) == 'illicit': return 'returned: the controlled-substance screen is removed'
+    w = _pex_by_cid.get(e['cid']) or ''
+    if w.startswith('too obscure'):
+        return 'recognisability is no longer a filter: ' + ('only Wikidata, in < 12 Wikipedias' if 'only by wikidata' in w
+                                                          else 'only ChEBI, in no Wikipedia' if 'only by chebi' in w else 'another obscure entry')
+    if w.startswith('no plain tag'): return 'the use-word gate is gone (it earns no use word)'
+    if w.startswith('an ion'): return 'a closed-shell ion, kept with its charge'
+    if 'past the 50' in w: return 'heavy 51–70 (the cap rose from 50 to 70)'
+    if w.startswith('not one molecule') or any(n.get('c7_salt') for n in e['noms']): return 'a salt or a mixture, as its neutral parent'
+    if any(n['src'] == 'curated' and n.get('name') in CUR.C7_LIFTED for n in e['noms']): return 'a hand skip lifted (curated.C7_LIFTED)'
+    if row['charge']: return 'a closed-shell ion, kept with its charge'
+    if row['heavy'] > 50: return 'heavy 51–70 (the cap rose from 50 to 70)'
+    if w: return 'refused before for another reason: ' + re.sub(r'\d+', 'N', w.split('—')[0].strip())[:80]
+    return 'new this run (PubChem answered a name, a key or a parent the previous build had not)'
+C7_NEW = collections.Counter(); C7_SAMPLES = collections.defaultdict(list)
+for e, row in rows:
+    if e['app'] or row['inchikey'] in prev_id_by_key: continue
+    r = why_new(e, row); C7_NEW[r] += 1
+    if len(C7_SAMPLES[r]) < 15: C7_SAMPLES[r].append(f'{row["id"]} ({row["name"]})')
 def binned(h):
     for nm, lo, hi in bins:
         if lo <= h <= hi: return nm
@@ -944,11 +1168,13 @@ stats = {
  'excludedCount': len(excluded),
  'excludedByReason': dict(collections.Counter(re.sub(r'\d+', 'N', e['why'].split('—')[0].strip())[:110] for e in excluded).most_common()),
  'excludedBySource': dict(collections.Counter(e.get('src', '?') for e in excluded).most_common()),
- 'screens': {'cwc': sum(1 for e in excluded if e.get('screen') == 'CWC'), 'illicit': sum(1 for e in excluded if e.get('screen') == 'illicit'),
-             'namedScheduled': len(WEAPON_NAMED), 'namedControlled': len(ILLICIT_NAMED),
-             # iteration 006 C4: the screens on the skeleton — how many first blocks carry a signal, how many rows a skeleton-mate's
+ 'screens': {'cwc': sum(1 for e in excluded if e.get('screen') == 'CWC'),
+             'namedScheduled': len(WEAPON_NAMED),
+             # iteration 006 C7: the controlled-substance screen is removed (Josh's decision); the CWC screen is unchanged
+             'controlledSubstanceScreen': 'removed in iteration 006 C7',
+             # iteration 006 C4: the screen on the skeleton — how many first blocks carry a signal, how many rows a skeleton-mate's
              # signal refused, and the rows a screened skeleton holds that stay because each is ITSELF an approved drug by ChEMBL
-             'cwcSkeletons': len(CWC_SKELETON), 'illicitSkeletons': len(ILLICIT_SKELETON),
+             'cwcSkeletons': len(CWC_SKELETON),
              'bySkeleton': sum(1 for e in excluded if e.get('screen') and e.get('skeleton')),
              'keptAsApprovedDrugs': sorted((dict(r, id=id_by_key[r['key']]) for r in SCREEN_KEPT if r['key'] in id_by_key),
                                            key=lambda r: (r['screen'], r['name'].lower()))},
@@ -966,7 +1192,15 @@ stats = {
  'tagClassFrom': {w: {s: TAG_FROM[(w, s)] for s in ('ChEBI', 'structure') if TAG_FROM[(w, s)]} for w in VOCAB if w in ST.CHEBI_WORDS},
  'tagStructureFrom': dict(STRUCTURE_FROM.most_common()),
  'pubchem': {'conformers': len(conf), 'conformersAsked': len(need3d), 'synonymsFor': len(syn), 'descriptionsFor': len(desc), 'live': len(live),
-             'cacheOnly': bool(C.OFFLINE), 'stopped': PUBCHEM_STOPPED},
+             'cacheOnly': bool(C.OFFLINE), 'stopped': PUBCHEM_STOPPED or C.STOPPED,
+             # iteration 006 C7: how many requests this run sent, the throttle's last word, and what a cache-only run left PENDING
+             'requests': C._throttle['requests'], 'throttle': C._throttle['note'], 'pauses': C._throttle['pauses'],
+             'pending': {k: len(v) for k, v in sorted(P.PENDING.items()) if v}},
+ # iteration 006 C7: MORE MOLECULES — the new rows by why they are new, the rows that came back under an earlier id, the cap
+ 'c7': {'maxHeavy': MAX_HEAVY, 'newRows': sum(C7_NEW.values()), 'newByReason': dict(C7_NEW.most_common()),
+        'newSamples': {k: v for k, v in C7_SAMPLES.items()}, 'returnedUnderEarlierIds': RETURNED,
+        'earlierFiles': OLDER, 'localGeometriesBuilt': GEOM_BUILT, 'jobs': JOBS,
+        'pendingRows': sum(1 for x in excluded if x['why'].startswith('pending'))},
 }
 write_json(sibling(OUT, 'stats'), stats, indent=1)
 write_json(sibling(OUT, 'excluded'), {'built': out['built'], 'count': len(excluded), 'rows': excluded}, indent=1)
