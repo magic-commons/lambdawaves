@@ -168,19 +168,19 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(local_invocation
   if (lid == 0u) { atomicMax(&stats[P.slot], atomicLoad(&wmax)); }
 }`;
 /* THE BEAT EQUALIZER's kernel (0.6.0 B1), DERIVED from COMPUTE_WGSL, never a copy, so the locked text above stays byte for byte
-   what FLAT runs.  Position hydrogen only: six complex shell accumulators acc_n (shell n = c.w − 1, the exponent n + 1 that a Z
+   what FLAT runs.  Position hydrogen only: seven complex shell accumulators acc_n (iteration 009 N7: the seventh band; shell n = c.w − 1, the exponent n + 1 that a Z
    table keeps integer) and the incoherent sum inc = Σ|c_a ψ_a|²; then ρ′ = Σ_{nn′} Re Γ_{nn′} acc_n acc̄_{n′} + κ·inc from the
    uniform G (lab/equalizer.js) and one of three stores: 0 a pure state Σ_n Γ̄_{0n} acc_n (the pulse: Γ = uu†), 1 a density
    (√ρ′, 0), 2 signed (sign·√|ρ′|, 0), zero under the relative floor.  The presenter reads each as it reads today's texels. */
 const EQ_WGSL = (() => {
-  let c = once(COMPUTE_WGSL, 'var<workgroup> wmax', 'struct EQ { g: array<vec4<f32>, 18>, k: f32, mode: f32, floor: f32, pad: f32 };   // Γ row-major, (re, im) per entry\n@group(0) @binding(6) var<uniform> G: EQ;\nvar<workgroup> wmax');
-  c = once(c, 'var psiB = vec2<f32>(0.0, 0.0);', 'var psiB = vec2<f32>(0.0, 0.0); var acc: array<vec2<f32>, 6>; var inc = 0.0;');
-  c = once(c, 'if (P.space == 5u && M.ctr.w > 0.5) { psiB += f * ce; } else { psi += f * ce; }', '{ let s = min(u32(M.c.w) - 2u, 5u); acc[s] += f * ce; inc += f * f * dot(M.c.xy, M.c.xy); }');
+  let c = once(COMPUTE_WGSL, 'var<workgroup> wmax', 'struct EQ { g: array<vec4<f32>, 25>, k: f32, mode: f32, floor: f32, pad: f32 };   // Γ row-major 7 × 7, (re, im) per entry (98 of the 100)\n@group(0) @binding(6) var<uniform> G: EQ;\nvar<workgroup> wmax');
+  c = once(c, 'var psiB = vec2<f32>(0.0, 0.0);', 'var psiB = vec2<f32>(0.0, 0.0); var acc: array<vec2<f32>, 7>; var inc = 0.0;');
+  c = once(c, 'if (P.space == 5u && M.ctr.w > 0.5) { psiB += f * ce; } else { psi += f * ce; }', '{ let s = min(u32(M.c.w) - 2u, 6u); acc[s] += f * ce; inc += f * f * dot(M.c.xy, M.c.xy); }');
   c = once(c, 'if (P.space == 5u) { psi = vec2<f32>(sqrt(dot(psi, psi) + dot(psiB, psiB)), 0.0); }', `var rho = G.k * inc; var u = vec2<f32>(0.0); var s2 = 0.0;
-    for (var i = 0u; i < 6u; i++) {
+    for (var i = 0u; i < 7u; i++) {
       let a = acc[i]; let g0 = select(G.g[i / 2u].xy, G.g[i / 2u].zw, (i & 1u) == 1u); s2 += dot(a, a);
       u += vec2<f32>(g0.x * a.x + g0.y * a.y, g0.x * a.y - g0.y * a.x);
-      for (var j = 0u; j < 6u; j++) { let q = i * 6u + j; let g = select(G.g[q / 2u].xy, G.g[q / 2u].zw, (q & 1u) == 1u); let b = acc[j];
+      for (var j = 0u; j < 7u; j++) { let q = i * 7u + j; let g = select(G.g[q / 2u].xy, G.g[q / 2u].zw, (q & 1u) == 1u); let b = acc[j];
         rho += g.x * (a.x * b.x + a.y * b.y) - g.y * (a.y * b.x - a.x * b.y); }
     }
     if (G.mode < 0.5) { psi = u; } else if (G.mode < 1.5) { psi = vec2<f32>(sqrt(max(rho, 0.0)), 0.0); }
@@ -1220,7 +1220,7 @@ export async function createField(canvas, opts = {}) {
      record reads it while every lag[3] is 0) */
   let gasTab = null, gasTabStandIn = null;
   /* THE BEAT EQUALIZER (0.6.0 B1): its table, and EQ_WGSL's pipeline, compiled on the first frame that needs it (boot stays at 8) */
-  let eqTable = null, eqWritten = null, eqPipeline = null, eqBuf = null, eqBind = null; const EQ_F = new Float32Array(76);
+  let eqTable = null, eqWritten = null, eqPipeline = null, eqBuf = null, eqBind = null; const EQ_F = new Float32Array(104);   // 009 N7: Γ 7 × 7 (98, padded to 100), then κ, mode, floor
   function bindCompute() {
     const tab = gasTab || gasTabStandIn || (gasTabStandIn = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE }));
     const entries = (tex, i) => [
@@ -1237,7 +1237,7 @@ export async function createField(canvas, opts = {}) {
       eqPipeline = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } });
       eqBuf = device.createBuffer({ size: EQ_F.byteLength, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }); bindCompute();
     }
-    if (eqWritten !== eqTable) { eqWritten = eqTable; EQ_F.set(eqTable.gamma); EQ_F[72] = eqTable.kappa; EQ_F[73] = eqTable.mode; EQ_F[74] = 2e-4; device.queue.writeBuffer(eqBuf, 0, EQ_F); }   // floor: the signed view's 2·10⁻⁴ of the local within-shell ρ
+    if (eqWritten !== eqTable) { eqWritten = eqTable; EQ_F.set(eqTable.gamma); EQ_F[100] = eqTable.kappa; EQ_F[101] = eqTable.mode; EQ_F[102] = 2e-4; device.queue.writeBuffer(eqBuf, 0, EQ_F); }   // floor: the signed view's 2·10⁻⁴ of the local within-shell ρ
     return true;
   }
   function setResolution(n) {

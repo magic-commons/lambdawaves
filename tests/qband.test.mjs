@@ -43,12 +43,13 @@ const re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length);
 for (let a = 0; a < BASIS.length; a++) { re[a] = 0.25 + rnd(); im[a] = rnd() - 0.5; }
 const REL = 1e-9;
 const w7200 = (n) => Math.round(7200 * energy(n));              // 7200·E_n = −3600/n², an integer for n ≤ 6
+const wUnit = (U) => (n) => Math.round(U * energy(n));          // U·E_n an integer: 7200 for n ≤ 6, 352800 = 2·lcm(1…7)² for n ≤ 7 (iteration 009 N7)
 for (let n = 1; n <= NMAX; n++) assert.equal(w7200(n) * n * n, -3600, `7200·E_${n} is the integer −3600/${n}²`);
 
-/** everything Sol counts, computed from coaxialPolynomial on the ring (r bohr, θ rad) */
-function census(R, THETA) {
+/** everything Sol counts, computed from coaxialPolynomial on the ring (r bohr, θ rad); NM the top shell, w the integer energy */
+function census(R, THETA, NM = NMAX, w = w7200) {
   const g = []; let labels = 0;                                  // g[n] = Map m → {re, im}
-  for (let n = 1; n <= NMAX; n++) {
+  for (let n = 1; n <= NM; n++) {
     const ids = BASIS.filter((s) => s.n === n).map((s) => s.index);
     const P = coaxialPolynomial(re, im, ids, R, THETA), top = Math.max(...P.gAbs), row = new Map();
     assert(P.mmin === 1 - n && P.mmax === n - 1, `shell ${n}: m runs ${P.mmin}..${P.mmax}`);
@@ -56,8 +57,8 @@ function census(R, THETA) {
     g[n] = row; labels += row.size;
   }
   const bins = new Map();                                        // "ω7200|q" → the cross term Σ a·conj(b) and Σ|a||b|, over every ordered pair of shells
-  for (let n = 1; n <= NMAX; n++) for (let n2 = 1; n2 <= NMAX; n2++) {
-    const dw = w7200(n) - w7200(n2);
+  for (let n = 1; n <= NM; n++) for (let n2 = 1; n2 <= NM; n2++) {
+    const dw = w(n) - w(n2);
     for (const [m, a] of g[n]) for (const [m2, b] of g[n2]) {
       const key = dw + '|' + (m - m2), cur = bins.get(key) || { re: 0, im: 0, mag: 0 };
       cur.mag += Math.hypot(a.re, a.im) * Math.hypot(b.re, b.im);
@@ -93,6 +94,29 @@ for (const [R, THETA] of [[10, 1.0719], [20, 0.6]]) {          // r in bohr, θ 
   lines.push(`ring r = ${R}, θ = ${THETA}: ${table}`);
 }
 console.log(`PASS THE q-BAND ANCHOR (ours counted from coaxialPolynomial, Sol's from the ledger; a difference would be REPORTED, never fixed) — ${lines.join('\n  ')}\n  Generic seeded coefficients on all ${N6} modes of n ≤ 6; the ${SOL.channels} occupied bins are the non-cancelled cross terms of the per-shell polynomials.`);
+
+/* ── THE SEVENTH SHELL (iteration 009 N7): the register reaches n = 7, so the same census runs on all 140 labels.  Sol's count is of n ≤ 6 and stays
+   the anchor above; here OUR count at n ≤ 7 is set beside SOL'S STATED RULE carried one shell up (not a ledger number): N² = 49 joint labels,
+   4N − 3 = 25 bins at ω = 0 (|q| ≤ 2(N − 1) = 12), every shell pair (n, n′) carrying 2(n + n′ − 2) + 1 bins — Σ = 273, so 25 + 2·273 = 571
+   channels against the rectangle 25 × 43 = 1075 — the 21 gaps distinct, the widest (shells 1 and 7, 24/49 a.u. = 172800 / 352800) reaching
+   |q| ≤ 6.  A difference is REPORTED, never fixed. ── */
+{
+  const N7 = 7, U7 = 352800, w7 = wUnit(U7);
+  for (let n = 1; n <= N7; n++) assert.equal(w7(n) * n * n, -176400, `352800·E_${n} is the integer −176400/${n}²`);
+  let pairs7 = 0; for (let n = 1; n <= N7; n++) for (let n2 = n + 1; n2 <= N7; n2++) pairs7 += 2 * (n + n2 - 2) + 1;
+  const RULE = { labels: N7 * N7, atZero: 4 * N7 - 3, positive: pairs7, channels: 4 * N7 - 3 + 2 * pairs7, gaps: N7 * (N7 - 1) / 2, widest: w7(N7) - w7(1), widestQ: N7 - 1, qmaxAtZero: 2 * (N7 - 1) };
+  const out = [];
+  for (const [R, THETA] of [[10, 1.0719], [20, 0.6]]) {
+    const c = census(R, THETA, N7, w7);
+    const rows = [['joint labels (n, m)', c.labels, RULE.labels], ['(ω, q) density channels', c.channels, RULE.channels], ['channels at ω = 0', c.atZero, RULE.atZero],
+      ['channels at ω > 0', c.positive, RULE.positive], ['distinct positive gaps', c.gapList.length, RULE.gaps], ['the largest gap, in 1/352800 a.u.', c.widest, RULE.widest],
+      ['|q| reached at the largest gap', c.widestQ, RULE.widestQ], ['|q| reached at ω = 0', c.qmaxAtZero, RULE.qmaxAtZero]];
+    const table = rows.map(([k, ours, rule]) => `${k}: ours ${ours}, rule ${rule} ${ours === rule ? 'AGREE' : 'DISAGREE'}`).join(' · ');
+    assert.equal(rows.filter(([, a, b]) => a !== b).length, 0, `Q-BAND AT n ≤ 7 (ring r = ${R}, θ = ${THETA}): OUR COUNT DISAGREES WITH SOL'S RULE CARRIED TO n = 7 — REPORT TO THE PILOT.  ${table}`);
+    out.push(`ring r = ${R}, θ = ${THETA}: ${table}`);
+  }
+  console.log(`PASS THE q-BAND AT n ≤ 7 (all ${BASIS.length} labels; Sol's rule carried one shell up, our count from coaxialPolynomial) — ${out.join('\n  ')}`);
+}
 
 /* ── a sparse preparation occupies FEWER bins, never more (Sol: "poles, zeros, cancellation, mute/solo … reduce actual occupancy") ─────── */
 {

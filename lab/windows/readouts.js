@@ -3,7 +3,7 @@
 import { TIER } from '../rack.js';
 import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js';
 import { toLUT } from '../mir/palette.js';
-import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js'; import { BASIS, orbitalFromTable } from '../hydrogen.js'; import { RENDER_CAP } from '../state.js'; import { waitForPaint } from '../frame-settle.js';
+import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js'; import { BASIS, orbitalFromTable } from '../hydrogen.js'; import { gammaAbs2 } from '../equalizer.js'; import { RENDER_CAP } from '../state.js'; import { waitForPaint } from '../frame-settle.js';
 import { createShadowView, createShadowFoot } from '../shadowview.js'; import { createOrbit } from '../orbit.js'; import { createKepler } from '../keplerview.js';
 import { createVortex } from '../vortex.js'; import { createParticles } from '../particles.js'; import { createSliceView } from '../sliceview.js';
 import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { createBloch } from '../bloch.js'; import { solveLattice } from '../lattice-model.js'; import { createCentral, solveCentral } from '../central.js'; import { createSeparable } from '../separable.js'; import { solveLadder } from '../ladder-model.js';
@@ -141,7 +141,7 @@ export function createReadouts(app) {
   // LADDER — the Rydberg revival as a spectral instrument (print, Thread A); its own register, no field
   const wLad = device({ id: 'ladder', eyebrow: 'LADDER', status: '' });
   app.w.wCalc = wCalc; app.w.wLad = wLad; app.w.calculus = calculus;
-  calculus.trace = () => { const T = app.state.eq.last, G = T && T.mode === 1 && !reg.field.Fz && T.gamma; return { P: app.hooks.period && app.hooks.period(), T, signed: !!(T && T.gamma && T.mode === 2), g2: G && ((a, b) => { const k = ((BASIS[a].n - 1) * 6 + BASIS[b].n - 1) * 2; return G[k] ** 2 + G[k + 1] ** 2; }) }; };   // 0.8.3 B2: the A(t) tile's source — the transport's REPEATS period and the equalizer's table in force
+  calculus.trace = () => { const T = app.state.eq.last, G = T && T.mode === 1 && !reg.field.Fz && T.gamma; return { P: app.hooks.period && app.hooks.period(), T, signed: !!(T && T.gamma && T.mode === 2), g2: G && ((a, b) => gammaAbs2(G, BASIS[a].n, BASIS[b].n)) }; };   // 0.8.3 B2: the A(t) tile's source — the transport's REPEATS period and the equalizer's table in force
   if (useCompactDefaults) wLad.root.classList.add('closed');
   rack.appendChild(wLad.root);
   const ladder = createLadder(wLad.body, { active: () => canPresent(wLad), loading: cardLoading(wLad, 'revival'), solve: (params) => solveCard({ op: 'ladder', params }, () => solveLadder(params)) });

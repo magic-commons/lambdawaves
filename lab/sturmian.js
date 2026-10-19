@@ -1,8 +1,8 @@
-/* sturmian.js — THE SCALE λ: the Coulomb Sturmians on the register's 91 labels of n ≤ 6, and the eigen-selector.  Atomic units.
+/* sturmian.js — THE SCALE λ: the Coulomb Sturmians on the register's 140 labels of n ≤ 7, and the eigen-selector.  Atomic units.
  *
  * The register's radial functions are hydrogen's bound states, each with its own exponent 1/n; that set is NOT complete
  * (the continuum is missing — 23.4 % of He⁺ 1s lives there: the −1.5585 floor of the FIELDS AND MOLECULES round).  The
- * COULOMB STURMIANS keep the 91 labels and give every one of them ONE common exponent λ:
+ * COULOMB STURMIANS keep the register's labels and give every one of them ONE common exponent λ:
  *     S_nlm(λ; r) = N_nl(λ) (2λr)^l e^{−λr} L^{2l+1}_{n−l−1}(2λr) Y_lm(θ, φ),   N_nl(λ) = √((2λ)³ (n−l−1)! / (2n (n+l)!)),
  * normalised here to ⟨S|S⟩ = 1 (the L² norm, NOT the Sturmian's own 1/r-weighted norm), so that at λ = 1/n the Sturmian
  * IS the register's R_nl Y_lm to the last bit (same Laguerre, same prefactor: ρ = 2λr = 2r/n).  They solve the STURMIAN
@@ -42,9 +42,12 @@
  *
  * STATUS: EXACT (closed-form S and H — KNOWN: Rotenberg, Ann. Phys. 19, 262 (1962); Avery & Avery, Generalized Sturmians
  * and Atomic Spectra (2006); the tridiagonal overlap DERIVED-HERE from the Laguerre recurrence), VARIATIONAL (the
- * eigenvalues, upper bounds), NUMERICAL only in the eigen-solver (residuals judged to 1e-12 on the 91 × 91 problem).
+ * eigenvalues, upper bounds), NUMERICAL only in the eigen-solver (residuals judged to 1e-12 on the 140 × 140 problem).
+ * THE SEVENTH SHELL (iteration 009 N7): the scale took n = 7 with the register — each (l, m) block gains its n = 7 Sturmian, so by
+ * Hylleraas–Undheim–MacDonald every one of the n ≤ 6 blocks' variational eigenvalues moved DOWN or held (it held exactly where it is
+ * exact: the label n₀ at λ = Z/n₀); tests/sturmian.test.mjs Q9 and research/iteration-009/N7-BUILD.md hold the table.
  */
-import { BASIS, BASIS_INDEX, N6, factorial, laguerre, laguerreCoeffs, legendreDerivCoeffs, ylmNorm } from './hydrogen.js';
+import { BASIS, BASIS_INDEX, factorial, laguerre, laguerreCoeffs, legendreDerivCoeffs, ylmNorm } from './hydrogen.js';
 
 /* ── the functions ───────────────────────────────────────────────────────────── */
 /** N_nl(λ): the L² normalisation of the Sturmian; equals hydrogen.js radialNorm(n, l) at λ = 1/n */
@@ -78,10 +81,10 @@ export function sturmianOverlap(n1, n2, l) {
   const n = Math.min(n1, n2);
   return -0.5 * Math.sqrt((n - l) * (n + l + 1) / (n * (n + 1)));
 }
-/** labels: BASIS entries, BASIS indices, ids "h:n:l:m", or plain {n, l, m}; undefined → the 91 of n ≤ 6 (THE SCALE's register: the
- *  register grew to n = 7 at iteration 008 A7, the scale did not — sturmianreg.js says why) */
+/** labels: BASIS entries, BASIS indices, ids "h:n:l:m", or plain {n, l, m}; undefined → all 140 of n ≤ 7 (THE SCALE's register: the
+ *  register grew to n = 7 at iteration 008 A7 and the scale followed it at iteration 009 N7) */
 export function resolveLabels(labels) {
-  if (!labels) return BASIS.slice(0, N6);
+  if (!labels) return BASIS.slice();
   return labels.map((x) => typeof x === 'number' ? BASIS[x] : typeof x === 'string' ? BASIS[BASIS_INDEX.get(x)] : x);
 }
 /**

@@ -1,4 +1,4 @@
-/* tests/stark.test.mjs — 0.8.0 G3 INTER-SHELL STARK: H = diag(E) + F·z over the 91 labels (lab/stark.js) and the register's road to it.
+/* tests/stark.test.mjs — 0.8.0 G3 INTER-SHELL STARK: H = diag(E) + F·z over the 140 labels (lab/stark.js) and the register's road to it.
  *   node tests/stark.test.mjs
  * Oracles: ⟨1s|z|2p₀⟩ = 128√2/243; the within-shell law ±3F for n = 2, m = 0 as the F → 0 limit (Richardson); the basis's own sum over states. */
 import { hydrogenZ, starkPropagator, polarizability, saddle } from '../lab/stark.js';

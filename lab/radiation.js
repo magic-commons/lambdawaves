@@ -58,7 +58,7 @@ export const FIELD_AU_T = 1715.2553;               // the same unit read as a ma
 /* ── resolving a BASIS label ────────────────────────────────────────────────────────────────────────────── */
 const BY_NAME = new Map();
 for (const s of BASIS) { BY_NAME.set(s.id, s.index); BY_NAME.set(s.label, s.index);
-  BY_NAME.set(`${s.n}${'spdfgh'[s.l]}${s.m}`, s.index); }
+  BY_NAME.set(`${s.n}${'spdfghi'[s.l]}${s.m}`, s.index); }
 /** a BASIS index, id "h:n:l:m", label "2p₀", plain "2p0", or the state object itself → the BASIS entry */
 export function stateFor(x) {
   if (typeof x === 'number') return BASIS[x];

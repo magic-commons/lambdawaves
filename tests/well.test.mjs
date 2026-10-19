@@ -57,11 +57,11 @@ function simpson(f, a, b, N) { const h = (b - a) / N; let s = f(a) + f(b); for (
   const { wellPacket, wellCentroid } = await import('../lab/well.js');
   setWellRadius(10);
   const P = wellPacket([0, 0, -4], [0, 0, 0.8], 1.6);
-  const ids = []; for (let a = 0; a < 91; a++) if (Math.hypot(P.re[a], P.im[a]) > 1e-12) ids.push(a);
+  const ids = []; for (let a = 0; a < BASIS.length; a++) if (Math.hypot(P.re[a], P.im[a]) > 1e-12) ids.push(a);
   let n2 = 0; for (const a of ids) n2 += P.re[a] ** 2 + P.im[a] ** 2;
-  judge('W a Gaussian packet (σ = 1.6) at z = −4 with momentum 0.8 is held by the box\'s 91 states to 96.68% (reproducible to 5e-4) — the register resolves ≈ a/6 — and is normalised as a new state', Math.abs(P.captured - 0.96683) < 5e-4 && Math.abs(n2 - 1) < 1e-12 && ids.length > 20, { captured: P.captured, states: ids.length });
+  judge('W a Gaussian packet (σ = 1.6) at z = −4 with momentum 0.8 is held by the box\'s 140 states to 99.22% (reproducible to 5e-4; iteration 009 N7: the 91 of n ≤ 6 hold the 96.68% they always did and n = 7 adds 2.54%) — the register resolves ≈ a/7 — and is normalised as a new state', Math.abs(P.captured - 0.99223) < 5e-4 && Math.abs(n2 - 1) < 1e-12 && ids.length > 20, { captured: P.captured, states: ids.length });
   const c0 = wellCentroid(P.re, P.im, ids, { G: 32 });
-  const at = (t) => { const re = new Float64Array(91), im = new Float64Array(91); for (const a of ids) { const E = wellEnergy(a), c = Math.cos(E * t), s = Math.sin(E * t); re[a] = P.re[a] * c + P.im[a] * s; im[a] = P.im[a] * c - P.re[a] * s; } return { re, im }; };
+  const at = (t) => { const re = new Float64Array(BASIS.length), im = new Float64Array(BASIS.length); for (const a of ids) { const E = wellEnergy(a), c = Math.cos(E * t), s = Math.sin(E * t); re[a] = P.re[a] * c + P.im[a] * s; im[a] = P.im[a] * c - P.re[a] * s; } return { re, im }; };
   const c3 = at(3), x3 = wellCentroid(c3.re, c3.im, ids, { G: 32 });
   judge('W it starts where it was put (centroid z = −4 within 0.3) and three time units later has moved by ≈ k·t = 2.4 (Ehrenfest, until the wall)', Math.abs(c0[2] + 4) < 0.3 && Math.abs(x3[2] - (c0[2] + 2.4)) < 0.6 && Math.abs(c0[0]) < 0.3 && Math.abs(c0[1]) < 0.3, { c0, x3 });
   const c14 = at(14), x14 = wellCentroid(c14.re, c14.im, ids, { G: 32 });
