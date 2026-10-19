@@ -136,7 +136,8 @@ export function createSettings(app) {
      window independently and the heir already names itself. */
   /* 0.4.0 S3 (R-W1): DYNAMICS is retired into SHADOW (L, T, V, S and the plot), CALCULUS (the moments), RADIATION (the
      lines) and VORTEX (PARTICLES); a saved layout's DYNAMICS seat lands on SHADOW. */
-  const RETIRED_WINDOWS = { style: 'observer', dynamics: 'shadow' };
+  /* iteration 008 U: MO-REGISTRY is merged INTO MOLECULES (its panes under the ON row); a saved layout's `orbitals` seat lands on `chem` */
+  const RETIRED_WINDOWS = { style: 'observer', dynamics: 'shadow', orbitals: 'chem' };
   /* POWER is persistent device state. Presentation eligibility is a separate, transient visibility law below:
      leaving the viewport must save work without rewriting the user's project or switches. */
   const powered = (w) => !(w && w.root && w.root.classList.contains('off'));

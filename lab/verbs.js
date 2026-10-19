@@ -34,7 +34,7 @@ export const VERBS = [
     doc: 'the observable on the field: under MOLECULES density|orbital|diff|esp|spin (orbital by number or name; spin = ρα − ρβ of an open shell), otherwise density|phase|real|imag|diff|reim',
     run(app, a) {
       const c = app.state.chem;
-      if (c && c.on && ['density', 'orbital', 'diff', 'esp', 'spin', 'dlda'].includes(a.id)) { if (a.orbital !== undefined) return orb(c, a.orbital); c.setView(a.id); }
+      if (c && c.on && ['density', 'orbital', 'registry', 'diff', 'esp', 'spin', 'dlda'].includes(a.id)) { if (a.orbital !== undefined) return orb(c, a.orbital); c.setView(a.id); }
       else if (VIEW[a.id] === undefined) return `${a.id} is a MOLECULES view and MOLECULES is off`; else app.sh.LW.setView(a.id);
       return { fade: 'VIEW · ' + mdText(a.id) };
     } },

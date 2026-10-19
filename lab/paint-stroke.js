@@ -16,6 +16,8 @@
  *   across(a, b)   → keys[]   every item the segment a→b crosses (it need not repeat at(b))
  *   apply(keys, add)          add or remove them, in ONE pass (one rebuild, one repaint)
  *   ready()        → bool     optional: false ignores the press (nothing to paint yet)
+ *   onEnd(add)               optional: the stroke is over and painted something — still inside the pointerup, so whatever it
+ *                            does (iteration 008: MOLECULES' register normalises here) joins the stroke's one undo row
  */
 export function paintStroke(surface, o) {
   const local = o.local || ((e) => ({ x: e.clientX, y: e.clientY }));
@@ -28,7 +30,7 @@ export function paintStroke(surface, o) {
     const right = e.pointerType === 'mouse' ? e.button === 2 || (e.button === 0 && e.altKey) : false;
     if (e.pointerType === 'mouse' && e.button !== 0 && e.button !== 2) return;
     const p = local(e);
-    stroke = { id: e.pointerId, start: p, last: p, cx: e.clientX, cy: e.clientY, add: !right, moved: false };
+    stroke = { id: e.pointerId, start: p, last: p, cx: e.clientX, cy: e.clientY, add: !right, moved: false, hit: false };
     try { surface.setPointerCapture(e.pointerId); } catch (_) {}
     if (right) e.preventDefault();
   });
@@ -40,17 +42,18 @@ export function paintStroke(surface, o) {
       if (Math.hypot(e.clientX - stroke.cx, e.clientY - stroke.cy) < 4) return;
       stroke.moved = true;
       if (o.onStart) o.onStart();
-      o.apply(o.at(stroke.start), stroke.add);
+      const k0 = o.at(stroke.start); if (k0.length) { stroke.hit = true; o.apply(k0, stroke.add); }
     }
     e.stopImmediatePropagation();
     const keys = o.across(stroke.last, p).concat(o.at(p));
     stroke.last = p;
-    if (keys.length) o.apply(keys, stroke.add);
+    if (keys.length) { stroke.hit = true; o.apply(keys, stroke.add); }
   }, { capture: true });
   const end = (e, tap) => {
     if (!stroke || (e && e.pointerId !== stroke.id)) return;
     const s = stroke; stroke = null; eatUntil = performance.now() + 500;
-    if (tap && !s.moved) o.apply(o.at(s.start), s.add);
+    if (tap && !s.moved) { const k = o.at(s.start); if (k.length) { s.hit = true; o.apply(k, s.add); } }
+    if (s.hit && o.onEnd) o.onEnd(s.add);
   };
   surface.addEventListener('pointerup', (e) => end(e, true));
   surface.addEventListener('pointercancel', (e) => end(e, false));

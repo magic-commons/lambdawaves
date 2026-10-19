@@ -11,7 +11,7 @@ const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentati
 export function createPersist(app) {
   const { ui, reg, clock, obs, mat, FIELD_CHROME, rates, energyOf, sturm, PAL_DEF } = app; const { schedule, paceRate } = app.loop; const { quality, layout, phone, tablet } = app.sh;
   const { camera, camLevel, syncFreeAngles, syncCamUI } = app.host;
-  const { wState, switchHamiltonian, applySturmian, setElement, fillValence, shadowView, shadowFoot, kepler, vortex, particles, slice, wChem, wOrbs, ladder, wAtoms, wignerView, kepShell,
+  const { wState, switchHamiltonian, applySturmian, setElement, fillValence, shadowView, shadowFoot, kepler, vortex, particles, slice, wChem, ladder, wAtoms, wignerView, kepShell,
     keplerRowSync, gas, stageTextTick } = app.w;
   /* ── persistence (§46): experiment and presentation, separately ───────── */
   /* 0.3.1 · S3 THE EDIT SCOPE (PLAN §4.1, D6; docs/STATE-SCOPES.md) — what the history reads, keys and writes back: the PROJECT keys
@@ -223,7 +223,10 @@ export function createPersist(app) {
              its DENSITY — the card drew the one-electron density, and this is the same molecule's (its R scan, CI curves and the
              collision have no twin).  The old `h2` record and seat are read by nothing else. */
           const hl = !!(I.h2 && I.h2.on) && !(I.chem && I.chem.on);
-          const fieldOwner = (I.chem && I.chem.on) || h2plus || hl ? 'chem' : null;
+          /* iteration 008 U · MOLECULES ON IS REGISTRY ON: a file that saved them apart opens with the molecule on when either was (its
+             register's ON below is MOLECULES ON with VIEW REGISTRY and that pane) */
+          const regOn = !!((I.orbitals && I.orbitals.on) || (I.states && I.states.on));
+          const fieldOwner = (I.chem && I.chem.on) || h2plus || hl || (regOn && I.chem) ? 'chem' : null;
           if (I.chem) app.state.chem.load({ ...I.chem, on: false });
           if (h2plus) { const u = I.molecule.kind === 'sigma_u'; app.state.chem.load({ preset: 'H2', basis: 'sto-3g', view: 'orbital', orbital: u ? 2 : 1, on: false }); gone.push('H₂⁺ (opened as MOLECULES · H₂ ' + (u ? 'σu' : 'σg') + ')'); }
           if (hl) { app.state.chem.load({ preset: 'H2', basis: 'sto-3g', view: 'density', orbital: null, on: false }); gone.push('H₂ (opened as MOLECULES · H₂)'); }
@@ -271,7 +274,7 @@ export function createPersist(app) {
         if (pr.notebook && layout.notebookResize && Number.isFinite(pr.notebook.w) && !(pr.layout && pr.layout.nb)) layout.notebookResize(pr.notebook.w, pr.notebook.h);   // wave 127: a layout carrying nb sizes it next (applyLayout), last
         if (pr.layout && layout.applyLayout) layout.applyLayout(pr.layout);
         if (getHamiltonian().id === 'atom' && !hist) { wAtoms.root.hidden = false; wAtoms.root.classList.remove('closed'); }   // 0.4.0 S0: the ATOM operator brings its element picker
-        if (pr.instruments && app.state.chem.on && !hist) { wChem.root.classList.remove('closed'); const I = pr.instruments; if ((I.orbitals && I.orbitals.on) || (I.states && I.states.on)) wOrbs.root.classList.remove('closed'); }   // W129 · the same law for MOLECULES (a first visit leaves it and MO-REGISTRY off the rack): a file it owns brings it back, and MO-REGISTRY when the file's register is on
+        if (pr.instruments && app.state.chem.on && !hist) wChem.root.classList.remove('closed');   // W129 · the same law for MOLECULES (a first visit leaves it off the rack): a file it owns brings it back — its register with it (iteration 008 U: one card)
         /* D9 · A FILE THAT USED A RETIRED WINDOW OPENS WITHOUT IT, AND SAYS SO IN ONE LINE (the PROJECTS status and STATE's): an old
            layout seat is skipped by applyLayout (no such card), nothing throws.  QCD counts as used when its seat was open. */
         if (!hist && pr.layout && Array.isArray(pr.layout.cards) && pr.layout.cards.some((c) => c && c.id === 'qcd' && !c.closed)) gone.push('QCD (QUARKONIUM keeps its parameters)');
