@@ -277,7 +277,7 @@ export async function createController(app) {
     for (const key of Object.keys(rotRate)) setRotationRate(key, 0);
     reg.load(p); clock.reset(); app.state.lastNmax = -1;
     clock.window = p.visual.window;
-    if (app.state.applyVisuals) { clock.setRate(app.loop.paceRate(p.visual.rate)); { const w = waveView(p.visual.view); mat.view = VIEW[w]; ui.viewSeg.set(w); } ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
+    if (app.state.applyVisuals) { clock.setRate(app.loop.paceRate(p.visual.rate)); { const w = waveView(p.visual.view) || 'density'; mat.view = VIEW[w]; ui.viewSeg.set(w); } ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
     ui.presetSel.value = id; ui.presetSel.note = p.note;
     setReference();
     app.w.spectrum.select(-1);

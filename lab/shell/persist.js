@@ -141,7 +141,7 @@ export function createPersist(app) {
    *  only moves if the coefficients did) and the ring, notebook, view and arrangement are left alone.  opt.project: a file opens at
    *  t = 0.  Neither clears the history: the road that opened the file does, naming it (boot, link, open · …). */
   function restore(obj, opt) {
-    const hist = !!(opt && opt.history), gone = [], cut = [];   // cut: iteration 008 W's views that left WAVE (Re+Im, Δρ), named once below                  // D9: the retired legacy windows this file used, named once below
+    const hist = !!(opt && opt.history), gone = [], cut = []; let said = '';   // cut: iteration 008 W's views that left WAVE (Re+Im, Δρ), named once below                  // D9: the retired legacy windows this file used, named once below
     if (!hist) app.state.restoreNotice = '';
     app.ctl.markBatchBegin();                                                // M7: released in the finally below
     try {
@@ -173,7 +173,7 @@ export function createPersist(app) {
       the ones it carried; anything that genuinely disagrees is still re-derived, which is what an old favourite
       carrying no quaternion needs. */
       const y0 = obs.yaw, p0 = obs.pitch; syncFreeAngles();
-      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } camera.stop(); syncCamUI(); } const pm = { ...(pr.mat || {}) }; for (const k of ['bg', 'lightUI', ...FIELD_CHROME]) delete pm[k]; if (pm.view !== undefined) { const wv = VIEW[waveView(pm.view)]; if (wv !== pm.view && !hist) cut.push(pm.view === 5 ? 'Re+Im left WAVE: opened as PHASE' : 'Δρ left WAVE: opened as DENSITY'); pm.view = wv; }   /* iteration 008 W: a saved Re+Im opens as PHASE, a saved Δρ as DENSITY */ if (pm.style !== undefined) { const ds = STYLE[drawStyle(pm.style)]; if (ds !== pm.style && !hist && pm.style === STYLE.grain) cut.push('GRAIN joined DUST: opened as DUST'); pm.style = ds; }   /* iteration 008 G: a saved GRAIN opens as DUST */ Object.assign(mat, pm);   /* S1: an older file's chrome is the sender's preference — ignored, so the reader's frame, axes and invert stand */ if (Number.isFinite(pm.gamma) && ui.gammaK) ui.gammaK.set(pm.gamma); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));   /* PACE P2: within the device's grid ceiling, and never AUTO SCALE (the device's switch) */ Object.assign(app.ctl.domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(app.ctl.domain.auto); ui.domainKnob.setDisabled(app.ctl.domain.auto); }
+      if (Math.abs(obs.yaw - y0) < 1e-4 && Math.abs(obs.pitch - p0) < 1e-4) { obs.yaw = y0; obs.pitch = p0; } } camera.stop(); syncCamUI(); } const pm = { ...(pr.mat || {}) }; for (const k of ['bg', 'lightUI', ...FIELD_CHROME]) delete pm[k]; if (pm.view !== undefined) { const wv = VIEW[waveView(pm.view) || 'density']; if (wv !== pm.view && !hist) cut.push(pm.view === 5 ? 'Re+Im left WAVE: opened as PHASE' : 'Δρ left WAVE: opened as DENSITY'); pm.view = wv; }   /* iteration 008 W: a saved Re+Im opens as PHASE, a saved Δρ as DENSITY */ if (pm.style !== undefined) { const ds = STYLE[drawStyle(pm.style)]; if (ds !== pm.style && !hist && pm.style === STYLE.grain) cut.push('GRAIN joined DUST: opened as DUST'); pm.style = ds; }   /* iteration 008 G: a saved GRAIN opens as DUST */ Object.assign(mat, pm);   /* S1: an older file's chrome is the sender's preference — ignored, so the reader's frame, axes and invert stand */ if (Number.isFinite(pm.gamma) && ui.gammaK) ui.gammaK.set(pm.gamma); mat.finish=pm.finish||'lit'; mat.bow={gain:1,curve:1,limit:3,...pm.bow}; if(ui.finishSeg)ui.finishSeg.set(mat.finish||'lit'); if(ui.bowKnobs)for(const k in ui.bowKnobs)ui.bowKnobs[k].set(mat.bow?.[k]??({gain:1,curve:1,limit:3}[k])); if (ui.styleSeg && STYLE_NAMES[mat.style]) ui.styleSeg.set(STYLE_NAMES[mat.style]); Object.assign(quality, deviceQuality(pr.quality, phone.on ? 'phone' : tablet.on ? 'tablet' : 'desktop'));   /* PACE P2: within the device's grid ceiling, and never AUTO SCALE (the device's switch) */ Object.assign(app.ctl.domain, pr.domain || {}); ui.viewSeg.set(VIEW_NAMES[mat.view]); if (pr.shadow) { shadowView.setMode(pr.shadow); ui.shadowSeg.set(pr.shadow); } ui.domainAuto.set(app.ctl.domain.auto); ui.domainKnob.setDisabled(app.ctl.domain.auto); }
       /* A restored number and the control that owns it are one state. Keep every Wave, Clip,
          field and quality control on the value that was just loaded before modulation reads it. */
       if (pr) {
@@ -278,8 +278,7 @@ export function createPersist(app) {
         /* D9 · A FILE THAT USED A RETIRED WINDOW OPENS WITHOUT IT, AND SAYS SO IN ONE LINE (the PROJECTS status and STATE's): an old
            layout seat is skipped by applyLayout (no such card), nothing throws.  QCD counts as used when its seat was open. */
         if (!hist && pr.layout && Array.isArray(pr.layout.cards) && pr.layout.cards.some((c) => c && c.id === 'qcd' && !c.closed)) gone.push('QCD (QUARKONIUM keeps its parameters)');
-        if (gone.length) app.state.restoreNotice = 'retired in 0.5.0: ' + gone.join(' · ');
-        if (cut.length) app.state.restoreNotice = [app.state.restoreNotice, ...cut].filter(Boolean).join(' · ');
+        said = [gone.length ? 'retired in 0.5.0: ' + gone.join(' · ') : '', ...cut].filter(Boolean).join(' · '); if (said) app.state.restoreNotice = said;
         stageTextTick();                                              // the STAGE TEXT follows whatever MOLECULES the file left
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = Math.max(0.25, Math.min(3, +pr.sturmian.lambda || 1)); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
@@ -312,7 +311,7 @@ export function createPersist(app) {
         if (pr.modwin && app.state.modView) app.state.modView.restore(pr.modwin);
         if (!hist && app.state.tl) app.state.tl.model.restore(pr.timeline || null);           // 0.5.0 C7b: an open replaces the arrangement (NEW clears it); an undo leaves it — it keeps its own
       }
-      schedule(TIER.REBUILD); wState.setStatus(gone.length || cut.length ? app.state.restoreNotice : 'restored', gone.length || cut.length ? 'warn' : 'live');
+      schedule(TIER.REBUILD); wState.setStatus(said || 'restored', said ? 'warn' : 'live');
       return true;
     } catch (e) { console.warn('restore failed', e); wState.setStatus('restore failed', 'warn'); return false; }   // say WHY in the console too: a silent catch hid a scope error for an afternoon
     /* OPTIMIZATION 2026-09-24 · M5: a restore that throws half-way has still moved state, and an early throw left it

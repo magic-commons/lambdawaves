@@ -23,8 +23,9 @@ import { evaluator, shellsFromField } from './molecular-field.js';
 export const VIEW = { density: 0, phase: 1, real: 2, imag: 3, diff: 4 };
 export const VIEW_NAMES = ['density', 'phase', 'real', 'imag', 'diff'];
 export const WAVE_VIEWS = Object.freeze(['density', 'phase', 'real', 'imag']);
-/** a saved or named view (an index or a name, `reim` = 5 included) → the WAVE observable it opens as */
-export function waveView(v) { const n = typeof v === 'number' ? (v === 5 ? 'reim' : VIEW_NAMES[v]) : String(v); return WAVE_VIEWS.includes(n) ? n : n === 'reim' ? 'phase' : 'density'; }
+/** a saved or named view (an index or a name, `reim` = 5 included) → the WAVE observable it opens as, or null for a name WAVE never had
+ *  (MOLECULES' orbital · esp · spin …, a stray index): the caller says what an unknown one means */
+export function waveView(v) { const n = typeof v === 'number' ? (v === 5 ? 'reim' : VIEW_NAMES[v]) : String(v); return WAVE_VIEWS.includes(n) ? n : n === 'reim' ? 'phase' : n === 'diff' ? 'density' : null; }
 /** how the same observable is DRAWN: a cloud, a bounded plateau (lit surface), world-locked grains (DUST), octave bands …
  *  iteration 008 G: GRAIN (2) joined DUST — its index stays retired, never reused (the shader draws a stray 2 as DUST) and a saved one
  *  opens as DUST; drawStyle() is that one mapping, for every road in. */

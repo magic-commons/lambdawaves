@@ -873,7 +873,7 @@ export async function boot(dom) {
   const q = new URLSearchParams(location.search);
   loadPreset(q.get('preset') && PRESET_BY_ID.has(q.get('preset')) ? q.get('preset') : '1s+2pz');
   mat.view = VIEW.phase; if (ui.viewSeg) ui.viewSeg.set('phase'); schedule(TIER.PRESENT);
-  if (q.get('view') && (VIEW[q.get('view')] !== undefined || q.get('view') === 'reim')) { const w = waveView(q.get('view')); mat.view = VIEW[w]; ui.viewSeg.set(w); }   // iteration 008 W: an old link's reim / diff opens as PHASE / DENSITY
+  { const w = q.get('view') && waveView(q.get('view')); if (w) { mat.view = VIEW[w]; ui.viewSeg.set(w); } }   // iteration 008 W: an old link's reim / diff opens as PHASE / DENSITY
   if (q.get('gastab') !== '0') gasTableOn(true);   // K7 → W125: the axial gas's Hermite table is ARMED by default (built at the first AXIAL launch); `?gastab=0` opts out (never saved, never linked)
   /* WAVE 57 · `?play=1` USED TO BE HERE, seventy-five lines above the photosensitivity notice — so a shared
      link animated the field underneath the warning while it was being read, which is exactly the thing the

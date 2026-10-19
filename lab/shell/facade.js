@@ -176,7 +176,7 @@ export function createFacade(app) {
     seedParticles(n = 160) { particles.setOn(true); const k = particles.seed(n, reg, clock.t, domain.half); schedule(TIER.PRESENT); return k; },
     play() { clock.play(performance.now() / 1000); schedule(TIER.EVOLVE); }, pause() { clock.pause(); schedule(TIER.PRESENT); },
     scrub(t) { clock.scrub(t); schedule(TIER.EVOLVE); }, step(dt) { clock.step(dt); schedule(TIER.EVOLVE); },
-    setMute(a, on) { reg.setMute(a, on); touchState(); }, setView(v) { const w = waveView(v); mat.view = VIEW[w]; ui.viewSeg.set(w); schedule(TIER.PRESENT); return w; },   // iteration 008 W: 'reim' → phase, 'diff' → density
+    setMute(a, on) { reg.setMute(a, on); touchState(); }, setView(v) { const w = waveView(v) || 'density'; mat.view = VIEW[w]; ui.viewSeg.set(w); schedule(TIER.PRESENT); return w; },   // iteration 008 W: 'reim' → phase, 'diff' → density
     orbit(dy, dp) { orbitBy(dy, dp); schedule(TIER.PRESENT); },
     setShadowMode(m) { shadowView.setMode(m); ui.shadowSeg.set(m); schedule(TIER.PRESENT); },
     /** GPU throughput at the current settings: ms per frame for reconstruct+present, reconstruct, present (n back-to-back frames) */
