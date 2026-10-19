@@ -15,6 +15,9 @@
  *             digest-lock-s4a.json` 1004, both 0/0, since D9b retired `h2` (908 / 1052 after D9's h2plus and helium).
  *             ITERATION 008 W: Re+Im left the shader, and its 17 style rows (8 VIEW × STYLE, 9 flags on reim/glass) left both fixtures
  *             by name — nothing else re-baked — so the counts are 843 and 987.
+ *             ITERATION 008 G: GRAIN joined DUST (world-locked grains) and BANDS became octave bands, so the 15 particle-style rows
+ *             (density · phase · real · imag · diff × grain · dust · bands) were re-captured in both fixtures by name; every CLOUD, iso-style,
+ *             flag, line and state row held to the bit (KNEE 0.6 draws the old arithmetic).
  *
  * What it locks, every number read from the SHIPPED pipelines through the booted app (window.__LW, __LW.field) —
  * no replica, no copied WGSL:

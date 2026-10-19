@@ -68,8 +68,8 @@
  * `HAZARDS` below is this list as data.  A frame is emitted only when its witnesses agree; a contended frame is
  * rendered again, and a frame that cannot be made to agree ABORTS the film by name, through the kit's failure road.
  *   λWAVES' — named here and pinned in `frame(i, ctx)` and its `before`:
- *   H1  THE RAY-MARCH JITTER.  field.js seeds the march's start offset with (stats.presents % 97)/97, and the GRAIN
- *       style reads the same word to pick its voxels.  PIN: presents = 13 before every frame.  WITNESS: 14 after it.
+ *   H1  THE RAY-MARCH JITTER.  field.js seeds the march's start offset with (stats.presents % 97)/97 (the GRAIN style read
+ *       the same word until iteration 008 G; DUST reads none of it — its grains are fixed in the world).  PIN: presents = 13 before every frame.  WITNESS: 14 after it.
  *   H2  THE GOVERNOR steps the field grid down the ladder (128 → 96 → 64) on a slow machine.  PIN: the physics clock
  *       paused (it only judges while playing; pausing resets its drop) and governor.on = false.  WITNESS: the grid.
  *   H3  AUTO SCALE multiplies the canvas size; a window resize or a DPR change does the same, and NOTHING PRESENTS
@@ -437,7 +437,7 @@ export function digest(bytes) {
  */
 const hz = (id, owner, what, where, pin, witness) => Object.freeze({ id, owner, what, where, pin, witness });
 export const HAZARDS = Object.freeze([
-  hz('jitter', 'app', 'field.js seeds the ray-march start offset AND the GRAIN style\'s voxel-keep cell with (field.stats.presents % 97)/97, so the same state renders differently at different points of a 97-frame cycle', 'field.js writeView v[19] → V.p0.w', 'stats.presents is set to the seed (13) immediately before every frame and restored honestly afterwards', 'presents reads seed+1 after the frame: exactly one present happened and it was ours'),
+  hz('jitter', 'app', 'field.js seeds the ray-march start offset with (field.stats.presents % 97)/97 (DUST, which replaced GRAIN at iteration 008 G, reads none of it), so the same state renders differently at different points of a 97-frame cycle', 'field.js writeView v[19] → V.p0.w', 'stats.presents is set to the seed (13) immediately before every frame and restored honestly afterwards', 'presents reads seed+1 after the frame: exactly one present happened and it was ours'),
   hz('governor', 'app', 'the rack\'s one controller judges the window median of presented frames against the frame budget and steps the FIELD GRID down the ladder (128 → 96 → 64) on a slow machine — the picture literally coarsens with machine speed', 'rack.js loop, controlStep / gov / effectiveRes', 'the physics clock is paused (the governor only acts while playing, and pausing resets its drop) and governor.on is turned off for the film', 'field.resolution is compared against its reading before frame 0 after every frame'),
   hz('autoscale', 'app', 'quality.autoScale is moved by ONE time-paced proportional decision and multiplies the size the rack asks field.resize for; a window resize or a DPR change does the same, and NOTHING PRESENTS when they do', 'rack.js loop, autoQ', 'quality.auto = false for the film, restored after', 'canvas.width/height are read AT the readback, after the copy completes — the one place a resize between the render and the copy cannot slip past'),
   hz('fieldclock', 'app', 'the rack reconstructs psi on an EVOLVE tier only when the field clock is due, so a capped field clock renders the same picture twice', 'rack.js loop, fieldRate.capMs / lastReconMs', 'the frame bypasses the tier router and passes a non-null modes to field.frame, so the compute pass is unconditional', 'field.stats.generation advances by exactly one per frame'),
