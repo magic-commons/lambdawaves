@@ -13,6 +13,8 @@
   "axis": false,
   "atoms": {
    "view": "imag",
+   "style": "signed",
+   "iso": 0.03,
    "exposure": 0.5,
    "hueByL": [
     0,
@@ -22,14 +24,23 @@
    ],
    "phase": "m = 0 imaginary, else real",
    "cut": {
-    "l": 0,
-    "normal": [
+    "l": [
      0,
-     0,
-     1
+     1,
+     2,
+     3
     ],
-    "pos": 0
-   }
+    "normal": [
+     0.57735,
+     0.57735,
+     0.57735
+    ],
+    "pos": 0,
+    "mode": "clip"
+   },
+   "grid": 128,
+   "system": "hydrogen (the pure orbital)",
+   "subshell": "highest n, then highest l (lab/valence.js)"
   },
   "camera": {
    "molecules": "home",
@@ -140,595 +151,714 @@
   {
    "sym": "H",
    "Z": 1,
-   "orbital": "1s_0"
+   "orbital": "1s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "He",
    "Z": 2,
-   "orbital": "1s_0"
+   "orbital": "1s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Li",
    "Z": 3,
-   "orbital": "2s_0"
+   "orbital": "2s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Be",
    "Z": 4,
-   "orbital": "2s_0"
+   "orbital": "2s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "B",
    "Z": 5,
-   "orbital": "2p_-1"
+   "orbital": "2p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "C",
    "Z": 6,
-   "orbital": "2p_0"
+   "orbital": "2p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "N",
    "Z": 7,
-   "orbital": "2p_1"
+   "orbital": "2p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "O",
    "Z": 8,
-   "orbital": "2p_-1"
+   "orbital": "2p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "F",
    "Z": 9,
-   "orbital": "2p_0"
+   "orbital": "2p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ne",
    "Z": 10,
-   "orbital": "2p_1"
+   "orbital": "2p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "Na",
    "Z": 11,
-   "orbital": "3s_0"
+   "orbital": "3s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Mg",
    "Z": 12,
-   "orbital": "3s_0"
+   "orbital": "3s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Al",
    "Z": 13,
-   "orbital": "3p_-1"
+   "orbital": "3p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "Si",
    "Z": 14,
-   "orbital": "3p_0"
+   "orbital": "3p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "P",
    "Z": 15,
-   "orbital": "3p_1"
+   "orbital": "3p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "S",
    "Z": 16,
-   "orbital": "3p_-1"
+   "orbital": "3p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "Cl",
    "Z": 17,
-   "orbital": "3p_0"
+   "orbital": "3p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ar",
    "Z": 18,
-   "orbital": "3p_1"
+   "orbital": "3p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "K",
    "Z": 19,
-   "orbital": "4s_0"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ca",
    "Z": 20,
-   "orbital": "4s_0"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Sc",
    "Z": 21,
-   "orbital": "3d_-2"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ti",
    "Z": 22,
-   "orbital": "3d_-1"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "V",
    "Z": 23,
-   "orbital": "3d_0"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Cr",
    "Z": 24,
-   "orbital": "3d_2"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Mn",
    "Z": 25,
-   "orbital": "3d_2"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Fe",
    "Z": 26,
-   "orbital": "3d_-2"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Co",
    "Z": 27,
-   "orbital": "3d_-1"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ni",
    "Z": 28,
-   "orbital": "3d_0"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Cu",
    "Z": 29,
-   "orbital": "4s_0"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Zn",
    "Z": 30,
-   "orbital": "3d_2"
+   "orbital": "4s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ga",
    "Z": 31,
-   "orbital": "4p_-1"
+   "orbital": "4p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "Ge",
    "Z": 32,
-   "orbital": "4p_0"
+   "orbital": "4p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "As",
    "Z": 33,
-   "orbital": "4p_1"
+   "orbital": "4p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "Se",
    "Z": 34,
-   "orbital": "4p_-1"
+   "orbital": "4p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "Br",
    "Z": 35,
-   "orbital": "4p_0"
+   "orbital": "4p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Kr",
    "Z": 36,
-   "orbital": "4p_1"
+   "orbital": "4p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "Rb",
    "Z": 37,
-   "orbital": "5s_0"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Sr",
    "Z": 38,
-   "orbital": "5s_0"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Y",
    "Z": 39,
-   "orbital": "4d_-2"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Zr",
    "Z": 40,
-   "orbital": "4d_-1"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Nb",
    "Z": 41,
-   "orbital": "4d_1"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Mo",
    "Z": 42,
-   "orbital": "4d_2"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Tc",
    "Z": 43,
-   "orbital": "4d_2"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ru",
    "Z": 44,
-   "orbital": "4d_-1"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Rh",
    "Z": 45,
-   "orbital": "4d_0"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Pd",
    "Z": 46,
-   "orbital": "4d_2"
+   "orbital": "4d_2",
+   "system": "hydrogen"
   },
   {
    "sym": "Ag",
    "Z": 47,
-   "orbital": "5s_0"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Cd",
    "Z": 48,
-   "orbital": "4d_2"
+   "orbital": "5s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "In",
    "Z": 49,
-   "orbital": "5p_-1"
+   "orbital": "5p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "Sn",
    "Z": 50,
-   "orbital": "5p_0"
+   "orbital": "5p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Sb",
    "Z": 51,
-   "orbital": "5p_1"
+   "orbital": "5p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "Te",
    "Z": 52,
-   "orbital": "5p_-1"
+   "orbital": "5p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "I",
    "Z": 53,
-   "orbital": "5p_0"
+   "orbital": "5p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Xe",
    "Z": 54,
-   "orbital": "5p_1"
+   "orbital": "5p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "Cs",
    "Z": 55,
-   "orbital": "6s_0"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ba",
    "Z": 56,
-   "orbital": "6s_0"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "La",
    "Z": 57,
-   "orbital": "5d_-2"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ce",
    "Z": 58,
-   "orbital": "4f_-3"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Pr",
    "Z": 59,
-   "orbital": "4f_-1"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Nd",
    "Z": 60,
-   "orbital": "4f_0"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Pm",
    "Z": 61,
-   "orbital": "4f_1"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Sm",
    "Z": 62,
-   "orbital": "4f_2"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Eu",
    "Z": 63,
-   "orbital": "4f_3"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Gd",
    "Z": 64,
-   "orbital": "4f_3"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Tb",
    "Z": 65,
-   "orbital": "4f_-2"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Dy",
    "Z": 66,
-   "orbital": "4f_-1"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ho",
    "Z": 67,
-   "orbital": "4f_0"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Er",
    "Z": 68,
-   "orbital": "4f_1"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Tm",
    "Z": 69,
-   "orbital": "4f_2"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Yb",
    "Z": 70,
-   "orbital": "4f_3"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Lu",
    "Z": 71,
-   "orbital": "5d_-2"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Hf",
    "Z": 72,
-   "orbital": "5d_-1"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ta",
    "Z": 73,
-   "orbital": "5d_0"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "W",
    "Z": 74,
-   "orbital": "5d_1"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Re",
    "Z": 75,
-   "orbital": "5d_2"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Os",
    "Z": 76,
-   "orbital": "5d_-2"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ir",
    "Z": 77,
-   "orbital": "5d_-1"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Pt",
    "Z": 78,
-   "orbital": "5d_1"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Au",
    "Z": 79,
-   "orbital": "6s_0"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Hg",
    "Z": 80,
-   "orbital": "5d_2"
+   "orbital": "6s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Tl",
    "Z": 81,
-   "orbital": "6p_-1"
+   "orbital": "6p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "Pb",
    "Z": 82,
-   "orbital": "6p_0"
+   "orbital": "6p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Bi",
    "Z": 83,
-   "orbital": "6p_1"
+   "orbital": "6p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "Po",
    "Z": 84,
-   "orbital": "6p_-1"
+   "orbital": "6p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "At",
    "Z": 85,
-   "orbital": "6p_0"
+   "orbital": "6p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Rn",
    "Z": 86,
-   "orbital": "6p_1"
+   "orbital": "6p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "Fr",
    "Z": 87,
-   "orbital": "7s_0"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ra",
    "Z": 88,
-   "orbital": "7s_0"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ac",
    "Z": 89,
-   "orbital": "6d_-2"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Th",
    "Z": 90,
-   "orbital": "6d_-1"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Pa",
    "Z": 91,
-   "orbital": "5f_-2"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "U",
    "Z": 92,
-   "orbital": "5f_-1"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Np",
    "Z": 93,
-   "orbital": "5f_0"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Pu",
    "Z": 94,
-   "orbital": "5f_2"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Am",
    "Z": 95,
-   "orbital": "5f_3"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Cm",
    "Z": 96,
-   "orbital": "5f_3"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Bk",
    "Z": 97,
-   "orbital": "5f_-2"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Cf",
    "Z": 98,
-   "orbital": "5f_-1"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Es",
    "Z": 99,
-   "orbital": "5f_0"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Fm",
    "Z": 100,
-   "orbital": "5f_1"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Md",
    "Z": 101,
-   "orbital": "5f_2"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "No",
    "Z": 102,
-   "orbital": "5f_3"
-  },
-  {
-   "sym": "Lr",
-   "Z": 103,
-   "orbital": "7p_-1"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Rf",
    "Z": 104,
-   "orbital": "6d_-1"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Db",
    "Z": 105,
-   "orbital": "6d_0"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Sg",
    "Z": 106,
-   "orbital": "6d_1"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Bh",
    "Z": 107,
-   "orbital": "6d_2"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Hs",
    "Z": 108,
-   "orbital": "6d_-2"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Mt",
    "Z": 109,
-   "orbital": "6d_-1"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Ds",
    "Z": 110,
-   "orbital": "6d_0"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Rg",
    "Z": 111,
-   "orbital": "6d_1"
+   "orbital": "7s_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Cn",
    "Z": 112,
-   "orbital": "6d_2"
+   "orbital": "7s_0",
+   "system": "hydrogen"
+  },
+  {
+   "sym": "Lr",
+   "Z": 103,
+   "orbital": "7p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "Nh",
    "Z": 113,
-   "orbital": "7p_-1"
+   "orbital": "7p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "Fl",
    "Z": 114,
-   "orbital": "7p_0"
+   "orbital": "7p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Mc",
    "Z": 115,
-   "orbital": "7p_1"
+   "orbital": "7p_1",
+   "system": "hydrogen"
   },
   {
    "sym": "Lv",
    "Z": 116,
-   "orbital": "7p_-1"
+   "orbital": "7p_-1",
+   "system": "hydrogen"
   },
   {
    "sym": "Ts",
    "Z": 117,
-   "orbital": "7p_0"
+   "orbital": "7p_0",
+   "system": "hydrogen"
   },
   {
    "sym": "Og",
    "Z": 118,
-   "orbital": "7p_1"
+   "orbital": "7p_1",
+   "system": "hydrogen"
   }
  ],
  "orbitals": [
+  "5s_0",
   "4d_-2",
   "4d_-1",
   "4d_0",
@@ -737,6 +867,7 @@
   "5p_-1",
   "5p_0",
   "5p_1",
+  "6s_0",
   "4f_-3",
   "4f_-2",
   "4f_-1",
@@ -763,8 +894,6 @@
   "6d_-1",
   "6d_0",
   "6d_1",
-  "6d_2",
-  "5s_0",
-  "6s_0"
+  "6d_2"
  ]
 }

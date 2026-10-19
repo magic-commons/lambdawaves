@@ -148,7 +148,7 @@ photosensitivity notice unless a link, `?preset=` or `?menu=0` opened something,
 for a test driver unless `?menu=1` / `?opener=1`. Three decks sized to the space (bigger tiles
 AND more columns, ≥ 8 across on a desktop; ‹ › beside the pages, dots under): ATOMIC (the
 118-square periodic table: each tile's symbol in STIX, its picture THE HIGHEST ORBITAL of the atom
-from the CORNER pose — the valence subshell's last electron, (n, l, m) by `lab/valence.js` (every element's own state since 008 A7 took the ATOM system to Og — the hydrogen `orb-<nl>_<m>` pictures are no longer shown), while a press still opens goAtom's
+from the CORNER pose — the HIGHEST occupied subshell, the highest n then the highest l in it, and its last electron's m, by `lab/valence.js` (iteration 011 Q3, Josh 10-19: "I just noticed that the orbitals aren't correctly their 'n' level. it's definitely incorrect to just show the lone highest orbital with it's pure n= at it's level but it's really just an indicator and visual aid" — so Fe shows 4s, not 3d; Ce 6s, not 4f; Pd 4d, the one element whose n is not its period; the caption's subshell is the same one), drawn as the PURE (hydrogen) orbital of that (n, l, m), cut in half through the nucleus facing the camera so its n − l radial layers read as rings (the atom's own orbital folds its inner layers into the core: Rb 5s, Cs 6s and Fr 7s all showed 3 layers; `tools/tile-layers.py` counts them), while a press still opens goAtom's
 fillValence — every subshell outside the noble-gas core (atoms.js `valenceShells`: Fe 4s and 3d, Au 6s, 4f and 5d), each at its electrons' weight, every m, in phase, the status line naming them, a shell past the basis said and not loaded (008 Q); Josh 10-18), MOLECULAR (every molecule of the catalogue at the
 HOME pose) and LIBRARY — THE VOLUMES. A hover moves only the picture (`lab/picker-fx.js`,
 SynchroSpectre's motion) and names a molecule's tile beneath it (an element's tile names nothing);
@@ -156,7 +156,7 @@ the caption is large (LW Title + STIX): for an element the name alone over its s
 (`3d²`, STIX), never the symbol or Z. Pictures: `tools/menu-thumbs.mjs`
 into `lab/img/menu/` (a molecule: density · SIGNED · ISO 0.03 · the HSV wheel; an atom, Josh 10-18: the
 signed Im view of its one state — m = 0 held imaginary so the view holds it, m ≠ 0 real so Im ψ is the real orbital's
-lobes — the wheel turned by l, s 0° · p 45° · d 90° · f 135°, EXPOSURE 0.5 so a shell is see-through; the field alone via a
+lobes — the wheel turned by l, s 0° · p 45° · d 90° · f 135°, EXPOSURE 0.5 so a shell is see-through, the MATERIAL CLIP at the nucleus with its normal toward THE CORNER's eye and the GRID at 128 (011 Q3); the field alone via a
 two-ground alpha matte; rerun it after a molecule is added) and `--volume vol-1` into a
 volume's `t/<id>.webp`. The way back: the grid button by the title, L, WINDOW › PICKER. The
 look controls live in the kit's MIR OPTIONS (`lab/mir-gui.js` over the `mir.gui` look store);
