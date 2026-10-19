@@ -137,10 +137,14 @@ THE PICKER (iteration 003's main menu, renamed and rebuilt in iteration 004: `la
 photosensitivity notice unless a link, `?preset=` or `?menu=0` opened something, and never
 for a test driver unless `?menu=1` / `?opener=1`. Three decks sized to the space (bigger tiles
 AND more columns, ≥ 8 across on a desktop; ‹ › beside the pages, dots under): ATOMIC (the
-118-square periodic table, each live element's picture from the CORNER pose — exactly what a
-press opens), MOLECULAR (every molecule of the catalogue at the HOME pose) and LIBRARY — THE
-VOLUMES. A hover moves only the picture (`lab/picker-fx.js`, SynchroSpectre's motion) and names
-the tile beneath it; the caption is large (LW Title + STIX). Pictures: `tools/menu-thumbs.mjs`
+118-square periodic table: each tile's symbol in STIX, its picture THE HIGHEST ORBITAL of the atom
+from the CORNER pose — the valence subshell's last electron, (n, l, m) by `lab/valence.js` (H–Kr the
+atom's own state, past Kr hydrogen's `orb-<nl>_<m>`), while a press still opens goAtom's
+fillValence, every m of the shell; Josh 10-18), MOLECULAR (every molecule of the catalogue at the
+HOME pose) and LIBRARY — THE VOLUMES. A hover moves only the picture (`lab/picker-fx.js`,
+SynchroSpectre's motion) and names a molecule's tile beneath it (an element's tile names nothing);
+the caption is large (LW Title + STIX): for an element the name alone over its subshell alone
+(`3d²`, STIX), never the symbol or Z. Pictures: `tools/menu-thumbs.mjs`
 into `lab/img/menu/` (density · SIGNED · ISO 0.03 · the HSV wheel, the field alone via a
 two-ground alpha matte; rerun it after a molecule is added) and `--volume vol-1` into a
 volume's `t/<id>.webp`. The way back: the grid button by the title, L, WINDOW › PICKER. The

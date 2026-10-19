@@ -3,7 +3,7 @@
  * headless Firefox (the gate kit) and written to lab/img/menu/.
  *
  *   python3 tools/gate/server.py . 9671 &                                   # serve this checkout
- *   GD_PORT=5681 LW_PORT=9671 node tools/menu-thumbs.mjs [--set molecules,elements,orbitals] [--only H2O,el-Fe,orb-4d] [--iso 0.03] [--size 200] [--q 0.64]
+ *   GD_PORT=5681 LW_PORT=9671 node tools/menu-thumbs.mjs [--set molecules,elements,orbitals] [--only H2O,el-Fe,orb-4d_0] [--iso 0.03] [--size 200] [--q 0.64]
  *
  * THE LOOK (every picture the same, Josh's words: "density mode in Signed with a somewhat fat ISO, all in HSV colouring"):
  *   OBSERVABLE ρ = |ψ|² (density) · STYLE SIGNED · ISO 0.03 (the shipped 0.06 halved: a fatter shell) · PALETTE ON, 'wheel' (the kit's HSV
@@ -23,9 +23,10 @@
  * MOLECULES: every row of the store (molecules.js MOLECULES + RECORD_ONLY, the Picker's order), MOLECULES ON, the molecule picked by the
  *   card's hand road (a record-only row loads its library record), solved STO-3G RHF ground state.  The two disabled rows (CuH, ZnH₂ — no
  *   RHF minimum) have no picture: the Picker shows them dimmed with the reason.
- * ELEMENTS (el-<symbol>): H–Kr, exactly what a press on the tile opens — the Picker's goAtom road: ATOMS mode, the ATOM system,
- *   setElement(Z), fillValence() (the outermost occupied shell of atoms.js' configuration, every m equal and in phase).
- * SUBSHELLS (orb-<nl>): the dimmed elements past Kr — hydrogen (n, l) with every m equal and in phase (amplitude 1/√(2l+1), phase 0), the
+ * ELEMENTS (el-<symbol>): H–Kr — ATOMS mode, the ATOM system, setElement(Z), and THE HIGHEST ORBITAL alone (Josh 10-18): the valence
+ *   subshell's last electron, (n, l, m) from lab/valence.js (the same rule the Picker's caption line reads), amplitude 1, phase 0.
+ *   A press on the tile still opens goAtom's fillValence (every m of the shell, equal and in phase).
+ * SUBSHELLS (orb-<nl>_<m>): the dimmed elements past Kr — hydrogen's one state (n, l, m) for every m of each valence subshell, the
  *   subshells the table names past Kr up to n = 6 (the register ends there: 7s and 7p have no picture).
  * Writes lab/img/menu/<id>.webp, el-<sym>.webp, orb-<nl>.webp and lab/img/menu/manifest.json (what exists + these settings).
  * A VOLUME (iteration 004 V2, `--volume vol-1`): each molecule of <LW_VOLUMES>/dist/<vol>/index.json opened by the card's own road
@@ -38,6 +39,7 @@ import { spawnSync } from 'node:child_process';
 import { tmpdir, homedir } from 'node:os';
 import { MOLECULES, RECORD_ONLY } from '../lab/molecules.js';
 import { ATOMS } from '../lab/atoms.js';
+import { valenceOf } from '../lab/valence.js';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const ISO = +arg('iso', 0.03), SIZE = +arg('size', 200), Q = +arg('q', 0.64), AQ = +arg('aq', 50), RENDER = +arg('render', 640);
@@ -123,25 +125,27 @@ if (sets.includes('elements')) {
   await g.ev(`__LW.chem.setOn(false); __LW.setHamiltonian('atom'); __pose(${JSON.stringify(CORNER)}); return true;`);
   for (const a of ATOMS) {
     const name = 'el-' + a.symbol; if (only && !only.includes(name)) continue;
-    const r = await g.ev(`const LW = __LW; LW.setElement(${a.Z}); if (LW.hamiltonian !== 'atom') LW.setHamiltonian('atom'); const f = LW.fillValence();
-      LW.setView('density'); LW.setStyle('signed'); LW.mat.iso = ${ISO}; __pose(${JSON.stringify(CORNER)});
-      await new Promise((r) => setTimeout(r, 700));
-      const t = await __thumb(${2 * SIZE}, ${Q}); if (t) t.shell = f; return t;`);
-    if (save(name, r)) made.elements.push({ sym: a.symbol, Z: a.Z, shell: r.shell ? r.shell.n + 'spdf'[r.shell.l] : null });
-  }
-}
-
-/* SUBSHELLS: ATOMS mode, hydrogen, every m of (n, l) equal and in phase, THE CORNER */
-if (sets.includes('orbitals')) {
-  await g.ev(`__LW.chem.setOn(false); __LW.setHamiltonian('hydrogen'); __pose(${JSON.stringify(CORNER)}); return true;`);
-  for (const s of SUBSHELLS) {
-    const name = 'orb-' + nl(s); if (only && !only.includes(name)) continue;
-    const r = await g.ev(`const LW = __LW, H = await import('./hydrogen.js'), amp = 1 / Math.sqrt(${2 * s[1] + 1});
-      LW.reg.clear(); for (let m = -${s[1]}; m <= ${s[1]}; m++) { const a = H.stateOf(${s[0]}, ${s[1]}, m).index; LW.reg.set(a, amp, 0); LW.setMute(a, false); }
+    const v = valenceOf(a.Z);
+    const r = await g.ev(`const LW = __LW, H = await import('./hydrogen.js'); LW.setElement(${a.Z}); if (LW.hamiltonian !== 'atom') LW.setHamiltonian('atom');
+      const i = H.stateOf(${v.n}, ${v.l}, ${v.m}).index; LW.reg.clear(); LW.reg.set(i, 1, 0); LW.setMute(i, false);
       LW.setView('density'); LW.setStyle('signed'); LW.mat.iso = ${ISO}; __pose(${JSON.stringify(CORNER)});
       await new Promise((r) => setTimeout(r, 700));
       return await __thumb(${2 * SIZE}, ${Q});`);
-    if (save(name, r)) made.orbitals.push(nl(s));
+    if (save(name, r)) made.elements.push({ sym: a.symbol, Z: a.Z, orbital: v.nl + '_' + v.m });
+  }
+}
+
+/* SUBSHELLS: ATOMS mode, hydrogen, one state (n, l, m) for every m of each valence subshell, THE CORNER */
+if (sets.includes('orbitals')) {
+  await g.ev(`__LW.chem.setOn(false); __LW.setHamiltonian('hydrogen'); __pose(${JSON.stringify(CORNER)}); return true;`);
+  for (const s of SUBSHELLS) for (let m = -s[1]; m <= s[1]; m++) {
+    const name = 'orb-' + nl(s) + '_' + m; if (only && !only.includes(name)) continue;
+    const r = await g.ev(`const LW = __LW, H = await import('./hydrogen.js');
+      const i = H.stateOf(${s[0]}, ${s[1]}, ${m}).index; LW.reg.clear(); LW.reg.set(i, 1, 0); LW.setMute(i, false);
+      LW.setView('density'); LW.setStyle('signed'); LW.mat.iso = ${ISO}; __pose(${JSON.stringify(CORNER)});
+      await new Promise((r) => setTimeout(r, 700));
+      return await __thumb(${2 * SIZE}, ${Q});`);
+    if (save(name, r)) made.orbitals.push(nl(s) + '_' + m);
   }
 }
 /* A VOLUME: each molecule by the card's openVolume (its lowest rung), waited until it is the field's; the HOME pose */

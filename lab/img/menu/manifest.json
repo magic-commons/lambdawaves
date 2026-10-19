@@ -1,7 +1,7 @@
 {
  "tool": "tools/menu-thumbs.mjs",
- "size": 240,
- "quality": 0.62,
+ "size": 200,
+ "quality": 0.64,
  "alphaQuality": 50,
  "render": 640,
  "look": {
@@ -120,193 +120,221 @@
   {
    "sym": "H",
    "Z": 1,
-   "shell": "1s"
+   "orbital": "1s_0"
   },
   {
    "sym": "He",
    "Z": 2,
-   "shell": "1s"
+   "orbital": "1s_0"
   },
   {
    "sym": "Li",
    "Z": 3,
-   "shell": "2s"
+   "orbital": "2s_0"
   },
   {
    "sym": "Be",
    "Z": 4,
-   "shell": "2s"
+   "orbital": "2s_0"
   },
   {
    "sym": "B",
    "Z": 5,
-   "shell": "2p"
+   "orbital": "2p_-1"
   },
   {
    "sym": "C",
    "Z": 6,
-   "shell": "2p"
+   "orbital": "2p_0"
   },
   {
    "sym": "N",
    "Z": 7,
-   "shell": "2p"
+   "orbital": "2p_1"
   },
   {
    "sym": "O",
    "Z": 8,
-   "shell": "2p"
+   "orbital": "2p_-1"
   },
   {
    "sym": "F",
    "Z": 9,
-   "shell": "2p"
+   "orbital": "2p_0"
   },
   {
    "sym": "Ne",
    "Z": 10,
-   "shell": "2p"
+   "orbital": "2p_1"
   },
   {
    "sym": "Na",
    "Z": 11,
-   "shell": "3s"
+   "orbital": "3s_0"
   },
   {
    "sym": "Mg",
    "Z": 12,
-   "shell": "3s"
+   "orbital": "3s_0"
   },
   {
    "sym": "Al",
    "Z": 13,
-   "shell": "3p"
+   "orbital": "3p_-1"
   },
   {
    "sym": "Si",
    "Z": 14,
-   "shell": "3p"
+   "orbital": "3p_0"
   },
   {
    "sym": "P",
    "Z": 15,
-   "shell": "3p"
+   "orbital": "3p_1"
   },
   {
    "sym": "S",
    "Z": 16,
-   "shell": "3p"
+   "orbital": "3p_-1"
   },
   {
    "sym": "Cl",
    "Z": 17,
-   "shell": "3p"
+   "orbital": "3p_0"
   },
   {
    "sym": "Ar",
    "Z": 18,
-   "shell": "3p"
+   "orbital": "3p_1"
   },
   {
    "sym": "K",
    "Z": 19,
-   "shell": "4s"
+   "orbital": "4s_0"
   },
   {
    "sym": "Ca",
    "Z": 20,
-   "shell": "4s"
+   "orbital": "4s_0"
   },
   {
    "sym": "Sc",
    "Z": 21,
-   "shell": "4s"
+   "orbital": "3d_-2"
   },
   {
    "sym": "Ti",
    "Z": 22,
-   "shell": "4s"
+   "orbital": "3d_-1"
   },
   {
    "sym": "V",
    "Z": 23,
-   "shell": "4s"
+   "orbital": "3d_0"
   },
   {
    "sym": "Cr",
    "Z": 24,
-   "shell": "4s"
+   "orbital": "3d_2"
   },
   {
    "sym": "Mn",
    "Z": 25,
-   "shell": "4s"
+   "orbital": "3d_2"
   },
   {
    "sym": "Fe",
    "Z": 26,
-   "shell": "4s"
+   "orbital": "3d_-2"
   },
   {
    "sym": "Co",
    "Z": 27,
-   "shell": "4s"
+   "orbital": "3d_-1"
   },
   {
    "sym": "Ni",
    "Z": 28,
-   "shell": "4s"
+   "orbital": "3d_0"
   },
   {
    "sym": "Cu",
    "Z": 29,
-   "shell": "4s"
+   "orbital": "4s_0"
   },
   {
    "sym": "Zn",
    "Z": 30,
-   "shell": "4s"
+   "orbital": "3d_2"
   },
   {
    "sym": "Ga",
    "Z": 31,
-   "shell": "4p"
+   "orbital": "4p_-1"
   },
   {
    "sym": "Ge",
    "Z": 32,
-   "shell": "4p"
+   "orbital": "4p_0"
   },
   {
    "sym": "As",
    "Z": 33,
-   "shell": "4p"
+   "orbital": "4p_1"
   },
   {
    "sym": "Se",
    "Z": 34,
-   "shell": "4p"
+   "orbital": "4p_-1"
   },
   {
    "sym": "Br",
    "Z": 35,
-   "shell": "4p"
+   "orbital": "4p_0"
   },
   {
    "sym": "Kr",
    "Z": 36,
-   "shell": "4p"
+   "orbital": "4p_1"
   }
  ],
  "orbitals": [
-  "5s",
-  "4d",
-  "5p",
-  "6s",
-  "4f",
-  "5d",
-  "6p",
-  "5f",
-  "6d"
+  "5s_0",
+  "4d_-2",
+  "4d_-1",
+  "4d_0",
+  "4d_1",
+  "4d_2",
+  "5p_-1",
+  "5p_0",
+  "5p_1",
+  "6s_0",
+  "4f_-3",
+  "4f_-2",
+  "4f_-1",
+  "4f_0",
+  "4f_1",
+  "4f_2",
+  "4f_3",
+  "5d_-2",
+  "5d_-1",
+  "5d_0",
+  "5d_1",
+  "5d_2",
+  "6p_-1",
+  "6p_0",
+  "6p_1",
+  "5f_-3",
+  "5f_-2",
+  "5f_-1",
+  "5f_0",
+  "5f_1",
+  "5f_2",
+  "5f_3",
+  "6d_-2",
+  "6d_-1",
+  "6d_0",
+  "6d_1",
+  "6d_2"
  ]
 }

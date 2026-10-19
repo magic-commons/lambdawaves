@@ -12,6 +12,7 @@
 import { el, chip, mathPlain } from './mir/kit.js';
 import { CHEM_PRESETS } from './chemview.js';
 import { ATOMS } from './atoms.js';
+import { valenceOf } from './valence.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { RM, animate, pointerFrame, tiltPictures, enterTiles, develop, swapLine, installRing, clamp } from './picker-fx.js';
 import * as V from './volumes.js';
@@ -21,27 +22,6 @@ const SYM = ('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn F
   + 'Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr '
   + 'Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og').split(' ');
 const NAMES = 'Hydrogen Helium Lithium Beryllium Boron Carbon Nitrogen Oxygen Fluorine Neon Sodium Magnesium Aluminium Silicon Phosphorus Sulfur Chlorine Argon Potassium Calcium Scandium Titanium Vanadium Chromium Manganese Iron Cobalt Nickel Copper Zinc Gallium Germanium Arsenic Selenium Bromine Krypton Rubidium Strontium Yttrium Zirconium Niobium Molybdenum Technetium Ruthenium Rhodium Palladium Silver Cadmium Indium Tin Antimony Tellurium Iodine Xenon Caesium Barium Lanthanum Cerium Praseodymium Neodymium Promethium Samarium Europium Gadolinium Terbium Dysprosium Holmium Erbium Thulium Ytterbium Lutetium Hafnium Tantalum Tungsten Rhenium Osmium Iridium Platinum Gold Mercury Thallium Lead Bismuth Polonium Astatine Radon Francium Radium Actinium Thorium Protactinium Uranium Neptunium Plutonium Americium Curium Berkelium Californium Einsteinium Fermium Mendelevium Nobelium Lawrencium Rutherfordium Dubnium Seaborgium Bohrium Hassium Meitnerium Darmastadtium Roentgenium Copernicium Nihonium Flerovium Moscovium Livermorium Tennessine Oganesson'.split(' ');   /* the 118 names (ASE's table), the caption's word for an element */
-const L = 'spdf', CAP = [2, 6, 10, 14], SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
-const sup = (k) => String(k).split('').map((d) => SUP[d]).join('');
-/* the Madelung order (n + l, then n), filled to Z; past Kr the standard ground-state exceptions move k electrons from one subshell to
-   another (Z: from > to, k).  H–Kr read atoms.js' own configurations instead. */
-const ORDER = []; for (let s = 1; s <= 8; s++) for (let n = 1; n <= s; n++) { const l = s - n; if (l < n && l <= 3) ORDER.push([n, l]); }
-const MOVE = { 41: ['5s', '4d', 1], 42: ['5s', '4d', 1], 44: ['5s', '4d', 1], 45: ['5s', '4d', 1], 46: ['5s', '4d', 2], 47: ['5s', '4d', 1], 57: ['4f', '5d', 1], 58: ['4f', '5d', 1],
-  64: ['4f', '5d', 1], 78: ['6s', '5d', 1], 79: ['6s', '5d', 1], 89: ['5f', '6d', 1], 90: ['5f', '6d', 2], 91: ['5f', '6d', 1], 92: ['5f', '6d', 1], 93: ['5f', '6d', 1], 96: ['5f', '6d', 1], 103: ['6d', '7p', 1] };
-function configOf(Z) {
-  const own = ATOMS.find((a) => a.Z === Z);
-  if (own) return own.config.map((c) => ({ n: c.n, l: c.l, occ: c.occ }));
-  const c = []; let left = Z; for (const [n, l] of ORDER) { if (left <= 0) break; const k = Math.min(left, CAP[l]); c.push({ n, l, occ: k }); left -= k; }
-  const m = MOVE[Z]; if (m) { const key = (s) => s.n + L[s.l], from = c.find((s) => key(s) === m[0]); let to = c.find((s) => key(s) === m[1]);
-    if (!to) { to = { n: +m[1][0], l: L.indexOf(m[1][1]), occ: 0 }; c.push(to); } from.occ -= m[2]; to.occ += m[2]; }
-  return c.filter((s) => s.occ > 0);
-}
-/** the subshell that makes the atom: the open one (the highest l, then the latest in the Madelung order), else the last one filled */
-function valenceOf(Z) {
-  const c = configOf(Z), rank = (s) => (s.n + s.l) * 10 + s.n, sorted = c.slice().sort((a, b) => rank(a) - rank(b));
-  const open = sorted.filter((s) => s.occ < CAP[s.l]).sort((a, b) => a.l - b.l || rank(a) - rank(b)); const v = (open.length ? open : sorted).at(-1);   // of two open (Cr 3d⁵ 4s¹, Ce 4f¹ 5d¹) the higher l makes it
-  return { nl: v.n + L[v.l], label: v.n + L[v.l] + sup(v.occ) };
-}
 /** the 18-column seat: [row, column] (rows 1–7 the periods, 9–10 the f-block under them) */
 function seatOf(Z) {
   const P = [2, 10, 18, 36, 54, 86, 118], p = P.findIndex((e) => Z <= e) + 1, z0 = p > 1 ? P[p - 2] : 0, i = Z - z0;
@@ -84,7 +64,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const b = el('button', 'mm-tile ' + cls, host); b.type = 'button';
     if (off) { b.classList.add('off'); b.setAttribute('aria-disabled', 'true'); }
     b.setAttribute('aria-label', [info.name, info.formula, info.sub, info.note].filter(Boolean).join(' — '));
-    el('span', 'mm-under', b, info.under || info.name);
+    if (info.under !== false) el('span', 'mm-under', b, info.under || info.name);   // an element has none: the caption says it
     const hi = () => say(info); b.addEventListener('pointerenter', hi); b.addEventListener('focus', hi);
     b.addEventListener('click', () => { if (!off) go(); });
     return b;
@@ -165,9 +145,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const table = el('div', 'mm-table', sections[0].sec);
   for (let Z = 1; Z <= 118; Z++) {
     const [r, c] = seatOf(Z), v = valenceOf(Z), a = ATOMS.find((x) => x.Z === Z), live = !!a, sym = SYM[Z - 1];
-    const t = tile(table, 'mm-el', { name: NAMES[Z - 1], sub: v.label, math: true, note: live ? '' : 'past krypton: not in the ATOM system yet' }, () => goAtom(Z), !live);
+    const t = tile(table, 'mm-el', { name: NAMES[Z - 1], sub: v.label, math: true, under: false, note: live ? '' : 'past krypton: not in the ATOM system yet' }, () => goAtom(Z), !live);
     t.style.gridRow = String(r); t.style.gridColumn = String(c);
-    pic(t, './img/menu/' + (live ? 'el-' + sym : 'orb-' + v.nl) + '.webp');
+    pic(t, './img/menu/' + (live ? 'el-' + sym : 'orb-' + v.nl + '_' + v.m) + '.webp');   // the atom's highest orbital: its own past H–Kr hydrogen's (n, l, m)
     el('i', 'mm-z', t, String(Z)); el('b', 'mm-sym', t, sym);
   }
   /* ── MOLECULAR: the store's own order ── */
