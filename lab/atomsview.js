@@ -2,13 +2,13 @@
  *
  * The maths is lab/atoms.js: one self-consistent CENTRAL field per element (Xα, α = 2/3, plus the Latter tail),
  * solved live on a logarithmic mesh — twice, and Richardson-extrapolated in dx² — for Z = 1 … 118 (H … Og), with the scalar ZORA kinetic
- * operator (iteration 008 Z; spin–orbit not included, said past Kr in the MODEL readout and in STATUS).  RELATIVITY Δ solves the same atom
- * once more without relativity, on a press and under the busy mark, never in a frame, and writes ε_ZORA − ε_NR beside every shell.  This window
+ * operator (iteration 008 Z) and MacDonald–Vosko's relativistic exchange (iteration 009 MV; spin–orbit not included, said past Kr in the MODEL readout and in STATUS).  RELATIVITY Δ solves the same atom
+ * once more without relativity, on a press and under the busy mark, never in a frame, and writes ε_rel − ε_NR beside every shell.  This window
  * prints what the model says and, as loudly, what it does NOT say:
  *
  *   · an Xα eigenvalue is not a Koopmans energy, so −ε and the Δ-SCF ionisation stand SIDE BY SIDE and only the
  *     second is ever called an ionisation energy (Ne: −ε(2p) = 15.07 eV, Δ-SCF = 21.07 eV, measured 21.56);
- *   · the quantum defect travels with its α (Na 3s: 1.3276 at α = 2/3, 1.3743 at α = 1, spectra 1.3730);
+ *   · the quantum defect travels with its α (Na 3s: 1.3273 at α = 2/3, 1.3739 at α = 1, spectra 1.3730);
  *   · when the two least-bound shells lie within 0.1 hartree the window says the ORDER IS α-DEPENDENT instead of
  *     asserting one (Sc's 3d/4s crosses at α* ≈ 0.86; 0.84 without relativity) — the whole transition row is in that band.
  *
@@ -35,7 +35,7 @@ const rgba = (c, al) => `rgba(${c[0]},${c[1]},${c[2]},${al})`;
  */
 export function createAtoms(host, api) {
   let Z = 0, cache = null, dirty = true;
-  const rel = new Map();                                                // Z → Map(shell → ε_ZORA − ε_NR in eV): RELATIVITY Δ, filled on a press
+  const rel = new Map();                                                // Z → Map(shell → ε_rel − ε_NR in eV, rel = ZORA · MV): RELATIVITY Δ, filled on a press
 
   const r0 = el('div', 'row tight', host);
   const roEl = readout({ label: 'ELEMENT', value: '—', sub: '' });
@@ -67,13 +67,13 @@ export function createAtoms(host, api) {
   }
   const r2 = el('div', 'row tight', host);
   r2.appendChild(trig({ label: 'LOAD VALENCE', title: 'Load every subshell outside the noble-gas core into the register, each at its electrons’ weight, every m equal and in phase', onFire: () => api.fill() }).root);
-  r2.appendChild(trig({ label: 'RELATIVITY Δ', title: 'Solve this atom once more without relativity (p²/2) and write ε_ZORA − ε_NR beside every shell, in eV', onFire: () => relativity() }).root);
+  r2.appendChild(trig({ label: 'RELATIVITY Δ', title: 'Solve this atom once more without relativity (p²/2, plain exchange) and write ε_ZORA·MV − ε_NR beside every shell, in eV', onFire: () => relativity() }).root);
   const roScf = readout({ label: 'SCF', value: '—', sub: '' });
   r2.appendChild(roScf.root);
 
   const alpha = el('div', 'note atm-alpha', host); alpha.hidden = true;
   el('div', 'note', host).innerHTML = '<b>Model.</b> One self-consistent central field per element. Δ-SCF estimates ionisation energy; −ε is shown separately. A ° shell has an energy but no drawable radial. Position space only.';
-  el('div', 'note', host).innerHTML = '<b>ZORA.</b> The zeroth-order regular approximation replaces the kinetic energy p²/2 by p·[c²/(2c² − V)]p, so an electron deep in the nuclear potential moves with the heavier relativistic mass and its s and p shells contract. The eigenvalues are the scaled ZORA ones, which are exact for a one-electron ion\'s 1s; spin–orbit splitting (j = l ± ½) is not included.';
+  el('div', 'note', host).innerHTML = '<b>ZORA.</b> The zeroth-order regular approximation replaces the kinetic energy p²/2 by p·[c²/(2c² − V)]p, so an electron deep in the nuclear potential moves with the heavier relativistic mass and its s and p shells contract. The eigenvalues are the scaled ZORA ones, which are exact for a one-electron ion\'s 1s; the exchange carries MacDonald–Vosko\'s relativistic factor, which weakens it in the dense core; spin–orbit splitting (j = l ± ½) is not included.';
   el('div', 'note', host).textContent = `${EXCHANGE_MODEL} · SCF to ‖ΔV·r‖ < 1e-8 · virtual shells (°) in the frozen field`;   // 0.9.0 Z3 THE R_m CAPTION: atoms.js' EXCHANGE_MODEL and solveAtom's default tol
 
   /* ── the model, once per element (≈ 0.3 s for the neutral, the ion and the α = 1 comparison, then cached) ── */
@@ -112,7 +112,7 @@ export function createAtoms(host, api) {
     const C = cache, A = C.A, S = C.S;
     for (let z = 1; z < cells.length; z++) cells[z].classList.toggle('on', z === A.Z);
     roEl.set(`${A.symbol} · ${A.name} · Z = ${A.Z}`); roEl.setSub((A.Z > 36 ? A.core : A.term) + (A.exception ? '  · an Aufbau exception' : ''));
-    roModel.set(S.model); roModel.setSub(`central field · one potential for every shell · ${api.active() ? 'IN FORCE on the register' : 'not the operator in force'} · scalar-relativistic (ZORA), spin–orbit not included${A.Z > 36 ? ': past Kr the p and d levels miss their j = l ± ½ splitting' : ''}`);
+    roModel.set(S.model); roModel.setSub(`central field · one potential for every shell · ${api.active() ? 'IN FORCE on the register' : 'not the operator in force'} · scalar-relativistic (ZORA · MV), spin–orbit not included${A.Z > 36 ? ': past Kr the p and d levels miss their j = l ± ½ splitting' : ''}`);
     roE.set(S.Escaled.toFixed(5) + ' Eh'); roE.setSub(`${(S.Escaled * HARTREE_EV).toFixed(2)} eV · scaled ZORA: the functional's ${S.E.toFixed(3)} Eh less Σ f(λ − ε), the deep core's ZORA excess · ${S.electrons.toFixed(4)} electrons on the mesh`);
     roIP.set(C.ip.toFixed(3) + ' eV', 'ok');
     roIP.setSub(`Δ-SCF of the ${C.outer.n}${SPD[C.outer.l]} shell: E(ion) − E(neutral), the same functional and the neutral's ZORA operator both sides`);
@@ -126,7 +126,7 @@ export function createAtoms(host, api) {
     alpha.hidden = !near;
     if (near) {
       const a = C.top[1], b = C.top[0];                                  // a is the least bound of the two
-      alpha.innerHTML = `<b>Close shell order.</b> ${b.n}${SPD[b.l]} and ${a.n}${SPD[a.l]} differ by ${C.gap.toFixed(4)} Eh (${(C.gap * HARTREE_EV).toFixed(3)} eV), within the model’s exchange uncertainty. Values: ${b.n}${SPD[b.l]} ${b.eps.toFixed(5)} Eh; ${a.n}${SPD[a.l]} ${a.eps.toFixed(5)} Eh.${Z === 21 ? ' They cross at α = 0.863 (0.839 without relativity).' : ''}`;
+      alpha.innerHTML = `<b>Close shell order.</b> ${b.n}${SPD[b.l]} and ${a.n}${SPD[a.l]} differ by ${C.gap.toFixed(4)} Eh (${(C.gap * HARTREE_EV).toFixed(3)} eV), within the model’s exchange uncertainty. Values: ${b.n}${SPD[b.l]} ${b.eps.toFixed(5)} Eh; ${a.n}${SPD[a.l]} ${a.eps.toFixed(5)} Eh.${Z === 21 ? ' They cross at α = 0.860 (0.839 without relativity).' : ''}`;
     }
   }
 
@@ -158,7 +158,7 @@ export function createAtoms(host, api) {
       const j = n - 1 - i, s = sh[j], y = y0 + rowH * (i + 0.5), c = mix(A, B, n < 2 ? 0 : j / (n - 1));
       const len = 5 + (barW - 5) * (lg[j] - lo) / span;
       bars.push({ kind: 'bar', key: `${s.n}${SPD[s.l]}`, x: barX, y: y - 3, w: len, h: 6, colour: rgba(c, 1),
-        info: `${s.n}${SPD[s.l]}  ·  ${s.occ} electron${s.occ === 1 ? '' : 's'}  ·  ε = ${s.eps.toFixed(5)} Eh = ${(s.eps * HARTREE_EV).toFixed(1)} eV${D ? `  ·  relativity Δ = ${relFmt(D.get(`${s.n}${SPD[s.l]}`))} eV (ε_ZORA − ε_NR)` : ''}` });
+        info: `${s.n}${SPD[s.l]}  ·  ${s.occ} electron${s.occ === 1 ? '' : 's'}  ·  ε = ${s.eps.toFixed(5)} Eh = ${(s.eps * HARTREE_EV).toFixed(1)} eV${D ? `  ·  relativity Δ = ${relFmt(D.get(`${s.n}${SPD[s.l]}`))} eV (ε_ZORA·MV − ε_NR)` : ''}` });
       g.fillStyle = rgba(c, 0.22); g.fillRect(barX, y - 3, len, 6);
       g.fillStyle = rgba(c, 0.95); g.fillRect(barX, y - 3, 2, 6);
       g.textAlign = 'left'; g.fillStyle = rgba(c, 1); g.fillText(`${s.n}${SPD[s.l]}`, left, y);

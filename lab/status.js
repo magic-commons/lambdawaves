@@ -22,10 +22,10 @@ export function statusOf({ owner = 'molecule', record = null, sol = null, oracle
     head: join(s2 && `${s2} (exact ${S * (S + 1)})`, head), geometry });   // the line keeps the 110-character budget; the head has room for S(S+1)
   if (owner === 'hydrogen') { const H = FIELD_LAW.hydrogen, p = `picture good to ${up(H.rms)} RMS (worst voxel ${up(H.worst)})`; label = label || 'HYDROGEN'; return said('EXACT', p, join(label !== 'HYDROGEN' && label, 'EXACT', p)); }   // 0.8.1 T2: a reduced mass rides in the label
   if (owner === 'stark') { label = label || 'HYDROGEN + F·z'; return said('NUMERICAL', 'eigensolve in the n ≤ 7 basis · no continuum: ionisation said, not simulated', join('NUMERICAL', 'INTER-SHELL STARK · eigensolve in the n ≤ 7 basis')); }   // 0.8.0 G3
-  if (owner === 'atom') {   // iteration 008 A, A7, Z: past Kr the central field says it is scalar-relativistic without spin–orbit (atoms.js' header has the numbers); H–Kr keep no line
+  if (owner === 'atom') {   // iteration 008 A, A7, Z, 009 MV: past Kr the central field says it is scalar-relativistic without spin–orbit (atoms.js' header has the numbers); H–Kr keep no line
     if (!(Z > 36)) return null;
-    const why = 'scalar-relativistic (ZORA) Xα; spin–orbit not included';
-    const o = said('NUMERICAL', why, join('NUMERICAL', 'ATOM · ' + (label || 'Z = ' + Z), 'one Xα(2/3) + Latter-tail central field, scalar ZORA', 'no spin–orbit: a p or d level is its j = l ± ½ pair\'s average (Rn 6p splits by 3.6 eV)'));
+    const why = 'scalar-relativistic (ZORA · MV) Xα; spin–orbit not included';
+    const o = said('NUMERICAL', why, join('NUMERICAL', 'ATOM · ' + (label || 'Z = ' + Z), 'one Xα(2/3) + Latter-tail central field, scalar ZORA, MacDonald–Vosko exchange', 'no spin–orbit: a p or d level is its j = l ± ½ pair\'s average (Rn 6p splits by 3.6 eV)'));
     o.line = join(label, 'NUMERICAL', why); o.atom = true; return o;
   }
   if (owner !== 'molecule') return null;
