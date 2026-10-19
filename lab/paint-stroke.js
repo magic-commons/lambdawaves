@@ -86,13 +86,12 @@ export function fillButton(row, titles, onPress) {
 }
 
 /* iteration 008 A (Josh: "simple lines that's dark when off and full vivid color when on") · THE LEVEL LINE, written once for the three
-   ladders (iteration 009 F2 lifted it here from spectrum.js, Yan's call 8): an empty level is `off` at 0.42 and `w` px; a populated one is
-   `on` at full strength and `w + 1` px — no population bar, no halo, no glow (the share is the line's hover).  `on` null = off; both are
-   [r, g, b].  SPECTRUM: on = the shell's colour, off = the theme's ink, w = 1.  ORBITAL: the level's accent (A occupied, B virtual) both ways.
+   ladders (iteration 009 F2 lifted it here from spectrum.js, Yan's call 8): an empty level is `rgb` at 0.42 and `w` px; a `lit` one is
+   at full strength and `w + 1` px — no population bar, no halo, no glow (the share is the line's hover).  `rgb` is [r, g, b].
+   SPECTRUM: lit, the shell's colour, else the theme's ink; w = 1.  ORBITAL: the level's accent (A occupied, B virtual) both ways.
    STATES: w is the oscillator strength's weight (1–3 px, S₀ 2), the colour its axis's.  `fade` steps a mark back (it multiplies the alpha):
    ORBITAL's register under VIEW ORBITAL 0.5, a level this record does not carry 0.25; STATES' dark states 0.7. */
-export function levelLine(g, x0, x1, y, on, off, w = 1, fade = 1) {
-  const c = on || off;
-  g.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},${(on ? 1 : 0.42) * fade})`; g.lineWidth = on ? w + 1 : w;
+export function levelLine(g, x0, x1, y, c, lit, w = 1, fade = 1) {
+  g.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},${(lit ? 1 : 0.42) * fade})`; g.lineWidth = lit ? w + 1 : w;
   g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
 }

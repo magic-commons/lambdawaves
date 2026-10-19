@@ -630,7 +630,7 @@ export function createStates(host, api) {
            oscillator strength, and no population bar, box or glow is drawn beside a line (the lanes carry |b|).  Iteration 009 F2: SPECTRUM's
            levelLine (paint-stroke.js) draws it — off 0.42, on full, w / w + 1 px — a dark state in the theme's ink at 0.7 of that */
         const lc = rgb || T.INK;
-        levelLine(g, x0, x1, yy, lit ? lc : null, lc, wgt, rgb ? 1 : 0.7);
+        levelLine(g, x0, x1, yy, lc, lit, wgt, rgb ? 1 : 0.7);
         hits.push({ y: yy, x0, x1, key });
         hovers.push({ kind: 'line', key: 'S' + key, points: [x0, yy, x1, yy], lw: wgt, colour: ink(1),
           info: key === GROUND ? 'S₀ · the RHF ground determinant · pinned' + (lit ? ` · |b|² ${(c.amp * c.amp / n2).toFixed(3)}` : '')

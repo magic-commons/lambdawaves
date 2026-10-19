@@ -12,8 +12,9 @@
 import { BASIS, narrow } from './hydrogen.js';
 /** the shell table's width: the register's n ≤ 7 (the kernel's accumulators, the grid, the faders) */
 export const EQ_SHELLS = 7;
-/** |Γ_{nn′}|² of a table's gamma (7 × 7, (re, im) per entry), n and n′ from 1 */
-export const gammaAbs2 = (G, n, n2) => { const k = ((n - 1) * EQ_SHELLS + n2 - 1) * 2; return G[k] ** 2 + G[k + 1] ** 2; };
+/** Γ_{nn′}'s place in a table's gamma (7 × 7, (re, im) per entry), n and n′ from 1; |Γ_{nn′}|² */
+const gk = (n, n2) => ((n - 1) * EQ_SHELLS + n2 - 1) * 2;
+export const gammaAbs2 = (G, n, n2) => { const k = gk(n, n2); return G[k] ** 2 + G[k + 1] ** 2; };
 export const EQ_PRESETS = [
   { id: 'flat', label: 'FLAT', note: 'the plain sum' }, { id: 'gauss', label: 'GAUSSIAN JITTER', note: 'a Gaussian spread of clocks' },
   { id: 'cauchy', label: 'CAUCHY JITTER', note: 'a Lorentzian spread of clocks' }, { id: 'box', label: 'BOX JITTER', note: 'a uniform spread of clocks' },
@@ -51,7 +52,7 @@ const embed = (G, D) => { const D2 = 2 * D, M = new Float64Array(D2 * D2); for (
  *  table T (spectrum.js keeps the one in force as eq.last) — the expectation of e^{−iω_ab δt} over the preset's spread of clocks, what the picture applies */
 export function coherence(c, T = null) {
   const G = T && T.gamma, s = c.reduce((q, x) => q + x.re ** 2 + x.im ** 2, 0) || 1, keep = new Set([...c].sort((a, b) => b.re ** 2 + b.im ** 2 - a.re ** 2 - a.im ** 2).slice(0, 12)), L = c.filter((x) => keep.has(x));
-  const f = (a, b) => { const k = ((a.n - 1) * EQ_SHELLS + b.n - 1) * 2; return G && a !== b && a.n ? Math.hypot(G[k], G[k + 1]) : 1; }, F = L.map((a) => L.map((b) => f(a, b)));
+  const f = (a, b) => { const k = gk(a.n, b.n); return G && a !== b && a.n ? Math.hypot(G[k], G[k + 1]) : 1; }, F = L.map((a) => L.map((b) => f(a, b)));
   return { L, F, cut: c.length - L.length, M: L.map((a, i) => L.map((b, j) => Math.hypot(a.re, a.im) * Math.hypot(b.re, b.im) / s * F[i][j])) };
 }
 export function createEqualizer() {
@@ -66,7 +67,6 @@ export function createEqualizer() {
       if (eq.birth()) return null;
       const shell = new Map(), w = new Float64Array(EQ_SHELLS);                    // the labels gate: one rate per populated shell
       for (const a of populated) { const n = BASIS[a].n, r = rates ? rates[a] : 1;    // w: the shell populations, else equal over the populated shells
-        if (n > EQ_SHELLS) return { gate: 'the equalizer’s table is seven shells', gamma: null };   // the register stops at n = 7 (never reached)
         if (shell.has(n) && shell.get(n) !== r) return { gate: 'one rate per shell for the equalizer', gamma: null };
         shell.set(n, r); if (pops) w[n - 1] += pops[a]; else w[n - 1] = 1; }
       /* D: the shells the table is solved over — six while n = 7 is empty (the six-shell arithmetic, to the bit), seven once it is populated (the header) */
