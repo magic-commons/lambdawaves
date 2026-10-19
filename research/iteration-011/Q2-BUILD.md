@@ -108,7 +108,11 @@ shot has a `.json` beside it listing every window and every `aria-expanded` with
 - `./test.sh node`: rc 0 (every suite GREEN; `first-run.test — 0 failing of 13`)
 - `node tools/rack-deps.mjs --classes --no-write`: rc 0, THE HINGE HOLDS (spectrum 25/25 unchanged), the app literal is 30 keys (unchanged)
 - `node tools/new-project.mjs --check`: in step (16098 B)
-- browser suites: see "Browser results" below
+- browser suites (LW_PORT 9411, GD_PORT 5411, one at a time): start 3/3 · chem 56/56 (the first pass had one timing RED, L7 glycine
+  1765 ms against a 1638 ms budget, while other rows' Firefoxes were running; a rerun on its own was 0 failing of 56) · curves · export3d ·
+  molecular-names · offer 16/16 · stage-text · frame-occlusion · lw-links · molecule-head · register 22/22 · current · history · new-project ·
+  project-formats 5/5 · keyboard-window · menubar: all GREEN.  official-defaults-palette: RED with "vivid is undefined", the known red that
+  is not this row's
 
 ## CLAUDE.md sentences (added after the LOOK paragraph)
 
