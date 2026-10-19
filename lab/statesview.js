@@ -29,9 +29,9 @@
 import { stateName } from './names.js';
 import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, chip } from './mir/kit.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
-import { paintStroke, fillButton } from './paint-stroke.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
-import { GROUND, AU_TIME_AS, createStatesModel, slerpCoefficients, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
+import { GROUND, AU_TIME_AS, createStatesModel, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 
 const TAU = 2 * Math.PI;
 export const LANE_CAP = 8;                         // eight modulation slots (reg.amp1…8, reg.ph1…8): S₀ + seven states
@@ -55,7 +55,7 @@ export function createStates(host, api) {
   let sol = null, ladder = null, model = null, on = false, active = api.active ? !!api.active() : true, shown = true;
   let version = 0, pushedT = NaN, pushedV = -1, selected = GROUND, wanted = null, unsub = null, ladderSeq = 0, ladderRefused = null;   // S4c-VERIFY N5: the worker's refusal sentence outlives a press
   let armed = 0;                                   // 0.5.3 M3: ON wished while the ladder is out — 1 a restore's, 2 a hand's; the ladder's landing (fetchLadder) re-arms
-  let view = 'change', ref = 'ground', brightOnly = true, morphOn = false, morphS = 0, storeA = null, storeB = null;
+  let view = 'change', ref = 'ground', brightOnly = true;
   const lanes = new Map();                         // key → { amp, phase, mute, solo }; GROUND first, then ascending K
   const pending = new Set();                       // state keys whose vectors are on their way from the worker
   const product = { kind: 'signed', matrix: null, view: 'real', hash: null, solution: 0 };
@@ -90,20 +90,16 @@ export function createStates(host, api) {
   { const o = el('option', '', presetSel, 'PRESET…'); o.value = ''; for (const p of PRESETS) { const q = el('option', '', presetSel, p); q.value = p; } }
   presetSel.addEventListener('change', () => { const p = presetSel.value; presetSel.value = ''; if (p && preset(p) && api.announce) api.announce(p); });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
   const brightBtn = el('button', 'trig on', bar); brightBtn.type = 'button'; brightBtn.textContent = 'BRIGHT'; brightBtn.title = 'The ladder shows the bright valence states only, or every state';
-  const aBtn = el('button', 'trig', bar); aBtn.type = 'button'; aBtn.textContent = '→ A'; aBtn.title = 'Store this register as A';
-  const bBtn = el('button', 'trig', bar); bBtn.type = 'button'; bBtn.textContent = '→ B'; bBtn.title = 'Store this register as B';
-  const morphSw = sw({ label: 'MORPH', value: false, title: 'Play the normalised path from A to B instead of the lanes — a performance path, not dynamics', onChange: (v) => setMorph(v, morphS) });
-  const mrow = el('div', 'row tight reg-morph', host); mrow.appendChild(morphSw.root);
-  const morphK = knob({ label: '<m>A ↔ B</m>', aria: 'morph A to B', min: 0, max: 1, value: 0, fmt: (v) => v.toFixed(3),
-    title: 'Where on the path from A (0) to B (1) the register plays; for orthogonal stores this is cos/sin, hydrogen’s TRANSITION envelope',
-    onInput: (v) => { if (hand('reg.morph', v)) return; setMorph(morphOn, v); } });   // iteration 007 (MIR check B2): routed, the hand moves the base
-  mrow.appendChild(morphK.root);
+  const mrow = el('div', 'row tight reg-morph', host);
+  /* A ↔ B (register-morph.js, one for both panes): its own target `reg.morph`; a store asks the worker for its states' vectors */
+  const M = createMorph({ bar, row: mrow, id: 'reg.morph', key: 'key', lanes: 'lanes', hand, status, rows: () => rowsEl,
+    knobTitle: 'Where on the path from A (0) to B (1) the register plays; for orthogonal stores this is cos/sin, hydrogen’s TRANSITION envelope',
+    valid: (k) => k >= GROUND && !!ladder && k < ladder.count, snapshot: () => snapshot(),
+    stored: (S) => { request([...S.keys()]); touch(); refresh(); }, changed: () => { touch(); refresh(); api.repaint(); } });
 
   const rowsEl = el('div', 'sp-rows', host);
   hideBtn.addEventListener('click', () => { rowsEl.hidden = !rowsEl.hidden; hideBtn.classList.toggle('on', rowsEl.hidden); });
   brightBtn.addEventListener('click', () => { brightOnly = !brightOnly; brightBtn.classList.toggle('on', brightOnly); brightBtn.textContent = brightOnly ? 'BRIGHT' : 'ALL'; paint(); });
-  aBtn.addEventListener('click', () => store('A'));
-  bBtn.addEventListener('click', () => store('B'));
 
   const vr = el('div', 'row tight', host);
   const viewSeg = seg({ label: 'VIEW', value: 'change', options: [{ id: 'change', label: 'CHANGE' }, { id: 'density', label: 'DENSITY' }],
@@ -274,7 +270,7 @@ export function createStates(host, api) {
   /** what plays: the lanes (masked by MUTE and SOLO), or the A → B path when MORPH is up */
   function playing() {
     evalList.length = 0;
-    if (morphOn && storeA && storeB) { for (const [key, c] of slerpCoefficients(storeA, storeB, morphS)) evalList.push({ key, re: c.re, im: c.im }); return evalList; }
+    const path = M.path(); if (path) { for (const [key, c] of path) evalList.push({ key, re: c.re, im: c.im }); return evalList; }
     let anySolo = false; for (const c of lanes.values()) if (c.solo) anySolo = true;
     for (const [key, c] of lanes) {
       if (c.mute || (anySolo && !c.solo) || !(c.amp > 0)) continue;
@@ -283,19 +279,6 @@ export function createStates(host, api) {
     return evalList;
   }
   function snapshot() { const M = new Map(); for (const [key, c] of lanes) if (c.amp > 0) M.set(key, { re: c.amp * Math.cos(c.phase), im: c.amp * Math.sin(c.phase) }); return M; }
-  function store(which) {
-    const M = snapshot(); if (!M.size) return false;
-    if (which === 'A') { storeA = M; aBtn.classList.add('on'); } else { storeB = M; bBtn.classList.add('on'); }
-    request([...M.keys()]); touch(); refresh(); return true;
-  }
-  function setMorph(v, s) {
-    morphS = Math.min(1, Math.max(0, Number.isFinite(s) ? s : morphS));
-    const want = !!v && !!storeA && !!storeB;
-    if (v && !want) status('MORPH needs both stores: → A, change the register, → B', 'warn');
-    morphOn = want; morphSw.set(morphOn); if (morphK.get() !== morphS) morphK.set(morphS);
-    rowsEl.classList.toggle('reg-morphing', morphOn);
-    touch(); refresh(); api.repaint(); return morphOn;
-  }
   function setFlow(v) {
     flowOn = !!v && !!model && !!sol; flowSw.set(flowOn);
     if (flowOn && !flow) { flow = createFlow(sol.shells, api.balance); flow.setSource(flowSrc); flowRe = new Float64Array(model.n * model.n); flowIm = new Float64Array(model.n * model.n); flowEpoch++; }
@@ -408,7 +391,7 @@ export function createStates(host, api) {
     if (want && !drive.on) {
       if (!on) api.one(true, true);                        // a hand asking for this register: the one switch, VIEW REGISTRY, this pane
       if (!on && !claim(true)) { driveSw.set(false); return false; }
-      if (morphOn) setMorph(false, morphS);
+      if (M.on) M.set(false, M.s);
       drive.on = true; drive.last = null; drive.ready = false; drive.dirty = false; driveSw.set(true);
       rowsEl.classList.add('reg-driven'); refSeg.root.classList.add('off');
       initDrive(now());
@@ -593,13 +576,13 @@ export function createStates(host, api) {
     roSum.setSub(`${lanes.size} of ${LANE_CAP} lanes · ${ladder.count} states in the ladder · the field always plays b/‖b‖`);
     const dl = drive.on && drive.last ? drive.last : null;                        // under the DRIVE the beats are those of the driven populations
     const list = (dl ? keys().map((key) => ({ key, energy: energyOf(key), amp: Math.sqrt(Math.max(0, key === GROUND ? dl.p0 : dl.pops[key])) }))
-      : morphOn && storeA && storeB ? [...slerpCoefficients(storeA, storeB, morphS)].map(([key, c]) => ({ key, energy: energyOf(key), amp: Math.hypot(c.re, c.im) }))
+      : M.path() ? [...M.path()].map(([key, c]) => ({ key, energy: energyOf(key), amp: Math.hypot(c.re, c.im) }))
       : keys().filter((k) => !lanes.get(k).mute).map((key) => ({ key, energy: energyOf(key), amp: lanes.get(key).amp })));
     const beats = beatsOf(list), b = beats[0];
     roBeat.set(b ? `${b.period.toFixed(3)} a.u. = ${(b.period * AU_TIME_AS).toFixed(1)} as` : '—', b ? 'ok' : '');
     roBeat.setSub(b ? `${label(b.a)} × ${label(b.b)} · ΔE ${b.dE.toFixed(6)} Eh` + (beats.length > 1 ? ` · ${beats.length - 1} more beat${beats.length > 2 ? 's' : ''}` : '') : 'one level has no beat: add a state');
     const why = refusal();
-    status(on ? `REGISTRY · STATES · ${morphOn ? 'MORPH A ↔ B' : lanes.size + ' lane' + (lanes.size === 1 ? '' : 's')} · ${LAW}`
+    status(on ? `REGISTRY · STATES · ${M.on ? 'MORPH A ↔ B' : lanes.size + ' lane' + (lanes.size === 1 ? '' : 's')} · ${LAW}`
       : why ? 'REGISTRY off — ' + why : `${ladder.count} states · VIEW REGISTRY plays the many-electron state`, on ? 'live' : why ? 'warn' : 'ok');
   }
   function paintMu(t) {
@@ -709,7 +692,7 @@ export function createStates(host, api) {
     if (!fresh) return;
     ladder = null; model = null; flow = null; flowOn = false; flowSw.set(false); fr.hidden = true; pending.clear(); rows.forEach((L) => L.root.remove()); rows.clear();
     lanes.clear(); lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false }); selected = GROUND;
-    storeA = storeB = null; aBtn.classList.remove('on'); bBtn.classList.remove('on'); morphOn = false; morphSw.set(false); trailN = 0; trailAt = 0;
+    M.reset(); trailN = 0; trailAt = 0;
     pushedT = NaN; pushedV = -1; touch();
     if (drive.on) { drive.on = false; drive.seq++; drive.busy = false; drive.last = null; driveSw.set(false); rowsEl.classList.remove('reg-driven'); }
     if (on) { claim(false); armed = 2; }                                         // 0.5.3 M3: no auto-off — it stands by for the new ladder, which re-arms it
@@ -753,8 +736,6 @@ export function createStates(host, api) {
   function setShown(v) { shown = !!v; if (shown) { paint(); paintScope(); refresh(); } }
 
   /* ── the record ───────────────────────────────────────────────────────────────────────────────── */
-  const packStore = (M) => (M ? [...M].map(([key, c]) => ({ key, re: c.re, im: c.im })) : null);
-  const unpackStore = (a) => { if (!Array.isArray(a) || !a.length) return null; const M = new Map(); for (const e of a) { const key = Math.round(e && e.key); if (Number.isFinite(key) && key >= GROUND && ladder && key < ladder.count) M.set(key, { re: +e.re || 0, im: +e.im || 0 }); } return M.size ? M : null; };
   function applyRecord(r, parked) {
     lanes.clear(); if (parked || !emptyLanes(r)) lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false });
     for (const e of (Array.isArray(r.lanes) ? r.lanes : [])) {
@@ -764,17 +745,15 @@ export function createStates(host, api) {
       if (key !== GROUND && Number.isFinite(e.omega) && Math.abs(e.omega - ladder.omega[key]) > 1e-6) continue;
       lanes.set(key, { amp: Math.max(0, Math.min(1, Number.isFinite(e.amp) ? e.amp : 0.45)), phase: ((((+e.phase || 0) % TAU) + TAU) % TAU), mute: !!e.mute, solo: !!e.solo });
     }
-    storeA = unpackStore(r.A); storeB = unpackStore(r.B); aBtn.classList.toggle('on', !!storeA); bBtn.classList.toggle('on', !!storeB);
-    if (storeA) request([...storeA.keys()]); if (storeB) request([...storeB.keys()]);
+    M.load(r); if (M.A) request([...M.A.keys()]); if (M.B) request([...M.B.keys()]);
     view = r.view === 'density' ? 'density' : 'change'; ref = r.ref === 'mean' ? 'mean' : 'ground'; viewSeg.set(view); refSeg.set(ref);
-    morphS = Math.min(1, Math.max(0, +r.morph || 0)); morphK.set(morphS); morphOn = !!r.morphOn && !!storeA && !!storeB; morphSw.set(morphOn);
     if (r.flow !== undefined) setFlow(!!r.flow);
     setFlowSource(r.flowSource);
     if (r.drive) { for (const k of ['pol', 'envelope', 'duration', 'omega', 'e0', 'phase']) if (r.drive[k] !== undefined) setDriveParam(k, r.drive[k]); wK.set(drive.omega); eK.set(drive.e0); durK.set(drive.duration); }
     selected = GROUND;
   }
   function save() {
-    return { on: api.want(), view, ref, flow: flowOn, ...(flowSrc === 'balanced' && { flowSource: flowSrc }), morph: morphS, morphOn, A: packStore(storeA), B: packStore(storeB),
+    return { on: api.want(), view, ref, flow: flowOn, ...(flowSrc === 'balanced' && { flowSource: flowSrc }), ...M.save(),
       drive: { pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, phase: drive.phase },   // the knobs, never the run: a project opens paused and undriven
       lanes: keys().map((key) => { const c = lanes.get(key); return { key, omega: key === GROUND || !ladder ? 0 : ladder.omega[key], amp: c.amp, phase: c.phase, mute: c.mute, solo: c.solo }; }), ...(song.meta && { song: { ...song.meta } }) };
   }
@@ -801,21 +780,21 @@ export function createStates(host, api) {
     update, setActive, setShown, paint, refresh, claim,
     get on() { return on; }, setOn: (v, hand) => api.one(v, hand), get songOn() { return song.on; },
     setFlow, setFlowSource, get flowOn() { return flowOn; }, get flowEpoch() { return flowEpoch; }, flowSource() { return flow; },
-    select, deselect, toggle, clear, fill, norm, setAmp, setPhase, preset, play, store, setMorph, setView, setRef, setDrive, setDriveParam, tune,
+    select, deselect, toggle, clear, fill, norm, setAmp, setPhase, preset, play, store: (w) => !!M.store(w), setMorph: (v, s) => M.set(v, s), setView, setRef, setDrive, setDriveParam, tune,
     get drive() { return { on: drive.on, ready: drive.ready, pol: drive.pol, omega: drive.omega, e0: drive.e0, envelope: drive.envelope, duration: drive.duration, last: drive.last ? { t: drive.last.t, p0: drive.last.p0, norm: drive.last.norm, steps: drive.last.steps, lag: drive.last.lag, pops: drive.last.pops } : null }; },
-    get view() { return view; }, get ref() { return ref; }, get morph() { return morphS; }, get morphOn() { return morphOn; },
+    get view() { return view; }, get ref() { return ref; }, get morph() { return M.s; }, get morphOn() { return M.on; },
     /* the eight modulation slots: lane order, present-only */
-    knobs: { morph: () => morphK, driveW: () => wK, driveE: () => eK, pop: (i) => { const L = rows.get(slotKey(i)); return L ? L.pop : null; }, ph: (i) => { const L = rows.get(slotKey(i)); return L ? L.ph : null; } },
+    knobs: { morph: () => M.knob, driveW: () => wK, driveE: () => eK, pop: (i) => { const L = rows.get(slotKey(i)); return L ? L.pop : null; }, ph: (i) => { const L = rows.get(slotKey(i)); return L ? L.ph : null; } },
     slotAmp: (i) => { const c = lanes.get(slotKey(i)); return c ? c.amp * c.amp : 0; },
     setSlotAmp(i, v) { const k = slotKey(i); if (k === undefined) return; const c = lanes.get(k); c.amp = Math.sqrt(Math.max(0, Math.min(1, v))); touch(); },
     slotPhase: (i) => { const c = lanes.get(slotKey(i)); return c ? c.phase : 0; },
     setSlotPhase(i, v) { const k = slotKey(i); if (k === undefined) return; lanes.get(k).phase = ((v % TAU) + TAU) % TAU; touch(); },
-    setMorphValue(v) { morphS = Math.min(1, Math.max(0, v)); touch(); },
+    setMorphValue(v) { M.setValue(v); touch(); },
     ladder() { return ladder ? { count: ladder.count, omega: ladder.omega, f: ladder.f, mu: ladder.mu, size: ladder.size, cluster: ladder.cluster, pivot: ladder.pivot } : null; },
     state() {
       const list = keys().map((key) => { const c = lanes.get(key); return { key, label: label(key), omega: energyOf(key), amp: c.amp, phase: c.phase, mute: c.mute, solo: c.solo, ready: model ? model.has(key) : false }; });
       const b = ladder ? beatsOf(list.map((l) => ({ key: l.key, energy: l.omega, amp: l.amp })))[0] : null;
-      return { on, view, ref, morphOn, morph: morphS, hasA: !!storeA, hasB: !!storeB, lanes: list, sum: sum2(), count: ladder ? ladder.count : 0,
+      return { on, view, ref, morphOn: M.on, morph: M.s, hasA: !!M.A, hasB: !!M.B, lanes: list, sum: sum2(), count: ladder ? ladder.count : 0,
         beat: b ? { period: b.period, dE: b.dE, attoseconds: b.period * AU_TIME_AS } : null,
         dipole: model ? [...model.state.dipole] : null, excited: model ? model.state.excited : null, scale: model ? model.state.scale : null,
         trail: trailN, refusal: refusal(), status: statusText, law: LAW, hash: sol ? sol.hash : null, pending: pending.size };
