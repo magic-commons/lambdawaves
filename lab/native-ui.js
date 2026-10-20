@@ -17,6 +17,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   // Shape and finish compose without multiplying the number of style buttons.
   const finish=seg({label:'FINISH',value:mat.finish||'lit',options:[{id:'lit',label:'LIT'},{id:'glass',label:'GLASS'},{id:'matte',label:'MATTE'}],onChange:v=>{mat.finish=v;repaint();}});
   ui.styleSeg.root.after(finish.root);ui.finishSeg=finish;
+  for(const k of ['styleSeg','finishSeg']){const l=ui[k].root.querySelector('.k-lbl');if(l)l.remove();}   // iteration 012 R3 (Josh 10-20): the words STYLE and FINISH go; the buttons say what they are
   const syncFinish=()=>{const matte=finish.button('matte'),glass=finish.button('glass');
     matte.disabled=![1,3,6,8].includes(mat.style);matte.title=matte.disabled?'This shape has no surface lighting to remove':'Unlit surface colour';
     glass.disabled=mat.style===6||mat.style===8;glass.title=glass.disabled?(mat.style===8?'SHELL ±':'SHELL')+' already uses translucent glass':'Use a translucent highlighted finish';

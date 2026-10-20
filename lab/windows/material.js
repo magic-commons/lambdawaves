@@ -62,11 +62,13 @@ export function createMaterial(app) {
        switch with its lamp (off = the full volume) and the kind CLIP | SLAB beside it, shown while on; the kind is remembered across an off.
        `mat.slice.mode` keeps 0 · 1 · 2, and `ui.sliceModeSeg` keeps the seg's get / set ('off' · 'clip' · 'slab') for restore and undo. */
     const SLICE_MODE = { off: 0, clip: 1, slab: 2 }; let sliceKind = 'clip';
-    const sliceShow = (v) => { if (v !== 'off') sliceKind = v; clipSw.set(v !== 'off'); kindSeg.set(sliceKind); kindSeg.root.style.visibility = v === 'off' ? 'hidden' : ''; kindSeg.root.inert = v === 'off'; };   // hidden in its seat: the row never moves
+    /* iteration 012 R3 (Josh 10-20: "Have On, Clip, Slab and the two knobs on the same row … Don't let Clip and Slab disappear when clip window is off"):
+       CLIP | SLAB stays shown while off (dimmed, the remembered kind lit), and a press on either turns CLIP on with that kind */
+    const sliceShow = (v) => { if (v !== 'off') sliceKind = v; clipSw.set(v !== 'off'); kindSeg.set(sliceKind); kindSeg.root.classList.toggle('clip-kind-off', v === 'off'); };
     const clipSw = sw({ label: 'ON', value: false, cls: 'clip-on', title: 'CLIP on: cut the volume by the plane (CLIP) or keep a slab about it (SLAB); off draws the full volume',
       onChange: (on) => { const v = on ? sliceKind : 'off'; sliceShow(v); mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
     const kindSeg = seg({ aria: 'clip kind', value: 'clip', options: [{ id: 'clip', label: 'CLIP', title: 'draw the half of the volume beyond the plane' }, { id: 'slab', label: 'SLAB', title: 'draw a slab THICK wide about the plane' }],
-      onChange: (v) => { sliceKind = v; mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
+      onChange: (v) => { sliceShow(v); mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
     ui.sliceModeSeg = { root: clipSw.root, kind: kindSeg, get: () => (clipSw.get() ? sliceKind : 'off'), set: sliceShow };
     r3.appendChild(clipSw.root); r3.appendChild(kindSeg.root); sliceShow('off');
     ui.sliceAxisSeg = seg({ aria: 'slice axis', value: 'z', options: [{ id: 'x', label: 'X' }, { id: 'y', label: 'Y' }, { id: 'z', label: 'Z' }], onChange: (v) => { mat.slice.axis = { x: 0, y: 1, z: 2 }[v]; delete mat.slice.normal; schedule(TIER.PRESENT); } });
@@ -107,12 +109,15 @@ export function createMaterial(app) {
        and the selected stop's angle shown twice from showArg — a reader under ROTATE (CSS hides the knob's "turn") and a float over the stop (radians; degrees on hover).
        It watches the ARG ψ field (hidden) because that field is repainted on every select, edit and app pull, which `ramp.set` alone does not see. */
     const verbs = rv.root.querySelector('.mir-ramp-verbs'), argRo = readout({ label: 'STOP ANGLE' }), argFloat = el('i', 'pal-float', rv.strip);
-    rowOn.appendChild(rv.root.querySelector('.mir-ramp-reset'));
-    /* iteration 001 (Josh): RESET is a glyph and the selected stop's swatch and × join this row — one row fewer */
-    chip(rowOn.lastElementChild, 'undo', 'RESET'); rowOn.appendChild(rv.root.querySelector('.mir-ramp-sel'));
-    const resetEl = rowOn.querySelector('.mir-ramp-reset'); verbs.querySelector('.k').appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
+    /* iteration 001 (Josh): RESET is a glyph.  Iteration 012 R3 (Josh 10-20: "move the Invert and color & delete controls to the bottom and move
+       the 'reload' and 'Reverse' to the top … and vice versa"; "Make 'Add' a plus sign icon"): the top row is PALETTE · RELOAD (the kit's RESET,
+       "reload the chosen preset") · REVERSE; the bottom row is ADD (the plus icon) · INVERT · the selected stop's swatch and × · ROTATE */
+    const resetEl = rv.root.querySelector('.mir-ramp-reset'), [addEl, revEl] = verbs.querySelectorAll(':scope > .trig'), rotEl = verbs.querySelector(':scope > .k');
+    chip(resetEl, 'undo', 'RELOAD'); rowOn.append(resetEl, revEl);
+    rotEl.appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
     ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
-    rowOn.insertBefore(ui.invertSw.root, resetEl); verbs.appendChild(resetEl);   // iteration 002 (Josh): INVERT in the PALETTE row, RESET where INVERT stood
+    verbs.insertBefore(ui.invertSw.root, rotEl); verbs.insertBefore(rv.root.querySelector('.mir-ramp-sel'), rotEl);
+    addEl.classList.add('pal-add'); addEl.replaceChildren(el('span', 'lw-icon lw-icon-plus')); addEl.setAttribute('aria-label', 'ADD — a stop opposite the selected one');
     const showArg = () => { const s = rv.stops()[rv.selected()]; if (!s) return; argRo.set(argFloat.textContent = ang(s.at)); argRo.root.title = argFloat.title = ((2 * s.at - 1) * 180).toFixed(1) + '°'; argFloat.style.setProperty('--at', s.at); };
     new MutationObserver(showArg).observe(gp.querySelector('.mir-ramp-at'), { childList: true, characterData: true, subtree: true }); showArg();
     el('div', 'note', gp).innerHTML = '<b>Phase palette.</b> The strip runs from arg ψ = −π to +π and wraps at the seam. Tap the strip to add a stop, drag one to move it, drag it off the strip to remove it. OKLab blending keeps transitions perceptually even.';
@@ -144,6 +149,13 @@ export function createMaterial(app) {
       gc.querySelector(':scope > .grp-lbl')?.remove();
       for (const c of ['.cam-pan', '.cam-scales', '.cam-hand']) { const n = q(c); if (n) more.appendChild(n); }
       const v = q('.cam-verbs'); (v || more).appendChild(ui.camLockSw.root); if (v) v.dataset.n = String(v.children.length); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
+    /* iteration 012 R3 (Josh 10-20: "Remove text that says 'control' and 'direction' in camera … Increase the size of the 3D thingy while moving Zoom
+       and FOV under 'YAW' and 'PITCH' … Rename 'Hand' to 'Controls'"): the kit's two labels leave its DOM, ZOOM · FOV join the sphere's knob column
+       under YAW · PITCH (the view row empties and goes), and skin.css draws the sphere bigger; the panel's own file is untouched */
+    { const R = gc.querySelector('.mir-camera'), side = R.querySelector('.mir-camsphere-side'), view = R.querySelector(':scope > .cam-view');
+      R.querySelector('.cam-mode .k-lbl')?.remove(); R.querySelector('.mir-camsphere > .k-lbl')?.remove();
+      if (side && view) { side.append(...view.children); view.remove(); }
+      const t = R.querySelector('.cam-hand .cam-title'); if (t) { t.textContent = 'CONTROLS'; t.dataset.t = 'CONTROLS'; } }
     el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt(+Shift)+Drag, two fingers or the PAN pad slide the picture 1:1 (Shift does not make the pan finer); the molecule stays the pivot. Double-click, double-tap or HOME restores the camera.';
   }
   return { wObs, wPal, wCam, wClip, createDrawClipPaletteCamera };
