@@ -28,3 +28,4 @@ round, newest first; an item leaves this list when an adopted MIR release carrie
 - **RENDER › FILES is a closed disclosure with no caret**, so SAVE AS ZIP… / OPEN ZIP… hide behind a bare heading (kit CSS). (files polish 1)
 - **Opening the same ZIP again adds a copy each time** (ZIPPED 2, ZIPPED 3) while a `.json` import of the same content dedupes. (files polish 2)
 - **The FLASH GUARD's sentence shows only in METERS**, which ships closed, so a held picture gives no visible reason. (modulation polish 1)
+- **The glyph table takes no app SVG, and a MENUBAR row takes no glyph**: the rack's + list draws only `glyph.js` names, so λWAVES paints ATOMS / MOLECULES' icons with CSS masks over `.mb-item[data-win]`, and WINDOW › PICKER (a menubar row, no `data-*` hook) cannot wear `library.svg` at all. The kit could take `registerGlyph(name, svg)` and a row glyph in `createMenubar`. (iteration 012 I1)

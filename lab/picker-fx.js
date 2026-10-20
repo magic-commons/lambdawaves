@@ -97,6 +97,7 @@ export function swapLine(host, make) {
   const prev = host.querySelector('.mm-line');
   const a = prev && prev.childNodes.length ? animate(prev, [{ opacity: 0, translate: '0 -18px' }], T.titleSwap) : null;
   if (!a) { if (prev) prev.remove(); return build(host, w); }
+  a.effect.updateTiming({ fill: 'both' });   // iteration 012 L2: the leaving line HOLDS its end (gone) until it is removed — it used to snap back for a frame and flash
   w.leaving = true; prev.classList.add('out');
   const next = () => { prev.remove(); w.leaving = false; build(host, w); };
   a.finished.then(next, next);

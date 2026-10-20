@@ -913,7 +913,8 @@ export async function boot(dom) {
      could not be reached (IT004-MIR15-GAP §0 item 5).  `onAccept` runs at once when the notice is not up (a returning visitor, a driver). */
   const pickerAtBoot = !linkAtBoot.opened && !q.get('preset') && q.get('menu') !== '0' && (navigator.webdriver !== true || q.get('menu') === '1' || q.get('opener') === '1' || q.get('warn') === '1');   // a test driver goes straight in (as the opener's law was); ?menu=1, ?opener=1 or ?warn=1 (a human start, played) shows it there
   createPicker(app, { open: false });
-  dom.start.warning.onAccept(() => { if (pickerAtBoot && app.state.picker) app.state.picker.open(); });
+  const firstRun = dom.start.warning.open;   // iteration 012 L3: a reader who has just read the notice meets the MOLECULAR deck, with THE ENTRANCE
+  dom.start.warning.onAccept(() => { if (pickerAtBoot && app.state.picker) app.state.picker.open(firstRun ? { first: true } : undefined); });
   /* the fragment is a live address, not only a start.  WAVE 133 (found by its verifier; the hole is wave 56's): a link pasted
      over an EDITED session replaced the edit and wiped the undo ring without a question, and over an unedited one left the page
      reading dirty although a reload brings the same scene back clean.  It now asks first, in the house's words, and a link
