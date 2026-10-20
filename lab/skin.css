@@ -658,11 +658,14 @@ body.no-transport-bar #transport { display: none; }
  * durations as custom properties; the iris opens from the home button; reduced motion turns every one of them off. */
 #lwMenu { --ease: cubic-bezier(.22,.7,.25,1); --ease-settle: cubic-bezier(.2,.7,.2,1); --t-relocate: 280ms; --ox: 50%; --oy: 50%;
   position: fixed; inset: 0; z-index: 100000; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
-  color: var(--fg); background: hsl(var(--glass-tint) / .985);
+  color: var(--fg);
   clip-path: circle(0% at var(--ox) var(--oy)); opacity: 0; transition: clip-path .55s var(--ease-settle), opacity .28s ease; }
 #lwMenu.in { clip-path: circle(150% at var(--ox) var(--oy)); opacity: 1; }
 #lwMenu[hidden] { display: none; }
-body.frost #lwMenu { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: blur(28px) saturate(1.25); backdrop-filter: blur(28px) saturate(1.25); }
+/* THE PICKER'S SURFACE is its class `.lw-menu`, so another pane can wear it (iteration 012 R4: the palette preset list, material.js); the
+   second selector out-ranks the refractive `.glass` veil and frost above (0,3,1) for a kit pane that carries .glass */
+.lw-menu { background: hsl(var(--glass-tint) / .985); }
+body.frost .lw-menu, body.frost[data-card] .lw-menu.glass { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: blur(28px) saturate(1.25); backdrop-filter: blur(28px) saturate(1.25); }
 body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #transport { visibility: hidden; opacity: 0; }   /* opacity too: the kit's block sets its own visibility */
 #lwMenu *, #lwMenu *::before, #lwMenu *::after { outline: none; border: 0; box-shadow: none; }
 #lwMenu button { background: none; color: inherit; font: inherit; padding: 0; cursor: pointer; }
@@ -851,3 +854,8 @@ body .mir-modwindow .m2pick { background-color: hsl(var(--glass-tint) / .94); } 
 .native-clean[data-id="palette"] .mir-ramp-verbs > .mir-ramp-sel { flex: 0 0 auto; }
 /* WAVE: POSITION | MOMENTUM is hidden while MOLECULES owns the field (inert there: windows/molecules.js) — its row goes with it */
 .native-clean[data-id="observer"] .wave-row-0:not(:has(> :not([hidden]))) { display: none; }
+/* iteration 012 R4 · THE PALETTE DROPDOWN: the Picker's surface (.lw-menu above), short rows, each palette's strip at the right edge */
+.mir-pick.pal-pick { gap: 0; padding: 6px; }
+.mir-pick.pal-pick .mir-pick-i { min-height: 24px; padding: 0 8px; gap: 14px; }
+.mir-pick.pal-pick .pal-strip { flex: 0 0 72px; height: 10px; margin-left: auto; border-radius: 5px; box-shadow: inset 0 0 0 1px hsl(0 0% 50% / .25); }
+@media (pointer: coarse) { .mir-pick.pal-pick .mir-pick-i { min-height: 34px; } }

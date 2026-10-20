@@ -2,7 +2,7 @@
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
 import { el, knob, sw, seg, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT } from '../field.js'; import { planeModel } from '../native-ui.js';
-import { createRampPanel } from '../mir/panels/ramp.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS } from '../mir/palette.js';
+import { createRampPanel } from '../mir/panels/ramp.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
@@ -118,6 +118,17 @@ export function createMaterial(app) {
     ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
     verbs.insertBefore(ui.invertSw.root, rotEl); verbs.insertBefore(rv.root.querySelector('.mir-ramp-sel'), rotEl);
     addEl.classList.add('pal-add'); addEl.replaceChildren(el('span', 'lw-icon lw-icon-plus')); addEl.setAttribute('aria-label', 'ADD — a stop opposite the selected one');
+    /* iteration 012 R4 (Josh 10-20: "the palette window's preset picker ends up being too transparent, make it similar to the main menu and make the
+       vertical gaps waayyy smaller … show the palette as a color strip aligned to the right side of the dropdown menu"): the kit's list pane, as it
+       opens, wears the Picker's surface (`.lw-menu`, skin.css) and short rows, each with its palette's strip at the right; a pane opened upward keeps
+       its foot where the kit placed it */
+    const palPick = () => { const p = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!p || p.classList.contains('lw-menu')) return;
+      const r0 = p.getBoundingClientRect(); p.classList.add('lw-menu', 'pal-pick');
+      for (const b of p.querySelectorAll('.mir-pick-i')) { const P = PALETTE_BY_ID.get(b.dataset.id); if (!P) continue; const st = [...P.stops].sort((a, c) => a.at - c.at);
+        el('i', 'pal-strip', b).style.background = 'linear-gradient(to right in oklab, ' + [...st, { at: 1, rgb: st[0].rgb }].map((q) => rgbToHex(q.rgb) + ' ' + (q.at * 100).toFixed(1) + '%').join(', ') + ')'; }
+      const r1 = p.getBoundingClientRect(); if (p.dataset.dir === 'up') p.style.top = Math.max(8, r0.bottom - r1.height) + 'px';
+      if (r1.right > innerWidth - 8) p.style.left = Math.max(8, innerWidth - 8 - r1.width) + 'px'; };
+    { const n = rv.root.querySelector('.mir-ramp-step .mir-step-name'); if (n) { n.addEventListener('click', palPick); n.addEventListener('keydown', () => queueMicrotask(palPick)); } }
     const showArg = () => { const s = rv.stops()[rv.selected()]; if (!s) return; argRo.set(argFloat.textContent = ang(s.at)); argRo.root.title = argFloat.title = ((2 * s.at - 1) * 180).toFixed(1) + '°'; argFloat.style.setProperty('--at', s.at); };
     new MutationObserver(showArg).observe(gp.querySelector('.mir-ramp-at'), { childList: true, characterData: true, subtree: true }); showArg();
     el('div', 'note', gp).innerHTML = '<b>Phase palette.</b> The strip runs from arg ψ = −π to +π and wraps at the seam. Tap the strip to add a stop, drag one to move it, drag it off the strip to remove it. OKLab blending keeps transitions perceptually even.';
