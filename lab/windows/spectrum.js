@@ -33,7 +33,12 @@ export function createSpectrumCard(app) {
        word · oracle.  A window opens and leaves the Hamiltonian alone; the name reads back what owns the field; CENTRAL and CENTRAL › QUARKONIUM (0.8.0 G1)
        set their operator and open CENTRAL, its editor (an older project restoring `cornell` still lands).  `ui.hamSeg` keeps its name and set(id): persist, the verbs and LAUNCH read it. */
     const SYS = ['hydrogen', 'qho', 'well', 'atom', 'central', 'cornell', 'separable', 'molecules', 'lattice'].map((id) => CATALOGUE.find((r) => r.id === id)), tip = (r) => r.word + ' · ' + r.oracle.what;
-    const sys = stepper({ label: 'SYSTEM', items: SYS.map((r) => ({ id: r.id, label: r.name.split(' ·')[0] })), value: 'hydrogen', cls: 'mol-step', onChange: (v) => {
+    /* 013 H2 · THE WINDOWS THAT FOLLOW THE SYSTEM: the window a system opened closes when the stepper leaves it — only one this stepper
+       opened (a window already open by hand stays); MOLECULES' card is the mode and never closes here; BOX opens no window.  It closes by the card's own ✕ (the rack's close(id), no new hinge) */
+    const WIN = { central: 'central', cornell: 'central', separable: 'separable', lattice: 'lattice', atom: 'atoms' }, dev = (id) => document.querySelector('.dev[data-id="' + id + '"]'), isOpen = (id) => { const d = dev(id); return !!d && !d.hidden && !d.classList.contains('closed'); };
+    let opened = null;
+    const sys = stepper({ aria: 'SYSTEM', items: SYS.map((r) => ({ id: r.id, label: r.name.split(' ·')[0] })), value: 'hydrogen', cls: 'mol-step', onChange: (v) => {
+      const w = WIN[v]; if (opened && opened !== w) { if (isOpen(opened)) dev(opened).querySelector('.dev-close').click(); opened = null; } if (w && w !== opened) opened = isOpen(w) ? null : w;
       if (v === 'molecules' || v === 'lattice') app.sh.layout.reopen(v === 'molecules' ? 'chem' : v); else { switchHamiltonian(v); if (v === 'central' || v === 'cornell' || v === 'separable') app.sh.layout.reopen(v === 'separable' ? v : 'central'); if (v === 'well') app.w.enterBox(); if (v === 'atom') { app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); } }
       ui.hamSeg.set(getHamiltonian().id); } });
     sys.name.addEventListener('click', () => document.querySelectorAll('.mir-pick-i[data-id]').forEach((b) => { const r = SYS.find((x) => x.id === b.dataset.id); if (r) b.title = tip(r); }));
