@@ -265,8 +265,8 @@ export async function createController(app) {
   /* ── state mutations: ONE road (finger, key, test, restore all come here) ─ */
   app.state.lastNmax = 1;
   function touchState() {
-    const nm = reg.nmax();
-    if (domain.auto && nm !== app.state.lastNmax) { app.state.lastNmax = nm; schedule(TIER.REBUILD); }
+    const key = reg.nmax() + '|' + getHamiltonian().domainFor(reg.nmax(1e-3), reg);   // H1: and the box the rebuild would choose (an ATOM label's own row, a tail crossing 1e-3)
+    if (domain.auto && key !== app.state.lastNmax) { app.state.lastNmax = key; schedule(TIER.REBUILD); }
     else schedule(TIER.RECONSTRUCT);
   }
   /** a preset into the atom register.  `opt.hand` is the PRESS (SPECTRUM's ‹ PRESET › and its re-pick, iteration 008 S): only a hand's preset is

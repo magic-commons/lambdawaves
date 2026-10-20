@@ -348,7 +348,7 @@ an untouched session (ring origin boot/link/resume) takes a waiting build itself
 The banner is MIR's
 `installBanner`, the veil MIR's `bootVeil`, and the wake lock follows THE play.
 
-DOMAIN AUTO on is a project default, not a preference (see the scopes below). DOMAIN AUTO's half under a molecule is max(max|coordinate| + 6, (20/13)(R + 3)), R the farthest nucleus (iteration 012 O1, chemview `framed` at the landing): the visible molecule is at most 65 % of the box at every turn; H₂ and water keep theirs. In
+DOMAIN AUTO on is a project default, not a preference (see the scopes below). DOMAIN AUTO's half under a molecule is max(max|coordinate| + 6, (20/13)(R + 3)), R the farthest nucleus (iteration 012 O1, chemview `framed` at the landing): the visible molecule is at most 65 % of the box at every turn; H₂ and water keep theirs. THE CLIPPED ORBITAL (iteration 013 H1): DOMAIN AUTO's box is `HH.domainFor(reg.nmax(1e-3), reg)`; under the ATOM system (`atomHalf`, lab/hamiltonian.js) it is the larger of the atom's occupied size and the edge `rTab` of every populated row, so a virtual (°) label never clips (the box was the occupied shells' alone since the pre-alpha freeze; hydrogen's law, the march box and the rack's AUTO expression are the pre-library ones unchanged); `touchState` rebuilds whenever that box would move, not only when nmax does; `tools/clip-probe.mjs` takes the pictures. The LOCK holds no ATOM state: 843/0 and 987/0. In
 `lab/field.js`, WAVE density uses palette θ=0; Δρ uses the same ±π/2 pair as
 Re/Im; palette OFF retains the old colors. Keep
 `tests/official-defaults-palette.browser-test.mjs` green when editing either. Since iteration 008 (W) WAVE's OBSERVABLE is
