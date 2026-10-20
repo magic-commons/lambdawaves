@@ -705,7 +705,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-arrow:hover { scale: 1.08; color: var(--acc); } #lwMenu .mm-arrow:active { scale: .94; } #lwMenu .mm-arrow:focus-visible { opacity: 1; color: var(--acc); }
 @media (hover: none) { #lwMenu .mm-arrow { opacity: 1; } }
 #lwMenu .mm-arrow[disabled] { opacity: 0; pointer-events: none; }
-#lwMenu .mm-dots { display: flex; gap: 8px; justify-content: center; align-items: center; min-height: 10px; font-size: 12px; letter-spacing: .14em; font-variant-numeric: tabular-nums; opacity: .8; }
+#lwMenu .mm-dots { display: flex; gap: 8px; justify-content: center; align-items: center; height: 18px; font-size: 12px; letter-spacing: .14em; font-variant-numeric: tabular-nums; opacity: .8; }
 #lwMenu .mm-dots[hidden] { display: none; }
 #lwMenu .mm-dot { width: 7px; height: 7px; border-radius: 4px; background: currentColor; opacity: .28; transition: width 160ms, opacity 160ms; }
 #lwMenu .mm-dot.on { width: 22px; opacity: 1; background: var(--acc); }
@@ -728,9 +728,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-vol-open { display: grid; gap: 7px; justify-items: center; text-align: center; }
 #lwMenu .mm-vol-num { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(52px, 6.4vw, 96px); line-height: .95; letter-spacing: .02em; white-space: nowrap; transition: color 160ms; }
 #lwMenu .mm-vol-open:hover .mm-vol-num, #lwMenu .mm-vol-open:focus-visible .mm-vol-num { color: var(--acc); }
-#lwMenu .mm-vol-title { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; }
 #lwMenu .mm-vol-meta { font-size: 12px; letter-spacing: .08em; opacity: .6; font-variant-numeric: tabular-nums; }
-#lwMenu .mm-vol-blurb { font-size: 13px; line-height: 1.5; opacity: .75; max-width: 32ch; }
 #lwMenu .mm-install { display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: .18em; padding: 4px 12px 4px 4px; border-radius: 999px; font-variant-numeric: tabular-nums; transition: color 120ms; }
 #lwMenu .mm-install:hover, #lwMenu .mm-install:focus-visible { color: var(--acc); }
 #lwMenu .mm-ring-host { position: relative; width: 30px; height: 30px; flex: none; }
@@ -763,9 +761,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
    iteration 008 P's ring · lamp · word, once the deck's heading tile) and THIS DEVICE */
 #lwMenu .mm-cat { display: grid; gap: 14px; justify-items: center; max-width: 1240px; margin-top: 10px; }
 #lwMenu .mm-cat[hidden], #lwMenu .mm-dev[hidden] { display: none; }
-#lwMenu .mm-cat-h { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 14px; text-align: center; }
-#lwMenu .mm-cat-h b, #lwMenu .mm-dev b { font-weight: 400; font-size: 11px; letter-spacing: .22em; opacity: .55; }
-#lwMenu .mm-cat-h span { font-size: 12px; letter-spacing: .04em; opacity: .5; }
+#lwMenu .mm-dev b { font-weight: 400; font-size: 11px; letter-spacing: .22em; opacity: .55; }
 #lwMenu .mm-cat-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
 #lwMenu .mm-scard { width: 220px; gap: 12px; padding: 22px 16px 16px; box-sizing: border-box; } #lwMenu .mm-scard .mm-vol-meta { white-space: pre-line; line-height: 1.5; }
 #lwMenu .mm-scard-n { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(30px, 2.8vw, 44px); line-height: 1; letter-spacing: .04em; white-space: nowrap; }
@@ -785,6 +781,24 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 @media (prefers-reduced-motion: reduce) {
   #lwMenu { clip-path: none; transition: none; } #lwMenu .mm-pic, #lwMenu .mm-pill, #lwMenu .mm-under, #lwMenu .mm-ring-ink, #lwMenu .mm-arrow, #lwMenu .mm-arrow svg { transition: none; }
   #lwMenu .mm-pic[data-tilt] { transform: none; } #lwMenu .mm-arrow { scale: 1 !important; } }
+/* iteration 012 L1 · THE LIBRARY'S WORDS: SHOW LABELS (one subtle seat under the tabs; its twin in a volume's head where INSTALL was), the
+   formula on every molecule tile when it is on (the name stays the hover's), the atoms' symbol and Z when theirs is; the deck a fixed height —
+   the rows the space holds, filled or not — so a search never moves the head row; the back to the shelf an icon */
+#lwMenu .mm-ico { display: inline-block; flex: none; width: 14px; height: 14px; background: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; }
+#lwMenu .mm-opts { display: flex; justify-content: center; min-height: 22px; margin-top: -4px; }
+#lwMenu .mm-opt { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .22em; padding: 3px 8px; border-radius: 999px; opacity: .38; transition: opacity 140ms, color 140ms; }
+#lwMenu .mm-opt:hover, #lwMenu .mm-opt:focus-visible { opacity: .8; } #lwMenu .mm-opt.on { opacity: .75; color: var(--acc); } #lwMenu .mm-opt[hidden] { display: none; }
+#lwMenu .mm-opt .mm-ico { width: 12px; height: 12px; }
+#lwMenu .mm-vhead .mm-opt { flex: none; white-space: nowrap; font-size: 11px; letter-spacing: .18em; opacity: .55; } #lwMenu .mm-vhead .mm-opt.on { opacity: 1; }
+#lwMenu .mm-back { display: grid; place-items: center; width: 28px; height: 28px; } #lwMenu .mm-back .mm-ico { width: 18px; height: 18px; }
+#lwMenu .mm-lbl { position: absolute; left: 7%; bottom: 5%; max-width: 86%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none;
+  font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: clamp(11px, calc(var(--t) * .1), 18px); line-height: 1;
+  text-shadow: 0 0 5px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); opacity: 0; transition: opacity 200ms ease; }
+#lwMenu.labels-mol .mm-lbl { opacity: .9; } #lwMenu .mm-tile:has(.mm-ph) .mm-lbl { display: none; }
+#lwMenu .mm-el .mm-sym, #lwMenu .mm-el .mm-z { transition: opacity 200ms ease; }
+#lwMenu:not(.labels-atom) .mm-el .mm-sym, #lwMenu:not(.labels-atom) .mm-el .mm-z { opacity: 0; }
+#lwMenu .mm-pages { box-sizing: content-box; height: calc(var(--t) * var(--rows, 2) + var(--gap) * (var(--rows, 2) - 1)); }
+
 /* the way back: the grid glyph left of ATOMS | MOLECULES */
 #lwHome { position: absolute; left: calc(var(--rack-w) + 24px); top: 46px; z-index: var(--z-chrome); width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
   border: 0; border-radius: 8px; background: none; color: var(--fg); opacity: .7; cursor: pointer; }

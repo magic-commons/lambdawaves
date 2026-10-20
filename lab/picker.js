@@ -4,15 +4,16 @@
  * the catalogue in its sections' order, one not yet on this device wearing the kit's download glyph; the pages sized to the screen, ‹ ›
  * beside them) and LIBRARY — the one place for what is kept: THE VOLUMES (lab/volumes.js: VOL. I, VOL. II … — each a card that installs
  * with one press; inside a volume ONE head row — the volume's stepper, the count, its plain tags (two intersect), a search, INSTALL — over
- * its molecules; a one-atom entry opens the ATOM), the catalogue's RECORDS (a card per section — THE SECTION INSTALL, iteration 008 P's,
- * moved out of the MOLECULAR deck) and THIS DEVICE (use, quota, what is kept, persisted).  The pictures are tools/menu-thumbs.mjs' and each
+ * its molecules; a one-atom entry opens the ATOM), a card per catalogue section that keeps files (THE SECTION INSTALL, iteration 008 P's,
+ * moved out of the MOLECULAR deck) and THIS DEVICE's use.  Iteration 012 L1 (Josh: "too much text … concise and not repetitive"): a card
+ * says its count and its install (the size rides in INSTALL / REMOVE), a remove is armed for 600 ms, SHOW LABELS sits under the tabs.  The pictures are tools/menu-thumbs.mjs' and each
  * volume's own (t/<id>.webp).  A hover or a focus moves ONLY the picture (lab/picker-fx.js: the spring tilt and a zoom — no background,
  * no tint), writes the name under the tile, and swaps the large caption at the foot.  A press goes there: ATOMS mode and the element
  * (goAtom), MOLECULES mode and the molecule (chem.pick), or a volume's molecule (chem.openVolume).  THE WAY BACK is instant: the DOM is
  * built once and only shown or hidden — the home button (the iris opens from it), L (keys.js `menu`), WINDOW › PICKER; Escape leaves.
  * FOLDERS (the projects and the demos) has its door at the top left.  It opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
-import { keptSummary, storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
+import { storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
 import { el, chip, mathPlain, stepper } from './mir/kit.js';
 import { CHEM_PRESETS } from './chemview.js';
 import { SECTIONS, GROUPS, RECORD_GROUP } from './molecules.js';
@@ -46,6 +47,22 @@ const volName = (v) => 'VOL. ' + v.numeral;
 const fmtBytes = (b) => (b >= 1e9 ? (b / 1e9).toFixed(b >= 1e10 ? 0 : 1) + ' GB' : b >= 1e6 ? Math.round(b / 1e6) + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' kB');
 const ARROW = (dir) => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="${dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
+/* iteration 012 L1 · the Picker's own PREFERENCE (settings-store.js FAMILIES, never a project or a link): SHOW LABELS for the atoms (on: the symbol
+   and Z, as before) and for the molecules (on: the formula on every tile, the name under it on a hover) */
+const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false };
+const readPrefs = () => { try { return Object.assign({}, PREF0, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (_) { return Object.assign({}, PREF0); } };
+const writePrefs = (p) => { try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (_) { /* a blocked profile keeps it for the visit */ } };
+/** an iteration 012 icon (lab/img/icons/<name>.svg), drawn in currentColor through a CSS mask */
+const icon = (host, name) => { const i = el('i', 'mm-ico', host); i.style.setProperty('--ico', `url(img/icons/${name}.svg)`); i.setAttribute('aria-hidden', 'true'); return i; };
+/** two presses remove (no window.confirm): the first arms the button for 600 ms, or until a press anywhere else, then it repaints (Josh 10-20) */
+function armer(b, repaint) {
+  let t = 0;
+  const off = (e) => { if (!b.contains(e.target)) disarm(); };
+  const stop = () => { clearTimeout(t); t = 0; removeEventListener('pointerdown', off, true); };
+  const disarm = () => { if (!t) return; stop(); repaint(); };
+  return { arm() { stop(); t = setTimeout(disarm, 600); addEventListener('pointerdown', off, true); }, take() { const was = !!t; stop(); return was; } };
+}
+
 export function createPicker(app, { open: openAtBoot = true } = {}) {
   const root = el('div', 'lw-menu', document.body); root.id = 'lwMenu'; root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'the Picker');
   const top = el('div', 'mm-top', root);
@@ -56,6 +73,18 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   fetch('./img/lambdawaves-logo.svg').then((r) => r.text()).then((t) => { logo.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const s = logo.querySelector('svg'); if (s) { s.setAttribute('aria-label', 'λWAVES'); s.setAttribute('role', 'img'); } }).catch(() => { logo.textContent = 'λWAVES'; });
   const tabs = el('div', 'mm-tabs', top), pill = el('i', 'mm-pill', tabs), scroller = el('div', 'mm-scroll', root), caption = el('div', 'mm-caption', root);
   caption.setAttribute('aria-live', 'polite');
+  /* SHOW LABELS (iteration 012 L1): one subtle seat under the tabs, the atoms' switch on ATOMIC and the molecules' elsewhere; the volume's head has its twin */
+  const prefs = readPrefs(), opts = el('div', 'mm-opts', top);
+  let labelBtns = [];
+  const labelToggle = (host, kind) => { const b = el('button', 'mm-opt', host); b.type = 'button'; b.dataset.labels = kind; icon(b, 'labels'); el('span', '', b, 'SHOW LABELS');
+    b.title = kind === 'atomLabels' ? 'the symbol and Z on every element' : 'the formula on every molecule; the name under it on a hover';
+    b.addEventListener('click', () => { prefs[kind] = !prefs[kind]; writePrefs(prefs); paintLabels(); }); labelBtns.push(b); paintLabels(); return b; };
+  function paintLabels() {
+    root.classList.toggle('labels-atom', !!prefs.atomLabels); root.classList.toggle('labels-mol', !!prefs.molLabels);
+    labelBtns = labelBtns.filter((b) => b.isConnected);
+    for (const b of labelBtns) { const on = !!prefs[b.dataset.labels]; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
+  }
+  const atomOpt = labelToggle(opts, 'atomLabels'), molOpt = labelToggle(opts, 'molLabels');
 
   /* ── the caption: the formula (STIX), the name (LW Title), the line under them (an element: its name alone, its valence subshell alone in STIX); R6's swap ── */
   let said = null;
@@ -89,7 +118,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const fill = (k) => { const p = pages[k]; if (!p || p.dataset.full) return; p.dataset.full = '1'; for (let i = k * per; i < Math.min(list.length, (k + 1) * per); i++) make(list[i], p); };
     const near = (k) => { for (let j = k - 1; j <= k + 1; j++) fill(j); };
     function paint() {
-      arrows[0].disabled = page <= 0; arrows[1].disabled = page >= pages.length - 1; foot.hidden = pages.length < 2;
+      arrows[0].disabled = page <= 0; arrows[1].disabled = page >= pages.length - 1; foot.style.visibility = pages.length < 2 ? 'hidden' : '';   // iteration 012 L1: a one-page deck keeps the line, so the head never moves
       if (pages.length <= 16) {
         if (foot.dataset.mode !== 'dots' || foot.childElementCount !== pages.length) {
           foot.textContent = ''; foot.dataset.mode = 'dots';
@@ -112,7 +141,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     function lay() {
       if (root.hidden || !make || !host.getClientRects().length) return;
       const first = page * per, g = size(); per = g.cols * g.rows;
-      for (const e of [pagesEl, host]) { e.style.setProperty('--t', g.t + 'px'); e.style.setProperty('--cols', String(g.cols)); e.style.setProperty('--gap', g.gap + 'px'); }   // the host's: a head row (the LIBRARY's) as wide as the page
+      for (const e of [pagesEl, host]) { e.style.setProperty('--t', g.t + 'px'); e.style.setProperty('--cols', String(g.cols)); e.style.setProperty('--gap', g.gap + 'px'); e.style.setProperty('--rows', String(g.rows)); }   // the host's: a head row (the LIBRARY's) as wide as the page
       pagesEl.textContent = ''; pages = [];
       for (let i = 0; i < Math.max(1, Math.ceil(list.length / per)); i++) pages.push(el('div', 'mm-page', pagesEl));
       page = Math.min(pages.length - 1, Math.floor(first / per)); near(page);
@@ -141,7 +170,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* ── the sections and the tabs (R9: the sliding pill, the approach accent) ── */
   const sections = [['atomic', 'ATOMIC'], ['molecular', 'MOLECULAR'], ['library', 'LIBRARY']].map(([id, label]) => {
     const sec = el('section', 'mm-sec mm-' + id, scroller), b = el('button', 'mm-tab', tabs, label); b.type = 'button';
-    b.addEventListener('click', () => sec.scrollIntoView({ behavior: RM.matches ? 'auto' : 'smooth', block: 'start' }));
+    b.addEventListener('click', () => { if (id === 'library' && current.id === 'library') library.home(); sec.scrollIntoView({ behavior: RM.matches ? 'auto' : 'smooth', block: 'start' }); });
     return { id, sec, b };
   });
   const movePill = (b) => { pill.style.setProperty('--px', b.offsetLeft - 10 + 'px'); pill.style.setProperty('--pw', b.offsetWidth + 20 + 'px'); };
@@ -173,13 +202,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const a = away.get(m.id); if (!a || !a.t.isConnected) return;
     const r = dlRec(m), off = !!r && !have.get(r.hash) && !safariTab();
     a.t.classList.toggle('away', off); a.g.hidden = !off;
-    a.info.sub = off ? `${m.section} · not on this device — a press downloads it (${fmtBytes(r.bytes)})` : m.section;
+    a.info.sub = off ? `${m.section} · a press downloads it (${fmtBytes(r.bytes)})` : m.section;
   }
   const molDeck = deck(sections[1].sec);
   molDeck.set(SECTIONS.flatMap((sec) => secs.get(sec).rows), (m, host) => {
     const info = { formula: mathPlain(m.formula), name: cap(m.name), sub: m.disabled ? m.reason : m.section };
     const t = tile(host, 'mm-mol', info, () => goMolecule(m.id), !!m.disabled);
-    pic(t, './img/menu/' + m.id + '.webp');
+    pic(t, './img/menu/' + m.id + '.webp'); el('b', 'mm-lbl', t, info.formula);
     if (!m.disabled && dlRec(m)) { const g = el('i', 'mm-dl', t); chip(g, 'download', 'not on this device'); g.hidden = true; away.set(m.id, { t, g, info }); paintAway(m); }
   });
 
@@ -188,14 +217,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      (persist() asked once; `n / N · CANCEL` and the ring while it runs, a press then stops after the record in hand) or, pressed twice, removes
      them.  The records' road is library.js keepSection (chemview's too: each record checked against its sha-256 name), and MOLECULES' lamps
      are re-read after (chem.records()). ── */
-  const secLine = (S) => `${S.rows.length} molecules · ` + (S.recs.length ? `${S.recs.length} record${S.recs.length > 1 ? 's' : ''} · ${fmtBytes(S.bytes)} · ${S.n} here` : 'all live');
-  const cardLine = (S) => `${S.rows.length} molecules · ${S.recs.length} record${S.recs.length > 1 ? 's' : ''}\n${fmtBytes(S.bytes)} · ${S.n} here`;   // the card's two lines
+  const cardLine = (S) => `${S.rows.length} molecules`;   // iteration 012 L1: the size rides in the install word, the count of files kept is the ring
   function paintSec(S) {
     const v = S.view; if (!v || !v.b.isConnected) return;
     const N = S.recs.length, all = N > 0 && S.n === N;
     v.meta.textContent = cardLine(S); if (S.busy) return;
     v.b.dataset.state = all ? 'installed' : S.n ? 'partial' : 'absent'; v.b.setAttribute('aria-pressed', String(all)); v.ring.set(N ? S.n / N : 0, all ? 'done' : 'idle');
-    v.word.textContent = all ? 'INSTALLED · REMOVE' : S.n ? `${S.n} / ${N} · INSTALL` : 'INSTALL · ' + fmtBytes(S.bytes);
+    v.word.textContent = all ? 'REMOVE · ' + fmtBytes(S.bytes) : S.n ? `${S.n} / ${N} · INSTALL` : 'INSTALL · ' + fmtBytes(S.bytes);
   }
   /* the store read each time the MOLECULAR deck or the LIBRARY comes into view (the card, a press or the browser may have changed it) */
   async function readStore() {
@@ -206,8 +234,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   async function pressSec(S) {
     if (S.busy) { S.stop = true; return; }   // a press while installing: stop after the record in hand
     if (S.n === S.recs.length) {             // two presses remove: no window.confirm (the volume's law)
-      if (Date.now() - S.arm > 3000) { S.arm = Date.now(); S.view.word.textContent = 'REMOVE ' + S.sec + '? PRESS AGAIN'; return; }
-      S.arm = 0; await keepSection(S.recs, false);
+      if (!S.view.arm.take()) { S.view.arm.arm(); S.view.word.textContent = 'REMOVE ' + S.sec + '? PRESS AGAIN'; return; }
+      await keepSection(S.recs, false);
     } else {
       S.busy = true; S.stop = false; S.view.b.dataset.state = 'busy'; S.view.ring.set(0, 'busy'); S.view.word.textContent = `0 / ${S.recs.length} · CANCEL`;
       await keepSection(S.recs, true, { stop: () => S.stop, onStep: (k, n) => { const w = S.view; if (w && w.b.isConnected) { w.ring.set(k / n, 'busy'); w.word.textContent = `${k} / ${n} · CANCEL`; } } });
@@ -215,43 +243,40 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     await readStore();
     if (app.state.chem && app.state.chem.records) app.state.chem.records().catch(() => {});   // MOLECULES' lamps and its download glyph read the store again
-    if (!S.stop && S.n && S.n < S.recs.length) say({ name: S.sec, sub: `${S.n} of ${S.recs.length} records on this device — the rest did not download (offline?)` });
+    if (!S.stop && S.n && S.n < S.recs.length) say({ name: S.sec, sub: `${S.n} of ${S.recs.length} on this device — the rest did not download (offline?)` });
   }
   function secCard(S, host) {
-    const c = el('div', 'mm-vol mm-scard', host); c.dataset.section = S.sec; c.setAttribute('role', 'group'); c.setAttribute('aria-label', S.sec + ' — ' + secLine(S));
+    const c = el('div', 'mm-vol mm-scard', host); c.dataset.section = S.sec; c.setAttribute('role', 'group'); c.setAttribute('aria-label', S.sec + ' — ' + cardLine(S));
     const h = el('div', 'mm-vol-open', c); el('b', 'mm-scard-n', h, S.sec); const meta = el('span', 'mm-vol-meta', h, cardLine(S));
-    c.addEventListener('pointerenter', () => say({ name: S.sec, sub: secLine(S) }));
     if (safariTab()) return;   // a Safari tab is offered nothing to keep (chemview's own rule)
-    const b = el('button', 'mm-install mm-sinstall', c); b.type = 'button'; b.title = `Every record of ${S.sec} kept on this device: press to install them all, press twice to remove them`;
+    const b = el('button', 'mm-install mm-sinstall', c); b.type = 'button'; b.title = `Keep ${S.sec} on this device: press to install, press twice to remove`;
     const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost); el('i', 'mm-lamp', b); const word = el('span', 'mm-install-word', b);
-    S.view = { b, ring, word, meta }; paintSec(S);
+    S.view = { b, ring, word, meta, arm: armer(b, () => paintSec(S)) }; paintSec(S);
     b.addEventListener('click', (e) => { e.stopPropagation(); pressSec(S); });
   }
 
   /* ── LIBRARY: the shelf of volumes; a volume's molecules by their tags ── */
   const library = (() => {
     const sec = sections[2].sec, shelfEl = el('div', 'mm-shelf', sec), catEl = el('div', 'mm-cat', sec), devEl = el('div', 'mm-dev', sec), view = el('div', 'mm-volview', sec); view.hidden = true;
-    /* iteration 011 Q4: under the shelf, THE CATALOGUE'S RECORDS (a card per section that keeps any — THE SECTION INSTALL) and THIS DEVICE (the
-       store's use and quota, what keepSection and keepData hold, persisted or not); both stand aside while a volume is open */
+    /* iteration 011 Q4: under the shelf, a card per catalogue section that keeps files (THE SECTION INSTALL) and THIS DEVICE (the store's use
+       and quota; iteration 012 L1 cut the heading, the kept counts and the persisted line); both stand aside while a volume is open */
     catEl.hidden = devEl.hidden = true;
     function paintCat() {
-      catEl.textContent = ''; const live = [...secs.values()].filter((S) => !S.recs.length).map((S) => S.sec);
-      const h = el('div', 'mm-cat-h', catEl); el('b', '', h, 'RECORDS'); el('span', '', h, 'the catalogue’s molecules that open from a file, kept a section at a time' + (live.length ? ' · ' + live.join(' and ') + ' solve live' : ''));
+      catEl.textContent = '';
       const row = el('div', 'mm-cat-row', catEl); for (const S of secs.values()) if (S.recs.length) secCard(S, row);
     }
     async function paintDevice() {
       if (!woke) return;
-      const [k, i] = await Promise.all([keptSummary().catch(() => null), storageInfo().catch(() => null)]), size = (b) => (b ? fmtBytes(b) : '0 kB');
+      const i = await storageInfo().catch(() => null), size = (b) => (b ? fmtBytes(b) : '0 kB');
       devEl.textContent = ''; el('b', '', devEl, 'THIS DEVICE');
       const part = (t) => { if (t) el('span', '', devEl, t); };
       part(i && i.usage != null && i.quota ? `${size(i.usage)} of ${size(i.quota)} in use` : '');
-      part(k ? `${k.records.n} record${k.records.n === 1 ? '' : 's'} kept · ${size(k.records.bytes)}` : '');
-      part(k ? `${k.data.n} picture${k.data.n === 1 ? '' : 's'} and files kept · ${size(k.data.bytes)}` : '');
-      part(!i ? '' : i.persisted ? 'persisted: the browser keeps it' : i.safariTab ? 'a Safari tab: kept until the browser clears it — add λWAVES to the Home Screen to keep it' : i.persisted === false ? 'not persisted: the browser may clear it under pressure' : '');
+      part(i && i.safariTab ? 'add λWAVES to the Home Screen to keep it' : '');
     }
     /* iteration 008 P (Josh: "less of the stuff on top … much tighter, and more molecules shown per page"): the volume's head is ONE row —
-       ‹ LIBRARY · the kit's stepper ‹ VOL. I › (its title and size on its hover) · the count · the tags on one line that scrolls sideways
-       (the wheel turns it) · the search · INSTALL / OPEN FILE… with its ring — and the deck below measures its tile from what is left */
+       ‹ (back to the shelf) · the kit's stepper ‹ VOL. I › (its size on its hover) · the count · the tags on one line that scrolls sideways
+       (the wheel turns it) · the search · SHOW LABELS (iteration 012 L1: INSTALL / REMOVE live on the shelf's card only) — and the deck below
+       measures its tile from what is left */
     const vhead = el('div', 'mm-vhead', view), vdeck = deck(view);
     let woke = false, cur = null, vols = [], mols = [], on = new Set(), query = '', tagsEl = null, countEl = null;
     /* a volume with an `index` installs from the network (INSTALL); one without is a file the reader downloads once (OPEN FILE…, or a drop) */
@@ -260,13 +285,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost), word = el('span', 'mm-install-word', b);
       const fromFile = !v.index, size = fromFile ? v.archive.bytes : v.bytes, pick = fromFile ? el('input', '', host) : null;
       if (pick) { pick.type = 'file'; pick.accept = '.lwv'; pick.hidden = true; pick.addEventListener('change', () => { const f = pick.files && pick.files[0]; pick.value = ''; if (f) run(f); }); }
-      let ctl = null, arm = 0;
+      let ctl = null; const arm = armer(b, () => paint());
       const paint = async () => {
         const s = await V.statusOf(v.id).catch(() => ({ state: 'absent', n: 0, N: v.count || 0 }));
         const est = fromFile && s.state !== 'installed' ? await navigator.storage?.estimate?.().catch(() => null) : null;
         const tight = est && est.quota && est.quota - (est.usage || 0) < size ? ' · TOO BIG FOR THIS DEVICE' : '';
         b.dataset.state = s.state; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle');
-        word.textContent = s.state === 'installed' ? 'INSTALLED · REMOVE' : (s.state === 'partial' ? `RESUME · ${s.n.toLocaleString('en')} / ${s.N.toLocaleString('en')}` + (fromFile ? ' · OPEN FILE…' : '')
+        word.textContent = s.state === 'installed' ? 'REMOVE' + (size ? ' · ' + fmtBytes(size) : '') : (s.state === 'partial' ? `RESUME · ${s.n.toLocaleString('en')} / ${s.N.toLocaleString('en')}` + (fromFile ? ' · OPEN FILE…' : '')
           : (fromFile ? 'OPEN FILE…' : 'INSTALL') + (size ? ' · ' + fmtBytes(size) : '')) + tight;
       };
       const run = async (f) => {
@@ -282,22 +307,20 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         e.stopPropagation();
         if (ctl) { ctl.abort(); return; }
         if (b.dataset.state === 'installed') {   // two presses remove: no window.confirm
-          if (Date.now() - arm > 3000) { arm = Date.now(); word.textContent = 'REMOVE ' + volName(v) + '? PRESS AGAIN'; return; }
-          arm = 0; await V.remove(v.id); await paint(); return;
+          if (!arm.take()) { arm.arm(); word.textContent = 'REMOVE ' + volName(v) + '? PRESS AGAIN'; return; }
+          await V.remove(v.id); await paint(); return;
         }
         if (pick) pick.click(); else run(null);
       });
       paint(); return { paint, run };
     }
     function card(v) {
+      /* iteration 012 L1: the numeral, the count and the bases — the title and the blurb are the hover's (title), the size the install's, and
+         no caption under a hover (it repeated the card) */
       const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
-      el('b', 'mm-vol-num', o, volName(v)); if (v.title) el('span', 'mm-vol-title', o, v.title);
-      const size = v.index ? v.bytes : v.archive.bytes;
-      const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', size ? fmtBytes(size) : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
+      el('b', 'mm-vol-num', o, volName(v)); o.title = [v.title, v.blurb].filter(Boolean).join(' — ');
+      const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
       if (meta) el('span', 'mm-vol-meta', o, meta);
-      if (v.blurb) el('span', 'mm-vol-blurb', o, v.blurb);
-      if (!v.index) el('span', 'mm-vol-blurb', o, 'A volume is a file you download once and open here.');
-      o.addEventListener('pointerenter', () => say({ formula: volName(v), name: v.title || '', sub: meta }));
       o.addEventListener('click', () => enter(v));
       const ins = installer(c, v);
       if (!v.index) {   // the card takes a drop of its .lwv
@@ -312,7 +335,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       let s = { volumes: [] }; try { s = await V.shelf({ fresh: true }); } catch (_) { /* no shelf: said below */ }
       if (!s.volumes.length) {
         const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'LIBRARY');
-        el('span', '', e, 'No volume is published yet. A volume is an expansion library — thousands of molecules, each solved in every basis from STO-3G to 6-31+G* — installed on this device with one press.');
+        el('span', '', e, 'No volume is published yet.');
         return;
       }
       vols = s.volumes; for (const v of s.volumes) card(v);
@@ -320,18 +343,18 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     async function enter(v) {
       cur = v; on.clear(); query = ''; shelfEl.hidden = catEl.hidden = devEl.hidden = true; view.hidden = false; vhead.textContent = '';
-      const back = el('button', 'mm-back', vhead, '‹ LIBRARY'); back.type = 'button'; back.addEventListener('click', () => paintShelf());
+      const back = el('button', 'mm-back', vhead); back.type = 'button'; icon(back, 'arrow-left'); back.setAttribute('aria-label', 'back to the volumes'); back.title = 'back to the volumes'; back.addEventListener('click', () => paintShelf());
       const size = v.index ? v.bytes : v.archive && v.archive.bytes;
       const step = stepper({ aria: 'volume', items: (vols.length ? vols : [v]).map((x) => ({ id: x.id, label: volName(x) })), value: v.id, list: false, cls: 'mm-vstep',
         onChange: (id) => { const x = vols.find((y) => y.id === id); if (x) enter(x); } });
-      step.root.title = [volName(v), v.title, size ? fmtBytes(size) : ''].filter(Boolean).join(' · '); vhead.appendChild(step.root);
+      step.root.title = [volName(v), size ? fmtBytes(size) : ''].filter(Boolean).join(' · '); vhead.appendChild(step.root);
       countEl = el('span', 'mm-count', vhead);
       tagsEl = el('div', 'mm-tags', vhead); tagsEl.setAttribute('role', 'group'); tagsEl.setAttribute('aria-label', 'tags of ' + volName(v));
       tagsEl.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && tagsEl.scrollWidth > tagsEl.clientWidth) { e.preventDefault(); tagsEl.scrollLeft += e.deltaY; } }, { passive: false });
       const q = el('input', 'mm-search', vhead); q.type = 'search'; q.placeholder = 'search'; q.setAttribute('aria-label', 'search ' + volName(v));
       q.addEventListener('input', () => { query = q.value.trim().toLowerCase(); filter(); });
       q.addEventListener('keydown', (e) => e.stopPropagation());
-      installer(vhead, v);
+      labelToggle(vhead, 'molLabels');
       animate(view, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
       try { mols = (await V.index(v.id)).molecules; } catch (err) { mols = []; countEl.textContent = String(err && err.message || err); }
       if (cur !== v) return;
@@ -358,17 +381,18 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         const z = atomZ(m.formula), atom = z && ATOMS.some((a) => a.Z === z) ? z : 0;
         const t = tile(host, 'mm-mol', { formula: m.formulaM ? mathPlain(m.formulaM) : m.formula, name: cap(m.name), sub: atom ? volName(cur) + ' · one atom: it opens in ATOMS' : [volName(cur), ...(m.tags || [])].join(' · ') },
           () => (atom ? goAtom(atom) : goVolume(cur, m)));
+        el('b', 'mm-lbl', t, m.formulaM ? mathPlain(m.formulaM) : m.formula);
         if (atom) { pic(t, './img/menu/el-' + SYM[atom - 1] + '.webp'); return; }
         const i = pic(t, null), ph = () => { i.remove(); el('b', 'mm-ph', t, m.formulaM ? mathPlain(m.formulaM) : m.formula); };   // no picture yet: the formula holds the square
         if (!m.thumb) ph(); else V.picture(cur.id, m.id).then((u) => { if (u) { develop(i); i.src = u; } else ph(); }, ph);
       });
     }
-    return { wake() { if (!woke) { woke = true; paintCat(); paintShelf(); } }, paintDevice };
+    return { wake() { if (!woke) { woke = true; paintCat(); paintShelf(); } }, paintDevice, home() { if (cur) paintShelf(); } };
   })();
 
   /* ── the tab under the reader's eye ── */
   let current = sections[0];
-  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
+  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
   let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); movePill(current.b); } }); });   // observed only while the Picker is open
 
