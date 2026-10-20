@@ -437,7 +437,7 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 .mol-pick .mol-dl svg:not(.k-arc) { width: 16px; height: 16px; }
 /* iteration 008 V · THE LIBRARY ROAD: the molecule's small picture in the same seat, left of the name; the glyph wears the kit's ring (arcRing,
    colour-controls.css' .k-arc) only while a molecule is being kept — its three seat values, nothing redrawn; a volume page's shelf scrolls */
-.mol-pick .mol-thumb { flex: 0 0 28px; width: 28px; height: 28px; object-fit: contain; }
+.mol-pick .mol-thumb { flex: 0 0 28px; width: 28px; height: 28px; object-fit: contain; filter: hue-rotate(var(--mol-hue, 0deg)); transition: filter 360ms var(--ease); }   /* iteration 013 P2: THE HUE ring turns it as it turns the Picker's pictures */
 .mol-pick .mol-thumb[hidden] { display: none; }
 .mol-pick .mol-dl { position: relative; --arc-pad: 1px; --arc-stroke: 4; --arc-groove: hsl(0 0% 50% / .25); }
 .mol-pick .mol-dl:not([data-busy]) .k-arc { display: none; }
