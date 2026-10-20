@@ -75,10 +75,13 @@ export function createKeys(app) {
     { id: 'rotorK', group: KG.S, short: 'rotor K', label: 'rotor: Runge–Lenz K', key: 'Digit4', run: () => setWhich('K') },
     { id: 'turnNeg', group: KG.S, short: 'turn −', label: 'turn ψ about the axis, −', key: 'BracketLeft', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: -0.12 * f, t: clock.t }); touchState(); } },
     { id: 'turnPos', group: KG.S, short: 'turn +', label: 'turn ψ about the axis, +', key: 'BracketRight', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: 0.12 * f, t: clock.t }); touchState(); } },
-    { id: 'slap', group: KG.S, short: 'impulse', label: 'impulse ψ ↦ e^{ik·x}ψ along the axis X · Y · Z picks (k = 0.2, Shift finer) — STATE\'s old RELEASE along ALONG; METERS says what it did', key: 'KeyK', run: (f) => { if (app.hooks.slap) app.hooks.slap(0.2 * f, keyState.axis); } },
+    { id: 'slap', group: KG.S, short: 'impulse', label: 'impulse ψ ↦ e^{ik·x}ψ along the axis X · Y · Z picks (k = 0.2, Shift finer); METERS says what it did', key: 'KeyK', run: (f) => { if (app.hooks.slap) app.hooks.slap(0.2 * f, keyState.axis); } },
     { id: 'style', short: 'style', label: 'cycle the draw style', key: 'KeyC', run: () => { const order = ['cloud', 'solid', 'signed', 'dust', 'bands']; const nx = order[(order.indexOf(drawStyle(mat.style)) + 1) % 5];   /* iteration 008 G: GRAIN joined DUST */ mat.style = STYLE[nx]; ui.styleSeg.set(nx); schedule(TIER.PRESENT); } },
     { id: 'view', short: 'view', label: 'cycle the observable', key: 'KeyV', run: () => { const order = WAVE_VIEWS; const nx = order[(order.indexOf(VIEW_NAMES[mat.view]) + 1) % order.length]; mat.view = VIEW[nx]; ui.viewSeg.set(nx); schedule(TIER.PRESENT); } },
     { id: 'palette', short: 'palette', label: 'toggle the phase palette', key: 'KeyP', run: () => { if (app.state.palette) app.state.palette.setOn(!app.state.palette.on); } },
+    /* iteration 012 M1 (the key-table audit): the mode under the title and R1's BALL AND STICK are rows of their own, with no chord (Josh's to give) */
+    { id: 'mode', short: 'mode', label: 'switch the mode: ATOMS | MOLECULES', key: null, run: () => { const c = app.state.chem; if (c) c.setOn(!c.on); } },
+    { id: 'ballStick', short: 'ball and stick', label: 'the molecule’s nuclei and bonds on the stage, on / off', key: null, run: () => { if (ui.skeletonSw) ui.skeletonSw.root.click(); } },
     { id: 'hide', was: 'hideUI', short: 'hide UI', label: 'hide / show the interface (the frame and the axes with it)', key: 'KeyH', run: () => toggleUI() },
     { id: 'nextWindow', short: 'next win', label: 'next window to the top of the rack (from the stage)', key: 'Tab', shift: false, stage: true, run: () => cycleWindow(1) },
     { id: 'prevWindow', short: 'prev win', label: 'previous window to the top of the rack (from the stage)', key: 'Tab', shift: true, stage: true, run: () => cycleWindow(-1) },
@@ -94,7 +97,7 @@ export function createKeys(app) {
     /* R-K1 · the MOD arm is Ctrl+Space (the real Control: ⌘Space is Spotlight); A5+A6 seam: its run() follows the one clock's POWER. */
     { id: 'modArm', group: KG.T, short: 'mod arm', label: 'MOD — the modulation’s power: routes on or bypassed (time runs on; space plays the one clock)', key: 'Space', ctrl: 'Ctrl', run: () => setModArm(!app.state.modArm) },
     { id: 'modulation', was: 'modWin', label: 'the modulation window — open it, or close it again', key: 'KeyM', run: () => layout.modulation.toggle() },
-    { id: 'modBar', group: KG.T, short: 'bar lock', label: 'lock the modulation loop clock: one bar = one recurrence of the density', key: 'KeyG', run: () => barLock() },
+    { id: 'modBar', group: KG.T, short: 'bar lock', label: 'lock the tempo to the state: one bar = one recurrence of the density', key: 'KeyG', run: () => barLock() },
     { id: 'undo', group: KG.P, short: 'undo', label: 'undo the last edit', key: 'KeyZ', ctrl: true, shift: false, run: () => app.sh.historyApi.undo() },
     { id: 'redo', group: KG.P, short: 'redo', label: 'redo it (Ctrl+Y too)', key: 'KeyZ', ctrl: true, shift: true, run: () => app.sh.historyApi.redo() },
     { id: 'redoY', group: KG.P, short: 'redo', label: 'redo (Ctrl+Y)', key: 'KeyY', ctrl: true, shift: false, run: () => app.sh.historyApi.redo() },
@@ -108,6 +111,8 @@ export function createKeys(app) {
       run: () => layout.projects.toggle() },   // iteration 004: shown over the front page (it is put away first), shut when it is seen
     /* the kit's windows λWAVES has are rows with NO chord (MIR ADOPTING-1.5 §11: their keys are Josh's to give; bind one in the keyboard) */
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
+    { id: 'render', short: 'render', label: 'the RENDER card — film the stage', key: null, run: () => layout.raise('render') },   // iteration 012 M1: the kit's two cards λWAVES carries, as HISTORY
+    { id: 'curves', short: 'curves', label: 'the CURVES card — grade the screen', key: null, run: () => layout.raise('curves') },
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
     { id: 'menu', short: 'picker', label: 'the Picker — open it, or back to the lab', key: 'KeyL', run: () => { if (app.state.picker) app.state.picker.toggle(); } },   // iteration 003; iteration 004: THE PICKER (the id stays 'menu': saved bindings)
     { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', key: null, run: () => { if (app.state.tl) app.state.tl.toggle(); } },   // 0.5.0 C7b

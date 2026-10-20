@@ -136,7 +136,7 @@ try {
     r.d = { pressed: await press(hello), open: N.isOpen, face: N.face, text: __LW.notebook.text, current: P.current };   /* (d) text opens onto NOTES */
     F.close(); window.confirm = c0; r.errs = __e.slice(); return r;`);
   assert.deepEqual(law, { a: { ok: true, open: false }, closedBlank: { ok: true, open: false }, alias: { folders: true, open: false },
-    closedGallery: { pressed: true, open: false, folders: true, current: 'probe/blank' },
+    closedGallery: { pressed: true, open: false, folders: false, current: 'probe/blank' },   // iteration 012 M1: an OPEN from FOLDERS closes FOLDERS
     c: { pressed: true, open: true, face: 'about', current: 'probe/blank' },
     d: { pressed: true, open: true, face: 'notes', text: 'hello', current: 'probe/hello' }, errs: [] });
   console.log('PASS the notebook law: an open never closes the notebook — NEW, a blank project (whitespace only) and a blank FOLDERS tile leave a closed notebook closed and an ABOUT face on ABOUT; a project with text opens onto its NOTES; open(\'projects\') is FOLDERS');

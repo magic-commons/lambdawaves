@@ -17,7 +17,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   // Shape and finish compose without multiplying the number of style buttons.
   const finish=seg({label:'FINISH',value:mat.finish||'lit',options:[{id:'lit',label:'LIT'},{id:'glass',label:'GLASS'},{id:'matte',label:'MATTE'}],onChange:v=>{mat.finish=v;repaint();}});
   ui.styleSeg.root.after(finish.root);ui.finishSeg=finish;
-  for(const k of ['styleSeg','finishSeg']){const l=ui[k].root.querySelector('.k-lbl');if(l)l.remove();}   // iteration 012 R3 (Josh 10-20): the words STYLE and FINISH go; the buttons say what they are
+  for(const k of ['styleSeg','finishSeg']){const l=ui[k].root.querySelector('.k-lbl');if(l)l.style.display='none';}   // iteration 012 R3 (Josh 10-20): the words STYLE and FINISH go; the buttons say what they are.  M1: hidden, not removed — the history still names a press STYLE CLOUD · WAVE from it
   const syncFinish=()=>{const matte=finish.button('matte'),glass=finish.button('glass');
     matte.disabled=![1,3,6,8].includes(mat.style);matte.title=matte.disabled?'This shape has no surface lighting to remove':'Unlit surface colour';
     glass.disabled=mat.style===6||mat.style===8;glass.title=glass.disabled?(mat.style===8?'SHELL ±':'SHELL')+' already uses translucent glass':'Use a translucent highlighted finish';
@@ -63,7 +63,7 @@ export function reworkNative({ ui, mat, repaint, modHost, modApi, cadence, setCa
   row('display',['capSw','audioSw']);ui.capSw.root.parentElement.classList.add('settings-status-grid');if(ui.askUrl)row('display',['askUrl']);row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
   const quality=ui.gridSeg.root.closest('.grp');if(quality)pages.quality.appendChild(quality);
   const actions=el('div','row tight settings-actions',pages.display);
-  for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig')){if(b.textContent.includes('SHOW THE WARNING'))b.querySelector('.trig-l').textContent='WARNING';actions.appendChild(b);}
+  for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig'))actions.appendChild(b);if(!actions.children.length)actions.remove();   // iteration 012 M1: WARNING left for ABOUT
   const help=el('div','settings-help',pages.display);
   for(const g of oldGroups){if(g===quality)continue;for(const n of g.querySelectorAll('.note:not(.link-note), .sturm-note'))help.appendChild(n);g.remove();}
   // iteration 008 S: the rotor grid (ROTATE z · STARK K_z · DEFECT L² over the three SPINs) is FIELD's DRIVES row, built in that order with .native-rotors

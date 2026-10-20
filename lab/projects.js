@@ -45,7 +45,7 @@ export function createProjects(port) {
      frame (coalesced) to every subscriber of the shared registry — the session books its save, FOLDERS repaints its mark */
   const heard = new Set(), say = coalesce(() => { for (const fn of heard) { try { fn(); } catch (_) {} } }), changed = () => say.post();
   registerProjectPart(PART, { ...port.part, subscribe: (fn) => { heard.add(fn); return () => heard.delete(fn); } });
-  let currentId = null, status = '', echo = null, hush = 0, pinned = null, cleanAt = null;
+  let currentId = null, status = '', echo = null, hush = 0, pinned = null, cleanAt = null, landed = false;
   const told = new Set(), skips = [];
   const toast = (line, warn) => notice(line, { kind: warn ? 'warn' : 'ok', ms: warn ? 5000 : 3200 });
   const pjStatus = (line, warn) => { status = line; toast(line, warn); };
@@ -148,7 +148,8 @@ export function createProjects(port) {
       restore(payload, entry) {
         if (!entry) return restoreProject(payload && payload.parts, {});         // the kit's roll-back: the part, nothing else
         if (skipped(entry.id)) return true;
-        return openPayload(valueOf(payload), metaOf(entry), false) || { ok: false, why: 'the project did not take' };
+        const ok = openPayload(valueOf(payload), metaOf(entry), false); landed = ok;
+        return ok || { ok: false, why: 'the project did not take' };
       },
       async empty() {
         if (skipped('new')) return 'new';
@@ -162,10 +163,13 @@ export function createProjects(port) {
     },
     /* FOLDERS' entrance is a motion (core/motion.js presence): the mask is taken again where it lands, paused or not (CLAUDE.md's
        mask law).  And opened over the current project, clean and still without a picture, it takes one then */
-    onOpen: () => { cover(); const { root, rail } = folders.win; Promise.all([root, rail.el].flatMap((el) => (el && el.getAnimations ? el.getAnimations() : [])).map((a) => a.finished.catch(() => null))).then(() => port.onMoved());
+    onOpen: () => { cover(); demosFirst(folders.gallery); const { root, rail } = folders.win; Promise.all([root, rail.el].flatMap((el) => (el && el.getAnimations ? el.getAnimations() : [])).map((a) => a.finished.catch(() => null))).then(() => port.onMoved());
       const e = currentId && files.entry(currentId); if (e && !e.thumb && !dirty()) Promise.resolve(port.thumbnail()).then(toThumb)
       .then((thumb) => { if (thumb) files.overwrite(e.id, { payload: e.payload, thumb, facts: e.facts, at: e.at }); }).catch(() => {}); },
-    onOpened: () => { if (echo) { toast(echo, true); echo = null; } },
+    /* iteration 012 M1 (O1's finding; Josh 10-20 "make sure the Window, UI, saving system works"): an OPEN from FOLDERS lands on the stage, so the
+       window goes — only for an open FOLDERS' own adapter took (`landed`), never for the facade's telling (a Ctrl+S, __LW.projects.open): the kit
+       calls this after its picture's await, when the telling is already over */
+    onOpened: () => { if (echo) { toast(echo, true); echo = null; } if (landed) { landed = false; folders.close(); } },
     /* FOLDERS' own SAVE / SAVE AS: an untitled notebook takes the project's name, in the file too (λWAVES' save always did) */
     onSaved: (e) => {
       currentId = e.id; touchRecent(ls, pathOf(e)); status = 'saved ' + pathOf(e);
@@ -200,11 +204,17 @@ export function createProjects(port) {
     for (const f of list) take(f, 'drop');
   }, { capture: true });
 
+  /* iteration 012 M1 (Josh 10-20: "Folders should automatically show demos IF there is no saved projects in root"): a view opened at ROOT, where
+     nothing of the reader's is saved, turns to DEMOS (the folder the starters live in); a reader's save at ROOT keeps ROOT the landing */
+  function demosFirst(view) {
+    const all = files.entries(), demos = STARTERS[0] && STARTERS[0].folder;
+    if (view && view.folder() === '' && demos && !all.some((e) => !e.folder) && all.some((e) => e.folder === demos)) view.go(demos);
+  }
   const collection = () => { const r = readCollection(ls); if (r.why) unavailable(r.why); return r.c; };
   const starterOfFile = (file) => files.entries().find((e) => e.facts && e.facts.seedId === 'demos/' + file) || null;
 
   const api = {
-    folders, store, changed,
+    folders, store, changed, demosFirst,
     get status() { return status; },
     /** show({ folder, name }) — FOLDERS on screen, the front page put away; `folder` turns the explorer to it, `name` focuses NAME (SAVE AS) */
     show(o = {}) {
