@@ -154,7 +154,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const [r, c] = seatOf(Z), v = valenceOf(Z), a = ATOMS.find((x) => x.Z === Z), live = !!a, sym = SYM[Z - 1];
     const t = tile(table, 'mm-el', { name: NAMES[Z - 1], sub: v.label, math: true, under: false, note: live ? '' : 'past krypton: not in the ATOM system yet' }, () => goAtom(Z), !live);
     t.style.gridRow = String(r); t.style.gridColumn = String(c);
-    pic(t, './img/menu/' + (live ? 'el-' + sym : 'orb-' + v.nl + '_' + v.m) + '.webp');   // the atom's highest orbital (011 Q3: the pure orbital of its (n, l, m), cut to show its layers)
+    pic(t, './img/menu/' + (live ? 'el-' + sym : 'orb-' + v.nl + '_' + v.m) + '.webp');   // the block's orbital (011 Q3b: the differentiating subshell — Fe 3d, Ce 4f; the pure orbital of its (n, l, m), cut to show its layers)
     el('i', 'mm-z', t, String(Z)); el('b', 'mm-sym', t, sym);
   }
   /* ── MOLECULAR: MOLECULES ONLY (iteration 011 Q4, Josh: "remove those 'lattice' and 'heavy' and other downloadable stuff from the molecular
@@ -380,7 +380,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function goAtom(Z) {
     close(); const C = app.state.chem; if (C && C.on) C.setOn(false);
     app.w.setElement(Z); if (getHamiltonian().id !== 'atom') app.w.switchHamiltonian('atom'); if (app.ui.hamSeg) app.ui.hamSeg.set('atom');
-    if (app.w.fillValence) app.w.fillValence();                         // every valence subshell (outside the noble-gas core), every m, in phase (SPECTRUM's own road); the tile shows the highest alone
+    if (app.w.fillValence) app.w.fillValence();                         // every valence subshell (outside the noble-gas core), every m, in phase (SPECTRUM's own road); the tile shows the block's subshell alone
   }
   /* ── open / close: shown or hidden, nothing rebuilt; the iris opens from the home button (R8), the way back is instant ── */
   function open() {
