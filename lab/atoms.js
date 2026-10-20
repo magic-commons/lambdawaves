@@ -178,7 +178,7 @@ export const ATOMS = NAMES.map(([symbol, name], i) => {
   return { Z, symbol, name, config, model: EXCHANGE_MODEL, term, core, exception: !!MOVES[Z] };
 });
 /** the valence of Z (1 … 118): every subshell outside the noble-gas core (the last noble gas below Z; H and He have none), in the
- *  Madelung order (n + l, then n) — Fe 4s² 3d⁶, Au 6s¹ 4f¹⁴ 5d¹⁰.  LOAD VALENCE loads them all (008 Q); valence.js' one HIGHEST orbital
+ *  Madelung order (n + l, then n) — Fe 4s² 3d⁶, Au 6s¹ 4f¹⁴ 5d¹⁰.  LOAD VALENCE loads them all (008 Q); valence.js' one BLOCK'S orbital
  *  (the Picker's tile) is its own rule. */
 export function valenceShells(Z) {
   const ng = NOBLE.filter(([z]) => z < Z).at(-1), inner = ng ? groundConfig(ng[0]) : [];

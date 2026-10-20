@@ -26,7 +26,8 @@
  * MOLECULES: every row of the store (molecules.js MOLECULES + RECORD_ONLY, the Picker's order), MOLECULES ON, the molecule picked by the
  *   card's hand road (a record-only row loads its library record), solved STO-3G RHF ground state.  The two disabled rows (CuH, ZnH₂ — no
  *   RHF minimum) have no picture: the Picker shows them dimmed with the reason.
- * ELEMENTS (el-<symbol>): THE HIGHEST ORBITAL alone (Josh 10-18) — the highest occupied subshell (011 Q3: highest n, then highest l) and
+ * ELEMENTS (el-<symbol>): THE BLOCK'S ORBITAL alone (Josh 10-18; 011 Q3b) — the differentiating subshell, the last the Aufbau fills in the
+ *   real ground configuration (an open f shell, else the occupied subshell last in Madelung order: Fe 3d, Ce 4f, La 5d, Lr 7p) and
  *   its last electron's m from lab/valence.js (the rule the Picker's caption line reads), amplitude 1, drawn as hydrogen's PURE orbital
  *   (011 Q3; --own: each element's own ATOM state, 008 A7's road) and cut through the nucleus facing THE CORNER's eye, so its n − l
  *   radial layers are rings.  A press on the tile still opens goAtom's fillValence (every valence subshell, every m, in phase; 008 Q).
@@ -143,7 +144,7 @@ if (sets.includes('molecules')) {
   }
 }
 
-/* ELEMENTS: the highest occupied subshell's (n, l, m) (valence.js) seen from THE CORNER.  Since iteration 011 Q3 (Josh 10-19: "it's really
+/* ELEMENTS: the block's subshell's (n, l, m) (valence.js blockSubshell, 011 Q3b: the d block shows d, the f block f) seen from THE CORNER.  Since iteration 011 Q3 (Josh 10-19: "it's really
    just an indicator and visual aid") it is drawn as the PURE orbital — hydrogen's (n, l, m), the same picture for every element that
    shares it (rendered once, written to each el-) — because the atom's own orbital folds its inner layers into the core: under the ATOM
    system Rb 5s, Cs 6s and Fr 7s all show 3 layers on a 200 px tile (Fr's six radial nodes lie within 2.15 bohr of a lobe that reaches 8).
@@ -195,7 +196,7 @@ await g.ev(`__LW.domain.auto = true; Object.assign(__LW.quality, { res: __res.re
 /* the manifest keeps what this run did not redo (a --set or --only run updates its own rows only) */
 const keepRows = (key, rows, id) => (sets.includes(key) && !only ? rows : [...(prior[key] || []).filter((p) => !rows.some((r) => id(r) === id(p))), ...rows]);
 if (!VOL && OUT === MENU) writeFileSync(OUT + 'manifest.json', JSON.stringify({ tool: 'tools/menu-thumbs.mjs', size: SIZE, quality: Q, alphaQuality: AQ, render: RENDER,
-  look: { view: 'density', style: 'signed', iso: ISO, palette: 'wheel', frame: false, axis: false, atoms: { view: 'imag', style: ATOM_STYLE, iso: AISO, exposure: EXPOSURE, hueByL: HUE_BY_L, phase: 'm = 0 imaginary, else real', cut: CUT && { l: CUT_L, normal: CUT.map((x) => +x.toFixed(6)), pos: 0, mode: 'clip' }, grid: RES, system: process.argv.includes('--own') ? 'atom (each element its own)' : 'hydrogen (the pure orbital)', subshell: 'highest n, then highest l (lab/valence.js)' }, camera: { molecules: 'home', elements: 'corner (yaw 45°, pitch 35.26°)', orbitals: 'corner (yaw 45°, pitch 35.26°)' }, ground: 'none (two-ground matte)' },
+  look: { view: 'density', style: 'signed', iso: ISO, palette: 'wheel', frame: false, axis: false, atoms: { view: 'imag', style: ATOM_STYLE, iso: AISO, exposure: EXPOSURE, hueByL: HUE_BY_L, phase: 'm = 0 imaginary, else real', cut: CUT && { l: CUT_L, normal: CUT.map((x) => +x.toFixed(6)), pos: 0, mode: 'clip' }, grid: RES, system: process.argv.includes('--own') ? 'atom (each element its own)' : 'hydrogen (the pure orbital)', subshell: "the block's orbital: an open f shell, else the occupied subshell last in Madelung order (lab/valence.js blockSubshell)" }, camera: { molecules: 'home', elements: 'corner (yaw 45°, pitch 35.26°)', orbitals: 'corner (yaw 45°, pitch 35.26°)' }, ground: 'none (two-ground matte)' },
   molecules: keepRows('molecules', made.molecules, (x) => x), elements: keepRows('elements', made.elements, (x) => x.sym), orbitals: keepRows('orbitals', made.orbitals, (x) => x) }, null, 1) + '\n');
 if (arg('nuclei', null)) writeFileSync(arg('nuclei'), JSON.stringify(nuclei, null, 1) + '\n');
 console.log(`${made.molecules.length} molecules, ${made.elements.length} elements, ${made.orbitals.length} subshells, ${(total / 1024).toFixed(1)} kB`, JSON.stringify((await g.errors()).errs.filter((e) => !/ResizeObserver/.test(e))));
