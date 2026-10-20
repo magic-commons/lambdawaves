@@ -80,7 +80,7 @@ export function createKeys(app) {
     { id: 'view', short: 'view', label: 'cycle the observable', key: 'KeyV', run: () => { const order = WAVE_VIEWS; const nx = order[(order.indexOf(VIEW_NAMES[mat.view]) + 1) % order.length]; mat.view = VIEW[nx]; ui.viewSeg.set(nx); schedule(TIER.PRESENT); } },
     { id: 'palette', short: 'palette', label: 'toggle the phase palette', key: 'KeyP', run: () => { if (app.state.palette) app.state.palette.setOn(!app.state.palette.on); } },
     /* iteration 012 M1 (the key-table audit): the mode under the title and R1's BALL AND STICK are rows of their own, with no chord (Josh's to give) */
-    { id: 'mode', short: 'mode', label: 'switch the mode: ATOMS | MOLECULES', key: null, run: () => { const c = app.state.chem; if (c) c.setOn(!c.on); } },
+    { id: 'mode', short: 'mode', label: 'switch the mode: HYDROGEN | MOLECULES', key: null, run: () => { const c = app.state.chem; if (c) c.setOn(!c.on); } },
     { id: 'ballStick', short: 'ball and stick', label: 'the molecule’s nuclei and bonds on the stage, on / off', key: null, run: () => { if (ui.skeletonSw) ui.skeletonSw.root.click(); } },
     { id: 'hide', was: 'hideUI', short: 'hide UI', label: 'hide / show the interface (the frame and the axes with it)', key: 'KeyH', run: () => toggleUI() },
     { id: 'nextWindow', short: 'next win', label: 'next window to the top of the rack (from the stage)', key: 'Tab', shift: false, stage: true, run: () => cycleWindow(1) },

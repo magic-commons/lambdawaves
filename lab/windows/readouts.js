@@ -171,6 +171,9 @@ export function createReadouts(app) {
     busy: cardLoading(wAtoms, 'relativity'),   // iteration 008 Z: RELATIVITY Δ's second solve wears the card's busy mark
   });
   app.w.wAtoms = wAtoms; app.w.atomsView = atomsView;
+  /* 013 H4: the reader's hand turning the ATOMS window ON puts SPECTRUM's system on ATOM — the stepper's own road for 'atom' (a click, so a
+     project restoring the window's power never moves the operator; switchHamiltonian never presses the power, so there is no loop) */
+  wAtoms.root.querySelector('.dev-power').addEventListener('click', () => { if (!wAtoms.root.classList.contains('off') && getHamiltonian().id !== 'atom') { switchHamiltonian('atom'); ui.hamSeg.set('atom'); } });
 
   /* ELECTROSTATICS · LEGACY (Φ, E, B and j of the register's charge, the #fieldlines overlay) was DELETED in 0.5.0 D9b */
 

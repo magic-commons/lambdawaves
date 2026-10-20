@@ -1,7 +1,7 @@
 /* lab/windows/molecules.js — MOLECULES, the molecular session, THE HEAD and the register (0.5.2 R2d; moved verbatim out of lab/rack.js boot()) at ONE seat,
  * where the LEGACY note stands.  Iteration 008 U: MO-REGISTRY is no longer a window — the register is built INTO the MOLECULES card (chemview's `slots`)
  * and a saved `orbitals` seat opens MOLECULES (settings.js RETIRED_WINDOWS); the fix round (F5) folded its second seat, which no longer made a device, into this one. */
-import { TIER } from '../rack.js'; import { seg } from '../mir/kit.js';
+import { TIER } from '../rack.js'; import { el } from '../mir/kit.js';
 import { VIEW, VIEW_NAMES } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
@@ -16,9 +16,18 @@ export function createMolecules(app) {
      instruments.  MOLECULES: MOLECULES and MO-REGISTRY.  The mode IS MOLECULES ON — the switch under the title, the card's own switch, a project
      and a link all say it by one road (chem.setOn → moleculeMode) — and each mode HIDES the other's windows (hidden, never closed or moved: the
      arrangement waits for the mode to come back).  This replaces 2026-10's folded SPECTRUM under a molecule. */
-  const modeSeg = seg({ aria: 'Mode: atoms or molecules', value: 'atoms', options: [{ id: 'atoms', label: 'ATOMS', title: 'ATOMS — SPECTRUM\'s 140 hydrogen states, their names and the EQUALIZER' }, { id: 'molecules', label: 'MOLECULES', title: 'MOLECULES — the molecule and its register, one window' }],
-    onChange: (v) => { if (app.state.chem) app.state.chem.setOn(v === 'molecules'); } });
-  modeSeg.root.id = 'lwMode'; { const t = document.getElementById('title'); if (t) t.after(modeSeg.root); }
+  /* 013 H4 · THE STAGE'S THREE BUTTONS (Josh, 2026-10-20): under the title a COLUMN of icons, the words only as hover hints — LIBRARY (a door:
+     the Picker, the key row `menu`'s road), MOLECULAR (MOLECULES on) and HYDROGEN (MOLECULES off: the mode ATOMS was, renamed; the boot's).
+     #lwMode, the ids 'atoms' | 'molecules' and set(v) are kept, so the key row `mode`, a project and a link still say the mode by one road. */
+  const modeSeg = (() => {
+    const root = el('div', 'lw-stage-btns'); root.id = 'lwMode'; root.setAttribute('role', 'group'); root.setAttribute('aria-label', 'Library and mode');
+    const B = [['library', 'LIBRARY — open the Picker', () => { if (app.state.picker) app.state.picker.toggle(); }],
+      ['molecules', 'MOLECULAR — the molecule and its register, one window', () => { if (app.state.chem) app.state.chem.setOn(true); }],
+      ['atoms', 'HYDROGEN — SPECTRUM\'s 140 hydrogen states, their names and the EQUALIZER', () => { if (app.state.chem) app.state.chem.setOn(false); }]]
+      .map(([id, tip, run]) => { const b = el('button', 'lw-stage-b', root); b.type = 'button'; b.dataset.id = id; b.title = tip; b.setAttribute('aria-label', tip.split(' —')[0]); b.addEventListener('click', run); return b; });
+    return { root, set(v) { for (const b of B) if (b.dataset.id !== 'library') b.setAttribute('aria-pressed', String(b.dataset.id === v)); } };
+  })();
+  modeSeg.set('atoms'); { const t = document.getElementById('title'); if (t) t.after(modeSeg.root); }
   function moleculeMode(v) {
     for (const w of [wState, wSh, wOrb, wVor, wSlice, app.w.wLad, app.w.wCalc, wSpec, { root: document.querySelector('.dev[data-id="equalizer"]') }, { root: document.querySelector('.dev[data-id="staticfield"]') }]) if (w && w.root) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
     wChem.root.hidden = !v;                                          // iteration 008 U: the one card (the register lives in it)
