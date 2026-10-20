@@ -277,7 +277,7 @@ try {
   const segb = (group, label) => `[...document.querySelectorAll('.seg-b')].find((b) => b.textContent.trim() === ${JSON.stringify(label)} && ((b.closest('.segw') || b).querySelector('.k-lbl') || {}).textContent?.trim() === ${JSON.stringify(group)})`;
   const themeOther = `(__LW.themeChoice === 'light' ? 'DARK' : 'LIGHT')`;
   const table = {
-    gridThenKey: await pressThen(`await __press(__show(${segb('GRID', '96³')}))`, () => realKey(']')),
+    gridThenKey: await pressThen(`await __press(__show([...document.querySelectorAll('.seg-b')].find((b) => b.textContent.trim() === '96³')))`   /* iteration 013 S1: the GRID seg has no word */, () => realKey(']')),
     themeThenModApi: await pressThen(`await __press(__show([...document.querySelectorAll('.seg-b')].find((b) => b.textContent.trim() === ${themeOther} && b.closest('.segw')?.querySelector('.k-lbl')?.textContent.trim() === 'THEME')))`, `__LW.mod.addSource('lfo')`),
     frameThenStage: await pressThen(`window.__frameWas = [...document.querySelectorAll('.seg-b.on')].find((b) => b.closest('.segw')?.querySelector('.k-lbl')?.textContent.trim() === 'FRAME');
       await __press(__show(${segb('FRAME', 'OFF')}))`, `__LW.setStage(0.61); __LW.history.note()`),
@@ -381,7 +381,7 @@ try {
   await realDrag(await at('[data-mir-window="notebook"] .nb-grip'), 40, 30, 4);
   none.nbResize = { rows: (await rows()) - n }; n += none.nbResize.rows;
   Object.assign(none, await ev(`const H = __LW.history, r = {}, count = () => H.entries().length; __LW.layout.notebook.close(); let n = count();
-    const grid = __show(document.querySelector('.dev[data-id="settings"]')); const b = [...grid.querySelectorAll('.seg-b')].find((x) => x.textContent.trim() === '96³' && x.closest('.segw')?.querySelector('.k-lbl')?.textContent.trim() === 'GRID');
+    const grid = __show(document.querySelector('.dev[data-id="settings"]')); const b = [...grid.querySelectorAll('.seg-b')].find((x) => x.textContent.trim() === '96³' && x.closest('.seg')?.getAttribute('aria-label') === 'GRID');   // iteration 013 S1: the GRID seg has no word
     await __press(b); await __w(520); H.flush(); r.grid = { rows: count() - n, res: __LW.quality.res }; n = count();
     __LW.layout.modulation.toggle(); await __w(300); __LW.layout.modulation.toggle(); await __w(300); await __press(document.querySelector('.mod-logo')); await __w(300); await __press(document.querySelector('.mod-logo')); await __w(520); H.flush();
     r.modToggle = { rows: count() - n }; n = count();
