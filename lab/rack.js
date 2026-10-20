@@ -321,7 +321,7 @@ export async function boot(dom) {
   function applyRebuild() {
     busyWrap(null);                                                    // wave 48: a rebuild is BUSY work — synchronous, so it only shows when the frame-gap rule catches it running long
     const HH = getHamiltonian();
-    if (domain.auto) domain.half = (app.state.chem && app.state.chem.on) ? app.state.chem.half : (app.state.space === 'p' ? HH.domainForP(reg.nmin()) : sturm.P ? sturmHalf() : HH.domainFor(reg.nmax(1e-3)));   // ignore a slap's 1e-4 tails
+    if (domain.auto) domain.half = (app.state.chem && app.state.chem.on) ? app.state.chem.half : (app.state.space === 'p' ? HH.domainForP(reg.nmin()) : sturm.P ? sturmHalf() : HH.domainFor(reg.nmax(1e-3), reg));   // ignore a slap's 1e-4 tails
     if (field.ok) field.setSpace(app.state.space === 'p' ? HH.kernelSpace.p : HH.kernelSpace.x);
     if (field.ok && HH.radialTable) field.setRadialTable(HH.radialTable());   // QUARKONIUM: the tabulated radial rows the kernel reads
     if (field.ok) {

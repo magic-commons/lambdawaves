@@ -113,6 +113,16 @@ function atomState() {
   atomBuilt = { Z: atomZ, S, table: T.table, rows, half: atomDomainFor(atomZ) };
   return atomBuilt;
 }
+/** DOMAIN AUTO's half (iteration 013 H1): the atom's own size (its occupied shells) AND the edge rTab of every row the register draws
+ *  (`reg`: the labels holding ≥ 1e-3 of the norm, as reg.nmax(1e-3) counts them; without it, every row up to nmax — CENTRAL's law).
+ *  The atom's size alone cut each VIRTUAL shell (°, the frozen field's near-hydrogenic orbital, ~n² across) at the box: H's 2p° in ±7,
+ *  C's 3d° (to 34 a₀) in ±10, Fe's 4f° (to 53) in ±12.  An occupied label keeps the atom's box, so LOAD VALENCE's picture is unchanged. */
+function atomHalf(nmax, reg) {
+  const A = atomState(); let r = A.half;
+  if (reg) { const w2 = 1e-3 * reg.norm2(); for (const a of reg.populated()) { const s = BASIS[a], w = A.rows.get(s.n + ':' + s.l); if (w && reg.population(a) >= w2) r = Math.max(r, w.rTab); } }
+  else for (const w of A.rows.values()) if (w.n <= nmax) r = Math.max(r, w.rTab);
+  return r;
+}
 /** the occupancy of (n, l) in the ground configuration — 0 marks a virtual shell */
 const atomOcc = (n, l) => { const r = atomState().rows.get(n + ':' + l); return r ? r.occ : 0; };
 /** ε_nl in hartree: the SCF eigenvalue when the shell is occupied, the frozen field's readout when it is not */
@@ -150,7 +160,7 @@ HAMILTONIANS.atom = {
   radial: (n, l, r) => atomRadial(atomZ, n, l, r),
   tableFor: atomTableFor, momentumTableFor: atomTableFor,             // momentum space is not built: the selector forces position space
   psiAt: atomPsiAt, phiAt: atomPsiAt,
-  domainFor: () => atomState().half, domainForP: () => atomState().half,
+  domainFor: atomHalf, domainForP: () => atomState().half,
   kernelSpace: { x: 6, p: 6 },
   stark: false, hydrogenTheorems: false, noMomentum: true,
   labelOf: (s) => atomForms(s).plain + (atomOcc(s.n, s.l) ? '' : '°'),
