@@ -897,3 +897,10 @@ body[data-theme="light"] { --n7: hsl(350 97% 47%); }
 .picker .pk-n > button.pk-nl:hover, .picker .pk-n > button.pk-nl:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
 .picker .pk-n.folded > button.pk-nl { padding-top: 2px; opacity: .78; }
 .picker .pk-count { font-size: var(--fs-tiny); color: var(--dim); padding-top: 2px; }
+
+/* iteration 012 I1 · the rack's window list (the kit's + list) wears the PICKER's own icons for ATOMS and MOLECULES, drawn in the
+ kit's glyph seat (14 px, --dim) from lab/img/icons/ — the kit's glyph table takes no app SVG (FOR-MIR). */
+[data-rack-list] .mb-item[data-win="atoms"]::before, [data-rack-list] .mb-item[data-win="chem"]::before {
+  content: ""; flex: 0 0 auto; width: 14px; height: 14px; background: var(--dim, currentColor);
+  -webkit-mask: url(img/icons/atomic.svg) center / contain no-repeat; mask: url(img/icons/atomic.svg) center / contain no-repeat; }
+[data-rack-list] .mb-item[data-win="chem"]::before { -webkit-mask-image: url(img/icons/molecular.svg); mask-image: url(img/icons/molecular.svg); }
