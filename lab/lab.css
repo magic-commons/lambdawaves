@@ -820,6 +820,12 @@ body[data-theme="dark"] .km-key-unbound {
 .mol-view { flex: 1 1 100%; align-items: stretch; }
 .mol-view .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; box-sizing: border-box; }
 .mol-view .seg-b { min-width: 0; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* iteration 012 R2 (Josh: "the Orbital knob seems too high"): METHOD's seg and the ORBITAL dial share one seat (0.4.0 S4c) on a flex-end row,
+   where the dial's box (label · 34 px dial · value line) stood 5 px taller than the seg's and lifted the dial 11 px above the RHF | LDA cells.
+   The dial is OFFSET onto the cells' centre and its label back onto METHOD's label line — relative offsets, so no box in the card changes
+   size (a margin that did set the register's ResizeObservers looping in tests/register.browser-test.mjs) */
+.mol-mrow > .k { position: relative; top: 11px; }
+.mol-mrow > .k > .k-lbl { position: relative; top: -6px; }
 /* 0.7.4 C2 · THE SHELF (chemview.js): the page as tiles under the picker, as many as fit (two a row on a phone); a tile wears ATOMS' cell (.pk-c), the current one lit */
 .mol-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 4px; margin: 2px 0 6px; --nc: var(--acc); }
 .mol-shelf[hidden] { display: none; }

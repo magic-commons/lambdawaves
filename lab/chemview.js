@@ -367,7 +367,7 @@ export function createChem(host, api) {
     holds = next; paintBasis(); return holds;
   }
   paintBasis();
-  const r1 = el('div', 'row tight', host), rV = el('div', 'row tight', host), rM = el('div', 'row tight', host);   // iteration 007 M: BASIS, VIEW, then METHOD with the dial's seat and the chevron
+  const r1 = el('div', 'row tight', host), rV = el('div', 'row tight', host), rM = el('div', 'row tight mol-mrow', host);   // iteration 007 M: BASIS, VIEW, then METHOD with the dial's seat and the chevron
   r1.appendChild(bSeg.root);
   /* 0.7.3 K2 · METHOD beside BASIS: RHF · LDA, and U2's UHF on H₂ (folded in here); an open shell's RHF reads UHF and LDA waits for UKS. LDA always solves live
      (never a record), and only up to benzene's 36 STO-3G AOs: the grid's AO table is points × AOs (78 MB for benzene). A press is a hand pick (its head) */

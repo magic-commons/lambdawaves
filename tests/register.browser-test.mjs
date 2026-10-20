@@ -287,13 +287,20 @@ try {
   const ks = (v) => (v.startsWith('refused') ? null : v.split(' ').map((t) => +t.split(':')[0]));
   const inCols = Object.values(r13.c60).filter((v) => !v.startsWith('refused')).every((v) => ks(v).every((k) => r13.cols.includes(k)));
   judge('R13 eight ORBITAL presets from one table: water takes HOMO 4 · LUMO 5 · FRONTIER FOUR 3–6 · OCCUPIED 1–4 (equal |c|, equal phase) and refuses WINDING with its sentence; on C₆₀ every preset stays inside the record\'s columns (the frontier eight at 175–182; 0.6.1: all 183) and OCCUPIED takes the 120 valence orbitals 60–179; ON is answered',
-    r13.opts.join('|') === 'HOMO|LUMO|HOMO + LUMO|FRONTIER FOUR|HOMO SET|LUMO SET|WINDING|OCCUPIED'
+    r13.opts.slice(0, 8).join('|') === 'HOMO|LUMO|HOMO + LUMO|FRONTIER FOUR|HOMO SET|LUMO SET|WINDING|OCCUPIED'
       && r13.water['HOMO'] === '4:1.0000' && r13.water['LUMO'] === '5:1.0000' && r13.water['HOMO + LUMO'] === '4:0.7071 5:0.7071'
       && r13.water['FRONTIER FOUR'] === '3:0.5000 4:0.5000 5:0.5000 6:0.5000' && r13.water['HOMO SET'] === '4:1.0000' && r13.water['LUMO SET'] === '5:1.0000'
       && /^refused · WINDING: no degenerate orbital pair/.test(r13.water['WINDING']) && r13.water['OCCUPIED'] === '1:0.5000 2:0.5000 3:0.5000 4:0.5000'
       && inCols && ks(r13.c60['HOMO SET']).every((k) => k < 180) && ks(r13.c60['HOMO SET']).includes(179) && ks(r13.c60['LUMO SET']).every((k) => k >= 180) && ks(r13.c60['LUMO SET']).includes(180)
       && ks(r13.c60['FRONTIER FOUR']).join() === '178,179,180,181' && (() => { const k = ks(r13.c60['OCCUPIED']); return k && k.length === 120 && k[0] === 60 && k[119] === 179; })()   /* 0.6.1 F1: the record carries every occupied column, so OCCUPIED takes the 120 valence orbitals 60–179 (the core 60 frozen), as water takes 1–4 */
       && r13.on === true && r13.refusal === null && r13.errs.length === 0, r13);
+
+  /* iteration 012 R2 · the seven more from the same table, on water (core 0, valence lines 1–6, no degenerate level); INVERT runs last, over VIRTUAL's 5–6 */
+  judge('R13b ALL ODD 1·3·5 · ALL EVEN 2·4·6 · BELOW HOMO 1–3 · ABOVE LUMO 6 · VIRTUAL 5–6 on water, DEGENERATE refused with its sentence, INVERT the complement 0–4',
+    r13.opts.slice(8).join('|') === 'ALL ODD|ALL EVEN|BELOW HOMO|ABOVE LUMO|VIRTUAL|DEGENERATE|INVERT'
+      && r13.water['ALL ODD'] === '1:0.5774 3:0.5774 5:0.5774' && r13.water['ALL EVEN'] === '2:0.5774 4:0.5774 6:0.5774'
+      && r13.water['BELOW HOMO'] === '1:0.5774 2:0.5774 3:0.5774' && r13.water['ABOVE LUMO'] === '6:1.0000' && r13.water['VIRTUAL'] === '5:0.7071 6:0.7071'
+      && /^refused · DEGENERATE: no degenerate level/.test(r13.water['DEGENERATE']) && r13.water['INVERT'] === '0:0.4472 1:0.4472 2:0.4472 3:0.4472 4:0.4472', r13.water);
 
   const errs = await g.ev('return { errs: window.__e.slice(), gpu: __LW.field.lastGpuError || null };');
   judge('RZ no page error and no GPU error at any step', errs.errs.length === 0 && !errs.gpu, errs);
