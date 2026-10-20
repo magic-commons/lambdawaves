@@ -28,7 +28,7 @@ export const FAMILIES = Object.freeze({
   'lambdawaves.q0.render': ['film-card.js (MIR createRenderView, its prefix): the RENDER card\'s choices and the picture scale', 'PREFERENCE'],   // 0.5.0 C7b
   'lambdawaves.q0.curves': ['rack.js curvesStore (mir/panels/curves.js model.serialize): the CURVES card\'s screen grade, the points per channel and AMOUNT', 'PREFERENCE'],   // 0.5.1 D10-24
   'lambdawaves.q0.info': ['shell/stage-words.js infoPrefs (mir/core/prefs.js createPrefs over INFO_ROWS; INFORMATIONAL writes it): the STAGE FORMULA, NAME, ATOM LABELS, their SIZEs, POSITION · PAD, one switch per announcement kind, the pop-ups\' SIZE, the CURSOR rows', 'PREFERENCE'],   // iteration 007 I (ADR-0003): the blob\'s six keys lifted once
-  'lambdawaves.q0.picker': ['picker.js PREF_KEY: the Picker\'s SHOW LABELS (atoms, molecules)', 'PREFERENCE'],   // iteration 012 L1
+  'lambdawaves.q0.picker': ['picker.js PREF_KEY: the Picker\'s SHOW LABELS (atoms, molecules) and THE HUE ring (hue, degrees)', 'PREFERENCE'],   // iteration 012 L1 · L2
   'mir.render.calib':['the kit recorder (mir/render/recorder.js CALIB_KEY): this device\'s measured ms a frame', 'PREFERENCE'],   // 0.5.0 C7b
 });
 export function createSettingsStore(storage) {

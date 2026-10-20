@@ -662,14 +662,12 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu *, #lwMenu *::before, #lwMenu *::after { outline: none; border: 0; box-shadow: none; }
 #lwMenu button { background: none; color: inherit; font: inherit; padding: 0; cursor: pointer; }
 #lwMenu .mm-top { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px 4px; }
-#lwMenu .mm-door { position: absolute; left: 22px; top: 22px; display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: .22em; opacity: .55; transition: opacity 120ms, color 120ms; }
-#lwMenu .mm-door:hover, #lwMenu .mm-door:focus-visible { opacity: 1; color: var(--acc); } #lwMenu .mm-door svg { width: 16px; height: 16px; }
 #lwMenu .mm-logo { height: 44px; color: var(--fg); } #lwMenu .mm-logo svg { height: 100%; width: auto; display: block; }
 /* the tabs: R9's sliding pill and approach accent */
 #lwMenu .mm-tabs { position: relative; isolation: isolate; display: flex; gap: 26px; }
 #lwMenu .mm-pill { position: absolute; top: -2px; bottom: -2px; left: 0; width: var(--pw, 0); translate: var(--px, 0) 0; border-radius: 999px; background: hsl(var(--glass-tint) / .5); z-index: -1; pointer-events: none;
   transition: translate var(--t-relocate) var(--ease), width var(--t-relocate) var(--ease); }
-#lwMenu .mm-tab { --on: 0; position: relative; font-size: 11px; letter-spacing: .22em; padding: 5px 2px; opacity: calc(.45 + .55 * max(var(--approach, 0), var(--on)));
+#lwMenu .mm-tab { --on: 0; position: relative; display: inline-flex; align-items: center; gap: 8px; font-family: 'LW Title', var(--font-ui); font-size: 16px; letter-spacing: .1em; padding: 5px 2px; opacity: calc(.45 + .55 * max(var(--approach, 0), var(--on)));
   color: color-mix(in srgb, var(--acc) calc(max(var(--approach, 0), var(--on)) * 100%), var(--fg)); transition: opacity .12s ease; }
 #lwMenu .mm-tab.on { --on: 1; }
 #lwMenu .mm-scroll { overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; overscroll-behavior: contain; }
@@ -701,7 +699,7 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
   background: hsl(var(--glass-tint) / .4); opacity: calc(.18 + .82 * var(--near)); transition: opacity .18s ease, scale .16s var(--ease), color .12s ease; }
 body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25); backdrop-filter: blur(14px) saturate(1.25); }
 #lwMenu .mm-prev { right: calc(100% + 14px); } #lwMenu .mm-next { left: calc(100% + 14px); }
-#lwMenu .mm-arrow svg { transform: scale(var(--glyph-scale, 1)); transition: transform .16s cubic-bezier(.2,.7,.25,1); }
+#lwMenu .mm-arrow .mm-ico { width: 22px; height: 22px; transform: scale(var(--glyph-scale, 1)); transition: transform .16s cubic-bezier(.2,.7,.25,1); }
 #lwMenu .mm-arrow:hover { scale: 1.08; color: var(--acc); } #lwMenu .mm-arrow:active { scale: .94; } #lwMenu .mm-arrow:focus-visible { opacity: 1; color: var(--acc); }
 @media (hover: none) { #lwMenu .mm-arrow { opacity: 1; } }
 #lwMenu .mm-arrow[disabled] { opacity: 0; pointer-events: none; }
@@ -756,7 +754,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-tag:hover, #lwMenu .mm-tag:focus-visible { opacity: .95; } #lwMenu .mm-tag.on { opacity: 1; color: var(--acc); background: color-mix(in srgb, var(--acc) 16%, transparent); }
 /* iteration 011 Q4: the MOLECULAR deck is molecules only — a record not yet on this device keeps its picture and wears the kit's download glyph */
 #lwMenu .mm-dl { position: absolute; right: 5%; bottom: 5%; width: clamp(20px, calc(var(--t) * .15), 32px); height: clamp(20px, calc(var(--t) * .15), 32px); display: grid; place-items: center; border-radius: 50%; color: var(--fg); background: hsl(var(--glass-tint) / .7); pointer-events: none; }
-#lwMenu .mm-dl svg { width: 62%; height: 62%; } #lwMenu .mm-dl[hidden] { display: none; }
+#lwMenu .mm-dl .mm-ico { width: 62%; height: 62%; } #lwMenu .mm-dl[hidden] { display: none; }
 /* … and the LIBRARY owns what is kept: under the shelf, RECORDS (a card per catalogue section in the volume card's look — THE SECTION INSTALL,
    iteration 008 P's ring · lamp · word, once the deck's heading tile) and THIS DEVICE */
 #lwMenu .mm-cat { display: grid; gap: 14px; justify-items: center; max-width: 1240px; margin-top: 10px; }
@@ -769,17 +767,15 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-sinstall .mm-ring-host { width: 24px; height: 24px; }
 #lwMenu .mm-dev { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 16px; max-width: 1000px; text-align: center; font-size: 12px; letter-spacing: .06em; font-variant-numeric: tabular-nums; }
 #lwMenu .mm-dev span { opacity: .6; }
-#lwMenu .mm-lamp { position: absolute; left: 12px; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -1px; border-radius: 50%; background: currentColor; opacity: .25; pointer-events: none; transition: background-color 160ms, opacity 160ms; }   /* the lamp sits in the ring's eye */
-#lwMenu .mm-sinstall[data-state="installed"] .mm-lamp { background: var(--acc); opacity: 1; box-shadow: 0 0 6px color-mix(in srgb, var(--acc) 70%, transparent); }
 #lwMenu .mm-ph { position: absolute; inset: 0; display: grid; place-items: center; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: calc(var(--t) * .17); opacity: .75; transition: scale 280ms var(--ease); }
 #lwMenu .mm-tile:hover .mm-ph { scale: 1.1; }
 @media (max-width: 700px) {
   #lwMenu .mm-vhead { flex-wrap: wrap; justify-content: center; width: 100%; } #lwMenu .mm-vhead .mm-tags { order: 9; flex: 1 1 100%; } #lwMenu .mm-search { width: 120px; }
-  #lwMenu .mm-door span { display: none; } #lwMenu .mm-door { left: 14px; top: 16px; } #lwMenu .mm-tabs { gap: 14px; }
+  #lwMenu .mm-tabs { gap: 14px; } #lwMenu .mm-tab { font-size: 12px; letter-spacing: .08em; } #lwMenu .mm-tab .mm-ico { display: none; }
   #lwMenu .mm-prev { right: auto; left: 2px; } #lwMenu .mm-next { left: auto; right: 2px; } #lwMenu .mm-caption { min-height: 76px; }
   #lwMenu .mm-cat-row { gap: 10px; } #lwMenu .mm-scard { width: calc(50vw - 26px); padding: 16px 10px 12px; } #lwMenu .mm-scard-n { font-size: 26px; } }
 @media (prefers-reduced-motion: reduce) {
-  #lwMenu { clip-path: none; transition: none; } #lwMenu .mm-pic, #lwMenu .mm-pill, #lwMenu .mm-under, #lwMenu .mm-ring-ink, #lwMenu .mm-arrow, #lwMenu .mm-arrow svg { transition: none; }
+  #lwMenu { clip-path: none; transition: none; } #lwMenu .mm-pic, #lwMenu .mm-pill, #lwMenu .mm-under, #lwMenu .mm-ring-ink, #lwMenu .mm-arrow, #lwMenu .mm-arrow .mm-ico { transition: none; }
   #lwMenu .mm-pic[data-tilt] { transform: none; } #lwMenu .mm-arrow { scale: 1 !important; } }
 /* iteration 012 L1 · THE LIBRARY'S WORDS: SHOW LABELS (one subtle seat under the tabs; its twin in a volume's head where INSTALL was), the
    formula on every molecule tile when it is on (the name stays the hover's), the atoms' symbol and Z when theirs is; the deck a fixed height —
@@ -798,6 +794,30 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-el .mm-sym, #lwMenu .mm-el .mm-z { transition: opacity 200ms ease; }
 #lwMenu:not(.labels-atom) .mm-el .mm-sym, #lwMenu:not(.labels-atom) .mm-el .mm-z { opacity: 0; }
 #lwMenu .mm-pages { box-sizing: content-box; height: calc(var(--t) * var(--rows, 2) + var(--gap) * (var(--rows, 2) - 1)); }
+
+/* iteration 012 L2 · THE LIBRARY'S LAYOUT.  Under the logo, centred: RETURN HOME · FOLDERS · THE HUE ring (a conic wheel masked by I1's ring,
+   turned by --mol-hue so its tick points at the hue in use); the molecules' pictures turn with it (a hue-rotate filter that glides); the install's
+   eye is DOWNLOAD or TRASH; a volume's tags are two rows in one sideways strip, the head's other controls centred between them in height */
+#lwMenu .mm-nav { display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: -2px; }
+#lwMenu .mm-navb { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; opacity: .55; transition: opacity 140ms, color 140ms, scale 160ms var(--ease); }
+#lwMenu .mm-navb .mm-ico { width: 18px; height: 18px; }
+#lwMenu .mm-navb:hover, #lwMenu .mm-navb:focus-visible { opacity: 1; color: var(--acc); scale: 1.1; } #lwMenu .mm-navb:active { scale: .94; }
+#lwMenu .mm-hue { opacity: .85; cursor: ns-resize; touch-action: none; }
+#lwMenu .mm-hue-ring { width: 20px; height: 20px; rotate: var(--mol-hue); background: conic-gradient(from 0deg, hsl(0 85% 58%), hsl(60 85% 52%), hsl(120 70% 48%), hsl(180 80% 50%), hsl(240 80% 62%), hsl(300 80% 60%), hsl(360 85% 58%));
+  -webkit-mask: url(img/icons/hue-ring.svg) center / contain no-repeat; mask: url(img/icons/hue-ring.svg) center / contain no-repeat; transition: rotate 120ms var(--ease); }
+#lwMenu .mm-hue:hover .mm-hue-ring { filter: saturate(1.2) brightness(1.06); }
+#lwMenu .mm-mol .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)); transition: scale 280ms var(--ease), filter 360ms var(--ease); }
+#lwMenu .mm-mol:not(.off):hover .mm-pic, #lwMenu .mm-mol:not(.off):focus-visible .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)) saturate(1.15) brightness(1.06); }
+#lwMenu .mm-tab .mm-ico { width: 18px; height: 18px; transition: translate 160ms var(--ease); } #lwMenu .mm-tab:hover .mm-ico { translate: 0 -1px; }
+#lwMenu .mm-ring-host > .mm-ico { position: absolute; left: 50%; top: 50%; width: 52%; height: 52%; translate: -50% -50%; opacity: .7; transition: opacity 160ms; }
+#lwMenu .mm-install[data-state="installed"] .mm-ring-host > .mm-ico { opacity: 1; } #lwMenu .mm-install[data-state="busy"] .mm-ring-host > .mm-ico { opacity: 0; }
+#lwMenu .mm-tags { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding-top: 1px; padding-bottom: 1px; }
+#lwMenu .mm-tagrow { display: flex; gap: 4px; flex-wrap: nowrap; width: max-content; }
+#lwMenu[data-sec="library"].in-volume .mm-opts .mm-opt { visibility: hidden; }   /* inside a volume its head's twin is the one */
+#lwMenu.labels-mol .mm-lbl { animation: mm-rise 240ms var(--ease) both; }
+@keyframes mm-rise { from { opacity: 0; translate: 0 4px; } }
+@media (prefers-reduced-motion: reduce) {
+  #lwMenu .mm-navb, #lwMenu .mm-hue-ring, #lwMenu .mm-mol .mm-pic, #lwMenu .mm-tab .mm-ico, #lwMenu .mm-lbl, #lwMenu .mm-el .mm-sym, #lwMenu .mm-el .mm-z { transition: none; animation: none; } }
 
 /* the way back: the grid glyph left of ATOMS | MOLECULES */
 #lwHome { position: absolute; left: calc(var(--rack-w) + 24px); top: 46px; z-index: var(--z-chrome); width: 28px; height: 28px; display: grid; place-items: center; padding: 0;

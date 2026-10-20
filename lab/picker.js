@@ -11,7 +11,8 @@
  * no tint), writes the name under the tile, and swaps the large caption at the foot.  A press goes there: ATOMS mode and the element
  * (goAtom), MOLECULES mode and the molecule (chem.pick), or a volume's molecule (chem.openVolume).  THE WAY BACK is instant: the DOM is
  * built once and only shown or hidden — the home button (the iris opens from it), L (keys.js `menu`), WINDOW › PICKER; Escape leaves.
- * FOLDERS (the projects and the demos) has its door at the top left.  It opens at boot once the photosensitivity notice is accepted,
+ * Under the logo (iteration 012 L2): RETURN HOME (the lab), FOLDERS (the projects and the demos) and THE HUE ring (a dial that turns the
+ * molecules' pictures round the colour wheel).  The Picker opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
 import { storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
 import { el, chip, mathPlain, stepper } from './mir/kit.js';
@@ -45,11 +46,10 @@ const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const atomZ = (f) => SYM.indexOf(String(f || '').replace(/<\/?m>/g, '').trim()) + 1;
 const volName = (v) => 'VOL. ' + v.numeral;
 const fmtBytes = (b) => (b >= 1e9 ? (b / 1e9).toFixed(b >= 1e10 ? 0 : 1) + ' GB' : b >= 1e6 ? Math.round(b / 1e6) + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' kB');
-const ARROW = (dir) => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="${dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 /* iteration 012 L1 · the Picker's own PREFERENCE (settings-store.js FAMILIES, never a project or a link): SHOW LABELS for the atoms (on: the symbol
    and Z, as before) and for the molecules (on: the formula on every tile, the name under it on a hover) */
-const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false };
+const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0 };   // hue: THE HUE ring's turn in degrees (L2)
 const readPrefs = () => { try { return Object.assign({}, PREF0, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (_) { return Object.assign({}, PREF0); } };
 const writePrefs = (p) => { try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (_) { /* a blocked profile keeps it for the visit */ } };
 /** an iteration 012 icon (lab/img/icons/<name>.svg), drawn in currentColor through a CSS mask */
@@ -66,11 +66,17 @@ function armer(b, repaint) {
 export function createPicker(app, { open: openAtBoot = true } = {}) {
   const root = el('div', 'lw-menu', document.body); root.id = 'lwMenu'; root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'the Picker');
   const top = el('div', 'mm-top', root);
-  /* FOLDERS' door (iteration 004 · F: the projects and the demos live there now; iteration 009: one demo, WAVE DANCER PROTOTYPE) */
-  const door = el('button', 'mm-door', top); door.type = 'button'; chip(door, 'folder', 'Folders'); el('span', '', door, 'FOLDERS'); door.title = 'your projects and the demos — FOLDERS';
-  door.addEventListener('click', () => { close(); const P = app.sh.layout && app.sh.layout.projects; if (P) (P.show || P.toggle).call(P); });
   const logo = el('div', 'mm-logo', top);
   fetch('./img/lambdawaves-logo.svg').then((r) => r.text()).then((t) => { logo.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const s = logo.querySelector('svg'); if (s) { s.setAttribute('aria-label', 'λWAVES'); s.setAttribute('role', 'img'); } }).catch(() => { logo.textContent = 'λWAVES'; });
+  /* iteration 012 L2 · under the logo, centred: RETURN HOME (the lab), FOLDERS (iteration 004 · F's door, once at the top left: the projects
+     and the demos) and THE HUE ring — a dial dressed as a circle: a vertical drag, the wheel or ↑ ↓ turn the molecules' pictures round the
+     colour wheel (cyan hides its shadows, Josh), a double-click puts it back at 0; the Picker's PREFERENCE, never a project's or a link's */
+  const nav = el('div', 'mm-nav', top);
+  const navBtn = (name, label, go) => { const b = el('button', 'mm-navb', nav); b.type = 'button'; icon(b, name); b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', go); return b; };
+  navBtn('home', 'Return home — the lab', () => close());
+  navBtn('folders', 'Folders — your projects and the demos', () => { close(); const P = app.sh.layout && app.sh.layout.projects; if (P) (P.show || P.toggle).call(P); });
+  const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
+  hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); el('i', 'mm-hue-ring', hue);
   const tabs = el('div', 'mm-tabs', top), pill = el('i', 'mm-pill', tabs), scroller = el('div', 'mm-scroll', root), caption = el('div', 'mm-caption', root);
   caption.setAttribute('aria-live', 'polite');
   /* SHOW LABELS (iteration 012 L1): one subtle seat under the tabs, the atoms' switch on ATOMIC and the molecules' elsewhere; the volume's head has its twin */
@@ -85,6 +91,19 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     for (const b of labelBtns) { const on = !!prefs[b.dataset.labels]; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
   }
   const atomOpt = labelToggle(opts, 'atomLabels'), molOpt = labelToggle(opts, 'molLabels');
+  const setHue = (deg, keep = true) => {
+    prefs.hue = ((Math.round(deg) % 360) + 360) % 360; root.style.setProperty('--mol-hue', prefs.hue + 'deg');
+    hue.setAttribute('aria-valuenow', String(prefs.hue)); hue.title = 'Hue of the molecules\u2019 pictures · ' + prefs.hue + '° — drag up or down, double-click for 0';
+    if (keep) writePrefs(prefs);
+  };
+  setHue(+prefs.hue || 0, false);
+  { let y0 = null, h0 = 0;   // the ONE KNOB LAW's vertical drag: a full turn in 360 px, ⅛ with Shift
+    hue.addEventListener('pointerdown', (e) => { if (e.button) return; y0 = e.clientY; h0 = prefs.hue; hue.setPointerCapture(e.pointerId); e.preventDefault(); });
+    hue.addEventListener('pointermove', (e) => { if (y0 != null) setHue(h0 + (y0 - e.clientY) * (e.shiftKey ? 0.125 : 1)); });
+    const end = () => { y0 = null; }; hue.addEventListener('pointerup', end); hue.addEventListener('pointercancel', end);
+    hue.addEventListener('wheel', (e) => { e.preventDefault(); setHue(prefs.hue - Math.sign(e.deltaY) * (e.shiftKey ? 2 : 10)); }, { passive: false });
+    hue.addEventListener('dblclick', () => setHue(0));
+    hue.addEventListener('keydown', (e) => { const d = { ArrowUp: 10, ArrowRight: 10, ArrowDown: -10, ArrowLeft: -10 }[e.key]; if (d) { e.preventDefault(); e.stopPropagation(); setHue(prefs.hue + (e.shiftKey ? d / 5 : d)); } else if (e.key === 'Home' || e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); setHue(0); } }); }
 
   /* ── the caption: the formula (STIX), the name (LW Title), the line under them (an element: its name alone, its valence subshell alone in STIX); R6's swap ── */
   let said = null;
@@ -112,7 +131,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function deck(host) {
     const wrap = el('div', 'mm-pager', host), pagesEl = el('div', 'mm-pages', wrap), foot = el('div', 'mm-dots', host);
     const arrow = (dir) => { const b = el('button', 'mm-arrow ' + (dir < 0 ? 'mm-prev' : 'mm-next'), wrap); b.type = 'button';
-      b.setAttribute('aria-label', dir < 0 ? 'previous page' : 'next page'); b.innerHTML = ARROW(dir); b.addEventListener('click', () => pageTo(page + dir)); return b; };
+      b.setAttribute('aria-label', dir < 0 ? 'previous page' : 'next page'); icon(b, dir < 0 ? 'arrow-left' : 'arrow-right'); b.addEventListener('click', () => pageTo(page + dir)); return b; };
     const arrows = [arrow(-1), arrow(1)];
     let list = [], make = null, pages = [], page = 0, per = 1;
     const fill = (k) => { const p = pages[k]; if (!p || p.dataset.full) return; p.dataset.full = '1'; for (let i = k * per; i < Math.min(list.length, (k + 1) * per); i++) make(list[i], p); };
@@ -130,7 +149,11 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     function size() {
       const narrow = innerWidth < 700, gap = narrow ? 6 : 10;
       let above = 0; for (const c of host.children) { if (c === wrap) break; if (!c.hidden) above += c.offsetHeight + 12; }
-      const H = Math.max(150, scroller.clientHeight - above - 70), W = Math.max(200, Math.min(scroller.clientWidth - (narrow ? 24 : 150), 1900));
+      /* iteration 012 L2: on a desktop the deck keeps off the racks behind the Picker (a rack's width and 20 px a side, Josh: "not overlap the
+         blurred racks too much" on a 16:9 screen); the ATOMIC table is not a deck and keeps its size */
+      const rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300;
+      const side = narrow ? 12 : innerWidth >= 1100 ? Math.min(rackW + 20, (innerWidth - 900) / 2) : 75;
+      const H = Math.max(150, scroller.clientHeight - above - 70), W = Math.max(200, Math.min(scroller.clientWidth - 2 * side, 1900));
       let rows = H >= 560 ? 4 : H >= 400 ? 3 : 2, t = Math.min(260, (H - (rows - 1) * gap) / rows);   // iteration 008 P: a row sooner (4 from 560 px, once 640) — "more molecules per page"
       let cols = Math.max(3, Math.min(12, Math.floor((W + gap) / (t + gap))));
       const want = narrow ? 3 : 8;   // Josh: bigger AND more columns — a desktop page is at least eight across while a tile stays ≥ 150 px
@@ -169,7 +192,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
 
   /* ── the sections and the tabs (R9: the sliding pill, the approach accent) ── */
   const sections = [['atomic', 'ATOMIC'], ['molecular', 'MOLECULAR'], ['library', 'LIBRARY']].map(([id, label]) => {
-    const sec = el('section', 'mm-sec mm-' + id, scroller), b = el('button', 'mm-tab', tabs, label); b.type = 'button';
+    const sec = el('section', 'mm-sec mm-' + id, scroller), b = el('button', 'mm-tab', tabs); b.type = 'button'; icon(b, id); el('span', '', b, label);   // iteration 012 L2: I1's icon left of the word
     b.addEventListener('click', () => { if (id === 'library' && current.id === 'library') library.home(); sec.scrollIntoView({ behavior: RM.matches ? 'auto' : 'smooth', block: 'start' }); });
     return { id, sec, b };
   });
@@ -209,7 +232,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const info = { formula: mathPlain(m.formula), name: cap(m.name), sub: m.disabled ? m.reason : m.section };
     const t = tile(host, 'mm-mol', info, () => goMolecule(m.id), !!m.disabled);
     pic(t, './img/menu/' + m.id + '.webp'); el('b', 'mm-lbl', t, info.formula);
-    if (!m.disabled && dlRec(m)) { const g = el('i', 'mm-dl', t); chip(g, 'download', 'not on this device'); g.hidden = true; away.set(m.id, { t, g, info }); paintAway(m); }
+    if (!m.disabled && dlRec(m)) { const g = el('i', 'mm-dl', t); icon(g, 'download'); g.title = 'not on this device'; g.hidden = true; away.set(m.id, { t, g, info }); paintAway(m); }
   });
 
   /* ── THE SECTION INSTALL (iteration 008 P; in the LIBRARY since iteration 011 Q4): a card per catalogue section with records — its name, its
@@ -218,11 +241,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      them.  The records' road is library.js keepSection (chemview's too: each record checked against its sha-256 name), and MOLECULES' lamps
      are re-read after (chem.records()). ── */
   const cardLine = (S) => `${S.rows.length} molecules`;   // iteration 012 L1: the size rides in the install word, the count of files kept is the ring
+  /** the install's eye: DOWNLOAD while there is something to fetch, TRASH once it is all here (iteration 012 L2, I1's icons) */
+  const eye = (i, here) => i.style.setProperty('--ico', `url(img/icons/${here ? 'trash' : 'download'}.svg)`);
   function paintSec(S) {
     const v = S.view; if (!v || !v.b.isConnected) return;
     const N = S.recs.length, all = N > 0 && S.n === N;
     v.meta.textContent = cardLine(S); if (S.busy) return;
-    v.b.dataset.state = all ? 'installed' : S.n ? 'partial' : 'absent'; v.b.setAttribute('aria-pressed', String(all)); v.ring.set(N ? S.n / N : 0, all ? 'done' : 'idle');
+    v.b.dataset.state = all ? 'installed' : S.n ? 'partial' : 'absent'; v.b.setAttribute('aria-pressed', String(all)); v.ring.set(N ? S.n / N : 0, all ? 'done' : 'idle'); eye(v.ico, all);
     v.word.textContent = all ? 'REMOVE · ' + fmtBytes(S.bytes) : S.n ? `${S.n} / ${N} · INSTALL` : 'INSTALL · ' + fmtBytes(S.bytes);
   }
   /* the store read each time the MOLECULAR deck or the LIBRARY comes into view (the card, a press or the browser may have changed it) */
@@ -250,8 +275,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const h = el('div', 'mm-vol-open', c); el('b', 'mm-scard-n', h, S.sec); const meta = el('span', 'mm-vol-meta', h, cardLine(S));
     if (safariTab()) return;   // a Safari tab is offered nothing to keep (chemview's own rule)
     const b = el('button', 'mm-install mm-sinstall', c); b.type = 'button'; b.title = `Keep ${S.sec} on this device: press to install, press twice to remove`;
-    const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost); el('i', 'mm-lamp', b); const word = el('span', 'mm-install-word', b);
-    S.view = { b, ring, word, meta, arm: armer(b, () => paintSec(S)) }; paintSec(S);
+    const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost), ico = icon(ringHost, 'download'), word = el('span', 'mm-install-word', b);
+    S.view = { b, ring, ico, word, meta, arm: armer(b, () => paintSec(S)) }; paintSec(S);
     b.addEventListener('click', (e) => { e.stopPropagation(); pressSec(S); });
   }
 
@@ -282,7 +307,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     /* a volume with an `index` installs from the network (INSTALL); one without is a file the reader downloads once (OPEN FILE…, or a drop) */
     function installer(host, v) {
       const b = el('button', 'mm-install', host); b.type = 'button';
-      const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost), word = el('span', 'mm-install-word', b);
+      const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost), ico = icon(ringHost, 'download'), word = el('span', 'mm-install-word', b);
       const fromFile = !v.index, size = fromFile ? v.archive.bytes : v.bytes, pick = fromFile ? el('input', '', host) : null;
       if (pick) { pick.type = 'file'; pick.accept = '.lwv'; pick.hidden = true; pick.addEventListener('change', () => { const f = pick.files && pick.files[0]; pick.value = ''; if (f) run(f); }); }
       let ctl = null; const arm = armer(b, () => paint());
@@ -290,7 +315,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         const s = await V.statusOf(v.id).catch(() => ({ state: 'absent', n: 0, N: v.count || 0 }));
         const est = fromFile && s.state !== 'installed' ? await navigator.storage?.estimate?.().catch(() => null) : null;
         const tight = est && est.quota && est.quota - (est.usage || 0) < size ? ' · TOO BIG FOR THIS DEVICE' : '';
-        b.dataset.state = s.state; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle');
+        b.dataset.state = s.state; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle'); eye(ico, s.state === 'installed');
         word.textContent = s.state === 'installed' ? 'REMOVE' + (size ? ' · ' + fmtBytes(size) : '') : (s.state === 'partial' ? `RESUME · ${s.n.toLocaleString('en')} / ${s.N.toLocaleString('en')}` + (fromFile ? ' · OPEN FILE…' : '')
           : (fromFile ? 'OPEN FILE…' : 'INSTALL') + (size ? ' · ' + fmtBytes(size) : '')) + tight;
       };
@@ -331,7 +356,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       }
     }
     async function paintShelf() {
-      shelfEl.textContent = ''; shelfEl.hidden = catEl.hidden = devEl.hidden = false; view.hidden = true; cur = null;
+      shelfEl.textContent = ''; shelfEl.hidden = catEl.hidden = devEl.hidden = false; view.hidden = true; cur = null; root.classList.remove('in-volume');
       let s = { volumes: [] }; try { s = await V.shelf({ fresh: true }); } catch (_) { /* no shelf: said below */ }
       if (!s.volumes.length) {
         const e = el('div', 'mm-empty', shelfEl); el('b', '', e, 'LIBRARY');
@@ -342,7 +367,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       enterTiles([...shelfEl.children]);
     }
     async function enter(v) {
-      cur = v; on.clear(); query = ''; shelfEl.hidden = catEl.hidden = devEl.hidden = true; view.hidden = false; vhead.textContent = '';
+      cur = v; on.clear(); query = ''; shelfEl.hidden = catEl.hidden = devEl.hidden = true; view.hidden = false; vhead.textContent = ''; root.classList.add('in-volume');   // the head's SHOW LABELS stands for the one under the tabs
       const back = el('button', 'mm-back', vhead); back.type = 'button'; icon(back, 'arrow-left'); back.setAttribute('aria-label', 'back to the volumes'); back.title = 'back to the volumes'; back.addEventListener('click', () => paintShelf());
       const size = v.index ? v.bytes : v.archive && v.archive.bytes;
       const step = stepper({ aria: 'volume', items: (vols.length ? vols : [v]).map((x) => ({ id: x.id, label: volName(x) })), value: v.id, list: false, cls: 'mm-vstep',
@@ -362,14 +387,17 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     /* the tags: built once a volume and lit in place (the strip keeps where it was scrolled); two or more intersect, ALL clears them */
     function paintTags() {
+      /* iteration 012 L2: TWO rows in one sideways strip (the head's other controls sit between them in height); each tag in its count's order
+         goes to the row that is shorter so far, so both rows read most-common first and end together */
       tagsEl.textContent = ''; const n = new Map(); for (const m of mols) for (const t of m.tags || []) n.set(t, (n.get(t) || 0) + 1);
-      const chipOf = (id, label, count) => { const b = el('button', 'mm-tag', tagsEl, label); b.type = 'button'; b.dataset.tag = id; el('i', '', b, count.toLocaleString('en'));
+      const rows = [el('div', 'mm-tagrow', tagsEl), el('div', 'mm-tagrow', tagsEl)], len = [0, 0];
+      const chipOf = (id, label, count) => { const r = len[0] <= len[1] ? 0 : 1; len[r] += String(label).length + String(count).length + 4; const b = el('button', 'mm-tag', rows[r], label); b.type = 'button'; b.dataset.tag = id; el('i', '', b, count.toLocaleString('en'));
         b.addEventListener('click', () => { if (id === '') on.clear(); else if (on.has(id)) on.delete(id); else on.add(id); markTags(); filter(); }); };
       chipOf('', 'all', mols.length);
       for (const [t, k] of [...n].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))) chipOf(t, t, k);
       markTags();
     }
-    function markTags() { for (const b of tagsEl.children) { const isOn = b.dataset.tag ? on.has(b.dataset.tag) : !on.size; b.classList.toggle('on', isOn); b.setAttribute('aria-pressed', String(isOn)); } }
+    function markTags() { for (const b of tagsEl.querySelectorAll('.mm-tag')) { const isOn = b.dataset.tag ? on.has(b.dataset.tag) : !on.size; b.classList.toggle('on', isOn); b.setAttribute('aria-pressed', String(isOn)); } }
     function filter() {
       const list = mols.filter((m) => [...on].every((t) => (m.tags || []).includes(t))
         && (!query || [m.name, m.formula, m.id, ...(m.tags || [])].some((s) => s && String(s).toLowerCase().includes(query))));
@@ -386,13 +414,14 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         const i = pic(t, null), ph = () => { i.remove(); el('b', 'mm-ph', t, m.formulaM ? mathPlain(m.formulaM) : m.formula); };   // no picture yet: the formula holds the square
         if (!m.thumb) ph(); else V.picture(cur.id, m.id).then((u) => { if (u) { develop(i); i.src = u; } else ph(); }, ph);
       });
+      enterTiles(vdeck.tiles);   // iteration 012 L2: a tag or a search deals the page in (animate() stands down under reduced motion)
     }
     return { wake() { if (!woke) { woke = true; paintCat(); paintShelf(); } }, paintDevice, home() { if (cur) paintShelf(); } };
   })();
 
   /* ── the tab under the reader's eye ── */
   let current = sections[0];
-  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
+  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; root.dataset.sec = s.id; for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
   let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); movePill(current.b); } }); });   // observed only while the Picker is open
 
