@@ -431,7 +431,7 @@ const PRECACHE = [
   ['./windows/material.js',                                         '55822c21f24e'],
   ['./windows/molecules.js',                                        '561922577837'],
   ['./windows/readouts.js',                                         '346181bac03a'],
-  ['./windows/settings-card.js',                                    '6c410623e781'],
+  ['./windows/settings-card.js',                                    '0e05f6c6724d'],
   ['./windows/spectrum.js',                                         'b6197c6f3025'],
   ['./windows/state.js',                                            '15e8593c80df'],
   ['./windows/static-field.js',                                     '8ad1f4019eb4'],

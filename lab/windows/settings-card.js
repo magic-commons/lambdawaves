@@ -122,9 +122,9 @@ export function createSettingsCard(app) {
   function createFieldQuality() {   // the second seat: FIELD QUALITY
     const gq = group(ui.set.body, 'FIELD QUALITY');
     const r5 = el('div', 'row', gq);
-    ui.gridSeg = seg({ label: 'GRID', value: String(quality.res),   /* wave 101: the CONTROL reads the shipped grid rather than restating it — a hardcoded '96' here would have disagreed with quality.res the moment the default moved */ options: [{ id: '64', label: '64³' }, { id: '96', label: '96³' }, { id: '128', label: '128³' }],
+    ui.gridSeg = seg({ label: '', aria: 'GRID', value: String(quality.res),   /* wave 101: the CONTROL reads the shipped grid rather than restating it — a hardcoded '96' here would have disagreed with quality.res the moment the default moved */ options: [{ id: '64', label: '64³' }, { id: '96', label: '96³' }, { id: '128', label: '128³' }],
       onChange: (v) => { quality.res = +v; quality.steps = { 64: 110, 96: 160, 128: 240 }[+v]; quality.scale = { 64: 0.75, 96: 1, 128: 1 }[+v]; schedule(TIER.REBUILD); } });
-    r5.appendChild(ui.gridSeg.root);
+    r5.appendChild(ui.gridSeg.root);   // iteration 013 S1 (Josh: "Remove text that says 'grid' in quality"): no word over 64³ · 96³ · 128³; the radiogroup is still named GRID
     r5.appendChild(seg({ label: 'FIELD CLOCK cap', value: '0', options: [{ id: '0', label: 'MAX' }, { id: '33', label: '30 Hz' }, { id: '66', label: '15 Hz' }, { id: '200', label: '5 Hz' }],
       onChange: (v) => { fieldRate.capMs = +v; } }).root);
     const r5b = el('div', 'row tight', gq);
