@@ -699,7 +699,17 @@ export function createChem(host, api) {
   function methodsVol() { const b = mthS.button('lda'); mthS.button('uhf').style.display = 'none'; mthS.button('rhf').textContent = 'RHF'; b.disabled = true; b.title = b.dataset.help = VOL; mthS.set('rhf'); }
   const stem = (k) => k.replace(/\|(uhf|lda)$/, '');   // a solve's key without its METHOD: the molecule, basis, charge and H₂'s stretch
   /** a landing: `r` goes on stage and is kept beside this molecule's other solves (Δ LDA−RHF reads the pair) */
+  /* iteration 012 O1 · THE FRAMING (Josh: "some molecules are going outside of the box … keep scale and size consistent between molecules and
+     atoms").  DOMAIN AUTO's half under a molecule was the worker's / the record's max|coordinate| + 6 bohr: a cube that holds every nucleus,
+     but a chain on a diagonal (colfosceril palmitate: nuclei to 32.5 bohr from the centre in a ±34.6 box) put its density at the faces and,
+     turned toward the eye, off the stage, while water filled 63 % of its box and an atom ~45 %.  The half is now also at least FRAME × (R + 3),
+     R the farthest nucleus from the box's centre and 3 bohr the valence density's visible edge past it: the molecule's visible sphere is at most
+     65 % of the half at every turn — an atom's order of size on screen — and never less than the old cube (so H₂ and water keep their boxes, and
+     tests/field-law's water with them).  Set once at the landing, so the field, the flow, THE POTENTIAL and the rack's domain read one number */
+  const FRAME = 20 / 13;
+  function framed(r) { let R = 0; for (const a of chemAtoms(preset)) R = Math.max(R, Math.hypot(a.x, a.y, a.z)); if (Number.isFinite(r.half)) r.half = Math.max(r.half, FRAME * (R + 3)); }
   function land(r) {
+    framed(r);
     kept = new Map([...kept].filter(([k]) => stem(k) === stem(r.key))); kept.set(r.key, r);
     sol = r; mBuf = oBuf = dBuf = dRef = vibSh = null; fieldHash = null;
     const named = keyed(r.names, pendingKey), [lo, hi] = span(), P = pendingOrbital;
