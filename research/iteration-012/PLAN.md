@@ -97,3 +97,14 @@ Serial chains (shared files): **I1 → L1 → L2 → L3** (all `lab/picker.js`);
 ## Closed
 | row | merged | note |
 |---|---|---|
+| I1 | 9697084 (it012-library 0006bd7) | 17 SVGs by Antigravity `gemini-4-argon-medium`; sheet I1-ICONS.html; + list icons via CSS mask; WINDOW › PICKER → FOR-MIR |
+| L1 | 9697084 (0f4b2ec) | words cut; size into INSTALL / REMOVE; 600 ms arm; fixed-height deck (146.3 px); SHOW LABELS ×2 in `lambdawaves.q0.picker` |
+| L2 | 9697084 (217a025) | HOME · FOLDERS · HUE ring under the logo; two tag rows; rack-width + 20 px margins; serif tabs with icons; four animations |
+| L3 | 9697084 (44fe847) | notice on the Picker's ground; MOLECULAR first; tiles one by one; pictures 430 → 380 ms, last tile 917 → 2 001 ms (the sequence) |
+| R2 | 3663ca0 (it012-other 9cf5701) | 15 ORBITAL presets; METHOD | ORBITAL levelled (`.mol-mrow`) |
+| O1 | 3663ca0 (5b1e06c) | WASD every frame from 120 ms; smoothstep depth fade; DOMAIN AUTO ≤ 65 % fill (13 subjects); UI table green; THE LOCK re-captured 54 leaves by name (6e6886f) |
+| B1 | ad3b38d (it012-rack f75e515) | Q5 allow-list reverted; two narrow rules; `.m2pick` tinted; knob max is 30 px (not 40); 85 / 104 fps at 2× |
+| R1 | ad3b38d (fba63d4) | STATUS = title-bar Aa; BALL AND STICK + OPACITY; MARKS › DIPOLE (the arrow); ORBITALS one row; CURSOR | MARKS columns; PARALLAX |
+| R3 | ad3b38d (29aea0e) | PALETTE swap + plus; CAMERA words gone, ZOOM · FOV under YAW · PITCH, sphere 40 → 64 px, CONTROLS; CLIP one row; POSITION | MOMENTUM hidden under a molecule (inert there) |
+| R4 | ad3b38d (b3e3de6) | `.lw-menu` surface on the palette list; 24 px rows; colour strips at the right edge |
+| M1 | — | in flight (it012-m1 from 6e6886f) |
