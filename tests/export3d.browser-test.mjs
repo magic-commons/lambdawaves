@@ -18,7 +18,7 @@ try {
          define the menubar driver (menubar.browser-test.mjs's __row) plus the format readers every section shares ── */
   const boot = await g.ev(`
     __LW.pause();
-    const gridSeg = [...document.querySelectorAll('.segw')].find((s) => s.querySelector('.k-lbl') && s.querySelector('.k-lbl').textContent === 'GRID');
+    const gridSeg = [...document.querySelectorAll('.segw')].find((s) => [...s.querySelectorAll('.seg-b')].some((b) => b.textContent === '64³'));   // iteration 013 S1: the GRID seg has no word
     const b64 = [...gridSeg.querySelectorAll('.seg-b')].find((b) => b.textContent === '64³');
     b64.click();
     await __LW.settle();

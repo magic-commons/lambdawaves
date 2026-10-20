@@ -32,7 +32,7 @@ export function createInformational(app) {
   row(words, ['molName', 'listCap'], 'info-words');   // iteration 011 Q1: THE LIST CAP beside NAME — both say what the formula writes
   row(words, ['atomLabels', 'atomLabelsSize'], 'info-words');
   row(words, ['skeleton', 'skeletonOpacity', 'skeletonSize'], 'info-words info-ball');   // iteration 011 Q1: its own row; 012 R1: BALL AND STICK, shorter, OPACITY between it and SIZE
-  row(words, ['infoPos', 'infoPad'], 'info-seat');
+  const seat = row(words, ['infoPos', 'infoPad'], 'info-seat');
   const announce = group(w.body, 'ANNOUNCE');
   /* iteration 012 R1: ORBITALS is one switch for the two orbital kinds, so the pop-ups' SIZE takes the grid's last cell (where STYLE · PALETTE stood) */
   row(announce, [...INFO_ROWS.filter((r) => r.group === 'announce' && r.type === 'bool').map((r) => r.key), 'popSize'], 'info-grid');
@@ -45,10 +45,10 @@ export function createInformational(app) {
   const marks = group(cols, 'MARKS');
   row(marks, ['bead', 'ellipsoid', 'dipole'], 'info-col info-marks');
   ui.skeletonSw = ctl.skeleton.widget; ui.skeletonSize = ctl.skeletonSize.widget; ui.skeletonOpacity = ctl.skeletonOpacity.widget; ui.dipoleSw = ctl.dipole.widget; ui.beadSw = ctl.bead.widget; ui.ellipsoidSw = ctl.ellipsoid.widget;
-  /* THE FOLD (lab/fold.js): ANNOUNCE · CURSOR · MARKS behind one chevron on its own line under THE WORDS — open on a desktop, folded on a phone
-     (as MOLECULES' MORE) */
-  const more = el('div', 'row tight info-more'); words.after(more);
-  fold(more, [announce, cols], { what: 'announcements, cursor and marks', open: !isPhone() });
+  /* THE FOLD (lab/fold.js): ANNOUNCE · CURSOR · MARKS behind one chevron — open on a desktop, folded on a phone (as MOLECULES' MORE); iteration 013
+     N1 (Josh: "Shorten the buttons for position move pad knob to fit the expand window button so it's on the same row"): the chevron is the
+     seat row's last cell, after POSITION and PAD — one row less */
+  fold(seat, [announce, cols], { what: 'announcements, cursor and marks', open: !isPhone() });
   /* 0.5.4 P4 · STATUS (PLAN R8, Q12): lab/status.js' line for what owns the field — MOLECULES' kept one (per VIEW; its molecule-level line beneath), else the
      operator's — written by app.hooks.status on a landing, a VIEW or FLOW change, an owner or operator change, NEVER in a frame.  A tap: the MODEL sheet, its words. */
   /* iteration 011 Q1 (Josh 10-19: "a button that hides the extra status thingy"): the STATUS switch above it shows or hides the readout's row — the record's

@@ -195,6 +195,18 @@ export function createStageWords(app) {
     let settle = 0;
     const place = (again = true) => { stats.places++; layer.viewChanged(); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
     const rackKey = () => ['rack-hidden', 'rack-peek', 'rack-l', 'ui-hidden', 'phone', 'transport-peek'].map((c) => +document.body.classList.contains(c)).join('');
+    /* iteration 013 N2 (Josh: "When 'cursor' settings are off, the text should stay fixed and not sway"): the kit's layer parts its bodies from a
+       moving pointer (mir/info/bodies.js, 260 px of reach) whatever follow and parallax say, so with PARALLAX and DRIFT off the layer is held by
+       its own freeze while the pointer is within that reach of the block, and let go as it leaves (a rest that moved meanwhile is reached then);
+       docs/FOR-MIR.md asks the kit for the switch */
+    let stilled = false;
+    const still = (v) => { if (v !== stilled) { stilled = v; layer.freeze(v); } };
+    addEventListener('pointermove', (e) => {
+      if (!block || P.get('cursorAway') || P.get('cursorDrift')) return still(false);
+      const r = block.el.getBoundingClientRect(), dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right), dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
+      still(Math.hypot(dx, dy) < 280);
+    }, { passive: true });
+    addEventListener('blur', () => still(false)); addEventListener('pointerout', (e) => { if (!e.relatedTarget) still(false); });
     let racksAt = rackKey();
     new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     for (const [n, f] of [[document.getElementById('transport'), ['class']], [app.state.tl && app.state.tl.root, ['hidden', 'style']]]) if (n) new MutationObserver(() => place()).observe(n, { attributes: true, attributeFilter: f });

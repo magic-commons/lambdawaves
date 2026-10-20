@@ -92,7 +92,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   }
   const atomOpt = labelToggle(opts, 'atomLabels'), molOpt = labelToggle(opts, 'molLabels');
   const setHue = (deg, keep = true) => {
-    prefs.hue = ((Math.round(deg) % 360) + 360) % 360; root.style.setProperty('--mol-hue', prefs.hue + 'deg');
+    prefs.hue = ((Math.round(deg) % 360) + 360) % 360; document.documentElement.style.setProperty('--mol-hue', prefs.hue + 'deg');   // iteration 013 P2: on the page's root, so MOLECULES' picture (.mol-thumb) turns with the Picker's
     hue.setAttribute('aria-valuenow', String(prefs.hue)); hue.title = 'Hue of the molecules\u2019 pictures · ' + prefs.hue + '° — drag up or down, double-click for 0';
     if (keep) writePrefs(prefs);
   };

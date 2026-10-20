@@ -102,7 +102,7 @@ try {
        the FIELD QUALITY segments (GRID, PERFORMANCE) and the AUTO SCALE switch pressed twice — after each, settled, the three readings ── */
   const v = await g.ev(`${LIB}
     const R = LW.mod.registry, sol0 = LW.chem.solution();
-    const seg = (label, text) => { const s = [...document.querySelectorAll('.segw')].find((x) => x.querySelector('.k-lbl') && x.querySelector('.k-lbl').textContent === label);
+    const seg = (label, text) => { const s = [...document.querySelectorAll('.segw')].find((x) => (x.querySelector('.k-lbl') ? x.querySelector('.k-lbl').textContent : x.querySelector('.seg')?.getAttribute('aria-label')) === label);   // iteration 013 S1: GRID is named by aria-label alone
       const b = s && [...s.querySelectorAll('.seg-b')].find((x) => x.textContent === text); if (b) b.click(); return !!b; };
     const swi = (label) => { const b = [...document.querySelectorAll('button.sw')].find((x) => x.querySelector('.sw-lbl') && x.querySelector('.sw-lbl').textContent === label); if (b) b.click(); return !!b; };
     const read = async () => { const s = LW.chem.solution(), st = await LW.chem.workerStat();
