@@ -60,7 +60,7 @@ body.rack-hidden.rack-peek #rackAdd, body.rack-hidden.rack-peek #rackFav { opaci
 .mb-item .fav-x { float: right; color: var(--dim); margin-left: 10px; }
 .mb-item:hover .fav-x { color: var(--acc2); }
 body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* wave 133: STATUS TAGS hides the four ψ-badges, never the build offer */
-/* ── the NOTEBOOK: a free glass, no colour overlay (its blur below is overruled since iteration 011 Q5: skin.css' last rule) ── */
+/* ── the NOTEBOOK: a free glass — real blur, no colour overlay ── */
 #notebook { position: absolute; left: calc(50% - 320px); top: 12%; width: 640px; height: 460px; min-width: 320px; min-height: 240px; max-width: calc(100vw - 2 * var(--rack-w) - 40px); max-height: calc(100vh - 40px); resize: both; --nb-line: hsl(0 0% 100% / .45); --nb-btn: hsl(0 0% 100% / .18); --nb-btn-line: hsl(0 0% 100% / .35); z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; border-radius: 16px;
   border: 1px solid hsl(0 0% 100% / .45); background: transparent; -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(115%); backdrop-filter: blur(var(--glass-blur)) saturate(115%);
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / .55), 0 8px 24px hsl(0 0% 0% / .18); color: var(--fg); overflow: hidden; }

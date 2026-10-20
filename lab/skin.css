@@ -549,7 +549,7 @@ body.window-info-off .settings-help { display:none; }
 
 .native-clean[data-id="settings"] .settings-status-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
 .native-clean[data-id="settings"] .settings-status-grid > .sw { width:100%;min-width:0;box-sizing:border-box; }
-#menubar .mb-list { background:var(--glass-sheen),hsl(var(--glass-tint) / .65);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));box-shadow:var(--glass-shadow);border:1px solid var(--glass-border-color); }
+#menubar .mb-list { background:var(--glass-sheen),hsl(var(--glass-tint) / .65);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:var(--glass-shadow);border:1px solid var(--glass-border-color); }
 
 .shadow-controls { display:flex;flex-wrap:nowrap;gap:6px; }
 .shadow-controls > .segw { flex:1;min-width:0; }
@@ -813,24 +813,15 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
 .lw-info-card .info-status { display: grid; gap: 6px 8px; align-items: center; margin: 4px 0; }   /* iteration 011 Q1: the STATUS switch over its readout, on THE WORDS' grid */
 .lw-info-card .info-more > .lw-fold { flex: 0 0 30px; height: 26px; min-height: 26px; }
 
-/* ═══ iteration 011 Q5 · THE BLUR, ONLY WHERE IT BELONGS (Josh 2026-10-19: "there appears to be a rogue blurring that's on in
-   any of the UI elements, the blur should only apply to the work bars, the timeline bar and scrubber and the chips") ═══════
-   ONE LAW, LAST IN THE APP'S SHEETS: no surface paints a backdrop-filter except
-     the WORK BARS     the timeline's tool strip `.tl-toolbar` (SLICE · CLIPS · POINTS · SNAP · STEP · SLIDE · ACTIVE) and the
-                       modulation window's `.m2workbar`s (the PRESET bar and the BPM bar);
-     the TIMELINE BAR  the ruler `.tl-ruler` — the strip the playhead's flag rides and the scrubber drags (the playhead is a line,
-     AND SCRUBBER      it never carried glass);
-     the CHIPS         the kit's `.mir-chip` and the modulation rail's `.crail-chip` (both paint their disc, and its blur, on
-                       ::before), and the rack's chip stack #rackToggle · #rackAdd · #rackFav (round glass buttons, the rack's chips).
-   Everything else — the rack cards (head and body), the timeline's window and lanes, the menus, the Picker and its arrows, the
-   transport, the notebook, the keyboard pane, the modulation window's panes, every popover — keeps its tint, sheen and border
-   exactly and paints NO backdrop (a refractive pane now always looks as FROST · STILL's hold already painted it).  The kit's 38 rules
-   (lab/mir/**) and the app's own rules above still compute; this one rule overrules every one of them outside the list.
-   The three places that keep it keep THE FROST PREFERENCE's rules unchanged: they blur only under `body.frost`, stop under
-   `frost-hold`, and a phone (frost OFF, rack-wiring.js) paints no backdrop at all.  `!important` because the kit's are
-   layered and the app's are unlayered and specific; `:not(:where(…))` adds no specificity, so a later !important wins over it.
-   The occlusion mask (lab/shell/ink.js refreshOcclusion) reads painted rects, not filters: it does not move.
-   research/iteration-011/Q5-BUILD.md has the inventory, the cost and the proof. */
-:not(:where(.tl-toolbar, .tl-ruler, .m2workbar, #rackToggle, #rackAdd, #rackFav)),
-:not(:where(.mir-chip, .crail-chip))::before,
-::after { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+/* ═══ iteration 012 B1 · THE BLUR, PUT BACK (Josh 2026-10-20: "I was trying to fix a bug; why would it get rid of all the blurs if
+   I already have GUI customization for it?").  Iteration 011 Q5's allow-list is gone: the GLASS BLUR knob (`mir.gui`, lab/look.js)
+   governs every surface it governed before Q5.  Only Q5's two true findings stay, each one narrow rule:
+     THE LANES   the timeline's window and its lanes paint no backdrop, so the field reads crisp under the lanes (Josh's 10-19
+                 screenshot); the tool strip `.tl-toolbar` and the ruler `.tl-ruler` keep the frost.  (0,3,1) and later than
+                 the refractive `.glass` frost above, so it wins that tie; the kit's are layered.
+     THE MENUS   `#menubar .mb-list` blurred unconditionally (FROST off, a phone); it now frosts only under FROST, never on a
+                 phone, and stops under FROST · STILL's hold like every pane.
+   And the modulation window's ADD MACRO / ADD DEVICE sheets (`.m2pick`) wear the windows' tint, not the chassis' thin plate. */
+body.frost .mir-win.mir-timeline, body.frost .mir-timeline .tl-pane { -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.frost:not(.phone):not(.frost-hold) #menubar .mb-list { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
+body .mir-modwindow .m2pick { background-color: hsl(var(--glass-tint) / .94); }   /* a colour, not the sheen pair: the sheen is `transparent` here and a colour in a non-final background layer voids the whole declaration */
