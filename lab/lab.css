@@ -905,11 +905,37 @@ body[data-theme="light"] { --n7: hsl(350 97% 47%); }
 .picker .pk-count { font-size: var(--fs-tiny); color: var(--dim); padding-top: 2px; }
 
 /* iteration 012 I1 · the rack's window list (the kit's + list) wears the PICKER's own icons for ATOMS and MOLECULES, drawn in the
- kit's glyph seat (14 px, --dim) from lab/img/icons/ — the kit's glyph table takes no app SVG (FOR-MIR). */
-[data-rack-list] .mb-item[data-win="atoms"]::before, [data-rack-list] .mb-item[data-win="chem"]::before {
-  content: ""; flex: 0 0 auto; width: 14px; height: 14px; background: var(--dim, currentColor);
+ kit's glyph seat (14 px, --dim) from lab/img/icons/ — the kit's glyph table takes no app SVG (FOR-MIR).
+ iteration 012 M1 (Josh: "Let the icon be on the right and the text on the left like the rest"): the list is not the kit's .mir-rack-list here, so
+ its rows kept shell.css' space-between and pushed the word to the right of an icon; the word now leads at the left and every icon — the kit's
+ CURVES / FOLDERS / RENDER and these two — sits at the right edge, the favourite star after it. */
+[data-rack-list] .mb-item { justify-content: flex-start; align-items: center; }
+[data-rack-list] .mb-item > .mb-lbl { order: -1; }
+[data-rack-list] .mb-item > .mb-glyph, [data-rack-list] .mb-item > .mb-fav { margin-left: auto; }
+[data-rack-list] .mb-item > .mb-glyph ~ .mb-fav { margin-left: 0; }
+[data-rack-list] .mb-item[data-win="atoms"]::after, [data-rack-list] .mb-item[data-win="chem"]::after,
+#menubar .mb-item[data-icon]::after {
+  content: ""; flex: 0 0 auto; width: 14px; height: 14px; margin-left: auto; align-self: center; background: var(--dim, currentColor);
   -webkit-mask: url(img/icons/atomic.svg) center / contain no-repeat; mask: url(img/icons/atomic.svg) center / contain no-repeat; }
-[data-rack-list] .mb-item[data-win="chem"]::before { -webkit-mask-image: url(img/icons/molecular.svg); mask-image: url(img/icons/molecular.svg); }
+[data-rack-list] .mb-item[data-win="chem"]::after, #menubar .mb-item[data-icon="molecular"]::after { -webkit-mask-image: url(img/icons/molecular.svg); mask-image: url(img/icons/molecular.svg); }
+#menubar .mb-item[data-icon="library"]::after { -webkit-mask-image: url(img/icons/library.svg); mask-image: url(img/icons/library.svg); }
+/* WINDOW's PICKER / ATOMS / MOLECULES (notebook.js tags them): the word left, the chord, then the icon at the right edge */
+#menubar .mb-item[data-icon] { justify-content: flex-start; }
+#menubar .mb-item[data-icon] > .mb-key { margin-left: auto; }
+#menubar .mb-item[data-icon]:has(> .mb-key)::after { margin-left: 0; }
+
+/* iteration 012 M1 · FOLDERS, λWAVES' look over the kit's gallery (folders/gallery.js, untouched).  PROJECT — BASINS' "store with a picture" spot —
+   wore the same floppy as λWAVES' SAVE beside it; it wears I1's save.svg (a page filed into the library).  The NAME and SAVE TO bars each carry
+   their glyph at the left (I1's file-name.svg / folder-name.svg), so a NAME that proposes the folder's own word (DEMOS · DEMOS) still reads as
+   two different boxes. */
+.mir-folders .sv-project .trig-l > svg { display: none; }
+.mir-folders .sv-project .trig-l::before { content: ""; width: 20px; height: 20px; background: currentColor;
+  -webkit-mask: url(img/icons/save.svg) center / contain no-repeat; mask: url(img/icons/save.svg) center / contain no-repeat; }
+.mir-folders .sv-field { position: relative; }
+.mir-folders .sv-field::before { content: ""; position: absolute; left: 10px; top: 50%; width: 15px; height: 15px; margin-top: -7.5px; pointer-events: none;
+  background: var(--ink-faint, currentColor); -webkit-mask: url(img/icons/file-name.svg) center / contain no-repeat; mask: url(img/icons/file-name.svg) center / contain no-repeat; }
+.mir-folders .sv-field:has(.sv-to-input)::before { -webkit-mask-image: url(img/icons/folder-name.svg); mask-image: url(img/icons/folder-name.svg); }
+.mir-folders .sv-field > .sv-input { padding-left: 32px; }
 
 /* iteration 012 L3 · THE NOTICE ON THE PICKER'S GROUND (Josh: "reworked to not have a background window and instead share the same background as
    the main menu").  While the kit's photosensitivity notice is up (main.js adds body.lw-notice) the stage is covered by the Picker's own ground —

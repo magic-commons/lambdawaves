@@ -107,4 +107,4 @@ Serial chains (shared files): **I1 → L1 → L2 → L3** (all `lab/picker.js`);
 | R1 | ad3b38d (fba63d4) | STATUS = title-bar Aa; BALL AND STICK + OPACITY; MARKS › DIPOLE (the arrow); ORBITALS one row; CURSOR | MARKS columns; PARALLAX |
 | R3 | ad3b38d (29aea0e) | PALETTE swap + plus; CAMERA words gone, ZOOM · FOV under YAW · PITCH, sphere 40 → 64 px, CONTROLS; CLIP one row; POSITION | MOMENTUM hidden under a molecule (inert there) |
 | R4 | ad3b38d (b3e3de6) | `.lw-menu` surface on the palette list; 24 px rows; colour strips at the right edge |
-| M1 | — | in flight (it012-m1 from 6e6886f) |
+| M1 | merge of it012-m1 c8aead0 | key table audited (2 labels fixed, 4 rows added, no chord); VIEW/WINDOW/ABOUT menus; + list word-left glyph-right; WINDOW icons from I1; FOLDERS lands on DEMOS, closes after OPEN, save.svg + name/folder glyphs; WARNING → ABOUT; 4 FOR-MIR lines. Iteration 012 CLOSED |

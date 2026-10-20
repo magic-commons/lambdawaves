@@ -1,7 +1,7 @@
 /* lab/windows/settings-card.js — the SETTINGS card (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO seats: INTERFACE · THEME · SURFACE and the
  * stage hooks (app.hooks, read live) under THEME and SURFACE's header; boot() calls createFieldQuality() where FIELD QUALITY stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
+import { el, knob, sw, seg, readout, group } from '../mir/kit.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
     { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, modHand, look, applyAccent, paintMarks, field } = app.ctl;
@@ -30,7 +30,7 @@ export function createSettingsCard(app) {
       { id: 'rgb', label: 'RGB', title: 'Use red, green, and blue axes' }],
       onChange: (v) => { mat.axisInk = v; saveSettings(); schedule(TIER.PRESENT); } });
     rc.appendChild(ui.axisInkSeg.root);
-    ri.appendChild(trig({ label: 'SHOW THE WARNING AGAIN', title: 'Show the photosensitivity notice now and on the next load', onFire: () => { if (app.hooks.warning) { app.hooks.warning.reset(); app.hooks.warning.show(); } } }).root);
+    /* iteration 012 M1 (Josh 10-20: "In settings window, 'WARNING' should be in the 'ABOUT' menu dropdown"): SHOW THE WARNING AGAIN is ABOUT › PHOTOSENSITIVITY WARNING… (notebook.js MENUS) */
     el('div', 'note', gi).innerHTML = '<b>Settings.</b> Appearance and performance choices are stored in this browser. Window power stops its reader; collapse changes layout; close removes the window until reopened from + or WINDOW.';
     const gt = group(ui.set.body, 'THEME  ·  SURFACE');
     const rt = el('div', 'row tight', gt);

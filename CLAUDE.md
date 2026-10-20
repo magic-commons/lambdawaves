@@ -307,7 +307,7 @@ modulation window is in the kit's one window stack (`registerWindow`).
 The CAMERA card's LOCK (PREFERENCE `camLock`, off by default) is the classic camera. It holds the pan only: the shift stays 0,
 every zoom (the wheel, the pinch, the dials, the dolly zoom) is from the centre, the PAN pad rests, and a route on observer.panx/pany
 or a project's shift opens centred without its record being written. FOV, CONTROL and the turn stay live (`lab/camera-law.js`
-`setLock`). Alt(+Shift)+Drag is the 1:1 pan; Shift does not make it finer (0.5.3 M6, M7).
+`setLock`). Alt(+Shift)+Drag is the 1:1 pan; Shift does not make it finer (0.5.3 M6, M7). Since iteration 012 M1 the table carries `mode` (ATOMS | MOLECULES), `ballStick`, `render` and `curves`, each with no chord; VIEW has the mode and BALL AND STICK rows, ABOUT has PHOTOSENSITIVITY WARNING… (SETTINGS has no WARNING), WINDOW lists FOLDERS once (the `projects` card is in + only), and WINDOW's PICKER / ATOMS / MOLECULES rows wear I1's icons (notebook.js `tagIcons` after the kit's fill, a lab.css mask); the + list puts the word left and every glyph right. Since iteration 012 M1 FOLDERS opens on DEMOS while ROOT holds none of the reader's projects (`projects.js` `demosFirst`, the window's and the card's onOpen), closes after an OPEN its own adapter took (`landed`; never for the facade's telling), PROJECT wears `save.svg` and NAME / SAVE TO carry `file-name.svg` / `folder-name.svg`. There is one demo (WAVE DANCER PROTOTYPE, iteration 009), not eleven.
 
 A held WASD key turns the camera every frame from 120 ms after its press (iteration 012 O1, `camera-law.js` `queueKeyOrbit(yaw, pitch, id)` holds and `(0, 0, id)` releases through the rows' `up`); a tap is still one eased 0.12 rad step.
 
