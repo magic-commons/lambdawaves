@@ -97,12 +97,25 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
   }
   /* Key presses add a small orbit to a time-based easing queue. Repeats accumulate while held;
      a released key finishes its queued travel without leaving a perpetual camera drive. */
-  const keyOrbit = { yaw: 0, pitch: 0 };
-  const keyOrbitMoving = () => Math.abs(keyOrbit.yaw) + Math.abs(keyOrbit.pitch) > 0;
-  function queueKeyOrbit(yaw, pitch) { if (!keyOrbitMoving()) resetWall();
+  /* iteration 012 O1 (Josh: "reduce the delay when rotating the molecule via keyboard"): a HELD key no longer waits on the system's
+     auto-repeat (500 ms before the first repeat, then one 0.12 rad step every 30 ms on this desktop).  A press with an `id` (WASD's rows)
+     queues its one eased step as before, so a tap is unchanged; KEY_HOLD_MS after the press a still-held key turns the camera EVERY FRAME at
+     the step's rate (step / 30 ms, the old repeat's speed) until its release — `queueKeyOrbit(0, 0, id)`, the row's `up`, which the kit also
+     runs when the page loses the focus — so no step quantisation and never a perpetual drive.  An auto-repeat of a held id is ignored */
+  const KEY_HOLD_MS = 120, KEY_RATE = 1 / 0.030;
+  const keyOrbit = { yaw: 0, pitch: 0 }, keyHeld = new Map();
+  const queued = () => Math.abs(keyOrbit.yaw) + Math.abs(keyOrbit.pitch) > 0;
+  const keyOrbitMoving = () => queued() || keyHeld.size > 0;
+  function queueKeyOrbit(yaw, pitch, id) {
+    if (id !== undefined) { if (!yaw && !pitch) { keyHeld.delete(id); return; } if (keyHeld.has(id)) return; }
+    if (!keyOrbitMoving()) resetWall();
+    if (id !== undefined) keyHeld.set(id, { yaw, pitch, t0: performance.now() });
     keyOrbit.yaw += yaw; keyOrbit.pitch += pitch; present(); }
   function stepKeyOrbit(dt) {
     if (!keyOrbitMoving()) return false;
+    const now = performance.now(), d = Math.max(0, dt) * KEY_RATE;
+    for (const h of keyHeld.values()) if (now - h.t0 >= KEY_HOLD_MS) orbitBy(h.yaw * d, h.pitch * d);
+    if (!queued()) return true;
     const k = 1 - Math.exp(-Math.max(0, dt) / 0.065);
     const y = Math.abs(keyOrbit.yaw) < 0.00015 ? keyOrbit.yaw : keyOrbit.yaw * k;
     const p = Math.abs(keyOrbit.pitch) < 0.00015 ? keyOrbit.pitch : keyOrbit.pitch * k;

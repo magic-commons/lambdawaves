@@ -87,6 +87,10 @@ export function createOrbitals(host, api) {
   const NO_VIRTUAL = 'this basis has no virtual orbital';
   const level = (k) => { let a = k, b = k; while (a > 0 && Math.abs(sol.eps[a - 1] - sol.eps[k]) < DEG) a--; while (b + 1 < sol.nAO && Math.abs(sol.eps[b + 1] - sol.eps[k]) < DEG) b++; return Array.from({ length: b - a + 1 }, (_, i) => a + i); };
   const pairAt = (k) => carried(k) && carried(k + 1) && Math.abs(sol.eps[k + 1] - sol.eps[k]) < DEG;
+  const span = (a, b) => (b > a ? Array.from({ length: b - a }, (_, i) => a + i) : null);
+  /** the carried valence orbitals grouped into ladder lines (a degenerate level is one line) */
+  const lines = () => { const out = []; for (let k = Math.min(nCore(), sol.nocc - 1); k < sol.nAO; k++) { if (!carried(k)) continue; const L = out.at(-1); if (L && Math.abs(sol.eps[k] - sol.eps[L[0]]) < DEG) L.push(k); else out.push([k]); } return out; };
+  const alternate = (r) => { const ks = lines().filter((_, i) => i % 2 === r).flat(); return ks.length ? ks : null; };
   const ORB_PRESETS = {
     'HOMO': [(h) => [h], ''], 'LUMO': [(h, l) => [l], NO_VIRTUAL], 'HOMO + LUMO': [(h, l) => [h, l], NO_VIRTUAL],
     'FRONTIER FOUR': [(h, l) => [h - 1, h, l, l + 1], 'it needs two occupied and two virtual orbitals'],
@@ -94,11 +98,21 @@ export function createOrbitals(host, api) {
     'WINDING': [(h, l) => { let k = pairAt(h - 1) ? h - 1 : pairAt(l) ? l : -1; for (let q = sol.nAO - 2; k < 0 && q >= 0; q--) if (pairAt(q)) k = q; return k < 0 ? null : [k, k + 1]; },
       'no degenerate orbital pair in this molecule — a winding phase needs a twofold level', [0, Math.PI / 2]],
     'OCCUPIED': [(h) => { const c = Math.min(nCore(), h); return Array.from({ length: h + 1 - c }, (_, i) => c + i); }, ''],
+    /* iteration 012 R2 (Josh: "All Even / All Odd … everything below HOMO, everything above LUMO"): a LINE is a ladder row (a degenerate
+       level whole, as the paint law takes it), counted upward from the first valence line; ODD is lines 1, 3, 5 …, EVEN 2, 4, 6 … over the
+       lines this record carries.  BELOW HOMO and ABOVE LUMO are spans, so a record that lacks one of their orbitals refuses with its sentence */
+    'ALL ODD': [() => alternate(0), 'no valence line on this ladder'], 'ALL EVEN': [() => alternate(1), 'it needs two valence lines'],
+    'BELOW HOMO': [(h) => span(Math.min(nCore(), h), level(h)[0]), 'no valence level below the HOMO'],
+    'ABOVE LUMO': [(h, l) => (l < sol.nAO ? span(level(l).at(-1) + 1, sol.nAO) : null), 'no virtual level above the LUMO'],
+    'VIRTUAL': [(h, l) => span(l, sol.nAO), NO_VIRTUAL],
+    'DEGENERATE': [() => { const ks = lines().filter((L) => L.length > 1).flat(); return ks.length ? ks : null; }, 'no degenerate level in this molecule'],
+    'INVERT': [() => { const ks = []; for (let k = 0; k < sol.nAO; k++) if (carried(k) && !sel.has(k)) ks.push(k); return ks.length ? ks : null; }, 'the register holds every orbital: its inverse is empty'],
   };
   const bar = el('div', 'row tight reg-bar', host);
   const presetSel = el('select', 'sel', bar); presetSel.setAttribute('aria-label', 'register preset');
   presetSel.title = 'HOMO, LUMO: one orbital. HOMO + LUMO: the frozen-orbital beat. FRONTIER FOUR: HOMO−1 to LUMO+1, four orbitals. HOMO SET, LUMO SET: the whole degenerate level. '
-    + 'WINDING: a degenerate orbital pair a quarter turn apart — a phase that winds around the ring under a stationary density. OCCUPIED: every valence orbital, equal phase';
+    + 'WINDING: a degenerate orbital pair a quarter turn apart — a phase that winds around the ring under a stationary density. OCCUPIED: every valence orbital, equal phase. '
+    + 'ALL ODD, ALL EVEN: every other ladder line from the first valence line. BELOW HOMO, ABOVE LUMO, VIRTUAL: the spans they name. DEGENERATE: every degenerate level. INVERT: every orbital the register does not hold';
   { const o = el('option', '', presetSel, 'PRESET…'); o.value = ''; for (const p of Object.keys(ORB_PRESETS)) { const q = el('option', '', presetSel, p); q.value = p; } }
   /* a HAND's preset is announced on the stage (0.4.0 S3 · F2) by its rule and the orbitals the names give it —
      `WINDING · $1e_{1g}$ (a) + (b)`, `HOMO + LUMO · $1b_{1}$ + $4a_{1}$`; preset() itself (an API, a restore) says nothing */

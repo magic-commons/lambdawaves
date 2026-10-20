@@ -51,10 +51,10 @@ export function createKeys(app) {
     ...(ASK_ENABLED ? [{ id: 'ask', group: KG.T, short: 'ask Gemma', label: 'ask Gemma — the transport strip becomes the type box', key: 'Slash', shift: false, inFields: false, run: () => transport.openAsk() }] : []),   // 0.6.6 G2; iteration 011 Q6: the row only under ASK_ENABLED (lab/ask.js) — off, a saved `ask` chord is kept, inert (createKeyTable's `keep`)
     { id: 'zoomIn', group: KG.C, short: 'zoom in', label: 'camera closer', key: 'ArrowUp', run: (f) => { setDist(obs.dist / (1 + 0.12 * f)); } },
     { id: 'zoomOut', group: KG.C, short: 'zoom out', label: 'camera farther', key: 'ArrowDown', run: (f) => { setDist(obs.dist * (1 + 0.12 * f)); } },
-    { id: 'yawL', group: KG.C, short: 'yaw left', label: 'camera yaw left', key: 'KeyA', run: (f) => queueKeyOrbit(-0.12 * f, 0) },
-    { id: 'yawR', group: KG.C, short: 'yaw right', label: 'camera yaw right', key: 'KeyD', run: (f) => queueKeyOrbit(0.12 * f, 0) },
-    { id: 'pitchUp', group: KG.C, short: 'pitch up', label: 'camera pitch up', key: 'KeyW', run: (f) => queueKeyOrbit(0, 0.12 * f) },
-    { id: 'pitchDn', group: KG.C, short: 'pitch down', label: 'camera pitch down', key: 'KeyS', run: (f) => queueKeyOrbit(0, -0.12 * f) },   // R-K1: S stays WASD's (the kit's S is FOLDERS)
+    { id: 'yawL', group: KG.C, short: 'yaw left', label: 'camera yaw left', key: 'KeyA', run: (f) => queueKeyOrbit(-0.12 * f, 0, 'yawL'), up: () => queueKeyOrbit(0, 0, 'yawL') },
+    { id: 'yawR', group: KG.C, short: 'yaw right', label: 'camera yaw right', key: 'KeyD', run: (f) => queueKeyOrbit(0.12 * f, 0, 'yawR'), up: () => queueKeyOrbit(0, 0, 'yawR') },
+    { id: 'pitchUp', group: KG.C, short: 'pitch up', label: 'camera pitch up', key: 'KeyW', run: (f) => queueKeyOrbit(0, 0.12 * f, 'pitchUp'), up: () => queueKeyOrbit(0, 0, 'pitchUp') },
+    { id: 'pitchDn', group: KG.C, short: 'pitch down', label: 'camera pitch down', key: 'KeyS', run: (f) => queueKeyOrbit(0, -0.12 * f, 'pitchDn'), up: () => queueKeyOrbit(0, 0, 'pitchDn') },   // R-K1: S stays WASD's (the kit's S is FOLDERS)
     { id: 'dollyIn', group: KG.C, short: 'dolly in', label: 'dolly in', key: 'KeyQ', shift: false, run: (f) => dolly(-1, f) },
     { id: 'dollyOut', group: KG.C, short: 'dolly out', label: 'dolly out', key: 'KeyE', shift: false, run: (f) => dolly(1, f) },
     { id: 'povIn', group: KG.C, short: 'POV tighter', label: 'POV tighter (field of view)', key: 'KeyQ', shift: true, run: () => pov(-1, 1) },

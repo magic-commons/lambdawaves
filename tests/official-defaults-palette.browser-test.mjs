@@ -8,7 +8,8 @@ const g = await open(url, { width: 1280, height: 900, script: 30000 });
 try {
   assert.equal((await g.waitFor('window.__LW?.ready', 200, 100)).ok, 1);
   const fresh = await g.ev(`const b=document.body, S=document.querySelector('.dev[data-id="settings"]');
-    const vivid=[...S.querySelectorAll('.k')].find(k=>k.querySelector('.k-lbl')?.textContent==='VIVID');
+    /* iteration 012 O1: VIVID left SETTINGS for the kit's look store in iteration 003 G (MIR OPTIONS); the law reads the store */
+    const look=__LW.look.get(), vivid=typeof look==='object'&&look?look.vivid:__LW.look.get('vivid');
     return {tags:b.classList.contains('no-badges'),captions:b.classList.contains('no-captions'),
       hints:!b.classList.contains('control-hints-off'),helpOff:b.classList.contains('window-info-off'),
       lean:[...document.querySelectorAll('.dev-lean')].every(k=>k.closest('.dev').classList.contains('lean')),
@@ -18,7 +19,7 @@ try {
       auto:__LW.quality.auto,domain:__LW.domain.auto,governor:__LW.governor.on,
       theme:__LW.themeChoice,card:__LW.cardStyle,frost:__LW.frost,
       blur:getComputedStyle(document.documentElement).getPropertyValue('--glass-blur').trim(),
-      vivid:+vivid.getAttribute('aria-valuenow'),errors:__e.slice()};`);
+      vivid:+vivid,errors:__e.slice()};`);
   assert.deepEqual(fresh, { tags:true,captions:true,hints:true,helpOff:true,lean:true,aaHidden:true,chemAaShown:true,
     auto:true,domain:true,governor:true,theme:'light',card:'refractive',frost:'always',
     blur:'22px',vivid:.5,errors:[] });
@@ -61,7 +62,8 @@ try {
   await go(g.s, url);
   assert.equal((await g.waitFor('window.__LW?.ready', 200, 100)).ok, 1);
   const saved = await g.ev(`const b=document.body,S=document.querySelector('.dev[data-id="settings"]');
-    const vivid=[...S.querySelectorAll('.k')].find(k=>k.querySelector('.k-lbl')?.textContent==='VIVID');
+    /* iteration 012 O1: VIVID left SETTINGS for the kit's look store in iteration 003 G (MIR OPTIONS); the law reads the store */
+    const look=__LW.look.get(), vivid=typeof look==='object'&&look?look.vivid:__LW.look.get('vivid');
     return {tags:!b.classList.contains('no-badges'),captions:!b.classList.contains('no-captions'),
       hints:!b.classList.contains('control-hints-off'),help:!b.classList.contains('window-info-off'),
       notes:[...document.querySelectorAll('.dev-lean')].every(k=>!k.closest('.dev').classList.contains('lean')),
@@ -69,10 +71,11 @@ try {
       auto:__LW.quality.auto,governor:__LW.governor.on,theme:__LW.themeChoice,
       card:__LW.cardStyle,frost:__LW.frost,
       blur:getComputedStyle(document.documentElement).getPropertyValue('--glass-blur').trim(),
-      vivid:+vivid.getAttribute('aria-valuenow'),
+      vivid:+vivid,
       // 0.5.0 C2 · THE LOOK LIFT: the older blob's look (and HELP's own key) went into the kit's store, once, and left
       left:['theme','card','cardSet','frost','disc','blur','accent','badges','controlHints','hint'].filter(k=>k in JSON.parse(localStorage.getItem('lambdawaves.q0.settings')||'{}')),
-      helpKey:localStorage.getItem('lw-window-info'),gui:JSON.parse(localStorage.getItem('mir.gui')||'null'),errors:__e.slice()};`);
+      helpKey:localStorage.getItem('lw-window-info'),gui:(()=>{const g=JSON.parse(localStorage.getItem('mir.gui')||'null');   /* iteration 012 O1: the kit's store now writes its whole record; the law reads the lifted keys */
+        return g&&Object.fromEntries(['theme','accentA','accentB','vivid','card','frost','blur','disconnected','hints','help','badges'].filter(k=>k in g).map(k=>[k,g[k]]));})(),errors:__e.slice()};`);
   // the kit's blur row writes `14px` (its map is v + 'px'); the stored look is the kit's record, the blob keeps none of it
   assert.deepEqual(saved, { tags:true,captions:true,hints:false,help:true,notes:true,aaShown:true,
     auto:false,governor:false,theme:'dark',card:'tinted',frost:'off',blur:'14px',vivid:.1,left:[],helpKey:null,
