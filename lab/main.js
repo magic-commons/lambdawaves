@@ -23,12 +23,13 @@ const warned = { getItem: () => (blob.read().warned === true ? '1' : null), setI
   removeItem: () => blob.write({ ...blob.read(), warned: false }) };
 const warning = (() => {
   let open = false; const accepted = [];
-  const accept = () => { if (!open) return; open = false; warned.setItem(); while (accepted.length) { try { accepted.shift()(); } catch (_) {} } };
+  const accept = () => { if (!open) return; open = false; warned.setItem(); while (accepted.length) { try { accepted.shift()(); } catch (_) {} }
+    const m = document.getElementById('lwMenu'); if (!m || m.hidden) document.body.classList.remove('lw-notice'); };   // the Picker, when it opened, lifts the ground itself (picker.js)
   const press = (n) => { const b = document.querySelector('.mir-dialog[data-kind="notice"] .trig[data-kind="primary"]'); if (b) b.click(); else if (n) setTimeout(() => press(n - 1), 50); };
   return {
     needed(o) { const q = new URLSearchParams(o && o.query !== undefined ? o.query : location.search);
       return (o && o.driver !== undefined ? o.driver : navigator.webdriver === true) && q.get('opener') !== '1' ? q.get('warn') === '1' : !warned.getItem(); },
-    show() { if (open) return false; open = true;
+    show() { if (open) return false; open = true; document.body.classList.add('lw-notice');   // iteration 012 L3: the notice on the Picker's own ground, no pane (lab.css)
       photosensitivityNotice({ key: 'warned', storage: warned, force: true, art: './img/warning-sign.png', alt: 'Caution triangle filled with a λWAVES orbital, the exclamation mark knocked out of it' }).then(accept);
       return true; },
     dismiss() { if (!open) return false; accept(); press(40); return true; },

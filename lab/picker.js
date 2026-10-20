@@ -114,7 +114,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   };
   /* ── a tile: the picture moves, the name shows under it; nothing else changes on a hover ── */
   /* a picture of ours (img/menu/, sw.js DATA) is kept on the device once it has loaded (library.js keepData); a volume's is its own */
-  const pic = (host, src) => { const i = el('img', 'mm-pic', host); i.alt = ''; i.decoding = 'async'; i.loading = 'lazy'; i.draggable = false; i.addEventListener('error', () => { i.remove(); }); if (src) { develop(i); i.addEventListener('load', () => keepData(src), { once: true }); i.src = src; } return i; };
+  let hot = false;   // iteration 012 L3: true while the page on show of the section in view is being made — its pictures are asked for first
+  const pic = (host, src) => { const i = el('img', 'mm-pic', host); i.alt = ''; i.decoding = 'async'; i.loading = hot ? 'eager' : 'lazy'; if (hot) i.fetchPriority = 'high'; i.draggable = false; i.addEventListener('error', () => { i.remove(); }); if (src) { develop(i); i.addEventListener('load', () => keepData(src), { once: true }); i.src = src; } return i; };
   const tile = (host, cls, info, go, off) => {
     const b = el('button', 'mm-tile ' + cls, host); b.type = 'button';
     if (off) { b.classList.add('off'); b.setAttribute('aria-disabled', 'true'); }
@@ -133,9 +134,11 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const arrow = (dir) => { const b = el('button', 'mm-arrow ' + (dir < 0 ? 'mm-prev' : 'mm-next'), wrap); b.type = 'button';
       b.setAttribute('aria-label', dir < 0 ? 'previous page' : 'next page'); icon(b, dir < 0 ? 'arrow-left' : 'arrow-right'); b.addEventListener('click', () => pageTo(page + dir)); return b; };
     const arrows = [arrow(-1), arrow(1)];
-    let list = [], make = null, pages = [], page = 0, per = 1;
-    const fill = (k) => { const p = pages[k]; if (!p || p.dataset.full) return; p.dataset.full = '1'; for (let i = k * per; i < Math.min(list.length, (k + 1) * per); i++) make(list[i], p); };
-    const near = (k) => { for (let j = k - 1; j <= k + 1; j++) fill(j); };
+    let list = [], make = null, pages = [], page = 0, per = 1, laid = '';
+    const fill = (k) => { const p = pages[k]; if (!p || p.dataset.full) return; p.dataset.full = '1';
+      hot = k === page && host.closest('.mm-sec') === current.sec;
+      try { for (let i = k * per; i < Math.min(list.length, (k + 1) * per); i++) make(list[i], p); } finally { hot = false; } };
+    const near = (k) => { fill(k); fill(k - 1); fill(k + 1); };   // the page first, then its neighbours (iteration 012 L3: the requests in that order)
     function paint() {
       arrows[0].disabled = page <= 0; arrows[1].disabled = page >= pages.length - 1; foot.style.visibility = pages.length < 2 ? 'hidden' : '';   // iteration 012 L1: a one-page deck keeps the line, so the head never moves
       if (pages.length <= 16) {
@@ -163,7 +166,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     function lay() {
       if (root.hidden || !make || !host.getClientRects().length) return;
-      const first = page * per, g = size(); per = g.cols * g.rows;
+      const g = size(), key = [g.t, g.cols, g.rows].join();
+      if (key === laid && pages.length) { paint(); return; }   // iteration 012 L3: the same geometry keeps its tiles (the open's first ResizeObserver call rebuilt every deck and asked for every picture again)
+      laid = key; const first = page * per; per = g.cols * g.rows;
       for (const e of [pagesEl, host]) { e.style.setProperty('--t', g.t + 'px'); e.style.setProperty('--cols', String(g.cols)); e.style.setProperty('--gap', g.gap + 'px'); e.style.setProperty('--rows', String(g.rows)); }   // the host's: a head row (the LIBRARY's) as wide as the page
       pagesEl.textContent = ''; pages = [];
       for (let i = 0; i < Math.max(1, Math.ceil(list.length / per)); i++) pages.push(el('div', 'mm-page', pagesEl));
@@ -186,7 +191,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         a.style.setProperty('--glyph-scale', (1 + g * g * 0.075).toFixed(4)); a.style.setProperty('--near', isNear ? '1' : '0');
       }
     });
-    const d = { set(l, m) { list = l; make = m; page = 0; per = 1; lay(); }, lay, pageTo, get tiles() { return pages[page] ? [...pages[page].children] : []; }, get count() { return list.length; } };
+    const d = { set(l, m) { list = l; make = m; page = 0; per = 1; laid = ''; lay(); }, lay, pageTo, get tiles() { return pages[page] ? [...pages[page].children] : []; }, get count() { return list.length; } };
     decks.push(d); return d;
   }
 
@@ -436,13 +441,43 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     if (app.w.fillValence) app.w.fillValence();                         // every valence subshell (outside the noble-gas core), every m, in phase (SPECTRUM's own road); the tile shows the block's subshell alone
   }
   /* ── open / close: shown or hidden, nothing rebuilt; the iris opens from the home button (R8), the way back is instant ── */
-  function open() {
+  /* THE ENTRANCE (iteration 012 L3, Josh: "the main menu fades in, the logo slides in from the top, the icons appear, fading in, easing upwards,
+     the molecules start appearing one by one in sequence"): a first run's open, straight after the notice's CONTINUE, on the MOLECULAR deck.
+     The menu fades (no iris), the logo drops, the nav · tabs · labels rise (skin.css #lwMenu.first); the first page's tiles come one at a time
+     in reading order, each at its turn AND once its picture has decoded (its request went first: `hot`), so no tile shows empty and none
+     waits on a picture further down; under reduced motion the end state at once.  The notice's ground (body.lw-notice) is lifted after. */
+  function entrance(tiles) {
+    if (RM.matches) return;
+    const t0 = performance.now(), wait = (ms) => new Promise((r) => setTimeout(r, Math.max(0, ms)));
+    let chain = wait(300), last = 270;   // the deck's own fade first; then one tile every 30 ms at the soonest, never out of turn
+    for (const t of tiles) {
+      const img = t.querySelector('.mm-pic');
+      t.style.opacity = '0';
+      const ready = img && !img.complete ? Promise.race([new Promise((r) => { img.addEventListener('load', r, { once: true }); img.addEventListener('error', r, { once: true }); }), wait(2500)]) : null;
+      chain = chain.then(() => ready).then(() => wait(last + 30 - (performance.now() - t0))).then(() => {
+        last = performance.now() - t0; t.style.opacity = '';
+        if (img) for (const x of img.getAnimations()) x.finish();   // the tile's own rise is the picture's arrival: no second develop
+        animate(t, [{ opacity: 0, translate: '0 10px', scale: '.96' }], 420);
+      });
+    }
+  }
+  function open(o) {
     if (!root.hidden) return;
+    const first = !!(o && o.first);
     const r = home.getBoundingClientRect();
     root.style.setProperty('--ox', r.width ? r.left + r.width / 2 + 'px' : '50%'); root.style.setProperty('--oy', r.width ? r.top + r.height / 2 + 'px' : '50%');
+    root.classList.toggle('first', first);
+    if (first) { current = sections[1]; show(current); }   // before the decks are laid, so the MOLECULAR page is the one asked for first
     root.hidden = false; document.body.classList.add('menu-open'); said = null; say(null); ro.observe(scroller);
+    if (first) sections[1].sec.scrollIntoView({ block: 'start' });
     for (const d of decks) d.lay();
     if (current.id !== 'atomic') readStore();
+    if (first) {
+      requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); entrance(molDeck.tiles); });
+      setTimeout(() => { document.body.classList.remove('lw-notice'); }, 700);
+      setTimeout(() => { root.classList.remove('first'); }, 2600);
+      return;
+    }
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? [...table.children] : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
   function close() { if (root.hidden) return; ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }

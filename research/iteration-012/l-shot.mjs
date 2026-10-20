@@ -9,7 +9,7 @@ const SHOTS = new URL('./l-shots/', import.meta.url); mkdirSync(SHOTS, { recursi
 const url = `https://127.0.0.1:${process.env.LW_PORT || 9501}/lab/${query}`;
 const g = await open(url, { width: 1920, height: 1080, script: 120000 });
 try {
-  await g.waitFor('window.__LW?.ready', 400, 100);
+  await g.waitFor(process.env.SHOT_READY || 'window.__LW?.ready', 400, 100);   // SHOT_READY: another page expression to wait for (the notice holds LW.ready)
   const r = await g.ev(js);
   if (r && r.E) throw new Error('page threw: ' + r.E);
   await g.ev(`await new Promise((r) => setTimeout(r, ${Number(wait) || 0})); return 1;`);

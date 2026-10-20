@@ -819,6 +819,17 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 @media (prefers-reduced-motion: reduce) {
   #lwMenu .mm-navb, #lwMenu .mm-hue-ring, #lwMenu .mm-mol .mm-pic, #lwMenu .mm-tab .mm-ico, #lwMenu .mm-lbl, #lwMenu .mm-el .mm-sym, #lwMenu .mm-el .mm-z { transition: none; animation: none; } }
 
+/* iteration 012 L3 · THE ENTRANCE (a first run, after CONTINUE): the menu fades in (no iris), the logo drops from the top, the nav, the tabs and
+   SHOW LABELS rise in turn; picker.js deals the MOLECULAR tiles one by one.  Reduced motion: the end state at once. */
+#lwMenu.first { clip-path: none; transition: opacity .6s ease; }
+#lwMenu.first.in .mm-logo { animation: mm-drop 820ms var(--ease) both; }
+#lwMenu.first.in .mm-nav { animation: mm-up 620ms var(--ease) 260ms both; }
+#lwMenu.first.in .mm-tabs { animation: mm-up 620ms var(--ease) 340ms both; }
+#lwMenu.first.in .mm-opts { animation: mm-up 620ms var(--ease) 420ms both; }
+@keyframes mm-drop { from { opacity: 0; translate: 0 -56px; } }
+@keyframes mm-up { from { opacity: 0; translate: 0 14px; } }
+@media (prefers-reduced-motion: reduce) { #lwMenu.first { transition: none; } #lwMenu.first.in .mm-logo, #lwMenu.first.in .mm-nav, #lwMenu.first.in .mm-tabs, #lwMenu.first.in .mm-opts { animation: none; } }
+
 /* the way back: the grid glyph left of ATOMS | MOLECULES */
 #lwHome { position: absolute; left: calc(var(--rack-w) + 24px); top: 46px; z-index: var(--z-chrome); width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
   border: 0; border-radius: 8px; background: none; color: var(--fg); opacity: .7; cursor: pointer; }

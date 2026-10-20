@@ -904,3 +904,13 @@ body[data-theme="light"] { --n7: hsl(350 97% 47%); }
   content: ""; flex: 0 0 auto; width: 14px; height: 14px; background: var(--dim, currentColor);
   -webkit-mask: url(img/icons/atomic.svg) center / contain no-repeat; mask: url(img/icons/atomic.svg) center / contain no-repeat; }
 [data-rack-list] .mb-item[data-win="chem"]::before { -webkit-mask-image: url(img/icons/molecular.svg); mask-image: url(img/icons/molecular.svg); }
+
+/* iteration 012 L3 · THE NOTICE ON THE PICKER'S GROUND (Josh: "reworked to not have a background window and instead share the same background as
+   the main menu").  While the kit's photosensitivity notice is up (main.js adds body.lw-notice) the stage is covered by the Picker's own ground —
+   its tint, its frost — under the notice's z, and the notice loses its pane: the art, the words and CONTINUE stand on the ground.  The notice is
+   still the kit's (mir/shell/flash-guard.js, untouched); the Picker lifts the ground once it has faded in over it (picker.js THE ENTRANCE). */
+body.lw-notice::before { content: ""; position: fixed; inset: 0; z-index: calc(var(--z-banner) + 5); background: hsl(var(--glass-tint) / .985); pointer-events: auto; }
+body.frost.lw-notice::before { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: blur(28px) saturate(1.25); backdrop-filter: blur(28px) saturate(1.25); }
+body.lw-notice .mir-dialog.glass[data-kind="notice"] { background: none; border-color: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.lw-notice .mir-dialog[data-kind="notice"]::before, body.lw-notice .mir-dialog[data-kind="notice"]::after { display: none; }
+body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #transport { visibility: hidden; opacity: 0; }   /* as under the Picker (skin.css menu-open) */
