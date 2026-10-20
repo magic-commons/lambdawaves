@@ -24,6 +24,7 @@ export function createMolecules(app) {
     wChem.root.hidden = !v;                                          // iteration 008 U: the one card (the register lives in it)
     modeSeg.set(v ? 'molecules' : 'atoms');
     if (v && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
+    if (ui.spaceSeg) ui.spaceSeg.root.hidden = !!v;                 // iteration 012 R3: POSITION | MOMENTUM is inert under a molecule (field.js: a set molecule owns the volume, the eigenmode kernel and its SPACE stand down) — hidden while MOLECULES owns the field
     if (!v) switchHamiltonian(getHamiltonian().id);                  // restore the atom's own hiding rules
     if (ui.hamSeg) ui.hamSeg.set(getHamiltonian().id);               // 0.7.4 C1: SPECTRUM's ‹ SYSTEM › reads back what owns the field
     app.state.refSnapshot = null; app.state.pendingRef = null;

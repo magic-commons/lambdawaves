@@ -13,9 +13,11 @@ export const INFO_KEY = 'lambdawaves.q0.info';
 export const KINDS = Object.freeze([
   { id: 'preset', key: 'sayPreset', seat: 'fade', label: 'PRESETS', hint: 'A hand\'s preset — SPECTRUM\'s PRESET (a pick of the one shown reloads it), the register\'s ORBITAL and STATES presets in MOLECULES, a notebook link — named in the formula\'s seat for 2.4 s' },
   { id: 'head', key: 'sayHead', seat: 'head', label: 'MOLECULE HEAD', hint: 'A hand pick of a molecule shows its head once the solve lands — formula and name, method and E, the HOMO and the gap, its STATUS — held until Escape or a press on the picture' },
-  { id: 'registry', key: 'sayRegistry', seat: 'pop', label: 'REGISTRY ADDS', hint: 'The orbital a hand just added to MOLECULES\' register' },
+  /* iteration 012 R1 (Josh 10-20: "Merge the function 'Orbital Dial' and 'Registry Adds'"): ONE switch, ORBITALS, speaks for both kinds — the orbital kind
+     reads the registry's key, so a stored `sayOrbital` is simply never read again and the window's grid has room for the pop-ups' SIZE */
+  { id: 'registry', key: 'sayRegistry', seat: 'pop', label: 'ORBITALS', hint: 'The orbital a hand just added to MOLECULES\' register, and the orbital MOLECULES\' ORBITAL dial lands on while a hand turns it' },
   { id: 'view', key: 'sayView', seat: 'pop', label: 'WAVE VIEW', hint: 'WAVE\'s OBSERVABLE and MOLECULES\' VIEW, as a hand changes them' },
-  { id: 'orbital', key: 'sayOrbital', seat: 'pop', label: 'ORBITAL DIAL', hint: 'The orbital MOLECULES\' ORBITAL dial lands on, while a hand turns it' },
+  { id: 'orbital', key: 'sayRegistry', seat: 'pop', label: 'ORBITALS' },
   { id: 'basis', key: 'sayBasis', seat: 'pop', label: 'BASIS · METHOD', hint: 'MOLECULES\' BASIS and METHOD, as a hand picks them' },
   { id: 'rate', key: 'sayRate', seat: 'pop', label: 'RATE', hint: 'The time multiplier (the transport\'s RATE), while a hand turns it' },
   { id: 'style', key: 'sayStyle', seat: 'pop', label: 'STYLE · PALETTE', hint: 'WAVE\'s draw STYLE, PALETTE on or off and a palette preset, as a hand picks them' },
@@ -36,16 +38,20 @@ export const INFO_ROWS = Object.freeze([
   { key: 'atomLabelsSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'labels', label: 'SIZE', fmt: pct, hint: 'The ATOM LABELS\' size: 100% is the notebook\'s body (14 px)' },
   { key: 'infoPos', type: 'enum', values: ['top', 'bottom'], default: 'top', group: 'seat', label: 'POSITION', options: [{ id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'The formula at the top or the bottom of the free stage; the pop-ups take the other side' },
   { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0.12, group: 'seat', label: 'PAD', fmt: pct, hint: 'The formula\'s distance from its edge of the free stage, as a share of its height; the pop-ups keep the same distance on the other side' },
-  ...KINDS.map((k) => ({ key: k.key, type: 'bool', default: false, group: 'announce', label: k.label, hint: k.hint })),
+  ...KINDS.filter((k) => k.hint).map((k) => ({ key: k.key, type: 'bool', default: false, group: 'announce', label: k.label, hint: k.hint })),
   { key: 'popSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'announce', label: 'SIZE', fmt: pct, hint: 'The pop-ups\' size: 100% is 15 px' },
-  { key: 'cursorAway', type: 'bool', default: false, group: 'cursor', label: 'AWAY', hint: 'The words lean away from the pointer as it crosses the stage (the kit layer\'s follow and parallax)' },
+  { key: 'cursorAway', type: 'bool', default: false, group: 'cursor', label: 'PARALLAX', hint: 'The words lean away from the pointer as it crosses the stage (the kit layer\'s follow and parallax)' },
   { key: 'cursorDrift', type: 'bool', default: false, group: 'cursor', label: 'DRIFT', hint: 'The words bob slowly while they are on the stage (the kit layer\'s drift; it keeps a frame booked)' },
   /* MARKS draw ON the stage (rack.js' frame reads ui.skeletonSw · beadSw · ellipsoidSw, these rows' widgets): the record's since the fix round (C6).
      Iteration 011 Q1 (Josh 10-19: "move skeleton into it's own row amongst stage formula and atom labels with a size knob to increase the disk size"):
      SKELETON is THE WORDS' third ON + SIZE row; its disks are flat (no outline) and SIZE scales them — 100 % is the old 0.28 × the covalent radius,
      the default 160 %; the bonds and the dipole keep their 2 px.  BEAD and UNCERTAINTY stay in MARKS. */
-  { key: 'skeleton', type: 'bool', default: false, group: 'skeleton', label: 'SKELETON', hint: 'The nuclei as flat disks in their CPK colours, the bonds within 1.3 × the covalent radii, and the dipole arrow from the centre of nuclear charge — a PREFERENCE, off by default' },   // 0.7.0 V2: rack.js draws it (lab/skeleton.js)
-  { key: 'skeletonSize', type: 'number', min: 0.5, max: 4, step: 0.01, default: 1.6, group: 'skeleton', label: 'SIZE', fmt: pct, hint: 'The SKELETON\'s disks: 100% is 0.28 × the element\'s covalent radius (the size before iteration 011), 160% the default; the bonds and the dipole arrow keep their width' },
+  /* iteration 012 R1 (Josh 10-20): SKELETON is BALL AND STICK (the label only: the key `skeleton` stays), with an OPACITY knob between its switch and SIZE;
+     the dipole arrow it drew ("a weird arrow … can it be separated from Skeleton?") is MARKS' DIPOLE, its own switch, off by default */
+  { key: 'skeleton', type: 'bool', default: false, group: 'skeleton', label: 'BALL AND STICK', hint: 'The nuclei as flat disks in their CPK colours and the bonds within 1.3 × the covalent radii — a PREFERENCE, off by default' },   // 0.7.0 V2: rack.js draws it (lab/skeleton.js)
+  { key: 'skeletonOpacity', type: 'number', min: 0.1, max: 1, step: 0.01, default: 1, group: 'skeleton', label: 'OPACITY', fmt: pct, hint: 'BALL AND STICK\'s opacity: 100% is as drawn before (the near half 90%, the far half dimmed)' },
+  { key: 'skeletonSize', type: 'number', min: 0.5, max: 4, step: 0.01, default: 1.6, group: 'skeleton', label: 'SIZE', fmt: pct, hint: 'BALL AND STICK\'s disks: 100% is 0.28 × the element\'s covalent radius (the size before iteration 011), 160% the default; the bonds and the dipole arrow keep their width' },
+  { key: 'dipole', type: 'bool', default: false, group: 'marks', label: 'DIPOLE', hint: 'THE DIPOLE ARROW: the molecule\'s dipole moment (a.u.) from the centre of nuclear charge, 2 bohr per a.u., in the accent — once drawn with BALL AND STICK; a PREFERENCE, off by default' },
   { key: 'bead', type: 'bool', default: false, group: 'marks', label: 'BEAD', hint: 'THE BEAD: the expectation point (⟨x⟩, ⟨y⟩, ⟨z⟩) on the stage with its trail over the last period (⟨p⟩ in momentum space; for a molecule the electron density\'s centroid (ΣZR − μ)/N_e) — a PREFERENCE, off by default' },   // 0.8.2 P3: on the skeleton's canvas
   { key: 'ellipsoid', type: 'bool', default: false, group: 'marks', label: 'UNCERTAINTY', hint: 'THE UNCERTAINTY ELLIPSOID: the position covariance Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ as its three principal circles, semi-axes √λ_k, about the bead (with it) — position space and a register only; a PREFERENCE, off by default' },   // 0.8.3 B3 · iteration 008 P: the switch says what it draws; the key stays `ellipsoid`
   /* iteration 011 Q1 · STATUS (Josh 10-19: "a button that hides the extra status thingy"): INFORMATIONAL's STATUS readout — the only status block the
