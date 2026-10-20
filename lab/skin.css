@@ -699,14 +699,18 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-z { position: absolute; left: 7%; top: 5%; font-size: calc(var(--t) * .14); font-style: normal; opacity: .6; line-height: 1; }
 #lwMenu .mm-el .mm-under { font-size: 11px; }
 /* the deck: pages sized by picker.js (--t, --cols, --gap), ‹ › beside them (R4), dots or a count under */
-#lwMenu .mm-pager { position: relative; }
-#lwMenu .mm-pages { --t: 160px; --gap: 10px; --cols: 6; width: calc(var(--t) * var(--cols) + var(--gap) * (var(--cols) - 1)); display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 22px; }
+/* iteration 013 P1: a page sliding sideways fades out instead of being cut at the grid's edge — the container runs --fade past the grid a side
+   under the tag strip's mask (wider); pages sit 2·--fade apart so a page's start is still k × clientWidth (picker.js) and no neighbour shows at rest */
+#lwMenu .mm-pager { position: relative; --fade: 40px; }
+@media (max-width: 699px) { #lwMenu .mm-pager { --fade: 12px; } }
+#lwMenu .mm-pages { --t: 160px; --gap: 10px; --cols: 6; box-sizing: content-box; width: calc(var(--t) * var(--cols) + var(--gap) * (var(--cols) - 1)); display: flex; column-gap: calc(var(--fade) * 2); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 0 var(--fade) 22px; scroll-padding-inline: var(--fade);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent); mask-image: linear-gradient(90deg, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent); }
 #lwMenu .mm-pages::-webkit-scrollbar { display: none; }
 #lwMenu .mm-page { flex: 0 0 100%; scroll-snap-align: start; display: grid; grid-template-columns: repeat(var(--cols), var(--t)); grid-auto-rows: var(--t); gap: var(--gap); align-content: start; }
 #lwMenu .mm-arrow { --near: 0; position: absolute; top: calc(50% - 11px); margin-top: -22px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--fg);
   background: hsl(var(--glass-tint) / .4); opacity: calc(.18 + .82 * var(--near)); transition: opacity .18s ease, scale .16s var(--ease), color .12s ease; }
 body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25); backdrop-filter: blur(14px) saturate(1.25); }
-#lwMenu .mm-prev { right: calc(100% + 14px); } #lwMenu .mm-next { left: calc(100% + 14px); }
+#lwMenu .mm-prev { right: calc(100% + 14px - var(--fade)); } #lwMenu .mm-next { left: calc(100% + 14px - var(--fade)); }
 #lwMenu .mm-arrow .mm-ico { width: 22px; height: 22px; transform: scale(var(--glyph-scale, 1)); transition: transform .16s cubic-bezier(.2,.7,.25,1); }
 #lwMenu .mm-arrow:hover { scale: 1.08; color: var(--acc); } #lwMenu .mm-arrow:active { scale: .94; } #lwMenu .mm-arrow:focus-visible { opacity: 1; color: var(--acc); }
 @media (hover: none) { #lwMenu .mm-arrow { opacity: 1; } }

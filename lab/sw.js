@@ -401,7 +401,7 @@ const PRECACHE = [
   ['./shell/stage-words.js',                                        'e0d7525d1b6e'],
   ['./shell/transport.js',                                          '0a4c0af56f21'],
   ['./skeleton.js',                                                 '9828d4ceaa5b'],
-  ['./skin.css',                                                    'ef553f600654'],
+  ['./skin.css',                                                    '94958612ecb8'],
   ['./slice.js',                                                    '0fbaa89ce784'],
   ['./sliceview.js',                                                '6fa789fe996a'],
   ['./spectrum.js',                                                 'd83ccbd4e962'],
