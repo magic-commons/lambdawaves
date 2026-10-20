@@ -3,7 +3,7 @@
 //   DISPLAY=:0 LW_PORT=9511 node research/iteration-012/r-shots/shot.mjs <scenes.mjs>
 // <scenes.mjs> default-exports { query?, boot?: 'js', scenes: [{ name, js }] }: each scene's js runs in the page (async body;
 // return a value to log it), then the screenshot lands beside this file as <name>.png (no shot when name is null).
-// LW_DSF=2 for the 2× reads.
+// LW_DSF=2 for the 2× reads.  Vulkan is off unless LW_VULKAN=1: with it this box's 2D canvases (the skeleton, kepler) paint nothing.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -14,7 +14,7 @@ const PROFILE = fs.mkdtempSync(path.join(os.tmpdir(), 'lw-it012-'));
 const cdpPort = 9800 + Math.floor(Math.random() * 90), W = 1920, H = 1080;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const proc = spawn(CHROME, [`--user-data-dir=${PROFILE}`, `--remote-debugging-port=${cdpPort}`, '--ignore-certificate-errors',
-  '--enable-unsafe-webgpu', '--enable-features=Vulkan', '--no-sandbox', '--no-first-run', '--no-default-browser-check',
+  '--enable-unsafe-webgpu', ...(process.env.LW_VULKAN === '1' ? ['--enable-features=Vulkan'] : []), '--no-sandbox', '--no-first-run', '--no-default-browser-check',
   '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding', '--disable-background-timer-throttling',
   `--window-size=${W + 16},${H + 120}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'], env: { ...process.env, DISPLAY: process.env.DISPLAY || ':0' } });
 let stderr = ''; proc.stderr.on('data', (d) => { stderr += d; });

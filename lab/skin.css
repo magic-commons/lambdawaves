@@ -808,9 +808,14 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
 .lw-info-card .info-seat > .segw .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .lw-info-card .info-size { grid-template-columns: minmax(0, 1fr) 56px; }
 .lw-info-card .info-size > .k { grid-column: 2; }
-.lw-info-card .info-more { display: flex; justify-content: space-between; align-items: center; margin: 2px 0 6px; }
+.lw-info-card .info-more { display: flex; justify-content: flex-end; align-items: center; margin: 2px 0 6px; }   /* iteration 012 R1: the fold's words are gone; the chevron alone, at the right */
 .lw-info-card .info-more > .grp-lbl { margin: 0; }
-.lw-info-card .info-status { display: grid; gap: 6px 8px; align-items: center; margin: 4px 0; }   /* iteration 011 Q1: the STATUS switch over its readout, on THE WORDS' grid */
+/* iteration 012 R1: BALL AND STICK's switch shortened to one column, OPACITY and SIZE beside it; CURSOR and MARKS two columns of switches side by side */
+.lw-info-card .info-ball { grid-template-columns: minmax(0, 1fr) 56px 56px; }
+.lw-info-card .info-ball > .sw { grid-column: 1; }
+.lw-info-card .info-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 8px; align-items: start; }
+.lw-info-card .info-col { grid-template-columns: minmax(0, 1fr); }
+.lw-info-card .info-col > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
 .lw-info-card .info-more > .lw-fold { flex: 0 0 30px; height: 26px; min-height: 26px; }
 
 /* ═══ iteration 012 B1 · THE BLUR, PUT BACK (Josh 2026-10-20: "I was trying to fix a bug; why would it get rid of all the blurs if

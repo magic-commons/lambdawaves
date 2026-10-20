@@ -114,7 +114,7 @@ try {
   assert.ok(t4.stageOff && t4.hidden && t4.swCaption === '' && t4.hSw === t4.hOff, 'STAGE FORMULA off still captions: ' + JSON.stringify(t4));
   assert.equal(t4.mol, 'H₂O · 1b1 HOMO · STO-3G · NUMERICAL');
   assert.deepEqual(t4.rows, { settings: [], informational: ['STAGE FORMULA', 'ATOM LABELS'] }, 'the two rows are not INFORMATIONAL\'s (and DISPLAY\'s none): ' + JSON.stringify(t4.rows));
-  assert.deepEqual(t4.info, { k: 6, eyebrow: 'INFORMATIONAL' }, 'INFORMATIONAL is not its six dials (the formula\'s and the labels\' SIZE, PAD, the pop-ups\' SIZE; iteration 007 — and LIST CAP and SKELETON\'s SIZE, iteration 011 Q1): ' + JSON.stringify(t4.info));
+  assert.deepEqual(t4.info, { k: 7, eyebrow: 'INFORMATIONAL' }, 'INFORMATIONAL is not its seven dials (the formula\'s and the labels\' SIZE, PAD, the pop-ups\' SIZE; iteration 007 — and LIST CAP and SKELETON\'s SIZE, iteration 011 Q1 — and BALL AND STICK\'s OPACITY, iteration 012 R1): ' + JSON.stringify(t4.info));
   assert.deepEqual(t4.split, { both: { labels: true, formula: true }, labOff: { labels: false, formula: true, caption: t4.mol }, fOff: { labels: true, formula: false } }, 'the two switches are not independent: ' + JSON.stringify(t4.split));
   assert.deepEqual(t4.errs, []);
   pass(`the picture carries "${t4.caption}" (its bytes differ from the captionless picture, which is byte-identical twice); STAGE TEXT off hides the text and takes a clean picture; MOLECULES captions "${t4.mol}"; INFORMATIONAL holds STAGE FORMULA and ATOM LABELS, each its own switch (labels off keep the formula and its caption; formula off keeps the labels), and DISPLAY neither`);

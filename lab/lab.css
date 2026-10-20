@@ -407,7 +407,7 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 .dev-lean { width: 26px; height: 22px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--ink-faint); font-size: 11px; font-weight: var(--w-bold); letter-spacing: 0; cursor: pointer; }
 .dev-lean.on { color: var(--acc); text-decoration: line-through; }
 /* 0.4.0 S0: MOLECULES keeps its Aa with HELP off — LEAN is on by default and its readouts (E, ε, Tr DS) have no other road back */
-body.window-info-off .dev:not([data-id="chem"]) .dev-lean { display: none; }
+body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-lean { display: none; }   /* iteration 012 R1: INFORMATIONAL's Aa is its STATUS switch, never a note toggle */
 .dev.lean .dev-body .note, .dev.lean .dev-body .ro, .dev.lean .dev-body .row:has(> .ro):not(:has(> :not(.ro))) { display: none; }
 /* CALCULUS AS TILES (0.4.0 S3 · F3; calculusview.js): the laws are RADIATION's tiles — the kit's .ro, untouched — in a grid,
    two columns on the card and three floating, and OUT of LEAN: the tiles are the window, not its commentary */
@@ -843,7 +843,7 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .mir-info.lw-stage { z-index: 20; --info-size-body: calc(clamp(16px, 8vw, 34px) * var(--lw-stage-size, 1)); }
 .mir-info.lw-stage .mir-info-block[data-fade] { font-size: calc(clamp(16px, 8vw, 22px) * var(--lw-stage-size, 1)); }
 /* iteration 007 I · NAME: the molecule's name is the formula block's second paragraph, at the notebook's heading (22 px of the title's 34) and close under it */
-.mir-info.lw-stage .mir-info-block:not([data-fade]) .mir-info-text > p + p { font-size: 0.65em; margin-top: 0.15em; }
+.mir-info.lw-stage .mir-info-block:not([data-fade]) .mir-info-text > p + p { font-size: 0.65em; margin-top: -0.25em; line-height: 1.1; }   /* iteration 012 R1 (Josh 10-20): the name sits close under its formula */
 /* iteration 008 P (Josh: "the name of the molecule should be centered, not aligned left to the formula"): the formula block's lines are centred
    on one axis — the block is max-content wide and the kit seats it centred, so a name shorter than the formula sits centred under it, and a longer one
    leaves the formula on the same axis it holds alone.  THE FADE's and THE HEAD's blocks ([data-fade]) keep the kit's left edge. */
