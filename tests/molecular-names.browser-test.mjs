@@ -59,7 +59,7 @@ try {
   const ops = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]');
     /* 0.7.4 C1: OPERATOR is the catalogue's ‹ SYSTEM › stepper, a pick is the kit's list; QUARKONIUM, DISABLED there until 0.8.0 G1, is enabled */
-    const sys = [...card('spectrum').querySelectorAll('.mir-step')].find(s => (s.querySelector('.k-lbl') || {}).textContent === 'SYSTEM');
+    const sys = card('spectrum').querySelector('.mir-step-row[aria-label="SYSTEM"]').parentElement;   // 013 H3: the word SYSTEM went; the stepper is HAMILTONIAN's first row
     const row = (id) => { if (!document.querySelector('.mir-pick-i')) sys.querySelector('.mir-step-name').click(); return document.querySelector('.mir-pick-i[data-id="' + id + '"]'); };
     const quarkLive = !row('cornell').classList.contains('coming') && !row('cornell').disabled; sys.querySelector('.mir-step-name').click();
     __LW.setHamiltonian('cornell'); await __LW.settle(); const cornellRestores = __LW.hamiltonian === 'cornell';
