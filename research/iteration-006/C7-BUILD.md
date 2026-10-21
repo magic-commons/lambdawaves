@@ -154,3 +154,19 @@ hard-link `vol-1.{candidates,stats,excluded}.json` → `*.before-c7.json` and re
 `*.before-c7.json`, `queues.py`, restart (`long-run-finish.sh`, `long-run-gpu-finish.sh 1 3` / `2 3`), `report.py` →
 `research/iteration-004/CAT-BUILD.md`, repack `--sole --incremental`. (If the solvers finish more molecules first, the pin and the gate
 before the swap carry them.)
+
+
+## 3 · SWAPPED IN 2026-10-21 13:37 (Claude Sos's script, run by Josh's hand; Josh: "We can do as much as we can, I might be out for the day")
+
+Last night's `vol-1.finish.json` (1,248) emptied at 23:38 under the zero-token babysitter (0 failed; VOL. I packed to 3,832 molecules with every picture).
+The swap followed §2's "what is left" to the letter, as `~/.claude/jobs/8497d75b/tmp/c7/swap-c7.sh` (Josh ran it with `!`, because the auto-mode
+classifier refused Sos every write under `LAMBDAWAVES-VOLUMES/`; log `babysit/swap-c7.log`): `guards.py --pin` 0 rows · `check.py .next --against live`
+29,509 rows, 0 complaints (7070/7070 ids, 3848/3848 solved rows at their atoms; adrenaline and menthol carried by no row, as before) · hard links
+`vol-1.{candidates,stats,excluded}.before-c7.json` and the `.next` files renamed in · the gate again, live against before-c7: 0 complaints · the queue
+files hard-linked to `*.before-c7.json` · `queues.py --window-hours=24`: **finish 8,984** (cost 1,471,744 units) · **gpu-day 16,677** (96,385,819 units;
+Rent-A-GPU day) · `solve.py --status` so STATUS.json reads the new queue. `report.py` → `research/iteration-004/CAT-BUILD.md` (29,509).
+The three solvers (Yan's start scripts, same pid files) are up since 13:37 under `babysit/babysit-c7.sh` (log `babysit-c7.log`; at remaining 0 →
+`finish-c7.sh`: pack → the missing pictures → pack → the note `DATABASE/CLAUDE/LAMBDAWAVES NIGHT-SHIFT 2026-10-21 (babysitter, c7).md`); a
+`finish-c7.sh --now` pack + pictures runs beside them from 13:37 so the already-solved rows reach VOL. I today. The pause and resume lines are in
+`raw/RESUME-NIGHT.md`. queues.py's clock for the finish queue on the three together: 14.3 days by cost, 32 by count (last night's 24 h were the
+costliest tail; the small-molecule clock is the truer).

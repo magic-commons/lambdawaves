@@ -1,8 +1,8 @@
-> **FULL RUN, 2026-10-17 (iteration 006, row C2 THE FULL CATALOGUE; research/iteration-006/C2-BUILD.md has the guards, the swap and the solvers) — REBUILT FROM THE CACHE on 2026-10-18 by row C3 THE CATALOGUE'S YESES (research/iteration-006/C3-BUILD.md: the ten iteration-006 tags), by row C4 THE SCREEN GAP AND THE STRAY TAGS (research/iteration-006/C4-BUILD.md: both screens match on the InChIKey's first block, 10 rows refused; the drug-class words from evidence about the molecule itself) and by row C5 WHAT A MOLECULE IS (research/iteration-006/C5-BUILD.md; Josh: tags of structure or class only): every tag now says what the molecule IS — 35 words read off its own structure and its ChEBI structural class (THE TAGS below); no use word is a tag any more. 7,030 rows' tags changed and nothing else in any row: the same 7,070 ids, atoms, blurbs and priorities, the same 27,326 exclusions. No PubChem request was sent, no id moved, every solved row keeps the atoms it was solved at. Descriptions still exist for 1,101 CIDs only (PubChem went Black during C2's online run); a calm online re-run of build.py fills in the rest. The previous file is kept as vol-1.candidates.before-c5.json (C4's), before-c4 (C3's), before-c3 (C2's) and the 950 as vol-1.candidates.950.json.**
+> **SWAPPED IN 2026-10-21 13:37 by Josh's word (iteration 006, row C7 THE WIDER CATALOGUE; research/iteration-006/C7-BUILD.md §2–3): 29,509 molecules, the gate 0 complaints both ways, 3,848 solved rows at their solved atoms; the previous file is vol-1.candidates.before-c7.json (hard link), queues vol-1.{finish,gpu-day}.before-c7.json likewise. queues.py: finish 8,984 molecules (heavy ≤ 20) on the three local solvers from 13:37 under the zero-token babysitter (babysit/babysit-c7.sh); gpu-day 16,677 waits for Rent-A-GPU day. — PREVIOUSLY: FULL RUN, 2026-10-17 (iteration 006, row C2 THE FULL CATALOGUE; research/iteration-006/C2-BUILD.md has the guards, the swap and the solvers) — REBUILT FROM THE CACHE on 2026-10-18 by row C3 THE CATALOGUE'S YESES (research/iteration-006/C3-BUILD.md: the ten iteration-006 tags), by row C4 THE SCREEN GAP AND THE STRAY TAGS (research/iteration-006/C4-BUILD.md: both screens match on the InChIKey's first block, 10 rows refused; the drug-class words from evidence about the molecule itself) and by row C5 WHAT A MOLECULE IS (research/iteration-006/C5-BUILD.md; Josh: tags of structure or class only): every tag now says what the molecule IS — 35 words read off its own structure and its ChEBI structural class (THE TAGS below); no use word is a tag any more. 7,030 rows' tags changed and nothing else in any row: the same 7,070 ids, atoms, blurbs and priorities, the same 27,326 exclusions. No PubChem request was sent, no id moved, every solved row keeps the atoms it was solved at. Descriptions still exist for 1,101 CIDs only (PubChem went Black during C2's online run); a calm online re-run of build.py fills in the rest. The previous file is kept as vol-1.candidates.before-c5.json (C4's), before-c4 (C3's), before-c3 (C2's) and the 950 as vol-1.candidates.950.json.**
 
 # CAT · THE CANDIDATE LIST (iteration 004, row CAT THE CATALOGUE)
 
-`~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json` — **7070 molecules**, built 2026-10-18T11:27:15-05:00, schema 1.
+`~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.candidates.json` — **29509 molecules**, built 2026-10-19T09:17:51-05:00, schema 1.
 Scripts: `tools/volumes/catalogue/` (committed). Data, caches and the exclusion list: `~/Documents/LAMBDAWAVES-VOLUMES/catalogue/`
 (never in git; every network answer is cached in `catalogue/cache/http.sqlite`, so a re-run is offline and asks PubChem nothing).
 
@@ -25,178 +25,199 @@ Rows per source (a molecule is counted once per source that nominates it; most c
 
 | source | molecules |
 |---|---|
-| PubChem | 7066 |
-| Wikidata | 6543 |
-| ChEBI | 3864 |
-| ChEMBL | 1940 |
-| curated | 1554 |
-| WHO EML | 320 |
+| PubChem | 29505 |
+| Wikidata | 18323 |
+| ChEBI | 14824 |
+| ChEMBL | 2070 |
+| curated | 1583 |
+| WHO EML | 359 |
 | λWAVES | 88 |
 
 The combinations, most common first (PubChem is on every row and is left out of the key):
 
 | sources | molecules |
 |---|---|
-| ChEBI + Wikidata | 2049 |
-| Wikidata | 1430 |
-| ChEMBL + Wikidata | 720 |
-| ChEBI + ChEMBL + Wikidata | 683 |
-| Wikidata + curated | 668 |
-| ChEBI + Wikidata + curated | 534 |
-| ChEBI + ChEMBL + WHO EML + Wikidata | 181 |
-| ChEBI | 150 |
-| curated | 133 |
-| ChEMBL | 104 |
-| ChEBI + curated | 72 |
-| ChEMBL + WHO EML + Wikidata | 70 |
-| ChEBI + ChEMBL + Wikidata + curated | 67 |
-| ChEBI + ChEMBL | 35 |
+| Wikidata | 12810 |
+| ChEBI | 10806 |
+| ChEBI + Wikidata | 2287 |
+| ChEMBL + Wikidata | 778 |
+| ChEBI + ChEMBL + Wikidata | 722 |
+| Wikidata + curated | 688 |
+| ChEBI + Wikidata + curated | 545 |
+| ChEBI + ChEMBL + WHO EML + Wikidata | 199 |
+| curated | 130 |
+| ChEMBL | 108 |
+| ChEMBL + WHO EML + Wikidata | 81 |
+| ChEBI + curated | 71 |
+| ChEBI + ChEMBL + Wikidata + curated | 70 |
 | ChEBI + ChEMBL + WHO EML + Wikidata + curated | 33 |
-| Wikidata + λWAVES | 32 |
-| ChEBI + Wikidata + λWAVES | 17 |
-| ChEMBL + Wikidata + curated | 16 |
+| ChEBI + ChEMBL | 31 |
+| Wikidata + λWAVES | 24 |
+| ChEBI + Wikidata + λWAVES | 18 |
+| ChEMBL + Wikidata + curated | 17 |
 
 By tag (PLAN.md's TAGS since iteration 006 C5 — what the molecule IS, from its structure and its ChEBI class; a molecule carries 1–4; the vocabulary, its patterns and the cap: THE TAGS below):
 
 | tag | molecules |
 |---|---|
-| heterocycle | 3464 |
-| aromatic | 2641 |
-| amine | 1627 |
-| amide | 1581 |
-| alcohol | 1361 |
-| ether | 1245 |
-| acid | 1068 |
-| halogen | 1058 |
-| ketone | 1058 |
-| ester | 1007 |
-| chain | 984 |
-| alkene | 970 |
-| phenol | 867 |
-| sulfur | 714 |
-| steroid | 445 |
-| ring | 347 |
-| inorganic | 247 |
-| amino acid | 246 |
-| terpene | 230 |
-| alkaloid | 193 |
-| nitro | 193 |
-| phosphorus | 191 |
-| fat | 173 |
-| nitrile | 151 |
-| aldehyde | 127 |
-| sugar | 117 |
-| alkane | 106 |
-| metal | 98 |
-| alkyne | 85 |
-| cage | 63 |
-| nucleotide | 62 |
-| nucleoside | 51 |
-| peptide | 35 |
+| heterocycle | 15840 |
+| aromatic | 9350 |
+| alcohol | 7019 |
+| amine | 6922 |
+| ether | 5970 |
+| amide | 5549 |
+| ketone | 5028 |
+| ester | 4998 |
+| alkene | 4986 |
+| phenol | 4284 |
+| acid | 3921 |
+| chain | 3780 |
+| halogen | 3578 |
+| sulfur | 2365 |
+| steroid | 2181 |
+| terpene | 1703 |
+| ring | 1532 |
+| fat | 1476 |
+| sugar | 1297 |
+| amino acid | 1059 |
+| alkaloid | 795 |
+| ion | 654 |
+| phosphorus | 610 |
+| inorganic | 579 |
+| aldehyde | 569 |
+| nitro | 543 |
+| nitrile | 493 |
+| nucleotide | 363 |
+| alkyne | 345 |
+| alkane | 220 |
+| metal | 198 |
+| peptide | 185 |
+| cage | 135 |
+| nucleoside | 124 |
 | nucleobase | 8 |
-| ion | 5 |
 
-Tags per molecule: 1 tag: 289 · 2 tags: 1440 · 3 tags: 1715 · 4 tags: 3626
+Tags per molecule: 1 tag: 672 · 2 tags: 5296 · 3 tags: 6769 · 4 tags: 16772
 
 By heavy atoms:
 
 | heavy atoms | molecules |
 |---|---|
-| ≤10 | 1530 |
-| 11–20 | 2300 |
-| 21–30 | 2163 |
-| 31–40 | 816 |
-| 41–50 | 260 |
-| >50 | 1 |
+| ≤10 | 4101 |
+| 11–20 | 8721 |
+| 21–30 | 9860 |
+| 31–40 | 4143 |
+| 41–50 | 1555 |
+| 51–60 | 707 |
+| 61–70 | 422 |
+| >70 | 0 |
 
 By geometry:
 
 | geometry | molecules |
 |---|---|
-| PubChem 3-D conformer | 6384 |
-| RDKit ETKDGv3 + MMFF94 | 409 |
-| GFN2-xTB | 189 |
+| PubChem 3-D conformer | 26064 |
+| RDKit ETKDGv3 + MMFF94 | 2789 |
+| GFN2-xTB | 568 |
 | app pinned | 88 |
 
-THE GUARDS (guards.py). (a) 2783 rows already solved in `raw/` kept the exact atoms they were solved at
-(PubChem 3-D conformer 2310 · RDKit ETKDGv3 + MMFF94 221 · GFN2-xTB 174 · app pinned 78); 246 of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again).
-(b) 7070/7070 ids of the previous file kept; the ids came from the previous file 6982 · the app 88.
+THE GUARDS (guards.py). (a) 3485 rows already solved in `raw/` kept the exact atoms they were solved at
+(PubChem 3-D conformer 3007 · RDKit ETKDGv3 + MMFF94 223 · GFN2-xTB 177 · app pinned 78); 246 of them have a PubChem 3-D conformer waiting, which `--refresh-geometry` would take (and those rows would then be solved again).
+(b) 7070/7070 ids of the previous file kept; the ids came from new, its own slug 22067 · the previous file 6982 · new, suffixed past another new row 201 · new, suffixed past an old id 160 · the app 88 · raw/ (solved under it) 8 · an earlier file (it returns) 3.
 
 By blurb:
 
 | blurb written by | molecules |
 |---|---|
-| λWAVES | 2386 |
-| ChEBI definition (CC BY 4.0) | 4684 |
+| λWAVES | 13555 |
+| ChEBI definition (CC BY 4.0) | 15954 |
 
 ## THE EXCLUSIONS
 
-27326 nominations were refused, and every one is written down with its reason in
+3003 nominations were refused, and every one is written down with its reason in
 `~/Documents/LAMBDAWAVES-VOLUMES/catalogue/vol-1.excluded.json`. By reason:
 
 | reason | count |
 |---|---|
-| too obscure to be a library row: nominated only by wikidata and in N Wikipedias | 12910 |
-| too obscure to be a library row: nominated only by chebi and in no Wikipedia | 11150 |
-| not one molecule: PubChem counts N separate units, and it has no neutral parent | 1258 |
-| no plain tag of the vocabulary fits it, so the library could not shelve it | 425 |
-| N heavy atoms, past the N the volume allows | 371 |
-| an ion (charge N) with no neutral parent in PubChem | 156 |
-| PubChem has no compound under this name | 122 |
-| an element beyond krypton (I) | 116 |
-| refused: on the Chemical Weapons Convention schedules or in a scheduled family | 115 |
-| refused: a controlled psychoactive substance that is not an approved medicine | 93 |
-| an isotopically labelled compound | 84 |
-| an odd electron count (N): an open shell, not an RHF molecule | 61 |
-| a radical (RDKit finds unpaired electrons): an open shell | 25 |
-| an ion (charge -N) with no neutral parent in PubChem | 20 |
-| an element beyond krypton (Te) | 17 |
-| an element beyond krypton (Hg) | 17 |
-| an element beyond krypton (Sn) | 17 |
-| an element beyond krypton (Pb) | 17 |
-| an element beyond krypton (Mo) | 14 |
-| left out by hand: heavy atoms N | 12 |
-| an element beyond krypton (Sb) | 12 |
-| an element beyond krypton (W) | 11 |
-| its PubChem structure does not parse | 10 |
-| an element beyond krypton (Tl) | 10 |
-| PubChem's record for it carries no InChIKey or no formula | 9 |
-| an element beyond krypton (Re) | 9 |
+| N heavy atoms, past the N the volume allows | 732 |
+| an isotopically labelled compound | 332 |
+| an element beyond krypton (I) | 303 |
+| refused: on the Chemical Weapons Convention schedules or in a scheduled family | 241 |
+| an odd electron count (N): an open shell, not an RHF molecule | 175 |
+| PubChem has no compound under this name | 125 |
+| not one molecule: PubChem counts N separate units, and it has no neutral parent | 83 |
+| an element beyond krypton (Sn) | 59 |
+| an element beyond krypton (Hg) | 54 |
+| a radical (RDKit finds unpaired electrons): an open shell | 53 |
+| an element beyond krypton (Te) | 37 |
+| an element beyond krypton (Pb) | 36 |
+| an element beyond krypton (Sb) | 32 |
+| an element beyond krypton (Mo) | 26 |
+| an element beyond krypton (Bi) | 26 |
+| no N-D geometry: its build ran past N minutes and was stopped | 25 |
+| an element beyond krypton (U) | 23 |
+| an element beyond krypton (Tl) | 23 |
+| an element beyond krypton (In) | 22 |
+| an element beyond krypton (W) | 21 |
+| no N-D geometry: PubChem has no conformer and neither MMFFN nor GFNN-xTB would build one | 21 |
+| an element beyond krypton (Zr) | 20 |
+| an element beyond krypton (Nb) | 19 |
+| an element beyond krypton (Pt) | 18 |
+| an element beyond krypton (Os) | 18 |
+| its PubChem structure does not parse | 17 |
 
 By the source that nominated it:
 
 | source | refused |
 |---|---|
-| wikidata | 15345 |
-| chebi | 11197 |
-| chebi/wikidata | 317 |
-| who | 114 |
-| curated | 90 |
-| chembl/wikidata | 65 |
-| chembl | 47 |
-| chebi/chembl/wikidata | 42 |
-| chebi/chembl/who/wikidata | 26 |
-| curated/wikidata | 19 |
-| chebi/chembl | 15 |
-| chembl/who/wikidata | 12 |
+| wikidata | 2101 |
+| chebi | 455 |
+| chebi/wikidata | 155 |
+| who | 110 |
+| curated | 55 |
+| chembl/wikidata | 38 |
+| chebi/chembl/wikidata | 19 |
+| curated/wikidata | 17 |
+| chembl | 12 |
+| app | 10 |
+| chebi/chembl/who/wikidata | 10 |
+| chebi/who/wikidata | 8 |
 
-THE TWO SCREENS. **119** nominations were refused as Chemical Weapons Convention scheduled chemicals, listed
-precursors or members of a scheduled family — by NAME (64 of the Annex's own names resolved through
-PubChem to an InChIKey skeleton) and by CLASS (five coarse substructure families, so a congener under another name is refused too),
-and by Wikidata's own "chemical warfare agent" uses. **93** were refused as controlled psychoactive
-substances that are not approved medicines (51 names resolved, plus ChEBI's hallucinogen and opioid
-roles and Wikidata's recreational-drug uses); an approved medicine passes the second screen, so morphine and fentanyl are in the
-library as medicines and nothing else of that kind is.
+THE SCREEN. **250** nominations were refused as Chemical Weapons Convention scheduled chemicals, listed precursors
+or members of a scheduled family — by NAME (64 of the Annex's own names resolved through PubChem to an InChIKey
+skeleton), by CLASS (five coarse substructure families, so a congener under another name is refused too) and by Wikidata's own
+"chemical warfare agent" uses; each signal screens its whole connectivity skeleton (the InChIKey's FIRST BLOCK: racemate,
+enantiomers, isotopologues, protonated forms) and, for a salt, its neutral parent's (29 first blocks carry a
+signal; **4** rows were refused only through a skeleton-mate's). A row a screened skeleton holds stays only when it
+is ITSELF an approved drug by ChEMBL: 1 rows, menthol (beside Menthol).
+The Annex names and classes refuse outright, approved or not. This screen is unchanged since iteration 006 C4.
 
-Since iteration 006 C4 both screens match on the InChIKey's FIRST BLOCK (the connectivity skeleton): every signal — a name, a
-Wikidata use, a ChEBI role, and for the second screen an approved medicine whose own ATC code sits in a controlled-drug group
-(`curated.CONTROLLED_ATC`: opioids, central stimulants and anorectics, barbiturates, benzodiazepines and Z-drugs, ketamine) — screens
-its whole skeleton (racemate, enantiomers, isotopologues, protonated forms) and, for a salt, its neutral parent's. 29
-first blocks carry a CWC signal, 189 a controlled-substance signal; **10** rows were refused only
-through a skeleton-mate's signal. A row a screened skeleton holds stays only when it is ITSELF an approved drug by ChEMBL (max_phase 4:
-a ChEMBL approved parent whose structure is this row, never a salt folded onto it): 103 rows, 4
-of them beside another form's signal — menthol (beside Menthol), Dextromethorphan (beside Levomethorphan), Levoamphetamine (beside Amphetamine), Levopropoxyphene (beside Dextropropoxyphene). The CWC's Annex
-names and classes refuse outright, approved or not.
+**The controlled-substance screen is removed** (iteration 006 C7, Josh's decision, 2026-10-18: "That's only the human's relation
+with the molecule that's the problem"): the illicit-names list, ChEBI's hallucinogen and opioid roles, Wikidata's recreational-drug
+uses and the controlled-medicine ATC groups refuse nothing now; those molecules are ordinary rows.
+
+## MORE MOLECULES (iteration 006 C7: Josh, 2026-10-18 — "add in whatever molecules you can")
+
+Recognisability no longer refuses a row (it orders the rows: the recognisable first in each tier); the use-word gate is gone; a
+Wikidata article's salt or mixture is folded onto its neutral parent; a closed-shell ion is a row with its charge; the heavy-atom
+cap is 70 (was 50; the rows of 51–70 wait for the Rent-A-GPU-day queue); the controlled-substance screen is
+gone. **22439** rows are new against the previous file, by why the previous build refused them (or what this build does
+differently):
+
+| why the row is new | rows | for example |
+|---|---|---|
+| recognisability is no longer a filter: only ChEBI, in no Wikipedia | 10703 | thiamine-pyrophosphate-2 (Thiamine Pyrophosphate), abamectin (Abamectin), metaphosphoric-acid (Metaphosphoric Acid), p-toluenesulfonamide (P-Toluenesulfonamide), acriflavine (Acriflavine), lauryl-sulfate (Lauryl Sulfate) |
+| recognisability is no longer a filter: only Wikidata, in < 12 Wikipedias | 10311 | chlormequat (Chlormequat), phosphocholine (Phosphocholine), metasilicic-acid (Metasilicic Acid), medronic-acid (Medronic Acid), thiomalic-acid (Thiomalic Acid), tetraethylenepentamine (Tetraethylenepentamine) |
+| a salt or a mixture, as its neutral parent | 516 | aluminium-fluoride (Aluminium Fluoride), nickel-ii-fluoride (Nickel(II) Fluoride), sodium-stearoyl-lactylate (Sodium Stearoyl Lactylate), pheophytin-a (Pheophytin a), tetraborate (Tetraborate), murexide (Murexide) |
+| the use-word gate is gone (it earns no use word) | 425 | glutaraldehyde (Glutaraldehyde), neon (Neon), silicon-carbide (Silicon Carbide), platelet-activating-factor (Platelet-activating Factor), boron-nitride (Boron Nitride), bromoacetone (Bromoacetone) |
+| heavy 51–70 (the cap rose from 50 to 70) | 205 | azithromycin (Azithromycin), erythromycin (Erythromycin), clarithromycin (Clarithromycin), digoxin (Digoxin), rifampicin (Rifampicin), paclitaxel (Paclitaxel) |
+| a closed-shell ion, kept with its charge | 158 | thiamine (Thiamine), neostigmine (Neostigmine), pyridostigmine (Pyridostigmine), suxamethonium-chloride (Suxamethonium Chloride), potassium-chloride (Potassium Chloride), methylene-blue (Methylene Blue) |
+| returned: the controlled-substance screen is removed | 91 | heroin (Heroin), methamphetamine-2 (Methamphetamine), mdma (MDMA), lsd (LSD), mescaline (Mescaline), phencyclidine (Phencyclidine) |
+| new this run (PubChem answered a name, a key or a parent the previous build had not) | 29 | iron-ii-oxide (Iron(II) Oxide), nickel-ii-chloride (Nickel(II) Chloride), zinc-fluoride (Zinc Fluoride), aluminium-bromide (Aluminium Bromide), aluminium-arsenide (Aluminium Arsenide), titanium-ii-chloride (Titanium(II) Chloride) |
+| a hand skip lifted (curated.C7_LIFTED) | 1 | brevetoxin (Brevetoxin) |
+
+The rows the controlled-substance screen had refused since C4 came back under the ids an earlier file gave them: `methorphan` (Methorphan), `levofenfluramine` (Levofenfluramine), `arketamine` (Arketamine), `levomethamphetamine` (Levomethamphetamine), `methamphetamine-2` (Methamphetamine), `tilidine` (Tilidine), `vinbarbital-2` (Vinbarbital), `esmodafinil` (Esmodafinil), `acetylmethadol` (Acetylmethadol), `pentazocine` (Pentazocine).
+
+PubChem: 0 requests this run; PENDING (never asked; a calm run fills them): descriptions 25616 — 0 rows held back. Local geometries built this run: 0 (4 worker processes).
 
 ## THE TEN FIRST ROWS (priority order: the app's own, then the WHO essential medicines and the most recognisable names, then small before large)
 
@@ -226,41 +247,41 @@ place. "earned" = rows the word fits before either rule; "kept" = rows that carr
 
 | tag | kept | earned | subsumed | cut by the cap | from |
 |---|---|---|---|---|---|
-| `peptide` | 35 | 35 | 0 | 0 | ChEBI 35 — ChEBI peptide (CHEBI:16670) |
-| `nucleotide` | 62 | 62 | 0 | 0 | ChEBI 62 — ChEBI nucleoside phosphate (CHEBI:25608) |
-| `nucleoside` | 51 | 51 | 0 | 0 | ChEBI 51 — ChEBI nucleoside (CHEBI:33838) |
+| `peptide` | 185 | 185 | 0 | 0 | ChEBI 185 — ChEBI peptide (CHEBI:16670) |
+| `nucleotide` | 363 | 363 | 0 | 0 | ChEBI 363 — ChEBI nucleoside phosphate (CHEBI:25608) |
+| `nucleoside` | 124 | 125 | 1 | 0 | ChEBI 124 — ChEBI nucleoside (CHEBI:33838) |
 | `nucleobase` | 8 | 8 | 0 | 0 | ChEBI 8 — ChEBI nucleobase (CHEBI:18282) |
-| `steroid` | 445 | 445 | 0 | 0 | ChEBI 350 · structure 95 — ChEBI steroid (CHEBI:35341) · the cyclopenta[a]phenanthrene nucleus, rings C and D not aromatic, no fifth all-carbon ring of ≥ 5 atoms fused onto it |
-| `amino acid` | 246 | 253 | 7 | 0 | ChEBI 189 · structure 57 — ChEBI α-amino acid (CHEBI:33704), β-amino acid (CHEBI:33706), γ-amino acid (CHEBI:33707), δ-amino acid (CHEBI:35931), ε-amino acid (CHEBI:35958) · an α-amino acid: a free amine (with H) on the carbon next to a carboxylic acid; a β-amino acid; a γ-amino acid (GABA, gabapentin, baclofen); a δ-amino acid (5-aminolevulinic acid); an ε-amino acid (aminocaproic acid, tranexamic acid) |
-| `sugar` | 117 | 117 | 0 | 0 | ChEBI 117 — ChEBI carbohydrate (CHEBI:16646) |
-| `alkaloid` | 193 | 193 | 0 | 0 | ChEBI 193 — ChEBI alkaloid (CHEBI:22315) |
-| `terpene` | 230 | 230 | 0 | 0 | ChEBI 230 — ChEBI terpenoid (CHEBI:26873), terpene (CHEBI:35186) |
-| `fat` | 173 | 173 | 0 | 0 | ChEBI 173 — ChEBI fatty acid (CHEBI:35366), glyceride (CHEBI:47778), wax (CHEBI:73702) |
-| `metal` | 98 | 98 | 0 | 0 | an atom of Li, Be, Na, Mg, Al, K, Ca or Sc–Ga |
-| `ion` | 5 | 5 | 0 | 0 | a net charge |
-| `cage` | 63 | 63 | 0 | 0 | three rings or more, every ring atom in two of them (a closed polyhedron) |
-| `inorganic` | 247 | 247 | 0 | 0 | no carbon, or carbon only as CO, CO₂, CS₂, carbonic acid, a cyanide, a metal carbonyl or a carbide |
-| `nitro` | 193 | 193 | 0 | 0 | a nitro group on carbon or nitrogen, or a nitrate ester |
-| `nitrile` | 151 | 151 | 0 | 0 | a nitrile: C≡N on carbon |
-| `alkyne` | 85 | 85 | 0 | 0 | a carbon–carbon triple bond |
-| `aldehyde` | 127 | 144 | 17 | 0 | an aldehyde: CHO on carbon; formaldehyde |
-| `phenol` | 867 | 867 | 0 | 0 | an OH on an aromatic ring |
-| `ester` | 1007 | 1024 | 17 | 0 | an ester (a lactone, a carbonate or a carbamate too): C(=O)–O–C |
-| `amide` | 1581 | 1702 | 118 | 3 | an amide (a lactam, an imide, a urea, a carbamate too): N–C(=O); a sulfonamide: N–S(=O)₂ |
-| `ketone` | 1058 | 1083 | 15 | 10 | a ketone: C=O between two carbons (a quinone too) |
-| `acid` | 1068 | 1558 | 484 | 6 | a carboxylic acid; an oxoacid group: sulfonic, sulfuric, phosphoric, phosphonic, nitric, nitrous, chloric …; an OH on S, P, B, As, Se, Si, Cl or Br (sulfurous, boric, silicic, hypochlorous acid …); a hydrogen halide |
-| `amine` | 1627 | 2182 | 494 | 61 | an amine nitrogen (primary, secondary or tertiary; an aniline too); a quaternary ammonium on carbon |
-| `alcohol` | 1361 | 1783 | 226 | 196 | an OH on an sp³ carbon |
-| `ether` | 1245 | 1824 | 180 | 399 | an ether: C–O–C, neither carbon a carbonyl (an epoxide, an acetal too) |
-| `halogen` | 1058 | 1399 | 0 | 341 | an atom of F, Cl or Br |
-| `phosphorus` | 191 | 331 | 62 | 78 | an atom of P |
-| `sulfur` | 714 | 1070 | 0 | 356 | an atom of S |
-| `alkene` | 970 | 1674 | 0 | 704 | a carbon–carbon double bond outside an aromatic ring |
-| `alkane` | 106 | 106 | 0 | 0 | carbon and hydrogen only, every bond single |
-| `heterocycle` | 3464 | 3465 | 0 | 1 | a ring holding carbon and another element (organic rows) |
-| `aromatic` | 2641 | 4236 | 0 | 1595 | an aromatic ring (RDKit's model; organic rows) |
-| `ring` | 347 | 716 | 369 | 0 | a ring, none aromatic and none a heterocycle |
-| `chain` | 984 | 1140 | 156 | 0 | no ring, organic, two carbons or more (one carbon: only when nothing else fits) |
+| `steroid` | 2181 | 2181 | 0 | 0 | ChEBI 1365 · structure 816 — ChEBI steroid (CHEBI:35341) · the cyclopenta[a]phenanthrene nucleus, rings C and D not aromatic, no fifth all-carbon ring of ≥ 5 atoms fused onto it |
+| `amino acid` | 1059 | 1086 | 27 | 0 | ChEBI 732 · structure 327 — ChEBI α-amino acid (CHEBI:33704), β-amino acid (CHEBI:33706), γ-amino acid (CHEBI:33707), δ-amino acid (CHEBI:35931), ε-amino acid (CHEBI:35958) · an α-amino acid: a free amine (with H) on the carbon next to a carboxylic acid; a β-amino acid; a γ-amino acid (GABA, gabapentin, baclofen); a δ-amino acid (5-aminolevulinic acid); an ε-amino acid (aminocaproic acid, tranexamic acid) |
+| `sugar` | 1297 | 1297 | 0 | 0 | ChEBI 1297 — ChEBI carbohydrate (CHEBI:16646) |
+| `alkaloid` | 795 | 795 | 0 | 0 | ChEBI 795 — ChEBI alkaloid (CHEBI:22315) |
+| `terpene` | 1703 | 1703 | 0 | 0 | ChEBI 1703 — ChEBI terpenoid (CHEBI:26873), terpene (CHEBI:35186) |
+| `fat` | 1476 | 1476 | 0 | 0 | ChEBI 1476 — ChEBI fatty acid (CHEBI:35366), glyceride (CHEBI:47778), wax (CHEBI:73702) |
+| `metal` | 198 | 198 | 0 | 0 | an atom of Li, Be, Na, Mg, Al, K, Ca or Sc–Ga |
+| `ion` | 654 | 654 | 0 | 0 | a net charge |
+| `cage` | 135 | 135 | 0 | 0 | three rings or more, every ring atom in two of them (a closed polyhedron) |
+| `inorganic` | 579 | 579 | 0 | 0 | no carbon, or carbon only as CO, CO₂, CS₂, carbonic acid, a cyanide, a metal carbonyl or a carbide |
+| `nitro` | 543 | 543 | 0 | 0 | a nitro group on carbon or nitrogen, or a nitrate ester |
+| `nitrile` | 493 | 493 | 0 | 0 | a nitrile: C≡N on carbon |
+| `alkyne` | 345 | 345 | 0 | 0 | a carbon–carbon triple bond |
+| `aldehyde` | 569 | 662 | 93 | 0 | an aldehyde: CHO on carbon; formaldehyde |
+| `phenol` | 4284 | 4284 | 0 | 0 | an OH on an aromatic ring |
+| `ester` | 4998 | 5287 | 281 | 8 | an ester (a lactone, a carbonate or a carbamate too): C(=O)–O–C |
+| `amide` | 5549 | 6048 | 476 | 23 | an amide (a lactam, an imide, a urea, a carbamate too): N–C(=O); a sulfonamide: N–S(=O)₂ |
+| `ketone` | 5028 | 5218 | 81 | 109 | a ketone: C=O between two carbons (a quinone too) |
+| `acid` | 3921 | 6728 | 2703 | 104 | a carboxylic acid; an oxoacid group: sulfonic, sulfuric, phosphoric, phosphonic, nitric, nitrous, chloric …; an OH on S, P, B, As, Se, Si, Cl or Br (sulfurous, boric, silicic, hypochlorous acid …); a hydrogen halide |
+| `amine` | 6922 | 9262 | 2084 | 256 | an amine nitrogen (primary, secondary or tertiary; an aniline too); a quaternary ammonium on carbon |
+| `alcohol` | 7019 | 10020 | 1773 | 1228 | an OH on an sp³ carbon |
+| `ether` | 5970 | 10234 | 1571 | 2693 | an ether: C–O–C, neither carbon a carbonyl (an epoxide, an acetal too) |
+| `halogen` | 3578 | 4654 | 0 | 1076 | an atom of F, Cl or Br |
+| `phosphorus` | 610 | 1414 | 363 | 441 | an atom of P |
+| `sulfur` | 2365 | 3607 | 0 | 1242 | an atom of S |
+| `alkene` | 4986 | 9033 | 0 | 4047 | a carbon–carbon double bond outside an aromatic ring |
+| `alkane` | 220 | 220 | 0 | 0 | carbon and hydrogen only, every bond single |
+| `heterocycle` | 15840 | 15845 | 0 | 5 | a ring holding carbon and another element (organic rows) |
+| `aromatic` | 9350 | 16465 | 0 | 7115 | an aromatic ring (RDKit's model; organic rows) |
+| `ring` | 1532 | 3062 | 1530 | 0 | a ring, none aromatic and none a heterocycle |
+| `chain` | 3780 | 5101 | 1321 | 0 | no ring, organic, two carbons or more (one carbon: only when nothing else fits) |
 
 ## THE LICENCES
 
