@@ -1,7 +1,7 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, CONTROL_SURFACE_LAYOUT, barButton } from '../mir/shell/transport.js'; import { mirGui } from '../mir-gui.js'; import { createCsbSearch } from '../csb-search.js';
+import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, CONTROL_SURFACE_LAYOUT, barButton } from '../mir/shell/transport.js'; import { mirGui } from '../mir-gui.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates, isPhone } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
@@ -72,6 +72,11 @@ export function createTransport(app) {
     door.addEventListener('pointerenter', () => spinLogo(false)); door.addEventListener('pointerleave', () => spinLogo(true));
     /* the expander's first row: ‹ › ⟳, REPEATS and its formula, read in full (A1: they read once a minute; the bar keeps SCRUB and t) */
     if (bar.el.panel) { const rep = el('div', 'csb-repeats'); rep.append(sm, sp, jmp, ui.periodRo.root, ui.periodFx.root); bar.el.panel.prepend(rep); }
+    /* A3 · THE EXPANDER'S FAVOURITES (lab/csb-favs.js): a strip under the macros; a knob's right-click / hold menu ADDs it, three segments are offered
+       (Josh's answer 4: SPECTRUM's HYDROGEN | STURMIAN, WAVE's POSITION | MOMENTUM and its OBSERVABLE); the faces are made when the expander opens */
+    const favs = createCsbFavs(app, { panel: bar.el.panel }); app.sh.csb = favs;
+    if (bar.parts.panel) bar.parts.panel.onToggle((v) => { if (v) favs.show(); });
+    for (const [id, c] of [['spectrum.scale', ui.scaleSeg], ['wave.space', ui.spaceSeg], ['wave.view', ui.viewSeg]]) favs.offer(id, c, { width: 150 });
     /* iteration 011 Q6 · GEMMA, HIDDEN: the ASK door and THE TYPE BOX mount only under ASK_ENABLED (lab/ask.js, the one flag); off, the strip is
        the 0.6.5 strip, `openAsk` does nothing (no key row calls it) and createAsk is never made, so no request can leave */
     let echoOn = false, openAsk = () => {};

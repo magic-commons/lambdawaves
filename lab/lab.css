@@ -373,6 +373,14 @@ html body.rack-hidden #transport.mini[data-place="free"] { transform: none; opac
 #transport.docked[data-layout="csb"] .tempo-expand { flex: 0 0 76px; width: 76px; }
 #transport.docked[data-layout="csb"] .ro.time { flex: 1 1 90px; min-width: 0; }
 #transport.docked[data-layout="csb"] .csb-app > .mol-pick { flex: 1 1 100%; max-width: none; margin: 0; order: 9; }
+/* A3 · the favourites strip, under the macros and the clock, the width of the panel; a face is the original control at the bar's size */
+#transport:is(.mini, .docked) .csb-favs { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 36px; padding-top: 4px; border-top: 1px solid var(--glass-hairline); }
+#transport:is(.mini, .docked) > .native-tempo > .csb-favs > * { order: 0; }
+#transport:is(.mini, .docked) .csb-favs .k { width: 48px; flex: 0 0 auto; }
+#transport:is(.mini, .docked) .csb-favs .k-lbl { display: block; font-size: var(--fs-micro); }
+#transport:is(.mini, .docked) .csb-favs .segw { flex: 0 1 auto; max-width: 300px; }
+#transport:is(.mini, .docked) .csb-favs .segw .k-lbl { display: none; }
+#transport:is(.mini, .docked) .csb-favs-empty { font-size: var(--fs-micro); color: var(--ink-faint); }
 /* the expander's first row: ‹ › ⟳, REPEATS and its formula */
 #transport .csb-repeats { grid-column: 1 / -1; display: flex; align-items: center; gap: 4px; min-width: 0; }
 #transport:is(.mini, .docked) > .native-tempo > .csb-repeats > * { order: 0; }

@@ -5,6 +5,7 @@ round, newest first; an item leaves this list when an adopted MIR release carrie
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
 
+- 1.5.0-alpha.25 · `kit.js`: `knob()` and `seg()` return their options as `spec`, so an app can make a second face of the same control (λWAVES iteration 014 A3's favourites); `timeline/knobs.js` `setTimelineKnobRows(fn)` adds the app's rows under LOCATE CLIPS in the TIMELINE CLIP popup (ADD TO / REMOVE FROM CONTROL SURFACE).
 - 1.5.0-alpha.25 · `shell/transport.js` + `.css`: `createTransport({ places, onDock })` — the dock chip cycles RACK → STAGE → FREE (`setPlace`, `cycle`, `nextPlace`); FREE is the one bar in a window of its own (createWindow, chrome 'close', rect remembered in `<key>.free`; × back to the stage) with a VERTICAL chip (`data-orient="vertical"`); the seat store writes `{ v: 2, seat, place, orient }` — λWAVES iteration 014 A4 (Josh: "a cycle of: dock to rack, dock to stage, free-window").
 - 1.5.0-alpha.25 · `shell/transport.js` + `.css`: `CONTROL_SURFACE_LAYOUT` (`data-layout="csb"`): the bar in two rows (the clock; the app's modes, chooser, search and the rack's + ◧ ☆), 1.5 × the height, as narrow as its wider row; `named(name, list, { title })` names the dock window (CONTROL SURFACE) — λWAVES iteration 014 A1.
 - 1.5.0-alpha.25 · `shell/gui.js`: `aboutPage(host)` lends MIR ABOUT's page to the app's own ABOUT as its second page (Josh: "MIR about should be a second page to the About page(s)"); the window takes it back when opened (A1).

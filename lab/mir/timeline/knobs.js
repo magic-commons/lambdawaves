@@ -7,6 +7,11 @@
  *   installTimelineKnobs({ registry, editor, root = document }) → dispose */
 import { label, ariaLabel } from '../kit.js';
 
+/* 1.5.0-alpha.25 (λWAVES iteration 014 A3): an app's own rows under LOCATE CLIPS — `setTimelineKnobRows((id) => [{ label, run }])`, one port for
+   every installed popup (λWAVES: ADD TO / REMOVE FROM CONTROL SURFACE).  The label is a word the app passes through label(). */
+let appRows = null;
+export function setTimelineKnobRows(fn) { appRows = typeof fn === 'function' ? fn : null; }
+
 export function installTimelineKnobs({ registry, editor }) {
   let pending=null,owned=null,pop=null,suppressUntil=0;
   const events=new AbortController();
@@ -20,6 +25,7 @@ export function installTimelineKnobs({ registry, editor }) {
     const title=document.createElement('div');title.className='tl-pop-title';label(title,'TIMELINE CLIP');pop.append(title);
     const b=document.createElement('button');b.type='button';b.className='trig';b.dataset.tlAction='create-clip';label(b,'CREATE AUTOMATION CLIP');b.onclick=()=>{close();editor.createClip(id);};pop.append(b);
     const locate=document.createElement('button');locate.type='button';locate.className='trig';locate.dataset.tlAction='locate-clips';label(locate,'LOCATE CLIPS');locate.onclick=()=>{close();editor.locate(id);};pop.append(locate);
+    for(const row of (appRows?appRows(id):null)||[]){if(!row||typeof row.run!=='function')continue;const x=document.createElement('button');x.type='button';x.className='trig';x.dataset.tlAction='app';label(x,row.label);x.onclick=()=>{close();row.run();};pop.append(x);}
     /* the focus leaving the menu closes it (Tab away, or HIDE, which blurs what it hides: no key of its own for that) */
     const me=pop;me.tabIndex=-1;me.addEventListener('focusout',e=>{if(pop===me&&!me.contains(e.relatedTarget))close();});
     document.body.append(pop);const r=pop.getBoundingClientRect();pop.style.left=Math.max(8,Math.min(innerWidth-r.width-8,x))+'px';pop.style.top=Math.max(8,Math.min(innerHeight-r.height-8,y))+'px';b.focus();

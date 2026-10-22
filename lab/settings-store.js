@@ -29,6 +29,9 @@ export const FAMILIES = Object.freeze({
   'lambdawaves.q0.curves': ['rack.js curvesStore (mir/panels/curves.js model.serialize): the CURVES card\'s screen grade, the points per channel and AMOUNT', 'PREFERENCE'],   // 0.5.1 D10-24
   'lambdawaves.q0.info': ['shell/stage-words.js infoPrefs (mir/core/prefs.js createPrefs over INFO_ROWS; INFORMATIONAL writes it): the STAGE FORMULA, NAME, ATOM LABELS, their SIZEs, POSITION · PAD, one switch per announcement kind, the pop-ups\' SIZE, the CURSOR rows', 'PREFERENCE'],   // iteration 007 I (ADR-0003): the blob\'s six keys lifted once
   'lambdawaves.q0.picker': ['picker.js PREF_KEY: the Picker\'s SHOW LABELS (atoms, molecules) and THE HUE ring (hue, degrees)', 'PREFERENCE'],   // iteration 012 L1 · L2
+  'lambdawaves.q0.csb': ['csb-favs.js CSB_KEY: the CONTROL SURFACE\'s favourite controls (ids, in order)', 'PREFERENCE'],   // iteration 014 A3
+  'mir.transport': ['the kit\'s transport (mir/shell/transport.js localSeatStore): the bar\'s seat, place (STAGE | FREE) and orientation', 'PREFERENCE'],   // iteration 014 A4
+  'mir.transport.free': ['the kit\'s transport FREE window (mir/window/window.js persist): its rect', 'PREFERENCE'],   // iteration 014 A4
   'mir.render.calib':['the kit recorder (mir/render/recorder.js CALIB_KEY): this device\'s measured ms a frame', 'PREFERENCE'],   // 0.5.0 C7b
 });
 export function createSettingsStore(storage) {

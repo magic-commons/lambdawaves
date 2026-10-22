@@ -393,7 +393,7 @@ export function knob(o) {
   });
   root.addEventListener('blur', () => announce(false));     // the tree catches up the moment nobody is listening
   paint();
-  return { root, get: () => v, set(x, silent = true) { v = x; shown = null; paint(); if (!silent && o.onChange) o.onChange(v); },
+  return { root, spec: o, get: () => v, set(x, silent = true) { v = x; shown = null; paint(); if (!silent && o.onChange) o.onChange(v); },   // spec: the options it was made from (1.5.0-alpha.25: a second face is made from them)
     /** paint a modulated value over the base — the needle dances, the base (and a drag's start) stays the hand's */
     show(x) { shown = x; paint(); }, get shown() { return shown; }, setDefault(x) { def = x; }, dragging: () => dragging,
     /* WAVE 68 · A DEAD CONTROL SAYS SO, AND DOES NOT KEEP THE SEAT.  This wrote a class and a
@@ -499,7 +499,7 @@ export function seg(o) {
   };
   paint();
   try { new MutationObserver(paint).observe(row, { attributes: true, attributeFilter: ['disabled'], subtree: true }); } catch (_) {}
-  return { root, get: () => v, set(x) { v = x; paint(); }, button: (id) => btns.get(id), paint };
+  return { root, spec: o, get: () => v, set(x) { v = x; paint(); }, button: (id) => btns.get(id), paint };   // spec: as knob's (1.5.0-alpha.25)
 }
 
 /** trig({ label, onFire, glyph, cls }) — a momentary event */
