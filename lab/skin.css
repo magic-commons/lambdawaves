@@ -831,7 +831,12 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-install[data-state="installed"] .mm-ring-host > .mm-ico { opacity: 1; } #lwMenu .mm-install[data-state="busy"] .mm-ring-host > .mm-ico { opacity: 0; }
 #lwMenu .mm-tags { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding-top: 1px; padding-bottom: 1px; }
 #lwMenu .mm-tagrow { display: flex; gap: 4px; flex-wrap: nowrap; width: max-content; }
-#lwMenu[data-sec="library"].in-volume .mm-opts .mm-opt { visibility: hidden; }   /* inside a volume its head's twin is the one */
+#lwMenu[data-sec="library"].in-volume .mm-opts .mm-opt { display: none; }   /* inside a volume its head's twin is the one */
+/* iteration 014 D1: inside a volume the seat under the tabs is the search; the head's old seat holds NAME and MASS (3-state, as-is unpressed) */
+#lwMenu .mm-opts .mm-search { display: none; width: 240px; text-align: center; } #lwMenu[data-sec="library"].in-volume .mm-opts .mm-search { display: block; }
+#lwMenu .mm-sort { flex: none; display: inline-flex; align-items: center; gap: 4px; min-width: 30px; height: 26px; padding: 0 8px; border-radius: 999px; font-size: 11px; letter-spacing: .08em; white-space: nowrap; opacity: .45; background: color-mix(in srgb, var(--fg) 5%, transparent); transition: opacity 140ms, color 140ms; }
+#lwMenu .mm-sort:hover, #lwMenu .mm-sort:focus-visible { opacity: .8; } #lwMenu .mm-sort.on { opacity: 1; color: var(--acc); }
+#lwMenu .mm-sort .mm-ico { width: 14px; height: 14px; } #lwMenu .mm-sort[data-sort="name"] span { min-width: 2.4em; text-align: center; }
 #lwMenu.labels-mol .mm-lbl { animation: mm-rise 240ms var(--ease) both; }
 @keyframes mm-rise { from { opacity: 0; translate: 0 4px; } }
 @media (prefers-reduced-motion: reduce) {
