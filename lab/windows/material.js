@@ -101,7 +101,7 @@ export function createMaterial(app) {
     const ang = (u) => ((2 * u - 1) * Math.PI).toFixed(3) + ' rad';   // the ONE function that prints a stop's angle (the reader, the float, the stops' aria-valuetext)
     /* iteration 013 S2 (Josh: "Remove the text that says 'the built in' for HSV and 'Re/Im Legible'"): the kit's words lose their parenthetical
        where the app shows them (the stepper's name, the list's rows, the toast) — HSV WHEEL, BIPOLAR; the kit's PRESETS are untouched */
-    const palLabel = (P) => P.label.replace(/\s*\([^)]*\)$/, '');
+    const palLabel = (P) => { const s = P.label.replace(/\s*\([^)]*\)$/, ''); return s.charAt(0).toUpperCase() + s.slice(1); };   // iteration 014 D4: 'sea' → 'Sea'
     let palId = PAL_DEF, palStops = PALETTE_BY_ID.get(PAL_DEF).stops, palQuiet = true;   // quiet while the panel is built and while the app (a restore, a link, LW) loads the ramp
     const rv = createRampPanel({ parent: gp, cyclic: true, project: false, presets: PRESET_GROUPS.flatMap((g) => g.items).map((P) => ({ ...P, label: palLabel(P) })),
       labels: { ticks: [], seam: 'SEAM at ±π', seamWarn: 'a visible seam at arg ψ = ±π', at: 'ARG ψ', fmt: ang },

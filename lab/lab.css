@@ -394,6 +394,8 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport[data-layout="csb"] .csb-favs .segw { flex: 0 1 auto; max-width: 300px; }
 #transport[data-layout="csb"] .csb-favs .segw .k-lbl { display: none; }
 #transport[data-layout="csb"] .csb-favs-empty { font-size: var(--fs-micro); color: var(--ink-faint); }
+#transport[data-layout="csb"] .csb-favs .pal-invert { flex: 0 0 auto; width: 48px; height: 48px; }   /* iteration 014 D4: INVERT, a knob-sized face; ON turns its glyph over, as on the card */
+#transport[data-layout="csb"] .csb-favs .pal-invert svg { transition: transform var(--motion-ui) var(--ease-out); } #transport[data-layout="csb"] .csb-favs .pal-invert.on svg { transform: rotate(180deg); }
 /* the expander's first row (A8 tidy): ‹ › ⟳ as one group of round seats, REPEATS as the kit's readout (its word over its value), the formula on
    the same line taking the rest, one alignment, a hairline under */
 #transport[data-layout="csb"] > .native-tempo > .csb-repeats { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 2px 6px; border-bottom: 1px solid var(--glass-hairline); }

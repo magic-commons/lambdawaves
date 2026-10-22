@@ -927,6 +927,6 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .native-clean[data-id="observer"] .wave-row-0:not(:has(> :not([hidden]))) { display: none; }
 /* iteration 012 R4 · THE PALETTE DROPDOWN: the Picker's surface (.lw-menu above), short rows, each palette's strip at the right edge */
 .mir-pick.pal-pick { gap: 0; padding: 6px; }
-.mir-pick.pal-pick .mir-pick-i { min-height: 24px; padding: 0 8px; gap: 14px; }
+.mir-pick.pal-pick .mir-pick-i { min-height: 24px; padding: 0 8px; gap: 14px; justify-content: space-between; text-align: left; }   /* iteration 014 D4: the name left, the strip right */
 .mir-pick.pal-pick .pal-strip { flex: 0 0 72px; height: 10px; margin-left: auto; border-radius: 5px; box-shadow: inset 0 0 0 1px hsl(0 0% 50% / .25); }
 @media (pointer: coarse) { .mir-pick.pal-pick .mir-pick-i { min-height: 34px; } }

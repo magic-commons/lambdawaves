@@ -28,6 +28,18 @@ try {
     info = { asIs, az, za, heavy, search: await g.ev(`const s = document.querySelector('#lwMenu .mm-opts .mm-search'), b = s.getBoundingClientRect(), t = document.querySelector('#lwMenu .mm-tabs').getBoundingClientRect();
       return { shown: getComputedStyle(s).display, centreX: Math.round(b.left + b.width / 2), tabsCentreX: Math.round(t.left + t.width / 2), belowTabs: b.top >= t.bottom }; `),
       buttons: await g.ev(`return [...document.querySelectorAll('#lwMenu .mm-sort')].map((b) => b.getAttribute("aria-label"));`) };
+  } else if (scene === 'palette') {
+    await g.ev(`__LW.layout.raise('palette'); __LW.layout.popOut('palette', { x: 560, y: 60, w: 320 }); return 1;`); await wait(800);
+    const inv = await g.ev(`const b = document.querySelector('.dev[data-id="palette"] .pal-invert'), r = b.getBoundingClientRect();
+      b.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
+      const row = [...document.querySelectorAll('.tl-pop button')].find((x) => /ADD TO CONTROL SURFACE/.test(x.textContent)); if (row) row.click();
+      const pill = document.querySelector('#transport .tempo-chevron'); if (pill) pill.parentElement.click();
+      await new Promise((r) => setTimeout(r, 600)); const f = document.querySelector('#transport .csb-favs .pal-invert');
+      if (!f) return { face: null }; const before = __LW.mat.invert; f.click(); const after = __LW.mat.invert, card = b.getAttribute('aria-pressed'); f.click();
+      const fr = f.getBoundingClientRect(); return { added: !!row, face: [fr.width, fr.height].map(Math.round), before, after, cardFollows: card, back: __LW.mat.invert };`);
+    writeFileSync(OUT.replace(/\.png$/, '-csb.png'), Buffer.from(await g.snap(), 'base64'));
+    await g.ev(`const pill = document.querySelector('#transport .tempo-chevron'); if (pill) pill.parentElement.click(); document.querySelector('.dev[data-id="palette"] .mir-ramp-step .mir-step-name').click(); return 1;`); await wait(700);
+    info = { inv, rows: await g.ev(`const p = document.querySelector('.mir-pick.pal-pick'); if (!p) return null; return [...p.querySelectorAll('.mir-pick-i')].slice(0, 8).map((b) => { const r = b.getBoundingClientRect(), s = b.querySelector('.pal-strip').getBoundingClientRect(); return b.textContent.trim() + ' · text-left ' + Math.round(b.firstChild.nodeType === 3 ? r.left : b.firstElementChild.getBoundingClientRect().left - r.left) + ' · strip-right-gap ' + Math.round(r.right - s.right); });`) };
   } else if (scene === 'register') {
     await g.ev(`__LW.chem.setOn(true); return 1;`);
     await g.waitFor('document.querySelector(".mol-reg canvas.mol-c")?.clientHeight > 0', 300, 100);
