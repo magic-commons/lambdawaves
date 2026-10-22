@@ -198,7 +198,7 @@ export function createModSeam(app) {
       const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));
       occlusion.dirty();   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
-      if (!t || !t.classList.contains('mini')) return;
+      if (!t || !t.classList.contains('mini') || t.dataset.place === 'free') return;   // iteration 014 A4: the FREE window is the hand's, never dodged
       if (trMoving) { if (!rs.length) setTimeout(() => modDodge(rect, who), 320); return; }
       if (document.body.classList.contains('rack-hidden')) return;   // it is already parked off-screen
       /* OPTIMIZATION 2026-09-24 · N8 · A CLOSED WINDOW HAS NOTHING TO DODGE, AND ASKING COST THE BOOT A LAYOUT.  A closed

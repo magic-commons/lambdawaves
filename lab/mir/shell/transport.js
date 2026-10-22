@@ -50,6 +50,7 @@ import { createLayoutMotion, wireReorder as reorderEngine } from '../modulation/
 import { settled } from '../core/motion.js';
 import * as MOD from '../modulation/mod.js';
 import { jsonStore } from '../core/prefs.js';
+import { createWindow } from '../window/window.js';
 
 /** the numbers the bar keeps (BASINS transport.js measured them) */
 export const TRANSPORT = Object.freeze({
@@ -65,8 +66,19 @@ export const TRANSPORT = Object.freeze({
   travelFine: 1760,    // … and 1760 px with Shift held
   panelGap: 16,        // the tempo panel opens below when that much room is left under it (BASINS positionTempo)
 });
-/** placementOf({ docked, host }) — BASINS' rule: the rack's dock wins, then a work lane that shows, else the stage */
-export const placementOf = ({ docked = false, host = null } = {}) => (docked ? 'rack' : host ? 'work' : 'stage');
+/** placementOf({ docked, host, free }) — BASINS' rule: the rack's dock wins, then the FREE window (1.5.0-alpha.25), then a work lane
+ *  that shows, else the stage */
+export const placementOf = ({ docked = false, host = null, free = false } = {}) => (docked ? 'rack' : free ? 'free' : host ? 'work' : 'stage');
+/** the places a dock chip cycles through (1.5.0-alpha.25, λWAVES iteration 014 A4: RACK → STAGE → FREE) */
+export const PLACES = Object.freeze(['rack', 'stage', 'free']);
+/** nextPlace(list, current) — the place after `current` in the cycle (a work lane counts as the stage) */
+export function nextPlace(list, current) {
+  const L = (Array.isArray(list) ? list : PLACES).filter((p) => PLACES.includes(p)); if (!L.length) return 'stage';
+  const i = L.indexOf(current === 'work' ? 'stage' : current);
+  return L[(i + 1) % L.length];
+}
+const PLACE_GLYPH = { rack: 'dock', stage: 'barsBottom', free: 'popOut' };
+const PLACE_WORD = { rack: phrase('Dock the bar into the rack'), stage: phrase('Put the bar on the stage'), free: phrase('Float the bar in its own window') };
 /** tempoDirection(bar, panelHeight, viewHeight) — BASINS positionTempo: below while the room under the bar holds the
  *  panel and a 16 px margin, or while there is at least as much room below as above; else above */
 export function tempoDirection(r, height, vh) {
@@ -262,10 +274,10 @@ export function playButton({ clock, onRefused = null, signal } = {}) {
 /** modPower({ mod }) — MODULATION'S POWER (BASINS transport-controls.js `mountModulationPower`: the ring-and-stem
  *  glyph with its halo; ON, the ring closes and lights in accent B).  A press powers modulation on or off — BASINS'
  *  `controller.toggleModulation()` → `mod.arm(!mod.armed())` — and never plays or pauses anything. */
-export function modPower({ mod, signal } = {}) {
+export function modPower({ mod, word = '', signal } = {}) {
   const life = lifeOf(signal), root = tbtn('modb mir-mod-power');
-  root.dataset.face = 'power';
-  root.innerHTML = glyphSvg('power', 'mir-power-icon', 28);
+  root.dataset.face = word ? 'word' : 'power';
+  if (word) label(root, word); else root.innerHTML = glyphSvg('power', 'mir-power-icon', 28);   // `word`: the app's own word on the seat (λWAVES' MOD) in place of the ring
   ariaLabel(root, 'Modulation on or off'); root.title = 'Enable or bypass modulation'; root.setAttribute('aria-pressed', 'true');
   const armed = () => (mod && typeof mod.armed === 'function' ? !!mod.armed() : false);
   function sync() { const on = armed(); root.classList.toggle('on', on); setAttr(root, 'aria-pressed', String(on)); }
@@ -526,9 +538,10 @@ export function wayBack({ run, signal } = {}) {
 }
 
 /* ── the layouts ───────────────────────────────────────────────────────────────────────────────────────────── */
-/** named(name, list) — a layout that carries its own drawing: the bar writes `data-layout="<name>"` and transport.css
- *  keys that layout's values on it.  A layout with no name (an app's own list) is drawn as BASINS' is. */
-const named = (name, list) => Object.freeze(Object.assign(list, { name }));
+/** named(name, list, { title }) — a layout that carries its own drawing: the bar writes `data-layout="<name>"` and transport.css
+ *  keys that layout's values on it; `title` names the rack window it docks into (default TRANSPORT).  A layout with no name
+ *  (an app's own list) is drawn as BASINS' is. */
+const named = (name, list, extra = {}) => Object.freeze(Object.assign(list, { name }, extra));
 /** BASINS' basic bar (app/transport.js): the play row — play, modulation's power, the BPM pill, to-start (BASINS adds its
  *  depth readout after the pill) — then the tempo panel the pill opens, the window latches, the seat button, the dock chip
  *  and the modulation door.  Its drawing is the default (transport.css): the bar as wide as its row, the pill in the row's
@@ -539,6 +552,16 @@ export const BASINS_LAYOUT = named('basins', [{ group: 'native-play-row', items:
  *  Its own drawing (`data-layout="lambdawaves"`): the 640 px bar, the pill last, the docked row wrapping. */
 export const LAMBDAWAVES_LAYOUT = named('lambdawaves', [{ group: 'native-play-row', items: ['play', 'power', 'rewind', 'app:back', 'app:forward', 'app:scrub', 'app:jump', 'app:time', 'app:period', 'app:rate', 'tempo'] },
   'panel', 'openers', 'seat', 'dock', 'door']);
+
+/** THE CONTROL SURFACE (1.5.0-alpha.25, λWAVES iteration 014 A1): the bar in TWO ROWS (`data-layout="csb"`, 1.5 × the bar's
+ *  height, as narrow as its wider row).  Row 1 is the clock — play, power, to-start, the app's scrub, time readout and rate,
+ *  the BPM pill, the window latches, the app's gear, the dock chip, the modulation door; row 2 is the app — its modes, its
+ *  chooser, its search and the rack's add / hide / favourites (`app:<name>`, from `nodes`; a name the app does not hand in is
+ *  left out).  The tempo panel opens under the rows.  Docked, the rack window is CONTROL SURFACE. */
+export const CONTROL_SURFACE_LAYOUT = named('csb', [
+  { group: 'csb-row csb-clock', items: ['play', 'power', 'rewind', 'app:scrub', 'app:time', 'app:rate', 'tempo', 'openers', 'app:gear', 'dock', 'door'] },
+  { group: 'csb-row csb-app', items: ['app:modes', 'app:chooser', 'app:search', 'app:add', 'app:rack', 'app:fav'] },
+  'panel'], { title: 'CONTROL SURFACE' });
 
 /** layoutNames(layout) — every part name a layout uses, groups opened */
 export function layoutNames(list) {
@@ -551,15 +574,20 @@ export function layoutNames(list) {
    rack, registered once; its hooks are forwarded to whichever bar is alive. */
 const docks = new WeakMap();
 let bars = 0;                                                       // bars made on this page (each paints under its own key)
-function dockOf(R) {
+function dockOf(R, title = 'TRANSPORT') {
   let d = docks.get(R);
   if (!d) {
     d = { open: null, close: null }; docks.set(R, d);
-    if (!(R.registered || []).includes(DOCK_ID)) R.register({ id: DOCK_ID, title: 'TRANSPORT', side: 'left', hint: 'the transport, docked',
+    if (!(R.registered || []).includes(DOCK_ID)) R.register({ id: DOCK_ID, title, side: 'left', hint: 'the transport, docked',
       build() {}, onOpen: (api) => d.open && d.open(api), onClose: () => d.close && d.close() });
   }
   return d;
 }
+
+/** transportDock(rack) — the docked seat's hooks `{ open(api), close() }` for a rack whose app registered the TRANSPORT card
+ *  itself (λWAVES' `card: true`, with its own slot and fold): the app's card calls them from its onOpen / onClose, and the
+ *  bar moves in and out exactly as with the kit's own window.  Registers the kit's window only when no card is there. */
+export const transportDock = (R) => dockOf(R);
 
 /** createTransport(options) → api
  *    layout      the bar's arrangement: an array of part names ('play', 'power', 'door', 'tempo', 'panel', 'tap',
@@ -581,7 +609,7 @@ function dockOf(R) {
 export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = globalThis.document && document.body, root = null, id = 'transport',
   clock = null, mod = null, model = MOD, setBpm = null, persist = null, openers = [], rack = null, keys = null, store = null,
   key = 'mir.transport', opener = true, onRefused = null, onInterface = null, bar: barKind = 'float', door: doorMark = 'palette',
-  onSwitch = null, macros = true } = {}) {
+  onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true, places = null, onDock = null } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView, body = doc.body;
   const life = new AbortController(), on = { signal: life.signal }, signal = life.signal;
   const S = store || localSeatStore(key);
@@ -604,7 +632,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     if (typeof name === 'string' && name.startsWith('app:')) return nodes[name.slice(4)] || null;
     switch (name) {
       case 'play': return one(playPart);
-      case 'power': return one(modPower({ mod, signal }));
+      case 'power': return one(modPower({ mod, word: powerWord, signal }));
       case 'door': return one(modDoor({ mod, mark: doorMark, onSwitch, work: () => placement === 'work', signal }));
       case 'tempo': return one(pillPart());
       case 'panel': return panelPart().root;
@@ -625,7 +653,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   let pillP = null;
   function panelPart() { if (!panel) { panel = tempoPanel({ tempo, mod, macros, signal }); parts.push(panel); panel.onToggle((v) => {   /* THE HAND: the bar keeps the row's width while the panel opens beside its row — read with the panel out of the flow (it is already shown when this runs), so the panel never widens the bar */
       if (v && placement === 'stage') { panel.root.hidden = true; bar.style.width = bar.getBoundingClientRect().width + 'px'; panel.root.hidden = false; } else bar.style.removeProperty('width');
-      bar.classList.toggle('tempo-open', v); aimPanel(); if (pillP) pillP.sync(); }); } return panel; }
+      bar.classList.toggle('tempo-open', v); aimPanel(); if (pillP) pillP.sync(); if (placement === 'free') view.requestAnimationFrame(fitFree); }); } return panel; }
   function pillPart() { if (!pillP) pillP = tempoPill({ tempo, panel: layoutNames(layout).includes('panel') ? panelPart() : null, work: () => placement === 'work', signal }); return pillP; }
   const place = (list, parent) => {
     for (const item of list) {
@@ -642,6 +670,55 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   /* ── THE ONE BAR THAT MOVES (BASINS transport-placement.js): stage · work lane · rack.  The same node goes; in a work
      bar its round seats are the bar's buttons (barFace) and a click on the pill types the tempo (tempoPill's work()) ── */
   let placement = barKind === 'work' ? 'work' : 'stage', workHost = barKind === 'work' ? stageHost : null, docked = false;
+  /* THE FREE WINDOW (1.5.0-alpha.25): `places` (an array, or a function → array) turns the dock chip into a cycle RACK → STAGE →
+     FREE; FREE seats the one bar in a window of its own (createWindow, chrome 'close', its rect remembered), whose × puts the bar
+     back on the stage; a chip on that window stands the bar up (data-orient="vertical": its rows become columns) */
+  let free = false, orient = 'horizontal', freeWin = null, orientB = null;
+  const placeList = () => (typeof places === 'function' ? places() : places) || null;
+  const freeStore = jsonStore(key + '.free');
+  function freeWindow() {
+    if (freeWin) return freeWin;
+    freeWin = createWindow({ id: id + '-free', title: (layout && layout.title) || 'TRANSPORT', host: body, chrome: 'close', resizable: false, emptyDrag: true,
+      size: { w: 560, h: 120 }, min: { w: 40, h: 40 }, persist: { read: freeStore.get, write: freeStore.set },
+      onClose: () => { if (free) { free = false; seatBar(); saveSeat(); } } });
+    freeWin.root.classList.add('mir-transport-free');
+    if (freeWin.tools) {
+      orientB = el('button', 'mir-win-btn tr-orient'); orientB.type = 'button'; setGlyph(orientB, 'swap', { label: 'Stand the bar up or lay it down' });
+      orientB.title = 'Stand the bar up or lay it down'; orientB.setAttribute('aria-pressed', 'false');
+      orientB.addEventListener('click', () => setOrient(orient === 'vertical' ? 'horizontal' : 'vertical'), on);
+      freeWin.tools.prepend(orientB);
+    }
+    return freeWin;
+  }
+  /** the free window takes the bar's size (it is not resizable: the bar decides) */
+  function fitFree() {
+    if (!freeWin || placement !== 'free') return;
+    const W = freeWin;                                                // layout sizes, never a rect: the window's open motion scales it
+    W.resize({ w: bar.offsetWidth + (W.root.offsetWidth - W.body.clientWidth), h: bar.offsetHeight + (W.root.offsetHeight - W.body.clientHeight) });
+  }
+  function setOrient(o) {
+    orient = o === 'vertical' ? 'vertical' : 'horizontal';
+    setAttr(bar, 'data-orient', placement === 'free' && orient === 'vertical' ? 'vertical' : null);
+    if (orientB) setAttr(orientB, 'aria-pressed', String(orient === 'vertical'));
+    if (placement === 'free') view.requestAnimationFrame(fitFree);
+    saveSeat(); return orient;
+  }
+  const saveSeat = () => { if (placeList()) S.set({ v: 2, seat, place: placement === 'free' ? 'free' : 'stage', orient }); };
+  const dockTo = (v) => { if (onDock) return onDock(v); const R = rackOf(); if (!R) return; if (v) R.open(DOCK_ID, { index: 0 }); else R.close(DOCK_ID); };
+  /** setPlace('rack' | 'stage' | 'free') — where the one bar sits; the chip's cycle and the app's own verbs come here */
+  function setPlace(p) {
+    if (p === 'rack') { free = false; if (!docked) dockTo(true); if (!docked) seatBar(); }
+    else if (p === 'free') { free = true; if (docked) dockTo(false); if (docked) free = false; else seatBar(); }
+    else { free = false; if (docked) dockTo(false); else seatBar(); }
+    saveSeat(); rove(null); soon();
+    return placement;
+  }
+  /** the dock chip in a cycle wears the NEXT place's glyph and says it */
+  function faceChip() {
+    if (!dockB || !placeList()) return;
+    const n = nextPlace(placeList(), placement);
+    setGlyph(dockB, PLACE_GLYPH[n], { label: PLACE_WORD[n] }); dockB.title = PLACE_WORD[n]; dockB.dataset.next = n;
+  }
   const barFace = (on) => { setAttr(bar, 'data-bar', on ? 'work' : 'float'); for (const b of bar.querySelectorAll(BAR_SEATS)) b.classList.toggle('trig', on); };
   barFace(placement === 'work');
   /** the tempo panel opens toward the free side in a work bar (BASINS positionTempo) */
@@ -651,12 +728,16 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   }
   function seatBar() {
     const host = workHost && workHost.isConnected ? workHost : null;
-    const next = placementOf({ docked, host });
-    if (next === 'work') { bar.classList.remove('mini', 'docked'); if (bar.parentElement !== host) host.appendChild(bar); barFace(true); }
+    const next = placementOf({ docked, host, free });
+    if (placement === 'free' && next !== 'free' && freeWin && freeWin.isOpen()) freeWin.close();   // `free` is already false: its onClose does nothing
+    setAttr(bar, 'data-place', next);
+    setAttr(bar, 'data-orient', next === 'free' && orient === 'vertical' ? 'vertical' : null);
+    if (next === 'free') { barFace(false); bar.classList.remove('docked'); bar.classList.add('mini'); const W = freeWindow(); if (bar.parentElement !== W.body) W.body.appendChild(bar); if (!W.isOpen()) W.open(); view.requestAnimationFrame(fitFree); }
+    else if (next === 'work') { bar.classList.remove('mini', 'docked'); if (bar.parentElement !== host) host.appendChild(bar); barFace(true); }
     else if (next === 'stage') { barFace(false); bar.classList.remove('docked'); bar.classList.add('mini'); if (bar.parentElement !== stageHost) stageHost.appendChild(bar); }
     else barFace(false);                                              // docked: setDocked keeps the rack window's form
-    if (next === placement) { aimPanel(); return placement; }
-    placement = next;
+    if (next === placement) { aimPanel(); faceChip(); return placement; }
+    placement = next; faceChip();
     /* BASINS placementChanged: the panel and the field close, a drag in flight ends */
     if (panel) panel.close();
     if (pillP) pillP.cancel();
@@ -753,12 +834,12 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     if (d) { e.preventDefault(); list[(i + d + list.length) % list.length].focus({ preventScroll: true }); }
   }, on);
   doc.addEventListener('pointerdown', (e) => { if (!menu.hidden && !menu.contains(e.target) && !(seatB && seatB.contains(e.target))) seatMenu(false); }, { capture: true, signal });
-  bar.addEventListener('contextmenu', (e) => { if (e.target.tagName === 'INPUT') return; e.preventDefault(); seatMenu(true, { x: e.clientX }); }, on);
+  if (seatMenuOn) bar.addEventListener('contextmenu', (e) => { if (e.target.tagName === 'INPUT') return; e.preventDefault(); seatMenu(true, { x: e.clientX }); }, on);   // `seatMenu: false`: no BOTTOM / TOP / COMPACT menu (an app that seats the bar itself; its controls keep their own right click)
   let hold = null, swallow = false;
   const endHold = () => { if (hold) { view.clearTimeout(hold.timer); hold = null; } };
   bar.addEventListener('pointerdown', (e) => {
     endHold(); swallow = false;
-    if (e.pointerType !== 'touch' || e.target.tagName === 'INPUT' || e.target.closest('.tempo-expand, .native-tempo')) return;
+    if (!seatMenuOn || e.pointerType !== 'touch' || e.target.tagName === 'INPUT' || e.target.closest('.tempo-expand, .native-tempo')) return;
     hold = { id: e.pointerId, x: e.clientX, y: e.clientY, timer: view.setTimeout(() => { hold = null; swallow = true; seatMenu(true, { x: e.clientX }); }, TRANSPORT.longPress) };
   }, on);
   bar.addEventListener('pointermove', (e) => { if (hold && e.pointerId === hold.id && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > TRANSPORT.slop) endHold(); }, on);
@@ -767,20 +848,23 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
 
   /* ── docked: BASINS' dock chip moves the bar into a rack window named TRANSPORT and back ── */
   function setDocked(v) {
-    docked = !!v;
+    docked = !!v; if (docked) free = false;
     bar.classList.toggle('docked', docked); bar.classList.toggle('mini', !docked);
-    if (dockB) { setAttr(dockB, 'aria-pressed', String(docked)); setGlyph(dockB, docked ? 'popOut' : 'dock', { label: docked ? 'Undock the transport' : 'Dock the transport into the rack' }); }
+    if (dockB && !placeList()) { setAttr(dockB, 'aria-pressed', String(docked)); setGlyph(dockB, docked ? 'popOut' : 'dock', { label: docked ? 'Undock the transport' : 'Dock the transport into the rack' }); }
+    else if (dockB) setAttr(dockB, 'aria-pressed', String(docked));
     seatBar();                                                      // undocked: back to the work lane if one shows, else the stage
     rove(null); soon();
   }
   function wireDock() {
     const R = rackOf(); if (!R || typeof R.register !== 'function') return;
-    const d = dockOf(R);
+    const d = dockOf(R, layout && layout.title);
     d.open = (api) => { api.body.appendChild(bar); setDocked(true); };
     d.close = () => setDocked(false);
     if (R.isOpen && R.isOpen(DOCK_ID)) { const api = R.window(DOCK_ID); if (api) d.open(api); }
   }
-  if (dockB) dockB.addEventListener('click', () => { const R = rackOf(); if (!R) return; if (docked) R.close(DOCK_ID); else R.open(DOCK_ID, { index: 0 }); }, on);
+  if (dockB) dockB.addEventListener('click', () => {
+    if (placeList()) { setPlace(nextPlace(placeList(), placement)); return; }   // the cycle (1.5.0-alpha.25)
+    const R = rackOf(); if (!R) return; if (docked) R.close(DOCK_ID); else R.open(DOCK_ID, { index: 0 }); }, on);
 
   /** moved(rect | null) — a floating window reports where it is: the rack's dodge moves the bar (on the stage) */
   function moved(r) {
@@ -806,11 +890,15 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   if (mod && typeof mod.onArm === 'function') offs.push(mod.onArm(soon));
   if (clock && typeof clock.onChange === 'function') offs.push(clock.onChange(soon));
 
-  const savedSeat = (() => { try { const v = S.get(); return v && typeof v === 'object' ? v.seat : v; } catch { return null; } })();
+  const savedRec = (() => { try { return S.get(); } catch { return null; } })();
+  const savedSeat = savedRec && typeof savedRec === 'object' ? savedRec.seat : savedRec;
+  if (savedRec && typeof savedRec === 'object' && savedRec.orient === 'vertical') orient = 'vertical';
   seat = seatOf(savedSeat);
   setAttr(bar, 'data-home', homeOf(seat)); setAttr(bar, 'data-form', seat === 'compact' ? 'compact' : 'bar');
   let started = false;
-  const start = () => { if (started || signal.aborted) return; started = true; wireDock(); if (!docked && placement === 'stage') applySeat(seat); sync(); };
+  const start = () => { if (started || signal.aborted) return; started = true; wireDock(); if (!docked && placement === 'stage') applySeat(seat);
+    if (!docked && placeList() && savedRec && savedRec.place === 'free' && placeList().includes('free')) setPlace('free');   // the free window comes back where the hand left it
+    setAttr(bar, 'data-place', placement); faceChip(); sync(); };
   queueMicrotask(start);
   sync(); rove(null);
 
@@ -826,6 +914,8 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     edit: () => pillP && pillP.edit(),
     setSeat: (s) => applySeat(s, { save: true }), get seat() { return seat; }, get docked() { return docked; },
     mountIn, get placement() { return placement; },
+    /** setPlace('rack' | 'stage' | 'free'), the cycle's next place, the free window and its orientation (1.5.0-alpha.25) */
+    setPlace, cycle: () => setPlace(nextPlace(placeList(), placement)), get orient() { return orient; }, setOrient, get freeWindow() { return freeWin; },
     /** closed — the user switched the bar off (Settings › TRANSPORT BAR: body.no-transport-bar); it stays off in every seat */
     get closed() { return body.classList.contains('no-transport-bar'); },
     /** tempoPanel(show) — open or close the tempo panel from code (BASINS toggleTempo) */
@@ -839,6 +929,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
       for (const off of offs) if (typeof off === 'function') off();
       const R = rackOf(); const d = R && docks.get(R); if (d) { d.open = null; d.close = null; }
       if (bar.parentElement !== stageHost) stageHost.appendChild(bar);
+      if (freeWin) freeWin.destroy();
       for (const n of made) n.remove();
       if (!made.includes(bar)) { bar.removeAttribute('data-bar'); bar.textContent = ''; bar.classList.remove('mir-transport', 'mini', 'docked', 'tempo-open'); for (const a of ['data-home', 'data-form', 'data-tempo-direction', 'data-layout']) bar.removeAttribute(a); delete bar.dataset.opener; }
     },

@@ -194,7 +194,7 @@ try {
     q.on('error', rej); q.end(body ? JSON.stringify(body) : undefined); });
   /* the hand's pick, under the browser's own rule: a <select> fires `change` only when its VALUE changes (Firefox's driver fires it on
      every <option> click, so its element road cannot stand in for a hand here) — the page turned to the molecule's section first */
-  const choose = (id) => g.ev(`const s = document.querySelector('.dev[data-id="chem"] .mol-pick select.sel');
+  const choose = (id) => g.ev(`const s = document.querySelector('#transport .mol-pick select.sel');
     for (const sec of ['DIATOMICS', 'HYDRIDES', 'ORGANIC', 'BIO', 'LATTICE', 'HEAVY']) { if ([...s.options].some((o) => o.value === '${id}')) break; __LW.chem.section(sec); }
     if (s.value === '${id}') return false;
     s.value = '${id}'; s.dispatchEvent(new Event('input', { bubbles: true })); s.dispatchEvent(new Event('change', { bubbles: true })); return true;`);
@@ -206,7 +206,7 @@ try {
   const pick1 = await choose('C60');
   const r11b = await g.ev(`${HELP}
     await wait(() => /record is not open/.test(__LW.chem.state().status));
-    const s = document.querySelector('.dev[data-id="chem"] .mol-pick select.sel');
+    const s = document.querySelector('#transport .mol-pick select.sel');
     const out = { preset: __LW.chem.preset(), value: s.value, sol: !!__LW.chem.solution(), status: __LW.chem.state().status };
     window.fetch = __f0; return out;`);
   const pick2 = await choose('C60');

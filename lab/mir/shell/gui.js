@@ -605,7 +605,8 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
 
   const A = createWindow({ id: 'gui-about', title: 'MIR ABOUT', host, chrome: 'close', size: { w: 480, h: 560 }, min: { w: 280, h: 200 }, emptyDrag: true, body: ab });
   A.root.classList.add('mir-gui', 'mir-gui-about');
-  const openAbout = () => { if (!A.isOpen()) A.open(); A.raise(); showLogo(); fitTo(A, ab); };
+  const abHome = ab.parentElement;                                   // the MIR ABOUT window's body: aboutPage() lends the page out, openAbout takes it back
+  const openAbout = () => { if (abHome && ab.parentElement !== abHome) abHome.appendChild(ab); if (!A.isOpen()) A.open(); A.raise(); showLogo(); fitTo(A, ab); };
   aboutBtn.addEventListener('click', openAbout, on);
 
   /** fitTo(w, content) — the window to its content's natural size (one layout read), capped by the screen; centred the
@@ -705,6 +706,9 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
       W.raise();
       show(id || tab);
     },
+    /** aboutPage(host) — MIR ABOUT's page as a page of the app's own ABOUT (λWAVES iteration 014 A1: "MIR about should be a second
+     *  page to the About page"): the one node moves into `host` with its logo; MIR ABOUT's window takes it back when it opens */
+    aboutPage(host) { if (A.isOpen()) A.close(); host.appendChild(ab); showLogo(); return ab; },
     /** close() — both windows */
     close() { W.close(); A.close(); },
     toggle(p) { const w = p === 'about' ? A : W; if (w.isOpen() && (!p || p === 'about' || p === 'options' || p === tab)) w.close(); else this.open(p); },

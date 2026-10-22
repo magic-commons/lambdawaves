@@ -34,7 +34,7 @@ try {
     window.__ws = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack']) delete o[k]; return JSON.stringify(o); };
     window.__calls = async () => (await __LW.chem.workerStat()).solverCalls;
     window.__sec = ${JSON.stringify(SEC)};   /* 0.4.0 S4b: the dropdown holds one section — turn to the row's page first */
-    window.__opt = (id) => { if (__sec[id]) __LW.chem.section(__sec[id]); return [...document.querySelectorAll('.dev[data-id="chem"] .mol-pick option')].find((o) => o.value === id); };
+    window.__opt = (id) => { if (__sec[id]) __LW.chem.section(__sec[id]); return [...document.querySelectorAll('#transport .mol-pick option')].find((o) => o.value === id); };
     window.__real = window.fetch;
     window.__offline = (on) => { window.fetch = on ? (u, o) => (/\\/library\\//.test(String(u && u.url || u)) ? Promise.reject(new TypeError('NetworkError: the gate is offline')) : __real(u, o)) : __real; };
     for (const k of await caches.keys()) if (k === 'lw-data-v1') await caches.delete(k);
@@ -88,7 +88,7 @@ try {
   pass(`cached = fresh: benzene live in Firefox (${two.liveCalls} solver calls) then installed (${two.inst.bytes} B, persisted ${two.inst.persisted}) and opened from its node-made record in ${two.ms.toFixed(0)} ms with 0 solver calls — |ΔE| ${two.dE.toExponential(1)}, |Δε| ${two.dEps.toExponential(1)}, |ΔD| ${two.dD.toExponential(1)}, ${two.clusters} degenerate projectors ${two.proj.toExponential(1)}, |ΔC| ${two.dC.toExponential(1)} with every sign kept, every name the same, 315 sticks |Δω| ${two.dOmega.toExponential(1)} |Δf| ${two.dF.toExponential(1)}; status "${two.status}"`);
 
   /* 3 · INSTALL BY A PRESS: lysine downloads, opens with 0 solver calls; a basis change and a KICK are refused with a sentence */
-  const three = await g.ev(`const c0 = await __calls(); const sel = document.querySelector('.dev[data-id="chem"] .mol-pick select');
+  const three = await g.ev(`const c0 = await __calls(); const sel = document.querySelector('#transport .mol-pick select');
     __opt('lysine'); sel.value = 'lysine'; sel.dispatchEvent(new Event('change'));   // S4b: turn to BIO first — the dropdown holds one section
     let st = __LW.chem.state(); for (let i = 0; i < 300 && !(st.nAO === 64 && st.roots); i++) { await __w(100); st = __LW.chem.state(); }
     await __w(200); st = __LW.chem.state();
@@ -145,7 +145,7 @@ try {
   pass(`EVICT → NOT INSTALLED: lysine removed; offline, the project restored everything else (palette ${five.pal}) and MOLECULES says "${five.status.slice(0, 120)}…"; the row says DOWNLOAD again, enabled; no page error`);
   /* 6 · THE SECTIONS: the page turner, the header, INSTALLED for a whole section, and the three sizing entries opened, timed */
   const six = await g.ev(`await __w(4000); __offline(false);
-    const card = document.querySelector('.dev[data-id="chem"]'), sel = card.querySelector('.mol-pick select');
+    const card = document.querySelector('.dev[data-id="chem"]'), sel = document.querySelector('#transport .mol-pick select');
     const dia = __LW.chem.section('DIATOMICS');
     const prev = card.querySelector('.mol-section .mir-step-b[data-step="-1"]'), next = card.querySelector('.mol-section .mir-step-b[data-step="1"]');   // 0.5.3 M8: the kit's stepper, PALETTE's look
     next.click(); const turned = __LW.chem.section().name; prev.click(); const back = __LW.chem.section().name;

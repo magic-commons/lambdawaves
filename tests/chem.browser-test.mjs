@@ -208,7 +208,7 @@ try {
   /* 0.4.0 S4b: the dropdown holds ONE SECTION; the page turner (‹ SECTION ›, the section header) turns it.  Every page is read
      through __LW.chem.section (the turner's own road), and then the page goes back to the molecule on screen. */
   const l6 = await g.ev(`const card = document.querySelector('.dev[data-id="chem"]');
-    const sel = card.querySelector('.mol-pick select.sel'), opts = [], groups = new Set(), pages = [];
+    const sel = document.querySelector('#transport .mol-pick select.sel'), opts = [], groups = new Set(), pages = [];
     for (const s of ${JSON.stringify(SECTIONS)}) {
       const h = __LW.chem.section(s); const here = sel ? [...sel.options] : [];
       for (const g of sel.querySelectorAll('optgroup')) groups.add(g.label);
@@ -289,7 +289,7 @@ try {
     const ok = __LW.restore(a); await new Promise((r) => setTimeout(r, 900));
     const B = JSON.parse(JSON.stringify(__LW.serialize().presentation.instruments.chem));
     const st = __LW.chem.state();
-    const sel = document.querySelector('.dev[data-id="chem"] .mol-pick select.sel');
+    const sel = document.querySelector('#transport .mol-pick select.sel');
     return { A, B, mid, preset: __LW.chem.preset(), selValue: sel && sel.value, energy: st.energy, nAO: st.nAO, errs: window.__e.slice() };`);
   judge('L9 a non-default preset (PH₃) round-trips through save → scramble → restore, select and all',
     l9.A.preset === 'PH3' && l9.mid === 'H2O' && l9.B.preset === 'PH3' && l9.preset === 'PH3' && l9.selValue === 'PH3'

@@ -295,6 +295,7 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport.mini { left: 50%; right: auto; transform: translateX(-50%); width: min(560px, calc(100% - 2 * var(--rack-w) - 40px)); height: 46px; bottom: 60px; padding: 2px 7px 3px; gap: 2px; border-radius: 16px; }   /* wave 92: the modulation work bar's box */
 #transport.mini .tbtn { width: 26px; height: 26px; font-size: 11px; border-radius: 50%; }
 #transport.mini .tbtn.play { width: 34px; }
+#transport.mini .tbtn.play > svg { width: 15px; height: 15px; }   /* iteration 014 A0: the kit's play glyph at the old ▶'s size */
 #transport.mini .fd { flex: 1 1 auto; min-width: 120px; }   /* the play bar keeps its length: the readouts beside it are fixed-width */
 #transport.mini .k { width: 36px; }
 /* WAVE 65 · THE PILL'S WIDTH BUDGET, MEASURED RATHER THAN ASSUMED.  Adding the MOD seat is what
@@ -312,6 +313,81 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport.mini .ro.period { flex: 0 0 120px; min-width: 120px; width: 120px; }
 #transport.mini .tbtn.jump { font-size: 13px; }
 #transport.mini .k-val, #transport.mini .ro-val { font-size: 9px; }
+/* ── iteration 014 A1 · THE CONTROL SURFACE (the kit's CONTROL_SURFACE_LAYOUT, data-layout="csb"): two rows, 69 px, as narrow as the wider row.
+   These beat λWAVES' own one-row rules above and in skin.css §12 (the 560 / 640 px box, its 46 px, its overflow and its `order`s). ── */
+#transport[data-layout="csb"] { align-items: stretch; }
+#transport.mini[data-layout="csb"] { width: max-content; max-width: calc(100vw - 24px); height: auto; min-height: 69px; padding: 3px 8px; overflow: visible; }
+#transport[data-layout="csb"]:is(.mini, .docked) > .csb-row > *, #transport[data-layout="csb"]:is(.mini, .docked) > .csb-row .tempo-expand { order: 0; }
+#transport[data-layout="csb"] > .csb-row { width: auto; min-width: 0; overflow: visible; }
+#transport.mini[data-layout="csb"] > .csb-row > :not(.mol-pick) { flex-shrink: 0; }
+#transport[data-layout="csb"] .tr-openers { flex: 0 0 auto; min-width: max-content; }
+#transport.mini[data-layout="csb"] > .csb-row { height: 31px; }
+#transport.mini[data-layout="csb"] .tbtn:not(.tempo-expand), #transport.mini[data-layout="csb"] :is(.dock-btn, .mod-exp, .tr-open) { width: 28px; height: 28px; min-width: 0; }
+#transport.mini[data-layout="csb"] .tbtn.play { width: 34px; }
+#transport.mini[data-layout="csb"] .tbtn.modb { width: 32px; }
+#transport.mini[data-layout="csb"] .fd { flex: 0 0 120px; width: 120px; min-width: 120px; }
+#transport.mini[data-layout="csb"] .ro.time { flex: 0 0 64px; width: 64px; min-width: 64px; }
+#transport[data-layout="csb"] .tr-open { border: 0; background: transparent; color: var(--ink-key); border-radius: 50%; display: inline-grid; place-items: center; padding: 0; }
+#transport[data-layout="csb"] .tr-open.on { color: var(--acc); }
+#transport[data-layout="csb"] .csb-gear .tr-gly, #transport[data-layout="csb"] .tr-open .tr-gly { width: 15px; height: 15px; }
+/* row 2: the modes, MOLECULES' chooser and the rack's three, in the bar's flow (they were absolutely seated on the stage) */
+#transport #lwMode { position: static; flex-direction: row; gap: 2px; }
+#transport #lwMode .lw-stage-b { width: 28px; height: 28px; }
+#transport :is(#rackToggle, #rackAdd, #rackFav) { position: static; inset: auto; width: 28px; height: 28px; transform: none; border: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.rack-hidden #transport :is(#rackAdd, #rackFav) { opacity: 1; visibility: inherit; pointer-events: auto; }
+#transport .csb-app > #lwMode { margin-right: 4px; }
+#transport .csb-app > .mol-pick { flex: 1 1 200px; min-width: 150px; max-width: 220px; height: 28px; margin-right: auto; }
+/* A2 · THE MINIATURE PICKER: the field in row 2, the six tiles in a .lw-menu pane above the bar (the Picker's tile, the hue in use) */
+#transport .csb-search { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; }
+#transport .csb-search-b { display: none; }
+#transport .csb-search-in { width: 100px; height: 24px; padding: 0 10px; border: 1px solid var(--glass-hairline); border-radius: var(--r-pill); background: var(--glass-raise); color: var(--fg); font: var(--fs-small) var(--font-ui); }
+#transport .csb-search-in::placeholder { color: var(--ink-faint); }
+#transport .csb-search-in:focus { outline: 0; border-color: color-mix(in srgb, var(--acc) 60%, transparent); }
+#transport[data-orient="vertical"] .csb-search-b { display: inline-grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--ink-key); }
+#transport[data-orient="vertical"] .csb-search-in { display: none; position: absolute; top: 50%; translate: 0 -50%; width: 180px; z-index: 2; }
+#transport[data-orient="vertical"] .csb-search.open .csb-search-in { display: block; }
+#transport[data-orient="vertical"] .csb-search[data-dir="right"] .csb-search-in { left: calc(100% + 4px); }
+#transport[data-orient="vertical"] .csb-search[data-dir="left"] .csb-search-in { right: calc(100% + 4px); }
+.csb-suggest { position: fixed; z-index: calc(var(--z-chrome) + 4); display: flex; gap: 6px; padding: 6px; border-radius: 14px; }
+.csb-suggest[hidden] { display: none; }
+.csb-suggest .mm-tile { position: relative; width: 76px; height: 76px; padding: 0; border: 1px solid transparent; border-radius: 10px; background: transparent; cursor: pointer; overflow: hidden; }
+.csb-suggest .mm-tile.on, .csb-suggest .mm-tile:hover { border-color: color-mix(in srgb, var(--acc) 55%, transparent); background: var(--glass-raise); }
+.csb-suggest .mm-pic { position: absolute; inset: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; filter: hue-rotate(var(--mol-hue, 0deg)); }
+.csb-suggest .mm-under { display: none; }
+.csb-suggest .mm-lbl { position: absolute; left: 0; right: 0; bottom: 3px; font: var(--w-bold) 10px/1 var(--font-math, serif); color: var(--fg); text-align: center; pointer-events: none; }
+.csb-suggest .csb-none { padding: 6px 10px; font-size: var(--fs-small); color: var(--ink-faint); }
+#transport .csb-app > #lwMode + :is(#rackAdd, #rackToggle, #rackFav), #transport .csb-app > .csb-search + #rackAdd { margin-left: auto; }
+#transport:has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-app > .mol-pick { display: none; }   /* HYDROGEN: no molecule to choose (row 1 is the wider row, so the bar keeps its width) */
+/* iteration 014 A4 · THE FREE WINDOW (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack;
+   VERTICAL (data-orient) stands it up — the rows become columns, the chooser leaves (the search finds a molecule), the modes stack */
+html body #transport.mini[data-place="free"] { position: static; left: auto; right: auto; top: auto; bottom: auto; transform: none; margin: 0; border: 0; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+html body.rack-hidden #transport.mini[data-place="free"] { transform: none; opacity: 1; visibility: visible; pointer-events: auto; }
+#transport.mini[data-layout="csb"][data-orient="vertical"] { flex-direction: row; align-items: flex-start; column-gap: 4px; }
+#transport.mini[data-layout="csb"][data-orient="vertical"] > .csb-row { flex-direction: column; height: auto; }
+#transport.mini[data-layout="csb"][data-orient="vertical"] > .csb-row > * { flex-basis: auto; }   /* a seat's basis was its WIDTH in a row; in a column it would be its height */
+#transport.mini[data-layout="csb"][data-orient="vertical"] .fd { width: 96px; min-width: 96px; }
+#transport[data-orient="vertical"] .csb-app > .mol-pick { display: none; }
+#transport[data-orient="vertical"] #lwMode { flex-direction: column; margin: 0; }
+#transport[data-orient="vertical"] .csb-app > :is(#rackAdd, #rackToggle, #rackFav) { margin: 0; }
+/* docked in the CONTROL SURFACE card: each row wraps; the chooser takes a line of its own under the modes and the rack's three */
+#transport.docked[data-layout="csb"] .tempo-expand { flex: 0 0 76px; width: 76px; }
+#transport.docked[data-layout="csb"] .ro.time { flex: 1 1 90px; min-width: 0; }
+#transport.docked[data-layout="csb"] .csb-app > .mol-pick { flex: 1 1 100%; max-width: none; margin: 0; order: 9; }
+/* A3 · the favourites strip, under the macros and the clock, the width of the panel; a face is the original control at the bar's size */
+#transport:is(.mini, .docked) .csb-favs { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 36px; padding-top: 4px; border-top: 1px solid var(--glass-hairline); }
+#transport:is(.mini, .docked) > .native-tempo > .csb-favs > * { order: 0; }
+#transport:is(.mini, .docked) .csb-favs .k { width: 48px; flex: 0 0 auto; }
+#transport:is(.mini, .docked) .csb-favs .k-lbl { display: block; font-size: var(--fs-micro); }
+#transport:is(.mini, .docked) .csb-favs .segw { flex: 0 1 auto; max-width: 300px; }
+#transport:is(.mini, .docked) .csb-favs .segw .k-lbl { display: none; }
+#transport:is(.mini, .docked) .csb-favs-empty { font-size: var(--fs-micro); color: var(--ink-faint); }
+/* the expander's first row: ‹ › ⟳, REPEATS and its formula */
+#transport .csb-repeats { grid-column: 1 / -1; display: flex; align-items: center; gap: 4px; min-width: 0; }
+#transport:is(.mini, .docked) > .native-tempo > .csb-repeats > * { order: 0; }
+#transport:is(.mini, .docked) .csb-repeats .ro.period { flex: 0 0 auto; width: auto; min-width: 120px; align-items: flex-start; text-align: left; }
+#transport:is(.mini, .docked) .csb-repeats .ro-lbl { display: block; font-size: var(--fs-micro); color: var(--ink-faint); }
+#transport:is(.mini, .docked) .csb-repeats .ro-val { font-size: var(--fs-small); }
+#transport .csb-repeats .fx { display: block; flex: 1 1 auto; min-width: 0; overflow: hidden; font-size: var(--fs-micro); }
 /* docked into the rack as a card */
 #transport.docked { position: static; transform: none; width: auto; height: auto; flex-wrap: wrap; padding: 6px; gap: 6px; border: 0; box-shadow: none; background: transparent; }
 /* 0.6.6 G2 · THE TYPE BOX (lab/shell/transport.js): ASK swaps the centre for one line to Gemma; her answer echoes in the t readout's seat for 4 s */

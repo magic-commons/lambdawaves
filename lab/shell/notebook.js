@@ -1,7 +1,7 @@
-/* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, the transport's dock chip and MOD logo, layout.modulation,
+/* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, layout.modulation,
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
-import { TIER, BUILD_LINE } from '../rack.js'; import { el, chip } from '../mir/kit.js'; import { createMenubar } from '../mir/shell/menubar.js'; import { toLUT } from '../mir/palette.js';
+import { TIER, BUILD_LINE } from '../rack.js'; import { el, seg } from '../mir/kit.js'; import { createMenubar } from '../mir/shell/menubar.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
@@ -21,26 +21,7 @@ export function createNotebook(app) {
     for (const a of document.querySelectorAll('a.skip')) {
       a.addEventListener('click', (e) => { const t = document.querySelector(a.getAttribute('href')); if (!t) return; e.preventDefault(); t.focus(); });
     }
-    /* a dock button on the transport itself */
-    const tr = document.getElementById('transport');
-    /* WAVE 55: the same drawing every floating window's DOCK chip wears — one mark, one meaning, and never
-       a text character (glyph.js: iOS answers several of ours with a colour emoji). */
-    if (tr) { const b = el('button', 'dock-btn', tr); b.type = 'button'; b.dataset.keyAction = 'dock';
-      chip(b, 'north', 'dock the transport into the rack'); b.title = 'move the transport between the stage and the rack (T)'; b.addEventListener('click', () => layout.dockTransport()); }
-    if (tr) {
-      const e = el('button', 'mod-exp mod-logo', tr); e.type = 'button'; e.dataset.keyAction = 'modulation';
-      /* WAVE 55: the mark is now the POP-OUT's, because that is literally what the press does — the pill's
-         EXPAND opens modulation as a FLOATING window over the stage, not as a card in the rack. */
-      const lg = document.querySelector('#title .mark');
-      if (lg) { const c = lg.cloneNode(true); c.removeAttribute('aria-hidden'); e.appendChild(c); }
-      e.setAttribute('aria-label', 'open the modulation window');
-      e.title = 'Open the modulation window';
-      e.addEventListener('click', () => layout.modulation.toggle());
-      const spinLogo = (reverse) => { const mark = e.querySelector('.mark'); if (!mark) return; if (e._spin) e._spin.cancel(); e._spin = mark.animate([{ transform: 'rotate(0deg)' }, { transform: `rotate(${reverse ? -360 : 360}deg)` }], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 550, easing: 'ease-in-out' }); };
-      e.addEventListener('pointerenter', () => spinLogo(false));
-      e.addEventListener('pointerleave', () => spinLogo(true));
-      ui.modExp = e;
-    }
+    /* iteration 014 A0: the transport's dock chip and its modulation door are the kit's bar's (lab/shell/transport.js) */
     /** THE EXPANSION.  Not layout.raise(): on a phone the transport is docked at the TOP of the one
      *  rack and must stay there, so the window opens directly BENEATH it rather than above it. */
     layout.modulation = {
@@ -110,11 +91,10 @@ export function createNotebook(app) {
         VIEW: () => [['HYDROGEN | MOLECULES  switch the mode', () => runAction('mode'), null, 'the mode under the title: HYDROGEN (SPECTRUM and the atomic windows) or MOLECULES (the one MOLECULES card)'], null, ['INVERT the cloud \u2014 ink, not light', () => app.sh.LW.setInvert(!mat.invert), null, 'draw the cloud as ink rather than light; the transfer is inverted and ψ is not touched'], ['ρ = |ψ|²  density', () => app.sh.LW.setView('density')], ['arg ψ  phase\t' + keyFor('view') + ' cycles', () => app.sh.LW.setView('phase')], ['Re ψ', () => app.sh.LW.setView('real')], ['Im ψ', () => app.sh.LW.setView('imag')],
           ['— style: CLOUD\t' + keyFor('style') + ' cycles', () => app.sh.LW.setStyle('cloud')], ['— style: SOLID', () => app.sh.LW.setStyle('solid')], ['— style: SIGNED', () => app.sh.LW.setStyle('signed')], ['— style: DUST', () => app.sh.LW.setStyle('dust')], ['— style: BANDS', () => app.sh.LW.setStyle('bands')],
           ['STAGE CAPTIONS  on / off', () => ui.capSw && ui.capSw.root.click()], ['STAGE FORMULA  on / off', () => ui.molFormulaSw && ui.molFormulaSw.root.click()], ['ATOM LABELS  on / off', () => ui.atomLabelsSw && ui.atomLabelsSw.root.click()], ['BALL AND STICK  on / off', () => runAction('ballStick')], ['STATUS TAGS  on / off', () => app.ctl.look.set({ badges: !app.ctl.look.get('badges') })], ['CONTROL HINTS  on / off', () => app.ctl.look.set({ hints: !app.ctl.look.get('hints') })], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['FULL SCREEN / back\t' + keyFor('fullscreen'), () => toggleFullscreen()]],
-        WINDOW: () => { queueMicrotask(tagIcons); return [['PICKER\t' + keyFor('menu'), () => runAction('menu')], ['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['FOLDERS\t' + keyFor('folders'), () => runAction('folders'), null, 'your projects and the DEMOS'], ['TIMELINE', () => runAction('timeline')], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the transport\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => app.hooks.setTheme && app.hooks.setTheme('light')], ['THEME · DARK', () => app.hooks.setTheme && app.hooks.setTheme('dark')], ['THEME · SYSTEM', () => app.hooks.setTheme && app.hooks.setTheme('system')], null,
+        WINDOW: () => { queueMicrotask(tagIcons); return [['PICKER\t' + keyFor('menu'), () => runAction('menu')], ['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['FOLDERS\t' + keyFor('folders'), () => runAction('folders'), null, 'your projects and the DEMOS'], ['TIMELINE', () => runAction('timeline')], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the control surface\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => app.hooks.setTheme && app.hooks.setTheme('light')], ['THEME · DARK', () => app.hooks.setTheme && app.hooks.setTheme('dark')], ['THEME · SYSTEM', () => app.hooks.setTheme && app.hooks.setTheme('system')], null,
           /* iteration 012 M1: the FOLDERS card (`projects`) is not listed — FOLDERS above is the one door (O), and the card stays in + */
           ...[...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => layout.raise(d.dataset.id), null, winHint(d)])]; },
-        /* iteration 003 · BASINS' GUI menu (shell.js createMenubar): the kit's two windows, lab/mir-gui.js */
-        GUI: () => [['MIR OPTIONS', () => mirGui().open('options'), null, 'the interface’s look: theme, accents, text, quality, material, controls, motion, light, windows'], ['MIR ABOUT', () => mirGui().open('about'), null, 'what MIR is']],
+        /* iteration 014 A1: the GUI menu left the menubar — MIR OPTIONS is the CONTROL SURFACE's gear, MIR ABOUT the second page of ABOUT */
         ABOUT: () => [['ABOUT λWAVES', () => layout.notebook.open('about')], ['KEYBOARD SHORTCUTS…\t' + keyFor('help'), () => layout.keymap.toggle()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')], ['PHOTOSENSITIVITY WARNING…', () => { if (app.hooks.warning) { app.hooks.warning.reset(); app.hooks.warning.show(); } }, null, 'show the photosensitivity notice now and on the next load (iteration 012 M1: out of SETTINGS)'], null, ['UPDATE APP', () => swClient.refresh(), null, 'check for a new build, rebuild the offline cache, and reload']],
       };
       /* 0.5.0 C3 · THE BAR IS THE KIT'S createMenubar (its port of this app's bar: the disclosure, 400 ms hover hide, the placement,
@@ -293,6 +273,19 @@ export function createNotebook(app) {
       ta.addEventListener('input', () => { nbStore(NB_KEY, ta.value); count(); });
       const ABOUT_DEF_W = 470, ABOUT_DEF_H = 670;
       const NOTES_DEF_W = 640, NOTES_DEF_H = 460;
+      /* iteration 014 A1 · ABOUT has two pages, λWAVES | MIR: the MIR page is MIR ABOUT's own (the kit's aboutPage lends it; its window takes it back) */
+      let abSeg = null;
+      function aboutTabs() {
+        if (abSeg) return;
+        let off = [];
+        const page = (id) => { const mir = id === 'mir';
+          if (mir) { off = [...faces.about.children].filter((n) => !n.hidden && n !== abSeg.root && n !== mirHost); for (const n of off) n.hidden = true; mirGui().aboutPage(mirHost); }
+          else { for (const n of off) n.hidden = false; off = []; }
+          mirHost.hidden = !mir; };
+        abSeg = seg({ aria: 'About page', value: 'lw', options: [{ id: 'lw', label: 'λWAVES' }, { id: 'mir', label: 'MIR' }], onChange: page });
+        abSeg.root.classList.add('ab-tabs'); faces.about.prepend(abSeg.root);
+        const mirHost = el('div', 'ab-mir', faces.about); mirHost.hidden = true;
+      }
       const show = (face) => {
         if (face === 'projects') { projects.show(); return; }   // 0.5.0 C6: the PROJECTS face left the notebook; its open is FOLDERS' (iteration 004: the front page put away first)
         nb.hidden = false; faces.notes.hidden = face !== 'notes'; faces.about.hidden = face !== 'about'; nb.dataset.face = face;
@@ -305,6 +298,7 @@ export function createNotebook(app) {
             nb.style.left = 'calc(50% - ' + Math.round(w / 2) + 'px)';
             nb.style.top = 'max(20px, calc(50% - ' + Math.round(h / 2) + 'px))';
           }
+          aboutTabs();
           const logo = nb.querySelector('.nb-logo');
           if (logo && !logo.children.length) { for (const c of document.getElementById('title').children) if (!c.classList.contains('ms')) logo.appendChild(c.cloneNode(true)); paintMarks(); }
         } else {

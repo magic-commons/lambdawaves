@@ -139,7 +139,7 @@ export async function boot(dom) {
       rotStep: null, modStore: null, saveMod: null, curvesStore: null, occlusion: null, look: null, applyAccent: null, paintMarks: null, markBatchBegin: null, markBatchEnd: null, wheelColor: null,
       accent: null, inkCtx: null, markInk: null, stageGround: null, busyWrap: null, busyFlash: null, busy: null, busySync: null, cardLoading: null, busyHost: null, field: null, maths: null,
       scan: null, cards: null, solveChem: null, solveCard: null, cancelWarm: null, warmArm: null, touchState: null, loadPreset: null, setReference: null, api: null },
-    sh: { readSettings, ask: null, saveSettings: null, setCardStyle: null, setFrost: null, setDisconnected: null, lookSync: null, applySettings: null, KIND: null, RETIRED_WINDOWS: null, powered: null,
+    sh: { readSettings, csb: null, ask: null, saveSettings: null, setCardStyle: null, setFrost: null, setDisconnected: null, lookSync: null, applySettings: null, KIND: null, RETIRED_WINDOWS: null, powered: null,
       DIGESTS: null, quality: null, transport: null, togglePlay: null, setModArm: null, barLock: null, refreshOcclusion: null, devById: null, rackCardWidth: null, popFace: null, rk: null,
       layout: null, winHint: null, wTr: null, phone: null, tablet: null, syncPhone: null, keyState: null, keyHelp: null, stageHasFocus: null, ACTIONS: null, kt: null, modSeats: null, serialize: null,
       restoreModulation: null, save: null, copyJSON: null, restore: null, notCarriedWords: null, esc: null, mintLink: null, copyLink: null, openLink: null, historyApi: null, verbs: null, LW: null },
@@ -286,8 +286,8 @@ export async function boot(dom) {
   app.loop.windowActivity = windowActivity;
   const canPresent = (w) => windowActivity.canPresent(w);
   app.loop.canPresent = canPresent;
-  const canPresentTransport = () => !app.state.uiHidden && (layout.docked ? canPresent(wTr)
-    : (!document.body.classList.contains('rack-hidden') || document.body.classList.contains('transport-peek')));
+  const canPresentTransport = () => !app.state.uiHidden && (layout.docked ? canPresent(wTr) : transport.bar.placement === 'free'
+    || (!document.body.classList.contains('rack-hidden') || document.body.classList.contains('transport-peek')));   // iteration 014 A4: the FREE window shows whatever the rack does
   const tableOf = (a) => sturm.P ? sturm.rec[a] : (app.state.space === 'p' ? getHamiltonian().momentumTableFor(BASIS[a]) : getHamiltonian().tableFor(BASIS[a]));   // W-STURMIAN: the scaled record, else the operator's
   const sturmHalf = () => { const nm = reg.reachNmax(1e-3); return domainFor(nm) / (nm * sturm.lambda); };   // a Sturmian's extent is hydrogen's for n over nλ (ρ = 2λr against 2r/n); iteration 010 X1: over the REACH the field draws (state.js reach), not the anchor
   /* Population membership, mute/solo eligibility and ordering change only with register.version. During exact
@@ -934,7 +934,7 @@ export async function boot(dom) {
   /* the photosensitivity notice is main.js' `warning` (0.5.0 C6b: λWAVES' law over the kit's notice, shown before the title screen) */
   const warning = dom.start.warning;
   ui.saveNative = saveSettings;
-  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost: app.state.modHost, modApi:()=>app.state.modView&&app.state.modView.api, cadence:()=>MOD.hz, setCadence:mod.setCadence });
+  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT) });
   app.hooks.warning = warning;
   /* ── WAVE 57 · THE ORDER, AND IT IS THE WHOLE FIX ────────────────────────────────────────────────
    * NOTHING MOVES UNTIL THE NOTICE HAS BEEN ACCEPTED — or was accepted by this browser before and is

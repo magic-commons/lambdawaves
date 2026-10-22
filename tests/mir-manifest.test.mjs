@@ -11,13 +11,14 @@ const root = fileURLToPath(new URL('..', import.meta.url));
    file AND rewrites the manifest ("1.4.4", 2026-10-05, a release MIR never cut) passed them.  Each accepted MIR version
    pins the sha-256 of the manifest's own bytes: a forged version fails here, in every checkout and every CI, and a real
    adoption is a visible TWO-file edit — MIR-MANIFEST.json (written by MIR's tools/adopt.mjs) and its row below. */
-const ACCEPTED = { '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
+const ACCEPTED = { '1.5.0-alpha.25': 'cba672db9d086a924383f47823e29be1845a275c28a14610688df8abfabba021',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
+  '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES is PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs; re-adopt once when brief 8 lands (PLAN §1). */
   '1.5.0-alpha.24': '3f969725fe44715bb96a42fc56d668defc9b9cfceeb4219d146ecd24cad35351',
   /* iteration 014 (Josh 2026-10-22: "lift") · the kit is edited in place under the trickle-down rule (docs/FOR-MIR.md's top section):
      A6 THE SCROLL PILL made 1.5.0-alpha.25; the manifest's file rows re-hashed for the six files it touched, `commit` still alpha.24's */
-  '1.5.0-alpha.25': '9501c77f0c49b1dfd94a7d155879a6143deec11e63d1f2e092e16125e48d7b15' };
+  '1.5.0-alpha.25': 'cba672db9d086a924383f47823e29be1845a275c28a14610688df8abfabba021' };
 const manifestBytes = readFileSync(path.join(root, 'MIR-MANIFEST.json'));
 const manifest = JSON.parse(manifestBytes.toString('utf8'));
 assert.equal(manifest.kit, 'MIR');

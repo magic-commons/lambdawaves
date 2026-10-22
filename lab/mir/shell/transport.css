@@ -171,22 +171,41 @@
 .mir-transport .native-tempo .trig { min-width: 0; height: 44px; min-height: 44px; padding: 0 3px; justify-content: center; font-size: var(--xport-tile-size); letter-spacing: var(--xport-tile-track); }
 .mir-transport.mini > :is(.tr-openers, .tr-seat, .dock-btn, .mod-exp) { order: 3; }
 
-/* ── λWAVES' own seats on its bar (skin.css §12): the scrub a thin line, a small RATE knob, the readouts stacked ── */
-.mir-transport .fd { flex: 1 1 48px; min-width: 40px; height: 24px; border: 0; background: transparent; box-shadow: var(--xport-flat); border-radius: 0; cursor: ew-resize; overflow: visible; }
-.mir-transport .fd::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -.5px; background: var(--xport-scrub-line); }
-.mir-transport .fd-fill { top: 50%; bottom: auto; height: 2px; margin-top: -1px; border-radius: var(--xport-line-r); background: var(--acc); opacity: .85; }
-.mir-transport .fd-edge { top: 50%; bottom: auto; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--fg); box-shadow: var(--relief-raise, var(--neu-raise)); }
-.mir-transport :is(.fd-lbl, .fd-label, .k-lbl, .k-label, .ro-lbl, .ro-label, .ro-sub) { display: none; }
-.mir-transport .fd-val { right: 0; top: -14px; bottom: auto; font-size: var(--fs-micro); padding: 0 5px; border-radius: var(--r-pill); background: var(--xport-face); }
-.mir-transport .k { width: 34px; gap: 0; flex: 0 0 auto; }
-.mir-transport .k-dial { width: 30px; height: 30px; }
-.mir-transport .k-val { position: absolute; top: -22px; left: 50%; transform: translate(-50%, 2px); font-size: var(--fs-micro); display: none; }
-.mir-transport .k:is(:hover, :focus-within, .drag) .k-val { display: block; transform: translate(-50%, 0); }
-.mir-transport .ro { flex: 0 1 auto; min-width: 0; width: auto; padding: 0 2px; background: transparent; box-shadow: var(--xport-flat); text-align: right;
+/* ── λWAVES' own seats on its bar (skin.css §12): the scrub a thin line, a small RATE knob, the readouts stacked (on the stage and in a work bar; docked, the card keeps the app's own readouts) ── */
+.mir-transport:not(.docked) .fd { flex: 1 1 48px; min-width: 40px; height: 24px; border: 0; background: transparent; box-shadow: var(--xport-flat); border-radius: 0; cursor: ew-resize; overflow: visible; }
+.mir-transport:not(.docked) .fd::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -.5px; background: var(--xport-scrub-line); }
+.mir-transport:not(.docked) .fd-fill { top: 50%; bottom: auto; height: 2px; margin-top: -1px; border-radius: var(--xport-line-r); background: var(--acc); opacity: .85; }
+.mir-transport:not(.docked) .fd-edge { top: 50%; bottom: auto; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--fg); box-shadow: var(--relief-raise, var(--neu-raise)); }
+.mir-transport:not(.docked) :is(.fd-lbl, .fd-label, .k-lbl, .k-label, .ro-lbl, .ro-label, .ro-sub) { display: none; }
+.mir-transport:not(.docked) .fd-val { right: 0; top: -14px; bottom: auto; font-size: var(--fs-micro); padding: 0 5px; border-radius: var(--r-pill); background: var(--xport-face); }
+.mir-transport:not(.docked) .k { width: 34px; gap: 0; flex: 0 0 auto; }
+.mir-transport:not(.docked) .k-dial { width: 30px; height: 30px; }
+.mir-transport:not(.docked) .k-val { position: absolute; top: -22px; left: 50%; transform: translate(-50%, 2px); font-size: var(--fs-micro); display: none; }
+.mir-transport:not(.docked) .k:is(:hover, :focus-within, .drag) .k-val { display: block; transform: translate(-50%, 0); }
+.mir-transport:not(.docked) .ro { flex: 0 1 auto; min-width: 0; width: auto; padding: 0 2px; background: transparent; box-shadow: var(--xport-flat); text-align: right;
   display: flex; flex-direction: column; justify-content: center; align-items: flex-end; gap: 0; overflow: hidden; }
-.mir-transport .ro.time { width: 58px; }
-.mir-transport .ro.period { width: 76px; }
-.mir-transport .ro-val { color: var(--ink-key, var(--fg-soft)); font-size: var(--fs-micro); line-height: 1.15; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.mir-transport:not(.docked) .ro.time { width: 58px; }
+.mir-transport:not(.docked) .ro.period { width: 76px; }
+.mir-transport:not(.docked) .ro-val { color: var(--ink-key, var(--fg-soft)); font-size: var(--fs-micro); line-height: 1.15; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── THE CONTROL SURFACE (CONTROL_SURFACE_LAYOUT, data-layout="csb"; 1.5.0-alpha.25): two rows, 1.5 × the bar's height, as narrow
+   as its wider row; the panel opens under them; docked, each row wraps in the card.  A latch with a glyph shows the glyph alone. ── */
+.mir-transport[data-layout="csb"] { flex-direction: column; align-items: stretch; justify-content: center; row-gap: 1px; }   /* a column: the bar is as wide as its WIDER row (a wrapping row would sum them) */
+.mir-transport.mini[data-layout="csb"] { width: max-content; min-width: 0; height: auto; min-height: calc(var(--xport-h, 46px) * 1.5); }
+.mir-transport[data-layout="csb"] > .csb-row { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; min-width: 0; height: calc(var(--xport-h, 46px) * .7); }
+.mir-transport[data-layout="csb"] .csb-row :is(.tbtn.tempo-expand, .transport-tempo-input) { order: 0; }
+.mir-transport[data-layout="csb"] > .csb-app { justify-content: flex-start; }
+.mir-transport[data-layout="csb"] .tr-openers { display: flex; gap: 2px; }
+.mir-transport[data-layout="csb"] .tr-open.has-glyph .tr-word { display: none; }
+.mir-transport.docked[data-layout="csb"] > .csb-row { flex-wrap: wrap; height: auto; row-gap: 4px; }
+.mir-transport[data-layout="csb"] > .native-tempo { flex: 0 0 auto; }
+
+/* ── THE FREE WINDOW (1.5.0-alpha.25): the bar in a window of its own (data-place="free"), in the window's flow; VERTICAL stands it up:
+   the bar's rows become columns ── */
+.mir-transport[data-place="free"] { position: static; inset: auto; transform: none; margin: 0; box-shadow: none; border: 0; background: transparent; }
+.mir-transport-free .mir-win-body { padding: 0; overflow: visible; }
+.mir-transport[data-place="free"][data-orient="vertical"] { flex-direction: row; align-items: flex-start; }
+.mir-transport[data-place="free"][data-orient="vertical"] > .csb-row { flex-direction: column; height: auto; width: auto; }
 
 /* ── COMPACT (ruled 2026-10-01): glyphs only, no TAP, no Hz reading ───────────────────────────────────────── */
 .mir-transport[data-form="compact"] { --xport-w: 0px; --xport-h: 40px; --xport-seat: 30px; --xport-power: 36px; --xport-pill-w: 52px; --xport-play-size: 22px; --xport-num-size: 14px; }
