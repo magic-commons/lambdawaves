@@ -317,9 +317,9 @@ export async function file(volId, molId, { network = true } = {}) {   // network
   if (m.sha256 && await hex(b) !== m.sha256) throw new Error(molId + ': its bytes do not match the catalogue');
   return b;
 }
-export async function picture(volId, molId) {
+export async function picture(volId, molId, style = null) {   // iteration 014 B4: `style` (im · balls · sticks · esp) when the row names it in `thumbs`, else the one picture
   const { v, m } = await molecule(volId, molId);
   if (!m.thumb) return null;
-  const url = inVolume(v, m.thumb), c = await store(volId), hit = c && await c.match(url).catch(() => null);
+  const url = inVolume(v, style && (m.thumbs || []).includes(style) ? m.thumb.replace(/\.webp$/, '.' + style + '.webp') : m.thumb), c = await store(volId), hit = c && await c.match(url).catch(() => null);
   return hit ? URL.createObjectURL(await hit.blob()) : url;
 }

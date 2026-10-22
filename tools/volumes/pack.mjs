@@ -156,6 +156,8 @@ function appChecks(C, n, nocc, S, M, atoms) {
 }
 
 /* a kept file: the target volume's folder, then every other vol-<n>/ of the out dir, then of the data's dist */
+const THUMB_STYLES = ['im', 'balls', 'sticks', 'esp'];                       // iteration 014 B4: the picture variants a row may name
+const variantPaths = (r) => (r.thumbs || []).map((st) => 't/' + r.id + '.' + st + '.webp');
 function findKept(vol, sub, name) {
   for (const d of LOOK) {
     const dirs = [vol, ...(existsSync(d) ? readdirSync(d).filter((e) => /^vol-\d+$/.test(e) && e !== vol).sort() : [])];
@@ -299,7 +301,7 @@ const pad8 = (n) => (n + 7) & ~7;
 
 /* ── THE ARCHIVE: 'LWV1' · u32 H · the index JSON · pad to 8 · every file 8-aligned; deterministic (no clock; the same dist → the same bytes) ── */
 function writeArchive(entry, rows, vdir) {
-  const files = [{ path: 'index.json' }, ...rows.map((r) => ({ path: r.file })), ...rows.filter((r) => r.thumb).map((r) => ({ path: r.thumb }))]
+  const files = [{ path: 'index.json' }, ...rows.map((r) => ({ path: r.file })), ...rows.filter((r) => r.thumb).map((r) => ({ path: r.thumb })), ...rows.flatMap(variantPaths).map((f) => ({ path: f }))]
     .map((f) => { const b = readFileSync(path.join(vdir, f.path)); return { path: f.path, offset: 0, length: b.length, sha256: sha(b) }; });
   const volume = { ...entry };
   let base = 0, text = '', end = 0;
@@ -374,16 +376,20 @@ for (const p of plan) {
     writeFileSync(tmp, r.bytes); renameSync(tmp, file);
     const thumbAt = path.join(VDIR, 't', id + '.webp'), th = findKept(p.id, 't', id + '.webp');
     if (th && path.resolve(th) !== thumbAt) { mkdirSync(path.dirname(thumbAt), { recursive: true }); copyFileSync(th, thumbAt); }
+    /* iteration 014 B4 · THE VARIANTS: tools/menu-thumbs.mjs --style writes t/<id>.<style>.webp; each one kept is carried and the row names them in
+       `thumbs` (the Picker's STYLE seg; a row without the key shows its one picture as before, and an index without variants is byte-identical) */
+    const thumbs = THUMB_STYLES.filter((st) => { const at = path.join(VDIR, 't', id + '.' + st + '.webp'), k = findKept(p.id, 't', id + '.' + st + '.webp');
+      if (k && path.resolve(k) !== at) { mkdirSync(path.dirname(at), { recursive: true }); copyFileSync(k, at); } return existsSync(at); });
     const M = r.header.meta;
     rows.push({ id, name: M.name, formula: M.formula, formulaM: M.formulaM, charge: M.charge, heavy: M.heavy, tags: M.tags || [], cid: M.cid || null, inchikey: M.inchikey || null,
       mw: M.mw != null ? M.mw : M.mass, pg: M.pointGroup || null, file: 'm/' + id + '.lwm', bytes: r.bytes.length, sha256: sha(r.bytes),
-      thumb: existsSync(thumbAt) ? 't/' + id + '.webp' : null,
+      thumb: existsSync(thumbAt) ? 't/' + id + '.webp' : null, ...(thumbs.length ? { thumbs } : {}),
       rungs: Object.fromEntries(Object.entries(r.header.rungs).map(([b, g]) => [b, { E: g.record.ground.energy, nAO: g.record.ground.nAO, gapEv: g.record.stem.gapEv }])),
       ...(r.header.skipped ? { skipped: Object.keys(r.header.skipped) } : {}), ...(r.header.failed ? { failed: Object.keys(r.header.failed) } : {}) });
     vreports.push(r.report); reports.push(r.report);
     console.log(`${p.id.padEnd(6)} ${id.padEnd(16)} ${String(M.heavy).padStart(3)} heavy · ${Object.keys(r.header.rungs).length} rungs · ${(r.bytes.length / 1024).toFixed(1)} KB (header ${(r.report.headerBytes / 1024).toFixed(1)} KB)`);
   }
-  written.push({ dir: VDIR, reach: new Set(rows.flatMap((r) => [r.file, r.thumb].filter(Boolean))) });
+  written.push({ dir: VDIR, reach: new Set(rows.flatMap((r) => [r.file, r.thumb, ...variantPaths(r)].filter(Boolean))) });
   const stale = readdirSync(path.join(VDIR, 'm')).filter((f) => f.endsWith('.lwm') && !rows.some((r) => r.file === 'm/' + f));
   const indexText = '{"schema":1,"id":' + JSON.stringify(p.id) + ',"numeral":' + JSON.stringify(p.numeral) + ',"title":' + JSON.stringify(p.title) + ',"bases":' + JSON.stringify(LADDER)
     + ',"generator":' + JSON.stringify({ tool: 'tools/volumes/pack.mjs', commit: GENERATOR, format: 'THE VOLUME FORMAT v1 (lab/volumes-format.js)' }) + ',"molecules":[\n'

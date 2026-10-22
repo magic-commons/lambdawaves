@@ -803,6 +803,10 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-opt { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .22em; padding: 3px 8px; border-radius: 999px; opacity: .38; transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-opt:hover, #lwMenu .mm-opt:focus-visible { opacity: .8; } #lwMenu .mm-opt.on { opacity: .75; color: var(--acc); } #lwMenu .mm-opt[hidden] { display: none; }
 #lwMenu .mm-opt .mm-ico { width: 12px; height: 12px; }
+/* iteration 014 B4 · THE PICTURES' STYLE under the hue ring (picker.js `.mm-looks`): the SHOW LABELS look, one lit */
+#lwMenu .mm-looks { display: flex; justify-content: center; gap: 2px; margin: 2px auto 4px; }
+#lwMenu .mm-look { font-size: 10px; letter-spacing: .2em; padding: 3px 8px; border-radius: 999px; opacity: .38; transition: opacity 140ms, color 140ms; white-space: nowrap; }
+#lwMenu .mm-look:hover, #lwMenu .mm-look:focus-visible { opacity: .8; } #lwMenu .mm-look.on { opacity: .85; color: var(--acc); }
 #lwMenu .mm-vhead .mm-opt { flex: none; white-space: nowrap; font-size: 11px; letter-spacing: .18em; opacity: .55; } #lwMenu .mm-vhead .mm-opt.on { opacity: 1; }
 #lwMenu .mm-back { display: grid; place-items: center; width: 28px; height: 28px; } #lwMenu .mm-back .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-lbl { position: absolute; left: 7%; bottom: 5%; max-width: 86%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none;
