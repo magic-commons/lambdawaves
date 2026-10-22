@@ -228,3 +228,16 @@ B3-animated last and optional.
 Builders' common brief: `~/.config/claude-backup/jobs/8497d75b/tmp/brief-it014-common.md` (013's with the kit law replaced by the trickle-down
 rule). Yan plans and builds CHAIN A from this file; Sos (or whoever integrates) merges with the 013 recipe, LOCK by name only if `lab/field.js`'s
 numbers move (B1–B3 add styles; the digest's leaves must not move — a new style is a new branch in the shader, never a change to the old ones).
+
+## CLOSED — CHAIN A (Claude Yan, 2026-10-22; merges `72e2e1b` it014-a-side, `7cfc299` it014-a-bar; gate green at both; LOCK untouched)
+| row | commit | what landed |
+|---|---|---|
+| A0 | 7f11bf1 | the kit's createTransport adopted (nodes, appPlay clock, setModArm power, transportDock); old expander / dock / logo code deleted; shots match |
+| A1 | 25d162f | CONTROL_SURFACE_LAYOUT two rows 534 × 72; #lwMode + chooser + search + ◧ ☆ on row 2; REPEATS ⟳ ‹ › in the expander; GUI menu gone, ⚙ on the bar; ABOUT page 2 = MIR |
+| A4 | 31a190c | dock chip cycles RACK → STAGE → FREE; FREE window with VERTICAL; T from any seat; phone stays docked |
+| A2 | e3bfd84 | lab/csb-search.js + picker.suggest(); ≤ 6 tiles above the bar; vertical = glyph unfolding to the centre |
+| A3 | 71f6cf3 | lab/csb-favs.js; ADD TO / REMOVE FROM CONTROL SURFACE on the knob menu; second face of the same control; lambdawaves.q0.csb |
+| A5 | b8e9326 | keys.js transport port → the kit's work bar in the timeline (play · power · BPM · t · ⏮ · door); the window's slab cleared |
+| A6 | 5ee738c | kit 1.5.0-alpha.25: rack scroll pills (createRackPills, 900 ms, clip-path, luminance ink); LOOK row rackPill; MIR-MANIFEST re-hashed |
+| A7 | — | not built (optional; after Josh's calls) |
+
