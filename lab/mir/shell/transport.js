@@ -581,15 +581,15 @@ export const LAMBDAWAVES_LAYOUT = named('lambdawaves', [{ group: 'native-play-ro
   'panel', 'openers', 'seat', 'dock', 'door']);
 
 /** THE CONTROL SURFACE (1.5.0-alpha.25, λWAVES iteration 014 A1 · A8; `data-layout="csb"`): three columns.  LEFT the play, large and
- *  centred in the bar's height, with the modulation power under it; MIDDLE two rows — the timing row (to-start, the app's time readout, the
- *  window latches, the modulation door, the app's gear, the dock chip) over the buttons row (the app's modes, chooser, search and the rack's
+ *  centred in the bar's height, with the modulation power under it; MIDDLE two rows — the timing row (to-start, the
+ *  window latches, the modulation door, the app's gear, the dock chip, the app's time readout at the right end — 014 A11) over the buttons row (the app's modes, chooser, search and the rack's
  *  add / hide / favourites); RIGHT the app's rate knob over the BPM pill.  The tempo panel opens under the whole bar.  In a rack card (docked,
  *  or the FREE window, one card wide) the same columns become bands: play + power left and rate + pill right, then the timing row, then the
  *  buttons.  `app:<name>` comes from `nodes`; a name the app does not hand in is left out.  Docked, the rack window is CONTROL SURFACE. */
 export const CONTROL_SURFACE_LAYOUT = named('csb', [
   { group: 'csb-col csb-play', items: ['play', 'power'] },
   { group: 'csb-mid', items: [
-    { group: 'csb-row csb-clock', items: ['rewind', 'app:time', 'openers', 'door', 'app:gear', 'dock'] },
+    { group: 'csb-row csb-clock', items: ['rewind', 'openers', 'door', 'app:gear', 'dock', 'app:time'] },
     { group: 'csb-row csb-app', items: ['app:modes', 'app:chooser', 'app:search', 'app:add', 'app:rack', 'app:fav'] }] },
   { group: 'csb-col csb-tempo', items: ['app:rate', 'tempo'] },
   'panel'], { title: 'CONTROL SURFACE' });

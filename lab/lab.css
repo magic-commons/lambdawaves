@@ -346,8 +346,8 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport[data-layout="csb"] .csb-tempo > .k .k-lbl { display: none; }
 #transport[data-layout="csb"] .csb-tempo .tempo-expand { flex: 0 0 auto; width: 72px; height: 34px; }
 #transport[data-layout="csb"] .csb-tempo .tempo-expand .tempo-number { font: var(--w-bold) 12px/1 var(--font-num); }   /* the stage pill's reading in a card too */   /* its basis was its WIDTH in a row; in this column it would be its height */
-/* the timing row: ⏮ · t (it takes the room, so the latch, the door, ⚙ and the dock chip sit right) */
-#transport[data-layout="csb"] .csb-row > .ro.time { flex: 1 1 auto; width: auto; min-width: 72px; padding: 0 6px; align-items: flex-start; text-align: left; background: transparent; box-shadow: none; }
+/* the timing row (A11): ⏮ · TIMELINE · the door · ⚙ · the dock chip together on the left, t taking the rest and reading from the right end */
+#transport[data-layout="csb"] .csb-row > .ro.time { flex: 1 1 auto; width: auto; min-width: 72px; padding: 0 6px; align-items: flex-end; text-align: right; background: transparent; box-shadow: none; }
 #transport[data-layout="csb"] .csb-row > .ro.time .ro-val { font-size: 13px; }
 #transport[data-layout="csb"] .csb-row :is(.ro-lbl, .ro-sub) { display: none; }
 /* the buttons row: the modes, MOLECULES' chooser, then SEARCH and the rack's three at the right edge */
@@ -365,7 +365,9 @@ body.rack-hidden #transport :is(#rackAdd, #rackFav) { opacity: 1; visibility: in
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-play > .tbtn.play { width: 48px; height: 48px; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-row { gap: 3px; height: 34px; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-row > .tbtn, .csb-row > .dock-btn, .csb-row > .mod-exp, .csb-row .tr-open, .csb-row > .csb-search-b, .csb-row > #rackAdd, .csb-row > #rackToggle, .csb-row > #rackFav, #lwMode .lw-stage-b) { width: 32px; height: 32px; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-row > .ro.time { min-width: 52px; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-row > .ro.time { flex: 1 1 0; min-width: 0; overflow: hidden; }   /* A11: t takes what the five seats leave */
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) { column-gap: 0; }   /* the first band's empty middle takes the slack: 48 + MOD | RATE + an 88-px pill fit one card */
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-tempo .tempo-expand { width: 88px; }   /* A11: the card's BPM pill, 88 px */
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-app { flex-wrap: wrap; height: auto; row-gap: 6px; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-app > .mol-pick { order: 9; flex: 1 1 100%; max-width: none; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo:not([hidden]) { grid-template-columns: minmax(0, 1fr); }

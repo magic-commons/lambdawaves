@@ -4,6 +4,17 @@
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
+- **THE FOUR CALLS** (014 A11, Yan's picks on Josh's "whichever you prefer"):
+  - The timing row of `CONTROL_SURFACE_LAYOUT` is now to-start · latches · door · gear · dock · the app's time readout. The time takes
+    the right end. File: `shell/transport.js`.
+  - The scroll pill lies ON the window's eyebrow: from the name's start to `PILL.gap` (4 px) short of the head's first button, with an
+    ellipsis when the name is longer. It never covers the head's buttons, the grip or the scrollbar, and its mask opens from the name's
+    start. This replaces A10's tip; `PILL.track` is gone. Files: `shell/rack-scrollbar.js`, `shell/rack.css`.
+  - `workspaceSwitch({ glyph })` draws a kit glyph in the ink in place of the palette diamond. The modulation window's switch passes
+    `'lanes'`, the timeline's glyph; every other MIR mark stays. Files: `window/workspaces.js`, `window/window.css`,
+    `modulation/window.js`.
+  - Why: Josh's A10 open question ("say if it should stop at the eyebrow") and his "remove anything with the MIR logo and have proper
+    icons for it". BASINS sees all three on kit day.
 - **THE PILL'S TIP** (014 A10): the scroll pill's outer end stops 2 px short of the seated track's inner edge (or `scrollbarSeat`'s x when
   none runs) and reaches inward over the title bar, its mask opening from that tip; `rackPill` defaults to A, the scrollbar's accent.
   `shell/rack-scrollbar.js` (`PILL.gap` 2, `PILL.track` 12), `shell/rack.css`, `shell/gui.js`. Why: Josh, "make the scroll bar also be at the

@@ -37,9 +37,9 @@
  *     name, at the title bar's outer edge (left rack: right of the card; right rack: left), measured ONCE; while the burst lasts a
  *     scroll writes one transform on the layer, never a layout.  The reveal is a clip-path mask (rack.css), 180 ms each way.
  *   · the ink is read once a burst from the pill's own fill (light ink on a dark accent, dark on a light one: `data-ink`).
- *   · THE TIP (014 A10, Josh: "make the scroll bar also be at the very tip of the pill so that the pill doesn't overlap the scroll bar"):
- *     the pill's outer end stops 2 px short of the seated track's inner edge, or of where `scrollbarSeat` would seat it when no track
- *     runs; the pill reaches inward over the title bar from there, and its mask opens from that tip.
+ *   · THE SEAT (014 A11, replacing A10's tip at the scrollbar): the pill lies ON the window's eyebrow — it starts where the head's own
+ *     name starts and stops `PILL.gap` px short of the head's first button after it, so it never covers the head's buttons, its grip or
+ *     the rack's scrollbar; a name longer than that room ends in an ellipsis.  Its mask opens from the name's start.
  *   MIR OPTIONS › WINDOWS › SCROLL PILL (LOOK_SCHEMA `rackPill`: OFF · A · B, default A, the scrollbar's own accent) is `body[data-rack-pill]`. */
 import { el, ariaLabel } from '../kit.js';
 import { drag } from '../core/pointer.js';
@@ -65,9 +65,8 @@ export function thumbOf({ height, client, scrollHeight, scrollTop }) {
   return { size, top: max ? (height - size) * scrollTop / max : 0, max };
 }
 
-/** the pill's numbers: how long the pills stay after the last scroll, the gap between its tip and the scrollbar's track, and the
- *  track's width where none is seated (rack.css --rack-scrollbar-w) */
-export const PILL = Object.freeze({ linger: 900, gap: 2, track: 12 });
+/** the pill's numbers: how long the pills stay after the last scroll, and the gap it keeps before the head's first button */
+export const PILL = Object.freeze({ linger: 900, gap: 4 });
 /** inkOn(rgb) — 'dark' ink on a light fill, 'light' on a dark one (WCAG relative luminance against the two inks' midpoint) */
 export function inkOn(rgb) {
   const m = String(rgb).match(/[\d.]+/g); if (!m || m.length < 3) return 'light';
@@ -86,20 +85,19 @@ export function createRackPills({ host, racks, view = globalThis.window }) {
     return e;
   });
   function seat(e) {
-    const { rack, side, layer, inner } = e, hr = host.getBoundingClientRect(), rr = rack.getBoundingClientRect();
+    const { rack, layer, inner } = e, hr = host.getBoundingClientRect(), rr = rack.getBoundingClientRect();
     layer.style.top = (rr.top - hr.top) + 'px'; layer.style.height = rr.height + 'px';
     inner.textContent = ''; e.top = rack.scrollTop;
-    /* the tip: the seated track's inner edge, or the seat's (scrollbarSeat's x) when no track runs */
-    const track = host.querySelector('.rack-scrollbar[aria-controls="' + rack.id + '"]'), tr = track && !track.hidden ? track.getBoundingClientRect() : null;
-    const g = parseFloat(view.getComputedStyle(rack).getPropertyValue('--rack-shadow-gutter')) || 0;
-    const tip = tr && tr.width ? (side === 'left' ? tr.left : tr.right) : (side === 'left' ? rr.right - g - SCROLLBAR.leftIn : rr.left + g - SCROLLBAR.rightIn + PILL.track);
     for (const dev of rack.querySelectorAll(':scope > .dev')) {
       const head = dev.querySelector('.dev-head'), name = dev.querySelector('.dev-eyebrow');
       const text = name && name.textContent.trim(); if (!head || !text || dev.hidden) continue;
-      const h = head.getBoundingClientRect(); if (!h.height) continue;
+      const h = head.getBoundingClientRect(), n = name.getBoundingClientRect(); if (!h.height || !n.width) continue;
+      /* the room: from the name's start to the head's first button after it (else the head's own end) */
+      let end = h.right;
+      for (const b of head.querySelectorAll('button, [role="button"]')) { const r = b.getBoundingClientRect(); if (r.width && r.left >= n.left && r.left < end) end = r.left; }
       const pill = el('span', 'rack-pill', inner, text);
       pill.style.top = (h.top + h.height / 2 - rr.top) + 'px';
-      if (side === 'left') pill.style.right = (hr.right - tip + PILL.gap) + 'px'; else pill.style.left = (tip + PILL.gap - hr.left) + 'px';
+      pill.style.left = (n.left - hr.left) + 'px'; pill.style.maxWidth = Math.max(0, end - PILL.gap - n.left) + 'px';
     }
     const first = inner.firstChild; if (first) layer.dataset.ink = inkOn(view.getComputedStyle(first).backgroundColor);
     inner.style.transform = '';

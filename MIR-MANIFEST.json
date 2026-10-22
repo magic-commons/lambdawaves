@@ -122,7 +122,7 @@
     "lab/mir/modulation/layout-motion.js": "bad0ef731bccb0fb",
     "lab/mir/modulation/mod-cursor.js": "4984041d0263e7da",
     "lab/mir/modulation/mod.js": "8c7a02ad2c33b599",
-    "lab/mir/modulation/modhost.css": "ca03b2efb3488f07",
+    "lab/mir/modulation/modhost.css": "17305bb8d7a023c4",
     "lab/mir/modulation/modwindow/ACCEPTANCE.md": "b69590f77574a5f5",
     "lab/mir/modulation/modwindow/MANIFEST.md": "6f34d8cc9e7a1189",
     "lab/mir/modulation/modwindow/host-contract.md": "113e8007762c8584",
@@ -130,7 +130,7 @@
     "lab/mir/modulation/modwindow/modwindow.js": "ba87946b95b37a95",
     "lab/mir/modulation/project.js": "39e2c203e3ed9d60",
     "lab/mir/modulation/registry.js": "1fb9c97b41dd842d",
-    "lab/mir/modulation/window.js": "fc89361f5032e96d",
+    "lab/mir/modulation/window.js": "360c94b60099bf8e",
     "lab/mir/notes/face.js": "7dff682dd8272b6d",
     "lab/mir/notes/notes.css": "cbe347e37ed0fd82",
     "lab/mir/notes/shelf.js": "9c3d2bc9f67cf6e7",
@@ -192,8 +192,8 @@
     "lab/mir/shell/pages.css": "66dd1f06b643f3aa",
     "lab/mir/shell/pages.js": "f7e821b4455a18df",
     "lab/mir/shell/parts.css": "830878076e9fbfe6",
-    "lab/mir/shell/rack-scrollbar.js": "10fecba326d7b7d9",
-    "lab/mir/shell/rack.css": "0fdaa455e6cea8e0",
+    "lab/mir/shell/rack-scrollbar.js": "21975138d279c391",
+    "lab/mir/shell/rack.css": "c586011c633f2c3f",
     "lab/mir/shell/rack.js": "cab2e00b99b2d040",
     "lab/mir/shell/scene-guard.js": "0c41641e90c539fa",
     "lab/mir/shell/share-link.js": "c9f171c94e54b636",
@@ -201,7 +201,7 @@
     "lab/mir/shell/stage.css": "db4a83037ab9c2bd",
     "lab/mir/shell/themes.js": "f811f9ba3e5037db",
     "lab/mir/shell/transport.css": "77b905aab9db6c77",
-    "lab/mir/shell/transport.js": "2af324629ae5b710",
+    "lab/mir/shell/transport.js": "c266724f9b46cbbb",
     "lab/mir/shell/vendor/katex/LICENSE": "766ccc1f306c885a",
     "lab/mir/shell/vendor/katex/fonts/KaTeX_AMS-Regular.woff2": "0cdd387c9590a1a9",
     "lab/mir/shell/vendor/katex/fonts/KaTeX_Caligraphic-Bold.woff2": "de7701e42cf1f4cf",
@@ -263,8 +263,8 @@
     "lab/mir/window-activity.js": "8eb6cefdf972a053",
     "lab/mir/window/dock.js": "6b678fe062232fde",
     "lab/mir/window/rail.js": "60d28f8f5c584dea",
-    "lab/mir/window/window.css": "caec49352b98c890",
+    "lab/mir/window/window.css": "76fc9804b1925adc",
     "lab/mir/window/window.js": "7587cddda52aedf4",
-    "lab/mir/window/workspaces.js": "060feaa914d786c1"
+    "lab/mir/window/workspaces.js": "ccbc08107b9597af"
   }
 }

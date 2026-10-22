@@ -26,11 +26,12 @@
  *     upper   { isOpen(), open(), close(), stackAbove(anchor | null), isStacked, stackHeight() } — a kit window
  *             (window.js) or the modulation window
  *     lower   { isOpen(), open(), close(), rect(), reserveTop(px) } — a kit window (the timeline's `tl.win`)
- *   workspaceSwitch({ run, title }) → { root, destroy() } — the MIR switch (BASINS `.m2-workspace-switch`): the
- *     palette diamond in a 44 × 34 seat.  The app seats it (the modulation preset bar, after the picker arrows).
+ *   workspaceSwitch({ run, title, glyph }) → { root, destroy() } — the MIR switch (BASINS `.m2-workspace-switch`): the
+ *     palette diamond (or the kit glyph `glyph` names) in a 44 × 34 seat.  The app seats it (the modulation preset bar, after the picker arrows).
  */
 import { frame } from '../core/frame.js';
 import { ariaLabel } from '../kit.js';
+import { glyphEl } from '../glyph.js';
 import { createMirDiamond } from '../shell/wordmark.js';
 import { stackedAt } from './window.js';
 
@@ -77,12 +78,14 @@ export function createWorkspaces({ upper, lower, gap = WORKSPACE.gap } = {}) {
   return { sync, moved, show, get stacked() { return !!upper.isStacked; }, destroy() { if (dead) return; upper.stackAbove(null); lower.reserveTop(0); dead = true; } };
 }
 
-/** workspaceSwitch({ run, title }) — BASINS modwindow.js `workspaceButton`: a 44 × 34 seat holding the MIR palette
- *  diamond (it cycles under a mouse).  A press runs `run` (show the other workspace). */
-export function workspaceSwitch({ run, title = 'Switch to Timeline' } = {}) {
+/** workspaceSwitch({ run, title, glyph }) — BASINS modwindow.js `workspaceButton`: a 44 × 34 seat holding the MIR palette
+ *  diamond (it cycles under a mouse), or the kit glyph `glyph` names in the ink (λWAVES 014 A11: the modulation window's switch
+ *  wears `lanes`, the timeline's own glyph).  A press runs `run` (show the other workspace). */
+export function workspaceSwitch({ run, title = 'Switch to Timeline', glyph = null } = {}) {
   const root = document.createElement('button'); root.type = 'button'; root.className = 'm2-workspace-switch mir-workspace-switch';
   root.title = title; ariaLabel(root, title);
-  const mark = createMirDiamond(root);
+  const g = glyph && glyphEl(glyph, 'ws-glyph gly gly-' + glyph, 20);
+  const mark = g ? (root.appendChild(g), { destroy() {} }) : createMirDiamond(root);
   const life = new AbortController();
   root.addEventListener('click', () => { if (run) run(); }, { signal: life.signal });
   return { root, destroy() { life.abort(); mark.destroy(); root.remove(); } };

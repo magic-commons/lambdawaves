@@ -2401,6 +2401,7 @@ body.mod-arming :is(.sw, .seg, .trig, .k:not([data-param]), .fd:not([data-param]
 #modwin.mir-modwindow .m2-workspace-switch { flex: 0 0 var(--ws-w); width: var(--ws-w); height: var(--ws-h); padding: 0; border: 0; background: none;
   box-shadow: var(--ws-flat); border-radius: var(--ws-r); }
 #modwin.mir-modwindow .m2-workspace-switch .mod-palette-mark, #modwin.mir-modwindow .m2-workspace-switch .mod-palette-mark rect { stroke: none; }
+#modwin.mir-modwindow .m2-workspace-switch .ws-glyph, #modwin.mir-modwindow .m2-workspace-switch .ws-glyph * { stroke: none; }   /* a glyph's own fills, unstroked (014 A11) */
 /* → TL on an LFO or ENV head (only while a timeline is attached) */
 #modwin.mir-modwindow .m2dev .m2ab.m2tl { width: 30px; }
 /* THE HAND (1.5.0-alpha.19): a work-bar chip whose word changes with state keeps its widest word's width — the word in
