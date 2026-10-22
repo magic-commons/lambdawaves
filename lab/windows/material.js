@@ -155,6 +155,8 @@ export function createMaterial(app) {
     app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
     /* 0.5.3 M6 · LOCK, the classic camera (a PREFERENCE, `camLock`): the pan held at the centre and every zoom from it; the PAN pad rests while it holds */
     ui.camLockSw = sw({ label: 'LOCK', value: false, title: 'LOCK — the classic camera: the pan stays at the centre and every zoom is from the centre (CONTROL, the turn, ZOOM and FOV stay live)', onChange: (v) => { cameraPort.set('lock', v); saveSettings(); } });
+    /* iteration 014 C2 · FLIP: the view's parity — the picture mirrored (an enantiomer, as a view); a session's switch beside LOCK, never saved */
+    ui.camFlipSw = sw({ label: 'FLIP', value: false, title: 'FLIP — mirror the view: the molecule as its mirror image (its enantiomer). A view, not a new molecule; it is not saved', onChange: (v) => cameraPort.set('flip', v) });
     let lockShown = false;
     cameraPort.subscribe(() => { const on = cameraPort.get('lock'); if (on !== lockShown) { lockShown = on; ui.camLockSw.set(on); camView.pad.widget.setDisabled(on); } });   // every road (the switch, the settings, LW) is a notice
     /* iteration 001 (Josh): CAMERA, SHORTER — the group's CAMERA word goes (the window says it), LOCK joins HOME · PAN HOME, and the PAN pad,
@@ -162,7 +164,7 @@ export function createMaterial(app) {
     { const R = gc.querySelector('.mir-camera'), q = (c) => R.querySelector(':scope > ' + c), more = el('div', 'cam-more', R);
       gc.querySelector(':scope > .grp-lbl')?.remove();
       for (const c of ['.cam-pan', '.cam-scales', '.cam-hand']) { const n = q(c); if (n) more.appendChild(n); }
-      const v = q('.cam-verbs'); (v || more).appendChild(ui.camLockSw.root); if (v) v.dataset.n = String(v.children.length); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
+      const v = q('.cam-verbs'); (v || more).appendChild(ui.camLockSw.root); (v || more).appendChild(ui.camFlipSw.root); if (v) v.dataset.n = String(v.children.length); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
     /* iteration 012 R3 (Josh 10-20: "Remove text that says 'control' and 'direction' in camera … Increase the size of the 3D thingy while moving Zoom
        and FOV under 'YAW' and 'PITCH' … Rename 'Hand' to 'Controls'"): the kit's two labels leave its DOM, ZOOM · FOV join the sphere's knob column
        under YAW · PITCH (the view row empties and goes), and skin.css draws the sphere bigger; the panel's own file is untouched */

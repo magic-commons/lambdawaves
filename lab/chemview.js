@@ -689,6 +689,7 @@ export function createChem(host, api) {
       r.opened = { bytes: v.bytes, from: v.from }; r.stem = lib.stem || null; r.volume = { volume: v.volume, id: v.id, numeral: v.numeral };
       if (v.esp === undefined) v.esp = espOf(v.lwm);   // iteration 014 C1: the file's potential grid ({ n, box, f16, basis … }) or null — the live Poisson is the fallback
       r.esp = v.esp;
+      r.bonds = Array.isArray(v.meta.bonds) ? v.meta.bonds : null;   // iteration 014 C2: [[i, j, order]] over the file's atom order (1 · 1.5 aromatic · 2 · 3), or null: the distance rule
       const fill = () => { r.key = key; r.seq = seq; r.note = v.note; v.note = null;
         r.identity = MS ? MS.identityOf({ atoms: v.atoms, basisHash: r.hash, charge: v.charge, multiplicity: 1, model: 'RHF' }) : null; land(r); };
       if (api.derived) api.derived(fill); else fill();

@@ -773,6 +773,19 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 /* iteration 011 Q4: the MOLECULAR deck is molecules only — a record not yet on this device keeps its picture and wears the kit's download glyph */
 #lwMenu .mm-dl { position: absolute; right: 5%; bottom: 5%; width: clamp(20px, calc(var(--t) * .15), 32px); height: clamp(20px, calc(var(--t) * .15), 32px); display: grid; place-items: center; border-radius: 50%; color: var(--fg); background: hsl(var(--glass-tint) / .7); pointer-events: none; }
 #lwMenu .mm-dl .mm-ico { width: 62%; height: 62%; } #lwMenu .mm-dl[hidden] { display: none; }
+/* iteration 014 C2 ISOMERS: the corner mark (the count of the molecule and its structural isomers) and THE ISOMER DECK over the volume's deck */
+#lwMenu .mm-iso { position: absolute; right: 6%; top: 6%; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; display: grid; place-items: center; border-radius: 9px;
+  font: var(--w-bold, 600) 10px/1 var(--font-ui, sans-serif); letter-spacing: .04em; color: var(--fg); background: hsl(var(--glass-tint) / .72);
+  box-shadow: 2px -2px 0 -1px hsl(var(--glass-tint) / .72), 2px -2px 0 0 color-mix(in srgb, var(--fg) 30%, transparent); pointer-events: none; }
+#lwMenu .mm-volview { position: relative; }
+#lwMenu .mm-isos { position: absolute; inset: 52px max(0px, calc(50% - (var(--t, 150px) * var(--cols, 8) + var(--gap, 10px) * (var(--cols, 8) - 1)) / 2 - 24px)) 0; z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 18px 12px; overflow-y: auto;
+  border-radius: 18px; background: hsl(var(--glass-tint) / .97); }
+#lwMenu .mm-isos[hidden] { display: none; }
+#lwMenu .mm-isohead { display: flex; align-items: baseline; gap: 14px; }
+#lwMenu .mm-isof { font: var(--w-bold, 600) 22px/1 var(--font-math, serif); } #lwMenu .mm-isocount { font-size: 12px; letter-spacing: .12em; opacity: .6; }
+#lwMenu .mm-isox { font-size: 18px; letter-spacing: 0; }
+#lwMenu .mm-isogrid { display: grid; grid-template-columns: repeat(min(var(--n, 1), var(--cols, 8)), var(--t, 150px)); grid-auto-rows: var(--t, 150px); gap: var(--gap, 10px); justify-content: center; }
+#lwMenu .mm-isogrid .mm-tile.here { outline: 1px solid color-mix(in srgb, var(--acc) 60%, transparent); outline-offset: 2px; }
 /* … and the LIBRARY owns what is kept: under the shelf, RECORDS (a card per catalogue section in the volume card's look — THE SECTION INSTALL,
    iteration 008 P's ring · lamp · word, once the deck's heading tile) and THIS DEVICE */
 #lwMenu .mm-cat { display: grid; gap: 14px; justify-items: center; max-width: 1240px; margin-top: 10px; }

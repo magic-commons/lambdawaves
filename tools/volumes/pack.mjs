@@ -177,7 +177,7 @@ function candidateOf(id, meta) {
   const solvedAt = meta.candidate || {}, row = CANDS.get(id);
   if (!row) { FALLBACK.push(id); return solvedAt; }
   const cand = { ...solvedAt, ...row };
-  if (row.atomsAng && !sameAtoms(row.atomsAng, meta.atomsBohr)) { STALE.push(id); cand.geometrySource = solvedAt.geometrySource; }
+  if (row.atomsAng && !sameAtoms(row.atomsAng, meta.atomsBohr)) { STALE.push(id); cand.geometrySource = solvedAt.geometrySource; if (solvedAt.bonds) cand.bonds = solvedAt.bonds; else delete cand.bonds; }   // C2: bonds index the atoms they were read off
   return cand;
 }
 function packMolecule(id, vol = VOL) {
@@ -377,6 +377,10 @@ if (T) {
 } else plan = [{ id: VOL, numeral: NUMERAL, title: TITLE, blurb: BLURB, members: packed }];
 
 const entries = [], written = [];
+/* iteration 014 C2: a row's structural isomers (catalogue/isomers.py) that this run shelves — on any volume — ride in the index, so the
+   Picker's tile can wear its mark and open their deck; the bonds stay in the .lwm (header.meta.bonds, the candidate's own field) */
+const SHELVED = new Set(plan.flatMap((p) => p.members.map((r) => r.id)));
+const isomersOf = (M) => { const l = (M.isomers || []).filter((i) => SHELVED.has(i)); return l.length ? { isomers: l } : {}; };
 for (const p of plan) {
   const VDIR = path.join(DIST, p.id), rows = [], vreports = [];
   mkdirSync(path.join(VDIR, 'm'), { recursive: true });
@@ -391,7 +395,8 @@ for (const p of plan) {
       mw: M.mw != null ? M.mw : M.mass, pg: M.pointGroup || null, file: 'm/' + id + '.lwm', bytes: r.bytes.length, sha256: sha(r.bytes),
       thumb: existsSync(thumbAt) ? 't/' + id + '.webp' : null,
       rungs: Object.fromEntries(Object.entries(r.header.rungs).map(([b, g]) => [b, { E: g.record.ground.energy, nAO: g.record.ground.nAO, gapEv: g.record.stem.gapEv }])),
-      ...(r.header.skipped ? { skipped: Object.keys(r.header.skipped) } : {}), ...(r.header.failed ? { failed: Object.keys(r.header.failed) } : {}) });
+      ...(r.header.skipped ? { skipped: Object.keys(r.header.skipped) } : {}), ...(r.header.failed ? { failed: Object.keys(r.header.failed) } : {}),
+      ...isomersOf(M) });
     vreports.push(r.report); reports.push(r.report);
     console.log(`${p.id.padEnd(6)} ${id.padEnd(16)} ${String(M.heavy).padStart(3)} heavy · ${Object.keys(r.header.rungs).length} rungs · ${(r.bytes.length / 1024).toFixed(1)} KB (header ${(r.report.headerBytes / 1024).toFixed(1)} KB)`);
   }
