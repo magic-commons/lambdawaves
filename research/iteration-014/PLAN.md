@@ -122,9 +122,15 @@ LAYOUT plus NEW PARTS, not a new window class — and `docked` (a rack window na
   (`lambdawaves.q0.csb`), never the project. Remove by the same menu or drag out.
 - **A4 SEATS.** The dock chip becomes a cycle: RACK (today's docked) → STAGE (today's free bar at top/bottom with auto-hide) → FREE (a floating
   window, may stand vertical; the VERTICAL toggle lives here). The rack window's seat and the floating window's rect persist (`mir.gui`).
-- **A5 THE TIMELINE'S WORK BAR.** Turn the kit's work lane on in λWAVES (`installTimeline` store default `workLane: 'top'` → Josh wants LEFT:
-  the kit's lane is top/bottom; A5 adds `'left'` to the kit's cycle with BASINS' animation, since Josh asked for the left side — a kit change,
-  logged). After A1 "the transport" means this bar.
+- **A5 THE TIMELINE'S WORK BAR.** Josh's pictures (`refs/timeline-lambdawaves.png` vs `refs/timeline-basins.png`): BASINS' timeline has the
+  work bar at the TOP LEFT of the window — play · power · the BPM pill · the zoom readout (10^243.3) · rewind · the mod door · palette — in the
+  same row as the right tool bar (pen · clone · SLICE · CLIPS | POINTS · SNAP · STEP · SLIDE · ACTIVE · …); λWAVES' timeline shows ONLY the right
+  tool bar, the transport pill floats on the stage instead. A5 = the kit's work lane (`bar: 'work'`, `workLane: 'top'`) actually mounted in λWAVES'
+  timeline with BASINS' content and its open/close animation (read BASINS' `app/lab/mir/timeline/*` — identical to ours — and BASINS' app-side
+  wiring in `app/shell.js` / `timeline` install to see what λWAVES' `installTimeline` call in `lab/shell/keys.js` l.164 leaves out). SECOND
+  FAULT in the same picture: λWAVES' lanes sit on a frosted, light translucent slab under the whole timeline; BASINS' lanes are clean glass over
+  the fractal — Yan inspects BASINS' GUI/CSS (`app/basins.css`, `material.css`, the look store's FROST/tier values) during planning and removes
+  λWAVES' slab (likely `lab/skin.css` or the look store's defaults, not the kit). After A1 "the transport" means this work bar.
 - **A6 THE RACK SCROLL PILL.** `lab/mir/shell/rack-scrollbar.js` + `rack.css`: while the 2-px thumb is visible, each rack window shows a solid
   pill beside its title bar with the window's name (the kit's bold sans), accent B (option: A | B, ON | OFF in MIR OPTIONS › LOOK › RACK), text
   colour by luminance (the kit's contrast helper), a clip-path reveal/hide (`transition: clip-path`, no layout, no shadow). Hidden when the
@@ -196,21 +202,27 @@ B3-animated last and optional.
 3. **The stage keeps the logo and the menus only.** LIBRARY · MOLECULAR · HYDROGEN, the molecule chooser, ADD WINDOW · AUTO-HIDE · LAYOUTS move to
    the CSB. Keys and saved projects keep working (ids unchanged, only seats move).
 4. **The potential map's first form is DENSITY painted by φ**; SAS/SES surfaces follow; animated ESP only if the static one is cheap.
-5. **The special colour map is blue = high, red = low** (Josh's words and refs/esp-sas-heatmap.jpg); "USE PALETTE" swaps in the active ramp.
+5. **The special colour map is the standard: red = negative, blue = positive** (Josh answer 3; refs/esp-sas-heatmap.jpg is the colour-bar hint); "USE PALETTE" swaps in the active ramp.
 6. **Isomers = structural (same formula, different connectivity)**; FLIP is a mirror of the view, not a new molecule.
 7. **Favourites are browser preferences**, not project state; a favourite knob is a clone bound to the same target id.
 8. **Thumbnail styles are extra files**, the index names them, the night render makes them; the builder renders ten for proof.
 9. **C3's new tags are proposals** until verified by structure; a cheap model proposes, the tool adopts what it can prove.
 10. **The solvers keep running throughout**; C1's solver change is dry-run only until Josh's word.
 
-## FOR JOSH (answer when you can; none blocks the start)
-1. CSB default seat at boot: RACK (docked) or STAGE (the free bar, as today)?
-2. The timeline's work bar: LEFT as you wrote (a kit addition) or the kit's TOP as it exists?
-3. ESP colours: confirm blue = high / red = low (your picture) — many viewers draw it the other way.
-4. Favourites: may a favourite be a whole small control (A/B store, a segment) from day one, or knobs first?
-5. The 24-icon Gol sample: Gemini via `agy` writes the note and draws the samples — fine, or keep it to a note?
-6. C1: when the solver learns to write the potential grid, do we re-solve the top rung of the already-solved 6k (a few GPU-days locally), or let the
-   app's Poisson pass cover them?
+## JOSH'S ANSWERS (2026-10-22 01:1x) TO THE SIX CALLS — these overrule the assumptions above where they differ
+1. **CSB seat at boot: the STAGE** (the free bar, where the transport is today). The rack seat and the free window are the other two of the cycle.
+2. **The work bar**: see A5 — not a left lane; the kit's TOP-LEFT work bar as BASINS shows it, which λWAVES never mounted. Plus the frosted slab
+   under λWAVES' timeline goes (BASINS' is clean). Yan inspects BASINS' GUI/CSS during planning.
+3. **ESP colours: the standard** — RED = negative (electron-rich) … BLUE = positive, as the chemistry viewers draw it (assumption 5 is reversed).
+   `refs/esp-sas-heatmap.jpg`'s colour bar is the hint for the palette: a vertical bar beside the map, numbers at five stops (±max, ±half, 0),
+   the same ramp (red → yellow → green → cyan → blue) as the kit's special ESP preset; "USE PALETTE" swaps the active ramp into the bar too.
+4. **Favourites: knobs first, plus a few easy non-knobs**: SPECTRUM's HYDROGEN | STURMIAN row (whole row; the λ SCALE knob may stay behind), WAVE's
+   POSITION | MOMENTUM segment and its PROBABILITY · ARG · RE/IM view segment. Other rows next round.
+5. **Gol icons: note AND a sample sheet**, and the icons may be 95–99 % like Gol's own related icons — the brief is "match, don't reinterpret".
+6. **The previous ~6,000 molecules get the potential grid too** — it is NOT a re-solve: the saved rung (C, occ) rebuilds the density matrix and the
+   ESP grid is one integral pass (`mol.intor('int1e_grids', grids=…)` with the nuclear term), seconds a molecule on the CPU — a post-pass
+   `tools/volumes/esp-pass.py` over raw/ (run by the babysitter's finish or a night, never by a builder on the live raw/), hours for all, then a
+   pack. The app's Poisson pass stays as the fallback for a molecule without the grid.
 
 ## HANDOFF
 Builders' common brief: `~/.config/claude-backup/jobs/8497d75b/tmp/brief-it014-common.md` (013's with the kit law replaced by the trickle-down
