@@ -21,7 +21,7 @@ try {
   await g.ev(`__LW.stageText.prefs.set({ sayHead: true }); window.__w = (n) => new Promise((r) => setTimeout(r, n));
     window.__fades = () => __LW.stageText.layer.root.querySelectorAll('.mir-info-block[data-fade]').length;
     /* the hand's road: the page turner to the molecule's section (the dropdown holds one), then the dropdown's own change */
-    window.__pick = (id) => { const s = document.querySelector('.dev[data-id="chem"] .mol-pick select.sel');
+    window.__pick = (id) => { const s = document.querySelector('#transport .mol-pick select.sel');
       for (const sec of ['DIATOMICS', 'HYDRIDES', 'ORGANIC', 'BIO', 'LATTICE', 'HEAVY']) { if ([...s.options].some((o) => o.value === id)) break; __LW.chem.section(sec); }
       s.value = id; s.dispatchEvent(new Event('input', { bubbles: true })); s.dispatchEvent(new Event('change', { bubbles: true })); };
     window.__until = async (f, ms = 20000) => { const t0 = performance.now(); while (!f()) { if (performance.now() - t0 > ms) return false; await __w(10); } return true; };

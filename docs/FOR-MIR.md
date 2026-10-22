@@ -5,6 +5,8 @@ round, newest first; an item leaves this list when an adopted MIR release carrie
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
 
+- 1.5.0-alpha.25 · `shell/transport.js` + `.css`: `CONTROL_SURFACE_LAYOUT` (`data-layout="csb"`): the bar in two rows (the clock; the app's modes, chooser, search and the rack's + ◧ ☆), 1.5 × the height, as narrow as its wider row; `named(name, list, { title })` names the dock window (CONTROL SURFACE) — λWAVES iteration 014 A1.
+- 1.5.0-alpha.25 · `shell/gui.js`: `aboutPage(host)` lends MIR ABOUT's page to the app's own ABOUT as its second page (Josh: "MIR about should be a second page to the About page(s)"); the window takes it back when opened (A1).
 - 1.5.0-alpha.25 · `shell/transport.css`: λWAVES' own seats (the thin scrub, the small RATE, the stacked readouts without labels) are the stage and work-bar form only (`.mir-transport:not(.docked)`); docked, the card keeps the app's readouts with their labels, as λWAVES drew it (A0).
 - 1.5.0-alpha.25 · `shell/transport.js`: `transportDock(rack)` exports the docked seat's hooks, so an app that registers its own TRANSPORT card (`card: true`, its slot and fold) docks the kit's bar through it — λWAVES adopts `createTransport` (iteration 014 A0).
 - 1.5.0-alpha.25 · `shell/transport.js`: `createTransport({ seatMenu: false })` drops the BOTTOM / TOP / COMPACT menu (its right click and long press) for an app that seats the bar itself and keeps right click for its controls (A0; A3's favourites menu).

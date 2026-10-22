@@ -313,6 +313,43 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport.mini .ro.period { flex: 0 0 120px; min-width: 120px; width: 120px; }
 #transport.mini .tbtn.jump { font-size: 13px; }
 #transport.mini .k-val, #transport.mini .ro-val { font-size: 9px; }
+/* ── iteration 014 A1 · THE CONTROL SURFACE (the kit's CONTROL_SURFACE_LAYOUT, data-layout="csb"): two rows, 69 px, as narrow as the wider row.
+   These beat λWAVES' own one-row rules above and in skin.css §12 (the 560 / 640 px box, its 46 px, its overflow and its `order`s). ── */
+#transport[data-layout="csb"] { align-items: stretch; }
+#transport.mini[data-layout="csb"] { width: max-content; max-width: calc(100vw - 24px); height: auto; min-height: 69px; padding: 3px 8px; overflow: visible; }
+#transport[data-layout="csb"]:is(.mini, .docked) > .csb-row > *, #transport[data-layout="csb"]:is(.mini, .docked) > .csb-row .tempo-expand { order: 0; }
+#transport[data-layout="csb"] > .csb-row { width: auto; min-width: 0; overflow: visible; }
+#transport.mini[data-layout="csb"] > .csb-row > :not(.mol-pick) { flex-shrink: 0; }
+#transport[data-layout="csb"] .tr-openers { flex: 0 0 auto; min-width: max-content; }
+#transport.mini[data-layout="csb"] > .csb-row { height: 31px; }
+#transport.mini[data-layout="csb"] .tbtn:not(.tempo-expand), #transport.mini[data-layout="csb"] :is(.dock-btn, .mod-exp, .tr-open) { width: 28px; height: 28px; min-width: 0; }
+#transport.mini[data-layout="csb"] .tbtn.play { width: 34px; }
+#transport.mini[data-layout="csb"] .tbtn.modb { width: 32px; }
+#transport.mini[data-layout="csb"] .fd { flex: 0 0 120px; width: 120px; min-width: 120px; }
+#transport.mini[data-layout="csb"] .ro.time { flex: 0 0 64px; width: 64px; min-width: 64px; }
+#transport[data-layout="csb"] .tr-open { border: 0; background: transparent; color: var(--ink-key); border-radius: 50%; display: inline-grid; place-items: center; padding: 0; }
+#transport[data-layout="csb"] .tr-open.on { color: var(--acc); }
+#transport[data-layout="csb"] .csb-gear .tr-gly, #transport[data-layout="csb"] .tr-open .tr-gly { width: 15px; height: 15px; }
+/* row 2: the modes, MOLECULES' chooser and the rack's three, in the bar's flow (they were absolutely seated on the stage) */
+#transport #lwMode { position: static; flex-direction: row; gap: 2px; }
+#transport #lwMode .lw-stage-b { width: 28px; height: 28px; }
+#transport :is(#rackToggle, #rackAdd, #rackFav) { position: static; inset: auto; width: 28px; height: 28px; transform: none; border: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.rack-hidden #transport :is(#rackAdd, #rackFav) { opacity: 1; visibility: inherit; pointer-events: auto; }
+#transport .csb-app > #lwMode { margin-right: 4px; }
+#transport .csb-app > .mol-pick { flex: 1 1 220px; min-width: 150px; max-width: 260px; height: 28px; margin-right: auto; }
+#transport .csb-app > #lwMode + :is(#rackAdd, #rackToggle, #rackFav), #transport .csb-app > .csb-search + #rackAdd { margin-left: auto; }
+#transport:has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-app > .mol-pick { display: none; }   /* HYDROGEN: no molecule to choose (row 1 is the wider row, so the bar keeps its width) */
+/* docked in the CONTROL SURFACE card: each row wraps; the chooser takes a line of its own under the modes and the rack's three */
+#transport.docked[data-layout="csb"] .tempo-expand { flex: 0 0 76px; width: 76px; }
+#transport.docked[data-layout="csb"] .ro.time { flex: 1 1 90px; min-width: 0; }
+#transport.docked[data-layout="csb"] .csb-app > .mol-pick { flex: 1 1 100%; max-width: none; margin: 0; order: 9; }
+/* the expander's first row: ‹ › ⟳, REPEATS and its formula */
+#transport .csb-repeats { grid-column: 1 / -1; display: flex; align-items: center; gap: 4px; min-width: 0; }
+#transport:is(.mini, .docked) > .native-tempo > .csb-repeats > * { order: 0; }
+#transport:is(.mini, .docked) .csb-repeats .ro.period { flex: 0 0 auto; width: auto; min-width: 120px; align-items: flex-start; text-align: left; }
+#transport:is(.mini, .docked) .csb-repeats .ro-lbl { display: block; font-size: var(--fs-micro); color: var(--ink-faint); }
+#transport:is(.mini, .docked) .csb-repeats .ro-val { font-size: var(--fs-small); }
+#transport .csb-repeats .fx { display: block; flex: 1 1 auto; min-width: 0; overflow: hidden; font-size: var(--fs-micro); }
 /* docked into the rack as a card */
 #transport.docked { position: static; transform: none; width: auto; height: auto; flex-wrap: wrap; padding: 6px; gap: 6px; border: 0; box-shadow: none; background: transparent; }
 /* 0.6.6 G2 · THE TYPE BOX (lab/shell/transport.js): ASK swaps the centre for one line to Gemma; her answer echoes in the t readout's seat for 4 s */

@@ -15,8 +15,8 @@ export function createRackWiring(app) {
   /** the TRANSPORT's pop chip wears the act its next press performs (its floating mode is the pill); every other card's is the kit's */
   function popFace(d) {
     const b = d && d.querySelector('.dev-pop'); if (!b) return;
-    chip(b, layout.docked ? 'north' : 'reopen', layout.docked ? 'undock the transport' : 'dock the transport');
-    b.title = 'Dock or undock the transport';
+    chip(b, layout.docked ? 'north' : 'reopen', layout.docked ? 'undock the control surface' : 'dock the control surface');
+    b.title = 'Dock or undock the control surface';
   }
   /* ── 0.5.0 C3 · THE RACK IS THE KIT'S (lab/mir/shell/rack.js createRack; research/release-0.5.0/C3-DESIGN.md §2–3) ──────────
    * #rack, #rackL, #floats and the ◧ + ☆ chrome are adopted BY ID (their classes, sheets and listeners kept) and every .dev is
@@ -221,12 +221,12 @@ export function createRackWiring(app) {
   };
   /** a window's hover hint in the + list and the WINDOW menu: its long title, and its status when it says something (wave 44) */
   const winHint = (d) => { const t = (d.querySelector('.dev-title') || {}).textContent || '', st = ((d.querySelector('.dev-stat') || {}).textContent || '').trim(); return st ? t + '  ·  ' + st : t; };
-  const wTr = device({ id: 'transport', eyebrow: 'TRANSPORT', status: '' });
+  const wTr = device({ id: 'transport', eyebrow: 'CONTROL SURFACE', status: '' });   // iteration 014 A1: the card's word (its id stays `transport`)
   wTr.root.classList.add('closed'); (rackL || rack).appendChild(wTr.root);
   windowActivity.track(wTr);
   /* iteration 014 A0 · the kit's bar docks HERE: the card is λWAVES' (its slot, its fold, `card: true`), the move is the kit's (transportDock's hooks) */
   const barDock = () => transportDock(rk);
-  rk.register({ id: 'transport', el: wTr, title: 'TRANSPORT', card: true, onFold: () => saveSettings(),   // C3: an app card (its own buttons; in neither + nor WINDOW)
+  rk.register({ id: 'transport', el: wTr, title: 'CONTROL SURFACE', card: true, onFold: () => saveSettings(),   // C3: an app card (its own buttons; in neither + nor WINDOW)
     onOpen: () => {
       const host = layout.dockHost(), cards = [...host.querySelectorAll('.dev')].filter((d) => d !== wTr.root);
       host.insertBefore(wTr.root, cards[Math.min(layout.dockIndex, cards.length)] || null);

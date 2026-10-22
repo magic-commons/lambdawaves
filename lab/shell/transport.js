@@ -1,11 +1,8 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula, chip } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, LAMBDAWAVES_LAYOUT } from '../mir/shell/transport.js'; import { infoPanel } from '../mir/control-help.js';
+import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula, chip } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, CONTROL_SURFACE_LAYOUT, barButton } from '../mir/shell/transport.js'; import { mirGui } from '../mir-gui.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
-/** λWAVES' bar from the kit's parts (LAMBDAWAVES_LAYOUT's name and drawing; its items in the order the strip has always had): play, MOD, ⏮, ‹ ›, SCRUB,
- *  RATE, t, REPEATS, ⟳, the dock chip, the modulation door, the BPM pill, then the tempo panel the pill opens */
-const BAR_LAYOUT = Object.freeze(Object.assign([{ group: 'native-play-row', items: ['play', 'power', 'rewind', 'app:back', 'app:forward', 'app:scrub', 'app:rate', 'app:time', 'app:period', 'app:jump', 'dock', 'door', 'tempo'] }, 'panel'], { name: LAMBDAWAVES_LAYOUT.name }));
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
   const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames, stats } = app.ctl;
@@ -45,9 +42,23 @@ export function createTransport(app) {
       armed: () => app.state.modArm, arm: (v) => setModArm(v), onArm: (f) => { armSubs.add(f); return () => armSubs.delete(f); },
       isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => app.sh.layout.modulation.toggle(),
       cadence: () => app.ctl.MOD.hz, setCadence: (hz) => app.ctl.mod.setCadence(hz), persist: () => saveSettings() };
-    const bar = createBar({ layout: BAR_LAYOUT, root: T, host: dom.stage, nodes: { back: sm, forward: sp, scrub: ui.scrub.root, rate: ui.rateKnob.root, time: tro.root, period: ui.periodRo.root, jump: jmp },
+    /* iteration 014 A1 · THE CONTROL SURFACE (the kit's CONTROL_SURFACE_LAYOUT, two rows).  Row 1, the clock: play · MOD · ⏮ · SCRUB · t · RATE ·
+       the BPM pill · TIMELINE · the gear (MIR OPTIONS: the GUI menu left the menubar) · dock · the modulation door.  Row 2, the app: LIBRARY ·
+       MOLECULAR · HYDROGEN (#lwMode, moved off the title's side) · ‹ MOLECULE › (MOLECULES' chooser, moved out of the card) · + ◧ ☆ (the rack's
+       three, moved off the stage's right edge).  REPEATS, its formula, ⟳ and ‹ › ride in the expander's first row (A-PLAN call 1). */
+    const gear = barButton({ cls: 'csb-gear', glyph: 'settings', label: 'MIR OPTIONS', title: 'MIR OPTIONS — the interface’s look', run: () => mirGui().open('options') }).root;
+    const chooser = document.querySelector('.dev[data-id="chem"] .mol-pick');
+    const byId = (id) => document.getElementById(id);
+    const bar = createBar({ layout: CONTROL_SURFACE_LAYOUT, root: T, host: dom.stage,
+      nodes: { scrub: ui.scrub.root, rate: ui.rateKnob.root, time: tro.root, gear, modes: byId('lwMode'), chooser, add: byId('rackAdd'), rack: byId('rackToggle'), fav: byId('rackFav') },
+      openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'the timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
       clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),
       rack: () => app.sh.rk, door: 'mark', powerWord: 'MOD', seatMenu: false, opener: false });
+    /* the rack's + and ☆ lists open beside their buttons, wherever the bar sits (they are the stage's, never the bar's: the bar clips) */
+    for (const [b, l] of [['rackAdd', 'rackAddList'], ['rackFav', 'rackFavList']]) { const btnEl = byId(b), list = byId(l); if (!btnEl || !list) continue;
+      btnEl.addEventListener('click', () => requestAnimationFrame(() => { if (list.hidden) return; const r = btnEl.getBoundingClientRect(), h = list.offsetHeight, w = list.offsetWidth, up = r.top - h - 8 >= 8;
+        list.style.left = Math.round(Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2))) + 'px'; list.style.right = 'auto';
+        list.style.top = Math.round(up ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8)) + 'px'; })); }
     ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'modulation on or off');
     { const rst = bar.root.querySelector('.transport-home'); if (rst) { rst.title = 't → 0  (home)'; rst.setAttribute('aria-label', 'back to t = 0'); } }
     /* the dock chip keeps λWAVES' drawing (WAVE 55: the floating windows' DOCK chip, `north`); docked it wears the kit's pop-out */
@@ -57,8 +68,8 @@ export function createTransport(app) {
     const door = bar.el.door; ui.modExp = door; door.title = 'Open the modulation window';
     const spinLogo = (reverse) => { const mark = door.querySelector('svg'); if (!mark) return; if (door._spin) door._spin.cancel(); door._spin = mark.animate([{ transform: 'rotate(0deg)' }, { transform: `rotate(${reverse ? -360 : 360}deg)` }], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 550, easing: 'ease-in-out' }); };
     door.addEventListener('pointerenter', () => spinLogo(false)); door.addEventListener('pointerleave', () => spinLogo(true));
-    /* the repeat mathematics, in the tempo panel's corner — not a tile */
-    if (bar.el.panel) el('div', 'tempo-info', bar.el.panel).appendChild(infoPanel(ui.periodFx.root, 'Repeat mathematics'));
+    /* the expander's first row: ‹ › ⟳, REPEATS and its formula, read in full (A1: they read once a minute; the bar keeps SCRUB and t) */
+    if (bar.el.panel) { const rep = el('div', 'csb-repeats'); rep.append(sm, sp, jmp, ui.periodRo.root, ui.periodFx.root); bar.el.panel.prepend(rep); }
     /* iteration 011 Q6 · GEMMA, HIDDEN: the ASK door and THE TYPE BOX mount only under ASK_ENABLED (lab/ask.js, the one flag); off, the strip is
        the 0.6.5 strip, `openAsk` does nothing (no key row calls it) and createAsk is never made, so no request can leave */
     let echoOn = false, openAsk = () => {};

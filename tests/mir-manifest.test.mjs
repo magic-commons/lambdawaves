@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
    file AND rewrites the manifest ("1.4.4", 2026-10-05, a release MIR never cut) passed them.  Each accepted MIR version
    pins the sha-256 of the manifest's own bytes: a forged version fails here, in every checkout and every CI, and a real
    adoption is a visible TWO-file edit — MIR-MANIFEST.json (written by MIR's tools/adopt.mjs) and its row below. */
-const ACCEPTED = { '1.5.0-alpha.25': '06941cb77f699441113f2026359a48603fb2bacc57806654306424985aa5a670',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
+const ACCEPTED = { '1.5.0-alpha.25': 'a59339b0a9f59b360864182308e963aa2b132006a0a7652e9ad9995941febed4',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES is PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs; re-adopt once when brief 8 lands (PLAN §1). */

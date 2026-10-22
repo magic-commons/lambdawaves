@@ -188,6 +188,18 @@
 .mir-transport:not(.docked) .ro.period { width: 76px; }
 .mir-transport:not(.docked) .ro-val { color: var(--ink-key, var(--fg-soft)); font-size: var(--fs-micro); line-height: 1.15; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 
+/* ── THE CONTROL SURFACE (CONTROL_SURFACE_LAYOUT, data-layout="csb"; 1.5.0-alpha.25): two rows, 1.5 × the bar's height, as narrow
+   as its wider row; the panel opens under them; docked, each row wraps in the card.  A latch with a glyph shows the glyph alone. ── */
+.mir-transport[data-layout="csb"] { flex-direction: column; align-items: stretch; justify-content: center; row-gap: 1px; }   /* a column: the bar is as wide as its WIDER row (a wrapping row would sum them) */
+.mir-transport.mini[data-layout="csb"] { width: max-content; min-width: 0; height: auto; min-height: calc(var(--xport-h, 46px) * 1.5); }
+.mir-transport[data-layout="csb"] > .csb-row { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; min-width: 0; height: calc(var(--xport-h, 46px) * .7); }
+.mir-transport[data-layout="csb"] .csb-row :is(.tbtn.tempo-expand, .transport-tempo-input) { order: 0; }
+.mir-transport[data-layout="csb"] > .csb-app { justify-content: flex-start; }
+.mir-transport[data-layout="csb"] .tr-openers { display: flex; gap: 2px; }
+.mir-transport[data-layout="csb"] .tr-open.has-glyph .tr-word { display: none; }
+.mir-transport.docked[data-layout="csb"] > .csb-row { flex-wrap: wrap; height: auto; row-gap: 4px; }
+.mir-transport[data-layout="csb"] > .native-tempo { flex: 0 0 auto; }
+
 /* ── COMPACT (ruled 2026-10-01): glyphs only, no TAP, no Hz reading ───────────────────────────────────────── */
 .mir-transport[data-form="compact"] { --xport-w: 0px; --xport-h: 40px; --xport-seat: 30px; --xport-power: 36px; --xport-pill-w: 52px; --xport-play-size: 22px; --xport-num-size: 14px; }
 .mir-transport[data-form="compact"] :is(.tap, .tempo-hz, .tempo-unit, .tempo-chevron, .tr-open.has-glyph .tr-word, .fd, .ro, .k) { display: none; }

@@ -90,7 +90,7 @@ export function createKeys(app) {
     (({ id, run, up }) => ({ id, short: 'hold text', label: 'hold the stage text still (while I is held)', key: 'KeyI', shift: false, run, up }))(infoActions(() => app.state.stageText && app.state.stageText.layer)[0]),   // 0.5.1 D1: the kit's hold-still row
     { id: 'notes', short: 'notes', label: 'show / hide window help', key: 'KeyN', run: () => { const on = document.body.classList.contains('window-info-off'); if (ui.setWindowInfo) ui.setWindowInfo(on); if (ui.windowInfoSw) ui.windowInfoSw.set(on); } },
     { id: 'rack', short: 'rack', label: 'hide / show the rack', key: 'KeyB', run: () => layout.toggleRack() },
-    { id: 'dock', short: 'dock', label: 'dock / undock the transport', key: 'KeyT', run: () => layout.dockTransport() },
+    { id: 'dock', short: 'dock', label: 'dock / undock the control surface', key: 'KeyT', run: () => layout.dockTransport() },
     /* WAVE 65 · the arm and the loop clock's lock.  Both are REBINDABLE and both appear in the keyboard
        editor, which is the visible seat neither could have inside the ported window: its timing bar is
        the artifact's and is not ours to grow (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW EXCEPTION). */

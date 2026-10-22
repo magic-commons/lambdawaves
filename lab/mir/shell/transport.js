@@ -526,9 +526,10 @@ export function wayBack({ run, signal } = {}) {
 }
 
 /* ── the layouts ───────────────────────────────────────────────────────────────────────────────────────────── */
-/** named(name, list) — a layout that carries its own drawing: the bar writes `data-layout="<name>"` and transport.css
- *  keys that layout's values on it.  A layout with no name (an app's own list) is drawn as BASINS' is. */
-const named = (name, list) => Object.freeze(Object.assign(list, { name }));
+/** named(name, list, { title }) — a layout that carries its own drawing: the bar writes `data-layout="<name>"` and transport.css
+ *  keys that layout's values on it; `title` names the rack window it docks into (default TRANSPORT).  A layout with no name
+ *  (an app's own list) is drawn as BASINS' is. */
+const named = (name, list, extra = {}) => Object.freeze(Object.assign(list, { name }, extra));
 /** BASINS' basic bar (app/transport.js): the play row — play, modulation's power, the BPM pill, to-start (BASINS adds its
  *  depth readout after the pill) — then the tempo panel the pill opens, the window latches, the seat button, the dock chip
  *  and the modulation door.  Its drawing is the default (transport.css): the bar as wide as its row, the pill in the row's
@@ -539,6 +540,16 @@ export const BASINS_LAYOUT = named('basins', [{ group: 'native-play-row', items:
  *  Its own drawing (`data-layout="lambdawaves"`): the 640 px bar, the pill last, the docked row wrapping. */
 export const LAMBDAWAVES_LAYOUT = named('lambdawaves', [{ group: 'native-play-row', items: ['play', 'power', 'rewind', 'app:back', 'app:forward', 'app:scrub', 'app:jump', 'app:time', 'app:period', 'app:rate', 'tempo'] },
   'panel', 'openers', 'seat', 'dock', 'door']);
+
+/** THE CONTROL SURFACE (1.5.0-alpha.25, λWAVES iteration 014 A1): the bar in TWO ROWS (`data-layout="csb"`, 1.5 × the bar's
+ *  height, as narrow as its wider row).  Row 1 is the clock — play, power, to-start, the app's scrub, time readout and rate,
+ *  the BPM pill, the window latches, the app's gear, the dock chip, the modulation door; row 2 is the app — its modes, its
+ *  chooser, its search and the rack's add / hide / favourites (`app:<name>`, from `nodes`; a name the app does not hand in is
+ *  left out).  The tempo panel opens under the rows.  Docked, the rack window is CONTROL SURFACE. */
+export const CONTROL_SURFACE_LAYOUT = named('csb', [
+  { group: 'csb-row csb-clock', items: ['play', 'power', 'rewind', 'app:scrub', 'app:time', 'app:rate', 'tempo', 'openers', 'app:gear', 'dock', 'door'] },
+  { group: 'csb-row csb-app', items: ['app:modes', 'app:chooser', 'app:search', 'app:add', 'app:rack', 'app:fav'] },
+  'panel'], { title: 'CONTROL SURFACE' });
 
 /** layoutNames(layout) — every part name a layout uses, groups opened */
 export function layoutNames(list) {
@@ -551,11 +562,11 @@ export function layoutNames(list) {
    rack, registered once; its hooks are forwarded to whichever bar is alive. */
 const docks = new WeakMap();
 let bars = 0;                                                       // bars made on this page (each paints under its own key)
-function dockOf(R) {
+function dockOf(R, title = 'TRANSPORT') {
   let d = docks.get(R);
   if (!d) {
     d = { open: null, close: null }; docks.set(R, d);
-    if (!(R.registered || []).includes(DOCK_ID)) R.register({ id: DOCK_ID, title: 'TRANSPORT', side: 'left', hint: 'the transport, docked',
+    if (!(R.registered || []).includes(DOCK_ID)) R.register({ id: DOCK_ID, title, side: 'left', hint: 'the transport, docked',
       build() {}, onOpen: (api) => d.open && d.open(api), onClose: () => d.close && d.close() });
   }
   return d;
@@ -780,7 +791,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   }
   function wireDock() {
     const R = rackOf(); if (!R || typeof R.register !== 'function') return;
-    const d = dockOf(R);
+    const d = dockOf(R, layout && layout.title);
     d.open = (api) => { api.body.appendChild(bar); setDocked(true); };
     d.close = () => setDocked(false);
     if (R.isOpen && R.isOpen(DOCK_ID)) { const api = R.window(DOCK_ID); if (api) d.open(api); }
