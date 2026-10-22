@@ -1021,6 +1021,9 @@ body[data-theme="light"] { --n7: hsl(350 97% 47%); }
 #menubar .mb-item[data-icon] { justify-content: flex-start; }
 #menubar .mb-item[data-icon] > .mb-key { margin-left: auto; }
 #menubar .mb-item[data-icon]:has(> .mb-key)::after { margin-left: 0; }
+/* iteration 014 A7 · THE WINDOW PICKER's ATOMS / MOLECULES rows: the same icons by the same mask road, on the kit's empty glyph seat */
+.mir-window-picker .wp-row[data-icon] > .wp-icon { background: currentColor; -webkit-mask: url(img/icons/atomic.svg) center / contain no-repeat; mask: url(img/icons/atomic.svg) center / contain no-repeat; }
+.mir-window-picker .wp-row[data-icon="molecular"] > .wp-icon { -webkit-mask-image: url(img/icons/molecular.svg); mask-image: url(img/icons/molecular.svg); }
 
 /* iteration 012 M1 · FOLDERS, λWAVES' look over the kit's gallery (folders/gallery.js, untouched).  PROJECT — BASINS' "store with a picture" spot —
    wore the same floppy as λWAVES' SAVE beside it; it wears I1's save.svg (a page filed into the library).  The NAME and SAVE TO bars each carry

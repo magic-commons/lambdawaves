@@ -114,6 +114,7 @@ export function createKeys(app) {
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
     { id: 'render', short: 'render', label: 'the RENDER card — film the stage', key: null, run: () => layout.raise('render') },   // iteration 012 M1: the kit's two cards λWAVES carries, as HISTORY
     { id: 'curves', short: 'curves', label: 'the CURVES card — grade the screen', key: null, run: () => layout.raise('curves') },
+    { id: 'windowPicker', short: 'find a window', label: 'THE WINDOW PICKER — search every window by name', key: null, run: () => { if (layout.windowPicker) layout.windowPicker.toggle(); } },   // iteration 014 A7 (no chord)
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
     { id: 'menu', short: 'picker', label: 'the Picker — open it, or back to the lab', key: 'KeyL', run: () => { if (app.state.picker) app.state.picker.toggle(); } },   // iteration 003; iteration 004: THE PICKER (the id stays 'menu': saved bindings)
     { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', key: null, run: () => { if (app.state.tl) app.state.tl.toggle(); } },   // 0.5.0 C7b

@@ -37,6 +37,7 @@
 @import url("panels/ramp.css");
 @import url("fx/fx.css");
 @import url("shell/opener.css");
+@import url("shell/window-picker.css");
 @import url("keyboard/keyboard.css");
 @import url("folders/folders.css");
 @import url("shell/transport.css");

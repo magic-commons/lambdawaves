@@ -4,6 +4,16 @@
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
+- **THE WINDOW PICKER** (014 A7): `createWindowPicker({ rack, open, can, icon, cls })`. Files: `shell/window-picker.js`, `.css`
+  (imported by `mir.css`), and two words in `locales/en.json`.
+  - Every window of the rack (`rack.windows()`, cards left out) is a row, by name, under a search field. The first openable match is
+    the default: Enter opens it, ↑ ↓ move it, Escape or a press outside closes. A row `can(id)` refuses is greyed, with the app's
+    sentence, and never opens.
+  - The row's glyph is its `spec(id).glyph`, or an empty `.wp-icon` seat with `data-icon` that the app paints.
+  - The motion is GOL-NOTE.md §4: a spring open from 0.94 × 0.6, rows 30 ms apart (capped at the twelfth), each with a faux motion blur
+    (a stretched copy at 10 % alpha collapsing into it), and a 120 ms close. Reduced motion shows none of it.
+  - Why: Josh, "something similar to FL Studio's plugin picker where you could look for MIR windows and have the ones that can't be
+    opened be greyed out … a search bar". λWAVES opens it from WINDOW's first row and the key row `windowPicker`.
 - **THE FOUR CALLS** (014 A11, Yan's picks on Josh's "whichever you prefer"):
   - The timing row of `CONTROL_SURFACE_LAYOUT` is now to-start · latches · door · gear · dock · the app's time readout. The time takes
     the right end. File: `shell/transport.js`.
