@@ -9,6 +9,7 @@
  *
  *   parseLwm(bytes)           → { header, blob(basis, key) } — a typed array per blob (a copy, aligned), or throws on a bad file
  *   rungs(lwm)                → [{ basis, nAO, nocc, energy, gapEv }] in the header's (the ladder's) order
+ *   espOf(lwm)                → the potential grid { n, box, f16, … } or null (iteration 014 C1)
  *   rungRecord(lwm, basis)    → the schema-1 record the worker opens (chem.open), each placeholder → { $f64 | $f32: base64 }
  *   encodeLwm(header, data)   → Uint8Array: `data[basis][key]` a typed array; fills each rung's `blobs` (offsets) in the header
  * Typed arrays are little-endian; a big-endian host is refused by name rather than misread.
@@ -18,7 +19,7 @@
  *   to 8 · the files, each at its 8-aligned offset from the file's start (index.json first, then m/*.lwm, then t/*.webp; paths relative to
  *   the volume's folder).  lwvIndexLength(first 8 bytes) → 8 + H; parseLwv(the first 8 + H bytes) → the index, checked. */
 export const MAGIC = 'LWM1', LWM_SCHEMA = 1, LWV_MAGIC = 'LWV1';
-const DTYPE = { f64: Float64Array, f32: Float32Array, i32: Int32Array };
+const DTYPE = { f64: Float64Array, f32: Float32Array, i32: Int32Array, f16: Uint16Array };   // f16: IEEE binary16 bits (iteration 014 C1's potential grid)
 const LE = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 const pad8 = (n) => (n + 7) & ~7;
 
@@ -72,6 +73,15 @@ export function rungRecord(lwm, basis) {
   return fill(r.record);
 }
 
+/** THE POTENTIAL GRID (iteration 014 C1; tools/volumes/esp-pass.py, carried by pack.mjs): { n, box, f16, basis, min, max, charges, unit, grid }
+ *  or null — φ in Eh/e on n³ cell centres of the cube [−box, box]³ bohr about the origin, x_i = −box + (i + ½)·2·box/n, flat index i + n·(j + n·k);
+ *  f16 a Uint16Array of IEEE binary16 bits (upload as an r16float texture); charges the rung's Mulliken charges per atom; basis the rung it is of */
+export function espOf(lwm) {
+  const e = lwm.header.esp;
+  if (!e || !lwm.header.rungs || !lwm.header.rungs[e.basis]) return null;
+  return { ...e, f16: lwm.blob(e.basis, 'esp') };
+}
+
 export function encodeLwm(header, data) {
   if (!LE) throw new Error('volumes-format: a big-endian host cannot write a .lwm');
   const parts = []; let at = 0;
@@ -79,7 +89,7 @@ export function encodeLwm(header, data) {
     r.blobs = {};
     for (const [key, arr] of Object.entries(data[basis] || {})) {
       const dtype = Object.keys(DTYPE).find((k) => arr instanceof DTYPE[k]);
-      if (!dtype) throw new Error(`volumes-format: ${basis}/${key} is not a f64, f32 or i32 array`);
+      if (!dtype) throw new Error(`volumes-format: ${basis}/${key} is not a f64, f32, i32 or f16 (u16) array`);
       r.blobs[key] = { dtype, offset: at, length: arr.length };
       parts.push({ at, bytes: new Uint8Array(arr.buffer, arr.byteOffset, arr.byteLength) }); at = pad8(at + arr.byteLength);
     }

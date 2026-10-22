@@ -110,7 +110,7 @@ function readNpy(b, name) {
   if (/'fortran_order':\s*True/.test(head)) throw new Error(`${name}: Fortran order`);
   const body = b.subarray(h0 + hl), n = shape.reduce((a, c) => a * c, 1), copy = (T, w) => new T(body.buffer.slice(body.byteOffset, body.byteOffset + n * w));
   let data;
-  if (descr === '<f8') data = copy(Float64Array, 8); else if (descr === '<i4') data = copy(Int32Array, 4); else if (descr === '<i8') data = Array.from(copy(BigInt64Array, 8), Number);
+  if (descr === '<f8') data = copy(Float64Array, 8); else if (descr === '<i4') data = copy(Int32Array, 4); else if (descr === '<u2') data = copy(Uint16Array, 2); else if (descr === '<i8') data = Array.from(copy(BigInt64Array, 8), Number);
   else if (/^<U\d+$/.test(descr)) { const w = +descr.slice(2); data = []; for (let i = 0; i < n; i++) { let s = ''; for (let c = 0; c < w; c++) { const u = body.readUInt32LE((i * w + c) * 4); if (!u) break; s += String.fromCodePoint(u); } data.push(s); } }
   else throw new Error(`${name}: dtype ${descr} is not read here`);
   return { shape, data };
@@ -193,10 +193,11 @@ function packMolecule(id, vol = VOL) {
   const unclocked = (v) => (Array.isArray(v) ? v.map(unclocked) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([k]) => !CLOCKS.has(k)).map(([k, x]) => [k, unclocked(x)])) : v);
   const metaSha = sha(JSON.stringify(unclocked(meta)));          // what the rungs ARE, not when or where they were solved
   const candSha = sha(JSON.stringify(cand));                      // and what the catalogue says the molecule is (names, tags …)
+  const espFile = path.join(dir, 'esp.npz'), espSha = existsSync(espFile) ? sha(readFileSync(espFile)) : undefined;   // iteration 014 C1: tools/volumes/esp-pass.py
   const have = INCREMENTAL && !OUT ? findKept(vol, 'm', id + '.lwm') : null;
   if (have) {
     const old = readFileSync(have), h = parseLwm(old).header;
-    if (h.source && h.source.metaSha256 === metaSha && h.source.candSha256 === candSha && h.source.packer === PACKER) return { id, bytes: old, header: h, report: { id, heavy: h.meta.heavy, nAtoms: h.meta.nAtoms, rungs: {}, bytes: old.length, headerBytes: old.readUInt32LE(4), kept: true }, meta };
+    if (h.source && h.source.metaSha256 === metaSha && h.source.candSha256 === candSha && h.source.packer === PACKER && h.source.espSha256 === espSha) return { id, bytes: old, header: h, report: { id, heavy: h.meta.heavy, nAtoms: h.meta.nAtoms, rungs: {}, bytes: old.length, headerBytes: old.readUInt32LE(4), kept: true }, meta };
   }
   const atoms = meta.atomsBohr.map(([Z, x, y, z]) => ({ Z, x, y, z })), zs = atoms.map((a) => a.Z), N = zs.reduce((s, z) => s + z, 0) - charge, nocc = N / 2;
   const rs = rs0;
@@ -261,6 +262,17 @@ function packMolecule(id, vol = VOL) {
     report.rungs[b] = { nAO: n, Cbytes: n * n * 4, epsBytes: n * 8, orthonormality: ck.orthonormality, names: names.reliable ? names.group : 'indices' };
   }
   if (!Object.keys(header.rungs).length) return { id, skip: 'no rung converged' };
+  /* THE POTENTIAL GRID (iteration 014 C1): raw/<id>/esp.npz, when it names a rung this file carries — its f16 grid rides in that rung's blobs
+     as `esp` (dtype f16: binary16 bits), its words in header.esp (lab/volumes-format.js espOf); a molecule without it packs as before, byte for byte */
+  if (espSha) {
+    const e = readNpz(espFile), b = e.basis.data[0];
+    if (header.rungs[b] && e.f16.data.length === e.n.data[0] ** 3) {
+      header.esp = { basis: b, n: e.n.data[0], box: e.half.data[0], min: e.min.data[0], max: e.max.data[0], charges: Array.from(e.charges.data, (v) => +v.toFixed(6)),
+        unit: 'Eh/e', grid: 'the cube [−box, box]³ bohr about the origin, n³ cell centres x_i = −box + (i + ½)·2·box/n; index i + n·(j + n·k), x fastest',
+        source: 'tools/volumes/esp-pass.py: φ = Σ Z_A/|r − R_A| − Σ D_μν (μν|1/|r − r′||), the rung\'s own D; charges: Mulliken' };
+      blobs[b].esp = Uint16Array.from(e.f16.data); header.source.espSha256 = espSha; report.esp = b;
+    }
+  }
   for (const k of ['skipped', 'failed', 'refused']) if (header[k] && !Object.keys(header[k]).length) delete header[k];
   const bytes = encodeLwm(header, blobs);
   /* read back through the reader the app uses: every rung validates and opens through chem.open, 0 solver calls, its own energy */

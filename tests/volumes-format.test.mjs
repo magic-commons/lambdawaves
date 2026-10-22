@@ -6,7 +6,7 @@
  * the app end to end); decodeRecord builds D from the every-column C and Tr(DS) = 10. */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseLwm, rungs, rungRecord } from '../lab/volumes-format.js';
+import { parseLwm, rungs, rungRecord, espOf, encodeLwm } from '../lab/volumes-format.js';
 import { validateRecord, decodeRecord, DENSITY_AO } from '../lab/library.js';
 import { BASIS_FILES, moleculeRHF } from '../lab/rhf-molecule.js';
 import { moleculeAtoms } from '../lab/molecules.js';
@@ -46,5 +46,13 @@ for (const { basis, nAO } of rungs(lwm)) {
   worstTr = Math.max(worstTr, Math.abs(tr - 10));
   assert(Math.abs(tr - 10) < 1e-5, `${basis}: Tr(DS) = ${tr}, not 10 (C is f32: ~1e-7 is its precision)`);
 }
+/* iteration 014 C1 THE POTENTIAL GRID: a file without one reads null; one with one (an f16 blob in its rung, header.esp) reads back bit for bit */
+assert.equal(espOf(lwm), null, 'the fixture predates the potential grid: espOf is null');
+{ const top = '6-31+g-star', header = structuredClone(lwm.header), n = 4, f16 = Uint16Array.from({ length: n ** 3 }, (_, i) => 0x3c00 + i);
+  const data = Object.fromEntries(Object.keys(header.rungs).map((b) => [b, Object.fromEntries(Object.keys(header.rungs[b].blobs).map((k) => [k, lwm.blob(b, k)]))]));
+  data[top].esp = f16; header.esp = { basis: top, n, box: 7.5, min: -0.1, max: 12, charges: [-0.8, 0.4, 0.4], unit: 'Eh/e' };
+  const back = parseLwm(encodeLwm(header, data)), e = espOf(back);
+  assert(e && e.n === n && e.box === 7.5 && e.basis === top && e.f16 instanceof Uint16Array && e.f16.length === n ** 3 && e.f16.every((v, i) => v === f16[i]), 'espOf: { n, box, f16 } round-trips');
+  assert.equal(rungRecord(back, top).ground.energy, rungRecord(lwm, top).ground.energy, 'the grid leaves the rung\'s record alone'); }
 assert.equal(DENSITY_AO, MAX_MOL_AO, 'lab/library.js DENSITY_AO is lab/field.js MAX_MOL_AO (the density\'s χ tile)');
 console.log(`PASS the volume format: H2O.lwm (${bytes.length} B) parses into ${rungs(lwm).length} rungs, each a valid every-column record chem.open opens with 0 solver calls; STO-3G and 6-31+G* equal the app's live RHF to ${worstLive.toExponential(1)} Eh; D decodes and Tr(DS) = 10 to ${worstTr.toExponential(1)} (f32 C).`);
