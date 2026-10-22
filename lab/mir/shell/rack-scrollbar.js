@@ -25,7 +25,19 @@
  *   5. The class names are BASINS' (`.rack-scrollbar`, `.rack-scrollbar-thumb`, `.drag`, `body.rack-scrollbars`), so
  *      BASINS' own sheet keeps matching while it adopts.
  *
- * createRackScrollbars({ host, racks, span, view }) → { paint(), tracks, destroy() }.  The pure seat is exported. */
+ * createRackScrollbars({ host, racks, span, view }) → { paint(), tracks, destroy() }.  The pure seat is exported.
+ *
+ * THE SCROLL PILL (1.5.0-alpha.25, from λWAVES 014 A6; Josh: "When scrolling on the rack window, let a little colored pill appear
+ * directly adjacent to the window title bar … the name of the window in a strong, bold, sans serif font … No shadow just solid pill
+ * … When the scroll bar disappears, the pills disappear too … material animated … incredibly cheap … autodetect white or black text").
+ * createRackPills({ host, racks, view }) → { destroy() }, made by createRack for every rack, whichever scrollbar it runs:
+ *   · a scroll adds `scrolling` to the rack (and to its seated track, which lifts the thumb) and arms ONE timeout, re-armed by each
+ *     scroll; 900 ms after the last scroll the class goes.  No poller, no frame job.
+ *   · the first scroll of a burst seats the pills — one `.rack-pill` per docked window, its text the head's own (already labelled)
+ *     name, at the title bar's outer edge (left rack: right of the card; right rack: left), measured ONCE; while the burst lasts a
+ *     scroll writes one transform on the layer, never a layout.  The reveal is a clip-path mask (rack.css), 180 ms each way.
+ *   · the ink is read once a burst from the pill's own fill (light ink on a dark accent, dark on a light one: `data-ink`).
+ *   MIR OPTIONS › WINDOWS › SCROLL PILL (LOOK_SCHEMA `rackPill`: OFF · A · B, default B) is `body[data-rack-pill]`, read by the sheet. */
 import { el, ariaLabel } from '../kit.js';
 import { drag } from '../core/pointer.js';
 import { frame } from '../core/frame.js';
@@ -48,6 +60,52 @@ export function thumbOf({ height, client, scrollHeight, scrollTop }) {
   const max = Math.max(0, scrollHeight - client);
   const size = Math.min(height, Math.max(SCROLLBAR.minThumb, height * client / (scrollHeight || 1)));
   return { size, top: max ? (height - size) * scrollTop / max : 0, max };
+}
+
+/** the pill's numbers: how long the pills stay after the last scroll, and their gap to the card */
+export const PILL = Object.freeze({ linger: 900, gap: 6 });
+/** inkOn(rgb) — 'dark' ink on a light fill, 'light' on a dark one (WCAG relative luminance against the two inks' midpoint) */
+export function inkOn(rgb) {
+  const m = String(rgb).match(/[\d.]+/g); if (!m || m.length < 3) return 'light';
+  const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+  const L = 0.2126 * lin(+m[0]) + 0.7152 * lin(+m[1]) + 0.0722 * lin(+m[2]);
+  return L > 0.179 ? 'dark' : 'light';
+}
+export function createRackPills({ host, racks, view = globalThis.window }) {
+  const doc = view.document, life = new AbortController();
+  const entries = racks.filter(Boolean).map((rack) => {
+    const side = rack.dataset.side === 'left' ? 'left' : 'right';
+    const layer = el('div', 'rack-pills', host), inner = el('div', 'rack-pills-in', layer);
+    layer.dataset.side = side; layer.setAttribute('aria-hidden', 'true');
+    const e = { rack, side, layer, inner, timer: 0, top: 0 };
+    rack.addEventListener('scroll', () => scrolled(e), { passive: true, signal: life.signal });
+    return e;
+  });
+  function seat(e) {
+    const { rack, side, layer, inner } = e, hr = host.getBoundingClientRect(), rr = rack.getBoundingClientRect();
+    layer.style.top = (rr.top - hr.top) + 'px'; layer.style.height = rr.height + 'px';
+    inner.textContent = ''; e.top = rack.scrollTop;
+    for (const dev of rack.querySelectorAll(':scope > .dev')) {
+      const head = dev.querySelector('.dev-head'), name = dev.querySelector('.dev-eyebrow');
+      const text = name && name.textContent.trim(); if (!head || !text || dev.hidden) continue;
+      const d = dev.getBoundingClientRect(), h = head.getBoundingClientRect(); if (!h.height) continue;
+      const pill = el('span', 'rack-pill', inner, text);
+      pill.style.top = (h.top + h.height / 2 - rr.top) + 'px';
+      if (side === 'left') pill.style.left = (d.right - hr.left + PILL.gap) + 'px'; else pill.style.right = (hr.right - d.left + PILL.gap) + 'px';
+    }
+    const first = inner.firstChild; if (first) layer.dataset.ink = inkOn(view.getComputedStyle(first).backgroundColor);
+    inner.style.transform = '';
+  }
+  function scrolled(e) {
+    const { rack, layer, inner } = e, track = host.querySelector('.rack-scrollbar[aria-controls="' + rack.id + '"]');
+    if (!rack.classList.contains('scrolling')) { seat(e); rack.classList.add('scrolling'); if (track) track.classList.add('scrolling'); layer.classList.add('on'); }
+    else inner.style.transform = 'translateY(' + (e.top - rack.scrollTop) + 'px)';
+    clearTimeout(e.timer);
+    e.timer = setTimeout(() => { rack.classList.remove('scrolling'); if (track) track.classList.remove('scrolling'); layer.classList.remove('on'); }, PILL.linger);
+  }
+  return {
+    destroy() { life.abort(); for (const e of entries) { clearTimeout(e.timer); e.layer.remove(); e.rack.classList.remove('scrolling'); } },
+  };
 }
 
 export function createRackScrollbars({ host, racks, span = null, view = globalThis.window }) {

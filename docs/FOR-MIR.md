@@ -3,6 +3,13 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
+- **THE SCROLL PILL** (014 A6): while a rack scrolls and 900 ms after (one timeout), each docked window's name in a solid accent pill beside
+  its title bar, revealed by a clip-path mask, ink by luminance; `scrolling` on the rack and its track lifts the thumb.
+  `shell/rack-scrollbar.js` (`createRackPills`, `inkOn`, `PILL`), `shell/rack.js` (made with every rack), `shell/rack.css`, `shell/gui.js`
+  (LOOK_SCHEMA `rackPill` OFF · A · B, default B; MIR OPTIONS › WINDOWS › SCROLL PILL), `locales/en.json`. Why: Josh, "scrolling through
+  windows is hard to see where one window begins and another starts".
+
 ## From iteration 010 (X6, the deletion pass)
 - **A starter's refresh carries its name.** `folders/seed.js` refreshes a starter in place but keeps the entry's old name, so λWAVES renames
   a refreshed starter itself (`lab/projects.js` `seed()`, WAVE DANCER → WAVE DANCER PROTOTYPE). When the kit carries the name, that loop goes.

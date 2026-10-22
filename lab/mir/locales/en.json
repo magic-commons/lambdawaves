@@ -593,6 +593,7 @@
   "No copies made: source budget reached.": "No copies made: source budget reached.",
   "No envelopes on the rack — add one with +": "No envelopes on the rack — add one with +",
   "No macros yet — add one in the modulation window.": "No macros yet — add one in the modulation window.",
+  "No name pill while a rack scrolls": "No name pill while a rack scrolls",
   "No room for this audio clip here: add a lane or choose another time.": "No room for this audio clip here: add a lane or choose another time.",
   "No room on the timeline for {what} — add a lane or move the playhead": "No room on the timeline for {what} — add a lane or move the playhead",
   "No room: {max} minutes of audio is the budget (this would be {now}).": "No room: {max} minutes of audio is the budget (this would be {now}).",
@@ -810,6 +811,7 @@
   "SAW↑": "SAW↑",
   "SAW↓": "SAW↓",
   "SCOPE · {value}": "SCOPE · {value}",
+  "SCROLL PILL": "SCROLL PILL",
   "SCRUB": "SCRUB",
   "SCRUB TOOL": "SCRUB TOOL",
   "SCRUB is how the picture follows a ruler drag. AUTOMATION is how playback reads the Timeline into the engine; never during a recorded render.": "SCRUB is how the picture follows a ruler drag. AUTOMATION is how playback reads the Timeline into the engine; never during a recorded render.",
@@ -1090,6 +1092,8 @@
   "What this app is, for a visiting model: windows, parameters, keys and shared pages": "What this app is, for a visiting model: windows, parameters, keys and shared pages",
   "What this theme cost when it was applied: surfaces that blur, shadows drawn, shine layers, the mean frame time": "What this theme cost when it was applied: surfaces that blur, shadows drawn, shine layers, the mean frame time",
   "Where the transport sits": "Where the transport sits",
+  "While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar": "While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar",
+  "While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar": "While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar",
   "White text on every label": "White text on every label",
   "Windows and Linux": "Windows and Linux",
   "Work bars": "Work bars",
@@ -1639,6 +1643,7 @@
   "SAW↑": "waveform names (saw up, saw down, sine, triangle, square, sample-and-hold, a slow random drift); most languages keep these as written",
   "SAW↓": "waveform names (saw up, saw down, sine, triangle, square, sample-and-hold, a slow random drift); most languages keep these as written",
   "SCOPE · {value}": "a folded setting's row in the ⋯ list: its name · the choice in force",
+  "SCROLL PILL": "the small coloured label with a window's name shown beside it while the column of windows scrolls",
   "SHELF": "the SHELF: where your notes are kept in this browser (not the RACK, the column of windows)",
   "SIGNAL ONLY (MUTE THE FILE)": "a clip's menu: the file plays / the envelope alone / fit the audio into the clip's length (varispeed)",
   "SINE": "waveform names (saw up, saw down, sine, triangle, square, sample-and-hold, a slow random drift); most languages keep these as written",
@@ -3505,6 +3510,9 @@
   "No macros yet — add one in the modulation window.": [
    "mir/shell/transport.js"
   ],
+  "No name pill while a rack scrolls": [
+   "mir/shell/gui.js"
+  ],
   "No room for this audio clip here: add a lane or choose another time.": [
    "mir/timeline/audio-drop.js"
   ],
@@ -4182,6 +4190,9 @@
   ],
   "SCOPE · {value}": [
    "mir/timeline/editor.js"
+  ],
+  "SCROLL PILL": [
+   "mir/shell/gui.js"
   ],
   "SCRUB": [
    "mir/shell/gui.js"
@@ -5033,6 +5044,12 @@
   ],
   "Where the transport sits": [
    "mir/shell/transport.js"
+  ],
+  "While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar": [
+   "mir/shell/gui.js"
+  ],
+  "While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar": [
+   "mir/shell/gui.js"
   ],
   "White text on every label": [
    "mir/shell/gui.js"
