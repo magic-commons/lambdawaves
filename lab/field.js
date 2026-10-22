@@ -845,7 +845,17 @@ export function yawPitchFromQuat(q, pitchMax = 1.52) {
 export function turnFree(q, dyaw, dpitch) {
   return qnormalize(qmul(q, expPure([-dpitch / 2, dyaw / 2, 0])));
 }
+/** FLIP (iteration 014 C2): THE PARITY of the view — the camera's right vector reversed, so every reader of the basis (the ray pass, the lines,
+ *  toScreen and the pointer) sees the mirror image: a molecule's enantiomer, as a view (enantiomers are not catalogued).  A session's view
+ *  toggle (camera-law.js setFlip), never in a project, a link or the digest: off, the basis is the old one, bit for bit. */
+let PARITY = 1;
+export function setParity(on) { PARITY = on ? -1 : 1; }
 export function cameraBasis(obs) {
+  const B = cameraBasis0(obs);
+  if (PARITY < 0) B.right = [-B.right[0], -B.right[1], -B.right[2]];
+  return B;
+}
+function cameraBasis0(obs) {
   if (obs.mode === 'free' && obs.quat) {                    // FREE: the rotor's three columns, no angles anywhere
     const q = obs.quat, dir = adjoint(q, [0, 0, 1]);
     return { dir, fwd: [-dir[0], -dir[1], -dir[2]], right: adjoint(q, [1, 0, 0]), up: adjoint(q, [0, 1, 0]) };
@@ -900,8 +910,9 @@ export function lensShift(E, aspect, lane, at, P) {
  *  camera can ROLL without moving either angle and a (yaw, pitch) key would hand it back a stale bitmap (wave 54) */
 export function cameraKey(obs) {
   const s = obs.shift ? '|' + obs.shift.map((v) => v.toFixed(4)).join(',') : '|0.0000,0.0000';
-  if (obs.mode === 'free' && obs.quat) return 'q' + obs.quat.map((v) => v.toFixed(6)).join(',') + s;
-  return obs.yaw.toFixed(4) + '|' + obs.pitch.toFixed(4) + s;
+  const m = PARITY < 0 ? '|m' : '';   // C2: a flipped view is another picture
+  if (obs.mode === 'free' && obs.quat) return 'q' + obs.quat.map((v) => v.toFixed(6)).join(',') + s + m;
+  return obs.yaw.toFixed(4) + '|' + obs.pitch.toFixed(4) + s + m;
 }
 function f16(h) {
   const s = (h & 0x8000) ? -1 : 1, e = (h >> 10) & 0x1f, f = h & 0x3ff;

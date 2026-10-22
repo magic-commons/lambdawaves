@@ -26,6 +26,10 @@
  *               (`app`: the app's own table; `any`: a tag, `none`: … but not this one; no step: the `rest` theme; --count-themes: print the whole catalogue's
  *               counts and stop), a theme ordered by the catalogue's `priority`, split past --cap bytes (5e9) of .lwm + .webp
  *               into 'TITLE · 2' with the next numeral; writes dist/vol-<n>/ for each and ONE volumes.json (replacing the old one)
+ *   --max-gb G  (iteration 014 C4) THE CUT: a volume holds at most G GiB of .lwm + pictures (Josh: 5–5.5 GB; the night runs 5.25); a shelved
+ *               molecule stays in its volume, a new one fills the LAST shelved volume (an earlier, released one is never refilled), the overflow opens the next vol-<n>; --wip marks the last,
+ *               still-filling volume `wip: true` (its index and shelf entry) — the Picker shows WIP and installs it.  Every index carries
+ *               `indexVersion` (+1 whenever anything but the number and the packer's commit moved).
  *   --archive   per volume, dist/LAMBDAWAVES-VOL-<numeral>.lwv (lab/volumes-format.js THE ARCHIVE) and its .sha256; the shelf entry gains
  *               archive: { name, bytes, sha256 } and drops `index` unless --fetchable (the dev link; a Drive volume has no index)
  *
@@ -61,6 +65,7 @@ const DATA = path.resolve(process.env.LW_VOLUMES || path.join(homedir(), 'Docume
 const RAW = path.join(DATA, 'raw'), DIST = path.resolve((argOf('--out-dir') || path.join(DATA, 'dist')).replace(/^~/, homedir()));
 const LOOK = [...new Set([DIST, path.join(DATA, 'dist')])];
 const THEMES = argOf('--themes'), CAP = +argOf('--cap', 5e9), ARCHIVE = has('--archive'), FETCHABLE = has('--fetchable');
+const MAX_BYTES = argOf('--max-gb') ? Math.round(+argOf('--max-gb') * 2 ** 30) : 0, WIP = has('--wip');   // iteration 014 C4: THE CUT (GiB) and the WIP label
 const VOL = argOf('--volume', 'vol-1'), NUMERAL = argOf('--numeral', 'I'), TITLE = argOf('--title', 'Volume ' + NUMERAL);
 const BLURB = argOf('--blurb', 'Named molecules, each solved in RHF up the whole basis ladder STO-3G → 6-31+G*, with its identifiers and properties.');
 const ONLY = argOf('--only') ? new Set(argOf('--only').split(',')) : null, PARTIAL = has('--partial'), OUT = argOf('--out'), INCREMENTAL = has('--incremental');
@@ -110,7 +115,7 @@ function readNpy(b, name) {
   if (/'fortran_order':\s*True/.test(head)) throw new Error(`${name}: Fortran order`);
   const body = b.subarray(h0 + hl), n = shape.reduce((a, c) => a * c, 1), copy = (T, w) => new T(body.buffer.slice(body.byteOffset, body.byteOffset + n * w));
   let data;
-  if (descr === '<f8') data = copy(Float64Array, 8); else if (descr === '<i4') data = copy(Int32Array, 4); else if (descr === '<i8') data = Array.from(copy(BigInt64Array, 8), Number);
+  if (descr === '<f8') data = copy(Float64Array, 8); else if (descr === '<i4') data = copy(Int32Array, 4); else if (descr === '<u2') data = copy(Uint16Array, 2); else if (descr === '<i8') data = Array.from(copy(BigInt64Array, 8), Number);
   else if (/^<U\d+$/.test(descr)) { const w = +descr.slice(2); data = []; for (let i = 0; i < n; i++) { let s = ''; for (let c = 0; c < w; c++) { const u = body.readUInt32LE((i * w + c) * 4); if (!u) break; s += String.fromCodePoint(u); } data.push(s); } }
   else throw new Error(`${name}: dtype ${descr} is not read here`);
   return { shape, data };
@@ -177,7 +182,7 @@ function candidateOf(id, meta) {
   const solvedAt = meta.candidate || {}, row = CANDS.get(id);
   if (!row) { FALLBACK.push(id); return solvedAt; }
   const cand = { ...solvedAt, ...row };
-  if (row.atomsAng && !sameAtoms(row.atomsAng, meta.atomsBohr)) { STALE.push(id); cand.geometrySource = solvedAt.geometrySource; }
+  if (row.atomsAng && !sameAtoms(row.atomsAng, meta.atomsBohr)) { STALE.push(id); cand.geometrySource = solvedAt.geometrySource; if (solvedAt.bonds) cand.bonds = solvedAt.bonds; else delete cand.bonds; }   // C2: bonds index the atoms they were read off
   return cand;
 }
 function packMolecule(id, vol = VOL) {
@@ -193,10 +198,11 @@ function packMolecule(id, vol = VOL) {
   const unclocked = (v) => (Array.isArray(v) ? v.map(unclocked) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([k]) => !CLOCKS.has(k)).map(([k, x]) => [k, unclocked(x)])) : v);
   const metaSha = sha(JSON.stringify(unclocked(meta)));          // what the rungs ARE, not when or where they were solved
   const candSha = sha(JSON.stringify(cand));                      // and what the catalogue says the molecule is (names, tags …)
+  const espFile = path.join(dir, 'esp.npz'), espSha = existsSync(espFile) ? sha(readFileSync(espFile)) : undefined;   // iteration 014 C1: tools/volumes/esp-pass.py
   const have = INCREMENTAL && !OUT ? findKept(vol, 'm', id + '.lwm') : null;
   if (have) {
     const old = readFileSync(have), h = parseLwm(old).header;
-    if (h.source && h.source.metaSha256 === metaSha && h.source.candSha256 === candSha && h.source.packer === PACKER) return { id, bytes: old, header: h, report: { id, heavy: h.meta.heavy, nAtoms: h.meta.nAtoms, rungs: {}, bytes: old.length, headerBytes: old.readUInt32LE(4), kept: true }, meta };
+    if (h.source && h.source.metaSha256 === metaSha && h.source.candSha256 === candSha && h.source.packer === PACKER && h.source.espSha256 === espSha) return { id, bytes: old, header: h, report: { id, heavy: h.meta.heavy, nAtoms: h.meta.nAtoms, rungs: {}, bytes: old.length, headerBytes: old.readUInt32LE(4), kept: true }, meta };
   }
   const atoms = meta.atomsBohr.map(([Z, x, y, z]) => ({ Z, x, y, z })), zs = atoms.map((a) => a.Z), N = zs.reduce((s, z) => s + z, 0) - charge, nocc = N / 2;
   const rs = rs0;
@@ -261,6 +267,17 @@ function packMolecule(id, vol = VOL) {
     report.rungs[b] = { nAO: n, Cbytes: n * n * 4, epsBytes: n * 8, orthonormality: ck.orthonormality, names: names.reliable ? names.group : 'indices' };
   }
   if (!Object.keys(header.rungs).length) return { id, skip: 'no rung converged' };
+  /* THE POTENTIAL GRID (iteration 014 C1): raw/<id>/esp.npz, when it names a rung this file carries — its f16 grid rides in that rung's blobs
+     as `esp` (dtype f16: binary16 bits), its words in header.esp (lab/volumes-format.js espOf); a molecule without it packs as before, byte for byte */
+  if (espSha) {
+    const e = readNpz(espFile), b = e.basis.data[0];
+    if (header.rungs[b] && e.f16.data.length === e.n.data[0] ** 3) {
+      header.esp = { basis: b, n: e.n.data[0], box: e.half.data[0], min: e.min.data[0], max: e.max.data[0], charges: Array.from(e.charges.data, (v) => +v.toFixed(6)),
+        unit: 'Eh/e', grid: 'the cube [−box, box]³ bohr about the origin, n³ cell centres x_i = −box + (i + ½)·2·box/n; index i + n·(j + n·k), x fastest',
+        source: 'tools/volumes/esp-pass.py: φ = Σ Z_A/|r − R_A| − Σ D_μν (μν|1/|r − r′||), the rung\'s own D; charges: Mulliken' };
+      blobs[b].esp = Uint16Array.from(e.f16.data); header.source.espSha256 = espSha; report.esp = b;
+    }
+  }
   for (const k of ['skipped', 'failed', 'refused']) if (header[k] && !Object.keys(header[k]).length) delete header[k];
   const bytes = encodeLwm(header, blobs);
   /* read back through the reader the app uses: every rung validates and opens through chem.open, 0 solver calls, its own energy */
@@ -362,9 +379,27 @@ if (T) {
     flush();
   });
   plan.forEach((p, i) => Object.assign(p, { id: 'vol-' + (i + 1), numeral: roman(i + 1), title: p.theme.title + (p.part > 1 ? ' · ' + p.part : ''), blurb: p.theme.blurb || BLURB }));
+} else if (MAX_BYTES) {
+  /* THE CUT (iteration 014 C4; Josh: volumes of 5–5.5 GB, VOL. II filled partially now with a WIP label, indexes versioned, payloads
+     immutable): a molecule already shelved in a vol-<n>/ of the out dir STAYS there (a full volume never loses or reshuffles one); every new
+     molecule, in the catalogue's order, goes to the LAST volume shelved (never back into a released one) while it has room under --max-gb
+     (.lwm + picture), then a new volume opens.  With --wip the LAST volume — the one still filling — says so (`wip: true` in its index and its shelf entry). */
+  const base = +(VOL.match(/^vol-(\d+)$/) || [0, 1])[1], vols = [], sizeOf = (r, v) => { const th = findKept(v, 't', r.id + '.webp'); return r.bytes.length + (th ? readFileSync(th).length : 0); };
+  const home = (id) => { for (const d of LOOK) { if (!existsSync(d)) continue; for (const v of readdirSync(d).filter((e) => /^vol-\d+$/.test(e)).sort((a, b) => +a.slice(4) - +b.slice(4))) if (+v.slice(4) >= base && existsSync(path.join(d, v, 'm', id + '.lwm'))) return +v.slice(4) - base; } return -1; };
+  const volAt = (k) => (vols[k] ||= { members: [], size: 0 });
+  const fresh = [];
+  for (const r of packed) { const k = home(r.id); if (k < 0) { fresh.push(r); continue; } const v = volAt(k); v.members.push(r); v.size += sizeOf(r, 'vol-' + (base + k)); }
+  let k = Math.max(0, vols.length - 1);                            // the last volume already shelved: a released (earlier) one is never refilled
+  for (const r of fresh) { for (;; k++) { const v = volAt(k), b = sizeOf(r, 'vol-' + (base + k)); if (!v.members.length || v.size + b <= MAX_BYTES) { v.members.push(r); v.size += b; break; } } }
+  plan = vols.map((v, k) => ({ id: 'vol-' + (base + k), numeral: roman(base + k), title: k ? TITLE.replace(/\s*·\s*\d+$/, '') + ' · ' + (k + 1) : TITLE, blurb: BLURB,
+    members: v.members.sort((a, b) => a.order - b.order), ...(WIP && k === vols.length - 1 && vols.length > 1 ? { wip: true } : {}) }));
 } else plan = [{ id: VOL, numeral: NUMERAL, title: TITLE, blurb: BLURB, members: packed }];
 
 const entries = [], written = [];
+/* iteration 014 C2: a row's structural isomers (catalogue/isomers.py) that this run shelves — on any volume — ride in the index, so the
+   Picker's tile can wear its mark and open their deck; the bonds stay in the .lwm (header.meta.bonds, the candidate's own field) */
+const SHELVED = new Set(plan.flatMap((p) => p.members.map((r) => r.id)));
+const isomersOf = (M) => { const l = (M.isomers || []).filter((i) => SHELVED.has(i)); return l.length ? { isomers: l } : {}; };
 for (const p of plan) {
   const VDIR = path.join(DIST, p.id), rows = [], vreports = [];
   mkdirSync(path.join(VDIR, 'm'), { recursive: true });
@@ -375,22 +410,29 @@ for (const p of plan) {
     const thumbAt = path.join(VDIR, 't', id + '.webp'), th = findKept(p.id, 't', id + '.webp');
     if (th && path.resolve(th) !== thumbAt) { mkdirSync(path.dirname(thumbAt), { recursive: true }); copyFileSync(th, thumbAt); }
     const M = r.header.meta;
-    rows.push({ id, name: M.name, formula: M.formula, formulaM: M.formulaM, charge: M.charge, heavy: M.heavy, tags: M.tags || [], cid: M.cid || null, inchikey: M.inchikey || null,
+    rows.push({ id, name: M.name, formula: M.formula, formulaM: M.formulaM, charge: M.charge, heavy: M.heavy, tags: M.tags || [], ...(M.geo && M.geo.length ? { geo: M.geo } : {}), cid: M.cid || null, inchikey: M.inchikey || null,
       mw: M.mw != null ? M.mw : M.mass, pg: M.pointGroup || null, file: 'm/' + id + '.lwm', bytes: r.bytes.length, sha256: sha(r.bytes),
       thumb: existsSync(thumbAt) ? 't/' + id + '.webp' : null,
       rungs: Object.fromEntries(Object.entries(r.header.rungs).map(([b, g]) => [b, { E: g.record.ground.energy, nAO: g.record.ground.nAO, gapEv: g.record.stem.gapEv }])),
-      ...(r.header.skipped ? { skipped: Object.keys(r.header.skipped) } : {}), ...(r.header.failed ? { failed: Object.keys(r.header.failed) } : {}) });
+      ...(r.header.skipped ? { skipped: Object.keys(r.header.skipped) } : {}), ...(r.header.failed ? { failed: Object.keys(r.header.failed) } : {}),
+      ...isomersOf(M) });
     vreports.push(r.report); reports.push(r.report);
     console.log(`${p.id.padEnd(6)} ${id.padEnd(16)} ${String(M.heavy).padStart(3)} heavy · ${Object.keys(r.header.rungs).length} rungs · ${(r.bytes.length / 1024).toFixed(1)} KB (header ${(r.report.headerBytes / 1024).toFixed(1)} KB)`);
   }
   written.push({ dir: VDIR, reach: new Set(rows.flatMap((r) => [r.file, r.thumb].filter(Boolean))) });
   const stale = readdirSync(path.join(VDIR, 'm')).filter((f) => f.endsWith('.lwm') && !rows.some((r) => r.file === 'm/' + f));
-  const indexText = '{"schema":1,"id":' + JSON.stringify(p.id) + ',"numeral":' + JSON.stringify(p.numeral) + ',"title":' + JSON.stringify(p.title) + ',"bases":' + JSON.stringify(LADDER)
+  /* iteration 014 C4: EVERY index is versioned — `indexVersion` counts its changes (the old file's, + 1 when anything but the number moved; 1 for a
+     new one), so a reader can tell an index it holds from a newer one; a volume still filling carries `wip: true` */
+  const vText = (n) => '{"schema":1,"indexVersion":' + n + ',"id":' + JSON.stringify(p.id) + ',"numeral":' + JSON.stringify(p.numeral) + ',"title":' + JSON.stringify(p.title) + (p.wip ? ',"wip":true' : '') + ',"bases":' + JSON.stringify(LADDER)
     + ',"generator":' + JSON.stringify({ tool: 'tools/volumes/pack.mjs', commit: GENERATOR, format: 'THE VOLUME FORMAT v1 (lab/volumes-format.js)' }) + ',"molecules":[\n'
     + rows.map((r) => JSON.stringify(r)).join(',\n') + '\n]}\n';
+  const oldIdx = existsSync(path.join(VDIR, 'index.json')) ? readFileSync(path.join(VDIR, 'index.json'), 'utf8') : null;
+  const bare = (t) => { try { const o = JSON.parse(t); delete o.indexVersion; delete o.generator; return JSON.stringify(o); } catch (_) { return null; } };   // the packer's commit is not a change
+  const oldN = oldIdx ? +(JSON.parse(oldIdx).indexVersion || 0) : 0;
+  const indexVersion = oldN && bare(oldIdx) === bare(vText(oldN)) ? oldN : oldN + 1, indexText = vText(indexVersion);
   writeFileSync(path.join(VDIR, 'index.json'), indexText);
   const tags = {}; for (const r of rows) for (const t of r.tags) tags[t] = (tags[t] || 0) + 1;
-  const entry = { id: p.id, numeral: p.numeral, title: p.title, blurb: p.blurb, count: rows.length, bytes: rows.reduce((s, r) => s + r.bytes, 0), bases: LADDER,
+  const entry = { id: p.id, numeral: p.numeral, title: p.title, blurb: p.blurb, ...(p.wip ? { wip: true } : {}), indexVersion, count: rows.length, bytes: rows.reduce((s, r) => s + r.bytes, 0), bases: LADDER,
     tags: Object.fromEntries(Object.entries(tags).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))), index: p.id + '/index.json', indexSha256: sha(indexText),
     built: { generator: 'tools/volumes/pack.mjs', commit: GENERATOR } };
   if (ARCHIVE) { if (!FETCHABLE) delete entry.index; entry.archive = writeArchive(entry, rows, VDIR); }

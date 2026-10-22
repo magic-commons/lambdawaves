@@ -10,7 +10,7 @@
  * 0.5.0 A8 · THE CAMERA PORT (`port`, at the foot): the object MIR 1.5's CAMERA panel takes, and the notices it subscribes to.
  * 0.5.0 C1 · the panel is that window now, so the fifth edge, `ui` (the dials the law moved by hand), is gone: every change
  * the law makes is a notice, and the panel reads the port on the frame after it. */
-import { quatFromYawPitch, yawPitchFromQuat, turnFree } from './field.js';
+import { quatFromYawPitch, yawPitchFromQuat, turnFree, setParity } from './field.js';
 import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit quaternion, and it uses the lab's own rotor library
 
 /* ── THE CAMERA LAW (wave 50, W-CAMERA) ─────────────────────────────────────────────────────────────────────
@@ -75,7 +75,8 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
     setSpeed(v) { this.speed = v; this.wake(); return v; },
     setDist(v) { return setDist(v); }, setFov(v, c) { return setFov(v, c); }, reset() { resetView(); },
     zoomAt(c, v) { return zoomAt(c, v); }, setShift(x, y) { return setShift(x, y); }, panBy(du, dv) { return panBy(du, dv); },   // 0.4.0 S2
-    get lock() { return locked; }, setLock(v) { return setLock(v); },   // 0.5.3 M6: THE LOCK, read nested (__LW.camera.lock), so the facade's own members stay as they were
+    get lock() { return locked; }, setLock(v) { return setLock(v); },
+    get flip() { return flipped; }, setFlip(v) { return setFlip(v); },   // iteration 014 C2: FLIP, the view's parity (field.js setParity)   // 0.5.3 M6: THE LOCK, read nested (__LW.camera.lock), so the facade's own members stay as they were
   };
   const camTravel = { yaw: 0, pitch: 0 };     // the turn a drag has APPLIED, in the turntable's units — the FLING reads this in BOTH modes
   const camLevel = { from: null, to: null, t0: 0, ms: 150, yaw: 0, pitch: 0 };   // FREE → TURNTABLE levels the roll over 150 ms; it never snaps
@@ -190,7 +191,11 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
     obs.shift = [hx ? s[0] : c[0], hy ? s[1] : c[1]]; present(); return obs.shift;
   }
   const panBy = (du, dv) => { const s = obs.shift || CENTRE; return setShift(s[0] + du, s[1] + dv); };
-  function setLock(v) { locked = !!v; if (locked) obs.shift = [0, 0]; present(); return locked; }   // M6: engaged, PAN HOME raw — a routed axis keeps its base, its route is clamped
+  function setLock(v) { locked = !!v; if (locked) obs.shift = [0, 0]; present(); return locked; }
+  /* iteration 014 C2 · FLIP: the view's parity — the picture mirrored (a molecule seen as its enantiomer), a session's toggle, never saved; the
+     stage's drag turns the other way while it holds, so the picture still follows the hand (stage-gestures.js) */
+  let flipped = false;
+  function setFlip(v) { flipped = !!v; setParity(flipped); present(); return flipped; }   // M6: engaged, PAN HOME raw — a routed axis keeps its base, its route is clamped
   /** RESET VIEW (HOME, R, a double-click and a double-tap): the shipped pose and the motion with it —
       AUTO-ROTATE is a mode, not a pose, so the ambient drive is left exactly where the switch put it */
   function resetView() { const m = obs.mode; camLevel.from = null; Object.assign(obs, CAM.HOME); obs.mode = m; obs.quat = quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch); camera.stop(); present(); }   // wave 54: the pose is the same pose in either mode
@@ -206,7 +211,7 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
     yaw: [() => obs.yaw, (v) => modHand('observer.yaw', v) || turn(v - obs.yaw, 0)], pitch: [() => obs.pitch, (v) => modHand('observer.pitch', v) || turn(0, v - obs.pitch)],
     autoRotate: [() => camera.autoRotate, (v) => camera.setAutoRotate(v)], spin: [() => camera.speed, (v) => camera.setSpeed(v)],
     friction: [() => camera.friction, (v) => camera.setFriction(v)], drag: [() => camera.dragGain, (v) => camera.setDragGain(v)], fling: [() => camera.flingGain, (v) => camera.setFling(v)],
-    lock: [() => locked, setLock] };   // 0.5.3 M6: not in the kit's vocabulary, so the panel draws no control for it; the card's LOCK switch is λWAVES'
+    lock: [() => locked, setLock], flip: [() => flipped, setFlip] };   // 0.5.3 M6: not in the kit's vocabulary, so the panel draws no control for it; the card's LOCK switch is λWAVES'
   const pan = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
   const port = { angle: 'rad', get: (id) => (ROADS[id] ? ROADS[id][0]() : undefined), set(id, v) { if (ROADS[id]) ROADS[id][1](v); },
     subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }, notify: tell, turn, home: () => resetView(), setShift, zoomAt, panBy,

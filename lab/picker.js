@@ -343,7 +343,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        (the wheel turns it) · the search · SHOW LABELS (iteration 012 L1: INSTALL / REMOVE live on the shelf's card only) — and the deck below
        measures its tile from what is left */
     const vhead = el('div', 'mm-vhead', view), vdeck = deck(view);
-    let woke = false, cur = null, vols = [], mols = [], on = new Set(), query = '', tagsEl = null, countEl = null, vq = null, sortBtns = [];
+    let woke = false, cur = null, vols = [], mols = [], byId = new Map(), on = new Set(), query = '', tagsEl = null, countEl = null, vq = null, sortBtns = [];
     /* iteration 014 D1 · THE SORT: NAME (A–Z → Z–A → as-is) and MASS (heavy first → light first → as-is), one at a time; as-is is the index's own
        order and the buttons unpressed; kept for the Picker's life, never saved */
     const sort = { key: '', dir: 0 };
@@ -397,6 +397,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
          no caption under a hover (it repeated the card) */
       const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
       el('b', 'mm-vol-num', o, volName(v)); o.title = [v.title, v.blurb].filter(Boolean).join(' — ');
+      if (v.wip) { const w = el('span', 'mm-vol-wip', o, 'WIP'); w.title = 'Work in progress: this volume is still being filled — it installs now, and grows'; }   // iteration 014 C4 (pack.mjs --wip)
       const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
       if (meta) el('span', 'mm-vol-meta', o, meta);
       o.addEventListener('click', () => enter(v));
@@ -439,38 +440,64 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       labelToggle(vhead, 'molLabels');
       animate(view, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
       try { mols = (await V.index(v.id)).molecules; } catch (err) { mols = []; countEl.textContent = String(err && err.message || err); }
+      byId = new Map(mols.map((m) => [m.id, m])); isoEl.hidden = true;
       if (cur !== v) return;
       paintTags(); filter();
     }
     /* the tags: built once a volume and lit in place (the strip keeps where it was scrolled); two or more intersect, ALL clears them */
     function paintTags() {
-      /* iteration 012 L2: TWO rows in one sideways strip (the head's other controls sit between them in height); each tag in its count's order
-         goes to the row that is shorter so far, so both rows read most-common first and end together */
-      tagsEl.textContent = ''; const n = new Map(); for (const m of mols) for (const t of m.tags || []) n.set(t, (n.get(t) || 0) + 1);
-      const rows = [el('div', 'mm-tagrow', tagsEl), el('div', 'mm-tagrow', tagsEl)], len = [0, 0];
-      const chipOf = (id, label, count) => { const r = len[0] <= len[1] ? 0 : 1; len[r] += String(label).length + String(count).length + 4; const b = el('button', 'mm-tag', rows[r], label); b.type = 'button'; b.dataset.tag = id; el('i', '', b, count.toLocaleString('en'));
+      /* iteration 012 L2 · 014 C3: THREE rows in one sideways strip; each tag in its count's order goes to the row that is shortest so far, so
+         every row reads most-common first and they end together.  The chips are the index's words: `tags` (what it is) and `geo` (its shape,
+         catalogue/structure_tags.py THE SHAPE WORDS — linear · planar · strained · macrocycle · spiro · bridged · fused · polycyclic · …) */
+      tagsEl.textContent = ''; const n = new Map(); for (const m of mols) for (const t of wordsOf(m)) n.set(t, (n.get(t) || 0) + 1);
+      const rows = [0, 1, 2].map(() => el('div', 'mm-tagrow', tagsEl)), len = [0, 0, 0];
+      const chipOf = (id, label, count) => { const r = len.indexOf(Math.min(...len)); len[r] += String(label).length + String(count).length + 4; const b = el('button', 'mm-tag', rows[r], label); b.type = 'button'; b.dataset.tag = id; el('i', '', b, count.toLocaleString('en'));
         b.addEventListener('click', () => { if (id === '') on.clear(); else if (on.has(id)) on.delete(id); else on.add(id); markTags(); filter(); }); };
       chipOf('', 'all', mols.length);
       for (const [t, k] of [...n].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))) chipOf(t, t, k);
       markTags();
     }
     function markTags() { for (const b of tagsEl.querySelectorAll('.mm-tag')) { const isOn = b.dataset.tag ? on.has(b.dataset.tag) : !on.size; b.classList.toggle('on', isOn); b.setAttribute('aria-pressed', String(isOn)); } }
+    /* a volume's molecule as a tile; iteration 008 P: a ONE-ATOM entry (VOL. I's Fe · Kr · Zn · Cr · Ni · Ti, PubChem compounds) is an atom: it
+       opens the ATOMS road, wearing its element's own picture; past the ATOM system's reach it still opens from the volume.  ISOMERS (iteration
+       014 C2): a molecule whose structural isomers (the index's `isomers`, same formula, another connectivity) are in this volume wears a corner
+       mark with their count, and its press opens THE ISOMER DECK — the same tiles, the same hue and style — instead of loading at once */
+    function molTile(host, m, deep) {
+      const z = atomZ(m.formula), atom = z && ATOMS.some((a) => a.Z === z) ? z : 0, isos = deep && !atom ? isomersIn(m) : [];
+      const t = tile(host, 'mm-mol', { formula: m.formulaM ? mathPlain(m.formulaM) : m.formula, name: cap(m.name), sub: atom ? volName(cur) + ' · one atom: it opens in ATOMS' : [volName(cur), ...(m.tags || []), isos.length ? (isos.length + 1) + ' isomers' : ''].filter(Boolean).join(' · ') },
+        () => { if (atom) goAtom(atom); else if (isos.length) openIsomers(m, isos); else { isoEl.hidden = true; goVolume(cur, m); } });
+      el('b', 'mm-lbl', t, m.formulaM ? mathPlain(m.formulaM) : m.formula);
+      if (isos.length) { const k = el('span', 'mm-iso', t, String(isos.length + 1)); k.title = (isos.length + 1) + ' structural isomers in ' + volName(cur); }
+      if (atom) { pic(t, './img/menu/el-' + SYM[atom - 1] + '.webp'); return t; }
+      const i = pic(t, null), ph = () => { i.remove(); el('b', 'mm-ph', t, m.formulaM ? mathPlain(m.formulaM) : m.formula); };   // no picture yet: the formula holds the square
+      if (!m.thumb) ph(); else V.picture(cur.id, m.id).then((u) => { if (u) { develop(i); i.src = u; } else ph(); }, ph);
+      return t;
+    }
+    const wordsOf = (m) => (m.geo ? [...(m.tags || []), ...m.geo] : m.tags || []);   // C3: a molecule's chips, what it is and its shape
+    const isomersIn = (m) => (m.isomers || []).map((id) => byId.get(id)).filter(Boolean);
+    /* THE ISOMER DECK: over the volume's deck, the molecule and its isomers (the catalogue's order); a press opens one, ×, Escape or a press on
+       the ground puts it away */
+    const isoEl = el('div', 'mm-isos', view); isoEl.hidden = true; isoEl.setAttribute('role', 'dialog');
+    const isoHead = el('div', 'mm-isohead', isoEl), isoGrid = el('div', 'mm-isogrid', isoEl);
+    const closeIsomers = () => { if (isoEl.hidden) return; isoEl.hidden = true; const f = vdeck.tiles.find((x) => x.dataset.iso === isoEl.dataset.of); if (f) f.focus({ preventScroll: true }); };
+    isoEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeIsomers(); } });
+    isoEl.addEventListener('click', (e) => { if (e.target === isoEl) closeIsomers(); });
+    function openIsomers(m, isos) {
+      isoHead.textContent = ''; isoGrid.textContent = ''; isoEl.dataset.of = m.id;
+      el('b', 'mm-isof', isoHead, m.formulaM ? mathPlain(m.formulaM) : m.formula); el('span', 'mm-isocount', isoHead, (isos.length + 1) + ' isomers');
+      const x = el('button', 'mm-back mm-isox', isoHead); x.type = 'button'; x.setAttribute('aria-label', 'close the isomers'); x.textContent = '×'; x.addEventListener('click', closeIsomers);
+      isoGrid.style.setProperty('--n', String(isos.length + 1));
+      for (const y of [m, ...isos]) { const t = molTile(isoGrid, y, false); if (y === m) t.classList.add('here'); }
+      const pager = view.querySelector('.mm-pager'); if (pager) isoEl.style.top = pager.offsetTop + 'px';   // over the deck, never the head (its tag rows set its height)
+      isoEl.hidden = false; enterTiles([...isoGrid.children]);
+      const first = isoGrid.firstElementChild; if (first) first.focus({ preventScroll: true });
+    }
     function filter() {
-      const list = sorted(mols.filter((m) => [...on].every((t) => (m.tags || []).includes(t))
-        && (!query || [m.name, m.formula, m.id, ...(m.tags || [])].some((s) => s && String(s).toLowerCase().includes(query)))));
+      const list = sorted(mols.filter((m) => [...on].every((t) => wordsOf(m).includes(t))
+        && (!query || [m.name, m.formula, m.id, ...wordsOf(m)].some((s) => s && String(s).toLowerCase().includes(query)))));
       countEl.textContent = list.length === mols.length ? mols.length.toLocaleString('en') : list.length.toLocaleString('en') + ' / ' + mols.length.toLocaleString('en');
       countEl.title = (on.size ? [...on].join(' + ') : query ? '“' + query + '”' : 'all') + ' · ' + list.length.toLocaleString('en') + ' molecules';
-      vdeck.set(list, (m, host) => {
-        /* iteration 008 P: a ONE-ATOM entry (VOL. I's Fe · Kr · Zn · Cr · Ni · Ti, PubChem compounds) is an atom: it opens the ATOMS road, wearing its
-           element's own picture; past the ATOM system's reach it still opens from the volume */
-        const z = atomZ(m.formula), atom = z && ATOMS.some((a) => a.Z === z) ? z : 0;
-        const t = tile(host, 'mm-mol', { formula: m.formulaM ? mathPlain(m.formulaM) : m.formula, name: cap(m.name), sub: atom ? volName(cur) + ' · one atom: it opens in ATOMS' : [volName(cur), ...(m.tags || [])].join(' · ') },
-          () => (atom ? goAtom(atom) : goVolume(cur, m)));
-        el('b', 'mm-lbl', t, m.formulaM ? mathPlain(m.formulaM) : m.formula);
-        if (atom) { pic(t, './img/menu/el-' + SYM[atom - 1] + '.webp'); return; }
-        const i = pic(t, null), ph = () => { i.remove(); el('b', 'mm-ph', t, m.formulaM ? mathPlain(m.formulaM) : m.formula); };   // no picture yet: the formula holds the square
-        if (!m.thumb) ph(); else V.picture(cur.id, m.id).then((u) => { if (u) { develop(i); i.src = u; } else ph(); }, ph);
-      });
+      vdeck.set(list, (m, host) => { const t = molTile(host, m, true); t.dataset.iso = m.id; return t; });
       enterTiles(vdeck.tiles);   // iteration 012 L2: a tag or a search deals the page in (animate() stands down under reduced motion)
     }
     return { wake() { if (!woke) { woke = true; paintCat(); paintShelf(); } }, paintDevice, home() { if (cur) paintShelf(); } };

@@ -1,0 +1,129 @@
+{
+ "adopted": [
+  "linear",
+  "planar",
+  "strained",
+  "macrocycle",
+  "spiro",
+  "bridged",
+  "fused",
+  "organometallic",
+  "zwitterion",
+  "chiral",
+  "polycyclic"
+ ],
+ "rules": {
+  "linear": "every atom within 0.05 Å RMS of one line through the row's own atoms (≥ 2 atoms)",
+  "planar": "not linear, ≥ 3 atoms, every atom (H too) within 0.10 Å RMS of one plane through the row's own atoms",
+  "strained": "a ring of 3 or 4 atoms (RDKit SSSR)",
+  "macrocycle": "a ring of 12 atoms or more (RDKit SSSR)",
+  "spiro": "a spiro atom (rdMolDescriptors.CalcNumSpiroAtoms > 0)",
+  "bridged": "a bridgehead atom (rdMolDescriptors.CalcNumBridgeheadAtoms > 0)",
+  "fused": "two SSSR rings that share exactly one bond (two atoms)",
+  "organometallic": "a metal (METALS) bonded to carbon in the row's own atoms (DetermineConnectivity)",
+  "zwitterion": "net charge 0 with a formal + and a formal − on its atoms, a nitro group's N⁺/O⁻ not counted",
+  "chiral": "a stereocentre the SMILES marks (@ / @@), FindMolChiralCenters without the unassigned",
+  "polycyclic": "three rings or more (RDKit SSSR)"
+ },
+ "notAdopted": [],
+ "extraWords (wait for Josh)": {
+  "cage": "a polyhedral framework in which atoms form several faces (cubane, adamantane, C60); proposed for browsing, not used in rows"
+ },
+ "rows": 29509,
+ "perWord": {
+  "linear": 136,
+  "planar": 1054,
+  "strained": 1663,
+  "macrocycle": 634,
+  "spiro": 1277,
+  "bridged": 1793,
+  "fused": 12639,
+  "organometallic": 29,
+  "zwitterion": 495,
+  "chiral": 13312,
+  "polycyclic": 13704
+ },
+ "agreementOnTheSample": {
+  "linear": {
+   "both": 22,
+   "modelOnly": 0,
+   "rdkitOnly": 0
+  },
+  "planar": {
+   "both": 29,
+   "modelOnly": 8,
+   "rdkitOnly": 1
+  },
+  "strained": {
+   "both": 29,
+   "modelOnly": 0,
+   "rdkitOnly": 2
+  },
+  "macrocycle": {
+   "both": 11,
+   "modelOnly": 0,
+   "rdkitOnly": 0
+  },
+  "spiro": {
+   "both": 4,
+   "modelOnly": 0,
+   "rdkitOnly": 8
+  },
+  "bridged": {
+   "both": 16,
+   "modelOnly": 0,
+   "rdkitOnly": 3
+  },
+  "fused": {
+   "both": 137,
+   "modelOnly": 0,
+   "rdkitOnly": 3
+  },
+  "organometallic": {
+   "both": 3,
+   "modelOnly": 0,
+   "rdkitOnly": 0
+  },
+  "zwitterion": {
+   "both": 6,
+   "modelOnly": 0,
+   "rdkitOnly": 8
+  },
+  "chiral": {
+   "both": 162,
+   "modelOnly": 0,
+   "rdkitOnly": 0
+  },
+  "polycyclic": {
+   "both": 148,
+   "modelOnly": 0,
+   "rdkitOnly": 1
+  }
+ },
+ "waiting (the model said it, RDKit did not)": {
+  "cytosine": [
+   "planar"
+  ],
+  "guanine": [
+   "planar"
+  ],
+  "salicylic-acid": [
+   "planar"
+  ],
+  "isoniazid": [
+   "planar"
+  ],
+  "hydroxycarbamide": [
+   "planar"
+  ],
+  "hydralazine": [
+   "planar"
+  ],
+  "amiloride": [
+   "planar"
+  ],
+  "2-amino-3-carboxymuconate-semialdehyde": [
+   "planar"
+  ]
+ }
+}

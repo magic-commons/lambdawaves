@@ -73,6 +73,7 @@ import geom as G
 import guards as GU
 import curated as CUR
 import structure_tags as ST
+import isomers as ISO
 from app_tags import APP, APP_REFUSED
 from rdkit import Chem, RDLogger
 from rdkit.Chem import rdMolDescriptors as RD
@@ -1092,6 +1093,10 @@ def tier(e):
 rows.sort(key=lambda er: (tier(er[0]), 0 if er[0]['app'] or er[0].get('recognisable', True) else 1, -(score(er[0]) // 10), er[1]['heavy'], er[1]['name'].lower()))
 for i, (e, row) in enumerate(rows): row['priority'] = i
 molecules = [row for _, row in rows]
+ISOMERS = ISO.annotate(molecules)                                   # iteration 014 C2: isomers (formula + InChIKey first block) and bonds (RDKit)
+log(f'isomers and bonds: {ISOMERS}')
+GEO_COUNTS = ST.annotate_geo(molecules)                            # iteration 014 C3: the shape words RDKit decides (row['geo'])
+log(f'shape words: {GEO_COUNTS}')
 
 # ── 12. WRITE ────────────────────────────────────────────────────────────────────────────────────────────────────────
 SOURCES = [
@@ -1191,6 +1196,8 @@ stats = {
  # iteration 006 C5: what the tags are made of — every word each row EARNED (structure_tags.raw_tags), the words a class word
  # SUBSUMED (an amino acid's acid and amine …), the words the four-tag cap then CUT, which source gave each kept class word, and where
  # each row's structure was read
+ 'isomersAndBonds': ISOMERS,   # iteration 014 C2 (isomers.py)
+ 'geoWords': GEO_COUNTS, 'geoRules': ST.GEO_RULES,   # iteration 014 C3 (structure_tags.py THE SHAPE WORDS)
  'tagRule': 'iteration 006 C5 (Josh: structure or class) — tools/volumes/catalogue/structure_tags.py',
  'tagEarned': dict(TAG_EARNED.most_common()), 'tagSubsumed': dict(TAG_SUBSUMED.most_common()), 'tagCapCut': dict(CAP_CUT.most_common()),
  'tagClassFrom': {w: {s: TAG_FROM[(w, s)] for s in ('ChEBI', 'structure') if TAG_FROM[(w, s)]} for w in VOCAB if w in ST.CHEBI_WORDS},

@@ -30,7 +30,7 @@ import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; imp
 import { fetchRecord, installed, removeRecord, persistOnce, keepSection, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
 import { planePoints } from './slice.js';   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
-import * as V from './volumes.js'; import { parseLwm, rungRecord } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
+import * as V from './volumes.js'; import { parseLwm, rungRecord, espOf } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -688,7 +688,9 @@ export function createChem(host, api) {
       if (!r || r.refused || r.error || !Number.isFinite(r.energy)) { sol = null; status(`${volName(v)} at ${BASIS_LABEL[basis]} did not open: ` + ((r && (r.refused || r.error)) || 'no answer'), 'warn'); refresh(); tell(); notify(); return null; }
       r.opened = { bytes: v.bytes, from: v.from }; r.stem = lib.stem || null; r.volume = { volume: v.volume, id: v.id, numeral: v.numeral };
       try { r.mulliken = Array.from(v.lwm.blob(basis, 'mulliken')); } catch (_) { r.mulliken = null; }   // iteration 014 D6: the rung's Mulliken charges, for BALL AND STICK's IONIC
-      r.bonds = Array.isArray(v.bonds) ? v.bonds : null;   // iteration 014 D6: a record's bonds [[i, j, order]] (chain C's pack day), else the length rule
+      if (v.esp === undefined) v.esp = espOf(v.lwm);   // iteration 014 C1: the file's potential grid ({ n, box, f16, basis … }) or null — the live Poisson is the fallback
+      r.esp = v.esp;
+      r.bonds = Array.isArray(v.meta && v.meta.bonds) ? v.meta.bonds : Array.isArray(v.bonds) ? v.bonds : null;   // iteration 014 C2 / D6: [[i, j, order]] from the file's meta (a C2 pack day), else the index row, else null: the length rule
       const fill = () => { r.key = key; r.seq = seq; r.note = v.note; v.note = null;
         r.identity = MS ? MS.identityOf({ atoms: v.atoms, basisHash: r.hash, charge: v.charge, multiplicity: 1, model: 'RHF' }) : null; land(r); };
       if (api.derived) api.derived(fill); else fill();

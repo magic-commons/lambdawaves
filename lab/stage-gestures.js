@@ -99,7 +99,7 @@ export function bindStageGestures(canvas, {
     if (points.size === 1) {
       if (fine !== e[FINE]) { fine = e[FINE]; history.length = 0; }
       const gain = law.SENS * camera.dragGain * (fine ? law.FINE : 1);
-      orbitBy(-(e.clientX - p.x) * gain, (e.clientY - p.y) * gain);
+      orbitBy(-(e.clientX - p.x) * gain * (camera.flip ? -1 : 1), (e.clientY - p.y) * gain);   // iteration 014 C2: a FLIPPED view turns the other way, so it follows the hand
       remember();
     }
     const c0 = pinch && centroid();
