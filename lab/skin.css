@@ -892,6 +892,18 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
 body.frost .mir-win.mir-timeline, body.frost .mir-timeline .tl-pane { -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.frost:not(.phone):not(.frost-hold) #menubar .mb-list { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
 body .mir-modwindow .m2pick { background-color: hsl(var(--glass-tint) / .94); }   /* a colour, not the sheen pair: the sheen is `transparent` here and a colour in a non-final background layer voids the whole declaration */
+/* iteration 014 A5 · THE SLAB GOES (Josh: "the frosted slab under λWAVES' timeline goes (BASINS' is clean)"): measured, the milky slab was the
+   window's own fill — the refractive `.glass` frost's rgba(255,255,255,.1) beating the kit's `--tl-win-fill: transparent` (layered) — so the
+   window is clear again, as BASINS draws it; its panes (toolbar, work bar, ruler, lanes) keep their glass. */
+body .mir-win.glass.mir-timeline { background: transparent; }
+/* …and its work bar wears the kit's face: λWAVES' strip rules (`.tbtn`, `.tbtn.play`, `.mod-exp`, lab.css) are unlayered and beat the kit's
+   layered work-bar look, so inside the timeline's bar they step back to the layers (BASINS' bar, exactly). */
+body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: revert-layer; }
+/* its readout is t in BASINS' readout seat and face (basins.css `.transport-decade`: the math face, 28 px, no box, never a target) */
+.mir-timeline .tl-transport .ro.time { display: inline-flex; flex-direction: row; width: auto; min-width: 0; max-width: none; overflow: visible; align-items: baseline; gap: 5px; padding: 0 5px; flex: 0 0 auto; white-space: nowrap; pointer-events: none; }
+.mir-timeline .tl-transport .ro.time .ro-lbl { display: inline; font: italic 400 18px/1 var(--font-math); letter-spacing: 0; text-transform: none; color: var(--fg-soft); }
+.mir-timeline .tl-transport .ro.time .ro-val { width: auto; max-width: none; overflow: visible; font: 400 26px/1 var(--font-math); letter-spacing: -.02em; font-variant-numeric: lining-nums tabular-nums; color: var(--fg); }
+.mir-timeline .tl-transport .ro.time .ro-sub { display: none; }
 
 /* ═══ iteration 012 R3 · WAVE · CAMERA · PALETTE ═══ */
 /* CAMERA: the sphere drawn bigger beside its knob column (YAW · PITCH · ZOOM · FOV, material.js).  The kit's drawing is 400 × 280 with the ball

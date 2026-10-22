@@ -554,7 +554,7 @@ export async function boot(dom) {
        the EXPAND lamp, which is the one thing that must be painted whether the window is open or not. */
     if (app.state.modHost) {
       if (!app.state.uiHidden && app.state.modView && app.state.modView.isOpen) app.state.modView.paint(false);
-      if (!app.state.uiHidden && app.state.tl && app.state.tl.isOpen()) app.state.tl.paintHead();   // 0.5.0 C7b: the playhead paints from the one present (TIMELINE.md: no tick of its own)
+      if (!app.state.uiHidden && app.state.tl && app.state.tl.isOpen()) { app.state.tl.paintHead(); ui.tlTime.paint(nowMs); }   // 0.5.0 C7b: the playhead paints from the one present (TIMELINE.md: no tick of its own)
       const on = app.state.modHost.clock.isRunning();
       if (on !== app.state.modExpOn) { app.state.modExpOn = on; if (ui.modExp) ui.modExp.classList.toggle('live', on); }
     }

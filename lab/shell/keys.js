@@ -3,7 +3,7 @@
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
 import { TIER } from '../rack.js'; import { VIEW, VIEW_NAMES, WAVE_VIEWS, STYLE, drawStyle } from '../field.js'; import { CAM } from '../camera-law.js'; import { STAGE_BINDINGS } from '../stage-gestures.js';
 import { createKeyTable } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
-import { infoActions } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js';
+import { infoActions } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout } from '../mir/kit.js';
 export function createKeys(app) {
   const { dom, ui, reg, clock, appPlay, obs, mat, settingsStore } = app, { schedule } = app.loop, { floats, panBy, queueKeyOrbit, rack, rackL, resetView, setDist, setFov } = app.host;
   const { barLock, devById, layout, readSettings, rk, setModArm, togglePlay, transport } = app.sh, { particles, shadowView, toggleFullscreen, wState } = app.w;
@@ -161,10 +161,20 @@ export function createKeys(app) {
      (presentation.timeline) with its own undo; λWAVES' pill stays the one transport (R9), the window a WORKSPACE record (`tlwin`) that
      ships closed (R1).  Its rows join the ONE KEY TABLE; its UNDO / REDO are the two rows added below it. */
   if (app.state.modHost && app.state.modView) {
+    /* iteration 014 A5 · THE WORK BAR (Josh: "the timeline should now have the basic tempo, play/pause button and the likes for a 'work bar'"):
+       the kit's own work-bar transport (timeline/window.js, BASINS' TIMELINE_TRANSPORT less the dock) — play is THE play, power the MOD
+       bypass, the BPM pill the one tempo model, ⏮ the beat to 0, the door the modulation window — with λWAVES' t as its readout.  It is
+       its own bar: λWAVES' stage strip stays where it is.  The readout paints with the playhead (rack.js loop: 5 Hz playing, every paused
+       present; `set` writes only a changed string). */
+    const tlRo = readout({ label: 't', value: '0.00', cls: 'time' }); let tlWall = 0;
+    ui.tlTime = { root: tlRo.root, paint(now) { const on = clock.playing; if (on && now - tlWall < 200) return; tlWall = now; const t = clock.t;
+      tlRo.set(Math.abs(t) < 1e5 ? t.toFixed(2) : t.toExponential(2).replace('e+', 'e'), on ? 'live' : ''); } };
     app.state.tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'),
       mod: { host: app.state.modHost, registry: app.state.modHost.registry, armed: () => app.state.modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => app.state.modView.setTimeline(x),
+        isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => layout.modulation && layout.modulation.toggle(), persist: () => ui.saveNative && ui.saveNative(),   // A5: the work bar's door and tempo
         play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
-      dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, transport: false, audio: false,
+      dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, audio: false,
+      transport: { layout: [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'app:readout', 'rewind'] }, 'door'], nodes: { readout: tlRo.root } },
       store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },
       busy: () => app.state.capApi.busy, moved: (r) => app.state.dodge(r, 'tl'), onWindow: () => occlusion.dirty(),
       /* iteration 004 · MIR OPTIONS › SAMPLING › SCRUB is how a ruler drag seeks (BASINS shell.js: the kit's controller reads it at each
