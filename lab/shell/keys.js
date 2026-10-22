@@ -167,14 +167,16 @@ export function createKeys(app) {
        its own bar: λWAVES' stage strip stays where it is.  The readout paints with the playhead (rack.js loop: 5 Hz playing, every paused
        present; `set` writes only a changed string). */
     const tlRo = readout({ label: 't', value: '0.00', cls: 'time' }); let tlWall = 0;
-    ui.tlTime = { root: tlRo.root, paint(now) { const on = clock.playing; if (on && now - tlWall < 200) return; tlWall = now; const t = clock.t;
-      tlRo.set(Math.abs(t) < 1e5 ? t.toFixed(2) : t.toExponential(2).replace('e+', 'e'), on ? 'live' : ''); } };
+    const compact = (v, at, d) => (Math.abs(v) < at ? v.toFixed(d) : v.toExponential(d).replace('e+', 'e'));   // the stage strip's clockText form (A9: with the lap)
+    ui.tlTime = { root: tlRo.root, paint(now) { const on = clock.playing; if (on && now - tlWall < 200) return; tlWall = now; const t = clock.t, lap = Math.floor(t / clock.window);
+      tlRo.set(compact(t, 1e5, 2) + (lap ? '  (' + compact(lap, 1e4, 1) + ')' : ''), on ? 'live' : ''); } };
     app.state.tl = installTimeline({ mount: floats, present: () => schedule(TIER.PRESENT), say: (m) => wState.setStatus(m, 'warn'),
       mod: { host: app.state.modHost, registry: app.state.modHost.registry, armed: () => app.state.modArm, arm: (on) => setModArm(!!on), onPlay: appPlay.onChange, setTimeline: (x) => app.state.modView.setTimeline(x),
         isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => layout.modulation && layout.modulation.toggle(), persist: () => ui.saveNative && ui.saveNative(),   // A5: the work bar's door and tempo
         play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
       dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, audio: false,
-      transport: { layout: [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'app:readout', 'rewind'] }, 'door'], nodes: { readout: tlRo.root } },
+      transport: { layout: [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'app:readout', 'rewind'] }, 'door'], nodes: { readout: tlRo.root },
+        door: 'icon', doorIcon: new URL('../img/icons/modulation.svg', import.meta.url).href },   // A9: the modulation window's own icon, no MIR logo (Josh 10-22)
       store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },
       busy: () => app.state.capApi.busy, moved: (r) => app.state.dodge(r, 'tl'), onWindow: () => occlusion.dirty(),
       /* iteration 004 · MIR OPTIONS › SAMPLING › SCRUB is how a ruler drag seeks (BASINS shell.js: the kit's controller reads it at each

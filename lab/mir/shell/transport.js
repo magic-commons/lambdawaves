@@ -292,10 +292,16 @@ export function modPower({ mod, word = '', signal } = {}) {
  *  while a mouse hovers it (wordmark.js createMirDiamond); `mark: 'mark'` seats the nine squares the accent paints
  *  (λWAVES).  A press opens or closes the window; in a work bar (`work()` true) with `onSwitch`, it SWITCHES to the
  *  modulation workspace instead (BASINS: the timeline's MIR button swaps to MODULATION).  `aria-expanded` says which. */
-export function modDoor({ mod, mark = 'palette', onSwitch = null, work = () => false, signal } = {}) {
-  const life = lifeOf(signal), root = el('button', 'mod-exp mod-logo'); root.type = 'button';
+export function modDoor({ mod, mark = 'palette', icon = null, onSwitch = null, work = () => false, signal } = {}) {
+  /* mark 'icon' (1.5.0-alpha.25, from λWAVES; Josh: "remove anything with the MIR logo and have proper icons for it"): the app's own glyph,
+     `icon` an svg string or a url, drawn as a CSS mask in the ink (`.mod-door-icon`, transport.css); the diamond and the mark stay */
+  const life = lifeOf(signal), root = el('button', mark === 'icon' ? 'mod-exp mod-door' : 'mod-exp mod-logo'); root.type = 'button';
   let diamond = null;
-  if (typeof document !== 'undefined') { if (mark === 'mark') root.appendChild(markSvg()); else diamond = createMirDiamond(root); }
+  if (typeof document !== 'undefined') {
+    if (mark === 'icon') { const s = String(icon || ''), g = el('span', 'mod-door-icon', root); g.setAttribute('aria-hidden', 'true');
+      g.style.setProperty('--door-icon', 'url("' + (s.trim().startsWith('<') ? 'data:image/svg+xml,' + encodeURIComponent(s) : s) + '")'); }
+    else if (mark === 'mark') root.appendChild(markSvg()); else diamond = createMirDiamond(root);
+  }
   ariaLabel(root, 'Open the modulation window'); root.title = 'Open the modulation window'; root.setAttribute('aria-expanded', 'false');
   root.dataset.keyAction = 'modulation';   // its key is the table's (keys.hints), never typed (W19 K2)
   function sync() { setAttr(root, 'aria-expanded', String(isOpenOf(mod))); }
@@ -601,14 +607,15 @@ export const transportDock = (R) => dockOf(R);
  *    model, setBpm, persist   the tempo (createTempo)
  *    bar         'float' (default: on the stage) or 'work' (inside a work bar: the to-start, send-to-rack and logo seats
  *                take the bar's own button face, 34 px with radius 8, and the bar's padding is 3 px — BASINS' timeline)
- *    door        'palette' (default, BASINS: the MIR palette diamond that cycles under a mouse) or 'mark' (λWAVES)
+ *    door        'palette' (default, BASINS: the MIR palette diamond that cycles under a mouse), 'mark' (λWAVES) or 'icon' with
+ *    doorIcon    an svg string or a url: the app's own glyph, a CSS mask in the ink (1.5.0-alpha.25)
  *    onSwitch    in a work bar the door switches to the modulation workspace (BASINS): window/workspaces.js `show('upper')`
  *    macros      false leaves the macro rail out of the tempo panel (default true when there is a `mod`)
  *    openers, rack, keys, store, key, opener, onRefused, onInterface, host, root, id — as in docs/TRANSPORT.md
  *  The api's mountIn(host | null) moves the one bar into a work lane and back (docs/TRANSPORT.md "The one bar that moves"). */
 export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = globalThis.document && document.body, root = null, id = 'transport',
   clock = null, mod = null, model = MOD, setBpm = null, persist = null, openers = [], rack = null, keys = null, store = null,
-  key = 'mir.transport', opener = true, onRefused = null, onInterface = null, bar: barKind = 'float', door: doorMark = 'palette',
+  key = 'mir.transport', opener = true, onRefused = null, onInterface = null, bar: barKind = 'float', door: doorMark = 'palette', doorIcon = null,
   onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true, places = null, onDock = null } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView, body = doc.body;
   const life = new AbortController(), on = { signal: life.signal }, signal = life.signal;
@@ -633,7 +640,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     switch (name) {
       case 'play': return one(playPart);
       case 'power': return one(modPower({ mod, word: powerWord, signal }));
-      case 'door': return one(modDoor({ mod, mark: doorMark, onSwitch, work: () => placement === 'work', signal }));
+      case 'door': return one(modDoor({ mod, mark: doorMark, icon: doorIcon, onSwitch, work: () => placement === 'work', signal }));
       case 'tempo': return one(pillPart());
       case 'panel': return panelPart().root;
       case 'tap': return one(tapButton({ tempo, signal }));

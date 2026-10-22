@@ -4,6 +4,10 @@
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
+- **THE DOOR'S ICON** (014 A9): `modDoor({ mark: 'icon', icon })` / `createTransport({ door: 'icon', doorIcon })` draw the app's own glyph (an
+  svg string or a url) as a CSS mask in the ink (`.mod-door-icon`); the timeline's work bar passes `transport.door` / `doorIcon` through.
+  `shell/transport.js`, `shell/transport.css`, `timeline/window.js`. Why: Josh, "remove anything with the MIR logo and have proper icons for it";
+  the diamond and the mark stay (the MIR Logo Button).
 - **THE SCROLL PILL** (014 A6): while a rack scrolls and 900 ms after (one timeout), each docked window's name in a solid accent pill beside
   its title bar, revealed by a clip-path mask, ink by luminance; `scrolling` on the rack and its track lifts the thumb.
   `shell/rack-scrollbar.js` (`createRackPills`, `inkOn`, `PILL`), `shell/rack.js` (made with every rack), `shell/rack.css`, `shell/gui.js`

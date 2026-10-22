@@ -126,6 +126,8 @@
 }
 .mir-transport :is(.dock-btn, .mod-exp) > svg { width: var(--xport-glyph); height: var(--xport-glyph); filter: var(--xport-glyph-lift); }
 .mir-transport .mod-exp > svg.mark { width: 16px; height: 16px; }
+.mir-transport .mod-exp > .mod-door-icon { display: block; width: var(--xport-door-icon, 18px); height: var(--xport-door-icon, 18px); margin: auto; background: currentColor;
+  -webkit-mask: var(--door-icon) center / contain no-repeat; mask: var(--door-icon) center / contain no-repeat; }   /* door: 'icon' (alpha.25) */
 .mir-transport :is(.dock-btn, .mod-exp, .tbtn.transport-home):hover { color: var(--fg); }
 .mir-transport :is(.dock-btn, .mod-exp, .tbtn.transport-home):active { background: var(--state-press, var(--glass-press)); }
 
