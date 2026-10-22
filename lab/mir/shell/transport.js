@@ -262,10 +262,10 @@ export function playButton({ clock, onRefused = null, signal } = {}) {
 /** modPower({ mod }) — MODULATION'S POWER (BASINS transport-controls.js `mountModulationPower`: the ring-and-stem
  *  glyph with its halo; ON, the ring closes and lights in accent B).  A press powers modulation on or off — BASINS'
  *  `controller.toggleModulation()` → `mod.arm(!mod.armed())` — and never plays or pauses anything. */
-export function modPower({ mod, signal } = {}) {
+export function modPower({ mod, word = '', signal } = {}) {
   const life = lifeOf(signal), root = tbtn('modb mir-mod-power');
-  root.dataset.face = 'power';
-  root.innerHTML = glyphSvg('power', 'mir-power-icon', 28);
+  root.dataset.face = word ? 'word' : 'power';
+  if (word) label(root, word); else root.innerHTML = glyphSvg('power', 'mir-power-icon', 28);   // `word`: the app's own word on the seat (λWAVES' MOD) in place of the ring
   ariaLabel(root, 'Modulation on or off'); root.title = 'Enable or bypass modulation'; root.setAttribute('aria-pressed', 'true');
   const armed = () => (mod && typeof mod.armed === 'function' ? !!mod.armed() : false);
   function sync() { const on = armed(); root.classList.toggle('on', on); setAttr(root, 'aria-pressed', String(on)); }
@@ -561,6 +561,11 @@ function dockOf(R) {
   return d;
 }
 
+/** transportDock(rack) — the docked seat's hooks `{ open(api), close() }` for a rack whose app registered the TRANSPORT card
+ *  itself (λWAVES' `card: true`, with its own slot and fold): the app's card calls them from its onOpen / onClose, and the
+ *  bar moves in and out exactly as with the kit's own window.  Registers the kit's window only when no card is there. */
+export const transportDock = (R) => dockOf(R);
+
 /** createTransport(options) → api
  *    layout      the bar's arrangement: an array of part names ('play', 'power', 'door', 'tempo', 'panel', 'tap',
  *                'rewind', 'openers', 'seat', 'dock', 'back'), `app:<name>` (a node from `nodes`), DOM nodes, and
@@ -581,7 +586,7 @@ function dockOf(R) {
 export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = globalThis.document && document.body, root = null, id = 'transport',
   clock = null, mod = null, model = MOD, setBpm = null, persist = null, openers = [], rack = null, keys = null, store = null,
   key = 'mir.transport', opener = true, onRefused = null, onInterface = null, bar: barKind = 'float', door: doorMark = 'palette',
-  onSwitch = null, macros = true } = {}) {
+  onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView, body = doc.body;
   const life = new AbortController(), on = { signal: life.signal }, signal = life.signal;
   const S = store || localSeatStore(key);
@@ -604,7 +609,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     if (typeof name === 'string' && name.startsWith('app:')) return nodes[name.slice(4)] || null;
     switch (name) {
       case 'play': return one(playPart);
-      case 'power': return one(modPower({ mod, signal }));
+      case 'power': return one(modPower({ mod, word: powerWord, signal }));
       case 'door': return one(modDoor({ mod, mark: doorMark, onSwitch, work: () => placement === 'work', signal }));
       case 'tempo': return one(pillPart());
       case 'panel': return panelPart().root;
@@ -753,12 +758,12 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     if (d) { e.preventDefault(); list[(i + d + list.length) % list.length].focus({ preventScroll: true }); }
   }, on);
   doc.addEventListener('pointerdown', (e) => { if (!menu.hidden && !menu.contains(e.target) && !(seatB && seatB.contains(e.target))) seatMenu(false); }, { capture: true, signal });
-  bar.addEventListener('contextmenu', (e) => { if (e.target.tagName === 'INPUT') return; e.preventDefault(); seatMenu(true, { x: e.clientX }); }, on);
+  if (seatMenuOn) bar.addEventListener('contextmenu', (e) => { if (e.target.tagName === 'INPUT') return; e.preventDefault(); seatMenu(true, { x: e.clientX }); }, on);   // `seatMenu: false`: no BOTTOM / TOP / COMPACT menu (an app that seats the bar itself; its controls keep their own right click)
   let hold = null, swallow = false;
   const endHold = () => { if (hold) { view.clearTimeout(hold.timer); hold = null; } };
   bar.addEventListener('pointerdown', (e) => {
     endHold(); swallow = false;
-    if (e.pointerType !== 'touch' || e.target.tagName === 'INPUT' || e.target.closest('.tempo-expand, .native-tempo')) return;
+    if (!seatMenuOn || e.pointerType !== 'touch' || e.target.tagName === 'INPUT' || e.target.closest('.tempo-expand, .native-tempo')) return;
     hold = { id: e.pointerId, x: e.clientX, y: e.clientY, timer: view.setTimeout(() => { hold = null; swallow = true; seatMenu(true, { x: e.clientX }); }, TRANSPORT.longPress) };
   }, on);
   bar.addEventListener('pointermove', (e) => { if (hold && e.pointerId === hold.id && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > TRANSPORT.slop) endHold(); }, on);

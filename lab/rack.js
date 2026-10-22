@@ -934,7 +934,7 @@ export async function boot(dom) {
   /* the photosensitivity notice is main.js' `warning` (0.5.0 C6b: λWAVES' law over the kit's notice, shown before the title screen) */
   const warning = dom.start.warning;
   ui.saveNative = saveSettings;
-  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT), modHost: app.state.modHost, modApi:()=>app.state.modView&&app.state.modView.api, cadence:()=>MOD.hz, setCadence:mod.setCadence });
+  reworkNative({ ui, mat, repaint:()=>schedule(TIER.PRESENT) });
   app.hooks.warning = warning;
   /* ── WAVE 57 · THE ORDER, AND IT IS THE WHOLE FIX ────────────────────────────────────────────────
    * NOTHING MOVES UNTIL THE NOTICE HAS BEEN ACCEPTED — or was accepted by this browser before and is

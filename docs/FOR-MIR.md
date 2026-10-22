@@ -3,6 +3,13 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
+
+- 1.5.0-alpha.25 · `shell/transport.css`: λWAVES' own seats (the thin scrub, the small RATE, the stacked readouts without labels) are the stage and work-bar form only (`.mir-transport:not(.docked)`); docked, the card keeps the app's readouts with their labels, as λWAVES drew it (A0).
+- 1.5.0-alpha.25 · `shell/transport.js`: `transportDock(rack)` exports the docked seat's hooks, so an app that registers its own TRANSPORT card (`card: true`, its slot and fold) docks the kit's bar through it — λWAVES adopts `createTransport` (iteration 014 A0).
+- 1.5.0-alpha.25 · `shell/transport.js`: `createTransport({ seatMenu: false })` drops the BOTTOM / TOP / COMPACT menu (its right click and long press) for an app that seats the bar itself and keeps right click for its controls (A0; A3's favourites menu).
+- 1.5.0-alpha.25 · `shell/transport.js`: `modPower({ word })` / `createTransport({ powerWord })` put the app's word on the power seat (λWAVES' MOD) through `label()` in place of the ring (A0: no visible change).
+
 ## From iteration 010 (X6, the deletion pass)
 - **A starter's refresh carries its name.** `folders/seed.js` refreshes a starter in place but keeps the entry's old name, so λWAVES renames
   a refreshed starter itself (`lab/projects.js` `seed()`, WAVE DANCER → WAVE DANCER PROTOTYPE). When the kit carries the name, that loop goes.

@@ -1,7 +1,7 @@
 /* lab/shell/rack-wiring.js — §19a THE RACK IS THE KIT'S (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): createRack, the layout verbs (aliases over the
  * kit's rack; captureLayout's v3 the WORKSPACE record), the TRANSPORT card, the phone and tablet crossings, the stage gestures.  Two seats, as the code stood:
  * createRackWiring(app) at §19a's, wireStage() after the notebook's.  rk, layout, phone, tablet, winHint and devById are registered on app.sh at creation. */
-import { TIER } from '../rack.js'; import { chip } from '../mir/kit.js'; import { createRack, readLayout, layoutLabel as rackLayoutLabel } from '../mir/shell/rack.js';
+import { TIER } from '../rack.js'; import { chip } from '../mir/kit.js'; import { transportDock } from '../mir/shell/transport.js'; import { createRack, readLayout, layoutLabel as rackLayoutLabel } from '../mir/shell/rack.js';
 import { uiSpace } from '../mir/shell/scene-guard.js'; import { bindStageGestures } from '../stage-gestures.js'; import { CAM } from '../camera-law.js'; import { paintedRect } from '../occlusion.js';
 const SHELLS_FOLDED = [7];   // iteration 008 A7: SPECTRUM's shells folded by default (spectrum.js FOLD_DEFAULT)
 export function createRackWiring(app) {
@@ -81,7 +81,7 @@ export function createRackWiring(app) {
       const d = devById(c.id); if (!d) continue;
       if (d === wTr.root) {
         layout.dockSide = sideKey(c.side) === 'left' ? 'L' : 'R'; layout.dockIndex = [...d.parentElement.querySelectorAll('.dev')].indexOf(d);   // project order owns the docked transport seat too
-        d.classList.toggle('closed', c.closed === true || c.open === false);
+        d.classList.toggle('closed', !layout.docked);                // iteration 014 A0: the card is open exactly while the kit's bar is docked in it
         if (d.classList.contains('folded') !== !!c.folded) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
       }
       const mt = typeof c.more === 'boolean' ? d.querySelector('.mol-more-toggle') : null;   // an older record has no `more`: the fold stays as it is
@@ -112,25 +112,17 @@ export function createRackWiring(app) {
     moveCard(id, index) { const list = [...rack.querySelectorAll('.dev')]; const card = list.find((d) => d.dataset.id === id); if (!card) return false; const rest = list.filter((d) => d !== card); const ref = rest[Math.max(0, Math.min(index, rest.length))] || null; rack.insertBefore(card, ref); return true; },
     order() { return [...rack.querySelectorAll('.dev')].map((d) => d.dataset.id); },
     orderAll() { return [...document.querySelectorAll('#rackL .dev, #rack .dev')].map((d) => d.dataset.id); },
-    docked: false,
+    /** the kit's bar is docked (iteration 014 A0: lab/shell/transport.js createBar; the card below is its seat) */
+    get docked() { const b = app.sh.transport && app.sh.transport.bar; return !!(b && b.docked); },
     dockSide: 'L',
     dockIndex: 0,                                                    // the transport's remembered slot in the left rack (0 = the very top)
     /** where a docked transport lives: the mirror rack on a desktop, the ONE rack on a phone (wave 51) */
     dockHost() { return document.body.classList.contains('phone') ? rack : (layout.dockSide==='R'?rack:(rackL || rack)); },
+    /** dock or undock the kit's bar: the TRANSPORT card opens at its remembered slot (the bar moves in through the kit's transportDock) or closes */
     dockTransport() {
-      const tr = document.getElementById('transport'); if (!tr) return;
-      layout.docked = !layout.docked;
-      const host = layout.dockHost();
-      if (layout.docked) {
-        wTr.root.hidden = false;wTr.root.classList.remove('closed','folded');wTr.body.hidden=false; wTr.body.appendChild(tr); tr.classList.add('docked'); tr.classList.remove('mini');
-        const cards = [...host.querySelectorAll('.dev')].filter((d) => d !== wTr.root);
-        host.insertBefore(wTr.root, cards[Math.min(layout.dockIndex, cards.length)] || null);
-      } else {
-        layout.dockSide=wTr.root.parentElement===rackL?'L':'R';const cards = [...wTr.root.parentElement.querySelectorAll('.dev')]; layout.dockIndex = Math.max(0, cards.indexOf(wTr.root));
-        dom.stage.appendChild(tr); tr.classList.remove('docked'); tr.classList.add('mini'); wTr.root.hidden = true;
-      }
+      if (layout.docked) rk.close('transport'); else rk.open('transport', { index: layout.dockIndex });
       schedule(TIER.PRESENT);
-      popFace(wTr.root);                                             // the pop chip and the pill's own dock chip say the same thing
+      popFace(wTr.root);                                             // the pop chip and the bar's own dock chip say the same thing
     },
     /* ── the kit's float verbs under their 0.4.0 names (C3-DESIGN §2): a home side is 'L'/'R' here, 'left'/'right' in the kit ── */
     floating: () => rk.floating(),
@@ -180,7 +172,7 @@ export function createRackWiring(app) {
           const fs = [...d.querySelectorAll('.lw-fold[data-fold][aria-expanded="true"]')].map((b) => b.dataset.fold);   // iteration 011 Q2: the card's open inner folds
           const sh = d.dataset.id === 'spectrum' ? [...d.querySelectorAll('.picker .pk-n.folded')].map((g) => +g.dataset.n) : null;   // iteration 008 A7: the folded shells
           return { id: d.dataset.id, side: st ? sideLR(st.home.side) : (d.dataset.phoneFrom === 'left' || d.parentElement === rackL ? 'L' : 'R'),
-            folded: d.classList.contains('folded'), closed: d.classList.contains('closed'), off: d.classList.contains('off'),
+            folded: d.classList.contains('folded'), closed: d !== wTr.root && d.classList.contains('closed'), off: d.classList.contains('off'),
             float: st ? { x: st.x, y: st.y, w: st.w, compact: !!st.compact, z: rk.floating().indexOf(d.dataset.id), index: st.home.index } : null,
             ...(mt ? { more: mt.getAttribute('aria-expanded') === 'true' } : {}), ...(ct ? { core: ct.getAttribute('aria-expanded') === 'true' } : {}),
             ...(sh && sh.join() !== SHELLS_FOLDED.join() ? { shells: sh } : {}), ...(fs.length ? { folds: fs } : {}) };
@@ -230,9 +222,22 @@ export function createRackWiring(app) {
   /** a window's hover hint in the + list and the WINDOW menu: its long title, and its status when it says something (wave 44) */
   const winHint = (d) => { const t = (d.querySelector('.dev-title') || {}).textContent || '', st = ((d.querySelector('.dev-stat') || {}).textContent || '').trim(); return st ? t + '  ·  ' + st : t; };
   const wTr = device({ id: 'transport', eyebrow: 'TRANSPORT', status: '' });
-  wTr.root.hidden = true; (rackL || rack).appendChild(wTr.root);
+  wTr.root.classList.add('closed'); (rackL || rack).appendChild(wTr.root);
   windowActivity.track(wTr);
-  rk.register({ id: 'transport', el: wTr, title: 'TRANSPORT', card: true, onFold: () => saveSettings() }); popFace(wTr.root);   // C3: an app card (its own buttons; in neither + nor WINDOW)
+  /* iteration 014 A0 · the kit's bar docks HERE: the card is λWAVES' (its slot, its fold, `card: true`), the move is the kit's (transportDock's hooks) */
+  const barDock = () => transportDock(rk);
+  rk.register({ id: 'transport', el: wTr, title: 'TRANSPORT', card: true, onFold: () => saveSettings(),   // C3: an app card (its own buttons; in neither + nor WINDOW)
+    onOpen: () => {
+      const host = layout.dockHost(), cards = [...host.querySelectorAll('.dev')].filter((d) => d !== wTr.root);
+      host.insertBefore(wTr.root, cards[Math.min(layout.dockIndex, cards.length)] || null);
+      wTr.root.classList.remove('folded'); wTr.body.hidden = false;
+      const d = barDock(); if (d.open) d.open({ body: wTr.body });
+    },
+    onClose: () => {
+      layout.dockSide = wTr.root.parentElement === rackL ? 'L' : 'R'; layout.dockIndex = Math.max(0, [...wTr.root.parentElement.querySelectorAll('.dev')].indexOf(wTr.root));
+      const d = barDock(); if (d.close) d.close();
+    } });
+  popFace(wTr.root);
   { const p = wTr.root.querySelector('.dev-pop'); if (p) p.addEventListener('click', (e) => { e.stopPropagation(); layout.dockTransport(); }); }
   const phone = { on: false, applied: false, DPR: 1.5, wasDocked: false, wasRes: 0, wasSteps: 0, wasScale: 0, wasFrost: 'off' };
   function enterPhone() {
@@ -309,6 +314,7 @@ export function createRackWiring(app) {
   }
   const tablet = { on: false, DPR: 1.5, steps: 110 };   // isTablet() itself sits beside isPhone() at the top (W125: the first-run material asks it before any window exists)
   app.sh.rk = rk; app.sh.layout = layout; app.sh.phone = phone; app.sh.tablet = tablet; app.sh.winHint = winHint; app.sh.devById = devById;
+  if (app.sh.transport && app.sh.transport.bar) app.sh.transport.bar.start();   // the bar's dock is wired now that its rack and card exist
   function syncPhone() {
     app.state.cornerLayoutDirty=true;
     const on = isPhone();

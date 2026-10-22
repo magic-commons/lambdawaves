@@ -1,6 +1,6 @@
 {
   "kit": "MIR",
-  "version": "1.5.0-alpha.24",
+  "version": "1.5.0-alpha.25",
   "line": "1.5",
   "commit": "1b7ae99b9905",
   "files": {
@@ -200,8 +200,8 @@
     "lab/mir/shell/shell.css": "48f2f875d8241aa6",
     "lab/mir/shell/stage.css": "db4a83037ab9c2bd",
     "lab/mir/shell/themes.js": "f811f9ba3e5037db",
-    "lab/mir/shell/transport.css": "0fbb6bfe341de2f8",
-    "lab/mir/shell/transport.js": "df602dd57309667c",
+    "lab/mir/shell/transport.css": "bacee61ab071054e",
+    "lab/mir/shell/transport.js": "1b2a482637039015",
     "lab/mir/shell/vendor/katex/LICENSE": "766ccc1f306c885a",
     "lab/mir/shell/vendor/katex/fonts/KaTeX_AMS-Regular.woff2": "0cdd387c9590a1a9",
     "lab/mir/shell/vendor/katex/fonts/KaTeX_Caligraphic-Bold.woff2": "de7701e42cf1f4cf",
@@ -259,7 +259,7 @@
     "lab/mir/timeline/view.js": "938f864a972f9af5",
     "lab/mir/timeline/window.js": "68082a149adbf455",
     "lab/mir/tokens.json": "3f8decbbc349581f",
-    "lab/mir/version.js": "ff577b1f0695b252",
+    "lab/mir/version.js": "03a1da5971dd606c",
     "lab/mir/window-activity.js": "8eb6cefdf972a053",
     "lab/mir/window/dock.js": "6b678fe062232fde",
     "lab/mir/window/rail.js": "60d28f8f5c584dea",

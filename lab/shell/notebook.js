@@ -1,7 +1,7 @@
-/* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, the transport's dock chip and MOD logo, layout.modulation,
+/* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, layout.modulation,
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
-import { TIER, BUILD_LINE } from '../rack.js'; import { el, chip } from '../mir/kit.js'; import { createMenubar } from '../mir/shell/menubar.js'; import { toLUT } from '../mir/palette.js';
+import { TIER, BUILD_LINE } from '../rack.js'; import { el } from '../mir/kit.js'; import { createMenubar } from '../mir/shell/menubar.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
@@ -21,26 +21,7 @@ export function createNotebook(app) {
     for (const a of document.querySelectorAll('a.skip')) {
       a.addEventListener('click', (e) => { const t = document.querySelector(a.getAttribute('href')); if (!t) return; e.preventDefault(); t.focus(); });
     }
-    /* a dock button on the transport itself */
-    const tr = document.getElementById('transport');
-    /* WAVE 55: the same drawing every floating window's DOCK chip wears — one mark, one meaning, and never
-       a text character (glyph.js: iOS answers several of ours with a colour emoji). */
-    if (tr) { const b = el('button', 'dock-btn', tr); b.type = 'button'; b.dataset.keyAction = 'dock';
-      chip(b, 'north', 'dock the transport into the rack'); b.title = 'move the transport between the stage and the rack (T)'; b.addEventListener('click', () => layout.dockTransport()); }
-    if (tr) {
-      const e = el('button', 'mod-exp mod-logo', tr); e.type = 'button'; e.dataset.keyAction = 'modulation';
-      /* WAVE 55: the mark is now the POP-OUT's, because that is literally what the press does — the pill's
-         EXPAND opens modulation as a FLOATING window over the stage, not as a card in the rack. */
-      const lg = document.querySelector('#title .mark');
-      if (lg) { const c = lg.cloneNode(true); c.removeAttribute('aria-hidden'); e.appendChild(c); }
-      e.setAttribute('aria-label', 'open the modulation window');
-      e.title = 'Open the modulation window';
-      e.addEventListener('click', () => layout.modulation.toggle());
-      const spinLogo = (reverse) => { const mark = e.querySelector('.mark'); if (!mark) return; if (e._spin) e._spin.cancel(); e._spin = mark.animate([{ transform: 'rotate(0deg)' }, { transform: `rotate(${reverse ? -360 : 360}deg)` }], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 550, easing: 'ease-in-out' }); };
-      e.addEventListener('pointerenter', () => spinLogo(false));
-      e.addEventListener('pointerleave', () => spinLogo(true));
-      ui.modExp = e;
-    }
+    /* iteration 014 A0: the transport's dock chip and its modulation door are the kit's bar's (lab/shell/transport.js) */
     /** THE EXPANSION.  Not layout.raise(): on a phone the transport is docked at the TOP of the one
      *  rack and must stay there, so the window opens directly BENEATH it rather than above it. */
     layout.modulation = {

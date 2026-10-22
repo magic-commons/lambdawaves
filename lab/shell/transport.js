@@ -1,39 +1,32 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js';
+import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula, chip } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, LAMBDAWAVES_LAYOUT } from '../mir/shell/transport.js'; import { infoPanel } from '../mir/control-help.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
+/** λWAVES' bar from the kit's parts (LAMBDAWAVES_LAYOUT's name and drawing; its items in the order the strip has always had): play, MOD, ⏮, ‹ ›, SCRUB,
+ *  RATE, t, REPEATS, ⟳, the dock chip, the modulation door, the BPM pill, then the tempo panel the pill opens */
+const BAR_LAYOUT = Object.freeze(Object.assign([{ group: 'native-play-row', items: ['play', 'power', 'rewind', 'app:back', 'app:forward', 'app:scrub', 'app:rate', 'app:time', 'app:period', 'app:jump', 'dock', 'door', 'tempo'] }, 'panel'], { name: LAMBDAWAVES_LAYOUT.name }));
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
   const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames, stats } = app.ctl;
+  const armSubs = new Set();   // the kit's bar hears THE POWER (setModArm) through its mod seam's onArm
   /* ── transport strip (§25) ─────────────────────────────────────────────── */
   const transport = (() => {
     const T = dom.transport;
-    /* WAVE 62: the glyph is the drawing, the name is the word.  `play`'s NAME never changes when its
-       glyph swaps ▶ ↔ ❚❚ — a control that renames itself is a different control to a screen reader;
-       what changes is its `aria-pressed`, which is what "is it playing" actually means. */
-    const play = el('button', 'tbtn play', T, '▶'); play.type = 'button'; play.title = 'Play or pause'; play.setAttribute('aria-label', 'play or pause'); play.setAttribute('aria-pressed', 'false');
-    const modB = el('button', 'tbtn modb', T, 'MOD'); modB.type = 'button';
-    modB.setAttribute('aria-label', 'modulation on or off');
-    modB.setAttribute('aria-pressed', 'true');
-    modB.title = 'Enable modulation';
-    modB.addEventListener('click', () => setModArm(!app.state.modArm));
-    ui.modB = modB;
-    const SVG_REWIND = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="width:13px;height:13px;display:block;margin:auto"><rect x="5" y="5" width="2.6" height="14" rx="1.1"/><polygon points="20 5 20 19 9.5 12 20 5"/></svg>';
-    const rst = el('button', 'tbtn transport-home', T); rst.type = 'button'; rst.innerHTML = SVG_REWIND; rst.title = 't → 0  (home)'; rst.setAttribute('aria-label', 'back to t = 0');
-    const sm = el('button', 'tbtn transport-step-back', T, '‹'); sm.type = 'button'; sm.title = 'step back  (←)'; sm.setAttribute('aria-label', 'step back');
-    const sp = el('button', 'tbtn transport-step-forward', T, '›'); sp.type = 'button'; sp.title = 'step forward  (→)'; sp.setAttribute('aria-label', 'step forward');
+    /* iteration 014 A0 · THE KIT'S BAR (lab/mir/shell/transport.js createTransport): play, the MOD power, rewind, the dock chip, the modulation door, the
+       BPM pill and its tempo panel (MACROS | CLOCK) are the kit's parts; λWAVES' own nodes — ‹ ›, SCRUB, RATE, the t readout, REPEATS, ⟳ — are built here
+       and handed in by name.  THE PLAY is appPlay (the kit's play part toggles it); the power is setModArm; the docked seat is λWAVES' TRANSPORT card
+       (rack-wiring.js, through the kit's transportDock).  The physics behind REPEATS stays below. */
+    const btn = (cls, text, title, aria) => { const b = el('button', 'tbtn ' + cls, null, text); b.type = 'button'; b.title = title; b.setAttribute('aria-label', aria); return b; };
+    const sm = btn('transport-step-back', '‹', 'step back  (←)', 'step back');
+    const sp = btn('transport-step-forward', '›', 'step forward  (→)', 'step forward');
     ui.scrub = fader({ label: 'SCRUB  t / window', min: 0, max: 1, value: 0, fmt: (v) => (v * clock.window).toFixed(2) + ' a.u.',
       onInput: (v) => { clock.scrub(v * clock.window + laps() * clock.window); schedule(TIER.EVOLVE); } });
-    T.appendChild(ui.scrub.root);
     ui.rateKnob = knob({ label: 'RATE a.u./s', min: 0.1, max: 3000, value: 4, log: true, fmt: (v) => v >= 100 ? v.toFixed(0) : v.toFixed(1), onInput: (v) => { if (app.state.stageText) app.state.stageText.say('rate', 'RATE · ' + (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + ' a.u./s', { hold: true }); if (modHand('transport.rate', v)) return; clock.setRate(v); } });   // iteration 007: INFORMATIONAL › RATE
-    T.appendChild(ui.rateKnob.root);
     const tro = readout({ label: 't  a.u.  (lap)', value: '0.00', cls: 'time' });
-    T.appendChild(tro.root);
     /* ── THE CLOCK's law: when does this density repeat?  T = 2π / gcd{|E_a − E_b|} over the populated labels (EXACT where the
        differences are commensurate: hydrogen and its ions, the oscillator; a near-recurrence with its error otherwise) ── */
     ui.periodRo = readout({ label: 'REPEATS every', value: '—', cls: 'period', sub: 'exact period of the density, from the energies in force' });
-    T.appendChild(ui.periodRo.root);
     /* WAVE 69 · THE THEOREM, SUBSTITUTED, LIVE.  This is the first of the three places a number was
        given permission to move (see REPORT wave 69).  It earns it because every value on the line is
        EXACT at the instant it is printed: the gcd comes from the same scan the readout above prints,
@@ -42,17 +35,39 @@ export function createTransport(app) {
     ui.periodFx = formula({ lines: [
       ['<m>T = 2π / gcd{|ΔE|} = 2π / </m>', { s: 'g' }, '<m> = </m>', { s: 'T' }],
       ['<m>t = </m>', { s: 'lap' }, '<m> · T + </m>', { s: 'ph' }, '<m> · T</m>'] ] });
-    T.appendChild(ui.periodFx.root);
-    const jmp = el('button', 'tbtn jump', T, '⟳'); jmp.type = 'button'; jmp.title = 'jump to the next exact repeat of the density'; jmp.setAttribute('aria-label', 'jump to the next exact repeat of the density');
+    const jmp = btn('jump', '⟳', 'jump to the next exact repeat of the density', 'jump to the next exact repeat of the density');
+    /* THE PLAY's clock for the kit's play part: appPlay, and a press schedules the frame that shows it (togglePlay's law) */
+    const barClock = { play: () => { const r = appPlay.play(); schedule(TIER.EVOLVE); return r; }, pause: () => { const r = appPlay.pause(); schedule(TIER.EVOLVE); return r; },
+      isPlaying: () => appPlay.isPlaying(), onChange: (f) => appPlay.onChange(f),
+      seek: () => { clock.reset(); ui.scrub.set(0); shadowView.clearTrail(); schedule(TIER.EVOLVE); } };   // ⏮ (wave 106: the playhead goes back with the clock)
+    /* the modulation seam the kit's power, door and tempo panel read (the port, the host, THE POWER, the window) */
+    const barMod = { get host() { return app.state.modHost; }, get view() { return app.state.modView; },
+      armed: () => app.state.modArm, arm: (v) => setModArm(v), onArm: (f) => { armSubs.add(f); return () => armSubs.delete(f); },
+      isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => app.sh.layout.modulation.toggle(),
+      cadence: () => app.ctl.MOD.hz, setCadence: (hz) => app.ctl.mod.setCadence(hz), persist: () => saveSettings() };
+    const bar = createBar({ layout: BAR_LAYOUT, root: T, host: dom.stage, nodes: { back: sm, forward: sp, scrub: ui.scrub.root, rate: ui.rateKnob.root, time: tro.root, period: ui.periodRo.root, jump: jmp },
+      clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),
+      rack: () => app.sh.rk, door: 'mark', powerWord: 'MOD', seatMenu: false, opener: false });
+    ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'modulation on or off');
+    { const rst = bar.root.querySelector('.transport-home'); if (rst) { rst.title = 't → 0  (home)'; rst.setAttribute('aria-label', 'back to t = 0'); } }
+    /* the dock chip keeps λWAVES' drawing (WAVE 55: the floating windows' DOCK chip, `north`); docked it wears the kit's pop-out */
+    const faceDock = () => { chip(bar.el.dock, bar.docked ? 'popOut' : 'north', bar.docked ? 'undock the transport' : 'dock the transport into the rack'); bar.el.dock.title = 'move the transport between the stage and the rack (T)'; };
+    T.addEventListener('transport-placement', faceDock); faceDock();
+    /* the door wears the title's mark and spins under a mouse (WAVE 55) */
+    const door = bar.el.door; ui.modExp = door; door.title = 'Open the modulation window';
+    const spinLogo = (reverse) => { const mark = door.querySelector('svg'); if (!mark) return; if (door._spin) door._spin.cancel(); door._spin = mark.animate([{ transform: 'rotate(0deg)' }, { transform: `rotate(${reverse ? -360 : 360}deg)` }], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 550, easing: 'ease-in-out' }); };
+    door.addEventListener('pointerenter', () => spinLogo(false)); door.addEventListener('pointerleave', () => spinLogo(true));
+    /* the repeat mathematics, in the tempo panel's corner — not a tile */
+    if (bar.el.panel) el('div', 'tempo-info', bar.el.panel).appendChild(infoPanel(ui.periodFx.root, 'Repeat mathematics'));
     /* iteration 011 Q6 · GEMMA, HIDDEN: the ASK door and THE TYPE BOX mount only under ASK_ENABLED (lab/ask.js, the one flag); off, the strip is
        the 0.6.5 strip, `openAsk` does nothing (no key row calls it) and createAsk is never made, so no request can leave */
     let echoOn = false, openAsk = () => {};
     if (ASK_ENABLED) {
       /* 0.6.6 G2 · THE TYPE BOX: ASK (or /) swaps the centre — the t readout, REPEATS, the formula — for one line to Gemma (lab/ask.js); the first press ever asks consent */
-      const seat = el('span', 'ask-seat', T); T.insertBefore(seat, tro.root);   // its seat, as 0.6.6 built it: just before the t readout
+      const seat = el('span', 'ask-seat'); tro.root.before(seat);   // its seat, as 0.6.6 built it: just before the t readout
       const line = el('input', 'ask-line', seat), note = el('span', 'ask-note', seat), okB = el('button', 'tbtn ask-ok', seat, 'CONTINUE');
       line.type = 'text'; line.spellcheck = false; line.autocomplete = 'off'; line.placeholder = 'ask Gemma — what does benzene look like?'; line.setAttribute('aria-label', 'ask Gemma'); okB.type = 'button'; okB.style.flex = 'none';
-      const askB = el('button', 'tbtn ask', T, 'ASK'); askB.type = 'button'; askB.title = 'ask Gemma  (/)'; askB.setAttribute('aria-label', 'ask Gemma');
+      const askB = el('button', 'tbtn ask', null, 'ASK'); jmp.after(askB); askB.type = 'button'; askB.title = 'ask Gemma  (/)'; askB.setAttribute('aria-label', 'ask Gemma');
       const asker = createAsk(app), troLbl = tro.root.querySelector('.ro-lbl'); app.sh.ask = asker;
       let echoT = 0;
       function showAsk(on) {
@@ -200,18 +215,11 @@ export function createTransport(app) {
       return compactClock(clock.t, 1e5, 2) + (lap ? '  (' + compactClock(lap, 1e4, 1) + ')' : '');
     };
     const stepDt = () => clock.window / 48;
-    play.addEventListener('click', () => togglePlay());
-    /* wave 106: …and the PLAYHEAD goes back with the clock.  `ui.scrub` is only ever repainted inside
-       `if (keep.frames)` in update(), and KEEP FRAMES ships OFF — so pressing ⏮ moved t to 0 and left
-       the bar standing wherever it had been.  `loadPreset` has always done this (it calls
-       `ui.scrub.set(0)` beside `clock.reset()`); the transport's own button did not. */
-    rst.addEventListener('click', () => { clock.reset(); ui.scrub.set(0); shadowView.clearTrail(); schedule(TIER.EVOLVE); });
     sm.addEventListener('click', () => { clock.step(-stepDt()); schedule(TIER.EVOLVE); });
     sp.addEventListener('click', () => { clock.step(stepDt()); schedule(TIER.EVOLVE); });
-    let troWall = 0, periodWall = 0, playShown = null;
+    let troWall = 0, periodWall = 0;
     function update() {
       const on = clock.playing, now = performance.now();
-      if (playShown !== on) { playShown = on; play.textContent = on ? '❚❚' : '▶'; play.classList.toggle('on', on); play.setAttribute('aria-pressed', String(on)); }
       /* KEEP FRAMES (wave 45): on, the playhead follows every frame as it always did; off — the default — the bar is
          disabled and never repainted, and the t readout runs at 5 Hz while playing (every paused frame, as before) */
       if (keep.frames) {
@@ -222,7 +230,7 @@ export function createTransport(app) {
     }
     setKeepFrames(keep.frames);                                // the shipped default: the bar disabled
     setModArm(app.state.modArm, { quiet: true });                        // wave 65: ONE writer paints the lamp, boot included
-    return { update, stepDt, openAsk };
+    return { update, stepDt, openAsk, bar };
   })();
   /** THE PLAY (0.5.0 A6): the physics clock's toggle; its edge plays or pauses the modulation (C4: the one clock, always). */
   function togglePlay() { appPlay.toggle(); schedule(TIER.EVOLVE); }
@@ -236,6 +244,7 @@ export function createTransport(app) {
       ui.modB.classList.toggle('on', want);
       ui.modB.setAttribute('aria-pressed', String(want));
     }
+    for (const f of armSubs) f();                                        // the kit's bar repaints its power seat
     if (app.state.modHost) {
       app.state.modHost.clock.setModulationEnabled(want);
       if (app.state.modView) app.state.modView.sync();

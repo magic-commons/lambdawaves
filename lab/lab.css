@@ -295,6 +295,7 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport.mini { left: 50%; right: auto; transform: translateX(-50%); width: min(560px, calc(100% - 2 * var(--rack-w) - 40px)); height: 46px; bottom: 60px; padding: 2px 7px 3px; gap: 2px; border-radius: 16px; }   /* wave 92: the modulation work bar's box */
 #transport.mini .tbtn { width: 26px; height: 26px; font-size: 11px; border-radius: 50%; }
 #transport.mini .tbtn.play { width: 34px; }
+#transport.mini .tbtn.play > svg { width: 15px; height: 15px; }   /* iteration 014 A0: the kit's play glyph at the old ▶'s size */
 #transport.mini .fd { flex: 1 1 auto; min-width: 120px; }   /* the play bar keeps its length: the readouts beside it are fixed-width */
 #transport.mini .k { width: 36px; }
 /* WAVE 65 · THE PILL'S WIDTH BUDGET, MEASURED RATHER THAN ASSUMED.  Adding the MOD seat is what
