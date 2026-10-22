@@ -8,6 +8,27 @@ round, newest first; an item leaves this list when an adopted MIR release carrie
   at the left, a rise, ArrowUp / ArrowRight or PageUp move it right and lower the value; the value, `min` / `max`, `aria-value*`, `spec` (a
   second face inherits it) and a modulation map are unchanged; ignored on a `wrap` knob. `kit.js` `knob`. Why: Josh, "can the knob direction of
   the parameter of ISO, KNEE, SOFT be inverted? … I associate 'more-ness' to dialing it to the right" (ISO / KNEE / SOFT lower = more opaque).
+- **THE WINDOW PICKER** (014 A7): `createWindowPicker({ rack, open, can, icon, cls })`. Files: `shell/window-picker.js`, `.css`
+  (imported by `mir.css`), and two words in `locales/en.json`.
+  - Every window of the rack (`rack.windows()`, cards left out) is a row, by name, under a search field. The first openable match is
+    the default: Enter opens it, ↑ ↓ move it, Escape or a press outside closes. A row `can(id)` refuses is greyed, with the app's
+    sentence, and never opens.
+  - The row's glyph is its `spec(id).glyph`, or an empty `.wp-icon` seat with `data-icon` that the app paints.
+  - The motion is GOL-NOTE.md §4: a spring open from 0.94 × 0.6, rows 30 ms apart (capped at the twelfth), each with a faux motion blur
+    (a stretched copy at 10 % alpha collapsing into it), and a 120 ms close. Reduced motion shows none of it.
+  - Why: Josh, "something similar to FL Studio's plugin picker where you could look for MIR windows and have the ones that can't be
+    opened be greyed out … a search bar". λWAVES opens it from WINDOW's first row and the key row `windowPicker`.
+- **THE FOUR CALLS** (014 A11, Yan's picks on Josh's "whichever you prefer"):
+  - The timing row of `CONTROL_SURFACE_LAYOUT` is now to-start · latches · door · gear · dock · the app's time readout. The time takes
+    the right end. File: `shell/transport.js`.
+  - The scroll pill lies ON the window's eyebrow: from the name's start to `PILL.gap` (4 px) short of the head's first button, with an
+    ellipsis when the name is longer. It never covers the head's buttons, the grip or the scrollbar, and its mask opens from the name's
+    start. This replaces A10's tip; `PILL.track` is gone. Files: `shell/rack-scrollbar.js`, `shell/rack.css`.
+  - `workspaceSwitch({ glyph })` draws a kit glyph in the ink in place of the palette diamond. The modulation window's switch passes
+    `'lanes'`, the timeline's glyph; every other MIR mark stays. Files: `window/workspaces.js`, `window/window.css`,
+    `modulation/window.js`.
+  - Why: Josh's A10 open question ("say if it should stop at the eyebrow") and his "remove anything with the MIR logo and have proper
+    icons for it". BASINS sees all three on kit day.
 - **THE PILL'S TIP** (014 A10): the scroll pill's outer end stops 2 px short of the seated track's inner edge (or `scrollbarSeat`'s x when
   none runs) and reaches inward over the title bar, its mask opening from that tip; `rackPill` defaults to A, the scrollbar's accent.
   `shell/rack-scrollbar.js` (`PILL.gap` 2, `PILL.track` 12), `shell/rack.css`, `shell/gui.js`. Why: Josh, "make the scroll bar also be at the

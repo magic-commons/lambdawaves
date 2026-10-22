@@ -1095,6 +1095,7 @@
   "While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar": "While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar",
   "While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar": "While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar",
   "White text on every label": "White text on every label",
+  "Windows": "Windows",
   "Windows and Linux": "Windows and Linux",
   "Work bars": "Work bars",
   "Work bars: above. Tap to hide them": "Work bars: above. Tap to hide them",
@@ -1344,6 +1345,7 @@
   "scrub::LIGHT": "LIGHT",
   "scrub::LIVE": "LIVE",
   "sea": "sea",
+  "search the windows": "search the windows",
   "seek": "seek",
   "selected project": "selected project",
   "shared with a visiting model — hide it": "shared with a visiting model — hide it",
@@ -1669,6 +1671,7 @@
   "The {panel} panel could not be built: {why}": "an error notice: {panel} is a panel's name (RENDER …), {why} the program's reason, left as it is",
   "This device’s tier, measured once: A and B are {:FULL}, C is {:BALANCED}": "a short benchmark sorts this device into tier A, B or C",
   "WALL": "the clock follows wall-clock time (real elapsed seconds), as opposed to FREE, which counts frame time and slows with the picture",
+  "Windows": "the window picker: a list of every window of the app, with a search field",
   "clock state::HOLD": "— the modulation clock is held (paused in place), as opposed to RUN",
   "close ({key})": "{key} is the notebook’s shortcut key, e.g. J",
   "device view::FULL": "a device's view: FULL shows every control, CMP (compact) only the performance bank",
@@ -1703,6 +1706,7 @@
   "peak hold::HOLD": "the audio follower's PEAK HOLD: how long a band's peak is held before it falls (a time), not the envelope stage",
   "retrying without the processing constraints": "the microphone's state: a browser that cannot turn AGC off is still worth listening to",
   "right rack scroll": "the scrollbar beside the cards of the left / right RACK (the column of docked windows)",
+  "search the windows": "the window picker's search field: type part of a window's name",
   "text ink::SAMPLED": "TEXT (the label ink) set by the app itself, from the picture under each label: \"measured\", not \"a sample\"",
   "the audio graph could not be built": "the microphone's state: a fault",
   "the gate opens here and stays open until hysteresis below it": "hysteresis: a small margin below the opening level, so the gate does not flicker open and shut",
@@ -5022,7 +5026,8 @@
    "mir/panels/xy.js"
   ],
   "WINDOWS": [
-   "mir/shell/gui.js"
+   "mir/shell/gui.js",
+   "mir/shell/window-picker.js"
   ],
   "WORK BARS · BOTTOM": [
    "mir/modulation/window.js"
@@ -5053,6 +5058,9 @@
   ],
   "White text on every label": [
    "mir/shell/gui.js"
+  ],
+  "Windows": [
+   "mir/shell/window-picker.js"
   ],
   "Windows and Linux": [
    "mir/keyboard/keyboard.js"
@@ -5870,6 +5878,9 @@
   ],
   "sea": [
    "mir/palette.js"
+  ],
+  "search the windows": [
+   "mir/shell/window-picker.js"
   ],
   "seek": [
    "mir/render/panel.js"

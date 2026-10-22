@@ -719,8 +719,8 @@ export function createModulation(host, port) {
   foot.prev.addEventListener('click', () => stepPreset(-1));
   foot.next.addEventListener('click', () => stepPreset(1));
   /* THE MIR SWITCH (BASINS modwindow.js 563–566): after the picker arrows; it swaps to the timeline.  Only when the host has
-     two workspaces (port.switchWorkspace). */
-  const wsSwitch = typeof port.switchWorkspace === 'function' ? workspaceSwitch({ run: () => port.switchWorkspace(), title: 'Switch to Timeline' }) : null;
+     two workspaces (port.switchWorkspace).  It wears the timeline's `lanes` glyph, not the palette diamond (λWAVES 014 A11). */
+  const wsSwitch = typeof port.switchWorkspace === 'function' ? workspaceSwitch({ run: () => port.switchWorkspace(), title: 'Switch to Timeline', glyph: 'lanes' }) : null;
   if (wsSwitch) foot.core.appendChild(wsSwitch.root);
   foot.name.addEventListener('input', () => foot.name.classList.add('m2predirty'));
 

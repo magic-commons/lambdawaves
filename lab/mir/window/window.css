@@ -200,6 +200,8 @@ body.touch-tablet .mir-win { --win-head-h: var(--touch); --win-head-btn: var(--t
   flex: 0 0 var(--ws-w); width: var(--ws-w); height: var(--ws-h); padding: 0; border: 0; background: transparent; box-shadow: var(--ws-flat);
   border-radius: var(--ws-r); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .mir-workspace-switch > .mod-palette-mark { display: block; width: var(--ws-diamond); height: var(--ws-diamond); overflow: visible; stroke: none; }
+.mir-workspace-switch > .ws-glyph { display: block; width: 20px; height: 20px; color: var(--ink-key, currentColor); }   /* a kit glyph in the ink (014 A11) */
+.mir-workspace-switch:hover > .ws-glyph { color: var(--fg, currentColor); }
 .mir-workspace-switch:focus-visible { outline: 1px solid var(--acc2); outline-offset: -2px; }
 
 }   /* end @layer mir.kit.house */
