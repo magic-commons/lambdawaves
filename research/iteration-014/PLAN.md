@@ -218,7 +218,7 @@ B3-animated last and optional.
    the same ramp (red → yellow → green → cyan → blue) as the kit's special ESP preset; "USE PALETTE" swaps the active ramp into the bar too.
 4. **Favourites: knobs first, plus a few easy non-knobs**: SPECTRUM's HYDROGEN | STURMIAN row (whole row; the λ SCALE knob may stay behind), WAVE's
    POSITION | MOMENTUM segment and its PROBABILITY · ARG · RE/IM view segment. Other rows next round.
-5. **Gol icons: note AND a sample sheet**, and the icons may be 95–99 % like Gol's own related icons — the brief is "match, don't reinterpret".
+5. **Gol icons: note AND a sample sheet.** Where FL Studio or Image-Line's VSTs have the same icon (play, stop, record, folder, save, settings gear, zoom, snap, the picker's search), copy it *exactly* — that is fine by Josh. Where λWAVES has an icon FL has nothing for (orbitals, the hydrogen atom, the molecule, the spectrum ladder, the palette ring, the lattice, the field box), the sheet REINTERPRETS it in Gol's language: same stroke weight, soft fills, two tones, the same corner radii and optical sizes as the copied ones, so the two families read as one set.
 6. **The previous ~6,000 molecules get the potential grid too** — it is NOT a re-solve: the saved rung (C, occ) rebuilds the density matrix and the
    ESP grid is one integral pass (`mol.intor('int1e_grids', grids=…)` with the nuclear term), seconds a molecule on the CPU — a post-pass
    `tools/volumes/esp-pass.py` over raw/ (run by the babysitter's finish or a night, never by a builder on the live raw/), hours for all, then a
