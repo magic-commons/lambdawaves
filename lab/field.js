@@ -16,6 +16,7 @@ import { modeTable, NMAX } from './hydrogen.js';
 import { qmul, qnormalize, adjoint, expPure } from './rotor4.js';
 import { gpuBoot, requestGpu } from './gpu-boot.js';
 import { evaluator, shellsFromField } from './molecular-field.js';
+import { CPK, bondsOf, vdwRadius } from './elements.js';
 
 /* iteration 008 W: WAVE's OBSERVABLE is DENSITY · PHASE · RE · IM (WAVE_VIEWS).  Re+Im (index 5, two pictures in one volume) left the
    shader; its index stays retired, never reused, and a saved one opens as PHASE.  Δρ (4) stays in the shader (the reference volume
@@ -31,8 +32,11 @@ export function waveView(v) { const n = typeof v === 'number' ? (v === 5 ? 'reim
  *  opens as DUST; drawStyle() is that one mapping, for every road in.
  *  iteration 010 X7: SHELL ± (`glassSigned`, 8) is APPENDED — never renumber — SIGNED's lobes through SHELL's transfer; a build older
  *  than it reads a saved 8 as an unknown style, so drawStyle() opens it as CLOUD there. */
-export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4, dust: 5, glass: 6, additive: 7, glassSigned: 8 };
-export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust', 'glass', 'additive', 'glassSigned'];
+export const STYLE = { cloud: 0, solid: 1, grain: 2, signed: 3, bands: 4, dust: 5, glass: 6, additive: 7, glassSigned: 8, balls: 9, sticks: 10, esp: 11 };
+export const STYLE_NAMES = ['cloud', 'solid', 'grain', 'signed', 'bands', 'dust', 'glass', 'additive', 'glassSigned', 'balls', 'sticks', 'esp'];
+/** iteration 014 B: THE THREE VIEWS (APPENDED: 9 BALLS, 10 STICKS, 11 ESP) draw the MOLECULE, not the volume — the atoms setAtoms gave (an older
+ *  build opens a saved 9–11 as CLOUD; with no atoms set the shader draws them as CLOUD) */
+export const ATOM_STYLES = Object.freeze([9, 10, 11]);
 /** a saved or named style (an index or a name) → the style it opens as: GRAIN → DUST, an unknown one → CLOUD */
 export function drawStyle(v) { const n = typeof v === 'number' ? STYLE_NAMES[v] : String(v); return n === 'grain' ? 'dust' : STYLE[n] === undefined ? 'cloud' : n; }
 /** THE KNEE's default (008 Q, Josh 10-19: "somewhat opaque but slightly see-through"): 3, a soft shoulder — measured at EXPOSURE 1, the
@@ -43,6 +47,8 @@ export const KNEE_DEFAULT = 3;
  *  arithmetic drawn bit for bit); an absent knee is the default's q */
 export function kneeQ(k) { return Math.log((Number.isFinite(k) && k > 0 ? k : KNEE_DEFAULT) / 0.6); }
 export const SLICE = { off: 0, clip: 1, slab: 2 };
+/** iteration 014 B: THE THREE VIEWS' defaults — STICKS' radius (bohr, 0.2 Å), the probe (bohr, water's 1.4 Å), the map's RANGE (±φ, a.u.) and its surfaces */
+export const STICK_R = 0.38, PROBE_R = 1.4 / 0.52917721092, ESP_RANGE = 0.05, ESP_SURF = Object.freeze(['iso', 'sas', 'ses']);
 export const MAX_MODES = 320;                                 // the whole 140-state register fits (a gas packet populates every m)
 const MODE_BYTES = 112;                                  // 7 vec4: nlm, c, lag0, lag1, leg0, leg1, ctr
 
@@ -357,6 +363,113 @@ const FACTOR_WGSL = (() => {
 /* ── CARD_WGSL — THE CARD ROAD (0.6.5 X2), DERIVED from MOL_HEAD's params and bindings 0, 4, 5, 6: a worker's N³ f32 volume in `mat`
  * (x fastest, cell centres over [−r1, r1]³, N = r0) sampled TRILINEARLY at each texel of the current res, written SIGNED (v, 0) and
  * reduced as max v², so the 'real' view divides by max |v|.  Outside the card's box the edge cell holds.  Dispatched only on `cardDirty`. */
+/* ── THE POTENTIAL's POISSON PASS (iteration 014 B3) ───────────────────────────────────────────────────────────────────
+ * φ = Σ Z_A/|r − R_A| − ∫ρ(r′)/|r − r′| dr′ on an M³ cell-centred grid over the field's box, from the volume the field already holds:
+ *   elec   ρ per cell (the mean of 8 trilinear samples of |ψ|², psiTex's own a.u.) and its workgroup sums (Σρ, Σρ·r);
+ *   core   per atom (H, Li–Ar), THE CORE'S CHARGE: the texture holds √ρ at its voxels and cannot resolve a 1s cusp, so the grid's core charge is
+ *          wrong by up to an electron an atom, at random along a chain — a dipole of tens of a.u. on a fatty acid.  The free atom's Slater core
+ *          (1s², and 2s²2p⁶ past Ne; the valence by Slater's rules; H's whole 1s at ζ = 1.24) is sampled EXACTLY as the texture samples (√ρ at the voxels, trilinear,
+ *          squared, 8 points a cell), and n_core minus that sampled core is put back at the nucleus as a point charge;
+ *   total  one workgroup: the scale s that makes the grid's electrons N_e minus those corrections, and the dipole μ;
+ *   rhs    the charge q = (Σ_A Z_A·CIC_A − s·ρ)/h³ (each nucleus cloud-in-cell: its 8 weights sum to Z exactly) as 4πq·h², and the far field
+ *          Q/r + μ·r/r³ as the first guess and the fixed boundary;
+ *   sor    red–black over-relaxation (ω = 2/(1 + sin π/M)), ∇²φ = −4πq, 3M sweeps.
+ * The grid is the molecule's box (max |coordinate| + 8 bohr, inside the volume's), M = 64 … 128 cells a side aiming at 0.35 bohr.  Its accuracy is
+ * the volume's: where the texture cannot resolve the cores (a long molecule's box) the atoms' charges smear and the map is qualitative — a volume's
+ * own φ grid (C1) replaces it. 
+ * The total charge solved at once (nuclei and electrons together) keeps φ a small number everywhere: no cancellation of two large ones. */
+const ESP_WGSL = /* wgsl */`
+struct EP { M: u32, nA: u32, color: u32, nW: u32, half: f32, h: f32, Ne: f32, omega: f32, fhalf: f32, p0: f32, p1: f32, p2: f32 };   // half: φ's box; fhalf: the volume's
+@group(0) @binding(0) var<uniform> E: EP;
+@group(0) @binding(1) var psiTex: texture_3d<f32>;
+@group(0) @binding(2) var samp: sampler;
+@group(0) @binding(3) var<storage, read> atm: array<vec4<f32>>;
+@group(0) @binding(4) var<storage, read_write> ebuf: array<f32>;
+@group(0) @binding(5) var<storage, read_write> part: array<vec4<f32>>;
+@group(0) @binding(6) var<storage, read_write> phi: array<f32>;
+@group(0) @binding(7) var<storage, read_write> corr: array<f32>;
+var<workgroup> red: array<vec4<f32>, 256>;
+/* the free atom's core and valence densities (Slater's rules): x = (ρ_core(r), ρ_valence(r)), and its core count and reach */
+fn freeAtom(Z: f32, r: f32) -> vec2<f32> {
+  if (Z < 1.5) { return vec2<f32>(1.906624 / 3.14159265 * exp(-2.48 * r), 0.0); }   // H: its one 1s (ζ = 1.24, the molecular STO-3G exponent) is the cusp
+  let z1 = Z - 0.3; var c = 2.0 * z1 * z1 * z1 / 3.14159265 * exp(-2.0 * z1 * r); var v = 0.0;
+  if (Z <= 10.0) { let nv = Z - 2.0; let z2 = (Z - 1.7 - 0.35 * (nv - 1.0)) / 2.0; v = nv * pow(2.0 * z2, 5.0) / 301.5928947 * r * r * exp(-2.0 * z2 * r); }
+  else { let z2 = (Z - 4.15) / 2.0; c += 8.0 * pow(2.0 * z2, 5.0) / 301.5928947 * r * r * exp(-2.0 * z2 * r);
+         let nv = Z - 10.0; let z3 = (Z - 8.8 - 0.35 * (nv - 1.0)) / 3.0; v = nv * pow(2.0 * z3, 7.0) / 9047.786842 * r * r * r * r * exp(-2.0 * z3 * r); }
+  return vec2<f32>(c, v);
+}
+@compute @workgroup_size(256) fn core(@builtin(local_invocation_index) l: u32, @builtin(workgroup_id) w: vec3<u32>) {
+  let a = w.x; let A = atm[2u * a]; let Z = atm[2u * a + 1u].w;
+  var acc = 0.0;
+  if (Z != 2.0 && Z <= 18.0) {
+    let zc = select(select((Z - 8.8 - 0.35 * (Z - 11.0)) / 3.0, (Z - 1.7 - 0.35 * (Z - 3.0)) / 2.0, Z <= 10.0), 1.24, Z < 1.5); let K = i32(ceil((7.0 / zc) / E.h)) + 1; let n = 2 * K + 1;
+    let res = f32(textureDimensions(psiTex).x); let tv = 2.0 * E.fhalf / res;
+    let ci = vec3<i32>(floor((A.xyz + vec3<f32>(E.half)) / E.h));
+    for (var t = i32(l); t < n * n * n; t += 256) {
+      let q = ci + vec3<i32>(t % n, (t / n) % n, t / (n * n)) - vec3<i32>(K);
+      if (any(q < vec3<i32>(0)) || any(q >= vec3<i32>(i32(E.M)))) { continue; }
+      let p = (vec3<f32>(q) + vec3<f32>(0.5)) * E.h - vec3<f32>(E.half);
+      for (var k = 0u; k < 8u; k++) {
+        let ps = p + (vec3<f32>(f32(k & 1u), f32((k >> 1u) & 1u), f32(k >> 2u)) - vec3<f32>(0.5)) * (0.5 * E.h);
+        let g = (ps + vec3<f32>(E.fhalf)) / tv - vec3<f32>(0.5); let i0 = floor(g); let f = g - i0;
+        var sa = 0.0; var sb = 0.0;
+        for (var c = 0u; c < 8u; c++) {
+          let o = vec3<f32>(f32(c & 1u), f32((c >> 1u) & 1u), f32(c >> 2u)); let wv = select(vec3<f32>(1.0) - f, f, o == vec3<f32>(1.0));
+          let vi = clamp(i0 + o, vec3<f32>(0.0), vec3<f32>(res - 1.0)); let d = length((vi + vec3<f32>(0.5)) * tv - vec3<f32>(E.fhalf) - A.xyz);
+          let rv = freeAtom(Z, d); let ww = wv.x * wv.y * wv.z; sa += ww * sqrt(rv.x + rv.y); sb += ww * sqrt(rv.y);
+        }
+        acc += sa * sa;
+      }
+    }
+  }
+  red[l] = vec4<f32>(acc, 0.0, 0.0, 0.0); workgroupBarrier();
+  for (var s = 128u; s > 0u; s >>= 1u) { if (l < s) { red[l] += red[l + s]; } workgroupBarrier(); }
+  if (l == 0u) { let nc = select(Z, 0.0, Z == 2.0 || Z > 18.0); corr[a] = nc - red[0].x * E.h * E.h * E.h / 8.0; }
+}
+fn cellPos(i: u32) -> vec3<f32> { let M = E.M; return (vec3<f32>(f32(i % M), f32((i / M) % M), f32(i / (M * M))) + vec3<f32>(0.5)) * E.h - vec3<f32>(E.half); }
+@compute @workgroup_size(256) fn elec(@builtin(global_invocation_id) g: vec3<u32>, @builtin(local_invocation_index) l: u32, @builtin(workgroup_id) w: vec3<u32>) {
+  let i = g.x; var v = vec4<f32>(0.0);
+  if (i < E.M * E.M * E.M) {
+    let p = cellPos(i); var r = 0.0;
+    for (var k = 0u; k < 8u; k++) {
+      let o = (vec3<f32>(f32(k & 1u), f32((k >> 1u) & 1u), f32(k >> 2u)) - vec3<f32>(0.5)) * (0.5 * E.h);
+      let s = textureSampleLevel(psiTex, samp, (p + o + vec3<f32>(E.fhalf)) / (2.0 * E.fhalf), 0.0).rg; r += dot(s, s);
+    }
+    r *= 0.125; ebuf[i] = r; v = vec4<f32>(r, r * p);
+  }
+  red[l] = v; workgroupBarrier();
+  for (var s = 128u; s > 0u; s >>= 1u) { if (l < s) { red[l] += red[l + s]; } workgroupBarrier(); }
+  if (l == 0u) { part[w.x] = red[0]; }
+}
+@compute @workgroup_size(256) fn total(@builtin(local_invocation_index) l: u32) {
+  var v = vec4<f32>(0.0);
+  for (var k = l; k < E.nW; k += 256u) { v += part[k]; }
+  red[l] = v; workgroupBarrier();
+  for (var s = 128u; s > 0u; s >>= 1u) { if (l < s) { red[l] += red[l + s]; } workgroupBarrier(); }
+  if (l == 0u) {
+    var cs = 0.0; for (var a = 0u; a < E.nA; a++) { cs += corr[a]; }
+    let sc = (E.Ne - cs) / max(red[0].x, 1e-30); var mu = -sc * red[0].yzw;
+    for (var a = 0u; a < E.nA; a++) { mu += (atm[2u * a + 1u].w - corr[a]) * atm[2u * a].xyz; }
+    part[E.nW] = vec4<f32>(mu, sc);
+  }
+}
+@compute @workgroup_size(256) fn rhs(@builtin(global_invocation_id) g: vec3<u32>) {
+  let i = g.x; if (i >= E.M * E.M * E.M) { return; }
+  let T = part[E.nW]; let p = cellPos(i);
+  var nuc = 0.0; var Q = -E.Ne;
+  for (var a = 0u; a < E.nA; a++) { let Z = atm[2u * a + 1u].w; Q += Z; let w3 = max(vec3<f32>(0.0), vec3<f32>(1.0) - abs(p - atm[2u * a].xyz) / E.h); nuc += (Z - corr[a]) * w3.x * w3.y * w3.z; }
+  ebuf[i] = 12.566370614 * (nuc - T.w * ebuf[i]) / E.h;
+  let r = max(length(p), 1.0);
+  phi[i] = Q / r + dot(T.xyz, p) / (r * r * r);
+}
+@compute @workgroup_size(256) fn sor(@builtin(global_invocation_id) g: vec3<u32>) {
+  let i = g.x; let M = E.M; if (i >= M * M * M) { return; }
+  let x = i % M; let y = (i / M) % M; let z = i / (M * M);
+  if (x == 0u || y == 0u || z == 0u || x == M - 1u || y == M - 1u || z == M - 1u || ((x + y + z) & 1u) != E.color) { return; }
+  let s = phi[i - 1u] + phi[i + 1u] + phi[i - M] + phi[i + M] + phi[i - M * M] + phi[i + M * M];
+  phi[i] = mix(phi[i], (s + ebuf[i]) / 6.0, E.omega);
+}`;
+
 const CARD_WGSL = MOL_HEAD.replace(/@group\(0\) @binding\([123]\).*\n/g, '') + /* wgsl */`
 var<workgroup> red: array<f32, 64>;
 @compute @workgroup_size(4, 4, 4)
@@ -392,6 +505,10 @@ struct View {
   p4: vec4<f32>,     // PREVIEW BOOST: k (xyz) and on (w) — while the bow is drawn the field is shown multiplied by e^{ik·x}, the exact boosted state
   p6: vec4<f32>,     // arbitrary slice normal (xyz), finish (w)
   p5: vec4<f32>,     // SURFACE: the stage background colour (xyz) and the output gamma (w) — the theme lives here
+  p7: vec4<f32>,     // iteration 014 B · THE ATOMS: count, bond count, BALLS' SIZE (× r_vdW), STICKS' RADIUS (bohr)
+  p8: vec4<f32>,     // THE POTENTIAL MAP: surface (0 ISO · 1 SAS · 2 SES), probe radius (bohr), RANGE (±φ, a.u.), USE PALETTE
+  p9: vec4<f32>,     // φ's grid: half-width, cells a side, valid (0 · 1), the ISO surface's ρ (a.u.)
+  p10: vec4<f32>,    // the atoms' bounding sphere (centre xyz, radius w)
 };
 @group(0) @binding(0) var<uniform> V: View;
 @group(0) @binding(1) var psiTex: texture_3d<f32>;
@@ -401,6 +518,10 @@ struct View {
 /* the PALETTE: 256 colours around the complex plane, arg ψ = −π at index 0 and +π at 255 (wrapping).
    Written from palette.js; V.p2.z > 0.5 turns it on and the built-in HSV wheel off. */
 @group(0) @binding(5) var<storage, read> pal: array<vec4<f32>, 256>;
+/* iteration 014 B: the atoms (two vec4 each: centre + r_vdW, NEGATIVE for an atom with no bond; sRGB colour + Z) then the bonds (i, j as floats),
+   and φ on its cell-centred grid (x fastest) */
+@group(0) @binding(6) var<storage, read> atm: array<vec4<f32>>;
+@group(0) @binding(7) var<storage, read> phiG: array<f32>;
 
 struct VSOut { @builtin(position) pos: vec4<f32>, @location(0) uv: vec2<f32> };
 @vertex fn vs(@builtin(vertex_index) i: u32) -> VSOut {
@@ -548,6 +669,149 @@ fn dustPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, mode: u3
   }
   return vec4<f32>(col, 1.0 - T);
 }
+/* ── THE THREE VIEWS (iteration 014 B) ─────────────────────────────────────────────────────────────────────────────
+ * BALLS: the CPK spheres (r_vdW × SIZE), ray-traced exactly, no sticks.  STICKS: a capsule per bond, each half in its own atom's colour,
+ * RADIUS wide (an atom with no bond is a ball of that radius).  ESP: THE POTENTIAL MAP — a surface (the density's ISO at ρ = ISO/30 a.u.; the
+ * SAS, r_vdW + PROBE; the SES, the vdW spheres' log-sum-exp union filleted by the probe) coloured by φ(r) read from phiG (the Poisson pass or
+ * a volume's grid), translucent by EXPOSURE over the STICKS inside it.  One key light; HUE rotates the colours.  All return before the march,
+ * whose text is untouched (THE LOCK). */
+fn hueRot(c: vec3<f32>, h: f32) -> vec3<f32> {
+  if (h == 0.0) { return c; }
+  let k = vec3<f32>(0.57735027); let a = h * 6.283185307; let ca = cos(a);
+  return clamp(c * ca + cross(k, c) * sin(a) + k * dot(k, c) * (1.0 - ca), vec3<f32>(0.0), vec3<f32>(1.0));
+}
+fn atomLit(c: vec3<f32>, n: vec3<f32>, rd: vec3<f32>) -> vec3<f32> {
+  let L = normalize(-rd + 0.55 * V.up.xyz + 0.35 * V.right.xyz);
+  let d = max(dot(n, L), 0.0); let sp = pow(max(dot(reflect(-L, n), -rd), 0.0), 40.0);
+  return c * (0.32 + 0.68 * d) + vec3<f32>(0.32 * sp);
+}
+fn sphereHit(ro: vec3<f32>, rd: vec3<f32>, c: vec3<f32>, r: f32) -> vec2<f32> {
+  let oc = ro - c; let b = dot(oc, rd); let h = b * b - (dot(oc, oc) - r * r);
+  if (h < 0.0) { return vec2<f32>(1e30, -1e30); }
+  let q = sqrt(h); return vec2<f32>(-b - q, -b + q);
+}
+fn capsuleHit(ro: vec3<f32>, rd: vec3<f32>, pa: vec3<f32>, pb: vec3<f32>, r: f32) -> f32 {   // Quilez's ray–capsule: the nearest t, or −1
+  let ba = pb - pa; let oa = ro - pa;
+  let baba = dot(ba, ba); let bard = dot(ba, rd); let baoa = dot(ba, oa); let rdoa = dot(rd, oa); let oaoa = dot(oa, oa);
+  let a = max(baba - bard * bard, 1e-12); let b = baba * rdoa - baoa * bard; let c = baba * oaoa - baoa * baoa - r * r * baba;
+  let h = b * b - a * c;
+  if (h >= 0.0) {
+    let t = (-b - sqrt(h)) / a; let y = baoa + t * bard;
+    if (y > 0.0 && y < baba) { return t; }
+    let oc = select(ro - pb, oa, y <= 0.0);
+    let b2 = dot(rd, oc); let h2 = b2 * b2 - (dot(oc, oc) - r * r);
+    if (h2 > 0.0) { return -b2 - sqrt(h2); }
+  }
+  return -1.0;
+}
+fn atomColour(i: u32) -> vec3<f32> { return hueRot(atm[2u * i + 1u].rgb, V.p2.x); }
+/* the nearest ball or stick on the ray inside [t0, tf]: (lit rgb, t), t = 1e30 when none */
+fn ballsOrSticks(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, sticks: bool) -> vec4<f32> {
+  let nA = u32(V.p7.x); let nB = u32(V.p7.y);
+  let bs = sphereHit(ro, rd, V.p10.xyz, V.p10.w);
+  if (bs.y < t0 || bs.x > tf) { return vec4<f32>(0.0, 0.0, 0.0, 1e30); }
+  var best = 1e30; var col = vec3<f32>(0.0); var nrm = vec3<f32>(0.0);
+  if (!sticks) {
+    for (var i = 0u; i < nA; i++) {
+      let A = atm[2u * i]; let hit = sphereHit(ro, rd, A.xyz, abs(A.w) * V.p7.z);
+      var t = hit.x; var n = vec3<f32>(0.0);
+      if (hit.x < t0 && hit.y > t0) { t = t0; n = -rd; } else { n = normalize(ro + rd * t - A.xyz); }   // a CLIP cut: the flat face
+      if (hit.y >= hit.x && t >= t0 && t < tf && t < best) { best = t; nrm = n; col = atomColour(i); }
+    }
+  } else {
+    let r = V.p7.w;
+    for (var k = 0u; k < nB; k++) {
+      let B = atm[2u * nA + k]; let i = u32(B.x); let j = u32(B.y);
+      let pa = atm[2u * i].xyz; let pb = atm[2u * j].xyz; let pm = 0.5 * (pa + pb);
+      for (var e = 0u; e < 2u; e++) {
+        let p0 = select(pb, pa, e == 0u); let t = capsuleHit(ro, rd, p0, pm, r);
+        if (t >= t0 && t < tf && t < best) {
+          best = t; col = atomColour(select(j, i, e == 0u));
+          let ba = pm - p0; let q = ro + rd * t - p0; let h = clamp(dot(q, ba) / max(dot(ba, ba), 1e-12), 0.0, 1.0); nrm = (q - h * ba) / r;
+        }
+      }
+    }
+    for (var i = 0u; i < nA; i++) {                                    // a lone atom (its radius stored negative) is a ball of RADIUS
+      let A = atm[2u * i];
+      if (A.w >= 0.0) { continue; }
+      let hit = sphereHit(ro, rd, A.xyz, r);
+      if (hit.y >= hit.x && hit.x >= t0 && hit.x < tf && hit.x < best) { best = hit.x; col = atomColour(i); nrm = normalize(ro + rd * hit.x - A.xyz); }
+    }
+  }
+  if (best >= 1e30) { return vec4<f32>(0.0, 0.0, 0.0, 1e30); }
+  var c = atomLit(col, nrm, rd);
+  if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
+  return vec4<f32>(c, best);
+}
+/* THE SURFACES' distance: SAS = min_A |p − R_A| − (r_A + probe); SES = −k·ln Σ e^{−(|p − R_A| − r_A)/k}, k = 0.3·probe (1-Lipschitz: sphere-traceable) */
+fn surfDist(p: vec3<f32>, ses: bool) -> f32 {
+  let nA = u32(V.p7.x); let pr = V.p8.y;
+  if (!ses) { var d = 1e30; for (var i = 0u; i < nA; i++) { let A = atm[2u * i]; d = min(d, length(p - A.xyz) - (abs(A.w) + pr)); } return d; }
+  let k = max(0.3 * pr, 0.05); var m = 1e30; var sum = 0.0;
+  for (var i = 0u; i < nA; i++) { let A = atm[2u * i]; m = min(m, length(p - A.xyz) - abs(A.w)); }
+  for (var i = 0u; i < nA; i++) { let A = atm[2u * i]; sum += exp(-((length(p - A.xyz) - abs(A.w)) - m) / k); }
+  return m - k * log(sum);
+}
+fn phiAt(p: vec3<f32>) -> f32 {
+  let M = u32(V.p9.y); let hh = V.p9.x; let h = 2.0 * hh / f32(M);
+  let g = clamp((p + vec3<f32>(hh)) / h - vec3<f32>(0.5), vec3<f32>(0.0), vec3<f32>(f32(M) - 1.001));
+  let i0 = vec3<u32>(floor(g)); let f = g - floor(g);
+  var v = 0.0;
+  for (var c = 0u; c < 8u; c++) {
+    let o = vec3<u32>(c & 1u, (c >> 1u) & 1u, c >> 2u); let w = select(vec3<f32>(1.0) - f, f, o == vec3<u32>(1u)); let q = min(i0 + o, vec3<u32>(M - 1u));
+    v += w.x * w.y * w.z * phiG[q.x + M * (q.y + M * q.z)];
+  }
+  return v;
+}
+/* the map's colour: the standard ramp RED (φ < 0, electron-rich) → yellow → green → cyan → BLUE (φ > 0), or USE PALETTE's ramp end to end */
+fn espColour(phi: f32) -> vec3<f32> {
+  let u = 0.5 + 0.5 * clamp(phi / max(V.p8.z, 1e-9), -1.0, 1.0);
+  if (V.p8.w > 0.5) { let x = fract(u * 0.99609375 + V.p2.x) * 255.0; let i0 = u32(floor(x)); return mix(pal[i0].rgb, pal[min(i0 + 1u, 255u)].rgb, fract(x)); }
+  let s = u * 4.0; let k = min(u32(s), 3u); let f = s - f32(k);
+  var r = array<vec3<f32>, 5>(vec3<f32>(0.86, 0.09, 0.07), vec3<f32>(0.98, 0.86, 0.12), vec3<f32>(0.22, 0.80, 0.26), vec3<f32>(0.10, 0.80, 0.90), vec3<f32>(0.07, 0.22, 0.86));
+  return hueRot(mix(r[k], r[k + 1u], f), V.p2.x);
+}
+fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<f32>) -> vec3<f32> {
+  let inner = ballsOrSticks(ro, rd, t0, tf, true);
+  let surf = u32(V.p8.x);
+  var th = 1e30; var n = vec3<f32>(0.0);
+  if (surf == 0u) {                                                  // the density's ISO surface: march, then bisect
+    let rs = V.p9.w; let steps = max(V.fwd.w, 8.0); let ds = (tf - t0) / steps; var ta = t0;
+    for (var i = 0u; i < 512u; i++) {
+      if (f32(i) >= steps) { break; }
+      let tb = ta + ds; let s = textureSampleLevel(psiTex, samp, (ro + rd * tb + vec3<f32>(half)) / (2.0 * half), 0.0).rg;
+      if (dot(s, s) >= rs) {
+        var lo = ta; var hi = tb;
+        for (var k = 0u; k < 6u; k++) { let tm = 0.5 * (lo + hi); let sm = textureSampleLevel(psiTex, samp, (ro + rd * tm + vec3<f32>(half)) / (2.0 * half), 0.0).rg; if (dot(sm, sm) >= rs) { hi = tm; } else { lo = tm; } }
+        th = hi; let uvw = (ro + rd * th + vec3<f32>(half)) / (2.0 * half); let e = 1.2 / f32(textureDimensions(psiTex).x);
+        n = -normalize(vec3<f32>(rhoAt(psiTex, samp, uvw + vec3<f32>(e, 0.0, 0.0)) - rhoAt(psiTex, samp, uvw - vec3<f32>(e, 0.0, 0.0)),
+                                 rhoAt(psiTex, samp, uvw + vec3<f32>(0.0, e, 0.0)) - rhoAt(psiTex, samp, uvw - vec3<f32>(0.0, e, 0.0)),
+                                 rhoAt(psiTex, samp, uvw + vec3<f32>(0.0, 0.0, e)) - rhoAt(psiTex, samp, uvw - vec3<f32>(0.0, 0.0, e))) + vec3<f32>(1e-12));
+        break;
+      }
+      ta = tb;
+    }
+  } else {                                                           // SAS · SES: sphere-traced inside the bounding sphere grown by the probe
+    let ses = surf == 2u; let bs = sphereHit(ro, rd, V.p10.xyz, V.p10.w + V.p8.y);
+    var t = max(t0, bs.x); let te = min(tf, bs.y); let eps = 2e-4 * half;
+    for (var i = 0u; i < 160u; i++) {
+      if (t > te) { break; }
+      let d = surfDist(ro + rd * t, ses);
+      if (d < eps) { th = t; break; }
+      t += max(d, eps);
+    }
+    if (th < 1e30) { let p = ro + rd * th; let e = 0.02; n = normalize(vec3<f32>(surfDist(p + vec3<f32>(e, 0.0, 0.0), ses) - surfDist(p - vec3<f32>(e, 0.0, 0.0), ses),
+                                                                                   surfDist(p + vec3<f32>(0.0, e, 0.0), ses) - surfDist(p - vec3<f32>(0.0, e, 0.0), ses),
+                                                                                   surfDist(p + vec3<f32>(0.0, 0.0, e), ses) - surfDist(p - vec3<f32>(0.0, 0.0, e), ses)) + vec3<f32>(1e-12)); }
+  }
+  let back = select(bg, inner.rgb, inner.w < 1e30);
+  if (th >= 1e30 || inner.w < th) { return back; }
+  var c = vec3<f32>(0.62);                                           // φ not ready: a grey surface
+  if (V.p9.z > 0.5) { c = espColour(phiAt(ro + rd * th)); }
+  if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
+  if (V.p6.w < 1.5) { c = atomLit(c, n, rd); }                       // MATTE: the map's colour unlit
+  return mix(back, c, clamp(0.8 * V.p0.y, 0.05, 1.0));
+}
 @fragment fn fs(in: VSOut) -> @location(0) vec4<f32> {
   let pxA = abs(dpdy(in.uv.y)) * V.up.w;                          // DUST: one pixel's angle (uniform control flow: before any branch)
   let half = V.cam.w;
@@ -584,6 +848,13 @@ fn dustPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, mode: u3
     var od = pow(max(d.rgb + bg * (1.0 - d.a), vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     od = select(od, bg, od != od);
     return vec4<f32>(od + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
+  }
+  if (style >= 9u && style <= 11u && V.p7.x > 0.5) {                // iteration 014 B: BALLS · STICKS · ESP draw the atoms (none set: the march below, as CLOUD)
+    var oc = bg;
+    if (style == 11u) { oc = espPixel(ro, rd, t0, tf, half, bg); } else { let m = ballsOrSticks(ro, rd, t0, tf, style == 10u); oc = select(bg, m.rgb, m.w < 1e30); }
+    var om = pow(max(oc, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
+    om = select(om, bg, om != om);
+    return vec4<f32>(om + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
   }
   let kq = V.p3.w;                                                // THE KNEE's q (0 at the shipped 0.6: the old compositing, untouched)
   var tau = 0.0;
@@ -1114,7 +1385,9 @@ export async function createField(canvas, opts = {}) {
     { binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float', viewDimension: '3d' } },
     { binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
     { binding: 4, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
-    { binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } }] });
+    { binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
+    { binding: 6, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
+    { binding: 7, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } }] });
   const renderLayout = device.createPipelineLayout({ bindGroupLayouts: [renderBGL] });
   const lineBGL = device.createBindGroupLayout({ entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }, { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }, { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }] });
   const lineLayout = device.createPipelineLayout({ bindGroupLayouts: [lineBGL] });
@@ -1164,7 +1437,7 @@ export async function createField(canvas, opts = {}) {
   const modesBuf = [0, 1].map(() => device.createBuffer({ size: MAX_MODES * MODE_BYTES, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }));
   const radialBuf = device.createBuffer({ size: 48 * 256 * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });   // 43 rows in use: the 6 × 6 (n_r, l) grid and n = 7's (6, 0) and (0, 6) at 36 + l (atoms.js rowOf)
   const statsBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC });
-  const viewBuf = device.createBuffer({ size: 11 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const viewBuf = device.createBuffer({ size: 15 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   const vpBuf = device.createBuffer({ size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   /* the phase PALETTE: 256 RGBA colours around the complex plane (see palette.js) */
   const palBuf = device.createBuffer({ size: 256 * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
@@ -1206,7 +1479,7 @@ export async function createField(canvas, opts = {}) {
   /* the per-frame scratch (wave 45): the frame path allocates nothing — the params block, the stats zero, the view block,
      the three matrices and the line vertices are written in place */
   const PARAMS = new ArrayBuffer(32), PARAMS_U = new Uint32Array(PARAMS), PARAMS_F = new Float32Array(PARAMS), ZERO_U32 = new Uint32Array([0]);
-  const VIEW = new Float32Array(44), M_PERSP = new Float32Array(16), M_LOOK = new Float32Array(16), M_VP = new Float32Array(16);
+  const VIEW = new Float32Array(60), M_PERSP = new Float32Array(16), M_LOOK = new Float32Array(16), M_VP = new Float32Array(16);
   /* LATTICE MESH (wave 108 zero-allocation law): pre-allocated unit grid lines.
      Radius 8 grid (17^3 nodes). Segments: X (16*17*17), Y (17*16*17), Z (17*17*16) = 13872 segments. */
   const LATTICE_SEGS = new Int8Array(13872 * 6);
@@ -1233,7 +1506,7 @@ export async function createField(canvas, opts = {}) {
   /* THE CARD (0.6.5 X2): a worker's volume OWNS the field while set — one storage buffer made on the first card and reused, CARD_WGSL compiled then */
   let card = null, cardDirty = false, cardBuf = null, cardPipe = null, cardBind = null, cardParams = null;
   let half = 7, space = 0, generation = 0, refGeneration = -1, refValid = false;
-  const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0, molDispatches: 0, molAO: 0, molMs: 0 };
+  const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0, molDispatches: 0, molAO: 0, molMs: 0, espRuns: 0, espMs: 0 };
   let dprCap = 2;                       // the device-pixel ceiling: 2 on a desktop, dropped at the phone breakpoint (wave 51)
   let stepCap = Infinity;               // a runtime presentation budget; the saved/project ray-step choice remains mat.steps
   /* PACE (P1, 2026-09-25) · frames submitted whose onSubmittedWorkDone has not resolved — counted only where completion is
@@ -1270,6 +1543,92 @@ export async function createField(canvas, opts = {}) {
     if (eqWritten !== eqTable) { eqWritten = eqTable; EQ_F.set(eqTable.gamma); EQ_F[EQ_G] = eqTable.kappa; EQ_F[EQ_G + 1] = eqTable.mode; EQ_F[EQ_G + 2] = 2e-4; device.queue.writeBuffer(eqBuf, 0, EQ_F); }   // floor: the signed view's 2·10⁻⁴ of the local within-shell ρ
     return true;
   }
+  function bindRender() {
+    renderBind = device.createBindGroup({ layout: renderBGL, entries: [
+      { binding: 0, resource: { buffer: viewBuf } }, { binding: 1, resource: psiTex.createView({ dimension: '3d' }) },
+      { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } },
+      { binding: 5, resource: { buffer: palBuf } }, { binding: 6, resource: { buffer: atomBuf } }, { binding: 7, resource: { buffer: phiBuf } }] });
+  }
+  /* ── THE ATOMS AND THE POTENTIAL (iteration 014 B) ─────────────────────────────────────────────────────────────────────
+   * setAtoms(atoms, charge) uploads the molecule BALLS, STICKS and ESP draw: two vec4 an atom (centre + r_vdW, negative for an atom no bond
+   * reaches; CPK sRGB + Z) and then skeleton.js' bonds (bondsOf, the one rule) — only when the atoms change.  φ is the Poisson pass's (ESP_WGSL,
+   * run while ESP is drawn, when the volume or the atoms changed: at once, then at most once a second while the density moves, unless
+   * mat.espLive) or a volume's grid (setEspGrid, which then owns it). */
+  let espM = 0, espW = 0;
+  let atomBuf = device.createBuffer({ size: 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  let phiBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  let atomsIn = null, atomsKey = '', atomsN = 0, bondsN = 0, atomsV = 0, atomsNe = 0, atomsBound = [0, 0, 0, 0, 0], atomsAbs = 0;
+  const phi = { src: 'poisson', ok: false, M: 0, half: 0, key: '', at: 0, atomsV: -1, pending: 0 };
+  let espPipes = null, espBGL = null, espParams = null, espE = null, espPart = null, espCorr = null, espBind = null;
+  const ESP_P = new ArrayBuffer(48), ESP_PU = new Uint32Array(ESP_P), ESP_PF = new Float32Array(ESP_P);
+  const hex3 = (h) => { const x = h.replace('#', ''), f = x.length === 3 ? x.split('').map((c) => c + c).join('') : x; return [0, 2, 4].map((i) => parseInt(f.slice(i, i + 2), 16) / 255); };
+  function setAtoms(atoms, charge = 0) {
+    if (atoms === atomsIn) return atomsN;
+    atomsIn = atoms; atoms = atoms || [];
+    const key = atoms.map((a) => `${a.Z},${a.x.toFixed(4)},${a.y.toFixed(4)},${a.z.toFixed(4)}`).join(';') + '|' + charge;
+    if (key === atomsKey) return atomsN;
+    atomsKey = key; atomsV++; atomsN = Math.min(atoms.length, 1024);
+    const A = atoms.slice(0, atomsN), bonds = bondsOf(A), lone = new Uint8Array(atomsN).fill(1); for (const [i, j] of bonds) { lone[i] = 0; lone[j] = 0; }
+    bondsN = bonds.length;
+    const f = new Float32Array(Math.max(8, (2 * atomsN + bondsN) * 4)); let Z = 0;
+    const c = [0, 0, 0]; for (const a of A) { c[0] += a.x / atomsN; c[1] += a.y / atomsN; c[2] += a.z / atomsN; }
+    let dmax = 0, rmax = 0;
+    A.forEach((a, i) => { const r = vdwRadius(a.Z), col = hex3(CPK[a.Z] || '#ff1493'); f.set([a.x, a.y, a.z, lone[i] ? -r : r, col[0], col[1], col[2], a.Z], 8 * i); Z += a.Z;
+      dmax = Math.max(dmax, Math.hypot(a.x - c[0], a.y - c[1], a.z - c[2])); rmax = Math.max(rmax, r); atomsAbs = Math.max(i ? atomsAbs : 0, Math.abs(a.x), Math.abs(a.y), Math.abs(a.z)); });
+    bonds.forEach(([i, j], k) => f.set([i, j, 0, 0], 4 * (2 * atomsN + k)));
+    atomsNe = Z - charge; atomsBound = [c[0], c[1], c[2], dmax, rmax];
+    if (atomBuf.size < f.byteLength) { atomBuf.destroy(); atomBuf = device.createBuffer({ size: f.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }); if (psiTex) bindRender(); espBind = null; }
+    device.queue.writeBuffer(atomBuf, 0, f);
+    return atomsN;
+  }
+  function phiBufFor(n) { const bytes = Math.max(16, n ** 3 * 4); if (phiBuf.size < bytes) { phiBuf.destroy(); phiBuf = device.createBuffer({ size: bytes, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }); if (psiTex) bindRender(); espBind = null; } }
+  function setEspGrid(g) {
+    if (g === phi.gridIn) return g ? phi : null;
+    phi.gridIn = g;
+    if (!g) { if (phi.src === 'grid') { phi.src = 'poisson'; phi.ok = false; phi.key = ''; } return null; }
+    if (!(g.n >= 2) || !(g.half > 0) || !g.data || g.data.length !== g.n ** 3) throw new Error('field: an ESP grid needs { n ≥ 2, half > 0, data: n³ }');
+    phiBufFor(g.n); device.queue.writeBuffer(phiBuf, 0, g.data instanceof Float32Array ? g.data : new Float32Array(g.data));
+    Object.assign(phi, { src: 'grid', ok: true, M: g.n, half: g.half, key: '' }); return phi;
+  }
+  function encodeEsp(enc, mat) {
+    if ((mat.style | 0) !== STYLE.esp || !atomsN || phi.src !== 'poisson' || !psiTex) return false;
+    const key = generation + ':' + atomsV + ':' + half + ':' + res, now = performance.now();
+    if (key === phi.key || (!mat.espLive && phi.ok && phi.atomsV === atomsV && phi.key.endsWith(':' + atomsV + ':' + half + ':' + res) && now - phi.at < 1000)) return false;
+    if (!espPipes) {
+      espBGL = device.createBindGroupLayout({ entries: [
+        { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
+        { binding: 1, visibility: GPUShaderStage.COMPUTE, texture: { sampleType: 'float', viewDimension: '3d' } },
+        { binding: 2, visibility: GPUShaderStage.COMPUTE, sampler: { type: 'filtering' } },
+        { binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },
+        ...[4, 5, 6, 7].map((binding) => ({ binding, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }))] });
+      const module = device.createShaderModule({ code: ESP_WGSL }), layout = device.createPipelineLayout({ bindGroupLayouts: [espBGL] });
+      espCorr = device.createBuffer({ size: 1024 * 4, usage: GPUBufferUsage.STORAGE });
+      espPipes = Object.fromEntries(['elec', 'core', 'total', 'rhs', 'sor'].map((e) => [e, device.createComputePipeline({ layout, compute: { module, entryPoint: e } })]));
+      espParams = [0, 1].map(() => device.createBuffer({ size: 48, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }));
+    }
+    const hh = Math.min(half, atomsAbs + 8), M = Math.max(64, Math.min(128, Math.ceil(2 * hh / 0.35 / 16) * 16));
+    if (M > espM) { espM = M; espW = Math.ceil(M ** 3 / 256); if (espE) { espE.destroy(); espPart.destroy(); }
+      espE = device.createBuffer({ size: M ** 3 * 4, usage: GPUBufferUsage.STORAGE }); espPart = device.createBuffer({ size: (espW + 1) * 16, usage: GPUBufferUsage.STORAGE }); espBind = null; }
+    const W = Math.ceil(M ** 3 / 256);
+    phiBufFor(M);
+    if (!espBind) espBind = espParams.map((pb) => device.createBindGroup({ layout: espBGL, entries: [{ binding: 0, resource: { buffer: pb } },
+      { binding: 1, resource: psiTex.createView({ dimension: '3d' }) }, { binding: 2, resource: sampler }, { binding: 3, resource: { buffer: atomBuf } },
+      { binding: 4, resource: { buffer: espE } }, { binding: 5, resource: { buffer: espPart } }, { binding: 6, resource: { buffer: phiBuf } }, { binding: 7, resource: { buffer: espCorr } }] }));
+    ESP_PU[0] = M; ESP_PU[1] = atomsN; ESP_PU[3] = W; ESP_PF[4] = hh; ESP_PF[5] = 2 * hh / M; ESP_PF[6] = atomsNe; ESP_PF[7] = 2 / (1 + Math.sin(Math.PI / M)); ESP_PF[8] = half;
+    for (const c of [0, 1]) { ESP_PU[2] = c; device.queue.writeBuffer(espParams[c], 0, ESP_P); }
+    const pass = enc.beginComputePass();
+    pass.setBindGroup(0, espBind[0]);
+    pass.setPipeline(espPipes.elec); pass.dispatchWorkgroups(W);
+    pass.setPipeline(espPipes.core); pass.dispatchWorkgroups(atomsN);
+    pass.setPipeline(espPipes.total); pass.dispatchWorkgroups(1);
+    pass.setPipeline(espPipes.rhs); pass.dispatchWorkgroups(W);
+    pass.setPipeline(espPipes.sor);
+    for (let k = 0; k < 3 * M; k++) for (const c of [0, 1]) { pass.setBindGroup(0, espBind[c]); pass.dispatchWorkgroups(W); }
+    pass.end();
+    Object.assign(phi, { ok: true, M, half: hh, key, at: now, atomsV, pending: now }); stats.espRuns++;
+    return true;
+  }
+  function espDone() { if (!phi.pending) return; const t = phi.pending; phi.pending = 0; device.queue.onSubmittedWorkDone().then(() => { stats.espMs = performance.now() - t; }, () => {}); }
   function setResolution(n) {
     if (n === res) return;
     res = n;
@@ -1277,10 +1636,7 @@ export async function createField(canvas, opts = {}) {
     const mk = () => device.createTexture({ size: [n, n, n], dimension: '3d', format: 'rgba16float', usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC });
     psiTex = mk(); refTex = mk();
     bindCompute();
-    renderBind = device.createBindGroup({ layout: renderBGL, entries: [
-      { binding: 0, resource: { buffer: viewBuf } }, { binding: 1, resource: psiTex.createView({ dimension: '3d' }) },
-      { binding: 2, resource: refTex.createView({ dimension: '3d' }) }, { binding: 3, resource: sampler }, { binding: 4, resource: { buffer: statsBuf } },
-      { binding: 5, resource: { buffer: palBuf } }] });
+    bindRender(); espBind = null;
     molBind = molPipelines.map(molBindFor);
     molDirty = molDirty || !!molSpec; cardDirty = !!card; cardBind = null; stats.resolution = n;
     refValid = false;
@@ -1364,6 +1720,11 @@ export async function createField(canvas, opts = {}) {
     const snLen = Math.hypot(sn[0], sn[1], sn[2]) || 1;
     v[36]=sn[0]/snLen; v[37]=sn[1]/snLen; v[38]=sn[2]/snLen;
     v[39]=mat.finish==='glass'?1:mat.finish==='matte'?2:0;
+    const asz = Number.isFinite(mat.atomSize) ? mat.atomSize : 1, srad = Number.isFinite(mat.stickR) ? mat.stickR : STICK_R, prb = Number.isFinite(mat.probe) ? mat.probe : PROBE_R;   // iteration 014 B: absent keys read the defaults
+    v[44] = atomsN; v[45] = bondsN; v[46] = asz; v[47] = srad;
+    v[48] = ESP_SURF.indexOf(mat.espSurf) < 0 ? 0 : ESP_SURF.indexOf(mat.espSurf); v[49] = prb; v[50] = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE; v[51] = mat.espPal ? 1 : 0;
+    v[52] = phi.half; v[53] = phi.M; v[54] = phi.ok ? 1 : 0; v[55] = (mat.iso === undefined ? 0.06 : mat.iso) / 30;
+    v[56] = atomsBound[0]; v[57] = atomsBound[1]; v[58] = atomsBound[2]; v[59] = atomsBound[3] + Math.max(atomsBound[4] * Math.max(asz, 1), srad) + 0.01;
     perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lensShift(E, aspect, v, 12, M_PERSP);   // S2: the lane and the principal point, or nothing at p = 0
     device.queue.writeBuffer(viewBuf, 0, v);
     lookAt(cam, E.target, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);
@@ -1581,8 +1942,9 @@ export async function createField(canvas, opts = {}) {
     if (modes) { stats.modesRendered = encodeCompute(enc, 0, modes); generation++; stats.reconstructs++; stats.generation = generation; stats.lastReconstructWall = t0; }
     }
     const w = canvas.width, h = canvas.height;
+    encodeEsp(enc, mat);                                          // iteration 014 B3: φ, after the volume it reads and before the present that reads it
     if (w > 0 && h > 0) { encodeRender(enc, ctx.getCurrentTexture().createView(), obs, mat, w, h); stats.presents++; }
-    device.queue.submit([enc.finish()]);
+    device.queue.submit([enc.finish()]); espDone();
     if (paced) { inFlight++; const ts = performance.now(); device.queue.onSubmittedWorkDone().then(() => { inFlight--; queueMs = performance.now() - ts; }, landed); }
     stats.lastEncodeMs = performance.now() - t0;
   }
@@ -1602,6 +1964,7 @@ export async function createField(canvas, opts = {}) {
       if (!out._rp) { out._rp = makeRenderPipeline('rgba8unorm'); out._lp = makeLinePipeline('rgba8unorm'); }
       const rp = makeRenderPipeline('rgba8unorm', mat), lp = out._lp;   // K2: selected synchronously — nothing awaits before the submit
       const enc = device.createCommandEncoder();
+      encodeEsp(enc, mat);
       writeView(obs, mat, w, h); const sl = writeLines(mat);
       const pass = enc.beginRenderPass({ colorAttachments: [{ view: tex.createView(), loadOp: 'clear', clearValue: { r: 0, g: 0, b: 0, a: 1 }, storeOp: 'store' }] });
       pass.setPipeline(rp); pass.setBindGroup(0, renderBind); pass.draw(3);
@@ -1942,6 +2305,9 @@ export async function createField(canvas, opts = {}) {
     ok: !b.lost, device, adapter, format, stats,
     frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, errorField, lineColors, linePixels,
     setResolution, setMolecule, setMoleculeMatrix, reconstructMolecule, moleculeThroughput,
+    /** iteration 014 B: the atoms BALLS · STICKS · ESP draw ([{ Z, x, y, z }] in bohr, or null) and the molecule's charge; a volume's φ grid
+     *  ({ n, half, data: Float32Array(n³) }, cell centres, x fastest — volumes-format.js espGrid) or null for the Poisson pass; φ's state */
+    setAtoms, setEspGrid, espState() { return { src: phi.src, ok: phi.ok, M: phi.M, half: phi.half, runs: stats.espRuns, ms: stats.espMs, atoms: atomsN, bonds: bondsN, Ne: atomsNe }; },
     /** K2 · THE EXPORT PIN: pinRenderPipeline(true) … (false), nested by depth — while held every draw takes the generic
      *  pipeline, so a specialised compile that resolves mid-run can never change an export's pipeline.  Returns the depth. */
     pinRenderPipeline(on) { pinDepth = Math.max(0, pinDepth + (on ? 1 : -1)); return pinDepth; },

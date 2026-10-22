@@ -22,7 +22,7 @@ import { el, device as kitDevice } from './mir/kit.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
-import { createSkeleton, centroid } from './skeleton.js';   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
+import { createSkeleton, centroid } from './skeleton.js'; import { moleculeCharge } from './molecules.js';   // iteration 014 B: the atoms BALLS · STICKS · ESP draw (field.setAtoms) and the molecule's charge   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
 import { createMolecules } from './windows/molecules.js'; import { createStageWords } from './shell/stage-words.js'; import { createModSeam } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
 import { calculusMarkdown, beadOf, covariance } from './calculus.js';
 import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
@@ -434,7 +434,7 @@ export async function boot(dom) {
     const tFrame0 = performance.now();
     if (tier >= TIER.PRESENT && field.ok) {                          // PRESENTATION
       field.setStepCap(tabletMotion ? tablet.steps : Infinity);   // full saved quality returns on the first still frame
-      tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); field.frame({ modes, refModes: app.state.pendingRef, obs, mat, molecule: !!(app.state.molSession && app.state.molSession.molecule) }); });   // ONE owner flag: the session holds the molecule, so the session says whether the volume is molecular
+      tick('field', () => { field.resize(quality.scale * (quality.auto ? quality.autoScale : 1)); if (mat.style >= STYLE.balls && field.setAtoms) { field.setAtoms(app.state.chem.on ? app.state.chem.atomsNow() : null, app.state.chem.on ? moleculeCharge(app.state.chem.preset()) : 0); field.setEspGrid(app.state.chem.on ? app.state.chem.espGrid() : null); } field.frame({ modes, refModes: app.state.pendingRef, obs, mat, molecule: !!(app.state.molSession && app.state.molSession.molecule) }); });   // ONE owner flag: the session holds the molecule, so the session says whether the volume is molecular
       app.state.pendingRef = null;
       stats.presents++; stats.lastEncodeMs = field.stats.lastEncodeMs;
     }

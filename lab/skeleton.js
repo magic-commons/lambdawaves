@@ -8,10 +8,8 @@
  * Iteration 012 R1 (Josh 10-20): SKELETON is BALL AND STICK — `opacity` (its OPACITY knob) scales the beads and bonds; `sticks` false draws the atoms'
  * dipole arrow alone (MARKS › DIPOLE, its own switch now: the "weird arrow" Josh asked to separate). */
 import { cameraKey, toScreen } from './field.js';
-import { ANGSTROM } from './md.js'; import { moleculeCharge } from './molecules.js';
+import { ANGSTROM } from './md.js'; import { moleculeCharge } from './molecules.js'; import { RCOV, CPK } from './elements.js';   // iteration 014 B: the element table; the skeleton's own bondsOf (D6: orders, rings, ionic, H-bonds) is below — field.js' sticks read elements.js' length rule   // iteration 014 B: the element table lives in elements.js
 
-const RCOV = [0, 0.31, 0.28, 1.28, 0.96, 0.84, 0.76, 0.71, 0.66, 0.57, 0.58, 1.66, 1.41, 1.21, 1.11, 1.07, 1.05, 1.02, 1.06, 2.03, 1.76, 1.70, 1.60, 1.53, 1.39, 1.39, 1.32, 1.26, 1.24, 1.32, 1.22, 1.22, 1.20, 1.19, 1.20, 1.20, 1.16].map((r) => r * ANGSTROM);
-const CPK = { 1: '#fff', 3: '#cc80ff', 4: '#c2ff00', 5: '#ffb5b5', 6: '#909090', 7: '#3050f8', 8: '#ff0d0d', 9: '#90e050', 11: '#ab5cf2', 12: '#8aff00', 13: '#bfa6a6', 14: '#f0c8a0', 15: '#ff8000', 16: '#ffff30', 17: '#1ff01f', 29: '#c88033', 30: '#7d80b0', 32: '#668f8f', 33: '#bd80e3', 34: '#ffa100', 35: '#a62929' };
 
 /* ── iteration 014 D6 · THE BONDS (Josh: "Let the Ball and stick model show double/triple bonds, whether a bond is sigma, or ionic, or different types
    of attraction, resonances (like benzene) and other 'sticks' you could think of. Let these be a customizable feature to be in the informational").

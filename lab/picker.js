@@ -49,7 +49,7 @@ const fmtBytes = (b) => (b >= 1e9 ? (b / 1e9).toFixed(b >= 1e10 ? 0 : 1) + ' GB'
 
 /* iteration 012 L1 · the Picker's own PREFERENCE (settings-store.js FAMILIES, never a project or a link): SHOW LABELS for the atoms (on: the symbol
    and Z, as before) and for the molecules (on: the formula on every tile, the name under it on a hover) */
-const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0 };   // hue: THE HUE ring's turn in degrees (L2)
+const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0, look: 'density' };   // look: THE PICTURES' STYLE (iteration 014 B4)   // hue: THE HUE ring's turn in degrees (L2)
 const readPrefs = () => { try { return Object.assign({}, PREF0, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (_) { return Object.assign({}, PREF0); } };
 const writePrefs = (p) => { try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (_) { /* a blocked profile keeps it for the visit */ } };
 /** an iteration 012 icon (lab/img/icons/<name>.svg), drawn in currentColor through a CSS mask */
@@ -125,6 +125,16 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   }
   const atomOpt = labelToggle(opts, 'atomLabels'), molOpt = labelToggle(opts, 'molLabels');
   let hueShown = 0;   // iteration 014 D2: the CSS sees an unwrapped turn (the nearest twin of the hue to the last one shown), so 359 → 0 glides one degree, never back round the wheel
+  /* iteration 014 B4 · THE PICTURES' STYLE, under the hue ring: a volume molecule's tile shows the variant its row names (`thumbs`, tools/menu-thumbs.mjs
+     --style), else its one picture; the Picker's PREFERENCE `look`, turned by THE HUE ring like every picture */
+  const LOOKS = [['density', 'ρ', 'the density, SIGNED (every molecule has it)'], ['im', 'IM', 'the HOMO, signed: two complementary colours'], ['balls', 'BALLS', 'space-filling CPK balls'], ['sticks', 'STICKS', '3D sticks'], ['esp', 'ESP', 'the electrostatic potential on the SES']];
+  const looks = el('div', 'mm-looks', top); top.insertBefore(looks, tabs); looks.setAttribute('role', 'radiogroup'); looks.setAttribute('aria-label', 'picture style');
+  const lookOf = () => (prefs.look && prefs.look !== 'density' ? prefs.look : null);
+  const paintLooks = () => { for (const b of looks.children) { const on = b.dataset.look === (prefs.look || 'density'); b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); } };
+  for (const [id, word, tip] of LOOKS) { const b = el('button', 'mm-look', looks, word); b.type = 'button'; b.dataset.look = id; b.title = tip; b.setAttribute('role', 'radio');
+    b.addEventListener('click', () => { prefs.look = id; writePrefs(prefs); paintLooks();
+      for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) i.src = u; }, () => {}); }); }
+  paintLooks();
   const setHue = (deg, keep = true) => {
     prefs.hue = ((Math.round(deg) % 360) + 360) % 360; hueShown += ((prefs.hue - hueShown) % 360 + 540) % 360 - 180;
     document.documentElement.style.setProperty('--mol-hue', hueShown + 'deg');   // iteration 013 P2: on the page's root, so MOLECULES' picture (.mol-thumb) turns with the Picker's
@@ -470,7 +480,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       if (isos.length) { const k = el('span', 'mm-iso', t, String(isos.length + 1)); k.title = (isos.length + 1) + ' structural isomers in ' + volName(cur); }
       if (atom) { pic(t, './img/menu/el-' + SYM[atom - 1] + '.webp'); return t; }
       const i = pic(t, null), ph = () => { i.remove(); el('b', 'mm-ph', t, m.formulaM ? mathPlain(m.formulaM) : m.formula); };   // no picture yet: the formula holds the square
-      if (!m.thumb) ph(); else V.picture(cur.id, m.id).then((u) => { if (u) { develop(i); i.src = u; } else ph(); }, ph);
+      if (!m.thumb) ph(); else { i.dataset.vol = cur.id; i.dataset.mol = m.id; } if (!m.thumb) {} else V.picture(cur.id, m.id, lookOf()).then((u) => { if (u) { develop(i); i.src = u; } else ph(); }, ph);
       return t;
     }
     const wordsOf = (m) => (m.geo ? [...(m.tags || []), ...m.geo] : m.tags || []);   // C3: a molecule's chips, what it is and its shape
@@ -570,7 +580,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const suggestTile = (host, r) => {
     const info = { formula: mathPlain(r.formula), name: cap(r.name), sub: r.vol ? r.vol.toUpperCase() : '' };
     const t = tile(host, 'mm-mol', info, () => (r.vol ? goVolume(r.v, r.m) : goMolecule(r.id)));
-    const i = pic(t, r.vol ? '' : r.pic); if (r.vol) { if (r.thumb) V.picture(r.vol, r.id).then((u) => { if (u) i.src = u; else i.remove(); }, () => i.remove()); else i.remove(); }
+    const i = pic(t, r.vol ? '' : r.pic); if (r.vol) { if (r.thumb) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { if (u) i.src = u; else i.remove(); }, () => i.remove()); } else i.remove(); }
     el('b', 'mm-lbl', t, info.formula); return t;
   };
   const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { const s = sections.find((x) => x.id === id); if (s) { open(); s.sec.scrollIntoView({ block: 'start' }); } }, suggest, suggestTile };

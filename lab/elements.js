@@ -1,0 +1,13 @@
+/* elements.js — the stage's ONE element table (iteration 014 B; moved out of skeleton.js so field.js reads it without importing the skeleton,
+ * whose import graph closed a cycle that stalled the chem solve): covalent radii (Cordero et al., Dalton Trans. 2008, 2832: H–Kr), the Jmol
+ * CPK colours, the van der Waals radii and THE ONE BOND RULE, all in bohr.  DOM-free: skeleton.js (BALL AND STICK) and field.js (BALLS ·
+ * STICKS · ESP) read it. */
+import { ANGSTROM } from './md.js';
+
+export const RCOV = [0, 0.31, 0.28, 1.28, 0.96, 0.84, 0.76, 0.71, 0.66, 0.57, 0.58, 1.66, 1.41, 1.21, 1.11, 1.07, 1.05, 1.02, 1.06, 2.03, 1.76, 1.70, 1.60, 1.53, 1.39, 1.39, 1.32, 1.26, 1.24, 1.32, 1.22, 1.22, 1.20, 1.19, 1.20, 1.20, 1.16].map((r) => r * ANGSTROM);
+export const CPK = { 1: '#fff', 2: '#d9ffff', 10: '#b3e3f5', 18: '#80d1e3', 19: '#8f40d4', 20: '#3dff00', 21: '#e6e6e6', 22: '#bfc2c7', 23: '#a6a6ab', 24: '#8a99c7', 25: '#9c7ac7', 26: '#e06633', 27: '#f090a0', 28: '#50d050', 31: '#c28f8f', 36: '#5cb8d1', 37: '#702eb0', 38: '#00ff00', 47: '#c0c0c0', 50: '#668080', 53: '#940094', 54: '#429eb0', 55: '#57178f', 56: '#00c900', 78: '#d0d0e0', 79: '#ffd123', 80: '#b8b8d0', 82: '#575961', 3: '#cc80ff', 4: '#c2ff00', 5: '#ffb5b5', 6: '#909090', 7: '#3050f8', 8: '#ff0d0d', 9: '#90e050', 11: '#ab5cf2', 12: '#8aff00', 13: '#bfa6a6', 14: '#f0c8a0', 15: '#ff8000', 16: '#ffff30', 17: '#1ff01f', 29: '#c88033', 30: '#7d80b0', 32: '#668f8f', 33: '#bd80e3', 34: '#ffa100', 35: '#a62929' };
+/* the van der Waals radii (Bondi 1964, J. Phys. Chem. 68, 441; Å → bohr; 2.0 Å where Bondi gives none): FAT BALLS' spheres and THE POTENTIAL MAP's SAS / SES */
+const BONDI = { 1: 1.2, 2: 1.4, 3: 1.82, 4: 1.53, 5: 1.92, 6: 1.7, 7: 1.55, 8: 1.52, 9: 1.47, 10: 1.54, 11: 2.27, 12: 1.73, 13: 1.84, 14: 2.1, 15: 1.8, 16: 1.8, 17: 1.75, 18: 1.88, 19: 2.75, 20: 2.31, 28: 1.63, 29: 1.4, 30: 1.39, 31: 1.87, 32: 2.11, 33: 1.85, 34: 1.9, 35: 1.85, 36: 2.02, 37: 3.03, 38: 2.49, 46: 1.63, 47: 1.72, 48: 1.58, 49: 1.93, 50: 2.17, 51: 2.06, 52: 2.06, 53: 1.98, 54: 2.16, 55: 3.43, 56: 2.68, 78: 1.75, 79: 1.66, 80: 1.55, 81: 1.96, 82: 2.02, 83: 2.07 };
+export const vdwRadius = (Z) => (BONDI[Z] || 2.0) * ANGSTROM;
+/** the bonds: every pair within 1.3 × (rᵢ + rⱼ) of the atoms as passed — THE ONE RULE (the skeleton's sticks and the field's STICKS read it) */
+export function bondsOf(atoms) { const bonds = []; for (let i = 0; i < atoms.length; i++) for (let j = i + 1; j < atoms.length; j++) { const a = atoms[i], b = atoms[j]; if (Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) < 1.3 * (RCOV[a.Z] + RCOV[b.Z])) bonds.push([i, j]); } return bonds; }

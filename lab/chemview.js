@@ -30,7 +30,7 @@ import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; imp
 import { fetchRecord, installed, removeRecord, persistOnce, keepSection, storageInfo, safariTab, decodeVibrate } from './library.js'; import { aliasOf, FLASH_HZ } from './flash-law.js';
 import { CATALOGUE } from './catalogue.js'; import { ATOMS } from './atoms.js';   // 0.7.4 C2 · THE SHELF: the tiles' status words, and ‹ ATOMS ›' H–Kr
 import { planePoints } from './slice.js';   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
-import * as V from './volumes.js'; import { parseLwm, rungRecord, espOf } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
+import * as V from './volumes.js'; import { parseLwm, rungRecord, espOf, espGrid } from './volumes-format.js'; import { BASIS_LABEL } from './latex-state.js';   // iteration 004 V2: a volume's molecule on the stage
 
 /* ── the library, under the names this window has always used ─────────────────────────────────────────────────
  * The geometries and their sources moved to lab/molecules.js on 2026-09-12; the eight ids the laws pin are still
@@ -691,6 +691,7 @@ export function createChem(host, api) {
       if (v.esp === undefined) v.esp = espOf(v.lwm);   // iteration 014 C1: the file's potential grid ({ n, box, f16, basis … }) or null — the live Poisson is the fallback
       r.esp = v.esp;
       r.bonds = Array.isArray(v.meta && v.meta.bonds) ? v.meta.bonds : Array.isArray(v.bonds) ? v.bonds : null;   // iteration 014 C2 / D6: [[i, j, order]] from the file's meta (a C2 pack day), else the index row, else null: the length rule
+      r.espGrid = espGrid(v.lwm, basis);   // iteration 014 B3: φ's grid as field.js setEspGrid takes it (C1's layout or B's), else null: the Poisson pass
       const fill = () => { r.key = key; r.seq = seq; r.note = v.note; v.note = null;
         r.identity = MS ? MS.identityOf({ atoms: v.atoms, basisHash: r.hash, charge: v.charge, multiplicity: 1, model: 'RHF' }) : null; land(r); };
       if (api.derived) api.derived(fill); else fill();
@@ -1420,7 +1421,7 @@ export function createChem(host, api) {
     /** 0.6.5 X2 · ESP: the pump's consumer (a `chem.esp` reply), and the caption a capture carries while its card is on the field */
     onEsp, espCaption: () => [espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.${esp.cap ? ` · shown clipped at ${sgn(esp.cap)}` : ''}` : '', vibLine(' · STO-3G RHF harmonic, as computed'), drawn() === 'dlda' && pair() ? 'Δ LDA−RHF · where LDA puts more density' : '', said && said.lda, drawn() === 'spin' && sol && sol.Ds ? 'SPIN · UHF' : ''].filter(Boolean).join(' · '),   // 0.7.0 V1: and the mode while VIBRATE plays
     /** 0.7.0 · the nuclei and the dipole AS DRAWN this frame (bohr, a.u.): the preset's atoms and the solve's dipole until VIBRATE poses them (V1); the skeleton and the atom labels read these, never moleculeAtoms */
-    atomsNow: () => (vibFr && vibAt) || chemAtoms(preset), /** iteration 014 D6: the open rung's Mulliken charges and a record's bonds, or null */ chargesNow: () => (sol && sol.mulliken) || null, bondsNow: () => (sol && sol.bonds) || null, dipoleNow: () => (vibFr && vibJ >= 0 ? Array.from(vibFr.dipole.subarray(3 * vibJ, 3 * vibJ + 3)) : (sol && sol.dipole) || null),
+    atomsNow: () => (vibFr && vibAt) || chemAtoms(preset), /** iteration 014 D6: the open rung's Mulliken charges and a record's bonds, or null */ /** iteration 014 B3: a volume rung's φ grid, or null (field.js's Poisson pass) */ espGrid: () => (sol && sol.espGrid) || null, chargesNow: () => (sol && sol.mulliken) || null, bondsNow: () => (sol && sol.bonds) || null, dipoleNow: () => (vibFr && vibJ >= 0 ? Array.from(vibFr.dipole.subarray(3 * vibJ, 3 * vibJ + 3)) : (sol && sol.dipole) || null),
     /** 0.7.0 V1 · VIBRATE from outside (the verb, __LW.chem): the row's own controls; `breathe` presses BREATHE; → the line while it plays, or null */
     async vibrate({ on: v = true, mode, amp, breathe: b } = {}) { if (Number.isFinite(amp)) ampKnob.set(Math.min(4, Math.max(0, amp))); await (b ? breathe() : setVib(v, Number.isFinite(mode) ? mode : vibK, Number.isFinite(amp) ? amp : vibAmp)); return vibLine(); },
     vibLine,

@@ -38,10 +38,10 @@ for (const name of ['readPixels', 'linePixels', 'throughput']) {
   };
   const run = new Function('device', 'GPUTextureUsage', 'GPUBufferUsage', 'GPUMapMode', 'out',
    'makeRenderPipeline', 'makeLinePipeline', 'writeView', 'writeLines', 'drawChrome', 'renderBind',
-   'DEFAULT_BG', 'canvas', 'encodeCompute', code + ';return ' + name)(device,
+   'DEFAULT_BG', 'canvas', 'encodeCompute', 'encodeEsp', code + ';return ' + name)(device,   // encodeEsp: iteration 014 B3's φ pass, a no-op here
    { RENDER_ATTACHMENT: 1, COPY_SRC: 2 }, { COPY_DST: 1, MAP_READ: 2 }, { READ: 1 }, {},
    () => fail('pipeline'), () => ({}), () => {}, () => {}, () => {}, {}, [0,0,0],
-   { width: 2, height: 2 }, () => {});
+   { width: 2, height: 2 }, () => {}, () => false);
   await assert.rejects(name === 'throughput' ? run({ modes: [], obs: {}, mat: {}, n: 1 }) : run({}, {}, 2, 2), e => e === error);
   assert.equal(textures, 1, name + ' releases texture after ' + failure);
   assert.equal(buffers, allocated, name + ' releases allocated buffers after ' + failure);

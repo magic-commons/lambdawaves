@@ -28,6 +28,14 @@ if (!PRESET_BY_ID.has(JET_BLACK.id)) {   // silent once the kit carries the row 
   PRESET_GROUPS.find((g) => g.points === JET_BLACK.points).items.push(JET_BLACK);   // the kit has four 3-point rows
 }
 
+/* THE POTENTIAL MAP's ramp (iteration 014 B3; Josh's answer 3: the standard, RED negative … BLUE positive): five stops, the colours field.js'
+   espColour draws (keep the two equal) and the colour bar paints.  As the PALETTE row ESP (a phase map must close its circle, tests/palette.test.mjs)
+   the five ride 0 … 0.8 of the wheel and a magenta stop at 0.9 carries blue back round to red. */
+export const ESP_RAMP = Object.freeze(['#db1712', '#fadb1f', '#38cc42', '#1acce6', '#1238db']);
+const ESP_PAL = { id: 'esp', label: 'ESP', points: 6, constL: false, harsh: false, cvd: true, note: 'the electrostatic potential’s standard map: red negative → yellow → green → cyan → blue positive',
+  stops: [...ESP_RAMP, '#b0189c'].map((h, i) => ({ at: i < 5 ? i * 0.2 : 0.9, rgb: hexToRgb(h) })) };
+if (!PRESET_BY_ID.has(ESP_PAL.id)) { PRESETS.push(ESP_PAL); PRESET_BY_ID.set(ESP_PAL.id, ESP_PAL); PRESET_GROUPS.find((g) => g.points === ESP_PAL.points).items.push(ESP_PAL); }
+
 /* THE SEVENTH SHELL (iteration 008 A7): the register reaches n = 7 and the kit's shell set has six.  Appended here, as JET BLACK is, until
    MIR carries it (a KIT BRIEF line): hue 350 (the rose the six leave free), dark hsl(350 85% 76%), light hsl(350 97% 47%) — 3.46 : 1 on the
    well (220,225,232) and 3.94 : 1 on the light card, the wave-46 rule.  lab.css defines --n7 for both themes. */

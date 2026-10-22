@@ -37,7 +37,12 @@
  * A VOLUME (iteration 004 V2, `--volume vol-1`): each molecule of <LW_VOLUMES>/dist/<vol>/index.json opened by the card's own road
  *   (__LW.chem.openVolume — the lowest rung, its record, no solve) at the HOME pose in the same look, into <dist>/<vol>/t/<id>.webp;
  *   no manifest (the packer's index carries `thumb`: run tools/volumes/pack.mjs --incremental after).  The page must serve the volume
- *   (the dev link lab/volumes). */
+ *   (the dev link lab/volumes).
+ * THE VARIANTS (iteration 014 B4, `--style im|balls|sticks|esp` with --set molecules or --volume): the same molecules in another look, written as
+ *   <id>.<style>.webp (into --out, a SCRATCH dir — never dist/ by hand; the night render and pack.mjs --incremental carry them into a volume,
+ *   whose index row then names them in `thumbs`).  im: the molecule's VIEW ORBITAL (the HOMO) drawn SIGNED on WAVE's RE — two complementary
+ *   colours of the HSV wheel, which THE HUE ring (--mol-hue) turns like every picture; balls: BALLS (CPK, no sticks); sticks: STICKS; esp:
+ *   THE POTENTIAL MAP on the SES (--esp-surface iso|sas|ses), the standard red → blue.  --style signed|glassSigned stays the atoms' style. */
 import { open } from './gate/gatekit.mjs';
 import { writeFileSync, mkdirSync, statSync, existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -54,7 +59,8 @@ const EXPOSURE = +arg('exposure', 0.5);                      // the atoms: half 
    whole; or an explicit normal 'x,y,z' (iteration 008's '0,0,1'), or 'none'.  --cutl: which l are cut ('all', the default: every tile; '0' the s tiles alone) */
 const CUT_ARG = arg('cut', 'camera'), CUT = CUT_ARG === 'none' ? null : CUT_ARG === 'camera' ? [1, 1, 1].map((x) => x / Math.sqrt(3)) : CUT_ARG.split(',').map(Number);
 const CUT_L = arg('cutl', 'all') === 'all' ? [0, 1, 2, 3] : arg('cutl').split(',').map(Number);
-const ATOM_STYLE = arg('style', 'signed');                   // the atoms' DRAW STYLE: SIGNED, or SHELL ± (iteration 010 X7, 'glassSigned')
+const VARIANT = ['im', 'balls', 'sticks', 'esp'].includes(arg('style', '')) ? arg('style') : null, ESP_SURFACE = arg('esp-surface', 'ses');   // iteration 014 B4: a molecule variant
+const ATOM_STYLE = VARIANT ? 'signed' : arg('style', 'signed');                   // the atoms' DRAW STYLE: SIGNED, or SHELL ± (iteration 010 X7, 'glassSigned')
 const RES = +arg('res', 128);
 const DOMAIN_K = +arg('domain', 1);                         // the hydrogen box as a share of DOMAIN AUTO's (hydrogen.js domainFor(n)): DOMAIN AUTO off and the knob turned, as a hand would                                // the GRID (SETTINGS · QUALITY's seg, 64 · 96 · 128): the finest, so an inner layer is not one voxel
 const HUE_BY_L = [0, 0.125, 0.25, 0.375];                    // the atoms: the HSV wheel turned by l — every s at 0°, p 45°, d 90°, f 135° (SIGNED paints ± at hue ± 90°, so quarter turns would pair s with d and p with f)
@@ -68,7 +74,7 @@ const ATOM_LOOK = (n, l, m) => `const i = H.stateOf(${n}, ${l}, ${m}).index; LW.
 const only = arg('only', '') ? arg('only', '').split(',') : null;
 const VOL = arg('volume', null), VDIR = VOL && (process.env.LW_VOLUMES || homedir() + '/Documents/LAMBDAWAVES-VOLUMES') + '/dist/' + VOL + '/';
 const sets = VOL ? ['volume'] : arg('set', 'molecules,elements,orbitals').split(',');
-const MENU = new URL('../lab/img/menu/', import.meta.url).pathname, OUT = VOL ? VDIR + 't/' : arg('out', null) ? arg('out').replace(/\/?$/, '/') : MENU; mkdirSync(OUT, { recursive: true });   // --out DIR: a trial run elsewhere (no manifest)
+const MENU = new URL('../lab/img/menu/', import.meta.url).pathname, OUT = arg('out', null) ? arg('out').replace(/\/?$/, '/') : VOL ? VDIR + 't/' : MENU; if (VARIANT && !arg('out', null)) { console.error('--style ' + VARIANT + ' writes variants: name a scratch --out DIR'); process.exit(2); } mkdirSync(OUT, { recursive: true });   // --out DIR: a trial run elsewhere (no manifest)
 const SUBSHELLS = arg('orbs', null) ? arg('orbs').split(',').map((t) => [+t[0], 'spdf'.indexOf(t[1])]) : [[5, 0], [4, 2], [5, 1], [6, 0], [4, 3], [5, 2], [6, 1], [5, 3], [6, 2]];   // the valence subshells of Rb … Og, n ≤ 6 — since iteration 008 A7 every element H–Og is live (el-), so no tile shows these; 7s and 7p are not rendered (no dimmed element names them)
 const nl = ([n, l]) => n + 'spdf'[l];
 const mols = [...MOLECULES, ...RECORD_ONLY].filter((m) => !m.disabled);
@@ -130,6 +136,12 @@ const save = (name, r) => { if (!r || r.E || r.empty) { console.log('  ✗', nam
   if (py.status !== 0) { console.log('  ✗', name, py.stderr); return false; }
   const b = statSync(OUT + name + '.webp').size; total += b; nuclei[name] = r.nucleus.map((x) => +x.toFixed(4)); console.log('  ✓', name, b, 'B'); return true; };
 
+/* the molecule's look: the density SIGNED (the shipped tile) or a variant (B4); `file` is the name it is written under */
+const molLook = () => VARIANT === 'im' ? `await LW.chem.setView('orbital'); LW.setView('real'); LW.setStyle('signed'); LW.mat.iso = ${ISO};`
+  : VARIANT ? `LW.setView('density'); LW.setStyle('${VARIANT}'); LW.mat.espSurf = '${ESP_SURFACE}'; LW.palette.setOn(false);`
+  : `LW.setView('density'); LW.setStyle('signed'); LW.mat.iso = ${ISO};`;
+const file = (id) => VARIANT ? id + '.' + VARIANT : id;
+
 /* MOLECULES: ON once, then each row by the hand road, waited until THIS molecule's solve is the field's; the HOME pose */
 if (sets.includes('molecules')) {
   await g.ev(`__LW.chem.setOn(true); __pose(__home); return true;`);
@@ -137,10 +149,10 @@ if (sets.includes('molecules')) {
     if (only && !only.includes(id)) continue;
     const r = await g.ev(`const LW = __LW; await LW.chem.pick(${JSON.stringify(id)});
       for (let i = 0; i < 900; i++) { const c = LW.chem.state(), m = LW.molsession.state().molecule; if (c.preset === ${JSON.stringify(id)} && c.nAO === ${nAO} && m && m.nAO === ${nAO}) break; await new Promise((r) => setTimeout(r, 100)); }
-      LW.setView('density'); LW.setStyle('signed'); LW.mat.iso = ${ISO};
-      await new Promise((r) => setTimeout(r, 300));
+      ${molLook()}
+      await new Promise((r) => setTimeout(r, ${VARIANT ? 900 : 300}));
       return await __thumb(${2 * SIZE}, ${Q});`);
-    if (save(id, r)) made.molecules.push(id);
+    if (save(file(id), r)) made.molecules.push(id);
   }
 }
 
@@ -184,10 +196,10 @@ if (VOL) {
     if (only && !only.includes(id)) continue;
     const r = await g.ev(`const LW = __LW; if (!(await LW.chem.openVolume(${JSON.stringify(VOL)}, ${JSON.stringify(id)}))) return { E: LW.chem.state().status };
       for (let i = 0; i < 900; i++) { const c = LW.chem.state(), m = LW.molsession.state().molecule; if (m && m.nAO === c.nAO) break; await new Promise((r) => setTimeout(r, 100)); }
-      LW.setView('density'); LW.setStyle('signed'); LW.mat.iso = ${ISO}; __pose(__home);
-      await new Promise((r) => setTimeout(r, 300));
+      ${molLook()} __pose(__home);
+      await new Promise((r) => setTimeout(r, ${VARIANT ? 900 : 300}));
       return await __thumb(${2 * SIZE}, ${Q});`);
-    if (save(id, r)) made.molecules.push(id);
+    if (save(file(id), r)) made.molecules.push(id);
   }
 }
 await g.ev(`__LW.domain.auto = true; Object.assign(__LW.quality, { res: __res.res, steps: __res.steps, scale: __res.scale }); __LW.governor.on = __res.gov; __LW.schedule(__LW.TIER.REBUILD);
@@ -195,7 +207,7 @@ await g.ev(`__LW.domain.auto = true; Object.assign(__LW.quality, { res: __res.re
 
 /* the manifest keeps what this run did not redo (a --set or --only run updates its own rows only) */
 const keepRows = (key, rows, id) => (sets.includes(key) && !only ? rows : [...(prior[key] || []).filter((p) => !rows.some((r) => id(r) === id(p))), ...rows]);
-if (!VOL && OUT === MENU) writeFileSync(OUT + 'manifest.json', JSON.stringify({ tool: 'tools/menu-thumbs.mjs', size: SIZE, quality: Q, alphaQuality: AQ, render: RENDER,
+if (!VOL && !VARIANT && OUT === MENU) writeFileSync(OUT + 'manifest.json', JSON.stringify({ tool: 'tools/menu-thumbs.mjs', size: SIZE, quality: Q, alphaQuality: AQ, render: RENDER,
   look: { view: 'density', style: 'signed', iso: ISO, palette: 'wheel', frame: false, axis: false, atoms: { view: 'imag', style: ATOM_STYLE, iso: AISO, exposure: EXPOSURE, hueByL: HUE_BY_L, phase: 'm = 0 imaginary, else real', cut: CUT && { l: CUT_L, normal: CUT.map((x) => +x.toFixed(6)), pos: 0, mode: 'clip' }, grid: RES, system: process.argv.includes('--own') ? 'atom (each element its own)' : 'hydrogen (the pure orbital)', subshell: "the block's orbital: an open f shell, else the occupied subshell last in Madelung order (lab/valence.js blockSubshell)" }, camera: { molecules: 'home', elements: 'corner (yaw 45°, pitch 35.26°)', orbitals: 'corner (yaw 45°, pitch 35.26°)' }, ground: 'none (two-ground matte)' },
   molecules: keepRows('molecules', made.molecules, (x) => x), elements: keepRows('elements', made.elements, (x) => x.sym), orbitals: keepRows('orbitals', made.orbitals, (x) => x) }, null, 1) + '\n');
 if (arg('nuclei', null)) writeFileSync(arg('nuclei'), JSON.stringify(nuclei, null, 1) + '\n');
