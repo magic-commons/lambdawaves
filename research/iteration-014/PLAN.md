@@ -240,4 +240,7 @@ numbers move (B1–B3 add styles; the digest's leaves must not move — a new st
 | A5 | b8e9326 | keys.js transport port → the kit's work bar in the timeline (play · power · BPM · t · ⏮ · door); the window's slab cleared |
 | A6 | 5ee738c | kit 1.5.0-alpha.25: rack scroll pills (createRackPills, 900 ms, clip-path, luminance ink); LOOK row rackPill; MIR-MANIFEST re-hashed |
 | A7 | — | not built (optional; after Josh's calls) |
+| A8 | f290f88 (merge f8b0fba) | ROUND 2, Josh's answers: PLAY column + MOD, timing row over buttons row, RATE over BPM, 668 × 102; SCRUB off; no vertical; FREE one card wide in the card drawing; the sine door; `logoButton` kept; SEARCH / Mod+K = a pill above the bar |
+| A9 | 01ee41f (merge 148d925) | the work bar's t with the lap; its door the sine icon (kit `door: 'icon'`, `doorIcon`); the remaining MIR-logo marks listed for Josh |
+| A10 | 6e1a925 (merge 148d925) | rackPill default A; the pill's tip 2 px short of the scrollbar, reaching inward |
 
