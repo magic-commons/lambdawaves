@@ -336,7 +336,26 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport :is(#rackToggle, #rackAdd, #rackFav) { position: static; inset: auto; width: 28px; height: 28px; transform: none; border: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.rack-hidden #transport :is(#rackAdd, #rackFav) { opacity: 1; visibility: inherit; pointer-events: auto; }
 #transport .csb-app > #lwMode { margin-right: 4px; }
-#transport .csb-app > .mol-pick { flex: 1 1 220px; min-width: 150px; max-width: 260px; height: 28px; margin-right: auto; }
+#transport .csb-app > .mol-pick { flex: 1 1 200px; min-width: 150px; max-width: 220px; height: 28px; margin-right: auto; }
+/* A2 · THE MINIATURE PICKER: the field in row 2, the six tiles in a .lw-menu pane above the bar (the Picker's tile, the hue in use) */
+#transport .csb-search { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; }
+#transport .csb-search-b { display: none; }
+#transport .csb-search-in { width: 100px; height: 24px; padding: 0 10px; border: 1px solid var(--glass-hairline); border-radius: var(--r-pill); background: var(--glass-raise); color: var(--fg); font: var(--fs-small) var(--font-ui); }
+#transport .csb-search-in::placeholder { color: var(--ink-faint); }
+#transport .csb-search-in:focus { outline: 0; border-color: color-mix(in srgb, var(--acc) 60%, transparent); }
+#transport[data-orient="vertical"] .csb-search-b { display: inline-grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--ink-key); }
+#transport[data-orient="vertical"] .csb-search-in { display: none; position: absolute; top: 50%; translate: 0 -50%; width: 180px; z-index: 2; }
+#transport[data-orient="vertical"] .csb-search.open .csb-search-in { display: block; }
+#transport[data-orient="vertical"] .csb-search[data-dir="right"] .csb-search-in { left: calc(100% + 4px); }
+#transport[data-orient="vertical"] .csb-search[data-dir="left"] .csb-search-in { right: calc(100% + 4px); }
+.csb-suggest { position: fixed; z-index: calc(var(--z-chrome) + 4); display: flex; gap: 6px; padding: 6px; border-radius: 14px; }
+.csb-suggest[hidden] { display: none; }
+.csb-suggest .mm-tile { position: relative; width: 76px; height: 76px; padding: 0; border: 1px solid transparent; border-radius: 10px; background: transparent; cursor: pointer; overflow: hidden; }
+.csb-suggest .mm-tile.on, .csb-suggest .mm-tile:hover { border-color: color-mix(in srgb, var(--acc) 55%, transparent); background: var(--glass-raise); }
+.csb-suggest .mm-pic { position: absolute; inset: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; filter: hue-rotate(var(--mol-hue, 0deg)); }
+.csb-suggest .mm-under { display: none; }
+.csb-suggest .mm-lbl { position: absolute; left: 0; right: 0; bottom: 3px; font: var(--w-bold) 10px/1 var(--font-math, serif); color: var(--fg); text-align: center; pointer-events: none; }
+.csb-suggest .csb-none { padding: 6px 10px; font-size: var(--fs-small); color: var(--ink-faint); }
 #transport .csb-app > #lwMode + :is(#rackAdd, #rackToggle, #rackFav), #transport .csb-app > .csb-search + #rackAdd { margin-left: auto; }
 #transport:has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-app > .mol-pick { display: none; }   /* HYDROGEN: no molecule to choose (row 1 is the wider row, so the bar keeps its width) */
 /* iteration 014 A4 · THE FREE WINDOW (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack;

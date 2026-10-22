@@ -63,6 +63,39 @@ function armer(b, repaint) {
   return { arm() { stop(); t = setTimeout(disarm, 600); addEventListener('pointerdown', off, true); }, take() { const was = !!t; stop(); return was; } };
 }
 
+/* ── iteration 014 A2 · THE MINIATURE PICKER's matches: the catalogue and every INSTALLED volume's index (read once, on the first search — never at
+   boot), the name, the formula or the id starting with the typed text first, then containing it ── */
+let volRowsP = null;
+function volumeRows() {
+  if (!volRowsP) volRowsP = (async () => {
+    const out = [];
+    try {
+      for (const v of (await V.shelf()).volumes) {
+        const s = await V.statusOf(v.id).catch(() => null); if (!s || s.state !== 'installed') continue;
+        const idx = await V.index(v.id).catch(() => null);
+        for (const m of (idx && idx.molecules) || []) out.push({ id: m.id, name: m.name, formula: m.formula, vol: v.id, thumb: !!m.thumb, m, v });
+      }
+    } catch (_) { /* no shelf: the catalogue alone */ }
+    return out;
+  })();
+  return volRowsP;
+}
+const plain = (s) => String(s || '').replace(/<\/?m>/g, '').replace(/[_{}\\]/g, '').toLowerCase();
+/** suggest(query, n) → [{ id, name, formula, vol, pic }] — at most n molecules for a typed query: prefix matches (name, formula, id) first */
+export async function suggest(query, n = 6) {
+  const q = plain(query).trim(); if (!q) return [];
+  const cat = CHEM_PRESETS.filter((p) => !p.disabled && !atomZ(p.formula)).map((p) => ({ id: p.id, name: p.name, formula: p.formula, vol: null, pic: './img/menu/' + p.id + '.webp' }));
+  const rows = cat.concat((await volumeRows()).map((r) => ({ id: r.id, name: r.name, formula: r.formula, vol: r.vol, thumb: r.thumb, m: r.m, v: r.v })));
+  const seen = new Set(), first = [], then = [];
+  for (const r of rows) {
+    const keys = [plain(r.name), plain(r.formula), plain(r.id)], key = (r.vol || '') + '|' + r.id;
+    if (seen.has(key)) continue;
+    if (keys.some((k) => k.startsWith(q))) { seen.add(key); first.push(r); } else if (keys.some((k) => k.includes(q))) { seen.add(key); then.push(r); }
+    if (first.length >= n) break;
+  }
+  return first.concat(then).slice(0, n);
+}
+
 export function createPicker(app, { open: openAtBoot = true } = {}) {
   const root = el('div', 'lw-menu', document.body); root.id = 'lwMenu'; root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'the Picker');
   const top = el('div', 'mm-top', root);
@@ -487,7 +520,14 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* the home button by the title: the kit's grid glyph */
   const home = el('button', 'lw-home', document.body); home.id = 'lwHome'; home.type = 'button'; chip(home, 'gallery', 'Picker'); home.title = 'Picker (L)';
   home.addEventListener('click', toggle);
-  const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { const s = sections.find((x) => x.id === id); if (s) { open(); s.sec.scrollIntoView({ block: 'start' }); } } };
+  /** iteration 014 A2 · a suggestion's tile is the Picker's own tile (its picture, its formula, the hue in use) and its press the Picker's road */
+  const suggestTile = (host, r) => {
+    const info = { formula: mathPlain(r.formula), name: cap(r.name), sub: r.vol ? r.vol.toUpperCase() : '' };
+    const t = tile(host, 'mm-mol', info, () => (r.vol ? goVolume(r.v, r.m) : goMolecule(r.id)));
+    const i = pic(t, r.vol ? '' : r.pic); if (r.vol) { if (r.thumb) V.picture(r.vol, r.id).then((u) => { if (u) i.src = u; else i.remove(); }, () => i.remove()); else i.remove(); }
+    el('b', 'mm-lbl', t, info.formula); return t;
+  };
+  const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { const s = sections.find((x) => x.id === id); if (s) { open(); s.sec.scrollIntoView({ block: 'start' }); } }, suggest, suggestTile };
   app.state.picker = api;
   if (openAtBoot) open();
   return api;

@@ -1,7 +1,7 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, CONTROL_SURFACE_LAYOUT, barButton } from '../mir/shell/transport.js'; import { mirGui } from '../mir-gui.js';
+import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, CONTROL_SURFACE_LAYOUT, barButton } from '../mir/shell/transport.js'; import { mirGui } from '../mir-gui.js'; import { createCsbSearch } from '../csb-search.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates, isPhone } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
@@ -49,8 +49,9 @@ export function createTransport(app) {
     const gear = barButton({ cls: 'csb-gear', glyph: 'settings', label: 'MIR OPTIONS', title: 'MIR OPTIONS — the interface’s look', run: () => mirGui().open('options') }).root;
     const chooser = document.querySelector('.dev[data-id="chem"] .mol-pick');
     const byId = (id) => document.getElementById(id);
+    const search = createCsbSearch(app, { bar: () => T });   // A2 · THE MINIATURE PICKER (lab/csb-search.js)
     const bar = createBar({ layout: CONTROL_SURFACE_LAYOUT, root: T, host: dom.stage,
-      nodes: { scrub: ui.scrub.root, rate: ui.rateKnob.root, time: tro.root, gear, modes: byId('lwMode'), chooser, add: byId('rackAdd'), rack: byId('rackToggle'), fav: byId('rackFav') },
+      nodes: { scrub: ui.scrub.root, rate: ui.rateKnob.root, time: tro.root, gear, modes: byId('lwMode'), chooser, search: search.root, add: byId('rackAdd'), rack: byId('rackToggle'), fav: byId('rackFav') },
       openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'the timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
       clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),
       rack: () => app.sh.rk, door: 'mark', powerWord: 'MOD', seatMenu: false, opener: false,
@@ -242,7 +243,7 @@ export function createTransport(app) {
     }
     setKeepFrames(keep.frames);                                // the shipped default: the bar disabled
     setModArm(app.state.modArm, { quiet: true });                        // wave 65: ONE writer paints the lamp, boot included
-    return { update, stepDt, openAsk, bar };
+    return { update, stepDt, openAsk, bar, search };
   })();
   /** THE PLAY (0.5.0 A6): the physics clock's toggle; its edge plays or pauses the modulation (C4: the one clock, always). */
   function togglePlay() { appPlay.toggle(); schedule(TIER.EVOLVE); }
