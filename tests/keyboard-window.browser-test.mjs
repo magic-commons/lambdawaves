@@ -74,7 +74,7 @@ try {
   assert.ok(geo.w > 900 && geo.w < 1440 && geo.h <= 416, 'the pane is ' + geo.w + ' × ' + geo.h);
   assert.ok(geo.x >= 8 && geo.y >= 8);
   assert.equal(geo.rows, 5); assert.equal(geo.inWell, true, 'the five rows do not fit the board\'s well');
-  assert.deepEqual(geo.groups, ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'PROJECT', 'TIMELINE']);   // 0.5.0 C7b: the TIMELINE's rows, after λWAVES' own
+  assert.deepEqual(geo.groups, ['CONTROL SURFACE', 'TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'PROJECT', 'TIMELINE']);   // 0.5.0 C7b: the TIMELINE's rows, after λWAVES' own; iteration 014 A8: the CONTROL SURFACE's row (Mod+K, the search)
   assert.equal(geo.oneRow, true); assert.deepEqual(geo.icons, ['⌘', 4]);
   assert.ok(geo.centred < 2); assert.equal(geo.above, true); assert.deepEqual(geo.bare, ['RECORD INPUT', 'RESET TO DEFAULT'], 'RECORD / RESET carry no subtitle');
   assert.equal(geo.statusShown, false, 'an empty status is shown'); assert.deepEqual(geo.borders, Array(9).fill('0px'));
