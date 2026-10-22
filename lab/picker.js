@@ -124,8 +124,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     for (const b of labelBtns) { const on = !!prefs[b.dataset.labels]; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
   }
   const atomOpt = labelToggle(opts, 'atomLabels'), molOpt = labelToggle(opts, 'molLabels');
+  let hueShown = 0;   // iteration 014 D2: the CSS sees an unwrapped turn (the nearest twin of the hue to the last one shown), so 359 → 0 glides one degree, never back round the wheel
   const setHue = (deg, keep = true) => {
-    prefs.hue = ((Math.round(deg) % 360) + 360) % 360; document.documentElement.style.setProperty('--mol-hue', prefs.hue + 'deg');   // iteration 013 P2: on the page's root, so MOLECULES' picture (.mol-thumb) turns with the Picker's
+    prefs.hue = ((Math.round(deg) % 360) + 360) % 360; hueShown += ((prefs.hue - hueShown) % 360 + 540) % 360 - 180;
+    document.documentElement.style.setProperty('--mol-hue', hueShown + 'deg');   // iteration 013 P2: on the page's root, so MOLECULES' picture (.mol-thumb) turns with the Picker's
     hue.setAttribute('aria-valuenow', String(prefs.hue)); hue.title = 'Hue of the molecules\u2019 pictures · ' + prefs.hue + '° — drag up or down, double-click for 0';
     if (keep) writePrefs(prefs);
   };
