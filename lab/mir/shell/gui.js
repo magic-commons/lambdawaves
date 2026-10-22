@@ -178,6 +178,8 @@ export function lookSchema({ tier = () => null } = {}) {
       { on: 'html', attr: 'data-shine', map: (v, s) => (s.shine > 0 ? '' : null) },
       ...['--surface-shadow', '--surface-shadow-float', '--surface-shadow-menu'].map((prop) => ({ on: 'body', prop, map: (v, s) => (offShadow(s) ? ZERO_SHADOW : null) }))] },
     { key: 'disconnected', type: 'bool', default: false, apply: [{ on: 'body', cls: 'disconnected' }] },
+    /* SCROLL PILL (1.5.0-alpha.25, from λWAVES): the window's name beside its title bar while a rack scrolls (rack.css); B writes nothing */
+    { key: 'rackPill', type: 'enum', values: ['off', 'a', 'b'], default: 'b', apply: [{ on: 'body', attr: 'data-rack-pill', map: (v) => (v === 'b' ? null : v) }] },
     /* SPACING — the rack's air (Josh, 2026-10-01: "the dock margins are too large … an option for 0 padding/margins"):
        BASINS' levels 0 · TIGHT · DEFAULT (and AIRY, this kit's) to --rack-gap, --rack-inset, --pane-pad and --rail-gap
        (core/look.js SPACING); 0 is flush (html[data-flush]) */
@@ -516,6 +518,9 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
     swOf('transportBar', phrase('TRANSPORT BAR'), phrase('Show the main transport bar, floating or docked')).root);
   line(g).append(segOf('spacing', phrase('SPACING'), [['0', '0', phrase('Rack windows flush to each other and to the screen’s edge')], ['tight', phrase('TIGHT'), phrase('3 px between rack windows and from the edge')],
     ['default', phrase('DEFAULT'), phrase('6 px between rack windows and from the edge')], ['airy', phrase('AIRY'), phrase('16 px between rack windows and from the edge')]]).root);   // BASINS' row (settings-window.js), and AIRY
+  line(g).append(segOf('rackPill', phrase('SCROLL PILL'), [['off', phrase('OFF'), phrase('No name pill while a rack scrolls')],
+    ['a', phrase('A'), phrase('While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar')],
+    ['b', phrase('B'), phrase('While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar')]]).root);   // tr[SCROLL PILL]: the small coloured label with a window's name shown beside it while the column of windows scrolls
 
   /* SAMPLING (BASINS Settings › QUALITY › SAMPLING, docs/TIMELINE-SAMPLING-2026-10-01.md): how a scrub and the automation
      read the engine.  BASINS' words, its cost toasts and its note (prose: it hides with HELP) */

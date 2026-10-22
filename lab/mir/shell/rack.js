@@ -47,7 +47,7 @@ import { createWindowActivity } from '../window-activity.js';
 import { observeSpan } from '../window/dock.js';
 import { registerWindow } from '../window/window.js';
 import { glyphEl, hasGlyph } from '../glyph.js';
-import { createRackScrollbars } from './rack-scrollbar.js';
+import { createRackScrollbars, createRackPills } from './rack-scrollbar.js';
 import { jsonStore } from '../core/prefs.js';
 
 export const SIDES = Object.freeze(['left', 'right']);
@@ -1192,5 +1192,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
   };
   /* BASINS installs its scrollbars with the rack; they follow the page's one dock span through a rack's slide */
   let bars = scrollbar ? createRackScrollbars({ host, racks: Object.values(racks), span: api.span(), view }) : null;
+  /* THE SCROLL PILL (1.5.0-alpha.25): every rack, whichever scrollbar it runs (shell/rack-scrollbar.js createRackPills) */
+  createRackPills({ host, racks: Object.values(racks), view });
   return api;
 }
