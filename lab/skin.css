@@ -842,7 +842,8 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-tab .mm-ico { width: 18px; height: 18px; transition: translate 160ms var(--ease); } #lwMenu .mm-tab:hover .mm-ico { translate: 0 -1px; }
 #lwMenu .mm-ring-host > .mm-ico { position: absolute; left: 50%; top: 50%; width: 52%; height: 52%; translate: -50% -50%; opacity: .7; transition: opacity 160ms; }
 #lwMenu .mm-install[data-state="installed"] .mm-ring-host > .mm-ico { opacity: 1; } #lwMenu .mm-install[data-state="busy"] .mm-ring-host > .mm-ico { opacity: 0; }
-#lwMenu .mm-tags { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding-top: 1px; padding-bottom: 1px; }
+#lwMenu .mm-tags { display: flex; flex-direction: column; justify-content: center; gap: 3px; padding-top: 1px; padding-bottom: 1px; }
+#lwMenu .mm-tags .mm-tag { font-size: 11px; padding: 3px 9px; }   /* iteration 014 C3: three rows in the head's height */
 #lwMenu .mm-tagrow { display: flex; gap: 4px; flex-wrap: nowrap; width: max-content; }
 #lwMenu[data-sec="library"].in-volume .mm-opts .mm-opt { visibility: hidden; }   /* inside a volume its head's twin is the one */
 #lwMenu.labels-mol .mm-lbl { animation: mm-rise 240ms var(--ease) both; }

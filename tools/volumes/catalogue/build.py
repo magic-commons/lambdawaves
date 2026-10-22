@@ -1095,6 +1095,8 @@ for i, (e, row) in enumerate(rows): row['priority'] = i
 molecules = [row for _, row in rows]
 ISOMERS = ISO.annotate(molecules)                                   # iteration 014 C2: isomers (formula + InChIKey first block) and bonds (RDKit)
 log(f'isomers and bonds: {ISOMERS}')
+GEO_COUNTS = ST.annotate_geo(molecules)                            # iteration 014 C3: the shape words RDKit decides (row['geo'])
+log(f'shape words: {GEO_COUNTS}')
 
 # ── 12. WRITE ────────────────────────────────────────────────────────────────────────────────────────────────────────
 SOURCES = [
@@ -1195,6 +1197,7 @@ stats = {
  # SUBSUMED (an amino acid's acid and amine …), the words the four-tag cap then CUT, which source gave each kept class word, and where
  # each row's structure was read
  'isomersAndBonds': ISOMERS,   # iteration 014 C2 (isomers.py)
+ 'geoWords': GEO_COUNTS, 'geoRules': ST.GEO_RULES,   # iteration 014 C3 (structure_tags.py THE SHAPE WORDS)
  'tagRule': 'iteration 006 C5 (Josh: structure or class) — tools/volumes/catalogue/structure_tags.py',
  'tagEarned': dict(TAG_EARNED.most_common()), 'tagSubsumed': dict(TAG_SUBSUMED.most_common()), 'tagCapCut': dict(CAP_CUT.most_common()),
  'tagClassFrom': {w: {s: TAG_FROM[(w, s)] for s in ('ChEBI', 'structure') if TAG_FROM[(w, s)]} for w in VOCAB if w in ST.CHEBI_WORDS},

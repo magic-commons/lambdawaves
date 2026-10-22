@@ -194,3 +194,119 @@ def tags(mol, charge=0, chebi=(), n=4):
     """a molecule's tags (≤ n, ranked) — and every word it earned before the cap, for the build's numbers"""
     t = raw_tags(mol, charge, chebi)
     return cap(t, n), t
+
+
+# ── THE SHAPE WORDS (iteration 014 C3) ──────────────────────────────────────────────────────────────────────────────────────────────
+# A cheap model (Haiku, research/iteration-014/c-data/tags.proposed.json) PROPOSED geometry and class words over a sample of the catalogue;
+# a word is ADOPTED only when RDKit can decide it from the row's own structure — its SMILES (rings, charges, marked stereocentres) and its
+# own atoms (linear, planar, metal–carbon bonds) — and the test below then decides it for EVERY row, never the model.  They live in their
+# own field, row['geo'] (not `tags`: the four-word cap and the shelf's themes read `tags` and must not move); the Picker shows both.
+GEO = ['linear', 'planar', 'strained', 'macrocycle', 'spiro', 'bridged', 'fused', 'polycyclic', 'organometallic', 'zwitterion', 'chiral']
+GEO_RULES = {
+    'linear':         'every atom within 0.05 Å RMS of one line through the row\'s own atoms (≥ 2 atoms)',
+    'planar':         'not linear, ≥ 3 atoms, every atom (H too) within 0.10 Å RMS of one plane through the row\'s own atoms',
+    'strained':       'a ring of 3 or 4 atoms (RDKit SSSR)',
+    'macrocycle':     'a ring of 12 atoms or more (RDKit SSSR)',
+    'spiro':          'a spiro atom (rdMolDescriptors.CalcNumSpiroAtoms > 0)',
+    'bridged':        'a bridgehead atom (rdMolDescriptors.CalcNumBridgeheadAtoms > 0)',
+    'fused':          'two SSSR rings that share exactly one bond (two atoms)',
+    'polycyclic':     'three rings or more (RDKit SSSR)',
+    'organometallic': 'a metal (METALS) bonded to carbon in the row\'s own atoms (DetermineConnectivity)',
+    'zwitterion':     'net charge 0 with a formal + and a formal − on its atoms, a nitro group\'s N⁺/O⁻ not counted',
+    'chiral':         'a stereocentre the SMILES marks (@ / @@), FindMolChiralCenters without the unassigned',
+}
+_NITRO = Chem.MolFromSmarts('[N+](=O)[O-]')
+
+
+def _spread(atoms):
+    import numpy as np
+    P = np.array([[float(a[1]), float(a[2]), float(a[3])] for a in atoms]); P -= P.mean(axis=0)
+    s = np.linalg.svd(P, compute_uv=False) / np.sqrt(len(P))      # RMS distances along the principal axes
+    return list(s) + [0.0] * (3 - len(s))
+
+
+def _xyz(atoms, charge=0):
+    """mol_from_atoms, the coordinates written fixed-point: RDKit's XYZ reader refuses a bare integer 0 (an app row's) and an exponent
+    (1.7e-16, 3e-05 — 60-odd catalogue rows), and mol_from_atoms writes Python's repr"""
+    xyz = f'{len(atoms)}\n\n' + '\n'.join(f'{PT.GetElementSymbol(int(a[0]))} {float(a[1]):.8f} {float(a[2]):.8f} {float(a[3]):.8f}' for a in atoms) + '\n'
+    m = Chem.MolFromXYZBlock(xyz)
+    if m is None: return None
+    try: rdDetermineBonds.DetermineConnectivity(m, charge=int(charge))
+    except Exception: return None
+    m.UpdatePropertyCache(strict=False); Chem.GetSymmSSSR(m)
+    return m
+
+
+def geo_tags(smiles, atoms=None, charge=0):
+    """the shape words RDKit decides for one row (GEO's order); smiles may be None (the ring words then come from the atoms' connectivity)"""
+    out = set(); mol = Chem.MolFromSmiles(smiles) if smiles else None
+    xyz = _xyz(atoms, charge) if atoms else None
+    ring = mol if mol is not None else xyz
+    if atoms and len(atoms) >= 2:
+        s = _spread(atoms)
+        if s[1] < 0.05: out.add('linear')
+        elif len(atoms) >= 3 and s[2] < 0.10: out.add('planar')
+    if ring is not None:
+        rings = [set(r) for r in ring.GetRingInfo().AtomRings()]
+        if any(len(r) in (3, 4) for r in rings): out.add('strained')
+        if any(len(r) >= 12 for r in rings): out.add('macrocycle')
+        if len(rings) >= 3: out.add('polycyclic')
+        if any(len(a & b) == 2 for i, a in enumerate(rings) for b in rings[i + 1:]): out.add('fused')
+        try:
+            if RD.CalcNumSpiroAtoms(ring): out.add('spiro')
+            if RD.CalcNumBridgeheadAtoms(ring): out.add('bridged')
+        except Exception: pass
+    if xyz is not None and any((b.GetBeginAtom().GetAtomicNum() in METALS and b.GetEndAtom().GetAtomicNum() == 6)
+                               or (b.GetEndAtom().GetAtomicNum() in METALS and b.GetBeginAtom().GetAtomicNum() == 6) for b in xyz.GetBonds()):
+        out.add('organometallic')
+    if mol is not None:
+        nitro = {i for m in mol.GetSubstructMatches(_NITRO) for i in m}
+        q = [a.GetFormalCharge() for a in mol.GetAtoms() if a.GetIdx() not in nitro]
+        if not int(charge) and any(c > 0 for c in q) and any(c < 0 for c in q): out.add('zwitterion')
+        if Chem.FindMolChiralCenters(mol, includeUnassigned=False, useLegacyImplementation=False): out.add('chiral')
+    return [w for w in GEO if w in out]
+
+
+def annotate_geo(molecules):
+    """row['geo'] for every row (dropped when empty); the counts per word"""
+    import collections
+    n = collections.Counter()
+    for m in molecules:
+        m.pop('geo', None)
+        try: g = geo_tags(m.get('smiles'), m.get('atomsAng'), m.get('charge') or 0)
+        except Exception: g = []
+        if g: m['geo'] = g; n.update(g)
+    return dict(n)
+
+
+if __name__ == '__main__':
+    # python -I structure_tags.py --adopt PROPOSED.json --candidates IN.json [--out OUT.json] [--report REPORT.json]
+    import json, os, sys
+    from rdkit import RDLogger; RDLogger.DisableLog('rdApp.*')
+    arg = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
+    prop, src = json.load(open(arg('--adopt'))), arg('--candidates'); dst, rep = arg('--out', src), arg('--report')
+    doc = json.load(open(src)); rows = doc['molecules']
+    asked = [w for w in prop.get('vocabulary', []) if w in GEO]                # ADOPTED: proposed by the model AND decidable here
+    counts = annotate_geo(rows); by = {m['id']: m for m in rows}
+    for m in rows:
+        g = [w for w in m.pop('geo', []) if w in asked]
+        if g: m['geo'] = g
+    agree = {}
+    for w in asked:
+        tp = fp = fn = 0
+        for i, ws in prop['rows'].items():
+            if i not in by: continue
+            p, r = w in ws, w in by[i].get('geo', [])
+            tp += p and r; fp += p and not r; fn += r and not p
+        agree[w] = {'both': tp, 'modelOnly': fp, 'rdkitOnly': fn}
+    waiting = {i: [w for w in ws if w not in by.get(i, {}).get('geo', [])] for i, ws in prop['rows'].items()}
+    waiting = {i: ws for i, ws in waiting.items() if ws}
+    tmp = dst + '.tmp'
+    with open(tmp, 'w') as f: json.dump(doc, f, ensure_ascii=False)
+    os.replace(tmp, dst)
+    out = {'adopted': asked, 'rules': {w: GEO_RULES[w] for w in asked}, 'notAdopted': [w for w in prop.get('vocabulary', []) if w not in GEO],
+           'extraWords (wait for Josh)': prop.get('extraWords', {}), 'rows': len(rows), 'perWord': {w: counts.get(w, 0) for w in asked},
+           'agreementOnTheSample': agree, 'waiting (the model said it, RDKit did not)': waiting}
+    if rep:
+        with open(rep, 'w') as f: json.dump(out, f, ensure_ascii=False, indent=1)
+    print(json.dumps({k: out[k] for k in ('adopted', 'notAdopted', 'perWord', 'agreementOnTheSample')}, ensure_ascii=False))

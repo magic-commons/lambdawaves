@@ -426,11 +426,12 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     /* the tags: built once a volume and lit in place (the strip keeps where it was scrolled); two or more intersect, ALL clears them */
     function paintTags() {
-      /* iteration 012 L2: TWO rows in one sideways strip (the head's other controls sit between them in height); each tag in its count's order
-         goes to the row that is shorter so far, so both rows read most-common first and end together */
-      tagsEl.textContent = ''; const n = new Map(); for (const m of mols) for (const t of m.tags || []) n.set(t, (n.get(t) || 0) + 1);
-      const rows = [el('div', 'mm-tagrow', tagsEl), el('div', 'mm-tagrow', tagsEl)], len = [0, 0];
-      const chipOf = (id, label, count) => { const r = len[0] <= len[1] ? 0 : 1; len[r] += String(label).length + String(count).length + 4; const b = el('button', 'mm-tag', rows[r], label); b.type = 'button'; b.dataset.tag = id; el('i', '', b, count.toLocaleString('en'));
+      /* iteration 012 L2 · 014 C3: THREE rows in one sideways strip; each tag in its count's order goes to the row that is shortest so far, so
+         every row reads most-common first and they end together.  The chips are the index's words: `tags` (what it is) and `geo` (its shape,
+         catalogue/structure_tags.py THE SHAPE WORDS — linear · planar · strained · macrocycle · spiro · bridged · fused · polycyclic · …) */
+      tagsEl.textContent = ''; const n = new Map(); for (const m of mols) for (const t of wordsOf(m)) n.set(t, (n.get(t) || 0) + 1);
+      const rows = [0, 1, 2].map(() => el('div', 'mm-tagrow', tagsEl)), len = [0, 0, 0];
+      const chipOf = (id, label, count) => { const r = len.indexOf(Math.min(...len)); len[r] += String(label).length + String(count).length + 4; const b = el('button', 'mm-tag', rows[r], label); b.type = 'button'; b.dataset.tag = id; el('i', '', b, count.toLocaleString('en'));
         b.addEventListener('click', () => { if (id === '') on.clear(); else if (on.has(id)) on.delete(id); else on.add(id); markTags(); filter(); }); };
       chipOf('', 'all', mols.length);
       for (const [t, k] of [...n].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))) chipOf(t, t, k);
@@ -452,6 +453,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       if (!m.thumb) ph(); else V.picture(cur.id, m.id).then((u) => { if (u) { develop(i); i.src = u; } else ph(); }, ph);
       return t;
     }
+    const wordsOf = (m) => (m.geo ? [...(m.tags || []), ...m.geo] : m.tags || []);   // C3: a molecule's chips, what it is and its shape
     const isomersIn = (m) => (m.isomers || []).map((id) => byId.get(id)).filter(Boolean);
     /* THE ISOMER DECK: over the volume's deck, the molecule and its isomers (the catalogue's order); a press opens one, ×, Escape or a press on
        the ground puts it away */
@@ -466,12 +468,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       const x = el('button', 'mm-back mm-isox', isoHead); x.type = 'button'; x.setAttribute('aria-label', 'close the isomers'); x.textContent = '×'; x.addEventListener('click', closeIsomers);
       isoGrid.style.setProperty('--n', String(isos.length + 1));
       for (const y of [m, ...isos]) { const t = molTile(isoGrid, y, false); if (y === m) t.classList.add('here'); }
+      const pager = view.querySelector('.mm-pager'); if (pager) isoEl.style.top = pager.offsetTop + 'px';   // over the deck, never the head (its tag rows set its height)
       isoEl.hidden = false; enterTiles([...isoGrid.children]);
       const first = isoGrid.firstElementChild; if (first) first.focus({ preventScroll: true });
     }
     function filter() {
-      const list = mols.filter((m) => [...on].every((t) => (m.tags || []).includes(t))
-        && (!query || [m.name, m.formula, m.id, ...(m.tags || [])].some((s) => s && String(s).toLowerCase().includes(query))));
+      const list = mols.filter((m) => [...on].every((t) => wordsOf(m).includes(t))
+        && (!query || [m.name, m.formula, m.id, ...wordsOf(m)].some((s) => s && String(s).toLowerCase().includes(query))));
       countEl.textContent = list.length === mols.length ? mols.length.toLocaleString('en') : list.length.toLocaleString('en') + ' / ' + mols.length.toLocaleString('en');
       countEl.title = (on.size ? [...on].join(' + ') : query ? '“' + query + '”' : 'all') + ' · ' + list.length.toLocaleString('en') + ' molecules';
       vdeck.set(list, (m, host) => { const t = molTile(host, m, true); t.dataset.iso = m.id; return t; });
