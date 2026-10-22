@@ -382,6 +382,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
          no caption under a hover (it repeated the card) */
       const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
       el('b', 'mm-vol-num', o, volName(v)); o.title = [v.title, v.blurb].filter(Boolean).join(' — ');
+      if (v.wip) { const w = el('span', 'mm-vol-wip', o, 'WIP'); w.title = 'Work in progress: this volume is still being filled — it installs now, and grows'; }   // iteration 014 C4 (pack.mjs --wip)
       const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
       if (meta) el('span', 'mm-vol-meta', o, meta);
       o.addEventListener('click', () => enter(v));

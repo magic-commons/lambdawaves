@@ -26,6 +26,10 @@
  *               (`app`: the app's own table; `any`: a tag, `none`: … but not this one; no step: the `rest` theme; --count-themes: print the whole catalogue's
  *               counts and stop), a theme ordered by the catalogue's `priority`, split past --cap bytes (5e9) of .lwm + .webp
  *               into 'TITLE · 2' with the next numeral; writes dist/vol-<n>/ for each and ONE volumes.json (replacing the old one)
+ *   --max-gb G  (iteration 014 C4) THE CUT: a volume holds at most G GiB of .lwm + pictures (Josh: 5–5.5 GB; the night runs 5.25); a shelved
+ *               molecule stays in its volume, a new one fills the LAST shelved volume (an earlier, released one is never refilled), the overflow opens the next vol-<n>; --wip marks the last,
+ *               still-filling volume `wip: true` (its index and shelf entry) — the Picker shows WIP and installs it.  Every index carries
+ *               `indexVersion` (+1 whenever anything but the number and the packer's commit moved).
  *   --archive   per volume, dist/LAMBDAWAVES-VOL-<numeral>.lwv (lab/volumes-format.js THE ARCHIVE) and its .sha256; the shelf entry gains
  *               archive: { name, bytes, sha256 } and drops `index` unless --fetchable (the dev link; a Drive volume has no index)
  *
@@ -61,6 +65,7 @@ const DATA = path.resolve(process.env.LW_VOLUMES || path.join(homedir(), 'Docume
 const RAW = path.join(DATA, 'raw'), DIST = path.resolve((argOf('--out-dir') || path.join(DATA, 'dist')).replace(/^~/, homedir()));
 const LOOK = [...new Set([DIST, path.join(DATA, 'dist')])];
 const THEMES = argOf('--themes'), CAP = +argOf('--cap', 5e9), ARCHIVE = has('--archive'), FETCHABLE = has('--fetchable');
+const MAX_BYTES = argOf('--max-gb') ? Math.round(+argOf('--max-gb') * 2 ** 30) : 0, WIP = has('--wip');   // iteration 014 C4: THE CUT (GiB) and the WIP label
 const VOL = argOf('--volume', 'vol-1'), NUMERAL = argOf('--numeral', 'I'), TITLE = argOf('--title', 'Volume ' + NUMERAL);
 const BLURB = argOf('--blurb', 'Named molecules, each solved in RHF up the whole basis ladder STO-3G → 6-31+G*, with its identifiers and properties.');
 const ONLY = argOf('--only') ? new Set(argOf('--only').split(',')) : null, PARTIAL = has('--partial'), OUT = argOf('--out'), INCREMENTAL = has('--incremental');
@@ -374,6 +379,20 @@ if (T) {
     flush();
   });
   plan.forEach((p, i) => Object.assign(p, { id: 'vol-' + (i + 1), numeral: roman(i + 1), title: p.theme.title + (p.part > 1 ? ' · ' + p.part : ''), blurb: p.theme.blurb || BLURB }));
+} else if (MAX_BYTES) {
+  /* THE CUT (iteration 014 C4; Josh: volumes of 5–5.5 GB, VOL. II filled partially now with a WIP label, indexes versioned, payloads
+     immutable): a molecule already shelved in a vol-<n>/ of the out dir STAYS there (a full volume never loses or reshuffles one); every new
+     molecule, in the catalogue's order, goes to the LAST volume shelved (never back into a released one) while it has room under --max-gb
+     (.lwm + picture), then a new volume opens.  With --wip the LAST volume — the one still filling — says so (`wip: true` in its index and its shelf entry). */
+  const base = +(VOL.match(/^vol-(\d+)$/) || [0, 1])[1], vols = [], sizeOf = (r, v) => { const th = findKept(v, 't', r.id + '.webp'); return r.bytes.length + (th ? readFileSync(th).length : 0); };
+  const home = (id) => { for (const d of LOOK) { if (!existsSync(d)) continue; for (const v of readdirSync(d).filter((e) => /^vol-\d+$/.test(e)).sort((a, b) => +a.slice(4) - +b.slice(4))) if (+v.slice(4) >= base && existsSync(path.join(d, v, 'm', id + '.lwm'))) return +v.slice(4) - base; } return -1; };
+  const volAt = (k) => (vols[k] ||= { members: [], size: 0 });
+  const fresh = [];
+  for (const r of packed) { const k = home(r.id); if (k < 0) { fresh.push(r); continue; } const v = volAt(k); v.members.push(r); v.size += sizeOf(r, 'vol-' + (base + k)); }
+  let k = Math.max(0, vols.length - 1);                            // the last volume already shelved: a released (earlier) one is never refilled
+  for (const r of fresh) { for (;; k++) { const v = volAt(k), b = sizeOf(r, 'vol-' + (base + k)); if (!v.members.length || v.size + b <= MAX_BYTES) { v.members.push(r); v.size += b; break; } } }
+  plan = vols.map((v, k) => ({ id: 'vol-' + (base + k), numeral: roman(base + k), title: k ? TITLE.replace(/\s*·\s*\d+$/, '') + ' · ' + (k + 1) : TITLE, blurb: BLURB,
+    members: v.members.sort((a, b) => a.order - b.order), ...(WIP && k === vols.length - 1 && vols.length > 1 ? { wip: true } : {}) }));
 } else plan = [{ id: VOL, numeral: NUMERAL, title: TITLE, blurb: BLURB, members: packed }];
 
 const entries = [], written = [];
@@ -402,12 +421,18 @@ for (const p of plan) {
   }
   written.push({ dir: VDIR, reach: new Set(rows.flatMap((r) => [r.file, r.thumb].filter(Boolean))) });
   const stale = readdirSync(path.join(VDIR, 'm')).filter((f) => f.endsWith('.lwm') && !rows.some((r) => r.file === 'm/' + f));
-  const indexText = '{"schema":1,"id":' + JSON.stringify(p.id) + ',"numeral":' + JSON.stringify(p.numeral) + ',"title":' + JSON.stringify(p.title) + ',"bases":' + JSON.stringify(LADDER)
+  /* iteration 014 C4: EVERY index is versioned — `indexVersion` counts its changes (the old file's, + 1 when anything but the number moved; 1 for a
+     new one), so a reader can tell an index it holds from a newer one; a volume still filling carries `wip: true` */
+  const vText = (n) => '{"schema":1,"indexVersion":' + n + ',"id":' + JSON.stringify(p.id) + ',"numeral":' + JSON.stringify(p.numeral) + ',"title":' + JSON.stringify(p.title) + (p.wip ? ',"wip":true' : '') + ',"bases":' + JSON.stringify(LADDER)
     + ',"generator":' + JSON.stringify({ tool: 'tools/volumes/pack.mjs', commit: GENERATOR, format: 'THE VOLUME FORMAT v1 (lab/volumes-format.js)' }) + ',"molecules":[\n'
     + rows.map((r) => JSON.stringify(r)).join(',\n') + '\n]}\n';
+  const oldIdx = existsSync(path.join(VDIR, 'index.json')) ? readFileSync(path.join(VDIR, 'index.json'), 'utf8') : null;
+  const bare = (t) => { try { const o = JSON.parse(t); delete o.indexVersion; delete o.generator; return JSON.stringify(o); } catch (_) { return null; } };   // the packer's commit is not a change
+  const oldN = oldIdx ? +(JSON.parse(oldIdx).indexVersion || 0) : 0;
+  const indexVersion = oldN && bare(oldIdx) === bare(vText(oldN)) ? oldN : oldN + 1, indexText = vText(indexVersion);
   writeFileSync(path.join(VDIR, 'index.json'), indexText);
   const tags = {}; for (const r of rows) for (const t of r.tags) tags[t] = (tags[t] || 0) + 1;
-  const entry = { id: p.id, numeral: p.numeral, title: p.title, blurb: p.blurb, count: rows.length, bytes: rows.reduce((s, r) => s + r.bytes, 0), bases: LADDER,
+  const entry = { id: p.id, numeral: p.numeral, title: p.title, blurb: p.blurb, ...(p.wip ? { wip: true } : {}), indexVersion, count: rows.length, bytes: rows.reduce((s, r) => s + r.bytes, 0), bases: LADDER,
     tags: Object.fromEntries(Object.entries(tags).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))), index: p.id + '/index.json', indexSha256: sha(indexText),
     built: { generator: 'tools/volumes/pack.mjs', commit: GENERATOR } };
   if (ARCHIVE) { if (!FETCHABLE) delete entry.index; entry.archive = writeArchive(entry, rows, VDIR); }
