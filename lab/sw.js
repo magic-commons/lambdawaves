@@ -121,6 +121,7 @@ const PRECACHE = [
   ['./img/icons/hue-ring.svg',                                      'caecd194c2f7'],
   ['./img/icons/labels.svg',                                        'b609a92152c3'],
   ['./img/icons/library.svg',                                       'd8fe79bdc91d'],
+  ['./img/icons/modulation.svg',                                    'ece29f1bebfe'],
   ['./img/icons/molecular.svg',                                     'd177d43d65bc'],
   ['./img/icons/plus.svg',                                          '642b2dd405d8'],
   ['./img/icons/render.svg',                                        '376aba87cd9f'],
