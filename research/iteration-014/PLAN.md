@@ -244,3 +244,18 @@ numbers move (B1–B3 add styles; the digest's leaves must not move — a new st
 | A9 | 01ee41f (merge 148d925) | the work bar's t with the lap; its door the sine icon (kit `door: 'icon'`, `doorIcon`); the remaining MIR-logo marks listed for Josh |
 | A10 | 6e1a925 (merge 148d925) | rackPill default A; the pill's tip 2 px short of the scrollbar, reaching inward |
 
+## CLOSED — CHAINS B · C · D · E+A (Claude Yan, 2026-10-22; merges `7895041` D · `4e04979` E+A · `9182461` C · `6580eef` B; gate green at each; LOCK 843/0 + 987/0 on the final tree)
+| row | commit | what landed |
+|---|---|---|
+| B1–B3 | ce42f92 | BALLS 9 · STICKS 10 · ESP 11 (ISO / SAS / SES, the standard ramp or USE PALETTE, the colour bar, GPU Poisson + core correction, LIVE · SLOW); lab/elements.js; LOCK held |
+| B4 | 4306f77 | menu-thumbs --style, thumbs in the index (dry), the ρ · IM · BALLS · STICKS · ESP row; the 6k × 4 night render not run |
+| C1 | 9d67b74 | esp-pass.py (no re-solve), the esp blob + header.esp, espOf; dry on H2O (byte-identical without the grid) |
+| C2 | 7a2e0fe | isomers.py: isomers + bonds; the isomer deck; FLIP (camera parity, session-only) |
+| C3 | 4753f93 | Haiku proposal → RDKit-verified geo words; three tag rows |
+| C4 | fe6682b | pack --max-gb --wip, indexVersion, the WIP card; 0.01 GiB dry split proven |
+| D1–D6 | f2711ed 04fb720 4431948 a4540e6 ea04de8 a948e57 | hue unwrapped; search seat + NAME / MASS sorts; ladders +50 %; palette list + Capitalised + INVERT offered; knob reverse (kit); BONDS |
+| E | 59463e1 | GOL-NOTE.md, 24 sample icons, GOL-ICONS.html (no code) |
+| A11 | ee3915a | Yan's four calls: controls beside ⏮, card BPM 88 px, the pill on the eyebrow, the workspace switch wears lanes |
+| A7 | fe65e29 | the kit's window picker (search, greyed by mode, Gol's motion) |
+| merge | 6580eef | espOf + espGrid joined (one reader for C1's and B's layouts); D6's bondsOf beside elements.js'; D5's reverse on KNEE kept; B's `dipoleNow` restored (a // comment had hidden it); gpu-cleanup stub for encodeEsp; official-defaults-palette's LEAN laws leave INFORMATIONAL's STATUS Aa out (red since 012 R1) |
+
