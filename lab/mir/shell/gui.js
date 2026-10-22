@@ -178,8 +178,8 @@ export function lookSchema({ tier = () => null } = {}) {
       { on: 'html', attr: 'data-shine', map: (v, s) => (s.shine > 0 ? '' : null) },
       ...['--surface-shadow', '--surface-shadow-float', '--surface-shadow-menu'].map((prop) => ({ on: 'body', prop, map: (v, s) => (offShadow(s) ? ZERO_SHADOW : null) }))] },
     { key: 'disconnected', type: 'bool', default: false, apply: [{ on: 'body', cls: 'disconnected' }] },
-    /* SCROLL PILL (1.5.0-alpha.25, from λWAVES): the window's name beside its title bar while a rack scrolls (rack.css); B writes nothing */
-    { key: 'rackPill', type: 'enum', values: ['off', 'a', 'b'], default: 'b', apply: [{ on: 'body', attr: 'data-rack-pill', map: (v) => (v === 'b' ? null : v) }] },
+    /* SCROLL PILL (1.5.0-alpha.25, from λWAVES): the window's name beside its title bar while a rack scrolls (rack.css); A, the scrollbar's accent, writes nothing (014 A10) */
+    { key: 'rackPill', type: 'enum', values: ['off', 'a', 'b'], default: 'a', apply: [{ on: 'body', attr: 'data-rack-pill', map: (v) => (v === 'a' ? null : v) }] },
     /* SPACING — the rack's air (Josh, 2026-10-01: "the dock margins are too large … an option for 0 padding/margins"):
        BASINS' levels 0 · TIGHT · DEFAULT (and AIRY, this kit's) to --rack-gap, --rack-inset, --pane-pad and --rail-gap
        (core/look.js SPACING); 0 is flush (html[data-flush]) */

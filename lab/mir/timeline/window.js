@@ -90,7 +90,7 @@ export function createTimeline(host, port) {
   } else if (tp !== false) {
     const seat = document.createElement('div'); seat.className = 'tl-transport'; editor.transportHost.appendChild(seat);
     const layout = (tp.layout || TIMELINE_TRANSPORT).filter((x) => x !== 'dock' || tp.rack);
-    transport = createTransport({ root: seat, host: editor.transportHost, bar: 'work', opener: false, clock, mod, layout, nodes: tp.nodes || {},
+    transport = createTransport({ root: seat, host: editor.transportHost, bar: 'work', opener: false, clock, mod, layout, nodes: tp.nodes || {}, door: tp.door || 'palette', doorIcon: tp.doorIcon || null,
       rack: tp.rack || null, keys: port.keys || null, key: (port.storageKey || 'mir.timeline') + '.transport' });
     transport.start();   // a click on the BPM pill types the tempo: shell/transport.js does it for `bar: 'work'` (BASINS' timeline form)
   }
