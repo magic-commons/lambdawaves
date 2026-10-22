@@ -124,8 +124,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     for (const b of labelBtns) { const on = !!prefs[b.dataset.labels]; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
   }
   const atomOpt = labelToggle(opts, 'atomLabels'), molOpt = labelToggle(opts, 'molLabels');
+  let hueShown = 0;   // iteration 014 D2: the CSS sees an unwrapped turn (the nearest twin of the hue to the last one shown), so 359 → 0 glides one degree, never back round the wheel
   const setHue = (deg, keep = true) => {
-    prefs.hue = ((Math.round(deg) % 360) + 360) % 360; document.documentElement.style.setProperty('--mol-hue', prefs.hue + 'deg');   // iteration 013 P2: on the page's root, so MOLECULES' picture (.mol-thumb) turns with the Picker's
+    prefs.hue = ((Math.round(deg) % 360) + 360) % 360; hueShown += ((prefs.hue - hueShown) % 360 + 540) % 360 - 180;
+    document.documentElement.style.setProperty('--mol-hue', hueShown + 'deg');   // iteration 013 P2: on the page's root, so MOLECULES' picture (.mol-thumb) turns with the Picker's
     hue.setAttribute('aria-valuenow', String(prefs.hue)); hue.title = 'Hue of the molecules\u2019 pictures · ' + prefs.hue + '° — drag up or down, double-click for 0';
     if (keep) writePrefs(prefs);
   };
@@ -341,7 +343,20 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
        (the wheel turns it) · the search · SHOW LABELS (iteration 012 L1: INSTALL / REMOVE live on the shelf's card only) — and the deck below
        measures its tile from what is left */
     const vhead = el('div', 'mm-vhead', view), vdeck = deck(view);
-    let woke = false, cur = null, vols = [], mols = [], on = new Set(), query = '', tagsEl = null, countEl = null;
+    let woke = false, cur = null, vols = [], mols = [], on = new Set(), query = '', tagsEl = null, countEl = null, vq = null, sortBtns = [];
+    /* iteration 014 D1 · THE SORT: NAME (A–Z → Z–A → as-is) and MASS (heavy first → light first → as-is), one at a time; as-is is the index's own
+       order and the buttons unpressed; kept for the Picker's life, never saved */
+    const sort = { key: '', dir: 0 };
+    const SORTS = { name: { first: 1, word: (d) => (d < 0 ? 'Z–A' : 'A–Z'), tip: (d) => (d > 0 ? 'name A–Z' : d < 0 ? 'name Z–A' : 'as listed') + ' — press for ' + (d > 0 ? 'Z–A' : d < 0 ? 'as listed' : 'A–Z') },
+      mass: { first: -1, word: (d) => (d < 0 ? '↓' : d > 0 ? '↑' : ''), tip: (d) => (d < 0 ? 'heaviest first' : d > 0 ? 'lightest first' : 'as listed') + ' — press for ' + (d < 0 ? 'lightest first' : d > 0 ? 'as listed' : 'heaviest first') } };
+    const sortBtn = (host, key) => { const b = el('button', 'mm-sort', host); b.type = 'button'; b.dataset.sort = key; if (key === 'mass') icon(b, 'mass'); el('span', '', b);
+      b.addEventListener('click', () => { const S = SORTS[key]; if (sort.key !== key) { sort.key = key; sort.dir = S.first; } else if (sort.dir === S.first) sort.dir = -S.first; else { sort.key = ''; sort.dir = 0; } paintSort(); filter(); });
+      sortBtns.push(b); return b; };
+    function paintSort() { sortBtns = sortBtns.filter((b) => b.isConnected); for (const b of sortBtns) { const k = b.dataset.sort, d = sort.key === k ? sort.dir : 0, S = SORTS[k];
+      b.classList.toggle('on', !!d); b.setAttribute('aria-pressed', String(!!d)); b.lastChild.textContent = S.word(d); b.title = (k === 'name' ? 'Sort by name · ' : 'Sort by mass · ') + S.tip(d); b.setAttribute('aria-label', b.title); } }
+    const sorted = (list) => { if (!sort.key) return list; const d = sort.dir;
+      return list.slice().sort(sort.key === 'name' ? (a, b) => d * String(a.name || a.id).localeCompare(String(b.name || b.id), 'en', { sensitivity: 'base' })
+        : (a, b) => (a.mw == null) - (b.mw == null) || d * ((a.mw || 0) - (b.mw || 0))); };
     /* a volume with an `index` installs from the network (INSTALL); one without is a file the reader downloads once (OPEN FILE…, or a drop) */
     function installer(host, v) {
       const b = el('button', 'mm-install', host); b.type = 'button';
@@ -414,9 +429,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       countEl = el('span', 'mm-count', vhead);
       tagsEl = el('div', 'mm-tags', vhead); tagsEl.setAttribute('role', 'group'); tagsEl.setAttribute('aria-label', 'tags of ' + volName(v));
       tagsEl.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && tagsEl.scrollWidth > tagsEl.clientWidth) { e.preventDefault(); tagsEl.scrollLeft += e.deltaY; } }, { passive: false });
-      const q = el('input', 'mm-search', vhead); q.type = 'search'; q.placeholder = 'search'; q.setAttribute('aria-label', 'search ' + volName(v));
-      q.addEventListener('input', () => { query = q.value.trim().toLowerCase(); filter(); });
-      q.addEventListener('keydown', (e) => e.stopPropagation());
+      /* iteration 014 D1 (Josh: "move the search bar to the middle, underneath the atomic, molecular, and library buttons"): the search is
+         the seat under the tabs while a volume is open (opts' SHOW LABELS stands aside there); its old seat holds NAME and MASS */
+      if (!vq) { vq = el('input', 'mm-search', opts); vq.type = 'search'; vq.placeholder = 'search';
+        vq.addEventListener('input', () => { query = vq.value.trim().toLowerCase(); filter(); });
+        vq.addEventListener('keydown', (e) => e.stopPropagation()); }
+      vq.value = ''; vq.setAttribute('aria-label', 'search ' + volName(v));
+      sortBtn(vhead, 'name'); sortBtn(vhead, 'mass'); paintSort();
       labelToggle(vhead, 'molLabels');
       animate(view, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
       try { mols = (await V.index(v.id)).molecules; } catch (err) { mols = []; countEl.textContent = String(err && err.message || err); }
@@ -437,8 +456,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     function markTags() { for (const b of tagsEl.querySelectorAll('.mm-tag')) { const isOn = b.dataset.tag ? on.has(b.dataset.tag) : !on.size; b.classList.toggle('on', isOn); b.setAttribute('aria-pressed', String(isOn)); } }
     function filter() {
-      const list = mols.filter((m) => [...on].every((t) => (m.tags || []).includes(t))
-        && (!query || [m.name, m.formula, m.id, ...(m.tags || [])].some((s) => s && String(s).toLowerCase().includes(query))));
+      const list = sorted(mols.filter((m) => [...on].every((t) => (m.tags || []).includes(t))
+        && (!query || [m.name, m.formula, m.id, ...(m.tags || [])].some((s) => s && String(s).toLowerCase().includes(query)))));
       countEl.textContent = list.length === mols.length ? mols.length.toLocaleString('en') : list.length.toLocaleString('en') + ' / ' + mols.length.toLocaleString('en');
       countEl.title = (on.size ? [...on].join(' + ') : query ? '“' + query + '”' : 'all') + ' · ' + list.length.toLocaleString('en') + ' molecules';
       vdeck.set(list, (m, host) => {

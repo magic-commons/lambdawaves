@@ -137,7 +137,7 @@ export function createChem(host, api) {
   rH.appendChild(secStep.root);
   const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule — and its register, under VIEW MIX: one switch', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
   rTop.appendChild(onSw.root);
-  const r0 = el('div', 'row tight', host);
+  const r0 = el('div', 'row tight mol-r0', host);   // iteration 014 D3: the chooser's row; the CONTROL SURFACE takes the chooser (A1), so the empty row folds away (lab.css .mol-r0:empty)
   /* 0.7.4 C2 · THE SHELF: SECTION's name opens the page as TILES under the picker (formula, name, AOs, the catalogue's word, the lamp); a tap is the hand's
      pick and the shelf folds.  ‹ ATOMS ›, the first page, is the periodic table: a tile sets OPERATOR ATOM and its element (api.atom).  Alt+↓ keeps the kit's list. */
   const shelf = el('div', 'mol-shelf', host), ATOM_W = CATALOGUE.find((r) => r.id === 'atom'); shelf.id = 'mol-shelf'; shelf.hidden = true;
@@ -652,7 +652,7 @@ export function createChem(host, api) {
         const lwm = parseLwm(buf), H = lwm.header;
         v = { key: volId + ':' + molId, volume: volId, id: molId, numeral: idx.numeral, lwm, meta: H.meta, name: H.meta.name || molId, charge: H.meta.charge || 0,
           atoms: H.geometry.atoms.map((a) => ({ Z: +a.Z, x: +a.x, y: +a.y, z: +a.z })), geometry: H.geometry.source || '', rungs: Object.keys(H.rungs),
-          why: { ...(H.skipped || {}), ...(H.failed || {}) }, sha256: m.sha256 || null, bytes: buf.byteLength, from };
+          why: { ...(H.skipped || {}), ...(H.failed || {}) }, sha256: m.sha256 || null, bytes: buf.byteLength, from, bonds: H.geometry.bonds || H.meta.bonds || m.bonds || null };
       } catch (e) {
         if (seq0 === volSeq) { if (api.loading) api.loading(false);
           status(network ? String(e && e.message || e) : `${String((m && m.name) || molId).toUpperCase()} · VOL. ${(idx && idx.numeral) || volId} is not on this device — install it in the PICKER's LIBRARY`, 'warn'); }
@@ -687,6 +687,8 @@ export function createChem(host, api) {
       if (seq !== solveSeq) return null;
       if (!r || r.refused || r.error || !Number.isFinite(r.energy)) { sol = null; status(`${volName(v)} at ${BASIS_LABEL[basis]} did not open: ` + ((r && (r.refused || r.error)) || 'no answer'), 'warn'); refresh(); tell(); notify(); return null; }
       r.opened = { bytes: v.bytes, from: v.from }; r.stem = lib.stem || null; r.volume = { volume: v.volume, id: v.id, numeral: v.numeral };
+      try { r.mulliken = Array.from(v.lwm.blob(basis, 'mulliken')); } catch (_) { r.mulliken = null; }   // iteration 014 D6: the rung's Mulliken charges, for BALL AND STICK's IONIC
+      r.bonds = Array.isArray(v.bonds) ? v.bonds : null;   // iteration 014 D6: a record's bonds [[i, j, order]] (chain C's pack day), else the length rule
       const fill = () => { r.key = key; r.seq = seq; r.note = v.note; v.note = null;
         r.identity = MS ? MS.identityOf({ atoms: v.atoms, basisHash: r.hash, charge: v.charge, multiplicity: 1, model: 'RHF' }) : null; land(r); };
       if (api.derived) api.derived(fill); else fill();
@@ -1416,7 +1418,7 @@ export function createChem(host, api) {
     /** 0.6.5 X2 · ESP: the pump's consumer (a `chem.esp` reply), and the caption a capture carries while its card is on the field */
     onEsp, espCaption: () => [espOn() ? `ESP · ${esp.N}³ · min ${sgn(esp.min)} · max ${sgn(esp.max)} a.u.${esp.cap ? ` · shown clipped at ${sgn(esp.cap)}` : ''}` : '', vibLine(' · STO-3G RHF harmonic, as computed'), drawn() === 'dlda' && pair() ? 'Δ LDA−RHF · where LDA puts more density' : '', said && said.lda, drawn() === 'spin' && sol && sol.Ds ? 'SPIN · UHF' : ''].filter(Boolean).join(' · '),   // 0.7.0 V1: and the mode while VIBRATE plays
     /** 0.7.0 · the nuclei and the dipole AS DRAWN this frame (bohr, a.u.): the preset's atoms and the solve's dipole until VIBRATE poses them (V1); the skeleton and the atom labels read these, never moleculeAtoms */
-    atomsNow: () => (vibFr && vibAt) || chemAtoms(preset), dipoleNow: () => (vibFr && vibJ >= 0 ? Array.from(vibFr.dipole.subarray(3 * vibJ, 3 * vibJ + 3)) : (sol && sol.dipole) || null),
+    atomsNow: () => (vibFr && vibAt) || chemAtoms(preset), /** iteration 014 D6: the open rung's Mulliken charges and a record's bonds, or null */ chargesNow: () => (sol && sol.mulliken) || null, bondsNow: () => (sol && sol.bonds) || null, dipoleNow: () => (vibFr && vibJ >= 0 ? Array.from(vibFr.dipole.subarray(3 * vibJ, 3 * vibJ + 3)) : (sol && sol.dipole) || null),
     /** 0.7.0 V1 · VIBRATE from outside (the verb, __LW.chem): the row's own controls; `breathe` presses BREATHE; → the line while it plays, or null */
     async vibrate({ on: v = true, mode, amp, breathe: b } = {}) { if (Number.isFinite(amp)) ampKnob.set(Math.min(4, Math.max(0, amp))); await (b ? breathe() : setVib(v, Number.isFinite(mode) ? mode : vibK, Number.isFinite(amp) ? amp : vibAmp)); return vibLine(); },
     vibLine,

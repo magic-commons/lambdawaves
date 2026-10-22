@@ -4,6 +4,10 @@
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
+- **THE REVERSED KNOB** (014 D5): `knob({ reverse: true })` turns the dial the other way — the needle (and a modulated base tick) reads max
+  at the left, a rise, ArrowUp / ArrowRight or PageUp move it right and lower the value; the value, `min` / `max`, `aria-value*`, `spec` (a
+  second face inherits it) and a modulation map are unchanged; ignored on a `wrap` knob. `kit.js` `knob`. Why: Josh, "can the knob direction of
+  the parameter of ISO, KNEE, SOFT be inverted? … I associate 'more-ness' to dialing it to the right" (ISO / KNEE / SOFT lower = more opaque).
 - **THE PILL'S TIP** (014 A10): the scroll pill's outer end stops 2 px short of the seated track's inner edge (or `scrollbarSeat`'s x when
   none runs) and reaches inward over the title bar, its mask opening from that tip; `rackPill` defaults to A, the scrollbar's accent.
   `shell/rack-scrollbar.js` (`PILL.gap` 2, `PILL.track` 12), `shell/rack.css`, `shell/gui.js`. Why: Josh, "make the scroll bar also be at the

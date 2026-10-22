@@ -32,6 +32,10 @@ export function createInformational(app) {
   row(words, ['molName', 'listCap'], 'info-words');   // iteration 011 Q1: THE LIST CAP beside NAME — both say what the formula writes
   row(words, ['atomLabels', 'atomLabelsSize'], 'info-words');
   row(words, ['skeleton', 'skeletonOpacity', 'skeletonSize'], 'info-words info-ball');   // iteration 011 Q1: its own row; 012 R1: BALL AND STICK, shorter, OPACITY between it and SIZE
+  row(words, ['bondOrder', 'bondAromatic', 'bondIonic', 'bondHydrogen'], 'info-words info-bonds');   // iteration 014 D6: BALL AND STICK's BONDS, one row under it
+  /* the frame reads the BONDS as one object (rack.js → skeleton.draw) and the skeleton tells which road drew them in this card's status line */
+  ui.bondsOf = () => { const c = app.state.chem; return { order: P.get('bondOrder'), aromatic: P.get('bondAromatic'), ionic: P.get('bondIonic'), hbond: P.get('bondHydrogen'), charges: c && c.chargesNow ? c.chargesNow() : null, rec: c && c.bondsNow ? c.bondsNow() : null }; };
+  ui.bondSay = (line) => w.setStatus(line, 'live');
   const seat = row(words, ['infoPos', 'infoPad'], 'info-seat');
   const announce = group(w.body, 'ANNOUNCE');
   /* iteration 012 R1: ORBITALS is one switch for the two orbital kinds, so the pop-ups' SIZE takes the grid's last cell (where STYLE · PALETTE stood) */

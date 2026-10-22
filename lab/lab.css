@@ -394,6 +394,8 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport[data-layout="csb"] .csb-favs .segw { flex: 0 1 auto; max-width: 300px; }
 #transport[data-layout="csb"] .csb-favs .segw .k-lbl { display: none; }
 #transport[data-layout="csb"] .csb-favs-empty { font-size: var(--fs-micro); color: var(--ink-faint); }
+#transport[data-layout="csb"] .csb-favs .pal-invert { flex: 0 0 auto; width: 48px; height: 48px; }   /* iteration 014 D4: INVERT, a knob-sized face; ON turns its glyph over, as on the card */
+#transport[data-layout="csb"] .csb-favs .pal-invert svg { transition: transform var(--motion-ui) var(--ease-out); } #transport[data-layout="csb"] .csb-favs .pal-invert.on svg { transform: rotate(180deg); }
 /* the expander's first row (A8 tidy): ‹ › ⟳ as one group of round seats, REPEATS as the kit's readout (its word over its value), the formula on
    the same line taking the rest, one alignment, a hairline under */
 #transport[data-layout="csb"] > .native-tempo > .csb-repeats { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 2px 6px; border-bottom: 1px solid var(--glass-hairline); }
@@ -525,6 +527,11 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 .mol-reg { margin: var(--sp-2) 0; }
 .mol-reg:empty { display: none; }
 .mol-reg.mol-reg-off { opacity: var(--state-disabled, .38); }   /* iteration 008 R: MOLECULES OFF keeps the last solve's ladder on the card, dimmed as the kit dims an inert control (still paintable) */
+.mol-r0:empty { display: none; }   /* iteration 014 D3: the chooser left for the CONTROL SURFACE (A1); its row is no seat */
+/* iteration 014 D3 (Josh: "Increase the height of the paint-able table thingy in molecules window by about 50% more"): the register's ladders
+   half again as tall — ORBITAL's 150 → 225 px, STATES' ladder and scope 170 → 255 px */
+.mol-reg canvas.mol-c { height: 225px; }
+.mol-reg .reg-top .reg-ladder, .mol-reg .reg-top .reg-scope { height: 255px; }
 /* the record-only molecule's download glyph, in the MOLECULE stepper's name beside the <select> (chemview.js dlB) */
 .mol-pick .mir-step-name { display: flex; align-items: center; }
 .mol-pick .mir-step-name > select.sel { flex: 1 1 0; min-width: 0; }

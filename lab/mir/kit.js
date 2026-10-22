@@ -238,6 +238,8 @@ export function dragTravel(e, { touch = false, travel, fine } = {}) {
  *   wrap: free-spinning (phase); onDelta(dRad) reports drag deltas instead of absolute values (a JOG WHEEL);
  *   onReset: what a wheel's reset does; size: 'lg'; travel / fine: this knob's own drag law (see setKnobLaw).
  *   dragAxis: 'vertical' (the default: one law for every knob) or 'sum' (the 1.4 law, rise + sideways, for an app that has not moved).
+ *   reverse: the dial turns the other way (1.5.0-alpha.25, λWAVES 014 D5): the needle reads max at the left, a rise or an arrow up moves it
+ *   right and lowers the value; the value, min / max, aria-value* and a modulation map are unchanged (not on a wrap knob).
  *   → { root, get, set(x, silent = true), show(x), shown, setDefault(x), setDisabled(on), setBase(fn), paint }
  */
 export function knob(o) {
@@ -248,7 +250,7 @@ export function knob(o) {
   const val = el('div', 'k-val', root);
   let v = o.value, def = o.value, dragging = false, disabled = false;
   let shown = null;                 // a value PAINTED over the base by a modulator (show()); the base v is what the hand owns
-  const lo = o.min, hi = o.max, log = !!o.log;
+  const lo = o.min, hi = o.max, log = !!o.log, rev = !!o.reverse && !o.wrap;   // rev: the displayed direction flips (see reverse above)
   const norm = (x) => log ? (Math.log(x) - Math.log(lo)) / (Math.log(hi) - Math.log(lo)) : (x - lo) / (hi - lo);
   const denorm = (p) => log ? Math.exp(Math.log(lo) + p * (Math.log(hi) - Math.log(lo))) : lo + p * (hi - lo);
   const fmt = o.fmt || ((x) => (Math.abs(x) >= 100 ? x.toFixed(0) : Math.abs(x) >= 10 ? x.toFixed(1) : x.toFixed(2)) + (o.unit || ''));
@@ -299,14 +301,14 @@ export function knob(o) {
   }
   function paint(fromUser) {
     const shownV = (shown !== null && !dragging) ? shown : v;
-    const p = o.wrap ? (norm(shownV) % 1 + 1) % 1 : clamp01(norm(shownV));
+    const pv = o.wrap ? (norm(shownV) % 1 + 1) % 1 : clamp01(norm(shownV)), p = rev ? 1 - pv : pv;
     setVar(needle, '--turn', (o.wrap ? p * 360 : -135 + p * 270) + 'deg');
     setText(val, fmt(shownV));
     /* THE BASE STAYS VISIBLE UNDER A MODULATOR (Bitwig's convention): while a painted value dances the needle, a
        small tick at the rim marks the base the hand owns — where a drag starts and what the file saves. */
     const mod = shown !== null && !dragging;
     root.classList.toggle('k-mod', mod);
-    if (mod) { const pb = o.wrap ? (norm(v) % 1 + 1) % 1 : clamp01(norm(v)); setVar(dial, '--base-turn', (o.wrap ? pb * 360 : -135 + pb * 270) + 'deg'); }
+    if (mod) { const pb0 = o.wrap ? (norm(v) % 1 + 1) % 1 : clamp01(norm(v)), pb = rev ? 1 - pb0 : pb0; setVar(dial, '--base-turn', (o.wrap ? pb * 360 : -135 + pb * 270) + 'deg'); }
     announce(fromUser);
   }
   /** WAVE 68 · ONE QUANTISER, ONE FOLD, ONE CLAMP — and BOTH ROADS TAKE IT.  The fold lived in the
@@ -333,7 +335,7 @@ export function knob(o) {
     if (!dragging || e.pointerId !== vd.id) return;
     const dp = vd.move(e);                              // the virtual point: changing the gear in place never moves the value
     if (o.onDelta) { const d = dp - acc; acc = dp; turn = ((turn + d * 360) % 360 + 360) % 360; o.onDelta(d * 2 * Math.PI); announce(true); return; }
-    const nv = settle(denorm(o.wrap ? p0 + dp : clamp01(p0 + dp)));
+    const nv = settle(denorm(o.wrap ? p0 + dp : clamp01(p0 + (rev ? -dp : dp))));
     if (nv !== v) { v = nv; paint(); if (o.onInput) o.onInput(v); }
   });
   const end = (e) => { if (!dragging || (e && e.isTrusted && vd && e.pointerId !== vd.id)) return;   // a synthetic cancel (the timeline's hold, a test) ends it whoever it names
@@ -367,7 +369,7 @@ export function knob(o) {
   const KEYDIR = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 1, PageDown: -1 };
   root.addEventListener('keydown', (e) => {
     if (disabled || e.ctrlKey || e.metaKey || e.altKey) return;
-    const dir = KEYDIR[e.code] || 0, page = e.code === 'PageUp' || e.code === 'PageDown';
+    const dir = (KEYDIR[e.code] || 0) * (rev ? -1 : 1), page = e.code === 'PageUp' || e.code === 'PageDown';
     if (wheel) {                                            // a wheel reports a turn; it has no lo, no hi and no End
       if (dir) { e.preventDefault(); const d = dir * (page ? 10 : 1) * 2 * Math.PI / 100;
         turn = ((turn + d * 180 / Math.PI) % 360 + 360) % 360; o.onDelta(d); announce(true); return; }

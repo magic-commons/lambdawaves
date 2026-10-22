@@ -9,7 +9,7 @@
  *     OBSERVABLE): a seg made from the original's options whose press presses the original's button, so its owner's road (history, its status) runs.
  * ADD / REMOVE ride the knob's TIMELINE CLIP menu (the kit's setTimelineKnobRows) and a right click on an offered row (`data-fav`).  The list is a
  * PREFERENCE (`lambdawaves.q0.csb` { v: 1, items }), never a project: every new project starts with it.  Faces are built when the expander opens. */
-import { el, knob, seg, label } from './mir/kit.js';
+import { el, knob, seg, sw, label } from './mir/kit.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { setTimelineKnobRows } from './mir/timeline/knobs.js';
 
@@ -59,11 +59,19 @@ export function createCsbFavs(app, { panel }) {
     mo.observe(orig.root, { subtree: true, attributes: true, attributeFilter: ['aria-checked', 'aria-pressed', 'class'] });
     return { root: f.root, destroy() { mo.disconnect(); } };
   }
+  /** a switch's second face (iteration 014 D4): the same glyph switch, knob-sized; a press is the original's own press, so its owner's road runs */
+  function swFace(id, orig, o) {
+    const f = sw({ ...o, value: orig.get(), onChange: () => { orig.root.click(); f.set(orig.get()); } });
+    f.root.classList.add('csb-fav'); f.root.dataset.fav = id;
+    const mo = new MutationObserver(() => { if (f.get() !== orig.get()) f.set(orig.get()); });
+    mo.observe(orig.root, { attributes: true, attributeFilter: ['aria-pressed'] });
+    return { root: f.root, destroy() { mo.disconnect(); } };
+  }
   function paint() {
     for (const [id, face] of faces) if (!isFav(id)) { face.destroy(); face.root.remove(); faces.delete(id); }
     for (const id of items) {
       if (faces.has(id)) { strip.appendChild(faces.get(id).root); continue; }   // the list's order
-      const face = offers.has(id) ? segFace(id) : knobFace(id);
+      const face = offers.has(id) ? (offers.get(id).build ? offers.get(id).build(offers.get(id).control) : segFace(id)) : knobFace(id);
       if (face) { faces.set(id, face); strip.appendChild(face.root); }
     }
     strip.classList.toggle('empty', !faces.size);
@@ -98,9 +106,10 @@ export function createCsbFavs(app, { panel }) {
   addEventListener('keydown', (e) => { if (e.key === 'Escape') closePop(); });
 
   return {
-    strip, add, remove, rowsFor, get items() { return items.slice(); },
-    /** offer(id, control, { width }) — an owner's segment that may become a favourite; its row answers a right click */
-    offer(id, control, { width = HALF_CARD } = {}) { if (!control || !control.root) return; offers.set(id, { control, width }); const row = control.root; row.dataset.fav = id; },
+    strip, add, remove, rowsFor, swFace, get items() { return items.slice(); },
+    /** offer(id, control, { width, build }) — an owner's segment that may become a favourite; its row answers a right click.  `build(control)` makes a
+     *  face that is not a segment (iteration 014 D4: PALETTE's INVERT, a knob-sized switch) and returns { root, destroy } */
+    offer(id, control, { width = HALF_CARD, build = null } = {}) { if (!control || !control.root) return; offers.set(id, { control, width, build }); const row = control.root; row.dataset.fav = id; },
     /** the expander opened: the faces are made (nothing is built at boot) */
     show() { built = true; paint(); },
   };

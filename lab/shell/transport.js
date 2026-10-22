@@ -80,6 +80,8 @@ export function createTransport(app) {
     const favs = createCsbFavs(app, { panel: bar.el.panel }); app.sh.csb = favs;
     if (bar.parts.panel) bar.parts.panel.onToggle((v) => { if (v) favs.show(); });
     for (const [id, c] of [['spectrum.scale', ui.scaleSeg], ['wave.space', ui.spaceSeg], ['wave.view', ui.viewSeg]]) favs.offer(id, c, { width: 150 });
+    /* iteration 014 D4 (Josh: "Let Invert also be a custom button that's a 'Knob' size for the CSB"): PALETTE's INVERT, offered as a knob-sized switch */
+    favs.offer('palette.invert', ui.invertSw, { width: 44, build: (c) => favs.swFace('palette.invert', c, { label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ' }) });
     /* iteration 011 Q6 · GEMMA, HIDDEN: the ASK door and THE TYPE BOX mount only under ASK_ENABLED (lab/ask.js, the one flag); off, the strip is
        the 0.6.5 strip, `openAsk` does nothing (no key row calls it) and createAsk is never made, so no request can leave */
     let echoOn = false, openAsk = () => {};
