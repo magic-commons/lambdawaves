@@ -18,7 +18,7 @@
  *   to 8 · the files, each at its 8-aligned offset from the file's start (index.json first, then m/*.lwm, then t/*.webp; paths relative to
  *   the volume's folder).  lwvIndexLength(first 8 bytes) → 8 + H; parseLwv(the first 8 + H bytes) → the index, checked. */
 export const MAGIC = 'LWM1', LWM_SCHEMA = 1, LWV_MAGIC = 'LWV1';
-const DTYPE = { f64: Float64Array, f32: Float32Array, i32: Int32Array };
+const DTYPE = { f64: Float64Array, f32: Float32Array, i32: Int32Array, f16: Uint16Array };   // f16: the raw halves (espGrid widens them)
 const LE = new Uint8Array(new Uint16Array([1]).buffer)[0] === 1;
 const pad8 = (n) => (n + 7) & ~7;
 
@@ -70,6 +70,17 @@ export function rungRecord(lwm, basis) {
     const o = {}; for (const k of Object.keys(v)) o[k] = fill(v[k]); return o;
   };
   return fill(r.record);
+}
+
+/* iteration 014 B3 · THE POTENTIAL's GRID, OPTIONAL (chain C's C1 writes it; a file without it is unchanged): header.rungs[basis].esp =
+ * { n, box } over the rung's blob `esp` (dtype 'f16', n³ halves, x fastest), the TOTAL φ (hartree/e, nuclei included) at the cell centres
+ * of [−box, box]³ bohr.  espGrid(lwm, basis) → { n, half, data: Float32Array(n³) } for field.js setEspGrid, or null (the app's Poisson pass). */
+function half2f(h) { const e = (h >> 10) & 31, m = h & 1023, s = h & 32768 ? -1 : 1; return e === 0 ? s * m * 2 ** -24 : e === 31 ? (m ? NaN : s * Infinity) : s * (1 + m / 1024) * 2 ** (e - 15); }
+export function espGrid(lwm, basis) {
+  const r = lwm.header.rungs && lwm.header.rungs[basis], e = r && r.esp, d = r && r.blobs && r.blobs.esp;
+  if (!e || !d || !(e.n >= 2) || !(e.box > 0) || d.length !== e.n ** 3 || (d.dtype !== 'f16' && d.dtype !== 'f32')) return null;
+  const raw = lwm.blob(basis, 'esp'), data = d.dtype === 'f32' ? raw : Float32Array.from(raw, half2f);
+  return { n: e.n, half: e.box, data };
 }
 
 export function encodeLwm(header, data) {

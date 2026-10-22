@@ -1,7 +1,7 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT } from '../field.js'; import { planeModel } from '../native-ui.js';
+import { el, knob, sw, seg, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, ATOM_STYLES, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
@@ -44,14 +44,61 @@ export function createMaterial(app) {
       { id:'glass',label:'SHELL',title:'Render a translucent density shell' },
       { id: 'glassSigned', label: 'SHELL ±', title: 'Render the signed lobes as a translucent shell: SHELL’s look on SIGNED’s geometry' },   // iteration 010 X7 (STYLE 8)
       { id:'additive',label:'ADD',title:'Additive emission through the field' },
-      { id: 'bands', label: 'BANDS', title: 'One level surface per octave of the density, anchored at ISO' }],
-      onChange: (v) => { mat.style = STYLE[drawStyle(v)]; schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE
+      { id: 'bands', label: 'BANDS', title: 'One level surface per octave of the density, anchored at ISO' },
+      { id: 'balls', label: 'BALLS', title: 'The molecule as space-filling CPK balls (van der Waals radii × SIZE), no sticks' },   // iteration 014 B1 (STYLE 9)
+      { id: 'sticks', label: 'STICKS', title: 'The molecule as 3D sticks, each half in its atom’s colour (RADIUS)' },                // B2 (STYLE 10)
+      { id: 'esp', label: 'ESP', title: 'THE POTENTIAL MAP: φ(r) = Σ Z/|r − R| − ∫ρ/|r − r′| painted on the density’s ISO surface, the SAS or the SES — red negative, blue positive' }],   // B3 (STYLE 11)
+      onChange: (v) => { mat.style = STYLE[drawStyle(v)]; atomDrawSync(); schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE
     rd.appendChild(ui.styleSeg.root).dataset.keyAction = 'style';
     /* 2026-09-10 (Josh): ISO, GRAIN and KNEE sit directly under EXPOSURE, SOFT and HUE — one six-knob
        material row above STYLE — instead of a second row below the style seg. */
     ui.isoK = knob({ label: 'ISO', min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.isoK.root);
     ui.grainK = knob({ label: 'GRAIN', min: 0.02, max: 1, value: 0.35, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.grain', v)) return; mat.grain = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.grainK.root);
     ui.kneeK = knob({ label: 'KNEE', min: 0.02, max: 8, value: KNEE_DEFAULT, log: true, fmt: (v) => v.toFixed(2), title: 'KNEE bends the ray’s opacity: 0.6 is the plain exponential, above it a soft shoulder (dense cores show through; the default 3 is somewhat opaque, slightly see-through), below it a hard knee (the silhouette closes sooner)', onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.kneeK.root);
+    /* iteration 014 B · THE THREE VIEWS' controls (two rows, shown while BALLS, STICKS or ESP is drawn; a control the style does not read is dimmed,
+       never moved).  The keys are written into `mat` only by a hand, so a project that never touched them serialises as before. */
+    const pctF = (v) => Math.round(v * 100) + '%', au = (v) => '±' + v.toFixed(3);
+    ui.atomSizeK = knob({ label: 'SIZE', min: 0.2, max: 1.5, value: 1, fmt: pctF, title: 'BALLS: the van der Waals radius × SIZE (100 % is space-filling CPK)', onInput: (v) => { mat.atomSize = v; schedule(TIER.PRESENT); } });
+    ui.stickK = knob({ label: 'RADIUS', min: 0.1, max: 1.2, value: STICK_R, log: true, fmt: (v) => v.toFixed(2), title: 'STICKS (and the sticks inside ESP): the stick radius in bohr', onInput: (v) => { mat.stickR = v; schedule(TIER.PRESENT); } });
+    ui.probeK = knob({ label: 'PROBE', min: 0.5, max: 5, value: PROBE_R, fmt: (v) => v.toFixed(2), title: 'ESP · SAS / SES: the probe radius in bohr (2.65 = water’s 1.4 Å)', onInput: (v) => { mat.probe = v; schedule(TIER.PRESENT); } });
+    ui.espRangeK = knob({ label: 'RANGE', min: 0.005, max: 0.5, value: ESP_RANGE, log: true, fmt: au, title: 'ESP: the colour map spans ±RANGE hartree/e; beyond it the colour holds', onInput: (v) => { mat.espRange = v; atomDrawSync(); schedule(TIER.PRESENT); } });
+    ui.espSurfSeg = seg({ aria: 'potential surface', value: 'iso', options: [
+      { id: 'iso', label: 'ISO', title: 'the density’s own surface, ρ = ISO/30 a.u. (0.002 at the default ISO)' },
+      { id: 'sas', label: 'SAS', title: 'the solvent-accessible surface: the van der Waals spheres grown by PROBE' },
+      { id: 'ses', label: 'SES', title: 'the solvent-excluded surface: the van der Waals spheres with their crevices filled by the probe' }],
+      onChange: (v) => { mat.espSurf = v; atomDrawSync(); schedule(TIER.PRESENT); } });
+    ui.espPalSw = sw({ label: 'USE PALETTE', value: false, title: 'ESP: colour the map (and its bar) with the active PALETTE instead of the standard red → blue', onChange: (on) => { mat.espPal = on; atomDrawSync(); schedule(TIER.PRESENT); } });
+    ui.espLiveSw = sw({ label: 'LIVE · SLOW', value: false, title: 'ESP: solve φ again on every new density (a running molecule); off, at most once a second', onChange: (on) => { mat.espLive = on; schedule(TIER.PRESENT); } });
+    { const r = el('div', 'row tight', gd); for (const k of [ui.atomSizeK, ui.stickK, ui.probeK, ui.espRangeK]) r.appendChild(k.root); const r2 = el('div', 'row tight', gd); for (const k of [ui.espSurfSeg, ui.espPalSw, ui.espLiveSw]) r2.appendChild(k.root); }
+    /* the map's COLOUR BAR (Josh's answer 3): vertical, beside the map at the free stage's right, five numbers (±RANGE, ±RANGE/2, 0); USE PALETTE puts
+       the active ramp in it too; HUE turns it as it turns the map */
+    const bar = el('div', 'lw-espbar', app.dom.stage); bar.hidden = true; bar.setAttribute('aria-hidden', 'true');
+    const barRamp = el('i', 'lw-espbar-ramp', bar), barNums = [0, 1, 2, 3, 4].map((i) => { const n = el('span', 'lw-espbar-n', bar); n.style.top = (i * 25) + '%'; return n; });
+    el('span', 'lw-espbar-u', bar).textContent = 'φ · a.u.';
+    let barTimer = 0;
+    const barSeat = () => { const r = app.host.rack, rr = r && !r.hidden && r.querySelector('.dev:not(.closed):not([hidden])') ? r.getBoundingClientRect() : null, sb = app.dom.stage.getBoundingClientRect();
+      bar.style.right = Math.max(16, rr && rr.left > sb.left + sb.width / 2 && rr.left < sb.right ? sb.right - rr.left + 16 : 16) + 'px'; };
+    function atomDrawSync() {
+      const st = mat.style | 0, atoms = ATOM_STYLES.includes(st), esp = st === STYLE.esp;
+      const r1 = ui.atomSizeK.root.parentElement, r2 = ui.espSurfSeg.root.parentElement; if (r1) r1.hidden = !atoms; if (r2) r2.hidden = !esp;
+      ui.atomSizeK.setDisabled(st !== STYLE.balls); ui.stickK.setDisabled(st === STYLE.balls); ui.probeK.setDisabled(!esp || (mat.espSurf || 'iso') === 'iso'); ui.espRangeK.setDisabled(!esp);
+      bar.hidden = !esp;
+      if (esp) {
+        const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, st2 = mat.espPal && app.state.palette ? [...app.state.palette.stops].sort((a, b) => a.at - b.at) : null;
+        barRamp.style.background = 'linear-gradient(to top, ' + (st2 ? st2.map((q) => rgbToHex(q.rgb) + ' ' + (q.at * 100).toFixed(1) + '%').join(', ') : ESP_RAMP.join(', ')) + ')';
+        barRamp.style.filter = mat.hueShift ? `hue-rotate(${Math.round(mat.hueShift * 360)}deg)` : '';
+        [R, R / 2, 0, -R / 2, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3); });
+        barSeat(); if (!barTimer) barTimer = setInterval(() => { if (bar.hidden) { clearInterval(barTimer); barTimer = 0; } else barSeat(); }, 500);
+      }
+    }
+    /* a restore: the knobs from `mat` (an absent key is the default and leaves `mat`), then the rows and the bar */
+    ui.atomDrawSync = (pm) => {
+      if (pm) for (const k of ['atomSize', 'stickR', 'probe', 'espRange', 'espSurf', 'espPal', 'espLive']) if (!(k in pm)) delete mat[k];
+      ui.atomSizeK.set(Number.isFinite(mat.atomSize) ? mat.atomSize : 1); ui.stickK.set(Number.isFinite(mat.stickR) ? mat.stickR : STICK_R); ui.probeK.set(Number.isFinite(mat.probe) ? mat.probe : PROBE_R);
+      ui.espRangeK.set(Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE); ui.espSurfSeg.set(mat.espSurf || 'iso'); ui.espPalSw.set(!!mat.espPal); ui.espLiveSw.set(!!mat.espLive);
+      atomDrawSync();
+    };
+    { const set0 = ui.styleSeg.set; ui.styleSeg.set = (v) => { set0(v); atomDrawSync(); }; }   // LW.setStyle and a restore set mat.style first
     el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL, SIGNED and SHELL ± surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
 
     const gs = group(wClip.body, 'observer only');

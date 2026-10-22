@@ -1042,3 +1042,10 @@ body.frost.lw-notice::before { background: hsl(var(--glass-tint) / .62); -webkit
 body.lw-notice .mir-dialog.glass[data-kind="notice"] { background: none; border-color: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.lw-notice .mir-dialog[data-kind="notice"]::before, body.lw-notice .mir-dialog[data-kind="notice"]::after { display: none; }
 body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #transport { visibility: hidden; opacity: 0; }   /* as under the Picker (skin.css menu-open) */
+/* iteration 014 B3 · THE POTENTIAL MAP's colour bar (material.js): vertical, at the free stage's right, under every window, never a pointer target */
+.lw-espbar { position: absolute; top: 50%; right: 16px; width: 64px; height: min(46vh, 320px); transform: translateY(-50%); z-index: 8; pointer-events: none; user-select: none;
+  font: 600 11px/1 var(--mono, ui-monospace, monospace); color: var(--fg); text-shadow: 0 0 6px hsl(var(--glass-tint, 220 20% 10%) / .8); }
+.lw-espbar[hidden] { display: none; }
+.lw-espbar-ramp { position: absolute; left: 0; top: 0; bottom: 0; width: 12px; border-radius: 3px; box-shadow: 0 0 0 1px hsl(0 0% 50% / .35); }
+.lw-espbar-n { position: absolute; left: 18px; transform: translateY(-50%); white-space: nowrap; }
+.lw-espbar-u { position: absolute; left: 0; bottom: -18px; white-space: nowrap; opacity: .75; font-weight: 500; }

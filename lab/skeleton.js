@@ -8,10 +8,8 @@
  * Iteration 012 R1 (Josh 10-20): SKELETON is BALL AND STICK — `opacity` (its OPACITY knob) scales the beads and bonds; `sticks` false draws the atoms'
  * dipole arrow alone (MARKS › DIPOLE, its own switch now: the "weird arrow" Josh asked to separate). */
 import { cameraKey, toScreen } from './field.js';
-import { ANGSTROM } from './md.js'; import { moleculeCharge } from './molecules.js';
+import { ANGSTROM } from './md.js'; import { moleculeCharge } from './molecules.js'; import { RCOV, CPK, bondsOf } from './elements.js';   // iteration 014 B: the element table lives in elements.js
 
-const RCOV = [0, 0.31, 0.28, 1.28, 0.96, 0.84, 0.76, 0.71, 0.66, 0.57, 0.58, 1.66, 1.41, 1.21, 1.11, 1.07, 1.05, 1.02, 1.06, 2.03, 1.76, 1.70, 1.60, 1.53, 1.39, 1.39, 1.32, 1.26, 1.24, 1.32, 1.22, 1.22, 1.20, 1.19, 1.20, 1.20, 1.16].map((r) => r * ANGSTROM);
-const CPK = { 1: '#fff', 3: '#cc80ff', 4: '#c2ff00', 5: '#ffb5b5', 6: '#909090', 7: '#3050f8', 8: '#ff0d0d', 9: '#90e050', 11: '#ab5cf2', 12: '#8aff00', 13: '#bfa6a6', 14: '#f0c8a0', 15: '#ff8000', 16: '#ffff30', 17: '#1ff01f', 29: '#c88033', 30: '#7d80b0', 32: '#668f8f', 33: '#bd80e3', 34: '#ffa100', 35: '#a62929' };
 
 /** 0.8.2 P3 · a molecule's bead: the electron density's centroid (ΣZ_A R_A − μ)/N_e, N_e = ΣZ − q (μ is nuclear minus electronic, rhf-molecule.js) */
 export function centroid(atoms, mu, id) { if (!mu || !atoms.length) return null; let Z = 0; const C = [0, 0, 0]; for (const a of atoms) { Z += a.Z; C[0] += a.Z * a.x; C[1] += a.Z * a.y; C[2] += a.Z * a.z; }
@@ -26,7 +24,7 @@ export function createSkeleton(cv) {
     if (bead && bead.t - trailT >= bead.T / 64) { trail.push(bead.r); trailT = bead.t; if (trail.length > 64) trail.shift(); }
     const ak = atoms.map((a) => `${a.Z},${a.x.toFixed(4)},${a.y.toFixed(4)},${a.z.toFixed(4)}`).join(';');
     const k = [ak, dipole ? dipole.map((v) => v.toFixed(4)).join() : '', cameraKey(obs), obs.dist.toFixed(4), obs.fov, half, W, H, dpr, th, bead ? bead.r.map((v) => v.toFixed(4)).join() + ':' + trail.length + ':' + trailT : '', bead && bead.ell ? bead.ell.S.flat().map((v) => v.toFixed(4)).join() : '', size, opacity, sticks].join('|'); if (k === key) return; key = k;
-    if (ak !== atomsKey) { atomsKey = ak; bonds = []; for (let i = 0; i < atoms.length; i++) for (let j = i + 1; j < atoms.length; j++) { const a = atoms[i], b = atoms[j]; if (Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) < 1.3 * (RCOV[a.Z] + RCOV[b.Z])) bonds.push([i, j]); } }
+    if (ak !== atomsKey) { atomsKey = ak; bonds = bondsOf(atoms); }
     if (th !== theme) { theme = th; const cs = getComputedStyle(document.body); ink = cs.getPropertyValue('--fg').trim() || cs.color; acc = cs.getPropertyValue('--acc').trim() || ink; }
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H); drawn = true;
