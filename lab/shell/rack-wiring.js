@@ -314,7 +314,7 @@ export function createRackWiring(app) {
     schedule(TIER.REBUILD);
   }
   const tablet = { on: false, DPR: 1.5, steps: 110 };   // isTablet() itself sits beside isPhone() at the top (W125: the first-run material asks it before any window exists)
-  app.sh.rk = rk; app.sh.layout = layout; app.sh.phone = phone; app.sh.tablet = tablet; app.sh.winHint = winHint; app.sh.devById = devById;
+  app.sh.rk = rk; app.sh.layout = layout; app.sh.phone = phone; app.sh.tablet = tablet; app.sh.winHint = winHint; app.sh.devById = devById; app.sh.rackCardWidth = rackCardWidth;
   if (app.sh.transport && app.sh.transport.bar) app.sh.transport.bar.start();   // the bar's dock is wired now that its rack and card exist
   function syncPhone() {
     app.state.cornerLayoutDirty=true;

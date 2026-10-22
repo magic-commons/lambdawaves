@@ -313,41 +313,71 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport.mini .ro.period { flex: 0 0 120px; min-width: 120px; width: 120px; }
 #transport.mini .tbtn.jump { font-size: 13px; }
 #transport.mini .k-val, #transport.mini .ro-val { font-size: 9px; }
-/* ── iteration 014 A1 · THE CONTROL SURFACE (the kit's CONTROL_SURFACE_LAYOUT, data-layout="csb"): two rows, 69 px, as narrow as the wider row.
-   These beat λWAVES' own one-row rules above and in skin.css §12 (the 560 / 640 px box, its 46 px, its overflow and its `order`s). ── */
-#transport[data-layout="csb"] { align-items: stretch; }
-#transport.mini[data-layout="csb"] { width: max-content; max-width: calc(100vw - 24px); height: auto; min-height: 69px; padding: 3px 8px; overflow: visible; }
-#transport[data-layout="csb"]:is(.mini, .docked) > .csb-row > *, #transport[data-layout="csb"]:is(.mini, .docked) > .csb-row .tempo-expand { order: 0; }
-#transport[data-layout="csb"] > .csb-row { width: auto; min-width: 0; overflow: visible; }
-#transport.mini[data-layout="csb"] > .csb-row > :not(.mol-pick) { flex-shrink: 0; }
-#transport[data-layout="csb"] .tr-openers { flex: 0 0 auto; min-width: max-content; }
-#transport.mini[data-layout="csb"] > .csb-row { height: 31px; }
-#transport.mini[data-layout="csb"] .tbtn:not(.tempo-expand), #transport.mini[data-layout="csb"] :is(.dock-btn, .mod-exp, .tr-open) { width: 28px; height: 28px; min-width: 0; }
-#transport.mini[data-layout="csb"] .tbtn.play { width: 34px; }
-#transport.mini[data-layout="csb"] .tbtn.modb { width: 32px; }
-#transport.mini[data-layout="csb"] .fd { flex: 0 0 120px; width: 120px; min-width: 120px; }
-#transport.mini[data-layout="csb"] .ro.time { flex: 0 0 64px; width: 64px; min-width: 64px; }
-#transport[data-layout="csb"] .tr-open { border: 0; background: transparent; color: var(--ink-key); border-radius: 50%; display: inline-grid; place-items: center; padding: 0; }
-#transport[data-layout="csb"] .tr-open.on { color: var(--acc); }
-#transport[data-layout="csb"] .csb-gear .tr-gly, #transport[data-layout="csb"] .tr-open .tr-gly { width: 15px; height: 15px; }
-/* row 2: the modes, MOLECULES' chooser and the rack's three, in the bar's flow (they were absolutely seated on the stage) */
+/* ── iteration 014 A1 · A8 · THE CONTROL SURFACE (the kit's CONTROL_SURFACE_LAYOUT, data-layout="csb").  Josh 10-22: "button related stuff on the
+   bottom row … transport/tempo/timing stuff on the top … the rate knob exists as its own column on the right side … Play … takes the entire column
+   and is on the left side … Increase the height dimension of the CSB and make the icons and elements much larger".  ON THE STAGE three columns:
+   PLAY (56 px) over MOD · the timing row over the buttons row · RATE over the BPM pill; 96 px tall, the seats 40 px.  IN A RACK CARD (docked, or
+   the FREE window one card wide): the same columns as bands — PLAY + MOD left and RATE + BPM right, the timing row, the buttons (the chooser on a
+   line of its own), the expander one column.  These beat λWAVES' one-row rules (lab.css' box, skin.css §12's seats, sizes and `order`s). ── */
+#transport[data-layout="csb"] { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "play mid tempo" "panel panel panel"; grid-template-rows: auto auto; align-items: center; column-gap: 12px; row-gap: 0; overflow: visible; }
+#transport.mini[data-layout="csb"] { width: max-content; max-width: calc(100vw - 24px); height: auto; min-height: 96px; padding: 6px 12px; }
+#transport[data-layout="csb"] > .csb-play { grid-area: play; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+#transport[data-layout="csb"] > .csb-mid { grid-area: mid; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+#transport[data-layout="csb"] > .csb-tempo { grid-area: tempo; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+#transport[data-layout="csb"] > .native-tempo { grid-area: panel; margin-top: 8px; }
+#transport[data-layout="csb"] .csb-row { display: flex; align-items: center; gap: 4px; width: auto; min-width: 0; height: 40px; overflow: visible; }
+#transport[data-layout="csb"].mir-transport :is(.csb-col, .csb-row) > * { order: 0; flex-shrink: 0; }
+#transport[data-layout="csb"].mir-transport :is(.csb-col, .csb-row) .tempo-expand { order: 0; }
+/* the seats: round, flat until hovered, 40 px (1.4 × the old 28), their glyphs 20 px */
+#transport[data-layout="csb"] :is(.csb-row > .tbtn, .csb-row > .dock-btn, .csb-row > .mod-exp, .csb-row .tr-open, .csb-row > .csb-search-b, .csb-row > #rackAdd, .csb-row > #rackToggle, .csb-row > #rackFav) {
+  display: inline-grid; place-items: center; width: 40px; height: 40px; min-width: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 18px; transform: none; }
+#transport[data-layout="csb"] :is(.csb-row > .tbtn, .csb-row > .dock-btn, .csb-row > .mod-exp, .csb-row .tr-open, .csb-row > .csb-search-b, .csb-row > #rackAdd, .csb-row > #rackToggle, .csb-row > #rackFav):hover { color: var(--fg); background: var(--glass-raise); }
+#transport[data-layout="csb"] .csb-row svg { width: 20px; height: 20px; }
+#transport[data-layout="csb"] .csb-row .tr-open.on, #transport[data-layout="csb"] .csb-row > .mod-exp.live, #transport[data-layout="csb"] .csb-row > .csb-search-b[aria-expanded="true"] { color: var(--acc); }
+#transport[data-layout="csb"] .csb-row > .mod-exp[data-mark="none"]::before { content: ""; width: 22px; height: 22px; background: currentColor;   /* A8: the modulation window's own icon (a sine wave) */
+  -webkit-mask: url(img/icons/modulation.svg) center / contain no-repeat; mask: url(img/icons/modulation.svg) center / contain no-repeat; }
+/* the left column: PLAY large and centred, MOD under it */
+#transport[data-layout="csb"] .csb-play > .tbtn.play { width: 56px; height: 56px; min-width: 0; border-radius: 50%; background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--fg); }
+#transport[data-layout="csb"] .csb-play > .tbtn.play.on { color: var(--acc); }
+#transport[data-layout="csb"] .csb-play > .tbtn.play > svg { width: 26px; height: 26px; }
+#transport[data-layout="csb"] .csb-play > .tbtn.modb { background: transparent; border-color: transparent; box-shadow: none; width: 48px; height: 26px; min-width: 0; min-height: 0; border-radius: var(--r-pill); font-size: var(--fs-tiny); }
+/* the right column: RATE and the BPM pill at today's size */
+#transport[data-layout="csb"] .csb-tempo > .k { width: 44px; }
+#transport[data-layout="csb"] .csb-tempo > .k .k-lbl { display: none; }
+#transport[data-layout="csb"] .csb-tempo .tempo-expand { flex: 0 0 auto; width: 72px; height: 34px; }
+#transport[data-layout="csb"] .csb-tempo .tempo-expand .tempo-number { font: var(--w-bold) 12px/1 var(--font-num); }   /* the stage pill's reading in a card too */   /* its basis was its WIDTH in a row; in this column it would be its height */
+/* the timing row: ⏮ · t (it takes the room, so the latch, the door, ⚙ and the dock chip sit right) */
+#transport[data-layout="csb"] .csb-row > .ro.time { flex: 1 1 auto; width: auto; min-width: 72px; padding: 0 6px; align-items: flex-start; text-align: left; background: transparent; box-shadow: none; }
+#transport[data-layout="csb"] .csb-row > .ro.time .ro-val { font-size: 13px; }
+#transport[data-layout="csb"] .csb-row :is(.ro-lbl, .ro-sub) { display: none; }
+/* the buttons row: the modes, MOLECULES' chooser, then SEARCH and the rack's three at the right edge */
 #transport #lwMode { position: static; flex-direction: row; gap: 2px; }
-#transport #lwMode .lw-stage-b { width: 28px; height: 28px; }
-#transport :is(#rackToggle, #rackAdd, #rackFav) { position: static; inset: auto; width: 28px; height: 28px; transform: none; border: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+#transport[data-layout="csb"] #lwMode .lw-stage-b { width: 40px; height: 40px; border-radius: 10px; }
+#transport[data-layout="csb"] #lwMode .lw-stage-b::before { width: 22px; height: 22px; }
+#transport :is(#rackToggle, #rackAdd, #rackFav) { position: static; inset: auto; -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.rack-hidden #transport :is(#rackAdd, #rackFav) { opacity: 1; visibility: inherit; pointer-events: auto; }
-#transport .csb-app > #lwMode { margin-right: 4px; }
-#transport .csb-app > .mol-pick { flex: 1 1 200px; min-width: 150px; max-width: 220px; height: 28px; margin-right: auto; }
-/* A2 · THE MINIATURE PICKER: the field in row 2, the six tiles in a .lw-menu pane above the bar (the Picker's tile, the hue in use) */
-#transport .csb-search { position: relative; display: inline-flex; align-items: center; flex: 0 0 auto; }
-#transport .csb-search-b { display: none; }
-#transport .csb-search-in { width: 100px; height: 24px; padding: 0 10px; border: 1px solid var(--glass-hairline); border-radius: var(--r-pill); background: var(--glass-raise); color: var(--fg); font: var(--fs-small) var(--font-ui); }
-#transport .csb-search-in::placeholder { color: var(--ink-faint); }
-#transport .csb-search-in:focus { outline: 0; border-color: color-mix(in srgb, var(--acc) 60%, transparent); }
-#transport[data-orient="vertical"] .csb-search-b { display: inline-grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--ink-key); }
-#transport[data-orient="vertical"] .csb-search-in { display: none; position: absolute; top: 50%; translate: 0 -50%; width: 180px; z-index: 2; }
-#transport[data-orient="vertical"] .csb-search.open .csb-search-in { display: block; }
-#transport[data-orient="vertical"] .csb-search[data-dir="right"] .csb-search-in { left: calc(100% + 4px); }
-#transport[data-orient="vertical"] .csb-search[data-dir="left"] .csb-search-in { right: calc(100% + 4px); }
+#transport[data-layout="csb"] .csb-app > .mol-pick { flex: 1 1 220px; min-width: 160px; max-width: 240px; height: 34px; }
+#transport[data-layout="csb"] .csb-app > .csb-search-b { margin-left: auto; }
+#transport:has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-app > .mol-pick { display: none; }   /* HYDROGEN: no molecule to choose */
+/* IN A RACK CARD (docked, or the FREE window one card wide): the columns as bands, 32 px seats, the expander one column */
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) { grid-template-areas: "play . tempo" "mid mid mid" "panel panel panel"; grid-template-rows: auto auto auto; padding: 8px; row-gap: 6px; height: auto; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > :is(.csb-play, .csb-tempo) { flex-direction: row; gap: 8px; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-play > .tbtn.play { width: 48px; height: 48px; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-row { gap: 3px; height: 34px; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-row > .tbtn, .csb-row > .dock-btn, .csb-row > .mod-exp, .csb-row .tr-open, .csb-row > .csb-search-b, .csb-row > #rackAdd, .csb-row > #rackToggle, .csb-row > #rackFav, #lwMode .lw-stage-b) { width: 32px; height: 32px; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-row > .ro.time { min-width: 52px; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-app { flex-wrap: wrap; height: auto; row-gap: 6px; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-app > .mol-pick { order: 9; flex: 1 1 100%; max-width: none; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo:not([hidden]) { grid-template-columns: minmax(0, 1fr); }
+/* the FREE window (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack */
+html body #transport[data-place="free"] { position: static; left: auto; right: auto; top: auto; bottom: auto; transform: none; margin: 0; border: 0; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 1; visibility: visible; pointer-events: auto; }
+/* THE SEARCH PILL (A8) above the bar and its ≤ 6 tiles above the pill (lab/csb-search.js; the Picker's tile, the hue in use) */
+.csb-pill { position: fixed; z-index: calc(var(--z-chrome) + 4); padding: 4px; border-radius: var(--r-pill); }
+.csb-pill[hidden] { display: none; }
+.csb-pill .csb-search-in { display: block; width: 280px; height: 34px; padding: 0 14px; border: 0; border-radius: var(--r-pill); background: transparent; color: var(--fg); font: 14px var(--font-ui); }
+.csb-pill .csb-search-in::placeholder { color: var(--ink-faint); }
+.csb-pill .csb-search-in:focus { outline: 0; }
 .csb-suggest { position: fixed; z-index: calc(var(--z-chrome) + 4); display: flex; gap: 6px; padding: 6px; border-radius: 14px; }
 .csb-suggest[hidden] { display: none; }
 .csb-suggest .mm-tile { position: relative; width: 76px; height: 76px; padding: 0; border: 1px solid transparent; border-radius: 10px; background: transparent; cursor: pointer; overflow: hidden; }
@@ -356,38 +386,28 @@ body.rack-hidden #transport :is(#rackAdd, #rackFav) { opacity: 1; visibility: in
 .csb-suggest .mm-under { display: none; }
 .csb-suggest .mm-lbl { position: absolute; left: 0; right: 0; bottom: 3px; font: var(--w-bold) 10px/1 var(--font-math, serif); color: var(--fg); text-align: center; pointer-events: none; }
 .csb-suggest .csb-none { padding: 6px 10px; font-size: var(--fs-small); color: var(--ink-faint); }
-#transport .csb-app > #lwMode + :is(#rackAdd, #rackToggle, #rackFav), #transport .csb-app > .csb-search + #rackAdd { margin-left: auto; }
-#transport:has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-app > .mol-pick { display: none; }   /* HYDROGEN: no molecule to choose (row 1 is the wider row, so the bar keeps its width) */
-/* iteration 014 A4 · THE FREE WINDOW (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack;
-   VERTICAL (data-orient) stands it up — the rows become columns, the chooser leaves (the search finds a molecule), the modes stack */
-html body #transport.mini[data-place="free"] { position: static; left: auto; right: auto; top: auto; bottom: auto; transform: none; margin: 0; border: 0; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
-html body.rack-hidden #transport.mini[data-place="free"] { transform: none; opacity: 1; visibility: visible; pointer-events: auto; }
-#transport.mini[data-layout="csb"][data-orient="vertical"] { flex-direction: row; align-items: flex-start; column-gap: 4px; }
-#transport.mini[data-layout="csb"][data-orient="vertical"] > .csb-row { flex-direction: column; height: auto; }
-#transport.mini[data-layout="csb"][data-orient="vertical"] > .csb-row > * { flex-basis: auto; }   /* a seat's basis was its WIDTH in a row; in a column it would be its height */
-#transport.mini[data-layout="csb"][data-orient="vertical"] .fd { width: 96px; min-width: 96px; }
-#transport[data-orient="vertical"] .csb-app > .mol-pick { display: none; }
-#transport[data-orient="vertical"] #lwMode { flex-direction: column; margin: 0; }
-#transport[data-orient="vertical"] .csb-app > :is(#rackAdd, #rackToggle, #rackFav) { margin: 0; }
-/* docked in the CONTROL SURFACE card: each row wraps; the chooser takes a line of its own under the modes and the rack's three */
-#transport.docked[data-layout="csb"] .tempo-expand { flex: 0 0 76px; width: 76px; }
-#transport.docked[data-layout="csb"] .ro.time { flex: 1 1 90px; min-width: 0; }
-#transport.docked[data-layout="csb"] .csb-app > .mol-pick { flex: 1 1 100%; max-width: none; margin: 0; order: 9; }
-/* A3 · the favourites strip, under the macros and the clock, the width of the panel; a face is the original control at the bar's size */
-#transport:is(.mini, .docked) .csb-favs { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 36px; padding-top: 4px; border-top: 1px solid var(--glass-hairline); }
-#transport:is(.mini, .docked) > .native-tempo > .csb-favs > * { order: 0; }
-#transport:is(.mini, .docked) .csb-favs .k { width: 48px; flex: 0 0 auto; }
-#transport:is(.mini, .docked) .csb-favs .k-lbl { display: block; font-size: var(--fs-micro); }
-#transport:is(.mini, .docked) .csb-favs .segw { flex: 0 1 auto; max-width: 300px; }
-#transport:is(.mini, .docked) .csb-favs .segw .k-lbl { display: none; }
-#transport:is(.mini, .docked) .csb-favs-empty { font-size: var(--fs-micro); color: var(--ink-faint); }
-/* the expander's first row: ‹ › ⟳, REPEATS and its formula */
-#transport .csb-repeats { grid-column: 1 / -1; display: flex; align-items: center; gap: 4px; min-width: 0; }
-#transport:is(.mini, .docked) > .native-tempo > .csb-repeats > * { order: 0; }
-#transport:is(.mini, .docked) .csb-repeats .ro.period { flex: 0 0 auto; width: auto; min-width: 120px; align-items: flex-start; text-align: left; }
-#transport:is(.mini, .docked) .csb-repeats .ro-lbl { display: block; font-size: var(--fs-micro); color: var(--ink-faint); }
-#transport:is(.mini, .docked) .csb-repeats .ro-val { font-size: var(--fs-small); }
-#transport .csb-repeats .fx { display: block; flex: 1 1 auto; min-width: 0; overflow: hidden; font-size: var(--fs-micro); }
+/* A3 · the favourites strip, under the macros and the clock, the width of the panel; a face is the original control */
+#transport[data-layout="csb"] .csb-favs { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 36px; padding-top: 4px; border-top: 1px solid var(--glass-hairline); }
+#transport[data-layout="csb"] > .native-tempo > .csb-favs > * { order: 0; }
+#transport[data-layout="csb"] .csb-favs .k { width: 48px; flex: 0 0 auto; }
+#transport[data-layout="csb"] .csb-favs .k-lbl { display: block; font-size: var(--fs-micro); }
+#transport[data-layout="csb"] .csb-favs .segw { flex: 0 1 auto; max-width: 300px; }
+#transport[data-layout="csb"] .csb-favs .segw .k-lbl { display: none; }
+#transport[data-layout="csb"] .csb-favs-empty { font-size: var(--fs-micro); color: var(--ink-faint); }
+/* the expander's first row (A8 tidy): ‹ › ⟳ as one group of round seats, REPEATS as the kit's readout (its word over its value), the formula on
+   the same line taking the rest, one alignment, a hairline under */
+#transport[data-layout="csb"] > .native-tempo > .csb-repeats { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 2px 6px; border-bottom: 1px solid var(--glass-hairline); }
+#transport[data-layout="csb"] > .native-tempo > .csb-repeats > * { order: 0; }
+#transport[data-layout="csb"] .csb-repeats > .csb-steps { display: inline-flex; gap: 2px; flex: 0 0 auto; }
+#transport[data-layout="csb"] .csb-repeats > .csb-steps > .tbtn { display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 14px; }
+#transport[data-layout="csb"] .csb-repeats > .csb-steps > .tbtn:hover { color: var(--fg); background: var(--glass-raise); }
+#transport[data-layout="csb"] .csb-repeats > .ro.period { flex: 0 0 auto; width: auto; min-width: 130px; padding: 0; display: flex; flex-direction: column; align-items: flex-start; text-align: left; background: transparent; box-shadow: none; }
+#transport[data-layout="csb"] .csb-repeats > .ro.period .ro-lbl { display: block; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--ink-faint); }
+#transport[data-layout="csb"] .csb-repeats > .ro.period .ro-val { font-size: var(--fs-small); color: var(--fg); }
+#transport[data-layout="csb"] .csb-repeats > .ro.period .ro-sub { display: none; }
+#transport[data-layout="csb"] .csb-repeats > .fx { display: block; flex: 1 1 auto; min-width: 0; overflow: hidden; font-size: var(--fs-micro); text-align: right; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo > .csb-repeats { flex-wrap: wrap; row-gap: 4px; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-repeats > .fx { flex-basis: 100%; text-align: left; }
 /* docked into the rack as a card */
 #transport.docked { position: static; transform: none; width: auto; height: auto; flex-wrap: wrap; padding: 6px; gap: 6px; border: 0; box-shadow: none; background: transparent; }
 /* 0.6.6 G2 · THE TYPE BOX (lab/shell/transport.js): ASK swaps the centre for one line to Gemma; her answer echoes in the t readout's seat for 4 s */

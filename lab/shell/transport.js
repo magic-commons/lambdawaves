@@ -42,19 +42,23 @@ export function createTransport(app) {
       armed: () => app.state.modArm, arm: (v) => setModArm(v), onArm: (f) => { armSubs.add(f); return () => armSubs.delete(f); },
       isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => app.sh.layout.modulation.toggle(),
       cadence: () => app.ctl.MOD.hz, setCadence: (hz) => app.ctl.mod.setCadence(hz), persist: () => saveSettings() };
-    /* iteration 014 A1 · THE CONTROL SURFACE (the kit's CONTROL_SURFACE_LAYOUT, two rows).  Row 1, the clock: play · MOD · ⏮ · SCRUB · t · RATE ·
-       the BPM pill · TIMELINE · the gear (MIR OPTIONS: the GUI menu left the menubar) · dock · the modulation door.  Row 2, the app: LIBRARY ·
-       MOLECULAR · HYDROGEN (#lwMode, moved off the title's side) · ‹ MOLECULE › (MOLECULES' chooser, moved out of the card) · + ◧ ☆ (the rack's
-       three, moved off the stage's right edge).  REPEATS, its formula, ⟳ and ‹ › ride in the expander's first row (A-PLAN call 1). */
+    /* iteration 014 A1 · A8 · THE CONTROL SURFACE (the kit's CONTROL_SURFACE_LAYOUT; Josh 10-22: "button related stuff on the bottom row …
+       transport/tempo/timing stuff on the top … the rate knob … its own column on the right … Play … takes the entire column … on the left").
+       LEFT: PLAY, large, with MOD under it.  MIDDLE: ⏮ · t · TIMELINE · the modulation door (its sine icon) · ⚙ (MIR OPTIONS; the GUI menu left
+       the menubar) · the dock cycle, over LIBRARY · MOLECULAR · HYDROGEN (#lwMode) · ‹ MOLECULE › (MOLECULES' chooser) · SEARCH · + ◧ ☆.  RIGHT:
+       RATE over the BPM pill.  REPEATS, its formula, ⟳ and ‹ › ride in the expander's first row (Josh: "Its fine in the expander").  The SCRUB
+       left the bar in every seat (Josh: "drop"): `ui.scrub` is still built, unmounted, so a preset's, CLEAR's and a restore's `ui.scrub.set(0)`
+       and KEEP FRAMES stand. */
     const gear = barButton({ cls: 'csb-gear', glyph: 'settings', label: 'MIR OPTIONS', title: 'MIR OPTIONS — the interface’s look', run: () => mirGui().open('options') }).root;
     const chooser = document.querySelector('.dev[data-id="chem"] .mol-pick');
     const byId = (id) => document.getElementById(id);
     const search = createCsbSearch(app, { bar: () => T });   // A2 · THE MINIATURE PICKER (lab/csb-search.js)
     const bar = createBar({ layout: CONTROL_SURFACE_LAYOUT, root: T, host: dom.stage,
-      nodes: { scrub: ui.scrub.root, rate: ui.rateKnob.root, time: tro.root, gear, modes: byId('lwMode'), chooser, search: search.root, add: byId('rackAdd'), rack: byId('rackToggle'), fav: byId('rackFav') },
+      nodes: { rate: ui.rateKnob.root, time: tro.root, gear, modes: byId('lwMode'), chooser, search: search.root, add: byId('rackAdd'), rack: byId('rackToggle'), fav: byId('rackFav') },
       openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'the timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
       clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),
-      rack: () => app.sh.rk, door: 'mark', powerWord: 'MOD', seatMenu: false, opener: false,
+      rack: () => app.sh.rk, door: 'none', powerWord: 'MOD', seatMenu: false, opener: false,
+      freeWidth: () => (app.sh.rackCardWidth ? app.sh.rackCardWidth() : 262), freeHost: () => app.host.floats,   // A8: the FREE window is one rack card wide and wears the card's drawing
       /* iteration 014 A4 · THE SEATS: the dock chip cycles RACK → STAGE → FREE (Josh's answer 1: the STAGE at boot); a phone keeps rack and stage.
          The rack seat is λWAVES' TRANSPORT card at its remembered slot (rack-wiring.js), so the kit docks through it */
       places: () => (isPhone() ? ['rack', 'stage'] : ['rack', 'stage', 'free']),
@@ -66,12 +70,11 @@ export function createTransport(app) {
         list.style.top = Math.round(up ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8)) + 'px'; })); }
     ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'modulation on or off');
     { const rst = bar.root.querySelector('.transport-home'); if (rst) { rst.title = 't → 0  (home)'; rst.setAttribute('aria-label', 'back to t = 0'); } }
-    /* the door wears the title's mark and spins under a mouse (WAVE 55) */
+    /* A8 · the door wears the modulation window's own icon (lab/img/icons/modulation.svg, a CSS mask; Josh: "a sine wave icon instead of the MIR
+       3x3 square logo"); the turning mark is the kit's unplaced logoButton now */
     const door = bar.el.door; ui.modExp = door; door.title = 'Open the modulation window';
-    const spinLogo = (reverse) => { const mark = door.querySelector('svg'); if (!mark) return; if (door._spin) door._spin.cancel(); door._spin = mark.animate([{ transform: 'rotate(0deg)' }, { transform: `rotate(${reverse ? -360 : 360}deg)` }], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 550, easing: 'ease-in-out' }); };
-    door.addEventListener('pointerenter', () => spinLogo(false)); door.addEventListener('pointerleave', () => spinLogo(true));
-    /* the expander's first row: ‹ › ⟳, REPEATS and its formula, read in full (A1: they read once a minute; the bar keeps SCRUB and t) */
-    if (bar.el.panel) { const rep = el('div', 'csb-repeats'); rep.append(sm, sp, jmp, ui.periodRo.root, ui.periodFx.root); bar.el.panel.prepend(rep); }
+    /* the expander's first row: ‹ › ⟳ as one group of round seats, then REPEATS (the kit's readout face) and its formula, one baseline (A8 tidy) */
+    if (bar.el.panel) { const rep = el('div', 'csb-repeats'), steps = el('span', 'csb-steps', rep); steps.append(sm, sp, jmp); rep.append(ui.periodRo.root, ui.periodFx.root); bar.el.panel.prepend(rep); }
     /* A3 · THE EXPANDER'S FAVOURITES (lab/csb-favs.js): a strip under the macros; a knob's right-click / hold menu ADDs it, three segments are offered
        (Josh's answer 4: SPECTRUM's HYDROGEN | STURMIAN, WAVE's POSITION | MOMENTUM and its OBSERVABLE); the faces are made when the expander opens */
     const favs = createCsbFavs(app, { panel: bar.el.panel }); app.sh.csb = favs;

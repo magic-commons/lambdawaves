@@ -292,16 +292,36 @@ export function modPower({ mod, word = '', signal } = {}) {
  *  while a mouse hovers it (wordmark.js createMirDiamond); `mark: 'mark'` seats the nine squares the accent paints
  *  (λWAVES).  A press opens or closes the window; in a work bar (`work()` true) with `onSwitch`, it SWITCHES to the
  *  modulation workspace instead (BASINS: the timeline's MIR button swaps to MODULATION).  `aria-expanded` says which. */
-export function modDoor({ mod, mark = 'palette', onSwitch = null, work = () => false, signal } = {}) {
+export function modDoor({ mod, mark = 'palette', onSwitch = null, work = () => false, signal } = {}) {   // mark 'none' (1.5.0-alpha.25): the app dresses the door itself (λWAVES: its modulation icon)
   const life = lifeOf(signal), root = el('button', 'mod-exp mod-logo'); root.type = 'button';
   let diamond = null;
-  if (typeof document !== 'undefined') { if (mark === 'mark') root.appendChild(markSvg()); else diamond = createMirDiamond(root); }
+  if (typeof document !== 'undefined' && mark !== 'none') { if (mark === 'mark') root.appendChild(markSvg()); else diamond = createMirDiamond(root); }
+  if (mark === 'none') root.dataset.mark = 'none';
   ariaLabel(root, 'Open the modulation window'); root.title = 'Open the modulation window'; root.setAttribute('aria-expanded', 'false');
   root.dataset.keyAction = 'modulation';   // its key is the table's (keys.hints), never typed (W19 K2)
   function sync() { setAttr(root, 'aria-expanded', String(isOpenOf(mod))); }
   root.addEventListener('click', () => { if (onSwitch && work()) onSwitch(); else if (mod) mod.toggle(); }, { signal: life.signal });
   if (!mod && !onSwitch) root.hidden = true;
   return { root, sync, destroy() { life.abort(); if (diamond) diamond.destroy(); } };
+}
+
+/** logoButton({ mark, label, run }) — THE MIR LOGO BUTTON (1.5.0-alpha.25; Josh 2026-10-22: "Leave the mechanism for the animation and CSS, as it
+ *  will be useful somewhere else. I shall call it the MIR Logo Button"): a round seat wearing the nine squares (`mark: 'mark'`, the accent paints
+ *  them) or the MIR palette diamond (`'palette'`), which turns a whole turn under a mouse and back on leaving (λWAVES' modulation door until
+ *  iteration 014 A8).  No layout places it; an app seats `root` where it wants one.  → { root, sync(), destroy() } */
+export function logoButton({ mark = 'mark', label: name = 'MIR', run = null, signal } = {}) {
+  const life = lifeOf(signal), root = el('button', 'mir-logo-btn mod-exp mod-logo'); root.type = 'button';
+  let diamond = null;
+  if (typeof document !== 'undefined') { if (mark === 'mark') root.appendChild(markSvg()); else diamond = createMirDiamond(root); }
+  ariaLabel(root, name); root.title = name;
+  let spin = null;
+  const turn = (back) => { const m = root.querySelector('svg'); if (!m || typeof m.animate !== 'function') return; if (spin) spin.cancel();
+    const still = root.ownerDocument.defaultView.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    spin = m.animate([{ transform: 'rotate(0deg)' }, { transform: `rotate(${back ? -360 : 360}deg)` }], { duration: still ? 1 : 550, easing: 'ease-in-out' }); };
+  root.addEventListener('pointerenter', () => turn(false), { signal: life.signal });
+  root.addEventListener('pointerleave', () => turn(true), { signal: life.signal });
+  if (run) root.addEventListener('click', run, { signal: life.signal });
+  return { root, sync() {}, destroy() { life.abort(); if (spin) spin.cancel(); if (diamond) diamond.destroy(); } };
 }
 
 /** bindTempoField({ button, input, tempo, enabled, drag, paint }) — THE inline BPM editor of the work bars (BASINS
@@ -553,14 +573,18 @@ export const BASINS_LAYOUT = named('basins', [{ group: 'native-play-row', items:
 export const LAMBDAWAVES_LAYOUT = named('lambdawaves', [{ group: 'native-play-row', items: ['play', 'power', 'rewind', 'app:back', 'app:forward', 'app:scrub', 'app:jump', 'app:time', 'app:period', 'app:rate', 'tempo'] },
   'panel', 'openers', 'seat', 'dock', 'door']);
 
-/** THE CONTROL SURFACE (1.5.0-alpha.25, λWAVES iteration 014 A1): the bar in TWO ROWS (`data-layout="csb"`, 1.5 × the bar's
- *  height, as narrow as its wider row).  Row 1 is the clock — play, power, to-start, the app's scrub, time readout and rate,
- *  the BPM pill, the window latches, the app's gear, the dock chip, the modulation door; row 2 is the app — its modes, its
- *  chooser, its search and the rack's add / hide / favourites (`app:<name>`, from `nodes`; a name the app does not hand in is
- *  left out).  The tempo panel opens under the rows.  Docked, the rack window is CONTROL SURFACE. */
+/** THE CONTROL SURFACE (1.5.0-alpha.25, λWAVES iteration 014 A1 · A8; `data-layout="csb"`): three columns.  LEFT the play, large and
+ *  centred in the bar's height, with the modulation power under it; MIDDLE two rows — the timing row (to-start, the app's time readout, the
+ *  window latches, the modulation door, the app's gear, the dock chip) over the buttons row (the app's modes, chooser, search and the rack's
+ *  add / hide / favourites); RIGHT the app's rate knob over the BPM pill.  The tempo panel opens under the whole bar.  In a rack card (docked,
+ *  or the FREE window, one card wide) the same columns become bands: play + power left and rate + pill right, then the timing row, then the
+ *  buttons.  `app:<name>` comes from `nodes`; a name the app does not hand in is left out.  Docked, the rack window is CONTROL SURFACE. */
 export const CONTROL_SURFACE_LAYOUT = named('csb', [
-  { group: 'csb-row csb-clock', items: ['play', 'power', 'rewind', 'app:scrub', 'app:time', 'app:rate', 'tempo', 'openers', 'app:gear', 'dock', 'door'] },
-  { group: 'csb-row csb-app', items: ['app:modes', 'app:chooser', 'app:search', 'app:add', 'app:rack', 'app:fav'] },
+  { group: 'csb-col csb-play', items: ['play', 'power'] },
+  { group: 'csb-mid', items: [
+    { group: 'csb-row csb-clock', items: ['rewind', 'app:time', 'openers', 'door', 'app:gear', 'dock'] },
+    { group: 'csb-row csb-app', items: ['app:modes', 'app:chooser', 'app:search', 'app:add', 'app:rack', 'app:fav'] }] },
+  { group: 'csb-col csb-tempo', items: ['app:rate', 'tempo'] },
   'panel'], { title: 'CONTROL SURFACE' });
 
 /** layoutNames(layout) — every part name a layout uses, groups opened */
@@ -609,7 +633,7 @@ export const transportDock = (R) => dockOf(R);
 export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = globalThis.document && document.body, root = null, id = 'transport',
   clock = null, mod = null, model = MOD, setBpm = null, persist = null, openers = [], rack = null, keys = null, store = null,
   key = 'mir.transport', opener = true, onRefused = null, onInterface = null, bar: barKind = 'float', door: doorMark = 'palette',
-  onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true, places = null, onDock = null } = {}) {
+  onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true, places = null, onDock = null, freeWidth = null, freeHost = null } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView, body = doc.body;
   const life = new AbortController(), on = { signal: life.signal }, signal = life.signal;
   const S = store || localSeatStore(key);
@@ -672,38 +696,28 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   let placement = barKind === 'work' ? 'work' : 'stage', workHost = barKind === 'work' ? stageHost : null, docked = false;
   /* THE FREE WINDOW (1.5.0-alpha.25): `places` (an array, or a function → array) turns the dock chip into a cycle RACK → STAGE →
      FREE; FREE seats the one bar in a window of its own (createWindow, chrome 'close', its rect remembered), whose × puts the bar
-     back on the stage; a chip on that window stands the bar up (data-orient="vertical": its rows become columns) */
-  let free = false, orient = 'horizontal', freeWin = null, orientB = null;
+     back on the stage.  `freeWidth()` (A8): the window is that wide (λWAVES: one rack card) and the bar wears its card drawing there */
+  let free = false, freeWin = null;
   const placeList = () => (typeof places === 'function' ? places() : places) || null;
   const freeStore = jsonStore(key + '.free');
   function freeWindow() {
     if (freeWin) return freeWin;
-    freeWin = createWindow({ id: id + '-free', title: (layout && layout.title) || 'TRANSPORT', host: body, chrome: 'close', resizable: false, emptyDrag: true,
+    freeWin = createWindow({ id: id + '-free', title: (layout && layout.title) || 'TRANSPORT', host: (typeof freeHost === 'function' ? freeHost() : freeHost) || body,   // freeHost: the app's float layer (its windows' stack)
+      chrome: 'close', resizable: false, emptyDrag: true,
       size: { w: 560, h: 120 }, min: { w: 40, h: 40 }, persist: { read: freeStore.get, write: freeStore.set },
       onClose: () => { if (free) { free = false; seatBar(); saveSeat(); } } });
     freeWin.root.classList.add('mir-transport-free');
-    if (freeWin.tools) {
-      orientB = el('button', 'mir-win-btn tr-orient'); orientB.type = 'button'; setGlyph(orientB, 'swap', { label: 'Stand the bar up or lay it down' });
-      orientB.title = 'Stand the bar up or lay it down'; orientB.setAttribute('aria-pressed', 'false');
-      orientB.addEventListener('click', () => setOrient(orient === 'vertical' ? 'horizontal' : 'vertical'), on);
-      freeWin.tools.prepend(orientB);
-    }
     return freeWin;
   }
   /** the free window takes the bar's size (it is not resizable: the bar decides) */
   function fitFree() {
     if (!freeWin || placement !== 'free') return;
     const W = freeWin;                                                // layout sizes, never a rect: the window's open motion scales it
+    const fw = typeof freeWidth === 'function' ? Math.round(freeWidth()) : 0;
+    if (fw > 0) bar.style.width = fw + 'px';
     W.resize({ w: bar.offsetWidth + (W.root.offsetWidth - W.body.clientWidth), h: bar.offsetHeight + (W.root.offsetHeight - W.body.clientHeight) });
   }
-  function setOrient(o) {
-    orient = o === 'vertical' ? 'vertical' : 'horizontal';
-    setAttr(bar, 'data-orient', placement === 'free' && orient === 'vertical' ? 'vertical' : null);
-    if (orientB) setAttr(orientB, 'aria-pressed', String(orient === 'vertical'));
-    if (placement === 'free') view.requestAnimationFrame(fitFree);
-    saveSeat(); return orient;
-  }
-  const saveSeat = () => { if (placeList()) S.set({ v: 2, seat, place: placement === 'free' ? 'free' : 'stage', orient }); };
+  const saveSeat = () => { if (placeList()) S.set({ v: 2, seat, place: placement === 'free' ? 'free' : 'stage' }); };
   const dockTo = (v) => { if (onDock) return onDock(v); const R = rackOf(); if (!R) return; if (v) R.open(DOCK_ID, { index: 0 }); else R.close(DOCK_ID); };
   /** setPlace('rack' | 'stage' | 'free') — where the one bar sits; the chip's cycle and the app's own verbs come here */
   function setPlace(p) {
@@ -731,8 +745,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     const next = placementOf({ docked, host, free });
     if (placement === 'free' && next !== 'free' && freeWin && freeWin.isOpen()) freeWin.close();   // `free` is already false: its onClose does nothing
     setAttr(bar, 'data-place', next);
-    setAttr(bar, 'data-orient', next === 'free' && orient === 'vertical' ? 'vertical' : null);
-    if (next === 'free') { barFace(false); bar.classList.remove('docked'); bar.classList.add('mini'); const W = freeWindow(); if (bar.parentElement !== W.body) W.body.appendChild(bar); if (!W.isOpen()) W.open(); view.requestAnimationFrame(fitFree); }
+    if (next === 'free') { barFace(false); bar.classList.remove('docked', 'mini'); const W = freeWindow(); if (bar.parentElement !== W.body) W.body.appendChild(bar); if (!W.isOpen()) W.open(); view.requestAnimationFrame(fitFree); }
     else if (next === 'work') { bar.classList.remove('mini', 'docked'); if (bar.parentElement !== host) host.appendChild(bar); barFace(true); }
     else if (next === 'stage') { barFace(false); bar.classList.remove('docked'); bar.classList.add('mini'); if (bar.parentElement !== stageHost) stageHost.appendChild(bar); }
     else barFace(false);                                              // docked: setDocked keeps the rack window's form
@@ -892,7 +905,6 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
 
   const savedRec = (() => { try { return S.get(); } catch { return null; } })();
   const savedSeat = savedRec && typeof savedRec === 'object' ? savedRec.seat : savedRec;
-  if (savedRec && typeof savedRec === 'object' && savedRec.orient === 'vertical') orient = 'vertical';
   seat = seatOf(savedSeat);
   setAttr(bar, 'data-home', homeOf(seat)); setAttr(bar, 'data-form', seat === 'compact' ? 'compact' : 'bar');
   let started = false;
@@ -914,8 +926,8 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     edit: () => pillP && pillP.edit(),
     setSeat: (s) => applySeat(s, { save: true }), get seat() { return seat; }, get docked() { return docked; },
     mountIn, get placement() { return placement; },
-    /** setPlace('rack' | 'stage' | 'free'), the cycle's next place, the free window and its orientation (1.5.0-alpha.25) */
-    setPlace, cycle: () => setPlace(nextPlace(placeList(), placement)), get orient() { return orient; }, setOrient, get freeWindow() { return freeWin; },
+    /** setPlace('rack' | 'stage' | 'free'), the cycle's next place and the free window (1.5.0-alpha.25) */
+    setPlace, cycle: () => setPlace(nextPlace(placeList(), placement)), get freeWindow() { return freeWin; },
     /** closed — the user switched the bar off (Settings › TRANSPORT BAR: body.no-transport-bar); it stays off in every seat */
     get closed() { return body.classList.contains('no-transport-bar'); },
     /** tempoPanel(show) — open or close the tempo panel from code (BASINS toggleTempo) */

@@ -4,6 +4,8 @@
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
+- 1.5.0-alpha.25 · `shell/transport.js` + `.css` (iteration 014 A8, Josh's answers of 2026-10-22): `CONTROL_SURFACE_LAYOUT` is three columns — the play over the power; the timing row (to-start · time · latches · door · gear · dock) over the buttons row (modes · chooser · search · + ◧ ☆); the rate over the BPM pill — and bands in a rack card (`.docked` / FREE); the scrub left it; the VERTICAL chip, `data-orient` and `setOrient` are gone; `createTransport({ freeWidth, freeHost })` makes the FREE window that wide, on the app's float layer, (λWAVES: one rack card) and the bar wears its card drawing there; `modDoor({ mark: 'none' })` lets the app dress the door (λWAVES: a sine-wave icon).
+- 1.5.0-alpha.25 · `shell/transport.js` + `.css`: `logoButton({ mark, label, run })` — THE MIR LOGO BUTTON (Josh: "Leave the mechanism for the animation and CSS, as it will be useful somewhere else. I shall call it the MIR Logo Button"): the nine squares (or the palette diamond) turning a whole turn under a mouse, `.mir-logo-btn`; no layout places it.
 - **THE SCROLL PILL** (014 A6): while a rack scrolls and 900 ms after (one timeout), each docked window's name in a solid accent pill beside
   its title bar, revealed by a clip-path mask, ink by luminance; `scrolling` on the rack and its track lifts the thumb.
   `shell/rack-scrollbar.js` (`createRackPills`, `inkOn`, `PILL`), `shell/rack.js` (made with every rack), `shell/rack.css`, `shell/gui.js`
