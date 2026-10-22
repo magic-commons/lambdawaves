@@ -881,6 +881,7 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
 /* iteration 012 R1: BALL AND STICK's switch shortened to one column, OPACITY and SIZE beside it; CURSOR and MARKS two columns of switches side by side */
 .lw-info-card .info-ball { grid-template-columns: minmax(0, 1fr) 56px 56px; }
 .lw-info-card .info-ball > .sw { grid-column: 1; }
+.lw-info-card .info-words.info-bonds { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lw-info-card .info-words.info-bonds > .sw { grid-column: auto; }   /* iteration 014 D6: BONDS · ORDER AROMATIC IONIC H-BOND, two by two under BALL AND STICK */
 .lw-info-card .info-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 8px; align-items: start; }
 .lw-info-card .info-col { grid-template-columns: minmax(0, 1fr); }
 .lw-info-card .info-col > .sw { width: 100%; min-width: 0; justify-content: flex-start; }

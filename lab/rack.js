@@ -508,7 +508,7 @@ export async function boot(dom) {
       if (app.state.bow) kepler.clear(); else kepler.suspend();
     }
     const mol = app.state.chem.on, skOn = !!(ui.skeletonSw && ui.skeletonSw.get() && mol), dpOn = !!(ui.dipoleSw && ui.dipoleSw.get() && mol), elOn = !!(ui.ellipsoidSw && ui.ellipsoidSw.get()) && !mol && !sturm.P && app.state.space !== 'p', bdOn = (!!(ui.beadSw && ui.beadSw.get()) && (mol || !sturm.P)) || elOn;   // 0.8.2 P3: THE BEAD shares the canvas, drawn after the skeleton, with SKELETON off too; 0.8.3 B3: THE ELLIPSOID rides it (position space, a register)
-    if (skOn || dpOn || bdOn) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(skOn || dpOn ? app.state.chem.atomsNow() : null, dpOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : Object.assign(beadOf(reg, clock.t, app.state.space === 'p'), { ell: elOn ? covariance(reg, clock.t) : null }), ui.skeletonSize ? ui.skeletonSize.get() : 1.6, ui.skeletonOpacity ? ui.skeletonOpacity.get() : 1, skOn)); } else skeleton.clear();   /* iteration 012 R1: DIPOLE is its own switch (the arrow alone when BALL AND STICK is off) */   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
+    if (skOn || dpOn || bdOn) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(skOn || dpOn ? app.state.chem.atomsNow() : null, dpOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : Object.assign(beadOf(reg, clock.t, app.state.space === 'p'), { ell: elOn ? covariance(reg, clock.t) : null }), ui.skeletonSize ? ui.skeletonSize.get() : 1.6, ui.skeletonOpacity ? ui.skeletonOpacity.get() : 1, skOn, ui.bondsOf ? ui.bondsOf() : null)); } else skeleton.clear();   /* iteration 012 R1: DIPOLE is its own switch (the arrow alone when BALL AND STICK is off) */   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
 
     kepler.bowFrame();
     app.state.chem.setActive(canPresent(wChem));
@@ -737,7 +737,7 @@ export async function boot(dom) {
   // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); it ships CLOSED.  0.4.0 S3 (R-A2):
   // no longer LEGACY — the periodic table of SPECTRUM's ATOM operator, with its own row in + and WINDOW
   const { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, WIG_OK, RAD_OK } = createAtomsWignerRadiation();   // 0.5.2 R2b: readouts' third seat
-  const skeleton = createSkeleton(document.getElementById('skeleton'));   // 0.7.0 V2: its switch is MOLECULES' (ui.skeletonSw, a PREFERENCE)
+  const skeleton = createSkeleton(document.getElementById('skeleton'), (line) => { if (ui.bondSay) ui.bondSay(line); });   // iteration 014 D6: the BONDS' road, said in INFORMATIONAL's status   // 0.7.0 V2: its switch is MOLECULES' (ui.skeletonSw, a PREFERENCE)
   Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wVor, kepler: wOrb,
     slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc, skeleton: wChem, lattice: wLat, bloch: wBlo, central: wCen, separable: wSep });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
   for (const w of [...Object.values(READERS), wVor, wMet, wLad]) windowActivity.track(w);

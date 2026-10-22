@@ -40,6 +40,12 @@ try {
     writeFileSync(OUT.replace(/\.png$/, '-csb.png'), Buffer.from(await g.snap(), 'base64'));
     await g.ev(`const pill = document.querySelector('#transport .tempo-chevron'); if (pill) pill.parentElement.click(); document.querySelector('.dev[data-id="palette"] .mir-ramp-step .mir-step-name').click(); return 1;`); await wait(700);
     info = { inv, rows: await g.ev(`const p = document.querySelector('.mir-pick.pal-pick'); if (!p) return null; return [...p.querySelectorAll('.mir-pick-i')].slice(0, 8).map((b) => { const r = b.getBoundingClientRect(), s = b.querySelector('.pal-strip').getBoundingClientRect(); return b.textContent.trim() + ' · text-left ' + Math.round(b.firstChild.nodeType === 3 ? r.left : b.firstElementChild.getBoundingClientRect().left - r.left) + ' · strip-right-gap ' + Math.round(r.right - s.right); });`) };
+  } else if (scene === 'bonds') {   // D6: MOL=<id> (default C6H6); INFORMATIONAL open, BALL AND STICK on with the four BONDS switches
+    const mol = process.env.MOL || 'C6H6';
+    await g.ev(`__LW.chem.setOn(true); await __LW.chem.pick(${JSON.stringify(mol)}); __LW.layout.reopen('informational', 'R'); __LW.layout.raise('informational'); return 1;`);
+    await g.waitFor('document.querySelector(".lw-info-card .info-bonds")', 200, 100); await wait(800);
+    await g.ev(`const sw = document.querySelector('.lw-info-card .info-ball > .sw'); if (sw.getAttribute('aria-pressed') !== 'true') sw.click(); return 1;`); await wait(2500);
+    info = await g.ev(`return { status: document.querySelector('.dev[data-id="informational"] .dev-stat')?.textContent || null, bonds: [...document.querySelectorAll('.lw-info-card .info-bonds .sw')].map((b) => b.textContent + ':' + b.getAttribute('aria-pressed')) };`);
   } else if (scene === 'register') {
     await g.ev(`__LW.chem.setOn(true); return 1;`);
     await g.waitFor('document.querySelector(".mol-reg canvas.mol-c")?.clientHeight > 0', 300, 100);
