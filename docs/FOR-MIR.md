@@ -4,6 +4,10 @@
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
+- **THE PILL'S TIP** (014 A10): the scroll pill's outer end stops 2 px short of the seated track's inner edge (or `scrollbarSeat`'s x when
+  none runs) and reaches inward over the title bar, its mask opening from that tip; `rackPill` defaults to A, the scrollbar's accent.
+  `shell/rack-scrollbar.js` (`PILL.gap` 2, `PILL.track` 12), `shell/rack.css`, `shell/gui.js`. Why: Josh, "make the scroll bar also be at the
+  very tip of the pill so that the pill doesn't overlap the scroll bar" and "the default should be Accent A instead to match the scroll bar".
 - **THE DOOR'S ICON** (014 A9): `modDoor({ mark: 'icon', icon })` / `createTransport({ door: 'icon', doorIcon })` draw the app's own glyph (an
   svg string or a url) as a CSS mask in the ink (`.mod-door-icon`); the timeline's work bar passes `transport.door` / `doorIcon` through.
   `shell/transport.js`, `shell/transport.css`, `timeline/window.js`. Why: Josh, "remove anything with the MIR logo and have proper icons for it";

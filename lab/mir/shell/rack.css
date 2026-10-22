@@ -104,18 +104,19 @@ body.ui-hidden :is(.mir-rack, .mir-rack-floats, .mir-rack-btn, .mir-rack-list) {
 body.ui-hidden .rack-scrollbar { display: none; }
 .rack-scrollbar.scrolling .rack-scrollbar-thumb { opacity: 1; }   /* a scroll lifts the thumb as a hover does, for the pill's 900 ms */
 /* THE SCROLL PILL (1.5.0-alpha.25, shell/rack-scrollbar.js createRackPills): the window's name beside its title bar while the rack
-   scrolls — solid ACCENT B (A, or none: MIR OPTIONS › WINDOWS › SCROLL PILL), bold UI face, no shadow; revealed by a clip-path mask
-   from the card outward and hidden the same way back, 180 ms; never a target, never a layout */
+   scrolls — solid ACCENT A, the scrollbar's (B, or none: MIR OPTIONS › WINDOWS › SCROLL PILL), bold UI face, no shadow; its tip just short
+   of the scrollbar's track (014 A10), revealed by a clip-path mask from that tip inward and hidden the same way back, 180 ms; never a
+   target, never a layout */
 .rack-pills { position: absolute; left: 0; right: 0; overflow: hidden; pointer-events: none; z-index: calc(var(--z-chrome) + 1);
   --rack-pill-r: 12px; --rack-pill-t: 180ms; --rack-pill-ease: cubic-bezier(.2, 0, 0, 1); }
 .rack-pills-in { position: absolute; inset: 0; }
 .rack-pill { position: absolute; transform: translateY(-50%); padding: 4px 10px; border-radius: var(--rack-pill-r); white-space: nowrap;
-  background: var(--acc2); color: #fff; font: var(--w-bold) 11px/1.2 var(--font-ui); letter-spacing: var(--tr-wide, .06em); box-shadow: none;
-  clip-path: inset(0 100% 0 0 round var(--rack-pill-r)); transition: clip-path var(--rack-pill-t) var(--rack-pill-ease); }
-.rack-pills[data-side="right"] .rack-pill { clip-path: inset(0 0 0 100% round var(--rack-pill-r)); }
+  background: var(--acc); color: #fff; font: var(--w-bold) 11px/1.2 var(--font-ui); letter-spacing: var(--tr-wide, .06em); box-shadow: none;
+  clip-path: inset(0 0 0 100% round var(--rack-pill-r)); transition: clip-path var(--rack-pill-t) var(--rack-pill-ease); }
+.rack-pills[data-side="right"] .rack-pill { clip-path: inset(0 100% 0 0 round var(--rack-pill-r)); }
 .rack-pills.on .rack-pill { clip-path: inset(0 0 0 0 round var(--rack-pill-r)); }
 .rack-pills[data-ink="dark"] .rack-pill { color: #000; }
-body[data-rack-pill="a"] .rack-pill { background: var(--acc); }
+body[data-rack-pill="b"] .rack-pill { background: var(--acc2); }
 body[data-rack-pill="off"] .rack-pills, body.ui-hidden .rack-pills, body.phone .rack-pills { display: none; }
 :root:is([data-motion="reduced"], [data-motion="off"]) .rack-pill { transition: none; }
 
