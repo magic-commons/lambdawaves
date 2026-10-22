@@ -12,9 +12,10 @@ try {
     const look=__LW.look.get(), vivid=typeof look==='object'&&look?look.vivid:__LW.look.get('vivid');
     return {tags:b.classList.contains('no-badges'),captions:b.classList.contains('no-captions'),
       hints:!b.classList.contains('control-hints-off'),helpOff:b.classList.contains('window-info-off'),
-      lean:[...document.querySelectorAll('.dev-lean')].every(k=>k.closest('.dev').classList.contains('lean')),
+      // iteration 012 R1 (re-aimed at 014): INFORMATIONAL's Aa is its STATUS switch (.info-aa), never a LEAN button — out of both laws
+      lean:[...document.querySelectorAll('.dev-lean:not(.info-aa)')].every(k=>k.closest('.dev').classList.contains('lean')),
       // 0.4.0 S0 C3(d): MOLECULES' Aa stays visible with HELP off (its KICK / RUN / TDA / spectra are otherwise unreachable on a first run); every other window's Aa stays hidden
-      aaHidden:[...document.querySelectorAll('.dev-lean')].filter(k=>k.closest('.dev').dataset.id!=='chem').every(k=>getComputedStyle(k).display==='none'),
+      aaHidden:[...document.querySelectorAll('.dev-lean:not(.info-aa)')].filter(k=>k.closest('.dev').dataset.id!=='chem').every(k=>getComputedStyle(k).display==='none'),
       chemAaShown:getComputedStyle(document.querySelector('.dev[data-id="chem"] .dev-lean')).display!=='none',
       auto:__LW.quality.auto,domain:__LW.domain.auto,governor:__LW.governor.on,
       theme:__LW.themeChoice,card:__LW.cardStyle,frost:__LW.frost,
