@@ -28,8 +28,12 @@ try {
     info = { asIs, az, za, heavy, search: await g.ev(`const s = document.querySelector('#lwMenu .mm-opts .mm-search'), b = s.getBoundingClientRect(), t = document.querySelector('#lwMenu .mm-tabs').getBoundingClientRect();
       return { shown: getComputedStyle(s).display, centreX: Math.round(b.left + b.width / 2), tabsCentreX: Math.round(t.left + t.width / 2), belowTabs: b.top >= t.bottom }; `),
       buttons: await g.ev(`return [...document.querySelectorAll('#lwMenu .mm-sort')].map((b) => b.getAttribute("aria-label"));`) };
-  } else {
-    info = await g.ev(`return await (window.__dShot ? window.__dShot(${JSON.stringify(scene)}) : null);`);
+  } else if (scene === 'register') {
+    await g.ev(`__LW.chem.setOn(true); return 1;`);
+    await g.waitFor('document.querySelector(".mol-reg canvas.mol-c")?.clientHeight > 0', 300, 100);
+    await g.ev(`__LW.layout.raise('chem'); __LW.layout.popOut('chem', { x: 560, y: 40, w: 340 }); return 1;`); await wait(1500);
+    info = await g.ev(`const c = document.querySelector('.mol-reg canvas.mol-c'), r0 = document.querySelector('.mol-r0'), card = document.querySelector('.dev[data-id="chem"]').getBoundingClientRect();
+      return { ladderH: c.clientHeight, r0: r0 ? { kids: r0.children.length, shown: getComputedStyle(r0).display } : null, card: [card.left, card.top, card.width, card.height].map(Math.round) };`);
   }
   writeFileSync(OUT, Buffer.from(await g.snap(), 'base64'));
   console.log(JSON.stringify({ scene, OUT, info, errors: (await g.errors()).errs }, null, 1));

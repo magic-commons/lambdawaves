@@ -137,7 +137,7 @@ export function createChem(host, api) {
   rH.appendChild(secStep.root);
   const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule — and its register, under VIEW MIX: one switch', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
   rTop.appendChild(onSw.root);
-  const r0 = el('div', 'row tight', host);
+  const r0 = el('div', 'row tight mol-r0', host);   // iteration 014 D3: the chooser's row; the CONTROL SURFACE takes the chooser (A1), so the empty row folds away (lab.css .mol-r0:empty)
   /* 0.7.4 C2 · THE SHELF: SECTION's name opens the page as TILES under the picker (formula, name, AOs, the catalogue's word, the lamp); a tap is the hand's
      pick and the shelf folds.  ‹ ATOMS ›, the first page, is the periodic table: a tile sets OPERATOR ATOM and its element (api.atom).  Alt+↓ keeps the kit's list. */
   const shelf = el('div', 'mol-shelf', host), ATOM_W = CATALOGUE.find((r) => r.id === 'atom'); shelf.id = 'mol-shelf'; shelf.hidden = true;
