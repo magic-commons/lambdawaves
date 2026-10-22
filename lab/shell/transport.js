@@ -1,10 +1,10 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula, chip } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, CONTROL_SURFACE_LAYOUT, barButton } from '../mir/shell/transport.js'; import { mirGui } from '../mir-gui.js';
+import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar, CONTROL_SURFACE_LAYOUT, barButton } from '../mir/shell/transport.js'; import { mirGui } from '../mir-gui.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createTransport(app) {
-  const { dom, ui, reg, clock, appPlay, sturm, rates } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
+  const { dom, ui, reg, clock, appPlay, sturm, rates, isPhone } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
   const { keep, modHand, rotDriving, saveMod, scan, setKeepFrames, stats } = app.ctl;
   const armSubs = new Set();   // the kit's bar hears THE POWER (setModArm) through its mod seam's onArm
   /* ── transport strip (§25) ─────────────────────────────────────────────── */
@@ -53,7 +53,11 @@ export function createTransport(app) {
       nodes: { scrub: ui.scrub.root, rate: ui.rateKnob.root, time: tro.root, gear, modes: byId('lwMode'), chooser, add: byId('rackAdd'), rack: byId('rackToggle'), fav: byId('rackFav') },
       openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'the timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
       clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),
-      rack: () => app.sh.rk, door: 'mark', powerWord: 'MOD', seatMenu: false, opener: false });
+      rack: () => app.sh.rk, door: 'mark', powerWord: 'MOD', seatMenu: false, opener: false,
+      /* iteration 014 A4 · THE SEATS: the dock chip cycles RACK → STAGE → FREE (Josh's answer 1: the STAGE at boot); a phone keeps rack and stage.
+         The rack seat is λWAVES' TRANSPORT card at its remembered slot (rack-wiring.js), so the kit docks through it */
+      places: () => (isPhone() ? ['rack', 'stage'] : ['rack', 'stage', 'free']),
+      onDock: (v) => { const rk = app.sh.rk; if (!rk) return; if (v) rk.open('transport', { index: app.sh.layout.dockIndex }); else rk.close('transport'); } });
     /* the rack's + and ☆ lists open beside their buttons, wherever the bar sits (they are the stage's, never the bar's: the bar clips) */
     for (const [b, l] of [['rackAdd', 'rackAddList'], ['rackFav', 'rackFavList']]) { const btnEl = byId(b), list = byId(l); if (!btnEl || !list) continue;
       btnEl.addEventListener('click', () => requestAnimationFrame(() => { if (list.hidden) return; const r = btnEl.getBoundingClientRect(), h = list.offsetHeight, w = list.offsetWidth, up = r.top - h - 8 >= 8;
@@ -61,9 +65,6 @@ export function createTransport(app) {
         list.style.top = Math.round(up ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8)) + 'px'; })); }
     ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'modulation on or off');
     { const rst = bar.root.querySelector('.transport-home'); if (rst) { rst.title = 't → 0  (home)'; rst.setAttribute('aria-label', 'back to t = 0'); } }
-    /* the dock chip keeps λWAVES' drawing (WAVE 55: the floating windows' DOCK chip, `north`); docked it wears the kit's pop-out */
-    const faceDock = () => { chip(bar.el.dock, bar.docked ? 'popOut' : 'north', bar.docked ? 'undock the transport' : 'dock the transport into the rack'); bar.el.dock.title = 'move the transport between the stage and the rack (T)'; };
-    T.addEventListener('transport-placement', faceDock); faceDock();
     /* the door wears the title's mark and spins under a mouse (WAVE 55) */
     const door = bar.el.door; ui.modExp = door; door.title = 'Open the modulation window';
     const spinLogo = (reverse) => { const mark = door.querySelector('svg'); if (!mark) return; if (door._spin) door._spin.cancel(); door._spin = mark.animate([{ transform: 'rotate(0deg)' }, { transform: `rotate(${reverse ? -360 : 360}deg)` }], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 550, easing: 'ease-in-out' }); };

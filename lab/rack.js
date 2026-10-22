@@ -286,8 +286,8 @@ export async function boot(dom) {
   app.loop.windowActivity = windowActivity;
   const canPresent = (w) => windowActivity.canPresent(w);
   app.loop.canPresent = canPresent;
-  const canPresentTransport = () => !app.state.uiHidden && (layout.docked ? canPresent(wTr)
-    : (!document.body.classList.contains('rack-hidden') || document.body.classList.contains('transport-peek')));
+  const canPresentTransport = () => !app.state.uiHidden && (layout.docked ? canPresent(wTr) : transport.bar.placement === 'free'
+    || (!document.body.classList.contains('rack-hidden') || document.body.classList.contains('transport-peek')));   // iteration 014 A4: the FREE window shows whatever the rack does
   const tableOf = (a) => sturm.P ? sturm.rec[a] : (app.state.space === 'p' ? getHamiltonian().momentumTableFor(BASIS[a]) : getHamiltonian().tableFor(BASIS[a]));   // W-STURMIAN: the scaled record, else the operator's
   const sturmHalf = () => { const nm = reg.reachNmax(1e-3); return domainFor(nm) / (nm * sturm.lambda); };   // a Sturmian's extent is hydrogen's for n over nλ (ρ = 2λr against 2r/n); iteration 010 X1: over the REACH the field draws (state.js reach), not the anchor
   /* Population membership, mute/solo eligibility and ordering change only with register.version. During exact

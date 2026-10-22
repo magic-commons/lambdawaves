@@ -118,9 +118,10 @@ export function createRackWiring(app) {
     dockIndex: 0,                                                    // the transport's remembered slot in the left rack (0 = the very top)
     /** where a docked transport lives: the mirror rack on a desktop, the ONE rack on a phone (wave 51) */
     dockHost() { return document.body.classList.contains('phone') ? rack : (layout.dockSide==='R'?rack:(rackL || rack)); },
-    /** dock or undock the kit's bar: the TRANSPORT card opens at its remembered slot (the bar moves in through the kit's transportDock) or closes */
+    /** T: dock the control surface into its card, or put it back on the stage (from the FREE window too) — the kit's setPlace (iteration 014 A4) */
     dockTransport() {
-      if (layout.docked) rk.close('transport'); else rk.open('transport', { index: layout.dockIndex });
+      const b = app.sh.transport && app.sh.transport.bar;
+      if (b) b.setPlace(layout.docked ? 'stage' : 'rack'); else if (layout.docked) rk.close('transport'); else rk.open('transport', { index: layout.dockIndex });
       schedule(TIER.PRESENT);
       popFace(wTr.root);                                             // the pop chip and the bar's own dock chip say the same thing
     },

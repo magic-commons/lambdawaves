@@ -339,6 +339,17 @@ body.rack-hidden #transport :is(#rackAdd, #rackFav) { opacity: 1; visibility: in
 #transport .csb-app > .mol-pick { flex: 1 1 220px; min-width: 150px; max-width: 260px; height: 28px; margin-right: auto; }
 #transport .csb-app > #lwMode + :is(#rackAdd, #rackToggle, #rackFav), #transport .csb-app > .csb-search + #rackAdd { margin-left: auto; }
 #transport:has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-app > .mol-pick { display: none; }   /* HYDROGEN: no molecule to choose (row 1 is the wider row, so the bar keeps its width) */
+/* iteration 014 A4 · THE FREE WINDOW (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack;
+   VERTICAL (data-orient) stands it up — the rows become columns, the chooser leaves (the search finds a molecule), the modes stack */
+html body #transport.mini[data-place="free"] { position: static; left: auto; right: auto; top: auto; bottom: auto; transform: none; margin: 0; border: 0; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+html body.rack-hidden #transport.mini[data-place="free"] { transform: none; opacity: 1; visibility: visible; pointer-events: auto; }
+#transport.mini[data-layout="csb"][data-orient="vertical"] { flex-direction: row; align-items: flex-start; column-gap: 4px; }
+#transport.mini[data-layout="csb"][data-orient="vertical"] > .csb-row { flex-direction: column; height: auto; }
+#transport.mini[data-layout="csb"][data-orient="vertical"] > .csb-row > * { flex-basis: auto; }   /* a seat's basis was its WIDTH in a row; in a column it would be its height */
+#transport.mini[data-layout="csb"][data-orient="vertical"] .fd { width: 96px; min-width: 96px; }
+#transport[data-orient="vertical"] .csb-app > .mol-pick { display: none; }
+#transport[data-orient="vertical"] #lwMode { flex-direction: column; margin: 0; }
+#transport[data-orient="vertical"] .csb-app > :is(#rackAdd, #rackToggle, #rackFav) { margin: 0; }
 /* docked in the CONTROL SURFACE card: each row wraps; the chooser takes a line of its own under the modes and the rack's three */
 #transport.docked[data-layout="csb"] .tempo-expand { flex: 0 0 76px; width: 76px; }
 #transport.docked[data-layout="csb"] .ro.time { flex: 1 1 90px; min-width: 0; }

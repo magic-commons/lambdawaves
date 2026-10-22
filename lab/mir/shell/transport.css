@@ -200,6 +200,13 @@
 .mir-transport.docked[data-layout="csb"] > .csb-row { flex-wrap: wrap; height: auto; row-gap: 4px; }
 .mir-transport[data-layout="csb"] > .native-tempo { flex: 0 0 auto; }
 
+/* ── THE FREE WINDOW (1.5.0-alpha.25): the bar in a window of its own (data-place="free"), in the window's flow; VERTICAL stands it up:
+   the bar's rows become columns ── */
+.mir-transport[data-place="free"] { position: static; inset: auto; transform: none; margin: 0; box-shadow: none; border: 0; background: transparent; }
+.mir-transport-free .mir-win-body { padding: 0; overflow: visible; }
+.mir-transport[data-place="free"][data-orient="vertical"] { flex-direction: row; align-items: flex-start; }
+.mir-transport[data-place="free"][data-orient="vertical"] > .csb-row { flex-direction: column; height: auto; width: auto; }
+
 /* ── COMPACT (ruled 2026-10-01): glyphs only, no TAP, no Hz reading ───────────────────────────────────────── */
 .mir-transport[data-form="compact"] { --xport-w: 0px; --xport-h: 40px; --xport-seat: 30px; --xport-power: 36px; --xport-pill-w: 52px; --xport-play-size: 22px; --xport-num-size: 14px; }
 .mir-transport[data-form="compact"] :is(.tap, .tempo-hz, .tempo-unit, .tempo-chevron, .tr-open.has-glyph .tr-word, .fd, .ro, .k) { display: none; }
