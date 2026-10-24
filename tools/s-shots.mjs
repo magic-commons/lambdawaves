@@ -47,6 +47,21 @@ try {
     await g.ev(`const t = document.getElementById('transport'); if (t) t.style.visibility = 'hidden'; return 1;`); await wait(300);
     writeFileSync(OUT.replace(/\.png$/, '-a.png'), Buffer.from(await g.snap(), 'base64'));   // the row: ‹ MY DIPOLE › and the glyph
     await g.ev(`document.querySelector('.dev[data-id="spectrum"] .sp-preset .mir-step-name').click(); return 1;`); await wait(400);
+  } else if (scene === 'palette') {   // P3: the current stops saved as MY SEA, another preset picked, MY SEA picked back; the list left open for the picture
+    await float('palette', 560, 10, 320); await wait(800);
+    info = await g.ev(`const d = document.querySelector('.dev[data-id="palette"]'), w = (ms) => new Promise((r) => setTimeout(r, ms)), nm = () => d.querySelector('.mir-ramp-step .mir-step-name');
+      const stops0 = JSON.stringify(__LW.palette.stops); d.querySelector('.mir-ramp-presets .sp-presave').click(); await w(100);
+      const f = d.querySelector('.sp-prename'), asked = f ? f.value : null; f.value = 'MY SEA'; f.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); await w(300);
+      const stored = localStorage.getItem('lambdawaves.q0.palettes'), shown = nm().textContent.trim();
+      const pick = (id) => { nm().click(); const b = document.querySelector('.mir-pick-i[data-id="' + id + '"]'); if (b) b.click(); return !!b; };
+      nm().click(); await w(200); const rows = [...document.querySelectorAll('.mir-pick-i')].slice(0, 4).map((b) => b.dataset.id + ':' + (b.querySelector('.pal-strip') ? Math.round(b.querySelector('.pal-strip').getBoundingClientRect().left) : '-')); nm().click(); await w(200);
+      const other = __LW.palette.groups[0].items.find((id) => id !== __LW.palette.id); pick(other); await w(400); const changed = JSON.stringify(__LW.palette.stops) !== stops0;
+      pick('user:MY SEA'); await w(400); const back = JSON.stringify(__LW.palette.stops) === stops0, id = __LW.palette.id, link = __LW.palette.id.startsWith('user:');
+      const s = d.querySelector('.mir-ramp-presets .sp-presave').getBoundingClientRect();
+      return { asked, stored: stored && stored.slice(0, 80), shown, rows, changed, back, id, userIdLeaks: link, save: [s.left, s.top, s.width, s.height].map(Math.round) };`);
+    await g.ev(`const t = document.getElementById('transport'); if (t) t.style.visibility = 'hidden'; return 1;`); await wait(300);
+    writeFileSync(OUT.replace(/\.png$/, '-a.png'), Buffer.from(await g.snap(), 'base64'));
+    await g.ev(`document.querySelector('.dev[data-id="palette"] .mir-ramp-step .mir-step-name').click(); return 1;`); await wait(400);
   } else if (scene === 'fill') {
     /* SPECTRUM's button as it stands (1s + 2p: EMPTY), then pressed (FILL ALL); then the register's ORBITAL pane on water — each shot's rect printed */
     const read = () => g.ev(`return [...document.querySelectorAll('.reg-fill')].filter((b) => b.getBoundingClientRect().width).map((b) => { const r = b.getBoundingClientRect();

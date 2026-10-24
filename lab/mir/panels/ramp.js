@@ -103,8 +103,11 @@ export function createRampView(parent, o = {}) {
   if (!port || typeof port.get !== 'function' || typeof port.set !== 'function') throw new TypeError('panels/ramp: the port needs get() and set()');
   const cyc = o.cyclic !== false, N = o.n || 256, cap = o.cap || 16, minStops = o.min || 2, tol = Number.isFinite(o.seamTol) ? o.seamTol : 0.06;
   const L = { ticks: cyc ? DEFAULT_TICKS : DEFAULT_TICKS, seam: 'SEAM', seamOk: 'closes cleanly', seamWarn: 'a visible seam where the ramp wraps', at: 'AT', fmt: (u) => u.toFixed(3), ...(o.labels || {}) };
-  const presets = (o.presets || PRESETS).map((p) => ({ id: p.id, label: p.label, stops: p.stops }));
-  const byId = new Map(presets.map((p) => [p.id, p]));
+  /* 1.5.0-alpha.26 (λWAVES' user palettes): the list is replaceable — setPresets(list, id?) — and a row may be a `coming` heading (no stops, never chosen) */
+  const asPresets = (list) => (list || PRESETS).map((p) => ({ id: p.id, label: p.label, stops: p.stops || [], ...(p.coming && { coming: true }) }));
+  let presets = asPresets(o.presets), byId = new Map(presets.filter((p) => !p.coming).map((p) => [p.id, p]));
+  const firstStops = () => { const p = presets.find((q) => !q.coming && q.stops.length); return p ? p.stops : []; };
+  const stepItems = () => presets.map((p) => ({ id: p.id, label: p.label, ...(p.coming && { coming: true }) }));
   const life = new AbortController(), key = 'ramp:' + (++uid);
   const root = el('div', 'mir-ramp', parent);
   root.dataset.cyclic = String(cyc);
@@ -119,7 +122,7 @@ export function createRampView(parent, o = {}) {
 
   /* ── the preset row ── */
   const top = el('div', 'mir-ramp-presets', root);
-  const stp = stepper({ aria: 'Ramp preset', items: presets.map((p) => ({ id: p.id, label: p.label })), value: null, cls: 'mir-ramp-step', onChange: (id) => loadPreset(id) });
+  const stp = stepper({ aria: 'Ramp preset', items: stepItems(), value: null, cls: 'mir-ramp-step', onChange: (id) => loadPreset(id) });
   top.appendChild(stp.root);
   const reset = trig({ label: 'RESET', cls: 'mir-ramp-reset', title: 'Reload the chosen preset', onFire: () => { if (preset) loadPreset(preset); } });
   top.appendChild(reset.root);
@@ -252,13 +255,19 @@ export function createRampView(parent, o = {}) {
   function pull() { const g = port.get() || {}; if (g.stops && !sameStops(normalizeStops(g.stops, cyc), out())) { loadStops(g.stops, g.preset); } else if (g.preset && g.preset !== preset && byId.has(g.preset)) { preset = g.preset; stp.set(g.preset); } }
   const request = () => { if (!life.signal.aborted) frame.coalesce(key, pull); };
   const offSub = typeof port.subscribe === 'function' ? port.subscribe(request) : null;
-  { const g = port.get() || {}; loadStops(g.stops && g.stops.length ? g.stops : (presets[0] ? presets[0].stops : []), g.preset); if (typeof port.lut === 'function') port.lut(rampLUT(out(), N, cyc), N); }
+  { const g = port.get() || {}; loadStops(g.stops && g.stops.length ? g.stops : firstStops(), g.preset); if (typeof port.lut === 'function') port.lut(rampLUT(out(), N, cyc), N); }
+  /** the app's list changed (a user preset saved or removed): the stepper shows `id` when given and listed, else the preset in force when still listed */
+  function setPresets(list, id) {
+    presets = asPresets(list); byId = new Map(presets.filter((p) => !p.coming).map((p) => [p.id, p]));
+    if (id !== undefined && byId.has(id)) preset = id; else if (!byId.has(preset)) preset = null;
+    stp.setItems(stepItems(), preset);
+  }
 
   return {
     root, strip, layout: 'ramp',
     stops: () => out(), selected: () => { const i = [...S].sort((a, b) => a.at - b.at).findIndex((s) => s.id === sel); return i; },
     toLUT: (size = N) => rampLUT(out(), size, cyc),
-    load: (stops, id) => { loadStops(stops, id); push(false); }, preset: (id) => loadPreset(id), presetId: () => preset,
+    load: (stops, id) => { loadStops(stops, id); push(false); }, preset: (id) => loadPreset(id), presetId: () => preset, setPresets,
     refresh: pull, seam: () => seamOf(out()), handle: (i) => { const s = [...S].sort((a, b) => a.at - b.at)[i]; return s ? handles.get(s.id) : null; },
     part: () => ({ capture: () => ({ stops: out().map((s) => ({ at: +s.at.toFixed(6), rgb: s.rgb.map((c) => +c.toFixed(6)) })), preset }),
       restore: (saved) => { if (saved && saved.stops) { loadStops(saved.stops, saved.preset); push(false); } },
@@ -279,6 +288,8 @@ export function createRampPanel(o = {}) {
   const api = {
     id, get view() { return view; }, get root() { return view ? view.root : null; },
     stops: () => (view ? view.stops() : normalizeStops((port.get() || {}).stops || [], cyc)), toLUT: (n = o.n || 256) => (view ? view.toLUT(n) : rampLUT((port.get() || {}).stops || [], n, cyc)),
+    /** setPresets(list, id?) — replace the preset list (the view's, and the one a later build takes) */
+    setPresets(list, id) { o = { ...o, presets: list }; if (view) view.setPresets(list, id); },
     snapshot: snap, restore: apply, part: () => ({ capture: snap, restore: (saved) => { if (saved) apply(saved); }, signature: () => JSON.stringify(snap()), subscribe: (fn) => (typeof port.subscribe === 'function' ? port.subscribe(fn) : () => {}) }),
     destroy() { if (offPart) offPart(); if (offHist) offHist(); if (view) view.destroy(); view = null; },
   };

@@ -2,7 +2,7 @@
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
 import { el, knob, sw, seg, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js';
-import { createRampPanel } from '../mir/panels/ramp.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex } from '../mir/palette.js';
+import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets } from '../user-presets.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
@@ -159,10 +159,21 @@ export function createMaterial(app) {
     const palLabel = (P) => { const s = P.label.replace(/\s*\([^)]*\)$/, ''); return s.charAt(0).toUpperCase() + s.slice(1); };   // iteration 014 D4: 'sea' → 'Sea'
     let palId = PAL_DEF, palStops = PALETTE_BY_ID.get(PAL_DEF).stops, palQuiet = true;
     function palSorted() { return palStops.map((q) => ({ at: ((q.at % 1) + 1) % 1, rgb: q.rgb })).sort((x, y) => x.at - y.at); }   // palette.js normalize's order: ESP's span and bar (W2)   // quiet while the panel is built and while the app (a restore, a link, LW) loads the ramp
-    const rv = createRampPanel({ parent: gp, cyclic: true, project: false, presets: PRESET_GROUPS.flatMap((g) => g.items).map((P) => ({ ...P, label: palLabel(P) })),
+    /* iteration 015 P3 · SAVE A PALETTE (Josh: "fit in a floppy disk icon to save presets … at the very top, it will say 'User' (but don't show it if
+       the user didn't save any yet)"): the reader's palettes are a PREFERENCE record (`lambdawaves.q0.palettes`, lab/user-presets.js — S4's store) of
+       `{ name, data: { stops } }`; the kit's stepper lists USER · theirs · PRESETS · the kit's while one exists, and the plain list otherwise
+       (createRampPanel's setPresets re-feeds it on every change).  A reader's palette is a `user:<name>` row: picking it loads its stops, but `palId`
+       — the name a link and the settings carry — stays the last BUILT palette, so a reader's name never leaves the device (the stops travel as custom). */
+    const PAL_BUILT = PRESET_GROUPS.flatMap((g) => g.items).map((P) => ({ ...P, label: palLabel(P) })), PU = 'user:', palUsers = createUserPresets('lambdawaves.q0.palettes');
+    const palUserRows = () => palUsers.list().filter((u) => u.data && Array.isArray(u.data.stops) && u.data.stops.length >= 2).map((u) => ({ id: PU + u.name, label: u.name, stops: u.data.stops }));
+    const palPresets = () => { const U = palUserRows(); return U.length ? [{ id: '#user', label: 'USER', coming: true }, ...U, { id: '#built', label: 'PRESETS', coming: true }, ...PAL_BUILT] : PAL_BUILT; };
+    let palShown = palId;
+    const rp = createRampPanel({ parent: gp, cyclic: true, project: false, presets: palPresets(),
       labels: { ticks: [], seam: 'SEAM at ±π', seamWarn: 'a visible seam at arg ψ = ±π', at: 'ARG ψ', fmt: ang },
-      ramp: { get: () => ({ stops: palStops, preset: palId }), set: (s, o) => { palStops = s; if (o.preset && o.preset !== palId && !palQuiet && !o.live) palSay('PALETTE · ' + palLabel(PALETTE_BY_ID.get(o.preset) || { label: o.preset })); if (o.preset) palId = o.preset; },
-        lut: (lut) => { const ps = palSorted(); if (field.ok) field.setPalette(lut, [ps[0].at, ps[ps.length - 1].at]); if (bar && !bar.hidden) styleSync(); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }).view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
+      ramp: { get: () => ({ stops: palStops, preset: palId }), set: (s, o) => { palStops = s; const user = !!o.preset && o.preset.startsWith(PU);
+        if (o.preset && o.preset !== palShown && !palQuiet && !o.live) palSay('PALETTE · ' + (user ? o.preset.slice(PU.length) : palLabel(PALETTE_BY_ID.get(o.preset) || { label: o.preset })));
+        if (o.preset) { palShown = o.preset; if (!user) palId = o.preset; } },
+        lut: (lut) => { const ps = palSorted(); if (field.ok) field.setPalette(lut, [ps[0].at, ps[ps.length - 1].at]); if (bar && !bar.hidden) styleSync(); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }), rv = rp.view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
     palQuiet = false;
     /* 0.5.3 M12 · PALETTE, SHORTER: the kit's rows re-seated from outside (MIR briefs filed): RESET beside PALETTE ON, INVERT right of ROTATE as the kit's half disk,
        and the selected stop's angle shown twice from showArg — a reader under ROTATE (CSS hides the knob's "turn") and a float over the stop (radians; degrees on hover).
@@ -184,11 +195,31 @@ export function createMaterial(app) {
        its foot where the kit placed it */
     const palPick = () => { const p = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!p || p.classList.contains('lw-menu')) return;
       const r0 = p.getBoundingClientRect(); p.classList.add('lw-menu', 'pal-pick');
-      for (const b of p.querySelectorAll('.mir-pick-i')) { const P = PALETTE_BY_ID.get(b.dataset.id); if (!P) continue; const st = [...P.stops].sort((a, c) => a.at - c.at);
+      const mine = new Map(palUserRows().map((u) => [u.id, u]));
+      for (const b of p.querySelectorAll('.mir-pick-i')) { const P = PALETTE_BY_ID.get(b.dataset.id) || mine.get(b.dataset.id); if (!P) continue; const st = [...P.stops].sort((a, c) => a.at - c.at);
         el('span', 'pal-name', b).append(...[...b.childNodes].filter((n) => n.nodeType === 3));   // iteration 015 P1: the name its own flex item, the strip a column
+        if (mine.has(b.dataset.id)) {   // P3: a reader's row carries its × between the name and the strip, so the strips stay one column
+          const name = b.dataset.id.slice(PU.length), x = el('span', 'sp-prex', b, '×'); x.setAttribute('role', 'button'); x.title = 'remove ' + name; x.setAttribute('aria-label', 'remove ' + name);
+          x.addEventListener('mousedown', (e) => e.preventDefault());
+          x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); if (palShown === PU + name) palShown = palId; palUsers.remove(name); b.remove();
+            if (!p.querySelector('.mir-pick-i[data-id^="' + PU + '"]')) for (const h of p.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); }); }
         el('i', 'pal-strip', b).style.background = 'linear-gradient(to right in oklab, ' + [...st, { at: 1, rgb: st[0].rgb }].map((q) => rgbToHex(q.rgb) + ' ' + (q.at * 100).toFixed(1) + '%').join(', ') + ')'; }
       const r1 = p.getBoundingClientRect(); if (p.dataset.dir === 'up') p.style.top = Math.max(8, r0.bottom - r1.height) + 'px';
       if (r1.right > innerWidth - 8) p.style.left = Math.max(8, innerWidth - 8 - r1.width) + 'px'; };
+    /* P3 · the bare save glyph in a 26-px seat after the stepper (S4's `.sp-presave`); a press asks the name in the stepper's own seat — Enter keeps the
+       current stops under it, Escape or a press elsewhere lets it go — and the list is re-fed with the reader's row shown */
+    palUsers.watch(() => rp.setPresets(palPresets(), palShown));
+    { const top = rv.root.querySelector('.mir-ramp-presets'), nm = top.querySelector('.mir-ramp-step .mir-step-name'), save = el('button', 'sp-presave', top); save.type = 'button';
+      save.setAttribute('aria-label', 'SAVE PALETTE'); save.title = 'SAVE · these stops as your own palette (kept on this device)';
+      save.addEventListener('click', () => {
+        if (top.querySelector('.sp-prename')) return;
+        const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; f.setAttribute('aria-label', 'palette name');
+        f.value = 'My ' + (nm.textContent || 'palette').trim(); nm.parentElement.insertBefore(f, nm); nm.hidden = true;
+        let done = false; const end = (keep, key) => { if (done) return; done = true; const n = f.value.trim(); f.remove(); nm.hidden = false;
+          if (keep && n) { palShown = PU + n; palUsers.add(n, { stops: rv.stops().map((s) => ({ at: s.at, rgb: s.rgb.slice() })) }); } if (key) nm.focus(); };
+        f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
+        f.addEventListener('blur', () => end(false)); f.focus(); f.select();
+      }); }
     { const n = rv.root.querySelector('.mir-ramp-step .mir-step-name'); if (n) { n.addEventListener('click', palPick); n.addEventListener('keydown', () => queueMicrotask(palPick)); } }
     const showArg = () => { const s = rv.stops()[rv.selected()]; if (!s) return; argRo.set(argFloat.textContent = ang(s.at)); argRo.root.title = argFloat.title = ((2 * s.at - 1) * 180).toFixed(1) + '°'; argFloat.style.setProperty('--at', s.at); };
     new MutationObserver(showArg).observe(gp.querySelector('.mir-ramp-at'), { childList: true, characterData: true, subtree: true }); showArg();

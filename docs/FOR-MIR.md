@@ -4,6 +4,9 @@
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.26)
+- **THE RAMP'S PRESETS ARE REPLACEABLE** (015 P3, `panels/ramp.js`): `createRampPanel(…).setPresets(list, id?)` (and the view's) swaps the stepper's
+  list in place — the app's own saved palettes beside the kit's — and a row may be a `coming` heading (`USER`, no stops, never chosen); the preset in
+  force stays shown while listed, `id` names the one to show. The default ramp is now the first row WITH stops. Why: λWAVES' SAVE A PALETTE.
 - **THE MODULATION WINDOW'S BARS ON THE KIT'S SEATS** (015 T2): the tempo / power bar and the preset bar wear `shell/transport.css`'s seat
   standard. Every button is a `.tbtn` (a round 34-px seat, flat until hovered: ▾ · save · ‹ › · the workspace switch); TAP · WALL | FREE ·
   60 | 120 HZ · HOLD ¼ · HOLD 1 and the dead light are `.tbtn.trig` (the work bar's raised 34-px key, 8-px corner, lit in accent A); the BPM
