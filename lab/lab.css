@@ -345,7 +345,7 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport[data-layout="csb"] .csb-tempo > .k { width: 44px; }
 #transport[data-layout="csb"] .csb-tempo > .k .k-lbl { display: none; }
 #transport[data-layout="csb"] .csb-tempo .tempo-expand { flex: 0 0 auto; width: 72px; height: 34px; }
-#transport[data-layout="csb"] .csb-tempo .tempo-expand .tempo-number { font: var(--w-bold) 12px/1 var(--font-num); }   /* the stage pill's reading in a card too */   /* its basis was its WIDTH in a row; in this column it would be its height */
+#transport[data-layout="csb"] .csb-tempo .tempo-expand .tempo-number { font: var(--w-bold) 12px/1 var(--font-num); font-variant-numeric: tabular-nums; }   /* 015 T4: the shorthand reset the numerals; tabular again */   /* the stage pill's reading in a card too */   /* its basis was its WIDTH in a row; in this column it would be its height */
 /* the timing row (A11): ⏮ · TIMELINE · the door · ⚙ · the dock chip together on the left, t taking the rest and reading from the right end */
 #transport[data-layout="csb"] .csb-row > .ro.time { flex: 1 1 auto; width: auto; min-width: 72px; padding: 0 6px; align-items: flex-end; text-align: right; background: transparent; box-shadow: none; }
 #transport[data-layout="csb"] .csb-row > .ro.time .ro-val { font-size: 13px; font-variant-numeric: lining-nums tabular-nums; white-space: pre; }   /* 015 T1: tabular, so the digits never change width */
@@ -357,7 +357,7 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport[data-layout="csb"] #lwMode .lw-stage-b::before { width: 22px; height: 22px; }
 #transport :is(#rackToggle, #rackAdd, #rackFav) { position: static; inset: auto; -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.rack-hidden #transport :is(#rackAdd, #rackFav) { opacity: 1; visibility: inherit; pointer-events: auto; }
-#transport[data-layout="csb"] .csb-app > .mol-pick { flex: 1 1 220px; min-width: 160px; max-width: 240px; height: 34px; }
+#transport[data-layout="csb"] .csb-app > .mol-pick { flex: 0 0 220px; width: 220px; min-width: 220px; max-width: 220px; height: 34px; overflow: hidden; }   /* 015 T4: a fixed 220 px, so a long name never widens the bar */
 #transport[data-layout="csb"] .csb-app > .csb-search-b { margin-left: auto; }
 #transport:has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-app > .mol-pick { display: none; }   /* HYDROGEN: no molecule to choose */
 /* IN A RACK CARD (docked, or the FREE window one card wide): the columns as bands, 32 px seats, the expander one column */
