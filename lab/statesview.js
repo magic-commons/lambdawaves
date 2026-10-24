@@ -81,7 +81,7 @@ export function createStates(host, api) {
   const hideBtn = mk('HIDE', 'Hide or show the lanes');
   /* iteration 008 U · EMPTY <-> FILL ALL (paint-stroke.js fillButton): S₀ alone shows FILL ALL — every state the ladder shows, up to the eight
      lanes, equal and in phase — anything more shows EMPTY.  NORM is gone: a HAND stroke normalises at its end */
-  const fillB = fillButton(head, { fill: 'Fill the register: S₀ and every state the ladder shows (up to ' + LANE_CAP + ' lanes), equal and in phase', empty: 'Empty the register: S₀ alone' },
+  const fillB = fillButton(head, { fill: 'S₀ and every state the ladder shows (up to ' + LANE_CAP + ' lanes) on, equal and in phase', empty: 'every state off but S₀' },
     (empty) => (empty ? fill() : clear()));
 
   const bar = el('div', 'row tight reg-bar', host);

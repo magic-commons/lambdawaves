@@ -58,7 +58,7 @@ export function createSpectrum(host, api) {
      normalises at its end (below), a modulator never does.  The press reads the register itself (the label is repainted by rebuild(), which a
      folded or paused card may not have run yet), and so does a hover. */
   const fillSync = () => fillB.set(!api.reg.populated().length);
-  const fillB = fillButton(head, { fill: 'every label on, equal and in phase, normalised', empty: 'c ↦ 0 for every label' },
+  const fillB = fillButton(head, { fill: 'every label on, equal and in phase', empty: 'every label off' },
     () => { if (api.reg.populated().length) { if (api.clear) api.clear(); } else if (api.fillAll) api.fillAll(); fillSync(); });
   fillB.set(true); fillB.root.addEventListener('pointerenter', fillSync); head.appendChild(preVis.root);
   const info = el('div', 'note', head);

@@ -68,18 +68,21 @@ export function paintStroke(surface, o) {
 /* iteration 008 U · EMPTY <-> FILL ALL, the one two-state button the three ladders' heads carry (SPECTRUM, ORBITAL, STATES): an empty register
    shows FILL ALL, any other EMPTY.  The glyphs are 24-unit outline drawings in the kit's hand (glyph.js: stroke 1.9, round caps; the kit's
    registry is not ours to extend, so they are drawn here), designed by Gemini 3.8 Flash (High) — the prompt and its answer are in
-   research/iteration-008/U-BUILD.md.  Iteration 009 F2 (Josh, Yan's call 8): SPECTRUM wears the glyph too — one look, no words mode. */
+   research/iteration-008/U-BUILD.md.  Iteration 009 F2 (Josh, Yan's call 8): SPECTRUM wears the glyph too — one look, no words mode.
+   Iteration 015 S2 (Josh: "users can't tell which clears all and fills all"): two glyphs nobody confuses — FILL ALL is the frame with every rung
+   solid and a filled disc at its foot, EMPTY the same frame with no rungs and a ∅ in it; the hint and the aria label lead with the word
+   (`FILL ALL · …` / `EMPTY · …`), each ladder handing its own tail. */
 const GS = 'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
-const GLYPH = {   // Gemini's answer, verbatim but for the kit's stroke block on each element: a register frame and three rungs, whole or broken
-  fill: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8"/>',
-  empty: '<rect ' + GS + ' x="5" y="3" width="14" height="18" rx="3"/><path ' + GS + ' d="M8 8h8M8 12h8M8 16h8" stroke-dasharray="2 4"/>',
+const GLYPH = {
+  fill: '<rect ' + GS + ' x="5" y="2.5" width="14" height="19" rx="3"/><path ' + GS + ' d="M8.5 6.5h7M8.5 10h7M8.5 13.5h7"/><circle cx="12" cy="17.6" r="1.9" fill="currentColor"/>',
+  empty: '<rect ' + GS + ' x="5" y="2.5" width="14" height="19" rx="3"/><circle ' + GS + ' cx="12" cy="12" r="3.6"/><path ' + GS + ' d="M8.6 16.4 15.4 7.6"/>',
 };
 export function fillButton(row, titles, onPress) {
   const b = el('button', 'trig reg-fill', row); b.type = 'button';
   let empty = null;
   const draw = (v) => {
     b.innerHTML = '<svg class="gly" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">' + GLYPH[v ? 'fill' : 'empty'] + '</svg>';
-    b.setAttribute('aria-label', v ? 'FILL ALL' : 'EMPTY'); b.title = v ? titles.fill : titles.empty; b.dataset.state = v ? 'fill' : 'empty';
+    const word = v ? 'FILL ALL' : 'EMPTY'; b.setAttribute('aria-label', word); b.title = word + ' · ' + (v ? titles.fill : titles.empty); b.dataset.state = v ? 'fill' : 'empty';
   };
   b.addEventListener('click', () => onPress(empty));
   return { root: b, set(v, ok = true) { const e = !!v; if (e !== empty) { empty = e; draw(e); } b.disabled = !ok; }, get empty() { return empty; } };
