@@ -65,7 +65,7 @@ export function createOrbitals(host, api) {
   dialsBtn.setAttribute('aria-expanded', 'false');
   /* iteration 008 U (Josh: "can it become the 'fill all registers' button?") · ONE two-state button: an empty register shows FILL ALL, any
      other shows EMPTY.  NORM is gone: a HAND stroke on the ladder normalises at its end (the stroke's one undo row), and nothing else does */
-  const fillB = fillButton(head, { fill: 'Fill the register: every orbital of the ladder, equal and in phase', empty: 'Empty the register (c ↦ 0 for every orbital)' },
+  const fillB = fillButton(head, { fill: 'every orbital on, equal and in phase', empty: 'every orbital off' },
     (empty) => (empty ? fill() : clear()));
   /* THE CORE FOLD (0.4.0 S1): the frozen-core levels (lab/names.js coreCount — He for Li–Ne, Ne for Na–Ar, Ar for K–Zn,
      Ar + 3d¹⁰ for Ga–Kr) fold into one `core ×n` rung, opened by this button or a click on the rung.  Folded by default;

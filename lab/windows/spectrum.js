@@ -2,7 +2,7 @@
  * there.  §0's consts, schedule, page, the rack, wState and the controller's names are handed over (backward); the windows, the gas and the layout made
  * later in boot() are read through their slots inside callbacks (forward).  It registers on app.w what a moved reader needs; boot() destructures the return. */
 import { TIER } from '../rack.js';
-import { el, knob, seg, sw, trig, readout, group, mathPlain, fader, stepper } from '../mir/kit.js';
+import { el, knob, seg, sw, trig, readout, group, label, mathPlain, fader, stepper } from '../mir/kit.js'; import { fold } from '../fold.js';
 import { createEqualizer, EQ_PRESETS, EQ_SHELLS } from '../equalizer.js'; import { createEqAudio } from '../eq-audio.js'; import { createChord } from '../chord-audio.js';
 import { VIEW } from '../field.js';
 import { BASIS, NMAX, stateOf } from '../hydrogen.js'; import { L_LETTERS } from '../names.js';
@@ -26,9 +26,18 @@ export function createSpectrumCard(app) {
   { const util = wSpec.root.querySelector('.dev-util'), b = el('button', 'dev-copy', null, '⧉'); b.type = 'button';
     b.title = 'Copy the state as LaTeX'; b.setAttribute('aria-label', 'Copy the state as LaTeX');
     util.insertBefore(b, util.querySelector('.dev-fold')); b.addEventListener('click', (e) => { e.stopPropagation(); copyLatex(); }); }
+  /* iteration 015 S1 · THE COMPACT HAMILTONIAN (Josh: "Everything below the 140 orbital picker is a mess. I want it more compact … hide that section
+     with a expander toggle"): the group folds behind lab/fold.js' chevron (`data-fold="ham"`: closed on a first run, open through the card's WORKSPACE
+     `folds`), and inside it ‹ SYSTEM › then ONE tight row per system, shown only while the stepper names it — HYDROGEN: Z · μ · 1 | Ps | μH, and SCALE:
+     1/n | λ · λ; BOX and OSCILLATOR: WELL a · σ · |k| · BASIS · LAUNCH / BOUNCE; ATOM: ELEMENT Z.  The segs are knob-sized (`.sp-vseg`, a column);
+     every `ui.*` name, id and saved key is the one it was. */
+  const hamGroup = group(wSpec.body, ''), hamHead = el('div', 'row tight lw-field-head', hamGroup), hamBody = el('div', 'sp-ham-body', hamGroup);
+  hamGroup.classList.add('sp-ham'); label(el('div', 'grp-lbl', hamHead), 'HAMILTONIAN'); fold(hamHead, hamBody, { what: 'the Hamiltonian', key: 'ham' });
+  const hamRows = { hydrogen: el('div', 'row tight sp-ham-h', null), scale: el('div', 'row tight sp-ham-s', null), box: el('div', 'row tight sp-ham-b', null), atom: el('div', 'row tight sp-ham-a', null) };
+  /** the rows the system in force shows (the stepper's id: an operator, or 'molecules') */
+  const hamShow = (id) => { hamRows.hydrogen.hidden = hamRows.scale.hidden = id !== 'hydrogen'; hamRows.box.hidden = id !== 'well' && id !== 'qho'; hamRows.atom.hidden = id !== 'atom'; };
   {
-    const hamGroup = group(wSpec.body, 'HAMILTONIAN');
-    const rh = el('div', 'row tight', hamGroup);
+    const rh = el('div', 'row tight sp-ham-sys', hamBody);
     /* 0.7.4 C1 · THE PICKER: ‹ SYSTEM ›, the kit's stepper over lab/catalogue.js — the operators with HYDROGEN, MOLECULES and LATTICE, each row's hover its
        word · oracle.  A window opens and leaves the Hamiltonian alone; the name reads back what owns the field; CENTRAL and CENTRAL › QUARKONIUM (0.8.0 G1)
        set their operator and open CENTRAL, its editor (an older project restoring `cornell` still lands).  `ui.hamSeg` keeps its name and set(id): persist, the verbs and LAUNCH read it. */
@@ -42,47 +51,49 @@ export function createSpectrumCard(app) {
       if (v === 'molecules' || v === 'lattice') app.sh.layout.reopen(v === 'molecules' ? 'chem' : v); else { switchHamiltonian(v); if (v === 'central' || v === 'cornell' || v === 'separable') app.sh.layout.reopen(v === 'separable' ? v : 'central'); if (v === 'well') app.w.enterBox(); if (v === 'atom') { app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); } }
       ui.hamSeg.set(getHamiltonian().id); } });
     sys.name.addEventListener('click', () => document.querySelectorAll('.mir-pick-i[data-id]').forEach((b) => { const r = SYS.find((x) => x.id === b.dataset.id); if (r) b.title = tip(r); }));
-    ui.hamSeg = { root: sys.root, get value() { return sys.get(); }, set(id) { sys.set(app.state.chem && app.state.chem.on ? 'molecules' : id); sys.root.title = tip(SYS.find((r) => r.id === sys.get()) || SYS[0]); } };
-    ui.hamSeg.set('hydrogen');
+    ui.hamSeg = { root: sys.root, get value() { return sys.get(); }, set(id) { sys.set(app.state.chem && app.state.chem.on ? 'molecules' : id); sys.root.title = tip(SYS.find((r) => r.id === sys.get()) || SYS[0]); hamShow(sys.get()); } };
     rh.appendChild(ui.hamSeg.root);
-    ui.wellKnob = knob({ label: 'WELL RADIUS <m>a</m>', min: 3, max: 30, value: 10, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => { HAMILTONIANS.well.setRadius(v); app.w.gas.setRadius(v); hNote(); if (getHamiltonian().id === 'well') { reg.setEnergies(energyOf); wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); }); schedule(TIER.REBUILD); } } });
-    rh.appendChild(ui.wellKnob.root);
+    hamBody.append(hamRows.hydrogen, hamRows.scale, hamRows.box, hamRows.atom);
+    ui.hamSeg.set('hydrogen');
+    ui.wellKnob = knob({ label: 'WELL <m>a</m>', title: 'WELL RADIUS a — the box of BOX and of the gas packet', min: 3, max: 30, value: 10, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => { HAMILTONIANS.well.setRadius(v); app.w.gas.setRadius(v); hNote(); if (getHamiltonian().id === 'well') { reg.setEnergies(energyOf); wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); }); schedule(TIER.REBUILD); } } });
     {
-      const rg = wSpec.row('tight');
-      rg.appendChild(knob({ label: 'GAS  σ', min: 0.5, max: 3, value: 1.8, fmt: (v) => v.toFixed(2) + ' a₀', onInput: (v) => { app.state.gasWidth = v; } }).root);
-      ui.gasBasis = seg({ label: 'GAS BASIS', value: 'reg', options: [{ id: 'reg', label: String(BASIS.length), title: `the register's ${BASIS.length} labels (l ≤ ${NMAX - 1}): a packet no smaller than about a/${NMAX}, launched on any axis` }, { id: 'axial', label: 'AXIAL 256', title: 'Use the larger axial box basis for narrower z packets' }], onChange: (v) => { app.state.gasAxial = v === 'axial'; if (!app.state.gasAxial) app.w.gas.off(); hNote(); schedule(TIER.RECONSTRUCT); } });
-      rg.appendChild(ui.gasBasis.root);
-      ui.gasSpeed = knob({ label: 'GAS  |k|', min: 0.1, max: 2.5, value: 0.8, log: true, fmt: (v) => v.toFixed(2), onInput: () => {} });
+      const rg = hamRows.box;
+      rg.appendChild(ui.wellKnob.root);
+      rg.appendChild(knob({ label: 'GAS  σ', title: 'GAS σ — the launched packet\'s width', min: 0.5, max: 3, value: 1.8, fmt: (v) => v.toFixed(2) + ' a₀', onInput: (v) => { app.state.gasWidth = v; } }).root);
+      ui.gasSpeed = knob({ label: 'GAS  |k|', title: 'GAS |k| — the launch\'s momentum (LAUNCH and BOUNCE)', min: 0.1, max: 2.5, value: 0.8, log: true, fmt: (v) => v.toFixed(2), onInput: () => {} });
       rg.appendChild(ui.gasSpeed.root);
-      rg.appendChild(trig({ label: 'LAUNCH', title: 'Launch a Gaussian packet in the box', onFire: () => {
+      ui.gasBasis = seg({ label: 'BASIS', cls: 'sp-vseg', value: 'reg', options: [{ id: 'reg', label: String(BASIS.length), title: `GAS BASIS · the register's ${BASIS.length} labels (l ≤ ${NMAX - 1}): a packet no smaller than about a/${NMAX}, launched on any axis` }, { id: 'axial', label: 'AXIAL', title: 'GAS BASIS · AXIAL 256: the larger axial box basis for narrower z packets' }], onChange: (v) => { app.state.gasAxial = v === 'axial'; if (!app.state.gasAxial) app.w.gas.off(); hNote(); schedule(TIER.RECONSTRUCT); } });
+      rg.appendChild(ui.gasBasis.root);
+      const go = el('div', 'sp-ham-trigs', rg);
+      go.appendChild(trig({ label: 'LAUNCH', title: 'LAUNCH · a Gaussian packet in the box', onFire: () => {
         if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); }
         const ax = app.sh.keyState.axis, a = HAMILTONIANS.well.radius, d = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] }[ax], k = ui.gasSpeed.get ? ui.gasSpeed.get() : 0.8;
         app.w.launchPacket(d.map((v) => -v * a / 2), d.map((v) => v * k), app.w.gasSigma(k));
       } }).root);
+      go.appendChild(trig({ label: 'BOUNCE', title: 'COHERENT BOUNCE · a non-spreading oscillator packet (OSCILLATOR)', onFire: () => app.w.coherentBounce() }).root);
       ui.gasRo = readout({ label: 'GAS  packet held by the box', value: '—', sub: 'nothing launched' });
       rg.appendChild(ui.gasRo.root);
-      rg.appendChild(trig({ label: 'COHERENT BOUNCE', title: 'Launch a non-spreading oscillator packet', onFire: () => app.w.coherentBounce() }).root);
-      el('div', 'note', wSpec.body).innerHTML = '<b>Coherent bounce.</b> In the oscillator, an impulse moves the ground-state packet without changing its width. In the box, the packet disperses and reflects from the wall.';
-      el('div', 'note', wSpec.body).innerHTML = '<b>Gas packet.</b> LAUNCH projects a Gaussian packet into the box basis. CAPTURED reports how much fits. Ctrl-drag on the field sets its launch point, direction, and strength.';
+      el('div', 'note', hamBody).innerHTML = '<b>Coherent bounce.</b> In the oscillator, an impulse moves the ground-state packet without changing its width. In the box, the packet disperses and reflects from the wall.';
+      el('div', 'note', hamBody).innerHTML = '<b>Gas packet.</b> LAUNCH projects a Gaussian packet into the box basis. CAPTURED reports how much fits. Ctrl-drag on the field sets its launch point, direction, and strength.';
     }
     /* WAVE 68 · `step: 1`, and it is the only knob in the lab that lacked one.  Without it an arrow
        moved 1/100 of the travel = 0.05 = a TWENTIETH of an integer, so eleven real presses produced
        TWO announced values while `aria-valuenow` walked 1.05 … 1.55 through Z values the register
        cannot hold.  A dial whose `fmt` rounds has a lattice; the travel law has to know about it. */
     ui.zKnob = knob({ label: 'Z  (ion)', min: 1, max: 6, value: 1, step: 1, fmt: (v) => 'Z = ' + Math.round(v), onInput: (v) => { setZ(Math.round(v)); if (getHamiltonian().id === 'hydrogen') switchHamiltonian('hydrogen'); } });
-    rh.appendChild(ui.zKnob.root);
+    hamRows.hydrogen.appendChild(ui.zKnob.root);
     /* 0.8.1 T2 · MASS: μ/mₑ, the reduced mass — hydrogen's E → μE and r → r/μ on setZ's road (hamiltonian.js setMu); refused under another operator */
     const MASS = { 1: 1, ps: MASSES.positronium, muh: MASSES['muonic hydrogen'] }, setMass = (v) => { if (getHamiltonian().id === 'hydrogen') { setMu(v); hNote(); switchHamiltonian('hydrogen'); } else { ui.muKnob.set(getMu()); wSpec.setStatus('μ/mₑ scales hydrogen alone: the operator in force is ' + hamLabel(), 'warn'); } };
-    ui.muKnob = knob({ label: 'μ/mₑ  (mass)', min: 0.5, max: 200, log: true, value: 1, fmt: (v) => 'μ = ' + +v.toPrecision(5), title: 'The reduced mass in mₑ: E → μE, r → r/μ (hydrogen only); double-tap resets to 1', onInput: setMass });
-    const muSeg = seg({ aria: 'reduced mass', value: '1', options: [['1', '1'], ['ps', 'POSITRONIUM'], ['muh', 'MUONIC H']].map(([id, label]) => ({ id, label, title: `μ = ${+MASS[id].toPrecision(5)} mₑ` })), onChange: (id) => setMass(MASS[id]) });
-    rh.append(ui.muKnob.root, muSeg.root); onHamiltonian(() => { ui.muKnob.set(getMu()); muSeg.set(Object.keys(MASS).find((id) => MASS[id] === getMu()) || ''); });
+    ui.muKnob = knob({ label: 'μ/mₑ', min: 0.5, max: 200, log: true, value: 1, fmt: (v) => 'μ = ' + +v.toPrecision(5), title: 'μ/mₑ · the reduced mass in mₑ: E → μE, r → r/μ (hydrogen only); double-tap resets to 1', onInput: setMass });
+    const muSeg = seg({ aria: 'reduced mass', cls: 'sp-vseg', value: '1', options: [['1', '1', 'ELECTRON'], ['ps', 'Ps', 'POSITRONIUM'], ['muh', 'μH', 'MUONIC H']].map(([id, label, word]) => ({ id, label, title: `${word} · μ = ${+MASS[id].toPrecision(5)} mₑ` })), onChange: (id) => setMass(MASS[id]) });
+    hamRows.hydrogen.append(ui.muKnob.root, muSeg.root); onHamiltonian(() => { ui.muKnob.set(getMu()); muSeg.set(Object.keys(MASS).find((id) => MASS[id] === getMu()) || ''); if (!(app.state.chem && app.state.chem.on)) hamShow(getHamiltonian().id); });
     ui.elemKnob = knob({ label: 'ELEMENT  Z', min: 1, max: ZMAX, value: 10, step: 1, fmt: (v) => 'Z = ' + Math.round(v) + '  ' + ATOMS[Math.max(0, Math.min(ZMAX - 1, Math.round(v) - 1))].symbol, onChange: (v) => setElement(Math.round(v)) });
-    rh.appendChild(ui.elemKnob.root);
+    hamRows.atom.appendChild(ui.elemKnob.root);
     {
-      const rs = wSpec.row('tight');
-      ui.scaleSeg = seg({ label: `SCALE  ·  the exponent of the ${BASIS.length} radials  (hydrogen operator only)`, value: 'hydrogen', options: [
-        { id: 'hydrogen', label: 'HYDROGEN  1/n', title: 'Use standard hydrogen radial functions' },
-        { id: 'sturmian', label: 'STURMIAN  λ', title: 'Use one common radial exponent λ for every label' }],
+      const rs = hamRows.scale;
+      ui.scaleSeg = seg({ label: 'SCALE', cls: 'sp-vseg', value: 'hydrogen', options: [
+        { id: 'hydrogen', label: '1/n', title: `HYDROGEN 1/n · the standard hydrogen radial functions (the exponent of the ${BASIS.length} radials; hydrogen operator only)` },
+        { id: 'sturmian', label: 'λ', title: `STURMIAN λ · one common radial exponent λ for all ${BASIS.length} labels (hydrogen operator only)` }],
         onChange: (v) => setSturmian({ on: v === 'sturmian' }) });
       rs.appendChild(ui.scaleSeg.root);
       /* iteration 010 X2 · THE REACH OF n = 7: the floor is 1/7 (sturmianreg.js LAMBDA_MIN, the hydrogen limit of n = 7; it was 0.25) and the
@@ -95,11 +106,11 @@ export function createSpectrumCard(app) {
       rs.appendChild(ui.lambdaKnob.root);
       ui.sturmRo = readout({ label: 'SCALE', value: 'HYDROGEN 1/n', cls: 'two', sub: 'the shipped radials · λ acts once STURMIAN is on' });
       rs.appendChild(ui.sturmRo.root);
-      el('div', 'note', wSpec.body).innerHTML = '<b>Radial scale.</b> HYDROGEN uses the standard n-dependent orbitals. STURMIAN gives all labels one exponent λ and evolves them in a non-orthogonal basis. Controls that require diagonal hydrogen phases are disabled while it is active.';
+      el('div', 'note', hamBody).innerHTML = '<b>Radial scale.</b> HYDROGEN uses the standard n-dependent orbitals. STURMIAN gives all labels one exponent λ and evolves them in a non-orthogonal basis. Controls that require diagonal hydrogen phases are disabled while it is active.';
     }
-    el('div', 'note', wSpec.body).innerHTML = '<b>Hamiltonian.</b> Z rescales hydrogen-like ions. OSCILLATOR uses equally spaced levels; BOX uses spherical-well levels; ATOM and QUARKONIUM load numerical radial tables. Windows tied to hydrogen identities pause under other operators.';
+    el('div', 'note', hamBody).innerHTML = '<b>Hamiltonian.</b> Z rescales hydrogen-like ions. OSCILLATOR uses equally spaced levels; BOX uses spherical-well levels; ATOM and QUARKONIUM load numerical radial tables. Windows tied to hydrogen identities pause under other operators.';
   }
-    el('div', 'note', wSpec.body).innerHTML = '<b>Atom operator.</b> Uses the selected element’s self-consistent Xα central field. Occupied shells have drawable radial functions; ° marks virtual shells with energy only. Momentum space is unavailable. See ATOMS for Δ-SCF and −ε values.';
+    el('div', 'note', hamBody).innerHTML = '<b>Atom operator.</b> Uses the selected element’s self-consistent Xα central field. Occupied shells have drawable radial functions; ° marks virtual shells with energy only. Momentum space is unavailable. See ATOMS for Δ-SCF and −ε values.';
   api.hamiltonian = () => sturm.P ? sturmSpectrum() : getHamiltonian().spectrum;          // W-STURMIAN: the eigen ladder under the scale
   /* wave 50: THE RATE WAS MISSING HERE.  The register evolves label a at energyOf(a) = H.energy(a) · rates[a]
      (`energyOf` at the top of boot(), what reg.setEnergies is given), and this — the API every reader prints from, SPECTRUM's Eh and

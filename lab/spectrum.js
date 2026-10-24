@@ -14,6 +14,11 @@
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
 import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, sw } from './mir/kit.js';
 import { paintStroke, fillButton, levelLine } from './paint-stroke.js';
+import { PRESET_BY_ID } from './state.js';
+import { createUserPresets } from './user-presets.js';
+
+/** iteration 015 S4 · THE READER'S PRESETS: SPECTRUM's PREFERENCE record (settings-store.js FAMILIES), rows `{ name, data: { labels } }` */
+export const USER_PRESETS_KEY = 'lambdawaves.q0.presets';
 
 /* THE LADDER IS A CANVAS, AND A CANVAS HAS NO THEME (wave 44).  Every rule here was written in
    rgba(255,255,255,…) — right on the dark theme, WHITE ON WHITE on the light one, where "E = 0", the footer and
@@ -37,19 +42,56 @@ function readRGB(g, name, fallback) {
 export function createSpectrum(host, api) {
   const ladder = el('div', 'ladder', host);
   const lcv = el('canvas', '', ladder);
-  /* iteration 008 S · THE PRESET, at the head (it left STATE): the kit's stepper in PALETTE's preset look over the same list; ← → and a pick
+  /* iteration 008 S · THE PRESET (it left STATE; since iteration 015 S3 seated under the picker, above the HAMILTONIAN): the kit's stepper in PALETTE's preset look over the same list; ← → and a pick
      load a preset by the hand's road (api.loadPreset: THE FADE announces it), a pick of the preset already shown is RELOAD; VISUALS is STATE's
      PRESET VISUALS (a preset also sets its view, rate and window).  A register that is no preset reads '—' (the select's blank). */
   const pre = el('div', 'row tight sp-preset', host), DASH = { id: '', label: '—', coming: true }, PRE = (api.presets || []).map((p) => ({ id: p.id, label: p.label }));
-  const preStep = stepper({ aria: 'preset superposition', items: [...PRE, DASH], value: '', cls: 'mol-step', onChange: (id) => { if (id && api.loadPreset) api.loadPreset(id); } });
+  /* iteration 015 S4 · SAVE A PRESET (Josh: "add a save orbital (so that it just saves which orbitals were selected and that's it). Do the same
+     'User' section appears when a custom preset is saved"): the bare save glyph beside the stepper asks a name in the stepper's own seat (Enter
+     saves, Escape or a press elsewhere cancels) and keeps WHICH labels are populated — the reader's PREFERENCE (user-presets.js), never a project or
+     a link.  The list grows a USER group at its top only while one exists, each row with a ×; a reader's preset is a `user:<name>` row of
+     state.js' PRESET_BY_ID with no id (the register's provenance stays null) and no visuals, so it loads by loadPreset's own hand road — one undo
+     row, THE FADE says its name — and sets nothing but the labels, equal and in phase. */
+  const users = createUserPresets(USER_PRESETS_KEY), UK = 'user:', HEADS = [{ id: '#user', label: 'USER', coming: true }, { id: '#built', label: 'PRESETS', coming: true }];
+  const syncUsers = () => {
+    for (const k of [...PRESET_BY_ID.keys()]) if (k.startsWith(UK)) PRESET_BY_ID.delete(k);
+    for (const u of users.list()) {
+      const modes = ((u.data && u.data.labels) || []).filter((a) => BASIS[a]).map((a) => ({ n: BASIS[a].n, l: BASIS[a].l, m: BASIS[a].m, amp: 1 }));
+      if (modes.length) PRESET_BY_ID.set(UK + u.name, { id: null, label: u.name, note: `your preset · ${modes.length} label${modes.length === 1 ? '' : 's'}, equal and in phase`, modes });
+    }
+  };
+  const isPreset = (id) => !!id && (PRE.some((p) => p.id === id) || (id.startsWith(UK) && PRESET_BY_ID.has(id)));
+  const itemsFor = (v) => { const U = users.list().filter((u) => PRESET_BY_ID.has(UK + u.name)).map((u) => ({ id: UK + u.name, label: u.name }));
+    return [...(U.length ? [HEADS[0], ...U, HEADS[1]] : []), ...PRE, ...(v ? [] : [DASH])]; };
+  syncUsers();
+  const preStep = stepper({ aria: 'preset superposition', items: itemsFor(''), value: '', cls: 'mol-step', onChange: (id) => { if (id && api.loadPreset) api.loadPreset(id); } });
   preStep.name.title = 'the preset superpositions — a pick of the one shown reloads it and resets time';
   preStep.name.addEventListener('click', () => { const pane = [...document.querySelectorAll('.mir-pick')].pop(), on = pane && pane.querySelector('.mir-pick-i.on');
-    if (on) on.addEventListener('click', () => { if (preStep.get() && api.loadPreset) api.loadPreset(preStep.get()); }); });   // RELOAD: the stepper ignores a pick of its own value
+    if (on) on.addEventListener('click', () => { if (preStep.get() && api.loadPreset) api.loadPreset(preStep.get()); });   // RELOAD: the stepper ignores a pick of its own value
+    if (pane) for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + UK + '"]')) {                                // S4: each reader's row carries its ×
+      const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(UK.length); x.setAttribute('role', 'button'); x.title = 'remove ' + name; x.setAttribute('aria-label', 'remove ' + name);
+      x.addEventListener('mousedown', (e) => e.preventDefault());
+      x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
+        if (!pane.querySelector('.mir-pick-i[data-id^="' + UK + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
+    } });
   const preVis = sw({ label: 'VISUALS', value: true, title: 'PRESET VISUALS — a preset also sets its view, its rate and its window', onChange: (v) => { api.visuals = v; } });
-  pre.append(preStep.root);
+  const preSave = el('button', 'sp-presave', null); preSave.type = 'button'; preSave.setAttribute('aria-label', 'SAVE PRESET');
+  preSave.title = 'SAVE · the populated labels as your own preset (equal and in phase; kept on this device)';
+  pre.append(preStep.root, preSave);
+  /** the name, asked in the stepper's seat: Enter keeps it, Escape or a press elsewhere lets it go */
+  preSave.addEventListener('click', () => {
+    const labels = api.reg.populated(); if (!labels.length || pre.querySelector('.sp-prename')) return;
+    const row = preStep.name.parentElement, f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; f.setAttribute('aria-label', 'preset name');
+    f.value = labels.slice(0, 4).map((a) => BASIS[a].label).join(' + ') + (labels.length > 4 ? ' …' : ''); row.insertBefore(f, preStep.name); preStep.name.hidden = true;
+    let done = false; const end = (keep, key) => { if (done) return; done = true; const n = f.value.trim(); f.remove(); preStep.name.hidden = false;
+      if (keep && n) { users.add(n, { labels }); preset.value = UK + n; preset.note = PRESET_BY_ID.get(UK + n).note; } if (key) preStep.name.focus(); };
+    f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
+    f.addEventListener('blur', () => end(false)); f.focus(); f.select();
+  });
   /** `ui.presetSel` keeps the select's two words (persist.js and the one road write `.value`, the old note is the hover) */
-  const preset = { root: preStep.root, get value() { return preStep.get(); }, set value(id) { const v = PRE.some((p) => p.id === id) ? id : ''; preStep.setItems(v ? PRE : [...PRE, DASH], v); },
+  const preset = { root: preStep.root, get value() { return preStep.get(); }, set value(id) { const v = isPreset(id) ? id : ''; preStep.setItems(itemsFor(v), v); },
     set note(t) { preStep.name.title = t || ''; } };
+  users.watch(() => { syncUsers(); preset.value = preStep.get(); });
   const head = el('div', 'row tight sp-head', host);
   const hideBtn = el('button', 'trig', head); hideBtn.type = 'button'; hideBtn.textContent = 'HIDE'; hideBtn.title = 'Hide or show the channels';
   const addBtn = el('button', 'trig', head); addBtn.type = 'button'; addBtn.innerHTML = '<span class="trig-g">+</span><span class="trig-l">MODE</span>';
@@ -58,7 +100,7 @@ export function createSpectrum(host, api) {
      normalises at its end (below), a modulator never does.  The press reads the register itself (the label is repainted by rebuild(), which a
      folded or paused card may not have run yet), and so does a hover. */
   const fillSync = () => fillB.set(!api.reg.populated().length);
-  const fillB = fillButton(head, { fill: 'every label on, equal and in phase, normalised', empty: 'c ↦ 0 for every label' },
+  const fillB = fillButton(head, { fill: 'every label on, equal and in phase', empty: 'every label off' },
     () => { if (api.reg.populated().length) { if (api.clear) api.clear(); } else if (api.fillAll) api.fillAll(); fillSync(); });
   fillB.set(true); fillB.root.addEventListener('pointerenter', fillSync); head.appendChild(preVis.root);
   const info = el('div', 'note', head);
@@ -81,6 +123,7 @@ export function createSpectrum(host, api) {
   hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', 'false');
   const picker = el('div', 'picker', host); picker.hidden = true;
   host.appendChild(psiFx.root);                                                     // the live coefficient readout follows the scale/state controls
+  host.appendChild(pre);   // iteration 015 S3 (Josh: "Move the preset thing to the bottom between the 140 picker and above the Hamiltonian"): outside the HAMILTONIAN fold
   addBtn.addEventListener('click', () => { picker.hidden = !picker.hidden; addBtn.classList.toggle('on', !picker.hidden); });
   const chips = new Map();
   /* iteration 008 A7 · THE SHELL FOLD (Josh: "clicking on the colored 'n=' number … should be able to hide section of all 1, 2, 3, all the way
