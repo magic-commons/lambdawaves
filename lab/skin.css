@@ -693,7 +693,7 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-pic { position: absolute; inset: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; transition: scale 280ms var(--ease), filter 280ms var(--ease); }
 #lwMenu .mm-pic[data-tilt] { transform: perspective(1100px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)); }
 #lwMenu .mm-tile:not(.off):hover .mm-pic, #lwMenu .mm-tile:not(.off):focus-visible .mm-pic { scale: 1.1; filter: saturate(1.15) brightness(1.06); }
-#lwMenu .mm-tile.off { cursor: default; } #lwMenu .mm-tile.off .mm-pic, #lwMenu .mm-tile.off .mm-sym, #lwMenu .mm-tile.off .mm-z { opacity: .3; }
+#lwMenu .mm-tile.off { cursor: default; } #lwMenu .mm-tile.off .mm-pic, #lwMenu .mm-tile.off .mm-sym { opacity: .3; }
 /* "the element underneath": the name, under the tile, on a hover or a focus */
 #lwMenu .mm-under { position: absolute; left: 50%; top: 100%; translate: -50% 0; white-space: nowrap; pointer-events: none; font-size: 12px; letter-spacing: .06em; opacity: 0;
   text-shadow: 0 0 6px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); transition: opacity 160ms ease, translate 160ms var(--ease); }
@@ -702,7 +702,13 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-table { --t: min(calc((100vw - 64px) / 18.6), calc((100dvh - 270px) / 10.3)); display: grid; grid-template-columns: repeat(18, var(--t)); grid-template-rows: repeat(7, var(--t)) calc(var(--t) * .35) repeat(2, var(--t)); gap: 2px; }
 #lwMenu .mm-el { border-radius: 6px; } #lwMenu .mm-el .mm-pic { inset: 6%; width: 88%; height: 88%; }
 #lwMenu .mm-sym { position: absolute; left: 7%; bottom: 4%; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: calc(var(--t) * .3); font-weight: 400; line-height: 1; text-shadow: 0 0 5px hsl(var(--glass-tint)); }
-#lwMenu .mm-z { position: absolute; left: 7%; top: 5%; font-size: calc(var(--t) * .14); font-style: normal; opacity: .6; line-height: 1; }
+#lwMenu .mm-table[hidden] { display: none; }
+/* iteration 015 M3 · THE 140 (HYDROGEN on the ATOMIC deck): the state's name in STIX, its m the subscript; under SHOW LABELS as the symbols are */
+#lwMenu .mm-hl { position: absolute; left: 7%; bottom: 5%; pointer-events: none; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: clamp(14px, calc(var(--t) * .17), 30px); line-height: 1;
+  text-shadow: 0 0 5px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); transition: opacity 200ms ease; }
+#lwMenu .mm-hl sub { font-size: .6em; vertical-align: -.3em; margin-left: .04em; }
+#lwMenu:not(.labels-atom) .mm-orb .mm-hl { opacity: 0; }
+#lwMenu .mm-amode { display: inline-flex; gap: 2px; } #lwMenu .mm-amode[hidden] { display: none; }
 #lwMenu .mm-el .mm-under { font-size: 11px; }
 /* the deck: pages sized by picker.js (--t, --cols, --gap), ‹ › beside them (R4), dots or a count under */
 /* iteration 013 P1: a page sliding sideways fades out instead of being cut at the grid's edge — the container runs --fade past the grid a side
@@ -813,7 +819,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
    formula on every molecule tile when it is on (the name stays the hover's), the atoms' symbol and Z when theirs is; the deck a fixed height —
    the rows the space holds, filled or not — so a search never moves the head row; the back to the shelf an icon */
 #lwMenu .mm-ico { display: inline-block; flex: none; width: 14px; height: 14px; background: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; }
-#lwMenu .mm-opts { display: flex; justify-content: center; min-height: 22px; margin-top: -4px; }
+#lwMenu .mm-opts { display: flex; justify-content: center; align-items: center; gap: 12px; min-height: 22px; margin-top: -4px; }
 #lwMenu .mm-opt { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .22em; padding: 3px 8px; border-radius: 999px; opacity: .38; transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-opt:hover, #lwMenu .mm-opt:focus-visible { opacity: .8; } #lwMenu .mm-opt.on { opacity: .75; color: var(--acc); } #lwMenu .mm-opt[hidden] { display: none; }
 #lwMenu .mm-opt .mm-ico { width: 12px; height: 12px; }
@@ -845,8 +851,8 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
   font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: clamp(11px, calc(var(--t) * .1), 18px); line-height: 1;
   text-shadow: 0 0 5px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); opacity: 0; transition: opacity 200ms ease; }
 #lwMenu.labels-mol .mm-lbl { opacity: .9; } #lwMenu .mm-tile:has(.mm-ph) .mm-lbl { display: none; }
-#lwMenu .mm-el .mm-sym, #lwMenu .mm-el .mm-z { transition: opacity 200ms ease; }
-#lwMenu:not(.labels-atom) .mm-el .mm-sym, #lwMenu:not(.labels-atom) .mm-el .mm-z { opacity: 0; }
+#lwMenu .mm-el .mm-sym { transition: opacity 200ms ease; }
+#lwMenu:not(.labels-atom) .mm-el .mm-sym { opacity: 0; }
 #lwMenu .mm-pages { box-sizing: content-box; height: calc(var(--t) * var(--rows, 2) + var(--gap) * (var(--rows, 2) - 1)); }
 
 /* iteration 012 L2 · THE LIBRARY'S LAYOUT.  Under the logo, centred: RETURN HOME · FOLDERS · THE HUE ring (a conic wheel masked by I1's ring,
@@ -881,7 +887,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu.labels-mol .mm-lbl { animation: mm-rise 240ms var(--ease) both; }
 @keyframes mm-rise { from { opacity: 0; translate: 0 4px; } }
 @media (prefers-reduced-motion: reduce) {
-  #lwMenu .mm-navb, #lwMenu .mm-hue-ring, #lwMenu .mm-hue-ring::after, #lwMenu .mm-mol .mm-pic, #lwMenu .mm-tab .mm-ico, #lwMenu .mm-lbl, #lwMenu .mm-el .mm-sym, #lwMenu .mm-el .mm-z { transition: none; animation: none; } }
+  #lwMenu .mm-navb, #lwMenu .mm-hue-ring, #lwMenu .mm-hue-ring::after, #lwMenu .mm-mol .mm-pic, #lwMenu .mm-tab .mm-ico, #lwMenu .mm-lbl, #lwMenu .mm-el .mm-sym, #lwMenu .mm-hl { transition: none; animation: none; } }
 
 /* iteration 012 L3 · THE ENTRANCE (a first run, after CONTINUE): the menu fades in (no iris), the logo drops from the top, the nav, the tabs and
    SHOW LABELS rise in turn; picker.js deals the MOLECULAR tiles one by one.  Reduced motion: the end state at once. */

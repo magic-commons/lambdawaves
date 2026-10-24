@@ -21,6 +21,8 @@ import { SECTIONS, GROUPS, RECORD_GROUP } from './molecules.js';
 import { ATOMS } from './atoms.js';
 import { valenceOf } from './valence.js';
 import { getHamiltonian } from './hamiltonian.js';
+import { BASIS } from './hydrogen.js';
+import { L_LETTERS } from './names.js';
 import { RM, animate, pointerFrame, tiltPictures, enterTiles, develop, swapLine, installRing, clamp } from './picker-fx.js';
 import * as V from './volumes.js';
 import { keepData, keepSection, installed, safariTab } from './library.js';
@@ -49,7 +51,7 @@ const fmtBytes = (b) => (b >= 1e9 ? (b / 1e9).toFixed(b >= 1e10 ? 0 : 1) + ' GB'
 
 /* iteration 012 L1 · the Picker's own PREFERENCE (settings-store.js FAMILIES, never a project or a link): SHOW LABELS for the atoms (on: the symbol
    and Z, as before) and for the molecules (on: the formula on every tile, the name under it on a hover) */
-const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0, look: 'density' };   // look: THE PICTURES' STYLE (iteration 014 B4)   // hue: THE HUE ring's turn in degrees (L2)
+const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0, look: 'density', atomic: 'atoms' };   // atomic: THE ATOMIC deck's HYDROGEN | ATOMS (iteration 015 M3)   // look: THE PICTURES' STYLE (iteration 014 B4)   // hue: THE HUE ring's turn in degrees (L2)
 const readPrefs = () => { try { return Object.assign({}, PREF0, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (_) { return Object.assign({}, PREF0); } };
 const writePrefs = (p) => { try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (_) { /* a blocked profile keeps it for the visit */ } };
 /** an iteration 012 icon (lab/img/icons/<name>.svg), drawn in currentColor through a CSS mask */
@@ -120,13 +122,18 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const prefs = readPrefs(), opts = el('div', 'mm-opts', top);
   let labelBtns = [];
   const labelToggle = (host, kind) => { const b = el('button', 'mm-opt', host); b.type = 'button'; b.dataset.labels = kind; icon(b, 'labels'); el('span', '', b, 'SHOW LABELS');
-    b.title = kind === 'atomLabels' ? 'the symbol and Z on every element' : 'the formula on every molecule; the name under it on a hover';
+    b.title = kind === 'atomLabels' ? 'the symbol on every element, the name on every state' : 'the formula on every molecule; the name under it on a hover';
     b.addEventListener('click', () => { prefs[kind] = !prefs[kind]; writePrefs(prefs); paintLabels(); }); labelBtns.push(b); paintLabels(); return b; };
   function paintLabels() {
     root.classList.toggle('labels-atom', !!prefs.atomLabels); root.classList.toggle('labels-mol', !!prefs.molLabels);
     labelBtns = labelBtns.filter((b) => b.isConnected);
     for (const b of labelBtns) { const on = !!prefs[b.dataset.labels]; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
   }
+  /* iteration 015 M3 · ATOMIC MODE (Josh: "In atomic mode, it should show options to pick 'hyrogen' and the periodic table 'atoms'"): HYDROGEN | ATOMS
+     beside SHOW LABELS on the ATOMIC deck — ATOMS the periodic table, HYDROGEN THE 140; the Picker's PREFERENCE `atomic` */
+  const amode = el('div', 'mm-amode', opts); amode.setAttribute('role', 'radiogroup'); amode.setAttribute('aria-label', 'the atomic deck');
+  const amodeBtns = [['hydrogen', 'HYDROGEN', 'every hydrogen state, n ≤ 7: one label each'], ['atoms', 'ATOMS', 'the periodic table']].map(([id, word, tip]) => {
+    const b = el('button', 'mm-opt', amode, word); b.type = 'button'; b.dataset.amode = id; b.title = tip; b.setAttribute('role', 'radio'); b.addEventListener('click', () => setAtomic(id)); return b; });
   const atomOpt = labelToggle(opts, 'atomLabels'), molOpt = labelToggle(opts, 'molLabels');
   let hueShown = 0;   // iteration 014 D2: the CSS sees an unwrapped turn (the nearest twin of the hue to the last one shown), so 359 → 0 glides one degree, never back round the wheel
   /* iteration 014 B4 · 015 M1 · THE PICTURES' STYLE: the Picker's PREFERENCE `look`, turned by THE HUE ring like every picture.  THE LOOK DROP
@@ -292,7 +299,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         a.style.setProperty('--glyph-scale', (1 + g * g * 0.075).toFixed(4)); a.style.setProperty('--near', isNear ? '1' : '0');
       }
     });
-    const d = { set(l, m) { list = l; make = m; page = 0; per = 1; laid = ''; lay(); }, lay, pageTo, get tiles() { return pages[page] ? [...pages[page].children] : []; }, get count() { return list.length; } };
+    const d = { wrap, foot, set(l, m) { list = l; make = m; page = 0; per = 1; laid = ''; lay(); }, lay, pageTo, get tiles() { return pages[page] ? [...pages[page].children] : []; }, get count() { return list.length; } };
     decks.push(d); return d;
   }
 
@@ -313,8 +320,28 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const t = tile(table, 'mm-el', { name: NAMES[Z - 1], sub: v.label, math: true, under: false, note: live ? '' : 'past krypton: not in the ATOM system yet' }, () => goAtom(Z), !live);
     t.style.gridRow = String(r); t.style.gridColumn = String(c);
     pic(t, null, 'el:' + sym + ':' + v.nl + '_' + v.m);   // the block's orbital (011 Q3b: the differentiating subshell — Fe 3d, Ce 4f; the pure orbital of its (n, l, m), cut to show its layers)
-    el('i', 'mm-z', t, String(Z)); el('b', 'mm-sym', t, sym);
+    el('b', 'mm-sym', t, sym);   // M3: the symbol alone (Z left the tile: "it shouldn't show the 'z' number")
   }
+  /* ── HYDROGEN: THE 140 (iteration 015 M3) — a tile per (n, l, m) label in SPECTRUM's order (hydrogen.js BASIS: n ≤ 6's 91, then n = 7's 49), paged
+     like the molecular deck; the label is the state's name in STIX, `3p` large and the m its subscript (names.js atomForms); the picture is the
+     pure orbital in the look in use (M2's `orb-<nl>_<m>`).  A press opens HYDROGEN — MOLECULES off, SPECTRUM's system HYDROGEN — with THAT label
+     alone populated, through loadPreset's road as a hand's preset (one history row, THE FADE says its name). ── */
+  const SUBN = '₀₁₂₃₄₅₆₇₈₉', subOf = (m) => (m < 0 ? '₋' : '') + String(Math.abs(m)).split('').map((d) => SUBN[+d]).join('');
+  const hDeck = deck(sections[0].sec), hWrap = hDeck.wrap, hDots = hDeck.foot;
+  let hSet = false;
+  const hTile = (b, host) => {
+    const nl = b.n + L_LETTERS[b.l], info = { formula: nl + subOf(b.m), sub: `n ${b.n} · ℓ ${b.l} · m ${b.m < 0 ? '−' + -b.m : b.m}`, math: true, under: false };
+    const t = tile(host, 'mm-orb', info, () => goHydrogen(b)); pic(t, null, 'orb:' + nl + '_' + b.m);
+    const lb = el('b', 'mm-hl', t, nl); el('sub', '', lb, b.m < 0 ? '−' + -b.m : String(b.m)); return t;
+  };
+  function setAtomic(id, keep = true) {
+    prefs.atomic = id === 'hydrogen' ? 'hydrogen' : 'atoms'; if (keep) writePrefs(prefs);
+    const h = prefs.atomic === 'hydrogen'; table.hidden = h; hWrap.hidden = hDots.hidden = !h;
+    for (const b of amodeBtns) { const on = b.dataset.amode === prefs.atomic; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
+    if (h && !hSet) { hSet = true; hDeck.set(BASIS, hTile); } else if (h) hDeck.lay();
+    if (keep && !root.hidden) enterTiles(h ? hDeck.tiles : [...table.children], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i));
+  }
+  setAtomic(prefs.atomic, false);
   /* ── MOLECULAR: MOLECULES ONLY (iteration 011 Q4, Josh: "remove those 'lattice' and 'heavy' and other downloadable stuff from the molecular
      system, let that be it's own UI system for handling saved/stored/unsaved molecules in the library section").  The catalogue in its
      SECTIONS' order (lab/molecules.js), within a section the dropdown's order (its groups); no heading tile — a heading broke the picture grid,
@@ -571,7 +598,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
 
   /* ── the tab under the reader's eye ── */
   let current = sections[0]; paintLooks();
-  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; root.dataset.sec = s.id; paintLooks(); for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
+  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = amode.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; root.dataset.sec = s.id; paintLooks(); for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
   let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); movePill(current.b); } }); });   // observed only while the Picker is open
 
@@ -579,6 +606,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function goMolecule(id) { close(); const C = app.state.chem; if (!C) return; if (!C.on) C.setOn(true); C.pick(id); }
   function goVolume(v, m) {
     close(); if (app.state.chem) app.state.chem.openVolume(v.id, m.id);   // V2: its record, the lowest rung, MOLECULES on (chemview openVolume)
+  }
+  function goHydrogen(b) {
+    close(); const C = app.state.chem; if (C && C.on) C.setOn(false);
+    if (getHamiltonian().id !== 'hydrogen') app.w.switchHamiltonian('hydrogen'); if (app.ui.hamSeg) app.ui.hamSeg.set('hydrogen');
+    const look = prefs.look, name = b.n + L_LETTERS[b.l] + subOf(b.m);   // the field opens in the look the tile showed (an m = 0 state held imaginary for Im ψ, as its picture)
+    app.ctl.loadPreset({ id: b.id, label: name, note: 'hydrogen · one label, from the Picker', modes: [{ n: b.n, l: b.l, m: b.m, amp: 1, phase: look === 'im' && b.m === 0 ? Math.PI / 2 : 0 }],
+      visual: { rate: 4, window: 4 * Math.PI * b.n * b.n, view: look === 'phase' ? 'phase' : look === 'im' ? 'imag' : 'density' } }, { hand: true });
   }
   function goAtom(Z) {
     close(); const C = app.state.chem; if (C && C.on) C.setOn(false);
@@ -623,7 +657,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       setTimeout(() => { root.classList.remove('first'); }, 2600);
       return;
     }
-    requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? [...table.children] : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
+    requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? hDeck.tiles : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
   function close() { if (root.hidden) return; closeDrop(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = () => (root.hidden ? open() : close());
