@@ -169,7 +169,7 @@ export function createProjects(port) {
     /* iteration 012 M1 (O1's finding; Josh 10-20 "make sure the Window, UI, saving system works"): an OPEN from FOLDERS lands on the stage, so the
        window goes — only for an open FOLDERS' own adapter took (`landed`), never for the facade's telling (a Ctrl+S, __LW.projects.open): the kit
        calls this after its picture's await, when the telling is already over */
-    onOpened: () => { if (echo) { toast(echo, true); echo = null; } if (landed) { landed = false; folders.close(); } },
+    onOpened: () => { if (echo) { toast(echo, true); echo = null; } if (landed) { landed = false; folders.close(); cover(); } },   // iteration 015 M4: and the Picker, when its FOLDERS page took the open
     /* FOLDERS' own SAVE / SAVE AS: an untitled notebook takes the project's name, in the file too (λWAVES' save always did) */
     onSaved: (e) => {
       currentId = e.id; touchRecent(ls, pathOf(e)); status = 'saved ' + pathOf(e);

@@ -673,10 +673,18 @@ body.no-transport-bar #transport { display: none; }
 .lw-menu { background: hsl(var(--glass-tint) / .985); }
 body.frost .lw-menu, body.frost[data-card] .lw-menu.glass { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: blur(28px) saturate(1.25); backdrop-filter: blur(28px) saturate(1.25); }
 body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #transport { visibility: hidden; opacity: 0; }   /* opacity too: the kit's block sets its own visibility */
-#lwMenu *, #lwMenu *::before, #lwMenu *::after { outline: none; border: 0; box-shadow: none; }
-#lwMenu button { background: none; color: inherit; font: inherit; padding: 0; cursor: pointer; }
+#lwMenu :where(:not(.mm-folders, .mm-folders *)), #lwMenu :where(:not(.mm-folders, .mm-folders *))::before, #lwMenu :where(:not(.mm-folders, .mm-folders *))::after { outline: none; border: 0; box-shadow: none; }
+#lwMenu button:where(:not(.mm-folders *)) { background: none; color: inherit; font: inherit; padding: 0; cursor: pointer; }   /* iteration 015 M4: the kit's gallery keeps its own look */
+/* iteration 015 M4 · THE THIRD VIEW: the gallery in the decks' seat, as wide as a deck, its paged grid --fcols across (picker.js sizes it) */
+#lwMenu .mm-folders { grid-row: 2; grid-column: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; justify-content: center; padding: 8px 24px 20px; box-sizing: border-box; }
+#lwMenu .mm-folders[hidden], #lwMenu .mm-scroll[hidden], #lwMenu .mm-caption[hidden] { display: none; }
+#lwMenu .mm-fgal { width: min(1500px, 100%); container-type: inline-size; }
+@media (min-width: 1100px) { #lwMenu .mm-fgal { width: min(1500px, 100%, calc(100vw - 2 * (var(--rack-w, 300px) + 20px))); } }   /* off the racks, as the decks keep */
+#lwMenu[data-sec="folders"] .mm-opts { visibility: hidden; }
+#lwMenu .mm-folders .sv-paged .sv-project-grid { grid-template-columns: repeat(var(--fcols, 4), minmax(0, 1fr)); }
+#lwMenu[data-sec="folders"] .mm-navb[data-nav="folders"] { opacity: 1; color: var(--acc); }
 #lwMenu .mm-top { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px 4px; }
-#lwMenu .mm-logo { height: 44px; color: var(--fg); } #lwMenu .mm-logo svg { height: 100%; width: auto; display: block; }
+#lwMenu .mm-logo { height: 56px; color: var(--fg); } #lwMenu .mm-logo svg { height: 100%; width: auto; display: block; }
 /* the tabs: R9's sliding pill and approach accent */
 #lwMenu .mm-tabs { position: relative; isolation: isolate; display: flex; gap: 26px; }
 #lwMenu .mm-pill { position: absolute; top: -2px; bottom: -2px; left: 0; width: var(--pw, 0); translate: var(--px, 0) 0; border-radius: 999px; background: hsl(var(--glass-tint) / .5); z-index: -1; pointer-events: none;
@@ -693,7 +701,7 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-pic { position: absolute; inset: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; transition: scale 280ms var(--ease), filter 280ms var(--ease); }
 #lwMenu .mm-pic[data-tilt] { transform: perspective(1100px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)); }
 #lwMenu .mm-tile:not(.off):hover .mm-pic, #lwMenu .mm-tile:not(.off):focus-visible .mm-pic { scale: 1.1; filter: saturate(1.15) brightness(1.06); }
-#lwMenu .mm-tile.off { cursor: default; } #lwMenu .mm-tile.off .mm-pic, #lwMenu .mm-tile.off .mm-sym, #lwMenu .mm-tile.off .mm-z { opacity: .3; }
+#lwMenu .mm-tile.off { cursor: default; } #lwMenu .mm-tile.off .mm-pic, #lwMenu .mm-tile.off .mm-sym { opacity: .3; }
 /* "the element underneath": the name, under the tile, on a hover or a focus */
 #lwMenu .mm-under { position: absolute; left: 50%; top: 100%; translate: -50% 0; white-space: nowrap; pointer-events: none; font-size: 12px; letter-spacing: .06em; opacity: 0;
   text-shadow: 0 0 6px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); transition: opacity 160ms ease, translate 160ms var(--ease); }
@@ -702,7 +710,13 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-table { --t: min(calc((100vw - 64px) / 18.6), calc((100dvh - 270px) / 10.3)); display: grid; grid-template-columns: repeat(18, var(--t)); grid-template-rows: repeat(7, var(--t)) calc(var(--t) * .35) repeat(2, var(--t)); gap: 2px; }
 #lwMenu .mm-el { border-radius: 6px; } #lwMenu .mm-el .mm-pic { inset: 6%; width: 88%; height: 88%; }
 #lwMenu .mm-sym { position: absolute; left: 7%; bottom: 4%; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: calc(var(--t) * .3); font-weight: 400; line-height: 1; text-shadow: 0 0 5px hsl(var(--glass-tint)); }
-#lwMenu .mm-z { position: absolute; left: 7%; top: 5%; font-size: calc(var(--t) * .14); font-style: normal; opacity: .6; line-height: 1; }
+#lwMenu .mm-table[hidden] { display: none; }
+/* iteration 015 M3 · THE 140 (HYDROGEN on the ATOMIC deck): the state's name in STIX, its m the subscript; under SHOW LABELS as the symbols are */
+#lwMenu .mm-hl { position: absolute; left: 7%; bottom: 5%; pointer-events: none; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: clamp(14px, calc(var(--t) * .17), 30px); line-height: 1;
+  text-shadow: 0 0 5px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); transition: opacity 200ms ease; }
+#lwMenu .mm-hl sub { font-size: .6em; vertical-align: -.3em; margin-left: .04em; }
+#lwMenu:not(.labels-atom) .mm-orb .mm-hl { opacity: 0; }
+#lwMenu .mm-amode { display: inline-flex; gap: 2px; } #lwMenu .mm-amode[hidden] { display: none; }
 #lwMenu .mm-el .mm-under { font-size: 11px; }
 /* the deck: pages sized by picker.js (--t, --cols, --gap), ‹ › beside them (R4), dots or a count under */
 /* iteration 013 P1: a page sliding sideways fades out instead of being cut at the grid's edge — the container runs --fade past the grid a side
@@ -745,6 +759,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-vol-num { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(52px, 6.4vw, 96px); line-height: .95; letter-spacing: .02em; white-space: nowrap; transition: color 160ms; }
 #lwMenu .mm-vol-open:hover .mm-vol-num, #lwMenu .mm-vol-open:focus-visible .mm-vol-num { color: var(--acc); }
 #lwMenu .mm-vol-wip { font-size: 10px; letter-spacing: .22em; padding: 3px 8px 3px 10px; border-radius: 999px; color: var(--acc); background: color-mix(in srgb, var(--acc) 14%, transparent); }   /* iteration 014 C4: a volume still filling */
+#lwMenu .mm-vol.filling .mm-vol-open { cursor: default; } #lwMenu .mm-vol.filling .mm-vol-num { opacity: .55; } #lwMenu .mm-vol.filling .mm-vol-open:hover .mm-vol-num { color: inherit; }   /* iteration 015 M5: VOL. II · WIP, FILLING */
 #lwMenu .mm-vol-meta { font-size: 12px; letter-spacing: .08em; opacity: .6; font-variant-numeric: tabular-nums; }
 #lwMenu .mm-install { display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: .18em; padding: 4px 12px 4px 4px; border-radius: 999px; font-variant-numeric: tabular-nums; transition: color 120ms; }
 #lwMenu .mm-install:hover, #lwMenu .mm-install:focus-visible { color: var(--acc); }
@@ -813,22 +828,40 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
    formula on every molecule tile when it is on (the name stays the hover's), the atoms' symbol and Z when theirs is; the deck a fixed height —
    the rows the space holds, filled or not — so a search never moves the head row; the back to the shelf an icon */
 #lwMenu .mm-ico { display: inline-block; flex: none; width: 14px; height: 14px; background: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; }
-#lwMenu .mm-opts { display: flex; justify-content: center; min-height: 22px; margin-top: -4px; }
+#lwMenu .mm-opts { display: flex; justify-content: center; align-items: center; gap: 12px; min-height: 22px; margin-top: -4px; }
 #lwMenu .mm-opt { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .22em; padding: 3px 8px; border-radius: 999px; opacity: .38; transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-opt:hover, #lwMenu .mm-opt:focus-visible { opacity: .8; } #lwMenu .mm-opt.on { opacity: .75; color: var(--acc); } #lwMenu .mm-opt[hidden] { display: none; }
 #lwMenu .mm-opt .mm-ico { width: 12px; height: 12px; }
-/* iteration 014 B4 · THE PICTURES' STYLE under the hue ring (picker.js `.mm-looks`): the SHOW LABELS look, one lit */
-#lwMenu .mm-looks { display: flex; justify-content: center; gap: 2px; margin: 2px auto 4px; }
-#lwMenu .mm-look { font-size: 10px; letter-spacing: .2em; padding: 3px 8px; border-radius: 999px; opacity: .38; transition: opacity 140ms, color 140ms; white-space: nowrap; }
-#lwMenu .mm-look:hover, #lwMenu .mm-look:focus-visible { opacity: .8; } #lwMenu .mm-look.on { opacity: .85; color: var(--acc); }
+/* iteration 015 M1 · THE LOOK DROP (picker.js `.mm-lookdrop`): the LOOK button wears the look in use as its glyph (the math face); the drop is a
+   2 × 3 pane of 72 px tiles on the Picker's surface, centred under the button and over the decks, the glyph alone in each (the word is its hint);
+   the Gol note's motion — the spring open (scale .94 × .6 → 1, 320 ms, the overshoot), the tiles 30 ms apart, the 120 ms close; reduced motion none */
+#lwMenu .mm-lookg { font: 400 17px/1 'STIX Two Math', 'Latin Modern Math', serif; white-space: nowrap; letter-spacing: 0; }
+#lwMenu .mm-lookb[aria-expanded="true"] { opacity: 1; color: var(--acc); }
+#lwMenu .mm-lookdrop { --ease-spring: cubic-bezier(.2, 1.4, .4, 1); position: absolute; z-index: 20; translate: -50% 0; transform-origin: 50% 0; display: grid; grid-template-columns: repeat(3, 72px); grid-auto-rows: 72px; gap: 6px; padding: 8px; border-radius: 16px; }
+#lwMenu .mm-lookdrop.lw-menu { background: hsl(var(--glass-tint) / .92); }   /* over the tiles: the glyphs read on any picture */
+#lwMenu .mm-lookdrop[hidden] { display: none; }
+#lwMenu .mm-lk { display: grid; place-items: center; border-radius: 12px; opacity: .6; transition: opacity 140ms, color 140ms, background-color 140ms, scale 160ms var(--ease); }
+#lwMenu .mm-lk-g { font: 400 26px/1 'STIX Two Math', 'Latin Modern Math', serif; white-space: nowrap; letter-spacing: 0; }
+#lwMenu :is(.mm-lk-g, .mm-lookg) svg { display: block; width: 1em; height: 1em; }   /* ● and ⊸, drawn at the glyph's em */
+#lwMenu .mm-lk:hover, #lwMenu .mm-lk:focus-visible { opacity: 1; background: color-mix(in srgb, var(--fg) 7%, transparent); }
+#lwMenu .mm-lk:active { scale: .95; }
+#lwMenu .mm-lk.on { opacity: 1; color: var(--acc); background: color-mix(in srgb, var(--acc) 14%, transparent); }
+#lwMenu .mm-lk.off { opacity: .18; cursor: default; background: none; }
+#lwMenu .mm-lookdrop.in { animation: mm-drop-open 320ms var(--ease-spring) both; }
+#lwMenu .mm-lookdrop.in .mm-lk { animation: mm-lk-in 420ms var(--ease-spring) both; animation-delay: calc(var(--i, 0) * 30ms + 60ms); }
+#lwMenu .mm-lookdrop.out { animation: mm-drop-close 120ms ease-in both; pointer-events: none; }
+@keyframes mm-drop-open { from { transform: scale(.94, .6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes mm-lk-in { from { transform: translateY(14px) scale(.96); opacity: 0; } 60% { opacity: 1; } }
+@keyframes mm-drop-close { to { transform: translateY(-6px) scale(.98); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #lwMenu .mm-lookdrop.in, #lwMenu .mm-lookdrop.in .mm-lk, #lwMenu .mm-lookdrop.out { animation: none; } }
 #lwMenu .mm-vhead .mm-opt { flex: none; white-space: nowrap; font-size: 11px; letter-spacing: .18em; opacity: .55; } #lwMenu .mm-vhead .mm-opt.on { opacity: 1; }
 #lwMenu .mm-back { display: grid; place-items: center; width: 28px; height: 28px; } #lwMenu .mm-back .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-lbl { position: absolute; left: 7%; bottom: 5%; max-width: 86%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none;
   font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: clamp(11px, calc(var(--t) * .1), 18px); line-height: 1;
   text-shadow: 0 0 5px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); opacity: 0; transition: opacity 200ms ease; }
 #lwMenu.labels-mol .mm-lbl { opacity: .9; } #lwMenu .mm-tile:has(.mm-ph) .mm-lbl { display: none; }
-#lwMenu .mm-el .mm-sym, #lwMenu .mm-el .mm-z { transition: opacity 200ms ease; }
-#lwMenu:not(.labels-atom) .mm-el .mm-sym, #lwMenu:not(.labels-atom) .mm-el .mm-z { opacity: 0; }
+#lwMenu .mm-el .mm-sym { transition: opacity 200ms ease; }
+#lwMenu:not(.labels-atom) .mm-el .mm-sym { opacity: 0; }
 #lwMenu .mm-pages { box-sizing: content-box; height: calc(var(--t) * var(--rows, 2) + var(--gap) * (var(--rows, 2) - 1)); }
 
 /* iteration 012 L2 · THE LIBRARY'S LAYOUT.  Under the logo, centred: RETURN HOME · FOLDERS · THE HUE ring (a conic wheel masked by I1's ring,
@@ -838,10 +871,14 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-navb { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; opacity: .55; transition: opacity 140ms, color 140ms, scale 160ms var(--ease); }
 #lwMenu .mm-navb .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-navb:hover, #lwMenu .mm-navb:focus-visible { opacity: 1; color: var(--acc); scale: 1.1; } #lwMenu .mm-navb:active { scale: .94; }
-#lwMenu .mm-hue { opacity: .85; cursor: ns-resize; touch-action: none; }
-#lwMenu .mm-hue-ring { width: 20px; height: 20px; rotate: var(--mol-hue); background: conic-gradient(from 0deg, hsl(0 85% 58%), hsl(60 85% 52%), hsl(120 70% 48%), hsl(180 80% 50%), hsl(240 80% 62%), hsl(300 80% 60%), hsl(360 85% 58%));
+#lwMenu .mm-hue { opacity: .55; cursor: ns-resize; touch-action: none; }
+#lwMenu .mm-hue-ring { width: 20px; height: 20px; rotate: var(--mol-hue); position: relative; background: currentColor;
   -webkit-mask: url(img/icons/hue-ring.svg) center / contain no-repeat; mask: url(img/icons/hue-ring.svg) center / contain no-repeat; transition: rotate 120ms var(--ease); }
-#lwMenu .mm-hue:hover .mm-hue-ring { filter: saturate(1.2) brightness(1.06); }
+/* iteration 015 M6 · THE HUE BUTTON (Josh: "grey like the rest but then mouse over shows the colors avail"): the ring in the ink at rest, as its
+   neighbours' icons are, and the wheel's colours fading in on a hover, a focus or a drag (the mask clips the ::after too) */
+#lwMenu .mm-hue-ring::after { content: ''; position: absolute; inset: 0; background: conic-gradient(from 0deg, hsl(0 85% 58%), hsl(60 85% 52%), hsl(120 70% 48%), hsl(180 80% 50%), hsl(240 80% 62%), hsl(300 80% 60%), hsl(360 85% 58%)); opacity: 0; transition: opacity 200ms var(--ease); }
+#lwMenu .mm-hue:is(:hover, :focus-visible, .drag) { opacity: 1; color: var(--fg); }
+#lwMenu .mm-hue:is(:hover, :focus-visible, .drag) .mm-hue-ring::after { opacity: 1; }
 #lwMenu .mm-mol .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)); transition: scale 280ms var(--ease), filter 360ms var(--ease); }
 #lwMenu .mm-mol:not(.off):hover .mm-pic, #lwMenu .mm-mol:not(.off):focus-visible .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)) saturate(1.15) brightness(1.06); }
 #lwMenu .mm-tab .mm-ico { width: 18px; height: 18px; transition: translate 160ms var(--ease); } #lwMenu .mm-tab:hover .mm-ico { translate: 0 -1px; }
@@ -859,14 +896,14 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu.labels-mol .mm-lbl { animation: mm-rise 240ms var(--ease) both; }
 @keyframes mm-rise { from { opacity: 0; translate: 0 4px; } }
 @media (prefers-reduced-motion: reduce) {
-  #lwMenu .mm-navb, #lwMenu .mm-hue-ring, #lwMenu .mm-mol .mm-pic, #lwMenu .mm-tab .mm-ico, #lwMenu .mm-lbl, #lwMenu .mm-el .mm-sym, #lwMenu .mm-el .mm-z { transition: none; animation: none; } }
+  #lwMenu .mm-navb, #lwMenu .mm-hue-ring, #lwMenu .mm-hue-ring::after, #lwMenu .mm-mol .mm-pic, #lwMenu .mm-tab .mm-ico, #lwMenu .mm-lbl, #lwMenu .mm-el .mm-sym, #lwMenu .mm-hl { transition: none; animation: none; } }
 
 /* iteration 012 L3 · THE ENTRANCE (a first run, after CONTINUE): the menu fades in (no iris), the logo drops from the top, the nav, the tabs and
    SHOW LABELS rise in turn; picker.js deals the MOLECULAR tiles one by one.  Reduced motion: the end state at once. */
 #lwMenu.first { clip-path: none; transition: opacity .6s ease; }
 #lwMenu.first.in .mm-logo { animation: mm-drop 820ms var(--ease) both; }
-#lwMenu.first.in .mm-nav { animation: mm-up 620ms var(--ease) 260ms both; }
-#lwMenu.first.in .mm-tabs { animation: mm-up 620ms var(--ease) 340ms both; }
+#lwMenu.first.in .mm-tabs { animation: mm-up 620ms var(--ease) 260ms both; }
+#lwMenu.first.in .mm-nav { animation: mm-up 620ms var(--ease) 340ms both; }
 #lwMenu.first.in .mm-opts { animation: mm-up 620ms var(--ease) 420ms both; }
 @keyframes mm-drop { from { opacity: 0; translate: 0 -56px; } }
 @keyframes mm-up { from { opacity: 0; translate: 0 14px; } }

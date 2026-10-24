@@ -3,8 +3,12 @@
    (`blockSubshell`: an open f shell, else the occupied subshell last in Madelung order).  A second, independent column: the subshell the
    element's SEAT in the table names (s block ns, p block np, d block (n−1)d, the two f rows (n−2)f) — where the seat and the rule part,
    the configuration is why (La/Ac/Th hold no f, Lu/Lr close theirs).  Prints every row (Z · symbol · configuration · subshell) with
-   `--all`, else the mismatches and the seat partings. */
-import { readFileSync } from 'node:fs';
+   `--all`, else the mismatches and the seat partings.
+   THE 140 (iteration 015 M3): every hydrogen.js BASIS label has its picture beside the manifest, orb-<nl>_<m>.webp (Im ψ) and each variant the
+   manifest's `variants.orbitals` names (density, phase) — the Picker's HYDROGEN deck reads them. */
+import { readFileSync, existsSync } from 'node:fs';
+import { BASIS } from '../lab/hydrogen.js';
+import { L_LETTERS } from '../lab/names.js';
 import { ATOMS } from '../lab/atoms.js';
 import { blockSubshell } from '../lab/valence.js';
 const file = process.argv.slice(2).find((a) => !a.startsWith('--')) || 'lab/img/menu/manifest.json', ALL = process.argv.includes('--all');
@@ -29,4 +33,7 @@ console.log(`${ok} of ${ATOMS.length} match, ${miss.length} mismatch · the seat
 if (miss.length) console.log('MISMATCHES\n' + head + miss.join('\n') + '\n');
 console.log('THE SEAT PARTINGS (the configuration rules)\n' + head + part.join('\n'));
 if (ALL) console.log('\nEVERY ELEMENT\n' + head + rows.join('\n'));
-process.exit(miss.length ? 1 : 0);
+const dir = file.replace(/[^/]*$/, ''), looks = ['', ...((man.variants || {}).orbitals || []).map((v) => '.' + v)];
+const lost = BASIS.flatMap((b) => looks.map((v) => `orb-${b.n}${L_LETTERS[b.l]}_${b.m}${v}.webp`)).filter((f) => !existsSync(dir + f));
+console.log(`\nTHE 140: ${BASIS.length * looks.length - lost.length} of ${BASIS.length * looks.length} pictures (${looks.map((v) => v || 'im').join(' · ')})` + (lost.length ? ' · missing ' + lost.slice(0, 12).join(' ') + (lost.length > 12 ? ' …' : '') : ''));
+process.exit(miss.length || lost.length ? 1 : 0);
