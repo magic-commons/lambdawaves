@@ -25,6 +25,14 @@
   - The manifest keeps its rows when a run makes only variants, and records `variants`.
 - The pictures are DATA (`img/menu/` in sw.js's DATA roots, `tests/pwa.test.mjs`), never precache.
 
+## The pictures (rendered 10-23/24 over the gate server, the GPU shared with the solvers: ≈ 10 s a picture)
+- The catalogue: 96 molecules × 5 looks (im · balls · sticks · esp · phase) = 480, none failed.
+- THE 140: 103 new plain (Im ψ) pictures, plus 140 × density and 140 × phase = 383 new; the 37 old `orb-` files were kept.
+- `lab/img/menu` now holds 1,115 files, 6.9 MB (once 252, 1.7 MB). All of it is DATA: fetched on first sight and kept on the device, never
+  precached.
+- `tools/tile-check.mjs`: 118/118 elements · THE 140 420/420.
+- Shot `m-shots/M2-looks.jpg`: the MOLECULAR deck in φ (ESP), and benzene · methanol · glycine in ρ · arg ψ · Im ψ · ● · ⊸ · φ.
+
 ## Files
 `lab/picker.js` (`picOf`, `pic(host, src, ref)`, `setLook`'s repaint), `tools/menu-thumbs.mjs`, `lab/img/menu/` (the pictures; see the
 pictures commit).
