@@ -110,7 +110,10 @@
    it would make the tempo pill a flex row (132 → 124 px).  The pill keeps the kit's grid. */
 #modwin.mir-modwindow .m2workbar button:not(:where(.modtempo)) { display: inline-flex; align-items: center; }
 #modwin.mir-modwindow .m2workbar button > svg { display: block; margin: auto; }
-#modwin.mir-modwindow .m2presave svg { width: 26px; height: 26px; }
+/* 015 T2 · THE MODULATION WINDOW'S BARS ON THE KIT'S SEATS: their buttons are `.tbtn` now (modhost.css § THE WORK BARS), and λWAVES' strip rule
+   `.tbtn` (lab.css, unlayered: a 44-px raised box) would beat the kit's layered seat — so inside the two bars they step back to the layers, as
+   the timeline's work bar does below (A5) */
+body #modwin.mir-modwindow .m2workbar :is(.tbtn, .tbtn > svg) { all: revert-layer; }
 
 /* ── 13. motion and touch courtesy ─────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) { .dev, .k-val, .fd-val, .ro-sub, #rack, #transport.mini { transition: none; }

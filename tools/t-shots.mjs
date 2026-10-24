@@ -30,8 +30,10 @@ try {
     await g.ev(`document.querySelector('#transport .tr-open').click(); return 1;`); await wait(1500);
     info.timelineUnder = await g.ev(R);
   } else if (scene === 'mod') {
-    await g.ev(`__LW.layout.modulation.expand(); return 1;`); await wait(1500);
-    info.workbar = await rect('.m2workbar'); info.prebar = await rect('.m2prebar');
+    await g.ev(`if (${JSON.stringify(process.env.THEME || '')}) __LW.setTheme(${JSON.stringify(process.env.THEME || '')}); __LW.layout.modulation.expand(); return 1;`); await wait(1500);
+    info.workbar = await rect('.m2workbar.m2pre'); info.prebar = await rect('.m2prebar');
+    info.seats = await g.ev(`return ['.m2preopen', '.m2presave', '.m2prename', '.modtap', '.modsync', '.m2hold', '.modtempo', '.modxport', '.m2-workspace-switch'].map((q) => { const e = document.querySelector('[data-mir-window="modulation"] ' + q); if (!e) return q + ' —'; const s = getComputedStyle(e), r = e.getBoundingClientRect();
+      return q + ' ' + [Math.round(r.width) + '×' + Math.round(r.height), s.fontSize, s.fontFamily.slice(0, 12), s.borderRadius, s.backgroundColor, s.boxShadow.slice(0, 40)].join(' | '); });`);
   }
   writeFileSync(OUT, Buffer.from(await g.snap(), 'base64'));
   for (const [k, v] of Object.entries({ scene, OUT, ...info, errors: (await g.errors()).errs })) console.log(k, JSON.stringify(v));

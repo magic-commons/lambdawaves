@@ -526,6 +526,8 @@ export function setWorkLane(panel, where) {
 
 function buildPresetStrip(panel, copy) {
   const foot = m2mk('div', 'm2foot', panel);
+  /* 1.5.0-alpha.26 (λWAVES 015 T2): both bars wear the kit's seat standard — every button a `.tbtn` (shell/transport.css: a round seat,
+     flat until hovered), the switches `.tbtn.trig`, the BPM pill `.tbtn.tempo-expand` with its `.tempo-number`; modhost.css § THE WORK BARS */
   const prebar = m2mk('div', 'm2workbar m2prebar glass', foot);
   const core = m2mk('div', 'm2precore', prebar);
 
@@ -539,13 +541,13 @@ function buildPresetStrip(panel, copy) {
 
   /* the ▾: dirNext turned a quarter turn by the stylesheet — glyph.js carries
      no chevron-down, and a drawing rotated is still a drawing. */
-  const open = navBtn('m2prenav m2preopen', 'chevronDown', 15,
+  const open = navBtn('tbtn m2prenav m2preopen', 'chevronDown', 15,
     copy.presetOpenLabel, null, { factory: { t: copy.factory } });
   open.setAttribute('aria-haspopup', 'listbox');
   open.setAttribute('aria-expanded', 'false');
   kitHint(open, 'PRESETS');
 
-  const save = navBtn('m2presave', null, 20, 'Save this rack as a preset');
+  const save = navBtn('tbtn m2presave', null, 20, 'Save this rack as a preset');
   setGlyph(save, 'save', { size: 20 });
   kitAria(save, 'Save this rack as a preset');
   kitHint(save, 'SAVE');
@@ -557,14 +559,14 @@ function buildPresetStrip(panel, copy) {
   name.setAttribute('autocapitalize', 'characters');
   kitAria(name, 'Preset name — type one, then tap {:SAVE}');
 
-  const prev = navBtn('m2prenav', 'dirPrev', 15, phrase('Previous preset'));
-  const next = navBtn('m2prenav', 'dirNext', 15, phrase('Next preset'));
+  const prev = navBtn('tbtn m2prenav', 'dirPrev', 15, phrase('Previous preset'));
+  const next = navBtn('tbtn m2prenav', 'dirNext', 15, phrase('Next preset'));
   /* m2preDel is null.  NO DELETE BUTTON IS BUILT. */
 
   /* THE DEAD LIGHT.  A SIBLING of .m2precore, not inside it, so it lives in
      the 46 px extension.  Hidden entirely when nothing is dormant — a warning
      that is always on the glass is furniture, not a warning. */
-  const dead = navBtn('m2predead off', copy.deadChip,
+  const dead = navBtn('tbtn trig m2predead off', copy.deadChip,
     null, phrase('Sends that are dead until their controls come back'), prebar);
   dead.id = IDS.deadWarn;
   dead.setAttribute('aria-haspopup', 'dialog');
@@ -590,13 +592,13 @@ function buildTimingBar(pre, copy) {
   xport.setAttribute('aria-pressed', 'false');
   kitAria(xport, 'Modulation on or off');
 
-  const tempo = m2mk('button', 'modtempo', pre);
+  const tempo = m2mk('button', 'tbtn tempo-expand modtempo', pre);
   tempo.type = 'button';
   tempo.id = IDS.tempo;
-  const tempoNum = m2mk('b', null, tempo);
-  const tempoUnit = m2mk('span', null, tempo);
-  tempoUnit.textContent = 'BPM';                    // hidden by .tighter; a unit, never translated
-  const tempoHz = m2mk('i', 'modhz', tempo);        // hidden by .tight
+  const tempoNum = m2mk('b', 'tempo-number', tempo);
+  const tempoUnit = m2mk('span', 'tempo-unit', tempo);
+  tempoUnit.textContent = 'BPM';                    // a unit, never translated
+  const tempoHz = m2mk('i', 'tempo-hz modhz', tempo);
 
   /* It stands exactly where the field stood: the two swap `hidden`. */
   const tempoIn = m2mk('input', 'modtempoin', pre);
@@ -607,23 +609,23 @@ function buildTimingBar(pre, copy) {
   tempoIn.spellcheck = false;
   tempoIn.hidden = true;
 
-  const tap = m2mk('button', 'modtap', pre);
+  const tap = m2mk('button', 'tbtn trig modtap', pre);
   tap.type = 'button';
   tap.id = IDS.tap;
   kitLabel(tap, copy.tap);
 
-  const sync = m2mk('button', 'modsync', pre);
+  const sync = m2mk('button', 'tbtn trig modsync', pre);
   sync.type = 'button';
   sync.id = IDS.sync;
 
-  const cad = m2mk('button', 'modcad', pre);
+  const cad = m2mk('button', 'tbtn trig modcad', pre);
   cad.type = 'button';
   cad.id = IDS.cad;
 
   /* anim.js:8951 mkHold sets, in this exact order: className, type,
      textContent, aria-label, aria-pressed, title. */
   const holds = copy.hold.map((label) => {
-    const b = m2mk('button', 'm2hold', pre);
+    const b = m2mk('button', 'tbtn trig m2hold', pre);
     b.type = 'button';
     kitLabel(b, label);
     b.setAttribute('aria-pressed', 'false');
