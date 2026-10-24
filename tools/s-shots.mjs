@@ -7,7 +7,7 @@ import { writeFileSync } from 'node:fs';
 import { open } from './gate/gatekit.mjs';
 
 const scene = process.argv[2] || 'spectrum', OUT = process.argv[3] || `.tmp/s-${scene}.png`;
-const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 9621}/lab/?starter=home`, { width: 1600, height: 1150 });
+const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 9621}/lab/?starter=home`, { width: 1600, height: 1750 });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const float = (id, x, y, w) => g.ev(`__LW.layout.reopen(${JSON.stringify(id)}); __LW.layout.raise(${JSON.stringify(id)}); __LW.layout.popOut(${JSON.stringify(id)}, { x: ${x}, y: ${y}, w: ${w} });
   await new Promise((r) => setTimeout(r, 300)); const d = document.querySelector('.dev[data-id=${JSON.stringify(id)}]'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click(); return 1;`);
@@ -29,7 +29,7 @@ try {
       await g.ev(`__LW.setHamiltonian(${JSON.stringify(id)}); return 1;`); await wait(700);
       info.groupH[id] = await g.ev(`${HAM} const r = grp.getBoundingClientRect(); return Math.round(r.height);`);
     }
-    await g.ev(`${HAM} grp.scrollIntoView({ block: 'end' }); return 1;`); await wait(400);
+    await g.ev(`const t = document.getElementById('transport'); if (t) t.style.visibility = 'hidden'; return 1;`); await wait(300);   // the picture is the card's
   } else if (scene === 'fill') {
     /* SPECTRUM's button as it stands (1s + 2p: EMPTY), then pressed (FILL ALL); then the register's ORBITAL pane on water — each shot's rect printed */
     const read = () => g.ev(`return [...document.querySelectorAll('.reg-fill')].filter((b) => b.getBoundingClientRect().width).map((b) => { const r = b.getBoundingClientRect();

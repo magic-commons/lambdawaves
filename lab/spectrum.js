@@ -37,7 +37,7 @@ function readRGB(g, name, fallback) {
 export function createSpectrum(host, api) {
   const ladder = el('div', 'ladder', host);
   const lcv = el('canvas', '', ladder);
-  /* iteration 008 S · THE PRESET, at the head (it left STATE): the kit's stepper in PALETTE's preset look over the same list; ← → and a pick
+  /* iteration 008 S · THE PRESET (it left STATE; since iteration 015 S3 seated under the picker, above the HAMILTONIAN): the kit's stepper in PALETTE's preset look over the same list; ← → and a pick
      load a preset by the hand's road (api.loadPreset: THE FADE announces it), a pick of the preset already shown is RELOAD; VISUALS is STATE's
      PRESET VISUALS (a preset also sets its view, rate and window).  A register that is no preset reads '—' (the select's blank). */
   const pre = el('div', 'row tight sp-preset', host), DASH = { id: '', label: '—', coming: true }, PRE = (api.presets || []).map((p) => ({ id: p.id, label: p.label }));
@@ -81,6 +81,7 @@ export function createSpectrum(host, api) {
   hideBtn.textContent = 'DIALS'; hideBtn.setAttribute('aria-expanded', 'false');
   const picker = el('div', 'picker', host); picker.hidden = true;
   host.appendChild(psiFx.root);                                                     // the live coefficient readout follows the scale/state controls
+  host.appendChild(pre);   // iteration 015 S3 (Josh: "Move the preset thing to the bottom between the 140 picker and above the Hamiltonian"): outside the HAMILTONIAN fold
   addBtn.addEventListener('click', () => { picker.hidden = !picker.hidden; addBtn.classList.toggle('on', !picker.hidden); });
   const chips = new Map();
   /* iteration 008 A7 · THE SHELL FOLD (Josh: "clicking on the colored 'n=' number … should be able to hide section of all 1, 2, 3, all the way

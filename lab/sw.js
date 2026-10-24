@@ -411,7 +411,7 @@ const PRECACHE = [
   ['./skin.css',                                                    'f0649514188b'],
   ['./slice.js',                                                    '0fbaa89ce784'],
   ['./sliceview.js',                                                '6fa789fe996a'],
-  ['./spectrum.js',                                                 'e3985768c4b5'],
+  ['./spectrum.js',                                                 'a94e89c50219'],
   ['./stage-gestures.js',                                           '9bb80027fbef'],
   ['./stark.js',                                                    '6ca9675b9d4a'],
   ['./state.js',                                                    '892d7bda23e8'],
