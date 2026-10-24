@@ -348,7 +348,8 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport[data-layout="csb"] .csb-tempo .tempo-expand .tempo-number { font: var(--w-bold) 12px/1 var(--font-num); }   /* the stage pill's reading in a card too */   /* its basis was its WIDTH in a row; in this column it would be its height */
 /* the timing row (A11): ⏮ · TIMELINE · the door · ⚙ · the dock chip together on the left, t taking the rest and reading from the right end */
 #transport[data-layout="csb"] .csb-row > .ro.time { flex: 1 1 auto; width: auto; min-width: 72px; padding: 0 6px; align-items: flex-end; text-align: right; background: transparent; box-shadow: none; }
-#transport[data-layout="csb"] .csb-row > .ro.time .ro-val { font-size: 13px; }
+#transport[data-layout="csb"] .csb-row > .ro.time .ro-val { font-size: 13px; font-variant-numeric: lining-nums tabular-nums; white-space: pre; }   /* 015 T1: tabular, so the digits never change width */
+#transport[data-layout="csb"]:not(.docked, [data-place="free"]) .csb-row > .ro.time { flex: 0 0 auto; width: 16ch; font-size: 13px; }   /* 015 T1: on the stage a fixed 16 ch ("99999.99  (9999.9)" fits), so a turning t never widens the bar */
 #transport[data-layout="csb"] .csb-row :is(.ro-lbl, .ro-sub) { display: none; }
 /* the buttons row: the modes, MOLECULES' chooser, then SEARCH and the rack's three at the right edge */
 #transport #lwMode { position: static; flex-direction: row; gap: 2px; }

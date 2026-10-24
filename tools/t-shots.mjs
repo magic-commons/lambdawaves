@@ -16,12 +16,12 @@ try {
   if (scene === 'bars') {
     await g.ev(`__LW.timeline.open(); __LW.clock.t = 1234.5; __LW.layout.raise && 0; return 1;`); await wait(1500);
     info.csb = await rect('#transport');
-    info.times = await g.ev(`return [...document.querySelectorAll('.ro.time')].map((e) => { const v = e.querySelector('.ro-v, .v') || e, s = getComputedStyle(v), r = e.getBoundingClientRect();
+    info.times = await g.ev(`return [...document.querySelectorAll('.ro.time')].map((e) => { const v = e.querySelector('.ro-val') || e, s = getComputedStyle(v), r = e.getBoundingClientRect();
       return { text: e.textContent.trim(), rect: [r.left, r.top, r.width, r.height].map(Math.round), font: s.fontFamily.slice(0, 32), size: s.fontSize, style: s.fontStyle, num: s.fontVariantNumeric }; });`);
   } else if (scene === 'mod') {
     await g.ev(`__LW.layout.modulation.expand(); return 1;`); await wait(1500);
     info.workbar = await rect('.m2workbar'); info.prebar = await rect('.m2prebar');
   }
   writeFileSync(OUT, Buffer.from(await g.snap(), 'base64'));
-  console.log(JSON.stringify({ scene, OUT, info, errors: (await g.errors()).errs }, null, 1));
+  for (const [k, v] of Object.entries({ scene, OUT, ...info, errors: (await g.errors()).errs })) console.log(k, JSON.stringify(v));
 } finally { await g.close(); }
