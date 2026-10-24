@@ -1,39 +1,28 @@
 note: using only cached resource files
 note: Running TeX ...
+note: Rerunning TeX because "MANUSCRIPT.aux" changed ...
 note: Running xdvipdfmx ...
-note: Writing `MANUSCRIPT.log` (35.4208984375 KiB)
-note: Writing `MANUSCRIPT.pdf` (861.4990234375 KiB)
+note: Writing `MANUSCRIPT.aux` (12.67578125 KiB)
+note: Writing `MANUSCRIPT.log` (35.53125 KiB)
+note: Writing `MANUSCRIPT.pdf` (1.6138038635253906 MiB)
 note: Writing `MANUSCRIPT.out` (2.42578125 KiB)
-note: Writing `MANUSCRIPT.aux` (9.091796875 KiB)
 
 warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
 warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
-warning: MANUSCRIPT.tex:45: 
-Missing character: There is no ��� ("27E8) in font LinLibertineT-tlf-t1!
-warning: could not represent character "⟨" (0x27e8) in font "LinLibertineT-tlf-t1"
-warning:   you may need to load the `fontspec` package and use (e.g.) \setmainfont to
-warning:   choose a different font that covers the unrepresentable character(s)
-warning: MANUSCRIPT.tex:45: Missing character: There is no ��� ("27E9) in font LinLibertineT-tlf-t1!
-warning: could not represent character "⟩" (0x27e9) in font "LinLibertineT-tlf-t1"
-warning: MANUSCRIPT.tex:52: Missing character: There is no ��� ("27E8) in font LinLibertineT-tlf-t1!
-warning: could not represent character "⟨" (0x27e8) in font "LinLibertineT-tlf-t1"
-warning: MANUSCRIPT.tex:52: Missing character: There is no ��� ("27E9) in font LinLibertineT-tlf-t1!
-warning: could not represent character "⟩" (0x27e9) in font "LinLibertineT-tlf-t1"
 warning: MANUSCRIPT.tex:75: Overfull \hbox (2.91212pt too wide) detected at line 75
-warning: MANUSCRIPT.tex:167: 
-Missing character: There is no ��� ("27E8) in font LinLibertineT-tlf-t1!
-warning: could not represent character "⟨" (0x27e8) in font "LinLibertineT-tlf-t1"
-warning: MANUSCRIPT.tex:167: Missing character: There is no ��� ("27E9) in font LinLibertineT-tlf-t1!
-warning: could not represent character "⟩" (0x27e9) in font "LinLibertineT-tlf-t1"
-warning: MANUSCRIPT.tex:175: 
-Missing character: There is no ��� ("27E8) in font LinLibertineT-tlf-t1!
-warning: could not represent character "⟨" (0x27e8) in font "LinLibertineT-tlf-t1"
-warning: MANUSCRIPT.tex:175: Missing character: There is no ��� ("27E9) in font LinLibertineT-tlf-t1!
-warning: could not represent character "⟩" (0x27e9) in font "LinLibertineT-tlf-t1"
-warning: MANUSCRIPT.tex:186: Missing character: There is no ��� ("27E8) in font LinLibertineT-tlf-t1!
-warning: could not represent character "⟨" (0x27e8) in font "LinLibertineT-tlf-t1"
-warning: MANUSCRIPT.tex:186: Missing character: There is no ��� ("27E9) in font LinLibertineT-tlf-t1!
-warning: could not represent character "⟩" (0x27e9) in font "LinLibertineT-tlf-t1"
+warning: MANUSCRIPT.tex:172: Overfull \hbox (7.98196pt too wide) in paragraph at lines 172--172
+warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
+warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
+warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
+warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
+warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
+warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
+warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
+warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
+warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
+warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
+warning: MANUSCRIPT.tex:75: Overfull \hbox (2.91212pt too wide) detected at line 75
+warning: MANUSCRIPT.tex:172: Overfull \hbox (7.98196pt too wide) in paragraph at lines 172--172
 warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
 warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).
 warning: Trying to include PDF file with version (1.7), which is newer than current output PDF setting (1.5).

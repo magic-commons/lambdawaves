@@ -3,12 +3,12 @@
   {
    "paper": "03-LEAK-AND-REPAIR",
    "title": "The Leak and the Repair",
-   "words": 4381,
+   "words": 5440,
    "equations": 6,
-   "tables": 3,
+   "tables": 4,
    "references": 13,
-   "tex_sha256": "4a77b866e6ea6a57ae48351e47a22997cb6f56939b1c500f94124bfd42d28df4",
-   "md_sha256": "69e51178d578f93d4298a9730c7f1112f1a7c2c151b59c81b994b519db54e053"
+   "tex_sha256": "18e3d88338a9b927e6f337a587d4c0341e1b49a384037d54dd70949bc8af4bc6",
+   "md_sha256": "6d392cff803a5fcc5c08632a2803b04a40d49896da898f0b28594bb5297299a8"
   }
  ]
 }

@@ -21,6 +21,6 @@ for ci, (fz, js, name) in enumerate(cols):
         a.pcolormesh(X, Z, f, cmap=cmap, vmin=-v, vmax=v, shading='nearest', rasterized=True); a.set_aspect('equal'); a.set_xlim(-Lw, Lw); a.set_ylim(-Lw, Lw)
         a.axvline(0, color='#777', ls=':', lw=0.7); a.plot(R[0, 0], R[0, 2], 'o', color='white', ms=3.5); a.plot(R[1:, 0], R[1:, 2], '+', color='white', ms=6, mew=0.8)
         a.set_xlabel('$x$ (bohr)'); a.set_ylabel('$z$ (bohr)'); a.tick_params(length=2)
-        a.set_title((f'{name}:  $s$, scale $\\pm{v:.2f}$;  $q={q:+.2f}$, $q\'={qq:+.4f}$' if ri == 0 else f'$b$ (basis), scale $\\pm{v:.2f}$;  basis share of $\\int x\\,s$: ${sh["basis"]:+.2f}$'), pad=4, fontsize=8.5)
+        a.set_title((f'{name}:  $s$  (scale $\\pm{v:.2f}$)' if ri == 0 else f'{name}:  $b$  (scale $\\pm{v:.2f}$)'), pad=4, fontsize=9)
 fig.tight_layout()
 fig.savefig(os.path.join(HERE, 'leak_ladder.png'), facecolor='black', bbox_inches='tight'); print('wrote leak_ladder.png')
