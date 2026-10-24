@@ -145,7 +145,8 @@ export function createStageWords(app) {
   }
   app.w.stageTextTick = stageTextTick; app.w.stageCaption = stageCaption;
   /* 0.5.1 D1 · THE STAGE TEXT IS ONE BLOCK of the kit's INFORMATIONAL layer (mir/info/layer.js; stage-text.js left): the kit's ink,
-     shade and serif at the kit's seat — the free stage's top + 12 %, between the racks, clear of the transport and a docked TIMELINE —
+     shade and serif at the kit's seat — the free stage's top + 12 %, between the racks, clear of the undocked transport (015 H2: the TIMELINE and the modulation window are not dodged — the words go
+     UNDER them, z 20 below #floats) —
      and STILL: no subject, no labels, no parallax, no drift, no following (iteration 007: INFORMATIONAL › CURSOR may turn the kit's follow ·
      parallax · drift on), and never told of a camera move (a block with no subject
      depends on no view; the layer's own ResizeObserver and `resize` cover a size, and the racks and the transport are told below);
@@ -163,7 +164,7 @@ export function createStageWords(app) {
        own seat).  The kit is not edited: two hair-thin bands in `avoid()` (mid-stage, never at an edge, so never read as a rack) pin the free stage
        to exactly the block's height at the seat, so the kit's placeBlock lands it there.  THE POP-UPS sit on the OTHER side, at the same PAD. */
     const seat = { bottom: false, pad: 0.12 }; let block = null;
-    const bars = () => [...racks(), app.sh.layout.docked ? null : document.getElementById('transport'), app.state.tl && app.state.tl.isOpen() ? app.state.tl.root : null].map((e) => paintedRect(e)).filter(Boolean);
+    const bars = () => [...racks(), app.sh.layout.docked ? null : document.getElementById('transport')].map((e) => paintedRect(e)).filter(Boolean);
     function freeOf(rs, sb) {                                          // the kit's free() rule (info/layer.js), in stage px
       const m = INFO.margin, vw = innerWidth; let L = m, R = sb.width - m, T = m, B = sb.height - m;
       for (const r of rs) {
@@ -195,7 +196,7 @@ export function createStageWords(app) {
       block = md ? layer.addBlock({ md }) : null; shown = md;
       if (block) { block.el.toggleAttribute('data-fade', banner !== null); lastRender = performance.now(); stats.renders++; }
     }
-    /* the racks hide, peek and slide (body classes), the transport docks or goes to the top, the TIMELINE opens or docks: only THOSE
+    /* the racks hide, peek and slide (body classes), the transport docks or goes to the top: only THOSE
        re-place the block — the play edge's frost-hold and the tablet's motion class are not a reason to read layout — and once more
        400 ms on, when the slide or the pill's dodge (a class first, then its arrival) has landed */
     let settle = 0;
@@ -215,7 +216,7 @@ export function createStageWords(app) {
     addEventListener('blur', () => still(false)); addEventListener('pointerout', (e) => { if (!e.relatedTarget) still(false); });
     let racksAt = rackKey();
     new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    for (const [n, f] of [[document.getElementById('transport'), ['class']], [app.state.tl && app.state.tl.root, ['hidden', 'style']]]) if (n) new MutationObserver(() => place()).observe(n, { attributes: true, attributeFilter: f });
+    { const n = document.getElementById('transport'); if (n) new MutationObserver(() => place()).observe(n, { attributes: true, attributeFilter: ['class'] }); }
 
     const labels = el('div', '', dom.stage); labels.id = 'atomLabels'; labels.setAttribute('aria-hidden', 'true'); labels.hidden = true;
     let cssW = dom.canvas.clientWidth, cssH = dom.canvas.clientHeight;
