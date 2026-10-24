@@ -3,6 +3,12 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.26)
+- **THE TIMELINE'S DOOR SWAPS** (015 T5): `installTimeline({ transport: { onSwitch } })` hands `onSwitch` to the work bar's `modDoor`, so a press
+  on the timeline's door runs the app's swap (λWAVES: the TIMELINE closes, the modulation window opens) as the modulation window's workspace
+  switch already swaps back. Without `onSwitch` the door toggles the window as before. File: `timeline/window.js`. Why: Josh, "Hitting the
+  modulation button on the timeline and the timeline button on the modulation window should swap between them."
+
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
 - **THE REVERSED KNOB** (014 D5): `knob({ reverse: true })` turns the dial the other way — the needle (and a modulated base tick) reads max
   at the left, a rise, ArrowUp / ArrowRight or PageUp move it right and lower the value; the value, `min` / `max`, `aria-value*`, `spec` (a

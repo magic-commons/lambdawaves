@@ -1,6 +1,6 @@
 {
   "kit": "MIR",
-  "version": "1.5.0-alpha.25",
+  "version": "1.5.0-alpha.26",
   "line": "1.5",
   "commit": "1b7ae99b9905",
   "files": {
@@ -259,9 +259,9 @@
     "lab/mir/timeline/time-format.js": "bace74d4a020942c",
     "lab/mir/timeline/timeline.css": "981aac836f2eba38",
     "lab/mir/timeline/view.js": "938f864a972f9af5",
-    "lab/mir/timeline/window.js": "c31fc7f472235645",
+    "lab/mir/timeline/window.js": "baf1855498575a93",
     "lab/mir/tokens.json": "3f8decbbc349581f",
-    "lab/mir/version.js": "03a1da5971dd606c",
+    "lab/mir/version.js": "3be35e1f7d7f8332",
     "lab/mir/window-activity.js": "8eb6cefdf972a053",
     "lab/mir/window/dock.js": "6b678fe062232fde",
     "lab/mir/window/rail.js": "60d28f8f5c584dea",

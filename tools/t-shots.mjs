@@ -18,6 +18,17 @@ try {
     info.csb = await rect('#transport');
     info.times = await g.ev(`return [...document.querySelectorAll('.ro.time')].map((e) => { const v = e.querySelector('.ro-val') || e, s = getComputedStyle(v), r = e.getBoundingClientRect();
       return { text: e.textContent.trim(), rect: [r.left, r.top, r.width, r.height].map(Math.round), font: s.fontFamily.slice(0, 32), size: s.fontSize, style: s.fontStyle, num: s.fontVariantNumeric }; });`);
+  } else if (scene === 'magnet') {   // T5: the CSB's latch, then its door: both open, the modulation window on the timeline; then the timeline's door swaps
+    const R = `const q = (s) => { const e = document.querySelector(s); if (!e || e.closest('[hidden]')) return null; const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom].map(Math.round); };
+      return { tl: __LW.timeline.isOpen() ? q('.mir-timeline') : null, mod: __LW.layout.modulation.open ? q('[data-mir-window="modulation"]') : null };`;
+    await g.ev(`document.querySelector('#transport .tr-open').click(); return 1;`); await wait(900);
+    await g.ev(`document.querySelector('#transport .mod-exp').click(); return 1;`); await wait(1500);
+    info.both = await g.ev(R);
+    writeFileSync(OUT.replace(/\.png$/, '-both.png'), Buffer.from(await g.snap(), 'base64'));
+    await g.ev(`document.querySelector('.mir-timeline .tl-transport .mod-exp').click(); return 1;`); await wait(1200);
+    info.afterTimelineDoor = await g.ev(R);
+    await g.ev(`document.querySelector('#transport .tr-open').click(); return 1;`); await wait(1500);
+    info.timelineUnder = await g.ev(R);
   } else if (scene === 'mod') {
     await g.ev(`__LW.layout.modulation.expand(); return 1;`); await wait(1500);
     info.workbar = await rect('.m2workbar'); info.prebar = await rect('.m2prebar');

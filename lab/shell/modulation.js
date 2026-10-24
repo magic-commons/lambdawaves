@@ -195,6 +195,7 @@ export function createModSeam(app) {
       /* 0.5.0 C4: the kit's close reports null, and its place() reports the real box even while closed (λWAVES' copy sent the
          zero rect): a window that is not open has nothing to dodge */
       dodging[who] = rect && (who === 'mod' ? app.state.modView && app.state.modView.isOpen : app.state.tl && app.state.tl.isOpen()) ? rect : null;
+      if (who === 'tl') magnetSeat();   // 015 T5: the modulation window follows the timeline it sits on
       const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));
       occlusion.dirty();   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
@@ -239,6 +240,20 @@ export function createModSeam(app) {
       setTimeout(arrive, 220);                                  // the same belt on the leaving half
     }
 
+    /* iteration 015 T5 · THE MAGNET (Josh: "The CSB can allow them to be called both on the screen and magnet/stack on top of each other"): with
+       the TIMELINE open, the modulation window's bottom sits on the timeline's top, centred on it and clamped to the screen — the kit's lego
+       stack (`stackAbove`, BASINS' stackAbove: 8 px above the anchor) handed an anchor whose left centres this window on the timeline.  It is
+       asked on the window's open and on every timeline layout (its open, its dock, a move: `moved` → modDodge('tl')), so it follows; a hand's
+       grip drag ends the kit's stack, which releases the magnet until the next open; the timeline's close lets the window stay where it is. */
+    const magnet = { ours: false, released: false };
+    const onTimeline = () => { const r = dodging.tl; if (!r) return null; const w = app.state.modView.root.offsetWidth || 0;
+      return { left: r.left + (r.right - r.left - w) / 2, top: r.top }; };
+    function magnetSeat() {
+      const mv = app.state.modView; if (!mv || !mv.isOpen) return;
+      if (magnet.ours && !mv.isStacked) { magnet.ours = false; magnet.released = true; }   // the hand dragged it away
+      if (!magnet.released && dodging.tl) { magnet.ours = true; mv.stackAbove(onTimeline); }
+      else if (magnet.ours) { magnet.ours = false; mv.stackAbove(null); }
+    }
     app.state.modView = createModulation(document.getElementById('floats') || document.getElementById('lab'), mod.port({
       moved: modDodge, persist: () => saveSettings(), note: hNote,
       rateControl: () => knob({ label: 'RATE', min: 0.1, max: 3000, value: clock.rate, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (!modHand('transport.rate', v)) { clock.setRate(v); ui.rateKnob.set(v); } } }),
@@ -252,6 +267,7 @@ export function createModSeam(app) {
       armed: () => app.state.modArm, arm: (on) => app.sh.setModArm(!!on),
       /* 0.5.3 M13a · the kit's 3×3 mark on the window's foot: it swaps to the TIMELINE (the button alone; no lego stack, R11) */
       switchWorkspace: () => { app.state.modView.close(); app.state.tl.open(); },
+      onOpen: () => { magnet.released = false; magnetSeat(); },   // 015 T5: every open meets the magnet afresh
       /* iteration 003 · IT DOCKS AT THE BOTTOM LIKE BASINS' (shell.js installModulation dock): dragged to the foot it lands full-width
          between the racks, the kit's guide drawn while MIR OPTIONS' DROP GUIDES is on; dragged out, it floats.  The transport pill
          gives way to its rect through modDodge (moved) and takes the top seat; a docked transport is a rack card and never meets it. */

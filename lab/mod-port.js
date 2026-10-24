@@ -138,12 +138,12 @@ export function createModPort({ available, present, view, onCapture, save, say }
     },
     /** THE PORT.  `extra` is the host's own: moved (the transport's dodge), rateControl, persist, note (a model edit may be a
      *  history row), device { read, write } (the remembered input, a PREFERENCE), and the arm (armed, arm). */
-    port({ moved, rateControl, persist, note, device, armed, arm, switchWorkspace, dock }) {
+    port({ moved, rateControl, persist, note, device, armed, arm, switchWorkspace, dock, onOpen }) {
       const C = host.clock;
       return { moved, rateControl, persist, armed, arm, switchWorkspace, knobOf: P.knobOf,
         M: host.model, registry: host.registry, clock: C,   // 0.5.0 C4: no `targets` — the kit reads it as the routable-control SELECTOR
         dock: dock || false,                                             // iteration 003: it docks at the bottom like BASINS' (the kit rack's span, MIR OPTIONS' DROP GUIDES); 0.5.0 C4 floated it
-        opened: () => { C.setPresentationActive(true); present(); },   // the editor's preview demand only: THE play holds its own (A6)
+        opened: () => { C.setPresentationActive(true); present(); if (onOpen) onOpen(); },   // the editor's preview demand only: THE play holds its own (A6); onOpen: 015 T5's magnet
         closed: () => { C.setPresentationActive(false); },              // the kit's close reports moved(null) itself
         apply: () => { C.applyAll(false); present(); note(); },
         cadence: () => cadence.hz, setCadence: P.setCadence,
