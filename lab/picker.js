@@ -154,6 +154,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function setLook(id) {
     if (prefs.look === id) return; prefs.look = id; writePrefs(prefs); paintLooks();
     for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) i.src = u; }, () => {});
+    for (const i of root.querySelectorAll('img.mm-pic[data-menu]')) { const { src } = picOf(i.dataset.menu); if (i.getAttribute('src') !== src) i.src = src; }   // M2: every deck of ours
   }
   let dropT = 0;
   const outside = (e) => { if (!drop.contains(e.target) && !lookB.contains(e.target)) closeDrop(); };
@@ -202,7 +203,20 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* ── a tile: the picture moves, the name shows under it; nothing else changes on a hover ── */
   /* a picture of ours (img/menu/, sw.js DATA) is kept on the device once it has loaded (library.js keepData); a volume's is its own */
   let hot = false;   // iteration 012 L3: true while the page on show of the section in view is being made — its pictures are asked for first
-  const pic = (host, src) => { const i = el('img', 'mm-pic', host); i.alt = ''; i.decoding = 'async'; i.loading = hot ? 'eager' : 'lazy'; if (hot) i.fetchPriority = 'high'; i.draggable = false; i.addEventListener('error', () => { i.remove(); }); if (src) { develop(i); i.addEventListener('load', () => keepData(src), { once: true }); i.src = src; } return i; };
+  /* iteration 015 M2 · THE LOOK EVERYWHERE: a picture of ours is named by its kind and base (`mol:H2O`, `el:Fe:3d_2`, `orb:3d_2`) and drawn in the
+     look in use — a catalogue molecule's `<id>.<look>.webp`, an element's or a hydrogen state's `orb-<nl>_<m>.<look>.webp` for ρ and arg ψ (an
+     element's picture IS its block orbital's, so the two decks share one file), else the one picture; a missing variant falls back to it */
+  const MENU = './img/menu/';
+  const picOf = (ref, look = prefs.look) => {
+    const [kind, a, b] = ref.split(':');
+    if (kind === 'mol') return { src: look && look !== 'density' ? MENU + a + '.' + look + '.webp' : MENU + a + '.webp', fb: MENU + a + '.webp' };
+    const key = kind === 'el' ? b : a, fb = kind === 'el' ? MENU + 'el-' + a + '.webp' : MENU + 'orb-' + key + '.webp';
+    return { src: look === 'density' || look === 'phase' ? MENU + 'orb-' + key + '.' + look + '.webp' : fb, fb };
+  };
+  const pic = (host, src, ref) => { const i = el('img', 'mm-pic', host); i.alt = ''; i.decoding = 'async'; i.loading = hot ? 'eager' : 'lazy'; if (hot) i.fetchPriority = 'high'; i.draggable = false;
+    let fb = null; if (ref) { i.dataset.menu = ref; ({ src, fb } = picOf(ref)); }
+    i.addEventListener('error', () => { const f = i.dataset.menu ? picOf(i.dataset.menu).fb : null; if (f && i.getAttribute('src') !== f) i.src = f; else i.remove(); });
+    if (src) { develop(i); i.addEventListener('load', () => { const u = i.getAttribute('src'); if (u && u.startsWith(MENU)) keepData(u); }); i.src = src; } return i; };
   const tile = (host, cls, info, go, off) => {
     const b = el('button', 'mm-tile ' + cls, host); b.type = 'button';
     if (off) { b.classList.add('off'); b.setAttribute('aria-disabled', 'true'); }
@@ -298,7 +312,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const [r, c] = seatOf(Z), v = valenceOf(Z), a = ATOMS.find((x) => x.Z === Z), live = !!a, sym = SYM[Z - 1];
     const t = tile(table, 'mm-el', { name: NAMES[Z - 1], sub: v.label, math: true, under: false, note: live ? '' : 'past krypton: not in the ATOM system yet' }, () => goAtom(Z), !live);
     t.style.gridRow = String(r); t.style.gridColumn = String(c);
-    pic(t, './img/menu/' + (live ? 'el-' + sym : 'orb-' + v.nl + '_' + v.m) + '.webp');   // the block's orbital (011 Q3b: the differentiating subshell — Fe 3d, Ce 4f; the pure orbital of its (n, l, m), cut to show its layers)
+    pic(t, null, 'el:' + sym + ':' + v.nl + '_' + v.m);   // the block's orbital (011 Q3b: the differentiating subshell — Fe 3d, Ce 4f; the pure orbital of its (n, l, m), cut to show its layers)
     el('i', 'mm-z', t, String(Z)); el('b', 'mm-sym', t, sym);
   }
   /* ── MOLECULAR: MOLECULES ONLY (iteration 011 Q4, Josh: "remove those 'lattice' and 'heavy' and other downloadable stuff from the molecular
@@ -323,7 +337,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   molDeck.set(SECTIONS.flatMap((sec) => secs.get(sec).rows), (m, host) => {
     const info = { formula: mathPlain(m.formula), name: cap(m.name), sub: m.disabled ? m.reason : m.section };
     const t = tile(host, 'mm-mol', info, () => goMolecule(m.id), !!m.disabled);
-    pic(t, './img/menu/' + m.id + '.webp'); el('b', 'mm-lbl', t, info.formula);
+    pic(t, null, 'mol:' + m.id); el('b', 'mm-lbl', t, info.formula);
     if (!m.disabled && dlRec(m)) { const g = el('i', 'mm-dl', t); icon(g, 'download'); g.title = 'not on this device'; g.hidden = true; away.set(m.id, { t, g, info }); paintAway(m); }
   });
 
@@ -520,7 +534,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
         () => { if (atom) goAtom(atom); else if (isos.length) openIsomers(m, isos); else { isoEl.hidden = true; goVolume(cur, m); } });
       el('b', 'mm-lbl', t, m.formulaM ? mathPlain(m.formulaM) : m.formula);
       if (isos.length) { const k = el('span', 'mm-iso', t, String(isos.length + 1)); k.title = (isos.length + 1) + ' structural isomers in ' + volName(cur); }
-      if (atom) { pic(t, './img/menu/el-' + SYM[atom - 1] + '.webp'); return t; }
+      if (atom) { const v = valenceOf(atom); pic(t, null, 'el:' + SYM[atom - 1] + ':' + v.nl + '_' + v.m); return t; }
       const i = pic(t, null), ph = () => { i.remove(); el('b', 'mm-ph', t, m.formulaM ? mathPlain(m.formulaM) : m.formula); };   // no picture yet: the formula holds the square
       if (!m.thumb) ph(); else { i.dataset.vol = cur.id; i.dataset.mol = m.id; } if (!m.thumb) {} else V.picture(cur.id, m.id, lookOf()).then((u) => { if (u) { develop(i); i.src = u; } else ph(); }, ph);
       return t;
@@ -623,7 +637,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const suggestTile = (host, r) => {
     const info = { formula: mathPlain(r.formula), name: cap(r.name), sub: r.vol ? r.vol.toUpperCase() : '' };
     const t = tile(host, 'mm-mol', info, () => (r.vol ? goVolume(r.v, r.m) : goMolecule(r.id)));
-    const i = pic(t, r.vol ? '' : r.pic); if (r.vol) { if (r.thumb) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { if (u) i.src = u; else i.remove(); }, () => i.remove()); } else i.remove(); }
+    const i = pic(t, null, r.vol ? null : 'mol:' + r.id); if (r.vol) { if (r.thumb) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { if (u) i.src = u; else i.remove(); }, () => i.remove()); } else i.remove(); }
     el('b', 'mm-lbl', t, info.formula); return t;
   };
   const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { const s = sections.find((x) => x.id === id); if (s) { open(); s.sec.scrollIntoView({ block: 'start' }); } }, suggest, suggestTile };

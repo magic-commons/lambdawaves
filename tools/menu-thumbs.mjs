@@ -42,7 +42,14 @@
  *   <id>.<style>.webp (into --out, a SCRATCH dir — never dist/ by hand; the night render and pack.mjs --incremental carry them into a volume,
  *   whose index row then names them in `thumbs`).  im: the molecule's VIEW ORBITAL (the HOMO) drawn SIGNED on WAVE's RE — two complementary
  *   colours of the HSV wheel, which THE HUE ring (--mol-hue) turns like every picture; balls: BALLS (CPK, no sticks); sticks: STICKS; esp:
- *   THE POTENTIAL MAP on the SES (--esp-surface iso|sas|ses), the standard red → blue.  --style signed|glassSigned stays the atoms' style. */
+ *   THE POTENTIAL MAP on the SES (--esp-surface iso|sas|ses), the standard red → blue.  --style signed|glassSigned stays the atoms' style.
+ * THE LOOK EVERYWHERE (iteration 015 M2): --style takes a LIST (`--style im,balls,sticks,esp,phase`), each molecule picked ONCE and drawn in
+ *   every look; `phase` is WAVE's PHASE (arg ψ on the HSV wheel) of the frontier packet HOMO + i·LUMO under VIEW MIX (a real orbital's
+ *   phase is only its sign — the Im ψ picture again — so the quarter-turn pair is what winds the wheel).  The catalogue's variants are written INTO
+ *   lab/img/menu/ (<id>.<look>.webp: the Picker's DATA road, never precache); a volume's still need a scratch --out.  --set orbitals --orbs all
+ *   draws THE 140 (hydrogen.js BASIS, the HYDROGEN deck of iteration 015 M3) in --style im,density,phase: `im` is the plain orb-<nl>_<m>.webp
+ *   (the Q3 look), density and phase orb-<nl>_<m>.<look>.webp — ρ = |ψ|² SIGNED, arg ψ the complex state (amplitude 1, real) on PHASE so its
+ *   e^{imφ} winds the wheel.  An ATOMIC tile in ρ or arg ψ reads its block orbital's orb- picture (the el- picture IS that orbital's). */
 import { open } from './gate/gatekit.mjs';
 import { writeFileSync, mkdirSync, statSync, existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -50,6 +57,7 @@ import { tmpdir, homedir } from 'node:os';
 import { MOLECULES, RECORD_ONLY } from '../lab/molecules.js';
 import { ATOMS } from '../lab/atoms.js';
 import { valenceOf } from '../lab/valence.js';
+import { BASIS } from '../lab/hydrogen.js';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const ISO = +arg('iso', 0.03), AISO = +arg('aiso', ISO), SIZE = +arg('size', 200), Q = +arg('q', 0.64), AQ = +arg('aq', 50), RENDER = +arg('render', 640);
@@ -58,25 +66,28 @@ const EXPOSURE = +arg('exposure', 0.5);                      // the atoms: half 
    plane through the nucleus (the MATERIAL window's CLIP, pos 0) — `camera` faces THE CORNER's eye, (1, 1, 1)/√3, so the cut face is seen
    whole; or an explicit normal 'x,y,z' (iteration 008's '0,0,1'), or 'none'.  --cutl: which l are cut ('all', the default: every tile; '0' the s tiles alone) */
 const CUT_ARG = arg('cut', 'camera'), CUT = CUT_ARG === 'none' ? null : CUT_ARG === 'camera' ? [1, 1, 1].map((x) => x / Math.sqrt(3)) : CUT_ARG.split(',').map(Number);
-const CUT_L = arg('cutl', 'all') === 'all' ? [0, 1, 2, 3] : arg('cutl').split(',').map(Number);
-const VARIANT = ['im', 'balls', 'sticks', 'esp'].includes(arg('style', '')) ? arg('style') : null, ESP_SURFACE = arg('esp-surface', 'ses');   // iteration 014 B4: a molecule variant
-const ATOM_STYLE = VARIANT ? 'signed' : arg('style', 'signed');                   // the atoms' DRAW STYLE: SIGNED, or SHELL ± (iteration 010 X7, 'glassSigned')
+const CUT_L = arg('cutl', 'all') === 'all' ? [0, 1, 2, 3, 4, 5, 6] : arg('cutl').split(',').map(Number);
+const STYLES = arg('style', '').split(',').filter(Boolean), ESP_SURFACE = arg('esp-surface', 'ses');
+const VARIANTS = STYLES.filter((s) => ['im', 'balls', 'sticks', 'esp', 'phase'].includes(s));          // iteration 014 B4 · 015 M2: the molecule looks
+const ORB_LOOKS = STYLES.filter((s) => ['im', 'density', 'phase'].includes(s));                       // iteration 015 M2: the orbitals' looks (im = the plain file)
+const VARIANT = VARIANTS.length > 0;
+const ATOM_STYLE = ['signed', 'glassSigned'].includes(STYLES[0]) ? STYLES[0] : 'signed';                  // the atoms' DRAW STYLE: SIGNED, or SHELL ± (iteration 010 X7, 'glassSigned')
 const RES = +arg('res', 128);
 const DOMAIN_K = +arg('domain', 1);                         // the hydrogen box as a share of DOMAIN AUTO's (hydrogen.js domainFor(n)): DOMAIN AUTO off and the knob turned, as a hand would                                // the GRID (SETTINGS · QUALITY's seg, 64 · 96 · 128): the finest, so an inner layer is not one voxel
-const HUE_BY_L = [0, 0.125, 0.25, 0.375];                    // the atoms: the HSV wheel turned by l — every s at 0°, p 45°, d 90°, f 135° (SIGNED paints ± at hue ± 90°, so quarter turns would pair s with d and p with f)
+const HUE_BY_L = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75];   // 015 M2: g h i continue the eighth turns (180°, 225°, 270°)                    // the atoms: the HSV wheel turned by l — every s at 0°, p 45°, d 90°, f 135° (SIGNED paints ± at hue ± 90°, so quarter turns would pair s with d and p with f)
 /* an atom's one state (n, l, m) in the register at amplitude 1 (reg.set is re, im): m = 0 purely imaginary so the Im view holds R·Y_l0 (real,
    it would draw nothing); m ≠ 0 real, so Im ψ = R·P_lm·sin(mφ) — the real orbital's lobes, not the torus |ψ|² makes */
 const cutOf = (l) => (CUT && CUT_L.includes(l) ? CUT : null);
-const ATOM_LOOK = (n, l, m) => `const i = H.stateOf(${n}, ${l}, ${m}).index; LW.reg.clear(); LW.reg.set(i, ${m === 0 ? '0, 1' : '1, 0'}); LW.setMute(i, false);
-      LW.setView('imag'); LW.setStyle(${JSON.stringify(ATOM_STYLE)}); LW.mat.iso = ${AISO}; LW.mat.exposure = ${EXPOSURE}; LW.mat.hueShift = ${HUE_BY_L[l]};
+const ATOM_LOOK = (n, l, m, look = 'im') => `const i = H.stateOf(${n}, ${l}, ${m}).index; LW.reg.clear(); LW.reg.set(i, ${m === 0 && look !== 'phase' ? '0, 1' : '1, 0'}); LW.setMute(i, false);
+      LW.setView(${JSON.stringify({ im: 'imag', density: 'density', phase: 'phase' }[look])}); LW.setStyle(${JSON.stringify(ATOM_STYLE)}); LW.mat.iso = ${AISO}; LW.mat.exposure = ${EXPOSURE}; LW.mat.hueShift = ${look === 'phase' ? 0 : HUE_BY_L[l]};
       LW.mat.slice = Object.assign(LW.mat.slice || {}, { mode: ${cutOf(l) ? 1 : 0}, pos: 0 }); ${cutOf(l) ? `LW.mat.slice.normal = ${JSON.stringify(cutOf(l))};` : 'delete LW.mat.slice.normal;'}
       if (LW.hamiltonian === 'hydrogen' && ${DOMAIN_K} !== 1) { LW.domain.auto = false; LW.domain.half = ${DOMAIN_K} * H.domainFor(${n}); } else LW.domain.auto = true; LW.schedule(LW.TIER.REBUILD);`;
 const only = arg('only', '') ? arg('only', '').split(',') : null;
 const VOL = arg('volume', null), VDIR = VOL && (process.env.LW_VOLUMES || homedir() + '/Documents/LAMBDAWAVES-VOLUMES') + '/dist/' + VOL + '/';
 const sets = VOL ? ['volume'] : arg('set', 'molecules,elements,orbitals').split(',');
-const MENU = new URL('../lab/img/menu/', import.meta.url).pathname, OUT = arg('out', null) ? arg('out').replace(/\/?$/, '/') : VOL ? VDIR + 't/' : MENU; if (VARIANT && !arg('out', null)) { console.error('--style ' + VARIANT + ' writes variants: name a scratch --out DIR'); process.exit(2); } mkdirSync(OUT, { recursive: true });   // --out DIR: a trial run elsewhere (no manifest)
-const SUBSHELLS = arg('orbs', null) ? arg('orbs').split(',').map((t) => [+t[0], 'spdf'.indexOf(t[1])]) : [[5, 0], [4, 2], [5, 1], [6, 0], [4, 3], [5, 2], [6, 1], [5, 3], [6, 2]];   // the valence subshells of Rb … Og, n ≤ 6 — since iteration 008 A7 every element H–Og is live (el-), so no tile shows these; 7s and 7p are not rendered (no dimmed element names them)
-const nl = ([n, l]) => n + 'spdf'[l];
+const MENU = new URL('../lab/img/menu/', import.meta.url).pathname, OUT = arg('out', null) ? arg('out').replace(/\/?$/, '/') : VOL ? VDIR + 't/' : MENU; if (VOL && VARIANT && !arg('out', null)) { console.error('--style ' + VARIANTS + ' on a volume writes variants: name a scratch --out DIR'); process.exit(2); } mkdirSync(OUT, { recursive: true });   // --out DIR: a trial run elsewhere (no manifest)
+const SUBSHELLS = arg('orbs', null) === 'all' ? null : arg('orbs', null) ? arg('orbs').split(',').map((t) => [+t[0], 'spdf'.indexOf(t[1])]) : [[5, 0], [4, 2], [5, 1], [6, 0], [4, 3], [5, 2], [6, 1], [5, 3], [6, 2]];   // the valence subshells of Rb … Og, n ≤ 6 — since iteration 008 A7 every element H–Og is live (el-), so no tile shows these; 7s and 7p are not rendered (no dimmed element names them)
+const nl = ([n, l]) => n + 'spdfghik'[l];   // names.js L_LETTERS: THE 140 reach l = 6 (7i)
 const mols = [...MOLECULES, ...RECORD_ONLY].filter((m) => !m.disabled);
 const CORNER = { yaw: Math.PI / 4, pitch: Math.asin(1 / Math.sqrt(3)) };
 
@@ -137,10 +148,12 @@ const save = (name, r) => { if (!r || r.E || r.empty) { console.log('  ✗', nam
   const b = statSync(OUT + name + '.webp').size; total += b; nuclei[name] = r.nucleus.map((x) => +x.toFixed(4)); console.log('  ✓', name, b, 'B'); return true; };
 
 /* the molecule's look: the density SIGNED (the shipped tile) or a variant (B4); `file` is the name it is written under */
-const molLook = () => VARIANT === 'im' ? `await LW.chem.setView('orbital'); LW.setView('real'); LW.setStyle('signed'); LW.mat.iso = ${ISO};`
-  : VARIANT ? `LW.setView('density'); LW.setStyle('${VARIANT}'); LW.mat.espSurf = '${ESP_SURFACE}'; LW.palette.setOn(false);`
-  : `LW.setView('density'); LW.setStyle('signed'); LW.mat.iso = ${ISO};`;
-const file = (id) => VARIANT ? id + '.' + VARIANT : id;
+const molLook = (v) => v === 'im' ? `await LW.chem.setView('orbital'); LW.setView('real'); LW.setStyle('signed'); LW.mat.iso = ${ISO};`
+  : v === 'phase' ? `{ const o = LW.orbitals.state(); LW.orbitals.clear(); LW.orbitals.select(o.homo, 1, 0); LW.orbitals.select(o.lumo, 1, Math.PI / 2); await LW.chem.setView('registry'); } LW.setView('phase'); LW.setStyle('signed'); LW.mat.iso = ${ISO};`
+  : v ? `await LW.chem.setView('density'); LW.setView('density'); LW.setStyle('${v}'); LW.mat.espSurf = '${ESP_SURFACE}'; LW.palette.setOn(false);`
+  : `await LW.chem.setView('density'); LW.setView('density'); LW.setStyle('signed'); LW.mat.iso = ${ISO}; LW.palette.setOn(true);`;
+const file = (id, v) => v ? id + '.' + v : id;
+const looksOf = () => (VARIANT ? VARIANTS : ['']);
 
 /* MOLECULES: ON once, then each row by the hand road, waited until THIS molecule's solve is the field's; the HOME pose */
 if (sets.includes('molecules')) {
@@ -149,10 +162,13 @@ if (sets.includes('molecules')) {
     if (only && !only.includes(id)) continue;
     const r = await g.ev(`const LW = __LW; await LW.chem.pick(${JSON.stringify(id)});
       for (let i = 0; i < 900; i++) { const c = LW.chem.state(), m = LW.molsession.state().molecule; if (c.preset === ${JSON.stringify(id)} && c.nAO === ${nAO} && m && m.nAO === ${nAO}) break; await new Promise((r) => setTimeout(r, 100)); }
-      ${molLook()}
-      await new Promise((r) => setTimeout(r, ${VARIANT ? 900 : 300}));
-      return await __thumb(${2 * SIZE}, ${Q});`);
-    if (save(file(id), r)) made.molecules.push(id);
+      return true;`);
+    for (const v of looksOf()) {
+      const r1 = r && r.E ? r : await g.ev(`const LW = __LW; ${molLook(v)} LW.palette.setOn(${v ? (v === 'balls' || v === 'sticks' || v === 'esp' ? 'false' : 'true') : 'true'});
+        await new Promise((r) => setTimeout(r, ${v ? 900 : 300}));
+        return await __thumb(${2 * SIZE}, ${Q});`);
+      if (save(file(id, v), r1) && !v) made.molecules.push(id);
+    }
   }
 }
 
@@ -180,13 +196,14 @@ if (sets.includes('elements')) {
 /* SUBSHELLS: ATOMS mode, hydrogen, one state (n, l, m) for every m of each valence subshell, THE CORNER */
 if (sets.includes('orbitals')) {
   await g.ev(`__LW.chem.setOn(false); __LW.setHamiltonian('hydrogen'); __pose(${JSON.stringify(CORNER)}); return true;`);
-  for (const s of SUBSHELLS) for (let m = -s[1]; m <= s[1]; m++) {
-    const name = 'orb-' + nl(s) + '_' + m; if (only && !only.includes(name)) continue;
+  const states = SUBSHELLS ? SUBSHELLS.flatMap((s) => Array.from({ length: 2 * s[1] + 1 }, (_, k) => [s[0], s[1], k - s[1]])) : BASIS.map((b) => [b.n, b.l, b.m]);
+  for (const [n, l, m] of states) for (const look of (ORB_LOOKS.length ? ORB_LOOKS : ['im'])) {
+    const name = 'orb-' + nl([n, l]) + '_' + m + (look === 'im' ? '' : '.' + look); if (only && !only.includes(name) && !only.includes('orb-' + nl([n, l]) + '_' + m)) continue;
     const r = await g.ev(`const LW = __LW, H = await import('./hydrogen.js');
-      ${ATOM_LOOK(s[0], s[1], m)} __pose(${JSON.stringify(CORNER)});
+      ${ATOM_LOOK(n, l, m, look)} __pose(${JSON.stringify(CORNER)});
       await new Promise((r) => setTimeout(r, 700));
       return await __thumb(${2 * SIZE}, ${Q});`);
-    if (save(name, r)) made.orbitals.push(nl(s) + '_' + m);
+    if (save(name, r) && look === 'im') made.orbitals.push(nl([n, l]) + '_' + m);
   }
 }
 /* A VOLUME: each molecule by the card's openVolume (its lowest rung), waited until it is the field's; the HOME pose */
@@ -196,19 +213,23 @@ if (VOL) {
     if (only && !only.includes(id)) continue;
     const r = await g.ev(`const LW = __LW; if (!(await LW.chem.openVolume(${JSON.stringify(VOL)}, ${JSON.stringify(id)}))) return { E: LW.chem.state().status };
       for (let i = 0; i < 900; i++) { const c = LW.chem.state(), m = LW.molsession.state().molecule; if (m && m.nAO === c.nAO) break; await new Promise((r) => setTimeout(r, 100)); }
-      ${molLook()} __pose(__home);
-      await new Promise((r) => setTimeout(r, ${VARIANT ? 900 : 300}));
-      return await __thumb(${2 * SIZE}, ${Q});`);
-    if (save(file(id), r)) made.molecules.push(id);
+      __pose(__home); return true;`);
+    for (const v of looksOf()) {
+      const r1 = r && r.E ? r : await g.ev(`const LW = __LW; ${molLook(v)} LW.palette.setOn(${v === 'balls' || v === 'sticks' || v === 'esp' ? 'false' : 'true'});
+        await new Promise((r) => setTimeout(r, ${v ? 900 : 300}));
+        return await __thumb(${2 * SIZE}, ${Q});`);
+      if (save(file(id, v), r1) && !v) made.molecules.push(id);
+    }
   }
 }
 await g.ev(`__LW.domain.auto = true; Object.assign(__LW.quality, { res: __res.res, steps: __res.steps, scale: __res.scale }); __LW.governor.on = __res.gov; __LW.schedule(__LW.TIER.REBUILD);
   __LW.mat.exposure = 1; __LW.mat.hueShift = 0; if (__LW.mat.slice) { __LW.mat.slice.mode = 0; delete __LW.mat.slice.normal; } __LW.setView('density'); __pose(__home); return true;`);
 
 /* the manifest keeps what this run did not redo (a --set or --only run updates its own rows only) */
-const keepRows = (key, rows, id) => (sets.includes(key) && !only ? rows : [...(prior[key] || []).filter((p) => !rows.some((r) => id(r) === id(p))), ...rows]);
-if (!VOL && !VARIANT && OUT === MENU) writeFileSync(OUT + 'manifest.json', JSON.stringify({ tool: 'tools/menu-thumbs.mjs', size: SIZE, quality: Q, alphaQuality: AQ, render: RENDER,
+const keepRows = (key, rows, id) => (sets.includes(key) && !only && rows.length ? rows : [...(prior[key] || []).filter((p) => !rows.some((r) => id(r) === id(p))), ...rows]);
+if (!VOL && OUT === MENU) writeFileSync(OUT + 'manifest.json', JSON.stringify({ tool: 'tools/menu-thumbs.mjs', size: SIZE, quality: Q, alphaQuality: AQ, render: RENDER,
   look: { view: 'density', style: 'signed', iso: ISO, palette: 'wheel', frame: false, axis: false, atoms: { view: 'imag', style: ATOM_STYLE, iso: AISO, exposure: EXPOSURE, hueByL: HUE_BY_L, phase: 'm = 0 imaginary, else real', cut: CUT && { l: CUT_L, normal: CUT.map((x) => +x.toFixed(6)), pos: 0, mode: 'clip' }, grid: RES, system: process.argv.includes('--own') ? 'atom (each element its own)' : 'hydrogen (the pure orbital)', subshell: "the block's orbital: an open f shell, else the occupied subshell last in Madelung order (lab/valence.js blockSubshell)" }, camera: { molecules: 'home', elements: 'corner (yaw 45°, pitch 35.26°)', orbitals: 'corner (yaw 45°, pitch 35.26°)' }, ground: 'none (two-ground matte)' },
+  variants: { molecules: [...new Set([...((prior.variants || {}).molecules || []), ...(sets.includes('molecules') ? VARIANTS : [])])], orbitals: [...new Set([...((prior.variants || {}).orbitals || []), ...(sets.includes('orbitals') ? ORB_LOOKS.filter((x) => x !== 'im') : [])])] },
   molecules: keepRows('molecules', made.molecules, (x) => x), elements: keepRows('elements', made.elements, (x) => x.sym), orbitals: keepRows('orbitals', made.orbitals, (x) => x) }, null, 1) + '\n');
 if (arg('nuclei', null)) writeFileSync(arg('nuclei'), JSON.stringify(nuclei, null, 1) + '\n');
 console.log(`${made.molecules.length} molecules, ${made.elements.length} elements, ${made.orbitals.length} subshells, ${(total / 1024).toFixed(1)} kB`, JSON.stringify((await g.errors()).errs.filter((e) => !/ResizeObserver/.test(e))));
