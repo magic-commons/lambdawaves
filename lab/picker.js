@@ -185,9 +185,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   };
   setHue(+prefs.hue || 0, false);
   { let y0 = null, h0 = 0;   // the ONE KNOB LAW's vertical drag: a full turn in 360 px, ⅛ with Shift
-    hue.addEventListener('pointerdown', (e) => { if (e.button) return; y0 = e.clientY; h0 = prefs.hue; hue.setPointerCapture(e.pointerId); e.preventDefault(); });
+    hue.addEventListener('pointerdown', (e) => { if (e.button) return; y0 = e.clientY; h0 = prefs.hue; hue.setPointerCapture(e.pointerId); hue.classList.add('drag'); e.preventDefault(); });   // M6: the colours while the hand turns it
     hue.addEventListener('pointermove', (e) => { if (y0 != null) setHue(h0 + (y0 - e.clientY) * (e.shiftKey ? 0.125 : 1)); });
-    const end = () => { y0 = null; }; hue.addEventListener('pointerup', end); hue.addEventListener('pointercancel', end);
+    const end = () => { y0 = null; hue.classList.remove('drag'); }; hue.addEventListener('pointerup', end); hue.addEventListener('pointercancel', end);
     hue.addEventListener('wheel', (e) => { e.preventDefault(); setHue(prefs.hue - Math.sign(e.deltaY) * (e.shiftKey ? 2 : 10)); }, { passive: false });
     hue.addEventListener('dblclick', () => setHue(0));
     hue.addEventListener('keydown', (e) => { const d = { ArrowUp: 10, ArrowRight: 10, ArrowDown: -10, ArrowLeft: -10 }[e.key]; if (d) { e.preventDefault(); e.stopPropagation(); setHue(prefs.hue + (e.shiftKey ? d / 5 : d)); } else if (e.key === 'Home' || e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); setHue(0); } }); }

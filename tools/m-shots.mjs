@@ -22,7 +22,10 @@ try {
       return { order, drop: [r.left, r.top, r.width, r.height].map(Math.round), centred: Math.round(r.left + r.width / 2 - (b.left + b.width / 2)), tiles: [...d.children].map((t) => t.textContent + (t.classList.contains('on') ? '*' : '') + (t.classList.contains('off') ? '(off)' : '')),
         font: getComputedStyle(d.querySelector('.mm-lk-g')).fontFamily, logo: Math.round(document.querySelector('#lwMenu .mm-logo').getBoundingClientRect().height) };`);
   } else if (scene === 'hue') {
-    info = await g.ev(`const h = document.querySelector('#lwMenu .mm-hue'), ring = h.querySelector('.mm-hue-ring'); return { rest: getComputedStyle(ring).filter, op: getComputedStyle(h).opacity };`);
+    const read = () => g.ev(`const h = document.querySelector('#lwMenu .mm-hue'), ring = h.querySelector('.mm-hue-ring'); return { filter: getComputedStyle(ring).filter, opacity: getComputedStyle(h).opacity };`);
+    const rest = await read(); writeFileSync(OUT.replace(/\.png$/, '-rest.png'), Buffer.from(await g.snap(), 'base64'));
+    await g.ev(`document.querySelector('#lwMenu .mm-hue').classList.add('drag'); return 1;`); await wait(500);
+    info = { rest, hand: await read() };
   } else if (scene === 'look') {
     await g.ev(`const p = JSON.parse(localStorage.getItem('lambdawaves.q0.picker') || '{}'); return 1;`);
     await tab('MOLECULAR'); await wait(900);

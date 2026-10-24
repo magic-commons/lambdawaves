@@ -856,10 +856,14 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-navb { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; opacity: .55; transition: opacity 140ms, color 140ms, scale 160ms var(--ease); }
 #lwMenu .mm-navb .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-navb:hover, #lwMenu .mm-navb:focus-visible { opacity: 1; color: var(--acc); scale: 1.1; } #lwMenu .mm-navb:active { scale: .94; }
-#lwMenu .mm-hue { opacity: .85; cursor: ns-resize; touch-action: none; }
-#lwMenu .mm-hue-ring { width: 20px; height: 20px; rotate: var(--mol-hue); background: conic-gradient(from 0deg, hsl(0 85% 58%), hsl(60 85% 52%), hsl(120 70% 48%), hsl(180 80% 50%), hsl(240 80% 62%), hsl(300 80% 60%), hsl(360 85% 58%));
+#lwMenu .mm-hue { opacity: .55; cursor: ns-resize; touch-action: none; }
+#lwMenu .mm-hue-ring { width: 20px; height: 20px; rotate: var(--mol-hue); position: relative; background: currentColor;
   -webkit-mask: url(img/icons/hue-ring.svg) center / contain no-repeat; mask: url(img/icons/hue-ring.svg) center / contain no-repeat; transition: rotate 120ms var(--ease); }
-#lwMenu .mm-hue:hover .mm-hue-ring { filter: saturate(1.2) brightness(1.06); }
+/* iteration 015 M6 · THE HUE BUTTON (Josh: "grey like the rest but then mouse over shows the colors avail"): the ring in the ink at rest, as its
+   neighbours' icons are, and the wheel's colours fading in on a hover, a focus or a drag (the mask clips the ::after too) */
+#lwMenu .mm-hue-ring::after { content: ''; position: absolute; inset: 0; background: conic-gradient(from 0deg, hsl(0 85% 58%), hsl(60 85% 52%), hsl(120 70% 48%), hsl(180 80% 50%), hsl(240 80% 62%), hsl(300 80% 60%), hsl(360 85% 58%)); opacity: 0; transition: opacity 200ms var(--ease); }
+#lwMenu .mm-hue:is(:hover, :focus-visible, .drag) { opacity: 1; color: var(--fg); }
+#lwMenu .mm-hue:is(:hover, :focus-visible, .drag) .mm-hue-ring::after { opacity: 1; }
 #lwMenu .mm-mol .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)); transition: scale 280ms var(--ease), filter 360ms var(--ease); }
 #lwMenu .mm-mol:not(.off):hover .mm-pic, #lwMenu .mm-mol:not(.off):focus-visible .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)) saturate(1.15) brightness(1.06); }
 #lwMenu .mm-tab .mm-ico { width: 18px; height: 18px; transition: translate 160ms var(--ease); } #lwMenu .mm-tab:hover .mm-ico { translate: 0 -1px; }
@@ -877,7 +881,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu.labels-mol .mm-lbl { animation: mm-rise 240ms var(--ease) both; }
 @keyframes mm-rise { from { opacity: 0; translate: 0 4px; } }
 @media (prefers-reduced-motion: reduce) {
-  #lwMenu .mm-navb, #lwMenu .mm-hue-ring, #lwMenu .mm-mol .mm-pic, #lwMenu .mm-tab .mm-ico, #lwMenu .mm-lbl, #lwMenu .mm-el .mm-sym, #lwMenu .mm-el .mm-z { transition: none; animation: none; } }
+  #lwMenu .mm-navb, #lwMenu .mm-hue-ring, #lwMenu .mm-hue-ring::after, #lwMenu .mm-mol .mm-pic, #lwMenu .mm-tab .mm-ico, #lwMenu .mm-lbl, #lwMenu .mm-el .mm-sym, #lwMenu .mm-el .mm-z { transition: none; animation: none; } }
 
 /* iteration 012 L3 · THE ENTRANCE (a first run, after CONTINUE): the menu fades in (no iris), the logo drops from the top, the nav, the tabs and
    SHOW LABELS rise in turn; picker.js deals the MOLECULAR tiles one by one.  Reduced motion: the end state at once. */
