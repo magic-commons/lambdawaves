@@ -673,8 +673,16 @@ body.no-transport-bar #transport { display: none; }
 .lw-menu { background: hsl(var(--glass-tint) / .985); }
 body.frost .lw-menu, body.frost[data-card] .lw-menu.glass { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: blur(28px) saturate(1.25); backdrop-filter: blur(28px) saturate(1.25); }
 body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #transport { visibility: hidden; opacity: 0; }   /* opacity too: the kit's block sets its own visibility */
-#lwMenu *, #lwMenu *::before, #lwMenu *::after { outline: none; border: 0; box-shadow: none; }
-#lwMenu button { background: none; color: inherit; font: inherit; padding: 0; cursor: pointer; }
+#lwMenu :where(:not(.mm-folders, .mm-folders *)), #lwMenu :where(:not(.mm-folders, .mm-folders *))::before, #lwMenu :where(:not(.mm-folders, .mm-folders *))::after { outline: none; border: 0; box-shadow: none; }
+#lwMenu button:where(:not(.mm-folders *)) { background: none; color: inherit; font: inherit; padding: 0; cursor: pointer; }   /* iteration 015 M4: the kit's gallery keeps its own look */
+/* iteration 015 M4 · THE THIRD VIEW: the gallery in the decks' seat, as wide as a deck, its paged grid --fcols across (picker.js sizes it) */
+#lwMenu .mm-folders { grid-row: 2; grid-column: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; justify-content: center; padding: 8px 24px 20px; box-sizing: border-box; }
+#lwMenu .mm-folders[hidden], #lwMenu .mm-scroll[hidden], #lwMenu .mm-caption[hidden] { display: none; }
+#lwMenu .mm-fgal { width: min(1500px, 100%); container-type: inline-size; }
+@media (min-width: 1100px) { #lwMenu .mm-fgal { width: min(1500px, 100%, calc(100vw - 2 * (var(--rack-w, 300px) + 20px))); } }   /* off the racks, as the decks keep */
+#lwMenu[data-sec="folders"] .mm-opts { visibility: hidden; }
+#lwMenu .mm-folders .sv-paged .sv-project-grid { grid-template-columns: repeat(var(--fcols, 4), minmax(0, 1fr)); }
+#lwMenu[data-sec="folders"] .mm-navb[data-nav="folders"] { opacity: 1; color: var(--acc); }
 #lwMenu .mm-top { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 16px 4px; }
 #lwMenu .mm-logo { height: 56px; color: var(--fg); } #lwMenu .mm-logo svg { height: 100%; width: auto; display: block; }
 /* the tabs: R9's sliding pill and approach accent */

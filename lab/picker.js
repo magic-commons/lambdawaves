@@ -111,12 +111,32 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const nav = el('div', 'mm-nav', top);
   const navBtn = (name, label, go) => { const b = el('button', 'mm-navb', nav); b.type = 'button'; icon(b, name); b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', go); return b; };
   navBtn('home', 'Return home — the lab', () => close());
-  navBtn('folders', 'Folders — your projects and the demos', () => { close(); const P = app.sh.layout && app.sh.layout.projects; if (P) (P.show || P.toggle).call(P); });
+  navBtn('folders', 'Folders — your projects and the demos', () => (root.dataset.sec === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
   const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
   hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); el('i', 'mm-hue-ring', hue);
   const lookB = el('button', 'mm-navb mm-lookb', nav); lookB.type = 'button'; lookB.setAttribute('aria-haspopup', 'true'); lookB.setAttribute('aria-expanded', 'false');
   const lookG = el('b', 'mm-lookg', lookB);
   const scroller = el('div', 'mm-scroll', root), caption = el('div', 'mm-caption', root);
+  /* iteration 015 M4 · FOLDERS IN THE MENU (Josh: "Have a main menu, full screen mode of the folder. This way, hitting folder does not take it to the
+     stage"): THE THIRD VIEW — the kit's gallery mounted in the Picker's own page (`.mm-folders`, the decks' seat), a second live view of FOLDERS'
+     one library as the `projects` rack card is: DEMOS first while ROOT holds nothing of the reader's, the toolbar SAVE · PROJECT · DUPLICATE · NEW,
+     RESTORE THE DEMOS in the foot, sized to the page.  The Picker stays up; an OPEN the adapter took closes it (projects.js `landed` → cover()).
+     O, WINDOW › FOLDERS and the stage keep the floating window.  A tab returns to the decks. */
+  const foldersEl = el('div', 'mm-folders', root); foldersEl.hidden = true; foldersEl.setAttribute('role', 'region'); foldersEl.setAttribute('aria-label', 'Folders');
+  let foldersView = null;
+  function showFolders() {
+    const P = app.sh.layout && app.sh.layout.projects; if (!P) return;
+    closeDrop(); scroller.hidden = caption.hidden = true; foldersEl.hidden = false; root.dataset.sec = 'folders';
+    for (const x of sections) x.b.classList.remove('on'); pill.style.setProperty('--pw', '0px');
+    if (!foldersView) {   // sized to the page once, at its first showing: the columns as the decks', the rows from the height
+      const rackW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rack-w')) || 300;
+      const W = Math.min(1500, foldersEl.clientWidth - 48, innerWidth >= 1100 ? innerWidth - 2 * (rackW + 20) : Infinity), H = foldersEl.clientHeight - 150, cols = Math.max(2, Math.min(8, Math.floor(W / 210))), rows = Math.max(1, Math.min(4, Math.floor(H / ((W / cols) * 0.75 + 56))));
+      foldersEl.style.setProperty('--fcols', String(cols)); foldersEl.style.setProperty('--sv-page-rows', String(rows));
+      foldersView = P.folders.mountGallery(el('div', 'mm-fgal', foldersEl), { pageSize: cols * rows, prefsKey: 'pickerGallery', factory: () => P.restoreDemos() });
+    }
+    P.demosFirst(foldersView); foldersView.paint(); animate(foldersEl, [{ opacity: 0, transform: 'translateY(12px) scale(.98)' }], 260);
+  }
+  function showDecks() { if (foldersEl.hidden) return; foldersEl.hidden = true; scroller.hidden = caption.hidden = false; const s = current; current = null; show(s); }
   caption.setAttribute('aria-live', 'polite');
   /* SHOW LABELS (iteration 012 L1): one subtle seat under the tabs, the atoms' switch on ATOMIC and the molecules' elsewhere; the volume's head has its twin */
   const prefs = readPrefs(), opts = el('div', 'mm-opts', top);
@@ -306,7 +326,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /* ── the sections and the tabs (R9: the sliding pill, the approach accent) ── */
   const sections = [['atomic', 'ATOMIC'], ['molecular', 'MOLECULAR'], ['library', 'LIBRARY']].map(([id, label]) => {
     const sec = el('section', 'mm-sec mm-' + id, scroller), b = el('button', 'mm-tab', tabs); b.type = 'button'; icon(b, id); el('span', '', b, label);   // iteration 012 L2: I1's icon left of the word
-    b.addEventListener('click', () => { if (id === 'library' && current.id === 'library') library.home(); sec.scrollIntoView({ behavior: RM.matches ? 'auto' : 'smooth', block: 'start' }); });
+    b.addEventListener('click', () => { showDecks(); if (id === 'library' && current.id === 'library') library.home(); sec.scrollIntoView({ behavior: RM.matches ? 'auto' : 'smooth', block: 'start' }); });
     return { id, sec, b };
   });
   const movePill = (b) => { pill.style.setProperty('--px', b.offsetLeft - 10 + 'px'); pill.style.setProperty('--pw', b.offsetWidth + 20 + 'px'); };
@@ -659,7 +679,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? hDeck.tiles : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; closeDrop(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  function close() { if (root.hidden) return; closeDrop(); showDecks(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = () => (root.hidden ? open() : close());
   const escape = () => (drop.hidden ? close() : closeDrop(true));   // M1: Escape puts THE LOOK DROP away first
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });
