@@ -30,6 +30,9 @@
  *               molecule stays in its volume, a new one fills the LAST shelved volume (an earlier, released one is never refilled), the overflow opens the next vol-<n>; --wip marks the last,
  *               still-filling volume `wip: true` (its index and shelf entry) — the Picker shows WIP and installs it.  Every index carries
  *               `indexVersion` (+1 whenever anything but the number and the packer's commit moved).
+ *   --next N    (iteration 015 M5) with --wip, THE NEXT VOLUME is on the shelf before the cut opens it: while every molecule still fits the
+ *               last volume, volumes.json gains a placeholder { id: 'vol-<last+1>', numeral: N, wip: true, count: 0 } (no index, no files) — the
+ *               Picker's card for it says FILLING and offers no INSTALL; once the cut opens that volume for real, its own entry stands instead
  *   --archive   per volume, dist/LAMBDAWAVES-VOL-<numeral>.lwv (lab/volumes-format.js THE ARCHIVE) and its .sha256; the shelf entry gains
  *               archive: { name, bytes, sha256 } and drops `index` unless --fetchable (the dev link; a Drive volume has no index)
  *
@@ -447,6 +450,11 @@ for (const p of plan) {
   console.log(`pack: ${p.id} ${p.numeral} ${p.title} — ${rows.length} molecules (${(entry.bytes / 1048576).toFixed(2)} MiB), index.json ${indexText.length} B`
     + (entry.archive ? `, ${entry.archive.name} ${entry.archive.bytes} B sha256 ${entry.archive.sha256.slice(0, 16)}` : '')
     + (stale.length ? `; ${stale.length} .lwm in m/ no row reaches: ${stale.join(', ')}` : ''));
+}
+const NEXT = WIP && argOf('--next');                              // iteration 015 M5: VOL. II on the shelf while VOL. I still fills
+if (NEXT && plan.length) {
+  const last = +plan[plan.length - 1].id.slice(4), id = 'vol-' + (last + 1);
+  if (!entries.some((e) => e.id === id) && !plan[plan.length - 1].wip) entries.push({ id, numeral: NEXT, title: TITLE.replace(/\s*·\s*\d+$/, '') + ' · ' + (plan.length + 1), blurb: BLURB, wip: true, count: 0, bytes: 0, bases: LADDER });
 }
 const shelfFile = path.join(DIST, 'volumes.json'), shelf = !SOLE && existsSync(shelfFile) ? JSON.parse(readFileSync(shelfFile, 'utf8')) : { schema: 1, volumes: [] };
 shelf.volumes = [...shelf.volumes.filter((v) => !entries.some((e) => e.id === v.id)), ...entries].sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));

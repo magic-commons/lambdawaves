@@ -759,6 +759,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-vol-num { font-family: 'LW Title', var(--font-ui); font-weight: 400; font-size: clamp(52px, 6.4vw, 96px); line-height: .95; letter-spacing: .02em; white-space: nowrap; transition: color 160ms; }
 #lwMenu .mm-vol-open:hover .mm-vol-num, #lwMenu .mm-vol-open:focus-visible .mm-vol-num { color: var(--acc); }
 #lwMenu .mm-vol-wip { font-size: 10px; letter-spacing: .22em; padding: 3px 8px 3px 10px; border-radius: 999px; color: var(--acc); background: color-mix(in srgb, var(--acc) 14%, transparent); }   /* iteration 014 C4: a volume still filling */
+#lwMenu .mm-vol.filling .mm-vol-open { cursor: default; } #lwMenu .mm-vol.filling .mm-vol-num { opacity: .55; } #lwMenu .mm-vol.filling .mm-vol-open:hover .mm-vol-num { color: inherit; }   /* iteration 015 M5: VOL. II · WIP, FILLING */
 #lwMenu .mm-vol-meta { font-size: 12px; letter-spacing: .08em; opacity: .6; font-variant-numeric: tabular-nums; }
 #lwMenu .mm-install { display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: .18em; padding: 4px 12px 4px 4px; border-radius: 999px; font-variant-numeric: tabular-nums; transition: color 120ms; }
 #lwMenu .mm-install:hover, #lwMenu .mm-install:focus-visible { color: var(--acc); }

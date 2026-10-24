@@ -57,7 +57,7 @@ async function store(volId, create = false) {
 }
 /* a volume is fetchable (its `index`, the dev link) or a file (its `archive`: opened from disk; its keys are the same folder's) */
 const validVolume = (v) => v && SAFE.test(v.id) && typeof v.numeral === 'string'
-  && (typeof v.index === 'string' ? RELATIVE.test(v.index) : !!(v.archive && typeof v.archive.name === 'string'));
+  && (typeof v.index === 'string' ? RELATIVE.test(v.index) : !!(v.archive && typeof v.archive.name === 'string') || (v.wip === true && v.count === 0));   // iteration 015 M5: the next volume, still filling (no index yet)
 const validMolecule = (m) => m && SAFE.test(m.id) && typeof m.file === 'string' && RELATIVE.test(m.file) && (m.thumb == null || (typeof m.thumb === 'string' && RELATIVE.test(m.thumb)));
 const indexUrl = (v) => new URL(v.index || v.id + '/index.json', VOLUME_BASE).href;
 const inVolume = (v, rel) => new URL(rel, indexUrl(v)).href;   // the catalogue's paths are relative to its own folder
