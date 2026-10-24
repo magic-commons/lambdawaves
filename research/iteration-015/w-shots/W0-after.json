@@ -1,0 +1,364 @@
+{
+ "when": "2026-10-24T01:55:15.911Z",
+ "rows": [
+  {
+   "mol": "C6H6",
+   "style": "sticks",
+   "land": {
+    "preset": "C6H6",
+    "nAO": 36,
+    "basis": "sto-3g",
+    "view": "density"
+   },
+   "rest": {
+    "fps": 87.1,
+    "presents": 86.4,
+    "medMs": 8.4,
+    "worstMs": 208.3,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 0,
+    "esp": {
+     "src": "poisson",
+     "ok": false,
+     "M": 0,
+     "half": 0,
+     "runs": 0,
+     "ms": 0,
+     "atoms": 12,
+     "bonds": 12,
+     "Ne": 42
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0
+   },
+   "drag": {
+    "fps": 111.8,
+    "presents": 37.6,
+    "medMs": 8.3,
+    "worstMs": 50.1,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 0,
+    "esp": {
+     "src": "poisson",
+     "ok": false,
+     "M": 0,
+     "half": 0,
+     "runs": 0,
+     "ms": 0,
+     "atoms": 12,
+     "bonds": 12,
+     "Ne": 42
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0,
+    "yawMoved": -0.767,
+    "zoom": 0.621
+   },
+   "play": {
+    "fps": 57.1,
+    "presents": 56.1,
+    "medMs": 16.6,
+    "worstMs": 99.9,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 0,
+    "esp": {
+     "src": "poisson",
+     "ok": false,
+     "M": 0,
+     "half": 0,
+     "runs": 0,
+     "ms": 0,
+     "atoms": 12,
+     "bonds": 12,
+     "Ne": 42
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0
+   }
+  },
+  {
+   "mol": "C6H6",
+   "style": "esp",
+   "land": {
+    "preset": "C6H6",
+    "nAO": 36,
+    "basis": "sto-3g",
+    "view": "density"
+   },
+   "rest": {
+    "fps": 79.4,
+    "presents": 79,
+    "medMs": 8.4,
+    "worstMs": 200.3,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 120,
+    "esp": {
+     "src": "poisson",
+     "ok": true,
+     "M": 80,
+     "half": 11.825416598340546,
+     "runs": 1,
+     "ms": 119.70000004768372,
+     "atoms": 12,
+     "bonds": 12,
+     "Ne": 42
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0
+   },
+   "drag": {
+    "fps": 114.9,
+    "presents": 37.6,
+    "medMs": 8.3,
+    "worstMs": 100,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 120,
+    "esp": {
+     "src": "poisson",
+     "ok": true,
+     "M": 80,
+     "half": 11.825416598340546,
+     "runs": 1,
+     "ms": 119.70000004768372,
+     "atoms": 12,
+     "bonds": 12,
+     "Ne": 42
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0,
+    "yawMoved": -0.568,
+    "zoom": 0.621
+   },
+   "play": {
+    "fps": 76.8,
+    "presents": 74.4,
+    "medMs": 8.4,
+    "worstMs": 49.9,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 120,
+    "esp": {
+     "src": "poisson",
+     "ok": true,
+     "M": 80,
+     "half": 11.825416598340546,
+     "runs": 1,
+     "ms": 119.70000004768372,
+     "atoms": 12,
+     "bonds": 12,
+     "Ne": 42
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0
+   },
+   "kick": {
+    "fps": 57.6,
+    "presents": 53.6,
+    "medMs": 16.6,
+    "worstMs": 124.7,
+    "gen": 12,
+    "espRuns": 0,
+    "espMs": 120,
+    "esp": {
+     "src": "poisson",
+     "ok": true,
+     "M": 80,
+     "half": 11.825416598340546,
+     "runs": 1,
+     "ms": 119.70000004768372,
+     "atoms": 12,
+     "bonds": 12,
+     "Ne": 42
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0
+   }
+  },
+  {
+   "mol": "vol-1/palmitic-acid",
+   "style": "sticks",
+   "land": {
+    "preset": "vol-1:palmitic-acid",
+    "nAO": 122,
+    "basis": "sto-3g",
+    "view": "density"
+   },
+   "rest": {
+    "fps": 74.4,
+    "presents": 74,
+    "medMs": 8.4,
+    "worstMs": 175.1,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 322,
+    "esp": {
+     "src": "poisson",
+     "ok": true,
+     "M": 128,
+     "half": 29.92573633287859,
+     "runs": 2,
+     "ms": 322.2999999523163,
+     "atoms": 50,
+     "bonds": 49,
+     "Ne": 144
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0
+   },
+   "drag": {
+    "fps": 100.6,
+    "presents": 34.2,
+    "medMs": 8.3,
+    "worstMs": 58.3,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 322,
+    "esp": {
+     "src": "poisson",
+     "ok": true,
+     "M": 128,
+     "half": 29.92573633287859,
+     "runs": 2,
+     "ms": 322.2999999523163,
+     "atoms": 50,
+     "bonds": 49,
+     "Ne": 144
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0,
+    "yawMoved": -0.443,
+    "zoom": 0.943
+   },
+   "play": {
+    "fps": 75.9,
+    "presents": 75.2,
+    "medMs": 8.4,
+    "worstMs": 50.1,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 322,
+    "esp": {
+     "src": "poisson",
+     "ok": true,
+     "M": 128,
+     "half": 29.92573633287859,
+     "runs": 2,
+     "ms": 322.2999999523163,
+     "atoms": 50,
+     "bonds": 49,
+     "Ne": 144
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0
+   }
+  },
+  {
+   "mol": "vol-1/palmitic-acid",
+   "style": "esp",
+   "land": {
+    "preset": "vol-1:palmitic-acid",
+    "nAO": 122,
+    "basis": "sto-3g",
+    "view": "density"
+   },
+   "rest": {
+    "fps": 77.8,
+    "presents": 77.8,
+    "medMs": 8.4,
+    "worstMs": 283.4,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 322,
+    "esp": {
+     "src": "poisson",
+     "ok": true,
+     "M": 128,
+     "half": 29.92573633287859,
+     "runs": 2,
+     "ms": 322.2999999523163,
+     "atoms": 50,
+     "bonds": 49,
+     "Ne": 144
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0
+   },
+   "drag": {
+    "fps": 111.8,
+    "presents": 36.6,
+    "medMs": 8.3,
+    "worstMs": 91.6,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 322,
+    "esp": {
+     "src": "poisson",
+     "ok": true,
+     "M": 128,
+     "half": 29.92573633287859,
+     "runs": 2,
+     "ms": 322.2999999523163,
+     "atoms": 50,
+     "bonds": 49,
+     "Ne": 144
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0,
+    "yawMoved": -0.629,
+    "zoom": 1
+   },
+   "play": {
+    "fps": 71.8,
+    "presents": 70.8,
+    "medMs": 8.4,
+    "worstMs": 125,
+    "gen": 0,
+    "espRuns": 0,
+    "espMs": 322,
+    "esp": {
+     "src": "poisson",
+     "ok": true,
+     "M": 128,
+     "half": 29.92573633287859,
+     "runs": 2,
+     "ms": 322.2999999523163,
+     "atoms": 50,
+     "bonds": 49,
+     "Ne": 144
+    },
+    "res": "64→64",
+    "gov": "nominal",
+    "govSteps": 0
+   }
+  }
+ ],
+ "adapter": {
+  "ok": true,
+  "adapter": {
+   "vendor": "nvidia",
+   "architecture": "ampere",
+   "device": "",
+   "description": ""
+  },
+  "w": 1556,
+  "h": 769
+ },
+ "errors": []
+}

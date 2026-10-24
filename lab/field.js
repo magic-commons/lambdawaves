@@ -1552,13 +1552,15 @@ export async function createField(canvas, opts = {}) {
   /* ── THE ATOMS AND THE POTENTIAL (iteration 014 B) ─────────────────────────────────────────────────────────────────────
    * setAtoms(atoms, charge) uploads the molecule BALLS, STICKS and ESP draw: two vec4 an atom (centre + r_vdW, negative for an atom no bond
    * reaches; CPK sRGB + Z) and then skeleton.js' bonds (bondsOf, the one rule) — only when the atoms change.  φ is the Poisson pass's (ESP_WGSL,
-   * run while ESP is drawn, when the volume or the atoms changed: at once, then at most once a second while the density moves, unless
-   * mat.espLive) or a volume's grid (setEspGrid, which then owns it). */
+   * run while ESP is drawn: ONCE per LANDING — the atoms, a molecule or its basis (setMolecule's first matrix), the VIEW (the matrix kind), a card,
+   * the box or the grid — and, under mat.espLive, again at most once a second while the density moves; iteration 015 W0) or a volume's grid
+   * (setEspGrid, which then owns it). */
   let espM = 0, espW = 0;
   let atomBuf = device.createBuffer({ size: 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
   let phiBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
   let atomsIn = null, atomsKey = '', atomsN = 0, bondsN = 0, atomsV = 0, atomsNe = 0, atomsBound = [0, 0, 0, 0, 0], atomsAbs = 0;
-  const phi = { src: 'poisson', ok: false, M: 0, half: 0, key: '', at: 0, atomsV: -1, pending: 0 };
+  const phi = { src: 'poisson', ok: false, M: 0, half: 0, key: '', gen: -1, at: 0, pending: 0 };
+  let espLand = 0, molFresh = false;                             // iteration 015 W0: a landing's count (φ's key without the density's generation) and "the next matrix is a new molecule's"
   let espPipes = null, espBGL = null, espParams = null, espE = null, espPart = null, espCorr = null, espBind = null;
   const ESP_P = new ArrayBuffer(48), ESP_PU = new Uint32Array(ESP_P), ESP_PF = new Float32Array(ESP_P);
   const hex3 = (h) => { const x = h.replace('#', ''), f = x.length === 3 ? x.split('').map((c) => c + c).join('') : x; return [0, 2, 4].map((i) => parseInt(f.slice(i, i + 2), 16) / 255); };
@@ -1592,8 +1594,10 @@ export async function createField(canvas, opts = {}) {
   }
   function encodeEsp(enc, mat) {
     if ((mat.style | 0) !== STYLE.esp || !atomsN || phi.src !== 'poisson' || !psiTex) return false;
-    const key = generation + ':' + atomsV + ':' + half + ':' + res, now = performance.now();
-    if (key === phi.key || (!mat.espLive && phi.ok && phi.atomsV === atomsV && phi.key.endsWith(':' + atomsV + ':' + half + ':' + res) && now - phi.at < 1000)) return false;
+    /* iteration 015 W0 · THE ESP STALL: the clock moving the density (RUN, a beating register) re-solved φ once a second with LIVE off — 50–370 ms of GPU
+       each (W0-BUILD.md), a hitch the drag fell into.  Now LIVE off solves once per landing; LIVE on keeps the 1 Hz law on a moving density. */
+    const key = espLand + ':' + atomsV + ':' + half + ':' + res, now = performance.now();
+    if (phi.ok && key === phi.key && (!mat.espLive || generation === phi.gen || now - phi.at < 1000)) return false;
     if (!espPipes) {
       espBGL = device.createBindGroupLayout({ entries: [
         { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
@@ -1625,7 +1629,7 @@ export async function createField(canvas, opts = {}) {
     pass.setPipeline(espPipes.sor);
     for (let k = 0; k < 3 * M; k++) for (const c of [0, 1]) { pass.setBindGroup(0, espBind[c]); pass.dispatchWorkgroups(W); }
     pass.end();
-    Object.assign(phi, { ok: true, M, half: hh, key, at: now, atomsV, pending: now }); stats.espRuns++;
+    Object.assign(phi, { ok: true, M, half: hh, key, gen: generation, at: now, pending: now }); stats.espRuns++;
     return true;
   }
   function espDone() { if (!phi.pending) return; const t = phi.pending; phi.pending = 0; device.queue.onSubmittedWorkDone().then(() => { stats.espMs = performance.now() - t; }, () => {}); }
@@ -2200,7 +2204,7 @@ export async function createField(canvas, opts = {}) {
     device.queue.writeBuffer(molAlphaBuf, 0, pack.alpha, 0, pack.nPrim);
     device.queue.writeBuffer(molWBuf, 0, pack.weight, 0, pack.nWeight);
     device.queue.writeBuffer(molCutBuf, 0, pack.cut, 0, pack.nShell);
-    molSpec = spec; molPack = pack; molDirty = true;
+    molSpec = spec; molPack = pack; molDirty = true; molFresh = true; espLand++;
     if (molTier < 0 && molMat && (molKind === 0 || molKind === 3)) molMat = null;   // a matrix kept from a smaller molecule cannot draw here
     if (spec.half !== undefined) { if (!(spec.half > 0)) throw new Error('field: a molecule spec half must be positive'); half = spec.half; }
     return { nAO: pack.nAO, nShell: pack.nShell, nPrim: pack.nPrim, nWeight: pack.nWeight, expsPerVoxel: pack.nExp, cap: MOL_CAPS[molTier] || null, half };
@@ -2219,6 +2223,7 @@ export async function createField(canvas, opts = {}) {
     if (!molSpec) throw new Error('field: setMoleculeMatrix before setMolecule');
     if (kind !== 'density' && kind !== 'diff' && kind !== 'orbital' && kind !== 'signed' && kind !== 'factor') throw new Error(`field: unknown molecule matrix kind '${kind}'`);
     const n = molPack.nAO;
+    if (molFresh || kind !== molKindName) { molFresh = false; espLand++; }   // iteration 015 W0: a landing (a new molecule's first matrix, or another VIEW) for φ
     const cplx = !!(kind === 'orbital' && M && !M.length && M.re && M.im);      // a bare array is still the real path, untouched
     if (cplx) {
       if (M.re.length !== n || M.im.length !== n) throw new Error(`field: a complex orbital needs two vectors of ${n}, got ${M.re.length} and ${M.im.length}`);
@@ -2327,7 +2332,7 @@ export async function createField(canvas, opts = {}) {
       const bytes = c.N ** 3 * 4; if (!(c.N >= 2) || !(c.half > 0) || !c.data || c.data.length !== c.N ** 3) throw new Error('field: a card needs { N ≥ 2, half > 0, data: N³ }');
       if (!cardPipe) { const module = device.createShaderModule({ code: CARD_WGSL }); cardPipe = device.createComputePipeline({ layout: 'auto', compute: { module, entryPoint: 'main' } }); cardParams = device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }); }
       if (!cardBuf || cardBuf.size < bytes) { if (cardBuf) cardBuf.destroy(); cardBuf = device.createBuffer({ size: bytes, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }); cardBind = null; }
-      device.queue.writeBuffer(cardBuf, 0, c.data, 0, c.N ** 3); card = { N: c.N, half: c.half }; cardDirty = true; return card;
+      device.queue.writeBuffer(cardBuf, 0, c.data, 0, c.N ** 3); if (!card) espLand++; card = { N: c.N, half: c.half }; cardDirty = true; return card;
     },
     /** 0 = position space ψ(x), 1 = momentum space φ(p): the grid then holds the Fourier transform, exactly */
     setRadialTable(arr) { device.queue.writeBuffer(radialBuf, 0, arr instanceof Float32Array ? arr : new Float32Array(arr)); refValid = false; },

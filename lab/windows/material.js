@@ -68,7 +68,7 @@ export function createMaterial(app) {
       { id: 'ses', label: 'SES', title: 'the solvent-excluded surface: the van der Waals spheres with their crevices filled by the probe' }],
       onChange: (v) => { mat.espSurf = v; atomDrawSync(); schedule(TIER.PRESENT); } });
     ui.espPalSw = sw({ label: 'USE PALETTE', value: false, title: 'ESP: colour the map (and its bar) with the active PALETTE instead of the standard red → blue', onChange: (on) => { mat.espPal = on; atomDrawSync(); schedule(TIER.PRESENT); } });
-    ui.espLiveSw = sw({ label: 'LIVE · SLOW', value: false, title: 'ESP: solve φ again on every new density (a running molecule); off, at most once a second', onChange: (on) => { mat.espLive = on; schedule(TIER.PRESENT); } });
+    ui.espLiveSw = sw({ label: 'LIVE · SLOW', value: false, title: 'ESP: solve φ again while the density moves (RUN, a beating register), at most once a second — slow; off, φ is solved once per molecule, basis and VIEW', onChange: (on) => { mat.espLive = on; schedule(TIER.PRESENT); } });
     { const r = el('div', 'row tight', gd); for (const k of [ui.atomSizeK, ui.stickK, ui.probeK, ui.espRangeK]) r.appendChild(k.root); const r2 = el('div', 'row tight', gd); for (const k of [ui.espSurfSeg, ui.espPalSw, ui.espLiveSw]) r2.appendChild(k.root); }
     /* the map's COLOUR BAR (Josh's answer 3): vertical, beside the map at the free stage's right, five numbers (±RANGE, ±RANGE/2, 0); USE PALETTE puts
        the active ramp in it too; HUE turns it as it turns the map */
