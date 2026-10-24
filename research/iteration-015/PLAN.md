@@ -242,7 +242,7 @@ and the live-tree runs still wait.
 | S | it015-s | `a2b8169` | S2 fill icons · S3 preset seat · S1 compact HAMILTONIAN (570 → 213 px) · S4 save a preset (`lab/user-presets.js`) | controller.js hand-combined: M3's object + S4's visual guards; the stepper's value is the USER key or the object's id |
 | T | it015-t | `c47dc56` | T3 icon · T1 time · T4 fixed bar (494.8 / 682 px) · T5 doors + magnet · T6 switching (`tests/window-switching`, ink `landing()`) · T2 the mod window's bars | FOR-MIR both sides; kit alpha.26 (three lines) |
 | W | it015-w | `901da23` | W0 ESP stall (once per landing) · W2 + W3 palette rules ESP, signed-log range · W1 STYLE_READS · P1 list aligned (Firefox) · P2 reverse icon | LOCK 843/0 + 987/0 on the branch and on the merged tree; the palette is read first stop to last (not the whole LUT) |
-| P3 | it015-p3 | (pending) | save a palette on `createUserPresets` | built after the merge |
+| P3 | it015-p3 | `83d9e6b` | save a palette (kit `setPresets`, `lambdawaves.q0.palettes`, USER / PRESETS headings only while one exists) | built on `901da23` after the merge; manifest 060ddb35892a |
 
 Gate (pwa --write · ./test.sh node · rack-deps --classes · new-project --check) green at every merge; the node flake (wigner W42-8 under the
 solvers' load) re-run alone each time. On the merged tree `901da23`: THE LOCK 843/0 + 987/0; thirteen browser suites green (render-regressions · official-defaults-palette · library ·
