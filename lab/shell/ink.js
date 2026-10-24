@@ -20,7 +20,8 @@ export function createInk(app) {
     if (field.setOcclusion(occlusion.rects(toCanvas))) schedule(TIER.PRESENT);
   }
   { const body = document.body, { root: mw, rail } = app.state.modView, dirty = occlusion.dirty, shown = (d) => !d.hidden && !d.classList.contains('closed');
-    const rackShown = () => !body.classList.contains('rack-hidden') || body.classList.contains('rack-peek'), rects = (els) => els.map((s) => paintedRect(s));
+    /* 015 H3: a hidden rack shows only while ITS edge peeks (rack-peek-left | right), so the mask follows the one rack that came back */
+    const rackShown = (rk) => !body.classList.contains('rack-hidden') || body.classList.contains(rk === rackL ? 'rack-peek-left' : 'rack-peek-right'), rects = (els) => els.map((s) => paintedRect(s));
     /* a card is one pane, or (DISCONNECTED, never on a phone) its head and its body with the stage showing between them */
     const panes = (d) => body.classList.contains('disconnected') && !body.classList.contains('phone') ? [d.querySelector('.dev-head'), d.querySelector('.dev-body')] : [d];
     /* Device cards scroll inside the modulation run. Their offscreen bounds must not mask the stage. */
@@ -33,8 +34,8 @@ export function createInk(app) {
     occlusion.register('floats', () => rects([...floats.children].filter((d) => d.classList.contains('dev') && shown(d)).flatMap(panes)));
     occlusion.register('extra', () => rects(['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => document.getElementById(id))));
     occlusion.register('keymap', () => rects([document.querySelector('[data-mir-window="keyboard"]'), ...document.querySelectorAll('[data-mir-rail="keyboard"] .mir-chip')]));   // C3: the kit's window and its rail
-    occlusion.register('rack', () => rackShown() ? rects([rack, rackL].flatMap((rk) => rk ? [...rk.children] : []).filter((d) => d.classList.contains('dev') && !d.classList.contains('closed')).flatMap(panes)) : [],
-      { standIn: () => rackShown() ? [paintedRect(rack), paintedRect(rackL)] : [] });   // past the block's 32 the two columns stand in for their cards
+    occlusion.register('rack', () => rects([rack, rackL].flatMap((rk) => rk && rackShown(rk) ? [...rk.children] : []).filter((d) => d.classList.contains('dev') && !d.classList.contains('closed')).flatMap(panes)),
+      { standIn: () => [rack, rackL].filter((rk) => rk && rackShown(rk)).map((rk) => paintedRect(rk)) });   // past the block's 32 the two columns stand in for their cards
     for (const el of [floats, rack, rackL]) occlusion.watch(el, { childList: true });
     /* A paused field has no periodic frame to notice a source card sliding under the run's clip. */
     if (floats) floats.addEventListener('scroll', dirty, { capture: true, passive: true });
