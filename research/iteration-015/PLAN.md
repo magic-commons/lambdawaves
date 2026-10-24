@@ -233,5 +233,18 @@ the kit, `bash ~/.claude/jobs/2ea66c54/tmp/gate-it004.sh`). Then P3 on the merge
 B(3) the ESP row stays a preset, no USE PALETTE switch (W2). A(1) the pill leaves the eyebrow (H1). The rest of FOR-JOSH 2026-10-22's calls
 and the live-tree runs still wait.
 
-## CLOSED
-(filled at each merge)
+## CLOSED (Claude Yan, 2026-10-24; merges on yan-c, NOT pushed)
+
+| Chain | Branch | Merge | Rows | Notes |
+|---|---|---|---|---|
+| H | it015-h | `8cbb2ba` | H1 pill outside · H2 words under · H3 the audit (`tests/hide-reveal`) | four faults fixed: both racks peeked from one edge, the hidden bar had no mouse road back, the hint under the menubar, no auto-hide exists; kit alpha.26 |
+| M | it015-m | `cad5259` | M1 head + LOOK DROP · M6 grey hue · M2 looks everywhere (863 pictures, 6.9 MB) · M3 HYDROGEN \| ATOMS, THE 140 · M4 FOLDERS page · M5 `--wip --next II` | an element's variant is its block orbital's `orb-` picture (no `el-` variants); `loadPreset` takes an object |
+| S | it015-s | `a2b8169` | S2 fill icons · S3 preset seat · S1 compact HAMILTONIAN (570 → 213 px) · S4 save a preset (`lab/user-presets.js`) | controller.js hand-combined: M3's object + S4's visual guards; the stepper's value is the USER key or the object's id |
+| T | it015-t | `c47dc56` | T3 icon · T1 time · T4 fixed bar (494.8 / 682 px) · T5 doors + magnet · T6 switching (`tests/window-switching`, ink `landing()`) · T2 the mod window's bars | FOR-MIR both sides; kit alpha.26 (three lines) |
+| W | it015-w | `901da23` | W0 ESP stall (once per landing) · W2 + W3 palette rules ESP, signed-log range · W1 STYLE_READS · P1 list aligned (Firefox) · P2 reverse icon | LOCK 843/0 + 987/0 on the branch and on the merged tree; the palette is read first stop to last (not the whole LUT) |
+| P3 | it015-p3 | (pending) | save a palette on `createUserPresets` | built after the merge |
+
+Gate (pwa --write · ./test.sh node · rack-deps --classes · new-project --check) green at every merge; the node flake (wigner W42-8 under the
+solvers' load) re-run alone each time. On the merged tree `901da23`: THE LOCK 843/0 + 987/0; thirteen browser suites green (render-regressions · official-defaults-palette · library ·
+stage-text · start · timeline · menubar · history · frame-occlusion · hide-reveal · window-switching · keyboard-window · orbitals — L9 red under
+the solvers' GPU load, 24/24 alone).
