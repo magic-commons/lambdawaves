@@ -185,7 +185,7 @@ export function createPersist(app) {
           [ui.isoK, mat.iso], [ui.grainK, mat.grain], [ui.kneeK, mat.knee], [ui.slicePosK, mat.slice && mat.slice.pos],
           [ui.sliceThickK, mat.slice && mat.slice.thick]]) if (k && Number.isFinite(v)) k.set(v);
         if (ui.sliceModeSeg && mat.slice) ui.sliceModeSeg.set(['off', 'clip', 'slab'][mat.slice.mode] || 'off');
-        if (ui.atomDrawSync) ui.atomDrawSync(pr.mat || {});   // iteration 014 B: THE THREE VIEWS' keys (absent: the defaults) and their rows
+        if (ui.styleSync) ui.styleSync(pr.mat || {});   // iteration 014 B: THE THREE VIEWS' keys (absent: the defaults); iteration 015 W1: every WAVE control the style reads
         if (ui.sliceAxisSeg && mat.slice) ui.sliceAxisSeg.set(['x', 'y', 'z'][mat.slice.axis] || 'z');
         if (ui.gridSeg && [64, 96, 128].includes(quality.res)) ui.gridSeg.set(String(quality.res));
         if (ui.autoSw) ui.autoSw.set(!!quality.auto);
