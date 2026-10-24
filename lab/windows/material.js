@@ -184,6 +184,7 @@ export function createMaterial(app) {
     const palPick = () => { const p = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!p || p.classList.contains('lw-menu')) return;
       const r0 = p.getBoundingClientRect(); p.classList.add('lw-menu', 'pal-pick');
       for (const b of p.querySelectorAll('.mir-pick-i')) { const P = PALETTE_BY_ID.get(b.dataset.id); if (!P) continue; const st = [...P.stops].sort((a, c) => a.at - c.at);
+        el('span', 'pal-name', b).append(...[...b.childNodes].filter((n) => n.nodeType === 3));   // iteration 015 P1: the name its own flex item, the strip a column
         el('i', 'pal-strip', b).style.background = 'linear-gradient(to right in oklab, ' + [...st, { at: 1, rgb: st[0].rgb }].map((q) => rgbToHex(q.rgb) + ' ' + (q.at * 100).toFixed(1) + '%').join(', ') + ')'; }
       const r1 = p.getBoundingClientRect(); if (p.dataset.dir === 'up') p.style.top = Math.max(8, r0.bottom - r1.height) + 'px';
       if (r1.right > innerWidth - 8) p.style.left = Math.max(8, innerWidth - 8 - r1.width) + 'px'; };
