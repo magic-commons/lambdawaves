@@ -1,6 +1,6 @@
 """knots.py — knotted nodal lines of hydrogen in the λWAVES register (n ≤ 7): Berry's construction re-derived,
 converted to the app's convention (lab/hydrogen.js), and verified on the expanded superposition.
-Run: OMP_NUM_THREADS=2 nice -n 19 python -I knots.py [stage ...]   (no stage = all)."""
+Run: OMP_NUM_THREADS=2 nice -n 19 python -I knots.py [stage ...]; no stage = final then thickness (about 20 min); md, figs, selftest, berry are utilities."""
 import json, sys, os, subprocess, math
 import numpy as np
 import sympy as sp
@@ -318,7 +318,7 @@ def nodal_scan(state, L, h, curves, zL=None):
     from scipy import ndimage
     from scipy.spatial import cKDTree
     zL = L if zL is None else zL
-    g = np.arange(-L, L + 1e-9, h); gz = np.arange(-zL, zL + 1e-9, h); n, nz = len(g), len(gz)
+    g = np.arange(-L, L + 1e-9, h) + 0.3137 * h; gz = np.arange(-zL, zL + 1e-9, h) + 0.2718 * h; n, nz = len(g), len(gz)   # offset: no symmetry plane on the grid
     XX, YY = np.meshgrid(g, g, indexing='ij'); w = lambda p, q: np.angle(np.exp(1j * (q - p)))
     cell = np.zeros((n - 1, n - 1, nz - 1), bool); prev = None
     for k in range(nz):
@@ -333,7 +333,7 @@ def nodal_scan(state, L, h, curves, zL=None):
         prev = a
     lab, ncomp = ndimage.label(cell, structure=np.ones((3, 3, 3)))
     idx = np.argwhere(lab > 0); centers = np.c_[g[idx[:, 0]] + h / 2, g[idx[:, 1]] + h / 2, gz[idx[:, 2]] + h / 2]; labs = lab[idx[:, 0], idx[:, 1], idx[:, 2]]
-    P = np.vstack(curves); ii = np.clip(((P[:, :2] + L) / h).astype(int), 0, n - 2); kk = np.clip(((P[:, 2] + zL) / h).astype(int), 0, nz - 2)
+    P = np.vstack(curves); ii = np.clip(((P[:, :2] - g[0]) / h).astype(int), 0, n - 2); kk = np.clip(((P[:, 2] - gz[0]) / h).astype(int), 0, nz - 2)
     own = sorted(set(int(v) for v in np.unique(lab[ii[:, 0], ii[:, 1], kk]) if v > 0))
     tree = cKDTree(P); d_own = tree.query(centers[np.isin(labs, own)])[0] if own else np.array([np.nan])
     others = ~np.isin(labs, own)
@@ -407,14 +407,6 @@ def knot_state(n, m0, p, le, lo, root, pert, delta, C=None):
     eps = (abs(Kp) + abs(Km)) * (delta * rs) ** p / g
     return State({**s0.c, pert: s0.c.get(pert, 0) + eps}), {'C': C, 'eps': eps, 'K_plus': [Kp.real, Kp.imag], 'K_minus': [Km.real, Km.imag]}
 
-def quick(st, rs, w, step):
-    sd = seeds_halfplane(st, 0.1234, max(0.05, rs - w), rs + w, -w, w, 160, 160)
-    comps = components(st, sd, step)
-    print(' seeds', len(sd), 'components', [(len(C), closed, round(L, 2)) for C, closed, L in comps])
-    if all(c for _, c, _ in comps) and comps:
-        inv = invariants([C for C, _, _ in comps], seeds=(11, 12, 13))
-        print(' ', [(d['crossings'], d['alexander'], d['self_writhe_per_component'], d['linking_numbers']) for d in inv])
-
 def verify(state, rs, w, step, scan=None, phi0=0.1234, nseed=200):
     """the full check on the expanded superposition: seeds in a meridian half-plane window around the loop circle (R = rs, z = 0),
     tracing, components inside the torus of radius w, invariants, quality, Gauss linking, and (optionally) the global plaquette scan"""
@@ -462,38 +454,6 @@ RECIPES = [('Hopf link T(2,2)', 2, 2, 4, 0, (0, 2), (1, 3), (4, 2, 2)), ('trefoi
            ('8_19 = T(3,4)', 3, 4, 6, 0, (0, 2, 4), (1, 3, 5), (6, 4, 4)), ('10_124 = T(3,5)', 3, 5, 6, 0, (0, 2, 4), (1, 3, 5), (6, 5, 5)),
            ('T(3,7)', 3, 7, 7, -1, (1, 3, 5), (2, 4, 6), (7, 6, 6))]
 
-def stage_explore():
-    rs = BERRY_TREFOIL['rstar']; s0 = from_berry({k: v for k, v in trefoil_terms().items() if k != (7, 0, 0)})
-    Kp, Km = local_K(s0, 7, 3, rs, 2); g = abs(Mode(7, 0, 0)(np.array(rs), np.array(0.0), np.array(0.0))) * 400 / (radial_norm(7, 0) * ylm_norm(0, 0))
-    print('Berry fig 2: K+', Kp, 'K-', Km, '|K-/K+|', abs(Km / Kp), 'delta_Berry', math.sqrt(g / (abs(Kp) + abs(Km))) / rs)
-    root = {'r_star_bohr': rs, 'rho_star': rs * 2 / 7, 'a': [1.0, None], 'b': [1.0, None]}
-    for name, n, m0, le, lo, pert, root in [('n4 trefoil', 4, 0, (0, 2), (1, 3), (4, 3, 3), loop_coeffs(4, 0, 2, (0, 2), (1, 3))[0]),
-                                            ('n4 hopf', 4, 0, (0, 2), (1, 3), (4, 2, 2), loop_coeffs(4, 0, 2, (0, 2), (1, 3))[0])]:
-        print(name, 'C_circ', circular_C(n, m0, 2, le, lo, root))
-        for delta in (0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5):
-            st, info = knot_state(n, m0, 2, le, lo, root, pert, delta)
-            print(' delta', delta, 'eps', round(float(info['eps']), 5), light(st, root['r_star_bohr'], delta, 2))
-
-def stage_table():
-    for name, p, q, n, m0, le, lo, pert in RECIPES:
-        roots = loop_coeffs(n, m0, p, le, lo)
-        print(name, 'n', n, 'roots', [round(r['r_star_bohr'], 4) for r in roots], 'expected Alexander', torus_alexander(p, q) if math.gcd(p, q) == 1 else 'link')
-        for root in roots:
-            g = abs(Mode(*pert)(np.array(root['r_star_bohr']), np.array(0.0), np.array(0.0)))
-            for delta in (0.1, 0.05):
-                st, info = knot_state(n, m0, p, le, lo, root, pert, delta)
-                r = light(st, root['r_star_bohr'], delta, p); print('  r*', round(root['r_star_bohr'], 4), 'pert on loop', f'{g:.3e}', 'delta', delta, r)
-                if r.get('alexander'): break
-
-def stage_explore_old():
-    for name, n, m0, le, lo, pert in [('trefoil n4', 4, 0, (0, 2), (1, 3), (4, 3, 3)), ('hopf n4', 4, 0, (0, 2), (1, 3), (4, 2, 2)),
-                                      ('cinquefoil n5', 5, 1, (1, 3), (2, 4), (5, 4, -4))]:
-        roots = loop_coeffs(n, m0, 2, le, lo); print(name, roots)
-        for root in roots:
-            for delta in (0.05, 0.1, 0.2):
-                st, info = knot_state(n, m0, 2, le, lo, root, pert, delta); print(name, 'r*', round(root['r_star_bohr'], 4), 'delta', delta, info)
-                quick(st, root['r_star_bohr'], max(1.0, 3 * delta * root['r_star_bohr']), 0.01 * root['r_star_bohr'])
-
 # ── exact forms, time dependence, figures, the record ─────────────────────────────────────────────────────────────
 def exact_loop(n, m, le, lo):
     """sympy: the Wronskian polynomial (factored), its positive real roots in radicals where sympy finds them, and a, b (app basis) exactly"""
@@ -511,20 +471,26 @@ def exact_loop(n, m, le, lo):
 
 def time_dependence(st7, eta, nphase=16):
     """ψ7 + η e^{iα} ψ(6s₀), α = (E7 − E6) t over one beat T = 2π/(E7 − E6): the knot at each phase"""
-    T = 2 * math.pi / (-0.5 / 49 + 0.5 / 36); rows = []; ref = None
+    T = 2 * math.pi / (-0.5 / 49 + 0.5 / 36); rows = []; rs = 23.03016837326312; w = 8.0; az0 = None
+    on_loop = lambda key: complex(Mode(*key)(np.array(rs), np.array(0.0), np.array(0.0)))
+    eta_star = abs(st7.c[(7, 0, 0)] * on_loop((7, 0, 0))) / abs(on_loop((6, 0, 0)))   # the admixture at which ε_eff = c(7s)ψ7s + η e^{iα}ψ6s can vanish on the loop
     for k in range(nphase):
         al = 2 * math.pi * k / nphase
-        st = State({**st7.c, (6, 0, 0): eta * complex(math.cos(al), math.sin(al))})
-        rs = 23.03; w = 8.0; sd = seeds_halfplane(st, 0.1234, rs - w, rs + w, -w, w, 160, 160)
-        comps = components(st, sd, 0.05, rbox=rs + 3 * w); tor =[C for C, c, L in comps if c and np.hypot(np.hypot(C[:, 0], C[:, 1]) - rs, C[:, 2]).max() < w]
+        st = State({**st7.c, (6, 0, 0): eta * complex(math.cos(al), math.sin(al))})   # unnormalised: the norm does not move a zero
+        sd = seeds_halfplane(st, 0.1234, rs - w, rs + w, -w, w, 160, 160)
+        comps = components(st, sd, 0.05, rbox=rs + 3 * w); tor = [C for C, c, L in comps if c and np.hypot(np.hypot(C[:, 0], C[:, 1]) - rs, C[:, 2]).max() < w]
         row = {'phase_over_2pi': k / nphase, 't_au': T * k / nphase, 'components_in_torus': len(tor)}
         if tor:
-            inv = invariants(tor, seeds=(), axial=(21,))[0]; K = tor[int(np.argmax([len(C) for C in tor]))]
-            top = K[np.argmax(K[:, 2])]; row.update({'alexander': inv['alexander'], 'crossings': inv['crossings'], 'writhe': inv['self_writhe_per_component'],
-                                                      'azimuth_of_highest_point_deg': math.degrees(math.atan2(top[1], top[0])), 'z_max': float(K[:, 2].max()),
-                                                      'R_range': [float(np.hypot(K[:, 0], K[:, 1]).min()), float(np.hypot(K[:, 0], K[:, 1]).max())]})
+            inv = invariants(tor, seeds=(), axial=(21,))[0]; per = inv['alexander_per_component'] or [inv['alexander']]
+            kk = next((i for i, a in enumerate(per) if a != '1'), int(np.argmax([len(C) for C in tor]))); K = tor[kk]
+            top = K[np.argmax(K[:, 2])]; az = math.degrees(math.atan2(top[1], top[0])); az0 = az if az0 is None else az0
+            row.update({'alexander_per_component': per, 'writhe_per_component': inv['self_writhe_per_component'], 'linking': inv['linking_numbers'],
+                        'knot_azimuth_mod_120_deg_rel_phase0': ((az - az0 + 60) % 120) - 60, 'knot_z_max': float(K[:, 2].max()),
+                        'knot_R_range': [float(np.hypot(K[:, 0], K[:, 1]).min()), float(np.hypot(K[:, 0], K[:, 1]).max())]})
         rows.append(row)
-    return {'eta': eta, 'admixture': '6s₀', 'beat_period_au': T, 'beat_period_fs': T * 0.024188843265857, 'phases': rows}
+    return {'eta': eta, 'admixture': '6s₀', 'eta_star_small_tube_model': eta_star,
+            'predicted_rocking_amplitude_deg': math.degrees(math.asin(eta / eta_star) / 3) if eta < eta_star else None,
+            'beat_period_au': T, 'beat_period_fs': T * 0.024188843265857, 'phases': rows}
 
 def vortex_spheres(rr, half):
     """how many of VORTEX's sampled spheres (lab/vortex.js: r_k = rMin + (rMax − rMin)(k + ½)/nr, rMin = 0.05·half, rMax = 0.98·half) cut [rr0, rr1]"""
@@ -537,23 +503,28 @@ def domain_for(n): return 2 * n * n + 3 * n + 2   # lab/hydrogen.js domainFor
 
 def figures(rec, curves, states):
     import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d.art3d import Line3DCollection
     def tube3d(ax, Cs, cols, lw=2.6, lim=None, chain=None):
+        A = np.vstack(Cs); L = lim or 1.12 * np.abs(A[:, :2]).max(); Z = 1.3 * max(np.abs(A[:, 2]).max(), 1e-3); k = 0.45 * L / Z   # z stretched by k, labelled
         for C, col in zip(Cs, cols):
-            P = np.vstack([C, C[:1]]); ax.plot(P[:, 0], P[:, 1], P[:, 2], color=col, lw=lw)
+            P = np.vstack([C, C[:1]]); seg = np.stack([P[:-1], P[1:]], axis=1)
+            shade = 0.55 + 0.45 * (seg[:, 0, 2] + Z) / (2 * Z)   # depth cue: higher strands darker
+            base = np.array(matplotlib.colors.to_rgb(col)); ax.add_collection3d(Line3DCollection(seg, colors=[tuple(base * s + (1 - s)) for s in shade], lw=lw))
         if chain is not None: ax.scatter(chain[:, 0], chain[:, 1], chain[:, 2], s=0.3, color='0.6', alpha=0.5)
-        L = lim or 1.15 * max(np.abs(np.vstack(Cs)).max(), 1); ax.set_xlim(-L, L); ax.set_ylim(-L, L); ax.set_zlim(-L, L); ax.set_box_aspect((1, 1, 1))
-        ax.set_xlabel('x (bohr)'); ax.set_ylabel('y (bohr)'); ax.set_zlabel('z (bohr)'); ax.view_init(28, -60)
+        ax.set_xlim(-L, L); ax.set_ylim(-L, L); ax.set_zlim(-Z, Z); ax.set_box_aspect((1, 1, 0.45))
+        ax.set_xlabel('x (bohr)'); ax.set_ylabel('y (bohr)'); ax.set_zlabel(f'z (bohr), stretched ×{k:.1f}'); ax.view_init(38, -60)
     fig = plt.figure(figsize=(12, 5.6))
     for i, (key, title) in enumerate((('trefoil_n7_recommended', 'n = 7 trefoil (Berry loop, round cross-section, δ = 0.1)'), ('trefoil_n4', 'n = 4 trefoil (twist carried by 4f₃)'))):
         ax = fig.add_subplot(1, 2, i + 1, projection='3d'); tube3d(ax, curves[key], ['#b2182b']); ax.set_title(title, fontsize=10)
-    fig.tight_layout(); fig.savefig(os.path.join(HERE, 'fig_trefoils_3d.png'), dpi=150); plt.close(fig)
+    fig.tight_layout(); fig.savefig(os.path.join(HERE, 'fig_trefoils_3d.png'), dpi=150, bbox_inches='tight', pad_inches=0.3); plt.close(fig)
     # the planar projection with its crossings
     C = resample(curves['trefoil_n7_recommended'][0], 400); Rm = tilt(21); X = crossings([C], Rm); P = C @ Rm.T
     fig, ax = plt.subplots(figsize=(6, 6)); Q = np.vstack([P, P[:1]]); ax.plot(Q[:, 0], Q[:, 1], color='#b2182b', lw=2)
     for k in range(0, len(P), 25): ax.annotate('', xy=P[(k + 1) % len(P), :2], xytext=P[k, :2], arrowprops=dict(arrowstyle='->', color='#b2182b', lw=1.2))
-    for co, so, cu, su, sg, dz in X:
-        k = int(su); f = su - k; pt = P[k, :2] * (1 - f) + P[(k + 1) % len(P), :2] * f
-        ax.plot(*pt, 'o', ms=14, mfc='white', mec='k'); ax.text(*pt, '+' if sg > 0 else '−', ha='center', va='center', fontsize=12)
+    for co, so, cu, su, sg, dz in X:   # the over-strand redrawn over a white halo: the under-strand shows its gap
+        idx = [(int(so) + j) % len(P) for j in range(-6, 8)]; ax.plot(P[idx, 0], P[idx, 1], color='white', lw=9, solid_capstyle='butt'); ax.plot(P[idx, 0], P[idx, 1], color='#b2182b', lw=2)
+        k = int(su); f = su - k; pt = P[k, :2] * (1 - f) + P[(k + 1) % len(P), :2] * f; off = 2.8 * pt / np.linalg.norm(pt)
+        ax.text(*(pt + off), '+' if sg > 0 else '−', ha='center', va='center', fontsize=14)
     ax.set_aspect('equal'); ax.set_xlabel("x' (bohr)"); ax.set_ylabel("y' (bohr)")
     ax.set_title(f"n = 7 trefoil, view 0.07 rad off +z: {len(X)} crossings, writhe {sum(x[4] for x in X):+d}", fontsize=10)
     fig.tight_layout(); fig.savefig(os.path.join(HERE, 'fig_trefoil_projection.png'), dpi=150); plt.close(fig)
@@ -561,7 +532,7 @@ def figures(rec, curves, states):
     fig = plt.figure(figsize=(12, 5.6))
     for i, (key, title) in enumerate((('hopf_n4', 'n = 4 Hopf link (twist carried by 4d₂)'), ('hopf_n6_berry', 'n = 6 Hopf link (Berry 2001, eq. 4 corrected)'))):
         ax = fig.add_subplot(1, 2, i + 1, projection='3d'); tube3d(ax, curves[key], ['#b2182b', '#2166ac']); ax.set_title(title, fontsize=10)
-    fig.tight_layout(); fig.savefig(os.path.join(HERE, 'fig_hopf_3d.png'), dpi=150); plt.close(fig)
+    fig.tight_layout(); fig.savefig(os.path.join(HERE, 'fig_hopf_3d.png'), dpi=150, bbox_inches='tight', pad_inches=0.3); plt.close(fig)
     # the radial profile: P(r) = r² Σ |c_l|² R_nl(r)² exactly (angular orthonormality within one n)
     fig, axs = plt.subplots(1, 2, figsize=(12, 4.2))
     for ax, key, n in ((axs[0], 'trefoil_n7_recommended', 7), (axs[1], 'trefoil_n4', 4)):
@@ -577,8 +548,8 @@ def figures(rec, curves, states):
     keys = [k for k in curves if k.startswith('T(')]; fig = plt.figure(figsize=(3.2 * min(4, len(keys)), 3.4 * math.ceil(len(keys) / 4)))
     for i, k in enumerate(keys):
         ax = fig.add_subplot(math.ceil(len(keys) / 4), 4, i + 1, projection='3d'); tube3d(ax, curves[k], ['#b2182b', '#2166ac', '#1b7837'], lw=1.8)
-        ax.set_title(k, fontsize=9); ax.set_xlabel(''); ax.set_ylabel(''); ax.set_zlabel(''); ax.tick_params(labelsize=6)
-    fig.tight_layout(); fig.savefig(os.path.join(HERE, 'fig_table_knots.png'), dpi=130); plt.close(fig)
+        ax.set_title(k, fontsize=10, pad=-4); ax.set_xlabel(''); ax.set_ylabel(''); ax.set_zlabel(''); ax.set_xticklabels([]); ax.set_yticklabels([]); ax.set_zticklabels([])
+    fig.subplots_adjust(wspace=0.02, hspace=0.08, left=0.01, right=0.99, top=0.97, bottom=0.01); fig.savefig(os.path.join(HERE, 'fig_table_knots.png'), dpi=130); plt.close(fig)
 
 def radial_stats(st, r0, r1, rs):
     """P(r) = r² Σ|c|² R_nl(r)² (exact within one n): P(r*)/max P and the probability in the shell r0 ≤ r ≤ r1 the knot spans"""
@@ -621,9 +592,9 @@ def stage_final():
             {'source': "Berry's loop (same four states and r*), C set so K- = 0 (round cross-section), ε so the predicted tube radius is 0.1 r*", 'loop_app_basis': r7, **info})
     r4 = loop_coeffs(4, 0, 2, (0, 2), (1, 3))[0]
     st, info = knot_state(4, 0, 2, (0, 2), (1, 3), r4, (4, 3, 3), 0.15)
-    deliver('trefoil_n4', st, r4["r_star_bohr"], 1.4, 0.01, (9, 0.06), (4, 0, 0), {'source': 'generalised recipe: m0 = 0 loop from 4s₀, 4d₀ | 4p₀, 4f₀; twist from 4f₃', 'loop_app_basis': r4, **info})
+    deliver('trefoil_n4', st, r4["r_star_bohr"], 1.4, 0.01, (12, 0.08), (4, 0, 0), {'source': 'generalised recipe: m0 = 0 loop from 4s₀, 4d₀ | 4p₀, 4f₀; twist from 4f₃', 'loop_app_basis': r4, **info})
     st, info = knot_state(4, 0, 2, (0, 2), (1, 3), r4, (4, 2, 2), 0.15)
-    deliver('hopf_n4', st, r4["r_star_bohr"], 1.4, 0.01, (9, 0.06), (4, 0, 0), {'source': 'generalised recipe: the same loop; twist from 4d₂', 'loop_app_basis': r4, **info})
+    deliver('hopf_n4', st, r4["r_star_bohr"], 1.4, 0.01, (12, 0.08), (4, 0, 0), {'source': 'generalised recipe: the same loop; twist from 4d₂', 'loop_app_basis': r4, **info})
     lt = link_terms()
     deliver('hopf_n6_berry', from_berry(lt), BERRY_LINK['rstar'], 4.0, 0.03, (40, 0.3), (6, 2, 2),
             {'source': 'Berry 2001 eqs. (4), (5), (8), Fig. 1, with eq. (4) read as ψ622 + a ψ642 + iC(ψ632 + b ψ652) (the printed b fits this order)', 'a': BERRY_LINK['a'], 'b': BERRY_LINK['b'], 'C': 0.1, 'eps': 10.0}, berry_terms=lt)
@@ -649,9 +620,9 @@ def stage_final():
         rec['table'].append(row); curves[f'T({p},{q}) n={n}'] = light.curves
         print(name, 'verified', ok, chk.get('alexander'), chk.get('linking'), flush=True)
 
-    for eta in (0.02, 0.1, 0.3):
+    for eta in (0.02, 0.1, 0.2, 0.3):
         rec['time_dependence'].append(time_dependence(states['trefoil_n7_recommended'], eta)); print('time dependence', eta, flush=True)
-    rec['exact'] = {'n4_m0_loop': exact_loop(4, 0, (0, 2), (1, 3))}
+    rec['exact'] = {'n4_m0_loop': exact_loop(4, 0, (0, 2), (1, 3))}; rec['selftest'] = selftest()
     figures(rec, curves, states)
     with open(os.path.join(HERE, 'knots.json'), 'w') as f: json.dump(rec, f, indent=1, ensure_ascii=False, default=lambda o: o.tolist() if hasattr(o, 'tolist') else str(o))
     print('written', flush=True)
@@ -686,11 +657,38 @@ def stage_md():
         c = t['check']; b = c.get('braid', {})
         print(f"| {t['name']} | {t['p']} | {t['q']} | {t['n_berry_recipe']} | {t['n_generalised']} | {t['m0']}; {t['loop_l_even']} / {t['loop_l_odd']} | {t['perturbation']} | {t['r_star_bohr']:.4f} | {t['delta']} | {b.get('word', '—')} | {c.get('alexander')} lk {c.get('linking')} | {t['verified']} |")
     for td in rec['time_dependence']:
-        print('\neta', td['eta'], 'T', td['beat_period_au'], td['beat_period_fs'])
-        for r in td['phases']: print('  ', round(r['phase_over_2pi'], 4), r['components_in_torus'], r.get('alexander'), r.get('writhe'), round(r.get('azimuth_of_highest_point_deg', float('nan')), 2), round(r.get('z_max', float('nan')), 3), [round(x, 3) for x in r.get('R_range', [])])
+        print('\neta', td['eta'], 'eta*', td['eta_star_small_tube_model'], 'predicted rocking', td['predicted_rocking_amplitude_deg'], 'T', td['beat_period_au'], td['beat_period_fs'])
+        for r in td['phases']: print('  ', round(r['phase_over_2pi'], 4), r['components_in_torus'], r.get('alexander_per_component'), r.get('writhe_per_component'), r.get('linking'),
+                                     round(r.get('knot_azimuth_mod_120_deg_rel_phase0', float('nan')), 2), round(r.get('knot_z_max', float('nan')), 3), [round(x, 3) for x in r.get('knot_R_range', [])])
     print('\nexact', json.dumps(rec['exact'], ensure_ascii=False, indent=1)); print('convention', rec['convention']); print('berry', json.dumps(rec['berry_constants'], indent=1))
 
-STAGES = {'berry': stage_berry, 'explore': stage_explore, 'table': stage_table, 'final': stage_final, 'md': stage_md,
+def stage_figs():
+    """redraw the figures from knots.json (curves re-traced by the light check; no scans)"""
+    rec = json.load(open(os.path.join(HERE, 'knots.json'))); lab2k = {label(n, l, m): (n, l, m) for n in range(1, 8) for l in range(n) for m in range(-l, l + 1)}
+    mk = lambda co: State({lab2k[k]: complex(*v) for k, v in co.items()}); curves, states = {}, {}
+    for key, delta in (('trefoil_n7_recommended', 0.1), ('trefoil_n4', 0.15), ('hopf_n4', 0.15), ('hopf_n6_berry', 0.1)):
+        s = rec['states'][key]; states[key] = mk(s['coeffs_app']); light(states[key], s['r_star_bohr'], delta, 2); curves[key] = light.curves
+    for t in rec['table']:
+        light(mk(t['coeffs_app']), t['r_star_bohr'], t['delta'], t['p']); curves[f"T({t['p']},{t['q']}) n={t['n_generalised']}"] = light.curves
+    figures(rec, curves, states)
+
+def stage_thickness():
+    """the δ scans quoted in KNOTS.md §3 and Berry's Fig. 2 K±, appended to knots.json"""
+    path = os.path.join(HERE, 'knots.json'); rec = json.load(open(path)); out = {}
+    r7 = loop_coeffs(7, 3, 2, (3, 5), (4, 6))[0]; r4 = loop_coeffs(4, 0, 2, (0, 2), (1, 3))[0]
+    for name, n, m0, le, lo, pert, root in [('trefoil n=7 (Berry loop, round C, + 7s₀)', 7, 3, (3, 5), (4, 6), (7, 0, 0), r7),
+                                            ('trefoil n=4 (+ 4f₃)', 4, 0, (0, 2), (1, 3), (4, 3, 3), r4), ('Hopf n=4 (+ 4d₂)', 4, 0, (0, 2), (1, 3), (4, 2, 2), r4)]:
+        out[name] = []
+        for delta in (0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5):
+            st, info = knot_state(n, m0, 2, le, lo, root, pert, delta); out[name].append({'delta': delta, 'eps': float(info['eps']), **light(st, root['r_star_bohr'], delta, 2)})
+            print(name, delta, out[name][-1].get('in_torus'), out[name][-1].get('per_component') or out[name][-1].get('alexander'), flush=True)
+    rs = BERRY_TREFOIL['rstar']; s0 = from_berry({k: v for k, v in trefoil_terms().items() if k != (7, 0, 0)}); Kp, Km = local_K(s0, 7, 3, rs, 2)
+    g = 400 * abs(Mode(7, 0, 0)(np.array(rs), np.array(0.0), np.array(0.0))) / (radial_norm(7, 0) * ylm_norm(0, 0))
+    out['berry_fig2'] = {'K_plus': [Kp.real, Kp.imag], 'K_minus': [Km.real, Km.imag], 'abs_Kminus_over_Kplus': abs(Km / Kp), 'predicted_tube_over_rstar': math.sqrt(g / (abs(Kp) + abs(Km))) / rs}
+    rec['thickness'] = out
+    with open(path, 'w') as f: json.dump(rec, f, indent=1, ensure_ascii=False, default=lambda o: o.tolist() if hasattr(o, 'tolist') else str(o))
+
+STAGES = {'berry': stage_berry, 'final': stage_final, 'thickness': stage_thickness, 'md': stage_md, 'figs': stage_figs,
           'selftest': lambda: print(json.dumps(selftest(), indent=1, default=str))}
 if __name__ == '__main__':
-    for s in (sys.argv[1:] or list(STAGES)): STAGES[s]()
+    for s in (sys.argv[1:] or ['final', 'thickness']): STAGES[s]()

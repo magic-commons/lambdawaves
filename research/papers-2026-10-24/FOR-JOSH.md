@@ -25,6 +25,24 @@ Your "continue with whatever you think is next" was read as the authorisation in
 
 **New call 9.** The next pilots are the same computation on water's 6-31G and 6-31G* rungs (does the basis part shrink while the exchange part holds?) and on benzene's ring packet; both CPU, both post-processing of records the volumes already hold. Say the word and they run. And for the app: the GPU Poisson pass's wall condition decides whether a repaired FLOW carries the dipole rate; it has to be the closed-wall one.
 
+## Later: Papers 3 and 4 written (your "Let's do those next papers!")
+
+Both are Draft 01, built with the review's exporter (10 pages each), on the desk under `DRAFTS/`; the Markdown, figures, scripts and every number are in the repo under `research/papers-2026-10-24/` (`03-LEAK-AND-REPAIR/`, `04-KNOTTED-ZEROS/`, `leak/`, `knots/`).
+
+**Paper 3, THE LEAK AND THE REPAIR (by Fable 5.1).** The pilot, plus water up the basis ladder and benzene: for water the leak's effect on the net current falls from 2.32 to 0.28 to 0.08 dipole rates (STO-3G, 6-31G, 6-31G*), the exchange part holding near half a dipole rate while the basis part collapses and changes sign; benzene's π packet is the reverse case (73 % exchange, smooth, away from the nuclei, the repair as large as the current); the closed-wall repair gives q′ = 1 in every case. `DRAFTS/CLAUDE YAN PAPER 3 — THE LEAK AND THE REPAIR — 2026-10-24/`.
+
+**Paper 4, KNOTTED ZEROS IN SEVEN LEVELS (by Fable 5.1 and Opus 5.5).** An Opus mathematician refuted the lemma I had planned on (a level holds one radial function per (l, m), so the polynomial knots of optics are not hydrogen states), rebuilt Berry's 2001 construction in the register's own conventions to every printed digit, found a misprint in his equation 4, and lowered the knots by letting the perturbing state carry the twist: a Hopf link and a trefoil at n = 4, the cinquefoil at n = 5, 7₁ at n = 6, 9₁ and T(3,7) at n = 7; every T(2,q) up to q = 9 is in the register. Each state is a list of coefficients over the register's labels, checked against `lab/hydrogen.js psiAt` to 5e-15 and verified as a knot by the Alexander polynomial of its traced curve; a beat with 6s₀ rocks or turns the trefoil without untying it. `DRAFTS/CLAUDE YAN PAPER 4 — KNOTTED ZEROS IN SEVEN LEVELS — 2026-10-24/`; the record `CLAUDE YAN — KNOTTED ZEROS RECORD (the proving lab) — 2026-10-24/`.
+
+**The writing rules** are in your Obsidian root: `LAMBDAWAVES CLAUDE YAN WRITING RULES (the October argument) 2026-10-24.md`, with a ninth rule the evening taught ("let the kill clause fire").
+
+**Calls 10–14.**
+
+10. **Paper 4's byline.** I wrote "Fable 5.1 and Opus 5.5": the mathematics is the proving lab's and should carry its name. Confirm the model name you want printed (the agent runs as "Opus"; I have not verified its exact version string).
+11. **The novelty check before Paper 4 goes anywhere.** A forward-citation search on Berry 2001 (and Enciso–Hartley–Peralta-Salas 2018) for the n = 4 trefoil and the twist transfer. The paper says plainly it has not been done. I can run it with the arXiv tools and Semantic Scholar on your word.
+12. **Loading the knots in the app.** `knots.json → states.<key>.preset_modes` is a `modes` list for `lab/state.js load`; a row for a later iteration is a KNOTS group of presets in SPECTRUM's list (seven states), with DOMAIN 5 bohr and PHASE for the n = 4 ones. Not built; nothing in `lab/` was touched.
+13. **Two app findings from the knots work:** VORTEX samples spheres and so draws the n = 7 knot as a few dozen points, not a curve (a radial-sampling row); only the CPU evaluator was checked, not the WGSL kernel (one native PHASE frame of the recommended trefoil would close that).
+14. **A second reader for both papers.** Draft 01 of each has had no independent re-computation; the house rule is one paper, read by you and one outside human, then the next. Paper 3 first.
+
 ## Your calls
 
 1. **Byline of Draft 08.** Recommendation: keep "by SOL-6.1 and Sonnet 5.5" and name the pass in the series line and Credits, as done; or add Fable 5.1. Your rule was that the model receives paper credit; three models have now written on these papers.

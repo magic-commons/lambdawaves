@@ -1,14 +1,14 @@
 {
  "documents": [
   {
-   "paper": "03-LEAK-AND-REPAIR",
-   "title": "The Leak and the Repair",
-   "words": 5440,
-   "equations": 6,
+   "paper": "04-KNOTTED-ZEROS",
+   "title": "Knotted Zeros in Seven Levels",
+   "words": 5226,
+   "equations": 5,
    "tables": 4,
-   "references": 13,
-   "tex_sha256": "18e3d88338a9b927e6f337a587d4c0341e1b49a384037d54dd70949bc8af4bc6",
-   "md_sha256": "6d392cff803a5fcc5c08632a2803b04a40d49896da898f0b28594bb5297299a8"
+   "references": 11,
+   "tex_sha256": "d157be4ea9d64ac8f2a0600372e518ad2aa3635370bd4e63787864eb48df2473",
+   "md_sha256": "c3feef7fb6366ee7b9106327dfa24c17969319451a4fd09ee065fd8f66c5c8cf"
   }
  ]
 }

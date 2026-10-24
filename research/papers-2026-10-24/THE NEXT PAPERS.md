@@ -54,6 +54,8 @@ Pairwise, by what a reader learns times how much of the evidence already exists.
 
 ### 3.1. The leak and the repair: where a finite basis creates probability, and the smallest current that puts it back
 
+*Written: Draft 01 of 24 October, evening (`03-LEAK-AND-REPAIR/`; desk `DRAFTS/CLAUDE YAN PAPER 3 — THE LEAK AND THE REPAIR — 2026-10-24/`).*
+
 **Thesis.** In a finite basis probability is conserved globally and violated locally by an explicit source $S=\partial_t\rho+\nabla\cdot\mathbf j$ (Paper 2, Proposition 2). This paper draws $S$, and then repairs it: the unique correction of minimal $L^2$ norm that makes the current conserving and confined is a gradient, $\mathbf c^*=\nabla\varphi$ with $\nabla^2\varphi=-S$ and no flux at the walls, and the repaired current's net flow is then exactly the dipole rate. (Corrected on 24 October, evening, by the pilot: the net flow depends on the walls. Closed walls carry the dipole rate inside, $q'\to+1$; open walls push it out as wall flux, $q'=q$; free space keeps one third. See `leak/LEAK-AND-REPAIR.md`.)
 
 **The picture.** Probability does not leak out of the molecule; it is teleported within it, appearing near the nucleus and vanishing in the outer shell with no current between (Paper 2, Figure 9). The repair is the minimal plumbing that carries it instead.
@@ -77,6 +79,8 @@ Pairwise, by what a reader learns times how much of the evidence already exists.
 Size: 8 to 10 pages. This is the strongest candidate because it turns the two papers' most awkward number into a prediction, uses only machinery the app has, and its two lemmas are checkable by anyone in an afternoon.
 
 ### 3.2. Knotted zeros you can turn: Berry's hydrogen knots in the $n\le7$ register
+
+*Written: Draft 01 of 24 October, evening (`04-KNOTTED-ZEROS/`, record `knots/KNOTS.md`; desk `DRAFTS/CLAUDE YAN PAPER 4 — KNOTTED ZEROS IN SEVEN LEVELS — 2026-10-24/`). The lemma proposed below was false (a level holds one radial function per (l, m)); the proving lab proved its negation and built the knots by Berry's construction with the twist moved to the perturbation, which lowers every torus knot's level: trefoil and Hopf link at n = 4.*
 
 **Thesis.** Berry (2001) showed that superpositions of degenerate hydrogen states can have zero lines that are knots and links, a link needing $n\ge6$ and a trefoil $n\ge7$. The register reaches $n=7$ since iteration 008. The instrument can therefore draw Berry's trefoil as a line of phase singularities the reader can rotate, slice and watch stay put under the common phase.
 
