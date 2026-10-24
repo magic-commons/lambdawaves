@@ -101,16 +101,20 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const top = el('div', 'mm-top', root);
   const logo = el('div', 'mm-logo', top);
   fetch('./img/lambdawaves-logo.svg').then((r) => r.text()).then((t) => { logo.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const s = logo.querySelector('svg'); if (s) { s.setAttribute('aria-label', 'λWAVES'); s.setAttribute('role', 'img'); } }).catch(() => { logo.textContent = 'λWAVES'; });
-  /* iteration 012 L2 · under the logo, centred: RETURN HOME (the lab), FOLDERS (iteration 004 · F's door, once at the top left: the projects
-     and the demos) and THE HUE ring — a dial dressed as a circle: a vertical drag, the wheel or ↑ ↓ turn the molecules' pictures round the
-     colour wheel (cyan hides its shadows, Josh), a double-click puts it back at 0; the Picker's PREFERENCE, never a project's or a link's */
+  /* iteration 015 M1 · THE HEAD (Josh: "Logo (a little bit bigger), Atomic, molecular, etc. Row, and then Home Folder, and Hue. Add a 4th
+     button"): the logo, the tabs, then four round buttons — RETURN HOME (the lab), FOLDERS (the projects and the demos), THE HUE ring (a dial
+     dressed as a circle: a vertical drag, the wheel or ↑ ↓ turn the molecules' pictures round the colour wheel, a double-click puts it back at
+     0; the Picker's PREFERENCE, never a project's or a link's) and LOOK, which opens THE LOOK DROP below */
+  const tabs = el('div', 'mm-tabs', top), pill = el('i', 'mm-pill', tabs);
   const nav = el('div', 'mm-nav', top);
   const navBtn = (name, label, go) => { const b = el('button', 'mm-navb', nav); b.type = 'button'; icon(b, name); b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', go); return b; };
   navBtn('home', 'Return home — the lab', () => close());
   navBtn('folders', 'Folders — your projects and the demos', () => { close(); const P = app.sh.layout && app.sh.layout.projects; if (P) (P.show || P.toggle).call(P); });
   const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
   hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); el('i', 'mm-hue-ring', hue);
-  const tabs = el('div', 'mm-tabs', top), pill = el('i', 'mm-pill', tabs), scroller = el('div', 'mm-scroll', root), caption = el('div', 'mm-caption', root);
+  const lookB = el('button', 'mm-navb mm-lookb', nav); lookB.type = 'button'; lookB.setAttribute('aria-haspopup', 'true'); lookB.setAttribute('aria-expanded', 'false');
+  const lookG = el('b', 'mm-lookg', lookB);
+  const scroller = el('div', 'mm-scroll', root), caption = el('div', 'mm-caption', root);
   caption.setAttribute('aria-live', 'polite');
   /* SHOW LABELS (iteration 012 L1): one subtle seat under the tabs, the atoms' switch on ATOMIC and the molecules' elsewhere; the volume's head has its twin */
   const prefs = readPrefs(), opts = el('div', 'mm-opts', top);
@@ -125,16 +129,54 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   }
   const atomOpt = labelToggle(opts, 'atomLabels'), molOpt = labelToggle(opts, 'molLabels');
   let hueShown = 0;   // iteration 014 D2: the CSS sees an unwrapped turn (the nearest twin of the hue to the last one shown), so 359 → 0 glides one degree, never back round the wheel
-  /* iteration 014 B4 · THE PICTURES' STYLE, under the hue ring: a volume molecule's tile shows the variant its row names (`thumbs`, tools/menu-thumbs.mjs
-     --style), else its one picture; the Picker's PREFERENCE `look`, turned by THE HUE ring like every picture */
-  const LOOKS = [['density', 'ρ', 'the density, SIGNED (every molecule has it)'], ['im', 'IM', 'the HOMO, signed: two complementary colours'], ['balls', 'BALLS', 'space-filling CPK balls'], ['sticks', 'STICKS', '3D sticks'], ['esp', 'ESP', 'the electrostatic potential on the SES']];
-  const looks = el('div', 'mm-looks', top); top.insertBefore(looks, tabs); looks.setAttribute('role', 'radiogroup'); looks.setAttribute('aria-label', 'picture style');
+  /* iteration 014 B4 · 015 M1 · THE PICTURES' STYLE: the Picker's PREFERENCE `look`, turned by THE HUE ring like every picture.  THE LOOK DROP
+     (Josh: "a fancy drop down … a 2x3 layout of buttons … center aligned and is allowed to overlap the main menu"): a pane of six tiles under
+     the LOOK button, each glyph in the math face and its word the hint — ρ · arg ψ · Im ψ / ● · ⊸ · φ; the Gol note's spring open and 120 ms
+     close, ← → ↑ ↓ move, Enter or a press picks and closes, Escape or a press elsewhere closes; the look in use is lit.  The molecular looks
+     are greyed on the ATOMIC deck (a lone atom has no bonds, and its potential is a monopole). */
+  const LOOKS = [['density', 'ρ', 'Density · ρ = |ψ|²'], ['phase', 'arg ψ', 'Phase · arg ψ on the colour wheel'], ['im', 'Im ψ', 'Imaginary part · Im ψ, signed'],
+    ['balls', '●', 'Balls · space-filling CPK spheres'], ['sticks', '⊸', 'Sticks · the bonds'], ['esp', 'φ', 'Electrostatic potential · φ on the surface']];
+  const ATOM_LOOKS = new Set(['density', 'phase', 'im']);
+  /* the glyph in the math face; ● and ⊸ are not in the shipped STIX subset (lab/fonts is never touched), so they are drawn, in the ink, at the em */
+  const SHAPES = { '●': '<circle cx="12" cy="12" r="6.5" fill="currentColor"/>', '⊸': '<path d="M3 12h11.5" stroke="currentColor" stroke-width="1.6" fill="none"/><circle cx="17.5" cy="12" r="3.2" stroke="currentColor" stroke-width="1.6" fill="none"/>' };
+  const glyph = (host, g) => { host.textContent = ''; if (SHAPES[g]) host.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${SHAPES[g]}</svg>`; else host.textContent = g; return host; };
   const lookOf = () => (prefs.look && prefs.look !== 'density' ? prefs.look : null);
-  const paintLooks = () => { for (const b of looks.children) { const on = b.dataset.look === (prefs.look || 'density'); b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); } };
-  for (const [id, word, tip] of LOOKS) { const b = el('button', 'mm-look', looks, word); b.type = 'button'; b.dataset.look = id; b.title = tip; b.setAttribute('role', 'radio');
-    b.addEventListener('click', () => { prefs.look = id; writePrefs(prefs); paintLooks();
-      for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) i.src = u; }, () => {}); }); }
-  paintLooks();
+  const drop = el('div', 'mm-lookdrop lw-menu', root); drop.hidden = true; drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');
+  const lookTiles = LOOKS.map(([id, glyph_, word], i) => { const b = el('button', 'mm-lk', drop); b.type = 'button'; b.dataset.look = id; b.setAttribute('role', 'radio'); b.style.setProperty('--i', String(i));
+    glyph(el('b', 'mm-lk-g', b), glyph_); b.addEventListener('click', () => { if (b.getAttribute('aria-disabled') === 'true') return; setLook(id); closeDrop(true); }); return b; });
+  function paintLooks() {
+    const cur = prefs.look || 'density', atomic = current && current.id === 'atomic';
+    for (const b of lookTiles) { const id = b.dataset.look, on = id === cur, off = atomic && !ATOM_LOOKS.has(id), word = LOOKS.find((x) => x[0] === id)[2];
+      b.classList.toggle('on', on); b.classList.toggle('off', off); b.setAttribute('aria-checked', String(on)); b.setAttribute('aria-disabled', String(off));
+      b.title = off ? word + ' — a lone atom: none to show' : word; b.setAttribute('aria-label', b.title); b.tabIndex = on ? 0 : -1; }
+    const L = LOOKS.find((x) => x[0] === cur) || LOOKS[0]; glyph(lookG, L[1]); lookB.title = 'Look of the pictures · ' + L[2]; lookB.setAttribute('aria-label', lookB.title);
+  }
+  function setLook(id) {
+    if (prefs.look === id) return; prefs.look = id; writePrefs(prefs); paintLooks();
+    for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) i.src = u; }, () => {});
+  }
+  let dropT = 0;
+  const outside = (e) => { if (!drop.contains(e.target) && !lookB.contains(e.target)) closeDrop(); };
+  function openDrop() {
+    if (!drop.hidden && !drop.classList.contains('out')) return;
+    clearTimeout(dropT); paintLooks(); drop.classList.remove('out'); drop.hidden = false;
+    const r = lookB.getBoundingClientRect(); drop.style.left = Math.round(r.left + r.width / 2) + 'px'; drop.style.top = Math.round(r.bottom + 10) + 'px';
+    drop.classList.remove('in'); void drop.offsetWidth; drop.classList.add('in'); lookB.setAttribute('aria-expanded', 'true');
+    addEventListener('pointerdown', outside, true);
+    (lookTiles.find((b) => b.classList.contains('on')) || lookTiles[0]).focus({ preventScroll: true });
+  }
+  function closeDrop(refocus) {
+    if (drop.hidden) return; removeEventListener('pointerdown', outside, true); lookB.setAttribute('aria-expanded', 'false');
+    drop.classList.remove('in'); drop.classList.add('out'); clearTimeout(dropT);
+    dropT = setTimeout(() => { drop.hidden = true; drop.classList.remove('out'); }, RM.matches ? 0 : 120);
+    if (refocus) lookB.focus({ preventScroll: true });
+  }
+  lookB.addEventListener('click', () => (drop.hidden || drop.classList.contains('out') ? openDrop() : closeDrop()));
+  drop.addEventListener('keydown', (e) => {
+    const k = lookTiles.indexOf(document.activeElement), d = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 3, ArrowUp: -3 }[e.key];
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeDrop(true); return; }
+    if (d && k >= 0) { e.preventDefault(); e.stopPropagation(); const n = lookTiles[(k + d + 6) % 6]; n.focus({ preventScroll: true }); if (n.getAttribute('aria-disabled') !== 'true') setLook(n.dataset.look); }
+  });
   const setHue = (deg, keep = true) => {
     prefs.hue = ((Math.round(deg) % 360) + 360) % 360; hueShown += ((prefs.hue - hueShown) % 360 + 540) % 360 - 180;
     document.documentElement.style.setProperty('--mol-hue', hueShown + 'deg');   // iteration 013 P2: on the page's root, so MOLECULES' picture (.mol-thumb) turns with the Picker's
@@ -514,8 +556,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   })();
 
   /* ── the tab under the reader's eye ── */
-  let current = sections[0];
-  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; root.dataset.sec = s.id; for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
+  let current = sections[0]; paintLooks();
+  const show = (s) => { if (!s) return; if (s !== current) say(null); current = s; atomOpt.hidden = s.id !== 'atomic'; molOpt.hidden = s.id === 'atomic'; root.dataset.sec = s.id; paintLooks(); for (const x of sections) x.b.classList.toggle('on', x === s); movePill(s.b); if (s.id === 'library') library.wake(); if (s.id !== 'atomic') readStore(); };
   { const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) show(sections.find((s) => s.sec === e.target)); }, { root: scroller, threshold: 0.55 }); for (const s of sections) io.observe(s.sec); }
   let rf = 0; const ro = new ResizeObserver(() => { if (!rf) rf = requestAnimationFrame(() => { rf = 0; if (!root.hidden) { for (const d of decks) d.lay(); movePill(current.b); } }); });   // observed only while the Picker is open
 
@@ -569,10 +611,11 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     }
     requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? [...table.children] : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
-  function close() { if (root.hidden) return; ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
+  function close() { if (root.hidden) return; closeDrop(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = () => (root.hidden ? open() : close());
-  root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } });
-  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !root.hidden) close(); });
+  const escape = () => (drop.hidden ? close() : closeDrop(true));   // M1: Escape puts THE LOOK DROP away first
+  root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !root.hidden) escape(); });
   /* the home button by the title: the kit's grid glyph */
   const home = el('button', 'lw-home', document.body); home.id = 'lwHome'; home.type = 'button'; chip(home, 'gallery', 'Picker'); home.title = 'Picker (L)';
   home.addEventListener('click', toggle);
