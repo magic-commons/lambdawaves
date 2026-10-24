@@ -123,7 +123,7 @@ const PRECACHE = [
   ['./img/icons/labels.svg',                                        'b609a92152c3'],
   ['./img/icons/library.svg',                                       'd8fe79bdc91d'],
   ['./img/icons/mass.svg',                                          'cf336b49d003'],
-  ['./img/icons/modulation.svg',                                    'ece29f1bebfe'],
+  ['./img/icons/modulation.svg',                                    '67a9e97ed3bc'],
   ['./img/icons/molecular.svg',                                     'd177d43d65bc'],
   ['./img/icons/plus.svg',                                          '642b2dd405d8'],
   ['./img/icons/render.svg',                                        '376aba87cd9f'],
