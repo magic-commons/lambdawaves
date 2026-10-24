@@ -44,6 +44,19 @@ Both are discrete identities on the cell-centred grid as well (summation by part
 - Next computations, all CPU: the same for water in 6-31G and 6-31G* from the volume rungs (the basis part should shrink, the exchange part not); the benzene ring packet (first many-electron instance); the time-dependent version where the Poisson solve runs once per frame in the app's GPU pass with its Neumann walls.
 - The app shortfall this exposes: the GPU Poisson pass's boundary condition decides whether a repaired FLOW carries the dipole rate; it must be the closed-wall one for the meter to read $+1$.
 
+## Later the same evening: up the ladder, and a ring (`leak_any.py`)
+
+Josh: "Let's do those next papers!" The same computation for any catalogue molecule and basis (PySCF RHF, Cartesian, the app's DOMAIN AUTO box; `--mol water --basis sto-3g` reproduces the pilot to $5\times10^{-8}$ in $q$). Results at $224^3$ (water) and $128^3$ / $160^3$ (benzene, which agree in every digit shown), in units of the dipole rate:
+
+| packet | $n_{\rm AO}$ | $q$ | $1-q$ | exchange part | basis part | $q'$ closed | $q'$ open | $\|c^*\|/\|j\|$ | time |
+|---|---|---|---|---|---|---|---|---|---|
+| water STO-3G | 7 | −1.3245 | 2.3245 | 0.562 | 1.763 | +1.000004 | −1.317 | 0.127 | 177 s |
+| water 6-31G | 13 | +0.7228 | 0.2772 | 0.464 | −0.187 | +0.99995 | +0.724 | 0.077 | 300 s |
+| water 6-31G* | 19 | +0.9200 | 0.0800 | 0.483 | −0.403 | +0.99994 | +0.920 | 0.084 | 376 s |
+| benzene STO-3G | 36 | +0.2841 | 0.7159 | 0.520 | 0.196 | +1 (13 digits) | +0.287 | 1.014 | 882 s |
+
+The plan's second kill clause ("if the 6-31G and 6-31G* rungs do not shrink the basis part while the exchange part holds, the split is an STO-3G accident") did not fire: the basis part collapses ($1.76\to-0.19\to-0.40$) and the exchange part holds ($0.56$, $0.46$, $0.48$). Benzene's π packet is the reverse case (73 % exchange; the orbitals vanish at the nuclei, 0.2 % of the leak's mass within 0.3 bohr of one; the leak smooth, so the midpoint rule is spectrally accurate and $q'=1$ to thirteen digits); its SCF's choice within each degenerate frontier pair differs between the grids, and $q$, the shares and $q'$ do not. These are Paper 3's Table 3 and Figures 2 and 3 (`figure_ladder.py`, `figure_any.py`).
+
 ## Files
 
 `leak_repair.py` (the computation; `python -I leak_repair.py N`), `figure.py` (the picture), `run_all.sh`, `leak_repair_N*.json` (every number above), `leak_repair_N*.png`. The field grids `fields_N*.npz` are regenerated, not kept in git.
