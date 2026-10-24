@@ -35,5 +35,4 @@ for a in ax:
     a.plot(R[0, 0], R[0, 2], 'o', color='white', ms=3.5); a.plot(R[1:, 0], R[1:, 2], '+', color='white', ms=6, mew=0.8)
     a.set_xlabel('$x$ (bohr)'); a.set_ylabel('$z$ (bohr)'); a.tick_params(length=2)
 cb = fig.colorbar(im, ax=ax[:3].tolist(), fraction=0.02, pad=0.01); cb.set_label(r'per unit $\sin\Delta\varepsilon t$  (a.u.)', color='white'); cb.ax.yaxis.set_tick_params(color='#aaa'); plt.setp(cb.ax.get_yticklabels(), color='#aaa')
-fig.suptitle(f'Water, STO-3G, the HOMO + LUMO packet: section $y=0$; dot O, crosses the H nuclei projected, dotted line the molecular plane; grid {N}³', y=0.995, fontsize=9)
 fig.savefig(os.path.join(HERE, f'leak_repair_N{N}.png'), facecolor='black', bbox_inches='tight'); print('wrote', f'leak_repair_N{N}.png')

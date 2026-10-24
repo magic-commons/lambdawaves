@@ -1,0 +1,14 @@
+{
+ "documents": [
+  {
+   "paper": "03-LEAK-AND-REPAIR",
+   "title": "The Leak and the Repair",
+   "words": 4381,
+   "equations": 6,
+   "tables": 3,
+   "references": 13,
+   "tex_sha256": "4a77b866e6ea6a57ae48351e47a22997cb6f56939b1c500f94124bfd42d28df4",
+   "md_sha256": "69e51178d578f93d4298a9730c7f1112f1a7c2c151b59c81b994b519db54e053"
+  }
+ ]
+}

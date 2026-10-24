@@ -10,12 +10,13 @@ Markdown conventions (all plain Markdown, readable in Obsidian):
 from pathlib import Path
 import re, json, hashlib, subprocess, sys, shutil, time
 ROOT = Path(__file__).resolve().parent.parent
-PAPERS = [('01-PLAYABLE-QUANTUM-FIELD', '01'), ('02-MOLECULAR-CURRENT', '02')]
-PAPERS = [(f, n) for f, n in PAPERS if (ROOT / f / 'MANUSCRIPT.md').exists()]
-EDITION = 'Draft 08'
+PAPERS = [('01-PLAYABLE-QUANTUM-FIELD', '01'), ('02-MOLECULAR-CURRENT', '02'), ('03-LEAK-AND-REPAIR', '03')]
+ONLY = [a for a in sys.argv[1:] if a.isdigit()]           # 'build_edition.py 03' builds one paper (its own edition)
+PAPERS = [(f, n) for f, n in PAPERS if (ROOT / f / 'MANUSCRIPT.md').exists() and (not ONLY or n in ONLY)]
+EDITIONS = {'01': 'Draft 08', '02': 'Draft 08', '03': 'Draft 01'}
 DATE = '24 October 2026'
-BYLINE = 'SOL-6.1 and Sonnet 5.5'
-SHORT = {'01': 'A Playable Quantum Field', '02': 'From Molecular Orbitals to Electronic Current'}   # running-head titles
+BYLINES = {'01': 'SOL-6.1 and Sonnet 5.5', '02': 'SOL-6.1 and Sonnet 5.5', '03': 'Fable 5.1'}
+SHORT = {'01': 'A Playable Quantum Field', '02': 'From Molecular Orbitals to Electronic Current', '03': 'The Leak and the Repair'}   # running-head titles
 PREAMBLE = r'''\documentclass[10pt,twocolumn]{article}
 \usepackage[letterpaper,margin=0.72in,columnsep=0.26in]{geometry}
 \usepackage[T1]{fontenc}
@@ -24,7 +25,7 @@ PREAMBLE = r'''\documentclass[10pt,twocolumn]{article}
 \usepackage{amsmath}
 \usepackage[libertine]{newtxmath}
 \usepackage{xcolor,graphicx,caption,sectsty,fancyhdr,hyperref,multicol}
-\graphicspath{{../assets/pdf/}{../figures/}}
+\graphicspath{{../assets/pdf/}{../figures/}{figures/}}
 \hypersetup{colorlinks=true,allcolors=white,pdfauthor={BYLINE},pdftitle={TITLE}}
 \allsectionsfont{\sffamily\bfseries\raggedright\hyphenpenalty=10000 }   % no hyphenated headings
 \captionsetup{font={small,sf},labelfont=bf}
@@ -98,6 +99,7 @@ def convert(folder, num):
     title = lines[0][2:]
     refs = [l[2:] for l in src.split('## References\n', 1)[1].splitlines() if l.startswith('- ')]
     BIB_MAP = {url: 'ref' + str(k) for k, l in enumerate(refs, 1) for url in re.findall(r'\]\((https?://[^)]+)\)', l)}
+    BYLINE = BYLINES[num]; EDITION = EDITIONS[num]
     assert lines[2] == 'by ' + BYLINE, ('byline line must read: by ' + BYLINE, lines[2])
     assert lines[4].startswith('Magic Commons · AI-generated technical paper · ' + EDITION + ' · ' + DATE), ('series line must start with the constants', lines[4])
     tex = PREAMBLE.replace('TITLE', plain(title.replace('λWAVES', 'lambdaWAVES'))).replace('BYLINE', BYLINE).replace('SHORT', plain(SHORT[num])).replace('EDITION', EDITION)
@@ -234,7 +236,7 @@ if __name__ == '__main__':
     if '--no-compile' not in sys.argv:
         res = [compile_one(f) for f, _ in PAPERS]; print(json.dumps(res, indent=1))
         (ROOT / 'output' / 'pdf').mkdir(parents=True, exist_ok=True)
-        names = {'01': '01-Lambdawaves-A-Playable-Quantum-Field.pdf', '02': '02-From-Molecular-Orbitals-to-Electronic-Current.pdf'}
+        names = {'01': '01-Lambdawaves-A-Playable-Quantum-Field.pdf', '02': '02-From-Molecular-Orbitals-to-Electronic-Current.pdf', '03': '03-The-Leak-and-the-Repair.pdf'}
         for (f, n), r_ in zip(PAPERS, res):
             if r_['ok']: shutil.copyfile(ROOT / f / 'MANUSCRIPT.pdf', ROOT / 'output' / 'pdf' / names[n])
     (ROOT / 'logs' / 'build_summary.json').write_text(json.dumps({'documents': docs}, indent=1))
