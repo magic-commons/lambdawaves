@@ -276,8 +276,8 @@ export async function createController(app) {
     if (opt && opt.hand && app.state.stageText) app.state.stageText.say('preset', mdText(p.label));   // the label as text: markdown's specials escaped
     for (const key of Object.keys(rotRate)) setRotationRate(key, 0);
     reg.load(p); clock.reset(); app.state.lastNmax = -1;
-    clock.window = p.visual.window;
-    if (app.state.applyVisuals) { clock.setRate(app.loop.paceRate(p.visual.rate)); { const w = waveView(p.visual.view) || 'density'; mat.view = VIEW[w]; ui.viewSeg.set(w); } ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
+    if (p.visual) clock.window = p.visual.window;   // iteration 015 S4: a reader's preset (lab/spectrum.js) carries no visuals — it is the labels and that's it
+    if (app.state.applyVisuals && p.visual) { clock.setRate(app.loop.paceRate(p.visual.rate)); { const w = waveView(p.visual.view) || 'density'; mat.view = VIEW[w]; ui.viewSeg.set(w); } ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
     ui.presetSel.value = id; ui.presetSel.note = p.note;
     setReference();
     app.w.spectrum.select(-1);

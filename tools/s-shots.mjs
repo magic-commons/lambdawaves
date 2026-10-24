@@ -31,6 +31,22 @@ try {
         return [Math.round(r.height), row ? [...row.children].filter((c) => c.offsetWidth).map((c) => c.className.split(' ')[0] + ':' + c.offsetWidth).join(' ') + ' | row ' + row.clientWidth : ''];`);
     }
     await g.ev(`const t = document.getElementById('transport'); if (t) t.style.visibility = 'hidden'; return 1;`); await wait(300);   // the picture is the card's
+  } else if (scene === 'preset') {   // S4: 1s + 2p_z saved as MY DIPOLE, another preset loaded, then MY DIPOLE from the list; the list left open for the picture
+    await float('spectrum', 560, 10, 320); await wait(800);
+    info = await g.ev(`const d = document.querySelector('.dev[data-id="spectrum"]'), w = (ms) => new Promise((r) => setTimeout(r, ms));
+      d.querySelector('.sp-presave').click(); await w(100); const f = d.querySelector('.sp-prename'), asked = f ? f.value : null;
+      f.value = 'MY DIPOLE'; f.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); await w(200);
+      const stored = localStorage.getItem('lambdawaves.q0.presets'), shown = d.querySelector('.sp-preset .mir-step-text').textContent;
+      __LW.ui ? 0 : 0; d.querySelector('.sp-preset .mir-step-name').click(); await w(200);
+      const pick = (id) => { const b = document.querySelector('.mir-pick-i[data-id="' + id + '"]'); if (b) b.click(); return !!b; };
+      pick('3dz2'); await w(400); const after3d = __LW.reg.populated().length;
+      d.querySelector('.sp-preset .mir-step-name').click(); await w(200); const rows = [...document.querySelectorAll('.mir-pick-i')].map((b) => b.dataset.id);
+      pick('user:MY DIPOLE'); await w(500); const back = __LW.reg.populated(), provenance = __LW.reg.preset, value = d.querySelector('.sp-preset .mir-step-text').textContent;
+      const s = d.querySelector('.sp-presave').getBoundingClientRect();
+      return { asked, stored, shown, after3d, rows: rows.slice(0, 5), back, provenance, value, save: [s.left, s.top, s.width, s.height].map(Math.round) };`);
+    await g.ev(`const t = document.getElementById('transport'); if (t) t.style.visibility = 'hidden'; return 1;`); await wait(300);
+    writeFileSync(OUT.replace(/\.png$/, '-a.png'), Buffer.from(await g.snap(), 'base64'));   // the row: ‹ MY DIPOLE › and the glyph
+    await g.ev(`document.querySelector('.dev[data-id="spectrum"] .sp-preset .mir-step-name').click(); return 1;`); await wait(400);
   } else if (scene === 'fill') {
     /* SPECTRUM's button as it stands (1s + 2p: EMPTY), then pressed (FILL ALL); then the register's ORBITAL pane on water — each shot's rect printed */
     const read = () => g.ev(`return [...document.querySelectorAll('.reg-fill')].filter((b) => b.getBoundingClientRect().width).map((b) => { const r = b.getBoundingClientRect();

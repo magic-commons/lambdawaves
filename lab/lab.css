@@ -999,6 +999,20 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .native-clean .row > .trig.lw-fold { flex: 0 0 30px; }
 .sp-preset > .mir-step { flex: 1 1 auto; }
 .native-clean .sp-head > .sw { padding: 0 3px; font-size: 9px; min-width: 0; gap: 4px; justify-content: center; }
+/* § iteration 015 S4 · SAVE A PRESET (lab/spectrum.js): the bare save glyph in a 26-px seat beside the stepper (no chrome: the mod window's .m2presave
+   way), the name asked in the stepper's own seat, and the list's USER / PRESETS headings and each reader's × */
+.dev .row.sp-preset { gap: 4px; flex-wrap: nowrap; }
+.dev .row.sp-preset > .mir-step { min-width: 0; }
+.sp-preset > .sp-presave { flex: 0 0 26px; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: var(--acc); opacity: .8; cursor: pointer;
+  -webkit-mask: url(img/icons/save.svg) center / 20px no-repeat; mask: url(img/icons/save.svg) center / 20px no-repeat; }
+.sp-preset > .sp-presave:hover, .sp-preset > .sp-presave:focus-visible { opacity: 1; }
+.sp-preset .mir-step-name[hidden] { display: none; }
+.sp-preset .sp-prename { flex: 1 1 auto; min-width: 0; height: 30px; padding: 0 8px; box-sizing: border-box; font: inherit; font-size: var(--fs-small); text-align: center; color: var(--fg);
+  background: transparent; border: 1px solid var(--acc); border-radius: var(--r-md); outline: none; }
+.mir-pick-i.coming[data-id="#user"], .mir-pick-i.coming[data-id="#built"] { font-size: var(--fs-micro); letter-spacing: var(--tr-wider, .12em); opacity: .6; cursor: default; }
+.mir-pick-i:has(> .sp-prex) { display: flex; align-items: center; gap: 14px; }
+.mir-pick-i > .sp-prex { margin-left: auto; padding: 0 4px; font-size: 14px; line-height: 1; opacity: .55; cursor: pointer; }
+.mir-pick-i > .sp-prex:hover { opacity: 1; color: var(--acc); }
 /* § iteration 015 S1 · THE COMPACT HAMILTONIAN (windows/spectrum.js): the group's head is its label and the fold's chevron; inside, ‹ SYSTEM › and one
    tight row per system — 52-px knobs, a knob-sized seg (`.sp-vseg`: its options in a column) and LAUNCH / BOUNCE as two small trigs in one column */
 .dev[data-id="spectrum"] .sp-ham > .lw-field-head { margin: 2px 0; }
