@@ -1004,11 +1004,12 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
    way), the name asked in the stepper's own seat, and the list's USER / PRESETS headings and each reader's × */
 .dev .row.sp-preset { gap: 4px; flex-wrap: nowrap; }
 .dev .row.sp-preset > .mir-step { min-width: 0; }
-.sp-preset > .sp-presave { flex: 0 0 26px; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: var(--acc); opacity: .8; cursor: pointer;
+:is(.sp-preset, .mir-ramp-presets) > .sp-presave { flex: 0 0 26px; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: var(--acc); opacity: .8; cursor: pointer;
   -webkit-mask: url(img/icons/save.svg) center / 20px no-repeat; mask: url(img/icons/save.svg) center / 20px no-repeat; }
-.sp-preset > .sp-presave:hover, .sp-preset > .sp-presave:focus-visible { opacity: 1; }
-.sp-preset .mir-step-name[hidden] { display: none; }
-.sp-preset .sp-prename { flex: 1 1 auto; min-width: 0; height: 30px; padding: 0 8px; box-sizing: border-box; font: inherit; font-size: var(--fs-small); text-align: center; color: var(--fg);
+:is(.sp-preset, .mir-ramp-presets) > .sp-presave:is(:hover, :focus-visible) { opacity: 1; }
+:is(.sp-preset, .mir-ramp-presets) .mir-step-name[hidden] { display: none; }
+.mir-ramp-presets > .mir-ramp-step { flex: 1 1 auto; min-width: 0; }   /* 015 P3: the stepper narrows for the save glyph */
+:is(.sp-preset, .mir-ramp-presets) .sp-prename { flex: 1 1 auto; min-width: 0; height: 30px; padding: 0 8px; box-sizing: border-box; font: inherit; font-size: var(--fs-small); text-align: center; color: var(--fg);
   background: transparent; border: 1px solid var(--acc); border-radius: var(--r-md); outline: none; }
 .mir-pick-i.coming[data-id="#user"], .mir-pick-i.coming[data-id="#built"] { font-size: var(--fs-micro); letter-spacing: var(--tr-wider, .12em); opacity: .6; cursor: default; }
 .mir-pick-i:has(> .sp-prex) { display: flex; align-items: center; gap: 14px; }
