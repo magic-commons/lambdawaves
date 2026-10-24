@@ -14,13 +14,24 @@ Paper 2 found that the frozen water packet's net current runs *against* the moti
 
 Second: Berry's knotted zeros of hydrogen need $n\ge7$ for the trefoil, and the register has had $n=7$ since iteration 008. Nobody has drawn Berry's knot in an instrument you can turn.
 
+## Done since this note was written: the pilot ran (evening)
+
+Your "continue with whatever you think is next" was read as the authorisation in call 5. The computation ran on the CPU at nice 19 (two threads, 177 s at 224³), the solvers untouched; everything is post-processing of the exported water record. Record and figure: `PUBLICATIONS & DRAFTING/CLAUDE YAN — THE LEAK AND THE REPAIR PILOT — 2026-10-24/` (repo: `research/papers-2026-10-24/leak/`).
+
+1. **The prediction holds, with a correction that improves the paper.** The repaired net current is $q'=+1.000004$ times the dipole rate (from $-1.32$) when the repair is confined to the box (no flux through the walls, the app's own boundary). With open walls it stays at $q'=-1.317$: the missing dipole rate leaves as wall flux. In free space the minimal repair keeps one third. The plan's Lemma B had assumed a decay the minimal repair does not have; its own kill clause caught it, and both lemmas are rewritten in §3.1.
+2. **A new number.** The leak's first moment is 0.76 finite basis and 0.24 frozen exchange: STO-3G, not the frozen exchange, is the main reason water's net current runs against its centre. The basis part sits on the nuclei, the exchange part is diffuse.
+3. **The repair is small, the reversal large.** The repair's norm is 0.13 of the current's.
+4. **Checks.** The first moment by quadrature matches its analytic value to $2\times10^{-7}$; the grid exchange operator matches PySCF's two-electron integrals to $4\times10^{-6}$; the discrete identities hold to $10^{-14}$.
+
+**New call 9.** The next pilots are the same computation on water's 6-31G and 6-31G* rungs (does the basis part shrink while the exchange part holds?) and on benzene's ring packet; both CPU, both post-processing of records the volumes already hold. Say the word and they run. And for the app: the GPU Poisson pass's wall condition decides whether a repaired FLOW carries the dipole rate; it has to be the closed-wall one.
+
 ## Your calls
 
 1. **Byline of Draft 08.** Recommendation: keep "by SOL-6.1 and Sonnet 5.5" and name the pass in the series line and Credits, as done; or add Fable 5.1. Your rule was that the model receives paper credit; three models have now written on these papers.
 2. **Adopt Draft 08 whole, or merge it into Draft 07.** Recommendation: adopt whole; the checker proves nothing quantitative moved, and the review edition stays untouched beside it.
 3. **Confirm the six added references** before any posting (titles, authors, venues and years were verified by search today; DOIs were not pulled).
 4. **Which paper next.** Recommendation: 3.1 (the leak and the repair), then 3.2 (Berry's knots). 3.3 (the 118 atoms) and 3.4 (the volumes) are data papers that can follow when you want them; 3.4 waits for the queue and your live-tree runs.
-5. **Authorise the CPU computation for 3.1's first figures.** It needs the exported H₂O/STO-3G solution already in the review's `figures/source-captures/`, PySCF on the CPU for `int1e_grids` over orbital pairs, and a Poisson solve. No solver, no GPU, no new solve. I would run it in a scratch tree and report the number before touching the app.
+5. **~~Authorise the CPU computation for 3.1's first figures.~~ Done this evening on your word; see above.** It needed only the exported H₂O/STO-3G solution already in the review's `figures/source-captures/`, PySCF on the CPU for `int1e_grids` over orbital pairs, and a Poisson solve. No solver, no GPU, no new solve. I would run it in a scratch tree and report the number before touching the app.
 6. **Public record.** Recommendation: the posted edition carries `verification/` and the work ledger; it is the only answer to "how do you know" that costs us nothing.
 7. **The critics.** Recommendation: do not cite the October argument anywhere in the papers. The craft should show.
 8. **Two shortfalls found by the Codex reader, for when you are back at the app:** `chemview.js` calls `flow.setFloor(0, …)`, so FLOW's assessed floor collapses to the fixed $10^{-7}$; and the shipped BALANCED face-flux repair can leave pointwise velocity about 50 % off (Codex Round 37). Both are rows for a later iteration, not for today.
