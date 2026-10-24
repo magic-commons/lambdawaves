@@ -3,6 +3,13 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.26)
+- **THE PILL OUTSIDE** (015 H1): the scroll pill floats beside the window over the stage, at the title bar's height, `PILL.gap` (8 px)
+  clear of the card's inner edge — or of the seated scrollbar's thumb, or of the rack's inner edge where a native bar shows — with a
+  6-px tail (a turned square, `.rack-pill::before`) pointing at the window, the name whole (`width: max-content`, no ellipsis), its mask
+  opening from the tail. Replaces 014 A11's eyebrow seat. Files: `shell/rack-scrollbar.js` `createRackPills`, `shell/rack.css`. Why:
+  Josh 10-23, "Do not let the bubble touch or overlap the rack window".
+
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
 - **THE REVERSED KNOB** (014 D5): `knob({ reverse: true })` turns the dial the other way — the needle (and a modulated base tick) reads max
   at the left, a rise, ArrowUp / ArrowRight or PageUp move it right and lower the value; the value, `min` / `max`, `aria-value*`, `spec` (a
