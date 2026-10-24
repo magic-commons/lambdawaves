@@ -181,7 +181,7 @@ export function createModSeam(app) {
         if (H.registry.isModulated('chem.orbital')) H.clock.applyAll(true);
         mod.stamp(); if (app.state.modView) app.state.modView.rebuild(); }); }
 
-    let trSeat = 'bottom', trMoving = false;
+    let trSeat = 'bottom', trMoving = false, dodgeAgain = 0;
     function seatRect(where, w, h) {
       const vw = window.innerWidth, vh = window.innerHeight;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
@@ -200,7 +200,9 @@ export function createModSeam(app) {
       occlusion.dirty();   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
       if (!t || !t.classList.contains('mini') || t.dataset.place === 'free') return;   // iteration 014 A4: the FREE window is the hand's, never dodged
-      if (trMoving) { if (!rs.length) setTimeout(() => modDodge(rect, who), 320); return; }
+      /* 015 T6 · A DODGE ASKED MID-MOVE IS KEPT, NOT DROPPED: the last one re-asks once the move has landed (before, only a report with no window
+         open was retried, so a window that opened while the pill travelled could land on top of it) */
+      if (trMoving) { clearTimeout(dodgeAgain); dodgeAgain = setTimeout(() => modDodge(dodging.mod || null, 'mod'), 320); return; }
       if (document.body.classList.contains('rack-hidden')) return;   // it is already parked off-screen
       /* OPTIMIZATION 2026-09-24 · N8 · A CLOSED WINDOW HAS NOTHING TO DODGE, AND ASKING COST THE BOOT A LAYOUT.  A closed
          modulation window reports the origin's empty rect (the kit's window.js place(); `closed` sends −1s).  No seat can hit a
