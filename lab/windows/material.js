@@ -173,6 +173,7 @@ export function createMaterial(app) {
        "reload the chosen preset") · REVERSE; the bottom row is ADD (the plus icon) · INVERT · the selected stop's swatch and × · ROTATE */
     const resetEl = rv.root.querySelector('.mir-ramp-reset'), [addEl, revEl] = verbs.querySelectorAll(':scope > .trig'), rotEl = verbs.querySelector(':scope > .k');
     chip(resetEl, 'undo', 'RELOAD'); rowOn.append(resetEl, revEl);
+    revEl.classList.add('pal-rev'); revEl.replaceChildren(el('span', 'lw-icon lw-icon-reverse')); revEl.setAttribute('aria-label', 'REVERSE'); revEl.title = 'REVERSE · run the ramp backwards';   // iteration 015 P2: the word is the hint
     rotEl.appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
     ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
     verbs.insertBefore(ui.invertSw.root, rotEl); verbs.insertBefore(rv.root.querySelector('.mir-ramp-sel'), rotEl);

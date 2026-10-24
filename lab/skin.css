@@ -940,7 +940,8 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 /* PALETTE: ADD is the plus icon (lab/img/icons/plus.svg, drawn in the ink by a mask) */
 .lw-icon { display: inline-block; width: 18px; height: 18px; background: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
 .lw-icon-plus { --icon: url("img/icons/plus.svg"); }
-.native-clean[data-id="palette"] .pal-add { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
+.lw-icon-reverse { --icon: url("img/icons/reverse.svg"); }   /* iteration 015 P2: REVERSE, two counter-pointing arrows */
+.native-clean[data-id="palette"] .pal-add, .native-clean[data-id="palette"] .pal-rev { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
 .native-clean[data-id="palette"] .mir-ramp-verbs { flex-wrap: nowrap; }
 .native-clean[data-id="palette"] .mir-ramp-verbs > .mir-ramp-sel { flex: 0 0 auto; }
 /* WAVE: POSITION | MOMENTUM is hidden while MOLECULES owns the field (inert there: windows/molecules.js) — its row goes with it */
