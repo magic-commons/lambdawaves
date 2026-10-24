@@ -25,9 +25,10 @@ try {
       const body = d.querySelector('.dev-body'), kids = [...body.children].filter((k) => !k.hidden && getComputedStyle(k).display !== 'none').map((k) => k.tagName.toLowerCase() + '.' + [...k.classList].slice(0, 3).join('.'));
       return { order: kids, fold: !!f, card: Math.round(d.getBoundingClientRect().height) };`);
     info.groupH = {};
-    for (const id of ['atom', 'well', 'hydrogen']) {
+    for (const id of ['atom', 'well', 'hydrogen', ...(process.env.SYS ? [process.env.SYS] : [])]) {   // SYS=well: the picture under that system
       await g.ev(`__LW.setHamiltonian(${JSON.stringify(id)}); return 1;`); await wait(700);
-      info.groupH[id] = await g.ev(`${HAM} const r = grp.getBoundingClientRect(); return Math.round(r.height);`);
+      info.groupH[id] = await g.ev(`${HAM} const r = grp.getBoundingClientRect(), row = [...grp.querySelectorAll('.sp-ham-body > .row')].filter((x) => !x.hidden && x.offsetHeight).pop();
+        return [Math.round(r.height), row ? [...row.children].filter((c) => c.offsetWidth).map((c) => c.className.split(' ')[0] + ':' + c.offsetWidth).join(' ') + ' | row ' + row.clientWidth : ''];`);
     }
     await g.ev(`const t = document.getElementById('transport'); if (t) t.style.visibility = 'hidden'; return 1;`); await wait(300);   // the picture is the card's
   } else if (scene === 'fill') {
