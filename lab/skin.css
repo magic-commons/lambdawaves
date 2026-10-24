@@ -982,13 +982,17 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 /* PALETTE: ADD is the plus icon (lab/img/icons/plus.svg, drawn in the ink by a mask) */
 .lw-icon { display: inline-block; width: 18px; height: 18px; background: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
 .lw-icon-plus { --icon: url("img/icons/plus.svg"); }
-.native-clean[data-id="palette"] .pal-add { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
+.lw-icon-reverse { --icon: url("img/icons/reverse.svg"); }   /* iteration 015 P2: REVERSE, two counter-pointing arrows */
+.native-clean[data-id="palette"] .pal-add, .native-clean[data-id="palette"] .pal-rev { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
 .native-clean[data-id="palette"] .mir-ramp-verbs { flex-wrap: nowrap; }
 .native-clean[data-id="palette"] .mir-ramp-verbs > .mir-ramp-sel { flex: 0 0 auto; }
 /* WAVE: POSITION | MOMENTUM is hidden while MOLECULES owns the field (inert there: windows/molecules.js) — its row goes with it */
 .native-clean[data-id="observer"] .wave-row-0:not(:has(> :not([hidden]))) { display: none; }
 /* iteration 012 R4 · THE PALETTE DROPDOWN: the Picker's surface (.lw-menu above), short rows, each palette's strip at the right edge */
-.mir-pick.pal-pick { gap: 0; padding: 6px; }
+.mir-pick.pal-pick { gap: 0; padding: 6px; scrollbar-gutter: stable; }   /* P1: the scrollbar beside the rows, never out of the names' width (Firefox) */
 .mir-pick.pal-pick .mir-pick-i { min-height: 24px; padding: 0 8px; gap: 14px; justify-content: space-between; text-align: left; }   /* iteration 014 D4: the name left, the strip right */
-.mir-pick.pal-pick .pal-strip { flex: 0 0 72px; height: 10px; margin-left: auto; border-radius: 5px; box-shadow: inset 0 0 0 1px hsl(0 0% 50% / .25); }
+/* iteration 015 P1 (Josh: "Align them"): the strip has a WIDTH, not only a flex basis — Firefox sized the pane from the names alone (an empty <i>'s
+   intrinsic width is 0 whatever its basis), so each strip trailed its name and the column zig-zagged; the name is its own item, ellipsised if the pane is narrow */
+.mir-pick.pal-pick .pal-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.mir-pick.pal-pick .pal-strip { flex: 0 0 72px; width: 72px; height: 10px; margin-left: auto; border-radius: 5px; box-shadow: inset 0 0 0 1px hsl(0 0% 50% / .25); }
 @media (pointer: coarse) { .mir-pick.pal-pick .mir-pick-i { min-height: 34px; } }

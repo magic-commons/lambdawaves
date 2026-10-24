@@ -1,7 +1,7 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, ATOM_STYLES, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js';
+import { el, knob, sw, seg, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
@@ -48,7 +48,7 @@ export function createMaterial(app) {
       { id: 'balls', label: 'BALLS', title: 'The molecule as space-filling CPK balls (van der Waals radii × SIZE), no sticks' },   // iteration 014 B1 (STYLE 9)
       { id: 'sticks', label: 'STICKS', title: 'The molecule as 3D sticks, each half in its atom’s colour (RADIUS)' },                // B2 (STYLE 10)
       { id: 'esp', label: 'ESP', title: 'THE POTENTIAL MAP: φ(r) = Σ Z/|r − R| − ∫ρ/|r − r′| painted on the density’s ISO surface, the SAS or the SES — red negative, blue positive' }],   // B3 (STYLE 11)
-      onChange: (v) => { mat.style = STYLE[drawStyle(v)]; atomDrawSync(); schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE
+      onChange: (v) => { mat.style = STYLE[drawStyle(v)]; styleSync(); schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE
     rd.appendChild(ui.styleSeg.root).dataset.keyAction = 'style';
     /* 2026-09-10 (Josh): ISO, GRAIN and KNEE sit directly under EXPOSURE, SOFT and HUE — one six-knob
        material row above STYLE — instead of a second row below the style seg. */
@@ -61,44 +61,52 @@ export function createMaterial(app) {
     ui.atomSizeK = knob({ label: 'SIZE', min: 0.2, max: 1.5, value: 1, fmt: pctF, title: 'BALLS: the van der Waals radius × SIZE (100 % is space-filling CPK)', onInput: (v) => { mat.atomSize = v; schedule(TIER.PRESENT); } });
     ui.stickK = knob({ label: 'RADIUS', min: 0.1, max: 1.2, value: STICK_R, log: true, fmt: (v) => v.toFixed(2), title: 'STICKS (and the sticks inside ESP): the stick radius in bohr', onInput: (v) => { mat.stickR = v; schedule(TIER.PRESENT); } });
     ui.probeK = knob({ label: 'PROBE', min: 0.5, max: 5, value: PROBE_R, fmt: (v) => v.toFixed(2), title: 'ESP · SAS / SES: the probe radius in bohr (2.65 = water’s 1.4 Å)', onInput: (v) => { mat.probe = v; schedule(TIER.PRESENT); } });
-    ui.espRangeK = knob({ label: 'RANGE', min: 0.005, max: 0.5, value: ESP_RANGE, log: true, fmt: au, title: 'ESP: the colour map spans ±RANGE hartree/e; beyond it the colour holds', onInput: (v) => { mat.espRange = v; atomDrawSync(); schedule(TIER.PRESENT); } });
+    ui.espRangeK = knob({ label: 'RANGE', min: 0.002, max: 2, value: ESP_RANGE, log: true, fmt: au, title: 'ESP: the colour map spans ±RANGE hartree/e through a signed log (the middle a real band, the ends only near ±RANGE); beyond it the colour holds', onInput: (v) => { mat.espRange = v; styleSync(); schedule(TIER.PRESENT); } });
     ui.espSurfSeg = seg({ aria: 'potential surface', value: 'iso', options: [
       { id: 'iso', label: 'ISO', title: 'the density’s own surface, ρ = ISO/30 a.u. (0.002 at the default ISO)' },
       { id: 'sas', label: 'SAS', title: 'the solvent-accessible surface: the van der Waals spheres grown by PROBE' },
       { id: 'ses', label: 'SES', title: 'the solvent-excluded surface: the van der Waals spheres with their crevices filled by the probe' }],
-      onChange: (v) => { mat.espSurf = v; atomDrawSync(); schedule(TIER.PRESENT); } });
-    ui.espPalSw = sw({ label: 'USE PALETTE', value: false, title: 'ESP: colour the map (and its bar) with the active PALETTE instead of the standard red → blue', onChange: (on) => { mat.espPal = on; atomDrawSync(); schedule(TIER.PRESENT); } });
-    ui.espLiveSw = sw({ label: 'LIVE · SLOW', value: false, title: 'ESP: solve φ again on every new density (a running molecule); off, at most once a second', onChange: (on) => { mat.espLive = on; schedule(TIER.PRESENT); } });
-    { const r = el('div', 'row tight', gd); for (const k of [ui.atomSizeK, ui.stickK, ui.probeK, ui.espRangeK]) r.appendChild(k.root); const r2 = el('div', 'row tight', gd); for (const k of [ui.espSurfSeg, ui.espPalSw, ui.espLiveSw]) r2.appendChild(k.root); }
-    /* the map's COLOUR BAR (Josh's answer 3): vertical, beside the map at the free stage's right, five numbers (±RANGE, ±RANGE/2, 0); USE PALETTE puts
-       the active ramp in it too; HUE turns it as it turns the map */
+      onChange: (v) => { mat.espSurf = v; styleSync(); schedule(TIER.PRESENT); } });
+    ui.espLiveSw = sw({ label: 'LIVE · SLOW', value: false, title: 'ESP: solve φ again while the density moves (RUN, a beating register), at most once a second — slow; off, φ is solved once per molecule, basis and VIEW', onChange: (on) => { mat.espLive = on; schedule(TIER.PRESENT); } });
+    { const r = el('div', 'row tight', gd); for (const k of [ui.atomSizeK, ui.stickK, ui.probeK, ui.espRangeK]) r.appendChild(k.root); const r2 = el('div', 'row tight', gd); for (const k of [ui.espSurfSeg, ui.espLiveSw]) r2.appendChild(k.root); }
+    /* the map's COLOUR BAR (Josh's answer 3): vertical, beside the map at the free stage's right, five numbers — the signed log's inverse at s = ±1, ±½, 0
+       (iteration 015 W3: ±RANGE, ±RANGE·(√21 − 1)/20, 0); PALETTE ON puts the palette in it from its first stop to its last, as the map reads it (W2);
+       HUE turns it as it turns the map */
     const bar = el('div', 'lw-espbar', app.dom.stage); bar.hidden = true; bar.setAttribute('aria-hidden', 'true');
     const barRamp = el('i', 'lw-espbar-ramp', bar), barNums = [0, 1, 2, 3, 4].map((i) => { const n = el('span', 'lw-espbar-n', bar); n.style.top = (i * 25) + '%'; return n; });
     el('span', 'lw-espbar-u', bar).textContent = 'φ · a.u.';
     let barTimer = 0;
     const barSeat = () => { const r = app.host.rack, rr = r && !r.hidden && r.querySelector('.dev:not(.closed):not([hidden])') ? r.getBoundingClientRect() : null, sb = app.dom.stage.getBoundingClientRect();
       bar.style.right = Math.max(16, rr && rr.left > sb.left + sb.width / 2 && rr.left < sb.right ? sb.right - rr.left + 16 : 16) + 'px'; };
-    function atomDrawSync() {
-      const st = mat.style | 0, atoms = ATOM_STYLES.includes(st), esp = st === STYLE.esp;
-      const r1 = ui.atomSizeK.root.parentElement, r2 = ui.espSurfSeg.root.parentElement; if (r1) r1.hidden = !atoms; if (r2) r2.hidden = !esp;
-      ui.atomSizeK.setDisabled(st !== STYLE.balls); ui.stickK.setDisabled(st === STYLE.balls); ui.probeK.setDisabled(!esp || (mat.espSurf || 'iso') === 'iso'); ui.espRangeK.setDisabled(!esp);
+    /* iteration 015 W1 · THE KNOBS FOLLOW THE STYLE (Josh: "Allow the knobs to be dynamically shown"): a WAVE control is shown only while the drawn
+       style reads it — the table is RENDER_WGSL's own reads (SOFT is the power w = ρ^SOFT, which SOLID · SIGNED · SHELL · SHELL ± overwrite; KNEE is the
+       transmittance T_q, which ADD and the atom styles skip; ISO under ESP is its ISO surface's) — and the rows re-flow; nothing is dimmed */
+    const S_ = STYLE, VOL = [S_.cloud, S_.solid, S_.signed, S_.bands, S_.dust, S_.glass, S_.glassSigned];
+    const STYLE_READS = { isoK: [S_.solid, S_.signed, S_.bands, S_.glass, S_.glassSigned, S_.esp], kneeK: VOL, softK: [S_.cloud, S_.bands, S_.dust, S_.additive], grainK: [S_.dust],
+      atomSizeK: [S_.balls], stickK: [S_.sticks, S_.esp], probeK: [S_.esp], espRangeK: [S_.esp], espSurfSeg: [S_.esp], espLiveSw: [S_.esp] };
+    function styleSync() {
+      const st = mat.style | 0, esp = st === STYLE.esp, surf = mat.espSurf || 'iso';
+      for (const [k, on] of Object.entries(STYLE_READS)) ui[k].root.hidden = !on.includes(st) || (esp && ((k === 'probeK' && surf === 'iso') || (k === 'isoK' && surf !== 'iso')));
+      for (const r of [ui.atomSizeK.root.parentElement, ui.espSurfSeg.root.parentElement]) if (r) r.hidden = ![...r.children].some((c) => !c.hidden);
       bar.hidden = !esp;
       if (esp) {
-        const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, st2 = mat.espPal && app.state.palette ? [...app.state.palette.stops].sort((a, b) => a.at - b.at) : null;
-        barRamp.style.background = 'linear-gradient(to top, ' + (st2 ? st2.map((q) => rgbToHex(q.rgb) + ' ' + (q.at * 100).toFixed(1) + '%').join(', ') : ESP_RAMP.join(', ')) + ')';
+        const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, h = R * (Math.sqrt(21) - 1) / 20, st2 = mat.paletteOn ? palSorted() : null, a = st2 && st2[0].at, w = st2 && (st2[st2.length - 1].at - a || 1);
+        barRamp.style.background = st2 ? 'linear-gradient(to top in oklab, ' + st2.map((q) => rgbToHex(q.rgb) + ' ' + ((q.at - a) / w * 100).toFixed(1) + '%').join(', ') + ')' : 'linear-gradient(to top, ' + ESP_RAMP.join(', ') + ')';
         barRamp.style.filter = mat.hueShift ? `hue-rotate(${Math.round(mat.hueShift * 360)}deg)` : '';
-        [R, R / 2, 0, -R / 2, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3); });
+        [R, h, 0, -h, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3); });
         barSeat(); if (!barTimer) barTimer = setInterval(() => { if (bar.hidden) { clearInterval(barTimer); barTimer = 0; } else barSeat(); }, 500);
       }
     }
     /* a restore: the knobs from `mat` (an absent key is the default and leaves `mat`), then the rows and the bar */
-    ui.atomDrawSync = (pm) => {
-      if (pm) for (const k of ['atomSize', 'stickR', 'probe', 'espRange', 'espSurf', 'espPal', 'espLive']) if (!(k in pm)) delete mat[k];
+    ui.styleSync = (pm) => {
+      if (pm) for (const k of ['atomSize', 'stickR', 'probe', 'espRange', 'espSurf', 'espLive']) if (!(k in pm)) delete mat[k];
+      delete mat.espPal;   // iteration 015 W2: USE PALETTE is gone — PALETTE ON paints the map — so an older file's key leaves on every road in
       ui.atomSizeK.set(Number.isFinite(mat.atomSize) ? mat.atomSize : 1); ui.stickK.set(Number.isFinite(mat.stickR) ? mat.stickR : STICK_R); ui.probeK.set(Number.isFinite(mat.probe) ? mat.probe : PROBE_R);
-      ui.espRangeK.set(Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE); ui.espSurfSeg.set(mat.espSurf || 'iso'); ui.espPalSw.set(!!mat.espPal); ui.espLiveSw.set(!!mat.espLive);
-      atomDrawSync();
+      ui.espRangeK.set(Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE); ui.espSurfSeg.set(mat.espSurf || 'iso'); ui.espLiveSw.set(!!mat.espLive);
+      styleSync();
     };
-    { const set0 = ui.styleSeg.set; ui.styleSeg.set = (v) => { set0(v); atomDrawSync(); }; }   // LW.setStyle and a restore set mat.style first
+    { const set0 = ui.styleSeg.set; ui.styleSeg.set = (v) => { set0(v); styleSync(); }; }   // LW.setStyle and a restore set mat.style first
+    styleSync();   // the first paint: the boot's style shows only its own controls
     el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL, SIGNED and SHELL ± surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
 
     const gs = group(wClip.body, 'observer only');
@@ -141,7 +149,7 @@ export function createMaterial(app) {
        grouped order; the table is palette.js toLUT bit for bit.  PALETTE (on/off, the `palette` key) stays the app's switch, and the
        stops ride λWAVES' own project (`project: false`); `palette` keeps the editor's old API for serialize/restore, the link and LW. */
     const gp = group(wPal.body, 'COLOUR');
-    const palOn = (v) => { mat.paletteOn = v; applyAccent(); if (v) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } schedule(TIER.PRESENT); };
+    const palOn = (v) => { mat.paletteOn = v; applyAccent(); if (v) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } styleSync(); schedule(TIER.PRESENT); };
     const palSay = (t) => { if (app.state.stageText) app.state.stageText.say('style', t); };   // iteration 007: a hand's PALETTE on, off or preset (INFORMATIONAL › STYLE · PALETTE); a restore, a link or an undo say nothing
     const palSw = sw({ label: 'PALETTE', value: false, onChange: (v) => { palOn(v); palSay('PALETTE · ' + (v ? 'ON' : 'OFF')); } });
     const rowOn = el('div', 'row tight palette-enable', gp); rowOn.appendChild(palSw.root).dataset.keyAction = 'palette';
@@ -149,11 +157,12 @@ export function createMaterial(app) {
     /* iteration 013 S2 (Josh: "Remove the text that says 'the built in' for HSV and 'Re/Im Legible'"): the kit's words lose their parenthetical
        where the app shows them (the stepper's name, the list's rows, the toast) — HSV WHEEL, BIPOLAR; the kit's PRESETS are untouched */
     const palLabel = (P) => { const s = P.label.replace(/\s*\([^)]*\)$/, ''); return s.charAt(0).toUpperCase() + s.slice(1); };   // iteration 014 D4: 'sea' → 'Sea'
-    let palId = PAL_DEF, palStops = PALETTE_BY_ID.get(PAL_DEF).stops, palQuiet = true;   // quiet while the panel is built and while the app (a restore, a link, LW) loads the ramp
+    let palId = PAL_DEF, palStops = PALETTE_BY_ID.get(PAL_DEF).stops, palQuiet = true;
+    function palSorted() { return palStops.map((q) => ({ at: ((q.at % 1) + 1) % 1, rgb: q.rgb })).sort((x, y) => x.at - y.at); }   // palette.js normalize's order: ESP's span and bar (W2)   // quiet while the panel is built and while the app (a restore, a link, LW) loads the ramp
     const rv = createRampPanel({ parent: gp, cyclic: true, project: false, presets: PRESET_GROUPS.flatMap((g) => g.items).map((P) => ({ ...P, label: palLabel(P) })),
       labels: { ticks: [], seam: 'SEAM at ±π', seamWarn: 'a visible seam at arg ψ = ±π', at: 'ARG ψ', fmt: ang },
       ramp: { get: () => ({ stops: palStops, preset: palId }), set: (s, o) => { palStops = s; if (o.preset && o.preset !== palId && !palQuiet && !o.live) palSay('PALETTE · ' + palLabel(PALETTE_BY_ID.get(o.preset) || { label: o.preset })); if (o.preset) palId = o.preset; },
-        lut: (lut) => { if (field.ok) field.setPalette(lut); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }).view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
+        lut: (lut) => { const ps = palSorted(); if (field.ok) field.setPalette(lut, [ps[0].at, ps[ps.length - 1].at]); if (bar && !bar.hidden) styleSync(); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }).view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
     palQuiet = false;
     /* 0.5.3 M12 · PALETTE, SHORTER: the kit's rows re-seated from outside (MIR briefs filed): RESET beside PALETTE ON, INVERT right of ROTATE as the kit's half disk,
        and the selected stop's angle shown twice from showArg — a reader under ROTATE (CSS hides the knob's "turn") and a float over the stop (radians; degrees on hover).
@@ -164,6 +173,7 @@ export function createMaterial(app) {
        "reload the chosen preset") · REVERSE; the bottom row is ADD (the plus icon) · INVERT · the selected stop's swatch and × · ROTATE */
     const resetEl = rv.root.querySelector('.mir-ramp-reset'), [addEl, revEl] = verbs.querySelectorAll(':scope > .trig'), rotEl = verbs.querySelector(':scope > .k');
     chip(resetEl, 'undo', 'RELOAD'); rowOn.append(resetEl, revEl);
+    revEl.classList.add('pal-rev'); revEl.replaceChildren(el('span', 'lw-icon lw-icon-reverse')); revEl.setAttribute('aria-label', 'REVERSE'); revEl.title = 'REVERSE · run the ramp backwards';   // iteration 015 P2: the word is the hint
     rotEl.appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
     ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
     verbs.insertBefore(ui.invertSw.root, rotEl); verbs.insertBefore(rv.root.querySelector('.mir-ramp-sel'), rotEl);
@@ -175,6 +185,7 @@ export function createMaterial(app) {
     const palPick = () => { const p = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!p || p.classList.contains('lw-menu')) return;
       const r0 = p.getBoundingClientRect(); p.classList.add('lw-menu', 'pal-pick');
       for (const b of p.querySelectorAll('.mir-pick-i')) { const P = PALETTE_BY_ID.get(b.dataset.id); if (!P) continue; const st = [...P.stops].sort((a, c) => a.at - c.at);
+        el('span', 'pal-name', b).append(...[...b.childNodes].filter((n) => n.nodeType === 3));   // iteration 015 P1: the name its own flex item, the strip a column
         el('i', 'pal-strip', b).style.background = 'linear-gradient(to right in oklab, ' + [...st, { at: 1, rgb: st[0].rgb }].map((q) => rgbToHex(q.rgb) + ' ' + (q.at * 100).toFixed(1) + '%').join(', ') + ')'; }
       const r1 = p.getBoundingClientRect(); if (p.dataset.dir === 'up') p.style.top = Math.max(8, r0.bottom - r1.height) + 'px';
       if (r1.right > innerWidth - 8) p.style.left = Math.max(8, innerWidth - 8 - r1.width) + 'px'; };
