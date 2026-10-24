@@ -61,17 +61,17 @@ export function createMaterial(app) {
     ui.atomSizeK = knob({ label: 'SIZE', min: 0.2, max: 1.5, value: 1, fmt: pctF, title: 'BALLS: the van der Waals radius × SIZE (100 % is space-filling CPK)', onInput: (v) => { mat.atomSize = v; schedule(TIER.PRESENT); } });
     ui.stickK = knob({ label: 'RADIUS', min: 0.1, max: 1.2, value: STICK_R, log: true, fmt: (v) => v.toFixed(2), title: 'STICKS (and the sticks inside ESP): the stick radius in bohr', onInput: (v) => { mat.stickR = v; schedule(TIER.PRESENT); } });
     ui.probeK = knob({ label: 'PROBE', min: 0.5, max: 5, value: PROBE_R, fmt: (v) => v.toFixed(2), title: 'ESP · SAS / SES: the probe radius in bohr (2.65 = water’s 1.4 Å)', onInput: (v) => { mat.probe = v; schedule(TIER.PRESENT); } });
-    ui.espRangeK = knob({ label: 'RANGE', min: 0.005, max: 0.5, value: ESP_RANGE, log: true, fmt: au, title: 'ESP: the colour map spans ±RANGE hartree/e; beyond it the colour holds', onInput: (v) => { mat.espRange = v; atomDrawSync(); schedule(TIER.PRESENT); } });
+    ui.espRangeK = knob({ label: 'RANGE', min: 0.002, max: 2, value: ESP_RANGE, log: true, fmt: au, title: 'ESP: the colour map spans ±RANGE hartree/e through a signed log (the middle a real band, the ends only near ±RANGE); beyond it the colour holds', onInput: (v) => { mat.espRange = v; atomDrawSync(); schedule(TIER.PRESENT); } });
     ui.espSurfSeg = seg({ aria: 'potential surface', value: 'iso', options: [
       { id: 'iso', label: 'ISO', title: 'the density’s own surface, ρ = ISO/30 a.u. (0.002 at the default ISO)' },
       { id: 'sas', label: 'SAS', title: 'the solvent-accessible surface: the van der Waals spheres grown by PROBE' },
       { id: 'ses', label: 'SES', title: 'the solvent-excluded surface: the van der Waals spheres with their crevices filled by the probe' }],
       onChange: (v) => { mat.espSurf = v; atomDrawSync(); schedule(TIER.PRESENT); } });
-    ui.espPalSw = sw({ label: 'USE PALETTE', value: false, title: 'ESP: colour the map (and its bar) with the active PALETTE instead of the standard red → blue', onChange: (on) => { mat.espPal = on; atomDrawSync(); schedule(TIER.PRESENT); } });
     ui.espLiveSw = sw({ label: 'LIVE · SLOW', value: false, title: 'ESP: solve φ again while the density moves (RUN, a beating register), at most once a second — slow; off, φ is solved once per molecule, basis and VIEW', onChange: (on) => { mat.espLive = on; schedule(TIER.PRESENT); } });
-    { const r = el('div', 'row tight', gd); for (const k of [ui.atomSizeK, ui.stickK, ui.probeK, ui.espRangeK]) r.appendChild(k.root); const r2 = el('div', 'row tight', gd); for (const k of [ui.espSurfSeg, ui.espPalSw, ui.espLiveSw]) r2.appendChild(k.root); }
-    /* the map's COLOUR BAR (Josh's answer 3): vertical, beside the map at the free stage's right, five numbers (±RANGE, ±RANGE/2, 0); USE PALETTE puts
-       the active ramp in it too; HUE turns it as it turns the map */
+    { const r = el('div', 'row tight', gd); for (const k of [ui.atomSizeK, ui.stickK, ui.probeK, ui.espRangeK]) r.appendChild(k.root); const r2 = el('div', 'row tight', gd); for (const k of [ui.espSurfSeg, ui.espLiveSw]) r2.appendChild(k.root); }
+    /* the map's COLOUR BAR (Josh's answer 3): vertical, beside the map at the free stage's right, five numbers — the signed log's inverse at s = ±1, ±½, 0
+       (iteration 015 W3: ±RANGE, ±RANGE·(√21 − 1)/20, 0); PALETTE ON puts the palette in it from its first stop to its last, as the map reads it (W2);
+       HUE turns it as it turns the map */
     const bar = el('div', 'lw-espbar', app.dom.stage); bar.hidden = true; bar.setAttribute('aria-hidden', 'true');
     const barRamp = el('i', 'lw-espbar-ramp', bar), barNums = [0, 1, 2, 3, 4].map((i) => { const n = el('span', 'lw-espbar-n', bar); n.style.top = (i * 25) + '%'; return n; });
     el('span', 'lw-espbar-u', bar).textContent = 'φ · a.u.';
@@ -84,18 +84,19 @@ export function createMaterial(app) {
       ui.atomSizeK.setDisabled(st !== STYLE.balls); ui.stickK.setDisabled(st === STYLE.balls); ui.probeK.setDisabled(!esp || (mat.espSurf || 'iso') === 'iso'); ui.espRangeK.setDisabled(!esp);
       bar.hidden = !esp;
       if (esp) {
-        const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, st2 = mat.espPal && app.state.palette ? [...app.state.palette.stops].sort((a, b) => a.at - b.at) : null;
-        barRamp.style.background = 'linear-gradient(to top, ' + (st2 ? st2.map((q) => rgbToHex(q.rgb) + ' ' + (q.at * 100).toFixed(1) + '%').join(', ') : ESP_RAMP.join(', ')) + ')';
+        const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, h = R * (Math.sqrt(21) - 1) / 20, st2 = mat.paletteOn ? palSorted() : null, a = st2 && st2[0].at, w = st2 && (st2[st2.length - 1].at - a || 1);
+        barRamp.style.background = st2 ? 'linear-gradient(to top in oklab, ' + st2.map((q) => rgbToHex(q.rgb) + ' ' + ((q.at - a) / w * 100).toFixed(1) + '%').join(', ') + ')' : 'linear-gradient(to top, ' + ESP_RAMP.join(', ') + ')';
         barRamp.style.filter = mat.hueShift ? `hue-rotate(${Math.round(mat.hueShift * 360)}deg)` : '';
-        [R, R / 2, 0, -R / 2, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3); });
+        [R, h, 0, -h, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3); });
         barSeat(); if (!barTimer) barTimer = setInterval(() => { if (bar.hidden) { clearInterval(barTimer); barTimer = 0; } else barSeat(); }, 500);
       }
     }
     /* a restore: the knobs from `mat` (an absent key is the default and leaves `mat`), then the rows and the bar */
     ui.atomDrawSync = (pm) => {
-      if (pm) for (const k of ['atomSize', 'stickR', 'probe', 'espRange', 'espSurf', 'espPal', 'espLive']) if (!(k in pm)) delete mat[k];
+      if (pm) for (const k of ['atomSize', 'stickR', 'probe', 'espRange', 'espSurf', 'espLive']) if (!(k in pm)) delete mat[k];
+      delete mat.espPal;   // iteration 015 W2: USE PALETTE is gone — PALETTE ON paints the map — so an older file's key leaves on every road in
       ui.atomSizeK.set(Number.isFinite(mat.atomSize) ? mat.atomSize : 1); ui.stickK.set(Number.isFinite(mat.stickR) ? mat.stickR : STICK_R); ui.probeK.set(Number.isFinite(mat.probe) ? mat.probe : PROBE_R);
-      ui.espRangeK.set(Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE); ui.espSurfSeg.set(mat.espSurf || 'iso'); ui.espPalSw.set(!!mat.espPal); ui.espLiveSw.set(!!mat.espLive);
+      ui.espRangeK.set(Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE); ui.espSurfSeg.set(mat.espSurf || 'iso'); ui.espLiveSw.set(!!mat.espLive);
       atomDrawSync();
     };
     { const set0 = ui.styleSeg.set; ui.styleSeg.set = (v) => { set0(v); atomDrawSync(); }; }   // LW.setStyle and a restore set mat.style first
@@ -141,7 +142,7 @@ export function createMaterial(app) {
        grouped order; the table is palette.js toLUT bit for bit.  PALETTE (on/off, the `palette` key) stays the app's switch, and the
        stops ride λWAVES' own project (`project: false`); `palette` keeps the editor's old API for serialize/restore, the link and LW. */
     const gp = group(wPal.body, 'COLOUR');
-    const palOn = (v) => { mat.paletteOn = v; applyAccent(); if (v) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } schedule(TIER.PRESENT); };
+    const palOn = (v) => { mat.paletteOn = v; applyAccent(); if (v) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } atomDrawSync(); schedule(TIER.PRESENT); };
     const palSay = (t) => { if (app.state.stageText) app.state.stageText.say('style', t); };   // iteration 007: a hand's PALETTE on, off or preset (INFORMATIONAL › STYLE · PALETTE); a restore, a link or an undo say nothing
     const palSw = sw({ label: 'PALETTE', value: false, onChange: (v) => { palOn(v); palSay('PALETTE · ' + (v ? 'ON' : 'OFF')); } });
     const rowOn = el('div', 'row tight palette-enable', gp); rowOn.appendChild(palSw.root).dataset.keyAction = 'palette';
@@ -149,11 +150,12 @@ export function createMaterial(app) {
     /* iteration 013 S2 (Josh: "Remove the text that says 'the built in' for HSV and 'Re/Im Legible'"): the kit's words lose their parenthetical
        where the app shows them (the stepper's name, the list's rows, the toast) — HSV WHEEL, BIPOLAR; the kit's PRESETS are untouched */
     const palLabel = (P) => { const s = P.label.replace(/\s*\([^)]*\)$/, ''); return s.charAt(0).toUpperCase() + s.slice(1); };   // iteration 014 D4: 'sea' → 'Sea'
-    let palId = PAL_DEF, palStops = PALETTE_BY_ID.get(PAL_DEF).stops, palQuiet = true;   // quiet while the panel is built and while the app (a restore, a link, LW) loads the ramp
+    let palId = PAL_DEF, palStops = PALETTE_BY_ID.get(PAL_DEF).stops, palQuiet = true;
+    function palSorted() { return palStops.map((q) => ({ at: ((q.at % 1) + 1) % 1, rgb: q.rgb })).sort((x, y) => x.at - y.at); }   // palette.js normalize's order: ESP's span and bar (W2)   // quiet while the panel is built and while the app (a restore, a link, LW) loads the ramp
     const rv = createRampPanel({ parent: gp, cyclic: true, project: false, presets: PRESET_GROUPS.flatMap((g) => g.items).map((P) => ({ ...P, label: palLabel(P) })),
       labels: { ticks: [], seam: 'SEAM at ±π', seamWarn: 'a visible seam at arg ψ = ±π', at: 'ARG ψ', fmt: ang },
       ramp: { get: () => ({ stops: palStops, preset: palId }), set: (s, o) => { palStops = s; if (o.preset && o.preset !== palId && !palQuiet && !o.live) palSay('PALETTE · ' + palLabel(PALETTE_BY_ID.get(o.preset) || { label: o.preset })); if (o.preset) palId = o.preset; },
-        lut: (lut) => { if (field.ok) field.setPalette(lut); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }).view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
+        lut: (lut) => { const ps = palSorted(); if (field.ok) field.setPalette(lut, [ps[0].at, ps[ps.length - 1].at]); if (bar && !bar.hidden) atomDrawSync(); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }).view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
     palQuiet = false;
     /* 0.5.3 M12 · PALETTE, SHORTER: the kit's rows re-seated from outside (MIR briefs filed): RESET beside PALETTE ON, INVERT right of ROTATE as the kit's half disk,
        and the selected stop's angle shown twice from showArg — a reader under ROTATE (CSS hides the knob's "turn") and a float over the stop (radians; degrees on hover).

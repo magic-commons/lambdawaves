@@ -48,7 +48,7 @@ export const KNEE_DEFAULT = 3;
 export function kneeQ(k) { return Math.log((Number.isFinite(k) && k > 0 ? k : KNEE_DEFAULT) / 0.6); }
 export const SLICE = { off: 0, clip: 1, slab: 2 };
 /** iteration 014 B: THE THREE VIEWS' defaults — STICKS' radius (bohr, 0.2 Å), the probe (bohr, water's 1.4 Å), the map's RANGE (±φ, a.u.) and its surfaces */
-export const STICK_R = 0.38, PROBE_R = 1.4 / 0.52917721092, ESP_RANGE = 0.05, ESP_SURF = Object.freeze(['iso', 'sas', 'ses']);
+export const STICK_R = 0.38, PROBE_R = 1.4 / 0.52917721092, ESP_RANGE = 0.1, ESP_SURF = Object.freeze(['iso', 'sas', 'ses']);
 export const MAX_MODES = 320;                                 // the whole 140-state register fits (a gas packet populates every m)
 const MODE_BYTES = 112;                                  // 7 vec4: nlm, c, lag0, lag1, leg0, leg1, ctr
 
@@ -506,7 +506,7 @@ struct View {
   p6: vec4<f32>,     // arbitrary slice normal (xyz), finish (w)
   p5: vec4<f32>,     // SURFACE: the stage background colour (xyz) and the output gamma (w) — the theme lives here
   p7: vec4<f32>,     // iteration 014 B · THE ATOMS: count, bond count, BALLS' SIZE (× r_vdW), STICKS' RADIUS (bohr)
-  p8: vec4<f32>,     // THE POTENTIAL MAP: surface (0 ISO · 1 SAS · 2 SES), probe radius (bohr), RANGE (±φ, a.u.), USE PALETTE
+  p8: vec4<f32>,     // THE POTENTIAL MAP: surface (0 ISO · 1 SAS · 2 SES), probe radius (bohr), RANGE (±φ, a.u.), the palette's stop span (LUT index first · 512 + last)
   p9: vec4<f32>,     // φ's grid: half-width, cells a side, valid (0 · 1), the ISO surface's ρ (a.u.)
   p10: vec4<f32>,    // the atoms' bounding sphere (centre xyz, radius w)
 };
@@ -763,10 +763,16 @@ fn phiAt(p: vec3<f32>) -> f32 {
   }
   return v;
 }
-/* the map's colour: the standard ramp RED (φ < 0, electron-rich) → yellow → green → cyan → BLUE (φ > 0), or USE PALETTE's ramp end to end */
+/* the map's colour (iteration 015 W2 · W3): φ through a SIGNED LOG, s = sign φ · ln(1 + |φ|/ε) / ln(1 + R/ε), ε = R/20, so the middle spans a real band and
+   the ends arrive only near ±RANGE; PALETTE ON paints s with the palette read from its first stop to its last (a cyclic palette's closing segment
+   left out, so −R and +R differ; HUE turns it as it turns DENSITY), PALETTE OFF with the standard ramp RED (φ < 0) → yellow → green → cyan → BLUE */
 fn espColour(phi: f32) -> vec3<f32> {
-  let u = 0.5 + 0.5 * clamp(phi / max(V.p8.z, 1e-9), -1.0, 1.0);
-  if (V.p8.w > 0.5) { let x = fract(u * 0.99609375 + V.p2.x) * 255.0; let i0 = u32(floor(x)); return mix(pal[i0].rgb, pal[min(i0 + 1u, 255u)].rgb, fract(x)); }
+  let R = max(V.p8.z, 1e-9); let e = 0.05 * R;
+  let u = 0.5 + 0.5 * clamp(sign(phi) * log(1.0 + abs(phi) / e) / log(1.0 + R / e), -1.0, 1.0);
+  if (V.p2.z > 0.5) {
+    let pk = u32(V.p8.w); let x = mix(f32(pk / 512u), f32(pk % 512u), u) + V.p2.x * 256.0; let xw = x - 256.0 * floor(x / 256.0);
+    let i0 = u32(floor(xw)) % 256u; return mix(pal[i0].rgb, pal[(i0 + 1u) % 256u].rgb, fract(xw));
+  }
   let s = u * 4.0; let k = min(u32(s), 3u); let f = s - f32(k);
   var r = array<vec3<f32>, 5>(vec3<f32>(0.86, 0.09, 0.07), vec3<f32>(0.98, 0.86, 0.12), vec3<f32>(0.22, 0.80, 0.26), vec3<f32>(0.10, 0.80, 0.90), vec3<f32>(0.07, 0.22, 0.86));
   return hueRot(mix(r[k], r[k + 1u], f), V.p2.x);
@@ -1348,7 +1354,7 @@ export async function createField(canvas, opts = {}) {
   const cssP3 = !!(window.CSS && CSS.supports && CSS.supports('color', 'color(display-p3 1 0 0)'));
   const displayP3 = !!(window.matchMedia && matchMedia('(color-gamut: p3)').matches);
   const GAMUT_WHY = 'Display P3 is unavailable on this canvas';
-  let lastLUT = null;
+  let lastLUT = null, palSpan = 255;   // palSpan (iteration 015 W2): the palette's first and last stop as LUT indices, first · 512 + last — ESP reads the palette between them
   /** the palette reaches the GPU through the gamut, so the field and the interface can never disagree */
   function uploadPalette() {
     if (!lastLUT) return;
@@ -1726,7 +1732,7 @@ export async function createField(canvas, opts = {}) {
     v[39]=mat.finish==='glass'?1:mat.finish==='matte'?2:0;
     const asz = Number.isFinite(mat.atomSize) ? mat.atomSize : 1, srad = Number.isFinite(mat.stickR) ? mat.stickR : STICK_R, prb = Number.isFinite(mat.probe) ? mat.probe : PROBE_R;   // iteration 014 B: absent keys read the defaults
     v[44] = atomsN; v[45] = bondsN; v[46] = asz; v[47] = srad;
-    v[48] = ESP_SURF.indexOf(mat.espSurf) < 0 ? 0 : ESP_SURF.indexOf(mat.espSurf); v[49] = prb; v[50] = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE; v[51] = mat.espPal ? 1 : 0;
+    v[48] = ESP_SURF.indexOf(mat.espSurf) < 0 ? 0 : ESP_SURF.indexOf(mat.espSurf); v[49] = prb; v[50] = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE; v[51] = palSpan;
     v[52] = phi.half; v[53] = phi.M; v[54] = phi.ok ? 1 : 0; v[55] = (mat.iso === undefined ? 0.06 : mat.iso) / 30;
     v[56] = atomsBound[0]; v[57] = atomsBound[1]; v[58] = atomsBound[2]; v[59] = atomsBound[3] + Math.max(atomsBound[4] * Math.max(asz, 1), srad) + 0.01;
     perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lensShift(E, aspect, v, 12, M_PERSP);   // S2: the lane and the principal point, or nothing at p = 0
@@ -2348,7 +2354,7 @@ export async function createField(canvas, opts = {}) {
      *  read on the next reconstruct, which the caller asks for. */
     setEqualizer(t) { eqTable = t && t.gamma ? t : null; },
     /** upload a 256×RGBA phase palette (Float32Array(1024), values 0..1) — an OBSERVER product: ψ is untouched */
-    setPalette(lut) { lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); uploadPalette(); },
+    setPalette(lut, span) { lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); if (span) palSpan = Math.round(span[0] * 256) * 512 + Math.min(255, Math.round(span[1] * 256)); uploadPalette(); },
     /* ── THE GAMUT (wave 54) ────────────────────────────────────────────────────────────────────────────────
      * `support` is measured, never assumed: `canvas` is the WebIDL getter probe above, `css` asks the engine
      * whether it parses color(display-p3 …), and `display` is the media query — with the caveat that Firefox
