@@ -4,6 +4,19 @@
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.26)
+- **THE MODULATION WINDOW'S BARS ON THE KIT'S SEATS** (015 T2): the tempo / power bar and the preset bar wear `shell/transport.css`'s seat
+  standard. Every button is a `.tbtn` (a round 34-px seat, flat until hovered: ▾ · save · ‹ › · the workspace switch); TAP · WALL | FREE ·
+  60 | 120 HZ · HOLD ¼ · HOLD 1 and the dead light are `.tbtn.trig` (the work bar's raised 34-px key, 8-px corner, lit in accent A); the BPM
+  is the kit's pill (`.tbtn.tempo-expand`, `.tempo-number` in accent B, `.tempo-unit` / `.tempo-hz`); the name is a well. Same DOM order, same
+  ids, every function kept; the power was already `.mir-mod-power`. The hints of power, BPM, TAP, WALL | FREE and 60 | 120 HZ go through
+  `hint()` (the raw `title` showed WALL | FREE's `{:…}` marks). `modhost.css` loses 72 selectors (28 whole rules) of the old m2* / mod* faces for
+  these bars and gains one block, § THE WORK BARS. Files: `modulation/modwindow/modwindow.js`, `modulation/window.js`, `modulation/modhost.css`.
+  Why: Josh, "Remove the DJ buttons and refine the DJ buttons on the tempo/power button bar on the modulation window … need updating to the new
+  MIR standard". `modwindow.css` (the artifact's base sheet) still carries their old layout rules underneath; a later round may retire them.
+- **THE TIMELINE'S DOOR SWAPS** (015 T5): `installTimeline({ transport: { onSwitch } })` hands `onSwitch` to the work bar's `modDoor`, so a press
+  on the timeline's door runs the app's swap (λWAVES: the TIMELINE closes, the modulation window opens) as the modulation window's workspace
+  switch already swaps back. Without `onSwitch` the door toggles the window as before. File: `timeline/window.js`. Why: Josh, "Hitting the
+  modulation button on the timeline and the timeline button on the modulation window should swap between them."
 - **THE HINT ON TOP** (015 H3): `#controlHelp` is a manual popover (`popover="manual"` where supported), hidden and re-shown at every
   open so it is the top of the top layer; `.control-help[popover]` drops the UA popover's centred box (`inset: auto; margin: 0`). A hint
   on a menubar row (the bar is a top-layer popover) was painted under the bar's list, whatever its z 10000. Files: `control-help.js`

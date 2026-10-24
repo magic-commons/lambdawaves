@@ -642,7 +642,7 @@ export function createModulation(host, port) {
     status(on ? t('MOD on') : t('MOD off'), '');   // tr: MOD: modulation as a whole, switched on or off by its power button
     sync();
   });
-  transport.xport.title = 'Enable or bypass modulation';
+  hintTo(transport.xport, 'Enable or bypass modulation');   // 1.5.0-alpha.26: every work-bar hint through the kit's words
 
   const nativeRate = port.rateControl && port.rateControl();
   if (nativeRate) { nativeRate.root.classList.add('m2-native-rate'); transport.xport.parentNode.insertBefore(nativeRate.root, transport.tempo); }
@@ -651,7 +651,7 @@ export function createModulation(host, port) {
      by the modulation and timeline work bars): a click types it (8 characters, decimals; Enter or blur commits, Escape
      cancels and gives the focus back), a vertical drag turns it (220 px for the whole range, a finger 320, Shift 1760);
      a drag is not a click. */
-  transport.tempo.title = 'Set the modulation clock in beats per minute';
+  hintTo(transport.tempo, 'Set the modulation clock in beats per minute');
   const tempoField = bindTempoField({ button: transport.tempo, input: transport.tempoIn, drag: true, paint: () => paint(true),
     tempo: { get: () => M.transport.bpm, set: (v) => clock.setBpm(v), commit: () => {}, min: M.BPM_MIN, max: M.BPM_MAX } });
 
@@ -661,7 +661,7 @@ export function createModulation(host, port) {
   /* `tapTempo` reads MILLISECONDS (TAP_GAP_MS is 2600) and hands back a NEW run rather than
      mutating the one it was given, so the run is reassigned and never appended to. */
   let taps = [];
-  transport.tap.title = 'Tap repeatedly to set the modulation clock';
+  hintTo(transport.tap, 'Tap repeatedly to set the modulation clock');
   transport.tap.addEventListener('click', () => {
     const r = M.tapTempo(taps, performance.now());
     taps = r.taps;
@@ -670,9 +670,9 @@ export function createModulation(host, port) {
     paint(true);
   });
 
-  transport.sync.title = '{:WALL} follows elapsed time. {:FREE} accumulates frame time.';
+  hintTo(transport.sync, '{:WALL} follows elapsed time. {:FREE} accumulates frame time.');   // the raw title showed the {:…} marks
   transport.sync.addEventListener('click', () => { clock.setSync(M.syncMode() === 'wall' ? 'free' : 'wall'); sync(); });
-  transport.cad.title = 'Limit modulation updates per second';
+  hintTo(transport.cad, 'Limit modulation updates per second');
   transport.cad.dataset.w = '120 HZ';                                 // THE HAND: the chip keeps its widest word's width (modhost.css), so 60 ⇄ 120 moves nothing after it
   transport.cad.addEventListener('click', () => { if (port.setCadence) port.setCadence(port.cadence() === 120 ? 60 : 120); sync(); });
 

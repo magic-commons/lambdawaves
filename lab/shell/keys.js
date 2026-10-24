@@ -178,7 +178,8 @@ export function createKeys(app) {
         play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
       dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, audio: false,
       transport: { layout: [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'app:readout', 'rewind'] }, 'door'], nodes: { readout: tlRo.root },
-        door: 'icon', doorIcon: new URL('../img/icons/modulation.svg', import.meta.url).href },   // A9: the modulation window's own icon, no MIR logo (Josh 10-22)
+        door: 'icon', doorIcon: new URL('../img/icons/modulation.svg', import.meta.url).href,
+        onSwitch: () => { app.state.tl.close(); layout.modulation.expand(); } },   // 015 T5: the timeline's door SWAPS to the modulation window, as that window's switch swaps back   // A9: the modulation window's own icon, no MIR logo (Josh 10-22)
       store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },
       busy: () => app.state.capApi.busy, moved: (r) => app.state.dodge(r, 'tl'), onWindow: () => occlusion.dirty(),
       /* iteration 004 · MIR OPTIONS › SAMPLING › SCRUB is how a ruler drag seeks (BASINS shell.js: the kit's controller reads it at each

@@ -110,7 +110,10 @@
    it would make the tempo pill a flex row (132 → 124 px).  The pill keeps the kit's grid. */
 #modwin.mir-modwindow .m2workbar button:not(:where(.modtempo)) { display: inline-flex; align-items: center; }
 #modwin.mir-modwindow .m2workbar button > svg { display: block; margin: auto; }
-#modwin.mir-modwindow .m2presave svg { width: 26px; height: 26px; }
+/* 015 T2 · THE MODULATION WINDOW'S BARS ON THE KIT'S SEATS: their buttons are `.tbtn` now (modhost.css § THE WORK BARS), and λWAVES' strip rule
+   `.tbtn` (lab.css, unlayered: a 44-px raised box) would beat the kit's layered seat — so inside the two bars they step back to the layers, as
+   the timeline's work bar does below (A5) */
+body #modwin.mir-modwindow .m2workbar :is(.tbtn, .tbtn > svg) { all: revert-layer; }
 
 /* ── 13. motion and touch courtesy ─────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) { .dev, .k-val, .fd-val, .ro-sub, #rack, #transport.mini { transition: none; }
@@ -961,10 +964,12 @@ body .mir-win.glass.mir-timeline { background: transparent; }
 /* …and its work bar wears the kit's face: λWAVES' strip rules (`.tbtn`, `.tbtn.play`, `.mod-exp`, lab.css) are unlayered and beat the kit's
    layered work-bar look, so inside the timeline's bar they step back to the layers (BASINS' bar, exactly). */
 body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: revert-layer; }
-/* its readout is t in BASINS' readout seat and face (basins.css `.transport-decade`: the math face, 28 px, no box, never a target) */
+/* its readout is t in BASINS' readout seat, in the UI face (iteration 015 T1, Josh: "Timeline time should not be a math font … a sans serif font that's
+   smaller … a font that doesn't adjust in length much"): Roboto upright, 13 px t over an 18 px value in tabular lining numerals, the value a fixed
+   16 ch so a turning t never moves the bar's buttons; no box, never a target */
 .mir-timeline .tl-transport .ro.time { display: inline-flex; flex-direction: row; width: auto; min-width: 0; max-width: none; overflow: visible; align-items: baseline; gap: 5px; padding: 0 5px; flex: 0 0 auto; white-space: nowrap; pointer-events: none; }
-.mir-timeline .tl-transport .ro.time .ro-lbl { display: inline; font: italic 400 18px/1 var(--font-math); letter-spacing: 0; text-transform: none; color: var(--fg-soft); }
-.mir-timeline .tl-transport .ro.time .ro-val { width: auto; max-width: none; overflow: visible; font: 400 26px/1 var(--font-math); letter-spacing: -.02em; font-variant-numeric: lining-nums tabular-nums; color: var(--fg); }
+.mir-timeline .tl-transport .ro.time .ro-lbl { display: inline; font: 400 13px/1 var(--font-ui); letter-spacing: 0; text-transform: none; color: var(--fg-soft); }
+.mir-timeline .tl-transport .ro.time .ro-val { width: 16ch; max-width: none; text-align: left; overflow: visible; font: 400 18px/1 var(--font-ui); letter-spacing: 0; font-variant-numeric: lining-nums tabular-nums; white-space: pre; color: var(--fg); }
 .mir-timeline .tl-transport .ro.time .ro-sub { display: none; }
 
 /* ═══ iteration 012 R3 · WAVE · CAMERA · PALETTE ═══ */
