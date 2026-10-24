@@ -38,11 +38,11 @@ body.disconnected.frost.frost-hold:not(.phone) .dev > .dev-head { -webkit-backdr
 #rack > *, #rackL > * { pointer-events: auto; }
 #rackL { right: auto; left: 0; }
 body.rack-hidden #rackL { transform: translateX(calc(-100% - 12px)); opacity: 0; }
-body.rack-hidden.rack-peek #rackL { transform: none; opacity: 1; }
+body.rack-hidden.rack-peek-left #rackL { transform: none; opacity: 1; }   /* 015 H3: each edge peeks its own rack (the kit's rack-peek-left | right), not both */
 #rackPeekL { position: absolute; left: 0; top: 0; bottom: 0; width: 16px; z-index: var(--z-chrome); }
 #rackL:empty { pointer-events: none; }
 body.rack-hidden #rack { transform: translateX(calc(100% + 12px)); opacity: 0; }
-body.rack-hidden.rack-peek #rack { transform: none; opacity: 1; }
+body.rack-hidden.rack-peek-right #rack { transform: none; opacity: 1; }
 #rackPeek { position: absolute; right: 0; top: 0; bottom: 0; width: 16px; z-index: var(--z-chrome); }
 #rackToggle, #rackAdd, #rackFav { position: absolute; right: calc(var(--rack-w) + 14px); top: 8px; z-index: calc(var(--z-chrome) + 1); width: 30px; height: 30px; border-radius: 50%; color: var(--fg-soft); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 body.rack-hidden #rackToggle { color: var(--acc); }
@@ -650,7 +650,7 @@ body.ui-hidden #notebook, body.ui-hidden #rackPeek, body.ui-hidden #rackPeekL, b
    would throw away (the wave-24 law: a rack comes back where you left it).  The delay lets the slide finish
    first, so hiding is still animated; peeking cancels the delay so it comes back instantly. */
 body.rack-hidden #rack, body.rack-hidden #rackL { visibility: hidden; transition: transform .28s ease, opacity .28s ease, visibility 0s linear .28s; }
-body.rack-hidden.rack-peek #rack, body.rack-hidden.rack-peek #rackL { visibility: visible; transition: transform .28s ease, opacity .28s ease, visibility 0s linear 0s; }
+body.rack-hidden.rack-peek-right #rack, body.rack-hidden.rack-peek-left #rackL { visibility: visible; transition: transform .28s ease, opacity .28s ease, visibility 0s linear 0s; }
 body.rack-hidden #rackAdd, body.rack-hidden #rackAddList { visibility: hidden; }
 body.rack-hidden.rack-peek #rackAdd { visibility: visible; }
 body.rack-hidden #transport.mini { visibility: hidden; transition: transform .28s ease, opacity .28s ease, visibility 0s linear .28s; }
@@ -716,7 +716,7 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
    * tooltips, `.note` — because reduced motion is FEWER AND GENTLER, NEVER ZERO, and an opacity
    * change is exactly what the preference asks to keep.  Only transforms go. */
   body.rack-hidden #rack, body.rack-hidden #rackL,
-  body.rack-hidden.rack-peek #rack, body.rack-hidden.rack-peek #rackL,
+  body.rack-hidden.rack-peek-right #rack, body.rack-hidden.rack-peek-left #rackL,
   body.rack-hidden #transport.mini, body.rack-hidden.transport-peek #transport.mini {
     transition-property: opacity, visibility; }
   body.rack-hidden #rack, body.rack-hidden #rackL, body.rack-hidden #transport.mini { transform: none; }

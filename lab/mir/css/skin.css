@@ -728,6 +728,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-body { outline: none; }
 .native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--surface-radius, var(--r-lg)); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
 .control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(100vw - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--surface-radius, var(--r-md)); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
 .control-help[hidden] { display: none; }
+.control-help[popover] { inset: auto; margin: 0; overflow: visible; height: auto; }   /* 1.5.0-alpha.26: the top-layer hint keeps its own seat (left / top inline), never the UA popover's centred box */
 .native-info .native-info-content, .control-help {   /* a popover: the TINTED pane at menu height (L10/L11), no blur; layers replace the !important */
   border: var(--surface-edge-width, var(--glass-border)) solid var(--surface-edge, var(--glass-border-color));
   background: var(--surface-sheen, var(--glass-sheen)), var(--surface-fill, var(--popover-fill));

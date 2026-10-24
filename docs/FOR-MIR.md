@@ -3,6 +3,17 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.26)
+- **THE HINT ON TOP** (015 H3): `#controlHelp` is a manual popover (`popover="manual"` where supported), hidden and re-shown at every
+  open so it is the top of the top layer; `.control-help[popover]` drops the UA popover's centred box (`inset: auto; margin: 0`). A hint
+  on a menubar row (the bar is a top-layer popover) was painted under the bar's list, whatever its z 10000. Files: `control-help.js`
+  `installControlHelp`, `css/skin.css`. Why: Josh 10-23, "Let mouseover control hints not get cropped over any CSS errors".
+- **THE PILL OUTSIDE** (015 H1): the scroll pill floats beside the window over the stage, at the title bar's height, `PILL.gap` (8 px)
+  clear of the card's inner edge — or of the seated scrollbar's thumb, or of the rack's inner edge where a native bar shows — with a
+  6-px tail (a turned square, `.rack-pill::before`) pointing at the window, the name whole (`width: max-content`, no ellipsis), its mask
+  opening from the tail. Replaces 014 A11's eyebrow seat. Files: `shell/rack-scrollbar.js` `createRackPills`, `shell/rack.css`. Why:
+  Josh 10-23, "Do not let the bubble touch or overlap the rack window".
+
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.25+)
 - **THE REVERSED KNOB** (014 D5): `knob({ reverse: true })` turns the dial the other way — the needle (and a modulated base tick) reads max
   at the left, a rise, ArrowUp / ArrowRight or PageUp move it right and lower the value; the value, `min` / `max`, `aria-value*`, `spec` (a
