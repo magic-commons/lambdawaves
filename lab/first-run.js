@@ -24,9 +24,11 @@
  * (n ≤ 6 open, n = 7 folded: they are what the window is for).
  * Node-testable: tests/first-run.test.mjs. */
 const FOLD_ALL = Object.freeze(['informational', 'spectrum', 'chem', 'settings', 'state', 'palette', 'observer', 'camera', 'clip']);
+/* iteration 016 W3 (Josh, call 6: "H on touch: Yan's choice (give it the kit's edge handle)") · `handle`: the kit rack's edge handle — the on-screen way
+   back to a hidden rack — on a phone or tablet only (rack-wiring.js hands it createRack); a desktop keeps none, its keys and the edge peek */
 export const FIRST_RUN_MATERIAL = Object.freeze({
-  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: FOLD_ALL, more: false, inner: false }),
-  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: FOLD_ALL, more: false, inner: false }),
+  desktop: Object.freeze({ card: 'refractive', frost: 'always', folded: FOLD_ALL, more: false, inner: false, handle: 'never' }),
+  mobile: Object.freeze({ card: 'tinted', frost: 'off', folded: FOLD_ALL, more: false, inner: false, handle: 'always' }),
 });
 /** the material a browser that has never said anything gets on this device */
 export function firstRunMaterial(mobile) { return mobile ? FIRST_RUN_MATERIAL.mobile : FIRST_RUN_MATERIAL.desktop; }

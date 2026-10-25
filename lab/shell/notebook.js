@@ -280,11 +280,11 @@ export function createNotebook(app) {
       const ABOUT_DEF_W = 470, ABOUT_DEF_H = 670;
       const NOTES_DEF_W = 640, NOTES_DEF_H = 460;
       /* iteration 014 A1 · ABOUT has two pages, λWAVES | MIR: the MIR page is MIR ABOUT's own (the kit's aboutPage lends it; its window takes it back) */
-      let abSeg = null;
+      let abSeg = null, abPage = null, abBack = null;
       function aboutTabs() {
         if (abSeg) return;
         let off = [];
-        const page = (id) => { const mir = id === 'mir';
+        const page = abPage = (id) => { const mir = id === 'mir';
           if (mir) { off = [...faces.about.children].filter((n) => !n.hidden && n !== abSeg.root && n !== mirHost); for (const n of off) n.hidden = true; mirGui().aboutPage(mirHost); }
           else { for (const n of off) n.hidden = false; off = []; }
           mirHost.hidden = !mir; };
@@ -306,7 +306,13 @@ export function createNotebook(app) {
           }
           aboutTabs();
           const logo = nb.querySelector('.nb-logo');
-          if (logo && !logo.children.length) { for (const c of document.getElementById('title').children) if (!c.classList.contains('ms')) logo.appendChild(c.cloneNode(true)); paintMarks(); }
+          /* iteration 016 P5 (Josh: "the new λWAVES logo, much larger; the MIR logo shrunk"): the wordmark lab/img/lambdawaves-logo.svg, large — its word in the
+             ink, its λ and its dot their own colours (the Picker's own road); the title's clone stays the fallback */
+          if (logo && !logo.children.length) {
+            logo.classList.add('nb-wordmark');
+            fetch('./img/lambdawaves-logo.svg').then((r) => (r.ok ? r.text() : Promise.reject())).then((t) => { logo.innerHTML = t.replace(/fill="#f0f4f7"/g, 'fill="currentColor"'); const g = logo.querySelector('svg'); if (g) { g.removeAttribute('width'); g.removeAttribute('height'); g.setAttribute('aria-hidden', 'true'); } })
+              .catch(() => { logo.classList.remove('nb-wordmark'); for (const c of document.getElementById('title').children) if (!c.classList.contains('ms')) logo.appendChild(c.cloneNode(true)); paintMarks(); });
+          }
         } else {
           const w = typeof S.nbW === 'number' ? S.nbW : NOTES_DEF_W;
           const h = typeof S.nbH === 'number' ? S.nbH : NOTES_DEF_H;
@@ -318,7 +324,13 @@ export function createNotebook(app) {
         }
         if (face === 'notes') ta.focus();
       };
-      nb.querySelector('.nb-about').addEventListener('click', () => show(nb.dataset.face === 'about' ? 'notes' : 'about'));
+      /* iteration 016 P5 · the i CYCLES (Josh: "the i button cycles MIR ABOUT ↔ λWAVES ABOUT"): λWAVES ABOUT → MIR ABOUT → close — back to the notes
+         when the window was showing them, else the window shuts */
+      nb.querySelector('.nb-about').addEventListener('click', () => {
+        if (nb.hidden || nb.dataset.face !== 'about') { abBack = nb.hidden ? null : nb.dataset.face; show('about'); if (abSeg.get() !== 'lw') { abSeg.set('lw'); abPage('lw'); } return; }
+        if (abSeg.get() !== 'mir') { abSeg.set('mir'); abPage('mir'); return; }
+        abSeg.set('lw'); abPage('lw'); if (abBack === 'notes') show('notes'); else nb.hidden = true;
+      });
       nb.querySelector('.nb-close').addEventListener('click', () => { nb.hidden = true; });
       nb.querySelector('.nb-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(ta.value); } catch (e) {} });
       const dump = nb.querySelector('.nb-dump');

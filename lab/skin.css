@@ -714,6 +714,12 @@ body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #t
 #lwMenu .mm-el { border-radius: 6px; } #lwMenu .mm-el .mm-pic { inset: 6%; width: 88%; height: 88%; }
 #lwMenu .mm-sym { position: absolute; left: 7%; bottom: 4%; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-size: calc(var(--t) * .3); font-weight: 400; line-height: 1; text-shadow: 0 0 5px hsl(var(--glass-tint)); }
 #lwMenu .mm-table[hidden] { display: none; }
+/* iteration 016 L3 · THE 140 ON ONE PAGE: fourteen columns of the periodic cell (the same --t while the screen is wide; on a narrow one the
+   fourteen take the width), ten rows, the state's name centred at the tile's foot */
+#lwMenu .mm-htable { --t: min(calc((100vw - 48px) / 14.3), calc((100dvh - 300px) / 10.25)); grid-template-columns: repeat(14, var(--t)); grid-template-rows: none; grid-auto-rows: var(--t); }
+@media (min-width: 900px) { #lwMenu .mm-htable { --t: min(calc((100vw - 64px) / 18.6), calc((100dvh - 300px) / 10.25)); } }   /* ten full rows where the table's 9.35 stood: a cell's size while the height allows */
+#lwMenu .mm-htable .mm-orb { border-radius: 6px; }
+#lwMenu .mm-htable .mm-hl { left: 50%; bottom: 3%; translate: -50% 0; font-size: clamp(11px, calc(var(--t) * .2), 24px); white-space: nowrap; }
 /* iteration 015 M3 · THE 140 (HYDROGEN on the ATOMIC deck): the state's name in STIX, its m the subscript; under SHOW LABELS as the symbols are */
 #lwMenu .mm-hl { position: absolute; left: 7%; bottom: 5%; pointer-events: none; font-family: 'STIX Two Math', 'Latin Modern Math', serif; font-weight: 400; font-size: clamp(14px, calc(var(--t) * .17), 30px); line-height: 1;
   text-shadow: 0 0 5px hsl(var(--glass-tint)), 0 0 2px hsl(var(--glass-tint)); transition: opacity 200ms ease; }
@@ -840,7 +846,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
    the Gol note's motion — the spring open (scale .94 × .6 → 1, 320 ms, the overshoot), the tiles 30 ms apart, the 120 ms close; reduced motion none */
 #lwMenu .mm-lookg { font: 400 17px/1 'STIX Two Math', 'Latin Modern Math', serif; white-space: nowrap; letter-spacing: 0; }
 #lwMenu .mm-lookb[aria-expanded="true"] { opacity: 1; color: var(--acc); }
-#lwMenu .mm-lookdrop { --ease-spring: cubic-bezier(.2, 1.4, .4, 1); position: absolute; z-index: 20; translate: -50% 0; transform-origin: 50% 0; display: grid; grid-template-columns: repeat(3, 72px); grid-auto-rows: 72px; gap: 6px; padding: 8px; border-radius: 16px; }
+#lwMenu .mm-lookdrop { --ease-spring: cubic-bezier(.2, 1.4, .4, 1); position: absolute; z-index: 20; translate: -50% 0; transform-origin: 50% 0; display: grid; grid-template-columns: repeat(8, 33px); grid-auto-rows: 72px; gap: 6px; padding: 8px; border-radius: 16px; }   /* 016 L1: two brick rows (picker.js places each tile over two 33 px columns), 3 over 4 */
 #lwMenu .mm-lookdrop.lw-menu { background: hsl(var(--glass-tint) / .92); }   /* over the tiles: the glyphs read on any picture */
 #lwMenu .mm-lookdrop[hidden] { display: none; }
 #lwMenu .mm-lk { display: grid; place-items: center; border-radius: 12px; opacity: .6; transition: opacity 140ms, color 140ms, background-color 140ms, scale 160ms var(--ease); }
@@ -956,7 +962,11 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
    And the modulation window's ADD MACRO / ADD DEVICE sheets (`.m2pick`) wear the windows' tint, not the chassis' thin plate. */
 body.frost .mir-win.mir-timeline, body.frost .mir-timeline .tl-pane { -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.frost:not(.phone):not(.frost-hold) #menubar .mb-list { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
-body .mir-modwindow .m2pick { background-color: hsl(var(--glass-tint) / .94); }   /* a colour, not the sheen pair: the sheen is `transparent` here and a colour in a non-final background layer voids the whole declaration */
+body .mir-modwindow .m2pick { background-color: hsl(var(--glass-tint) / .94); }
+/* iteration 016 W1 · TINT UNDER THE WORDS: FROST off, a card over the stage words (ink.js `tint` sets `data-tint`) wears the menus' own tint — the
+   card whole, or under DISCONNECTED its head and its body */
+body:not(.frost):not(.disconnected) .dev[data-tint], body.phone:not(.frost) .dev[data-tint],
+body:not(.frost).disconnected:not(.phone) .dev[data-tint] > :is(.dev-head, .dev-body) { background: var(--glass-sheen), hsl(var(--glass-tint) / .65); }   /* a colour, not the sheen pair: the sheen is `transparent` here and a colour in a non-final background layer voids the whole declaration */
 /* iteration 014 A5 · THE SLAB GOES (Josh: "the frosted slab under λWAVES' timeline goes (BASINS' is clean)"): measured, the milky slab was the
    window's own fill — the refractive `.glass` frost's rgba(255,255,255,.1) beating the kit's `--tl-win-fill: transparent` (layered) — so the
    window is clear again, as BASINS draws it; its panes (toolbar, work bar, ruler, lanes) keep their glass. */
@@ -971,6 +981,11 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .mir-timeline .tl-transport .ro.time .ro-lbl { display: inline; font: 400 13px/1 var(--font-ui); letter-spacing: 0; text-transform: none; color: var(--fg-soft); }
 .mir-timeline .tl-transport .ro.time .ro-val { width: 16ch; max-width: none; text-align: left; overflow: visible; font: 400 18px/1 var(--font-ui); letter-spacing: 0; font-variant-numeric: lining-nums tabular-nums; white-space: pre; color: var(--fg); }
 .mir-timeline .tl-transport .ro.time .ro-sub { display: none; }
+/* iteration 016 T1 · ONE TIME READER (Josh: "THE TIMELINE'S TIME READER takes the modulation window's tempo reader's CSS, font and sizing"): the value in
+   the tempo number's face (modhost.css `.m2workbar .tempo-number`: bold 18 px, the numeral face, tabular, ACCENT B), `t` in its unit's (bold 8 px UI,
+   .04em, soft); 015 T1's fixed 16 ch and its lining numerals stay */
+.mir-timeline .tl-transport .ro.time .ro-lbl { font: var(--w-bold) 8px/1 var(--font-ui); letter-spacing: .04em; color: var(--fg-soft); }
+.mir-timeline .tl-transport .ro.time .ro-val { font: var(--w-bold) 18px/1 var(--font-num); font-variant-numeric: lining-nums tabular-nums; color: var(--acc2); }
 
 /* ═══ iteration 012 R3 · WAVE · CAMERA · PALETTE ═══ */
 /* CAMERA: the sphere drawn bigger beside its knob column (YAW · PITCH · ZOOM · FOV, material.js).  The kit's drawing is 400 × 280 with the ball

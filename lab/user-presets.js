@@ -2,9 +2,15 @@
  * that's it). Do the same 'User' section appears when a custom preset is saved").  One PREFERENCE record per list — `{ v: 1, items: [{ name, data }] }`
  * under its own localStorage key (settings-store.js FAMILIES) — never a project, a link or a history row.  SPECTRUM keeps its labels here
  * (`lambdawaves.q0.presets`); PALETTE's stops will (P3, `lambdawaves.q0.palettes`).  A plain module: no `app`.
- *   createUserPresets(storeKey) → { add(name, data), remove(name), list(), watch(fn) → unwatch }
- * `add` replaces a row of the same name in its seat (a new name is appended); `list()` is a copy in the saved order; `watch(fn)` hears every change
- * made in this tab (fn(list)). */
+ *   createUserPresets(storeKey) → { add(name, data) → the name kept, remove(name), list(), watch(fn) → unwatch }
+ * `add` appends; a name already taken is kept as `name 2`, `name 3` … (iteration 016 W9, Josh call 16: "a re-save under a taken name becomes
+ * name 2, name 3 … by the count of copies"; `uniqueName`), so a save never overwrites one; `list()` is a copy in the saved order; `watch(fn)` hears
+ * every change made in this tab (fn(list)). */
+/** uniqueName(name, taken) → name, or the first `name k` (k = 2, 3 …) no row holds — pure, for both lists (SPECTRUM's presets, PALETTE's) */
+export function uniqueName(name, taken) {
+  const has = new Set(taken); if (!has.has(name)) return name;
+  for (let k = 2; ; k++) if (!has.has(name + ' ' + k)) return name + ' ' + k;
+}
 import { jsonStore } from './mir/core/prefs.js';
 
 export function createUserPresets(storeKey) {
@@ -15,9 +21,8 @@ export function createUserPresets(storeKey) {
   return {
     add(name, data) {
       name = String(name || '').trim(); if (!name) return false;
-      const items = read(), i = items.findIndex((x) => x.name === name), row = { name, data };
-      if (i >= 0) items[i] = row; else items.push(row);
-      write(items); return true;
+      const items = read(); name = uniqueName(name, items.map((x) => x.name));
+      items.push({ name, data }); write(items); return name;
     },
     remove(name) { const items = read(), next = items.filter((x) => x.name !== name); if (next.length === items.length) return false; write(next); return true; },
     list,

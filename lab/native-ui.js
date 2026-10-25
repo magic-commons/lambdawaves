@@ -28,7 +28,7 @@ export function reworkNative({ ui, mat, repaint }) {
   const waveHelp=[...wave.querySelectorAll('.note:not(.link-note), .sturm-note, .sp-fx')];
   // Row indices are part of the skin (wave-row-2 and wave-row-6 have their own rules), so the material knobs
   // merge into row 2 and row 5 is simply absent: ISO, GRAIN and KNEE sit under EXPOSURE, SOFT and HUE (Josh, 2026-09-10).
-  const waveRows=[[0,['spaceSeg']],[1,['viewSeg']],[2,['expK','softK','hueK','isoK','grainK','kneeK']],[3,['styleSeg']],[4,['finishSeg']],[7,['atomSizeK','stickK','probeK','espRangeK']],[8,['espSurfSeg','espLiveSw']]];   // iteration 014 B: THE THREE VIEWS' two rows (shown while BALLS · STICKS · ESP is drawn)   // iteration 008 W: row 6 (DITHER) left for SETTINGS › QUALITY
+  const waveRows=[[0,['spaceSeg']],[1,['viewSeg']],[2,['expK','softK','hueK','isoK','grainK','kneeK']],[3,['styleSeg']],[4,['finishSeg']],[7,['atomSizeK','stickK','espBareSw','probeK','espRangeK']],[8,['espSurfSeg','espLiveSw']]];   // iteration 014 B: THE THREE VIEWS' two rows (shown while BALLS · STICKS · ESP is drawn)   // iteration 008 W: row 6 (DITHER) left for SETTINGS › QUALITY
   const flat=document.createDocumentFragment();
   for(const [i,names] of waveRows){const r=el('div','row tight wave-row wave-row-'+i,flat);for(const name of names)r.appendChild(ui[name].root);}
   wave.replaceChildren(flat);for(const n of waveHelp)wave.appendChild(n);

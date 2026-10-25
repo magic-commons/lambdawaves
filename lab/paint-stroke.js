@@ -98,3 +98,18 @@ export function levelLine(g, x0, x1, y, c, lit, w = 1, fade = 1) {
   g.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},${(lit ? 1 : 0.42) * fade})`; g.lineWidth = lit ? w + 1 : w;
   g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
 }
+
+/** THE FOOTNOTE (iteration 016 R1, Josh: "the maths text at the foot of MOLECULES' register ladders and of SPECTRUM's registry … shows only on
+ *  mouse-over"): footLine(cv) → set(text, x, W, H) — the ladder's law line as a DOM `.reg-foot` beside its canvas, laid over the canvas' foot
+ *  (from x to W − 4, the old fitText box), so one unlayered lab.css rule hides it until the window is hovered or focused.  The canvas no longer
+ *  paints it; the place stays its. */
+export function footLine(cv) {
+  const foot = el('div', 'reg-foot'); foot.setAttribute('aria-hidden', 'true'); cv.after(foot);
+  let at = '';
+  return (text, x, W, H) => {
+    if (foot.textContent !== text) foot.textContent = text;
+    const k = (cv.offsetLeft + x) + '|' + (cv.offsetTop + H - 12) + '|' + Math.max(0, W - 4 - x);
+    if (k === at) return; at = k; const [l, t, w] = k.split('|');
+    foot.style.left = l + 'px'; foot.style.top = t + 'px'; foot.style.width = w + 'px';
+  };
+}

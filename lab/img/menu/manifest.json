@@ -61,7 +61,8 @@
    "balls",
    "sticks",
    "esp",
-   "phase"
+   "phase",
+   "labels"
   ],
   "orbitals": [
    "density",

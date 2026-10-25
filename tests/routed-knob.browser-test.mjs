@@ -43,6 +43,28 @@ try {
     r.touched[0].join() === 'true,true,true' && r.touched[1].join() === 'false,false,false', r.touched);
   judge('K3 a held press on the DIAL opens the pop-over with REMOVE, without moving the value; the × takes the macro off and the ring goes with it',
     r.pop && r.pop.buttons.includes('REMOVE') && r.heldMovedValue === false && r.after.rings.length === 1 && r.after.hasRing === false && r.after.x === false && r.errs.length === 0, { pop: r.pop, after: r.after, errs: r.errs });
+  /* iteration 016 V1 · S2 · W8 — a knob its style does not read is GREYED in its seat, never hidden; MAP ONLY is ESP's alone and its key is the
+     hand's; a window whose control carries a route wears the ACCENT B dot, the greyed routed knob included, and loses it with the last route */
+  const v = await g.ev(`
+    const L = __LW, nap = (ms) => new Promise((r) => setTimeout(r, ms)), w = document.querySelector('.dev[data-id="observer"]'); w.classList.remove('closed', 'folded');
+    const C = (n) => [...w.querySelectorAll('.k, .sw, .segw')].find((e) => { const l = e.querySelector(':scope > .k-lbl, :scope > .sw-lbl'); return l && l.textContent.trim() === n; });
+    const names = ['SOFT', 'ISO', 'GRAIN', 'KNEE', 'RADIUS', 'MAP ONLY', 'RANGE'];
+    const look = () => names.map((n) => { const e = C(n), b = e.getBoundingClientRect(), c = w.getBoundingClientRect(); return [n, Math.round(b.left - c.left), Math.round(b.top - c.top), e.hidden || getComputedStyle(e).display === 'none', e.classList.contains('disabled')]; });
+    L.setStyle('cloud'); await nap(150); const cloud = look(); L.setStyle('esp'); await nap(150); const esp = look();
+    C('MAP ONLY').click(); const bare = L.mat.espBare === true; C('MAP ONLY').click();
+    L.setStyle('cloud'); await nap(100);
+    const m = L.mod.addMacro(), rid = L.mod.route(m, 'material.iso', 0, 0.5); await nap(600);
+    const dot = { on: w.classList.contains('lw-routed'), isoGrey: C('ISO').classList.contains('disabled'), others: [...document.querySelectorAll('.dev.lw-routed')].map((d) => d.dataset.id),
+      paint: getComputedStyle(w.querySelector('.dev-head'), '::after').width };
+    L.mod.unroute(rid); await nap(600); dot.after = w.classList.contains('lw-routed');
+    return { cloud, esp, bare, dot, errs: (window.__e || []).slice() };`);
+  const same = v.cloud.every((c, i) => c[1] === v.esp[i][1] && c[2] === v.esp[i][2]);
+  const greyed = (rows, ns) => rows.every(([n, , , hid, dis]) => !hid && dis === ns.includes(n));
+  judge('K4 (016 V1) a control the style does not read is greyed in its seat, never hidden: CLOUD greys ISO · GRAIN · RADIUS · MAP ONLY · RANGE, ESP greys GRAIN · KNEE, and no seat moves',
+    same && greyed(v.cloud, ['ISO', 'GRAIN', 'RADIUS', 'MAP ONLY', 'RANGE']) && greyed(v.esp, ['GRAIN', 'KNEE']), { cloud: v.cloud, esp: v.esp });
+  judge('K5 (016 S2) MAP ONLY is ESP\'s switch and writes mat.espBare', v.bare === true, v.bare);
+  judge('K6 (016 W8) a route on a greyed knob (ISO under CLOUD) gives WAVE its 6 px ACCENT B dot, and the last route\'s removal takes it away',
+    v.dot.on && v.dot.isoGrey && v.dot.others.includes('observer') && v.dot.paint === '6px' && v.dot.after === false && v.errs.length === 0, v.dot);
 } catch (error) {
   judge('gate ran to the end', false, String(error && error.message || error).slice(0, 400));
 } finally { await g.close(); }

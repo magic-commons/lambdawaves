@@ -138,6 +138,10 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .nb-logo .lam { font-family: 'STIX Two Math', 'Latin Modern Math', 'Noto Serif', 'DejaVu Serif', serif; font-style: italic; font-weight: 700; font-size: 1.3em; line-height: 1; margin-right: -.04em; }
 .nb-logo .word { font-family: 'LW Title', var(--font-ui); font-weight: 700; letter-spacing: .06em; color: var(--fg); }
 .nb-logo .mark { align-self: center; height: 1.05em; width: 1.05em; margin-left: .05em; }
+/* iteration 016 P5 · ABOUT: the λWAVES wordmark (lab/img/lambdawaves-logo.svg) large, its word in the ink; the MIR page's mark small */
+.nb-logo.nb-wordmark { display: block; width: min(380px, 86%); margin: 14px auto 10px; color: var(--fg); }
+.nb-logo.nb-wordmark > svg { display: block; width: 100%; height: auto; }
+.ab-mir { --gui-logo-h: 34px; }
 .ab-eyebrow { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--dim); margin-top: 6px; }
 .ab-version { font-size: 12px; letter-spacing: .06em; color: var(--acc); }
 .ab-tag { text-transform: uppercase; }
@@ -325,6 +329,13 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport[data-layout="csb"] > .csb-mid { grid-area: mid; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 #transport[data-layout="csb"] > .csb-tempo { grid-area: tempo; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
 #transport[data-layout="csb"] > .native-tempo { grid-area: panel; margin-top: 8px; }
+/* iteration 016 W6 · THE EXPANDER'S DIRECTION (Josh, call 9: "seated at the top it hangs down; seated at the bottom it grows upward, the bar staying at the
+   foot"): at the stage's foot the expander is the grid's first row, so the bar (anchored by its bottom) keeps its rows where they were and the panel
+   rises above them; at the top (.at-top) it hangs below as before.  A narrow screen seats the bar at the top whatever its class (skin.css), so wide only. */
+@media (min-width: 861px) {
+  #transport.mini[data-layout="csb"]:not(.at-top) { grid-template-areas: "panel panel panel" "play mid tempo"; }
+  #transport.mini[data-layout="csb"]:not(.at-top) > .native-tempo { margin-top: 0; margin-bottom: 8px; }
+}
 #transport[data-layout="csb"] .csb-row { display: flex; align-items: center; gap: 4px; width: auto; min-width: 0; height: 40px; overflow: visible; }
 #transport[data-layout="csb"].mir-transport :is(.csb-col, .csb-row) > * { order: 0; flex-shrink: 0; }
 #transport[data-layout="csb"].mir-transport :is(.csb-col, .csb-row) .tempo-expand { order: 0; }
@@ -349,7 +360,11 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 /* the timing row (A11): ⏮ · TIMELINE · the door · ⚙ · the dock chip together on the left, t taking the rest and reading from the right end */
 #transport[data-layout="csb"] .csb-row > .ro.time { flex: 1 1 auto; width: auto; min-width: 72px; padding: 0 6px; align-items: flex-end; text-align: right; background: transparent; box-shadow: none; }
 #transport[data-layout="csb"] .csb-row > .ro.time .ro-val { font-size: 13px; font-variant-numeric: lining-nums tabular-nums; white-space: pre; }   /* 015 T1: tabular, so the digits never change width */
-#transport[data-layout="csb"]:not(.docked, [data-place="free"]) .csb-row > .ro.time { flex: 0 0 auto; width: 16ch; font-size: 13px; }   /* 015 T1: on the stage a fixed 16 ch ("99999.99  (9999.9)" fits), so a turning t never widens the bar */
+#transport[data-layout="csb"]:not(.docked, [data-place="free"]) .csb-row > .ro.time { flex: 0 0 auto; width: 16ch; font-size: 13px; }
+/* iteration 016 T1 · ONE TIME READER: the bar's t wears its own BPM pill's face (skin.css `#transport .tempo-number` / `.tempo-unit`, the modulation window's
+   reader at the bar's size): the value bold in the numeral face, tabular, ACCENT B; `t` the unit's bold 7 px UI */
+#transport[data-layout="csb"] .csb-row > .ro.time .ro-val { font: var(--w-bold) 13px/1 var(--font-num); font-variant-numeric: lining-nums tabular-nums; color: var(--acc2); }
+#transport[data-layout="csb"] .csb-row > .ro.time .ro-lbl { font: var(--w-bold) 7px/1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-key); }   /* 015 T1: on the stage a fixed 16 ch ("99999.99  (9999.9)" fits), so a turning t never widens the bar */
 #transport[data-layout="csb"] .csb-row :is(.ro-lbl, .ro-sub) { display: none; }
 /* the buttons row: the modes, MOLECULES' chooser, then SEARCH and the rack's three at the right edge */
 #transport #lwMode { position: static; flex-direction: row; gap: 2px; }
@@ -482,6 +497,11 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 /* ── spectrum rail ──────────────────────────────────────────────────────── */
 .ladder { position: relative; height: 92px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }
 .ladder canvas { width: 100%; height: 100%; display: block; }
+/* iteration 016 R1 · THE REGISTER'S FOOTNOTE (paint-stroke.js footLine): the law line under SPECTRUM's ladder and MOLECULES' two ladders, shown only
+   while its window is hovered or focused; reduced motion: no fade */
+.reg-foot { position: absolute; z-index: 1; height: 11px; font: 8px/11px ui-monospace, monospace; color: var(--fg); opacity: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; transition: opacity 160ms ease; }
+.dev:is(:hover, :focus-within) .reg-foot { opacity: .8; }
+@media (prefers-reduced-motion: reduce) { .reg-foot { transition: none; } }
 .sp-rows { display: flex; flex-direction: column; gap: 3px; }
 .sp-row { display: grid; grid-template-columns: 4px 50px minmax(0, 1fr) 40px 28px 28px 22px; align-items: center; gap: 4px; height: 56px; padding: 0 4px 0 0;
   border-radius: 7px; border: var(--glass-border) solid var(--glass-hairline); background: hsl(0 0% 100% / .035); }
@@ -921,6 +941,10 @@ body[data-theme="dark"] .km-key-unbound {
 .mol-pick select.sel { width: 100%; min-height: var(--step-b); padding: 0 var(--sp-2); border: 0; background: transparent; box-shadow: none; appearance: none;
   font: inherit; color: var(--fg); letter-spacing: inherit; text-align: center; text-align-last: center; text-overflow: ellipsis; cursor: pointer; }
 .mol-pick select.sel:hover { background: var(--state-hover, var(--glass-raise)); }
+/* iteration 016 P2 (Josh: "a denser picker when expanded"): the ‹ MOLECULE › chooser's open list is the platform's own <select> popup (optgroups,
+   disabled reasons and native keys kept, 0.5.3 M8), so its rows are set by its options' face: 11 px with no padding — Firefox draws a row ≈ 20 px where
+   the inherited face drew ≈ 24; a browser that ignores option styling keeps its own list.  The closed name keeps its face. */
+.mol-pick select.sel :is(option, optgroup) { font-size: 11px; line-height: 1.25; padding-block: 0; min-block-size: 0; }
 /* iteration 007 M · VIEW in two balanced rows (Josh: "not so top-heavy"): DENSITY · ORBITAL · Δρ over ESP · SPIN · Δ LDA−RHF, three equal
    columns across the card's body — the kit's render card's grid-on-.seg idiom (render.css), one word a cell, never wrapped */
 .mol-view { flex: 1 1 100%; align-items: stretch; }
@@ -1093,3 +1117,28 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .lw-espbar-ramp { position: absolute; left: 0; top: 0; bottom: 0; width: 12px; border-radius: 3px; box-shadow: 0 0 0 1px hsl(0 0% 50% / .35); }
 .lw-espbar-n { position: absolute; left: 18px; transform: translateY(-50%); white-space: nowrap; }
 .lw-espbar-u { position: absolute; left: 0; bottom: -18px; white-space: nowrap; opacity: .75; font-weight: 500; }
+/* iteration 016 W8 · THE ACCENT B DOT (Josh's call 14): a rack window whose controls carry a modulation route (mod-port.js `routeDots`, `.lw-routed`)
+   wears a 6 px ACCENT B dot at its title bar's height, just past the card's inner edge — where the scroll pill's tail starts (rack-scrollbar.js PILL.gap
+   8 px, the tail's tip 4 px out), inside the rack's 10 px padding, so the rack's clip keeps it; a greyed routed knob (016 V1) is thus still told of */
+.dev.lw-routed > .dev-head::after { content: ''; position: absolute; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--acc2); pointer-events: none; }
+[data-side="left"] > .dev.lw-routed > .dev-head::after { left: calc(100% + 2px); }
+[data-side="right"] > .dev.lw-routed > .dev-head::after { right: calc(100% + 2px); }
+
+/* iteration 016 E1 · EMISSION SPECTRA (lab/emissionview.js): the strip is λWAVES' own black canvas, a whole line; ‹ SERIES › and ‹ PAIR › take the
+   row, RANGE is a knob-sized seg (its two options in a column, SPECTRUM's `.sp-vseg` look), DECAY and the fold close the third row */
+.dev[data-id="emission"] .em-strip { display: block; width: 100%; height: 92px; border-radius: 6px; background: #000; cursor: crosshair; touch-action: none; }
+.dev[data-id="emission"] .em-strip:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.dev[data-id="emission"] .em-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+.dev[data-id="emission"] .em-step { flex: 1 1 auto; min-width: 0; }
+.dev[data-id="emission"] .em-step .mir-step-row { width: 100%; justify-content: space-between; }
+.dev[data-id="emission"] .em-step .mir-step-name { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dev[data-id="emission"] .em-vseg { flex: 0 0 58px; width: 58px; align-items: stretch; }
+.dev[data-id="emission"] .em-vseg > .seg { display: flex; flex-direction: column; flex-wrap: nowrap; gap: 1px; padding: 2px; width: 100%; box-sizing: border-box; }
+.dev[data-id="emission"] .em-vseg .seg-b { min-height: 17px; min-width: 0; padding: 0 4px; font-size: var(--fs-micro); }
+.dev[data-id="emission"] .em-row > .sw { flex: 0 0 auto; }
+.dev[data-id="emission"] .em-row > .lw-fold { flex: 0 0 30px; }
+.dev[data-id="emission"] .em-table table { width: 100%; border-collapse: collapse; font-size: var(--fs-micro); font-variant-numeric: tabular-nums; }
+.dev[data-id="emission"] .em-table th, .dev[data-id="emission"] .em-table td { padding: 2px 4px; text-align: right; white-space: nowrap; }
+.dev[data-id="emission"] .em-table th { color: var(--dim); font-weight: 500; }
+.dev[data-id="emission"] .em-table td:last-child, .dev[data-id="emission"] .em-table th:last-child { text-align: left; }
+.dev[data-id="emission"] .em-none { color: var(--dim); font-size: var(--fs-micro); margin: 4px 0; }

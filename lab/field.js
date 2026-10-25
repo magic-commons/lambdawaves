@@ -48,6 +48,9 @@ export const KNEE_DEFAULT = 3;
 export function kneeQ(k) { return Math.log((Number.isFinite(k) && k > 0 ? k : KNEE_DEFAULT) / 0.6); }
 export const SLICE = { off: 0, clip: 1, slab: 2 };
 /** iteration 014 B: THE THREE VIEWS' defaults — STICKS' radius (bohr, 0.2 Å), the probe (bohr, water's 1.4 Å), the map's RANGE (±φ, a.u.) and its surfaces */
+/** iteration 016 S1: ESP's soft edge from WAVE's SOFT (γ 0.3 … 2.2, `reverse`, so right is softer): 0 at γ 2.2 — the knob's left end, the hard ISO
+ *  surface exactly — up to 1 at γ 0.3; the default γ 0.7 reads e ≈ 0.79 */
+export const espSoftOf = (g) => Math.min(1, Math.max(0, (2.2 - (Number.isFinite(g) ? g : 0.7)) / 1.9));
 export const STICK_R = 0.38, PROBE_R = 1.4 / 0.52917721092, ESP_RANGE = 0.1, ESP_SURF = Object.freeze(['iso', 'sas', 'ses']);
 export const MAX_MODES = 320;                                 // the whole 140-state register fits (a gas packet populates every m)
 const MODE_BYTES = 112;                                  // 7 vec4: nlm, c, lag0, lag1, leg0, leg1, ctr
@@ -509,6 +512,7 @@ struct View {
   p8: vec4<f32>,     // THE POTENTIAL MAP: surface (0 ISO · 1 SAS · 2 SES), probe radius (bohr), RANGE (±φ, a.u.), the palette's stop span (LUT index first · 512 + last)
   p9: vec4<f32>,     // φ's grid: half-width, cells a side, valid (0 · 1), the ISO surface's ρ (a.u.)
   p10: vec4<f32>,    // the atoms' bounding sphere (centre xyz, radius w)
+  p11: vec4<f32>,    // iteration 016 S: ESP's SOFT edge (0 = the hard ISO surface … 1), MAP ONLY (0 · 1)
 };
 @group(0) @binding(0) var<uniform> V: View;
 @group(0) @binding(1) var psiTex: texture_3d<f32>;
@@ -777,9 +781,46 @@ fn espColour(phi: f32) -> vec3<f32> {
   var r = array<vec3<f32>, 5>(vec3<f32>(0.86, 0.09, 0.07), vec3<f32>(0.98, 0.86, 0.12), vec3<f32>(0.22, 0.80, 0.26), vec3<f32>(0.10, 0.80, 0.90), vec3<f32>(0.07, 0.22, 0.86));
   return hueRot(mix(r[k], r[k + 1u], f), V.p2.x);
 }
-fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<f32>) -> vec3<f32> {
-  let inner = ballsOrSticks(ro, rd, t0, tf, true);
+/* iteration 016 S1 · ESP SOFT (Josh: "the ESP surface is very hard; give it the softness of SIGNED and SOLID"): under the ISO surface with SOFT's edge
+   e > 0 the surface is SOLID's one-sided band, not a single hit — the opacity per bohr (14 − 8e) ramps in over ln ρ ∈ [ln ISO − 2e, ln ISO + e] (smoothstep)
+   and stays full inside, so a grazing ray (the silhouette) gathers only part of it and the edge fades, while the interior still hides the far side; every
+   sample that adds colour paints φ there, lit by the density's gradient as the hard surface is.  e = 0 never reaches this function: the hard path
+   below is the SOFT-at-its-hard-end picture, text unchanged.  The march stops at the sticks (tEnd), the way the hard surface yields to them. */
+fn espSoft(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, tEnd: f32, half: f32, back: vec3<f32>, jit: f32) -> vec3<f32> {
+  let rs = V.p9.w; let e = V.p11.x; let lo = -2.0 * e; let hi = e;
+  let steps = max(V.fwd.w, 8.0); let ds = (tf - t0) / steps; let K = 14.0 - 8.0 * e; // K: the band's opacity per bohr once inside it (a softer edge also gathers slower)
+  var T = 1.0; var col = vec3<f32>(0.0); var t = t0 + ds * jit;
+  for (var i = 0u; i < 512u; i++) {
+    if (f32(i) >= steps || t > tEnd) { break; }
+    let p = ro + rd * t; let uvw = (p + vec3<f32>(half)) / (2.0 * half);
+    let s = textureSampleLevel(psiTex, samp, uvw, 0.0).rg; let rho = dot(s, s);
+    if (rho > rs * exp(lo)) {                                                        // below e^{lo} · ISO the band is zero: skip the log and the colour
+      let a = 1.0 - exp(-K * smoothstep(lo, hi, log(max(rho, 1e-30) / rs)) * ds);
+      if (a > 0.002) {
+        var c = vec3<f32>(0.62);                                                       // φ not ready: a grey surface
+        if (V.p9.z > 0.5) { c = espColour(phiAt(p)); }
+        if (V.p2.y > 0.5) { c = vec3<f32>(1.0) - c; }
+        if (V.p6.w < 1.5) {
+          let g = 1.2 / f32(textureDimensions(psiTex).x);
+          let n = -normalize(vec3<f32>(rhoAt(psiTex, samp, uvw + vec3<f32>(g, 0.0, 0.0)) - rhoAt(psiTex, samp, uvw - vec3<f32>(g, 0.0, 0.0)),
+                                       rhoAt(psiTex, samp, uvw + vec3<f32>(0.0, g, 0.0)) - rhoAt(psiTex, samp, uvw - vec3<f32>(0.0, g, 0.0)),
+                                       rhoAt(psiTex, samp, uvw + vec3<f32>(0.0, 0.0, g)) - rhoAt(psiTex, samp, uvw - vec3<f32>(0.0, 0.0, g))) + vec3<f32>(1e-12));
+          c = atomLit(c, n, rd);
+        }
+        col += T * a * c; T *= 1.0 - a;
+        if (T < 0.01) { break; }
+      }
+    }
+    t += ds;
+  }
+  let am = clamp(0.8 * V.p0.y, 0.05, 1.0);                                            // EXPOSURE's translucency, as the hard surface's
+  return back * (1.0 - (1.0 - T) * am) + col * am;
+}
+fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<f32>, jit: f32) -> vec3<f32> {
+  var inner = vec4<f32>(0.0, 0.0, 0.0, 1e30);
+  if (V.p11.y < 0.5) { inner = ballsOrSticks(ro, rd, t0, tf, true); }   // iteration 016 S2 · MAP ONLY: no sticks inside, the stage alone beneath the map
   let surf = u32(V.p8.x);
+  if (surf == 0u && V.p11.x > 0.0) { return espSoft(ro, rd, t0, tf, min(tf, inner.w), half, select(bg, inner.rgb, inner.w < 1e30), jit); }
   var th = 1e30; var n = vec3<f32>(0.0);
   if (surf == 0u) {                                                  // the density's ISO surface: march, then bisect
     let rs = V.p9.w; let steps = max(V.fwd.w, 8.0); let ds = (tf - t0) / steps; var ta = t0;
@@ -857,7 +898,7 @@ fn espPixel(ro: vec3<f32>, rd: vec3<f32>, t0: f32, tf: f32, half: f32, bg: vec3<
   }
   if (style >= 9u && style <= 11u && V.p7.x > 0.5) {                // iteration 014 B: BALLS · STICKS · ESP draw the atoms (none set: the march below, as CLOUD)
     var oc = bg;
-    if (style == 11u) { oc = espPixel(ro, rd, t0, tf, half, bg); } else { let m = ballsOrSticks(ro, rd, t0, tf, style == 10u); oc = select(bg, m.rgb, m.w < 1e30); }
+    if (style == 11u) { oc = espPixel(ro, rd, t0, tf, half, bg, hash(in.pos.xy + vec2<f32>(V.p0.w))); } else { let m = ballsOrSticks(ro, rd, t0, tf, style == 10u); oc = select(bg, m.rgb, m.w < 1e30); }
     var om = pow(max(oc, vec3<f32>(0.0)), vec3<f32>(1.0 / max(V.p5.w, 0.05)));
     om = select(om, bg, om != om);
     return vec4<f32>(om + bayer8(in.pos.xy) * (V.p2.w / 255.0), 1.0);
@@ -1443,7 +1484,7 @@ export async function createField(canvas, opts = {}) {
   const modesBuf = [0, 1].map(() => device.createBuffer({ size: MAX_MODES * MODE_BYTES, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }));
   const radialBuf = device.createBuffer({ size: 48 * 256 * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });   // 43 rows in use: the 6 × 6 (n_r, l) grid and n = 7's (6, 0) and (0, 6) at 36 + l (atoms.js rowOf)
   const statsBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC });
-  const viewBuf = device.createBuffer({ size: 15 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const viewBuf = device.createBuffer({ size: 16 * 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   const vpBuf = device.createBuffer({ size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
   /* the phase PALETTE: 256 RGBA colours around the complex plane (see palette.js) */
   const palBuf = device.createBuffer({ size: 256 * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
@@ -1485,7 +1526,7 @@ export async function createField(canvas, opts = {}) {
   /* the per-frame scratch (wave 45): the frame path allocates nothing — the params block, the stats zero, the view block,
      the three matrices and the line vertices are written in place */
   const PARAMS = new ArrayBuffer(32), PARAMS_U = new Uint32Array(PARAMS), PARAMS_F = new Float32Array(PARAMS), ZERO_U32 = new Uint32Array([0]);
-  const VIEW = new Float32Array(60), M_PERSP = new Float32Array(16), M_LOOK = new Float32Array(16), M_VP = new Float32Array(16);
+  const VIEW = new Float32Array(64), M_PERSP = new Float32Array(16), M_LOOK = new Float32Array(16), M_VP = new Float32Array(16);
   /* LATTICE MESH (wave 108 zero-allocation law): pre-allocated unit grid lines.
      Radius 8 grid (17^3 nodes). Segments: X (16*17*17), Y (17*16*17), Z (17*17*16) = 13872 segments. */
   const LATTICE_SEGS = new Int8Array(13872 * 6);
@@ -1735,6 +1776,7 @@ export async function createField(canvas, opts = {}) {
     v[48] = ESP_SURF.indexOf(mat.espSurf) < 0 ? 0 : ESP_SURF.indexOf(mat.espSurf); v[49] = prb; v[50] = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE; v[51] = palSpan;
     v[52] = phi.half; v[53] = phi.M; v[54] = phi.ok ? 1 : 0; v[55] = (mat.iso === undefined ? 0.06 : mat.iso) / 30;
     v[56] = atomsBound[0]; v[57] = atomsBound[1]; v[58] = atomsBound[2]; v[59] = atomsBound[3] + Math.max(atomsBound[4] * Math.max(asz, 1), srad) + 0.01;
+    v[60] = espSoftOf(mat.softness); v[61] = mat.espBare ? 1 : 0;   // iteration 016 S1 · S2
     perspective(obs.fov || 0.6, aspect, 0.05 * half, 20 * half, M_PERSP); lensShift(E, aspect, v, 12, M_PERSP);   // S2: the lane and the principal point, or nothing at p = 0
     device.queue.writeBuffer(viewBuf, 0, v);
     lookAt(cam, E.target, B.up, M_LOOK); mul4(M_PERSP, M_LOOK, M_VP);

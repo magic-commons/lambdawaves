@@ -5,7 +5,7 @@ import { TIER } from '../rack.js'; import { chip } from '../mir/kit.js'; import 
 import { uiSpace } from '../mir/shell/scene-guard.js'; import { bindStageGestures } from '../stage-gestures.js'; import { CAM } from '../camera-law.js'; import { paintedRect } from '../occlusion.js';
 const SHELLS_FOLDED = [7];   // iteration 008 A7: SPECTRUM's shells folded by default (spectrum.js FOLD_DEFAULT)
 export function createRackWiring(app) {
-  const { dom, ui, device, DEVICES, clock, obs, settingsStore, isPhone, isTablet } = app, { schedule, windowActivity } = app.loop;
+  const { dom, ui, device, DEVICES, clock, obs, settingsStore, isPhone, isTablet, FIRST_RUN } = app, { schedule, windowActivity } = app.loop;
   const { camera, camTravel, floats, LAYOUT_SLOTS, orbitBy, panBy, rack, rackL, resetView, zoomAt } = app.host, { DIGESTS, quality, readSettings, RETIRED_WINDOWS, saveSettings, setFrost } = app.sh;
   const { bowCancel, bowMove, bowRelease, bowStart, kepler, keplerDragTo } = app.w;
   const { field, look, occlusion, setGovernor, setKeepFrames } = app.ctl;
@@ -29,7 +29,7 @@ export function createRackWiring(app) {
   const sideKey = (s) => (s === 'L' || s === 'left' ? 'left' : s === 'R' || s === 'right' ? 'right' : undefined), sideLR = (s) => (s === 'left' ? 'L' : 'R');
   let parkedIds = [];   // the floats the crossing parks (the kit's memory is private: BRIEF R2), read by this listener, registered AHEAD of the kit's
   window.addEventListener('resize', () => { if (!rk.phone && isPhone()) parkedIds = rk.floating(); }, { passive: true });
-  const rk = createRack({ host: document.getElementById('lab'), favourites: LAYOUT_SLOTS, handle: 'never', tabletClamp: false, phone: isPhone, retired: RETIRED_WINDOWS,
+  const rk = createRack({ host: document.getElementById('lab'), favourites: LAYOUT_SLOTS, handle: FIRST_RUN.handle, tabletClamp: false, phone: isPhone, retired: RETIRED_WINDOWS,
     notebook: () => (layout.notebookSize ? { size: layout.notebookSize, resize: layout.notebookResize } : null),
     store: {
       get: () => ({ favs: readSettings().layouts || {} }),

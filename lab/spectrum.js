@@ -13,7 +13,7 @@
  */
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
 import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, sw } from './mir/kit.js';
-import { paintStroke, fillButton, levelLine } from './paint-stroke.js';
+import { paintStroke, fillButton, levelLine, footLine } from './paint-stroke.js';
 import { PRESET_BY_ID } from './state.js';
 import { createUserPresets } from './user-presets.js';
 
@@ -41,7 +41,7 @@ function readRGB(g, name, fallback) {
 
 export function createSpectrum(host, api) {
   const ladder = el('div', 'ladder', host);
-  const lcv = el('canvas', '', ladder);
+  const lcv = el('canvas', '', ladder), lfoot = footLine(lcv);   // 016 R1: the law line, shown on a hover
   /* iteration 008 S · THE PRESET (it left STATE; since iteration 015 S3 seated under the picker, above the HAMILTONIAN): the kit's stepper in PALETTE's preset look over the same list; ← → and a pick
      load a preset by the hand's road (api.loadPreset: THE FADE announces it), a pick of the preset already shown is RELOAD; VISUALS is STATE's
      PRESET VISUALS (a preset also sets its view, rate and window).  A register that is no preset reads '—' (the select's blank). */
@@ -84,7 +84,7 @@ export function createSpectrum(host, api) {
     const row = preStep.name.parentElement, f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; f.setAttribute('aria-label', 'preset name');
     f.value = labels.slice(0, 4).map((a) => BASIS[a].label).join(' + ') + (labels.length > 4 ? ' …' : ''); row.insertBefore(f, preStep.name); preStep.name.hidden = true;
     let done = false; const end = (keep, key) => { if (done) return; done = true; const n = f.value.trim(); f.remove(); preStep.name.hidden = false;
-      if (keep && n) { users.add(n, { labels }); preset.value = UK + n; preset.note = PRESET_BY_ID.get(UK + n).note; } if (key) preStep.name.focus(); };
+      if (keep && n) { const got = users.add(n, { labels }) || n; preset.value = UK + got; preset.note = PRESET_BY_ID.get(UK + got).note; } if (key) preStep.name.focus(); };
     f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
     f.addEventListener('blur', () => end(false)); f.focus(); f.select();
   });
@@ -369,7 +369,7 @@ export function createSpectrum(host, api) {
       usedY.push(nm.y); g.fillStyle = nm.col; g.fillText(nm.txt, left - 4, nm.y);   // the gutter, not the plot
     }
     if (!HS && freeRow(y(0))) { g.fillStyle = ink(0.75); g.textAlign = 'right'; g.fillText('E = 0', left - 4, y(0)); }
-    g.fillStyle = ink(0.75); g.textAlign = 'left'; g.fillText(HS ? HS.footer : 'EIGENVALUE  E_n = −1/(2n²) hartree', left, H - 5);
+    lfoot(HS ? HS.footer : 'EIGENVALUE  E_n = −1/(2n²) hartree', left, W, H);
     hover.set(hovers, plot);
   }
   /* W-STURMIAN: the eigen ladder — the rank eigenvalues of S⁻¹H at physical height below E = 0 (the same scale and
@@ -411,7 +411,7 @@ export function createSpectrum(host, api) {
       g.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},1)`; g.textAlign = 'right'; g.fillText(lv.label, left - 4, ty); usedTy.push(ty);   // the gutter, not the plot
     }
     if (!usedTy.some((t) => Math.abs(t - y(0)) < 9)) { g.fillStyle = ink(0.75); g.textAlign = 'right'; g.fillText('E = 0', left - 4, y(0)); }
-    g.fillStyle = ink(0.75); g.textAlign = 'left'; g.fillText(HS.footer || '', left, H - 5);
+    lfoot(HS.footer || '', left, W, H);
     hover.set(hovers, plot);
   }
   lcv.addEventListener('click', (e) => {

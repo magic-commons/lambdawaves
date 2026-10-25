@@ -115,6 +115,7 @@
  ["shapeExport","get"],
  ["wigner","value"],
  ["radiation","value"],
+ ["emission","value"],
  ["atoms","value"],
  ["setElement","method"],
  ["fillValence","method"],

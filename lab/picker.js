@@ -51,8 +51,25 @@ const fmtBytes = (b) => (b >= 1e9 ? (b / 1e9).toFixed(b >= 1e10 ? 0 : 1) + ' GB'
 
 /* iteration 012 L1 · the Picker's own PREFERENCE (settings-store.js FAMILIES, never a project or a link): SHOW LABELS for the atoms (on: the symbol
    and Z, as before) and for the molecules (on: the formula on every tile, the name under it on a hover) */
-const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0, look: 'density', atomic: 'atoms' };   // atomic: THE ATOMIC deck's HYDROGEN | ATOMS (iteration 015 M3)   // look: THE PICTURES' STYLE (iteration 014 B4)   // hue: THE HUE ring's turn in degrees (L2)
-const readPrefs = () => { try { return Object.assign({}, PREF0, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (_) { return Object.assign({}, PREF0); } };
+const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels: false, hue: 0, atomic: 'atoms' };   // iteration 016 P3: no `look` until the reader picks one (lookFor)   // atomic: THE ATOMIC deck's HYDROGEN | ATOMS (iteration 015 M3)   // look: THE PICTURES' STYLE (iteration 014 B4)   // hue: THE HUE ring's turn in degrees (L2)
+/* iteration 016 P3 · DEFAULT LOOKS (Josh: "Im ψ for atoms, arg ψ for molecules, until the reader changes it"): a record before 016 wrote PREF0's
+   look 'density' on every save of the hue or the labels, so a stored 'density' without `lookHand` is read as no choice; any other stored look
+   could only be a hand's and wins */
+const readPrefs = () => { let p; try { p = Object.assign({}, PREF0, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (_) { p = Object.assign({}, PREF0); }
+  if (p.look === 'density' && !p.lookHand) delete p.look; return p; };
+/** wheelSteps(node, step) — iteration 016 L2 (Josh: "a mouse wheel over the LOOK picker cycles the looks one notch each"): one step per detent — a
+    line or page wheel one per event, a pixel wheel's notch (one event of 50 px or more: Chromium's 100, Windows' 120) one per event, a trackpad's
+    trickle one per 100 px gathered */
+function wheelSteps(node, step) {
+  let acc = 0;
+  node.addEventListener('wheel', (e) => {
+    const d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX; if (!d) return;
+    e.preventDefault(); e.stopPropagation();
+    if (e.deltaMode || Math.abs(d) >= 50) { acc = 0; step(Math.sign(d)); return; }
+    if (Math.sign(acc) !== Math.sign(d)) acc = 0;
+    acc += d; if (Math.abs(acc) >= 100) { step(Math.sign(acc)); acc = 0; }
+  }, { passive: false });
+}
 const writePrefs = (p) => { try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (_) { /* a blocked profile keeps it for the visit */ } };
 /** an iteration 012 icon (lab/img/icons/<name>.svg), drawn in currentColor through a CSS mask */
 const icon = (host, name) => { const i = el('i', 'mm-ico', host); i.style.setProperty('--ico', `url(img/icons/${name}.svg)`); i.setAttribute('aria-hidden', 'true'); return i; };
@@ -161,25 +178,31 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      the LOOK button, each glyph in the math face and its word the hint — ρ · arg ψ · Im ψ / ● · ⊸ · φ; the Gol note's spring open and 120 ms
      close, ← → ↑ ↓ move, Enter or a press picks and closes, Escape or a press elsewhere closes; the look in use is lit.  The molecular looks
      are greyed on the ATOMIC deck (a lone atom has no bonds, and its potential is a monopole). */
+  /* iteration 016 L1 · THE SEVENTH TILE, ATOM LABELS (Josh, call 1: "the element letters drawn over the picture, very small, barely readable,
+     overlaps allowed"): Aa in STIX, the density picture with each nucleus' symbol (menu-thumbs --style labels); the drop is two centred rows,
+     the wave's three looks over the structure's four (● · ⊸ · φ · Aa) */
   const LOOKS = [['density', 'ρ', 'Density · ρ = |ψ|²'], ['phase', 'arg ψ', 'Phase · arg ψ on the colour wheel'], ['im', 'Im ψ', 'Imaginary part · Im ψ, signed'],
-    ['balls', '●', 'Balls · space-filling CPK spheres'], ['sticks', '⊸', 'Sticks · the bonds'], ['esp', 'φ', 'Electrostatic potential · φ on the surface']];
+    ['balls', '●', 'Balls · space-filling CPK spheres'], ['sticks', '⊸', 'Sticks · the bonds'], ['esp', 'φ', 'Electrostatic potential · φ on the surface'], ['labels', 'Aa', 'Atom labels · each nucleus\u2019 symbol over ρ']];
   const ATOM_LOOKS = new Set(['density', 'phase', 'im']);
+  /** the look a deck draws: the reader's pick, else (016 P3) Im ψ on ATOMIC and arg ψ on a molecule (MOLECULAR, a volume, the search) */
+  const lookFor = (atomic) => prefs.look || (atomic ? 'im' : 'phase');
   /* the glyph in the math face; ● and ⊸ are not in the shipped STIX subset (lab/fonts is never touched), so they are drawn, in the ink, at the em */
   const SHAPES = { '●': '<circle cx="12" cy="12" r="6.5" fill="currentColor"/>', '⊸': '<path d="M3 12h11.5" stroke="currentColor" stroke-width="1.6" fill="none"/><circle cx="17.5" cy="12" r="3.2" stroke="currentColor" stroke-width="1.6" fill="none"/>' };
   const glyph = (host, g) => { host.textContent = ''; if (SHAPES[g]) host.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${SHAPES[g]}</svg>`; else host.textContent = g; return host; };
-  const lookOf = () => (prefs.look && prefs.look !== 'density' ? prefs.look : null);
+  const lookOf = () => { const l = lookFor(false); return l !== 'density' ? l : null; };   // a volume tile's style (V.picture), a molecule's look
   const drop = el('div', 'mm-lookdrop lw-menu', root); drop.hidden = true; drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');
   const lookTiles = LOOKS.map(([id, glyph_, word], i) => { const b = el('button', 'mm-lk', drop); b.type = 'button'; b.dataset.look = id; b.setAttribute('role', 'radio'); b.style.setProperty('--i', String(i));
+    b.style.gridRow = i < 3 ? '1' : '2'; b.style.gridColumn = (i < 3 ? 2 + 2 * i : 1 + 2 * (i - 3)) + ' / span 2';   // L1: the bricks, each row centred
     glyph(el('b', 'mm-lk-g', b), glyph_); b.addEventListener('click', () => { if (b.getAttribute('aria-disabled') === 'true') return; setLook(id); closeDrop(true); }); return b; });
   function paintLooks() {
-    const cur = prefs.look || 'density', atomic = current && current.id === 'atomic';
+    const atomic = current && current.id === 'atomic', cur = lookFor(atomic);
     for (const b of lookTiles) { const id = b.dataset.look, on = id === cur, off = atomic && !ATOM_LOOKS.has(id), word = LOOKS.find((x) => x[0] === id)[2];
       b.classList.toggle('on', on); b.classList.toggle('off', off); b.setAttribute('aria-checked', String(on)); b.setAttribute('aria-disabled', String(off));
       b.title = off ? word + ' — a lone atom: none to show' : word; b.setAttribute('aria-label', b.title); b.tabIndex = on ? 0 : -1; }
     const L = LOOKS.find((x) => x[0] === cur) || LOOKS[0]; glyph(lookG, L[1]); lookB.title = 'Look of the pictures · ' + L[2]; lookB.setAttribute('aria-label', lookB.title);
   }
   function setLook(id) {
-    if (prefs.look === id) return; prefs.look = id; writePrefs(prefs); paintLooks();
+    if (prefs.look === id) return; prefs.look = id; prefs.lookHand = true; writePrefs(prefs); paintLooks();   // P3: the first write is the reader's
     for (const i of root.querySelectorAll('img.mm-pic[data-mol]')) V.picture(i.dataset.vol, i.dataset.mol, lookOf()).then((u) => { if (u) i.src = u; }, () => {});
     for (const i of root.querySelectorAll('img.mm-pic[data-menu]')) { const { src } = picOf(i.dataset.menu); if (i.getAttribute('src') !== src) i.src = src; }   // M2: every deck of ours
   }
@@ -203,8 +226,13 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   drop.addEventListener('keydown', (e) => {
     const k = lookTiles.indexOf(document.activeElement), d = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 3, ArrowUp: -3 }[e.key];
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeDrop(true); return; }
-    if (d && k >= 0) { e.preventDefault(); e.stopPropagation(); const n = lookTiles[(k + d + 6) % 6]; n.focus({ preventScroll: true }); if (n.getAttribute('aria-disabled') !== 'true') setLook(n.dataset.look); }
+    if (d && k >= 0) { e.preventDefault(); e.stopPropagation(); const N = lookTiles.length, j = Math.abs(d) === 1 ? (k + d + N) % N : d > 0 ? (k < 3 ? k + 3 : k) : (k >= 3 ? Math.min(2, k - 3) : k);   // L1: ↓ to the brick under, ↑ to the one over
+      const n = lookTiles[j]; n.focus({ preventScroll: true }); if (n.getAttribute('aria-disabled') !== 'true') setLook(n.dataset.look); }
   });
+  /* L2: the wheel over the drop or the LOOK button steps one look per detent, over the greyed ones, round the seven */
+  const wheelLook = (d) => { const live = lookTiles.filter((b) => b.getAttribute('aria-disabled') !== 'true'), k = live.findIndex((b) => b.dataset.look === lookFor(current && current.id === 'atomic'));
+    const n = live[(k + d + live.length) % live.length]; if (!n) return; setLook(n.dataset.look); if (!drop.hidden) n.focus({ preventScroll: true }); };
+  wheelSteps(drop, wheelLook); wheelSteps(lookB, (d) => { paintLooks(); wheelLook(d); });
   const setHue = (deg, keep = true) => {
     prefs.hue = ((Math.round(deg) % 360) + 360) % 360; hueShown += ((prefs.hue - hueShown) % 360 + 540) % 360 - 180;
     document.documentElement.style.setProperty('--mol-hue', hueShown + 'deg');   // iteration 013 P2: on the page's root, so MOLECULES' picture (.mol-thumb) turns with the Picker's
@@ -234,8 +262,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      look in use — a catalogue molecule's `<id>.<look>.webp`, an element's or a hydrogen state's `orb-<nl>_<m>.<look>.webp` for ρ and arg ψ (an
      element's picture IS its block orbital's, so the two decks share one file), else the one picture; a missing variant falls back to it */
   const MENU = './img/menu/';
-  const picOf = (ref, look = prefs.look) => {
-    const [kind, a, b] = ref.split(':');
+  const picOf = (ref, look) => {
+    const [kind, a, b] = ref.split(':'); if (look === undefined) look = lookFor(kind !== 'mol');   // P3: Im ψ for an element or a state, arg ψ for a molecule
     if (kind === 'mol') return { src: look && look !== 'density' ? MENU + a + '.' + look + '.webp' : MENU + a + '.webp', fb: MENU + a + '.webp' };
     const key = kind === 'el' ? b : a, fb = kind === 'el' ? MENU + 'el-' + a + '.webp' : MENU + 'orb-' + key + '.webp';
     return { src: look === 'density' || look === 'phase' ? MENU + 'orb-' + key + '.' + look + '.webp' : fb, fb };
@@ -347,7 +375,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      pure orbital in the look in use (M2's `orb-<nl>_<m>`).  A press opens HYDROGEN — MOLECULES off, SPECTRUM's system HYDROGEN — with THAT label
      alone populated, through loadPreset's road as a hand's preset (one history row, THE FADE says its name). ── */
   const SUBN = '₀₁₂₃₄₅₆₇₈₉', subOf = (m) => (m < 0 ? '₋' : '') + String(Math.abs(m)).split('').map((d) => SUBN[+d]).join('');
-  const hDeck = deck(sections[0].sec), hWrap = hDeck.wrap, hDots = hDeck.foot;
+  /* iteration 016 L3 · THE 140 ON ONE PAGE (Josh, call 15: "on ONE page, each the size of a periodic-table cell"): one grid of fourteen columns,
+     the periodic cells' --t, no pages and no arrows (14 × 10 at 1600 px); built at its first showing, its pictures lazy */
+  const hTable = el('div', 'mm-table mm-htable', sections[0].sec); hTable.setAttribute('role', 'group'); hTable.setAttribute('aria-label', 'every hydrogen state, n ≤ 7');
   let hSet = false;
   const hTile = (b, host) => {
     const nl = b.n + L_LETTERS[b.l], info = { formula: nl + subOf(b.m), sub: `n ${b.n} · ℓ ${b.l} · m ${b.m < 0 ? '−' + -b.m : b.m}`, math: true, under: false };
@@ -356,10 +386,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   };
   function setAtomic(id, keep = true) {
     prefs.atomic = id === 'hydrogen' ? 'hydrogen' : 'atoms'; if (keep) writePrefs(prefs);
-    const h = prefs.atomic === 'hydrogen'; table.hidden = h; hWrap.hidden = hDots.hidden = !h;
+    const h = prefs.atomic === 'hydrogen'; table.hidden = h; hTable.hidden = !h;
     for (const b of amodeBtns) { const on = b.dataset.amode === prefs.atomic; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
-    if (h && !hSet) { hSet = true; hDeck.set(BASIS, hTile); } else if (h) hDeck.lay();
-    if (keep && !root.hidden) enterTiles(h ? hDeck.tiles : [...table.children], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i));
+    if (h && !hSet) { hSet = true; for (const b of BASIS) hTile(b, hTable); }
+    if (keep && !root.hidden) enterTiles(h ? [...hTable.children] : [...table.children], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i % 14 + Math.floor(i / 14)));
   }
   setAtomic(prefs.atomic, false);
   /* ── MOLECULAR: MOLECULES ONLY (iteration 011 Q4, Josh: "remove those 'lattice' and 'heavy' and other downloadable stuff from the molecular
@@ -542,7 +572,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       const size = v.index ? v.bytes : v.archive && v.archive.bytes;
       const step = stepper({ aria: 'volume', items: (vols.length ? vols : [v]).filter((x) => x.count || x.index || x.archive).map((x) => ({ id: x.id, label: volName(x) })), value: v.id, list: false, cls: 'mm-vstep',
         onChange: (id) => { const x = vols.find((y) => y.id === id); if (x) enter(x); } });
-      step.root.title = [volName(v), size ? fmtBytes(size) : ''].filter(Boolean).join(' · '); vhead.appendChild(step.root);
+      step.root.title = [volName(v), size ? fmtBytes(size) : ''].filter(Boolean).join(' · '); vhead.appendChild(step.root); wheelSteps(step.root, (d) => step.step(d));   // L2
       countEl = el('span', 'mm-count', vhead);
       tagsEl = el('div', 'mm-tags', vhead); tagsEl.setAttribute('role', 'group'); tagsEl.setAttribute('aria-label', 'tags of ' + volName(v));
       tagsEl.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && tagsEl.scrollWidth > tagsEl.clientWidth) { e.preventDefault(); tagsEl.scrollLeft += e.deltaY; } }, { passive: false });
@@ -633,7 +663,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function goHydrogen(b) {
     close(); const C = app.state.chem; if (C && C.on) C.setOn(false);
     if (getHamiltonian().id !== 'hydrogen') app.w.switchHamiltonian('hydrogen'); if (app.ui.hamSeg) app.ui.hamSeg.set('hydrogen');
-    const look = prefs.look, name = b.n + L_LETTERS[b.l] + subOf(b.m);   // the field opens in the look the tile showed (an m = 0 state held imaginary for Im ψ, as its picture)
+    const look = lookFor(true), name = b.n + L_LETTERS[b.l] + subOf(b.m);   // the field opens in the look the tile showed (an m = 0 state held imaginary for Im ψ, as its picture)
     app.ctl.loadPreset({ id: b.id, label: name, note: 'hydrogen · one label, from the Picker', modes: [{ n: b.n, l: b.l, m: b.m, amp: 1, phase: look === 'im' && b.m === 0 ? Math.PI / 2 : 0 }],
       visual: { rate: 4, window: 4 * Math.PI * b.n * b.n, view: look === 'phase' ? 'phase' : look === 'im' ? 'imag' : 'density' } }, { hand: true });
   }
@@ -680,7 +710,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       setTimeout(() => { root.classList.remove('first'); }, 2600);
       return;
     }
-    requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? hDeck.tiles : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
+    requestAnimationFrame(() => { root.classList.add('in'); movePill(current.b); enterTiles(current.id === 'atomic' ? (prefs.atomic === 'hydrogen' ? [...hTable.children] : [...table.children]) : current.id === 'molecular' ? molDeck.tiles : [], (t, i) => (t.classList.contains('mm-el') ? (+t.style.gridColumn || 0) + (+t.style.gridRow || 0) : i)); });
   }
   function close() { if (root.hidden) return; closeDrop(); showDecks(); ro.unobserve(scroller); root.classList.remove('in'); document.body.classList.remove('menu-open'); root.hidden = true; }
   const toggle = () => (root.hidden ? open() : close());

@@ -7,7 +7,7 @@ import { readLink, LINK_CHAR_CEILING } from '../statelink.js'; import { CATALOGU
 export function createFacade(app) {
   const { dom, ui, reg, hNote, clock, appPlay, obs, mat, rates, energyOf, sturm, labelExpect } = app, { schedule, page, loopRing, ringMedian, windowActivity, modesAt, meterSnapshot,
     MOTION } = app.loop, { camera, orbitBy, camLevel, setCamMode, hydroReader, swClient } = app.host, { spectrum, switchHamiltonian, setSturmian, sturmEigen, selectEigen, setElement, fillValence,
-    shadowView, orbit, kepler, vortex, particles, flowTracers, slice, head, calculus, ladder, atomsView, wignerView, radiationView, bowStart, bowMove, bowRelease, orbitOfShell, kepShell, keplerTurn,
+    shadowView, orbit, kepler, vortex, particles, flowTracers, slice, head, calculus, ladder, atomsView, wignerView, radiationView, emissionView, bowStart, bowMove, bowRelease, orbitOfShell, kepShell, keplerTurn,
     keplerDragToPoint, keplerRowSync, gas, gasTableOn, launchPacket, enterBox, coherentBounce, bowCancel, slapAlong } = app.w, { autoQ, gov, effectiveRes, READER_LAW, keep, domain, fieldRate, perf,
     setGovernor, setKeepFrames, setPerfMode, stats, mod, MOD, modHand, modGets, modKnobs, modHeld, ROT_LIMIT, rotRate, rotDriving, setRotationRate, look, paintMarks, wheelColor, accent, inkCtx,
     markInk, stageGround, busyWrap, busyFlash, busy, busySync, busyHost, field, maths, scan, cards, touchState, loadPreset, setReference, api } = app.ctl, { readSettings, saveSettings, setCardStyle,
@@ -166,6 +166,8 @@ export function createFacade(app) {
       get A() { const s = radiationView.stats; return s ? s.A : 0; }, get tau() { const s = radiationView.stats; return s ? s.tau : Infinity; },
       get power() { const s = radiationView.stats; return s ? s.P : 0; }, get stats() { return radiationView.stats; },
       get canvas() { return radiationView.canvas; }, table() { return radiationView.table(); } },
+    /* iteration 016 E1 · EMISSION SPECTRA: the catalogue in force, a press by id or name ({ decay, pair }: one history row, THE FADE), the last pair pressed, the lit lines */
+    emission: { lines() { return emissionView.lines(); }, pick(id, opt) { return emissionView.pick(id, opt); }, pair() { return emissionView.pair(); }, lit() { return emissionView.lit(); }, get canvas() { return emissionView.canvas; } },
     atoms: atomsView, setElement, fillValence, get atomZ() { return HAMILTONIANS.atom.Z; }, get element() { return HAMILTONIANS.atom.element; },
     /* W-STURMIAN: the scale — on/off, λ, the eigen-decomposition {E, pop, l, m, n} (of c(t) when t is given, else the anchor), load eigenstate k, the S-norm ⟨c|S|c⟩ */
     sturmian: { set(on) { setSturmian({ on: !!on }); return sturm.on; }, setLambda(l) { setSturmian({ lambda: l }); return sturm.lambda; }, get on() { return sturm.on; }, get lambda() { return sturm.lambda; }, get active() { return !!sturm.P; },

@@ -68,7 +68,7 @@ const EXPOSURE = +arg('exposure', 0.5);                      // the atoms: half 
 const CUT_ARG = arg('cut', 'camera'), CUT = CUT_ARG === 'none' ? null : CUT_ARG === 'camera' ? [1, 1, 1].map((x) => x / Math.sqrt(3)) : CUT_ARG.split(',').map(Number);
 const CUT_L = arg('cutl', 'all') === 'all' ? [0, 1, 2, 3, 4, 5, 6] : arg('cutl').split(',').map(Number);
 const STYLES = arg('style', '').split(',').filter(Boolean), ESP_SURFACE = arg('esp-surface', 'ses');
-const VARIANTS = STYLES.filter((s) => ['im', 'balls', 'sticks', 'esp', 'phase'].includes(s));          // iteration 014 B4 · 015 M2: the molecule looks
+const VARIANTS = STYLES.filter((s) => ['im', 'balls', 'sticks', 'esp', 'phase', 'labels'].includes(s));          // iteration 014 B4 · 015 M2: the molecule looks · 016 L1: labels (the plain picture + each nucleus' symbol)
 const ORB_LOOKS = STYLES.filter((s) => ['im', 'density', 'phase'].includes(s));                       // iteration 015 M2: the orbitals' looks (im = the plain file)
 const VARIANT = VARIANTS.length > 0;
 const ATOM_STYLE = ['signed', 'glassSigned'].includes(STYLES[0]) ? STYLES[0] : 'signed';                  // the atoms' DRAW STYLE: SIGNED, or SHELL ± (iteration 010 X7, 'glassSigned')
@@ -105,7 +105,12 @@ await g.ev(`const LW = __LW; LW.pause(); LW.setFrame(false); LW.setAxis(false); 
   window.__home = { yaw: LW.obs.yaw, pitch: LW.obs.pitch };
   window.__pose = (p) => { LW.obs.yaw = p.yaw; LW.obs.pitch = p.pitch; LW.schedule(LW.TIER.PRESENT); };
   /* the shot: two grounds, the matte, the crop, the encode — in the page, so the bytes never cross the wire twice */
-  window.__thumb = async (size, q) => {
+  /* iteration 016 L1 · ATOM LABELS: each nucleus' element symbol drawn over the plain picture at its projected place — tiny (barely readable on a
+     tile, as Josh asked), white with a dark halo so it reads on any colour and either theme, overlaps allowed; the nuclei are the molecule's
+     AS DRAWN (chem.atomsNow) through the stage's own projection (field.js toScreen) at the picture's size */
+  const SYMS = 'H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn'.split(' ');
+  const FIELD = await import('./field.js');
+  window.__thumb = async (size, q, labels = false) => {
     const settle = async () => { const p = LW.stats.presents; for (let i = 0; i < 60 && LW.stats.presents < p + 2; i++) await new Promise((r) => setTimeout(r, 50)); };
     const grab = async (bg) => { LW.mat.bg = bg; LW.schedule(LW.TIER.PRESENT); await settle();
       const p = await LW.capture.picture({ width: ${RENDER}, height: ${RENDER}, caption: false }); if (!p.ok) throw new Error(p.error);
@@ -130,6 +135,13 @@ await g.ev(`const LW = __LW; LW.pause(); LW.setFrame(false); LW.setAxis(false); 
     const side = Math.max(x1 - x0, y1 - y0) * 1.08 + 4, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
     const c = new OffscreenCanvas(size, size), cg = c.getContext('2d'); cg.imageSmoothingQuality = 'high';
     cg.drawImage(full, cx - side / 2, cy - side / 2, side, side, 0, 0, size, size);
+    if (labels) {
+      const S = FIELD.toScreen(LW.obs, LW.domain.half, W, H), k = size / side, fs = Math.max(8, Math.round(size * 0.05));
+      cg.font = '600 ' + fs + 'px "Roboto", "Helvetica Neue", Arial, sans-serif'; cg.textAlign = 'center'; cg.textBaseline = 'middle'; cg.lineJoin = 'round';
+      cg.lineWidth = Math.max(2, fs * 0.22); cg.strokeStyle = 'rgba(0, 0, 0, 0.72)'; cg.fillStyle = '#fff';
+      for (const a of LW.chem.atomsNow()) { const p = S.at(a.x, a.y, a.z); if (!p) continue; const x = (p[0] - (cx - side / 2)) * k, y = (p[1] - (cy - side / 2)) * k, t = SYMS[a.Z - 1] || '?';
+        cg.strokeText(t, x, y); cg.fillText(t, x, y); }
+    }
     const blob = await c.convertToBlob({ type: 'image/png' });   // lossless here; the WebP (lossy colour AND alpha) is PIL's, below
     const buf = new Uint8Array(await blob.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
     return { b64: btoa(s), bytes: buf.length, box: [x0, y0, x1, y1], nucleus: [(W / 2 - cx) / side + 0.5, (H / 2 - cy) / side + 0.5] };   // the origin is the frame's centre (THE CORNER looks at it): where it lands on the tile, 0…1
@@ -148,7 +160,7 @@ const save = (name, r) => { if (!r || r.E || r.empty) { console.log('  ✗', nam
   const b = statSync(OUT + name + '.webp').size; total += b; nuclei[name] = r.nucleus.map((x) => +x.toFixed(4)); console.log('  ✓', name, b, 'B'); return true; };
 
 /* the molecule's look: the density SIGNED (the shipped tile) or a variant (B4); `file` is the name it is written under */
-const molLook = (v) => v === 'im' ? `await LW.chem.setView('orbital'); LW.setView('real'); LW.setStyle('signed'); LW.mat.iso = ${ISO};`
+const molLook = (v) => v === 'labels' ? molLook('') : v === 'im' ? `await LW.chem.setView('orbital'); LW.setView('real'); LW.setStyle('signed'); LW.mat.iso = ${ISO};`
   : v === 'phase' ? `{ const o = LW.orbitals.state(); LW.orbitals.clear(); LW.orbitals.select(o.homo, 1, 0); LW.orbitals.select(o.lumo, 1, Math.PI / 2); await LW.chem.setView('registry'); } LW.setView('phase'); LW.setStyle('signed'); LW.mat.iso = ${ISO};`
   : v ? `await LW.chem.setView('density'); LW.setView('density'); LW.setStyle('${v}'); LW.mat.espSurf = '${ESP_SURFACE}'; LW.palette.setOn(false);`
   : `await LW.chem.setView('density'); LW.setView('density'); LW.setStyle('signed'); LW.mat.iso = ${ISO}; LW.palette.setOn(true);`;
@@ -166,7 +178,7 @@ if (sets.includes('molecules')) {
     for (const v of looksOf()) {
       const r1 = r && r.E ? r : await g.ev(`const LW = __LW; ${molLook(v)} LW.palette.setOn(${v ? (v === 'balls' || v === 'sticks' || v === 'esp' ? 'false' : 'true') : 'true'});
         await new Promise((r) => setTimeout(r, ${v ? 900 : 300}));
-        return await __thumb(${2 * SIZE}, ${Q});`);
+        return await __thumb(${2 * SIZE}, ${Q}, ${v === 'labels'});`);
       if (save(file(id, v), r1) && !v) made.molecules.push(id);
     }
   }
@@ -217,7 +229,7 @@ if (VOL) {
     for (const v of looksOf()) {
       const r1 = r && r.E ? r : await g.ev(`const LW = __LW; ${molLook(v)} LW.palette.setOn(${v === 'balls' || v === 'sticks' || v === 'esp' ? 'false' : 'true'});
         await new Promise((r) => setTimeout(r, ${v ? 900 : 300}));
-        return await __thumb(${2 * SIZE}, ${Q});`);
+        return await __thumb(${2 * SIZE}, ${Q}, ${v === 'labels'});`);
       if (save(file(id, v), r1) && !v) made.molecules.push(id);
     }
   }

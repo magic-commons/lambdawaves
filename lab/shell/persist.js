@@ -306,7 +306,7 @@ export function createPersist(app) {
           if (sp && sp !== app.state.space && !getHamiltonian().noMomentum && !sturm.P) { app.state.space = sp; if (ui.spaceSeg) ui.spaceSeg.set(app.state.space); } }
         if (pr.palette && app.state.palette) {
           if (Array.isArray(pr.palette.stops)) app.state.palette.load(pr.palette.stops, pr.palette.selected, pr.paletteId); else if (pr.paletteId) app.state.palette.select(pr.paletteId);   // wave 127: the file's own stops under its name — one push, not a catalogue read then a load
-          app.state.palette.setOn(!!pr.palette.on); if (!pr.palette.on && mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);
+          app.state.palette.setOn(!!pr.palette.on, true); if (mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);   // iteration 016 P6: the file's VIEW stands under PALETTE ON too (setOn's keepView)
         }
         /* Restore modulation last. Its base setters now see the final camera, Stage, transport,
            palette and state controls, so no later project step can overwrite a routed hand value. */

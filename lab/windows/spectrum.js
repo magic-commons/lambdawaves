@@ -35,7 +35,18 @@ export function createSpectrumCard(app) {
   hamGroup.classList.add('sp-ham'); label(el('div', 'grp-lbl', hamHead), 'HAMILTONIAN'); fold(hamHead, hamBody, { what: 'the Hamiltonian', key: 'ham' });
   const hamRows = { hydrogen: el('div', 'row tight sp-ham-h', null), scale: el('div', 'row tight sp-ham-s', null), box: el('div', 'row tight sp-ham-b', null), atom: el('div', 'row tight sp-ham-a', null) };
   /** the rows the system in force shows (the stepper's id: an operator, or 'molecules') */
-  const hamShow = (id) => { hamRows.hydrogen.hidden = hamRows.scale.hidden = id !== 'hydrogen'; hamRows.box.hidden = id !== 'well' && id !== 'qho'; hamRows.atom.hidden = id !== 'atom'; };
+  /* iteration 016 W7 (Josh, call 10: "make the section dynamic by mode as WAVE's knobs are"): a turn of ‹ SYSTEM › re-lays the group once — the rows
+     written only when the set shown changes (the stepper and the operator's listener both ask), and the body's height glides old → new in 160 ms
+     (the kit's ease; reduced motion, a folded group or a hidden card: at once), so the cards under it never jump */
+  let hamKey = '';
+  const hamShow = (id) => {
+    const want = { hydrogen: id === 'hydrogen', scale: id === 'hydrogen', box: id === 'well' || id === 'qho', atom: id === 'atom' }, key = Object.values(want).join();
+    if (key === hamKey) return;
+    const live = !!hamKey && hamBody.getClientRects().length > 0 && !matchMedia('(prefers-reduced-motion: reduce)').matches, h0 = live ? hamBody.offsetHeight : 0;
+    hamKey = key; for (const k of Object.keys(want)) hamRows[k].hidden = !want[k];
+    if (!live) return; const h1 = hamBody.offsetHeight;
+    if (h1 !== h0) hamBody.animate([{ height: h0 + 'px', overflow: 'clip' }, { height: h1 + 'px', overflow: 'clip' }], { duration: 160, easing: 'cubic-bezier(.23, 1, .32, 1)' });
+  };
   {
     const rh = el('div', 'row tight sp-ham-sys', hamBody);
     /* 0.7.4 C1 · THE PICKER: ‹ SYSTEM ›, the kit's stepper over lab/catalogue.js — the operators with HYDROGEN, MOLECULES and LATTICE, each row's hover its

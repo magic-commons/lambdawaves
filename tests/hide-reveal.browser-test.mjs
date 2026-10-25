@@ -16,7 +16,7 @@ import http from 'node:http';
 import { open } from '../tools/gate/gatekit.mjs';
 import * as drv from '../tools/gate/drv.mjs';
 
-const W0 = 1500, H0 = 900;
+const W0 = 1500, H0 = 1400;   // 016 W5: tall enough that the TIMELINE and the modulation window stack (a shorter stage cycles them, one at a time)
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 8701}/lab/?preset=1s%2B2pz`, { width: W0, height: H0, script: 120000 });
 const pass = (m) => console.log('PASS ' + m);
 const ev = async (body) => { const r = await g.ev(body); assert.ok(r !== undefined && r !== null && !r.E, 'page threw: ' + JSON.stringify(r)); return r; };

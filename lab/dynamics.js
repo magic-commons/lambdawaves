@@ -33,7 +33,7 @@
  * differentiated), so particle trajectories are integrated from closed forms, not from the grid.  A trajectory can
  * never cross a nodal surface, and the vortex lines of VORTEX are exactly where v is singular.
  */
-import { BASIS, stateOf, modeTable, radial, laguerre, factorial } from './hydrogen.js';
+import { BASIS, BASIS_INDEX, NMAX, AU_TIME_AS, stateOf, modeTable, radial, laguerre, factorial } from './hydrogen.js';
 
 const PI = Math.PI, SQRT2 = Math.SQRT2;
 
@@ -167,6 +167,72 @@ export function dipoleLines(re, im, ids) {
   }
   out.sort((x, y) => y.amplitude - x.amplitude);
   return out;
+}
+
+/* ── THE LINE LIST (iteration 016 E2: EMISSION SPECTRA's catalogue and the state's own lines) ──────────────────────────────
+ * A line is two eigenstates beating; the window is the inverse map, a press on a line populating the pair that makes it.
+ * The subshell line (n l) → (n′ l′), Δl = ±1, carries the TABULATED Einstein A (summed over the lower m′, independent of the
+ * upper m by Wigner–Eckart):  A = (4/3) α³ ω³ · max(l, l′)/(2l + 1) · |∫R_{n′l′} r R_{nl} r² dr|²  in atomic units, ÷ t_au.
+ * A state-to-state pair (n l m) → (n′ l′ m′) carries (4/3) α³ ω³ |⟨n′l′m′|r|nlm⟩|²: Δm = 0 the z channel (π), Δm = ±1 the
+ * rotating dipole (σ); summed over m′ it is the subshell's A for every m (angularDipole2's sum rule, tests/emission.test.mjs).
+ * ω is the OPERATOR IN FORCE's gap (Z, μ, Ps, μH move every line; positronium's Hα sits at 1312.9 nm).  The register's hydrogen at
+ * μ = mₑ is the infinite-mass −1/2n², so its λ and A carry ¹H's reduced mass once (lineMass: E ∝ μ, so λ ∝ 1/μ and A ∝ μ — the
+ * RADIATION law, radiation.js), which puts Hα at 656.47 nm in vacuum (656.11 at infinite mass; NIST 656.46).  The beat itself runs
+ * at the register's own ω (Hα: T = 2π/ω = 90.48 a.u.).  No fine structure, no Lamb shift, no radiation reaction, no widths. */
+const ALPHA_FS = 7.2973525693e-3, AU_SECOND = AU_TIME_AS * 1e-18, MU_1H = 1 / (1 + 1 / 1836.15267343);   // CODATA 2018, as radiation.js
+export const C_LIGHT_AU = 1 / ALPHA_FS, BOHR_NM = 0.0529177210903, HARTREE_EV = 27.211386245988;
+/** the reduced mass a line's λ and A carry: ¹H's under the register's own hydrogen at μ = mₑ; any other operator's energies are its own */
+export const lineMass = (H = getHamiltonian()) => (H.id === 'hydrogen' && (H.mu || 1) === 1 ? MU_1H : 1);
+/** the vacuum wavelength in nm of a gap ω (a.u.) */
+export const lambdaNm = (omega) => (omega > 0 ? 2 * PI * C_LIGHT_AU / omega * BOHR_NM : Infinity);
+/** |⟨l′m′| r̂ |lm⟩|² — all three components (radiation.js angularDipole's |x|² + |y|² + |z|²): zero unless l′ = l ± 1, |m′ − m| ≤ 1 */
+export function angularDipole2(lp, mp, l, m) {
+  if ((lp !== l + 1 && lp !== l - 1) || Math.abs(mp) > lp || Math.abs(m) > l) return 0;
+  if (mp === m) { const z = angularDipoleZ(lp, mp, l, m); return z * z; }
+  if (mp === m + 1) return (lp === l + 1 ? (l + m + 1) * (l + m + 2) / ((2 * l + 1) * (2 * l + 3)) : (l - m) * (l - m - 1) / ((2 * l - 1) * (2 * l + 1))) / 2;
+  if (mp === m - 1) return (lp === l + 1 ? (l - m + 1) * (l - m + 2) / ((2 * l + 1) * (2 * l + 3)) : (l + m) * (l + m - 1) / ((2 * l - 1) * (2 * l + 1))) / 2;
+  return 0;
+}
+const idxOf = (n, l, m) => BASIS_INDEX.get(`h:${n}:${l}:${m}`);
+const rateOf = (omega, d2, mass) => (4 / 3) * ALPHA_FS ** 3 * omega ** 3 * d2 / AU_SECOND * mass;
+/** lineList(H) → every subshell line of the n ≤ 7 register under the operator in force: { upper: {n, l}, lower: {n, l}, omega (the
+ *  register's gap), lambda (nm, vacuum, the line's mass), A (s⁻¹, the subshell's tabulated rate), radial }, longest λ last */
+export function lineList(H = getHamiltonian()) {
+  const out = [], mass = lineMass(H), sub = [];
+  for (let n = 1; n <= NMAX; n++) for (let l = 0; l < n; l++) sub.push({ n, l, E: H.energy(idxOf(n, l, 0)) });
+  for (const u of sub) for (const w of sub) {
+    if (Math.abs(u.l - w.l) !== 1 || !(u.E - w.E > 1e-9)) continue;                     // u above w, Δl = ±1
+    const omega = u.E - w.E, R = radialDipole(w.n, w.l, u.n, u.l);
+    out.push({ upper: { n: u.n, l: u.l }, lower: { n: w.n, l: w.l }, omega, lambda: lambdaNm(omega * mass),
+      A: rateOf(omega, Math.max(u.l, w.l) / (2 * u.l + 1) * R * R, mass), radial: R });
+  }
+  return out.sort((a, b) => a.lambda - b.lambda);
+}
+/** linePairs(upper, lower, H) → the m-pairs of one subshell line: { a, b (the upper and lower BASIS indices), dm, A (state-to-state,
+ *  s⁻¹) }, π (Δm = 0) first, then σ (Δm = ±1), each strongest first (ties: the smaller |m| first) */
+export function linePairs(upper, lower, H = getHamiltonian()) {
+  const a0 = idxOf(upper.n, upper.l, 0), b0 = idxOf(lower.n, lower.l, 0); if (a0 === undefined || b0 === undefined) return [];
+  const omega = Math.abs(H.energy(a0) - H.energy(b0)), R = radialDipole(lower.n, lower.l, upper.n, upper.l), mass = lineMass(H), out = [];
+  for (let mu = -upper.l; mu <= upper.l; mu++) for (let ml = -lower.l; ml <= lower.l; ml++) {
+    const g = angularDipole2(lower.l, ml, upper.l, mu); if (!(g > 0)) continue;
+    out.push({ a: idxOf(upper.n, upper.l, mu), b: idxOf(lower.n, lower.l, ml), dm: ml - mu, A: rateOf(omega, g * R * R, mass) });
+  }
+  return out.sort((x, y) => (x.dm !== 0) - (y.dm !== 0) || y.A - x.A || Math.abs(BASIS[x.a].m) - Math.abs(BASIS[y.a].m) || BASIS[x.a].m - BASIS[y.a].m);
+}
+/** stateLines(re, im, ids, H) → the prepared state's own lines, π and σ alike: each populated pair with ⟨a|r|b⟩ ≠ 0 and a gap, upper
+ *  first — { a, b, omega, lambda, d = |⟨a|r|b⟩|, amplitude 2|c_a||c_b|d, A (state-to-state) } — strongest first.  (dipoleLines reads
+ *  the z channel alone: RADIATION's and the tests' road, unchanged.) */
+export function stateLines(re, im, ids, H = getHamiltonian()) {
+  const list = ids || BASIS.map((s) => s.index), out = [], mass = lineMass(H);
+  for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+    let a = list[i], b = list[j]; const Ea = H.energy(a), Eb = H.energy(b);
+    if (Eb > Ea) { const t = a; a = b; b = t; }
+    const A = BASIS[a], B = BASIS[b], g = angularDipole2(B.l, B.m, A.l, A.m), omega = Math.abs(Ea - Eb);
+    if (!(g > 0) || !(omega > 1e-12)) continue;
+    const d = Math.sqrt(g) * Math.abs(radialDipole(B.n, B.l, A.n, A.l)), amp = 2 * Math.hypot(re[a], im[a]) * Math.hypot(re[b], im[b]) * d;
+    if (amp > 1e-12) out.push({ a, b, omega, lambda: lambdaNm(omega * mass), d, amplitude: amp, A: rateOf(omega, d * d, mass) });
+  }
+  return out.sort((x, y) => y.amplitude - x.amplitude);
 }
 
 /* ── radial moments, and the atom's OWN virial theorem ───────────────────── */

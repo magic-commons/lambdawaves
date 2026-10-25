@@ -21,6 +21,12 @@
  *     play's edge (clock.js onePlay), the power on or off.  A play holds the kit's `demand('app.play')` first, so the modulation is
  *     never refused for want of a route or an open editor (MIR 1.5 `installModulation().play`); a pause releases it.
  *   · THE FLASH GUARD's LIMITER (0.5.1 D10-19, PARTIAL): `guardRoutes`, below — four luminance routes, nothing else.
+ *   · THE ACCENT B DOT (iteration 016 W8, Josh's call 14: "a modulated knob its style hides: an ACCENT B dot where the pill starts, meaning this
+ *     window has routes"): `routeDots` marks every rack window holding a `[data-param]` control some route targets with `.lw-routed` (lab.css draws
+ *     the 6 px dot just past the card's inner edge, where the scroll pill's tail starts — rack-scrollbar.js' PILL.gap).  A route is model data, not a
+ *     modulated value, so the dot shows paused or playing, powered or not; the routes reach the model from many roads (the drop, the window, a
+ *     restore, an undo, LW.mod), so the check is a key — the model's route adds · removes · count and the stamped controls' count — read every
+ *     400 ms while the page shows, and the DOM is touched only when that key moves.
  */
 import { createModHost } from './mir/modulation/host.js';
 import { createAudioCapture, AUDIO_STATE } from './mir/modulation/audio-capture.js';   // wave 102's capture half, the kit's since 1.5 (0.5.0 C4: lab/audio.js deleted)
@@ -58,7 +64,7 @@ const IDLE = { state: AUDIO_STATE.IDLE, reason: '', live: false, deviceId: '', s
 
 /** deps: { available, present (never a tier above PRESENT), view: () => the window or null, onCapture(cap), save(), say(text): the flash guard's line } */
 export function createModPort({ available, present, view, onCapture, save, say }) {
-  let host = null, cap = null, syncing = false, adapters = [], idOf = null;
+  let host = null, cap = null, syncing = false, adapters = [], idOf = null, dotKey = '';
   const knobs = Object.create(null), gets = Object.create(null), held = new Set();
   const cadence = { hz: 60, get step() { return 1000 / this.hz - 0.5; } };
   const win = () => view() || null;
@@ -124,7 +130,21 @@ export function createModPort({ available, present, view, onCapture, save, say }
         const k = knobs[ev.id] && knobs[ev.id]();
         if (k && k.root) k.root.classList.toggle('mod-held', on);
       });
+      if (typeof document !== 'undefined') setInterval(P.routeDots, 400);   // a node test installs the port with no DOM
       return host;
+    },
+    /** iteration 016 W8: the windows whose controls a route targets wear `.lw-routed` (the header says why a key and not an event) */
+    routeDots(force) {
+      if (!host || typeof document === 'undefined' || (document.hidden && !force)) return 0;
+      const M = host.model, st = M.modStat || {}, L = M.routeList(), stamped = document.querySelectorAll('[data-param]');
+      const key = (st.routeAdds | 0) + ':' + (st.routeRemoves | 0) + ':' + L.length + ':' + stamped.length;
+      if (key === dotKey && !force) return -1;
+      dotKey = key;
+      const ids = new Set(L.map((r) => r.targetId)), on = new Set();
+      for (const k of stamped) if (ids.has(k.dataset.param)) { const d = k.closest('.dev'); if (d) on.add(d); }
+      for (const d of document.querySelectorAll('.dev.lw-routed')) if (!on.has(d)) d.classList.remove('lw-routed');
+      for (const d of on) d.classList.add('lw-routed');
+      return on.size;
     },
     follow(on) {
       if (!host) return null;
@@ -146,7 +166,7 @@ export function createModPort({ available, present, view, onCapture, save, say }
         opened: () => { C.setPresentationActive(true); present(); if (onOpen) onOpen(); },   // the editor's preview demand only: THE play holds its own (A6); onOpen: 015 T5's magnet
         closed: () => { C.setPresentationActive(false); },              // the kit's close reports moved(null) itself
         apply: () => { C.applyAll(false); present(); note(); },
-        cadence: () => cadence.hz, setCadence: P.setCadence,
+        cadence: () => cadence.hz, setCadence: P.setCadence, cadenceKey: false,   // iteration 016 W4: 60 | 120 HZ lives in SETTINGS › QUALITY beside GOVERNOR (settings-card.js), never on the work bar
         audio: {
           state: () => (cap ? Object.fromEntries(CAP.map((k) => [k, cap[k]])) : { ...IDLE }),
           support: () => capture().support(),

@@ -27,9 +27,9 @@
  * CHANGE: GROUND is D₀, MEAN is the stationary part, which leaves exactly the interference terms on screen.
  */
 import { stateName } from './names.js';
-import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, fitText, vividInk, nRGB, chip } from './mir/kit.js';
+import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, vividInk, nRGB, chip } from './mir/kit.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
-import { paintStroke, fillButton, levelLine } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
+import { paintStroke, fillButton, levelLine, footLine } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
 import { GROUND, AU_TIME_AS, createStatesModel, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 
@@ -68,7 +68,7 @@ export function createStates(host, api) {
 
   /* ── the top: ladder + scope ──────────────────────────────────────────────────────────────────── */
   const top = el('div', 'row tight reg-top', host);
-  const cv = el('canvas', 'mol-c reg-ladder', top);
+  const cv = el('canvas', 'mol-c reg-ladder', top), cfoot = footLine(cv);   // 016 R1: the law line, shown on a hover
   cv.title = 'The many-electron ladder: S₀ at zero and the singlet excited states above it, ω in hartree. Stick weight is oscillator strength, hue is the '
     + 'axis of the transition dipole, degenerate levels sit side by side. Left-click a state to put it in the register, right-click to take it out; left-drag paints every state you cross in, right-drag paints them out.';
   const scope = el('canvas', 'mol-c reg-scope', top);
@@ -639,8 +639,7 @@ export function createStates(host, api) {
       });
       if (!used.some((q) => Math.abs(q - yy) < 9)) { used.push(yy); g.fillStyle = T.ink(0.85); g.fillText(i === 0 ? 'S₀' : row.E.toFixed(row.E < 10 ? 3 : 1), left - 4, yy); }
     });
-    g.fillStyle = T.ink(0.8); g.textAlign = 'left';
-    fitText(g, `ω_TDA Eh · ${brightOnly ? 'bright valence states (f > ' + BRIGHT_F + ')' : 'all ' + ladder.count + ' states'} · TD-CIS, not ω_RPA`, left, H - 5, { x0: left, y0: H - 11, x1: W - 4, y1: H - 1 }, 'left', true);
+    cfoot(`ω_TDA Eh · ${brightOnly ? 'bright valence states (f > ' + BRIGHT_F + ')' : 'all ' + ladder.count + ' states'} · TD-CIS, not ω_RPA`, left, W, H);
     hover.set(hovers, plot);
   }
   /* 2026-10 (Josh) · PAINT THE LADDER (lab/paint-stroke.js), the ORBITAL ladder's law: LEFT adds, RIGHT removes; a press

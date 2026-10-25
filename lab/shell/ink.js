@@ -18,7 +18,24 @@ export function createInk(app) {
     const toCanvas = (r) => { const x0 = r.left - cb.left, y0 = r.top - cb.top, x1 = r.right - cb.left, y1 = r.bottom - cb.top;
       return x1 - x0 < 2 || y1 - y0 < 2 || x1 <= 0 || y1 <= 0 || x0 >= cb.width || y0 >= cb.height ? null : [x0, y0, x1, y1]; };
     if (field.setOcclusion(occlusion.rects(toCanvas))) schedule(TIER.PRESENT);
-    landing();
+    landing(); tint();
+  }
+  /* iteration 016 W1 · TINT UNDER THE WORDS (Josh, call 4: "With FROST off, a translucent window over the stage words takes a tint like the drop-down
+     menus"): read with the mask (every window move and fold already lands here), a card whose box meets a line of the stage words wears `data-tint`
+     and skin.css paints it the menus' tint; FROST on (its own veil), a card the words do not meet, or a hidden interface, none.  The words' own
+     comings and goings dirty the block (one childList observer on the layer, made when the layer first exists). */
+  let wordsSeen = null;
+  function tint() {
+    const body = document.body, layer = document.querySelector('.mir-info.lw-stage');
+    if (layer && layer !== wordsSeen) { wordsSeen = layer; new MutationObserver(occlusion.dirty).observe(layer, { childList: true, subtree: true }); }
+    const on = !body.classList.contains('frost') && !!layer && !layer.hidden && !body.classList.contains('ui-hidden');
+    const words = on ? [...layer.querySelectorAll('.mir-info-text')].map((e) => e.getBoundingClientRect()).filter((r) => r.width > 1 && r.height > 1) : [];
+    for (const d of [rack, rackL, floats].flatMap((h) => (h ? [...h.children] : []))) {
+      if (!d.classList || !d.classList.contains('dev')) continue;
+      const r = words.length && !d.classList.contains('closed') ? d.getBoundingClientRect() : null;
+      const hit = !!r && words.some((w) => w.left < r.right && w.right > r.left && w.top < r.bottom && w.bottom > r.top);
+      if (hit !== d.hasAttribute('data-tint')) d.toggleAttribute('data-tint', hit);
+    }
   }
   /* iteration 015 T6 · A MASK TAKEN MID-MOTION IS TAKEN AGAIN WHEN THE MOTION LANDS.  The kit's rack folds a card's height and slides its
      neighbours (core/motion.js, WAAPI on the cards): no attribute changes when they land, so under a storm of folds and raises the last

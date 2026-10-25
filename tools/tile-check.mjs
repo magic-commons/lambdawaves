@@ -7,6 +7,7 @@
    THE 140 (iteration 015 M3): every hydrogen.js BASIS label has its picture beside the manifest, orb-<nl>_<m>.webp (Im ψ) and each variant the
    manifest's `variants.orbitals` names (density, phase) — the Picker's HYDROGEN deck reads them. */
 import { readFileSync, existsSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { BASIS } from '../lab/hydrogen.js';
 import { L_LETTERS } from '../lab/names.js';
 import { ATOMS } from '../lab/atoms.js';
@@ -36,4 +37,12 @@ if (ALL) console.log('\nEVERY ELEMENT\n' + head + rows.join('\n'));
 const dir = file.replace(/[^/]*$/, ''), looks = ['', ...((man.variants || {}).orbitals || []).map((v) => '.' + v)];
 const lost = BASIS.flatMap((b) => looks.map((v) => `orb-${b.n}${L_LETTERS[b.l]}_${b.m}${v}.webp`)).filter((f) => !existsSync(dir + f));
 console.log(`\nTHE 140: ${BASIS.length * looks.length - lost.length} of ${BASIS.length * looks.length} pictures (${looks.map((v) => v || 'im').join(' · ')})` + (lost.length ? ' · missing ' + lost.slice(0, 12).join(' ') + (lost.length > 12 ? ' …' : '') : ''));
-process.exit(miss.length || lost.length ? 1 : 0);
+/* iteration 016 L3 · THE FILL: each of THE 140's pictures fills its square (Josh, call 15: "1s reads about as big as 7f") — the side of its alpha box
+   (alpha > 25) over the picture's side, by PIL; a picture under 0.8 is named */
+const files = BASIS.flatMap((b) => looks.map((v) => `orb-${b.n}${L_LETTERS[b.l]}_${b.m}${v}.webp`)).filter((f) => existsSync(dir + f));
+const py = spawnSync('python3', ['-I', '-c', 'import sys,json\nfrom PIL import Image\nout={}\nfor f in sys.argv[2:]:\n a=Image.open(sys.argv[1]+f).getchannel("A"); b=a.point(lambda v:255 if v>25 else 0).getbbox()\n out[f]=round(max(b[2]-b[0],b[3]-b[1])/a.width,3) if b else 0\nprint(json.dumps(out))', dir, ...files], { encoding: 'utf8', maxBuffer: 1 << 24 });
+let thin = [];
+if (py.status === 0) { const fill = Object.entries(JSON.parse(py.stdout)), v = fill.map((x) => x[1]); thin = fill.filter((x) => x[1] < 0.8);
+  console.log(`THE FILL: ${fill.length} pictures · side ${Math.min(...v).toFixed(3)} … ${Math.max(...v).toFixed(3)} of the square (mean ${(v.reduce((a, b) => a + b, 0) / v.length).toFixed(3)})` + (thin.length ? ' · under 0.8: ' + thin.map((x) => x[0]).slice(0, 12).join(' ') : ''));
+} else console.log('THE FILL: not measured (python3 with PIL) · ' + String(py.stderr).slice(0, 200));
+process.exit(miss.length || lost.length || thin.length ? 1 : 0);

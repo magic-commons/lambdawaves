@@ -43,7 +43,7 @@ import { readLink } from './statelink.js';   // wave 56: every state of this lab
 
 /* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
    nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-export const BUILD_LINE = '0.9.4-alpha · Separable · 2026-10-16';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+export const BUILD_LINE = '0.9.9-alpha · Emission Spectra · 2026-10-25';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
 
 export const TIER = { NONE: 0, PRESENT: 1, RECONSTRUCT: 2, EVOLVE: 3, REBUILD: 4 };
 const TIER_NAME = ['NONE', 'PRESENT', 'RECONSTRUCT', 'EVOLVE', 'REBUILD'];
@@ -130,7 +130,7 @@ export async function boot(dom) {
       switchHamiltonian: null, setSturmian: null, applySturmian: null, paintSturmRo: null, sturmEigen: null, occupiedEigen: null, periodEnergies: null, selectEigen: null, setElement: null,
       fillValence: null, wSh: null, shadowView: null, shadowFoot: null, wOrb: null, orbit: null, kepler: null, wVor: null, vortex: null, particles: null, flowTracers: null, wSlice: null, slice: null,
       wChem: null, head: null, stageCaption: null, stageTextTick: null, initStageText: null, wCalc: null, calculus: null, wMet: null, meters: null, wLad: null, ladder: null, wAtoms: null,
-      atomsView: null, wWig: null, wignerView: null, wRad: null, radiationView: null, WIG_OK: null, RAD_OK: null, bowStart: null, bowMove: null, bowRelease: null, orbitOfShell: null, kepShell: null,
+      atomsView: null, wWig: null, wignerView: null, wRad: null, radiationView: null, emissionView: null, WIG_OK: null, RAD_OK: null, bowStart: null, bowMove: null, bowRelease: null, orbitOfShell: null, kepShell: null,
       keplerTurn: null, keplerDragToPoint: null, keplerDragTo: null, keplerRowSync: null, gas: null, gasReadout: null, gasTableOn: null, gasSigma: null, launchPacket: null, enterBox: null,
       coherentBounce: null, bowCancel: null, slapAlong: null },
     ctl: { autoQ: null, controlStep: null, RES_LADDER: null, gov: null, effectiveRes: null, READER_LAW: null, keep: null, domain: null, fieldRate: null, perf: null, frameBudget: null,
@@ -542,6 +542,7 @@ export async function boot(dom) {
         const st = G.status !== null ? G.status : radiationView.cache ? RAD_OK : 'no dipole in this state';
         wRad.setStatus(st, st === RAD_OK ? '' : 'warn');
       });
+      if (may('emission', wEm)) tick('emission', () => emissionView.update());   // iteration 016 E1: nothing unless the operator, the element or the register moved
       if (may('calculus', wCalc)) tick('calculus', () => { if (calculus && !sturm.P) calculus.update(reg, clock.t, domain.half, app.state.space === 'p', !!(app.state.chem && app.state.chem.on)); });   // 0.8.2 P3: a molecule reads only the RAY's sentence
       if (may('lattice', wLat)) tick('lattice', () => lattice.update(clock.t));   // 0.7.2 L1: ψ(t) from LATTICE's eigenpairs, N² a frame, only while it can present
       if (may('bloch', wBlo)) tick('bloch', () => bloch.update(clock.t));   // 0.8.1 T1: one 2 × 2 step a frame (a chirp's few), only while it can present
@@ -736,10 +737,10 @@ export async function boot(dom) {
 
   // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); it ships CLOSED.  0.4.0 S3 (R-A2):
   // no longer LEGACY — the periodic table of SPECTRUM's ATOM operator, with its own row in + and WINDOW
-  const { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, WIG_OK, RAD_OK } = createAtomsWignerRadiation();   // 0.5.2 R2b: readouts' third seat
+  const { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, wEm, emissionView, WIG_OK, RAD_OK } = createAtomsWignerRadiation();   // 0.5.2 R2b: readouts' third seat
   const skeleton = createSkeleton(document.getElementById('skeleton'), (line) => { if (ui.bondSay) ui.bondSay(line); });   // iteration 014 D6: the BONDS' road, said in INFORMATIONAL's status   // 0.7.0 V2: its switch is MOLECULES' (ui.skeletonSw, a PREFERENCE)
   Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wVor, kepler: wOrb,
-    slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, calculus: wCalc, skeleton: wChem, lattice: wLat, bloch: wBlo, central: wCen, separable: wSep });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
+    slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, emission: wEm, calculus: wCalc, skeleton: wChem, lattice: wLat, bloch: wBlo, central: wCen, separable: wSep });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
   for (const w of [...Object.values(READERS), wVor, wMet, wLad]) windowActivity.track(w);
   /** the guard the two hydrogenic readers share: hydrogen at Z = 1, no Sturmian scale, no other model holding the
       field.  Both windows integrate the SHIPPED closed-form radials, so anything else would be two operators in one

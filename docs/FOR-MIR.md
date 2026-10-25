@@ -3,6 +3,11 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.27)
+- **THE CADENCE KEY MAY LIVE ELSEWHERE** (016 W4, `modulation/window.js`): a port with `cadenceKey: false` takes the 60 | 120 HZ key off the
+  modulation window's work bar (`transport.cad.remove()`); the app seats the cadence in its own SETTINGS. Why: Josh's call 7 of 2026-10-25 — the
+  DJ keys stay, the sample-rate key is a setting, not a performance control.
+
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.26)
 - **THE RAMP'S PRESETS ARE REPLACEABLE** (015 P3, `panels/ramp.js`): `createRampPanel(…).setPresets(list, id?)` (and the view's) swaps the stepper's
   list in place — the app's own saved palettes beside the kit's — and a row may be a `coming` heading (`USER`, no stops, never chosen); the preset in

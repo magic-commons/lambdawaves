@@ -65,7 +65,7 @@ export function createSettings(app) {
            the palette is PROJECT state (D2), and so is the mode, because a pose cannot be read back without it (D4: a
            TURNTABLE record's rotor is stale, a FREE one carries roll; docs/STATE-SCOPES.md). */
         gamut: document.body.dataset.gamut === 'p3' ? 'p3' : 'srgb', p3Mode: ui.p3Seg ? ui.p3Seg.get() : 'convert',
-        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id) });
+        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id), gen: 16 });   // iteration 016 E1: the generation, read by applySettings' `older` table
     } catch (e) {}
   }
 
@@ -119,7 +119,7 @@ export function createSettings(app) {
     /* the remembered set, exactly — and a card the profile is older than stays closed, as a first run has it (0.5.3 M9: INFORMATIONAL, no record and no
        atomLabels in the blob; iteration 008 Q: FIELD, no `dither` here — saveSettings has written `dither` on every save since 008 W, which merged after
        FIELD (S), so its absence is a blob no FIELD build ever saved, exactly as `atomLabels`' absence once said older than INFORMATIONAL) */
-    const older = { informational: !infoKnown(), staticfield: !('dither' in s) };
+    const older = { informational: !infoKnown(), staticfield: !('dither' in s), emission: !(s.gen >= 16) };   // iteration 016 E1: `gen` (the iteration that wrote the blob) is written on every save from 016, so a blob without it never met EMISSION SPECTRA
     if (Array.isArray(s.closed)) for (const d of document.querySelectorAll('.dev')) d.classList.toggle('closed', s.closed.includes(d.dataset.id) || older[d.dataset.id] === true);
     /* 0.3.1 · S1 (D4's escape hatch): the camera MODE is the project's, like the pose it is needed to read, so a `camMode`
        an older build left here is not read — the boot is FREE (the shipped seed) and a project brings its own. */
@@ -137,7 +137,7 @@ export function createSettings(app) {
   }
 
 
-  const KIND = { state: 'core', staticfield: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', equalizer: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', lattice: 'info', bloch: 'info', orbit: 'control', atoms: 'info', chem: 'other', wigner: 'info', radiation: 'info' };
+  const KIND = { state: 'core', staticfield: 'core', spectrum: 'core', observer: 'core', palette: 'core', camera: 'core', clip: 'core', transport: 'core', settings: 'other', shadow: 'info', equalizer: 'info', vortex: 'info', slice: 'info', calculus: 'info', meters: 'info', ladder: 'info', lattice: 'info', bloch: 'info', orbit: 'control', atoms: 'info', chem: 'other', wigner: 'info', radiation: 'info', emission: 'info' };
   /* WAVE 56 · WINDOWS THAT NO LONGER EXIST, and the window that absorbed each of them.  A saved LAYOUT is
      a list of window ids and nothing else, so retiring an id would silently drop a seat out of every layout
      ever saved unless the id has somewhere to go.  `style` (DRAW STYLE) was merged into `observer` (WAVE) by

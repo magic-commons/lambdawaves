@@ -24,8 +24,8 @@
  * a `refusal()` dance and a push ORDER in the frame loop; the refusal survives only as the sentence the interface
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
-import { el, knob, sw, readout, graphHover, themeInk, accentRGB, fitText, chip } from './mir/kit.js';
-import { paintStroke, fillButton, levelLine } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
+import { el, knob, sw, readout, graphHover, themeInk, accentRGB, chip } from './mir/kit.js';
+import { paintStroke, fillButton, levelLine, footLine } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { createFlow } from './molecular-flow.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
 
@@ -51,7 +51,7 @@ export function createOrbitals(host, api) {
   const sel = new Map();                // k → { amp, phase } — the register's own coefficients
 
   /* ── the ladder ───────────────────────────────────────────────────────────────────────────────── */
-  const cv = el('canvas', 'mol-c', host);
+  const cv = el('canvas', 'mol-c', host), cfoot = footLine(cv);   // 016 R1: the law line, shown on a hover
   cv.title = 'The molecular orbital ladder: ε_k in hartree, occupied levels filled and virtual ones hollow, degenerate levels side by side. '
     + 'Left-click a level to put it in the register, right-click to take it out; left-drag paints every level you cross in, right-drag paints them out — a stroke down the ladder takes them all, one along a degenerate row takes its levels one by one. The axis is order-exact but not linear: every gap is drawn to scale '
     + 'up to three times the median gap and compressed beyond it, because H₂O’s O 1s at −20.24 would otherwise put the whole valence inside four pixels. '
@@ -529,9 +529,7 @@ export function createOrbitals(host, api) {
       if (used.some((q) => Math.abs(q - nm.y) < 9)) continue;
       used.push(nm.y); g.fillStyle = nm.col; g.fillText(nm.txt, left - 4, nm.y);
     }
-    g.fillStyle = T.ink(0.8); g.textAlign = 'left';
-    const foot = `ε_k Eh · Δε ${Number.isFinite(eL) ? (eL - eH).toFixed(6) : '—'} · FROZEN, not ω_RPA`;
-    fitText(g, foot, left, H - 5, { x0: left, y0: H - 11, x1: W - 4, y1: H - 1 }, 'left', true);
+    cfoot(`ε_k Eh · Δε ${Number.isFinite(eL) ? (eL - eH).toFixed(6) : '—'} · FROZEN, not ω_RPA`, left, W, H);
     hover.set(hovers, plot);
   }
   /* 2026-10 (Josh) · PAINT THE LADDER (lab/paint-stroke.js): LEFT adds, RIGHT removes; a press adds/removes the level under

@@ -4,7 +4,7 @@ import { TIER } from '../rack.js';
 import { el, knob, sw, seg, readout, group } from '../mir/kit.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
-    { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, modHand, look, applyAccent, paintMarks, field } = app.ctl;
+    { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, modHand, look, applyAccent, paintMarks, field, mod, MOD } = app.ctl;
     ui.set = device({ id: 'settings', eyebrow: 'SETTINGS', status: '' });
     const gi = group(ui.set.body, 'INTERFACE');
     const ri = el('div', 'row tight', gi);
@@ -78,7 +78,10 @@ export function createSettingsCard(app) {
     app.hooks.setStage = (v) => { const x = Math.max(0, Math.min(1, +v || 0)); ui.stageK.set(x); setStageMix(x); return x; };
     { const seat = el('div', 'stage-seat', rt); ui.stageSeat = { root: seat };
       ui.stageColour = el('input', 'pal-color stage-colour', seat); ui.stageColour.type = 'color'; ui.stageColour.title = 'Stage colour at 100%'; ui.stageColour.setAttribute('aria-label', 'stage colour');
-      ui.stageColour.addEventListener('input', () => { setStageColour(hexToRgb(ui.stageColour.value)); setStageFollow(false); });
+      /* iteration 016 P7 (Josh: "if a user chooses a background color, let that automatically" turn it on): a pick leaves FOLLOW THEME and, when the
+         STAGE knob sits at its near-theme rest (≤ 5 %, the first run's 4 %), takes it to 100 %, so the colour chosen IS the ground; a knob the hand set
+         higher keeps its blend */
+      ui.stageColour.addEventListener('input', () => { setStageColour(hexToRgb(ui.stageColour.value)); setStageFollow(false); if (app.state.stageMix <= 0.05 && !modHand('material.stage', 1)) app.hooks.setStage(1); });
       ui.stageFollow = el('button', 'trig stage-follow', seat, 'FOLLOW THEME'); ui.stageFollow.type = 'button'; ui.stageFollow.title = 'Ignore the chosen stage colour';
       ui.stageFollow.addEventListener('click', () => setStageFollow(!app.state.stageFollow));
       rt.appendChild(ui.stageK.root); setStageColour(mat.stageCustom); setStageFollow(true); }
@@ -135,6 +138,13 @@ export function createSettingsCard(app) {
       { id: '120', label: '120 Hz', title: 'Update visible CPU readers every fourth frame' }],
       onChange: (v) => { setPerfMode(v); saveSettings(); } });
     r5b.appendChild(ui.perfSeg.root);
+    /* iteration 016 W4 (Josh, call 7: "60 | 120 HZ probably moves into SETTINGS"): the modulation's update rate, beside the GOVERNOR — off the modulation
+       window's work bar (mod-port.js `cadenceKey: false`) and the control surface's expander; the kit's record keeps it (controller.js saveMod) */
+    ui.cadSeg = seg({ label: 'MODULATION', value: String(MOD.hz), options: [
+      { id: '60', label: '60 Hz', title: 'Update the modulation 60 times a second' },
+      { id: '120', label: '120 Hz', title: 'Update the modulation 120 times a second' }],
+      onChange: (v) => { mod.setCadence(+v); } });
+    ui.cadSeg.root.title = 'Limit modulation updates per second'; r5b.appendChild(ui.cadSeg.root);
     ui.scaleRo = readout({ label: 'RENDER SCALE', value: '100%', sub: 'canvas pixels per CSS pixel × DPR' });
     r5b.appendChild(ui.scaleRo.root);
     /* iteration 008 W (Josh: "Remove dithering row from wave and move it to quality in settings"): DITHER is this display's, a PREFERENCE

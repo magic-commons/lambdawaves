@@ -7,10 +7,10 @@ import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js'; import { BASIS
 import { createShadowView, createShadowFoot } from '../shadowview.js'; import { createOrbit } from '../orbit.js'; import { createKepler } from '../keplerview.js';
 import { createVortex } from '../vortex.js'; import { createParticles } from '../particles.js'; import { createSliceView } from '../sliceview.js';
 import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { createBloch } from '../bloch.js'; import { solveLattice } from '../lattice-model.js'; import { createCentral, solveCentral } from '../central.js'; import { createSeparable } from '../separable.js'; import { solveLadder } from '../ladder-model.js';
-import { createAtoms } from '../atomsview.js'; import { createWigner } from '../wignerview.js'; import { createRadiation } from '../radiationview.js';
+import { createAtoms } from '../atomsview.js'; import { createWigner } from '../wignerview.js'; import { createRadiation } from '../radiationview.js'; import { createEmission } from '../emissionview.js';
 export function createReadouts(app) {
   const { dom, ui, device, reg, clock, obs, useCompactDefaults } = app, { schedule, canPresent } = app.loop, { rack } = app.host, { setElement, fillValence, switchHamiltonian } = app.w,
-    { domain, cardLoading, solveCard, touchState, api, field, stats } = app.ctl;
+    { domain, cardLoading, solveCard, touchState, api, field, stats, loadPreset } = app.ctl;
   const wSh = device({ id: 'shadow', eyebrow: 'SHADOW', status: '' });
   rack.appendChild(wSh.root);
   const shCanvas = el('canvas', 'shadow-c', wSh.body);
@@ -160,7 +160,7 @@ export function createReadouts(app) {
   const wSep = device({ id: 'separable', eyebrow: 'SEPARABLE', status: '' }); wSep.root.classList.add('closed'); rack.appendChild(wSep.root);   // 0.9.4 S1: the Cartesian oscillators' editor (lab/separable.js); ships closed
   const sep = createSeparable(wSep.body, { apply: (id) => { switchHamiltonian(id); ui.hamSeg.set(id); } }); wSep.root.addEventListener('devopen', () => sep.prepare());
   return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen, wSep }; }
-  function createAtomsWignerRadiation() {   // the third seat: ATOMS · WIGNER · RADIATION
+  function createAtomsWignerRadiation() {   // the third seat: ATOMS · WIGNER · RADIATION · EMISSION SPECTRA
   const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack
   const atomsView = createAtoms(wAtoms.body, {
@@ -187,7 +187,27 @@ export function createReadouts(app) {
   const wRad = device({ id: 'radiation', eyebrow: 'RADIATION', status: '' });
   rack.appendChild(wRad.root); wRad.root.classList.add('closed');
   const radiationView = createRadiation(wRad.body, { repaint() { schedule(TIER.PRESENT); }, ab: () => app.hooks.ab }); app.w.radiationView = radiationView;
+  // EMISSION SPECTRA — the inverse map: the strip of lines the system can make, a press populates the pair that makes one (iteration 016 E1); CLOSED
+  const wEm = device({ id: 'emission', eyebrow: 'EMISSION SPECTRA', status: '' });
+  rack.appendChild(wEm.root); wEm.root.classList.add('closed');
+  const emissionView = createEmission(wEm.body, { reg, clock, repaint() { schedule(TIER.PRESENT); }, status: (t, c) => wEm.setStatus(t, c),
+    /* a press: ONE history row named for the line (held across the load, as verbs.js holds a link's), a HAND's preset (THE FADE) — the two labels
+       at equal weight, phase 0, one period in the window — and with DECAY the A ↔ B TRANSITION from the upper label to the lower, played */
+    load(p) {
+      const H = app.state.history, was = !!(H && H.holding);
+      if (H) { H.hold(p.row); if (was) H.release(); }
+      try {
+        const ok = loadPreset({ id: p.id, label: p.label, note: 'EMISSION SPECTRA · the pair that makes the line', modes: p.modes, visual: { rate: Math.max(0.1, Math.min(3000, p.T / 4)), window: p.T, view: 'density' } }, { hand: true });
+        if (ok && p.decay && app.hooks.ab) {
+          const one = (a) => { const re = new Float64Array(reg.re0.length), im = new Float64Array(reg.re0.length); re[a] = 1; return { re, im }; };
+          app.hooks.ab.setStores(one(p.upper), one(p.lower)); app.hooks.ab.set(true);
+          if (!clock.playing) { clock.play(performance.now() / 1000); schedule(TIER.EVOLVE); }
+        }
+        return ok;
+      } finally { if (H && !was) H.release(); }
+    } });
+  app.w.emissionView = emissionView;
   const WIG_OK = 'numerical · a slice, not a marginal', RAD_OK = 'exact matrix elements · classical far field';
-  return { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, WIG_OK, RAD_OK }; }
+  return { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, wEm, emissionView, WIG_OK, RAD_OK }; }
   return { wSh, shadowView, shadowFoot, wOrb, orbit, kepler, wVor, vortex, particles, flowTracers, wSlice, slice, createCalcMetersLadder, createAtomsWignerRadiation };
 }

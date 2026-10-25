@@ -2,7 +2,7 @@
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
 import { TIER } from '../rack.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS } from '../field.js';
 export function createModSeam(app) {
-  const { ui, hNote, clock, obs, mat, settingsStore, reg, rates } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings } = app.sh,
+  const { ui, hNote, clock, obs, mat, settingsStore, reg, rates, dom } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings } = app.sh,
     { mod, modHand, setKnob, ROT_LIMIT, rotRate, setRotationRate, occlusion, applyAccent, api } = app.ctl;
   /* ── WAVE 64 · THERE IS NO MODULATION CARD ANY MORE ──────────────────────────────────────────
    * The modulation window is a PORTED ARTIFACT (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW
@@ -194,7 +194,9 @@ export function createModSeam(app) {
     function modDodge(rect, who = 'mod') {
       /* 0.5.0 C4: the kit's close reports null, and its place() reports the real box even while closed (λWAVES' copy sent the
          zero rect): a window that is not open has nothing to dodge */
+      const was = dodging[who];
       dodging[who] = rect && (who === 'mod' ? app.state.modView && app.state.modView.isOpen : app.state.tl && app.state.tl.isOpen()) ? rect : null;
+      if (who === 'tl' && !was && dodging.tl && cycle('tl')) return;   // 016 W5: the timeline opened where the two cannot stack — the window gave way
       if (who === 'tl') magnetSeat();   // 015 T5: the modulation window follows the timeline it sits on
       const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));
       occlusion.dirty();   // a paused field still has to move its line masks with the window
@@ -248,6 +250,19 @@ export function createModSeam(app) {
        asked on the window's open and on every timeline layout (its open, its dock, a move: `moved` → modDodge('tl')), so it follows; a hand's
        grip drag ends the kit's stack, which releases the magnet until the next open; the timeline's close lets the window stay where it is. */
     const magnet = { ours: false, released: false };
+    /* iteration 016 W5 · THE MAGNET CYCLES (Josh, call 8: "CYCLE (one at a time) rather than stack or swap — two at once is too much even on a large
+       screen" when they do not fit): when the TIMELINE's height and the modulation window's (with the stack's 8 px) exceed the stage's, opening one
+       closes the other — the CSB latch, the door, a key or a menu alike; a stage that holds both keeps 015 T5's magnet.  → true when it closed one */
+    function cycle(opened) {
+      const mv = app.state.modView, tl = app.state.tl;
+      if (!mv || !mv.isOpen || !tl || !tl.isOpen() || !dodging.tl) return false;
+      /* the stage's height less the menubar's seat (the kit window's 52 px top clamp) and, on the stage, the control surface with its margin */
+      const t = document.getElementById('transport'), bar = t && t.classList.contains('mini') && t.dataset.place !== 'free' && !document.body.classList.contains('rack-hidden') ? t.offsetHeight + 12 : 0;
+      const stage = ((dom.canvas && dom.canvas.getBoundingClientRect().height) || window.innerHeight) - 52 - bar;
+      if ((dodging.tl.bottom - dodging.tl.top) + mv.root.offsetHeight + 8 <= stage) return false;
+      if (opened === 'tl') mv.close(); else tl.close();
+      return true;
+    }
     const onTimeline = () => { const r = dodging.tl; if (!r) return null; const w = app.state.modView.root.offsetWidth || 0;
       return { left: r.left + (r.right - r.left - w) / 2, top: r.top }; };
     function magnetSeat() {
@@ -269,7 +284,7 @@ export function createModSeam(app) {
       armed: () => app.state.modArm, arm: (on) => app.sh.setModArm(!!on),
       /* 0.5.3 M13a · the kit's 3×3 mark on the window's foot: it swaps to the TIMELINE (the button alone; no lego stack, R11) */
       switchWorkspace: () => { app.state.modView.close(); app.state.tl.open(); },
-      onOpen: () => { magnet.released = false; magnetSeat(); },   // 015 T5: every open meets the magnet afresh
+      onOpen: () => { magnet.released = false; if (!cycle('mod')) magnetSeat(); },   // 015 T5: every open meets the magnet afresh; 016 W5: or closes the timeline that cannot hold it
       /* iteration 003 · IT DOCKS AT THE BOTTOM LIKE BASINS' (shell.js installModulation dock): dragged to the foot it lands full-width
          between the racks, the kit's guide drawn while MIR OPTIONS' DROP GUIDES is on; dragged out, it floats.  The transport pill
          gives way to its rect through modDodge (moved) and takes the top seat; a docked transport is a rack card and never meets it. */

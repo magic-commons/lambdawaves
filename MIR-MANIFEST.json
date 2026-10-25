@@ -1,6 +1,6 @@
 {
   "kit": "MIR",
-  "version": "1.5.0-alpha.26",
+  "version": "1.5.0-alpha.27",
   "line": "1.5",
   "commit": "1b7ae99b9905",
   "files": {
@@ -130,7 +130,7 @@
     "lab/mir/modulation/modwindow/modwindow.js": "3c30010b86ddd45c",
     "lab/mir/modulation/project.js": "39e2c203e3ed9d60",
     "lab/mir/modulation/registry.js": "1fb9c97b41dd842d",
-    "lab/mir/modulation/window.js": "be87e7bcbd82b14b",
+    "lab/mir/modulation/window.js": "279c3d4e04e93096",
     "lab/mir/notes/face.js": "7dff682dd8272b6d",
     "lab/mir/notes/notes.css": "cbe347e37ed0fd82",
     "lab/mir/notes/shelf.js": "9c3d2bc9f67cf6e7",
@@ -261,7 +261,7 @@
     "lab/mir/timeline/view.js": "938f864a972f9af5",
     "lab/mir/timeline/window.js": "baf1855498575a93",
     "lab/mir/tokens.json": "3f8decbbc349581f",
-    "lab/mir/version.js": "3be35e1f7d7f8332",
+    "lab/mir/version.js": "6e4227544f8c58f4",
     "lab/mir/window-activity.js": "8eb6cefdf972a053",
     "lab/mir/window/dock.js": "6b678fe062232fde",
     "lab/mir/window/rail.js": "60d28f8f5c584dea",

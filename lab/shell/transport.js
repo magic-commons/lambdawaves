@@ -41,7 +41,7 @@ export function createTransport(app) {
     const barMod = { get host() { return app.state.modHost; }, get view() { return app.state.modView; },
       armed: () => app.state.modArm, arm: (v) => setModArm(v), onArm: (f) => { armSubs.add(f); return () => armSubs.delete(f); },
       isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => app.sh.layout.modulation.toggle(),
-      cadence: () => app.ctl.MOD.hz, setCadence: (hz) => app.ctl.mod.setCadence(hz), persist: () => saveSettings() };
+      persist: () => saveSettings() };   // iteration 016 W4: no cadence here — 60 | 120 HZ is SETTINGS › QUALITY's (the kit's tempo panel seats no key without it)
     /* iteration 014 A1 · A8 · THE CONTROL SURFACE (the kit's CONTROL_SURFACE_LAYOUT; Josh 10-22: "button related stuff on the bottom row …
        transport/tempo/timing stuff on the top … the rate knob … its own column on the right … Play … takes the entire column … on the left").
        LEFT: PLAY, large, with MOD under it.  MIDDLE: ⏮ · t · TIMELINE · the modulation door (its sine icon) · ⚙ (MIR OPTIONS; the GUI menu left
