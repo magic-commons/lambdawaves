@@ -164,7 +164,7 @@ function appChecks(C, n, nocc, S, M, atoms) {
 }
 
 /* a kept file: the target volume's folder, then every other vol-<n>/ of the out dir, then of the data's dist */
-const THUMB_STYLES = ['im', 'balls', 'sticks', 'esp'];                       // iteration 014 B4: the picture variants a row may name
+const THUMB_STYLES = ['im', 'balls', 'sticks', 'esp', 'phase'];              // iteration 014 B4: the picture variants a row may name; `phase` (arg ψ) since 015 M2, named here from the c8 night run (2026-10-25)
 const variantPaths = (r) => (r.thumbs || []).map((st) => 't/' + r.id + '.' + st + '.webp');
 function findKept(vol, sub, name) {
   for (const d of LOOK) {
