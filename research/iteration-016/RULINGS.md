@@ -24,5 +24,11 @@
 12. ESP under PALETTE ON reads first stop to last. Yes.
 13. ESP ε and ±0.1: Yan's choice.
 14. A modulated knob its style hides: an ACCENT B dot where the pill starts, meaning this window has routes.
-15. The 140 hydrogen tiles: can all 140 fit on one page? (to measure; answer pending)
-16. Removing the palette in use: Josh asked for the behaviour explained — answer pending.
+15. The 140 hydrogen tiles on ONE page, each the size of a periodic-table cell; the pictures normalised so 1s reads about as big as 7f (the state scaled to fill its thumbnail).
+16. Removing the palette in use changes nothing on screen (the reader can change their mind and save again, or adjust and save another). A re-save under a taken name becomes `name 2`, `name 3` … by the count of copies.
+
+## More for 016 (Josh, 2026-10-25, plan only)
+8. THE REGISTER'S FOOTNOTE: the maths text at the foot of MOLECULES' register ladders and of SPECTRUM's registry (the one that cannot be painted) shows only on mouse-over.
+9. WAVE: the knobs a style does not read are GREYED, not hidden (015 W1's `STYLE_READS` keeps deciding which; the seats stay put — the hand law).
+10. ESP SOFT: the ESP surface is very hard; give it the softness of SIGNED and SOLID (SOFT reads under ESP's ISO surface). A toggle beside RADIUS hides the sticks under ESP so the map stands alone, and nothing is drawn underneath as its opacity falls.
+11. THE TIMELINE'S TIME READER takes the modulation window's tempo reader's CSS, font and sizing — the two readouts one look.
