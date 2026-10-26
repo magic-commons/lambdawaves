@@ -1,6 +1,6 @@
 {
   "kit": "MIR",
-  "version": "1.5.0-alpha.27",
+  "version": "1.5.0-alpha.28",
   "line": "1.5",
   "commit": "1b7ae99b9905",
   "files": {
@@ -192,8 +192,8 @@
     "lab/mir/shell/pages.css": "66dd1f06b643f3aa",
     "lab/mir/shell/pages.js": "f7e821b4455a18df",
     "lab/mir/shell/parts.css": "830878076e9fbfe6",
-    "lab/mir/shell/rack-scrollbar.js": "18f29a7c32b1427d",
-    "lab/mir/shell/rack.css": "d50a271717326c38",
+    "lab/mir/shell/rack-scrollbar.js": "3bd6744099ea4975",
+    "lab/mir/shell/rack.css": "be3491baaf6868bb",
     "lab/mir/shell/rack.js": "cab2e00b99b2d040",
     "lab/mir/shell/scene-guard.js": "0c41641e90c539fa",
     "lab/mir/shell/share-link.js": "c9f171c94e54b636",
@@ -261,7 +261,7 @@
     "lab/mir/timeline/view.js": "938f864a972f9af5",
     "lab/mir/timeline/window.js": "baf1855498575a93",
     "lab/mir/tokens.json": "3f8decbbc349581f",
-    "lab/mir/version.js": "6e4227544f8c58f4",
+    "lab/mir/version.js": "1bcf39b37336458a",
     "lab/mir/window-activity.js": "8eb6cefdf972a053",
     "lab/mir/window/dock.js": "6b678fe062232fde",
     "lab/mir/window/rail.js": "60d28f8f5c584dea",

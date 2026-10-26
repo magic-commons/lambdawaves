@@ -3,6 +3,11 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.28)
+- **ONLY A PILL** (017 R1, `shell/rack.css`): the scroll pill's tail (`.rack-pill::before`, an 8-px square turned 45°) is gone and the mask opens
+  from the window's side over the pill alone (`inset(0 100% 0 0)` → `inset(0)`). Why: the mask opened from the tail, so every reveal and hide
+  showed the tail by itself — Josh: "strange diamonds under the pills … it should only be a pill".
+
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.27)
 - **THE CADENCE KEY MAY LIVE ELSEWHERE** (016 W4, `modulation/window.js`): a port with `cadenceKey: false` takes the 60 | 120 HZ key off the
   modulation window's work bar (`transport.cad.remove()`); the app seats the cadence in its own SETTINGS. Why: Josh's call 7 of 2026-10-25 — the

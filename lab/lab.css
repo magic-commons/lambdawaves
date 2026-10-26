@@ -1118,11 +1118,10 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .lw-espbar-n { position: absolute; left: 18px; transform: translateY(-50%); white-space: nowrap; }
 .lw-espbar-u { position: absolute; left: 0; bottom: -18px; white-space: nowrap; opacity: .75; font-weight: 500; }
 /* iteration 016 W8 · THE ACCENT B DOT (Josh's call 14): a rack window whose controls carry a modulation route (mod-port.js `routeDots`, `.lw-routed`)
-   wears a 6 px ACCENT B dot at its title bar's height, just past the card's inner edge — where the scroll pill's tail starts (rack-scrollbar.js PILL.gap
-   8 px, the tail's tip 4 px out), inside the rack's 10 px padding, so the rack's clip keeps it; a greyed routed knob (016 V1) is thus still told of */
-.dev.lw-routed > .dev-head::after { content: ''; position: absolute; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--acc2); pointer-events: none; }
-[data-side="left"] > .dev.lw-routed > .dev-head::after { left: calc(100% + 2px); }
-[data-side="right"] > .dev.lw-routed > .dev-head::after { right: calc(100% + 2px); }
+   wears a 6 px ACCENT B dot; a greyed routed knob (016 V1) is thus still told of.  Since 017 R1 it sits INSIDE the title bar at the eyebrow's end
+   (016 seated it just past the card's edge, where the scroll pill now floats — "strange diamonds under the pills"): the eyebrow's own padding
+   and background, so a long name's ellipsis never cuts it */
+.dev.lw-routed .dev-eyebrow { padding-right: 11px; background: radial-gradient(circle 3px at calc(100% - 3px) 50%, var(--acc2) 2.4px, transparent 3px) no-repeat; }
 
 /* iteration 016 E1 · EMISSION SPECTRA (lab/emissionview.js): the strip is λWAVES' own black canvas, a whole line; ‹ SERIES › and ‹ PAIR › take the
    row, RANGE is a knob-sized seg (its two options in a column, SPECTRUM's `.sp-vseg` look), DECAY and the fold close the third row */

@@ -55,7 +55,7 @@ try {
     L.setStyle('cloud'); await nap(100);
     const m = L.mod.addMacro(), rid = L.mod.route(m, 'material.iso', 0, 0.5); await nap(600);
     const dot = { on: w.classList.contains('lw-routed'), isoGrey: C('ISO').classList.contains('disabled'), others: [...document.querySelectorAll('.dev.lw-routed')].map((d) => d.dataset.id),
-      paint: getComputedStyle(w.querySelector('.dev-head'), '::after').width };
+      paint: /radial-gradient/.test(getComputedStyle(w.querySelector('.dev-eyebrow')).backgroundImage) && getComputedStyle(w.querySelector('.dev-eyebrow')).paddingRight };   // 017 R1: inside the title bar, at the eyebrow's end
     L.mod.unroute(rid); await nap(600); dot.after = w.classList.contains('lw-routed');
     return { cloud, esp, bare, dot, errs: (window.__e || []).slice() };`);
   const same = v.cloud.every((c, i) => c[1] === v.esp[i][1] && c[2] === v.esp[i][2]);
@@ -63,8 +63,8 @@ try {
   judge('K4 (016 V1) a control the style does not read is greyed in its seat, never hidden: CLOUD greys ISO · GRAIN · RADIUS · MAP ONLY · RANGE, ESP greys GRAIN · KNEE, and no seat moves',
     same && greyed(v.cloud, ['ISO', 'GRAIN', 'RADIUS', 'MAP ONLY', 'RANGE']) && greyed(v.esp, ['GRAIN', 'KNEE']), { cloud: v.cloud, esp: v.esp });
   judge('K5 (016 S2) MAP ONLY is ESP\'s switch and writes mat.espBare', v.bare === true, v.bare);
-  judge('K6 (016 W8) a route on a greyed knob (ISO under CLOUD) gives WAVE its 6 px ACCENT B dot, and the last route\'s removal takes it away',
-    v.dot.on && v.dot.isoGrey && v.dot.others.includes('observer') && v.dot.paint === '6px' && v.dot.after === false && v.errs.length === 0, v.dot);
+  judge('K6 (016 W8, 017 R1) a route on a greyed knob (ISO under CLOUD) gives WAVE its 6 px ACCENT B dot at its eyebrow\'s end, and the last route\'s removal takes it away',
+    v.dot.on && v.dot.isoGrey && v.dot.others.includes('observer') && v.dot.paint === '11px' && v.dot.after === false && v.errs.length === 0, v.dot);
 } catch (error) {
   judge('gate ran to the end', false, String(error && error.message || error).slice(0, 400));
 } finally { await g.close(); }
