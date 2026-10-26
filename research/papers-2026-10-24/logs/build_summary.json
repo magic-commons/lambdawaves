@@ -1,14 +1,14 @@
 {
  "documents": [
   {
-   "paper": "04-KNOTTED-ZEROS",
-   "title": "Knotted Zeros in Seven Levels",
-   "words": 5226,
-   "equations": 5,
-   "tables": 4,
-   "references": 11,
-   "tex_sha256": "d157be4ea9d64ac8f2a0600372e518ad2aa3635370bd4e63787864eb48df2473",
-   "md_sha256": "c3feef7fb6366ee7b9106327dfa24c17969319451a4fd09ee065fd8f66c5c8cf"
+   "paper": "01-PLAYABLE-QUANTUM-FIELD",
+   "title": "\u03bbWAVES: A Playable Quantum Field",
+   "words": 6605,
+   "equations": 15,
+   "tables": 3,
+   "references": 16,
+   "tex_sha256": "63daada84ffeab5e468a06dd026d92e367cb16225bde3af0fe67068ebf1f6205",
+   "md_sha256": "8d495b7260d4e331765d98da78e075e28977fdd6e6302381bc17a8b1ae97be39"
   }
  ]
 }
