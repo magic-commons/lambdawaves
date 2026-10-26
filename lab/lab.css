@@ -99,14 +99,9 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
      · FUTURE   the rows you stepped back from.  GREYED, NOT REMOVED — that is FL's behaviour and it
                 is the honest one: they are still reachable until you do something new, and a list
                 that deleted them would be lying about what the next click can still do.
-   0.3.1 · S4: the card lists EVERY row the ring keeps (≤ 61), and the list scrolls inside the card at a
-   fixed maximum height: 250 px is ten rows (pitch 23.8 px, measured) and half of the eleventh, so the cut
-   row says there is more, and the card stops growing about 13 px past the old ten-row card. */
-.hist-list { display: flex; flex-direction: column; gap: 1px; max-height: 250px; overflow: hidden auto;
-  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin; scrollbar-color: var(--acc) transparent; }
-.hist-list::-webkit-scrollbar { width: 2px; }
-.hist-list::-webkit-scrollbar-thumb { background: var(--acc); border-radius: 2px; }
+   0.3.1 · S4 listed every row the ring keeps (≤ 61) in a 250 px scroller; since 017 R2 the card shows twelve rows a page
+   and the rack pager (pager.js) turns the rest — no window in a rack scrolls (Josh). */
+.hist-list { display: flex; flex-direction: column; gap: 1px; overflow: visible; }   /* the kit sheet's `overflow: auto` (its floating window) is not a rack card's */
 .hist-row { display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left;
   border: 0; border-left: 2px solid transparent; background: transparent; cursor: pointer;
   padding: 3px 6px; border-radius: var(--r-sm); color: var(--fg); font: 12px/1.4 var(--font-ui); }
@@ -562,12 +557,11 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 .mol-pick .mol-dl[hidden] { display: none; }
 .mol-pick .mol-dl svg:not(.k-arc) { width: 16px; height: 16px; }
 /* iteration 008 V · THE LIBRARY ROAD: the molecule's small picture in the same seat, left of the name; the glyph wears the kit's ring (arcRing,
-   colour-controls.css' .k-arc) only while a molecule is being kept — its three seat values, nothing redrawn; a volume page's shelf scrolls */
+   colour-controls.css' .k-arc) only while a molecule is being kept — its three seat values, nothing redrawn; a volume page's shelf turns in pages (017 R2) */
 .mol-pick .mol-thumb { flex: 0 0 28px; width: 28px; height: 28px; object-fit: contain; filter: hue-rotate(var(--mol-hue, 0deg)); transition: filter 360ms var(--ease); }   /* iteration 013 P2: THE HUE ring turns it as it turns the Picker's pictures */
 .mol-pick .mol-thumb[hidden] { display: none; }
 .mol-pick .mol-dl { position: relative; --arc-pad: 1px; --arc-stroke: 4; --arc-groove: hsl(0 0% 50% / .25); }
 .mol-pick .mol-dl:not([data-busy]) .k-arc { display: none; }
-.mol-shelf.mol-shelf-vol { max-height: 340px; overflow-y: auto; }
 .mol-tile > img.mol-tile-pic { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; }
 .reg-top { align-items: stretch; flex-wrap: nowrap; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
@@ -963,6 +957,12 @@ body[data-theme="dark"] .km-key-unbound {
 .mol-tile > * { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mol-tile > b { color: var(--fg); font-size: var(--fs-tiny); }
 body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
+/* iteration 017 R2 · THE RACK PAGER (pager.js): pages in a rack window, never an inner scroll — the kit's page turner (‹ ›, `stepper({ pager })`)
+   round the Picker's dots (skin.css `.mm-dot`); the MOLECULES shelf and HISTORY wear it */
+.lw-pager[hidden] { display: none; }
+.lw-pager .mir-step-row { width: 100%; justify-content: space-between; }
+.lw-pager .mir-step-name { flex: 1 1 auto; display: flex; justify-content: center; }
+.mol-shelf-pager { margin: -2px 0 6px; }
 
 /* 0.5.3 M11 · STATE's A / B is ONE row (R7): STORE A · A · STORE B · B, built in that order by state.js, skin.css's .native-ab the four
    columns.  A stored slot is lit by a CLASS, never a child text node (current.browser-test finds the buttons by exact textContent): the

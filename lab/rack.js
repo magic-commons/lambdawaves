@@ -120,7 +120,7 @@ export async function boot(dom) {
     state: { history: null, palette: null, picker: null, space: 'x', playedLast: false, uiHidden: false, pointerHeld: false, metersWall: 0, govVersion: -1, keplerDirty: true, badgesWall: 0,
       applyVisuals: true, modView: null, modHost: null, modWall: 0, tl: null, modExpOn: null, dodge: null, filmCard: null, feedMs: 0, rotMoved: false, rotTicking: false, audioCap: null, modArm: true,
       occludeDirty: true, occludeAt: 0, stageMix: 0.04, stageFollow: true, refSnapshot: null, pendingRef: null, warmTimer: 0, warmIdle: 0, dragging: false, cornerLayoutDirty: true,
-      exportLocked: false, histShown: null, lastNmax: 1, capApi: null, camKnobs: {}, exporter3d: null, flowEpoch: null, chem: null, restampParams: null, molSession: null, register: null,
+      exportLocked: false, lastNmax: 1, capApi: null, camKnobs: {}, exporter3d: null, flowEpoch: null, chem: null, restampParams: null, molSession: null, register: null,
       orbitals: null, states: null, stageText: null, bow: null, bowInFlight: 0, bowChain: null, kdrag: null, gasWidth: 1.8, gasAxial: false, lastLaunch: null, restoreNotice: '', linkLast: null, eq: null, eqNoNodes: false, chord: null },
     loop: { schedule, hold: filmHold, resetWall: () => { lastWall = performance.now() / 1000; }, page: null, loopRing: null, ringMedian: null, windowActivity: null, canPresent: null, modesAt, refModes,
       meterSnapshot, paceRate: null, MOTION: null },
@@ -281,8 +281,7 @@ export async function boot(dom) {
   }
   /* The frame loop asks this cached service instead of reading layout geometry. IntersectionObserver accounts for
      both viewport clipping and a rack's scrollport; class/hidden mutations wake one catch-up frame on re-entry. */
-  app.state.histShown = null;                // S4: the HISTORY card's reveal (below) rides the one activity hook the rack already has
-  const windowActivity = createWindowActivity({ onChange: () => { schedule(TIER.PRESENT); if (app.state.histShown) app.state.histShown(); } });
+  const windowActivity = createWindowActivity({ onChange: () => { schedule(TIER.PRESENT); } });
   app.loop.windowActivity = windowActivity;
   const canPresent = (w) => windowActivity.canPresent(w);
   app.loop.canPresent = canPresent;

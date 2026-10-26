@@ -113,43 +113,45 @@ try {
   assert.deepEqual(boot, { rows: ['boot'], depth: 0, cursor: 0, errs: [] });
   pass('the boot is the bottom of the stack: one row, named boot, depth 0');
 
-  /* ── 1b · S4 THE HISTORY CARD LISTS EVERY ROW: 25 distinct edits → 25 rows + the bottom (boot), newest at the top, one row
-         aria-current and in view, a click on row k lands on the reading taken when row k was made, the list scrolls inside the
-         card, and the card stops growing (its height with 13 rows = with 26) ── */
+  /* ── 1b · S4 THE HISTORY CARD LISTS EVERY ROW — since 017 R2 in PAGES of twelve (Josh: no window in a rack scrolls; call 4): 25 distinct
+         edits → 25 rows + the bottom (boot) on three pages, newest at the top, the page holding the aria-current row shown, a click on
+         row k lands on the reading taken when row k was made, the list never scrolls, and the card stops growing (13 rows = 26) ── */
   const card = await ev(`const H = __LW.history, list = __show(document.querySelector('.dev[data-id="history"] .hist-list')), dev = list.closest('.dev');
-    await __w(100); const readings = [__ser()]; let h12 = 0;
-    for (let i = 1; i <= 25; i++) { __LW.setStage(0.2 + i / 100); H.flush(); readings.push(__ser()); if (i === 12) h12 = await __rest(dev); }
+    const pager = dev.querySelector('.hist-pager'), dots = () => [...pager.querySelectorAll('.mm-dot')], page = () => dots().findIndex((d) => d.classList.contains('on'));
+    await __w(100); const readings = [__ser()]; let h13 = 0;
+    for (let i = 1; i <= 25; i++) { __LW.setStage(0.2 + i / 100); H.flush(); readings.push(__ser()); if (i === 12) h13 = await __rest(dev); }
     const h25 = await __rest(dev);
     const rowEls = () => [...list.querySelectorAll('.hist-row')], idx = (b) => +b.querySelector('.hist-i').textContent;
     const cur = () => rowEls().filter((b) => b.getAttribute('aria-current') === 'true');
-    const inView = (b) => { const L = list.getBoundingClientRect(), R = b.getBoundingClientRect(); return R.top >= L.top - 0.5 && R.bottom <= L.bottom + 0.5; };
+    const inView = (b) => !!b && b.getClientRects().length > 0;
     const rows = rowEls();
-    const top = { n: rows.length, order: rows.map(idx).join(','), bottom: rows.at(-1).querySelector('.hist-lbl').textContent,
-      current: cur().map(idx), currentShown: inView(cur()[0]), scrolls: list.scrollHeight > list.clientHeight, h12, h25, listH: list.clientHeight };
-    /* a hand's click: scroll the list to the row, press it */
-    const click = async (k) => { const b = rowEls().find((x) => idx(x) === k); list.scrollTop += b.getBoundingClientRect().top - list.getBoundingClientRect().top; await __press(b); await __frame();
+    const top = { n: rows.length, order: rows.map(idx).join(','), pages: dots().length, page: page(), current: cur().map(idx), currentShown: inView(cur()[0]),
+      scrolls: list.scrollHeight > list.clientHeight + 1 || getComputedStyle(list).overflowY !== 'visible', h13, h25 };
+    await __press(dots()[2]); await __frame(); top.last = rowEls().map(idx).join(','); top.bottom = rowEls().at(-1).querySelector('.hist-lbl').textContent;
+    /* a hand's click: turn to the row's page by its dot, press the row */
+    const click = async (k) => { await __press(dots()[Math.floor((25 - k) / 12)]); await __frame(); const b = rowEls().find((x) => idx(x) === k); await __press(b); await __frame();
       return { k, lands: __ser() === readings[k], cursor: H.cursor, current: cur().map(idx), shown: inView(cur()[0]) }; };
     const clicks = [await click(3), await click(17), await click(0)];
-    /* the current row is KEPT in view: the list scrolled away from it, then a jump by the API */
-    const kept = []; for (const [k, st] of [[1, 0], [25, 1e6], [2, 0]]) { list.scrollTop = st; H.goto(k); await __frame(); kept.push({ k, lands: __ser() === readings[k], current: cur().map(idx), shown: inView(cur()[0]) }); }
+    /* the current row's page is SHOWN: the hand turned to another page, then a jump by the API */
+    const kept = []; for (const [k, p] of [[1, 0], [25, 2], [2, 0]]) { await __press(dots()[p]); await __frame(); H.goto(k); await __frame(); await __frame(); kept.push({ k, lands: __ser() === readings[k], current: cur().map(idx), shown: inView(cur()[0]) }); }
     /* every row's tooltip is its WHOLE name (the lab's CONTROL HINTS move a title into data-help and show it on hover) */
     const titled = rowEls().every((b) => (b.dataset.help || b.title).startsWith(b.querySelector('.hist-lbl').textContent + ' — '));
-    /* a jump made while the card is CLOSED is in view when the card opens again (window-activity's flip) */
-    list.scrollTop = 0; dev.classList.add('closed'); await __frame(); H.goto(1); await __frame(); await __w(50);
+    /* a jump made while the card is CLOSED is shown when the card opens again */
+    dev.classList.add('closed'); await __frame(); H.goto(1); await __frame(); await __w(50);
     __LW.layout.reopen('history'); await __frame(); await __frame(); await __w(150);
     const reopened = { current: cur().map(idx), shown: inView(cur()[0]), closed: dev.classList.contains('closed') };
     H.goto(25); await __w(450); H.flush();
     return { top, clicks, kept, titled, reopened, rows: rowEls().length, back: __ser() === readings[25], errs: __e.slice() };`);
-  assert.equal(card.top.n, 26, '25 edits + the bottom, not ' + card.top.n + ' rows');
-  assert.equal(card.top.order, Array.from({ length: 26 }, (_, i) => 25 - i).join(','), 'not newest at the top: ' + card.top.order);
-  assert.equal(card.top.bottom, 'boot'); assert.deepEqual(card.top.current, [25]); assert.equal(card.top.currentShown, true);
-  assert.equal(card.top.scrolls, true, 'the list does not scroll'); assert.equal(card.top.h25, card.top.h12, 'the card grew from ' + card.top.h12 + ' to ' + card.top.h25 + ' px');
-  assert.ok(card.top.listH <= 250.5, 'the list is ' + card.top.listH + ' px tall');
-  for (const c of [...card.clicks, ...card.kept]) { assert.equal(c.lands, true, 'row ' + c.k + ' did not land on its reading'); assert.deepEqual(c.current, [c.k]); assert.equal(c.shown, true, 'row ' + c.k + ' is current but out of view'); }
+  assert.equal(card.top.n, 12, 'a page of twelve, not ' + card.top.n + ' rows');
+  assert.equal(card.top.order, Array.from({ length: 12 }, (_, i) => 25 - i).join(','), 'not newest at the top: ' + card.top.order);
+  assert.equal(card.top.pages, 3); assert.equal(card.top.page, 0); assert.equal(card.top.last, '1,0'); assert.equal(card.top.bottom, 'boot');
+  assert.deepEqual(card.top.current, [25]); assert.equal(card.top.currentShown, true);
+  assert.equal(card.top.scrolls, false, 'the list scrolls inside the card'); assert.equal(card.top.h25, card.top.h13, 'the card grew from ' + card.top.h13 + ' to ' + card.top.h25 + ' px');
+  for (const c of [...card.clicks, ...card.kept]) { assert.equal(c.lands, true, 'row ' + c.k + ' did not land on its reading'); assert.deepEqual(c.current, [c.k]); assert.equal(c.shown, true, 'row ' + c.k + ' is current but not on the page shown'); }
   assert.equal(card.titled, true, 'a row without its whole name as its tooltip');
   assert.deepEqual(card.reopened, { current: [1], shown: true, closed: false }, 'a jump made while the card was closed: ' + JSON.stringify(card.reopened));
-  assert.equal(card.rows, 26); assert.equal(card.back, true); assert.deepEqual(card.errs, []);
-  pass(`the HISTORY card lists every row: 25 edits → 26 rows newest first with boot at the bottom, one aria-current row in view; clicks on rows 3, 17 and boot land on their readings; jumps by the API keep the current row in view, and one made while the card was closed is in view when it reopens; every row's tooltip is its whole name; the list scrolls (${card.top.listH} px) and the card holds ${card.top.h25} px from 13 rows to 26`);
+  assert.equal(card.rows, 12); assert.equal(card.back, true); assert.deepEqual(card.errs, []);
+  pass(`the HISTORY card in pages of twelve: 25 edits → 26 rows on 3 pages, newest first with boot on the last, the aria-current row's page shown; clicks on rows 3, 17 and boot land on their readings; jumps by the API show the current row's page, and one made while the card was closed is shown when it reopens; every row's tooltip is its whole name; the list never scrolls and the card holds ${card.top.h25} px from 13 rows to 26`);
 
   /* ── 2 · ONE SCENE PER EDIT FAMILY ── */
   const undoMs = {};

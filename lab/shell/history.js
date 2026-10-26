@@ -2,9 +2,10 @@
  * runs at the seat, so the HISTORY card's device / appendChild / register keep their place in the rack; serialize / restore (persist's),
  * esc (the links') and rotDriving are read live at use (app.sh.x, app.ctl.rotDriving). */
 import { el, trig } from '../mir/kit.js';
+import { rackPager } from '../pager.js';
 import { createEditHistory } from '../edit-domain.js';   // 0.5.0 C5: the one `edit` domain on the kit's stack (mir/history/history.js); lab/history.js left
 export function createHistory(app) {
-  const { device, reg, hNote } = app; const { canPresent } = app.loop; const { rack } = app.host; const { rk } = app.sh; const { wState } = app.w;
+  const { device, reg, hNote } = app; const { rack } = app.host; const { rk } = app.sh; const { wState } = app.w;
   /* 0.3.1 · S3 THE TRUE HISTORY: one reader, writer and key over the edit scope (the chrome, a PREFERENCE, left with the hand-kept
      lists); the key is FNV-1a over the record's JSON, taken at a commit and by canUndo / canRedo — never per frame.  0.5.0 C5: the
      rows are the kit's stack (mir/history/history.js), this record its one `edit` domain (lab/edit-domain.js) */
@@ -117,6 +118,11 @@ export function createHistory(app) {
   const wHist = device({ id: 'history', eyebrow: 'HISTORY', status: '' });
   rack.appendChild(wHist.root); rk.register({ id: 'history', el: wHist, title: 'HISTORY', hint: 'HISTORY' });   // C3: registered where it is built (A4's open item)
   const histList = el('div', 'hist-list', wHist.body);
+  /* iteration 017 R2 · HISTORY IN PAGES (Josh: "avoid scrolling in rack windows"; call 4: 12 a page): the list shows twelve rows, newest first,
+     and the rack pager (pager.js) turns the rest; every change of the ring shows the page that holds the row you stand on, a turn holds until then */
+  const HIST_PAGE = 12; let histAt = -1;
+  const histPg = rackPager({ aria: 'History page', cls: 'hist-pager', onPage: (k) => { histAt = k; renderHistory(true); } });
+  histList.after(histPg.root);
   let histUndoBtn = null, histRedoBtn = null, histReturnBtn = null;
   {
     const rh = wHist.row('tight hist-actions');
@@ -126,39 +132,27 @@ export function createHistory(app) {
     rh.appendChild(trig({ label: 'CLEAR', title: 'Clear history without changing the state', onFire: () => { historyApi.clear(); } }).root);
     el('div', 'note', wHist.body).innerHTML = '<b>History.</b> Every edit to the project is a row, newest at the top. The last ' + historyApi.limit + ' are kept for Undo and Redo; older ones fall off the bottom. Select a row to jump there. HISTORY UNDO returns once to the timeline from before that jump, even after a new edit. Preferences, the camera, the windows and the notebook are not edits.';
   }
-  /* S4 · EVERY ROW (≤ 61 with the bottom), newest at the top; the list scrolls inside the card (lab.css `.hist-list`) and the
-     current row is kept in view — measured against the list's own box, never scrollIntoView, which would scroll the rack too.
-     A full ring built node by node, a listener each, inside the ring's onChange made one flush 2.6–3.9 ms on the desktop, past
-     S3's < 2 ms (probes/S4/render-*.js): so the list is ONE string with ONE click listener, and onChange asks for ONE repaint
-     per frame (sixty flushes in a loop paint once; the boot's first paint is the first frame's, no layout forced mid-boot) */
+  /* S4 · newest at the top; the list is ONE string with ONE click listener, and onChange asks for ONE repaint per frame (a full ring built node
+     by node, a listener each, made one flush 2.6–3.9 ms on the desktop, past S3's < 2 ms).  Since 017 R2 a page of twelve, never a scroller. */
   histList.addEventListener('click', (e) => { const b = e.target.closest('.hist-row'); if (b) historyApi.goto(+b.dataset.i); });
-  function renderHistory() {
+  function renderHistory(turned) {
     histRaf = 0;
-    const rows = historyApi.entries();
+    const rows = historyApi.entries(), n = Math.max(1, Math.ceil(rows.length / HIST_PAGE));
+    const ci = rows.findIndex((r) => r.state === 'current'), hereAt = ci < 0 ? 0 : Math.floor((rows.length - 1 - ci) / HIST_PAGE);
+    histAt = Math.max(0, Math.min(n - 1, turned === true && histAt >= 0 ? histAt : hereAt));
+    const top = rows.length - 1 - histAt * HIST_PAGE;
     let h = '';
-    for (let j = rows.length - 1; j >= 0; j--) {
+    for (let j = top; j >= 0 && j > top - HIST_PAGE; j--) {
       const r = rows[j], name = app.sh.esc(r.label || 'edit');   /* the title is the WHOLE name (a key's row is a long sentence the column cuts) */
       h += '<button type="button" class="hist-row hist-' + r.state + '" data-i="' + r.i + '"' + (r.state === 'current' ? ' aria-current="true"' : '')
         + ' title="' + name.replace(/"/g, '&quot;') + (r.state === 'current' ? ' — where the instrument is standing' : ' — land on this moment') + '"><span class="hist-i">' + r.i + '</span><span class="hist-lbl">' + name + '</span></button>';
     }
-    histList.innerHTML = h;
-    histHere();
+    histList.innerHTML = h; histPg.paint(histAt, n);
     if (histUndoBtn) histUndoBtn.disabled = !historyApi.canUndo;
     if (histRedoBtn) histRedoBtn.disabled = !historyApi.canRedo;
     if (histReturnBtn) histReturnBtn.disabled = !historyApi.canHistoryUndo;
     wHist.setStatus(rows.length + ' kept  ·  on ' + (historyApi.cursor + 1), 'live');
   }
-  /** keep the current row inside the list's box (a closed or folded card has no box: it is done when the card shows) */
-  function histHere() {
-    const here = histList.querySelector('[aria-current]');
-    if (!here || !histList.clientHeight) return;
-    const box = histList.getBoundingClientRect(), at = here.getBoundingClientRect();
-    if (at.top < box.top) histList.scrollTop += at.top - box.top; else if (at.bottom > box.bottom) histList.scrollTop += at.bottom - box.bottom;
-  }
-  /* S4 · …and when the card comes back into view (opened, unfolded, its rack shown or scrolled to): a jump made while it was
-     closed left its list at the top.  window-activity's onChange already fires on each of those flips; this reads one flag. */
-  let histWas = canPresent(wHist);   // tracks the card, so its flips reach onChange
-  app.state.histShown = () => { const now = canPresent(wHist); if (now && !histWas) histHere(); histWas = now; };
   let histRaf = 0;
   hRender = (now) => { if (now) { cancelAnimationFrame(histRaf); renderHistory(); } else if (!histRaf) histRaf = requestAnimationFrame(renderHistory); };
   renderHistory();
