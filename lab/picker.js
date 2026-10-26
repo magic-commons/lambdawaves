@@ -663,9 +663,12 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   function goHydrogen(b) {
     close(); const C = app.state.chem; if (C && C.on) C.setOn(false);
     if (getHamiltonian().id !== 'hydrogen') app.w.switchHamiltonian('hydrogen'); if (app.ui.hamSeg) app.ui.hamSeg.set('hydrogen');
-    const look = lookFor(true), name = b.n + L_LETTERS[b.l] + subOf(b.m);   // the field opens in the look the tile showed (an m = 0 state held imaginary for Im ψ, as its picture)
-    app.ctl.loadPreset({ id: b.id, label: name, note: 'hydrogen · one label, from the Picker', modes: [{ n: b.n, l: b.l, m: b.m, amp: 1, phase: look === 'im' && b.m === 0 ? Math.PI / 2 : 0 }],
-      visual: { rate: 4, window: 4 * Math.PI * b.n * b.n, view: look === 'phase' ? 'phase' : look === 'im' ? 'imag' : 'density' } }, { hand: true });
+    const name = b.n + L_LETTERS[b.l] + subOf(b.m);
+    /* iteration 017 W1 (Josh 2026-10-26: "When clicking on the 140 orbital table … and playing with 'WAVE' it doesn't seem to work like it used to"):
+       the pick is the label at phase 0 with the rate and window it always had; WAVE (SPACE · OBSERVABLE · DRAW) stays the reader's — the LOOK is the
+       thumbnails' style only (no `view` here, so loadPreset leaves the OBSERVABLE alone) */
+    app.ctl.loadPreset({ id: b.id, label: name, note: 'hydrogen · one label, from the Picker', modes: [{ n: b.n, l: b.l, m: b.m, amp: 1, phase: 0 }],
+      visual: { rate: 4, window: 4 * Math.PI * b.n * b.n } }, { hand: true });
   }
   function goAtom(Z) {
     close(); const C = app.state.chem; if (C && C.on) C.setOn(false);
