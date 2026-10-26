@@ -18,7 +18,7 @@ Screenshots: `e-shots/`, `s-shots/`, `l-shots/` (sent to your phone). Build note
 - **LOOK DROP has seven tiles**: the sixth seat ● (BALLS) kept, Aa = ATOM LABELS added (96 catalogue pictures; the VOLUME's wait for the night run).
   Wheel over it steps a look. **Default looks** Im ψ on ATOMIC, arg ψ on MOLECULAR and volumes until you pick.
 - **The 140 on one page** (14 × 10 at periodic-cell size); the pictures already filled 0.89–0.91 of their square, so none were re-rendered.
-- **ABOUT**: the existing λWAVES logo at 368 px, the MIR mark at 34 px, the i button cycles λWAVES → MIR → close. **Your new logo file is not on this machine.**
+- **ABOUT**: the existing λWAVES logo at 368 px, the MIR mark at 34 px, the i button cycles λWAVES → MIR → close. The wordmark is the one in Pictures/MAGIC COMMONS/JL-LOGOS (its dark variant, repainted to the theme).
 - A background colour pick turns STAGE on; tint under the stage words with FROST off; the edge handle on touch only; **60 | 120 HZ** moved to
   SETTINGS › QUALITY beside GOVERNOR (off the modulation bar and the expander); **the magnet cycles** when the two windows cannot fit (at 1600 × 1000
   they cycle; at 1800 × 1500 both stay); the expander grows upward at the foot; HAMILTONIAN rows re-lay without a flash (the height glides 160 ms);
@@ -30,7 +30,7 @@ Screenshots: `e-shots/`, `s-shots/`, `l-shots/` (sent to your phone). Build note
 2. **The magnet**: cycles only when the two windows cannot fit. Your words ("too much even on a large screen") could mean ALWAYS cycle — one line.
 3. **ESP's soft default**: the surface is soft at SOFT's default; SOFT fully left is the hard one. Keep, or hard by default with SOFT opt-in?
 4. **The LOOK pictures of the VOLUME** (`labels` and the soft ESP re-render of the catalogue's `esp` tiles) wait for the night run c8 to finish.
-5. **The new λWAVES logo**: tell me the file and I drop it in (one path in notebook.js).
+5. ~~The new λWAVES logo~~ — RESOLVED 10-25: Pictures/MAGIC COMMONS/JL-LOGOS holds the same wordmark (the shipped file is its dark variant, repainted to the theme) and the kit's own MIR marks; ABOUT already shows them.
 6. **W5 at a 900-px screen**: the cycle rule reads the stage's height minus the control surface; if a screen you use still shows both, say its size.
 
 ## The compute
