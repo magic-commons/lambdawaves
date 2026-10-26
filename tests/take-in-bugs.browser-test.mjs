@@ -75,8 +75,7 @@ try {
 
   /* ── 3 · the STATUS TAGS tick with METERS closed ── */
   const tags = await g.ev(`const met = document.querySelector('.dev[data-id="meters"]'); if (met && !met.classList.contains('closed')) met.querySelector('.dev-close').click();
-    const sw = [...document.querySelectorAll('.dev[data-id="settings"] .sw')].find((s) => /^STATUS TAGS/.test(s.textContent.trim()));
-    if (document.body.classList.contains('no-badges')) sw.click();
+    if (document.body.classList.contains('no-badges')) __LW.look.set({ badges: true });   // 017 S1: STATUS TAGS is the kit's TEXT › SHOW (mir/shell/gui.js 'badges'), not a SETTINGS switch since iteration 003
     __LW.reg.setField({ Fz: 0 }); await __LW.settle(); await __w(250);
     const stark = () => [...document.querySelectorAll('#badges .badge')].find((b) => /STARK/.test(b.textContent));
     const before = !!stark() && !stark().hidden; const t0 = performance.now();
