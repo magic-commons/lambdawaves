@@ -423,6 +423,10 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
    rule for every control (the knob and the fader were faded twice, .38 in base.css and .3 here: L55–L58).  It sits
    after .on so a disabled ON control loses its rim too. */
 .k.disabled, .fd.disabled, .sw.disabled, .sw:disabled, .seg-b:disabled, .trig:disabled { opacity: var(--state-disabled, .38); pointer-events: none; box-shadow: 0 0 0 0 transparent; }
+/* 1.5.0-alpha.28 (λWAVES 017, call 11): a DISABLED SEG BUTTON KEEPS ITS HINT — it takes the pointer again so the hover reaches the hint
+   (control-help.js' pointerover), and the browser itself refuses a disabled button's click; no hover or press face answers it */
+.seg-b:disabled { pointer-events: auto; cursor: not-allowed; }
+.seg-b:disabled:not(.on):is(:hover, :active) { background: transparent; }
 .k.disabled .k-dial { box-shadow: 0 0 0 0 transparent; }
 
 /* KEYBOARD FOCUS (INTENT): an accent ring OUTSIDE the control, on :focus-visible only, one drawing for every control

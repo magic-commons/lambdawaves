@@ -128,6 +128,7 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
   border-radius: var(--r-lg); border: 1px solid var(--glass-hairline); background: var(--glass-well); }   /* the well's GROUND, as BASINS' (no inset relief: a tile is pressed, not a well, INTENT); GLASS faces clear it */
 .mir-folders .sv-folder { border-radius: var(--r-md); }
 .mir-folders .sv-projects { display: flex; flex-direction: column; gap: var(--folders-gap-tight); min-width: 0; }
+.mir-folders .sv-projects[hidden] { display: none; }
 .mir-folders .sv-projects-heading { display: flex; align-items: center; gap: var(--sp-2); min-height: 18px; padding: 0 2px; touch-action: none;
   font: var(--w-semi) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--tr-wider); color: var(--ink-faint); }
 .mir-folders .sv-projects-glyph { display: flex; align-items: center; color: var(--acc); }

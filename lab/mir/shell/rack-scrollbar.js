@@ -39,8 +39,8 @@
  *   · the ink is read once a burst from the pill's own fill (light ink on a dark accent, dark on a light one: `data-ink`).
  *   · THE SEAT (015 H1, replacing 014 A11's eyebrow; Josh 10-23: "Do not let the bubble touch or overlap the rack window"): the pill
  *     floats OUTSIDE the window, over the stage, at the title bar's height — `PILL.gap` px clear of the card's inner edge (left rack:
- *     right of the card; right rack: left of it), or of the rack's seated scrollbar thumb where that lies further out — with a small tail
- *     pointing at the window and the name whole (the stage has the room).  Its mask opens from the tail.
+ *     right of the card; right rack: left of it), or of the rack's seated scrollbar thumb where that lies further out — the name
+ *     whole (the stage has the room).  Its mask opens from the window's side.  Only a pill: no tail (1.5.0-alpha.28, rack.css).
  *   MIR OPTIONS › WINDOWS › SCROLL PILL (LOOK_SCHEMA `rackPill`: OFF · A · B, default A, the scrollbar's own accent) is `body[data-rack-pill]`. */
 import { el, ariaLabel } from '../kit.js';
 import { drag } from '../core/pointer.js';

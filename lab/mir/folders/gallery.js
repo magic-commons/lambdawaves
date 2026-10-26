@@ -246,9 +246,11 @@ export function buildGallery(panel, opts) {
   }
   function revealEntry(entry) {
     if (!pageSize || !entry) return;
-    const direct = files.entries().filter(e => e.folder === S.folder).sort(entrySort);
+    const entries = files.entries(), direct = entries.filter(e => e.folder === S.folder).sort(entrySort);
+    const prefix = S.folder ? S.folder + '/' : '', kids = new Set();   // the folders lead the pages (paintExplorer)
+    for (const p of files.folders()) { if (S.folder && p.indexOf(prefix) !== 0) continue; const rest = p.slice(prefix.length); if (rest) kids.add(rest.split('/')[0]); }
     const i = direct.findIndex(e => e.id === entry.id);
-    if (i >= 0) S.page = Math.floor(i / pageSize);
+    if (i >= 0) S.page = Math.floor((kids.size + i) / pageSize);
   }
 
   /* ════ behaviour ══════════════════════════════════════════════════════════ */
@@ -633,9 +635,16 @@ export function buildGallery(panel, opts) {
     const prefix = S.folder ? S.folder + '/' : '';
     const children = new Set();
     for (const p of all) { if (S.folder && p.indexOf(prefix) !== 0) continue; const rest = p.slice(prefix.length); if (!rest) continue; children.add(prefix + rest.split('/')[0]); }
-    const folderRow = children.size ? mk('section', 'sv-folder-row', grid) : null;
+    /* 1.5.0-alpha.28 (λWAVES 017 R2, Josh: a docked card grows with its content up to a rack window's height, then PAGES): with a pageSize
+       the pages hold the folders first, then the projects — a long folder list turns pages instead of lengthening the card */
+    const kids = [...children].sort((a, b) => folderSort(a, b, entries)), direct = entries.filter((e) => e.folder === S.folder).sort(entrySort);
+    const pages = pageSize ? Math.max(1, Math.ceil((kids.length + direct.length) / pageSize)) : 1;
+    S.page = Math.max(0, Math.min(S.page, pages - 1));
+    const a = pageSize ? S.page * pageSize : 0, b = pageSize ? a + pageSize : Infinity;
+    const kidsShown = kids.slice(a, Math.min(b, kids.length)), shown = direct.slice(Math.max(0, a - kids.length), Math.max(0, b - kids.length));
+    const folderRow = kidsShown.length ? mk('section', 'sv-folder-row', grid) : null;
     if (folderRow) folderRow.setAttribute('aria-label', t('Folders'));
-    for (const path of [...children].sort((a, b) => folderSort(a, b, entries))) {
+    for (const path of kidsShown) {
       const card = mk('div', 'sv-folder', folderRow);
       card.dataset.folder = path;
       const shot = btn('sv-folder-shot', card, null, t('Open folder {name}', { name: leafOf(path) }));
@@ -651,7 +660,6 @@ export function buildGallery(panel, opts) {
       wireLongPress(shot, () => folderMenu(path));
     }
 
-    const direct = entries.filter((e) => e.folder === S.folder).sort(entrySort);
     const projectSection = mk('section', 'sv-projects', grid);
     projectSection.setAttribute('aria-label', t('Projects'));
     const projectHeading = mk('div', 'sv-projects-heading', projectSection);
@@ -659,14 +667,11 @@ export function buildGallery(panel, opts) {
     mk('span', null, projectHeading, t('PROJECTS'));
     const projectGrid = mk('div', 'sv-project-grid', projectSection);
     if (pageSize) projectGrid.style.setProperty('--sv-page-rows', Math.ceil(pageSize / 2));
-    const pages = pageSize ? Math.max(1, Math.ceil(direct.length / pageSize)) : 1;
-    S.page = Math.max(0, Math.min(S.page, pages - 1));
     if (pager) {
       pageLabel.textContent = t('PAGE {page} / {of}', { page: S.page + 1, of: pages });
       prevPage.disabled = S.page === 0;
       nextPage.disabled = S.page === pages - 1;
     }
-    const shown = pageSize ? direct.slice(S.page * pageSize, (S.page + 1) * pageSize) : direct;
     for (const e of shown) {
       const card = mk('div', 'sv-card' + (S.selected === e.id ? ' selected' : '') + (ro(e) ? ' read-only' : ''), projectGrid);
       card.dataset.entry = e.id;
@@ -708,6 +713,7 @@ export function buildGallery(panel, opts) {
       });
     }
     if (!direct.length) mk('div', 'sv-empty', projectGrid, t(S.folder ? copy.emptyFolder : copy.emptyRoot));
+    else if (!shown.length) projectSection.hidden = true;   // a page of folders only
     count.textContent = tn(direct.length, '{n} PROJECT', '{n} PROJECTS') + ' · ' + tn(children.size, '{n} FOLDER', '{n} FOLDERS');
     if (S.selected && !direct.some((e) => e.id === S.selected)) { S.selected = null; if (typeof o.onInspect === 'function') o.onInspect(null, { show: false }); }
     if (duplicateBtn) duplicateBtn.disabled = !S.selected || busy;

@@ -24,6 +24,7 @@
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
 import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip, hint, mathPlain, arcRing } from './mir/kit.js';
+import { rackPager } from './pager.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
@@ -142,33 +143,46 @@ export function createChem(host, api) {
      pick and the shelf folds.  ‹ ATOMS ›, the first page, is the periodic table: a tile sets OPERATOR ATOM and its element (api.atom).  Alt+↓ keeps the kit's list. */
   const shelf = el('div', 'mol-shelf', host), ATOM_W = CATALOGUE.find((r) => r.id === 'atom'); shelf.id = 'mol-shelf'; shelf.hidden = true;
   secStep.name.setAttribute('aria-controls', shelf.id); secStep.root.addEventListener('click', (e) => { if (e.target.closest('.mir-step-name')) { e.stopPropagation(); setShelf(shelf.hidden); } }, true);
-  function setShelf(open) { shelf.hidden = !open; secStep.name.setAttribute('aria-expanded', String(open)); shelfFill();
-    const here = open && shelf.classList.contains('mol-shelf-vol') && shelf.querySelector('.mol-tile.on');   // iteration 008 V: a volume page's shelf scrolls, opened at the molecule on screen
-    if (here) shelf.scrollTop += here.getBoundingClientRect().top - shelf.getBoundingClientRect().top - 8; }
+  /* iteration 017 R2 · THE SHELF IN PAGES (Josh: "avoid scrolling in rack windows"): the shelf shows one page of tiles that fits the card — three
+     rows of a volume's pictured tiles, four of the others — under the rack pager (pager.js: the kit's page turner round the Picker's dots); it opens
+     at the page holding the molecule (or element) on screen.  Only the page's tiles are made, so only its pictures are asked for. */
+  let shelfAt = 0, shelfFor = null;
+  const shelfPg = rackPager({ aria: 'Shelf page', cls: 'mol-shelf-pager', onPage: (k) => { shelfAt = k; shelfFill(); } });
+  shelf.after(shelfPg.root);
+  function setShelf(open) { shelf.hidden = !open; secStep.name.setAttribute('aria-expanded', String(open)); shelfAt = -1; shelfFill(); }
   let shelfUrls = [], shelfSeen = null;
   function shelfFill() {
-    if (shelf.hidden) return; shelf.replaceChildren();
+    if (shelf.hidden) { shelfPg.paint(0, 0); return; } shelf.replaceChildren();
+    if (shelfFor !== page) { shelfFor = page; shelfAt = -1; }   // another section opens at its own molecule's page
     for (const u of shelfUrls) URL.revokeObjectURL(u); shelfUrls = []; if (shelfSeen) { shelfSeen.disconnect(); shelfSeen = null; }
     const VP = vByPage.get(page); shelf.classList.toggle('mol-shelf-vol', !!VP);
-    const tile = (title, lines, pick, here, off) => { const b = el('button', 'pk-c mol-tile' + (here ? ' on' : ''), shelf); b.type = 'button'; b.title = title; b.disabled = !!off;
-      lines.forEach((t, i) => el(i ? 'span' : 'b', '', b, t)); b.addEventListener('click', () => { setShelf(false); pick(); }); return b; };
+    const rows = [];   // the page's tiles as makers, one page made at a time
+    const tile = (title, lines, pick, here, off) => rows.push({ here, make: () => { const b = el('button', 'pk-c mol-tile' + (here ? ' on' : ''), shelf); b.type = 'button'; b.title = title; b.disabled = !!off;
+      lines.forEach((t, i) => el(i ? 'span' : 'b', '', b, t)); b.addEventListener('click', () => { setShelf(false); pick(); }); return b; } });
+    const lay = () => {
+      const cols = Math.max(1, getComputedStyle(shelf).gridTemplateColumns.split(' ').filter(Boolean).length), per = cols * (VP ? 3 : 4);
+      const n = Math.max(1, Math.ceil(rows.length / per)), here = rows.findIndex((r) => r.here);
+      shelfAt = Math.max(0, Math.min(n - 1, shelfAt < 0 ? (here < 0 ? 0 : Math.floor(here / per)) : shelfAt));
+      return { n, page: rows.slice(shelfAt * per, (shelfAt + 1) * per) };
+    };
     if (VP) {   // iteration 008 V: a volume's page — each tile its picture (read as it scrolls into view), formula, name, tags and its lamp
       const kept = vKept.get(VP.vol.id) || new Set();
       shelfSeen = typeof IntersectionObserver === 'function' ? new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { const i = e.target; shelfSeen.unobserve(i);
         V.picture(VP.vol.id, i.dataset.mol).then((u) => { if (!u) return; if (!i.isConnected) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) shelfUrls.push(u); i.src = u; }, () => {}); } }, { root: shelf, rootMargin: '120px' }) : null;
       for (const m of VP.mols) {
-        const key = VP.vol.id + ':' + m.id, b = tile(`${capName(m.name)} · ${volLabelOf(VP.vol)} · ${(m.tags || []).join(' · ') || 'untagged'}`,
+        const key = VP.vol.id + ':' + m.id;
+        tile(`${capName(m.name)} · ${volLabelOf(VP.vol)} · ${(m.tags || []).join(' · ') || 'untagged'}`,
           [plainF(m), capName(m.name), (m.tags || []).join(' · ') || '—', kept.has(m.id) ? 'INSTALLED' : 'DOWNLOAD'], () => { handPick(key); }, key === preset, false);
-        if (m.thumb) { const i = el('img', 'mol-tile-pic'); i.alt = ''; i.decoding = 'async'; i.dataset.mol = m.id; b.prepend(i); if (shelfSeen) shelfSeen.observe(i); }
+        const make = rows.at(-1).make;
+        rows.at(-1).make = () => { const b = make(); if (m.thumb) { const i = el('img', 'mol-tile-pic'); i.alt = ''; i.decoding = 'async'; i.dataset.mol = m.id; b.prepend(i); if (shelfSeen) shelfSeen.observe(i); } return b; };
       }
-      return;
-    }
-    if (page === 'ATOMS') { ATOMS.forEach((a, i) => tile(`${a.name} · Z = ${a.Z} · ${a.term} · ${ATOM_W.word} · ${ATOM_W.oracle.what}`, [a.symbol, 'Z = ' + a.Z, ATOM_W.word],
-      () => { if (on) setOn(false); api.atom(a.Z); }, api.atomZ() === a.Z)); return; }
-    for (const g of [...GROUPS, RECORD_GROUP]) for (const p of CHEM_PRESETS.filter((q) => q.group === g.id && q.section === page)) {
+    } else if (page === 'ATOMS') ATOMS.forEach((a) => tile(`${a.name} · Z = ${a.Z} · ${a.term} · ${ATOM_W.word} · ${ATOM_W.oracle.what}`, [a.symbol, 'Z = ' + a.Z, ATOM_W.word],
+      () => { if (on) setOn(false); api.atom(a.Z); }, api.atomZ() === a.Z));
+    else for (const g of [...GROUPS, RECORD_GROUP]) for (const p of CHEM_PRESETS.filter((q) => q.group === g.id && q.section === page)) {
       const w = (CATALOGUE.find((r) => r.id === p.id && r.shelf === 'molecules') || {}).word || '—', lamp = p.disabled ? p.shortReason.toUpperCase() : !p.recordOnly ? 'LIVE' : have.get(p.records['sto-3g'].hash) ? 'INSTALLED' : 'DOWNLOAD';
       tile(p.name + (p.disabled ? ' — ' + p.reason : p.over ? ' — past the cap: it opens from its record' : '') + ' · ' + p.source, [p.formula, p.name, `${p.nAO} AO`, w, lamp], () => { handPick(p.id); }, p.id === preset, p.disabled);
     }
+    const L = lay(); for (const r of L.page) r.make(); shelfPg.paint(shelfAt, L.n);
   }
   /* ── THE MOLECULE DROPDOWN ────────────────────────────────────────────────────────────────────────────────
    * paletteview.js:22's node and class, and its lesson too: a `<select>` fires `change` only when the VALUE
