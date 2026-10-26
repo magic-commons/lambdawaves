@@ -241,8 +241,10 @@ THE SECOND LOOK (iteration 015, Claude Yan; `research/iteration-015/PLAN.md`, `<
 
 THE EMISSION SPECTRA (iteration 016, 0.9.9-alpha, Claude Yan; `research/iteration-016/PLAN.md`, `E/S/L-BUILD.md`). An emission line is two eigenstates
 beating, and the window is THE INVERSE MAP of `dynamics.js` `dipoleLines`: `lab/emissionview.js` (seated after RADIATION in readouts.js, id `emission`,
-an ATOMS window hidden by moleculeMode, closed on a first run and for a profile older than it — the blob writes `gen: 16`) draws a black strip of lines
-coloured by wavelength over an nm axis (RANGE VISIBLE | ALL), THE CATALOGUE's lines dim and THE REGISTER's own emission lit in ACCENT A at the strength
+an ATOMS window hidden by moleculeMode, closed on a first run and for a profile older than it — the blob writes `gen: 16`) draws a strip of lines ON THE CARD'S GLASS in LATTICE's vocabulary (E6, Josh: "the code of 'lattice' … looks gorgeous"; no black box, `themeInk` for
+the axis and ticks in the UI face, THE CATALOGUE a comb of ink strokes at 0.3 each with a 1-px core in its spectral colour, unpressable lines ink only at
+0.16, the hover the ladder's cursor bracket set upright, `paint-stroke.js levelLine(…, vertical)`; `STRIP_SHADE` 0 — the feathered shade B was less legible
+in both themes) over an nm axis (RANGE VISIBLE | ALL), THE REGISTER's own emission lit in ACCENT A at the strength
 `dipoleLines` gives the prepared state (under ATOM the lit line stands beside the measured one when the Xα Δε misses — the engine's error shown);
 hover names the line, the wheel and ← → step it, a press is THE HAND (`loadPreset({ modes }, { hand: true })`, equal weights, phase 0, one history row
 `EMISSION · Hα`, THE FADE), Shift+press or DECAY plays the A ↔ B TRANSITION from the upper label to the lower; ‹ SERIES › (LYMAN … HUMPHREYS) and ‹ PAIR ›

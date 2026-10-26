@@ -10,8 +10,9 @@
  * A wheel over the strip steps the hover line by line (← → too, Enter presses); the hover is the kit's graph tip.  Nothing here runs on the frame
  * path: update() returns at once unless the operator, the element or the register moved.  The fold holds the prepared state's line table, which
  * was RADIATION's EMISSION LINES (moved whole, call 1 of the plan; RADIATION keeps its far field). */
-import { el, seg, sw, stepper, accentRGB, showGraphTip, hideGraphTip } from './mir/kit.js';
+import { el, seg, sw, stepper, accentRGB, themeInk, showGraphTip, hideGraphTip } from './mir/kit.js';
 import { fold } from './fold.js';
+import { levelLine } from './paint-stroke.js';
 import { BASIS, BASIS_INDEX } from './hydrogen.js';
 import { getHamiltonian } from './hamiltonian.js';
 import { lineList, linePairs, stateLines, lineMass, lambdaNm, HARTREE_EV } from './dynamics.js';
@@ -20,6 +21,11 @@ import { keepData } from './library.js';
 import { EMISSION_STATUS } from './status.js';
 
 const NIST_URL = './vendor/nist/lines.json';
+/* E6 · THE STRIP IN LATTICE'S STYLE (Josh 10-25): no black box — the card's glass is the ground (clearRect), the axis in the theme's ink and the
+   UI face, the catalogue a comb (a fine ink stroke with a 1-px core in the line's spectral colour), the register's lit lines THE LEVEL LINE upright
+   in ACCENT A, the hover the ladder's cursor bracket.  STRIP_SHADE 0 = A, the lines straight on the glass (LATTICE's way, shipped); 1 = B, a
+   translucent feathered shade of the ink behind them (the kit's informational layer's way). */
+const STRIP_SHADE = 0;
 const sci = (v, d = 2) => (v > 0 ? v.toExponential(d).replace('e+', 'e') : '—');
 const nmText = (nm) => (nm >= 10000 ? (nm / 1000).toFixed(2) + ' µm' : nm >= 1000 ? (nm / 1000).toFixed(3) + ' µm' : nm.toFixed(2) + ' nm');
 const lbl = (a) => BASIS[a].label;
@@ -121,50 +127,65 @@ export function createEmission(host, api) {
   }
 
   /* ── painting ── */
-  let rect = { x0: 0, x1: 1, top: 0, base: 1 };
+  let rect = { x0: 0, x1: 1, top: 0, base: 1 }, T = null, face = 'system-ui, sans-serif';
   const X = (nm) => rect.x0 + xOf(nm, RANGES[range]) * (rect.x1 - rect.x0);
   function paint() {
     const W = cv.clientWidth, Hh = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
     if (W < 40 || Hh < 30) return;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(Hh * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(Hh * dpr); }
-    g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    g.fillStyle = '#000'; g.fillRect(0, 0, W, Hh);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, Hh);
+    T = themeInk(g); face = getComputedStyle(document.body).getPropertyValue('--font-ui').trim() || 'Roboto, system-ui, sans-serif';
     rect = { x0: 6, x1: W - 6, top: 6, base: Hh - 16 };
     const R = RANGES[range], span = rect.base - rect.top;
+    if (STRIP_SHADE) {   // B: a feathered shade of the ink, soft at its top and bottom and at both ends (no edge to see)
+      const v = g.createLinearGradient(0, 0, 0, rect.base + 2); v.addColorStop(0, T.ink(0)); v.addColorStop(0.28, T.ink(0.55)); v.addColorStop(0.82, T.ink(0.55)); v.addColorStop(1, T.ink(0));
+      g.fillStyle = v; g.fillRect(0, 0, W, rect.base + 2);
+      const h = g.createLinearGradient(0, 0, W, 0); h.addColorStop(0, 'rgba(0,0,0,0)'); h.addColorStop(0.06, '#000'); h.addColorStop(0.94, '#000'); h.addColorStop(1, 'rgba(0,0,0,0)');
+      g.globalCompositeOperation = 'destination-in'; g.fillStyle = h; g.fillRect(0, 0, W, Hh); g.globalCompositeOperation = 'source-over';
+    }
     /* the eye's band under the axis, and the axis */
     const v0 = Math.max(rect.x0, X(380)), v1 = Math.min(rect.x1, X(750));
     for (let x = Math.floor(v0); x < v1; x++) { const nm = R.log ? R.lo * Math.pow(R.hi / R.lo, (x - rect.x0) / (rect.x1 - rect.x0)) : R.lo + (R.hi - R.lo) * (x - rect.x0) / (rect.x1 - rect.x0), c = waveRGB(nm); if (!c) continue; g.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.55)`; g.fillRect(x, rect.base + 1, 1, 3); }
-    g.strokeStyle = 'rgba(160,160,160,0.55)'; g.lineWidth = 1; g.beginPath(); g.moveTo(rect.x0, rect.base + 0.5); g.lineTo(rect.x1, rect.base + 0.5); g.stroke();
-    g.font = '9px ui-monospace, monospace'; g.fillStyle = 'rgba(170,170,170,0.9)'; g.textBaseline = 'top'; g.textAlign = 'center';
+    g.strokeStyle = T.ink(0.3); g.lineWidth = 1; g.beginPath(); g.moveTo(rect.x0, rect.base + 0.5); g.lineTo(rect.x1, rect.base + 0.5); g.stroke();
+    g.font = `9px ${face}`; g.textBaseline = 'top'; g.textAlign = 'center';
     const ticks = R.log ? [100, 200, 500, 1000, 2000, 5000, 10000] : [400, 500, 600, 700];
-    for (const t of ticks) { const x = X(t); g.fillRect(Math.round(x), rect.base, 1, 4); if (R.log ? [100, 1000, 10000].includes(t) : true) g.fillText(t >= 1000 ? t / 1000 + ' µm' : t + (R.log ? ' nm' : ''), Math.min(rect.x1 - 14, Math.max(rect.x0 + 14, x)), rect.base + 5); }
+    for (const t of ticks) { const x = X(t); g.fillStyle = T.ink(0.3); g.fillRect(Math.round(x), rect.base, 1, 4); g.fillStyle = T.ink(0.85); if (R.log ? [100, 1000, 10000].includes(t) : true) g.fillText(t >= 1000 ? t / 1000 + ' µm' : t + (R.log ? ' nm' : ''), Math.min(rect.x1 - 14, Math.max(rect.x0 + 14, x)), rect.base + 5); }
     const H = getHamiltonian();
     if (sys !== 'hydrogen' && sys !== 'atom') { say('lines for HYDROGEN and ATOM only'); return; }
     if (reg.P) { say('the lines need a diagonal H: switch SCALE back to HYDROGEN'); return; }
     /* the series limits (n → ∞), past the register */
-    if (sys === 'hydrogen') { g.fillStyle = 'rgba(150,150,150,0.6)'; for (const s of SERIES) { if (series !== 'all' && series !== s.id) continue; const lim = lambdaNm(-H.energy(idx(s.lower, 0, 0)) * lineMass(H)), x = X(lim); if (x >= rect.x0 && x <= rect.x1) g.fillRect(Math.round(x), rect.top - 4, 1, 7); } }
-    /* THE CATALOGUE, dim: height by log A over what is drawn */
+    if (sys === 'hydrogen') { g.fillStyle = T.ink(0.45); for (const s of SERIES) { if (series !== 'all' && series !== s.id) continue; const lim = lambdaNm(-H.energy(idx(s.lower, 0, 0)) * lineMass(H)), x = X(lim); if (x >= rect.x0 && x <= rect.x1) g.fillRect(Math.round(x), rect.top - 4, 1, 7); } }
+    /* THE CATALOGUE, a comb: a fine ink stroke, a 1-px core in the line's spectral colour (ink past the eye); height by log A over what is drawn.
+       A line no picture can make (past the register, not one electron) is the ink stroke alone, fainter */
     let lo = Infinity, hi = -Infinity; for (const L of view) { const a = Math.log10(L.A || 1); lo = Math.min(lo, a); hi = Math.max(hi, a); }
     const hOf = (A) => span * (0.22 + 0.7 * (hi > lo ? (Math.log10(A || 1) - lo) / (hi - lo) : 1));
+    let hovX = NaN, hovTop = rect.base;
     view.forEach((L, i) => {
-      const x = Math.round(X(L.lambda)) + 0.5, c = L.map ? waveRGB(L.lambda) : null, h = hOf(L.A);
-      g.strokeStyle = c ? `rgba(${c[0]},${c[1]},${c[2]},${i === hover ? 1 : 0.62})` : `rgba(150,150,150,${L.map ? 0.55 : 0.32})`;
-      g.lineWidth = i === hover ? 2 : 1; g.beginPath(); g.moveTo(x, rect.base); g.lineTo(x, rect.base - h); g.stroke();
+      const x = Math.round(X(L.lambda)) + 0.5, c = L.map ? waveRGB(L.lambda) : null, h = hOf(L.A), on = i === hover;
+      g.strokeStyle = T.ink(L.map ? (on ? 0.45 : 0.3) : 0.16); g.lineWidth = L.map ? 3 : 2; g.beginPath(); g.moveTo(x, rect.base); g.lineTo(x, rect.base - h); g.stroke();
+      if (L.map) { g.strokeStyle = c ? `rgba(${c[0]},${c[1]},${c[2]},${on ? 1 : 0.9})` : T.ink(on ? 0.95 : 0.6); g.lineWidth = 1; g.beginPath(); g.moveTo(x, rect.base); g.lineTo(x, rect.base - h); g.stroke(); }
+      if (on) { hovX = x; hovTop = rect.base - h; }
     });
-    /* THE STATE, lit in ACCENT A */
+    /* THE STATE, lit: THE LEVEL LINE upright in ACCENT A at full strength — a pressed line reads as an occupied rung */
     if (lit.length) {
       const acc = accentRGB(g, 1), top = Math.log10(lit[0].amplitude), bot = Math.log10(lit[lit.length - 1].amplitude);
       for (const L of lit) { const x = X(L.lambda); if (!(x >= rect.x0 - 1 && x <= rect.x1 + 1)) { edge(x < rect.x0 ? rect.x0 : rect.x1, acc); continue; }
-        const h = span * (0.45 + 0.55 * (top > bot ? (Math.log10(L.amplitude) - bot) / (top - bot) : 1));
-        g.strokeStyle = `rgb(${acc[0]},${acc[1]},${acc[2]})`; g.lineWidth = 2.5; g.beginPath(); g.moveTo(Math.round(x) + 0.5, rect.base); g.lineTo(Math.round(x) + 0.5, rect.base - h); g.stroke(); }
+        const h = span * (0.45 + 0.55 * (top > bot ? (Math.log10(L.amplitude) - bot) / (top - bot) : 1)), xx = Math.round(x) + 0.5;
+        levelLine(g, rect.base, rect.base - h, xx, acc, true, 1.5, 1, true);
+        if (Math.abs(xx - hovX) < 1.5) hovTop = Math.min(hovTop, rect.base - h); }
     }
+    /* THE HOVER: the ladder's cursor bracket, upright — a cap over the line, a cup at its foot, in the theme's ink */
+    if (hovX === hovX) { const a = Math.max(1, hovTop - 3), b = rect.base + 2, w = 4;
+      g.strokeStyle = T.ink(0.95); g.lineWidth = 1.5; g.beginPath();
+      g.moveTo(hovX - w, a + 3); g.lineTo(hovX - w, a); g.lineTo(hovX + w, a); g.lineTo(hovX + w, a + 3);
+      g.moveTo(hovX - w, b - 3); g.lineTo(hovX - w, b); g.lineTo(hovX + w, b); g.lineTo(hovX + w, b - 3); g.stroke(); }
     if (sys === 'atom' && nistState !== 'ok') say(nistState === 'failed' ? 'NIST table unavailable here (offline before its first read)' : 'reading the NIST lines…');
     else if (!view.length && sys === 'atom') say(cat.length ? 'no measured line in this range' : `NIST ASD lists no neutral ${H.short || ''} line with A and both configurations`);
   }
   function edge(x, acc) { g.fillStyle = `rgb(${acc[0]},${acc[1]},${acc[2]})`; g.beginPath(); const d = x <= rect.x0 ? -1 : 1, y = (rect.top + rect.base) / 2; g.moveTo(x + d * 5, y); g.lineTo(x - d * 1, y - 5); g.lineTo(x - d * 1, y + 5); g.fill(); }
-  function say(t) { g.font = '10px ui-monospace, monospace'; g.fillStyle = 'rgba(200,200,200,0.85)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, (rect.x0 + rect.x1) / 2, (rect.top + rect.base) / 2); }
+  function say(t) { g.font = `10px ${face}`; g.fillStyle = T ? T.ink(0.85) : 'rgba(128,128,128,0.85)'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, (rect.x0 + rect.x1) / 2, (rect.top + rect.base) / 2); }
 
-  /* ── the hover: a hairline, the kit's graph tip; the wheel and ← → step it ── */
+  /* ── the hover: the cursor bracket, the kit's graph tip; the wheel and ← → step it ── */
   function tipFor(L) {
     if (sys === 'hydrogen') { const P = pairsOf(L)[0];
       return `${L.name} · ${nmText(L.lambda)} · ${L.upper} → ${L.lower}${P ? ` · ${lbl(P.a)} + ${lbl(P.b)} · A ${sci(P.level)} s⁻¹` : ''}`; }

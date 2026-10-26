@@ -93,10 +93,11 @@ export function fillButton(row, titles, onPress) {
    at full strength and `w + 1` px — no population bar, no halo, no glow (the share is the line's hover).  `rgb` is [r, g, b].
    SPECTRUM: lit, the shell's colour, else the theme's ink; w = 1.  ORBITAL: the level's accent (A occupied, B virtual) both ways.
    STATES: w is the oscillator strength's weight (1–3 px, S₀ 2), the colour its axis's.  `fade` steps a mark back (it multiplies the alpha):
-   ORBITAL's register under VIEW ORBITAL 0.5, a level this record does not carry 0.25; STATES' dark states 0.7. */
-export function levelLine(g, x0, x1, y, c, lit, w = 1, fade = 1) {
+   ORBITAL's register under VIEW ORBITAL 0.5, a level this record does not carry 0.25; STATES' dark states 0.7.
+   Iteration 016 E6: `vertical` turns the same line upright — (x0, x1) are then its two y ends and `y` its x — for EMISSION SPECTRA's lit lines. */
+export function levelLine(g, x0, x1, y, c, lit, w = 1, fade = 1, vertical = false) {
   g.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},${(lit ? 1 : 0.42) * fade})`; g.lineWidth = lit ? w + 1 : w;
-  g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+  g.beginPath(); if (vertical) { g.moveTo(y, x0); g.lineTo(y, x1); } else { g.moveTo(x0, y); g.lineTo(x1, y); } g.stroke();
 }
 
 /** THE FOOTNOTE (iteration 016 R1, Josh: "the maths text at the foot of MOLECULES' register ladders and of SPECTRUM's registry … shows only on

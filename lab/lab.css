@@ -1126,7 +1126,7 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 
 /* iteration 016 E1 · EMISSION SPECTRA (lab/emissionview.js): the strip is λWAVES' own black canvas, a whole line; ‹ SERIES › and ‹ PAIR › take the
    row, RANGE is a knob-sized seg (its two options in a column, SPECTRUM's `.sp-vseg` look), DECAY and the fold close the third row */
-.dev[data-id="emission"] .em-strip { display: block; width: 100%; height: 92px; border-radius: 6px; background: #000; cursor: crosshair; touch-action: none; }
+.dev[data-id="emission"] .em-strip { display: block; width: 100%; height: 92px; border-radius: 6px; background: transparent; cursor: crosshair; touch-action: none; }
 .dev[data-id="emission"] .em-strip:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
 .dev[data-id="emission"] .em-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
 .dev[data-id="emission"] .em-step { flex: 1 1 auto; min-width: 0; }
