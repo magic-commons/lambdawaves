@@ -190,7 +190,7 @@ export function createReadouts(app) {
   // EMISSION SPECTRA — the inverse map: the strip of lines the system can make, a press populates the pair that makes one (iteration 016 E1); CLOSED
   const wEm = device({ id: 'emission', eyebrow: 'EMISSION SPECTRA', status: '' });
   rack.appendChild(wEm.root); wEm.root.classList.add('closed');
-  const emissionView = createEmission(wEm.body, { reg, clock, repaint() { schedule(TIER.PRESENT); }, status: (t, c) => wEm.setStatus(t, c),
+  const emissionView = createEmission(wEm.body, { reg, clock, palette: () => app.state.palette, repaint() { schedule(TIER.PRESENT); }, status: (t, c) => wEm.setStatus(t, c),
     /* a press: ONE history row named for the line (held across the load, as verbs.js holds a link's), a HAND's preset (THE FADE) — the two labels
        at equal weight, phase 0, one period in the window — and with DECAY the A ↔ B TRANSITION from the upper label to the lower, played */
     load(p) {

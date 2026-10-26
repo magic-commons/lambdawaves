@@ -244,7 +244,9 @@ beating, and the window is THE INVERSE MAP of `dynamics.js` `dipoleLines`: `lab/
 an ATOMS window hidden by moleculeMode, closed on a first run and for a profile older than it — the blob writes `gen: 16`) draws a strip of lines ON THE CARD'S GLASS in LATTICE's vocabulary (E6, Josh: "the code of 'lattice' … looks gorgeous"; no black box, `themeInk` for
 the axis and ticks in the UI face, THE CATALOGUE a comb of ink strokes at 0.3 each with a 1-px core in its spectral colour, unpressable lines ink only at
 0.16, the hover the ladder's cursor bracket set upright, `paint-stroke.js levelLine(…, vertical)`; `STRIP_SHADE` 0 — the feathered shade B was less legible
-in both themes) over an nm axis (RANGE VISIBLE | ALL), THE REGISTER's own emission lit in ACCENT A at the strength
+in both themes; E7: PALETTE ON paints the cores with the reader's palette read across the strip — `toLUT` re-made when the stops change, the seat hands
+`palette: () => app.state.palette` — PALETTE OFF the true spectral colour, and the catalogue line the lit state was pressed from, its HOME, wears ACCENT B:
+A the computed line, B the measured one it answers) over an nm axis (RANGE VISIBLE | ALL), THE REGISTER's own emission lit in ACCENT A at the strength
 `dipoleLines` gives the prepared state (under ATOM the lit line stands beside the measured one when the Xα Δε misses — the engine's error shown);
 hover names the line, the wheel and ← → step it, a press is THE HAND (`loadPreset({ modes }, { hand: true })`, equal weights, phase 0, one history row
 `EMISSION · Hα`, THE FADE), Shift+press or DECAY plays the A ↔ B TRANSITION from the upper label to the lower; ‹ SERIES › (LYMAN … HUMPHREYS) and ‹ PAIR ›

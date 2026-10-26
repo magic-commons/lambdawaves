@@ -10,7 +10,7 @@
  * A wheel over the strip steps the hover line by line (← → too, Enter presses); the hover is the kit's graph tip.  Nothing here runs on the frame
  * path: update() returns at once unless the operator, the element or the register moved.  The fold holds the prepared state's line table, which
  * was RADIATION's EMISSION LINES (moved whole, call 1 of the plan; RADIATION keeps its far field). */
-import { el, seg, sw, stepper, accentRGB, themeInk, showGraphTip, hideGraphTip } from './mir/kit.js';
+import { el, seg, sw, stepper, accentRGB, themeInk, showGraphTip, hideGraphTip } from './mir/kit.js'; import { toLUT } from './mir/palette.js';
 import { fold } from './fold.js';
 import { levelLine } from './paint-stroke.js';
 import { BASIS, BASIS_INDEX } from './hydrogen.js';
@@ -127,7 +127,7 @@ export function createEmission(host, api) {
   }
 
   /* ── painting ── */
-  let rect = { x0: 0, x1: 1, top: 0, base: 1 }, T = null, face = 'system-ui, sans-serif';
+  let rect = { x0: 0, x1: 1, top: 0, base: 1 }, T = null, face = 'system-ui, sans-serif', palOf = null, lut = null;
   const X = (nm) => rect.x0 + xOf(nm, RANGES[range]) * (rect.x1 - rect.x0);
   function paint() {
     const W = cv.clientWidth, Hh = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -159,11 +159,18 @@ export function createEmission(host, api) {
        A line no picture can make (past the register, not one electron) is the ink stroke alone, fainter */
     let lo = Infinity, hi = -Infinity; for (const L of view) { const a = Math.log10(L.A || 1); lo = Math.min(lo, a); hi = Math.max(hi, a); }
     const hOf = (A) => span * (0.22 + 0.7 * (hi > lo ? (Math.log10(A || 1) - lo) / (hi - lo) : 1));
+    /* E7 (Josh 10-25: "Can it use the color of the palette or using the accent A/B?"): PALETTE ON paints the cores with the reader's palette read
+       across the strip (LATTICE's road: the palette's LUT, re-made when the stops change), PALETTE OFF the line's true spectral colour; the catalogue
+       line the lit state was pressed from — its HOME — wears ACCENT B (A is the computed line, B the measured one it answers) */
+    const pal = api.palette && api.palette(), stops = pal && pal.on ? pal.stops : null;
+    if (stops !== palOf) { palOf = stops; lut = stops ? toLUT(stops) : null; }
+    const coreOf = (L, x) => { if (!lut) return waveRGB(L.lambda); const u = Math.max(0, Math.min(255, Math.round((x - rect.x0) / (rect.x1 - rect.x0) * 255))) * 4; return [lut[u] * 255 | 0, lut[u + 1] * 255 | 0, lut[u + 2] * 255 | 0]; };
+    const B = accentRGB(g, 2);
     let hovX = NaN, hovTop = rect.base;
     view.forEach((L, i) => {
-      const x = Math.round(X(L.lambda)) + 0.5, c = L.map ? waveRGB(L.lambda) : null, h = hOf(L.A), on = i === hover;
-      g.strokeStyle = T.ink(L.map ? (on ? 0.45 : 0.3) : 0.16); g.lineWidth = L.map ? 3 : 2; g.beginPath(); g.moveTo(x, rect.base); g.lineTo(x, rect.base - h); g.stroke();
-      if (L.map) { g.strokeStyle = c ? `rgba(${c[0]},${c[1]},${c[2]},${on ? 1 : 0.9})` : T.ink(on ? 0.95 : 0.6); g.lineWidth = 1; g.beginPath(); g.moveTo(x, rect.base); g.lineTo(x, rect.base - h); g.stroke(); }
+      const x = Math.round(X(L.lambda)) + 0.5, c = L.map ? coreOf(L, x) : null, h = hOf(L.A), on = i === hover, home = !!(picked && L.id === picked.id);
+      g.strokeStyle = T.ink(L.map ? (on || home ? 0.45 : 0.3) : 0.16); g.lineWidth = L.map ? 3 : 2; g.beginPath(); g.moveTo(x, rect.base); g.lineTo(x, rect.base - h); g.stroke();
+      if (L.map) { g.strokeStyle = home ? `rgb(${B[0]},${B[1]},${B[2]})` : c ? `rgba(${c[0]},${c[1]},${c[2]},${on ? 1 : 0.9})` : T.ink(on ? 0.95 : 0.6); g.lineWidth = home ? 1.5 : 1; g.beginPath(); g.moveTo(x, rect.base); g.lineTo(x, rect.base - h); g.stroke(); }
       if (on) { hovX = x; hovTop = rect.base - h; }
     });
     /* THE STATE, lit: THE LEVEL LINE upright in ACCENT A at full strength — a pressed line reads as an occupied rung */
@@ -228,6 +235,7 @@ export function createEmission(host, api) {
     const H = getHamiltonian();
     if (H.id === 'atom' && nistState === 'idle') readNist();
     build(false);
+    { const pal = api.palette && api.palette(); if ((pal && pal.on ? pal.stops : null) !== palOf) dirty = true; }   // E7: a palette change repaints the comb
     if (reg.version !== litV || dirty) {
       if (reg.version !== litV) { litV = reg.version; lit = litLines(); paintTable(); }
       api.status(H.id === 'hydrogen' ? EMISSION_STATUS.hydrogen : H.id === 'atom' ? EMISSION_STATUS.atom : 'lines for HYDROGEN and ATOM only', H.id === 'hydrogen' || H.id === 'atom' ? (reg.P ? 'warn' : '') : 'warn');
