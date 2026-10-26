@@ -191,7 +191,7 @@ const PRECACHE = [
   ['./mir/core/wakelock.js',                                        '460826e7310c'],
   ['./mir/core/zip.js',                                             '14a6b76c144c'],
   ['./mir/css/base.css',                                            'cd9298663b6b'],
-  ['./mir/css/skin.css',                                            '0d7f3213d5cd'],
+  ['./mir/css/skin.css',                                            '9210ed78cfc1'],
   ['./mir/css/tokens.css',                                          'd2f047775c58'],
   ['./mir/folders/files.js',                                        '81edd3d3fc39'],
   ['./mir/folders/folders.css',                                     '5061a922d0e0'],

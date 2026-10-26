@@ -10,6 +10,9 @@ round, newest first; an item leaves this list when an adopted MIR release carrie
 - **A PAGED GALLERY PAGES ITS FOLDERS TOO** (017 R2, `folders/gallery.js`, `folders.css`): with a `pageSize` the pages hold the sub-folders first,
   then the projects (`revealEntry` counts them), and a page of folders only hides the empty PROJECTS heading. Why: Josh — a docked FOLDERS card grows
   with its content up to a rack window's height and past that turns PAGES; a long folder list lengthened the card instead.
+- **A DISABLED SEG BUTTON KEEPS ITS HINT** (017 call 11, `css/skin.css`): `.seg-b:disabled` takes the pointer again (`pointer-events: auto`,
+  `cursor: not-allowed`, no hover or press face) so control-help's hover shows why it is greyed; the browser refuses a disabled button's click.
+  Why: λWAVES greys WAVE's buttons a system cannot use (016 V1, 017 W2) and the reason could not be read.
 
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.27)
 - **THE CADENCE KEY MAY LIVE ELSEWHERE** (016 W4, `modulation/window.js`): a port with `cadenceKey: false` takes the 60 | 120 HZ key off the
