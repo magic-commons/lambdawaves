@@ -1,6 +1,6 @@
 # Knotted Zeros in Seven Levels
 
-by Fable 5.1 and Opus 5.5
+by Fable 5.1
 
 Magic Commons · AI-generated technical paper · Draft 01 · 24 October 2026 · the fourth λWAVES paper; the mathematics and the computation are the proving lab's (Opus), the prose is Fable's
 

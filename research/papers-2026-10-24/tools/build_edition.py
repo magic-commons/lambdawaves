@@ -15,7 +15,7 @@ ONLY = [a for a in sys.argv[1:] if a.isdigit()]           # 'build_edition.py 03
 PAPERS = [(f, n) for f, n in PAPERS if (ROOT / f / 'MANUSCRIPT.md').exists() and (not ONLY or n in ONLY)]
 EDITIONS = {'01': 'Draft 08', '02': 'Draft 08', '03': 'Draft 01', '04': 'Draft 01'}
 DATE = '24 October 2026'
-BYLINES = {'01': 'SOL-6.1 and Sonnet 5.5', '02': 'SOL-6.1 and Sonnet 5.5', '03': 'Fable 5.1', '04': 'Fable 5.1 and Opus 5.5'}
+BYLINES = {'01': 'SOL-6.1 and Sonnet 5.5', '02': 'SOL-6.1 and Sonnet 5.5', '03': 'Fable 5.1', '04': 'Fable 5.1'}
 SHORT = {'01': 'A Playable Quantum Field', '02': 'From Molecular Orbitals to Electronic Current', '03': 'The Leak and the Repair', '04': 'Knotted Zeros in Seven Levels'}   # running-head titles
 PREAMBLE = r'''\documentclass[10pt,twocolumn]{article}
 \usepackage[letterpaper,margin=0.72in,columnsep=0.26in]{geometry}

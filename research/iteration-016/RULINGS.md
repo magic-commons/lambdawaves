@@ -32,3 +32,14 @@
 9. WAVE: the knobs a style does not read are GREYED, not hidden (015 W1's `STYLE_READS` keeps deciding which; the seats stay put — the hand law).
 10. ESP SOFT: the ESP surface is very hard; give it the softness of SIGNED and SOLID (SOFT reads under ESP's ISO surface). A toggle beside RADIUS hides the sticks under ESP so the map stands alone, and nothing is drawn underneath as its opacity falls.
 11. THE TIMELINE'S TIME READER takes the modulation window's tempo reader's CSS, font and sizing — the two readouts one look.
+
+## Josh's answers to the 016 FOR-JOSH and the papers' calls (2026-10-25, remote)
+- 016 call 1 (seven look tiles): Josh thought the drop had an empty sixth seat; all six were used (ρ · arg ψ · Im ψ / ● · ⊸ · φ), so Aa is a seventh — he sees the layout at home. Kept.
+- 016 call 2 (the magnet): cycle ONLY when it detects no room — as built.
+- 016 call 3 (ESP soft): a knob tunes it — SOFT reads under ESP (S1), fully left = hard, default soft. As built.
+- 016 call 4: YES — the VOLUME's `labels` pictures and the catalogue's soft-ESP `esp` tiles are rendered after DONE-c8.
+- 016 call 5 (W5 at 900 px): when he is home.
+- Papers 1 (Draft 08 byline): "Fable 5.1 for the new 2 papers" — Papers 3 and 4 by Fable 5.1 alone (Paper 4's series line and Credits keep the proving lab's credit); Draft 08's byline stays as recommended. DONE: BYLINES['04'], line 3, rebuilt, republished.
+- Papers 2: ADOPT Draft 08 whole. 3 (six references): YES — DOIs pulled (agent, REFS-CHECK-2026-10-25.md). 4 (public record): "Sure?" — and a research-repo polish in the style of OpenAI's math repo, much later.
+- Papers 5–9 (critics out · the two app shortfalls as later rows · Paper 4's Opus version string moot after the byline · the novelty search RUN NOW (agent, NOVELTY-CHECK-PAPER-4-2026-10-25.md) · the KNOTS presets and the VORTEX sampling as later rows): the defaults stand.
+- Papers 10 (a second reader): Josh asks who online would be the right reader — Yan's suggestions in the reply of 10-25.
