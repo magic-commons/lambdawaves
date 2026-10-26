@@ -5,7 +5,7 @@ import { el, trig } from '../mir/kit.js';
 import { rackPager } from '../pager.js';
 import { createEditHistory } from '../edit-domain.js';   // 0.5.0 C5: the one `edit` domain on the kit's stack (mir/history/history.js); lab/history.js left
 export function createHistory(app) {
-  const { device, reg, hNote } = app; const { rack } = app.host; const { rk } = app.sh; const { wState } = app.w;
+  const { device, reg, hNote } = app; const { canPresent } = app.loop; const { rack } = app.host; const { rk } = app.sh; const { wState } = app.w;
   /* 0.3.1 · S3 THE TRUE HISTORY: one reader, writer and key over the edit scope (the chrome, a PREFERENCE, left with the hand-kept
      lists); the key is FNV-1a over the record's JSON, taken at a commit and by canUndo / canRedo — never per frame.  0.5.0 C5: the
      rows are the kit's stack (mir/history/history.js), this record its one `edit` domain (lab/edit-domain.js) */
@@ -153,6 +153,7 @@ export function createHistory(app) {
     if (histReturnBtn) histReturnBtn.disabled = !historyApi.canHistoryUndo;
     wHist.setStatus(rows.length + ' kept  ·  on ' + (historyApi.cursor + 1), 'live');
   }
+  canPresent(wHist);   // tracked by window activity as since S4: its flips are one road that re-reads a paused mask (tests/frame-occlusion's detached row leans on it — 017 R-BUILD)
   let histRaf = 0;
   hRender = (now) => { if (now) { cancelAnimationFrame(histRaf); renderHistory(); } else if (!histRaf) histRaf = requestAnimationFrame(renderHistory); };
   renderHistory();

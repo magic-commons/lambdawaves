@@ -400,7 +400,7 @@ const PRECACHE = [
   ['./shadowview.js',                                               'ad101af8b299'],
   ['./shell/controller.js',                                         '44ddf4df82d9'],
   ['./shell/facade.js',                                             'd54ab30ba6e3'],
-  ['./shell/history.js',                                            '0d8ee046d2d6'],
+  ['./shell/history.js',                                            '90f04873bc55'],
   ['./shell/ink.js',                                                '0a97f2a1f70a'],
   ['./shell/keys.js',                                               '909af5300956'],
   ['./shell/links.js',                                              '5a8a34805378'],
