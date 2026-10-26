@@ -2,7 +2,7 @@
  * where the LEGACY note stands.  Iteration 008 U: MO-REGISTRY is no longer a window — the register is built INTO the MOLECULES card (chemview's `slots`)
  * and a saved `orbitals` seat opens MOLECULES (settings.js RETIRED_WINDOWS); the fix round (F5) folded its second seat, which no longer made a device, into this one. */
 import { TIER } from '../rack.js'; import { el } from '../mir/kit.js';
-import { VIEW, VIEW_NAMES } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
+import { VIEW, VIEW_NAMES, STYLE } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
   const { dom, ui, device, clock, mat, useCompactDefaults, FIRST_RUN, reg } = app, { schedule, canPresent } = app.loop, { rack } = app.host,
@@ -33,7 +33,11 @@ export function createMolecules(app) {
     wChem.root.hidden = !v;                                          // iteration 008 U: the one card (the register lives in it)
     modeSeg.set(v ? 'molecules' : 'atoms');
     if (v && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
-    if (ui.spaceSeg) ui.spaceSeg.root.hidden = !!v;                 // iteration 012 R3: POSITION | MOMENTUM is inert under a molecule (field.js: a set molecule owns the volume, the eigenmode kernel and its SPACE stand down) — hidden while MOLECULES owns the field
+    /* iteration 012 R3 hid POSITION | MOMENTUM under a molecule; iteration 017 W2 GREYS MOMENTUM instead (016 V1: greyed, never hidden, the seats stay) —
+       WAVE's one seat is styleSync (material.js), which greys by mode too.  A molecule letting go with BALLS · STICKS · ESP drawn falls back to CLOUD, as
+       the shader already draws it — after the turn, so a restore that lands the molecule OFF then ON keeps its file's style */
+    if (ui.styleSync) ui.styleSync();
+    if (!v && mat.style >= STYLE.balls) queueMicrotask(() => { if (!(app.state.chem && app.state.chem.on) && mat.style >= STYLE.balls) { mat.style = STYLE.cloud; ui.styleSeg.set('cloud'); schedule(TIER.PRESENT); } });
     if (!v) switchHamiltonian(getHamiltonian().id);                  // restore the atom's own hiding rules
     if (ui.hamSeg) ui.hamSeg.set(getHamiltonian().id);               // 0.7.4 C1: SPECTRUM's ‹ SYSTEM › reads back what owns the field
     app.state.refSnapshot = null; app.state.pendingRef = null;
@@ -53,6 +57,7 @@ export function createMolecules(app) {
   function molFieldView(name) {
     if (!name) { if (chemPrevView !== null) { mat.view = chemPrevView; if (ui.viewSeg) ui.viewSeg.set(VIEW_NAMES[chemPrevView]); chemPrevView = null; } }
     else if (VIEW[name] !== undefined && mat.view !== VIEW[name]) { if (chemPrevView === null) chemPrevView = mat.view; mat.view = VIEW[name]; if (ui.viewSeg) ui.viewSeg.set(name); }
+    if (ui.styleSync) ui.styleSync();   // iteration 017 W2: the volume's kind moved with its model — Im ψ greys or wakes (material.js modeSync)
     schedule(TIER.PRESENT);
   }
   /* THE MOLECULAR SESSION — one owner, and the end of "last writer wins".  CHEMISTRY and the ORBITALS register are

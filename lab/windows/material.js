@@ -1,7 +1,7 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, group, readout, chip } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js';
+import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
@@ -92,9 +92,24 @@ export function createMaterial(app) {
     /* the kit's muted look on the three shapes: a knob's own setDisabled, a switch's button, a seg's buttons */
     const mute = (c, off) => { if (c.setDisabled) { c.setDisabled(off); return; } c.root.classList.toggle('disabled', off); c.root.setAttribute('aria-disabled', String(off));
       for (const b of c.root.matches('button') ? [c.root] : c.root.querySelectorAll('button')) b.disabled = off; };
+    /* iteration 017 W2 (Josh 2026-10-26: "Grey out anything from 'Wave' that shouldn't work when switching between molecules or atoms/hydrogen"):
+       styleSync greys by MODE as well as by style, one button at a time in the kit's muted look (seats stay).  Under a molecule MOMENTUM φ(p) (a set
+       molecule owns the volume; the eigenmode kernel and its SPACE stand down) and Im ψ unless the volume is a complex orbital (the density, Δρ and a
+       real orbital write (√ρ | ψ, 0): Im ψ draws nothing — field.js setMoleculeMatrix); under hydrogen / an atom BALLS · STICKS · ESP, the molecule's
+       views (the shader draws them as CLOUD there) */
+    const modeMute = (s, id, off, why) => { const b = s.button(id); if (!b) return; b.disabled = off; const o = s.spec.options.find((q) => q.id === id), t = off ? why : o && o.title;
+      if (t) hint(b, t); else { b.removeAttribute('title'); delete b.dataset.help; delete b.dataset.helpEn; } };   // the kit's hint hop keeps a title as data-help
+    function modeSync() {
+      const mol = !!(app.state.chem && app.state.chem.on);
+      if (mol) modeMute(ui.spaceSeg, 'p', true, 'a molecule owns the volume: position space only while MOLECULES is on');
+      else if (!(app.sturm && app.sturm.P)) modeMute(ui.spaceSeg, 'p', false);   // STURMIAN keeps its own grey (spectrum.js applySturmian)
+      modeMute(ui.viewSeg, 'imag', mol && !(field && field.moleculeComplex), 'this molecular volume is real (ψ or √ρ): Im ψ is zero — the ORBITALS register draws a complex ψ');
+      for (const id of ['balls', 'sticks', 'esp']) modeMute(ui.styleSeg, id, !mol, 'a molecule’s view: switch MOLECULES on');
+    }
     function styleSync() {
       const st = mat.style | 0, esp = st === STYLE.esp, surf = mat.espSurf || 'iso';
       for (const [k, on] of Object.entries(STYLE_READS)) mute(ui[k], !on.includes(st) || (esp && ((k === 'probeK' && surf === 'iso') || ((k === 'isoK' || k === 'softK') && surf !== 'iso'))));
+      modeSync();
       bar.hidden = !esp;
       if (esp) {
         const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, h = R * (Math.sqrt(21) - 1) / 20, st2 = mat.paletteOn ? palSorted() : null, a = st2 && st2[0].at, w = st2 && (st2[st2.length - 1].at - a || 1);
