@@ -33,15 +33,17 @@ export function createSpectrumCard(app) {
      every `ui.*` name, id and saved key is the one it was. */
   const hamGroup = group(wSpec.body, ''), hamHead = el('div', 'row tight lw-field-head', hamGroup), hamBody = el('div', 'sp-ham-body', hamGroup);
   hamGroup.classList.add('sp-ham'); label(el('div', 'grp-lbl', hamHead), 'HAMILTONIAN'); fold(hamHead, hamBody, { what: 'the Hamiltonian', key: 'ham' });
-  const hamRows = { hydrogen: el('div', 'row tight sp-ham-h', null), scale: el('div', 'row tight sp-ham-s', null), box: el('div', 'row tight sp-ham-b', null), atom: el('div', 'row tight sp-ham-a', null) };
+  const hamRows = { hydrogen: el('div', 'row tight sp-ham-h', null), scale: el('div', 'row tight sp-ham-s', null), box: el('div', 'row tight sp-ham-b', null), atom: el('div', 'row tight sp-ham-a', null), note: el('div', 'sp-cap sp-ham-n', null) };
   /** the rows the system in force shows (the stepper's id: an operator, or 'molecules') */
   /* iteration 016 W7 (Josh, call 10: "make the section dynamic by mode as WAVE's knobs are"): a turn of ‹ SYSTEM › re-lays the group once — the rows
      written only when the set shown changes (the stepper and the operator's listener both ask), and the body's height glides old → new in 160 ms
      (the kit's ease; reduced motion, a folded group or a hidden card: at once), so the cards under it never jump */
   let hamKey = '';
   const hamShow = (id) => {
-    const want = { hydrogen: id === 'hydrogen', scale: id === 'hydrogen', box: id === 'well' || id === 'qho', atom: id === 'atom' }, key = Object.values(want).join();
-    if (key === hamKey) return;
+    /* iteration 017 W3: a system whose operator lives in its own window says so (the X walk found CENTRAL · SEPARABLE · LATTICE's rows empty) */
+    const note = { central: 'its potential is drawn in CENTRAL', cornell: 'its potential is drawn in CENTRAL', separable: 'its potential is set in SEPARABLE', lattice: 'LATTICE solves its own register in its window; this grid is the atom’s' }[id];
+    const want = { hydrogen: id === 'hydrogen', scale: id === 'hydrogen', box: id === 'well' || id === 'qho', atom: id === 'atom', note: !!note }, key = Object.values(want).join() + (note || '');
+    if (key === hamKey) return; if (note) label(hamRows.note, note);
     const live = !!hamKey && hamBody.getClientRects().length > 0 && !matchMedia('(prefers-reduced-motion: reduce)').matches, h0 = live ? hamBody.offsetHeight : 0;
     hamKey = key; for (const k of Object.keys(want)) hamRows[k].hidden = !want[k];
     if (!live) return; const h1 = hamBody.offsetHeight;
@@ -72,7 +74,7 @@ export function createSpectrumCard(app) {
       /* 017 X1 · THE STAND-DOWN: a window of the table closed or powered off — the stepper forgets it opened it and reads back the operator in force */
       readBack(id) { if (opened === id) opened = null; this.set(getHamiltonian().id); } };
     rh.appendChild(ui.hamSeg.root);
-    hamBody.append(hamRows.hydrogen, hamRows.scale, hamRows.box, hamRows.atom);
+    hamBody.append(hamRows.hydrogen, hamRows.scale, hamRows.box, hamRows.atom, hamRows.note); hamRows.note.hidden = true;
     ui.hamSeg.set('hydrogen');
     ui.wellKnob = knob({ label: 'WELL <m>a</m>', title: 'WELL RADIUS a — the box of BOX and of the gas packet', min: 3, max: 30, value: 10, fmt: (v) => v.toFixed(1) + ' a₀', onInput: (v) => { HAMILTONIANS.well.setRadius(v); app.w.gas.setRadius(v); hNote(); if (getHamiltonian().id === 'well') { reg.setEnergies(energyOf); wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); }); schedule(TIER.REBUILD); } } });
     {

@@ -295,7 +295,7 @@ export async function createController(app) {
     reg,
     select(a) { app.w.spectrum.select(a); schedule(TIER.PRESENT); },
     toggleMode(a) {
-      if (reg.population(a) > 0) { reg.set(a, 0, 0, clock.t); }
+      if (reg.populated().includes(a)) { reg.set(a, 0, 0, clock.t); }   // iteration 017 W3: the grid's own rule (populated(): |c|² > EPS_POP), not > 0 — a BOX packet leaves 1e-33 dust a press could never add to
       else { const pop = reg.populated(); let amp = 1; if (pop.length) { amp = 0; for (const b of pop) amp += Math.sqrt(reg.population(b)); amp /= pop.length; } reg.set(a, amp, 0, clock.t); }
       touchState();
     },
@@ -305,9 +305,10 @@ export async function createController(app) {
     paintModes(list, add) {
       let n = 0, amp = 1;
       if (add) { const pop = reg.populated(); if (pop.length) { amp = 0; for (const b of pop) amp += Math.sqrt(reg.population(b)); amp /= pop.length; } }
+      const live = new Set(reg.populated());   // iteration 017 W3: the chip's 'on' (populated(), > EPS_POP) — `population > 0` took a BOX packet's 1e-33 dust for a state
       for (const a of list) {
         if (!(a >= 0) || a >= BASIS.length) continue;
-        const on = reg.population(a) > 0;
+        const on = live.has(a);
         if (add && !on) { reg.set(a, amp, 0, clock.t); n++; } else if (!add && on) { reg.set(a, 0, 0, clock.t); n++; }
       }
       if (n) touchState();
