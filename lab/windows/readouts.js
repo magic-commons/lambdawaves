@@ -11,6 +11,11 @@ import { createAtoms } from '../atomsview.js'; import { createWigner } from '../
 export function createReadouts(app) {
   const { dom, ui, device, reg, clock, obs, useCompactDefaults } = app, { schedule, canPresent } = app.loop, { rack } = app.host, { setElement, fillValence, switchHamiltonian } = app.w,
     { domain, cardLoading, solveCard, touchState, api, field, stats, loadPreset } = app.ctl;
+  /* 017 X1 · THE STAND-DOWN (AN EFFECT SHOWS ITS WINDOW): a special window's × (the kit's `devclose`) or POWER OFF ends its effect and ‹ SYSTEM ›
+     reads back the operator in force; `hidden` (moleculeMode) is neither.  When the stepper closes the window it opened on its way to another
+     operator, the stepper switches (its value already names that operator), so the stand-down only reads back. */
+  const standDown = (w, end) => { w.root.addEventListener('devclose', end); w.root.querySelector('.dev-power').addEventListener('click', () => { if (w.root.classList.contains('off')) end(); }); };
+  const toHydrogen = (ops, id) => () => { const H = getHamiltonian().id, v = ui.hamSeg.value; if (ops.includes(H) && (v === H || v === 'molecules' || v === 'lattice')) switchHamiltonian('hydrogen'); ui.hamSeg.readBack(id); };
   const wSh = device({ id: 'shadow', eyebrow: 'SHADOW', status: '' });
   rack.appendChild(wSh.root);
   const shCanvas = el('canvas', 'shadow-c', wSh.body);
@@ -159,6 +164,8 @@ export function createReadouts(app) {
   const central = createCentral(wCen.body, { solve: (w) => solveCard({ op: 'central.solve', ...w }, () => solveCentral(w.preset, w.params)), apply: (id) => { switchHamiltonian(id); ui.hamSeg.set(id); }, current: () => getHamiltonian().id, populated: () => reg.populated() }); wCen.root.addEventListener('devopen', () => central.prepare());
   const wSep = device({ id: 'separable', eyebrow: 'SEPARABLE', status: '' }); wSep.root.classList.add('closed'); rack.appendChild(wSep.root);   // 0.9.4 S1: the Cartesian oscillators' editor (lab/separable.js); ships closed
   const sep = createSeparable(wSep.body, { apply: (id) => { switchHamiltonian(id); ui.hamSeg.set(id); } }); wSep.root.addEventListener('devopen', () => sep.prepare());
+  standDown(wLat, () => ui.hamSeg.readBack('lattice')); standDown(wBlo, () => ui.hamSeg.readBack('bloch'));
+  standDown(wCen, toHydrogen(['central', 'cornell'], 'central')); standDown(wSep, toHydrogen(['separable'], 'separable'));
   return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen, wSep }; }
   function createAtomsWignerRadiation() {   // the third seat: ATOMS · WIGNER · RADIATION · EMISSION SPECTRA
   const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
@@ -174,6 +181,7 @@ export function createReadouts(app) {
   /* 013 H4: the reader's hand turning the ATOMS window ON puts SPECTRUM's system on ATOM — the stepper's own road for 'atom' (a click, so a
      project restoring the window's power never moves the operator; switchHamiltonian never presses the power, so there is no loop) */
   wAtoms.root.querySelector('.dev-power').addEventListener('click', () => { if (!wAtoms.root.classList.contains('off') && getHamiltonian().id !== 'atom') { switchHamiltonian('atom'); ui.hamSeg.set('atom'); } });
+  standDown(wAtoms, toHydrogen(['atom'], 'atoms'));   // 017 X1 (call 1, the uniform law): its × or POWER OFF hands SPECTRUM back to HYDROGEN
 
   /* ELECTROSTATICS · LEGACY (Φ, E, B and j of the register's charge, the #fieldlines overlay) was DELETED in 0.5.0 D9b */
 
@@ -207,6 +215,8 @@ export function createReadouts(app) {
       } finally { if (H && !was) H.release(); }
     } });
   app.w.emissionView = emissionView;
+  /* 017 X1: the A ↔ B TRANSITION a press started (its preset's id is `emission:…`) stops with the window; the prepared pair stays */
+  standDown(wEm, () => { if (reg.transition && /^emission:/.test(reg.preset || '') && app.hooks.ab) app.hooks.ab.set(false); });
   const WIG_OK = 'numerical · a slice, not a marginal', RAD_OK = 'exact matrix elements · classical far field';
   return { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, wEm, emissionView, WIG_OK, RAD_OK }; }
   return { wSh, shadowView, shadowFoot, wOrb, orbit, kepler, wVor, vortex, particles, flowTracers, wSlice, slice, createCalcMetersLadder, createAtomsWignerRadiation };

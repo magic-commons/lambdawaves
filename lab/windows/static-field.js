@@ -33,6 +33,9 @@ export function createStaticField(app) {
     const c = reg.at(clock.t); reg.setField({ inter: v }); reg.anchorFrom(c.re, c.im, clock.t); interSync(); touchState(); } });
   rf.appendChild(ui.bz.root); rf.appendChild(ui.fz.root); rf.appendChild(ui.interSw.root);
   rf.appendChild(trig({ label: 'NO FIELD', onFire: () => { reg.setField({ Bz: 0, Fz: 0 }); ui.bz.set(0); ui.fz.set(0); touchState(); } }).root);
+  /* 017 X1 · AN EFFECT SHOWS ITS WINDOW: the window's × or POWER OFF puts the field to zero (Fz · Bz · INTER-SHELL; c(t) continuous) and the knobs read 0 */
+  const fieldDown = () => { const f = reg.field; if (!f.Fz && !f.Bz && !f.inter) return; const c = f.inter && reg.at(clock.t); reg.setField({ Fz: 0, Bz: 0, inter: false }); if (c) reg.anchorFrom(c.re, c.im, clock.t); ui.bz.set(0); ui.fz.set(0); touchState(); };
+  wField.root.addEventListener('devclose', fieldDown); wField.root.querySelector('.dev-power').addEventListener('click', () => { if (wField.root.classList.contains('off')) fieldDown(); });
   ui.fieldRo = readout({ label: 'H IN FORCE', value: 'H₀ (bare Coulomb)', cls: 'two', sub: '' });
   rf.appendChild(ui.fieldRo.root);
   ui.interRo = readout({ label: 'INTER-SHELL', value: 'off', cls: 'wide', sub: 'STARK F acts within each shell' }); el('div', 'row tight', gF).appendChild(ui.interRo.root);

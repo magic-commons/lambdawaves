@@ -441,11 +441,11 @@ const PRECACHE = [
   ['./windows/kepler.js',                                           '1fc674c01815'],
   ['./windows/material.js',                                         '9de11261dc8c'],
   ['./windows/molecules.js',                                        '68251ba01245'],
-  ['./windows/readouts.js',                                         '7a385c0f39c8'],
+  ['./windows/readouts.js',                                         '425b49870b73'],
   ['./windows/settings-card.js',                                    'b85a834793c8'],
-  ['./windows/spectrum.js',                                         '5e6484181162'],
+  ['./windows/spectrum.js',                                         '2be75d960ac9'],
   ['./windows/state.js',                                            '15e8593c80df'],
-  ['./windows/static-field.js',                                     '8ad1f4019eb4'],
+  ['./windows/static-field.js',                                     '22eb041218c2'],
   ['./worker-pool.js',                                              'f31d5675dcae'],
 ];
 
