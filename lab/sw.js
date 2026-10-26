@@ -405,7 +405,7 @@ const PRECACHE = [
   ['./shell/links.js',                                              '5a8a34805378'],
   ['./shell/modulation.js',                                         '9d2de187dc66'],
   ['./shell/notebook.js',                                           '14e9b23d7505'],
-  ['./shell/persist.js',                                            '84cfce8cf032'],
+  ['./shell/persist.js',                                            'dd9f851548b8'],
   ['./shell/rack-wiring.js',                                        '01efcabc813c'],
   ['./shell/settings.js',                                           'f58f0ff3d121'],
   ['./shell/stage-words.js',                                        '7310de96975d'],
@@ -441,11 +441,11 @@ const PRECACHE = [
   ['./windows/kepler.js',                                           '1fc674c01815'],
   ['./windows/material.js',                                         '9de11261dc8c'],
   ['./windows/molecules.js',                                        '68251ba01245'],
-  ['./windows/readouts.js',                                         '7a385c0f39c8'],
+  ['./windows/readouts.js',                                         '425b49870b73'],
   ['./windows/settings-card.js',                                    'b85a834793c8'],
-  ['./windows/spectrum.js',                                         '5e6484181162'],
+  ['./windows/spectrum.js',                                         '1d777e05f2f2'],
   ['./windows/state.js',                                            '15e8593c80df'],
-  ['./windows/static-field.js',                                     '8ad1f4019eb4'],
+  ['./windows/static-field.js',                                     '22eb041218c2'],
   ['./worker-pool.js',                                              'f31d5675dcae'],
 ];
 

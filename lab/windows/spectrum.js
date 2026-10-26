@@ -57,12 +57,20 @@ export function createSpectrumCard(app) {
        opened (a window already open by hand stays); MOLECULES' card is the mode and never closes here; BOX opens no window.  It closes by the card's own ✕ (the rack's close(id), no new hinge) */
     const WIN = { central: 'central', cornell: 'central', separable: 'separable', lattice: 'lattice', atom: 'atoms' }, dev = (id) => document.querySelector('.dev[data-id="' + id + '"]'), isOpen = (id) => { const d = dev(id); return !!d && !d.hidden && !d.classList.contains('closed'); };
     let opened = null;
+    /* 017 X3 (the walk): MOLECULES turns the molecule ON and any other system lets it go (the arrows could never pass it: it read back the
+       operator and stepped onto itself); LATTICE reads LATTICE while its window is open (its ✕ reads back, X1); a window the system needs that
+       stands powered off is powered on with it — an effect shows its window */
+    const chem = () => app.state.chem;
     const sys = stepper({ aria: 'SYSTEM', items: SYS.map((r) => ({ id: r.id, label: r.name.split(' ·')[0] })), value: 'hydrogen', cls: 'mol-step', onChange: (v) => {
+      if (v !== 'molecules' && chem() && chem().on) chem().setOn(false);
       const w = WIN[v]; if (opened && opened !== w) { if (isOpen(opened)) dev(opened).querySelector('.dev-close').click(); opened = null; } if (w && w !== opened) opened = isOpen(w) ? null : w;
-      if (v === 'molecules' || v === 'lattice') app.sh.layout.reopen(v === 'molecules' ? 'chem' : v); else { switchHamiltonian(v); if (v === 'central' || v === 'cornell' || v === 'separable') app.sh.layout.reopen(v === 'separable' ? v : 'central'); if (v === 'well') app.w.enterBox(); if (v === 'atom') { app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); } }
-      ui.hamSeg.set(getHamiltonian().id); } });
+      if (v === 'molecules' || v === 'lattice') { app.sh.layout.reopen(v === 'molecules' ? 'chem' : v); if (v === 'molecules' && chem() && !chem().on) chem().setOn(true); } else { switchHamiltonian(v); if (v === 'central' || v === 'cornell' || v === 'separable') app.sh.layout.reopen(v === 'separable' ? v : 'central'); if (v === 'well') app.w.enterBox(); if (v === 'atom') { app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); } }
+      if (w && dev(w) && dev(w).classList.contains('off')) dev(w).querySelector('.dev-power').click();
+      ui.hamSeg.set(v === 'lattice' ? v : getHamiltonian().id); } });
     sys.name.addEventListener('click', () => document.querySelectorAll('.mir-pick-i[data-id]').forEach((b) => { const r = SYS.find((x) => x.id === b.dataset.id); if (r) b.title = tip(r); }));
-    ui.hamSeg = { root: sys.root, get value() { return sys.get(); }, set(id) { sys.set(app.state.chem && app.state.chem.on ? 'molecules' : id); sys.root.title = tip(SYS.find((r) => r.id === sys.get()) || SYS[0]); hamShow(sys.get()); } };
+    ui.hamSeg = { root: sys.root, get value() { return sys.get(); }, set(id) { sys.set(app.state.chem && app.state.chem.on ? 'molecules' : id); sys.root.title = tip(SYS.find((r) => r.id === sys.get()) || SYS[0]); hamShow(sys.get()); },
+      /* 017 X1 · THE STAND-DOWN: a window of the table closed or powered off — the stepper forgets it opened it and reads back the operator in force */
+      readBack(id) { if (opened === id) opened = null; this.set(getHamiltonian().id); } };
     rh.appendChild(ui.hamSeg.root);
     hamBody.append(hamRows.hydrogen, hamRows.scale, hamRows.box, hamRows.atom);
     ui.hamSeg.set('hydrogen');
@@ -153,6 +161,8 @@ export function createSpectrumCard(app) {
   const eqRo = readout({ label: 'PURITY', value: '1.000', sub: 'pure' }), rFd = el('div', 'eq-faders', mix);
   const eqFd = Array.from({ length: EQ_SHELLS }, (_, i) => i).map((i) => fader({ label: 'n ' + (i + 1), min: 0, max: 1, value: 1, fmt: (v) => Math.round(v * 100) + ' %', onInput: (v) => { eq.setGain(i, v); syncEq(true); }, onChange: hNote }));
   eqHead.append(eqStep.root, eqRo.root); for (const f of eqFd) rFd.appendChild(f.root);
+  /* 017 X1 · AN EFFECT SHOWS ITS WINDOW: × or POWER OFF stands the table down (syncEq's `why`); a reopen re-arms it from the knobs */
+  for (const t of ['devclose', 'devopen']) wEq.root.addEventListener(t, () => syncEq(false)); wEq.root.querySelector('.dev-power').addEventListener('click', () => syncEq(false));
   const aud = createEqAudio(app, { eq, host: gEq, sync: () => { eqKey = ''; syncEq(false); } });   // iteration 002: AUDIO IN (lab/eq-audio.js)
   el('div', 'note', gEq).textContent = 'the beats fade, the shells stay';
   /* 0.6.4 S2 · THE CHORD (lab/chord-audio.js): SOUND and LEVELS · BEATS, shown only while SETTINGS › AUDIO is on; not saved (a hand press each session) */
@@ -163,7 +173,7 @@ export function createSpectrumCard(app) {
   let eqKey = '', eqT = null, eqMode = 0;
   function syncEq(hand) {
     if (chord.retune() && !snd.hidden) paintChord();   // S2: keyed on version, RATE, mode — the bank moves only on change
-    const H = getHamiltonian(), why = app.state.chem && app.state.chem.on ? 'MOLECULES owns the field' : sturm.P ? 'STURMIAN is on' : H.id !== 'hydrogen' ? 'the operator is not HYDROGEN' : H.mass ? H.mass + ' (its beats are written at μ = mₑ)' : app.state.space !== 'x' ? 'momentum space is on' : '';
+    const H = getHamiltonian(), why = app.state.chem && app.state.chem.on ? 'MOLECULES owns the field' : wEq.root.classList.contains('closed') || wEq.root.classList.contains('off') ? 'its window is closed or off' : sturm.P ? 'STURMIAN is on' : H.id !== 'hydrogen' ? 'the operator is not HYDROGEN' : H.mass ? H.mass + ' (its beats are written at μ = mₑ)' : app.state.space !== 'x' ? 'momentum space is on' : '';
     const key = why + eq.preset + eq.gains.join() + reg.version; if (key === eqKey) return; eqKey = key;
     const P = reg.populated(), pops = reg.re0.map((r, a) => r * r + reg.im0[a] ** 2), w = new Array(EQ_SHELLS).fill(0); for (const a of P) w[BASIS[a].n - 1] += pops[a];
     const t = why ? null : eq.table({ Z: getZ(), rates, populated: P, pops }), G = t && t.gamma, m = G ? t.mode : 0;
