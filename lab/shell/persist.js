@@ -11,7 +11,7 @@ const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentati
 export function createPersist(app) {
   const { ui, reg, clock, obs, mat, FIELD_CHROME, rates, energyOf, sturm, PAL_DEF } = app; const { schedule, paceRate } = app.loop; const { quality, layout, phone, tablet } = app.sh;
   const { camera, camLevel, syncFreeAngles, syncCamUI } = app.host;
-  const { wState, switchHamiltonian, applySturmian, setElement, fillValence, shadowView, shadowFoot, kepler, vortex, particles, slice, wChem, ladder, wAtoms, wignerView, kepShell,
+  const { wState, switchHamiltonian, applySturmian, setElement, fillValence, shadowView, shadowFoot, kepler, vortex, particles, slice, wChem, ladder, wignerView, kepShell,
     keplerRowSync, gas, stageTextTick } = app.w;
   /* ── persistence (§46): experiment and presentation, separately ───────── */
   /* 0.3.1 · S3 THE EDIT SCOPE (PLAN §4.1, D6; docs/STATE-SCOPES.md) — what the history reads, keys and writes back: the PROJECT keys
@@ -278,7 +278,6 @@ export function createPersist(app) {
         if (pr.ab && ui.ab) ui.ab.set(pr.ab);
         if (pr.notebook && layout.notebookResize && Number.isFinite(pr.notebook.w) && !(pr.layout && pr.layout.nb)) layout.notebookResize(pr.notebook.w, pr.notebook.h);   // wave 127: a layout carrying nb sizes it next (applyLayout), last
         if (pr.layout && layout.applyLayout) layout.applyLayout(pr.layout);
-        if (getHamiltonian().id === 'atom' && !hist) { wAtoms.root.hidden = false; wAtoms.root.classList.remove('closed'); }   // 0.4.0 S0: the ATOM operator brings its element picker
         if (pr.instruments && app.state.chem.on && !hist) wChem.root.classList.remove('closed');   // W129 · the same law for MOLECULES (a first visit leaves it off the rack): a file it owns brings it back — its register with it (iteration 008 U: one card)
         /* D9 · A FILE THAT USED A RETIRED WINDOW OPENS WITHOUT IT, AND SAYS SO IN ONE LINE (the PROJECTS status and STATE's): an old
            layout seat is skipped by applyLayout (no such card), nothing throws.  QCD counts as used when its seat was open. */
@@ -288,6 +287,12 @@ export function createPersist(app) {
         if (pr.sturmian) { sturm.on = !!pr.sturmian.on; sturm.lambda = clampLambda(pr.sturmian.lambda); } else sturm.on = false;   // a file without it means HYDROGEN
         applySturmian(true);                                          // the file's anchor is c(0) under the file's own law: keep it
         app.state.eq.restore(pr.eq);                                  // 0.6.0 B2: absent is FLAT; the loop's syncEq repaints the card and hands the field its table
+        /* 017 X2 · AN EFFECT SHOWS ITS WINDOW (0.4.0 S0's ATOM law, made one): a record whose operator, static field, equalizer table or EMISSION's
+           transition is in force brings that window back, powered — a project, a link, RESUME and an undo alike; under MOLECULES the atomic windows stay hidden */
+        if (!app.state.chem.on) { const H = getHamiltonian().id, f = reg.field;
+          for (const [id, on] of [['separable', H === 'separable'], ['central', H === 'central' || H === 'cornell'], ['atoms', H === 'atom'], ['staticfield', !!(f.Fz || f.Bz || f.inter)],
+            ['equalizer', !app.state.eq.birth()], ['emission', !!reg.transition && /^emission:/.test(reg.preset || '')]]) {
+            if (!on || !layout.reopen(id)) continue; const d = document.querySelector('.dev[data-id="' + id + '"]'); if (d.classList.contains('off')) d.querySelector('.dev-power').click(); } }
         /* S3 · an UNDO's bases are its record's seats, never read back off a control the modulator is moving (an unseated target keeps
            its base; an unmodulated one is the control just written) */
         const histBases = {};
