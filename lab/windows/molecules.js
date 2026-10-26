@@ -31,6 +31,7 @@ export function createMolecules(app) {
   function moleculeMode(v) {
     for (const w of [wState, wSh, wOrb, wVor, wSlice, app.w.wLad, app.w.wCalc, wSpec, { root: document.querySelector('.dev[data-id="equalizer"]') }, { root: document.querySelector('.dev[data-id="staticfield"]') }, { root: document.querySelector('.dev[data-id="emission"]') }]) if (w && w.root) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
     wChem.root.hidden = !v;                                          // iteration 008 U: the one card (the register lives in it)
+    if (v && wChem.root.classList.contains('closed')) app.sh.layout.reopen('chem');   // 017 call 8: ON after a × brings the card back (the rack's road, neighbours travel)
     modeSeg.set(v ? 'molecules' : 'atoms');
     if (v && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
     /* iteration 012 R3 hid POSITION | MOMENTUM under a molecule; iteration 017 W2 GREYS MOMENTUM instead (016 V1: greyed, never hidden, the seats stay) —
@@ -69,6 +70,10 @@ export function createMolecules(app) {
   const wChem = device({ id: 'chem', eyebrow: 'MOLECULES', title: 'RHF · real time', status: '' });
   if (useCompactDefaults) wChem.root.classList.add('closed');   // built closed (chemview's N8 shown() guard); the first-run block opens it on the LEFT rack — still no solve until it is switched on
   rack.appendChild(wChem.root);
+  /* 017 (Josh's call 8, 2026-10-26): AN EFFECT SHOWS ITS WINDOW holds for the mode too — the card's × or POWER OFF is MOLECULES OFF (the molecule
+     lets the field go; the Picker, the CSB's mode or ‹ SYSTEM › MOLECULES bring it back, and moleculeMode reopens a ×'d card) */
+  wChem.root.addEventListener('devclose', () => { const C = app.state.chem; if (C && C.on) C.setOn(false); });
+  wChem.root.querySelector('.dev-power').addEventListener('click', () => { const C = app.state.chem; if (wChem.root.classList.contains('off') && C && C.on) C.setOn(false); });
   /* SKELETON · BEAD · ELLIPSOID (0.7.0 V2 · 0.8.2 P3 · 0.8.3 B3) are INFORMATIONAL's MARKS since iteration 007 (lab/informational.js builds them):
      MOLECULES no longer reaches into that card's body.  The stage words are spoken through ONE verb, stageText.say(kind, text) (shell/stage-words.js) */
   const say = (kind, t, o) => !!app.state.stageText && app.state.stageText.say(kind, t, o);

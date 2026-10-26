@@ -39,11 +39,14 @@ export function createSpectrumCard(app) {
      written only when the set shown changes (the stepper and the operator's listener both ask), and the body's height glides old → new in 160 ms
      (the kit's ease; reduced motion, a folded group or a hidden card: at once), so the cards under it never jump */
   let hamKey = '';
+  const NOTE_WIN = { central: 'central', cornell: 'central', separable: 'separable', lattice: 'lattice' };
+  const noteOpen = trig({ label: 'OPEN', onFire: () => { const w = NOTE_WIN[ui.hamSeg ? ui.hamSeg.value : '']; if (w) app.sh.layout.reopen(w); } });
   const hamShow = (id) => {
     /* iteration 017 W3: a system whose operator lives in its own window says so (the X walk found CENTRAL · SEPARABLE · LATTICE's rows empty) */
     const note = { central: 'its potential is drawn in CENTRAL', cornell: 'its potential is drawn in CENTRAL', separable: 'its potential is set in SEPARABLE', lattice: 'LATTICE solves its own register in its window; this grid is the atom’s' }[id];
     const want = { hydrogen: id === 'hydrogen', scale: id === 'hydrogen', box: id === 'well' || id === 'qho', atom: id === 'atom', note: !!note }, key = Object.values(want).join() + (note || '');
-    if (key === hamKey) return; if (note) label(hamRows.note, note);
+    if (key === hamKey) return;
+    if (note) { label(hamRows.note, note); hamRows.note.appendChild(noteOpen.root); noteOpen.root.title = 'OPEN ' + NOTE_WIN[id].toUpperCase() + ' — raise the window that holds this operator'; }   // 017 (call 10): the note and one OPEN, nothing else
     const live = !!hamKey && hamBody.getClientRects().length > 0 && !matchMedia('(prefers-reduced-motion: reduce)').matches, h0 = live ? hamBody.offsetHeight : 0;
     hamKey = key; for (const k of Object.keys(want)) hamRows[k].hidden = !want[k];
     if (!live) return; const h1 = hamBody.offsetHeight;

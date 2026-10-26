@@ -34,7 +34,11 @@ export function createStaticField(app) {
   rf.appendChild(ui.bz.root); rf.appendChild(ui.fz.root); rf.appendChild(ui.interSw.root);
   rf.appendChild(trig({ label: 'NO FIELD', onFire: () => { reg.setField({ Bz: 0, Fz: 0 }); ui.bz.set(0); ui.fz.set(0); touchState(); } }).root);
   /* 017 X1 · AN EFFECT SHOWS ITS WINDOW: the window's × or POWER OFF puts the field to zero (Fz · Bz · INTER-SHELL; c(t) continuous) and the knobs read 0 */
-  const fieldDown = () => { const f = reg.field; if (!f.Fz && !f.Bz && !f.inter) return; const c = f.inter && reg.at(clock.t); reg.setField({ Fz: 0, Bz: 0, inter: false }); if (c) reg.anchorFrom(c.re, c.im, clock.t); ui.bz.set(0); ui.fz.set(0); touchState(); };
+  const fieldDown = () => {
+    const f = reg.field, drives = [ui.rotZRate, ui.kzRate, ui.defRate].some((K) => K.get() !== 0) || reg.damping !== 0;   // 017 call 9 (Josh: "Sure?"): the DRIVES and DRAG end with the window too
+    if (!f.Fz && !f.Bz && !f.inter && !drives) return;
+    const c = f.inter && reg.at(clock.t); reg.setField({ Fz: 0, Bz: 0, inter: false }); if (c) reg.anchorFrom(c.re, c.im, clock.t); ui.bz.set(0); ui.fz.set(0);
+    for (const [k, K] of [['z', ui.rotZRate], ['kz', ui.kzRate], ['def', ui.defRate]]) { setRotationRate(k, 0); K.set(0); } reg.setDamping(0); ui.dragKnob.set(0); touchState(); };
   wField.root.addEventListener('devclose', fieldDown); wField.root.querySelector('.dev-power').addEventListener('click', () => { if (wField.root.classList.contains('off')) fieldDown(); });
   ui.fieldRo = readout({ label: 'H IN FORCE', value: 'H₀ (bare Coulomb)', cls: 'two', sub: '' });
   rf.appendChild(ui.fieldRo.root);
