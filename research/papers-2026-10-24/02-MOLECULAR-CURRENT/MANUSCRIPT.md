@@ -335,9 +335,9 @@ Every molecular density and current in λWAVES is a contraction of one Hermitian
 - W3C. *WebGPU*. [w3.org/TR/webgpu](https://www.w3.org/TR/webgpu/). Accessed 17 October 2026.
 - X. Li, S. M. Smith, A. N. Markevitch, D. A. Romanov, R. J. Levis and H. B. Schlegel. A time-dependent Hartree–Fock approach for studying the electronic optical response of molecules in intense fields. *Physical Chemistry Chemical Physics* **7**, 233–239 (2005). [doi:10.1039/B415849K](https://doi.org/10.1039/B415849K).
 - Khronos Group. *The Vulkan Specification*, Fundamentals: Floating-Point Format Conversions. [docs.vulkan.org/spec/latest/chapters/fundamentals.html](https://docs.vulkan.org/spec/latest/chapters/fundamentals.html). Accessed 17 October 2026.
-- P. Lazzeretti. Ring currents. *Progress in Nuclear Magnetic Resonance Spectroscopy* **36**, 1–88 (2000). (Added in Draft 08 as background on charge-current conservation in finite bases; to be confirmed against the publisher's record before posting.)
-- I. Barth, J. Manz, Y. Shigeta and K. Yagi. Unidirectional electronic ring current driven by a few cycle circularly polarized laser pulse: quantum model simulations for Mg-porphyrin. *Journal of the American Chemical Society* **128**, 7043 (2006). (Added in Draft 08; to be confirmed.)
-- I. Bialynicki-Birula, Z. Bialynicka-Birula and C. Śliwa. Motion of vortex lines in quantum mechanics. *Physical Review A* **61**, 032110 (2000). [arXiv:quant-ph/9911007](https://arxiv.org/abs/quant-ph/9911007). (Added in Draft 08.)
+- P. Lazzeretti. Ring currents. *Progress in Nuclear Magnetic Resonance Spectroscopy* **36**, 1–88 (2000). [doi:10.1016/S0079-6565(99)00021-7](https://doi.org/10.1016/S0079-6565(99)00021-7). (Added in Draft 08 as background on charge-current conservation in finite bases; to be confirmed against the publisher's record before posting.)
+- I. Barth, J. Manz, Y. Shigeta and K. Yagi. Unidirectional electronic ring current driven by a few cycle circularly polarized laser pulse: quantum model simulations for Mg-porphyrin. *Journal of the American Chemical Society* **128**, 7043 (2006). [doi:10.1021/ja057197l](https://doi.org/10.1021/ja057197l). (Added in Draft 08; to be confirmed.)
+- I. Bialynicki-Birula, Z. Bialynicka-Birula and C. Śliwa. Motion of vortex lines in quantum mechanics. *Physical Review A* **61**, 032110 (2000). [doi:10.1103/PhysRevA.61.032110](https://doi.org/10.1103/PhysRevA.61.032110); [arXiv:quant-ph/9911007](https://arxiv.org/abs/quant-ph/9911007). (Added in Draft 08.)
 
 ## Credits
 

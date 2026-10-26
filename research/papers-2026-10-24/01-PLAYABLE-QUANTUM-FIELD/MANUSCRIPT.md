@@ -297,9 +297,9 @@ A hydrogen state is a short list of complex numbers turning at their energies. D
 - L. D. Landau and E. M. Lifshitz. *Quantum Mechanics: Non-Relativistic Theory*. 3rd edition, Pergamon, 1977.
 - W3C. *WebGPU*. [w3.org/TR/webgpu](https://www.w3.org/TR/webgpu/). Accessed 17 October 2026.
 - Khronos Group. *The Vulkan Specification*, Fundamentals: Floating-Point Format Conversions. [docs.vulkan.org/spec/latest/chapters/fundamentals.html](https://docs.vulkan.org/spec/latest/chapters/fundamentals.html). Accessed 17 October 2026.
-- B. Thaller. *Visual Quantum Mechanics: Selected Topics with Computer-Generated Animations of Quantum-Mechanical Phenomena*. Springer, 2000. (Added in Draft 08; bibliographic details to be confirmed against the publisher's record before posting.)
-- P. A. M. Dirac. Quantised singularities in the electromagnetic field. *Proceedings of the Royal Society A* **133**, 60–72 (1931). (Added in Draft 08; to be confirmed.)
-- J. O. Hirschfelder, A. C. Christoph and W. E. Palke. Quantum mechanical streamlines. I. Square potential barrier. *Journal of Chemical Physics* **61**, 5435–5455 (1974). (Added in Draft 08; to be confirmed.)
+- B. Thaller. *Visual Quantum Mechanics: Selected Topics with Computer-Generated Animations of Quantum-Mechanical Phenomena*. Springer, 2000. [doi:10.1007/b98962](https://doi.org/10.1007/b98962). (Added in Draft 08; bibliographic details to be confirmed against the publisher's record before posting.)
+- P. A. M. Dirac. Quantised singularities in the electromagnetic field. *Proceedings of the Royal Society A* **133**, 60–72 (1931). [doi:10.1098/rspa.1931.0130](https://doi.org/10.1098/rspa.1931.0130). (Added in Draft 08; to be confirmed.)
+- J. O. Hirschfelder, A. C. Christoph and W. E. Palke. Quantum mechanical streamlines. I. Square potential barrier. *Journal of Chemical Physics* **61**, 5435–5455 (1974). [doi:10.1063/1.1681899](https://doi.org/10.1063/1.1681899). (Added in Draft 08; to be confirmed.)
 
 ## Credits
 

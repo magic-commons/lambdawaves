@@ -15,8 +15,10 @@ knots of optics multiplied by e^{−r/n} are not hydrogen states unless the poly
 **Verification.** The knots are traced on the zero set and identified by Alexander polynomials and braid words; the oracle is the instrument's own
 wavefunction evaluator to 5e-15. The coefficients are printed in the paper so anyone can redo it.
 
-**What is not verified.** No independent re-computation by a human; one reader (me); the forward-citation search on your paper was done only this
-week [UPDATE FROM NOVELTY-CHECK-PAPER-4-2026-10-25.md BEFORE SENDING]. The status table says exactly this.
+**What is not verified.** No independent re-computation by a human; one reader (me); the forward-citation search on your paper (and on Enciso, Hartley and Peralta-Salas 2018) was done on 25 October through
+OpenAlex with keyword and web searches, found no hydrogen knot below your levels, and has not yet covered the arXiv full text or your appendices with
+Dennis. The mechanism is not claimed as new: moving the twist into the perturbation is the structure of the Milnor polynomials of optical vortex knots
+(Dennis et al. 2010); the paper claims only that it works inside one hydrogen level. The status table says exactly this.
 
 **The one question.** Is the n = 4 trefoil, or the lowering rule, already known to you or in work I have missed? If so I would rather cite than claim.
 
