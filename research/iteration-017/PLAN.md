@@ -134,3 +134,4 @@ X → W → R → S → P (P last, alone). Each: `git merge --no-ff --no-commit 
 ## CLOSED
 | Chain | Branch | Merge | Rows | Notes |
 |---|---|---|---|---|
+| X | it017-x | `` | X1 the law's seat · X2 the restore side · X3 the walk (`X-BUILD.md`, `X-shots/`) | rows inside readouts.js · static-field.js · spectrum.js · persist.js; no new app key; take-in-bugs §3 red at BASE too (STATUS TAGS moved to TEXT › SHOW — re-aim in S); open: MOLECULES' own ×, FIELD's DRIVES/DRAG, LATTICE's empty HAMILTONIAN rows |
