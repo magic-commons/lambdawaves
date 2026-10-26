@@ -126,6 +126,10 @@ browser or origin — call 7. The sticky behaviour is explained by F1 without th
 6. The screenshots the prompt mentions did not arrive — drop them in `research/iteration-017/refs/` (or paste their paths) and R4 reads them.
 7. Which browser reads 9261? Firefox's storage for 127.0.0.1:9261 holds only info · library · notebook (no settings, no session) — did you press FORGET?
 
+8. (from X's walk) MOLECULES is a main window: should its own × mean MOLECULES OFF (the molecule lets the field go), or does the molecule keep the field with the card closed? Default: unchanged (keeps it).
+9. (from X) FIELD's DRIVES (the spin rates) and DRAG γ survive the window's × — only Fz · Bz · INTER-SHELL end. Should the drives end too? Default: unchanged.
+10. (from X) Under LATTICE the HAMILTONIAN group shows empty rows — a note row, or the fold closes itself there? W takes it if one line; else your word.
+
 ## MERGE ORDER
 X → W → R → S → P (P last, alone). Each: `git merge --no-ff --no-commit it017-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write`
 → `./test.sh node` (after DONE-c8; before it, the chain's own suites) → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check`
