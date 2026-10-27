@@ -17,8 +17,12 @@
  *     matrix's twenty numbers once a frame and never rebuilds a table; a table is rebuilt only when the tone, a curve or INVERT moved.
  *   · sRGB.  The filter works in sRGB (`color-interpolation-filters`), as CSS filters do, so a table read on the screen is the table written.
  *
- *   pictureFilter(el) → { el, id, setGrade(partial), setTable(channel, table | null), grade(), tables(), describe(), flush(), release() }
+ *   pictureFilter(el) → { el, id, setGrade(partial), setTable(channel, table | null), setChain(runs), grade(), tables(), describe(), flush(), release() }
  *     channel   'MASTER' | 'R' | 'G' | 'B' (any case); a table is 256 numbers in 0..1 (a Float32Array, an array), null is identity
+ *     runs      THE CHAIN (1.5.0-alpha.33, λWAVES NODES): an app's own primitives AFTER the grade's pair, in order — each run one of
+ *               { matrix: [20 numbers] } · { tables: { r, g, b } } · { prim: [[tag, { attr: value }, children?], …] }; an attribute
+ *               '$IN' is the previous run's result.  The fixed pair is the degenerate chain; [] or null = none.  A run handed back by
+ *               identity (the same array, the same tables) is not rewritten: a modulated matrix rewrites its twenty numbers, never a table.
  *   Pure, for tests and for an app that takes the values into its own shader:
  *     GRADE_HOME · BLEND_MODES · TABLE_N · toneAt(x, g) · toneTable(g, n) · colourMatrix(saturation, hueDeg) · isNeutralTone(g)
  *     isNeutralMatrix(g) · lookup(table, x) · composeTables(g, tables, n) → { r, g, b } | null */
@@ -127,6 +131,26 @@ export function pictureFilter(target) {
   for (const c of ['R', 'G', 'B']) { const e = document.createElementNS(NS, 'feFunc' + c); e.setAttribute('type', 'table'); ct.appendChild(e); fn[c] = e; }
   svgHost().appendChild(f);
   let dirtyMatrix = true, dirtyTable = true, dirtyCss = true, on = { matrix: false, table: false };
+  let chain = [], dirtyChain = false, built = [];                    // the app's runs, and per run { key, els, src } as written
+  const make = ([tag, attrs, kids]) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k] === '$IN' ? '' : String(attrs[k])); for (const c of kids || []) e.appendChild(make(c)); return e; };
+  const shape = (spec) => spec.map(([t, a, k]) => t + '(' + Object.keys(a).join() + (k ? ':' + shape(k) : '') + ')').join();
+  const fill = (els, spec) => spec.forEach(([, a, k], i) => { for (const n in a) if (a[n] !== '$IN') setAttr(els[i], n, String(a[n])); if (k) fill([...els[i].children], k); });
+  function buildChain() {
+    built = chain.map((r, i) => {
+      const key = r.matrix ? 'm' : r.tables ? 't' : 'p:' + shape(r.prim), had = built[i];
+      const b = had && had.key === key ? had : { key, els: r.matrix ? [make(['feColorMatrix', { type: 'matrix' }])] : r.tables ? [make(['feComponentTransfer', {}, ['R', 'G', 'B'].map((c) => ['feFunc' + c, { type: 'table' }])])] : r.prim.map(make), src: null };
+      const src = r.matrix || r.tables || r.prim;
+      if (b.src !== src) { b.src = src; if (r.matrix) setAttr(b.els[0], 'values', str(r.matrix)); else if (r.tables) { const f = b.els[0].children; setAttr(f[0], 'tableValues', str(r.tables.r)); setAttr(f[1], 'tableValues', str(r.tables.g)); setAttr(f[2], 'tableValues', str(r.tables.b)); } else fill(b.els, r.prim); }
+      b.ins = r.prim ? r.prim.map(([, a]) => Object.keys(a).filter((n) => a[n] === '$IN')) : [];
+      return b;
+    });
+  }
+  /** '$IN': the run before a run that names it carries a result (`<id>-<n>`); a run that is not named carries none */
+  function link(groups) {
+    groups.forEach((g, i) => { const last = g.els[g.els.length - 1], nx = groups[i + 1], want = nx && nx.ins && nx.ins.some((a) => a.length);
+      if (want) setAttr(last, 'result', id + '-' + i); else if (last.hasAttribute('result')) last.removeAttribute('result');
+      if (g.ins) g.ins.forEach((names, j) => { for (const n of names) setAttr(g.els[j], n, i ? id + '-' + (i - 1) : 'SourceGraphic'); }); });
+  }
 
   function write() {
     if (dirtyMatrix) {
@@ -140,8 +164,10 @@ export function pictureFilter(target) {
       on.table = !!t;
       if (t) { setAttr(fn.R, 'tableValues', str(t.r)); setAttr(fn.G, 'tableValues', str(t.g)); setAttr(fn.B, 'tableValues', str(t.b)); }
     }
-    const want = [on.matrix ? mx : null, on.table ? ct : null].filter(Boolean);
-    if (want.length !== f.childNodes.length || want.some((n, i) => f.childNodes[i] !== n)) f.replaceChildren(...want);
+    const pair = [on.matrix ? mx : null, on.table ? ct : null].filter(Boolean).map((e) => ({ els: [e] }));
+    if (dirtyChain) { dirtyChain = false; buildChain(); }
+    const groups = pair.concat(built), want = groups.flatMap((g) => g.els);
+    if (want.length !== f.childNodes.length || want.some((n, i) => f.childNodes[i] !== n)) { f.replaceChildren(...want); link(groups); }
     const css = want.length ? 'url(#' + id + ')' + (before.filter ? ' ' + before.filter : '') : (before.filter || '');   // the element's own filter, if it had one, still runs after
     if (target.style.filter !== css) target.style.filter = css;
     if (dirtyCss) {
@@ -173,10 +199,12 @@ export function pictureFilter(target) {
       T[c] = table && table.length ? Float32Array.from(table) : null;
       dirtyTable = true; schedule(); return api;
     },
+    /** setChain(runs) — the app's own runs after the grade's pair (see the header); one write per frame, as every setter */
+    setChain(runs) { chain = Array.isArray(runs) ? runs : []; dirtyChain = true; schedule(); return api; },
     grade: () => ({ ...G }),
     tables: () => ({ ...T }),
     /** what the filter is doing now: { matrix, table, css } (after the last write) */
-    describe: () => ({ matrix: on.matrix, table: on.table, css: target.style.filter, opacity: target.style.opacity, blend: target.style.mixBlendMode }),
+    describe: () => ({ matrix: on.matrix || built.some((b) => b.key === 'm'), table: on.table || built.some((b) => b.key === 't'), css: target.style.filter, opacity: target.style.opacity, blend: target.style.mixBlendMode }),
     /** write now (a test, or an export that must see this frame's grade) */
     flush() { frame.cancel(key); write(); return api; },
     release() {

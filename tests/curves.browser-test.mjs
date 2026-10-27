@@ -46,7 +46,7 @@ try {
   const before = await g.ev('await __LW.settle(); return { pic: await __pic(), rows: __LW.history.entries().length };');
   const shot0 = await g.snapHash();
   await g.ev(`__LW.curves.preset('MASTER', 'S'); await __w(300); await __LW.settle(); return 1;`);
-  const graded = await g.ev(`return { filter: __filter(), table: __LW.curves.filter.describe().table, pic: await __pic(), rows: __LW.history.entries().length };`);
+  const graded = await g.ev(`return { filter: __filter(), table: __LW.nodes.filter.describe().table, pic: await __pic(), rows: __LW.history.entries().length };`);
   const shot1 = await g.snapHash();
   assert.match(graded.filter, /^url\(/); assert.equal(graded.table, true);
   assert.notEqual(shot0, shot1);

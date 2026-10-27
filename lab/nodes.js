@@ -9,7 +9,10 @@
  *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after }) → { model, win, views, open(), close(), has(), setHas(on) } */
 import { el, label, ariaLabel, chip } from './mir/kit.js';
 import { createWindow } from './mir/window/window.js';
-import { createCurvesPanel, createCurvesView } from './mir/panels/curves.js';
+import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/curves.js';
+import { pictureFilter, lookup } from './mir/panels/picture-filter.js';
+import { frame } from './mir/core/frame.js';
+import { compile } from './nodes-compile.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { createUserPresets } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
@@ -30,13 +33,24 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const users = createUserPresets('lambdawaves.q0.curvePresets'), CU = 'user:';
   const presets = () => { const U = users.list().filter((u) => u.data && Array.isArray(u.data.points) && u.data.points.length >= 2).map((u) => ({ id: CU + u.name, label: u.name, points: u.data.points }));
     return U.length ? [{ id: '#user', label: 'USER', coming: true }, ...U, { id: '#built', label: 'PRESETS', coming: true }] : []; };
-  const panel = createCurvesPanel({ canvas, project: false, presets }), model = panel.model;
+  /* 019 N1 · THE COMPILER: the graph compiles to the kit's one picture filter (setChain, kit alpha.33).  CURVES hands its tables to the graph
+     (a `port`), not to the filter: it is a TABLE node like any other, and alone it compiles to the byte-identical filter 018 wrote */
+  const filter = pictureFilter(canvas), cache = new Map();
+  let cv = 0, passes = 0;
+  const recompile = () => frame.coalesce('nodes.compile', () => { const c = compile(list(), TYPES, cache); passes = c.passes; filter.setChain(c.runs).flush(); });
+  const panel = createCurvesPanel({ port: { setTable() { cv++; recompile(); } }, project: false, presets }), model = panel.model;
+  const curveTables = () => Object.fromEntries(model.channels.map((ch) => [ch, isIdentity(model.points(ch)) || model.amount() === 0 ? null : Float32Array.from(model.table(ch))]));
+  const TYPES = {
+    curves: { cls: 'table', neutral: () => model.amount() === 0 || model.channels.every((ch) => isIdentity(model.points(ch))),
+      fn: () => { const T = curveTables(); return (y, ch) => { if (T.MASTER) y = lookup(T.MASTER, y); if (T[ch]) y = lookup(T[ch], y); return y; }; } },
+  };
+  const list = () => [{ id: 'curves', type: 'curves', values: null, bypass: !has(), v: cv }];
   model.restore(curvesStore.get());
   let saving = 0;
   model.onChange(() => { clearTimeout(saving); saving = setTimeout(() => curvesStore.set(model.serialize()), 250); });
-  /** CURVES out of the graph = the screen bypassed (each channel's table off); back in = its tables again.  The points are kept either way */
-  const bypass = () => { if (has()) model.restore(model.serialize()); else for (const ch of model.channels) model.filter.setTable(ch, null); };
-  if (!has()) bypass();
+  /** CURVES out of the graph = bypassed: it emits nothing and keeps its points */
+  const bypass = recompile;
+  recompile();
 
   /** one curves view in a node's body: the kit's view over the one model, CHANNEL · PRESET as aria (018 A7), the save glyph and each × (018 D2) */
   function curvesIn(body) {
@@ -142,5 +156,5 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) v.view.setPresets(); });
-  return { model, win, views, has, setHas, open: () => win.open(), close: () => win.close() };
+  return { model, filter, win, views, has, setHas, passes: () => passes, compile: () => compile(list(), TYPES, new Map()), open: () => win.open(), close: () => win.close() };
 }
