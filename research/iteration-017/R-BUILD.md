@@ -1,17 +1,13 @@
 # CHAIN R — THE RACK · build note (Opus builder, 2026-10-26; branch `it017-r` from `1399e25`; kit now 1.5.0-alpha.28)
 
-Machine: `DONE-c8` never landed, so every suite and probe ran niced, one browser at a time; R4 is UNBUILT.
+Machine: R1–R3 ran under the c8 night run (niced, one browser); R4 ran once the coordinator said the CPU was quiet.
 ## R1 THE DIAMONDS (F4) — `b6bb922`
-- Reproduced at 1600 × 1000 with SCROLL PILL on B and a route on WAVE (`R-shots/R1-before-*.jpg`). Firefox (the suites' geckodriver road)
-  painted the pill's TAIL ALONE for whole frames at every reveal and every hide: the mask opened FROM the tail, so the first and last thing
-  visible was the 8-px square turned 45° — a lone ACCENT B diamond/triangle beside the window. Chromium (`tools/perf/cdp.mjs`) the same
-  geometry. Beside it 016 W8's routed dot sat 2–8 px outside the card, exactly under the tail.
+- Reproduced at 1600 × 1000, pill on B, a route on WAVE, in Firefox and Chromium (`R-shots/R1-before-*.jpg`): the mask opened FROM the
+  tail, so at every reveal and hide the 8-px square turned 45° showed ALONE (a lone diamond), and 016 W8's routed dot sat right under it.
 - Fix: ONLY A PILL (Josh: "it should only be a pill") — the tail (`.rack-pill::before`, an invention of 015 H1, not Josh's) is gone; the
   mask opens from the window's side over the pill alone (`inset(0 100% 0 0)` → `inset(0)`; right rack mirrored). Nothing can show before
   the reveal or after the linger. The routed dot moved INSIDE the title bar at the eyebrow's end (6 px, ACCENT B, drawn by the eyebrow's
-  own padding + radial background so an ellipsis never cuts it). `R-shots/R1-after-*.jpg`.
-- Files: `lab/mir/shell/rack.css`, `rack-scrollbar.js` (doc), `lab/lab.css`; `tests/routed-knob` K6 re-aimed at the new seat.
-
+  own padding + radial background so an ellipsis never cuts it; `routed-knob` K6 re-aimed). `R-shots/R1-after-*.jpg`.
 ## R2 NO INNER SCROLL IN A RACK WINDOW (F5) — `d198c91`, `7d9dc9a`
 - One part, `lab/pager.js` `rackPager()`: the kit's page turner (`stepper({ pager })`, BASINS' rack-card pager, ‹ ›) round the Picker's
   page dots (`.mm-dot`, skin.css selectors widened to `.lw-pager`; past 16 pages a count, the Picker's rule). Hidden on one page.
@@ -24,17 +20,11 @@ Machine: `DONE-c8` never landed, so every suite and probe ran niced, one browser
   serves only the kit's floating HISTORY window, not a rack window) — so the page size is the app's `HIST_PAGE = 12` and no kit `pageSize`
   was added (it would have no consumer). `lab.css .hist-list` lost its 250 px scroller (`overflow: visible` beats the kit sheet's auto).
   `R-shots/R2-history-pages.jpg`. `tests/history` 1b re-aimed (pages of 12, dots, clicks through pages; the card holds 13 → 26 rows).
-- (c) FOLDERS docked (Josh's call 5: grows with its content up to a max, then PAGES; FREE/stage keeps its scroll): the rack card was
-  already the kit's `mountGallery({ pageSize: 8 })` and no ancestor bounds its height, so `.sv-explorer-scroll`'s `overflow: auto` never
-  engages docked. What still lengthened it was the sub-FOLDER row (unpaged): kit `gallery.js` now pages folders first, then projects,
-  with a `pageSize` (`revealEntry` counts them; a folders-only page hides the empty PROJECTS heading). The max is the 8-tile page. The
-  FOLDERS window (stage/free, no pageSize) is unchanged and keeps its scroll. The Picker's FOLDERS (also paged) pages its folders too.
-- Remaining scrollers inside rack windows (measured live: every card opened and unfolded, Firefox 1600 × 1000):
-  `.native-info .native-info-content` — the ⓘ pop-over (display none until asked, absolute, a hover card over the stage, not the body);
-  `.mir-folders .sv-explorer-scroll` — unbounded docked, never scrolls (the stage FOLDERS window's own scroller);
-  **OPEN for R4**: `.ro.wide .ro-val` (modhost.css `height: 2.6em; overflow: auto` beats skin.css's `.dev … hidden`; two-line readouts
-  in BLOCH · CALCULUS · LATTICE · METERS · MOLECULES · RADIATION …) and RENDER's `.sr-lines` log (`max-height: var(--render-lines-h)`) —
-  letting them grow makes a live readout jitter the rack, so they want R4's eye (clamp or fold), not a blind change.
+- (c) FOLDERS docked (call 5: grows with its content up to a max, then PAGES; stage/FREE keeps its scroll): the card was already the kit's
+  `mountGallery({ pageSize: 8 })`; kit `gallery.js` now pages sub-folders first, then projects (`revealEntry` counts them; a folders-only
+  page hides the empty PROJECTS heading). The Picker's FOLDERS (also paged) pages its folders too.
+- Remaining scrollers in rack windows (measured live, every card open): the ⓘ pop-over `.native-info-content` (a hover card, not the
+  body) and docked FOLDERS' `.sv-explorer-scroll` (unbounded, never engages). The wide readouts and RENDER's log were handled in R4.
 - Kept on purpose (`7d9dc9a`): HISTORY stays tracked by window activity (`canPresent(wHist)`, as since S4). Dropping it (its only other use
   was scrolling the current row into view) turned `tests/frame-occlusion`'s "detached window keeps the gap" row red: after a popOut the
   paused mask is re-read only because a tracked card's intersection flips. A latent dependency — the float's placement is not watched
@@ -55,15 +45,26 @@ Machine: `DONE-c8` never landed, so every suite and probe ran niced, one browser
   browser itself refuses a disabled button's click. Checked: BALLS · STICKS · ESP · CONVERT · VIVID · MATTE (greyed) take the pointer and
   carry their hint.
 
-## R4 THE LAYOUT POLISH — UNBUILT (waiting for the machine: `DONE-c8` absent at 03:05)
-- When it lands: `refs/hamiltonian-misaligned.png` first (HAMILTONIAN under HYDROGEN: knob-sized segs on the knobs' baseline and rhythm,
-  equal gaps), the same knob + vertical-seg pattern elsewhere, then the two open scrollers above.
-
+## R4 THE LAYOUT POLISH (after the coordinator's go, CPU quiet; merged `ab5a97f` first)
+- HAMILTONIAN (Josh's `refs/hamiltonian-misaligned.png`): HYDROGEN's two rows are one grid, three 56-px columns, 6-px gaps, centred as
+  a block. Z · μ/mₑ · mass seg and SCALE · λ SCALE now share columns (x 33 · 95 · 157 in both rows), and every seg top is on the dial
+  line (105/105, 186/186; it was 91 vs 105). The fold chevron was already where FIELD's IMPULSE has its fold, so it is unchanged. W3's note row
+  is a flex row: the words, then OPEN at the end on their centre line. `R-shots/R4-hamiltonian-{before,after}.jpg`.
+- ONE knob-sized seg rule: `.dev .sp-vseg` (was SPECTRUM-scoped); EMISSION's RANGE wears it (`sp-vseg em-vseg`, its copy of the rules
+  dropped). An unlabelled one keeps the label's line empty (`::before`, `--vseg-lbl` 12 px) so its top sits on the dials' line; beside a
+  stepper (EMISSION) it has no such line. WAVE's ESP row, FIELD and BALL AND STICK hold no vertical seg (knobs + a switch), so nothing changed there.
+- Tour (all 31 rack windows at 1600 × 1000, the right rack and MOLECULES · SPECTRUM on the phone), fixed what was plainly out of place:
+  MO-REGISTRY's "no molecule solved…" canvas line ran past both edges → it wraps to the plot (`orbitalsview.js`); the docked FOLDERS card
+  kept the kit's whole-page height for one project (724 → 397 px) and showed PAGE 1 / 1 → it grows with its tiles (call 5) and a single
+  page has no pager (`lab.css`, app-side, the kit's steady pager kept for BASINS/the Picker). `R-shots/R4-folders-render-after.jpg`.
+- Call 14: RENDER's self-test printout is no longer a scroller. It shows its last six lines, and a fold above them opens the earlier
+  ones (`film-card.js`, app-side over the kit's `controls.lines`). The wide readouts are clamped to two lines in rack windows (`overflow: hidden`).
+- Left as is: SPECTRUM's grid and ATOMS' table run long but are the registers themselves; METERS reads empty until the clock runs.
 ## Tests (niced, one browser at a time)
-node: `rack-deps` · `mir-manifest` (alpha.28 pinned) · `new-project` · `history` (18/18) all green; `tools/rack-deps.mjs --classes
---no-write` exit 0 (HINGE ok, no new `app` key; the dead `app.state.histShown` slot removed); `tools/new-project.mjs --check` in step.
-browser: `routed-knob` 7/7 · `history` · `molecule-head` · `library` · `window-switching` · `frame-occlusion` green. THE LOCK: no shader,
-no `field.js` touched; no leaf moved.
+node: `rack-deps` · `mir-manifest` (alpha.28) · `new-project` · `history` 18/18; `rack-deps --classes --no-write` exit 0 (no new `app` key;
+the dead `app.state.histShown` slot removed); `new-project --check` in step. browser: `routed-knob` 7/7 · `history` · `molecule-head` ·
+`library` · `window-switching` · `frame-occlusion` · `register` 23/23 (R4 re-ran window-switching · frame-occlusion · register). THE LOCK: no
+shader, no `field.js`; no leaf moved.
 
 ## FOR-MIR lines written (top of `docs/FOR-MIR.md`, heading 1.5.0-alpha.28)
 ONLY A PILL (`shell/rack.css`) · A PAGED GALLERY PAGES ITS FOLDERS TOO (`folders/gallery.js`, `folders.css`) · A DISABLED SEG BUTTON
@@ -76,4 +77,3 @@ scroll pill is only a pill (no tail) and the routed ACCENT B dot sits inside the
 events with one idle look every ≥ 2 s."
 ## Questions for Josh
 - The pill's tail is gone entirely (your "only a pill"); say if you want a pointer back in some other form.
-- The two-line wide readouts and RENDER's log are still tiny scrollers — clamp them, or fold the long text? (R4)
