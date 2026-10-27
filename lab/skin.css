@@ -564,6 +564,10 @@ body.window-info-off .settings-help { display:none; }
 .shadow-controls .seg { display:flex; }
 .shadow-controls .seg-b { min-width:0;padding:0 4px;flex:1; }
 .dev .shadow-controls > .shadow-details-toggle { flex:0 0 30px;padding:0; }
+/* iteration 018 A4 (Josh: "shouldn't have a button like an outset white/black button but should rather just be the icon"): every fold is the
+   bare chevron — no face, no relief, no hover lift; the ink answers the hover */
+:is(.dev, body) .trig.lw-fold:is(*, :hover, :active, .on) { background: none; border-color: transparent; box-shadow: none; translate: none; text-shadow: none; }
+:is(.dev, body) .trig.lw-fold:is(:hover, [aria-expanded="true"]) { color: var(--fg); }
 .lw-fold::before { display:none !important; }
 .lw-fold svg { width:14px;height:14px;transform:rotate(-90deg); }
 .lw-fold[aria-expanded="true"] svg { transform:none; }
