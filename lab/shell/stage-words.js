@@ -38,6 +38,11 @@ export const INFO_ROWS = Object.freeze([
   { key: 'atomLabelsSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'labels', label: 'SIZE', fmt: pct, hint: 'The ATOM LABELS\' size: 100% is the notebook\'s body (14 px)' },
   { key: 'infoPos', type: 'enum', values: ['top', 'bottom'], default: 'top', group: 'seat', label: 'POSITION', options: [{ id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'The formula at the top or the bottom of the free stage; the pop-ups take the other side' },
   { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0.12, group: 'seat', label: 'PAD', fmt: pct, hint: 'The formula\'s distance from its edge of the free stage, as a share of its height; the pop-ups keep the same distance on the other side' },
+  /* iteration 018 B7 (Josh: "Include ESP's bar with a padding setting and a toggle that just cycles between right (where it is now), left, top, and bottom.
+     Stage text and formula is on top of the bar … Stage text takes priority"): the bar is painted by WAVE (material.js) and seated by these three */
+  { key: 'espBar', type: 'bool', default: true, group: 'bar', label: 'ESP BAR', hint: 'The ESP map’s colour bar on the stage while WAVE draws ESP — the shader’s own colours and five numbers in a.u.' },
+  { key: 'espBarSide', type: 'enum', values: ['right', 'left', 'top', 'bottom'], default: 'right', group: 'bar', label: 'SIDE', options: [{ id: 'right', label: 'RIGHT' }, { id: 'left', label: 'LEFT' }, { id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'The ESP bar’s side of the free stage — a press turns it RIGHT → LEFT → TOP → BOTTOM; where the formula is, the bar steps clear of it' },
+  { key: 'espBarPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'bar', label: 'PAD', fmt: pct, hint: 'The ESP bar’s distance from its edge of the free stage, as a share of the free stage across it' },
   ...KINDS.filter((k) => k.hint).map((k) => ({ key: k.key, type: 'bool', default: false, group: 'announce', label: k.label, hint: k.hint })),
   { key: 'popSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'announce', label: 'SIZE', fmt: pct, hint: 'The pop-ups\' size: 100% is 15 px' },
   { key: 'cursorAway', type: 'bool', default: false, group: 'cursor', label: 'PARALLAX', hint: 'The words lean away from the pointer as it crosses the stage (the kit layer\'s follow and parallax)' },
@@ -286,6 +291,10 @@ export function createStageWords(app) {
       setScale(s) { layer.root.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
       /** the pop-ups' SIZE (× 15 px), apart from the formula's since iteration 007 */
       setPopScale(s) { pop.style.setProperty('--lw-pop-size', String(s)); },
+      /** the free stage (stage px { L, R, T, B, m }) and the formula block's rect in stage px or null: where the ESP bar may sit and what it yields to (018 B7) */
+      free: () => freeOf(bars(), dom.stage.getBoundingClientRect()),
+      blockRect() { if (!on || !block) return null; const r = block.el.getBoundingClientRect(), sb = dom.stage.getBoundingClientRect();
+        return r.width ? { left: r.left - sb.left, right: r.right - sb.left, top: r.top - sb.top, bottom: r.bottom - sb.top } : null; },
       get on() { return on; }, get labelsOn() { return labelsOn; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
     };
     /* THE RECORD APPLIED: every row at the go, then each change (INFORMATIONAL, FORGET).  The kit's createPrefs coalesces its page writes under ONE

@@ -939,6 +939,7 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
 .lw-info-card .grp > .row { display: grid; gap: 6px 8px; align-items: center; justify-items: stretch; margin: 4px 0; }
 .lw-info-card .info-words { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 56px; }
 .lw-info-card .info-words > .sw { grid-column: 1 / 3; }
+.lw-info-card .info-bar > .sw { grid-column: auto; } .lw-info-card .info-bar > .info-side { width: 100%; min-width: 0; }   /* 018 B7: ESP BAR · SIDE · PAD */
 .lw-info-card .info-seat { grid-template-columns: minmax(0, 1fr) 56px 30px; }   /* iteration 013 N1: POSITION · PAD · the fold's chevron, one row */
 .lw-info-card .info-seat > .lw-fold { width: 30px; min-width: 0; height: 26px; min-height: 26px; padding: 0; }
 .lw-info-card .row > .k { justify-self: center; }

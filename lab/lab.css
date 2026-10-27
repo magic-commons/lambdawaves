@@ -1127,13 +1127,18 @@ body.frost.lw-notice::before { background: hsl(var(--glass-tint) / .62); -webkit
 body.lw-notice .mir-dialog.glass[data-kind="notice"] { background: none; border-color: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.lw-notice .mir-dialog[data-kind="notice"]::before, body.lw-notice .mir-dialog[data-kind="notice"]::after { display: none; }
 body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #transport { visibility: hidden; opacity: 0; }   /* as under the Picker (skin.css menu-open) */
-/* iteration 014 B3 · THE POTENTIAL MAP's colour bar (material.js): vertical, at the free stage's right, under every window, never a pointer target */
-.lw-espbar { position: absolute; top: 50%; right: 16px; width: 64px; height: min(46vh, 320px); transform: translateY(-50%); z-index: 8; pointer-events: none; user-select: none;
+/* iteration 014 B3 · THE POTENTIAL MAP's colour bar (material.js): under every window and the stage words, never a pointer target; 018 B7: seated by
+   INFORMATIONAL (left/top from material.js barSeat), vertical on the RIGHT or LEFT, lying down on the TOP or BOTTOM */
+.lw-espbar { position: absolute; left: 0; top: 0; width: 64px; height: min(46vh, 320px); z-index: 8; pointer-events: none; user-select: none;
   font: 600 11px/1 var(--mono, ui-monospace, monospace); color: var(--fg); text-shadow: 0 0 6px hsl(var(--glass-tint, 220 20% 10%) / .8); }
 .lw-espbar[hidden] { display: none; }
 .lw-espbar-ramp { position: absolute; left: 0; top: 0; bottom: 0; width: 12px; border-radius: 3px; box-shadow: 0 0 0 1px hsl(0 0% 50% / .35); }
 .lw-espbar-n { position: absolute; left: 18px; transform: translateY(-50%); white-space: nowrap; }
 .lw-espbar-u { position: absolute; left: 0; bottom: -18px; white-space: nowrap; opacity: .75; font-weight: 500; }
+.lw-espbar:is([data-side="top"], [data-side="bottom"]) { width: min(46vw, 320px); height: 30px; }
+.lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-ramp { bottom: auto; width: auto; right: 0; height: 12px; }
+.lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-n { top: 20px; transform: translateX(-50%); }
+.lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-u { left: calc(100% + 10px); top: 0; bottom: auto; }
 /* iteration 016 W8 · THE ACCENT B DOT (Josh's call 14): a rack window whose controls carry a modulation route (mod-port.js `routeDots`, `.lw-routed`)
    wears a 6 px ACCENT B dot; a greyed routed knob (016 V1) is thus still told of.  Since 017 R1 it sits INSIDE the title bar at the eyebrow's end
    (016 seated it just past the card's edge, where the scroll pill now floats — "strange diamonds under the pills"): the eyebrow's own padding

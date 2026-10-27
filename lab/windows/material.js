@@ -1,7 +1,7 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js';
+import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js'; import { infoPrefs } from '../shell/stage-words.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
@@ -79,7 +79,7 @@ export function createMaterial(app) {
        first and last stop (palSpan) offset by HUE × 256, PALETTE OFF the five-stop ramp through hueRot (Rodrigues about grey), then INVERT 1 − c; no
        CSS filter.  ROTATE follows because it rotates the stops the LUT is made of */
     const bar = el('div', 'lw-espbar', app.dom.stage); bar.hidden = true; bar.setAttribute('aria-hidden', 'true');
-    const barRamp = el('i', 'lw-espbar-ramp', bar), barNums = [0, 1, 2, 3, 4].map((i) => { const n = el('span', 'lw-espbar-n', bar); n.style.top = (i * 25) + '%'; return n; });
+    const barRamp = el('i', 'lw-espbar-ramp', bar), barNums = [0, 1, 2, 3, 4].map(() => el('span', 'lw-espbar-n', bar));
     el('span', 'lw-espbar-u', bar).textContent = 'φ · a.u.';
     let barTimer = 0, barKey = '', palLut = null, lutN = 0;
     const RAMP = ESP_RAMP.map(hexToRgb), K3 = 1 / Math.sqrt(3);
@@ -92,11 +92,23 @@ export function createMaterial(app) {
         c = [0, 1, 2].map((q) => palLut[i * 4 + q] + (palLut[j * 4 + q] - palLut[i * 4 + q]) * f); }
       else { const s = u * 4, k = Math.min(3, Math.floor(s)), f = s - k; c = hueRot(RAMP[k].map((v, q) => v + (RAMP[k + 1][q] - v) * f), h); }
       return mat.invert ? c.map((v) => 1 - v) : c; };
-    paintBar = () => { if (bar.hidden) return; const key = [mat.paletteOn, mat.hueShift, mat.invert, lutN].join();
+    paintBar = () => { if (bar.hidden) return; const key = [mat.paletteOn, mat.hueShift, mat.invert, lutN, bar.dataset.side].join();
       if (key === barKey) return; barKey = key;
-      barRamp.style.background = 'linear-gradient(to top, ' + Array.from({ length: 25 }, (_, i) => rgbToHex(espAt(i / 24)) + ' ' + (i / 24 * 100).toFixed(1) + '%').join(', ') + ')'; };
-    const barSeat = () => { const r = app.host.rack, rr = r && !r.hidden && r.querySelector('.dev:not(.closed):not([hidden])') ? r.getBoundingClientRect() : null, sb = app.dom.stage.getBoundingClientRect();
-      bar.style.right = Math.max(16, rr && rr.left > sb.left + sb.width / 2 && rr.left < sb.right ? sb.right - rr.left + 16 : 16) + 'px'; };
+      barRamp.style.background = 'linear-gradient(to ' + (/^(top|bottom)$/.test(bar.dataset.side) ? 'right' : 'top') + ', ' + Array.from({ length: 25 }, (_, i) => rgbToHex(espAt(i / 24)) + ' ' + (i / 24 * 100).toFixed(1) + '%').join(', ') + ')'; };
+    /* iteration 018 B7 · THE BAR'S SEAT is INFORMATIONAL's (ESP BAR · SIDE · PAD in `lambdawaves.q0.info`): the free stage the formula's block reads (racks
+       and a floating transport out), PAD a share of it from the SIDE's edge, centred along it; TOP and BOTTOM lie the bar down (data-side, lab.css).
+       THE STAGE TEXT WINS: a bar that would cross the formula block steps clear of it, vertically — a TOP bar under it, a BOTTOM bar over it, a side
+       bar away from it */
+    const IP = infoPrefs();
+    const barSeat = () => {
+      const st = app.state.stageText, sb = app.dom.stage.getBoundingClientRect(), side = IP.get('espBarSide'), pad = IP.get('espBarPad'), horiz = side === 'top' || side === 'bottom';
+      if (bar.dataset.side !== side) { bar.dataset.side = side; barNums.forEach((n, i) => { n.style.top = horiz ? '' : i * 25 + '%'; n.style.left = horiz ? 100 - i * 25 + '%' : ''; }); paintBar(); }
+      const F = st ? st.free() : { L: 16, R: sb.width - 16, T: 16, B: sb.height - 16 }, w = bar.offsetWidth, h = bar.offsetHeight, b = st && st.blockRect(), G = 12;
+      const x = horiz ? (F.L + F.R - w) / 2 : side === 'left' ? F.L + pad * (F.R - F.L) : F.R - pad * (F.R - F.L) - w;
+      let y = horiz ? (side === 'top' ? F.T + pad * (F.B - F.T) : F.B - pad * (F.B - F.T) - h) : (F.T + F.B - h) / 2;
+      if (b && x < b.right + G && x + w > b.left - G && y < b.bottom + G && y + h > b.top - G) y = side === 'top' || (side !== 'bottom' && b.top + b.bottom < 2 * y + h) ? b.bottom + G : b.top - G - h;
+      bar.style.left = Math.round(x) + 'px'; bar.style.top = Math.round(y) + 'px'; };
+    IP.subscribe((_, changed) => { if (changed.some((k) => /^(espBar|infoP)/.test(k))) styleSync(); });
     /* iteration 015 W1 · THE KNOBS FOLLOW THE STYLE (Josh: "Allow the knobs to be dynamically shown"): the table is RENDER_WGSL's own reads (SOFT is the
        power w = ρ^SOFT, which SOLID · SIGNED · SHELL · SHELL ± overwrite, and ESP's soft edge under its ISO surface since 016 S1; KNEE is the transmittance
        T_q, which ADD and the atom styles skip; ISO under ESP is its ISO surface's).  Iteration 016 V1 (Josh: "the knobs a style does not read are GREYED,
@@ -129,8 +141,8 @@ export function createMaterial(app) {
       const st = mat.style | 0, esp = st === STYLE.esp, surf = mat.espSurf || 'iso';
       for (const [k, on] of Object.entries(STYLE_READS)) mute(ui[k], !on.includes(st) || (esp && ((k === 'probeK' && surf === 'iso') || ((k === 'isoK' || k === 'softK') && surf !== 'iso'))));
       modeSync();
-      bar.hidden = !esp;
-      if (esp) {
+      bar.hidden = !esp || !IP.get('espBar');
+      if (!bar.hidden) {
         const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, h = R * (Math.sqrt(21) - 1) / 20; paintBar();
         [R, h, 0, -h, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3); });
         barSeat(); if (!barTimer) barTimer = setInterval(() => { if (bar.hidden) { clearInterval(barTimer); barTimer = 0; } else { barSeat(); paintBar(); } }, 500);   // the poll also catches a routed HUE and LW.setInvert
