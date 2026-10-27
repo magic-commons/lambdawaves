@@ -37,7 +37,7 @@ export const INFO_ROWS = Object.freeze([
   { key: 'atomLabels', type: 'bool', default: true, group: 'labels', label: 'ATOM LABELS', hint: 'Mark each MOLECULES nucleus with its element symbol, inverting whatever is beneath it' },
   { key: 'atomLabelsSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'labels', label: 'SIZE', fmt: pct, hint: 'The ATOM LABELS\' size: 100% is the notebook\'s body (14 px)' },
   { key: 'infoPos', type: 'enum', values: ['top', 'bottom'], default: 'top', group: 'seat', label: 'POSITION', options: [{ id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'The formula at the top or the bottom of the free stage; the pop-ups take the other side' },
-  { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0.12, group: 'seat', label: 'PAD', fmt: pct, hint: 'The formula\'s distance from its edge of the free stage, as a share of its height; the pop-ups keep the same distance on the other side' },
+  { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'seat', label: 'PAD', fmt: pct, hint: 'The formula\'s distance from its edge of the free stage, as a share of its height; the pop-ups keep the same distance on the other side' },
   /* iteration 018 B7 (Josh: "Include ESP's bar with a padding setting and a toggle that just cycles between right (where it is now), left, top, and bottom.
      Stage text and formula is on top of the bar … Stage text takes priority"): the bar is painted by WAVE (material.js) and seated by these three */
   { key: 'espBar', type: 'bool', default: true, group: 'bar', label: 'ESP BAR', hint: 'The ESP map’s colour bar on the stage while WAVE draws ESP — the shader’s own colours and five numbers in a.u.' },
@@ -74,13 +74,13 @@ export const BLOB_INFO = Object.freeze(['molFormula', 'molFormulaSize', 'atomLab
 /** …and the three MARKS it held until the fix round (C6), each written only while on: read once into the record, whenever they are found */
 const BLOB_MARKS = Object.freeze(['skeleton', 'bead', 'ellipsoid']);
 /** liftInfo(blob) → the record's patch, by the laws shell/settings.js read them by: nothing said is ON at 100 %; an absent atomLabels /
- *  atomLabelsSize takes the stored molFormula / molFormulaSize (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); TOP at 12 % */
+ *  atomLabelsSize takes the stored molFormula / molFormulaSize (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); TOP at PAD 0 (018 B8; 12 % before) */
 export function liftInfo(s = {}) {
   if (!BLOB_INFO.some((k) => s[k] !== undefined)) return {};
   const num = (v) => (v === undefined || v === null ? NaN : +v), clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const molFormula = s.molFormula !== undefined ? s.molFormula !== false : s.atomLabels !== false, atomLabels = s.atomLabels !== undefined ? s.atomLabels !== false : molFormula;
   const molFormulaSize = Number.isFinite(num(s.molFormulaSize)) ? clamp(num(s.molFormulaSize), 0.5, 3) : 1, atomLabelsSize = Number.isFinite(num(s.atomLabelsSize)) ? clamp(num(s.atomLabelsSize), 0.5, 3) : molFormulaSize;
-  return { molFormula, atomLabels, molFormulaSize, atomLabelsSize, infoPos: s.infoPos === 'bottom' ? 'bottom' : 'top', infoPad: Number.isFinite(num(s.infoPad)) ? clamp(num(s.infoPad), 0, 0.4) : 0.12 };
+  return { molFormula, atomLabels, molFormulaSize, atomLabelsSize, infoPos: s.infoPos === 'bottom' ? 'bottom' : 'top', infoPad: Number.isFinite(num(s.infoPad)) ? clamp(num(s.infoPad), 0, 0.4) : 0 };
 }
 let infoStore = null, infoSeen = false;
 /** infoPrefs() — the one record (made at its first call: INFORMATIONAL's seat or applySettings', whichever comes first).  THE LIFT runs here, once:
@@ -168,7 +168,7 @@ export function createStageWords(app) {
     /* 2026-10-16 (Josh, iteration 001) · THE SEAT: TOP or BOTTOM of the free stage, PAD its share of the free height from that edge (0.12 is the kit's
        own seat).  The kit is not edited: two hair-thin bands in `avoid()` (mid-stage, never at an edge, so never read as a rack) pin the free stage
        to exactly the block's height at the seat, so the kit's placeBlock lands it there.  THE POP-UPS sit on the OTHER side, at the same PAD. */
-    const seat = { bottom: false, pad: 0.12 }; let block = null;
+    const seat = { bottom: false, pad: 0 }; let block = null;   // 018 B8: PAD 0 on a first run (Josh: "Informational's pad at zero"); a stored record keeps its own
     const bars = () => [...racks(), app.sh.layout.docked ? null : document.getElementById('transport')].map((e) => paintedRect(e)).filter(Boolean);
     function freeOf(rs, sb) {                                          // the kit's free() rule (info/layer.js), in stage px
       const m = INFO.margin, vw = innerWidth; let L = m, R = sb.width - m, T = m, B = sb.height - m;
