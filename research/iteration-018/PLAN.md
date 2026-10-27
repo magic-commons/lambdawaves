@@ -148,6 +148,10 @@ Tests: look/gui suites, official-defaults-palette, first-run, mir-manifest.
 18. (C) STATES, the rest of the audit: (a) name the lit lines S₅ not 0.811, (b) BEAT escapes LEAN, (c) auto-play on the first STATES show, (d) DRIVE out of the fold — builder's pick (a) + (d). Default: wait for you.
 19. (C) CLEAR keeps the running mix as the state (built) or falls back to A? Default: keep.
 20. (C) Older projects that seated the transport elsewhere open with it top-left now. Default: yes.
+21. (D) NEW's MACRO 2 (AUDIO) stays bound to the audio LEVEL (as built) or free? Default: bound.
+22. (D) A hand-drawn curve matching no preset reads LINEAR in the stepper (the kit's way); CUSTOM instead? Default: LINEAR for now.
+23. (D) NODES: the next node types? (the experiment's v0 has STAGE IN → CURVES → STAGE OUT; candidates: PALETTE, HUE, BLUR, MIX). Default: none yet.
+24. (D) FORGET clears the grade but keeps the graph record and the saved curves. Default: yes.
 
 ## MERGE ORDER
 A → B → C → D → E → F, each builder based on the merged tree (BASE sha below). Recipe: `git merge --no-ff --no-commit it018-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → focused suites → commit → CLOSED row → handoff STATE NOW line.
@@ -158,4 +162,5 @@ A → B → C → D → E → F, each builder based on the merged tree (BASE sha
 | A | 90a2fce | 58ab389 | A1–A9 (A-BUILD.md; kit alpha.29; picker-looks/library/start/hide-reveal/menubar green) |
 | B | 58ab389 | 21ae7ef | B1–B10 (B-BUILD.md; camera-shift/render-exact re-aimed to μ = 0 under AUTO-ROTATE; official-defaults-palette/window-switching/take-in-bugs/routed-knob/stage-text green; legacy boot B65 not run) |
 | C | fadfc07 | 2677fb9 | C1–C4 (C-BUILD.md; transition.js at HINGE 2; register/history/current/lw-links/timeline/keyboard-window green; pre-existing reds molecular-names:89 → chain E, latex-copy §8 → close pass) |
-| D | 2677fb9 | | |
+| D | 701640b | 5bf327f | D1–D3 (D-BUILD.md; kit alpha.30; new-project/history/timeline/frame-occlusion/curves→NODES green) |
+| E | 5bf327f | | |
