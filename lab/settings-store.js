@@ -32,6 +32,7 @@ export const FAMILIES = Object.freeze({
   'lambdawaves.q0.csb': ['csb-favs.js CSB_KEY: the CONTROL SURFACE\'s favourite controls (ids, in order)', 'PREFERENCE'],   // iteration 014 A3
   'lambdawaves.q0.palettes': ['user-presets.js createUserPresets (PALETTE\'s save glyph, windows/material.js): the reader\'s own palettes, { name, data: { stops } } rows in order', 'PREFERENCE'],   // iteration 015 P3
   'lambdawaves.q0.curvePresets': ['user-presets.js createUserPresets (CURVES\' save glyph): the reader\'s own curves, { name, data: { points } } rows in order', 'PREFERENCE'],   // 018 D2
+  'lambdawaves.q0.nodes': ['nodes.js createNodes (NODES, the window and the rack card): the node places, each view\'s pan, the window\'s shape, CURVES in or out', 'PREFERENCE'],   // 018 D3
   'lambdawaves.q0.presets': ['user-presets.js createUserPresets (SPECTRUM\'s save glyph, lab/spectrum.js USER_PRESETS_KEY): the reader\'s own PRESETs, { name, data: { labels } } rows in order', 'PREFERENCE'],   // iteration 015 S4
   'mir.transport': ['the kit\'s transport (mir/shell/transport.js localSeatStore): the bar\'s seat, place (STAGE | FREE) and orientation', 'PREFERENCE'],   // iteration 014 A4
   'mir.transport.free': ['the kit\'s transport FREE window (mir/window/window.js persist): its rect', 'PREFERENCE'],   // iteration 014 A4
