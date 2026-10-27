@@ -136,7 +136,6 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 /* iteration 016 P5 · ABOUT: the λWAVES wordmark (lab/img/lambdawaves-logo.svg) large, its word in the ink; the MIR page's mark small */
 .nb-logo.nb-wordmark { display: block; width: min(380px, 86%); margin: 14px auto 10px; color: var(--fg); }
 .nb-logo.nb-wordmark > svg { display: block; width: 100%; height: auto; }
-.ab-mir { --gui-logo-h: 34px; }
 .ab-eyebrow { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--dim); margin-top: 6px; }
 .ab-version { font-size: 12px; letter-spacing: .06em; color: var(--acc); }
 .ab-tag { text-transform: uppercase; }

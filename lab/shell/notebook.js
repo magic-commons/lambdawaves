@@ -1,12 +1,11 @@
 /* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, layout.modulation,
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
-import { TIER, BUILD_LINE } from '../rack.js'; import { el, seg } from '../mir/kit.js'; import { createMenubar } from '../mir/shell/menubar.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
+import { TIER, BUILD_LINE } from '../rack.js'; import { el } from '../mir/kit.js'; import { createMenubar } from '../mir/shell/menubar.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js';
-import { mirGui } from '../mir-gui.js';
 export function createNotebook(app) {
   const { dom, ui, reg, clock, obs, mat, settingsStore, isPhone } = app, { schedule } = app.loop, { floats, resetView, swClient } = app.host;
   const { KIND, layout, readSettings, rk, saveSettings, winHint } = app.sh, { clearRegister, copyLatex, normalizeNow, toggleFullscreen } = app.w;
@@ -279,19 +278,7 @@ export function createNotebook(app) {
       ta.addEventListener('input', () => { nbStore(NB_KEY, ta.value); count(); });
       const ABOUT_DEF_W = 470, ABOUT_DEF_H = 670;
       const NOTES_DEF_W = 640, NOTES_DEF_H = 460;
-      /* iteration 014 A1 · ABOUT has two pages, λWAVES | MIR: the MIR page is MIR ABOUT's own (the kit's aboutPage lends it; its window takes it back) */
-      let abSeg = null, abPage = null, abBack = null;
-      function aboutTabs() {
-        if (abSeg) return;
-        let off = [];
-        const page = abPage = (id) => { const mir = id === 'mir';
-          if (mir) { off = [...faces.about.children].filter((n) => !n.hidden && n !== abSeg.root && n !== mirHost); for (const n of off) n.hidden = true; mirGui().aboutPage(mirHost); }
-          else { for (const n of off) n.hidden = false; off = []; }
-          mirHost.hidden = !mir; };
-        abSeg = seg({ aria: 'About page', value: 'lw', options: [{ id: 'lw', label: 'λWAVES' }, { id: 'mir', label: 'MIR' }], onChange: page });
-        abSeg.root.classList.add('ab-tabs'); faces.about.prepend(abSeg.root);
-        const mirHost = el('div', 'ab-mir', faces.about); mirHost.hidden = true;
-      }
+      let abBack = null;   // iteration 018 A6: ABOUT is λWAVES' alone — MIR's ABOUT lives in MIR OPTIONS (its own window)
       const show = (face) => {
         if (face === 'projects') { projects.show(); return; }   // 0.5.0 C6: the PROJECTS face left the notebook; its open is FOLDERS' (iteration 004: the front page put away first)
         nb.hidden = false; faces.notes.hidden = face !== 'notes'; faces.about.hidden = face !== 'about'; nb.dataset.face = face;
@@ -304,7 +291,6 @@ export function createNotebook(app) {
             nb.style.left = 'calc(50% - ' + Math.round(w / 2) + 'px)';
             nb.style.top = 'max(20px, calc(50% - ' + Math.round(h / 2) + 'px))';
           }
-          aboutTabs();
           const logo = nb.querySelector('.nb-logo');
           /* iteration 016 P5 (Josh: "the new λWAVES logo, much larger; the MIR logo shrunk"): the wordmark lab/img/lambdawaves-logo.svg, large — its word in the
              ink, its λ and its dot their own colours (the Picker's own road); the title's clone stays the fallback */
@@ -324,12 +310,10 @@ export function createNotebook(app) {
         }
         if (face === 'notes') ta.focus();
       };
-      /* iteration 016 P5 · the i CYCLES (Josh: "the i button cycles MIR ABOUT ↔ λWAVES ABOUT"): λWAVES ABOUT → MIR ABOUT → close — back to the notes
-         when the window was showing them, else the window shuts */
+      /* the i opens λWAVES ABOUT; pressed again it puts it away — back to the notes when the window was showing them, else the window shuts */
       nb.querySelector('.nb-about').addEventListener('click', () => {
-        if (nb.hidden || nb.dataset.face !== 'about') { abBack = nb.hidden ? null : nb.dataset.face; show('about'); if (abSeg.get() !== 'lw') { abSeg.set('lw'); abPage('lw'); } return; }
-        if (abSeg.get() !== 'mir') { abSeg.set('mir'); abPage('mir'); return; }
-        abSeg.set('lw'); abPage('lw'); if (abBack === 'notes') show('notes'); else nb.hidden = true;
+        if (nb.hidden || nb.dataset.face !== 'about') { abBack = nb.hidden ? null : nb.dataset.face; show('about'); return; }
+        if (abBack === 'notes') show('notes'); else nb.hidden = true;
       });
       nb.querySelector('.nb-close').addEventListener('click', () => { nb.hidden = true; });
       nb.querySelector('.nb-copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(ta.value); } catch (e) {} });
