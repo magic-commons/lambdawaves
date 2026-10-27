@@ -15,6 +15,7 @@ import { VIEW_NAMES } from './field.js';
 import { registerClipKind } from './mir/timeline/kinds.js';
 import { el, label, trig, svgNode } from './mir/kit.js';
 import { handOver } from './capture.js';
+import { fold } from './fold.js';
 
 const PREFIX = 'lambdawaves.q0.render.', SCALES = ['1', '2', '3', '4'];
 /* what a picture is OF, read the same way off the live lab (`here()`) and off a saved project's data */
@@ -55,6 +56,17 @@ export function createFilmCard(o) {
       s.append(trig({ label: 'PLAN', cls: 'sv-act sv-wide', onFire: () => plan() }).root, trig({ label: 'PLACE ONE PERIOD', cls: 'sv-act sv-wide', onFire: () => place() }).root);
     } });
   const { card, view } = made, C = view.controls, set = (f, v) => { f.value = v; f.dispatchEvent(new Event('change')); };
+  /* 017 R4 (call 14) · THE SELF-TEST'S PRINTOUT IS A FOLD, not a scroller in a rack window: its last six lines show, and the fold above them opens
+     the earlier ones (the card grows; only the rack scrolls).  The kit writes the whole printout into `C.lines`; the split is the app's. */
+  if (C.lines) {
+    const early = el('pre', 'sr-lines sr-early'), row = el('div', 'row tight sr-fold'), f = fold(row, early, { what: 'the self-test\'s earlier lines', key: 'selftest' });
+    C.lines.before(row, early); row.hidden = true; let mine = false;
+    new MutationObserver(() => {
+      if (mine) return; const all = C.lines.textContent.split('\n'), cut = Math.max(0, all.length - 6);
+      row.hidden = !cut; early.textContent = all.slice(0, cut).join('\n'); if (!cut) { f.set(false); return; }
+      mine = true; C.lines.textContent = all.slice(cut).join('\n'); queueMicrotask(() => { mine = false; });
+    }).observe(C.lines, { childList: true, characterData: true, subtree: true });
+  }
   /** THE LOOP PLAN at the card's FPS and LENGTH (capture.js planLoop: a refused or STATIONARY plan says its sentence) */
   function plan() {
     let P; try { P = o.capture.planLoop({ fps: Number(C.recFps.value), seconds: Number(C.recDuration.value) }); } catch (e) { P = { ok: false, label: 'ERROR', message: String((e && e.message) || e) }; }

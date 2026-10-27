@@ -453,7 +453,10 @@ export function createOrbitals(host, api) {
     const rows = rowsOf();
     if (!rows.length) {
       g.fillStyle = T.ink(0.85); g.textAlign = 'center';
-      g.fillText('no molecule solved — MOLECULES solves the ladder this register runs on', W / 2, H / 2);
+      /* 017 R4: the line WRAPS to the plot's width (it ran past both edges of a rack card's canvas) */
+      const lines = []; let ln = '';
+      for (const w of 'no molecule solved — MOLECULES solves the ladder this register runs on'.split(' ')) { const t = ln ? ln + ' ' + w : w; if (ln && g.measureText(t).width > W - 16) { lines.push(ln); ln = w; } else ln = t; }
+      lines.push(ln); lines.forEach((t, i) => g.fillText(t, W / 2, H / 2 + (i - (lines.length - 1) / 2) * 11));
       hover.set([], plot); return;
     }
     /* the soft-capped y map, by ROW index: to scale up to 3 × the median gap, clamped beyond it */

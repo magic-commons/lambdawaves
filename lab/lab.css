@@ -1046,10 +1046,20 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .dev[data-id="spectrum"] .sp-ham-body > .row { margin: 4px 0; gap: 6px; flex-wrap: nowrap; justify-content: center; align-items: flex-start; }
 .dev[data-id="spectrum"] .sp-ham-body .row > .k { flex: 0 0 52px; width: 52px; }   /* over skin.css' .native-clean .row > .k (64 px) */
 .dev[data-id="spectrum"] .sp-ham-body .k-lbl { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
-.dev[data-id="spectrum"] .sp-vseg { flex: 0 0 58px; width: 58px; align-items: stretch; }
-.dev[data-id="spectrum"] .sp-vseg > .k-lbl { white-space: nowrap; text-align: center; }
-.dev[data-id="spectrum"] .sp-vseg > .seg { display: flex; flex-direction: column; flex-wrap: nowrap; gap: 1px; padding: 2px; width: 100%; box-sizing: border-box; }
-.dev[data-id="spectrum"] .sp-vseg .seg-b { min-height: 17px; min-width: 0; padding: 0 4px; font-size: var(--fs-micro); }
+/* THE KNOB-SIZED SEG (`.sp-vseg`, 015 S1; one rule for every window since 017 R4 — SPECTRUM, EMISSION's RANGE): its options in a column, a
+   knob's width, and its top on the dials' line — an unlabelled one keeps the label's line empty (a knob's `.k-lbl` is one micro line + 2 px) */
+.dev .sp-vseg { flex: 0 0 58px; width: 58px; align-items: stretch; }
+.dev .sp-vseg > .k-lbl { white-space: nowrap; text-align: center; }
+.dev .sp-vseg:not(:has(> .k-lbl))::before { content: ''; display: block; height: var(--vseg-lbl, 12px); }
+.dev .sp-vseg > .seg { display: flex; flex-direction: column; flex-wrap: nowrap; gap: 1px; padding: 2px; width: 100%; box-sizing: border-box; }
+.dev .sp-vseg .seg-b { min-height: 17px; min-width: 0; padding: 0 4px; font-size: var(--fs-micro); }
+/* 017 R4 (Josh's refs/hamiltonian-misaligned.png): HYDROGEN's two rows share ONE column rhythm — three 56-px columns, 6-px gaps, centred
+   as a block, so Z · μ/mₑ · the mass seg and SCALE · λ SCALE stand in the same columns on the same dial line */
+.dev[data-id="spectrum"] .sp-ham-body > :is(.sp-ham-h, .sp-ham-s) { display: grid; grid-template-columns: repeat(3, 56px); justify-content: center; column-gap: 6px; }
+.dev[data-id="spectrum"] .sp-ham-body > :is(.sp-ham-h, .sp-ham-s) > :is(.k, .sp-vseg) { width: 56px; }
+/* the note row (017 W3): its words, then OPEN at the row's end on their centre line */
+.dev[data-id="spectrum"] .sp-ham-n:not([hidden]) { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.dev[data-id="spectrum"] .sp-ham-n > .trig { flex: 0 0 auto; margin-left: auto; min-height: 26px; font-size: var(--fs-micro); }
 .dev[data-id="spectrum"] .sp-ham-body > .sp-ham-b { gap: 4px; }   /* the widest row: three knobs, the seg and the trigs in a 280-px body */
 .dev[data-id="spectrum"] .sp-ham-body .sp-ham-b > .k { flex: 0 0 46px; width: 46px; }
 .dev[data-id="spectrum"] .sp-ham-b .sp-vseg { flex-basis: 52px; width: 52px; }
@@ -1100,6 +1110,10 @@ body[data-theme="light"] { --n7: hsl(350 97% 47%); }
   background: var(--ink-faint, currentColor); -webkit-mask: url(img/icons/file-name.svg) center / contain no-repeat; mask: url(img/icons/file-name.svg) center / contain no-repeat; }
 .mir-folders .sv-field:has(.sv-to-input)::before { -webkit-mask-image: url(img/icons/folder-name.svg); mask-image: url(img/icons/folder-name.svg); }
 .mir-folders .sv-field > .sv-input { padding-left: 32px; }
+/* 017 R4 · THE DOCKED FOLDERS CARD GROWS WITH ITS CONTENT (Josh's call 5): the kit keeps a whole page's height for a steady pager (BASINS); on
+   λWAVES' rack the card is as tall as its tiles, up to the 8-tile page, and a single page shows no pager */
+.dev[data-id="projects"] .sv-paged .sv-project-grid { min-height: 0; }
+.dev[data-id="projects"] .sv-pages:has(> .sv-page-prev:disabled):has(> .sv-page-next:disabled) { display: none; }
 
 /* iteration 012 L3 · THE NOTICE ON THE PICKER'S GROUND (Josh: "reworked to not have a background window and instead share the same background as
    the main menu").  While the kit's photosensitivity notice is up (main.js adds body.lw-notice) the stage is covered by the Picker's own ground —
@@ -1131,9 +1145,8 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .dev[data-id="emission"] .em-step { flex: 1 1 auto; min-width: 0; }
 .dev[data-id="emission"] .em-step .mir-step-row { width: 100%; justify-content: space-between; }
 .dev[data-id="emission"] .em-step .mir-step-name { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dev[data-id="emission"] .em-vseg { flex: 0 0 58px; width: 58px; align-items: stretch; }
-.dev[data-id="emission"] .em-vseg > .seg { display: flex; flex-direction: column; flex-wrap: nowrap; gap: 1px; padding: 2px; width: 100%; box-sizing: border-box; }
-.dev[data-id="emission"] .em-vseg .seg-b { min-height: 17px; min-width: 0; padding: 0 4px; font-size: var(--fs-micro); }
+.dev[data-id="emission"] .em-vseg { flex-basis: 58px; }   /* 017 R4: the knob-sized seg's own rule (`.sp-vseg`, above) */
+.dev[data-id="emission"] .em-vseg::before { content: none; }   /* beside a stepper, not knobs: no label line */
 .dev[data-id="emission"] .em-row > .sw { flex: 0 0 auto; }
 .dev[data-id="emission"] .em-row > .lw-fold { flex: 0 0 30px; }
 .dev[data-id="emission"] .em-table table { width: 100%; border-collapse: collapse; font-size: var(--fs-micro); font-variant-numeric: tabular-nums; }
@@ -1141,3 +1154,9 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .dev[data-id="emission"] .em-table th { color: var(--dim); font-weight: 500; }
 .dev[data-id="emission"] .em-table td:last-child, .dev[data-id="emission"] .em-table th:last-child { text-align: left; }
 .dev[data-id="emission"] .em-none { color: var(--dim); font-size: var(--fs-micro); margin: 4px 0; }
+/* 017 R4 (call 14) · RENDER's self-test printout: no scroller in a rack window — the last six lines, the earlier ones behind a fold (film-card.js) */
+.dev[data-id="render"] .sr-lines { max-height: none; overflow: visible; }
+.dev[data-id="render"] .sr-fold { justify-content: flex-end; margin: 4px 0 0; }
+.dev[data-id="render"] .sr-fold[hidden], .dev[data-id="render"] .sr-early[hidden] { display: none; }
+/* 017 R4 (call 14) · a WIDE readout in a rack window is CLAMPED to its two lines (modhost.css gives it `overflow: auto`, a tiny scroller) */
+[data-mir-rack] > .dev .ro.wide .ro-val { overflow: hidden; }
