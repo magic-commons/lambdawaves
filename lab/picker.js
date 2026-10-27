@@ -627,14 +627,14 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const isoHead = el('div', 'mm-isohead', isoEl), isoGrid = el('div', 'mm-isogrid', isoEl);
     const closeIsomers = () => { if (isoEl.hidden) return; isoEl.hidden = true; const f = vdeck.tiles.find((x) => x.dataset.iso === isoEl.dataset.of); if (f) f.focus({ preventScroll: true }); };
     isoEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeIsomers(); } });
-    isoEl.addEventListener('click', (e) => { if (e.target === isoEl) closeIsomers(); });
+    view.addEventListener('click', (e) => { if (!isoEl.hidden && !isoEl.contains(e.target)) { e.stopPropagation(); e.preventDefault(); closeIsomers(); } }, true);   // the ground around the pane
     function openIsomers(m, isos) {
       isoHead.textContent = ''; isoGrid.textContent = ''; isoEl.dataset.of = m.id;
       el('b', 'mm-isof', isoHead, m.formulaM ? mathPlain(m.formulaM) : m.formula); el('span', 'mm-isocount', isoHead, (isos.length + 1) + ' isomers');
       const x = el('button', 'mm-back mm-isox', isoHead); x.type = 'button'; x.setAttribute('aria-label', 'close the isomers'); x.textContent = '×'; x.addEventListener('click', closeIsomers);
       isoGrid.style.setProperty('--n', String(isos.length + 1));
       for (const y of [m, ...isos]) { const t = molTile(isoGrid, y, false); if (y === m) t.classList.add('here'); }
-      const pager = view.querySelector('.mm-pager'); if (pager) isoEl.style.top = pager.offsetTop + 'px';   // over the deck, never the head (its tag rows set its height)
+      const pager = view.querySelector('.mm-pager'); if (pager) { isoEl.style.top = pager.offsetTop + 'px'; isoEl.style.maxHeight = Math.max(200, innerHeight - pager.getBoundingClientRect().top - 24) + 'px'; }   // over the deck, never the head (its tag rows set its height)
       isoEl.hidden = false; enterTiles([...isoGrid.children]);
       const first = isoGrid.firstElementChild; if (first) first.focus({ preventScroll: true });
     }
