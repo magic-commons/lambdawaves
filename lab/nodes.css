@@ -1,0 +1,38 @@
+/* lab/nodes.css — NODES (lab/nodes.js, 018 D3): the ground (a dotted plane that pans), the node cards (a title bar, a top in-port, a bottom
+   out-port), the wires (one SVG layer under the cards), + and the window ↔ rack door in the ground's top corners.  Glass and ink from the skin. */
+.nodes-host { display: flex; flex-direction: column; gap: 6px; height: 100%; min-height: 0; }
+.nodes-ground { position: relative; overflow: hidden; touch-action: none; cursor: grab; border-radius: var(--r-md); box-shadow: var(--neu-inset);
+  background: radial-gradient(circle, color-mix(in srgb, var(--ink-faint) 35%, transparent) 1px, transparent 1.5px) 0 0 / 22px 22px, var(--glass-well); }
+.nodes-host > .nodes-ground { flex: 1 1 auto; min-height: 0; }
+.dev .nodes-ground { height: min(70vh, 680px); }
+.nodes-ground:active { cursor: grabbing; }
+.nodes-plane { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.nodes-wires { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
+.nodes-wires path { fill: none; stroke: var(--acc); stroke-width: 2; opacity: .75; }
+.nodes-card { position: absolute; width: 120px; box-sizing: border-box; padding: 0 8px 8px; cursor: default; border-radius: var(--r-md);
+  background: var(--glass-raise, var(--glass-tint)); border: 1px solid var(--glass-border); box-shadow: var(--neu-raise); }
+.nodes-card[data-node="curves"] { width: 250px; }
+.nodes-title { display: flex; align-items: center; gap: 6px; height: 26px; margin: 0 -8px 6px; padding: 0 8px; cursor: move; user-select: none;
+  font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wider, .12em); color: var(--acc); border-bottom: 1px solid var(--glass-hairline); }
+.nodes-title > span { flex: 1 1 auto; }
+.nodes-body { font-size: var(--fs-tiny); color: var(--dim); }
+.nodes-card[data-node="curves"] .nodes-body { color: inherit; }
+.nodes-port { position: absolute; left: 50%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 2px var(--glass-well); }
+.nodes-port.in { top: -5px; }
+.nodes-port.out { bottom: -5px; }
+:is(.nodes-x, .nodes-add, .nodes-door) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
+  background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; }
+.nodes-x { width: 18px; height: 18px; margin-right: -4px; }
+:is(.nodes-x, .nodes-add, .nodes-door):is(:hover, :focus-visible) { color: var(--acc); }
+:is(.nodes-x, .nodes-add, .nodes-door) svg { width: 16px; height: 16px; }
+:is(.nodes-add, .nodes-door) { position: absolute; top: 6px; z-index: 1; border-radius: var(--r-sm); background: var(--glass-tint); }
+.nodes-add { left: 6px; }
+.nodes-door { right: 6px; }
+.nodes-menu { position: absolute; left: 6px; top: 36px; z-index: 2; display: grid; padding: 4px; border-radius: var(--r-md); background: var(--glass-raise, var(--glass-tint));
+  border: 1px solid var(--glass-border); box-shadow: var(--neu-raise); }
+.nodes-item { padding: 6px 12px; border: 0; background: transparent; box-shadow: none; color: var(--fg); font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui);
+  letter-spacing: var(--tr-wide); text-align: left; cursor: pointer; }
+.nodes-item:hover:not(:disabled) { color: var(--acc); }
+.nodes-item:disabled { opacity: .45; cursor: default; }
+.nodes-host > .note { flex: none; }
+[data-mir-window="nodes"] .mir-win-body { display: flex; flex-direction: column; min-height: 0; }

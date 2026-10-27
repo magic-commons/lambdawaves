@@ -18,7 +18,7 @@ import { Register, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock, onePlay } from './clock.js';
 import { createWindowActivity } from './mir/window-activity.js';
 import { VIEW, VIEW_NAMES, STYLE, quatFromYawPitch, waveView, KNEE_DEFAULT } from './field.js';
-import { el, ariaLabel, device as kitDevice } from './mir/kit.js'; import { createUserPresets } from './user-presets.js';
+import { el, device as kitDevice } from './mir/kit.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
@@ -31,7 +31,7 @@ import { createTransition } from './windows/transition.js';   // 018 C1: A ↔ B
 import { createStaticField } from './windows/static-field.js';   // iteration 008 S: the FIELD card (STATE's static field, drives and impulse knobs)
 import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js'; import { createFacade } from './shell/facade.js'; import { createVerbs } from './verbs.js';   // 0.5.2 R3a (edit-domain.js left with the history) · R5 the facade
 import { createCameraLaw } from './camera-law.js'; import { createPicker } from './picker.js';   // iteration 003: THE MAIN MENU; iteration 004: THE PICKER   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
-import { createCurvesPanel } from './mir/panels/curves.js';     // 0.5.1 D10-24: the CURVES card's rows are the kit's panel over the stage canvas
+import { createNodes } from './nodes.js';     // 018 D3: NODES, the CURVES card's heir (the kit's curves panel in a node graph)
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
 import { createController } from './shell/controller.js';   // 0.5.2 R1: ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD, out of boot()
@@ -838,44 +838,12 @@ export async function boot(dom) {
     here: () => { const C = app.state.chem; return { chem: C && C.on ? C.save() : null, ham: getHamiltonian().id, preset: reg.preset, view: mat.view, t: clock.t }; } });
   rack.prepend(app.state.filmCard.card.root);   // at the top, where a reopen puts it and a layout that does not list it (a demo's) leaves it: a reload saves the same `closed`
   rk.register({ id: 'render', el: app.state.filmCard.card, side: 'right', closed: true, title: 'RENDER', glyph: 'render', hint: 'the picture and the film' });
-  /* 0.5.1 D10-24 · THE CURVES CARD: the kit's curves panel over the stage canvas (MASTER · R · G · B through its one SVG picture filter), so the SCREEN is
-     graded and nothing else: capture.js reads the GPU texture and the film draws frame(i, ctx), neither sees a CSS filter.  `project: false` (ONE project
-     part), no `history`, no `port`, no `mod` (AMOUNT is not routed).  The grade is PREFERENCE (`lambdawaves.q0.curves`): restored here, written 250 ms
-     after a change, never in a project, a link or a history row.  Neutral = `filter: none`.  Closed, in + and WINDOW, seated after RENDER (where a layout
-     that does not list it leaves it, so a reload saves the same `closed`); `__LW.curves` is the model. */
-  const wCurves = device({ id: 'curves', eyebrow: 'CURVES', status: '' });
-  el('div', 'note', wCurves.body, 'Grades the screen only — pictures and films are untouched.');
-  /* 018 D2 · THE READER'S CURVES (the PALETTE way): a PREFERENCE record `lambdawaves.q0.curvePresets` of { name, data: { points } }; the kit's PRESET
-     stepper lists USER · theirs · PRESETS while one exists (curves.js `presets`); the bare save glyph keeps the channel's curve; each row has its × */
-  const curveUsers = createUserPresets('lambdawaves.q0.curvePresets'), CU = 'user:';
-  const curveRows = () => { const U = curveUsers.list().filter((u) => u.data && Array.isArray(u.data.points) && u.data.points.length >= 2).map((u) => ({ id: CU + u.name, label: u.name, points: u.data.points }));
-    return U.length ? [{ id: '#user', label: 'USER', coming: true }, ...U, { id: '#built', label: 'PRESETS', coming: true }] : []; };
-  const curvesPanel = createCurvesPanel({ parent: wCurves.body, canvas: dom.canvas, project: false, presets: curveRows }), curves = curvesPanel.model;
-  curveUsers.watch(() => curvesPanel.setPresets());
-  { const foot = wCurves.body.querySelector('.curves-foot'), nm = foot.querySelector('.mir-step-name'), save = el('button', 'sp-presave', foot); save.type = 'button';
-    ariaLabel(save, 'SAVE CURVE'); save.title = 'SAVE · this channel\'s curve as your own preset (kept on this device)';
-    save.addEventListener('click', () => {
-      if (foot.querySelector('.sp-prename')) return;
-      const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'curve name'); f.value = 'My curve';
-      nm.parentElement.insertBefore(f, nm); nm.hidden = true;
-      let done = false; const end = (keep, key) => { if (done) return; done = true; const n = f.value.trim(); f.remove(); nm.hidden = false;
-        if (keep && n) curveUsers.add(n, { points: curves.points().map((q) => ({ t: q.t, v: q.v, tension: q.tension || 0 })) }); if (key) nm.focus(); };
-      f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
-      f.addEventListener('blur', () => end(false)); f.focus(); f.select();
-    });
-    nm.addEventListener('click', () => { const pane = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!pane) return;
-      for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + CU + '"]')) {
-        const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'remove ' + name; ariaLabel(x, 'remove {name}', { name });
-        x.addEventListener('mousedown', (e) => e.preventDefault());
-        x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); curveUsers.remove(name); b.remove();
-          if (!pane.querySelector('.mir-pick-i[data-id^="' + CU + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
-      } }); }
-  for (const l of wCurves.body.querySelectorAll('.curves-channel .k-lbl, .curves-foot .k-lbl')) if (/^(CHANNEL|PRESET)$/.test(l.textContent.trim())) { l.parentElement.setAttribute('aria-label', l.textContent.trim()); l.remove(); }   // 018 A7: one label, no heading
-  curves.restore(curvesStore.get());
-  let curvesSave = 0;
-  curves.onChange(() => { clearTimeout(curvesSave); curvesSave = setTimeout(() => curvesStore.set(curves.serialize()), 250); });
-  app.state.filmCard.card.root.after(wCurves.root); rk.register({ id: 'curves', el: wCurves, side: 'right', closed: true, title: 'CURVES', glyph: 'curves', hint: 'grade the screen: a transfer curve per channel' });
-  LW.curves = curves;
+  /* 018 D3 · NODES (lab/nodes.js, call 1): the CURVES card retired into a node graph — STAGE IN → CURVES → STAGE OUT — shown as the MIR window `nodes`
+     and the rack card `nodes`, seated where CURVES was (after RENDER, closed; a saved layout's `curves` seat opens `nodes`: settings.js RETIRED_WINDOWS).
+     The grade is still the kit's curves panel over the stage canvas (the SCREEN only, never a picture or a film), PREFERENCE `lambdawaves.q0.curves`;
+     `__LW.curves` is its model, `__LW.nodes` the graph. */
+  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root });
+    LW.curves = N.model; LW.nodes = N; }
   /* iteration 004 · THE FOLDERS CARD (BASINS' rackSave, save-window.js:380): the kit's mountGallery, a second live view of FOLDERS' one library,
      8 a page — closed at the top of the LEFT rack, in + and WINDOW.  Built here, as BASINS builds it (a saved layout opens a card by its
      class alone, shell/rack-wiring.js, so a first-open build would leave it empty); painted again when it opens.  The id `projects` is
