@@ -83,6 +83,9 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     unnamedCardIsTheDevices: src.includes("look.set({ card: id === 'tinted' || id === 'refractive' ? id : FIRST_RUN.card })"),
     phoneOverrideKept: src.includes("phone.wasFrost = look.get('frost'); setFrost('off');"),
     foldsFromSeed: src.includes('const fold=FIRST_RUN.folded.includes(id);') && !src.includes("const fold=['settings','state']"),
+    /* 018 C4 (Josh): the right rack is the basic look controls; the docked transport always seats at the left rack's top */
+    racks: src.includes("const left=['informational','spectrum','chem'],right=['settings','palette','observer','camera','clip'];"),
+    transportTop: src.includes('if (layout.docked) layout.seatTransport();') && !src.includes('layout.dockIndex = '),
   };
   judge('THE WIRING: rack.js asks with its own crossings (isPhone() || isTablet(), one tablet predicate, declared before the ask), seeds the look store\'s card and frost defaults (0.5.0 C2: LOOK_DEFAULTS → createLook, mir.gui) and the furniture\'s folds from the answer, an unnamed card is the device\'s, and the phone crossing\'s FROST OFF override is kept',
     Object.values(wires).every(Boolean), wires);
