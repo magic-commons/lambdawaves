@@ -564,6 +564,10 @@ body.window-info-off .settings-help { display:none; }
 .shadow-controls .seg { display:flex; }
 .shadow-controls .seg-b { min-width:0;padding:0 4px;flex:1; }
 .dev .shadow-controls > .shadow-details-toggle { flex:0 0 30px;padding:0; }
+/* iteration 018 A4 (Josh: "shouldn't have a button like an outset white/black button but should rather just be the icon"): every fold is the
+   bare chevron — no face, no relief, no hover lift; the ink answers the hover */
+:is(.dev, body) .trig.lw-fold:is(*, :hover, :active, .on) { background: none; border-color: transparent; box-shadow: none; translate: none; text-shadow: none; }
+:is(.dev, body) .trig.lw-fold:is(:hover, [aria-expanded="true"]) { color: var(--fg); }
 .lw-fold::before { display:none !important; }
 .lw-fold svg { width:14px;height:14px;transform:rotate(-90deg); }
 .lw-fold[aria-expanded="true"] svg { transform:none; }
@@ -803,7 +807,8 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
   font: var(--w-bold, 600) 10px/1 var(--font-ui, sans-serif); letter-spacing: .04em; color: var(--fg); background: hsl(var(--glass-tint) / .72);
   box-shadow: 2px -2px 0 -1px hsl(var(--glass-tint) / .72), 2px -2px 0 0 color-mix(in srgb, var(--fg) 30%, transparent); pointer-events: none; }
 #lwMenu .mm-volview { position: relative; }
-#lwMenu .mm-isos { position: absolute; inset: 52px max(0px, calc(50% - (var(--t, 150px) * var(--cols, 8) + var(--gap, 10px) * (var(--cols, 8) - 1)) / 2 - 24px)) 0; z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 18px 12px; overflow-y: auto;
+/* iteration 018 A2: the pane is as big as its isomers (three isomers, three tiles), centred over the deck; the tiles keep the deck's size */
+#lwMenu .mm-isos { position: absolute; top: 52px; left: 50%; translate: -50% 0; width: max-content; max-width: 100%; box-sizing: border-box; z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 18px 14px 32px; overflow: hidden auto; scrollbar-width: thin;
   border-radius: 18px; background: hsl(var(--glass-tint) / .97); }
 #lwMenu .mm-isos[hidden] { display: none; }
 #lwMenu .mm-isohead { display: flex; align-items: baseline; gap: 14px; }
@@ -1011,3 +1016,5 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .mir-pick.pal-pick .pal-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .mir-pick.pal-pick .pal-strip { flex: 0 0 72px; width: 72px; height: 10px; margin-left: auto; border-radius: 5px; box-shadow: inset 0 0 0 1px hsl(0 0% 50% / .25); }
 @media (pointer: coarse) { .mir-pick.pal-pick .mir-pick-i { min-height: 34px; } }
+/* iteration 018 A8 (Josh: "Make the grid much more faint"): the CURVES quarter grid and diagonal at ≈ 12 % of ink-faint (the kit: 45 %) */
+body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, transparent); }

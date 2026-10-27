@@ -68,12 +68,13 @@ export function thumbOf({ height, client, scrollHeight, scrollTop }) {
 
 /** the pill's numbers: how long the pills stay after the last scroll, and the gap it keeps from the window (and its scrollbar) */
 export const PILL = Object.freeze({ linger: 900, gap: 8 });
-/** inkOn(rgb) — 'dark' ink on a light fill, 'light' on a dark one (WCAG relative luminance against the two inks' midpoint) */
-export function inkOn(rgb) {
+/** inkOn(rgb, theme) — the theme's ink first: a LIGHT theme prefers 'light' (white) text, a DARK theme 'dark' (black) text; it flips only when
+ *  the fill would leave it under 3:1 (WCAG relative luminance L: white needs L ≤ 0.3, black needs L ≥ 0.1) — λWAVES 018 A5, Josh */
+export function inkOn(rgb, theme = 'light') {
   const m = String(rgb).match(/[\d.]+/g); if (!m || m.length < 3) return 'light';
   const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
   const L = 0.2126 * lin(+m[0]) + 0.7152 * lin(+m[1]) + 0.0722 * lin(+m[2]);
-  return L > 0.179 ? 'dark' : 'light';
+  return theme === 'dark' ? (L >= 0.1 ? 'dark' : 'light') : (L <= 0.3 ? 'light' : 'dark');
 }
 export function createRackPills({ host, racks, view = globalThis.window }) {
   const doc = view.document, life = new AbortController();
@@ -108,7 +109,7 @@ export function createRackPills({ host, racks, view = globalThis.window }) {
       if (left) pill.style.left = (edge + PILL.gap - lr.left) + 'px';
       else pill.style.right = (lr.right - edge + PILL.gap) + 'px';
     }
-    const first = inner.firstChild; if (first) layer.dataset.ink = inkOn(view.getComputedStyle(first).backgroundColor);
+    const first = inner.firstChild; if (first) layer.dataset.ink = inkOn(view.getComputedStyle(first).backgroundColor, doc.body.dataset.theme);
     inner.style.transform = '';
   }
   function scrolled(e) {

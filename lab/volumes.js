@@ -318,8 +318,7 @@ export async function file(volId, molId, { network = true } = {}) {   // network
   return b;
 }
 export async function picture(volId, molId, style = null) {   // iteration 014 B4: `style` (im · balls · sticks · esp) when the row names it in `thumbs`, else the one picture
-  const { v, m } = await molecule(volId, molId);
-  if (!m.thumb) return null;
-  const url = inVolume(v, style && (m.thumbs || []).includes(style) ? m.thumb.replace(/\.webp$/, '.' + style + '.webp') : m.thumb), c = await store(volId), hit = c && await c.match(url).catch(() => null);
+  const { v, m } = await molecule(volId, molId), thumb = m.thumb || 't/' + m.id + '.webp';   // iteration 018 A3: a row the index does not name still has its t/<id>.webp (the next pack names it); a miss is the caller's onerror
+  const url = inVolume(v, style && (m.thumbs || []).includes(style) ? thumb.replace(/\.webp$/, '.' + style + '.webp') : thumb), c = await store(volId), hit = c && await c.match(url).catch(() => null);
   return hit ? URL.createObjectURL(await hit.blob()) : url;
 }
