@@ -211,7 +211,7 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
     yaw: [() => obs.yaw, (v) => modHand('observer.yaw', v) || turn(v - obs.yaw, 0)], pitch: [() => obs.pitch, (v) => modHand('observer.pitch', v) || turn(0, v - obs.pitch)],
     autoRotate: [() => camera.autoRotate, (v) => camera.setAutoRotate(v)], spin: [() => camera.speed, (v) => camera.setSpeed(v)],
     friction: [() => camera.friction, (v) => camera.setFriction(v)], drag: [() => camera.dragGain, (v) => camera.setDragGain(v)], fling: [() => camera.flingGain, (v) => camera.setFling(v)],
-    lock: [() => locked, setLock], flip: [() => flipped, setFlip] };   // 0.5.3 M6: not in the kit's vocabulary, so the panel draws no control for it; the card's LOCK switch is λWAVES'
+    lock: [() => locked, setLock], flip: [() => flipped, setFlip] };   // 0.5.3 M6: `lock` is not in the kit's vocabulary (the card's LOCK switch is λWAVES'); `flip` is (camera-rig.js), so the panel draws THE FLIP switch (018 B3)
   const pan = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
   const port = { angle: 'rad', get: (id) => (ROADS[id] ? ROADS[id][0]() : undefined), set(id, v) { if (ROADS[id]) ROADS[id][1](v); },
     subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }, notify: tell, turn, home: () => resetView(), setShift, zoomAt, panBy,
