@@ -19,7 +19,8 @@ import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/cu
 import { pictureFilter, lookup } from './mir/panels/picture-filter.js';
 import { frame } from './mir/core/frame.js';
 import { compile } from './nodes-compile.js';
-import { TABLE_TYPES, MATRIX_TYPES, homeOf, isNeutral, nodeBody } from './node-types.js';
+import { TABLE_TYPES, MATRIX_TYPES, homeOf, nodeBody } from './node-types.js';
+import { LAYER_TYPES, createLayerHost } from './node-layers.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { createUserPresets } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
@@ -42,16 +43,16 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
 
   /* 019 N1 · THE COMPILER: CURVES hands its tables to the graph (a `port`), not to the filter: it is a TABLE node like any other, and alone it
      compiles to the byte-identical filter 018 wrote.  One compile and one filter write per frame, whatever moved */
-  const filter = pictureFilter(canvas), cache = new Map();
+  const filter = pictureFilter(canvas), cache = new Map(), layers = createLayerHost(canvas.parentElement);
   let passes = 0, nodes = [];
-  const recompile = () => frame.coalesce('nodes.compile', () => { const c = compile(nodes, TYPES, cache); passes = c.passes; filter.setChain(c.runs).flush(); });
+  const recompile = () => frame.coalesce('nodes.compile', () => { const c = compile(nodes, TYPES, cache); passes = c.passes; filter.setChain(c.runs).flush(); layers.set(c.layers); });
   const panel = createCurvesPanel({ port: { setTable() { const q = nodes.find((n) => n.type === 'curves'); if (q) q.v++; recompile(); } }, project: false, presets }), model = panel.model;
   const curveTables = () => Object.fromEntries(model.channels.map((ch) => [ch, isIdentity(model.points(ch)) || model.amount() === 0 ? null : Float32Array.from(model.table(ch))]));
   const TYPES = {
     curves: { cls: 'table', label: 'CURVES', hint: 'a transfer curve per channel, as Photoshop draws it', knobs: [],
       neutral: () => model.amount() === 0 || model.channels.every((ch) => isIdentity(model.points(ch))),
       fn: () => { const T = curveTables(); return (y, ch) => { if (T.MASTER) y = lookup(T.MASTER, y); if (T[ch]) y = lookup(T[ch], y); return y; }; } },
-    ...TABLE_TYPES, ...MATRIX_TYPES,
+    ...TABLE_TYPES, ...MATRIX_TYPES, ...LAYER_TYPES,
   };
 
   /* THE LIST: the graph record's nodes, or 018's one-node graph (CURVES, `curves: false` = bypassed) */

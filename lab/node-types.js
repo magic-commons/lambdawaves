@@ -5,7 +5,7 @@
  *           EXPOSURE · CONTRAST — fn(values) → (y, channel) → y, the same on every channel
  *   MATRIX  (folded into one feColorMatrix)  HUE · SATURATION · LUMA · TINT (a colour and an amount) · TEMPERATURE — matrix(values) → 20
  * A NEUTRAL NODE COSTS NOTHING: `neutral(v)` is true where the node is the identity (INVERT at 0, HUE at 0° …); POSTERIZE and THRESHOLD are
- * never the identity.  homeOf(type) → the values a new node starts from.
+ * never the identity; a type with no `neutral` is neutral with every knob at home.  homeOf(type) → the values a new node starts from.
  *   nodeBody(parent, node, T, { idOf(k), hand(k, v, done) }) → { ctls: { k: control }, paint(k, v, shown) }: each knob a MIR control
  *   (controls/factory.js — the kind of value chooses it), a number knob stamped `data-param` with its stable modulation target id
  *   `nodes.<node>.<knob>` (idOf), so it is a drop target like any rack dial; the hand's write goes to `hand`. */
@@ -17,7 +17,6 @@ const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const mix = (A, B, t) => A.map((a, i) => a + (B[i] - a) * t);
 const W = [0.2126, 0.7152, 0.0722];
 const AMOUNT = (home = 1) => ({ k: 'amount', label: 'AMOUNT', min: 0, max: 1, home });
-const at = (v, K) => v[K.k] === K.home;
 
 export const TABLE_TYPES = {
   levels: { cls: 'table', label: 'LEVELS', hint: 'input black and white, the middle (gamma), output black and white — Photoshop\'s levels',
@@ -51,9 +50,9 @@ export const MATRIX_TYPES = {
     matrix: (v) => { const w = v.warmth * 0.25; return [1 + w, 0, 0, 0, 0, 0, 1 + w * 0.15, 0, 0, 0, 0, 0, 1 - w, 0, 0, 0, 0, 0, 1, 0]; } },
 };
 
-/** homeOf(T) → a new node's values; isNeutral(T, v) → the type's neutral(v), or every knob at home */
+/** homeOf(T) → a new node's values.  A type with no `neutral` of its own is neutral with every knob at home (the compiler reads `neutral`) */
 export const homeOf = (T) => Object.fromEntries(T.knobs.map((K) => [K.k, Array.isArray(K.home) ? K.home.slice() : K.home]));
-export const isNeutral = (T, v) => (T.neutral ? T.neutral(v) : T.knobs.every((K) => at(v, K)));
+for (const T of [...Object.values(TABLE_TYPES), ...Object.values(MATRIX_TYPES)]) if (!T.neutral) T.neutral = (v) => T.knobs.every((K) => v[K.k] === K.home);
 
 /** THE NODE FACTORY: the knob list of type T as MIR controls in `parent` */
 export function nodeBody(parent, node, T, { idOf, hand }) {

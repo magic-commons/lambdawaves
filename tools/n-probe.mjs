@@ -39,6 +39,16 @@ try {
       return { a, b, targets: T, stamped: document.querySelectorAll('[data-mir-window="nodes"] [data-param^="nodes."]').length, record: JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')).list.map((q) => q.id + ':' + q.type) };`);
     shot = true;
   }
+  if (scene === 'layers') {
+    info = await g.ev(`const N = __LW.nodes, w = (n) => new Promise((r) => setTimeout(r, n));
+      N.add('grain'); N.add('vignette'); N.set('n2', 'amount', 0.8); await w(400);
+      const host = document.getElementById('nodeLayers'), cs = getComputedStyle(host), kids = [...host.children].map((d) => d.dataset.type + ':' + getComputedStyle(d).mixBlendMode + ':' + d.style.opacity);
+      const r = host.getBoundingClientRect(), masked = (window.__LW.field.occlusionRects ? 'n/a' : 'n/a');
+      N.add('scanlines'); await w(200); const three = host.children.length; N.setBypass('n3', true); await w(200);
+      return { kids, z: cs.zIndex, pe: cs.pointerEvents, parent: host.parentElement.id, prev: host.previousElementSibling.id, three, afterBypass: host.children.length, passes: N.passes(),
+        anim: getComputedStyle(host.children[0]).animationName, box: [r.width, r.height] };`);
+    shot = true;
+  }
   if (shot) writeFileSync(OUT, Buffer.from(await g.snap(), 'base64'));
   console.log(JSON.stringify({ scene, info, errors: (await g.errors()).errs }, null, 1));
 } finally { await g.close(); }

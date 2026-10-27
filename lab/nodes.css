@@ -44,3 +44,14 @@
 .nodes-item:disabled { opacity: .45; cursor: default; }
 .nodes-host > .note { flex: none; }
 [data-mir-window="nodes"] .mir-win-body { display: flex; flex-direction: column; min-height: 0; }
+/* 019 N3 · the LAYER host (lab/node-layers.js): over the stage canvases, under the atom labels (9), the stage text (20) and the racks; never a pointer */
+#nodeLayers { position: absolute; inset: 0; z-index: 8; overflow: hidden; pointer-events: none; }
+.node-layer { position: absolute; inset: 0; }
+.node-layer[data-type="grain"] { inset: calc(-1 * var(--tile, 256px)) 0 0 calc(-1 * var(--tile, 256px)); animation: node-grain .5s step-end infinite; will-change: transform; }
+@keyframes node-grain {
+  0% { transform: translate(0, 0); } 8.3% { transform: translate(calc(var(--tile) * .37), calc(var(--tile) * .71)); } 16.7% { transform: translate(calc(var(--tile) * .82), calc(var(--tile) * .13)); }
+  25% { transform: translate(calc(var(--tile) * .19), calc(var(--tile) * .48)); } 33.3% { transform: translate(calc(var(--tile) * .64), calc(var(--tile) * .92)); } 41.7% { transform: translate(calc(var(--tile) * .05), calc(var(--tile) * .29)); }
+  50% { transform: translate(calc(var(--tile) * .91), calc(var(--tile) * .57)); } 58.3% { transform: translate(calc(var(--tile) * .43), calc(var(--tile) * .06)); } 66.7% { transform: translate(calc(var(--tile) * .27), calc(var(--tile) * .83)); }
+  75% { transform: translate(calc(var(--tile) * .76), calc(var(--tile) * .38)); } 83.3% { transform: translate(calc(var(--tile) * .58), calc(var(--tile) * .66)); } 91.7% { transform: translate(calc(var(--tile) * .12), calc(var(--tile) * .97)); }
+}
+@media (prefers-reduced-motion: reduce) { .node-layer[data-type="grain"] { animation: none; } }
