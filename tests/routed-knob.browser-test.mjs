@@ -50,6 +50,8 @@ try {
     const C = (n) => [...w.querySelectorAll('.k, .sw, .segw')].find((e) => { const l = e.querySelector(':scope > .k-lbl, :scope > .sw-lbl'); return l && l.textContent.trim() === n; });
     const names = ['SOFT', 'ISO', 'GRAIN', 'KNEE', 'RADIUS', 'MAP ONLY', 'RANGE'];
     const look = () => names.map((n) => { const e = C(n), b = e.getBoundingClientRect(), c = w.getBoundingClientRect(); return [n, Math.round(b.left - c.left), Math.round(b.top - c.top), e.hidden || getComputedStyle(e).display === 'none', e.classList.contains('disabled')]; });
+    const hyd = ['RADIUS', 'MAP ONLY', 'RANGE'].every((n) => C(n).hidden) && [...w.querySelectorAll('button')].filter((b) => ['BALLS', 'STICKS', 'ESP'].includes(b.textContent.trim())).filter((b) => b.hidden).length === 3;   // 018 B1: hidden under hydrogen
+    L.chem.setOn(true); for (let i = 0; i < 60 && !(L.chem.on && L.chem.row()); i++) await nap(100);   // 016 V1's grey-in-seat law stands under a molecule
     L.setStyle('cloud'); await nap(150); const cloud = look(); L.setStyle('esp'); await nap(150); const esp = look();
     C('MAP ONLY').click(); const bare = L.mat.espBare === true; C('MAP ONLY').click();
     L.setStyle('cloud'); await nap(100);
@@ -57,11 +59,12 @@ try {
     const dot = { on: w.classList.contains('lw-routed'), isoGrey: C('ISO').classList.contains('disabled'), others: [...document.querySelectorAll('.dev.lw-routed')].map((d) => d.dataset.id),
       paint: /radial-gradient/.test(getComputedStyle(w.querySelector('.dev-eyebrow')).backgroundImage) && getComputedStyle(w.querySelector('.dev-eyebrow')).paddingRight };   // 017 R1: inside the title bar, at the eyebrow's end
     L.mod.unroute(rid); await nap(600); dot.after = w.classList.contains('lw-routed');
-    return { cloud, esp, bare, dot, errs: (window.__e || []).slice() };`);
+    L.chem.setOn(false); await nap(300);
+    return { hyd, cloud, esp, bare, dot, errs: (window.__e || []).slice() };`);
   const same = v.cloud.every((c, i) => c[1] === v.esp[i][1] && c[2] === v.esp[i][2]);
   const greyed = (rows, ns) => rows.every(([n, , , hid, dis]) => !hid && dis === ns.includes(n));
-  judge('K4 (016 V1) a control the style does not read is greyed in its seat, never hidden: CLOUD greys ISO · GRAIN · RADIUS · MAP ONLY · RANGE, ESP greys GRAIN · KNEE, and no seat moves',
-    same && greyed(v.cloud, ['ISO', 'GRAIN', 'RADIUS', 'MAP ONLY', 'RANGE']) && greyed(v.esp, ['GRAIN', 'KNEE']), { cloud: v.cloud, esp: v.esp });
+  judge('K4 (016 V1, 018 B1) under a molecule a control the style does not read is greyed in its seat, never hidden: CLOUD greys ISO · GRAIN · RADIUS · MAP ONLY · RANGE, ESP greys GRAIN · KNEE, and no seat moves; under hydrogen the molecule rows and BALLS · STICKS · ESP are HIDDEN',
+    v.hyd && same && greyed(v.cloud, ['ISO', 'GRAIN', 'RADIUS', 'MAP ONLY', 'RANGE']) && greyed(v.esp, ['GRAIN', 'KNEE']), { hyd: v.hyd, cloud: v.cloud, esp: v.esp });
   judge('K5 (016 S2) MAP ONLY is ESP\'s switch and writes mat.espBare', v.bare === true, v.bare);
   judge('K6 (016 W8, 017 R1) a route on a greyed knob (ISO under CLOUD) gives WAVE its 6 px ACCENT B dot at its eyebrow\'s end, and the last route\'s removal takes it away',
     v.dot.on && v.dot.isoGrey && v.dot.others.includes('observer') && v.dot.paint === '11px' && v.dot.after === false && v.errs.length === 0, v.dot);
