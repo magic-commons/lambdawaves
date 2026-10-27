@@ -1,6 +1,6 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
-import { TIER } from '../rack.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS } from '../field.js';
+import { TIER } from '../rack.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS } from '../field.js';
 export function createModSeam(app) {
   const { ui, hNote, clock, obs, mat, settingsStore, reg, rates, dom } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings } = app.sh,
     { mod, modHand, setKnob, ROT_LIMIT, rotRate, setRotationRate, occlusion, applyAccent, api } = app.ctl;
@@ -107,9 +107,9 @@ export function createModSeam(app) {
         get: () => rotRate.def,
         set: (v) => { setRotationRate('def', v); } },
       /* 0.6.0 B3a · THE SHELL RATES: a shell's labels on the lanes' own road (api.setRate: rates, setEnergies, the ring, the lanes' knobs); no dial of their own; `n1` because the kit's segment starts with a letter */
-      ...Array.from({ length: 7 }, (_, i) => ({ id: `shell.rate.n${i + 1}`, label: `SHELL ${i + 1} RATE`, unit: '×', map: 'log', min: 0.25, max: 4, def: 1, group: 'state', knob: () => null,
+      ...Array.from({ length: 7 }, (_, i, at = BASIS.flatMap((s, a) => (s.n === i + 1 ? [a] : []))) => ({ id: `shell.rate.n${i + 1}`, label: `SHELL ${i + 1} RATE`, unit: '×', map: 'log', min: 0.25, max: 4, def: 1, group: 'state', knob: () => null,
         hint: 'one shell’s per-label RATE (× its energies); a beat above 3 Hz on screen flashes — the RATE label says when',
-        get: () => rates[reg.populated().find((b) => BASIS[b].n === i + 1) ?? BASIS.findIndex((s) => s.n === i + 1)],   // its first populated label, else its first
+        get: () => { for (const a of at) if (reg.re0[a] ** 2 + reg.im0[a] ** 2 > EPS_POP) return rates[a]; return rates[at[0]]; },   // its first populated label, else its first (017 P2: no populated() array per read — syncBases reads it every modulation tick)
         set: (v) => { for (const s of BASIS) if (s.n === i + 1 && rates[s.index] !== v) api.setRate(s.index, v); } })),
 
       /* CHEMISTRY's targets: a κ and a RATE, both PRESENT-only setters that store a number and schedule nothing (the RT pump is
