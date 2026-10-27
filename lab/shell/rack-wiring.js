@@ -145,9 +145,9 @@ export function createRackWiring(app) {
       if (id === 'transport') { if (layout.docked) layout.dockTransport(); return true; }
       const a = { ...(at || {}), w: (at && at.w) || rackCardWidth() };
       if (at && at.home) a.home = { side: sideKey(at.home.side) || 'right', index: Math.max(0, at.home.index | 0) };
-      return rk.float(id, a);
+      const ok = rk.float(id, a); occlusion.dirty(); return ok;   // 017 P2 (R4's note): the placement itself marks a paused mask stale
     },
-    dockWindow(id) { if (id === 'transport') { if (!layout.docked) layout.dockTransport(); return true; } return rk.dock(id); },
+    dockWindow(id) { if (id === 'transport') { if (!layout.docked) layout.dockTransport(); return true; } const ok = rk.dock(id); occlusion.dirty(); return ok; },
     toggleFloat(id) { if (id === 'transport') { layout.dockTransport(); return true; } return rk.toggleFloat(id); },
     setCompact: (id, on) => rk.setCompact(id, on),
     /** the kit has no move for a float (BRIEF R1): dock and float it again at (x, y), clamped, in the same seat of the layer */
