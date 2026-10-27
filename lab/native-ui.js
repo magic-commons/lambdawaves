@@ -6,7 +6,7 @@ export { infoPanel, installControlHelp, consolidateWindowHelp, planeModel };
 
 
 export function reworkNative({ ui, mat, repaint }) {
-  const ids=['spectrum','state','staticfield','palette','observer','camera','clip','slice','settings'];
+  const ids=['spectrum','staticfield','palette','observer','camera','clip','slice','settings'];
   for(const id of ids){const d=document.querySelector(`.dev[data-id="${id}"]`);if(!d)continue;d.classList.add('native-clean');
     for(const l of d.querySelectorAll('.grp-lbl')) { l.title=l.textContent;l.textContent=l.textContent.split(/·|  |\(/)[0].trim(); }
   }

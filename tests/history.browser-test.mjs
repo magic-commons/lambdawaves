@@ -161,10 +161,10 @@ try {
   await scene('an overlay switch (KEPLER ORBIT)', `const s = __show(__sw('KEPLER ORBIT')); await __w(50); await __press(s.querySelector('button') || s);`, 'KEPLER ORBIT · ORBIT');
   undoMs.preset = (await scene('a preset (SPECTRUM\'s ‹ PRESET › stepper → loadPreset; iteration 008 S: it left STATE)', `await __press(__show(document.querySelector('.dev[data-id="spectrum"] .sp-preset [aria-label="next"]')));`, 'edit')).undoMs;   // the kit's stepper names no row yet (the palette's RAMP stepper below is 'edit' too)
   undoMs.element = (await scene('an element change (ELEMENT Z dragged)', `const k = __show(__knob('ELEMENT Z')); await __w(80); await __drag(k.querySelector('.k-dial'), 0, -30);`, 'ELEMENT Z · SPECTRUM')).undoMs;
-  await scene('A/B · STORE A', `await __press(__show(__trig('STORE A')));`, 'STORE A · STATE');
+  await scene('A/B · STORE A', `await __press(__show(__trig('STORE A')));`, 'STORE A · SPECTRUM');
   await g.ev(`__LW.loadPreset('1s+2pz'); await __w(500); __LW.history.flush(); return 1;`);
-  await scene('A/B · STORE B', `await __press(__show(__trig('STORE B')));`, 'STORE B · STATE');
-  await scene('A/B · the transition on', `const s = __show(__sw('TRANSITION')); await __press(s.querySelector('button') || s);`, 'TRANSITION · STATE');
+  await scene('A/B · STORE B', `await __press(__show(__trig('STORE B')));`, 'STORE B · SPECTRUM');
+  await scene('A/B · the transition on', `const s = __show(__sw('TRANSITION')); await __press(s.querySelector('button') || s);`, 'TRANSITION · SPECTRUM');
   await g.ev(`const s = __sw('TRANSITION'); await __press(s.querySelector('button') || s); await __w(500); __LW.history.flush(); return 1;`);   /* stood down again: the scenes below need a still register */
   /* 0.5.0 C1: the palette's editor is MIR's RAMP (paletteview.js left) — a preset is the stepper's ›, a stop's colour is the swatch's chooser.
      The row names are what the history's naming (hTouchName) makes of the kit's controls today; C5's kit gesture names replace them. */
@@ -375,7 +375,7 @@ try {
   let n = await ev(`const H = __LW.history; H.flush(); await __w(450); H.flush(); __room(); __LW.layout.modulation.collapse(); __LW.camera.setAutoRotate(false); window.__yaw0 = __LW.obs.yaw; return H.entries().length;`);
   await realDrag(await at('#field'), 150, 30);
   none.orbit = { rows: (await rows()) - n, moved: await ev(`__LW.camera.stop(); return __LW.obs.yaw !== window.__yaw0;`) }; n += none.orbit.rows;
-  await realDrag(await at('.dev[data-id="state"] .dev-eyebrow'), -80, 60, 6);
+  await realDrag(await at('.dev[data-id="settings"] .dev-eyebrow'), -80, 60, 6);   // 018 C1: STATE retired; SETTINGS is a first-run right-rack card
   none.windowDrag = { rows: (await rows()) - n }; n += none.windowDrag.rows;
   await ev(`__LW.layout.notebook.open('notes'); await __w(150); const ta = document.querySelector('.nb-text'); ta.focus();
     for (const ch of 'a note') { ta.value += ch; ta.dispatchEvent(new Event('input', { bubbles: true })); await __w(20); } return 1;`);

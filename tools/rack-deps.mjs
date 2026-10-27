@@ -892,7 +892,7 @@ export const PLANNED = {
   material: { title: 'WAVE · CLIP · PALETTE · CAMERA (the 1100 block\'s material)', row: 'R2c', file: 'lab/windows/material.js' },
   'settings-card': { title: 'SETTINGS card (the 1100 block, two spans)', row: 'R2c', file: 'lab/windows/settings-card.js' },   // not settings.js: lab/shell/settings.js is §1's
   film: { title: 'FILM / capture (filmHold stays)', row: 'R2c', file: 'lab/windows/film.js' },
-  state: { title: 'STATE', row: 'R2a', file: 'lab/windows/state.js' },
+  transition: { title: 'TRANSITION (A ↔ B, SPECTRUM\'s block; the STATE card retired at 018 C1)', row: 'it018 C1', file: 'lab/windows/transition.js' },
   spectrum: { title: 'SPECTRUM (the five appends stay)', row: 'R2a', file: 'lab/windows/spectrum.js' },
   staticfield: { title: 'FIELD (STATE\'s static field, drives and impulse knobs)', row: 'it008 S', file: 'lab/windows/static-field.js' },
   readouts: { title: 'SHADOW·ORBIT·VORTEX·PLANE + CALC·METERS·LADDER + ATOMS·WIGNER·RADIATION', row: 'R2b', file: 'lab/windows/readouts.js' },
@@ -923,7 +923,7 @@ export const PLANNED_CUT = [
   [/^ {2}createDrawClipPaletteCamera\(\);/, 'material'],                             // material's second seat: WAVE's DRAW · CLIP · PALETTE · CAMERA
   [/^ {2}\/\* ── THE FILM \(0\.5\.0 C7/, 'film'],                                     // the seat (0.5.2 R2c: lab/windows/film.js): the FILM / capture
   [/^ {2}createFieldQuality\(\);/, 'settings-card'],                                 // the SETTINGS card's second seat: FIELD QUALITY
-  [/^ {2}\/\/ STATE — preparation/, 'state'],                                       // the seat (0.5.2 R2a: the card and its CLEAR are lab/windows/state.js)
+  [/^ {2}\/\/ TRANSITION — A ↔ B/, 'transition'],                                    // the seat (018 C1: SPECTRUM's A ↔ B block and the register's CLEAR, lab/windows/transition.js)
   [/^ {2}\/\/ SPECTRUM$/, 'spectrum'],                                              // the seat (0.5.2 R2a: lab/windows/spectrum.js)
   [/^ {2}\/\/ FIELD — the static field/, 'staticfield'],                            // the seat (iteration 008 S: lab/windows/static-field.js)
   [/^ {2}rack\.appendChild\(wPal\.root\); rack\.appendChild\(wObs\.root\)/, 'boot'],   // the five appends stay at their seat

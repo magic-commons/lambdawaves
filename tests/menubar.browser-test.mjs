@@ -150,7 +150,7 @@ try {
 
   /* ── 6 · every other row does what it names, and the bar closes behind each one ── */
   const rest = await g.ev(`const R = {}, ok = (r) => r.found && r.closed && r.listsDown;
-    const st = () => document.querySelector('.dev[data-id="state"] .dev-stat').textContent;
+    const st = () => document.querySelector('.dev[data-id="spectrum"] .dev-stat').textContent;   // 018 C1: the lab's status line is SPECTRUM's
     window.confirm = () => true;                                      // NEW project asks before discarding a dirty project
     /* EDIT */
     { __LW.pause(); const r = await __row('EDIT', 'PLAY / PAUSE'); R.play = ok(r) && __LW.clock.playing; __LW.pause(); }

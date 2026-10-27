@@ -89,8 +89,8 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 }
 {
   const rows = { desktop: firstRunMaterial(false).folded, mobile: firstRunMaterial(true).folded };
-  judge('THE FIRST-RUN FOLDS (2026-10-16, iteration 001): every first-visit window arrives folded on every device, INFORMATIONAL in SHADOW\'s seat, MO-REGISTRY inside MOLECULES (iteration 008 U); frozen',
-    eq(rows.desktop, rows.mobile) && rows.desktop.length === 9 && rows.desktop.includes('informational') && !rows.desktop.includes('orbitals') && !rows.desktop.includes('shadow') && Object.isFrozen(rows.desktop) && Object.isFrozen(rows.mobile), rows);
+  judge('THE FIRST-RUN FOLDS (2026-10-16, iteration 001): every first-visit window arrives folded on every device, INFORMATIONAL in SHADOW\'s seat, MO-REGISTRY inside MOLECULES (iteration 008 U), no STATE (018 C1: retired into SPECTRUM); frozen',
+    eq(rows.desktop, rows.mobile) && rows.desktop.length === 8 && !rows.desktop.includes('state') && rows.desktop.includes('informational') && !rows.desktop.includes('orbitals') && !rows.desktop.includes('shadow') && Object.isFrozen(rows.desktop) && Object.isFrozen(rows.mobile), rows);
 }
 {
   const rows = { desktop: firstRunMaterial(false).more, mobile: firstRunMaterial(true).more, wired: appSource().includes('moreOpen: FIRST_RUN.more') };

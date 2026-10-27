@@ -154,12 +154,12 @@ try {
     const ok = __LW.restore(saved), chem = document.querySelector('.dev[data-id="chem"]');
     let st = __LW.chem.state(); for (let i = 0; i < 100 && !(st.on && st.nocc); i++) { await new Promise(r => setTimeout(r, 100)); st = __LW.chem.state(); }
     const out = { ok, gone: !document.querySelector('.dev[data-id="molecule"]'), on: st.on, preset: __LW.chem.preset(), view: st.view, orbital: st.orbital,
-      visible: !chem.hidden && !chem.classList.contains('closed'), status: document.querySelector('.dev[data-id="state"] .dev-stat').textContent,
+      visible: !chem.hidden && !chem.classList.contains('closed'), status: document.querySelector('.dev[data-id="spectrum"] .dev-stat').textContent,
       saved: Object.keys(__LW.serialize().presentation.instruments).includes('molecule'), errors: __e.slice() };
     __LW.chem.setOn(false); await __LW.settle();
     return out;
   `);
   assert.deepEqual(legacy, { ok: true, gone: true, on: true, preset: 'H2', view: 'orbital', orbital: 2, visible: true,
     status: 'retired in 0.5.0: H₂⁺ (opened as MOLECULES · H₂ σu)', saved: false, errors: [] }, JSON.stringify(legacy));
-  console.log('PASS an active legacy H₂⁺ record restores as MOLECULES · H₂ on σu, its controls reachable, STATE saying so in one line');
+  console.log('PASS an active legacy H₂⁺ record restores as MOLECULES · H₂ on σu, its controls reachable, SPECTRUM’s status line saying so (018 C1)');
 } finally { await g.close(); }

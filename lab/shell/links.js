@@ -24,7 +24,7 @@ export function createLinks(app) {
   const esc = (t) => String(t).replace(/[&<>]/g, (c) => (c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'));
   app.state.linkLast = null;
 
-  /** what the interface says about a link, in the two places it can be read: the STATE card's status line
+  /** what the interface says about a link, in the two places it can be read: SPECTRUM's status line (018 C1)
    *  (short, and its hover hint carries the whole of it) and a note on the card that does not disappear. */
   function linkSay(msg, cls, detail) {
     wState.setStatus(msg, cls || 'live');
