@@ -152,6 +152,9 @@ Tests: look/gui suites, official-defaults-palette, first-run, mir-manifest.
 22. (D) A hand-drawn curve matching no preset reads LINEAR in the stepper (the kit's way); CUSTOM instead? Default: LINEAR for now.
 23. (D) NODES: the next node types? (the experiment's v0 has STAGE IN → CURVES → STAGE OUT; candidates: PALETTE, HUE, BLUR, MIX). Default: none yet.
 24. (D) FORGET clears the grade but keeps the graph record and the saved curves. Default: yes.
+25. (E) INFORMATIONAL's remembered set lasts the session; survive a reload (a new stored key)? Default: session only.
+26. (E) The right block of the CSB has one empty slot in its 4-wide grid — a wish for it? Default: leave.
+27. (E) The BPM pill still shows its accent ring while the expander is open though it no longer opens it. Default: F's builder drops the ring (one kit line).
 
 ## MERGE ORDER
 A → B → C → D → E → F, each builder based on the merged tree (BASE sha below). Recipe: `git merge --no-ff --no-commit it018-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → focused suites → commit → CLOSED row → handoff STATE NOW line.
@@ -163,4 +166,5 @@ A → B → C → D → E → F, each builder based on the merged tree (BASE sha
 | B | 58ab389 | 21ae7ef | B1–B10 (B-BUILD.md; camera-shift/render-exact re-aimed to μ = 0 under AUTO-ROTATE; official-defaults-palette/window-switching/take-in-bugs/routed-knob/stage-text green; legacy boot B65 not run) |
 | C | fadfc07 | 2677fb9 | C1–C4 (C-BUILD.md; transition.js at HINGE 2; register/history/current/lw-links/timeline/keyboard-window green; pre-existing reds molecular-names:89 → chain E, latex-copy §8 → close pass) |
 | D | 701640b | 5bf327f | D1–D3 (D-BUILD.md; kit alpha.30; new-project/history/timeline/frame-occlusion/curves→NODES green) |
-| E | 5bf327f | | |
+| E | 638a8c8 | 7daff43 | E1–E6 (E-BUILD.md; kit alpha.31; molecular-names/curves/emission/keyboard-window/window-switching/menubar/offer green) |
+| F | 7daff43 | | |
