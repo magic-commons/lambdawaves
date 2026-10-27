@@ -96,7 +96,7 @@ export function createChem(host, api) {
   const rungRec = () => volRef.lwm.header.rungs[basis].record;
   function chemCharge(id) { return volRef && id === volRef.key ? volRef.charge : moleculeCharge(id); }   // the card's own: shadows the module's export with a volume molecule's
   /** the molecule on screen as a row the stage words, the caption and EDIT › COPY read: the catalogue's, or a volume molecule's { id, name, formula, charge, volume } */
-  const row = () => (volRef ? { id: volRef.key, name: volRef.name, formula: volRef.meta.formulaM || volRef.meta.formula, charge: volRef.charge, volume: 'VOL. ' + volRef.numeral } : PRESET_BY_ID.get(preset) || null);
+  const row = () => (volRef ? { id: volRef.key, name: volRef.name, formula: volRef.meta.formulaM || volRef.meta.formula, charge: volRef.charge, volume: 'VOL. ' + volRef.numeral, sub: volRef.sub } : PRESET_BY_ID.get(preset) || null);
 
   /** the dial's own label: knob() paints on construction and calls fmt() at once, so this is HOISTED */
   const sayOrbital = () => { if (api.say && sol) api.say('orbital', 'ORBITAL · ' + orbFmt(orbital), { hold: true }); };   // iteration 007: the dial under the hand, on the stage while INFORMATIONAL › ORBITAL DIAL is on
@@ -667,7 +667,7 @@ export function createChem(host, api) {
         const lwm = parseLwm(buf), H = lwm.header;
         v = { key: volId + ':' + molId, volume: volId, id: molId, numeral: idx.numeral, lwm, meta: H.meta, name: H.meta.name || molId, charge: H.meta.charge || 0,
           atoms: H.geometry.atoms.map((a) => ({ Z: +a.Z, x: +a.x, y: +a.y, z: +a.z })), geometry: H.geometry.source || '', rungs: Object.keys(H.rungs),
-          why: { ...(H.skipped || {}), ...(H.failed || {}) }, sha256: m.sha256 || null, bytes: buf.byteLength, from, bonds: H.geometry.bonds || H.meta.bonds || m.bonds || null };
+          why: { ...(H.skipped || {}), ...(H.failed || {}) }, sub: [...(m.tags || []), m.pg].filter(Boolean).join(' · '), sha256: m.sha256 || null, bytes: buf.byteLength, from, bonds: H.geometry.bonds || H.meta.bonds || m.bonds || null };
       } catch (e) {
         if (seq0 === volSeq) { if (api.loading) api.loading(false);
           status(network ? String(e && e.message || e) : `${String((m && m.name) || molId).toUpperCase()} · VOL. ${(idx && idx.numeral) || volId} is not on this device — install it in the PICKER's LIBRARY`, 'warn'); }

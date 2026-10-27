@@ -33,10 +33,10 @@ export function createSettings(app) {
       settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'),   // iteration 007: INFORMATIONAL's six keys left for their own record, lambdawaves.q0.info (shell/stage-words.js)
         auto: app.sh.quality.auto, governor: app.ctl.gov.on, keepFrames: app.ctl.keep.frames, perfMode: app.ctl.perf.mode,
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
-           none of the three survived a reload).  FRICTION and SPIN are how the instrument FEELS in the hand and they
-           belong beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
+           none of the three survived a reload).  FRICTION is how the instrument FEELS in the hand (SPIN left at 018 B4) and it
+           belongs beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
            when you open it is a surprise, not a setting. */
-        friction: app.host.camera.friction, spin: app.host.camera.speed, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock, audio: !!(ui.audioSw && ui.audioSw.get()), askOk: ASK_ENABLED ? ui.askOk || undefined : S0.askOk, askUrl: ASK_ENABLED ? (ui.askUrlIn && ui.askUrlIn.value.trim()) || undefined : S0.askUrl,   /* iteration 011 Q6: ASK hidden → the stored pair carried as it was */   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod); 0.5.3 M6: the camera's LOCK too
+        friction: app.host.camera.friction, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock, audio: !!(ui.audioSw && ui.audioSw.get()), askOk: ASK_ENABLED ? ui.askOk || undefined : S0.askOk, askUrl: ASK_ENABLED ? (ui.askUrlIn && ui.askUrlIn.value.trim()) || undefined : S0.askUrl,   /* iteration 011 Q6: ASK hidden → the stored pair carried as it was */   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod); 0.5.3 M6: the camera's LOCK too
         /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE, and it is the sixth of the six things
            host-contract.md says a host owes it: where the window sits, which lane the work bars are
            in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
@@ -91,8 +91,7 @@ export function createSettings(app) {
     if (s.governor === false) app.ctl.setGovernor(false);                 // wave 45: the governor held off
     if (s.keepFrames === true) app.ctl.setKeepFrames(true);              // wave 45: the playhead follows every frame (off by default)
     app.ctl.setPerfMode(s.perfMode === 'full' ? 'full' : '120');         // an absent key takes the official 120 Hz profile; an explicit FULL choice survives
-    if (typeof s.friction === 'number') app.host.camera.setFriction(s.friction);   // wave 51: the camera's feel comes back …
-    if (typeof s.spin === 'number') app.host.camera.setSpeed(s.spin);              // … but AUTO-ROTATE never does (see saveSettings)
+    if (typeof s.friction === 'number') app.host.camera.setFriction(s.friction);   // wave 51: the camera's feel comes back … but AUTO-ROTATE never does (see saveSettings); 018 B4: SPIN left, an old `spin` is read by nothing
     if (typeof s.dragGain === 'number') app.host.camera.setDragGain(s.dragGain);   // wave 58: DRAG GAIN and FLING ride beside them
     if (typeof s.fling === 'number') app.host.camera.setFling(s.fling);
     if (typeof s.camLock === 'boolean') app.host.camera.setLock(s.camLock);       // 0.5.3 M6: the classic camera (pan held at the centre), off when nothing was said

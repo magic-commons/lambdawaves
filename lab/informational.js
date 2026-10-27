@@ -6,7 +6,7 @@
  * kind of value chooses — grouped under short headings: THE WORDS (the formula, its NAME and SIZE; the ATOM LABELS and theirs; POSITION · PAD),
  * ANNOUNCE (one switch per kind and the pop-ups' SIZE), CURSOR (PARALLAX · DRIFT), MARKS (BEAD · UNCERTAINTY · DIPOLE — BALL AND STICK is THE WORDS' since 011 Q1 — which draw on the stage; the
  * record's since the fix round, C6, their blob keys lifted once) — and STATUS.  A hand writes the record and nothing else; the record repaints the controls (FORGET, a verb's flip). */
-import { el, readout, group } from './mir/kit.js'; import { control } from './mir/controls/factory.js'; import { fold } from './fold.js';
+import { el, readout, group, trig } from './mir/kit.js'; import { control } from './mir/controls/factory.js'; import { fold } from './fold.js';
 import { statusOf } from './status.js'; import { getHamiltonian } from './hamiltonian.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
 export function createInformational(app) {
   const { ui, device, isPhone } = app, P = infoPrefs();
@@ -15,6 +15,7 @@ export function createInformational(app) {
   /* one control per row, its value the record's: a hand sets the row (a dial live, as before), nothing else is written */
   const ctl = {};
   for (const r of INFO_ROWS) {
+    if (r.key === 'espBarSide') continue;   // a cycle button, below
     const d = { id: 'info.' + r.key, label: r.label, hint: r.hint, value: P.get(r.key) };
     if (r.type === 'bool') d.type = 'boolean';
     else if (r.type === 'enum') d.options = r.options;
@@ -22,6 +23,10 @@ export function createInformational(app) {
     d.onChange = (v) => P.set(r.key, v);
     ctl[r.key] = control(d);
   }
+  /* iteration 018 B7: the ESP bar's SIDE is one press that cycles RIGHT → LEFT → TOP → BOTTOM (Josh: "a toggle that just cycles"), not a seg */
+  { const r = INFO_ROWS.find((q) => q.key === 'espBarSide'), word = (v) => r.options.find((o) => o.id === v).label; let shown = P.get(r.key);
+    const b = trig({ label: word(shown), title: r.hint, cls: 'info-side', onFire: () => P.set(r.key, r.values[(r.values.indexOf(P.get(r.key)) + 1) % r.values.length]) });
+    ctl[r.key] = { root: b.root, get: () => shown, set: (v) => { shown = v; b.setLabel(word(v)); } }; }
   P.subscribe((st, changed) => { for (const k of changed) if (ctl[k] && ctl[k].get() !== st[k]) ctl[k].set(st[k]); });
   /* the names other roads press: verbs.js `switch formula|labels`, the notebook's command list */
   ui.molFormulaSw = ctl.molFormula.widget; ui.atomLabelsSw = ctl.atomLabels.widget;
@@ -29,7 +34,7 @@ export function createInformational(app) {
   /* iteration 012 R1 (Josh 10-20): the headings THE WORDS and ANNOUNCE · CURSOR · MARKS are hidden — the rows say what they are */
   const words = group(w.body, 'THE WORDS'); words.querySelector(':scope > .grp-lbl')?.remove();
   row(words, ['molFormula', 'molFormulaSize'], 'info-words');
-  row(words, ['molName', 'listCap'], 'info-words');   // iteration 011 Q1: THE LIST CAP beside NAME — both say what the formula writes
+  row(words, ['molName', 'molSubtitle', 'listCap'], 'info-words info-bar');   // iteration 011 Q1: THE LIST CAP beside NAME — both say what the formula writes; 018 B9: SUBTITLE between
   row(words, ['atomLabels', 'atomLabelsSize'], 'info-words');
   row(words, ['skeleton', 'skeletonOpacity', 'skeletonSize'], 'info-words info-ball');   // iteration 011 Q1: its own row; 012 R1: BALL AND STICK, shorter, OPACITY between it and SIZE
   row(words, ['bondOrder', 'bondAromatic', 'bondIonic', 'bondHydrogen'], 'info-words info-bonds');   // iteration 014 D6: BALL AND STICK's BONDS, one row under it
@@ -37,6 +42,8 @@ export function createInformational(app) {
   ui.bondsOf = () => { const c = app.state.chem; return { order: P.get('bondOrder'), aromatic: P.get('bondAromatic'), ionic: P.get('bondIonic'), hbond: P.get('bondHydrogen'), charges: c && c.chargesNow ? c.chargesNow() : null, rec: c && c.bondsNow ? c.bondsNow() : null }; };
   ui.bondSay = (line) => w.setStatus(line, 'live');
   const seat = row(words, ['infoPos', 'infoPad'], 'info-seat');
+  ui.espBarRow = row(words, ['espBar', 'espBarSide', 'espBarPad'], 'info-words info-bar');   // 018 B7: ESP BAR · SIDE · PAD (WAVE paints it, these seat it)
+  ui.espBarRow.hidden = !(app.state.chem && app.state.chem.on);   // 018 B10: a molecule's row — hidden under hydrogen or an atom; WAVE's modeSync re-syncs it
   const announce = group(w.body, 'ANNOUNCE');
   /* iteration 012 R1: ORBITALS is one switch for the two orbital kinds, so the pop-ups' SIZE takes the grid's last cell (where STYLE · PALETTE stood) */
   row(announce, [...INFO_ROWS.filter((r) => r.group === 'announce' && r.type === 'bool').map((r) => r.key), 'popSize'], 'info-grid');

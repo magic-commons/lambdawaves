@@ -28,6 +28,10 @@ const pct = (v) => Math.round(v * 100) + '%';
 export const INFO_ROWS = Object.freeze([
   { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'STAGE FORMULA', hint: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states — and caption a picture or a recording with it and its STATUS word; off, an export carries neither and the stage announces nothing' },
   { key: 'molName', type: 'bool', default: false, group: 'words', label: 'NAME', hint: 'The molecule\'s name under its formula (water under H₂O)' },
+  /* iteration 018 B9 (Josh: "Since we have isomers, let a secondary subtitle text be optional for the name … the name is a heading type and the subtitle
+     should be smaller like a 'body' text"): the line under the NAME that tells a molecule from its isomers — neither the catalogue nor a volume's index
+     carries a second name, so it is a volume molecule's index `tags` and point group `pg` (amide · C2v), a catalogue molecule's shelf (`group`) */
+  { key: 'molSubtitle', type: 'bool', default: false, group: 'words', label: 'SUBTITLE', hint: 'Under the NAME, in body type: what tells the molecule from its isomers — a volume molecule\'s tags and point group (amide · C2v), a catalogue molecule\'s shelf' },
   /* iteration 011 Q1 · THE LIST CAP (Josh 10-19: "have the informational automatically hide ultra large lists so it doesn't fight the screen and users don't
      have to keep toggling it on and off just because a certain mode uses an obscene amount of 140 levels"): SPECTRUM's populated list longer than the cap is
      written as its count — "140 levels · 7 shells" (capLine) — on the stage and in an export's caption; at or under the cap it is the list, as before.
@@ -37,7 +41,12 @@ export const INFO_ROWS = Object.freeze([
   { key: 'atomLabels', type: 'bool', default: true, group: 'labels', label: 'ATOM LABELS', hint: 'Mark each MOLECULES nucleus with its element symbol, inverting whatever is beneath it' },
   { key: 'atomLabelsSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'labels', label: 'SIZE', fmt: pct, hint: 'The ATOM LABELS\' size: 100% is the notebook\'s body (14 px)' },
   { key: 'infoPos', type: 'enum', values: ['top', 'bottom'], default: 'top', group: 'seat', label: 'POSITION', options: [{ id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'The formula at the top or the bottom of the free stage; the pop-ups take the other side' },
-  { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0.12, group: 'seat', label: 'PAD', fmt: pct, hint: 'The formula\'s distance from its edge of the free stage, as a share of its height; the pop-ups keep the same distance on the other side' },
+  { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'seat', label: 'PAD', fmt: pct, hint: 'The formula\'s distance from its edge of the free stage, as a share of its height; the pop-ups keep the same distance on the other side' },
+  /* iteration 018 B7 (Josh: "Include ESP's bar with a padding setting and a toggle that just cycles between right (where it is now), left, top, and bottom.
+     Stage text and formula is on top of the bar … Stage text takes priority"): the bar is painted by WAVE (material.js) and seated by these three */
+  { key: 'espBar', type: 'bool', default: true, group: 'bar', label: 'ESP BAR', hint: 'The ESP map’s colour bar on the stage while WAVE draws ESP — the shader’s own colours and five numbers in a.u.' },
+  { key: 'espBarSide', type: 'enum', values: ['right', 'left', 'top', 'bottom'], default: 'right', group: 'bar', label: 'SIDE', options: [{ id: 'right', label: 'RIGHT' }, { id: 'left', label: 'LEFT' }, { id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'The ESP bar’s side of the free stage — a press turns it RIGHT → LEFT → TOP → BOTTOM; where the formula is, the bar steps clear of it' },
+  { key: 'espBarPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'bar', label: 'PAD', fmt: pct, hint: 'The ESP bar’s distance from its edge of the free stage, as a share of the free stage across it' },
   ...KINDS.filter((k) => k.hint).map((k) => ({ key: k.key, type: 'bool', default: false, group: 'announce', label: k.label, hint: k.hint })),
   { key: 'popSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'announce', label: 'SIZE', fmt: pct, hint: 'The pop-ups\' size: 100% is 15 px' },
   { key: 'cursorAway', type: 'bool', default: false, group: 'cursor', label: 'PARALLAX', hint: 'The words lean away from the pointer as it crosses the stage (the kit layer\'s follow and parallax)' },
@@ -69,13 +78,13 @@ export const BLOB_INFO = Object.freeze(['molFormula', 'molFormulaSize', 'atomLab
 /** …and the three MARKS it held until the fix round (C6), each written only while on: read once into the record, whenever they are found */
 const BLOB_MARKS = Object.freeze(['skeleton', 'bead', 'ellipsoid']);
 /** liftInfo(blob) → the record's patch, by the laws shell/settings.js read them by: nothing said is ON at 100 %; an absent atomLabels /
- *  atomLabelsSize takes the stored molFormula / molFormulaSize (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); TOP at 12 % */
+ *  atomLabelsSize takes the stored molFormula / molFormulaSize (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); TOP at PAD 0 (018 B8; 12 % before) */
 export function liftInfo(s = {}) {
   if (!BLOB_INFO.some((k) => s[k] !== undefined)) return {};
   const num = (v) => (v === undefined || v === null ? NaN : +v), clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const molFormula = s.molFormula !== undefined ? s.molFormula !== false : s.atomLabels !== false, atomLabels = s.atomLabels !== undefined ? s.atomLabels !== false : molFormula;
   const molFormulaSize = Number.isFinite(num(s.molFormulaSize)) ? clamp(num(s.molFormulaSize), 0.5, 3) : 1, atomLabelsSize = Number.isFinite(num(s.atomLabelsSize)) ? clamp(num(s.atomLabelsSize), 0.5, 3) : molFormulaSize;
-  return { molFormula, atomLabels, molFormulaSize, atomLabelsSize, infoPos: s.infoPos === 'bottom' ? 'bottom' : 'top', infoPad: Number.isFinite(num(s.infoPad)) ? clamp(num(s.infoPad), 0, 0.4) : 0.12 };
+  return { molFormula, atomLabels, molFormulaSize, atomLabelsSize, infoPos: s.infoPos === 'bottom' ? 'bottom' : 'top', infoPad: Number.isFinite(num(s.infoPad)) ? clamp(num(s.infoPad), 0, 0.4) : 0 };
 }
 let infoStore = null, infoSeen = false;
 /** infoPrefs() — the one record (made at its first call: INFORMATIONAL's seat or applySettings', whichever comes first).  THE LIFT runs here, once:
@@ -124,7 +133,8 @@ export function createStageWords(app) {
   }
   function stageMd() {
     const row = app.state.chem && app.state.chem.on ? app.state.chem.row() : null;   // the catalogue's row or a volume molecule's (V2)
-    return row ? '$' + formulaLatex(row.formula) + '$' + (P.get('molName') && row.name ? '\n\n' + mdText(row.name) : '') : stageStates(true);   // NAME: the molecule's name under its formula
+    const sub = row && P.get('molName') && P.get('molSubtitle') && (row.sub || row.group);   // 018 B9: SUBTITLE, under the NAME only
+    return row ? '$' + formulaLatex(row.formula) + '$' + (P.get('molName') && row.name ? '\n\n' + mdText(row.name) : '') + (sub ? '\n\n' + mdText(sub) : '') : stageStates(true);   // NAME: the molecule's name under its formula
   }
   /** THE CAPTION a capture carries (T3): the same stage text as ONE plain-Unicode line — `H₂O · 1b1 HOMO · STO-3G` (the
    *  formula, the ORBITAL on the field in names.js's plain form, the basis) or SPECTRUM's states ("2s₀, 2p₋₁"; A ↔ B) — drawn
@@ -163,7 +173,7 @@ export function createStageWords(app) {
     /* 2026-10-16 (Josh, iteration 001) · THE SEAT: TOP or BOTTOM of the free stage, PAD its share of the free height from that edge (0.12 is the kit's
        own seat).  The kit is not edited: two hair-thin bands in `avoid()` (mid-stage, never at an edge, so never read as a rack) pin the free stage
        to exactly the block's height at the seat, so the kit's placeBlock lands it there.  THE POP-UPS sit on the OTHER side, at the same PAD. */
-    const seat = { bottom: false, pad: 0.12 }; let block = null;
+    const seat = { bottom: false, pad: 0 }; let block = null;   // 018 B8: PAD 0 on a first run (Josh: "Informational's pad at zero"); a stored record keeps its own
     const bars = () => [...racks(), app.sh.layout.docked ? null : document.getElementById('transport')].map((e) => paintedRect(e)).filter(Boolean);
     function freeOf(rs, sb) {                                          // the kit's free() rule (info/layer.js), in stage px
       const m = INFO.margin, vw = innerWidth; let L = m, R = sb.width - m, T = m, B = sb.height - m;
@@ -286,6 +296,10 @@ export function createStageWords(app) {
       setScale(s) { layer.root.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
       /** the pop-ups' SIZE (× 15 px), apart from the formula's since iteration 007 */
       setPopScale(s) { pop.style.setProperty('--lw-pop-size', String(s)); },
+      /** the free stage (stage px { L, R, T, B, m }) and the formula block's rect in stage px or null: where the ESP bar may sit and what it yields to (018 B7) */
+      free: () => freeOf(bars(), dom.stage.getBoundingClientRect()),
+      blockRect() { if (!on || !block) return null; const r = block.el.getBoundingClientRect(), sb = dom.stage.getBoundingClientRect();
+        return r.width ? { left: r.left - sb.left, right: r.right - sb.left, top: r.top - sb.top, bottom: r.bottom - sb.top } : null; },
       get on() { return on; }, get labelsOn() { return labelsOn; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },
     };
     /* THE RECORD APPLIED: every row at the go, then each change (INFORMATIONAL, FORGET).  The kit's createPrefs coalesces its page writes under ONE
@@ -301,7 +315,7 @@ export function createStageWords(app) {
       if (ch('popSize')) api.setPopScale(st.popSize);
       if (!all && ch('cursorAway')) { layer.setFollow(st.cursorAway); layer.setParallax(st.cursorAway); }
       if (!all && ch('cursorDrift')) layer.setDrift(st.cursorDrift);
-      if (!all && (ch('molName') || ch('listCap'))) { stageSrc.v = -1; stageTextTick(); }   // iteration 011 Q1: the cap re-writes the list at once
+      if (!all && (ch('molName') || ch('molSubtitle') || ch('listCap'))) { stageSrc.v = -1; stageTextTick(); }   // iteration 011 Q1: the cap re-writes the list at once
       if (!all) { look.prefs.apply(); schedule(TIER.PRESENT); }   // the atom labels are the frame's
     };
     applyInfo(P.all()); P.subscribe(applyInfo);

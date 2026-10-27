@@ -11,24 +11,23 @@
  * 0.5.0 C1 · the panel is that window now, so the fifth edge, `ui` (the dials the law moved by hand), is gone: every change
  * the law makes is a notice, and the panel reads the port on the frame after it. */
 import { quatFromYawPitch, yawPitchFromQuat, turnFree, setParity } from './field.js';
-import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit quaternion, and it uses the lab's own rotor library
+import { slerp } from './rotor4.js';   // wave 54: the FREE camera is ONE unit quaternion, and it uses the lab's own rotor library
 
 /* ── THE CAMERA LAW (wave 50, W-CAMERA) ─────────────────────────────────────────────────────────────────────
  * NEBULA carries four motion modes (AUTO-ROTATE × MOMENTUM) and a fling that fights whichever one is on.  We
- * carry ONE first-order law and one constant.  The camera's angular velocity is an AMBIENT drive plus a
- * RESIDUAL, and only the residual relaxes — at the rate μ = FRICTION (1/s):
+ * carry ONE first-order law and one constant.  The camera's angular velocity is the RESIDUAL a fling left, and
+ * it relaxes at the rate μ (1/s):
  *
- *        ω(t) = ω_amb + d(t),     ḋ = −μ d     ⇒     ω(t) = ω_amb + (ω₀ − ω_amb) e^{−μt}
- *        ω_amb = (AUTO-ROTATE ? SPIN : 0,  0)                    — a yaw drive; PITCH has no ambient
+ *        ω(t) = d(t),     ḋ = −μ d     ⇒     ω(t) = ω₀ e^{−μt},     μ = AUTO-ROTATE ? 0 : FRICTION
  *
- * so a fling COMPOSES with the ambient spin and relaxes TO it, never against it (NEBULA's N7, "one coalesced
- * strongest request", as a single equation instead of a state machine).  The four booleans become two dials:
- * μ large is "no momentum" (a flick dies inside half a second), μ moderate is momentum, μ = 0 is NO DECAY —
- * the residual never dies and the view spins forever — crossed with the ambient switch, and every combination
- * is reachable and legible.  THE ANGLE IS THE INTEGRAL of ω, not ω·dt: over a frame of dt the exact solution is
- *        Δyaw = ω_amb·dt + d_y (1 − e^{−μ dt})/μ,   Δpitch = d_p (1 − e^{−μ dt})/μ        (→ d·dt as μ → 0)
- * which is why the whole travel of a fling is closed form — with the ambient off it turns through exactly ω₀/μ
- * and stops — and that identity is what the gate judges (B65), not a screenshot.
+ * Iteration 018 B4 (Josh: "Auto-Rotate should simply … take the 'friction' knob and pretend the knob is set to 0! Clicking
+ * auto-rotate does not change the current 'friction' knob setting"): AUTO-ROTATE is FRICTION READ AS 0 while it is on —
+ * a fling keeps its speed for ever, the FRICTION knob keeps its value, and there is no ambient drive (the SPIN knob left
+ * with it; the port no longer answers `spin`).  μ large is "no momentum" (a flick dies inside half a second), μ moderate
+ * is momentum, μ = 0 is NO DECAY.  THE ANGLE IS THE INTEGRAL of ω, not ω·dt: over a frame of dt the exact solution is
+ *        Δyaw = d_y (1 − e^{−μ dt})/μ,   Δpitch = d_p (1 − e^{−μ dt})/μ        (→ d·dt as μ → 0)
+ * which is why the whole travel of a fling is closed form — it turns through exactly ω₀/μ and stops — and that
+ * identity is what the gate judges (B65), not a screenshot.
  * THE CONSTANTS.  μ ∈ [0, 12] /s in steps of 0.05 (so μ = 0 is EXACTLY reachable), DEFAULT CAM.MU_DEF = 1.0 (wave 50
  * shipped 2.5, and the figures that follow are 2.5's): τ = 1/μ = 0.4 s,
  * a hard flick (3 rad/s) coasts ln(ω₀/ω_rest)/μ ≈ 2.8 s and turns through ω₀/μ = 1.2 rad = 69° — two flicks to
@@ -39,7 +38,7 @@ import { qmul, qnormalize, slerp } from './rotor4.js';   // wave 54: the FREE ca
  * component and keeps its yaw.  THE CAMERA NEVER TOUCHES ψ: it schedules TIER.PRESENT and nothing else, it is
  * not on the undo stack, and reg.version cannot move because of it (§14). */
 export const CAM = { MU_MAX: 12, MU_DEF: 1.0, MU_STEP: 0.05, REST: 0.003, MAX: 12, HIST_MS: 80, STALE_MS: 120, SENS: 0.0065, FINE: 0.25, PITCH: 1.52, DIST: [1.2, 8], FOV: [0.25, 1.2], TAP_MS: 320, HOME: { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6, shift: Object.freeze([0, 0]) },
-  GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01, SHIFT: 1, SPIN: [0.02, 2], SPIN_DEF: 0.25 };   // C1: SPIN's range, once
+  GAIN: [0.2, 8], GAIN_DEF: 1, GAIN_STEP: 0.01, FLING: [0, 2], FLING_DEF: 1, FLING_STEP: 0.01, SHIFT: 1 };
 /** THE LENS SHIFT's one bound (0.4.0 S2): obs.shift = [px, py] is where the pivot appears on the frame, in NDC (+y up),
  *  each component in [−SHIFT, SHIFT] — the pivot reaches the frame's edge and never leaves it.  A fresh array; anything
  *  that is not a finite number reads 0 (an older project, a hand-edited file). */
@@ -48,22 +47,22 @@ export const clampShift = (s) => [0, 1].map((i) => { const v = s ? +s[i] : 0; re
 export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
   const subs = new Set(), tell = () => { for (const f of subs) f(); }, present = () => { paint(); tell(); };   // A8: every PRESENT the law asks for is a notice
   const camera = {
-    autoRotate: false, speed: CAM.SPIN_DEF, friction: CAM.MU_DEF,
+    autoRotate: false, friction: CAM.MU_DEF,
     dragGain: CAM.GAIN_DEF, flingGain: CAM.FLING_DEF,   // wave 58: rad/px = dragGain × CAM.SENS · the release is multiplied by flingGain before the law sees it
-    dy: 0, dp: 0,                                    // THE RESIDUAL d = ω − ω_amb (rad/s): the only state the law carries
+    dy: 0, dp: 0,                                    // THE RESIDUAL d = ω (rad/s): the only state the law carries
     t: 0, steps: 0, flings: 0, last: null,           // t: the seconds the law has integrated — the CAMERA clock (§12)
-    get ambient() { return this.autoRotate ? this.speed : 0; },
-    get wy() { return this.ambient + this.dy; },     // ω_yaw
+    get mu() { return this.autoRotate ? 0 : Math.max(0, this.friction); },   // 018 B4: AUTO-ROTATE reads FRICTION as 0, the knob untouched
+    get wy() { return this.dy; },                    // ω_yaw
     get wp() { return this.dp; },                    // ω_pitch
     get omega() { return Math.hypot(this.wy, this.wp); },
-    get moving() { return this.ambient !== 0 || this.dy !== 0 || this.dp !== 0; },   // "the law has something to integrate"
-    /** hand the camera an angular velocity (rad/s, capped at MAX): what the law relaxes is ω − ω_amb.
+    get moving() { return this.dy !== 0 || this.dp !== 0; },   // "the law has something to integrate"
+    /** hand the camera an angular velocity (rad/s, capped at MAX): what the law relaxes.
      *  FLING scales ω₀ FIRST — how much you get — and μ then decides how fast it goes: at gain 0 there is nothing
      *  to decay and the view stops dead on release (the drag itself is untouched), which no value of μ can do. */
     fling(wy, wp = 0) { const G = this.flingGain; wy *= G; wp *= G;
       const m = Math.hypot(wy, wp), k = m > CAM.MAX ? CAM.MAX / m : 1;
       if (m < CAM.REST) { wy = 0; wp = 0; }                                   // gain 0, and anything under half a pixel a second: REST is REST after the gain, not before
-      this.dy = k * wy - this.ambient; this.dp = k * wp; this.flings++; this.last = { wy: this.wy, wp: this.wp, mu: this.friction, gain: G }; this.wake(); return this.omega; },
+      this.dy = k * wy; this.dp = k * wp; this.flings++; this.last = { wy: this.wy, wp: this.wp, mu: this.mu, gain: G }; this.wake(); return this.omega; },
     stop() { this.dy = 0; this.dp = 0; },
     /** the camera clock starts NOW: the first frame after an idle must not integrate the idle */
     wake() { resetWall(); present(); },
@@ -72,7 +71,6 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
     setFling(v) { this.flingGain = Math.max(CAM.FLING[0], Math.min(CAM.FLING[1], +v)); tell(); return this.flingGain; },
     get radPerPixel() { return this.dragGain * CAM.SENS; },
     setAutoRotate(v) { this.autoRotate = !!v; this.wake(); return this.autoRotate; },
-    setSpeed(v) { this.speed = v; this.wake(); return v; },
     setDist(v) { return setDist(v); }, setFov(v, c) { return setFov(v, c); }, reset() { resetView(); },
     zoomAt(c, v) { return zoomAt(c, v); }, setShift(x, y) { return setShift(x, y); }, panBy(du, dv) { return panBy(du, dv); },   // 0.4.0 S2
     get lock() { return locked; }, setLock(v) { return setLock(v); },
@@ -153,23 +151,19 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
    *  Returns whether the pose moved.  Never called while a finger is on the field — the drag owns the pose then. */
   function cameraStep(dt) {
     if (!(dt > 0)) return false;
-    const mu = Math.max(0, camera.friction), wa = camera.ambient;
+    const mu = camera.mu;
     let iy, ip;                                                                      // ∫₀^dt d(s) ds — the residual's own travel
     if (mu > 0) { const e = Math.exp(-mu * dt), s = (1 - e) / mu; iy = camera.dy * s; ip = camera.dp * s; camera.dy *= e; camera.dp *= e; }
     else { iy = camera.dy * dt; ip = camera.dp * dt; }                               // μ = 0: no decay at all — the fling spins forever
-    if (!wa && Math.hypot(camera.dy, camera.dp) < CAM.REST) { camera.dy = 0; camera.dp = 0; }   // REST: the camera is still, and the loop may stop
+    if (Math.hypot(camera.dy, camera.dp) < CAM.REST) { camera.dy = 0; camera.dp = 0; }   // REST: the camera is still, and the loop may stop
     camera.t += dt; camera.steps++;
     if (obs.mode === 'free') {
-      const amb = wa * dt;                                                           // the AMBIENT is a WORLD axis: LEFT-multiply
-      if (amb) obs.quat = qnormalize(qmul([Math.cos(amb / 2), 0, 0, Math.sin(amb / 2)], obs.quat));
-      if (iy || ip) obs.quat = turnFree(obs.quat, iy, ip);                            // the RESIDUAL is screen-relative: RIGHT-multiply, and no clamp anywhere
-      if (amb || iy || ip) { syncFreeAngles(); return true; }
+      if (iy || ip) { obs.quat = turnFree(obs.quat, iy, ip); syncFreeAngles(); return true; }   // the RESIDUAL is screen-relative: RIGHT-multiply, and no clamp anywhere
       return false;
     }
-    const dyaw = wa * dt + iy;
-    if (dyaw) obs.yaw += dyaw;
+    if (iy) obs.yaw += iy;
     if (ip) { const want = obs.pitch + ip, held = Math.max(-CAM.PITCH, Math.min(CAM.PITCH, want)); if (held !== want) camera.dp = 0; obs.pitch = held; }   // the pole clamp EATS the pitch fling; the yaw runs on
-    return dyaw !== 0 || ip !== 0;
+    return iy !== 0 || ip !== 0;
   }
   /* the camera's pose has ONE road each: the ZOOM dial, the wheel, the pinch and the arrow keys all come through
      zoomAt, so the dial can never lie about where the camera is (and neither can a restored project).
@@ -197,7 +191,7 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
   let flipped = false;
   function setFlip(v) { flipped = !!v; setParity(flipped); present(); return flipped; }   // M6: engaged, PAN HOME raw — a routed axis keeps its base, its route is clamped
   /** RESET VIEW (HOME, R, a double-click and a double-tap): the shipped pose and the motion with it —
-      AUTO-ROTATE is a mode, not a pose, so the ambient drive is left exactly where the switch put it */
+      AUTO-ROTATE is a mode, not a pose, so the switch stays where it is */
   function resetView() { const m = obs.mode; camLevel.from = null; Object.assign(obs, CAM.HOME); obs.mode = m; obs.quat = quatFromYawPitch(CAM.HOME.yaw, CAM.HOME.pitch); camera.stop(); present(); }   // wave 54: the pose is the same pose in either mode
   /* ── 0.5.0 A8 · THE PORT (MIR 1.5 panels/camera.js: get / set / subscribe, ranges in the port's unit, angle 'rad', modIds onto the
      saved observer.* routes, turn, home) and brief 1's three hands.  `set` is a HAND's road: a routed axis moves its base, as every
@@ -209,16 +203,16 @@ export function createCameraLaw({ obs, present: paint, modHand, resetWall }) {
   const ROADS = { mode: [() => obs.mode, (v) => setCamMode(v)], zoom: [() => obs.dist, setDist], fov: [() => obs.fov, (v) => setFov(v)],
     panX: [() => sh()[0], (v) => setShift(v, sh()[1], 0)], panY: [() => sh()[1], (v) => setShift(sh()[0], v, 1)],
     yaw: [() => obs.yaw, (v) => modHand('observer.yaw', v) || turn(v - obs.yaw, 0)], pitch: [() => obs.pitch, (v) => modHand('observer.pitch', v) || turn(0, v - obs.pitch)],
-    autoRotate: [() => camera.autoRotate, (v) => camera.setAutoRotate(v)], spin: [() => camera.speed, (v) => camera.setSpeed(v)],
+    autoRotate: [() => camera.autoRotate, (v) => camera.setAutoRotate(v)],
     friction: [() => camera.friction, (v) => camera.setFriction(v)], drag: [() => camera.dragGain, (v) => camera.setDragGain(v)], fling: [() => camera.flingGain, (v) => camera.setFling(v)],
-    lock: [() => locked, setLock], flip: [() => flipped, setFlip] };   // 0.5.3 M6: not in the kit's vocabulary, so the panel draws no control for it; the card's LOCK switch is λWAVES'
+    lock: [() => locked, setLock], flip: [() => flipped, setFlip] };   // 0.5.3 M6: `lock` is not in the kit's vocabulary (the card's LOCK switch is λWAVES'); `flip` is (camera-rig.js), so the panel draws THE FLIP switch (018 B3)
   const pan = (v) => (v > 0 ? '+' : '') + v.toFixed(2);
   const port = { angle: 'rad', get: (id) => (ROADS[id] ? ROADS[id][0]() : undefined), set(id, v) { if (ROADS[id]) ROADS[id][1](v); },
     subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }, notify: tell, turn, home: () => resetView(), setShift, zoomAt, panBy,
     verbs: Object.freeze([{ label: 'PAN HOME', title: 'PAN HOME — put the pivot back in the middle of the frame', run: () => { setShift(0, 0); } }]),
     modIds: Object.freeze({ yaw: 'observer.yaw', pitch: 'observer.pitch', zoom: 'observer.dist', fov: 'observer.fov', panX: 'observer.panx', panY: 'observer.pany' }),
     ranges: Object.freeze({ zoom: R(...CAM.DIST, H.dist, { log: true, fmt: 'zoom' }), fov: R(...CAM.FOV, H.fov), yaw: R(0, 2 * Math.PI, H.yaw),
-      pitch: R(-CAM.PITCH, CAM.PITCH, H.pitch), panX: R(-CAM.SHIFT, CAM.SHIFT, 0, { fmt: pan }), panY: R(-CAM.SHIFT, CAM.SHIFT, 0, { fmt: pan }), spin: R(...CAM.SPIN, CAM.SPIN_DEF),
+      pitch: R(-CAM.PITCH, CAM.PITCH, H.pitch), panX: R(-CAM.SHIFT, CAM.SHIFT, 0, { fmt: pan }), panY: R(-CAM.SHIFT, CAM.SHIFT, 0, { fmt: pan }),
       drag: R(...CAM.GAIN, CAM.GAIN_DEF, { step: CAM.GAIN_STEP, log: false }), friction: R(0, CAM.MU_MAX, CAM.MU_DEF, { step: CAM.MU_STEP }),
       fling: R(...CAM.FLING, CAM.FLING_DEF, { step: CAM.FLING_STEP }) }) };
   return { camera, camTravel, camLevel, syncFreeAngles, orbitBy: told(orbitBy), keyOrbitMoving, queueKeyOrbit, stepKeyOrbit: told(stepKeyOrbit), setCamMode,

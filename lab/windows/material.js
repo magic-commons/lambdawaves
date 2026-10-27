@@ -1,11 +1,12 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js';
-import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex } from '../mir/palette.js';
+import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js'; import { infoPrefs } from '../shell/stage-words.js';
+import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
   const wObs = device({ id: 'observer', eyebrow: 'WAVE', status: '' });
+  let paintBar = () => {};   // the ESP bar's colours (018 B5), set where the bar is built
   const wPal = device({ id: 'palette', eyebrow: 'PALETTE', status: '' });
   const wCam = device({ id: 'camera', eyebrow: 'CAMERA', status: '' });
   const wClip = device({ id: 'clip', eyebrow: 'CLIP', status: '' });   // 0.4.0 S3 (R-W3): CLIP, once SLICE / CLIP — the id stays
@@ -32,7 +33,7 @@ export function createMaterial(app) {
     const r2 = el('div', 'row tight', gSpace);
     ui.expK = knob({ label: 'EXPOSURE', min: 0.08, max: 12, value: 1, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.exposure', v)) return; mat.exposure = v; schedule(TIER.PRESENT); } }); r2.appendChild(ui.expK.root);
     ui.softK = knob({ label: 'SOFT', reverse: true, min: 0.3, max: 2.2, value: 0.7, fmt: (v) => 'γ' + v.toFixed(2), onInput: (v) => { if (modHand('material.softness', v)) return; mat.softness = v; schedule(TIER.PRESENT); } }); r2.appendChild(ui.softK.root);
-    ui.hueK = knob({ label: 'HUE', min: 0, max: 1, value: 0, wrap: true, fmt: (v) => (v * 360).toFixed(0) + '°', onInput: (v) => { if (modHand('material.hue', v)) return; mat.hueShift = v; applyAccent(); schedule(TIER.PRESENT); } }); r2.appendChild(ui.hueK.root);
+    ui.hueK = knob({ label: 'HUE', min: 0, max: 1, value: 0, wrap: true, fmt: (v) => (v * 360).toFixed(0) + '°', onInput: (v) => { if (modHand('material.hue', v)) return; mat.hueShift = v; applyAccent(); paintBar(); schedule(TIER.PRESENT); } }); r2.appendChild(ui.hueK.root);
   function createDrawClipPaletteCamera() {   // the second seat: WAVE's DRAW · CLIP · PALETTE · INVERT · CAMERA
     const gd = group(gDraw, 'the transfer has a bounded ceiling');            // WAVE 56: DRAW STYLE (window id `style`) merged into WAVE (board #59); this block is the DRAW section of the WAVE window
     const rd = el('div', 'row tight', gd);
@@ -71,16 +72,43 @@ export function createMaterial(app) {
        opacity falls"): `mat.espBare`, written only by a hand (absent = off, so an older file and the edit bytes are unchanged; an older build ignores it) */
     ui.espBareSw = sw({ label: 'MAP ONLY', value: false, title: 'ESP: the map alone — no sticks inside it, and only the stage beneath it as EXPOSURE lowers its opacity', onChange: (on) => { mat.espBare = on; schedule(TIER.PRESENT); } });
     ui.espLiveSw = sw({ label: 'LIVE · SLOW', value: false, title: 'ESP: solve φ again while the density moves (RUN, a beating register), at most once a second — slow; off, φ is solved once per molecule, basis and VIEW', onChange: (on) => { mat.espLive = on; schedule(TIER.PRESENT); } });
-    { const r = el('div', 'row tight', gd); for (const k of [ui.atomSizeK, ui.stickK, ui.espBareSw, ui.probeK, ui.espRangeK]) r.appendChild(k.root); const r2 = el('div', 'row tight', gd); for (const k of [ui.espSurfSeg, ui.espLiveSw]) r2.appendChild(k.root); }
+    { const r = el('div', 'row tight', gd); for (const k of [ui.atomSizeK, ui.stickK, ui.espBareSw, ui.espSurfSeg]) r.appendChild(k.root); const r2 = el('div', 'row tight', gd); for (const k of [ui.probeK, ui.espRangeK, ui.espLiveSw]) r2.appendChild(k.root); }   // 018 B2 (native-ui.js seats the same two)
     /* the map's COLOUR BAR (Josh's answer 3): vertical, beside the map at the free stage's right, five numbers — the signed log's inverse at s = ±1, ±½, 0
-       (iteration 015 W3: ±RANGE, ±RANGE·(√21 − 1)/20, 0); PALETTE ON puts the palette in it from its first stop to its last, as the map reads it (W2);
-       HUE turns it as it turns the map */
+       (iteration 015 W3: ±RANGE, ±RANGE·(√21 − 1)/20, 0).  Iteration 018 B5 (Josh: "the charge color strip … should change while summing all the hue
+       changes from wave's hue knob, palette's hue rotate knob and invert"): the bar IS field.js espColour, sampled — PALETTE ON the LUT between its
+       first and last stop (palSpan) offset by HUE × 256, PALETTE OFF the five-stop ramp through hueRot (Rodrigues about grey), then INVERT 1 − c; no
+       CSS filter.  ROTATE follows because it rotates the stops the LUT is made of */
     const bar = el('div', 'lw-espbar', app.dom.stage); bar.hidden = true; bar.setAttribute('aria-hidden', 'true');
-    const barRamp = el('i', 'lw-espbar-ramp', bar), barNums = [0, 1, 2, 3, 4].map((i) => { const n = el('span', 'lw-espbar-n', bar); n.style.top = (i * 25) + '%'; return n; });
+    const barRamp = el('i', 'lw-espbar-ramp', bar), barNums = [0, 1, 2, 3, 4].map(() => el('span', 'lw-espbar-n', bar));
     el('span', 'lw-espbar-u', bar).textContent = 'φ · a.u.';
-    let barTimer = 0;
-    const barSeat = () => { const r = app.host.rack, rr = r && !r.hidden && r.querySelector('.dev:not(.closed):not([hidden])') ? r.getBoundingClientRect() : null, sb = app.dom.stage.getBoundingClientRect();
-      bar.style.right = Math.max(16, rr && rr.left > sb.left + sb.width / 2 && rr.left < sb.right ? sb.right - rr.left + 16 : 16) + 'px'; };
+    let barTimer = 0, barKey = '', palLut = null, lutN = 0;
+    const RAMP = ESP_RAMP.map(hexToRgb), K3 = 1 / Math.sqrt(3);
+    const hueRot = (c, h) => { if (!h) return c; const a = h * 2 * Math.PI, ca = Math.cos(a), sa = Math.sin(a), d = (c[0] + c[1] + c[2]) / 3 * (1 - ca);
+      const x = [c[2] - c[1], c[0] - c[2], c[1] - c[0]]; return c.map((v, i) => Math.min(1, Math.max(0, v * ca + K3 * x[i] * sa + d))); };   // field.js hueRot: k = (1,1,1)/√3
+    const espAt = (u) => {   // field.js espColour at the map's u ∈ [0, 1] (−RANGE … +RANGE)
+      const h = mat.hueShift || 0; let c;
+      if (mat.paletteOn && palLut) { const ps = palSorted(), a = Math.round(ps[0].at * 256), b = Math.min(255, Math.round(ps[ps.length - 1].at * 256));
+        let x = a + (b - a) * u + h * 256; x -= 256 * Math.floor(x / 256); const i = Math.floor(x) % 256, j = (i + 1) % 256, f = x - Math.floor(x);
+        c = [0, 1, 2].map((q) => palLut[i * 4 + q] + (palLut[j * 4 + q] - palLut[i * 4 + q]) * f); }
+      else { const s = u * 4, k = Math.min(3, Math.floor(s)), f = s - k; c = hueRot(RAMP[k].map((v, q) => v + (RAMP[k + 1][q] - v) * f), h); }
+      return mat.invert ? c.map((v) => 1 - v) : c; };
+    paintBar = () => { if (bar.hidden) return; const key = [mat.paletteOn, mat.hueShift, mat.invert, lutN, bar.dataset.side].join();
+      if (key === barKey) return; barKey = key;
+      barRamp.style.background = 'linear-gradient(to ' + (/^(top|bottom)$/.test(bar.dataset.side) ? 'right' : 'top') + ', ' + Array.from({ length: 25 }, (_, i) => rgbToHex(espAt(i / 24)) + ' ' + (i / 24 * 100).toFixed(1) + '%').join(', ') + ')'; };
+    /* iteration 018 B7 · THE BAR'S SEAT is INFORMATIONAL's (ESP BAR · SIDE · PAD in `lambdawaves.q0.info`): the free stage the formula's block reads (racks
+       and a floating transport out), PAD a share of it from the SIDE's edge, centred along it; TOP and BOTTOM lie the bar down (data-side, lab.css).
+       THE STAGE TEXT WINS: a bar that would cross the formula block steps clear of it, vertically — a TOP bar under it, a BOTTOM bar over it, a side
+       bar away from it */
+    const IP = infoPrefs();
+    const barSeat = () => {
+      const st = app.state.stageText, sb = app.dom.stage.getBoundingClientRect(), side = IP.get('espBarSide'), pad = IP.get('espBarPad'), horiz = side === 'top' || side === 'bottom';
+      if (bar.dataset.side !== side) { bar.dataset.side = side; barNums.forEach((n, i) => { n.style.top = horiz ? '' : i * 25 + '%'; n.style.left = horiz ? 100 - i * 25 + '%' : ''; }); paintBar(); }
+      const F = st ? st.free() : { L: 16, R: sb.width - 16, T: 16, B: sb.height - 16 }, w = bar.offsetWidth, h = bar.offsetHeight, b = st && st.blockRect(), G = 12;
+      const x = horiz ? (F.L + F.R - w) / 2 : side === 'left' ? F.L + pad * (F.R - F.L) : F.R - pad * (F.R - F.L) - w;
+      let y = horiz ? (side === 'top' ? F.T + pad * (F.B - F.T) : F.B - pad * (F.B - F.T) - h) : (F.T + F.B - h) / 2;
+      if (b && x < b.right + G && x + w > b.left - G && y < b.bottom + G && y + h > b.top - G) y = side === 'top' || (side !== 'bottom' && b.top + b.bottom < 2 * y + h) ? b.bottom + G : b.top - G - h;
+      bar.style.left = Math.round(x) + 'px'; bar.style.top = Math.round(y) + 'px'; };
+    IP.subscribe((_, changed) => { if (changed.some((k) => /^(espBar|infoP)/.test(k))) styleSync(); });
     /* iteration 015 W1 · THE KNOBS FOLLOW THE STYLE (Josh: "Allow the knobs to be dynamically shown"): the table is RENDER_WGSL's own reads (SOFT is the
        power w = ρ^SOFT, which SOLID · SIGNED · SHELL · SHELL ± overwrite, and ESP's soft edge under its ISO surface since 016 S1; KNEE is the transmittance
        T_q, which ADD and the atom styles skip; ISO under ESP is its ISO surface's).  Iteration 016 V1 (Josh: "the knobs a style does not read are GREYED,
@@ -96,7 +124,9 @@ export function createMaterial(app) {
        styleSync greys by MODE as well as by style, one button at a time in the kit's muted look (seats stay).  Under a molecule MOMENTUM φ(p) (a set
        molecule owns the volume; the eigenmode kernel and its SPACE stand down) and Im ψ unless the volume is a complex orbital (the density, Δρ and a
        real orbital write (√ρ | ψ, 0): Im ψ draws nothing — the molecule matrix road in field.js); under hydrogen / an atom BALLS · STICKS · ESP, the molecule's
-       views (the shader draws them as CLOUD there) */
+       views (the shader draws them as CLOUD there).  Iteration 018 B1 (Josh: "If molecules is off, it should hide anything related to molecules … so
+       that the window is much smaller for hydrogen"): under hydrogen / an atom BALLS · STICKS · ESP and the two molecule rows are HIDDEN, their seats
+       collapse; under a molecule the style greys stand as in 017 */
     const modeMute = (s, id, off, why) => { const b = s.button(id); if (!b) return; b.disabled = off; const o = s.spec.options.find((q) => q.id === id), t = off ? why : o && o.title;
       if (t) hint(b, t); else { b.removeAttribute('title'); delete b.dataset.help; delete b.dataset.helpEn; } };   // the kit's hint hop keeps a title as data-help
     function modeSync() {
@@ -104,19 +134,19 @@ export function createMaterial(app) {
       if (mol) modeMute(ui.spaceSeg, 'p', true, 'a molecule owns the volume: position space only while MOLECULES is on');
       else if (!(app.sturm && app.sturm.P)) modeMute(ui.spaceSeg, 'p', false);   // STURMIAN keeps its own grey (spectrum.js applySturmian)
       modeMute(ui.viewSeg, 'imag', mol && !(field && field.moleculeComplex), 'this molecular volume is real (ψ or √ρ): Im ψ is zero — the ORBITALS register draws a complex ψ');
-      for (const id of ['balls', 'sticks', 'esp']) modeMute(ui.styleSeg, id, !mol, 'a molecule’s view: switch MOLECULES on');
+      for (const id of ['balls', 'sticks', 'esp']) { const b = ui.styleSeg.button(id); if (b) b.hidden = !mol; }
+      for (const k of ['atomSizeK', 'stickK', 'espBareSw', 'probeK', 'espRangeK', 'espSurfSeg', 'espLiveSw']) ui[k].root.hidden = !mol;
+      if (ui.espBarRow) ui.espBarRow.hidden = !mol;   // 018 B10: INFORMATIONAL's ESP BAR · SIDE · PAD follows the same mode   // an emptied row collapses (skin.css .wave-row:not(:has(…)))
     }
     function styleSync() {
       const st = mat.style | 0, esp = st === STYLE.esp, surf = mat.espSurf || 'iso';
       for (const [k, on] of Object.entries(STYLE_READS)) mute(ui[k], !on.includes(st) || (esp && ((k === 'probeK' && surf === 'iso') || ((k === 'isoK' || k === 'softK') && surf !== 'iso'))));
       modeSync();
-      bar.hidden = !esp;
-      if (esp) {
-        const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, h = R * (Math.sqrt(21) - 1) / 20, st2 = mat.paletteOn ? palSorted() : null, a = st2 && st2[0].at, w = st2 && (st2[st2.length - 1].at - a || 1);
-        barRamp.style.background = st2 ? 'linear-gradient(to top in oklab, ' + st2.map((q) => rgbToHex(q.rgb) + ' ' + ((q.at - a) / w * 100).toFixed(1) + '%').join(', ') + ')' : 'linear-gradient(to top, ' + ESP_RAMP.join(', ') + ')';
-        barRamp.style.filter = mat.hueShift ? `hue-rotate(${Math.round(mat.hueShift * 360)}deg)` : '';
+      bar.hidden = !esp || !IP.get('espBar');
+      if (!bar.hidden) {
+        const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, h = R * (Math.sqrt(21) - 1) / 20; paintBar();
         [R, h, 0, -h, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3); });
-        barSeat(); if (!barTimer) barTimer = setInterval(() => { if (bar.hidden) { clearInterval(barTimer); barTimer = 0; } else barSeat(); }, 500);
+        barSeat(); if (!barTimer) barTimer = setInterval(() => { if (bar.hidden) { clearInterval(barTimer); barTimer = 0; } else { barSeat(); paintBar(); } }, 500);   // the poll also catches a routed HUE and LW.setInvert
       }
     }
     /* a restore: the knobs from `mat` (an absent key is the default and leaves `mat`), then the rows and the bar */
@@ -201,7 +231,7 @@ export function createMaterial(app) {
         if (o.preset && o.preset !== palShown && !palQuiet && !o.live) { palSay('PALETTE · ' + (user ? o.preset.slice(PU.length) : palLabel(PALETTE_BY_ID.get(o.preset) || { label: o.preset })));
           if (palHand && !palSw.get()) { palSw.set(true); palOn(true); } }   // iteration 016 P6 (Josh: "picking a palette turns PALETTE on"): a HAND's pick only (palHand, below) — a restore, a link, LW and an undo never turn it on
         if (o.preset) { palShown = o.preset; if (!user) palId = o.preset; } },
-        lut: (lut) => { const ps = palSorted(); if (field.ok) field.setPalette(lut, [ps[0].at, ps[ps.length - 1].at]); if (bar && !bar.hidden) styleSync(); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }), rv = rp.view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
+        lut: (lut) => { palLut = lut; lutN++; const ps = palSorted(); if (field.ok) field.setPalette(lut, [ps[0].at, ps[ps.length - 1].at]); if (bar && !bar.hidden) styleSync(); applyAccent({ wheelStops: palStops }); schedule(TIER.PRESENT); } } }), rv = rp.view;   // the kit's accent takes stops: toLUT(palStops) is this lut bit for bit
     palQuiet = false;
     /* 0.5.3 M12 · PALETTE, SHORTER: the kit's rows re-seated from outside (MIR briefs filed): RESET beside PALETTE ON, INVERT right of ROTATE as the kit's half disk,
        and the selected stop's angle shown twice from showArg — a reader under ROTATE (CSS hides the knob's "turn") and a float over the stop (radians; degrees on hover).
@@ -214,7 +244,7 @@ export function createMaterial(app) {
     chip(resetEl, 'undo', 'RELOAD'); rowOn.append(resetEl, revEl);
     revEl.classList.add('pal-rev'); revEl.replaceChildren(el('span', 'lw-icon lw-icon-reverse')); revEl.setAttribute('aria-label', 'REVERSE'); revEl.title = 'REVERSE · run the ramp backwards';   // iteration 015 P2: the word is the hint
     rotEl.appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
-    ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; saveSettings(); schedule(TIER.PRESENT); } });
+    ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; paintBar(); saveSettings(); schedule(TIER.PRESENT); } });
     addEl.after(rotEl, rv.root.querySelector('.mir-ramp-sel'), ui.invertSw.root);   // iteration 016 P1 (Josh: "swap INVERT and ROTATE"): ADD · ROTATE · the stop's swatch and × · INVERT
     addEl.classList.add('pal-add'); addEl.replaceChildren(el('span', 'lw-icon lw-icon-plus')); addEl.setAttribute('aria-label', 'ADD — a stop opposite the selected one');
     /* iteration 012 R4 (Josh 10-20: "the palette window's preset picker ends up being too transparent, make it similar to the main menu and make the
@@ -244,7 +274,7 @@ export function createMaterial(app) {
         const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; f.setAttribute('aria-label', 'palette name');
         f.value = 'My ' + (nm.textContent || 'palette').trim(); nm.parentElement.insertBefore(f, nm); nm.hidden = true;
         let done = false; const end = (keep, key) => { if (done) return; done = true; let n = f.value.trim(); f.remove(); nm.hidden = false;
-          if (keep && n) { n = uniqueName(n, palUsers.list().map((x) => x.name)); palShown = PU + n; palUsers.add(n, { stops: rv.stops().map((s) => ({ at: s.at, rgb: s.rgb.slice() })) }); } if (key) nm.focus(); };
+          if (keep && n) { n = uniqueName(n, palUsers.list().map((x) => x.name)); palShown = PU + n; palUsers.add(n, { stops: rv.stops().map((s) => ({ at: s.at, rgb: mat.invert ? s.rgb.map((v) => 1 - v) : s.rgb.slice() })) }); }   /* 018 B6: INVERT on bakes the colours seen (1 − rgb); the switch stays */ if (key) nm.focus(); };
         f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
         f.addEventListener('blur', () => end(false)); f.focus(); f.select();
       }); }
@@ -264,7 +294,7 @@ export function createMaterial(app) {
        PREFERENCE, so a hand on it saves the settings (coalesced).  `mod` is the modulation port WITHOUT `add`: the panel registers no
        target — the saved observer.* routes stay the defs' below, whose knob accessors are these dials (camKnobs) — and a hand on a
        routed dial writes its base (modHand), as everywhere. */
-    const gc = group(wCam.body, 'CAMERA'), FEEL = new Set(['spin', 'friction', 'drag', 'fling']); let feelSave = 0;
+    const gc = group(wCam.body, 'CAMERA'), FEEL = new Set(['friction', 'drag', 'fling']); let feelSave = 0;
     const camPanel = createCameraPanel({ mode: '3d', modPrefix: 'observer', project: false, mod,
       port: { ...cameraPort, set(id, v) { cameraPort.set(id, v); if (FEEL.has(id)) { clearTimeout(feelSave); feelSave = setTimeout(saveSettings, 250); } },
         turn(dy, dp) { cameraPort.turn(dy, dp); const s = camView.sphere; s.yaw.set(cameraPort.get('yaw')); s.pitch.set(cameraPort.get('pitch')); } } });   // 0.5.3 M5: the kit's port.turn road never sets the sphere's arcs and its sync skips a sphere mid-drag, so the rings' arrow froze until a later notice (and each step turned from the stale arrow): it follows the hand here, per move (MIR-BRIEF-sphere.md)
@@ -273,8 +303,6 @@ export function createMaterial(app) {
     app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
     /* 0.5.3 M6 · LOCK, the classic camera (a PREFERENCE, `camLock`): the pan held at the centre and every zoom from it; the PAN pad rests while it holds */
     ui.camLockSw = sw({ label: 'LOCK', value: false, title: 'LOCK — the classic camera: the pan stays at the centre and every zoom is from the centre (CONTROL, the turn, ZOOM and FOV stay live)', onChange: (v) => { cameraPort.set('lock', v); saveSettings(); } });
-    /* iteration 014 C2 · FLIP: the view's parity — the picture mirrored (an enantiomer, as a view); a session's switch beside LOCK, never saved */
-    ui.camFlipSw = sw({ label: 'FLIP', value: false, title: 'FLIP — mirror the view: the molecule as its mirror image (its enantiomer). A view, not a new molecule; it is not saved', onChange: (v) => cameraPort.set('flip', v) });
     let lockShown = false;
     cameraPort.subscribe(() => { const on = cameraPort.get('lock'); if (on !== lockShown) { lockShown = on; ui.camLockSw.set(on); camView.pad.widget.setDisabled(on); } });   // every road (the switch, the settings, LW) is a notice
     /* iteration 001 (Josh): CAMERA, SHORTER — the group's CAMERA word goes (the window says it), LOCK joins HOME · PAN HOME, and the PAN pad,
@@ -282,7 +310,11 @@ export function createMaterial(app) {
     { const R = gc.querySelector('.mir-camera'), q = (c) => R.querySelector(':scope > ' + c), more = el('div', 'cam-more', R);
       gc.querySelector(':scope > .grp-lbl')?.remove();
       for (const c of ['.cam-pan', '.cam-scales', '.cam-hand']) { const n = q(c); if (n) more.appendChild(n); }
-      const v = q('.cam-verbs'); (v || more).appendChild(ui.camLockSw.root); (v || more).appendChild(ui.camFlipSw.root); if (v) v.dataset.n = String(v.children.length); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
+      /* iteration 018 B3 (Josh: "Move the 'auto-rotate' toggle to the same row as 'flip' … a bugged second 'flip' toggle underneath FOV"): ONE FLIP, the
+         kit's (the port answers `flip`, iteration 014 C2's parity, a session's switch, never saved), and AUTO-ROTATE leave their rows for the verbs:
+         PAN HOME · HOME · LOCK · FLIP · AUTO-ROTATE */
+      const kitRoot = (id) => { const e = camView.controls.find((c) => c.vids[0] === id); return e && e.c.root; };
+      const v = q('.cam-verbs') || more; for (const n of [ui.camLockSw.root, kitRoot('flip'), kitRoot('autoRotate')]) if (n) v.appendChild(n); v.dataset.n = String(v.children.length); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
     /* iteration 012 R3 (Josh 10-20: "Remove text that says 'control' and 'direction' in camera … Increase the size of the 3D thingy while moving Zoom
        and FOV under 'YAW' and 'PITCH' … Rename 'Hand' to 'Controls'"): the kit's two labels leave its DOM, ZOOM · FOV join the sphere's knob column
        under YAW · PITCH (the view row empties and goes), and skin.css draws the sphere bigger; the panel's own file is untouched */
