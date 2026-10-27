@@ -1,0 +1,229 @@
+{
+ "label": "base",
+ "port": "9711",
+ "field": {
+  "ok": true,
+  "adapter": "",
+  "w": 1556,
+  "h": 813
+ },
+ "setup": null,
+ "knob": {
+  "id": "material.exposure",
+  "x": 1327.65625,
+  "y": 413.78125
+ },
+ "water": true,
+ "state": {
+  "chem": false,
+  "menu": false,
+  "tl": false,
+  "errs": []
+ },
+ "secs": 21.5,
+ "load": [
+  [
+   1.71,
+   1.61,
+   1.25
+  ],
+  [
+   1.4,
+   1.54,
+   1.24
+  ]
+ ],
+ "frames": 2545,
+ "presents": 2541,
+ "traceEvents": 601820,
+ "traceMB": 132.3,
+ "metrics": {
+  "TaskDuration": 5315.6,
+  "ScriptDuration": 1234.7,
+  "LayoutDuration": 76.5,
+  "RecalcStyleDuration": 224.8,
+  "LayoutCount": 387,
+  "RecalcStyleCount": 1199
+ },
+ "busyMs": {
+  "CrRendererMain": 10417.4,
+  "CrGpuMain": 9541.6,
+  "VizCompositorThread": 5098.5,
+  "Compositor": 3445.9
+ },
+ "loaf": {
+  "over50": 18,
+  "blockingMs": 0,
+  "byStep": {
+   "(before)": 1,
+   "scroll": 2,
+   "water": 1,
+   "end": 14
+  },
+  "worst": [
+   "203 ms (render 2, style+layout 1)",
+   "148 ms (render 2, style+layout 1)",
+   "141 ms (render 2, style+layout 0)",
+   "140 ms (render 2, style+layout 1)",
+   "128 ms (render 2, style+layout 1)",
+   "121 ms (render 3, style+layout 1)"
+  ]
+ },
+ "longTasks": [
+  {
+   "ms": 194.7,
+   "step": "(before)",
+   "top": [
+    "Receive mojo message 194.1",
+    "V8.GC_HEAP_ENSURE_SWEEPING_COMPLETED 0.4",
+    "BlinkScheduler_PerformMicrotaskCheckpoint 0"
+   ]
+  }
+ ],
+ "topEvents": [
+  {
+   "what": "FunctionCall loop lab/rack.js:337",
+   "ms": 1031.8
+  },
+  {
+   "what": "Commit",
+   "ms": 463.6
+  },
+  {
+   "what": "Receive mojo message",
+   "ms": 305.6
+  },
+  {
+   "what": "PrePaint",
+   "ms": 246.3
+  },
+  {
+   "what": "UpdateLayoutTree",
+   "ms": 221.3
+  },
+  {
+   "what": "Layerize",
+   "ms": 207.9
+  },
+  {
+   "what": "BlinkScheduler_PerformMicrotaskCheckpoint",
+   "ms": 204.2
+  },
+  {
+   "what": "IntersectionObserverController::computeIntersections",
+   "ms": 150.7
+  },
+  {
+   "what": "HitTest",
+   "ms": 137.7
+  },
+  {
+   "what": "UpdateLayer",
+   "ms": 127.2
+  },
+  {
+   "what": "FireAnimationFrame",
+   "ms": 116.2
+  },
+  {
+   "what": "RunMicrotasks",
+   "ms": 87.3
+  }
+ ],
+ "topFns": [
+  {
+   "fn": "loop lab/rack.js:337",
+   "ms": 92.6,
+   "from": [
+    "(root) (native) 92.6"
+   ]
+  },
+  {
+   "fn": "getBoundingClientRect (native)",
+   "ms": 77,
+   "from": [
+    "refreshOcclusion lab/shell/ink.js:7 13",
+    "paintedRect lab/occlusion.js:13 12.7",
+    "(anonymous) lab/mir/shell/rack.js:244 12.1"
+   ]
+  },
+  {
+   "fn": "get lab/shell/modulation.js:112",
+   "ms": 60.2,
+   "from": [
+    "syncBases lab/mod-port.js:97 59.9",
+    "loop lab/rack.js:337 0.3"
+   ]
+  },
+  {
+   "fn": "now (native)",
+   "ms": 49.9,
+   "from": [
+    "loop lab/rack.js:337 14.3",
+    "frame lab/field.js:1982 12",
+    "tick lab/shell/controller.js:79 10.3"
+   ]
+  },
+  {
+   "fn": "getCurrentTexture (native)",
+   "ms": 47.6,
+   "from": [
+    "frame lab/field.js:1982 47.6"
+   ]
+  },
+  {
+   "fn": "requestAnimationFrame (native)",
+   "ms": 47.2,
+   "from": [
+    "loopTail lab/rack.js:593 44.8",
+    "raf.raf lab/mir/core/frame.js:25 2.4"
+   ]
+  },
+  {
+   "fn": "submit (native)",
+   "ms": 43.3,
+   "from": [
+    "frame lab/field.js:1982 43.3"
+   ]
+  },
+  {
+   "fn": "frame lab/field.js:1982",
+   "ms": 41.3,
+   "from": [
+    "(anonymous) lab/rack.js:436 41.1",
+    "tick lab/shell/controller.js:79 0.3"
+   ]
+  },
+  {
+   "fn": "contentBottom lab/shell/rack-wiring.js:61",
+   "ms": 36.6,
+   "from": [
+    "(anonymous) lab/shell/rack-wiring.js:62 36.6"
+   ]
+  },
+  {
+   "fn": "writeBuffer (native)",
+   "ms": 34.4,
+   "from": [
+    "encodeCompute lab/field.js:1708 29.1",
+    "writeView lab/field.js:1754 4.9",
+    "writeOcc lab/field.js:1522 0.3"
+   ]
+  },
+  {
+   "fn": "beginRenderPass (native)",
+   "ms": 26.2,
+   "from": [
+    "encodeRender lab/field.js:1966 26.2"
+   ]
+  },
+  {
+   "fn": "syncBases lab/mod-port.js:97",
+   "ms": 25.8,
+   "from": [
+    "loop lab/rack.js:337 24.8",
+    "(root) (native) 1.1"
+   ]
+  }
+ ]
+}
