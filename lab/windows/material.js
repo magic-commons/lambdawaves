@@ -96,7 +96,9 @@ export function createMaterial(app) {
        styleSync greys by MODE as well as by style, one button at a time in the kit's muted look (seats stay).  Under a molecule MOMENTUM φ(p) (a set
        molecule owns the volume; the eigenmode kernel and its SPACE stand down) and Im ψ unless the volume is a complex orbital (the density, Δρ and a
        real orbital write (√ρ | ψ, 0): Im ψ draws nothing — the molecule matrix road in field.js); under hydrogen / an atom BALLS · STICKS · ESP, the molecule's
-       views (the shader draws them as CLOUD there) */
+       views (the shader draws them as CLOUD there).  Iteration 018 B1 (Josh: "If molecules is off, it should hide anything related to molecules … so
+       that the window is much smaller for hydrogen"): under hydrogen / an atom BALLS · STICKS · ESP and the two molecule rows are HIDDEN, their seats
+       collapse; under a molecule the style greys stand as in 017 */
     const modeMute = (s, id, off, why) => { const b = s.button(id); if (!b) return; b.disabled = off; const o = s.spec.options.find((q) => q.id === id), t = off ? why : o && o.title;
       if (t) hint(b, t); else { b.removeAttribute('title'); delete b.dataset.help; delete b.dataset.helpEn; } };   // the kit's hint hop keeps a title as data-help
     function modeSync() {
@@ -104,7 +106,8 @@ export function createMaterial(app) {
       if (mol) modeMute(ui.spaceSeg, 'p', true, 'a molecule owns the volume: position space only while MOLECULES is on');
       else if (!(app.sturm && app.sturm.P)) modeMute(ui.spaceSeg, 'p', false);   // STURMIAN keeps its own grey (spectrum.js applySturmian)
       modeMute(ui.viewSeg, 'imag', mol && !(field && field.moleculeComplex), 'this molecular volume is real (ψ or √ρ): Im ψ is zero — the ORBITALS register draws a complex ψ');
-      for (const id of ['balls', 'sticks', 'esp']) modeMute(ui.styleSeg, id, !mol, 'a molecule’s view: switch MOLECULES on');
+      for (const id of ['balls', 'sticks', 'esp']) { const b = ui.styleSeg.button(id); if (b) b.hidden = !mol; }
+      for (const k of ['atomSizeK', 'stickK', 'espBareSw', 'probeK', 'espRangeK', 'espSurfSeg', 'espLiveSw']) ui[k].root.hidden = !mol;   // an emptied row collapses (skin.css .wave-row:not(:has(…)))
     }
     function styleSync() {
       const st = mat.style | 0, esp = st === STYLE.esp, surf = mat.espSurf || 'iso';
