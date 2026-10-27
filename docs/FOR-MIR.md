@@ -15,8 +15,8 @@ round, newest first; an item leaves this list when an adopted MIR release carrie
   record that says `closed`, as λWAVES' v3 layouts do — the old + list's star never lit there). The `#rackAdd` button, `#rackAddList`,
   `addMenu`, `el.add` / `el.addList` and `.rack-add-none` are gone; `queueToggle` / `openOrder` stay exported for the FINDER. Why: Josh — "If a
   user picks a window that's already open, let it *scroll* to the window on the rack, never rearranging the windows"; one window list, not two.
-- **THE BAR'S OWN EXPAND** (018 E2, `shell/transport.js`): a layout part `'expand'` (`.tr-expand`, the `expand` glyph, `aria-expanded`, `.on`
-  while open) opens and shuts the tempo panel; a layout that names it gives the pill `tempoPill({ typed: true })`, so a click on the pill types
+- **THE BAR'S OWN EXPAND** (018 E2, `shell/transport.js`): a layout part `'expand'` (`.tr-expand`, the `chevronDown` glyph turned up while
+  open in transport.css, `aria-expanded`, `.on` while open) opens and shuts the tempo panel; a layout that names it gives the pill `tempoPill({ typed: true })`, so a click on the pill types
   the tempo on any seat (the work bars' field) and the pill opens nothing. Why: Josh — "let tempo be typable … and have a dedicated icon to
   expand the CSB instead".
 

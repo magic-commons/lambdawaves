@@ -72,3 +72,5 @@ LOCK leaves moved: none. `lab/sw.js` written once at the end (`node tests/pwa.te
 2. INFORMATIONAL's remembered set is per session (no stored key); after a reload the press brings the defaults back. Keep, or store it?
 3. The right block has 7 icons in a 4-wide grid (one empty slot); a future CSB button has a seat waiting there.
 4. The WINDOW menu's own window rows still RAISE (reorder) — make them reveal too?
+- **E6 WINDOW MENU REVEALS · CHEVRON EXPAND** (`lab/shell/notebook.js`; kit `shell/transport.js`, `transport.css`, same alpha.31, re-hashed): WINDOW's window rows take the FINDER's road (`rk.reveal`: an open window scrolled to and ringed, never moved; a closed one opens at the top) — one "never rearranging" law for both lists.
+  EXPAND wears the kit's `chevronDown`, turned up (180°) while the expander is open (`e6-chevron-open.jpg`). menubar, window-switching, mir-manifest green. Note: the BPM pill still wears its accent ring while the expander is open (skin.css `[aria-expanded]`).
