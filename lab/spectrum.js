@@ -343,18 +343,20 @@ export function createSpectrum(host, api) {
     const Emin = HS ? HS.Emin : energy(1), Etop = HS ? HS.Etop : 0;
     const y = (E) => bot - (E - Emin) / (Etop - Emin) * (bot - top);
     g.font = '8px ui-monospace, monospace'; g.textBaseline = 'middle';
-    // continuum line — its NAME is placed last, and only if the gutter row is free (see below)
-    if (!HS) { g.strokeStyle = ink(0.35); g.setLineDash([2, 3]); g.beginPath(); g.moveTo(left, y(0)); g.lineTo(right, y(0)); g.stroke(); g.setLineDash([]); }
+    /* iteration 018 C2 (Josh: "the reader at the very top seems to have some 'ticks' that run left to right like a horizontal ruler … delete those to
+       make it cleaner like the molecule window's"): n = 3 … 7 bunch within a few px of E = 0, so their dim off-lines and the dashed continuum read as a
+       ruler.  Only the LIT levels are drawn (and named, and hovered); no E = 0 dash.  The heights stay physical: the bunching of a lit Rydberg pair is the point. */
     const n2 = reg.norm2() || 1;
     const pops = {}; for (const a of reg.populated()) { const k = HS ? HS.levelKey(a) : BASIS[a].n; pops[k] = (pops[k] || 0) + reg.population(a) / n2; }
     const LEVELS = HS ? HS.levels : Array.from({ length: NMAX }, (_, i) => i + 1).map((n) => ({ key: n, E: energy(n), label: 'n' + n, rgb: nRGB(n) }));
     const names = [];                                    // (the Rydberg bunching crowds the gutter: see the placement below)
     for (const lv of LEVELS) {
-      const n = lv.key, yy = y(lv.E), c = vividInk(lv.rgb), lit = pops[n] > 0;
-      levelLine(g, left, right, yy, lit ? c : INK, lit);
-      if (n <= 2 || lit) names.push({ y: yy, txt: lv.label, col: lit ? `rgba(${c[0]},${c[1]},${c[2]},1)` : ink(0.75), lit, n, pop: pops[n] || 0 });
-      hovers.push({ kind: 'line', key: 'L' + n, points: [left, yy, right, yy], lw: lit ? 2 : 1, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
-        info: `${lv.label}  ·  ${lit ? (pops[n] * 100).toFixed(1) + ' %' : 'empty'}  ·  E = ${lv.E.toFixed(4)} Eh` });
+      const n = lv.key, yy = y(lv.E), c = vividInk(lv.rgb);
+      if (!(pops[n] > 0)) continue;
+      levelLine(g, left, right, yy, c, true);
+      names.push({ y: yy, txt: lv.label, col: `rgba(${c[0]},${c[1]},${c[2]},1)`, lit: true, n, pop: pops[n] });
+      hovers.push({ kind: 'line', key: 'L' + n, points: [left, yy, right, yy], lw: 2, colour: `rgba(${c[0]},${c[1]},${c[2]},1)`,
+        info: `${lv.label}  ·  ${(pops[n] * 100).toFixed(1)} %  ·  E = ${lv.E.toFixed(4)} Eh` });
     }
     /* THE GUTTER IS 44 px OF ONE COLUMN, AND E_n = −1/(2n²) BUNCHES (wave 46).  n3 … n6 fall inside 6 px of the
        E = 0 line on a 92 px card, so the names used to print straight over one another — "n3" and "n4" and
@@ -368,7 +370,6 @@ export function createSpectrum(host, api) {
       if (!freeRow(nm.y)) continue;
       usedY.push(nm.y); g.fillStyle = nm.col; g.fillText(nm.txt, left - 4, nm.y);   // the gutter, not the plot
     }
-    if (!HS && freeRow(y(0))) { g.fillStyle = ink(0.75); g.textAlign = 'right'; g.fillText('E = 0', left - 4, y(0)); }
     lfoot(HS ? HS.footer : 'EIGENVALUE  E_n = −1/(2n²) hartree', left, W, H);
     hover.set(hovers, plot);
   }
