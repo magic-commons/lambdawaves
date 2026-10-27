@@ -135,7 +135,8 @@ export function createMaterial(app) {
       else if (!(app.sturm && app.sturm.P)) modeMute(ui.spaceSeg, 'p', false);   // STURMIAN keeps its own grey (spectrum.js applySturmian)
       modeMute(ui.viewSeg, 'imag', mol && !(field && field.moleculeComplex), 'this molecular volume is real (ψ or √ρ): Im ψ is zero — the ORBITALS register draws a complex ψ');
       for (const id of ['balls', 'sticks', 'esp']) { const b = ui.styleSeg.button(id); if (b) b.hidden = !mol; }
-      for (const k of ['atomSizeK', 'stickK', 'espBareSw', 'probeK', 'espRangeK', 'espSurfSeg', 'espLiveSw']) ui[k].root.hidden = !mol;   // an emptied row collapses (skin.css .wave-row:not(:has(…)))
+      for (const k of ['atomSizeK', 'stickK', 'espBareSw', 'probeK', 'espRangeK', 'espSurfSeg', 'espLiveSw']) ui[k].root.hidden = !mol;
+      if (ui.espBarRow) ui.espBarRow.hidden = !mol;   // 018 B10: INFORMATIONAL's ESP BAR · SIDE · PAD follows the same mode   // an emptied row collapses (skin.css .wave-row:not(:has(…)))
     }
     function styleSync() {
       const st = mat.style | 0, esp = st === STYLE.esp, surf = mat.espSurf || 'iso';

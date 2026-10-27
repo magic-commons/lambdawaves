@@ -42,7 +42,8 @@ export function createInformational(app) {
   ui.bondsOf = () => { const c = app.state.chem; return { order: P.get('bondOrder'), aromatic: P.get('bondAromatic'), ionic: P.get('bondIonic'), hbond: P.get('bondHydrogen'), charges: c && c.chargesNow ? c.chargesNow() : null, rec: c && c.bondsNow ? c.bondsNow() : null }; };
   ui.bondSay = (line) => w.setStatus(line, 'live');
   const seat = row(words, ['infoPos', 'infoPad'], 'info-seat');
-  row(words, ['espBar', 'espBarSide', 'espBarPad'], 'info-words info-bar');   // 018 B7: ESP BAR · SIDE · PAD (WAVE paints it, these seat it)
+  ui.espBarRow = row(words, ['espBar', 'espBarSide', 'espBarPad'], 'info-words info-bar');   // 018 B7: ESP BAR · SIDE · PAD (WAVE paints it, these seat it)
+  ui.espBarRow.hidden = !(app.state.chem && app.state.chem.on);   // 018 B10: a molecule's row — hidden under hydrogen or an atom; WAVE's modeSync re-syncs it
   const announce = group(w.body, 'ANNOUNCE');
   /* iteration 012 R1: ORBITALS is one switch for the two orbital kinds, so the pop-ups' SIZE takes the grid's last cell (where STYLE · PALETTE stood) */
   row(announce, [...INFO_ROWS.filter((r) => r.group === 'announce' && r.type === 'bool').map((r) => r.key), 'popSize'], 'info-grid');
