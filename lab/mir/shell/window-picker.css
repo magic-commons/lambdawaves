@@ -1,5 +1,5 @@
-/* ── THE WINDOW PICKER (shell/window-picker.js; 1.5.0-alpha.25, from λWAVES 014 A7): a search field over every window as a row, the
-   unopenable greyed with their reason, centred in the top third.  THE MOTION (GOL-NOTE.md §4): the surface springs open from
+/* ── THE FINDER (shell/window-picker.js; 1.5.0-alpha.25, from λWAVES 014 A7; 1.5.0-alpha.31 the SHIFT queue's badges and the ☆): a search field
+   over every window as a row, the unopenable greyed with their reason, centred in the top third.  THE MOTION (GOL-NOTE.md §4): the surface springs open from
    0.94 × 0.6 (320 ms, an overshoot), the rows enter 30 ms apart (--i, capped by the script), each trailing a stretched copy of itself
    at 10 % alpha that collapses into it (the faux motion blur: one composited layer, no filter), and the close is a fast 120 ms fade.
    Reduced motion: the end state, no animation. ── */
@@ -7,11 +7,9 @@
   position: fixed; z-index: calc(var(--z-chrome, 40) + 6); left: 50%; top: 12vh; width: var(--wp-w); max-height: 58vh; margin-left: calc(var(--wp-w) / -2);
   display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: var(--wp-r); transform-origin: 50% 0; color: var(--fg); }
 .mir-window-picker[hidden] { display: none; }
-.mir-window-picker .wp-head { flex: 0 0 auto; display: flex; align-items: center; padding: 0 4px; }
-.mir-window-picker .wp-title { font: var(--w-bold, 700) var(--fs-tiny, 11px)/1 var(--font-ui); letter-spacing: var(--tr-wide, .06em); color: var(--dim); }
 .mir-window-picker .wp-search { display: block; flex: 0 0 auto; width: 100%; height: 34px; padding: 0 12px; border: 1px solid var(--glass-hairline, transparent); border-radius: var(--r-pill, 999px);
   background: var(--glass-well, transparent); color: var(--fg); font: 14px var(--font-ui); }
-.mir-window-picker .wp-search:focus { outline: 0; border-color: color-mix(in srgb, var(--acc) 55%, transparent); }
+.mir-window-picker .wp-search:focus { outline: 0; }   /* no accent ring: the field is the finder's only input */
 .mir-window-picker .wp-list { display: flex; flex-direction: column; gap: 1px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--dim) 55%, transparent) transparent; }
 .mir-window-picker .wp-row { position: relative; display: flex; align-items: center; gap: 10px; flex: 0 0 var(--wp-row); height: var(--wp-row); padding: 0 10px;
   border: 0; border-radius: 9px; background: transparent; color: var(--fg); font: var(--w-bold, 700) 12px/1 var(--font-ui); letter-spacing: var(--tr-wide, .06em);
@@ -24,6 +22,11 @@
 .mir-window-picker .wp-why { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 11px/1 var(--font-ui); letter-spacing: 0; color: var(--ink-faint, var(--dim)); }
 .mir-window-picker .wp-row.off { cursor: default; color: var(--ink-faint, var(--dim)); }
 .mir-window-picker .wp-row.off .wp-glyph { opacity: .45; }
+.mir-window-picker .wp-fav { flex: 0 0 auto; display: inline-flex; color: var(--acc); }
+.mir-window-picker .wp-fav > svg { width: 10px; height: 10px; }
+.mir-window-picker .wp-row.queued { background: color-mix(in srgb, var(--acc) 10%, transparent); }
+.mir-window-picker .wp-num { flex: 0 0 auto; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--acc); color: var(--bg, #000);
+  font: var(--w-bold, 700) 10px/18px var(--font-num, var(--font-ui)); text-align: center; letter-spacing: 0; }
 /* the motion */
 .mir-window-picker.wp-in { animation: wp-open 320ms var(--wp-ease) both; }
 .mir-window-picker.wp-in .wp-row { animation: wp-row 420ms var(--wp-ease) both; animation-delay: calc(var(--i, 0) * 30ms + 60ms); }

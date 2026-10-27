@@ -61,7 +61,7 @@ export function createTransport(app) {
       b.setAttribute('aria-label', word); b.title = word; if (action) b.dataset.keyAction = action; b.addEventListener('click', run); return b; };
     const gear = ico('csb-gear', 'cog-solid', 'MIR OPTIONS — the interface’s look', () => mirGui().open('options'));
     const folders = ico('csb-folders', 'folders', 'FOLDERS — save, open, recent', () => app.sh.layout.projects.toggle(), 'folders');
-    const finder = ico('csb-finder', 'window-plus', 'FINDER — search every window', () => { if (app.sh.layout.windowPicker) app.sh.layout.windowPicker.toggle(); }, 'windowPicker');
+    const finder = ico('csb-finder', 'window-plus', 'FINDER — search every window', () => { if (app.sh.layout.finder) app.sh.layout.finder.toggle(); }, 'windowPicker');
     const theme = ico('csb-theme', '', 'LIGHT | DARK', () => { if (app.hooks.setTheme) app.hooks.setTheme(document.body.dataset.theme === 'light' ? 'dark' : 'light'); });   // call 11: the theme only (lab.css swaps sun ↔ moon on body[data-theme])
     /* E3 · INFORMATIONAL: one press turns every INFORMATIONAL switch off and remembers which were on; the next press puts that set back (the rows'
        own defaults when nothing is remembered, e.g. after a reload) */

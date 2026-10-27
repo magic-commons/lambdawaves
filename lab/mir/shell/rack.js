@@ -1,11 +1,11 @@
-/* shell/rack.js — the rack: the columns of windows at the screen's edges, the + and ☆ menus, drag to reorder, float
+/* shell/rack.js — the rack: the columns of windows at the screen's edges, the ☆ menu, drag to reorder, float
  * and dock, hide and peek, the transport's dodge, the phone's one rack, and the layout that survives a reload.
  *
  * Harvested from BASINS rack.js (the newest: the held card follows the hand while its neighbours swap, it stays in
  * the rack until it has cleared it by 12 px, a hidden rack is still a drop target, the phone crossing), checked
  * against λWAVES 0.3.2 (rack.js, rack-menus.js: the SHIFT-queue, favourite layouts, edge peek with an armed dismiss,
  * the transport dodge).  The DOM and the class names are theirs (`#rack`, `#rackL`, `#floats`, `.dev.floating`,
- * `.dragging`, `body.rack-hidden`, `rack-peek-left|right`, `#rackAdd`, `.mb-item`, `.mb-num`), so an adopting app's
+ * `.dragging`, `body.rack-hidden`, `rack-peek-left|right`, `.mb-item`), so an adopting app's
  * own sheets keep matching and its look does not move.  docs/RACK.md is the manual.
  *
  * THE LAWS IT KEEPS
@@ -64,6 +64,7 @@ export const RACK = Object.freeze({
   seatTop: 52, seatBottom: 60,   // the transport's two seats (λWAVES seatRect)
   tabletEdge: 8,    // on a touch tablet a float stays this far inside the visual viewport (BASINS clampFloat)
   tabletMin: 701,   // … a touch tablet is a coarse pointer at least this wide, and not the phone
+  reveal: 900,      // the FINDER's pick wears .mir-reveal this long (1.5.0-alpha.31)
 });
 const RACK_ID = { left: 'rackL', right: 'rack' };
 /* what a header press must leave alone: its own buttons and anything a hand edits */
@@ -332,10 +333,10 @@ export function createRackMotion(hosts, view = globalThis) {
  *    favourites  ☆ slots (0: no ☆ button)
  *    transport   an element that gives way to a floating rect (dodge) and peeks with a hidden rack (optional)
  *    phone       () => boolean — the phone law (default: the kit's --phone sentinel, or body.phone)
- *    chrome      false: build no hide / + / ☆ buttons (the app drives the api itself)
+ *    chrome      false: build no hide / ☆ buttons (the app drives the api itself; windows are opened through the FINDER, window-picker.js)
  *    handle      'coarse' (default): the edge handle shows for a coarse pointer only; 'always'; 'never'
  *    look        'auto' (default): nodes the rack creates wear the kit's look (rack.css), nodes the app already had
- *                (#rack, #rackL, #floats, #rackAdd …, found by id) keep the app's; 'kit': the kit's look on both
+ *                (#rack, #rackL, #floats, #rackFav …, found by id) keep the app's; 'kit': the kit's look on both
  *    onChange    (layout) after every persisted change
  *    scrollbar   true: the scrollbar seated at the card column (shell/rack-scrollbar.js, BASINS'); default false
  *    tabletClamp true (default, BASINS): on a touch tablet a float is clamped fully inside the visual viewport
@@ -353,7 +354,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
   const S = store || localStore(key, view);
   const isPhone = phone || (() => body.classList.contains('phone') || (parseFloat(view.getComputedStyle(doc.documentElement).getPropertyValue('--phone')) || 0) >= 1);
   const made = [];                                                  // nodes this rack created, removed by destroy()
-  /* ADOPTION: a node the app already has (BASINS' #rack, #rackL, #floats, #rackAdd …) is used AS IT IS — same element,
+  /* ADOPTION: a node the app already has (BASINS' #rack, #rackL, #floats, #rackFav …) is used AS IT IS — same element,
      same id, same classes, so every app rule and script that names it keeps working, and no second container is made.
      It gets the rack's behaviour hooks (data-side, data-mir-adopted) but not the kit's look classes, unless the app
      asks for the kit's look (`look: 'kit'`).  A node the rack creates wears the kit's look (rack.css). */
@@ -380,10 +381,9 @@ export function createRack({ host = globalThis.document && document.body, sides 
   const grip = el('div', 'mir-rack-grip', host); grip.setAttribute('aria-hidden', 'true'); made.push(grip);
   const btn = (id, kind, text, label) => { const b = take(id, 'button', 'glass mir-rack-btn'); b.type = 'button'; b.dataset.rackBtn = kind; if (text) b.textContent = text; b.setAttribute('aria-label', label); b.title = label; return b; };
   const list = (id, kind) => { const l = take(id, 'div', 'glass mir-rack-list'); l.dataset.rackList = kind; l.hidden = true; l.setAttribute('role', 'menu'); return l; };
-  let toggleBtn = null, addBtn = null, addList = null, favBtn = null, favList = null;
+  let toggleBtn = null, favBtn = null, favList = null;
   if (chrome) {
     toggleBtn = btn('rackToggle', 'toggle', '◧', 'Hide or show the rack');
-    addBtn = btn('rackAdd', 'add', '', 'Open a window'); chip(addBtn, 'plus', 'open a window'); addList = list('rackAddList', 'add');
     if (favourites > 0) { favBtn = btn('rackFav', 'fav', '☆', 'Save or load a window layout'); favList = list('rackFavList', 'fav'); }
   }
   const handles = handle === 'never' ? [] : Object.keys(racks).map((side) => {
@@ -572,6 +572,23 @@ export function createRack({ host = globalThis.document && document.body, sides 
     if (root.classList.contains('floating')) { raiseFloat(root); if (root.classList.contains('compact')) setCompact(id, false); }
     else { const rk = root.parentElement; if (cards(rk)[0] !== root) rk.insertBefore(root, cards(rk)[0] || null); rk.scrollTop = 0; setHidden(false); }
     save(); return true;
+  }
+  /** reveal(id) — the FINDER's pick (1.5.0-alpha.31): a closed window opens at the top of its rack and the rack scrolls to the top; an open one
+   *  stays where it is and its rack SCROLLS to it (never a reorder); either way it unfolds, the rack shows and the card wears `.mir-reveal` a
+   *  moment (rack.css).  A floating window comes to the front. */
+  function reveal(id) {
+    const w = reg.get(id); if (!w) return false;
+    const fresh = !isOpen(id); if (fresh) open(id, { index: 0 }); else build(id);
+    const root = w.dev.root;
+    if (root.classList.contains('folded')) fold(id, false);
+    if (root.classList.contains('floating')) raiseFloat(root);
+    else {
+      setHidden(false); const rk = root.parentElement;
+      if (isRack(rk)) rk.scrollTo({ top: fresh ? 0 : Math.max(0, rk.scrollTop + root.getBoundingClientRect().top - rk.getBoundingClientRect().top - 8), behavior: 'smooth' });
+    }
+    root.classList.remove('mir-reveal'); void root.offsetWidth; root.classList.add('mir-reveal');
+    view.setTimeout(() => root.classList.remove('mir-reveal'), RACK.reveal);
+    return true;
   }
   /** move(id, { side, index }) — to a place in a rack (the keyboard's move, and a host's) */
   function move(id, { side, index } = {}) {
@@ -897,49 +914,13 @@ export function createRack({ host = globalThis.document && document.body, sides 
     return home;
   }
 
-  /* ── the + menu (the SHIFT-queue) and the ☆ menu (favourite layouts) ── */
-  let queue = [];
-  const titleOf = (w) => w.spec.title;
-  function renumber() {
-    for (const b of addList.querySelectorAll('.mb-item')) {
-      const k = queue.indexOf(b.dataset.win); b.classList.toggle('queued', k >= 0);
-      let n = b.querySelector('.mb-num');
-      if (k < 0) { if (n) n.remove(); continue; }
-      if (!n) n = el('span', 'mb-num', b);
-      n.textContent = String(k + 1);
-    }
-  }
-  const addShown = (v) => { if (!addList) return; addList.hidden = !v; addBtn.setAttribute('aria-expanded', String(!!v)); if (!v) { queue = []; } };
+  /* ── the ☆ menu (favourite layouts); windows open through the FINDER (window-picker.js) since 1.5.0-alpha.31 ── */
   const favShown = (v) => { if (!favList) return; favList.hidden = !v; favBtn.setAttribute('aria-expanded', String(!!v)); };
-  function flushQueue() {
-    if (!queue.length) return false;
-    const ids = openOrder(queue); addShown(false);
-    for (const id of ids) open(id);
-    return true;
-  }
+  /** lastFavourite() — the ids open in the most recently saved ☆ layout (the FINDER's star), or null */
   function lastFavIds() {
     const m = favs(); let best = null;
     for (const k of Object.keys(m)) if (m[k] && (!best || (m[k].at || 0) > (best.at || 0))) best = m[k];
-    return best ? new Set(best.cards.filter((c) => c.open).map((c) => c.id)) : null;
-  }
-  function drawAdd() {
-    addList.innerHTML = ''; queue = [];
-    const closed = [...reg.values()].filter((w) => !w.spec.card && !isOpen(w.spec.id)).sort((a, b) => titleOf(a).localeCompare(titleOf(b), undefined, { sensitivity: 'base' }));
-    if (!closed.length) el('div', 'rack-add-none', addList, 'every window is open — × on a window closes it');
-    const fav = lastFavIds();
-    for (const w of closed) {
-      const it = el('button', 'mb-item', addList); it.type = 'button'; it.dataset.win = w.spec.id; it.setAttribute('role', 'menuitem');
-      if (w.spec.glyph && hasGlyph(w.spec.glyph)) it.appendChild(glyphEl(w.spec.glyph, 'mb-glyph', 14));
-      el('span', 'mb-lbl', it, '⊕  ' + w.spec.title);
-      /* the drawn solid star (glyph.js starFill: "is one"), never a typed ★ (Josh's call 18, 2026-10-07) */
-      if (fav && fav.has(w.spec.id)) { const st = el('span', 'mb-fav', it); st.appendChild(glyphEl('starFill', 'gly gly-starFill', 10)); st.title = 'In the most recently saved layout'; st.setAttribute('aria-label', 'in the saved favourite layout'); }
-      it.title = (w.spec.hint ? w.spec.title + '  ·  ' + w.spec.hint : w.spec.title) + '  ·  SHIFT-click to queue several; they open in the order you picked them when you let SHIFT go';
-      it.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        if (ev.shiftKey) { queue = queueToggle(queue, w.spec.id); renumber(); return; }
-        addShown(false); open(w.spec.id);
-      });
-    }
+    return best && Array.isArray(best.cards) ? new Set(best.cards.filter((c) => (c.open !== undefined ? c.open : !c.closed)).map((c) => c.id)) : null;   // an app's own record may say closed (λWAVES v3)
   }
   function drawFav() {
     favList.innerHTML = '';
@@ -955,15 +936,12 @@ export function createRack({ host = globalThis.document && document.body, sides 
     }
   }
   if (toggleBtn) toggleBtn.addEventListener('click', () => setHidden(!isHidden()), on);
-  if (addBtn) addBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!addList.hidden) { addShown(false); return; } favShown(false); drawAdd(); addShown(true); }, on);
-  if (favBtn) favBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!favList.hidden) { favShown(false); return; } addShown(false); drawFav(); favShown(true); }, on);
-  view.addEventListener('keyup', (e) => { if (e.key === 'Shift' && addList && !addList.hidden) flushQueue(); }, on);
+  if (favBtn) favBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!favList.hidden) { favShown(false); return; } drawFav(); favShown(true); }, on);
   view.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || e.defaultPrevented) return;
-    if (addList && !addList.hidden) { e.preventDefault(); addShown(false); addBtn.focus(); } else if (favList && !favList.hidden) { e.preventDefault(); favShown(false); favBtn.focus(); }
+    if (favList && !favList.hidden) { e.preventDefault(); favShown(false); favBtn.focus(); }
   }, on);
   doc.addEventListener('pointerdown', (e) => {
-    if (addList && !addList.hidden && !addList.contains(e.target) && !addBtn.contains(e.target)) addShown(false);
     if (favList && !favList.hidden && !favList.contains(e.target) && !favBtn.contains(e.target)) favShown(false);
   }, { capture: true, signal: life.signal });
 
@@ -1136,7 +1114,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
   queueMicrotask(() => { if (!life.signal.aborted) start(); });
 
   const api = {
-    register, start, open, close, toggle, isOpen, raise, fold, move, float, dock, toggleFloat, setCompact,
+    register, start, open, close, toggle, isOpen, raise, reveal, lastFavourite: lastFavIds, fold, move, float, dock, toggleFloat, setCompact,
     setHidden, setInterface, dodge, setHome, windowMenu,
     get hidden() { return isHidden(); },
     toggleHidden: () => setHidden(!isHidden()),
@@ -1166,7 +1144,6 @@ export function createRack({ host = globalThis.document && document.body, sides 
     capture, apply, layouts, saveLayout, loadLayout, forgetLayout, resetLayout,
     /** the scrollbar seated at the card column (`scrollbar: true`), or null */
     get scrollbar() { return bars; },
-    addMenu: { open: () => { if (addBtn && addList.hidden) addBtn.click(); return !!addBtn; }, close: () => { addShown(false); return true; }, get shown() { return !!addList && !addList.hidden; }, get queued() { return queue.slice(); }, commit: flushQueue },
     favMenu: { open: () => { if (favBtn && favList.hidden) favBtn.click(); return !!favBtn; }, close: () => { favShown(false); return true; }, get shown() { return !!favList && !favList.hidden; } },
     get dragging() { return !!G; },
     cancelDrag: () => drg.cancel(),
@@ -1174,7 +1151,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
     /** span() — THE dock span for every docking window on the page: dock.js observeSpan on these two racks (BASINS'
      *  rack-bounds: the shadow gutter out, an empty / hidden / phone / narrow rack absent).  Made once, on first ask. */
     span() { if (!spanObs) spanObs = observeSpan({ left: racks.left || null, right: racks.right || null, view }); return spanObs; },
-    el: { racks: { ...racks }, floats, grip, toggle: toggleBtn, add: addBtn, addList, fav: favBtn, favList, handles: handles.slice() },
+    el: { racks: { ...racks }, floats, grip, toggle: toggleBtn, fav: favBtn, favList, handles: handles.slice() },
     sync: syncPhone,
     destroy() {
       if (bars) { bars.destroy(); bars = null; }

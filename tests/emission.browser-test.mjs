@@ -19,10 +19,10 @@ try {
 
   /* 1 · closed on a first run, in + */
   const first = await g.ev(`const d = document.querySelector('.dev[data-id="emission"]');
-    document.getElementById('rackAdd').click(); const plus = [...document.querySelectorAll('#rackAddList .mb-item')].map((i) => i.dataset.win); document.getElementById('rackAdd').click();
+    __LW.layout.finder.open(); const plus = [...document.querySelectorAll('.mir-window-picker .wp-row:not(.off)')].map((i) => i.dataset.win); __LW.layout.finder.close();
     return { made: !!d, closed: d.classList.contains('closed'), plus: plus.includes('emission'), eyebrow: d.querySelector('.dev-eyebrow').textContent.trim() };`);
   assert.deepEqual(first, { made: true, closed: true, plus: true, eyebrow: 'EMISSION SPECTRA' });
-  console.log('PASS EMISSION SPECTRA ships closed and is listed in +');
+  console.log('PASS EMISSION SPECTRA ships closed and is listed in the FINDER');
 
   /* 2 · a press on Hα: the pair, one history row, the lit line */
   const pressed = await g.ev(`__LW.layout.reopen('emission'); await __w(400); await __LW.settle();

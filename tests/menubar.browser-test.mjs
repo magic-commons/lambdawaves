@@ -96,7 +96,8 @@ try {
     const r = await __row('EDIT', 'CLEAR the register');
     sv.clearTrail = orig;
     __LW.history.flush(); await __LW.settle();
-    const tro = document.querySelector('#transport .ro.time .ro-val'), scrubNow = tro ? parseFloat(tro.textContent) : NaN;   // iteration 014 A8: the SCRUB left the bar; the playhead's reading is the t readout
+    const tl = document.querySelector('#transport .tr-open'); tl.click(); await __LW.settle();   // 018 E2: t left the CSB; the playhead's reading is the TIMELINE's t (keys.js ui.tlTime)
+    const tro = document.querySelector('#floats .ro.time .ro-val'), scrubNow = tro ? parseFloat(tro.textContent) : NaN; tl.click();
     const out = { r, floated, firstIsHistory, d0, pop0, t0, pop1: __LW.reg.populated().length, t1: __LW.clock.t, trails, scrubNow,
       d1: __LW.history.depth, canUndo: __LW.history.canUndo };
     __LW.history.undo(); await __LW.settle();

@@ -6,7 +6,7 @@
  * likely symptom).  Nothing here sets opacity on a rack, on the float layer or on a carried window.
  *
  * The geometry is λWAVES' (lab.css §2, skin.css §1/§3 for the phone) with BASINS' shadow gutter; the class and id
- * hooks are the ones app sheets already style (#rack, #rackL, #floats, #rackAdd, .dev.floating, .dragging), so an
+ * hooks are the ones app sheets already style (#rack, #rackL, #floats, #rackFav, .dev.floating, .dragging), so an
  * app that keeps its own rules keeps its look: an app rule is unlayered and beats everything here.
  * Motion is the core's tokens; everything sits in mir.kit.house, after skin.css. */
 @layer mir.kit.house {
@@ -137,13 +137,12 @@ body[data-rack-pill="off"] .rack-pills, body.ui-hidden .rack-pills, body.phone .
   width: 30px; height: 30px; border-radius: 50%; padding: 0; color: var(--fg-soft); cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
 }
-.mir-rack-btn[data-rack-btn="add"] { top: 44px; }
-.mir-rack-btn[data-rack-btn="fav"] { top: 80px; }
+.mir-rack-btn[data-rack-btn="fav"] { top: 44px; }
 .mir-rack-btn > svg { width: 16px; height: 16px; }
 .mir-rack-btn:hover, .mir-rack-btn[aria-expanded="true"] { color: var(--acc); }
 .mir-rack-btn:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
 body.rack-hidden .mir-rack-btn[data-rack-btn="toggle"] { color: var(--acc); }
-body.rack-hidden:not(.rack-peek-right) :is(.mir-rack-btn[data-rack-btn="add"], .mir-rack-btn[data-rack-btn="fav"], .mir-rack-list) { visibility: hidden; }
+body.rack-hidden:not(.rack-peek-right) :is(.mir-rack-btn[data-rack-btn="fav"], .mir-rack-list) { visibility: hidden; }
 .mir-rack-list {
   position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3);
   display: flex; flex-direction: column; min-width: 260px; max-height: calc(100% - 132px); overflow: auto; padding: 4px; border-radius: var(--r-lg);
@@ -202,10 +201,12 @@ body.rack-hidden:not(.transport-peek) .mir-rack-transport[data-seat="top"] { tra
   .mir-rack-btn { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto; top: auto;
     transition: left var(--motion-structural) var(--ease-out); }
   .mir-rack-btn[data-rack-btn="toggle"] { bottom: calc(max(env(safe-area-inset-bottom), 0px) + 14px); }
-  .mir-rack-btn[data-rack-btn="add"] { bottom: calc(max(env(safe-area-inset-bottom), 0px) + 60px); }
-  .mir-rack-btn[data-rack-btn="fav"] { bottom: calc(max(env(safe-area-inset-bottom), 0px) + 106px); }
+  .mir-rack-btn[data-rack-btn="fav"] { bottom: calc(max(env(safe-area-inset-bottom), 0px) + 60px); }
   .mir-rack-btn::after { content: ''; position: absolute; inset: -8px; }   /* 30 px of ink, 44 px of finger */
   .mir-rack-list { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto; top: auto;
     bottom: calc(max(env(safe-area-inset-bottom), 0px) + 152px); max-width: calc(100vw - var(--rack-edge) - 24px); max-height: 50vh; }
 }
 }
+/* THE FINDER's REVEAL (rack.js reveal(), 1.5.0-alpha.31): the card it scrolled to, or opened, wears an accent ring that fades in 900 ms */
+.dev.mir-reveal { outline: 2px solid transparent; outline-offset: -2px; animation: mir-reveal 900ms ease-out; }
+@keyframes mir-reveal { from { outline-color: var(--acc); } to { outline-color: transparent; } }

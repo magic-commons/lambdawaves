@@ -14,7 +14,7 @@ const row = async (what) => { const r = await g.ev(`const t = document.getElemen
     rect: [r.left, r.top, r.width, r.height].map((v) => Math.round(v * 10) / 10), t: t.querySelector('.ro.time .ro-val')?.textContent };`);
   rows.push({ what, ...r }); console.log(what.padEnd(26), r.place.padEnd(6), r.mode.padEnd(10), JSON.stringify(r.rect), r.t); };
 const mode = (id) => g.ev(`document.querySelector('#lwMode [data-id="${id}"]').click(); return 1;`);
-const expander = () => g.ev(`document.querySelector('#transport .tempo-expand').click(); return 1;`);
+const expander = () => g.ev(`document.querySelector('#transport .tr-expand').click(); return 1;`);
 const cycle = () => g.ev(`document.querySelector('#transport .dock-btn').click(); return 1;`);
 try {
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up');

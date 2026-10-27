@@ -44,19 +44,18 @@ body.rack-hidden.rack-peek-left #rackL { transform: none; opacity: 1; }   /* 015
 body.rack-hidden #rack { transform: translateX(calc(100% + 12px)); opacity: 0; }
 body.rack-hidden.rack-peek-right #rack { transform: none; opacity: 1; }
 #rackPeek { position: absolute; right: 0; top: 0; bottom: 0; width: 16px; z-index: var(--z-chrome); }
-#rackToggle, #rackAdd, #rackFav { position: absolute; right: calc(var(--rack-w) + 14px); top: 8px; z-index: calc(var(--z-chrome) + 1); width: 30px; height: 30px; border-radius: 50%; color: var(--fg-soft); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+#rackToggle, #rackFav { position: absolute; right: calc(var(--rack-w) + 14px); top: 8px; z-index: calc(var(--z-chrome) + 1); width: 30px; height: 30px; border-radius: 50%; color: var(--fg-soft); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 body.rack-hidden #rackToggle { color: var(--acc); }
 .dev-loading .mark { width: 28px; height: 28px; animation: lw-busy-breathe 1.1s linear infinite alternate; }
 .dev.off .dev-stat::after { content: ' · OFF'; color: var(--dim); }
 .dev.copied .dev-stat::after { content: ' · COPIED'; color: var(--acc); }
-#rackAdd { top: 44px; font-size: 18px; line-height: 1; transition: opacity .28s ease; }
 /* wave 54 (board #48): FAVOURITE LAYOUTS takes the next seat down the same column, on the same rules as its two
    neighbours — one geometry, one hide rule, one hover colour, and its list opens where the + list opens. */
 #rackFav { top: 80px; font-size: 15px; line-height: 1; transition: opacity .28s ease; }
-body.rack-hidden #rackAdd, body.rack-hidden #rackAddList, body.rack-hidden #rackFav, body.rack-hidden #rackFavList { opacity: 0; pointer-events: none; }
-body.rack-hidden.rack-peek #rackAdd, body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
-#rackAdd:hover, #rackFav:hover { color: var(--acc); }
-#rackAddList, #rackFavList { position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
+body.rack-hidden #rackFav, body.rack-hidden #rackFavList { opacity: 0; pointer-events: none; }
+body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
+#rackFav:hover { color: var(--acc); }
+#rackFavList { position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
 .mb-item .fav-x { float: right; color: var(--dim); margin-left: 10px; }
 .mb-item:hover .fav-x { color: var(--acc2); }
 body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* wave 133: STATUS TAGS hides the four ψ-badges, never the build offer */
@@ -492,7 +491,6 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
    specificity or it loses silently — which it did, on the first run of the gate. */
 #floats > .dev.compact { width: var(--rail-w); }
 .dev.floating.compact .dev-stat { display: none; }
-#rackAdd > svg { width: 16px; height: 16px; }
 /* 0.5.0 C0 · TWIN: the kit sizes the dock / pop-out glyphs (`button:is([data-gly="north"], …) > svg`, 12 px) and on 1.4.3 its
    rule out-ranked this one there; unlayered on 1.5 this would grow the transport's dock glyph to 13 px. */
 .dock-btn > svg:not(:where(button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg)), .mod-exp > svg:not(:where(button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg)) { width: 13px; height: 13px; }
@@ -619,7 +617,7 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 
 
 body.ui-hidden #rackFav, body.ui-hidden #rackFavList,
-body.ui-hidden #rack, body.ui-hidden #rackL, body.ui-hidden #rackToggle, body.ui-hidden #rackAdd, body.ui-hidden #rackAddList, body.ui-hidden #menubar, body.ui-hidden #badges, body.ui-hidden #title, body.ui-hidden #transport, body.ui-hidden #sheet { display: none !important; }
+body.ui-hidden #rack, body.ui-hidden #rackL, body.ui-hidden #rackToggle, body.ui-hidden #menubar, body.ui-hidden #badges, body.ui-hidden #title, body.ui-hidden #transport, body.ui-hidden #sheet { display: none !important; }
 body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 .dyn-c { position: relative; height: 84px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }   /* the well, not a hard black: the light theme has its own (wave 46) */
 .dyn-c canvas { width: 100%; height: 100%; display: block; }
@@ -677,8 +675,6 @@ body.ui-hidden #notebook, body.ui-hidden #rackPeek, body.ui-hidden #rackPeekL, b
    first, so hiding is still animated; peeking cancels the delay so it comes back instantly. */
 body.rack-hidden #rack, body.rack-hidden #rackL { visibility: hidden; transition: transform .28s ease, opacity .28s ease, visibility 0s linear .28s; }
 body.rack-hidden.rack-peek-right #rack, body.rack-hidden.rack-peek-left #rackL { visibility: visible; transition: transform .28s ease, opacity .28s ease, visibility 0s linear 0s; }
-body.rack-hidden #rackAdd, body.rack-hidden #rackAddList { visibility: hidden; }
-body.rack-hidden.rack-peek #rackAdd { visibility: visible; }
 body.rack-hidden #transport.mini { visibility: hidden; transition: transform .28s ease, opacity .28s ease, visibility 0s linear .28s; }
 body.rack-hidden.transport-peek #transport.mini { visibility: visible; transition: transform .28s ease, opacity .28s ease, visibility 0s linear 0s; }
 
