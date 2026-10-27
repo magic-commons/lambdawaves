@@ -17,7 +17,7 @@
  *   4. PRESETS ARE NAMED OPTION SETS.  `preset()` names the preset whose every option matches the state, or 'custom'.
  *
  * createPrefs({ key, schema, presets, storage, doc, context, version?, migrate?, projectKeys?, project? }) →
- *   { get, set, reset, forget, all, subscribe, apply, preset, applyPreset, resolve, migration, settings, download, load, destroy }
+ *   { get, set, reset, forget, all, subscribe, apply, preset, applyPreset, presets, presetList, resolve, migration, settings, download, load, destroy }
  *   THE SPLIT (Josh 2026-10-01, BASINS app/prefs.js): preferences are the device's, the work is the project's.  With
  *   `version`, a versioned migration runs once per version (migratePrefs): the `projectKeys` the blob still holds are handed
  *   to `project(moved)` (core/session.js adoptInto) and removed; `set` refuses a project key ever after.
@@ -27,7 +27,8 @@
  *                 | { on, prop, map? }                      a custom (or any style) property; null removes it
  *                 | { run(v, state, env, context) }         a call, for an engine the kit already has (the accent,
  *                                                           the motion policy); it runs inside the same frame job
- *   presets  { id: { key: value, … } }
+ *   presets  { id: { key: value, … } }, or a LIST [{ id, name, values, tones }] (shell/themes.js THEMES' shape, 1.5.0-alpha.32):
+ *            the list is the app's SKIN stepper (`presetList`), in its order, matched by `values`
  *   storage  { getItem, setItem, removeItem } (default localStorage);  doc (default document);  context: passed to run()
  *   env      what a map is told: { theme: 'dark' | 'light' } — the resolved theme (SYSTEM asks the OS)
  * Pure exports for tests: repair(raw, schema), defaults(schema), resolve(state, schema, env), matchPreset(state, presets). */
@@ -134,6 +135,8 @@ export const settingsFileName = (app = 'mir', date = new Date()) => String(app |
 export function createPrefs({ key = 'mir.gui', schema = [], presets = {}, storage, doc, context, version, migrate, projectKeys = [], project } = {}) {
   const D = doc || globalThis.document || null;
   const S = storage !== undefined ? storage : (() => { try { return globalThis.localStorage || null; } catch (_) { return null; } })();
+  const presetList = Array.isArray(presets) ? presets : null;
+  if (presetList) presets = Object.fromEntries(presetList.map((p) => [p.id, p.values]));
   const projectSide = new Set(projectKeys);
   const rows = new Map(schema.filter((r) => !projectSide.has(r.key)).map((r) => [r.key, r]));   // a project key is never written here
   const migration = version ? migratePrefs(S, key, { version, migrate, projectKeys, project }) : null;
@@ -193,7 +196,7 @@ export function createPrefs({ key = 'mir.gui', schema = [], presets = {}, storag
     preset: () => matchPreset(state, presets),
     /** applyPreset(id) — set that preset's options (an unknown id changes nothing) */
     applyPreset: (id) => (presets[id] ? set(presets[id]) : []),
-    presets,
+    presets, presetList,
     resolve: () => resolve(state, schema, env()),
     env,
     /** forget() — FORGET (BASINS' settings window): the stored key is wiped and every option goes home; the app reloads */

@@ -10,6 +10,7 @@ const [stem, file, crop = ''] = process.argv.slice(2), setup = file ? readFileSy
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 9773}/lab/?starter=home${process.env.LW_Q || ''}`, { width: +(process.env.LW_W || 1600), height: +(process.env.LW_H || 1000) });
 try {
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up');
+  if (process.env.LW_FRESH) { await g.ev("localStorage.removeItem('mir.gui'); return 1;"); await g.nav(); if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came back'); }   // LW_FRESH=1: the look record cleared, then a reload
   await new Promise((r) => setTimeout(r, 1500));
   console.log(JSON.stringify(await g.ev(`const wait = (ms) => new Promise((r) => setTimeout(r, ms)); return (async () => { ${setup} })();`)));
   await new Promise((r) => setTimeout(r, 700));

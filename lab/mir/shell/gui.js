@@ -66,7 +66,7 @@ import { glassTint as lookTint, glassVeil, autoInk, solidRelief, spacingPx, DEVI
 import { createAccent, accentPart } from './accent.js';
 import { notice } from './notice.js';
 import { richText, safeHref } from './about.js';
-import { THEMES, themeById, themeValues, toneValues, matchTone } from './themes.js';
+import { THEMES } from './themes.js';
 import { createPointerLight } from '../fx/pointer-light.js';
 import { createParallax } from '../fx/parallax.js';
 import { installKbm, kbm, hoverable } from '../core/kbm.js';
@@ -74,8 +74,6 @@ import { installKbm, kbm, hoverable } from '../core/kbm.js';
 /** the kit's version, as package.json says it (the release step keeps the two in step) */
 import { MIR_VERSION } from '../version.js'; export { MIR_VERSION };   // one constant: mir/version.js
 export { THEMES };
-/** the 'name'-specs: rules or art outside the settings, announced, not selectable, until their packages land */
-export const SKINS = Object.freeze([{ id: 'frost', label: 'FROST' }, { id: 'metro', label: 'METRO', coming: true }, { id: 'sprites', label: 'SPRITES', coming: true }]);
 /** the words MIR says about itself — quoted from magic-commons.com/joshs-library/lambdawaves/about (2026-10-01) */
 export const MIR_WORDS = phrase('MIR is the shared Magic Commons interface kit behind its controls, window system, gestures, and modulation. MIR is an open source platform and will continuously be updated, allowing for ‘LLM Mods’ support and customizable skins.');
 const ZERO_SHADOW = '0 0 0 0 transparent';                       // the off shadow: never `none` (a list with none drops)
@@ -341,7 +339,13 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   const ctx = { doc, accent: accent === false ? null : accent || createAccent(), moving: false, lastAccent: null, fx: null };
   const schema = lookSchema({ tier: () => (tierReading ? tierReading.tier : null) }).map((r) => (r.key in defaults ? { ...r, default: defaults[r.key] } : r));
   if (!prefs) migrateShadow(storageKey, win);
-  const P = prefs || createPrefs({ key: storageKey, schema, presets: LOOK_PRESETS, context: ctx });
+  const P = prefs || createPrefs({ key: storageKey, schema, presets: THEMES, context: ctx });
+  /* THE SKINS are the store's list (1.5.0-alpha.32): an app may put its own first (λWAVES: its first-run look, λWAVES); the kit's THEMES
+     otherwise.  The first is the home look RESET LOOK returns to. */
+  const themes = P.presetList || THEMES;
+  const themeOf = (id) => themes.find((x) => x.id === id) || null;
+  const same = (state, values) => Object.entries(values).every(([k, v]) => state[k] === v);
+  const toneOf = (state, id) => { const th = themeOf(id), o = th && th.tones.find((x) => same(state, x.values)); return o ? o.id : 'custom'; };
   installKbm({ doc });                                               // the live pointer (touch vs precision), before the pointer effects ask it; once per page
   const light =createPointerLight({ doc, enabled: () => P.get('glow') });
   const plx = createParallax({ doc, enabled: () => P.get('parallax') });
@@ -367,8 +371,8 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
 
   /** applyTheme(id) — the theme's options and its own tone, in one set; its cost is measured once it has painted */
   let costFor = null;
-  const applyTheme = (id) => { const v = themeValues(id); if (!v) return []; costFor = id; const changed = P.set(v); if (!changed.length) measureCost(true); return changed; };
-  const applyTone = (id) => { const t = P.preset(), v = t !== 'custom' && toneValues(t, id); return v ? P.set(v) : []; };
+  const applyTheme = (id) => { const th = themeOf(id), v = th && { ...th.values, ...(th.tones[0] || {}).values }; if (!v) return []; costFor = id; const changed = P.set(v); if (!changed.length) measureCost(true); return changed; };
+  const applyTone = (id) => { const th = themeOf(P.preset()), o = th && th.tones.find((x) => x.id === id); return o ? P.set(o.values) : []; };
   const costs = {};                                                  // theme id → { blur, shadow, shine, ms }
 
   /* ── OPTIONS: one packed grid of groups ── */
@@ -389,16 +393,17 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   /* THEME — the vanilla themes (SKIN), their tones (TONE), the theme (LIGHT · DARK · SYSTEM), and what the theme costs */
   let g = groupEl('theme', phrase('THEME'));
   /* a theme's and a tone's name is a NAME (shell/themes.js): shown as it is in every language */
-  const themeItems = () => [...THEMES.map((t) => ({ id: t.id, label: phrase(t.name, 'name') })), { id: 'custom', label: 'CUSTOM', coming: true }];
+  const themeItems = () => [...themes.map((t) => ({ id: t.id, label: phrase(t.name, 'name') })), { id: 'custom', label: 'CUSTOM', coming: true }];
   const skinStep = stepper({ label: 'SKIN', items: themeItems(), value: P.preset(), onChange: (id) => applyTheme(id) });   // tr[SKIN]: the look the kit wears: one of the built-in THEMES (FROST, MORPH …, whose names stay as written)
-  const toneItems = (t) => { const th = themeById(t); return th ? [...th.tones.map((o) => ({ id: o.id, label: phrase(o.name, 'name') })), { id: 'custom', label: 'CUSTOM', coming: true }] : []; };
-  const toneStep = stepper({ label: 'TONE', items: toneItems(P.preset()), value: matchTone(P.all(), P.preset()), onChange: (id) => applyTone(id) });   // tr[TONE]: a colour variant of the chosen theme (its tones have names, kept as written)
+  const toneItems = (t) => { const th = themeOf(t); return th ? [...th.tones.map((o) => ({ id: o.id, label: phrase(o.name, 'name') })), { id: 'custom', label: 'CUSTOM', coming: true }] : []; };
+  const toneStep = stepper({ label: 'TONE', items: toneItems(P.preset()), value: toneOf(P.all(), P.preset()), onChange: (id) => applyTone(id) });   // tr[TONE]: a colour variant of the chosen theme (its tones have names, kept as written)
   skinStep.root.classList.add('gui-skin'); toneStep.root.classList.add('gui-tone');
   line(g, 'gui-pair').append(skinStep.root, toneStep.root);
   const costNote = el('div', 'gui-note gui-theme-cost', g); costNote.title = 'What this theme cost when it was applied: surfaces that blur, shadows drawn, shine layers, the mean frame time';
-  label(el('div', 'gui-note gui-coming gui-help', g), '{skins} — coming (“name”-specs)', { skins: SKINS.filter((s) => s.coming).map((s) => s.label).join(' · ') });   // tr: a “name”-spec is a theme with its own rules or art, outside the built-in settings; METRO and SPRITES are names
   line(g).append(segOf('theme', phrase('THEME'), [['light', phrase('LIGHT', 'theme mode')], ['dark', phrase('DARK', 'theme mode')], ['system', phrase('SYSTEM'), phrase('Follow the system')]]).root);   // tr[THEME]: THEME: LIGHT, DARK or SYSTEM, the light or dark mode (not the SKIN)
-  line(g, 'gui-trigs').append(trig({ label: 'RESET LOOK', title: 'Every look option back home: the {:name::FROST} theme', onFire: () => { costFor = 'frost'; P.reset(); } }).root,
+  const resetB = trig({ label: 'RESET LOOK', onFire: () => { costFor = themes[0].id; P.reset(); } }).root;
+  hint(resetB, 'Every look option back home: the {skin} skin', { skin: themes[0].name });
+  line(g, 'gui-trigs').append(resetB,
     /* RESET LAYOUT (BASINS settings-window.js:130, before FORGET): the rack's windows back to their default places */
     ...(rack && typeof rack.resetLayout === 'function' ? [trig({ label: 'RESET LAYOUT', title: 'Restore the default window layout', onFire: () => rack.resetLayout() }).root] : []),
     /* FORGET (BASINS Settings › LOOK): this browser's saved look is wiped and the page reloads at the new user's look */
@@ -533,7 +538,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
   const logo = el('div', 'gui-logo', ab); logo.dataset.light = ''; logo.setAttribute('role', 'img'); ariaLabel(logo, 'MIR', null, 'name');
   const logoArt = el('div', 'gui-logo-art', logo); logoArt.dataset.parallax = '5';
   const abVer = el('div', 'gui-ab-ver', ab);
-  const paintVer = () => { const th = themeById(P.preset()); label(abVer, 'MIR {version} · SKIN {theme}', { version: MIR_VERSION, theme: th ? th.name : { t: 'CUSTOM' } }); };
+  const paintVer = () => { const th = themeOf(P.preset()); label(abVer, 'MIR {version} · SKIN {theme}', { version: MIR_VERSION, theme: th ? th.name : { t: 'CUSTOM' } }); };
   paintVer();
   label(el('div', 'gui-ab-std', ab), '{app} is an MIR Standard app', { app: appName });
   label(el('p', 'gui-ab-words', ab), MIR_WORDS);
@@ -655,7 +660,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
     for (const k of changed) { const c = controls.get(k); if (c) c.set(state[k]); }
     kRelief.setDisabled(state.reliefLink || state.relief === 'flat');
     const theme = P.preset();
-    skinStep.set(theme); toneStep.setItems(toneItems(theme), theme === 'custom' ? undefined : matchTone(state, theme));
+    skinStep.set(theme); toneStep.setItems(toneItems(theme), theme === 'custom' ? undefined : toneOf(state, theme));
     paintVer(); paintCost();
     if (changed.includes('quality')) { paintTier(); wantTier(); }
     if (sampler && (!changed.length || changed.includes('text'))) sampler.mode(state.text === 'light' || state.text === 'dark' ? 'off' : 'auto');   // LIGHT · DARK: the ink is chosen, nothing is sampled
