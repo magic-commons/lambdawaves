@@ -155,6 +155,9 @@ Tests: look/gui suites, official-defaults-palette, first-run, mir-manifest.
 25. (E) INFORMATIONAL's remembered set lasts the session; survive a reload (a new stored key)? Default: session only.
 26. (E) The right block of the CSB has one empty slot in its 4-wide grid — a wish for it? Default: leave.
 27. (E) The BPM pill still shows its accent ring while the expander is open though it no longer opens it. Default: F's builder drops the ring (one kit line).
+28. (F) The λWAVES skin leaves LIGHT · DARK · SYSTEM to the reader (as every skin does); should picking it set LIGHT, as NEON sets dark? Default: leave.
+29. (F) λWAVES has one tone, also named λWAVES — a better name, or more tones? Default: as is.
+30. (F) With the group order fixed, MIR OPTIONS' first column ends ≈ 190 px shorter than its third; accept, or allow a reorder? Default: accept.
 
 ## MERGE ORDER
 A → B → C → D → E → F, each builder based on the merged tree (BASE sha below). Recipe: `git merge --no-ff --no-commit it018-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → focused suites → commit → CLOSED row → handoff STATE NOW line.
@@ -167,4 +170,5 @@ A → B → C → D → E → F, each builder based on the merged tree (BASE sha
 | C | fadfc07 | 2677fb9 | C1–C4 (C-BUILD.md; transition.js at HINGE 2; register/history/current/lw-links/timeline/keyboard-window green; pre-existing reds molecular-names:89 → chain E, latex-copy §8 → close pass) |
 | D | 701640b | 5bf327f | D1–D3 (D-BUILD.md; kit alpha.30; new-project/history/timeline/frame-occlusion/curves→NODES green) |
 | E | 638a8c8 | 7daff43 | E1–E6 (E-BUILD.md; kit alpha.31; molecular-names/curves/emission/keyboard-window/window-switching/menubar/offer green) |
-| F | 7daff43 | | |
+| F | c4de355 | aed085e | F1–F4 (F-BUILD.md; kit alpha.32; latex-copy/official-defaults-palette/take-in-bugs/menubar/ink green) |
+| CLOSE | aed085e | | |
