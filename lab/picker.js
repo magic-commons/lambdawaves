@@ -92,7 +92,7 @@ function volumeRows() {
       for (const v of (await V.shelf()).volumes) {
         const s = await V.statusOf(v.id).catch(() => null); if (!s || s.state !== 'installed') continue;
         const idx = await V.index(v.id).catch(() => null);
-        for (const m of (idx && idx.molecules) || []) out.push({ id: m.id, name: m.name, formula: m.formula, vol: v.id, thumb: !!m.thumb, m, v });
+        for (const m of (idx && idx.molecules) || []) out.push({ id: m.id, name: m.name, formula: m.formula, vol: v.id, m, v });
       }
     } catch (_) { /* no shelf: the catalogue alone */ }
     return out;
@@ -104,7 +104,7 @@ const plain = (s) => String(s || '').replace(/<\/?m>/g, '').replace(/[_{}\\]/g, 
 export async function suggest(query, n = 6) {
   const q = plain(query).trim(); if (!q) return [];
   const cat = CHEM_PRESETS.filter((p) => !p.disabled && !atomZ(p.formula)).map((p) => ({ id: p.id, name: p.name, formula: p.formula, vol: null, pic: './img/menu/' + p.id + '.webp' }));
-  const rows = cat.concat((await volumeRows()).map((r) => ({ id: r.id, name: r.name, formula: r.formula, vol: r.vol, thumb: r.thumb, m: r.m, v: r.v })));
+  const rows = cat.concat((await volumeRows()).map((r) => ({ id: r.id, name: r.name, formula: r.formula, vol: r.vol, m: r.m, v: r.v })));
   const seen = new Set(), first = [], then = [];
   for (const r of rows) {
     const keys = [plain(r.name), plain(r.formula), plain(r.id)], key = (r.vol || '') + '|' + r.id;
@@ -268,9 +268,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const key = kind === 'el' ? b : a, fb = kind === 'el' ? MENU + 'el-' + a + '.webp' : MENU + 'orb-' + key + '.webp';
     return { src: look === 'density' || look === 'phase' ? MENU + 'orb-' + key + '.' + look + '.webp' : fb, fb };
   };
+  const hold = (host, i) => { if (i) i.remove(); if (!host.querySelector('.mm-ph')) el('b', 'mm-ph', host, (host.querySelector('.mm-lbl') || {}).textContent || '');  };   // A3: no picture — the formula holds the square
   const pic = (host, src, ref) => { const i = el('img', 'mm-pic', host); i.alt = ''; i.decoding = 'async'; i.loading = hot ? 'eager' : 'lazy'; if (hot) i.fetchPriority = 'high'; i.draggable = false;
     let fb = null; if (ref) { i.dataset.menu = ref; ({ src, fb } = picOf(ref)); }
-    i.addEventListener('error', () => { const f = i.dataset.menu ? picOf(i.dataset.menu).fb : null; if (f && i.getAttribute('src') !== f) i.src = f; else i.remove(); });
+    i.addEventListener('error', () => { const f = i.dataset.menu ? picOf(i.dataset.menu).fb : null; if (f && i.getAttribute('src') !== f) i.src = f; else hold(host, i); });
     if (src) { develop(i); i.addEventListener('load', () => { const u = i.getAttribute('src'); if (u && u.startsWith(MENU)) keepData(u); }); i.src = src; } return i; };
   const tile = (host, cls, info, go, off) => {
     const b = el('button', 'mm-tile ' + cls, host); b.type = 'button';
@@ -615,8 +616,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       el('b', 'mm-lbl', t, m.formulaM ? mathPlain(m.formulaM) : m.formula);
       if (isos.length) { const k = el('span', 'mm-iso', t, String(isos.length + 1)); k.title = (isos.length + 1) + ' structural isomers in ' + volName(cur); }
       if (atom) { const v = valenceOf(atom); pic(t, null, 'el:' + SYM[atom - 1] + ':' + v.nl + '_' + v.m); return t; }
-      const i = pic(t, null), ph = () => { i.remove(); el('b', 'mm-ph', t, m.formulaM ? mathPlain(m.formulaM) : m.formula); };   // no picture yet: the formula holds the square
-      if (!m.thumb) ph(); else { i.dataset.vol = cur.id; i.dataset.mol = m.id; } if (!m.thumb) {} else V.picture(cur.id, m.id, lookOf()).then((u) => { if (u) { develop(i); i.src = u; } else ph(); }, ph);
+      const i = pic(t, null), ph = () => hold(t, i); i.dataset.vol = cur.id; i.dataset.mol = m.id;
+      V.picture(cur.id, m.id, lookOf()).then((u) => { develop(i); i.src = u; }, ph);
       return t;
     }
     const wordsOf = (m) => (m.geo ? [...(m.tags || []), ...m.geo] : m.tags || []);   // C3: a molecule's chips, what it is and its shape
@@ -727,8 +728,9 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const suggestTile = (host, r) => {
     const info = { formula: mathPlain(r.formula), name: cap(r.name), sub: r.vol ? r.vol.toUpperCase() : '' };
     const t = tile(host, 'mm-mol', info, () => (r.vol ? goVolume(r.v, r.m) : goMolecule(r.id)));
-    const i = pic(t, null, r.vol ? null : 'mol:' + r.id); if (r.vol) { if (r.thumb) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { if (u) i.src = u; else i.remove(); }, () => i.remove()); } else i.remove(); }
-    el('b', 'mm-lbl', t, info.formula); return t;
+    const i = pic(t, null, r.vol ? null : 'mol:' + r.id); el('b', 'mm-lbl', t, info.formula);
+    if (r.vol) { i.dataset.vol = r.vol; i.dataset.mol = r.id; V.picture(r.vol, r.id, lookOf()).then((u) => { i.src = u; }, () => hold(t, i)); }
+    return t;
   };
   const api = { open, close, toggle, get shown() { return !root.hidden; }, root, show(id) { const s = sections.find((x) => x.id === id); if (s) { open(); s.sec.scrollIntoView({ block: 'start' }); } }, suggest, suggestTile };
   app.state.picker = api;

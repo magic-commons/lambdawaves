@@ -397,6 +397,7 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 .csb-suggest .mm-tile.on, .csb-suggest .mm-tile:hover { border-color: color-mix(in srgb, var(--acc) 55%, transparent); background: var(--glass-raise); }
 .csb-suggest .mm-pic { position: absolute; inset: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; filter: hue-rotate(var(--mol-hue, 0deg)); }
 .csb-suggest .mm-under { display: none; }
+.csb-suggest .mm-ph { position: absolute; inset: 0 0 12px; display: grid; place-items: center; font: 400 15px/1 var(--font-math, serif); color: var(--fg); opacity: .75; pointer-events: none; }   /* 018 A3: no picture — the formula holds the square */
 .csb-suggest .mm-lbl { position: absolute; left: 0; right: 0; bottom: 3px; font: var(--w-bold) 10px/1 var(--font-math, serif); color: var(--fg); text-align: center; pointer-events: none; }
 .csb-suggest .csb-none { padding: 6px 10px; font-size: var(--fs-small); color: var(--ink-faint); }
 /* A3 · the favourites strip, under the macros and the clock, the width of the panel; a face is the original control */
@@ -563,6 +564,7 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 .mol-pick .mol-dl { position: relative; --arc-pad: 1px; --arc-stroke: 4; --arc-groove: hsl(0 0% 50% / .25); }
 .mol-pick .mol-dl:not([data-busy]) .k-arc { display: none; }
 .mol-tile > img.mol-tile-pic { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; }
+.mol-tile > .mol-tile-ph { display: grid; place-items: center; aspect-ratio: 1; font: 400 15px/1 var(--font-math, serif); opacity: .75; }
 .reg-top { align-items: stretch; flex-wrap: nowrap; }
 .reg-top .reg-ladder { flex: 1 1 0; min-width: 0; width: auto; height: 170px; }
 .reg-top .reg-scope { flex: 0 0 132px; width: 132px; height: 170px; }

@@ -168,13 +168,14 @@ export function createChem(host, api) {
     if (VP) {   // iteration 008 V: a volume's page — each tile its picture (read as it scrolls into view), formula, name, tags and its lamp
       const kept = vKept.get(VP.vol.id) || new Set();
       shelfSeen = typeof IntersectionObserver === 'function' ? new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { const i = e.target; shelfSeen.unobserve(i);
-        V.picture(VP.vol.id, i.dataset.mol).then((u) => { if (!u) return; if (!i.isConnected) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) shelfUrls.push(u); i.src = u; }, () => {}); } }, { root: shelf, rootMargin: '120px' }) : null;
+        V.picture(VP.vol.id, i.dataset.mol).then((u) => { if (!i.isConnected) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) shelfUrls.push(u); i.src = u; }, () => {}); } }, { root: shelf, rootMargin: '120px' }) : null;
       for (const m of VP.mols) {
         const key = VP.vol.id + ':' + m.id;
         tile(`${capName(m.name)} · ${volLabelOf(VP.vol)} · ${(m.tags || []).join(' · ') || 'untagged'}`,
           [plainF(m), capName(m.name), (m.tags || []).join(' · ') || '—', kept.has(m.id) ? 'INSTALLED' : 'DOWNLOAD'], () => { handPick(key); }, key === preset, false);
         const make = rows.at(-1).make;
-        rows.at(-1).make = () => { const b = make(); if (m.thumb) { const i = el('img', 'mol-tile-pic'); i.alt = ''; i.decoding = 'async'; i.dataset.mol = m.id; b.prepend(i); if (shelfSeen) shelfSeen.observe(i); } return b; };
+        rows.at(-1).make = () => { const b = make(), i = el('img', 'mol-tile-pic'); i.alt = ''; i.decoding = 'async'; i.dataset.mol = m.id; b.prepend(i); if (shelfSeen) shelfSeen.observe(i);
+          i.addEventListener('error', () => i.replaceWith(el('b', 'mol-tile-pic mol-tile-ph', null, plainF(m))), { once: true }); return b; };   // 018 A3: every row has its t/<id>.webp; a miss → the formula holds the square
       }
     } else if (page === 'ATOMS') ATOMS.forEach((a) => tile(`${a.name} · Z = ${a.Z} · ${a.term} · ${ATOM_W.word} · ${ATOM_W.oracle.what}`, [a.symbol, 'Z = ' + a.Z, ATOM_W.word],
       () => { if (on) setOn(false); api.atom(a.Z); }, api.atomZ() === a.Z));
@@ -225,7 +226,7 @@ export function createChem(host, api) {
     if (picFor === id) return;
     picFor = id; pic.hidden = true; pic.removeAttribute('src'); if (picUrl) { URL.revokeObjectURL(picUrl); picUrl = null; }
     if (src !== 'vol') { pic.src = src; return; }
-    V.picture(k.volume, k.id).then((u) => { if (!u) return; if (picFor !== id) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) picUrl = u; pic.src = u; }, () => {});
+    V.picture(k.volume, k.id).then((u) => { if (picFor !== id) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) picUrl = u; pic.src = u; }, () => {});
   }
   const dlShow = rowPic;
   mSel.setAttribute('aria-label', 'molecule');
