@@ -11,8 +11,9 @@
  * the modulation window — and keeps its own the stage text's ink and M7's one paint per batch.
  * THE LIFT (once, forward only): an older settings blob's look keys (and HELP's own key) are set into `mir.gui` by the laws
  * rack.js read them by, and leave the blob.  A fresh profile never runs it.  Node-testable: liftLook (tests/first-run.test.mjs). */
-import { createPrefs } from './mir/core/prefs.js';
-import { lookSchema, LOOK_PRESETS } from './mir/shell/gui.js';
+import { createPrefs, defaults as homeOf } from './mir/core/prefs.js';
+import { lookSchema } from './mir/shell/gui.js';
+import { THEMES, THEME_KEYS, COLOUR_KEYS } from './mir/shell/themes.js';
 import { lightIsHome } from './mir/core/look.js';
 import { createAccent } from './mir/shell/accent.js';
 import { rgbToHex } from './mir/palette.js';
@@ -68,7 +69,12 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
     ...(HOME_MAPS[r.key] ? { apply: r.apply.map((sp) => (sp.map ? { ...sp, map: HOME_MAPS[r.key](sp) } : sp)) } : {}),
     ...(r.key === 'blur' ? { max: 30 } : r.key.startsWith('accent') ? { wrap: false } : {}),   // GLASS BLUR's travel (the kit's row stops at 24): no stored value moves; an ACCENT keeps END's 360° (wave 68: it renders as 0°, a fold left the eye at 0° and HOME dead)
     ...(r.key === 'theme' ? { apply: [...r.apply, { run: (v, s, e) => { if (seen !== v + e.theme) { seen = v + e.theme; onTheme(e.theme, v); } } }] } : {}) }));
-  const prefs = createPrefs({ key: LOOK_KEY, schema, presets: LOOK_PRESETS, context: ctx });
+  /* 018 F2 · THE λWAVES SKIN: the first-run look itself (every row's home above, the device's material included), first in MIR OPTIONS' SKIN
+     stepper, so a first run reads λWAVES and RESET LOOK returns to it; the kit's THEMES follow.  A skin states the kit's THEME_KEYS and its
+     one tone the COLOUR_KEYS; LIGHT · DARK · SYSTEM, the hints and HELP stay the reader's own (shell/themes.js). */
+  const first = homeOf(schema), pick = (keys) => Object.fromEntries(keys.map((k) => [k, first[k]]));
+  const LAMBDAWAVES = { id: 'lambdawaves', name: 'λWAVES', values: pick(THEME_KEYS), tones: [{ id: 'lambdawaves', name: 'λWAVES', values: pick(COLOUR_KEYS) }] };
+  const prefs = createPrefs({ key: LOOK_KEY, schema, presets: [LAMBDAWAVES, ...THEMES], context: ctx });
   const blob = settings.read(), held = BLOB_LOOK.filter((k) => k in blob);
   let help = null; try { help = localStorage.getItem(HELP_KEY); localStorage.removeItem(HELP_KEY); } catch (_) {}
   if (held.length || help) prefs.set(liftLook(blob, help));

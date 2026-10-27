@@ -325,7 +325,7 @@
   "Escape": "Escape",
   "Escape is kept for closing and cancelling.": "Escape is kept for closing and cancelling.",
   "Every key is back to its default": "Every key is back to its default",
-  "Every look option back home: the {:name::FROST} theme": "Every look option back home: the {:name::FROST} theme",
+  "Every look option back home: the {skin} skin": "Every look option back home: the {skin} skin",
   "Everything": "Everything",
   "Exact video time, fixed resolution, complete frames. The active project supplies the colours and rack.": "Exact video time, fixed resolution, complete frames. The active project supplies the colours and rack.",
   "Export the selected project (or the open one) as a .mir file, or as a picture that carries it.": "Export the selected project (or the open one) as a .mir file, or as a picture that carries it.",
@@ -1561,7 +1561,6 @@
   "{shape} mirrored": "{shape} mirrored",
   "{shape} · tap to draw; tap again to mirror": "{shape} · tap to draw; tap again to mirror",
   "{shape} — {points} points, {bent} bent. Right-drag empty space to add; drag dots and handles.": "{shape} — {points} points, {bent} bent. Right-drag empty space to add; drag dots and handles.",
-  "{skins} — coming (“name”-specs)": "{skins} — coming (“name”-specs)",
   "{step} of {total}": "{step} of {total}",
   "{title} controls": "{title} controls",
   "{title} window controls": "{title} window controls",
@@ -1727,7 +1726,6 @@
   "{kind} {id}": "a device's name: its kind and its id (LFO s2); reorder if your language puts the id first",
   "{kind} {name}": "what drives a macro: a device (its kind and name, e.g. LFO 2), or HAND — the value set by hand, nothing modulating it",
   "{kind} — {message}": "a status line: the device kind (LFO, ENV, AUDIO), then a message that is already a whole sentence",
-  "{skins} — coming (“name”-specs)": "a “name”-spec is a theme with its own rules or art, outside the built-in settings; METRO and SPRITES are names",
   "{verb} — {what}": "a button's name: its label, then what it acts on (SAVE — this project)",
   "{what} {i} name — type your own": "the name field of a macro or a trigger: {what} is Macro or Trigger, {i} its number",
   "{what} · TIMELINE": "a history row: what was done, then the window it was done in",
@@ -2699,7 +2697,7 @@
   "Every key is back to its default": [
    "mir/keyboard/keyboard.js"
   ],
-  "Every look option back home: the {:name::FROST} theme": [
+  "Every look option back home: the {skin} skin": [
    "mir/shell/gui.js"
   ],
   "Everything": [
@@ -6420,9 +6418,6 @@
   ],
   "{shape} — {points} points, {bent} bent. Right-drag empty space to add; drag dots and handles.": [
    "mir/modulation/window.js"
-  ],
-  "{skins} — coming (“name”-specs)": [
-   "mir/shell/gui.js"
   ],
   "{step} of {total}": [
    "mir/shell/boot.js"

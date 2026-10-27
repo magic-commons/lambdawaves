@@ -1,8 +1,8 @@
-/* MIR · shell/gui.css — the GUI windows: MIR OPTIONS (its tab row and one grid of groups per tab) and MIR ABOUT in one column.
+/* MIR · shell/gui.css — the GUI windows: MIR OPTIONS (every group on one packed grid, no tabs) and MIR ABOUT in one column.
  *
- * THE LAW IT KEEPS: THE HEAD NEVER MOVES (1.5.0 wave 19, the hand law).  The tabs share one grid cell, so the body is the
- * size of the biggest tab and a tab changes nothing but what is painted; shell/gui.js sizes the window once for that and
- * keeps its top-left.  At phone width (720 px and under) each tab is one column and the body scrolls.
+ * THE PACK (1.5.0-alpha.32, λWAVES 018 F1): the groups flow down up to four balanced columns (CSS columns, a group never
+ * split), as many as the screen holds; shell/gui.js sizes the window to it and keeps its top-left.  At phone width (720 px
+ * and under) it is one column and the body scrolls.
  * The window itself is the kit's (mir/window/window.css, a `.glass`), so every look option paints it too.  The controls
  * are the kit's, unrestyled: this sheet only lays them out.  The one control it draws is the `‹ NAME ›` stepper, by the
  * rules of docs/INTENT.md: no relief at rest, hover a lighter face, press a sink and a small scale, focus an accent ring
@@ -12,7 +12,8 @@
 /* FROST · values ───────────────────────────────────────────────────────────────────────────────────────────────────
    1.5.0-alpha.4 · every look value of this sheet, in one place (docs/SKINS.md); the rules below read names only. */
 .mir-gui {
-  --gui-col: 208px;                                         /* one grid column: every group is one or two of them */
+  --gui-col: 276px;                                         /* one column of the pack */
+  --gui-cols: 4;                                            /* at most this many, fewer on a smaller screen */
   --gui-col-narrow: 300px;                                  /* the one column of a phone sheet */
   --gui-about-w: 440px;
   --gui-about-w-narrow: 300px;
@@ -23,38 +24,13 @@
 }
 /* ── end of the values ── */
 
-/* ── the tab row: one fixed row under the title (1.5.0 wave 19); on a narrow window it scrolls sideways, never wraps ── */
-.mir-gui .gui-tabbar { flex: 0 0 auto; display: flex; justify-content: center; padding: 0 var(--sp-4) var(--sp-3); overflow-x: auto; scrollbar-width: none; }
-.mir-gui .gui-tabs .seg { flex-wrap: nowrap; }
-.mir-gui .gui-tabs .seg-b { white-space: nowrap; }
-
-/* ── OPTIONS: one grid per tab, all in ONE grid cell, so the body is as big as the biggest tab and a tab never changes
-   the window's size; the tab not shown is invisible (no paint, no hits, out of the accessibility tree) ── */
-.gui-options { display: grid; width: max-content; }
-.gui-options > .gui-grid { grid-area: 1 / 1; align-self: start; }
-.gui-options:not([data-tab="look"]) > .gui-grid[data-tab="look"],
-.gui-options:not([data-tab="light"]) > .gui-grid[data-tab="light"],
-.gui-options:not([data-tab="windows"]) > .gui-grid[data-tab="windows"] { visibility: hidden; }
-.gui-grid {
-  display: grid; gap: var(--gui-gap); width: max-content; align-items: stretch;
-  grid-template-columns: repeat(5, var(--gui-col));         /* equal columns: shared edges, equal gutters */
-  grid-template-areas: "theme theme accent text quality" "material material controls motion motion";
-}
-.gui-grid[data-tab="light"] { grid-template-columns: repeat(2, var(--gui-col)); grid-template-areas: "light light"; }
-.gui-grid[data-tab="windows"] { grid-template-columns: repeat(2, var(--gui-col)); grid-template-areas: "windows sampling"; }
-.gui-grp[data-group="sampling"] { grid-area: sampling; }
+/* ── OPTIONS: one pack, the groups in their order down the columns (an app may hide a group: nothing is left empty) ── */
+.gui-options { width: min(calc(var(--gui-cols) * var(--gui-col) + (var(--gui-cols) - 1) * var(--gui-gap)), calc(100vw - 64px)); }   /* the screen less the window's margin, padding and a scrollbar */
+.gui-grid { columns: var(--gui-cols) var(--gui-col); column-gap: var(--gui-gap); }
+.gui-grid > .gui-grp { break-inside: avoid; margin-bottom: var(--gui-gap); }
 /* help prose goes with HELP (BASINS: "make it go away when 'help' is OFF"), and keeps its seat: a switch never moves the
    rows under it (the hand law) */
 body.window-info-off .mir-gui .gui-help { visibility: hidden; }
-.gui-grp[data-group="theme"] { grid-area: theme; }
-.gui-grp[data-group="accent"] { grid-area: accent; }
-.gui-grp[data-group="quality"] { grid-area: quality; }
-.gui-grp[data-group="material"] { grid-area: material; }
-.gui-grp[data-group="controls"] { grid-area: controls; }
-.gui-grp[data-group="text"] { grid-area: text; }
-.gui-grp[data-group="motion"] { grid-area: motion; }
-.gui-grp[data-group="light"] { grid-area: light; }
-.gui-grp[data-group="windows"] { grid-area: windows; }
 .gui-grp {
   display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; margin: 0;
   padding: var(--gui-grp-pad); border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--gui-grp-r);
@@ -83,6 +59,8 @@ body.window-info-off .mir-gui .gui-help { visibility: hidden; }
 .gui-pair > .mir-step .mir-step-name { min-width: 0; flex: 1 1 auto; }
 .gui-pair > .mir-step .mir-step-row { width: 100%; }
 .gui-pair > .trig { align-self: flex-end; }
+.gui-line.gui-trigs { flex-wrap: nowrap; }                    /* RESET LOOK · RESET LAYOUT · FORGET share one row */
+.gui-trigs > .trig { flex: 1 1 0; min-width: 0; }
 .gui-theme-cost { font-variant-numeric: tabular-nums; }
 .gui-ro .ro-sub { display: none; }
 .gui-ro .ro-val { font-size: var(--fs-small); }
@@ -99,15 +77,11 @@ body.window-info-off .mir-gui .gui-help { visibility: hidden; }
 .gui-ab-fine a, .gui-ab-words a { color: var(--acc); text-decoration: none; }
 .gui-ab-fine a:hover { text-decoration: underline; }
 
-/* ── a phone: the same tabs, one column, the body scrolling; the window is the screen's height (gui.js), so the tab not
-   shown leaves the layout instead of lengthening the scroll ── */
+/* ── a phone: one column, the body scrolling; the window is the screen's height (gui.js) ── */
 @media (max-width: 720px) {
-  .gui-grid, .gui-grid:is([data-tab="light"], [data-tab="windows"]) { grid-template-columns: var(--gui-col-narrow); grid-template-areas: none; }
-  .gui-grid > .gui-grp { grid-area: auto; }
+  .gui-options { width: var(--gui-col-narrow); }
+  .gui-grid { columns: 1; }
   .gui-line.gui-pair { flex-wrap: wrap; }
-  .gui-options:not([data-tab="look"]) > .gui-grid[data-tab="look"],
-  .gui-options:not([data-tab="light"]) > .gui-grid[data-tab="light"],
-  .gui-options:not([data-tab="windows"]) > .gui-grid[data-tab="windows"] { display: none; }
   .gui-about { width: var(--gui-about-w-narrow); }
 }
 
