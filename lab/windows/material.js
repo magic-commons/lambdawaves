@@ -95,7 +95,7 @@ export function createMaterial(app) {
     /* iteration 017 W2 (Josh 2026-10-26: "Grey out anything from 'Wave' that shouldn't work when switching between molecules or atoms/hydrogen"):
        styleSync greys by MODE as well as by style, one button at a time in the kit's muted look (seats stay).  Under a molecule MOMENTUM φ(p) (a set
        molecule owns the volume; the eigenmode kernel and its SPACE stand down) and Im ψ unless the volume is a complex orbital (the density, Δρ and a
-       real orbital write (√ρ | ψ, 0): Im ψ draws nothing — field.js setMoleculeMatrix); under hydrogen / an atom BALLS · STICKS · ESP, the molecule's
+       real orbital write (√ρ | ψ, 0): Im ψ draws nothing — the molecule matrix road in field.js); under hydrogen / an atom BALLS · STICKS · ESP, the molecule's
        views (the shader draws them as CLOUD there) */
     const modeMute = (s, id, off, why) => { const b = s.button(id); if (!b) return; b.disabled = off; const o = s.spec.options.find((q) => q.id === id), t = off ? why : o && o.title;
       if (t) hint(b, t); else { b.removeAttribute('title'); delete b.dataset.help; delete b.dataset.helpEn; } };   // the kit's hint hop keeps a title as data-help
