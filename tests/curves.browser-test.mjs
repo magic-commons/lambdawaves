@@ -1,4 +1,5 @@
 // 0.5.1 D10-24 · THE CURVES CARD: the kit's curves panel over the stage canvas, SCREEN ONLY, shipped closed, its grade a PREFERENCE.
+// 018 D3: re-aimed at NODES (lab/nodes.js), the card that hosts it now; a saved layout's `curves` seat opens `nodes`.
 //   1 shipped closed, in + and WINDOW, saying so in one line · 2 neutral reads `filter: none` · 3 a grade reaches the screen and NOT a picture
 //   4 the card is a painted surface in the frame mask, open and floated · 5 the grade is PREFERENCE: its own record, surviving a reload, untouched by a project open, absent from the project and the undo ring
 //   6 FORGET takes it away.
@@ -25,16 +26,16 @@ try {
   await ready();
 
   /* 1 · closed on a first run; in + and WINDOW; the one line */
-  const first = await g.ev(`const d = document.querySelector('.dev[data-id="curves"]');
+  const first = await g.ev(`const d = document.querySelector('.dev[data-id="nodes"]');
     document.getElementById('rackAdd').click(); const plus = [...document.querySelectorAll('#rackAddList .mb-item')].map((i) => i.dataset.win); document.getElementById('rackAdd').click();
     __LW.layout.menu.open(); const b = [...document.getElementById('menubar').querySelectorAll('.mb-btn')].find((x) => x.dataset.menu === 'WINDOW'); b.click();
     const win = [...b.parentElement.querySelectorAll('.mb-lbl')].map((l) => l.textContent.trim()); b.click();
-    return { made: !!d, closed: d.classList.contains('closed'), side: d.parentElement.id, plus: plus.includes('curves'), win: win.some((t) => /CURVES$/.test(t)),
+    return { made: !!d, closed: d.classList.contains('closed'), side: d.parentElement.id, plus: plus.includes('nodes'), win: win.some((t) => /NODES$/.test(t)),
       note: d.querySelector('.note').textContent, errs: __e.slice() };`);
   assert.equal(first.made, true); assert.equal(first.closed, true); assert.equal(first.side, 'rack');
   assert.equal(first.plus, true); assert.equal(first.win, true);
   assert.equal(first.note, 'Grades the screen only — pictures and films are untouched.'); assert.deepEqual(first.errs, []);
-  console.log('PASS CURVES ships closed on the right rack, in + and WINDOW, and says in one line that it grades the screen only');
+  console.log('PASS NODES (CURVES\' heir) ships closed on the right rack, in + and WINDOW, and says in one line that it grades the screen only');
 
   /* 2 · neutral costs nothing */
   assert.equal(await g.ev('return __filter();'), 'none');
@@ -55,12 +56,12 @@ try {
 
   /* 4 · a painted surface: the closed card masks nothing; the open, the floated and the folded card are surfaces in the frame mask */
   await g.ev(`__LW.mat.frame = true; __LW.mat.frameMode = 'lattice'; __LW.setStyle('cloud'); await __remask(); return 1;`);
-  const at = () => g.ev(`const e = document.querySelector('.dev[data-id="curves"]'), r = e.getBoundingClientRect(); return { masked: __mask('curves'), n: __masks.length, closed: e.classList.contains('closed'),
+  const at = () => g.ev(`const e = document.querySelector('.dev[data-id="nodes"]'), r = e.getBoundingClientRect(); return { masked: __mask('nodes'), n: __masks.length, closed: e.classList.contains('closed'),
     floating: e.classList.contains('floating'), deep: __masks.some((m) => m[0] <= (r.left + r.right) / 2 && (r.left + r.right) / 2 < m[2] && m[1] <= r.bottom - 20 && r.bottom - 20 < m[3]) };`);
   const shut = await at();
-  await g.ev(`__LW.layout.reopen('curves'); await __remask(); return 1;`); const opened = await at();
-  await g.ev(`__LW.layout.popOut('curves', { x: 640, y: 120, w: 300 }); await __remask(); return 1;`); const floated = await at();
-  await g.ev(`document.querySelector('.dev[data-id="curves"] .dev-fold').click(); await __remask(); return 1;`); const folded = await at();
+  await g.ev(`__LW.layout.reopen('nodes'); await __remask(); return 1;`); const opened = await at();
+  await g.ev(`__LW.layout.popOut('nodes', { x: 640, y: 120, w: 300 }); await __remask(); return 1;`); const floated = await at();
+  await g.ev(`document.querySelector('.dev[data-id="nodes"] .dev-fold').click(); await __remask(); return 1;`); const folded = await at();
   assert.equal(shut.closed, true); assert.equal(opened.masked, true, JSON.stringify(opened)); assert.ok(opened.n > shut.n && opened.n <= 32);
   assert.equal(floated.floating, true); assert.equal(floated.masked, true, JSON.stringify(floated)); assert.equal(floated.deep, true);
   assert.equal(folded.masked, true, JSON.stringify(folded));
@@ -77,9 +78,17 @@ try {
   assert.equal(after.raw, rec.raw); assert.match(after.filter, /^url\(/);
   console.log('PASS the grade is PREFERENCE: its own record, not in the settings blob or the project; a project open (NEW) leaves it and the screen as they were');
   await go(g.s, URL); await g.armErrors(); await ready();
-  const back = await g.ev(`return { raw: localStorage.getItem('${KEY}'), pts: __LW.curves.points('MASTER').length, filter: __filter(), closed: document.querySelector('.dev[data-id="curves"]').classList.contains('closed') };`);
+  const back = await g.ev(`return { raw: localStorage.getItem('${KEY}'), pts: __LW.curves.points('MASTER').length, filter: __filter(), closed: document.querySelector('.dev[data-id="nodes"]').classList.contains('closed') };`);
   assert.equal(back.raw, rec.raw); assert.ok(back.pts >= 3); assert.match(back.filter, /^url\(/);
   console.log('PASS the grade survives a reload (restored before the first frame, the canvas graded)');
+
+  /* 018 D3 · a saved layout naming the retired `curves` opens `nodes` (settings.js RETIRED_WINDOWS) */
+  const alias = await g.ev(`const L = __LW.layout.captureLayout(), rest = L.cards.filter((c) => c.id !== 'nodes');
+    __LW.layout.applyLayout({ ...L, cards: rest.concat([{ id: 'nodes', side: 'R', open: false }]) }); await __w(400);
+    if (!document.querySelector('.dev[data-id="nodes"]').classList.contains('closed')) return 'nodes did not close';
+    __LW.layout.applyLayout({ ...L, cards: rest.concat([{ id: 'curves', side: 'R', open: true }]) }); await __w(600); return { open: !document.querySelector('.dev[data-id="nodes"]').classList.contains('closed'), curves: !!document.querySelector('.dev[data-id="curves"]') };`);
+  assert.deepEqual(alias, { open: true, curves: false });
+  console.log('PASS a saved layout naming the retired CURVES card opens NODES');
 
   /* 6 · FORGET */
   await g.ev(`[...document.querySelectorAll('button')].find((x) => x.textContent.trim() === 'FORGET').click(); return 1;`);

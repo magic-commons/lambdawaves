@@ -31,7 +31,7 @@ import { createTransition } from './windows/transition.js';   // 018 C1: A ↔ B
 import { createStaticField } from './windows/static-field.js';   // iteration 008 S: the FIELD card (STATE's static field, drives and impulse knobs)
 import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js'; import { createFacade } from './shell/facade.js'; import { createVerbs } from './verbs.js';   // 0.5.2 R3a (edit-domain.js left with the history) · R5 the facade
 import { createCameraLaw } from './camera-law.js'; import { createPicker } from './picker.js';   // iteration 003: THE MAIN MENU; iteration 004: THE PICKER   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
-import { createCurvesPanel } from './mir/panels/curves.js';     // 0.5.1 D10-24: the CURVES card's rows are the kit's panel over the stage canvas
+import { createNodes } from './nodes.js';     // 018 D3: NODES, the CURVES card's heir (the kit's curves panel in a node graph)
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 A1: the settings blob's one door
 import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced-motion law, out of boot()
 import { createController } from './shell/controller.js';   // 0.5.2 R1: ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD, out of boot()
@@ -838,20 +838,12 @@ export async function boot(dom) {
     here: () => { const C = app.state.chem; return { chem: C && C.on ? C.save() : null, ham: getHamiltonian().id, preset: reg.preset, view: mat.view, t: clock.t }; } });
   rack.prepend(app.state.filmCard.card.root);   // at the top, where a reopen puts it and a layout that does not list it (a demo's) leaves it: a reload saves the same `closed`
   rk.register({ id: 'render', el: app.state.filmCard.card, side: 'right', closed: true, title: 'RENDER', glyph: 'render', hint: 'the picture and the film' });
-  /* 0.5.1 D10-24 · THE CURVES CARD: the kit's curves panel over the stage canvas (MASTER · R · G · B through its one SVG picture filter), so the SCREEN is
-     graded and nothing else: capture.js reads the GPU texture and the film draws frame(i, ctx), neither sees a CSS filter.  `project: false` (ONE project
-     part), no `history`, no `port`, no `mod` (AMOUNT is not routed).  The grade is PREFERENCE (`lambdawaves.q0.curves`): restored here, written 250 ms
-     after a change, never in a project, a link or a history row.  Neutral = `filter: none`.  Closed, in + and WINDOW, seated after RENDER (where a layout
-     that does not list it leaves it, so a reload saves the same `closed`); `__LW.curves` is the model. */
-  const wCurves = device({ id: 'curves', eyebrow: 'CURVES', status: '' });
-  el('div', 'note', wCurves.body, 'Grades the screen only — pictures and films are untouched.');
-  const curves = createCurvesPanel({ parent: wCurves.body, canvas: dom.canvas, project: false }).model;
-  for (const l of wCurves.body.querySelectorAll('.curves-channel .k-lbl, .curves-foot .k-lbl')) if (/^(CHANNEL|PRESET)$/.test(l.textContent.trim())) { l.parentElement.setAttribute('aria-label', l.textContent.trim()); l.remove(); }   // 018 A7: one label, no heading
-  curves.restore(curvesStore.get());
-  let curvesSave = 0;
-  curves.onChange(() => { clearTimeout(curvesSave); curvesSave = setTimeout(() => curvesStore.set(curves.serialize()), 250); });
-  app.state.filmCard.card.root.after(wCurves.root); rk.register({ id: 'curves', el: wCurves, side: 'right', closed: true, title: 'CURVES', glyph: 'curves', hint: 'grade the screen: a transfer curve per channel' });
-  LW.curves = curves;
+  /* 018 D3 · NODES (lab/nodes.js, call 1): the CURVES card retired into a node graph — STAGE IN → CURVES → STAGE OUT — shown as the MIR window `nodes`
+     and the rack card `nodes`, seated where CURVES was (after RENDER, closed; a saved layout's `curves` seat opens `nodes`: settings.js RETIRED_WINDOWS).
+     The grade is still the kit's curves panel over the stage canvas (the SCREEN only, never a picture or a film), PREFERENCE `lambdawaves.q0.curves`;
+     `__LW.curves` is its model, `__LW.nodes` the graph. */
+  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root });
+    LW.curves = N.model; LW.nodes = N; }
   /* iteration 004 · THE FOLDERS CARD (BASINS' rackSave, save-window.js:380): the kit's mountGallery, a second live view of FOLDERS' one library,
      8 a page — closed at the top of the LEFT rack, in + and WINDOW.  Built here, as BASINS builds it (a saved layout opens a card by its
      class alone, shell/rack-wiring.js, so a first-open build would leave it empty); painted again when it opens.  The id `projects` is

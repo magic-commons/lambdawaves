@@ -11,7 +11,8 @@ const root = fileURLToPath(new URL('..', import.meta.url));
    file AND rewrites the manifest ("1.4.4", 2026-10-05, a release MIR never cut) passed them.  Each accepted MIR version
    pins the sha-256 of the manifest's own bytes: a forged version fails here, in every checkout and every CI, and a real
    adoption is a visible TWO-file edit — MIR-MANIFEST.json (written by MIR's tools/adopt.mjs) and its row below. */
-const ACCEPTED = { '1.5.0-alpha.29': '692cb9ff15444fbfa01b339d1763bbb9d3b3733c8ce06d8b240ceaceef7342a7',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
+const ACCEPTED = { '1.5.0-alpha.30': 'f604777c7dfee943ed22b85cfd71a270f98eb2bf9a5378888ab1af9c6530f674',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
+  '1.5.0-alpha.29': '692cb9ff15444fbfa01b339d1763bbb9d3b3733c8ce06d8b240ceaceef7342a7',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
   '1.5.0-alpha.28': 'ad97ad710895ac169027e1b83fc07bb33996c3a7d2c68c9bcc5e8ae6f273ba00',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
   '1.5.0-alpha.27': '9d3fac82792c9655b8a59c45209a0995c4189f191f41907eaf29266a93e7bcdd',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
   '1.5.0-alpha.26': '060ddb35892a192b6788d730fe467091182a693573dbe0d6916f64196a7fdb14',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
