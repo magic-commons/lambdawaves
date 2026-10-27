@@ -14,12 +14,16 @@ export const T = { response: 170, enter: 280, leave: 200, titleLeave: 220, title
 export const clamp = (v, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, v));
 export const calm = () => RM.matches || document.hidden;
 
-/* ── R0 · one cancellable native animation per element; null (and nothing happens) when motion is off ── */
+/* ── R0 · one cancellable native animation per element; null (and nothing happens) when motion is off.
+   A lone keyframe is an ENTRANCE: it is the FROM (offset 0) and the element eases to its own style.  Web Animations reads a lone keyframe
+   without an offset as the END state — the element faded OUT and snapped back (iteration 018 A1, Josh's "fake out" flicker); a leave
+   passes its own `offset: 1`. ── */
 const owners = new WeakMap();
 export function animate(el, frames, duration = T.enter, delay = 0, easing = EASE) {
   if (!el) return null; const was = owners.get(el); if (was) was.cancel();
   if (calm() || !el.getClientRects().length) return null;
-  const a = el.animate(frames, { duration, delay, easing, fill: 'backwards' });   // backwards: a delayed tile waits invisible
+  if (frames.length === 1 && frames[0].offset == null) frames = [{ ...frames[0], offset: 0 }];
+  const a = el.animate(frames, { duration, delay, easing, fill: 'backwards' });   // backwards: a delayed tile holds its FROM (invisible) until it starts
   owners.set(el, a); a.finished.then(() => { if (owners.get(el) === a) owners.delete(el); }, () => {});
   return a;
 }
@@ -95,7 +99,7 @@ export function swapLine(host, make) {
   w.make = make;
   if (w.leaving) return null;                                            // the line on show is leaving: the newest make is taken when it has gone
   const prev = host.querySelector('.mm-line');
-  const a = prev && prev.childNodes.length ? animate(prev, [{ opacity: 0, translate: '0 -18px' }], T.titleSwap) : null;
+  const a = prev && prev.childNodes.length ? animate(prev, [{ opacity: 0, translate: '0 -18px', offset: 1 }], T.titleSwap) : null;
   if (!a) { if (prev) prev.remove(); return build(host, w); }
   a.effect.updateTiming({ fill: 'both' });   // iteration 012 L2: the leaving line HOLDS its end (gone) until it is removed — it used to snap back for a frame and flash
   w.leaving = true; prev.classList.add('out');
