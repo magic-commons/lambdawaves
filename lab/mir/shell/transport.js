@@ -401,7 +401,7 @@ export function tempoPill({ tempo, panel = null, work = () => false, typed = fal
     const bpm = tempo.get(), n = formatBpm(bpm);
     setText(num, n); setText(hz, (bpm / 60).toFixed(2) + ' Hz'); setAttr(root, 'aria-valuenow', n);
     if (shownBpm !== n) { shownBpm = n; ariaLabel(root, '{bpm} beats per minute', { bpm: n }); }
-    if (panel) setAttr(root, 'aria-expanded', String(panel.isOpen()));
+    if (panel && !typed) setAttr(root, 'aria-expanded', String(panel.isOpen()));   // `typed`: the bar's EXPAND opens the panel, so the pill never says it is open (no ring; 018 F3)
   }
   const offLang = onLanguage(() => { shownBpm = ''; sync(); });
   sync();
