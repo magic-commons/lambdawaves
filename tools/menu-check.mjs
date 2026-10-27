@@ -21,8 +21,8 @@ for (const f of files) {
 const missing = [];
 const need = (stem, looks) => { if (!files.has(stem + '.webp')) missing.push(stem + '.webp'); for (const l of looks) if (!files.has(stem + '.' + l + '.webp')) missing.push(stem + '.' + l + '.webp'); };
 for (const s of ids.el) need(s, []); for (const s of ids.orb) need(s, ORB_LOOKS); for (const s of ids.mol) need(s, MOL_LOOKS);
-let molsNotDrawn = [];
-try { const { MOLECULES } = await import(path.join(ROOT, 'lab', 'molecules.js')); molsNotDrawn = MOLECULES.map((m) => m.id).filter((id) => !ids.mol.has(id)); } catch (e) { molsNotDrawn = ['(lab/molecules.js did not load: ' + (e && e.message) + ')']; }
+let molsNotDrawn = [];   // a disabled row (the heavy group, 011 Q4) is not drawn by tools/menu-thumbs.mjs either, so it is no gap
+try { const { MOLECULES, RECORD_ONLY } = await import(path.join(ROOT, 'lab', 'molecules.js')); molsNotDrawn = [...MOLECULES, ...RECORD_ONLY].filter((m) => !m.disabled).map((m) => m.id).filter((id) => !ids.mol.has(id)); } catch (e) { molsNotDrawn = ['(lab/molecules.js did not load: ' + (e && e.message) + ')']; }
 console.log(`MENU  ${files.size} files · elements ${ids.el.size} (118 expected) · hydrogen states ${ids.orb.size} (140 expected, each + ${ORB_LOOKS.join(' · ')}) · molecules ${ids.mol.size} (each + ${MOL_LOOKS.join(' · ')})`);
 console.log(missing.length ? `  MISSING ${missing.length}: ${missing.slice(0, 12).join(', ')}${missing.length > 12 ? ' …' : ''}` : '  every picture present');
 console.log(molsNotDrawn.length ? `  lab/molecules.js ids without a menu picture: ${molsNotDrawn.join(', ')}` : '  every lab/molecules.js id has its pictures');
