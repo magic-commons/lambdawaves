@@ -18,7 +18,11 @@ Later rows (not this chain): the governor's bypass of PRIMITIVE nodes under a mi
 2. BLOOM and DISPLACE ship behind the "heavy" mark and a hint; no governor yet. Default: yes.
 3. The three shipped presets' recipes are the builder's. Default: yes.
 
+4. (N) GRAIN costs ≈ 20 % of the headless frames (the full-screen blended layer); the same on a real card? Default: keep; a smaller tile or shader grain if it hurts.
+5. (N) A graph preset renumbers nodes, so a saved route on nodes.n2.* can land on another type; PROJECT scope later. Default: as is.
+6. (N) A layer always sits over the filtered picture wherever it is in the chain. Default: as is.
+
 ## CLOSED
 | chain | BASE | commit | note |
 |---|---|---|---|
-| N | 10a299e | | |
+| N | 6bf68f7 | b2a4ccf | N1–N5 (N-BUILD.md; kit alpha.33; curves/frame-occlusion/history green; perf a +0.3 ms/s, b inside the bar, c −57 % frames) |
