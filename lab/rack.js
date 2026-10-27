@@ -18,7 +18,7 @@ import { Register, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock, onePlay } from './clock.js';
 import { createWindowActivity } from './mir/window-activity.js';
 import { VIEW, VIEW_NAMES, STYLE, quatFromYawPitch, waveView, KNEE_DEFAULT } from './field.js';
-import { el, device as kitDevice } from './mir/kit.js';
+import { el, ariaLabel, device as kitDevice } from './mir/kit.js'; import { createUserPresets } from './user-presets.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
@@ -845,7 +845,31 @@ export async function boot(dom) {
      that does not list it leaves it, so a reload saves the same `closed`); `__LW.curves` is the model. */
   const wCurves = device({ id: 'curves', eyebrow: 'CURVES', status: '' });
   el('div', 'note', wCurves.body, 'Grades the screen only — pictures and films are untouched.');
-  const curves = createCurvesPanel({ parent: wCurves.body, canvas: dom.canvas, project: false }).model;
+  /* 018 D2 · THE READER'S CURVES (the PALETTE way): a PREFERENCE record `lambdawaves.q0.curvePresets` of { name, data: { points } }; the kit's PRESET
+     stepper lists USER · theirs · PRESETS while one exists (curves.js `presets`); the bare save glyph keeps the channel's curve; each row has its × */
+  const curveUsers = createUserPresets('lambdawaves.q0.curvePresets'), CU = 'user:';
+  const curveRows = () => { const U = curveUsers.list().filter((u) => u.data && Array.isArray(u.data.points) && u.data.points.length >= 2).map((u) => ({ id: CU + u.name, label: u.name, points: u.data.points }));
+    return U.length ? [{ id: '#user', label: 'USER', coming: true }, ...U, { id: '#built', label: 'PRESETS', coming: true }] : []; };
+  const curvesPanel = createCurvesPanel({ parent: wCurves.body, canvas: dom.canvas, project: false, presets: curveRows }), curves = curvesPanel.model;
+  curveUsers.watch(() => curvesPanel.setPresets());
+  { const foot = wCurves.body.querySelector('.curves-foot'), nm = foot.querySelector('.mir-step-name'), save = el('button', 'sp-presave', foot); save.type = 'button';
+    ariaLabel(save, 'SAVE CURVE'); save.title = 'SAVE · this channel\'s curve as your own preset (kept on this device)';
+    save.addEventListener('click', () => {
+      if (foot.querySelector('.sp-prename')) return;
+      const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'curve name'); f.value = 'My curve';
+      nm.parentElement.insertBefore(f, nm); nm.hidden = true;
+      let done = false; const end = (keep, key) => { if (done) return; done = true; const n = f.value.trim(); f.remove(); nm.hidden = false;
+        if (keep && n) curveUsers.add(n, { points: curves.points().map((q) => ({ t: q.t, v: q.v, tension: q.tension || 0 })) }); if (key) nm.focus(); };
+      f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
+      f.addEventListener('blur', () => end(false)); f.focus(); f.select();
+    });
+    nm.addEventListener('click', () => { const pane = [...document.querySelectorAll('body > .mir-pick')].pop(); if (!pane) return;
+      for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + CU + '"]')) {
+        const x = el('span', 'sp-prex', b, '×'), name = b.dataset.id.slice(CU.length); x.setAttribute('role', 'button'); x.title = 'remove ' + name; ariaLabel(x, 'remove {name}', { name });
+        x.addEventListener('mousedown', (e) => e.preventDefault());
+        x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); curveUsers.remove(name); b.remove();
+          if (!pane.querySelector('.mir-pick-i[data-id^="' + CU + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
+      } }); }
   for (const l of wCurves.body.querySelectorAll('.curves-channel .k-lbl, .curves-foot .k-lbl')) if (/^(CHANNEL|PRESET)$/.test(l.textContent.trim())) { l.parentElement.setAttribute('aria-label', l.textContent.trim()); l.remove(); }   // 018 A7: one label, no heading
   curves.restore(curvesStore.get());
   let curvesSave = 0;

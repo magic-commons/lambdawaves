@@ -1,6 +1,6 @@
 {
   "kit": "MIR",
-  "version": "1.5.0-alpha.29",
+  "version": "1.5.0-alpha.30",
   "line": "1.5",
   "commit": "1b7ae99b9905",
   "files": {
@@ -139,7 +139,7 @@
     "lab/mir/panels/camera.css": "a7bb44f9271f1d63",
     "lab/mir/panels/camera.js": "57f72e8128c59ee9",
     "lab/mir/panels/curves.css": "22c3d24fb55205ec",
-    "lab/mir/panels/curves.js": "0df1130003919d95",
+    "lab/mir/panels/curves.js": "ab8c56be4301ca7a",
     "lab/mir/panels/grade.css": "da0334f1bdf90375",
     "lab/mir/panels/grade.js": "4a8f8953c1ece6bc",
     "lab/mir/panels/index.js": "74f015680d9e4c2b",
@@ -261,7 +261,7 @@
     "lab/mir/timeline/view.js": "938f864a972f9af5",
     "lab/mir/timeline/window.js": "baf1855498575a93",
     "lab/mir/tokens.json": "3f8decbbc349581f",
-    "lab/mir/version.js": "1e3fd4b225287de6",
+    "lab/mir/version.js": "819b5ee837045bf8",
     "lab/mir/window-activity.js": "8eb6cefdf972a053",
     "lab/mir/window/dock.js": "6b678fe062232fde",
     "lab/mir/window/rail.js": "60d28f8f5c584dea",

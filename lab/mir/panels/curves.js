@@ -16,7 +16,7 @@
  *                 the whole curve at 1; a modulation target) · RESET (this channel back to the diagonal at 100 %)
  *
  *   createCurvesPanel({ rack, channels = ['MASTER', 'R', 'G', 'B'], port | canvas, mod, history, project, histogram, … }) → handle
- *   createCurvesView(parent, options) → { root, model, editor, sync(), setHistogram(data), params(), destroy() }
+ *   createCurvesView(parent, options) → { root, model, editor, sync(), setPresets(), setHistogram(data), params(), destroy() }   (options.presets: the app's rows)
  *   createCurvesModel(options) → the curves and where their tables go, no DOM (made with the panel, so a closed card still applies them)
  *   curveEditor({ get, set(points, live), label, histogram }) → { root, svg, paint(), select(i), selected(), setHistogram(bins), destroy() }
  *   Pure: IDENTITY · PRESETS · PRESET_NAMES · isIdentity · presetOf · curveTable(points, amount, n) · pathOf(points, w, h, n) · histPath(bins, w, h)
@@ -307,10 +307,16 @@ export function createCurvesView(parent, o = {}) {
   const editor = curveEditor({ label: o.label || 'CURVE', get: () => M.points(), set: (pts, live) => M.set(M.channel(), pts, live), histogram: histOf() });
   root.appendChild(editor.root);
 
-  /* ── PRESET and AMOUNT, then RESET ── */
+  /* ── PRESET and AMOUNT, then RESET.  `presets: () => rows` (1.5.0-alpha.30): the app's own rows ahead of the kit's — { id, label, points } a
+     curve, { id, label, coming: true } a heading — re-read by setPresets() (a reader's saved curves); a row's curve lands on the channel shown ── */
+  const BUILT = PRESET_NAMES.map((n) => ({ id: n, label: n, hint: PRESET_HINT[n] }));
+  const extra = () => (typeof o.presets === 'function' && o.presets()) || [];
+  const shownOf = (pts) => { const k = JSON.stringify(pack(pts)); return presetOf(pts) || (extra().find((r) => r.points && JSON.stringify(pack(normalizePoints(r.points))) === k) || {}).id || 'LINEAR'; };
   const foot = el('div', 'curves-row curves-foot', root);
-  const preset = control({ id: M.part + '.preset', label: 'PRESET', hint: 'PRESET — a curve to start from', options: PRESET_NAMES.map((n) => ({ id: n, label: n, hint: PRESET_HINT[n] })),
-    value: presetOf(M.points()) || 'LINEAR', get: () => presetOf(M.points()) || 'LINEAR', set: (v) => M.preset(M.channel(), v) });
+  const preset = control({ id: M.part + '.preset', label: 'PRESET', hint: 'PRESET — a curve to start from', options: [...extra(), ...BUILT],
+    value: shownOf(M.points()), get: () => shownOf(M.points()),
+    set: (v) => { const r = extra().find((x) => x.id === v && x.points); if (r) M.set(M.channel(), r.points); else M.preset(M.channel(), v); } });
+  const setPresets = () => preset.widget.setItems([...extra(), ...BUILT].map((r) => ({ id: r.id, label: r.label, coming: !!r.coming })), shownOf(M.points()));
   const writeAmount = (v) => { if (!handWrite(mod, M.modId, v)) M.setAmount(v); };
   const amount = control({ id: M.modId, label: 'AMOUNT', hint: 'AMOUNT — how much of the curves apply: the diagonal at 0, the whole curve at 100 %', min: 0, max: 1, home: 1,
     fmt: (v) => Math.round(v * 100) + ' %', value: M.amount(), get: () => M.amount(), set: writeAmount });
@@ -324,7 +330,7 @@ export function createCurvesView(parent, o = {}) {
   function sync() {
     paintChannel();
     if (chan && chan.get() !== M.channel()) chan.set(M.channel());
-    const p = presetOf(M.points()) || 'LINEAR'; if (preset.get() !== p) preset.set(p);
+    const p = shownOf(M.points()); if (preset.get() !== p) preset.set(p);
     if (!routedAmount() && !(amount.widget.dragging && amount.widget.dragging()) && amount.get() !== M.amount()) amount.set(M.amount());
     if (o.histogram) editor.setHistogram(histOf());
     editor.paint();
@@ -336,7 +342,7 @@ export function createCurvesView(parent, o = {}) {
   if (mod && typeof mod.add === 'function' && targets.length) offMod.push(mod.add(targets));   // one rebuild of the modulation window (mod.add takes a list)
   sync();
   return {
-    root, model: M, editor, channel: chan, preset, amount, reset: resetBtn, sync, schedule, params: () => targets.slice(),
+    root, model: M, editor, channel: chan, preset, amount, reset: resetBtn, sync, schedule, setPresets, params: () => targets.slice(),
     setHistogram(d) { o.histogram = d; editor.setHistogram(histOf()); },
     destroy() {
       frame.cancel(key); offModel();
@@ -354,7 +360,7 @@ export function createCurvesPanel(o = {}) {
   const model = createCurvesModel({ ...o, id });               // at once: a closed card still applies the curves and restores from a project
   let view = null;
   const handle = {
-    id, model, view: () => view, params: () => (view ? view.params() : []), sync: () => view && view.sync(),
+    id, model, view: () => view, params: () => (view ? view.params() : []), sync: () => view && view.sync(), setPresets: () => view && view.setPresets(),
     setHistogram(d) { o.histogram = d; if (view) view.setHistogram(d); },
     destroy() { if (view) view.destroy(); view = null; model.destroy(); },
   };

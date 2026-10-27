@@ -3,6 +3,12 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.30)
+- **CURVES TAKES THE APP'S PRESET ROWS** (018 D2, `panels/curves.js`): `createCurvesPanel/View({ presets: () => rows })` puts the app's rows
+  ({ id, label, points } a curve, { id, label, coming } a heading) ahead of the kit's six in the PRESET stepper; a row's curve lands on the
+  channel shown, and the stepper names a curve that matches one; `setPresets()` (view and panel) re-reads the rows. Why: Josh — CURVES saves
+  the reader's own curves and the drop-down loads them, as PALETTE and SPECTRUM already do.
+
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.29)
 - **THE PILL WEARS THE THEME'S INK** (018 A5, `shell/rack-scrollbar.js` `inkOn(rgb, theme)`): a light theme prefers white pill text, a dark theme
   dark text; it flips only past a 3:1 floor (white needs L ≤ 0.3, black L ≥ 0.1). Why: Josh — the pure-luminance midpoint chose by the fill alone.
