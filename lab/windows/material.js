@@ -261,7 +261,7 @@ export function createMaterial(app) {
         const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; f.setAttribute('aria-label', 'palette name');
         f.value = 'My ' + (nm.textContent || 'palette').trim(); nm.parentElement.insertBefore(f, nm); nm.hidden = true;
         let done = false; const end = (keep, key) => { if (done) return; done = true; let n = f.value.trim(); f.remove(); nm.hidden = false;
-          if (keep && n) { n = uniqueName(n, palUsers.list().map((x) => x.name)); palShown = PU + n; palUsers.add(n, { stops: rv.stops().map((s) => ({ at: s.at, rgb: s.rgb.slice() })) }); } if (key) nm.focus(); };
+          if (keep && n) { n = uniqueName(n, palUsers.list().map((x) => x.name)); palShown = PU + n; palUsers.add(n, { stops: rv.stops().map((s) => ({ at: s.at, rgb: mat.invert ? s.rgb.map((v) => 1 - v) : s.rgb.slice() })) }); }   /* 018 B6: INVERT on bakes the colours seen (1 − rgb); the switch stays */ if (key) nm.focus(); };
         f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true, true); } else if (e.key === 'Escape') { e.preventDefault(); end(false, true); } });
         f.addEventListener('blur', () => end(false)); f.focus(); f.select();
       }); }
