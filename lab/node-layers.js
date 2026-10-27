@@ -1,7 +1,8 @@
 /* lab/node-layers.js — NODES' LAYER types and the one layer host (iteration 019 N3; NODES-DESIGN.md).  A LAYER node is not a filter primitive:
- * it is one absolutely placed div over the stage, composited by the GPU with `mix-blend-mode` — cheap and fixed, whatever the picture costs.
+ * it is one absolutely placed div over the stage, blended by the GPU (`mix-blend-mode`): no main-thread work a frame, a fixed GPU cost (019 N,
+ * headless rig: VIGNETTE nothing measurable, FILM GRAIN ≈ −20 % presents — a full-screen blended noise layer; research/iteration-019/N-BUILD.md).
  *   FILM GRAIN  a 256² noise tile drawn ONCE per kind (MONO | COLOUR) and repeated; it jumps to a fresh offset 24 times a second by a CSS
- *               stepped animation (`transform` only: the compositor's, no main-thread work at all; none under reduced motion); AMOUNT is its
+ *               stepped animation (`transform` only, keyframes in percentages; none under reduced motion); AMOUNT is its
  *               opacity, SIZE the tile's scale, SOFT (soft-light) | OVERLAY its blend
  *   VIGNETTE    a radial gradient, multiplied: AMOUNT · FEATHER (where the dark starts) · ROUNDNESS (the frame's ellipse → a circle)
  *   SCANLINES   a repeating gradient, multiplied: PITCH (px) · AMOUNT
@@ -33,7 +34,7 @@ function tile(kind) {
   return (tiles[kind] = 'url(' + c.toDataURL() + ')');
 }
 const PAINT = {
-  grain: (s, v) => { const px = Math.round(256 * v.size); s.backgroundImage = tile(v.kind === 'colour' ? 'colour' : 'mono'); s.backgroundSize = px + 'px ' + px + 'px'; s.setProperty('--tile', px + 'px'); s.mixBlendMode = v.blend === 'overlay' ? 'overlay' : 'soft-light'; },
+  grain: (s, v) => { const px = Math.round(256 * v.size); s.backgroundImage = tile(v.kind === 'colour' ? 'colour' : 'mono'); s.backgroundSize = px + 'px ' + px + 'px'; s.mixBlendMode = v.blend === 'overlay' ? 'overlay' : 'soft-light'; },
   vignette: (s, v) => { const r = v.round, a = (71 * (1 - r)).toFixed(1) + '% + ' + (60 * r).toFixed(1) + 'vmax', in0 = Math.round((1 - v.feather) * 100);
     s.backgroundImage = `radial-gradient(ellipse calc(${a}) calc(${a}) at 50% 50%, #fff ${Math.min(in0, 99)}%, #000 100%)`; s.mixBlendMode = 'multiply'; },
   scanlines: (s, v) => { const p = Math.max(2, Math.round(v.pitch)); s.backgroundImage = `repeating-linear-gradient(to bottom, #000 0 ${p / 2}px, #fff ${p / 2}px ${p}px)`; s.mixBlendMode = 'multiply'; },

@@ -61,11 +61,6 @@
 /* 019 N3 · the LAYER host (lab/node-layers.js): over the stage canvases, under the atom labels (9), the stage text (20) and the racks; never a pointer */
 #nodeLayers { position: absolute; inset: 0; z-index: 8; overflow: hidden; pointer-events: none; }
 .node-layer { position: absolute; inset: 0; }
-.node-layer[data-type="grain"] { inset: calc(-1 * var(--tile, 256px)) 0 0 calc(-1 * var(--tile, 256px)); animation: node-grain .5s step-end infinite; will-change: transform; }
-@keyframes node-grain {
-  0% { transform: translate(0, 0); } 8.3% { transform: translate(calc(var(--tile) * .37), calc(var(--tile) * .71)); } 16.7% { transform: translate(calc(var(--tile) * .82), calc(var(--tile) * .13)); }
-  25% { transform: translate(calc(var(--tile) * .19), calc(var(--tile) * .48)); } 33.3% { transform: translate(calc(var(--tile) * .64), calc(var(--tile) * .92)); } 41.7% { transform: translate(calc(var(--tile) * .05), calc(var(--tile) * .29)); }
-  50% { transform: translate(calc(var(--tile) * .91), calc(var(--tile) * .57)); } 58.3% { transform: translate(calc(var(--tile) * .43), calc(var(--tile) * .06)); } 66.7% { transform: translate(calc(var(--tile) * .27), calc(var(--tile) * .83)); }
-  75% { transform: translate(calc(var(--tile) * .76), calc(var(--tile) * .38)); } 83.3% { transform: translate(calc(var(--tile) * .58), calc(var(--tile) * .66)); } 91.7% { transform: translate(calc(var(--tile) * .12), calc(var(--tile) * .97)); }
-}
+.node-layer[data-type="grain"] { inset: -50% 0 0 -50%; animation: node-grain .5s step-end infinite; will-change: transform; }   /* 1.5 × the stage: a jump of up to a third of it never shows an edge */
+@keyframes node-grain { 0.0% { transform: translate(0%, 0%); } 8.3% { transform: translate(12.2%, 23.4%); } 16.7% { transform: translate(27.1%, 4.3%); } 25.0% { transform: translate(6.3%, 15.8%); } 33.3% { transform: translate(21.1%, 30.4%); } 41.7% { transform: translate(1.7%, 9.6%); } 50.0% { transform: translate(30.0%, 18.8%); } 58.3% { transform: translate(14.2%, 2.0%); } 66.7% { transform: translate(8.9%, 27.4%); } 75.0% { transform: translate(25.1%, 12.5%); } 83.3% { transform: translate(19.1%, 21.8%); } 91.7% { transform: translate(4.0%, 32.0%); } }   /* percentages, no var(): the compositor runs it, no style recalc a step */
 @media (prefers-reduced-motion: reduce) { .node-layer[data-type="grain"] { animation: none; } }
