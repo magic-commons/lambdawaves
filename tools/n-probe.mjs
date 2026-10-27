@@ -49,6 +49,15 @@ try {
         anim: getComputedStyle(host.children[0]).animationName, box: [r.width, r.height] };`);
     shot = true;
   }
+  if (scene === 'prims') {
+    info = await g.ev(`const N = __LW.nodes, f = N.filter, w = (n) => new Promise((r) => setTimeout(r, n));
+      const kids = () => [...document.getElementById(f.id).children].map((e) => e.localName + (e.getAttribute('in') ? '<' + e.getAttribute('in') : '') + (e.getAttribute('result') ? '>' + e.getAttribute('result') : ''));
+      N.add('posterize'); N.add('blur'); N.add('aberration'); N.add('invert'); await w(300); const a = { kids: kids(), passes: N.passes() };
+      N.add('bloom'); N.add('displace'); N.add('sharpen'); await w(300); const b = { kids: kids(), passes: N.passes() };
+      N.set('n2', 'radius', 0); await w(200); const c = { kids: kids().length, passes: N.passes() };
+      return { a, b, c, css: getComputedStyle(document.getElementById('field')).filter };`);
+    shot = true;
+  }
   if (shot) writeFileSync(OUT, Buffer.from(await g.snap(), 'base64'));
   console.log(JSON.stringify({ scene, info, errors: (await g.errors()).errs }, null, 1));
 } finally { await g.close(); }

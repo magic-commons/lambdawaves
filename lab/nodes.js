@@ -21,6 +21,7 @@ import { frame } from './mir/core/frame.js';
 import { compile } from './nodes-compile.js';
 import { TABLE_TYPES, MATRIX_TYPES, homeOf, nodeBody } from './node-types.js';
 import { LAYER_TYPES, createLayerHost } from './node-layers.js';
+import { PRIM_TYPES } from './node-prims.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { createUserPresets } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
@@ -52,7 +53,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     curves: { cls: 'table', label: 'CURVES', hint: 'a transfer curve per channel, as Photoshop draws it', knobs: [],
       neutral: () => model.amount() === 0 || model.channels.every((ch) => isIdentity(model.points(ch))),
       fn: () => { const T = curveTables(); return (y, ch) => { if (T.MASTER) y = lookup(T.MASTER, y); if (T[ch]) y = lookup(T[ch], y); return y; }; } },
-    ...TABLE_TYPES, ...MATRIX_TYPES, ...LAYER_TYPES,
+    ...TABLE_TYPES, ...MATRIX_TYPES, ...PRIM_TYPES, ...LAYER_TYPES,
   };
 
   /* THE LIST: the graph record's nodes, or 018's one-node graph (CURVES, `curves: false` = bypassed) */
