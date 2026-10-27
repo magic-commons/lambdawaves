@@ -842,7 +842,7 @@ export async function boot(dom) {
      and the rack card `nodes`, seated where CURVES was (after RENDER, closed; a saved layout's `curves` seat opens `nodes`: settings.js RETIRED_WINDOWS).
      The grade is still the kit's curves panel over the stage canvas (the SCREEN only, never a picture or a film), PREFERENCE `lambdawaves.q0.curves`;
      `__LW.curves` is its model, `__LW.nodes` the graph. */
-  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root });
+  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod });
     LW.curves = N.model; LW.nodes = N; }
   /* iteration 004 · THE FOLDERS CARD (BASINS' rackSave, save-window.js:380): the kit's mountGallery, a second live view of FOLDERS' one library,
      8 a page — closed at the top of the LEFT rack, in + and WINDOW.  Built here, as BASINS builds it (a saved layout opens a card by its

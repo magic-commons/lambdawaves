@@ -1,6 +1,6 @@
 {
   "kit": "MIR",
-  "version": "1.5.0-alpha.32",
+  "version": "1.5.0-alpha.33",
   "line": "1.5",
   "commit": "1b7ae99b9905",
   "files": {
@@ -146,7 +146,7 @@
     "lab/mir/panels/lanes.css": "f039f68d99301f01",
     "lab/mir/panels/lanes.js": "fdcc72b41d0e3e23",
     "lab/mir/panels/morph.js": "745c8b5fd15fee30",
-    "lab/mir/panels/picture-filter.js": "cd45299da223ccb3",
+    "lab/mir/panels/picture-filter.js": "cbb24dae2c658317",
     "lab/mir/panels/ramp.css": "9dff67db74471784",
     "lab/mir/panels/ramp.js": "b952cb9d4597b1e2",
     "lab/mir/panels/xy.css": "4b3f5226b680965e",
@@ -261,7 +261,7 @@
     "lab/mir/timeline/view.js": "938f864a972f9af5",
     "lab/mir/timeline/window.js": "baf1855498575a93",
     "lab/mir/tokens.json": "3f8decbbc349581f",
-    "lab/mir/version.js": "5b8516f5d4011c21",
+    "lab/mir/version.js": "8188fc4e53dc90ab",
     "lab/mir/window-activity.js": "8eb6cefdf972a053",
     "lab/mir/window/dock.js": "6b678fe062232fde",
     "lab/mir/window/rail.js": "60d28f8f5c584dea",
