@@ -362,8 +362,8 @@ export async function boot(dom) {
        of this frame is presented on this frame.  It runs whether or not the window that shows it is open. */
     if (app.state.modHost) {
       const modRunning = app.state.modHost.clock.isRunning();
-      if (modRunning) modSyncBases();
       if (nowMs - app.state.modWall >= MOD.step) {
+        if (modRunning) modSyncBases();   // 017 P2: the bases follow the hand on the cadence that reads them, not every frame (half the reads at 120 Hz)
         /* WAVE 102 · THE FEED RATE IS MEASURED, NOT NOMINAL.  `modFeedAudio` turns each output's
            attack and release MILLISECONDS into per-frame coefficients using this number, so handing
            it a nominal 60 while the loop is really running at 43 would make every one of those eight
