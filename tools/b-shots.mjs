@@ -61,6 +61,8 @@ try {
         return { side: b.textContent.trim(), bar: [r.left, r.top, r.right, r.bottom].map(Math.round), formula: [f.left, f.top, f.right, f.bottom].map(Math.round) };`);
       out[side].shot = await shot('b7-bar-' + side, null);
     }
+  } else if (scene === 'info') {   // INFORMATIONAL floated: NAME · SUBTITLE · LIST CAP and ESP BAR · SIDE · PAD
+    await float('informational', 560, 10, 340); await wait(800); out.shot = await shot('b7-informational', await rectOf('.dev[data-id="informational"]'));
   } else if (scene === 'subtitle') {
     await mol(); await g.ev(`__LW.layout.reopen('informational'); await new Promise((r) => setTimeout(r, 400)); for (const w of ['NAME', 'SUBTITLE']) { const s = [...document.querySelectorAll('.lw-info-card .sw')].find((x) => x.textContent.trim() === w); if (s && s.getAttribute('aria-checked') !== 'true') s.click(); } return 1;`); await wait(1500);
     out.md = await g.ev(`return document.querySelector('.mir-info.lw-stage .mir-info-block').textContent;`);

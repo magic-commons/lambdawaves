@@ -28,6 +28,10 @@ const pct = (v) => Math.round(v * 100) + '%';
 export const INFO_ROWS = Object.freeze([
   { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'STAGE FORMULA', hint: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states — and caption a picture or a recording with it and its STATUS word; off, an export carries neither and the stage announces nothing' },
   { key: 'molName', type: 'bool', default: false, group: 'words', label: 'NAME', hint: 'The molecule\'s name under its formula (water under H₂O)' },
+  /* iteration 018 B9 (Josh: "Since we have isomers, let a secondary subtitle text be optional for the name … the name is a heading type and the subtitle
+     should be smaller like a 'body' text"): the line under the NAME that tells a molecule from its isomers — neither the catalogue nor a volume's index
+     carries a second name, so it is a volume molecule's index `tags` and point group `pg` (amide · C2v), a catalogue molecule's shelf (`group`) */
+  { key: 'molSubtitle', type: 'bool', default: false, group: 'words', label: 'SUBTITLE', hint: 'Under the NAME, in body type: what tells the molecule from its isomers — a volume molecule\'s tags and point group (amide · C2v), a catalogue molecule\'s shelf' },
   /* iteration 011 Q1 · THE LIST CAP (Josh 10-19: "have the informational automatically hide ultra large lists so it doesn't fight the screen and users don't
      have to keep toggling it on and off just because a certain mode uses an obscene amount of 140 levels"): SPECTRUM's populated list longer than the cap is
      written as its count — "140 levels · 7 shells" (capLine) — on the stage and in an export's caption; at or under the cap it is the list, as before.
@@ -129,7 +133,8 @@ export function createStageWords(app) {
   }
   function stageMd() {
     const row = app.state.chem && app.state.chem.on ? app.state.chem.row() : null;   // the catalogue's row or a volume molecule's (V2)
-    return row ? '$' + formulaLatex(row.formula) + '$' + (P.get('molName') && row.name ? '\n\n' + mdText(row.name) : '') : stageStates(true);   // NAME: the molecule's name under its formula
+    const sub = row && P.get('molName') && P.get('molSubtitle') && (row.sub || row.group);   // 018 B9: SUBTITLE, under the NAME only
+    return row ? '$' + formulaLatex(row.formula) + '$' + (P.get('molName') && row.name ? '\n\n' + mdText(row.name) : '') + (sub ? '\n\n' + mdText(sub) : '') : stageStates(true);   // NAME: the molecule's name under its formula
   }
   /** THE CAPTION a capture carries (T3): the same stage text as ONE plain-Unicode line — `H₂O · 1b1 HOMO · STO-3G` (the
    *  formula, the ORBITAL on the field in names.js's plain form, the basis) or SPECTRUM's states ("2s₀, 2p₋₁"; A ↔ B) — drawn
@@ -310,7 +315,7 @@ export function createStageWords(app) {
       if (ch('popSize')) api.setPopScale(st.popSize);
       if (!all && ch('cursorAway')) { layer.setFollow(st.cursorAway); layer.setParallax(st.cursorAway); }
       if (!all && ch('cursorDrift')) layer.setDrift(st.cursorDrift);
-      if (!all && (ch('molName') || ch('listCap'))) { stageSrc.v = -1; stageTextTick(); }   // iteration 011 Q1: the cap re-writes the list at once
+      if (!all && (ch('molName') || ch('molSubtitle') || ch('listCap'))) { stageSrc.v = -1; stageTextTick(); }   // iteration 011 Q1: the cap re-writes the list at once
       if (!all) { look.prefs.apply(); schedule(TIER.PRESENT); }   // the atom labels are the frame's
     };
     applyInfo(P.all()); P.subscribe(applyInfo);

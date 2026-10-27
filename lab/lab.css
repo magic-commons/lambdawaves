@@ -983,6 +983,7 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .mir-info.lw-stage .mir-info-block[data-fade] { font-size: calc(clamp(16px, 8vw, 22px) * var(--lw-stage-size, 1)); }
 /* iteration 007 I · NAME: the molecule's name is the formula block's second paragraph, at the notebook's heading (22 px of the title's 34) and close under it */
 .mir-info.lw-stage .mir-info-block:not([data-fade]) .mir-info-text > p + p { font-size: 0.65em; margin-top: -0.25em; line-height: 1.1; }   /* iteration 012 R1 (Josh 10-20): the name sits close under its formula */
+.mir-info.lw-stage .mir-info-block:not([data-fade]) .mir-info-text > p + p + p { font-size: 0.42em; margin-top: 0.1em; opacity: .85; }   /* 018 B9: the SUBTITLE under the NAME at the body's 14 of the title's 34 */
 /* iteration 008 P (Josh: "the name of the molecule should be centered, not aligned left to the formula"): the formula block's lines are centred
    on one axis — the block is max-content wide and the kit seats it centred, so a name shorter than the formula sits centred under it, and a longer one
    leaves the formula on the same axis it holds alone.  THE FADE's and THE HEAD's blocks ([data-fade]) keep the kit's left edge. */
