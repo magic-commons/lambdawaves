@@ -349,7 +349,7 @@ export function createChem(host, api) {
      holding its id; a volume molecule's every rung is its record, a rung its file lacks disabled with the header's reason */
   const B_TITLE = { 'sto-3g': 'The vendored minimal Cartesian basis; the oracle for all eight',
     '6-31+g-star': 'A split-valence basis with diffuse and polarisation functions, for H, C, N, O, F molecules up to 46 Cartesian AOs — water’s first root moves 0.483 → 0.341' };
-  const bSeg = seg({ label: 'BASIS', value: 'sto-3g', options: Object.entries(BASIS_LABEL).map(([id, label]) => ({ id, label, title: B_TITLE[id] || label + ': in a volume' })),
+  const bSeg = seg({ aria: 'BASIS', value: 'sto-3g', options: Object.entries(BASIS_LABEL).map(([id, label]) => ({ id, label, title: B_TITLE[id] || label + ': in a volume' })),
     onChange: (v) => { pressBasis(v); if (api.say) api.say('basis', 'BASIS · ' + bSeg.button(v).textContent); } });
   bSeg.root.addEventListener('pointerenter', () => { readHolds(); }); bSeg.root.addEventListener('focusin', () => { readHolds(); });   // the volumes are read when the hand comes near, never at boot
   const liveOk = (P) => (P.recordOnly ? { ok: false, nAO: P.nAO, why: `${P.name} is past the live cap and opens only from its STO-3G record; another basis would be a live solve, which is not offered` } : basis631(P.id));
@@ -387,7 +387,7 @@ export function createChem(host, api) {
   /* 0.7.3 K2 · METHOD beside BASIS: RHF · LDA, and U2's UHF on H₂ (folded in here); an open shell's RHF reads UHF and LDA waits for UKS. LDA always solves live
      (never a record), and only up to benzene's 36 STO-3G AOs: the grid's AO table is points × AOs (78 MB for benzene). A press is a hand pick (its head) */
   const LDA_T = 'Kohn–Sham, local density (Slater + VWN5) on a Becke × Treutler–Ahlrichs × Lebedev-302 grid, solved live — PySCF RKS lda,vwn the oracle';
-  const mthS = seg({ label: 'METHOD', value: 'rhf', options: [{ id: 'rhf', label: 'RHF', title: 'Restricted Hartree–Fock: one spatial orbital for both spins' }, { id: 'uhf', label: 'UHF', title: 'H₂ by UHF: α and β free to part past the Coulson–Fischer point' }, { id: 'lda', label: 'LDA', title: LDA_T }],
+  const mthS = seg({ aria: 'METHOD', value: 'rhf', options: [{ id: 'rhf', label: 'RHF', title: 'Restricted Hartree–Fock: one spatial orbital for both spins' }, { id: 'uhf', label: 'UHF', title: 'H₂ by UHF: α and β free to part past the Coulson–Fischer point' }, { id: 'lda', label: 'LDA', title: LDA_T }],
     onChange: (v) => { method = v; if (api.say) api.say('basis', 'METHOD · ' + mthS.button(v).textContent); solve(preset).then((r) => { if (r && api.hand) api.hand(preset); }); } });
   rM.appendChild(mthS.root);
   const ldaWhy = (P) => (P.multiplicity > 1 ? 'LDA is closed-shell in this cut: an open shell is UHF (no UKS until a later cut)' : basis !== 'sto-3g' ? 'LDA is STO-3G only in this cut'
@@ -406,7 +406,7 @@ export function createChem(host, api) {
      VIEW: a stroke on the ladder → MIX (molecules.js `stroked`), a HAND turn of the ORBITAL dial → ORBITAL (orbInput); a modulator stepping
      chem.orbital (stepApply), an undo, a restore, a project or a link move neither.  The dial's orbital is the ladder's CURSOR (orbitalsview.js
      paint): the same MOs, so it always lands on a line */
-  const vSeg = seg({ label: 'VIEW', value: 'density', cls: 'mol-view', options: [   // iteration 007 M: two rows of three (lab.css .mol-view), never five over one
+  const vSeg = seg({ aria: 'VIEW', value: 'density', cls: 'mol-view', options: [   // iteration 007 M: two rows of three (lab.css .mol-view), never five over one
     { id: 'density', label: 'DENSITY', title: 'ρ(r) = Σ D_ij χ_i χ_j on the field' },
     { id: 'orbital', label: 'ORBITAL', title: 'ψ_k(r) = Σ C_ik χ_i — one molecular orbital, the ORBITAL dial’s' },
     { id: 'registry', label: 'MIX', title: 'MIX — the register on the field: the lines lit on the ladder above, mixed in phase (ORBITAL pane: one electron’s ψ(r, t); STATES: the many-electron state)' },

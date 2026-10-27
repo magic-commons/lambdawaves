@@ -846,6 +846,7 @@ export async function boot(dom) {
   const wCurves = device({ id: 'curves', eyebrow: 'CURVES', status: '' });
   el('div', 'note', wCurves.body, 'Grades the screen only — pictures and films are untouched.');
   const curves = createCurvesPanel({ parent: wCurves.body, canvas: dom.canvas, project: false }).model;
+  for (const l of wCurves.body.querySelectorAll('.curves-channel .k-lbl, .curves-foot .k-lbl')) if (/^(CHANNEL|PRESET)$/.test(l.textContent.trim())) { l.parentElement.setAttribute('aria-label', l.textContent.trim()); l.remove(); }   // 018 A7: one label, no heading
   curves.restore(curvesStore.get());
   let curvesSave = 0;
   curves.onChange(() => { clearTimeout(curvesSave); curvesSave = setTimeout(() => curvesStore.set(curves.serialize()), 250); });
