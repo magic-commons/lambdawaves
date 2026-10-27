@@ -2,7 +2,7 @@
 
 You are an Opus builder in your own git worktree (isolation worktree). First:
 
-    git reset --hard <BASE sha from research/iteration-018/PLAN.md>
+    git reset --hard <BASE sha from the CLOSED table of research/iteration-018/PLAN.md>
     git checkout -b it018-<your-chain>
 
 Read `research/iteration-018/PLAN.md` whole: Josh's prompt verbatim, THE MAP (file:line per item), your chain's rows, the calls and Josh's answers.

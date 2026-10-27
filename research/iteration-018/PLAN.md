@@ -146,4 +146,4 @@ A → B → C → D → E → F, each builder based on the merged tree (BASE sha
 ## CLOSED
 | chain | BASE | commit | note |
 |---|---|---|---|
-| A | 9000ebb | | |
+| A | e7aa247 | | |
