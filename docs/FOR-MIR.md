@@ -3,6 +3,9 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.32)
+- **MIR OPTIONS WITHOUT TABS** (018 F1, `shell/gui.js`, `gui.css`): the LOOK · LIGHT · WINDOWS tab seg, `GUI_TABS`, `TAB_OF`, the `mir.gui.tab` record and the api's `tab` / `turn()` are gone; every group sits on one pack of up to four balanced CSS columns (276 px; fewer on a smaller screen, one on a phone), in the order theme · accent · material · text · controls · quality · motion · menus · light · windows · sampling, ACCENT's four dials in one row, RELIEF beside FACES, MENU BAR beside SHOW LOGO, WINDOWS' switches two by two, the three THEME buttons in one row; the window opens ≈ 1180 × 660 and `fitTo` adds the body's scrollbar when the screen is too short. `open('light')` and the old page names open OPTIONS. Why: Josh — "try to not use tabs … remove as much empty space and pack everything into that window. Feel free to increase the dimensions".
+
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.31)
 - **THE FINDER REPLACES THE + LIST** (018 E5, `shell/window-picker.js`, `.css`, `locales/en.json`): the window picker is the FINDER — no WINDOWS
   heading, the field says "search windows" with no accent ring, `can()` may return null to leave a row out; SHIFT-click queues rows (number

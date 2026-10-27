@@ -19,7 +19,7 @@ export const FAMILIES = Object.freeze({
   'lambdawaves.q0.library': ['library.js', 'LIBRARY'], 'lambdawaves.q0.modpresets': ['mir/modulation/mod.js PRESET_LS', 'PREFERENCE'],
   'lambdawaves.q0.modulation': ['rack.js modStore (mir/modulation/bind.js localStore): modArm, modCadence', 'PREFERENCE'],   // 0.5.0 C4
   'mir.gui': ['look.js createLook (mir/core/prefs.js createPrefs over LOOK_SCHEMA rows; MIR OPTIONS writes it, mir-gui.js)', 'PREFERENCE'],   // 0.5.0 C2 · iteration 003
-  'mir.gui.tab': ['the kit\'s MIR OPTIONS (mir/shell/gui.js TAB_KEY): the tab this device last showed', 'PREFERENCE'],   // iteration 003
+  'mir.gui.tab': ['the kit\'s MIR OPTIONS: the tab this device last showed (no longer written since MIR OPTIONS lost its tabs, 018 F1; an older browser may still hold it)', 'PREFERENCE'],   // iteration 003
   'mir.pointer': ['the kit\'s input layer (mir/core/kbm.js): MIR OPTIONS › MOTION › POINTER, written only when picked', 'PREFERENCE'],   // iteration 003
   'mir.tier': ['the kit\'s MIR OPTIONS (mir/shell/gui.js TIER_KEY): QUALITY · AUTO\'s device reading', 'PREFERENCE'],   // iteration 003
   'lambdawaves.q0.projects.window': ['projects.js FOLDERS (mir/folders/folders.js localPrefs): place, size, open, rail side, sort', 'WORKSPACE'],   // 0.5.0 C6
