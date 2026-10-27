@@ -40,6 +40,8 @@
   **Neither the catalogue rows nor the vol-1 index carry a second or systematic name** (index fields: id, name, formula, formulaM, charge, heavy, tags,
   cid, inchikey, mw, pg, …), so the text is a volume molecule's `tags · pg` ("amide · C2v", `volRef.sub` → `row().sub`) or a catalogue molecule's
   shelf `group` ("hydrides"). Shot: `b9-subtitle.jpg`.
+- **B10 ESP BAR ROW BY MODE** (`informational.js` `ui.espBarRow`, `material.js` modeSync): the law of 018 answers question 4 — the row is HIDDEN under hydrogen or an atom, shown under a molecule, set at build and re-synced on the same mode hook as WAVE (molecules.js → styleSync → modeSync), no polling.
+  Checked in Firefox: hidden → shown → hidden across MOLECULES on/off. stage-text still counts 8 dials (it counts `.k` in the DOM, so a hidden row counts); stage-text and routed-knob 7/7 GREEN.
 
 ## Tests (gate 8779 / gd 5779, one browser at a time)
 - GREEN: `node tests/camera-shift.test.mjs` (re-aimed: SPIN gone; AUTO-ROTATE reads μ = 0, holds a fling, leaves FRICTION), `node tests/render-exact.test.mjs`
@@ -73,4 +75,4 @@
    systematic names, the pack would carry them (PubChem by `cid`). Should it?
 2. ISO | SAS | SES does not fit beside SIZE · RADIUS · MAP ONLY at rack width, so ESP takes three lines: row, seg, PROBE · RANGE · LIVE. Is that OK?
 3. AUTO-ROTATE alone no longer turns the view; a fling is needed first. If you want a one-press spin, it would be a separate verb.
-4. INFORMATIONAL's ESP BAR row shows under hydrogen too, because it is a preference. Should it hide there like WAVE's rows?
+4. (answered by the laws of 018: B10 hides it under hydrogen.)
