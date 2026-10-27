@@ -1,7 +1,7 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar } from '../mir/shell/transport.js'; import { mirGui } from '../mir-gui.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
+import { TIER } from '../rack.js'; import { el, knob, fader, readout, formula } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar } from '../mir/shell/transport.js'; import { mirGui } from '../mir-gui.js'; import { INFO_ROWS, infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates, isPhone } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
@@ -60,12 +60,23 @@ export function createTransport(app) {
     const ico = (cls, icon, word, run, action = '') => { const b = el('button', 'tbtn csb-ico-b ' + cls); b.type = 'button'; if (icon) b.style.setProperty('--ico', `url(img/icons/${icon}.svg)`);
       b.setAttribute('aria-label', word); b.title = word; if (action) b.dataset.keyAction = action; b.addEventListener('click', run); return b; };
     const gear = ico('csb-gear', 'cog-solid', 'MIR OPTIONS — the interface’s look', () => mirGui().open('options'));
+    const folders = ico('csb-folders', 'folders', 'FOLDERS — save, open, recent', () => app.sh.layout.projects.toggle(), 'folders');
     const finder = ico('csb-finder', 'window-plus', 'FINDER — search every window', () => { if (app.sh.layout.windowPicker) app.sh.layout.windowPicker.toggle(); }, 'windowPicker');
+    const theme = ico('csb-theme', '', 'LIGHT | DARK', () => { if (app.hooks.setTheme) app.hooks.setTheme(document.body.dataset.theme === 'light' ? 'dark' : 'light'); });   // call 11: the theme only (lab.css swaps sun ↔ moon on body[data-theme])
+    /* E3 · INFORMATIONAL: one press turns every INFORMATIONAL switch off and remembers which were on; the next press puts that set back (the rows'
+       own defaults when nothing is remembered, e.g. after a reload) */
+    const IP = infoPrefs(), infoKeys = INFO_ROWS.filter((r) => r.type === 'bool').map((r) => r.key); let infoKept = null;
+    const info = ico('csb-info', 'info-circle', 'INFORMATIONAL — every stage word on or off', () => {
+      const lit = infoKeys.filter((k) => IP.get(k));
+      if (lit.length) { infoKept = lit; IP.set(Object.fromEntries(infoKeys.map((k) => [k, false]))); }
+      else IP.set(Object.fromEntries(infoKeys.map((k) => [k, infoKept ? infoKept.includes(k) : !!INFO_ROWS.find((r) => r.key === k).default]))); });
+    const infoLit = () => { const on = infoKeys.some((k) => IP.get(k)); info.classList.toggle('on', on); info.setAttribute('aria-pressed', String(on)); };
+    IP.subscribe(infoLit); infoLit();
     const chooser = document.querySelector('.dev[data-id="chem"] .mol-pick');
     const byId = (id) => document.getElementById(id);
     const search = createCsbSearch(app, { bar: () => T });   // A2 · THE MINIATURE PICKER (lab/csb-search.js)
     const bar = createBar({ layout: CSB, root: T, host: dom.stage,
-      nodes: { rate: ui.rateKnob.root, gear, modes: byId('lwMode'), chooser, search: search.root, finder, rack: byId('rackToggle'), fav: byId('rackFav') },
+      nodes: { rate: ui.rateKnob.root, gear, modes: byId('lwMode'), chooser, search: search.root, folders, finder, info, theme, rack: byId('rackToggle'), fav: byId('rackFav') },
       openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'the timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
       clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),
       rack: () => app.sh.rk, door: 'none', powerWord: 'MOD', seatMenu: false, opener: false,

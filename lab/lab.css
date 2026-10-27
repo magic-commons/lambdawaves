@@ -351,6 +351,8 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
   -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; }
 #transport #rackToggle { --ico: url(img/icons/rack.svg); }
 #transport #rackFav { --ico: url(img/icons/heart-solid.svg); }
+#transport .csb-theme { --ico: url(img/icons/moon.svg); }
+body[data-theme="light"] #transport .csb-theme { --ico: url(img/icons/sun.svg); }
 /* PLAY: a round chip floating outside the bar's left edge, level with the bar's own rows (the panel never moves it) */
 #transport[data-layout="csb"] > .csb-play { display: grid; place-items: center; border-radius: 50%; padding: 4px; }
 #transport.mini[data-layout="csb"] > .csb-play { position: absolute; right: calc(100% + 12px); bottom: 11px; grid-area: auto; }
