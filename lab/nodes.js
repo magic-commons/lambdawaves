@@ -30,6 +30,16 @@ const AT = { in: [65, 16] };                                         // STAGE IN
 const SPAN = 250;                                                    // the column's width, centred in a view that has no pan of its own yet
 const GAP = 36;
 const NOTE = 'Grades the screen only — pictures and films are untouched.';
+const MARK = { table: '·', matrix: '·', prim: '···', layer: '··' };       // THE COST IS ON THE CARD: · folds for free, ·· a layer, ··· a pass
+const CLASSES = [['table', 'TABLE'], ['matrix', 'MATRIX'], ['prim', 'PRIMITIVE'], ['layer', 'LAYER']];
+/* 019 N5 · the shipped graphs (Josh's call 3: the recipes are the builder's) — every node but CURVES, which stays as it is */
+const SHIPPED = {
+  FILM: [{ type: 'levels', values: { outblack: 0.05, outwhite: 0.95, gamma: 1.08 } }, { type: 'temperature', values: { warmth: 0.3 } }, { type: 'saturation', values: { saturation: 0.82 } },
+    { type: 'grain', values: { amount: 0.32, size: 1.2 } }, { type: 'vignette', values: { amount: 0.45, feather: 0.6, round: 0.35 } }],
+  POSTER: [{ type: 'saturation', values: { saturation: 1.45 } }, { type: 'posterize', values: { steps: 5 } }, { type: 'sharpen', values: { amount: 0.4 } }],
+  PRINT: [{ type: 'luma', values: { amount: 1 } }, { type: 'contrast', values: { contrast: 1.35 } }, { type: 'tint', values: { colour: [1, 0.93, 0.8], amount: 0.5 } },
+    { type: 'grain', values: { amount: 0.25, size: 2, blend: 'overlay' } }, { type: 'vignette', values: { amount: 0.25 } }],
+};
 
 export function createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod }) {
   const store = jsonStore('lambdawaves.q0.nodes');
@@ -38,7 +48,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const views = [];
 
   /* the reader's curves (018 D2, the PALETTE way): USER · theirs · PRESETS in the kit's PRESET stepper while one exists */
-  const users = createUserPresets('lambdawaves.q0.curvePresets'), CU = 'user:';
+  const users = createUserPresets('lambdawaves.q0.curvePresets'), CU = 'user:', graphs = createUserPresets('lambdawaves.q0.nodePresets');
   const presets = () => { const U = users.list().filter((u) => u.data && Array.isArray(u.data.points) && u.data.points.length >= 2).map((u) => ({ id: CU + u.name, label: u.name, points: u.data.points }));
     return U.length ? [{ id: '#user', label: 'USER', coming: true }, ...U, { id: '#built', label: 'PRESETS', coming: true }] : []; };
 
@@ -46,7 +56,8 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
      compiles to the byte-identical filter 018 wrote.  One compile and one filter write per frame, whatever moved */
   const filter = pictureFilter(canvas), cache = new Map(), layers = createLayerHost(canvas.parentElement);
   let passes = 0, nodes = [];
-  const recompile = () => frame.coalesce('nodes.compile', () => { const c = compile(nodes, TYPES, cache); passes = c.passes; filter.setChain(c.runs).flush(); layers.set(c.layers); });
+  const recompile = () => frame.coalesce('nodes.compile', () => { const c = compile(nodes, TYPES, cache); filter.setChain(c.runs).flush(); layers.set(c.layers);
+    if (c.passes !== passes) { passes = c.passes; for (const v of views) v.foot(); } });
   const panel = createCurvesPanel({ port: { setTable() { const q = nodes.find((n) => n.type === 'curves'); if (q) q.v++; recompile(); } }, project: false, presets }), model = panel.model;
   const curveTables = () => Object.fromEntries(model.channels.map((ch) => [ch, isIdentity(model.points(ch)) || model.amount() === 0 ? null : Float32Array.from(model.table(ch))]));
   const TYPES = {
@@ -106,6 +117,15 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   function remove(id) { const q = byId(id); if (!q || q.type === 'curves') return false; unenroll(q); nodes = nodes.filter((n) => n !== q); changed(); return true; }
   function setBypass(id, on) { const q = byId(id); if (!q || q.bypass === !!on) return; q.bypass = !!on; changed(); }
   function setHas(on) { setBypass(curvesNode().id, !on); }
+  /** a graph preset (a shipped one, or the reader's): every node but CURVES replaced by its list, laid out afresh */
+  function applyGraph(list) {
+    for (const q of nodes) if (q.type !== 'curves') unenroll(q);
+    nodes = nodes.filter((q) => q.type === 'curves'); for (const q of nodes) q.at = null;
+    let k = 0;
+    for (const p of list || []) if (TYPES[p.type] && p.type !== 'curves') { const q = fresh('n' + ++k, p.type, p); nodes.push(q); enroll(q); }
+    changed();
+  }
+  const graphOf = () => nodes.filter((q) => q.type !== 'curves').map(({ type, values, bypass }) => ({ type, values: { ...values }, bypass }));
   for (const q of nodes) enroll(q);
   recompile();
 
@@ -162,7 +182,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
       const c = el('div', 'nodes-card', plane); c.dataset.node = id;
       const bar = el('div', 'nodes-title', c); if (mark) el('i', 'nodes-mark', bar, mark); label(el('span', '', bar), title);
       if (ins) el('i', 'nodes-port in', c); if (outs) el('i', 'nodes-port out', c);
-      grab(bar, (e) => !e.target.closest('button'), () => xy(c), (b, dx, dy) => { c.style.left = b[0] + dx + 'px'; c.style.top = b[1] + dy + 'px'; wires(); }, moved);
+      if (kind === 'win') grab(bar, (e) => !e.target.closest('button'), () => xy(c), (b, dx, dy) => { c.style.left = b[0] + dx + 'px'; c.style.top = b[1] + dy + 'px'; wires(); }, moved);
       ro.observe(c);
       return cards[id] = { c, bar, body: el('div', 'nodes-body', c) };
     };
@@ -170,7 +190,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     label(node('out', 'STAGE OUT', true, false).body, 'the screen');
     /** a node's card: its bar (the class mark, the title, × BYPASS, the bin while bypassed) and its body (CURVES, or the type's knobs) */
     function make(q) {
-      const T = TYPES[q.type], n = node(q.id, T.label, true, true, T.cls === 'prim' ? '···' : T.cls === 'layer' ? '··' : '·');
+      const T = TYPES[q.type], n = node(q.id, T.label, true, true, MARK[T.cls]);
       n.c.dataset.type = q.type; n.c.title = T.hint || '';
       const x = el('button', 'nodes-x', n.bar); x.type = 'button'; chip(x, 'close', 'BYPASS NODE'); x.addEventListener('click', () => setBypass(q.id, !q.bypass));
       if (q.type !== 'curves') { const b = el('button', 'nodes-rm', n.bar); b.type = 'button'; chip(b, 'clear', 'REMOVE NODE'); b.addEventListener('click', () => remove(q.id)); }
@@ -180,21 +200,46 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     }
     /** the wires: each node's out port (the bottom's middle) to the next one's in port (the top's middle), a cubic as a network draws it */
     function wires() {
+      if (kind === 'card') return;                                    // the rack card is a column: its ports meet, no wire to draw
       const mid = (id, end) => { const c = cards[id].c; return [c.offsetLeft + c.offsetWidth / 2, c.offsetTop + (end ? c.offsetHeight : 0)]; };
       const ids = ['in', ...nodes.map((q) => q.id), 'out'];
       svg.replaceChildren(...ids.slice(1).map((b, i) => { const [x1, y1] = mid(ids[i], true), [x2, y2] = mid(b, false), d = Math.max(30, Math.abs(y2 - y1) / 2);
         const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', `M${x1} ${y1} C${x1} ${y1 + d} ${x2} ${y2 - d} ${x2} ${y2}`); return p; }));
     }
-    grab(ground, (e) => e.target === ground || e.target === plane || e.target === svg, () => pan, (b, dx, dy) => setPan([b[0] + dx, b[1] + dy]),
+    if (kind === 'card') ground.classList.add('nodes-column');
+    grab(ground, (e) => kind === 'win' && (e.target === ground || e.target === plane || e.target === svg), () => pan, (b, dx, dy) => setPan([b[0] + dx, b[1] + dy]),
       () => put({ pan: { ...(rec().pan || {}), [kind]: pan } }));
     /* + : the node types; the view's other door: the window ↔ the rack card */
     const addB = el('button', 'nodes-add', ground); addB.type = 'button'; chip(addB, 'plus', 'ADD NODE');
     const menu = el('div', 'nodes-menu', ground); menu.hidden = true;
-    for (const [type, T] of Object.entries(TYPES)) {
-      const it = el('button', 'nodes-item', menu); it.type = 'button'; it.dataset.type = type; label(it, T.label); it.title = T.label + ' — ' + T.hint;
-      it.addEventListener('click', () => { menu.hidden = true; add(type); });
+    const head = (t, m) => { const h = el('div', 'nodes-head', menu); label(el('span', '', h), t); if (m) el('i', 'nodes-mark', h, m); };
+    const item = (text, title, run, cls = 'nodes-item') => { const it = el('button', cls, menu); it.type = 'button'; label(el('span', '', it), text); it.title = title;
+      it.addEventListener('click', () => { menu.hidden = true; run(); }); return it; };
+    /** + : the node types grouped by class with the class's cost mark, a heavy one marked; then the graphs — the shipped three, the reader's, SAVE */
+    function fill() {
+      menu.replaceChildren();
+      for (const [cls, name] of CLASSES) {
+        head(name, MARK[cls]);
+        for (const [type, T] of Object.entries(TYPES)) if (T.cls === cls) {
+          const it = item(T.label, T.label + ' — ' + T.hint, () => add(type)); it.dataset.type = type;
+          el('i', 'nodes-mark', it, MARK[cls]); if (T.heavy) label(el('i', 'nodes-heavy', it), 'HEAVY');
+          if (type === 'curves') it.disabled = has();
+        }
+      }
+      head('GRAPHS');
+      for (const [name, list] of Object.entries(SHIPPED)) item(name, name + ' — a shipped graph: every node but CURVES replaced', () => applyGraph(list)).dataset.graph = name;
+      for (const u of graphs.list()) { const it = item(u.name, u.name + ' — your graph', () => applyGraph(u.data && u.data.nodes)); it.dataset.graph = 'user:' + u.name;
+        const x = el('span', 'sp-prex', it, '×'); x.setAttribute('role', 'button'); ariaLabel(x, 'remove {name}', { name: u.name });
+        x.addEventListener('click', (e) => { e.stopPropagation(); graphs.remove(u.name); fill(); }); }
+      const sv = item('SAVE THIS GRAPH', 'SAVE · the nodes as your own graph (kept on this device)', () => {}, 'nodes-item nodes-save');
+      sv.addEventListener('click', (e) => { e.stopImmediatePropagation();
+        const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'graph name'); f.value = 'My graph'; sv.replaceWith(f);
+        let done = false; const end = (keep) => { if (done) return; done = true; const n = f.value.trim(); if (keep && n) graphs.add(n, { nodes: graphOf() }); fill(); };
+        f.addEventListener('keydown', (ev) => { ev.stopPropagation(); if (ev.key === 'Enter') { ev.preventDefault(); end(true); } else if (ev.key === 'Escape') { ev.preventDefault(); end(false); } });
+        f.addEventListener('blur', () => end(false)); f.focus(); f.select(); }, true);
     }
-    addB.addEventListener('click', () => { menu.querySelector('[data-type="curves"]').disabled = has(); menu.hidden = !menu.hidden; });
+    addB.addEventListener('click', () => { if (menu.hidden) fill(); menu.hidden = !menu.hidden; });
+    const foot = el('div', 'nodes-passes', ground);
     const door = el('button', 'nodes-door', ground); door.type = 'button';
     if (kind === 'win') { chip(door, 'dock', 'DOCK IN THE RACK'); door.addEventListener('click', () => { win.close(); raise('nodes'); }); }
     else { chip(door, 'popOut', 'OPEN AS A WINDOW'); door.addEventListener('click', () => { rk.close('nodes'); win.open(); }); }
@@ -203,6 +248,8 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
       get view() { return cards.curves && cards.curves.view; },
       widget: (id, k) => { const n = cards[id]; return n && n.ctl && n.ctl.ctls[k] ? n.ctl.ctls[k].targets[0] || null : null; },
       paint(q, k, v, shown) { const n = cards[q.id]; if (n && n.ctl) n.ctl.paint(k, v, shown); },
+      /** the graph's foot: what the graph costs — filter primitives + layers */
+      foot() { if (passes === 1) label(foot, '1 pass'); else label(foot, '{n} passes', { n: passes }); },
       /** the cards follow the list: a new node gets its card, a removed one loses it */
       sync() {
         for (const id of Object.keys(cards)) if (id !== 'in' && id !== 'out' && !byId(id)) { ro.unobserve(cards[id].c); if (cards[id].view) cards[id].view.destroy(); cards[id].c.remove(); delete cards[id]; }
@@ -210,7 +257,8 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
         api.place();
       },
       place() {
-        menu.hidden = true;
+        menu.hidden = true; api.foot();
+        if (kind === 'card') { plane.append(cards.in.c, ...nodes.map((q) => cards[q.id].c), cards.out.c); return; }   // the rack card: the chain as a column, in order
         const set = (n, l, t) => { n.c.style.left = l + 'px'; n.c.style.top = t + 'px'; };
         const A = rec().at || {}, pin = A.in || AT.in;
         set(cards.in, pin[0], pin[1]);

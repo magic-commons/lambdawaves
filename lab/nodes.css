@@ -36,12 +36,26 @@
 :is(.nodes-add, .nodes-door) { position: absolute; top: 6px; z-index: 1; border-radius: var(--r-sm); background: var(--glass-tint); }
 .nodes-add { left: 6px; }
 .nodes-door { right: 6px; }
-.nodes-menu { position: absolute; left: 6px; top: 36px; z-index: 2; display: grid; padding: 4px; border-radius: var(--r-md); background: var(--glass-raise, var(--glass-tint));
+.nodes-menu { position: absolute; left: 6px; top: 36px; z-index: 2; display: grid; grid-template-columns: repeat(2, minmax(0, auto)); max-height: calc(100% - 44px); overflow: auto; padding: 4px; border-radius: var(--r-md); background: var(--glass-raise, var(--glass-tint));
   border: 1px solid var(--glass-border); box-shadow: var(--neu-raise); }
 .nodes-item { padding: 6px 12px; border: 0; background: transparent; box-shadow: none; color: var(--fg); font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui);
   letter-spacing: var(--tr-wide); text-align: left; cursor: pointer; }
 .nodes-item:hover:not(:disabled) { color: var(--acc); }
 .nodes-item:disabled { opacity: .45; cursor: default; }
+/* 019 N5 · the + menu by class (each class's cost mark), the graphs, the foot's passes, the rack card's column */
+.nodes-menu { background: hsl(var(--glass-tint) / .97); }   /* a popover's .97 tint: the graph under it must not read through */
+.nodes-head { grid-column: 1 / -1; display: flex; gap: 6px; padding: 8px 12px 2px; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wider, .12em); color: var(--fg-soft); }
+.nodes-item { display: flex; align-items: center; gap: 6px; }
+.nodes-heavy { font-style: normal; font-size: .8em; color: var(--acc); }
+.nodes-menu .sp-prex { margin-left: auto; }
+.nodes-save, .nodes-menu .sp-prename { grid-column: 1 / -1; }
+.nodes-passes { position: absolute; left: 8px; bottom: 6px; z-index: 1; pointer-events: none; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
+.dev .nodes-ground.nodes-column { height: auto; cursor: default; }
+.nodes-column .nodes-plane { position: static; width: auto; height: auto; display: flex; flex-direction: column; gap: 18px; padding: 40px 8px 26px; translate: none !important; }
+.nodes-column .nodes-card { position: relative; left: auto !important; top: auto !important; width: auto; }
+.nodes-column .nodes-title { cursor: default; }
+.nodes-column .nodes-wires { display: none; }
+.nodes-column .nodes-card + .nodes-card::before { content: ''; position: absolute; left: 50%; top: -19px; height: 18px; border-left: 2px solid var(--acc); opacity: .75; }
 .nodes-host > .note { flex: none; }
 [data-mir-window="nodes"] .mir-win-body { display: flex; flex-direction: column; min-height: 0; }
 /* 019 N3 · the LAYER host (lab/node-layers.js): over the stage canvases, under the atom labels (9), the stage text (20) and the racks; never a pointer */
