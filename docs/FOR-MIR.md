@@ -3,6 +3,12 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.31)
+- **THE BAR'S OWN EXPAND** (018 E2, `shell/transport.js`): a layout part `'expand'` (`.tr-expand`, the `expand` glyph, `aria-expanded`, `.on`
+  while open) opens and shuts the tempo panel; a layout that names it gives the pill `tempoPill({ typed: true })`, so a click on the pill types
+  the tempo on any seat (the work bars' field) and the pill opens nothing. Why: Josh — "let tempo be typable … and have a dedicated icon to
+  expand the CSB instead".
+
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.30)
 - **CURVES TAKES THE APP'S PRESET ROWS** (018 D2, `panels/curves.js`): `createCurvesPanel/View({ presets: () => rows })` puts the app's rows
   ({ id, label, points } a curve, { id, label, coming } a heading) ahead of the kit's six in the PRESET stepper; a row's curve lands on the
