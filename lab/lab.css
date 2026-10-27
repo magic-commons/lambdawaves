@@ -974,6 +974,11 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .native-ab .trig { padding: 0 6px; }
 .native-ab .ab-slot::after { content: ''; flex: 0 0 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--glass-press); }
 .native-ab .ab-slot.stored::after { background: var(--acc); box-shadow: 0 0 6px color-mix(in srgb, var(--acc) 70%, transparent); }
+/* 018 C1 · SPECTRUM's A ↔ B (lab/windows/transition.js): ONE CLEAR, the bare trash glyph after B (the .sp-presave way: no chrome), dim while nothing is stored */
+.native-ab > .sp-abclear { width: 22px; height: 22px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: var(--fg); opacity: .6; cursor: pointer;
+  -webkit-mask: url(img/icons/trash.svg) center / 16px no-repeat; mask: url(img/icons/trash.svg) center / 16px no-repeat; }
+.native-ab > .sp-abclear:is(:hover, :focus-visible) { opacity: 1; background: var(--acc); }
+.native-ab > .sp-abclear:disabled { opacity: .2; cursor: default; background: var(--fg); }
 
 /* THE STAGE TEXT (INFORMATIONAL since 0.5.3 M9; 0.5.1 D1: one block of the kit's INFORMATIONAL layer, lab/shell/stage-words.js initStageText) wears the kit's ink,
    shade and serif at the kit's seat; beneath every window (z 20 < rack 30 < #floats 32: the kit's root has none), never a pointer

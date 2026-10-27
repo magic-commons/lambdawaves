@@ -145,9 +145,9 @@ try {
     are PREFERENCE, so a file that still carries them (an older save) leaves both exactly as they were. */
  const daw=await g.ev(`const M=__LW.mod.model,w=n=>new Promise(r=>setTimeout(r,n));const theme0=document.body.dataset.theme,fric0=__LW.camera.friction;
   __LW.loadPreset('1s+2pz');M.addSource('lfo');__LW.layout.modulation.expand();await w(400);M.addRoute(M.macroList()[0].id,'material.exposure',0.5,4);
-  __LW.layout.reopen('settings','R');__LW.layout.reopen('state','R');await w(200);
+  __LW.layout.reopen('settings','R');__LW.layout.reopen('spectrum','R');await w(200);
   __LW.camera.setAutoRotate(true);__LW.kepler.setOn(true);__LW.vortex.setOn(true);__LW.spectrum.setDials(true);__LW.layout.notebookResize(520,380);
-  const tr=[...document.querySelectorAll('.dev[data-id=state] .trig')],by=t=>tr.find(b=>b.textContent.trim()===t);by('STORE A').click();__LW.loadPreset('2p+');await w(150);by('STORE B').click();
+  const tr=[...document.querySelectorAll('.dev[data-id=spectrum] .sp-ab .trig')],by=t=>tr.find(b=>b.textContent.trim()===t);by('STORE A').click();__LW.loadPreset('2p+');await w(150);by('STORE B').click();
   const sc=document.querySelector('.stage-colour');sc.value='#203040';sc.dispatchEvent(new Event('input',{bubbles:true}));
   __LW.setStage(0);const stage0=__LW.mat.bg.slice();__LW.setStage(1);const stage1=__LW.mat.bg.slice();
   const follow=document.querySelector('.stage-follow');follow.click();const followed=__LW.mat.bg.slice(),retained=sc.value;follow.click();const resumed=__LW.mat.bg.slice();

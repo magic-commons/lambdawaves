@@ -61,6 +61,7 @@ export function createStates(host, api) {
   const product = { kind: 'signed', matrix: null, view: 'real', hash: null, solution: 0 };
   const evalList = [];                             // reused: what evaluate() is handed each frame
   const trail = new Float64Array(3 * 256); let trailN = 0, trailAt = 0, trailT = NaN;
+  let beatLine = '';   // 018 C3: the leading beat in words, written on the still scope (MOLECULES' LEAN hides the readouts)
   /* FLOW (stage 6): the current's source for the stage's tracers, rebuilt once a frame from the same (c₀, Z) */
   let flowOn = false, flow = null, flowRe = null, flowIm = null, flowEpoch = 0, flowSrc = 'computed';
   /* the drive: its knobs, and the pump's one outstanding request */
@@ -334,7 +335,7 @@ export function createStates(host, api) {
     if (want && !on) {
       const why = refusal();
       if (why) { armed = !ladder && !ladderRefused && C() && C().on ? (hand ? 2 : 1) : 0; status('REGISTRY off — ' + why + (armed ? ' · ON when it lands' : ''), 'warn'); return false; }
-      if (hand && lanes.size < 2 && preset('BEAT') && api.announce) api.announce('BEAT');   // 0.5.3 M3: a hand's ON over S₀ alone plays BEAT, so the stage shows something
+      if (hand && lanes.size < 2 && preset('BEAT')) { tune(); if (api.announce) api.announce('BEAT'); }   // 0.5.3 M3: a hand's ON over S₀ alone plays BEAT, so the stage shows something; 018 C3: DRIVE's ω sits on its gap (one press = Rabi)
       if (!lanes.size) { lanes.set(GROUND, { amp: 1, phase: 0, mute: false, solo: false }); selected = GROUND; touch(); rebuild(); }   // S4: seeded where an empty record left none
       on = true; pushedT = NaN; pushedV = -1; trailN = 0; trailAt = 0;
       const c = C(); if (c && c.setTda) c.setTda(true);                            // the sticks on screen belong to the model that is playing
@@ -579,6 +580,7 @@ export function createStates(host, api) {
       : M.path() ? [...M.path()].map(([key, c]) => ({ key, energy: energyOf(key), amp: Math.hypot(c.re, c.im) }))
       : keys().filter((k) => !lanes.get(k).mute).map((key) => ({ key, energy: energyOf(key), amp: lanes.get(key).amp })));
     const beats = beatsOf(list), b = beats[0];
+    beatLine = b ? `${label(b.a)} × ${label(b.b)} · ΔE ${b.dE.toFixed(3)} Eh · λ ${(45.5634 / b.dE).toFixed(1)} nm` : ''; paintScope();
     roBeat.set(b ? `${b.period.toFixed(3)} a.u. = ${(b.period * AU_TIME_AS).toFixed(1)} as` : '—', b ? 'ok' : '');
     roBeat.setSub(b ? `${label(b.a)} × ${label(b.b)} · ΔE ${b.dE.toFixed(6)} Eh` + (beats.length > 1 ? ` · ${beats.length - 1} more beat${beats.length > 2 ? 's' : ''}` : '') : 'one level has no beat: add a state');
     const why = refusal();
@@ -672,7 +674,7 @@ export function createStates(host, api) {
     g.strokeStyle = T.ink(0.35); g.lineWidth = 1; g.beginPath(); g.moveTo(cx - R, cy); g.lineTo(cx + R, cy); g.moveTo(cx, cy - R); g.lineTo(cx, cy + R); g.stroke();
     g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke();
     g.fillStyle = T.ink(0.85); g.textAlign = 'right'; g.fillText('δμ' + AX[px], W - 4, cy - 6); g.textAlign = 'left'; g.fillText('δμ' + AX[py], cx + 4, 7); g.textAlign = 'center';
-    if (!on || trailN < 2 || !(peak > 1e-9)) { g.fillText(on ? 'still' : 'dipole scope', cx, H - 6); return; }
+    if (!on || trailN < 2 || !(peak > 1e-9)) { g.fillText(on ? 'still' : 'dipole scope', cx, H - 6); if (on && beatLine) { g.fillText(beatLine.split(' · ')[0], cx, cy + R * 0.45); g.fillText(beatLine.split(' · ').slice(1).join(' · '), cx, cy + R * 0.45 + 11); } return; }
     const k = R / peak;
     for (let i = 1; i < trailN; i++) {
       const a = (trailAt - trailN + i - 1 + 512) % 256, b = (a + 1) % 256;

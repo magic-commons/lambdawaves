@@ -29,7 +29,7 @@ export function createMolecules(app) {
   })();
   modeSeg.set('atoms'); { const t = document.getElementById('title'); if (t) t.after(modeSeg.root); }
   function moleculeMode(v) {
-    for (const w of [wState, wSh, wOrb, wVor, wSlice, app.w.wLad, app.w.wCalc, wSpec, { root: document.querySelector('.dev[data-id="equalizer"]') }, { root: document.querySelector('.dev[data-id="staticfield"]') }, { root: document.querySelector('.dev[data-id="emission"]') }]) if (w && w.root) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
+    for (const w of [wSh, wOrb, wVor, wSlice, app.w.wLad, app.w.wCalc, wSpec, { root: document.querySelector('.dev[data-id="equalizer"]') }, { root: document.querySelector('.dev[data-id="staticfield"]') }, { root: document.querySelector('.dev[data-id="emission"]') }]) if (w && w.root) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
     wChem.root.hidden = !v;                                          // iteration 008 U: the one card (the register lives in it)
     if (v && wChem.root.classList.contains('closed')) app.sh.layout.reopen('chem');   // 017 call 8: ON after a × brings the card back (the rack's road, neighbours travel)
     modeSeg.set(v ? 'molecules' : 'atoms');

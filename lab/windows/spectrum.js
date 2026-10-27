@@ -1,5 +1,5 @@
 /* lab/windows/spectrum.js — the SPECTRUM card (0.5.2 R2a; moved verbatim out of lab/rack.js boot()), created at the card's seat; the five appends stay
- * there.  §0's consts, schedule, page, the rack, wState and the controller's names are handed over (backward); the windows, the gas and the layout made
+ * there.  §0's consts, schedule, page, the rack and the controller's names are handed over (backward); the windows, the gas and the layout made
  * later in boot() are read through their slots inside callbacks (forward).  It registers on app.w what a moved reader needs; boot() destructures the return. */
 import { TIER } from '../rack.js';
 import { el, knob, seg, sw, trig, readout, group, label, mathPlain, fader, stepper } from '../mir/kit.js'; import { fold } from '../fold.js';
@@ -14,11 +14,15 @@ import { stateLatex, moleculeLatex } from '../latex-state.js';
 import { createRegisterSturmian, LAMBDA_MIN, LAMBDA_MAX, clampLambda } from '../sturmianreg.js';
 const keepT = (elm, on, title) => { if (elm.dataset.title0 === undefined) elm.dataset.title0 = elm.title || ''; elm.title = on ? title : elm.dataset.title0; };
 export function createSpectrumCard(app) {
-  const { ui, device, reg, hNote, clock, appPlay, energyOf, sturm, labelExpect, mat, rates } = app, { schedule, page, MOTION } = app.loop, { rack } = app.host, { wState } = app.w;   // backward
+  const { ui, device, reg, hNote, clock, appPlay, energyOf, sturm, labelExpect, mat, rates } = app, { schedule, page, MOTION } = app.loop, { rack } = app.host;   // backward
   const { rotRate, busy, busySync, warmArm, touchState, setReference, api, field } = app.ctl;   // the controller's, filled before its seat returned
   const wSpec = device({ id: 'spectrum', eyebrow: 'SPECTRUM', status: '' });
   app.w.wSpec = wSpec;
   rack.appendChild(wSpec.root);
+  /* 018 C1 · THE LAB'S STATUS SINK (the STATE card retired): keys, links, undo, restore, the bow speak on SPECTRUM's status line through the card's
+     old hook shape, `wState.setStatus(msg, cls)`; an empty message gives the line back to the operator's own words */
+  const wState = { setStatus: (m, cls) => (m ? wSpec.setStatus(m, cls) : wSpec.setStatus(...specStatus())) };
+  app.w.wState = wState;
   /* 0.3.3 · wave 135 · THE COPY.  SPECTRUM's ⧉ is the INFO panels' ⧉ (window-chrome.js): the same class, the same glyph,
      the same seat before the fold — the kit already styles `.dev-copy` in the power button's box and tokens (base.css)
      and stands it down on a phone (skin.css §5), where EDIT › COPY the state as LaTeX is the road.  What it copies is
@@ -206,14 +210,14 @@ export function createSpectrumCard(app) {
     eqG.globalAlpha = 1;
   }
   { const kids = [...wSpec.body.children], i = kids.findIndex((k) => k.classList.contains('ladder')); const h=kids[0]; for(const k of kids.slice(1,Math.max(0,i)))h.appendChild(k); wSpec.body.appendChild(h); }
+  wSpec.body.insertBefore(ui.abBox, wSpec.body.querySelector(':scope > .sp-preset'));   // 018 C1: A ↔ B (lab/windows/transition.js) between the 140 table and the presets
   /** NORMALIZE, and say what it did — a unit-norm state looks the same afterwards, which is why it seemed to do nothing */
   function toggleFullscreen() { const d = document; if (d.fullscreenElement) { if (d.exitFullscreen) d.exitFullscreen(); } else { const e = d.documentElement; const f = e.requestFullscreen || e.webkitRequestFullscreen; if (f) try { f.call(e); } catch (err) {} } }
   function normalizeNow() {
     const n = reg.normalize(); touchState();
     const nm = sturm.P ? '⟨c|S|c⟩^½' : '‖c‖';                                     // W-STURMIAN: the S-norm is the norm
     const msg = Math.abs(n - 1) < 5e-4 ? nm + ' was 1 already · nothing to do' : nm + ' ' + n.toFixed(4) + ' → 1';
-    wState.setStatus(msg, 'live'); wSpec.setStatus(msg, 'live');
-    setTimeout(() => { wState.setStatus('changes c'); wSpec.setStatus(...specStatus()); }, 1800);
+    wState.setStatus(msg, 'live'); setTimeout(() => wState.setStatus(''), 1800);
   }
   app.w.normalizeNow = normalizeNow; app.w.toggleFullscreen = toggleFullscreen; app.w.copyLatex = copyLatex; app.w.periodEnergies = periodEnergies;
   /** THE COPY (0.3.3 · wave 135): the populated register at the clock's t — c(t), the mix while A/B plays — as the notebook's
@@ -372,6 +376,6 @@ export function createSpectrumCard(app) {
     return { n: top.n, l: top.l, labels, shells: held.map((c) => ({ n: c.n, l: c.l, occ: c.occ })), past: gone.map((c) => ({ n: c.n, l: c.l, occ: c.occ })) };
   }
   app.w.switchHamiltonian = switchHamiltonian; app.w.applySturmian = applySturmian; app.w.setElement = setElement; app.w.fillValence = fillValence; app.w.occupiedEigen = occupiedEigen;   // persist reads them (occupiedEigen: the transport)
-  return { wSpec, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen, periodEnergies,
+  return { wSpec, wState, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen, periodEnergies,
     selectEigen, setElement, fillValence, syncEq };
 }

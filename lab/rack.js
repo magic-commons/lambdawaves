@@ -27,7 +27,7 @@ import { createMolecules } from './windows/molecules.js'; import { createStageWo
 import { calculusMarkdown, beadOf, covariance } from './calculus.js';
 import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
 import { getHamiltonian, getZ } from './hamiltonian.js';
-import { createStateCard } from './windows/state.js';   // 0.5.2 R2a: the STATE card, out of boot()
+import { createTransition } from './windows/transition.js';   // 018 C1: A ↔ B · TRANSITION, SPECTRUM's block (the STATE card retired)
 import { createStaticField } from './windows/static-field.js';   // iteration 008 S: the FIELD card (STATE's static field, drives and impulse knobs)
 import { createSettings } from './shell/settings.js'; import { createPersist } from './shell/persist.js'; import { createLinks } from './shell/links.js'; import { createHistory } from './shell/history.js'; import { createFacade } from './shell/facade.js'; import { createVerbs } from './verbs.js';   // 0.5.2 R3a (edit-domain.js left with the history) · R5 the facade
 import { createCameraLaw } from './camera-law.js'; import { createPicker } from './picker.js';   // iteration 003: THE MAIN MENU; iteration 004: THE PICKER   // wave 130 seam 11: the camera law and the observer's pose, out of boot()
@@ -673,11 +673,11 @@ export async function boot(dom) {
   createFilmApi(app);   // 0.5.2 R2c: lab/windows/film.js — film(), capture(), the takes, app.state.capApi
   createFieldQuality();   // 0.5.2 R2c: the SETTINGS card's second seat — FIELD QUALITY
 
-  // STATE — preparation. Everything here changes c.
-  const { clearRegister, wState } = createStateCard(app); app.w.clearRegister = clearRegister;   // 0.5.2 R2a: lab/windows/state.js (STATE's CLEAR with it)
+  // TRANSITION — A ↔ B, built for SPECTRUM (018 C1: the STATE card retired; its block and the register's CLEAR are lab/windows/transition.js)
+  const { clearRegister } = createTransition(app); app.w.clearRegister = clearRegister;
 
   // SPECTRUM
-  const { wSpec, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen,
+  const { wSpec, wState, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen,
     periodEnergies, selectEigen, setElement, fillValence, syncEq } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
 
   // FIELD — the static field, the drives and the impulse's knobs, out of STATE (iteration 008 S)
@@ -890,7 +890,7 @@ export async function boot(dom) {
   // 2026-10 (Josh): MOLECULES (with its register since iteration 008 U) opens on the LEFT rack under SPECTRUM.  No `devopen` fires here, so neither
   // solves at boot — MOLECULES pays its solve when it is switched on or a molecule is picked.
   if(useCompactDefaults) {
-    const left=['informational','spectrum','chem'],right=['settings','state','palette','observer','camera','clip'];
+    const left=['informational','spectrum','chem'],right=['settings','palette','observer','camera','clip'];
     for(const d of document.querySelectorAll('.dev'))d.classList.toggle('closed',![...left,...right].includes(d.dataset.id));
     for(const [host,ids] of [[rackL,left],[rack,right]])for(const id of ids){const d=document.querySelector('.dev[data-id="'+id+'"]');host.appendChild(d);const fold=FIRST_RUN.folded.includes(id);if(d.classList.contains('folded')!==fold)d.querySelector('.dev-fold')?.click();}
     /* iteration 011 Q2 (Josh: "make most of the hidable texts and expandable windows minimized"): every fold inside every window closed (first-run.js `inner`); a record that loads after (rack-wiring.js `folds`) wins */

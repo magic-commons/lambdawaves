@@ -41,7 +41,7 @@ export function createKeplerSurface(app) {
     if (k <= 0.005) return;
     const job = getHamiltonian().id === 'well' ? () => launchPacketAsync(unproject(x0, y0), dir.map((v) => v * k), gasSigma(k)) : () => slapAlongAsync(k, dir);   // the GAS: a new packet where you pressed
     app.state.bowInFlight++; wState.setStatus('the impulse is in flight…', 'live');
-    app.state.bowChain = app.state.bowChain.then(job).catch((e) => { __e.push('BOW ' + (e && e.message || e)); }).then(() => { if (--app.state.bowInFlight === 0) wState.setStatus('changes c'); });
+    app.state.bowChain = app.state.bowChain.then(job).catch((e) => { __e.push('BOW ' + (e && e.message || e)); }).then(() => { if (--app.state.bowInFlight === 0) wState.setStatus(''); });
   }
   /** the BOX bow: wellPacket in the worker, the same numbers as launchPacket, landed on the clock's time when it answers */
   async function launchPacketAsync(x0, kvec, sigma) {

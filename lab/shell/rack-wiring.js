@@ -91,7 +91,7 @@ export function createRackWiring(app) {
     for (const c of L.cards) {
       const d = devById(c.id); if (!d) continue;
       if (d === wTr.root) {
-        layout.dockSide = sideKey(c.side) === 'left' ? 'L' : 'R'; layout.dockIndex = [...d.parentElement.querySelectorAll('.dev')].indexOf(d);   // project order owns the docked transport seat too
+        if (layout.docked) layout.seatTransport();                    // 018 C4: a record's seat is not read — the docked transport is the LEFT rack's top
         d.classList.toggle('closed', !layout.docked);                // iteration 014 A0: the card is open exactly while the kit's bar is docked in it
         if (d.classList.contains('folded') !== !!c.folded) { const f = d.querySelector('.dev-fold'); if (f) f.click(); }
       }
@@ -125,8 +125,11 @@ export function createRackWiring(app) {
     orderAll() { return [...document.querySelectorAll('#rackL .dev, #rack .dev')].map((d) => d.dataset.id); },
     /** the kit's bar is docked (iteration 014 A0: lab/shell/transport.js createBar; the card below is its seat) */
     get docked() { const b = app.sh.transport && app.sh.transport.bar; return !!(b && b.docked); },
+    /* iteration 018 C4 (Josh: "Transport window when docked goes to the top most side of the left rack all the time"): the seat is FIXED — the left rack's
+       top (the one rack's top on a phone) on every dock, from a record or a drag alike; nothing is remembered */
     dockSide: 'L',
-    dockIndex: 0,                                                    // the transport's remembered slot in the left rack (0 = the very top)
+    dockIndex: 0,
+    seatTransport() { const host = layout.dockHost(), first = [...host.querySelectorAll('.dev')].find((x) => x !== wTr.root); host.insertBefore(wTr.root, first || null); },
     /** where a docked transport lives: the mirror rack on a desktop, the ONE rack on a phone (wave 51) */
     dockHost() { return document.body.classList.contains('phone') ? rack : (layout.dockSide==='R'?rack:(rackL || rack)); },
     /** T: dock the control surface into its card, or put it back on the stage (from the FREE window too) — the kit's setPlace (iteration 014 A4) */
@@ -240,13 +243,11 @@ export function createRackWiring(app) {
   const barDock = () => transportDock(rk);
   rk.register({ id: 'transport', el: wTr, title: 'CONTROL SURFACE', card: true, onFold: () => saveSettings(),   // C3: an app card (its own buttons; in neither + nor WINDOW)
     onOpen: () => {
-      const host = layout.dockHost(), cards = [...host.querySelectorAll('.dev')].filter((d) => d !== wTr.root);
-      host.insertBefore(wTr.root, cards[Math.min(layout.dockIndex, cards.length)] || null);
+      layout.seatTransport();
       wTr.root.classList.remove('folded'); wTr.body.hidden = false;
       const d = barDock(); if (d.open) d.open({ body: wTr.body });
     },
     onClose: () => {
-      layout.dockSide = wTr.root.parentElement === rackL ? 'L' : 'R'; layout.dockIndex = Math.max(0, [...wTr.root.parentElement.querySelectorAll('.dev')].indexOf(wTr.root));
       const d = barDock(); if (d.close) d.close();
     } });
   popFace(wTr.root);

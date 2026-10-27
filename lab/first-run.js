@@ -22,8 +22,10 @@
  * register's PRESET · A ↔ B · FLOW folds, FIELD's impulse knobs, SHADOW's details, CAMERA's pan and hand) arrives CLOSED on every device; a
  * project's, a ☆ layout's or the resumed session's card record (`folds`, rack-wiring.js) wins when it loads.  SPECTRUM's shells keep their own law
  * (n ≤ 6 open, n = 7 folded: they are what the window is for).
+ * Iteration 018 C1/C4 (Josh: the right rack is 'settings', palette, wave, camera, clip — the basic look controls): STATE is retired into SPECTRUM, so the
+ * folded set is the eight first-run windows; the docked transport always seats at the top of the left rack (rack-wiring.js seatTransport).
  * Node-testable: tests/first-run.test.mjs. */
-const FOLD_ALL = Object.freeze(['informational', 'spectrum', 'chem', 'settings', 'state', 'palette', 'observer', 'camera', 'clip']);
+const FOLD_ALL = Object.freeze(['informational', 'spectrum', 'chem', 'settings', 'palette', 'observer', 'camera', 'clip']);
 /* iteration 016 W3 (Josh, call 6: "H on touch: Yan's choice (give it the kit's edge handle)") · `handle`: the kit rack's edge handle — the on-screen way
    back to a hidden rack — on a phone or tablet only (rack-wiring.js hands it createRack); a desktop keeps none, its keys and the edge peek */
 export const FIRST_RUN_MATERIAL = Object.freeze({
