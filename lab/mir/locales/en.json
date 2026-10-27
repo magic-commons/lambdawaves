@@ -336,6 +336,7 @@
   "FAILED": "FAILED",
   "FILES": "FILES",
   "FILL EACH {n} STEPS": "FILL EACH {n} STEPS",
+  "FINDER": "FINDER",
   "FIT": "FIT",
   "FL — Alt temporarily sets snap to none": "FL — Alt temporarily sets snap to none",
   "FL — Copy selection": "FL — Copy selection",
@@ -1095,7 +1096,6 @@
   "While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar": "While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar",
   "While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar": "While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar",
   "White text on every label": "White text on every label",
-  "Windows": "Windows",
   "Windows and Linux": "Windows and Linux",
   "Work bars": "Work bars",
   "Work bars: above. Tap to hide them": "Work bars: above. Tap to hide them",
@@ -1200,7 +1200,6 @@
   "enamel": "enamel",
   "every macro is already driven by another source — free one, or add a macro": "every macro is already driven by another source — free one, or add a macro",
   "every route into {target} removed": "every route into {target} removed",
-  "every window is open — × on a window closes it": "every window is open — × on a window closes it",
   "fitted to {s} s": "fitted to {s} s",
   "flipped in time": "flipped in time",
   "fold or unfold this window": "fold or unfold this window",
@@ -1291,7 +1290,6 @@
   "numbered lossless PNG frames": "numbered lossless PNG frames",
   "one cycle": "one cycle",
   "opal": "opal",
-  "open a window": "open a window",
   "open {path} in your notes tab": "open {path} in your notes tab",
   "opened {name}": "opened {name}",
   "page": "page",
@@ -1345,7 +1343,7 @@
   "scrub::LIGHT": "LIGHT",
   "scrub::LIVE": "LIVE",
   "sea": "sea",
-  "search the windows": "search the windows",
+  "search windows": "search windows",
   "seek": "seek",
   "selected project": "selected project",
   "shared with a visiting model — hide it": "shared with a visiting model — hide it",
@@ -1386,6 +1384,7 @@
   "the debug dump, to the clipboard": "the debug dump, to the clipboard",
   "the empty project": "the empty project",
   "the envelope": "the envelope",
+  "the expander": "the expander",
   "the file is larger than 32 MB": "the file is larger than 32 MB",
   "the gate opens here and stays open until hysteresis below it": "the gate opens here and stays open until hysteresis below it",
   "the last frame took {ms} ms — scrubbing will lag; LIGHT keeps the hand smooth": "the last frame took {ms} ms — scrubbing will lag; LIGHT keeps the hand smooth",
@@ -1609,6 +1608,7 @@
   "ENVELOPE · LOW ✓": "a clip's menu: the envelope band to follow, the one in use ticked",
   "EVT": "short for EVENT: this output fires on a hit (an onset), it does not carry a level",
   "Each label’s ink from the picture under it (this app’s sampler)": "the app's own sampler reads the picture behind each word and picks white or black ink",
+  "FINDER": "the finder: a search field over every window of the app; picking one opens it or scrolls the rack to it",
   "FOV": "field of view: how wide the camera sees",
   "FRAME": "the time to draw one frame of the screen, in milliseconds (not a picture frame)",
   "FREE": "the clock counts frame time (it slows when the picture slows), as opposed to WALL, which follows real elapsed time",
@@ -1671,7 +1671,6 @@
   "The {panel} panel could not be built: {why}": "an error notice: {panel} is a panel's name (RENDER …), {why} the program's reason, left as it is",
   "This device’s tier, measured once: A and B are {:FULL}, C is {:BALANCED}": "a short benchmark sorts this device into tier A, B or C",
   "WALL": "the clock follows wall-clock time (real elapsed seconds), as opposed to FREE, which counts frame time and slows with the picture",
-  "Windows": "the window picker: a list of every window of the app, with a search field",
   "clock state::HOLD": "— the modulation clock is held (paused in place), as opposed to RUN",
   "close ({key})": "{key} is the notebook’s shortcut key, e.g. J",
   "device view::FULL": "a device's view: FULL shows every control, CMP (compact) only the performance bank",
@@ -1706,9 +1705,10 @@
   "peak hold::HOLD": "the audio follower's PEAK HOLD: how long a band's peak is held before it falls (a time), not the envelope stage",
   "retrying without the processing constraints": "the microphone's state: a browser that cannot turn AGC off is still worth listening to",
   "right rack scroll": "the scrollbar beside the cards of the left / right RACK (the column of docked windows)",
-  "search the windows": "the window picker's search field: type part of a window's name",
+  "search windows": "the finder's search field: type part of a window's name",
   "text ink::SAMPLED": "TEXT (the label ink) set by the app itself, from the picture under each label: \"measured\", not \"a sample\"",
   "the audio graph could not be built": "the microphone's state: a fault",
+  "the expander": "the transport bar's expander: the panel under the bar with the macros, the clock and the app's own rows",
   "the gate opens here and stays open until hysteresis below it": "hysteresis: a small margin below the opening level, so the gate does not flicker open and shut",
   "the left rack": "the RACK: the column of docked windows at the screen’s edge (not the SHELF, where notes are kept)",
   "the microphone could not be opened": "the microphone's state: a fault",
@@ -2733,6 +2733,9 @@
   ],
   "FILL EACH {n} STEPS": [
    "mir/pattern/window.js"
+  ],
+  "FINDER": [
+   "mir/shell/window-picker.js"
   ],
   "FIT": [
    "mir/modulation/modwindow/modwindow.js",
@@ -5059,9 +5062,6 @@
   "White text on every label": [
    "mir/shell/gui.js"
   ],
-  "Windows": [
-   "mir/shell/window-picker.js"
-  ],
   "Windows and Linux": [
    "mir/keyboard/keyboard.js"
   ],
@@ -5371,9 +5371,6 @@
   "every route into {target} removed": [
    "mir/modulation/window.js"
   ],
-  "every window is open — × on a window closes it": [
-   "mir/shell/rack.js"
-  ],
   "fitted to {s} s": [
    "mir/modulation/window.js"
   ],
@@ -5501,7 +5498,7 @@
    "mir/panels/lanes.js"
   ],
   "in the saved favourite layout": [
-   "mir/shell/rack.js"
+   "mir/shell/window-picker.js"
   ],
   "in this gallery": [
    "mir/folders/gallery.js"
@@ -5715,9 +5712,6 @@
   "opal": [
    "mir/palette.js"
   ],
-  "open a window": [
-   "mir/shell/rack.js"
-  ],
   "open {path} in your notes tab": [
    "mir/notes/face.js"
   ],
@@ -5879,7 +5873,7 @@
   "sea": [
    "mir/palette.js"
   ],
-  "search the windows": [
+  "search windows": [
    "mir/shell/window-picker.js"
   ],
   "seek": [
@@ -6003,6 +5997,9 @@
   ],
   "the envelope": [
    "mir/modulation/window.js"
+  ],
+  "the expander": [
+   "mir/shell/transport.js"
   ],
   "the file is larger than 32 MB": [
    "mir/core/intake.js"

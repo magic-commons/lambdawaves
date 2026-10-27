@@ -66,8 +66,6 @@ export function createRackWiring(app) {
     const watch = () => { for (const r of cols) { see(r); for (const c of r.children) if (c.classList.contains('dev')) for (const n of c.children) if (n.matches('.dev-head, .dev-body')) see(n); } book(); };
     const members = new MutationObserver(watch); for (const r of cols) members.observe(r, { childList: true });
     watch(); }
-  /* the kit's + list knows nothing of `hidden` (a legacy card, or one a molecule stood down): those rows go (BRIEF R5) */
-  if (rk.el.add) rk.el.add.addEventListener('click', () => { for (const it of rk.el.addList.querySelectorAll('.mb-item[data-win]')) { const d = devById(it.dataset.win); if (d && d.hidden) it.remove(); } });
   /* 015 H3 · THE BAR'S PEEK under B: the kit's wave-108 peek runs only for a `transport` handed to createRack, which λWAVES' own seat law (the
      pill's dodge) does not hand it — so since 014 A0 a hidden stage bar never came back, and its ◧ with it.  The same numbers as the kit's
      (near 80 × 60, held within 120), read off the bar's own rect less the hide's slide (lab.css: translate(-50%, 140px)) */
@@ -354,7 +352,7 @@ export function createRackWiring(app) {
      between their parts are UI, not picture) and the app's own panes.  A press there never reaches the stage.  0.5.0 C3: the kit's rack
      hands in its columns (less their shadow gutter) and its float layer (C9's open item). */
   bindStageGestures(dom.canvas, {
-    ui: uiSpace({ rack: rk, extra:() => ['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => document.getElementById(id))   // 0.5.3 M4: a faded, hidden or
+    ui: uiSpace({ rack: rk, extra:() => ['transport', 'notebook', 'sheet', 'offer', 'rackFavList'].map((id) => document.getElementById(id))   // 0.5.3 M4: a faded, hidden or
       .map((el) => { const s = el && getComputedStyle(el); return s && +s.opacity > 0 && s.visibility !== 'hidden' && s.pointerEvents !== 'none' ? paintedRect(el) : null; }) }),   // click-through pane is no UI space
     camera, travel: camTravel, law: CAM,
     getDistance: () => obs.dist, zoomAt, pan: panBy, orbitBy, resetView,

@@ -347,8 +347,9 @@ export function bindTempoField({ button, input, tempo, enabled = () => true, dra
  *  On the stage: drag up or down, the digit under the pointer is the step; the wheel by that digit; ↑ → up and ↓ ←
  *  down by one, Shift a tenth, PageUp/PageDown ten.  A click opens the tempo panel (BASINS); a double click types the
  *  tempo (the kit's) through bindTempoField.  In a work bar (`work()` true, BASINS' timeline form): a click types the
- *  tempo and a drag runs BASINS' travel law (bindTempoField), the look unchanged (Josh: "Don't change the look"). */
-export function tempoPill({ tempo, panel = null, work = () => false, signal } = {}) {
+ *  tempo and a drag runs BASINS' travel law (bindTempoField), the look unchanged (Josh: "Don't change the look").  `typed` (1.5.0-alpha.31): a click
+ *  types the tempo on any seat — the bar's own EXPAND part opens the panel instead. */
+export function tempoPill({ tempo, panel = null, work = () => false, typed = false, signal } = {}) {
   const life = lifeOf(signal), on = { signal: life.signal };
   const wrap = el('span', 'tempo-seat');
   const root = tbtn('tempo-expand'); wrap.appendChild(root);
@@ -382,7 +383,7 @@ export function tempoPill({ tempo, panel = null, work = () => false, signal } = 
   root.addEventListener('pointerdown', () => { dragged = false; }, on);
   root.addEventListener('click', (e) => {
     if (dragged) { dragged = false; return; }
-    if (work()) { if (panel && panel.isOpen()) panel.close(); edit(); return; }   // the work bar's pill types the tempo (BASINS)
+    if (work() || typed) { if (work() && panel && panel.isOpen()) panel.close(); edit(); return; }   // the work bar's pill types the tempo (BASINS); `typed`: a bar with its own EXPAND (018 E2)
     if (twice(e)) return;
     if (panel) panel.toggle();
   }, on);
@@ -622,7 +623,7 @@ export const transportDock = (R) => dockOf(R);
 
 /** createTransport(options) → api
  *    layout      the bar's arrangement: an array of part names ('play', 'power', 'door', 'tempo', 'panel', 'tap',
- *                'rewind', 'openers', 'seat', 'dock', 'back'), `app:<name>` (a node from `nodes`), DOM nodes, and
+ *                'rewind', 'openers', 'seat', 'dock', 'back', 'expand' — the panel's own button; the pill then types), `app:<name>` (a node from `nodes`), DOM nodes, and
  *                `{ group: 'class names', items: [...] }`.  Default BASINS_LAYOUT.  A layout's
  *                `name` (BASINS_LAYOUT 'basins', LAMBDAWAVES_LAYOUT 'lambdawaves') is written as data-layout; λWAVES'
  *                has its own drawing, every other layout is drawn as BASINS' is.
@@ -667,6 +668,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
       case 'power': return one(modPower({ mod, word: powerWord, signal }));
       case 'door': return one(modDoor({ mod, mark: doorMark, icon: doorIcon, onSwitch, work: () => placement === 'work', signal }));
       case 'tempo': return one(pillPart());
+      case 'expand': return one(expandPart());
       case 'panel': return panelPart().root;
       case 'tap': return one(tapButton({ tempo, signal }));
       case 'rewind': return clock && typeof clock.seek === 'function'
@@ -686,7 +688,11 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   function panelPart() { if (!panel) { panel = tempoPanel({ tempo, mod, macros, signal }); parts.push(panel); panel.onToggle((v) => {   /* THE HAND: the bar keeps the row's width while the panel opens beside its row — read with the panel out of the flow (it is already shown when this runs), so the panel never widens the bar */
       if (v && placement === 'stage') { panel.root.hidden = true; bar.style.width = bar.getBoundingClientRect().width + 'px'; panel.root.hidden = false; } else bar.style.removeProperty('width');
       bar.classList.toggle('tempo-open', v); aimPanel(); if (pillP) pillP.sync(); if (placement === 'free') view.requestAnimationFrame(fitFree); }); } return panel; }
-  function pillPart() { if (!pillP) pillP = tempoPill({ tempo, panel: layoutNames(layout).includes('panel') ? panelPart() : null, work: () => placement === 'work', signal }); return pillP; }
+  function pillPart() { if (!pillP) pillP = tempoPill({ tempo, panel: layoutNames(layout).includes('panel') ? panelPart() : null, work: () => placement === 'work', typed: layoutNames(layout).includes('expand'), signal }); return pillP; }
+  /* 'expand' (1.5.0-alpha.31, λWAVES 018 E2 · E6): the expander's own button — it opens and shuts the tempo panel, so the pill only types; its
+     chevron points down while shut and turns up while open (transport.css) */
+  function expandPart() { const p = barButton({ cls: 'tr-expand', glyph: 'chevronDown', label: 'the expander', title: 'the expander', run: () => panelPart().toggle(), signal });
+    p.sync = () => { const o = !!panel && panel.isOpen(); setAttr(p.root, 'aria-expanded', String(o)); p.root.classList.toggle('on', o); }; p.sync(); return p; }
   const place = (list, parent) => {
     for (const item of list) {
       if (item && typeof item === 'object' && item.nodeType !== 1 && Array.isArray(item.items)) { const g = el('div', item.group || 'tr-group', parent); place(item.items, g); continue; }
@@ -924,7 +930,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
 
   return {
     root: bar, layout, parts: { play: playPart, pill: pillP, panel },
-    el: { play: playPart.root, power: bar.querySelector('.mir-mod-power'), door: bar.querySelector('.mod-exp'), pill: pillP && pillP.pill, field: pillP && pillP.field,
+    el: { expand: bar.querySelector('.tr-expand'), play: playPart.root, power: bar.querySelector('.mir-mod-power'), door: bar.querySelector('.mod-exp'), pill: pillP && pillP.pill, field: pillP && pillP.field,
       panel: panel && panel.root, seat: seatB, dock: dockB, back: back.root, menu, openers: openBox },
     sync, refresh: soon, moved, toggle: () => playPart.toggle(),
     play: () => (clock && !clock.isPlaying() ? playPart.toggle() : null),

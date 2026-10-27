@@ -44,19 +44,18 @@ body.rack-hidden.rack-peek-left #rackL { transform: none; opacity: 1; }   /* 015
 body.rack-hidden #rack { transform: translateX(calc(100% + 12px)); opacity: 0; }
 body.rack-hidden.rack-peek-right #rack { transform: none; opacity: 1; }
 #rackPeek { position: absolute; right: 0; top: 0; bottom: 0; width: 16px; z-index: var(--z-chrome); }
-#rackToggle, #rackAdd, #rackFav { position: absolute; right: calc(var(--rack-w) + 14px); top: 8px; z-index: calc(var(--z-chrome) + 1); width: 30px; height: 30px; border-radius: 50%; color: var(--fg-soft); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+#rackToggle, #rackFav { position: absolute; right: calc(var(--rack-w) + 14px); top: 8px; z-index: calc(var(--z-chrome) + 1); width: 30px; height: 30px; border-radius: 50%; color: var(--fg-soft); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
 body.rack-hidden #rackToggle { color: var(--acc); }
 .dev-loading .mark { width: 28px; height: 28px; animation: lw-busy-breathe 1.1s linear infinite alternate; }
 .dev.off .dev-stat::after { content: ' · OFF'; color: var(--dim); }
 .dev.copied .dev-stat::after { content: ' · COPIED'; color: var(--acc); }
-#rackAdd { top: 44px; font-size: 18px; line-height: 1; transition: opacity .28s ease; }
 /* wave 54 (board #48): FAVOURITE LAYOUTS takes the next seat down the same column, on the same rules as its two
    neighbours — one geometry, one hide rule, one hover colour, and its list opens where the + list opens. */
 #rackFav { top: 80px; font-size: 15px; line-height: 1; transition: opacity .28s ease; }
-body.rack-hidden #rackAdd, body.rack-hidden #rackAddList, body.rack-hidden #rackFav, body.rack-hidden #rackFavList { opacity: 0; pointer-events: none; }
-body.rack-hidden.rack-peek #rackAdd, body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
-#rackAdd:hover, #rackFav:hover { color: var(--acc); }
-#rackAddList, #rackFavList { position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
+body.rack-hidden #rackFav, body.rack-hidden #rackFavList { opacity: 0; pointer-events: none; }
+body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
+#rackFav:hover { color: var(--acc); }
+#rackFavList { position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
 .mb-item .fav-x { float: right; color: var(--dim); margin-left: 10px; }
 .mb-item:hover .fav-x { color: var(--acc2); }
 body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* wave 133: STATUS TAGS hides the four ψ-badges, never the build offer */
@@ -311,76 +310,84 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport.mini .ro.period { flex: 0 0 120px; min-width: 120px; width: 120px; }
 #transport.mini .tbtn.jump { font-size: 13px; }
 #transport.mini .k-val, #transport.mini .ro-val { font-size: 9px; }
-/* ── iteration 014 A1 · A8 · THE CONTROL SURFACE (the kit's CONTROL_SURFACE_LAYOUT, data-layout="csb").  Josh 10-22: "button related stuff on the
-   bottom row … transport/tempo/timing stuff on the top … the rate knob exists as its own column on the right side … Play … takes the entire column
-   and is on the left side … Increase the height dimension of the CSB and make the icons and elements much larger".  ON THE STAGE three columns:
-   PLAY (56 px) over MOD · the timing row over the buttons row · RATE over the BPM pill; 96 px tall, the seats 40 px.  IN A RACK CARD (docked, or
-   the FREE window one card wide): the same columns as bands — PLAY + MOD left and RATE + BPM right, the timing row, the buttons (the chooser on a
-   line of its own), the expander one column.  These beat λWAVES' one-row rules (lab.css' box, skin.css §12's seats, sizes and `order`s). ── */
-#transport[data-layout="csb"] { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "play mid tempo" "panel panel panel"; grid-template-rows: auto auto; align-items: center; column-gap: 12px; row-gap: 0; overflow: visible; }
-#transport.mini[data-layout="csb"] { width: max-content; max-width: calc(100vw - 24px); height: auto; min-height: 96px; padding: 6px 12px; }
-#transport[data-layout="csb"] > .csb-play { grid-area: play; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-#transport[data-layout="csb"] > .csb-mid { grid-area: mid; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-#transport[data-layout="csb"] > .csb-tempo { grid-area: tempo; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+/* ── THE CONTROL SURFACE (iteration 014 A1 · A8; 018 E2 · E4: λWAVES' own layout array under the kit's data-layout="csb", lab/shell/transport.js).
+   ON THE STAGE: PLAY floats outside the bar's left edge (a round chip of its own); three tracks, the two sides equal (--csb-side: the left block's width) so
+   MOLECULES' chooser sits dead centre over LIBRARY · MOLECULAR · HYDROGEN · FOLDERS; LEFT = RATE over the typed BPM pill, MOD over EXPAND, then a
+   2 × 2 of ⏮ TIMELINE / the door, the dock; RIGHT = a 4-wide grid SEARCH FINDER ♥ ◧ / INFORMATIONAL THEME ⚙.  Every seat one 36-px box, one
+   20-px icon.  IN A RACK CARD (docked, or FREE one card wide): the same order wrapping — PLAY · RATE · BPM · MOD · EXPAND, the chooser, the modes
+   + FOLDERS, then the eleven icons, centred. ── */
+#transport[data-layout="csb"] { --csb-side: 212px; display: grid; grid-template-columns: minmax(var(--csb-side), 1fr) auto minmax(var(--csb-side), 1fr); grid-template-areas: "left mid right" "panel panel panel"; grid-template-rows: auto auto; align-items: center; column-gap: 14px; row-gap: 0; overflow: visible; }
+#transport.mini[data-layout="csb"] { width: max-content; max-width: calc(100vw - 24px); height: auto; min-height: 0; padding: 6px 12px; contain: layout; }   /* E2: no paint containment — PLAY floats outside the box */
+#transport[data-layout="csb"] > .csb-left { grid-area: left; justify-self: start; }
+#transport[data-layout="csb"] > .csb-right { grid-area: right; justify-self: end; }
+#transport[data-layout="csb"] > .csb-mid { grid-area: mid; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 220px; }
 #transport[data-layout="csb"] > .native-tempo { grid-area: panel; margin-top: 8px; }
-/* iteration 016 W6 · THE EXPANDER'S DIRECTION (Josh, call 9: "seated at the top it hangs down; seated at the bottom it grows upward, the bar staying at the
-   foot"): at the stage's foot the expander is the grid's first row, so the bar (anchored by its bottom) keeps its rows where they were and the panel
-   rises above them; at the top (.at-top) it hangs below as before.  A narrow screen seats the bar at the top whatever its class (skin.css), so wide only. */
+/* iteration 016 W6 · THE EXPANDER'S DIRECTION (call 9): at the stage's foot the panel is the grid's first row and rises above the bar; at the top
+   (.at-top) it hangs below.  A narrow screen seats the bar at the top whatever its class (skin.css), so wide only. */
 @media (min-width: 861px) {
-  #transport.mini[data-layout="csb"]:not(.at-top) { grid-template-areas: "panel panel panel" "play mid tempo"; }
+  #transport.mini[data-layout="csb"]:not(.at-top) { grid-template-areas: "panel panel panel" "left mid right"; }
   #transport.mini[data-layout="csb"]:not(.at-top) > .native-tempo { margin-top: 0; margin-bottom: 8px; }
 }
-#transport[data-layout="csb"] .csb-row { display: flex; align-items: center; gap: 4px; width: auto; min-width: 0; height: 40px; overflow: visible; }
-#transport[data-layout="csb"].mir-transport :is(.csb-col, .csb-row) > * { order: 0; flex-shrink: 0; }
-#transport[data-layout="csb"].mir-transport :is(.csb-col, .csb-row) .tempo-expand { order: 0; }
-/* the seats: round, flat until hovered, 40 px (1.4 × the old 28), their glyphs 20 px */
-#transport[data-layout="csb"] :is(.csb-row > .tbtn, .csb-row > .dock-btn, .csb-row > .mod-exp, .csb-row .tr-open, .csb-row > .csb-search-b, .csb-row > #rackAdd, .csb-row > #rackToggle, .csb-row > #rackFav) {
-  display: inline-grid; place-items: center; width: 40px; height: 40px; min-width: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 18px; transform: none; }
-#transport[data-layout="csb"] :is(.csb-row > .tbtn, .csb-row > .dock-btn, .csb-row > .mod-exp, .csb-row .tr-open, .csb-row > .csb-search-b, .csb-row > #rackAdd, .csb-row > #rackToggle, .csb-row > #rackFav):hover { color: var(--fg); background: var(--glass-raise); }
-#transport[data-layout="csb"] .csb-row svg { width: 20px; height: 20px; }
-#transport[data-layout="csb"] .csb-row .tr-open.on, #transport[data-layout="csb"] .csb-row > .mod-exp.live, #transport[data-layout="csb"] .csb-row > .csb-search-b[aria-expanded="true"] { color: var(--acc); }
-#transport[data-layout="csb"] .csb-row > .mod-exp[data-mark="none"]::before { content: ""; width: 22px; height: 22px; background: currentColor;   /* A8: the modulation window's own icon (a sine wave) */
+#transport[data-layout="csb"] .csb-side { display: flex; align-items: center; gap: 8px; }
+#transport[data-layout="csb"] .csb-col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+#transport[data-layout="csb"] .csb-ico { display: grid; grid-template-columns: repeat(var(--csb-cols, 2), 36px); grid-auto-rows: 36px; gap: 4px; }
+#transport[data-layout="csb"] .csb-right { --csb-cols: 4; }
+#transport[data-layout="csb"] .tr-openers { display: contents; }
+#transport[data-layout="csb"] .tr-open.has-glyph .tr-word { display: none; }
+#transport[data-layout="csb"].mir-transport :is(.csb-col, .csb-row, .csb-ico) > * { order: 0; flex-shrink: 0; }
+#transport[data-layout="csb"] .csb-row { display: flex; align-items: center; gap: 4px; height: 36px; }
+/* THE SEATS: one 36-px round box, flat until hovered, the icon 20 px — the kit's glyphs and λWAVES' masks (lab/img/icons/) alike */
+#transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand) {
+  display: inline-grid; place-items: center; width: 36px; height: 36px; min-width: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 18px; transform: none; }
+#transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand):hover { color: var(--fg); background: var(--glass-raise); }
+#transport[data-layout="csb"] :is(.csb-ico, .csb-mod) svg { width: 20px; height: 20px; }
+#transport[data-layout="csb"] :is(.csb-ico .tr-open.on, .csb-ico .mod-exp.live, .csb-search-b[aria-expanded="true"], #rackFav[aria-expanded="true"], .csb-info.on, .tr-expand.on) { color: var(--acc); }
+#transport[data-layout="csb"] .csb-ico > .mod-exp[data-mark="none"]::before { content: ""; width: 20px; height: 20px; background: currentColor;   /* A8: the modulation window's own icon (a sine wave) */
   -webkit-mask: url(img/icons/modulation.svg) center / contain no-repeat; mask: url(img/icons/modulation.svg) center / contain no-repeat; }
-/* the left column: PLAY large and centred, MOD under it */
+/* the app's mask icons (E1 · E3): ⚙ solid, ♥ solid, ◧, FINDER, INFORMATIONAL, FOLDERS, the theme's sun ↔ moon (body[data-theme]) */
+#transport[data-layout="csb"] :is(.csb-ico-b, #rackToggle, #rackFav) { font-size: 0; }
+#transport[data-layout="csb"] :is(.csb-ico-b, #rackToggle, #rackFav)::before { content: ""; width: 20px; height: 20px; background: currentColor;
+  -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; }
+#transport #rackToggle { --ico: url(img/icons/rack.svg); }
+#transport #rackFav { --ico: url(img/icons/heart-solid.svg); }
+#transport .csb-theme { --ico: url(img/icons/moon.svg); }
+body[data-theme="light"] #transport .csb-theme { --ico: url(img/icons/sun.svg); }
+/* PLAY: a round chip floating outside the bar's left edge, level with the bar's own rows (the panel never moves it) */
+#transport[data-layout="csb"] > .csb-play { display: grid; place-items: center; border-radius: 50%; padding: 4px; }
+#transport.mini[data-layout="csb"] > .csb-play { position: absolute; right: calc(100% + 12px); bottom: 11px; grid-area: auto; }
+#transport.mini[data-layout="csb"].at-top > .csb-play { top: 11px; bottom: auto; }
 #transport[data-layout="csb"] .csb-play > .tbtn.play { width: 56px; height: 56px; min-width: 0; border-radius: 50%; background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--fg); }
 #transport[data-layout="csb"] .csb-play > .tbtn.play.on { color: var(--acc); }
 #transport[data-layout="csb"] .csb-play > .tbtn.play > svg { width: 26px; height: 26px; }
-#transport[data-layout="csb"] .csb-play > .tbtn.modb { background: transparent; border-color: transparent; box-shadow: none; width: 48px; height: 26px; min-width: 0; min-height: 0; border-radius: var(--r-pill); font-size: var(--fs-tiny); }
-/* the right column: RATE and the BPM pill at today's size */
+/* LEFT: RATE over the BPM pill (a click types it: the kit's `typed`), MOD over EXPAND */
+#transport[data-layout="csb"] .csb-mod > .tbtn.modb { background: transparent; border-color: transparent; box-shadow: none; width: 48px; height: 26px; min-width: 0; min-height: 0; border-radius: var(--r-pill); font-size: var(--fs-tiny); }
 #transport[data-layout="csb"] .csb-tempo > .k { width: 44px; }
 #transport[data-layout="csb"] .csb-tempo > .k .k-lbl { display: none; }
-#transport[data-layout="csb"] .csb-tempo .tempo-expand { flex: 0 0 auto; width: 72px; height: 34px; }
-#transport[data-layout="csb"] .csb-tempo .tempo-expand .tempo-number { font: var(--w-bold) 12px/1 var(--font-num); font-variant-numeric: tabular-nums; }   /* 015 T4: the shorthand reset the numerals; tabular again */   /* the stage pill's reading in a card too */   /* its basis was its WIDTH in a row; in this column it would be its height */
-/* the timing row (A11): ⏮ · TIMELINE · the door · ⚙ · the dock chip together on the left, t taking the rest and reading from the right end */
-#transport[data-layout="csb"] .csb-row > .ro.time { flex: 1 1 auto; width: auto; min-width: 72px; padding: 0 6px; align-items: flex-end; text-align: right; background: transparent; box-shadow: none; }
-#transport[data-layout="csb"] .csb-row > .ro.time .ro-val { font-size: 13px; font-variant-numeric: lining-nums tabular-nums; white-space: pre; }   /* 015 T1: tabular, so the digits never change width */
-#transport[data-layout="csb"]:not(.docked, [data-place="free"]) .csb-row > .ro.time { flex: 0 0 auto; width: 16ch; font-size: 13px; }
-/* iteration 016 T1 · ONE TIME READER: the bar's t wears its own BPM pill's face (skin.css `#transport .tempo-number` / `.tempo-unit`, the modulation window's
-   reader at the bar's size): the value bold in the numeral face, tabular, ACCENT B; `t` the unit's bold 7 px UI */
-#transport[data-layout="csb"] .csb-row > .ro.time .ro-val { font: var(--w-bold) 13px/1 var(--font-num); font-variant-numeric: lining-nums tabular-nums; color: var(--acc2); }
-#transport[data-layout="csb"] .csb-row > .ro.time .ro-lbl { font: var(--w-bold) 7px/1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-key); }   /* 015 T1: on the stage a fixed 16 ch ("99999.99  (9999.9)" fits), so a turning t never widens the bar */
-#transport[data-layout="csb"] .csb-row :is(.ro-lbl, .ro-sub) { display: none; }
-/* the buttons row: the modes, MOLECULES' chooser, then SEARCH and the rack's three at the right edge */
+#transport[data-layout="csb"] .csb-tempo .tempo-expand { flex: 0 0 auto; width: 72px; height: 34px; padding-right: 7px; }
+#transport[data-layout="csb"] .csb-tempo .tempo-expand .tempo-number { font: var(--w-bold) 12px/1 var(--font-num); font-variant-numeric: tabular-nums; }   /* 015 T4: tabular */
+#transport[data-layout="csb"] .tempo-chevron { display: none; }   /* the pill opens nothing now: EXPAND does */
+/* CENTRE: the chooser over the modes + FOLDERS (a fixed 220 px, so a long name never widens the bar; under HYDROGEN its seat stays, empty) */
 #transport #lwMode { position: static; flex-direction: row; gap: 2px; }
-#transport[data-layout="csb"] #lwMode .lw-stage-b { width: 40px; height: 40px; border-radius: 10px; }
-#transport[data-layout="csb"] #lwMode .lw-stage-b::before { width: 22px; height: 22px; }
-#transport :is(#rackToggle, #rackAdd, #rackFav) { position: static; inset: auto; -webkit-backdrop-filter: none; backdrop-filter: none; }
-body.rack-hidden #transport :is(#rackAdd, #rackFav) { opacity: 1; visibility: inherit; pointer-events: auto; }
-#transport[data-layout="csb"] .csb-app > .mol-pick { flex: 0 0 220px; width: 220px; min-width: 220px; max-width: 220px; height: 34px; overflow: hidden; }   /* 015 T4: a fixed 220 px, so a long name never widens the bar */
-#transport[data-layout="csb"] .csb-app > .csb-search-b { margin-left: auto; }
-#transport:has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-app > .mol-pick { display: none; }   /* HYDROGEN: no molecule to choose */
-/* IN A RACK CARD (docked, or the FREE window one card wide): the columns as bands, 32 px seats, the expander one column */
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) { grid-template-areas: "play . tempo" "mid mid mid" "panel panel panel"; grid-template-rows: auto auto auto; padding: 8px; row-gap: 6px; height: auto; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > :is(.csb-play, .csb-tempo) { flex-direction: row; gap: 8px; }
+#transport[data-layout="csb"] :is(#lwMode .lw-stage-b, .csb-folders) { width: 40px; height: 36px; border-radius: 10px; }
+#transport[data-layout="csb"] :is(#lwMode .lw-stage-b, .csb-folders)::before { width: 22px; height: 22px; }
+#transport[data-layout="csb"] .csb-folders { display: inline-grid; place-items: center; padding: 0; border: 0; background: transparent; box-shadow: none; color: var(--ink-key); }
+#transport[data-layout="csb"] .csb-folders:hover { color: var(--fg); background: var(--glass-raise); }
+#transport :is(#rackToggle, #rackFav) { position: static; inset: auto; -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.rack-hidden #transport #rackFav { opacity: 1; visibility: inherit; pointer-events: auto; }
+#transport[data-layout="csb"] .csb-mid > .mol-pick { flex: 0 0 auto; width: 220px; min-width: 220px; max-width: 220px; height: 34px; overflow: hidden; }
+#transport:has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-mid > .mol-pick { visibility: hidden; }   /* HYDROGEN: no molecule to choose */
+/* IN A RACK CARD (docked, or the FREE window one card wide): one wrapping flow in the stage's order, 32 px seats, the expander one column */
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 4px; padding: 8px; height: auto; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-left, .csb-right, .csb-ico) { display: contents; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .csb-play { padding: 0; border-radius: 0; background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-play > .tbtn.play { width: 48px; height: 48px; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-row { gap: 3px; height: 34px; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-row > .tbtn, .csb-row > .dock-btn, .csb-row > .mod-exp, .csb-row .tr-open, .csb-row > .csb-search-b, .csb-row > #rackAdd, .csb-row > #rackToggle, .csb-row > #rackFav, #lwMode .lw-stage-b) { width: 32px; height: 32px; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-row > .ro.time { flex: 1 1 0; min-width: 0; overflow: hidden; }   /* A11: t takes what the five seats leave */
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) { column-gap: 0; }   /* the first band's empty middle takes the slack: 48 + MOD | RATE + an 88-px pill fit one card */
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-tempo .tempo-expand { width: 88px; }   /* A11: the card's BPM pill, 88 px */
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-app { flex-wrap: wrap; height: auto; row-gap: 6px; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-app > .mol-pick { order: 9; flex: 1 1 100%; max-width: none; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-tempo, .csb-mod) { margin-left: 6px; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .csb-mid { order: 1; flex: 1 1 100%; min-width: 0; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand) { order: 2; width: 32px; height: 32px; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo { order: 3; flex: 1 1 100%; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo:not([hidden]) { grid-template-columns: minmax(0, 1fr); }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-mid > .mol-pick { width: 100%; max-width: none; min-width: 0; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]):has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-mid > .mol-pick { display: none; }
 /* the FREE window (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack */
 html body #transport[data-place="free"] { position: static; left: auto; right: auto; top: auto; bottom: auto; transform: none; margin: 0; border: 0; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
 html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 1; visibility: visible; pointer-events: auto; }
@@ -484,7 +491,6 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
    specificity or it loses silently — which it did, on the first run of the gate. */
 #floats > .dev.compact { width: var(--rail-w); }
 .dev.floating.compact .dev-stat { display: none; }
-#rackAdd > svg { width: 16px; height: 16px; }
 /* 0.5.0 C0 · TWIN: the kit sizes the dock / pop-out glyphs (`button:is([data-gly="north"], …) > svg`, 12 px) and on 1.4.3 its
    rule out-ranked this one there; unlayered on 1.5 this would grow the transport's dock glyph to 13 px. */
 .dock-btn > svg:not(:where(button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg)), .mod-exp > svg:not(:where(button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg)) { width: 13px; height: 13px; }
@@ -611,7 +617,7 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 
 
 body.ui-hidden #rackFav, body.ui-hidden #rackFavList,
-body.ui-hidden #rack, body.ui-hidden #rackL, body.ui-hidden #rackToggle, body.ui-hidden #rackAdd, body.ui-hidden #rackAddList, body.ui-hidden #menubar, body.ui-hidden #badges, body.ui-hidden #title, body.ui-hidden #transport, body.ui-hidden #sheet { display: none !important; }
+body.ui-hidden #rack, body.ui-hidden #rackL, body.ui-hidden #rackToggle, body.ui-hidden #menubar, body.ui-hidden #badges, body.ui-hidden #title, body.ui-hidden #transport, body.ui-hidden #sheet { display: none !important; }
 body.ui-hidden #lab { grid-template-columns: minmax(0, 1fr) 0; }
 .dyn-c { position: relative; height: 84px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--glass-well); overflow: hidden; }   /* the well, not a hard black: the light theme has its own (wave 46) */
 .dyn-c canvas { width: 100%; height: 100%; display: block; }
@@ -669,8 +675,6 @@ body.ui-hidden #notebook, body.ui-hidden #rackPeek, body.ui-hidden #rackPeekL, b
    first, so hiding is still animated; peeking cancels the delay so it comes back instantly. */
 body.rack-hidden #rack, body.rack-hidden #rackL { visibility: hidden; transition: transform .28s ease, opacity .28s ease, visibility 0s linear .28s; }
 body.rack-hidden.rack-peek-right #rack, body.rack-hidden.rack-peek-left #rackL { visibility: visible; transition: transform .28s ease, opacity .28s ease, visibility 0s linear 0s; }
-body.rack-hidden #rackAdd, body.rack-hidden #rackAddList { visibility: hidden; }
-body.rack-hidden.rack-peek #rackAdd { visibility: visible; }
 body.rack-hidden #transport.mini { visibility: hidden; transition: transform .28s ease, opacity .28s ease, visibility 0s linear .28s; }
 body.rack-hidden.transport-peek #transport.mini { visibility: visible; transition: transform .28s ease, opacity .28s ease, visibility 0s linear 0s; }
 

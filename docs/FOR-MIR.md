@@ -3,6 +3,23 @@
 λWAVES adopts the MIR kit at `lab/mir/` and never edits it (CLAUDE.md). What the app finds wanting in the kit is listed here for the kit's own
 round, newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
+## FROM λWAVES, FOR THE KIT (1.5.0-alpha.31)
+- **THE FINDER REPLACES THE + LIST** (018 E5, `shell/window-picker.js`, `.css`, `locales/en.json`): the window picker is the FINDER — no WINDOWS
+  heading, the field says "search windows" with no accent ring, `can()` may return null to leave a row out; SHIFT-click queues rows (number
+  badges `.wp-num`, `.queued`) and Shift's release opens them in pick order (rack.js `openOrder`); a row in the latest ☆ layout wears the solid
+  star (`.wp-fav`); the api gains `shown` and `queued`; a pick defaults to `rack.reveal`. Why: Josh — "Call this new feature 'finder' instead
+  of 'add window' … multi-add by holding shift. Let the new window adopt it … Remove text that says 'WINDOWS'".
+- **reveal(id), AND THE + LIST GOES** (018 E5, `shell/rack.js`, `rack.css`, `css/base.css`): `reveal(id)` opens a closed window at its rack's top
+  and scrolls the rack up, or scrolls the rack to an open one WITHOUT reordering it (unfolds it, shows the rack, a floating one to the front),
+  and rings the card 900 ms (`.mir-reveal`, RACK.reveal); `lastFavourite()` gives the ids open in the latest ☆ layout (it now also reads a
+  record that says `closed`, as λWAVES' v3 layouts do — the old + list's star never lit there). The `#rackAdd` button, `#rackAddList`,
+  `addMenu`, `el.add` / `el.addList` and `.rack-add-none` are gone; `queueToggle` / `openOrder` stay exported for the FINDER. Why: Josh — "If a
+  user picks a window that's already open, let it *scroll* to the window on the rack, never rearranging the windows"; one window list, not two.
+- **THE BAR'S OWN EXPAND** (018 E2, `shell/transport.js`): a layout part `'expand'` (`.tr-expand`, the `chevronDown` glyph turned up while
+  open in transport.css, `aria-expanded`, `.on` while open) opens and shuts the tempo panel; a layout that names it gives the pill `tempoPill({ typed: true })`, so a click on the pill types
+  the tempo on any seat (the work bars' field) and the pill opens nothing. Why: Josh — "let tempo be typable … and have a dedicated icon to
+  expand the CSB instead".
+
 ## FROM λWAVES, FOR THE KIT (1.5.0-alpha.30)
 - **CURVES TAKES THE APP'S PRESET ROWS** (018 D2, `panels/curves.js`): `createCurvesPanel/View({ presets: () => rows })` puts the app's rows
   ({ id, label, points } a curve, { id, label, coming } a heading) ahead of the kit's six in the PRESET stepper; a row's curve lands on the

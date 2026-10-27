@@ -86,7 +86,7 @@ const PROBE = (step) => `(() => {
     const bars = [...n.querySelectorAll('.m2workbar')].map(laid).filter(Boolean);
     const u = bars.length ? { left: Math.min(r.left, ...bars.map((b) => b.left)), top: Math.min(r.top, ...bars.map((b) => b.top)), right: Math.max(r.right, ...bars.map((b) => b.right)), bottom: Math.max(r.bottom, ...bars.map((b) => b.bottom)) } : r;
     return { r, bars, u, ghost: opacity(n) === 0 || cs(n).visibility === 'hidden', name: tag(n) }; }).filter(Boolean);
-  const extras = hidden ? [] : ['transport', 'notebook', 'sheet', 'offer', 'rackAddList', 'rackFavList'].map((id) => { const n = document.getElementById(id); const r = laid(n);
+  const extras = hidden ? [] : ['transport', 'notebook', 'sheet', 'offer', 'rackFavList'].map((id) => { const n = document.getElementById(id); const r = laid(n);
     if (!r || cs(n).visibility === 'hidden' || r.width < 2 || r.height < 2) return null;
     return { id, r, ghost: opacity(n) === 0 || cs(n).pointerEvents === 'none' }; }).filter(Boolean);
   function verdict(x, y) {

@@ -226,14 +226,12 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
   /* ── 3. THE HIDE TOGGLE FOLLOWS THE RACK, and sits in the thumb zone (desktop's stays fixed) ──── */
   #rackToggle { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto;
     top: auto; bottom: calc(max(env(safe-area-inset-bottom), 0px) + 14px); transition: left var(--t-soft) ease; }
-  #rackAdd { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto;
-    top: auto; bottom: calc(max(env(safe-area-inset-bottom), 0px) + 60px); transition: left var(--t-soft) ease; }
   /* wave 54: FAVOURITE LAYOUTS is the third button up the same stack, and it follows the rack exactly as the two
      below it do — same left, same transition, same 44-px finger.  Wave 51's law is one rule, not three copies. */
   #rackFav { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto;
     top: auto; bottom: calc(max(env(safe-area-inset-bottom), 0px) + 106px); transition: left var(--t-soft) ease; }
-  #rackToggle::after, #rackAdd::after, #rackFav::after { content: ''; position: absolute; inset: -8px; }   /* 30 px of ink, 44 px of finger (an absolute inset runs from the PADDING box, so the 1-px glass edge is paid for twice) */
-  #rackAddList, #rackFavList { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto;
+  #rackToggle::after, #rackFav::after { content: ''; position: absolute; inset: -8px; }   /* 30 px of ink, 44 px of finger (an absolute inset runs from the PADDING box, so the 1-px glass edge is paid for twice) */
+  #rackFavList { left: calc(max(env(safe-area-inset-left), 0px) + var(--rack-edge) + 6px); right: auto;
     top: auto; bottom: calc(max(env(safe-area-inset-bottom), 0px) + 152px); max-width: calc(100vw - var(--rack-edge) - 24px); max-height: 50vh; overflow: auto; }
 
   /* ── 4. OPAQUE: no backdrop-filter anywhere the phone paints every frame ─────────────────────── */

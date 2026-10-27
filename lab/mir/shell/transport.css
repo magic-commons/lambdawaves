@@ -353,3 +353,6 @@ body.ui-hidden .mir-transport { display: none; }
 :root[data-motion="off"] .mir-transport :is(.tbtn.play svg, .mir-power-icon) { transition: none; transform: none; }
 
 }   /* end @layer mir.kit.house */
+/* the bar's EXPAND part (1.5.0-alpha.31, λWAVES 018 E6): one chevron, down while the expander is shut, turned up while it is open */
+.mir-transport .tr-expand > svg { transition: transform var(--t-fast, 120ms) ease; }
+.mir-transport .tr-expand[aria-expanded="true"] > svg { transform: rotate(180deg); }

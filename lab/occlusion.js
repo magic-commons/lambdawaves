@@ -4,7 +4,7 @@
  * refreshOcclusion) converts them to the canvas, keeps the hidden-interface clearing and hands them to field.setOcclusion,
  * which keeps the first 32.  KIT BRIEF 8's `paintedSpace({ rack, layer, extra })` is the twin, and C8 makes these ONE
  * subscription to it:   layer ← 'modwin' + 'chiprail' + 'floats'  ·  rack ← 'rack' (its columns stand in past the cap)
- *   ·  extra() ← 'extra' (transport, notebook, sheet, offer, rackAddList, rackFavList) + 'keymap'
+ *   ·  extra() ← 'extra' (transport, notebook, sheet, offer, rackFavList) + 'keymap'
  *   ·  subscribe(fn) ← dirty() + watch(): the one producer, which asks for a PRESENT even while paused. */
 const CAP = 32;   // the field's uniform block (field.js setOcclusion)
 

@@ -142,7 +142,6 @@ h1, h2 { margin: 0; font-weight: var(--w-bold); }
 .ro { flex: 1 1 auto; }
 .about p { margin: 0 0 8px; font-size: var(--fs-small); line-height: 1.5; color: var(--fg-soft); }
 .about b { color: var(--fg); } .about a { color: var(--acc); } .about code { font-family: var(--font-mono); font-size: var(--fs-base); }
-.rack-add-none { padding: 6px 10px; font-size: var(--fs-tiny); color: var(--dim); }
 .picker { border: 1px solid var(--glass-hairline) !important; }
 /* ═══ WAVE 69 · <m> — MATHEMATICS, IN THE MATH FACE ═══════════════════════════════════════════════
  * ONE rule, one element, and the element is deliberately an unknown one: an inline note written with

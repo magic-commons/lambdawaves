@@ -25,9 +25,9 @@ let failed = false;
 try {
   await ready();
 
-  /* 1 · closed on a first run; in + and WINDOW; the one line */
+  /* 1 · closed on a first run; in the FINDER and WINDOW; the one line */
   const first = await g.ev(`const d = document.querySelector('.dev[data-id="nodes"]');
-    document.getElementById('rackAdd').click(); const plus = [...document.querySelectorAll('#rackAddList .mb-item')].map((i) => i.dataset.win); document.getElementById('rackAdd').click();
+    __LW.layout.finder.open(); const plus = [...document.querySelectorAll('.mir-window-picker .wp-row:not(.off)')].map((i) => i.dataset.win); __LW.layout.finder.close();
     __LW.layout.menu.open(); const b = [...document.getElementById('menubar').querySelectorAll('.mb-btn')].find((x) => x.dataset.menu === 'WINDOW'); b.click();
     const win = [...b.parentElement.querySelectorAll('.mb-lbl')].map((l) => l.textContent.trim()); b.click();
     return { made: !!d, closed: d.classList.contains('closed'), side: d.parentElement.id, plus: plus.includes('nodes'), win: win.some((t) => /NODES$/.test(t)),
@@ -35,7 +35,7 @@ try {
   assert.equal(first.made, true); assert.equal(first.closed, true); assert.equal(first.side, 'rack');
   assert.equal(first.plus, true); assert.equal(first.win, true);
   assert.equal(first.note, 'Grades the screen only — pictures and films are untouched.'); assert.deepEqual(first.errs, []);
-  console.log('PASS NODES (CURVES\' heir) ships closed on the right rack, in + and WINDOW, and says in one line that it grades the screen only');
+  console.log('PASS NODES (CURVES\' heir) ships closed on the right rack, in the FINDER and WINDOW, and says in one line that it grades the screen only');
 
   /* 2 · neutral costs nothing */
   assert.equal(await g.ev('return __filter();'), 'none');

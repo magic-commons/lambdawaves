@@ -15,9 +15,9 @@ try {
   assert.equal((await g.waitFor('window.__LW?.ready', 150, 100)).ok, 1);
   const boot = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]');
-    __LW.layout.addMenu.open();
-    const choices = [...document.querySelectorAll('[data-rack-list="add"] .mb-item')].map(b => b.dataset.win);
-    __LW.layout.addMenu.close();
+    __LW.layout.finder.open();   // 018 E5: the FINDER is the one window list (the + list is gone)
+    const choices = [...document.querySelectorAll('.mir-window-picker .wp-row')].map(b => b.dataset.win), shown = __LW.layout.finder.shown;
+    __LW.layout.finder.close();
     __LW.layout.menu.open();
     const win = [...document.querySelectorAll('#menubar .mb-btn')].find(b => b.dataset.menu === 'WINDOW'); win.click();
     const windows = [...win.parentElement.querySelectorAll('.mb-item .mb-lbl')].map(l => l.textContent);
@@ -29,7 +29,7 @@ try {
       onLeft: ['chem'].map(id => !card(id).classList.contains('closed') && card(id).parentElement.id === 'rackL'), atomsHides: card('chem').hidden,
       underSpectrum: (() => { const L = [...document.querySelectorAll('#rackL > .dev')].map(d => d.dataset.id); const i = L.indexOf('spectrum'); return L.slice(i + 1, i + 2); })(),
       legacyGone: ['h2', 'field'].map(id => !card(id)), qcdGone: !card('qcd'), heliumGone: !card('helium'), atomsSeat: !card('atoms').hidden && card('atoms').querySelector('.dev-eyebrow').textContent,
-      choices, windows, ids: saved.presentation.layout.cards.map(c => c.id),
+      choices, shown, windows, ids: saved.presentation.layout.cards.map(c => c.id),
       records: Object.keys(saved.presentation.instruments), errors: __e.slice()
     };
   `);
@@ -43,7 +43,8 @@ try {
   assert.equal(boot.qcdGone, true, 'the QCD window is deleted (0.5.0 D9)');
   assert.equal(boot.heliumGone, true, 'the HELIUM window is deleted (0.5.0 D9)');
   assert.equal(boot.atomsSeat, 'ATOMS');
-  assert.equal(boot.choices.includes('atoms'), true, 'ATOMS has no row in +: ' + JSON.stringify(boot.choices));
+  assert.equal(boot.shown, true);
+  assert.equal(boot.choices.includes('atoms'), true, 'ATOMS has no row in the FINDER: ' + JSON.stringify(boot.choices));
   assert.equal(boot.windows.some((w) => /ATOMS$/.test(w)), true, 'ATOMS has no row in WINDOW: ' + JSON.stringify(boot.windows));
   assert.equal(boot.choices.includes('molecule'), false);
   for (const id of ['qcd', 'helium', 'h2', 'field']) assert.equal(boot.choices.includes(id), false);   // qcd, helium (D9), h2, field (D9b): deleted, so no row either
@@ -79,17 +80,31 @@ try {
 
   const added = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]'), on = id => !card(id).classList.contains('closed') && !!card(id).closest('#rack, #rackL');
-    await __LW.chem.solve('H2O'); __LW.chem.setOn(true); await __LW.settle();   // the MOLECULES mode shows the card (the ATOMS mode hides it, and + lists no hidden card)
-    card('chem').querySelector('.dev-close').click();                 // it starts on the rack now: take it off first
-    __LW.layout.addMenu.open(); document.querySelector('[data-rack-list="add"] .mb-item[data-win="chem"]').click();
-    const chem = on('chem'); card('chem').querySelector('.dev-close').click();
-    const closedAgain = !on('chem'); __LW.chem.setOn(false); await __LW.settle();
-    return { chem, closedAgain, errors: __e.slice() };
+    await __LW.chem.solve('H2O'); __LW.chem.setOn(true); await __LW.settle();   // the MOLECULES mode shows the card (the ATOMS mode hides it; the FINDER greys a hidden card)
+    /* 018 E5 · THE FINDER: picking an OPEN window scrolls its rack to it — no reorder — and rings it a moment (kit rk.reveal) */
+    const order = () => [...card('chem').parentElement.children].filter((c) => c.classList.contains('dev') && !c.classList.contains('closed')).map((c) => c.dataset.id).join(' ');
+    const before = order(), row = (id) => document.querySelector('.mir-window-picker .wp-row[data-win="' + id + '"]');
+    __LW.layout.finder.open(); row('chem').click();
+    const chem = on('chem') && order() === before && card('chem').classList.contains('mir-reveal');
+    /* × stands MOLECULES down (the HYDROGEN mode hides the card): the FINDER lists it greyed, MOLECULES ONLY, and a press opens nothing */
+    card('chem').querySelector('.dev-close').click(); await __LW.settle();
+    __LW.layout.finder.open(); const grey = row('chem').classList.contains('off') && row('chem').querySelector('.wp-why').textContent; row('chem').click();
+    const closedAgain = !on('chem') && grey === 'MOLECULES ONLY'; __LW.layout.finder.close();
+    /* the SHIFT queue (the old + list's, now the FINDER's): two closed rows queued in pick order, badges 1 · 2, both opened on Shift's release */
+    __LW.layout.finder.open(); const two = [...document.querySelectorAll('.mir-window-picker .wp-row:not(.off):not([data-open])')].slice(0, 2).map((b) => b.dataset.win);
+    for (const id of two) row(id).dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }));
+    const queued = __LW.layout.finder.queued.join() === two.join(), badges = two.map((id) => row(id).querySelector('.wp-num')?.textContent);
+    dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift' }));
+    const both = two.length === 2 && two.every(on);
+    for (const id of two) card(id).querySelector('.dev-close').click();
+    await __LW.settle();
+    return { chem, closedAgain, queued, badges, both, errors: __e.slice() };
   `);
   assert.equal(added.chem, true);
   assert.equal(added.closedAgain, true);
+  assert.equal(added.queued, true); assert.deepEqual(added.badges, ['1', '2']); assert.equal(added.both, true);
   assert.deepEqual(added.errors, []);
-  console.log('PASS + puts MOLECULES on the rack');
+  console.log('PASS the FINDER scrolls to an open MOLECULES without moving it, greys it MOLECULES ONLY once × stands it down, and SHIFT queues two windows that open on Shift\'s release');
 
   const owner = await g.ev(`
     const card = id => document.querySelector('.dev[data-id="' + id + '"]'), on = id => !card(id).classList.contains('closed') && !!card(id).closest('#rack, #rackL');
