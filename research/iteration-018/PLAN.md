@@ -159,6 +159,9 @@ Tests: look/gui suites, official-defaults-palette, first-run, mir-manifest.
 29. (F) λWAVES has one tone, also named λWAVES — a better name, or more tones? Default: as is.
 30. (F) With the group order fixed, MIR OPTIONS' first column ends ≈ 190 px shorter than its third; accept, or allow a reorder? Default: accept.
 
+## JOSH'S ANSWERS (2026-10-27)
+Josh: "defaults" — every call 1–30 stands as built; STATES' remaining moves (18), the SUBTITLE source (15), the λWAVES skin's LIGHT (28) and NODES' next node types (23) stay parked until he says more.
+
 ## MERGE ORDER
 A → B → C → D → E → F, each builder based on the merged tree (BASE sha below). Recipe: `git merge --no-ff --no-commit it018-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → focused suites → commit → CLOSED row → handoff STATE NOW line.
 
