@@ -309,7 +309,7 @@ function fakeLab({ msPerFrame = 5, governor = true, autoScale = true, modulation
   const domain = { half: 12, auto: true };
   const obs = { yaw: 0.65, pitch: 0.38, dist: 3.3, fov: 0.6 };
   const mat = { view: 0, exposure: 1, softness: 0.5, style: 0, dither: 0.5, steps: 160 };
-  const cam = Object.assign({ dy: 0, dp: 0, autoRotate: false, speed: 0.25, get ambient() { return this.autoRotate ? this.speed : 0; }, get moving() { return this.ambient !== 0 || this.dy !== 0 || this.dp !== 0; } }, camera || {});
+  const cam = Object.assign({ dy: 0, dp: 0, autoRotate: false, get moving() { return this.dy !== 0 || this.dp !== 0; } }, camera || {});   // 018 B4: AUTO-ROTATE holds a fling (μ read as 0)
   const mod = { _running: modulation, _phase: 0, get running() { return this._running; }, get playing() { return this._running; },
     host: {}, stop() { this._running = false; }, play() { this._running = true; },
     _wallTick(dw) { if (this._running) { this._phase += dw; mat.exposure = 1 + 0.5 * Math.sin(2 * Math.PI * this._phase); } } };
@@ -518,8 +518,8 @@ function rigFor(lab, route = true) {
     { unpinnedDigests: [dNo[3], dNo[4]], pinnedDistinct: new Set(digestsOf(withFC)).size, pinnedRetries: withFC.contended });
 
   /* H5 — THE CAMERA. */
-  const camRefused = await runFake(fakeLab({ camera: { autoRotate: true } }), { frames: 4, camera: 'refuse' });
-  const camLab2 = fakeLab({ camera: { autoRotate: true } });
+  const camRefused = await runFake(fakeLab({ camera: { autoRotate: true, dy: 0.3 } }), { frames: 4, camera: 'refuse' });
+  const camLab2 = fakeLab({ camera: { autoRotate: true, dy: 0.3 } });
   const camStilled = await runFake(camLab2, { frames: 4, camera: 'still' });
   judge('PIN APPLIED · H5 THE CAMERA CLOCK. The pose is an INTEGRATOR on the wall clock, so a coasting camera makes a film depend on machine speed. A moving camera is REFUSED by name, before the kit\'s recorder is even asked, with the three ways out; camera: "still" brings it to rest, records that it did, and puts it back afterwards',
     camRefused.ok === false && camRefused.refused === true && camRefused.hazard === 'camera'
@@ -591,7 +591,7 @@ function rigFor(lab, route = true) {
    §10 — THE RESTORE, THE MANIFEST AND THE HAZARD REGISTER
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 {
-  const lab = fakeLab({ modulation: true, camera: { autoRotate: true } });
+  const lab = fakeLab({ modulation: true, camera: { autoRotate: true, dy: 0.3 } });
   lab.LW.clock.playing = true; lab.LW.clock.t = 4.125;
   const before = { t: lab.LW.clock.t, playing: lab.LW.clock.playing, auto: lab.quality.auto, gov: lab.gov.on, presents: lab.stats.presents, autoRotate: lab.LW.camera.autoRotate, modRunning: lab.mod.running };
   let held = 0;
@@ -626,7 +626,7 @@ function rigFor(lab, route = true) {
     && H.readings.length === 12 && H.readings.every((x) => typeof x.note === 'string' && x.state),
     { app: HAZARDS.filter((h) => h.owner === 'app').map((h) => h.id), kit: HAZARDS.filter((h) => h.owner === 'kit').map((h) => h.id), blockingNow: H.blocking });
 
-  const warnLab = fakeLab({ camera: { autoRotate: true }, modulation: true });
+  const warnLab = fakeLab({ camera: { autoRotate: true, dy: 0.3 }, modulation: true });
   const p = filmFor(warnLab, {}).plan({ fps: 30, seconds: 6, observable: 'density' });
   judge('AND THE PLAN SAYS ALL OF IT BEFORE THE BUTTON COMMITS TO ANYTHING: the schedule, the cost (the kit\'s estimate), and the live warnings — a moving camera, a running modulation, and a size that came from THIS machine\'s device pixel ratio rather than from the caller',
     p.ok && p.N === 180 && p.warnings.length >= 3 && /frames/.test(p.cost.human)

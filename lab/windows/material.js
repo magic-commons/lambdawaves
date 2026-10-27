@@ -267,7 +267,7 @@ export function createMaterial(app) {
        PREFERENCE, so a hand on it saves the settings (coalesced).  `mod` is the modulation port WITHOUT `add`: the panel registers no
        target — the saved observer.* routes stay the defs' below, whose knob accessors are these dials (camKnobs) — and a hand on a
        routed dial writes its base (modHand), as everywhere. */
-    const gc = group(wCam.body, 'CAMERA'), FEEL = new Set(['spin', 'friction', 'drag', 'fling']); let feelSave = 0;
+    const gc = group(wCam.body, 'CAMERA'), FEEL = new Set(['friction', 'drag', 'fling']); let feelSave = 0;
     const camPanel = createCameraPanel({ mode: '3d', modPrefix: 'observer', project: false, mod,
       port: { ...cameraPort, set(id, v) { cameraPort.set(id, v); if (FEEL.has(id)) { clearTimeout(feelSave); feelSave = setTimeout(saveSettings, 250); } },
         turn(dy, dp) { cameraPort.turn(dy, dp); const s = camView.sphere; s.yaw.set(cameraPort.get('yaw')); s.pitch.set(cameraPort.get('pitch')); } } });   // 0.5.3 M5: the kit's port.turn road never sets the sphere's arcs and its sync skips a sphere mid-drag, so the rings' arrow froze until a later notice (and each step turned from the stale arrow): it follows the hand here, per move (MIR-BRIEF-sphere.md)

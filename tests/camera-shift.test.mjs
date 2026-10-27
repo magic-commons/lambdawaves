@@ -152,16 +152,20 @@ pass('the pan law: panBy adds in uv, setShift clamps at the frame\'s edge, a mod
    (a routed axis moves its base), every pose change is a notice, and an id the law does not have reads undefined (the panel hides it). */
 {
   const L = law(BOOT(), (id) => id === 'observer.yaw'), P = L.port, o = L.obs; let told = 0; const off = P.subscribe(() => told++);
-  assert.deepEqual(['mode', 'zoom', 'fov', 'panX', 'panY', 'yaw', 'pitch', 'autoRotate', 'spin', 'friction', 'drag', 'fling'].map((id) => P.get(id)),
-    ['free', 3.3, 0.6, 0, 0, 0.65, 0.38, false, 0.25, CAM.MU_DEF, CAM.GAIN_DEF, CAM.FLING_DEF], 'the law\'s own numbers, in its own units');
+  assert.deepEqual(['mode', 'zoom', 'fov', 'panX', 'panY', 'yaw', 'pitch', 'autoRotate', 'friction', 'drag', 'fling'].map((id) => P.get(id)),
+    ['free', 3.3, 0.6, 0, 0, 0.65, 0.38, false, CAM.MU_DEF, CAM.GAIN_DEF, CAM.FLING_DEF], 'the law\'s own numbers, in its own units');
+  assert.equal(P.get('spin'), undefined, '018 B4: SPIN left — the panel draws no knob for it');
   assert.equal(P.get('roll'), undefined); assert.equal(P.get('wheel'), undefined); assert.equal(P.angle, 'rad');
   P.set('panX', 0.4); P.set('panY', -0.3); assert.deepEqual(o.shift, [0.4, -0.3], 'PAN X and PAN Y are the one setShift');
   P.set('zoom', 2.2); assert.equal(o.dist, 2.2); P.set('fov', 0.9); assert.equal(o.fov, 0.9);
   P.set('yaw', 1.5); assert.equal(o.yaw, 0.65, 'a routed YAW moves its base, not the pose'); assert.deepEqual(L.writes, [['observer.yaw', 1.5]]);
   const n = told; P.set('pitch', 0.1); assert.ok(Math.abs(o.pitch - 0.1) < 1e-12 && told > n, 'PITCH by the turn road, and told');
-  P.set('mode', 'turntable'); P.set('drag', 2); P.set('friction', 3); P.set('fling', 0.5); P.set('spin', 0.5); P.set('autoRotate', true);
-  assert.deepEqual([L.camera.dragGain, L.camera.friction, L.camera.flingGain, L.camera.speed, L.camera.autoRotate], [2, 3, 0.5, 0.5, true]);
-  const m = told; L.cameraStep(0.016); assert.ok(told > m, 'a moving step is a notice'); L.camera.setAutoRotate(false); L.camera.stop();
+  P.set('mode', 'turntable'); P.set('drag', 2); P.set('friction', 3); P.set('fling', 0.5); P.set('autoRotate', true);
+  assert.deepEqual([L.camera.dragGain, L.camera.friction, L.camera.flingGain, L.camera.autoRotate, L.camera.mu], [2, 3, 0.5, true, 0], 'AUTO-ROTATE reads FRICTION as 0 and leaves the knob');
+  assert.equal(L.cameraStep(0.016), false, 'AUTO-ROTATE alone does not turn the view (no ambient drive)');
+  L.camera.fling(0.8); const y0 = o.yaw, m = told; L.cameraStep(0.5); assert.ok(told > m, 'a moving step is a notice');
+  assert.ok(L.camera.dy === 0.8 * L.camera.flingGain && Math.abs(o.yaw - y0) > 0.19, 'a fling under AUTO-ROTATE keeps its speed (no decay) and turns the view');
+  L.camera.setAutoRotate(false); L.cameraStep(0.5); assert.ok(L.camera.dy < 0.8 * L.camera.flingGain, 'off, FRICTION decays it again'); L.camera.stop();
   const q = told; assert.equal(L.cameraStep(0.016), false); assert.equal(told, q, 'a still camera tells nobody');
   P.home(); assert.deepEqual([o.dist, o.fov, o.shift], [3.3, 0.6, [0, 0]], 'HOME is RESET VIEW');
   off(); const r = told; P.set('zoom', 4); assert.equal(told, r, 'unsubscribed');
@@ -169,7 +173,7 @@ pass('the pan law: panBy adds in uv, setShift clamps at the frame\'s edge, a mod
   assert.deepEqual([P.ranges.zoom.min, P.ranges.zoom.max, P.ranges.zoom.home, P.ranges.zoom.log, P.ranges.pitch.max, P.ranges.drag.log], [1.2, 8, 3.3, true, CAM.PITCH, false]);
   for (const k of ['setShift', 'zoomAt', 'panBy', 'turn', 'subscribe']) assert.equal(typeof P[k], 'function', k);
 }
-pass('the camera port: get reads the law\'s numbers (12 ids, radians), set takes the hand\'s road (a routed YAW moves its base), subscribe hears every pose change and a still camera tells nobody, HOME is RESET VIEW, modIds name the saved observer.* routes');
+pass('the camera port: get reads the law\'s numbers (11 ids, radians), set takes the hand\'s road (a routed YAW moves its base), subscribe hears every pose change and a still camera tells nobody, HOME is RESET VIEW, modIds name the saved observer.* routes');
 
 /* 8 · THE PORT AS THE KIT PANEL'S (0.5.0 C1): a dial is ONE axis — a hand on PAN Y never writes a routed PAN X's base (brief 2's
    acceptance); the feel setters are notices (the panel has no dial the law could move); `notify` is the modulation's door; PAN HOME
@@ -184,9 +188,9 @@ pass('the camera port: get reads the law\'s numbers (12 ids, radians), set takes
   P.setShift(0.4, -0.2); P.zoomAt([0, 0], 2.5); const [verb] = P.verbs; assert.equal(verb.label, 'PAN HOME'); verb.run();
   assert.deepEqual([o.shift, o.dist], [[0, 0], 2.5], 'PAN HOME centres the shift and nothing else (the routed X\'s pose is the modulation\'s)');
   assert.deepEqual([P.ranges.panX.fmt(0.25), P.ranges.panY.fmt(-0.5), P.ranges.panX.fmt(0)], ['+0.25', '-0.50', '0.00']);
-  assert.deepEqual([P.ranges.spin.min, P.ranges.spin.max, P.ranges.spin.home, L.camera.speed], [...CAM.SPIN, CAM.SPIN_DEF, CAM.SPIN_DEF]);
+  assert.equal(P.ranges.spin, undefined);
 }
-pass('the port as the kit panel\'s: a dial is one axis (a routed PAN X keeps its base under a hand on PAN Y), the feel setters and notify are notices, PAN HOME is the port\'s verb, PAN reads NDC, SPIN\'s range is CAM\'s');
+pass('the port as the kit panel\'s: a dial is one axis (a routed PAN X keeps its base under a hand on PAN Y), the feel setters and notify are notices, PAN HOME is the port\'s verb, PAN reads NDC, SPIN is gone (018 B4)');
 
 /* 9 · THE LOCK (0.5.3 M6, R3: the classic camera holds the PAN only).  Engaged, the shift goes to 0 raw (a routed axis's base is
    not written), and every road that moves the shift answers with a notice and moves nothing: setShift, panBy (Alt-drag, two fingers,
