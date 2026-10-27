@@ -139,6 +139,9 @@ Tests: look/gui suites, official-defaults-palette, first-run, mir-manifest.
 9. MIR OPTIONS grows to ≈ 1180 × 660. Default: yes.
 10. `t = n` leaves the CSB entirely (rack CSB too) and lives in TIMELINE. Default: yes.
 11. The CSB THEME button toggles light ↔ dark only (material untouched). Default: yes.
+12. (A) The MOLECULES chooser's 28-px picture: formula in its place when it fails (built) or hidden? Default: formula.
+13. (A) Dark-theme pill text is the theme's ink, not pure black. Default: ink.
+14. (A) An isomer pane with more isomers than fit scrolls inside (the one exception to no inner scroll, it is a popover). Default: yes.
 
 ## MERGE ORDER
 A → B → C → D → E → F, each builder based on the merged tree (BASE sha below). Recipe: `git merge --no-ff --no-commit it018-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → focused suites → commit → CLOSED row → handoff STATE NOW line.
@@ -146,4 +149,5 @@ A → B → C → D → E → F, each builder based on the merged tree (BASE sha
 ## CLOSED
 | chain | BASE | commit | note |
 |---|---|---|---|
-| A | e7aa247 | | |
+| A | 90a2fce | 58ab389 | A1–A9 (A-BUILD.md; kit alpha.29; picker-looks/library/start/hide-reveal/menubar green) |
+| B | 58ab389 | | |
