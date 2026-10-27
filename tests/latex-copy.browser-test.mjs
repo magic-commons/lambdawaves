@@ -133,8 +133,9 @@ try {
   assert.deepEqual(gotE.errs, []);
   console.log('PASS the empty register: the press and the EDIT row write nothing, SPECTRUM says "nothing to copy — the register is empty", no flash');
 
-  /* ── 8 · 0.4.0 S0 (wave 136): under a molecular field owner SPECTRUM FOLDS (Cloud's fold) and EDIT › COPY copies the
-         MOLECULE's page — the formula, RHF/basis, E and the ε ladder — never greyed; back on hydrogen it copies the register ── */
+  /* ── 8 · 0.4.0 S0 (wave 136): under a molecular field owner EDIT › COPY copies the MOLECULE's page — the formula, RHF/basis,
+         E and the ε ladder — never greyed; back on hydrogen it copies the register.  018 F4: SPECTRUM is HIDDEN under a molecule
+         (018's law "a window shows only what applies"; it was folded at wave 136) and comes back on hydrogen ── */
   const mol = await g.ev(`__LW.loadPreset('1s+2pz'); await __LW.chem.solve('H2O'); __LW.chem.setOn(true); await __LW.settle();
     const card = document.querySelector('.dev[data-id="spectrum"]');
     const hidden = card.hidden, folded = card.classList.contains('folded'); __clip.length = 0;
@@ -144,7 +145,7 @@ try {
     const unfolded = !card.hidden && !card.classList.contains('folded');
     const r2 = await __row('EDIT', 'COPY the state as LaTeX'); for (let i = 0; i < 40 && !__clip.length; i++) await new Promise((q) => setTimeout(q, 25));
     return { hidden, folded, disabled: r.disabled, page, status, unfolded, enabled: !r2.disabled, clip: __clip.slice(), errs: __e.slice() };`);
-  assert.equal(mol.hidden, false); assert.equal(mol.folded, true); assert.equal(mol.disabled, false);
+  assert.equal(mol.hidden, true); assert.equal(mol.disabled, false);
   assert.equal(mol.page.length, 1, JSON.stringify(mol));
   const [molHead, molLadder] = mol.page[0].split('\n');
   assert.ok(molHead.startsWith('$\\mathrm{H_{2}O}$, water — RHF/STO-3G'), molHead);
@@ -164,7 +165,7 @@ try {
   assert.equal(mol.unfolded, true); assert.equal(mol.enabled, true);
   assert.equal(mol.clip.length, 1); assert.equal(mol.clip[0].split('\n')[0], '$1s_{0}$ and $2p_{0}$');
   assert.deepEqual(mol.errs, []);
-  console.log('PASS under MOLECULES (water) SPECTRUM folds and EDIT › COPY copies the molecule\'s page — "' + molHead.slice(0, 60) + '…", the ε ladder named (1b₁ HOMO, 4a₁ LUMO); back on hydrogen SPECTRUM unfolds and the row copies "$1s_{0}$ and $2p_{0}$"');
+  console.log('PASS under MOLECULES (water) SPECTRUM is hidden and EDIT › COPY copies the molecule\'s page — "' + molHead.slice(0, 60) + '…", the ε ladder named (1b₁ HOMO, 4a₁ LUMO); back on hydrogen SPECTRUM returns and the row copies "$1s_{0}$ and $2p_{0}$"');
 
   /* ── 8 · 0.4.0 S3: CALCULUS is tiles (two columns on the card, three floating, seen through LEAN), and its ⧉ copies the
          PROSE FIGURE, which pasted into the notebook renders with no .katex-error ── */
@@ -182,7 +183,7 @@ try {
     const out = { tiles: tiles.length, seen, lean, onCard, floating, head: md.split('\\n')[0], figure: /\\nFigure\\. /.test(md), formulas: view.querySelectorAll('.katex').length, display: view.querySelectorAll('.katex-display').length, errors: view.querySelectorAll('.katex-error').length, dollars: (view.textContent.match(/\\$/g) || []).length, errs: __e.slice() };
     __LW.layout.notebook.setMode('edit'); ta.value = ''; ta.dispatchEvent(new Event('input')); __LW.layout.notebook.close();
     return out;`);
-  assert.ok(calc.tiles === 8 && calc.seen === 8 && calc.lean, 'the tiles: ' + JSON.stringify(calc));
+  assert.ok(calc.tiles === 9 && calc.seen === 9 && calc.lean, 'the tiles: ' + JSON.stringify(calc));
   assert.equal(calc.onCard, 2, 'two columns on the card: ' + JSON.stringify(calc)); assert.equal(calc.floating, 3, 'three floating: ' + JSON.stringify(calc));
   assert.ok(/^### CALCULUS · \$t = /.test(calc.head) && calc.figure, 'the copy is not the prose figure: ' + JSON.stringify(calc));
   assert.ok(calc.formulas > 15 && calc.display >= 3 && calc.errors === 0 && calc.dollars === 0, 'the paste: ' + JSON.stringify(calc));
