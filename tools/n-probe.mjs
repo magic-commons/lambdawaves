@@ -1,6 +1,7 @@
 /* n-probe.mjs — iteration 019 chain N's probes and pictures (a diagnostic, not a gate).
  *   LW_PORT=8819 GD_PORT=5819 node tools/n-probe.mjs <scene> [out.png]
  * Scenes: identity (N1: CURVES alone through the compiler vs 018's fixed pair — describe() and the filter's markup, byte for byte) ·
+ * tables (N2: LEVELS · POSTERIZE · THRESHOLD · HUE · TINT added; the filter's children, the targets, a routed knob, the window floating) ·
  * Prints what the scene measured; a picture scene writes a PNG (the driver's composite). */
 import { writeFileSync } from 'node:fs';
 import { open } from './gate/gatekit.mjs';
@@ -24,6 +25,19 @@ try {
       const strip = (d) => ({ ...d, html: d.html.length + ' B' });
       return { neutral: strip(neutral), chain: strip(chain), pair: strip(pair), identical: chain.html === pair.html && JSON.stringify({ ...chain, html: 0 }) === JSON.stringify({ ...pair, html: 0 }),
         back: back.html === chain.html, after: f.describe().css, passes: N.passes() };`);
+  }
+  if (scene === 'tables') {
+    info = await g.ev(`const N = __LW.nodes, f = N.filter, w = (n) => new Promise((r) => setTimeout(r, n));
+      for (const t of ['levels', 'posterize', 'threshold', 'hue', 'tint']) N.add(t);
+      N.set('n1', 'gamma', 1.6); N.set('n4', 'hue', 40); N.setBypass('n3', true); await w(300);
+      const kids = () => [...document.getElementById(f.id).children].map((e) => e.localName + (e.getAttribute('result') ? '>' + e.getAttribute('result') : ''));
+      const a = { kids: kids(), passes: N.passes() };
+      N.setBypass('n3', false); await w(200); const b = { kids: kids(), passes: N.passes() };
+      const T = __LW.mod.targets().filter((t) => t.id.startsWith('nodes.')).map((t) => t.id);
+      const r = JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')); r.pan = { win: [95, -470] }; r.win = { x: 520, y: 20, w: 560, h: 860 }; localStorage.setItem('lambdawaves.q0.nodes', JSON.stringify(r));
+      N.open(); await w(800);
+      return { a, b, targets: T, stamped: document.querySelectorAll('[data-mir-window="nodes"] [data-param^="nodes."]').length, record: JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')).list.map((q) => q.id + ':' + q.type) };`);
+    shot = true;
   }
   if (shot) writeFileSync(OUT, Buffer.from(await g.snap(), 'base64'));
   console.log(JSON.stringify({ scene, info, errors: (await g.errors()).errs }, null, 1));

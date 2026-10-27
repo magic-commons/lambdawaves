@@ -12,6 +12,12 @@
 .nodes-card { position: absolute; width: 120px; box-sizing: border-box; padding: 0 8px 8px; cursor: default; border-radius: var(--r-md);
   background: var(--glass-raise, var(--glass-tint)); border: 1px solid var(--glass-border); box-shadow: var(--neu-raise); }
 .nodes-card[data-node="curves"] { width: 250px; }
+.nodes-card[data-type] { width: 236px; }
+.nodes-card[data-type="curves"] { width: 250px; }
+.nodes-card.off { opacity: .5; }
+.nodes-card.off .nodes-body { pointer-events: none; }
+.nodes-mark { font-style: normal; letter-spacing: 0; color: var(--fg-soft); }
+.nodes-knobs { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 4px; }
 .nodes-title { display: flex; align-items: center; gap: 6px; height: 26px; margin: 0 -8px 6px; padding: 0 8px; cursor: move; user-select: none;
   font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wider, .12em); color: var(--acc); border-bottom: 1px solid var(--glass-hairline); }
 .nodes-title > span { flex: 1 1 auto; }
@@ -20,11 +26,13 @@
 .nodes-port { position: absolute; left: 50%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 2px var(--glass-well); }
 .nodes-port.in { top: -5px; }
 .nodes-port.out { bottom: -5px; }
-:is(.nodes-x, .nodes-add, .nodes-door) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
+:is(.nodes-x, .nodes-rm, .nodes-add, .nodes-door) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
   background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; }
-.nodes-x { width: 18px; height: 18px; margin-right: -4px; }
-:is(.nodes-x, .nodes-add, .nodes-door):is(:hover, :focus-visible) { color: var(--acc); }
-:is(.nodes-x, .nodes-add, .nodes-door) svg { width: 16px; height: 16px; }
+.nodes-x, .nodes-rm { width: 18px; height: 18px; margin-right: -4px; }
+.nodes-card:not(.off) .nodes-rm { display: none; }
+.nodes-x[aria-pressed="true"] { color: var(--acc); }
+:is(.nodes-x, .nodes-rm, .nodes-add, .nodes-door):is(:hover, :focus-visible) { color: var(--acc); }
+:is(.nodes-x, .nodes-rm, .nodes-add, .nodes-door) svg { width: 16px; height: 16px; }
 :is(.nodes-add, .nodes-door) { position: absolute; top: 6px; z-index: 1; border-radius: var(--r-sm); background: var(--glass-tint); }
 .nodes-add { left: 6px; }
 .nodes-door { right: 6px; }

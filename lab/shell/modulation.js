@@ -168,7 +168,7 @@ export function createModSeam(app) {
        CHEMISTRY's targets are `chem.kick`, `chem.speed` and `chem.orbital` (iteration 007 O), and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
        sphere arcs, so they are drop targets now, like every observer.* dial. */
-    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell']);
+    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell', 'nodes']);   // 019 N2: NODES' knobs, `nodes.<node>.<knob>` (lab/nodes.js, the runtime door)
     app.state.restampParams = mod.stamp;
     /* iteration 007 O (ADR-0001) · chem.orbital's RANGE IS THE MOLECULE'S: every landing re-registers it by id (the kit keeps the base and
        the routes; a lane's 0..1 curve spans the new molecule), hands the base the landing's orbital (the HOMO, or the index a file named),
