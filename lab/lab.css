@@ -393,7 +393,9 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 .csb-suggest { position: fixed; z-index: calc(var(--z-chrome) + 4); display: flex; gap: 6px; padding: 6px; border-radius: 14px; }
 .csb-suggest[hidden] { display: none; }
 .csb-suggest .mm-tile { position: relative; width: 76px; height: 76px; padding: 0; border: 1px solid transparent; border-radius: 10px; background: transparent; cursor: pointer; overflow: hidden; }
-.csb-suggest .mm-tile.on, .csb-suggest .mm-tile:hover { border-color: color-mix(in srgb, var(--acc) 55%, transparent); background: var(--glass-raise); }
+/* 018 A9 (Josh: "don't show a colored outline for the thumbnails, just either highlight/outset/inset"): relief only — hover raised, the chosen one sunk */
+.csb-suggest .mm-tile:hover { background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)); }
+.csb-suggest .mm-tile.on { background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
 .csb-suggest .mm-pic { position: absolute; inset: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; filter: hue-rotate(var(--mol-hue, 0deg)); }
 .csb-suggest .mm-under { display: none; }
 .csb-suggest .mm-ph { position: absolute; inset: 0 0 12px; display: grid; place-items: center; font: 400 15px/1 var(--font-math, serif); color: var(--fg); opacity: .75; pointer-events: none; }   /* 018 A3: no picture — the formula holds the square */
