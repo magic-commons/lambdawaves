@@ -1,7 +1,7 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../tier.js'; import { el, knob, fader, readout, formula, hint, ariaLabel, chip, section, meter, lamp } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
+import { TIER } from '../tier.js'; import { el, knob, fader, readout, hint, ariaLabel, chip, section, meter, lamp } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates, isPhone } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
@@ -24,14 +24,8 @@ export function createTransport(app) {
     /* ── THE CLOCK's law: when does this density repeat?  T = 2π / gcd{|E_a − E_b|} over the populated labels (EXACT where the
        differences are commensurate: hydrogen and its ions, the oscillator; a near-recurrence with its error otherwise) ── */
     ui.periodRo = readout({ label: 'REPEATS every', value: '—', cls: 'period', sub: 'exact period of the density, from the energies in force' });
-    /* WAVE 69 · THE THEOREM, SUBSTITUTED, LIVE.  This is the first of the three places a number was
-       given permission to move (see REPORT wave 69).  It earns it because every value on the line is
-       EXACT at the instant it is printed: the gcd comes from the same scan the readout above prints,
-       and the lap decomposition is arithmetic on the clock.  Nothing is tweened and nothing is
-       illustrative — which is the difference between this and animating a number in a video. */
-    ui.periodFx = formula({ lines: [
-      ['<m>T = 2π / gcd{|ΔE|} = 2π / </m>', { s: 'g' }, '<m> = </m>', { s: 'T' }],
-      ['<m>t = </m>', { s: 'lap' }, '<m> · T + </m>', { s: 'ph' }, '<m> · T</m>'] ] });
+    /* 023 B2 (Josh: "On CSB, remove the T=... and t=...."): WAVE 69's substituted theorem (T = 2π / gcd{|ΔE|} …, t = lap · T + ph · T) left
+       the expander; REPEATS above says the period and its hint the gcd and the lap */
     const jmp = chip(btn('jump', '', 'jump to the next exact repeat of the density', 'jump to the next exact repeat of the density'), 'repeat');   // 021 V2: lab/icons.js `repeat`, not ⟳
     /* THE PLAY's clock for the kit's play part: appPlay, and a press schedules the frame that shows it (togglePlay's law) */
     const barClock = { play: () => { const r = appPlay.play(); schedule(TIER.EVOLVE); return r; }, pause: () => { const r = appPlay.pause(); schedule(TIER.EVOLVE); return r; },
@@ -47,7 +41,7 @@ export function createTransport(app) {
       armed: () => app.state.modArm, arm: (v) => setModArm(v), onArm: (f) => { armSubs.add(f); return () => armSubs.delete(f); },
       isOpen: () => !!(app.state.modView && app.state.modView.isOpen), toggle: () => app.sh.layout.modulation.toggle(),
       persist: () => saveSettings() };   // iteration 016 W4: no cadence here — 60 | 120 HZ is SETTINGS › QUALITY's (the kit's tempo panel seats no key without it)
-    /* REPEATS, its formula, ⟳ and ‹ › ride in the expander's first row (014 A8).  The SCRUB left the bar (Josh: "drop"): `ui.scrub` is still built,
+    /* REPEATS, ⟳ and ‹ › ride in the expander's first row (014 A8).  The SCRUB left the bar (Josh: "drop"): `ui.scrub` is still built,
        unmounted, so a preset's, CLEAR's and a restore's `ui.scrub.set(0)` and KEEP FRAMES stand. */
     /* iteration 018 E2 · THE CSB, FLESHED OUT (Josh: "Play/Pause floats to the left … Preset picker is dead center and on the top row. The library
        buttons plus folders should be directly underneath … Move the rate knob and tempo column to the far left … 'MOD' … near the rate and tempo
@@ -100,7 +94,7 @@ export function createTransport(app) {
        `modulation`, an SVG); the turning mark is the kit's unplaced logoButton now */
     const door = bar.el.door; ui.modExp = door; door.title = 'Open the modulation window'; setGlyph(door, 'modulation');
     /* 022 C2 · THE SURFACE IS A SURFACE: the expander is ONE WELL (the kit's `data-mir-surface="well"`) of four kit sections on the 44-px grid —
-       TRANSPORT (⏮ ‹ › ⟳ as glyph chips, REPEATS, BPM with the beat lamp, the kit's clock tiles as one strip, the theorem under it), MACROS (the kit's
+       TRANSPORT (⏮ ‹ › ⟳ as glyph chips, REPEATS, BPM with the beat lamp, the kit's clock tiles as one strip), MACROS (the kit's
        knob bank), FAVOURITES (csb-favs' eight slots) and METERS (the AUDIO device's LOW · MID · HIGH and the beat equaliser's seven gains, painted per
        frame while it is open, nothing while it is shut).  Nothing scrolls inside it (017 R2).  The heads are label()s; the sheet is csb.css. */
     const P = bar.el.panel, PP = bar.parts.panel, sec = {}, mt = {};
@@ -111,7 +105,6 @@ export function createTransport(app) {
       mt.bpm = readout({ label: 'BPM', value: '—', cls: 'csb-bpm' }); mt.beat = lamp({ parent: mt.bpm.root, cls: 'mir-lamp csb-beat', title: 'the beat' });
       sec.tr.body.append(ui.periodRo.root, mt.bpm.root);
       const tiles = P.querySelector('.tempo-grid'); if (tiles) { sec.tr.body.append(...tiles.children); tiles.parentElement.remove(); }   // the kit's tiles, one strip
-      sec.tr.root.append(ui.periodFx.root);
       if (PP.rail) sec.mac.body.append(PP.rail.root);
       mt.lev = meter({ bands: ['low', 'mid', 'high'], labels: ['LOW', 'MID', 'HIGH'], led: true, peak: true, parent: sec.met.body });
       mt.eq = meter({ bands: 7, labels: ['1', '2', '3', '4', '5', '6', '7'], cls: 'mir-meter vertical csb-eqm', parent: sec.met.body }); hint(mt.eq.root, 'the beat equaliser: n 1–7');
@@ -127,7 +120,7 @@ export function createTransport(app) {
        the 0.6.5 strip, `openAsk` does nothing (no key row calls it) and createAsk is never made, so no request can leave */
     let echoOn = false, openAsk = () => {};
     if (ASK_ENABLED) {
-      /* 0.6.6 G2 · THE TYPE BOX: ASK (or /) swaps the centre — the t readout, REPEATS, the formula — for one line to Gemma (lab/ask.js); the first press ever asks consent */
+      /* 0.6.6 G2 · THE TYPE BOX: ASK (or /) swaps the centre — the t readout, REPEATS — for one line to Gemma (lab/ask.js); the first press ever asks consent */
       const seat = el('span', 'ask-seat'); tro.root.before(seat);   // its seat, as 0.6.6 built it: just before the t readout
       const line = el('input', 'ask-line', seat), note = el('span', 'ask-note', seat), okB = el('button', 'tbtn ask-ok', seat, 'CONTINUE');
       line.type = 'text'; line.spellcheck = false; line.autocomplete = 'off'; line.placeholder = 'ask Gemma — what does benzene look like?'; line.setAttribute('aria-label', 'ask Gemma'); okB.type = 'button'; okB.style.flex = 'none';
@@ -248,19 +241,9 @@ export function createTransport(app) {
         return [fmtPeriod(P.T), head + ' · lap ' + lap + ' · ' + (100 * ph / P.T).toFixed(0) + '%' + src, 'ok']; }
       return ['≈ ' + fmtPeriod(P.T), (unit || sturm.P ? '' : 'no exact period under these per-label rates · ') + 'nearest recurrence · error ' + (100 * P.err).toFixed(1) + '% of a beat' + src, 'warn'];
     }
-    /** the four slots of the REPEATS formula, from the SAME `periodNow()` the readout above reads — one
-        expression for one quantity (ANTI-PATTERN 20).  A state with no exact period prints an em dash in
-        every slot rather than a number that would be a lie. */
-    function paintPeriodFx() {
-      if (!ui.periodFx) return;
-      const P = periodNow();
-      if (!P || periodSettling || !P.exact || !(P.T > 0)) { ui.periodFx.set({ g: '—', T: '—', lap: '—', ph: '—' }); return; }
-      const lap = Math.floor(clock.t / P.T), ph = (clock.t - lap * P.T) / P.T;
-      ui.periodFx.set({ g: P.g.toPrecision(6), T: fmtPeriod(P.T), lap: String(lap), ph: ph.toFixed(3) });
-    }
     /** paint the REPEATS readout now — a forced scan (LW.period, ⟳, the digest) and the worker's answer both call it, so a paused
         instrument shows the answer the moment it exists rather than on a frame it will not run (wave 45) */
-    function paintPeriod() { if (!ui.periodRo) return; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub + flashSub()); paintPeriodFx(); }
+    function paintPeriod() { if (!ui.periodRo) return; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub + flashSub()); }
     /* 0.6.0 B3a · THE FLASH LAW (lab/flash-law.js) on the RATE knob and this sub, recomputed only when RATE or the register moves; it never changes RATE (the hand wins) */
     const fk = { v: -1, r: -1, sub: '' }, rateTitle = ui.rateKnob.root.title;
     function flashSub() {
@@ -296,7 +279,7 @@ export function createTransport(app) {
         mt.lev.set([o('low'), o('mid'), o('high')]); if (app.state.eq) mt.eq.set(app.state.eq.gains);
         if (PP.rail && now - railWall >= 200) { railWall = now; PP.rail.sync(); }
       }
-      if (ui.periodRo && (!on || keep.frames || now - periodWall >= 200)) { periodWall = now; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub + flashSub()); paintPeriodFx(); }   // periodNow() is cached on the register's version; the scan itself runs off the frame (wave 45) or waits out a live gesture (wave 44).  WAVE 69: the formula rides the SAME cadence law — every frame with KEEP FRAMES on, 5 Hz without — so a moving number obeys the readout law the transport already owns rather than inventing a second one
+      if (ui.periodRo && (!on || keep.frames || now - periodWall >= 200)) { periodWall = now; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub + flashSub()); }   // periodNow() is cached on the register's version; the scan itself runs off the frame (wave 45) or waits out a live gesture (wave 44). 
     }
     setKeepFrames(keep.frames);                                // the shipped default: the bar disabled
     setModArm(app.state.modArm, { quiet: true });                        // wave 65: ONE writer paints the lamp, boot included

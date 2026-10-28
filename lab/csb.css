@@ -40,16 +40,15 @@ body[data-theme="light"] #transport .csb-theme > .gly-moon, body:not([data-theme
 #transport[data-layout="csb"] > .csb-play { display: grid; place-items: center; border-radius: 50%; padding: 4px; box-shadow: none; }   /* 020 T1: the chip is the seat's glass; the relief is the button's alone */
 #transport.mini[data-layout="csb"] > .csb-play { position: absolute; right: calc(100% + 12px); bottom: 11px; grid-area: auto; }
 #transport.mini[data-layout="csb"].at-top > .csb-play { top: 11px; bottom: auto; }
-/* 020 T1 · PLAY IS A BUTTON (Josh: "it must feel like a button. Inspect the CSS behaviour of the chips"): the kit's `.trig` sequence (css/skin.css
-   .trig) — at rest raised; hover lifts a pixel under the hover wash; pressed sinks (the raise goes, the press face comes, no lift); ON wears the
-   frost face, its rim and the accent's glow.  The kit's own svg scale (shell/transport.css, 1.08 / .94) rides on top. */
+/* 020 T1 · PLAY IS A BUTTON (Josh: "it must feel like a button"); 023 B3 (Josh: "a weird outline and glow over the play pause button … the cool
+   animation for clicking, click-holding, and releasing"): the kit chip's motion (window.css .mir-chip) on the raised disc — hover a lighter face
+   and 6 % larger (--chip-hover-scale), press sinks to 92 % (--chip-press-scale) under the trig's press face, release eases back on
+   --motion-micro.  Playing is the same face (the glyph says pause): no rim, no glow.  The kit's own svg scale (shell/transport.css) rides on top. */
 #transport[data-layout="csb"] .csb-play > .tbtn.play { --state-hover-wash: inset 0 0 0 99px var(--state-hover, var(--glass-raise));
   width: 56px; height: 56px; min-width: 0; border-radius: 50%; background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--fg); translate: none;
-  transition: background var(--t-fast), box-shadow var(--t-fast), scale var(--t-fast), translate var(--t-fast), color var(--t-fast); }
-#transport[data-layout="csb"] .csb-play > .tbtn.play:hover { background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)), var(--state-hover-wash); translate: 0 -1px; }
-#transport[data-layout="csb"] .csb-play > .tbtn.play:active { background: var(--state-press, var(--glass-press)); box-shadow: var(--trig-press-relief); translate: none; }
-#transport[data-layout="csb"] .csb-play > .tbtn.play.on { background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)), var(--state-on-light, var(--acc-glow)); color: var(--acc); }
-#transport[data-layout="csb"] .csb-play > .tbtn.play.on:active { background: var(--state-press, var(--glass-press)); box-shadow: var(--trig-press-relief); }
+  transition: background var(--motion-micro) var(--ease-out), box-shadow var(--motion-micro) var(--ease-out), scale var(--motion-micro) var(--ease-out); }
+:where(:root:not(.kbm-touch)) #transport[data-layout="csb"] .csb-play > .tbtn.play:hover { box-shadow: var(--relief-raise, var(--neu-raise)), var(--state-hover-wash); scale: var(--chip-hover-scale); }
+#transport[data-layout="csb"] .csb-play > .tbtn.play:is(:active, .press) { background: var(--state-press, var(--glass-press)); box-shadow: var(--trig-press-relief); scale: var(--chip-press-scale); }
 #transport[data-layout="csb"] .csb-play > .tbtn.play > svg { width: 26px; height: 26px; }
 /* LEFT: RATE over the BPM pill (a click types it: the kit's `typed`), MOD over EXPAND */
 #transport[data-layout="csb"] .csb-mod > .tbtn.modb { background: transparent; border-color: transparent; box-shadow: none; width: 48px; height: 26px; min-width: 0; min-height: 0; border-radius: var(--r-pill); font-size: var(--fs-tiny); }
@@ -66,20 +65,27 @@ body[data-theme="light"] #transport .csb-theme > .gly-moon, body:not([data-theme
 #transport[data-layout="csb"] .csb-folders:hover { color: var(--fg); background: var(--glass-raise); }
 #transport :is(#rackToggle, #rackFav) { position: static; inset: auto; -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.rack-hidden #transport #rackFav { opacity: 1; visibility: inherit; pointer-events: auto; }
-#transport[data-layout="csb"] .csb-mid > .mol-pick { flex: 0 0 auto; width: 220px; min-width: 220px; max-width: 220px; height: 34px; overflow: hidden; }
+#transport[data-layout="csb"] .csb-mid > .mol-pick { --touch: 34px; flex: 0 0 auto; width: 220px; min-width: 220px; max-width: 220px; height: 34px; overflow: hidden; }   /* 023 B3: the kit stepper's seat is --touch (44 px); in the 34-px box its foot was cut, so the bar seats it at 34 */
 #transport:has(#lwMode [data-id="hydrogen"][aria-pressed="true"]) .csb-mid > .mol-pick { visibility: hidden; }   /* HYDROGEN: no molecule to choose */
-/* IN A RACK CARD (docked, or the FREE window one card wide): one wrapping flow in the stage's order, 32 px seats, the expander one column */
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 4px; padding: 8px; height: auto; }
+/* IN A RACK CARD (docked, or the FREE window one card wide) — 023 B4 (Josh: "don't purely center it condensely, give some space"): one 7-column
+   grid, its groups apart: PLAY · RATE over BPM · MOD over EXPAND on the row's thirds; THE PRESET (the chooser and its arrows the full width, LIBRARY ·
+   MOLECULES · HYDROGEN · FOLDERS on columns 1 · 3 · 5 · 7, subgrids of the card's columns); THE TOOLS, the thirteen icons seven a row on the same
+   columns (7 + 6, as 020 T2 counted them); the expander under them, one column, its order kept */
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; align-items: center; gap: 4px 2px; padding: 8px; height: auto; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-left, .csb-right, .csb-ico) { display: contents; }
-#transport[data-layout="csb"].docked { column-gap: 2px; }   /* 020 T2: the thirteen icons wrap 7 + 6 in the docked card's 240 px (at 4 px the ⚙ sat alone on a fourth row) */
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .csb-play { padding: 0; border-radius: 0; background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .csb-play { grid-area: 1 / 1 / 2 / 3; padding: 0; border-radius: 0; background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-play > .tbtn.play { width: 48px; height: 48px; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-tempo, .csb-mod) { margin-left: 6px; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .csb-mid { order: 1; flex: 1 1 100%; min-width: 0; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand) { order: 2; width: 32px; height: 32px; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo { order: 3; flex: 1 1 100%; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-tempo { grid-area: 1 / 3 / 2 / 6; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-mod { grid-area: 1 / 6 / 2 / 8; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .csb-mid { grid-area: 2 / 1 / 3 / -1; display: grid; grid-template-columns: subgrid; justify-items: center; gap: 4px normal; width: 100%; min-width: 0; margin: 6px 0; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-mid > .mol-pick { grid-area: 1 / 1 / 2 / -1; width: 100%; max-width: none; min-width: 0; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-lib { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; justify-items: center; column-gap: normal; width: 100%; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-lib > #lwMode { grid-column: 1 / 6; display: grid; grid-template-columns: subgrid; justify-items: center; column-gap: normal; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) #lwMode > :nth-child(1) { grid-column: 1; } #transport[data-layout="csb"]:is(.docked, [data-place="free"]) #lwMode > :nth-child(2) { grid-column: 3; } #transport[data-layout="csb"]:is(.docked, [data-place="free"]) #lwMode > :nth-child(3) { grid-column: 5; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-lib > .csb-folders { grid-column: 7; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand) { grid-area: auto; order: 2; width: 32px; height: 32px; }   /* auto: the kit's docked grid names cells for its own drawing */
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo { grid-area: auto / 1 / auto / -1; justify-self: stretch; order: 3; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo:not([hidden]) { grid-template-columns: minmax(0, 1fr); }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-mid > .mol-pick { width: 100%; max-width: none; min-width: 0; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]):has(#lwMode [data-id="hydrogen"][aria-pressed="true"]) .csb-mid > .mol-pick { display: none; }
 /* the FREE window (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack */
 html body #transport[data-place="free"] { position: static; left: auto; right: auto; top: auto; bottom: auto; transform: none; margin: 0; border: 0; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
@@ -113,7 +119,7 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport[data-layout="csb"] .csb-surface .k-val { display: block; position: static; opacity: 1; transform: none; font-size: var(--fs-micro); }
 #transport[data-layout="csb"] .csb-favs .segw .k-lbl { display: none; }
 /* TRANSPORT: ⏮ ‹ › ⟳ as glyph chips, REPEATS (it takes what is left) and BPM as readouts, the beat lamp on BPM, the kit's clock tiles one 44-px
-   strip, the theorem under it; in a card REPEATS takes the first line */
+   strip (023 B2: the T / t theorem is gone); in a card REPEATS takes the first line */
 #transport[data-layout="csb"] .csb-steps { display: inline-flex; }
 #transport[data-layout="csb"] .csb-steps > .tbtn { display: inline-grid; place-items: center; width: 28px; min-width: 0; height: var(--xport-grid); padding: 0; border: 0; border-radius: var(--r-md); background: transparent; box-shadow: none; color: var(--ink-key); }
 #transport[data-layout="csb"] .csb-steps > .tbtn > svg { width: 18px; height: 18px; }
@@ -127,7 +133,6 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-surface .mir-bank-grid { --cell-min: 48px; }   /* a card: four slots a line, eight in two */
 #transport[data-layout="csb"] .csb-beat { position: absolute; top: 7px; right: -4px; }
 #transport[data-layout="csb"] .csb-sec-tr .trig { flex: 0 0 var(--xport-grid); width: var(--xport-grid); padding: 0 2px; }
-#transport[data-layout="csb"] .csb-sec-tr > .fx { display: block; min-width: 0; overflow: hidden; font-size: var(--fs-micro); white-space: nowrap; text-overflow: ellipsis; }
 /* MACROS and FAVOURITES: the kit's knob banks (eight slots; a segment takes four) */
 .csb-sec-mac .tempo-pane, .csb-favs { flex: 1 1 100%; min-width: 0; }
 #transport[data-layout="csb"] .csb-favs .pal-invert { width: var(--xport-grid); height: var(--xport-grid); }
@@ -140,7 +145,7 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 /* docked into the rack as a card */
 #transport.docked { position: static; transform: none; width: auto; height: auto; flex-wrap: wrap; padding: 6px; gap: 6px; border: 0; box-shadow: none; background: transparent; }
 /* 0.6.6 G2 · THE TYPE BOX (lab/shell/transport.js): ASK swaps the centre for one line to Gemma; her answer echoes in the t readout's seat for 4 s */
-#transport:not(.asking) .ask-seat, .ask-seat [hidden], #transport.asking :is(.ro.time, .ro.period, .fx, .native-info), #transport.mini:is(.asking, .echo) .fd, #transport.consent .native-play-row > :not(.ask-seat, .ask), #transport.echo :is(.ro.period, .fx, .native-info) { display: none; }
+#transport:not(.asking) .ask-seat, .ask-seat [hidden], #transport.asking :is(.ro.time, .ro.period, .native-info), #transport.mini:is(.asking, .echo) .fd, #transport.consent .native-play-row > :not(.ask-seat, .ask), #transport.echo :is(.ro.period, .native-info) { display: none; }
 #transport .ask-seat, #transport.echo .native-play-row > .ro.time { display: flex; flex: 1 1 auto; align-items: center; gap: 6px; min-width: 0; order: 1; grid-area: 3 / 1 / 4 / 6; }
 .ask-line { flex: 1 1 auto; min-width: 0; height: 28px; box-sizing: border-box; padding: 0 10px; border: 1px solid var(--glass-hairline); border-radius: var(--r-pill); background: var(--glass-well); color: var(--fg); font: var(--w-med) var(--fs-small)/1.2 var(--font-ui); }
 .ask-line::placeholder, .ask-note, #transport .ask-seat > .tbtn.ask-ok, #transport .tbtn.ask { width: auto; min-width: 0; padding: 0 6px; border-radius: var(--r-pill); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--fs-small); }
@@ -159,8 +164,6 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport.mini .tbtn.modb.on { color:var(--acc2); }
 #transport.docked .tbtn:not(.transport-home,.tempo-expand) { border:0;background:transparent;box-shadow:none;color:var(--ink-key); }
 #transport.docked .tbtn:not(.transport-home,.tempo-expand):hover { color:var(--fg);background:var(--state-hover,var(--glass-raise)); }
-#transport.docked .tbtn.play { color:var(--fg-soft);font-size:22px; }
-#transport.docked .tbtn.play:is(.on,:hover) { color:var(--acc);background:transparent; }
 #transport.docked .tbtn.modb.on { color:var(--acc2);background:transparent; }
 #transport .native-tempo .trig { min-width:0;height:44px;min-height:44px;padding:0 3px;justify-content:center;font-size:8.5px;letter-spacing:.04em; }   /* the window's seats are 44 px; the clock tiles match */
 #transport .k-val { display:none; }
@@ -176,8 +179,8 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
    screen down to ≈ 620 px (021 V3: PLAY clipped under 776); a transform, so the hit road, the mask and the resting box read the drawn rect */
 @media (max-width:790px) { body:not(.phone) #transport.mini[data-layout="csb"] { transform:translateX(-50%) scale(.88);transform-origin:50% 0;max-width:none; } }
 @media (max-width:730px) { body:not(.phone) #transport.mini[data-layout="csb"] { transform:translateX(-50%) scale(.8);transform-origin:50% 0;max-width:none; } }
-/* 021 V3 · THE REDUCED-MOTION LIST CLOSED (REVIEW-C §3): PLAY's hover lift and INVERT's turn arrive at their end state at once (the system's
+/* 021 V3 · THE REDUCED-MOTION LIST CLOSED (REVIEW-C §3): PLAY's hover and press scale (023 B3) and INVERT's turn arrive at their end state at once (the system's
    setting or MIR OPTIONS' motion, <html data-motion>) */
-@media (prefers-reduced-motion: reduce) { #transport[data-layout="csb"] .csb-play > .tbtn.play:hover { translate: none; } .pal-invert svg { transition: none; } }
-:root:is([data-motion="reduced"], [data-motion="off"]) #transport[data-layout="csb"] .csb-play > .tbtn.play:hover { translate: none; }
+@media (prefers-reduced-motion: reduce) { #transport[data-layout="csb"] .csb-play > .tbtn.play { transition: none; } .pal-invert svg { transition: none; } }
+:root:is([data-motion="reduced"], [data-motion="off"]) #transport[data-layout="csb"] .csb-play > .tbtn.play { transition: none; }
 :root:is([data-motion="reduced"], [data-motion="off"]) .pal-invert svg { transition: none; }

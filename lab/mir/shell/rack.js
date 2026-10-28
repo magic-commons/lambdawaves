@@ -1172,6 +1172,8 @@ export function createRack({ host = globalThis.document && document.body, sides 
   /* BASINS installs its scrollbars with the rack; they follow the page's one dock span through a rack's slide */
   let bars = scrollbar ? createRackScrollbars({ host, racks: Object.values(racks), span: api.span(), view }) : null;
   /* THE SCROLL PILL (1.5.0-alpha.25): every rack, whichever scrollbar it runs (shell/rack-scrollbar.js createRackPills) */
-  createRackPills({ host, racks: Object.values(racks), view, glyphOf: (id) => (reg.get(id) && reg.get(id).spec.glyph) || '' });
+  const pills = createRackPills({ host, racks: Object.values(racks), view, glyphOf: (id) => (reg.get(id) && reg.get(id).spec.glyph) || '' });
+  /** showPills() (1.5.6-alpha.10) — every docked window's name pill, for a moment, as after a scroll (an EXPAND ALL's say) */
+  api.showPills = () => pills.show();
   return api;
 }
