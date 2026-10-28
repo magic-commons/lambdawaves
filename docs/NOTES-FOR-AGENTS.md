@@ -95,9 +95,9 @@ and the code disagree, the code is right; please say so in an issue.
   and uses the GPU. Source: `test.sh`.
 - After any edit under `lab/`, run `node tests/pwa.test.mjs --write`: it re-stamps the service worker's precache
   hashes in `lab/sw.js`, or the pwa suite fails. Source: AI_POLICY.md, RELEASING.md.
-- The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 860 values, and 1004 with the s4a fixture — both runs with `--query gastab=0`; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
-  `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --query gastab=0` (860) and the same with
-  `--fixture research/release-0.4.0/measure/digest-lock-s4a.json` (1004), against a tree served by `tools/gate/server.py`.
+- The digest lock proves a change leaves the field's pixels identical across states × grids × styles × lines, on THIS machine only (SAME-MACHINE; 843 values, and 987 with the s4a fixture since iteration 008 W — both runs with `--query gastab=0`; ≤ 64 AO tile states); no time-dependent molecular packet, STATES run, FLOW or `record()` is in it:
+  `LW_PORT=<port> GD_PORT=<port> node tools/perf/digest-lock.mjs --check --query gastab=0` (843) and the same with
+  `--fixture research/release-0.4.0/measure/digest-lock-s4a.json` (987), against a tree served by `tools/gate/server.py`.
   Source: `tools/perf/digest-lock.mjs` (header).
 - A change to CSS or to what the page builds at boot is checked with MIR's `tools/stylehash.mjs` (computed
   styles and pixels, theme × card × frost, before and after). Source: `research/optimization-2026-09-24/BUILD-BRIEF.md`.
@@ -119,7 +119,7 @@ and the code disagree, the code is right; please say so in an issue.
   (`tests/status.test.mjs` holds the two equal). README's PySCF table is `node tools/pyscf-table.mjs` (`--check`).
 - Every key is PREFERENCE (settings, never in a project or link), WORKSPACE (the window arrangement) or PROJECT (the work): `docs/STATE-SCOPES.md`.
 - NEW opens the hidden empty project `lab/new-project.lambdawaves.json` through the same restore-with-rollback road as any project; `node tools/new-project.mjs --check` proves the shipped file byte-exact against the modulation model and the boot defaults. The undo ring covers the whole PROJECT scope (not the camera pose, the notebook text or the quality hint): `serialize({ scope: 'edit' })` in, `restore(S, { history: true })` out; a project open, a link and NEW each start a new timeline whose bottom row is named for its origin.
-- The laws: CLAUDE.md (the standing rules for agents), REPORT.md (the notebook every session appends to), `docs/`
+- The laws: CLAUDE.md (two pages since 021 D2: the standing constraints, the gates, the index) and `docs/laws/*.md` (the laws by subject), REPORT.md (the notebook every session appends to), `docs/`
   (the optimization record, `ui/STYLE-LOCK.md`, `SHIPPING-READINESS.md`) and RELEASING.md.
 - `lab/mir/**` (and `lab/fonts/**`) is the adopted MIR interface kit, MIR 1.5.5. The law is THE KIT SENTENCE, CLAUDE.md:6:
   "THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS" — `lab/mir` is written by MIR's `adopt.mjs` alone, a λWAVES need is an additive
