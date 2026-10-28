@@ -895,6 +895,10 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .native-clean[data-id="settings"] .lw-dither { --cell-min: 56px; }
 .native-clean[data-id="settings"] .lw-dither > .segw { grid-column: span 3; width: auto; }
 .native-clean[data-id="settings"] .lw-domain > .sw { grid-column: span 2; }
+/* 023 R1 (Josh: "shorten … convert and vivid so that 'P3' can fit in that same row"): P3 beside IN P3's CONVERT · VIVID, one line at 300 px */
+.native-clean[data-id="settings"] .lw-gamut { align-items: end; }
+.native-clean[data-id="settings"] .lw-gamut > .sw { grid-column: span 2; }
+.native-clean[data-id="settings"] .lw-gamut > .segw { grid-column: span 3; width: auto; }
 /* CAMERA: AUTO-ROTATE needs two cells */
 .native-clean[data-id="camera"] .cam-switches > .sw:last-child { grid-column: span 2; }
 /* SPECTRUM: HYDROGEN's two rows keep ONE column rhythm (017 R4) — three columns for both, filled or not */
