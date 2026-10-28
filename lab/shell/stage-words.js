@@ -1,6 +1,6 @@
 /* lab/shell/stage-words.js — THE STAGE TEXT and its CAPTION (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the source, the caption a capture draws,
  * the tick and the INFORMATIONAL layer (initStageText, called by boot() at the go).  stageTextTick and stageCaption are registered on app.w at creation. */
-import { TIER } from '../rack.js'; import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { toScreen, cameraKey } from '../field.js';
+import { TIER } from '../rack.js'; import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { toScreen, cameraKey } from '../field.js';
 import { BASIS } from '../hydrogen.js'; import { getHamiltonian } from '../hamiltonian.js'; import { ELEMENT } from '../md.js';
 import { stateLatex, formulaLatex, BASIS_LABEL, mdText } from '../latex-state.js';
 import { createPrefs } from '../mir/core/prefs.js'; import { createSettingsStore } from '../settings-store.js';
@@ -174,7 +174,15 @@ export function createStageWords(app) {
        own seat).  The kit is not edited: two hair-thin bands in `avoid()` (mid-stage, never at an edge, so never read as a rack) pin the free stage
        to exactly the block's height at the seat, so the kit's placeBlock lands it there.  THE POP-UPS sit on the OTHER side, at the same PAD. */
     const seat = { bottom: false, pad: 0 }; let block = null;   // 018 B8: PAD 0 on a first run (Josh: "Informational's pad at zero"); a stored record keeps its own
-    const bars = () => [...racks(), app.sh.layout.docked ? null : document.getElementById('transport')].map((e) => paintedRect(e)).filter(Boolean);
+    /* 020 S5 · THE STAGE NEVER FOLLOWS THE FURNITURE: each rack's and the bar's RESTING box — the hide's slide taken back out of the rect (a rack's
+       translateX, the stage bar's 140 px drop; a FREE bar is a window and keeps its own) and its visibility ignored — so a hidden or peeking rack moves
+       neither the words nor the ESP bar (a recording never sees the furniture move); a rack with no open window still frees its side */
+    const resting = (e) => {
+      if (!e || e.hidden) return null; const r = e.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return null;
+      const m = new DOMMatrixReadOnly(getComputedStyle(e).transform), tr = e.id === 'transport', dx = tr ? 0 : m.e, dy = tr && e.dataset.place === 'free' ? 0 : m.f;
+      return dx || dy ? { left: r.left - dx, right: r.right - dx, top: r.top - dy, bottom: r.bottom - dy, width: r.width, height: r.height } : r;
+    };
+    const bars = () => [...racks(), app.sh.layout.docked ? null : document.getElementById('transport')].map(resting).filter(Boolean);
     function freeOf(rs, sb) {                                          // the kit's free() rule (info/layer.js), in stage px
       const m = INFO.margin, vw = innerWidth; let L = m, R = sb.width - m, T = m, B = sb.height - m;
       for (const r of rs) {
@@ -206,12 +214,12 @@ export function createStageWords(app) {
       block = md ? layer.addBlock({ md }) : null; shown = md;
       if (block) { block.el.toggleAttribute('data-fade', banner !== null); lastRender = performance.now(); stats.renders++; }
     }
-    /* the racks hide, peek and slide (body classes), the transport docks or goes to the top: only THOSE
+    /* the racks move sides or the interface goes (body classes), the transport docks or goes to the top: only THOSE (020 S5: a hide or a peek is not one)
        re-place the block — the play edge's frost-hold and the tablet's motion class are not a reason to read layout — and once more
        400 ms on, when the slide or the pill's dodge (a class first, then its arrival) has landed */
     let settle = 0;
     const place = (again = true) => { stats.places++; layer.viewChanged(); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
-    const rackKey = () => ['rack-hidden', 'rack-peek', 'rack-l', 'ui-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('');
+    const rackKey = () => ['rack-l', 'ui-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('');
     /* iteration 013 N2 (Josh: "When 'cursor' settings are off, the text should stay fixed and not sway"): the kit's layer parts its bodies from a
        moving pointer (mir/info/bodies.js, 260 px of reach) whatever follow and parallax say, so with PARALLAX and DRIFT off the layer is held by
        its own freeze while the pointer is within that reach of the block, and let go as it leaves (a rest that moved meanwhile is reached then);

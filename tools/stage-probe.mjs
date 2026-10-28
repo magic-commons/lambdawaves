@@ -99,10 +99,12 @@ try {
     const seat = `const b = [...__LW.stageText.layer.root.querySelectorAll('.mir-info-block')].pop(), e = document.querySelector('.lw-espbar');
       const R = (x) => { if (!x) return null; const r = x.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; };
       return { words: R(b), bar: R(e), body: document.body.className.split(' ').filter((c) => /rack|peek/.test(c)).join(' ') };`;
-    out('shown', await g.ev(seat));
-    await g.ev(`__LW.sh ? 0 : 0; document.getElementById('rackToggle').click(); await __w(1500); return 1;`);
-    out('hidden', await g.ev(seat));
+    out('shown', await g.ev(seat)); await shot('seat-shown');
     await g.ev(`document.getElementById('rackToggle').click(); await __w(1500); return 1;`);
+    out('hidden', await g.ev(seat)); await shot('seat-hidden');
+    await g.ev(`document.body.classList.add('rack-peek', 'rack-peek-right'); await __w(1000); return 1;`);
+    out('peek right', await g.ev(seat));
+    await g.ev(`document.body.classList.remove('rack-peek', 'rack-peek-right'); document.getElementById('rackToggle').click(); await __w(1500); return 1;`);
     out('back', await g.ev(seat));
   }
   out('errors', await g.ev(`return (window.__e || []).slice(0, 5);`));

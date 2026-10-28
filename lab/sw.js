@@ -422,7 +422,7 @@ const PRECACHE = [
   ['./shell/persist.js',                                            'dd9f851548b8'],
   ['./shell/rack-wiring.js',                                        'b416fd55f694'],
   ['./shell/settings.js',                                           '8e85ed91b877'],
-  ['./shell/stage-words.js',                                        'b872b68545c3'],
+  ['./shell/stage-words.js',                                        '5c8d15ad3ba8'],
   ['./shell/transport.js',                                          'e1ca54fee5c9'],
   ['./skeleton.js',                                                 'c2c68bc439f2'],
   ['./skin.css',                                                    '9445f26db8e8'],
