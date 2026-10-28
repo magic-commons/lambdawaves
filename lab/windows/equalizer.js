@@ -32,7 +32,7 @@ export function createEqualizerCard(app) {
   el('div', 'note', gEq).textContent = 'the beats fade, the shells stay';
   /* 0.6.4 S2 · THE CHORD (lab/chord-audio.js): SOUND and LEVELS · BEATS, shown only while SETTINGS › AUDIO is on; not saved (a hand press each session) */
   const chord = app.state.chord = createChord({ reg, clock, motion: MOTION, onPlay: appPlay.onChange }), snd = el('div', null, gEq), sndCap = el('div', 'note', null), paintChord = () => { sndCap.textContent = chord.caption; };
-  const sndSw = sw({ label: 'SOUND', value: false, title: 'SOUND — the populated levels as tones while THE play runs (a film stays silent)', onChange: (v) => { chord.set({ on: v }); paintChord(); } });
+  const sndSw = sw({ label: 'SOUND', value: false, title: 'SOUND · the populated levels as tones', onChange: (v) => { chord.set({ on: v }); paintChord(); } });
   sndSw.root.dataset.keyAction = 'eq.sound';   // 021 I1: the action presses it
   el('div', 'row tight', snd).append(sndSw.root, seg({ label: '', value: 'levels', options: [{ id: 'levels', label: 'LEVELS' }, { id: 'beats', label: 'BEATS' }], onChange: (v) => { chord.set({ mode: v }); paintChord(); } }).root); snd.append(sndCap); snd.hidden = true;
   ui.setAudio = (v) => { snd.hidden = !v; if (!v && sndSw.get()) { sndSw.set(false); chord.set({ on: false }); } chord.retune(); paintChord(); };
@@ -44,7 +44,7 @@ export function createEqualizerCard(app) {
     const P = reg.populated(), pops = reg.re0.map((r, a) => r * r + reg.im0[a] ** 2), w = new Array(EQ_SHELLS).fill(0); for (const a of P) w[BASIS[a].n - 1] += pops[a];
     const t = why ? null : eq.table({ Z: getZ(), rates, populated: P, pops }), G = t && t.gamma, m = G ? t.mode : 0;
     if (t || eqT) { field.setEqualizer(t); schedule(TIER.RECONSTRUCT); } eqT = eq.last = t;
-    gEq.classList.toggle('eq-off', !!why); gEq.title = why ? 'the equalizer is a hydrogen position-space feature: ' + why : ''; eqFd.forEach((f, i) => { f.setDisabled(!!why || aud.on); f.set(eq.gains[i]); });
+    gEq.classList.toggle('eq-off', !!why); gEq.title = why ? 'hydrogen only: ' + why : ''; eqFd.forEach((f, i) => { f.setDisabled(!!why || aud.on); f.set(eq.gains[i]); });
     eqStep.set(eq.preset); eqRo.set(G ? t.purity.toFixed(3) : '1.000'); eqRo.setSub(t && !G ? t.gate : G && t.repaired ? 'repaired' : ['pure', 'mixture · no phase', 'signed · relative floor 2·10⁻⁴'][m]);
     if (hand && m === 2 && eqMode !== 2) { mat.view = VIEW.real; ui.viewSeg.set('real'); wSpec.setStatus('a signed table: VIEW is Re ψ, its lobes in two colours', 'live'); }
     eqMode = m; const nn = app.state.eqNoNodes = !!(G && m === 1 && t.lambdaMin > 1e-3 * t.lambda[t.lambda.length - 1]);   // E4: a positive-definite mixture has no zeros

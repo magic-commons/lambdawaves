@@ -52,7 +52,7 @@ export function createEmission(host, api) {
   const r3 = el('div', 'row tight em-row', host);
   const pairStep = stepper({ aria: 'pair', items: [{ id: '', label: 'PAIR', coming: true }], value: '', cls: 'em-step', onChange: (id) => { const p = pairs[+id]; if (picked && p) press(picked, p, decaySw.get()); } });
   r3.appendChild(pairStep.root);
-  const decaySw = sw({ label: 'DECAY', value: false, title: 'A press plays the A ↔ B TRANSITION (the upper level to the lower, Rabi) instead of the steady beat; Shift + press does it once' });
+  const decaySw = sw({ label: 'DECAY', value: false, title: 'Play A ↔ B (Shift: once)' });
   r3.appendChild(decaySw.root);
   const table = el('div', 'em-table');
   fold(r3, table, { what: 'the line table', key: 'lines' });

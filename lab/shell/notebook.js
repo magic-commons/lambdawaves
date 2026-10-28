@@ -92,9 +92,9 @@ export function createNotebook(app) {
             sub('GRID', () => SHAPE_EXPORTS.filter((s) => s.kind === 'grid').map((s) => item('export.' + s.fmt, s.fmt.toUpperCase(), { hint: s.tip })))], 'download'),
           null, sub('QUICK', () => [item('quick.save', 'SAVE the experiment'), item('quick.load', 'LOAD the last quick save')])],
         EDIT: () => [item('undo', 'UNDO', { dis: () => !H().canUndo, icon: 'undo' }), item('redo', 'REDO', { dis: () => !H().canRedo, icon: 'redo' }),
-          item('historyUndo', 'HISTORY UNDO', { dis: () => !H().canHistoryUndo, hint: 'return once to the timeline that existed before the last history-row jump' }), item('history', 'UNDO HISTORY…'), null,
-          sub('COPY', () => [item('copy.latex', 'LaTeX', { hint: 'the populated states in chemistry order, in the notebook\'s LaTeX; under a molecule, the molecule\'s page' }), item('copy.json', 'JSON', { hint: 'the experiment and its presentation as JSON' }),
-            item('copy.link', 'LINK', { hint: 'a URL that reopens this exact state — SPECTRUM’s status line says how long it is and what it could not carry' })], 'duplicate'),
+          item('historyUndo', 'HISTORY UNDO', { dis: () => !H().canHistoryUndo, hint: 'back to the timeline before the last jump' }), item('history', 'UNDO HISTORY…'), null,
+          sub('COPY', () => [item('copy.latex', 'LaTeX', { hint: 'the populated states in chemistry order, as LaTeX' }), item('copy.json', 'JSON', { hint: 'the experiment and its presentation as JSON' }),
+            item('copy.link', 'LINK', { hint: 'a URL that reopens this exact state' })], 'duplicate'),
           sub('STATE', () => [item('state.normalize', 'NORMALIZE'), item('state.clear', 'CLEAR the register'), item('reseed', 'RESEED the particles')]), null,
           item('mapping', 'KEYBOARD & MAPPING…'), item('settings', 'SETTINGS…', { icon: 'settings' })],
         VIEW: () => [sub('MODE', () => radio('mode', 'mode', [['hydrogen', 'HYDROGEN'], ['molecules', 'MOLECULES']], () => (A.get('mode').get() ? 'molecules' : 'hydrogen'))),
@@ -109,7 +109,7 @@ export function createNotebook(app) {
         PLAY: () => [item('transport.play', 'PLAY / PAUSE', { icon: 'play' }), item('home', 't → 0', { icon: 'rewind' }), item('stepBack', 'STEP ◂'), item('stepFwd', 'STEP ▸'), null,
           item('modArm', 'MOD ARM'), item('modBar', 'BAR LOCK'), item('settings.playLock', 'PLAYBACK LOCK'), null,
           sub('RATE', () => [item('csb.rate.up', 'RATE ×1.25'), item('csb.rate.down', 'RATE ÷1.25')]), sub('TEMPO', () => [item('csb.tempo.up', 'TEMPO +1 BPM'), item('csb.tempo.down', 'TEMPO −1 BPM')])],
-        WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; SHIFT-click queues several; the ones this mode hides are greyed', icon: 'search' }), null,
+        WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; Shift-click queues several', icon: 'search' }), null,
           sub('RACKS', () => [item('rack', 'SHOW THE RACK'), item('folds', A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'MINIMIZE ALL', { on: () => undefined }), item('dock', 'DOCK THE CONTROL SURFACE')]),
           sub('TOOLS', () => [tool('menu', 'PICKER', null, 'library'), tool('modulation', 'MODULATION', null, 'modulation'), tool('timeline', 'TIMELINE', null, 'lanes'), tool('nodes', 'NODES', null, 'nodes'), tool('notebook', 'NOTEBOOK', null, 'notebook'), tool('folders', 'FOLDERS', null, 'folders'), item('history', 'HISTORY', { icon: 'history' }), tool('help', 'KEYBOARD', null, 'keyboard')]), null,
           /* 018 E6 · one submenu per KIND (window-chrome.js data-kind), each window ✓ while open: a press opens a closed one by the FINDER's road
@@ -117,7 +117,7 @@ export function createNotebook(app) {
           ...['core', 'info', 'control', 'other'].map((k) => sub(k.toUpperCase(), () => { const ds = wins().filter((d) => (d.dataset.kind || 'other') === k);
             return ds.length ? ds.map((d) => [d.querySelector('.dev-eyebrow').textContent, () => A.run('window.' + d.dataset.id + (d.classList.contains('closed') ? '.open' : '.close')), null, winHint(d), { checked: !d.classList.contains('closed'), icon: WINDOW_GLYPH[d.dataset.id] }]) : [['none', null, true]]; }))],   // 021 V2: each window its one glyph
         HELP: () => [item('about', 'ABOUT λWAVES', { icon: 'info' }), item('guiAbout', 'ABOUT MIR'), item('help', 'KEYBOARD SHORTCUTS…'),
-          item('photosensitivity', 'PHOTOSENSITIVITY WARNING…', { hint: 'show the photosensitivity notice now and on the next load (iteration 012 M1: out of SETTINGS)' }), null, item('update', 'UPDATE APP', { hint: 'check for a new build, rebuild the offline cache, and reload' })],
+          item('photosensitivity', 'PHOTOSENSITIVITY WARNING…', { hint: 'show the photosensitivity notice now and next load' }), null, item('update', 'UPDATE APP', { hint: 'check for a new build, rebuild the offline cache, and reload' })],
       };
       /* 0.5.0 C3 · THE BAR IS THE KIT'S createMenubar (its port of this app's bar: the disclosure, 400 ms hover hide, the placement,
          Escape → the wordmark, the phone crossing, a row that throws still closes it).  N1's hand-back stays app glue: the kit closes the

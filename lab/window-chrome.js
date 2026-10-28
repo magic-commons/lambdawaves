@@ -19,7 +19,7 @@ export function installWindowChrome({ KIND, layout, present }) {
   for (const d of document.querySelectorAll('.dev')) {
     if (!d.querySelector('.dev-body .note, .dev-body .ro:not(.lw-status)')) continue;   // 0.5.4 P4: INFORMATIONAL's STATUS is not a note to hide — no Aa there
     const util = d.querySelector('.dev-util'); if (!util) continue;
-    const b = el('button', 'dev-lean', null, 'Aa'); b.type = 'button'; b.title = 'Hide or show this window’s notes and readouts — the controls, ladders and plots stay';
+    const b = el('button', 'dev-lean', null, 'Aa'); b.type = 'button'; b.title = 'Hide or show this window’s notes and readouts';
     b.setAttribute('aria-label', 'hide or show notes and readouts'); b.setAttribute('aria-pressed', 'false'); util.insertBefore(b, util.firstChild);
     b.addEventListener('click', (e) => { e.stopPropagation(); setLean(d, !d.classList.contains('lean')); });
     if (firstLean || leanSet.has(d.dataset.id)) setLean(d, true);

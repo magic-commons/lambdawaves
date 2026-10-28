@@ -10,7 +10,7 @@
 import { el, knob, sw, trig, readout, group, label } from '../mir/kit.js';
 import { fold } from '../fold.js';
 import { momentumZ, AXIS_TO_Z } from '../kick.js';
-import { applyKickAlong, escaped, SQUEEZE, SQUEEZE_REFUSAL, SLAP_REFUSAL } from '../kick.js'; import { varianceZ } from '../calculus.js'; import { onHamiltonian } from '../hamiltonian.js';   // 0.8.0 G2 · SQUEEZE + CAT
+import { applyKickAlong, escaped, SQUEEZE, SLAP_REFUSAL } from '../kick.js'; import { varianceZ } from '../calculus.js'; import { onHamiltonian } from '../hamiltonian.js';   // 0.8.0 G2 · SQUEEZE + CAT
 import { applyRotor as rotorOnCopy } from '../frontier.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js';
 import { saddle, polarizability } from '../stark.js';
@@ -26,7 +26,7 @@ export function createStaticField(app) {
   ui.bz = knob({ label: 'ZEEMAN B', min: 0, max: 0.05, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(4), onInput: (v) => { reg.setField({ Bz: v }); touchState(); } });
   ui.fz = knob({ label: 'STARK F', min: 0, max: 0.01, value: 0, fmt: (v) => v === 0 ? 'off' : v.toExponential(1), onInput: (v) => { if (!getHamiltonian().stark || sturm.P) { ui.fz.set(0); return; } const c = reg.field.inter && reg.at(clock.t); reg.setField({ Fz: v }); if (c) reg.anchorFrom(c.re, c.im, clock.t); interSync(); touchState(); } });
   /* 0.8.0 G3 · INTER-SHELL: STARK F across shells — the register engages lab/stark.js' propagator (H = diag(E) + F·z over the 140 labels) at F > 0, c(t) continuous */
-  ui.interSw = sw({ label: 'INTER-SHELL', value: false, title: 'STARK F across shells: H = diag(E) + F·z over all 140 labels, eigensolved once per F', onChange: (v) => {
+  ui.interSw = sw({ label: 'INTER-SHELL', value: false, title: 'STARK F across shells (all 140 labels)', onChange: (v) => {
     const why = !v ? '' : !getHamiltonian().stark ? 'hydrogen only' : sturm.P ? 'off under STURMIAN' : getZ() !== 1 ? 'Z = 1 only' : '';
     if (why) { ui.interSw.set(false); ui.interRo.set('refused', 'warn'); ui.interRo.setSub(`INTER-SHELL is ${why}: z is hydrogen's own dipole matrix over the n ≤ 7 labels`); return; }
     if (reg.transition && app.hooks.ab) app.hooks.ab.set(false);
@@ -52,7 +52,7 @@ export function createStaticField(app) {
     let k = 1, k1 = 0; while (k <= 7 && saddle(k) > F) k++; for (let j = 1; j < P.n; j++) if (Math.abs(P.C[j]) > Math.abs(P.C[k1])) k1 = j;   // k1: the eigenvector carrying 1s
     ui.interRo.set(`1s ${(P.E[k1] - P.H[0]).toExponential(1)} Eh · α(n ≤ 7) ${polarizability().toFixed(2)} of 4.5`, 'live');
     ui.interRo.setSub(k > 7 ? 'every shell below its saddle' : `saddle n = ${k} at ${saddle(k).toExponential(1)}: ${reg.nmax() >= k ? 'would ionise — this basis holds it' : 'nothing populated past it'}`);
-    ui.interRo.root.title = `F = ${F} · NUMERICAL: eigensolve of diag(E) + F·z in the n ≤ 7 basis (${P.ms.toFixed(1)} ms), no continuum · RATE · K_z · DEFECT · A⇄B stand down`; }
+    ui.interRo.root.title = `F = ${F} · NUMERICAL (${P.ms.toFixed(1)} ms)`; }
   const fzSet = ui.fz.set; ui.fz.set = (v, q) => { fzSet(v, q); queueMicrotask(interSync); };
   el('div', 'note', gF).innerHTML = '<b>Fields.</b> ZEEMAN adds an orbital m-dependent phase. STARK mixes l within each shell and omits coupling between shells; keep F well below the limit shown in the readout. INTER-SHELL couples every shell (hydrogen only): an eigensolve in the n ≤ 7 basis, which has no continuum, so ionisation is said, never simulated.';
 
@@ -105,17 +105,17 @@ export function createStaticField(app) {
   feel.appendChild(ui.dragKnob.root);
   const rq = el('div', 'row tight', kBody);   // 0.8.0 G2 · SQUEEZE + CAT, the OSCILLATOR's: r rides in mat.bow.squeeze (PROJECT, absent until moved)
   let catK = 0.2;
-  const sqK = knob({ label: 'SQUEEZE r', min: 0, max: 0.33, value: mat.bow.squeeze || 0, fmt: (v) => (+v || 0).toFixed(3), title: 'S(r) = e^{r(a² − a†²)/2} · capped at 0.33, where Var is within 4e-4 of e^{−2r}·Var₀ on the n ≤ 7 register: past it the register keeps the norm and loses the variance (r = 0.5: 0.015 % lost, 0.7 % wrong)', onInput: (v) => { mat.bow.squeeze = v || undefined; } });
+  const sqK = knob({ label: 'SQUEEZE r', min: 0, max: 0.33, value: mat.bow.squeeze || 0, fmt: (v) => (+v || 0).toFixed(3), title: 'Squeeze r (cap 0.33)', onInput: (v) => { mat.bow.squeeze = v || undefined; } });
   const catKnob = knob({ label: 'CAT  <m>k</m>', min: 0.01, max: 1.5, value: catK, log: true, fmt: (v) => v.toFixed(3) + ' a.u.', title: 'the ±k of CAT\'s two slaps (STATE\'s old STRENGTH)', onInput: (v) => { catK = v; } });
   const axis = () => (app.sh.keyState ? app.sh.keyState.axis : 'z');   // the K key's axis (X · Y · Z): STATE's ALONG
-  const osc = [['SQUEEZE-IN', 'S(r) along the axis X · Y · Z pick', () => squeezeIn(sqK.get(), axis())], ['CAT', 'two slaps ±k of |0⟩ into A and B; the register is their normalised sum |α⟩ + |−α⟩', () => cat(catK, axis())]].map(([label, t, onFire]) => trig({ label, title: t + ' · ' + SQUEEZE_REFUSAL, onFire }).root);
+  const osc = [['SQUEEZE-IN', 'S(r) along the K axis (OSCILLATOR only)', () => squeezeIn(sqK.get(), axis())], ['CAT', '|α⟩ + |−α⟩ from two slaps ±k (OSCILLATOR only)', () => cat(catK, axis())]].map(([label, t, onFire]) => trig({ label, title: t, onFire }).root);
   ui.bowKnobs.squeeze = { set: (x) => sqK.set(+x || 0) }; for (const e of [sqK.root, catKnob.root, ...osc]) rq.appendChild(e);
   const oscSync = () => { const off = getHamiltonian().id !== 'qho'; sqK.setDisabled(off); catKnob.setDisabled(off); for (const b of osc) b.disabled = off; }; oscSync(); onHamiltonian(oscSync);
   function squeezeIn(r, axis) { if (!reg.populated().length) reg.set(0, 1, 0, clock.t); const n0 = reg.norm2(), v0 = pAlong(axis, varianceZ); reg.squeeze(r, axis, clock.t); const v1 = pAlong(axis, varianceZ), want = Math.exp(-2 * r) * v0;
     SQUEEZE.said = `Var(${axis}) ${v1.toFixed(4)} · e^{−2r}·Var₀ = ${want.toFixed(4)} · error ${Math.abs(v1 / want - 1).toExponential(1)} · lost norm ${escaped(n0, reg.norm2()).toExponential(1)}`; ui.kickRo.setSub(SQUEEZE.said); touchState(); }
   function cat(k, axis) { const [A, B] = [1, -1].map((q) => { const s = { re: new Float64Array(reg.re0.length), im: new Float64Array(reg.re0.length) }; s.re[0] = 1; applyKickAlong(s.re, s.im, k, [...'xyz'].map((c) => c === axis ? q : 0)); return s; });   // ±d, k > 0: the boost's Bessel tables take k ≥ 0
     app.hooks.ab.setStores(A, B); reg.anchorFrom(A.re.map((v, i) => v + B.re[i]), A.im.map((v, i) => v + B.im[i]), clock.t); reg.normalize(); touchState(); }
-  el('div', 'note', kBody).innerHTML = '<b>Impulse.</b> Ctrl-drag on the field sets direction and strength (PULL, RESPONSE and LIMIT shape that pull); K applies e<sup>ik·x</sup> with k = 0.2 along the axis X, Y or Z picked, and keeps only the part represented by n ≤ 7 — METERS\' IMPULSE line reports k, λ, the escaped norm and the momentum. DRAG γ damps excited amplitudes as a display model and discards the lost norm. On the OSCILLATOR, SQUEEZE-IN applies S(r) along the axis and METERS prints Var against e<sup>−2r</sup>·Var₀ beside the lost norm; CAT stores the ±k slaps of the ground state as A and B and sets their normalised sum.';
+  el('div', 'note', kBody).innerHTML = '<b>Impulse.</b> Ctrl-drag on the field sets direction and strength (PULL, RESPONSE and LIMIT shape that pull); K applies e<sup>ik·x</sup> with k = 0.2 along the axis X, Y or Z picked, and keeps only the part represented by n ≤ 7 — METERS\' IMPULSE line reports k, λ, the escaped norm and the momentum. DRAG γ damps excited amplitudes as a display model and discards the lost norm. On the OSCILLATOR, SQUEEZE-IN applies S(r) along the axis and METERS prints Var against e<sup>−2r</sup>·Var₀ beside the lost norm; CAT stores the ±k slaps of the ground state as A and B and sets their normalised sum. SQUEEZE r is capped at 0.33: past it the n ≤ 7 register keeps the norm and loses the variance.';
   function pAlong(axis, f = momentumZ) {
     const c = reg.at(clock.t);                                  // sum over the WHOLE register: a rotation moves amplitude between m
     if (axis === 'z') return f(c.re, c.im);

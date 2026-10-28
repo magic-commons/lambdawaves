@@ -282,7 +282,7 @@ export function createSliceView(host, api) {
   function setActive(v) { active = !!v; if (active) armPump(); return active; }
   function update(reg, t, playing) {
     mini.root.setAttribute('aria-disabled',String(mode!=='space'));mini.root.tabIndex=mode==='space'?0:-1;
-    mini.root.title=mode==='space'?'Drag to orient the plane · arrows rotate · Home resets':'Switch to ℝ³ for the sphere control; drag the slice image to rotate in KS ℝ⁴';
+    mini.root.title=mode==='space'?'Drag to orient the plane · arrows rotate · Home resets':'Switch to ℝ³ for the sphere; drag turns KS ℝ⁴';
     mini.paint();
     if (tour) {
       tour.t = Math.min(1, tour.t + 0.04);

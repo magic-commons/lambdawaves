@@ -13,10 +13,10 @@ export function createSettingsCard(app) {
        ACCENT A / B, VIVID, RESET LAYOUT and FORGET too.  SETTINGS keeps λWAVES' own: the stage, its chrome, sound, Gemma, the gamut, quality. */
     ui.setWindowInfo = (v) => look.set({ help: v });   // the WINDOW menu's `notes` action calls it by this name
     ui.capSw = sw({ label: 'STAGE CAPTIONS', value: false, title: 'the KEPLER / VORTEX lines at the foot of the stage', onChange: (v) => { document.body.classList.toggle('no-captions', !v); saveSettings(); schedule(TIER.PRESENT); } }); ri.appendChild(ui.capSw.root);
-    ui.audioSw = sw({ label: 'AUDIO', value: false, title: 'sound from this page: the populated levels as tones, off by default (SPECTRUM › BEAT EQUALIZER › SOUND)', onChange: (v) => { ui.setAudio(v); saveSettings(); } }); ri.appendChild(ui.audioSw.root);   // 0.6.4 S2: a PREFERENCE (`audio`), the consent
+    ui.audioSw = sw({ label: 'AUDIO', value: false, title: 'Levels as tones (SPECTRUM › EQUALIZER › SOUND)', onChange: (v) => { ui.setAudio(v); saveSettings(); } }); ri.appendChild(ui.audioSw.root);   // 0.6.4 S2: a PREFERENCE (`audio`), the consent
     if (ASK_ENABLED) {   // iteration 011 Q6: Gemma's address is built only under ASK_ENABLED (lab/ask.js); off, a stored `askUrl` is carried by the save, never shown
       const au = ui.askUrlIn = el('input', 'ask-line', ri); au.type = 'url'; au.spellcheck = false; au.placeholder = askUrlOf({}); au.setAttribute('aria-label', 'Gemma’s address');
-      au.title = 'GEMMA — where ASK sends your words (tools/gemma/broker.py); empty is this host at 9443'; au.addEventListener('change', saveSettings); ui.askUrl = { root: au };   // 0.6.6 G2: a PREFERENCE (`askUrl`)
+      au.title = 'GEMMA: where ASK sends your words'; au.addEventListener('change', saveSettings); ui.askUrl = { root: au };   // 0.6.6 G2: a PREFERENCE (`askUrl`)
     }
     createInformational(app);   // 0.5.3 M9: STAGE FORMULA and ATOM LABELS, each with its SIZE, left DISPLAY for their own window (lab/informational.js)
     const rc = el('div', 'row tight', gi);
@@ -91,7 +91,7 @@ export function createSettingsCard(app) {
     const rg = el('div', 'row tight', gt);
     ui.gamutSeg = seg({ label: 'GAMUT', value: 'srgb', options: [
       { id: 'srgb', label: 'sRGB', title: 'Use the sRGB colour space' },
-      { id: 'p3', label: 'DISPLAY-P3', title: gamutOK ? 'the wider space, on BOTH sides at once — the canvas is re-configured and every accent is re-expressed in it' : gamutSup.reason }],
+      { id: 'p3', label: 'DISPLAY-P3', title: gamutOK ? 'The wider space, for the canvas and every accent' : gamutSup.reason }],
       onChange: (v) => setGamut(v) });
     rg.appendChild(ui.gamutSeg.root);
     ui.p3Seg = seg({ label: 'IN P3', value: 'convert', options: [
@@ -154,8 +154,8 @@ export function createSettingsCard(app) {
       ui.latencyRo.set(fieldRate.lock ? ms.toFixed(1) + ' ms' : 'display', fieldRate.lock ? 'live' : '');
       ui.latencyRo.setSub(fieldRate.lock ? (fieldRate.hz ? '' : 'DISPLAY · ') + hz.toFixed(0) + ' Hz · ' + ms.toFixed(1) + ' ms a step' : 'each present takes the time that passed'); };
     ui.clockSeg = seg({ label: 'CLOCK', value: fieldRate.lock ? 'locked' : 'wall', options: [
-      { id: 'wall', label: 'WALL', title: 'Time follows the wall clock: smooth on screen, a late frame jumps ahead' },
-      { id: 'locked', label: 'LOCKED', title: 'Every frame steps time by exactly one cadence step, and the render scale holds: for a screen recording' }],
+      { id: 'wall', label: 'WALL', title: 'Time follows the wall clock' },
+      { id: 'locked', label: 'LOCKED', title: 'One cadence step per frame: for recordings' }],
       onChange: (v) => { fieldRate.lock = v === 'locked'; paintLock(); saveSettings(); } });
     rpb.appendChild(ui.clockSeg.root);
     ui.cadenceSeg = seg({ label: 'CADENCE', value: String(fieldRate.hz || 'display'), options: [

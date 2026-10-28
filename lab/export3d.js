@@ -18,11 +18,11 @@ import { slug, stamp, uniqueFileName } from './capture.js';
 
 /** the five FILE rows (R6: no dialog; each row is one file and its tooltip names what opens it) */
 export const EXPORTS = Object.freeze([
-  { fmt: 'glb', kind: 'shape', mime: 'model/gltf-binary', row: 'EXPORT SHAPE · GLB', tip: 'the density isosurface on screen, phase as vertex colour, the camera included — Blender and Cinema 4D: File › Import › glTF' },
-  { fmt: 'obj', kind: 'shape', mime: 'model/obj', row: 'EXPORT SHAPE · OBJ', tip: 'the same surface as Wavefront OBJ — opens everywhere; vertex colours where the importer reads them' },
+  { fmt: 'glb', kind: 'shape', mime: 'model/gltf-binary', row: 'EXPORT SHAPE · GLB', tip: 'glTF isosurface, phase colours and the camera' },
+  { fmt: 'obj', kind: 'shape', mime: 'model/obj', row: 'EXPORT SHAPE · OBJ', tip: 'The same surface as Wavefront OBJ' },
   { fmt: 'stl', kind: 'shape', mime: 'model/stl', row: 'EXPORT SHAPE · STL', tip: 'the same surface for printing or any tool' },
-  { fmt: 'npz', kind: 'grid', mime: 'application/zip', row: 'EXPORT GRID · NPZ', tip: "ψ on the grid for NumPy: np.load(file)['psi'], complex64, with the axis and a meta.json" },
-  { fmt: 'cube', kind: 'grid', mime: 'chemical/x-cube', row: 'EXPORT GRID · CUBE', tip: 'the density as a Gaussian cube in bohr — Avogadro, VMD, VESTA, Blender add-ons' },
+  { fmt: 'npz', kind: 'grid', mime: 'application/zip', row: 'EXPORT GRID · NPZ', tip: "ψ on the grid for NumPy (.npz + meta.json)" },
+  { fmt: 'cube', kind: 'grid', mime: 'chemical/x-cube', row: 'EXPORT GRID · CUBE', tip: 'The density as a Gaussian cube (bohr)' },
 ]);
 export const NO_FIELD = 'needs the FIELD (WebGPU)';
 

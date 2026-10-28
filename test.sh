@@ -19,6 +19,7 @@ if [ "$MODE" = all ] || [ "$MODE" = node ]; then
     node "$suite" || NODE_RC=1
   done
   node tools/state-scopes.mjs --check || NODE_RC=1   # 021 R4: docs/STATE-SCOPES.md's records table is generated from lab/settings-store.js
+  node tools/hints-census.mjs --check > /dev/null || NODE_RC=1   # 022 H1: A HINT IS ONE LINE — every app hint ≤ 60 characters
   node tests/pwa.test.mjs || NODE_RC=1
 fi
 [ "$MODE" = node ] && exit "$NODE_RC"

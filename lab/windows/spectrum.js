@@ -60,7 +60,7 @@ export function createSpectrumCard(app) {
     /* 0.7.4 C1 · THE PICKER: ‹ SYSTEM ›, the kit's stepper over lab/catalogue.js — the operators with HYDROGEN, MOLECULES and LATTICE, each row's hover its
        word · oracle.  A window opens and leaves the Hamiltonian alone; the name reads back what owns the field; CENTRAL and CENTRAL › QUARKONIUM (0.8.0 G1)
        set their operator and open CENTRAL, its editor (an older project restoring `cornell` still lands).  `ui.hamSeg` keeps its name and set(id): persist, the verbs and LAUNCH read it. */
-    const SYS = ['hydrogen', 'qho', 'well', 'atom', 'central', 'cornell', 'separable', 'molecules', 'lattice'].map((id) => CATALOGUE.find((r) => r.id === id)), tip = (r) => r.word + ' · ' + r.oracle.what;
+    const SYS = ['hydrogen', 'qho', 'well', 'atom', 'central', 'cornell', 'separable', 'molecules', 'lattice'].map((id) => CATALOGUE.find((r) => r.id === id)), tip = (r) => r.name + ' · ' + r.word;
     /* 013 H2 · THE WINDOWS THAT FOLLOW THE SYSTEM: the window a system opened closes when the stepper leaves it — only one this stepper
        opened (a window already open by hand stays); MOLECULES' card is the mode and never closes here; BOX opens no window.  It closes by the card's own ✕ (the rack's close(id), no new hinge) */
     const WIN = { central: 'central', cornell: 'central', separable: 'separable', lattice: 'lattice', atom: 'atoms' }, dev = (id) => document.querySelector('.dev[data-id="' + id + '"]'), isOpen = (id) => { const d = dev(id); return !!d && !d.hidden && !d.classList.contains('closed'); };
@@ -93,7 +93,7 @@ export function createSpectrumCard(app) {
     hamRows.hydrogen.appendChild(ui.zKnob.root);
     /* 0.8.1 T2 · MASS: μ/mₑ, the reduced mass — hydrogen's E → μE and r → r/μ on setZ's road (hamiltonian.js setMu); refused under another operator */
     const MASS = { 1: 1, ps: MASSES.positronium, muh: MASSES['muonic hydrogen'] }, setMass = (v) => { if (getHamiltonian().id === 'hydrogen') { setMu(v); hNote(); switchHamiltonian('hydrogen'); } else { ui.muKnob.set(getMu()); wSpec.setStatus('μ/mₑ scales hydrogen alone: the operator in force is ' + hamLabel(), 'warn'); } };
-    ui.muKnob = knob({ label: 'μ/mₑ', min: 0.5, max: 200, log: true, value: 1, fmt: (v) => 'μ = ' + +v.toPrecision(5), title: 'μ/mₑ · the reduced mass in mₑ: E → μE, r → r/μ (hydrogen only); double-tap resets to 1', onInput: setMass });
+    ui.muKnob = knob({ label: 'μ/mₑ', min: 0.5, max: 200, log: true, value: 1, fmt: (v) => 'μ = ' + +v.toPrecision(5), title: 'μ/mₑ · reduced mass: E → μE, r → r/μ', onInput: setMass });
     const muSeg = seg({ aria: 'reduced mass', cls: 'sp-vseg', value: '1', options: [['1', '1', 'ELECTRON'], ['ps', 'Ps', 'POSITRONIUM'], ['muh', 'μH', 'MUONIC H']].map(([id, label, word]) => ({ id, label, title: `${word} · μ = ${+MASS[id].toPrecision(5)} mₑ` })), onChange: (id) => setMass(MASS[id]) });
     hamRows.hydrogen.append(ui.muKnob.root, muSeg.root); onHamiltonian(() => { ui.muKnob.set(getMu()); muSeg.set(Object.keys(MASS).find((id) => MASS[id] === getMu()) || ''); if (!(app.state.chem && app.state.chem.on)) hamShow(getHamiltonian().id); });
     ui.elemKnob = knob({ label: 'ELEMENT  Z', min: 1, max: ZMAX, value: 10, step: 1, fmt: (v) => 'Z = ' + Math.round(v) + '  ' + ATOMS[Math.max(0, Math.min(ZMAX - 1, Math.round(v) - 1))].symbol, onChange: (v) => setElement(Math.round(v)) });
@@ -101,8 +101,8 @@ export function createSpectrumCard(app) {
     {
       const rs = hamRows.scale;
       ui.scaleSeg = seg({ label: 'SCALE', cls: 'sp-vseg', value: 'hydrogen', options: [
-        { id: 'hydrogen', label: '1/n', title: `HYDROGEN 1/n · the standard hydrogen radial functions (the exponent of the ${BASIS.length} radials; hydrogen operator only)` },
-        { id: 'sturmian', label: 'λ', title: `STURMIAN λ · one common radial exponent λ for all ${BASIS.length} labels (hydrogen operator only)` }],
+        { id: 'hydrogen', label: '1/n', title: 'HYDROGEN 1/n · the standard radial functions' },
+        { id: 'sturmian', label: 'λ', title: 'STURMIAN λ · one common radial exponent' }],
         onChange: (v) => setSturmian({ on: v === 'sturmian' }) });
       rs.appendChild(ui.scaleSeg.root);
       /* iteration 010 X2 · THE REACH OF n = 7: the floor is 1/7 (sturmianreg.js LAMBDA_MIN, the hydrogen limit of n = 7; it was 0.25) and the

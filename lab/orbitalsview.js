@@ -52,16 +52,12 @@ export function createOrbitals(host, api) {
 
   /* ── the ladder ───────────────────────────────────────────────────────────────────────────────── */
   const cv = el('canvas', 'mol-c', host), cfoot = footLine(cv);   // 016 R1: the law line, shown on a hover
-  cv.title = 'The molecular orbital ladder: ε_k in hartree, occupied levels filled and virtual ones hollow, degenerate levels side by side. '
-    + 'Left-click a level to put it in the register, right-click to take it out; left-drag paints every level you cross in, right-drag paints them out — a stroke down the ladder takes them all, one along a degenerate row takes its levels one by one. The axis is order-exact but not linear: every gap is drawn to scale '
-    + 'up to three times the median gap and compressed beyond it, because H₂O’s O 1s at −20.24 would otherwise put the whole valence inside four pixels. '
-    + 'The bracket is the ORBITAL dial’s orbital: the dial counts these same lines, k1 at the bottom up to the last, so it always stands on one (a degenerate row bracketed and lit whole: the dial on either member of a pair lights both lines) — '
-    + 'turn the dial and VIEW goes to ORBITAL, which draws the one orbital the dial names; paint the ladder and VIEW goes to MIX, which draws the lines lit here.';
+  cv.title = 'MO ladder ε_k (Eh): click adds, right-click removes';
 
   /* ── the head: the same four controls SPECTRUM's head carries, in the same order ──────────────── */
   const head = el('div', 'row tight sp-head', host);
   const dialsBtn = el('button', 'trig', head); dialsBtn.type = 'button'; dialsBtn.textContent = 'DIALS';
-  dialsBtn.title = 'Show or hide the amplitude and phase dials for the selected orbitals';
+  dialsBtn.title = 'Amplitude and phase dials for the selection';
   dialsBtn.setAttribute('aria-expanded', 'false');
   /* iteration 008 U (Josh: "can it become the 'fill all registers' button?") · ONE two-state button: an empty register shows FILL ALL, any
      other shows EMPTY.  NORM is gone: a HAND stroke on the ladder normalises at its end (the stroke's one undo row), and nothing else does */
@@ -72,7 +68,7 @@ export function createOrbitals(host, api) {
      the open state is the card's WORKSPACE key (rack.js captureLayout `core`), never a project's work. */
   let coreOpen = false;
   const coreBtn = el('button', 'trig orb-core-toggle', head); coreBtn.type = 'button'; coreBtn.textContent = 'CORE';
-  coreBtn.title = 'Fold or unfold the frozen-core levels (one `core ×n` rung on the ladder)';
+  coreBtn.title = 'Fold the frozen-core levels';
   coreBtn.setAttribute('aria-expanded', 'false'); coreBtn.hidden = true;
   const setCoreOpen = (v) => { coreOpen = !!v; coreBtn.setAttribute('aria-expanded', String(coreOpen)); coreBtn.classList.toggle('on', coreOpen); paint(); };
   coreBtn.addEventListener('click', () => setCoreOpen(!coreOpen));
@@ -113,9 +109,7 @@ export function createOrbitals(host, api) {
   const presetSel = listSelect({ aria: 'register preset', placeholder: 'PRESET…', cls: 'sel', items: Object.keys(ORB_PRESETS).map((p) => ({ id: p, label: p })), value: null,
     onChange: (p) => { presetSel.set(null); if (p && preset(p) && api.announce) api.announce(presetMd(p)); } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
   bar.appendChild(presetSel.root);
-  presetSel.button.title = 'HOMO, LUMO: one orbital. HOMO + LUMO: the frozen-orbital beat. FRONTIER FOUR: HOMO−1 to LUMO+1, four orbitals. HOMO SET, LUMO SET: the whole degenerate level. '
-    + 'WINDING: a degenerate orbital pair a quarter turn apart — a phase that winds around the ring under a stationary density. OCCUPIED: every valence orbital, equal phase. '
-    + 'ALL ODD, ALL EVEN: every other ladder line from the first valence line. BELOW HOMO, ABOVE LUMO, VIRTUAL: the spans they name. DEGENERATE: every degenerate level. INVERT: every orbital the register does not hold';
+  presetSel.button.title = 'Register preset';
   /* a HAND's preset is announced on the stage (0.4.0 S3 · F2) by its rule and the orbitals the names give it —
      `WINDING · $1e_{1g}$ (a) + (b)`, `HOMO + LUMO · $1b_{1}$ + $4a_{1}$`; preset() itself (an API, a restore) says nothing */
   function presetMd(name) {
@@ -126,14 +120,14 @@ export function createOrbitals(host, api) {
   }
   const mrow = el('div', 'row tight reg-morph', host);
   /* A ↔ B (register-morph.js, one for both panes): its own target OMORPH; a store marks the register, a MORPH change repaints */
-  const M = createMorph({ bar, row: mrow, id: OMORPH, key: 'k', lanes: 'dials', knobTitle: 'Where on the path from A (0) to B (1) the register plays', hand, status,
+  const M = createMorph({ bar, row: mrow, id: OMORPH, key: 'k', lanes: 'dials', knobTitle: 'Where the register plays on the path A → B', hand, status,
     rows: () => rowsEl, valid: (k) => !!sol && k >= 0 && k < sol.nAO, snapshot: () => { const S = new Map(); for (const [k, c] of sel) if (c.amp > 0) S.set(k, { re: c.amp * Math.cos(c.phase), im: c.amp * Math.sin(c.phase) }); return S; },
     stored: () => touch(), changed: () => { touch(); api.repaint(); } });
   /* FLOW for one orbital: ρ = |ψ|² and j = Im ψ̄∇ψ = ρ ∇arg ψ — the tracers ride the gradient of the very phase the field
      is coloured by.  A WINDING orbital circulates; a real orbital stands still.  The packet IS ψ: its f64 AO vector goes to
      the flow whole (`setPacket`, O(n) a point, any size), so there is no D_μν = c̄_μ c_ν to build and none to transpose. */
   let flowOn = false, flow = null, flowEpoch = 0;
-  const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage riding this orbital’s current j = Im ψ̄∇ψ — the gradient of the phase you see', onChange: (v) => setFlow(v) });
+  const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on this orbital’s current j', onChange: (v) => setFlow(v) });
   mrow.appendChild(flowSw.root);
   /* iteration 001 (Josh): PRESET · → A · → B and MORPH · FLOW fold behind the head's chevron (lab/fold.js); DIALS and CLEAR are glyphs */
   { const more = el('div', 'reg-more'); bar.before(more); more.append(bar, mrow); fold(head, more, { what: 'presets, A ↔ B and flow' });
@@ -159,7 +153,9 @@ export function createOrbitals(host, api) {
     + '<m>ψ(r, t) = Σ_k c_k e^{−iε_k t} φ_k(r)</m> with <m>φ_k = Σ_μ C_μk χ_μ</m> — hydrogen’s register with the molecule’s ladder. '
     + 'The ladder is <b>frozen</b>: a HOMO + LUMO pair beats at the Koopmans gap <m>Δε</m>, not at the RPA excitation <m>ω</m> the '
     + 'MOLECULES sticks stand at. Occupancies are the ground state’s; putting a virtual orbital in the register does not excite the molecule, '
-    + 'it asks what one electron in that superposition would look like. The field shows <m>arg ψ</m> in PHASE and <m>|ψ|²</m> in DENSITY.';
+    + 'it asks what one electron in that superposition would look like. The field shows <m>arg ψ</m> in PHASE and <m>|ψ|²</m> in DENSITY. '
+    + 'The ladder is order-exact, not linear: a gap is drawn to scale up to three times the median gap and compressed beyond it. '
+    + 'Presets: HOMO + LUMO is the frozen-orbital beat, FRONTIER FOUR HOMO−1 … LUMO+1, WINDING a degenerate pair a quarter turn apart, INVERT every orbital the register does not hold.';
 
   /* ── the register ─────────────────────────────────────────────────────────────────────────────── */
   const nAO = () => (sol ? sol.nAO : 0);
@@ -342,10 +338,10 @@ export function createOrbitals(host, api) {
     const es = el('div', 'sp-sub sp-e', id, `k${k + 1} · ${sol.eps[k].toFixed(6)} Eh · ${k < nocc() ? '2 e⁻' : 'virtual'}`);
     id.addEventListener('click', () => { selected = k; paint(); markSel(); });
     const amp = knob({ label: '<m>|c|</m>', aria: 'amplitude ' + label(k), min: 0, max: 1, value: c.amp,
-      title: 'The amplitude |c_k| of this orbital in the register; a stroke on the ladder makes Σ|c|² = 1',
+      title: 'Amplitude |c_k| in the register',
       fmt: (v) => v.toFixed(3), onInput: (v) => setAmp(k, v) });
     const ph = knob({ label: '<m>arg c</m>', aria: 'phase ' + label(k), min: 0, max: TAU, value: c.phase, wrap: true,
-      title: 'The phase arg c_k at t = 0; the register turns it by −ε_k t on its own',
+      title: 'Phase arg c_k at t = 0',
       fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°', onInput: (v) => setPhase(k, v) });
     root.appendChild(amp.root); root.appendChild(ph.root);
     const x = el('button', 'sp-x', root, '×'); x.type = 'button';

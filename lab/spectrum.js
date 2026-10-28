@@ -65,7 +65,7 @@ export function createSpectrum(host, api) {
     return [...(U.length ? [HEADS[0], ...U, HEADS[1]] : []), ...PRE, ...(v ? [] : [DASH])]; };
   syncUsers();
   const preStep = stepper({ aria: 'preset superposition', items: itemsFor(''), value: '', cls: 'mol-step', onChange: (id) => { if (id && api.loadPreset) api.loadPreset(id); } });
-  preStep.name.title = 'the preset superpositions — a pick of the one shown reloads it and resets time';
+  preStep.name.title = 'Preset superpositions (a re-pick reloads)';
   preStep.name.addEventListener('click', () => { const pane = [...document.querySelectorAll('.mir-pick')].pop(), on = pane && pane.querySelector('.mir-pick-i.on');
     if (on) on.addEventListener('click', () => { if (preStep.get() && api.loadPreset) api.loadPreset(preStep.get()); });   // RELOAD: the stepper ignores a pick of its own value
     if (pane) for (const b of pane.querySelectorAll('.mir-pick-i[data-id^="' + UK + '"]')) {                                // S4: each reader's row carries its ×
@@ -74,9 +74,9 @@ export function createSpectrum(host, api) {
       x.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); users.remove(name); b.remove();
         if (!pane.querySelector('.mir-pick-i[data-id^="' + UK + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
     } });
-  const preVis = sw({ label: 'VISUALS', value: true, title: 'PRESET VISUALS — a preset also sets its view, its rate and its window', onChange: (v) => { api.visuals = v; } });
+  const preVis = sw({ label: 'VISUALS', value: true, title: 'A preset also sets its view, rate and window', onChange: (v) => { api.visuals = v; } });
   const preSave = chip(el('button', 'sp-presave', null), 'saveInto'); preSave.type = 'button'; preSave.setAttribute('aria-label', 'SAVE PRESET');
-  preSave.title = 'SAVE · the populated labels as your own preset (equal and in phase; kept on this device)';
+  preSave.title = 'SAVE · the populated labels as a preset';
   pre.append(preStep.root, preSave);
   /** the name, asked in the stepper's seat: Enter keeps it, Escape or a press elsewhere lets it go */
   preSave.addEventListener('click', () => {
@@ -306,7 +306,7 @@ export function createSpectrum(host, api) {
     info.textContent = `${want.length} populated · ${rs.rendered} rendered · ${levels} level${levels === 1 ? '' : 's'}`;
     { const HS = api.hamiltonian ? api.hamiltonian() : null, eig = !!(HS && HS.eigen);                          // W-STURMIAN: the caption and the ladder's affordance
       cap.hidden = !eig; if (eig) cap.textContent = HS.caption || 'non-orthogonal basis: populations are projections';
-      if (eig !== ladderEigen) { ladderEigen = eig; lcv.style.cursor = eig ? 'pointer' : ''; lcv.title = eig ? 'click an eigenvalue to load its S-normalised eigenvector into the labels' : ''; } }
+      if (eig !== ladderEigen) { ladderEigen = eig; lcv.style.cursor = eig ? 'pointer' : ''; lcv.title = eig ? 'Click an eigenvalue to load its eigenvector' : ''; } }
     lastVersion = reg.version;
     paintLadder();
   }

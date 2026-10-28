@@ -62,12 +62,12 @@ export function createTransport(app) {
       { group: 'csb-mid', items: ['app:chooser', { group: 'csb-row csb-lib', items: ['app:modes', 'app:folders'] }] },
       { group: 'csb-side csb-right csb-ico', items: ['app:search', 'app:finder', 'app:fav', 'app:rack', 'app:folds', 'app:nodes', 'app:info', 'app:theme', 'app:gear'] },
       'panel'], { name: 'csb', title: 'CONTROL SURFACE' });
-    /* 021 I1 · THE SEATS READ THE REGISTRY (lab/actions.js): `seat(id)` takes its word (`word()` where it changes, else the label), its icon, its
+    /* 021 I1 · THE SEATS READ THE REGISTRY (lab/actions.js): `seat(id)` takes its word (`word()` where it changes, else the label; its hint the action's short `hint`, 022 H1), its icon, its
        light (a toggle's get()) and its key hint (data-key-action) from the action, and a press runs the action — FOLDS, NODES, INFORMATIONAL, THEME
        and ⚙ are actions of their own; a seat repaints when its action says its state moved (notify) and on the hand's hover */
     const A = app.sh.ACTIONS, seats = new Map();
     const seat = (id, cls) => { const a = A.get(id), b = el('button', 'tbtn csb-ico-b ' + cls); b.type = 'button'; b.dataset.keyAction = id;   // 021 V2: paint() draws the action's glyph (FOLDS' at the same read as its word)
-      const paint = () => { const w = a.word ? a.word() : a.label, g = typeof a.icon === 'function' ? a.icon() : a.icon; if (g && b.dataset.gly !== g) setGlyph(b, g); hint(b, w); ariaLabel(b, w); if (a.kind === 'toggle' && a.lit !== false) { let on = false; try { on = !!a.get(); } catch (_) { /* its owner is made later */ } b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); } };
+      const paint = () => { const w = a.word ? a.word() : a.label, g = typeof a.icon === 'function' ? a.icon() : a.icon; if (g && b.dataset.gly !== g) setGlyph(b, g); hint(b, a.word ? w : a.hint || w); ariaLabel(b, w); if (a.kind === 'toggle' && a.lit !== false) { let on = false; try { on = !!a.get(); } catch (_) { /* its owner is made later */ } b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); } };
       b.addEventListener('click', () => { A.run(id); paint(); }); b.addEventListener('pointerenter', paint); b.addEventListener('focus', paint); seats.set(id, paint); paint(); return b; };
     A.onState((id) => { const p = seats.get(id); if (p) p(); });
     const gear = seat('gui', 'csb-gear'), folders = seat('folders', 'csb-folders'), finder = seat('windowPicker', 'csb-finder'), theme = seat('theme', 'csb-theme');   // call 11: THEME the theme only (lab.css swaps sun ↔ moon)
@@ -94,7 +94,7 @@ export function createTransport(app) {
         list.style.top = Math.round(up ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8)) + 'px'; })); }
     { const pc = bar.root.querySelector('.csb-play'); if (pc) pc.dataset.mirSurface = 'chip'; }   // E2: PLAY's chip wears the kit's material outside the bar
     ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'modulation on or off');
-    { const rst = bar.root.querySelector('.transport-home'); if (rst) { rst.title = 't → 0  (home) · ψ\'s time back to 0 a.u.; the modulation beat and the TIMELINE playhead stay (TIMELINE\'s own ⏮ moves those)'; rst.setAttribute('aria-label', 'back to t = 0'); } }   // 021 R3: the hint says what it moves
+    { const rst = bar.root.querySelector('.transport-home'); if (rst) { rst.title = 't → 0 · ψ\'s time home; beat and playhead stay'; rst.setAttribute('aria-label', 'back to t = 0'); } }   // 021 R3: the hint says what it moves
     /* A8 · the door wears the modulation window's own icon (Josh: "a sine wave icon instead of the MIR 3x3 square logo"; 021 V2: the table's
        `modulation`, an SVG); the turning mark is the kit's unplaced logoButton now */
     const door = bar.el.door; ui.modExp = door; door.title = 'Open the modulation window'; setGlyph(door, 'modulation');
@@ -120,7 +120,7 @@ export function createTransport(app) {
       let echoT = 0;
       function showAsk(on) {
         const first = on && !ui.askOk; T.classList.toggle('asking', on); T.classList.toggle('consent', first); if (!on) return;
-        note.title = note.textContent = 'sends your words and this project’s readouts to ' + askUrlOf(ui) + ' on your network ·';
+        note.title = note.textContent = 'sends your words and readouts to ' + askUrlOf(ui) + ' ·';
         note.hidden = okB.hidden = !first; line.hidden = first; (first ? okB : line).focus();
       }
       function echo(s) { endEcho(); if (!s) return; echoOn = true; T.classList.add('echo'); troLbl.textContent = 'GEMMA'; tro.set(s, ''); tro.root.title = s; echoT = setTimeout(endEcho, 4000); }
@@ -250,7 +250,7 @@ export function createTransport(app) {
     function flashSub() {
       if (fk.v === reg.version && fk.r === clock.rate) return fk.sub;
       const w = aliasOf(periodEnergies(), fk.r = clock.rate, stats.fps >= 10 ? Math.round(stats.fps) : 60), on = !!w && w.alias > FLASH_HZ; fk.v = reg.version;
-      ui.rateKnob.root.title = on ? 'a beat of ' + w.hz.toFixed(1) + ' Hz shows at ' + w.alias.toFixed(1) + ' Hz on screen: above 3 a second it flashes' : rateTitle;
+      ui.rateKnob.root.title = on ? 'beats ' + w.hz.toFixed(1) + ' Hz show at ' + w.alias.toFixed(1) + ' Hz: a flash' : rateTitle;
       ui.rateKnob.root.classList.toggle('flash', on); return (fk.sub = on ? ' · beats alias at ' + w.alias.toFixed(1) + ' Hz on screen' : '');
     }
     app.hooks.period = () => periodNow(true);          // every reader outside the frame loop forces the scan: no proof and no digest ever sees a settling answer

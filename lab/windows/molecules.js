@@ -25,7 +25,7 @@ export function createMolecules(app) {
     const root = el('div', 'lw-stage-btns'); root.id = 'lwMode'; root.setAttribute('role', 'group'); root.setAttribute('aria-label', 'Library and mode');
     const B = [['library', 'LIBRARY — open the Picker', () => { if (app.state.picker) app.state.picker.toggle(); }],
       ['molecules', 'MOLECULAR — the molecule and its register, one window', () => { if (app.state.chem) app.state.chem.setOn(true); }],
-      ['hydrogen', 'HYDROGEN — SPECTRUM\'s 140 hydrogen states, their names and the EQUALIZER', () => { if (app.state.chem) app.state.chem.setOn(false); }]]
+      ['hydrogen', 'HYDROGEN — the 140 hydrogen states', () => { if (app.state.chem) app.state.chem.setOn(false); }]]
       .map(([id, tip, run]) => { const b = el('button', 'lw-stage-b', root); b.type = 'button'; b.dataset.id = id; b.title = tip; b.setAttribute('aria-label', tip.split(' —')[0]); setGlyph(b, { library: 'library', molecules: 'molecule', hydrogen: 'atom' }[id], { size: 16 }); b.addEventListener('click', run); return b; });
     return { root, set(v) { if (v === 'atoms') v = 'hydrogen'; for (const b of B) if (b.dataset.id !== 'library') b.setAttribute('aria-pressed', String(b.dataset.id === v)); } };
   })();
