@@ -185,7 +185,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     const v = createCurvesView(body, { model, presets });
     for (const l of v.root.querySelectorAll('.curves-channel .k-lbl, .curves-foot .k-lbl')) if (/^(CHANNEL|PRESET)$/.test(l.textContent.trim())) { ariaLabel(l.parentElement, l.textContent.trim()); l.remove(); }
     const foot = v.root.querySelector('.curves-foot'), nm = foot.querySelector('.mir-step-name'), save = chip(el('button', 'sp-presave', foot), 'saveInto'); save.type = 'button';
-    ariaLabel(save, 'SAVE CURVE'); save.title = 'SAVE · this channel\'s curve as your own preset (kept on this device)';
+    ariaLabel(save, 'SAVE CURVE'); save.title = 'SAVE · this curve as your own preset';
     save.addEventListener('click', () => {
       if (foot.querySelector('.sp-prename')) return;
       const f = el('input', 'sp-prename', null); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'curve name'); f.value = 'My curve';
@@ -216,7 +216,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const card = device({ id: 'nodes', eyebrow: 'NODES', status: '' });
   const vCard = createView(card.body, 'card', M); views.push(vCard);
   after.after(card.root);
-  rk.register({ id: 'nodes', el: card, side: 'right', closed: true, title: 'NODES', glyph: 'nodes', hint: 'a graph over the stage picture: STAGE IN → the nodes → STAGE OUT',
+  rk.register({ id: 'nodes', el: card, side: 'right', closed: true, title: 'NODES', glyph: 'nodes', hint: 'STAGE IN → the nodes → STAGE OUT',
     onOpen: () => requestAnimationFrame(() => vCard.place()) });
   const wbody = el('div', 'nodes-host');
   const vWin = createView(wbody, 'win', M); views.push(vWin);

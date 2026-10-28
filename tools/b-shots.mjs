@@ -55,7 +55,7 @@ try {
     await mol(); await g.ev(`__LW.setStyle('esp'); return 1;`); await wait(1500);
     await g.ev(`__LW.layout.reopen('informational'); return 1;`); await wait(400);
     for (const side of ['right', 'left', 'top', 'bottom']) {   // INFORMATIONAL's own controls: SIDE cycles, POSITION follows the side for the overlap case
-      out[side] = await g.ev(`const b = document.querySelector('.info-side'); for (let i = 0; i < 4 && b.textContent.trim() !== ${JSON.stringify(side.toUpperCase())}; i++) { b.click(); await new Promise((r) => setTimeout(r, 50)); }
+      out[side] = await g.ev(`const b = document.querySelector('.info-side'); for (let i = 0; i < 4 && b.dataset.side !== ${JSON.stringify(side)}; i++) { b.click(); await new Promise((r) => setTimeout(r, 50)); }
         const pos = [...document.querySelectorAll('.info-seat .seg button')].find((x) => x.textContent.trim() === ${JSON.stringify(side === 'bottom' ? 'BOTTOM' : 'TOP')}); if (pos) pos.click();
         await new Promise((r) => setTimeout(r, 1200)); const r = document.querySelector('.lw-espbar').getBoundingClientRect(), f = document.querySelector('.mir-info.lw-stage .mir-info-block').getBoundingClientRect();
         return { side: b.textContent.trim(), bar: [r.left, r.top, r.right, r.bottom].map(Math.round), formula: [f.left, f.top, f.right, f.bottom].map(Math.round) };`);

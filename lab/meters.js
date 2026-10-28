@@ -22,7 +22,7 @@ export function createMeters(host, src = null, measure = null) {
   const CERT = `CERTIFIED 0b0a8f6 · 1 f16 ulp · ψ ${e(L.hydrogen.rms)} RMS, ${e(L.hydrogen.worst)} worst · ρ ${e(L.density.worst)}`;
   const floor = readout({ label: 'FLOOR · GRID ERROR  f16 · press to measure', value: 'press to measure the grid in force', cls: 'wide', sub: 'one readback against the exact value at each voxel centre\n' + CERT }); grid.appendChild(floor.root);
   const meas = { N: 0, res: 0, busy: false };
-  const TITLE = floor.root.title = 'The f16 grid read back once and set against the exact value at every voxel centre (a molecule: a 4 × 4 × 4 probe, its own matrix in double precision). Press to measure; GRID re-measures while METERS is open.';
+  const TITLE = floor.root.title = 'f16 grid vs exact, per voxel';
   floor.root.querySelector('.ro-sub').style.whiteSpace = 'pre-line'; floor.root.tabIndex = 0; floor.root.setAttribute('role', 'button'); floor.root.style.cursor = 'pointer';
   floor.root.addEventListener('click', () => measureGrid()); floor.root.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); measureGrid(); } });
   async function measureGrid() {

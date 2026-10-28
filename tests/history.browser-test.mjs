@@ -160,7 +160,7 @@ try {
   await scene('the stage colour (its colour well)', `await __field(__show(document.querySelector('.stage-colour')), '#305070');`, 'STAGE COLOUR · SETTINGS');
   await scene('an overlay switch (KEPLER ORBIT)', `const s = __show(__sw('KEPLER ORBIT')); await __w(50); await __press(s.querySelector('button') || s);`, 'KEPLER ORBIT · ORBIT');
   undoMs.preset = (await scene('a preset (SPECTRUM\'s ‹ PRESET › stepper → loadPreset; iteration 008 S: it left STATE)', `await __press(__show(document.querySelector('.dev[data-id="spectrum"] .sp-preset [aria-label="next"]')));`, 'edit')).undoMs;   // the kit's stepper names no row yet (the palette's RAMP stepper below is 'edit' too)
-  undoMs.element = (await scene('an element change (ELEMENT Z dragged)', `const k = __show(__knob('ELEMENT Z')); await __w(80); await __drag(k.querySelector('.k-dial'), 0, -30);`, 'ELEMENT Z · SPECTRUM')).undoMs;
+  undoMs.element = (await scene('an element change (ELEMENT dragged)', `const k = __show(__knob('ELEMENT')); await __w(80); await __drag(k.querySelector('.k-dial'), 0, -30);`, 'ELEMENT · SPECTRUM')).undoMs;
   await scene('A/B · STORE A', `await __press(__show(__trig('STORE A')));`, 'STORE A · SPECTRUM');
   await g.ev(`__LW.loadPreset('1s+2pz'); await __w(500); __LW.history.flush(); return 1;`);
   await scene('A/B · STORE B', `await __press(__show(__trig('STORE B')));`, 'STORE B · SPECTRUM');
@@ -464,7 +464,7 @@ try {
          selection, the STATES ground lane) into the press's row (absorb), so the first undo turns it off and redo brings the fill ── */
   /* the undo is byte-identical: a record's null orbital and empty STATES lane list land as null and empty (S4 follow-up) */
   const mol = await ev(`const H = __LW.history, I = () => __LW.serialize({ scope: 'edit' }).presentation.instruments;
-    const s = __sw('MOLECULES ON'); __show(s); await __w(100); await __open(); const { n0, pre } = window.__s0;
+    const s = document.querySelector('.sw[aria-label="MOLECULES ON"]'); __show(s); await __w(100); await __open(); const { n0, pre } = window.__s0;
     await __press(s.querySelector('button') || s); await __w(1000); await __w(520); H.flush();
     const rows = H.entries().slice(n0).map((e) => e.label), post = __ser(), filled = I().chem.orbital;
     const diff = (a, b, p = '', o = []) => { if (a && b && typeof a === 'object' && typeof b === 'object') { for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) diff(a[k], b[k], p + '.' + k, o); } else if (JSON.stringify(a) !== JSON.stringify(b)) o.push(p); return o; };
@@ -473,7 +473,7 @@ try {
     await __w(1000); H.flush(); const later = H.entries().length - n0;
     __LW.chem.setOn(false); H.note(); await __w(600); H.flush();
     return { rows, filled, undid, off, undoLeft, redid, on, redoSame, orbital, later, errs: __e.slice() };`);
-  assert.deepEqual(mol.rows, ['MOLECULES ON · MOLECULES'], 'MOLECULES ON: ' + JSON.stringify(mol));
+  assert.deepEqual(mol.rows, ['ON · MOLECULES'], 'MOLECULES ON: ' + JSON.stringify(mol));
   assert.ok(Number.isFinite(mol.filled), 'the solve never filled the orbital'); assert.equal(mol.undid, true); assert.equal(mol.off, true, 'the first undo did not turn MOLECULES off');
   assert.equal(mol.redid, true); assert.equal(mol.on, true); assert.equal(mol.redoSame, true, 'redo is not the filled row'); assert.equal(mol.orbital, mol.filled);
   assert.equal(mol.later, 1, 'a row appeared after the redo'); assert.deepEqual(mol.undoLeft, [], 'the undo left ' + JSON.stringify(mol.undoLeft)); assert.deepEqual(mol.errs, []);
@@ -527,7 +527,7 @@ try {
   assert.equal((await g2.waitFor('window.__LW&&__LW.ready', 200, 100)).ok, 1);
   const molAt = await g2.ev(`window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.confirm = () => true;
     await __LW.layout.projects.fresh(); await __w(800); window.__pre = JSON.stringify(__LW.serialize({ scope: 'edit' }));
-    const s = [...document.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl')?.textContent || '').trim() === 'MOLECULES ON'), d = s.closest('.dev');
+    const s = document.querySelector('.sw[aria-label="MOLECULES ON"]'), d = s.closest('.dev');   // 022 H2: the switch reads ON beside the molecule glyph; its name is its aria-label
     d.hidden = false; d.classList.remove('closed'); if (d.classList.contains('folded')) d.querySelector('.dev-fold').click();
     const b = s.querySelector('button') || s; b.scrollIntoView({ block: 'center', behavior: 'instant' }); await __w(100);
     const r = b.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, h = document.elementFromPoint(x, y);
@@ -542,7 +542,7 @@ try {
     const F = await (await fetch('./new-project.lambdawaves.json', { cache: 'no-cache' })).json(), FI = (F.data || F).presentation.instruments;
     await __LW.layout.projects.fresh(); await __w(900); const I = __LW.serialize({ scope: 'edit' }).presentation.instruments;
     return { before, orbital: I.chem.orbital, lanes: JSON.stringify(I.states.lanes), fileOrbital: FI.chem.orbital, fileLanes: JSON.stringify(FI.states.lanes), errs: __e.slice() };`);
-  assert.deepEqual({ on: molOn.on, filled: Number.isFinite(molOn.orbital), lanes: molOn.lanes, rows: molOn.rows }, { on: true, filled: true, lanes: 1, rows: ['new project', 'MOLECULES ON · MOLECULES'] }, 'NEW → MOLECULES ON: ' + JSON.stringify(molOn));
+  assert.deepEqual({ on: molOn.on, filled: Number.isFinite(molOn.orbital), lanes: molOn.lanes, rows: molOn.rows }, { on: true, filled: true, lanes: 1, rows: ['new project', 'ON · MOLECULES'] }, 'NEW → MOLECULES ON: ' + JSON.stringify(molOn));
   assert.deepEqual(molUndo, { on: false, same: true, dirty: false, errs: [] }, 'NEW → MOLECULES ON → Ctrl+Z: ' + JSON.stringify(molUndo));
   assert.deepEqual(molNew.before, { on: true, orbital: molOn.orbital, lanes: 1 }, 'Ctrl+Shift+Z did not bring MOLECULES back filled: ' + JSON.stringify(molNew.before));
   assert.equal(molNew.orbital, molNew.fileOrbital); assert.equal(molNew.lanes, molNew.fileLanes, 'NEW after MOLECULES is not the file: ' + JSON.stringify(molNew)); assert.deepEqual(molNew.errs, []);

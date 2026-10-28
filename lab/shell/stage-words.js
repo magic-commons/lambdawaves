@@ -11,67 +11,67 @@ import { createPrefs } from '../mir/core/prefs.js'; import { createSettingsStore
    atoms on.  Everything else off."  A HAND speaks; a restore, an undo, a project or link open never does (each emitter's own law, unchanged). */
 export const INFO_KEY = 'lambdawaves.q0.info';
 export const KINDS = Object.freeze([
-  { id: 'preset', key: 'sayPreset', seat: 'fade', label: 'PRESETS', hint: 'A hand\'s preset — SPECTRUM\'s PRESET (a pick of the one shown reloads it), the register\'s ORBITAL and STATES presets in MOLECULES, a notebook link — named in the formula\'s seat for 2.4 s' },
-  { id: 'head', key: 'sayHead', seat: 'head', label: 'MOLECULE HEAD', hint: 'A hand pick of a molecule shows its head once the solve lands — formula and name, method and E, the HOMO and the gap, its STATUS — held until Escape or a press on the picture' },
+  { id: 'preset', key: 'sayPreset', seat: 'fade', label: 'PRESETS', hint: 'Name a hand-picked preset' },
+  { id: 'head', key: 'sayHead', seat: 'head', label: 'MOLECULE HEAD', hint: 'Show the picked molecule\'s head' },
   /* iteration 012 R1 (Josh 10-20: "Merge the function 'Orbital Dial' and 'Registry Adds'"): ONE switch, ORBITALS, speaks for both kinds — the orbital kind
      reads the registry's key, so a stored `sayOrbital` is simply never read again and the window's grid has room for the pop-ups' SIZE */
-  { id: 'registry', key: 'sayRegistry', seat: 'pop', label: 'ORBITALS', hint: 'The orbital a hand just added to MOLECULES\' register, and the orbital MOLECULES\' ORBITAL dial lands on while a hand turns it' },
-  { id: 'view', key: 'sayView', seat: 'pop', label: 'WAVE VIEW', hint: 'WAVE\'s OBSERVABLE and MOLECULES\' VIEW, as a hand changes them' },
+  { id: 'registry', key: 'sayRegistry', seat: 'pop', label: 'ORBITALS', hint: 'The orbital a hand adds or dials' },
+  { id: 'view', key: 'sayView', seat: 'pop', label: 'WAVE VIEW', hint: 'WAVE\'s OBSERVABLE, MOLECULES\' VIEW' },
   { id: 'orbital', key: 'sayRegistry', seat: 'pop', label: 'ORBITALS' },
   { id: 'basis', key: 'sayBasis', seat: 'pop', label: 'BASIS · METHOD', hint: 'MOLECULES\' BASIS and METHOD, as a hand picks them' },
-  { id: 'rate', key: 'sayRate', seat: 'pop', label: 'RATE', hint: 'The time multiplier (the transport\'s RATE), while a hand turns it' },
-  { id: 'style', key: 'sayStyle', seat: 'pop', label: 'STYLE · PALETTE', hint: 'WAVE\'s draw STYLE, PALETTE on or off and a palette preset, as a hand picks them' },
+  { id: 'rate', key: 'sayRate', seat: 'pop', label: 'RATE', hint: 'The transport\'s RATE, as a hand turns it' },
+  { id: 'style', key: 'sayStyle', seat: 'pop', label: 'STYLE · PALETTE', hint: 'WAVE\'s STYLE and PALETTE, as picked' },
 ]);
 const KIND = new Map(KINDS.map((k) => [k.id, k]));
 const pct = (v) => Math.round(v * 100) + '%';
 /** the rows: { key, type, default, … } is the kit's prefs schema; group · label · hint · options · fmt are the window's (informational.js) */
 export const INFO_ROWS = Object.freeze([
-  { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'STAGE FORMULA', hint: 'Write what is playing on the stage — the MOLECULES formula or the SPECTRUM states — and caption a picture or a recording with it and its STATUS word; off, an export carries neither and the stage announces nothing' },
+  { key: 'molFormula', type: 'bool', default: true, group: 'words', label: 'STAGE FORMULA', hint: 'Write the playing state on stage' },
   { key: 'molName', type: 'bool', default: false, group: 'words', label: 'NAME', hint: 'The molecule\'s name under its formula (water under H₂O)' },
   /* iteration 018 B9 (Josh: "Since we have isomers, let a secondary subtitle text be optional for the name … the name is a heading type and the subtitle
      should be smaller like a 'body' text"): the line under the NAME that tells a molecule from its isomers — neither the catalogue nor a volume's index
      carries a second name, so it is a volume molecule's index `tags` and point group `pg` (amide · C2v), a catalogue molecule's shelf (`group`) */
-  { key: 'molSubtitle', type: 'bool', default: false, group: 'words', label: 'SUBTITLE', hint: 'Under the NAME, in body type: what tells the molecule from its isomers — a volume molecule\'s tags and point group (amide · C2v), a catalogue molecule\'s shelf' },
+  { key: 'molSubtitle', type: 'bool', default: false, group: 'words', label: 'SUBTITLE', hint: 'Isomer tags under the name' },
   /* iteration 011 Q1 · THE LIST CAP (Josh 10-19: "have the informational automatically hide ultra large lists so it doesn't fight the screen and users don't
      have to keep toggling it on and off just because a certain mode uses an obscene amount of 140 levels"): SPECTRUM's populated list longer than the cap is
      written as its count — "140 levels · 7 shells" (capLine) — on the stage and in an export's caption; at or under the cap it is the list, as before.
      16 = the longest LOAD VALENCE (4f 5d 6s 6p, 5f 6d 7s 7p: 16 labels), so every atom's valence still reads as its subshells; a molecule's formula is untouched */
-  { key: 'listCap', type: 'number', min: 4, max: 140, step: 1, log: true, default: 16, group: 'words', label: 'LIST CAP', fmt: (v) => String(Math.round(v)), hint: 'The longest populated-state list the stage writes in full: a longer one (FILL ALL, a Hamiltonian that fills many levels) is written as its count, "140 levels · 7 shells", and returns as a list once it fits again' },
-  { key: 'molFormulaSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'words', label: 'SIZE', fmt: pct, hint: 'The STAGE FORMULA\'s size: 100% is the notebook\'s — the formula its title (34 px), THE FADE its heading' },
-  { key: 'atomLabels', type: 'bool', default: true, group: 'labels', label: 'ATOM LABELS', hint: 'Mark each MOLECULES nucleus with its element symbol, inverting whatever is beneath it' },
+  { key: 'listCap', type: 'number', min: 4, max: 140, step: 1, log: true, default: 16, group: 'words', label: 'LIST CAP', fmt: (v) => String(Math.round(v)), hint: 'Longest state list written in full' },
+  { key: 'molFormulaSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'words', label: 'SIZE', fmt: pct, hint: 'The formula\'s size (100% = 34 px)' },
+  { key: 'atomLabels', type: 'bool', default: true, group: 'labels', label: 'ATOM LABELS', hint: 'Each nucleus\'s element symbol' },
   { key: 'atomLabelsSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'labels', label: 'SIZE', fmt: pct, hint: 'The ATOM LABELS\' size: 100% is the notebook\'s body (14 px)' },
-  { key: 'infoPos', type: 'enum', values: ['top', 'bottom'], default: 'top', group: 'seat', label: 'POSITION', options: [{ id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'The formula at the top or the bottom of the free stage; the pop-ups take the other side' },
-  { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'seat', label: 'PAD', fmt: pct, hint: 'The formula\'s distance from its edge of the free stage, as a share of its height; the pop-ups keep the same distance on the other side' },
+  { key: 'infoPos', type: 'enum', values: ['top', 'bottom'], default: 'top', group: 'seat', label: 'POSITION', options: [{ id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'Formula at the top or bottom' },
+  { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'seat', label: 'PAD', fmt: pct, hint: 'Formula margin' },
   /* iteration 018 B7 (Josh: "Include ESP's bar with a padding setting and a toggle that just cycles between right (where it is now), left, top, and bottom.
      Stage text and formula is on top of the bar … Stage text takes priority"): the bar is painted by WAVE (material.js) and seated by these three */
-  { key: 'espBar', type: 'bool', default: true, group: 'bar', label: 'ESP BAR', hint: 'The ESP map’s colour bar on the stage while WAVE draws ESP — the shader’s own colours and five numbers in a.u.' },
-  { key: 'espBarSide', type: 'enum', values: ['right', 'left', 'top', 'bottom'], default: 'right', group: 'bar', label: 'SIDE', options: [{ id: 'right', label: 'RIGHT' }, { id: 'left', label: 'LEFT' }, { id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'The ESP bar’s side of the free stage — a press turns it RIGHT → LEFT → TOP → BOTTOM; where the formula is, the bar steps clear of it' },
-  { key: 'espBarPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'bar', label: 'PAD', fmt: pct, hint: 'The ESP bar’s distance from its edge of the free stage, as a share of the free stage across it' },
+  { key: 'espBar', type: 'bool', default: true, group: 'bar', label: 'ESP BAR', hint: 'ESP colour bar, five values in a.u.' },
+  { key: 'espBarSide', type: 'enum', values: ['right', 'left', 'top', 'bottom'], default: 'right', group: 'bar', label: 'SIDE', options: [{ id: 'right', label: 'RIGHT' }, { id: 'left', label: 'LEFT' }, { id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'ESP bar side: RIGHT → LEFT → TOP → BOTTOM' },
+  { key: 'espBarPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'bar', label: 'PAD', fmt: pct, hint: 'ESP bar margin' },
   ...KINDS.filter((k) => k.hint).map((k) => ({ key: k.key, type: 'bool', default: false, group: 'announce', label: k.label, hint: k.hint })),
   { key: 'popSize', type: 'number', min: 0.5, max: 3, step: 0.01, default: 1, group: 'announce', label: 'SIZE', fmt: pct, hint: 'The pop-ups\' size: 100% is 15 px' },
-  { key: 'cursorAway', type: 'bool', default: false, group: 'cursor', label: 'PARALLAX', hint: 'The words lean away from the pointer as it crosses the stage (the kit layer\'s follow and parallax)' },
-  { key: 'cursorDrift', type: 'bool', default: false, group: 'cursor', label: 'DRIFT', hint: 'The words bob slowly while they are on the stage (the kit layer\'s drift; it keeps a frame booked)' },
+  { key: 'cursorAway', type: 'bool', default: false, group: 'cursor', label: 'PARALLAX', hint: 'Words lean away from the pointer' },
+  { key: 'cursorDrift', type: 'bool', default: false, group: 'cursor', label: 'DRIFT', hint: 'Words bob slowly on the stage' },
   /* MARKS draw ON the stage (rack.js' frame reads ui.skeletonSw · beadSw · ellipsoidSw, these rows' widgets): the record's since the fix round (C6).
      Iteration 011 Q1 (Josh 10-19: "move skeleton into it's own row amongst stage formula and atom labels with a size knob to increase the disk size"):
      SKELETON is THE WORDS' third ON + SIZE row; its disks are flat (no outline) and SIZE scales them — 100 % is the old 0.28 × the covalent radius,
      the default 160 %; the bonds and the dipole keep their 2 px.  BEAD and UNCERTAINTY stay in MARKS. */
   /* iteration 012 R1 (Josh 10-20): SKELETON is BALL AND STICK (the label only: the key `skeleton` stays), with an OPACITY knob between its switch and SIZE;
      the dipole arrow it drew ("a weird arrow … can it be separated from Skeleton?") is MARKS' DIPOLE, its own switch, off by default */
-  { key: 'skeleton', type: 'bool', default: false, group: 'skeleton', label: 'BALL AND STICK', hint: 'The nuclei as flat disks in their CPK colours and the bonds within 1.3 × the covalent radii — a PREFERENCE, off by default' },   // 0.7.0 V2: rack.js draws it (lab/skeleton.js)
-  { key: 'skeletonOpacity', type: 'number', min: 0.1, max: 1, step: 0.01, default: 1, group: 'skeleton', label: 'OPACITY', fmt: pct, hint: 'BALL AND STICK\'s opacity: 100% is as drawn before (the near half 90%, the far half dimmed)' },
-  { key: 'skeletonSize', type: 'number', min: 0.5, max: 4, step: 0.01, default: 1.6, group: 'skeleton', label: 'SIZE', fmt: pct, hint: 'BALL AND STICK\'s disks: 100% is 0.28 × the element\'s covalent radius (the size before iteration 011), 160% the default; the bonds and the dipole arrow keep their width' },
+  { key: 'skeleton', type: 'bool', default: false, group: 'skeleton', label: 'BALL AND STICK', hint: 'Nuclei as CPK disks, bonds as sticks' },   // 0.7.0 V2: rack.js draws it (lab/skeleton.js)
+  { key: 'skeletonOpacity', type: 'number', min: 0.1, max: 1, step: 0.01, default: 1, group: 'skeleton', label: 'OPACITY', fmt: pct, hint: 'BALL AND STICK\'s opacity' },
+  { key: 'skeletonSize', type: 'number', min: 0.5, max: 4, step: 0.01, default: 1.6, group: 'skeleton', label: 'SIZE', fmt: pct, hint: 'Ball size × covalent radius' },
   /* iteration 014 D6 (Josh: "Let the Ball and stick model show double/triple bonds, whether a bond is sigma, or ionic, or different types of attraction,
      resonances (like benzene) … a customizable feature to be in the informational"): BALL AND STICK's BONDS, four switches (lab/skeleton.js bondsOf) */
-  { key: 'bondOrder', type: 'bool', default: true, group: 'bonds', label: 'ORDER', hint: 'Double and triple bonds as two and three parallel sticks — from the record\'s bonds when it carries them, else by length against Pyykkö\'s covalent radii' },
-  { key: 'bondAromatic', type: 'bool', default: true, group: 'bonds', label: 'AROMATIC', hint: 'An aromatic ring (benzene\'s, pyridine\'s, furan\'s) as single sticks with a dashed circle inside, in the ring\'s plane' },
-  { key: 'bondIonic', type: 'bool', default: true, group: 'bonds', label: 'IONIC', hint: 'An ionic or dative bond as a dotted stick: Mulliken charges 0.8 e apart (a volume molecule), else Pauling Δχ ≥ 2; dative a donor past its valence bound to B, Al or a metal' },
-  { key: 'bondHydrogen', type: 'bool', default: true, group: 'bonds', label: 'H-BOND', hint: 'A hydrogen bond N/O/F–H···N/O/F (H to acceptor within 2.5 Å, the angle at H ≥ 120°) as a dotted line in the accent' },
-  { key: 'dipole', type: 'bool', default: false, group: 'marks', label: 'DIPOLE', hint: 'THE DIPOLE ARROW: the molecule\'s dipole moment (a.u.) from the centre of nuclear charge, 2 bohr per a.u., in the accent — once drawn with BALL AND STICK; a PREFERENCE, off by default' },
-  { key: 'bead', type: 'bool', default: false, group: 'marks', label: 'BEAD', hint: 'THE BEAD: the expectation point (⟨x⟩, ⟨y⟩, ⟨z⟩) on the stage with its trail over the last period (⟨p⟩ in momentum space; for a molecule the electron density\'s centroid (ΣZR − μ)/N_e) — a PREFERENCE, off by default' },   // 0.8.2 P3: on the skeleton's canvas
-  { key: 'ellipsoid', type: 'bool', default: false, group: 'marks', label: 'UNCERTAINTY', hint: 'THE UNCERTAINTY ELLIPSOID: the position covariance Σ_ij = ⟨r_i r_j⟩ − ⟨r_i⟩⟨r_j⟩ as its three principal circles, semi-axes √λ_k, about the bead (with it) — position space and a register only; a PREFERENCE, off by default' },   // 0.8.3 B3 · iteration 008 P: the switch says what it draws; the key stays `ellipsoid`
+  { key: 'bondOrder', type: 'bool', default: true, group: 'bonds', label: 'ORDER', hint: 'Double and triple bonds' },
+  { key: 'bondAromatic', type: 'bool', default: true, group: 'bonds', label: 'AROMATIC', hint: 'Aromatic rings as a dashed circle' },
+  { key: 'bondIonic', type: 'bool', default: true, group: 'bonds', label: 'IONIC', hint: 'Dotted ionic/dative bonds' },
+  { key: 'bondHydrogen', type: 'bool', default: true, group: 'bonds', label: 'H-BOND', hint: 'Dotted hydrogen bonds' },
+  { key: 'dipole', type: 'bool', default: false, group: 'marks', label: 'DIPOLE', hint: 'Dipole arrow (a.u.)' },
+  { key: 'bead', type: 'bool', default: false, group: 'marks', label: 'BEAD', hint: '⟨r⟩ bead and its trail' },   // 0.8.2 P3: on the skeleton's canvas
+  { key: 'ellipsoid', type: 'bool', default: false, group: 'marks', label: 'UNCERTAINTY', hint: 'Position spread ellipsoid (√λ axes)' },   // 0.8.3 B3 · iteration 008 P: the switch says what it draws; the key stays `ellipsoid`
   /* iteration 011 Q1 · STATUS (Josh 10-19: "a button that hides the extra status thingy"): INFORMATIONAL's STATUS readout — the only status block the
      stage words own (research/iteration-011/q1-shots/before-*.png) — shown or hidden.  Off on a first run; a record older than it opens ON, as it was (infoPrefs) */
-  { key: 'status', type: 'bool', default: false, group: 'status', label: 'STATUS', hint: 'Show the STATUS readout below: EXACT · NUMERICAL · UNCHECKED and how good the picture is, for what owns the field (a tap on it opens the MODEL sheet).  An export caption\'s STATE word is not this switch\'s' },
+  { key: 'status', type: 'bool', default: false, group: 'status', label: 'STATUS', hint: 'STATUS under the formula' },
 ]);
 /** the six keys the settings blob held (0.5.3 M9, iteration 001): read once into the record, never written again */
 export const BLOB_INFO = Object.freeze(['molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'infoPos', 'infoPad']);

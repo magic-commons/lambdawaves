@@ -66,8 +66,8 @@ export function createAtoms(host, api) {
     for (let z = z0; z <= z1; z++) { const b = el('button', 'pk-c', cs, ATOMS[z - 1].symbol); b.type = 'button'; b.title = `${ATOMS[z - 1].name} · Z = ${z} · ${z > 36 ? ATOMS[z - 1].core : ATOMS[z - 1].term}`; b.addEventListener('click', () => api.select(z)); cells[z] = b; }
   }
   const r2 = el('div', 'row tight', host);
-  r2.appendChild(trig({ label: 'LOAD VALENCE', title: 'Load every subshell outside the noble-gas core into the register, each at its electrons’ weight, every m equal and in phase', onFire: () => api.fill() }).root);
-  r2.appendChild(trig({ label: 'RELATIVITY Δ', title: 'Solve this atom once more without relativity (p²/2, plain exchange) and write ε_ZORA·MV − ε_NR beside every shell, in eV', onFire: () => relativity() }).root);
+  r2.appendChild(trig({ label: 'LOAD VALENCE', title: 'Load the valence subshells, equal and in phase', onFire: () => api.fill() }).root);
+  r2.appendChild(trig({ label: 'RELATIVITY Δ', title: 'Relativistic shift ε_ZORA − ε_NR per shell (eV)', onFire: () => relativity() }).root);
   const roScf = readout({ label: 'SCF', value: '—', sub: '' });
   r2.appendChild(roScf.root);
 

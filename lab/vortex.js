@@ -21,7 +21,7 @@ export function createVortex(host, overlay, api) {
   const r1 = el('div', 'row tight', host);
   const on = sw({ label: 'LOCATE', value: false, onChange: () => { dirty = true; } }); r1.appendChild(on.root);   // off until asked: the census is a CPU reader
   const qual = seg({ label: 'SAMPLING', value: 'fine', options: [{ id: 'coarse', label: '20 × 48' }, { id: 'fine', label: '40 × 96' }, { id: 'dense', label: '72 × 160' }], onChange: () => { dirty = true; } }); r1.appendChild(qual.root);
-  const show = sw({ label: 'OVERLAY ON FIELD', value: false, onChange: () => { drawOverlay(); } }); r1.appendChild(show.root);
+  const show = sw({ label: 'OVERLAY', title: 'Draw the nodal lines over the field', value: false, onChange: () => { drawOverlay(); } }); r1.appendChild(show.root);
   const r2 = el('div', 'row tight', host);
   const mRo = readout({ label: 'DEGREE BOUND  M = m_max − m_min', value: '—', sub: 'lines per coaxial circle ≤ M' }); r2.appendChild(mRo.root);
   const nRo = readout({ label: 'POINTS · CIRCLES · DOMINANT', value: '—', sub: '' }); r2.appendChild(nRo.root);

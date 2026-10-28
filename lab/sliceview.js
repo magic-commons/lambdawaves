@@ -89,7 +89,7 @@ export function createSliceView(host, api) {
   const curSeg = seg({ label: 'CURRENT', value: 'off', options: [{ id: 'off', label: 'OFF' }, { id: 'arrows', label: 'ARROWS', title: 'the probability current in the plane as a quiver' },
     { id: 'lines', label: 'LINES', title: 'streamlines of the probability current in the plane' }], onChange: (v) => { current = v; jro.root.style.display = v === 'off' ? 'none' : ''; paint(); } });
   r1.appendChild(curSeg.root);
-  const extentK = knob({ label: 'EXTENT a₀', min: 1, max: 60, value: 8, log: true, fmt: (v) => '±' + v.toFixed(1), onInput: (v) => { half = v; dirty = true; api.repaint(); } });
+  const extentK = knob({ label: 'EXTENT', min: 1, max: 60, value: 8, log: true, fmt: (v) => '±' + v.toFixed(1) + ' a₀', onInput: (v) => { half = v; dirty = true; api.repaint(); } });
   const gainK = knob({ label: 'GAIN', min: 0.1, max: 20, value: 1.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { gain = v; regain = true; api.repaint(); } });
   r1.appendChild(extentK.root);
   r1.appendChild(gainK.root);
@@ -282,7 +282,7 @@ export function createSliceView(host, api) {
   function setActive(v) { active = !!v; if (active) armPump(); return active; }
   function update(reg, t, playing) {
     mini.root.setAttribute('aria-disabled',String(mode!=='space'));mini.root.tabIndex=mode==='space'?0:-1;
-    mini.root.title=mode==='space'?'Drag to orient the plane · arrows rotate · Home resets':'Switch to ℝ³ for the sphere control; drag the slice image to rotate in KS ℝ⁴';
+    mini.root.title=mode==='space'?'Drag to orient the plane · arrows rotate · Home resets':'Switch to ℝ³ for the sphere; drag turns KS ℝ⁴';
     mini.paint();
     if (tour) {
       tour.t = Math.min(1, tour.t + 0.04);

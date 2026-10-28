@@ -49,7 +49,12 @@ export const ICONS = {
   reverse: p('M4 8h15') + p('M15.5 4.5 19 8l-3.5 3.5') + p('M20 16H5') + p('M8.5 12.5 5 16l3.5 3.5'),
   trash: p('M3.5 6.5h17') + p('M9 6.5V4.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 4.5v2') + p('M5.5 6.5l1 13a2 2 0 0 0 2 1.5h7a2 2 0 0 0 2-1.5l1-13') + p('M10 10.5v6.5') + p('M14 10.5v6.5'),
   windowPlus: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/>' + p('M3 8.5h18M12 11.5v6M9 14.5h6'),   // the FINDER
-  repeat: p('M19.6 13.4A7.7 7.7 0 1 1 17 6.4') + p('M17.6 2.6 17 6.6l-4-.5'),   // ⟳: to the next exact repeat of the density
+  repeat: p('M19.6 13.4A7.7 7.7 0 1 1 17 6.4') + p('M17.6 2.6 17 6.6l-4-.5'),
+  /* 022 H1 · THE ESP BAR'S SIDE: the free stage with the bar on its edge (INFORMATIONAL › SIDE wears the side it is on, no word) */
+  sideRight: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/><rect x="15" y="7" width="3" height="10" rx="1" fill="currentColor"/>',
+  sideLeft: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/><rect x="6" y="7" width="3" height="10" rx="1" fill="currentColor"/>',
+  sideTop: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/><rect x="7" y="7" width="10" height="3" rx="1" fill="currentColor"/>',
+  sideBottom: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/><rect x="7" y="14" width="10" height="3" rx="1" fill="currentColor"/>',   // ⟳: to the next exact repeat of the density
   /* ── the Picker's look tiles (picker.js SHAPES) and the ladders' FILL ALL / EMPTY (paint-stroke.js, Gemini's 008 U drawings) ── */
   balls: dot(12, 12, 6.5),
   sticks: p('M3 12h11.3') + c(17.5, 12, 3.2),                                   // was 1.6 wide

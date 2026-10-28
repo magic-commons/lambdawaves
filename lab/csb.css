@@ -104,7 +104,7 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 /* A3 · the favourites strip, under the macros and the clock, the width of the panel; a face is the original control */
 #transport[data-layout="csb"] .csb-favs { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 36px; padding-top: 4px; border-top: 1px solid var(--glass-hairline); }
 #transport[data-layout="csb"] > .native-tempo > .csb-favs > * { order: 0; }
-#transport[data-layout="csb"] .csb-favs .k { width: 48px; flex: 0 0 auto; }
+#transport[data-layout="csb"] .csb-favs .k { width: 56px; flex: 0 0 auto; }   /* 022 H2: 56 px, so an eight-letter label (EXPOSURE) never needs the ellipsis; the strip wraps */
 #transport[data-layout="csb"] .csb-favs .k-lbl { display: block; font-size: var(--fs-micro); }
 #transport[data-layout="csb"] .csb-favs .segw { flex: 0 1 auto; max-width: 300px; }
 #transport[data-layout="csb"] .csb-favs .segw .k-lbl { display: none; }

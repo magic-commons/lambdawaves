@@ -204,7 +204,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const atomic = current && current.id === 'atomic', cur = lookFor(atomic);
     for (const b of lookTiles) { const id = b.dataset.look, on = id === cur, off = atomic && !ATOM_LOOKS.has(id), word = LOOKS.find((x) => x[0] === id)[2];
       b.classList.toggle('on', on); b.classList.toggle('off', off); b.setAttribute('aria-checked', String(on)); b.setAttribute('aria-disabled', String(off));
-      b.title = off ? word + ' — a lone atom: none to show' : word; b.setAttribute('aria-label', b.title); b.tabIndex = on ? 0 : -1; }
+      b.title = off ? word.split(' · ')[0] + ': none for a lone atom' : word; b.setAttribute('aria-label', b.title); b.tabIndex = on ? 0 : -1; }
     const L = LOOKS.find((x) => x[0] === cur) || LOOKS[0]; glyph(lookG, L[1]); lookB.title = 'Look of the pictures · ' + L[2]; lookB.setAttribute('aria-label', lookB.title);
   }
   function setLook(id) {
@@ -242,7 +242,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const setHue = (deg, keep = true) => {
     prefs.hue = ((Math.round(deg) % 360) + 360) % 360; hueShown += ((prefs.hue - hueShown) % 360 + 540) % 360 - 180;
     document.documentElement.style.setProperty('--mol-hue', hueShown + 'deg');   // iteration 013 P2: on the page's root, so MOLECULES' picture (.mol-thumb) turns with the Picker's
-    hue.setAttribute('aria-valuenow', String(prefs.hue)); hue.title = 'Hue of the molecules\u2019 pictures · ' + prefs.hue + '° — drag up or down, double-click for 0';
+    hue.setAttribute('aria-valuenow', String(prefs.hue)); hue.title = 'Hue of the pictures · ' + prefs.hue + '° (double-click: 0)';
     if (keep) writePrefs(prefs);
   };
   setHue(+prefs.hue || 0, false);
@@ -464,7 +464,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const c = el('div', 'mm-vol mm-scard', host); c.dataset.section = S.sec; c.setAttribute('role', 'group'); c.setAttribute('aria-label', S.sec + ' — ' + cardLine(S));
     const h = el('div', 'mm-vol-open', c); el('b', 'mm-scard-n', h, S.sec); const meta = el('span', 'mm-vol-meta', h, cardLine(S));
     if (safariTab()) return;   // a Safari tab is offered nothing to keep (chemview's own rule)
-    const b = el('button', 'mm-install mm-sinstall', c); b.type = 'button'; b.title = `Keep ${S.sec} on this device: press to install, press twice to remove`;
+    const b = el('button', 'mm-install mm-sinstall', c); b.type = 'button'; b.title = `Keep ${S.sec}: press to install, twice to remove`;
     const ringHost = el('span', 'mm-ring-host', b), ring = installRing(ringHost), ico = icon(ringHost, 'download'), word = el('span', 'mm-install-word', b);
     S.view = { b, ring, ico, word, meta, arm: armer(b, () => paintSec(S)) }; paintSec(S);
     b.addEventListener('click', (e) => { e.stopPropagation(); pressSec(S); });
@@ -547,10 +547,10 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
          no caption under a hover (it repeated the card) */
       const c = el('div', 'mm-vol', shelfEl), o = el('button', 'mm-vol-open', c); o.type = 'button'; o.setAttribute('aria-label', 'open ' + volName(v) + (v.title ? ' · ' + v.title : ''));
       el('b', 'mm-vol-num', o, volName(v)); o.title = [v.title, v.blurb].filter(Boolean).join(' — ');
-      if (v.wip) { const w = el('span', 'mm-vol-wip', o, 'WIP'); w.title = 'Work in progress: this volume is still being filled — it installs now, and grows'; }   // iteration 014 C4 (pack.mjs --wip)
+      if (v.wip) { const w = el('span', 'mm-vol-wip', o, 'WIP'); w.title = 'Still being filled: installs now, and grows'; }   // iteration 014 C4 (pack.mjs --wip)
       /* iteration 015 M5 · a volume on the shelf before its first molecule (pack.mjs --wip --next: the next volume, still filling) says FILLING:
          nothing to install or open yet */
-      if (v.wip && !v.count && !v.index && !v.archive) { c.classList.add('filling'); o.disabled = true; o.title = volName(v) + ' is being filled — it installs once its first molecules are packed'; el('span', 'mm-vol-meta', o, 'FILLING'); return; }
+      if (v.wip && !v.count && !v.index && !v.archive) { c.classList.add('filling'); o.disabled = true; o.title = volName(v) + ' is being filled'; el('span', 'mm-vol-meta', o, 'FILLING'); return; }
       const meta = [v.count != null ? Number(v.count).toLocaleString('en') + ' molecules' : '', Array.isArray(v.bases) && v.bases.length ? v.bases.length + ' bases' : ''].filter(Boolean).join(' · ');
       if (meta) el('span', 'mm-vol-meta', o, meta);
       o.addEventListener('click', () => enter(v));

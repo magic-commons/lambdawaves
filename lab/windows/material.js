@@ -26,7 +26,7 @@ export function createMaterial(app) {
     /* iteration 008 W (Josh: "delta p AND Re+Im … where is this different from the other viewpoints other than color?"): FOUR observables.
        Re+Im was two pictures in one volume (PHASE carries both as hue); Δρ is MOLECULES' Δ beside KICK.  A saved one maps by waveView. */
     ui.viewSeg = seg({ label: 'OBSERVABLE (colour is semantic)', value: 'phase', options: [
-      { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density; palette θ = 0 when enabled, original blue when off' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
+      { id: 'density', label: '<m>ρ=|ψ|²</m>', title: 'Probability density (palette θ = 0; off: the old blue)' }, { id: 'phase', label: '<m>arg ψ</m>', title: 'phase as hue, density as opacity' },
       { id: 'real', label: '<m>Re ψ</m>', title: 'signed, diverging: palette ±π/2 or original orange/blue' }, { id: 'imag', label: '<m>Im ψ</m>' }],
       onChange: (v) => { mat.view = VIEW[v]; schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('view', ui.viewSeg.button(v).textContent); } });
     r1.appendChild(ui.viewSeg.root).dataset.keyAction = 'view';
@@ -41,38 +41,38 @@ export function createMaterial(app) {
       { id: 'cloud', label: 'CLOUD', title: 'the emission/absorption integral' },
       { id: 'solid', label: 'SOLID', title: 'Render a lit density shell' },
       { id: 'signed', label: 'SIGNED', title: 'Render signed lobes and nodal surfaces' },
-      { id: 'dust', label: 'DUST', title: 'Grains fixed in the world, shown where the field is: GRAIN sets how many, nothing else' },
+      { id: 'dust', label: 'DUST', title: 'Grains fixed in the world, where the field is' },
       { id:'glass',label:'SHELL',title:'Render a translucent density shell' },
-      { id: 'glassSigned', label: 'SHELL ±', title: 'Render the signed lobes as a translucent shell: SHELL’s look on SIGNED’s geometry' },   // iteration 010 X7 (STYLE 8)
+      { id: 'glassSigned', label: 'SHELL ±', title: 'SIGNED lobes as a translucent shell' },   // iteration 010 X7 (STYLE 8)
       { id:'additive',label:'ADD',title:'Additive emission through the field' },
       { id: 'bands', label: 'BANDS', title: 'One level surface per octave of the density, anchored at ISO' },
-      { id: 'balls', label: 'BALLS', title: 'The molecule as space-filling CPK balls (van der Waals radii × SIZE), no sticks' },   // iteration 014 B1 (STYLE 9)
-      { id: 'sticks', label: 'STICKS', title: 'The molecule as 3D sticks, each half in its atom’s colour (RADIUS)' },                // B2 (STYLE 10)
-      { id: 'esp', label: 'ESP', title: 'THE POTENTIAL MAP: φ(r) = Σ Z/|r − R| − ∫ρ/|r − r′| painted on the density’s ISO surface, the SAS or the SES — red negative, blue positive' }],   // B3 (STYLE 11)
+      { id: 'balls', label: 'BALLS', title: 'Space-filling CPK balls, no sticks' },   // iteration 014 B1 (STYLE 9)
+      { id: 'sticks', label: 'STICKS', title: '3D sticks, each half in its atom’s colour' },                // B2 (STYLE 10)
+      { id: 'esp', label: 'ESP', title: 'ESP map on the surface (red −, blue +)' }],   // B3 (STYLE 11)
       onChange: (v) => { mat.style = STYLE[drawStyle(v)]; styleSync(); schedule(TIER.PRESENT); if (app.state.stageText) app.state.stageText.say('style', 'STYLE · ' + ui.styleSeg.button(v).textContent); } });   // iteration 007: INFORMATIONAL › STYLE · PALETTE
     rd.appendChild(ui.styleSeg.root).dataset.keyAction = 'style';
     /* 2026-09-10 (Josh): ISO, GRAIN and KNEE sit directly under EXPOSURE, SOFT and HUE — one six-knob
        material row above STYLE — instead of a second row below the style seg. */
     ui.isoK = knob({ label: 'ISO', reverse: true, min: 0.002, max: 0.9, value: 0.06, log: true, fmt: (v) => v.toFixed(3), onInput: (v) => { if (modHand('material.iso', v)) return; mat.iso = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.isoK.root);
     ui.grainK = knob({ label: 'GRAIN', min: 0.02, max: 1, value: 0.35, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { if (modHand('material.grain', v)) return; mat.grain = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.grainK.root);
-    ui.kneeK = knob({ label: 'KNEE', reverse: true, min: 0.02, max: 8, value: KNEE_DEFAULT, log: true, fmt: (v) => v.toFixed(2), title: 'KNEE bends the ray’s opacity: 0.6 is the plain exponential, above it a soft shoulder (dense cores show through; the default 3 is somewhat opaque, slightly see-through), below it a hard knee (the silhouette closes sooner)', onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.kneeK.root);
+    ui.kneeK = knob({ label: 'KNEE', reverse: true, min: 0.02, max: 8, value: KNEE_DEFAULT, log: true, fmt: (v) => v.toFixed(2), title: 'Opacity curve · 0.6 = exponential', onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.kneeK.root);
     /* iteration 014 B · THE THREE VIEWS' controls (two rows, shown while BALLS, STICKS or ESP is drawn; a control the style does not read is dimmed,
        never moved).  The keys are written into `mat` only by a hand, so a project that never touched them serialises as before. */
     /* 020 S4: a.u. with fewer decimals the larger it is (RANGE reaches 50): 0.100 · 2.50 · 37.5 — the knob and the ESP bar's numbers */
     const auN = (v) => { const a = Math.abs(v); return a.toFixed(a >= 10 ? 1 : a >= 1 ? 2 : 3); }, pctF = (v) => Math.round(v * 100) + '%', au = (v) => '±' + auN(v);
-    ui.atomSizeK = knob({ label: 'SIZE', min: 0.2, max: 1.5, value: 1, fmt: pctF, title: 'BALLS: the van der Waals radius × SIZE (100 % is space-filling CPK)', onInput: (v) => { mat.atomSize = v; schedule(TIER.PRESENT); } });
+    ui.atomSizeK = knob({ label: 'SIZE', min: 0.2, max: 1.5, value: 1, fmt: pctF, title: 'Ball radius × van der Waals (100 % = CPK)', onInput: (v) => { mat.atomSize = v; schedule(TIER.PRESENT); } });
     ui.stickK = knob({ label: 'RADIUS', min: 0.1, max: 1.2, value: STICK_R, log: true, fmt: (v) => v.toFixed(2), title: 'STICKS (and the sticks inside ESP): the stick radius in bohr', onInput: (v) => { mat.stickR = v; schedule(TIER.PRESENT); } });
-    ui.probeK = knob({ label: 'PROBE', min: 0.5, max: 5, value: PROBE_R, fmt: (v) => v.toFixed(2), title: 'ESP · SAS / SES: the probe radius in bohr (2.65 = water’s 1.4 Å)', onInput: (v) => { mat.probe = v; schedule(TIER.PRESENT); } });
-    ui.espRangeK = knob({ label: 'RANGE', min: 0.002, max: 50, value: ESP_RANGE, log: true, fmt: au, title: 'ESP: the colour map spans ±RANGE hartree/e through a signed log (the middle a real band, the ends only near ±RANGE); beyond it the colour holds', onInput: (v) => { mat.espRange = v; styleSync(); schedule(TIER.PRESENT); } });
+    ui.probeK = knob({ label: 'PROBE', min: 0.5, max: 5, value: PROBE_R, fmt: (v) => v.toFixed(2), title: 'Probe radius in bohr (2.65 = water)', onInput: (v) => { mat.probe = v; schedule(TIER.PRESENT); } });
+    ui.espRangeK = knob({ label: 'RANGE', min: 0.002, max: 50, value: ESP_RANGE, log: true, fmt: au, title: 'ESP colour span ±RANGE Eh/e', onInput: (v) => { mat.espRange = v; styleSync(); schedule(TIER.PRESENT); } });
     ui.espSurfSeg = seg({ aria: 'potential surface', value: 'iso', options: [
-      { id: 'iso', label: 'ISO', title: 'the density’s own surface, ρ = ISO/30 a.u. (0.002 at the default ISO)' },
-      { id: 'sas', label: 'SAS', title: 'the solvent-accessible surface: the van der Waals spheres grown by PROBE' },
-      { id: 'ses', label: 'SES', title: 'the solvent-excluded surface: the van der Waals spheres with their crevices filled by the probe' }],
+      { id: 'iso', label: 'ISO', title: 'The density’s own surface, ρ = ISO/30' },
+      { id: 'sas', label: 'SAS', title: 'Solvent-accessible surface (vdW + PROBE)' },
+      { id: 'ses', label: 'SES', title: 'Solvent-excluded surface (crevices filled)' }],
       onChange: (v) => { mat.espSurf = v; styleSync(); schedule(TIER.PRESENT); } });
     /* iteration 016 S2 · MAP ONLY (Josh: "a toggle beside RADIUS hides the sticks under ESP so the map stands alone, and nothing is drawn underneath as its
        opacity falls"): `mat.espBare`, written only by a hand (absent = off, so an older file and the edit bytes are unchanged; an older build ignores it) */
-    ui.espBareSw = sw({ label: 'MAP ONLY', value: false, title: 'ESP: the map alone — no sticks inside it, and only the stage beneath it as EXPOSURE lowers its opacity', onChange: (on) => { mat.espBare = on; schedule(TIER.PRESENT); } });
-    ui.espLiveSw = sw({ label: 'LIVE · SLOW', value: false, title: 'ESP: solve φ again while the density moves (RUN, a beating register), at most once a second — slow; off, φ is solved once per molecule, basis and VIEW', onChange: (on) => { mat.espLive = on; schedule(TIER.PRESENT); } });
+    ui.espBareSw = sw({ label: 'MAP ONLY', value: false, title: 'ESP map alone, no sticks inside', onChange: (on) => { mat.espBare = on; schedule(TIER.PRESENT); } });
+    ui.espLiveSw = sw({ label: 'LIVE · SLOW', value: false, title: 'ESP: re-solve live (≤ 1/s)', onChange: (on) => { mat.espLive = on; schedule(TIER.PRESENT); } });
     { const r = el('div', 'row tight', gd); for (const k of [ui.atomSizeK, ui.stickK, ui.espBareSw, ui.espSurfSeg]) r.appendChild(k.root); const r2 = el('div', 'row tight', gd); for (const k of [ui.probeK, ui.espRangeK, ui.espLiveSw]) r2.appendChild(k.root); }   // 018 B2 (native-ui.js seats the same two)
     /* the map's COLOUR BAR (Josh's answer 3): vertical, beside the map at the free stage's right, five numbers — the signed log's inverse at s = ±1, ±½, 0
        (iteration 015 W3: ±RANGE, ±RANGE·(√21 − 1)/20, 0).  Iteration 018 B5 (Josh: "the charge color strip … should change while summing all the hue
@@ -160,7 +160,7 @@ export function createMaterial(app) {
     };
     { const set0 = ui.styleSeg.set; ui.styleSeg.set = (v) => { set0(v); styleSync(); }; }   // LW.setStyle and a restore set mat.style first
     styleSync();   // the first paint: the boot's style shows only its own controls
-    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL, SIGNED and SHELL ± surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
+    el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL, SIGNED and SHELL ± surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are. ESP spans ±RANGE through a signed log, and beyond it the colour holds; LIVE solves φ again while the density moves, at most once a second — off, once per molecule, basis and VIEW.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
 
     const gs = group(wClip.body, 'observer only');
     const r3 = el('div', 'row', gs);
@@ -173,7 +173,7 @@ export function createMaterial(app) {
     /* iteration 012 R3 (Josh 10-20: "Have On, Clip, Slab and the two knobs on the same row … Don't let Clip and Slab disappear when clip window is off"):
        CLIP | SLAB stays shown while off (dimmed, the remembered kind lit), and a press on either turns CLIP on with that kind */
     const sliceShow = (v) => { if (v !== 'off') sliceKind = v; clipSw.set(v !== 'off'); kindSeg.set(sliceKind); kindSeg.root.classList.toggle('clip-kind-off', v === 'off'); };
-    const clipSw = sw({ label: 'ON', value: false, cls: 'clip-on', title: 'CLIP on: cut the volume by the plane (CLIP) or keep a slab about it (SLAB); off draws the full volume',
+    const clipSw = sw({ label: 'ON', value: false, cls: 'clip-on', title: 'Cut by the plane (CLIP) or keep a slab (SLAB)',
       onChange: (on) => { const v = on ? sliceKind : 'off'; sliceShow(v); mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
     const kindSeg = seg({ aria: 'clip kind', value: 'clip', options: [{ id: 'clip', label: 'CLIP', title: 'draw the half of the volume beyond the plane' }, { id: 'slab', label: 'SLAB', title: 'draw a slab THICK wide about the plane' }],
       onChange: (v) => { sliceShow(v); mat.slice.mode = SLICE_MODE[v]; schedule(TIER.PRESENT); } });
@@ -303,7 +303,7 @@ export function createMaterial(app) {
     const camView = camPanel.view(); camView.homeBtn.root.dataset.keyAction = 'camReset';
     app.state.camKnobs = Object.fromEntries(camView.targets().map((t) => [t.id, t.widget]));
     /* 0.5.3 M6 · LOCK, the classic camera (a PREFERENCE, `camLock`): the pan held at the centre and every zoom from it; the PAN pad rests while it holds */
-    ui.camLockSw = sw({ label: 'LOCK', value: false, title: 'LOCK — the classic camera: the pan stays at the centre and every zoom is from the centre (CONTROL, the turn, ZOOM and FOV stay live)', onChange: (v) => { cameraPort.set('lock', v); saveSettings(); } });
+    ui.camLockSw = sw({ label: 'LOCK', value: false, title: 'LOCK: pan and zoom at centre', onChange: (v) => { cameraPort.set('lock', v); saveSettings(); } });
     let lockShown = false;
     cameraPort.subscribe(() => { const on = cameraPort.get('lock'); if (on !== lockShown) { lockShown = on; ui.camLockSw.set(on); camView.pad.widget.setDisabled(on); } });   // every road (the switch, the settings, LW) is a notice
     /* iteration 001 (Josh): CAMERA, SHORTER — the group's CAMERA word goes (the window says it), LOCK joins HOME · PAN HOME, and the PAN pad,
@@ -326,7 +326,7 @@ export function createMaterial(app) {
       R.querySelector('.cam-mode .k-lbl')?.remove(); R.querySelector('.mir-camsphere > .k-lbl')?.remove();
       if (side && view) { side.append(...view.children); view.remove(); }
       const t = R.querySelector('.cam-hand .cam-title'); if (t) { t.textContent = 'CONTROLS'; t.dataset.t = 'CONTROLS'; } }
-    el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt(+Shift)+Drag, two fingers or the PAN pad slide the picture 1:1 (Shift does not make the pan finer); the molecule stays the pivot. Double-click, double-tap or HOME restores the camera.';
+    el('div', 'note', gc).innerHTML = '<b>Camera.</b> Drag the stage or the sphere to turn the view; Shift gives finer motion. Alt(+Shift)+Drag, two fingers or the PAN pad slide the picture 1:1 (Shift does not make the pan finer); the molecule stays the pivot. Double-click, double-tap or HOME restores the camera. LOCK is the classic camera: the pan stays at the centre and every zoom is from the centre.';
   }
   return { wObs, wPal, wCam, wClip, createDrawClipPaletteCamera };
 }

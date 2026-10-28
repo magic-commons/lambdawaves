@@ -50,9 +50,9 @@ export function createWigner(host, api = {}) {
   let cache = null, key = '', lastWall = -1e9, capped = 0, terms = 0, norm2 = 1;
 
   const r0 = el('div', 'row tight', host);
-  const kZ = knob({ label: 'Z RANGE  a₀', min: 2, max: 40, value: 8, fmt: (v) => '± ' + v.toFixed(1),
+  const kZ = knob({ label: 'Z RANGE', min: 2, max: 40, value: 8, fmt: (v) => '± ' + v.toFixed(1) + ' a₀',
     onInput: (v) => { zmax = v; zTouched = true; key = ''; if (api.repaint) api.repaint(); } });
-  const kP = knob({ label: 'P RANGE  a.u.', min: 0.5, max: 4, value: 2, fmt: (v) => '± ' + v.toFixed(2),
+  const kP = knob({ label: 'P RANGE', min: 0.5, max: 4, value: 2, fmt: (v) => '± ' + v.toFixed(2) + ' a.u.',
     onInput: (v) => { pmax = v; pTouched = true; key = ''; if (api.repaint) api.repaint(); } });
   r0.appendChild(kZ.root); r0.appendChild(kP.root);
 

@@ -70,11 +70,9 @@ export function createStates(host, api) {
   /* ── the top: ladder + scope ──────────────────────────────────────────────────────────────────── */
   const top = el('div', 'row tight reg-top', host);
   const cv = el('canvas', 'mol-c reg-ladder', top), cfoot = footLine(cv);   // 016 R1: the law line, shown on a hover
-  cv.title = 'The many-electron ladder: S₀ at zero and the singlet excited states above it, ω in hartree. Stick weight is oscillator strength, hue is the '
-    + 'axis of the transition dipole, degenerate levels sit side by side. Left-click a state to put it in the register, right-click to take it out; left-drag paints every state you cross in, right-drag paints them out.';
+  cv.title = 'Excited states: ω (Eh), stick height f';
   const scope = el('canvas', 'mol-c reg-scope', top);
-  scope.title = 'The dipole scope: the change of the electronic dipole δμ(t), traced in the plane it moves in. A line is a slosh, a circle is a ring current, '
-    + 'two lines of different colour draw a Lissajous figure.';
+  scope.title = 'Dipole scope δμ(t)';
 
   /* ── the head ─────────────────────────────────────────────────────────────────────────────────── */
   const head = el('div', 'row tight sp-head', host);
@@ -89,12 +87,12 @@ export function createStates(host, api) {
   /* 022 P3: the kit's select (its list the menu pane); a pick runs the preset and the list goes back to PRESET… */
   const presetSel = listSelect({ aria: 'register preset', placeholder: 'PRESET…', cls: 'sel', items: PRESETS.map((p) => ({ id: p, label: p })), value: null,
     onChange: (p) => { presetSel.set(null); if (p && preset(p) && api.announce) api.announce(p); } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
-  bar.appendChild(presetSel.root); presetSel.button.title = 'Presets are rules, not indices: each one exists for every molecule or says why it does not';
-  const brightBtn = el('button', 'trig on', bar); brightBtn.type = 'button'; brightBtn.textContent = 'BRIGHT'; brightBtn.title = 'The ladder shows the bright valence states only, or every state';
+  bar.appendChild(presetSel.root); presetSel.button.title = 'Rule-based presets, for every molecule';
+  const brightBtn = el('button', 'trig on', bar); brightBtn.type = 'button'; brightBtn.textContent = 'BRIGHT'; brightBtn.title = 'Bright valence states only, or every state';
   const mrow = el('div', 'row tight reg-morph', host);
   /* A ↔ B (register-morph.js, one for both panes): its own target `reg.morph`; a store asks the worker for its states' vectors */
   const M = createMorph({ bar, row: mrow, id: 'reg.morph', key: 'key', lanes: 'lanes', hand, status, rows: () => rowsEl,
-    knobTitle: 'Where on the path from A (0) to B (1) the register plays; for orthogonal stores this is cos/sin, hydrogen’s TRANSITION envelope',
+    knobTitle: 'Where the register plays on the path A → B',
     valid: (k) => k >= GROUND && !!ladder && k < ladder.count, snapshot: () => snapshot(),
     stored: (S) => { request([...S.keys()]); touch(); refresh(); }, changed: () => { touch(); refresh(); api.repaint(); } });
 
@@ -108,28 +106,28 @@ export function createStates(host, api) {
   const refSeg = seg({ label: 'REF', value: 'ground', options: [{ id: 'ground', label: 'GROUND' }, { id: 'mean', label: 'MEAN' }],
     onChange: (v) => setRef(v) });
   vr.appendChild(viewSeg.root); vr.appendChild(refSeg.root);
-  const flowSw = sw({ label: 'FLOW', value: false, title: 'Tracers on the stage, riding the molecule’s current v = j/ρ — the many-electron carrier of phase. Its direction is exact and its size qualitative, in STO-3G and in 6-31+G*; the tracers’ steps are checked by no oracle', onChange: (v) => setFlow(v) });
+  const flowSw = sw({ label: 'FLOW', value: false, title: 'Current tracers v = j/ρ (direction exact)', onChange: (v) => setFlow(v) });
   vr.appendChild(flowSw.root);
-  const srcSeg = seg({ label: 'FLOW SOURCE', value: 'computed', options: [{ id: 'computed', label: 'AS COMPUTED', title: 'v = j/ρ, the basis’s own current' }, { id: 'balanced', label: 'BALANCED', title: 'v + ∇φ with −∇·(ρ∇φ) = ∂ρ/∂t + ∇·j: continuity closed on a 32³ grid, solved in a worker' }], onChange: (v) => setFlowSource(v) });
+  const srcSeg = seg({ label: 'FLOW SOURCE', value: 'computed', options: [{ id: 'computed', label: 'AS COMPUTED', title: 'v = j/ρ, the basis’s own current' }, { id: 'balanced', label: 'BALANCED', title: 'v + ∇φ: continuity closed on a 32³ grid' }], onChange: (v) => setFlowSource(v) });
   vr.appendChild(srcSeg.root);
   const fr = el('div', 'row tight', host), roRep = readout({ label: 'REPAIR', cls: 'wide', value: '—' }), roGate = readout({ label: 'GATED', value: '—' }); fr.append(roRep.root, roGate.root); fr.hidden = true;
   const paintFlow = () => { if (!flow) return; const w = flow.said(); roRep.set(w[0]); roRep.setSub(w[1]); roGate.set(w[2]); roGate.setSub(w[3]); srcSeg.root.title = FLOW_ORACLE[C() && C().preset()] || ''; };
 
   /* ── the drive ────────────────────────────────────────────────────────────────────────────────── */
   const dr = el('div', 'row tight reg-drive', host);
-  const driveSw = sw({ label: 'DRIVE', value: false, title: 'Apply the field E(t)·r to the whole molecule: populations move, at the Rabi rate Ω = E₀μ when ω sits on a stick', onChange: (v) => setDrive(v) });
+  const driveSw = sw({ label: 'DRIVE', value: false, title: 'Drive the molecule with the field E(t)·r', onChange: (v) => setDrive(v) });
   dr.appendChild(driveSw.root);
   const polSel = listSelect({ aria: 'drive polarisation', cls: 'sel', value: drive.pol, onChange: (v) => setDriveParam('pol', v),
     items: [['x', 'x'], ['y', 'y'], ['z', 'z'], ['xy+', 'xy ⟲'], ['xy-', 'xy ⟳'], ['yz+', 'yz ⟲'], ['yz-', 'yz ⟳'], ['zx+', 'zx ⟲'], ['zx-', 'zx ⟳']].map(([id, label]) => ({ id, label })) });
-  dr.appendChild(polSel.root); polSel.button.title = 'The field’s polarisation: linear along an axis, or circular in a plane (⟲ and ⟳ drive opposite ring currents)';
-  const tuneBtn = el('button', 'trig', dr); tuneBtn.type = 'button'; tuneBtn.textContent = 'ω → LANE'; tuneBtn.title = 'Tune the drive to the selected lane: its ω, and the axis (or the plane, for a degenerate pair) of its dipole';
+  dr.appendChild(polSel.root); polSel.button.title = 'Polarisation: linear, or circular ⟲ ⟳';
+  const tuneBtn = el('button', 'trig', dr); tuneBtn.type = 'button'; tuneBtn.textContent = 'ω → LANE'; tuneBtn.title = 'Tune to the selected lane: its ω and axis';
   tuneBtn.addEventListener('click', () => tune());
   const envSeg = seg({ label: 'ENVELOPE', value: 'cw', options: [{ id: 'cw', label: 'CW' }, { id: 'pulse', label: 'PULSE' }], onChange: (v) => setDriveParam('envelope', v) });
   const dk = el('div', 'row tight reg-drive', host);
   const wK = knob({ label: '<m>ω</m>', aria: 'drive frequency', min: 0.05, max: 3, value: drive.omega, log: true, unit: ' Eh', fmt: (v) => v.toFixed(4),
-    title: 'The drive’s carrier frequency in hartree — resonance is a stick of the ladder', onInput: (v) => { if (hand('reg.w', v)) return; setDriveParam('omega', v); } });
+    title: 'Carrier frequency (Eh); a stick is resonance', onInput: (v) => { if (hand('reg.w', v)) return; setDriveParam('omega', v); } });
   const eK = knob({ label: '<m>E₀</m>', aria: 'drive amplitude', min: 1e-4, max: 0.2, value: drive.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2),
-    title: 'The field amplitude in atomic units; on resonance the population flops at Ω = E₀μ', onInput: (v) => { if (hand('reg.e0', v)) return; setDriveParam('e0', v); } });
+    title: 'Field amplitude (a.u.); Rabi Ω = E₀μ', onInput: (v) => { if (hand('reg.e0', v)) return; setDriveParam('e0', v); } });
   const durK = knob({ label: 'PULSE', aria: 'pulse duration', min: 10, max: 4000, value: drive.duration, log: true, unit: ' a.u.', fmt: (v) => v.toFixed(0),
     title: 'The sin² pulse’s duration — a π-pulse is π/Ω long', onInput: (v) => setDriveParam('duration', v) });
   dk.appendChild(wK.root); dk.appendChild(eK.root); dk.appendChild(durK.root); dk.appendChild(envSeg.root);
@@ -138,7 +136,7 @@ export function createStates(host, api) {
   /* ── THE SONG (0.6.4 S1): a track DRIVES hydrogen's register, E_z(t) = E₀·track(t) in i ċ = (diag E_n + E_z z) c, stepped in the chem worker (h.drive.*); each landing
      is reg.anchorFrom(c, t) and the register free-evolves between them.  The track never leaves this page: a project keeps { hash, name, e0, rateAtDrop }. */
   const song = { on: false, meta: null, samples: null, sr: 0, e0: 3e-3, ship: false, ready: false, busy: false, seq: 0, v: -1, last: null, omega: 0, dt: 0.5, speed: 0, wall: 0, paint: 0 };
-  const sg = el('div', 'row tight reg-drive', host), songSw = sw({ label: 'SONG', value: false, title: `Drive hydrogen with the track: its waveform is the field E_z(t) on the ${BASIS.length} labels, and RATE maps its pitch onto their lines`, onChange: (v) => setSong(v) });
+  const sg = el('div', 'row tight reg-drive', host), songSw = sw({ label: 'SONG', value: false, title: 'Drive H with the track\'s E_z(t)', onChange: (v) => setSong(v) });
   const songIn = el('input', '', sg); songIn.type = 'file'; songIn.accept = 'audio/*'; songIn.hidden = true; songIn.addEventListener('change', () => { songFile(songIn.files[0]); songIn.value = ''; });
   const fileBtn = el('button', 'trig', sg, 'FILE'); fileBtn.type = 'button'; fileBtn.title = 'Choose an audio file — or drop one on this row'; fileBtn.addEventListener('click', () => songIn.click());
   const sE = knob({ label: '<m>E₀</m>', aria: 'song amplitude', min: 1e-4, max: 1e-2, value: song.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2), title: 'The field at the track’s peak, in atomic units', onInput: (v) => setSongE0(v) });
@@ -160,7 +158,9 @@ export function createStates(host, api) {
     + '<m>Ψ(t) = b₀Φ₀ + Σ_K b_K e^{−iω_K t}Ψ_K</m> over the RHF determinant and its singlet CIS states, exact in that space by Brillouin’s theorem, '
     + 'so the density is a real N-electron density at any amplitude. It has no double excitations and no orbital relaxation, and its lines are the '
     + '<b>TDA</b> ones — a real-time TDHF run rings at the RPA lines instead. A degenerate pair is two lanes, <m>x</m> and <m>y</m>: '
-    + 'a quarter turn between them is a ring current. MORPH is a performance path between two stored registers, not dynamics.';
+    + 'a quarter turn between them is a ring current. MORPH is a performance path between two stored registers, not dynamics. '
+    + 'On the ladder a stick’s height is its oscillator strength and its hue the axis of its transition dipole; in the dipole scope a line is a slosh and a circle a ring current. '
+    + 'FLOW’s direction is exact and its size qualitative; no oracle checks the tracers’ steps.';
 
   /* ── names ────────────────────────────────────────────────────────────────────────────────────── */
   const axisOf = (k) => { let b = 0; for (let q = 1; q < 3; q++) if (Math.abs(ladder.mu[3 * k + q]) > Math.abs(ladder.mu[3 * k + b])) b = q; return b; };
@@ -517,7 +517,7 @@ export function createStates(host, api) {
     const id = el('div', 'sp-id', root);
     const nm = el('div', 'sp-name sp-nm', id, label(key));
     const es = el('div', 'sp-sub sp-e', id, key === GROUND ? 'ground' : ladder.omega[key].toFixed(4));
-    id.title = key === GROUND ? 'S₀, the RHF ground determinant — pinned: a bright line’s slosh is its cross term with this lane'
+    id.title = key === GROUND ? 'S₀, the RHF ground determinant (pinned)'
       : `${label(key)} · ω_TDA ${ladder.omega[key].toFixed(6)} Eh · f ${ladder.f[key].toFixed(4)} · μ (${[0, 1, 2].map((q) => ladder.mu[3 * key + q].toFixed(3)).join(', ')})`
         + (ladder.size[key] > 1 ? ` · one of a ${ladder.size[key]}-fold level, canonical gauge (pivot ${ladder.pivot[key].toExponential(1)})` : '');
     id.addEventListener('click', () => { selected = key; paint(); markSel(); });
@@ -527,7 +527,7 @@ export function createStates(host, api) {
     const ph = knob({ aria: 'phase ' + label(key), min: 0, max: TAU, value: c.phase, wrap: true, cls: 'live', fmt: (v) => (v * 180 / Math.PI).toFixed(0) + '°',
       onDelta: (dv) => { const l = lanes.get(key); if (!l) return; const w = ((l.phase + dv) % TAU + TAU) % TAU; if (hand(slotId('ph', key), w)) return; setPhase(key, w); }, onReset: () => { if (hand(slotId('ph', key), 0)) return; setPhase(key, 0); } });
     const kn = el('div', 'sp-knobs', root); kn.appendChild(ph.root);
-    const mute = el('button', 'sp-b mute', root, 'M'); mute.type = 'button'; mute.title = 'mute: leave this state out of the FIELD (the register keeps b)';
+    const mute = el('button', 'sp-b mute', root, 'M'); mute.type = 'button'; mute.title = 'Mute: leave this state out of the FIELD';
     mute.setAttribute('aria-label', 'mute ' + label(key)); mute.setAttribute('aria-pressed', 'false');
     mute.addEventListener('click', () => { const l = lanes.get(key); l.mute = !l.mute; touch(); syncLanes(); api.repaint(); });
     const solo = el('button', 'sp-b solo', root, 'S'); solo.type = 'button'; solo.title = 'solo: play this state alone';

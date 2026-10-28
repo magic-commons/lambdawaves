@@ -19,7 +19,7 @@ const W = [0.2126, 0.7152, 0.0722];
 const AMOUNT = (home = 1) => ({ k: 'amount', label: 'AMOUNT', min: 0, max: 1, home });
 
 export const TABLE_TYPES = {
-  levels: { cls: 'table', label: 'LEVELS', hint: 'input black and white, the middle (gamma), output black and white — Photoshop\'s levels',
+  levels: { cls: 'table', label: 'LEVELS', hint: 'input and output black/white, gamma (levels)',
     knobs: [{ k: 'inblack', label: 'IN BLACK', min: 0, max: 1, home: 0 }, { k: 'inwhite', label: 'IN WHITE', min: 0, max: 1, home: 1 },
       { k: 'gamma', label: 'GAMMA', min: 0.1, max: 10, home: 1, log: true }, { k: 'outblack', label: 'OUT BLACK', min: 0, max: 1, home: 0 },
       { k: 'outwhite', label: 'OUT WHITE', min: 0, max: 1, home: 1 }],

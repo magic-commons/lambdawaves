@@ -6,7 +6,7 @@
  * kind of value chooses — grouped under short headings: THE WORDS (the formula, its NAME and SIZE; the ATOM LABELS and theirs; POSITION · PAD),
  * ANNOUNCE (one switch per kind and the pop-ups' SIZE), CURSOR (PARALLAX · DRIFT), MARKS (BEAD · UNCERTAINTY · DIPOLE — BALL AND STICK is THE WORDS' since 011 Q1 — which draw on the stage; the
  * record's since the fix round, C6, their blob keys lifted once) — and STATUS.  A hand writes the record and nothing else; the record repaints the controls (FORGET, a verb's flip). */
-import { el, readout, group, trig } from './mir/kit.js'; import { control } from './mir/controls/factory.js'; import { fold } from './fold.js';
+import { el, readout, group, trig, ariaLabel } from './mir/kit.js'; import { control } from './mir/controls/factory.js'; import { fold } from './fold.js';
 import { statusOf } from './status.js'; import { getHamiltonian } from './hamiltonian.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
 export function createInformational(app) {
   const { ui, device, isPhone } = app, P = infoPrefs();
@@ -24,9 +24,11 @@ export function createInformational(app) {
     ctl[r.key] = control(d);
   }
   /* iteration 018 B7: the ESP bar's SIDE is one press that cycles RIGHT → LEFT → TOP → BOTTOM (Josh: "a toggle that just cycles"), not a seg */
-  { const r = INFO_ROWS.find((q) => q.key === 'espBarSide'), word = (v) => r.options.find((o) => o.id === v).label; let shown = P.get(r.key);
-    const b = trig({ label: word(shown), title: r.hint, cls: 'info-side', onFire: () => P.set(r.key, r.values[(r.values.indexOf(P.get(r.key)) + 1) % r.values.length]) });
-    ctl[r.key] = { root: b.root, get: () => shown, set: (v) => { shown = v; b.setLabel(word(v)); } }; }
+  /* 022 H1 · A GLYPH REPLACES THE WORDS: the button wears the side it is on (icons.js sideRight · sideLeft · sideTop · sideBottom); the word is its name */
+  { const r = INFO_ROWS.find((q) => q.key === 'espBarSide'), word = (v) => r.options.find((o) => o.id === v).label, gly = (v) => 'side' + v[0].toUpperCase() + v.slice(1); let shown = P.get(r.key);
+    const b = trig({ label: '', glyph: gly(shown), title: r.hint, cls: 'info-side', onFire: () => P.set(r.key, r.values[(r.values.indexOf(P.get(r.key)) + 1) % r.values.length]) });
+    const name = (v) => { b.root.dataset.side = v; ariaLabel(b.root, 'ESP bar side: {side}', { side: { t: word(v) } }); }; name(shown);
+    ctl[r.key] = { root: b.root, get: () => shown, set: (v) => { shown = v; b.setGlyph(gly(v)); name(v); } }; }
   P.subscribe((st, changed) => { for (const k of changed) if (ctl[k] && ctl[k].get() !== st[k]) ctl[k].set(st[k]); });
   /* the names other roads press: verbs.js `switch formula|labels`, the notebook's command list */
   ui.molFormulaSw = ctl.molFormula.widget; ui.atomLabelsSw = ctl.atomLabels.widget;
@@ -72,7 +74,9 @@ export function createInformational(app) {
   aa.addEventListener('click', (e) => { e.stopPropagation(); P.set('status', !P.get('status')); });
   const showStatus = () => { const on = !!P.get('status'); stRow.hidden = !on; aa.classList.toggle('on', !on); aa.setAttribute('aria-pressed', String(!on)); };
   showStatus(); P.subscribe((_, changed) => { if (changed.includes('status')) showStatus(); });
-  st.root.title = 'What EXACT, NUMERICAL and UNCHECKED mean: the MODEL sheet'; st.root.addEventListener('click', () => { if (app.hooks.sheet) app.hooks.sheet(); });
+  st.root.title = 'What EXACT, NUMERICAL and UNCHECKED mean: the MODEL sheet';
+  /* 022 H1 · A HINT IS ONE LINE: the two sentences the rows' hints no longer carry, in the window's ⓘ */
+  el('div', 'note', w.body).innerHTML = '<b>The words.</b> STAGE FORMULA also captions every picture and recording; off, an export carries no words. A list longer than LIST CAP is written as its count (140 levels · 7 shells) and returns once it fits.'; st.root.addEventListener('click', () => { if (app.hooks.sheet) app.hooks.sheet(); });
   app.hooks.status = () => { const c = app.state.chem, k = c && c.on ? c.said : app.reg.P && app.reg.P.stark ? 'stark' : getHamiltonian().id, m = k === 'hydrogen' && getHamiltonian().mass, A = k === 'atom' && getHamiltonian().element,   // iteration 008 A: the ATOM speaks per element (past Kr)
       key = m ? k + m : A ? k + A.Z : k, s = key === was ? undefined : typeof k === 'string' ? statusOf({ owner: k, label: m ? 'HYDROGEN · ' + m : A ? A.symbol : '', Z: A ? A.Z : 0 }) : k;
     if (s !== undefined) { was = key; st.set(s ? s.line : '—', s && s.word === 'UNCHECKED' ? 'warn' : ''); st.setSub(s && (typeof k !== 'string' || s.atom) ? s.head : ''); } };

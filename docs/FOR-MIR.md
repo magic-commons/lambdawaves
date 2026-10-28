@@ -71,6 +71,9 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
   docs/INTENT.md keeps for nothing ("ON is never an accent fill"; lint-intent `relief.accentOn`). A `.cur` hook and the state token's face.
 - **The modulation window's old bar rules** (alpha.26 note): `modwindow/modwindow.css` still carries the m2* tempo / preset bar layout under
   § THE WORK BARS; a 1.5.6 round may retire them.
+- **A HINT IS ONE LINE** (022 H1, not built): the kit writes 65 hints over 60 characters (`node tools/hints-census.mjs --kit`; gui.js's LIGHT ANGLE
+  first, 146) and three labels wider than their control (gui.js BRIGHTNESS · SATURATION · SHINE SOFT); the list and ≤ 40 rewrites are
+  research/iteration-022/H-BUILD.md § FOR 1.5.6 — a 1.5.6 round rewrites them in the English pack, the second sentence to the panel's ⓘ.
 
 ## From iteration 010 (X6, the deletion pass)
 - **A starter's refresh carries its name.** `folders/seed.js` refreshes a starter in place but keeps the entry's old name, so λWAVES renames

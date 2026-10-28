@@ -10,6 +10,8 @@ The menus: FILE · EDIT · VIEW · PLAY · WINDOW · HELP (notebook.js MENUS), e
 
 THE ICON TABLE (021 V2): `lab/icons.js` is λWAVES' one table of drawings in the kit's shape (24 box, stroke 1.9, round, currentColor, evenodd solids, 16/20/24 px, meaning-named camelCase), registered at boot through the kit's `registerGlyphs`; every icon is an SVG drawn by a kit road (`chip`/`setGlyph`, `sw({ glyph })`, `spec.glyph`, `opts.icon`); no CSS mask, no sprite, no image file; every window declares ONE glyph (`WINDOW_GLYPH`) at its register or through `windowGlyphs`; a window without a drawing wears a BORROWED one until it is drawn (V-BUILD.md's list is 022's drawing order).
 
+A HINT IS ONE LINE (022 H1): every hint λWAVES writes (`hint:` `title:` `tip:` `knobTitle:` `.title =`, `hint()`, `ariaLabel()`) is one line of ≤ 60 characters (≤ 40 where it fits), read by the kit's one tip (`#controlHelp`, 280 px); a second sentence worth keeping lives in the window's `.note` (its ⓘ), never in the hint; a glyph replaces the words where one exists (the download glyph + "{mb} MB", INFORMATIONAL › SIDE's `sideRight|Left|Top|Bottom`); an action whose label is over 40 carries a `hint` (≤ 40) that the bar's seats, the menus and the MAPPING read (`hint || label`). `node tools/hints-census.mjs --check` is its gate (in `./test.sh node`); the kit's strings over 60 wait in docs/FOR-MIR.md's list (research/iteration-022/H-BUILD.md).
+
 ## The standing paragraphs
 
 The stage frame/axis mask is built in `lab/shell/ink.js` `refreshOcclusion()` (`createInk` hands it to the loop) and

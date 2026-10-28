@@ -18,7 +18,7 @@ export function createMapping(app, { kt }) {
   const midi = createMidi({ storage: jsonStore(MIDI_KEY), run: (id) => { if (!A.get(id) || A.get(id).gesture) return; A.run(id); }, up: (id) => A.up(id), onState: () => paint() });
   const root = el('div', 'mp'), head = el('div', 'mp-head', root);
   const find = el('input', 'mp-find', head); find.type = 'search'; find.placeholder = t('Find an action…'); find.setAttribute('aria-label', t('Find an action'));
-  const conn = trig({ label: 'CONNECT MIDI', cls: 'mp-connect', title: 'ask the browser for MIDI (only on this press) and list the inputs', onFire: () => midi.start() });
+  const conn = trig({ label: 'CONNECT MIDI', cls: 'mp-connect', title: 'ask the browser for MIDI and list the inputs', onFire: () => midi.start() });
   head.appendChild(conn.root); if (!support.ok) conn.root.hidden = true;
   const status = el('div', 'mp-status', root); status.setAttribute('role', 'status');
   const cols = el('div', 'mp-row mp-cols', root);
@@ -43,13 +43,13 @@ export function createMapping(app, { kt }) {
     for (const r of rows) {
       if (r.group !== g) { g = r.group; label(el('div', 'mp-group', list), g); }
       const row = el('div', 'mp-row', list); row.dataset.id = r.id; row.setAttribute('role', 'listitem'); row.classList.toggle('mp-learning', learning === r.id);
-      label(el('span', 'mp-name', row), r.short || r.label).title = r.label;
+      label(el('span', 'mp-name', row), r.short || r.label).title = r.hint || r.label;
       const k = T.chords(r.id)[0]; chip(row, 'key', k ? displayChord(k, P) : '', () => T.unbind(r.id));
       if (r.gesture) { el('span', 'mp-chip mp-off', row, t('KEY only')); el('span', 'mp-chip mp-off', row, '·'); }
       else { const m = midi.keyOf(r.id); chip(row, 'midi', m ? midiText(m) : '', m && (() => midi.remove(m)));
         const rs = r.kind === 'hold' ? null : routes(r.id); if (rs) chip(row, 'mod', rs.length ? t('ROUTED') + (rs.length > 1 ? ' ×' + rs.length : '') : '', () => { for (const x of routes(r.id)) app.sh.LW.mod.unroute(x.id); });
         else el('span', 'mp-chip mp-off', row, '·'); }
-      const b = trig({ label: learning === r.id ? 'LISTENING…' : 'LEARN', cls: 'mp-learn', title: 'the next key, MIDI message or moved macro knob is this action’s', onFire: () => (learning === r.id ? stop() : learn(r.id)) });
+      const b = trig({ label: learning === r.id ? 'LISTENING…' : 'LEARN', cls: 'mp-learn', title: 'the next key, MIDI or macro move is this action’s', onFire: () => (learning === r.id ? stop() : learn(r.id)) });
       b.on = learning === r.id; row.appendChild(b.root);
     }
     if (!rows.length) label(el('div', 'mp-empty', list), 'Nothing matches');

@@ -25,7 +25,7 @@ export function createTransition(app) {
   const slotA = rab.appendChild(trig({ label: 'A', cls: 'ab-slot', title: 'recall state A', onFire: () => recall(abA) }).root);
   rab.appendChild(trig({ label: 'STORE B', title: 'keep the register as it is now as state B', onFire: () => { abB = snap(); abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeB';
   const slotB = rab.appendChild(trig({ label: 'B', cls: 'ab-slot', title: 'recall state B', onFire: () => recall(abB) }).root);
-  const clr = chip(el('button', 'sp-abclear', rab), 'trash'); clr.type = 'button'; clr.title = 'CLEAR · empty A and B (a running TRANSITION stops and keeps its mix)'; clr.setAttribute('aria-label', 'CLEAR A and B');
+  const clr = chip(el('button', 'sp-abclear', rab), 'trash'); clr.type = 'button'; clr.title = 'CLEAR · empty A and B'; clr.setAttribute('aria-label', 'CLEAR A and B');
   clr.addEventListener('click', () => { if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } abA = abB = null; touchState(); abStatus(); });
   const rab2 = el('div', 'row tight', gab);
   ui.abSw = sw({ label: 'TRANSITION', value: false, title: 'play the Rabi mix cos(Ω(t−t₀)/2)·A(t) + sin(Ω(t−t₀)/2)·B(t)', onChange: (v) => {
