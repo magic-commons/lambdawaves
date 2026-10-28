@@ -2,7 +2,7 @@
   "kit": "MIR",
   "version": "1.5.6-alpha.9",
   "line": "1.5",
-  "commit": "3c24473d8044",
+  "commit": "3ce9bc2fb60d",
   "files": {
     "lab/fonts/LWTitle-title.woff2": "8069abf19624158c",
     "lab/fonts/Roboto-OFL.txt": "061402327a96aadb",
@@ -202,7 +202,7 @@
     "lab/mir/shell/stage.css": "db4a83037ab9c2bd",
     "lab/mir/shell/themes.js": "8e736e9ba4f30330",
     "lab/mir/shell/transport.css": "9a1b24ef51354356",
-    "lab/mir/shell/transport.js": "f1ed5226d7915f28",
+    "lab/mir/shell/transport.js": "6f4754a2e47e4946",
     "lab/mir/shell/vendor/katex/LICENSE": "766ccc1f306c885a",
     "lab/mir/shell/vendor/katex/fonts/KaTeX_AMS-Regular.woff2": "0cdd387c9590a1a9",
     "lab/mir/shell/vendor/katex/fonts/KaTeX_Caligraphic-Bold.woff2": "de7701e42cf1f4cf",

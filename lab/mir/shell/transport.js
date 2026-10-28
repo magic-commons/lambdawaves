@@ -349,12 +349,21 @@ export function logoButton({ mark = 'mark', label: name = 'MIR', run = null, sig
  *  tempo-editor.js `bindTempoEditor`, one module for the modulation and timeline work bars).  A click on `button` (when
  *  `enabled()`) puts `input` in its seat at the button's size with the tempo as it is, selected; Enter or leaving takes
  *  it, Escape does not (focus goes back to the button); 8 characters, decimals.  `drag: true` also gives the button
- *  BASINS' drag (the whole range in 220 px, a finger 320, ⅛ on any modifier; a drag is not a click).  `tempo` is
+ *  BASINS' drag (the whole range in 220 px, a finger 320, ⅛ on any modifier; a drag is not a click); the wheel 1 BPM a notch, Shift 0.1 (1.5.6-alpha.9).  `tempo` is
  *  createTempo's { get, set, commit, min, max }.  → { open(), close(take), editing, destroy() } */
 export function bindTempoField({ button, input, tempo, enabled = () => true, drag: dragToo = false, paint = () => {}, signal } = {}) {
   /* the tempo field IS the kit's number field (controls/number.js bindNumber): a click opens it, Enter or leaving takes the number, Escape
      does not; the drag is the one knob law (220 px, 320 under a finger, ⅛ on any modifier or a second finger, on a virtual point) */
-  return bindNumber({ button, input, model: tempo, parse: parseBpm, enabled, drag: dragToo, click: dragToo, paint, chars: TRANSPORT.fieldChars, step: 0.1, signal });
+  const field = bindNumber({ button, input, model: tempo, parse: parseBpm, enabled, drag: dragToo, click: dragToo, paint, chars: TRANSPORT.fieldChars, step: 0.1, signal });
+  /* 1.5.6-alpha.9 ONE NOTCH IS ONE BPM: the field's button turns by the wheel as the pill does (the modulation window's own tempo had none) */
+  const notch = {};
+  button.addEventListener('wheel', (e) => {
+    if (!enabled() || field.editing) return;
+    e.preventDefault();
+    const n = wheelNotches(e, notch, e.timeStamp); if (!n) return;
+    tempo.set(clampBpm(tempo.get() + n * (e.shiftKey ? 0.1 : 1), tempo.min, tempo.max)); paint(); frame.coalesce(notch, () => tempo.commit());
+  }, { passive: false, signal });
+  return field;
 }
 
 /** tempoPill({ tempo, panel, work }) — BASINS' BPM pill (`.tbtn.tempo-expand`: the number, BPM, the Hz, the chevron).
@@ -401,12 +410,7 @@ export function tempoPill({ tempo, panel = null, work = () => false, typed = fal
     if (twice(e)) return;
     if (panel) panel.toggle();
   }, on);
-  const notch = {};                                                   // 1.5.6-alpha.9 ONE NOTCH IS ONE BPM (wheelNotches), Shift a tenth
-  root.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const n = wheelNotches(e, notch, e.timeStamp); if (!n) return;
-    tempo.set(tempo.get() + n * (e.shiftKey ? 0.1 : 1)); sync(); frame.coalesce('mir.transport.persist', () => tempo.commit());
-  }, { passive: false, signal: life.signal });
+  /* 1.5.6-alpha.9 ONE NOTCH IS ONE BPM: the wheel is the tempo field's (bindTempoField above), 1 BPM a notch, Shift a tenth */
   root.addEventListener('keydown', (e) => {
     const k = keyStep(e.code, e.shiftKey); if (!k) return;
     e.preventDefault(); tempo.set(tempo.get() + k); sync(); tempo.commit();

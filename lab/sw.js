@@ -279,7 +279,7 @@ const PRECACHE = [
   ['./mir/shell/stage.css',                                         'db4a83037ab9'],
   ['./mir/shell/themes.js',                                         '8e736e9ba4f3'],
   ['./mir/shell/transport.css',                                     '9a1b24ef5135'],
-  ['./mir/shell/transport.js',                                      'f1ed5226d791'],
+  ['./mir/shell/transport.js',                                      '6f4754a2e47e'],
   ['./mir/shell/vendor/katex/LICENSE',                              '766ccc1f306c'],
   ['./mir/shell/vendor/katex/fonts/KaTeX_AMS-Regular.woff2',        '0cdd387c9590'],
   ['./mir/shell/vendor/katex/fonts/KaTeX_Caligraphic-Bold.woff2',   'de7701e42cf1'],
