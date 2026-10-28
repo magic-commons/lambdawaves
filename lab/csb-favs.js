@@ -7,9 +7,9 @@
  *     so the modulation window routes it, the timeline's hold menu automates it and the registry paints it; a turn of either face moves both;
  *   · a segment the owners offer (`offer(id, control, { width })`; Josh's answer 4: SPECTRUM's HYDROGEN | STURMIAN, WAVE's POSITION | MOMENTUM and its
  *     OBSERVABLE): a seg made from the original's options whose press presses the original's button, so its owner's road (history, its status) runs.
- * ADD / REMOVE ride the knob's TIMELINE CLIP menu (the kit's setTimelineKnobRows) and a right click on an offered row (`data-fav`).  The list is a
+ * ADD / REMOVE ride the kit's knob menu (setTimelineKnobRows: its foot) and an offered row's menu (`data-fav`, lab/context-menus.js).  The list is a
  * PREFERENCE (`lambdawaves.q0.csb` { v: 1, items }), never a project: every new project starts with it.  Faces are built when the expander opens. */
-import { el, knob, seg, sw, label, TAP } from './mir/kit.js';
+import { el, knob, seg, sw, label } from './mir/kit.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { setTimelineKnobRows } from './mir/timeline/knobs.js';
 
@@ -83,27 +83,6 @@ export function createCsbFavs(app, { panel }) {
   function remove(id) { if (!isFav(id)) return false; items = items.filter((x) => x !== id); save(); return true; }
   const rowsFor = (id) => (isFav(id) ? [{ label: 'REMOVE FROM CONTROL SURFACE', run: () => remove(id) }] : eligible(id) ? [{ label: 'ADD TO CONTROL SURFACE', run: () => add(id) }] : []);
   setTimelineKnobRows(rowsFor);                                       // the knob's own right-click / hold menu (TIMELINE CLIP) carries the two rows
-
-  /* an offered row's right click (or a held finger): the same two rows in the house's menu pane */
-  let pop = null;
-  let popEsc = null;   // 021 I1: an open menu is a layer of THE ESCAPE STACK (lab/actions.js)
-  const closePop = () => { if (popEsc) { popEsc(); popEsc = null; } if (pop) { pop.remove(); pop = null; } };
-  function menu(id, x, y) {
-    closePop(); const rows = rowsFor(id); if (!rows.length) return;
-    popEsc = app.sh.ACTIONS.escape.push(closePop); pop = el('div', 'tl-pop glass', document.body); pop.dataset.mirSurface = 'menu'; pop.setAttribute('role', 'menu');
-    for (const r of rows) { const b = el('button', 'trig', pop); b.type = 'button'; label(b, r.label); b.addEventListener('click', () => { closePop(); r.run(); }); }
-    const b = pop.getBoundingClientRect(); pop.style.left = Math.max(8, Math.min(innerWidth - b.width - 8, x)) + 'px'; pop.style.top = Math.max(8, Math.min(innerHeight - b.height - 8, y)) + 'px';
-    pop.querySelector('button').focus();
-  }
-  document.addEventListener('contextmenu', (e) => { const row = e.target.closest && e.target.closest('[data-fav]'); if (!row || e.target.closest('.k[data-param]')) return; e.preventDefault(); menu(row.dataset.fav, e.clientX, e.clientY); });
-  let hold = null, at = null;   // 021 V3: a finger's own tremble is not a move — the hold cancels only past the kit's tap slop (TAP.px)
-  document.addEventListener('pointerdown', (e) => {
-    if (pop && !pop.contains(e.target)) closePop();
-    const row = e.pointerType === 'touch' && e.target.closest && e.target.closest('[data-fav]'); if (!row || e.target.closest('.k[data-param]')) return;
-    const x = e.clientX, y = e.clientY; at = { x, y }; hold = setTimeout(() => { hold = null; menu(row.dataset.fav, x, y); }, 500);
-  }, true);
-  const unhold = (e) => { if (!hold) return; if (e && e.type === 'pointermove' && at && Math.hypot(e.clientX - at.x, e.clientY - at.y) <= TAP.px) return; clearTimeout(hold); hold = null; };
-  for (const t of ['pointerup', 'pointercancel', 'pointermove']) document.addEventListener(t, unhold, true);
 
   return {
     strip, add, remove, rowsFor, swFace, get items() { return items.slice(); },

@@ -12,6 +12,7 @@
 import { TIER } from './tier.js'; import { VIEW, VIEW_NAMES, WAVE_VIEWS, STYLE, drawStyle } from './field.js'; import { CAM } from './camera-law.js'; import { STAGE_BINDINGS } from './stage-gestures.js';
 import { infoActions } from './mir/info/layer.js'; import { mirGui } from './mir-gui.js'; import { ASK_ENABLED } from './ask.js'; import { INFO_ROWS, infoPrefs } from './shell/stage-words.js';
 import { EXPORTS } from './export3d.js'; import { isField } from './mir/core/pointer.js';
+import { knobAct } from './mir/shell/menubar.js'; import { copyText } from './mir/shell/clipboard.js';
 
 const F = (a) => (a && a.fine) || 1;   // the fine step a key's Shift asks for (1 bare, 0.25 with Shift)
 
@@ -37,6 +38,13 @@ export function createActions(app) {
   const fsOn = () => !!(document.fullscreenElement || (typeof matchMedia === 'function' && matchMedia('(display-mode: fullscreen)').matches));
   const fullscreen = () => { if (!document.fullscreenElement && fsOn()) { W().wState.setStatus('the browser’s full screen (F11) is the browser’s: F11 leaves it', 'warn'); return; } W().toggleFullscreen(); };
   const IP = infoPrefs(), infoKeys = INFO_ROWS.filter((r) => r.type === 'bool').map((r) => r.key); let infoKept = null;
+  /* 022 P2 · the rows a CONTEXT MENU runs (lab/context-menus.js hands the pressed element as `{ el }`; a key acts on the focus) */
+  const at = (a) => (a && a.el) || document.activeElement || document.body, knobAt = (a) => at(a).closest && at(a).closest('.k'), tileAt = (a) => at(a).closest && at(a).closest('.mm-tile');
+  const said = (ok, what) => W().wState.setStatus(ok ? what + ' copied' : 'the clipboard refused the copy', ok ? 'live' : 'warn');
+  const copyOut = (text, what) => { if (!text) return false; copyText(String(text)).then((ok) => said(ok, what)); return true; };
+  const wordOf = (k, a) => { const t = tileAt(a); if (t) return k === 'name' ? (t.getAttribute('aria-label') || '').split(' — ')[0] : (t.querySelector('.mm-lbl, .mm-sym') || {}).textContent;
+    const q = (s) => (document.querySelector(s) || {}).textContent; return k === 'name' ? q('.mol-pick .mir-step-name') : q('.lw-stage .mir-info-text'); };
+  const winOf = (id) => (S().rk ? S().rk.windows().find((x) => x.id === id) : null) || {};
   const foldable = () => (S().rk ? S().rk.windows().filter((w) => w.open && w.built && !w.hidden && w.id !== 'transport') : []);   // 021 V3: a mode-hidden or LEGACY card is not FOLDS' (kit windows() `hidden`)
   /** reveal(id) — a window by the FINDER's road (kit rk.reveal: an open one scrolled to, a closed one opened at the top); NODES as its FREE window */
   const reveal = (id) => { const N = nodes(), d = document.querySelector('.dev[data-id="' + id + '"]'); if (id === 'nodes' && N && (!d || d.classList.contains('closed'))) N.open(); else S().rk.reveal(id); S().saveSettings(); };
@@ -148,6 +156,29 @@ export function createActions(app) {
     { id: 'copy.latex', group: PJ, label: 'COPY the state as LaTeX', run: () => W().copyLatex(), gesture: true, surface: true },
     { id: 'copy.json', group: PJ, label: 'COPY the experiment as JSON', run: () => S().copyJSON(), gesture: true, surface: true },
     { id: 'copy.link', group: PJ, label: 'COPY a LINK to this state', run: () => S().copyLink(), gesture: true, surface: true },
+    { id: 'copy.picture', group: PJ, short: 'copy picture', label: 'COPY the stage picture (PNG)', gesture: true, surface: true, undo: 'none',
+      run: () => { const C = app.state.capApi && app.state.capApi.capture; if (!C || !globalThis.ClipboardItem) return false;
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': C.picture({ scale: 1 }).then((r) => r.blob) })]).then(() => said(true, 'the picture'), () => said(false)); } },
+    ...[['name', 'COPY the name'], ['formula', 'COPY the formula']].map(([k, label]) => ({ id: 'copy.' + k, group: PJ, short: 'copy ' + k, label, surface: true, undo: 'none', run: (a) => copyOut(wordOf(k, a), 'the ' + k) })),
+    ...['reset', 'copy', 'paste', 'fine'].map((v) => ({ id: 'knob.' + v, group: CA, short: 'knob ' + v, label: 'KNOB › ' + v.toUpperCase() + (v === 'fine' ? ' — half the drag gain' : ''), surface: true, undo: v === 'copy' || v === 'fine' ? 'none' : 'row',
+      ...(v === 'fine' ? { kind: 'toggle', get: () => { const k = knobAt(); return !!(k && k.mirKnob && k.mirKnob.fine()); } } : {}), run: (a) => knobAct(knobAt(a), v) })),
+    { id: 'knob.copyId', group: CA, short: 'copy id', label: 'COPY the control’s id (its modulation target)', surface: true, undo: 'none', run: (a) => { const c = at(a).closest && at(a).closest('[data-param], [data-key-action], [data-fav]');
+      return c ? copyOut(c.dataset.param || c.dataset.keyAction || c.dataset.fav, 'the id') : false; } },
+    { id: 'knob.route', group: CA, short: 'route', label: 'ROUTE the selected macro (or a new one) onto the knob', surface: true, run: (a) => { const k = knobAt(a), id = k && k.dataset.param, M = S().LW && S().LW.mod;
+      if (!id || !M) return false; const v = app.state.modView, m = (v && v.api.selected && v.api.selected()) || M.addMacro(); return !!M.route(m, id); } },
+    { id: 'control.reset', group: CA, short: 'reset', label: 'RESET the control to its default', surface: true, run: (a) => { const c = at(a).closest && at(a).closest('[data-param]'), R = app.state.modHost && app.state.modHost.registry, id = c && c.dataset.param;
+      const d = id && R && R.has(id) ? R.describeOne(id) : null; if (!d || d.def === null || d.def === undefined) return false; R.setBase(id, d.def); return true; } },
+    { id: 'control.learn', group: CA, short: 'learn', label: 'LEARN a key, MIDI or a route for the control (the MAPPING)', surface: true, undo: 'none', run: (a) => { const c = at(a).closest && at(a).closest('[data-key-action]');
+      if (!c || !api.mapping) return false; L().keymap.open('MAPPING'); api.mapping.learn(c.dataset.keyAction); return true; } },
+    ...[['open', 'OPEN the tile', (t) => t.click()], ['isomers', 'its ISOMERS', (t) => t.querySelector('.mm-iso') && t.click()],
+      ['keep', 'KEEP it on this device', (t) => { const i = t.querySelector('img[data-vol]'); return i && chem() ? chem().keepMolecule(i.dataset.vol + ':' + i.dataset.mol) : false; }]]
+      .map(([k, label, f]) => ({ id: 'picker.' + k, group: V, short: 'picker ' + k, label: 'PICKER › ' + label, surface: true, undo: 'none', run: (a) => { const t = tileAt(a); return t ? f(t) : false; } })),
+    { id: 'picker.look', group: V, short: 'picker look', label: 'PICKER › the pictures’ LOOK', kind: 'set', args: { id: '?enum density|phase|im|re|cloud|solid|labels' }, undo: 'none', surface: true,
+      get: () => (document.querySelector('#lwMenu .mm-lk.on') || { dataset: {} }).dataset.look, run: (a) => { const b = a && a.id && document.querySelector('#lwMenu .mm-lk[data-look="' + a.id + '"]'); if (b) b.click(); return !!b; } },
+    { id: 'esp.side', group: V, short: 'esp side', label: 'the ESP BAR’s SIDE — RIGHT → LEFT → TOP → BOTTOM', kind: 'set', args: { id: '?enum right|left|top|bottom' }, get: () => IP.get('espBarSide'), surface: true,
+      run: (a) => { const s = ['right', 'left', 'top', 'bottom']; IP.set({ espBarSide: a && s.includes(a.id) ? a.id : s[(s.indexOf(IP.get('espBarSide')) + 1) % 4] }); } },
+    { id: 'notebook.copy', group: PJ, short: 'copy notebook', label: 'COPY the notebook’s text', surface: true, undo: 'none', run: () => copyOut((document.querySelector('#notebook .nb-text') || {}).value, 'the notebook') },
+    { id: 'spectrum.solo', group: WD, short: 'solo spectrum', label: 'SOLO SPECTRUM — fold every other window', surface: true, run: () => api.run('window.spectrum.solo') },
     ...[['film.picture', 'RENDER › CAPTURE IMAGE', '.sr-capture'], ['film.record', 'RENDER › RENDER the film', '.sv-primary']].map(([id, label, cls]) => ({ id, group: PJ, short: label.split(' › ')[1].toLowerCase(), label, surface: true,
       run: () => { const b = document.querySelector('.dev[data-id="render"] ' + cls); if (b && !b.disabled) b.click(); } })),   // the kit's RENDER card's own buttons (by their class)
     { id: 'invert', group: V, short: 'invert', label: 'INVERT the cloud — ink, not light', kind: 'toggle', get: () => !!mat.invert, run: () => S().LW.setInvert(!mat.invert), surface: true },
@@ -184,7 +215,12 @@ export function createActions(app) {
   const sync = () => { verbRows(); const rk = S().rk; if (!rk) return; for (const w of rk.windows()) { const t = (w.title || w.id).toUpperCase(), id = w.id;
     add([{ id: `window.${id}.open`, group: 'WINDOWS', short: t + ' open', label: t + ' — open', run: () => reveal(id), surface: true },
       { id: `window.${id}.close`, group: 'WINDOWS', short: t + ' close', label: t + ' — close', run: () => { if (id === 'nodes' && nodes()) nodes().close(); rk.close(id); S().saveSettings(); }, surface: true },
-      { id: `window.${id}.fold`, group: 'WINDOWS', short: t + ' fold', label: t + ' — fold / unfold', kind: 'toggle', get: () => !!(rk.windows().find((x) => x.id === id) || {}).folded, run: () => rk.fold(id, !(rk.windows().find((x) => x.id === id) || {}).folded), surface: true }]); } };
+      { id: `window.${id}.fold`, group: 'WINDOWS', short: t + ' fold', label: t + ' — fold / unfold', kind: 'toggle', get: () => !!(rk.windows().find((x) => x.id === id) || {}).folded, run: () => rk.fold(id, !(rk.windows().find((x) => x.id === id) || {}).folded), surface: true },
+      /* 022 P2 · the title bar's menu: FLOAT (toggle), SIDE (the other rack), RESET (home: docked on its own side, unfolded), SOLO (every other window folded) */
+      { id: `window.${id}.float`, group: 'WINDOWS', short: t + ' float', label: t + ' — float / dock', kind: 'toggle', get: () => !!winOf(id).floating, run: () => rk.toggleFloat(id), surface: true },
+      { id: `window.${id}.side`, group: 'WINDOWS', short: t + ' side', label: t + ' — to the other rack', run: () => { if (winOf(id).floating) rk.dock(id); rk.move(id, { side: winOf(id).side === 'right' ? 'left' : 'right' }); }, surface: true },
+      { id: `window.${id}.reset`, group: 'WINDOWS', short: t + ' reset', label: t + ' — back home, unfolded', run: () => { if (winOf(id).floating) rk.dock(id); rk.move(id, { side: (rk.spec(id) || {}).side }); rk.fold(id, false); }, surface: true },
+      { id: `window.${id}.solo`, group: 'WINDOWS', short: t + ' solo', label: t + ' — solo: fold every other window', run: () => { for (const x of foldable()) rk.fold(x.id, x.id !== id); }, surface: true }]); } };
   let edit = (a, run) => run();   // keys.js hands in THE ONE WRAPPER that names a history row (keyEdit), once the key table that spells the name exists
   /* THE ESCAPE STACK: the topmost layer closes first; a layer that has gone (`alive` false) is passed over; nothing open → the stage gives the keyboard back */
   const layers = [];

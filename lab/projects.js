@@ -146,6 +146,7 @@ export function createProjects(port) {
     factory: () => api.restoreDemos(),
     galleryCopy: { factory: 'RESTORE THE DEMOS', factoryNote: 'puts back the demos λWAVES ships with — adds only what is missing, and never touches anything you saved' },
     /* ⓘ (and a selection) names the project RENDER's SUBJECT describes; THIS VIEW when none */
+    itemRows: port.itemRows,   // 022 P2: a project's menu adds OPEN (and EXPORT for the open one) beside the kit's rows
     onInspect: (e, how) => { inspected = e ? e.id : null; if (port.inspect) port.inspect(e || null, how || {}); },
     zip: { validate: (p) => !!valueOf(p) },                       // a project ZIP is taken only when it carries λWAVES' part
     say: (text, warn) => { if (!hush) toast(text, warn); },

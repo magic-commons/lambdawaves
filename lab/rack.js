@@ -22,6 +22,7 @@ import { el, device as kitDevice } from './mir/kit.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createGas } from './windows/gas.js'; import { createEqualizerCard } from './windows/equalizer.js';   // 021 G2 (THE HINGE): the BOX rows and the EQUALIZER window, out of spectrum.js
 import { createFolders } from './windows/folders.js';   // 021 G3: the FOLDERS card, out of boot()
+import { createContextMenus } from './context-menus.js';   // 022 P2: ONE MENU DOOR
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
 import { registerIcons } from './icons.js';   // 021 V2: THE ICON TABLE, through the kit's registerGlyphs, before any window
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
@@ -894,6 +895,7 @@ export async function boot(dom) {
     LW.curves = N.model; LW.nodes = N; }
   // FOLDERS — the FOLDERS card (`projects`), the kit's mountGallery (021 G3: lab/windows/folders.js)
   createFolders(app);
+  createContextMenus(app);   // 022 P2: every right-click / hold is the kit's contextMenu over action ids (lab/context-menus.js)
   app.sh.ACTIONS.sync();   // 021 I1: the windows registered since the keys (RENDER, NODES, FOLDERS) get their open · close · fold rows
   app.sh.ACTIONS.mapping.install();   // 021 I2: every surface action an `action.<id>` trigger / toggle target (lab/mapping.js)
 
