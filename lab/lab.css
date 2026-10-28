@@ -55,7 +55,7 @@ body.rack-hidden #rackToggle { color: var(--acc); }
 body.rack-hidden #rackFav, body.rack-hidden #rackFavList { opacity: 0; pointer-events: none; }
 body.rack-hidden.rack-peek #rackFav { opacity: 1; pointer-events: auto; }
 #rackFav:hover { color: var(--acc); }
-#rackFavList { position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 3); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
+#rackFavList { position: absolute; right: calc(var(--rack-w) + 14px); top: 116px; z-index: calc(var(--z-chrome) + 4); display: flex; flex-direction: column; min-width: 260px; padding: 4px; border-radius: 10px; }
 .mb-item .fav-x { float: right; color: var(--dim); margin-left: 10px; }
 .mb-item:hover .fav-x { color: var(--acc2); }
 body.no-badges #badges > .badge:not(.build) { display: none !important; }   /* wave 133: STATUS TAGS hides the four ψ-badges, never the build offer */
@@ -290,6 +290,11 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
   height: 56px; padding: 0 var(--sp-3); border-radius: var(--r-lg); }
 /* the subtitle-sized transport: one slim bar at the bottom centre */
 #transport.mini { left: 50%; right: auto; transform: translateX(-50%); width: min(560px, calc(100% - 2 * var(--rack-w) - 40px)); height: 46px; bottom: 60px; padding: 2px 7px 3px; gap: 2px; border-radius: 16px; }   /* wave 92: the modulation work bar's box */
+/* 020 T3 · THE BAR IS ON TOP (Josh: "let the CSB be always on top so that users can control it"): above #floats (chrome + 2: the keyboard, MIR
+   OPTIONS, every floating window) — but under TIMELINE and MODULATION while it cannot dodge them (no free seat: modulation.js modDodge sets
+   body.transport-under).  Its ☆ list rises with it (+4, the search pill's height); the menubar's menus and the hints are top-layer popovers. */
+#transport.mini { z-index: calc(var(--z-chrome) + 3); }
+body.transport-under #transport.mini { z-index: var(--z-chrome); }
 #transport.mini .tbtn { width: 26px; height: 26px; font-size: 11px; border-radius: 50%; }
 #transport.mini .tbtn.play { width: 34px; }
 #transport.mini .tbtn.play > svg { width: 15px; height: 15px; }   /* iteration 014 A0: the kit's play glyph at the old ▶'s size */

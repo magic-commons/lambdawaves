@@ -9,7 +9,7 @@ const drv = await import(new URL('./gate/drv.mjs', import.meta.url).href);
 
 const scene = process.argv[2] || 'play', OUT = process.argv[3] || '.tmp/bar-probe';
 mkdirSync(OUT, { recursive: true });
-const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 9681}/lab/?starter=home`, { width: 1600, height: 1000 });
+const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 9681}/lab/?starter=home`, { width: 1600, height: scene === 'z' ? 1300 : 1000 });
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const shot = async (name) => writeFileSync(`${OUT}/${name}.png`, Buffer.from(await g.snap(), 'base64'));
 let n = 0;
@@ -61,13 +61,40 @@ try {
     for (const name of ['free', 'rack']) { await g.ev(`document.querySelector('#transport .dock-btn').click(); return 1;`); await wait(1500); await row(name); await shot('seats-' + name); }
   }
   if (scene === 'z') {
-    console.log('bar', JSON.stringify(await rectOf('#transport')), 'z', await g.ev(`return getComputedStyle(document.getElementById('transport')).zIndex;`));
-    console.log('alone                ', await hit());
-    /* the keyboard editor and MIR OPTIONS, each dragged over the bar's centre */
+    const state = async (what) => console.log(what.padEnd(34), (await hit()).padEnd(14), JSON.stringify(await g.ev(`const t = document.getElementById('transport'), r = t.getBoundingClientRect();
+      return { z: getComputedStyle(t).zIndex, under: document.body.classList.contains('transport-under'), top: Math.round(r.top), seat: t.classList.contains('at-top') ? 'top' : 'bottom',
+        tl: __LW.timeline.isOpen() ? [__LW.timeline.root.getBoundingClientRect()].map((q) => [q.left, q.top, q.width, q.height].map(Math.round))[0] : null,
+        mod: __LW.layout.modulation.open ? [document.querySelector('[data-mir-window="modulation"]').getBoundingClientRect()].map((q) => [q.left, q.top, q.width, q.height].map(Math.round))[0] : null };`)));
+    /* the chrome that stacks at the bar's height or above, and whether it follows the bar in the document (a tie goes to the later one) */
+    console.log('layers', JSON.stringify(await g.ev(`const t = document.getElementById('transport'), out = [];
+      for (const e of document.querySelectorAll('body *')) { const c = getComputedStyle(e); if (c.position === 'static' || c.zIndex === 'auto' || +c.zIndex < 32) continue; if (t.contains(e) || e.closest('#floats')) continue;
+        out.push((e.id || e.className.toString().split(' ')[0]) + ':' + c.zIndex + (t.compareDocumentPosition(e) & 4 ? ' after' : ' before')); } return out;`)));
     const over = (sel) => g.ev(`const w = document.querySelector(${JSON.stringify(sel)}); if (!w) return 'no window'; const b = document.getElementById('transport').getBoundingClientRect();
-      w.style.left = Math.round(b.left + b.width / 2 - w.offsetWidth / 2) + 'px'; w.style.top = Math.round(b.top + b.height / 2 - w.offsetHeight / 2) + 'px'; return w.dataset.id + ' ' + w.offsetWidth + 'x' + w.offsetHeight;`);
-    await g.ev(`__LW.keys?.open ? __LW.keys.open() : document.dispatchEvent(new KeyboardEvent('keydown', { key: 'K', ctrlKey: true, shiftKey: true })); return 1;`); await wait(900);
-    console.log('keyboard', await g.ev(`return [...document.querySelectorAll('#floats > *')].filter((e) => !e.hidden && e.offsetWidth).map((e) => e.dataset.id || e.id || e.className.slice(0, 30)).join(' | ');`));
+      w.style.left = Math.round(b.left + b.width / 2 - w.offsetWidth / 2) + 'px'; w.style.top = Math.round(b.top + b.height / 2 - w.offsetHeight / 2) + 'px'; return w.offsetWidth + 'x' + w.offsetHeight;`);
+    await state('alone');
+    await g.ev(`__LW.keymap.open(); return 1;`); await wait(900);
+    const kbSel = await g.ev(`const w = [...document.querySelectorAll('#floats > *')].find((e) => !e.hidden && e.offsetWidth && /key/i.test((e.dataset.id || '') + (e.dataset.mirWindow || '') + e.className)); if (!w) return null; w.id ||= 'probeKb'; return '#' + w.id;`);
+    console.log('keyboard', kbSel, await over(kbSel)); await wait(300); await state('keyboard over the bar'); await shot('z-keyboard');
+    await g.ev(`__LW.keymap.close(); return 1;`); await wait(600);
+    await g.tap('#transport .csb-gear'); await wait(1200);
+    const optSel = await g.ev(`const w = [...document.querySelectorAll('#floats > *, .mir-window')].find((e) => !e.hidden && e.offsetWidth && /option|mir-gui/i.test((e.dataset.id || '') + (e.dataset.mirWindow || '') + e.className)); if (!w) return null; w.id ||= 'probeOpt'; return '#' + w.id;`);
+    console.log('options', optSel, optSel && await over(optSel)); await wait(300); await state('MIR OPTIONS over the bar'); await shot('z-options');
+    await g.ev(`document.querySelector(${JSON.stringify(optSel || 'none')})?.querySelector('[aria-label="close"], .mir-win-x, .win-x')?.click(); return 1;`); await wait(400);
+    await g.ev(`document.querySelector(${JSON.stringify(optSel || 'none')}) && (document.querySelector(${JSON.stringify(optSel || 'none')}).hidden || 0); return 1;`);
+    await g.press('\uE00C'); await wait(500);   // Escape
+    await state('options closed');
+    await g.ev(`__LW.timeline.open(); return 1;`); await wait(1500); await state('TIMELINE open');
+    await g.tap('#transport .mod-exp'); await wait(1500); await state('+ MODULATION'); await shot('z-tl-mod');
+    /* pin both: drag the modulation window by its grip until it covers the top seat too (a real drag: the kit's onMoved → modDodge) */
+    const grip = await g.ev(`const mw = document.querySelector('[data-mir-window="modulation"]'); const gr = [...document.querySelectorAll('.crail-grip')].find((e) => e.offsetWidth > 6);
+      const r = (gr || mw).getBoundingClientRect(), m = mw.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + Math.min(r.height / 2, 10)), top: Math.round(m.top), cls: gr ? gr.className.toString().slice(0, 40) : 'none' };`);
+    console.log('grip', JSON.stringify(grip));
+    const dy = 60 - grip.top, steps = 8;
+    await ptr([{ type: 'pointerMove', duration: 0, origin: 'viewport', x: grip.x, y: grip.y }, { type: 'pointerDown', button: 0 },
+      ...Array.from({ length: steps }, (_, i) => ({ type: 'pointerMove', duration: 30, origin: 'viewport', x: grip.x, y: Math.round(grip.y + dy * (i + 1) / steps) })), { type: 'pointerUp', button: 0 }]);
+    await drv.relActions(g.s);
+    await wait(1200); await state('both pinned'); await shot('z-pinned');
+    await g.ev(`__LW.timeline.close(); __LW.layout.modulation.collapse(); return 1;`); await wait(1500); await state('both closed');
   }
   console.log('errors', JSON.stringify((await g.errors()).errs));
 } finally { await g.close(); }
