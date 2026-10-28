@@ -96,10 +96,12 @@ export function spacingPx(level) {
 /** solidRelief(state, theme) → { lift, sink, gain } — the SOLID relief's mixes as functions of the pane's lightness L
  *  (0…100), so a dark pane lifts as clearly as a light one.  The highlight is the pane mixed toward white enough to rise
  *  ΔL = 8 + 20·(1 − L/100) (more on a dark pane), the shade toward black enough to fall ΔL = 6 + 14·L/100 (more on a
- *  light one): lift = ΔL/(100 − L), sink = ΔL/L, as percentages.  gain multiplies the shine: 1 + 1.2·(1 − L/100). */
+ *  light one): lift = ΔL/(100 − L), sink = ΔL/L, as percentages.  gain multiplies the shine: 1 + 1.2·(1 − L/100).
+ *  1.5.6-alpha.5 (RELIEF IS TIGHT): a light pane's (L ≥ 50) lift is capped at 45 % — it reached 100 %, pure white — and the gain at 1.2. */
 export function solidRelief(o, theme) {
   const L = paneLightness(o, theme), pct = (v) => Math.round(Math.max(0, Math.min(1, v)) * 1000) / 10;
-  return { lift: pct((8 + 20 * (1 - L / 100)) / Math.max(1, 100 - L)), sink: pct((6 + 14 * L / 100) / Math.max(1, L)), gain: +(1 + 1.2 * (1 - L / 100)).toFixed(3) };
+  const lift = (8 + 20 * (1 - L / 100)) / Math.max(1, 100 - L);
+  return { lift: pct(L >= 50 ? Math.min(0.45, lift) : lift), sink: pct((6 + 14 * L / 100) / Math.max(1, L)), gain: +Math.min(1.2, 1 + 1.2 * (1 - L / 100)).toFixed(3) };
 }
 
 /* ── THE DEVICE (1.5.0-alpha.12, BASINS skin.js isMobile / newUserBlur / syncTablet, settings.js §2) ─────────────────── */

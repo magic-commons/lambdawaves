@@ -27,6 +27,9 @@ const ACCEPTED = {
   /* 022 P1 · MIR 1.5.6-alpha.4 on the clone road (kit 4654cb8, 0d98cc8): contextMenu, holdTap / onContext (TAP.hold · TAP.slop), ONE KNOB MENU, --surface-menu-floor,
      the kit's popups on the menu surface, a list row's picture */
   '1.5.6-alpha.4': '2e2ddd2a07c4c6a4eed431c2d5e914a7ea35ff8c8ca550c1ffedd132b6393f39',   // 022 P3 re-pin (kit 0d98cc8: select's repick, a list row's picture)
+  /* 022 S1 · MIR 1.5.6-alpha.5 on the clone road (kit 3e6f5cc): RELIEF IS TIGHT (a 1–2 px raise, a grey dark highlight, the shine a hairline,
+     SHINE SOFT 0–6, the light lift ≤ 45 %) and THE MENU'S INK (--surface-menu-tint, --surface-menu-edge; the floor on the menubar lists and the hint) */
+  '1.5.6-alpha.5': 'b208cdbf993e49fe208d768f7931bdc20d4bf5071de1a9e6031dab7333fe6592',
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */
