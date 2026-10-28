@@ -14,7 +14,7 @@
  * STATUS: EXACT file formats (proved by tests/export3d.test.mjs in node: an analytic sphere, every byte layout read
  * back); the surface is NUMERICAL — marching cubes on the grid, so a shape is exact up to the grid spacing. */
 import { StoredZip } from './mir/core/zip.js';
-import { slug, stamp, uniqueName } from './capture.js';
+import { slug, stamp, uniqueFileName } from './capture.js';
 
 /** the five FILE rows (R6: no dialog; each row is one file and its tooltip names what opens it) */
 export const EXPORTS = Object.freeze([
@@ -351,7 +351,7 @@ export function createExporter(env) {
       if (r === null && g.texels.byteLength) r = buildFile(msg);          // no worker at all: the same function, on this thread
       if (!r || r.error) throw new Error(r && r.error || 'the maths worker did not answer');
       const roundTripMs = nowMs() - t1;
-      const name = uniqueName(`lambdawaves-${slug(scene.label) || 'state'}-${stamp().slice(0, 13)}.${fmt}`, taken);
+      const name = uniqueFileName(`lambdawaves-${slug(scene.label) || 'state'}-${stamp().slice(0, 13)}.${fmt}`, taken);
       env.save({ blob: new Blob([r.bytes], { type: spec.mime }), name });
       const totalMs = nowMs() - t0;
       last = { ok: true, fmt, kind: spec.kind, name, bytes: r.bytes.byteLength ?? r.bytes.size, triangles: r.triangles || 0, vertices: r.vertices || 0, iso: r.iso, isoFrac: r.isoFrac,

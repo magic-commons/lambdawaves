@@ -8,7 +8,7 @@
  * Iteration 012 R1 (Josh 10-20): SKELETON is BALL AND STICK — `opacity` (its OPACITY knob) scales the beads and bonds; `sticks` false draws the atoms'
  * dipole arrow alone (MARKS › DIPOLE, its own switch now: the "weird arrow" Josh asked to separate). */
 import { cameraKey, toScreen } from './field.js';
-import { ANGSTROM } from './md.js'; import { moleculeCharge } from './molecules.js'; import { RCOV, CPK } from './elements.js';   // iteration 014 B: the element table; the skeleton's own bondsOf (D6: orders, rings, ionic, H-bonds) is below — field.js' sticks read elements.js' length rule   // iteration 014 B: the element table lives in elements.js
+import { ANGSTROM } from './md.js'; import { moleculeCharge } from './molecules.js'; import { RCOV, CPK, bondsOf as pairsOf } from './elements.js';   // iteration 014 B: the element table; the skeleton's own bondsOf (D6: orders, rings, ionic, H-bonds) is below — field.js' sticks read elements.js' length rule   // iteration 014 B: the element table lives in elements.js
 
 
 /* ── iteration 014 D6 · THE BONDS (Josh: "Let the Ball and stick model show double/triple bonds, whether a bond is sigma, or ionic, or different types
@@ -34,7 +34,7 @@ export function bondsOf(atoms, { rec = null, charges = null } = {}) {
   const recB = Array.isArray(rec) && rec.length && rec.every((b) => Array.isArray(b) && b[0] < n && b[1] < n) ? rec : null;
   const bonds = [];
   if (recB) for (const [i, j, o] of recB) bonds.push({ i: Math.min(i, j), j: Math.max(i, j), order: o === 1.5 || o === 4 || o === 12 ? 1 : Math.max(1, Math.min(3, Math.round(+o || 1))), arom: o === 1.5 || o === 4 || o === 12, ionic: false });
-  else for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) if (d(i, j) < 1.3 * (RCOV[atoms[i].Z] + RCOV[atoms[j].Z])) bonds.push({ i, j, order: 1, arom: false, ionic: false });
+  else for (const [i, j] of pairsOf(atoms)) bonds.push({ i, j, order: 1, arom: false, ionic: false });   // 021 G4: elements.js' 1.3 × (rᵢ + rⱼ) pairs, the one rule (field.js' sticks read it too)
   const nb = atoms.map(() => []); for (const b of bonds) { nb[b.i].push(b); nb[b.j].push(b); }
   const other = (b, k) => (b.i === k ? b.j : b.i);
   if (!recB) {

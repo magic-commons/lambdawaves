@@ -90,7 +90,7 @@ function volumeRows() {
     const out = [];
     try {
       for (const v of (await V.shelf()).volumes) {
-        const s = await V.statusOf(v.id).catch(() => null); if (!s || s.state !== 'installed') continue;
+        const s = await V.installStatus(v.id).catch(() => null); if (!s || s.state !== 'installed') continue;
         const idx = await V.index(v.id).catch(() => null);
         for (const m of (idx && idx.molecules) || []) out.push({ id: m.id, name: m.name, formula: m.formula, vol: v.id, m, v });
       }
@@ -509,7 +509,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
       if (pick) { pick.type = 'file'; pick.accept = '.lwv'; pick.hidden = true; pick.addEventListener('change', () => { const f = pick.files && pick.files[0]; pick.value = ''; if (f) run(f); }); }
       let ctl = null; const arm = armer(b, () => paint());
       const paint = async () => {
-        const s = await V.statusOf(v.id).catch(() => ({ state: 'absent', n: 0, N: v.count || 0 }));
+        const s = await V.installStatus(v.id).catch(() => ({ state: 'absent', n: 0, N: v.count || 0 }));
         const est = fromFile && s.state !== 'installed' ? await navigator.storage?.estimate?.().catch(() => null) : null;
         const tight = est && est.quota && est.quota - (est.usage || 0) < size ? ' · TOO BIG FOR THIS DEVICE' : '';
         b.dataset.state = s.state; ring.set(s.N ? s.n / s.N : 0, s.state === 'installed' ? 'done' : 'idle'); eye(ico, s.state === 'installed');

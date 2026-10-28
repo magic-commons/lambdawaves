@@ -403,7 +403,7 @@ export function captureName({ kind = 'still', label = '', w = 0, h = 0, fps = 0,
  * COLLISION-FREE, and the guard is the caller's ledger — a second of wall clock holds many captures.  Returns
  * `name` if free, else name-2, name-3 ... with the suffix BEFORE the extension.  Adds the answer to `taken`.
  */
-export function uniqueName(name, taken) {
+export function uniqueFileName(name, taken) {
   const set = taken instanceof Set ? taken : new Set(taken || []);
   const i = name.lastIndexOf('.'), stem = i > 0 ? name.slice(0, i) : name, ext = i > 0 ? name.slice(i) : '';
   let out = name;
@@ -750,7 +750,7 @@ export function createCapture(LW, opts = {}) {
     const caption = captionOf(o);                          // last, and at the picture's own size
     captionOver(shot.rgba, fit.w, fit.h, caption);
     const png = await encodePNG(shot.rgba, fit.w, fit.h, { filter: o.filter === undefined ? -1 : o.filter });
-    const name = uniqueName(o.name || captureName({ kind: 'still', label: stateLabel(), w: fit.w, h: fit.h, ext: 'png' }), taken);
+    const name = uniqueFileName(o.name || captureName({ kind: 'still', label: stateLabel(), w: fit.w, h: fit.h, ext: 'png' }), taken);
     return {
       ok: true, blob: new Blob([png], { type: 'image/png' }), bytes: png.length, name,
       w: fit.w, h: fit.h, scale: fit.scaleW, clipped: fit.clipped, aspectKept: fit.aspectKept,
@@ -800,5 +800,5 @@ export function createCapture(LW, opts = {}) {
 
   return { picture, planLoop, save, limits, grab, get names() { return taken; }, canvas,
     /** the pure laws, re-exported on the instance so a caller needs one import */
-    laws: { loopSchedule, planFrames, planPeriodRecording, endpointProof, seamError, captureName, uniqueName, maxPictureSize, fitPicture, encodePNG } };
+    laws: { loopSchedule, planFrames, planPeriodRecording, endpointProof, seamError, captureName, uniqueFileName, maxPictureSize, fitPicture, encodePNG } };
 }

@@ -72,7 +72,6 @@ function pAlong(re, im, d) {
 /* PARKED, and the speculative queue behind it.  busyMs counts only the maths, never the bookkeeping. */
 let parked = false, busyMs = 0, jobs = 0, parks = 0, resumes = 0, parkedAt = 0, parkedMs = 0;
 const held = [];                                   // speculative jobs that arrived while parked, in order
-const SPECULATIVE = new Set(['warm']);             // everything else was asked for by a hand and is allowed to finish
 const stat = () => ({ parked, busyMs: +busyMs.toFixed(3), jobs, parks, resumes, held: held.length,
   parkedMs: +(parkedMs + (parked ? Date.now() - parkedAt : 0)).toFixed(0), solverCalls });
 function run(m) {
@@ -85,8 +84,6 @@ function run(m) {
    frame thread when the worker fails; the message handler is installed ONLY inside a real worker, so importing
    this file on the main thread (or in node, where `self` does not exist) takes nothing over. */
 const IN_WORKER = typeof WorkerGlobalScope === 'function' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
-const CHEM = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.state.vectors', 'chem.drive.init', 'chem.drive.run', 'chem.drive.set', 'chem.drive.coupling', 'h.drive.init', 'h.drive.run', 'h.drive.set', 'chem.rt.init', 'chem.rt.run', 'chem.rt.reset', 'chem.rt.spectrum', 'chem.rt.fit', 'chem.vib.frames']);
-const CHEM_BASIS = new Set(['chem.solve', 'chem.ground', 'chem.open', 'chem.spectrum', 'chem.states', 'chem.rt.init', 'chem.vib.frames']);
 /** the vendored BSE record, fetched ONCE per basis inside the worker; the ops themselves stay synchronous */
 async function chemReady(m) {
   const basis = m.basis || 'sto-3g';
@@ -107,60 +104,72 @@ if (IN_WORKER) self.onmessage = (e) => {
     self.postMessage(Object.assign({ id: m.id, op: m.op, ok: true }, stat())); return;
   }
   /* CHEMISTRY is work a hand asked for: it finishes parked or not, and it waits for the basis record first. */
-  if (CHEM.has(m.op)) {
-    (CHEM_BASIS.has(m.op) ? chemReady(m) : Promise.resolve()).then(
+  const op = opOf(m.op);
+  if (op && op.chem) {
+    (op.basis ? chemReady(m) : Promise.resolve()).then(
       () => { const r = run(m); self.postMessage(Object.assign({ id: m.id, op: m.op }, r.out), r.transfer); },
       (err) => self.postMessage({ id: m.id, op: m.op, error: String(err && err.message || err) }));
     return;
   }
-  if (parked && SPECULATIVE.has(m.op)) { held.push(m); return; }     // it waits; the answer comes on resume, once
+  if (parked && op && op.speculative) { held.push(m); return; }     // it waits; the answer comes on resume, once
   const r = run(m);
   self.postMessage(Object.assign({ id: m.id, op: m.op }, r.out), r.transfer);
 };
+/* THE OP TABLE (021 G3; once 28 `m.op === …` branches in work()): one row per op, `run(m) → { out, transfer }`, and its flags —
+   `chem`: CHEMISTRY, work a hand asked for, which finishes parked or not; `basis`: it waits for the basis record first; `speculative`: it
+   WAITS while parked (warm — a table built early only pays off while there is a finger on the instrument); everything else was asked for by a
+   hand and is allowed to finish. */
+const T = (out) => ({ out, transfer: chemTransfer(out) });    // a chemistry reply: its typed arrays transferred
+const O = (out, transfer = []) => ({ out, transfer });
+const OPS = {
+  config: { run: (m) => { configure(m); return O({ ok: true }); } },
+  warm: { speculative: true, run: (m) => { configure(m); while (!warmStep(1e9)) { /* to the end */ } const one = new Float64Array(BASIS.length).fill(0.1), zero = new Float64Array(BASIS.length); pAlong(one, zero, [0, 0, 1]); return O({ ok: true }); } },   // the tables AND the dipole quadratures momentumZ caches (the first bow's other 100 ms)
+  kick: { run: (m) => {
+    configure(m);
+    const re = Float64Array.from(m.re), im = Float64Array.from(m.im);
+    const p0 = pAlong(re, im, m.d);
+    applyKickAlong(re, im, m.k, m.d);
+    const p1 = pAlong(re, im, m.d);
+    return O({ re, im, p0, p1 }, [re.buffer, im.buffer]);
+  } },
+  packet: { run: (m) => {
+    HAMILTONIANS.well.setRadius(m.radius);
+    const P = wellPacket(m.x0, m.k, m.sigma);
+    return O({ re: P.re, im: P.im, captured: P.captured }, [P.re.buffer, P.im.buffer]);
+  } },
+  period: { run: (m) => O(densityPeriod(m.energies, { horizon: m.horizon || 2e4 })) },
+  ladder: { run: (m) => O({ result: solveLadder(m.params || {}) }) },
+  'lattice.solve': { run: (m) => O({ result: solveLattice(m) }) },
+  'central.solve': { run: (m) => O({ result: solveCentral(m.preset, m.params) }) },   // 0.8.0 G1: CENTRAL's 21 rows, table, bound count and oracle
+  'gas.stats': { run: (m) => O(gasStats(m)) },
+  export: { run: (m) => { const out = buildFile(m); return O(out, out.bytes && out.bytes.buffer ? [out.bytes.buffer] : []); } },   // an NPZ is a Blob (the kit's StoredZip): cloned, not transferred
+  'chem.solve': { chem: true, basis: true, run: (m) => T(chemSolve(m)) },
+  'chem.ground': { chem: true, basis: true, run: (m) => T(chemGround(m)) },
+  'chem.open': { chem: true, basis: true, run: (m) => T(chemOpen(m)) },
+  'chem.spectrum': { chem: true, basis: true, run: (m) => T(chemSpectrum(m)) },
+  'chem.states': { chem: true, basis: true, run: (m) => T(chemStates(m)) },
+  'chem.state.vectors': { chem: true, run: (m) => T(chemStateVectors(m)) },
+  'chem.drive.init': { chem: true, run: (m) => T(chemDriveInit(m)) },
+  'chem.drive.run': { chem: true, run: (m) => T(chemDriveRun(m)) },
+  'chem.drive.set': { chem: true, run: (m) => O(chemDriveSet(m)) },
+  'chem.drive.coupling': { chem: true, run: (m) => O(chemDriveCoupling(m)) },
+  'h.drive.init': { chem: true, run: (m) => T(SONG.init(m)) },   // 0.6.4 S1 THE SONG: init · run · set
+  'h.drive.run': { chem: true, run: (m) => T(SONG.run(m)) },
+  'h.drive.set': { chem: true, run: (m) => T(SONG.set(m)) },
+  'chem.rt.init': { chem: true, basis: true, run: (m) => T(chemRtInit(m)) },
+  'chem.rt.run': { chem: true, run: (m) => T(chemRtRun(m)) },
+  'chem.rt.reset': { chem: true, run: () => T(chemRtReset()) },
+  'chem.rt.spectrum': { chem: true, run: (m) => T(chemRtSpectrum(m)) },
+  'chem.rt.fit': { chem: true, run: (m) => O(chemRtFit(m)) },
+  'chem.vib.frames': { chem: true, basis: true, run: (m) => T(chemVibFrames(m)) },   // 0.7.0 V1 THE MODES: K phase samples of one normal mode
+  'chem.esp': { run: (m) => { const out = chemEsp(m); return O(out, [out.phi.buffer]); } },   // THE POTENTIAL's volume (0.6.5 X1), on the cards queue
+  'flow.balance': { run: (m) => { const out = flowBalance(m), transfer = out.gx ? [out.gx.buffer, out.gy.buffer, out.gz.buffer] : []; if (m.plane) { out.plane = continuityOn({ shells: m.shells, ...m.plane }); transfer.push(out.plane.r.buffer); } return O(out, transfer); } },   // BALANCED FLOW's repair (flow-balance.js) and P2's CONTINUITY RECORD, on the cards queue
+};
+const opOf = (op) => (typeof op === 'string' && Object.hasOwn(OPS, op) ? OPS[op] : null);
 function work(m) {
-  let out = {}, transfer = [];
-  try {
-    if (m.op === 'config') { configure(m); out = { ok: true }; }
-    else if (m.op === 'warm') { configure(m); while (!warmStep(1e9)) { /* to the end */ } const one = new Float64Array(BASIS.length).fill(0.1), zero = new Float64Array(BASIS.length); pAlong(one, zero, [0, 0, 1]); out = { ok: true }; }   // the tables AND the dipole quadratures momentumZ caches (the first bow's other 100 ms)
-    else if (m.op === 'kick') {
-      configure(m);
-      const re = Float64Array.from(m.re), im = Float64Array.from(m.im);
-      const p0 = pAlong(re, im, m.d);
-      applyKickAlong(re, im, m.k, m.d);
-      const p1 = pAlong(re, im, m.d);
-      out = { re, im, p0, p1 }; transfer = [re.buffer, im.buffer];
-    } else if (m.op === 'packet') {
-      HAMILTONIANS.well.setRadius(m.radius);
-      const P = wellPacket(m.x0, m.k, m.sigma);
-      out = { re: P.re, im: P.im, captured: P.captured }; transfer = [P.re.buffer, P.im.buffer];
-    } else if (m.op === 'period') { out = densityPeriod(m.energies, { horizon: m.horizon || 2e4 }); }
-    else if (m.op === 'ladder') { out = { result: solveLadder(m.params || {}) }; }
-    else if (m.op === 'lattice.solve') { out = { result: solveLattice(m) }; }
-    else if (m.op === 'central.solve') { out = { result: solveCentral(m.preset, m.params) }; }   // 0.8.0 G1: CENTRAL's 21 rows, table, bound count and oracle
-    else if (m.op === 'gas.stats') { out = gasStats(m); }
-    else if (m.op === 'export') { out = buildFile(m); transfer = out.bytes && out.bytes.buffer ? [out.bytes.buffer] : []; }   // an NPZ is a Blob (the kit's StoredZip): cloned, not transferred
-    else if (m.op === 'chem.solve') { out = chemSolve(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.ground') { out = chemGround(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.open') { out = chemOpen(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.spectrum') { out = chemSpectrum(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.states') { out = chemStates(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.state.vectors') { out = chemStateVectors(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.drive.init') { out = chemDriveInit(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.drive.run') { out = chemDriveRun(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.drive.set') { out = chemDriveSet(m); }
-    else if (m.op === 'chem.drive.coupling') { out = chemDriveCoupling(m); }
-    else if (m.op.startsWith('h.drive.')) { out = SONG[m.op.slice(8)](m); transfer = chemTransfer(out); }   // 0.6.4 S1 THE SONG: init · run · set
-    else if (m.op === 'chem.rt.init') { out = chemRtInit(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.rt.run') { out = chemRtRun(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.rt.reset') { out = chemRtReset(); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.rt.spectrum') { out = chemRtSpectrum(m); transfer = chemTransfer(out); }
-    else if (m.op === 'chem.rt.fit') { out = chemRtFit(m); }
-    else if (m.op === 'chem.vib.frames') { out = chemVibFrames(m); transfer = chemTransfer(out); }   // 0.7.0 V1 THE MODES: K phase samples of one normal mode
-    else if (m.op === 'chem.esp') { out = chemEsp(m); transfer = [out.phi.buffer]; }   // THE POTENTIAL's volume (0.6.5 X1), on the cards queue
-    else if (m.op === 'flow.balance') { out = flowBalance(m); transfer = out.gx ? [out.gx.buffer, out.gy.buffer, out.gz.buffer] : []; if (m.plane) { out.plane = continuityOn({ shells: m.shells, ...m.plane }); transfer.push(out.plane.r.buffer); } }   // BALANCED FLOW's repair (flow-balance.js) and P2's CONTINUITY RECORD, on the cards queue
-    else out = { error: 'unknown op ' + m.op };
-  } catch (err) { out = err instanceof Refused ? { refused: err.message } : { error: String(err && err.message || err) }; transfer = []; }
-  return { out, transfer };
+  const op = opOf(m.op);
+  if (!op) return O({ error: 'unknown op ' + m.op });
+  try { return op.run(m); } catch (err) { return O(err instanceof Refused ? { refused: err.message } : { error: String(err && err.message || err) }); }
 }
 
 /* ── THE AXIAL GAS'S READOUT (optimization 2026-09-24, K5w · AUDIT-B FB1, AUDIT-F F11, SOL-REVIEW K5) ──────────────

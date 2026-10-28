@@ -330,37 +330,7 @@ body[data-theme="light"] .native-info .native-info-content, body[data-theme="lig
 body.disconnected:not(.phone) .dev.native-selected > .dev-head,
 body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(in srgb,var(--acc) 24%,transparent); }
 #transport .tempo-expand { order: 8; }
-#transport .native-tempo { order: 9; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.15fr); gap: 12px; width: 100%; }   /* 2026-09-10: MACROS | CLOCK, two tile rows high */
-#transport .native-tempo[hidden] { display: none; }
-.tempo-pane { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-/* THE TRANSPORT'S MACRO TILES ARE THE WINDOW'S ROWS. These rules are the ported window's own (.mir-modwindow
-   .m2grip / .m2numseat / .m2num / .m2depthring, modwindow.css 583–607) and the host's overrides for them
-   (modhost.css 1037–1038, 1204, 1847–1848, 1865), re-scoped to the rail — copied, not redesigned. */
-.tempo-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 6px; max-height: 92px; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--fg) 22%, transparent) transparent; align-content: start; }
-.tempo-tile { position: relative; height: 44px; border-radius: 8px; }
-.tempo-tile.m2reorder { opacity: .55; }
-.tempo-tile .m2slotrow { display: grid; grid-template-columns: 44px 44px 18px; align-items: center; height: 44px; }
-.tempo-tile .m2grip { flex: 0 0 44px; width: 44px; min-width: 44px; height: 44px; min-height: 44px; align-self: center; padding: 0; border: 0; background: transparent; color: var(--acc2); touch-action: none; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
-.tempo-tile .m2grip svg { width: 18px; height: 18px; display: block; pointer-events: none; }
-.tempo-tile .m2grip:active { color: var(--fg); background: var(--glass-press); }
-.tempo-tile .m2numseat { position: relative; display: flex; align-items: center; justify-content: center; width: 44px; height: 100%; padding: 0; border: 0; border-radius: 7px; background: transparent; touch-action: none; cursor: ns-resize; }
-.tempo-tile .m2numseat:focus-visible { outline: 1px solid color-mix(in srgb, var(--fg) 72%, transparent); outline-offset: -3px; }
-.tempo-tile .m2num { position: relative; z-index: 1; flex: 0 0 auto; pointer-events: none; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; border: 0; color: var(--acc2); font: 600 10px var(--font-num); line-height: 1; }
-.tempo-tile .m2depthring { position: absolute; z-index: 2; left: 7px; top: 50%; width: 30px; height: 30px; margin-top: -15px; overflow: visible; pointer-events: none; transform: rotate(-90deg); }
-.tempo-tile .m2depthtrack, .tempo-tile .m2deptharc { fill: none; stroke-width: 2.2; }
-.tempo-tile .m2depthtrack { stroke: transparent; }
-.tempo-tile .m2deptharc { stroke: var(--acc); stroke-linecap: round; }
-.tempo-tile .m2numseat.m2zero .m2deptharc { opacity: 0; }
-.tempo-tile .m2numseat.drag .m2deptharc { stroke-width: 3; }
-.tempo-tile .m2slottools { display: flex; align-items: center; width: 18px; height: 44px; }
-.tempo-tile .m2rowgrip { width: 18px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--acc2); opacity: .6; touch-action: none; cursor: grab; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
-.tempo-tile .m2rowgrip:hover, .tempo-tile .m2rowgrip:active { opacity: 1; }
-.tempo-tile .m2rowgrip svg { width: 13px; height: 13px; pointer-events: none; }
-.tempo-tile [hidden] { display: none !important; }
-#transport .native-tempo { position: relative; }
-.tempo-info { position: absolute; top: 6px; right: 6px; }
-.tempo-empty { grid-column: 1 / -1; font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.4; }
-.tempo-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 4px; }   /* 0.5.0 C4: eight tiles (LINKED and MOD ▶ retired), two rows of four */
+/* 021 G6: the transport rules that were copies of the kit's (pre-018) are gone; λWAVES' own values are --xport-* tokens and the rules a token cannot carry live in lab/csb.css. */
 #transport.tempo-open { flex-wrap: wrap; }
 /* Motion can change ink, never the dimensions of the controls around it. */
 .native-clean .formula { white-space: normal; }
@@ -422,90 +392,10 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 #transport.mini .native-play-row { gap:2px; }
 #transport { box-sizing:border-box;max-width:100%;overflow:hidden; }
 #transport .native-play-row { min-width:0;width:100%;overflow:hidden; }
-#transport .native-tempo { flex:none;box-sizing:border-box; }
-#transport.mini.tempo-open { width:min(640px,calc(100vw - 24px));height:auto;min-height:46px;padding-bottom:8px; }
-#transport .tempo-expand { position:relative;flex:0 0 72px;width:72px;height:34px;padding:4px 15px 4px 7px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;column-gap:4px;align-items:center;border:1px solid var(--glass-hairline);border-radius:8px;background:var(--glass-well);box-shadow:var(--neu-inset);color:var(--fg-soft);touch-action:none; }
-#transport .tempo-expand:hover,#transport .tempo-expand:focus-visible { border-color:color-mix(in srgb,var(--acc2) 60%,transparent);background:var(--glass-raise);outline:0; }
-#transport .tempo-expand[aria-expanded="true"] { border-color:color-mix(in srgb,var(--acc2) 70%,transparent);box-shadow:var(--neu-inset),0 0 7px color-mix(in srgb,var(--acc2) 24%,transparent); }
-#transport .tempo-number { grid-area:1/1/3/2;align-self:center;font:var(--w-bold) 12px/1 var(--font-num);font-variant-numeric:tabular-nums;color:var(--acc2); }
-#transport .tempo-unit { align-self:end;font:var(--w-bold) 7px/1 var(--font-ui);letter-spacing:var(--tr-wide);color:var(--ink-key); }
-#transport .tempo-hz { align-self:start;font:var(--w-med) 7px/1.1 var(--font-num);font-style:normal;font-variant-numeric:tabular-nums;color:var(--dim);white-space:nowrap; }
-#transport .tempo-chevron { position:absolute;right:6px;top:50%;width:5px;height:5px;margin-top:-4px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(45deg);transition:transform var(--t-fast);color:var(--dim); }
-#transport .tempo-expand[aria-expanded="true"] .tempo-chevron { transform:translateY(3px) rotate(225deg); }
-#transport .native-tempo { padding:8px;border-top:1px solid var(--glass-hairline);border-radius:0 0 10px 10px;background:linear-gradient(180deg,var(--glass-well),transparent); }
-#transport.mini { width:min(640px,calc(100vw - 24px));contain:layout paint; }
-#transport.mini .tempo-expand { flex-basis:72px;width:72px;min-width:72px; }
-#transport.mini .native-play-row { flex-wrap:nowrap; }
-#transport.mini .fd { flex:1 1 48px;min-width:40px; }
-#transport.mini .ro { flex:0 1 auto;min-width:0;overflow:hidden; }
-#transport.mini .ro.time { width:58px; }
-#transport.mini .ro.period { width:76px; }
-#transport.mini .ro-val { max-width:100%;overflow:hidden;text-overflow:ellipsis; }
-#transport.mini .tbtn.modb { min-width:38px;width:38px;padding:0 5px; }
-#transport.mini .tbtn.modb.on { color:var(--acc2); }
 .native-clean .native-rotors { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));justify-items:center;row-gap:14px; }
 .native-clean .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr) 44px) 22px;align-items:center; }
 .plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--neu-inset);border-radius:8px; }
 .native-clean[data-id="camera"] .camera-motion { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center;row-gap:12px; }
-#transport .native-info { display:inline-flex;position:relative;align-items:center;flex:0 0 24px;order:7; }
-#transport .native-info-content:popover-open { display:block !important; }
-/* ═══ 0.5.3 M13b · THE DOCKED BAR, IN THE KIT'S WORK-BAR IDIOM ═══════════════════════════════════════════════════════
- * Josh: "Transport docked window needs a new look".  Read from mir/shell/transport.css (§ the seats, § IN A WORK BAR, § DOCKED), not
- * imported: a seat is FLAT until hovered, play and the MOD power are ink that lights (accent A / B), the to-start, dock and logo
- * seats are the bar's own 34-px, radius-8 buttons with a hairline and the raised relief, the BPM pill is RAISED (the kit's ruling:
- * a well reads as already pressed), the scrub is the thin line, the readouts are plain.  CSS only; every part keeps its grid cell
- * and every height, so the card's rect (the stage probe's guard) does not move. */
-#transport.docked .native-play-row { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px; }
-#transport.docked .native-play-row > .tbtn { min-width:0;width:100%;height:34px;border-radius:8px; }
-#transport.docked .tbtn:not(.transport-home,.tempo-expand) { border:0;background:transparent;box-shadow:none;color:var(--ink-key); }
-#transport.docked .tbtn:not(.transport-home,.tempo-expand):hover { color:var(--fg);background:var(--state-hover,var(--glass-raise)); }
-#transport.docked .tbtn.play { color:var(--fg-soft);font-size:22px; }
-#transport.docked .tbtn.play:is(.on,:hover) { color:var(--acc);background:transparent; }
-#transport.docked .tbtn.modb.on { color:var(--acc2);background:transparent; }
-#transport.docked :is(.tbtn.transport-home,.dock-btn,.mod-exp) { border:var(--glass-border) solid var(--glass-hairline);border-radius:8px;background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise,var(--neu-raise)); }
-#transport.docked .native-play-row > .fd { min-width:0;width:100%;height:44px; }
-#transport.docked .fd::before { background:color-mix(in srgb,var(--fg) 16%,transparent); }   /* the line reads on both themes (the bar's white .14 is invisible on light) */
-#transport.docked .native-play-row > .k { width:auto;min-width:0; }
-#transport.docked .native-play-row > .ro { min-width:0;width:auto;height:42px;padding:4px;overflow:hidden;background:transparent;box-shadow:none; }
-#transport.docked .native-play-row .ro-sub { display:none; }
-#transport.docked .native-play-row .ro-val { white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-#transport.docked .native-play-row .k-val { position:absolute;top:100%;left:50%;transform:translateX(-50%); }
-#transport .native-tempo .trig { min-width:0;height:44px;min-height:44px;padding:0 3px;justify-content:center;font-size:8.5px;letter-spacing:.04em; }   /* the window's seats are 44 px; the clock tiles match */
-#transport .k-val { display:none; }
-#transport .k:hover .k-val, #transport .k:focus-within .k-val, #transport .k.drag .k-val { display:block; }
-#transport.docked .native-play-row .k-lbl { display:none; }
-#transport.docked .native-play-row .fd-val { display:none; }
-#transport.docked .native-play-row .fd:focus-visible .fd-val, #transport.docked .native-play-row .fd:hover .fd-val { display:block; }
-#transport.docked .tempo-expand { width:100%;background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise,var(--neu-raise)); }
-#transport.docked .tempo-number { font-size:16px; }
-#transport.docked :is(.tempo-unit,.tempo-hz) { font-size:8px; }
-#transport.docked .native-tempo { width:100%;grid-template-columns:minmax(0,1fr); }
-#transport.docked .play { grid-area:1/1; }
-#transport.docked .modb { grid-area:1/2; }
-#transport.docked .transport-home { grid-area:1/3; }
-#transport.docked .transport-step-back { grid-area:1/4; }
-#transport.docked .transport-step-forward { grid-area:1/5; }
-#transport.docked .fd { grid-area:2/1/3/5; }
-#transport.docked .k { grid-area:2/5; }
-#transport.docked .ro.time { grid-area:3/1/4/3; }
-#transport.docked .ro.period { grid-area:3/3/4/6; }
-#transport.docked .jump { grid-area:4/1; }
-#transport.docked .dock-btn { grid-area:4/2; }
-#transport.docked .mod-exp { grid-area:4/3; }
-#transport.docked .tempo-expand { grid-area:4/4/5/6; }
-@media (max-width:1000px) {
-  #transport.mini,#transport.mini.tempo-open { width:min(560px,calc(100vw - 24px)); }
-  #transport.mini .ro.period { display:none; }
-}
-@media (max-width:860px) {
-  #transport.mini,#transport.mini.tempo-open { left:calc(var(--rack-w) + 10px);right:10px;top:calc(env(safe-area-inset-top) + 112px);bottom:auto;width:auto;transform:none; }
-  #transport.mini .fd { min-width:32px; }
-  #transport.mini .ro.time { width:50px; }
-  #transport.mini .tbtn.modb { min-width:34px;width:34px; }
-  #transport.mini .tempo-expand { flex-basis:68px;width:68px;min-width:68px; }
-}
-@media (pointer:coarse) { #transport .native-tempo .trig { min-height:44px; }
-}
 
 /* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */
 .dev:not(.mir-modwindow) .seg { padding:3px;gap:2px;border:1px solid var(--glass-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--neu-inset); }

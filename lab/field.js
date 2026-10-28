@@ -1602,7 +1602,7 @@ export async function createField(canvas, opts = {}) {
   }
   /* ── THE ATOMS AND THE POTENTIAL (iteration 014 B) ─────────────────────────────────────────────────────────────────────
    * setAtoms(atoms, charge) uploads the molecule BALLS, STICKS and ESP draw: two vec4 an atom (centre + r_vdW, negative for an atom no bond
-   * reaches; CPK sRGB + Z) and then skeleton.js' bonds (bondsOf, the one rule) — only when the atoms change.  φ is the Poisson pass's (ESP_WGSL,
+   * reaches; CPK sRGB + Z) and then elements.js' bonds (bondsOf, the 1.3 × (rᵢ + rⱼ) pairs: the one rule, which skeleton.js' richer bondsOf also starts from) — only when the atoms change.  φ is the Poisson pass's (ESP_WGSL,
    * run while ESP is drawn: ONCE per LANDING — the atoms, a molecule or its basis (setMolecule's first matrix), the VIEW (the matrix kind), a card,
    * the box or the grid — and, under mat.espLive, again at most once a second while the density moves; iteration 015 W0) or a volume's grid
    * (setEspGrid, which then owns it). */

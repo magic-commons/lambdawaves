@@ -1,16 +1,16 @@
 /* lab/windows/readouts.js — the readout cards (0.5.2 R2b; moved verbatim out of lab/rack.js boot()) at THREE seats, so the rack keeps its order: createReadouts(app)
  * builds SHADOW · ORBIT · VORTEX · PLANE and returns the CALCULUS and ATOMS seats, which boot() calls where they stood (READERS, track, hydroReader stay there). */
-import { TIER } from '../rack.js';
+import { TIER } from '../tier.js';
 import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js';
 import { toLUT } from '../mir/palette.js';
 import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js'; import { BASIS, orbitalFromTable } from '../hydrogen.js'; import { gammaAbs2 } from '../equalizer.js'; import { RENDER_CAP } from '../state.js'; import { waitForPaint } from '../frame-settle.js';
 import { createShadowView, createShadowFoot } from '../shadowview.js'; import { createOrbit } from '../orbit.js'; import { createKepler } from '../keplerview.js';
 import { createVortex } from '../vortex.js'; import { createParticles } from '../particles.js'; import { createSliceView } from '../sliceview.js';
-import { createCalculus } from '../calculusview.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { createBloch } from '../bloch.js'; import { solveLattice } from '../lattice-model.js'; import { createCentral, solveCentral } from '../central.js'; import { createSeparable } from '../separable.js'; import { solveLadder } from '../ladder-model.js';
+import { createCalculus } from '../calculusview.js'; import { calculusMarkdown } from '../calculus.js'; import { createMeters } from '../meters.js'; import { createLadder } from '../ladder.js'; import { createLattice } from '../lattice.js'; import { createBloch } from '../bloch.js'; import { solveLattice } from '../lattice-model.js'; import { createCentral, solveCentral } from '../central.js'; import { createSeparable } from '../separable.js'; import { solveLadder } from '../ladder-model.js';
 import { createAtoms } from '../atomsview.js'; import { createWigner } from '../wignerview.js'; import { createRadiation } from '../radiationview.js'; import { createEmission } from '../emissionview.js';
 export function createReadouts(app) {
   const { dom, ui, device, reg, clock, obs, useCompactDefaults } = app, { schedule, canPresent } = app.loop, { rack } = app.host, { setElement, fillValence, switchHamiltonian } = app.w,
-    { domain, cardLoading, solveCard, touchState, api, field, stats, loadPreset } = app.ctl;
+    { domain, cardLoading, solveCard, touchState, api, field, stats, perf, loadPreset } = app.ctl;
   /* 017 X1 · THE STAND-DOWN (AN EFFECT SHOWS ITS WINDOW): a special window's × (the kit's `devclose`) or POWER OFF ends its effect and ‹ SYSTEM ›
      reads back the operator in force; `hidden` (moleculeMode) is neither.  When the stepper closes the window it opened on its way to another
      operator, the stepper switches (its value already names that operator), so the stand-down only reads back. */
@@ -166,7 +166,10 @@ export function createReadouts(app) {
   const sep = createSeparable(wSep.body, { apply: (id) => { switchHamiltonian(id); ui.hamSeg.set(id); } }); wSep.root.addEventListener('devopen', () => sep.prepare());
   standDown(wLat, () => ui.hamSeg.readBack('lattice')); standDown(wBlo, () => ui.hamSeg.readBack('bloch'));
   standDown(wCen, toHydrogen(['central', 'cornell'], 'central')); standDown(wSep, toHydrogen(['separable'], 'separable'));
-  return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen, wSep }; }
+  /* the ⧉ digests (021 G3: out of boot()'s DIGESTS table) */
+  const metersDigest = () => 'density period\t' + (() => { const P = app.hooks.period ? app.hooks.period() : null; return P && P.exact && P.T ? P.T.toFixed(6) + ' a.u. (exact)' : P && P.T ? '≈ ' + P.T.toFixed(3) + ' a.u. (no exact period)' : '—'; })() + '\nframe profile (ms, EMA)\n' + Object.entries(perf.profile).map(([k, v]) => k + '\t' + (+v).toFixed(3)).join('\n') + '\nframes\t' + stats.frames + '\nreconstructs\t' + stats.reconstructs + '\npresents\t' + stats.presents;
+  const calculusDigest = () => ({ md: calculus && calculus.last ? calculusMarkdown(calculus.last) : '' });   // 0.4.0 S3: ⧉ copies THE PROSE FIGURE (calculus.js), which pastes into the notebook and renders
+  return { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen, wSep, metersDigest, calculusDigest }; }
   function createAtomsWignerRadiation() {   // the third seat: ATOMS · WIGNER · RADIATION · EMISSION SPECTRA
   const wAtoms = device({ id: 'atoms', eyebrow: 'ATOMS', status: '' });
   rack.appendChild(wAtoms.root); wAtoms.root.classList.add('closed');            // reopened from the + at the top of the rack
@@ -218,6 +221,13 @@ export function createReadouts(app) {
   /* 017 X1: the A ↔ B TRANSITION a press started (its preset's id is `emission:…`) stops with the window; the prepared pair stays */
   standDown(wEm, () => { if (reg.transition && /^emission:/.test(reg.preset || '') && app.hooks.ab) app.hooks.ab.set(false); });
   const WIG_OK = 'numerical · a slice, not a marginal', RAD_OK = 'exact matrix elements · classical far field';
-  return { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, wEm, emissionView, WIG_OK, RAD_OK }; }
-  return { wSh, shadowView, shadowFoot, wOrb, orbit, kepler, wVor, vortex, particles, flowTracers, wSlice, slice, createCalcMetersLadder, createAtomsWignerRadiation };
+  /* the ⧉ digests (021 G3) */
+  const atomsDigest = () => atomsView.digest();
+  const wignerDigest = () => wignerView.table();
+  const radiationDigest = () => radiationView.table();
+  return { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, wEm, emissionView, WIG_OK, RAD_OK, atomsDigest, wignerDigest, radiationDigest }; }
+  /* the ⧉ digests (021 G3) */
+  const vortexDigest = () => vortex.last && vortex.last.points ? 'nodal points (x, y, z)\n' + vortex.last.points.map((p) => [p.x, p.y, p.z].map((v) => (+v).toFixed(5)).join('\t')).join('\n') : '';
+  const shadowDigest = () => { const c = reg.at(clock.t); return 'label\tq\tp\n' + reg.populated().map((a) => getHamiltonian().labelOf(BASIS[a]) + '\t' + (c.re[a] * Math.SQRT2).toFixed(6) + '\t' + (c.im[a] * Math.SQRT2).toFixed(6)).join('\n'); };
+  return { wSh, shadowView, shadowFoot, wOrb, orbit, kepler, wVor, vortex, particles, flowTracers, wSlice, slice, createCalcMetersLadder, createAtomsWignerRadiation, vortexDigest, shadowDigest };
 }

@@ -2,7 +2,7 @@
  * literal — and restore() — ONE ordered program — whole, never split by card.  createPersist(app) runs at §24's seat: the cards' handles come
  * from app (boot() fills each slot after its declaration), the controller's and SPECTRUM's are read live at use (app.ctl.x, app.w.spectrum).
  * serialize / restore / save / copyJSON are registered on app.sh for the modules that read them (the links, the history, STATE). */
-import { TIER } from '../rack.js';
+import { TIER } from '../tier.js';
 import { VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, quatFromYawPitch, waveView, drawStyle } from '../field.js';
 import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';

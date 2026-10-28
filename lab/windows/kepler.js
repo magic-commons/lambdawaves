@@ -1,6 +1,6 @@
 /* lab/windows/kepler.js — THE BOW and KEPLER AS A CONTROL SURFACE (0.5.2 R2b; moved verbatim out of lab/rack.js boot()), created where THE BOW stood.  Its
  * verbs are registered on app.w for the cards that read them (SPECTRUM, ORBIT, persist); keyState is read through app.sh; boot() destructures the rest. */
-import { TIER } from '../rack.js';
+import { TIER } from '../tier.js';
 import { VIEW, VIEW_NAMES, cameraBasis, toScreen } from '../field.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, getZ, getMu } from '../hamiltonian.js';
 import { NMAX } from '../hydrogen.js'; import { keplerOrbits } from '../kepler.js'; import { createGas } from '../gas.js'; import { wellPacket } from '../well.js';

@@ -1,6 +1,6 @@
 /* lab/shell/ink.js — §18 INK STAYS UNDER GLASS (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the occlusion host — refreshOcclusion, which the loop
  * calls, and the providers registered in their old order.  createInk(app) runs where §18 stood; boot() destructures refreshOcclusion for the loop. */
-import { TIER } from '../rack.js'; import { paintedRect } from '../occlusion.js';
+import { TIER } from '../tier.js'; import { paintedRect } from '../occlusion.js';
 export function createInk(app) {
   const { dom } = app, { schedule } = app.loop, { rack, rackL, floats } = app.host, { occlusion, field } = app.ctl;
   const NO_OCCLUSION = [];

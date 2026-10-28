@@ -1,6 +1,6 @@
 /* lab/shell/stage-words.js — THE STAGE TEXT and its CAPTION (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the source, the caption a capture draws,
  * the tick and the INFORMATIONAL layer (initStageText, called by boot() at the go).  stageTextTick and stageCaption are registered on app.w at creation. */
-import { TIER } from '../rack.js'; import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { toScreen, cameraKey } from '../field.js';
+import { TIER } from '../tier.js'; import { el, mathPlain } from '../mir/kit.js'; import { createInfoLayer, INFO } from '../mir/info/layer.js'; import { toScreen, cameraKey } from '../field.js';
 import { BASIS } from '../hydrogen.js'; import { getHamiltonian } from '../hamiltonian.js'; import { ELEMENT } from '../md.js';
 import { stateLatex, formulaLatex, BASIS_LABEL, mdText } from '../latex-state.js';
 import { createPrefs } from '../mir/core/prefs.js'; import { createSettingsStore } from '../settings-store.js';

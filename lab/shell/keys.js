@@ -1,7 +1,7 @@
 /* lab/shell/keys.js — §20–§23 (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): keyState, the ACTIONS rows on MIR's ONE KEY TABLE (lab/key-table.js), the
  * KEYBOARD window and THE TIMELINE (the kit's; THE FOCUS LAW's scoped rows), toggleUI and THE TAB ORDER.  createKeys(app) runs at its seat; keyState, ACTIONS
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
-import { TIER } from '../rack.js'; import { VIEW, VIEW_NAMES, WAVE_VIEWS, STYLE, drawStyle } from '../field.js'; import { CAM } from '../camera-law.js'; import { STAGE_BINDINGS } from '../stage-gestures.js';
+import { TIER } from '../tier.js'; import { VIEW, VIEW_NAMES, WAVE_VIEWS, STYLE, drawStyle } from '../field.js'; import { CAM } from '../camera-law.js'; import { STAGE_BINDINGS } from '../stage-gestures.js';
 import { createKeyTable } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
 import { infoActions } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout } from '../mir/kit.js';
 export function createKeys(app) {

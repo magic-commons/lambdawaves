@@ -1,6 +1,6 @@
 /* lab/shell/facade.js — §26 THE DIAGNOSTICS SURFACE (0.5.2 R5; moved whole out of lab/rack.js boot()): createFacade(app) returns the one `__LW` literal,
  * key for key and getter for getter; boot() keeps the window.__LW / app.sh.LW line and the members it adds later (curves, bootView … ready, report) at their seats. */
-import { TIER, BUILD_LINE } from '../rack.js'; import { PRESETS, RENDER_CAP } from '../state.js'; import { psiAt, orbitalFromTable } from '../hydrogen.js'; import { waitForPaint } from '../frame-settle.js';
+import { TIER } from '../tier.js'; import { BUILD_LINE } from '../rack.js'; import { PRESETS, RENDER_CAP } from '../state.js'; import { psiAt, orbitalFromTable } from '../hydrogen.js'; import { waitForPaint } from '../frame-settle.js';
 import { VIEW, STYLE, cameraBasis, quatFromYawPitch, waveView, drawStyle } from '../field.js'; import { parseCssColor, cssRGB, accentRGB } from '../mir/kit.js'; import { rgbToHex, contrastRatio } from '../mir/palette.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ } from '../hamiltonian.js'; import { wellCentroid } from '../well.js'; import { CARD_GROUND } from '../look.js';
 import { readLink, LINK_CHAR_CEILING } from '../statelink.js'; import { CATALOGUE } from '../catalogue.js';
