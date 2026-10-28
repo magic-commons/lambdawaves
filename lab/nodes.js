@@ -27,6 +27,7 @@ import { jsonStore } from './mir/core/prefs.js';
 import { createUserPresets } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
 import { createView } from './nodes-view.js';
+import { createUndo } from './nodes-undo.js';
 
 /* 019 N5 · the shipped graphs (Josh's call 3: the recipes are the builder's) — every node but CURVES, which stays as it is */
 const SHIPPED = {
@@ -104,23 +105,39 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     for (const view of views) view.paint(q, k, v, shown);
     if (from === 'hand') saveList();
   }
-  const hand = (q, k, v) => { if (routed(ID(q, k))) mod.registry.write(ID(q, k), v); else setValue(q, k, v, 'hand'); };
+  const hand = (q, k, v) => { undo.touch(); if (routed(ID(q, k))) mod.registry.write(ID(q, k), v); else setValue(q, k, v, 'hand'); };
+
+  /* 020 X1 · NODES' OWN UNDO (lab/nodes-undo.js): a snapshot of the list and the graph's places; every verb marks the state before it */
+  const snap = () => JSON.stringify({ list: nodes.map(({ id, type, values, bypass, at, name, fold }) => ({ id, type, values, bypass, at, name, fold })), at: rec().at || null });
+  const undo = createUndo(snap, (s) => { const o = JSON.parse(s); for (const q of nodes) unenroll(q); nodes = o.list.map((q) => fresh(q.id, q.type, q)); for (const q of nodes) enroll(q);
+    put({ at: o.at }); changed(true); });
+  const many = (x) => (Array.isArray(x) ? x : [x]);
 
   /* THE VERBS: add · remove · bypass · a graph · reorder (by the graph's top → bottom) */
-  const changed = () => { saveList(true); recompile(); for (const v of views) v.sync(); };
+  const changed = (rebuild) => { saveList(true); recompile(); for (const v of views) v.sync(rebuild); };
   function add(type, o) {
     if (!TYPES[type]) return null;
+    undo.mark();
     const c = type === 'curves' && curvesNode();
     if (c) { setBypass(c.id, false); return c.id; }
     let k = 1; while (byId('n' + k)) k++;
     const q = fresh(type === 'curves' ? 'curves' : 'n' + k, type, o); nodes.push(q); enroll(q); changed(); return q.id;
   }
-  function remove(id) { const q = byId(id); if (!q) return false; unenroll(q); nodes = nodes.filter((n) => n !== q); changed(); return true; }
-  function setBypass(id, on) { const q = byId(id); if (!q || q.bypass === !!on) return; q.bypass = !!on; changed(); }
+  /** remove(id | ids) · setBypass(id | ids, on): one step for the lot */
+  function remove(ids) { const Q = many(ids).map(byId).filter(Boolean); if (!Q.length) return false; undo.mark(); for (const q of Q) unenroll(q); nodes = nodes.filter((n) => !Q.includes(n)); changed(); return true; }
+  function setBypass(ids, on) { const Q = many(ids).map(byId).filter((q) => q && q.bypass !== !!on); if (!Q.length) return; undo.mark(); for (const q of Q) q.bypass = !!on; changed(); }
+  /** duplicate(ids, at): each beside its original (new ids, the same values, 24 px down-right of `at[id]`); CURVES stays one */
+  function duplicate(ids, at = {}) {
+    const Q = many(ids).map(byId).filter((q) => q && q.type !== 'curves'); if (!Q.length) return []; undo.mark();
+    const out = Q.map((q) => { let k = 1; while (byId('n' + k)) k++; const p = at[q.id] || q.at, d = fresh('n' + k, q.type, { ...q, values: JSON.parse(JSON.stringify(q.values)), at: p ? [p[0] + 24, p[1] + 24] : null });
+      nodes.splice(nodes.indexOf(q) + 1, 0, d); enroll(d); return d.id; });
+    changed(); return out;
+  }
   /** the rack's CURVES door: absent = off; on adds CURVES (or lifts its bypass), off bypasses it */
   function setHas(on) { const c = curvesNode(); if (on) add('curves'); else if (c) setBypass(c.id, true); }
   /** a graph preset (a shipped one, or the reader's): every node but CURVES replaced by its list, laid out afresh */
   function applyGraph(list) {
+    undo.mark();
     for (const q of nodes) if (q.type !== 'curves') unenroll(q);
     nodes = nodes.filter((q) => q.type === 'curves'); for (const q of nodes) q.at = null;
     let k = 0;
@@ -129,7 +146,8 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   }
   const graphOf = () => nodes.filter((q) => q.type !== 'curves').map(({ type, values, bypass }) => ({ type, values: { ...values }, bypass }));
   /** the cards moved (the window's ground): each node takes the place it shows, the list follows the graph's top → bottom (THE COLUMN IS THE CHAIN) */
-  function moved(at, io) {
+  function moved(at, io, nudge) {
+    if (nudge) undo.touch(); else undo.mark();
     for (const q of nodes) if (at[q.id]) q.at = at[q.id];
     put({ at: { ...(rec().at || {}), ...io } });
     nodes.sort((a, b) => (a.at ? a.at[1] : 0) - (b.at ? b.at[1] : 0)); changed();
@@ -164,7 +182,8 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
 
   /* the views' one door to the model */
   let win = null;
-  const M = { TYPES, SHIPPED, graphs, rec, put, ID, list: () => nodes, byId, has, add, remove, setBypass, applyGraph, graphOf, moved, hand, curvesIn, passes: () => passes,
+  const M = { TYPES, SHIPPED, graphs, rec, put, ID, list: () => nodes, byId, has, add, remove, setBypass, duplicate, applyGraph, graphOf, moved, hand, curvesIn, passes: () => passes,
+    undo: () => undo.undo(), redo: () => undo.redo(),
     door: (kind) => { if (kind === 'win') { win.close(); raise('nodes'); } else { rk.close('nodes'); win.open(); } } };
 
   /* the rack card (the CURVES card's seat, after RENDER, closed) and the MIR window, each its own view */
@@ -181,6 +200,6 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });
-  return { model, filter, win, views, has, setHas, add, remove, setBypass, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),
+  return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),
     set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, compile: () => compile(nodes, TYPES, new Map()), open: () => win.open(), close: () => win.close() };
 }

@@ -6,7 +6,7 @@
 .nodes-host > .nodes-ground { flex: 1 1 auto; min-height: 0; }
 .dev .nodes-ground { height: min(70vh, 680px); }
 .nodes-ground:active { cursor: grabbing; }
-.nodes-plane { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.nodes-plane { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; }
 .nodes-wires { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
 .nodes-wires path { fill: none; stroke: var(--acc); stroke-width: 2; opacity: .75; }
 .nodes-card { position: absolute; width: 120px; box-sizing: border-box; padding: 0 8px 8px; cursor: default; border-radius: var(--r-md);
@@ -27,15 +27,20 @@
 .nodes-port { position: absolute; left: 50%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 2px var(--glass-well); }
 .nodes-port.in { top: -5px; }
 .nodes-port.out { bottom: -5px; }
-:is(.nodes-x, .nodes-rm, .nodes-add, .nodes-door) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
+.nodes-tools button, :is(.nodes-x, .nodes-rm, .nodes-door) { display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0;
   background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; }
 .nodes-x, .nodes-rm { width: 18px; height: 18px; margin-right: -4px; }
 .nodes-x[aria-pressed="true"] { color: var(--acc); }
-:is(.nodes-x, .nodes-rm, .nodes-add, .nodes-door):is(:hover, :focus-visible) { color: var(--acc); }
-:is(.nodes-x, .nodes-rm, .nodes-add, .nodes-door) svg { width: 16px; height: 16px; }
-:is(.nodes-add, .nodes-door) { position: absolute; top: 6px; z-index: 1; border-radius: var(--r-sm); background: var(--glass-tint); }
-.nodes-add { left: 6px; }
+:is(.nodes-tools button, .nodes-x, .nodes-rm, .nodes-door):is(:hover, :focus-visible) { color: var(--acc); }
+:is(.nodes-tools button, .nodes-x, .nodes-rm, .nodes-door) svg { width: 16px; height: 16px; }
+.nodes-tools, .nodes-door { position: absolute; top: 6px; z-index: 1; }
+.nodes-tools { left: 6px; display: flex; gap: 2px; }
+:is(.nodes-tools button, .nodes-door) { border-radius: var(--r-sm); background: var(--glass-tint); }
 .nodes-door { right: 6px; }
+/* 020 X1 · the ground: focus, the selection's accent outline, the shift-drag box */
+.nodes-ground:focus-visible { outline: 1px solid color-mix(in srgb, var(--acc) 50%, transparent); outline-offset: -1px; }
+.nodes-card.sel { outline: 2px solid var(--acc); outline-offset: 2px; }
+.nodes-box { display: none; position: absolute; z-index: 1; pointer-events: none; border: 1px dashed var(--acc); background: color-mix(in srgb, var(--acc) 8%, transparent); }
 .nodes-menu { position: absolute; left: 6px; top: 36px; z-index: 2; display: flex; flex-direction: column; min-width: 200px; max-height: calc(100% - 44px); overflow: auto; padding: 4px; border-radius: var(--r-md); background: var(--glass-raise, var(--glass-tint));
   border: 1px solid var(--glass-border); box-shadow: var(--neu-raise); }
 .nodes-item { padding: 6px 12px; border: 0; background: transparent; box-shadow: none; color: var(--fg); font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui);

@@ -20,6 +20,20 @@ const SCENES = {
     const f = $('.nodes-find'); f.value = 'blu'; f.dispatchEvent(new Event('input')); const found = $$('.nodes-item').filter((i) => !i.hidden).map((i) => i.dataset.type || i.dataset.graph);
     f.value = ''; f.dispatchEvent(new Event('input')); await w(200);
     return { finder, empty, menu, found };`,
+  x1: `N.open(); await w(600); N.win.place({ x: 480, y: 70, w: 620, h: 720 }); await w(300); for (const t of ['levels', 'posterize', 'blur']) N.add(t); await w(500);
+    const G = $('.nodes-ground'), r = G.getBoundingClientRect(), sc = () => +($('.nodes-plane').style.scale || 1), n = () => N.nodes().length, sel = () => $$('.nodes-card.sel').length;
+    const ptr = (type, x, y, o = {}) => G.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 0, isPrimary: true, button: 0, buttons: type === 'pointerup' ? 0 : 1, clientX: r.left + x, clientY: r.top + y, ...o }));
+    G.focus(); key('Home'); const fit = sc();
+    G.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: true, deltaY: 400, clientX: r.left + 300, clientY: r.top + 300 })); const out = sc();
+    key('a', { ctrlKey: true }); const all = sel(); key('d', { ctrlKey: true }); const dup = { n: n(), sel: sel() }; key('Delete'); const del = n();
+    key('z', { ctrlKey: true }); const un = n(); key('z', { ctrlKey: true, shiftKey: true }); const re = n();
+    key('a', { ctrlKey: true }); key('m'); const off = N.nodes().filter((q) => q.bypass).length; key('m'); key('Escape');
+    let caught = null; window.addEventListener('keydown', (e) => { caught = e.key; }, { once: true }); key('x'); const leaked = caught;
+    __LW.nodes.views[1].place(); localStorage.setItem('lambdawaves.q0.nodes', JSON.stringify({ ...JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')), zoom: 1, pan: {} })); N.views[1].place(); await w(100);
+    G.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: true, deltaY: -Math.log(1.5) / 0.002, clientX: r.left + 140, clientY: r.top + 60 })); const z15 = sc();
+    ptr('pointerdown', 20, 120, { shiftKey: true }); ptr('pointermove', 560, 330, { shiftKey: true }); ptr('pointerup', 560, 330, { shiftKey: true }); const boxed = sel();
+    key('Escape'); ptr('pointerdown', 20, 200, { shiftKey: true }); ptr('pointermove', 600, 520, { shiftKey: true }); await w(200);
+    return { fit, out, all, dup, del, un, re, off, leaked, z15, boxed };`,
 };
 try {
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify(await g.errors()));
