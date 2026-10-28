@@ -79,4 +79,5 @@ S → T → L → X (each on the merged tree; the recipe: `git merge --no-ff --n
 ## CLOSED
 | chain | BASE | commit | note |
 |---|---|---|---|
-| S | 7e5d6db | | |
+| S | d9210a2 | 0fc2e3e | S1–S5 (S-BUILD.md; no kit edit; node suite 246 PASS; hide-reveal/stage-text/routed-knob/camera-shift green; LOCK 843/0; MAP ONLY lag was BALL AND STICK's 2-D canvas ignoring it + Firefox inFlight cap 2 under heavy frames) |
+| T | 0fc2e3e | | |
