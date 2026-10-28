@@ -65,6 +65,9 @@ E3 THE SHEET: the cramped-space Playwright sheet re-shot after all chains (1600,
 18. (H1) A volume tile's hint and EMISSION's head tip come from data or the kit and can still run long. Default: as is (the census reads literals).
 19. (F2) The card's content width is 252 px at the 300-px rack, so WAVE's six knobs stay 3 + 3 and the ESP rows three lines. Default: as is.
 20. (F2) Labels stay above the face (bounded by the cell); the face is capped at 34 px so no row adds height; dense rows draw 29-px faces. Default: as built.
+21. (C2) The stage panel is 72 px taller open (228 → 300). Default: keep; folding METERS into the TRANSPORT line is a 023 option.
+22. (C2) MACRO_MAX is 8 in the model, so the 9–16 page never appears. Default: 8 (raise to 16 on your word).
+23. (C2) The docked card expanded is taller than the viewport, so the rack scrolls (the card 262 → 256 px); nothing scrolls inside the card. Default: as is.
 
 ## MERGE ORDER
 P → S → H → F → C → E (each on the merged tree; the recipe: `git merge --no-ff --no-commit it022-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → THE LOCK `--check --query gastab=0` → commit → CLOSED row → handoff line; the kit bundle carried forward after each chain that bumps it).
@@ -76,4 +79,5 @@ P → S → H → F → C → E (each on the merged tree; the recipe: `git merge
 | S | 4538c0f | 94971a45 | S1–S2 (S-BUILD.md; kit 1.5.6-alpha.5: raise 1 px/.70, dark grey highlight --neu-lit, SOLID 1/2 px, shine hairline, SHINE SOFT 0–6, --surface-menu-tint/-edge; 44 raw relief sites → --relief-*; popup rows ≥ 4.5:1 in all 14 looks; tools/skin-sheet.mjs; LOCK 843/0) |
 | H | a044ec99 | 7b527754 | H1–H2 (H-BUILD.md; hints > 60: 167 → 0, tools/hints-census.mjs --check in the gate; 36 action hints; four side glyphs; labels fit at 300 px (label-fit 1 → 0); LOCK 843/0; latex-copy/camera-shift/take-in-bugs red at BASE → chain E re-aims) |
 | F | 79c67a62 | 5b059742 | F1–F2 (F-BUILD.md; kit 1.5.6-alpha.6 .row.fit + tokens; twelve windows on fit rows, no window taller, FIELD 681 → 600; tools/row-fit.mjs; LOCK 843/0; camera-shift + official-defaults-palette aaHidden red at BASE → chain E) |
-| C | 5b059742 | | |
+| C | f1c43fa4 | b5c7ce1d | C1–C2 (C-BUILD.md; kit 1.5.6-alpha.7 section/knobBank/meter/lamp/macroKnob + --xport-* tokens; the expanded CSB one well: TRANSPORT · MACROS 8 · FAVOURITES 8 + page · METERS; no inner scroll; collapsed bar unchanged; panel 228 → 300 px on the stage; LOCK 843/0) |
+| E | b5c7ce1d | | |
