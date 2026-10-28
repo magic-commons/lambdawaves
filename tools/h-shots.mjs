@@ -1,6 +1,6 @@
 /* h-shots.mjs — iteration 022 chain H's picture loop (a diagnostic, not a gate): THE WORDS before and after.
  *   LW_PORT=9683 GD_PORT=5683 node tools/h-shots.mjs tips <tag>     the hint tip over five controls (a real hover) → H-shots/tips-<tag>.jpg
- *   LW_PORT=9683 GD_PORT=5683 node tools/h-shots.mjs labels <tag>   SPECTRUM, WIGNER, FIELD and the bar's favourites → H-shots/labels-<tag>.jpg */
+ *   LW_PORT=9683 GD_PORT=5683 node tools/h-shots.mjs labels <tag>   SPECTRUM, WIGNER, FIELD (folds open), MOLECULES' top and the bar's favourites → H-shots/labels-<tag>.jpg */
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { open } from './gate/gatekit.mjs';
@@ -8,7 +8,7 @@ import * as drv from './gate/drv.mjs';
 
 const [MODE = 'tips', TAG = 'shot'] = process.argv.slice(2), DIR = 'research/iteration-022/H-shots';
 const TIPS = [['observer', 'KNEE'], ['informational', 'STAGE FORMULA'], ['informational', 'LIST CAP'], ['camera', 'LOCK'], ['spectrum', 'VISUALS']];
-const WINS = ['spectrum', 'wigner', 'staticfield'];
+const WINS = ['spectrum', 'wigner', 'staticfield', 'chem'];
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 mkdirSync(DIR, { recursive: true });
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT || 9683}/lab/?starter=home`, { width: 1600, height: 1000 });
@@ -35,11 +35,17 @@ try {
     crops.push([p, c.map(Math.round)]); console.log(JSON.stringify({ win, text, tip: box && box.slice(4), hint: at.slice(2) }));
     await hover(800, 500); await wait(300);
   } else {
+    /* the favourites are read at boot: EXPOSURE (the one 8-letter knob a modulation target) seated, then a reload */
+    await g.ev(`localStorage.setItem('lambdawaves.q0.csb', JSON.stringify({ v: 1, items: ['material.exposure', 'observer.zoom', 'transport.rate'] })); location.reload(); return 1;`);
+    await wait(1500); await g.waitFor('window.__LW?.ready', 400, 100); await wait(1200);
     for (const w of WINS) { await show(w); await wait(900);
-      const b = await g.ev(`const c = document.querySelector('.dev[data-id="${w}"]'); c.scrollIntoView({ block: 'start', behavior: 'instant' }); const b = c.getBoundingClientRect(); return [b.left, b.top, b.right, Math.min(innerHeight, b.bottom)];`);
+      if (w === 'chem') { await g.ev(`__LW.chem.setOn(true); return 1;`); await wait(4000); }
+      if (w === 'spectrum') { await g.ev(`__LW.setHamiltonian('atom'); const d = [...document.querySelectorAll('.dev[data-id="spectrum"] .sw')].find((x) => /DIALS/.test(x.textContent)); if (d && d.getAttribute('aria-pressed') !== 'true') d.click(); return 1;`); await wait(1500); }
+      await g.ev(`for (const b of document.querySelectorAll('.dev[data-id="${w}"] [data-fold][aria-expanded="false"]')) b.click(); return 1;`); await wait(600);
+      const b = await g.ev(`const c = document.querySelector('.dev[data-id="${w}"] .sp-ham') || document.querySelector('.dev[data-id="${w}"]'); c.scrollIntoView({ block: 'start', behavior: 'instant' }); const b = c.getBoundingClientRect(); return [b.left, b.top, b.right, Math.min(innerHeight, b.bottom, b.top + ${w === 'chem' ? 260 : 900})];`);
       const p = `.tmp/h-${TAG}-${crops.length}.png`; writeFileSync(p, Buffer.from(await g.snap(), 'base64')); crops.push([p, b.map(Math.round)]); await g.ev(`__LW.run('window.${w}.close'); return 1;`); }
     await g.ev(`__LW.run('window.transport.open'); const ex = document.querySelector('#transport .tr-expand'); if (ex && ex.getAttribute('aria-expanded') !== 'true') ex.click(); return 1;`); await wait(1000);
-    const b = await g.ev(`const f = document.querySelector('#transport .csb-favs, #transport'); const b = f.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom];`);
+    const b = await g.ev(`const f = document.querySelector('#transport .csb-favs') || document.querySelector('#transport'); const b = f.getBoundingClientRect(); return [b.left - 8, b.top - 8, b.right + 8, b.bottom + 8];`);
     const p = `.tmp/h-${TAG}-${crops.length}.png`; writeFileSync(p, Buffer.from(await g.snap(), 'base64')); crops.push([p, b.map(Math.round)]);
   }
   execFileSync('python3', ['-I', '-c', `import sys, json

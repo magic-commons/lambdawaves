@@ -89,7 +89,7 @@ export function createSliceView(host, api) {
   const curSeg = seg({ label: 'CURRENT', value: 'off', options: [{ id: 'off', label: 'OFF' }, { id: 'arrows', label: 'ARROWS', title: 'the probability current in the plane as a quiver' },
     { id: 'lines', label: 'LINES', title: 'streamlines of the probability current in the plane' }], onChange: (v) => { current = v; jro.root.style.display = v === 'off' ? 'none' : ''; paint(); } });
   r1.appendChild(curSeg.root);
-  const extentK = knob({ label: 'EXTENT a₀', min: 1, max: 60, value: 8, log: true, fmt: (v) => '±' + v.toFixed(1), onInput: (v) => { half = v; dirty = true; api.repaint(); } });
+  const extentK = knob({ label: 'EXTENT', min: 1, max: 60, value: 8, log: true, fmt: (v) => '±' + v.toFixed(1) + ' a₀', onInput: (v) => { half = v; dirty = true; api.repaint(); } });
   const gainK = knob({ label: 'GAIN', min: 0.1, max: 20, value: 1.6, log: true, fmt: (v) => v.toFixed(2), onInput: (v) => { gain = v; regain = true; api.repaint(); } });
   r1.appendChild(extentK.root);
   r1.appendChild(gainK.root);

@@ -96,7 +96,7 @@ export function createSpectrumCard(app) {
     ui.muKnob = knob({ label: 'μ/mₑ', min: 0.5, max: 200, log: true, value: 1, fmt: (v) => 'μ = ' + +v.toPrecision(5), title: 'μ/mₑ · reduced mass: E → μE, r → r/μ', onInput: setMass });
     const muSeg = seg({ aria: 'reduced mass', cls: 'sp-vseg', value: '1', options: [['1', '1', 'ELECTRON'], ['ps', 'Ps', 'POSITRONIUM'], ['muh', 'μH', 'MUONIC H']].map(([id, label, word]) => ({ id, label, title: `${word} · μ = ${+MASS[id].toPrecision(5)} mₑ` })), onChange: (id) => setMass(MASS[id]) });
     hamRows.hydrogen.append(ui.muKnob.root, muSeg.root); onHamiltonian(() => { ui.muKnob.set(getMu()); muSeg.set(Object.keys(MASS).find((id) => MASS[id] === getMu()) || ''); if (!(app.state.chem && app.state.chem.on)) hamShow(getHamiltonian().id); });
-    ui.elemKnob = knob({ label: 'ELEMENT  Z', min: 1, max: ZMAX, value: 10, step: 1, fmt: (v) => 'Z = ' + Math.round(v) + '  ' + ATOMS[Math.max(0, Math.min(ZMAX - 1, Math.round(v) - 1))].symbol, onChange: (v) => setElement(Math.round(v)) });
+    ui.elemKnob = knob({ label: 'ELEMENT', title: 'ELEMENT · its atomic number Z', min: 1, max: ZMAX, value: 10, step: 1, fmt: (v) => 'Z = ' + Math.round(v) + '  ' + ATOMS[Math.max(0, Math.min(ZMAX - 1, Math.round(v) - 1))].symbol, onChange: (v) => setElement(Math.round(v)) });
     hamRows.atom.appendChild(ui.elemKnob.root);
     {
       const rs = hamRows.scale;
@@ -109,8 +109,8 @@ export function createSpectrumCard(app) {
          map is LOG, so the seven limits 1, ½ … 1/7 sit 64 · 41 · 28 · 18 · 11 · 5 · 0 % up the travel instead of crowding its first eighth;
          the readout names a limit it stands on ("λ = 0.143 · 1/7"). */
       const lamFmt = (v) => { const n = Math.round(1 / v); return 'λ = ' + v.toFixed(3) + (n >= 2 && n <= 7 && Math.abs(v * n - 1) < 2e-3 ? ' · 1/' + n : ''); };
-      ui.lambdaKnob = knob({ label: 'λ  SCALE', min: LAMBDA_MIN, max: LAMBDA_MAX, value: 1, log: true, fmt: lamFmt, onInput: (v) => { if (sturm.on) setSturmian({ lambda: v }); else sturm.lambda = clampLambda(v); } });
-      ui.lambdaKnob.root.title = 'Set the Sturmian exponent; Shift is finer; double-tap resets';
+      ui.lambdaKnob = knob({ label: 'SCALE', min: LAMBDA_MIN, max: LAMBDA_MAX, value: 1, log: true, fmt: lamFmt, onInput: (v) => { if (sturm.on) setSturmian({ lambda: v }); else sturm.lambda = clampLambda(v); } });
+      ui.lambdaKnob.root.title = 'The Sturmian exponent λ; Shift is finer';
       ui.lambdaKnob.setDisabled(true);
       rs.appendChild(ui.lambdaKnob.root);
       ui.sturmRo = readout({ label: 'SCALE', value: 'HYDROGEN 1/n', cls: 'two', sub: 'the shipped radials · λ acts once STURMIAN is on' });
@@ -211,22 +211,22 @@ export function createSpectrumCard(app) {
     if (ui.scaleSeg) ui.scaleSeg.set(sturm.on ? 'sturmian' : 'hydrogen');
     if (ui.lambdaKnob) { ui.lambdaKnob.set(sturm.lambda); ui.lambdaKnob.setDisabled(!on); }
     const keep = (elm, title) => keepT(elm, on, title);
-    if (ui.abSw) { ui.abSw.root.disabled = on; ui.abSw.root.classList.toggle('disabled', on); keep(ui.abSw.root, 'A / B TRANSITION is a diagonal-phase feature (two exact diagonal evolutions mixed): off under STURMIAN — switch SCALE back to HYDROGEN'); }
+    if (ui.abSw) { ui.abSw.root.disabled = on; ui.abSw.root.classList.toggle('disabled', on); keep(ui.abSw.root, 'A / B TRANSITION: off under STURMIAN (SCALE → HYDROGEN)'); }
     if (ui.abOmega) ui.abOmega.setDisabled(on);
     if (ui.abRo && !on && /STURMIAN/.test(ui.abRo.root.textContent)) { ui.abRo.set('—  /  —', ''); ui.abRo.setSub('store two states, then TRANSITION plays A → B → A at Ω'); }
     if (ui.fz) { ui.fz.setDisabled(on); if (on) ui.fz.set(0); }
     /* wave 40: e^{−iθK_z} and e^{iαL²} are moves inside a COULOMB SHELL — written in a degeneracy the Sturmian
        scale does not have (its eigenvalues are variational, its shells are not n²-fold), so they stand down too */
-    if (ui.kzKnob) { ui.kzKnob.setDisabled(on); keep(ui.kzKnob.root, 'STARK K_z is an SO(4) rotation inside a Coulomb shell: off under STURMIAN — switch SCALE back to HYDROGEN'); }
-    if (ui.defKnob) { ui.defKnob.setDisabled(on); keep(ui.defKnob.root, 'DEFECT L² is a wait under the shell\'s l-dependent phase: off under STURMIAN — switch SCALE back to HYDROGEN'); }
+    if (ui.kzKnob) { ui.kzKnob.setDisabled(on); keep(ui.kzKnob.root, 'STARK K_z: off under STURMIAN (SCALE → HYDROGEN)'); }
+    if (ui.defKnob) { ui.defKnob.setDisabled(on); keep(ui.defKnob.root, 'DEFECT L²: off under STURMIAN (SCALE → HYDROGEN)'); }
     /* AND THE TWO RATES WITH THEM — the STORED number, not just the dial.  A rate left running into
        a scale change would go on turning a register the operator has no business turning, and
        switching back to HYDROGEN would find it already spun.  ROTATE z's rate is untouched: m is
        still m under the Sturmian scale, which is why its jog wheel is not disabled either. */
     if (on) { rotRate.kz = 0; rotRate.def = 0; }
-    if (ui.kzRate) { ui.kzRate.setDisabled(on); if (on) ui.kzRate.set(0); keep(ui.kzRate.root, 'SPIN K_z drives an SO(4) rotation inside a Coulomb shell: off under STURMIAN — switch SCALE back to HYDROGEN'); }
-    if (ui.defRate) { ui.defRate.setDisabled(on); if (on) ui.defRate.set(0); keep(ui.defRate.root, 'SPIN L² drives a wait under the shell\'s l-dependent phase: off under STURMIAN — switch SCALE back to HYDROGEN'); }
-    if (ui.spaceSeg) { const b = ui.spaceSeg.button('p'); if (b) { b.disabled = on; keep(b, 'not built for the Sturmians: position space only under STURMIAN'); } }
+    if (ui.kzRate) { ui.kzRate.setDisabled(on); if (on) ui.kzRate.set(0); keep(ui.kzRate.root, 'SPIN K_z: off under STURMIAN (SCALE → HYDROGEN)'); }
+    if (ui.defRate) { ui.defRate.setDisabled(on); if (on) ui.defRate.set(0); keep(ui.defRate.root, 'SPIN L²: off under STURMIAN (SCALE → HYDROGEN)'); }
+    if (ui.spaceSeg) { const b = ui.spaceSeg.button('p'); if (b) { b.disabled = on; keep(b, 'position space only under STURMIAN'); } }
     if (ui.spaceNote) ui.spaceNote.hidden = !on;
     for (const w of [app.w.wOrb, app.w.wVor, app.w.wSlice, app.w.wLad]) if (w) w.root.hidden = on || !H.hydrogenTheorems;
     if (app.w.wCalc) app.w.wCalc.root.hidden = on;   // theorems about hydrogen's eigenfunctions stand down

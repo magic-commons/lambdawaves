@@ -186,7 +186,7 @@ export function createSettingsCard(app) {
     const r6 = el('div', 'row', gq);
     ui.domainAuto = sw({ label: 'DOMAIN AUTO', value: true, onChange: (v) => { domain.auto = v; ui.domainKnob.setDisabled(v); schedule(TIER.REBUILD); } });
     r6.appendChild(ui.domainAuto.root);
-    ui.domainKnob = knob({ label: 'HALF-WIDTH', min: 3, max: 140, value: 7, log: true, fmt: (v) => '±' + v.toFixed(0) + ' a₀', onChange: (v) => { domain.half = v; schedule(TIER.REBUILD); } });
+    ui.domainKnob = knob({ label: 'WIDTH', title: 'The domain’s half-width, ± a₀', min: 3, max: 140, value: 7, log: true, fmt: (v) => '±' + v.toFixed(0) + ' a₀', onChange: (v) => { domain.half = v; schedule(TIER.REBUILD); } });
     ui.domainKnob.setDisabled(true);
     r6.appendChild(ui.domainKnob.root);
     const r7 = el('div', 'row tight', gq);

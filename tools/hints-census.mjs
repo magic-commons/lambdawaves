@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* tools/hints-census.mjs — A HINT IS ONE LINE (022 H1): every app hint in lab/ (minus lab/mir, the kit's) is ≤ 60 characters.
- * Read: `hint:` `title:` `tip:` `.title =` and the second argument of `hint(` / `ariaLabel(`; every string literal of the expression,
+ * Read: `hint:` `title:` `tip:` `knobTitle:` `.title =` and the second argument of `hint(` / `ariaLabel(` / `keep(`; every string literal of the expression,
  * a ternary's branches measured apart, a `+` chain as one string (an expression counts 3); `['… {x} …', { x }]` reads its first.
  *   node tools/hints-census.mjs [--kit] [--all]   the histogram (≤ 40 · 41–80 · 81–140 · > 140) and the strings over 60 with file:line
  *   node tools/hints-census.mjs --check           exit 1 when an app hint is over 60 (joins ./test.sh node, PLAN call 6) */
@@ -8,7 +8,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 const ROOT = new URL('../lab/', import.meta.url).pathname, KIT = process.argv.includes('--kit'), LIMIT = 60;
 const files = (d) => readdirSync(d).flatMap((f) => { const p = join(d, f); return statSync(p).isDirectory() ? (!KIT && f === 'mir' && d === ROOT ? [] : files(p)) : p.endsWith('.js') ? [p] : []; });
-const KEY = /(?:\b(?:hint|title|tip|knobTitle)\s*:(?!:)|\.title\s*=(?!=)|\b(?:hint|ariaLabel)\(\s*[\w.$[\]'"]+\s*,)\s*/g;
+const KEY = /(?:\b(?:hint|title|tip|knobTitle)\s*:(?!:)|\.title\s*=(?!=)|\b(?:hint|ariaLabel|keep)\(\s*[\w.$[\]'"]+\s*,)\s*/g;
 const unq = (s) => s.slice(1, -1).replace(/\\u([0-9a-f]{4})/gi, (_, h) => String.fromCharCode(parseInt(h, 16))).replace(/\\(.)/g, '$1').replace(/\$\{[^}]*\}/g, '{x}');
 /* scan(src, i) → the branches' lengths of the expression at i: literals summed across `+`, split at a top-level `?`/`:`, stopped at , ; ) ] } */
 function scan(src, i) {

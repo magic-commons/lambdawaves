@@ -23,7 +23,7 @@
  * window is a collapsible inset, off by default, on its own amplitude scale, badged as a timestep diagnostic.
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
-import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip, hint, mathPlain, arcRing } from './mir/kit.js';
+import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip, hint, ariaLabel, mathPlain, arcRing } from './mir/kit.js'; import { glyphEl } from './mir/glyph.js';
 import { rackPager } from './pager.js'; import { select as listSelect } from './mir/controls/select.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
@@ -136,8 +136,10 @@ export function createChem(host, api) {
   const secItems = () => [...['ATOMS', ...SECTIONS].map((id) => ({ id, label: id })), ...vPages.map((p) => ({ id: p.id, label: p.label }))];
   const secStep = stepper({ aria: 'Library section', items: secItems(), value: page, cls: 'mol-step', onChange: (id) => { page = id; fillSel(); if (id === 'ATOMS') setShelf(true); } });
   rH.appendChild(secStep.root);
-  const onSw = sw({ label: 'MOLECULES ON', value: false, title: 'Give the field to this molecule', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
+  const onSw = sw({ label: 'ON', value: false, title: 'Give the field to this molecule', onChange: (v) => { setOn(v); if (v && api.hand) api.hand(preset); } });   // 0.5.1 D2: ON with a molecule chosen is a hand pick
   rTop.appendChild(onSw.root);
+  /* 022 H2 · A LABEL IS NEVER WIDER THAN ITS CONTROL: MOLECULES ON is the molecule's glyph + ON (lab/icons.js `molecule`); its name is its aria-label */
+  onSw.root.insertBefore(glyphEl('molecule', 'gly gly-molecule mol-on-gly', 16), onSw.root.querySelector('.sw-lbl')); ariaLabel(onSw.root, 'MOLECULES ON');
   const r0 = el('div', 'row tight mol-r0', host);   // iteration 014 D3: the chooser's row; the CONTROL SURFACE takes the chooser (A1), so the empty row folds away (lab.css .mol-r0:empty)
   /* 0.7.4 C2 · THE SHELF: SECTION's name opens the page as TILES under the picker (formula, name, AOs, the catalogue's word, the lamp); a tap is the hand's
      pick and the shelf folds.  ‹ ATOMS ›, the first page, is the periodic table: a tile sets OPERATOR ATOM and its element (api.atom).  Alt+↓ keeps the kit's list. */
@@ -513,7 +515,7 @@ export function createChem(host, api) {
      R₀ + A·Q₀·cos(ωt)·L and the density LINEAR + one McWeeny step — 32 phase samples from the worker (chem.vib.frames), posed per frame in update() */
   const rVib = el('div', 'row tight mol-vib', more), vibSw = sw({ label: 'VIBRATE', value: false, title: 'Breathe in one normal mode (STO-3G RHF)', onChange: (v) => { setVib(v); } });
   const modeStep = stepper({ aria: 'Normal mode', list: false, items: [], value: null, cls: 'mol-step', onChange: (id) => { setVib(vibOn, +id); } }), roVib = readout({ label: 'MODE', cls: 'wide', value: '—' });
-  const ampKnob = knob({ label: 'AMPLITUDE', min: 0, max: 4, value: 1, title: 'Amplitude in Q₀ (harmonic to 2 Q₀)', fmt: (v) => v.toFixed(1) + ' Q₀', onInput: (v) => { setVib(vibOn, vibK, v); } });
+  const ampKnob = knob({ label: 'SWING', min: 0, max: 4, value: 1, title: 'Amplitude in Q₀ (harmonic to 2 Q₀)', fmt: (v) => v.toFixed(1) + ' Q₀', onInput: (v) => { setVib(vibOn, vibK, v); } });
   rVib.append(vibSw.root, modeStep.root, ampKnob.root, trig({ label: 'BREATHE', title: 'One breath a second, the clock playing', onFire: () => { breathe(); } }).root, roVib.root);
   const rTda = el('div', 'row tight', more); rTda.appendChild(tdaSw.root); rTda.appendChild(coreSw.root);
   for (const n of [r2, fr, roCon.root, cv, cvCore, rr, note]) more.appendChild(n);

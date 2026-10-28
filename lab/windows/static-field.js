@@ -60,9 +60,9 @@ export function createStaticField(app) {
   const gD = group(wField.body, 'DRIVES');
   const rd = el('div', 'row tight native-rotors', gD);
   rd.appendChild(knob({ label: 'ROTATE z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)', onDelta: (d) => { reg.rotateZ(d); touchState(); } }).root);
-  ui.kzKnob = knob({ label: 'STARK K_z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{−iθK_z}', onDelta: (d) => { reg.rotateK(d); touchState(); } });
+  ui.kzKnob = knob({ label: 'STARK', title: 'STARK K_z: turn e^{−iθK_z}', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{−iθK_z}', onDelta: (d) => { reg.rotateK(d); touchState(); } });
   rd.appendChild(ui.kzKnob.root);
-  ui.defKnob = knob({ label: 'DEFECT L²', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{iαL²}', onDelta: (d) => { reg.defectWait(d); touchState(); } });
+  ui.defKnob = knob({ label: 'DEFECT', title: 'DEFECT L²: wait e^{iαL²}', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{iαL²}', onDelta: (d) => { reg.defectWait(d); touchState(); } });
   rd.appendChild(ui.defKnob.root);
   /* THE JOG WHEEL ABOVE AND THE DIAL BELOW ARE NOT TWO TRUTHS.  The wheel is a DELTA — one shove,
      applied and forgotten, holding nothing (mir/kit.js knob, `onDelta`).  This is a RATE, in rad/s, and it is a
@@ -105,7 +105,7 @@ export function createStaticField(app) {
   feel.appendChild(ui.dragKnob.root);
   const rq = el('div', 'row tight', kBody);   // 0.8.0 G2 · SQUEEZE + CAT, the OSCILLATOR's: r rides in mat.bow.squeeze (PROJECT, absent until moved)
   let catK = 0.2;
-  const sqK = knob({ label: 'SQUEEZE r', min: 0, max: 0.33, value: mat.bow.squeeze || 0, fmt: (v) => (+v || 0).toFixed(3), title: 'Squeeze r (cap 0.33)', onInput: (v) => { mat.bow.squeeze = v || undefined; } });
+  const sqK = knob({ label: 'SQUEEZE', min: 0, max: 0.33, value: mat.bow.squeeze || 0, fmt: (v) => (+v || 0).toFixed(3), title: 'Squeeze r (cap 0.33)', onInput: (v) => { mat.bow.squeeze = v || undefined; } });
   const catKnob = knob({ label: 'CAT  <m>k</m>', min: 0.01, max: 1.5, value: catK, log: true, fmt: (v) => v.toFixed(3) + ' a.u.', title: 'the ±k of CAT\'s two slaps (STATE\'s old STRENGTH)', onInput: (v) => { catK = v; } });
   const axis = () => (app.sh.keyState ? app.sh.keyState.axis : 'z');   // the K key's axis (X · Y · Z): STATE's ALONG
   const osc = [['SQUEEZE-IN', 'S(r) along the K axis (OSCILLATOR only)', () => squeezeIn(sqK.get(), axis())], ['CAT', '|α⟩ + |−α⟩ from two slaps ±k (OSCILLATOR only)', () => cat(catK, axis())]].map(([label, t, onFire]) => trig({ label, title: t, onFire }).root);
