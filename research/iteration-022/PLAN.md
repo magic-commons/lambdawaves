@@ -61,6 +61,8 @@ E3 THE SHEET: the cramped-space Playwright sheet re-shot after all chains (1600,
 14. (S2) FROST in the light theme still writes white ink on every window pane (1.05:1); only the popups are fixed. Default: chain E switches FROST's light text to AUTO (a theme value, kit door).
 15. (S2) The menus' 3:1 rim is visible. Default: keep.
 16. (S1) SHINE SOFT is a 0–6 knob drawn at a third (so stored values stay valid). Default: keep.
+17. (H2) AMPLITUDE became SWING; HALF-WIDTH became WIDTH; MOLECULES ON's undo row reads 'ON · MOLECULES'. Default: as built.
+18. (H1) A volume tile's hint and EMISSION's head tip come from data or the kit and can still run long. Default: as is (the census reads literals).
 
 ## MERGE ORDER
 P → S → H → F → C → E (each on the merged tree; the recipe: `git merge --no-ff --no-commit it022-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → THE LOCK `--check --query gastab=0` → commit → CLOSED row → handoff line; the kit bundle carried forward after each chain that bumps it).
@@ -70,4 +72,5 @@ P → S → H → F → C → E (each on the merged tree; the recipe: `git merge
 |---|---|---|---|
 | P | 61b42e0 | c07f202 | P1–P3 (P-BUILD.md; kit 1.5.6-alpha.4: contextMenu · holdTap · onContext · knobMenu · --surface-menu-floor; lab/context-menus.js 12 surfaces; no native select; LOCK 843/0; molecule-demos red at BASE too (headless frames)) |
 | S | 4538c0f | 94971a45 | S1–S2 (S-BUILD.md; kit 1.5.6-alpha.5: raise 1 px/.70, dark grey highlight --neu-lit, SOLID 1/2 px, shine hairline, SHINE SOFT 0–6, --surface-menu-tint/-edge; 44 raw relief sites → --relief-*; popup rows ≥ 4.5:1 in all 14 looks; tools/skin-sheet.mjs; LOCK 843/0) |
-| H | 94971a45 | | |
+| H | a044ec99 | 7b527754 | H1–H2 (H-BUILD.md; hints > 60: 167 → 0, tools/hints-census.mjs --check in the gate; 36 action hints; four side glyphs; labels fit at 300 px (label-fit 1 → 0); LOCK 843/0; latex-copy/camera-shift/take-in-bugs red at BASE → chain E re-aims) |
+| F | 7b527754 | | |
