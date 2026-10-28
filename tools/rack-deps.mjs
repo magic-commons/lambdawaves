@@ -894,6 +894,8 @@ export const PLANNED = {
   film: { title: 'FILM / capture (filmHold stays)', row: 'R2c', file: 'lab/windows/film.js' },
   transition: { title: 'TRANSITION (A ↔ B, SPECTRUM\'s block; the STATE card retired at 018 C1)', row: 'it018 C1', file: 'lab/windows/transition.js' },
   spectrum: { title: 'SPECTRUM (the five appends stay)', row: 'R2a', file: 'lab/windows/spectrum.js' },
+  gas: { title: 'the BOX rows of SPECTRUM\'s Hamiltonian group', row: 'it021 G2', file: 'lab/windows/gas.js' },
+  equalizer: { title: 'THE BEAT EQUALIZER window · AUDIO IN · THE CHORD', row: 'it021 G2', file: 'lab/windows/equalizer.js' },
   staticfield: { title: 'FIELD (STATE\'s static field, drives and impulse knobs)', row: 'it008 S', file: 'lab/windows/static-field.js' },
   readouts: { title: 'SHADOW·ORBIT·VORTEX·PLANE + CALC·METERS·LADDER + ATOMS·WIGNER·RADIATION', row: 'R2b', file: 'lab/windows/readouts.js' },
   molecules: { title: 'MOLECULES · session · head + MO-REGISTRY', row: 'R2d', file: 'lab/windows/molecules.js' },
@@ -925,6 +927,8 @@ export const PLANNED_CUT = [
   [/^ {2}createFieldQuality\(\);/, 'settings-card'],                                 // the SETTINGS card's second seat: FIELD QUALITY
   [/^ {2}\/\/ TRANSITION — A ↔ B/, 'transition'],                                    // the seat (018 C1: SPECTRUM's A ↔ B block and the register's CLEAR, lab/windows/transition.js)
   [/^ {2}\/\/ SPECTRUM$/, 'spectrum'],                                              // the seat (0.5.2 R2a: lab/windows/spectrum.js)
+  [/^ {2}\/\/ GAS — the BOX rows/, 'gas'],                                          // the seat (021 G2: lab/windows/gas.js)
+  [/^ {2}\/\/ EQUALIZER — THE BEAT EQUALIZER/, 'equalizer'],                         // the seat (021 G2: lab/windows/equalizer.js)
   [/^ {2}\/\/ FIELD — the static field/, 'staticfield'],                            // the seat (iteration 008 S: lab/windows/static-field.js)
   [/^ {2}rack\.appendChild\(wPal\.root\); rack\.appendChild\(wObs\.root\)/, 'boot'],   // the five appends stay at their seat
   [/^ {2}\/\* THE ABOUT FACE LIVES IN THE NOTEBOOK GLASS/, 'spectrum'],

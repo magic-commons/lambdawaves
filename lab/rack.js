@@ -20,6 +20,7 @@ import { createWindowActivity } from './mir/window-activity.js';
 import { VIEW, VIEW_NAMES, STYLE, quatFromYawPitch, waveView, KNEE_DEFAULT } from './field.js';
 import { el, device as kitDevice } from './mir/kit.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
+import { createGas } from './windows/gas.js'; import { createEqualizerCard } from './windows/equalizer.js';   // 021 G2 (THE HINGE): the BOX rows and the EQUALIZER window, out of spectrum.js
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
 import { createSkeleton, centroid } from './skeleton.js'; import { moleculeCharge } from './molecules.js';   // iteration 014 B: the atoms BALLS · STICKS · ESP draw (field.setAtoms) and the molecule's charge   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
@@ -696,7 +697,13 @@ export async function boot(dom) {
 
   // SPECTRUM
   const { wSpec, wState, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen,
-    periodEnergies, selectEigen, setElement, fillValence, syncEq } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
+    periodEnergies, selectEigen, setElement, fillValence } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
+
+  // GAS — the BOX rows of SPECTRUM's Hamiltonian group (021 G2: lab/windows/gas.js)
+  createGas(app);
+
+  // EQUALIZER — THE BEAT EQUALIZER window, its AUDIO IN and THE CHORD (021 G2: lab/windows/equalizer.js)
+  const { syncEq } = createEqualizerCard(app);
 
   // FIELD — the static field, the drives and the impulse's knobs, out of STATE (iteration 008 S)
   createStaticField(app);   // lab/windows/static-field.js: closed on a first run, an ATOMS window
