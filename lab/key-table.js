@@ -12,11 +12,14 @@
  *     id (`was`), is read into the kit's { id: [chords] }; what is written is the kit's difference, and nothing when there is none;
  *   · the rows' key / ctrl / alt / shift follow the table, so the menus, the history's names and the tests read the live chord. */
 import { createKeys, parseChord, normalize, chordFromEvent } from './mir/shell/keys.js';
+import { jsonStore } from './mir/core/prefs.js';
 
 const ORDER = ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'PROJECT'];   // the keyboard window's groups, in λWAVES' order
 const LS_KEYS = 'lambdawaves.q0.keys';
-const local = { get() { try { return JSON.parse(localStorage.getItem(LS_KEYS)); } catch (_) { return null; } },
-  set(o) { try { if (o && Object.keys(o).length) localStorage.setItem(LS_KEYS, JSON.stringify(o)); else localStorage.removeItem(LS_KEYS); } catch (_) {} } };
+/* 021 R4 · the kit's jsonStore, versioned: `{ v: 1, keys: { id: [chords] } }`; an older unversioned record is read once and written back upgraded */
+const keyStore = jsonStore(LS_KEYS);
+const local = { get() { const r = keyStore.get(); if (!r || typeof r !== 'object') return null; if (r.v === 1) return r.keys || null; keyStore.set({ v: 1, keys: r }); return r; },
+  set(o) { if (o && Object.keys(o).length) keyStore.set({ v: 1, keys: o }); else keyStore.remove(); } };
 
 /** chordsOf({ key, ctrl, alt, shift }) → the kit's chords; no `shift` is both the chord and its Shift (the fine step) */
 export function chordsOf(b) {

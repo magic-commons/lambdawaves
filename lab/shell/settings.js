@@ -4,7 +4,16 @@
  * (§0 calls it first, U1) and comes by value; lookSync is registered for the controller; boot() destructures the rest. */
 import { infoKnown } from './stage-words.js'; import { readSession } from '../mir/core/session.js';
 import { ASK_ENABLED } from '../ask.js';   // iteration 011 Q6: the one flag (ASK hidden: the stored askOk / askUrl carried, never written)
+import { RETIRED } from '../settings-store.js';   // 021 R4: the keys the blob drops (the carry list is gone)
 const SESSION_KEY = 'lambdawaves.q0.session';   // main.js createSession's key (settings-store.js FAMILIES)
+/* 021 R5 · ONE MODE: every window's mode, one seat beside KIND — 'hydrogen' (hidden under MOLECULES), 'molecules' (hidden under HYDROGEN),
+   absent = 'both' (shown in either).  windows/molecules.js `moleculeMode` iterates it; the FINDER greys by it.  The atomic readers and
+   operators are HYDROGEN's (they read or replace the hydrogenic register the molecule does not drive); LATTICE and BLOCH keep their own
+   registers and touch neither, so they stand in both (LATTICE's benzene Hückel preset is a molecule's picture) */
+export const MODE = Object.freeze({ spectrum: 'hydrogen', equalizer: 'hydrogen', staticfield: 'hydrogen', emission: 'hydrogen', shadow: 'hydrogen', orbit: 'hydrogen',
+  vortex: 'hydrogen', slice: 'hydrogen', ladder: 'hydrogen', calculus: 'hydrogen', central: 'hydrogen', separable: 'hydrogen', atoms: 'hydrogen',
+  wigner: 'hydrogen', radiation: 'hydrogen', chem: 'molecules', lattice: 'both', bloch: 'both' });
+
 export function createSettings(app) {
   const { ui, mat, settingsStore, useCompactDefaults, FIRST_RUN, appleDevice } = app; const { readSettings } = app.sh;
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */
@@ -12,60 +21,32 @@ export function createSettings(app) {
   function saveSettings() {
     if (!settingsLoaded) return;
     try {
-      /* WAVE 54 · FOUND HERE: this writer built the object FROM SCRATCH, so every key written by anyone else was
-         silently dropped on the next call — the notebook's remembered size (nbW / nbH, written by nbSaveSize's own
-         merge) did not survive so much as a fold. The three keys this function does not own are carried through. */
-      /* WAVE 59 · AND `warned` IS THE FOURTH, and it is not bookkeeping.  Wave 48 added the photosensitivity
-         acceptance to this key AFTER wave 54 fixed the three above, so it fell into the same hole: accept the
-         notice, then change the theme / close a window / load a layout / open a link that names a palette, and
-         the acceptance was ERASED — in the same session, before `warning.needed()` reads it.  A safety notice a
-         visitor has answered must stay answered, so it is carried like the other three. `remember()` writes the
-         value; this function's only job is not to throw it away. */
-      const S0 = readSettings();
-      /* WAVE 105 · `audioDevice` IS THE FIFTH CARRIED KEY.  This writer rebuilds the object from
-         scratch, so a key it does not name is destroyed on the next call — the exact hole waves 54 and
-         59 each fixed once, and wave 102 reopened by writing the chosen microphone from somewhere
-         else.  Pick an input, move any window, reload: back to the system default. */
-      /* OPTIMIZATION 2026-09-24 · M4 · `abW` / `abH` ARE THE SIXTH AND SEVENTH, and the fourth time this one hole has been
-         found (waves 54, 59, 105): nbSaveSize writes the ABOUT face's remembered size into this key, and the next
-         preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
-         470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
-      settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'),   // iteration 007: INFORMATIONAL's six keys left for their own record, lambdawaves.q0.info (shell/stage-words.js)
+      /* 021 R4 · ONE STORE: THE BLOB IS { ...S0, ...owned } MINUS RETIRED.  This writer used to rebuild the object from an allowlist of
+         carried keys, and every key another writer put here (the notebook's nbW/nbH and ABOUT's abW/abH, `warned`, `audioDevice`,
+         `layouts`, `tlwin`) was erased by the next theme flip until it joined the list — waves 54, 59, 105 and M4 found that one hole
+         four times.  Now what this function owns is written over what is there, and only the keys an older build wrote and nothing reads
+         (RETIRED, settings-store.js) leave.  An owned value of undefined still drops its key (JSON), as before. */
+      const S0 = readSettings(), owned = {
+        nativeLayout: useCompactDefaults ? 1 : S0.nativeLayout, captions: !document.body.classList.contains('no-captions'),   // iteration 007: INFORMATIONAL's six keys left for their own record, lambdawaves.q0.info (shell/stage-words.js)
         auto: app.sh.quality.auto, governor: app.ctl.gov.on, keepFrames: app.ctl.keep.frames, perfMode: app.ctl.perf.mode, playLock: app.ctl.fieldRate.lock || undefined, playHz: app.ctl.fieldRate.hz || undefined,   // 020 L2: PLAYBACK LOCK, written only when not WALL · DISPLAY
-        /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
-           none of the three survived a reload).  FRICTION is how the instrument FEELS in the hand (SPIN left at 018 B4) and it
-           belongs beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
-           when you open it is a surprise, not a setting. */
-        friction: app.host.camera.friction, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock, audio: !!(ui.audioSw && ui.audioSw.get()), askOk: ASK_ENABLED ? ui.askOk || undefined : S0.askOk, askUrl: ASK_ENABLED ? (ui.askUrlIn && ui.askUrlIn.value.trim()) || undefined : S0.askUrl,   /* iteration 011 Q6: ASK hidden → the stored pair carried as it was */   // wave 58: the two View-window dials are the same kind of preference as FRICTION and SPIN (0.5.0 C4: the MOD power and cadence are the kit's record, saveMod); 0.5.3 M6: the camera's LOCK too
-        /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE, and it is the sixth of the six things
-           host-contract.md says a host owes it: where the window sits, which lane the work bars are
-           in, each device's F/C/M mode, the ribbon, and whether it was left open.  The RACK itself
-           is not here — that rides in the project file, exactly as it did before. */
-        modwin: app.state.modView ? app.state.modView.presentation() : S0.modwin,
-        tlwin: S0.tlwin,   // 0.5.0 C7b: the TIMELINE window's shape and work lane (WORKSPACE), written by its own store and carried here
-        frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode:mat.axisMode, cornerSide:mat.cornerSide,
-        /* ⚠ WAVE 106 · TWO MORE OF THE FIELD'S CHROME, AND ONE CLOSES AN ASYMMETRY NEVER DECIDED.
-           `invert` IS NEW HERE: it sat in the same row as FRAME and AXIS from wave 56 and was the only
-           one of the three this browser did not remember — two kept over a reload and one silently
-           thrown away.  Moving it to PALETTE is the moment to end that.
-           `axisInk` is a BROWSER PREFERENCE like frame and axis, and NOT like `mat.lightUI`, which
-           serialize() strips out of every project: lightUI is not a choice at all, it is the RESOLVED
-           theme, and a file carrying it would impose the sender's theme on its reader.  AXIS COLOUR
-           *is* a choice, and it is remembered here.  0.3.1 · S1 (D1): the whole field chrome — frame, axis,
-           their modes, the corner, invert, axis colour — is this browser's alone; serialize() strips it and
-           restore() ignores it in an older file, so no project or link can change a reader's axes. */
+        /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning
+           by itself when you open it is a surprise, not a setting. */
+        friction: app.host.camera.friction, dragGain: app.host.camera.dragGain, fling: app.host.camera.flingGain, camLock: app.host.camera.lock, audio: !!(ui.audioSw && ui.audioSw.get()),
+        ...(ASK_ENABLED ? { askOk: ui.askOk || undefined, askUrl: (ui.askUrlIn && ui.askUrlIn.value.trim()) || undefined } : {}),   // iteration 011 Q6: ASK hidden → the stored pair stays as it was
+        /* WAVE 64 · THE PORTED WINDOW'S PRESENTATION STATE (host-contract.md's sixth debt): where the window sits, the lanes, each device's
+           F/C/M mode, the ribbon, open or not.  The RACK itself rides in the project file. */
+        ...(app.state.modView ? { modwin: app.state.modView.presentation() } : {}),
+        frame: mat.frame !== false, axis: mat.axis !== false, frameMode: mat.frameMode, axisMode: mat.axisMode, cornerSide: mat.cornerSide,
+        /* WAVE 106 · INVERT and AXIS COLOUR are this browser's, like FRAME and AXIS (0.3.1 S1, D1: the whole field chrome; serialize() strips it) */
         invert: !!mat.invert, axisInk: mat.axisInk || 'theme', dither: +mat.dither || 0,   // iteration 008 W: DITHER is this display's (SETTINGS › QUALITY), always written, so a profile older than it is known by its absence (the lift below)
-               // wave 53: the two chrome objects are this browser's, like FROST and the tags
         phoneTr: !!document.querySelector('.dev[data-id="transport"].folded'),
-        /* WAVE 59 · WHICH WAY THE PHONE'S RACK WAS LEFT, on exactly phoneTr's pattern — a phone-only chrome
-           preference, derived from the DOM rather than tracked in a second place.  The DEFAULT (nothing said)
-           is HIDDEN, and that default is the whole point: see enterPhone(). */
-        phoneRack: document.body.classList.contains('phone') ? !document.body.classList.contains('rack-hidden') : S0.phoneRack,
-        /* WAVE 54: which colour space this BROWSER asked for.  0.3.1 · S1: the camera MODE and the palette left this key —
-           the palette is PROJECT state (D2), and so is the mode, because a pose cannot be read back without it (D4: a
-           TURNTABLE record's rotor is stale, a FREE one carries roll; docs/STATE-SCOPES.md). */
+        /* WAVE 59 · WHICH WAY THE PHONE'S RACK WAS LEFT (phone-only; the DEFAULT, nothing said, is HIDDEN — see enterPhone()) */
+        ...(document.body.classList.contains('phone') ? { phoneRack: !document.body.classList.contains('rack-hidden') } : {}),
+        /* WAVE 54: which colour space this BROWSER asked for.  0.3.1 · S1: the camera MODE and the palette left this key (PROJECT, D2/D4) */
         gamut: document.body.dataset.gamut === 'p3' ? 'p3' : 'srgb', p3Mode: ui.p3Seg ? ui.p3Seg.get() : 'convert',
-        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id), gen: 16 });   // iteration 016 E1: the generation, read by applySettings' `older` table
+        closed: [...document.querySelectorAll('.dev.closed')].map((d) => d.dataset.id), gen: 16 };   // iteration 016 E1: the generation, read by applySettings' `older` table
+      const blob = { ...S0, ...owned }; for (const k of RETIRED) delete blob[k];
+      settingsStore.write(blob);
     } catch (e) {}
   }
 

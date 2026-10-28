@@ -32,7 +32,7 @@ const HELP = `window.__w = (n) => new Promise((r) => setTimeout(r, n)); window.c
     for (let i = 0; i < 600 && st.on && !(st.fieldOwner && st.nocc); i++) { await __w(100); st = __LW.chem.state(); }
     await __LW.settle(); await __w(400); return 1; };
   return 1;`;
-const scopeOf = (k) => { const f = FAMILIES[k] || Object.entries(FAMILIES).find(([p]) => k.startsWith(p + '.'))?.[1]; return f ? f[1] : 'UNKNOWN'; };
+const scopeOf = (k) => { const f = FAMILIES[k] || Object.values(FAMILIES).find((r) => k.startsWith(r.prefix ? r.key : r.key + '.')); return f ? f.scope : 'UNKNOWN'; };   // 021 R4: FAMILIES' rows are { key, scope, version, forget, owner }
 /** what moved from snapshot a to b: [{ key, sub?, scope }]; the blob is read key by key */
 function diff(a, b) {
   const out = [];

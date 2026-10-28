@@ -275,14 +275,12 @@ export async function createController(app) {
     const p = id && typeof id === 'object' ? id : PRESET_BY_ID.get(id); if (!p) return false;   // iteration 015 M3: a preset object too (the Picker's one-label HYDROGEN tile)
     if (opt && opt.hand && app.state.stageText) app.state.stageText.say('preset', mdText(p.label));   // the label as text: markdown's specials escaped
     for (const key of Object.keys(rotRate)) setRotationRate(key, 0);
-    reg.load(p); clock.reset(); app.state.lastNmax = -1;
+    reg.load(p); appPlay.seek(0, { schedule: false }); app.state.lastNmax = -1;   // 021 R3: THE ONE SEEK (the trail and the playhead with it)
     if (p.visual) clock.window = p.visual.window;   // iteration 015 S4: a reader's preset (lab/spectrum.js) carries no visuals — it is the labels and that's it
     if (app.state.applyVisuals && p.visual) { clock.setRate(app.loop.paceRate(p.visual.rate)); if (p.visual.view) { const w = waveView(p.visual.view) || 'density'; mat.view = VIEW[w]; ui.viewSeg.set(w); } ui.rateKnob.set(clock.rate); }   // wave 57: a rate NOBODY CHOSE is paced by the motion preference
     ui.presetSel.value = typeof id === 'object' ? p.id : id; ui.presetSel.note = p.note;   // M3 hands an object (its own id); S4's USER key is the stepper's value
     setReference();
     app.w.spectrum.select(-1);
-    app.w.shadowView.clearTrail();
-    ui.scrub.set(0);
     schedule(TIER.REBUILD);
     return true;
   }

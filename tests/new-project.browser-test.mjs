@@ -96,7 +96,7 @@ try {
   assert.deepEqual(fresh.cancel, { promise: true, value: false, dirty: true, abOn: true }, 'requestFresh on Cancel: a Promise of false, nothing changed');
   assert.deepEqual(fresh.diff, [], 'PROJECT keys differ from the file: ' + fresh.diff.join(', ')); assert.equal(fresh.expSame, true);
   assert.deepEqual(fresh.sources, ['s1:lfo', 's2:audio']); assert.deepEqual(fresh.macros, [['LFO', 's1'], ['AUDIO', 's2:level']]); assert.equal(fresh.routes, 0);
-  assert.deepEqual(fresh.nb, { open: true, face: 'notes', text: '', title: 'NOTEBOOK', subtitle: '', stored: '', empty: true }, 'NEW over an open notebook: it stays open on NOTES, emptied, the empty placeholder shown');
+  assert.deepEqual(fresh.nb, { open: true, face: 'notes', text: '', title: 'NOTEBOOK', subtitle: '', stored: null, empty: true }, 'NEW over an open notebook: it stays open on NOTES, emptied, the empty placeholder shown (021 R4: the 0.4 key is retired; the session part holds it)');
   assert.deepEqual(fresh.ab, { on: false, A: null, B: null, transition: false });
   assert.equal(fresh.wsSame, true, 'a PREFERENCE key moved'); assert.equal(fresh.themeSame, true); assert.equal(fresh.arrSame, true, 'the window arrangement moved');
   assert.equal(fresh.current, null); assert.equal(fresh.depth, 0); assert.equal(fresh.dirty, false); assert.equal(fresh.gum, 0); assert.deepEqual(fresh.errs, []);

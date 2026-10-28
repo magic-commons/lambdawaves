@@ -18,7 +18,7 @@ export function createTransport(app) {
     const sm = btn('transport-step-back', '‹', 'step back  (←)', 'step back');
     const sp = btn('transport-step-forward', '›', 'step forward  (→)', 'step forward');
     ui.scrub = fader({ label: 'SCRUB  t / window', min: 0, max: 1, value: 0, fmt: (v) => (v * clock.window).toFixed(2) + ' a.u.',
-      onInput: (v) => { clock.scrub(v * clock.window + laps() * clock.window); schedule(TIER.EVOLVE); } });
+      onInput: (v) => appPlay.seek(v * clock.window + laps() * clock.window, { trail: false }) });   // 021 R3: THE ONE SEEK (clock.js); R6: a drag keeps the trail, as before
     ui.rateKnob = knob({ label: 'RATE a.u./s', min: 0.1, max: 3000, value: 4, log: true, fmt: (v) => v >= 100 ? v.toFixed(0) : v.toFixed(1), onInput: (v) => { if (app.state.stageText) app.state.stageText.say('rate', 'RATE · ' + (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + ' a.u./s', { hold: true }); if (modHand('transport.rate', v)) return; clock.setRate(v); } });   // iteration 007: INFORMATIONAL › RATE
     const tro = readout({ label: 't  a.u.  (lap)', value: '0.00', cls: 'time' });
     /* ── THE CLOCK's law: when does this density repeat?  T = 2π / gcd{|E_a − E_b|} over the populated labels (EXACT where the
@@ -36,7 +36,10 @@ export function createTransport(app) {
     /* THE PLAY's clock for the kit's play part: appPlay, and a press schedules the frame that shows it (togglePlay's law) */
     const barClock = { play: () => { const r = appPlay.play(); schedule(TIER.EVOLVE); return r; }, pause: () => { const r = appPlay.pause(); schedule(TIER.EVOLVE); return r; },
       isPlaying: () => appPlay.isPlaying(), onChange: (f) => appPlay.onChange(f),
-      seek: () => { clock.reset(); ui.scrub.set(0); shadowView.clearTrail(); schedule(TIER.EVOLVE); } };   // ⏮ (wave 106: the playhead goes back with the clock)
+      seek: () => appPlay.seek(0) };   // ⏮ (wave 106: the playhead goes back with the clock; 021 R3: through THE ONE SEEK)
+    /* 021 R3 · THE ONE SEEK's hooks (clock.js): the playhead (the SCRUB, never under a hand), the shadow trail, the frame */
+    appPlay.bind({ playhead: (t) => { if (ui.scrub && !ui.scrub.dragging()) ui.scrub.set(((t % clock.window) + clock.window) % clock.window / clock.window); },
+      trail: () => shadowView.clearTrail(), schedule: () => schedule(TIER.EVOLVE) });
     /* the modulation seam the kit's power, door and tempo panel read (the port, the host, THE POWER, the window) */
     const barMod = { get host() { return app.state.modHost; }, get view() { return app.state.modView; },
       armed: () => app.state.modArm, arm: (v) => setModArm(v), onArm: (f) => { armSubs.add(f); return () => armSubs.delete(f); },
@@ -105,7 +108,7 @@ export function createTransport(app) {
         list.style.top = Math.round(up ? r.top - h - 8 : Math.min(innerHeight - h - 8, r.bottom + 8)) + 'px'; })); }
     { const pc = bar.root.querySelector('.csb-play'); if (pc) pc.dataset.mirSurface = 'chip'; }   // E2: PLAY's chip wears the kit's material outside the bar
     ui.modB = bar.el.power; ui.modB.title = 'Enable modulation'; ui.modB.setAttribute('aria-label', 'modulation on or off');
-    { const rst = bar.root.querySelector('.transport-home'); if (rst) { rst.title = 't → 0  (home)'; rst.setAttribute('aria-label', 'back to t = 0'); } }
+    { const rst = bar.root.querySelector('.transport-home'); if (rst) { rst.title = 't → 0  (home) · ψ\'s time back to 0 a.u.; the modulation beat and the TIMELINE playhead stay (TIMELINE\'s own ⏮ moves those)'; rst.setAttribute('aria-label', 'back to t = 0'); } }   // 021 R3: the hint says what it moves
     /* A8 · the door wears the modulation window's own icon (lab/img/icons/modulation.svg, a CSS mask; Josh: "a sine wave icon instead of the MIR
        3x3 square logo"); the turning mark is the kit's unplaced logoButton now */
     const door = bar.el.door; ui.modExp = door; door.title = 'Open the modulation window';
@@ -147,7 +150,7 @@ export function createTransport(app) {
       });
       document.addEventListener('pointerdown', (e) => { if (!T.contains(e.target)) endEcho(); }, true); addEventListener('keydown', (e) => { if (e.key === 'Escape') endEcho(); });
     }
-    jmp.addEventListener('click', () => { const P = periodNow(true); if (P && P.T > 0) { const t = clock.t, next = t + P.T - (((t % P.T) + P.T) % P.T); clock.scrub(next); shadowView.clearTrail(); schedule(TIER.EVOLVE); } });
+    jmp.addEventListener('click', () => { const P = periodNow(true); if (P && P.T > 0) { const t = clock.t, next = t + P.T - (((t % P.T) + P.T) % P.T); appPlay.seek(next); } });
     let lastPeriod = null, periodCostMs = 0, periodSettling = false, periodPending = null;
     /* LA6 · ONE SCAN IN FLIGHT, THE LATEST KEY WAITING.  Every new key used to post a fresh O(pairs × 2·10⁶) scan into a
        FIFO worker that cannot drop stale work: 4 s of a moving register (keyboard auto-repeat on ZEEMAN B, a script)

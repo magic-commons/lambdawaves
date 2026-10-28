@@ -43,21 +43,32 @@ import { createFlashGuard, WCAG } from './mir/shell/flash-guard.js';
  *  it, a write no different from the modulator's own, so that picture IS held (D-V N3: a flash is a flash whoever makes it, and a bypass
  *  that resets the guard would let a wiggled dial through a 10 Hz strobe). */
 export const FLASH_STEP = { 'material.exposure': 0.0953, 'material.gamma': 0.1319, 'material.stage': 0.1131, 'material.knee': 0.4902 };   // 008 Q: taken at the new default KNEE 3 (q0 = ln 5; 0.2723 at 0.6) · iteration 008 G: THE KNEE on the ray (was 0.2595 on the step)
-export function guardRoutes(defs, { driven, now, say, read, onAdvance }) {
-  const on = defs.filter((d) => d.id in FLASH_STEP), lastWrite = new Map();   // a HELD def → the modulation-second its last write came
-  const guard = createFlashGuard({ now, ranges: Object.fromEntries(on.map((d) => [d.label, [0, FLASH_STEP[d.id] / WCAG.delta]])),
+export function guardRoutes(defs, opts) {
+  const G = routeGuard(opts);
+  return defs.map((d) => (d.id in FLASH_STEP ? G.wrap(d, FLASH_STEP[d.id]) : d));
+}
+/** routeGuard(opts) → { wrap(def, step, route?) } — ONE limiter for the whole registry (021 R2): the install defs' four luminance routes
+ *  and every runtime target that declares a `flash` step (LW.mod.register, NODES' knobs) are guarded by the same instance, so a strobe
+ *  is held whichever door registered its target.  `step` is the change, in the map's own space, that moves the picture 10 %. */
+export function routeGuard({ driven, now, say, read, onAdvance }) {
+  const ranges = {}, lastWrite = new Map();   // a HELD def → the modulation-second its last write came
+  const guard = createFlashGuard({ now, ranges,
     onTrip: (t) => say(`FLASH GUARD · ${t.route} ${t.hz.toFixed(1)} Hz held to ${WCAG.maxHz}/s`), onRelease: () => say('') });
   /* THE QUIET SECOND (D-V S1).  The kit lets go only inside guard(), and the registry never calls a set whose value did not change, so a
      modulator gone constant mid-hold would leave the picture off the registry's number and the line up for good.  The modulation's own
      seconds do the waiting (`onAdvance` fires after every tick and every film step, so a film lets go on the same frame): a held route
      with no write for WCAG.releaseS is let go of and handed the registry's current value. */
-  onAdvance(() => { for (const [d, t] of lastWrite) if (now() - t >= WCAG.releaseS) { lastWrite.delete(d); guard.reset(d.label); say(''); d.set(read(d.id)); } });
-  return defs.map((d) => (!on.includes(d) ? d : { ...d, set: (v) => {
-    if (!driven(d.id)) { lastWrite.delete(d); if (guard.state(d.label)?.held) say(''); guard.reset(d.label); return d.set(v); }
-    const log = d.map === 'log', x = log ? Math.log(v) : v, g = guard(x, d.label);
-    if (guard.state(d.label)?.held) lastWrite.set(d, now()); else lastWrite.delete(d);
-    return d.set(g === x ? v : log ? Math.exp(g) : g);          // a pass hands over the number it was given, never exp(ln v)
-  } }));
+  onAdvance(() => { for (const [d, t] of lastWrite) if (now() - t >= WCAG.releaseS) { lastWrite.delete(d); guard.reset(d.route); say(''); d.set(read(d.id)); } });
+  return { wrap(d, step, route = d.label) {
+    ranges[route] = [0, step / WCAG.delta];
+    const R = { id: d.id, route, set: d.set };
+    return { ...d, set: (v) => {
+      if (!driven(d.id)) { lastWrite.delete(R); if (guard.state(route)?.held) say(''); guard.reset(route); return d.set(v); }
+      const log = d.map === 'log', x = log ? Math.log(v) : v, g = guard(x, route);
+      if (guard.state(route)?.held) lastWrite.set(R, now()); else lastWrite.delete(R);
+      return d.set(g === x ? v : log ? Math.exp(g) : g);          // a pass hands over the number it was given, never exp(ln v)
+    } };
+  } };
 }
 
 const CAP = ['state', 'reason', 'live', 'deviceId', 'sampleRate', 'frames', 'inputLatencyMs', 'analysisLatencyMs', 'visualLatencyMs', 'latencyMs', 'latencyEstimated'];
@@ -66,7 +77,7 @@ const IDLE = { state: AUDIO_STATE.IDLE, reason: '', live: false, deviceId: '', s
 
 /** deps: { available, present (never a tier above PRESENT), view: () => the window or null, onCapture(cap), save(), say(text): the flash guard's line } */
 export function createModPort({ available, present, view, onCapture, save, say }) {
-  let host = null, cap = null, syncing = false, adapters = [], idOf = null, dotKey = '', stampGen = 0, dotsQ = 0;
+  let G = null, host = null, cap = null, syncing = false, adapters = [], idOf = null, dotKey = '', stampGen = 0, dotsQ = 0;
   const knobs = Object.create(null), gets = Object.create(null), held = new Set();
   const cadence = { hz: 60, get step() { return 1000 / this.hz - 0.5; } };
   const win = () => view() || null;
@@ -90,6 +101,8 @@ export function createModPort({ available, present, view, onCapture, save, say }
     get host() { return host; }, get syncing() { return syncing; }, knobs, gets, held, cadence,
     setCadence(hz) { cadence.hz = hz === 120 ? 120 : 60; save(); return cadence.hz; },
     knobOf: (id) => (knobs[id] ? knobs[id]() : null),
+    /** guard(id, spec) — a runtime target (LW.mod.register) that declares `flash` (its 10 % step) joins the one limiter (021 R2) */
+    guard: (id, spec) => (G && spec && spec.flash > 0 ? G.wrap({ id, ...spec }, spec.flash, (spec.label || id) + ' · ' + id) : spec),
     setKnob(k, v) { if (!k || k.root.classList.contains('drag')) return; const id = knobId(k); if (id && routed(id) && k.show) k.show(v); else k.set(v); },
     hand(id, v) { if (!routed(id)) return false; host.registry.write(id, v); return true; },
     /** 0.5.0 C1: the kit panels' two reads (panels/camera.js `routed`, `base`).  No `add`: the panels register nothing, the catalogue is rack.js' */
@@ -120,7 +133,8 @@ export function createModPort({ available, present, view, onCapture, save, say }
     },
     install(defs, roots) {
       host = createModHost({ available, present, presentationActive: false, roots });   // a closed editor has no preview demand
-      defs = guardRoutes(defs, { driven: routed, now: () => host.clock.stats().seconds, say, read: host.registry.read, onAdvance: host.clock.onAdvance });   // the modulation's own seconds: wall live, the exact step in a film
+      G = routeGuard({ driven: routed, now: () => host.clock.stats().seconds, say, read: host.registry.read, onAdvance: host.clock.onAdvance });   // the modulation's own seconds: wall live, the exact step in a film
+      defs = defs.map((d) => (d.id in FLASH_STEP ? G.wrap(d, FLASH_STEP[d.id]) : d));
       adapters = defs; idOf = null;
       host.install(defs.map(({ knob: _k, ...d }) => d));
       for (const d of defs) { if (d.knob) knobs[d.id] = d.knob; gets[d.id] = d.get; }

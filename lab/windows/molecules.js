@@ -3,6 +3,7 @@
  * and a saved `orbitals` seat opens MOLECULES (settings.js RETIRED_WINDOWS); the fix round (F5) folded its second seat, which no longer made a device, into this one. */
 import { TIER } from '../tier.js'; import { el } from '../mir/kit.js';
 import { VIEW, VIEW_NAMES, STYLE } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
+import { MODE } from '../shell/settings.js';   // 021 R5: ONE MODE, the windows' table
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
   const { dom, ui, device, clock, mat, useCompactDefaults, FIRST_RUN, reg } = app, { schedule, canPresent } = app.loop, { rack } = app.host,
@@ -18,21 +19,23 @@ export function createMolecules(app) {
      arrangement waits for the mode to come back).  This replaces 2026-10's folded SPECTRUM under a molecule. */
   /* 013 H4 · THE STAGE'S THREE BUTTONS (Josh, 2026-10-20): under the title a COLUMN of icons, the words only as hover hints — LIBRARY (a door:
      the Picker, the key row `menu`'s road), MOLECULAR (MOLECULES on) and HYDROGEN (MOLECULES off: the mode ATOMS was, renamed; the boot's).
-     #lwMode, the ids 'atoms' | 'molecules' and set(v) are kept, so the key row `mode`, a project and a link still say the mode by one road. */
+     #lwMode and set(v) are kept, so the key row `mode`, a project and a link still say the mode by one road.  021 R5 (call 7): the HYDROGEN button's id
+     is `hydrogen` (it was `atoms`, which also named the ATOMS window and the Picker's deck); set('atoms') is still read as HYDROGEN. */
   const modeSeg = (() => {
     const root = el('div', 'lw-stage-btns'); root.id = 'lwMode'; root.setAttribute('role', 'group'); root.setAttribute('aria-label', 'Library and mode');
     const B = [['library', 'LIBRARY — open the Picker', () => { if (app.state.picker) app.state.picker.toggle(); }],
       ['molecules', 'MOLECULAR — the molecule and its register, one window', () => { if (app.state.chem) app.state.chem.setOn(true); }],
-      ['atoms', 'HYDROGEN — SPECTRUM\'s 140 hydrogen states, their names and the EQUALIZER', () => { if (app.state.chem) app.state.chem.setOn(false); }]]
+      ['hydrogen', 'HYDROGEN — SPECTRUM\'s 140 hydrogen states, their names and the EQUALIZER', () => { if (app.state.chem) app.state.chem.setOn(false); }]]
       .map(([id, tip, run]) => { const b = el('button', 'lw-stage-b', root); b.type = 'button'; b.dataset.id = id; b.title = tip; b.setAttribute('aria-label', tip.split(' —')[0]); b.addEventListener('click', run); return b; });
-    return { root, set(v) { for (const b of B) if (b.dataset.id !== 'library') b.setAttribute('aria-pressed', String(b.dataset.id === v)); } };
+    return { root, set(v) { if (v === 'atoms') v = 'hydrogen'; for (const b of B) if (b.dataset.id !== 'library') b.setAttribute('aria-pressed', String(b.dataset.id === v)); } };
   })();
-  modeSeg.set('atoms'); { const t = document.getElementById('title'); if (t) t.after(modeSeg.root); }
+  modeSeg.set('hydrogen'); { const t = document.getElementById('title'); if (t) t.after(modeSeg.root); }
   function moleculeMode(v) {
-    for (const w of [wSh, wOrb, wVor, wSlice, app.w.wLad, app.w.wCalc, wSpec, { root: document.querySelector('.dev[data-id="equalizer"]') }, { root: document.querySelector('.dev[data-id="staticfield"]') }, { root: document.querySelector('.dev[data-id="emission"]') }]) if (w && w.root) w.root.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
+    /* 021 R5 · ONE MODE: the windows each mode hides are the MODE table's (shell/settings.js), never a hand list here */
+    for (const d of document.querySelectorAll('.dev[data-id]')) if (MODE[d.dataset.id] === 'hydrogen') d.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
     wChem.root.hidden = !v;                                          // iteration 008 U: the one card (the register lives in it)
     if (v && wChem.root.classList.contains('closed')) app.sh.layout.reopen('chem');   // 017 call 8: ON after a × brings the card back (the rack's road, neighbours travel)
-    modeSeg.set(v ? 'molecules' : 'atoms');
+    modeSeg.set(v ? 'molecules' : 'hydrogen');
     if (v && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
     /* iteration 012 R3 hid POSITION | MOMENTUM under a molecule; iteration 017 W2 GREYS MOMENTUM instead (016 V1: greyed, never hidden, the seats stay) —
        WAVE's one seat is styleSync (material.js), which greys by mode too.  A molecule letting go with BALLS · STICKS · ESP drawn falls back to CLOUD, as

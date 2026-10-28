@@ -11,7 +11,8 @@
  *   · LEAVING SAVES NOW.  `pagehide` and a page going hidden (`visibilitychange`) flush at once (BASINS' two events).
  *   · NOTHING IS WRITTEN BEFORE THE APP CHOSE.  Autosave is armed by `resume()` or `discard()` (the opener's RESUME or
  *     NEW), or by `arm()` for an app with no opener — so the boot's own writes can never overwrite the work a cold start
- *     is about to offer back.
+ *     is about to offer back.  A resume whose saved parts failed does NOT arm (1.5.6): the record is copied to
+ *     `<key>.failed` and the app decides (a later resume that takes, NEW, or `arm()`).
  *   · `hold()` → true keeps the session from writing (BASINS: while a film renders the view is the film's, not the work).
  *   · NOTHING IS THROWN.  A storage that throws (a private window) is a session that keeps nothing; a part that throws is
  *     isolated by core/project.js.
@@ -112,7 +113,8 @@ export function createSession({ key, storage, parts, also = [], delay = 300, hol
       try { return !!S && (S.getItem(key) != null || also.some((k) => S.getItem(k) != null)); } catch (_) { return false; }
     },
     /** resume(ctx) — put the saved work back (every part restored, ctx = { session: true, …ctx }), hand the seed over,
-     *  and arm autosave.  → { ok, failed, seeded } (ok false: no saved parts to restore) */
+     *  and arm autosave — unless saved parts failed to restore (1.5.6: then `<key>.failed` keeps the record and autosave
+     *  stays unarmed).  → { ok, failed, seeded } (ok false: no saved parts to restore, or the restore threw) */
     resume(ctx = {}) {
       const rec = readSession(S, key, lift);
       let ok = false, failed = [];
@@ -121,6 +123,14 @@ export function createSession({ key, storage, parts, also = [], delay = 300, hol
       }
       const seeded = !!(rec && rec.seed && typeof onSeed === 'function');
       if (seeded) { try { onSeed(rec.seed, { live: ok }); } catch (_) {} }
+      /* 1.5.6 · A FAILED RESUME NEVER ARMS: saved parts that threw or came back failed are the user's last work, and the next
+         booked save would write the half-restored state over them.  The record is kept beside itself as `<key>.failed` and
+         autosave stays off until a later resume takes, `discard()` (NEW) or an explicit `arm()`. */
+      if (rec && rec.parts && (!ok || failed.length)) {
+        try { const t = S && S.getItem(key); if (t != null) S.setItem(key + '.failed', t); } catch (_) {}
+        armed = false; last = null;
+        return { ok, failed, seeded };
+      }
       armed = true; last = ok && !seeded ? sig() : null;
       return { ok, failed, seeded };
     },

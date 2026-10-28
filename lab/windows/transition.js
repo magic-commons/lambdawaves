@@ -13,7 +13,7 @@ import { N6, widen } from '../hydrogen.js';
 export function createTransition(app) {
   const { ui, reg, hNote, clock, sturm } = app, { schedule } = app.loop, { touchState } = app.ctl;
   /* OPTIMIZATION 2026-09-24 · N1 · THE REGISTER'S CLEAR, NAMED: the menubar's "CLEAR the register" is this one function */
-  function clearRegister() { reg.clear(); app.state.refSnapshot = null; clock.reset(); if (ui.scrub) ui.scrub.set(0); app.w.shadowView.clearTrail(); touchState(); }
+  function clearRegister() { reg.clear(); app.state.refSnapshot = null; clock.seek(0, { schedule: false }); touchState(); }   // 021 R3: THE ONE SEEK
   const gab = ui.abBox = group(null, ''); gab.classList.add('sp-ab'); gab.setAttribute('aria-label', 'A / B · TRANSITION (Rabi)');
   const rab = el('div', 'row tight native-ab', gab);   // 0.5.3 M11 (R7): ONE row STORE A · A · STORE B · B, a stored slot lit by `.stored` (lab.css ::after); 018 C1: + CLEAR
   let abA = null, abB = null, abOmega = 0.05;

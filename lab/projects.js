@@ -45,7 +45,7 @@ export function createProjects(port) {
      frame (coalesced) to every subscriber of the shared registry — the session books its save, FOLDERS repaints its mark */
   const heard = new Set(), say = coalesce(() => { for (const fn of heard) { try { fn(); } catch (_) {} } }), changed = () => say.post();
   registerProjectPart(PART, { ...port.part, subscribe: (fn) => { heard.add(fn); return () => heard.delete(fn); } });
-  let currentId = null, status = '', echo = null, hush = 0, pinned = null, cleanAt = null, landed = false;
+  let unarmed = null, currentId = null, status = '', echo = null, hush = 0, pinned = null, cleanAt = null, landed = false;
   const told = new Set(), skips = [];
   const toast = (line, warn) => notice(line, { kind: warn ? 'warn' : 'ok', ms: warn ? 5000 : 3200 });
   const pjStatus = (line, warn) => { status = line; toast(line, warn); };
@@ -85,13 +85,16 @@ export function createProjects(port) {
   }
   const skipped = (id) => { const tk = skips.find((t) => t.id === id && !t.used); if (tk) tk.used = true; return !!tk; };
 
-  /* ── THE OPEN ROAD ── */
-  function openPayload(value, meta, rollback) {
+  /* ── THE OPEN ROAD ── (021 R1: every restore road takes it — FOLDERS, the facade's verbs, NEW, a link, quick LOAD and RESUME.
+     `take()` is the restore (the part's, by default); `meta.land === false` keeps the snapshot and the roll-back but leaves the
+     bookkeeping to the caller (a link, quick LOAD); `meta.clean === false` lands without marking clean (RESUME: unsaved until a SAVE);
+     a `meta.say` of null says nothing on success) */
+  function openPayload(value, meta, { rollback = false, take } = {}) {
     const before = rollback ? port.snapshot() : null, wasClean = rollback && folders.dirty().known && !dirty();
     let ok = false, back = true;
     port.busy(1);
     try {
-      try { ok = !!value && port.part.restore(value, { name: meta.name }) === true; } catch (_) { ok = false; }
+      try { ok = take ? take() === true : !!value && port.part.restore(value, { name: meta.name }) === true; } catch (_) { ok = false; }
       if (!ok && rollback) { try { back = port.rollback(before) === true; } catch (_) { back = false; } }
     } finally { port.busy(-1); }
     if (!ok) {
@@ -100,12 +103,14 @@ export function createProjects(port) {
       else { currentId = null; pjStatus(meta.failed + ' — the previous state could not be put back; nothing is current, SAVE AS to keep this', true); }
       return false;
     }
+    if (meta.land === false) return true;
     currentId = meta.id || null;
     const remembered = meta.path ? touchRecent(ls, meta.path, new Date().toISOString()) : true, gone = port.notice();
-    const line = meta.say + (remembered ? '' : ' — recent history could not be saved') + (gone ? ' · ' + gone : '');
-    pjStatus(line, !!gone);
+    const line = (meta.say || '') + (remembered ? '' : ' — recent history could not be saved') + (gone ? (meta.say ? ' · ' : '') + gone : '');
+    if (line) pjStatus(line, !!gone);
     echo = !rollback && gone ? line : null;                     // the gallery's "Opened —" toast follows; D9's line is said once more after it
-    markClean();
+    if (meta.clean !== false) markClean();
+    if (unarmed && unarmed.armed && !unarmed.armed()) unarmed.arm();   // 021 R1: a project that took after a failed resume is the work again
     port.opened(meta.label);
     return true;
   }
@@ -148,13 +153,13 @@ export function createProjects(port) {
       restore(payload, entry) {
         if (!entry) return restoreProject(payload && payload.parts, {});         // the kit's roll-back: the part, nothing else
         if (skipped(entry.id)) return true;
-        const ok = openPayload(valueOf(payload), metaOf(entry), false); landed = ok;
+        const ok = openPayload(valueOf(payload), metaOf(entry)); landed = ok;
         return ok || { ok: false, why: 'the project did not take' };
       },
       async empty() {
         if (skipped('new')) return 'new';
         let file; try { file = await fetchNew(); } catch (e) { pjStatus('new project failed — ' + e.message + '; nothing was changed', true); return { ok: false, why: e.message }; }
-        return openPayload({ data: file.data, notebook: file.notebook }, NEW_META(file), false) ? undefined : { ok: false, why: 'the empty project did not take' };
+        return openPayload({ data: file.data, notebook: file.notebook }, NEW_META(file)) ? undefined : { ok: false, why: 'the empty project did not take' };
       },
       signature: () => (pinned !== null ? pinned : projectSignature()),
       /* A PICTURE IS TAKEN WHERE IT IS SEEN: while FOLDERS is open.  The first one runs capture's readability probe (a video and
@@ -264,10 +269,10 @@ export function createProjects(port) {
     /** open(path, file) — a stored project, or (`file`, parsed) one that is not in the library: NEW's empty project (0.3.1 · S2: it
      *  takes this same road, M5b's roll-back included, stores nothing and leaves nothing current) */
     open(path, file) {
-      if (file) { const ok = openPayload({ data: file.data, notebook: file.notebook }, NEW_META(file), true); if (ok) tell('new'); return ok; }
+      if (file) { const ok = openPayload({ data: file.data, notebook: file.notebook }, NEW_META(file), { rollback: true }); if (ok) tell('new'); return ok; }
       sync();
       const e = entryAt(String(path || '')); if (!e) return false;
-      const ok = openPayload(valueOf(e.payload), metaOf(e), true);
+      const ok = openPayload(valueOf(e.payload), metaOf(e), { rollback: true });
       if (ok) tell(e.id);
       return ok;
     },
@@ -285,13 +290,18 @@ export function createProjects(port) {
       let file; try { file = await fetchNew(); } catch (err) { pjStatus('new project failed — ' + err.message + '; nothing was changed', true); return false; }
       return api.open(null, file);
     },
-    /** resume(session) — the opener's RESUME (0.5.0 C6b): the session's part put back through the part's own restore, then the landing
-     *  (the notebook law, the ring's origin `resume`).  Nothing is current, and the work stays unsaved until a SAVE */
+    /** resume(session) — the opener's RESUME (0.5.0 C6b): the session's part put back through the open road with its roll-back (021 R1),
+     *  then the landing (the notebook law, the ring's origin `resume`).  Nothing is current, and the work stays unsaved until a SAVE.
+     *  A resume that did not take leaves the boot scene, and the kit (1.5.6-alpha.1) keeps the record as `lambdawaves.q0.session.failed`
+     *  with autosave unarmed — the line says so, and nothing else is offered */
     resume(session) {
-      let r = null; port.busy(1); try { r = session.resume(); } finally { port.busy(-1); }
-      if (!r || !r.ok || r.failed.length) { pjStatus('the last session could not be put back', true); return false; }
-      currentId = null; port.opened('resume'); return true;
+      unarmed = session;
+      return openPayload(null, { label: 'resume', say: null, clean: false, failed: 'the last session could not be put back (kept as lambdawaves.q0.session.failed; autosave is off until a project opens)' },
+        { rollback: true, take: () => { const r = session.resume(); return !!(r && r.ok && !r.failed.length); } });
     },
+    /** openWith(take, meta) — a restore that is not a stored project (a link, quick LOAD) on the same road: the snapshot, `take()`, the
+     *  roll-back when it did not take; the caller keeps its own landing (meta.land false) */
+    openWith(take, failed) { return openPayload(null, { land: false, failed }, { rollback: true, take }); },
     exportText(path) { const C = collection(), p = path || api.current; return C && p && Object.hasOwn(C.items, p) ? projectFileText(C.items[p]) : null; },
     /** importText(text) → the path it is stored at.  The same project already at its path is that path (a demo re-imported is the
      *  starter); otherwise a new entry, numbered beside one of the same name (the kit never overwrites on an import) */

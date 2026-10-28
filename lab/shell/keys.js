@@ -45,7 +45,7 @@ export function createKeys(app) {
     /* wave 106: the button's own title says "t → 0  (home)", so the key must BE the button — it was
        clearing neither the shadow trail nor the playhead, so the same advertised act did two different
        things depending on which surface you used. */
-    { id: 'home', group: KG.T, short: 'zero', label: 'time to zero', key: 'Home', run: () => { clock.reset(); if (ui.scrub) ui.scrub.set(0); shadowView.clearTrail(); schedule(TIER.EVOLVE); } },
+    { id: 'home', group: KG.T, short: 'zero', label: 'time to zero', key: 'Home', run: () => appPlay.seek(0) },   // 021 R3: THE ONE SEEK
     { id: 'stepBack', group: KG.T, short: 'step back', label: 'step time back (shift: fine)', key: 'ArrowLeft', run: (f) => { clock.step(-transport.stepDt() * f); schedule(TIER.EVOLVE); } },
     { id: 'stepFwd', group: KG.T, short: 'step fwd', label: 'step time forward (shift: fine)', key: 'ArrowRight', run: (f) => { clock.step(transport.stepDt() * f); schedule(TIER.EVOLVE); } },
     ...(ASK_ENABLED ? [{ id: 'ask', group: KG.T, short: 'ask Gemma', label: 'ask Gemma — the transport strip becomes the type box', key: 'Slash', shift: false, inFields: false, run: () => transport.openAsk() }] : []),   // 0.6.6 G2; iteration 011 Q6: the row only under ASK_ENABLED (lab/ask.js) — off, a saved `ask` chord is kept, inert (createKeyTable's `keep`)
@@ -185,6 +185,9 @@ export function createKeys(app) {
       /* iteration 004 · MIR OPTIONS › SAMPLING › SCRUB is how a ruler drag seeks (BASINS shell.js: the kit's controller reads it at each
          scrub's start): LIVE every move, LIGHT one in three, RELEASE when the hand lets go */
       scrubLevel: () => { const g = mirGui(); return g ? g.sampling().scrub : 'live'; } });
+    /* 021 R3 · TWO ⏮, EACH SAYS WHAT IT MOVES: the work bar's sends the modulation beat and the TIMELINE playhead to bar 1 and leaves ψ's t
+       (the main bar's ⏮ moves t); one position spanning both is a kit door for 1.5.6 (docs/FOR-MIR.md) */
+    { const h = app.state.tl.root.querySelector('.transport-home'); if (h) { h.title = 'beat → bar 1 · the TIMELINE playhead and the modulation beat back to the start; ψ\'s t stays (the main bar\'s ⏮ moves t)'; h.setAttribute('aria-label', 'timeline back to bar 1'); } }
     /* the window draws no pane of its own: its ruler, lanes and work bar are each a .glass pane (a lane clipped by the scroller), its rail chips */
     occlusion.register('timeline', () => app.state.tl.isOpen() ? [...app.state.tl.root.querySelectorAll('.glass'), ...(app.state.tl.rail.el ? app.state.tl.rail.el.querySelectorAll('.mir-chip') : [])].map((s) => paintedRect(s, s.closest('.tl-viewport'))) : []);
     for (const n of [app.state.tl.root, app.state.tl.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });

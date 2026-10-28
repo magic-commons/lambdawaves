@@ -74,7 +74,7 @@ body[data-theme="light"] #transport .csb-theme { --ico: url(img/icons/sun.svg); 
 #transport :is(#rackToggle, #rackFav) { position: static; inset: auto; -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.rack-hidden #transport #rackFav { opacity: 1; visibility: inherit; pointer-events: auto; }
 #transport[data-layout="csb"] .csb-mid > .mol-pick { flex: 0 0 auto; width: 220px; min-width: 220px; max-width: 220px; height: 34px; overflow: hidden; }
-#transport:has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-mid > .mol-pick { visibility: hidden; }   /* HYDROGEN: no molecule to choose */
+#transport:has(#lwMode [data-id="hydrogen"][aria-pressed="true"]) .csb-mid > .mol-pick { visibility: hidden; }   /* HYDROGEN: no molecule to choose */
 /* IN A RACK CARD (docked, or the FREE window one card wide): one wrapping flow in the stage's order, 32 px seats, the expander one column */
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 4px; padding: 8px; height: auto; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-left, .csb-right, .csb-ico) { display: contents; }
@@ -87,7 +87,7 @@ body.rack-hidden #transport #rackFav { opacity: 1; visibility: inherit; pointer-
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo { order: 3; flex: 1 1 100%; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo:not([hidden]) { grid-template-columns: minmax(0, 1fr); }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-mid > .mol-pick { width: 100%; max-width: none; min-width: 0; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]):has(#lwMode [data-id="atoms"][aria-pressed="true"]) .csb-mid > .mol-pick { display: none; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]):has(#lwMode [data-id="hydrogen"][aria-pressed="true"]) .csb-mid > .mol-pick { display: none; }
 /* the FREE window (the kit's createWindow; data-place="free"): the bar in the window's flow, never parked by a hidden rack */
 html body #transport[data-place="free"] { position: static; left: auto; right: auto; top: auto; bottom: auto; transform: none; margin: 0; border: 0; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
 html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 1; visibility: visible; pointer-events: auto; }

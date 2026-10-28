@@ -69,8 +69,13 @@ export function createLinks(app) {
     if (!got) return { ok: true, opened: false, code: null, message: null };
     /* THE PALETTE IS NAMED BEFORE THE STATE IS RESTORED, never after: select() re-reads the catalogue's own
        stops, so doing it second would throw away an EDITED palette that the link had carried in full. */
-    if (got.paletteId && app.state.palette && got.paletteId !== app.state.palette.id) app.state.palette.select(got.paletteId);   // S1 (D2): the palette is the link's, never written into this browser's settings
-    const ok = app.sh.restore(got.state);
+    const take = () => {
+      if (got.paletteId && app.state.palette && got.paletteId !== app.state.palette.id) app.state.palette.select(got.paletteId);   // S1 (D2): the palette is the link's, never written into this browser's settings
+      return app.sh.restore(got.state) === true;
+    };
+    /* 021 R1 · THE OPEN ROAD: the snapshot, the restore, the roll-back when it did not take (lab/projects.js openPayload) */
+    const P = app.sh.layout && app.sh.layout.projects;
+    const ok = P ? P.openWith(take, 'link not opened') : take();
     const d = +(got.state.experiment && got.state.experiment.damping);
     if (Number.isFinite(d) && d !== reg.damping) { reg.setDamping(d); if (ui.dragKnob) ui.dragKnob.set(d); }
     if (app.state.history) app.state.history.clear('link');                 // a link is the BOTTOM of the stack, exactly as ?preset= is
