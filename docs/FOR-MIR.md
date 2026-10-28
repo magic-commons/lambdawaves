@@ -47,6 +47,15 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - **BUILT 1.5.6-alpha.4 · the kit's popups on the menu surface** (022 P1): PATTERN's cap menu is a contextMenu; FOLDERS' context box a menu
   pane (no well) with `itemRows(e)`; `.m2pick` / `.m2ppick` / `.m2deadpick` and the transport's seat menu carry `data-mir-surface="menu"`.
 - **BUILT 1.5.6-alpha.4 · a list row's picture** (022 P3, `controls/select.js`; kit 0d98cc8): `listPane` / `select()` items take `pic` (lazy) and `title`; `select({ repick })`.
+- **BUILT 1.5.6-alpha.5 · RELIEF IS TIGHT** (022 S1, `css/skin.css`, `core/look.js`, `shell/gui.js`, `shell/themes.js`, docs/INTENT.md's row; kit
+  3e6f5cc): a raise is a 1–2 px highlight (light 1 px · .70; dark `--neu-lit`, a grey; SOLID 1 / 2 px, drop 1.5 / 3, wells ±1 / 2; a light pane's
+  lift ≤ 45 %), the shine a hairline (≤ 1 px, a 0–2 px blur, α ≤ .35, gain ≤ 1.2), SHINE SOFT 0–6, MORPH and AURORA shine .5 / 6.
+- **BUILT 1.5.6-alpha.5 · THE MENU'S INK** (022 S2 / call 13, `css/skin.css`, `shell/shell.css`, tokens.json): `--surface-menu-tint` (flipped
+  under a forced ink against the theme) and `--surface-menu-edge` (≥ 3 : 1 against the stage); the floor reaches `#menubar .mb-list`, the
+  hover hint and the ⓘ panel — every popup's rows ≥ 4.5 : 1 in every skin × theme (S-BUILD.md's table).
+- **FROST in LIGHT writes white ink on every pane** (022 S, not built): the recipe's White Text holds in LIGHT, so over a light stage FROST's
+  windows read 1.05 : 1 (the kit's own themes.browser label table says the same); the popups are fixed (above), the panes wait for a ruling
+  (TEXT AUTO in LIGHT, or a darker veil).
 - **A `'midi'` modulation SOURCE kind** (021 I2; not built): midi.js hands every CC as 0…1 (`sources()`, `source(key, v)`), but the model
   (`modulation/mod.js`) knows lfo · env · audio only; a `kind: 'midi'` source beside audio (its rack face, its serialisation) would let a
   learned knob drive any dial as an LFO does. λWAVES routes notes and CCs to ACTIONS today, not to dials.

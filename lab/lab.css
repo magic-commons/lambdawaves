@@ -171,7 +171,7 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
    proud; the groove ring is the only texture".  A border here would win on specificity and look
    wrong-footed against every other dial in the lab.  The accent ring is spelled exactly as skin.css
    already spells a lit dial (`.k.drag`, `.k.active`): the raise, plus one accent pixel outside it. */
-.sp-row .sp-knobs .k.live .k-dial { box-shadow: var(--neu-raise), 0 0 0 1px color-mix(in srgb, var(--acc) 60%, transparent); }
+.sp-row .sp-knobs .k.live .k-dial { box-shadow: var(--relief-raise, var(--neu-raise)), 0 0 0 1px color-mix(in srgb, var(--acc) 60%, transparent); }
 /* RATE — a setting, not a reading: two pixels smaller, and the plain puck.  The 45-px finger band
    skin.css gives these dials on a phone sits on `.k-dial::before` and is absolute, so it does not
    shrink with the ink. */
@@ -654,7 +654,7 @@ body.rack-hidden.transport-peek #transport.mini { visibility: visible; transitio
 
 /* A knob whose parameter a modulator is holding wears ACCENT A wherever it lives in the rack.
    Selecting the route's macro or source promotes it to ACCENT B in the host layer. */
-.k.mod-held .k-dial { box-shadow: var(--neu-raise), 0 0 0 1px color-mix(in srgb, var(--acc) 65%, transparent); }
+.k.mod-held .k-dial { box-shadow: var(--relief-raise, var(--neu-raise)), 0 0 0 1px color-mix(in srgb, var(--acc) 65%, transparent); }
 .k.mod-held .k-needle { background: var(--acc); }
 
 /* WHILE THE GESTURE IS LIVE.  There is no hover on a touch screen, so validity cannot be reported at
@@ -670,7 +670,7 @@ body.mod-arming .k[data-param].mod-drop > .k-lbl { color: var(--acc2); }
 body.mod-arming .k[data-param].mod-drop.is-dup > .k-dial { outline-style: solid; outline-color: color-mix(in srgb, var(--acc2) 75%, transparent); }
 /* the `+` cursor, drawn at the destination because a touch screen has no pointer to draw it at */
 body.mod-arming .k[data-param].mod-drop.is-over > .k-dial {
-  outline: 3px solid var(--acc2); outline-offset: 3px; box-shadow: var(--neu-raise), 0 0 0 7px var(--acc2-soft); }
+  outline: 3px solid var(--acc2); outline-offset: 3px; box-shadow: var(--relief-raise, var(--neu-raise)), 0 0 0 2px var(--acc2-soft); }   /* 022 S2: the halo 7 → 2 px (RELIEF IS TIGHT) */
 body.mod-arming .sw, body.mod-arming .seg, body.mod-arming .trig, body.mod-arming .fd,
 body.mod-arming .mir-select, body.mod-arming .k:not([data-param]) { opacity: .45; }
 

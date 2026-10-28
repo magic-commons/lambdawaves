@@ -61,11 +61,14 @@
   --relief-angle: 315deg;                                         /* RELIEF ANGLE: the controls' light (1.4 and BASINS: upper left); LINK makes it LIGHT ANGLE */
   --relief-sin: sin(var(--relief-angle)); --relief-cos: cos(var(--relief-angle));
   --shadow-amount: 1; --shadow-dist: 2px; --shadow-soft: 8px;     /* SHADOW 100 %, DISTANCE, SOFTNESS: read only under html[data-cast] */
-  --shine-amount: 0; --shine-soft: 12px;                          /* SHINE and its SOFTNESS: read only under html[data-shine] */
+  --shine-amount: 0; --shine-soft: 6px;                           /* SHINE and its SOFTNESS (0–6, drawn ÷ 3: a 0–2 px hairline, 1.5.6-alpha.5): read only under html[data-shine] */
   --shine-term: 0 0 0 0 transparent;                              /* the shine's layer in a pane's shadow list, off */
-  --neu-raise: calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 3px hsl(0 0% 100% / .05),
+  /* 1.5.6-alpha.5 · RELIEF IS TIGHT (INTENT: a raise is a 1–2 px highlight; a dark highlight is grey): the highlight is the dark
+     pane's tint lifted, a grey at a third, never white, and it reaches 1 px */
+  --neu-lit: color-mix(in srgb, color-mix(in srgb, hsl(var(--glass-tint)), hsl(0 0% 100%) 34%) 32%, transparent);
+  --neu-raise: calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 1px var(--neu-lit),
     calc(-2px * sqrt(2) * var(--relief-sin)) calc(2px * sqrt(2) * var(--relief-cos)) 4px hsl(0 0% 0% / .42),
-    inset 0 1px 0 hsl(0 0% 100% / .08);                            /* a control that stands proud */
+    inset 0 1px 0 var(--neu-lit);                                   /* a control that stands proud */
   --neu-inset: inset calc(-1px * sqrt(2) * var(--relief-sin)) calc(1px * sqrt(2) * var(--relief-cos)) 3px hsl(0 0% 0% / .48),
     inset calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 2px hsl(0 0% 100% / .04);                 /* a well cut into the card */
   --neu-flat: 0 0 0 1px hsl(0 0% 100% / .05);                     /* a resting seat, neither up nor down */
@@ -108,6 +111,9 @@ body {
   --acc2: hsl(var(--hue-acc2) var(--sat-acc2) var(--lum-acc2));
   --acc-soft: color-mix(in srgb, var(--acc) 16%, transparent); --acc-glow: 0 0 8px color-mix(in srgb, var(--acc) 55%, transparent);
   --acc2-soft: color-mix(in srgb, var(--acc2) 18%, transparent);
+  /* 1.5.6-alpha.5 · THE MENU'S INK (λWAVES 022 S): a menu pane's tint (the card's, flipped below when a forced ink would vanish on it)
+     and its edge, ≥ 3 : 1 against the stage beside it (a rim mid-grey, light or dark by the theme) */
+  --surface-menu-tint: var(--glass-tint); --surface-menu-edge: hsl(0 0% 100% / .40);
 }
 body[data-theme="light"] {
   --glass-hue: 214; --glass-sat-tint: 22%; --glass-lum: 93%; --glass-tint: 214 22% 93%; --glass-opacity: .86;
@@ -122,13 +128,18 @@ body[data-theme="light"] {
   --tip-shadow: inset 0 1px 0 hsl(0 0% 100% / .8), 0 10px 28px hsl(214 40% 20% / .20), 0 2px 6px hsl(214 40% 20% / .10);
   --state-on: hsl(0 0% 100% / .62);                               /* on a light card a .086 white is invisible: the frost face is whiter */
   --state-on-rim: inset 0 0 0 1px hsl(214 30% 40% / .34), inset 0 1px 0 hsl(0 0% 100% / .12);
-  --neu-raise: calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 3px hsl(0 0% 100% / .9),
+  --neu-raise: calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 1px hsl(0 0% 100% / .7),
     calc(-2px * sqrt(2) * var(--relief-sin)) calc(2px * sqrt(2) * var(--relief-cos)) 4px hsl(214 30% 40% / .22),
-    inset 0 1px 0 hsl(0 0% 100% / .9);
+    inset 0 1px 0 hsl(0 0% 100% / .7);                             /* 1.5.6-alpha.5: the highlight 3 px · .9 → 1 px · .7 (RELIEF IS TIGHT) */
   --neu-inset: inset calc(-1px * sqrt(2) * var(--relief-sin)) calc(1px * sqrt(2) * var(--relief-cos)) 3px hsl(214 30% 40% / .24),
     inset calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 2px hsl(0 0% 100% / .8);
   --lum-acc: 34%; --acc: hsl(var(--hue-acc) calc(var(--sat-acc) - 10%) var(--lum-acc)); --acc-ink: hsl(0 0% 100%);   /* hsl(188 70% 34%) by default, and it follows the hue */
+  --surface-menu-edge: hsl(214 24% 30% / .62);
 }
+/* 1.5.6-alpha.5 · a forced ink against the theme (FROST's White Text in LIGHT, DARK text in dark) on a clear pane: the menu pane takes the
+   ink's ground, so its rows read at ≥ 4.5 : 1 over any stage (a SOLID pane's ink is chosen from the pane: it needs no flip) */
+body[data-theme="light"][data-text="light"]:not([data-card="solid"]) { --surface-menu-tint: 214 16% 13%; }
+body:not([data-theme="light"])[data-text="dark"]:not([data-card="solid"]) { --surface-menu-tint: 214 22% 93%; }
 /* LIGHT · THE VIVID SHELL SET (wave 46).  --n1…--n6 were chosen on the dark ground: measured against the
    light card they run 1.25 : 1 … 2.19 : 1, far under the 3 : 1 a 2 px line needs.  Same six hues, chroma up
    (+12 saturation), lightness walked DOWN until the WCAG contrast ratio clears 3 : 1 against BOTH grounds the
@@ -186,13 +197,14 @@ body[data-card="solid"] {
   --solid-shade: color-mix(in srgb, var(--solid-pane), hsl(0 0% 0%) var(--solid-sink, 32%));
   --glass-well: color-mix(in srgb, var(--solid-pane), hsl(0 0% 0%) 10%);
   --sw-fill: var(--solid-pane);
-  --neu-raise: calc(2px * sqrt(2) * var(--relief-sin)) calc(-2px * sqrt(2) * var(--relief-cos)) 6px var(--solid-lit),
-    calc(-2px * sqrt(2) * var(--relief-sin)) calc(2px * sqrt(2) * var(--relief-cos)) 6px var(--solid-shade);
-  --neu-inset: inset calc(-2px * var(--relief-sin)) calc(2px * var(--relief-cos)) 4px var(--solid-shade),
-    inset calc(2px * var(--relief-sin)) calc(-2px * var(--relief-cos)) 4px var(--solid-lit);
+  /* 1.5.6-alpha.5 · RELIEF IS TIGHT: the highlight (1, 1) 2 px, the drop (1.5, 1.5) 3 px, the wells ±1 at 2 px (were 2.8 / 6, ±2 / 4: the white blob) */
+  --neu-raise: calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 2px var(--solid-lit),
+    calc(-1.5px * sqrt(2) * var(--relief-sin)) calc(1.5px * sqrt(2) * var(--relief-cos)) 3px var(--solid-shade);
+  --neu-inset: inset calc(-1px * sqrt(2) * var(--relief-sin)) calc(1px * sqrt(2) * var(--relief-cos)) 2px var(--solid-shade),
+    inset calc(1px * sqrt(2) * var(--relief-sin)) calc(-1px * sqrt(2) * var(--relief-cos)) 2px var(--solid-lit);
 }
 body[data-card="solid"][data-theme="light"] {
-  --solid-lit: color-mix(in srgb, var(--solid-pane), hsl(0 0% 100%) var(--solid-lift, 70%));
+  --solid-lit: color-mix(in srgb, var(--solid-pane), hsl(0 0% 100%) var(--solid-lift, 45%));   /* 1.5.6-alpha.5: a light pane's lift is capped at 45 % (core/look.js solidRelief), never white */
   --solid-shade: color-mix(in srgb, var(--solid-pane), hsl(214 30% 30%) var(--solid-sink, 22%));
   --glass-well: color-mix(in srgb, var(--solid-pane), hsl(214 30% 30%) 5%);
 }
@@ -249,8 +261,10 @@ html[data-cast] body[data-theme="light"] {
    On a rack card (.dev) it is its own layer blended additively (`plus-lighter`, §3b); on a pane that clips its own
    overflow (the kit window, the notebook, a menu) it is one more layer of the pane's shadow, which cannot blend. */
 html[data-cast][data-shine] body { --surface-shadow: var(--cast-pane), var(--shine-term); --surface-shadow-float: var(--cast-float), var(--shine-term); --surface-shadow-menu: var(--cast-menu), var(--shine-term); }
+/* 1.5.6-alpha.5 · RELIEF IS TIGHT: the shine is a hairline — at most 1 px toward the light, SOFTNESS 0–6 drawn as a 0–2 px blur, α ≤ .35
+   (it was DISTANCE and SOFTNESS whole at α ≤ 1: AURORA's 18 px white glow, MORPH's 6 px offset) */
 html[data-shine] body {
-  --shine-term: calc(var(--shadow-dist) * var(--light-sin)) calc(-1 * var(--shadow-dist) * var(--light-cos)) var(--shine-soft) hsl(0 0% 100% / min(1, calc(.5 * var(--shine-amount) * var(--shine-gain, 1))));
+  --shine-term: calc(min(var(--shadow-dist), 1px) * var(--light-sin)) calc(-1 * min(var(--shadow-dist), 1px) * var(--light-cos)) calc(min(var(--shine-soft), 6px) / 3) hsl(0 0% 100% / min(.35, calc(.5 * var(--shine-amount) * var(--shine-gain, 1))));
 }
 @media (hover: none) and (max-width: 700px),
        (hover: none) and (max-height: 520px) and (max-width: 1000px) {
@@ -469,7 +483,7 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
 /* 1.5.6-alpha.4 · THE MENU FLOOR: a menu pane (`.glass[data-mir-surface="menu"]`) keeps its skin's material and never thins below
    --surface-menu-floor — the one token for the .92 / .94 / .97 an app hard-coded so the stage could not read through.  Heavy enough to beat
    every card style's pane rule, FROST's and STILL's included; it paints the colour only, so a sheen and the blur stay. */
-body[data-card] .glass[data-mir-surface="menu"]:not([hidden]) { background-color: hsl(var(--glass-tint) / var(--surface-menu-floor)); }
+body[data-card] .glass[data-mir-surface="menu"]:not([hidden]) { background-color: hsl(var(--surface-menu-tint) / var(--surface-menu-floor)); border-color: var(--surface-menu-edge); }
 :where([data-mir-surface="island"]) { border: var(--surface-edge-width, var(--glass-border)) solid transparent; }   /* joined: paintless, the same box it has as an island */   /* the pane is CARD STYLE's, §14c */
 .badge { min-height: 24px; padding: 2px 9px; border-color: transparent; box-shadow: var(--surface-shadow, var(--glass-shadow)); outline: var(--seat-edge); outline-offset: 0;   /* a pane's height (L13) */
   color: var(--ink-key);
@@ -751,6 +765,8 @@ body.frost:not([data-card="solid"]) :is(.native-info .native-info-content, .cont
   -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter)); }
 body.frost.frost-hold :is(.native-info .native-info-content, .control-help) { -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.frost.frost-hold[data-card="refractive"] :is(.native-info .native-info-content, .control-help) { background: var(--surface-fill, var(--popover-fill)); }
+/* 1.5.6-alpha.5 · the hover hint and the ⓘ panel are popovers at menu height: the menu floor, its tint and its edge reach them too */
+body[data-card] :is(.native-info .native-info-content, .control-help):not([hidden]) { background-color: hsl(var(--surface-menu-tint) / var(--surface-menu-floor)); border-color: var(--surface-menu-edge); }
 .plane-model { display: block; width: 100%; height: 150px; touch-action: none; cursor: grab; }
 .plane-model:active { cursor: grabbing; }
 @media (pointer: coarse) { .native-info-button { min-width: 44px; min-height: 44px; } }

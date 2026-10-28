@@ -234,6 +234,9 @@ body[data-card="refractive"] #menubar .mb-list { background: var(--surface-sheen
    (--card-opacity, skin.css) and takes the frost filter, as BASINS draws it; FROST · STILL holds it */
 body.frost:not(.frost-hold)[data-card="tinted"] #menubar .mb-list {
   -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter)); }
+/* 1.5.6-alpha.5 · THE MENU'S INK (λWAVES 022 S): the bar's lists are menus — the menu floor's opacity, its tint (flipped under a forced ink against
+   the theme) and its edge (css/skin.css), after the card-style rules above so they win the tie; the blur and the sheen stay */
+body[data-card] #menubar .mb-list:not([hidden]) { background-color: hsl(var(--surface-menu-tint) / var(--surface-menu-floor)); border-color: var(--surface-menu-edge); }
 }
 
 /* ── kit additions (not from λWAVES) ── */

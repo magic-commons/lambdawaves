@@ -167,7 +167,8 @@ export function lookSchema({ tier = () => null } = {}) {
     { key: 'shadowDist', type: 'number', step: 1, min: 0, max: 24, default: 2, apply: [{ on: 'html', prop: '--shadow-dist', map: (v) => (v === 2 ? null : v + 'px') }] },
     { key: 'shadowSoft', type: 'number', step: 1, min: 0, max: 48, default: 8, apply: [{ on: 'html', prop: '--shadow-soft', map: (v) => (v === 8 ? null : v + 'px') }] },
     { key: 'shine', type: 'number', step: 0.01, min: 0, max: 1, default: 0, apply: [{ on: 'html', prop: '--shine-amount', map: (v) => (v ? String(v) : null) }] },
-    { key: 'shineSoft', type: 'number', step: 1, min: 0, max: 48, default: 12, apply: [{ on: 'html', prop: '--shine-soft', map: (v) => (v === 12 ? null : v + 'px') }] },
+    /* 1.5.6-alpha.5 · SHINE SOFT 0–6 (was 0–48), drawn ÷ 3: the shine is a hairline (skin.css); a stored value above 6 clamps on read */
+    { key: 'shineSoft', type: 'number', step: 1, min: 0, max: 6, default: 6, apply: [{ on: 'html', prop: '--shine-soft', map: (v) => (v === 6 ? null : v + 'px') }] },
     /* DROP SHADOW — Display's switch (BASINS: "Display can switch it off"); off, or SHADOW at 0, is no pane shadow at all */
     { key: 'dropShadow', type: 'bool', default: true, apply: [
       { on: 'html', attr: 'data-cast', map: (v, s) => (offShadow(s) ? null : '') },   // the engine always draws BASINS' material shadow (at 100 % too)

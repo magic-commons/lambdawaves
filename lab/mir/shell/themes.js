@@ -28,7 +28,7 @@ export const THEME_KEYS = Object.freeze(['card', 'frost', 'blur', 'veil', 'satur
 
 /* what a theme does not say: the kit's own home for each (shell/gui.js lookSchema defaults, before FROST) */
 const BASE = { card: 'tinted', frost: 'off', blur: 11, veil: 10, saturation: 1, corners: 14, faces: 'solid', faceBlend: 0, text: 'theme', relief: 'default', edge: true,
-  lightAngle: 0, reliefAngle: 315, reliefLink: false, shadow: 1, shadowDist: 2, shadowSoft: 8, shine: 0, shineSoft: 12, dropShadow: true, disconnected: false, spacing: 'default', motion: 'auto', glow: true, parallax: true,
+  lightAngle: 0, reliefAngle: 315, reliefLink: false, shadow: 1, shadowDist: 2, shadowSoft: 8, shine: 0, shineSoft: 6, dropShadow: true, disconnected: false, spacing: 'default', motion: 'auto', glow: true, parallax: true,
   quality: 'auto' };   // alpha.12: QUALITY AUTO, the device's measured tier (BASINS settings.js §2); a theme that must be cheap says so (SWIFT)
 const tone = (id, name, hue, tint, bright, accentA, accentB, vivid) => ({ id, name, values: { hue, tint, bright, accentA, accentB, vivid, accentBright: 0 } });
 
@@ -45,7 +45,7 @@ const TABLE = [   // tr: names
     tones: [tone('clear', 'CLEAR', 0, 0, 0, 30, 300, 0.1), tone('rose', 'ROSE', 340, 0.22, 0, 345, 300, 0.25), tone('azure', 'AZURE', 205, 0.28, 0, 200, 280, 0.25)] },
   /* MORPH — neumorphism: the SOLID pane, the light at the upper left, a drop shadow bottom-right and the shine upper-left
      (Josh: "So bottom right shadow, upper left shine"), faces the pane's colour, soft corners, no edge. */
-  { id: 'morph', name: 'MORPH', values: { card: 'solid', corners: 20, edge: false, lightAngle: 315, reliefLink: true, shadow: 1.4, shadowDist: 6, shadowSoft: 14, shine: 0.7, shineSoft: 14, glow: false, parallax: false, spacing: 'airy' },
+  { id: 'morph', name: 'MORPH', values: { card: 'solid', corners: 20, edge: false, lightAngle: 315, reliefLink: true, shadow: 1.4, shadowDist: 6, shadowSoft: 14, shine: 0.5, shineSoft: 6, glow: false, parallax: false, spacing: 'airy' },
     tones: [tone('clay', 'CLAY', 24, 0.16, 0, 30, 300, 0.1), tone('mint', 'MINT', 150, 0.18, 0, 140, 300, 0.1), tone('lilac', 'LILAC', 268, 0.2, 0, 280, 30, 0.1), tone('slate', 'SLATE', 0, 0, 0, 30, 300, 0.1)] },
   /* CLASSIC — the 1.4 spirit: the tinted pane, solid faces, the relief, the house corner and veil, and 1.4's 22 px blur.
      FROST is 1.4's own default, OFF (STYLE-LOCK: "FROST OFF, GLASS BLUR 22px"): a still tinted pane, no filter.  Since
@@ -56,8 +56,8 @@ const TABLE = [   // tr: names
      parallax off, the flat tier.  (It replaces the preset called LIGHT: the name was ambiguous with the light theme.) */
   { id: 'swift', name: 'SWIFT', values: { card: 'solid', relief: 'flat', shadow: 0, motion: 'off', glow: false, parallax: false, quality: 'light', spacing: 'tight' },
     tones: [tone('graphite', 'GRAPHITE', 0, 0, 0, 30, 300, 0.1), tone('sand', 'SAND', 40, 0.14, 0, 40, 300, 0.1), tone('steel', 'STEEL', 210, 0.16, 0, 200, 300, 0.1)] },
-  /* AURORA — the flashy one: refractive, saturation up, a strong shine, vivid accents, pointer glow and parallax on. */
-  { id: 'aurora', name: 'AURORA', values: { card: 'refractive', frost: 'always', blur: 16, veil: 6, saturation: 1.8, corners: 22, faces: 'glass', edge: true, shadow: 1.5, shadowDist: 3, shadowSoft: 14, shine: 1, shineSoft: 18, spacing: 'default' },
+  /* AURORA — the flashy one: refractive, saturation up, a shine (a hairline since 1.5.6-alpha.5), vivid accents, pointer glow and parallax on. */
+  { id: 'aurora', name: 'AURORA', values: { card: 'refractive', frost: 'always', blur: 16, veil: 6, saturation: 1.8, corners: 22, faces: 'glass', edge: true, shadow: 1.5, shadowDist: 3, shadowSoft: 14, shine: 0.5, shineSoft: 6, spacing: 'default' },
     tones: [tone('borealis', 'BOREALIS', 160, 0.3, 0, 120, 280, 0.8), tone('dusk', 'DUSK', 300, 0.3, 0, 320, 40, 0.7), tone('solar', 'SOLAR', 40, 0.3, 0, 45, 200, 0.8)] },
   /* NEON — near-black SOLID panes, accents at full strength with their glow, everything else quiet (no pane shadow, no edge).
      A dark-pane theme in either mode, so it states THEME dark. */
