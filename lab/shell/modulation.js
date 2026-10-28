@@ -191,8 +191,28 @@ export function createModSeam(app) {
     }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
     const dodging = {};   // 0.5.0 C7b: each kit window's open rect (the modulation window's, the TIMELINE's): the pill gives way to both
-    /* 020 T3 · THE BAR IS ON TOP of every window (lab.css, chrome + 3) but these two: when no seat clears them it goes UNDER them for that time */
-    const under = (on) => document.body.classList.toggle('transport-under', !!on);
+    /* 020 T3 · THE BAR IS ON TOP of every window (lab.css, chrome + 3) but these two: when no seat clears them it goes UNDER them for that time.
+       021 V3 · …AND UNDER EVERY OTHER OPEN FLOAT IT MEETS (a short screen: MIR OPTIONS, KEYBOARD, NODES, a floated card): the seat is chosen
+       against TIMELINE and MODULATION as before; then any open window in #floats over the bar's box puts the bar under it (`blocked`: no seat
+       cleared those two).  A window off the bar leaves it on top, so on a tall screen nothing changes until a window is dragged over it */
+    const floatsEl = document.getElementById('floats');
+    let blocked = false;
+    const floatOver = () => {
+      if (!floatsEl) return false;
+      const open = [...floatsEl.children].filter((n) => !n.hidden && (n.classList.contains('mir-win') || (n.classList.contains('dev') && n.classList.contains('floating') && !n.classList.contains('closed'))) && !n.classList.contains('mir-transport-free'));
+      if (!open.length) return false;
+      const t = document.getElementById('transport'); if (!t || !t.classList.contains('mini') || t.dataset.place === 'free') return false;
+      const b = t.getBoundingClientRect(); if (!b.width) return false;
+      return open.some((n) => { const r = n.getBoundingClientRect(); return r.width > 0 && hits(r, b); });
+    };
+    const under = (on) => document.body.classList.toggle('transport-under', !!on || floatOver());
+    if (floatsEl) {   // a float opened, closed, moved or resized: ask again, once a frame
+      let booked = 0; const book = () => { if (!booked) booked = requestAnimationFrame(() => { booked = 0; if (!trMoving) under(blocked); }); };
+      const mo = new MutationObserver((list) => { for (const m of list) for (const n of m.addedNodes || []) if (n.nodeType === 1) watch(n); book(); });
+      const watch = (n) => mo.observe(n, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
+      mo.observe(floatsEl, { childList: true }); for (const n of floatsEl.children) watch(n);
+      addEventListener('resize', book);
+    }
     function modDodge(rect, who = 'mod') {
       /* 0.5.0 C4: the kit's close reports null, and its place() reports the real box even while closed (λWAVES' copy sent the
          zero rect): a window that is not open has nothing to dodge */
@@ -203,7 +223,7 @@ export function createModSeam(app) {
       const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));
       occlusion.dirty();   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
-      if (!t || !t.classList.contains('mini') || t.dataset.place === 'free') { under(false); return; }   // iteration 014 A4: the FREE window is the hand's, never dodged
+      if (!t || !t.classList.contains('mini') || t.dataset.place === 'free') { blocked = false; under(false); return; }   // iteration 014 A4: the FREE window is the hand's, never dodged
       /* 015 T6 · A DODGE ASKED MID-MOVE IS KEPT, NOT DROPPED: the last one re-asks once the move has landed (before, only a report with no window
          open was retried, so a window that opened while the pill travelled could land on top of it) */
       if (trMoving) { clearTimeout(dodgeAgain); dodgeAgain = setTimeout(() => modDodge(dodging.mod || null, 'mod'), 320); return; }
@@ -215,7 +235,7 @@ export function createModSeam(app) {
          When the pill already sits there, that answer changed nothing but it read the pill's rect first: on a first visit
          the boot's forced style + layout, 30–38 ms, once the closed H₂ and MOLECULES cards stopped paying it
          (probes/N/n8-reads.mjs).  Any other case falls through to the measured road below, unchanged. */
-      if (!rs.length && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) { under(false); return; }
+      if (!rs.length && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) { blocked = false; under(false); return; }
       const box = t.getBoundingClientRect();
       const w = box.width || 560, h = box.height || 34;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
@@ -223,7 +243,7 @@ export function createModSeam(app) {
       const want = narrowRack ? 'top'
                  : free('bottom', w, h) ? 'bottom'
                  : free('top', w, h) ? 'top' : trSeat;
-      under(!free(want, w, h));
+      blocked = !free(want, w, h); under(blocked);
       if (want === trSeat) return;
       trMoving = true;
       const leaving = trSeat === 'bottom' ? 'lw-tr-out-down' : 'lw-tr-out-up';
@@ -239,7 +259,7 @@ export function createModSeam(app) {
         t.style.animation = arriving + ' 160ms cubic-bezier(.23,1,.32,1) forwards';
         let ended = false;
         const done = () => { if (ended) return; ended = true;
-          t.removeEventListener('animationend', done); t.style.animation = ''; trMoving = false; };
+          t.removeEventListener('animationend', done); t.style.animation = ''; trMoving = false; under(blocked); };   // 021 V3: landed, the floats asked again
         t.addEventListener('animationend', done);
         setTimeout(done, 400);                                  // the belt: an animation that never fires must not wedge the flag
       };

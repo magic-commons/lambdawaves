@@ -772,6 +772,8 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-navb:hover, #lwMenu .mm-navb:focus-visible { opacity: 1; color: var(--acc); scale: 1.1; } #lwMenu .mm-navb:active { scale: .94; }
 #lwMenu .mm-hue { opacity: .55; cursor: ns-resize; touch-action: none; }
 #lwMenu .mm-hue-ring { display: block; width: 20px; height: 20px; rotate: var(--mol-hue); position: relative; transition: rotate 120ms var(--ease); }
+@media (prefers-reduced-motion: reduce) { #lwMenu .mm-hue-ring { transition: none; } }   /* 021 V3: the ring turns to the hue at once */
+:root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-hue-ring { transition: none; }
 /* iteration 015 M6 · THE HUE BUTTON (Josh: "grey like the rest but then mouse over shows the colors avail"): the ring in the ink at rest, as its
    neighbours' icons are, and the wheel's colours fading in on a hover, a focus or a drag.  021 V2: the ring is the table's `hueRing` (an SVG); the
    colours lie over its circle only, clipped by a radial ring (r 7.05–8.95 of the 24 box, centre 12, 12.5) — no image mask */

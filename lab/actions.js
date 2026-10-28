@@ -37,7 +37,7 @@ export function createActions(app) {
   const fsOn = () => !!(document.fullscreenElement || (typeof matchMedia === 'function' && matchMedia('(display-mode: fullscreen)').matches));
   const fullscreen = () => { if (!document.fullscreenElement && fsOn()) { W().wState.setStatus('the browser’s full screen (F11) is the browser’s: F11 leaves it', 'warn'); return; } W().toggleFullscreen(); };
   const IP = infoPrefs(), infoKeys = INFO_ROWS.filter((r) => r.type === 'bool').map((r) => r.key); let infoKept = null;
-  const foldable = () => (S().rk ? S().rk.windows().filter((w) => w.open && w.built && w.id !== 'transport') : []);
+  const foldable = () => (S().rk ? S().rk.windows().filter((w) => w.open && w.built && !w.hidden && w.id !== 'transport') : []);   // 021 V3: a mode-hidden or LEGACY card is not FOLDS' (kit windows() `hidden`)
   /** reveal(id) — a window by the FINDER's road (kit rk.reveal: an open one scrolled to, a closed one opened at the top); NODES as its FREE window */
   const reveal = (id) => { const N = nodes(), d = document.querySelector('.dev[data-id="' + id + '"]'); if (id === 'nodes' && N && (!d || d.classList.contains('closed'))) N.open(); else S().rk.reveal(id); S().saveSettings(); };
   const theme = (a) => { const T = app.hooks.setTheme; if (!T) return; if (a && a.id) T(a.id); else T(document.body.dataset.theme === 'light' ? 'dark' : 'light'); };

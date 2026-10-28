@@ -36,7 +36,9 @@ export function createTransport(app) {
     /* THE PLAY's clock for the kit's play part: appPlay, and a press schedules the frame that shows it (togglePlay's law) */
     const barClock = { play: () => { const r = appPlay.play(); schedule(TIER.EVOLVE); return r; }, pause: () => { const r = appPlay.pause(); schedule(TIER.EVOLVE); return r; },
       isPlaying: () => appPlay.isPlaying(), onChange: (f) => appPlay.onChange(f),
-      seek: () => appPlay.seek(0) };   // ⏮ (wave 106: the playhead goes back with the clock; 021 R3: through THE ONE SEEK)
+      seek: () => appPlay.seek(0) };
+    /* 021 V3 · THE PLAYING CLASS: body.lw-playing while THE PLAY runs (one edge each way, onePlay's onChange) — GRAIN's keyframes rest without it (nodes.css) */
+    { const playing = (on) => document.body.classList.toggle('lw-playing', !!on); appPlay.onChange(playing); playing(appPlay.isPlaying()); }   // ⏮ (wave 106: the playhead goes back with the clock; 021 R3: through THE ONE SEEK)
     /* 021 R3 · THE ONE SEEK's hooks (clock.js): the playhead (the SCRUB, never under a hand), the shadow trail, the frame */
     appPlay.bind({ playhead: (t) => { if (ui.scrub && !ui.scrub.dragging()) ui.scrub.set(((t % clock.window) + clock.window) % clock.window / clock.window); },
       trail: () => shadowView.clearTrail(), schedule: () => schedule(TIER.EVOLVE) });
