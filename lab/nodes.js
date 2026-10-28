@@ -20,7 +20,7 @@ import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/cu
 import { pictureFilter, lookup } from './mir/panels/picture-filter.js';
 import { frame } from './mir/core/frame.js';
 import { compile } from './nodes-compile.js';
-import { TABLE_TYPES, MATRIX_TYPES, homeOf } from './node-types.js';
+import { TABLE_TYPES, MATRIX_TYPES, homeOf, FOOT } from './node-types.js';
 import { LAYER_TYPES, createLayerHost } from './node-layers.js';
 import { PRIM_TYPES } from './node-prims.js';
 import { jsonStore } from './mir/core/prefs.js';
@@ -33,9 +33,10 @@ import { createUndo } from './nodes-undo.js';
 const SHIPPED = {
   FILM: [{ type: 'levels', values: { outblack: 0.05, outwhite: 0.95, gamma: 1.08 } }, { type: 'temperature', values: { warmth: 0.3 } }, { type: 'saturation', values: { saturation: 0.82 } },
     { type: 'grain', values: { amount: 0.32, size: 1.2 } }, { type: 'vignette', values: { amount: 0.45, feather: 0.6, round: 0.35 } }],
-  POSTER: [{ type: 'saturation', values: { saturation: 1.45 } }, { type: 'posterize', values: { steps: 5 } }, { type: 'sharpen', values: { amount: 0.4 } }],
-  PRINT: [{ type: 'luma', values: { amount: 1 } }, { type: 'contrast', values: { contrast: 1.35 } }, { type: 'tint', values: { colour: [1, 0.93, 0.8], amount: 0.5 } },
+  POSTER: [{ type: 'saturation', values: { saturation: 1.45 } }, { type: 'posterize', values: { steps: 5, fade: 0.85 } }, { type: 'sharpen', values: { amount: 0.4 } }],
+  PRINT: [{ type: 'luma', values: { amount: 1 } }, { type: 'contrast', values: { contrast: 1.5, mask: 'mids', soft: 0.6 } }, { type: 'tint', values: { colour: [1, 0.93, 0.8], amount: 0.5 } },
     { type: 'grain', values: { amount: 0.25, size: 2, blend: 'overlay' } }, { type: 'vignette', values: { amount: 0.25 } }],
+  /* 020 X4: POSTER's steps at 85 % (the banding softened, free: a fold), PRINT's contrast in the mid-tones only (a masked run) */
 };
 
 export function createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod }) {
@@ -89,7 +90,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
      its BASE (the registry's), a modulator's write is PAINTED (show), as every rack dial (mod-port.js) */
   const ID = (q, k) => 'nodes.' + q.id + '.' + k;
   const routed = (id) => !!(mod && mod.registry && mod.registry.has(id) && mod.registry.isModulated(id));
-  const knobsOf = (q) => TYPES[q.type].knobs.filter((K) => !K.colour && !K.options);
+  const knobsOf = (q) => [...TYPES[q.type].knobs, ...(TYPES[q.type].cls === 'layer' ? [] : FOOT)].filter((K) => !K.colour && !K.options);   // X4: FADE and SOFT too
   const knobOf = (q, k) => { for (const v of views) { const w = v.widget(q.id, k); if (w) return w; } return null; };
   function enroll(q) {
     if (!mod || !mod.register) return;

@@ -203,7 +203,8 @@ export function createNotebook(app) {
       function modulationBases() {
         if (!app.state.modHost) return null;
         modSyncBases(); // catch paused hand edits; routed targets keep their protected base by contract
-        return Object.fromEntries(app.state.modHost.registry.list().map((id) => [id, app.state.modHost.registry.baseOf(id)]));
+        /* 020 X4: NODES' knobs (`nodes.*`) are the reader's graph (PREFERENCE), not the project's: their bases stay out (a CURVES added is no edit) */
+        return Object.fromEntries(app.state.modHost.registry.list().filter((id) => !id.startsWith('nodes.')).map((id) => [id, app.state.modHost.registry.baseOf(id)]));
       }
       /* A project stores the HAND values behind every routed control. The live Card values may be
          anywhere in an LFO cycle when Save is pressed; those animated values are presentation for

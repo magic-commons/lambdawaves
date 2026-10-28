@@ -57,6 +57,12 @@
 .nodes-card.past { opacity: .4; }
 .nodes-passes > span + span::before { content: ' · '; }
 .nodes-off .nodes-wires { opacity: .3; }
+/* 020 X4 · the foot fold: FADE · MASK · SOFT under the knobs; lit while either is off home */
+.nodes-foot { margin-top: 6px; border-top: 1px solid var(--glass-hairline); }
+.nodes-foot-t { display: block; width: 100%; padding: 5px 0 0; border: 0; background: transparent; box-shadow: none; cursor: pointer; font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg-soft); }
+.nodes-foot-t.on, .nodes-foot-t:hover { color: var(--acc); }
+.nodes-foot > .nodes-knobs { padding-top: 4px; }
+.nodes-card.fold > .nodes-foot { display: none; }
 .nodes-box { display: none; position: absolute; z-index: 1; pointer-events: none; border: 1px dashed var(--acc); background: color-mix(in srgb, var(--acc) 8%, transparent); }
 .nodes-menu { position: absolute; left: 6px; top: 36px; z-index: 2; display: flex; flex-direction: column; min-width: 200px; max-height: calc(100% - 44px); overflow: auto; padding: 4px; border-radius: var(--r-md); background: var(--glass-raise, var(--glass-tint));
   border: 1px solid var(--glass-border); box-shadow: var(--neu-raise); }

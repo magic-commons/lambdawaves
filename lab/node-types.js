@@ -50,8 +50,13 @@ export const MATRIX_TYPES = {
     matrix: (v) => { const w = v.warmth * 0.25; return [1 + w, 0, 0, 0, 0, 0, 1 + w * 0.15, 0, 0, 0, 0, 0, 1 - w, 0, 0, 0, 0, 0, 1, 0]; } },
 };
 
+/** 020 X4 · FADE AND MASK: the foot of every node but a LAYER (whose AMOUNT is its fade) — lab/nodes-compile.js folds FADE; a MASK makes the
+ *  node its own run.  FADE and SOFT are knobs, so modulation targets (`nodes.<node>.fade`, `.soft`) */
+export const FOOT = [{ k: 'fade', label: 'FADE', min: 0, max: 1, home: 1, hint: 'the node mixed back with its input: 100 % is all of it', fmt: (x) => Math.round(x * 100) + ' %' },
+  { k: 'mask', label: 'MASK', home: 'none', options: ['none', 'lights', 'darks', 'mids', 'centre', 'edges'].map((id) => ({ id, label: id.toUpperCase() })) },
+  { k: 'soft', label: 'SOFT', min: 0, max: 1, home: 0.5, hint: 'the mask\'s edge: 0 hard, 1 a long ramp' }];
 /** homeOf(T) → a new node's values.  A type with no `neutral` of its own is neutral with every knob at home (the compiler reads `neutral`) */
-export const homeOf = (T) => Object.fromEntries(T.knobs.map((K) => [K.k, Array.isArray(K.home) ? K.home.slice() : K.home]));
+export const homeOf = (T) => Object.fromEntries((T.cls && T.cls !== 'layer' ? [...T.knobs, ...FOOT] : T.knobs).map((K) => [K.k, Array.isArray(K.home) ? K.home.slice() : K.home]));
 for (const T of [...Object.values(TABLE_TYPES), ...Object.values(MATRIX_TYPES)]) if (!T.neutral) T.neutral = (v) => T.knobs.every((K) => v[K.k] === K.home);
 
 /** THE NODE FACTORY: the knob list of type T as MIR controls in `parent` */

@@ -16,10 +16,12 @@
  * right-click menus (a card's, the ground's) and TIDY (the cards back in one column, in list order).
  * 020 X3 THE FLAGS: an eye on every bar (VIEW HERE: the stage shows the chain up to it, the foot says "viewing 3 of 6"; the lit eye again =
  * STAGE OUT), SOLO (S, a second lit mark: this node alone), BYPASS ALL (the head's power, key \: the foot says "graph off").
+ * 020 X4 FADE AND MASK: a foot fold on every card but a LAYER — FADE · MASK · SOFT (MIR controls; FADE and SOFT are modulation targets); the
+ * fold is lit while either is off home; the cost mark follows the compiler (a masked LEVELS reads ···).
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
 import { el, svgEl, label, ariaLabel, chip } from './mir/kit.js';
-import { nodeBody } from './node-types.js';
-import { transfer } from './nodes-compile.js';
+import { nodeBody, FOOT } from './node-types.js';
+import { transfer, ownRun } from './nodes-compile.js';
 import { frame } from './mir/core/frame.js';
 
 const AT = { in: [65, 16] };                                         // STAGE IN's first-run place; the nodes stack under it, STAGE OUT under the last
@@ -28,6 +30,7 @@ const GAP = 36;
 const NOTE = 'Grades the screen only — pictures and films are untouched.';
 const MARK = { table: '·', matrix: '·', prim: '···', layer: '··' };       // THE COST IS ON THE CARD: · folds for free, ·· a layer, ··· a pass
 const CLASSES = ['table', 'matrix', 'prim', 'layer'];
+const markOf = (q, T) => MARK[T.cls !== 'layer' && ownRun(q, T) ? 'prim' : T.cls];
 const NS = 'http://www.w3.org/2000/svg';
 const hueAt = (h) => [Math.abs(h * 6 - 3) - 1, 2 - Math.abs(h * 6 - 2), 2 - Math.abs(h * 6 - 4)].map((x) => Math.min(1, Math.max(0, x)));
 const ZOOM = [0.5, 2], clampZ = (z) => Math.min(ZOOM[1], Math.max(ZOOM[0], z));
@@ -106,6 +109,11 @@ export function createView(parent, kind, M) {
     const b = el('button', 'nodes-rm', n.bar); b.type = 'button'; chip(b, 'clear', 'REMOVE NODE'); b.addEventListener('click', () => M.remove(q.id));
     if (q.type === 'curves') n.view = M.curvesIn(n.body);
     else { n.body.classList.add('nodes-knobs'); n.ctl = nodeBody(n.body, q, t, { idOf: (k) => M.ID(q, k), hand: (k, v) => M.hand(q, k, v) }); }
+    if (t.cls !== 'layer') {                                          // the foot fold: FADE · MASK · SOFT
+      const f = el('div', 'nodes-foot', n.c), tg = el('button', 'nodes-foot-t', f), fb = el('div', 'nodes-knobs', f); tg.type = 'button'; label(tg, 'FADE · MASK'); fb.hidden = true;
+      tg.setAttribute('aria-expanded', 'false'); tg.addEventListener('click', () => { fb.hidden = !fb.hidden; tg.setAttribute('aria-expanded', String(!fb.hidden)); });
+      n.foot = tg; n.fctl = nodeBody(fb, q, { knobs: FOOT }, { idOf: (k) => M.ID(q, k), hand: (k, v) => M.hand(q, k, v) });
+    }
     plane.insertBefore(n.c, cards.out.c);
   }
   /** the wires: each node's out port (the bottom's middle) to the next one's in port (the top's middle), a cubic as a network draws it */
@@ -254,8 +262,11 @@ export function createView(parent, kind, M) {
   if (!W) label(el('div', 'note', parent), NOTE);                   // the card's one line (window notes are a SETTINGS choice)
   const api = {
     get view() { return cards.curves && cards.curves.view; },
-    widget: (id, k) => { const n = cards[id]; return n && n.ctl && n.ctl.ctls[k] ? n.ctl.ctls[k].targets[0] || null : null; },
-    paint(q, k, v, shown) { const n = cards[q.id]; if (n && n.ctl) n.ctl.paint(k, v, shown); },
+    widget: (id, k) => { const n = cards[id], c = n && ((n.ctl && n.ctl.ctls[k]) || (n.fctl && n.fctl.ctls[k])); return c ? c.targets[0] || null : null; },
+    paint(q, k, v, shown) { const n = cards[q.id]; if (!n) return; for (const c of [n.ctl, n.fctl]) if (c) c.paint(k, v, shown); api.mark(q); },
+    /** the cost mark (a masked node is a pass) and the foot fold's light (FADE or MASK off home) */
+    mark(q) { const n = cards[q.id]; if (!n) return; n.bar.querySelector('.nodes-mark').textContent = markOf(q, T[q.type]);
+      if (n.foot) n.foot.classList.toggle('on', q.values.fade < 1 || (q.values.mask || 'none') !== 'none'); },
     /** the PREVIEW strip: a grey ramp over a hue ramp, each of the 128 columns through the node's own transfer (coalesced on the frame) */
     strip(q) { const n = cards[q.id]; if (!n || !n.strip) return; frame.coalesce('nodes.strip.' + kind + '.' + q.id, () => {
       const f = transfer(q, T[q.type]), g = n.strip.getContext('2d'), im = g.createImageData(128, 10);
@@ -273,7 +284,7 @@ export function createView(parent, kind, M) {
       const L = M.list();
       for (const id of Object.keys(cards)) if (id !== 'in' && id !== 'out' && (rebuild || !M.byId(id))) { sel.delete(id); ro.unobserve(cards[id].c); if (cards[id].view) cards[id].view.destroy(); cards[id].c.remove(); delete cards[id]; }
       for (const q of L) { if (!cards[q.id]) make(q); const n = cards[q.id]; n.c.classList.toggle('off', q.bypass); n.bar.querySelector('.nodes-x').setAttribute('aria-pressed', String(q.bypass));
-        n.c.classList.toggle('fold', q.fold); n.bar.querySelector('.nodes-eye').setAttribute('aria-pressed', String(M.flags.view === q.id));
+        api.mark(q); n.c.classList.toggle('fold', q.fold); n.bar.querySelector('.nodes-eye').setAttribute('aria-pressed', String(M.flags.view === q.id));
         n.bar.querySelector('.nodes-solo').setAttribute('aria-pressed', String(M.flags.solo === q.id));
         n.c.classList.toggle('past', !!(M.flags.solo ? M.flags.solo !== q.id : M.flags.view && L.findIndex((p) => p.id === M.flags.view) < L.indexOf(q))); n.bar.querySelector('.nodes-chev').setAttribute('aria-expanded', String(!q.fold));
         if (q.name) { label(n.name, ''); n.name.textContent = q.name; } else label(n.name, T[q.type].label); }

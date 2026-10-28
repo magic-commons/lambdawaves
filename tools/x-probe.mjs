@@ -63,6 +63,42 @@ const SCENES = {
     $('[data-node="n2"] .nodes-solo').click(); await w(100); $('.nodes-ground').focus(); key('\\\\'); await w(200); const off = { css: css(), foot: foot(), rec: JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')).off, flagsInRec: 'view' in JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')) };
     key('\\\\'); await w(100); $('[data-node="n3"] .nodes-eye').click(); await w(300); N.views[1].place(); await w(200);
     return { full, view, back, solo, off, after: { css: css().slice(0, 20), foot: foot() } };`,
+  /* X4: CURVES alone (FADE 100, MASK NONE) through the compiler vs 018's fixed pair — describe() and the filter's markup, byte for byte;
+     then a masked LEVELS (LIGHTS, then CENTRE), a faded POSTERIZE (a fold) and a faded BLUR (one composite); the targets */
+  x4: `const f = N.filter, html = () => document.getElementById(f.id).outerHTML, kids = () => [...document.getElementById(f.id).children].map((e) => e.tagName);
+    N.setHas(true); __LW.curves.preset('MASTER', 'S'); __LW.curves.preset('R', 'LIFT'); await w(300); f.flush();
+    const chain = { ...f.describe(), html: html() };
+    f.setChain([]); for (const ch of ['MASTER', 'R', 'G', 'B']) f.setTable(ch, ch === 'G' || ch === 'B' ? null : __LW.curves.table(ch)); f.flush();
+    const pair = { ...f.describe(), html: html() };
+    for (const ch of ['MASTER', 'R']) f.setTable(ch, null); f.setChain(N.compile().runs); f.flush();
+    const proof = { describe: f.describe(), bytes: chain.html.length, identical: chain.html === pair.html && JSON.stringify({ ...chain, html: 0 }) === JSON.stringify({ ...pair, html: 0 }), back: html() === chain.html };
+    N.remove('curves'); N.open(); await w(600); N.win.place({ x: 480, y: 70, w: 620, h: 720 }); await w(300);
+    const id = N.add('levels'); N.set(id, 'gamma', 2.5); await w(200); const plain = { kids: kids(), passes: N.passes(), mark: $('[data-node="' + id + '"] .nodes-mark').textContent };
+    N.set(id, 'mask', 'lights'); await w(200); const lights = { kids: kids(), passes: N.passes(), mark: $('[data-node="' + id + '"] .nodes-mark').textContent, foot: $('[data-node="' + id + '"] .nodes-foot-t').classList.contains('on') };
+    N.set(id, 'mask', 'centre'); await w(200); const centre = { kids: kids(), img: (document.getElementById(f.id).querySelector('feImage').getAttribute('href') || '').slice(0, 22) };
+    const p = N.add('posterize'); N.set(p, 'fade', 0.5); const b = N.add('blur'); await w(200); const k0 = kids().length; N.set(b, 'fade', 0.5); await w(200);
+    const faded = { kidsBefore: k0, kidsAfter: kids().length, last: kids().slice(-2), blurMark: $('[data-node="' + b + '"] .nodes-mark').textContent, posterMark: $('[data-node="' + p + '"] .nodes-mark').textContent };
+    const targets = __LW.mod.targets().filter((t) => t.id.startsWith('nodes.' + id + '.')).map((t) => t.id + ' ' + t.label);
+    N.remove([p, b]); N.set(id, 'mask', 'lights'); await w(200); $('[data-node="' + id + '"] .nodes-foot-t').click(); N.views[1].place(); await w(400);
+    return { proof, plain, lights, centre, faded, targets, errs: __e.slice() };`,
+  /* a NODES edit is no project edit (the graph is PREFERENCE): FOLDERS' unsaved mark before and after CURVES and a LEVELS are added */
+  dirty: `await w(400); const d = () => __LW.layout.projects.dirty, o = { d0: d() }; N.setHas(true); N.set(N.add('levels'), 'gamma', 2); await w(600); o.d1 = d(); return o;`,
+  /* X4: what a mask does on the screen — the stage canvas's pixels (the driver's composite) bare, under LEVELS GAMMA 3, and under it masked */
+  x4px: async (E) => {
+    await E(`__LW.setInvert && __LW.setInvert(true); await w(600); return 1;`);
+    const r = await E(`const r = document.getElementById('field').getBoundingClientRect(); return [r.left, r.top, r.width, r.height].map(Math.round);`), out = {};
+    for (const [name, js] of [['bare', ''], ['gamma', `N.set(N.add('levels'), 'gamma', 3);`], ['lights', `N.set('n1', 'mask', 'lights');`], ['darks', `N.set('n1', 'mask', 'darks');`], ['centre', `N.set('n1', 'mask', 'centre');`], ['fade50', `N.set('n1', 'mask', 'none'); N.set('n1', 'fade', 0.5);`]]) {
+      await E(js + ` await w(500); return 1;`); writeFileSync(`.tmp/x4px-${name}.png`, Buffer.from(await g.snap(), 'base64'));
+    }
+    out.stats = execFileSync('python3', ['-I', '-c', `import sys
+from PIL import Image
+x,y,w,h=map(int,sys.argv[1:5]); L={n: Image.open('.tmp/x4px-'+n+'.png').convert('L').crop((x+w//4,y+h//4,x+3*w//4,y+3*h//4)) for n in ['bare','gamma','lights','darks','centre','fade50']}
+b=list(L['bare'].getdata()); W=L['bare'].size[0]
+for n,im in L.items():
+  d=list(im.getdata()); dk=[d[i] for i in range(len(b)) if b[i]<90]; lt=[d[i] for i in range(len(b)) if b[i]>170]; c=[d[i] for i in range(len(b)) if abs((i%W)-W/2)<W/8 and abs((i//W)-len(b)/W/2)<len(b)/W/8]
+  print(n, 'darks', round(sum(dk)/max(1,len(dk)),1), len(dk), 'lights', round(sum(lt)/max(1,len(lt)),1), len(lt), 'centre', round(sum(c)/max(1,len(c)),1))`, ...r.map(String)]).toString();
+    return out;
+  },
 };
 try {
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify(await g.errors()));
