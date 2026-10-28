@@ -42,7 +42,7 @@ S5 THE STAGE NEVER FOLLOWS THE FURNITURE: the stage text and the ESP bar measure
 
 ### T — THE CONTROL SURFACE (items 7, 9, 10)
 T1 PLAY IS A BUTTON: PLAY takes the `.trig` sequence — rest raise → hover lift + wash → press sink (press relief + press face) → ON face + rim + glow, with the transition; the container stops doubling the relief; the kit's svg scale stays. Side by side with a chip in the BUILD note (a picture of each state is enough).
-T2 FOLDS: `app:folds` in the right group after `app:rack` — one toggling button, EXPAND ALL when any open window is folded, else MINIMIZE ALL (`rk.windows()` + `rk.fold(id, want)`), icon a plain SVG (chevrons up/down) in `lab/img/icons/`; both racks; the grid's 8th seat (two full rows of four).
+T2 FOLDS AND NODES: `app:folds` in the right group after `app:rack` — one toggling button, EXPAND ALL when any open window is folded, else MINIMIZE ALL (`rk.windows()` + `rk.fold(id, want)`), icon a plain SVG (chevrons up/down) in `lab/img/icons/`; both racks — and `app:nodes` (Josh: "Open Node's window"): a button that opens the NODES window (`LW.nodes.open()`; lit while it is open, a second press closes it), icon `lab/img/icons/nodes.svg` (a three-node chain); the right group grows to 9 seats (three rows of four with one gap, or `--csb-cols: 5` for two rows of five, the builder's pick for the bar's 674 px — say which in the BUILD note).
 T3 THE BAR ON TOP: `#transport.mini` above `#floats` (chrome + 3) so the keyboard, MIR OPTIONS and any floating window never cover it; when `modDodge` leaves the bar overlapping TIMELINE or MODULATION (no free seat) a body class drops it under them for that time; menus and the pill still above the bar.
 
 ### L — PLAYBACK LOCK (the EXPERIMENTAL pair; MAP.md's diagnosis)
@@ -61,7 +61,7 @@ Later rows (not this chain): a true DAG (MIX of branches, reroute dots, `setChai
 ## CALLS FOR JOSH (defaults stand unless he says)
 1. (S1) "Hiding the informational via CSB": the INFORMATIONAL button or the ◧ rack toggle? Default: both are fixed.
 2. (S2) If Firefox's in-flight cap costs frames at 64³ the cap applies only above a measured frame cost. Default: the builder's threshold, printed in the BUILD note.
-3. (T2) The list's last words "an open node's" are cut off; read as "and open NODES"? Default: only the folds toggle (the FINDER opens NODES); say if a NODES button belongs on the bar.
+3. (T2) The list's last words "an open node's" — Josh: "it's supposed to say 'Open Node's window'": a NODES button on the bar that opens the NODES window. ANSWERED.
 4. (T3) When the bar cannot dodge TIMELINE/MODULATION it goes under them. Default: yes.
 5. (L) PLAYBACK LOCK is OFF by default (WALL), CADENCE DISPLAY; Josh switches it on for a recording. Default: off. (Alternative: LOCKED while RECORD is armed.)
 6. (L3) The look-ahead ring is not built until L3's numbers show the reconstruct missing the cadence. Default: not built.
@@ -69,6 +69,9 @@ Later rows (not this chain): a true DAG (MIX of branches, reroute dots, `setChai
 8. (X) FADE + MASK on every node instead of a wired DAG (NODES-FLESH-OUT.md THE ROUTE). Default: yes; the DAG stays a later row.
 9. (X0) An existing reader's graph keeps its CURVES; only a first run is empty. Default: yes.
 10. (X0) The node icons are the builder's plain SVGs in one sprite, for Gemini to redraw later as 018's. Default: yes.
+
+## JOSH'S ANSWERS (2026-10-27, evening)
+"Oh it's supposed to say 'Open Node's window'. defaultss for all" — call 3 answered as above; calls 1, 2, 4–10 at their defaults.
 
 ## MERGE ORDER
 S → T → L → X (each on the merged tree; the recipe: `git merge --no-ff --no-commit it020-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → commit → CLOSED row → handoff line).
