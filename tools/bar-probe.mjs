@@ -51,7 +51,7 @@ try {
     const row = async (what) => console.log(what.padEnd(22), JSON.stringify(await g.ev(`const t = document.getElementById('transport'), r = t.getBoundingClientRect(), R = t.querySelector('.csb-right');
       const q = (s) => { const b = t.querySelector(s); if (!b) return null; const x = b.getBoundingClientRect(); return [Math.round(x.left), Math.round(x.top)]; };
       return { place: t.dataset.place || (t.classList.contains('docked') ? 'rack' : 'stage'), w: Math.round(r.width), h: Math.round(r.height), right: R ? getComputedStyle(R).gridTemplateColumns : '-',
-        folds: q('.csb-folds'), nodes: q('.csb-nodes'), foldsWord: t.querySelector('.csb-folds')?.title, nodesOn: t.querySelector('.csb-nodes')?.getAttribute('aria-pressed') };`)));
+        folds: q('.csb-folds'), nodes: q('.csb-nodes'), foldsWord: t.querySelector('.csb-folds')?.getAttribute('aria-label'), nodesOn: t.querySelector('.csb-nodes')?.getAttribute('aria-pressed') };`)));
     const census = () => g.ev(`const ws = [...document.querySelectorAll('#rack > .dev:not(.closed), #rackL > .dev:not(.closed), #rack .dev:not(.closed), #rackL .dev:not(.closed)')]; const u = [...new Set(ws)]; return u.filter((d) => d.classList.contains('folded')).length + ' folded of ' + u.length + ' open';`);
     await row('boot'); await shot('seats-stage'); console.log('  racks', await census());
     for (const k of [1, 2, 3]) { await g.tap('#transport .csb-folds'); await wait(900); await row('after FOLDS ' + k); console.log('  racks', await census()); }

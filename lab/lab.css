@@ -313,9 +313,9 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 /* ── THE CONTROL SURFACE (iteration 014 A1 · A8; 018 E2 · E4: λWAVES' own layout array under the kit's data-layout="csb", lab/shell/transport.js).
    ON THE STAGE: PLAY floats outside the bar's left edge (a round chip of its own); three tracks, the two sides equal (--csb-side: the left block's width) so
    MOLECULES' chooser sits dead centre over LIBRARY · MOLECULAR · HYDROGEN · FOLDERS; LEFT = RATE over the typed BPM pill, MOD over EXPAND, then a
-   2 × 2 of ⏮ TIMELINE / the door, the dock; RIGHT = a 4-wide grid SEARCH FINDER ♥ ◧ / INFORMATIONAL THEME ⚙.  Every seat one 36-px box, one
+   2 × 2 of ⏮ TIMELINE / the door, the dock; RIGHT = a 5-wide grid SEARCH FINDER ♥ ◧ FOLDS / NODES INFORMATIONAL THEME ⚙ (020 T2).  Every seat one 36-px box, one
    20-px icon.  IN A RACK CARD (docked, or FREE one card wide): the same order wrapping — PLAY · RATE · BPM · MOD · EXPAND, the chooser, the modes
-   + FOLDERS, then the eleven icons, centred. ── */
+   + FOLDERS, then the thirteen icons, centred. ── */
 #transport[data-layout="csb"] { --csb-side: 212px; display: grid; grid-template-columns: minmax(var(--csb-side), 1fr) auto minmax(var(--csb-side), 1fr); grid-template-areas: "left mid right" "panel panel panel"; grid-template-rows: auto auto; align-items: center; column-gap: 14px; row-gap: 0; overflow: visible; }
 #transport.mini[data-layout="csb"] { width: max-content; max-width: calc(100vw - 24px); height: auto; min-height: 0; padding: 6px 12px; contain: layout; }   /* E2: no paint containment — PLAY floats outside the box */
 #transport[data-layout="csb"] > .csb-left { grid-area: left; justify-self: start; }
@@ -331,7 +331,7 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport[data-layout="csb"] .csb-side { display: flex; align-items: center; gap: 8px; }
 #transport[data-layout="csb"] .csb-col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
 #transport[data-layout="csb"] .csb-ico { display: grid; grid-template-columns: repeat(var(--csb-cols, 2), 36px); grid-auto-rows: 36px; gap: 4px; }
-#transport[data-layout="csb"] .csb-right { --csb-cols: 4; }
+#transport[data-layout="csb"] .csb-right { --csb-cols: 5; }   /* 020 T2: nine seats, two rows of five (196 px, inside the 212-px side track: the bar keeps its 674 px and its height) */
 #transport[data-layout="csb"] .tr-openers { display: contents; }
 #transport[data-layout="csb"] .tr-open.has-glyph .tr-word { display: none; }
 #transport[data-layout="csb"].mir-transport :is(.csb-col, .csb-row, .csb-ico) > * { order: 0; flex-shrink: 0; }
@@ -341,7 +341,7 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
   display: inline-grid; place-items: center; width: 36px; height: 36px; min-width: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 18px; transform: none; }
 #transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand):hover { color: var(--fg); background: var(--glass-raise); }
 #transport[data-layout="csb"] :is(.csb-ico, .csb-mod) svg { width: 20px; height: 20px; }
-#transport[data-layout="csb"] :is(.csb-ico .tr-open.on, .csb-ico .mod-exp.live, .csb-search-b[aria-expanded="true"], #rackFav[aria-expanded="true"], .csb-info.on, .tr-expand.on) { color: var(--acc); }
+#transport[data-layout="csb"] :is(.csb-ico .tr-open.on, .csb-ico .mod-exp.live, .csb-search-b[aria-expanded="true"], #rackFav[aria-expanded="true"], .csb-info.on, .csb-nodes.on, .tr-expand.on) { color: var(--acc); }
 #transport[data-layout="csb"] .csb-ico > .mod-exp[data-mark="none"]::before { content: ""; width: 20px; height: 20px; background: currentColor;   /* A8: the modulation window's own icon (a sine wave) */
   -webkit-mask: url(img/icons/modulation.svg) center / contain no-repeat; mask: url(img/icons/modulation.svg) center / contain no-repeat; }
 /* the app's mask icons (E1 · E3): ⚙ solid, ♥ solid, ◧, FINDER, INFORMATIONAL, FOLDERS, the theme's sun ↔ moon (body[data-theme]) */
@@ -387,6 +387,7 @@ body.rack-hidden #transport #rackFav { opacity: 1; visibility: inherit; pointer-
 /* IN A RACK CARD (docked, or the FREE window one card wide): one wrapping flow in the stage's order, 32 px seats, the expander one column */
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 4px; padding: 8px; height: auto; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-left, .csb-right, .csb-ico) { display: contents; }
+#transport[data-layout="csb"].docked { column-gap: 2px; }   /* 020 T2: the thirteen icons wrap 7 + 6 in the docked card's 240 px (at 4 px the ⚙ sat alone on a fourth row) */
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .csb-play { padding: 0; border-radius: 0; background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-play > .tbtn.play { width: 48px; height: 48px; }
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) :is(.csb-tempo, .csb-mod) { margin-left: 6px; }
