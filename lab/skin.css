@@ -888,8 +888,11 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .row.fit > .wide { grid-column: span 2; }
 /* WAVE: 6 × 40 + 5 × 4 = 260 > the card's 252, so the six material dials stay three over three (72-px cells, every label whole) */
 .native-clean[data-id="observer"] .wave-row-2 { --cell-min: 72px; }
-.native-clean[data-id="observer"] .wave-row-7 > .sw, .native-clean[data-id="observer"] .wave-row-8 > .sw { grid-column: span 2; }
-.native-clean[data-id="observer"] .wave-row-7 > .segw { grid-column: 1 / -1; }   /* ESP stays three lines: its seven controls need 11 cells, five a line */
+/* 023 R3 A ROW IS EVEN: ESP's two rows share three columns — SIZE · RADIUS · MAP ONLY over PROBE · RANGE · LIVE · SLOW, knob over knob,
+   the switch in the third; ISO | SAS | SES the whole line between them */
+.native-clean[data-id="observer"] :is(.wave-row-7, .wave-row-8) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr); --knob-max: 29px; }   /* LIVE · SLOW whole on one line; the four faces one size, the row no taller */
+.native-clean[data-id="observer"] :is(.wave-row-7, .wave-row-8) > .sw { padding-inline: 6px; justify-content: flex-start; } .native-clean[data-id="observer"] :is(.wave-row-7, .wave-row-8) > .sw .sw-lbl { white-space: nowrap; }
+.native-clean[data-id="observer"] .wave-row-7 > .segw { grid-column: 1 / -1; }
 /* SETTINGS: the stage's seat beside STAGE · GAMMA; DITHER's seg and STRENGTH on one line; DOMAIN AUTO beside WIDTH */
 .native-clean[data-id="settings"] .lw-stage-row > .stage-seat { grid-column: span 2; justify-self: center; }
 .native-clean[data-id="settings"] .lw-dither { --cell-min: 56px; }
