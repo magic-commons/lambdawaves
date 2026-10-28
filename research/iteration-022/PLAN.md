@@ -68,6 +68,11 @@ E3 THE SHEET: the cramped-space Playwright sheet re-shot after all chains (1600,
 21. (C2) The stage panel is 72 px taller open (228 → 300). Default: keep; folding METERS into the TRANSPORT line is a 023 option.
 22. (C2) MACRO_MAX is 8 in the model, so the 9–16 page never appears. Default: 8 (raise to 16 on your word).
 23. (C2) The docked card expanded is taller than the viewport, so the rack scrolls (the card 262 → 256 px); nothing scrolls inside the card. Default: as is.
+24. (E1) Momentum is greyed (not switched back to position) under every operator without momentum. Default: keep.
+25. (E2) The builder's icons ship; the Gemini redraw (ICONS-FOR-GEMINI.md's agy command) is yours to run; orbit and emission are the weakest at 16 px. Default: builder's.
+26. (E3) The stage bar scales down under 790 px rather than docking. Default: keep.
+27. (E1) FROST light uses λWAVES' dark-grey ink, not the kit's pure black. Default: keep.
+28. (E1) A look saved with FROST's old white text reads CUSTOM until FROST is picked again (no migration; FOR 1.5.6). Default: as is.
 
 ## MERGE ORDER
 P → S → H → F → C → E (each on the merged tree; the recipe: `git merge --no-ff --no-commit it022-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → THE LOCK `--check --query gastab=0` → commit → CLOSED row → handoff line; the kit bundle carried forward after each chain that bumps it).
@@ -80,4 +85,5 @@ P → S → H → F → C → E (each on the merged tree; the recipe: `git merge
 | H | a044ec99 | 7b527754 | H1–H2 (H-BUILD.md; hints > 60: 167 → 0, tools/hints-census.mjs --check in the gate; 36 action hints; four side glyphs; labels fit at 300 px (label-fit 1 → 0); LOCK 843/0; latex-copy/camera-shift/take-in-bugs red at BASE → chain E re-aims) |
 | F | 79c67a62 | 5b059742 | F1–F2 (F-BUILD.md; kit 1.5.6-alpha.6 .row.fit + tokens; twelve windows on fit rows, no window taller, FIELD 681 → 600; tools/row-fit.mjs; LOCK 843/0; camera-shift + official-defaults-palette aaHidden red at BASE → chain E) |
 | C | f1c43fa4 | b5c7ce1d | C1–C2 (C-BUILD.md; kit 1.5.6-alpha.7 section/knobBank/meter/lamp/macroKnob + --xport-* tokens; the expanded CSB one well: TRANSPORT · MACROS 8 · FAVOURITES 8 + page · METERS; no inner scroll; collapsed bar unchanged; panel 228 → 300 px on the stage; LOCK 843/0) |
-| E | b5c7ce1d | | |
+| E | 9dc73892 | 4c0e98df | E0–E3 (E-BUILD.md; five suites green/explained; availability(control) one law; H holds the words; the MOLECULES busy mark; FROST light 8.1:1; 31 windows drawn, 167 glyphs on the sheet, ICONS-FOR-GEMINI.md; the sheet re-shot, nothing regressed; the bar scales under 790 px; the 022 laws in docs/laws; kit 1.5.6-alpha.8; LOCK 843/0 · 987/0) |
+| CLOSE | | 4c0e98df | 022 closed: six chains, kit 1.5.6-alpha.8 in .tmp/it021/kit.bundle (Josh: 021 call 12), FOR-JOSH in DATABASE, map refreshed |
