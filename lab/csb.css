@@ -172,6 +172,10 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 @media (max-width:860px) {
   #transport.mini[data-layout="csb"],#transport.mini[data-layout="csb"].tempo-open { left:calc(50% + 39px);right:auto;top:calc(env(safe-area-inset-top) + 112px);bottom:auto;transform:translateX(-50%);max-width:calc(100vw - 102px); }
 }
+/* 022 E3 · BELOW 790 px ON A DESKTOP (a phone has its own layout) the stage bar and its PLAY are scaled about the bar's centre, so the pair stays on the
+   screen down to ≈ 620 px (021 V3: PLAY clipped under 776); a transform, so the hit road, the mask and the resting box read the drawn rect */
+@media (max-width:790px) { body:not(.phone) #transport.mini[data-layout="csb"] { transform:translateX(-50%) scale(.88);transform-origin:50% 0;max-width:none; } }
+@media (max-width:730px) { body:not(.phone) #transport.mini[data-layout="csb"] { transform:translateX(-50%) scale(.8);transform-origin:50% 0;max-width:none; } }
 /* 021 V3 · THE REDUCED-MOTION LIST CLOSED (REVIEW-C §3): PLAY's hover lift and INVERT's turn arrive at their end state at once (the system's
    setting or MIR OPTIONS' motion, <html data-motion>) */
 @media (prefers-reduced-motion: reduce) { #transport[data-layout="csb"] .csb-play > .tbtn.play:hover { translate: none; } .pal-invert svg { transition: none; } }

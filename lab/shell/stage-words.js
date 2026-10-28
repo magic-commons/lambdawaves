@@ -182,7 +182,12 @@ export function createStageWords(app) {
       const m = new DOMMatrixReadOnly(getComputedStyle(e).transform), tr = e.id === 'transport', dx = tr ? 0 : m.e, dy = tr && e.dataset.place === 'free' ? 0 : m.f;
       return dx || dy ? { left: r.left - dx, right: r.right - dx, top: r.top - dy, bottom: r.bottom - dy, width: r.width, height: r.height } : r;
     };
-    const bars = () => [...racks(), app.sh.layout.docked ? null : document.getElementById('transport')].map(resting).filter(Boolean);
+    /* 022 E1 · H HOLDS THE WORDS (020 S-BUILD Q3): with the whole interface out (`ui-hidden`) the racks and the bar are not drawn and the stage widens,
+       so the words and the ESP bar keep the furniture's resting boxes AND the stage box they were last placed against — the picture under them
+       may widen, the words do not move; H again places them on the live furniture */
+    let kept = null;
+    const rest = () => { if (kept && document.body.classList.contains('ui-hidden')) return kept;
+      return (kept = { rs: [...racks(), app.sh.layout.docked ? null : document.getElementById('transport')].map(resting).filter(Boolean), sb: dom.stage.getBoundingClientRect() }); };
     function freeOf(rs, sb) {                                          // the kit's free() rule (info/layer.js), in stage px
       const m = INFO.margin, vw = innerWidth; let L = m, R = sb.width - m, T = m, B = sb.height - m;
       for (const r of rs) {
@@ -196,7 +201,7 @@ export function createStageWords(app) {
     const at = (F, h, bottom) => (bottom ? F.B - seat.pad * (F.B - F.T) - h : F.T + seat.pad * (F.B - F.T));   // a body's top edge at its seat
     const layer = createInfoLayer({ stage: dom.stage, parallax: P.get('cursorAway'), drift: P.get('cursorDrift'), follow: P.get('cursorAway'),   // the CURSOR rows (off by default): the kit's own follow · parallax · drift
       avoid: () => {
-        const rs = bars(), sb = dom.stage.getBoundingClientRect(), F = freeOf(rs, sb), h = block ? block.el.offsetHeight : 0, y = Math.max(F.T, at(F, h, seat.bottom)), x = sb.left + sb.width / 2;
+        const { rs, sb } = rest(), F = freeOf(rs, sb), h = block ? block.el.offsetHeight : 0, y = Math.max(F.T, at(F, h, seat.bottom)), x = sb.left + sb.width / 2;
         const band = (y0, y1) => ({ left: x - 1, right: x + 1, top: sb.top + y0, bottom: sb.top + y1 });
         return [...rs, band(0, y - F.m), band(y + h + F.m, sb.height)];
       } });
@@ -281,7 +286,7 @@ export function createStageWords(app) {
         clearTimeout(popHold);
         const letGo = () => { popHold = setTimeout(() => pop.classList.replace('hold', 'out'), 1200); };   // the hand let go: the held line fades from where it is
         if (hold && pop.classList.contains('hold')) { if (pop.textContent !== text) pop.textContent = text; letGo(); return true; }
-        const sb = dom.stage.getBoundingClientRect(), F = freeOf(bars(), sb);
+        const { rs, sb } = rest(), F = freeOf(rs, sb);
         pop.textContent = text; pop.classList.remove('go', 'hold', 'out');
         pop.style.left = (sb.left + (F.L + F.R) / 2) + 'px'; pop.style.top = (sb.top + Math.max(F.T, at(F, pop.offsetHeight, !seat.bottom))) + 'px';
         void pop.offsetWidth; pop.classList.add(hold ? 'hold' : 'go'); if (hold) letGo(); return true;
@@ -307,7 +312,8 @@ export function createStageWords(app) {
       /** the pop-ups' SIZE (× 15 px), apart from the formula's since iteration 007 */
       setPopScale(s) { pop.style.setProperty('--lw-pop-size', String(s)); },
       /** the free stage (stage px { L, R, T, B, m }) and the formula block's rect in stage px or null: where the ESP bar may sit and what it yields to (018 B7) */
-      free: () => freeOf(bars(), dom.stage.getBoundingClientRect()),
+      free: () => { const { rs, sb } = rest(), F = freeOf(rs, sb), now = dom.stage.getBoundingClientRect(), dx = sb.left - now.left, dy = sb.top - now.top;   // in today's stage px
+        return { ...F, L: F.L + dx, R: F.R + dx, T: F.T + dy, B: F.B + dy }; },
       blockRect() { if (!on || !block) return null; const r = block.el.getBoundingClientRect(), sb = dom.stage.getBoundingClientRect();
         return r.width ? { left: r.left - sb.left, right: r.right - sb.left, top: r.top - sb.top, bottom: r.bottom - sb.top } : null; },
       get on() { return on; }, get labelsOn() { return labelsOn; }, get md() { return shown; }, get formula() { return formula; }, get banner() { return banner; },

@@ -157,6 +157,8 @@ export function createMolecularSession(api = {}) {
     /** the frame loop's one call: the boundary a second product in the same frame is measured against */
     tick() { frame++; return frame; },
     get selected() { return selected; },
+    /** 022 E1: the selected model's volume is on the field (its product published, or its card) — the end of the switch's busy mark */
+    get drawn() { return !!selected && !!mol && (carded === selected || (last.model === selected && last.hash === mol.hash)); },
     get reason() { return reason; },
     get molecule() { return mol; },
     get solution() { return solution; },

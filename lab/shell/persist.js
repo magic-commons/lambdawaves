@@ -2,6 +2,7 @@
  * literal — and restore() — ONE ordered program — whole, never split by card.  createPersist(app) runs at §24's seat: the cards' handles come
  * from app (boot() fills each slot after its declaration), the controller's and SPECTRUM's are read live at use (app.ctl.x, app.w.spectrum).
  * serialize / restore / save / copyJSON are registered on app.sh for the modules that read them (the links, the history, STATE). */
+import { availability } from './settings.js';   // 022 E1 · AVAILABILITY IS ONE LAW
 import { TIER } from '../tier.js';
 import { VIEW, VIEW_NAMES, STYLE, STYLE_NAMES, quatFromYawPitch, waveView, drawStyle } from '../field.js';
 import { deviceQuality } from '../first-run.js';
@@ -326,7 +327,7 @@ export function createPersist(app) {
         }
         if (pr.modulation === undefined) app.state.modHost.clock.applyAll(true);
         { const sp = pr.space === 'r' ? 'x' : pr.space;   // iteration 007 (MIR check, files B1): projects saved after an old link carry 'r' for position space
-          if (sp && sp !== app.state.space && !getHamiltonian().noMomentum && !sturm.P) { app.state.space = sp; if (ui.spaceSeg) ui.spaceSeg.set(app.state.space); } }
+          if (sp && sp !== app.state.space && (sp !== 'p' || availability('wave.space.p', app).on)) {   /* 022 E1: availability, the one law */ app.state.space = sp; if (ui.spaceSeg) ui.spaceSeg.set(app.state.space); } }
         if (pr.palette && app.state.palette) {
           if (Array.isArray(pr.palette.stops)) app.state.palette.load(pr.palette.stops, pr.palette.selected, pr.paletteId); else if (pr.paletteId) app.state.palette.select(pr.paletteId);   // wave 127: the file's own stops under its name — one push, not a catalogue read then a load
           app.state.palette.setOn(!!pr.palette.on, true); if (mat.view !== undefined) ui.viewSeg.set(VIEW_NAMES[mat.view]);   // iteration 016 P6: the file's VIEW stands under PALETTE ON too (setOn's keepView)

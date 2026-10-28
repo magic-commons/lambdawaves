@@ -7,11 +7,11 @@ import { writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { open } from './gate/gatekit.mjs';
 
-const TAG = process.argv[2] || 'shot', DIR = 'research/iteration-021/V-shots';
+const TAG = process.argv[2] || 'shot', DIR = process.env.DIR || 'research/iteration-021/V-shots';   // 022 E3: DIR=research/iteration-022/E-shots/sheet
 const ALL = ['stage-1600', 'icons-1600', 'options-1280', 'keyboard-1280', 'nodes-1280', 'stage-1366', 'stage-1280', 'stage-1024', 'stage-800', 'phone'];
 const SCENES = process.argv[3] ? process.argv[3].split(',') : ALL;
 const SIZE = { 'stage-1600': [1600, 1000], 'icons-1600': [1600, 1000], 'options-1280': [1280, 720], 'keyboard-1280': [1280, 720], 'nodes-1280': [1280, 720],
-  'stage-1366': [1366, 768], 'stage-1280': [1280, 720], 'stage-1024': [1024, 768], 'stage-800': [800, 600], phone: [390, 844] };
+  'stage-1366': [1366, 768], 'stage-1280': [1280, 720], 'stage-1024': [1024, 768], 'stage-800': [800, 600], 'stage-760': [760, 600], 'stage-720': [720, 600], phone: [390, 844] };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const jpg = (png, name, crop) => { const p = `.tmp/v-${name}.png`; writeFileSync(p, Buffer.from(png, 'base64'));
   execFileSync('python3', ['-I', '-c', `import sys
@@ -53,6 +53,12 @@ for (const scene of SCENES) {
       const fr = await g.ev(`const b = document.querySelector('.mir-window-picker').getBoundingClientRect(); return [b.left - 4, b.top - 4, b.right + 4, b.bottom + 4].map(Math.round);`);
       info.finder = await g.ev(CENSUS); jpg(await g.snap(), scene + '-finder', fr);
       await run('windowPicker'); await wait(500);
+      /* 022 E2: the menus' rows wear their actions' glyphs — VIEW open, CAMERA's submenu out */
+      await g.ev(`__LW.layout.menu.open(); const b = [...document.querySelectorAll('#menubar .mb-btn')].find((x) => x.dataset.menu === 'VIEW'); b.click(); await new Promise((r) => setTimeout(r, 300));
+        const it = [...b.parentElement.querySelectorAll('.mb-item')].find((x) => /CAMERA/.test(x.textContent)); if (it) it.click(); return 1;`); await wait(600);
+      const mr = await g.ev(`const ls = [...document.querySelectorAll('#menubar .mb-list, #menubar .mb-sub-list')].filter((l) => l.offsetWidth && !l.hidden).map((l) => l.getBoundingClientRect());
+        return [Math.min(...ls.map((b) => b.left)) - 6, Math.min(...ls.map((b) => b.top)) - 40, Math.max(...ls.map((b) => b.right)) + 6, Math.max(...ls.map((b) => b.bottom)) + 6].map(Math.round);`);
+      jpg(await g.snap(), scene + '-menu', mr); await g.ev(`__LW.layout.menu.close(); return 1;`); await wait(300);
       await run('menu'); await wait(1800); info.picker = await g.ev(CENSUS); jpg(await g.snap(), scene + '-picker');
       await run('menu'); await wait(900);
       await g.ev(`__LW.nodes.setHas(true); for (const t of ['grain', 'blur', 'hue', 'vignette', 'levels']) __LW.nodes.add(t); return 1;`);

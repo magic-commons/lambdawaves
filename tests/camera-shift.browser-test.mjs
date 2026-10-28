@@ -128,7 +128,7 @@ try {
   /* ── 4 · THE PANEL, THE SCOPE, THE LINK (K3) ── */
   await check('CAMERA\'s PAN X / PAN Y follow every hand and drive the shift; PAN HOME centres it; neither is a history row', `
     const LW = __LW, kx = document.querySelector('[data-param="observer.panx"]'), ky = document.querySelector('[data-param="observer.pany"]');
-    const home = [...document.querySelectorAll('button, [role="button"]')].find((b) => /PAN HOME/.test(b.textContent));
+    const home = [...document.querySelectorAll('.dev[data-id="camera"] :is(button, [role="button"])')].find((b) => /PAN HOME/.test(b.textContent));   /* 022 E0: CAMERA's own verb (MAPPING's rows read PAN HOME too since 022 H1) */
     LW.camera.reset(); const cursor = LW.history.cursor;
     LW.camera.setShift(0.25, -0.5); await new Promise((r) => setTimeout(r, 120));   /* C1: the kit panel reads the port on the frame after the notice */
     const shown = [kx.querySelector('.k-val').textContent, ky.querySelector('.k-val').textContent];

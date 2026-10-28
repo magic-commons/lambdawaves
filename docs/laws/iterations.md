@@ -2,6 +2,10 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 022
+
+THE LAWS OF 022 (`research/iteration-022/PLAN.md`, `P/S/H/F/C/E-BUILD.md`), each seated in its subject file: ONE MENU DOOR, A HINT IS ONE LINE, A LABEL IS NEVER WIDER THAN ITS CONTROL, A ROW FITS, THE SURFACE IS A SURFACE, AVAILABILITY IS ONE LAW (shell.md); A POPUP WEARS THE SKIN, RELIEF IS TIGHT, THE MENU'S INK, THE ICON TABLE IS λWAVES' OWN (kit.md); H holds the stage words (stage-words.md); the switch wears the busy mark (chemistry.md).
+
 ## The laws of 021
 
 THE LAWS OF 021 (`research/iteration-021/PLAN.md`, `K/G/R/I/V/D-BUILD.md`), each seated in its subject file: THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS (kit.md); ONE STORE (scopes-and-records.md), ONE REGISTRY OF ACTIONS (shell.md), ONE TIME (modulation-and-timeline.md), ONE MODE (chemistry.md); STATE-SCOPES.md is generated, never hand-written; NO MODULE IMPORTS FROM rack.js and no app cycle (architecture.md); A FLAG, A ROUTE AND A LANE NAME A PERMANENT ID: NODES ids are monotonic and never reused, a dormant route never wakes on another node (nodes.md); the icon table (shell.md); the bar under any float (control-surface.md).

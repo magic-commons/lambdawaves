@@ -5,6 +5,7 @@
 import { infoKnown } from './stage-words.js'; import { readSession } from '../mir/core/session.js';
 import { ASK_ENABLED } from '../ask.js';   // iteration 011 Q6: the one flag (ASK hidden: the stored askOk / askUrl carried, never written)
 import { RETIRED } from '../settings-store.js';   // 021 R4: the keys the blob drops (the carry list is gone)
+import { getHamiltonian } from '../hamiltonian.js';   // 022 E1: availability reads the operator in force
 const SESSION_KEY = 'lambdawaves.q0.session';   // main.js createSession's key (settings-store.js FAMILIES)
 /* 021 R5 · ONE MODE: every window's mode, one seat beside KIND — 'hydrogen' (hidden under MOLECULES), 'molecules' (hidden under HYDROGEN),
    absent = 'both' (shown in either).  windows/molecules.js `moleculeMode` iterates it; the FINDER greys by it.  The atomic readers and
@@ -13,6 +14,23 @@ const SESSION_KEY = 'lambdawaves.q0.session';   // main.js createSession's key (
 export const MODE = Object.freeze({ spectrum: 'hydrogen', equalizer: 'hydrogen', staticfield: 'hydrogen', emission: 'hydrogen', shadow: 'hydrogen', orbit: 'hydrogen',
   vortex: 'hydrogen', slice: 'hydrogen', ladder: 'hydrogen', calculus: 'hydrogen', central: 'hydrogen', separable: 'hydrogen', atoms: 'hydrogen',
   wigner: 'hydrogen', radiation: 'hydrogen', chem: 'molecules', lattice: 'both', bloch: 'both' });
+/* 022 E1 · AVAILABILITY IS ONE LAW: availability(control, app) → { on, why, hide } — whether a control stands, and why not, read in ONE place
+   from the mode (a molecule holds the field), the operator in force (`noMomentum`), the scale (STURMIAN) and the molecule-only rows.  `on`
+   false greys the control in its seat with `why` before its hint (016 V1: greyed, never moved); `hide` takes a molecule's row out under
+   hydrogen (018 B1).  WAVE's styleSync applies it (windows/material.js `ui.availSync`); the operator, the scale, the mode, a restore and the
+   facade ask it, never a rule of their own */
+const MOLECULE_ROWS = new Set(['wave.style.balls', 'wave.style.sticks', 'wave.style.esp', 'wave.esp', 'info.espBar']);
+const ON = Object.freeze({ on: true, why: '', hide: false });
+export function availability(control, app) {
+  const mol = !!(app.state.chem && app.state.chem.on);
+  if (MOLECULE_ROWS.has(control)) return mol ? ON : { on: false, why: 'MOLECULES only', hide: true };
+  if (control === 'wave.space.p') {
+    const H = getHamiltonian(), why = mol ? 'off under MOLECULES' : app.sturm && app.sturm.P ? 'off under STURMIAN' : H.noMomentum ? 'off under ' + H.label.split('  ')[0] : '';
+    return why ? { on: false, why, hide: false } : ON;
+  }
+  if (control === 'wave.view.imag') return mol && !(app.ctl.field && app.ctl.field.moleculeComplex) ? { on: false, why: 'a real volume: Im ψ is 0', hide: false } : ON;
+  return ON;
+}
 
 export function createSettings(app) {
   const { ui, mat, settingsStore, useCompactDefaults, FIRST_RUN, appleDevice } = app; const { readSettings } = app.sh;

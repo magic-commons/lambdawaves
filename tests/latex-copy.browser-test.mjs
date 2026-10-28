@@ -1,4 +1,4 @@
-// THE COPY (0.3.3 · wave 135): SPECTRUM's ⧉ and EDIT › COPY the state as LaTeX, in the real app, on WAVE DANCER.
+// THE COPY (0.3.3 · wave 135): SPECTRUM's ⧉ and EDIT › COPY › LaTeX, in the real app, on WAVE DANCER.
 // The head button is found where the lab's other ⧉ sits, pressed by the driver's own pointer at a centre elementFromPoint
 // says is the button; what it copies is judged against Josh's own sentence in the demo's notebook, the EDIT row must copy
 // the same text, the text must render under KaTeX in the notebook with no .katex-error, and an empty register copies nothing.
@@ -19,7 +19,11 @@ try {
       const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === menu);
       if (!btn) return { found: false, why: 'no menu ' + menu };
       btn.click();
-      const it = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.startsWith(label));
+      /* 022 E0: a row is named by its path ('COPY › LaTeX', 021 I3's submenus): each submenu row pressed, the last one returned */
+      let list = btn.parentElement.querySelector('.mb-list'), it = null; const parts = label.split(' › ');
+      for (let i = 0; i < parts.length && list; i++) { it = [...list.querySelectorAll(':scope > .mb-item')].find((x) => x.querySelector('.mb-lbl').textContent.startsWith(parts[i]));
+        if (!it || i === parts.length - 1) break; if (it.getAttribute('aria-expanded') !== 'true') it.click(); await new Promise((q) => setTimeout(q, 30));
+        list = [...document.querySelectorAll('#menubar .mb-sub-list')].find((l) => l.mbRow === it); it = null; }
       if (!it) { btn.click(); return { found: false, why: 'no row ' + label }; }
       const disabled = it.disabled, title = it.dataset.help || it.title;
       if (!disabled) it.click(); else btn.click();
@@ -74,15 +78,15 @@ try {
   console.log('PASS a real press on the A set copies line 1 = the notebook\'s sentence, line 2 = ψ with 0.50 on each term; SPECTRUM flashes · COPIED and says "4 states as LaTeX"');
   console.log(`     copied (A at t = ${gotA.t}): ` + JSON.stringify(gotA.clip[0]));
 
-  /* ── 4 · EDIT › COPY the state as LaTeX writes the same text through the same road ── */
+  /* ── 4 · EDIT › COPY › LaTeX writes the same text through the same road ── */
   const rowA = await g.ev(`__clip.length = 0; await new Promise((r) => setTimeout(r, 950));
-    const r = await __row('EDIT', 'COPY the state as LaTeX'); for (let i = 0; i < 40 && !__clip.length; i++) await new Promise((q) => setTimeout(q, 25));
+    const r = await __row('EDIT', 'COPY › LaTeX'); for (let i = 0; i < 40 && !__clip.length; i++) await new Promise((q) => setTimeout(q, 25));
     return { r, clip: __clip.slice(), copied: document.querySelector('.dev[data-id="spectrum"]').classList.contains('copied') };`);
   assert.equal(rowA.r.found, true); assert.equal(rowA.r.disabled, false); assert.equal(rowA.r.closed, true);
   assert.match(rowA.r.title, /chemistry order/);
   assert.deepEqual(rowA.clip, gotA.clip);
   assert.equal(rowA.copied, true);
-  console.log('PASS EDIT › COPY the state as LaTeX copies the identical text and flashes the same `copied`');
+  console.log('PASS EDIT › COPY › LaTeX copies the identical text and flashes the same `copied`');
 
   /* ── 4b · the phases are the LIVE ones: at t = 16π/3 the n = 4 terms have turned −(E₄ − E₂)t = −(3/32)(16π/3) = −π/2
           against the n = 2 terms (E_n = −1/(2n²), every RATE 1 in WAVE DANCER, no field), and the amplitudes have not moved ── */
@@ -125,7 +129,7 @@ try {
   assert.equal(tapE.ok, 1, JSON.stringify(tapE));
   const gotE = await g.ev(`await new Promise((r) => setTimeout(r, 200)); const card = document.querySelector('.dev[data-id="spectrum"]');
     const status = card.querySelector('.dev-stat').textContent, copied = card.classList.contains('copied');
-    const r = await __row('EDIT', 'COPY the state as LaTeX'); await new Promise((q) => setTimeout(q, 100));
+    const r = await __row('EDIT', 'COPY › LaTeX'); await new Promise((q) => setTimeout(q, 100));
     return { clip: __clip.slice(), status, copied, row: r, errs: __e.slice() };`);
   assert.deepEqual(gotE.clip, []);
   assert.equal(gotE.status, 'nothing to copy — the register is empty');
@@ -139,11 +143,11 @@ try {
   const mol = await g.ev(`__LW.loadPreset('1s+2pz'); await __LW.chem.solve('H2O'); __LW.chem.setOn(true); await __LW.settle();
     const card = document.querySelector('.dev[data-id="spectrum"]');
     const hidden = card.hidden, folded = card.classList.contains('folded'); __clip.length = 0;
-    const r = await __row('EDIT', 'COPY the state as LaTeX'); for (let i = 0; i < 40 && !__clip.length; i++) await new Promise((q) => setTimeout(q, 25));
+    const r = await __row('EDIT', 'COPY › LaTeX'); for (let i = 0; i < 40 && !__clip.length; i++) await new Promise((q) => setTimeout(q, 25));
     const page = __clip.slice(), status = card.querySelector('.dev-stat').textContent;
     __LW.chem.setOn(false); await __LW.settle(); __clip.length = 0;
     const unfolded = !card.hidden && !card.classList.contains('folded');
-    const r2 = await __row('EDIT', 'COPY the state as LaTeX'); for (let i = 0; i < 40 && !__clip.length; i++) await new Promise((q) => setTimeout(q, 25));
+    const r2 = await __row('EDIT', 'COPY › LaTeX'); for (let i = 0; i < 40 && !__clip.length; i++) await new Promise((q) => setTimeout(q, 25));
     return { hidden, folded, disabled: r.disabled, page, status, unfolded, enabled: !r2.disabled, clip: __clip.slice(), errs: __e.slice() };`);
   assert.equal(mol.hidden, true); assert.equal(mol.disabled, false);
   assert.equal(mol.page.length, 1, JSON.stringify(mol));

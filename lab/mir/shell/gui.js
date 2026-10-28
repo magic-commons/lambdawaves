@@ -147,8 +147,9 @@ export function lookSchema({ tier = () => null } = {}) {
        under glass BASINS' unsampled seat, the pure ladder in the mode's polarity (white in dark, black in light); on a
        SOLID pane the pane's lightness; on a TINTED pane the house ladder.  No sampling: BASINS' sampler is the app's.
        SAMPLED leaves the ink to the app: no data-text at all, so an app's own sampler (BASINS' adaptive-ink.js, which
-       writes its own w | k ink on each label) decides; the GUI window offers it only to an app that says it has one */
-    { key: 'text', type: 'enum', values: ['theme', 'light', 'dark', 'sampled'], default: 'light', apply: [{ on: 'body', attr: 'data-text',
+       writes its own w | k ink on each label) decides; the GUI window offers it only to an app that says it has one.  Home: AUTO since
+       1.5.6-alpha.8 (FROST's TEXT, the home look's: white in dark as before, black in light) */
+    { key: 'text', type: 'enum', values: ['theme', 'light', 'dark', 'sampled'], default: 'theme', apply: [{ on: 'body', attr: 'data-text',
       map: (v, s, e) => (v === 'sampled' ? null : v !== 'theme' ? v : autoInk(s, e.theme)) }] },
     { key: 'relief', type: 'enum', values: ['default', 'flat'], default: 'default', apply: [
       { on: 'html', prop: '--relief-raise', map: (v) => (v === 'flat' ? ZERO_SHADOW : null) },

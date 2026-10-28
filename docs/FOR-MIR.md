@@ -65,9 +65,12 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
   `--xport-section` `--xport-grid` 44 `--xport-led` `--xport-led-off` `--lamp` `--peak`. Left for 1.5.6: the AUDIO editor's SVG meter (`buildAudioMeter`,
   drawn in the curve's own coordinates) is not the kit meter; the bank's reorder for macros (the window's rows reorder them); a 44-px finger on the
   macro knob's grip and depth seat (22 × 24 drawn, no outset yet).
-- **FROST in LIGHT writes white ink on every pane** (022 S, not built): the recipe's White Text holds in LIGHT, so over a light stage FROST's
-  windows read 1.05 : 1 (the kit's own themes.browser label table says the same); the popups are fixed (above), the panes wait for a ruling
-  (TEXT AUTO in LIGHT, or a darker veil).
+- **BUILT 1.5.6-alpha.8 · EVERY DISABLED CONTROL KEEPS ITS HINT** (022 E1, `css/skin.css`, `kit.js`, `shell/menubar.js`; kit d5d8149, the clone road;
+  017 W's last case): a disabled knob, fader, switch or trigger takes the pointer on its root (its hint shows, `cursor: not-allowed`) and refuses the
+  press — its parts take none, a disabled knob does not reset, `knobMenu` opens nothing on it; a disabled seg button kept its hint since 1.5.0-alpha.28.
+- **BUILT 1.5.6-alpha.8 · FROST is TEXT AUTO** (022 E1 · call 14, `shell/themes.js`, `shell/gui.js` home TEXT AUTO): white in dark as before, black in
+  light (the kit's tile table: FROST light 8.06–8.11 : 1, was 1.05); a look stored with FROST's old TEXT LIGHT reads CUSTOM until FROST is picked again.
+  λWAVES keeps FROST dark's white ladder through its own AUTO map (`lab/look.js` HOME_MAPS.text).
 - **A `'midi'` modulation SOURCE kind** (021 I2; not built): midi.js hands every CC as 0…1 (`sources()`, `source(key, v)`), but the model
   (`modulation/mod.js`) knows lfo · env · audio only; a `kind: 'midi'` source beside audio (its rack face, its serialisation) would let a
   learned knob drive any dial as an LFO does. λWAVES routes notes and CCs to ACTIONS today, not to dials.

@@ -188,7 +188,7 @@ export function knobAct(knob, verb) {
 }
 /** knobMenu(knob, { x, y, appRows?, open?, onClose? }) → the contextMenu; appRows(id, root) → entries; open: 'routes' opens that submenu */
 export function knobMenu(knob, { x, y, appRows = null, open = '', onClose = null } = {}) {
-  const k = knobOf(knob); if (!k) return null;
+  const k = knobOf(knob); if (!k || k.root.classList.contains('disabled')) return null;   // 1.5.6-alpha.8: a greyed knob has its hint, never its menu
   const id = k.root.dataset.param || '', act = (v) => () => knobAct(k, v);
   const entries = [['RESET', act('reset'), false, 'Back to the default; the routes stay', { id: 'reset' }], ['COPY', act('copy'), false, 'Copy the value', { id: 'copy' }],
     ['PASTE', act('paste'), knobCopied === null, 'Paste the copied value', { id: 'paste' }], ['FINE', act('fine'), false, 'Half the drag gain while on', { id: 'fine', checked: k.fine() }]];
