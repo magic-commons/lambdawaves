@@ -429,7 +429,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
   /* ── build on first open ── */
   function build(id) {
     const w = reg.get(id); if (!w || w.dev) return w;
-    const dev = device({ id, eyebrow: w.spec.title, status: w.spec.status || '', loadingMark: w.spec.loadingMark,
+    const dev = device({ id, eyebrow: w.spec.title, status: w.spec.status || '', loadingMark: w.spec.loadingMark, glyph: w.spec.glyph,
       onPower: (live) => { call(w, 'onPower', live); save(); } });
     w.dev = dev;
     dev.root.dataset.home = w.spec.side; dev.root.classList.add('closed');
@@ -1066,12 +1066,12 @@ export function createRack({ host = globalThis.document && document.body, sides 
 
   /* ── the WINDOW menu, as data for createMenubar({ menus }) ── */
   /** windowMenu({ rack }) — one row per registered window: ↑ raises an open one, ⊕ opens a closed one; `rack: true`
-   *  adds a separator and HIDE / SHOW the rack.  A row is [label, run, disabled, hint] (shell/menubar.js). */
+   *  adds a separator and HIDE / SHOW the rack.  A row is [label, run, disabled, hint, { icon }] (shell/menubar.js; the window's glyph, 1.5.6-alpha.3). */
   function windowMenu({ rack: rackRow = false, rackKey = '', keyOf = null } = {}) {
     /* a card's key is the key table's chord for its `action` (keyOf(action) → text: createApp passes keys.menuKey), never a typed string (W19 K6) */
     const keyText = (spec) => (spec.action && keyOf ? keyOf(spec.action) || '' : '');
     const rows = [...reg.values()].filter((w) => !w.spec.card).map((w) => [(isOpen(w.spec.id) ? '↑  ' : '⊕  ') + w.spec.title + (keyText(w.spec) ? '\t' + keyText(w.spec) : ''),
-      () => raise(w.spec.id), false, w.spec.hint || (isOpen(w.spec.id) ? 'bring it to the top of its rack' : 'open it')]);
+      () => raise(w.spec.id), false, w.spec.hint || (isOpen(w.spec.id) ? 'bring it to the top of its rack' : 'open it'), w.spec.glyph ? { icon: w.spec.glyph } : undefined]);
     if (rackRow) rows.push(null, ['HIDE / SHOW the rack' + (rackKey ? '\t' + rackKey : ''), () => setHidden(!isHidden())]);
     return rows;
   }
@@ -1087,6 +1087,7 @@ export function createRack({ host = globalThis.document && document.body, sides 
     const node = spec.el && (spec.el.nodeType === 1 ? spec.el : spec.el.root);
     const inSide = node && isRack(node.parentElement) ? node.parentElement.dataset.side : undefined;
     const w = { spec: { title: spec.id.toUpperCase(), ...spec, side: sideOf(spec.side ?? inSide ?? 'right') }, dev: null, api: null, present: null };
+    if (!w.spec.glyph && node && node.dataset.glyph) w.spec.glyph = node.dataset.glyph;   // 1.5.6-alpha.3: device({ glyph })'s name when none is passed
     reg.set(spec.id, w);
     if (spec.el) { adopt(w, spec.el); return spec.id; }                 // already built: taken over, never rebuilt
     if (spec.eager) build(spec.id);                                  // built now, opened by the layout or its `open`
@@ -1125,9 +1126,10 @@ export function createRack({ host = globalThis.document && document.body, sides 
     get built() { return built; },
     get registered() { return [...reg.keys()]; },
     isBuilt: (id) => !!(reg.get(id) && reg.get(id).dev),
-    /** windows() — every registered window, in registration order: [{ id, title, side, open, built, floating, folded }] */
+    /** windows() — every registered window, in registration order: [{ id, title, side, open, built, floating, folded, hidden, glyph }];
+     *  `hidden` (1.5.6-alpha.3): its card is `[hidden]` (an app's mode or a legacy window) — open or not, nobody sees it */
     windows: () => [...reg.values()].map((w) => ({ id: w.spec.id, card: !!w.spec.card, title: w.spec.title, side: (w.dev && w.dev.root.parentElement && w.dev.root.parentElement.dataset.side) || w.spec.side, open: isOpen(w.spec.id), built: !!w.dev,
-      floating: !!(w.dev && w.dev.root.classList.contains('floating')), folded: !!(w.dev && w.dev.root.classList.contains('folded')) })),
+      floating: !!(w.dev && w.dev.root.classList.contains('floating')), folded: !!(w.dev && w.dev.root.classList.contains('folded')), hidden: !!(w.dev && w.dev.root.hidden), glyph: w.spec.glyph || '' })),
     /** keepClear() — the rects a new floating window should not land on: each rack showing a window, and the transport */
     keepClear() {
       const out = [];
@@ -1170,6 +1172,6 @@ export function createRack({ host = globalThis.document && document.body, sides 
   /* BASINS installs its scrollbars with the rack; they follow the page's one dock span through a rack's slide */
   let bars = scrollbar ? createRackScrollbars({ host, racks: Object.values(racks), span: api.span(), view }) : null;
   /* THE SCROLL PILL (1.5.0-alpha.25): every rack, whichever scrollbar it runs (shell/rack-scrollbar.js createRackPills) */
-  createRackPills({ host, racks: Object.values(racks), view });
+  createRackPills({ host, racks: Object.values(racks), view, glyphOf: (id) => (reg.get(id) && reg.get(id).spec.glyph) || '' });
   return api;
 }

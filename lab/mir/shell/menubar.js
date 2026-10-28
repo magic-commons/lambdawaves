@@ -32,7 +32,7 @@
  *                                    it opens inline under its row (an accordion), never beside it
  *   opts.checked: true | false       a CHECK row (role menuitemcheckbox, aria-checked, a ✓ while true)
  *   opts.radio: 'group'              with opts.checked, a RADIO row of that group (role menuitemradio, a • on the chosen one)
- *   opts.icon: 'name'                a kit glyph (glyph.js) before the label; an app's own drawing waits for registerGlyphs
+ *   opts.icon: 'name'                a glyph (glyph.js) before the label: a kit name or an app's own (registerGlyphs, 1.5.6-alpha.3)
  *
  * 1.5.4 · LANGUAGES.  The group names and every item label go through t() (core/i18n.js); the key after the TAB
  *   never does.  A group is found by `data-menu` (its English name), never by the text it shows.  On a language

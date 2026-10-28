@@ -3,7 +3,7 @@
  * card: the chain as a column, no pan, no drag).  STAGE IN → the nodes → STAGE OUT; THE DEFAULT GRAPH IS EMPTY and says so in one faint line.
  * The + menu is ONE list: a search line (type to filter, Enter adds the first match, Escape closes), the types by class with a hairline
  * divider carrying the class's icon between classes (no word), each item its icon + its name + its cost mark (HEAVY as 019), then a divider
- * and the GRAPHS.  Icons: lab/img/nodes-icons.svg (`<use href="img/nodes-icons.svg#n-<type>">`, currentColor).
+ * and the GRAPHS.  Icons: the one table's `node<Type>` glyphs (lab/icons.js, 021 V2; the sprite retired).
  * 020 X1 THE GROUND (the window only; the rack column never zooms or selects): ctrl/⌘ + wheel and a pinch zoom 0.5–2× about the pointer
  * (`scale` on the plane with the pan; the wires, the ports and the dot grid follow), FIT (the button beside +, Home) fits the cards with a
  * 24 px margin; a click on a title selects (shift adds), shift + drag on the empty ground draws a box (a plain drag still pans), Ctrl-A all,
@@ -19,10 +19,10 @@
  * 020 X4 FADE AND MASK: a foot fold on every card but a LAYER — FADE · MASK · SOFT (MIR controls; FADE and SOFT are modulation targets); the
  * fold is lit while either is off home; the cost mark follows the compiler (a masked LEVELS reads ···).
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
-import { el, svgEl, label, ariaLabel, chip } from './mir/kit.js';
+import { el, label, ariaLabel, chip } from './mir/kit.js';
 import { nodeBody, FOOT } from './node-types.js';
 import { transfer, ownRun } from './nodes-compile.js';
-import { frame } from './mir/core/frame.js';
+import { frame } from './mir/core/frame.js'; import { glyphEl } from './mir/glyph.js'; import { nodeGlyph } from './icons.js';
 /** keysAt(el) — the acts of the graph whose ground `el` is (the `nodes.*` rows run them while it has the focus), or null */
 const GROUNDS = new WeakMap(); export const keysAt = (n) => (n && GROUNDS.get(n)) || null;
 
@@ -36,9 +36,8 @@ const markOf = (q, T) => MARK[T.cls !== 'layer' && ownRun(q, T) ? 'prim' : T.cls
 const NS = 'http://www.w3.org/2000/svg';
 const hueAt = (h) => [Math.abs(h * 6 - 3) - 1, 2 - Math.abs(h * 6 - 2), 2 - Math.abs(h * 6 - 4)].map((x) => Math.min(1, Math.max(0, x)));
 const ZOOM = [0.5, 2], clampZ = (z) => Math.min(ZOOM[1], Math.max(ZOOM[0], z));
-/** one icon of the sprite, first or last in `parent` */
-const icon = (parent, name, first) => { const s = svgEl('svg', 'nodes-ico'); s.setAttribute('viewBox', '0 0 16 16'); s.setAttribute('aria-hidden', 'true');
-  svgEl('use', null, s).setAttribute('href', 'img/nodes-icons.svg#n-' + name); if (first) parent.prepend(s); else parent.appendChild(s); return s; };
+/** a node type's glyph (021 V2: the one table, lab/icons.js `node<Type>` — the sprite retired), first or last in `parent` */
+const icon = (parent, name, first) => { const s = glyphEl(nodeGlyph(name), 'nodes-ico', 14); if (!s) return null; if (first) parent.prepend(s); else parent.appendChild(s); return s; };
 
 /** a press-and-drag on `handle`: start() → the base, move(base, dx, dy), end() — the pointer captured, a cancel ends it too */
 const grab = (handle, ok, start, move, end) => handle.addEventListener('pointerdown', (e) => {

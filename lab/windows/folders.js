@@ -9,6 +9,6 @@ export function createFolders(app) {
   const wFolders = device({ id: 'projects', eyebrow: 'FOLDERS', status: 'PROJECTS' });
   const foldersView = layout.projects ? layout.projects.folders.mountGallery(wFolders.body, { pageSize: 8 }) : null;
   (rackL || rack).prepend(wFolders.root);
-  rk.register({ id: 'projects', el: wFolders, side: 'left', closed: true, title: 'FOLDERS', glyph: 'folder', hint: 'your projects and the DEMOS',
+  rk.register({ id: 'projects', el: wFolders, side: 'left', closed: true, title: 'FOLDERS', glyph: 'folders', hint: 'your projects and the DEMOS',
     onOpen: () => { if (foldersView) { layout.projects.demosFirst(foldersView); foldersView.paint(); } } });   // iteration 012 M1: the demos when ROOT holds nothing of the reader's
 }

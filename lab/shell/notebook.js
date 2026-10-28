@@ -3,7 +3,7 @@
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
 import { TIER } from '../tier.js'; import { BUILD_LINE } from '../rack.js'; import { el } from '../mir/kit.js'; import { createMenubar } from '../mir/shell/menubar.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle } from '../field.js'; import { getZ } from '../hamiltonian.js';
-import { paintedRect } from '../occlusion.js';
+import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js';
 import { MODE } from './settings.js';   // 021 R5: ONE MODE (the FINDER's greys)
@@ -74,7 +74,7 @@ export function createNotebook(app) {
       const A = app.sh.ACTIONS, keyFor = (id) => app.sh.kt.keyText(id);
       /** item(id, text, opts) — a row for an action: its key after the TAB, a toggle checked from get(), `args` run with arguments */
       const item = (id, text, o = {}) => { const a = A.get(id); if (!a) return null; const m = !o.args && app.sh.kt.table.menuItem(id, text), k = o.args ? '' : keyFor(id), on = o.on !== undefined ? o.on() : a.kind === 'toggle' && a.get ? !!a.get() : undefined;
-        return [(text || a.label) + (k && k !== '—' ? '\t' + k : ''), m ? m[1] : () => A.run(id, o.args), o.dis || (m ? m[2] : null), o.hint || a.hint, { ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(o.icon ? { icon: o.icon } : {}) }]; };
+        return [(text || a.label) + (k && k !== '—' ? '\t' + k : ''), m ? m[1] : () => A.run(id, o.args), o.dis || (m ? m[2] : null), o.hint || a.hint || a.label, { ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(o.icon ? { icon: o.icon } : {}) }]; };
       const sub = (text, entries, icon) => [text, entries, null, '', { sub: true, ...(icon ? { icon } : {}) }];
       const radio = (id, group, choices, cur) => choices.map(([v, w]) => item(id, w, { args: { id: v }, radio: group, on: () => cur() === v }));
       const reveal = A.reveal, H = () => app.sh.historyApi, wins = () => [...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')];
@@ -111,11 +111,11 @@ export function createNotebook(app) {
           sub('RATE', () => [item('csb.rate.up', 'RATE ×1.25'), item('csb.rate.down', 'RATE ÷1.25')]), sub('TEMPO', () => [item('csb.tempo.up', 'TEMPO +1 BPM'), item('csb.tempo.down', 'TEMPO −1 BPM')])],
         WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; SHIFT-click queues several; the ones this mode hides are greyed', icon: 'search' }), null,
           sub('RACKS', () => [item('rack', 'SHOW THE RACK'), item('folds', A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'MINIMIZE ALL', { on: () => undefined }), item('dock', 'DOCK THE CONTROL SURFACE')]),
-          sub('TOOLS', () => { queueMicrotask(tagIcons); return [tool('menu', 'PICKER'), tool('modulation', 'MODULATION'), tool('timeline', 'TIMELINE', null, 'lanes'), tool('nodes', 'NODES', null, 'curves'), tool('notebook', 'NOTEBOOK'), tool('folders', 'FOLDERS'), item('history', 'HISTORY'), tool('help', 'KEYBOARD')]; }), null,
+          sub('TOOLS', () => [tool('menu', 'PICKER', null, 'library'), tool('modulation', 'MODULATION', null, 'modulation'), tool('timeline', 'TIMELINE', null, 'lanes'), tool('nodes', 'NODES', null, 'nodes'), tool('notebook', 'NOTEBOOK', null, 'notebook'), tool('folders', 'FOLDERS', null, 'folders'), item('history', 'HISTORY', { icon: 'history' }), tool('help', 'KEYBOARD', null, 'keyboard')]), null,
           /* 018 E6 · one submenu per KIND (window-chrome.js data-kind), each window ✓ while open: a press opens a closed one by the FINDER's road
              (kit rk.reveal) and closes an open one */
-          ...['core', 'info', 'control', 'other'].map((k) => sub(k.toUpperCase(), () => { queueMicrotask(tagIcons); const ds = wins().filter((d) => (d.dataset.kind || 'other') === k);
-            return ds.length ? ds.map((d) => [d.querySelector('.dev-eyebrow').textContent, () => A.run('window.' + d.dataset.id + (d.classList.contains('closed') ? '.open' : '.close')), null, winHint(d), { checked: !d.classList.contains('closed') }]) : [['none', null, true]]; }))],
+          ...['core', 'info', 'control', 'other'].map((k) => sub(k.toUpperCase(), () => { const ds = wins().filter((d) => (d.dataset.kind || 'other') === k);
+            return ds.length ? ds.map((d) => [d.querySelector('.dev-eyebrow').textContent, () => A.run('window.' + d.dataset.id + (d.classList.contains('closed') ? '.open' : '.close')), null, winHint(d), { checked: !d.classList.contains('closed'), icon: WINDOW_GLYPH[d.dataset.id] }]) : [['none', null, true]]; }))],   // 021 V2: each window its one glyph
         HELP: () => [item('about', 'ABOUT λWAVES', { icon: 'info' }), item('guiAbout', 'ABOUT MIR'), item('help', 'KEYBOARD SHORTCUTS…'),
           item('photosensitivity', 'PHOTOSENSITIVITY WARNING…', { hint: 'show the photosensitivity notice now and on the next load (iteration 012 M1: out of SETTINGS)' }), null, item('update', 'UPDATE APP', { hint: 'check for a new build, rebuild the offline cache, and reload' })],
       };
@@ -124,21 +124,15 @@ export function createNotebook(app) {
          bar BEFORE the act and returns focus only on Escape, so a row that leaves focus on the vanished item (or nowhere) gives it back
          to the wordmark, an act that moved it on purpose (the keyboard window, the notebook) keeps it (BRIEF candidate M1). */
       const back = (run) => () => { try { run(); } finally { const f = document.activeElement; if (!f || f === document.body || mb.bar.contains(f)) title.focus({ preventScroll: true }); } };
-      /* iteration 012 M1 · WINDOW's PICKER / ATOMS / MOLECULES rows wear the Picker's own icons (I1, lab/img/icons/; lab.css paints the mask).  A
-         menubar row takes no glyph (FOR-MIR), so the rows are tagged once the kit has filled the list: its fill calls WINDOW() and builds the
-         rows in the same task, so a microtask lands after it */
-      const ROW_ICON = { PICKER: 'library', ATOMS: 'atomic', MOLECULES: 'molecular' };
       /* 021 I3: a submenu's entries are wrapped as they open (its run is its list, not an act) */
       const wrap = (rows) => rows.map((r) => (!r ? r : r[4] && r[4].sub ? [r[0], () => wrap(r[1]()), ...r.slice(2)] : [r[0], r[1] && back(r[1]), ...r.slice(2)]));
-      const tagIcons = () => { for (const it of mb.bar.querySelectorAll('.mb-item')) { const k = ROW_ICON[it.querySelector('.mb-lbl').textContent.replace(/^[⊕↑]\s+/, '')]; if (k) it.dataset.icon = k; } };
       const mb = createMenubar({ opener: title, host: document.getElementById('lab'), phone: isPhone,
         menus: Object.fromEntries(Object.entries(MENUS).map(([g, rows]) => [g, () => wrap(rows())])) });
       layout.menu = { open: mb.open, close: mb.close, get isOpen() { return mb.isOpen; }, scale: 1.04, get enlarged() { return title.classList.contains('menu-open'); } };
       /* iteration 014 A7 · 018 E5 · THE FINDER (the kit's createWindowPicker; WINDOW's first row, the CSB's window-plus and the key row `windowPicker`):
-         every window by name, ATOMS / MOLECULES wearing the Picker's icons (lab.css), a window the mode hides greyed with the mode that shows it;
+         every window by name with its one glyph (021 V2: its register's, lab/icons.js WINDOW_GLYPH), a window the mode hides greyed with the mode that shows it;
          a pick of an open window scrolls the rack to it (kit rk.reveal: no reorder), a closed one opens at the top and the rack scrolls up */
-      const modeIcon = { atoms: 'atomic', chem: 'molecular' };
-      layout.finder = createWindowPicker({ rack: rk, cls: 'lw-menu', icon: (id) => modeIcon[id] || null,
+      layout.finder = createWindowPicker({ rack: rk, cls: 'lw-menu',
         open: reveal,
         can: (id) => { const d = document.querySelector('.dev[data-id="' + id + '"]'); return !d || !d.hidden ? true : MODE[id] === 'molecules' ? 'MOLECULES ONLY' : 'HYDROGEN ONLY'; } });   // 021 R5: the MODE table's word
     }

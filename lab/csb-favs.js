@@ -9,7 +9,7 @@
  *     OBSERVABLE): a seg made from the original's options whose press presses the original's button, so its owner's road (history, its status) runs.
  * ADD / REMOVE ride the knob's TIMELINE CLIP menu (the kit's setTimelineKnobRows) and a right click on an offered row (`data-fav`).  The list is a
  * PREFERENCE (`lambdawaves.q0.csb` { v: 1, items }), never a project: every new project starts with it.  Faces are built when the expander opens. */
-import { el, knob, seg, sw, label } from './mir/kit.js';
+import { el, knob, seg, sw, label, TAP } from './mir/kit.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { setTimelineKnobRows } from './mir/timeline/knobs.js';
 
@@ -96,13 +96,13 @@ export function createCsbFavs(app, { panel }) {
     pop.querySelector('button').focus();
   }
   document.addEventListener('contextmenu', (e) => { const row = e.target.closest && e.target.closest('[data-fav]'); if (!row || e.target.closest('.k[data-param]')) return; e.preventDefault(); menu(row.dataset.fav, e.clientX, e.clientY); });
-  let hold = null;
+  let hold = null, at = null;   // 021 V3: a finger's own tremble is not a move — the hold cancels only past the kit's tap slop (TAP.px)
   document.addEventListener('pointerdown', (e) => {
     if (pop && !pop.contains(e.target)) closePop();
     const row = e.pointerType === 'touch' && e.target.closest && e.target.closest('[data-fav]'); if (!row || e.target.closest('.k[data-param]')) return;
-    const x = e.clientX, y = e.clientY; hold = setTimeout(() => { hold = null; menu(row.dataset.fav, x, y); }, 500);
+    const x = e.clientX, y = e.clientY; at = { x, y }; hold = setTimeout(() => { hold = null; menu(row.dataset.fav, x, y); }, 500);
   }, true);
-  const unhold = () => { if (hold) { clearTimeout(hold); hold = null; } };
+  const unhold = (e) => { if (!hold) return; if (e && e.type === 'pointermove' && at && Math.hypot(e.clientX - at.x, e.clientY - at.y) <= TAP.px) return; clearTimeout(hold); hold = null; };
   for (const t of ['pointerup', 'pointercancel', 'pointermove']) document.addEventListener(t, unhold, true);
 
   return {

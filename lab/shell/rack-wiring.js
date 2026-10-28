@@ -2,7 +2,7 @@
  * kit's rack; captureLayout's v3 the WORKSPACE record), the TRANSPORT card, the phone and tablet crossings, the stage gestures.  Two seats, as the code stood:
  * createRackWiring(app) at §19a's, wireStage() after the notebook's.  rk, layout, phone, tablet, winHint and devById are registered on app.sh at creation. */
 import { TIER } from '../tier.js'; import { chip } from '../mir/kit.js'; import { transportDock } from '../mir/shell/transport.js'; import { createRack, readLayout, layoutLabel as rackLayoutLabel } from '../mir/shell/rack.js';
-import { uiSpace } from '../mir/shell/scene-guard.js'; import { bindStageGestures } from '../stage-gestures.js'; import { CAM } from '../camera-law.js'; import { paintedRect } from '../occlusion.js';
+import { WINDOW_GLYPH } from '../icons.js'; import { setGlyph } from '../mir/glyph.js'; import { uiSpace } from '../mir/shell/scene-guard.js'; import { bindStageGestures } from '../stage-gestures.js'; import { CAM } from '../camera-law.js'; import { paintedRect } from '../occlusion.js';
 const SHELLS_FOLDED = [7];   // iteration 008 A7: SPECTRUM's shells folded by default (spectrum.js FOLD_DEFAULT)
 export function createRackWiring(app) {
   const { dom, ui, device, DEVICES, clock, obs, settingsStore, isPhone, isTablet, FIRST_RUN } = app, { schedule, windowActivity } = app.loop;
@@ -41,8 +41,9 @@ export function createRackWiring(app) {
       },
     },
     onChange: () => occlusion.dirty() });   // a kit-side act moved a window: the mask follows (what is remembered is saveSettings', on its own edges)
+  for (const [id, g] of [['rackToggle', 'rackToggle'], ['rackFav', 'heart']]) { const b = document.getElementById(id); if (b) setGlyph(b, g); }   // 021 V2: the kit wrote its text ◧ ☆ into λWAVES' own nodes; the table's glyphs (no kit seat needed)
   const devTitle = (d) => ((d.querySelector('.dev-eyebrow') || {}).textContent || d.dataset.id).trim();
-  for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, title: devTitle(d), hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
+  for (const d of document.querySelectorAll('#rackL > .dev, #rack > .dev')) rk.register({ id: d.dataset.id, el: DEVICES.get(d.dataset.id) || d, title: devTitle(d), glyph: WINDOW_GLYPH[d.dataset.id], hint: ((d.querySelector('.dev-title') || {}).textContent || '').trim() });
   /* ── iteration 006 R · A RACK'S SCROLLBAR ANSWERS ITS CONTENT, NEVER ITS MOTION ─────────────────────────────────────────────
    * Both racks are content-sized scrollers (lab.css: bottom auto, max-height 100%, overflow-y auto).  The kit's motion (mir/shell/
    * rack.js createRackMotion) FLIPs every card that moves UP when one above it hides, folds or leaves: for 320 ms it is drawn by a
@@ -244,7 +245,7 @@ export function createRackWiring(app) {
   windowActivity.track(wTr);
   /* iteration 014 A0 · the kit's bar docks HERE: the card is λWAVES' (its slot, its fold, `card: true`), the move is the kit's (transportDock's hooks) */
   const barDock = () => transportDock(rk);
-  rk.register({ id: 'transport', el: wTr, title: 'CONTROL SURFACE', card: true, onFold: () => saveSettings(),   // C3: an app card (its own buttons; in neither + nor WINDOW)
+  rk.register({ id: 'transport', el: wTr, title: 'CONTROL SURFACE', glyph: WINDOW_GLYPH.transport, card: true, onFold: () => saveSettings(),   // C3: an app card (its own buttons; in neither + nor WINDOW)
     onOpen: () => {
       layout.seatTransport();
       wTr.root.classList.remove('folded'); wTr.body.hidden = false;

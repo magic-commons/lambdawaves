@@ -33,7 +33,7 @@ import { drag, installPress } from '../core/pointer.js';
 import { presence, tweenRect, owns, settled } from '../core/motion.js';
 import { rect, setVar, setAttr } from '../core/perf.js';
 import { ariaLabel, label, hint } from '../kit.js';
-import { glyphEl } from '../glyph.js';
+import { glyphEl, hasGlyph } from '../glyph.js';
 import { createRail, seatRail, seatOn, nearestSide, roomFor, markForwarded, RAIL } from './rail.js';
 import { dockGeometry, createDockGuide, anchorBox } from './dock.js';
 
@@ -97,7 +97,9 @@ export function windowLayout(P, env) {
   const w = Math.min(P.w, view.width - CLAMP.inset), h = Math.min(P.h, view.height - CLAMP.inset);
   /* env.top: a floating window stays below a reserved band (BASINS snap-window.js: P.y = max(P.y, bounds().top)) */
   const x = P.x ?? Math.round((view.width - w) / 2), y = Math.max(env.top ?? -Infinity, P.y ?? Math.round(Math.max(CLAMP.top, (view.height - h) / 2)));
-  const box = { left: clamp(x, CLAMP.x - w, view.width - CLAMP.x), top: clamp(y, 0, view.height - CLAMP.y), width: w, height: h };
+  /* 1.5.6-alpha.3 (λWAVES 021 V1) · THE TALL WINDOW: one too tall to sit below the top band keeps its bottom (and its resize corner) on screen */
+  const low = h > view.height - CLAMP.top - CLAMP.inset / 2 ? Math.max(0, view.height - h - CLAMP.inset / 2) : view.height - CLAMP.y;
+  const box = { left: clamp(x, CLAMP.x - w, view.width - CLAMP.x), top: clamp(y, 0, Math.min(low, view.height - CLAMP.y)), width: w, height: h };
   return { box, seat: seatRail({ prefer: P.chipSide, box, sizes, view, gap: env.gap ?? 0 }), docked: null };
 }
 
@@ -153,8 +155,15 @@ export function registerWindow({ root, rail = null } = {}) {
    gripGesture runs on it as it runs on a rail's grip, so the drag, its cancels, the raise and the clamp are the same
    machinery.  The rail's side of that gesture is this stand-in: no element, no size, no seat. */
 const NO_RAIL = Object.freeze({ vertical: Object.freeze({ w: 0, h: 0 }), horizontal: Object.freeze({ w: 0, h: 0 }) });
-function titleBar(doc, root, title, onClose) {
+/** windowGlyphs({ id: glyphName }) (1.5.6-alpha.3) — an app names its windows' glyphs by window id once, before they are made, so a window
+ *  a kit factory creates (MIR OPTIONS `gui`, ABOUT `gui-about`, `keyboard`, the TIMELINE…) wears one with no option on each factory;
+ *  a `glyph` passed to createWindow wins */
+const NAMED = new Map();
+export function windowGlyphs(table) { for (const [id, g] of Object.entries(table || {})) if (typeof g === 'string' && g) NAMED.set(id, g); }
+
+function titleBar(doc, root, title, onClose, glyph) {
   const bar = doc.createElement('div'); bar.className = 'mir-win-head'; root.appendChild(bar);
+  if (glyph && hasGlyph(glyph)) bar.appendChild(glyphEl(glyph, 'mir-win-glyph gly gly-' + glyph));   // 1.5.6-alpha.3: the window's one drawing, before its title
   const name = label(doc.createElement('div'), String(title)); name.className = 'mir-win-title'; bar.appendChild(name);
   const tools = doc.createElement('div'); tools.className = 'mir-win-tools'; bar.appendChild(tools);
   /* a press on a head button is that button's, never the grip's (the grip's drag would take its pointer) */
@@ -263,9 +272,10 @@ export function gripGesture(rail, w) {
  *    chrome     'rail' (default): the chip rail beside the pane.  'close': no rail — a title bar inside the pane (the title,
  *               the window's head buttons in `tools`, a plain × in the corner), the whole bar its grip, Escape closes it
  *               while focus is in it (or on nothing, with it on top).  For a small window with nothing to dock (GUI, ABOUT);
- *               `chips`, `dock`, `railGap` and the seat gestures do not apply.  → the api also carries `head` and `tools` */
+ *               `chips`, `dock`, `railGap` and the seat gestures do not apply.  → the api also carries `head` and `tools`
+ *    glyph      a glyph name (1.5.6-alpha.3): the window's one drawing — before the title in a title bar, `data-glyph` on the root either way */
 export function createWindow({ id, title = id, host, chips = [], body, panels, size = { w: 520, h: 360 }, min = { w: 240, h: 160 },
-  resizable = false, emptyDrag = false, dock = null, persist = null, material = null, railGap = RAIL.gap, railTier = 1, chrome = 'rail', onMoved, onOpen, onClose } = {}) {
+  resizable = false, emptyDrag = false, dock = null, persist = null, material = null, railGap = RAIL.gap, railTier = 1, chrome = 'rail', glyph = '', onMoved, onOpen, onClose } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView;
   installOnce(doc);
   const mk = (tag, cls, parent) => { const n = doc.createElement(tag); if (cls) n.className = cls; if (parent) parent.appendChild(n); return n; };
@@ -278,7 +288,9 @@ export function createWindow({ id, title = id, host, chips = [], body, panels, s
   root.setAttribute('role', 'group');
   ariaLabel(root, String(title));   // no toUpperCase: it would upper-case a translation
   root.hidden = true;
-  const head = chrome === 'close' ? titleBar(doc, root, title, () => api.close()) : null;
+  if (!glyph) glyph = NAMED.get(id) || '';                         // 1.5.6-alpha.3: the app's table by id (windowGlyphs) for a kit factory's window
+  if (glyph) root.dataset.glyph = glyph;                             // 1.5.6-alpha.3: drawn in a title bar; a rail window carries the name for a reader
+  const head = chrome === 'close' ? titleBar(doc, root, title, () => api.close(), glyph) : null;
   if (head) { root.dataset.chrome = 'close'; dock = null; }
   const bodyEl = mk('div', 'mir-win-body', root);
   const fill = (target, b) => { const n = typeof b === 'function' ? b(target) : b; if (n && n.nodeType) target.appendChild(n); };

@@ -30,7 +30,8 @@ try {
   const first = await g.ev(`const d = document.querySelector('.dev[data-id="nodes"]');
     __LW.layout.finder.open(); const plus = [...document.querySelectorAll('.mir-window-picker .wp-row:not(.off)')].map((i) => i.dataset.win); __LW.layout.finder.close();
     __LW.layout.menu.open(); const b = [...document.getElementById('menubar').querySelectorAll('.mb-btn')].find((x) => x.dataset.menu === 'WINDOW'); b.click();
-    const win = [...b.parentElement.querySelectorAll('.mb-lbl')].map((l) => l.textContent.trim()); b.click();
+    const tools = [...b.parentElement.querySelectorAll('.mb-item')].find((i) => /^TOOLS/.test(i.textContent.trim())); if (tools) { tools.click(); await new Promise((r) => setTimeout(r, 200)); }   // 021 I3: NODES lives in WINDOW › TOOLS
+    const win = [...document.querySelectorAll('#menubar .mb-lbl, .mb-list .mb-lbl, [role="menu"] .mb-lbl')].map((l) => l.textContent.trim()); b.click();
     return { made: !!d, closed: d.classList.contains('closed'), side: d.parentElement.id, plus: plus.includes('nodes'), win: win.some((t) => /NODES$/.test(t)),
       note: d.querySelector('.note').textContent, errs: __e.slice() };`);
   assert.equal(first.made, true); assert.equal(first.closed, true); assert.equal(first.side, 'rack');
@@ -76,7 +77,7 @@ try {
     return { raw: localStorage.getItem('${KEY}'), inBlob: 'curves' in JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'), same: a === b };`);
   assert.ok(rec.raw); const parsed = JSON.parse(rec.raw); assert.equal(parsed.v, 1); assert.ok(parsed.curves.MASTER.length >= 3);
   assert.equal(rec.inBlob, false); assert.equal(rec.same, true);
-  await g.ev(`await __LW.layout.projects.requestFresh(); await __w(600); await __LW.settle(); return 1;`);
+  await g.ev(`window.confirm = () => true; await __LW.layout.projects.requestFresh();   /* NEW asks first when the project is dirty (the steps above dirty it); the subject here is the grade, so it says yes */ await __w(600); await __LW.settle(); return 1;`);
   const after = await g.ev(`return { raw: localStorage.getItem('${KEY}'), filter: __filter() };`);
   assert.equal(after.raw, rec.raw); assert.match(after.filter, /^url\(/);
   console.log('PASS the grade is PREFERENCE: its own record, not in the settings blob or the project; a project open (NEW) leaves it and the screen as they were');

@@ -23,6 +23,7 @@ import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the 
 import { createGas } from './windows/gas.js'; import { createEqualizerCard } from './windows/equalizer.js';   // 021 G2 (THE HINGE): the BOX rows and the EQUALIZER window, out of spectrum.js
 import { createFolders } from './windows/folders.js';   // 021 G3: the FOLDERS card, out of boot()
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
+import { registerIcons } from './icons.js';   // 021 V2: THE ICON TABLE, through the kit's registerGlyphs, before any window
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
 import { createSkeleton, centroid } from './skeleton.js'; import { moleculeCharge } from './molecules.js';   // iteration 014 B: the atoms BALLS · STICKS · ESP draw (field.setAtoms) and the molecule's charge   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
 import { createMolecules } from './windows/molecules.js'; import { createStageWords } from './shell/stage-words.js'; import { createModSeam } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
@@ -51,6 +52,7 @@ import { TIER, TIER_NAME } from './tier.js';   // 021 G1: the tiers live in lab/
 export { TIER };
 
 export async function boot(dom) {
+  registerIcons();
   const DEVICES = new Map(), device = (o) => { const d = kitDevice(o); DEVICES.set(o.id, d); return d; };   // 0.5.0 C3: the rack registers each card with its device(), so its fold is called, never re-clicked
   const reg = new Register();
   /* UNDO / REDO: the ring (`app.state.history`) is built at the foot of boot(), once every path it writes through exists; hNote() is

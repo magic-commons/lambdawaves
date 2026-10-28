@@ -37,7 +37,7 @@ export function createActions(app) {
   const fsOn = () => !!(document.fullscreenElement || (typeof matchMedia === 'function' && matchMedia('(display-mode: fullscreen)').matches));
   const fullscreen = () => { if (!document.fullscreenElement && fsOn()) { W().wState.setStatus('the browser’s full screen (F11) is the browser’s: F11 leaves it', 'warn'); return; } W().toggleFullscreen(); };
   const IP = infoPrefs(), infoKeys = INFO_ROWS.filter((r) => r.type === 'bool').map((r) => r.key); let infoKept = null;
-  const foldable = () => (S().rk ? S().rk.windows().filter((w) => w.open && w.built && w.id !== 'transport') : []);
+  const foldable = () => (S().rk ? S().rk.windows().filter((w) => w.open && w.built && !w.hidden && w.id !== 'transport') : []);   // 021 V3: a mode-hidden or LEGACY card is not FOLDS' (kit windows() `hidden`)
   /** reveal(id) — a window by the FINDER's road (kit rk.reveal: an open one scrolled to, a closed one opened at the top); NODES as its FREE window */
   const reveal = (id) => { const N = nodes(), d = document.querySelector('.dev[data-id="' + id + '"]'); if (id === 'nodes' && N && (!d || d.classList.contains('closed'))) N.open(); else S().rk.reveal(id); S().saveSettings(); };
   const theme = (a) => { const T = app.hooks.setTheme; if (!T) return; if (a && a.id) T(a.id); else T(document.body.dataset.theme === 'light' ? 'dark' : 'light'); };
@@ -102,10 +102,10 @@ export function createActions(app) {
     { id: 'render', short: 'render', label: 'the RENDER card — film the stage', run: () => L().raise('render'), surface: true },
     { id: 'nodes', was: 'curves', short: 'nodes', label: 'NODES — the picture’s node graph (CURVES grades the screen)', kind: 'toggle', icon: 'nodes', get: () => !!(nodes() && nodes().win.isOpen()), surface: true,   // 018 D3: the saved key id `curves` is read (was); 020 X0: the FREE window
       run: () => { const N = nodes(); if (!N) return L().raise('nodes'); if (N.win.isOpen()) N.close(); else N.open(); } },
-    { id: 'windowPicker', short: 'finder', label: 'FINDER — search every window by name; SHIFT-click queues several', icon: 'window-plus', run: () => { if (L().finder) L().finder.toggle(); }, surface: true },
+    { id: 'windowPicker', short: 'finder', label: 'FINDER — search every window by name; SHIFT-click queues several', icon: 'windowPlus', run: () => { if (L().finder) L().finder.toggle(); }, surface: true },
     { id: 'menu', short: 'picker', label: 'the Picker — open it, or back to the lab', keys: ['KeyL'], kind: 'toggle', get: () => !!(app.state.picker && app.state.picker.shown), run: () => { if (app.state.picker) app.state.picker.toggle(); }, surface: true },   // the id stays 'menu': saved bindings
     { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', kind: 'toggle', get: () => !!(app.state.tl && app.state.tl.isOpen()), run: () => { if (app.state.tl) app.state.tl.toggle(); }, surface: true },
-    { id: 'gui', short: 'mir options', label: 'MIR OPTIONS — the interface’s look (BASINS’ GUI menu)', icon: 'cog-solid', run: () => { const g = mirGui(); if (g) g.toggle(); }, surface: true },
+    { id: 'gui', short: 'mir options', label: 'MIR OPTIONS — the interface’s look (BASINS’ GUI menu)', icon: 'cogSolid', run: () => { const g = mirGui(); if (g) g.toggle(); }, surface: true },
     { id: 'guiAbout', short: 'mir about', label: 'MIR ABOUT — what MIR is', run: () => { const g = mirGui(); if (g) g.toggle('about'); }, surface: true },
     { id: 'mapping', short: 'mapping', label: 'the MAPPING — a key, a MIDI note or knob, or a modulation route for every action', run: () => L().keymap.open('MAPPING') },
     { id: 'about', short: 'about', label: 'ABOUT λWAVES — the notebook’s ABOUT face', run: () => L().notebook.open('about'), surface: true },
@@ -119,11 +119,11 @@ export function createActions(app) {
     { id: 'csb.expand', group: CS, short: 'expand', label: 'the CONTROL SURFACE’s expander — open or close', kind: 'toggle', get: () => { const p = S().transport && S().transport.bar.parts.panel; return !!(p && p.isOpen()); }, run: () => { const p = S().transport.bar.parts.panel; if (p) p.toggle(); }, surface: true },
     ...[['rate.up', 'RATE ×1.25', 1.25], ['rate.down', 'RATE ÷1.25', 0.8]].map(([id, label, k]) => ({ id: 'csb.' + id, group: CS, short: label, label: label + ' (the flash law may refuse it)', run: () => { const r = ran('rate')({ value: clock.rate * k }); if (typeof r === 'string') W().wState.setStatus(r, 'warn'); }, surface: true })),
     ...[['tempo.up', 'TEMPO +1 BPM', 1], ['tempo.down', 'TEMPO −1 BPM', -1]].map(([id, label, d]) => ({ id: 'csb.' + id, group: CS, short: label, label, run: () => { const h = app.state.modHost; if (h) { h.clock.setBpm(h.model.transport.bpm + d); S().saveSettings(); } }, surface: true })),
-    { id: 'folds', group: CS, short: 'folds', label: 'MINIMIZE ALL — fold every open window; EXPAND ALL when any is folded', kind: 'toggle', icon: 'folds', lit: false, get: () => foldable().some((w) => w.folded), surface: true,   // 020 T2
+    { id: 'folds', group: CS, short: 'folds', label: 'MINIMIZE ALL — fold every open window; EXPAND ALL when any is folded', kind: 'toggle', icon: () => (foldable().some((w) => w.folded) ? 'unfoldAll' : 'foldAll'), lit: false, get: () => foldable().some((w) => w.folded), surface: true,   // 020 T2; 021 V2: the glyph at the word's read
       word: () => (foldable().some((w) => w.folded) ? 'EXPAND ALL — open every folded window' : 'MINIMIZE ALL — fold every open window'),
       run: () => { const ws = foldable(), fold = !ws.some((w) => w.folded); for (const w of ws) S().rk.fold(w.id, fold); } },
     { id: 'theme', group: CS, short: 'theme', label: 'LIGHT | DARK — the theme', kind: 'set', icon: '', args: { id: '?enum light|dark|system' }, get: () => look().get('theme'), run: theme, surface: true },
-    { id: 'info.all', group: CS, short: 'informational', label: 'INFORMATIONAL — every stage word off, or the remembered set back', kind: 'toggle', icon: 'info-circle', get: () => infoKeys.some((k) => IP.get(k)), surface: true,
+    { id: 'info.all', group: CS, short: 'informational', label: 'INFORMATIONAL — every stage word off, or the remembered set back', kind: 'toggle', icon: 'info', get: () => infoKeys.some((k) => IP.get(k)), surface: true,
       run: () => { const lit = infoKeys.filter((k) => IP.get(k)); if (lit.length) { infoKept = lit; IP.set(Object.fromEntries(infoKeys.map((k) => [k, false]))); }
         else IP.set(Object.fromEntries(infoKeys.map((k) => [k, infoKept ? infoKept.includes(k) : !!INFO_ROWS.find((r) => r.key === k).default]))); } },
     { id: 'undo', group: PJ, short: 'undo', label: 'undo the last edit', keys: ['Mod+KeyZ'], exact: true, undo: 'travel', run: () => hist().undo() },

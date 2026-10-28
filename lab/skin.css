@@ -525,12 +525,8 @@ body.no-mol-formula .lw-pop { display: none; }
  * #lwMode (windows/molecules.js): ATOMS | MOLECULES under the title, the kit's seg at the title's left edge.  THE EQUALIZER's mixer
  * (windows/spectrum.js): the grid's canvas at device pixels beside its six faders, one per shell row; its colours are tokens here. */
 #lwMode { position: absolute; left: calc(var(--rack-w) + 24px); top: 46px; z-index: var(--z-chrome); width: auto; display: flex; flex-direction: column; gap: 4px; }
-/* 013 H4: LIBRARY · MOLECULAR · HYDROGEN, a column of icons worn as masks (the ink follows the theme); the pressed mode wears the seg's ON face */
+/* 013 H4: LIBRARY · MOLECULAR · HYDROGEN, a column of icons (021 V2: the table's library · molecule · atom, SVG in the ink); the pressed mode wears the seg's ON face */
 #lwMode .lw-stage-b { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--fg); opacity: .6; cursor: pointer; }
-#lwMode .lw-stage-b::before { content: ""; width: 16px; height: 16px; background: currentColor;
-  -webkit-mask: url(img/icons/library.svg) center / contain no-repeat; mask: url(img/icons/library.svg) center / contain no-repeat; }
-#lwMode .lw-stage-b[data-id="molecules"]::before { -webkit-mask-image: url(img/icons/molecular.svg); mask-image: url(img/icons/molecular.svg); }
-#lwMode .lw-stage-b[data-id="hydrogen"]::before { -webkit-mask-image: url(img/icons/atomic.svg); mask-image: url(img/icons/atomic.svg); }
 #lwMode .lw-stage-b:hover, #lwMode .lw-stage-b:focus-visible { opacity: 1; }
 #lwMode .lw-stage-b[aria-pressed="true"] { opacity: 1; color: var(--acc); background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
 body.ui-hidden #lwMode { display: none; }
@@ -729,7 +725,8 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 /* iteration 012 L1 · THE LIBRARY'S WORDS: SHOW LABELS (one subtle seat under the tabs; its twin in a volume's head where INSTALL was), the
    formula on every molecule tile when it is on (the name stays the hover's), the atoms' symbol and Z when theirs is; the deck a fixed height —
    the rows the space holds, filled or not — so a search never moves the head row; the back to the shelf an icon */
-#lwMenu .mm-ico { display: inline-block; flex: none; width: 14px; height: 14px; background: currentColor; -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; }
+#lwMenu .mm-ico { display: inline-block; flex: none; width: 14px; height: 14px; }
+#lwMenu :is(.mm-ico, .mm-hue-ring) > svg { display: block; width: 100%; height: 100%; }   /* 021 V2: the seat sizes its glyph (lab/icons.js), no mask */
 #lwMenu .mm-opts { display: flex; justify-content: center; align-items: center; gap: 12px; min-height: 22px; margin-top: -4px; }
 #lwMenu .mm-opt { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .22em; padding: 3px 8px; border-radius: 999px; opacity: .38; transition: opacity 140ms, color 140ms; }
 #lwMenu .mm-opt:hover, #lwMenu .mm-opt:focus-visible { opacity: .8; } #lwMenu .mm-opt.on { opacity: .75; color: var(--acc); } #lwMenu .mm-opt[hidden] { display: none; }
@@ -774,11 +771,13 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-navb .mm-ico { width: 18px; height: 18px; }
 #lwMenu .mm-navb:hover, #lwMenu .mm-navb:focus-visible { opacity: 1; color: var(--acc); scale: 1.1; } #lwMenu .mm-navb:active { scale: .94; }
 #lwMenu .mm-hue { opacity: .55; cursor: ns-resize; touch-action: none; }
-#lwMenu .mm-hue-ring { width: 20px; height: 20px; rotate: var(--mol-hue); position: relative; background: currentColor;
-  -webkit-mask: url(img/icons/hue-ring.svg) center / contain no-repeat; mask: url(img/icons/hue-ring.svg) center / contain no-repeat; transition: rotate 120ms var(--ease); }
+#lwMenu .mm-hue-ring { display: block; width: 20px; height: 20px; rotate: var(--mol-hue); position: relative; transition: rotate 120ms var(--ease); }
+@media (prefers-reduced-motion: reduce) { #lwMenu .mm-hue-ring { transition: none; } }   /* 021 V3: the ring turns to the hue at once */
+:root:is([data-motion="reduced"], [data-motion="off"]) #lwMenu .mm-hue-ring { transition: none; }
 /* iteration 015 M6 · THE HUE BUTTON (Josh: "grey like the rest but then mouse over shows the colors avail"): the ring in the ink at rest, as its
-   neighbours' icons are, and the wheel's colours fading in on a hover, a focus or a drag (the mask clips the ::after too) */
-#lwMenu .mm-hue-ring::after { content: ''; position: absolute; inset: 0; background: conic-gradient(from 0deg, hsl(0 85% 58%), hsl(60 85% 52%), hsl(120 70% 48%), hsl(180 80% 50%), hsl(240 80% 62%), hsl(300 80% 60%), hsl(360 85% 58%)); opacity: 0; transition: opacity 200ms var(--ease); }
+   neighbours' icons are, and the wheel's colours fading in on a hover, a focus or a drag.  021 V2: the ring is the table's `hueRing` (an SVG); the
+   colours lie over its circle only, clipped by a radial ring (r 7.05–8.95 of the 24 box, centre 12, 12.5) — no image mask */
+#lwMenu .mm-hue-ring::after { content: ''; position: absolute; inset: 0; -webkit-mask: radial-gradient(circle at 50% 52.08%, transparent 29.2%, #000 29.4% 37.2%, transparent 37.4%); mask: radial-gradient(circle at 50% 52.08%, transparent 29.2%, #000 29.4% 37.2%, transparent 37.4%); background: conic-gradient(from 0deg, hsl(0 85% 58%), hsl(60 85% 52%), hsl(120 70% 48%), hsl(180 80% 50%), hsl(240 80% 62%), hsl(300 80% 60%), hsl(360 85% 58%)); opacity: 0; transition: opacity 200ms var(--ease); }
 #lwMenu .mm-hue:is(:hover, :focus-visible, .drag) { opacity: 1; color: var(--fg); }
 #lwMenu .mm-hue:is(:hover, :focus-visible, .drag) .mm-hue-ring::after { opacity: 1; }
 #lwMenu .mm-mol .mm-pic { filter: hue-rotate(var(--mol-hue, 0deg)); transition: scale 280ms var(--ease), filter 360ms var(--ease); }
@@ -892,10 +891,8 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .native-clean[data-id="camera"] .cam-verbs { display: flex; flex-wrap: nowrap; gap: 6px; align-items: center; }
 .native-clean[data-id="camera"] .cam-verbs > .trig { width: auto; flex: 1 1 0; min-width: 0; padding-inline: 6px; white-space: nowrap; }
 .native-clean[data-id="camera"] .cam-verbs > .sw { flex: 1 1 auto; min-width: 0; padding: 0 4px; justify-content: center; letter-spacing: .04em; white-space: nowrap; }
-/* PALETTE: ADD is the plus icon (lab/img/icons/plus.svg, drawn in the ink by a mask) */
-.lw-icon { display: inline-block; width: 18px; height: 18px; background: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
-.lw-icon-plus { --icon: url("img/icons/plus.svg"); }
-.lw-icon-reverse { --icon: url("img/icons/reverse.svg"); }   /* iteration 015 P2: REVERSE, two counter-pointing arrows */
+/* PALETTE: ADD is the kit's plus, REVERSE (iteration 015 P2) the table's two counter-pointing arrows — 021 V2: SVG glyphs (material.js), no masks */
+.native-clean[data-id="palette"] :is(.pal-add, .pal-rev) > svg { width: 18px; height: 18px; }
 .native-clean[data-id="palette"] .pal-add, .native-clean[data-id="palette"] .pal-rev { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
 .native-clean[data-id="palette"] .mir-ramp-verbs { flex-wrap: nowrap; }
 .native-clean[data-id="palette"] .mir-ramp-verbs > .mir-ramp-sel { flex: 0 0 auto; }

@@ -27,22 +27,15 @@
 #transport[data-layout="csb"] .tr-open.has-glyph .tr-word { display: none; }
 #transport[data-layout="csb"].mir-transport :is(.csb-col, .csb-row, .csb-ico) > * { order: 0; flex-shrink: 0; }
 #transport[data-layout="csb"] .csb-row { display: flex; align-items: center; gap: 4px; height: 36px; }
-/* THE SEATS: one 36-px round box, flat until hovered, the icon 20 px — the kit's glyphs and λWAVES' masks (lab/img/icons/) alike */
+/* THE SEATS: one 36-px round box, flat until hovered, the icon a 20-px glyph (the kit's and lab/icons.js' alike) */
 #transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand) {
   display: inline-grid; place-items: center; width: 36px; height: 36px; min-width: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 18px; transform: none; }
 #transport[data-layout="csb"] :is(.csb-ico .tbtn, .csb-ico .dock-btn, .csb-ico .mod-exp, .csb-ico .tr-open, .csb-ico .csb-search-b, #rackToggle, #rackFav, .tr-expand):hover { color: var(--fg); background: var(--glass-raise); }
 #transport[data-layout="csb"] :is(.csb-ico, .csb-mod) svg { width: 20px; height: 20px; }
 #transport[data-layout="csb"] :is(.csb-ico .tr-open.on, .csb-ico .mod-exp.live, .csb-search-b[aria-expanded="true"], #rackFav[aria-expanded="true"], .csb-info.on, .csb-nodes.on, .tr-expand.on) { color: var(--acc); }
-#transport[data-layout="csb"] .csb-ico > .mod-exp[data-mark="none"]::before { content: ""; width: 20px; height: 20px; background: currentColor;   /* A8: the modulation window's own icon (a sine wave) */
-  -webkit-mask: url(img/icons/modulation.svg) center / contain no-repeat; mask: url(img/icons/modulation.svg) center / contain no-repeat; }
-/* the app's mask icons (E1 · E3): ⚙ solid, ♥ solid, ◧, FINDER, INFORMATIONAL, FOLDERS, the theme's sun ↔ moon (body[data-theme]) */
-#transport[data-layout="csb"] :is(.csb-ico-b, #rackToggle, #rackFav) { font-size: 0; }
-#transport[data-layout="csb"] :is(.csb-ico-b, #rackToggle, #rackFav)::before { content: ""; width: 20px; height: 20px; background: currentColor;
-  -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; }
-#transport #rackToggle { --ico: url(img/icons/rack.svg); }
-#transport #rackFav { --ico: url(img/icons/heart-solid.svg); }
-#transport .csb-theme { --ico: url(img/icons/moon.svg); }
-body[data-theme="light"] #transport .csb-theme { --ico: url(img/icons/sun.svg); }
+/* 021 V2 · every seat's icon is an SVG from the one table (lab/icons.js through the kit's setGlyph): no masks.  THEME carries the moon and the sun;
+   the theme shows one (body[data-theme]) */
+body[data-theme="light"] #transport .csb-theme > .gly-moon, body:not([data-theme="light"]) #transport .csb-theme > .gly-sun { display: none; }
 /* PLAY: a round chip floating outside the bar's left edge, level with the bar's own rows (the panel never moves it) */
 #transport[data-layout="csb"] > .csb-play { display: grid; place-items: center; border-radius: 50%; padding: 4px; box-shadow: none; }   /* 020 T1: the chip is the seat's glass; the relief is the button's alone */
 #transport.mini[data-layout="csb"] > .csb-play { position: absolute; right: calc(100% + 12px); bottom: 11px; grid-area: auto; }
@@ -68,7 +61,7 @@ body[data-theme="light"] #transport .csb-theme { --ico: url(img/icons/sun.svg); 
 /* CENTRE: the chooser over the modes + FOLDERS (a fixed 220 px, so a long name never widens the bar; under HYDROGEN its seat stays, empty) */
 #transport #lwMode { position: static; flex-direction: row; gap: 2px; }
 #transport[data-layout="csb"] :is(#lwMode .lw-stage-b, .csb-folders) { width: 40px; height: 36px; border-radius: 10px; }
-#transport[data-layout="csb"] :is(#lwMode .lw-stage-b, .csb-folders)::before { width: 22px; height: 22px; }
+#transport[data-layout="csb"] :is(#lwMode .lw-stage-b, .csb-folders) > svg { width: 22px; height: 22px; }   /* 021 V2: the glyph (was the mask ::before); 22 px kept as it was — 022 snaps it to 20 or 24 */
 #transport[data-layout="csb"] .csb-folders { display: inline-grid; place-items: center; padding: 0; border: 0; background: transparent; box-shadow: none; color: var(--ink-key); }
 #transport[data-layout="csb"] .csb-folders:hover { color: var(--fg); background: var(--glass-raise); }
 #transport :is(#rackToggle, #rackFav) { position: static; inset: auto; -webkit-backdrop-filter: none; backdrop-filter: none; }
@@ -124,6 +117,7 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport[data-layout="csb"] > .native-tempo > .csb-repeats > * { order: 0; }
 #transport[data-layout="csb"] .csb-repeats > .csb-steps { display: inline-flex; gap: 2px; flex: 0 0 auto; }
 #transport[data-layout="csb"] .csb-repeats > .csb-steps > .tbtn { display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 14px; }
+#transport[data-layout="csb"] .csb-repeats > .csb-steps > .tbtn > svg { width: 18px; height: 18px; }
 #transport[data-layout="csb"] .csb-repeats > .csb-steps > .tbtn:hover { color: var(--fg); background: var(--glass-raise); }
 #transport[data-layout="csb"] .csb-repeats > .ro.period { flex: 0 0 auto; width: auto; min-width: 130px; padding: 0; display: flex; flex-direction: column; align-items: flex-start; text-align: left; background: transparent; box-shadow: none; }
 #transport[data-layout="csb"] .csb-repeats > .ro.period .ro-lbl { display: block; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--ink-faint); }
@@ -162,6 +156,14 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport .k-val { display:none; }
 #transport .k:hover .k-val, #transport .k:focus-within .k-val, #transport .k.drag .k-val { display:block; }
 #transport.docked .tempo-expand { width:100%;background:hsl(var(--glass-tint) / 1);box-shadow:var(--relief-raise,var(--neu-raise)); }
+/* 021 V3 · THE NARROW STAGE (≤ 860 px: the racks stack, the right one at the foot): the old seat (left rack-w + 10, width auto) lost to the csb rules'
+   weight, so the bar kept its 674 px, stretched from 112 px to 60 px above the foot over the rack and left PLAY off the edge.  Now: under the top
+   rack's cards, centred with PLAY (the pair 674 + 78 px; 39 px is half PLAY's seat), its own height */
 @media (max-width:860px) {
-  #transport.mini,#transport.mini.tempo-open { left:calc(var(--rack-w) + 10px);right:10px;top:calc(env(safe-area-inset-top) + 112px);bottom:auto;width:auto;transform:none; }
+  #transport.mini[data-layout="csb"],#transport.mini[data-layout="csb"].tempo-open { left:calc(50% + 39px);right:auto;top:calc(env(safe-area-inset-top) + 112px);bottom:auto;transform:translateX(-50%);max-width:calc(100vw - 102px); }
 }
+/* 021 V3 · THE REDUCED-MOTION LIST CLOSED (REVIEW-C §3): PLAY's hover lift and INVERT's turn arrive at their end state at once (the system's
+   setting or MIR OPTIONS' motion, <html data-motion>) */
+@media (prefers-reduced-motion: reduce) { #transport[data-layout="csb"] .csb-play > .tbtn.play:hover { translate: none; } .pal-invert svg { transition: none; } }
+:root:is([data-motion="reduced"], [data-motion="off"]) #transport[data-layout="csb"] .csb-play > .tbtn.play:hover { translate: none; }
+:root:is([data-motion="reduced"], [data-motion="off"]) .pal-invert svg { transition: none; }

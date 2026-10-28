@@ -30,7 +30,8 @@
  * THE SCROLL PILL (1.5.0-alpha.25, from λWAVES 014 A6; Josh: "When scrolling on the rack window, let a little colored pill appear
  * directly adjacent to the window title bar … the name of the window in a strong, bold, sans serif font … No shadow just solid pill
  * … When the scroll bar disappears, the pills disappear too … material animated … incredibly cheap … autodetect white or black text").
- * createRackPills({ host, racks, view }) → { destroy() }, made by createRack for every rack, whichever scrollbar it runs:
+ * createRackPills({ host, racks, view, glyphOf }) → { destroy() }, made by createRack for every rack, whichever scrollbar it runs
+ *   (glyphOf(id) → a window's glyph name, drawn before its name; 1.5.6-alpha.3):
  *   · a scroll adds `scrolling` to the rack (and to its seated track, which lifts the thumb) and arms ONE timeout, re-armed by each
  *     scroll; 900 ms after the last scroll the class goes.  No poller, no frame job.
  *   · the first scroll of a burst seats the pills — one `.rack-pill` per docked window, its text the head's own (already labelled)
@@ -43,6 +44,7 @@
  *     whole (the stage has the room).  Its mask opens from the window's side.  Only a pill: no tail (1.5.0-alpha.28, rack.css).
  *   MIR OPTIONS › WINDOWS › SCROLL PILL (LOOK_SCHEMA `rackPill`: OFF · A · B, default A, the scrollbar's own accent) is `body[data-rack-pill]`. */
 import { el, ariaLabel } from '../kit.js';
+import { glyphEl, hasGlyph } from '../glyph.js';
 import { drag } from '../core/pointer.js';
 import { frame } from '../core/frame.js';
 import { setVar, setAttr } from '../core/perf.js';
@@ -76,7 +78,7 @@ export function inkOn(rgb, theme = 'light') {
   const L = 0.2126 * lin(+m[0]) + 0.7152 * lin(+m[1]) + 0.0722 * lin(+m[2]);
   return theme === 'dark' ? (L >= 0.1 ? 'dark' : 'light') : (L <= 0.3 ? 'light' : 'dark');
 }
-export function createRackPills({ host, racks, view = globalThis.window }) {
+export function createRackPills({ host, racks, view = globalThis.window, glyphOf = () => '' }) {
   const doc = view.document, life = new AbortController();
   const entries = racks.filter(Boolean).map((rack) => {
     const side = rack.dataset.side === 'left' ? 'left' : 'right';
@@ -104,7 +106,8 @@ export function createRackPills({ host, racks, view = globalThis.window }) {
       let edge = left ? d.right : d.left;
       if (th && th.width) edge = left ? Math.max(edge, th.right) : Math.min(edge, th.left);
       else if (native) edge = left ? Math.max(edge, rr.right) : Math.min(edge, rr.left);
-      const pill = el('span', 'rack-pill', inner, text);
+      const pill = el('span', 'rack-pill', inner, text), gn = glyphOf(dev.dataset.id) || dev.dataset.glyph;   // 1.5.6-alpha.3: the window's glyph before its name
+      if (gn && hasGlyph(gn)) pill.prepend(glyphEl(gn, 'rack-pill-glyph', 12));
       pill.style.top = (h.top + h.height / 2 - rr.top) + 'px';
       if (left) pill.style.left = (edge + PILL.gap - lr.left) + 'px';
       else pill.style.right = (lr.right - edge + PILL.gap) + 'px';

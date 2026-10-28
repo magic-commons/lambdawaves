@@ -4,7 +4,8 @@
  * replaces the rack's old + list, and takes its SHIFT queue and its ☆.
  *
  *   createWindowPicker({ rack, open, can, icon, cls, host }) → { root, open(), close(), toggle(), shown (isOpen), queued, destroy() }
- *     rack   the kit's rack (createRack): its windows() are the rows, its spec(id).glyph their kit glyph, its lastFavourite() the ☆
+ *     rack   the kit's rack (createRack): its windows() are the rows, its spec(id).glyph their glyph (a kit name or an app's own through
+ *            registerGlyphs, 1.5.6-alpha.3), its lastFavourite() the ☆
  *     open   (id) → void, a press or Enter on an openable row (default rack.reveal: an open window is scrolled to, never moved; a closed one
  *            opens at the top of its rack)
  *     can    (id) → true | a word: a word greys the row and says why (λWAVES: HYDROGEN ONLY / MOLECULES ONLY); null leaves the row out

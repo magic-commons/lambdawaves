@@ -43,7 +43,7 @@
  *   of the eleven modulation targets its registry base, and a dial nobody drives never sees it.
  *   B140 gates the EAR, the EYE and the MODEL together, which is what B127 could not see.
  */
-import { setGlyph, glyphEl } from './glyph.js';
+import { setGlyph, glyphEl, hasGlyph } from './glyph.js';
 import { setText, setVar } from './core/perf.js';   // paint writes only what changed, and the meter counts both
 import { t as tx, onLanguage } from './core/i18n.js';
 import { srgbToLinear, linearToSrgb, contrastRatio, hslToRgb01, rgbToHsl, hexToRgb } from './palette.js';
@@ -504,7 +504,7 @@ export function seg(o) {
   return { root, spec: o, get: () => v, set(x) { v = x; paint(); }, button: (id) => btns.get(id), paint };   // spec: as knob's (1.5.0-alpha.25)
 }
 
-/** trig({ label, onFire, glyph, cls }) — a momentary event */
+/** trig({ label, onFire, glyph, cls }) — a momentary event (`glyph`: a glyph name draws, other text is text) */
 /** THE DOT GRIP — Josh's 5×5: dots at rows 1, 3, 5 × columns 1, 3, 5. The reorder handle in the modulation
  *  rail and the transport's macro tiles; the four-way cross stays the ROUTING grip. */
 export function gripDots(parent, size = 13) {
@@ -515,13 +515,15 @@ export function gripDots(parent, size = 13) {
 export function trig(o) {
   const b = el('button', 'trig' + (o.cls ? ' ' + o.cls : ''));
   b.type = 'button';
-  if (o.glyph) el('span', 'trig-g', b, o.glyph);
+  /* 1.5.6-alpha.3: a glyph NAME draws its SVG, as sw({ glyph }) does; any other string stays text (a character, as before) */
+  const ink = (s, g) => { s.textContent = ''; if (hasGlyph(g)) s.appendChild(glyphEl(g, 'gly gly-' + g, 16)); else s.textContent = g; };
+  if (o.glyph) ink(el('span', 'trig-g', b), o.glyph);
   label(el('span', 'trig-l', b), o.label);
   if (o.title) hint(b, o.title);
   b.addEventListener('click', (e) => { if (o.onFire) o.onFire(e); });
   /* wave 62: a `trig` used as a STATE says so.  A trig that never sets `on` never gets the attribute,
      so this is correct for every caller and costs one expression. */
-  return { root: b, setLabel(s) { label(b.querySelector('.trig-l'), s); }, setGlyph(g) { const s = b.querySelector('.trig-g'); if (s) s.textContent = g; }, set on(v) { b.classList.toggle('on', !!v); b.setAttribute('aria-pressed', String(!!v)); } };
+  return { root: b, setLabel(s) { label(b.querySelector('.trig-l'), s); }, setGlyph(g) { const s = b.querySelector('.trig-g'); if (s) ink(s, g); }, set on(v) { b.classList.toggle('on', !!v); b.setAttribute('aria-pressed', String(!!v)); } };
 }
 
 /** fader({ label, aria, min, max, value, fmt, log, fine, cls, onInput, onChange }) — a horizontal scalar
@@ -643,9 +645,12 @@ export function formula(o) {
   };
 }
 
-/** device({ id, eyebrow, title, status }) — a rack window: identity | live status | utilities */
+/** device({ id, eyebrow, title, status, glyph }) — a rack window: identity | live status | utilities.  `glyph` (1.5.6-alpha.3): the window's
+ *  one drawing, written as data-glyph (createRack's register reads it when none is passed: the FINDER, the window menu, the scroll pill)
+ *  and drawn before the name in the head (`.dev-glyph`) */
 export function device(o) {
   const root = el('section', 'dev'); root.dataset.id = o.id;
+  if (o.glyph) root.dataset.glyph = o.glyph;
   const head = el('header', 'dev-head', root);
   /* THE STATUS IS NOT ALWAYS VISIBLE (wave 44).  The header is one grid row — eyebrow, status, buttons — and on a
      274 px card a long eyebrow beside six utility buttons leaves the status NO width at all: ELECTROSTATICS'
@@ -654,6 +659,7 @@ export function device(o) {
   const headHint = (st) => { const name = mathPlain(o.eyebrow || o.id || 'window'); head.title = st ? name + ': ' + mathPlain(st) : name; };
   headHint(o.status || '');
   const idz = el('div', 'dev-id', head);
+  if (o.glyph && hasGlyph(o.glyph)) idz.appendChild(glyphEl(o.glyph, 'dev-glyph gly gly-' + o.glyph, 14));
   label(el('div', 'dev-eyebrow', idz), o.eyebrow || '');
   /* WAVE 62 · TWENTY-FIVE NAMED REGIONS, for three lines.  A <section> is only a landmark once it has
      an accessible name, and the name it should carry is the <h2> already sitting in its header — so a

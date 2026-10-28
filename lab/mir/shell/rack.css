@@ -115,6 +115,7 @@ body.ui-hidden .rack-scrollbar { display: none; }
 .rack-pill { position: absolute; transform: translateY(-50%); box-sizing: border-box; padding: 4px 10px; border-radius: var(--rack-pill-r); white-space: nowrap;
   width: max-content; background: var(--acc); color: #fff; font: var(--w-bold) 11px/1.2 var(--font-ui); letter-spacing: var(--tr-wide, .06em); box-shadow: none;
   clip-path: inset(0 100% 0 0); transition: clip-path var(--rack-pill-t) var(--rack-pill-ease); }
+.rack-pill-glyph { vertical-align: -2px; margin-right: 5px; }   /* 1.5.6-alpha.3: the window's glyph before its name */
 .rack-pills[data-side="right"] .rack-pill { clip-path: inset(0 0 0 100%); }
 .rack-pills.on .rack-pill { clip-path: inset(0); }
 .rack-pills[data-pill-ink="dark"] .rack-pill { color: #000; }
