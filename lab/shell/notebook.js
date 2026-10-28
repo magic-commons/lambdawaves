@@ -74,7 +74,7 @@ export function createNotebook(app) {
       const A = app.sh.ACTIONS, keyFor = (id) => app.sh.kt.keyText(id);
       /** item(id, text, opts) — a row for an action: its key after the TAB, a toggle checked from get(), `args` run with arguments */
       const item = (id, text, o = {}) => { const a = A.get(id); if (!a) return null; const m = !o.args && app.sh.kt.table.menuItem(id, text), k = o.args ? '' : keyFor(id), on = o.on !== undefined ? o.on() : a.kind === 'toggle' && a.get ? !!a.get() : undefined;
-        return [(text || a.label) + (k && k !== '—' ? '\t' + k : ''), m ? m[1] : () => A.run(id, o.args), o.dis || (m ? m[2] : null), o.hint || a.hint || a.label, { ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(o.icon ? { icon: o.icon } : {}) }]; };
+        return [(text || a.label) + (k && k !== '—' ? '\t' + k : ''), m ? m[1] : () => A.run(id, o.args), o.dis || (m ? m[2] : null), o.hint || a.hint || a.label, { ...(on !== undefined ? { checked: on } : {}), ...(o.radio ? { radio: o.radio } : {}), ...(o.icon || (a.icon && !o.radio) ? { icon: o.icon || (typeof a.icon === 'function' ? a.icon() : a.icon) } : {}) }]; };   // 022 E2: a row wears its action's glyph (the registry's `icon`)
       const sub = (text, entries, icon) => [text, entries, null, '', { sub: true, ...(icon ? { icon } : {}) }];
       const radio = (id, group, choices, cur) => choices.map(([v, w]) => item(id, w, { args: { id: v }, radio: group, on: () => cur() === v }));
       const reveal = A.reveal, H = () => app.sh.historyApi, wins = () => [...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')];
@@ -87,7 +87,7 @@ export function createNotebook(app) {
           item('save', 'SAVE' + (layout.projects.current ? '  ' + layout.projects.current : '…'), { icon: 'save' }), item('saveAs', 'SAVE AS…'), null,
           item('import', 'IMPORT…', { icon: 'upload' }),
           sub('EXPORT', () => [sub('PROJECT', () => [item('export.json', '.json'), item('export.mir', '.mir'), item('export.png', '.png — the picture carrying the project')]),
-            item('export.picture', 'PICTURE'), item('render', 'FILM…', { icon: 'render' }),
+            item('export.picture', 'PICTURE'), item('render', 'FILM…'),
             sub('SHAPE', () => SHAPE_EXPORTS.filter((s) => s.kind === 'shape').map((s) => item('export.' + s.fmt, s.fmt.toUpperCase(), { hint: s.tip }))),
             sub('GRID', () => SHAPE_EXPORTS.filter((s) => s.kind === 'grid').map((s) => item('export.' + s.fmt, s.fmt.toUpperCase(), { hint: s.tip })))], 'download'),
           null, sub('QUICK', () => [item('quick.save', 'SAVE the experiment'), item('quick.load', 'LOAD the last quick save')])],
@@ -97,26 +97,26 @@ export function createNotebook(app) {
             item('copy.link', 'LINK', { hint: 'a URL that reopens this exact state' })], 'duplicate'),
           sub('STATE', () => [item('state.normalize', 'NORMALIZE'), item('state.clear', 'CLEAR the register'), item('reseed', 'RESEED the particles')]), null,
           item('mapping', 'KEYBOARD & MAPPING…'), item('settings', 'SETTINGS…', { icon: 'settings' })],
-        VIEW: () => [sub('MODE', () => radio('mode', 'mode', [['hydrogen', 'HYDROGEN'], ['molecules', 'MOLECULES']], () => (A.get('mode').get() ? 'molecules' : 'hydrogen'))),
+        VIEW: () => [sub('MODE', () => radio('mode', 'mode', [['hydrogen', 'HYDROGEN'], ['molecules', 'MOLECULES']], () => (A.get('mode').get() ? 'molecules' : 'hydrogen')), 'atom'),
           sub('OBSERVABLE', () => radio('view', 'view', [['density', 'ρ = |ψ|²  density'], ['phase', 'arg ψ  phase'], ['real', 'Re ψ'], ['imag', 'Im ψ']], () => VIEW_NAMES[mat.view])),
           sub('STYLE', () => radio('style', 'style', ['cloud', 'solid', 'signed', 'dust', 'bands'].map((v) => [v, v.toUpperCase()]), () => drawStyle(mat.style))),
           item('invert', 'INVERT the cloud — ink, not light'),
           sub('STAGE', () => [item('view.captions', 'CAPTIONS'), item('view.formula', 'FORMULA'), item('view.labels', 'ATOM LABELS'), item('ballStick', 'BALL AND STICK')]),
           sub('INTERFACE', () => [item('view.badges', 'STATUS TAGS'), item('view.hints', 'CONTROL HINTS'), item('notes', 'WINDOW HELP'), null, item('hide', 'HIDE the interface')]),
-          sub('CAMERA', () => [item('camReset', 'HOME', { icon: 'home' }), item('camera.panHome', 'PAN HOME'), null, item('camera.lock', 'LOCK', { icon: 'lock' }), item('camera.flip', 'FLIP'), item('camera.autoRotate', 'AUTO-ROTATE')], 'cameraOrbit'),
-          sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get())),
+          sub('CAMERA', () => [item('camReset', 'HOME', { icon: 'home' }), item('camera.panHome', 'PAN HOME'), null, item('camera.lock', 'LOCK', { icon: 'lock' }), item('camera.flip', 'FLIP'), item('camera.autoRotate', 'AUTO-ROTATE')], 'lens'),
+          sub('THEME', () => radio('theme', 'theme', [['light', 'LIGHT'], ['dark', 'DARK'], ['system', 'SYSTEM']], () => A.get('theme').get()), 'moon'),
           item('fullscreen', 'FULL SCREEN', { icon: 'expand' })],
         PLAY: () => [item('transport.play', 'PLAY / PAUSE', { icon: 'play' }), item('home', 't → 0', { icon: 'rewind' }), item('stepBack', 'STEP ◂'), item('stepFwd', 'STEP ▸'), null,
           item('modArm', 'MOD ARM'), item('modBar', 'BAR LOCK'), item('settings.playLock', 'PLAYBACK LOCK'), null,
           sub('RATE', () => [item('csb.rate.up', 'RATE ×1.25'), item('csb.rate.down', 'RATE ÷1.25')]), sub('TEMPO', () => [item('csb.tempo.up', 'TEMPO +1 BPM'), item('csb.tempo.down', 'TEMPO −1 BPM')])],
         WINDOW: () => [item('windowPicker', 'FINDER…', { hint: 'search every window; Shift-click queues several', icon: 'search' }), null,
           sub('RACKS', () => [item('rack', 'SHOW THE RACK'), item('folds', A.get('folds').word ? A.get('folds').word().split(' — ')[0] : 'MINIMIZE ALL', { on: () => undefined }), item('dock', 'DOCK THE CONTROL SURFACE')]),
-          sub('TOOLS', () => [tool('menu', 'PICKER', null, 'library'), tool('modulation', 'MODULATION', null, 'modulation'), tool('timeline', 'TIMELINE', null, 'lanes'), tool('nodes', 'NODES', null, 'nodes'), tool('notebook', 'NOTEBOOK', null, 'notebook'), tool('folders', 'FOLDERS', null, 'folders'), item('history', 'HISTORY', { icon: 'history' }), tool('help', 'KEYBOARD', null, 'keyboard')]), null,
+          sub('TOOLS', () => [tool('menu', 'PICKER', null, 'picker'), tool('modulation', 'MODULATION', null, 'modulation'), tool('timeline', 'TIMELINE', null, 'timeline'), tool('nodes', 'NODES', null, 'nodes'), tool('notebook', 'NOTEBOOK', null, 'notebook'), tool('folders', 'FOLDERS', null, 'folders'), item('history', 'HISTORY', { icon: 'history' }), tool('help', 'KEYBOARD', null, 'keyboard')]), null,
           /* 018 E6 · one submenu per KIND (window-chrome.js data-kind), each window ✓ while open: a press opens a closed one by the FINDER's road
              (kit rk.reveal) and closes an open one */
           ...['core', 'info', 'control', 'other'].map((k) => sub(k.toUpperCase(), () => { const ds = wins().filter((d) => (d.dataset.kind || 'other') === k);
             return ds.length ? ds.map((d) => [d.querySelector('.dev-eyebrow').textContent, () => A.run('window.' + d.dataset.id + (d.classList.contains('closed') ? '.open' : '.close')), null, winHint(d), { checked: !d.classList.contains('closed'), icon: WINDOW_GLYPH[d.dataset.id] }]) : [['none', null, true]]; }))],   // 021 V2: each window its one glyph
-        HELP: () => [item('about', 'ABOUT λWAVES', { icon: 'info' }), item('guiAbout', 'ABOUT MIR'), item('help', 'KEYBOARD SHORTCUTS…'),
+        HELP: () => [item('about', 'ABOUT λWAVES'), item('guiAbout', 'ABOUT MIR'), item('help', 'KEYBOARD SHORTCUTS…'),
           item('photosensitivity', 'PHOTOSENSITIVITY WARNING…', { hint: 'show the photosensitivity notice now and next load' }), null, item('update', 'UPDATE APP', { hint: 'check for a new build, rebuild the offline cache, and reload' })],
       };
       /* 0.5.0 C3 · THE BAR IS THE KIT'S createMenubar (its port of this app's bar: the disclosure, 400 ms hover hide, the placement,

@@ -5,8 +5,9 @@
  * at 16, 20 or 24 px only; named for its MEANING in camelCase, never for the character it replaced.  A kit name is never redrawn here (the door
  * refuses it): the same idea uses the kit's drawing (info, settings, folder, home, plus, download, save, curves, render, chevron*).
  * WINDOW_GLYPH is ONE glyph per window, declared at its register (rack-wiring.js) or its createWindow (kit factories through `windowGlyphs`).
- * BORROWED names are windows with no drawing yet: each wears the kit glyph named beside it until iteration 022 draws it (V-BUILD.md's list). */
-import { registerGlyphs, glyphSvg } from './mir/glyph.js';
+ * 022 E2: every window wears λWAVES' own drawing of its MEANING (V-BUILD.md's DRAWING LIST, drawn: no BORROWED name is left); Gemini may redraw
+ * them from research/iteration-022/E-shots/glyphs-*.png on Josh's word (research/iteration-022/ICONS-FOR-GEMINI.md). */
+import { registerGlyphs } from './mir/glyph.js';
 import { windowGlyphs } from './mir/window/window.js';
 
 const S = 'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
@@ -14,6 +15,9 @@ const p = (d) => '<path ' + S + ' d="' + d + '"/>';
 const c = (cx, cy, r) => '<circle ' + S + ' cx="' + cx + '" cy="' + cy + '" r="' + r + '"/>';
 const dot = (cx, cy, r) => '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="currentColor"/>';
 const solid = (d) => '<path fill="currentColor" fill-rule="evenodd" d="' + d + '"/>';
+const box = (x, y, w, h, rx) => '<rect ' + S + ' x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + rx + '"/>';
+const fill = (x, y, w, h, rx) => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + rx + '" fill="currentColor"/>';
+const oval = (cx, cy, rx, ry, t) => '<ellipse ' + S + ' cx="' + cx + '" cy="' + cy + '" rx="' + rx + '" ry="' + ry + '"' + (t ? ' transform="rotate(' + t + ' ' + cx + ' ' + cy + ')"' : '') + '/>';
 /* NODES' 16-unit drawings, through the kit's precedent (glyph.js `edit`, `select`, `scrub`) */
 const n16 = (inner) => '<g transform="scale(1.5)" fill="none" stroke="currentColor" stroke-width="1.267" stroke-linecap="round" stroke-linejoin="round">' + inner + '</g>';
 
@@ -55,6 +59,39 @@ export const ICONS = {
   sideLeft: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/><rect x="6" y="7" width="3" height="10" rx="1" fill="currentColor"/>',
   sideTop: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/><rect x="7" y="7" width="10" height="3" rx="1" fill="currentColor"/>',
   sideBottom: '<rect ' + S + ' x="3" y="4" width="18" height="16" rx="2.5"/><rect x="7" y="14" width="10" height="3" rx="1" fill="currentColor"/>',   // ⟳: to the next exact repeat of the density
+  /* ── 022 E2 · THE WINDOWS, each drawn for its MEANING (V-BUILD.md's DRAWING LIST and the rest of the brief), not its letter ── */
+  spectrum: p('M3 20.5h18') + p('M5.5 20.5v-6M9 20.5V6M12.5 20.5V11M16 20.5V3.5M19 20.5v-4'),                     // lines of different heights
+  wave: p('M2.5 12h2c1 0 1.3-3 2.3-3s1.4 6 2.5 6 1.5-10 2.7-10 1.5 14 2.7 14 1.4-10 2.5-10 1.3 6 2.3 6 1.3-3 2.3-3h2'),   // a packet: the wave under its envelope
+  clip: box(3.5, 3.5, 17, 17, 2.5) + fill(3.5, 9.5, 17, 5, 0),                                               // the box and the slab it keeps
+  field: p('M3.5 3.5v17') + p('M7 7h11.5M7 12h11.5M7 17h11.5') + p('M16 4.5 18.5 7 16 9.5M16 9.5l2.5 2.5-2.5 2.5M16 14.5l2.5 2.5-2.5 2.5'),   // a plate and its field lines
+  separable: p('M4 8l8-4.5L20 8v8l-8 4.5L4 16Z') + p('M4 8l8 4.5L20 8M12 12.5v8'),                                // the box: x · y · z apart
+  central: p('M3 3.5C6 3.5 7 19.5 12 19.5S18 3.5 21 3.5') + p('M7.6 13h8.8'),                                    // a central well and a bound level
+  lattice: dot(5, 5, 2) + dot(12, 5, 2) + dot(19, 5, 2) + dot(5, 12, 2) + dot(12, 12, 2) + dot(19, 12, 2) + dot(5, 19, 2) + dot(12, 19, 2) + dot(19, 19, 2),   // sites
+  emission: c(6, 12, 3) + p('M10.5 12c.9-2.2 1.9-2.2 2.8 0s1.9 2.2 2.8 0H21') + p('M18.5 9.5 21 12l-2.5 2.5'),  // an atom and the photon it sends
+  bloch: c(12, 12, 9) + p('M3 12a9 3 0 0 0 18 0') + p('M12 12l4.5-6') + dot(16.5, 6, 1.7),                       // the sphere and its state
+  plane: p('M3 16.5 9 7.5h12l-6 9Z') + p('M12 12V3.5'),                                                          // a tilted plane and its normal
+  calculus: p('M16 4.5c-1-1.4-3.2-1.2-3.6 1L10.6 18.5c-.4 2.2-2.6 2.4-3.6 1'),                                    // the integral sign
+  ladder: p('M7 3v18M17 3v18M7 7.5h10M7 12h10M7 16.5h10'),                                                       // rungs: a†, a
+  wigner: oval(12, 12, 9, 6, -25) + oval(12, 12, 5, 3, -25) + dot(12, 12, 1.4),                                  // a contour map
+  shadow: c(12, 9, 5.5) + '<ellipse cx="12" cy="19.5" rx="7.5" ry="2" fill="currentColor"/>',                    // a disc and its cast
+  orbit: oval(12, 12, 9, 5.5) + dot(19.8, 9.3, 2) + dot(4.9, 12, 1.2),                                          // the ellipse, the body, the focus
+  vortex: p('M12 12c.2-1 1.5-1.3 2.1-.4.9 1.3-.2 3-1.8 3.1-2.3.2-3.7-2.2-3-4.3 1-2.9 4.5-3.8 7-2.3 3.2 1.9 3.6 6.4 1.3 9.1-2.7 3.3-7.7 3.4-10.6.6-3.2-3-3.1-8.3-.2-11.4'),   // a spiral
+  meters: p('M3.5 17a8.5 8.5 0 1 1 17 0') + p('M12 17l4.2-5.6') + dot(12, 17, 1.6) + p('M6.2 11.4l1.2.9M12 8.6V10M17.8 11.4l-1.2.9'),   // a gauge
+  radiation: dot(12, 12, 2.4) + p('M12 2.5v4.5M12 17v4.5M2.5 12H7M17 12h4.5M5.3 5.3l3.2 3.2M15.5 15.5l3.2 3.2M5.3 18.7l3.2-3.2M15.5 8.5l3.2-3.2'),   // rays
+  equalizer: fill(3.5, 12, 3.2, 8.5, .8) + fill(8, 5.5, 3.2, 15, .8) + fill(12.5, 14, 3.2, 6.5, .8) + fill(17, 8, 3.2, 12.5, .8),   // bars
+  controlSurface: p('M7 3.5v17') + fill(4.3, 12, 5.4, 3.6, 1) + c(16.5, 9, 4) + p('M16.5 9V5') + dot(16.5, 18.2, 1.5),   // a fader and a knob
+  history: p('M4.5 12a7.5 7.5 0 1 0 2.2-5.3') + p('M6.7 3.6v3.1h3.1') + p('M12 8v4.5l3 2'),                       // the clock turned back
+  keyboard: box(2.5, 6, 19, 12, 2) + p('M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 14h8'),                    // keys
+  notebook: box(6, 3, 13, 18, 2) + p('M9.5 8h6M9.5 12h6M9.5 16h3.5') + p('M6 7H4M6 12H4M6 17H4'),                // a bound, lined page
+  informational: p('M4.5 4h15A1.5 1.5 0 0 1 21 5.5v10a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17h-1A1.5 1.5 0 0 1 3 15.5v-10A1.5 1.5 0 0 1 4.5 4Z') +
+    dot(12, 7.6, 1.15) + p('M12 10.4v3.6'),                                                                      // an i in a speech line: the stage's words
+  palette: dot(19, 12, 2.3) + dot(15.5, 18.06, 2.3) + dot(8.5, 18.06, 2.3) + dot(5, 12, 2.3) + dot(8.5, 5.94, 2.3) + dot(15.5, 5.94, 2.3),   // a ring of swatches
+  lens: p('M3 8.5A1.5 1.5 0 0 1 4.5 7h3L9 4.5h6L16.5 7h3A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5Z') + c(12, 13, 3.6),   // CAMERA: a lens
+  about: p('M6.5 3.5H8c1 0 1.7.5 2.1 1.4l8.4 15.6') + p('M12.4 10.6 5.5 20.5'),                                    // the λ mark
+  timeline: fill(3.5, 4.5, 9, 3.2, 1) + fill(8.5, 10.4, 11, 3.2, 1) + fill(5.5, 16.3, 7, 3.2, 1) + p('M15.5 2.5v19'),   // lanes of clips and the playhead
+  film: box(3, 5, 18, 14, 2.5) + solid('M10 9v6l5.2-3Z'),                                                        // RENDER: a frame with a play
+  picker: box(3.5, 3.5, 7.5, 7.5, 1.5) + box(13, 3.5, 7.5, 7.5, 1.5) + box(3.5, 13, 7.5, 7.5, 1.5) + fill(13, 13, 7.5, 7.5, 1.5),   // a shelf of tiles, one picked
+  transition: p('M3.5 5.5h9M3.5 18.5h9') + p('M8 6.5v10') + p('M5.8 14.3 8 16.5l2.2-2.2') + p('M13 12c.8-1.8 1.6-1.8 2.4 0s1.6 1.8 2.4 0 1.6-1.8 2.4 0'),   // two levels, the jump, the photon
   /* ── the Picker's look tiles (picker.js SHAPES) and the ladders' FILL ALL / EMPTY (paint-stroke.js, Gemini's 008 U drawings) ── */
   balls: dot(12, 12, 6.5),
   sticks: p('M3 12h11.3') + c(17.5, 12, 3.2),                                   // was 1.6 wide
@@ -93,33 +130,22 @@ export const ICONS = {
 /** a NODES type's glyph name ('grain' → 'nodeGrain') */
 export const nodeGlyph = (type) => 'node' + type[0].toUpperCase() + type.slice(1);
 
-/* THE DRAWING LIST FOR 022: a window's own name, wearing the drawing named beside it (a kit glyph, or one above) until it is drawn */
-export const BORROWED = {
-  spectrum: 'bulletList', wave: 'modulation', clip: 'compact', field: 'compassNorth', separable: 'duplicate', central: 'tune', lattice: 'gallery',
-  emission: 'barsBottom', bloch: 'loop', plane: 'xy', calculus: 'curves', ladder: 'barsTop', wigner: 'eye', shadow: 'eyeShut', orbit: 'morph',
-  vortex: 'mandelbrot', meters: 'grade', radiation: 'dot', equalizer: 'sliders', controlSurface: 'sliders', history: 'undo', keyboard: 'gripDots',
-  notebook: 'edit',
-};
-
 /** ONE glyph per window, by the window's id (its saved id, which never changes): a rack card's at its register, a kit window's at its make */
 export const WINDOW_GLYPH = {
-  informational: 'info', spectrum: 'spectrum', settings: 'settings', palette: 'hueRing', observer: 'wave', camera: 'cameraOrbit', clip: 'clip',
+  informational: 'informational', spectrum: 'spectrum', settings: 'settings', palette: 'palette', observer: 'wave', camera: 'lens', clip: 'clip',
   history: 'history', transport: 'controlSurface', chem: 'molecule', atoms: 'atom', equalizer: 'equalizer',
   staticfield: 'field', separable: 'separable', central: 'central', lattice: 'lattice', emission: 'emission', bloch: 'bloch', slice: 'plane',
   calculus: 'calculus', ladder: 'ladder', wigner: 'wigner', shadow: 'shadow', orbit: 'orbit', vortex: 'vortex', meters: 'meters',
-  radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'render',
+  radiation: 'radiation', nodes: 'nodes', projects: 'folders', render: 'film',
   /* the kit factories' windows (windowGlyphs) */
-  gui: 'settings', 'gui-about': 'info', keyboard: 'keyboard', 'keys-help': 'keyboard', timeline: 'lanes', modulation: 'modulation',
+  gui: 'cogSolid', 'gui-about': 'about', keyboard: 'keyboard', 'keys-help': 'keyboard', timeline: 'timeline', modulation: 'modulation',
   'transport-free': 'controlSurface', folders: 'folders',
 };
 
-const inner = (name) => glyphSvg(name).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
 let done = false;
-/** registerIcons() — boot's first act, before any window is made: the table and the borrowed names through the kit's door, and the kit
- *  factories' windows named by id.  Once. */
+/** registerIcons() — boot's first act, before any window is made: the table through the kit's door, and the kit factories' windows named by id.  Once. */
 export function registerIcons() {
   if (done) return; done = true;
   registerGlyphs(ICONS);
-  registerGlyphs(Object.fromEntries(Object.entries(BORROWED).map(([name, from]) => [name, ICONS[from] || inner(from)])));
   windowGlyphs(WINDOW_GLYPH);
 }
