@@ -54,7 +54,7 @@
  *                           clipboard through shell/clipboard.js copyText, its fallback included, for a tablet with no
  *                           console; a notice says whether it worked (BASINS debug.js copyDebugInfo)
  *   Recent projects are FOLDERS' (folders/files.js recentRows). */
-import { el, label as writeLabel } from '../kit.js';
+import { el, label as writeLabel, ariaLabel } from '../kit.js';
 import { t, onLanguage } from '../core/i18n.js';
 import { setVar } from '../core/perf.js';
 import { frame } from '../core/frame.js';
@@ -75,29 +75,20 @@ export const copyDumpRow = (dump, hint = 'the debug dump, to the clipboard') => 
   else { notice('Copy failed — the dump is in the browser console.', { kind: 'warn' }); try { console.log(text); } catch (_) { /* no console */ } }
 }, null, hint];
 
-export function createMenubar({ opener, host, menus, label, phone, keep } = {}) {
-  if (!opener || !menus) return null;
-  const isPhone = phone || (() => document.body.classList.contains('phone') || (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--phone')) || 0) >= 1);
-  const logoHidden = () => document.documentElement.dataset.logo === 'hidden';
-  const pinned = () => isPhone() || logoHidden() || document.documentElement.dataset.menuBar === 'always';
-  const life = new AbortController(), on = { signal: life.signal };
-  const keepers = keep || (() => [document.getElementById('rackToggle')].filter(Boolean));
-  const bar = el('nav', 'menubar', host || document.body); bar.id = 'menubar';
-  try { bar.setAttribute('popover', 'manual'); } catch (_) {}
-  bar.hidden = true;
-  const canPop = typeof bar.showPopover === 'function';
-  let openList = null;
-  const closeLists = () => { for (const l of bar.querySelectorAll('.mb-sub-list')) l.remove(); for (const l of bar.querySelectorAll('.mb-list')) l.hidden = true; for (const b of bar.querySelectorAll('.mb-btn')) b.setAttribute('aria-expanded', 'false'); openList = null; };
+/* 1.5.6-alpha.4 · ONE RENDERER: the bar's lists and contextMenu's pane are drawn by these rows.  rowsOn({ layer, phone, done }) →
+   { render, openSub, closeSub }: `layer` holds a submenu beside its row (written in its frame), `done()` closes after a row runs; `surface`
+   draws a submenu as its own menu pane (contextMenu's; the bar's lists are drawn by #menubar's rules). */
+function rowsOn({ layer, phone, done, surface = false }) {
   /* 1.5.6-alpha.2 · a submenu is a list of its own, made as it opens and removed as it closes: beside its row on the bar's own layer (a list
      a frosted, scrolling parent cannot clip), or inline under its row on a phone.  `child` is the list a list has open, `row` the row that opened it */
   const closeSub = (list) => { const c = list && list.mbChild; if (!c) return; closeSub(c); c.remove(); list.mbChild = null; if (c.mbRow) c.mbRow.setAttribute('aria-expanded', 'false'); };
   function openSub(list, it, entries) {
     if (list.mbChild && list.mbChild.mbRow === it) return list.mbChild;
     closeSub(list);
-    const sub = el('div', 'mb-list mb-sub-list'), phone = isPhone(); sub.mbRow = it; sub.mbParent = list; list.mbChild = sub; it.setAttribute('aria-expanded', 'true');
-    if (phone) { sub.classList.add('mb-accordion'); it.after(sub); } else bar.appendChild(sub);
+    const sub = el('div', 'mb-list mb-sub-list'), ph = phone(); sub.mbRow = it; sub.mbParent = list; list.mbChild = sub; it.setAttribute('aria-expanded', 'true');
+    if (ph) { sub.classList.add('mb-accordion'); it.after(sub); } else { layer.appendChild(sub); if (surface) { sub.classList.add('glass'); sub.dataset.mirSurface = 'menu'; } }
     render(sub, entries);
-    if (!phone) { const r = it.getBoundingClientRect(), o = bar.getBoundingClientRect(), w = sub.offsetWidth, h = sub.offsetHeight, W = window.innerWidth, H = window.innerHeight;   // placed in the viewport, written in the bar's frame
+    if (!ph) { const r = it.getBoundingClientRect(), o = layer.getBoundingClientRect(), w = sub.offsetWidth, h = sub.offsetHeight, W = window.innerWidth, H = window.innerHeight;   // placed in the viewport, written in the bar's frame
       const left = r.right + 2 + w <= W - 8 ? r.right + 2 : Math.max(8, r.left - 2 - w); sub.style.left = Math.round(left - o.left) + 'px'; sub.style.top = Math.round(Math.max(8, Math.min(H - h - 8, r.top - 4)) - o.top) + 'px'; }
     return sub;
   }
@@ -105,6 +96,7 @@ export function createMenubar({ opener, host, menus, label, phone, keep } = {}) 
     const it = e.target.closest('.mb-item'); if (!it) return;
     if (e.code === 'ArrowRight' && it.mbEntries) { e.preventDefault(); const s = openSub(list, it, it.mbEntries()); const f = s.querySelector('.mb-item:not(:disabled)'); if (f) f.focus(); }
     else if ((e.code === 'ArrowLeft' || e.code === 'Escape') && list.mbParent) { e.preventDefault(); e.stopPropagation(); const row = list.mbRow; closeSub(list.mbParent); row.focus(); }
+    else if (e.code === 'ArrowDown' || e.code === 'ArrowUp') { e.preventDefault(); const all = [...list.querySelectorAll(':scope > .mb-item:not(:disabled)')], i = all.indexOf(it); if (all.length) all[(i + (e.code === 'ArrowDown' ? 1 : -1) + all.length) % all.length].focus(); }
   };
   /** render(list, entries) — the rows of one list (a group's or a submenu's); a row that throws still closes the bar */
   function render(list, entries) {
@@ -122,17 +114,106 @@ export function createMenubar({ opener, host, menus, label, phone, keep } = {}) 
         el('span', 'mb-mark', it, o.checked ? (o.radio ? '•' : '✓') : '').setAttribute('aria-hidden', 'true'); }
       if (kk[1]) el('span', 'mb-key', it, kk[1]);
       if (hint) it.title = hint;
+      if (o.id) it.dataset.id = o.id;
       if (typeof dis === 'function' ? dis() : dis === true) it.disabled = true;
       if (o.sub) {
         it.classList.add('mb-sub'); it.setAttribute('aria-haspopup', 'true'); it.setAttribute('aria-expanded', 'false'); it.mbEntries = run; el('span', 'mb-arrow', it, '▸').setAttribute('aria-hidden', 'true');
-        it.addEventListener('click', (e) => { e.stopPropagation(); if (list.mbChild && list.mbChild.mbRow === it) closeSub(list); else openSub(list, it, run()); });
-        it.addEventListener('pointerenter', (e) => { if (hoverable(e) && !isPhone()) openSub(list, it, run()); });
+        it.addEventListener('click', (e) => { e.stopPropagation(); if (list.mbChild && list.mbChild.mbRow === it) { if (!(e.detail > 0 && hoverable(e) && !phone())) closeSub(list); } else openSub(list, it, run()); });   // a cursor's click keeps what its hover opened (1.5.6-alpha.4)
+        it.addEventListener('pointerenter', (e) => { if (hoverable(e) && !phone()) openSub(list, it, run()); });
         continue;
       }
-      it.addEventListener('pointerenter', (e) => { if (hoverable(e) && !isPhone() && list.mbChild) closeSub(list); });
-      it.addEventListener('click', (e) => { e.stopPropagation(); closeLists(); barShown(false); try { if (run) run(); } catch (err) { console.warn('menu: ' + kk[0], err); } });   // the item dies with the list
+      it.addEventListener('pointerenter', (e) => { if (hoverable(e) && !phone() && list.mbChild) closeSub(list); });
+      it.addEventListener('click', (e) => { e.stopPropagation(); done(); try { if (run) run(); } catch (err) { console.warn('menu: ' + kk[0], err); } });   // the item dies with the list
     }
   }
+  return { render, openSub, closeSub };
+}
+
+/* "Phone" is the kit's sentinel — skin.css raises `--phone` to 1 at its breakpoint — or `body.phone` where an app sets that class itself */
+const phoneNow = () => document.body.classList.contains('phone') || (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--phone')) || 0) >= 1;
+
+/* ── 1.5.6-alpha.4 · THE CONTEXT MENU DOOR (λWAVES 022 P1: ONE MENU DOOR) ──────────────────────────────────────────────────────────────
+ * contextMenu({ x, y, entries, anchor?, onClose?, label? }) → { pane, host, close() } | null
+ *   ONE pane of the menubar's own rows (entries as `menus` above: submenus, ✓ / •, glyphs, a key after a TAB, `opts.id` → data-id) at a point, or
+ *   under `anchor`; kept inside the viewport (it flips left / up at an edge); ↑ ↓ walk it, → ← a submenu, Enter runs, Escape closes; a phone
+ *   opens a submenu inline.  The pane is `.glass[data-mir-surface="menu"]`, so the skin draws it.  It closes on a press outside, a scroll,
+ *   a resize, the window's blur, the focus leaving it, and Escape — through the app's Escape stack when one is handed in (setMenuEscape).
+ *   One open at a time: a second replaces the first. */
+let escapeHook = null, ctxOpen = null;
+/** setMenuEscape(push) — the app's Escape stack: push(close) → the function that takes that layer off again (λWAVES: actions.escape.push) */
+export function setMenuEscape(push) { escapeHook = typeof push === 'function' ? push : null; }
+export function contextMenu({ x = 0, y = 0, entries, anchor = null, onClose = null, label: name = '' } = {}) {
+  if (ctxOpen) ctxOpen.close();
+  const rows = typeof entries === 'function' ? entries() : entries;
+  if (!rows || !rows.some(Boolean)) return null;
+  const host = el('div', 'mir-ctx', document.body); host.tabIndex = -1;
+  try { host.setAttribute('popover', 'manual'); host.showPopover(); } catch (_) {}   // the top layer: above every window, rail and dialog
+  const pane = el('div', 'mb-list mir-ctx-pane glass', host); pane.dataset.mirSurface = 'menu'; pane.setAttribute('role', 'menu'); if (name) ariaLabel(pane, name);
+  const life = new AbortController(), cap = { capture: true, signal: life.signal };
+  let off = null;
+  const api = { pane, host, close() { if (life.signal.aborted) return; life.abort(); if (off) off(); host.remove(); if (ctxOpen === api) ctxOpen = null; if (onClose) onClose(); } };
+  rowsOn({ layer: host, phone: phoneNow, done: api.close, surface: true }).render(pane, rows);
+  if (anchor) { const r = anchor.getBoundingClientRect(); x = r.left; y = r.bottom + 2; }
+  const w = pane.offsetWidth, h = pane.offsetHeight, W = window.innerWidth, H = window.innerHeight, M = 8;
+  pane.style.left = Math.round(Math.max(M, x + w > W - M ? Math.min(x - w, W - w - M) : x)) + 'px';
+  pane.style.top = Math.round(Math.max(M, y + h > H - M ? Math.min(y - h, H - h - M) : y)) + 'px';
+  document.addEventListener('pointerdown', (e) => { if (!host.contains(e.target)) api.close(); }, cap);
+  window.addEventListener('scroll', (e) => { if (!host.contains(e.target)) api.close(); }, cap);
+  for (const t of ['resize', 'blur']) window.addEventListener(t, api.close, { signal: life.signal });
+  host.addEventListener('focusout', (e) => { if (!host.contains(e.relatedTarget)) api.close(); }, { signal: life.signal });
+  off = escapeHook ? escapeHook(api.close) : null;
+  if (!off) window.addEventListener('keydown', (e) => { if (e.code === 'Escape' && !e.defaultPrevented) { e.preventDefault(); api.close(); } }, { signal: life.signal });
+  ctxOpen = api;
+  const first = pane.querySelector('.mb-item:not(:disabled)'); if (first) first.focus({ preventScroll: true });
+  return api;
+}
+
+/* ── 1.5.6-alpha.4 · ONE KNOB MENU: RESET · COPY · PASTE · FINE ✓ · ROUTES › · CLIP › · the app's rows ─────────────────────────────────
+ * It merges the timeline's TIMELINE CLIP pop (timeline/knobs.js) and the modulation window's route pop (modulation/window.js) into one pane.
+ * A part names its rows once — knobMenuPart(name, (id, root) → { entries, reset? } | null): 'routes' (the modulation window: RANGE ·
+ * REMOVE · REMOVE ALL · the macros holding it; its `reset` keeps the routes), 'clip' (the timeline), 'app' (the app's rows for every knob).
+ * The value is the knob's own door (root.mirKnob: get · home · input · fine); FINE halves its drag gain while on (this session). */
+const knobParts = new Map();
+let knobCopied = null;
+export function knobMenuPart(name, fn) { if (typeof fn === 'function') knobParts.set(name, fn); else knobParts.delete(name); }
+const knobOf = (k) => (k && k.root && k.home ? k : (k && k.closest && (k.closest('.k') || {}).mirKnob) || null);
+const partOf = (name, k) => { const f = knobParts.get(name), id = k.root.dataset.param; try { return f && id ? f(id, k.root) : null; } catch (_) { return null; } };
+/** knobAct(knob, 'reset' | 'copy' | 'paste' | 'fine') — the menu's four acts on a knob (its root or its api), for an app's keys too */
+export function knobAct(knob, verb) {
+  const k = knobOf(knob); if (!k) return false;
+  if (verb === 'reset') { const r = partOf('routes', k); if (r && r.reset) r.reset(); else k.home(); return true; }
+  if (verb === 'copy') { knobCopied = k.get(); return true; }
+  if (verb === 'paste') { if (knobCopied === null) return false; k.input(knobCopied); return true; }
+  return verb === 'fine' ? k.fine(!k.fine()) : false;
+}
+/** knobMenu(knob, { x, y, appRows?, open?, onClose? }) → the contextMenu; appRows(id, root) → entries; open: 'routes' opens that submenu */
+export function knobMenu(knob, { x, y, appRows = null, open = '', onClose = null } = {}) {
+  const k = knobOf(knob); if (!k) return null;
+  const id = k.root.dataset.param || '', act = (v) => () => knobAct(k, v);
+  const entries = [['RESET', act('reset'), false, 'Back to the default; the routes stay', { id: 'reset' }], ['COPY', act('copy'), false, 'Copy the value', { id: 'copy' }],
+    ['PASTE', act('paste'), knobCopied === null, 'Paste the copied value', { id: 'paste' }], ['FINE', act('fine'), false, 'Half the drag gain while on', { id: 'fine', checked: k.fine() }]];
+  for (const [part, word] of [['routes', 'ROUTES'], ['clip', 'CLIP']]) { const p = partOf(part, k); if (p && p.entries && p.entries.length) entries.push([word, () => p.entries, null, '', { sub: true, id: part }]); }
+  const app = [...((appRows && appRows(id, k.root)) || []), ...((partOf('app', k) || {}).entries || [])];
+  if (app.length) entries.push(null, ...app);
+  const m = contextMenu({ x, y, entries, onClose, label: 'Knob' });
+  const row = open && m && m.pane.querySelector(`[data-id="${open}"]`); if (row) row.click();
+  return m;
+}
+
+export function createMenubar({ opener, host, menus, label, phone, keep } = {}) {
+  if (!opener || !menus) return null;
+  const isPhone = phone || phoneNow;
+  const logoHidden = () => document.documentElement.dataset.logo === 'hidden';
+  const pinned = () => isPhone() || logoHidden() || document.documentElement.dataset.menuBar === 'always';
+  const life = new AbortController(), on = { signal: life.signal };
+  const keepers = keep || (() => [document.getElementById('rackToggle')].filter(Boolean));
+  const bar = el('nav', 'menubar', host || document.body); bar.id = 'menubar';
+  try { bar.setAttribute('popover', 'manual'); } catch (_) {}
+  bar.hidden = true;
+  const canPop = typeof bar.showPopover === 'function';
+  let openList = null;
+  const closeLists = () => { for (const l of bar.querySelectorAll('.mb-sub-list')) l.remove(); for (const l of bar.querySelectorAll('.mb-list')) l.hidden = true; for (const b of bar.querySelectorAll('.mb-btn')) b.setAttribute('aria-expanded', 'false'); openList = null; };
+  const { render, openSub, closeSub } = rowsOn({ layer: bar, phone: isPhone, done: () => { closeLists(); barShown(false); } });
 
   const names = Object.keys(menus);
   const word = (opener.querySelector('.lam') ? opener.querySelector('.lam').textContent : '') + (opener.querySelector('.word') ? opener.querySelector('.word').textContent : '');

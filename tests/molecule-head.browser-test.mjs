@@ -21,9 +21,10 @@ try {
   await g.ev(`__LW.stageText.prefs.set({ sayHead: true }); window.__w = (n) => new Promise((r) => setTimeout(r, n));
     window.__fades = () => __LW.stageText.layer.root.querySelectorAll('.mir-info-block[data-fade]').length;
     /* the hand's road: the page turner to the molecule's section (the dropdown holds one), then the dropdown's own change */
-    window.__pick = (id) => { const s = document.querySelector('#transport .mol-pick select.sel');
-      for (const sec of ['DIATOMICS', 'HYDRIDES', 'ORGANIC', 'BIO', 'LATTICE', 'HEAVY']) { if ([...s.options].some((o) => o.value === id)) break; __LW.chem.section(sec); }
-      s.value = id; s.dispatchEvent(new Event('input', { bubbles: true })); s.dispatchEvent(new Event('change', { bubbles: true })); };
+    window.__molRows = () => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const p = document.querySelector('.mir-pick'); const rows = p ? [...p.querySelectorAll('.mir-pick-i')].map((r) => ({ value: r.dataset.id, textContent: r.textContent, head: r.dataset.id[0] === '#', disabled: r.classList.contains('coming'), title: r.title, dataset: { help: r.title }, on: r.classList.contains('on') })) : []; if (p) b.click(); return rows; }; window.__molPick = (id) => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const r = document.querySelector('.mir-pick .mir-pick-i[data-id="' + id + '"]'); if (r) r.click(); else b.click(); return !!r; }; 
+    window.__pick = (id) => {   // 022 P3: the kit's select — open it and press the row, as a hand does
+      for (const sec of ['DIATOMICS', 'HYDRIDES', 'ORGANIC', 'BIO', 'LATTICE', 'HEAVY']) { if (__molRows().some((o) => o.value === id)) break; __LW.chem.section(sec); }
+      __molPick(id); };
     window.__until = async (f, ms = 20000) => { const t0 = performance.now(); while (!f()) { if (performance.now() - t0 > ms) return false; await __w(10); } return true; };
     document.activeElement && document.activeElement.blur && document.activeElement.blur();
     return 1;`);

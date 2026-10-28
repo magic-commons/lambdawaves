@@ -21,7 +21,8 @@ try {
      sections below speak THE FADE, so its kind (INFORMATIONAL › ANNOUNCE › PRESETS) is switched on in the record first */
   await g.ev(`__LW.stageText.prefs.set({ sayPreset: true }); window.__w = (n) => new Promise((r) => setTimeout(r, n));
     window.__node = () => [...__LW.stageText.layer.root.querySelectorAll('.mir-info-block')].pop() || null;
-    window.__field = (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); };
+    window.__field = (el, v) => { if (el.matches('.mir-select')) { const b = el.querySelector('.mir-sel-b'); b.click(); const r = document.querySelector('.mir-pick .mir-pick-i[data-id="' + v + '"]'); if (r) r.click(); else b.click(); return; }   // 022 P3: a kit select — a press on its row
+      el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); };
     return 1;`);
 
   /* ── 1 · the formula is KaTeX, keyed on its string ── */
@@ -71,7 +72,7 @@ try {
   pass(`a hand's preset announced once ("${t2.pressed.banner}" at ${t2.pressed.heading}) and faded back to the formula (${t2.after.title}); the undo, the link and the project open announced nothing — one banner, not three`);
 
   /* ── 3 · the names speak: HOMO + LUMO on water, WINDING on ammonia; the atom labels move only with the camera ── */
-  const t3 = await ev(`const S = __LW.stageText, sel = () => document.querySelector('.dev[data-id="chem"] .reg-pane .reg-bar select.sel');   /* iteration 008 U: the register's ORBITAL pane lives in MOLECULES */
+  const t3 = await ev(`const S = __LW.stageText, sel = () => document.querySelector('.dev[data-id="chem"] .reg-pane .reg-bar .mir-select');   /* iteration 008 U: the register's ORBITAL pane lives in MOLECULES */
     await __LW.chem.solve('H2O'); __LW.chem.setOn(true); await __LW.settle(); await __w(600);
     const a0 = S.stats.announced; __field(sel(), 'HOMO + LUMO'); await __w(80); const homo = S.banner;
     const l0 = S.stats.labelWrites; for (let i = 1; i <= 8; i++) { __LW.scrub(0.5 * i); await __LW.settle(); } const still = S.stats.labelWrites - l0;

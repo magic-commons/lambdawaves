@@ -32,7 +32,7 @@ try {
     await g.ev(`__LW.layout.raise('palette'); __LW.layout.popOut('palette', { x: 560, y: 60, w: 320 }); return 1;`); await wait(800);
     const inv = await g.ev(`const b = document.querySelector('.dev[data-id="palette"] .pal-invert'), r = b.getBoundingClientRect();
       b.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: r.left + 5, clientY: r.top + 5 }));
-      const row = [...document.querySelectorAll('.tl-pop button')].find((x) => /ADD TO CONTROL SURFACE/.test(x.textContent)); if (row) row.click();
+      const row = [...document.querySelectorAll('.mir-ctx .mb-item')].find((x) => /ADD TO CONTROL SURFACE/.test(x.textContent)); if (row) row.click();   // 022 P1: the kit's knob menu
       const pill = document.querySelector('#transport .tempo-chevron'); if (pill) pill.parentElement.click();
       await new Promise((r) => setTimeout(r, 600)); const f = document.querySelector('#transport .csb-favs .pal-invert');
       if (!f) return { face: null }; const before = __LW.mat.invert; f.click(); const after = __LW.mat.invert, card = b.getAttribute('aria-pressed'); f.click();

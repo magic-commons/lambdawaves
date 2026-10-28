@@ -207,30 +207,30 @@ try {
    * time, and an entry this engine cannot answer for is DISABLED with its reason on the option itself. */
   /* 0.4.0 S4b: the dropdown holds ONE SECTION; the page turner (‹ SECTION ›, the section header) turns it.  Every page is read
      through __LW.chem.section (the turner's own road), and then the page goes back to the molecule on screen. */
-  const l6 = await g.ev(`const card = document.querySelector('.dev[data-id="chem"]');
-    const sel = document.querySelector('#transport .mol-pick select.sel'), opts = [], groups = new Set(), pages = [];
+  const l6 = await g.ev(`window.__molRows = () => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const p = document.querySelector('.mir-pick'); const rows = p ? [...p.querySelectorAll('.mir-pick-i')].map((r) => ({ value: r.dataset.id, textContent: r.textContent, head: r.dataset.id[0] === '#', disabled: r.classList.contains('coming'), title: r.title, dataset: { help: r.title }, on: r.classList.contains('on') })) : []; if (p) b.click(); return rows; }; window.__molPick = (id) => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const r = document.querySelector('.mir-pick .mir-pick-i[data-id="' + id + '"]'); if (r) r.click(); else b.click(); return !!r; }; const card = document.querySelector('.dev[data-id="chem"]');   // 022 P3: the kit's select, read by opening it
+    const sel = document.querySelector('#transport .mol-pick .mir-select'), btn = sel && sel.querySelector('.mir-sel-b'), opts = [], groups = new Set(), pages = [];
     for (const s of ${JSON.stringify(SECTIONS)}) {
-      const h = __LW.chem.section(s); const here = sel ? [...sel.options] : [];
-      for (const g of sel.querySelectorAll('optgroup')) groups.add(g.label);
+      const h = __LW.chem.section(s); const all = sel ? __molRows() : [], here = all.filter((o) => !o.head);
+      for (const g of all.filter((o) => o.head)) groups.add(g.textContent);
       pages.push({ s, name: h.name, n: here.length, ids: here.map((o) => o.value).join(), want: h.molecules.join(), head: card.querySelector('.mol-section .mir-step-text').textContent });
       opts.push(...here.map((o) => ({ value: o.value, text: o.textContent, disabled: o.disabled, help: o.dataset.help || o.title || '' })));
     }
     __LW.chem.section('HYDRIDES');
-    return { exists: !!sel, cls: sel && sel.className, tag: sel && sel.tagName, pages,
+    return { exists: !!sel, cls: sel && sel.className, tag: sel && sel.tagName, natives: document.querySelectorAll('#transport select, .dev select').length, pages,
       count: opts.length, disabled: opts.filter((o) => o.disabled).length,
       disabledText: opts.filter((o) => o.disabled).map((o) => o.text + ' :: ' + o.help),
       groups: [...groups], turners: card.querySelectorAll('.mol-section .mir-step-b').length,
-      help: sel && (sel.dataset.help || sel.title) || '', aria: sel && sel.getAttribute('aria-label'),
-      value: sel && sel.value, first: opts[0] && opts[0].text, benzene: opts.find((o) => o.value === 'C6H6')?.text,
+      help: btn && (btn.dataset.help || btn.title) || '', aria: btn && btn.getAttribute('aria-label'),
+      value: (__molRows().find((o) => o.on) || {}).value, first: opts[0] && opts[0].text, benzene: opts.find((o) => o.value === 'C6H6')?.text,
       bad: opts.filter((o) => !/· [0-9]+ AO · (~([0-9]+ ms|[0-9]+[.][0-9] s)|record( · DOWNLOAD)?$)/.test(o.text)).map((o) => o.value + ' :: ' + JSON.stringify(o.text)),
       records: opts.filter((o) => / · record/.test(o.text)).map((o) => o.value),
       seg: !!card.querySelector('.segw[data-nope]'), errs: window.__e.slice() };`);
   judge(`L6 the page turner: ${l6.pages.length} sections, each page holds exactly its own molecules and its header names it (${l6.pages.map((p) => p.s + ' ' + p.n).join(' · ')})`,
     l6.turners === 2 && l6.pages.length === SECTIONS.length && l6.pages.every((p) => p.name === p.s && p.head === p.s && p.ids === p.want && p.n > 0),
     { pages: l6.pages.map((p) => ({ s: p.s, name: p.name, head: p.head, n: p.n, same: p.ids === p.want })) });
-  judge('L6 the MOLECULE control is a <select class="sel"> with an aria-label', l6.exists && l6.tag === 'SELECT' && l6.cls === 'sel' && l6.aria === 'molecule',
-    { tag: l6.tag, cls: l6.cls, aria: l6.aria });
-  judge(`L6 ≥ 30 options over the pages in ${l6.groups.length} optgroups, ≥ 1 disabled`, l6.count >= 30 && l6.disabled >= 1 && l6.groups.length >= 5,
+  judge('L6 the MOLECULE control is the kit\'s select (its list the menu pane) with an aria-label, and no native <select> is left', l6.exists && l6.tag === 'DIV' && /mir-select/.test(l6.cls) && l6.aria === 'molecule' && l6.natives === 0,
+    { tag: l6.tag, cls: l6.cls, aria: l6.aria, natives: l6.natives });
+  judge(`L6 ≥ 30 rows over the pages in ${l6.groups.length} groups, ≥ 1 disabled`, l6.count >= 30 && l6.disabled >= 1 && l6.groups.length >= 5,
     { options: l6.count, disabled: l6.disabled, groups: l6.groups, disabledText: l6.disabledText });
   /* 0.4.0 S4a: the COST refit (PLAN §10 N2) moved benzene's prediction from ~9.6 s to ~1.7 s; a row past the cap with a record
      says `record` (and DOWNLOAD until it is on this device) instead of a predicted time — never DISABLED */
@@ -289,8 +289,8 @@ try {
     const ok = __LW.restore(a); await new Promise((r) => setTimeout(r, 900));
     const B = JSON.parse(JSON.stringify(__LW.serialize().presentation.instruments.chem));
     const st = __LW.chem.state();
-    const sel = document.querySelector('#transport .mol-pick select.sel');
-    return { A, B, mid, preset: __LW.chem.preset(), selValue: sel && sel.value, energy: st.energy, nAO: st.nAO, errs: window.__e.slice() };`);
+    window.__molRows = () => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const p = document.querySelector('.mir-pick'); const rows = p ? [...p.querySelectorAll('.mir-pick-i')].map((r) => ({ value: r.dataset.id, textContent: r.textContent, head: r.dataset.id[0] === '#', disabled: r.classList.contains('coming'), title: r.title, dataset: { help: r.title }, on: r.classList.contains('on') })) : []; if (p) b.click(); return rows; }; window.__molPick = (id) => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const r = document.querySelector('.mir-pick .mir-pick-i[data-id="' + id + '"]'); if (r) r.click(); else b.click(); return !!r; }; 
+    return { A, B, mid, preset: __LW.chem.preset(), selValue: (__molRows().find((o) => o.on) || {}).value, energy: st.energy, nAO: st.nAO, errs: window.__e.slice() };`);
   judge('L9 a non-default preset (PH₃) round-trips through save → scramble → restore, select and all',
     l9.A.preset === 'PH3' && l9.mid === 'H2O' && l9.B.preset === 'PH3' && l9.preset === 'PH3' && l9.selValue === 'PH3'
     && JSON.stringify(l9.A) === JSON.stringify(l9.B), { A: l9.A, B: l9.B, mid: l9.mid, selValue: l9.selValue });

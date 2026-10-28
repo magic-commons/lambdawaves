@@ -270,7 +270,7 @@ export function createFolders(options = {}) {
     onSaved: (e) => { current = e.id; settled(self()); paintMark(); if (typeof o.onSaved === 'function') { try { o.onSaved(e); } catch (err) { console.warn('folders: onSaved', err); } } },
     onFresh: () => { current = null; settled(self()); paintMark(); },
     onRemoved: (e) => { if (current === e.id) { current = null; paintMark(); } },
-    onInspect: o.onInspect,
+    onInspect: o.onInspect, itemRows: o.itemRows,   // 1.5.6-alpha.4: the host's rows in a project's menu
     dragToFolder: o.dragToFolder === true, folderGlyph: o.folderGlyph,
     ...extraOpts,
   });

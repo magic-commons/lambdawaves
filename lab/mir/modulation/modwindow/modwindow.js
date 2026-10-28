@@ -1293,7 +1293,7 @@ export function buildGhost(text) {
 
 export function buildDevicePick(windowRoot, copyIn) {
   const copy = Object.assign({}, COPY, copyIn || {});
-  const root = m2mk('div', 'm2pick', windowRoot);
+  const root = m2mk('div', 'm2pick glass', windowRoot); root.dataset.mirSurface = 'menu';   // 1.5.6-alpha.4: the menu surface
   const btns = {};
   for (const [kind, label] of copy.devicePick) {
     const b = m2mk('button', 'm2pickb', root);
@@ -1308,7 +1308,7 @@ export function buildDevicePick(windowRoot, copyIn) {
 /** anim.js:3949. */
 export function buildMacroPick(windowRoot, copyIn) {
   const copy = Object.assign({}, COPY, copyIn || {});
-  const root = m2mk('div', 'm2pick m2mpick', windowRoot);
+  const root = m2mk('div', 'm2pick m2mpick glass', windowRoot); root.dataset.mirSurface = 'menu';
   const btns = {};
   for (const [kind, label] of copy.macroPick) {
     const b = m2mk('button', 'm2pickb', root);
@@ -1324,7 +1324,7 @@ export function buildMacroPick(windowRoot, copyIn) {
  *  --m2-plate, which is why it does NOT have the .m2pick defect. */
 export function buildPresetSheet(windowRoot, copyIn) {
   const copy = Object.assign({}, COPY, copyIn || {});
-  const root = m2mk('div', 'm2ppick glass', windowRoot);
+  const root = m2mk('div', 'm2ppick glass', windowRoot); root.dataset.mirSurface = 'menu';
   root.setAttribute('role', 'listbox');
   kitAria(root, copy.presetSheetLabel, { factory: { t: copy.factory } });
   root.hidden = true;
@@ -1374,7 +1374,7 @@ function buildPresetGroup(sheet, name, shut, on) {
 
 /** The dead-send inspector. */
 export function buildDeadInspector(windowRoot) {
-  const root = m2mk('div', 'm2deadpick glass', windowRoot);
+  const root = m2mk('div', 'm2deadpick glass', windowRoot); root.dataset.mirSurface = 'menu';
   root.id = IDS.deadInspector;
   root.setAttribute('role', 'dialog');
   kitAria(root, 'Dead-send inspector');

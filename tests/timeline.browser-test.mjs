@@ -67,13 +67,13 @@ try {
     const k = document.querySelector('.k[data-param="observer.dist"]'); k.scrollIntoView({ block: 'center', behavior: 'instant' }); await __w(300);
     const d = k.querySelector('.k-dial').getBoundingClientRect(); return { x: Math.round(d.left + d.width / 2), y: Math.round(d.top + d.height / 2), dist: __LW.obs.dist };`);
   await hold(zoom.x, zoom.y, 700);
-  const held = await ev(`await __w(150); const p = document.querySelector('.tl-pop'), r = { pop: !!p, create: !!(p && p.querySelector('[data-tl-action="create-clip"]')), moved: __LW.obs.dist !== ${zoom.dist} };
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await __w(100); r.closed = !document.querySelector('.tl-pop'); return r;`);
+  const held = await ev(`await __w(150); const p = document.querySelector('.mir-ctx'), r = { pop: !!p, create: !!(p && p.querySelector('[data-id="clip"]')), moved: __LW.obs.dist !== ${zoom.dist} };   // 022 P1: the kit's knob menu, CLIP ›
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await __w(100); r.closed = !document.querySelector('.mir-ctx'); return r;`);
   const yaw = await ev(`const d = document.querySelector('.k[data-param="observer.yaw"] .k-dial').getBoundingClientRect(); return { x: Math.round(d.left + d.width / 2), y: Math.round(d.top + d.height / 2), yaw: __LW.obs.yaw };`);
   await actions(g.s, [{ type: 'pointer', id: 'rc', parameters: { pointerType: 'mouse' }, actions: [
     { type: 'pointerMove', origin: 'viewport', x: yaw.x, y: yaw.y, duration: 0 }, { type: 'pointerDown', button: 2 }, { type: 'pause', duration: 40 }, { type: 'pointerUp', button: 2 }] }]);
   await relActions(g.s);
-  const pop = await ev(`await __w(150); const p = document.querySelector('.tl-pop'); const b = p && p.querySelector('[data-tl-action="create-clip"]'); if (b) b.id = 'tl-create';
+  const pop = await ev(`await __w(150); const p = document.querySelector('.mir-ctx'), s = p && p.querySelector('[data-id="clip"]'); if (s) s.click(); const b = p && p.querySelector('[data-id="create-clip"]'); if (b) b.id = 'tl-create';
     return { pop: !!p, title: p ? p.textContent.slice(0, 60) : null, yawMoved: __LW.obs.yaw !== ${yaw.yaw} };`);
   const tapCreate = await g.tap('#tl-create');
   const t3 = await ev(`await __w(300); const tl = __LW.timeline, doc = tl.model.state(), cv = doc.curves.find((c) => c.targetId === 'observer.yaw'), clip = cv && doc.clips.find((c) => c.curveId === cv.id);
@@ -83,7 +83,7 @@ try {
     const want = R.fromNorm('observer.yaw', tl.automation('observer.yaw', beat)), got = R.read('observer.yaw'), yaw1 = __LW.obs.yaw;
     tl.controller.seek(clip.start + clip.duration * 0.25); await __w(200); const got2 = R.read('observer.yaw'), want2 = R.fromNorm('observer.yaw', tl.automation('observer.yaw', clip.start + clip.duration * 0.25));
     return { clip: { start: clip.start, duration: clip.duration }, target: cv.targetId, want, got, want2, got2, stage: [yaw1, __LW.obs.yaw], errs: __e.slice() };`);
-  judge('T3 a held ZOOM dial opens TIMELINE CLIP (unmoved); a right-click on the YAW arc opens it; CREATE AUTOMATION CLIP (a real tap) places it; a paused seek previews the curve on YAW (the target; FREE orbits the stage by it)',
+  judge('T3 a held ZOOM dial opens the knob menu (unmoved), CLIP › inside; a right-click on the YAW arc opens it; CLIP › CREATE AUTOMATION CLIP (a real tap) places it; a paused seek previews the curve on YAW (the target; FREE orbits the stage by it)',
     held.pop && held.create && !held.moved && held.closed && pop.pop && !pop.yawMoved && tapCreate.ok === 1 && t3.clip && Math.abs(t3.got - t3.want) < 1e-9 && Math.abs(t3.got2 - t3.want2) < 1e-9 && Math.abs(t3.stage[0] - t3.stage[1]) > 0.1 && !t3.errs.length, { held, pop, tapCreate, t3 });
 
   /* ── T4 · the stage mask: panes and chips masked, gaps not; a real drag of the rail moves it while paused; closed, nothing of it ── */

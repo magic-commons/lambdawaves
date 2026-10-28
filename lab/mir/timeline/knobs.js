@@ -2,10 +2,10 @@
  * Participate in the existing knob lifecycle; a stationary hold (500 ms) on any routable knob (`.k[data-param]`, a
  * registered parameter) cancels its owned drag and opens TIMELINE CLIP: CREATE AUTOMATION CLIP · LOCATE CLIPS.  A right
  * click, ContextMenu or Shift+F10 on a focused knob opens it at once.  BASINS' sentence "Hold a camera or colour knob…" is
- * in the shortcut sheet.  Changed for the kit: words through label / ariaLabel; the popup is the house's menu pane
- * (`.glass[data-mir-surface="menu"]`), where BASINS cloned the modulation window's `.m2pick`.
+ * in the shortcut sheet.  Changed for the kit: the popup is the house's menu pane; since 1.5.6-alpha.4 it is THE KNOB MENU
+ * (shell/menubar.js knobMenu: RESET · COPY · PASTE · FINE · ROUTES › · CLIP › · the app's rows), TIMELINE CLIP its CLIP › part.
  *   installTimelineKnobs({ registry, editor, root = document }) → dispose */
-import { label, ariaLabel } from '../kit.js';
+import { knobMenu, knobMenuPart, contextMenu } from '../shell/menubar.js';
 
 /* 1.5.0-alpha.25 (λWAVES iteration 014 A3): an app's own rows under LOCATE CLIPS — `setTimelineKnobRows((id) => [{ label, run }])`, one port for
    every installed popup (λWAVES: ADD TO / REMOVE FROM CONTROL SURFACE).  The label is a word the app passes through label(). */
@@ -16,22 +16,17 @@ export function installTimelineKnobs({ registry, editor }) {
   let pending=null,owned=null,pop=null,suppressUntil=0;
   const events=new AbortController();
   const listen=(target,type,fn,capture=false)=>target.addEventListener(type,fn,{capture,signal:events.signal});
-  const close=()=>{const p=pop;pop=null;p?.remove();};   // pop is cleared first: removing the focused menu fires its focusout
+  const close=()=>{const p=pop;pop=null;p?.close();};
   const cancel=()=>{if(pending)clearTimeout(pending.timer);pending=null;};
   const abort=()=>{const p=pending||owned;cancel();owned=null;if(p){p.dial.dispatchEvent(new PointerEvent('pointercancel',{pointerId:p.id,bubbles:false}));try{if(p.dial.hasPointerCapture(p.id))p.dial.releasePointerCapture(p.id);}catch(_){}}};
-  const open=(root,x,y)=>{
-    const id=root.dataset.param;if(!registry.has(id))return;
-    close();pop=document.createElement('div');pop.className='tl-pop glass';pop.dataset.mirSurface='menu';pop.setAttribute('role','menu');ariaLabel(pop,'Timeline clip');
-    const title=document.createElement('div');title.className='tl-pop-title';label(title,'TIMELINE CLIP');pop.append(title);
-    const b=document.createElement('button');b.type='button';b.className='trig';b.dataset.tlAction='create-clip';label(b,'CREATE AUTOMATION CLIP');b.onclick=()=>{close();editor.createClip(id);};pop.append(b);
-    const locate=document.createElement('button');locate.type='button';locate.className='trig';locate.dataset.tlAction='locate-clips';label(locate,'LOCATE CLIPS');locate.onclick=()=>{close();editor.locate(id);};pop.append(locate);
-    for(const row of (appRows?appRows(id):null)||[]){if(!row||typeof row.run!=='function')continue;const x=document.createElement('button');x.type='button';x.className='trig';x.dataset.tlAction='app';label(x,row.label);x.onclick=()=>{close();row.run();};pop.append(x);}
-    /* the focus leaving the menu closes it (Tab away, or HIDE, which blurs what it hides: no key of its own for that) */
-    const me=pop;me.tabIndex=-1;me.addEventListener('focusout',e=>{if(pop===me&&!me.contains(e.relatedTarget))close();});
-    document.body.append(pop);const r=pop.getBoundingClientRect();pop.style.left=Math.max(8,Math.min(innerWidth-r.width-8,x))+'px';pop.style.top=Math.max(8,Math.min(innerHeight-r.height-8,y))+'px';b.focus();
-  };
+  /* 1.5.6-alpha.4 · ONE KNOB MENU (shell/menubar.js knobMenu): TIMELINE CLIP is its CLIP › part, the app's rows its foot */
+  const clip=(id)=>(registry.has(id)?{entries:[['CREATE AUTOMATION CLIP',()=>editor.createClip(id),false,'',{id:'create-clip'}],['LOCATE CLIPS',()=>editor.locate(id),false,'',{id:'locate-clips'}]]}:null);
+  knobMenuPart('clip',clip);
+  const rowsOf=(id)=>((appRows?appRows(id):null)||[]).filter((r)=>r&&typeof r.run==='function').map((r)=>[r.label,r.run,false,'',{id:'app'}]);
+  const open=(root,x,y)=>{const id=root.dataset.param;if(!registry.has(id))return;close();
+    pop=knobMenu(root,{x,y,appRows:rowsOf,onClose:()=>{pop=null;}})||contextMenu({x,y,entries:[...clip(id).entries,...rowsOf(id)],onClose:()=>{pop=null;}});};
   listen(document,'pointerdown',e=>{
-    if(pop&&!pop.contains(e.target))close();cancel();
+    if(pop&&!pop.host.contains(e.target))close();cancel();
     const root=e.target.closest?.('.k[data-param]');if(!root||root.getAttribute('aria-disabled')==='true'||!e.target.closest('.k-dial')||e.button!==0||!registry.has(root.dataset.param))return;
     const dial=e.target.closest('.k-dial');pending={root,dial,id:e.pointerId,x:e.clientX,y:e.clientY,timer:setTimeout(()=>{
       const p=pending;if(!p)return;pending=null;owned=p;
@@ -50,5 +45,5 @@ export function installTimelineKnobs({ registry, editor }) {
   listen(document,'keydown',e=>{if(e.key==='ContextMenu'||e.shiftKey&&e.key==='F10'){const root=document.activeElement?.closest?.('.k[data-param]');if(root&&registry.has(root.dataset.param)){e.preventDefault();const r=root.getBoundingClientRect();open(root,r.right,r.bottom);}}if(e.key==='Escape'){abort();close();}});
   listen(globalThis,'blur',()=>{abort();close();});
   listen(document,'visibilitychange',()=>{if(document.hidden){abort();close();}});
-  return ()=>{abort();close();events.abort();};
+  return ()=>{abort();close();events.abort();knobMenuPart('clip',null);};
 }

@@ -27,7 +27,7 @@
  * CHANGE: GROUND is D₀, MEAN is the stationary part, which leaves exactly the interference terms on screen.
  */
 import { stateName } from './names.js';
-import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, vividInk, nRGB, chip } from './mir/kit.js';
+import { el, knob, sw, seg, fader, readout, graphHover, themeInk, accentRGB, vividInk, nRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
 import { createFlow, FLOW_ORACLE } from './molecular-flow.js';
 import { paintStroke, fillButton, levelLine, footLine } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { BASIS } from './hydrogen.js';
@@ -86,10 +86,10 @@ export function createStates(host, api) {
     (empty) => (empty ? fill() : clear()));
 
   const bar = el('div', 'row tight reg-bar', host);
-  const presetSel = el('select', 'sel', bar); presetSel.title = 'Presets are rules, not indices: each one exists for every molecule or says why it does not';
-  presetSel.setAttribute('aria-label', 'register preset');
-  { const o = el('option', '', presetSel, 'PRESET…'); o.value = ''; for (const p of PRESETS) { const q = el('option', '', presetSel, p); q.value = p; } }
-  presetSel.addEventListener('change', () => { const p = presetSel.value; presetSel.value = ''; if (p && preset(p) && api.announce) api.announce(p); });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
+  /* 022 P3: the kit's select (its list the menu pane); a pick runs the preset and the list goes back to PRESET… */
+  const presetSel = listSelect({ aria: 'register preset', placeholder: 'PRESET…', cls: 'sel', items: PRESETS.map((p) => ({ id: p, label: p })), value: null,
+    onChange: (p) => { presetSel.set(null); if (p && preset(p) && api.announce) api.announce(p); } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
+  bar.appendChild(presetSel.root); presetSel.button.title = 'Presets are rules, not indices: each one exists for every molecule or says why it does not';
   const brightBtn = el('button', 'trig on', bar); brightBtn.type = 'button'; brightBtn.textContent = 'BRIGHT'; brightBtn.title = 'The ladder shows the bright valence states only, or every state';
   const mrow = el('div', 'row tight reg-morph', host);
   /* A ↔ B (register-morph.js, one for both panes): its own target `reg.morph`; a store asks the worker for its states' vectors */
@@ -119,9 +119,9 @@ export function createStates(host, api) {
   const dr = el('div', 'row tight reg-drive', host);
   const driveSw = sw({ label: 'DRIVE', value: false, title: 'Apply the field E(t)·r to the whole molecule: populations move, at the Rabi rate Ω = E₀μ when ω sits on a stick', onChange: (v) => setDrive(v) });
   dr.appendChild(driveSw.root);
-  const polSel = el('select', 'sel', dr); polSel.setAttribute('aria-label', 'drive polarisation'); polSel.title = 'The field’s polarisation: linear along an axis, or circular in a plane (⟲ and ⟳ drive opposite ring currents)';
-  for (const [id, txt] of [['x', 'x'], ['y', 'y'], ['z', 'z'], ['xy+', 'xy ⟲'], ['xy-', 'xy ⟳'], ['yz+', 'yz ⟲'], ['yz-', 'yz ⟳'], ['zx+', 'zx ⟲'], ['zx-', 'zx ⟳']]) { const o = el('option', '', polSel, txt); o.value = id; }
-  polSel.addEventListener('change', () => setDriveParam('pol', polSel.value));
+  const polSel = listSelect({ aria: 'drive polarisation', cls: 'sel', value: drive.pol, onChange: (v) => setDriveParam('pol', v),
+    items: [['x', 'x'], ['y', 'y'], ['z', 'z'], ['xy+', 'xy ⟲'], ['xy-', 'xy ⟳'], ['yz+', 'yz ⟲'], ['yz-', 'yz ⟳'], ['zx+', 'zx ⟲'], ['zx-', 'zx ⟳']].map(([id, label]) => ({ id, label })) });
+  dr.appendChild(polSel.root); polSel.button.title = 'The field’s polarisation: linear along an axis, or circular in a plane (⟲ and ⟳ drive opposite ring currents)';
   const tuneBtn = el('button', 'trig', dr); tuneBtn.type = 'button'; tuneBtn.textContent = 'ω → LANE'; tuneBtn.title = 'Tune the drive to the selected lane: its ω, and the axis (or the plane, for a degenerate pair) of its dipole';
   tuneBtn.addEventListener('click', () => tune());
   const envSeg = seg({ label: 'ENVELOPE', value: 'cw', options: [{ id: 'cw', label: 'CW' }, { id: 'pulse', label: 'PULSE' }], onChange: (v) => setDriveParam('envelope', v) });
@@ -448,7 +448,7 @@ export function createStates(host, api) {
     roSong.setSub(m.name + (r ? ` · ‖c‖² − 1 = ${(r.norm - 1).toExponential(0)}` + (r.lag > song.dt && song.speed > 0 && rate > song.speed ? ` · the song runs at 1/${(rate / song.speed).toFixed(1)} of real time` : '') : ''));
   }
   function setDriveParam(name, v) {
-    if (name === 'pol') { drive.pol = String(v); polSel.value = drive.pol; if (drive.on) drive.dirty = true; }
+    if (name === 'pol') { drive.pol = String(v); polSel.set(drive.pol); if (drive.on) drive.dirty = true; }
     else if (name === 'envelope') { drive.envelope = v === 'pulse' ? 'pulse' : 'cw'; envSeg.set(drive.envelope); if (drive.on) drive.dirty = true; }
     else if (name === 'duration') { drive.duration = Math.min(4000, Math.max(10, +v || 400)); if (drive.on) drive.dirty = true; }
     else if (name === 'omega' || name === 'e0' || name === 'phase') {

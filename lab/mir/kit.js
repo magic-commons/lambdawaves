@@ -153,7 +153,36 @@ const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 /** THE ONE DOUBLE-TAP LAW (Josh, 2026-10-07, call 20: "300ms"): two presses within 300 ms and 14 px.  It was two laws
  *  (320 ms anywhere here, 300 ms within 14 px in the colour controls); this is the one, and controls/gesture.js re-exports
  *  it (TAP, tapHome) so the colour controls read the same numbers. */
-export const TAP = Object.freeze({ ms: 300, px: 14 });
+export const TAP = Object.freeze({ ms: 300, px: 14, hold: 500, slop: 8 });   // 1.5.6-alpha.4: hold · slop, THE ONE HOLD LAW (holdTap)
+/** holdTap(el, fn, { ms = TAP.hold, slop = TAP.slop, accept }) → off() — a still press held `ms` (moving under `slop` px) runs fn(event, x, y)
+ *  once; the click its release would make is swallowed.  `accept(event)` filters the pointers that may start one (default: the primary button). */
+export function holdTap(node, fn, { ms = TAP.hold, slop = TAP.slop, accept = null } = {}) {
+  const life = new AbortController(), on = { capture: true, signal: life.signal };
+  let timer = 0, at = null, eat = false;
+  const stop = () => { clearTimeout(timer); timer = 0; at = null; };
+  node.addEventListener('pointerdown', (e) => {
+    stop(); eat = false; if (e.button !== 0 || (accept && !accept(e))) return;
+    at = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    timer = setTimeout(() => { const a = at; stop(); eat = true; try { if (e.pointerType === 'touch' && navigator.vibrate) navigator.vibrate(12); } catch (_) {} fn(e, a.x, a.y); }, ms);
+  }, on);
+  addEventListener('pointermove', (e) => { if (at && e.pointerId === at.id && Math.hypot(e.clientX - at.x, e.clientY - at.y) > slop) stop(); }, on);
+  for (const t of ['pointerup', 'pointercancel']) addEventListener(t, (e) => { if (at && e.pointerId === at.id) stop(); }, on);
+  node.addEventListener('click', (e) => { if (eat) { eat = false; e.preventDefault(); e.stopImmediatePropagation(); } }, on);
+  return () => { stop(); life.abort(); };
+}
+/** onContext(el, fn, { mouse = false, right = true, ms, slop }) → off() — THE MENU GESTURE: a right-click, the ContextMenu key, Shift+F10 or a
+ *  still hold (touch and pen; a mouse too with `mouse: true`) runs fn({ x, y, target, event }) ONCE per gesture, and the browser's own menu never
+ *  shows.  `right: false` leaves the right button to the surface (a paint law) and keeps the keys and the hold.  Sets `data-menu` (skin.css: no
+ *  touch callout). */
+export function onContext(node, fn, { mouse = false, right = true, ms, slop } = {}) {
+  let last = -1e9; node.setAttribute('data-menu', '');
+  const fire = (event, x, y) => { const now = performance.now(); if (now - last < 700) return; last = now; fn({ x, y, target: event.target, event }); };
+  const offHold = holdTap(node, (e, x, y) => fire(e, x, y), { ms, slop, accept: (e) => mouse || e.pointerType !== 'mouse' });
+  const ctx = (e) => { if (!right && e.button === 2) return; e.preventDefault(); const r = e.target.getBoundingClientRect(); fire(e, e.clientX || r.left, e.clientY || r.bottom); };
+  const key = (e) => { if (e.key !== 'ContextMenu' && !(e.shiftKey && e.key === 'F10')) return; e.preventDefault(); const r = e.target.getBoundingClientRect(); fire(e, r.left, r.bottom); };
+  node.addEventListener('contextmenu', ctx); node.addEventListener('keydown', key);
+  return () => { offHold(); node.removeEventListener('contextmenu', ctx); node.removeEventListener('keydown', key); node.removeAttribute('data-menu'); };
+}
 /** tapWatcher(fn) → (e?) → true when this press is the second of a double-tap (fn(e) has run).  Shared by knobs, faders,
  *  the modulation arc and the colour controls.  Hand it the press event and the 14 px half of the law holds; a caller
  *  that gives none is timed only. */
@@ -248,7 +277,7 @@ export function knob(o) {
   const dial = el('div', 'k-dial', root);
   const needle = el('i', 'k-needle', dial);
   const val = el('div', 'k-val', root);
-  let v = o.value, def = o.value, dragging = false, disabled = false;
+  let v = o.value, def = o.value, dragging = false, disabled = false, fine = false;   // fine: the menu's FINE (half the drag gain, this session)
   let shown = null;                 // a value PAINTED over the base by a modulator (show()); the base v is what the hand owns
   const lo = o.min, hi = o.max, log = !!o.log, rev = !!o.reverse && !o.wrap;   // rev: the displayed direction flips (see reverse above)
   const norm = (x) => log ? (Math.log(x) - Math.log(lo)) / (Math.log(hi) - Math.log(lo)) : (x - lo) / (hi - lo);
@@ -333,7 +362,7 @@ export function knob(o) {
   });
   dial.addEventListener('pointermove', (e) => {
     if (!dragging || e.pointerId !== vd.id) return;
-    const dp = vd.move(e);                              // the virtual point: changing the gear in place never moves the value
+    const dp = vd.move(e) * (fine ? 0.5 : 1);           // the virtual point: changing the gear in place never moves the value
     if (o.onDelta) { const d = dp - acc; acc = dp; turn = ((turn + d * 360) % 360 + 360) % 360; o.onDelta(d * 2 * Math.PI); announce(true); return; }
     const nv = settle(denorm(o.wrap ? p0 + dp : clamp01(p0 + (rev ? -dp : dp))));
     if (nv !== v) { v = nv; paint(); if (o.onInput) o.onInput(v); }
@@ -395,7 +424,9 @@ export function knob(o) {
   });
   root.addEventListener('blur', () => announce(false));     // the tree catches up the moment nobody is listening
   paint();
-  return { root, spec: o, get: () => v, set(x, silent = true) { v = x; shown = null; paint(); if (!silent && o.onChange) o.onChange(v); },   // spec: the options it was made from (1.5.0-alpha.25: a second face is made from them)
+  const api = { root, spec: o, get: () => v, set(x, silent = true) { v = x; shown = null; paint(); if (!silent && o.onChange) o.onChange(v); },
+    /* 1.5.6-alpha.4 · THE VALUE DOOR the knob menu reads (root.mirKnob): home() = a double tap; input(x) = a hand's value; fine(on?) */
+    home: reset, input(x) { const nv = settle(x); if (nv !== v) { v = nv; paint(true); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); } }, fine(on) { if (on !== undefined) fine = !!on; return fine; },   // spec: the options it was made from (1.5.0-alpha.25: a second face is made from them)
     /** paint a modulated value over the base — the needle dances, the base (and a drag's start) stays the hand's */
     show(x) { shown = x; paint(); }, get shown() { return shown; }, setDefault(x) { def = x; }, dragging: () => dragging,
     /* WAVE 68 · A DEAD CONTROL SAYS SO, AND DOES NOT KEEP THE SEAT.  This wrote a class and a
@@ -410,6 +441,8 @@ export function knob(o) {
       root.setAttribute('aria-disabled', String(!!on));
       if (on && root === document.activeElement) { const dev = root.closest('.dev'); const seat = dev && dev.querySelector('.dev-power'); if (seat) seat.focus(); else root.blur(); } },
     setBase, paint };
+  root.mirKnob = api;
+  return api;
 }
 
 /** sw({ label, value, onChange, lamp, glyph, glyphSize, title, cls }) — a boolean that stays on.  It wears the LAMP (Josh: "I like the

@@ -37,6 +37,7 @@
  *      recorder step, every seek — no loop of its own; the playing step's bar is painted from the existing tick.
  *   7. THE STEPS ARE THE KIT'S `.trig`, so the LOOK's CONTROL FACES and FLAT paint them as they paint every button. */
 import { el, trig, label, ariaLabel } from '../kit.js';
+import { contextMenu } from '../shell/menubar.js';
 import { t, tn } from '../core/i18n.js';
 import { createWindow } from '../window/window.js';
 import { registerProjectPart } from '../core/project.js';
@@ -296,35 +297,19 @@ export function installPattern(o) {
   }
 
   /* ── the cap's menu: FL's "Fill each 2/4/8 steps", CLEAR, the length, the switch, → TIMELINE ── */
-  function closeMenu() { if (menu) { menu.el.remove(); menu = null; } }
+  function closeMenu() { if (menu) { const m = menu; menu = null; m.api.close(); } }
+  /* 1.5.6-alpha.4: the kit's contextMenu (shell/menubar.js) — its keys, its Escape and its outside press are the door's */
   function openMenu(rec, e) {
     closeMenu();
-    const r = model.rowOf(rec.id), m = el('div', 'pt-menu glass'); m.setAttribute('role', 'menu');
-    const item = (words, fn, on) => { const b = el('button', 'pt-mi' + (on ? ' on' : ''), m); b.type = 'button'; b.setAttribute('role', 'menuitem');
-      if (Array.isArray(words)) b.textContent = words[0]; else label(b, words);
-      b.addEventListener('click', (ev) => { ev.stopPropagation(); closeMenu(); gesture('PATTERN', fn); }); return b; };
-    const rule = () => el('i', 'pt-rule', m);
-    item(r.live ? 'PATTERN OFF' : 'PATTERN ON', () => model.setLive(rec.id, !r.live), r.live);
-    rule();
-    for (const n of [2, 4, 8]) item([t('FILL EACH {n} STEPS', { n })], () => model.fill(rec.id, n));
-    item('CLEAR', () => model.clear(rec.id));
-    rule();
-    for (const n of PATTERN_LENGTHS) item([tn(n / 16, 'LENGTH {len} · {n} BAR', 'LENGTH {len} · {n} BARS', { len: n })], () => model.setLength(rec.id, n), r.length === n);
-    if (mod.timeline && mod.timeline()) {
-      rule();
-      item('SEND TO TIMELINE', () => { const said = view && view.api && view.api.sendToTimeline ? view.api.sendToTimeline(rec.id) : null; if (said) say(said); });
-    }
-    doc.body.appendChild(m);                   // above every window and rail, as the timeline's menus are
+    const r = model.rowOf(rec.id), item = (words, fn, opts) => [words, () => gesture('PATTERN', fn), false, '', { raw: !!opts && opts.raw, ...(opts || {}) }];
+    const rows = [item(r.live ? 'PATTERN OFF' : 'PATTERN ON', () => model.setLive(rec.id, !r.live), { current: r.live }), null,
+      ...[2, 4, 8].map((n) => item(t('FILL EACH {n} STEPS', { n }), () => model.fill(rec.id, n), { raw: true })), item('CLEAR', () => model.clear(rec.id)), null,
+      ...PATTERN_LENGTHS.map((n) => item(tn(n / 16, 'LENGTH {len} · {n} BAR', 'LENGTH {len} · {n} BARS', { len: n }), () => model.setLength(rec.id, n), { raw: true, checked: r.length === n, radio: 'length' }))];
+    if (mod.timeline && mod.timeline()) rows.push(null, item('SEND TO TIMELINE', () => { const said = view && view.api && view.api.sendToTimeline ? view.api.sendToTimeline(rec.id) : null; if (said) say(said); }));
     const cap = rec.cap.root.getBoundingClientRect();
-    const x = e && e.clientX ? e.clientX : cap.left, y = e && e.clientY ? e.clientY : cap.bottom;
-    m.style.left = Math.max(4, Math.min(win0.innerWidth - m.offsetWidth - 4, x)) + 'px';
-    m.style.top = Math.max(4, Math.min(win0.innerHeight - m.offsetHeight - 4, y)) + 'px';
-    menu = { el: m, env: rec.id };
+    const api = contextMenu({ x: e && e.clientX ? e.clientX : cap.left, y: e && e.clientY ? e.clientY : cap.bottom, entries: rows, onClose: () => { if (menu && menu.api === api) menu = null; } });
+    if (api) menu = { api, el: api.pane, env: rec.id };
   }
-  const away = (e) => { if (menu && !menu.el.contains(e.target)) closeMenu(); };
-  doc.addEventListener('pointerdown', away, true);
-  const keys = (e) => { if (e.key === 'Escape' && menu) { closeMenu(); e.preventDefault(); } };
-  win0.addEventListener('keydown', keys);
 
   /* ── THE PROJECT AND THE ONE HISTORY ── */
   const offProject = o.project === false ? null : registerProjectPart('pattern', patternProjectPart(model));
@@ -366,13 +351,13 @@ export function installPattern(o) {
     show, sync, paintMarkers, closeMenu,
     rows: () => [...built.values()].map((rec) => ({ env: rec.id, name: rec.cap.root.textContent, live: model.isLive(rec.id), length: rec.length, steps: model.steps(rec.id), step: rec.step })),
     seat: () => seat(H), docked, height: () => H,
-    menu: () => (menu ? [...menu.el.querySelectorAll('.pt-mi')].map((b) => b.textContent) : null),
+    menu: () => (menu ? [...menu.el.querySelectorAll('.mb-item')].map((b) => b.querySelector('.mb-lbl').textContent) : null),
     destroy() {
       frame.cancel(FOLLOW_KEY + uid); if (runEl) runEl.removeEventListener('scroll', onRunScroll);
       if (offGeometry) offGeometry(); offModel(); if (offTick) offTick(); if (offSpan) offSpan(); offAdvance();
       if (offProject) offProject(); if (offHistory) offHistory();
       if (view && view.setPattern) view.setPattern(null);
-      doc.removeEventListener('pointerdown', away, true); win0.removeEventListener('keydown', keys); closeMenu(); anchorFns.clear(); win.destroy();
+      closeMenu(); anchorFns.clear(); win.destroy();
     },
   };
   return pat;

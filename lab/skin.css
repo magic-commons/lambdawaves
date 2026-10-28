@@ -143,13 +143,14 @@ body.frost[data-card="tinted"] #transport.mini { -webkit-backdrop-filter: var(--
    a black .10 veil, mir/css/skin.css) and the modulation window's own `#modwin` material (its root is a transparent layout
    box with gaps, CLAUDE.md).  `:not(:where(…))` keeps the 1.4.3 winner and adds no specificity, so nothing of ours re-ranks.
    Found by mapping every property both a kit and an app sheet declare, base vs adopted (research/release-0.5.0/C0-BUILD.md). */
-body.frost[data-card="refractive"] .dev:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost[data-card="refractive"] .glass:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost #transport { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
-body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .dev:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .glass:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost #transport { background: hsl(0 0% 100% / .10); }
+/* 022 P2 · A POPUP WEARS THE SKIN: a menu pane (`.glass[data-mir-surface="menu"]`) is left to the kit's surface law and its menu floor */
+body.frost[data-card="refractive"] .dev:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost[data-card="refractive"] .glass:not(:where(.mir-modwindow, .mir-modwindow *, [data-mir-surface="menu"])), body.frost #transport { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
+body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .dev:not(:where(.mir-modwindow, .mir-modwindow *)), body.frost[data-card="refractive"]:not(:where([data-theme="dark"])) .glass:not(:where(.mir-modwindow, .mir-modwindow *, [data-mir-surface="menu"])), body.frost #transport { background: hsl(0 0% 100% / .10); }
 /* 0.5.0 fix · B139 (wave 67): FROST · STILL changes the FILTER, never the material.  MIR 1.5's hold also swaps a REFRACTIVE
    veil for the tinted fill (mir/css/skin.css "FROST · STILL"); λWAVES' panes keep the veil (light joined: the twin above). */
 body.frost.frost-hold[data-card="tinted"] { --card-opacity: var(--frost-opacity); }   /* B139 TINTED (0.5.0 fix round 1b): the kit thins a tinted pane only while it blurs (mir/css/skin.css:522) and restores it under the hold — the fill must not move while playing */
 body.disconnected.frost.frost-hold[data-card="refractive"]:not(.phone) .dev > .dev-body { background: var(--surface-veil, var(--frost-veil-light)); }
-body.frost.frost-hold[data-card="refractive"][data-theme="dark"] :where(.dev, .glass):not(:where(.mir-modwindow, .mir-modwindow *)), body.disconnected.frost.frost-hold[data-card="refractive"][data-theme="dark"]:not(.phone) .dev > .dev-body { background: var(--surface-veil, var(--frost-veil-dark)); }
+body.frost.frost-hold[data-card="refractive"][data-theme="dark"] :where(.dev, .glass):not(:where(.mir-modwindow, .mir-modwindow *, [data-mir-surface="menu"])), body.disconnected.frost.frost-hold[data-card="refractive"][data-theme="dark"]:not(.phone) .dev > .dev-body { background: var(--surface-veil, var(--frost-veil-dark)); }
 
 /* The keyboard is a dense editor rather than an airy instrument card. Keep its
    MIR tint and frost, but give the small legends a readable surface in either theme. */
@@ -305,18 +306,8 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 .native-info .native-info-content { display: none !important; z-index: 150; top: 100%; left: 0; width: min(340px, calc(100vw - 16px)); max-height: min(360px, calc(100vh - 16px)); overflow: auto; box-sizing: border-box; padding: 14px 16px; border-radius: var(--r-lg); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); }
 .control-help { position: fixed; z-index: 10000; width: max-content; max-width: min(280px, calc(100vw - 16px)); box-sizing: border-box; padding: 8px 11px; border-radius: var(--r-md); color: var(--fg-soft); font: var(--fs-small)/1.5 var(--font-ui); pointer-events: none; }
 .control-help[hidden] { display: none; }
-.native-info .native-info-content, .control-help {
-  border: 1px solid hsl(0 0% 100% / .12) !important;
-  background: linear-gradient(160deg, hsl(0 0% 100% / .055), transparent 44%), hsl(214 16% 13% / .98) !important;
-  box-shadow: 0 8px 24px hsl(0 0% 0% / .34), inset 0 1px 0 hsl(0 0% 100% / .05) !important;
-  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
-}
-body[data-theme="light"] .native-info .native-info-content, body[data-theme="light"] .control-help {
-  color: hsl(214 18% 20%);
-  border-color: hsl(214 20% 74% / .72) !important;
-  background: linear-gradient(160deg, hsl(0 0% 100% / .72), transparent 46%), hsl(214 24% 93% / .99) !important;
-  box-shadow: 0 8px 24px hsl(214 28% 28% / .18), inset 0 1px 0 hsl(0 0% 100% / .9) !important;
-}
+/* 022 P3 · A POPUP WEARS THE SKIN: the hint tip and the ⓘ panel take the kit's popover material (card style's fill, the menu floor's tint,
+   --surface-shadow-menu); the hard .98 / .99 gradients and their eight important-flags are gone */
 .native-clean[data-id="observer"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="observer"] .row > .k { flex: 1 1 60px; }
 .native-clean[data-id="observer"] .row { margin: 4px 0; }
@@ -445,7 +436,6 @@ body.window-info-off .settings-help { display:none; }
 
 .native-clean[data-id="settings"] .settings-status-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
 .native-clean[data-id="settings"] .settings-status-grid > .sw { width:100%;min-width:0;box-sizing:border-box; }
-#menubar .mb-list { background:var(--glass-sheen),hsl(var(--glass-tint) / .65);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:var(--glass-shadow);border:1px solid var(--glass-border-color); }
 
 .shadow-controls { display:flex;flex-wrap:nowrap;gap:6px; }
 .shadow-controls > .segw { flex:1;min-width:0; }
@@ -561,8 +551,10 @@ body.no-transport-bar #transport { display: none; }
 #lwMenu[hidden] { display: none; }
 /* THE PICKER'S SURFACE is its class `.lw-menu`, so another pane can wear it (iteration 012 R4: the palette preset list, material.js); the
    second selector out-ranks the refractive `.glass` veil and frost above (0,3,1) for a kit pane that carries .glass */
-.lw-menu { background: hsl(var(--glass-tint) / .985); }
-body.frost .lw-menu, body.frost[data-card] .lw-menu.glass { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: blur(28px) saturate(1.25); backdrop-filter: blur(28px) saturate(1.25); }
+/* 022 P3: the Picker is a PAGE, so its sheet stays its own; the popups that wore `.lw-menu` (the palette list, the FINDER, CSB search, the look
+   drop) are menu panes and take the skin (the kit's surface law and --surface-menu-floor) */
+#lwMenu { background: hsl(var(--glass-tint) / .985); }
+body.frost #lwMenu { background: hsl(var(--glass-tint) / .62); -webkit-backdrop-filter: blur(28px) saturate(1.25); backdrop-filter: blur(28px) saturate(1.25); }
 body.menu-open .mir-info.lw-stage, body.menu-open #atomLabels, body.menu-open #transport { visibility: hidden; opacity: 0; }   /* opacity too: the kit's block sets its own visibility */
 #lwMenu :where(:not(.mm-folders, .mm-folders *)), #lwMenu :where(:not(.mm-folders, .mm-folders *))::before, #lwMenu :where(:not(.mm-folders, .mm-folders *))::after { outline: none; border: 0; box-shadow: none; }
 #lwMenu button:where(:not(.mm-folders *)) { background: none; color: inherit; font: inherit; padding: 0; cursor: pointer; }   /* iteration 015 M4: the kit's gallery keeps its own look */
@@ -693,7 +685,7 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-volview { position: relative; }
 /* iteration 018 A2: the pane is as big as its isomers (three isomers, three tiles), centred over the deck; the tiles keep the deck's size */
 #lwMenu .mm-isos { position: absolute; top: 52px; left: 50%; translate: -50% 0; width: max-content; max-width: 100%; box-sizing: border-box; z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 18px 14px 32px; overflow: hidden auto; scrollbar-width: thin;
-  border-radius: 18px; background: hsl(var(--glass-tint) / .97); }
+  border-radius: var(--surface-radius, 18px); }   /* 022 P3: the menu surface (picker.js: .glass[data-mir-surface=menu]) */
 #lwMenu .mm-isos[hidden] { display: none; }
 #lwMenu .mm-isohead { display: flex; align-items: baseline; gap: 14px; }
 #lwMenu .mm-isof { font: var(--w-bold, 600) 22px/1 var(--font-math, serif); } #lwMenu .mm-isocount { font-size: 12px; letter-spacing: .12em; opacity: .6; }
@@ -737,7 +729,6 @@ body.frost #lwMenu .mm-arrow { -webkit-backdrop-filter: blur(14px) saturate(1.25
 #lwMenu .mm-lookg { font: 400 17px/1 'STIX Two Math', 'Latin Modern Math', serif; white-space: nowrap; letter-spacing: 0; }
 #lwMenu .mm-lookb[aria-expanded="true"] { opacity: 1; color: var(--acc); }
 #lwMenu .mm-lookdrop { --ease-spring: cubic-bezier(.2, 1.4, .4, 1); position: absolute; z-index: 20; translate: -50% 0; transform-origin: 50% 0; display: grid; grid-template-columns: repeat(8, 33px); grid-auto-rows: 72px; gap: 6px; padding: 8px; border-radius: 16px; }   /* 016 L1: two brick rows (picker.js places each tile over two 33 px columns), 3 over 4 */
-#lwMenu .mm-lookdrop.lw-menu { background: hsl(var(--glass-tint) / .92); }   /* over the tiles: the glyphs read on any picture */
 #lwMenu .mm-lookdrop[hidden] { display: none; }
 #lwMenu .mm-lk { display: grid; place-items: center; border-radius: 12px; opacity: .6; transition: opacity 140ms, color 140ms, background-color 140ms, scale 160ms var(--ease); }
 #lwMenu .mm-lk-g { font: 400 26px/1 'STIX Two Math', 'Latin Modern Math', serif; white-space: nowrap; letter-spacing: 0; }
@@ -855,7 +846,6 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
    And the modulation window's ADD MACRO / ADD DEVICE sheets (`.m2pick`) wear the windows' tint, not the chassis' thin plate. */
 body.frost .mir-win.mir-timeline, body.frost .mir-timeline .tl-pane { -webkit-backdrop-filter: none; backdrop-filter: none; }
 body.frost:not(.phone):not(.frost-hold) #menubar .mb-list { -webkit-backdrop-filter: var(--frost-filter); backdrop-filter: var(--frost-filter); }
-body .mir-modwindow .m2pick { background-color: hsl(var(--glass-tint) / .94); }
 /* iteration 016 W1 · TINT UNDER THE WORDS: FROST off, a card over the stage words (ink.js `tint` sets `data-tint`) wears the menus' own tint — the
    card whole, or under DISCONNECTED its head and its body */
 body:not(.frost):not(.disconnected) .dev[data-tint], body.phone:not(.frost) .dev[data-tint],

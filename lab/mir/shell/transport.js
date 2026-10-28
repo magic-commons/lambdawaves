@@ -822,7 +822,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
 
   /* ── the seats on the stage (BOTTOM, TOP, COMPACT: ruled 2026-10-01), remembered; the rack's dodge moves the bar ── */
   let seat = 'bottom', lastRect = null;
-  const menu = el('div', 'glass mb-list mir-transport-seats', host); menu.hidden = true; menu.setAttribute('role', 'menu'); made.push(menu);
+  const menu = el('div', 'glass mb-list mir-transport-seats', host); menu.hidden = true; menu.setAttribute('role', 'menu'); menu.dataset.mirSurface = 'menu'; made.push(menu);
   ariaLabel(menu, 'Where the transport sits');
   const seatItems = SEATS.map((s) => {
     const it = el('button', 'mb-item', menu); it.type = 'button'; it.dataset.seatChoice = s; it.setAttribute('role', 'menuitemradio');

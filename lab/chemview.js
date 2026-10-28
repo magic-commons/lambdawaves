@@ -24,7 +24,7 @@
  * MUST NOT CLAIM: quantitative UV/X-ray spectroscopy, ionisation, correlation beyond RHF, or nuclear motion.
  */
 import { el, seg, sw, knob, trig, readout, stepper, graphHover, themeInk, fitText, nRGB, accentRGB, vividInk, chip, hint, mathPlain, arcRing } from './mir/kit.js';
-import { rackPager } from './pager.js';
+import { rackPager } from './pager.js'; import { select as listSelect } from './mir/controls/select.js';
 import { MOLECULES, RECORD_ONLY, RECORD_GROUP, GROUPS, SECTIONS, moleculeAtoms, moleculeCharge, optionLabel, showMs, CAP_RULE, basis631, MAX_Z } from './molecules.js';
 import { statusOf, FIELD_LAW } from './status.js'; import { MAX_MOL_AO, MOL_LIMITS } from './field.js'; import { COMPONENT_ORDER } from './md.js';   // 0.5.4 P4: the status line and capability()'s limits
 import { orbitalName, forms, coreCount, symmetryDefects } from './names.js'; import { sto3gH2 } from './h2ci.js'; import { h2Curve, h2Point, drawCurve } from './h2curve.js';
@@ -194,14 +194,20 @@ export function createChem(host, api) {
    * 0.5.3 M8: the select IS the kit stepper's name (PALETTE's ‹ NAME ›): the arrows (and ← →) walk the page's enabled rows as a hand pick. */
   const mStep = stepper({ aria: 'Molecule', list: false, items: [], value: preset, cls: 'mol-step mol-pick', onChange: (id) => { mSel.value = id; handPick(id); } });
   r0.appendChild(mStep.root);
-  const mSel = el('select', 'sel'); mStep.name.replaceChildren(mSel);
+  /* 022 P3 · A POPUP WEARS THE SKIN: the chooser is the kit's select() — its list the menu pane, 44-px rows, each molecule's picture at its
+     left (loaded lazily, only when the list opens), a group's name a row that is never chosen; no native <select>.  `mSel` keeps the old
+     reads: value (set: chosen only when it is on this page) · options (the rows) · selectedIndex = −1 (nothing chosen) */
+  let mRows = [];
+  const mList = listSelect({ aria: 'molecule', items: [], value: preset, cls: 'mol-sel', repick: true, onChange: (id) => { mStep.set(id); dlShow(); handPick(id); } });   // a hand press: a DOWNLOAD row installs (and asks persist once)
+  const mSel = { get value() { return mList.get() || ''; }, set value(id) { mList.set(mRows.some((r) => r.id === id && !r.coming) ? id : null); }, set selectedIndex(_) { mList.set(null); }, get options() { return mRows; } };
+  mStep.name.replaceChildren(mList.root);
   /* iteration 008 U · THE DOWNLOAD GLYPH: the molecule chosen is a record not yet on this device — the kit's `download` beside its name, a press fetches
      it (checked against its sha-256 name, persist asked once) and opens it: the same road a DOWNLOAD row's pick takes */
   const dlB = el('button', 'trig mol-dl'); dlB.type = 'button'; chip(dlB, 'download', 'Download this molecule’s record'); dlB.hidden = true;
   /* iteration 008 V: the glyph sits in the PICTURE's seat (left of the name) and wears the kit's ring (arcRing) while a molecule is kept; the
      picture is the molecule's own (a volume's t/<id>.webp, the catalogue's img/menu/<id>.webp), read for the molecule chosen only */
   const pic = el('img', 'mol-thumb'); pic.alt = ''; pic.decoding = 'async'; pic.hidden = true;
-  const ring = arcRing(dlB); mStep.name.replaceChildren(pic, dlB, mSel);
+  const ring = arcRing(dlB); mStep.name.replaceChildren(pic, dlB, mList.root);
   let picFor = null, picUrl = null, dlBusy = false, near = false;   // near: the hand has come to the pickers (or picked) — no picture is fetched before, so a boot reads nothing (a DATA fetch would make lw-data-v1)
   pic.addEventListener('load', () => { if (pic.getAttribute('src')) pic.hidden = false; }); pic.addEventListener('error', () => { pic.hidden = true; });
   const ringTo = (r) => { if (r === null) { delete dlB.dataset.busy; ring.set(0); return; } dlB.dataset.busy = ''; ring.set(360 * Math.min(1, Math.max(0.02, r))); };
@@ -229,47 +235,39 @@ export function createChem(host, api) {
     V.picture(k.volume, k.id).then((u) => { if (picFor !== id) { if (u.startsWith('blob:')) URL.revokeObjectURL(u); return; } if (u.startsWith('blob:')) picUrl = u; pic.src = u; }, () => {});
   }
   const dlShow = rowPic;
-  mSel.setAttribute('aria-label', 'molecule');
-  mSel.title = CAP_RULE; mSel.dataset.help = CAP_RULE;
+  mList.button.title = CAP_RULE; mList.button.dataset.help = CAP_RULE;
   /** the dropdown holds the page's section, in the table's groups; the molecule on screen stays chosen when it is on this page */
   function fillSel() {
-    mSel.replaceChildren();
-    const VP = vByPage.get(page);
-    if (VP) {   // iteration 008 V: a volume's page — its molecules by name, each option its formula; the title its tags, point group and size
-      const og = el('optgroup', '', mSel); og.label = VP.label;
-      for (const m of VP.mols) { const o = el('option', '', og, `${capName(m.name)} · ${plainF(m)}`); o.value = VP.vol.id + ':' + m.id;
+    const rows = [], head = (w) => rows.push({ id: '#' + w, label: w, coming: true }), VP = vByPage.get(page);
+    if (VP) {   // iteration 008 V: a volume's page — its molecules by name, each row its formula; the hint its tags, point group and size
+      head(VP.label);
+      for (const m of VP.mols) {
         const r0 = m.rungs && m.rungs['sto-3g'], why = `${capName(m.name)} · ${volLabelOf(VP.vol)} · ${(m.tags || []).join(' · ') || 'untagged'}` + (m.pg ? ' · ' + m.pg : '') + (r0 ? ` · ${r0.nAO} AO at STO-3G` : '') + ` · ${Object.keys(m.rungs || {}).length} rungs`;
-        o.title = why; o.dataset.help = why; }
+        rows.push({ id: VP.vol.id + ':' + m.id, label: `${capName(m.name)} · ${plainF(m)}`, title: why, pic: V.pictureUrl(VP.vol, m) }); }
     }
     for (const g of VP ? [] : [...GROUPS, RECORD_GROUP]) {
-      const rows = CHEM_PRESETS.filter((p) => p.group === g.id && p.section === page);
-      if (!rows.length) continue;
-      const og = el('optgroup', '', mSel); og.label = g.label;
-      for (const p of rows) {
-        const o = el('option', '', og, optionLabel(p, !p.recordOnly || !!have.get(p.records['sto-3g'].hash))); o.value = p.id;
-        o.disabled = !!p.disabled;
-        /* the source goes on `data-help` as well as `title`: lab/mir/control-help.js moves a title to data-help at
-           boot, which is fine for the control but leaves an <option> with neither unless both are set here. */
-        const why = p.name + (p.disabled ? ' — ' + p.reason : '') + ' · ' + p.source;
-        o.title = why; o.dataset.help = why;
-      }
+      const list = CHEM_PRESETS.filter((p) => p.group === g.id && p.section === page);
+      if (!list.length) continue;
+      head(g.label);
+      for (const p of list) rows.push({ id: p.id, label: optionLabel(p, !p.recordOnly || !!have.get(p.records['sto-3g'].hash)), coming: !!p.disabled,
+        title: p.name + (p.disabled ? ' — ' + p.reason : '') + ' · ' + p.source, pic: './img/menu/' + p.id + '.webp' });
     }
-    if (volRef && !(VP && vMolPage.get(volRef.key) === page)) { const og = el('optgroup', '', mSel), o = el('option', '', og, volName(volRef)); og.label = 'VOL. ' + volRef.numeral; o.value = volRef.key; o.title = o.dataset.help = volRef.name + ' · ' + volRef.geometry; }   // V2: the volume molecule on screen, until a catalogue pick
-    mSel.value = preset; if (mSel.value !== preset) mSel.selectedIndex = -1;   // turned away from the molecule on screen: nothing chosen here yet
-    mStep.setItems([...mSel.options].filter((o) => !o.disabled).map((o) => ({ id: o.value, label: o.textContent })), mSel.value || null); secStep.set(page);
+    if (volRef && !(VP && vMolPage.get(volRef.key) === page)) { head('VOL. ' + volRef.numeral); rows.push({ id: volRef.key, label: volName(volRef), title: volRef.name + ' · ' + volRef.geometry }); }   // V2: the volume molecule on screen, until a catalogue pick
+    mRows = rows; mList.setItems(rows); mSel.value = preset;   // turned away from the molecule on screen: nothing chosen here yet
+    mStep.setItems(rows.filter((o) => !o.coming).map((o) => ({ id: o.id, label: o.label })), mSel.value || null); secStep.set(page);
     header();
   }
-  mSel.addEventListener('change', () => { mStep.set(mSel.value); dlShow(); handPick(mSel.value); });   // a hand press: a DOWNLOAD row installs (and asks persist once)
   /** THE HAND'S PICK (the dropdown; a notebook link, 0.5.1 D8): the solve as a press, and the app told — its head waits for this solve (D2) */
   function handPick(id) { near = true; const k = vKey(id); if (k) return openVolume(k.volume, k.id, null, { on: false });   // iteration 008 V: a volume page's row opens its molecule (openVolume tells the app)
     const p = solve(id, { press: true }); if (api.hand) api.hand(preset); return p; }
   /* THE INSTALLED LAMP, read off the store (lw-data-v1): a record-only row says DOWNLOAD until its record is on this device, and
      the store is re-read when the menu is opened (the browser may have evicted it: then the row says DOWNLOAD again, never broken) */
-  const have = new Map(), optOf = (id) => [...mSel.options].find((o) => o.value === id);
+  const have = new Map(), optOf = (id) => mRows.find((o) => o.id === id);
   const sectionRecs = () => CHEM_PRESETS.filter((p) => p.section === page).flatMap((p) => Object.values(p.records || {}));
   async function lamps() {
     for (const p of CHEM_PRESETS) for (const r of Object.values(p.records || {})) have.set(r.hash, await installed(r.hash));
-    for (const p of CHEM_PRESETS) if (p.recordOnly) { const o = optOf(p.id); if (o) o.textContent = optionLabel(p, have.get(p.records['sto-3g'].hash)); }
+    for (const p of CHEM_PRESETS) if (p.recordOnly) { const o = optOf(p.id); if (o) o.label = optionLabel(p, have.get(p.records['sto-3g'].hash)); }
+    mList.setItems(mRows);
     header(); return have;
   }
   function header() {
@@ -292,7 +290,7 @@ export function createChem(host, api) {
     status(`${sec}: ${on} of ${recs.length} records on this device` + (v && on < recs.length ? ' — the rest did not download (offline?)' : ''), on === (v ? recs.length : 0) ? 'ok' : 'warn');
     return { section: sec, records: recs.length, installed: on };
   }
-  fillSel(); lamps(); mSel.addEventListener('focus', () => { lamps(); });
+  fillSel(); lamps(); mList.button.addEventListener('focus', () => { lamps(); });
   /* iteration 008 V · THE PAGES: every shelf volume whose catalogue this device can read, its molecules (never a one-atom entry) by PRIMARY tag,
      alphabetical, each page's rows by name.  Read once when the hand comes near the pickers (or a hand opens a volume molecule), again after a change */
   function readPages() {
@@ -607,7 +605,7 @@ export function createChem(host, api) {
         const pc = t ? Math.round(100 * n / t) + ' %' : Math.round(n / 1024) + ' KB';
         if (seq === solveSeq) status(`downloading ${P.name}'s record… ${pc}`, 'warn');
         if (dlBusy) ringTo(t ? n / t : 0.5);   // iteration 008 V: the glyph's press — the kit's ring follows the record's bytes
-        if (o) o.textContent = optionLabel(P, false).replace('DOWNLOAD', 'downloading ' + pc); } });
+        if (o) { o.label = optionLabel(P, false).replace('DOWNLOAD', 'downloading ' + pc); mList.setItems(mRows); } } });
       if (!got.record) { why = `${P.name}'s record is not open: ${got.why}` + (P.recordOnly ? ' — it opens only from its record (DOWNLOAD when the network is back)' : ''); lamps(); return null; }
       if (got.from === 'network') lamps();
       if (seq !== solveSeq) return null;   /* S4a-VERIFY B1: the hand has moved on while the record was read — an abandoned chem.open would replace the worker's ONE cache */
@@ -1443,7 +1441,7 @@ export function createChem(host, api) {
     vibLine,
     /* THE LIBRARY (0.4.0 S4a): every record row with its installed lamp, and the INSTALL / REMOVE a section header (S4b) presses */
     async records() { await lamps(); return CHEM_PRESETS.flatMap((p) => Object.values(p.records || {}).map((r) => ({ id: p.id, basis: r.basis, hash: r.hash, bytes: r.bytes,
-      caps: r.caps, recordOnly: !!p.recordOnly, installed: !!have.get(r.hash), label: optOf(p.id) ? optOf(p.id).textContent : null }))); },
+      caps: r.caps, recordOnly: !!p.recordOnly, installed: !!have.get(r.hash), label: optOf(p.id) ? optOf(p.id).label : null }))); },
     async install(id, b = 'sto-3g') {
       const r = ((PRESET_BY_ID.get(id) || {}).records || {})[b]; if (!r) return { ok: false, why: 'no record for ' + id + ' in ' + b };
       const info = await persistOnce(); storageNote(info);

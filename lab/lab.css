@@ -213,7 +213,6 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 .mb-group { position: relative; }
 .mb-btn { height: 26px; padding: 0 10px; border: 0; border-radius: 7px; background: transparent; color: var(--fg-soft); font: var(--w-bold) var(--fs-tiny) var(--font-ui); letter-spacing: var(--tr-wider); cursor: pointer; }
 .mb-btn:hover { background: transparent; color: var(--acc); }
-.mb-list { position: absolute; left: 0; top: 30px; min-width: 240px; max-height: 60vh; overflow: auto; padding: 4px; border-radius: 10px; background: hsl(var(--glass-tint) / .97); border: 1px solid var(--glass-hairline); box-shadow: var(--glass-shadow); display: flex; flex-direction: column; }
 .mb-item { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; text-align: left; border: 0; background: transparent; color: var(--fg-soft); padding: 6px 10px; border-radius: 6px; font: var(--fs-small) var(--font-ui); cursor: pointer; white-space: nowrap; }
 .mb-item:hover { background: var(--glass-raise); color: var(--fg); }
 .mb-key { color: var(--dim); font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
@@ -441,7 +440,7 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 .mol-reg .reg-top .reg-ladder, .mol-reg .reg-top .reg-scope { height: 255px; }
 /* the record-only molecule's download glyph, in the MOLECULE stepper's name beside the <select> (chemview.js dlB) */
 .mol-pick .mir-step-name { display: flex; align-items: center; }
-.mol-pick .mir-step-name > select.sel { flex: 1 1 0; min-width: 0; }
+.mol-pick .mir-step-name > .mir-select { flex: 1 1 0; min-width: 0; }   /* 022 P3: the kit's select, not a native one */
 .mol-pick .mol-dl { flex: 0 0 26px; width: 26px; min-width: 26px; height: 26px; min-height: 26px; padding: 0; }
 .mol-pick .mol-dl[hidden] { display: none; }
 .mol-pick .mol-dl svg:not(.k-arc) { width: 16px; height: 16px; }
@@ -673,21 +672,9 @@ body.mod-arming .k[data-param].mod-drop.is-dup > .k-dial { outline-style: solid;
 body.mod-arming .k[data-param].mod-drop.is-over > .k-dial {
   outline: 3px solid var(--acc2); outline-offset: 3px; box-shadow: var(--neu-raise), 0 0 0 7px var(--acc2-soft); }
 body.mod-arming .sw, body.mod-arming .seg, body.mod-arming .trig, body.mod-arming .fd,
-body.mod-arming select.sel, body.mod-arming .k:not([data-param]) { opacity: .45; }
+body.mod-arming .mir-select, body.mod-arming .k:not([data-param]) { opacity: .45; }
 
-/* THE POPOVER — press and hold 450 ms, or the right button.  One menu, two doors: everything Serum
-   puts behind a right-click needs another road on a touch screen.  And it carries the half Serum is
-   missing — with more than one macro on a control, Serum sends you to another tile or to the Mod
-   Matrix; here the choice of which route the outer arc edits is ON the control. */
-.mod-pop { position: fixed; z-index: calc(var(--z-banner) + 4); min-width: 210px; max-width: 280px;
-  display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3); border-radius: var(--r-md);
-  border: var(--glass-border) solid var(--glass-border-color); background: hsl(var(--glass-tint) / .98);
-  box-shadow: var(--glass-shadow), 0 10px 30px hsl(0 0% 0% / .28);
-  -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur)); }
-.mod-poph { display: flex; align-items: baseline; gap: var(--sp-2); }
-.mod-poph > b { font-size: var(--fs-small); letter-spacing: var(--tr-wide); color: var(--fg); font-weight: var(--w-med); }
-.mod-poph > span { font-size: var(--fs-micro); letter-spacing: var(--tr-wider); color: var(--acc2); }
-.mod-poprts { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+/* THE POPOVER is the kit's knob menu since MIR 1.5.6-alpha.4 (022 P1: ROUTES ›): no sheet of ours */
 .mod-poprts > .grp-lbl { flex: 1 0 100%; }
 .mod-poprts > .mod-mchip { border: 0; cursor: pointer; font: inherit; font-size: var(--fs-micro); }
 .mod-poprts > .mod-mchip.on { box-shadow: inset 0 0 0 1px var(--acc2); font-weight: var(--w-bold); }

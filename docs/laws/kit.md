@@ -6,7 +6,7 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS: lab/mir is written by adopt.mjs alone; a λWAVES need becomes an additive door numbered 1.5.6-alpha.N with its FOR-MIR line; a removal waits for a line; `node <MIR>/tools/adopt.mjs . --check` says in step. (021 K; the one source is CLAUDE.md line 6, which `docs/NOTES-FOR-AGENTS.md` §7 and `docs/FOR-MIR.md` cite.)
 
-THE CLONE ROAD (021 K, PLAN call 12): a door is built in a clone of the kit's bundle on the kit's own laws (words through `label()`/`t()` and the English pack; parts by class and `data-*`; `.glass` takes the look store), committed there as `1.5.6-alpha.N`, adopted back with `adopt.mjs` (`MIR-MANIFEST.json` plus its pin in `tests/mir-manifest.test.mjs` ACCEPTED, the two-file edit), and its bundle left for Josh to fetch into `~/Documents/MIR`; `tools/mir-manifest.py` is retired (021 K4). The kit reads 1.5.6-alpha.3 after 021 (alpha.1 the failed resume, R1; alpha.2 the keyboard panels, MIDI and submenus, I2/I3; alpha.3 `registerGlyphs`, `windowGlyphs`, `glyph`, V1); open asks wait in `docs/FOR-MIR.md` § FOR 1.5.6.
+THE CLONE ROAD (021 K, PLAN call 12): a door is built in a clone of the kit's bundle on the kit's own laws (words through `label()`/`t()` and the English pack; parts by class and `data-*`; `.glass` takes the look store), committed there as `1.5.6-alpha.N`, adopted back with `adopt.mjs` (`MIR-MANIFEST.json` plus its pin in `tests/mir-manifest.test.mjs` ACCEPTED, the two-file edit), and its bundle left for Josh to fetch into `~/Documents/MIR`; `tools/mir-manifest.py` is retired (021 K4). The kit reads 1.5.6-alpha.4 (alpha.1 the failed resume, R1; alpha.2 the keyboard panels, MIDI and submenus, I2/I3; alpha.3 `registerGlyphs`, `windowGlyphs`, `glyph`, V1; alpha.4 `contextMenu`, `holdTap`/`onContext`, the knob menu, `--surface-menu-floor`, 022 P1); open asks wait in `docs/FOR-MIR.md` § FOR 1.5.6.
 
 ## The standing paragraphs
 
@@ -26,7 +26,7 @@ sentence (line 6), then `--check`. `index.html` declares `@layer app,
 mir;` then `mir/mir.css`; `lab.css` and `skin.css` stay UNLAYERED and beat
 every kit layer. An `app.*` layer ranks below the kit for a normal declaration,
 so keep a λWAVES look with an unlayered rule, and narrow an app rule the layers
-made live with a twin `:not(:where())`. The `!important` declarations stay unlayered: `grep -o '!important' lab/lab.css lab/skin.css lab/csb.css lab/keymap.css lab/nodes.css | wc -l` reads 39 at 021 (skin.css 25, lab.css 11, nodes.css 3; comments counted).
+made live with a twin `:not(:where())`. The `!important` declarations stay unlayered: `grep -o '!important' lab/lab.css lab/skin.css lab/csb.css lab/keymap.css lab/nodes.css | wc -l` reads 31 at 022 P3 (skin.css 17, lab.css 11, nodes.css 3; comments counted; 39 at 021 — the hint tip's eight left with the popup law).
 R5-W1: a kit module no root reaches is reported by `wiring --unreached-kit`,
 never precached, never failed; our own modules keep the hard gate. The
 KEYBOARD window's paint is λWAVES' own in `lab/keymap.css` (021 G6; the window is the kit's, on `#floats`). Knobs follow 1.5's ONE KNOB LAW (vertical drag, ⅛

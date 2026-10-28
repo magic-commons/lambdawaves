@@ -1289,12 +1289,9 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:active::bef
   background: transparent;
   color: var(--acc); font: var(--m2-add-font); line-height: 1; padding: 0; }
 .mir-modwindow .m2add:active { background: var(--acc-soft); }
-/* A chooser sheet, on the app's own glass. */
+/* A chooser sheet: since 1.5.6-alpha.4 a menu pane (`.glass[data-mir-surface="menu"]`, modwindow.js), so its material is the skin's. */
 .mir-modwindow .m2pick { position: absolute; left: 50%; top: 46px; transform: translateX(-50%); z-index: 42;
-  min-width: 200px; border-radius: var(--surface-radius, var(--r-lg)); background: var(--m2-plate);
-  -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter);
-  border: var(--surface-edge-width, var(--glass-border)) solid var(--surface-edge, var(--glass-hairline)); padding: 8px;
-  box-shadow: var(--surface-shadow, var(--glass-shadow)); display: flex; flex-direction: column; gap: 6px; }
+  min-width: 200px; border-radius: var(--surface-radius, var(--r-lg)); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
 .mir-modwindow .m2pick[hidden] { display: none; }
 .mir-modwindow .m2pickb { min-height: 46px; border: 0; border-radius: var(--r-md); background: var(--m2-face-w07);
   color: var(--m2-ink-w100); font: var(--m2-pickb-font); letter-spacing: var(--label-tracking, var(--m2-tr-08)); }

@@ -51,7 +51,7 @@ const SCENES = {
       $('[data-node="n1"] .nodes-chev').click(); await w(200); N.views[1].place(); await w(200);
       const b = $('[data-node="n2"] .nodes-name').getBoundingClientRect(); return { one, all, none, at: [Math.round(b.left + 30), Math.round(b.top + 6)] };`);
     await mouse(folds.at, 'right');
-    const rows = await E(`await w(300); return $$('.nodes-pop:not([hidden]) .nodes-item').map((b) => b.textContent);`);
+    const rows = await E(`await w(300); return [...document.querySelectorAll('.mir-ctx .mb-item .mb-lbl')].map((b) => b.textContent);`);   // 022 P2: the kit's contextMenu
     return { named, folds, rows };
   },
   x3: `N.open(); await w(600); N.win.place({ x: 480, y: 70, w: 620, h: 720 }); await w(300); for (const t of ['levels', 'posterize', 'hue', 'blur']) N.add(t); N.set('n1', 'gamma', 1.6); N.set('n3', 'hue', 120); await w(500);

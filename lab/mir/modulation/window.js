@@ -35,6 +35,7 @@
  */
 import { el, svgEl, seg, trig, knob, tapWatcher, gripDots, label, ariaLabel, hint as hintTo, gearOf, watchTouches } from '../kit.js';
 import { bindSliderKeys } from '../slider-keys.js';
+import { contextMenu, knobMenu, knobMenuPart } from '../shell/menubar.js';
 import { createModWindow, setDeviceMode, setWorkLane, sizeLaw, GEOM,
          buildGhost, buildAudioSheet, COPY } from './modwindow/modwindow.js';
 import { evaluate as curveEval, curveHash, curveInfo, presetPoints, presetMirror,
@@ -1006,7 +1007,7 @@ export function createModulation(host, port) {
     if (!ringFocus) return;
     const k = e.target.closest && e.target.closest('.has-ring');
     if (k && k.dataset.param === ringFocus) return;
-    if (e.target.closest && e.target.closest('.mod-pop')) return;
+    if (e.target.closest && e.target.closest('.mir-ctx')) return;
     focusRing(null);
   };
   document.addEventListener('pointerdown', focusAway, true);
@@ -1330,47 +1331,31 @@ export function createModulation(host, port) {
   }
 
 
+  /* 1.5.6-alpha.4 · THE ROUTE POP IS THE KNOB MENU's ROUTES › part (shell/menubar.js knobMenu): RANGE · REMOVE · REMOVE ALL · the macros that
+     hold it (which one the outer arc edits); its RESET (the menu's first row) sets the base and keeps the routes.  A fader, which has no knob
+     menu, gets the same rows in its own pane. */
+  function routeRows(id) {
+    const d = descOf(id), rs = M.routesOfTarget(id), er = editRouteOf(id), entries = [];
+    if (!rs.length) return null;
+    if (er) {
+      const now = rangeMode(er);
+      for (const [m, w, h] of [['centre', 'RANGE · CENTRE', 'Use the knob position as the centre of a bipolar range'], ['up', 'RANGE · UP', 'Use the knob position as the minimum'],
+        ['down', 'RANGE · DOWN', 'Use the knob position as the maximum']]) entries.push([w, () => { M.setRouteRange(er.id, rangeFor(id, m)); apply(); paintRings(); paint(true); }, false, h, { checked: now === m, radio: 'range', id: 'range-' + m }]);
+      entries.push(null, ['REMOVE', () => removeEditRoute(id), false, 'Remove this route', { id: 'remove' }]);
+    }
+    entries.push(['REMOVE ALL', () => { M.removeRoutesOfTarget(id); if (registry.has(id)) registry.restoreBase(id);
+      clock.recomputeRunning(); apply(); rebuild(); status(t('every route into {target} removed', { target: d ? { t: d.label } : id }), ''); }, false, 'remove every route into this control', { id: 'remove-all' }]);
+    if (rs.length > 1) { entries.push(null); for (const r of rs) { const m = M.macroOf(r.macroId); entries.push([m ? m.name : r.macroId, () => selectMacro(r.macroId), false, 'the macro the outer arc edits', { raw: true, checked: !!(er && r.id === er.id), radio: 'macro' }]); } }
+    return { entries, reset: d && d.def !== null && d.def !== undefined ? () => { registry.setBase(id, d.def); apply(); paintRings(); } : null };
+  }
+  knobMenuPart('routes', routeRows);
   let popEl = null;
-  function closePop() { if (popEl) { popEl.remove(); popEl = null; } }
+  function closePop() { const p = popEl; popEl = null; if (p) p.close(); }
   function openPop(id, x, y) {
     closePop();
-    const d = descOf(id), rs = M.routesOfTarget(id);
-    const er = editRouteOf(id);
-    popEl = el('div', 'mod-pop glass');
-    const head = el('div', 'mod-poph', popEl);
-    if (d) label(el('b', '', head), d.label); else el('b', '', head, id);
-    if (er) el('span', '', head, (M.macroOf(er.macroId) || { name: er.macroId }).name);
-    else label(el('span', '', head), rs.length ? 'no route from the selected macro' : 'no route');
-    if (er) {
-      const sg = seg({ label: 'RANGE', value: rangeMode(er), options: [
-      { id: 'centre', label: 'CENTRE', title: 'Use the knob position as the centre of a bipolar range' },
-      { id: 'up', label: 'UP', title: 'Use the knob position as the minimum' },
-      { id: 'down', label: 'DOWN', title: 'Use the knob position as the maximum' }],
-        onChange: (v) => { M.setRouteRange(er.id, rangeFor(id, v)); apply(); paintRings(); paint(true); } });
-      popEl.appendChild(sg.root);
-    }
-    const rw = el('div', 'row tight', popEl);
-    if (er) rw.appendChild(trig({ label: 'REMOVE', title: 'Remove this route',
-      onFire: () => { closePop(); removeEditRoute(id); } }).root);
-    if (rs.length) rw.appendChild(trig({ label: 'REMOVE ALL', title: 'remove every route into this control',
-      onFire: () => { closePop(); M.removeRoutesOfTarget(id); if (registry.has(id)) registry.restoreBase(id);
-        clock.recomputeRunning(); apply(); rebuild(); status(t('every route into {target} removed', { target: d ? { t: d.label } : id }), ''); } }).root);
-    if (d && d.def !== null && d.def !== undefined) rw.appendChild(trig({ label: 'RESET', title: 'Reset the base value and keep its routes',
-      onFire: () => { closePop(); registry.setBase(id, d.def); apply(); paintRings(); } }).root);
-    if (rs.length > 1) {
-      const l = el('div', 'mod-poprts', popEl);
-      label(el('div', 'grp-lbl', l), 'THIS CONTROL IS HELD BY {n} MACROS  ·  which one the outer arc edits', { n: rs.length });
-      for (const r of rs) {
-        const m = M.macroOf(r.macroId);
-        const b = el('button', 'mod-mchip' + (er && r.id === er.id ? ' on' : ''), l, m ? m.name : r.macroId);
-        b.type = 'button';
-        b.addEventListener('click', () => { closePop(); selectMacro(r.macroId); openPop(id, x, y); });
-      }
-    }
-    document.body.appendChild(popEl);
-    const b = popEl.getBoundingClientRect();
-    popEl.style.left = Math.round(Math.max(6, Math.min(innerWidth - b.width - 6, x - b.width / 2))) + 'px';
-    popEl.style.top = Math.round(Math.max(6, Math.min(innerHeight - b.height - 6, y + 14))) + 'px';
+    const onClose = () => { popEl = null; }, R = routeRows(id);
+    popEl = knobMenu(controlOf(id), { x, y, open: 'routes', onClose })
+      || contextMenu({ x, y, onClose, entries: R ? [...R.entries, ...(R.reset ? [null, ['RESET', R.reset, false, 'Reset the base value and keep its routes']] : [])] : [] });
   }
 
 
@@ -1382,10 +1367,6 @@ export function createModulation(host, port) {
     }
   };
   document.addEventListener('pointerdown', pickAway, true);
-  const popAway = (e) => { if (popEl && !popEl.contains(e.target)) closePop(); };
-  const popKey = (e) => { if (popEl && e.key === 'Escape') { e.stopPropagation(); closePop(); } };
-  document.addEventListener('pointerdown', popAway, true);
-  window.addEventListener('keydown', popKey, true);
 
   /* ═══════════════════════════════════════════════════════════════════════════════════════
    *  THE MACRO RAIL — the artifact's slots, wired
@@ -3317,9 +3298,9 @@ export function createModulation(host, port) {
     },
     rings: () => [...rings.keys()],
     pop: (id, x, y) => { openPop(id, x === undefined ? 40 : x, y === undefined ? 40 : y); return !!popEl; },
-    popState: () => (popEl ? { range: [...popEl.querySelectorAll('.seg-b')].filter((b) => b.classList.contains('on')).map((b) => b.textContent),
-                               buttons: [...popEl.querySelectorAll('.trig .trig-l')].map((b) => b.textContent),
-                               routes: [...popEl.querySelectorAll('.mod-mchip')].map((b) => b.textContent + (b.classList.contains('on') ? '*' : '')) } : null),
+    popState: () => (popEl ? { range: [...popEl.host.querySelectorAll('[data-radio="range"][aria-checked="true"] .mb-lbl')].map((b) => b.textContent),
+                               buttons: [...popEl.host.querySelectorAll('.mb-item .mb-lbl')].map((b) => b.textContent),
+                               routes: [...popEl.host.querySelectorAll('[data-radio="macro"]')].map((b) => b.querySelector('.mb-lbl').textContent + (b.getAttribute('aria-checked') === 'true' ? '*' : '')) } : null),
     closePop,
     reach: (id) => (registry.has(id) ? reachText(id) : null),
     cards: () => devOrder().map((s, i) => ({
@@ -3439,16 +3420,14 @@ export function createModulation(host, port) {
       for (const rec of devRows.values()) if (rec.readout) rec.readout.dispose();
       off(); offLanguage(); if (ro) { ro.disconnect(); ro = null; } if (boxRO) boxRO.disconnect();
       document.removeEventListener('pointerdown', armTap, true);
-      document.removeEventListener('pointerdown', popAway, true);
       document.removeEventListener('pointerdown', pickAway, true);
       document.removeEventListener('pointerdown', focusAway, true);
       window.removeEventListener('keydown', armKey, true);
-      window.removeEventListener('keydown', popKey, true);
       window.removeEventListener('resize', onResize);
       if (unSpan) unSpan();
       if (hintTimer) { clearTimeout(hintTimer); hintTimer = null; }
       audRings.clear(); audBands.clear(); audRoutes.clear();
-      endArm(); closePop();
+      endArm(); closePop(); knobMenuPart('routes', null);
       gripDrag.destroy(); if (guide) guide.destroy(); glow.destroy(); glowLayer.remove();
       if (ghost) { ghost.remove(); ghost = null; }
       for (const [, rec] of rings) dropRing(rec); rings.clear();

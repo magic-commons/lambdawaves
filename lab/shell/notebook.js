@@ -273,6 +273,9 @@ export function createNotebook(app) {
         notice: () => app.state.restoreNotice, thumbnail: () => app.sh.LW.thumbnail(), confirm: (text) => window.confirm(text), onMoved: () => occlusion.dirty(),
         /* iteration 004 · the front page sits above every window (THE PICKER, z 100000): FOLDERS puts it away when it comes on screen */
         cover: () => app.state.picker,
+        /* 022 P2 · a project's own menu (the kit's rows) adds OPEN, and EXPORT .mir / .png for the project that is open */
+        itemRows: (e) => { const P = layout.projects, cur = P && P.current && P.entryOf ? P.entryOf(P.current) : null, A = app.sh.ACTIONS;
+          return [['OPEN', () => P.folders.openEntry(e.id)], ...(cur && cur.id === e.id ? [['EXPORT .mir', () => A.run('export.mir')], ['EXPORT .png', () => A.run('export.png')]] : [])]; },
         /* Josh 10-01 · a project save writes its modulation as a preset named the project in CAPS (the kit's presetUpsertCaps, BASINS'
            presetOnSave) — only a rack that routes something, so a plain save adds no empty preset */
         saved(name) { const H = app.state.modHost; if (!H) return; const rack = H.model.serializeRack(); if (!rack || !Array.isArray(rack.routes) || !rack.routes.length) return;

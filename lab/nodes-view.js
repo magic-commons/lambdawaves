@@ -19,7 +19,7 @@
  * 020 X4 FADE AND MASK: a foot fold on every card but a LAYER — FADE · MASK · SOFT (MIR controls; FADE and SOFT are modulation targets); the
  * fold is lit while either is off home; the cost mark follows the compiler (a masked LEVELS reads ···).
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
-import { el, label, ariaLabel, chip } from './mir/kit.js';
+import { el, label, ariaLabel, chip, onContext } from './mir/kit.js'; import { contextMenu } from './mir/shell/menubar.js';
 import { nodeBody, FOOT } from './node-types.js';
 import { transfer, ownRun } from './nodes-compile.js';
 import { frame } from './mir/core/frame.js'; import { glyphEl } from './mir/glyph.js'; import { nodeGlyph } from './icons.js';
@@ -102,7 +102,6 @@ export function createView(parent, kind, M) {
     n.c.dataset.type = q.type; n.c.title = t.hint || '';
     const v = el('button', 'nodes-chev', null); v.type = 'button'; chip(v, 'chevronDown', 'COLLAPSE'); n.bar.prepend(v); v.addEventListener('click', () => M.setFold(q.id, !q.fold));
     if (!W) n.name.addEventListener('dblclick', () => renameAt(q.id));
-    n.c.addEventListener('contextmenu', (e) => { e.stopPropagation(); popup(e, cardRows(q)); });
     if (t.cls === 'table' || t.cls === 'matrix') { n.strip = el('canvas', 'nodes-strip'); n.strip.width = 128; n.strip.height = 10; n.c.insertBefore(n.strip, n.body); api.strip(q); }
     const eye = el('button', 'nodes-eye', n.bar); eye.type = 'button'; chip(eye, 'eye', 'VIEW HERE'); eye.addEventListener('click', () => M.setView(q.id));
     const so = el('button', 'nodes-solo', n.bar); so.type = 'button'; chip(so, 'solo', 'SOLO'); so.addEventListener('click', () => M.setSolo(q.id));
@@ -134,24 +133,16 @@ export function createView(parent, kind, M) {
     f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true); } else if (e.key === 'Escape') { e.preventDefault(); end(false); } });
     f.addEventListener('blur', () => end(false)); f.focus(); f.select();
   }
-  /* THE RIGHT-CLICK MENUS: rows [word, run] (null = a divider), at the pointer, inside the ground */
-  const pop = el('div', 'nodes-menu nodes-pop', ground); pop.hidden = true;
-  function popup(e, rows) {
-    e.preventDefault(); menu.hidden = true; pop.replaceChildren();
-    for (const r of rows) if (!r) el('div', 'nodes-sep', pop); else { const b = el('button', 'nodes-item', pop); b.type = 'button'; label(el('span', '', b), r[0]); if (r[2]) b.setAttribute('aria-pressed', 'true');
-      b.addEventListener('click', () => { pop.hidden = true; r[1](); }); }
-    pop.hidden = false; const [x, y] = local(e);
-    pop.style.left = Math.max(4, Math.min(x, ground.clientWidth - pop.offsetWidth - 4)) + 'px'; pop.style.top = Math.max(4, Math.min(y, ground.clientHeight - pop.offsetHeight - 4)) + 'px';
-  }
-  pop.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Escape') pop.hidden = true; });
-  ground.addEventListener('pointerdown', (e) => { if (!pop.contains(e.target)) pop.hidden = true; }, true);
+  /* THE RIGHT-CLICK MENUS (022 P2: the kit's contextMenu — a right-click, the ContextMenu key or a still hold, onContext; ✓ where a row is a state) */
+  let pop = null;
+  const popup = (x, y, rows) => { menu.hidden = true; pop = contextMenu({ x, y, entries: rows.map((r) => (r ? [r[0], r[1], false, '', r.length > 2 ? { checked: !!r[2] } : {}] : null)), onClose: () => { pop = null; } }); };
   const folded = () => M.list().length > 0 && M.list().every((q) => q.fold);
   const foldAll = () => M.setFold(M.list().map((q) => q.id), !folded());
   const cardRows = (q) => [['VIEW HERE', () => M.setView(q.id), M.flags.view === q.id], ['SOLO', () => M.setSolo(q.id), M.flags.solo === q.id], ['BYPASS', () => M.setBypass(q.id, !q.bypass), q.bypass], [q.fold ? 'EXPAND' : 'COLLAPSE', () => M.setFold(q.id, !q.fold)],
     ['DUPLICATE', () => pick(M.duplicate(q.id, at()))], ['RENAME', () => renameAt(q.id)], ['RESET', () => M.reset(q.id)], null,
     ['MOVE UP', () => M.move(q.id, -1)], ['MOVE DOWN', () => M.move(q.id, 1)], null, ['REMOVE', () => M.remove(q.id)]];
   const groundRows = () => [['ADD…', () => openMenu(true)], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'EXPAND ALL' : 'COLLAPSE ALL', foldAll], ['BYPASS ALL', () => M.setOff(!M.off()), M.off()]].filter((r) => r !== false);
-  ground.addEventListener('contextmenu', (e) => popup(e, groundRows()));
+  onContext(ground, ({ x, y, target }) => { if (target.closest('.nodes-menu, input')) return; const c = target.closest('.nodes-card[data-node]'), q = c && M.byId(c.dataset.node); popup(x, y, q ? cardRows(q) : groundRows()); });
   if (!W) ground.classList.add('nodes-column');
   else {
     /* THE GROUND'S HAND: a drag pans, shift + drag draws a box, two fingers pinch; ctrl/⌘ + wheel zooms about the pointer */
@@ -198,7 +189,7 @@ export function createView(parent, kind, M) {
       undo: () => M.undo(), redo: () => M.redo(), off: () => M.setOff(!M.off()), add: () => openMenu(true), fit: () => fit(),
       bypass() { const ids = [...sel]; if (ids.length) M.setBypass(ids, ids.some((id) => !M.byId(id).bypass)); }, solo() { const ids = [...sel]; if (ids.length) M.setSolo(ids[0]); },
       fold() { const ids = [...sel]; if (ids.length) M.setFold(ids, ids.some((id) => !M.byId(id).fold)); },
-      escape() { if (!menu.hidden || !pop.hidden) menu.hidden = pop.hidden = true; else pick([]); } });
+      escape() { if (!menu.hidden || pop) { menu.hidden = true; if (pop) pop.close(); } else pick([]); } });
   }
 
   /* + : ONE list — the search line, the classes split by an icon divider, then the GRAPHS; the view's other door: the window ↔ the rack card */
@@ -207,7 +198,7 @@ export function createView(parent, kind, M) {
   if (W) tool('nodes-fit', 'home', 'FIT — every card in view (Home)', () => fit());
   const foldB = tool('nodes-folds', 'compact', 'COLLAPSE ALL', () => foldAll());
   const offB = tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph (\\)', () => M.setOff(!M.off()));
-  const menu = el('div', 'nodes-menu', ground); menu.hidden = true;
+  const menu = el('div', 'nodes-menu glass', ground); menu.hidden = true; menu.dataset.mirSurface = 'menu';   // 022 P3: a menu pane, the skin's
   const sep = (cls) => { const s = el('div', 'nodes-sep', menu); if (cls) icon(s, cls); return s; };
   const item = (text, title, run, cls = 'nodes-item') => { const it = el('button', cls, menu); it.type = 'button'; label(el('span', '', it), text); it.title = title;
     it.addEventListener('click', () => { menu.hidden = true; run(); }); return it; };
@@ -282,7 +273,7 @@ export function createView(parent, kind, M) {
       paintSel(); api.place();
     },
     place() {
-      const L = M.list(); menu.hidden = pop.hidden = true; api.foot(); empty.hidden = L.length > 0;
+      const L = M.list(); menu.hidden = true; if (pop) pop.close(); api.foot(); empty.hidden = L.length > 0;
       if (!W) { plane.append(cards.in.c, empty, ...L.map((q) => cards[q.id].c), cards.out.c); return; }   // the rack card: the chain as a column, in order
       const set = (n, l, t) => { n.style.left = l + 'px'; n.style.top = t + 'px'; };
       const A = M.rec().at || {}, pin = A.in || AT.in;

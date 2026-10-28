@@ -6,8 +6,9 @@
  * an outside press, Escape, a resize or the page losing focus.  Rows are real 44 px touch seats; an item marked `coming`
  * is shown and never chosen; the keys are the listbox's (arrows, Home, End, Enter, a typed letter, Escape).
  *   listPane({ anchor, items, value, onPick, onClose, label, cls, signal }) → { root, close(), items }   one pane for the stepper and the select
- *   select({ label, aria, items, value, onChange, placeholder, cls, disabled }) → { root, button, get, set(id), setItems(list, id), open(), close(), isOpen, setDisabled(on), destroy() }
- * items: [{ id, label, vars?, coming? }] — the same record the stepper takes.  Words go through label() and so translate.
+ *   select({ label, aria, items, value, onChange, placeholder, cls, disabled, repick }) → { root, button, get, set(id), setItems(list, id), open(), close(), isOpen, setDisabled(on), destroy() }
+ * items: [{ id, label, vars?, coming?, pic?, title? }] — the same record the stepper takes (`pic` a picture at the row's left, loaded lazily;
+ * `title` its hint; `repick: true` — a press on the chosen row still calls onChange; 1.5.6-alpha.4).  Words go through label() and so translate.
  * No pollers, no timers: the pane is placed once from one rect read, and idle costs nothing. */
 import { el, label, ariaLabel } from '../kit.js';
 import { setGlyph } from '../glyph.js';
@@ -49,7 +50,9 @@ export function listPane({ anchor, items, value, onPick, onClose, label: name, c
   for (const it of items) {
     const b = el('button', 'mir-pick-i' + (it.coming ? ' coming' : '') + (it.id === value ? ' on' : ''), root); b.type = 'button';
     b.setAttribute('role', 'option'); b.setAttribute('aria-selected', String(it.id === value)); b.dataset.id = String(it.id);
-    label(b, it.label, it.vars);
+    if (it.pic) { const p = el('img', 'mir-pick-pic', b); p.alt = ''; p.loading = 'lazy'; p.decoding = 'async'; p.src = it.pic; p.onerror = () => { p.style.visibility = 'hidden'; }; label(el('span', '', b), it.label, it.vars); }
+    else label(b, it.label, it.vars);   // 1.5.6-alpha.4: `pic` — a row's picture at its left, read lazily (λWAVES' MOLECULES chooser)
+    if (it.title) b.title = it.title;
     if (it.coming) { b.setAttribute('aria-disabled', 'true'); b.tabIndex = -1; b.addEventListener('mousedown', (e) => e.preventDefault()); }   // a row that cannot be chosen does not take the focus either
     else b.addEventListener('click', () => { const id = it.id; close(true); if (onPick) onPick(id); });
     rows.set(it.id, b);
@@ -116,7 +119,7 @@ export function select(o = {}) {
   const close = (refocus) => { if (pane) pane.close(refocus); };
   const openIt = () => {
     if (pane || btn.disabled) return;
-    pane = listPane({ anchor: btn, items, value: v, label: o.aria || o.label, onPick: (id) => choose(id), onClose: () => { pane = null; btn.setAttribute('aria-expanded', 'false'); } });
+    pane = listPane({ anchor: btn, items, value: v, label: o.aria || o.label, onPick: (id) => (id === v && o.repick ? o.onChange && o.onChange(v) : choose(id)), onClose: () => { pane = null; btn.setAttribute('aria-expanded', 'false'); } });
     btn.setAttribute('aria-expanded', 'true');
   };
   btn.addEventListener('click', () => (pane ? close(false) : openIt()));
