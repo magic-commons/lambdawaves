@@ -262,6 +262,24 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
 .k-lg.k-mod .k-dial::after { height: 20px; background: linear-gradient(to top, transparent 15px, var(--acc) 15px); }
 .k-val { font-size: var(--fs-tiny); color: var(--fg-soft); }
 .k.drag .k-val { color: var(--acc); font-weight: var(--w-bold); }
+/* 1.5.6-alpha.6 · THE FIT ROW (λWAVES 022 F1; opt-in: `row(parent, { fit: true })` or the class `.row.fit` — a plain `.row` does not move).
+   A ROW FITS: its cells are `repeat(auto-fit, minmax(--cell-min, 1fr))`, so n controls share one line while n·cell + (n−1)·gap fits
+   (six at 262 px) and a row never adds a line for a control that fits.  A knob's cell is the cell (no 62-px seat) and its face scales
+   with it, between --knob-min and --knob-max (62 % of the cell; the arc's viewBox scales with the dial, the needle and the base tick
+   are shares of it, the 44-px finger stays the dial's ::before outset); a switch, a trigger, a readout or a select stretches to its
+   cell, a segmented select (and anything marked `.wide`) takes two, `.full` the whole line.  The sizes are tokens (css/tokens.css). */
+.row.fit { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(var(--cell-min, 40px), 100%), 1fr)); gap: var(--row-gap, 4px) 4px;
+  align-items: start; justify-content: stretch; }
+.row.fit[data-knob="sm"] { --knob-max: var(--knob, 34px); }                    /* the face at most the plain knob's */
+.row.fit[data-knob="lg"] { --knob-min: var(--knob, 34px); }                    /* the face at least the plain knob's */
+.row.fit > .k { width: auto; min-width: 0; container-type: inline-size; }
+.row.fit > .k > .k-dial { width: clamp(var(--knob-min, 28px), 62cqi, var(--knob-max, 44px)); height: auto; aspect-ratio: 1; box-sizing: border-box; }
+.row.fit > .k > .k-dial > .k-needle { height: 38%; }
+.row.fit > .k.k-mod > .k-dial::after { height: 47%; background: linear-gradient(to top, transparent 68%, var(--acc) 68%); }
+.row.fit > :is(.sw, .trig, .ro, .segw, .seg, select.sel) { width: auto; min-width: 0; max-width: 100%; box-sizing: border-box; }
+.row.fit > :is(.sw, .trig) { overflow: hidden; }
+.row.fit > :is(.seg, .segw, .wide) { grid-column: span 2; }
+.row.fit > .full { grid-column: 1 / -1; }
 /* DISABLED is one rule, in skin.css §6: one fade (--state-disabled), no relief, no pointer.  W-STURMIAN: a control that
    stands down keeps its seat and carries its note (wave 58: and a trigger the plan refuses). */
 

@@ -55,6 +55,15 @@
 
 @layer mir.tier {
 
+/* ── 1.5.6-alpha.6 · THE FIT ROW's sizes (base.css `.row.fit`; plain values, so :root is safe).  A skin or an app retunes them. ── */
+:where(:root) {
+  --cell-min: 40px;                  /* a fit row's narrowest cell: n controls share a line while n·40 + (n−1)·4 fits */
+  --knob-min: 28px;                  /* a fit row's smallest knob face */
+  --knob: 34px;                      /* the plain knob's face: the cap of data-knob="sm", the floor of "lg" */
+  --knob-max: 44px;                  /* a fit row's largest knob face */
+  --row-gap: 4px;                    /* a fit row's gap between its lines */
+}
+
 /* ── LITE, and FLAT, which is lite and more ── */
 :where(html[data-ui-tier="lite"], html[data-ui-tier="flat"]) {
   --surface-filter: none;            /* every blur the house draws: frost panes, the disconnected islands, the tip, the notebook, the menubar list */
