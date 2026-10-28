@@ -845,6 +845,9 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
    .04em, soft); 015 T1's fixed 16 ch and its lining numerals stay */
 .mir-timeline .tl-transport .ro.time .ro-lbl { font: var(--w-bold) 8px/1 var(--font-ui); letter-spacing: .04em; color: var(--fg-soft); }
 .mir-timeline .tl-transport .ro.time .ro-val { font: var(--w-bold) 18px/1 var(--font-num); font-variant-numeric: lining-nums tabular-nums; color: var(--acc2); }
+/* 023 R4: the kit's `.ro-val { min-height: 1.4em }` (base.css) gave the 18-px value a 25-px box with its numerals at the top, so t sat 3 px above
+   the tempo number beside it; at its own 18 px the value is centred on the row as the tempo number is — one baseline, one box */
+.mir-timeline .tl-transport .ro.time .ro-val { min-height: 0; }
 
 /* ═══ iteration 012 R3 · WAVE · CAMERA · PALETTE ═══ */
 /* CAMERA: the sphere drawn bigger beside its knob column (YAW · PITCH · ZOOM · FOV, material.js).  The kit's drawing is 400 × 280 with the ball
