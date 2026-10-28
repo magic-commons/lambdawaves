@@ -10,7 +10,7 @@
  * without a node and restored into the next CURVES), id `curves`.  THE DEFAULT GRAPH IS EMPTY: a first run (no record, no grade) opens
  * STAGE IN → STAGE OUT; a record with `list` opens as saved; 018's one-node record (`curves: false`, `at.curves`) opens with CURVES.
  * Every node knob is a MIR control routed like any other dial (`nodes.<node>.<knob>`, stable).  Records, all PREFERENCE: the grade
- * `lambdawaves.q0.curves`, the reader's curves `.curvePresets`, the graph `.nodes` ({ list: [{ id, type, values, bypass, at, name, fold }],
+ * `lambdawaves.q0.curves`, the reader's curves `.curvePresets`, the graph `.nodes` ({ seq, list: [{ id, type, values, bypass, at, name, fold }],
  * at, pan, zoom, win, off }), the reader's graphs `.nodePresets`.
  *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod }) → { model, filter, nodes(), add(type), remove(id),
  *     setBypass(id, on), set(id, knob, value), passes(), compile(), win, views, open(), close(), has(), setHas(on) } */
@@ -78,11 +78,16 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     return r.list.filter((q) => q && /^[a-z][a-z0-9]*$/.test(q.id) && TYPES[q.type] && (q.type !== 'curves' || (!one && (one = true)))).map((q) => fresh(q.type === 'curves' ? 'curves' : q.id, q.type, q));
   }
   nodes = load();
+  /* 021 R2 · A NODE'S ID IS PERMANENT: `seq` (in the record) only grows — add, duplicate and a graph take 'n' + (++seq), nothing renumbers,
+     so a route or a TIMELINE lane on `nodes.n2.amount` can never wake on another node.  An older record without it starts at its highest n */
+  let seq = Math.max(Number.isInteger(rec().seq) ? rec().seq : 0, ...nodes.map((q) => (/^n(\d+)$/.exec(q.id) || [0, 0])[1] | 0));
+  const nextId = () => 'n' + (++seq);
+  const batch = (fn) => (mod && mod.batch ? mod.batch(fn) : fn());   // one modulation-window rebuild per graph change
   const byId = (id) => nodes.find((q) => q.id === id);
   const curvesNode = () => nodes.find((q) => q.type === 'curves');
   const has = () => { const c = curvesNode(); return !!c && !c.bypass; };
   let saving = 0, savingList = 0;
-  const saveList = (now) => { clearTimeout(savingList); const w = () => put({ list: nodes.map(({ id, type, values, bypass, at, name, fold }) => ({ id, type, values, bypass, at, name, fold })) }); if (now) w(); else savingList = setTimeout(w, 250); };
+  const saveList = (now) => { clearTimeout(savingList); const w = () => put({ seq, list: nodes.map(({ id, type, values, bypass, at, name, fold }) => ({ id, type, values, bypass, at, name, fold })) }); if (now) w(); else savingList = setTimeout(w, 250); };
   model.restore(curvesStore.get());
   model.onChange(() => { clearTimeout(saving); saving = setTimeout(() => curvesStore.set(model.serialize()), 250); });
 
@@ -92,15 +97,17 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const routed = (id) => !!(mod && mod.registry && mod.registry.has(id) && mod.registry.isModulated(id));
   const knobsOf = (q) => [...TYPES[q.type].knobs, ...(TYPES[q.type].cls === 'layer' ? [] : FOOT)].filter((K) => !K.colour && !K.options);   // X4: FADE and SOFT too
   const knobOf = (q, k) => { for (const v of views) { const w = v.widget(q.id, k); if (w) return w; } return null; };
+  /* 021 R2 · THE FLASH GUARD reaches NODES: each knob's 10 % step is a tenth of its span (in ln for a log knob) — conservative, uncalibrated */
+  const flashStep = (K) => (K.log && K.min > 0 ? Math.log(K.max / K.min) : K.max - K.min) / 10;
   function enroll(q) {
     if (!mod || !mod.register) return;
     const T = TYPES[q.type];
     for (const K of knobsOf(q)) try {
       mod.register(ID(q, K.k), { label: (q.name || T.label) + ' ' + K.label, min: K.min, max: K.max, step: K.step || 0, map: K.log ? 'log' : K.step === 1 ? 'integer' : 'linear', unit: K.unit, hint: K.hint || T.hint,
-        def: K.home, group: 'nodes', get: () => q.values[K.k], set: (v) => setValue(q, K.k, v, 'mod'), knob: () => knobOf(q, K.k) });
+        def: K.home, group: 'nodes', flash: flashStep(K), get: () => q.values[K.k], set: (v) => setValue(q, K.k, v, 'mod'), knob: () => knobOf(q, K.k) });
     } catch (e) { console.warn('NODES: a knob is no target', e); }
   }
-  const unenroll = (q) => { if (mod && mod.unregister) for (const K of knobsOf(q)) mod.unregister(ID(q, K.k)); };
+  const unenroll = (q) => { if (mod && mod.unregister) for (const K of knobsOf(q)) mod.unregister(ID(q, K.k)); };   // its routes go dormant (the id is never reused)
   function setValue(q, k, v, from) {
     if (q.values[k] === v) return;
     q.values[k] = v; q.v++; recompile();
@@ -112,7 +119,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
 
   /* 020 X1 · NODES' OWN UNDO (lab/nodes-undo.js): a snapshot of the list and the graph's places; every verb marks the state before it */
   const snap = () => JSON.stringify({ list: nodes.map(({ id, type, values, bypass, at, name, fold }) => ({ id, type, values, bypass, at, name, fold })), at: rec().at || null });
-  const undo = createUndo(snap, (s) => { const o = JSON.parse(s); for (const q of nodes) unenroll(q); nodes = o.list.map((q) => fresh(q.id, q.type, q)); for (const q of nodes) enroll(q);
+  const undo = createUndo(snap, (s) => { const o = JSON.parse(s); batch(() => { for (const q of nodes) unenroll(q); nodes = o.list.map((q) => fresh(q.id, q.type, q)); for (const q of nodes) enroll(q); });
     put({ at: o.at }); changed(true); });
   const many = (x) => (Array.isArray(x) ? x : [x]);
 
@@ -123,18 +130,17 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     undo.mark();
     const c = type === 'curves' && curvesNode();
     if (c) { setBypass(c.id, false); return c.id; }
-    let k = 1; while (byId('n' + k)) k++;
-    const q = fresh(type === 'curves' ? 'curves' : 'n' + k, type, o); nodes.push(q); enroll(q); changed(); return q.id;
+    const q = fresh(type === 'curves' ? 'curves' : nextId(), type, o); nodes.push(q); batch(() => enroll(q)); changed(); return q.id;
   }
   /** remove(id | ids) · setBypass(id | ids, on): one step for the lot */
-  function remove(ids) { const Q = many(ids).map(byId).filter(Boolean); if (!Q.length) return false; undo.mark(); for (const q of Q) unenroll(q); nodes = nodes.filter((n) => !Q.includes(n));
+  function remove(ids) { const Q = many(ids).map(byId).filter(Boolean); if (!Q.length) return false; undo.mark(); batch(() => { for (const q of Q) unenroll(q); }); nodes = nodes.filter((n) => !Q.includes(n));
     for (const f of ['view', 'solo']) if (!byId(flags[f])) flags[f] = null; changed(); return true; }
   function setBypass(ids, on) { const Q = many(ids).map(byId).filter((q) => q && q.bypass !== !!on); if (!Q.length) return; undo.mark(); for (const q of Q) q.bypass = !!on; changed(); }
   /** duplicate(ids, at): each beside its original (new ids, the same values, 24 px down-right of `at[id]`); CURVES stays one */
   function duplicate(ids, at = {}) {
     const Q = many(ids).map(byId).filter((q) => q && q.type !== 'curves'); if (!Q.length) return []; undo.mark();
-    const out = Q.map((q) => { let k = 1; while (byId('n' + k)) k++; const p = at[q.id] || q.at, d = fresh('n' + k, q.type, { ...q, values: JSON.parse(JSON.stringify(q.values)), at: p ? [p[0] + 24, p[1] + 24] : null });
-      nodes.splice(nodes.indexOf(q) + 1, 0, d); enroll(d); return d.id; });
+    const out = batch(() => Q.map((q) => { const p = at[q.id] || q.at, d = fresh(nextId(), q.type, { ...q, values: JSON.parse(JSON.stringify(q.values)), at: p ? [p[0] + 24, p[1] + 24] : null });
+      nodes.splice(nodes.indexOf(q) + 1, 0, d); enroll(d); return d.id; }));
     changed(); return out;
   }
   /** the rack's CURVES door: absent = off; on adds CURVES (or lifts its bypass), off bypasses it */
@@ -142,15 +148,16 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   /** a graph preset (a shipped one, or the reader's): every node but CURVES replaced by its list, laid out afresh */
   function applyGraph(list) {
     undo.mark();
-    for (const q of nodes) if (q.type !== 'curves') unenroll(q);
-    nodes = nodes.filter((q) => q.type === 'curves'); for (const q of nodes) q.at = null;
-    let k = 0;
-    for (const p of list || []) if (TYPES[p.type] && p.type !== 'curves') { const q = fresh('n' + ++k, p.type, p); nodes.push(q); enroll(q); }
+    batch(() => {
+      for (const q of nodes) if (q.type !== 'curves') unenroll(q);
+      nodes = nodes.filter((q) => q.type === 'curves'); for (const q of nodes) q.at = null;
+      for (const p of list || []) if (TYPES[p.type] && p.type !== 'curves') { const q = fresh(nextId(), p.type, p); nodes.push(q); enroll(q); }
+    });
     changed();
   }
   /* 020 X2 · THE CARD's verbs: collapse · rename (the bar and the modulation target's label; ids never change) · reset · move up / down · tidy */
   function setFold(ids, on) { const Q = many(ids).map(byId).filter((q) => q && q.fold !== !!on); if (!Q.length) return; undo.mark(); for (const q of Q) q.fold = !!on; changed(); }
-  function rename(id, name) { const q = byId(id); name = String(name || '').trim().slice(0, 40) || null; if (!q || q.name === name) return; undo.mark(); unenroll(q); q.name = name; enroll(q); changed(); }
+  function rename(id, name) { const q = byId(id); name = String(name || '').trim().slice(0, 40) || null; if (!q || q.name === name) return; undo.mark(); batch(() => { unenroll(q); q.name = name; enroll(q); }); changed(); }
   function reset(id) { const q = byId(id); if (!q) return; undo.mark(); if (q.type === 'curves') for (const ch of model.channels) model.preset(ch, 'LINEAR');
     q.values = { ...q.values, ...homeOf(TYPES[q.type]) }; q.v++; changed(true); }
   function move(id, d) { const i = nodes.findIndex((q) => q.id === id), j = i + d; if (i < 0 || j < 0 || j >= nodes.length) return; undo.mark();
@@ -168,7 +175,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     put({ at: { ...(rec().at || {}), ...io } });
     nodes.sort((a, b) => (a.at ? a.at[1] : 0) - (b.at ? b.at[1] : 0)); changed();
   }
-  for (const q of nodes) enroll(q);
+  batch(() => { for (const q of nodes) enroll(q); });
   recompile();
 
   /** one curves view in a node's body: the kit's view over the one model, CHANNEL · PRESET as aria (018 A7), the save glyph and each × (018 D2) */
