@@ -191,6 +191,8 @@ export function createModSeam(app) {
     }
     const hits = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
     const dodging = {};   // 0.5.0 C7b: each kit window's open rect (the modulation window's, the TIMELINE's): the pill gives way to both
+    /* 020 T3 · THE BAR IS ON TOP of every window (lab.css, chrome + 3) but these two: when no seat clears them it goes UNDER them for that time */
+    const under = (on) => document.body.classList.toggle('transport-under', !!on);
     function modDodge(rect, who = 'mod') {
       /* 0.5.0 C4: the kit's close reports null, and its place() reports the real box even while closed (λWAVES' copy sent the
          zero rect): a window that is not open has nothing to dodge */
@@ -201,7 +203,7 @@ export function createModSeam(app) {
       const rs = Object.values(dodging).filter(Boolean), free = (s, w, h) => !rs.some((r) => hits(seatRect(s, w, h), r));
       occlusion.dirty();   // a paused field still has to move its line masks with the window
       const t = document.getElementById('transport');
-      if (!t || !t.classList.contains('mini') || t.dataset.place === 'free') return;   // iteration 014 A4: the FREE window is the hand's, never dodged
+      if (!t || !t.classList.contains('mini') || t.dataset.place === 'free') { under(false); return; }   // iteration 014 A4: the FREE window is the hand's, never dodged
       /* 015 T6 · A DODGE ASKED MID-MOVE IS KEPT, NOT DROPPED: the last one re-asks once the move has landed (before, only a report with no window
          open was retried, so a window that opened while the pill travelled could land on top of it) */
       if (trMoving) { clearTimeout(dodgeAgain); dodgeAgain = setTimeout(() => modDodge(dodging.mod || null, 'mod'), 320); return; }
@@ -213,7 +215,7 @@ export function createModSeam(app) {
          When the pill already sits there, that answer changed nothing but it read the pill's rect first: on a first visit
          the boot's forced style + layout, 30–38 ms, once the closed H₂ and MOLECULES cards stopped paying it
          (probes/N/n8-reads.mjs).  Any other case falls through to the measured road below, unchanged. */
-      if (!rs.length && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) return;
+      if (!rs.length && trSeat === (matchMedia('(max-width: 860px)').matches ? 'top' : 'bottom')) { under(false); return; }
       const box = t.getBoundingClientRect();
       const w = box.width || 560, h = box.height || 34;
       const narrowRack = matchMedia('(max-width: 860px)').matches;
@@ -221,6 +223,7 @@ export function createModSeam(app) {
       const want = narrowRack ? 'top'
                  : free('bottom', w, h) ? 'bottom'
                  : free('top', w, h) ? 'top' : trSeat;
+      under(!free(want, w, h));
       if (want === trSeat) return;
       trMoving = true;
       const leaving = trSeat === 'bottom' ? 'lw-tr-out-down' : 'lw-tr-out-up';
