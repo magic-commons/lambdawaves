@@ -113,7 +113,7 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport[data-layout="csb"] .csb-surface .k-val { display: block; position: static; opacity: 1; transform: none; font-size: var(--fs-micro); }
 #transport[data-layout="csb"] .csb-favs .segw .k-lbl { display: none; }
 /* TRANSPORT: ⏮ ‹ › ⟳ as glyph chips, REPEATS (it takes what is left) and BPM as readouts, the beat lamp on BPM, the kit's clock tiles one 44-px
-   strip, the theorem under it; in a card REPEATS takes the first line */
+   strip (023 B2: the T / t theorem is gone); in a card REPEATS takes the first line */
 #transport[data-layout="csb"] .csb-steps { display: inline-flex; }
 #transport[data-layout="csb"] .csb-steps > .tbtn { display: inline-grid; place-items: center; width: 28px; min-width: 0; height: var(--xport-grid); padding: 0; border: 0; border-radius: var(--r-md); background: transparent; box-shadow: none; color: var(--ink-key); }
 #transport[data-layout="csb"] .csb-steps > .tbtn > svg { width: 18px; height: 18px; }
@@ -127,7 +127,6 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 #transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-surface .mir-bank-grid { --cell-min: 48px; }   /* a card: four slots a line, eight in two */
 #transport[data-layout="csb"] .csb-beat { position: absolute; top: 7px; right: -4px; }
 #transport[data-layout="csb"] .csb-sec-tr .trig { flex: 0 0 var(--xport-grid); width: var(--xport-grid); padding: 0 2px; }
-#transport[data-layout="csb"] .csb-sec-tr > .fx { display: block; min-width: 0; overflow: hidden; font-size: var(--fs-micro); white-space: nowrap; text-overflow: ellipsis; }
 /* MACROS and FAVOURITES: the kit's knob banks (eight slots; a segment takes four) */
 .csb-sec-mac .tempo-pane, .csb-favs { flex: 1 1 100%; min-width: 0; }
 #transport[data-layout="csb"] .csb-favs .pal-invert { width: var(--xport-grid); height: var(--xport-grid); }
@@ -140,7 +139,7 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 /* docked into the rack as a card */
 #transport.docked { position: static; transform: none; width: auto; height: auto; flex-wrap: wrap; padding: 6px; gap: 6px; border: 0; box-shadow: none; background: transparent; }
 /* 0.6.6 G2 · THE TYPE BOX (lab/shell/transport.js): ASK swaps the centre for one line to Gemma; her answer echoes in the t readout's seat for 4 s */
-#transport:not(.asking) .ask-seat, .ask-seat [hidden], #transport.asking :is(.ro.time, .ro.period, .fx, .native-info), #transport.mini:is(.asking, .echo) .fd, #transport.consent .native-play-row > :not(.ask-seat, .ask), #transport.echo :is(.ro.period, .fx, .native-info) { display: none; }
+#transport:not(.asking) .ask-seat, .ask-seat [hidden], #transport.asking :is(.ro.time, .ro.period, .native-info), #transport.mini:is(.asking, .echo) .fd, #transport.consent .native-play-row > :not(.ask-seat, .ask), #transport.echo :is(.ro.period, .native-info) { display: none; }
 #transport .ask-seat, #transport.echo .native-play-row > .ro.time { display: flex; flex: 1 1 auto; align-items: center; gap: 6px; min-width: 0; order: 1; grid-area: 3 / 1 / 4 / 6; }
 .ask-line { flex: 1 1 auto; min-width: 0; height: 28px; box-sizing: border-box; padding: 0 10px; border: 1px solid var(--glass-hairline); border-radius: var(--r-pill); background: var(--glass-well); color: var(--fg); font: var(--w-med) var(--fs-small)/1.2 var(--font-ui); }
 .ask-line::placeholder, .ask-note, #transport .ask-seat > .tbtn.ask-ok, #transport .tbtn.ask { width: auto; min-width: 0; padding: 0 6px; border-radius: var(--r-pill); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--fs-small); }
