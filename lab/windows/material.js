@@ -58,11 +58,12 @@ export function createMaterial(app) {
     ui.kneeK = knob({ label: 'KNEE', reverse: true, min: 0.02, max: 8, value: KNEE_DEFAULT, log: true, fmt: (v) => v.toFixed(2), title: 'KNEE bends the ray’s opacity: 0.6 is the plain exponential, above it a soft shoulder (dense cores show through; the default 3 is somewhat opaque, slightly see-through), below it a hard knee (the silhouette closes sooner)', onInput: (v) => { if (modHand('material.knee', v)) return; mat.knee = v; schedule(TIER.PRESENT); } }); ui.hueK.root.parentElement.appendChild(ui.kneeK.root);
     /* iteration 014 B · THE THREE VIEWS' controls (two rows, shown while BALLS, STICKS or ESP is drawn; a control the style does not read is dimmed,
        never moved).  The keys are written into `mat` only by a hand, so a project that never touched them serialises as before. */
-    const pctF = (v) => Math.round(v * 100) + '%', au = (v) => '±' + v.toFixed(3);
+    /* 020 S4: a.u. with fewer decimals the larger it is (RANGE reaches 50): 0.100 · 2.50 · 37.5 — the knob and the ESP bar's numbers */
+    const auN = (v) => { const a = Math.abs(v); return a.toFixed(a >= 10 ? 1 : a >= 1 ? 2 : 3); }, pctF = (v) => Math.round(v * 100) + '%', au = (v) => '±' + auN(v);
     ui.atomSizeK = knob({ label: 'SIZE', min: 0.2, max: 1.5, value: 1, fmt: pctF, title: 'BALLS: the van der Waals radius × SIZE (100 % is space-filling CPK)', onInput: (v) => { mat.atomSize = v; schedule(TIER.PRESENT); } });
     ui.stickK = knob({ label: 'RADIUS', min: 0.1, max: 1.2, value: STICK_R, log: true, fmt: (v) => v.toFixed(2), title: 'STICKS (and the sticks inside ESP): the stick radius in bohr', onInput: (v) => { mat.stickR = v; schedule(TIER.PRESENT); } });
     ui.probeK = knob({ label: 'PROBE', min: 0.5, max: 5, value: PROBE_R, fmt: (v) => v.toFixed(2), title: 'ESP · SAS / SES: the probe radius in bohr (2.65 = water’s 1.4 Å)', onInput: (v) => { mat.probe = v; schedule(TIER.PRESENT); } });
-    ui.espRangeK = knob({ label: 'RANGE', min: 0.002, max: 5, value: ESP_RANGE, log: true, fmt: au, title: 'ESP: the colour map spans ±RANGE hartree/e through a signed log (the middle a real band, the ends only near ±RANGE); beyond it the colour holds', onInput: (v) => { mat.espRange = v; styleSync(); schedule(TIER.PRESENT); } });
+    ui.espRangeK = knob({ label: 'RANGE', min: 0.002, max: 50, value: ESP_RANGE, log: true, fmt: au, title: 'ESP: the colour map spans ±RANGE hartree/e through a signed log (the middle a real band, the ends only near ±RANGE); beyond it the colour holds', onInput: (v) => { mat.espRange = v; styleSync(); schedule(TIER.PRESENT); } });
     ui.espSurfSeg = seg({ aria: 'potential surface', value: 'iso', options: [
       { id: 'iso', label: 'ISO', title: 'the density’s own surface, ρ = ISO/30 a.u. (0.002 at the default ISO)' },
       { id: 'sas', label: 'SAS', title: 'the solvent-accessible surface: the van der Waals spheres grown by PROBE' },
@@ -145,7 +146,7 @@ export function createMaterial(app) {
       bar.hidden = !esp || !IP.get('espBar');
       if (!bar.hidden) {
         const R = Number.isFinite(mat.espRange) ? mat.espRange : ESP_RANGE, h = R * (Math.sqrt(21) - 1) / 20; paintBar();
-        [R, h, 0, -h, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(3); });
+        [R, h, 0, -h, -R].forEach((v, i) => { barNums[i].textContent = v === 0 ? '0' : (v > 0 ? '+' : '−') + auN(v); });
         barSeat(); if (!barTimer) barTimer = setInterval(() => { if (bar.hidden) { clearInterval(barTimer); barTimer = 0; } else { barSeat(); paintBar(); } }, 500);   // the poll also catches a routed HUE and LW.setInvert
       }
     }
@@ -314,7 +315,10 @@ export function createMaterial(app) {
          kit's (the port answers `flip`, iteration 014 C2's parity, a session's switch, never saved), and AUTO-ROTATE leave their rows for the verbs:
          PAN HOME · HOME · LOCK · FLIP · AUTO-ROTATE */
       const kitRoot = (id) => { const e = camView.controls.find((c) => c.vids[0] === id); return e && e.c.root; };
-      const v = q('.cam-verbs') || more; for (const n of [ui.camLockSw.root, kitRoot('flip'), kitRoot('autoRotate')]) if (n) v.appendChild(n); v.dataset.n = String(v.children.length); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
+      /* 020 S3 (Josh: "Make two rows if needed for that super crammed top row"): PAN HOME · HOME on the kit's row, LOCK · FLIP · AUTO-ROTATE on a second
+         one under it (also .cam-verbs, so skin.css and a reader of the verbs see both) */
+      const v0 = q('.cam-verbs'), v = v0 ? el('div', 'cam-row cam-verbs cam-switches') : more; if (v0) v0.after(v);
+      for (const n of [ui.camLockSw.root, kitRoot('flip'), kitRoot('autoRotate')]) if (n) v.appendChild(n); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
     /* iteration 012 R3 (Josh 10-20: "Remove text that says 'control' and 'direction' in camera … Increase the size of the 3D thingy while moving Zoom
        and FOV under 'YAW' and 'PITCH' … Rename 'Hand' to 'Controls'"): the kit's two labels leave its DOM, ZOOM · FOV join the sphere's knob column
        under YAW · PITCH (the view row empties and goes), and skin.css draws the sphere bigger; the panel's own file is untouched */
