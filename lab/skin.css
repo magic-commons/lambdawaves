@@ -801,14 +801,14 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
  * lab/informational.js builds every control from the record's rows (the kit's control()); here they sit on one grid: two columns of switches,
  * a knob column of 56 px for each SIZE and PAD, the headings the kit's group labels, the fold its own line.  A switch fills its cell. */
 .lw-info-card .grp { margin: 0 0 6px; gap: 0; }
-.lw-info-card .grp > .row { display: grid; gap: 6px 8px; align-items: center; justify-items: stretch; margin: 4px 0; }
-.lw-info-card .info-bar > .sw { grid-column: auto; } .lw-info-card .info-bar > .info-side { width: 100%; min-width: 0; }   /* 018 B7: ESP BAR · SIDE · PAD */
-.lw-info-card .info-seat > .lw-fold { width: 30px; min-width: 0; height: 26px; min-height: 26px; padding: 0; }
+.lw-info-card .grp > .row { display: grid; gap: 6px 8px; align-items: center; justify-items: stretch; margin: 2px 0; }   /* 023 R2: 4 px between rows = the 4 px between a row's lines (even gaps) */
+.lw-info-card .info-bar > .info-side { width: 100%; min-width: 0; }   /* 018 B7: ESP BAR · SIDE · PAD */
+.lw-info-card .info-seat > .lw-fold { width: 30px; min-width: 0; height: 26px; min-height: 26px; padding: 0; justify-self: center; }
 .lw-info-card .info-grid > .sw, .lw-info-card .info-words > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
 .lw-info-card .info-grid > .sw .sw-lbl, .lw-info-card .info-words > .sw .sw-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lw-info-card .info-seat > .segw .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 /* iteration 012 R1: BALL AND STICK's switch shortened to one column, OPACITY and SIZE beside it; CURSOR and MARKS two columns of switches side by side */
-.lw-info-card .info-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 8px; align-items: start; }
+.lw-info-card .info-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 4px; align-items: start; }
 .lw-info-card .info-col > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
 
 /* ═══ iteration 012 B1 · THE BLUR, PUT BACK (Josh 2026-10-20: "I was trying to fix a bug; why would it get rid of all the blurs if
@@ -903,8 +903,14 @@ body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, trans
 .native-clean[data-id="camera"] .cam-switches > .sw:last-child { grid-column: span 2; }
 /* SPECTRUM: HYDROGEN's two rows keep ONE column rhythm (017 R4) — three columns for both, filled or not */
 .dev[data-id="spectrum"] .sp-ham-body > :is(.sp-ham-h, .sp-ham-s) { --cell-min: 64px; grid-template-columns: repeat(auto-fill, minmax(var(--cell-min), 1fr)); }
-/* INFORMATIONAL (call 7): a switch takes two cells, a knob one, the fold's chevron its 30 px */
+/* INFORMATIONAL (call 7; 023 R2 A ROW IS EVEN): every row is the same four columns, so a column keeps its place from row to row — the
+   switches stretch over the first two (or three), OPACITY · the SIDE glyph · the fold's chevron in the third, every SIZE · LIST CAP · PAD in the
+   fourth (knobs over knobs); a pair of switches halves the row; CURSOR · MARKS (their own two columns) keep the same halves */
+.lw-info-card .row.fit:not(.info-col) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .lw-info-card .row.fit > .sw { grid-column: span 2; }
+.lw-info-card .row.fit > .sw:first-child:has(+ .k:last-child) { grid-column: 1 / 4; }   /* STAGE FORMULA · SIZE, ATOM LABELS · SIZE */
+.lw-info-card .info-name > .sw:first-child { grid-column: 1; } .lw-info-card .info-name > .sw + .sw { grid-column: 2 / 4; }   /* NAME · SUBTITLE · LIST CAP */
+.lw-info-card .row.fit:not(.info-col) > .k:last-child { grid-column: 4; }
 /* FIELD: the rotors keep their columns (a wheel over its rate); INTER-SHELL takes two cells, NO FIELD and CAT the line */
 .native-clean[data-id="staticfield"] .native-rotors { --cell-min: 72px; }
 .native-clean[data-id="staticfield"] .row.fit > .sw, .native-clean[data-id="staticfield"] .row.fit > .trig { grid-column: span 2; }
