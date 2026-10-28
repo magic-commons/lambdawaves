@@ -172,6 +172,7 @@
  ["render","get"],
  ["verbs","value"],
  ["curves","value"],
+ ["nodes","value"],
  ["bootView","value"],
  ["bootVortex","value"],
  ["bootOrder","value"],

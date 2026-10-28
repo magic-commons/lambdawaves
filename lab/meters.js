@@ -70,7 +70,7 @@ export function createMeters(host, src = null, measure = null) {
     modes.setSub(m.masked ? `${m.masked} muted · ${(m.covered * 100).toFixed(1)}% of norm rendered` : m.truncated ? `${m.truncated} truncated · ${(m.covered * 100).toFixed(1)}% of norm rendered` : 'full state rendered');
     field.set(`${m.res}³`); field.setSub(`L = ±${m.half} a.u. · ${m.steps} rays · ${m.encodeMs.toFixed(2)} ms enc`);
     rates.set(`${m.fps.toFixed(0)} · ${m.reconPerSec.toFixed(0)} · ${m.stepsPerSec.toFixed(0)} Hz`, m.playing ? 'live' : '');
-    rates.setSub(m.scheduled ? 'scheduled' : 'IDLE · zero work');
+    rates.setSub((m.lock ? m.lock + ' · ' : '') + (m.scheduled ? 'scheduled' : 'IDLE · zero work'));   // 020 L2: PLAYBACK LOCK said
     tier.set(m.lastTier); tier.setSub(`P ${m.tiers.PRESENT} · R ${m.tiers.RECONSTRUCT} · E ${m.tiers.EVOLVE} · B ${m.tiers.REBUILD}`);
     status.set(m.status, m.rendered < m.populated ? 'warn' : 'ok'); if (SQUEEZE.said) status.setSub(SQUEEZE.said);   // 0.8.0 G2: the last squeeze, its variance error beside its lost norm
     if (m.profile) {
