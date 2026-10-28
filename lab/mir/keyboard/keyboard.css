@@ -59,6 +59,8 @@
 .km-keyboard[hidden] { display: none; }
 /* MORE KEYS (1.5.6-alpha.2): the second page in the same well; its switch sits before the platform pair */
 .km-col-header .km-more { flex: 0 0 auto; min-height: 28px; padding: 0 10px; }
+.km-col-header .km-more .trig-l { display: none; }                                       /* 1.5.6-alpha.9: the glyph; the word is its name and hint */
+.km-col-header .km-more .trig-g { --trig-glyph: 16px; display: grid; place-items: center; }
 .km-extra .km-key { min-height: 46px; }
 .km-kb-row { display: flex; gap: 4px; }
 .km-key { position: relative; box-sizing: border-box; flex: 1 0 0; min-width: 0; min-height: 52px; padding: 15px 2px 4px; margin: 0;

@@ -82,6 +82,7 @@ export const ICONS = {
   controlSurface: p('M7 3.5v17') + fill(4.3, 12, 5.4, 3.6, 1) + c(16.5, 9, 4) + p('M16.5 9V5') + dot(16.5, 18.2, 1.5),   // a fader and a knob
   history: p('M4.5 12a7.5 7.5 0 1 0 2.2-5.3') + p('M6.7 3.6v3.1h3.1') + p('M12 8v4.5l3 2'),                       // the clock turned back
   keyboard: box(2.5, 6, 19, 12, 2) + p('M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 14h8'),                    // keys
+  mapping: box(3, 11, 10, 9.5, 2) + p('M6.5 16h3') + p('M13 15.5h3a2.5 2.5 0 0 0 2.5-2.5V8.5') + c(18.5, 6, 2.5),   // 023 D2: a key cap and its route (KEYBOARD's MAPPING face)
   notebook: box(6, 3, 13, 18, 2) + p('M9.5 8h6M9.5 12h6M9.5 16h3.5') + p('M6 7H4M6 12H4M6 17H4'),                // a bound, lined page
   informational: p('M4.5 4h15A1.5 1.5 0 0 1 21 5.5v10a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17h-1A1.5 1.5 0 0 1 3 15.5v-10A1.5 1.5 0 0 1 4.5 4Z') +
     dot(12, 7.6, 1.15) + p('M12 10.4v3.6'),                                                                      // an i in a speech line: the stage's words

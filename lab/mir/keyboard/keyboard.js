@@ -27,14 +27,15 @@
  *
  * createKeyboardWindow({ keys, host, persist?, platform?, onMoved?, panels? })
  *   → { win, root, open(), close(), toggle(), isOpen(), select(id), setPlatform(p), refresh(), tab(name), destroy() }
- *   panels (1.5.6-alpha.2) [{ name, body }] — the app's own faces after KEYS (panel 1), each a radio chip on the rail
+ *   panels (1.5.6-alpha.2) [{ name, body, icon? }] — the app's own faces after KEYS (panel 1), each a radio chip on the rail;
+ *     `icon` (1.5.6-alpha.9) a glyph name (the kit's or registerGlyphs') the chip draws, the name its label and hint (else the name as text)
  *          (createWindow's `panels`); under 860 px the window opens on the first of them (a phone's whole face)
  *   MORE KEYS (1.5.6-alpha.2): the board's second page — the arrows, Home/End, PgUp/PgDn, Insert/Delete, F1–F24, the
  *          numpad and the media keys — so every key a binding can name is shown and pressable (the same five-row well)
  * createKeysHelp({ keys, host, persist?, onMoved? })
  *   → { win, root, open(), close(), toggle(), isOpen(), refresh(), destroy() }
  * Pure: boardRows(platform), keyStates(list, platform, selectedId) */
-import { el, label, ariaLabel, seg, trig } from '../kit.js';
+import { el, label, ariaLabel, hint, seg, trig } from '../kit.js';
 import { t, onLanguage } from '../core/i18n.js';
 import { createWindow } from '../window/window.js';
 import { parseChord, displayChord, keyText, modText } from '../shell/keys.js';
@@ -113,8 +114,11 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
   /* MORE KEYS (1.5.6-alpha.2): the board's second page in the same well, one press away */
   const extra = el('div', 'km-keyboard km-extra', colL); extra.hidden = true;
   extra.setAttribute('role', 'group'); ariaLabel(extra, 'More keys'); extra.translate = false;
-  const more = trig({ label: 'MORE KEYS', cls: 'km-btn km-more', title: 'the arrows, Home and End, the pages, F1–F24, the numpad and the media keys', onFire: () => {
-    const on = extra.hidden; extra.hidden = !on; board.hidden = on; more.on = on; more.setLabel(on ? 'THE BOARD' : 'MORE KEYS'); } });
+  /* 1.5.6-alpha.9: a glyph (`more`, then `keys` for THE BOARD) with the word as its name and hint */
+  const moreWord = (w) => { more.setLabel(w); ariaLabel(more.root, w); hint(more.root, w); };
+  const more = trig({ label: 'MORE KEYS', glyph: 'more', cls: 'km-btn km-more', onFire: () => {
+    const on = extra.hidden; extra.hidden = !on; board.hidden = on; more.on = on; more.setGlyph(on ? 'keys' : 'more'); moreWord(on ? 'THE BOARD' : 'MORE KEYS'); } });
+  moreWord('MORE KEYS');
   head.insertBefore(more.root, sw.root);
 
   /* the right well: record and reset, the status, the search, the list */
@@ -129,9 +133,9 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
   placeholder();
   const list = el('div', 'km-list', colR); list.setAttribute('role', 'listbox'); ariaLabel(list, 'Keyboard actions');
 
-  const faces = panels && panels.length ? [{ name: 'KEYS', body: root }, ...panels] : null;   // 1.5.6-alpha.2: KEYS, then the app's faces
+  const faces = panels && panels.length ? [{ name: 'KEYS', body: root, icon: 'keys' }, ...panels] : null;   // 1.5.6-alpha.2: KEYS, then the app's faces
   const win = createWindow({ id: 'keyboard', title: 'KEYBOARD', host, persist, onMoved, emptyDrag: true,
-    size: { w: 1080, h: narrow() ? 530 : 416 }, min: { w: 300, h: 300 }, ...(faces ? { panels: faces, chips: faces.map((f, i) => ({ name: f.name, kind: 'radio', group: 'face', label: f.name, text: f.name, state: i === 0 })) } : { body: root }),
+    size: { w: 1080, h: narrow() ? 530 : 416 }, min: { w: 300, h: 300 }, ...(faces ? { panels: faces, chips: faces.map((f, i) => ({ name: f.name, kind: 'radio', group: 'face', label: f.name, hint: f.name, ...(f.icon ? { glyph: f.icon } : { text: f.name }), state: i === 0 })) } : { body: root }),
     onOpen: () => { if (faces && narrow()) win.tab(faces[1].name); refresh(); }, onClose: () => { if (recording) cancelRecording(); } });
   win.root.classList.add('km-win');
 

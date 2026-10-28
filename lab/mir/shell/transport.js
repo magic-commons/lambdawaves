@@ -65,6 +65,8 @@ export const TRANSPORT = Object.freeze({
   travelTouch: 320,    // … 320 px for a finger …
   travelFine: 1760,    // … and 1760 px with Shift held
   panelGap: 16,        // the tempo panel opens below when that much room is left under it (BASINS positionTempo)
+  notchPx: 50,         // 1.5.6-alpha.9: a trackpad's pixels gather to one wheel notch every 50 px …
+  notchIdle: 300,      // … and a part-notch is forgotten after 300 ms of rest
 });
 /** placementOf({ docked, host, free }) — BASINS' rule: the rack's dock wins, then the FREE window (1.5.0-alpha.25), then a work lane
  *  that shows, else the stage */
@@ -144,6 +146,18 @@ export function keyStep(code, shift = false) {
   const dir = code === 'ArrowUp' || code === 'ArrowRight' || code === 'PageUp' ? 1 : code === 'ArrowDown' || code === 'ArrowLeft' || code === 'PageDown' ? -1 : 0;
   if (!dir) return 0;
   return dir * (shift ? 0.1 : code.startsWith('Page') ? 10 : 1);
+}
+/** wheelNotches(e, state, now) — 1.5.6-alpha.9 ONE NOTCH IS ONE BPM: the whole notches a wheel event turns (+ up).  A line or page event
+ *  is one notch, and so is a pixel event of a notch's size or more (a mouse: one event a notch, however far the browser says it went);
+ *  smaller pixels (a trackpad) gather in `state.acc` to TRANSPORT.notchPx, a part-notch forgotten after TRANSPORT.notchIdle ms */
+export function wheelNotches(e, state = {}, now = 0) {
+  const mode = e.deltaMode, dy = e.deltaY;                            // deltaMode first: Firefox then keeps a mouse's lines
+  if (!dy) return 0;
+  if (mode || Math.abs(dy) >= TRANSPORT.notchPx) { state.acc = 0; return dy < 0 ? 1 : -1; }
+  if (!(now - (state.at ?? -Infinity) <= TRANSPORT.notchIdle)) state.acc = 0;
+  state.at = now; state.acc = (state.acc || 0) - dy;
+  const n = Math.trunc(state.acc / TRANSPORT.notchPx); state.acc -= n * TRANSPORT.notchPx;
+  return n;
 }
 /** parseBpm(text) — a typed tempo (a comma is a decimal point); null if it is not a number */
 export function parseBpm(text) {
@@ -335,16 +349,25 @@ export function logoButton({ mark = 'mark', label: name = 'MIR', run = null, sig
  *  tempo-editor.js `bindTempoEditor`, one module for the modulation and timeline work bars).  A click on `button` (when
  *  `enabled()`) puts `input` in its seat at the button's size with the tempo as it is, selected; Enter or leaving takes
  *  it, Escape does not (focus goes back to the button); 8 characters, decimals.  `drag: true` also gives the button
- *  BASINS' drag (the whole range in 220 px, a finger 320, ⅛ on any modifier; a drag is not a click).  `tempo` is
+ *  BASINS' drag (the whole range in 220 px, a finger 320, ⅛ on any modifier; a drag is not a click); the wheel 1 BPM a notch, Shift 0.1 (1.5.6-alpha.9).  `tempo` is
  *  createTempo's { get, set, commit, min, max }.  → { open(), close(take), editing, destroy() } */
 export function bindTempoField({ button, input, tempo, enabled = () => true, drag: dragToo = false, paint = () => {}, signal } = {}) {
   /* the tempo field IS the kit's number field (controls/number.js bindNumber): a click opens it, Enter or leaving takes the number, Escape
      does not; the drag is the one knob law (220 px, 320 under a finger, ⅛ on any modifier or a second finger, on a virtual point) */
-  return bindNumber({ button, input, model: tempo, parse: parseBpm, enabled, drag: dragToo, click: dragToo, paint, chars: TRANSPORT.fieldChars, step: 0.1, signal });
+  const field = bindNumber({ button, input, model: tempo, parse: parseBpm, enabled, drag: dragToo, click: dragToo, paint, chars: TRANSPORT.fieldChars, step: 0.1, signal });
+  /* 1.5.6-alpha.9 ONE NOTCH IS ONE BPM: the field's button turns by the wheel as the pill does (the modulation window's own tempo had none) */
+  const notch = {};
+  button.addEventListener('wheel', (e) => {
+    if (!enabled() || field.editing) return;
+    e.preventDefault();
+    const n = wheelNotches(e, notch, e.timeStamp); if (!n) return;
+    tempo.set(clampBpm(tempo.get() + n * (e.shiftKey ? 0.1 : 1), tempo.min, tempo.max)); paint(); frame.coalesce(notch, () => tempo.commit());
+  }, { passive: false, signal });
+  return field;
 }
 
 /** tempoPill({ tempo, panel, work }) — BASINS' BPM pill (`.tbtn.tempo-expand`: the number, BPM, the Hz, the chevron).
- *  On the stage: drag up or down, the digit under the pointer is the step; the wheel by that digit; ↑ → up and ↓ ←
+ *  On the stage: drag up or down, the digit under the pointer is the step; the wheel 1 BPM a notch, Shift 0.1 (1.5.6-alpha.9); ↑ → up and ↓ ←
  *  down by one, Shift a tenth, PageUp/PageDown ten.  A click opens the tempo panel (BASINS); a double click types the
  *  tempo (the kit's) through bindTempoField.  In a work bar (`work()` true, BASINS' timeline form): a click types the
  *  tempo and a drag runs BASINS' travel law (bindTempoField), the look unchanged (Josh: "Don't change the look").  `typed` (1.5.0-alpha.31): a click
@@ -387,11 +410,7 @@ export function tempoPill({ tempo, panel = null, work = () => false, typed = fal
     if (twice(e)) return;
     if (panel) panel.toggle();
   }, on);
-  root.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    const dir = e.deltaY < 0 ? 1 : e.deltaY > 0 ? -1 : 0; if (!dir) return;
-    tempo.set(tempo.get() + dir * stepAt(e.clientX)); sync(); frame.coalesce('mir.transport.persist', () => tempo.commit());
-  }, { passive: false, signal: life.signal });
+  /* 1.5.6-alpha.9 ONE NOTCH IS ONE BPM: the wheel is the tempo field's (bindTempoField above), 1 BPM a notch, Shift a tenth */
   root.addEventListener('keydown', (e) => {
     const k = keyStep(e.code, e.shiftKey); if (!k) return;
     e.preventDefault(); tempo.set(tempo.get() + k); sync(); tempo.commit();

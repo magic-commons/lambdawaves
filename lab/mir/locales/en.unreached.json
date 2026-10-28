@@ -97,7 +97,7 @@
  },
  {
   "file": "mir/glyph.js",
-  "line": 621,
+  "line": 626,
   "why": "fragment",
   "text": " — known: "
  },
@@ -181,13 +181,13 @@
  },
  {
   "file": "mir/panels/camera-rig.js",
-  "line": 161,
+  "line": 179,
   "why": "fragment",
   "text": "px, "
  },
  {
   "file": "mir/panels/camera.js",
-  "line": 366,
+  "line": 368,
   "why": "fragment",
   "text": "NORTH · back to "
  },

@@ -141,6 +141,24 @@ export const lookDir = (yaw, pitch) => [Math.cos(pitch) * Math.cos(yaw), Math.co
 export function anglesOf(d) { const n = Math.hypot(d[0], d[1], d[2]) || 1; return { yaw: Math.atan2(d[1], d[0]), pitch: Math.asin(Math.max(-1, Math.min(1, d[2] / n))) }; }
 /** plane-model.js `project`: a point of the unit ball → the 400 × 280 drawing (isometric) */
 export const project = (p) => [SPHERE.cx + SPHERE.R * S2 * (p[0] - p[1]), SPHERE.cy + SPHERE.R * ((p[0] + p[1]) * S6 - p[2] * S23)];
+/** the eye's depth of a point of the drawing: + toward the eye (the drawing is seen from above, along −(1, 1, 1)), − behind the view plane */
+export const depthOf = (p) => (p[0] + p[1] + p[2]) / Math.sqrt(3);
+/** splitDepth(points) → { front, back }: a 3-D polyline cut where it crosses the view plane, each a list of runs (≥ 2 points, the cut point
+ *  shared), so the part behind is drawn dashed in half the ink and the part in front solid (BEHIND IS DOTTED, 1.5.6-alpha.9) */
+export function splitDepth(pts) {
+  const out = { front: [], back: [] };
+  let run = null, behind = false;
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i], b = depthOf(p) < -1e-9;
+    if (run && b !== behind) {
+      const q = pts[i - 1], dq = depthOf(q), t = dq / (dq - depthOf(p)), m = q.map((x, k) => x + (p[k] - x) * t);
+      run.push(m); run = [m]; (b ? out.back : out.front).push(run);
+    } else if (!run) { run = []; (b ? out.back : out.front).push(run); }
+    behind = b; run.push(p);
+  }
+  const real = (r) => r.length > 1 && r.some((p) => Math.abs(p[0] - r[0][0]) + Math.abs(p[1] - r[0][1]) + Math.abs(p[2] - r[0][2]) > 1e-9);
+  return { front: out.front.filter(real), back: out.back.filter(real) };
+}
 const linear = (p) => [SPHERE.R * S2 * (p[0] - p[1]), SPHERE.R * ((p[0] + p[1]) * S6 - p[2] * S23)];
 
 /** sphereDrag(yaw, pitch, dsx, dsy) → [dyaw, dpitch] (radians): the turn that moves the arrow's TIP by the screen step (dsx, dsy) (in the

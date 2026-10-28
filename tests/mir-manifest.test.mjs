@@ -39,6 +39,9 @@ const ACCEPTED = {
   /* 022 E1 · MIR 1.5.6-alpha.8 on the clone road (kit d5d8149): EVERY DISABLED CONTROL KEEPS ITS HINT (a greyed knob, fader, switch or trigger takes
      the pointer on its root and refuses the press) and FROST is TEXT AUTO (call 14: black ink in light, white in dark as before) */
   '1.5.6-alpha.8': '47c7c8e4108589a1eb91085486ea6634c0f4b8ca0b2aed5ff106378c8ff35801',
+  /* 023 D · MIR 1.5.6-alpha.9 on the clone road (kit e826ec2 · 1f094a5 · e4d00e4 · dfd71cb · 3c24473 · 3ce9bc2): BEHIND IS DOTTED (camera sphere and plane model),
+     THE FACE TABS WEAR GLYPHS (a keyboard face's icon, the kit glyph keys), THE CHIPS' MOTION (the modulation rail), ONE NOTCH IS ONE BPM (wheelNotches) */
+  '1.5.6-alpha.9': 'ee57f02e34595e6199c9b2c9583962537add9f31e0579b280f940d469eb6dc69',   // D4 re-pin (kit 3ce9bc2: the wheel is bindTempoField's, the modulation window's own tempo too)
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */
