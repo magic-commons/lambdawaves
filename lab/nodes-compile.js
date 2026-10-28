@@ -71,3 +71,11 @@ export function compile(list, TYPES, cache = new Map()) {
   const out = runs.filter((r) => !r.matrix || !isIdentity(r.matrix));
   return { runs: out, layers, passes: out.reduce((s, r) => s + (r.prim ? r.prim.length : 1), 0) + layers.length };
 }
+
+/** transfer(q, T) → (rgb) → rgb, or null: what this node ALONE does to one colour, through the same fn / matrix the compiler folds — the
+ *  card's PREVIEW strip (020 X2; A PREVIEW IS THE NODE'S OWN TRANSFER, never a second render).  A PRIMITIVE or a LAYER has none (spatial) */
+export function transfer(q, T) {
+  if (T.cls === 'table') { const f = T.fn(q.values, q); return (c) => { const l = T.luma ? W[0] * c[0] + W[1] * c[1] + W[2] * c[2] : null; return c.map((x, i) => clamp01(f(l === null ? x : l, 'RGB'[i]))); }; }
+  if (T.cls === 'matrix') { const m = T.matrix(q.values); return (c) => [0, 1, 2].map((r) => clamp01(m[r * 5] * c[0] + m[r * 5 + 1] * c[1] + m[r * 5 + 2] * c[2] + m[r * 5 + 4])); }
+  return null;
+}

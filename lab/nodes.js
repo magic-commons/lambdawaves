@@ -55,7 +55,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   let passes = 0, nodes = [];
   const recompile = () => frame.coalesce('nodes.compile', () => { const c = compile(nodes, TYPES, cache); filter.setChain(c.runs).flush(); layers.set(c.layers);
     if (c.passes !== passes) { passes = c.passes; for (const v of views) v.foot(); } });
-  const panel = createCurvesPanel({ port: { setTable() { const q = nodes.find((n) => n.type === 'curves'); if (q) q.v++; recompile(); } }, project: false, presets }), model = panel.model;
+  const panel = createCurvesPanel({ port: { setTable() { const q = nodes.find((n) => n.type === 'curves'); if (q) { q.v++; for (const v of views) v.strip(q); } recompile(); } }, project: false, presets }), model = panel.model;
   const curveTables = () => Object.fromEntries(model.channels.map((ch) => [ch, isIdentity(model.points(ch)) || model.amount() === 0 ? null : Float32Array.from(model.table(ch))]));
   const TYPES = {
     curves: { cls: 'table', label: 'CURVES', hint: 'a transfer curve per channel, as Photoshop draws it', knobs: [],
@@ -102,7 +102,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     if (q.values[k] === v) return;
     q.values[k] = v; q.v++; recompile();
     const shown = from === 'mod' && routed(ID(q, k));
-    for (const view of views) view.paint(q, k, v, shown);
+    for (const view of views) { view.paint(q, k, v, shown); view.strip(q); }
     if (from === 'hand') saveList();
   }
   const hand = (q, k, v) => { undo.touch(); if (routed(ID(q, k))) mod.registry.write(ID(q, k), v); else setValue(q, k, v, 'hand'); };
@@ -144,6 +144,14 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     for (const p of list || []) if (TYPES[p.type] && p.type !== 'curves') { const q = fresh('n' + ++k, p.type, p); nodes.push(q); enroll(q); }
     changed();
   }
+  /* 020 X2 · THE CARD's verbs: collapse · rename (the bar and the modulation target's label; ids never change) · reset · move up / down · tidy */
+  function setFold(ids, on) { const Q = many(ids).map(byId).filter((q) => q && q.fold !== !!on); if (!Q.length) return; undo.mark(); for (const q of Q) q.fold = !!on; changed(); }
+  function rename(id, name) { const q = byId(id); name = String(name || '').trim().slice(0, 40) || null; if (!q || q.name === name) return; undo.mark(); unenroll(q); q.name = name; enroll(q); changed(); }
+  function reset(id) { const q = byId(id); if (!q) return; undo.mark(); if (q.type === 'curves') for (const ch of model.channels) model.preset(ch, 'LINEAR');
+    q.values = { ...q.values, ...homeOf(TYPES[q.type]) }; q.v++; changed(true); }
+  function move(id, d) { const i = nodes.findIndex((q) => q.id === id), j = i + d; if (i < 0 || j < 0 || j >= nodes.length) return; undo.mark();
+    const a = nodes[i], b = nodes[j]; [a.at, b.at] = [b.at, a.at]; nodes[i] = b; nodes[j] = a; changed(); }
+  function tidy() { undo.mark(); for (const q of nodes) q.at = null; put({ at: {} }); changed(); }
   const graphOf = () => nodes.filter((q) => q.type !== 'curves').map(({ type, values, bypass }) => ({ type, values: { ...values }, bypass }));
   /** the cards moved (the window's ground): each node takes the place it shows, the list follows the graph's top → bottom (THE COLUMN IS THE CHAIN) */
   function moved(at, io, nudge) {
@@ -183,6 +191,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   /* the views' one door to the model */
   let win = null;
   const M = { TYPES, SHIPPED, graphs, rec, put, ID, list: () => nodes, byId, has, add, remove, setBypass, duplicate, applyGraph, graphOf, moved, hand, curvesIn, passes: () => passes,
+    setFold, rename, reset, move, tidy,
     undo: () => undo.undo(), redo: () => undo.redo(),
     door: (kind) => { if (kind === 'win') { win.close(); raise('nodes'); } else { rk.close('nodes'); win.open(); } } };
 
@@ -200,6 +209,6 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });
-  return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),
+  return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, setFold, rename, reset, move, tidy, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),
     set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, compile: () => compile(nodes, TYPES, new Map()), open: () => win.open(), close: () => win.close() };
 }

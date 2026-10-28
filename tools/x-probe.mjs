@@ -6,6 +6,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { open } from './gate/gatekit.mjs';
+import * as drv from './gate/drv.mjs';
 
 const scene = process.argv[2] || 'x0', si = process.argv.indexOf('--shot'), SHOT = si > 0 ? process.argv[si + 1] : null;
 const URL = `https://127.0.0.1:${process.env.LW_PORT || 9677}/lab/?warn=0`;
@@ -13,6 +14,11 @@ const g = await open(URL, { width: 1600, height: 1000 });
 const W = '[data-mir-window="nodes"] ';
 const PRE = `const w = (n) => new Promise((r) => setTimeout(r, n)), N = __LW.nodes, $ = (s) => document.querySelector('${W}' + s), $$ = (s) => [...document.querySelectorAll('${W}' + s)];
   const key = (k, o = {}) => $('.nodes-ground').dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, ...o }));`;
+/** real input through the driver: a click (button 0 · 2) or a double click at viewport [x, y]; keys typed into what has focus */
+let nA = 0;
+const mouse = async ([x, y], how = 'click') => { const b = how === 'right' ? 2 : 0, one = [{ type: 'pointerDown', button: b }, { type: 'pointerUp', button: b }];
+  await drv.actions(g.s, [{ type: 'pointer', id: 'xp' + ++nA, parameters: { pointerType: 'mouse' }, actions: [{ type: 'pointerMove', x, y, origin: 'viewport' }, ...one, ...(how === 'dbl' ? one : [])] }]); await drv.relActions(g.s); };
+const type = async (text) => { await drv.actions(g.s, [{ type: 'key', id: 'xk' + ++nA, actions: [...text].flatMap((c) => [{ type: 'keyDown', value: c }, { type: 'keyUp', value: c }]) }]); await drv.relActions(g.s); };
 const SCENES = {
   x0: `__LW.layout.finder.open(); await w(300); document.querySelector('.mir-window-picker .wp-row[data-win="nodes"]').click(); await w(800);
     const finder = { win: N.win.isOpen(), card: !document.querySelector('.dev[data-id="nodes"]').classList.contains('closed') }; N.win.place({ x: 480, y: 70, w: 620, h: 720 }); await w(300); N.views[1].place(); await w(300); const empty = { list: N.nodes().length, line: $('.nodes-empty').textContent, shown: !$('.nodes-empty').hidden };
@@ -34,11 +40,25 @@ const SCENES = {
     ptr('pointerdown', 20, 120, { shiftKey: true }); ptr('pointermove', 560, 330, { shiftKey: true }); ptr('pointerup', 560, 330, { shiftKey: true }); const boxed = sel();
     key('Escape'); ptr('pointerdown', 20, 200, { shiftKey: true }); ptr('pointermove', 600, 520, { shiftKey: true }); await w(200);
     return { fit, out, all, dup, del, un, re, off, leaked, z15, boxed };`,
+  x2: async (E) => {
+    const at = await E(`N.open(); await w(600); N.win.place({ x: 480, y: 70, w: 620, h: 720 }); await w(300); for (const t of ['levels', 'hue', 'blur']) N.add(t); await w(500);
+      N.set('n1', 'gamma', 2.2); N.set('n2', 'hue', 90); await w(300); const b = $('[data-node="n1"] .nodes-name').getBoundingClientRect(); return [Math.round(b.left + 12), Math.round(b.top + b.height / 2)];`);
+    await mouse(at, 'dbl'); await type('my levels');
+    const named = await E(`await w(300); return { bar: $('[data-node="n1"] .nodes-name').textContent, label: __LW.mod.targets().find((t) => t.id === 'nodes.n1.gamma').label, ids: N.nodes().map((q) => q.id) };`);
+    const folds = await E(`$('[data-node="n1"] .nodes-chev').click(); await w(200); const c = $('[data-node="n1"]');
+      const one = { fold: c.classList.contains('fold'), h: c.offsetHeight, strips: $$('.nodes-strip').length, px: [...$('[data-node="n1"] .nodes-strip').getContext('2d').getImageData(64, 2, 1, 1).data].slice(0, 3) };
+      $('.nodes-folds').click(); await w(100); const all = $$('.nodes-card.fold').length; $('.nodes-folds').click(); await w(100); const none = $$('.nodes-card.fold').length;
+      $('[data-node="n1"] .nodes-chev').click(); await w(200); N.views[1].place(); await w(200);
+      const b = $('[data-node="n2"] .nodes-name').getBoundingClientRect(); return { one, all, none, at: [Math.round(b.left + 30), Math.round(b.top + 6)] };`);
+    await mouse(folds.at, 'right');
+    const rows = await E(`await w(300); return $$('.nodes-pop:not([hidden]) .nodes-item').map((b) => b.textContent);`);
+    return { named, folds, rows };
+  },
 };
 try {
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify(await g.errors()));
   await g.ev(`__LW.pause(); await __LW.settle(); return 1;`);
-  const info = await g.ev(PRE + SCENES[scene]);
+  const sc = SCENES[scene], info = typeof sc === 'string' ? await g.ev(PRE + sc) : await sc((b) => g.ev(PRE + b));
   if (SHOT) {
     const r = await g.ev(`const r = document.querySelector('${W.trim()}').getBoundingClientRect(); return [r.left, r.top, r.width, r.height].map(Math.round);`);
     mkdirSync('research/iteration-020/X-shots', { recursive: true });

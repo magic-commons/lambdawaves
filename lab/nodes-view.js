@@ -10,9 +10,15 @@
  * Escape none; a selected title drags the whole selection; arrows nudge 1 px (shift 10).  THE KEYS ARE THE GROUND'S: they fire only with the
  * ground focused (tabindex 0) and stop there, so the kit's one key table never sees them — Delete · Ctrl-D · M · Tab / Shift-A · Home ·
  * Ctrl-Z / Ctrl-Shift-Z (NODES' own ring, lab/nodes-undo.js).
+ * 020 X2 THE CARD: the chevron (H) collapses a card to its bar and its PREVIEW strip, COLLAPSE ALL / EXPAND ALL at the head; a double-click
+ * on the title RENAMES it (Enter / Escape; empty = the type's name); every TABLE and MATRIX card draws a 128 × 10 strip — a grey ramp and a
+ * hue ramp through the node's OWN transfer (nodes-compile.js transfer(): the compiler's fn / matrix), redrawn when its values move; the
+ * right-click menus (a card's, the ground's) and TIDY (the cards back in one column, in list order).
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
 import { el, svgEl, label, ariaLabel, chip } from './mir/kit.js';
 import { nodeBody } from './node-types.js';
+import { transfer } from './nodes-compile.js';
+import { frame } from './mir/core/frame.js';
 
 const AT = { in: [65, 16] };                                         // STAGE IN's first-run place; the nodes stack under it, STAGE OUT under the last
 const SPAN = 250;                                                    // the column's width, centred in a view that has no pan of its own yet
@@ -21,6 +27,7 @@ const NOTE = 'Grades the screen only — pictures and films are untouched.';
 const MARK = { table: '·', matrix: '·', prim: '···', layer: '··' };       // THE COST IS ON THE CARD: · folds for free, ·· a layer, ··· a pass
 const CLASSES = ['table', 'matrix', 'prim', 'layer'];
 const NS = 'http://www.w3.org/2000/svg';
+const hueAt = (h) => [Math.abs(h * 6 - 3) - 1, 2 - Math.abs(h * 6 - 2), 2 - Math.abs(h * 6 - 4)].map((x) => Math.min(1, Math.max(0, x)));
 const ZOOM = [0.5, 2], clampZ = (z) => Math.min(ZOOM[1], Math.max(ZOOM[0], z));
 /** one icon of the sprite, first or last in `parent` */
 const icon = (parent, name, first) => { const s = svgEl('svg', 'nodes-ico'); s.setAttribute('viewBox', '0 0 16 16'); s.setAttribute('aria-hidden', 'true');
@@ -68,9 +75,11 @@ export function createView(parent, kind, M) {
     const bar = el('div', 'nodes-title', c); icon(bar, glyph); const name = label(el('span', 'nodes-name', bar), title); if (mark) el('i', 'nodes-mark', bar, mark);
     if (ins) el('i', 'nodes-port in', c); if (outs) el('i', 'nodes-port out', c);
     /* a press on a title selects it (shift adds or takes it out) and drags the selection with it; STAGE IN / OUT drag alone */
+    let t0 = -1e9;                                                  // a second press within 350 ms is a double-click: RENAME
     if (W) grab(bar, (e) => !e.target.closest('button, input'), (e) => {
       ground.focus({ preventScroll: true });
       if (id === 'in' || id === 'out') return { g: [[c, xy(c)]] };
+      if (e.timeStamp - t0 < 350) { renameAt(id); return { g: [] }; } t0 = e.timeStamp;
       if (e.shiftKey && sel.has(id)) { sel.delete(id); paintSel(); return { g: [] }; }
       if (!sel.has(id)) pick([id], e.shiftKey);
       return { g: [...sel].map((i) => [cards[i].c, xy(cards[i].c)]) };
@@ -80,10 +89,15 @@ export function createView(parent, kind, M) {
   };
   label(node('in', 'STAGE IN', false, true, 'in').body, 'the stage picture');
   label(node('out', 'STAGE OUT', true, false, 'out').body, 'the screen');
-  /** a node's card: its bar (its icon, the title, the cost mark, × BYPASS, the bin) and its body (CURVES, or the type's knobs) */
+  /** a node's card: its bar (the chevron, its icon, the title, the cost mark, × BYPASS, the bin), the PREVIEW strip of a TABLE or MATRIX
+      node, and its body (CURVES, or the type's knobs) */
   function make(q) {
     const t = T[q.type], n = node(q.id, t.label, true, true, q.type, MARK[t.cls]);
     n.c.dataset.type = q.type; n.c.title = t.hint || '';
+    const v = el('button', 'nodes-chev', null); v.type = 'button'; chip(v, 'chevronDown', 'COLLAPSE'); n.bar.prepend(v); v.addEventListener('click', () => M.setFold(q.id, !q.fold));
+    if (!W) n.name.addEventListener('dblclick', () => renameAt(q.id));
+    n.c.addEventListener('contextmenu', (e) => { e.stopPropagation(); popup(e, cardRows(q)); });
+    if (t.cls === 'table' || t.cls === 'matrix') { n.strip = el('canvas', 'nodes-strip'); n.strip.width = 128; n.strip.height = 10; n.c.insertBefore(n.strip, n.body); api.strip(q); }
     const x = el('button', 'nodes-x', n.bar); x.type = 'button'; chip(x, 'close', 'BYPASS NODE'); x.addEventListener('click', () => M.setBypass(q.id, !q.bypass));
     const b = el('button', 'nodes-rm', n.bar); b.type = 'button'; chip(b, 'clear', 'REMOVE NODE'); b.addEventListener('click', () => M.remove(q.id));
     if (q.type === 'curves') n.view = M.curvesIn(n.body);
@@ -98,6 +112,33 @@ export function createView(parent, kind, M) {
     svg.replaceChildren(...ids.slice(1).map((b, i) => { const [x1, y1] = mid(ids[i], true), [x2, y2] = mid(b, false), d = Math.max(30, Math.abs(y2 - y1) / 2);
       const p = document.createElementNS(NS, 'path'); p.setAttribute('d', `M${x1} ${y1} C${x1} ${y1 + d} ${x2} ${y2 - d} ${x2} ${y2}`); return p; }));
   }
+  /** RENAME: the title becomes a line; Enter keeps it, Escape (or leaving it) does not; empty = the type's name */
+  function renameAt(id) {
+    const n = cards[id], q = M.byId(id); if (!n || !q || n.c.querySelector('.nodes-rename')) return;
+    const f = el('input', 'nodes-rename sp-prename', null); f.type = 'text'; f.maxLength = 40; ariaLabel(f, 'node name'); f.value = q.name || T[q.type].label;
+    n.name.hidden = true; n.name.after(f);
+    let done = false; const end = (keep) => { if (done) return; done = true; f.remove(); n.name.hidden = false; if (keep) M.rename(id, f.value === T[q.type].label ? '' : f.value); if (W) ground.focus({ preventScroll: true }); };
+    f.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); end(true); } else if (e.key === 'Escape') { e.preventDefault(); end(false); } });
+    f.addEventListener('blur', () => end(false)); f.focus(); f.select();
+  }
+  /* THE RIGHT-CLICK MENUS: rows [word, run] (null = a divider), at the pointer, inside the ground */
+  const pop = el('div', 'nodes-menu nodes-pop', ground); pop.hidden = true;
+  function popup(e, rows) {
+    e.preventDefault(); menu.hidden = true; pop.replaceChildren();
+    for (const r of rows) if (!r) el('div', 'nodes-sep', pop); else { const b = el('button', 'nodes-item', pop); b.type = 'button'; label(el('span', '', b), r[0]); if (r[2]) b.setAttribute('aria-pressed', 'true');
+      b.addEventListener('click', () => { pop.hidden = true; r[1](); }); }
+    pop.hidden = false; const [x, y] = local(e);
+    pop.style.left = Math.max(4, Math.min(x, ground.clientWidth - pop.offsetWidth - 4)) + 'px'; pop.style.top = Math.max(4, Math.min(y, ground.clientHeight - pop.offsetHeight - 4)) + 'px';
+  }
+  pop.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Escape') pop.hidden = true; });
+  ground.addEventListener('pointerdown', (e) => { if (!pop.contains(e.target)) pop.hidden = true; }, true);
+  const folded = () => M.list().length > 0 && M.list().every((q) => q.fold);
+  const foldAll = () => M.setFold(M.list().map((q) => q.id), !folded());
+  const cardRows = (q) => [['BYPASS', () => M.setBypass(q.id, !q.bypass), q.bypass], [q.fold ? 'EXPAND' : 'COLLAPSE', () => M.setFold(q.id, !q.fold)],
+    ['DUPLICATE', () => pick(M.duplicate(q.id, at()))], ['RENAME', () => renameAt(q.id)], ['RESET', () => M.reset(q.id)], null,
+    ['MOVE UP', () => M.move(q.id, -1)], ['MOVE DOWN', () => M.move(q.id, 1)], null, ['REMOVE', () => M.remove(q.id)]];
+  const groundRows = () => [['ADD…', () => openMenu(true)], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'EXPAND ALL' : 'COLLAPSE ALL', foldAll]].filter((r) => r !== false);
+  ground.addEventListener('contextmenu', (e) => popup(e, groundRows()));
   if (!W) ground.classList.add('nodes-column');
   else {
     /* THE GROUND'S HAND: a drag pans, shift + drag draws a box, two fingers pinch; ctrl/⌘ + wheel zooms about the pointer */
@@ -148,9 +189,10 @@ export function createView(parent, kind, M) {
       else if (c && /^[zZ]$/.test(k)) { if (e.shiftKey) M.redo(); else M.undo(); }
       else if (c && /^[yY]$/.test(k)) M.redo();
       else if (!c && /^[mM]$/.test(k) && ids.length) M.setBypass(ids, ids.some((id) => !M.byId(id).bypass));
+      else if (!c && /^[hH]$/.test(k) && ids.length) M.setFold(ids, ids.some((id) => !M.byId(id).fold));
       else if (k === 'Tab' || (k === 'A' && e.shiftKey && !c)) openMenu(true);
       else if (k === 'Home') fit();
-      else if (k === 'Escape') { if (!menu.hidden) menu.hidden = true; else pick([]); }
+      else if (k === 'Escape') { if (!menu.hidden || !pop.hidden) menu.hidden = pop.hidden = true; else pick([]); }
       else return;
       e.preventDefault();
     });
@@ -160,6 +202,7 @@ export function createView(parent, kind, M) {
   const tools = el('div', 'nodes-tools', ground), tool = (cls, g, word, run) => { const b = el('button', cls, tools); b.type = 'button'; chip(b, g, word); b.addEventListener('click', run); return b; };
   tool('nodes-add', 'plus', 'ADD NODE', () => openMenu(true));
   if (W) tool('nodes-fit', 'home', 'FIT — every card in view (Home)', () => fit());
+  const foldB = tool('nodes-folds', 'compact', 'COLLAPSE ALL', () => foldAll());
   const menu = el('div', 'nodes-menu', ground); menu.hidden = true;
   const sep = (cls) => { const s = el('div', 'nodes-sep', menu); if (cls) icon(s, cls); return s; };
   const item = (text, title, run, cls = 'nodes-item') => { const it = el('button', cls, menu); it.type = 'button'; label(el('span', '', it), text); it.title = title;
@@ -206,17 +249,26 @@ export function createView(parent, kind, M) {
     get view() { return cards.curves && cards.curves.view; },
     widget: (id, k) => { const n = cards[id]; return n && n.ctl && n.ctl.ctls[k] ? n.ctl.ctls[k].targets[0] || null : null; },
     paint(q, k, v, shown) { const n = cards[q.id]; if (n && n.ctl) n.ctl.paint(k, v, shown); },
+    /** the PREVIEW strip: a grey ramp over a hue ramp, each of the 128 columns through the node's own transfer (coalesced on the frame) */
+    strip(q) { const n = cards[q.id]; if (!n || !n.strip) return; frame.coalesce('nodes.strip.' + kind + '.' + q.id, () => {
+      const f = transfer(q, T[q.type]), g = n.strip.getContext('2d'), im = g.createImageData(128, 10);
+      for (let i = 0; i < 128; i++) { const s = i / 127, rows = [f([s, s, s]), f(hueAt(i / 128))];
+        for (let y = 0; y < 10; y++) { const c = rows[y < 5 ? 0 : 1], o = (y * 128 + i) * 4; im.data[o] = c[0] * 255; im.data[o + 1] = c[1] * 255; im.data[o + 2] = c[2] * 255; im.data[o + 3] = 255; } }
+      g.putImageData(im, 0, 0); }); },
     /** the graph's foot: what the graph costs — filter primitives + layers */
     foot() { const p = M.passes(); if (p === 1) label(foot, '1 pass'); else label(foot, '{n} passes', { n: p }); },
     /** the cards follow the list: a new node gets its card, a removed one loses it */
     sync(rebuild) {
       const L = M.list();
       for (const id of Object.keys(cards)) if (id !== 'in' && id !== 'out' && (rebuild || !M.byId(id))) { sel.delete(id); ro.unobserve(cards[id].c); if (cards[id].view) cards[id].view.destroy(); cards[id].c.remove(); delete cards[id]; }
-      for (const q of L) { if (!cards[q.id]) make(q); cards[q.id].c.classList.toggle('off', q.bypass); cards[q.id].bar.querySelector('.nodes-x').setAttribute('aria-pressed', String(q.bypass)); }
+      for (const q of L) { if (!cards[q.id]) make(q); const n = cards[q.id]; n.c.classList.toggle('off', q.bypass); n.bar.querySelector('.nodes-x').setAttribute('aria-pressed', String(q.bypass));
+        n.c.classList.toggle('fold', q.fold); n.bar.querySelector('.nodes-chev').setAttribute('aria-expanded', String(!q.fold));
+        if (q.name) { label(n.name, ''); n.name.textContent = q.name; } else label(n.name, T[q.type].label); }
+      chip(foldB, folded() ? 'expand' : 'compact', folded() ? 'EXPAND ALL' : 'COLLAPSE ALL');
       paintSel(); api.place();
     },
     place() {
-      const L = M.list(); menu.hidden = true; api.foot(); empty.hidden = L.length > 0;
+      const L = M.list(); menu.hidden = pop.hidden = true; api.foot(); empty.hidden = L.length > 0;
       if (!W) { plane.append(cards.in.c, empty, ...L.map((q) => cards[q.id].c), cards.out.c); return; }   // the rack card: the chain as a column, in order
       const set = (n, l, t) => { n.style.left = l + 'px'; n.style.top = t + 'px'; };
       const A = M.rec().at || {}, pin = A.in || AT.in;

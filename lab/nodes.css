@@ -40,6 +40,15 @@
 /* 020 X1 · the ground: focus, the selection's accent outline, the shift-drag box */
 .nodes-ground:focus-visible { outline: 1px solid color-mix(in srgb, var(--acc) 50%, transparent); outline-offset: -1px; }
 .nodes-card.sel { outline: 2px solid var(--acc); outline-offset: 2px; }
+/* 020 X2 · the card: the chevron, collapsed (the bar + the PREVIEW strip), the strip, a title being renamed, the right-click menu */
+.nodes-chev { display: grid; place-items: center; width: 16px; height: 16px; margin-left: -4px; padding: 0; border: 0; background: transparent; box-shadow: none; color: var(--fg-soft); cursor: pointer; }
+.nodes-chev svg { width: 12px; height: 12px; transition: rotate .15s; }
+.nodes-chev[aria-expanded="false"] svg { rotate: -90deg; }
+.nodes-card.fold { padding-bottom: 6px; }
+.nodes-card.fold > .nodes-body { display: none; }
+.nodes-strip { display: block; width: 100%; height: 10px; margin: -2px 0 6px; border-radius: 2px; box-shadow: 0 0 0 1px var(--glass-hairline); }
+.nodes-rename { flex: 1 1 auto; min-width: 0; height: 18px; padding: 0 4px; font: inherit; letter-spacing: inherit; }
+.nodes-pop { top: auto; min-width: 150px; z-index: 3; }
 .nodes-box { display: none; position: absolute; z-index: 1; pointer-events: none; border: 1px dashed var(--acc); background: color-mix(in srgb, var(--acc) 8%, transparent); }
 .nodes-menu { position: absolute; left: 6px; top: 36px; z-index: 2; display: flex; flex-direction: column; min-width: 200px; max-height: calc(100% - 44px); overflow: auto; padding: 4px; border-radius: var(--r-md); background: var(--glass-raise, var(--glass-tint));
   border: 1px solid var(--glass-border); box-shadow: var(--neu-raise); }
