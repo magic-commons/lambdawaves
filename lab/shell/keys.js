@@ -1,7 +1,7 @@
 /* lab/shell/keys.js — §20–§23 (0.5.2 R3b): THE KEY TABLE'S FEED (021 I1: the rows are lab/actions.js's registry) on MIR's ONE KEY TABLE (lab/key-table.js), the
  * KEYBOARD window and THE TIMELINE (the kit's; THE FOCUS LAW's scoped rows), toggleUI and THE TAB ORDER.  createKeys(app) runs at its seat; keyState
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
-import { TIER } from '../tier.js';
+import { TIER } from '../tier.js'; import { setGlyph } from '../mir/glyph.js';
 import { createKeyTable, keysOf } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
 import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout } from '../mir/kit.js';
 export function createKeys(app) {
@@ -73,13 +73,14 @@ export function createKeys(app) {
         play: (on) => { if (on) appPlay.play(); else appPlay.pause(); schedule(TIER.EVOLVE); return { ok: true, playing: clock.playing }; } },
       dock: { span: rk.span() }, initial: { dock: 'bottom', open: false }, keys: kt.table, project: false, audio: false,
       transport: { layout: [{ group: 'native-play-row', items: ['play', 'power', 'tempo', 'app:readout', 'rewind'] }, 'door'], nodes: { readout: tlRo.root }, seats: 'thin',
-        door: 'icon', doorIcon: new URL('../img/icons/modulation.svg', import.meta.url).href,
+        door: 'none',   // 021 V2: dressed below with the table's `modulation` (an SVG, no mask)
         onSwitch: () => { app.state.tl.close(); layout.modulation.expand(); } },   // 015 T5: the timeline's door SWAPS to the modulation window, as that window's switch swaps back   // A9: the modulation window's own icon, no MIR logo (Josh 10-22)
       store: { read: () => readSettings().tlwin || null, write: (s) => settingsStore.write({ ...readSettings(), tlwin: s }) },
       busy: () => app.state.capApi.busy, moved: (r) => app.state.dodge(r, 'tl'), onWindow: () => occlusion.dirty(),
       /* iteration 004 · MIR OPTIONS › SAMPLING › SCRUB is how a ruler drag seeks (BASINS shell.js: the kit's controller reads it at each
          scrub's start): LIVE every move, LIGHT one in three, RELEASE when the hand lets go */
       scrubLevel: () => { const g = mirGui(); return g ? g.sampling().scrub : 'live'; } });
+    { const d = app.state.tl.root.querySelector('.tl-transport .mod-exp'); if (d) setGlyph(d, 'modulation'); }   // 021 V2: the work bar's door wears the modulation window's own icon (A9)
     /* 021 R3 · TWO ⏮, EACH SAYS WHAT IT MOVES: the work bar's sends the modulation beat and the TIMELINE playhead to bar 1 and leaves ψ's t
        (the main bar's ⏮ moves t); one position spanning both is a kit door for 1.5.6 (docs/FOR-MIR.md) */
     { const h = app.state.tl.root.querySelector('.transport-home'); if (h) { h.title = 'beat → bar 1 · the TIMELINE playhead and the modulation beat back to the start; ψ\'s t stays (the main bar\'s ⏮ moves t)'; h.setAttribute('aria-label', 'timeline back to bar 1'); } }

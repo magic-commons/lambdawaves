@@ -20,7 +20,7 @@
  *   onEnd(add)               optional: the stroke is over and CHANGED something (the applies' n summed > 0) — still inside the
  *                            pointerup, so whatever it does (iteration 008: every ladder normalises here) joins the stroke's one undo row
  */
-import { el } from './mir/kit.js';
+import { el } from './mir/kit.js'; import { glyphSvg } from './mir/glyph.js';
 export function paintStroke(surface, o) {
   const local = o.local || ((e) => ({ x: e.clientX, y: e.clientY }));
   let stroke = null, eatUntil = 0;
@@ -72,16 +72,12 @@ export function paintStroke(surface, o) {
    Iteration 015 S2 (Josh: "users can't tell which clears all and fills all"): two glyphs nobody confuses — FILL ALL is the frame with every rung
    solid and a filled disc at its foot, EMPTY the same frame with no rungs and a ∅ in it; the hint and the aria label lead with the word
    (`FILL ALL · …` / `EMPTY · …`), each ladder handing its own tail. */
-const GS = 'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
-const GLYPH = {
-  fill: '<rect ' + GS + ' x="5" y="2.5" width="14" height="19" rx="3"/><path ' + GS + ' d="M8.5 6.5h7M8.5 10h7M8.5 13.5h7"/><circle cx="12" cy="17.6" r="1.9" fill="currentColor"/>',
-  empty: '<rect ' + GS + ' x="5" y="2.5" width="14" height="19" rx="3"/><circle ' + GS + ' cx="12" cy="12" r="3.6"/><path ' + GS + ' d="M8.6 16.4 15.4 7.6"/>',
-};
+/* 021 V2: the two drawings live in the one table (lab/icons.js `fillAll`, `emptyAll`) */
 export function fillButton(row, titles, onPress) {
   const b = el('button', 'trig reg-fill', row); b.type = 'button';
   let empty = null;
   const draw = (v) => {
-    b.innerHTML = '<svg class="gly" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">' + GLYPH[v ? 'fill' : 'empty'] + '</svg>';
+    b.innerHTML = glyphSvg(v ? 'fillAll' : 'emptyAll', 'gly', 20);
     const word = v ? 'FILL ALL' : 'EMPTY'; b.setAttribute('aria-label', word); b.title = word + ' · ' + (v ? titles.fill : titles.empty); b.dataset.state = v ? 'fill' : 'empty';
   };
   b.addEventListener('click', () => onPress(empty));

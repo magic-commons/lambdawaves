@@ -14,7 +14,7 @@
  * at, pan, zoom, win, off }), the reader's graphs `.nodePresets`.
  *   createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod }) → { model, filter, nodes(), add(type), remove(id),
  *     setBypass(id, on), set(id, knob, value), passes(), compile(), win, views, open(), close(), has(), setHas(on) } */
-import { el, ariaLabel } from './mir/kit.js';
+import { el, ariaLabel, chip } from './mir/kit.js';
 import { createWindow } from './mir/window/window.js';
 import { createCurvesPanel, createCurvesView, isIdentity } from './mir/panels/curves.js';
 import { pictureFilter, lookup } from './mir/panels/picture-filter.js';
@@ -184,7 +184,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   function curvesIn(body) {
     const v = createCurvesView(body, { model, presets });
     for (const l of v.root.querySelectorAll('.curves-channel .k-lbl, .curves-foot .k-lbl')) if (/^(CHANNEL|PRESET)$/.test(l.textContent.trim())) { ariaLabel(l.parentElement, l.textContent.trim()); l.remove(); }
-    const foot = v.root.querySelector('.curves-foot'), nm = foot.querySelector('.mir-step-name'), save = el('button', 'sp-presave', foot); save.type = 'button';
+    const foot = v.root.querySelector('.curves-foot'), nm = foot.querySelector('.mir-step-name'), save = chip(el('button', 'sp-presave', foot), 'saveInto'); save.type = 'button';
     ariaLabel(save, 'SAVE CURVE'); save.title = 'SAVE · this channel\'s curve as your own preset (kept on this device)';
     save.addEventListener('click', () => {
       if (foot.querySelector('.sp-prename')) return;
@@ -216,7 +216,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const card = device({ id: 'nodes', eyebrow: 'NODES', status: '' });
   const vCard = createView(card.body, 'card', M); views.push(vCard);
   after.after(card.root);
-  rk.register({ id: 'nodes', el: card, side: 'right', closed: true, title: 'NODES', glyph: 'curves', hint: 'a graph over the stage picture: STAGE IN → the nodes → STAGE OUT',
+  rk.register({ id: 'nodes', el: card, side: 'right', closed: true, title: 'NODES', glyph: 'nodes', hint: 'a graph over the stage picture: STAGE IN → the nodes → STAGE OUT',
     onOpen: () => requestAnimationFrame(() => vCard.place()) });
   const wbody = el('div', 'nodes-host');
   const vWin = createView(wbody, 'win', M); views.push(vWin);

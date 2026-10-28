@@ -29,7 +29,7 @@
  *   port { host, part, snapshot(), rollback(S) → bool, busy(±1), opened(label), notice() → D9's line, thumbnail(), confirm(text),
  *          rack, onMoved(rect), titleAfterSave(name) → bool, cover() → the front page { shown, close } | null, saved(name),
  *          inspect(entry | null, how) } */
-import { createFolders, toThumb } from './mir/folders/folders.js';
+import { createFolders, toThumb } from './mir/folders/folders.js'; import { glyphEl } from './mir/glyph.js';
 import { createFiles } from './mir/folders/files.js';
 import { registerProjectPart, restoreProject, projectSignature } from './mir/core/project.js';
 import { saveBlob } from './mir/folders/save-blob.js';
@@ -142,7 +142,7 @@ export function createProjects(port) {
     host: port.host, id: 'folders', title: 'FOLDERS', store: PJ_KEY, storage: store, files, app: PART, defaultName: 'UNTITLED',
     /* BASINS' toolbar (DEFAULT_ACTIONS' PROJECT · DUPLICATE · NEW) with λWAVES' SAVE in front — the report's option B, Josh's to confirm.
        OPEN FILE and EXPORT left the toolbar for FILE › IMPORT and FILE › EXPORT (.json · .mir · picture); a drop still opens a file */
-    actions: ['save', 'project', 'duplicate', 'fresh'], folderGlyph: 'folder', rack: port.rack, onMoved: port.onMoved,
+    actions: ['save', 'project', 'duplicate', 'fresh'], folderGlyph: 'folder', glyph: (name, cls, size) => glyphEl(name === 'save' ? 'saveInto' : name, cls, size),   // 021 V2: PROJECT wears λWAVES' saveInto (012 M1), not the floppy rack: port.rack, onMoved: port.onMoved,
     factory: () => api.restoreDemos(),
     galleryCopy: { factory: 'RESTORE THE DEMOS', factoryNote: 'puts back the demos λWAVES ships with — adds only what is missing, and never touches anything you saved' },
     /* ⓘ (and a selection) names the project RENDER's SUBJECT describes; THIS VIEW when none */
@@ -168,7 +168,7 @@ export function createProjects(port) {
     },
     /* FOLDERS' entrance is a motion (core/motion.js presence): the mask is taken again where it lands, paused or not (CLAUDE.md's
        mask law).  And opened over the current project, clean and still without a picture, it takes one then */
-    onOpen: () => { cover(); demosFirst(folders.gallery); const { root, rail } = folders.win; Promise.all([root, rail.el].flatMap((el) => (el && el.getAnimations ? el.getAnimations() : [])).map((a) => a.finished.catch(() => null))).then(() => port.onMoved());
+    onOpen: () => { fieldIcons(); cover(); demosFirst(folders.gallery); const { root, rail } = folders.win; Promise.all([root, rail.el].flatMap((el) => (el && el.getAnimations ? el.getAnimations() : [])).map((a) => a.finished.catch(() => null))).then(() => port.onMoved());
       const e = currentId && files.entry(currentId); if (e && !e.thumb && !dirty()) Promise.resolve(port.thumbnail()).then(toThumb)
       .then((thumb) => { if (thumb) files.overwrite(e.id, { payload: e.payload, thumb, facts: e.facts, at: e.at }); }).catch(() => {}); },
     /* iteration 012 M1 (O1's finding; Josh 10-20 "make sure the Window, UI, saving system works"): an OPEN from FOLDERS lands on the stage, so the
@@ -183,6 +183,9 @@ export function createProjects(port) {
       markClean(); presetOf(e.name);
     },
   });
+  /* 021 V2 · NAME and SAVE TO wear the table's fileName / folderName at their left (012 M1's glyphs, SVG now; the kit's gallery has no seat for them) */
+  const fieldIcons = () => { for (const f of folders.win.root.querySelectorAll('.sv-field')) if (!f.querySelector('.sv-field-ico')) f.prepend(glyphEl(f.querySelector('.sv-to-input') ? 'folderName' : 'fileName', 'sv-field-ico', 15)); };
+  fieldIcons();
   /* THE DOORS a λWAVES file comes in by (the kit's intake takes only its own envelopes): a drop on the window, OPEN FILE, IMPORT.
      8 MiB a project file on every one of them (R10 b; a picture is capped by the project it carries, at the store); a .mir or a
      picture goes on to the kit's intake, which refuses another app's project with the reason. */

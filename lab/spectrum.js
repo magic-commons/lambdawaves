@@ -12,7 +12,7 @@
  * keep the labels' coefficients under a caption, and the RATE knobs stand down (api.rateDisabled) with a note.
  */
 import { BASIS, NMAX, energy, HARTREE_EV } from './hydrogen.js';
-import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, sw } from './mir/kit.js';
+import { el, fader, knob, formula, N_COLOR, nRGB, vividInk, graphHover, stepper, sw, chip } from './mir/kit.js';
 import { paintStroke, fillButton, levelLine, footLine } from './paint-stroke.js';
 import { PRESET_BY_ID } from './state.js';
 import { createUserPresets } from './user-presets.js';
@@ -75,7 +75,7 @@ export function createSpectrum(host, api) {
         if (!pane.querySelector('.mir-pick-i[data-id^="' + UK + '"]')) for (const h of pane.querySelectorAll('.mir-pick-i[data-id^="#"]')) h.remove(); });
     } });
   const preVis = sw({ label: 'VISUALS', value: true, title: 'PRESET VISUALS — a preset also sets its view, its rate and its window', onChange: (v) => { api.visuals = v; } });
-  const preSave = el('button', 'sp-presave', null); preSave.type = 'button'; preSave.setAttribute('aria-label', 'SAVE PRESET');
+  const preSave = chip(el('button', 'sp-presave', null), 'saveInto'); preSave.type = 'button'; preSave.setAttribute('aria-label', 'SAVE PRESET');
   preSave.title = 'SAVE · the populated labels as your own preset (equal and in phase; kept on this device)';
   pre.append(preStep.root, preSave);
   /** the name, asked in the stepper's seat: Enter keeps it, Escape or a press elsewhere lets it go */

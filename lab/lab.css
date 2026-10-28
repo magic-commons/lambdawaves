@@ -750,10 +750,10 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .native-ab .ab-slot::after { content: ''; flex: 0 0 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--glass-press); }
 .native-ab .ab-slot.stored::after { background: var(--acc); box-shadow: 0 0 6px color-mix(in srgb, var(--acc) 70%, transparent); }
 /* 018 C1 · SPECTRUM's A ↔ B (lab/windows/transition.js): ONE CLEAR, the bare trash glyph after B (the .sp-presave way: no chrome), dim while nothing is stored */
-.native-ab > .sp-abclear { width: 22px; height: 22px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: var(--fg); opacity: .6; cursor: pointer;
-  -webkit-mask: url(img/icons/trash.svg) center / 16px no-repeat; mask: url(img/icons/trash.svg) center / 16px no-repeat; }
-.native-ab > .sp-abclear:is(:hover, :focus-visible) { opacity: 1; background: var(--acc); }
-.native-ab > .sp-abclear:disabled { opacity: .2; cursor: default; background: var(--fg); }
+.native-ab > .sp-abclear { display: grid; place-items: center; width: 22px; height: 22px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: none; color: var(--fg); opacity: .6; cursor: pointer; }
+.native-ab > .sp-abclear > svg { width: 16px; height: 16px; }   /* 021 V2: the table's trash, an SVG */
+.native-ab > .sp-abclear:is(:hover, :focus-visible) { opacity: 1; color: var(--acc); }
+.native-ab > .sp-abclear:disabled { opacity: .2; cursor: default; color: var(--fg); }
 
 /* THE STAGE TEXT (INFORMATIONAL since 0.5.3 M9; 0.5.1 D1: one block of the kit's INFORMATIONAL layer, lab/shell/stage-words.js initStageText) wears the kit's ink,
    shade and serif at the kit's seat; beneath every window (z 20 < rack 30 < #floats 32: the kit's root has none), never a pointer
@@ -812,8 +812,8 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
    way), the name asked in the stepper's own seat, and the list's USER / PRESETS headings and each reader's × */
 .dev .row.sp-preset { gap: 4px; flex-wrap: nowrap; }
 .dev .row.sp-preset > .mir-step { min-width: 0; }
-:is(.sp-preset, .mir-ramp-presets, .curves-foot) > .sp-presave { flex: 0 0 26px; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: var(--acc); opacity: .8; cursor: pointer;
-  -webkit-mask: url(img/icons/save.svg) center / 20px no-repeat; mask: url(img/icons/save.svg) center / 20px no-repeat; }
+:is(.sp-preset, .mir-ramp-presets, .curves-foot) > .sp-presave { flex: 0 0 26px; display: grid; place-items: center; width: 26px; height: 26px; min-width: 0; min-height: 0; padding: 0; border: 0; box-shadow: none; background: none; color: var(--acc); opacity: .8; cursor: pointer; }
+:is(.sp-preset, .mir-ramp-presets, .curves-foot) > .sp-presave > svg { width: 20px; height: 20px; }   /* 021 V2: the table's saveInto, an SVG */
 :is(.sp-preset, .mir-ramp-presets, .curves-foot) > .sp-presave:is(:hover, :focus-visible) { opacity: 1; }
 :is(.sp-preset, .mir-ramp-presets, .curves-foot) .mir-step-name[hidden] { display: none; }
 .mir-ramp-presets > .mir-ramp-step { flex: 1 1 auto; min-width: 0; }   /* 015 P3: the stepper narrows for the save glyph */
@@ -860,40 +860,15 @@ body[data-theme="light"] { --n7: hsl(350 97% 47%); }
 .picker .pk-n.folded > button.pk-nl { padding-top: 2px; opacity: .78; }
 .picker .pk-count { font-size: var(--fs-tiny); color: var(--dim); padding-top: 2px; }
 
-/* iteration 012 I1 · the rack's window list (the kit's + list) wears the PICKER's own icons for ATOMS and MOLECULES, drawn in the
- kit's glyph seat (14 px, --dim) from lab/img/icons/ — the kit's glyph table takes no app SVG (FOR-MIR).
- iteration 012 M1 (Josh: "Let the icon be on the right and the text on the left like the rest"): the list is not the kit's .mir-rack-list here, so
- its rows kept shell.css' space-between and pushed the word to the right of an icon; the word now leads at the left and every icon — the kit's
- CURVES / FOLDERS / RENDER and these two — sits at the right edge, the favourite star after it. */
-[data-rack-list] .mb-item { justify-content: flex-start; align-items: center; }
-[data-rack-list] .mb-item > .mb-lbl { order: -1; }
-[data-rack-list] .mb-item > .mb-glyph, [data-rack-list] .mb-item > .mb-fav { margin-left: auto; }
-[data-rack-list] .mb-item > .mb-glyph ~ .mb-fav { margin-left: 0; }
-[data-rack-list] .mb-item[data-win="atoms"]::after, [data-rack-list] .mb-item[data-win="chem"]::after,
-#menubar .mb-item[data-icon]::after {
-  content: ""; flex: 0 0 auto; width: 14px; height: 14px; margin-left: auto; align-self: center; background: var(--dim, currentColor);
-  -webkit-mask: url(img/icons/atomic.svg) center / contain no-repeat; mask: url(img/icons/atomic.svg) center / contain no-repeat; }
-[data-rack-list] .mb-item[data-win="chem"]::after, #menubar .mb-item[data-icon="molecular"]::after { -webkit-mask-image: url(img/icons/molecular.svg); mask-image: url(img/icons/molecular.svg); }
-#menubar .mb-item[data-icon="library"]::after { -webkit-mask-image: url(img/icons/library.svg); mask-image: url(img/icons/library.svg); }
-/* WINDOW's PICKER / ATOMS / MOLECULES (notebook.js tags them): the word left, the chord, then the icon at the right edge */
-#menubar .mb-item[data-icon] { justify-content: flex-start; }
-#menubar .mb-item[data-icon] > .mb-key { margin-left: auto; }
-#menubar .mb-item[data-icon]:has(> .mb-key)::after { margin-left: 0; }
-/* iteration 014 A7 · THE WINDOW PICKER's ATOMS / MOLECULES rows: the same icons by the same mask road, on the kit's empty glyph seat */
-.mir-window-picker .wp-row[data-icon] > .wp-icon { background: currentColor; -webkit-mask: url(img/icons/atomic.svg) center / contain no-repeat; mask: url(img/icons/atomic.svg) center / contain no-repeat; }
-.mir-window-picker .wp-row[data-icon="molecular"] > .wp-icon { -webkit-mask-image: url(img/icons/molecular.svg); mask-image: url(img/icons/molecular.svg); }
+/* 021 V2 · THE ICON TABLE: the menubar's rows wear their glyph through the kit's `opts.icon` (WINDOW's PICKER / ATOMS / MOLECULES, every window by
+   its WINDOW_GLYPH) and the FINDER's rows their window's `spec.glyph` — the iteration 012 masks (and the retired + list's) are gone. */
 
 /* iteration 012 M1 · FOLDERS, λWAVES' look over the kit's gallery (folders/gallery.js, untouched).  PROJECT — BASINS' "store with a picture" spot —
    wore the same floppy as λWAVES' SAVE beside it; it wears I1's save.svg (a page filed into the library).  The NAME and SAVE TO bars each carry
    their glyph at the left (I1's file-name.svg / folder-name.svg), so a NAME that proposes the folder's own word (DEMOS · DEMOS) still reads as
    two different boxes. */
-.mir-folders .sv-project .trig-l > svg { display: none; }
-.mir-folders .sv-project .trig-l::before { content: ""; width: 20px; height: 20px; background: currentColor;
-  -webkit-mask: url(img/icons/save.svg) center / contain no-repeat; mask: url(img/icons/save.svg) center / contain no-repeat; }
 .mir-folders .sv-field { position: relative; }
-.mir-folders .sv-field::before { content: ""; position: absolute; left: 10px; top: 50%; width: 15px; height: 15px; margin-top: -7.5px; pointer-events: none;
-  background: var(--ink-faint, currentColor); -webkit-mask: url(img/icons/file-name.svg) center / contain no-repeat; mask: url(img/icons/file-name.svg) center / contain no-repeat; }
-.mir-folders .sv-field:has(.sv-to-input)::before { -webkit-mask-image: url(img/icons/folder-name.svg); mask-image: url(img/icons/folder-name.svg); }
+.mir-folders .sv-field > .sv-field-ico { position: absolute; left: 10px; top: 50%; width: 15px; height: 15px; margin-top: -7.5px; pointer-events: none; color: var(--ink-faint, currentColor); }   /* 021 V2: projects.js seats the table's fileName / folderName */
 .mir-folders .sv-field > .sv-input { padding-left: 32px; }
 /* 017 R4 · THE DOCKED FOLDERS CARD GROWS WITH ITS CONTENT (Josh's call 5): the kit keeps a whole page's height for a steady pager (BASINS); on
    λWAVES' rack the card is as tall as its tiles, up to the 8-tile page, and a single page shows no pager */

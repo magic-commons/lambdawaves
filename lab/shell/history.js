@@ -116,7 +116,7 @@ export function createHistory(app) {
 
 
   const wHist = device({ id: 'history', eyebrow: 'HISTORY', status: '' });
-  rack.appendChild(wHist.root); rk.register({ id: 'history', el: wHist, title: 'HISTORY', hint: 'HISTORY' });   // C3: registered where it is built (A4's open item)
+  rack.appendChild(wHist.root); rk.register({ id: 'history', el: wHist, title: 'HISTORY', glyph: 'history', hint: 'HISTORY' });   // C3: registered where it is built (A4's open item)
   const histList = el('div', 'hist-list', wHist.body);
   /* iteration 017 R2 · HISTORY IN PAGES (Josh: "avoid scrolling in rack windows"; call 4: 12 a page): the list shows twelve rows, newest first,
      and the rack pager (pager.js) turns the rest; every change of the ring shows the page that holds the row you stand on, a turn holds until then */

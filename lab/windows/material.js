@@ -243,11 +243,11 @@ export function createMaterial(app) {
        "reload the chosen preset") · REVERSE; the bottom row was ADD (the plus icon) · INVERT · the selected stop's swatch and × · ROTATE, and is ADD · ROTATE · … · INVERT since 016 P1 */
     const resetEl = rv.root.querySelector('.mir-ramp-reset'), [addEl, revEl] = verbs.querySelectorAll(':scope > .trig'), rotEl = verbs.querySelector(':scope > .k');
     chip(resetEl, 'undo', 'RELOAD'); rowOn.append(resetEl, revEl);
-    revEl.classList.add('pal-rev'); revEl.replaceChildren(el('span', 'lw-icon lw-icon-reverse')); revEl.setAttribute('aria-label', 'REVERSE'); revEl.title = 'REVERSE · run the ramp backwards';   // iteration 015 P2: the word is the hint
+    revEl.classList.add('pal-rev'); chip(revEl, 'reverse'); revEl.setAttribute('aria-label', 'REVERSE'); revEl.title = 'REVERSE · run the ramp backwards';   // iteration 015 P2: the word is the hint
     rotEl.appendChild(argRo.root); argFloat.setAttribute('aria-hidden', 'true');
     ui.invertSw = sw({ label: 'INVERT', glyph: 'invertColors', cls: 'pal-invert', title: 'Invert field colour without changing ψ', onChange: (v) => { mat.invert = v; paintBar(); saveSettings(); schedule(TIER.PRESENT); } });
     addEl.after(rotEl, rv.root.querySelector('.mir-ramp-sel'), ui.invertSw.root);   // iteration 016 P1 (Josh: "swap INVERT and ROTATE"): ADD · ROTATE · the stop's swatch and × · INVERT
-    addEl.classList.add('pal-add'); addEl.replaceChildren(el('span', 'lw-icon lw-icon-plus')); addEl.setAttribute('aria-label', 'ADD — a stop opposite the selected one');
+    addEl.classList.add('pal-add'); chip(addEl, 'plus'); addEl.setAttribute('aria-label', 'ADD — a stop opposite the selected one');
     /* iteration 012 R4 (Josh 10-20: "the palette window's preset picker ends up being too transparent, make it similar to the main menu and make the
        vertical gaps waayyy smaller … show the palette as a color strip aligned to the right side of the dropdown menu"): the kit's list pane, as it
        opens, wears the Picker's surface (`.lw-menu`, skin.css) and short rows, each with its palette's strip at the right; a pane opened upward keeps
@@ -268,7 +268,7 @@ export function createMaterial(app) {
     /* P3 · the bare save glyph in a 26-px seat after the stepper (S4's `.sp-presave`); a press asks the name in the stepper's own seat — Enter keeps the
        current stops under it, Escape or a press elsewhere lets it go — and the list is re-fed with the reader's row shown */
     palUsers.watch(() => rp.setPresets(palPresets(), palShown));
-    { const top = rv.root.querySelector('.mir-ramp-presets'), nm = top.querySelector('.mir-ramp-step .mir-step-name'), save = el('button', 'sp-presave', top); save.type = 'button';
+    { const top = rv.root.querySelector('.mir-ramp-presets'), nm = top.querySelector('.mir-ramp-step .mir-step-name'), save = chip(el('button', 'sp-presave', top), 'saveInto'); save.type = 'button';
       save.setAttribute('aria-label', 'SAVE PALETTE'); save.title = 'SAVE · these stops as your own palette (kept on this device)';
       save.addEventListener('click', () => {
         if (top.querySelector('.sp-prename')) return;

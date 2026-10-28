@@ -1,7 +1,7 @@
 /* lab/windows/molecules.js — MOLECULES, the molecular session, THE HEAD and the register (0.5.2 R2d; moved verbatim out of lab/rack.js boot()) at ONE seat,
  * where the LEGACY note stands.  Iteration 008 U: MO-REGISTRY is no longer a window — the register is built INTO the MOLECULES card (chemview's `slots`)
  * and a saved `orbitals` seat opens MOLECULES (settings.js RETIRED_WINDOWS); the fix round (F5) folded its second seat, which no longer made a device, into this one. */
-import { TIER } from '../tier.js'; import { el } from '../mir/kit.js';
+import { TIER } from '../tier.js'; import { el } from '../mir/kit.js'; import { setGlyph } from '../mir/glyph.js';
 import { VIEW, VIEW_NAMES, STYLE } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { MODE } from '../shell/settings.js';   // 021 R5: ONE MODE, the windows' table
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
@@ -26,7 +26,7 @@ export function createMolecules(app) {
     const B = [['library', 'LIBRARY — open the Picker', () => { if (app.state.picker) app.state.picker.toggle(); }],
       ['molecules', 'MOLECULAR — the molecule and its register, one window', () => { if (app.state.chem) app.state.chem.setOn(true); }],
       ['hydrogen', 'HYDROGEN — SPECTRUM\'s 140 hydrogen states, their names and the EQUALIZER', () => { if (app.state.chem) app.state.chem.setOn(false); }]]
-      .map(([id, tip, run]) => { const b = el('button', 'lw-stage-b', root); b.type = 'button'; b.dataset.id = id; b.title = tip; b.setAttribute('aria-label', tip.split(' —')[0]); b.addEventListener('click', run); return b; });
+      .map(([id, tip, run]) => { const b = el('button', 'lw-stage-b', root); b.type = 'button'; b.dataset.id = id; b.title = tip; b.setAttribute('aria-label', tip.split(' —')[0]); setGlyph(b, { library: 'library', molecules: 'molecule', hydrogen: 'atom' }[id], { size: 16 }); b.addEventListener('click', run); return b; });
     return { root, set(v) { if (v === 'atoms') v = 'hydrogen'; for (const b of B) if (b.dataset.id !== 'library') b.setAttribute('aria-pressed', String(b.dataset.id === v)); } };
   })();
   modeSeg.set('hydrogen'); { const t = document.getElementById('title'); if (t) t.after(modeSeg.root); }

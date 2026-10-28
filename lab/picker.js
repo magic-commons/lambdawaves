@@ -15,7 +15,7 @@
  * molecules' pictures round the colour wheel).  The Picker opens at boot once the photosensitivity notice is accepted,
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
 import { storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
-import { el, chip, mathPlain, stepper } from './mir/kit.js';
+import { el, chip, mathPlain, stepper } from './mir/kit.js'; import { setGlyph, glyphSvg } from './mir/glyph.js';
 import { jsonStore } from './mir/core/prefs.js';   // 021 R4: the Picker's record on the kit's store
 import { CHEM_PRESETS } from './chemview.js';
 import { SECTIONS, GROUPS, RECORD_GROUP } from './molecules.js';
@@ -75,8 +75,10 @@ function wheelSteps(node, step) {
   }, { passive: false });
 }
 const writePrefs = (p) => pickerStore.set({ v: 1, ...p });   // a blocked profile keeps it for the visit (jsonStore swallows the refusal)
-/** an iteration 012 icon (lab/img/icons/<name>.svg), drawn in currentColor through a CSS mask */
-const icon = (host, name) => { const i = el('i', 'mm-ico', host); i.style.setProperty('--ico', `url(img/icons/${name}.svg)`); i.setAttribute('aria-hidden', 'true'); return i; };
+/** an iteration 012 icon, a glyph of the one table (021 V2: lab/icons.js, an SVG in the `.mm-ico` seat that sizes it; the section ids keep their
+ *  saved names, the glyphs their meaning) */
+const ICON = { atomic: 'atom', molecular: 'molecule', 'arrow-left': 'arrowLeft', 'arrow-right': 'arrowRight' };
+const icon = (host, name) => { const i = el('i', 'mm-ico', host); setGlyph(i, ICON[name] || name); i.setAttribute('aria-hidden', 'true'); return i; };
 /** two presses remove (no window.confirm): the first arms the button for 600 ms, or until a press anywhere else, then it repaints (Josh 10-20) */
 function armer(b, repaint) {
   let t = 0;
@@ -134,7 +136,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   navBtn('home', 'Return home — the lab', () => close());
   navBtn('folders', 'Folders — your projects and the demos', () => (root.dataset.sec === 'folders' ? showDecks() : showFolders())).dataset.nav = 'folders';
   const hue = el('button', 'mm-navb mm-hue', nav); hue.type = 'button'; hue.setAttribute('role', 'slider'); hue.setAttribute('aria-label', 'molecule picture hue');
-  hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); el('i', 'mm-hue-ring', hue);
+  hue.setAttribute('aria-valuemin', '0'); hue.setAttribute('aria-valuemax', '359'); setGlyph(el('i', 'mm-hue-ring', hue), 'hueRing');
   const lookB = el('button', 'mm-navb mm-lookb', nav); lookB.type = 'button'; lookB.setAttribute('aria-haspopup', 'true'); lookB.setAttribute('aria-expanded', 'false');
   const lookG = el('b', 'mm-lookg', lookB);
   const scroller = el('div', 'mm-scroll', root), caption = el('div', 'mm-caption', root);
@@ -191,8 +193,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   /** the look a deck draws: the reader's pick, else (016 P3) Im ψ on ATOMIC and arg ψ on a molecule (MOLECULAR, a volume, the search) */
   const lookFor = (atomic) => prefs.look || (atomic ? 'im' : 'phase');
   /* the glyph in the math face; ● and ⊸ are not in the shipped STIX subset (lab/fonts is never touched), so they are drawn, in the ink, at the em */
-  const SHAPES = { '●': '<circle cx="12" cy="12" r="6.5" fill="currentColor"/>', '⊸': '<path d="M3 12h11.5" stroke="currentColor" stroke-width="1.6" fill="none"/><circle cx="17.5" cy="12" r="3.2" stroke="currentColor" stroke-width="1.6" fill="none"/>' };
-  const glyph = (host, g) => { host.textContent = ''; if (SHAPES[g]) host.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${SHAPES[g]}</svg>`; else host.textContent = g; return host; };
+  const SHAPES = { '●': 'balls', '⊸': 'sticks' };   // 021 V2: the table's `balls` and `sticks` (lab/icons.js)
+  const glyph = (host, g) => { host.textContent = ''; if (SHAPES[g]) host.innerHTML = glyphSvg(SHAPES[g], 'gly'); else host.textContent = g; return host; };
   const lookOf = () => { const l = lookFor(false); return l !== 'density' ? l : null; };   // a volume tile's style (V.picture), a molecule's look
   const drop = el('div', 'mm-lookdrop lw-menu', root); drop.hidden = true; drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');
   const lookTiles = LOOKS.map(([id, glyph_, word], i) => { const b = el('button', 'mm-lk', drop); b.type = 'button'; b.dataset.look = id; b.setAttribute('role', 'radio'); b.style.setProperty('--i', String(i));
@@ -430,7 +432,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
      are re-read after (chem.records()). ── */
   const cardLine = (S) => `${S.rows.length} molecules`;   // iteration 012 L1: the size rides in the install word, the count of files kept is the ring
   /** the install's eye: DOWNLOAD while there is something to fetch, TRASH once it is all here (iteration 012 L2, I1's icons) */
-  const eye = (i, here) => i.style.setProperty('--ico', `url(img/icons/${here ? 'trash' : 'download'}.svg)`);
+  const eye = (i, here) => setGlyph(i, here ? 'trash' : 'download');
   function paintSec(S) {
     const v = S.view; if (!v || !v.b.isConnected) return;
     const N = S.recs.length, all = N > 0 && S.n === N;
