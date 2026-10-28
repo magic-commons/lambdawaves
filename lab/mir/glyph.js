@@ -503,18 +503,38 @@ const GLYPHS = {
 };
 
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
-/* the markup for a name, an alias followed to its target; undefined when there is none */
-const bodyOf = (name) => (own(GLYPHS, name) ? GLYPHS[name] : own(ALIASES, name) ? GLYPHS[ALIASES[name]] : undefined);
+/* 1.5.6-alpha.3 (λWAVES 021 V1): THE APP'S OWN DRAWINGS, registered beside the set (registerGlyphs), drawn by every road that draws a kit name */
+const APP = Object.create(null);
+/* the markup for a name, an alias followed to its target, or an app's own; undefined when there is none */
+const bodyOf = (name) => (own(GLYPHS, name) ? GLYPHS[name] : own(ALIASES, name) ? GLYPHS[ALIASES[name]] : own(APP, name) ? APP[name] : undefined);
 
-/** The names this module can draw, for a gate to enumerate against the DOM.  Aliases are not in it (glyphAliases()). */
+/** registerGlyphs({ name: innerMarkup }) — an app adds its own drawings in the set's shape (the inner markup of a 24-unit viewBox,
+ *  stroke 1.9, round caps, currentColor; a 16-unit drawing inside `<g transform="scale(1.5)">`, as `edit` does).  A name must be
+ *  meaning-named camelCase.  It REFUSES — throws, registering none of the table — a name the kit draws (or an alias), or an app name
+ *  already registered with other markup: a kit glyph is never overdrawn.  → the names registered */
+export function registerGlyphs(table) {
+  const rows = Object.entries(table || {}), bad = [];
+  for (const [name, body] of rows) {
+    if (!/^[a-z][A-Za-z0-9]*$/.test(name) || typeof body !== 'string' || !body.trim()) bad.push(name + ' (not a camelCase name with markup)');
+    else if (own(GLYPHS, name) || own(ALIASES, name)) bad.push(name + ' (a kit glyph)');
+    else if (own(APP, name) && APP[name] !== body) bad.push(name + ' (registered already)');
+  }
+  if (bad.length) throw new Error('registerGlyphs: refused ' + bad.join(', '));
+  for (const [name, body] of rows) APP[name] = body;
+  return rows.map(([name]) => name);
+}
+
+/** The names this module can draw, for a gate to enumerate against the DOM.  Aliases are not in it (glyphAliases()); an app's own are appGlyphNames(). */
 export function glyphNames() { return Object.keys(GLYPHS); }
+/** The names an app registered (registerGlyphs). */
+export function appGlyphNames() { return Object.keys(APP); }
 
 /** The old names that still draw, as { alias: target } (a copy). */
 export function glyphAliases() { return Object.assign({}, ALIASES); }
 
 /** True when `name` is one of them, or an alias — callers should not guess. */
 export function hasGlyph(name) {
-  return own(GLYPHS, name) || own(ALIASES, name);
+  return own(GLYPHS, name) || own(ALIASES, name) || own(APP, name);
 }
 
 /**
@@ -598,7 +618,7 @@ function missing(name) {
   told.add(k);
   try {
     console.warn('glyph: no drawing named ' + JSON.stringify(k) +
-                 ' — known: ' + Object.keys(GLYPHS).join(', '));
+                 ' — known: ' + Object.keys(GLYPHS).concat(Object.keys(APP)).join(', '));
   } catch (e) { /* a console that refuses is not worth a second failure */ }
 }
 

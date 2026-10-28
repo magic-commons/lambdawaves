@@ -22,8 +22,19 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - **BUILT 1.5.6-alpha.2 · menubar submenus, checks, radios, glyphs** (021 I3, `shell/menubar.js`; kit ace143d, dd7f48c, 92674bc): an entry
   `[label, () => entries, null, hint, { sub: true }]` (hover or → opens beside the row on the bar's layer, ← / Escape back, an accordion on a
   phone), `opts.checked` (✓), `opts.radio: 'group'` (•), `opts.icon` (a kit glyph name). λWAVES' tree FILE · EDIT · VIEW · PLAY · WINDOW · HELP.
-- **A menubar row's app glyph** (021 I3; not built — chain V's `registerGlyphs`): `opts.icon` takes kit glyph names only, so WINDOW's PICKER /
-  ATOMS / MOLECULES rows still wear their masks by label (`notebook.js` `tagIcons`, now over every list of the bar).
+- **BUILT 1.5.6-alpha.3 · `registerGlyphs({ name: markup })`** (021 V1, `glyph.js`; kit 67dcbfc, the clone road): an app's drawings beside the
+  set, drawn by `chip`/`setGlyph`/`glyphEl`/`glyphSvg`, `sw({ glyph })`, `trig({ glyph })`, the FINDER's `spec.glyph` and `opts.icon`; a kit
+  name, a non-camelCase name or a second markup is refused whole; `appGlyphNames()`. λWAVES' table is `lab/icons.js` (closes I3's app-glyph line).
+- **BUILT 1.5.6-alpha.3 · `createWindow({ glyph })`** (021 V1, `window/window.js`): drawn before the title in a title bar; `data-glyph` either way; `windowGlyphs({ id: name })` (kit 7da3c09) names a kit factory's windows (MIR OPTIONS, ABOUT, KEYBOARD) by id.
+- **BUILT 1.5.6-alpha.3 · `device({ glyph })`** (021 V1, `kit.js`): `data-glyph` + `.dev-glyph` before the name; `rk.register` reads it when
+  none is passed; a rack-built window hands its spec's glyph to `device`. λWAVES declares at `register` (its heads are its own until 022).
+- **BUILT 1.5.6-alpha.3 · `trig({ glyph })` draws** (021 V1, `kit.js`): a glyph name is an SVG, other text stays text.
+- **BUILT 1.5.6-alpha.3 · `windows()` → `hidden`, `glyph`** (021 V1, `shell/rack.js`): FOLDS skips hidden cards; the WINDOW menu's rows and the
+  scroll pill carry the glyph (`createRackPills({ glyphOf })`).
+- **BUILT 1.5.6-alpha.3 · the tall-window clamp** (021 V1, `window/window.js` windowLayout): a window taller than the room under the top band
+  keeps its bottom and resize corner on screen (`top ≤ max(0, vh − h − inset/2)`).
+- **BUILT 1.5.6-alpha.3 · `fitFree` places again** (021 V1, `shell/transport.js`): the FREE bar's window, grown, is moved back inside the viewport.
+- **BUILT 1.5.6-alpha.3 · `.k-lbl` ellipsis** (021 V1, `css/base.css`): `max-width: 100%; overflow: hidden; text-overflow: ellipsis`.
 - **A `'midi'` modulation SOURCE kind** (021 I2; not built): midi.js hands every CC as 0…1 (`sources()`, `source(key, v)`), but the model
   (`modulation/mod.js`) knows lfo · env · audio only; a `kind: 'midi'` source beside audio (its rack face, its serialisation) would let a
   learned knob drive any dial as an LFO does. λWAVES routes notes and CCs to ACTIONS today, not to dials.

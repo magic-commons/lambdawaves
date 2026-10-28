@@ -111,6 +111,8 @@ body.frost.frost-hold[data-card="refractive"] .mir-rail { --chip-fill: var(--sur
   flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font: var(--w-bold) var(--fs-micro)/1 var(--font-ui); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-faint);
 }
+/* 1.5.6-alpha.3 · createWindow({ glyph }): the window's one drawing before its title, the size of the head's glyphs */
+.mir-win-glyph { flex: none; width: var(--win-head-glyph); height: var(--win-head-glyph); color: var(--ink-faint); pointer-events: none; }
 .mir-win-tools { flex: 0 0 auto; display: flex; align-items: center; gap: var(--sp-1); }
 .mir-win-btn {
   width: var(--win-head-btn); height: var(--win-head-btn); flex: 0 0 auto; padding: 0; border: 0; border-radius: 50%;

@@ -50,7 +50,7 @@ import { createLayoutMotion, wireReorder as reorderEngine } from '../modulation/
 import { settled } from '../core/motion.js';
 import * as MOD from '../modulation/mod.js';
 import { jsonStore } from '../core/prefs.js';
-import { createWindow } from '../window/window.js';
+import { createWindow, CLAMP } from '../window/window.js';
 
 /** the numbers the bar keeps (BASINS transport.js measured them) */
 export const TRANSPORT = Object.freeze({
@@ -733,6 +733,10 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
     const fw = typeof freeWidth === 'function' ? Math.round(freeWidth()) : 0;
     if (fw > 0) bar.style.width = fw + 'px';
     W.resize({ w: bar.offsetWidth + (W.root.offsetWidth - W.body.clientWidth), h: bar.offsetHeight + (W.root.offsetHeight - W.body.clientHeight) });
+    /* 1.5.6-alpha.3 (λWAVES 021 V1): grown (the expander), it is placed again against the viewport — the whole window on screen */
+    const r = W.rect(), m = CLAMP.inset / 2, vw = view.innerWidth, vh = view.innerHeight;
+    if (r && (r.left < m || r.top < 0 || r.left + r.width > vw - m || r.top + r.height > vh - m))
+      W.place({ x: Math.max(m, Math.min(r.left, vw - r.width - m)), y: Math.max(0, Math.min(r.top, vh - r.height - m)) });
   }
   const saveSeat = () => { if (placeList()) S.set({ v: 2, seat, place: placement === 'free' ? 'free' : 'stage' }); };
   const dockTo = (v) => { if (onDock) return onDock(v); const R = rackOf(); if (!R) return; if (v) R.open(DOCK_ID, { index: 0 }); else R.close(DOCK_ID); };

@@ -21,6 +21,9 @@ const ACCEPTED = {
   /* 021 I2/I3 · MIR 1.5.6-alpha.2 on the clone road: the keyboard window's panels, MORE KEYS, media keys, RESERVED_BY_BROWSER, the event maps,
      the MIDI door (kit d798ebc + cbd721f), and I3's menubar submenus, checks, radios and glyphs (kit ace143d, dd7f48c, 92674bc) */
   '1.5.6-alpha.2': '4db1788a7fcc489668155216c9bc50fe1c2d75e3e5ce14d45550c43fcfcfacf9',
+  /* 021 V1 · MIR 1.5.6-alpha.3 on the clone road (kit 67dcbfc + 7da3c09): registerGlyphs, windowGlyphs, glyph on createWindow / device / trig, windows() hidden,
+     the tall-window clamp, fitFree places again, .k-lbl's ellipsis */
+  '1.5.6-alpha.3': '17b45f4a38478e05b69998e209ed8d0a2eabc0bd6ed187b92b382e8fbe2b2bc7',
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */

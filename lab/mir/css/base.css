@@ -186,6 +186,9 @@ m { font-family: var(--font-math); font-style: normal; font-size: var(--math-sca
   border-bottom: var(--glass-border) solid var(--glass-hairline); background: var(--glass-raise); border-radius: var(--surface-radius, var(--r-lg)) var(--surface-radius, var(--r-lg)) 0 0; }
 .folded .dev-head { border-bottom: 0; border-radius: var(--surface-radius, var(--r-lg)); }
 .dev-id { display: flex; flex-direction: column; justify-content: center; line-height: 1.1; min-width: 0; overflow: hidden; }
+/* 1.5.6-alpha.3 · device({ glyph }): the window's one drawing before its name */
+.dev-id:has(> .dev-glyph) { flex-direction: row; align-items: center; justify-content: flex-start; gap: var(--sp-2); }
+.dev-glyph { flex: none; color: var(--ink-faint); }
 .dev-eyebrow { font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dev-title { font-size: var(--fs-small); letter-spacing: var(--label-tracking, var(--tr-wide)); color: var(--acc); }
 .dev-util { display: flex; align-items: center; }
@@ -244,7 +247,8 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
 
 /* ── knob ───────────────────────────────────────────────────────────────── */
 .k { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 62px; flex: 0 0 auto; }
-.k-lbl { font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-key); white-space: nowrap; }
+.k-lbl { font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-key); white-space: nowrap;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; }   /* 1.5.6-alpha.3: a label longer than its control ends in … rather than spilling */
 .k-dial { position: relative; width: 34px; height: 34px; border-radius: 50%; border: var(--glass-border) solid var(--glass-hairline); touch-action: none; cursor: grab;
   background: repeating-conic-gradient(var(--glass-groove-hot) 0deg 1.8deg, var(--k-dial-groove-gap) 1.8deg 30deg), var(--glass-raise); }
 .k-dial::before { content: ""; position: absolute; left: -12px; right: -12px; top: -8px; bottom: -8px; }   /* the 44-px finger, the 34-px ink */
@@ -280,6 +284,7 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
 :is(.sw, .seg-b, .trig, .dev-fold):active { scale: var(--state-press-scale, .96); }
 .trig.acc2 { color: var(--acc2); }
 .trig-g { font-size: var(--trig-glyph); }
+.trig-g > svg { display: block; }                                             /* 1.5.6-alpha.3: a glyph name draws (kit.js trig) */
 select.sel { min-height: var(--touch); padding: 0 8px; border-radius: var(--r-md); border: var(--glass-border) solid var(--glass-hairline); background: var(--sel-fill); color: var(--fg); font-size: var(--fs-small); max-width: 100%; }
 
 /* ── fader ──────────────────────────────────────────────────────────────── */
