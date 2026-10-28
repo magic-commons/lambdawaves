@@ -81,6 +81,10 @@ Later rows (not this chain): a true DAG (MIX of branches, reroute dots, `setChai
 17. (L2) CADENCE DISPLAY on a panel the field cannot keep up with slows time (120 Hz panel at 81 presents/s = 0.67×). Default: keep (that is what LOCKED means); alternative: step by the measured present rate.
 18. (L) LOCKED while RECORD is armed (call 5's alternative) is not built. Default: not built.
 19. (L3) A heavy molecule under LOCKED 60 was not measured; the ring decision waits for it. Default: wait.
+20. (X0) A FINDER pick of NODES reveals the rack card when it is seated open, else opens the window. Default: as built; say 'always the window'.
+21. (X4) Old project files that carry nodes.* bases still apply them on open (only the capture side is filtered). Default: as is; the next project-format pass drops them.
+22. (X4) A masked PRIMITIVE reads its mask from its input: a masked BLUR blurs only the lights, its spill into the darks cut. Default: fine.
+23. (X1) Touch pinch is built but proved only through ctrl + wheel (no touch device on the box). Default: as built; try it on the phone.
 
 ## MERGE ORDER
 S → T → L → X (each on the merged tree; the recipe: `git merge --no-ff --no-commit it020-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → commit → CLOSED row → handoff line).
@@ -91,4 +95,4 @@ S → T → L → X (each on the merged tree; the recipe: `git merge --no-ff --n
 | S | d9210a2 | 0fc2e3e | S1–S5 (S-BUILD.md; no kit edit; node suite 246 PASS; hide-reveal/stage-text/routed-knob/camera-shift green; LOCK 843/0; MAP ONLY lag was BALL AND STICK's 2-D canvas ignoring it + Firefox inFlight cap 2 under heavy frames) |
 | T | c7bd626 | 1125c89 | T1–T3 (T-BUILD.md; no kit edit; node suite green; window-switching/hide-reveal/keyboard-window/menubar/stage-text green; bar 674 px both modes, right group two rows of five) |
 | L | 861a5ef | 2b1ef74 | L1–L3 (L-BUILD.md; no kit edit; node suite green; new-project/history/field-law/start green; LOCK 843/0; headed Firefox: WALL Δt CV 0.39 → LOCKED 60 CV 0, 0 reallocations; facade +nodes) |
-| X | 2b1ef74 | | |
+| X | 98581ce | 2c69f6f | X0–X4 (X-BUILD.md; no kit edit; nodes.js 222 · nodes-view.js 311 · nodes-undo.js 22 · nodes-compile.js 128 · nodes.css 100; curves/frame-occlusion/lw-facade/history green; LOCK 843/0; CURVES alone byte-identical 5411 B) |
