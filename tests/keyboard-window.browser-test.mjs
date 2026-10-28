@@ -56,7 +56,7 @@ try {
   const geo = await ev(`await __LW.settle(); await new Promise((r) => setTimeout(r, 400)); await __LW.settle();
     const w = document.querySelector('[data-mir-window="keyboard"]'), b = w.getBoundingClientRect(), c = document.querySelector('#field').getBoundingClientRect();
     const covers = (r) => __masks.some((m) => m[0] <= r.left - c.left + 20 && m[1] <= r.top - c.top + 20 && m[2] >= r.right - c.left - 20 && m[3] >= r.bottom - c.top - 20);
-    const col = w.querySelector('.km-col-left').getBoundingClientRect(), head = w.querySelector('.km-col-header').getBoundingClientRect(), rows = [...w.querySelectorAll('.km-kb-row')];
+    const col = w.querySelector('.km-col-left').getBoundingClientRect(), head = w.querySelector('.km-col-header').getBoundingClientRect(), rows = [...w.querySelectorAll('.km-keyboard:not(.km-extra) .km-kb-row')];   /* 021 I2: MORE KEYS (kit 1.5.6-alpha.2) is the board's hidden second page */
     const right = w.querySelector('.km-col-right').getBoundingClientRect(), btns = [...w.querySelectorAll('.km-editor-actions .km-btn')], bb = btns.map((e) => e.getBoundingClientRect());
     return { open: __LW.keymap.isOpen, focusIn: w.contains(document.activeElement), layer: w.parentElement.id, w: b.width, h: b.height, x: b.x, y: b.y, pointer: getComputedStyle(w).pointerEvents,
       rows: rows.length, inWell: rows[0].getBoundingClientRect().top >= head.bottom && rows.at(-1).getBoundingClientRect().bottom <= col.bottom,

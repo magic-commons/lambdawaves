@@ -53,6 +53,7 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 | `lambdawaves.q0.csb` | PREFERENCE | v 1 | yes | csb-favs.js: the CONTROL SURFACE’s favourites |
 | `lambdawaves.q0.picker` | PREFERENCE | v 1 | yes | picker.js: SHOW LABELS, THE HUE, the decks’ looks |
 | `lambdawaves.q0.keys` | PREFERENCE | v 1 | yes | key-table.js: the rebound chords (the kit’s difference) |
+| `lambdawaves.q0.midi` | PREFERENCE | v 1 | yes | mapping.js (kit shell/midi.js): the learned notes and CCs { v, map } |
 | `lambdawaves.q0.render.*` | PREFERENCE | — | yes | film-card.js: the RENDER card’s choices |
 | `lw.lean.v1` | PREFERENCE | v 1 (name) | yes | window-chrome.js: LEAN (window notes) |
 | `lambdawaves.q0.modpresets` | PREFERENCE | modV | no | kit mod.js PRESET_LS; a project SAVE also writes its rack here |

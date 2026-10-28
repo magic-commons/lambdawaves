@@ -11,7 +11,7 @@
  *   · the save, `lambdawaves.q0.keys` (PREFERENCE): a 0.4.0 record { id: { key, ctrl, alt, shift } }, or one saved under an old
  *     id (`was`), is read into the kit's { id: [chords] }; what is written is the kit's difference, and nothing when there is none;
  *   · the rows' key / ctrl / alt / shift follow the table, so the menus, the history's names and the tests read the live chord. */
-import { createKeys, parseChord, normalize, chordFromEvent } from './mir/shell/keys.js';
+import { createKeys, parseChord, normalize, chordFromEvent, RESERVED_BY_BROWSER } from './mir/shell/keys.js';
 import { jsonStore } from './mir/core/prefs.js';
 
 /** the keyboard window's groups, in λWAVES' order (021 I1: CONTROL SURFACE was missing — indexOf −1 sorted csb.search first — and the registry's groups follow) */
@@ -40,14 +40,14 @@ export function liftSaved(o, rows) {
   return out;
 }
 
-export function createKeyTable({ rows, edit = (a, run) => run(), stageHasFocus = () => false, storage = local, platform, target, keep = [] } = {}) {
+export function createKeyTable({ rows, edit = (a, run) => run(), stageHasFocus = () => false, storage = local, platform, target, keep = [], reserved = RESERVED_BY_BROWSER } = {}) {
   /* iteration 011 Q6 · `keep`: ids of rows hidden for now (ASK while ASK_ENABLED is off) — the kit drops a saved chord for an id it does not hold
      on its next save; a kept id's saved chords are carried through that save as they were stored, inert (no row runs them, no row is blocked) */
   const carry = (o) => { if (!keep.length) return o; const s = storage.get(), out = { ...(o || {}) };
     if (s && typeof s === 'object') for (const id of keep) if (s[id] !== undefined && !(id in out)) out[id] = s[id]; return out; };
   const byId = new Map(rows.map((a) => [a.id, a])), declared = new Map(rows.map((a) => [a.id, { key: a.key, ctrl: a.ctrl, alt: a.alt, shift: a.shift }]));
   const group = (a) => a.group || ORDER[3];
-  const table = createKeys({ platform, target, storage: { get: () => liftSaved(storage.get(), rows), set: (o) => storage.set(carry(o)) },
+  const table = createKeys({ platform, target, reserved, storage:   /* 021 I2: the browser's own chords refused by the binder (kit 1.5.6-alpha.2) */ { get: () => liftSaved(storage.get(), rows), set: (o) => storage.set(carry(o)) },
     actions: [...rows].sort((x, y) => ORDER.indexOf(group(x)) - ORDER.indexOf(group(y))).map((a) => ({ id: a.id, label: a.label, group: group(a), short: a.short,
       keys: keysOf(a), inFields: !!a.inFields, repeat: true, overControls: true, when: a.when || (a.stage ? stageHasFocus : undefined),
       run: (e) => edit(a, () => a.run(e && e.shiftKey ? 0.25 : 1)), up: a.up && (() => a.up()) })) });   // `up`: a HELD row (the kit's: its release, or leaving the page, runs it)

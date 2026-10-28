@@ -3,7 +3,7 @@
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
 import { TIER } from '../tier.js';
 import { createKeyTable, keysOf } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
-import { paintedRect } from '../occlusion.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout } from '../mir/kit.js';
+import { paintedRect } from '../occlusion.js'; import { createMapping } from '../mapping.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout } from '../mir/kit.js';
 export function createKeys(app) {
   const { dom, ui, clock, appPlay, mat, settingsStore } = app, { schedule } = app.loop, { floats, rack, rackL } = app.host;
   const { devById, layout, readSettings, rk, setModArm } = app.sh, { wState } = app.w, { occlusion } = app.ctl;
@@ -33,14 +33,15 @@ export function createKeys(app) {
   {
     const KB_AT = 'lw.keyboard.position.v1';
     let back = null;
-    const kb = createKeyboardWindow({ keys: kt.window, host: floats,
+    const mapping = A.mapping = createMapping(app, { kt });   // 021 I2: THE MAPPING (lab/mapping.js), the window's second face; its targets install once the facade exists (rack.js)
+    const kb = createKeyboardWindow({ keys: kt.window, host: floats, panels: [{ name: 'MAPPING', body: mapping.root }],
       onMoved: (r) => { occlusion.dirty(); const f = document.activeElement; if (r === null && back && back.isConnected && (!f || f === document.body || kb.win.root.contains(f))) back.focus({ preventScroll: true }); },
       persist: { read() { try { return JSON.parse(localStorage.getItem(KB_AT)); } catch (_) { return null; } },
         write(st) { try { if (st.x !== null) localStorage.setItem(KB_AT, JSON.stringify({ x: st.x, y: st.y })); } catch (_) {} } } });
     for (const n of [kb.win.root, kb.win.rail && kb.win.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });   // its `hidden` lands when the exit ends: the paused mask lets go then
     let esc = null;   // 021 I1: the window is a layer of THE ESCAPE STACK while it is open (lab/actions.js)
     layout.keymap = {
-      open() { if (!kb.isOpen()) { back = document.activeElement; kb.open(); if (esc) esc(); esc = A.escape.push(() => kb.close(), { alive: () => kb.isOpen() }); } const k = kb.root.querySelector('.km-key[tabindex="0"]'); (k && k.offsetParent ? k : kb.root.querySelector('.km-action-row') || kb.root).focus({ preventScroll: true }); return true; },
+      open(face) { if (!kb.isOpen()) { back = document.activeElement; kb.open(); if (esc) esc(); esc = A.escape.push(() => kb.close(), { alive: () => kb.isOpen() }); } if (face) kb.tab(face); mapping.paint(); const k = kb.root.querySelector('.km-key[tabindex="0"]'); (k && k.offsetParent ? k : kb.root.querySelector('.km-action-row') || kb.root).focus({ preventScroll: true }); return true; },
       close() { kb.close(); return false; },
       toggle() { return kb.isOpen() ? layout.keymap.close() : layout.keymap.open(); },
       get isOpen() { return kb.isOpen(); },

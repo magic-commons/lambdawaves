@@ -895,6 +895,7 @@ export async function boot(dom) {
   // FOLDERS — the FOLDERS card (`projects`), the kit's mountGallery (021 G3: lab/windows/folders.js)
   createFolders(app);
   app.sh.ACTIONS.sync();   // 021 I1: the windows registered since the keys (RENDER, NODES, FOLDERS) get their open · close · fold rows
+  app.sh.ACTIONS.mapping.install();   // 021 I2: every surface action an `action.<id>` trigger / toggle target (lab/mapping.js)
 
   /* ── go ───────────────────────────────────────────────────────────────── */
   LW.bootView = VIEW_NAMES[mat.view]; LW.bootVortex = vortex.on; LW.bootOrder = layout.orderAll(); LW.bootClosed = layout.closed();   // the shipped defaults, recorded before a URL preset's visuals apply

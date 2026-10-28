@@ -25,8 +25,12 @@
  *     label() and translates live; key caps and chords are never translated (docs/LANGUAGES.md §4).
  *   · IDLE COSTS NOTHING: no timers, no rAF; listeners live on one AbortController and destroy() removes everything.
  *
- * createKeyboardWindow({ keys, host, persist?, platform?, onMoved? })
- *   → { win, root, open(), close(), toggle(), isOpen(), select(id), setPlatform(p), refresh(), destroy() }
+ * createKeyboardWindow({ keys, host, persist?, platform?, onMoved?, panels? })
+ *   → { win, root, open(), close(), toggle(), isOpen(), select(id), setPlatform(p), refresh(), tab(name), destroy() }
+ *   panels (1.5.6-alpha.2) [{ name, body }] — the app's own faces after KEYS (panel 1), each a radio chip on the rail
+ *          (createWindow's `panels`); under 860 px the window opens on the first of them (a phone's whole face)
+ *   MORE KEYS (1.5.6-alpha.2): the board's second page — the arrows, Home/End, PgUp/PgDn, Insert/Delete, F1–F24, the
+ *          numpad and the media keys — so every key a binding can name is shown and pressable (the same five-row well)
  * createKeysHelp({ keys, host, persist?, onMoved? })
  *   → { win, root, open(), close(), toggle(), isOpen(), refresh(), destroy() }
  * Pure: boardRows(platform), keyStates(list, platform, selectedId) */
@@ -52,6 +56,15 @@ export function boardRows(platform = 'other') {
     R('Space', 'SPACE', '', 'space'), R('AltRight', mac ? '⌥' : 'ALT', '', 'alt'), R('ControlRight', 'CTRL', '', 'ctrl'),
     R('ArrowLeft', '←', '', 'arrow'), R('ArrowDown', '↓', '', 'arrow'), R('ArrowRight', '→', '', 'arrow')]];
 }
+/** extraRows() → MORE KEYS' five rows (1.5.6-alpha.2): every bindable key the ANSI board has no cap for */
+export function extraRows() {
+  const F = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => R('F' + (a + i), 'F' + (a + i)));
+  return [F(1, 12), F(13, 24),
+    [R('Insert', 'INS'), R('Delete', 'DEL'), R('Home', 'HOME'), R('End', 'END'), R('PageUp', 'PGUP'), R('PageDown', 'PGDN'), R('ArrowUp', '↑'), R('ArrowDown', '↓'), R('ArrowLeft', '←'), R('ArrowRight', '→')],
+    [...'0123456789'.split('').map((d) => R('Numpad' + d, d, 'NUM')), R('NumpadDecimal', '.', 'NUM')],
+    [R('NumpadAdd', '+', 'NUM'), R('NumpadSubtract', '−', 'NUM'), R('NumpadMultiply', '×', 'NUM'), R('NumpadDivide', '÷', 'NUM'), R('NumpadEnter', '↩', 'NUM'),
+      R('MediaTrackPrevious', '⏮'), R('MediaPlayPause', '⏯'), R('MediaTrackNext', '⏭'), R('MediaStop', '⏹'), R('AudioVolumeDown', 'VOL−'), R('AudioVolumeUp', 'VOL+'), R('AudioVolumeMute', 'MUTE')]];
+}
 /** which drawn keys a chord's modifier lights, on the platform being SHOWN */
 const MOD_KEYS = (m, platform) => (m === 'Shift' ? ['ShiftLeft', 'ShiftRight'] : m === 'Alt' ? ['AltLeft', 'AltRight']
   : m === 'Ctrl' ? ['ControlLeft', 'ControlRight'] : m === 'Meta' ? ['MetaLeft'] : platform === 'mac' ? ['MetaLeft'] : ['ControlLeft', 'ControlRight']);
@@ -72,7 +85,7 @@ const badgeKind = (mods) => (mods.length > 1 ? 'combo' : mods[0] === 'Shift' ? '
 const touchOnly = (view) => { try { return !view.matchMedia('(any-pointer: fine)').matches; } catch (_) { return false; } };
 
 /* ── THE KEYBOARD WINDOW ──────────────────────────────────────────────────────────────────────────────────── */
-export function createKeyboardWindow({ keys, host, persist = null, platform, onMoved } = {}) {
+export function createKeyboardWindow({ keys, host, persist = null, platform, onMoved, panels = null } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView;
   const life = new AbortController(), on = { signal: life.signal };
   let shown = platform || keys.platform, selected = null, recording = false, latched = new Set(), pending = null, last = null;
@@ -97,6 +110,12 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
   ariaLabel(sw.button('other'), 'Show Windows and Linux key names');
   const board = el('div', 'km-keyboard', colL);
   board.setAttribute('role', 'group'); ariaLabel(board, 'The keyboard'); board.translate = false;
+  /* MORE KEYS (1.5.6-alpha.2): the board's second page in the same well, one press away */
+  const extra = el('div', 'km-keyboard km-extra', colL); extra.hidden = true;
+  extra.setAttribute('role', 'group'); ariaLabel(extra, 'More keys'); extra.translate = false;
+  const more = trig({ label: 'MORE KEYS', cls: 'km-btn km-more', title: 'the arrows, Home and End, the pages, F1–F24, the numpad and the media keys', onFire: () => {
+    const on = extra.hidden; extra.hidden = !on; board.hidden = on; more.on = on; more.setLabel(on ? 'THE BOARD' : 'MORE KEYS'); } });
+  head.insertBefore(more.root, sw.root);
 
   /* the right well: record and reset, the status, the search, the list */
   const colR = el('div', 'km-col km-col-right', root);
@@ -110,9 +129,10 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
   placeholder();
   const list = el('div', 'km-list', colR); list.setAttribute('role', 'listbox'); ariaLabel(list, 'Keyboard actions');
 
+  const faces = panels && panels.length ? [{ name: 'KEYS', body: root }, ...panels] : null;   // 1.5.6-alpha.2: KEYS, then the app's faces
   const win = createWindow({ id: 'keyboard', title: 'KEYBOARD', host, persist, onMoved, emptyDrag: true,
-    size: { w: 1080, h: narrow() ? 530 : 416 }, min: { w: 300, h: 300 }, body: root,
-    onOpen: () => refresh(), onClose: () => { if (recording) cancelRecording(); } });
+    size: { w: 1080, h: narrow() ? 530 : 416 }, min: { w: 300, h: 300 }, ...(faces ? { panels: faces, chips: faces.map((f, i) => ({ name: f.name, kind: 'radio', group: 'face', label: f.name, text: f.name, state: i === 0 })) } : { body: root }),
+    onOpen: () => { if (faces && narrow()) win.tab(faces[1].name); refresh(); }, onClose: () => { if (recording) cancelRecording(); } });
   win.root.classList.add('km-win');
 
   /* ── the status line: one English sentence, kept so a language change says it again ── */
@@ -127,9 +147,9 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
   /* ── the board ── */
   const keyEls = new Map();
   function buildBoard() {
-    board.textContent = ''; keyEls.clear();
-    boardRows(shown).forEach((row, r) => {
-      const rowEl = el('div', 'km-kb-row', board);
+    board.textContent = ''; extra.textContent = ''; keyEls.clear();
+    [[board, boardRows(shown)], [extra, extraRows()]].forEach(([B, rows]) => rows.forEach((row, r) => {
+      const rowEl = el('div', 'km-kb-row', B);
       row.forEach((k, c) => {
         const b = el('button', 'km-key km-key-w-' + k.w, rowEl); b.type = 'button'; b.dataset.code = k.code; b.dataset.row = r; b.dataset.col = c;
         b.tabIndex = -1;
@@ -141,17 +161,18 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
         if (!keyEls.has(k.code)) keyEls.set(k.code, []);
         keyEls.get(k.code).push(b);
       });
-    });
+    }));
   }
-  board.addEventListener('click', (e) => { const b = e.target.closest('.km-key'); if (b) pressKey(b); }, on);
-  board.addEventListener('pointerover', (e) => { const b = e.target.closest('.km-key'); if (b) hoverCode(b.dataset.code); }, on);
-  board.addEventListener('pointerleave', () => clearHover(), on);
-  board.addEventListener('focusin', (e) => { const b = e.target.closest('.km-key'); if (b) { seat(b); hoverCode(b.dataset.code); } }, on);
-  board.addEventListener('focusout', () => clearHover(), on);
+  for (const B of [board, extra]) {
+  B.addEventListener('click', (e) => { const b = e.target.closest('.km-key'); if (b) pressKey(b); }, on);
+  B.addEventListener('pointerover', (e) => { const b = e.target.closest('.km-key'); if (b) hoverCode(b.dataset.code); }, on);
+  B.addEventListener('pointerleave', () => clearHover(), on);
+  B.addEventListener('focusin', (e) => { const b = e.target.closest('.km-key'); if (b) { seat(b); hoverCode(b.dataset.code); } }, on);
+  B.addEventListener('focusout', () => clearHover(), on);
   /* one tab stop for the board; arrows walk it, the nearest key by centre in the next row */
-  board.addEventListener('keydown', (e) => {
+  B.addEventListener('keydown', (e) => {
     const b = e.target.closest('.km-key'); if (!b || e.ctrlKey || e.metaKey || e.altKey) return;
-    const rows = [...board.children].map((r) => [...r.children]);
+    const rows = [...B.children].map((r) => [...r.children]);
     const r = +b.dataset.row, c = +b.dataset.col;
     let to = null;
     if (e.code === 'ArrowRight') to = rows[r][Math.min(c + 1, rows[r].length - 1)];
@@ -165,7 +186,8 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
     } else return;
     e.preventDefault(); if (to) { seat(to); to.focus(); }
   }, on);
-  function seat(b) { for (const k of board.querySelectorAll('.km-key')) k.tabIndex = k === b ? 0 : -1; }
+  }
+  function seat(b) { const B = b.closest('.km-keyboard') || board; for (const k of B.querySelectorAll('.km-key')) k.tabIndex = k === b ? 0 : -1; }
 
   function pressKey(b) {
     const code = b.dataset.code;
@@ -218,7 +240,7 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
         else ariaLabel(b, lit ? '{key}: a modifier' : '{key}: free', { key: capName });
       }
     }
-    if (!board.querySelector('.km-key[tabindex="0"]')) { const first = board.querySelector('.km-key-selected') || board.querySelector('.km-key-bound') || board.querySelector('.km-key'); if (first) seat(first); }
+    for (const B of [board, extra]) if (!B.querySelector('.km-key[tabindex="0"]')) { const first = B.querySelector('.km-key-selected') || B.querySelector('.km-key-bound') || B.querySelector('.km-key'); if (first) seat(first); }
   }
   function hoverCode(code) {
     clearHover();
@@ -355,6 +377,8 @@ export function createKeyboardWindow({ keys, host, persist = null, platform, onM
     select(id) { select(id); scrollToRow(id); },
     setPlatform, refresh,
     record: () => startRecording(),
+    /** tab(name) — show a face ('KEYS' or an app panel's name); → the face shown (1.5.6-alpha.2) */
+    tab: (name) => (faces ? win.tab(name) : 'KEYS'),
     destroy() { if (recording) cancelRecording(); offKeys(); offLang(); life.abort(); win.destroy(); },
   };
 }

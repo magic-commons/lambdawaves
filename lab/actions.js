@@ -106,6 +106,7 @@ export function createActions(app) {
     { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', kind: 'toggle', get: () => !!(app.state.tl && app.state.tl.isOpen()), run: () => { if (app.state.tl) app.state.tl.toggle(); }, surface: true },
     { id: 'gui', short: 'mir options', label: 'MIR OPTIONS — the interface’s look (BASINS’ GUI menu)', icon: 'cog-solid', run: () => { const g = mirGui(); if (g) g.toggle(); }, surface: true },
     { id: 'guiAbout', short: 'mir about', label: 'MIR ABOUT — what MIR is', run: () => { const g = mirGui(); if (g) g.toggle('about'); }, surface: true },
+    { id: 'mapping', short: 'mapping', label: 'the MAPPING — a key, a MIDI note or knob, or a modulation route for every action', run: () => L().keymap.open('MAPPING') },
     { id: 'about', short: 'about', label: 'ABOUT λWAVES — the notebook’s ABOUT face', run: () => L().notebook.open('about'), surface: true },
     { id: 'photosensitivity', label: 'PHOTOSENSITIVITY WARNING — show the notice now and on the next load', run: () => { if (app.hooks.warning) { app.hooks.warning.reset(); app.hooks.warning.show(); } } },
     { id: 'update', label: 'UPDATE APP — check for a new build, rebuild the offline cache, and reload', run: () => H().swClient.refresh() },
