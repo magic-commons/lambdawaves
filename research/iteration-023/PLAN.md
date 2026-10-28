@@ -45,4 +45,4 @@ D → B → R; each merged with the recipe (`git merge --no-ff --no-commit`, `--
 ## CLOSED
 | chain | base | commit | note |
 |---|---|---|---|
-| D | c50ac699 | | |
+| D | 7335da8f | | |
