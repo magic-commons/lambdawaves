@@ -69,6 +69,7 @@
   "AUTO: tier {tier} → {quality}": "AUTO: tier {tier} → {quality}",
   "AUTOMATION": "AUTOMATION",
   "Active": "Active",
+  "Add": "Add",
   "Add a macro": "Add a macro",
   "Add a point that preserves its current value": "Add a point that preserves its current value",
   "Add a stop opposite the selected one": "Add a stop opposite the selected one",
@@ -553,6 +554,7 @@
   "Modulation on or off": "Modulation on or off",
   "More keys": "More keys",
   "More tools and actions": "More tools and actions",
+  "Move": "Move",
   "Move it": "Move it",
   "Move it (Shift copies, right-button deletes); it has no points": "Move it (Shift copies, right-button deletes); it has no points",
   "Move macros to either side": "Move macros to either side",
@@ -583,6 +585,7 @@
   "New — back to the start.": "New — back to the start.",
   "New — the empty project": "New — the empty project",
   "New — the empty project: every part starts from nothing.": "New — the empty project: every part starts from nothing.",
+  "Next page": "Next page",
   "Next preset": "Next preset",
   "Next project page": "Next project page",
   "No blur anywhere, one shadow layer": "No blur anywhere, one shadow layer",
@@ -687,6 +690,7 @@
   "Point value": "Point value",
   "Preset name — type one, then tap {:SAVE}": "Preset name — type one, then tap {:SAVE}",
   "Preview ready": "Preview ready",
+  "Previous page": "Previous page",
   "Previous preset": "Previous preset",
   "Previous project page": "Previous project page",
   "Project components and display options": "Project components and display options",
@@ -1897,6 +1901,9 @@
   ],
   "Active": [
    "mir/keyboard/keyboard.js"
+  ],
+  "Add": [
+   "mir/kit.js"
   ],
   "Add a macro": [
    "mir/modulation/window.js"
@@ -3375,6 +3382,9 @@
   "More tools and actions": [
    "mir/timeline/editor.js"
   ],
+  "Move": [
+   "mir/kit.js"
+  ],
   "Move it": [
    "mir/timeline/shortcuts.js"
   ],
@@ -3467,6 +3477,9 @@
   ],
   "New — the empty project: every part starts from nothing.": [
    "mir/folders/folders.js"
+  ],
+  "Next page": [
+   "mir/kit.js"
   ],
   "Next preset": [
    "mir/modulation/modwindow/modwindow.js"
@@ -3789,6 +3802,9 @@
   ],
   "Preview ready": [
    "mir/render/panel.js"
+  ],
+  "Previous page": [
+   "mir/kit.js"
   ],
   "Previous preset": [
    "mir/modulation/modwindow/modwindow.js"

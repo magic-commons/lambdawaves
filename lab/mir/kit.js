@@ -45,6 +45,8 @@
  */
 import { setGlyph, glyphEl, hasGlyph } from './glyph.js';
 import { setText, setVar } from './core/perf.js';   // paint writes only what changed, and the meter counts both
+import { frame } from './core/frame.js';
+import { createLayoutMotion, wireReorder } from './modulation/layout-motion.js';
 import { t as tx, onLanguage } from './core/i18n.js';
 import { srgbToLinear, linearToSrgb, contrastRatio, hslToRgb01, rgbToHsl, hexToRgb } from './palette.js';
 
@@ -783,6 +785,82 @@ export function row(parent, { fit = false, cellMin, knob: size, cls } = {}) {
   if (fit && Number.isFinite(cellMin)) r.style.setProperty('--cell-min', cellMin + 'px');
   if (fit && (size === 'sm' || size === 'lg')) r.dataset.knob = size;
   return r;
+}
+
+/* ── 1.5.6-alpha.7 · THE SURFACE PARTS (λWAVES 022 C1): a lamp, a meter, a section and a knob bank — what a control surface (the transport's
+   expanded panel, a DAW's strip) is made of.  Words through label(); parts by class and data-*; a meter paints per frame through the kit's
+   frame coalescer (`set`), or now (`paint`). ── */
+/** lamp({ on, colour, parent, cls, title }) — a small LED: lit is `data-lit`; `colour` is its light (`--lamp`, else ACCENT A).  → { root, set(on), get, colour(c) } */
+export function lamp({ on = false, colour, parent, cls, title } = {}) {
+  const root = el('i', cls || 'mir-lamp', parent); if (on) root.dataset.lit = ''; if (title) hint(root, title);
+  const tint = (c) => setVar(root, '--lamp', c || null); if (colour) tint(colour);
+  return { root, get: () => on, set(v) { if (!!v !== on) { on = !!v; root.toggleAttribute('data-lit', on); } }, colour: tint };
+}
+let meters = 0;
+/** meter({ bands, peak, led, vertical, labels, parent, tag, cls, bar, key }) — level bars, each a `--signal` (0–1) its sheet fills.  `bands` a
+ *  count or a list of keys (then `data-<key>` names each bar); `led` draws a bar as LED segments; `peak` holds each bar's top and lets it fall;
+ *  `labels` puts a word under each bar.  `cls` / `bar` re-class the root and the bars (the modulation window's own meters are this part:
+ *  `.m2meter`, `.m2audminleds`).  → { root, bars, keys, set(values), paint(values) } — values: a list, a map by key, or one number */
+export function meter({ bands = 1, peak = false, led = false, vertical = true, labels = null, parent, tag = 'div', cls, bar, key = 'band' } = {}) {
+  const keys = Array.isArray(bands) ? bands.map(String) : Array.from({ length: bands }, (_, i) => String(i));
+  const root = el(tag, cls || 'mir-meter' + (vertical ? ' vertical' : '') + (led ? ' led' : '') + (peak ? ' peak' : ''), parent);
+  if (tag === 'button') root.type = 'button'; else root.setAttribute('aria-hidden', 'true');
+  const id = 'mir.meter.' + (++meters), held = keys.map(() => 0); let at = 0;
+  const bars = keys.map((k, i) => {
+    const host = labels ? el('span', 'mir-meter-band', root) : root, b = el('i', bar === undefined ? 'mir-meter-bar' : bar, host);
+    if (Array.isArray(bands)) b.dataset[key] = k;
+    if (labels && labels[i]) label(el('span', 'mir-meter-lbl', host), labels[i]);
+    return b;
+  });
+  const valueOf = (v, i) => { const x = typeof v === 'number' ? v : Array.isArray(v) ? v[i] : v && v[keys[i]]; return Math.max(0, Math.min(1, +x || 0)); };
+  function paint(v) {
+    const now = performance.now(), fall = at ? Math.min(1, (now - at) / 1000) * 0.8 : 0; at = now;
+    bars.forEach((b, i) => { const x = valueOf(v, i); setVar(b, '--signal', x.toFixed(3));
+      if (peak) { held[i] = Math.max(x, held[i] - fall); setVar(b, '--peak', held[i].toFixed(3)); } });
+  }
+  return { root, bars, keys, paint, set: (v) => frame.coalesce(id, () => paint(v)) };
+}
+/** section({ title, parent, cls }) — a framed group on a surface's well, its title in a label strip at the top-left (`data-mir-surface="section"`:
+ *  the skin's hairline over the well, never a second pane).  → { root, head, body, setTitle(t) } */
+export function section({ title, parent, cls } = {}) {
+  const root = el('section', 'mir-section' + (cls ? ' ' + cls : ''), parent); root.dataset.mirSurface = 'section';
+  const head = el('div', 'mir-section-head', root), body = el('div', 'mir-section-body', root);
+  const setTitle = (t) => { label(head, t || ''); if (t) ariaLabel(root, t); }; setTitle(title);
+  return { root, head, body, setTitle };
+}
+/** knobBank({ slots, page, onPage, items, onEmpty, onMove, parent, cellMin, label }) — an always-`slots` (8) grid of faces on a fit row: an item
+ *  is a built face `{ id, root }` or a knob's options (made here, once per id); an empty slot is a faint "+" (a button when `onEmpty(i)`); more
+ *  items than slots make pages, ‹ "n / N" › (`onPage(p)`); `onMove(id, to)` lets a slot be dragged by its grip among the others (the modulation
+ *  window's reorder engine) or moved with ← →.  → { root, grid, set(items), page(p?), pages, sync() } */
+export function knobBank({ slots = 8, page = 0, onPage, items = [], onEmpty, onMove, parent, cellMin, label: name } = {}) {
+  const root = el('div', 'mir-bank', parent); if (name) ariaLabel(root, name);
+  const grid = row(root, { fit: true, cellMin, cls: 'mir-bank-grid' }), nav = el('div', 'mir-bank-nav', root), made = new Map();
+  const step = (d, g) => { const b = el('button', 'mir-bank-page', nav); b.type = 'button'; chip(b, g, d < 0 ? 'Previous page' : 'Next page'); b.addEventListener('click', () => api.page(pg + d)); return b; };
+  const prev = step(-1, 'chevronLeft'), count = el('span', 'mir-bank-count', nav), next = step(1, 'chevronRight'); nav.append(prev, count, next);
+  const motion = createLayoutMotion(() => grid.querySelectorAll(':scope > .mir-bank-slot.filled'));
+  let list = items.slice(), pg = page;
+  const keyOf = (it, i) => String(it.id !== undefined ? it.id : it.label !== undefined ? it.label : i);
+  const faceOf = (it, i) => { if (it.root) return it.root; const k = keyOf(it, i); if (!made.has(k)) made.set(k, knob(it).root); return made.get(k); };
+  function slot(it, i) {
+    const s = el('div', 'mir-bank-slot' + (it ? ' filled' : ' empty'));
+    if (!it) { const plus = el(onEmpty ? 'button' : 'span', 'mir-bank-plus', s); setGlyph(plus, 'plus', { size: 16 });
+      if (onEmpty) { plus.type = 'button'; ariaLabel(plus, 'Add'); plus.addEventListener('click', () => onEmpty(i)); } return s; }
+    s.dataset.slot = keyOf(it, i); s.append(faceOf(it, i));
+    if (onMove) { const g = el('button', 'mir-bank-grip', s), id = it.id; g.type = 'button'; gripDots(g, 12); ariaLabel(g, 'Move');
+      wireReorder(g, s, { host: grid, selector: ':scope > .mir-bank-slot.filled', axis: 'grid', motion, slop: TAP.slop, commit: (to) => onMove(id, pg * slots + to), settle: () => api.sync() });
+      g.addEventListener('keydown', (e) => { const d = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0; if (d) { e.preventDefault(); onMove(id, Math.max(0, i + d)); } }); }
+    return s;
+  }
+  const api = {
+    root, grid, get pages() { return Math.max(1, Math.ceil(list.length / slots)); },
+    set(next) { list = next.slice(); const keep = new Set(list.map(keyOf)); for (const k of made.keys()) if (!keep.has(k)) made.delete(k); api.sync(); },
+    page(p) { if (p === undefined) return pg; const q = Math.max(0, Math.min(api.pages - 1, p)); if (q !== pg) { pg = q; api.sync(); if (onPage) onPage(pg); } return pg; },
+    sync() { pg = Math.max(0, Math.min(api.pages - 1, pg)); const cells = [];
+      for (let s = 0; s < slots; s++) { const i = pg * slots + s; cells.push(slot(i < list.length ? list[i] : null, i)); }
+      grid.replaceChildren(...cells); nav.hidden = api.pages < 2; count.textContent = (pg + 1) + ' / ' + api.pages; prev.disabled = pg === 0; next.disabled = pg >= api.pages - 1; },
+  };
+  api.sync();
+  return api;
 }
 export const N_COLOR = ['', 'var(--n1)', 'var(--n2)', 'var(--n3)', 'var(--n4)', 'var(--n5)', 'var(--n6)'];
 export const N_RGB = ['', [255, 226, 170], [120, 225, 240], [230, 160, 240], [255, 150, 90], [140, 220, 140], [180, 160, 255]];

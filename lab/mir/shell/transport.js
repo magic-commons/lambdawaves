@@ -38,7 +38,7 @@
  *
  * The pure helpers are exported for node tests. */
 import { bindNumber } from '../controls/number.js';
-import { el, label, ariaLabel, trig, gripDots, tapWatcher } from '../kit.js';
+import { el, label, ariaLabel, trig, gripDots, tapWatcher, knob, lamp, knobBank } from '../kit.js';
 import { onLanguage, phrase } from '../core/i18n.js';
 import { drag } from '../core/pointer.js';
 import { frame } from '../core/frame.js';
@@ -423,7 +423,10 @@ export function tempoPanel({ tempo, mod = null, macros = true, signal } = {}) {
   const life = lifeOf(signal), on = { signal: life.signal };
   const C = mod && mod.host && mod.host.clock, M = tempo.model || MOD;
   const root = el('div', 'native-tempo'); root.hidden = true;
-  const rail = macros && mod && typeof M.macroList === 'function' ? macroRail({ M, api: () => (mod.view && mod.view.api) || null, signal: life.signal }) : null;
+  /* 1.5.6-alpha.7: `macros: { face: 'knob', onAdd }` draws the rail as a knob bank (λWAVES 022 C1); a hand on a macro knob is applied once a frame */
+  const mo = macros && typeof macros === 'object' ? macros : {};
+  const apply = () => frame.coalesce('mir.transport.macro', () => { if (C && C.applyAll) C.applyAll(true); if (mod.view && mod.view.sync) mod.view.sync(); });
+  const rail = macros && mod && typeof M.macroList === 'function' ? macroRail({ M, api: () => (mod.view && mod.view.api) || null, signal: life.signal, face: mo.face, onAdd: mo.onAdd, apply }) : null;
   if (rail) { root.appendChild(rail.root); root.classList.add('with-macros'); }
   const pane = el('div', 'tempo-pane tempo-clock', root); ariaLabel(pane, 'clock');
   const grid = el('div', 'tempo-grid', pane);
@@ -473,8 +476,10 @@ export function tempoPanel({ tempo, mod = null, macros = true, signal } = {}) {
 
 /** macroRail({ M, api }) — the tempo panel's MACROS pane (BASINS transport.js §76–107), rebuilt only when the list of
  *  macros (or the window's presence) changes; the depth arcs repaint after a hand works a tile, never on a timer
- *  (BASINS re-read it every 200 ms while the panel was open).  → { root, rail, sync(), tiles } */
-export function macroRail({ M, api, signal } = {}) {
+ *  (BASINS re-read it every 200 ms while the panel was open).  → { root, rail, sync(), tiles }
+ *  1.5.6-alpha.7: `face: 'knob'` draws the macros as a knob bank (macroKnob, below): eight slots, pages past eight, `onAdd()` on an empty one. */
+export function macroRail({ M, api, signal, face = 'tile', onAdd = null, apply = () => {} } = {}) {
+  if (face === 'knob') return macroBank({ M, api, signal, onAdd, apply });
   const life = lifeOf(signal), on = { signal: life.signal };
   const root = el('div', 'tempo-pane tempo-macros'); ariaLabel(root, 'macros');
   const rail = el('div', 'tempo-rail', root);
@@ -520,6 +525,49 @@ export function macroRail({ M, api, signal } = {}) {
   const soon = () => frame.coalesce('mir.transport.macros', paint);
   for (const t of ['pointermove', 'pointerup', 'keydown', 'wheel']) root.addEventListener(t, soon, { passive: true, signal: life.signal });
   return { root, rail, tiles, sync() { build(); paint(); }, rebuild, destroy: () => life.abort() };
+}
+
+/** 1.5.6-alpha.7 · macroKnob({ M, m, index, api, apply }) — a macro as a knob face (λWAVES 022 C1): its NAME over a kit knob holding its value
+ *  (a hand macro; a source's macro shows the source's reading and the hand stands off; a trigger's dial stands down), its VALUE under the dial,
+ *  a lamp lit while it is routed or armed, and the slot's foot — the routing grip (`api.wireGrip`: drag to route, tap to arm, double-tap to
+ *  reset) and the numbered depth seat with its arc (`api.wireDepth` / `paintDepth`): the modulation window's own gestures, never copies.
+ *  → { id, root, knob, paint() } */
+export function macroKnob({ M, m, index, api, apply = () => {} }) {
+  const id = String(m.id), trigger = m.kind === 'trigger';
+  const k = knob({ label: m.name, min: 0, max: 1, value: m.value, fmt: (v) => Math.round(100 * v) + '%', cls: 'mir-macro-knob',
+    onInput: (v) => { const mm = M.macroOf(id); if (!mm || mm.sourceId || trigger) return; M.setMacro(id, { value: v }); apply(); } });
+  k.root.dataset.macro = id; if (trigger) k.setDisabled(true);
+  const lit = lamp({ parent: k.root, cls: 'mir-lamp mir-macro-lamp' }), name = k.root.querySelector('.k-lbl');
+  const rec = buildMacroSlot(k.root, m, index);
+  for (const x of [rec.val, rec.pad, rec.tools, rec.erow]) if (x) x.hidden = true;
+  const A = api(); if (A) { A.wireGrip(rec.grip, id); A.wireDepth(rec.numSeat, id, index); }
+  rec.grip.title = 'Drag to route; tap to arm; double-tap to reset';
+  function paint() {
+    const mm = M.macroOf(id), A2 = api(); if (!mm) return;
+    if (mm.sourceId) k.show(mm.value); else if (!k.dragging() && (k.get() !== mm.value || k.shown !== null)) k.set(mm.value);
+    setText(name, mm.name);
+    const armed = A2 && A2.arming ? A2.arming() : null;
+    lit.set((M.routeCountOfMacro ? M.routeCountOfMacro(id) > 0 : false) || !!(armed && String(armed.macro) === id));
+    if (A2) A2.paintDepth(rec.numSeat, rec.depthArc, id);
+  }
+  paint();
+  return { id, root: k.root, knob: k, rec, paint };
+}
+function macroBank({ M, api, signal, onAdd, apply }) {
+  const life = lifeOf(signal), root = el('div', 'tempo-pane tempo-macros tempo-knobs'); ariaLabel(root, 'macros');
+  const tiles = new Map(); let sig = '';
+  const bank = knobBank({ slots: 8, parent: root, label: 'macros', onEmpty: onAdd ? () => { onAdd(); sync(); } : null });
+  function build() {
+    const A = api(), list = M.macroList(), s = list.map((m) => m.id + ':' + m.kind + ':' + m.name).join('|') + (A ? '+' : '-');
+    if (s === sig) return false; sig = s; tiles.clear();
+    list.forEach((m, i) => tiles.set(String(m.id), macroKnob({ M, m, index: i + 1, api, apply })));
+    bank.set([...tiles.values()]); return true;
+  }
+  const paint = () => { for (const t of tiles.values()) t.paint(); };
+  const sync = () => { build(); paint(); };
+  const soon = () => frame.coalesce('mir.transport.macros', paint);
+  for (const t of ['pointermove', 'pointerup', 'keydown', 'wheel']) root.addEventListener(t, soon, { passive: true, signal: life.signal });
+  return { root, rail: bank.grid, bank, tiles, sync, paint, rebuild: () => { sig = ''; sync(); }, destroy: () => life.abort() };
 }
 
 /** tapButton({ tempo }) — TAP as a seat of its own on the bar (BASINS and λWAVES keep it in the tempo panel) */

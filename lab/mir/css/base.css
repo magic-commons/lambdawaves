@@ -169,7 +169,7 @@ m { font-family: var(--font-math); font-style: normal; font-size: var(--math-sca
 .k.rate .k-val { font-size: var(--fs-micro); }
 
 /* ── title chip and badges over the stage ──────────────────────────────── */
-.glass, :where([data-mir-surface]:not([data-mir-surface="island"])) { border: var(--surface-edge-width, var(--glass-border)) solid var(--pane-edge, var(--surface-edge, var(--glass-border-color))); background: var(--surface-fill, hsl(var(--glass-tint) / var(--glass-opacity)));
+.glass, :where([data-mir-surface]:not([data-mir-surface="island"], [data-mir-surface="section"], [data-mir-surface="well"])) { border: var(--surface-edge-width, var(--glass-border)) solid var(--pane-edge, var(--surface-edge, var(--glass-border-color))); background: var(--surface-fill, hsl(var(--glass-tint) / var(--glass-opacity)));
   box-shadow: var(--surface-shadow, var(--glass-shadow)); -webkit-backdrop-filter: var(--glass-filter); backdrop-filter: var(--glass-filter); text-shadow: var(--ink-shadow); }
 .badge { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 3px 10px; border-radius: var(--r-pill); font-size: var(--fs-tiny); letter-spacing: var(--label-tracking, var(--tr-wide));
   color: var(--fg-soft); cursor: pointer; border: var(--glass-border) solid var(--glass-border-color); background: hsl(var(--glass-tint) / var(--glass-opacity)); }
@@ -280,6 +280,41 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
 .row.fit > :is(.sw, .trig) { overflow: hidden; justify-content: center; }
 .row.fit > :is(.seg, .segw, .wide) { grid-column: span 2; }
 .row.fit > .full { grid-column: 1 / -1; }
+/* 1.5.6-alpha.7 · THE SURFACE PARTS (kit.js lamp · meter · section · knobBank; λWAVES 022 C1).  A section is a hairline frame on its surface's
+   well with its name in a strip at the top-left; a bank is a fit row of always-n slots (a knob's face scales with its slot, as in a fit row; an
+   empty slot is a faint "+"); a meter's bar is a well filled to --signal (LED segments under .led, a held top under .peak); a lamp is lit [data-lit]. */
+.mir-lamp { display: inline-block; flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; background: var(--sw-led-fill); }
+.mir-lamp[data-lit] { background: var(--lamp, var(--acc)); box-shadow: var(--state-on-light, var(--acc-glow)); }
+.mir-section { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 4px 6px 6px; border: var(--glass-border) solid var(--glass-hairline); border-radius: var(--r-md); }
+.mir-section-head { align-self: flex-start; font-size: var(--fs-micro); line-height: 1.2; letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--ink-faint); white-space: nowrap; }
+.mir-section-body { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
+.mir-meter { display: flex; align-items: stretch; gap: 3px; min-width: 0; }
+.mir-meter-band { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.mir-meter-bar { --signal: 0; --peak: 0; position: relative; display: block; flex: 1 1 auto; width: 6px; min-height: 24px; border-radius: var(--r-xs); background: var(--glass-well); overflow: hidden; }
+.mir-meter-bar::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--signal) * 100%); background: var(--lamp, var(--acc)); }
+.mir-meter.led .mir-meter-bar::after { background: repeating-linear-gradient(to top, var(--lamp, var(--acc)) 0 3px, transparent 3px 4px); }
+.mir-meter.peak .mir-meter-bar::before { content: ""; position: absolute; z-index: 1; left: 0; right: 0; bottom: calc(var(--peak) * 100%); height: 1px; background: var(--fg-soft); }
+.mir-meter:not(.vertical) { flex-direction: column; }
+.mir-meter:not(.vertical) .mir-meter-bar { width: auto; height: 6px; min-height: 0; }
+.mir-meter:not(.vertical) .mir-meter-bar::after { top: 0; height: auto; width: calc(var(--signal) * 100%); }
+.mir-meter-lbl { font-size: var(--fs-micro); line-height: 1; letter-spacing: var(--label-tracking, var(--tr-wide)); color: var(--ink-faint); }
+.mir-bank { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mir-bank-grid { --cell-min: 44px; }
+.mir-bank-slot { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 0; container-type: inline-size; }
+.mir-bank-slot > .k { width: 100%; min-width: 0; }
+.mir-bank-slot > .k > .k-dial { width: clamp(var(--knob-min, 28px), 62cqi, var(--knob-max, 44px)); height: auto; aspect-ratio: 1; box-sizing: border-box; }
+.mir-bank-slot > .k > .k-dial > .k-needle { height: 38%; }
+.mir-bank-slot.empty { justify-content: center; min-height: var(--touch); }
+.mir-bank-plus { display: grid; place-items: center; width: clamp(var(--knob-min, 28px), 62cqi, var(--knob-max, 44px)); aspect-ratio: 1; padding: 0; border: 1px dashed var(--glass-hairline); border-radius: 50%; background: transparent; color: var(--ink-faint); opacity: .55; }
+.mir-bank-plus > svg { width: 12px; height: 12px; }
+.mir-bank-grip { position: absolute; top: 0; right: 0; display: grid; place-items: center; width: 14px; height: 14px; padding: 0; border: 0; background: transparent; color: var(--ink-faint); opacity: 0; cursor: grab; touch-action: none; }
+.mir-bank-slot:hover > .mir-bank-grip, .mir-bank-grip:focus-visible { opacity: .85; }
+@media (pointer: coarse) { .mir-bank-grip { opacity: .55; } }
+.mir-bank-nav { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
+.mir-bank-nav[hidden] { display: none; }
+.mir-bank-page { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink-key); }
+.mir-bank-page > svg { width: 14px; height: 14px; }
+.mir-bank-count { font-size: var(--fs-micro); font-variant-numeric: tabular-nums; color: var(--ink-faint); }
 /* DISABLED is one rule, in skin.css §6: one fade (--state-disabled), no relief, no pointer.  W-STURMIAN: a control that
    stands down keeps its seat and carries its note (wave 58: and a trigger the plan refuses). */
 

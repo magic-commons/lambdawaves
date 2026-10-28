@@ -472,7 +472,7 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
 .calc-row { border-bottom-color: var(--glass-hairline); }
 
 /* ── 10. chrome over the stage: the title, badges, sheet, keyboard hint ─── */
-.glass, :where([data-mir-surface]:not([data-mir-surface="island"])) { border-color: var(--pane-edge, var(--surface-edge, var(--glass-border-color))); background: transparent; box-shadow: var(--surface-shadow, var(--glass-shadow)); }
+.glass, :where([data-mir-surface]:not([data-mir-surface="island"], [data-mir-surface="section"], [data-mir-surface="well"])) { border-color: var(--pane-edge, var(--surface-edge, var(--glass-border-color))); background: transparent; box-shadow: var(--surface-shadow, var(--glass-shadow)); }
 /* 1.5.0-alpha.7 · THE SURFACE HOOK (docs/GUI.md): an app's own pane takes the kit's material with one attribute,
    data-mir-surface = pane (the default) · float · menu (its height) · chip (pane height, its own corner) · island (a
    pane only while DISCONNECTED, paintless joined, like a window's body card).  The hook is in every rule a .glass pane
@@ -485,6 +485,9 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
    every card style's pane rule, FROST's and STILL's included; it paints the colour only, so a sheen and the blur stay. */
 body[data-card] .glass[data-mir-surface="menu"]:not([hidden]) { background-color: hsl(var(--surface-menu-tint) / var(--surface-menu-floor)); border-color: var(--surface-menu-edge); }
 :where([data-mir-surface="island"]) { border: var(--surface-edge-width, var(--glass-border)) solid transparent; }   /* joined: paintless, the same box it has as an island */   /* the pane is CARD STYLE's, §14c */
+/* 1.5.6-alpha.7 · two INNER surfaces (λWAVES 022 C1): `well` (a recess in a pane: the skin's well and its relief) and `section` (a hairline
+   frame on a well, kit.js section()); neither is a pane, so no card style, frost or pane shadow reaches them, and a SKIN change re-skins both */
+:where([data-mir-surface="well"]) { background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
 .badge { min-height: 24px; padding: 2px 9px; border-color: transparent; box-shadow: var(--surface-shadow, var(--glass-shadow)); outline: var(--seat-edge); outline-offset: 0;   /* a pane's height (L13) */
   color: var(--ink-key);
   background: hsl(var(--glass-tint) / var(--glass-opacity)); max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -527,9 +530,9 @@ body[data-theme="light"] .badge { color: var(--dim); }
 /* 1.5.0-alpha.2 · THE TWO MATERIALS, BY NAME.  TINTED reads --surface-sheen over --surface-fill; REFRACTIVE reads
    --surface-veil; the blur, wherever it is drawn, reads --surface-filter.  Each falls back to the exact 1.4 value, so
    nothing changes until a skin or the tier (mir/css/tokens.css) sets one. */
-body[data-card="refractive"] .dev, body[data-card="refractive"] .glass, body[data-card="refractive"] :where([data-mir-surface]:not([data-mir-surface="island"]))
+body[data-card="refractive"] .dev, body[data-card="refractive"] .glass, body[data-card="refractive"] :where([data-mir-surface]:not([data-mir-surface="island"], [data-mir-surface="section"], [data-mir-surface="well"]))
   { background: var(--surface-veil, transparent); }                           /* the blur alone */
-body:is([data-card="tinted"], [data-card="solid"]) .dev, body:is([data-card="tinted"], [data-card="solid"]) .glass, body:is([data-card="tinted"], [data-card="solid"]) :where([data-mir-surface]:not([data-mir-surface="island"]))
+body:is([data-card="tinted"], [data-card="solid"]) .dev, body:is([data-card="tinted"], [data-card="solid"]) .glass, body:is([data-card="tinted"], [data-card="solid"]) :where([data-mir-surface]:not([data-mir-surface="island"], [data-mir-surface="section"], [data-mir-surface="well"]))
   { background: var(--surface-sheen, var(--glass-sheen)), var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity))); }    /* the tinted pane: no filter, so no compositor cost — the shipped default since 2026-09-10 */
 
 /* CARD STYLE owns the pane even with FROST on. An enabled FROST policy otherwise
@@ -550,17 +553,17 @@ body.frost:not(.frost-hold)[data-card="tinted"] { --card-opacity: var(--frost-op
 body.frost[data-card="tinted"] { --surface-sheen: none; }
 /* … and the fill alone, so the computed `background-image` is the single `none` BASINS has (a two-layer list of nothing is
    `none, none`): the same seats as the tinted pane above and the disconnected body and head below */
-body.frost[data-card="tinted"] .dev, body.frost[data-card="tinted"] .glass, body.frost[data-card="tinted"] :where([data-mir-surface]:not([data-mir-surface="island"])),
+body.frost[data-card="tinted"] .dev, body.frost[data-card="tinted"] .glass, body.frost[data-card="tinted"] :where([data-mir-surface]:not([data-mir-surface="island"], [data-mir-surface="section"], [data-mir-surface="well"])),
 body.frost.disconnected[data-card="tinted"]:not(.phone) .dev > .dev-body, body.frost.disconnected[data-card="tinted"]:not(.phone) .dev > .dev-head
   { background: var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity))); }
 body.frost:not(.frost-hold)[data-card="tinted"] :is(.native-info .native-info-content, .control-help) { --popover-fill: hsl(var(--glass-tint) / var(--card-opacity)); }
-body.frost:not([data-card="solid"]) .dev, body.frost:not([data-card="solid"]) .glass, body.frost:not([data-card="solid"]) :where([data-mir-surface]:not([data-mir-surface="island"])) { -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter)); }
-body.frost[data-card="refractive"][data-theme="dark"] .dev, body.frost[data-card="refractive"][data-theme="dark"] .glass, body.frost[data-card="refractive"][data-theme="dark"] :where([data-mir-surface]:not([data-mir-surface="island"])) { background: var(--surface-veil, var(--frost-veil-dark)); }
+body.frost:not([data-card="solid"]) .dev, body.frost:not([data-card="solid"]) .glass, body.frost:not([data-card="solid"]) :where([data-mir-surface]:not([data-mir-surface="island"], [data-mir-surface="section"], [data-mir-surface="well"])) { -webkit-backdrop-filter: var(--surface-filter, var(--frost-filter)); backdrop-filter: var(--surface-filter, var(--frost-filter)); }
+body.frost[data-card="refractive"][data-theme="dark"] .dev, body.frost[data-card="refractive"][data-theme="dark"] .glass, body.frost[data-card="refractive"][data-theme="dark"] :where([data-mir-surface]:not([data-mir-surface="island"], [data-mir-surface="section"], [data-mir-surface="well"])) { background: var(--surface-veil, var(--frost-veil-dark)); }
 /* FROST · STILL (`body.frost-hold`, set while the picture moves): a REFRACTIVE pane stops blurring and wears the tinted
    fill for as long as the hold lasts — the surface the lite tier gives it — so STILL differs from ALWAYS.  Only the
    pixels of the hold change; the moment it lifts, the blur and the veil are back. */
-body.frost.frost-hold .dev, body.frost.frost-hold .glass, body.frost.frost-hold :where([data-mir-surface]:not([data-mir-surface="island"])) { -webkit-backdrop-filter: none; backdrop-filter: none; }
-body.frost.frost-hold[data-card="refractive"] .dev, body.frost.frost-hold[data-card="refractive"] .glass, body.frost.frost-hold[data-card="refractive"] :where([data-mir-surface]:not([data-mir-surface="island"])) {
+body.frost.frost-hold .dev, body.frost.frost-hold .glass, body.frost.frost-hold :where([data-mir-surface]:not([data-mir-surface="island"], [data-mir-surface="section"], [data-mir-surface="well"])) { -webkit-backdrop-filter: none; backdrop-filter: none; }
+body.frost.frost-hold[data-card="refractive"] .dev, body.frost.frost-hold[data-card="refractive"] .glass, body.frost.frost-hold[data-card="refractive"] :where([data-mir-surface]:not([data-mir-surface="island"], [data-mir-surface="section"], [data-mir-surface="well"])) {
   background: var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity))); }
 /* 1.5.0-alpha.12 · THE PANE'S FILL BY CARD STYLE, as one name on <body> (no sheen): what a pane is filled with in this
    seat, for a surface that sits inside another material's sheet and cannot carry the body's card selectors itself

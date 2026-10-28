@@ -34,7 +34,7 @@
 /* ── THE NAMESPACE ──────────────────────────────────────────────────────── */
 
 import { setGlyph, glyphEl, glyphSvg, hasGlyph } from '../../glyph.js';
-import { label as kitLabel, ariaLabel as kitAria, hint as kitHint, placeholder as kitPlaceholder } from '../../kit.js';
+import { label as kitLabel, ariaLabel as kitAria, hint as kitHint, placeholder as kitPlaceholder, meter as kitMeter, lamp as kitLamp } from '../../kit.js';
 import { t, phrase, onLanguage } from '../../core/i18n.js';
 
 /* ── THE WORDS (1.5.4).  Every word the tree shows goes through the kit's choke points: label() for a node that holds
@@ -935,9 +935,8 @@ export function buildDevice(run, add, src, copyIn) {
   minNum.type = 'button';
 
   const minBay = m2mk('div', 'm2minbay', headl);
-  const meter = m2mk('div', 'm2meter', minBay);
-  meter.setAttribute('aria-hidden', 'true');
-  const meterFill = m2mk('i', 'm2meterfill', meter);
+  /* 1.5.6-alpha.7: the kit's one meter (kit.js meter), in this window's classes; the window paints it as before */
+  const { root: meter, bars: [meterFill] } = kitMeter({ parent: minBay, cls: 'm2meter', bar: 'm2meterfill' });
   const envMinProg = kind === 'env' ? m2mk('div', 'm2envminprog', minBay) : null;
   const envMinProgFill = envMinProg ? m2mk('i', null, envMinProg) : null;
   const minName = m2mk('span', 'm2minname', minBay);   // the ROTATED label
@@ -949,14 +948,10 @@ export function buildDevice(run, add, src, copyIn) {
     minWavePath = m2svg('path', null, minWave);   // NO class
   }
   if (kind === 'audio') {
-    const lc = m2mk('button', 'm2audminleds', minBay);
-    lc.type = 'button';
+    const lc = kitMeter({ parent: minBay, tag: 'button', cls: 'm2audminleds', bar: null, bands: copy.audioOuts, key: 'out' });
     minLeds = {};
-    for (const k of copy.audioOuts) {
-      minLeds[k] = m2mk('i', null, lc);
-      minLeds[k].dataset.out = k;
-    }
-    minMeter = lc;
+    lc.keys.forEach((k, i) => { minLeds[k] = lc.bars[i]; });
+    minMeter = lc.root;
   }
   const minOut = m2mk('span', 'm2minstatus ' +
     (kind === 'lfo' ? 'm2lfominout' : kind === 'env' ? 'm2envminout' : 'm2audminout'), headl);
@@ -1010,7 +1005,7 @@ export function buildDevice(run, add, src, copyIn) {
        a gate, and a LIVE lamp in that count is a sixth output that does not
        exist. */
     const live = m2mk('div', 'm2audlive', wrap);
-    const liveLed = m2mk('i', 'm2audled', live);
+    const liveLed = kitLamp({ parent: live, cls: 'm2audled' }).root;
     const liveTxt = m2mk('span', null, live);     // NO class
     liveTxt.textContent = t('OFF');
     const setBtn = m2mk('button', 'm2audsrc', wrap);
