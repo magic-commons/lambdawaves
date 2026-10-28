@@ -13,7 +13,7 @@ import { createGui } from './mir/shell/gui.js';
 import { gplLicence } from './mir/shell/about.js';
 import { DOCK } from './mir/window/dock.js';
 import { paintedRect } from './occlusion.js';
-/* 021 G1: BUILD_LINE is handed in by rack.js' seat (createMirGui(app, BUILD_LINE)); this module imports nothing from rack.js */
+import { BUILD_LINE } from './build-line.js';   // 021 D1: the stamp's own module
 import { infoPrefs } from './shell/stage-words.js';   // iteration 007: INFORMATIONAL's own record, which FORGET wipes too
 import { forgetRecords } from './settings-store.js';   // 021 R4: FORGET wipes every registry row whose `forget` is true
 
@@ -27,7 +27,7 @@ export const dockSpan = {
   subscribe(fn) { subs.set(fn, span ? span.subscribe(fn) : null); return () => { const off = subs.get(fn); subs.delete(fn); if (off) off(); }; },
 };
 
-export function createMirGui(app, BUILD_LINE) {
+export function createMirGui(app) {
   const { settingsStore } = app, { look, modStore, curvesStore, occlusion } = app.ctl, { rk } = app.sh;
   span = rk.span();
   for (const fn of subs.keys()) { subs.set(fn, span.subscribe(fn)); fn(span.read()); }

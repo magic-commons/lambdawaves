@@ -29,7 +29,7 @@
  * BEFORE the pause / settle / 400 ms / play (a row's own scene: MOLECULES, a view, AUTO-ROTATE …; its answer recorded as `setup`);
  * --sweep S moves the pointer over the stage for the first S s of the window through CDP Input.dispatchMouseEvent, 40 moves a
  * second (a slow figure across the picture, x 30–70 %, y 50–80 % of the 1600 × 1000 page; recorded as `sweep`).  THE SERVED TREE (C-V N8):
- * the sha printed is the CWD's, so `served` records what the PORT serves — rack.js' BUILD_LINE and the sha-256 of rack.js (two
+ * the sha printed is the CWD's, so `served` records what the PORT serves — build-line.js' BUILD_LINE (021 D1) and the sha-256 of rack.js (two
  * trees with one version line still differ there).
  * STATUS: written whole; the first five runs are in 0.4.0 MEASURE.md §6 → 0.5.0 MEASURE.md §1. */
 import { launch, sleep } from './cdp.mjs';
@@ -50,8 +50,9 @@ const RUNS = Number(opt('--runs', 5)), SECS = Number(opt('--secs', 30)), JSON_OU
 const ALLOW_NO_FIELD = argv.includes('--allow-no-field');
 const KEEP_NOTICE = argv.includes('--keep-notice');
 const SETUP = opt('--setup', null), SWEEP = Number(opt('--sweep', 0));
-const served = () => new Promise((res) => https.get(`https://127.0.0.1:${PORT}/lab/rack.js`, { rejectUnauthorized: false }, (r) => { let t = ''; r.on('data', (c) => (t += c)); r.on('end', () => res({
-  buildLine: (t.match(/const BUILD_LINE = '([^']*)'/) || [])[1] || null, rackSha256: crypto.createHash('sha256').update(t).digest('hex').slice(0, 16) })); }).on('error', (e) => res({ error: String(e) })));
+const fetchText = (f) => new Promise((res, rej) => https.get(`https://127.0.0.1:${PORT}/lab/${f}`, { rejectUnauthorized: false }, (r) => { let t = ''; r.on('data', (c) => (t += c)); r.on('end', () => res(t)); }).on('error', rej));
+const served = () => Promise.all([fetchText('build-line.js'), fetchText('rack.js')]).then(([b, t]) => ({
+  buildLine: (b.match(/const BUILD_LINE = '([^']*)'/) || [])[1] || null, rackSha256: crypto.createHash('sha256').update(t).digest('hex').slice(0, 16) }), (e) => ({ error: String(e) }));
 const load = () => fs.readFileSync('/proc/loadavg', 'utf8').split(' ').slice(0, 3).map(Number);
 const sha = () => { try { return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim(); } catch { return 'unknown'; } };
 const med = (a) => { const s = [...a].sort((x, y) => x - y), k = s.length >> 1; return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; };

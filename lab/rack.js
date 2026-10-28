@@ -44,9 +44,7 @@ import { createActions } from './actions.js'; import { createTransport } from '.
 import { createMirGui } from './mir-gui.js';   // iteration 003: MIR OPTIONS and MIR ABOUT, the kit's createGui over the look store
 import { readLink } from './statelink.js';   // wave 56: every state of this lab is a LINK
 
-/* THE BUILD STAMP — one constant, and every wave updates it.  The ABOUT face and its copy dump both read it here;
-   nothing else in the app hand-writes a version, so a stale line can only come from forgetting THIS line. */
-export const BUILD_LINE = '0.9.9-alpha · Emission Spectra · 2026-10-25';   // THE ONLY PLACE THE NUMBER LIVES: the ABOUT face, the copy dump and the proof all read it back through LW.build (ANTI-PATTERN 6)
+/* THE BUILD STAMP is `lab/build-line.js` (021 D1): no module imports from rack.js */
 
 import { TIER, TIER_NAME } from './tier.js';   // 021 G1: the tiers live in lab/tier.js; no module imports them from rack.js
 export { TIER };
@@ -861,7 +859,7 @@ export async function boot(dom) {
   const { refreshOcclusion } = createInk(app);   // 0.5.2 R2d: lab/shell/ink.js
   /* ── 0.5.0 C3 · THE RACK IS THE KIT'S: lab/shell/rack-wiring.js (0.5.2 R3b), created here; its second seat, wireStage(), follows the notebook's ── */
   const { rk, layout, wTr, tablet, syncPhone, wireStage } = createRackWiring(app);
-  createMirGui(app, BUILD_LINE);   // iteration 003 (021 G1: the build line handed in, so mir-gui.js imports nothing from rack.js): after the rack, whose one dock span the modulation window docks in
+  createMirGui(app);   // iteration 003 (021 D1: mir-gui.js reads the build line from lab/build-line.js): after the rack, whose one dock span the modulation window docks in
   /* ── §19b the skip links · the dock chip · MENUS and the menubar · THE NOTEBOOK · PROJECTS: lab/shell/notebook.js (0.5.2 R3b), created here ── */
   createNotebook(app);
   wireStage();   // §19a's second seat (lab/shell/rack-wiring.js): the crossings' listeners and the stage gestures, after the notebook's, as they stood

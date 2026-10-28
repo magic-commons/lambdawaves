@@ -1,7 +1,7 @@
 /* lab/shell/notebook.js — §19b (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): the skip links, layout.modulation,
  * FILE › EXPORT SHAPE, MENUS and the kit's menubar, LEAN / KIND, THE NOTEBOOK and PROJECTS (projectSnapshot / projectKey whole).  createNotebook(app) runs at its
  * seat; the names persist, the links, the history, the keys and the facade make later are read through app.sh at use. */
-import { TIER } from '../tier.js'; import { BUILD_LINE } from '../rack.js'; import { el } from '../mir/kit.js'; import { createMenubar } from '../mir/shell/menubar.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
+import { TIER } from '../tier.js'; import { BUILD_LINE } from '../build-line.js'; import { el } from '../mir/kit.js'; import { createMenubar } from '../mir/shell/menubar.js'; import { createWindowPicker } from '../mir/shell/window-picker.js'; import { toLUT } from '../mir/palette.js';
 import { renderNotebook } from '../mir/shell/notebook-render.js'; import { cameraEye, VIEW_NAMES, drawStyle } from '../field.js'; import { getZ } from '../hamiltonian.js';
 import { paintedRect } from '../occlusion.js'; import { WINDOW_GLYPH } from '../icons.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
