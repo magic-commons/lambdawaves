@@ -38,6 +38,9 @@ R7 THE WORDS ARE LIVE: INFORMATIONAL's stage texts (name, formula, subtitle) lag
 5. (R6) "ψ · a.u." becomes the strip's hint. Default: yes.
 6. (D4) A wheel notch = 1 BPM; Shift = 0.1 BPM. Default: yes.
 7. (all) Kit 1.5.6-alpha.9 (and .10/.11 if B/R need a line) on the clone road; the bundle carried; you fetch when you like (021 call 12).
+8. (D1) 'Behind' assumes the sphere is seen from above; flipping it is one sign in depthOf. Default: as built.
+9. (D3) Only the modulation window's chip rail moved; the buttons inside (ADD MACRO / ADD DEVICE, TAP · SYNC · HOLD) are one more kit line on your word. Default: as built.
+10. (D1) The plane square and the camera film stay solid where they lie behind the view. Default: solid.
 
 ## MERGE ORDER
 D → B → R; each merged with the recipe (`git merge --no-ff --no-commit`, `--ours lab/sw.js`, `pwa.test --write`, rack-deps, new-project, mir-manifest, `./test.sh node`, THE LOCK 843/987) and recorded below.
@@ -45,4 +48,5 @@ D → B → R; each merged with the recipe (`git merge --no-ff --no-commit`, `--
 ## CLOSED
 | chain | base | commit | note |
 |---|---|---|---|
-| D | 7335da8f | | |
+| D | 7335da8f | 9915e18e | kit 1.5.6-alpha.9 (kit-1.5.5 @ 3ce9bc2, bundle carried to .tmp/it021/kit.bundle): D1 rings and CLIP's plane dashed behind the view · D2 KEYBOARD tabs wear glyphs (icons.js mapping) · D3 modulation chip rail on the trig motion · D4 one notch = 1 BPM on the CSB, TIMELINE and modulation tempo fields · D5 no door: T=/t= is the app's periodFx (transport.js:32–34, :114, :255–259; csb.css:130, :143); test.sh node EXIT 0, LOCK 843/0 and 987/0 |
+| B | 9915e18e | | |
