@@ -46,10 +46,10 @@ PREFERENCE. RETIRED blob keys, dropped by the next save: `palette`, `camMode`, `
 | `lambdawaves.q0.modulation` | PREFERENCE | — | yes | shell/controller.js modStore (kit localStore): modArm, modCadence |
 | `lambdawaves.q0.curves` | PREFERENCE | model | yes | nodes.js curvesStore: the CURVES grade (250 ms) |
 | `lambdawaves.q0.nodes` | PREFERENCE | v 1 | yes | nodes.js: the graph { seq, list, at, pan, zoom, win, off } (250 ms) |
-| `lambdawaves.q0.nodePresets` | PREFERENCE | v 1 | yes | user-presets.js: NODES’ SAVE THIS GRAPH |
-| `lambdawaves.q0.curvePresets` | PREFERENCE | v 1 | yes | user-presets.js: CURVES’ save glyph |
-| `lambdawaves.q0.palettes` | PREFERENCE | v 1 | yes | user-presets.js: PALETTE’s save glyph |
-| `lambdawaves.q0.presets` | PREFERENCE | v 1 | yes | user-presets.js: SPECTRUM’s save glyph |
+| `lambdawaves.q0.nodePresets` | PREFERENCE | v 1 | no | user-presets.js: NODES’ SAVE THIS GRAPH |
+| `lambdawaves.q0.curvePresets` | PREFERENCE | v 1 | no | user-presets.js: CURVES’ save glyph |
+| `lambdawaves.q0.palettes` | PREFERENCE | v 1 | no | user-presets.js: PALETTE’s save glyph |
+| `lambdawaves.q0.presets` | PREFERENCE | v 1 | no | user-presets.js: SPECTRUM’s save glyph |
 | `lambdawaves.q0.csb` | PREFERENCE | v 1 | yes | csb-favs.js: the CONTROL SURFACE’s favourites |
 | `lambdawaves.q0.picker` | PREFERENCE | v 1 | yes | picker.js: SHOW LABELS, THE HUE, the decks’ looks |
 | `lambdawaves.q0.keys` | PREFERENCE | v 1 | yes | key-table.js: the rebound chords (the kit’s difference) |

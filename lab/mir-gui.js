@@ -33,8 +33,8 @@ export function createMirGui(app, BUILD_LINE) {
   for (const fn of subs.keys()) { subs.set(fn, span.subscribe(fn)); fn(span.read()); }
   /* FORGET is the one SETTINGS had: createGui wipes the look through prefs.forget(), then reloads.  021 R4: the owners' pending writes are
      cancelled first (onForget: NODES' 250 ms graph and grade), then every settings-store.js RECORDS row marked `forget` goes — the blob, the
-     look, INFORMATIONAL, the modulation's power and cadence, the grade, the graph and its presets, the reader's palettes / curves / PRESETs,
-     the CONTROL SURFACE's favourites, the Picker's choices, the keys, RENDER's choices and LEAN.  The work stays (the session, the projects,
+     look, INFORMATIONAL, the modulation's power and cadence, the grade, the graph, the CONTROL SURFACE's favourites, the Picker's choices,
+     the keys, RENDER's choices and LEAN.  The reader's work stays (R6: their palettes, curves, graphs and PRESETs; the session, the projects,
      the quick save, the modulation presets a project SAVE writes) and so does the device's (the LIBRARY, the kit's own seats and calibration) */
   const prefs = { ...look.prefs, forget() { look.prefs.forget(); infoPrefs().forget(); modStore.write({ modArm: undefined, modCadence: undefined }); forgetRecords(); settingsStore.remove(); curvesStore.remove(); } };
   const tablet = document.body.classList.contains('touch-tablet');

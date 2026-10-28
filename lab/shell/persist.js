@@ -8,6 +8,11 @@ import { deviceQuality } from '../first-run.js';
 import { getHamiltonian, setHamiltonian, HAMILTONIANS, setZ, getZ, setMu, getMu } from '../hamiltonian.js';
 import { clampShift } from '../camera-law.js'; import { clampLambda } from '../sturmianreg.js'; import { BASIS, N6, narrow, widen } from '../hydrogen.js'; import { LAT } from '../lattice.js'; import { BL } from '../bloch.js'; import { save as centralSave, configure as centralConfigure } from '../central.js'; import { save as sepSave, load as sepLoad } from '../separable.js'; import { OMORPH } from '../orbitalsview.js';
 const LS_EXP = 'lambdawaves.q0.experiment', LS_PRES = 'lambdawaves.q0.presentation';
+/** 021 R6 · THIS DEVICE'S OWN CAPTURE: inside `asDevice(fn)` serialize() keeps `nodes.*` routes and lanes (the SESSION, main.js); every other
+ *  capture — a project file, FOLDERS, an export, a link — is what leaves the device and refuses them (call 3).  The undo history's edit scope
+ *  always keeps them. */
+let deviceCapture = 0;
+export function asDevice(fn) { deviceCapture++; try { return fn(); } finally { deviceCapture--; } }
 export function createPersist(app) {
   const { ui, reg, clock, obs, mat, FIELD_CHROME, rates, energyOf, sturm, PAL_DEF } = app; const { schedule, paceRate } = app.loop; const { quality, layout, phone, tablet } = app.sh;
   const { camera, camLevel, syncFreeAngles, syncCamUI } = app.host;
@@ -78,7 +83,7 @@ export function createPersist(app) {
         ab: ui.ab ? ui.ab.get() : null,
         notebook: !edit && layout.notebookSize ? (() => { const n = layout.notebookSize(); return n.custom ? { w: n.w, h: n.h } : null; })() : null } };
     const T = !edit && app.state.tl ? app.state.tl.model.serialize() : null;
-    if (!edit) refuseNodes(S.presentation.modulation, T);
+    if (!edit && !deviceCapture) refuseNodes(S.presentation.modulation, T);
     if (T && (T.clips.length || T.active)) S.presentation.timeline = T;   // 0.5.0 C7b: the arrangement, only when there is one (NEW and the demos stay byte-exact); never an undo row's
     { const E = app.state.eq.serialize(); if (E) S.presentation.eq = E; }   // 0.6.0 B2: the BEAT EQUALIZER, PROJECT and default-absent (FLAT writes nothing)
     if (!edit) return S;
@@ -90,8 +95,8 @@ export function createPersist(app) {
     return S;
   }
   /** 021 R2 · CALL 3: A PROJECT NEVER NAMES THE READER'S GRAPH.  NODES is PREFERENCE (per device), so a `nodes.*` route or TIMELINE curve
-   *  (and its clips) is refused on the way into a file, the session, a link or FOLDERS — one console line when the count changes.  The
-   *  edit scope keeps them (an undo row is this tab's, not a file). */
+   *  (and its clips) is refused on the way into what leaves this device — a project file (FOLDERS, an export) or a link — one console line
+   *  when the count changes.  R6: the SESSION (asDevice) and the undo history's edit scope keep them, so a NODES route survives a reload. */
   let refusedSaid = 0;
   function refuseNodes(M, T) {
     const isN = (id) => typeof id === 'string' && id.startsWith('nodes.');

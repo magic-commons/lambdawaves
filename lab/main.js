@@ -1,6 +1,8 @@
 /* main.js — decide the start (the notice, then the session or the boot), boot the lab behind it, then arm the install layer. */
 import { boot } from './rack.js';
 import { createSession } from './mir/core/session.js';   // 0.5.0 C6b: THE SESSION, the live project kept over the one part
+import { captureProject, restoreProject, projectSignature, subscribeProject } from './mir/core/project.js';
+import { asDevice } from './shell/persist.js';   // 021 R6: the session is this device's own capture (it keeps NODES' routes)
 import { photosensitivityNotice } from './mir/shell/flash-guard.js';   // 0.5.0 C6b: the kit's notice, under λWAVES' law
 import { createSettingsStore } from './settings-store.js';   // 0.5.0 C6b: the notice's seen-flag is the blob's `warned`
 import { STARTERS } from './project-store.js';   // the demos' ids are `?starter=`'s (iteration 009: one, wave-dancer) (their covers are FOLDERS' DEMOS pictures, iteration 004)
@@ -12,7 +14,8 @@ addEventListener('unhandledrejection', (e) => __e.push('REJ ' + String(e.reason 
 const $ = (id) => document.getElementById(id);
 /* 0.5.0 C6b · THE SESSION (MIR core/session.js): the one part's capture in `lambdawaves.q0.session` (PROJECT), written once the part
    says it changed (the kit's quiet 300 ms) and at once on pagehide; never a ring row, never an edit; nothing is written until armed */
-const session = createSession({ key: 'lambdawaves.q0.session' });
+const session = createSession({ key: 'lambdawaves.q0.session', parts: { capture: () => asDevice(captureProject), restore: restoreProject,
+  signature: () => asDevice(projectSignature), subscribe: subscribeProject } });
 /* THE PHOTOSENSITIVITY LAW (waves 57/59) IS λWAVES', NOT THE KIT'S: a human visitor reads the notice once per browser before anything
    animates, and NO query string silences it for a human (the kit's ?warn=0 is not honoured here); only a test driver skips it — ?warn=1
    forces it there, ?opener=1 makes a driven start a human one.  The notice is the kit's photosensitivityNotice; its seen-flag is the

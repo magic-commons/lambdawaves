@@ -18,7 +18,7 @@ export function createTransport(app) {
     const sm = btn('transport-step-back', '‹', 'step back  (←)', 'step back');
     const sp = btn('transport-step-forward', '›', 'step forward  (→)', 'step forward');
     ui.scrub = fader({ label: 'SCRUB  t / window', min: 0, max: 1, value: 0, fmt: (v) => (v * clock.window).toFixed(2) + ' a.u.',
-      onInput: (v) => appPlay.seek(v * clock.window + laps() * clock.window) });   // 021 R3: THE ONE SEEK (clock.js)
+      onInput: (v) => appPlay.seek(v * clock.window + laps() * clock.window, { trail: false }) });   // 021 R3: THE ONE SEEK (clock.js); R6: a drag keeps the trail, as before
     ui.rateKnob = knob({ label: 'RATE a.u./s', min: 0.1, max: 3000, value: 4, log: true, fmt: (v) => v >= 100 ? v.toFixed(0) : v.toFixed(1), onInput: (v) => { if (app.state.stageText) app.state.stageText.say('rate', 'RATE · ' + (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + ' a.u./s', { hold: true }); if (modHand('transport.rate', v)) return; clock.setRate(v); } });   // iteration 007: INFORMATIONAL › RATE
     const tro = readout({ label: 't  a.u.  (lap)', value: '0.00', cls: 'time' });
     /* ── THE CLOCK's law: when does this density repeat?  T = 2π / gcd{|E_a − E_b|} over the populated labels (EXACT where the
