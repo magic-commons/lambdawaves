@@ -42,6 +42,8 @@ const ACCEPTED = {
   /* 023 D · MIR 1.5.6-alpha.9 on the clone road (kit e826ec2 · 1f094a5 · e4d00e4 · dfd71cb · 3c24473 · 3ce9bc2): BEHIND IS DOTTED (camera sphere and plane model),
      THE FACE TABS WEAR GLYPHS (a keyboard face's icon, the kit glyph keys), THE CHIPS' MOTION (the modulation rail), ONE NOTCH IS ONE BPM (wheelNotches) */
   '1.5.6-alpha.9': 'ee57f02e34595e6199c9b2c9583962537add9f31e0579b280f940d469eb6dc69',   // D4 re-pin (kit 3ce9bc2: the wheel is bindTempoField's, the modulation window's own tempo too)
+  /* 023 B1 · MIR 1.5.6-alpha.10 on the clone road (kit 0272f11): THE PILLS ON CALL (createRackPills().show(), rack.showPills() — λWAVES' EXPAND ALL) */
+  '1.5.6-alpha.10': '16b410f1039f9795ee18f2365aca0aa109743bc9e5c22241efda442dade055c8',
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */

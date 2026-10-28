@@ -30,7 +30,7 @@
  * THE SCROLL PILL (1.5.0-alpha.25, from λWAVES 014 A6; Josh: "When scrolling on the rack window, let a little colored pill appear
  * directly adjacent to the window title bar … the name of the window in a strong, bold, sans serif font … No shadow just solid pill
  * … When the scroll bar disappears, the pills disappear too … material animated … incredibly cheap … autodetect white or black text").
- * createRackPills({ host, racks, view, glyphOf }) → { destroy() }, made by createRack for every rack, whichever scrollbar it runs
+ * createRackPills({ host, racks, view, glyphOf }) → { show(), destroy() }, made by createRack for every rack, whichever scrollbar it runs
  *   (glyphOf(id) → a window's glyph name, drawn before its name; 1.5.6-alpha.3):
  *   · a scroll adds `scrolling` to the rack (and to its seated track, which lifts the thumb) and arms ONE timeout, re-armed by each
  *     scroll; 900 ms after the last scroll the class goes.  No poller, no frame job.
@@ -42,7 +42,9 @@
  *     floats OUTSIDE the window, over the stage, at the title bar's height — `PILL.gap` px clear of the card's inner edge (left rack:
  *     right of the card; right rack: left of it), or of the rack's seated scrollbar thumb where that lies further out — the name
  *     whole (the stage has the room).  Its mask opens from the window's side.  Only a pill: no tail (1.5.0-alpha.28, rack.css).
- *   MIR OPTIONS › WINDOWS › SCROLL PILL (LOOK_SCHEMA `rackPill`: OFF · A · B, default A, the scrollbar's own accent) is `body[data-rack-pill]`. */
+ *   MIR OPTIONS › WINDOWS › SCROLL PILL (LOOK_SCHEMA `rackPill`: OFF · A · B, default A, the scrollbar's own accent) is `body[data-rack-pill]`.
+ *   · show() (1.5.6-alpha.10, λWAVES 023 B1): every shown rack's pills come and go as after one scroll (seated now, gone PILL.linger later) —
+ *     an app's EXPAND ALL says where every window landed; a rack slid off the view shows none. */
 import { el, ariaLabel } from '../kit.js';
 import { glyphEl, hasGlyph } from '../glyph.js';
 import { drag } from '../core/pointer.js';
@@ -123,6 +125,7 @@ export function createRackPills({ host, racks, view = globalThis.window, glyphOf
     e.timer = setTimeout(() => { rack.classList.remove('scrolling'); if (track) track.classList.remove('scrolling'); layer.classList.remove('on'); }, PILL.linger);
   }
   return {
+    show() { for (const e of entries) { const r = e.rack.getBoundingClientRect(); if (r.width && r.right > 0 && r.left < view.innerWidth) scrolled(e); } },
     destroy() { life.abort(); for (const e of entries) { clearTimeout(e.timer); e.layer.remove(); e.rack.classList.remove('scrolling'); } },
   };
 }
