@@ -361,27 +361,7 @@ export function createNotebook(app) {
       count();
       layout.notebook = { open: (face = 'notes') => show(face), close: () => { nb.hidden = true; }, toggle: () => { if (nb.hidden) show('notes'); else nb.hidden = true; }, get isOpen() { return !nb.hidden; }, get face() { return nb.dataset.face; }, moveTo(x, y) { nbMoved = true; nb.style.left = x + 'px'; nb.style.top = y + 'px'; }, dump: dumpText, get text() { return ta.value; }, set text(v) { ta.value = v; ta.dispatchEvent(new Event('input')); }, get title() { return titleIn.value; }, set title(v) { titleIn.value = v; titleIn.dispatchEvent(new Event('input')); }, get subtitle() { return subIn ? subIn.value : ''; }, set subtitle(v) { if (subIn) { subIn.value = v; subIn.hidden = !v; subIn.dispatchEvent(new Event('input')); } }, get mode() { return nb.dataset.mode; }, setMode, render: renderMarkdown, get html() { return view.innerHTML; } };
     }
-    /* a hidden rack peeks by the kit's pointer law (createRack); the playhead does the same around whichever seat modDodge gives it */
-    const peekLast = { x: -1, y: -1, bar: false };
-    const peekTransport = document.getElementById('transport');
-    window.addEventListener('pointermove', (e) => {
-      if (e.pointerType === 'touch' || app.state.uiHidden || !document.body.classList.contains('rack-hidden')) return;
-      if (Math.abs(e.clientX - peekLast.x) < 2 && Math.abs(e.clientY - peekLast.y) < 2) return;   // a synthesised move after a layout change is not the pointer leaving
-      peekLast.x = e.clientX; peekLast.y = e.clientY;
-      const W = window.innerWidth, H = window.innerHeight;
-      /* WAVE 108 · THE REVEAL TARGET FOLLOWS THE PLAYHEAD.  modDodge can tunnel the native
-         transport from its bottom seat to its top seat, but the hidden-rack hit area used to stay
-         hard-coded at the bottom of the viewport.  The pill's `at-top` class is the current seat
-         written by that move, so derive the same candidate rect from it here.  The 80/120 px margins preserve the old
-         720-px-wide target and its forgiving exit band without reading layout on every pointermove. */
-      const barTop = peekTransport && peekTransport.classList.contains('at-top') ? 52 : H - 60 - 46;
-      const bar = { left: (W - 560) / 2, right: (W + 560) / 2, top: barTop, bottom: barTop + 46 };
-      const nearBar = e.clientX >= bar.left - 80 && e.clientX <= bar.right + 80
-        && e.clientY >= bar.top - 60 && e.clientY <= bar.bottom + 60;
-      const insideBar = e.clientX >= bar.left - 120 && e.clientX <= bar.right + 120
-        && e.clientY >= bar.top - 120 && e.clientY <= bar.bottom + 120;
-      if (nearBar) { document.body.classList.add('transport-peek'); peekLast.bar = true; }
-      else if (!insideBar && peekLast.bar) { document.body.classList.remove('transport-peek'); peekLast.bar = false; }
-    });
+    /* the hidden rack's peeks: the kit's pointer law (createRack); the bar's own is rack-wiring.js' (015 H3; 020 S1 retired wave 108's second copy here,
+       which peeked the bar again under the very pointer that had just hidden it) */
   }
 }

@@ -69,13 +69,18 @@ export function createRackWiring(app) {
   /* 015 H3 · THE BAR'S PEEK under B: the kit's wave-108 peek runs only for a `transport` handed to createRack, which λWAVES' own seat law (the
      pill's dodge) does not hand it — so since 014 A0 a hidden stage bar never came back, and its ◧ with it.  The same numbers as the kit's
      (near 80 × 60, held within 120), read off the bar's own rect less the hide's slide (lab.css: translate(-50%, 140px)) */
+  /* 020 S1: the ◧ on the bar hides the bar from under the pointer that pressed it — the peek is ARMED only once the pointer has left the bar's
+     reach since the hide, so the hide no longer fights its own peek (the bar used to slide back mid-slide on the next twitch) */
+  let hid = false, armed = true;
   window.addEventListener('pointermove', (e) => {
     const b = document.body, tr = document.getElementById('transport'), on = b.classList.contains('transport-peek');
-    if (!b.classList.contains('rack-hidden') || b.classList.contains('ui-hidden') || !tr || !tr.classList.contains('mini')) { if (on) b.classList.remove('transport-peek'); return; }
+    if (!b.classList.contains('rack-hidden') || b.classList.contains('ui-hidden') || !tr || !tr.classList.contains('mini')) { hid = false; if (on) b.classList.remove('transport-peek'); return; }
     const r = tr.getBoundingClientRect(), dy = new DOMMatrixReadOnly(getComputedStyle(tr).transform).f, x = e.clientX, y = e.clientY + dy;
     const near = x >= r.left - 80 && x <= r.right + 80 && y >= r.top - 60 && y <= r.bottom + 60;
     const inside = x >= r.left - 120 && x <= r.right + 120 && y >= r.top - 120 && y <= r.bottom + 120;
-    if (near && !on) b.classList.add('transport-peek'); else if (!inside && on) b.classList.remove('transport-peek');
+    if (!hid) { hid = true; armed = !inside; }
+    if (!inside) armed = true;
+    if (near && !on && armed) b.classList.add('transport-peek'); else if (!inside && on) b.classList.remove('transport-peek');
   }, { passive: true });
   if (rk.el.toggle) rk.el.toggle.addEventListener('click', () => saveSettings());   // wave 59 (B111): the kit's ◧ hides by setHidden alone; on a phone the press IS the browser saying which it wants, stored as the B key stores it
   /* the ☆ list's LOAD is the kit's apply; the extras follow from the same slot once its click is done (BRIEF R4) */

@@ -211,7 +211,7 @@ export function createStageWords(app) {
        400 ms on, when the slide or the pill's dodge (a class first, then its arrival) has landed */
     let settle = 0;
     const place = (again = true) => { stats.places++; layer.viewChanged(); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
-    const rackKey = () => ['rack-hidden', 'rack-peek', 'rack-l', 'ui-hidden', 'phone', 'transport-peek'].map((c) => +document.body.classList.contains(c)).join('');
+    const rackKey = () => ['rack-hidden', 'rack-peek', 'rack-l', 'ui-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('');
     /* iteration 013 N2 (Josh: "When 'cursor' settings are off, the text should stay fixed and not sway"): the kit's layer parts its bodies from a
        moving pointer (mir/info/bodies.js, 260 px of reach) whatever follow and parallax say, so with PARALLAX and DRIFT off the layer is held by
        its own freeze while the pointer is within that reach of the block, and let go as it leaves (a rest that moved meanwhile is reached then);
@@ -291,7 +291,9 @@ export function createStageWords(app) {
       setSeat(bottom, pad) { if (bottom !== undefined) seat.bottom = !!bottom; if (Number.isFinite(pad)) seat.pad = Math.max(0, Math.min(0.4, pad)); place(); },
       get seat() { return { ...seat }; },   // a later announcement has already taken the seat: nothing
       /** STAGE FORMULA (the formula, the fade, the caption) and ATOM LABELS are two switches since 0.5.3 M9 (INFORMATIONAL) */
-      setOn(v) { on = !!v; layer.root.hidden = !on; show(); }, setLabels(v) { labelsOn = !!v; }, setLabelScale(s) { labelScale = s; labelsKey = ''; },
+      /* 020 S1 · ONE PRESS, ONE PLACE: OFF lets the block go inside the hidden root (its exit is never seen), so ON is ONE entrance of the string
+         wanted then — not the stale block's exit, a stale string's entrance and the right one's 250 ms later */
+      setOn(v) { on = !!v; layer.root.hidden = !on; if (!on && block) { block.remove(); block = null; shown = ''; } show(); }, setLabels(v) { labelsOn = !!v; }, setLabelScale(s) { labelScale = s; labelsKey = ''; },
       /** SIZE: the type × s (lab.css), then a re-measure — setPane(false) measures every bare block again (layer.js) */
       setScale(s) { layer.root.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
       /** the pop-ups' SIZE (× 15 px), apart from the formula's since iteration 007 */
@@ -307,7 +309,8 @@ export function createStageWords(app) {
        look's job is booked again after it (a MIR issue, filed in I-BUILD.md) */
     const applyInfo = (st, changed) => {
       const all = !changed, ch = (k) => all || changed.includes(k);
-      if (ch('molFormula')) { document.body.classList.toggle('no-mol-formula', !st.molFormula); api.setOn(st.molFormula); }
+      const words = () => { document.body.classList.toggle('no-mol-formula', !st.molFormula); api.setOn(st.molFormula); };
+      if (ch('molFormula') && !st.molFormula) words();   // 020 S1 · ONE PRESS, ONE PLACE: OFF first (nothing below renders), ON last (the string is final by then)
       if (ch('molFormulaSize')) api.setScale(st.molFormulaSize);
       if (ch('atomLabels')) api.setLabels(st.atomLabels);
       if (ch('atomLabelsSize')) api.setLabelScale(st.atomLabelsSize);
@@ -316,6 +319,7 @@ export function createStageWords(app) {
       if (!all && ch('cursorAway')) { layer.setFollow(st.cursorAway); layer.setParallax(st.cursorAway); }
       if (!all && ch('cursorDrift')) layer.setDrift(st.cursorDrift);
       if (!all && (ch('molName') || ch('molSubtitle') || ch('listCap'))) { stageSrc.v = -1; stageTextTick(); }   // iteration 011 Q1: the cap re-writes the list at once
+      if (ch('molFormula') && st.molFormula) words();
       if (!all) { look.prefs.apply(); schedule(TIER.PRESENT); }   // the atom labels are the frame's
     };
     applyInfo(P.all()); P.subscribe(applyInfo);
