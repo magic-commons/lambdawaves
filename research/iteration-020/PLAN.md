@@ -72,6 +72,12 @@ Later rows (not this chain): a true DAG (MIX of branches, reroute dots, `setChai
 
 ## JOSH'S ANSWERS (2026-10-27, evening)
 "Oh it's supposed to say 'Open Node's window'. defaultss for all" — call 3 answered as above; calls 1, 2, 4–10 at their defaults.
+11. (S2) MAP ONLY: headless Firefox shows ≤ 150 ms; if it still lags, run `node tools/stage-probe.mjs queue` on your session (prints the backlog). Default: BALL AND STICK was the lag.
+12. (S4) A project saved with ESP RANGE above 50 opens as stored (±80.0), not clamped. Default: as stored.
+13. (S5) H (the whole interface out) still re-centres the words; the law covers hide/peek only. Default: as is.
+14. (T2) EXPAND ALL unfolds every folded open window, SPECTRUM under a molecule too. Default: every window.
+15. (T2) The right group is two rows of five with the empty tenth seat at the end. Default: as is.
+16. (T1) PLAY's ON glow ring at the chips' strength. Default: as is.
 
 ## MERGE ORDER
 S → T → L → X (each on the merged tree; the recipe: `git merge --no-ff --no-commit it020-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → commit → CLOSED row → handoff line).
@@ -80,4 +86,5 @@ S → T → L → X (each on the merged tree; the recipe: `git merge --no-ff --n
 | chain | BASE | commit | note |
 |---|---|---|---|
 | S | d9210a2 | 0fc2e3e | S1–S5 (S-BUILD.md; no kit edit; node suite 246 PASS; hide-reveal/stage-text/routed-knob/camera-shift green; LOCK 843/0; MAP ONLY lag was BALL AND STICK's 2-D canvas ignoring it + Firefox inFlight cap 2 under heavy frames) |
-| T | 0fc2e3e | | |
+| T | c7bd626 | 1125c89 | T1–T3 (T-BUILD.md; no kit edit; node suite green; window-switching/hide-reveal/keyboard-window/menubar/stage-text green; bar 674 px both modes, right group two rows of five) |
+| L | 1125c89 | | |
