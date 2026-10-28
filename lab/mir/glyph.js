@@ -462,6 +462,11 @@ const GLYPHS = {
   more:
     '<circle cx="5" cy="12" r="2.1" fill="currentColor"/><circle cx="12" cy="12" r="2.1" fill="currentColor"/><circle cx="19" cy="12" r="2.1" fill="currentColor"/>',
 
+  /* ── keys (1.5.6-alpha.9).  A board of key caps: KEYBOARD's KEYS face and its THE BOARD trigger (MORE KEYS wears `more`). */
+  keys:
+    '<rect x="2.5" y="5.5" width="19" height="13" rx="2.5" ' + STROKE + '/>' +
+    '<path ' + STROKE + ' d="M6.5 9.5h.01M10 9.5h.01M13.5 9.5h.01M17 9.5h.01M6.5 12h.01M17 12h.01M8.5 15h7"/>',
+
   /* ── the windows that follow this wave. */
   xy:
     '<rect x="3.5" y="3.5" width="17" height="17" rx="2.5" ' + STROKE + '/>' +

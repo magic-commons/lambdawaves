@@ -34,7 +34,7 @@
   --win-corner: 18px; --win-corner-inset: 2px; --win-corner-rest: .5; --win-corner-z: 4;   /* the resize corner (BASINS kwin) */
   --win-trig-size: 11px; --win-trig-track: .12em;                                         /* a trigger's type: 11 px, 1.32 px */
 }
-.mir-rail {
+.mir-rail, .kwin-chiprail[data-mir-rail="modulation"] {   /* 1.5.6-alpha.9: the modulation window's own rail reads the same values (THE CHIPS' MOTION) */
   /* the disc's material, seat by seat below — the same ladder skin.css §14c gives the pane (L64/L65 change both) */
   --chip-fill: hsl(var(--glass-tint) / var(--glass-opacity));
   --chip-filter: var(--glass-filter);
@@ -52,7 +52,7 @@
   --rail-gap-share: .667;
   --rail-gap-derived: min(var(--rail-gap-max), calc(var(--rack-gap, 6px) * var(--rail-gap-share)));   /* the fallback: SPACING writes --rail-gap on <html> (the look engine), and that wins */
 }
-body[data-theme="light"] .mir-rail { --chip-rim: hsl(214 30% 40% / .34); }
+body[data-theme="light"] :is(.mir-rail, .kwin-chiprail[data-mir-rail="modulation"]) { --chip-rim: hsl(214 30% 40% / .34); }
 body:is([data-card="tinted"], [data-card="solid"]) .mir-rail { --chip-fill: var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity))); }
 body[data-card="refractive"] .mir-rail { --chip-fill: var(--surface-veil, transparent); }
 body.frost .mir-rail { --chip-filter: var(--surface-filter, var(--frost-filter)); }   /* every card style, as BASINS' rails (lab.css §56); TINTED's fill thins with --card-opacity */

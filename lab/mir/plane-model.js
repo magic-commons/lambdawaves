@@ -6,6 +6,7 @@
  * 1.5.0-alpha.14: the one knob law (kit.js gearOf): the fine gear is ⅛ on any modifier or a second finger (it was ⅕ on Shift),
  * the pointer that went down owns the drag (a lost capture ends it), and a double-tap is home. */
 import { el, onThemeChange, gearOf, watchTouches, setKnobLaw } from './kit.js';
+import { splitDepth } from './panels/camera-rig.js';
 
 export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
   const cv = el('canvas', 'plane-model', host); cv.width = 400; cv.height = 280; cv.tabIndex = 0;
@@ -29,10 +30,12 @@ export function planeModel(host, { getNormal, getPosition = () => 0, onTurn }) {
     g.setTransform(dpr,0,0,dpr,0,0);
     g.clearRect(0,0,400,280); g.strokeStyle = ink; g.globalAlpha = .25; g.lineWidth = 1.4;
     g.beginPath();g.arc(200,140,85,0,Math.PI*2);g.stroke();
-    for (let axis=0;axis<3;axis++) { g.beginPath(); for(let j=0;j<=96;j++){ const a=j*Math.PI/48,p=[0,0,0];p[(axis+1)%3]=Math.cos(a);p[(axis+2)%3]=Math.sin(a);const q=project(p);j?g.lineTo(...q):g.moveTo(...q); }g.stroke(); }
+    /* 1.5.6-alpha.9 BEHIND IS DOTTED: a line's part behind the view plane is dashed in half the ink, the part in front solid */
+    const lines=(pts,a)=>{const cut=splitDepth(pts);for(const side of ['front','back']){g.setLineDash(side==='back'?[4,4]:[]);g.globalAlpha=side==='back'?a/2:a;for(const run of cut[side]){g.beginPath();run.forEach((p,j)=>j?g.lineTo(...project(p)):g.moveTo(...project(p)));g.stroke();}}g.setLineDash([]);g.globalAlpha=a;};
+    for (let axis=0;axis<3;axis++) { const pts=[]; for(let j=0;j<=96;j++){ const a=j*Math.PI/48,p=[0,0,0];p[(axis+1)%3]=Math.cos(a);p[(axis+2)%3]=Math.sin(a);pts.push(p); } lines(pts,.25); }
     const u=unit(cross(n,Math.abs(n[2])<.9?[0,0,1]:[0,1,0])),v=cross(n,u);
     g.beginPath(); for(const [i,j] of [[-1,-1],[1,-1],[1,1],[-1,1]]){const p=project(n.map((a,k)=>a*pos+.8*(u[k]*i+v[k]*j)));g.lineTo(...p);}g.closePath();g.globalAlpha=.22;g.fillStyle=cssAccent;g.fill();g.globalAlpha=1;g.strokeStyle=cssAccent;g.stroke();
-    g.beginPath();g.moveTo(...project(n.map(a=>a*pos)));g.lineTo(...project(n.map(a=>a*(pos+.8))));g.stroke();
+    lines([n.map(a=>a*pos),n.map(a=>a*(pos+.8))],1);
     g.fillStyle=ink;g.font='18px sans-serif';for(const [i,label] of ['X','Y','Z'].entries()){const p=[0,0,0];p[i]=1.18;g.fillText(label,...project(p));}
   }
   /* Two small rotations about the world X and Y axes, not azimuth/elevation: the old parametrisation was

@@ -40,7 +40,7 @@ import { registerProjectPart } from '../core/project.js';
 import { handWrite } from '../modulation/registry.js';
 import {
   HAND_IDS, ANGLE_UNIT, createCameraRig, setCameraValue, atNorth, northStep, wrapDegrees, fmtDeg,
-  describe, present, SPHERE, lookDir, project, sphereDrag, transform2d, transform3d,
+  describe, present, SPHERE, lookDir, project, depthOf, splitDepth, sphereDrag, transform2d, transform3d,
 } from './camera-rig.js';
 
 const DEG = Math.PI / 180;
@@ -108,10 +108,11 @@ export function directionSphere(o = {}) {
   if (o.aria || o.label) svg.setAttribute('aria-label', o.aria || o.label);
   const side = el('div', 'mir-camsphere-side', body);
   const ball = svgEl('circle', 'cs-ball', svg); ball.setAttribute('cx', SPHERE.cx); ball.setAttribute('cy', SPHERE.cy); ball.setAttribute('r', SPHERE.R);
-  for (let axis = 0; axis < 3; axis++) {                                          // the three world rings: fixed on the screen
+  for (let axis = 0; axis < 3; axis++) {                                          // the three world rings: fixed on the screen; the half behind the view plane dashed
     const pts = [];
-    for (let j = 0; j <= 96; j++) { const a = j * Math.PI / 48, p = [0, 0, 0]; p[(axis + 1) % 3] = Math.cos(a); p[(axis + 2) % 3] = Math.sin(a); pts.push(project(p).map(f2).join(',')); }
-    svgEl('polyline', 'cs-ring', svg).setAttribute('points', pts.join(' '));
+    for (let j = 0; j <= 96; j++) { const a = j * Math.PI / 48, p = [0, 0, 0]; p[(axis + 1) % 3] = Math.cos(a); p[(axis + 2) % 3] = Math.sin(a); pts.push(p); }
+    const cut = splitDepth(pts);
+    for (const side of ['front', 'back']) for (const run of cut[side]) svgEl('polyline', side === 'back' ? 'cs-ring back' : 'cs-ring', svg).setAttribute('points', run.map((p) => project(p).map(f2).join(',')).join(' '));
   }
   const film = svgEl('polygon', 'cs-film', svg), look = svgEl('line', 'cs-look', svg), tip = svgEl('circle', 'cs-tip', svg);
   tip.setAttribute('r', 5);
@@ -132,6 +133,7 @@ export function directionSphere(o = {}) {
     const d = lookDir(yaw, pitch), t = project(d);
     setAttr(look, 'x2', f2(t[0])); setAttr(look, 'y2', f2(t[1]));
     setAttr(tip, 'cx', f2(t[0])); setAttr(tip, 'cy', f2(t[1]));
+    const behind = depthOf(d) < 0; look.classList.toggle('back', behind); tip.classList.toggle('back', behind);   // a look that points behind is dashed
     const ref = Math.abs(d[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0];
     const cr = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
     const nrm = (a) => { const n = Math.hypot(...a) || 1; return a.map((x) => x / n); };

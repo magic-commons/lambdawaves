@@ -969,7 +969,6 @@
   "Sync the modulation clock to the wall clock or run it free": "Sync the modulation clock to the wall clock or run it free",
   "TAP": "TAP",
   "TEXT": "TEXT",
-  "THE BOARD": "THE BOARD",
   "THEME": "THEME",
   "THIS VIEW": "THIS VIEW",
   "TIER": "TIER",
@@ -1366,7 +1365,6 @@
   "that output cannot be bound": "that output cannot be bound",
   "that preset could not be loaded": "that preset could not be loaded",
   "that preset was written by a model this build cannot honour": "that preset was written by a model this build cannot honour",
-  "the arrows, Home and End, the pages, F1–F24, the numpad and the media keys": "the arrows, Home and End, the pages, F1–F24, the numpad and the media keys",
   "the audio graph could not be built": "the audio graph could not be built",
   "the bar at the bottom centre": "the bar at the bottom centre",
   "the bar at the top centre": "the bar at the top centre",
@@ -4659,9 +4657,6 @@
   "TEXT": [
    "mir/shell/gui.js"
   ],
-  "THE BOARD": [
-   "mir/keyboard/keyboard.js"
-  ],
   "THEME": [
    "mir/shell/gui.js"
   ],
@@ -5927,9 +5922,6 @@
   ],
   "that preset was written by a model this build cannot honour": [
    "mir/modulation/window.js"
-  ],
-  "the arrows, Home and End, the pages, F1–F24, the numpad and the media keys": [
-   "mir/keyboard/keyboard.js"
   ],
   "the audio graph could not be built": [
    "mir/modulation/audio-capture.js"

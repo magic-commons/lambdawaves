@@ -729,6 +729,20 @@ html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:active::bef
   background-color: var(--state-press, var(--glass-press));
   border-color: var(--glass-border-color);
 }
+/* 1.5.6-alpha.9 · THE CHIPS' MOTION: the kit chip's (window/window.css .mir-chip), on its values and its timing — HOVER a lighter face
+   and 6 % larger (not under a finger), PRESS sinks (the wash, --chip-sink, 92 %; `.press` for a finger), RELEASE eases back */
+html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip { transition: color var(--motion-micro) var(--ease-out); }
+html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip::before {
+  transition: background-color var(--motion-micro) var(--ease-out), box-shadow var(--motion-micro) var(--ease-out), transform var(--motion-micro) var(--ease-out);
+}
+html:not(.kbm-touch) body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:hover { color: var(--fg); }
+html:not(.kbm-touch) body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:hover::before {
+  background-image: linear-gradient(var(--chip-lift), var(--chip-lift)), var(--m2-glass-wash); transform: translate(-50%, -50%) scale(var(--chip-hover-scale));
+}
+html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active, .press) { color: var(--fg); }
+html body .crail.crail-float[data-mir-rail="modulation"] .crail-chip:is(:active, .press)::before {
+  background-color: var(--state-press, var(--glass-press)); box-shadow: var(--chip-sink); transform: translate(-50%, -50%) scale(var(--chip-press-scale));
+}
 
 /* THE RUN SCROLLS HORIZONTALLY AND SHOWS NO BAR. */
 /* index.html:7390-7393   was:  #modwin .m2run  */

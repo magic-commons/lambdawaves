@@ -51,6 +51,9 @@
 .mir-camsphere .cs-film { fill: color-mix(in srgb, var(--acc) var(--cam-film-mix), transparent); stroke: var(--acc); stroke-width: 1.4; stroke-linejoin: round; }
 .mir-camsphere .cs-look { stroke: var(--acc); stroke-width: 2; stroke-linecap: round; }
 .mir-camsphere .cs-tip { fill: var(--acc); }
+.mir-camsphere .cs-ring.back { stroke-dasharray: 3 3; opacity: .28; }                    /* behind the view plane: dashed, half the ink (1.5.6-alpha.9) */
+.mir-camsphere .cs-look.back { stroke-dasharray: 4 4; stroke-linecap: butt; opacity: .5; }
+.mir-camsphere .cs-tip.back { opacity: .5; }
 .mir-camsphere .cs-svg.mod :is(.cs-film, .cs-look) { stroke: var(--acc2); }
 .mir-camsphere .cs-svg.mod .cs-film { fill: color-mix(in srgb, var(--acc2) var(--cam-film-mix), transparent); }
 .mir-camsphere .cs-svg.mod .cs-tip { fill: var(--acc2); }
