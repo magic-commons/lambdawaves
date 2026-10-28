@@ -81,6 +81,16 @@ const SCENES = {
     const targets = __LW.mod.targets().filter((t) => t.id.startsWith('nodes.' + id + '.')).map((t) => t.id + ' ' + t.label);
     N.remove([p, b]); N.set(id, 'mask', 'lights'); await w(200); $('[data-node="' + id + '"] .nodes-foot-t').click(); N.views[1].place(); await w(400);
     return { proof, plain, lights, centre, faded, targets, errs: __e.slice() };`,
+  card: async (E) => { const r = await E(`N.setHas(true); N.add('levels'); N.add('blur'); N.add('vignette'); __LW.layout.reopen('nodes'); __LW.layout.raise('nodes'); await w(1200);
+      const d = document.querySelector('.dev[data-id="nodes"]'); d.scrollIntoView(); await w(400); const r = d.getBoundingClientRect(); return [r.left, r.top, r.width, Math.min(r.height, 900)].map(Math.round);`);
+    writeFileSync('.tmp/x-card.png', Buffer.from(await g.snap(), 'base64'));
+    execFileSync('python3', ['-I', '-c', `import sys; from PIL import Image; x,y,w,h=map(int,sys.argv[2:6]); Image.open(sys.argv[1]).convert('RGB').crop((x,max(0,y),x+w,y+h)).save('.tmp/x-card.jpg', quality=80)`, '.tmp/x-card.png', ...r.map(String)]); return r; },
+  /* the older records: 018's one-node record opens with CURVES (bypassed), 019's list as saved (its values gain FADE · MASK · SOFT at home) */
+  compat: async (E) => {
+    const back = async (rec) => { await E(`localStorage.setItem('lambdawaves.q0.nodes', '${JSON.stringify(rec)}'); return 1;`); await g.nav(URL); await g.waitFor('window.__LW?.ready', 400, 100);
+      return E(`await w(400); return N.nodes().map((q) => q.id + ':' + q.type + (q.bypass ? '×' : '') + ':' + q.values.fade + ':' + q.values.mask);`); };
+    return { r018: await back({ v: 1, curves: false, at: { curves: [10, 90] } }), r019: await back({ v: 1, list: [{ id: 'curves', type: 'curves', values: {}, bypass: false, at: null }, { id: 'n2', type: 'posterize', values: { steps: 6 }, bypass: true, at: null }] }) };
+  },
   /* a NODES edit is no project edit (the graph is PREFERENCE): FOLDERS' unsaved mark before and after CURVES and a LEVELS are added */
   dirty: `await w(400); const d = () => __LW.layout.projects.dirty, o = { d0: d() }; N.setHas(true); N.set(N.add('levels'), 'gamma', 2); await w(600); o.d1 = d(); return o;`,
   /* X4: what a mask does on the screen — the stage canvas's pixels (the driver's composite) bare, under LEVELS GAMMA 3, and under it masked */
