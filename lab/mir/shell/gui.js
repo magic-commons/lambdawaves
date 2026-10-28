@@ -515,7 +515,7 @@ export function createGui({ host, prefs, app = {}, about = {}, accent, defaults 
     swOf('transportBar', phrase('TRANSPORT BAR'), phrase('Show the main transport bar, floating or docked')).root);
   line(g).append(segOf('spacing', phrase('SPACING'), [['0', '0', phrase('Rack windows flush to each other and to the screen’s edge')], ['tight', phrase('TIGHT'), phrase('3 px between rack windows and from the edge')],
     ['default', phrase('DEFAULT'), phrase('6 px between rack windows and from the edge')], ['airy', phrase('AIRY'), phrase('16 px between rack windows and from the edge')]]).root);   // BASINS' row (settings-window.js), and AIRY
-  line(g).append(segOf('rackPill', phrase('SCROLL PILL'), [['off', phrase('OFF'), phrase('No name pill while a rack scrolls')],
+  line(g).append(segOf('rackPill', phrase('SCROLL PILL'), [['off', phrase('OFF'), phrase('No name pill while a rack scrolls')],   // tr[SCROLL PILL]: the small coloured label with a window's name shown beside it while the column of windows scrolls
     ['a', phrase('A'), phrase('While a rack scrolls, each window’s name in a pill of {:ACCENT} A beside its title bar')],
     ['b', phrase('B'), phrase('While a rack scrolls, each window’s name in a pill of {:ACCENT} B beside its title bar')]]).root);   // tr[SCROLL PILL]: the small coloured label with a window's name shown beside it while the column of windows scrolls
 

@@ -36,7 +36,7 @@
  *   · the first scroll of a burst seats the pills — one `.rack-pill` per docked window, its text the head's own (already labelled)
  *     name, at the title bar's outer edge (left rack: right of the card; right rack: left), measured ONCE; while the burst lasts a
  *     scroll writes one transform on the layer, never a layout.  The reveal is a clip-path mask (rack.css), 180 ms each way.
- *   · the ink is read once a burst from the pill's own fill (light ink on a dark accent, dark on a light one: `data-ink`).
+ *   · the ink is read once a burst from the pill's own fill (light ink on a dark accent, dark on a light one: `data-pill-ink`).
  *   · THE SEAT (015 H1, replacing 014 A11's eyebrow; Josh 10-23: "Do not let the bubble touch or overlap the rack window"): the pill
  *     floats OUTSIDE the window, over the stage, at the title bar's height — `PILL.gap` px clear of the card's inner edge (left rack:
  *     right of the card; right rack: left of it), or of the rack's seated scrollbar thumb where that lies further out — the name
@@ -109,7 +109,7 @@ export function createRackPills({ host, racks, view = globalThis.window }) {
       if (left) pill.style.left = (edge + PILL.gap - lr.left) + 'px';
       else pill.style.right = (lr.right - edge + PILL.gap) + 'px';
     }
-    const first = inner.firstChild; if (first) layer.dataset.ink = inkOn(view.getComputedStyle(first).backgroundColor, doc.body.dataset.theme);
+    const first = inner.firstChild; if (first) layer.dataset.pillInk = inkOn(view.getComputedStyle(first).backgroundColor, doc.body.dataset.theme);
     inner.style.transform = '';
   }
   function scrolled(e) {

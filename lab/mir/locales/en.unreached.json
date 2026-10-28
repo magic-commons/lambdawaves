@@ -139,19 +139,19 @@
  },
  {
   "file": "mir/modulation/modwindow/modwindow.js",
-  "line": 598,
+  "line": 600,
   "why": "textContent",
   "text": "BPM"
  },
  {
   "file": "mir/modulation/modwindow/modwindow.js",
-  "line": 922,
+  "line": 924,
   "why": "textContent",
   "text": "A"
  },
  {
   "file": "mir/modulation/modwindow/modwindow.js",
-  "line": 924,
+  "line": 926,
   "why": "textContent",
   "text": "B"
  },
@@ -169,13 +169,13 @@
  },
  {
   "file": "mir/modulation/window.js",
-  "line": 1116,
+  "line": 1117,
   "why": "fragment",
   "text": "px,"
  },
  {
   "file": "mir/modulation/window.js",
-  "line": 1862,
+  "line": 1863,
   "why": "fragment",
   "text": " failed to build"
  },
@@ -457,7 +457,7 @@
  },
  {
   "file": "mir/shell/gui.js",
-  "line": 295,
+  "line": 293,
   "why": "fragment",
   "text": "the bench threw: "
  }

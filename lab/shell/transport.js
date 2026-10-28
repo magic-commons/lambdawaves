@@ -88,7 +88,7 @@ export function createTransport(app) {
     const chooser = document.querySelector('.dev[data-id="chem"] .mol-pick');
     const byId = (id) => document.getElementById(id);
     const search = createCsbSearch(app, { bar: () => T });   // A2 · THE MINIATURE PICKER (lab/csb-search.js)
-    const bar = createBar({ layout: CSB, root: T, host: dom.stage,
+    const bar = createBar({ layout: CSB, root: T, host: dom.stage, seats: 'thin',   // 021 K4: λWAVES' thin seats are a kit door since MIR 1.5.5
       nodes: { rate: ui.rateKnob.root, gear, modes: byId('lwMode'), chooser, search: search.root, folders, finder, info, theme, folds, nodes, rack: byId('rackToggle'), fav: byId('rackFav') },
       openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'the timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
       clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),

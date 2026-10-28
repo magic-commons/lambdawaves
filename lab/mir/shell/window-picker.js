@@ -32,9 +32,9 @@ export const WINDOW_PICKER = Object.freeze({ stagger: 30, cap: 12, close: 120 })
 
 export function createWindowPicker({ rack, open = (id) => rack.reveal(id), can = () => true, icon = () => null, cls = '', host = document.body } = {}) {
   const root = el('div', ('mir-window-picker glass ' + cls).trim(), host); root.hidden = true;
-  root.setAttribute('role', 'dialog'); ariaLabel(root, 'FINDER');
+  root.setAttribute('role', 'dialog'); ariaLabel(root, 'FINDER');   // tr[FINDER]: the finder: a search field over every window of the app; picking one opens it or scrolls the rack to it
   const input = el('input', 'wp-search', root); input.type = 'search'; input.spellcheck = false; input.autocomplete = 'off';
-  input.placeholder = t('search windows'); ariaLabel(input, 'search windows');
+  input.placeholder = t('search windows'); ariaLabel(input, 'search windows');   // tr[search windows]: the finder's search field: type part of a window's name
   const list = el('div', 'wp-list', root); list.setAttribute('role', 'listbox'); ariaLabel(list, 'FINDER');
   const life = new AbortController(), on = { signal: life.signal };
   let rows = [], cur = null, shut = 0, queue = [];
@@ -103,11 +103,19 @@ export function createWindowPicker({ rack, open = (id) => rack.reveal(id), can =
   addEventListener('keyup', (e) => { if (e.key === 'Shift' && !root.hidden) flush(); }, on);
   document.addEventListener('pointerdown', (e) => { if (!root.hidden && !root.contains(e.target)) close(); }, { capture: true, signal: life.signal });
 
-  return {
+  const api = {
     root, open: show, close, toggle: () => (root.hidden || root.classList.contains('wp-out') ? show() : close()),
     get shown() { return !root.hidden && !root.classList.contains('wp-out'); }, get isOpen() { return this.shown; },
     /** the SHIFT queue in pick order (a copy) */
     get queued() { return queue.slice(); },
-    destroy() { life.abort(); clearTimeout(shut); root.remove(); },
+    /** open the SHIFT queue now, in pick order (the old + list's commit) */
+    commit: flush,
+    destroy() { life.abort(); clearTimeout(shut); root.remove(); if (rack && Object.getOwnPropertyDescriptor(rack, 'addMenu')?.get === alias) delete rack.addMenu; },
   };
+  /* THE addMenu SHIM (1.5.5, deprecated; it leaves at the next line): the rack's old + list was `rack.addMenu` { open, close, shown, queued, commit };
+     the FINDER answers the same five, so an app that still calls rack.addMenu reaches it (a warning once) */
+  let warned = false;
+  const alias = () => { if (!warned) { warned = true; console.warn('MIR 1.5.5: rack.addMenu is gone; it answers as the FINDER (createWindowPicker) until the next line'); } return api; };
+  if (rack && typeof rack === 'object' && !('addMenu' in rack)) Object.defineProperty(rack, 'addMenu', { get: alias, configurable: true });
+  return api;
 }
