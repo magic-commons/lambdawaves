@@ -69,6 +69,8 @@ D1 `docs/laws/*.md` by subject (the stage words, the register and systems, the f
 12. (K) The kit commits and the tag v1.5.5 live in a clone and a bundle (the isolated builder could not write ~/Documents/MIR). Run: git -C ~/Documents/MIR fetch <λW>/.tmp/it021/kit-1.5.5.bundle kit-1.5.5:kit-1.5.5 'refs/tags/v1.5.5:refs/tags/v1.5.5' — then merging kit-1.5.5 into your branches is yours. Default: you run it when you like; later 1.5.6 doors are built on the clone road (a builder clones the bundle, commits the door there as 1.5.6-alpha.N, adopts back with adopt.mjs, pins the sha).
 13. (G1) BUILD_LINE to lab/build-line.js takes the app cycles to 0 (repoint tools/perf/main-thread.mjs's regex). Default: do it in chain D with the docs.
 14. (G2) The enterBox crossing stays in spectrum (17/25): the SYSTEM stepper's BOX press launches the gas and a restore must not. Default: acceptable.
+15. (R2) The NODES flash step is uncalibrated (a tenth of each knob's span per frame). Default: as built; calibrate after a hand check.
+16. (R5) The ≈ 150 ms gap when MOLECULES turns on remains (molSession.selected is set at the claim). Default: as is; a loading mark is 022's.
 
 ## MERGE ORDER
 K → G → R → I → V → D (each on the merged tree; the recipe: `git merge --no-ff --no-commit it021-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → commit → CLOSED row → handoff line). After K the kit law is "1.5.6-alpha.N, additive doors only"; every later chain's kit edit follows it.
@@ -78,4 +80,5 @@ K → G → R → I → V → D (each on the merged tree; the recipe: `git merge
 |---|---|---|---|
 | K | 5fefda2 | b0f6441 | K1–K4 (K-BUILD.md; MIR 1.5.5 cut in a clone — kit commits dd3e8c7/0feba5e/a7fba39 + tag v1.5.5, bundle .tmp/it021/kit-1.5.5.bundle, Josh fetches into ~/Documents/MIR; adopt --check in step; node suite green; LOCK 843/0 · 987/0; bar byte-identical) |
 | G | 7471173 | 6c5cae3 | G1–G6 (G-BUILD.md; no kit edit; app cycle edges 46 → 4 (BUILD_LINE only); spectrum 25 → 17; LOCK 843/0 · 987/0; bar 2,486 boxes 0 differing; 17 browser suites green) |
-| R | 6c5cae3 | | |
+| R | ec63b9b | 3bf035d | R1–R6 (R-BUILD.md; kit 1.5.6-alpha.1 session door via the clone road, bundle .tmp/it021/kit.bundle; STATE-SCOPES generated; LOCKED 60 Δt and modulation step both one constant; LOCK 843/0 · 987/0; 19 browser suites green) |
+| I | 3bf035d | | |
