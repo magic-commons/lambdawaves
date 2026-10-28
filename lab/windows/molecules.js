@@ -2,7 +2,7 @@
  * where the LEGACY note stands.  Iteration 008 U: MO-REGISTRY is no longer a window — the register is built INTO the MOLECULES card (chemview's `slots`)
  * and a saved `orbitals` seat opens MOLECULES (settings.js RETIRED_WINDOWS); the fix round (F5) folded its second seat, which no longer made a device, into this one. */
 import { TIER } from '../tier.js'; import { el } from '../mir/kit.js';
-import { VIEW, VIEW_NAMES, STYLE } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
+import { VIEW, VIEW_NAMES, STYLE } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { MODE } from '../shell/settings.js';   // 021 R5: ONE MODE, the windows' table
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
@@ -115,7 +115,7 @@ export function createMolecules(app) {
     if (!md || !T.announce(md, 0)) return;
     head.shown++; head.md = md;
     const life = new AbortController(), until = performance.now() + 2500, bye = head.bye = () => { life.abort(); if (head.bye === bye) head.bye = null; T.dismiss(md); };
-    addEventListener('keydown', (e) => { if (e.key === 'Escape' && !isField(e.target, true)) bye(); }, { signal: life.signal });
+    life.signal.addEventListener('abort', app.sh.ACTIONS.escape.push(bye));   // 021 I1: a layer of THE ESCAPE STACK (lab/actions.js) until it goes
     dom.canvas.addEventListener('pointerdown', () => { if (performance.now() >= until) bye(); }, { signal: life.signal, passive: true });
   }
   app.state.chem.subscribe(headLand);

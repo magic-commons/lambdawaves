@@ -8,6 +8,25 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - **BUILT 1.5.6-alpha.1 · a failed resume never arms** (021 R1, `core/session.js`; kit commit 7f052d5, the clone road): saved parts that threw
   or came back `failed` are copied to `<key>.failed` and autosave stays unarmed until a later resume takes, `discard()` or `arm()`.
   λWAVES' `projects.resume` reports it and rolls back through `openPayload(…, { rollback: true })`.
+- **BUILT 1.5.6-alpha.2 · the keyboard window takes `panels`** (021 I2, `keyboard/keyboard.js`; kit commits d798ebc + cbd721f, the clone road):
+  KEYS is face 1, the app's faces follow as radio chips on the rail; under 860 px it opens on the first app face; `tab(name)`. λWAVES' MAPPING.
+- **BUILT 1.5.6-alpha.2 · MORE KEYS** (021 I2, `keyboard/keyboard.js`): the board's second page in the same well (arrows, Home/End, PgUp/PgDn,
+  Insert/Delete, F1–F24, the numpad, the media keys) — a swap, not a strip under the board, so the 416 px pane keeps its five rows.
+- **BUILT 1.5.6-alpha.2 · media and volume keys** (021 I2, `shell/keys.js` NAMED): Media* and AudioVolume* codes parse and show.
+- **BUILT 1.5.6-alpha.2 · `RESERVED_BY_BROWSER`** (021 I1/I2, `shell/keys.js`): `createKeys({ reserved })` refuses Mod+W/T/N/⇧N/⇧T, Mod+Tab and
+  F11 in check and bind; λWAVES passes it through `lab/key-table.js`.
+- **BUILT 1.5.6-alpha.2 · the event maps** (021 I2, `modulation/registry.js`): `MAP_KINDS` + `'trigger'` / `'toggle'`, `fire(on)` on an edge
+  through 0.5 (0.55 / 0.45), deferred; λWAVES' `action.<id>` targets (lab/mapping.js).
+- **BUILT 1.5.6-alpha.2 · THE MIDI DOOR** (021 I2, `shell/midi.js`, new): `createMidi({ storage, run, up, source })`, request only on a press,
+  the `{ v: 1, map }` PREFERENCE, trigger · toggle · hold, `learn()`, `devices()`, `sources()`.
+- **BUILT 1.5.6-alpha.2 · menubar submenus, checks, radios, glyphs** (021 I3, `shell/menubar.js`; kit ace143d, dd7f48c, 92674bc): an entry
+  `[label, () => entries, null, hint, { sub: true }]` (hover or → opens beside the row on the bar's layer, ← / Escape back, an accordion on a
+  phone), `opts.checked` (✓), `opts.radio: 'group'` (•), `opts.icon` (a kit glyph name). λWAVES' tree FILE · EDIT · VIEW · PLAY · WINDOW · HELP.
+- **A menubar row's app glyph** (021 I3; not built — chain V's `registerGlyphs`): `opts.icon` takes kit glyph names only, so WINDOW's PICKER /
+  ATOMS / MOLECULES rows still wear their masks by label (`notebook.js` `tagIcons`, now over every list of the bar).
+- **A `'midi'` modulation SOURCE kind** (021 I2; not built): midi.js hands every CC as 0…1 (`sources()`, `source(key, v)`), but the model
+  (`modulation/mod.js`) knows lfo · env · audio only; a `kind: 'midi'` source beside audio (its rack face, its serialisation) would let a
+  learned knob drive any dial as an LFO does. λWAVES routes notes and CCs to ACTIONS today, not to dials.
 - **ONE POSITION** (021 R3, REVIEW-A §6.6; not built): the transport's `seek` spanning the play clock and the modulation beat (t = beat → a.u.
   through RATE/BPM), so the main bar's ⏮ and TIMELINE's ⏮ are one; and a LOCK option on the modulation clock (`stepMode: 'locked', hz`) as
   the recorder's clock has — λWAVES drives `host.clock.step(1/hz)` from its loop under PLAYBACK LOCK today and re-anchors on release through

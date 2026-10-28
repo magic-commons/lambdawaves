@@ -1,4 +1,5 @@
-// The logo's FILE · EDIT · VIEW · WINDOW · ABOUT bar, row by row (OPTIMIZATION 2026-09-24 · N1, AUDIT-E FE1).
+// The logo's FILE · EDIT · VIEW · PLAY · WINDOW · HELP bar, row by row (OPTIMIZATION 2026-09-24 · N1, AUDIT-E FE1; 021 I3: the tree of
+// REVIEW-B §4 — a row inside a submenu is named by its path, 'STATE › CLEAR', and pressed as a hand presses it, the submenu rows first).
 // Every row is clicked as a user clicks it — the bar opened, the menu's chip pressed, the item pressed — and each one
 // is judged by the act it names, not by "nothing threw".  Three rows were wrong before N1: EDIT › RESEED reset the
 // CAMERA (runKey('KeyR') found camReset), EDIT › RESET KEYS clicked a trigger deleted in 5f6421e, and EDIT › CLEAR
@@ -20,8 +21,8 @@ try {
       const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === menu);
       if (!btn) return { found: false, why: 'no menu ' + menu };
       btn.click();
-      const it = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.startsWith(label));
-      if (!it) { btn.click(); return { found: false, why: 'no row ' + label, rows: [...btn.parentElement.querySelectorAll('.mb-lbl')].map((l) => l.textContent) }; }
+      const it = await __find(btn, label);
+      if (!it || !it.querySelector) { btn.click(); return { found: false, why: 'no row ' + label, at: it }; }
       const key = (it.querySelector('.mb-key') || {}).textContent || '', disabled = it.disabled;
       if (!disabled) it.click(); else btn.click();
       await __LW.settle();
@@ -29,38 +30,37 @@ try {
         focus: document.activeElement === document.getElementById('title') ? 'title' : (document.activeElement || {}).tagName || '' };
     };
     window.__keyOf = (id) => __LW.keys.name(__LW.keys.actions.find((a) => a.id === id));
+    /* 021 I3 · a path 'A › B › C' in an open group: each submenu row pressed (it opens beside its row), the last row returned */
+    window.__find = async (btn, label) => { let list = btn.parentElement.querySelector('.mb-list'); const parts = label.split(' › ');
+      for (let i = 0; i < parts.length; i++) { const it = [...list.querySelectorAll(':scope > .mb-item')].find((x) => x.querySelector('.mb-lbl').textContent.startsWith(parts[i]));
+        if (!it || i === parts.length - 1) return it || 'no ' + parts[i]; if (it.getAttribute('aria-expanded') !== 'true') it.click(); await new Promise((q) => setTimeout(q, 30));
+        list = [...document.querySelectorAll('#menubar .mb-sub-list')].find((l) => l.mbRow === it); if (!list) return 'no submenu ' + parts[i]; } };
+    window.__keyAt = async (menu, label) => { __LW.layout.menu.open(); const bar = document.getElementById('menubar'), btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === menu);
+      if (btn.parentElement.querySelector('.mb-list').hidden) btn.click(); const it = await __find(btn, label); const k = it && it.querySelector ? (it.querySelector('.mb-key') || {}).textContent || '' : null; __LW.layout.menu.close(); return k; };
     return 1;`);
 
   /* ── 1 · every key hint is the LIVE binding, and a rebind renames the row ── */
-  const hints = await g.ev(`const want = { EDIT: [['PLAY / PAUSE', 'transport.play'], ['RESET the view', 'camReset'], ['RESEED the particles', 'reseed'], ['UNDO', 'undo'], ['REDO', 'redo'], ['HISTORY UNDO', 'historyUndo'], ['SETTINGS', 'settings']],
-      VIEW: [['HIDE the interface', 'hide'], ['FULL SCREEN', 'fullscreen']], WINDOW: [['MODULATION', 'modulation'], ['NOTEBOOK', 'notebook'], ['HIDE / SHOW the rack', 'rack'], ['DOCK / UNDOCK', 'dock'], ['HIDE the interface', 'hide'], ['SHOW / HIDE help', 'notes']],
-      ABOUT: [['KEYBOARD SHORTCUTS', 'help'], ['SETTINGS', 'settings']], FILE: [['SAVE project AS', 'saveAs']] };
+  const hints = await g.ev(`const want = { PLAY: [['PLAY / PAUSE', 'transport.play']], EDIT: [['STATE › RESEED the particles', 'reseed'], ['UNDO', 'undo'], ['REDO', 'redo'], ['HISTORY UNDO', 'historyUndo'], ['SETTINGS', 'settings']],
+      VIEW: [['CAMERA › HOME', 'camReset'], ['INTERFACE › HIDE the interface', 'hide'], ['INTERFACE › WINDOW HELP', 'notes'], ['FULL SCREEN', 'fullscreen']], WINDOW: [['TOOLS › MODULATION', 'modulation'], ['TOOLS › NOTEBOOK', 'notebook'], ['RACKS › SHOW THE RACK', 'rack'], ['RACKS › DOCK', 'dock']],
+      HELP: [['KEYBOARD SHORTCUTS', 'help']], FILE: [['SAVE AS', 'saveAs'], ['NEW', 'new'], ['OPEN', 'open'], ['EXPORT › PICTURE', 'export.picture']] };
     const bad = [];
-    const bar = document.getElementById('menubar');
-    for (const [menu, rows] of Object.entries(want)) {
-      __LW.layout.menu.open(); const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === menu); btn.click();
-      for (const [label, id] of rows) { const it = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.startsWith(label));
-        const k = it && it.querySelector('.mb-key') ? it.querySelector('.mb-key').textContent : null; if (k !== __keyOf(id)) bad.push([menu, label, k, __keyOf(id)]); }
-      btn.click();
-    }
-    __LW.layout.menu.open(); { const btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === 'VIEW'); btn.click();
-      const cyc = [...btn.parentElement.querySelectorAll('.mb-key')].map((k) => k.textContent).filter((t) => /cycles/.test(t));
-      if (cyc.join('|') !== __keyOf('view') + ' cycles|' + __keyOf('style') + ' cycles') bad.push(['VIEW', 'cycles', cyc]); btn.click(); }
+    for (const [menu, rows] of Object.entries(want)) for (const [label, id] of rows) { const k = await __keyAt(menu, label); if (k !== __keyOf(id)) bad.push([menu, label, k, __keyOf(id)]); }
+    /* 021 I3: a choice is a radio, and the one in force carries the mark (VIEW › OBSERVABLE: the boot's PHASE) */
+    { __LW.layout.menu.open(); const bar = document.getElementById('menubar'), btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === 'VIEW'); btn.click();
+      const it = await __find(btn, 'OBSERVABLE › arg ψ'); if (!it || it.getAttribute('aria-checked') !== 'true' || it.getAttribute('role') !== 'menuitemradio') bad.push(['VIEW', 'OBSERVABLE radio', it && it.outerHTML && it.outerHTML.slice(0, 120)]); __LW.layout.menu.close(); }
     const b = __LW.keys.bind('hide', { key: 'KeyU' });
-    __LW.layout.menu.open(); const out = {};
-    for (const menu of ['VIEW', 'WINDOW']) { const btn = [...bar.querySelectorAll('.mb-btn')].find((x) => x.dataset.menu === menu); btn.click();
-      out[menu] = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.startsWith('HIDE the interface')).querySelector('.mb-key').textContent; btn.click(); }
+    const out = { VIEW: await __keyAt('VIEW', 'INTERFACE › HIDE the interface') };
     __LW.keys.reset(); __LW.layout.menu.close();
     return { bad, bound: b.ok, rebound: out };`);
   assert.deepEqual(hints.bad, []);
   assert.equal(hints.bound, true);
-  assert.deepEqual(hints.rebound, { VIEW: 'U', WINDOW: 'U' });
-  console.log('PASS every key hint in the bar is the live binding, and a rebind renames the row (VIEW and WINDOW both read U)');
+  assert.deepEqual(hints.rebound, { VIEW: 'U' });
+  console.log('PASS every key hint in the bar is the live binding (call 6: NEW Ctrl+Alt+N, OPEN Ctrl+O, PICTURE Ctrl+E), a choice is a radio with its mark, and a rebind renames the row (VIEW › INTERFACE › HIDE reads U; HIDE is listed once)');
 
   /* ── 2 · RESEED seeds the particles and leaves the camera where the hand put it ── */
   const reseed = await g.ev(`__LW.particles.setOn(false); __LW.orbit(0.9, 0.1); await __LW.settle();
     const cam0 = { yaw: __LW.obs.yaw, pitch: __LW.obs.pitch, dist: __LW.obs.dist, fov: __LW.obs.fov, quat: __LW.obs.quat.slice() };
-    const r = await __row('EDIT', 'RESEED the particles');
+    const r = await __row('EDIT', 'STATE › RESEED the particles');
     const cam1 = { yaw: __LW.obs.yaw, pitch: __LW.obs.pitch, dist: __LW.obs.dist, fov: __LW.obs.fov, quat: __LW.obs.quat.slice() };
     const same = Object.keys(cam0).every((k) => k === 'quat' ? cam0.quat.every((v, i) => Object.is(v, cam1.quat[i])) : Object.is(cam0[k], cam1[k]));
     const out = { r, on: __LW.particles.on, n: __LW.particles.points.length, same, errors: __e.slice() };
@@ -74,13 +74,13 @@ try {
   /* ── 3 · RESET KEYS restores a rebound key and forgets the override ── */
   /* Digit9, a free key: L is the main menu's since iteration 003 (and 5 the timeline's zoom-selection), and an overlap binds only on an explicit steal */
   const keys = await g.ev(`const b = __LW.keys.bind('transport.play', { key: 'Digit9' });
-    const rebound = __LW.keys.actions.find((a) => a.id === 'transport.play').key, stored = localStorage.getItem('lambdawaves.q0.keys');
-    const r = await __row('EDIT', 'RESET the key bindings');
-    return { ok: b.ok, rebound, stored: !!stored && /transport\.play/.test(stored), r, after: __LW.keys.actions.find((a) => a.id === 'transport.play').key, storedAfter: localStorage.getItem('lambdawaves.q0.keys'), errors: __e.slice() };`);
+    const rebound = __LW.keys.table.chords('transport.play')[0], stored = localStorage.getItem('lambdawaves.q0.keys');
+    const r = await (async () => { __LW.run('keys.reset'); return { found: true, closed: true }; })();   /* 021 I3: RESET lives in the KEYBOARD window (RESET TO DEFAULT) and the action keys.reset; the tree has no row for it */
+    return { ok: b.ok, rebound, stored: !!stored && /transport\.play/.test(stored), r, after: __LW.keys.table.chords('transport.play')[0], storedAfter: localStorage.getItem('lambdawaves.q0.keys'), errors: __e.slice() };`);
   assert.equal(keys.ok, true); assert.equal(keys.rebound, 'Digit9'); assert.equal(keys.stored, true);
   assert.equal(keys.r.found, true); assert.equal(keys.r.closed, true);
   assert.equal(keys.after, 'Space'); assert.equal(keys.storedAfter, null); assert.deepEqual(keys.errors, []);
-  console.log('PASS EDIT › RESET the key bindings puts PLAY back on Space and removes the stored override');
+  console.log('PASS the keys.reset action puts PLAY back on Space and removes the stored override');
 
   /* ── 4 · CLEAR is STATE's CLEAR — t, playhead, trail, coefficients — and an EDIT on the undo ring, never its wipe,
          with HISTORY floated (whose own CLEAR trigger then precedes the racks in the document) ── */
@@ -93,7 +93,7 @@ try {
     const firstClear = [...document.querySelectorAll('.trig')].find((t) => t.textContent.trim() === 'CLEAR');
     const firstIsHistory = !!firstClear && !!firstClear.closest('.dev[data-id="history"]');
     const sv = __LW.shadowView, orig = sv.clearTrail; let trails = 0; sv.clearTrail = function () { trails++; return orig.call(this); };
-    const r = await __row('EDIT', 'CLEAR the register');
+    const r = await __row('EDIT', 'STATE › CLEAR the register');
     sv.clearTrail = orig;
     __LW.history.flush(); await __LW.settle();
     const tl = document.querySelector('#transport .tr-open'); tl.click(); await __LW.settle();   // 018 E2: t left the CSB; the playhead's reading is the TIMELINE's t (keys.js ui.tlTime)
@@ -120,7 +120,7 @@ try {
     __LW.loadPreset('1s+2pz'); __LW.pause(); await __LW.settle();
     localStorage.removeItem(LS_EXP); localStorage.removeItem(LS_PRES);
     const before = snapLS();
-    const rs = await __row('FILE', 'SAVE the experiment (quick)');
+    const rs = await __row('FILE', 'QUICK › SAVE the experiment');
     const after = snapLS();
     const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter((k) => before[k] !== after[k]).sort();
     const S = __LW.serialize();
@@ -130,14 +130,14 @@ try {
     __LW.loadPreset('rydberg'); await __LW.settle();
     const moved = __LW.stateDigest() !== digest;
     const beforeLoad = snapLS();
-    const rl = await __row('FILE', 'LOAD the last quick save');
+    const rl = await __row('FILE', 'QUICK › LOAD the last quick save');
     const loaded = __LW.stateDigest() === digest, quickKeysKept = localStorage.getItem(LS_EXP) === beforeLoad[LS_EXP] && localStorage.getItem(LS_PRES) === beforeLoad[LS_PRES];
     /* the clipboard, stubbed: a synthetic click is not a trusted gesture, and what is judged is WHAT the row copies */
     let clip = null; const cb = navigator.clipboard; const orig = cb.writeText; cb.writeText = async (t) => { clip = t; };
-    const rj = await __row('EDIT', 'COPY as JSON'); await new Promise((r) => setTimeout(r, 30));
+    const rj = await __row('EDIT', 'COPY › JSON'); await new Promise((r) => setTimeout(r, 30));
     const json = clip; const jsonSame = !!json && JSON.stringify(mask(JSON.parse(json).presentation)) === JSON.stringify(mask(__LW.serialize().presentation)) && JSON.stringify(JSON.parse(json).experiment) === JSON.stringify(__LW.serialize().experiment);
     clip = null;
-    const rk = await __row('EDIT', 'COPY a LINK'); await new Promise((r) => setTimeout(r, 30));
+    const rk = await __row('EDIT', 'COPY › LINK'); await new Promise((r) => setTimeout(r, 30));
     const linkSame = !!clip && !!__LW.link.last && clip === __LW.link.last.href && /#s=/.test(clip);
     cb.writeText = orig;
     return { rows: [rs, rl, rj, rk].map((r) => r.found && r.closed && r.listsDown), changed, expSame, presSame, moved, loaded, quickKeysKept, jsonSame, linkSame, errors: __e.slice() };`);
@@ -154,50 +154,48 @@ try {
     const st = () => document.querySelector('.dev[data-id="spectrum"] .dev-stat').textContent;   // 018 C1: the lab's status line is SPECTRUM's
     window.confirm = () => true;                                      // NEW project asks before discarding a dirty project
     /* EDIT */
-    { __LW.pause(); const r = await __row('EDIT', 'PLAY / PAUSE'); R.play = ok(r) && __LW.clock.playing; __LW.pause(); }
-    { __LW.loadPreset('1s+2pz'); const r = await __row('EDIT', 'NORMALIZE'); R.normalize = ok(r) && /‖c‖/.test(st()); }
+    { __LW.pause(); const r = await __row('PLAY', 'PLAY / PAUSE'); R.play = ok(r) && __LW.clock.playing; __LW.pause(); }
+    { __LW.loadPreset('1s+2pz'); const r = await __row('EDIT', 'STATE › NORMALIZE'); R.normalize = ok(r) && /‖c‖/.test(st()); }
     { __LW.loadPreset('1s+2pz'); __LW.pause(); let clip = null; const cb = navigator.clipboard, orig = cb.writeText; cb.writeText = async (t) => { clip = t; };   /* 0.3.3 · wave 135 */
-      const r = await __row('EDIT', 'COPY the state as LaTeX'); await new Promise((q) => setTimeout(q, 30)); cb.writeText = orig;
+      const r = await __row('EDIT', 'COPY › LaTeX'); await new Promise((q) => setTimeout(q, 30)); cb.writeText = orig;
       const L = (clip || '').split(String.fromCharCode(10)); R.latex = ok(r) && L.length === 2 && L[0] === '$1s_{0}$ and $2p_{0}$' && L[1].startsWith('$' + String.fromCharCode(92) + 'psi = 0.71');
       R.latexFlash = document.querySelector('.dev[data-id="spectrum"]').classList.contains('copied'); }
-    { __LW.orbit(0.7, 0.2); const r = await __row('EDIT', 'RESET the view'); R.view = ok(r) && Math.abs(__LW.obs.yaw - 0.65) < 1e-12 && Math.abs(__LW.obs.dist - 3.3) < 1e-12; }
+    { __LW.orbit(0.7, 0.2); const r = await __row('VIEW', 'CAMERA › HOME'); R.view = ok(r) && Math.abs(__LW.obs.yaw - 0.65) < 1e-12 && Math.abs(__LW.obs.dist - 3.3) < 1e-12; }
     { const r = await __row('EDIT', 'UNDO HISTORY'); R.hist = ok(r) && !document.querySelector('.dev[data-id="history"]').classList.contains('closed'); }
     { const r = await __row('EDIT', 'SETTINGS'); R.settings = ok(r) && !document.querySelector('.dev[data-id="settings"]').classList.contains('closed'); }
     { __LW.api.setPopulation(0, 0.5); __LW.history.flush(); const u = await __row('EDIT', 'UNDO'); const d = __LW.history.redoDepth; const re = await __row('EDIT', 'REDO'); R.undoRedo = ok(u) && ok(re) && d >= 1 && __LW.history.redoDepth === d - 1; }
     /* VIEW */
     { const i0 = __LW.mat.invert; const r = await __row('VIEW', 'INVERT the cloud'); R.invert = ok(r) && __LW.mat.invert === !i0; __LW.setInvert(i0); }
     { const views = [['ρ = |ψ|²', 0], ['arg ψ', 1], ['Re ψ', 2], ['Im ψ', 3]]; R.views = true;   /* iteration 008 W: Δρ and Re + Im left WAVE */
-      for (const [l, v] of views) { const r = await __row('VIEW', l); R.views = R.views && ok(r) && __LW.mat.view === v; } __LW.setView('phase'); }
+      for (const [l, v] of views) { const r = await __row('VIEW', 'OBSERVABLE › ' + l); R.views = R.views && ok(r) && __LW.mat.view === v; } __LW.setView('phase'); }
     { const styles = ['CLOUD', 'SOLID', 'SIGNED', 'DUST', 'BANDS']; R.styles = true;   /* iteration 008 G: GRAIN joined DUST (its index 2 retired; DUST is 5) */
-      for (const s of styles) { const r = await __row('VIEW', '— style: ' + s); R.styles = R.styles && ok(r) && __LW.mat.style === ({ CLOUD: 0, SOLID: 1, SIGNED: 3, DUST: 5, BANDS: 4 })[s]; } __LW.setStyle('cloud'); }
-    { const c0 = document.body.classList.contains('no-captions'); const r = await __row('VIEW', 'STAGE CAPTIONS'); R.captions = ok(r) && document.body.classList.contains('no-captions') === !c0; await __row('VIEW', 'STAGE CAPTIONS'); }
-    { const b0 = document.body.classList.contains('no-badges'); const r = await __row('VIEW', 'STATUS TAGS'); R.badges = ok(r) && document.body.classList.contains('no-badges') === !b0; await __row('VIEW', 'STATUS TAGS'); }
-    { const h0 = document.body.classList.contains('control-hints-off'); const r = await __row('VIEW', 'CONTROL HINTS'); R.hints = ok(r) && document.body.classList.contains('control-hints-off') === !h0; await __row('VIEW', 'CONTROL HINTS'); }
-    { const r = await __row('VIEW', 'HIDE the interface'); R.hideV = ok(r) && __LW.uiHidden === true; __LW.keys.toggleUI(); R.hideV = R.hideV && __LW.uiHidden === false; }
+      for (const s of styles) { const r = await __row('VIEW', 'STYLE › ' + s); R.styles = R.styles && ok(r) && __LW.mat.style === ({ CLOUD: 0, SOLID: 1, SIGNED: 3, DUST: 5, BANDS: 4 })[s]; } __LW.setStyle('cloud'); }
+    { const c0 = document.body.classList.contains('no-captions'); const r = await __row('VIEW', 'STAGE › CAPTIONS'); R.captions = ok(r) && document.body.classList.contains('no-captions') === !c0; await __row('VIEW', 'STAGE › CAPTIONS'); }
+    { const b0 = document.body.classList.contains('no-badges'); const r = await __row('VIEW', 'INTERFACE › STATUS TAGS'); R.badges = ok(r) && document.body.classList.contains('no-badges') === !b0; await __row('VIEW', 'INTERFACE › STATUS TAGS'); }
+    { const h0 = document.body.classList.contains('control-hints-off'); const r = await __row('VIEW', 'INTERFACE › CONTROL HINTS'); R.hints = ok(r) && document.body.classList.contains('control-hints-off') === !h0; await __row('VIEW', 'INTERFACE › CONTROL HINTS'); }
+    { const r = await __row('VIEW', 'INTERFACE › HIDE the interface'); R.hideV = ok(r) && __LW.uiHidden === true; __LW.keys.toggleUI(); R.hideV = R.hideV && __LW.uiHidden === false; }
     /* WINDOW */
-    { const m0 = __LW.mod.expanded; const r = await __row('WINDOW', 'MODULATION'); R.mod = ok(r) && __LW.mod.expanded === !m0; await __row('WINDOW', 'MODULATION'); R.mod = R.mod && __LW.mod.expanded === m0; }
-    { const n0 = __LW.layout.notebook.isOpen; const r = await __row('WINDOW', 'NOTEBOOK'); R.nb = ok(r) && __LW.layout.notebook.isOpen === !n0 && document.activeElement === document.querySelector('.nb-text'); await __row('WINDOW', 'NOTEBOOK'); }
-    { const k0 = document.body.classList.contains('rack-hidden'); const r = await __row('WINDOW', 'HIDE / SHOW the rack'); R.rack = ok(r) && document.body.classList.contains('rack-hidden') === !k0; await __row('WINDOW', 'HIDE / SHOW the rack'); }
-    { const d0 = __LW.layout.docked; const r = await __row('WINDOW', 'DOCK / UNDOCK'); R.dock = ok(r) && __LW.layout.docked === !d0; await __row('WINDOW', 'DOCK / UNDOCK'); R.dock = R.dock && __LW.layout.docked === d0; }
-    { const r = await __row('WINDOW', 'HIDE the interface'); R.hideW = ok(r) && __LW.uiHidden === true; __LW.keys.toggleUI(); }
-    { const w0 = document.body.classList.contains('window-info-off'); const r = await __row('WINDOW', 'SHOW / HIDE help'); R.help = ok(r) && document.body.classList.contains('window-info-off') === !w0; await __row('WINDOW', 'SHOW / HIDE help'); }
-    { const t0 = __LW.themeChoice; R.theme = true; for (const [l, t] of [['THEME · DARK', 'dark'], ['THEME · SYSTEM', 'system'], ['THEME · LIGHT', 'light']]) { const r = await __row('WINDOW', l); R.theme = R.theme && ok(r) && __LW.themeChoice === t; } __LW.setTheme(t0); }
+    { const m0 = __LW.mod.expanded; const r = await __row('WINDOW', 'TOOLS › MODULATION'); R.mod = ok(r) && __LW.mod.expanded === !m0; await __row('WINDOW', 'TOOLS › MODULATION'); R.mod = R.mod && __LW.mod.expanded === m0; }
+    { const n0 = __LW.layout.notebook.isOpen; const r = await __row('WINDOW', 'TOOLS › NOTEBOOK'); R.nb = ok(r) && __LW.layout.notebook.isOpen === !n0 && document.activeElement === document.querySelector('.nb-text'); await __row('WINDOW', 'TOOLS › NOTEBOOK'); }
+    { const k0 = document.body.classList.contains('rack-hidden'); const r = await __row('WINDOW', 'RACKS › SHOW THE RACK'); R.rack = ok(r) && document.body.classList.contains('rack-hidden') === !k0; await __row('WINDOW', 'RACKS › SHOW THE RACK'); }
+    { const d0 = __LW.layout.docked; const r = await __row('WINDOW', 'RACKS › DOCK'); R.dock = ok(r) && __LW.layout.docked === !d0; await __row('WINDOW', 'RACKS › DOCK'); R.dock = R.dock && __LW.layout.docked === d0; }
+    { const w0 = document.body.classList.contains('window-info-off'); const r = await __row('VIEW', 'INTERFACE › WINDOW HELP'); R.help = ok(r) && document.body.classList.contains('window-info-off') === !w0; await __row('VIEW', 'INTERFACE › WINDOW HELP'); }
+    { const t0 = __LW.themeChoice; R.theme = true; for (const [l, t] of [['THEME › DARK', 'dark'], ['THEME › SYSTEM', 'system'], ['THEME › LIGHT', 'light']]) { const r = await __row('VIEW', l); R.theme = R.theme && ok(r) && __LW.themeChoice === t; } __LW.setTheme(t0); }
     { const d = document.querySelector('.dev[data-id="informational"]'), s = document.querySelector('.dev[data-id="settings"]'); d.classList.add('closed'); if (s.classList.contains('closed')) __LW.layout.raise('settings');   /* 0.5.3 M9: listed, and opened UNDER SETTINGS */
-      const r = await __row('WINDOW', '⊕  INFORMATIONAL'); await new Promise((q) => setTimeout(q, 50)); R.info = ok(r) && !d.classList.contains('closed') && s.nextElementSibling === d; d.classList.add('closed'); }
-    { document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); const r = await __row('WINDOW', '⊕  WIGNER'); R.raise = ok(r) && !document.querySelector('.dev[data-id="wigner"]').classList.contains('closed'); document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); }   // ATOMS is a hidden LEGACY window since 2026-10
-    /* ABOUT */
-    { const r = await __row('ABOUT', 'ABOUT λWAVES'); R.about = ok(r) && __LW.layout.notebook.isOpen && __LW.layout.notebook.face === 'about'; __LW.layout.notebook.close(); }
-    { const r = await __row('ABOUT', 'KEYBOARD SHORTCUTS'); R.keymap = ok(r) && __LW.keymap.isOpen && document.querySelector('[data-mir-window="keyboard"]').contains(document.activeElement); __LW.keymap.close(); }
-    { document.querySelector('.dev[data-id="settings"]').classList.add('closed'); const r = await __row('ABOUT', 'SETTINGS'); R.settingsA = ok(r) && !document.querySelector('.dev[data-id="settings"]').classList.contains('closed'); }
-    { let reloaded = 0; const rl = __LW.sw.reload; __LW.sw.reload = () => { reloaded++; }; const r = await __row('ABOUT', 'UPDATE APP'); for (let i = 0; i < 40 && !reloaded; i++) await new Promise((q) => setTimeout(q, 50)); __LW.sw.reload = rl; __LW.sw.state = 'idle'; R.update = ok(r) && reloaded === 1; }
+      const r = await __row('WINDOW', 'OTHER › INFORMATIONAL'); await new Promise((q) => setTimeout(q, 50)); R.info = ok(r) && !d.classList.contains('closed') && s.nextElementSibling === d; d.classList.add('closed'); }
+    { document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); const r = await __row('WINDOW', 'INFO › WIGNER'); R.raise = ok(r) && !document.querySelector('.dev[data-id="wigner"]').classList.contains('closed'); document.querySelector('.dev[data-id="wigner"]').classList.add('closed'); }   // ATOMS is a hidden LEGACY window since 2026-10
+    /* HELP (021 I3: ABOUT renamed; SETTINGS is EDIT's alone) */
+    { const r = await __row('HELP', 'ABOUT λWAVES'); R.about = ok(r) && __LW.layout.notebook.isOpen && __LW.layout.notebook.face === 'about'; __LW.layout.notebook.close(); }
+    { const r = await __row('HELP', 'KEYBOARD SHORTCUTS'); R.keymap = ok(r) && __LW.keymap.isOpen && document.querySelector('[data-mir-window="keyboard"]').contains(document.activeElement); __LW.keymap.close(); }
+    { let reloaded = 0; const rl = __LW.sw.reload; __LW.sw.reload = () => { reloaded++; }; const r = await __row('HELP', 'UPDATE APP'); for (let i = 0; i < 40 && !reloaded; i++) await new Promise((q) => setTimeout(q, 50)); __LW.sw.reload = rl; __LW.sw.state = 'idle'; R.update = ok(r) && reloaded === 1; }
     /* FILE (the project rows) */
     /* 0.5.0 C6: the project rows open FOLDERS (the PROJECTS face left the notebook); the line is the facade's status */
-    { const r = await __row('FILE', 'SAVE project AS'); R.saveAs = ok(r) && __LW.projects.folders.isOpen(); __LW.projects.folders.close(); }
-    { const r = await __row('FILE', 'OPEN a project'); R.openP = ok(r) && __LW.projects.folders.isOpen(); __LW.projects.folders.close(); }
-    { const r = await __row('FILE', 'SAVE project'); R.saveP = ok(r) && __LW.projects.folders.isOpen(); __LW.projects.folders.close(); }
-    { const r = await __row('FILE', 'EXPORT project'); R.exportP = ok(r) && /nothing to export/.test(__LW.projects.status); }
-    { const r = await __row('FILE', 'IMPORT project'); R.importP = ok(r); }
-    { __LW.loadPreset('1s+2pz'); const r = await __row('FILE', 'NEW project');   /* 0.3.1 · S2: NEW fetches the empty project before it opens it — wait for its status */
+    { const r = await __row('FILE', 'SAVE AS'); R.saveAs = ok(r) && __LW.projects.folders.isOpen(); __LW.projects.folders.close(); }
+    { const r = await __row('FILE', 'OPEN…'); R.openP = ok(r) && __LW.projects.folders.isOpen(); __LW.projects.folders.close(); }
+    { const r = await __row('FILE', 'SAVE…'); R.saveP = ok(r) && __LW.projects.folders.isOpen(); __LW.projects.folders.close(); }
+    { const r = await __row('FILE', 'EXPORT › PROJECT › .json'); R.exportP = ok(r) && /nothing to export/.test(__LW.projects.status); }
+    { const r = await __row('FILE', 'IMPORT'); R.importP = ok(r); }
+    { __LW.loadPreset('1s+2pz'); const r = await __row('FILE', 'NEW');   /* 0.3.1 · S2: NEW fetches the empty project before it opens it — wait for its status */
       /* iteration 004: NEW goes through FOLDERS, which asks its own "Save this first?" over unsaved work (no window.confirm) */
       for (let i = 0; i < 20 && !document.querySelector('#folders .sv-ask'); i++) await new Promise((q) => setTimeout(q, 50));
       const nw = [...document.querySelectorAll('#folders .sv-ask .trig')].find((b) => /NEW WITHOUT SAVING/.test(b.textContent)); if (nw) nw.click();
@@ -218,7 +216,7 @@ try {
     window.__saved = [];
     const cap = __LW.captureUI.capture, origSave = cap.save;
     cap.save = (r) => { window.__saved.push(r); return true; };
-    const rows = ['EXPORT SHAPE · GLB', 'EXPORT SHAPE · OBJ', 'EXPORT SHAPE · STL', 'EXPORT GRID · NPZ', 'EXPORT GRID · CUBE'];
+    const rows = ['EXPORT › SHAPE › GLB', 'EXPORT › SHAPE › OBJ', 'EXPORT › SHAPE › STL', 'EXPORT › GRID › NPZ', 'EXPORT › GRID › CUBE'];
     const out = [];
     for (const label of rows) {
       const n0 = window.__saved.length;
@@ -242,7 +240,7 @@ try {
     __LW.layout.modulation.toggle = () => { throw new Error('probe: the act threw'); };
     window.addEventListener('error', (e) => { if (/probe: the act threw/.test(e.message)) e.preventDefault(); }, { once: true });
     let thrown = false;
-    try { const r = await __row('WINDOW', 'MODULATION'); thrown = r; } catch (e) { thrown = String(e); }
+    try { const r = await __row('WINDOW', 'TOOLS › MODULATION'); thrown = r; } catch (e) { thrown = String(e); }
     __LW.layout.modulation.toggle = lk;
     const bar = document.getElementById('menubar');
     const out = { closed: bar.hidden, listsDown: [...bar.querySelectorAll('.mb-list')].every((l) => l.hidden), focus: document.activeElement === document.getElementById('title') };

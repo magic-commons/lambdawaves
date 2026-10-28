@@ -21,9 +21,9 @@ export function createTransition(app) {
   const snap = () => ({ re: Float64Array.from(reg.re0), im: Float64Array.from(reg.im0) });
   const recall = (S) => { if (!S) return; if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } reg.re0.set(S.re); reg.im0.set(S.im); reg.version++; touchState(); abStatus(); };
   ui.abRo = readout({ label: '', value: '—  /  —', sub: SUB }); ui.abRo.root.querySelector('.ro-lbl').remove(); ui.abRo.root.setAttribute('aria-label', 'A / B');
-  rab.appendChild(trig({ label: 'STORE A', title: 'keep the register as it is now as state A', onFire: () => { abA = snap(); abStatus(); hNote(); } }).root);
+  rab.appendChild(trig({ label: 'STORE A', title: 'keep the register as it is now as state A', onFire: () => { abA = snap(); abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeA';   // 021 I1: the actions press them
   const slotA = rab.appendChild(trig({ label: 'A', cls: 'ab-slot', title: 'recall state A', onFire: () => recall(abA) }).root);
-  rab.appendChild(trig({ label: 'STORE B', title: 'keep the register as it is now as state B', onFire: () => { abB = snap(); abStatus(); hNote(); } }).root);
+  rab.appendChild(trig({ label: 'STORE B', title: 'keep the register as it is now as state B', onFire: () => { abB = snap(); abStatus(); hNote(); } }).root).dataset.keyAction = 'ab.storeB';
   const slotB = rab.appendChild(trig({ label: 'B', cls: 'ab-slot', title: 'recall state B', onFire: () => recall(abB) }).root);
   const clr = el('button', 'sp-abclear', rab); clr.type = 'button'; clr.title = 'CLEAR · empty A and B (a running TRANSITION stops and keeps its mix)'; clr.setAttribute('aria-label', 'CLEAR A and B');
   clr.addEventListener('click', () => { if (reg.transition) { reg.clearTransition(clock.t); ui.abSw.set(false); } abA = abB = null; touchState(); abStatus(); });

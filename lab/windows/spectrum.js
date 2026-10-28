@@ -69,16 +69,19 @@ export function createSpectrumCard(app) {
        operator and stepped onto itself); LATTICE reads LATTICE while its window is open (its ✕ reads back, X1); a window the system needs that
        stands powered off is powered on with it — an effect shows its window */
     const chem = () => app.state.chem;
-    const sys = stepper({ aria: 'SYSTEM', items: SYS.map((r) => ({ id: r.id, label: r.name.split(' ·')[0] })), value: 'hydrogen', cls: 'mol-step', onChange: (v) => {
+    const onSys = (v) => {
       if (v !== 'molecules' && chem() && chem().on) chem().setOn(false);
       const w = WIN[v]; if (opened && opened !== w) { if (isOpen(opened)) dev(opened).querySelector('.dev-close').click(); opened = null; } if (w && w !== opened) opened = isOpen(w) ? null : w;
       if (v === 'molecules' || v === 'lattice') { app.sh.layout.reopen(v === 'molecules' ? 'chem' : v); if (v === 'molecules' && chem() && !chem().on) chem().setOn(true); } else { switchHamiltonian(v); if (v === 'central' || v === 'cornell' || v === 'separable') app.sh.layout.reopen(v === 'separable' ? v : 'central'); if (v === 'well') app.w.enterBox(); if (v === 'atom') { app.w.wAtoms.root.hidden = false; app.w.wAtoms.root.classList.remove('closed'); } }
       if (w && dev(w) && dev(w).classList.contains('off')) dev(w).querySelector('.dev-power').click();
-      ui.hamSeg.set(v === 'lattice' ? v : getHamiltonian().id); } });
+      ui.hamSeg.set(v === 'lattice' ? v : getHamiltonian().id); };
+    const sys = stepper({ aria: 'SYSTEM', items: SYS.map((r) => ({ id: r.id, label: r.name.split(' ·')[0] })), value: 'hydrogen', cls: 'mol-step', onChange: onSys });
     sys.name.addEventListener('click', () => document.querySelectorAll('.mir-pick-i[data-id]').forEach((b) => { const r = SYS.find((x) => x.id === b.dataset.id); if (r) b.title = tip(r); }));
     ui.hamSeg = { root: sys.root, get value() { return sys.get(); }, set(id) { sys.set(app.state.chem && app.state.chem.on ? 'molecules' : id); sys.root.title = tip(SYS.find((r) => r.id === sys.get()) || SYS[0]); hamShow(sys.get()); },
       /* 017 X1 · THE STAND-DOWN: a window of the table closed or powered off — the stepper forgets it opened it and reads back the operator in force */
-      readBack(id) { if (opened === id) opened = null; this.set(getHamiltonian().id); } };
+      readBack(id) { if (opened === id) opened = null; this.set(getHamiltonian().id); },
+      /** step(±1) — the next or previous SYSTEM, as the stepper's arrows take it (021 I1: the `preset.next` / `preset.prev` actions) */
+      step(d) { const i = SYS.findIndex((r) => r.id === sys.get()), v = SYS[(i + d + SYS.length) % SYS.length].id; sys.set(v); onSys(v); } };
     rh.appendChild(ui.hamSeg.root);
     hamBody.append(hamRows.hydrogen, hamRows.scale, hamRows.box, hamRows.atom, hamRows.note); hamRows.note.hidden = true;
     ui.hamSeg.set('hydrogen');

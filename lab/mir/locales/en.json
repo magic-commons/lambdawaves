@@ -531,6 +531,7 @@
   "MOD off": "MOD off",
   "MOD on": "MOD on",
   "MODULATION": "MODULATION",
+  "MORE KEYS": "MORE KEYS",
   "MOTION": "MOTION",
   "MOVE CONTENTS TO {:ROOT}?": "MOVE CONTENTS TO {:ROOT}?",
   "MOVE EARLIER": "MOVE EARLIER",
@@ -553,6 +554,7 @@
   "Modulation ON replays the rack from its first Space edge. Timeline ON replays clips from beat zero. Both skip to “start at”. With both OFF, the current look is frozen. Escape cancels.": "Modulation ON replays the rack from its first Space edge. Timeline ON replays clips from beat zero. Both skip to “start at”. With both OFF, the current look is frozen. Escape cancels.",
   "Modulation cadence": "Modulation cadence",
   "Modulation on or off": "Modulation on or off",
+  "More keys": "More keys",
   "More tools and actions": "More tools and actions",
   "Move it": "Move it",
   "Move it (Shift copies, right-button deletes); it has no points": "Move it (Shift copies, right-button deletes); it has no points",
@@ -969,6 +971,7 @@
   "Sync the modulation clock to the wall clock or run it free": "Sync the modulation clock to the wall clock or run it free",
   "TAP": "TAP",
   "TEXT": "TEXT",
+  "THE BOARD": "THE BOARD",
   "THEME": "THEME",
   "THIS CONTROL IS HELD BY {n} MACROS  ·  which one the outer arc edits": "THIS CONTROL IS HELD BY {n} MACROS  ·  which one the outer arc edits",
   "THIS VIEW": "THIS VIEW",
@@ -1007,6 +1010,7 @@
   "The MIR logo is outlined from Butler Free Extra Bold by {who}.": "The MIR logo is outlined from Butler Free Extra Bold by {who}.",
   "The bank holds {n}: STORE over one, or × one.": "The bank holds {n}: STORE over one, or × one.",
   "The browser has WebGPU but found no graphics adapter to use.": "The browser has WebGPU but found no graphics adapter to use.",
+  "The browser keeps this key for itself: the page never sees it.": "The browser keeps this key for itself: the page never sees it.",
   "The controls take the panes’ light: one {:ANGLE} for everything": "The controls take the panes’ light: one {:ANGLE} for everything",
   "The dotted guide where a dragged window will land": "The dotted guide where a dragged window will land",
   "The envelope drives the target and the file plays with the transport": "The envelope drives the target and the file plays with the transport",
@@ -1374,6 +1378,7 @@
   "that output cannot be bound": "that output cannot be bound",
   "that preset could not be loaded": "that preset could not be loaded",
   "that preset was written by a model this build cannot honour": "that preset was written by a model this build cannot honour",
+  "the arrows, Home and End, the pages, F1–F24, the numpad and the media keys": "the arrows, Home and End, the pages, F1–F24, the numpad and the media keys",
   "the audio graph could not be built": "the audio graph could not be built",
   "the bar at the bottom centre": "the bar at the bottom centre",
   "the bar at the top centre": "the bar at the top centre",
@@ -3317,6 +3322,9 @@
    "mir/app.js",
    "mir/modulation/window.js"
   ],
+  "MORE KEYS": [
+   "mir/keyboard/keyboard.js"
+  ],
   "MOTION": [
    "mir/shell/gui.js"
   ],
@@ -3385,6 +3393,9 @@
   "Modulation on or off": [
    "mir/modulation/modwindow/modwindow.js",
    "mir/shell/transport.js"
+  ],
+  "More keys": [
+   "mir/keyboard/keyboard.js"
   ],
   "More tools and actions": [
    "mir/timeline/editor.js"
@@ -4668,6 +4679,9 @@
   "TEXT": [
    "mir/shell/gui.js"
   ],
+  "THE BOARD": [
+   "mir/keyboard/keyboard.js"
+  ],
   "THEME": [
    "mir/shell/gui.js"
   ],
@@ -4784,6 +4798,9 @@
   ],
   "The browser has WebGPU but found no graphics adapter to use.": [
    "mir/shell/boot.js"
+  ],
+  "The browser keeps this key for itself: the page never sees it.": [
+   "mir/shell/keys.js"
   ],
   "The controls take the panes’ light: one {:ANGLE} for everything": [
    "mir/shell/gui.js"
@@ -5960,6 +5977,9 @@
   ],
   "that preset was written by a model this build cannot honour": [
    "mir/modulation/window.js"
+  ],
+  "the arrows, Home and End, the pages, F1–F24, the numpad and the media keys": [
+   "mir/keyboard/keyboard.js"
   ],
   "the audio graph could not be built": [
    "mir/modulation/audio-capture.js"

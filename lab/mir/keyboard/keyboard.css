@@ -29,6 +29,8 @@
 /* ── the body: the window's pane holds two wells and nothing else ─────────────────────────────────────────── */
 .km-win > .mir-win-body, .km-help-win > .mir-win-body { padding: var(--sp-4); overflow: hidden; }
 .km-help-win > .mir-win-body { overflow: hidden auto; }
+.km-win .mir-win-panel { height: 100%; min-height: 0; }   /* 1.5.6-alpha.2: with `panels`, each face fills the pane as the one body did */
+.km-win .mir-win-panel[hidden] { display: none; }
 .km { display: flex; gap: var(--sp-4); height: 100%; min-height: 0; min-width: 0; }
 .km-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; padding: var(--sp-4); border: 0; border-radius: var(--r-md);
   background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
@@ -54,6 +56,10 @@
 
 /* ── the board ────────────────────────────────────────────────────────────────────────────────────────────── */
 .km-keyboard { display: flex; flex: 1; flex-direction: column; justify-content: center; gap: 5px; min-height: 0; }
+.km-keyboard[hidden] { display: none; }
+/* MORE KEYS (1.5.6-alpha.2): the second page in the same well; its switch sits before the platform pair */
+.km-col-header .km-more { flex: 0 0 auto; min-height: 28px; padding: 0 10px; }
+.km-extra .km-key { min-height: 46px; }
 .km-kb-row { display: flex; gap: 4px; }
 .km-key { position: relative; box-sizing: border-box; flex: 1 0 0; min-width: 0; min-height: 52px; padding: 15px 2px 4px; margin: 0;
   border: var(--glass-border) solid transparent; border-radius: var(--r-sm);

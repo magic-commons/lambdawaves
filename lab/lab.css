@@ -218,6 +218,10 @@ body.rack-hidden.transport-peek #transport.mini { transform: translateX(-50%); o
 .mb-item:hover { background: var(--glass-raise); color: var(--fg); }
 .mb-key { color: var(--dim); font-size: var(--fs-micro); letter-spacing: var(--tr-wide); }
 .mb-sep { height: 1px; margin: 4px 8px; background: var(--glass-hairline); pointer-events: none; }
+/* 021 I3 · the kit's submenus, checks and radios (MIR 1.5.6-alpha.2) under these unlayered rules: an accordion stays in its list on a phone, a mark has its gutter */
+.mb-sub-list.mb-accordion { position: static; flex: 0 0 auto; min-width: 0; max-height: none; overflow: visible; margin: 0 0 4px 12px; box-shadow: none; }
+.mb-item.mb-check, .mb-item.mb-radio { position: relative; padding-inline-start: 26px; }
+.mb-item:has(> .mb-icon) { align-items: center; }
 
 
 .mb-item > .mb-num { margin-left: auto; flex: 0 0 auto; display: inline-flex; align-items: center;

@@ -26,7 +26,7 @@ import { PRIM_TYPES } from './node-prims.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { createUserPresets } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
-import { createView } from './nodes-view.js';
+import { createView, keysAt } from './nodes-view.js';
 import { createUndo } from './nodes-undo.js';
 import { onForget } from './settings-store.js';   // 021 R4: FORGET cancels the 250 ms writes below before it wipes the records
 
@@ -40,7 +40,7 @@ const SHIPPED = {
   /* 020 X4: POSTER's steps at 85 % (the banding softened, free: a fold), PRINT's contrast in the mid-tones only (a masked run) */
 };
 
-export function createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod }) {
+export function createNodes({ device, rk, raise, host, canvas, curvesStore, occlusion, after, mod, onWin = () => {} }) {
   const store = jsonStore('lambdawaves.q0.nodes');
   const rec = () => { const r = store.get(); return r && r.v === 1 ? r : { v: 1 }; };
   const put = (patch) => store.set({ ...rec(), ...patch });
@@ -222,10 +222,10 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const vWin = createView(wbody, 'win', M); views.push(vWin);
   win = createWindow({ id: 'nodes', title: 'NODES', host, chrome: 'close', resizable: true, size: { w: 440, h: 640 }, min: { w: 300, h: 280 }, body: wbody,
     persist: { read: () => rec().win || null, write: (st) => put({ win: st }) },
-    onOpen: () => requestAnimationFrame(() => vWin.place()), onMoved: () => occlusion.dirty() });
+    onOpen: () => { onWin(true); requestAnimationFrame(() => vWin.place()); }, onClose: () => onWin(false), onMoved: () => occlusion.dirty() });   // 021 I1: the bar's NODES seat lights on these
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });
   return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, setFold, rename, reset, move, tidy, setView: M.setView, setSolo: M.setSolo, setOff, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),
-    set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, compile: () => compile(nodes, TYPES, new Map(), how()), open: () => win.open(), close: () => win.close() };
+    set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, keysAt, compile: () => compile(nodes, TYPES, new Map(), how()), open: () => win.open(), close: () => win.close() };
 }

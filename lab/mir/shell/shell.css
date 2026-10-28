@@ -142,6 +142,16 @@ body[data-theme="dark"] #notebook::before { content: ''; position: absolute; ins
 .mb-item:hover { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
 .mb-key { color: var(--dim); font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wide)); }
 .mb-sep { height: 1px; margin: 4px 8px; background: var(--glass-hairline); pointer-events: none; }
+/* 1.5.6-alpha.2 · a submenu beside its row (fixed, on the bar's layer), or inline under it on a phone; a check / radio mark; a row glyph */
+.mb-sub-list { position: absolute; inset-inline-start: auto; top: auto; z-index: 1; }
+.mb-sub-list.mb-accordion { position: static; flex: 0 0 auto; min-width: 0; max-height: none; overflow: visible; margin: 0 0 4px 12px; box-shadow: none; }
+.mb-item:has(> .mb-icon) { align-items: center; }
+.mb-item.mb-sub[aria-expanded="true"] { background: var(--state-hover, var(--glass-raise)); color: var(--fg); }
+.mb-arrow { margin-inline-start: auto; color: var(--dim); font-size: var(--fs-micro); }
+.mb-check, .mb-radio { position: relative; padding-inline-start: 24px; }
+.mb-mark { position: absolute; inset-inline-start: 8px; color: var(--acc); font-weight: var(--w-bold); }
+.mb-icon { flex: 0 0 auto; width: 16px; height: 16px; align-self: center; margin-inline-end: -8px; }
+.mb-icon + .mb-lbl { margin-inline-end: auto; }
 .mb-item:disabled { color: var(--dim); opacity: var(--state-disabled, .38); cursor: default; }
 .mb-item:disabled:hover { background: transparent; color: var(--dim); }
 #title { position: absolute; left: calc(var(--rack-w) + 14px); top: 6px; z-index: var(--z-chrome); display: flex; align-items: center; gap: var(--sp-3);

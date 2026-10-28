@@ -26,6 +26,13 @@
  *                                    disabled is a boolean or a function asked each time the list opens;
  *                                    opts.raw: the label is a NAME and is never translated (a language, a file);
  *                                    opts.current: the item is the chosen one (aria-current, class .on)
+ * 1.5.6-alpha.2 (λWAVES 021 I3) · TREES, STATES AND GLYPHS:
+ *   [label, () => entries, null, hint?, { sub: true }]   a SUBMENU: hover or → opens it beside its row (filled as it opens, so it says the
+ *                                    live state too), ← or Escape closes it back to its row, Enter or a press toggles it; it nests; on a phone
+ *                                    it opens inline under its row (an accordion), never beside it
+ *   opts.checked: true | false       a CHECK row (role menuitemcheckbox, aria-checked, a ✓ while true)
+ *   opts.radio: 'group'              with opts.checked, a RADIO row of that group (role menuitemradio, a • on the chosen one)
+ *   opts.icon: 'name'                a kit glyph (glyph.js) before the label; an app's own drawing waits for registerGlyphs
  *
  * 1.5.4 · LANGUAGES.  The group names and every item label go through t() (core/i18n.js); the key after the TAB
  *   never does.  A group is found by `data-menu` (its English name), never by the text it shows.  On a language
@@ -54,6 +61,7 @@ import { frame } from '../core/frame.js';
 import { copyText } from './clipboard.js';
 import { notice } from './notice.js';
 import { hoverable } from '../core/kbm.js';
+import { glyphEl } from '../glyph.js';
 
 /** comingRow(name, hint) — a disabled row for a window that is not built yet (BASINS: '○  JULIA  (coming)') */
 export const comingRow = (name, hint = '') => ['○  ' + name + '  (coming)', () => {}, () => true, hint];
@@ -79,7 +87,52 @@ export function createMenubar({ opener, host, menus, label, phone, keep } = {}) 
   bar.hidden = true;
   const canPop = typeof bar.showPopover === 'function';
   let openList = null;
-  const closeLists = () => { for (const l of bar.querySelectorAll('.mb-list')) l.hidden = true; for (const b of bar.querySelectorAll('.mb-btn')) b.setAttribute('aria-expanded', 'false'); openList = null; };
+  const closeLists = () => { for (const l of bar.querySelectorAll('.mb-sub-list')) l.remove(); for (const l of bar.querySelectorAll('.mb-list')) l.hidden = true; for (const b of bar.querySelectorAll('.mb-btn')) b.setAttribute('aria-expanded', 'false'); openList = null; };
+  /* 1.5.6-alpha.2 · a submenu is a list of its own, made as it opens and removed as it closes: beside its row on the bar's own layer (a list
+     a frosted, scrolling parent cannot clip), or inline under its row on a phone.  `child` is the list a list has open, `row` the row that opened it */
+  const closeSub = (list) => { const c = list && list.mbChild; if (!c) return; closeSub(c); c.remove(); list.mbChild = null; if (c.mbRow) c.mbRow.setAttribute('aria-expanded', 'false'); };
+  function openSub(list, it, entries) {
+    if (list.mbChild && list.mbChild.mbRow === it) return list.mbChild;
+    closeSub(list);
+    const sub = el('div', 'mb-list mb-sub-list'), phone = isPhone(); sub.mbRow = it; sub.mbParent = list; list.mbChild = sub; it.setAttribute('aria-expanded', 'true');
+    if (phone) { sub.classList.add('mb-accordion'); it.after(sub); } else bar.appendChild(sub);
+    render(sub, entries);
+    if (!phone) { const r = it.getBoundingClientRect(), o = bar.getBoundingClientRect(), w = sub.offsetWidth, h = sub.offsetHeight, W = window.innerWidth, H = window.innerHeight;   // placed in the viewport, written in the bar's frame
+      const left = r.right + 2 + w <= W - 8 ? r.right + 2 : Math.max(8, r.left - 2 - w); sub.style.left = Math.round(left - o.left) + 'px'; sub.style.top = Math.round(Math.max(8, Math.min(H - h - 8, r.top - 4)) - o.top) + 'px'; }
+    return sub;
+  }
+  const subKeys = (e, list) => {
+    const it = e.target.closest('.mb-item'); if (!it) return;
+    if (e.code === 'ArrowRight' && it.mbEntries) { e.preventDefault(); const s = openSub(list, it, it.mbEntries()); const f = s.querySelector('.mb-item:not(:disabled)'); if (f) f.focus(); }
+    else if ((e.code === 'ArrowLeft' || e.code === 'Escape') && list.mbParent) { e.preventDefault(); e.stopPropagation(); const row = list.mbRow; closeSub(list.mbParent); row.focus(); }
+  };
+  /** render(list, entries) — the rows of one list (a group's or a submenu's); a row that throws still closes the bar */
+  function render(list, entries) {
+    list.innerHTML = '';
+    if (!list.mbKeys) { list.mbKeys = true; list.addEventListener('keydown', (e) => subKeys(e, list)); }
+    for (const entry of entries) {
+      if (!entry) { const sep = el('div', 'mb-sep', list); sep.setAttribute('role', 'separator'); continue; }
+      const [text, run, dis, hint, opts] = entry, o = opts || {};
+      const it = el('button', 'mb-item', list); it.type = 'button';
+      const kk = String(text).split('\t');
+      if (o.icon) { const g = glyphEl(o.icon, 'mb-icon', 16); if (g) it.appendChild(g); }
+      if (o.raw) el('span', 'mb-lbl', it, kk[0]).translate = false; else writeLabel(el('span', 'mb-lbl', it), kk[0]);
+      if (o.current) { it.classList.add('on'); it.setAttribute('aria-current', 'true'); }
+      if (o.checked !== undefined) { it.setAttribute('role', o.radio ? 'menuitemradio' : 'menuitemcheckbox'); it.setAttribute('aria-checked', String(!!o.checked)); it.classList.add(o.radio ? 'mb-radio' : 'mb-check'); if (o.radio) it.dataset.radio = o.radio;
+        el('span', 'mb-mark', it, o.checked ? (o.radio ? '•' : '✓') : '').setAttribute('aria-hidden', 'true'); }
+      if (kk[1]) el('span', 'mb-key', it, kk[1]);
+      if (hint) it.title = hint;
+      if (typeof dis === 'function' ? dis() : dis === true) it.disabled = true;
+      if (o.sub) {
+        it.classList.add('mb-sub'); it.setAttribute('aria-haspopup', 'true'); it.setAttribute('aria-expanded', 'false'); it.mbEntries = run; el('span', 'mb-arrow', it, '▸').setAttribute('aria-hidden', 'true');
+        it.addEventListener('click', (e) => { e.stopPropagation(); if (list.mbChild && list.mbChild.mbRow === it) closeSub(list); else openSub(list, it, run()); });
+        it.addEventListener('pointerenter', (e) => { if (hoverable(e) && !isPhone()) openSub(list, it, run()); });
+        continue;
+      }
+      it.addEventListener('pointerenter', (e) => { if (hoverable(e) && !isPhone() && list.mbChild) closeSub(list); });
+      it.addEventListener('click', (e) => { e.stopPropagation(); closeLists(); barShown(false); try { if (run) run(); } catch (err) { console.warn('menu: ' + kk[0], err); } });   // the item dies with the list
+    }
+  }
 
   const names = Object.keys(menus);
   const word = (opener.querySelector('.lam') ? opener.querySelector('.lam').textContent : '') + (opener.querySelector('.word') ? opener.querySelector('.word').textContent : '');
@@ -110,21 +163,7 @@ export function createMenubar({ opener, host, menus, label, phone, keep } = {}) 
     const btn = writeLabel(el('button', 'mb-btn', grp), name); btn.type = 'button'; btn.dataset.menu = name;
     btn.setAttribute('aria-haspopup', 'true'); btn.setAttribute('aria-expanded', 'false');
     const list = el('div', 'mb-list', grp); list.hidden = true;
-    const fill = () => {
-      list.innerHTML = '';
-      for (const entry of menus[name]()) {
-        if (!entry) { const sep = el('div', 'mb-sep', list); sep.setAttribute('role', 'separator'); continue; }
-        const [text, run, dis, hint, opts] = entry;
-        const it = el('button', 'mb-item', list); it.type = 'button';
-        const kk = String(text).split('\t');
-        if (opts && opts.raw) el('span', 'mb-lbl', it, kk[0]).translate = false; else writeLabel(el('span', 'mb-lbl', it), kk[0]);
-        if (opts && opts.current) { it.classList.add('on'); it.setAttribute('aria-current', 'true'); }
-        if (kk[1]) el('span', 'mb-key', it, kk[1]);
-        if (hint) it.title = hint;
-        if (typeof dis === 'function' ? dis() : dis === true) it.disabled = true;
-        it.addEventListener('click', (e) => { e.stopPropagation(); closeLists(); barShown(false); try { if (run) run(); } catch (err) { console.warn('menu: ' + kk[0], err); } });   // the item dies with the list
-      }
-    };
+    const fill = () => { closeSub(list); render(list, menus[name]()); };
     fills.set(list, fill);
     const open = () => { closeLists(); fill(); list.hidden = false; fitList(list); btn.setAttribute('aria-expanded', 'true'); openList = list; };
     btn.addEventListener('click', (e) => { e.stopPropagation(); const was = openList === list;
@@ -179,7 +218,8 @@ export function createMenubar({ opener, host, menus, label, phone, keep } = {}) 
     hide();
   }, on);
   /* λWAVES wave 62: Escape closes the bar and the wordmark takes the focus back, so the keyboard is where it was */
-  window.addEventListener('keydown', (e) => { if (e.code === 'Escape' && !bar.hidden && !e.defaultPrevented) { e.preventDefault(); hide();
+  window.addEventListener('keydown', (e) => { if (e.code === 'Escape' && !bar.hidden && !e.defaultPrevented && openList && openList.mbChild) { e.preventDefault(); closeSub(openList); return; }
+    if (e.code === 'Escape' && !bar.hidden && !e.defaultPrevented) { e.preventDefault(); hide();
     (logoHidden() ? bar.querySelector('.mb-btn') : opener).focus(); } }, on);
   /* THE PHONE CROSSING (λWAVES wave 106): entering the breakpoint shows and PLACES the bar on the next frame;
      leaving it lets the bar go unless a list is open */
@@ -205,6 +245,8 @@ export function createMenubar({ opener, host, menus, label, phone, keep } = {}) 
     /** open the bar and one group, as a click would */
     openGroup(name) { showBar(false); const b = [...bar.querySelectorAll('.mb-btn')].find((x) => x.dataset.menu === name); if (b && (!openList || openList !== b.nextElementSibling)) b.click(); return !!b; },
     get items() { return openList ? [...openList.querySelectorAll('.mb-item')].map((b) => b.textContent) : []; },
+    /** openPath(path) — open the submenus along a path of row labels in the open group (a test, a tour); → the deepest list or null */
+    openPath(path) { let list = openList; for (const lbl of path || []) { if (!list) return null; const it = [...list.querySelectorAll(':scope > .mb-item')].find((b) => b.mbEntries && b.querySelector('.mb-lbl').textContent.startsWith(lbl)); if (!it) return null; list = openSub(list, it, it.mbEntries()); } return list; },
     destroy() { clearTimeout(barTimer); life.abort(); setVar(document.documentElement, '--menubar-bottom', null); try { if (canPop && bar.matches(':popover-open')) bar.hidePopover(); } catch (_) {} bar.remove();
       opener.classList.remove('menu-open'); for (const a of ['tabindex', 'role', 'aria-haspopup', 'aria-expanded', 'aria-label']) opener.removeAttribute(a); },
   };

@@ -104,7 +104,12 @@ export function handWrite(mod, id, v) {
  * any map given a `step`) and correct to a couple of ulps wherever it is continuous.
  * Every endpoint is special-cased to be bit-exact: a knob at its minimum must read
  * its minimum back, not its minimum plus 2e-16.  */
-export const MAP_KINDS = Object.freeze(['linear', 'log', 'wrap', 'integer', 'bipolar']);
+export const MAP_KINDS = Object.freeze(['linear', 'log', 'wrap', 'integer', 'bipolar', 'trigger', 'toggle']);
+/* 1.5.6-alpha.2 · THE TWO EVENT MAPS: an app's act as a target (λWAVES' `action.<id>`: an LFO or a macro knob fires MINIMIZE ALL).  The value lives
+ * on 0…1 and the spec's `fire(on)` is called on an EDGE through 0.5 with hysteresis (up at ≥ 0.55, down again at ≤ 0.45, so a value
+ * dithering at the middle fires once): 'trigger' fires fire(true) on each rising edge; 'toggle' follows the level, fire(true) rising and
+ * fire(false) falling.  fire runs DEFERRED (a task after the write), never inside the frame pump that wrote the value. */
+const EDGE_UP = 0.55, EDGE_DOWN = 0.45, EVENT = new Set(['trigger', 'toggle']);
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 const clamp01 = (u) => (u < 0 ? 0 : u > 1 ? 1 : u);
@@ -181,6 +186,8 @@ const MAPS = {
       : u > 0.5 ? (u - 0.5) * 2 * s.max : (0.5 - u) * 2 * s.min)
   }
 };
+/* the event maps are the unit line (min 0, max 1, no grid): their meaning is the edge, not the number */
+MAPS.trigger = MAPS.toggle = { fault: () => null, snap: (v) => clamp01(Number(v) || 0), toNorm: (v) => clamp01(Number(v) || 0), fromNorm: (u) => clamp01(Number(u) || 0) };
 
 /* ── the registry ─────────────────────────────────────────────────────────────── */
 
@@ -239,12 +246,19 @@ export function createRegistry(opts) {
     r.set(r.current);
     r.writes++;
     notify(r, reason);
+    if (r.fire) edge(r);
     return r.current;
+  }
+  /** an event map's edge (1.5.6-alpha.2): fire deferred out of the writer, a throw counted like a subscriber's */
+  function edge(r) {
+    const v = r.current, call = (on) => setTimeout(() => { try { r.fire(on); } catch (err) { stats.callbackErrors++; if (onError) { try { onError(err, r.id, 'fire'); } catch (_) { /* the reporter too */ } } } }, 0);
+    if (!r.high && v >= EDGE_UP) { r.high = true; call(true); } else if (r.high && v <= EDGE_DOWN) { r.high = false; if (r.map === 'toggle') call(false); }
   }
 
   /**
    * register(id, spec) — spec:
-   *   { label, unit, min, max, step, map, get, set, group, def, hint }
+   *   { label, unit, min, max, step, map, get, set, group, def, hint, fire? }
+   * map 'trigger' | 'toggle' (1.5.6-alpha.2): min/max/step are the unit line whatever is passed, and fire(on) is the act (above)
    * `map` defaults to 'linear'.  `get` and `set` are the Card's adapters: `get` is
    * read ONCE at first registration to seed the base (this is the fix for the other
    * project's "get is required, stored, and never called"), and `set` is the only way
@@ -267,8 +281,8 @@ export function createRegistry(opts) {
     if (typeof s.get !== 'function' || typeof s.set !== 'function') {
       throw new TypeError('mir/registry: "' + id + '" needs both get() and set() adapters');
     }
-    const step = finite(s.step) && s.step > 0 ? s.step : (map === 'integer' ? 1 : 0);
-    const shape = { min: Number(s.min), max: Number(s.max), step };
+    const step = EVENT.has(map) ? 0 : finite(s.step) && s.step > 0 ? s.step : (map === 'integer' ? 1 : 0);
+    const shape = EVENT.has(map) ? { min: 0, max: 1, step } : { min: Number(s.min), max: Number(s.max), step };
     const mf = MAPS[map].fault(shape);
     if (mf) throw new TypeError('mir/registry: "' + id + '" — ' + mf);
 
@@ -282,6 +296,7 @@ export function createRegistry(opts) {
     r.min = shape.min; r.max = shape.max; r.step = shape.step;
     r.wrap = map === 'wrap';
     r.get = s.get; r.set = s.set;
+    r.fire = EVENT.has(map) && typeof s.fire === 'function' ? s.fire : null;
     r.def = finite(s.def) ? snapOf(r, s.def) : null;
 
     if (old) {

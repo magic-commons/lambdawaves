@@ -708,7 +708,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     root.style.setProperty('--ox', r.width ? r.left + r.width / 2 + 'px' : '50%'); root.style.setProperty('--oy', r.width ? r.top + r.height / 2 + 'px' : '50%');
     root.classList.toggle('first', first);
     if (first) { current = sections[1]; show(current); }   // before the decks are laid, so the MOLECULAR page is the one asked for first
-    root.hidden = false; document.body.classList.add('menu-open'); said = null; say(null); ro.observe(scroller);
+    root.hidden = false; document.body.classList.add('menu-open'); said = null; say(null); ro.observe(scroller); layer();
     if (first) sections[1].sec.scrollIntoView({ block: 'start' });
     for (const d of decks) d.lay();
     if (current.id !== 'atomic') readStore();
@@ -724,7 +724,8 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const toggle = () => (root.hidden ? open() : close());
   const escape = () => (drop.hidden ? close() : closeDrop(true));   // M1: Escape puts THE LOOK DROP away first
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); escape(); } });
-  addEventListener('keydown', (e) => { if (e.key === 'Escape' && !root.hidden) escape(); });
+  /* 021 I1: the open Picker is a layer of THE ESCAPE STACK (lab/actions.js): from anywhere, Escape puts its drop away, then the Picker */
+  let escDrop = null; const layer = () => { if (escDrop) escDrop(); escDrop = app.sh.ACTIONS.escape.push(() => { escDrop = null; escape(); if (!root.hidden) layer(); }, { alive: () => !root.hidden }); };
   /* the home button by the title: the kit's grid glyph */
   const home = el('button', 'lw-home', document.body); home.id = 'lwHome'; home.type = 'button'; chip(home, 'gallery', 'Picker'); home.title = 'Picker (L)';
   home.addEventListener('click', toggle);

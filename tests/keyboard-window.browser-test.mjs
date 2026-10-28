@@ -19,34 +19,33 @@ try {
   assert.equal((await g.waitFor('window.__LW?.ready', 200, 100)).ok, 1);
 
   /* ── 1 · THE ROWS AND THE TABLE: A9's ids, R-K1, Ctrl vs Mod in the kit's spelling, the kit's windows with no chord, hooks that exist ── */
-  const binding = await ev(`const a = __LW.keys.actions, T = __LW.keys.table, row = (id) => { const x = a.find((y) => y.id === id); return x && [x.key, x.ctrl || false, !!x.shift]; };
+  const binding = await ev(`const a = __LW.keys.actions, T = __LW.keys.table, row = (id) => T.chords(id);   /* 021 I1: the registry's rows carry chords; the table is the one read */
     const kit = await import('./mir/shell/keys.js');
-    /* 0.5.0 C7b: the TIMELINE's rows (timeline.*) share chords with λWAVES' by design — live only while its surface has the focus, they
-       win there (key-table.js THE FOCUS LAW); any other shared chord is a conflict */
-    return { conflicts: T.conflicts().filter((c) => c.ids.filter((id) => id.startsWith('timeline.')).length !== 1 || c.ids.length !== 2), platform: T.platform,
+    /* 0.5.0 C7b: the TIMELINE's rows (timeline.*) and 021 I1 NODES' (nodes.*) share chords with λWAVES' by design — live only while their surface
+       has the focus (a \`when\`), they win there (key-table.js THE FOCUS LAW); a chord shared by two rows with no \`when\` is a conflict */
+    return { conflicts: T.conflicts().filter((c) => c.ids.filter((id) => !T.get(id).when).length > 1), platform: T.platform,
       timeline: T.list().filter((x) => x.id.startsWith('timeline.') && T.get(x.id).when).length,
       camera: Object.fromEntries(['dollyIn', 'povIn', 'dollyZoomIn', 'dollyOut', 'povOut', 'dollyZoomOut'].map((id) => [id, row(id)])),
       chord: Object.fromEntries(['transport.play', 'folders', 'pitchDn', 'modArm', 'help', 'hide', 'modulation', 'save', 'notebook', 'rack', 'dock', 'fullscreen'].map((id) => [id, row(id)])),
-      spelled: Object.fromEntries(['transport.play', 'dollyZoomIn', 'modArm', 'save', 'help', 'nextWindow', 'history', 'keyboard'].map((id) => [id, T.chords(id)])),
-      gone: ['play', 'hideUI', 'keysheet', 'modWin'].filter((id) => a.some((x) => x.id === id) || T.get(id)),
+      spelled: Object.fromEntries(['transport.play', 'dollyZoomIn', 'modArm', 'save', 'help', 'nextWindow', 'history', 'render'].map((id) => [id, T.chords(id)])),
+      gone: ['play', 'hideUI', 'keysheet', 'modWin', 'keyboard', 'redoY', 'curves'].filter((id) => T.get(id)),   /* 021 I1: play is the verb action now (no key row) */
       hooks: [...document.querySelectorAll('[data-key-action]')].map((e) => e.dataset.keyAction).filter((id) => !T.get(id)),
       hooked: ['rack', 'folders', 'notebook', 'camReset', 'undo', 'redo', 'view', 'style', 'palette', 'dock', 'modulation'].filter((id) => !document.querySelector('[data-key-action="' + id + '"]')),
       hint: document.getElementById('rackToggle').getAttribute('aria-keyshortcuts'),
       kit: Object.fromEntries(Object.entries(kit.KIT_KEYS).map(([k, v]) => [k, kit.normalize(v)])), errors: __e.slice() };`);
   assert.deepEqual(binding.conflicts, [], 'two rows hold one chord'); assert.ok(binding.timeline >= 30, 'the TIMELINE\'s rows are on the table, each with its focus `when`: ' + binding.timeline);
   assert.equal(binding.platform, 'other', 'the gate runs on Linux: Mod is Ctrl');
-  assert.deepEqual(binding.camera, { dollyIn: ['KeyQ', false, false], povIn: ['KeyQ', false, true], dollyZoomIn: ['KeyQ', 'Ctrl', true],
-    dollyOut: ['KeyE', false, false], povOut: ['KeyE', false, true], dollyZoomOut: ['KeyE', 'Ctrl', true] });
-  assert.deepEqual(binding.chord, { 'transport.play': ['Space', false, false], folders: ['KeyO', false, false], pitchDn: ['KeyS', false, false],
-    modArm: ['Space', 'Ctrl', false], help: ['Slash', false, true], hide: ['KeyH', false, false], modulation: ['KeyM', false, false], save: ['KeyS', true, false],
-    notebook: ['KeyJ', false, false], rack: ['KeyB', false, false], dock: ['KeyT', false, false], fullscreen: ['KeyF', false, false] });
+  assert.deepEqual(binding.camera, { dollyIn: ['KeyQ'], povIn: ['Shift+KeyQ'], dollyZoomIn: ['Mod+Shift+KeyQ'], dollyOut: ['KeyE'], povOut: ['Shift+KeyE'], dollyZoomOut: ['Mod+Shift+KeyE'] });
+  const tw = (c) => [c, 'Shift+' + c];
+  assert.deepEqual(binding.chord, { 'transport.play': tw('Space'), folders: tw('KeyO'), pitchDn: tw('KeyS'), modArm: ['Mod+Space', 'Mod+Shift+Space'], help: ['Shift+Slash'], hide: tw('KeyH'),
+    modulation: tw('KeyM'), save: ['Mod+KeyS'], notebook: tw('KeyJ'), rack: tw('KeyB'), dock: tw('KeyT'), fullscreen: tw('KeyF') });
   /* the fine step is the chord and its Shift; `ctrl: 'Ctrl'` is the kit's Ctrl, which off a Mac IS Mod (the NEW Ctrl-vs-Mod case's other half is node) */
   assert.deepEqual(binding.spelled, { 'transport.play': ['Space', 'Shift+Space'], dollyZoomIn: ['Mod+Shift+KeyQ'], modArm: ['Mod+Space', 'Mod+Shift+Space'],
-    save: ['Mod+KeyS'], help: ['Shift+Slash'], nextWindow: ['Tab'], history: [], keyboard: [] });
+    save: ['Mod+KeyS'], help: ['Shift+Slash'], nextWindow: ['Tab'], history: [], render: [] });
   assert.deepEqual(binding.gone, []); assert.deepEqual(binding.hooks, [], 'a data-key-action names a row'); assert.deepEqual(binding.hooked, []);
   assert.equal(binding.hint, 'B Shift+B', 'the table writes aria-keyshortcuts on a tagged control');
   for (const id of Object.keys(binding.kit).filter((id) => id !== 'folders')) assert.equal(binding.spelled[id] ? binding.spelled[id][0] : (await ev(`return __LW.keys.table.chords(${JSON.stringify(id)});`))[0], binding.kit[id], 'the kit row ' + id);
-  assert.equal(binding.kit.folders, 'KeyS'); assert.deepEqual(binding.chord.folders, ['KeyO', false, false], 'R-K1: FOLDERS is O, S is pitch-down');
+  assert.equal(binding.kit.folders, 'KeyS'); assert.deepEqual(binding.chord.folders, tw('KeyO'), 'R-K1: FOLDERS is O, S is pitch-down');
   assert.deepEqual(binding.errors, []);
   console.log('PASS the rows on the kit\'s table: no shared chord (the ' + binding.timeline + ' TIMELINE rows share theirs only under its focus), A9 ids, R-K1, Ctrl+Shift+Q spelled Mod+Shift+KeyQ off a Mac, the fine step as a chord and its Shift, the kit\'s windows with no chord, every tag a row, hints written');
 
@@ -57,7 +56,7 @@ try {
   const geo = await ev(`await __LW.settle(); await new Promise((r) => setTimeout(r, 400)); await __LW.settle();
     const w = document.querySelector('[data-mir-window="keyboard"]'), b = w.getBoundingClientRect(), c = document.querySelector('#field').getBoundingClientRect();
     const covers = (r) => __masks.some((m) => m[0] <= r.left - c.left + 20 && m[1] <= r.top - c.top + 20 && m[2] >= r.right - c.left - 20 && m[3] >= r.bottom - c.top - 20);
-    const col = w.querySelector('.km-col-left').getBoundingClientRect(), head = w.querySelector('.km-col-header').getBoundingClientRect(), rows = [...w.querySelectorAll('.km-kb-row')];
+    const col = w.querySelector('.km-col-left').getBoundingClientRect(), head = w.querySelector('.km-col-header').getBoundingClientRect(), rows = [...w.querySelectorAll('.km-keyboard:not(.km-extra) .km-kb-row')];   /* 021 I2: MORE KEYS (kit 1.5.6-alpha.2) is the board's hidden second page */
     const right = w.querySelector('.km-col-right').getBoundingClientRect(), btns = [...w.querySelectorAll('.km-editor-actions .km-btn')], bb = btns.map((e) => e.getBoundingClientRect());
     return { open: __LW.keymap.isOpen, focusIn: w.contains(document.activeElement), layer: w.parentElement.id, w: b.width, h: b.height, x: b.x, y: b.y, pointer: getComputedStyle(w).pointerEvents,
       rows: rows.length, inWell: rows[0].getBoundingClientRect().top >= head.bottom && rows.at(-1).getBoundingClientRect().bottom <= col.bottom,
@@ -67,14 +66,14 @@ try {
       centred: Math.abs((bb[0].left + bb[1].right) / 2 - (right.left + right.right) / 2), above: bb.every((r) => r.bottom <= w.querySelector('.km-search').getBoundingClientRect().top),
       bare: btns.map((e) => e.textContent.trim()), statusShown: getComputedStyle(w.querySelector('.km-status')).display !== 'none',
       borders: ['.km-col', '.km-platform .seg', '.km-key-bound', '.km-key-unbound', '.km-search', '.km-action-row', '.km-chip', '.km-btn'].map((s) => getComputedStyle(w.querySelector(s)).borderTopWidth).concat(getComputedStyle(w).borderTopWidth),
-      q: w.querySelector('.km-key[data-code="KeyQ"] .km-badge').textContent, more: w.querySelectorAll('.km-action-row:not([data-id^="timeline."]) .km-chip-more').length,   /* C7b: a timeline row's second chord is a real one (Delete · Backspace) */
+      q: w.querySelector('.km-key[data-code="KeyQ"] .km-badge').textContent, more: w.querySelectorAll('.km-action-row:not([data-id^="timeline."]):not([data-id^="nodes."]):not([data-id="redo"]) .km-chip-more').length,   /* C7b: a timeline row's second chord is a real one (Delete · Backspace); 021 I1: so are redo's (Mod+Y) and NODES' */
       play: w.querySelector('.km-action-row[data-id="transport.play"] .km-chips').textContent, card: document.body.dataset.card, mask: covers(b), errors: __e.slice() };`);
   assert.equal(geo.open, true, 'the ? key did not open the window'); assert.equal(geo.focusIn, true, 'the focus did not go into the window');
   assert.equal(geo.layer, 'floats'); assert.equal(geo.pointer, 'auto');
   assert.ok(geo.w > 900 && geo.w < 1440 && geo.h <= 416, 'the pane is ' + geo.w + ' × ' + geo.h);
   assert.ok(geo.x >= 8 && geo.y >= 8);
   assert.equal(geo.rows, 5); assert.equal(geo.inWell, true, 'the five rows do not fit the board\'s well');
-  assert.deepEqual(geo.groups, ['CONTROL SURFACE', 'TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'PROJECT', 'TIMELINE']);   // 0.5.0 C7b: the TIMELINE's rows, after λWAVES' own; iteration 014 A8: the CONTROL SURFACE's row (Mod+K, the search)
+  assert.deepEqual(geo.groups, ['TRANSPORT', 'CAMERA', 'STATE', 'WINDOWS & DISPLAY', 'CONTROL SURFACE', 'PROJECT', 'VIEW', 'SETTINGS', 'CARDS', 'NODES', 'WINDOWS', 'TIMELINE']);   // 021 I1: CONTROL SURFACE in ORDER (it sorted first at −1), the registry's groups   // 0.5.0 C7b: the TIMELINE's rows, after λWAVES' own; iteration 014 A8: the CONTROL SURFACE's row (Mod+K, the search)
   assert.equal(geo.oneRow, true); assert.deepEqual(geo.icons, ['⌘', 4]);
   assert.ok(geo.centred < 2); assert.equal(geo.above, true); assert.deepEqual(geo.bare, ['RECORD INPUT', 'RESET TO DEFAULT'], 'RECORD / RESET carry no subtitle');
   assert.equal(geo.statusShown, false, 'an empty status is shown'); assert.deepEqual(geo.borders, Array(9).fill('0px'));
@@ -103,18 +102,18 @@ try {
     return { listening: w.querySelector('.km-btn-record').classList.contains('on'), status: w.querySelector('.km-status').textContent };`);
   const rec1 = await pick('povIn');
   await press('l', [CTRL, SHIFT]);
-  const free = await ev(`const T = __LW.keys.table, x = __LW.keys.actions.find((a) => a.id === 'povIn');
-    return { chords: T.chords('povIn'), row: [x.key, x.ctrl, x.shift], saved: (JSON.parse(localStorage.getItem('lambdawaves.q0.keys')) || {}).keys, status: document.querySelector('[data-mir-window="keyboard"] .km-status').textContent };`);
+  const free = await ev(`const T = __LW.keys.table;
+    return { chords: T.chords('povIn'), saved: (JSON.parse(localStorage.getItem('lambdawaves.q0.keys')) || {}).keys, status: document.querySelector('[data-mir-window="keyboard"] .km-status').textContent };`);
   assert.equal(rec1.listening, true); assert.match(rec1.status, /Listening/);
-  assert.deepEqual(free.chords, ['Mod+Shift+KeyL']); assert.deepEqual(free.row, ['KeyL', true, true]); assert.deepEqual(free.saved, { povIn: ['Mod+Shift+KeyL'] });
+  assert.deepEqual(free.chords, ['Mod+Shift+KeyL']); assert.deepEqual(free.saved, { povIn: ['Mod+Shift+KeyL'] });
   assert.match(free.status, /now bound to/);
   await pick('camReset');
   await press('q');
   const asked = await ev(`const w = document.querySelector('[data-mir-window="keyboard"]'); return { status: w.querySelector('.km-status').textContent, tone: w.querySelector('.km-status').dataset.tone, cam: __LW.keys.table.chords('camReset') };`);
   await press('q');
-  const stolen = await ev(`const T = __LW.keys.table; return { cam: T.chords('camReset'), dolly: T.chords('dollyIn'), row: __LW.keys.actions.find((a) => a.id === 'dollyIn').key, status: document.querySelector('[data-mir-window="keyboard"] .km-status').textContent, errors: __e.slice() };`);
+  const stolen = await ev(`const T = __LW.keys.table; return { cam: T.chords('camReset'), dolly: T.chords('dollyIn'), status: document.querySelector('[data-mir-window="keyboard"] .km-status').textContent, errors: __e.slice() };`);
   assert.match(asked.status, /already bound to “dolly in”/); assert.equal(asked.tone, 'conflict'); assert.deepEqual(asked.cam, ['KeyR', 'Shift+KeyR'], 'the first press of a taken chord bound it');
-  assert.deepEqual(stolen.cam, ['KeyQ']); assert.deepEqual(stolen.dolly, []); assert.equal(stolen.row, null); assert.match(stolen.status, /taken from “dolly in”/);
+  assert.deepEqual(stolen.cam, ['KeyQ']); assert.deepEqual(stolen.dolly, []); assert.match(stolen.status, /taken from “dolly in”/);
   assert.deepEqual(stolen.errors, []);
   console.log('PASS recording with real keys: Ctrl+Shift+L binds POV tighter (table, row and lambdawaves.q0.keys say so); Q for cam reset asks, the second Q steals it and names "dolly in"');
 
@@ -173,11 +172,11 @@ try {
   await ev(`localStorage.setItem('lambdawaves.q0.keys', JSON.stringify({ play: { key: 'KeyU', ctrl: false, alt: false, shift: false }, dollyZoomIn: { key: 'KeyX', ctrl: 'Ctrl', alt: false, shift: true } })); return 1;`);
   await go(g.s, url);
   assert.equal((await g.waitFor('window.__LW?.ready', 200, 100)).ok, 1);
-  const lifted = await ev(`const T = __LW.keys.table; __LW.pause(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return { play: T.chords('transport.play'), dz: T.chords('dollyZoomIn'), row: __LW.keys.actions.find((a) => a.id === 'transport.play').key };`);
+  const lifted = await ev(`const T = __LW.keys.table; __LW.pause(); if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return { play: T.chords('transport.play'), dz: T.chords('dollyZoomIn') };`);
   await press('u');
   const played = await ev(`const out = { playing: __LW.clock.playing }; __LW.pause(); __LW.keys.reset(); out.stored = localStorage.getItem('lambdawaves.q0.keys'); out.errors = __e.slice(); return out;`);
   assert.deepEqual(lifted.play, ['KeyU'], 'the 0.4.0 binding saved under "play" did not load onto transport.play');
-  assert.deepEqual(lifted.dz, ['Mod+Shift+KeyX']); assert.equal(lifted.row, 'KeyU');
+  assert.deepEqual(lifted.dz, ['Mod+Shift+KeyX']);
   assert.equal(played.playing, true, 'U does not play after the lift'); assert.equal(played.stored, null); assert.deepEqual(played.errors, []);
   console.log('PASS a 0.4.0 save loads: { play: KeyU } under the old id plays on U after a reload, { dollyZoomIn: Ctrl+Shift+X } reads as Mod+Shift+KeyX');
   console.log('GREEN keyboard-window.browser-test');

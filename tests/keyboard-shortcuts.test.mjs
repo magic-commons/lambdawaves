@@ -128,4 +128,18 @@ function make(platform, saved = null) {
   assert.deepEqual(kt.table.holders('Alt+Shift+ArrowLeft'), ['panLeft'], 'Shift+Alt+← is the fine pan, not a new chord');
   assert.deepEqual(kt.table.holders('ArrowLeft'), ['stepBack']);
   console.log('PASS the Alt+Arrow pan quartet: no overlap with the arrows, WASD, Q/E, Shift+Q/E, Ctrl+Shift+Q/E or Ctrl+Alt+Z; Shift+Alt+Arrow is its fine step');
+  /* 021 I1 · the registry's rows (lab/actions.js: `keys`, `exact`, several chords, `was` a list) and call 6's four moved chords beside the shipped ones */
+  const t2 = new EventTarget(), saved = { keyboard: ['KeyU'] }, reg = [...rows.map((r) => ({ ...r })),
+    { id: 'reseed', label: 'reseed', keys: ['Alt+KeyR'], run() {} }, { id: 'open', label: 'open', keys: ['Mod+KeyO'], exact: true, run() {} },
+    { id: 'export.picture', label: 'picture', keys: ['Mod+KeyE'], exact: true, run() {} }, { id: 'new', label: 'new', keys: ['Mod+Alt+KeyN'], exact: true, run() {} },
+    { id: 'camReset', label: 'camReset', keys: ['KeyR'], run() {} }, { id: 'redo', label: 'redo', keys: ['Mod+Shift+KeyZ', 'Mod+KeyY'], exact: true, run() {} },
+    { id: 'help', was: ['keysheet', 'keyboard'], label: 'help', keys: ['Shift+Slash'], run() {} }];
+  const k2 = createKeyTable({ rows: reg, platform: 'other', target: t2, storage: { get: () => saved, set() {} } });
+  assert.deepEqual(k2.table.conflicts(), [], 'Alt+R, Mod+O, Mod+E and Mod+Alt+N overlap nothing shipped');
+  assert.deepEqual(k2.table.chords('reseed'), ['Alt+KeyR', 'Alt+Shift+KeyR'], 'reseed left Mod+R (the browser\'s reload) for Alt+R, its Shift twin the fine step');
+  assert.deepEqual(k2.table.holders('Mod+KeyR'), [], 'Mod+R is the browser\'s again');
+  assert.deepEqual(k2.table.chords('open'), ['Mod+KeyO']); assert.deepEqual(k2.table.chords('export.picture'), ['Mod+KeyE']); assert.deepEqual(k2.table.chords('new'), ['Mod+Alt+KeyN']);
+  assert.deepEqual(k2.table.chords('redo'), ['Mod+Shift+KeyZ', 'Mod+KeyY'], 'redo and redoY are one row of two chords');
+  assert.deepEqual(k2.table.chords('help'), ['KeyU'], 'a binding saved under an old id (keyboard) loads onto the row that names it in `was`');
+  console.log('PASS the registry rows: call 6 — reseed on Alt+R (Mod+R free), OPEN on Mod+O, the PICTURE on Mod+E, NEW on Mod+Alt+N — with no overlap; redo is one row of two chords; `was` reads a list');
 }

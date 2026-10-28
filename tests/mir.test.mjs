@@ -411,8 +411,8 @@ function runWindow(r, n, dt) {
     R.toNorm('field.resolution', 97.4) === R.toNorm('field.resolution', 96),
     { rungs: [0, 0.2, 0.4, 0.6, 0.8, 1].map((u) => R.fromNorm('field.resolution', u)) });
 
-  judge('...and MAP_KINDS is exactly the five things a kit.js control already is',
-    JSON.stringify(MAP_KINDS) === JSON.stringify(['linear', 'log', 'wrap', 'integer', 'bipolar']), MAP_KINDS);
+  judge('...and MAP_KINDS is exactly the five things a kit.js control already is, then the two event maps an action answers as (kit 1.5.6-alpha.2, 021 I2)',
+    JSON.stringify(MAP_KINDS) === JSON.stringify(['linear', 'log', 'wrap', 'integer', 'bipolar', 'trigger', 'toggle']), MAP_KINDS);
 }
 
 /* ══════════════ 8 · the id grammar ═════════════════════════════════════════════ */

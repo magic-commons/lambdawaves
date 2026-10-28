@@ -12,8 +12,9 @@ export const askUrlOf = (ui) => (ui.askUrlIn && ui.askUrlIn.value.trim()) || `${
 export function createAsk(app) {
   const { ui } = app, turns = [], api = { busy: false, last: null, ask };
   let held = null, said = false;
-  const dismiss = () => { if (held && app.state.stageText) app.state.stageText.dismiss(held); held = null; };
-  addEventListener('keydown', (e) => { if (e.key === 'Escape') dismiss(); });
+  let drop = null;   // 021 I1: a held answer is a layer of THE ESCAPE STACK (lab/actions.js) while it is held
+  const dismiss = () => { if (drop) { drop(); drop = null; } if (held && app.state.stageText) app.state.stageText.dismiss(held); held = null; };
+  const holdLayer = () => { if (drop) drop(); drop = app.sh.ACTIONS.escape.push(dismiss, { fields: true, alive: () => !!held }); };
   async function ask(text) {
     const url = askUrlOf(ui), verbs = app.sh.verbs;
     if (!verbs) return (api.last = { error: 'the verb table is not here' });
@@ -33,7 +34,7 @@ export function createAsk(app) {
     if (typeof rep.notebook === 'string' && rep.notebook) list.push({ verb: 'notebook', args: { md: rep.notebook } });
     const res = list.length ? await verbs.run(list, { who: 'GEMMA' }) : { ran: 0, refused: [] }, refused = res.refused || [];
     turns.push({ text, say }); if (turns.length > 6) turns.shift();
-    dismiss(); if (say && app.state.stageText && app.state.stageText.announce(say, 0)) held = say;
+    dismiss(); if (say && app.state.stageText && app.state.stageText.announce(say, 0)) { held = say; holdLayer(); }
     const dropped = refused.map((x) => x.verb).join(', ');
     return (api.last = { say, echo: say + (dropped ? ' (dropped: ' + dropped + ')' : ''), ran: res.ran, refused });
   }

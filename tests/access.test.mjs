@@ -179,11 +179,11 @@ const buttonOwnsEnterOnly = /overControls: true,/.test(kt);                 // a
 const noRoleOwnsSpace = buttonOwnsEnterOnly && /if \(owned && !a\.overControls\) continue;/.test(kitKeys);
 const spaceCancelled = /if \(owned\) taken\.add\(e\.code\);/.test(kitKeys) && /if \(taken\.delete\(e\.code\)\) e\.preventDefault\(\);/.test(kitKeys);
 const selectYieldsSpace = /e\.code !== 'Space' \|\| e\.defaultPrevented \|\| !t \|\| t\.tagName !== 'SELECT'/.test(kt);
-const stageContinue = /when: a\.stage \? stageHasFocus : undefined/.test(kt) && /if \(ok\) return a;/.test(kitKeys);
+const stageContinue = /when: a\.when \|\| \(a\.stage \? stageHasFocus : undefined\)/.test(kt) && /if \(ok\) return a;/.test(kitKeys);
 const roleAware = owned && /\^\(radio\|tab\|option\|menuitem/.test(kitKeys);
 const notDead = buttonOwnsEnterOnly && /if \(rec \|\| e\.defaultPrevented/.test(kitKeys);
 const handled = /if \(rec \|\| e\.defaultPrevented \|\| e\.isComposing/.test(kitKeys);
-const tabLaw = /when: a\.stage \? stageHasFocus : undefined/.test(kt) && /p\.code === 'Tab' && \(p\.mods\.length === 0/.test(kitKeys);
+const tabLaw = /when: a\.when \|\| \(a\.stage \? stageHasFocus : undefined\)/.test(kt) && /p\.code === 'Tab' && \(p\.mods\.length === 0/.test(kitKeys);
 const tabRefused = /\/\(\^\|\\\+\)Tab\$\/\.test\(c \|\| ''\) \? 'Tab is reserved for focus navigation\.'/.test(kt);
 judge('A7 the single-key law is a property of THE KEY AND THE ROLE — a slider owns the arrows, a button owns ENTER, and the arrows still step time from a focused switch — with ONE key carved out of it entirely: SPACE IS THE TRANSPORT\'S (wave 88, Josh). No role keeps it from the transport, its native activation is cancelled, and a focused <select> yields it too; Enter is the activator everywhere. And the stage guard skips one action (a `continue`), never the table (0.5.0 C3: MIR\'s ONE KEY TABLE through lab/key-table.js)',
   owned && sliderOwnsNoSpace && buttonOwnsEnterOnly && noRoleOwnsSpace && spaceCancelled && selectYieldsSpace && stageContinue,

@@ -25,8 +25,8 @@ export function createGas(app) {
       if (getHamiltonian().id !== 'well') { setHamiltonian('well'); switchHamiltonian('well'); if (ui.hamSeg) ui.hamSeg.set('well'); }
       const ax = app.sh.keyState.axis, a = HAMILTONIANS.well.radius, d = { x: [1, 0, 0], y: [0, 1, 0], z: [0, 0, 1] }[ax], k = ui.gasSpeed.get ? ui.gasSpeed.get() : 0.8;
       app.w.launchPacket(d.map((v) => -v * a / 2), d.map((v) => v * k), app.w.gasSigma(k));
-    } }).root);
-    go.appendChild(trig({ label: 'BOUNCE', title: 'COHERENT BOUNCE · a non-spreading oscillator packet (OSCILLATOR)', onFire: () => app.w.coherentBounce() }).root);
+    } }).root).dataset.keyAction = 'gas.launch';   // 021 I1: the actions press these two
+    go.appendChild(trig({ label: 'BOUNCE', title: 'COHERENT BOUNCE · a non-spreading oscillator packet (OSCILLATOR)', onFire: () => app.w.coherentBounce() }).root).dataset.keyAction = 'gas.bounce';
     ui.gasRo = readout({ label: 'GAS  packet held by the box', value: '—', sub: 'nothing launched' });
     rg.appendChild(ui.gasRo.root);
     el('div', 'note', hamBody).innerHTML = '<b>Coherent bounce.</b> In the oscillator, an impulse moves the ground-state packet without changing its width. In the box, the packet disperses and reflects from the wall.';

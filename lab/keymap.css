@@ -112,3 +112,31 @@ body[data-theme="dark"] .km-key-unbound {
   .km-col-right { min-width: 0; }
   .km-editor-actions .km-btn .trig-l { font-size: 9px; }
 }
+
+/* ── 021 I2 · THE MAPPING (lab/mapping.js), the KEYBOARD window's second face: one well, a search line and CONNECT MIDI over a header row, then
+   every surface action as a row — its name, KEY · MIDI · MOD chips (× unbinds) and one LEARN; the list scrolls inside the well ── */
+.mp { box-sizing: border-box; display: flex; flex-direction: column; height: 100%; min-height: 0; padding: var(--sp-4); border-radius: var(--r-md);
+  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); }
+.mp-head { display: flex; gap: 8px; align-items: center; flex: 0 0 auto; margin-bottom: 6px; }
+.mp-find { flex: 1 1 auto; min-width: 0; height: 30px; padding: 0 9px; border: 0; border-radius: var(--r-sm); background: var(--glass-press); color: var(--fg); font: 500 12px var(--font-ui); box-shadow: var(--neu-inset); }
+.mp-find:focus-visible { outline: var(--state-focus, 2px solid var(--acc)); outline-offset: 2px; }
+.mp-connect { flex: 0 1 auto; max-width: 48%; }
+.mp-connect .trig-l { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mp-status { flex: 0 0 auto; min-height: 1lh; margin: 0 0 4px; font: 600 11px / 1.3 var(--font-ui); color: var(--acc); overflow-wrap: anywhere; }
+.mp-status[data-tone="conflict"] { color: var(--fg); }
+.mp-row { display: grid; grid-template-columns: minmax(0, 1fr) 96px 96px 78px 84px; align-items: center; gap: 6px; min-height: 32px; padding: 2px 6px; border-radius: var(--r-sm); }
+.mp-cols { flex: 0 0 auto; min-height: 20px; color: var(--dim); font: 700 9px / 1 var(--font-ui); letter-spacing: var(--tr-wide, .08em); }
+.mp-col { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mp-list { flex: 1 1 auto; min-height: 0; overflow: hidden auto; }
+.mp-group { padding: 9px 6px 2px; color: var(--acc); font: 700 9px var(--font-ui); letter-spacing: var(--tr-wide, .08em); }
+.mp-row.mp-learning { background-color: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
+.mp-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 11px var(--font-ui); color: var(--fg); }
+.mp-chip { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: space-between; gap: 3px; min-width: 0; height: 22px; padding: 0 5px;
+  border-radius: var(--r-xs); background: var(--glass-press); box-shadow: var(--neu-inset); color: var(--fg); font: 600 10px / 1 var(--font-mono); white-space: nowrap; overflow: hidden; }
+.mp-chip-t { overflow: hidden; text-overflow: ellipsis; }
+.mp-chip.mp-none, .mp-chip.mp-off { color: var(--ink-faint); background: transparent; box-shadow: none; justify-content: center; font-family: var(--font-ui); }
+.mp-x { flex: 0 0 auto; padding: 0 2px; border: 0; background: none; color: var(--dim); font: 700 12px / 1 var(--font-ui); cursor: pointer; }
+.mp-x:hover { color: var(--acc); }
+.mp-learn { min-height: 26px; }
+.mp-empty { padding: 12px 6px; color: var(--dim); font: 500 11px var(--font-ui); }
+@media (max-width: 860px) { .mp-row { grid-template-columns: minmax(0, 1fr) 70px 70px 54px 70px; gap: 4px; } }

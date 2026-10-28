@@ -86,10 +86,11 @@ export function createCsbFavs(app, { panel }) {
 
   /* an offered row's right click (or a held finger): the same two rows in the house's menu pane */
   let pop = null;
-  const closePop = () => { if (pop) { pop.remove(); pop = null; } };
+  let popEsc = null;   // 021 I1: an open menu is a layer of THE ESCAPE STACK (lab/actions.js)
+  const closePop = () => { if (popEsc) { popEsc(); popEsc = null; } if (pop) { pop.remove(); pop = null; } };
   function menu(id, x, y) {
     closePop(); const rows = rowsFor(id); if (!rows.length) return;
-    pop = el('div', 'tl-pop glass', document.body); pop.dataset.mirSurface = 'menu'; pop.setAttribute('role', 'menu');
+    popEsc = app.sh.ACTIONS.escape.push(closePop); pop = el('div', 'tl-pop glass', document.body); pop.dataset.mirSurface = 'menu'; pop.setAttribute('role', 'menu');
     for (const r of rows) { const b = el('button', 'trig', pop); b.type = 'button'; label(b, r.label); b.addEventListener('click', () => { closePop(); r.run(); }); }
     const b = pop.getBoundingClientRect(); pop.style.left = Math.max(8, Math.min(innerWidth - b.width - 8, x)) + 'px'; pop.style.top = Math.max(8, Math.min(innerHeight - b.height - 8, y)) + 'px';
     pop.querySelector('button').focus();
@@ -103,7 +104,6 @@ export function createCsbFavs(app, { panel }) {
   }, true);
   const unhold = () => { if (hold) { clearTimeout(hold); hold = null; } };
   for (const t of ['pointerup', 'pointercancel', 'pointermove']) document.addEventListener(t, unhold, true);
-  addEventListener('keydown', (e) => { if (e.key === 'Escape') closePop(); });
 
   return {
     strip, add, remove, rowsFor, swFace, get items() { return items.slice(); },

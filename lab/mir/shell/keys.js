@@ -27,7 +27,8 @@
  *      English, translated where they are shown (kit.js label()); key caps are never translated.
  *   6. IDLE COSTS NOTHING: no timers, no polling; the listener is one map lookup per keydown.
  *
- * createKeys({ actions, storage?, platform?, target? }) → the table (API at the foot of this header).
+ * createKeys({ actions, storage?, platform?, target?, reserved? }) → the table (API at the foot of this header).
+ *   reserved (1.5.6-alpha.2) chords the binder refuses as the browser's — RESERVED_BY_BROWSER, or an app's own list
  *   action  { id, label, group, keys: ['Mod+S', …], run(event, action), when?(), hint?, inFields?, overControls?, repeat?, short?, up? }
  *           overControls: the action runs even when a focused control owns its key (BASINS: Space plays with a button
  *           or a slider focused) — never in a text field unless it also says inFields
@@ -71,7 +72,9 @@ export const MODIFIER_CODES = Object.freeze(new Set(['ControlLeft', 'ControlRigh
   'MetaLeft', 'MetaRight', 'OSLeft', 'OSRight', 'CapsLock', 'Fn', 'FnLock']));
 const NAMED = ['Space', 'Enter', 'Tab', 'Escape', 'Backspace', 'Delete', 'Insert', 'Home', 'End', 'PageUp', 'PageDown',
   'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Backquote', 'Minus', 'Equal', 'BracketLeft', 'BracketRight',
-  'Backslash', 'Semicolon', 'Quote', 'Comma', 'Period', 'Slash', 'IntlBackslash', 'ContextMenu', 'Pause', 'PrintScreen', 'ScrollLock'];
+  'Backslash', 'Semicolon', 'Quote', 'Comma', 'Period', 'Slash', 'IntlBackslash', 'ContextMenu', 'Pause', 'PrintScreen', 'ScrollLock',
+  /* 1.5.6-alpha.2 · the media and volume keys (a rotary encoder, a macro pad, a keyboard's media row send these codes) */
+  'MediaPlayPause', 'MediaStop', 'MediaTrackNext', 'MediaTrackPrevious', 'MediaSelect', 'AudioVolumeUp', 'AudioVolumeDown', 'AudioVolumeMute'];
 const CODE_LC = Object.fromEntries(NAMED.map((c) => [c.toLowerCase(), c]));
 Object.assign(CODE_LC, { esc: 'Escape', return: 'Enter', spacebar: 'Space', up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft',
   right: 'ArrowRight', del: 'Delete', ins: 'Insert', pgup: 'PageUp', pgdn: 'PageDown', pagedn: 'PageDown', bksp: 'Backspace',
@@ -148,7 +151,8 @@ export function chordFromEvent(e, platform = 'other') {
 /* ── the display (never translated: a key cap is a key cap in every language) ────────────────────────────── */
 const KEY_TEXT = { Space: 'Space', Escape: 'Esc', Enter: 'Enter', Tab: 'Tab', Backspace: 'Bksp', Delete: 'Del', Insert: 'Ins',
   Home: 'Home', End: 'End', PageUp: 'PgUp', PageDown: 'PgDn', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→',
-  IntlBackslash: '§', ContextMenu: 'Menu' };
+  IntlBackslash: '§', ContextMenu: 'Menu', MediaPlayPause: '⏯', MediaStop: '⏹', MediaTrackNext: '⏭', MediaTrackPrevious: '⏮', MediaSelect: 'Media',
+  AudioVolumeUp: 'Vol+', AudioVolumeDown: 'Vol−', AudioVolumeMute: 'Mute' };
 const MAC_KEY = { Enter: '↩', Backspace: '⌫', Delete: '⌦', Tab: '⇥', Escape: '⎋' };
 /** keyText(code, platform) → the cap's legend: 'S', '5', '/', '←', 'Space' */
 export function keyText(code, platform = 'other') {
@@ -214,12 +218,17 @@ export function pickAction(entries, chord, { field = false, repeat = false, owne
 /* ── the binding law ────────────────────────────────────────────────────────────────────────────────────── */
 /** bindError(chord) → null, or the English reason the chord cannot be bound (λWAVES shortcuts.js) */
 const WHY = { key: { t: 'Choose a key, with any modifiers.' }, esc: { t: 'Escape is kept for closing and cancelling.' },
-  tab: { t: 'Tab is kept for moving the focus.' }, none: { t: 'No such action.' } };      // { t } so the catalogue finds them
-export function bindError(chord) {
+  tab: { t: 'Tab is kept for moving the focus.' }, none: { t: 'No such action.' }, browser: { t: 'The browser keeps this key for itself: the page never sees it.' } };      // { t } so the catalogue finds them
+/** RESERVED_BY_BROWSER (1.5.6-alpha.2) — chords a browser takes before the page hears them (close, new tab / window, reopen, the tab switch, the
+ *  full screen): an app that passes them as `reserved` has its binder refuse them, so no action is bound to a key that can never fire */
+export const RESERVED_BY_BROWSER = Object.freeze(['Mod+KeyW', 'Mod+KeyT', 'Mod+KeyN', 'Mod+Shift+KeyN', 'Mod+Shift+KeyT', 'Mod+Tab', 'Mod+Shift+Tab', 'F11']);
+/** bindError(chord, reserved?) — `reserved`: chords (any spelling) refused as the browser's (1.5.6-alpha.2; omitted, nothing more is refused) */
+export function bindError(chord, reserved = null) {
   const p = parseChord(chord);
   if (!p) return WHY.key.t;
   if (p.code === 'Escape') return WHY.esc.t;
   if (p.code === 'Tab' && (p.mods.length === 0 || (p.mods.length === 1 && p.mods[0] === 'Shift'))) return WHY.tab.t;
+  if (reserved && reserved.length && reserved.some((r) => normalize(r) === join(p))) return WHY.browser.t;
   return null;
 }
 /** steal(map, id, chord, { add }) → { map, stolen: [ids] } — pure: `id` gets `chord`, every other holder loses it */
@@ -295,7 +304,7 @@ export function toggleFullscreen(doc = globalThis.document) {
 }
 
 /* ── the table ──────────────────────────────────────────────────────────────────────────────────────────── */
-export function createKeys({ actions = [], storage = null, platform = detectPlatform(), target } = {}) {
+export function createKeys({ actions = [], storage = null, platform = detectPlatform(), target, reserved = null } = {}) {
   const view = target || (typeof window !== 'undefined' ? window : null);
   const life = new AbortController();
   const defs = [], byId = new Map(), defaults = {}, bound = {}, ids = [];
@@ -383,10 +392,10 @@ export function createKeys({ actions = [], storage = null, platform = detectPlat
       try { a.run && a.run(e || null, a); } catch (err) { console.warn('keys: ' + id, err); }
       return true;
     },
-    check(id, chord) { if (!byId.has(id)) return WHY.none.t; return bindError(normalize(chord, platform)); },
+    check(id, chord) { if (!byId.has(id)) return WHY.none.t; return bindError(normalize(chord, platform), reserved); },
     bind(id, chord, { add = false } = {}) {
       const c = normalize(chord, platform);
-      const reason = !byId.has(id) ? WHY.none.t : bindError(c);
+      const reason = !byId.has(id) ? WHY.none.t : bindError(c, reserved);
       if (reason) return { ok: false, chord: c, stolen: [], reason };
       const r = steal(bound, id, c, { add });
       Object.assign(bound, r.map);
