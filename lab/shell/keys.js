@@ -34,7 +34,7 @@ export function createKeys(app) {
     const KB_AT = 'lw.keyboard.position.v1';
     let back = null;
     const mapping = A.mapping = createMapping(app, { kt });   // 021 I2: THE MAPPING (lab/mapping.js), the window's second face; its targets install once the facade exists (rack.js)
-    const kb = createKeyboardWindow({ keys: kt.window, host: floats, panels: [{ name: 'MAPPING', body: mapping.root }],
+    const kb = createKeyboardWindow({ keys: kt.window, host: floats, panels: [{ name: 'MAPPING', body: mapping.root, icon: 'mapping' }],
       onMoved: (r) => { occlusion.dirty(); const f = document.activeElement; if (r === null && back && back.isConnected && (!f || f === document.body || kb.win.root.contains(f))) back.focus({ preventScroll: true }); },
       persist: { read() { try { return JSON.parse(localStorage.getItem(KB_AT)); } catch (_) { return null; } },
         write(st) { try { if (st.x !== null) localStorage.setItem(KB_AT, JSON.stringify({ x: st.x, y: st.y })); } catch (_) {} } } });
