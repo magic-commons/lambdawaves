@@ -64,7 +64,13 @@
   --xport-depth-w-drag: 3;           /* … while it is dragged */
   --xport-rail-thumb: color-mix(in srgb, var(--fg) 22%, transparent);        /* the rail's thin scrollbar (BASINS skin.css:362) */
   --xport-seat-focus: color-mix(in srgb, var(--fg) 72%, transparent);        /* a depth seat's focus line (BASINS skin.css:370) */
+  --xport-section: var(--glass-hairline);                                     /* 1.5.6-alpha.7 · a surface section's frame (λWAVES 022 C1) */
+  --xport-grid: 44px;                /* … the surface's grid: a knob bank's least cell */
+  --xport-led: var(--acc);           /* … a lit lamp and a meter's fill */
+  --xport-led-off: var(--sw-led-fill);                                        /* … an unlit lamp */
 }
+/* 1.5.6-alpha.7 · the surface's ONE WELL is the skin's own well, read on the body: the bar clears its own wells under GLASS faces (below) */
+:where(body) { --xport-well: var(--glass-well); }
 /* CONTROL FACES · GLASS (1.5.0-alpha.5): under REFRACTIVE or FROST the pill's face is clear, as BASINS' transport
    seats are (material.css §1); the hairline keeps its outline */
 :where(body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"])) .mir-transport { --xport-face: transparent; --glass-well: transparent; }   /* … and its wells (the tempo field, the panel): since 1.5.0-alpha.8 the house clears wells by rule, not by token, so the bar clears its own, as BASINS' transport does */
@@ -284,6 +290,30 @@ body.no-transport-bar .mir-transport, body.no-transport-bar .dev[data-id="transp
 .mir-transport .tempo-tile .m2rowgrip svg { width: 13px; height: 13px; pointer-events: none; }
 .mir-transport .tempo-tile [hidden] { display: none; }
 .mir-transport .tempo-empty { grid-column: 1 / -1; font-size: var(--fs-micro); color: var(--ink-faint); line-height: 1.4; }
+/* ── 1.5.6-alpha.7 · THE SURFACE (λWAVES 022 C1): the panel on ONE WELL (`data-mir-surface="well"` on .native-tempo, the app's choice), its
+   sections' frames, the lamps and meters in the bar's LED colour, and the macro bank (macroRail face 'knob'): each slot a knob with the macro's
+   name over it and its value under it, a lamp while routed or armed, and the foot the window's routing grip and numbered depth seat ── */
+.mir-transport .native-tempo[data-mir-surface="well"] { background: var(--xport-well); box-shadow: var(--relief-well, var(--neu-inset)); }
+.mir-transport .mir-section { border-color: var(--xport-section); }
+.mir-transport :is(.mir-lamp, .mir-meter-bar) { --lamp: var(--xport-led); }
+.mir-transport .mir-lamp:not([data-lit]) { background: var(--xport-led-off); }
+.mir-transport .tempo-knobs .mir-bank-grid { --cell-min: var(--xport-grid); }
+.mir-transport .mir-macro-knob { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "l l l" "d d d" "g v n"; justify-items: center; align-items: center; }
+.mir-transport .mir-macro-knob > .k-lbl { grid-area: l; } .mir-transport .mir-macro-knob > .k-dial { grid-area: d; }
+.mir-transport .mir-macro-knob > .k-val { grid-area: v; }
+.mir-transport .mir-macro-knob > .mir-macro-lamp { position: absolute; top: 1px; left: 1px; }
+.mir-transport .mir-macro-knob :is(.m2slot, .m2slotrow) { display: contents; }
+.mir-transport .mir-macro-knob .m2grip { grid-area: g; } .mir-transport .mir-macro-knob .m2numseat { grid-area: n; }
+.mir-transport .mir-macro-knob :is(.m2grip, .m2numseat) { position: relative; display: grid; place-items: center; width: 18px; height: 20px; padding: 0; border: 0; background: transparent; color: var(--acc2); touch-action: none; }
+.mir-transport .mir-macro-knob .m2grip svg { width: 12px; height: 12px; pointer-events: none; }
+.mir-transport .mir-macro-knob .m2numseat { cursor: ns-resize; }
+.mir-transport .mir-macro-knob .m2num { font: var(--w-semi) var(--xport-macro-num) / 1 var(--font-num); color: var(--acc2); pointer-events: none; }
+.mir-transport .mir-macro-knob .m2depthring { position: absolute; left: 0; top: 1px; width: 18px; height: 18px; overflow: visible; pointer-events: none; transform: rotate(-90deg); }
+.mir-transport .mir-macro-knob :is(.m2depthtrack, .m2deptharc) { fill: none; stroke-width: var(--xport-depth-w); }
+.mir-transport .mir-macro-knob .m2depthtrack { stroke: var(--xport-section); }
+.mir-transport .mir-macro-knob .m2deptharc { stroke: var(--acc); stroke-linecap: round; }
+.mir-transport .mir-macro-knob .m2numseat.m2zero .m2deptharc { opacity: 0; }
+.mir-transport .mir-macro-knob [hidden] { display: none; }
 
 /* ── DOCKED: the bar in the rack's TRANSPORT window (BASINS / λWAVES lab.css:317) ──────────────────────────── */
 .mir-transport.docked { position: static; transform: none; min-width: 0; max-width: none; width: auto; height: auto; flex-wrap: wrap; padding: 6px; gap: 6px;

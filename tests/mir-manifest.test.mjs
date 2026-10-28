@@ -33,6 +33,9 @@ const ACCEPTED = {
   /* 022 F1 · MIR 1.5.6-alpha.6 on the clone road (kit 19c89e3, 6a8cd78): THE FIT ROW (.row.fit, row(parent, { fit, cellMin, knob, cls })) and its tokens
      --cell-min --knob-min --knob --knob-max --row-gap */
   '1.5.6-alpha.6': 'f0189191f314c0429f942704403e4c07d1299c1370f3c426f93a688fcb83e4cc',   // 022 F2 re-pin (kit 6a8cd78: the cells stretch, a stretched switch centres its words)
+  /* 022 C1 · MIR 1.5.6-alpha.7 on the clone road (kit eef6443): THE SURFACE PARTS (section · knobBank · meter · lamp), one meter in the modulation
+     window, macroRail({ face: 'knob' }) · macroKnob, the well and section inner surfaces, --xport-well --xport-section --xport-grid --xport-led(-off) */
+  '1.5.6-alpha.7': '59d60b70070060b8b476959944c9839e1c1a34ad5946260be92a5f872daaf38f',   // 022 C2 re-pin (kit a547da5: a face's span, the asked page, values at rest, the one-line foot)
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */

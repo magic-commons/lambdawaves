@@ -57,6 +57,14 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
   19c89e3): `.row.fit` (auto-fit cells of `--cell-min`, the knob face `clamp(--knob-min, 62cqi, --knob-max)`, switches and triggers stretch,
   segs and `.wide` span two, `.full` the line, `data-knob="sm|lg"`) and `row(parent, { fit, cellMin, knob, cls })`; the tokens `--cell-min` 40 ·
   `--knob-min` 28 · `--knob` 34 · `--knob-max` 44 · `--row-gap` 4; the cells stretch (kit 6a8cd78, 022 F2); opt-in (a plain `.row` does not move); the starter's PICTURE and a gallery card.
+- **BUILT 1.5.6-alpha.7 · THE SURFACE PARTS** (022 C1, `kit.js`, `css/base.css`, `css/skin.css`, `shell/transport.js` + `.css`, `modwindow.js`,
+  tokens.json, docs/CONTROLS.md "A surface is a surface"; kit eef6443, a547da5): `section({ title })` (`data-mir-surface="section"`, a hairline frame on a
+  `data-mir-surface="well"`; both inner surfaces the pane rules skip), `knobBank({ slots: 8, items, page, onPage, onEmpty, onMove })`, `meter({ bands,
+  led, peak, labels })` (`set()` through the frame coalescer; the modulation window's `.m2meter` / `.m2audminleds` / live LED are it), `lamp({ on,
+  colour })`; `createTransport({ macros: { face: 'knob', onAdd } })` → `macroRail({ face: 'knob' })` · `macroKnob`; `--xport-well` (on the body)
+  `--xport-section` `--xport-grid` 44 `--xport-led` `--xport-led-off` `--lamp` `--peak`. Left for 1.5.6: the AUDIO editor's SVG meter (`buildAudioMeter`,
+  drawn in the curve's own coordinates) is not the kit meter; the bank's reorder for macros (the window's rows reorder them); a 44-px finger on the
+  macro knob's grip and depth seat (22 × 24 drawn, no outset yet).
 - **FROST in LIGHT writes white ink on every pane** (022 S, not built): the recipe's White Text holds in LIGHT, so over a light stage FROST's
   windows read 1.05 : 1 (the kit's own themes.browser label table says the same); the popups are fixed (above), the panes wait for a ruling
   (TEXT AUTO in LIGHT, or a darker veil).
