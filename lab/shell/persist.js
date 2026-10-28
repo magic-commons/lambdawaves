@@ -174,9 +174,8 @@ export function createPersist(app) {
         if (reg.transition && app.hooks.ab) app.hooks.ab.set(false);   // wave 127 · every road stands a running A/B transition down FIRST (UNDO's law): clearing it later froze its mix over the register written here
         const t = reg.restore(ex);
         if (!hist) {
-          clock.pause(); clock.scrub(opt && opt.project ? 0 : t);
-          if (ui.scrub) ui.scrub.set(0);
-          shadowView.clearTrail(); shadowFoot.clear(); particles.resetClock(clock.t);
+          clock.pause(); clock.seek(opt && opt.project ? 0 : t, { schedule: false });   // 021 R3: THE ONE SEEK (the playhead and the trail)
+          shadowFoot.clear(); particles.resetClock(clock.t);
         }
         if (Number.isFinite(ex.rate) && ex.rate > 0) clock.setRate(paceRate(ex.rate));
         if (ex.window) clock.window = ex.window;

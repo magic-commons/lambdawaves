@@ -25,6 +25,7 @@ export class Clock {
     this.lastDt = 0;
     this.hz = 0;             // 020 L1: 0 = WALL (the wall interval × rate), > 0 = LOCKED (rate/hz per advance)
     this.onEdge = null;      // THE ONE PLAY's ear (onePlay, below): told of every play and pause edge, from whichever road
+    this.onSeek = null;      // 021 R3 · THE ONE SEEK's ear (onePlay): the playhead, the trail and the frame after every seek
   }
   play(nowSec) { if (!this.playing) { this.playing = true; this._wall = nowSec; if (this.onEdge) this.onEdge(true); } }
   pause() { const was = this.playing; this.playing = false; this._wall = null; if (was && this.onEdge) this.onEdge(false); }
@@ -44,17 +45,30 @@ export class Clock {
   }
   step(dt) { this.t += dt; this.steps++; this.lastDt = dt; }
   scrub(t) { this.t = t; this.lastDt = 0; }
+  /** seek(t, o) — THE ONE SEEK (onePlay, below): scrub, then the app's hooks */
+  seek(t, o = {}) { this.scrub(t); if (this.onSeek) this.onSeek(this.t, o); return this.t; }
   reset() { this.t = 0; this.lastDt = 0; }
   setRate(r) { this.rate = Math.max(1e-6, r); }
 }
 
 /** THE ONE PLAY (0.5.0 A6 · R-B1; MIR TRANSPORT.md "the two clocks become one"): `{ play, pause, isPlaying, toggle, onChange,
- *  seek }` over this clock, the `clock` the kit's createTransport takes.  The physics clock IS the play: every road that starts or
+ *  seek, bind }` over this clock, the `clock` the kit's createTransport takes.  The physics clock IS the play: every road that starts or
  *  stops it (the button, Space, LW.play, A/B, the bow, the slap, a restore, a capture) is an edge, and onChange hears each one at
- *  once — so the modulation follows by holding its app-play demand (mod-port.js `follow`), never by a per-frame poll. */
+ *  once — so the modulation follows by holding its app-play demand (mod-port.js `follow`), never by a per-frame poll.
+ *  THE ONE SEEK (021 R3): `seek(t, { trail, schedule })` (= `clock.seek`, whose ear this wires) is the one writer of t outside the clock's own advance — HOME, CLEAR, the bar's
+ *  ⏮, the SCRUB, ⟳, the vortex's LOCATE, a preset, a restore, LW.scrub and the film all call it.  It sets t (lastDt 0), paints the
+ *  playhead, clears the shadow trail (a jump in t is not a path; `trail: false` keeps it — the film, frame by frame) and asks for the frame
+ *  (`schedule: false` when the caller schedules its own).  `bind({ playhead, trail, schedule })` hands it the app's three hooks.  It moves
+ *  ψ's t only: the modulation beat has its own ⏮ (TIMELINE's), and one position spanning both is a kit door (docs/FOR-MIR.md, 1.5.6). */
 export function onePlay(clock, now = () => performance.now() / 1000) {
-  const subs = new Set();
+  const subs = new Set(), hooks = { playhead: null, trail: null, schedule: null };
   clock.onEdge = (on) => { for (const f of subs) f(on); };
+  clock.onSeek = (t, o) => {
+    if (hooks.playhead) hooks.playhead(t);
+    if (o.trail !== false && hooks.trail) hooks.trail();
+    if (o.schedule !== false && hooks.schedule) hooks.schedule();
+  };
+  const seek = (t, o) => clock.seek(t, o);
   return { play: () => clock.play(now()), pause: () => clock.pause(), toggle: () => clock.toggle(now()), isPlaying: () => clock.playing,
-    seek: (t) => clock.scrub(t), onChange: (f) => { subs.add(f); return () => subs.delete(f); } };
+    seek, bind: (h) => { Object.assign(hooks, h); }, onChange: (f) => { subs.add(f); return () => subs.delete(f); } };
 }

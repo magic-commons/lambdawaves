@@ -105,6 +105,9 @@ import { RECORD_FPS, estimateFilm, ceilingWarning, fmtMs, fmtBytes } from './mir
    PART 1 — THE LAWS.  Nothing below touches the DOM, WebGPU or a clock; all of it is proved in node.
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 
+/** 021 R3 · THE FILM SEEKS THROUGH THE ONE DOOR (clock.js `seek`): its own exact schedule, the trail kept, no frame asked (the film draws
+ *  its own); a host without the door (a node proof's fake LW) scrubs its clock directly */
+const seekTo = (LW, t) => (typeof LW.seek === 'function' ? LW.seek(t, { trail: false, schedule: false }) : LW.clock.scrub(t));
 export const ENDPOINT = Object.freeze({ loop: 'exclusive', span: 'inclusive' });
 export const MODES = Object.freeze(['loop', 'span']);
 
@@ -643,7 +646,7 @@ export function createFilm(LW, opts = {}) {
       if (LW.governor && P.gov !== null) LW.governor.on = P.gov;
       if (f && f.stats) f.stats.presents = P.presents + J.log.length;   // the diagnostic counter, put back honestly: the frames really did happen
       if (!J.host && P.modPlaying && LW.mod && LW.mod.play) LW.mod.play();
-      if (LW.clock) { LW.clock.scrub(P.t); if (LW.clock.setRate) LW.clock.setRate(P.rate); }
+      if (LW.clock) { seekTo(LW, P.t); if (LW.clock.setRate) LW.clock.setRate(P.rate); }
       if (P.playing && LW.play) LW.play();
       if (canvas && P.cfg !== 'copy' && !opts.grab) configure(false);
     } catch (_) { /* a restore must never be the thing that throws */ }
@@ -694,7 +697,7 @@ export function createFilm(LW, opts = {}) {
     for (;;) {
       tries++;
       const wit = {};
-      LW.clock.scrub(t);
+      seekTo(LW, t);
       if (J.poseAt && !pc) Object.assign(LW.obs, J.poseAt(i, J.N, t) || {});
       if (pinned('jitter') && f && f.stats) f.stats.presents = JITTER_SEED;         // H1: the seed, pinned for THIS frame
       shot = opts.grab ? await opts.grab({ t, w, h, wit, k: i, seed: JITTER_SEED, pinned })

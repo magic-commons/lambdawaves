@@ -232,7 +232,7 @@ export async function boot(dom) {
   window.addEventListener('pageshow', () => setPageHidden(document.visibilityState === 'hidden', 'pageshow'));
 
   /* ── the router ───────────────────────────────────────────────────────── */
-  let pending = TIER.NONE, rafId = 0, lastWall = 0, lastReconMs = -1e9, lockDue = 0; app.state.dragging = false; let inLoop = false;
+  let pending = TIER.NONE, rafId = 0, lastWall = 0, lastReconMs = -1e9, lockDue = 0, modLocked = false; app.state.dragging = false; let inLoop = false;
   /* OPTIMIZATION 2026-09-24 · LA1: the WHOLE loop's own ms, from entry (before the occlusion burst and the modulation
      pump, which perf.ring's tFrame0 leaves out), 60 deep, beside perf.ring — LW.perf.loopMedian reads it.  Both rings
      are written to the slot the frame's head captured (the tail used to write the NEXT slot, so the getter read the
@@ -357,6 +357,40 @@ export async function boot(dom) {
                       a preset restore) and a policy wired to one of them is a policy that is wrong six times.
                       Pausing schedules one more frame, which is the frame that gives the glass back. */
     const now = nowMs / 1000;
+    /* PLAYBACK LOCK (020 L1 · A LOCKED CLOCK STEPS, A WALL CLOCK FLOWS): while it plays, the loop presents only on a 1/hz tick (DISPLAY: every
+       rAF) and the clock advances exactly rate/hz per present.  A rAF between ticks, or one whose GPU is still behind (the PACE cap), carries
+       its ask whole and leaves t alone — a missed vsync slows time, never skips it (the due time re-anchors, it never catches up). */
+    const lockHz = fieldRate.lock ? (fieldRate.hz || 1000 / fieldRate.refreshMs()) : 0;
+    clock.hz = lockHz;
+    if (field.pinJitter) field.pinJitter(lockHz > 0);
+    let lockWait = false;
+    if (lockHz && clock.playing) {
+      if (field.ok && field.inFlight >= field.inFlightCap) lockWait = true;
+      else if (fieldRate.hz) {
+        const stepMs = 1000 / fieldRate.hz;
+        if (!(lockDue > 0) || nowMs - lockDue > stepMs) lockDue = nowMs;
+        if (nowMs >= lockDue - Math.min(2, stepMs / 4)) lockDue += stepMs; else lockWait = true;
+      }
+    }
+    /* 021 R3 · ONE TIME: under PLAYBACK LOCK, while ψ plays, the modulation clock and the rotation drive step EXACTLY 1/hz on the tick ψ steps
+       (the film's way, render-exact.js: the kit's deterministic `step`), so a late frame slows the LFOs, the TIMELINE clips and ROTATE z with
+       ψ and the three never part.  The release re-anchors the modulation's wall stamp (the kit's realtime door, no play edge) so WALL resumes
+       without a jump.  WALL (no lock) is the road below, byte for byte. */
+    const modLock = !!(app.state.modHost && lockHz && clock.playing);
+    if (app.state.modHost && modLocked && !modLock) { const rel = app.state.modHost.clock.suspendRealtime(now); if (rel) rel(now); }
+    modLocked = modLock;
+    if (modLock) {
+      if (!lockWait) {
+        const H = app.state.modHost, run = H.clock.isRunning();
+        if (run) modSyncBases();
+        if (run || (app.state.audioCap && app.state.audioCap.live) || rotDriving()) {
+          feedAudio(lockHz); if (run) H.clock.step(1 / lockHz);
+          if (app.state.eq && app.state.eq.audioTick) app.state.eq.audioTick();
+        }
+        rotStep(1 / lockHz);
+      }
+      app.state.modWall = nowMs;
+    }
     /* ── THE MODULATION CLOCK (wave 52) — the SECOND logical time over this one wall clock.  ONE call,
        with a monotonic stamp in SECONDS, and it is the only entry point the scheduler uses.  THE CADENCE
        CAP is here and nowhere else: on a 240 Hz panel the modulation still applies 60 (or 120) times a
@@ -364,7 +398,7 @@ export async function boot(dom) {
        stamp, so it cannot drift, and under FREE sync the next dt carries the whole gap.  Its present
        callback is schedule(TIER.PRESENT), which is why this sits ABOVE the read of `pending`: the output
        of this frame is presented on this frame.  It runs whether or not the window that shows it is open. */
-    if (app.state.modHost) {
+    else if (app.state.modHost) {
       const modRunning = app.state.modHost.clock.isRunning();
       if (nowMs - app.state.modWall >= MOD.step) {
         if (modRunning) modSyncBases();   // 017 P2: the bases follow the hand on the cadence that reads them, not every frame (half the reads at 120 Hz)
@@ -401,21 +435,6 @@ export async function boot(dom) {
       }
     }
     let tier = pending; pending = TIER.NONE;
-    /* PLAYBACK LOCK (020 L1 · A LOCKED CLOCK STEPS, A WALL CLOCK FLOWS): while it plays, the loop presents only on a 1/hz tick (DISPLAY: every
-       rAF) and the clock advances exactly rate/hz per present.  A rAF between ticks, or one whose GPU is still behind (the PACE cap), carries
-       its ask whole and leaves t alone — a missed vsync slows time, never skips it (the due time re-anchors, it never catches up). */
-    const lockHz = fieldRate.lock ? (fieldRate.hz || 1000 / fieldRate.refreshMs()) : 0;
-    clock.hz = lockHz;
-    if (field.pinJitter) field.pinJitter(lockHz > 0);
-    let lockWait = false;
-    if (lockHz && clock.playing) {
-      if (field.ok && field.inFlight >= field.inFlightCap) lockWait = true;
-      else if (fieldRate.hz) {
-        const stepMs = 1000 / fieldRate.hz;
-        if (!(lockDue > 0) || nowMs - lockDue > stepMs) lockDue = nowMs;
-        if (nowMs >= lockDue - Math.min(2, stepMs / 4)) lockDue += stepMs; else lockWait = true;
-      }
-    }
     const dt = lockWait ? 0 : clock.advance(now);                    // PHYSICS clock (exact; LOCKED: rate/hz)
     if (page.firstDt === null) { page.firstDt = dt; page.firstWall = Math.max(0, now - lastWall); if (dt > 0.5 * clock.rate) page.jumped++; }   // wave 54: the first frame after a resume, kept so the gate can read it rather than infer it
     if (dt !== 0) { tier = Math.max(tier, TIER.EVOLVE); stats.evolves++; winSteps++; }

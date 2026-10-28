@@ -71,7 +71,7 @@ export function createReadouts(app) {
   // VORTEX — the flow: the nodal lines (print, Thread C), and the PARTICLES that ride the same current
   const wVor = device({ id: 'vortex', eyebrow: 'VORTEX', status: '' });
   rack.appendChild(wVor.root);
-  const vortex = createVortex(wVor.body, dom.vortex, { reg, clock, scrubTo: (t) => { clock.scrub(t); schedule(TIER.EVOLVE); } }); ui.vorOn = wVor.body.querySelector('.sw');   // LOCATE: B2's no-nodes stand-down greys it
+  const vortex = createVortex(wVor.body, dom.vortex, { reg, clock, scrubTo: (t) => clock.seek(t) }); ui.vorOn = wVor.body.querySelector('.sw');   // LOCATE: B2's no-nodes stand-down greys it
   /* PARTICLES (0.4.0 S3 · R-W1: out of the retired DYNAMICS): de Broglie–Bohm tracers seeded from |ψ|² and riding v = j/ρ —
      the same current whose singular lines VORTEX locates, so the switch lives here and its overlay presents while VORTEX
      can.  COUNT and TRAIL are the project's (instruments.particles); the switch is the overlay's (overlays.particles). */
