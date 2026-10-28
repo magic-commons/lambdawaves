@@ -83,6 +83,7 @@ D1 `docs/laws/*.md` by subject (the stage words, the register and systems, the f
 23. (V3) Below ≈ 776 px PLAY still clips at the stage seat (rack 300 + bar 674). Default: a narrower CSB is 022 E3's.
 24. (V1) Rack card heads do not show the glyph (the FINDER, WINDOW menu, the pill and floating heads do). Default: not on card heads.
 25. (V3) The bar goes under any open float it overlaps on every screen height. Default: every float.
+26. (D0) action.* targets stay in the film's resume signature with base 0 (as built) rather than kept out by a kit door. Default: as built.
 
 ## MERGE ORDER
 K → G → R → I → V → D (each on the merged tree; the recipe: `git merge --no-ff --no-commit it021-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → commit → CLOSED row → handoff line). After K the kit law is "1.5.6-alpha.N, additive doors only"; every later chain's kit edit follows it.
@@ -95,4 +96,5 @@ K → G → R → I → V → D (each on the merged tree; the recipe: `git merge
 | R | ec63b9b | 3bf035d | R1–R6 (R-BUILD.md; kit 1.5.6-alpha.1 session door via the clone road, bundle .tmp/it021/kit.bundle; STATE-SCOPES generated; LOCKED 60 Δt and modulation step both one constant; LOCK 843/0 · 987/0; 19 browser suites green) |
 | I | 4710985 | ea2b12d | I1–I3 (I-BUILD.md; lab/actions.js 252 rows; MAPPING tab + mir/shell/midi.js; menus FILE·EDIT·VIEW·PLAY·WINDOW·HELP with submenus; kit 1.5.6-alpha.2; LOCK 843/0; facade re-captured +actions +run +seek) |
 | V | 87e88df | a1e00c1 | V1–V3 (V-BUILD.md; kit 1.5.6-alpha.3 registerGlyphs/windowGlyphs/glyph doors; lab/icons.js 56 drawings + 23 borrowed, masks and sprite retired, 30 sw rows gone; FOLDS skips hidden; the bar under any float; GRAIN pauses; LOCK 843/0; molecule-head + timeline T1/T2/T11 red since chain I → chain D re-aims) |
-| D | a1e00c1 | | |
+| D | 2031041 | 15255c6 | D0–D2 (D-BUILD.md; molecule-head + timeline 14/14 green — mapping.js action targets base 0 for the film's signature; app cycles 0; CLAUDE.md 18,903 → 1,147 words + docs/laws 16 files, laws-diff: only the 18 SUPERSEDED sentences; LOCK 843/0; 987 with one 'unrepeatable' momentum leaf = the GPU-load flake) |
+| CLOSE | | 15255c6 | 021 closed: CLAUDE.md two pages, docs/laws, FOR-JOSH in DATABASE, map refreshed; kit 1.5.6-alpha.3 in .tmp/it021/kit.bundle (Josh: call 12) |
