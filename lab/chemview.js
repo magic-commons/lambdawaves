@@ -1315,11 +1315,12 @@ export function createChem(host, api) {
   function setOn(v) {
     on = !!v; if (onSw.get() !== on) onSw.set(on);
     if (!on) { setRun(false); if (vibOn) setVib(false); if (S() && fieldHash !== null) { S().drop(); fieldHash = null; } }
-    api.setOn(on);
     /* the claim is the whole handover: ON asks the session for the field (and it asserts this card's observable
        even before the solve lands, as the old fieldView() call did), OFF lets go and the session restores the
-       observable the user had before any molecule took it */
+       observable the user had before any molecule took it.  021 R5: CLAIM FIRST, THEN THE MODE — the field's owner is settled before
+       moleculeMode turns the windows and schedules its REBUILD, so the frame it asks for draws the right owner once */
     if (S()) S().claim('ground', on, 'MOLECULES has the field: the card’s own view');
+    api.setOn(on);
     if (on && sol) pushField();
     else if (on) solve(preset);
     if (api.viewed) api.viewed();   // iteration 008 U: the register follows the one switch — after the field holds the molecule, so its claim can land

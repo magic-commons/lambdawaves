@@ -530,7 +530,7 @@ body.no-mol-formula .lw-pop { display: none; }
 #lwMode .lw-stage-b::before { content: ""; width: 16px; height: 16px; background: currentColor;
   -webkit-mask: url(img/icons/library.svg) center / contain no-repeat; mask: url(img/icons/library.svg) center / contain no-repeat; }
 #lwMode .lw-stage-b[data-id="molecules"]::before { -webkit-mask-image: url(img/icons/molecular.svg); mask-image: url(img/icons/molecular.svg); }
-#lwMode .lw-stage-b[data-id="atoms"]::before { -webkit-mask-image: url(img/icons/atomic.svg); mask-image: url(img/icons/atomic.svg); }
+#lwMode .lw-stage-b[data-id="hydrogen"]::before { -webkit-mask-image: url(img/icons/atomic.svg); mask-image: url(img/icons/atomic.svg); }
 #lwMode .lw-stage-b:hover, #lwMode .lw-stage-b:focus-visible { opacity: 1; }
 #lwMode .lw-stage-b[aria-pressed="true"] { opacity: 1; color: var(--acc); background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); }
 body.ui-hidden #lwMode { display: none; }

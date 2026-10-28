@@ -32,7 +32,7 @@ try {
     await expander(); await wait(700); await row('MOLECULES · expander');
     if (seat === 0) writeFileSync(OUT, Buffer.from(await g.snap(), 'base64'));
     await expander(); await wait(500);
-    await mode('atoms'); await wait(1500); await row('HYDROGEN again');
+    await mode('hydrogen'); await wait(1500); await row('HYDROGEN again');
     await g.ev(`__LW.clock.t = 0; return 1;`);
     await cycle(); await wait(1200);
   }

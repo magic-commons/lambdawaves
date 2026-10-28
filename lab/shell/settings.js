@@ -3,9 +3,17 @@
  * creation — as are app.host.camera, app.sh.setModArm and app.sh.quality, which boot() fills later.  readSettings stays in rack.js' head
  * (§0 calls it first, U1) and comes by value; lookSync is registered for the controller; boot() destructures the rest. */
 import { infoKnown } from './stage-words.js'; import { readSession } from '../mir/core/session.js';
-import { ASK_ENABLED } from '../ask.js';
-import { RETIRED } from '../settings-store.js';   // 021 R4: the keys the blob drops (the carry list is gone)   // iteration 011 Q6: the one flag (ASK hidden: the stored askOk / askUrl carried, never written)
+import { ASK_ENABLED } from '../ask.js';   // iteration 011 Q6: the one flag (ASK hidden: the stored askOk / askUrl carried, never written)
+import { RETIRED } from '../settings-store.js';   // 021 R4: the keys the blob drops (the carry list is gone)
 const SESSION_KEY = 'lambdawaves.q0.session';   // main.js createSession's key (settings-store.js FAMILIES)
+/* 021 R5 · ONE MODE: every window's mode, one seat beside KIND — 'hydrogen' (hidden under MOLECULES), 'molecules' (hidden under HYDROGEN),
+   absent = 'both' (shown in either).  windows/molecules.js `moleculeMode` iterates it; the FINDER greys by it.  The atomic readers and
+   operators are HYDROGEN's (they read or replace the hydrogenic register the molecule does not drive); LATTICE and BLOCH keep their own
+   registers and touch neither, so they stand in both (LATTICE's benzene Hückel preset is a molecule's picture) */
+export const MODE = Object.freeze({ spectrum: 'hydrogen', equalizer: 'hydrogen', staticfield: 'hydrogen', emission: 'hydrogen', shadow: 'hydrogen', orbit: 'hydrogen',
+  vortex: 'hydrogen', slice: 'hydrogen', ladder: 'hydrogen', calculus: 'hydrogen', central: 'hydrogen', separable: 'hydrogen', atoms: 'hydrogen',
+  wigner: 'hydrogen', radiation: 'hydrogen', chem: 'molecules', lattice: 'both', bloch: 'both' });
+
 export function createSettings(app) {
   const { ui, mat, settingsStore, useCompactDefaults, FIRST_RUN, appleDevice } = app; const { readSettings } = app.sh;
   /* ── SETTINGS: what this browser remembers (theme, chrome, accents, quality, closed windows) ── */

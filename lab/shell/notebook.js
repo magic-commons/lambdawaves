@@ -6,6 +6,7 @@ import { renderNotebook } from '../mir/shell/notebook-render.js'; import { camer
 import { paintedRect } from '../occlusion.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js';
+import { MODE } from './settings.js';   // 021 R5: ONE MODE (the FINDER's greys)
 import { NOTEBOOK_KEYS } from '../settings-store.js';   // 021 R4: the notebook's 0.4 keys, read once and retired
 export function createNotebook(app) {
   const { dom, ui, reg, clock, obs, mat, settingsStore, isPhone } = app, { schedule } = app.loop, { floats, resetView, swClient } = app.host;
@@ -120,7 +121,7 @@ export function createNotebook(app) {
       const modeIcon = { atoms: 'atomic', chem: 'molecular' };
       layout.finder = createWindowPicker({ rack: rk, cls: 'lw-menu', icon: (id) => modeIcon[id] || null,
         open: reveal,
-        can: (id) => { const d = document.querySelector('.dev[data-id="' + id + '"]'); return !d || !d.hidden ? true : id === 'chem' ? 'MOLECULES ONLY' : 'HYDROGEN ONLY'; } });
+        can: (id) => { const d = document.querySelector('.dev[data-id="' + id + '"]'); return !d || !d.hidden ? true : MODE[id] === 'molecules' ? 'MOLECULES ONLY' : 'HYDROGEN ONLY'; } });   // 021 R5: the MODE table's word
     }
     /* LEAN (the Aa button) and the KIND taxonomy (data-kind, ⧉ COPY, the boot folds): lab/window-chrome.js (N7 seam 9) */
     installWindowChrome({ KIND, layout, present: () => schedule(TIER.PRESENT) });

@@ -309,7 +309,7 @@ export async function boot(dom) {
   const modeState = { re: cRe, im: cIm };
   function modesAt(t) {
     modeStateT = NaN; modeStateVersion = -1;
-    if (app.state.chem && app.state.chem.on) return null;                                      // CHEMISTRY: the field reads an AO density matrix, not a mode list — packModes is skipped entirely
+    if (app.state.molSession && app.state.molSession.selected) return null;                    // CHEMISTRY: the field reads an AO density matrix, not a mode list — packModes is skipped entirely (021 R5: while a molecular model HOLDS the field, not while the switch says ON)
     if (gas && gas.on) return gas.fieldModes(t);                           // the AXIAL GAS: the box's second register
     const c = reg.at(t, cRe, cIm), ids = stateReaders().rendered.ids; modeStateT = t; modeStateVersion = reg.version;
     modeList.length = ids.length;                                        // wave 45: the same records, rewritten in place (was 1–91 fresh objects per reconstruct)
@@ -324,7 +324,7 @@ export async function boot(dom) {
   function applyRebuild() {
     busyWrap(null);                                                    // wave 48: a rebuild is BUSY work — synchronous, so it only shows when the frame-gap rule catches it running long
     const HH = getHamiltonian();
-    if (domain.auto) domain.half = (app.state.chem && app.state.chem.on) ? app.state.chem.half : (app.state.space === 'p' ? HH.domainForP(reg.nmin()) : sturm.P ? sturmHalf() : HH.domainFor(reg.nmax(1e-3), reg));   // ignore a slap's 1e-4 tails
+    if (domain.auto) domain.half = (app.state.molSession && app.state.molSession.selected) ? app.state.chem.half : (app.state.space === 'p' ? HH.domainForP(reg.nmin()) : sturm.P ? sturmHalf() : HH.domainFor(reg.nmax(1e-3), reg));   // ignore a slap's 1e-4 tails
     if (field.ok) field.setSpace(app.state.space === 'p' ? HH.kernelSpace.p : HH.kernelSpace.x);
     if (field.ok && HH.radialTable) field.setRadialTable(HH.radialTable());   // QUARKONIUM: the tabulated radial rows the kernel reads
     if (field.ok) {
