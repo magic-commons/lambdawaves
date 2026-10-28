@@ -16,6 +16,7 @@
  * unless a link, a ?preset= or ?menu=0 opened something (rack.js).  A plain module: app is read, never extended (app.state.picker). */
 import { storageInfo } from './library.js';   // iteration 011 Q4: the LIBRARY's THIS DEVICE line
 import { el, chip, mathPlain, stepper } from './mir/kit.js';
+import { jsonStore } from './mir/core/prefs.js';   // 021 R4: the Picker's record on the kit's store
 import { CHEM_PRESETS } from './chemview.js';
 import { SECTIONS, GROUPS, RECORD_GROUP } from './molecules.js';
 import { ATOMS } from './atoms.js';
@@ -55,7 +56,10 @@ const PREF_KEY = 'lambdawaves.q0.picker', PREF0 = { atomLabels: true, molLabels:
 /* iteration 016 P3 · DEFAULT LOOKS (Josh: "Im ψ for atoms, arg ψ for molecules, until the reader changes it"): a record before 016 wrote PREF0's
    look 'density' on every save of the hue or the labels, so a stored 'density' without `lookHand` is read as no choice; any other stored look
    could only be a hand's and wins */
-const readPrefs = () => { let p; try { p = Object.assign({}, PREF0, JSON.parse(localStorage.getItem(PREF_KEY) || '{}')); } catch (_) { p = Object.assign({}, PREF0); }
+/* 021 R4 · the kit's jsonStore, versioned `{ v: 1, …prefs }`; an older unversioned record is read once and written back upgraded */
+const pickerStore = jsonStore(PREF_KEY);
+const readPrefs = () => { const r = pickerStore.get(), o = r && typeof r === 'object' ? r : {}, p = Object.assign({}, PREF0, o); delete p.v;
+  if (r && o.v !== 1) pickerStore.set({ v: 1, ...o });
   if (p.look === 'density' && !p.lookHand) delete p.look; return p; };
 /** wheelSteps(node, step) — iteration 016 L2 (Josh: "a mouse wheel over the LOOK picker cycles the looks one notch each"): one step per detent — a
     line or page wheel one per event, a pixel wheel's notch (one event of 50 px or more: Chromium's 100, Windows' 120) one per event, a trackpad's
@@ -70,7 +74,7 @@ function wheelSteps(node, step) {
     acc += d; if (Math.abs(acc) >= 100) { step(Math.sign(acc)); acc = 0; }
   }, { passive: false });
 }
-const writePrefs = (p) => { try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (_) { /* a blocked profile keeps it for the visit */ } };
+const writePrefs = (p) => pickerStore.set({ v: 1, ...p });   // a blocked profile keeps it for the visit (jsonStore swallows the refusal)
 /** an iteration 012 icon (lab/img/icons/<name>.svg), drawn in currentColor through a CSS mask */
 const icon = (host, name) => { const i = el('i', 'mm-ico', host); i.style.setProperty('--ico', `url(img/icons/${name}.svg)`); i.setAttribute('aria-hidden', 'true'); return i; };
 /** two presses remove (no window.confirm): the first arms the button for 600 ms, or until a press anywhere else, then it repaints (Josh 10-20) */

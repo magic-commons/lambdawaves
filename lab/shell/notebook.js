@@ -6,6 +6,7 @@ import { renderNotebook } from '../mir/shell/notebook-render.js'; import { camer
 import { paintedRect } from '../occlusion.js';
 import { coalesce } from '../frame-coalescer.js'; import { createProjects } from '../projects.js'; import { createExporter, EXPORTS as SHAPE_EXPORTS } from '../export3d.js';
 import { installWindowChrome } from '../window-chrome.js';
+import { NOTEBOOK_KEYS } from '../settings-store.js';   // 021 R4: the notebook's 0.4 keys, read once and retired
 export function createNotebook(app) {
   const { dom, ui, reg, clock, obs, mat, settingsStore, isPhone } = app, { schedule } = app.loop, { floats, resetView, swClient } = app.host;
   const { KIND, layout, readSettings, rk, saveSettings, winHint } = app.sh, { clearRegister, copyLatex, normalizeNow, toggleFullscreen } = app.w;
@@ -128,24 +129,27 @@ export function createNotebook(app) {
     /* ── THE NOTEBOOK: a free glass over the stage; its ⓘ flips it into the ABOUT face ── */
     const nb = document.getElementById('notebook');
     if (nb) {
-      const NB_KEY = 'lambdawaves.q0.notebook', NB_TITLE = 'lambdawaves.q0.notebook.title', NB_SUBTITLE = 'lambdawaves.q0.notebook.subtitle';
+      const [NB_KEY, NB_TITLE, NB_SUBTITLE] = NOTEBOOK_KEYS;   // 021 R4: RETIRED — read once below, then the session part is the notebook's one record
       const ta = nb.querySelector('.nb-text'), view = nb.querySelector('.nb-view'), titleIn = nb.querySelector('.nb-title'), subIn = nb.querySelector('.nb-subtitle'), faces = { notes: nb.querySelector('.nb-notes'), about: nb.querySelector('.nb-aboutface') };
       /* the ABOUT face's version line is BUILD_LINE, never hand-written markup: the copy dump reads this same text back out of the face */
       const abV = nb.querySelector('.ab-version');
       if (abV) { const i = BUILD_LINE.indexOf(' · '); abV.textContent = ''; el('span', 'ab-tag', abV, i < 0 ? BUILD_LINE : BUILD_LINE.slice(0, i)); if (i >= 0) abV.appendChild(document.createTextNode(BUILD_LINE.slice(i))); }
+      /* 021 R4 · THE NOTEBOOK IS STORED ONCE, in the project part (the session, FOLDERS, a file).  A browser that still holds 0.4's three keys
+         boots onto them (a resume then puts the session's back), they leave storage, and the session's next save keeps the text */
+      let nbLegacy = false;
       try {
-        ta.value = localStorage.getItem(NB_KEY) || '';
-        const t = localStorage.getItem(NB_TITLE); if (t) titleIn.value = t;
-        if (subIn) { const s = localStorage.getItem(NB_SUBTITLE); if (s) { subIn.value = s; subIn.hidden = false; } }
+        const v = localStorage.getItem(NB_KEY), t = localStorage.getItem(NB_TITLE), s = localStorage.getItem(NB_SUBTITLE);
+        nbLegacy = v !== null || t !== null || s !== null;
+        ta.value = v || ''; if (t) titleIn.value = t;
+        if (subIn && s) { subIn.value = s; subIn.hidden = false; }
+        for (const k of NOTEBOOK_KEYS) localStorage.removeItem(k);
       } catch (e) {}
       /* 2026-09-11: a synchronous localStorage write per keystroke became one write 300 ms after the last key; pagehide flushes */
       /* 2026-09-11: the notebook's move and resize write style once per FRAME, not once per pointer event */
       const nbPaint = coalesce(paint => paint());
-      const nbPending = new Map(); let nbTimer = 0;
-      const nbFlush = () => { nbTimer = 0; for (const [k, v] of nbPending) { try { localStorage.setItem(k, v); } catch (e) {} } nbPending.clear(); };
-      const nbStore = (k, v) => { nbPending.set(k, v); if (!nbTimer) nbTimer = setTimeout(nbFlush, 300); };
-      window.addEventListener('pagehide', nbFlush);
-      titleIn.addEventListener('input', () => nbStore(NB_TITLE, titleIn.value));
+      /* the title, subtitle and text are the part's: each input tells the session (projects.changed, the part's subscribe) */
+      const nbStore = () => { if (layout.projects) layout.projects.changed(); };
+      titleIn.addEventListener('input', nbStore);
       titleIn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -156,10 +160,10 @@ export function createNotebook(app) {
         if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation();
       });
       if (subIn) {
-        subIn.addEventListener('input', () => nbStore(NB_SUBTITLE, subIn.value));
+        subIn.addEventListener('input', nbStore);
         subIn.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { e.preventDefault(); subIn.blur(); }
-          else if (e.key === 'Backspace' && !subIn.value) { e.preventDefault(); subIn.hidden = true; try { localStorage.removeItem(NB_SUBTITLE); } catch (_) {} titleIn.focus(); }
+          else if (e.key === 'Backspace' && !subIn.value) { e.preventDefault(); subIn.hidden = true; nbStore(); titleIn.focus(); }
           else if (e.key === 'ArrowUp') { e.preventDefault(); titleIn.focus(); }
           if (!((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyS' || e.code === 'Comma'))) e.stopPropagation();
         });
@@ -241,10 +245,8 @@ export function createNotebook(app) {
         restore(v, ctx) {
           if (!v || typeof v !== 'object' || !v.data || app.sh.restore(v.data, { project: true }) !== true) throw new Error('the project did not take');
           const n = v.notebook && typeof v.notebook === 'object' ? v.notebook : {};
-          if (nbTimer) { clearTimeout(nbTimer); nbTimer = 0; } nbPending.clear();   // S2: the last project's keystrokes still in the 300 ms debounce must not land over this one's notebook
           ta.value = n.text || ''; titleIn.value = n.title || (ctx && ctx.name) || 'NOTEBOOK';
           if (subIn) { subIn.value = n.subtitle || ''; subIn.hidden = !subIn.value; }
-          try { localStorage.setItem(NB_KEY, ta.value); localStorage.setItem(NB_TITLE, titleIn.value); if (subIn) localStorage.setItem(NB_SUBTITLE, subIn.value); } catch (e) {}
           return true;
         },
         signature: () => projectKey(),
@@ -280,8 +282,9 @@ export function createNotebook(app) {
         for (const el of [root, rail.el]) occlusion.watch(el, { attributes: true, attributeFilter: ['hidden'] }); }
       nb.querySelector('.nb-projects-btn').addEventListener('click', () => projects.toggle());
       layout.projects = projects;
+      if (nbLegacy) projects.changed();   // 021 R4: the migrated notebook joins the session at its next save
       const count = () => { const c = nb.querySelector('.nb-count'); if (c) c.textContent = ta.value.trim() ? ta.value.trim().split(/\s+/).length + ' words · kept in this browser' : 'empty · kept in this browser'; };
-      ta.addEventListener('input', () => { nbStore(NB_KEY, ta.value); count(); });
+      ta.addEventListener('input', () => { nbStore(); count(); });
       const ABOUT_DEF_W = 470, ABOUT_DEF_H = 670;
       const NOTES_DEF_W = 640, NOTES_DEF_H = 460;
       let abBack = null;   // iteration 018 A6: ABOUT is λWAVES' alone — MIR's ABOUT lives in MIR OPTIONS (its own window)

@@ -28,6 +28,7 @@ import { createUserPresets } from './user-presets.js';
 import { paintedRect } from './occlusion.js';
 import { createView } from './nodes-view.js';
 import { createUndo } from './nodes-undo.js';
+import { onForget } from './settings-store.js';   // 021 R4: FORGET cancels the 250 ms writes below before it wipes the records
 
 /* 019 N5 · the shipped graphs (Josh's call 3: the recipes are the builder's) — every node but CURVES, which stays as it is */
 const SHIPPED = {
@@ -88,6 +89,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const has = () => { const c = curvesNode(); return !!c && !c.bypass; };
   let saving = 0, savingList = 0;
   const saveList = (now) => { clearTimeout(savingList); const w = () => put({ seq, list: nodes.map(({ id, type, values, bypass, at, name, fold }) => ({ id, type, values, bypass, at, name, fold })) }); if (now) w(); else savingList = setTimeout(w, 250); };
+  onForget(() => { clearTimeout(saving); clearTimeout(savingList); saving = savingList = 0; });
   model.restore(curvesStore.get());
   model.onChange(() => { clearTimeout(saving); saving = setTimeout(() => curvesStore.set(model.serialize()), 250); });
 

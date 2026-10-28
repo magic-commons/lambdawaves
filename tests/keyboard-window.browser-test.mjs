@@ -104,7 +104,7 @@ try {
   const rec1 = await pick('povIn');
   await press('l', [CTRL, SHIFT]);
   const free = await ev(`const T = __LW.keys.table, x = __LW.keys.actions.find((a) => a.id === 'povIn');
-    return { chords: T.chords('povIn'), row: [x.key, x.ctrl, x.shift], saved: JSON.parse(localStorage.getItem('lambdawaves.q0.keys')), status: document.querySelector('[data-mir-window="keyboard"] .km-status').textContent };`);
+    return { chords: T.chords('povIn'), row: [x.key, x.ctrl, x.shift], saved: (JSON.parse(localStorage.getItem('lambdawaves.q0.keys')) || {}).keys, status: document.querySelector('[data-mir-window="keyboard"] .km-status').textContent };`);
   assert.equal(rec1.listening, true); assert.match(rec1.status, /Listening/);
   assert.deepEqual(free.chords, ['Mod+Shift+KeyL']); assert.deepEqual(free.row, ['KeyL', true, true]); assert.deepEqual(free.saved, { povIn: ['Mod+Shift+KeyL'] });
   assert.match(free.status, /now bound to/);
@@ -159,7 +159,7 @@ try {
   /* ── 7 · keys.bind's law (CLAUDE.md): an overlap is refused without an explicit steal, Tab and Escape never bind, a free chord saves ── */
   const law = await ev(`const k = __LW.keys, before = k.table.chords('camReset');
     const taken = k.bind('camReset', { key: 'KeyQ', shift: true }), tab = k.bind('camReset', { key: 'Tab' }), esc = k.bind('camReset', { key: 'Escape' }), stage = k.bind('nextWindow', { key: 'KeyL' });
-    const free = k.bind('camReset', { key: 'KeyU', shift: false }), saved = JSON.parse(localStorage.getItem('lambdawaves.q0.keys'));
+    const free = k.bind('camReset', { key: 'KeyU', shift: false }), saved = (JSON.parse(localStorage.getItem('lambdawaves.q0.keys')) || {}).keys;
     const steal = k.bind('camReset', { key: 'KeyQ', shift: true }, { steal: true }), pov = k.table.chords('povIn');
     k.reset(); return { taken, tab: tab.ok, esc: esc.ok, stage: stage.ok, free, saved, steal, pov, restored: k.table.chords('camReset'), before, errors: __e.slice() };`);
   assert.deepEqual(law.taken.conflicts, ['povIn']); assert.equal(law.taken.ok, false);

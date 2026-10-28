@@ -18,6 +18,7 @@ if [ "$MODE" = all ] || [ "$MODE" = node ]; then
     [ "$suite" = tests/pwa.test.mjs ] && continue
     node "$suite" || NODE_RC=1
   done
+  node tools/state-scopes.mjs --check || NODE_RC=1   # 021 R4: docs/STATE-SCOPES.md's records table is generated from lab/settings-store.js
   node tests/pwa.test.mjs || NODE_RC=1
 fi
 [ "$MODE" = node ] && exit "$NODE_RC"

@@ -7,38 +7,70 @@
  * every other key of the blob is PREFERENCE.  0.5.0 C2: the LOOK left it for the kit's `mir.gui` (lab/look.js lifts an older blob's
  * look keys, and HELP's own `lw-window-info`, once).  A project open may move only WORKSPACE keys here (tools/settings-probe.mjs).
  * `nativeLayout` is PREFERENCE, as STATE-SCOPES and the byte-identical gates have it.
- * THE FAMILIES THAT STAY where they are: their own localStorage keys, never inside this blob, each with its owner and scope. */
+ * 021 R4 · ONE STORE: RECORDS is the registry of every key λWAVES keeps on this device — `{ key, scope, version, forget, owner }`, a `prefix`
+ * row for a family of keys, the kit's own rows marked `owner: 'kit · …'`.  docs/STATE-SCOPES.md's "The records" table is GENERATED from it
+ * (`node tools/state-scopes.mjs`; `--check` runs in ./test.sh node).  FORGET (mir-gui.js) wipes every row whose `forget` is true, after the
+ * owners' pending writes are cancelled (`onForget`).  FAMILIES is the same rows by key. */
 export const SETTINGS_KEY = 'lambdawaves.q0.settings';
 export const WORKSPACE = Object.freeze(['closed', 'layouts', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'phoneTr', 'phoneRack',
   'tlwin']);   // 0.5.0 C7b: the TIMELINE window's shape and work lane (the kit's createTimeline store)
-export const FAMILIES = Object.freeze({
-  'lambdawaves.q0.notebook': ['rack.js NB_KEY', 'PROJECT'], 'lambdawaves.q0.notebook.title': ['rack.js NB_TITLE', 'PROJECT'],
-  'lambdawaves.q0.notebook.subtitle': ['rack.js NB_SUBTITLE', 'PROJECT'], 'lambdawaves.q0.projects': ['project-store.js PJ_KEY (FOLDERS\' store, in λWAVES\' form)', 'PROJECT'],
-  'lambdawaves.q0.experiment': ['rack.js LS_EXP', 'PROJECT'], 'lambdawaves.q0.presentation': ['rack.js LS_PRES', 'PROJECT'],
-  'lambdawaves.q0.keys': ['key-table.js (MIR createKeys)', 'PREFERENCE'], 'lw.keyboard.position.v1': ['the kit keyboard window (mir/keyboard)', 'PREFERENCE'], 'lw.lean.v1': ['window-chrome.js', 'PREFERENCE'],
-  'lambdawaves.q0.library': ['library.js', 'LIBRARY'], 'lambdawaves.q0.modpresets': ['mir/modulation/mod.js PRESET_LS', 'PREFERENCE'],
-  'lambdawaves.q0.modulation': ['rack.js modStore (mir/modulation/bind.js localStore): modArm, modCadence', 'PREFERENCE'],   // 0.5.0 C4
-  'mir.gui': ['look.js createLook (mir/core/prefs.js createPrefs over LOOK_SCHEMA rows; MIR OPTIONS writes it, mir-gui.js)', 'PREFERENCE'],   // 0.5.0 C2 · iteration 003
-  'mir.gui.tab': ['the kit\'s MIR OPTIONS: the tab this device last showed (no longer written since MIR OPTIONS lost its tabs, 018 F1; an older browser may still hold it)', 'PREFERENCE'],   // iteration 003
-  'mir.pointer': ['the kit\'s input layer (mir/core/kbm.js): MIR OPTIONS › MOTION › POINTER, written only when picked', 'PREFERENCE'],   // iteration 003
-  'mir.tier': ['the kit\'s MIR OPTIONS (mir/shell/gui.js TIER_KEY): QUALITY · AUTO\'s device reading', 'PREFERENCE'],   // iteration 003
-  'lambdawaves.q0.projects.window': ['projects.js FOLDERS (mir/folders/folders.js localPrefs): place, size, open, rail side, sort', 'WORKSPACE'],   // 0.5.0 C6
-  'lambdawaves.q0.projects.seeded': ['projects.js FOLDERS (mir/folders/seed.js): the starters added once', 'PROJECT'],   // 0.5.0 C6
-  'lambdawaves.q0.session': ['main.js createSession (mir/core/session.js): the live project, the one part as it stands', 'PROJECT'],   // 0.5.0 C6b
-  'lambdawaves.q0.render': ['film-card.js (MIR createRenderView, its prefix): the RENDER card\'s choices and the picture scale', 'PREFERENCE'],   // 0.5.0 C7b
-  'lambdawaves.q0.curves': ['rack.js curvesStore (mir/panels/curves.js model.serialize): the CURVES card\'s screen grade, the points per channel and AMOUNT', 'PREFERENCE'],   // 0.5.1 D10-24
-  'lambdawaves.q0.info': ['shell/stage-words.js infoPrefs (mir/core/prefs.js createPrefs over INFO_ROWS; INFORMATIONAL writes it): the STAGE FORMULA, NAME, ATOM LABELS, their SIZEs, POSITION · PAD, one switch per announcement kind, the pop-ups\' SIZE, the CURSOR rows', 'PREFERENCE'],   // iteration 007 I (ADR-0003): the blob\'s six keys lifted once
-  'lambdawaves.q0.picker': ['picker.js PREF_KEY: the Picker\'s SHOW LABELS (atoms, molecules) and THE HUE ring (hue, degrees)', 'PREFERENCE'],   // iteration 012 L1 · L2
-  'lambdawaves.q0.csb': ['csb-favs.js CSB_KEY: the CONTROL SURFACE\'s favourite controls (ids, in order)', 'PREFERENCE'],   // iteration 014 A3
-  'lambdawaves.q0.palettes': ['user-presets.js createUserPresets (PALETTE\'s save glyph, windows/material.js): the reader\'s own palettes, { name, data: { stops } } rows in order', 'PREFERENCE'],   // iteration 015 P3
-  'lambdawaves.q0.curvePresets': ['user-presets.js createUserPresets (CURVES\' save glyph): the reader\'s own curves, { name, data: { points } } rows in order', 'PREFERENCE'],   // 018 D2
-  'lambdawaves.q0.nodes': ['nodes.js createNodes (NODES, the window and the rack card): the node list (type, values, bypass, place), each view\'s pan, the window\'s shape', 'PREFERENCE'],   // 018 D3 · 019 N5
-  'lambdawaves.q0.nodePresets': ['user-presets.js createUserPresets (NODES\' + menu, SAVE THIS GRAPH): the reader\'s own graphs, { name, data: { nodes } } rows in order', 'PREFERENCE'],   // 019 N5
-  'lambdawaves.q0.presets': ['user-presets.js createUserPresets (SPECTRUM\'s save glyph, lab/spectrum.js USER_PRESETS_KEY): the reader\'s own PRESETs, { name, data: { labels } } rows in order', 'PREFERENCE'],   // iteration 015 S4
-  'mir.transport': ['the kit\'s transport (mir/shell/transport.js localSeatStore): the bar\'s seat, place (STAGE | FREE) and orientation', 'PREFERENCE'],   // iteration 014 A4
-  'mir.transport.free': ['the kit\'s transport FREE window (mir/window/window.js persist): its rect', 'PREFERENCE'],   // iteration 014 A4
-  'mir.render.calib':['the kit recorder (mir/render/recorder.js CALIB_KEY): this device\'s measured ms a frame', 'PREFERENCE'],   // 0.5.0 C7b
-});
+/** the blob's keys an older build wrote and nothing reads: saveSettings drops them ({ ...S0, ...owned } minus these; the carry list is gone).
+ *  The look's (lab/look.js BLOB_LOOK) and INFORMATIONAL's (BLOB_INFO) are lifted out by their owners first; the rest are read by nothing. */
+export const RETIRED = Object.freeze(['palette', 'camMode', 'clockLink', 'spin', 'speed', 'modArm', 'modCadence', 'look', 'cam',
+  'theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'badges', 'controlHints', 'hint',
+  'molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'infoPos', 'infoPad', 'skeleton', 'skeletonSize', 'bead', 'ellipsoid']);
+const P = 'PREFERENCE', W = 'WORKSPACE', J = 'PROJECT', L = 'LIBRARY';
+const row = (key, scope, version, forget, owner, o = {}) => Object.freeze({ key, scope, version, forget, owner, ...o });
+export const RECORDS = Object.freeze([
+  row(SETTINGS_KEY, P + ' + ' + W, 'gen 16', true, 'shell/settings.js saveSettings ({ ...S0, ...owned } − RETIRED); the WORKSPACE keys above'),
+  row('mir.gui', P, 'kit prefs', true, 'look.js createLook (kit createPrefs over LOOK_SCHEMA; MIR OPTIONS writes it)'),
+  row('lambdawaves.q0.info', P, 'kit prefs', true, 'shell/stage-words.js infoPrefs (INFORMATIONAL)'),
+  row('lambdawaves.q0.modulation', P, '—', true, 'shell/controller.js modStore (kit localStore): modArm, modCadence'),
+  row('lambdawaves.q0.curves', P, 'model', true, 'nodes.js curvesStore: the CURVES grade (250 ms)'),
+  row('lambdawaves.q0.nodes', P, 'v 1', true, 'nodes.js: the graph { seq, list, at, pan, zoom, win, off } (250 ms)'),
+  row('lambdawaves.q0.nodePresets', P, 'v 1', true, 'user-presets.js: NODES’ SAVE THIS GRAPH'),
+  row('lambdawaves.q0.curvePresets', P, 'v 1', true, 'user-presets.js: CURVES’ save glyph'),
+  row('lambdawaves.q0.palettes', P, 'v 1', true, 'user-presets.js: PALETTE’s save glyph'),
+  row('lambdawaves.q0.presets', P, 'v 1', true, 'user-presets.js: SPECTRUM’s save glyph'),
+  row('lambdawaves.q0.csb', P, 'v 1', true, 'csb-favs.js: the CONTROL SURFACE’s favourites'),
+  row('lambdawaves.q0.picker', P, 'v 1', true, 'picker.js: SHOW LABELS, THE HUE, the decks’ looks'),
+  row('lambdawaves.q0.keys', P, 'v 1', true, 'key-table.js: the rebound chords (the kit’s difference)'),
+  row('lambdawaves.q0.render.', P, '—', true, 'film-card.js: the RENDER card’s choices', { prefix: true }),
+  row('lw.lean.v1', P, 'v 1 (name)', true, 'window-chrome.js: LEAN (window notes)'),
+  row('lambdawaves.q0.modpresets', P, 'modV', false, 'kit mod.js PRESET_LS; a project SAVE also writes its rack here'),
+  row('lambdawaves.q0.session', J, 'v 1', false, 'main.js createSession: the live project (the one part, notebook included)'),
+  row('lambdawaves.q0.session.failed', J, 'v 1', false, 'kit 1.5.6: a resume that did not take, kept beside the session'),
+  row('lambdawaves.q0.experiment', J, '—', false, 'shell/persist.js quick SAVE (with .presentation)'),
+  row('lambdawaves.q0.presentation', J, '—', false, 'shell/persist.js quick SAVE (with .experiment)'),
+  row('lambdawaves.q0.projects', J, 'project-store', false, 'project-store.js: FOLDERS’ library in λWAVES’ form'),
+  row('lambdawaves.q0.projects.seeded', J, '—', false, 'projects.js: the starters added once'),
+  row('lambdawaves.q0.projects.window', W, 'kit', false, 'projects.js FOLDERS (kit localPrefs): place, size, rail, sort'),
+  row('lambdawaves.q0.notebook', J, 'RETIRED', false, 'read once into the session part (021 R4; with .title, .subtitle)'),
+  row('lambdawaves.q0.library', L, '—', false, 'library.js: persist() asked'),
+  row('mir.transport', P, 'v 2', false, 'kit · transport seat store (bar seat and place)'),
+  row('mir.transport.free', W, 'kit', false, 'kit · the transport’s FREE window rect'),
+  row('mir.tier', P, 'kit', false, 'kit · MIR OPTIONS QUALITY · AUTO reading'),
+  row('mir.pointer', P, 'kit', false, 'kit · MIR OPTIONS › MOTION › POINTER'),
+  row('mir.render.calib', P, 'kit', false, 'kit · recorder: this device’s ms a frame'),
+  row('lw.keyboard.position.v1', W, 'v 1 (name)', false, 'kit · the KEYBOARD window’s place'),
+]);
+export const FAMILIES = Object.freeze(Object.fromEntries(RECORDS.map((r) => [r.key, r])));
+/** the retired notebook keys (021 R4): read once at boot into the session part, then removed */
+export const NOTEBOOK_KEYS = Object.freeze(['lambdawaves.q0.notebook', 'lambdawaves.q0.notebook.title', 'lambdawaves.q0.notebook.subtitle']);
+const cancels = new Set();
+/** onForget(fn) — an owner's pending (debounced) write, cancelled before FORGET wipes its record (nodes.js' 250 ms) */
+export function onForget(fn) { cancels.add(fn); return () => cancels.delete(fn); }
+/** forgetRecords(storage?) — FORGET: the owners' pending writes cancelled, then every `forget` row removed (a prefix row: each key under it) */
+export function forgetRecords(storage) {
+  for (const fn of cancels) { try { fn(); } catch (_) {} }
+  let ls = null; try { ls = storage || globalThis.localStorage; } catch (_) { return 0; }
+  let n = 0;
+  try {
+    const all = Array.from({ length: ls.length }, (_, i) => ls.key(i));
+    for (const r of RECORDS) if (r.forget === true) for (const k of r.prefix ? all.filter((x) => x && x.startsWith(r.key)) : [r.key]) { if (ls.getItem(k) !== null) n++; ls.removeItem(k); }
+  } catch (_) {}
+  return n;
+}
 export function createSettingsStore(storage) {
   const ls = () => storage || globalThis.localStorage;
   return { key: SETTINGS_KEY,
