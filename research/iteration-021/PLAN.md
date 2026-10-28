@@ -80,6 +80,9 @@ D1 `docs/laws/*.md` by subject (the stage words, the register and systems, the f
 
 ## JOSH'S ANSWERS (2026-10-28)
 "defaults for all" — calls 1–22 at their defaults (the kit commits fetch into ~/Documents/MIR when he likes, call 12).
+23. (V3) Below ≈ 776 px PLAY still clips at the stage seat (rack 300 + bar 674). Default: a narrower CSB is 022 E3's.
+24. (V1) Rack card heads do not show the glyph (the FINDER, WINDOW menu, the pill and floating heads do). Default: not on card heads.
+25. (V3) The bar goes under any open float it overlaps on every screen height. Default: every float.
 
 ## MERGE ORDER
 K → G → R → I → V → D (each on the merged tree; the recipe: `git merge --no-ff --no-commit it021-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → commit → CLOSED row → handoff line). After K the kit law is "1.5.6-alpha.N, additive doors only"; every later chain's kit edit follows it.
@@ -91,4 +94,5 @@ K → G → R → I → V → D (each on the merged tree; the recipe: `git merge
 | G | 7471173 | 6c5cae3 | G1–G6 (G-BUILD.md; no kit edit; app cycle edges 46 → 4 (BUILD_LINE only); spectrum 25 → 17; LOCK 843/0 · 987/0; bar 2,486 boxes 0 differing; 17 browser suites green) |
 | R | ec63b9b | 3bf035d | R1–R6 (R-BUILD.md; kit 1.5.6-alpha.1 session door via the clone road, bundle .tmp/it021/kit.bundle; STATE-SCOPES generated; LOCKED 60 Δt and modulation step both one constant; LOCK 843/0 · 987/0; 19 browser suites green) |
 | I | 4710985 | ea2b12d | I1–I3 (I-BUILD.md; lab/actions.js 252 rows; MAPPING tab + mir/shell/midi.js; menus FILE·EDIT·VIEW·PLAY·WINDOW·HELP with submenus; kit 1.5.6-alpha.2; LOCK 843/0; facade re-captured +actions +run +seek) |
-| V | ea2b12d | | |
+| V | 87e88df | a1e00c1 | V1–V3 (V-BUILD.md; kit 1.5.6-alpha.3 registerGlyphs/windowGlyphs/glyph doors; lab/icons.js 56 drawings + 23 borrowed, masks and sprite retired, 30 sw rows gone; FOLDS skips hidden; the bar under any float; GRAIN pauses; LOCK 843/0; molecule-head + timeline T1/T2/T11 red since chain I → chain D re-aims) |
+| D | a1e00c1 | | |
