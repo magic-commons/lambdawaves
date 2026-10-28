@@ -19,6 +19,11 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
   through 0.5 (0.55 / 0.45), deferred; λWAVES' `action.<id>` targets (lab/mapping.js).
 - **BUILT 1.5.6-alpha.2 · THE MIDI DOOR** (021 I2, `shell/midi.js`, new): `createMidi({ storage, run, up, source })`, request only on a press,
   the `{ v: 1, map }` PREFERENCE, trigger · toggle · hold, `learn()`, `devices()`, `sources()`.
+- **BUILT 1.5.6-alpha.2 · menubar submenus, checks, radios, glyphs** (021 I3, `shell/menubar.js`; kit ace143d, dd7f48c, 92674bc): an entry
+  `[label, () => entries, null, hint, { sub: true }]` (hover or → opens beside the row on the bar's layer, ← / Escape back, an accordion on a
+  phone), `opts.checked` (✓), `opts.radio: 'group'` (•), `opts.icon` (a kit glyph name). λWAVES' tree FILE · EDIT · VIEW · PLAY · WINDOW · HELP.
+- **A menubar row's app glyph** (021 I3; not built — chain V's `registerGlyphs`): `opts.icon` takes kit glyph names only, so WINDOW's PICKER /
+  ATOMS / MOLECULES rows still wear their masks by label (`notebook.js` `tagIcons`, now over every list of the bar).
 - **A `'midi'` modulation SOURCE kind** (021 I2; not built): midi.js hands every CC as 0…1 (`sources()`, `source(key, v)`), but the model
   (`modulation/mod.js`) knows lfo · env · audio only; a `kind: 'midi'` source beside audio (its rack face, its serialisation) would let a
   learned knob drive any dial as an LFO does. λWAVES routes notes and CCs to ACTIONS today, not to dials.

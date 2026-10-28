@@ -84,7 +84,8 @@ export function createActions(app) {
       run: (a) => { if (a && a.id) return ran('view')(a); const o = WAVE_VIEWS, nx = o[(o.indexOf(VIEW_NAMES[mat.view]) + 1) % o.length]; mat.view = VIEW[nx]; ui.viewSeg.set(nx); sch(TIER.PRESENT); } },
     { id: 'palette', short: 'palette', label: 'toggle the phase palette', keys: ['KeyP'], kind: 'toggle', get: () => !!(app.state.palette && app.state.palette.on), run: () => { if (app.state.palette) app.state.palette.setOn(!app.state.palette.on); }, surface: true },
     /* iteration 012 M1: the mode and BALL AND STICK are rows of their own, with no chord (Josh's to give) */
-    { id: 'mode', short: 'mode', label: 'switch the mode: HYDROGEN | MOLECULES', kind: 'toggle', get: () => !!(chem() && chem().on), run: () => { const c = chem(); if (c) c.setOn(!c.on); }, surface: true },
+    { id: 'mode', short: 'mode', label: 'switch the mode: HYDROGEN | MOLECULES', kind: 'toggle', get: () => !!(chem() && chem().on), surface: true,
+      run: (a) => { const c = chem(), on = a && a.id ? a.id === 'molecules' : !(c && c.on); if (c && on !== c.on) c.setOn(on); } },
     { id: 'ballStick', group: V, short: 'ball and stick', label: 'the molecule’s nuclei and bonds on the stage, on / off', kind: 'toggle', get: () => !!(ui.skeletonSw && ui.skeletonSw.get()), run: () => tap(ui.skeletonSw), surface: true },
     { id: 'hide', was: 'hideUI', short: 'hide UI', label: 'hide / show the interface (the frame and the axes with it)', keys: ['KeyH'], kind: 'toggle', get: () => !!app.state.uiHidden, run: () => app.hooks.keys.toggleUI(), surface: true },
     { id: 'nextWindow', short: 'next win', label: 'next window to the top of the rack (from the stage)', keys: ['Tab'], exact: true, stage: true, run: () => app.hooks.keys.cycleWindow(1) },
