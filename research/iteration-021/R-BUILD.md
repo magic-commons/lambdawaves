@@ -44,7 +44,6 @@
   (`set('atoms')` still reads as HYDROGEN; csb.css / skin.css / tools/csb-probe.mjs re-aimed). chemview `setOn`: the claim first, then
   `api.setOn` → moleculeMode. `availability(control) → { on, why }` NOT built (022's UI law). Probe: CENTRAL/WIGNER/RADIATION/SPECTRUM hide
   under MOLECULES and return, LATTICE/BLOCH stay; the molecule chooser hides under HYDROGEN, the atomic icon still draws.
-
 ## R3 numbers (headless Firefox, 64³, 1600 px, 8 s each, preset 1s+2pz, LFO → HUE)
 | mode | presents/s | Δt median · CV · distinct | modulation step median · CV · distinct |
 |---|---|---|---|
@@ -52,20 +51,17 @@
 | LOCKED 60 | 23.1 | 0.0666667 (= 4/60) · **0** · 1 | 0.0166667 s (= 1/60) · **0** · 1 |
 | LOCKED DISPLAY | 25.1 | 0.06464 · **0** · 1 | 0.01616 s · **0** · 1 |
 Under LOCKED both clocks step by one constant on the same present. THE LOCK after R3 and R5: `--check --query gastab=0` **843 · 0 · 0**; plus `--fixture research/release-0.4.0/measure/digest-lock-s4a.json` **987 · 0 · 0**. Leaves moved: none.
-
 ## The kit door
 MIR **1.5.6-alpha.1** = kit commit `7f052d5` on the clone of `kit-1.5.5.bundle` (package.json, mir/version.js, tokens.json `kit`; CHANGELOG
 "1.5.6 (unreleased)"); adopted by `.tmp/kit/tools/adopt.mjs` (3 files + MIR-MANIFEST.json), pinned `'1.5.6-alpha.1': '753de766…'` in
 tests/mir-manifest.test.mjs (1.5.5 kept); `adopt.mjs --check` "in step with MIR 1.5.6-alpha.1". Bundle (branch `kit-1.5.5` now at 7f052d5,
 tag `v1.5.5`): **`<worktree>/.tmp/kit-1.5.6-alpha.1.bundle`**. ~/Documents/MIR untouched.
-
 ## Tests (LW 9683 / GD 5683, one browser at a time)
 `./test.sh node` green after every row (+ `tools/state-scopes.mjs --check`); `pwa.test.mjs --write` after every lab edit; `rack-deps --classes`
 HOLDS (persist 24/25 throughout — R3's restore seek goes through `clock.seek`, not a new app member). Browser: history, new-project, lw-links,
 project-formats, menubar (R1); curves, routed-knob, history (R2); timeline, current, film-handover, field-law, register (R3); new-project,
 history, keyboard-window, picker-looks, curves, project-formats, menubar, current + tools/settings-probe (R4); molecule-demos, field-molecule,
 chem, window-switching, picker-looks, molecular-names (R5) — all GREEN. Re-aimed: keyboard-window (`.keys`), new-project (the retired key reads null).
-
 ## CLAUDE.md sentences to add
 - ONE STORE: every stored key is a row of `lab/settings-store.js` RECORDS `{ key, scope, version, forget, owner }`; STATE-SCOPES' records
   table is generated (`node tools/state-scopes.mjs`, `--check` in the node gate); FORGET wipes the `forget` rows after `onForget` cancels;
@@ -74,16 +70,19 @@ chem, window-switching, picker-looks, molecular-names (R5) — all GREEN. Re-aim
   (`host.clock.step`) and `rotStep` step 1/hz on ψ's tick; the two ⏮ say what they move; one position is a 1.5.6 door.
 - ONE MODE: a window's mode is `MODE` in `shell/settings.js` (hydrogen | molecules | both); `moleculeMode` iterates it; field decisions read
   `molSession.selected`; the HYDROGEN button is `#lwMode [data-id="hydrogen"]`. (Correct the MOLECULES paragraph: ATOMS | MOLECULES → HYDROGEN.)
-- THE IDS: a NODES id is `'n' + (++seq)` and never reused; `nodes.*` is refused as a project route or lane target; runtime targets join
+- THE IDS: a NODES id is `'n' + (++seq)` and never reused; `nodes.*` is refused in a project file or link (the session keeps it); runtime targets join
   the flash limiter with `flash`; `LW.mod.batch` rebuilds once; a resume that fails never arms (kit 1.5.6-alpha.1).
-
 **FOR 1.5.6** (docs/FOR-MIR.md): BUILT alpha.1 (the failed resume). Open: ONE POSITION (`seek` over the play clock and the beat), a modulation-clock LOCK option (`stepMode: 'locked', hz`) and a `clock.reanchor(at)` door (today `suspendRealtime(now)(now)`).
-
+## R6 `fd9a89c` FIX-UP (the coordinator's three; supersedes the matching lines above)
+- Call 3 refuses `nodes.*` only in what LEAVES the device: `persist.js asDevice(fn)` marks this device's own capture; main.js' session
+  captures and signs through it, so the SESSION keeps NODES routes and lanes (the edit scope always did); a project file (FOLDERS, EXPORT,
+  .mir/.png), a link and the unsaved mark refuse them. Probe: route `nodes.n1.amount`, reload with RESUME → the route is live; SAVE → the
+  stored item and EXPORT .json carry 0 routes; one console line across two saves and an export.
+- FORGET keeps the reader's work: `presets`, `palettes`, `curvePresets`, `nodePresets` are `forget: false` (STATE-SCOPES regenerated).
+- A SCRUB drag keeps the shadow trail (`seek(…, { trail: false })`), as before R3; the other writers clear it.
+- Tests: history, new-project, lw-links, project-formats, routed-knob, timeline, curves, tools/settings-probe GREEN; `./test.sh node` green;
+  THE LOCK `--check --query gastab=0` 843 · 0 · 0.
 ## Open questions for Josh
-1. Call 3 as built: `nodes.*` routes and lanes leave the session too (the session IS the project), so a NODES route does not survive a reload.
-   Keep, or move the graph to PROJECT?
-2. FORGET now wipes the reader's own presets (palettes, curves, graphs, PRESETs) with the preferences — or should user-made presets stay?
-3. NODES' flash step (a tenth of each knob's span) is uncalibrated; calibrate the luminance nodes with tools/flash-calibrate.mjs?
-4. `molSession.selected` is set at the claim, before the solve lands, so the ≈ 150 ms ON gap is unchanged; read "selected and a volume
+1. NODES' flash step (a tenth of each knob's span) is uncalibrated; calibrate the luminance nodes with tools/flash-calibrate.mjs?
+2. `molSession.selected` is set at the claim, before the solve lands, so the ≈ 150 ms ON gap is unchanged; read "selected and a volume
    adopted" instead?
-5. A SCRUB drag now clears the shadow trail on every move (the one seek), where it kept it before.
