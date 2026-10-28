@@ -73,7 +73,7 @@ try {
 
   /* ── 3 · NEVER on a handless road: an undo back to WATER, a link open, a demo open, STAGE TEXT off ── */
   const t3 = await ev(`const S = __LW.stageText, Hd = __LW.head, H = __LW.history, P = __LW.layout.projects, c = __LW.chem, c0 = window.confirm; window.confirm = () => true;
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await __w(400); H.flush(); await __w(450); H.flush();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true })); await __w(400); H.flush(); await __w(450); H.flush();
     const n0 = Hd.shown, a0 = S.stats.announced;
     let undos = 0; while (c.preset() !== 'H2O' && undos < 12 && H.undo()) { undos++; await __w(200); }
     await __until(() => { const s = c.solution(); return s && s.key === 'H2O|sto-3g|0'; }); await __w(900);
