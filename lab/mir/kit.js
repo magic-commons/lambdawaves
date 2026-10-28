@@ -774,6 +774,16 @@ export function group(parent, text) {
   if (text) label(el('div', 'grp-lbl', g), text);
   return g;
 }
+
+/** 1.5.6-alpha.6 · a row of controls.  `fit: true` is THE FIT ROW (base.css `.row.fit`): auto-fit cells of at least `cellMin` px
+ *  (default the `--cell-min` token, 40), the knob faces scaled to the cell; `knob: 'sm'` caps a face at the plain knob's (`--knob`),
+ *  'lg' floors it there, 'md' (the default) leaves it between `--knob-min` and `--knob-max`.  Without `fit` it is the plain wrapping row. */
+export function row(parent, { fit = false, cellMin, knob: size, cls } = {}) {
+  const r = el('div', 'row' + (fit ? ' fit' : '') + (cls ? ' ' + cls : ''), parent);
+  if (fit && Number.isFinite(cellMin)) r.style.setProperty('--cell-min', cellMin + 'px');
+  if (fit && (size === 'sm' || size === 'lg')) r.dataset.knob = size;
+  return r;
+}
 export const N_COLOR = ['', 'var(--n1)', 'var(--n2)', 'var(--n3)', 'var(--n4)', 'var(--n5)', 'var(--n6)'];
 export const N_RGB = ['', [255, 226, 170], [120, 225, 240], [230, 160, 240], [255, 150, 90], [140, 220, 140], [180, 160, 255]];
 

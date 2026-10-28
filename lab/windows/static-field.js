@@ -22,7 +22,7 @@ export function createStaticField(app) {
 
   /* ── THE STATIC FIELD ── */
   const gF = group(wField.body, 'STATIC FIELD');
-  const rf = el('div', 'row tight', gF);
+  const rf = el('div', 'row tight fit', gF);   // 022 F2: A ROW FITS
   ui.bz = knob({ label: 'ZEEMAN B', min: 0, max: 0.05, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(4), onInput: (v) => { reg.setField({ Bz: v }); touchState(); } });
   ui.fz = knob({ label: 'STARK F', min: 0, max: 0.01, value: 0, fmt: (v) => v === 0 ? 'off' : v.toExponential(1), onInput: (v) => { if (!getHamiltonian().stark || sturm.P) { ui.fz.set(0); return; } const c = reg.field.inter && reg.at(clock.t); reg.setField({ Fz: v }); if (c) reg.anchorFrom(c.re, c.im, clock.t); interSync(); touchState(); } });
   /* 0.8.0 G3 · INTER-SHELL: STARK F across shells — the register engages lab/stark.js' propagator (H = diag(E) + F·z over the 140 labels) at F > 0, c(t) continuous */
@@ -58,7 +58,7 @@ export function createStaticField(app) {
 
   /* ── THE DRIVES: three jog wheels (a DELTA each) over their three rates, the rotor grid STATE wore (skin.css .native-rotors) ── */
   const gD = group(wField.body, 'DRIVES');
-  const rd = el('div', 'row tight native-rotors', gD);
+  const rd = el('div', 'row tight fit native-rotors', gD);
   rd.appendChild(knob({ label: 'ROTATE z', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'D(R_z)', onDelta: (d) => { reg.rotateZ(d); touchState(); } }).root);
   ui.kzKnob = knob({ label: 'STARK', title: 'STARK K_z: turn e^{−iθK_z}', min: 0, max: 2 * Math.PI, value: 0, wrap: true, cls: 'rot', fmt: () => 'e^{−iθK_z}', onDelta: (d) => { reg.rotateK(d); touchState(); } });
   rd.appendChild(ui.kzKnob.root);
@@ -96,14 +96,14 @@ export function createStaticField(app) {
   label(el('div', 'grp-lbl', kHead), 'IMPULSE  ·  a sudden momentum kick  <m>ψ ↦ e^{ik·x}ψ</m>');
   fold(kHead, kBody, { what: 'the impulse\'s knobs' });
   mat.bow = { gain: 1, curve: 1, limit: 3, ...(mat.bow || {}) };
-  const feel = el('div', 'row tight bow-feel', kBody);
+  const feel = el('div', 'row tight fit bow-feel', kBody);
   ui.bowKnobs = {};
   for (const [key,label,min,max] of [['gain','PULL',.25,4],['curve','RESPONSE',.25,3],['limit','LIMIT',.1,3]]) {
     const k = knob({ label, min, max, value:mat.bow[key], fmt:v=>v.toFixed(2), title: key==='curve'?'Shape the response around linear':'Impulse '+label.toLowerCase(), onInput:v=>{mat.bow[key]=v;} }); ui.bowKnobs[key]=k; feel.appendChild(k.root);
   }
   ui.dragKnob = knob({ label: 'DRAG <m>γ</m>', min: 0, max: 0.5, value: 0, fmt: (v) => v === 0 ? 'off' : v.toFixed(3), onInput: (v) => { reg.setDamping(v); touchState(); } });
   feel.appendChild(ui.dragKnob.root);
-  const rq = el('div', 'row tight', kBody);   // 0.8.0 G2 · SQUEEZE + CAT, the OSCILLATOR's: r rides in mat.bow.squeeze (PROJECT, absent until moved)
+  const rq = el('div', 'row tight fit', kBody);   // 0.8.0 G2 · SQUEEZE + CAT, the OSCILLATOR's: r rides in mat.bow.squeeze (PROJECT, absent until moved)
   let catK = 0.2;
   const sqK = knob({ label: 'SQUEEZE', min: 0, max: 0.33, value: mat.bow.squeeze || 0, fmt: (v) => (+v || 0).toFixed(3), title: 'Squeeze r (cap 0.33)', onInput: (v) => { mat.bow.squeeze = v || undefined; } });
   const catKnob = knob({ label: 'CAT  <m>k</m>', min: 0.01, max: 1.5, value: catK, log: true, fmt: (v) => v.toFixed(3) + ' a.u.', title: 'the ±k of CAT\'s two slaps (STATE\'s old STRENGTH)', onInput: (v) => { catK = v; } });

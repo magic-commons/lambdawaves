@@ -30,7 +30,7 @@ export function reworkNative({ ui, mat, repaint }) {
   // merge into row 2 and row 5 is simply absent: ISO, GRAIN and KNEE sit under EXPOSURE, SOFT and HUE (Josh, 2026-09-10).
   const waveRows=[[0,['spaceSeg']],[1,['viewSeg']],[2,['expK','softK','hueK','isoK','grainK','kneeK']],[3,['styleSeg']],[4,['finishSeg']],[7,['atomSizeK','stickK','espBareSw','espSurfSeg']],[8,['probeK','espRangeK','espLiveSw']]];   // iteration 014 B: THE THREE VIEWS' two rows; 018 B2: SIZE · RADIUS · MAP ONLY · ISO|SAS|SES over PROBE · RANGE · LIVE · SLOW   // iteration 008 W: row 6 (DITHER) left for SETTINGS › QUALITY
   const flat=document.createDocumentFragment();
-  for(const [i,names] of waveRows){const r=el('div','row tight wave-row wave-row-'+i,flat);for(const name of names)r.appendChild(ui[name].root);}
+  for(const [i,names] of waveRows){const r=el('div','row tight wave-row wave-row-'+i+([2,7,8].includes(i)?' fit':''),flat);/* 022 F2: the knob rows fit */for(const name of names)r.appendChild(ui[name].root);}
   wave.replaceChildren(flat);for(const n of waveHelp)wave.appendChild(n);
   const shadow=document.querySelector('.dev[data-id="shadow"] .dev-body');
   const shadowDetails=el('div','shadow-details');shadowDetails.id='shadow-details';shadowDetails.hidden=true;shadow.appendChild(shadowDetails);
@@ -58,8 +58,8 @@ export function reworkNative({ ui, mat, repaint }) {
   settings.prepend(tabs.root);
   const viewport=el('div','settings-viewport',settings),pages={};
   for(const id of ['display','quality']){pages[id]=el('div','settings-page',viewport);pages[id].hidden=id!=='display';}
-  function row(page, names){const r=el('div','row tight',pages[page]);for(const name of names)if(ui[name]?.root)r.appendChild(ui[name].root);}
-  row('display',['capSw','audioSw']);ui.capSw.root.parentElement.classList.add('settings-status-grid');if(ui.askUrl)row('display',['askUrl']);row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK']);row('display',['gamutToggle','p3Seg']);
+  function row(page, names, cls=''){const r=el('div','row tight'+(cls?' '+cls:''),pages[page]);for(const name of names)if(ui[name]?.root)r.appendChild(ui[name].root);}
+  row('display',['capSw','audioSw']);ui.capSw.root.parentElement.classList.add('settings-status-grid');if(ui.askUrl)row('display',['askUrl']);row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK'],'fit lw-stage-row');row('display',['gamutToggle','p3Seg']);
   const quality=ui.gridSeg.root.closest('.grp');if(quality)pages.quality.appendChild(quality);
   const actions=el('div','row tight settings-actions',pages.display);
   for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig'))actions.appendChild(b);if(!actions.children.length)actions.remove();   // iteration 012 M1: WARNING left for ABOUT

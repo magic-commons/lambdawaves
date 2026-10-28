@@ -171,7 +171,7 @@ export function createSettingsCard(app) {
     r5b.appendChild(ui.scaleRo.root);
     /* iteration 008 W (Josh: "Remove dithering row from wave and move it to quality in settings"): DITHER is this display's, a PREFERENCE
        (`dither` in the settings blob, the amplitude in LSB, 0 = OFF), no longer a project's (FIELD_CHROME: serialize strips it, restore ignores it) */
-    const r5c = el('div', 'row tight lw-dither', gq);
+    const r5c = el('div', 'row tight fit lw-dither', gq);   // 022 F2: A ROW FITS
     const setDither = (v) => { mat.dither = v; ui.ditherK.setDisabled(!v); schedule(TIER.PRESENT); saveSettings(); };
     ui.ditherSeg = seg({ label: 'DITHER', value: 'off', options: [
       { id: 'off', label: 'OFF', title: 'the colour goes to the 8-bit swapchain as it is' },
@@ -183,7 +183,7 @@ export function createSettingsCard(app) {
     ui.ditherK.setDisabled(true);
     r5c.appendChild(ui.ditherK.root);
     ui.showDither = (k) => { ui.ditherSeg.set(k ? 'ordered' : 'off'); ui.ditherK.setDisabled(!k); if (k) ui.ditherK.set(Math.max(0.25, Math.min(2, k))); };   // the controls repainted from mat.dither (the settings, a lift, LW)
-    const r6 = el('div', 'row', gq);
+    const r6 = el('div', 'row fit lw-domain', gq);
     ui.domainAuto = sw({ label: 'DOMAIN AUTO', value: true, onChange: (v) => { domain.auto = v; ui.domainKnob.setDisabled(v); schedule(TIER.REBUILD); } });
     r6.appendChild(ui.domainAuto.root);
     ui.domainKnob = knob({ label: 'WIDTH', title: 'The domain’s half-width, ± a₀', min: 3, max: 140, value: 7, log: true, fmt: (v) => '±' + v.toFixed(0) + ' a₀', onChange: (v) => { domain.half = v; schedule(TIER.REBUILD); } });

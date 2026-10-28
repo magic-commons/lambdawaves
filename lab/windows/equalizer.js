@@ -34,7 +34,7 @@ export function createEqualizerCard(app) {
   const chord = app.state.chord = createChord({ reg, clock, motion: MOTION, onPlay: appPlay.onChange }), snd = el('div', null, gEq), sndCap = el('div', 'note', null), paintChord = () => { sndCap.textContent = chord.caption; };
   const sndSw = sw({ label: 'SOUND', value: false, title: 'SOUND · the populated levels as tones', onChange: (v) => { chord.set({ on: v }); paintChord(); } });
   sndSw.root.dataset.keyAction = 'eq.sound';   // 021 I1: the action presses it
-  el('div', 'row tight', snd).append(sndSw.root, seg({ label: '', value: 'levels', options: [{ id: 'levels', label: 'LEVELS' }, { id: 'beats', label: 'BEATS' }], onChange: (v) => { chord.set({ mode: v }); paintChord(); } }).root); snd.append(sndCap); snd.hidden = true;
+  el('div', 'row tight fit', snd).append(sndSw.root, seg({ label: '', value: 'levels', options: [{ id: 'levels', label: 'LEVELS' }, { id: 'beats', label: 'BEATS' }], onChange: (v) => { chord.set({ mode: v }); paintChord(); } }).root); snd.append(sndCap); snd.hidden = true;
   ui.setAudio = (v) => { snd.hidden = !v; if (!v && sndSw.get()) { sndSw.set(false); chord.set({ on: false }); } chord.retune(); paintChord(); };
   let eqKey = '', eqT = null, eqMode = 0;
   function syncEq(hand) {
