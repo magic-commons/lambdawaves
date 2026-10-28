@@ -5,6 +5,9 @@ written by `adopt.mjs` alone; a λWAVES need becomes an additive door numbered `
 waits for a line. Newest first; an item leaves this list when an adopted MIR release carries it. Each names where it was met.
 
 ## FOR 1.5.6 (doors after the cut)
+- **BUILT 1.5.6-alpha.1 · a failed resume never arms** (021 R1, `core/session.js`; kit commit 7f052d5, the clone road): saved parts that threw
+  or came back `failed` are copied to `<key>.failed` and autosave stays unarmed until a later resume takes, `discard()` or `arm()`.
+  λWAVES' `projects.resume` reports it and rolls back through `openPayload(…, { rollback: true })`.
 - **A target carries a MODULATION route OR a TIMELINE lane, never both** (Josh's ruling, 2026-10-18; iteration 007 row B): Josh: "the timeline and routed dial is either-or, because modulation is essentially a locked timeline and a timeline is essentially a free modulation. User can pick either but not both, clips will have an error and always choose the top-most one." Today the kit adds a lane and a route together (iteration 007 row B found it; `timeline/knobs.js`, `modulation/bind.js`).
 - **The lift's look literals become tokens** (021 K3): 37 literals the λWAVES alphas wrote in `modulation/modhost.css` (the work bars),
   `shell/rack.css` (the pill, `.mir-reveal`), `shell/transport.css` (the expander's turn) and `shell/window-picker.css` (the FINDER) were

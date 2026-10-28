@@ -84,7 +84,7 @@ export function createNotebook(app) {
           null,
           ['EXPORT project (.json)', () => layout.projects.download()], ['EXPORT project (.mir)', () => layout.projects.folders.exportProject('mir'), null, 'the selected project in FOLDERS, else the open one, as the kit\'s .mir file'], ['EXPORT project as a PICTURE (.png)', () => layout.projects.folders.exportProject('png'), null, 'its picture, carrying the project inside it'], ['IMPORT project (.json · .mir · picture)…', () => layout.projects.pick()],
           null,
-          ['SAVE the experiment (quick)', () => app.sh.save()], ['LOAD the last quick save', () => app.sh.restore()],
+          ['SAVE the experiment (quick)', () => app.sh.save()], ['LOAD the last quick save', () => layout.projects.openWith(() => app.sh.restore() === true, 'quick load failed')],
           null,
           ...SHAPE_EXPORTS.map((spec) => [spec.row, () => app.state.exporter3d.run(spec.fmt), () => app.state.exporter3d.busy || !field.ok, spec.tip])],
         EDIT: () => [['UNDO\t' + keyFor('undo'), () => app.sh.historyApi.undo(), () => !app.sh.historyApi.canUndo], ['REDO\t' + keyFor('redo'), () => app.sh.historyApi.redo(), () => !app.sh.historyApi.canRedo], ['HISTORY UNDO\t' + keyFor('historyUndo'), () => app.sh.historyApi.historyUndo(), () => !app.sh.historyApi.canHistoryUndo, 'return once to the timeline that existed before the last history-row jump'], ['UNDO HISTORY…', () => layout.raise('history')], null,
