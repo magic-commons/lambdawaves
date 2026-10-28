@@ -90,9 +90,13 @@ try {
         return { t: c.textContent.trim(), w: Math.round(b.width), clipped: c.scrollWidth > c.clientWidth + 1 || b.right > p.right + 0.5 || b.left < p.left - 0.5 }; }));
       const b = card.getBoundingClientRect(); return { rows, card: [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(Math.min(b.height, 420))] };`);
     out('camera', r.rows); await shot('camera', r.card);
+  } else if (mode === 'range') {   // S4: RANGE's words and the ESP bar's numbers at the default, at 2.5 and at 50 (a project's road: serialize → restore)
+    out('range', await g.ev(`await __mol(); const w = document.querySelector('.dev[data-id="observer"]'), K = [...w.querySelectorAll('.k')].find((e) => (e.querySelector(':scope > .k-lbl') || {}).textContent.trim() === 'RANGE');
+      const read = () => [__LW.mat.espRange, K.querySelector('.k-val, .k-value, output') ? K.querySelector('.k-val, .k-value, output').textContent.trim() : K.textContent.trim(), [...document.querySelectorAll('.lw-espbar *')].filter((n) => !n.children.length).map((n) => n.textContent).filter(Boolean)];
+      const a = [read()]; for (const v of [2.5, 50, 80]) { const S = __LW.serialize(); S.presentation.mat.espRange = v; __LW.restore(S); await __w(700); a.push(read()); } return a;`));
   } else if (mode === 'seat') {
     await g.ev(`await __mol(); return 1;`);
-    const seat = `const b = [...__LW.stageText.layer.root.querySelectorAll('.mir-info-block')].pop(), e = document.querySelector('.lw-esp-bar, .esp-bar');
+    const seat = `const b = [...__LW.stageText.layer.root.querySelectorAll('.mir-info-block')].pop(), e = document.querySelector('.lw-espbar');
       const R = (x) => { if (!x) return null; const r = x.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; };
       return { words: R(b), bar: R(e), body: document.body.className.split(' ').filter((c) => /rack|peek/.test(c)).join(' ') };`;
     out('shown', await g.ev(seat));
