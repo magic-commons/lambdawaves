@@ -6,6 +6,8 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 ONE MODE (021 R5): a window's mode is `MODE` in `shell/settings.js` (hydrogen | molecules | both); `moleculeMode` iterates it; field decisions read `molSession.selected`; the HYDROGEN button is `#lwMode [data-id="hydrogen"]`.
 
+THE SWITCH WEARS THE BUSY MARK (022 E1): from MOLECULES ON until the selected model's volume is on the field (`molSession.drawn`, lab/molecular-session.js) the pointer's busy mark is up and MOLECULAR and the card say `aria-busy` (`switching`, lab/windows/molecules.js:37; ≈ 250 ms cold); a control a mode cannot use is greyed or hidden by AVAILABILITY IS ONE LAW (docs/laws/shell.md).
+
 ## The standing paragraphs
 
 The 0.2.0 alpha molecular UI is MOLECULES (`chem`) and MO-REGISTRY

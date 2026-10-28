@@ -35,7 +35,7 @@ After ANY edit under `lab/`:
 
     node tests/pwa.test.mjs --write && ./test.sh node
 
-`./test.sh node` runs every `tests/*.test.mjs` (pwa last) and `node tools/state-scopes.mjs --check`. Then, by what you touched:
+`./test.sh node` runs every `tests/*.test.mjs` (pwa last), `node tools/state-scopes.mjs --check` and `node tools/hints-census.mjs --check`. Then, by what you touched:
 
 - the boot, a module or a shared name: `node tools/rack-deps.mjs --classes --no-write` (HOLDS; move a name with `--rename`, never `sed`) and
   the cycle count: `npx --no-install dependency-cruiser --no-config --include-only '^lab' --output-type json lab` (0 app-side circular edges).

@@ -2,6 +2,16 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 022
+
+A POPUP WEARS THE SKIN (022 P): every popup list is `.glass[data-mir-surface="menu"]` and takes its material from the skin's tokens and `--surface-menu-floor` (lab/mir/css/skin.css:29: TINTED .94 · REFRACTIVE .72 · SOLID 1); no native `<select>` anywhere (the kit's `select()`/`listPane`, a row's `pic`); λWAVES writes no menu alpha (`#lwMenu`, the Picker page, is a page).
+
+RELIEF IS TIGHT (022 S, kit 1.5.6-alpha.5): a raised control's highlight reaches 1–2 px (lab/mir/css/skin.css:69, :131; light 1 px · .70, SOLID 2 px of a lift ≤ 45 %), a dark highlight is grey (`--neu-lit`), the shine a hairline (≤ 1 px, ≤ 2 px blur, α ≤ .35; SHINE SOFT 0–6). Nothing in lab/ reads `--neu-raise` or `--neu-inset` raw — `--relief-raise` / `--relief-well` always, so RELIEF FLAT reaches everything.
+
+THE MENU'S INK (022 S, call 13; 022 E1, call 14): every popup takes the menu floor, the menu tint (lab/mir/css/skin.css:116, flipped under a forced ink against the theme, :141) and the menu edge, and reads ≥ 4.5 : 1 with an edge ≥ 3 : 1 in every skin × theme (`node tools/skin-sheet.mjs <tag>`); since kit 1.5.6-alpha.8 FROST's TEXT is AUTO, so its panes write dark ink in LIGHT (8.1 : 1 on the kit's tile table) and keep the white ladder in DARK (lab/look.js HOME_MAPS.text).
+
+THE ICON TABLE IS λWAVES' OWN (022 E2): every window wears ONE glyph of its own drawing (`WINDOW_GLYPH`, lab/icons.js:134; the 31 of V-BUILD's list drawn in `ICONS`, lab/icons.js:24, no borrowed kit glyph left), and a menu row wears its action's `icon` (the registry, lab/actions.js; lab/shell/notebook.js item()). `node tools/glyph-sheet.mjs` draws every glyph at 16/20/24 on light and dark; Gemini redraws from that sheet only on Josh's word (research/iteration-022/ICONS-FOR-GEMINI.md).
+
 ## The laws of 021
 
 THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS: lab/mir is written by adopt.mjs alone; a λWAVES need becomes an additive door numbered 1.5.6-alpha.N with its FOR-MIR line; a removal waits for a line; `node <MIR>/tools/adopt.mjs . --check` says in step. (021 K; the one source is CLAUDE.md line 6, which `docs/NOTES-FOR-AGENTS.md` §7 and `docs/FOR-MIR.md` cite.)

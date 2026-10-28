@@ -58,7 +58,7 @@ const PRECACHE = [
   ['./cornell.js',                                                  'd38ee2adee25'],
   ['./csb-favs.js',                                                 '3daf1aaf6183'],
   ['./csb-search.js',                                               '939a2bd20669'],
-  ['./csb.css',                                                     'f0f9370c8ade'],
+  ['./csb.css',                                                     'ec7aacd53968'],
   ['./demos/wave-dancer.lambdawaves.json',                          'c8c61c14152c'],
   ['./density.js',                                                  'b7e7f8bde4fb'],
   ['./dft-grid.js',                                                 '4a75ae325355'],
