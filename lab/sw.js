@@ -147,7 +147,7 @@ const PRECACHE = [
   ['./keplerview.js',                                               '023792d43cfa'],
   ['./key-table.js',                                                '62d248af1193'],
   ['./kick.js',                                                     '5c17a0cbc2d7'],
-  ['./lab.css',                                                     'fd4bd31c6825'],
+  ['./lab.css',                                                     'fb74e09aecbb'],
   ['./ladder-model.js',                                             '69199febdca1'],
   ['./ladder.js',                                                   'ab571c69fb38'],
   ['./latex-state.js',                                              '8f4f247a3ac3'],

@@ -353,11 +353,19 @@ body.ui-hidden #offer { display: none !important; }   /* HIDE THE INTERFACE take
 #transport .csb-theme { --ico: url(img/icons/moon.svg); }
 body[data-theme="light"] #transport .csb-theme { --ico: url(img/icons/sun.svg); }
 /* PLAY: a round chip floating outside the bar's left edge, level with the bar's own rows (the panel never moves it) */
-#transport[data-layout="csb"] > .csb-play { display: grid; place-items: center; border-radius: 50%; padding: 4px; }
+#transport[data-layout="csb"] > .csb-play { display: grid; place-items: center; border-radius: 50%; padding: 4px; box-shadow: none; }   /* 020 T1: the chip is the seat's glass; the relief is the button's alone */
 #transport.mini[data-layout="csb"] > .csb-play { position: absolute; right: calc(100% + 12px); bottom: 11px; grid-area: auto; }
 #transport.mini[data-layout="csb"].at-top > .csb-play { top: 11px; bottom: auto; }
-#transport[data-layout="csb"] .csb-play > .tbtn.play { width: 56px; height: 56px; min-width: 0; border-radius: 50%; background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--fg); }
-#transport[data-layout="csb"] .csb-play > .tbtn.play.on { color: var(--acc); }
+/* 020 T1 · PLAY IS A BUTTON (Josh: "it must feel like a button. Inspect the CSS behaviour of the chips"): the kit's `.trig` sequence (css/skin.css
+   .trig) — at rest raised; hover lifts a pixel under the hover wash; pressed sinks (the raise goes, the press face comes, no lift); ON wears the
+   frost face, its rim and the accent's glow.  The kit's own svg scale (shell/transport.css, 1.08 / .94) rides on top. */
+#transport[data-layout="csb"] .csb-play > .tbtn.play { --state-hover-wash: inset 0 0 0 99px var(--state-hover, var(--glass-raise));
+  width: 56px; height: 56px; min-width: 0; border-radius: 50%; background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)); color: var(--fg); translate: none;
+  transition: background var(--t-fast), box-shadow var(--t-fast), scale var(--t-fast), translate var(--t-fast), color var(--t-fast); }
+#transport[data-layout="csb"] .csb-play > .tbtn.play:hover { background: var(--glass-raise); box-shadow: var(--relief-raise, var(--neu-raise)), var(--state-hover-wash); translate: 0 -1px; }
+#transport[data-layout="csb"] .csb-play > .tbtn.play:active { background: var(--state-press, var(--glass-press)); box-shadow: var(--trig-press-relief); translate: none; }
+#transport[data-layout="csb"] .csb-play > .tbtn.play.on { background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)), var(--state-on-light, var(--acc-glow)); color: var(--acc); }
+#transport[data-layout="csb"] .csb-play > .tbtn.play.on:active { background: var(--state-press, var(--glass-press)); box-shadow: var(--trig-press-relief); }
 #transport[data-layout="csb"] .csb-play > .tbtn.play > svg { width: 26px; height: 26px; }
 /* LEFT: RATE over the BPM pill (a click types it: the kit's `typed`), MOD over EXPAND */
 #transport[data-layout="csb"] .csb-mod > .tbtn.modb { background: transparent; border-color: transparent; box-shadow: none; width: 48px; height: 26px; min-width: 0; min-height: 0; border-radius: var(--r-pill); font-size: var(--fs-tiny); }
