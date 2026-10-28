@@ -37,11 +37,11 @@ const tone = (id, name, hue, tint, bright, accentA, accentB, vivid) => ({ id, na
 const TABLE = [   // tr: names
   /* FROST — Josh's recipe (2026-10-01): "'About Glass', Shadow maxed, Veil 0, Brightness 0, Dark mode, White Text, Glass
      control surface, Blur at 11px.  Saturation bumped to 130.  Tint 0, and disconnected off.  Corners knob maxed. …
-     Refractive on and frost always."  BASINS' ABOUT GLASS draws no pane edge (material.css), so EDGE is off.  TEXT is LIGHT
-     (alpha.14, BASINS parity round five): the recipe's "White Text" is the choice, not AUTO's polarity, so FROST is white
-     ink in either mode and no sampler is started.  BLUR is the device's (alpha.12, ruled 2026-10-02): 11 px on a desktop,
+     Refractive on and frost always."  BASINS' ABOUT GLASS draws no pane edge (material.css), so EDGE is off.  TEXT is AUTO
+     (1.5.6-alpha.8, λWAVES 022 E1 · call 14; LIGHT since alpha.14): under glass AUTO is the mode's polarity, so FROST keeps the
+     recipe's White Text in dark and writes black ink in light (white on a light pane read 1.05 : 1).  BLUR is the device's (alpha.12, ruled 2026-10-02): 11 px on a desktop,
      20 px on a touch device, where WebKit's blur reads weaker (core/look.js DEVICE_BLUR, read once). */
-  { id: 'frost', name: 'FROST', values: { card: 'refractive', frost: 'always', blur: DEVICE_BLUR, veil: 0, saturation: 1.3, corners: 24, faces: 'glass', text: 'light', edge: false, lightAngle: 0, reliefAngle: 315, shadow: 2, spacing: 'default' },
+  { id: 'frost', name: 'FROST', values: { card: 'refractive', frost: 'always', blur: DEVICE_BLUR, veil: 0, saturation: 1.3, corners: 24, faces: 'glass', text: 'theme', edge: false, lightAngle: 0, reliefAngle: 315, shadow: 2, spacing: 'default' },
     tones: [tone('clear', 'CLEAR', 0, 0, 0, 30, 300, 0.1), tone('rose', 'ROSE', 340, 0.22, 0, 345, 300, 0.25), tone('azure', 'AZURE', 205, 0.28, 0, 200, 280, 0.25)] },
   /* MORPH — neumorphism: the SOLID pane, the light at the upper left, a drop shadow bottom-right and the shine upper-left
      (Josh: "So bottom right shadow, upper left shine"), faces the pane's colour, soft corners, no edge. */

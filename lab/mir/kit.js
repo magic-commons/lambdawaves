@@ -372,7 +372,7 @@ export function knob(o) {
   const end = (e) => { if (!dragging || (e && e.isTrusted && vd && e.pointerId !== vd.id)) return;   // a synthetic cancel (the timeline's hold, a test) ends it whoever it names
     dragging = false; vd = null; root.classList.remove('drag'); setTimeout(() => root.classList.remove('active'), 700); if (o.onChange && !o.onDelta) o.onChange(v); };
   dial.addEventListener('pointerup', end); dial.addEventListener('pointercancel', end); dial.addEventListener('lostpointercapture', end);
-  const reset = () => { if (o.onDelta) { if (o.onReset) o.onReset(); return; } v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };
+  const reset = () => { if (disabled) return; if (o.onDelta) { if (o.onReset) o.onReset(); return; } v = def; paint(); if (o.onInput) o.onInput(v); if (o.onChange) o.onChange(v); };
   const tap = tapWatcher(reset);                       // two taps within 300 ms and 14 px reset the control to its default …
   dial.addEventListener('dblclick', (e) => { e.preventDefault(); reset(); });   // … and so does a double-click
   dial.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });

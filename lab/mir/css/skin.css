@@ -442,6 +442,10 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
    (control-help.js' pointerover), and the browser itself refuses a disabled button's click; no hover or press face answers it */
 .seg-b:disabled { pointer-events: auto; cursor: not-allowed; }
 .seg-b:disabled:not(.on):is(:hover, :active) { background: transparent; }
+/* 1.5.6-alpha.8 (λWAVES 022 E1): EVERY DISABLED CONTROL KEEPS ITS HINT — a knob, a fader, a disabled switch or trigger takes the pointer on its root
+   (where its hint is) and refuses the press: the knob and the fader read their own `disabled`, a disabled button refuses its click; their parts take none */
+.k.disabled, .fd.disabled, .sw:disabled, .trig:disabled { pointer-events: auto; cursor: not-allowed; }
+.k.disabled > *, .fd.disabled > * { pointer-events: none; }
 .k.disabled .k-dial { box-shadow: 0 0 0 0 transparent; }
 
 /* KEYBOARD FOCUS (INTENT): an accent ring OUTSIDE the control, on :focus-visible only, one drawing for every control

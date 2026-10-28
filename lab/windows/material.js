@@ -1,7 +1,7 @@
 /* lab/windows/material.js — WAVE (SPACE, OBSERVABLE, DRAW), CLIP, PALETTE · INVERT and CAMERA (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO
  * seats around SETTINGS: createMaterial(app) makes the four cards and WAVE's head; boot() calls createDrawClipPaletteCamera() where DRAW stood. */
 import { TIER } from '../tier.js';
-import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js'; import { infoPrefs } from '../shell/stage-words.js';
+import { el, knob, sw, seg, group, readout, chip, hint } from '../mir/kit.js'; import { fold } from '../fold.js'; import { VIEW, STYLE, drawStyle, KNEE_DEFAULT, STICK_R, PROBE_R, ESP_RANGE } from '../field.js'; import { ESP_RAMP } from '../palette-app.js'; import { planeModel } from '../native-ui.js'; import { availability } from '../shell/settings.js'; import { infoPrefs } from '../shell/stage-words.js';
 import { createRampPanel } from '../mir/panels/ramp.js'; import { createUserPresets, uniqueName } from '../user-presets.js'; import { createCameraPanel } from '../mir/panels/camera.js'; import { PRESET_BY_ID as PALETTE_BY_ID, PRESET_GROUPS, rgbToHex, hexToRgb } from '../mir/palette.js';
 export function createMaterial(app) {
   const { ui, device, mat, PAL_DEF } = app, { schedule } = app.loop, { cameraPort } = app.host, { saveSettings } = app.sh, { mod, modHand, applyAccent, field } = app.ctl;
@@ -16,7 +16,7 @@ export function createMaterial(app) {
       const r0 = el('div', 'row', gSpace);
       ui.spaceSeg = seg({ label: 'the same state, two exact pictures', value: 'x', options: [
         { id: 'x', label: 'POSITION ψ(x)', title: 'the wavefunction in space' },
-        { id: 'p', label: 'MOMENTUM φ(p)', title: 'Momentum-space view of the current state' }],
+        { id: 'p', label: 'MOMENTUM φ(p)', title: 'Momentum-space view of the state' }],
         onChange: (v) => { app.state.space = v; schedule(TIER.REBUILD); } });
       r0.appendChild(ui.spaceSeg.root);
       ui.spaceNote = el('div', 'sturm-note', gSpace); ui.spaceNote.hidden = true;          // its own class: the ⓘ sweep folds every .note away, and this one must be seen
@@ -119,8 +119,9 @@ export function createMaterial(app) {
     const STYLE_READS = { isoK: [S_.solid, S_.signed, S_.bands, S_.glass, S_.glassSigned, S_.esp], kneeK: VOL, softK: [S_.cloud, S_.bands, S_.dust, S_.additive, S_.esp], grainK: [S_.dust],
       atomSizeK: [S_.balls], stickK: [S_.sticks, S_.esp], espBareSw: [S_.esp], probeK: [S_.esp], espRangeK: [S_.esp], espSurfSeg: [S_.esp], espLiveSw: [S_.esp] };
     /* the kit's muted look on the three shapes: a knob's own setDisabled, a switch's button, a seg's buttons */
-    const mute = (c, off) => { if (c.setDisabled) { c.setDisabled(off); return; } c.root.classList.toggle('disabled', off); c.root.setAttribute('aria-disabled', String(off));
-      for (const b of c.root.matches('button') ? [c.root] : c.root.querySelectorAll('button')) b.disabled = off; };
+    const mute = (c, off, why) => { if (c.setDisabled) c.setDisabled(off); else { c.root.classList.toggle('disabled', off); c.root.setAttribute('aria-disabled', String(off));
+      for (const b of c.root.matches('button') ? [c.root] : c.root.querySelectorAll('button')) b.disabled = off; }
+      whyHint(c.root, off ? why : ''); };
     /* iteration 017 W2 (Josh 2026-10-26: "Grey out anything from 'Wave' that shouldn't work when switching between molecules or atoms/hydrogen"):
        styleSync greys by MODE as well as by style, one button at a time in the kit's muted look (seats stay).  Under a molecule MOMENTUM φ(p) (a set
        molecule owns the volume; the eigenmode kernel and its SPACE stand down) and Im ψ unless the volume is a complex orbital (the density, Δρ and a
@@ -128,20 +129,29 @@ export function createMaterial(app) {
        views (the shader draws them as CLOUD there).  Iteration 018 B1 (Josh: "If molecules is off, it should hide anything related to molecules … so
        that the window is much smaller for hydrogen"): under hydrogen / an atom BALLS · STICKS · ESP and the two molecule rows are HIDDEN, their seats
        collapse; under a molecule the style greys stand as in 017 */
-    const modeMute = (s, id, off, why) => { const b = s.button(id); if (!b) return; b.disabled = off; const o = s.spec.options.find((q) => q.id === id), t = off ? why : o && o.title;
-      if (t) hint(b, t); else { b.removeAttribute('title'); delete b.dataset.help; delete b.dataset.helpEn; } };   // the kit's hint hop keeps a title as data-help
+    /* 022 E1 · A GREYED CONTROL KEEPS ITS HINT, `why` FIRST: the English hint the control had (kept once in data-hint0), prefixed while it is
+       off; the kit's door (1.5.6-alpha.8) lets the hover reach a disabled knob, switch or seg button */
+    const whyHint = (n, why) => { if (n.dataset.hint0 === undefined) n.dataset.hint0 = n.dataset.helpEn || n.dataset.tTitle || n.title || '';
+      const t = why ? why + (n.dataset.hint0 ? ' · ' + n.dataset.hint0 : '') : n.dataset.hint0;
+      if (t) hint(n, t); else { n.removeAttribute('title'); delete n.dataset.help; delete n.dataset.helpEn; } };   // the kit's hint hop keeps a title as data-help
+    const modeMute = (s, id, a) => { const b = s.button(id); if (!b) return; b.disabled = !a.on; whyHint(b, a.on ? '' : a.why); };
+    /* AVAILABILITY IS ONE LAW (022 E1, shell/settings.js `availability`): SPACE's MOMENTUM (a molecule, STURMIAN or a `noMomentum` operator),
+       Im ψ on a real molecular volume, and the molecule-only rows — one call, asked by the mode, the operator, the scale and a restore alike */
     function modeSync() {
-      const mol = !!(app.state.chem && app.state.chem.on);
-      if (mol) modeMute(ui.spaceSeg, 'p', true, 'a molecule owns the volume: position space only while MOLECULES is on');
-      else if (!(app.sturm && app.sturm.P)) modeMute(ui.spaceSeg, 'p', false);   // STURMIAN keeps its own grey (spectrum.js applySturmian)
-      modeMute(ui.viewSeg, 'imag', mol && !(field && field.moleculeComplex), 'this molecular volume is real (ψ or √ρ): Im ψ is zero — the ORBITALS register draws a complex ψ');
-      for (const id of ['balls', 'sticks', 'esp']) { const b = ui.styleSeg.button(id); if (b) b.hidden = !mol; }
-      for (const k of ['atomSizeK', 'stickK', 'espBareSw', 'probeK', 'espRangeK', 'espSurfSeg', 'espLiveSw']) ui[k].root.hidden = !mol;
-      if (ui.espBarRow) ui.espBarRow.hidden = !mol;   // 018 B10: INFORMATIONAL's ESP BAR · SIDE · PAD follows the same mode   // an emptied row collapses (skin.css .wave-row:not(:has(…)))
+      const A = (c) => availability(c, app), p = A('wave.space.p');
+      modeMute(ui.spaceSeg, 'p', p);
+      if (!p.on && app.state.space === 'p') { app.state.space = 'x'; ui.spaceSeg.set('x'); schedule(TIER.REBUILD); }
+      modeMute(ui.viewSeg, 'imag', A('wave.view.imag'));
+      for (const id of ['balls', 'sticks', 'esp']) { const b = ui.styleSeg.button(id); if (b) b.hidden = A('wave.style.' + id).hide; }
+      const esp = A('wave.esp').hide; for (const k of ['atomSizeK', 'stickK', 'espBareSw', 'probeK', 'espRangeK', 'espSurfSeg', 'espLiveSw']) ui[k].root.hidden = esp;
+      if (ui.espBarRow) ui.espBarRow.hidden = A('info.espBar').hide;   // 018 B10: INFORMATIONAL's ESP BAR · SIDE · PAD   // an emptied row collapses (skin.css .wave-row:not(:has(…)))
     }
+    ui.availSync = modeSync;
     function styleSync() {
       const st = mat.style | 0, esp = st === STYLE.esp, surf = mat.espSurf || 'iso';
-      for (const [k, on] of Object.entries(STYLE_READS)) mute(ui[k], !on.includes(st) || (esp && ((k === 'probeK' && surf === 'iso') || ((k === 'isoK' || k === 'softK') && surf !== 'iso'))));
+      const styleName = (ui.styleSeg.button(drawStyle(st)) || {}).textContent || 'this STYLE';
+      for (const [k, on] of Object.entries(STYLE_READS)) { const styleOff = !on.includes(st);
+        mute(ui[k], styleOff || (esp && ((k === 'probeK' && surf === 'iso') || ((k === 'isoK' || k === 'softK') && surf !== 'iso'))), styleOff ? 'off in ' + styleName : 'off with ' + surf.toUpperCase()); }
       modeSync();
       bar.hidden = !esp || !IP.get('espBar');
       if (!bar.hidden) {

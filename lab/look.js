@@ -30,7 +30,10 @@ export const LOOK_HOME = Object.freeze({ veil: 10, saturation: 1, corners: 14, f
  *  at 100 % is no filter at any blur, the CAST is drawn only off LIGHT_HOME (the kit sheet's own words), DEFAULT spacing is the
  *  sheets' own air */
 const HOME_MAPS = {
-  text: (sp) => (v, s, e) => (v === 'theme' && s.card !== 'solid' ? null : sp.map(v, s, e)),
+  /* 022 E1 (call 14): FROST is TEXT AUTO since kit 1.5.6-alpha.8 — in LIGHT the theme's own (dark) ladder like every glass look here; in DARK its
+     pane (refractive, frost always, glass faces, no edge) keeps the kit's white ladder, so FROST dark looks as it did under TEXT LIGHT */
+  text: (sp) => (v, s, e) => (v === 'theme' && s.card !== 'solid' && !(e.theme === 'dark' && s.card === 'refractive' && s.frost === 'always' && s.faces === 'glass' && !s.edge)
+    ? null : sp.map(v, s, e)),
   saturation: (sp) => (v, s, e) => (v === 1 ? null : sp.map(v, s, e)),
   dropShadow: (sp) => (sp.attr === 'data-cast' ? (v, s, e) => (lightIsHome(s) ? null : sp.map(v, s, e)) : sp.map),
   spacing: (sp) => (v, s, e) => (v === 'default' ? null : sp.map(v, s, e)),

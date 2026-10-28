@@ -30,13 +30,24 @@ export function createMolecules(app) {
     return { root, set(v) { if (v === 'atoms') v = 'hydrogen'; for (const b of B) if (b.dataset.id !== 'library') b.setAttribute('aria-pressed', String(b.dataset.id === v)); } };
   })();
   modeSeg.set('hydrogen'); { const t = document.getElementById('title'); if (t) t.after(modeSeg.root); }
+  /* 022 E1 · THE SWITCH WEARS THE BUSY MARK: from the press until the field's owner is drawn (`molSession.selected` claims at once; `drawn` is
+     its volume published, ≈ 150 ms on a solved molecule, longer on a first solve) the pointer's busy mark is up (busy-mark.js, the one counter) and the mode column's MOLECULAR and the card say
+     `aria-busy`; MOLECULES OFF, or a molecule that never lands (a refusal), ends it */
+  let switchingOn = false;
+  function switching(v) {
+    if (!v || switchingOn || (app.state.molSession && app.state.molSession.drawn)) return;
+    const marks = [modeSeg.root.querySelector('[data-id="molecules"]'), wChem.root].filter(Boolean), t0 = performance.now(); switchingOn = true;
+    for (const m of marks) m.setAttribute('aria-busy', 'true');
+    app.ctl.busyWrap(new Promise((done) => { const look = () => { const C = app.state.chem, S = app.state.molSession;
+      if (!C || !C.on || (S && S.drawn) || performance.now() - t0 > 20000) { switchingOn = false; for (const m of marks) m.removeAttribute('aria-busy'); done(); } else requestAnimationFrame(look); };
+      requestAnimationFrame(look); }));
+  }
   function moleculeMode(v) {
     /* 021 R5 · ONE MODE: the windows each mode hides are the MODE table's (shell/settings.js), never a hand list here */
     for (const d of document.querySelectorAll('.dev[data-id]')) if (MODE[d.dataset.id] === 'hydrogen') d.hidden = !!v;   // CALCULUS reads the atomic register: it stands down too (Round 11 §10b)
     wChem.root.hidden = !v;                                          // iteration 008 U: the one card (the register lives in it)
     if (v && wChem.root.classList.contains('closed')) app.sh.layout.reopen('chem');   // 017 call 8: ON after a × brings the card back (the rack's road, neighbours travel)
     modeSeg.set(v ? 'molecules' : 'hydrogen');
-    if (v && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
     /* iteration 012 R3 hid POSITION | MOMENTUM under a molecule; iteration 017 W2 GREYS MOMENTUM instead (016 V1: greyed, never hidden, the seats stay) —
        WAVE's one seat is styleSync (material.js), which greys by mode too.  A molecule letting go with BALLS · STICKS · ESP drawn falls back to CLOUD, as
        the shader already draws it — after the turn, so a restore that lands the molecule OFF then ON keeps its file's style */
@@ -85,7 +96,7 @@ export function createMolecules(app) {
     modBase: (id, v) => { const H = app.state.modHost; if (H && H.registry.has(id)) H.registry.setBase(id, v); },   // iteration 007 O: an UNROUTED hand on the ORBITAL is its base at once (syncBases runs only while the modulation clock does)   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
-    setOn(v) { moleculeMode(v); app.w.stageTextTick(); if (app.hooks.status) app.hooks.status(); }, said: () => app.hooks.status && app.hooks.status(),   // 0.5.4 P4: the STATUS row (informational.js)
+    setOn(v) { moleculeMode(v); switching(v); app.w.stageTextTick(); if (app.hooks.status) app.hooks.status(); }, said: () => app.hooks.status && app.hooks.status(),   // 0.5.4 P4: the STATUS row (informational.js)
     viewed: (hand) => { const R = app.state.register; if (!R) return; if (hand && app.state.chem.view === 'orbital') R.setMode('orbital'); R.follow(hand); },   // iteration 008 U: ON, VIEW or a file moved — the register follows the one state; R: a HAND's VIEW ORBITAL shows the ladder its cursor stands on
     cursor: () => { if (app.state.register) app.state.register.orbitals.paint(); },   // iteration 008 R: the ORBITAL dial's orbital, the VIEW or ON moved — the ladder redraws its cursor
     hand: (id) => headPick(id),                                      // 0.5.1 D2: a HAND pick (the dropdown, ON, a notebook link)

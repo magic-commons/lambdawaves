@@ -174,7 +174,7 @@ export function createSpectrumCard(app) {
     const H = setHamiltonian(id); if (app.hooks.status) app.hooks.status();   // 0.5.4 P4: the STATUS row speaks for the operator in force
     reg.setEnergies(energyOf);
     if (!H.stark && reg.field.Fz !== 0) { reg.setField({ Fz: 0 }); if (ui.fz) ui.fz.set(0); }
-    if (H.noMomentum && app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }
+    if (ui.availSync) ui.availSync();   // 022 E1 · AVAILABILITY IS ONE LAW: SPACE's MOMENTUM under a `noMomentum` operator (greyed, and x if it was p)
     for (const w of [app.w.wOrb, app.w.wVor, app.w.wSlice, app.w.wLad]) if (w) w.root.hidden = !H.hydrogenTheorems;
     wSpec.setStatus(hamLabel(), H.id === 'hydrogen' ? '' : 'live');
     wSpec.body.querySelectorAll('.sp-e[data-a]').forEach((e) => { e.textContent = spectrum.energyText(+e.dataset.a); });   // wave 50: the API, so the RATE is in the number the card shows
@@ -203,7 +203,6 @@ export function createSpectrumCard(app) {
     if (want) {
       const t0 = performance.now();
       sturm.P = createRegisterSturmian(sturm.lambda, { Z: getZ() }); sturm.rec = sturm.P.records(); sturm.buildMs = performance.now() - t0;
-      if (app.state.space === 'p') { app.state.space = 'x'; if (ui.spaceSeg) ui.spaceSeg.set('x'); }                      // momentum space is not built for the scaled radials
       reg.setPropagator(sturm.P);
     } else { sturm.P = null; sturm.rec = null; reg.setPropagator(null); reg.setEnergies(energyOf); }
     if (c) reg.anchorFrom(c.re, c.im, clock.t);
@@ -226,7 +225,7 @@ export function createSpectrumCard(app) {
     if (on) { rotRate.kz = 0; rotRate.def = 0; }
     if (ui.kzRate) { ui.kzRate.setDisabled(on); if (on) ui.kzRate.set(0); keep(ui.kzRate.root, 'SPIN K_z: off under STURMIAN (SCALE → HYDROGEN)'); }
     if (ui.defRate) { ui.defRate.setDisabled(on); if (on) ui.defRate.set(0); keep(ui.defRate.root, 'SPIN L²: off under STURMIAN (SCALE → HYDROGEN)'); }
-    if (ui.spaceSeg) { const b = ui.spaceSeg.button('p'); if (b) { b.disabled = on; keep(b, 'position space only under STURMIAN'); } }
+    if (ui.availSync) ui.availSync();   // 022 E1: momentum space is not built for the scaled radials — availability greys it (and takes p back to x)
     if (ui.spaceNote) ui.spaceNote.hidden = !on;
     for (const w of [app.w.wOrb, app.w.wVor, app.w.wSlice, app.w.wLad]) if (w) w.root.hidden = on || !H.hydrogenTheorems;
     if (app.w.wCalc) app.w.wCalc.root.hidden = on;   // theorems about hydrogen's eigenfunctions stand down
