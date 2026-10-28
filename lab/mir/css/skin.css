@@ -26,6 +26,7 @@
   --glass-opacity: .84;
   --card-opacity: var(--glass-opacity);                            /* the TINTED pane wears the glass opacity — .84 dark, .86 light — as it originally did (Josh, 2026-09-11) */
   --frost-opacity: .58;                                            /* … and thins to this under FROST, so the blur shows (INTENT O12, Josh 2026-10-02: "tinted can blur") */
+  --surface-menu-floor: .94;                                       /* 1.5.6-alpha.4 · a menu pane's least opacity, so nothing reads through it: TINTED .94 · REFRACTIVE .72 · SOLID 1 */
   --glass-border-color: hsl(0 0% 100% / .14);                    /* card edge hairline */
   --glass-hairline: hsl(0 0% 100% / .08);                         /* inner hairlines, quieter than before */
   --glass-sheen: linear-gradient(160deg, hsl(0 0% 100% / .07), hsl(0 0% 100% / 0) 42%);   /* the glass highlight, replaces blur */
@@ -179,7 +180,7 @@ body.no-badges :is(#badges, [data-mir-badges]) { display: none; }
    it: lighter toward the light, darker away (neumorphism).  At a window's edge there is no relief: the pane floats by
    the shadow and the shine. */
 body[data-card="solid"] {
-  --card-opacity: 1; --glass-opacity: 1; --surface-sheen: none;
+  --card-opacity: 1; --glass-opacity: 1; --surface-sheen: none; --surface-menu-floor: 1;
   --solid-pane: hsl(var(--glass-tint) / 1);
   --solid-lit: color-mix(in srgb, var(--solid-pane), hsl(0 0% 100%) var(--solid-lift, 18%));
   --solid-shade: color-mix(in srgb, var(--solid-pane), hsl(0 0% 0%) var(--solid-sink, 32%));
@@ -412,7 +413,7 @@ select.sel { border-color: transparent; background: var(--glass-well); box-shado
    press and chosen rules above, as BASINS' ladder did.  The relief, the rims, the scale and the accent label stay. */
 body[data-faces="glass"]:is([data-card="refractive"], .frost):not([data-card="solid"]) :is(.k-dial, .trig:not(.on):not([aria-expanded="true"]):not([aria-pressed="true"]),
   .seg, .seg-b, .sw:not(.on), select.sel, .fd, .ro, .native-info-button, .badge,                 /* not .dev-power: the power disc stays solid in every face (Josh 2026-10-06) */
-  .mir-folders :is(.sv-split, .sv-parts, .sv-field input, .sv-input, .sv-card, .sv-folder, .sv-context:not(.sv-ask), .sr-section)) { background-color: transparent; background-image: none; }   /* FOLDERS' seats: BASINS' SAVE seats (material.css) */
+  .mir-folders :is(.sv-split, .sv-parts, .sv-field input, .sv-input, .sv-card, .sv-folder, .sr-section)) { background-color: transparent; background-image: none; }   /* FOLDERS' seats: BASINS' SAVE seats (material.css) */
 body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"], .frost):not([data-card="solid"]) :is(.k-dial, .trig:not(.on):not([aria-expanded="true"]):not([aria-pressed="true"]),
   .sw:not(.on), .seg, select.sel, .fd, .ro) { border-color: var(--glass-hairline); }
 /* … and BLEND's crossing layer, over the face, under the label (BASINS material.css BLEND) */
@@ -465,6 +466,10 @@ body:is([data-faces="glass"], [data-faces="blend"]):is([data-card="refractive"],
 :where([data-mir-surface]:not([data-mir-surface="chip"]):not([data-mir-surface="island"])) { border-radius: var(--surface-radius, var(--card-r)); }
 :where([data-mir-surface="float"]) { box-shadow: var(--surface-shadow-float, var(--glass-shadow)); }
 :where([data-mir-surface="menu"]) { box-shadow: var(--surface-shadow-menu, var(--glass-shadow)); }
+/* 1.5.6-alpha.4 · THE MENU FLOOR: a menu pane (`.glass[data-mir-surface="menu"]`) keeps its skin's material and never thins below
+   --surface-menu-floor — the one token for the .92 / .94 / .97 an app hard-coded so the stage could not read through.  Heavy enough to beat
+   every card style's pane rule, FROST's and STILL's included; it paints the colour only, so a sheen and the blur stay. */
+body[data-card] .glass[data-mir-surface="menu"]:not([hidden]) { background-color: hsl(var(--glass-tint) / var(--surface-menu-floor)); }
 :where([data-mir-surface="island"]) { border: var(--surface-edge-width, var(--glass-border)) solid transparent; }   /* joined: paintless, the same box it has as an island */   /* the pane is CARD STYLE's, §14c */
 .badge { min-height: 24px; padding: 2px 9px; border-color: transparent; box-shadow: var(--surface-shadow, var(--glass-shadow)); outline: var(--seat-edge); outline-offset: 0;   /* a pane's height (L13) */
   color: var(--ink-key);
@@ -548,7 +553,7 @@ body.frost.frost-hold[data-card="refractive"] .dev, body.frost.frost-hold[data-c
    (the work-bar transport inside a modulation window, and an app's re-scoped copy of that rule).  Each value is the
    pane's own, above; it resolves on <body>, where --glass-tint, --card-opacity and the store's --surface-* live. */
 body:is([data-card="tinted"], [data-card="solid"]) { --pane-fill: var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity))); }
-body[data-card="refractive"] { --pane-fill: var(--surface-veil, transparent); }
+body[data-card="refractive"] { --pane-fill: var(--surface-veil, transparent); --surface-menu-floor: .72; }
 body.frost[data-card="refractive"][data-theme="dark"] { --pane-fill: var(--surface-veil, var(--frost-veil-dark)); }
 body.frost.frost-hold[data-card="refractive"] { --pane-fill: var(--surface-fill, hsl(var(--glass-tint) / var(--card-opacity))); }
 

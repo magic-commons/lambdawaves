@@ -185,9 +185,9 @@ body[data-theme="light"] .mir-folders { --folders-ask-fill: color-mix(in srgb, h
   .mir-folders :is(.sv-input, .sv-part.sw, .sv-crumb) { min-height: 44px; }
 }
 
-/* ── the one box: menus, questions, refusals (a well) ────────────────────────────────────────────────────── */
-.mir-folders .sv-context { display: flex; flex-direction: column; gap: var(--folders-gap); padding: var(--folders-box-pad); border-radius: var(--r-md);
-  background: var(--glass-well); box-shadow: var(--relief-well, var(--neu-inset)); border: 1px solid var(--folders-menu-rim); }
+/* ── the one box: menus, questions, refusals — since 1.5.6-alpha.4 a MENU PANE (`.glass[data-mir-surface="menu"]`, gallery.js), no longer a well:
+   its material is the skin's; the ask below keeps its own ─────────────────────────────────────────────────────────────────────────────── */
+.mir-folders .sv-context { display: flex; flex-direction: column; gap: var(--folders-gap); padding: var(--folders-box-pad); border-radius: var(--r-md); }
 .mir-folders .sv-context[hidden] { display: none; }
 .mir-folders .sv-context-title { font: var(--w-semi) var(--fs-small)/1.3 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--fg); }
 .mir-folders .sv-context-label { font: var(--w-semi) var(--fs-micro)/1.3 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-faint); }

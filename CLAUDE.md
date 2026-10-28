@@ -11,7 +11,7 @@ vendored faces) · `tools/` diagnostics, generators and probes · `tests/` the n
 ## THE STANDING CONSTRAINTS (never break one)
 
 - NO push, NO deploy, NO tag, NO release until Josh says so. Commit locally on your own branch; the integrator merges.
-- THE KIT SENTENCE (line 6). The kit reads 1.5.6-alpha.3; a door is built on the clone road (docs/laws/kit.md). `lab/fonts/**` stays untouched.
+- THE KIT SENTENCE (line 6). The kit reads 1.5.6-alpha.4; a door is built on the clone road (docs/laws/kit.md). `lab/fonts/**` stays untouched.
 - Josh's dial: "Keep the builds tight and don't bloat the code with random verification/gate codes. Just build the features since we are not even
   1.0.0 release yet." Fix, simplify, don't add. Diagnostics live in `tools/`, never in `lab/`; one light visual or functional check per row.
 - `lab/rack.js`'s `app` literal is never extended (fixed-shape namespaces, each under 128 keys); NO MODULE IMPORTS FROM rack.js (only `main.js`);

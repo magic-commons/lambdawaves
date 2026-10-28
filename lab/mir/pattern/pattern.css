@@ -99,13 +99,7 @@
 .mir-pattern .pt-play-bar { position: absolute; left: 14%; right: 14%; top: 4px; height: 3px; border-radius: var(--pt-led-r); background: var(--pt-play-ink); box-shadow: var(--pt-play-glow); }
 
 /* the cap's menu (on the document, above every window and rail, as the timeline's menus are) */
-.pt-menu { pointer-events: auto; position: fixed; z-index: var(--pt-menu-z); min-width: 184px; padding: 4px; border-radius: var(--pt-menu-r); display: flex; flex-direction: column;
-  background: var(--pt-menu-fill); box-shadow: var(--pt-menu-shadow); }
-.pt-menu .pt-mi { height: var(--pt-mi-h); min-height: var(--pt-mi-h); padding: 0 10px; border: 0; border-radius: var(--pt-mi-r); background: transparent; text-align: left;
-  color: var(--fg); font-size: var(--pt-mi-size); font-weight: var(--pt-mi-weight); letter-spacing: var(--pt-mi-track); cursor: pointer; }
-.pt-menu .pt-mi:hover, .pt-menu .pt-mi:active { background: var(--pt-mi-press); }
-.pt-menu .pt-mi.on { color: var(--acc); }
-.pt-menu .pt-rule { display: block; height: 1px; margin: 3px 6px; background: var(--pt-rule-ink); }
+/* the cap's menu is the kit's contextMenu since 1.5.6-alpha.4 (the menu surface; the --pt-menu-* / --pt-mi-* tokens above are no longer read) */
 
 /* docked, the row owns the height and the device owns the width: no resize corner */
 .mir-pattern[data-dock="anchor"] .mir-win-resize { display: none; }

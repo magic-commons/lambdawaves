@@ -135,7 +135,6 @@
   "CAPTURE": "CAPTURE",
   "CAPTURE IMAGE": "CAPTURE IMAGE",
   "CENTER PLAYHEAD": "CENTER PLAYHEAD",
-  "CENTRE": "CENTRE",
   "CHANNEL — which curve the plot edits": "CHANNEL — which curve the plot edits",
   "CLEAR": "CLEAR",
   "CLOSED": "CLOSED",
@@ -157,7 +156,6 @@
   "COPY TO PROJECT": "COPY TO PROJECT",
   "COPY TO SHELF": "COPY TO SHELF",
   "CORNERS": "CORNERS",
-  "CREATE AUTOMATION CLIP": "CREATE AUTOMATION CLIP",
   "CURVE": "CURVE",
   "CURVES AMOUNT": "CURVES AMOUNT",
   "CUSTOM": "CUSTOM",
@@ -245,7 +243,6 @@
   "DISTANCE": "DISTANCE",
   "DOCK / UNDOCK the transport": "DOCK / UNDOCK the transport",
   "DOTTED": "DOTTED",
-  "DOWN": "DOWN",
   "DOWNLOAD": "DOWNLOAD",
   "DOWNLOAD IMAGE": "DOWNLOAD IMAGE",
   "DOWNLOAD STORED PNG PART": "DOWNLOAD STORED PNG PART",
@@ -483,6 +480,7 @@
   "Keep the menu bar visible": "Keep the menu bar visible",
   "Key names": "Key names",
   "Keyboard actions": "Keyboard actions",
+  "Knob": "Knob",
   "LANE DOWN": "LANE DOWN",
   "LANE UP": "LANE UP",
   "LAP": "LAP",
@@ -497,7 +495,6 @@
   "LISTENING…": "LISTENING…",
   "LIVE": "LIVE",
   "LOAD LAYOUT": "LOAD LAYOUT",
-  "LOCATE CLIPS": "LOCATE CLIPS",
   "LONGER than {limit}: keep this page open and visible (the screen is held awake), or shorten it; a failed render keeps its completed frames to recover": "LONGER than {limit}: keep this page open and visible (the screen is held awake), or shorten it; a failed render keeps its completed frames to recover",
   "LOW": "LOW",
   "LOWER": "LOWER",
@@ -723,7 +720,6 @@
   "RELIEF ANGLE": "RELIEF ANGLE",
   "RELIEF ANGLE — where the controls’ light is: their raise and wells turn with it (the panes follow {:ANGLE})": "RELIEF ANGLE — where the controls’ light is: their raise and wells turn with it (the panes follow {:ANGLE})",
   "REMOVE": "REMOVE",
-  "REMOVE ALL": "REMOVE ALL",
   "RENDER": "RENDER",
   "RES": "RES",
   "RESET": "RESET",
@@ -768,7 +764,6 @@
   "Remove the macro from this control": "Remove the macro from this control",
   "Remove the selected stop (tap twice)": "Remove the selected stop (tap twice)",
   "Remove this device and release its macros": "Remove this device and release its macros",
-  "Remove this route": "Remove this route",
   "Remove this stop": "Remove this stop",
   "Remove this stop — tap again to confirm": "Remove this stop — tap again to confirm",
   "Remove this {noun} (tap twice)": "Remove this {noun} (tap twice)",
@@ -781,7 +776,6 @@
   "Render — this project, and the picture or film you make of it": "Render — this project, and the picture or film you make of it",
   "Reorder {noun} {n} — drag, or the arrow keys": "Reorder {noun} {n} — drag, or the arrow keys",
   "Reset it": "Reset it",
-  "Reset the base value and keep its routes": "Reset the base value and keep its routes",
   "Reset window size": "Reset window size",
   "Resize at the edges; shift inside; double-click to reset": "Resize at the edges; shift inside; double-click to reset",
   "Resize the clip from its left edge": "Resize the clip from its left edge",
@@ -973,14 +967,12 @@
   "TEXT": "TEXT",
   "THE BOARD": "THE BOARD",
   "THEME": "THEME",
-  "THIS CONTROL IS HELD BY {n} MACROS  ·  which one the outer arc edits": "THIS CONTROL IS HELD BY {n} MACROS  ·  which one the outer arc edits",
   "THIS VIEW": "THIS VIEW",
   "TIER": "TIER",
   "TIGHT": "TIGHT",
   "TIME": "TIME",
   "TIME · BEATS FROM 0": "TIME · BEATS FROM 0",
   "TIMELINE": "TIMELINE",
-  "TIMELINE CLIP": "TIMELINE CLIP",
   "TIMELINE · ACTIVE": "TIMELINE · ACTIVE",
   "TIMELINE · SELECTION": "TIMELINE · SELECTION",
   "TINT": "TINT",
@@ -1045,7 +1037,6 @@
   "This pair is not here yet: its window has not been built.": "This pair is not here yet: its window has not been built.",
   "This time is before the source begins.": "This time is before the source begins.",
   "This time range is occupied in every lane. Add a lane or choose another range.": "This time range is occupied in every lane. Add a lane or choose another range.",
-  "Timeline clip": "Timeline clip",
   "Timeline shortcuts": "Timeline shortcuts",
   "Timeline snap": "Timeline snap",
   "Timeline tools": "Timeline tools",
@@ -1064,7 +1055,6 @@
   "UNDO": "UNDO",
   "UNSAVED CHANGES": "UNSAVED CHANGES",
   "UNTITLED": "UNTITLED",
-  "UP": "UP",
   "UPPER": "UPPER",
   "Unbound": "Unbound",
   "Under refractive or frost the knobs, buttons and fields are clear glass": "Under refractive or frost the knobs, buttons and fields are clear glass",
@@ -1074,9 +1064,6 @@
   "Untitled": "Untitled",
   "Use the compact window layout": "Use the compact window layout",
   "Use the full window layout": "Use the full window layout",
-  "Use the knob position as the centre of a bipolar range": "Use the knob position as the centre of a bipolar range",
-  "Use the knob position as the maximum": "Use the knob position as the maximum",
-  "Use the knob position as the minimum": "Use the knob position as the minimum",
   "Use transparent window surfaces: the blur, with a veil": "Use transparent window surfaces: the blur, with a veil",
   "VALUE · 0 TO 1": "VALUE · 0 TO 1",
   "VEIL": "VEIL",
@@ -1274,8 +1261,6 @@
   "no microphone was found on this device": "no microphone was found on this device",
   "no notes yet — name one above and {:SAVE AS}": "no notes yet — name one above and {:SAVE AS}",
   "no presets yet — type a name and press {:SAVE}": "no presets yet — type a name and press {:SAVE}",
-  "no route": "no route",
-  "no route from the selected macro": "no route from the selected macro",
   "no such entry": "no such entry",
   "no such note": "no such note",
   "not a MIR file (nothing here takes plain text)": "not a MIR file (nothing here takes plain text)",
@@ -1319,7 +1304,6 @@
   "quality tier::FULL": "FULL",
   "quality tier::LIGHT": "LIGHT",
   "ramp": "ramp",
-  "remove every route into this control": "remove every route into this control",
   "remove the macro from this control": "remove the macro from this control",
   "rename this tab": "rename this tab",
   "rename to folder/name": "rename to folder/name",
@@ -2117,9 +2101,6 @@
   "CENTER PLAYHEAD": [
    "mir/timeline/shortcuts.js"
   ],
-  "CENTRE": [
-   "mir/modulation/window.js"
-  ],
   "CHANNEL — which curve the plot edits": [
    "mir/panels/curves.js"
   ],
@@ -2190,9 +2171,6 @@
   ],
   "CORNERS": [
    "mir/shell/gui.js"
-  ],
-  "CREATE AUTOMATION CLIP": [
-   "mir/timeline/knobs.js"
   ],
   "CURVE": [
    "mir/modulation/window.js"
@@ -2460,9 +2438,6 @@
   ],
   "DOTTED": [
    "mir/modulation/modwindow/modwindow.js"
-  ],
-  "DOWN": [
-   "mir/modulation/window.js"
   ],
   "DOWNLOAD": [
    "mir/folders/gallery.js"
@@ -3179,6 +3154,9 @@
   "Keyboard actions": [
    "mir/keyboard/keyboard.js"
   ],
+  "Knob": [
+   "mir/shell/menubar.js"
+  ],
   "LANE DOWN": [
    "mir/timeline/shortcuts.js"
   ],
@@ -3214,9 +3192,6 @@
   ],
   "LOAD LAYOUT": [
    "mir/shell/rack.js"
-  ],
-  "LOCATE CLIPS": [
-   "mir/timeline/knobs.js"
   ],
   "LONGER than {limit}: keep this page open and visible (the screen is held awake), or shorten it; a failed render keeps its completed frames to recover": [
    "mir/render/plan.js"
@@ -3916,11 +3891,7 @@
    "mir/shell/gui.js"
   ],
   "REMOVE": [
-   "mir/modulation/modwindow/modwindow.js",
-   "mir/modulation/window.js"
-  ],
-  "REMOVE ALL": [
-   "mir/modulation/window.js"
+   "mir/modulation/modwindow/modwindow.js"
   ],
   "RENDER": [
    "mir/app.js",
@@ -3930,7 +3901,6 @@
    "mir/modulation/host.js"
   ],
   "RESET": [
-   "mir/modulation/window.js",
    "mir/panels/curves.js",
    "mir/panels/ramp.js"
   ],
@@ -4059,9 +4029,6 @@
   "Remove this device and release its macros": [
    "mir/modulation/window.js"
   ],
-  "Remove this route": [
-   "mir/modulation/window.js"
-  ],
   "Remove this stop": [
    "mir/panels/ramp.js"
   ],
@@ -4097,9 +4064,6 @@
   ],
   "Reset it": [
    "mir/timeline/shortcuts.js"
-  ],
-  "Reset the base value and keep its routes": [
-   "mir/modulation/window.js"
   ],
   "Reset window size": [
    "mir/timeline/window.js"
@@ -4685,9 +4649,6 @@
   "THEME": [
    "mir/shell/gui.js"
   ],
-  "THIS CONTROL IS HELD BY {n} MACROS  ·  which one the outer arc edits": [
-   "mir/modulation/window.js"
-  ],
   "THIS VIEW": [
    "mir/render/panel.js"
   ],
@@ -4705,9 +4666,6 @@
   ],
   "TIMELINE": [
    "mir/app.js"
-  ],
-  "TIMELINE CLIP": [
-   "mir/timeline/knobs.js"
   ],
   "TIMELINE · ACTIVE": [
    "mir/render/recorder.js"
@@ -4904,9 +4862,6 @@
   "This time range is occupied in every lane. Add a lane or choose another range.": [
    "mir/timeline/editor.js"
   ],
-  "Timeline clip": [
-   "mir/timeline/knobs.js"
-  ],
   "Timeline shortcuts": [
    "mir/timeline/shortcuts.js"
   ],
@@ -4962,9 +4917,6 @@
   "UNTITLED": [
    "mir/folders/folders.js"
   ],
-  "UP": [
-   "mir/modulation/window.js"
-  ],
   "UPPER": [
    "mir/modulation/window.js"
   ],
@@ -4993,15 +4945,6 @@
   ],
   "Use the full window layout": [
    "mir/shell/rack.js"
-  ],
-  "Use the knob position as the centre of a bipolar range": [
-   "mir/modulation/window.js"
-  ],
-  "Use the knob position as the maximum": [
-   "mir/modulation/window.js"
-  ],
-  "Use the knob position as the minimum": [
-   "mir/modulation/window.js"
   ],
   "Use transparent window surfaces: the blur, with a veil": [
    "mir/shell/gui.js"
@@ -5662,12 +5605,6 @@
   "no presets yet — type a name and press {:SAVE}": [
    "mir/modulation/window.js"
   ],
-  "no route": [
-   "mir/modulation/window.js"
-  ],
-  "no route from the selected macro": [
-   "mir/modulation/window.js"
-  ],
   "no such entry": [
    "mir/folders/files.js"
   ],
@@ -5797,9 +5734,6 @@
   ],
   "ramp": [
    "mir/panels/ramp.js"
-  ],
-  "remove every route into this control": [
-   "mir/modulation/window.js"
   ],
   "remove the macro from this control": [
    "mir/modulation/window.js"

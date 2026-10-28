@@ -22,7 +22,7 @@
 
 import { normalizeFolder, leafOf, inFolderTree } from './files.js';
 import * as kitDefault from '../kit.js';
-import { label as kitLabel, ariaLabel as kitAria, placeholder as kitPh } from '../kit.js';   // the kit's own words, whatever kit the app hands in
+import { label as kitLabel, ariaLabel as kitAria, placeholder as kitPh, onContext } from '../kit.js';   // the kit's own words, whatever kit the app hands in
 import { glyphEl } from '../glyph.js';
 import { t, tn, phrase, onLanguage } from '../core/i18n.js';
 import { drag, pointerField } from '../core/pointer.js';
@@ -55,7 +55,6 @@ export const GALLERY_COPY = {
   emptyFolder: phrase('This folder is empty.  Move a project here, or save what is on screen into it.')
 };
 
-const LONG_MS = 560;
 /** BASINS' SAVE toolbar, in its order: the default `actions` */
 export const DEFAULT_ACTIONS = Object.freeze(['project', 'capture', 'download', 'duplicate', 'fresh', 'options']);
 
@@ -389,7 +388,8 @@ export function buildGallery(panel, opts) {
 
   /* ── the one box: menus, questions, refusals ──────────────────────────── */
   function closeContext() { context.hidden = true; context.textContent = ''; context.className = 'sv-context'; context.style.removeProperty('top'); }
-  function box(title, cls) { closeContext(); context.className = 'sv-context' + (cls ? ' ' + cls : ''); context.hidden = false; if (title) mk('div', 'sv-context-title', context, title); return context; }
+  function box(title, cls) { closeContext(); context.className = 'sv-context' + (cls ? ' ' + cls : ' glass'); context.hidden = false;   // 1.5.6-alpha.4: a menu pane, the ask its own
+    if (cls) delete context.dataset.mirSurface; else context.dataset.mirSurface = 'menu'; if (title) mk('div', 'sv-context-title', context, title); return context; }
   function action(parent, label, fn, cls) { const tr = kit.trig({ label, cls: 'sv-act' + (cls ? ' ' + cls : ''), onFire: fn }); parent.appendChild(tr.root); return tr; }
   /* the ask's pane: in the one box over the explorer, or — `seat`, an element the caller keeps below its own button (RENDER's
      FILES under OPEN ZIP…) — in that seat, so it opens where the hand is and nothing above it moves (the hand law) */
@@ -456,6 +456,7 @@ export function buildGallery(panel, opts) {
       const r = files.setFolderPicture(S.folder, e.id);
       if (r.ok) { say(t('Folder picture set from {name}', { name: e.name })); closeContext(); paintExplorer(); } else say(t('Could not set the folder picture: {why}', { why: r.why }), true);
     }, 'sv-primary');
+    for (const [word, run] of (o.itemRows ? o.itemRows(e) : null) || []) action(b, word, () => { closeContext(); run(); });   // 1.5.6-alpha.4: the host's rows (λWAVES: OPEN · EXPORT)
     /* MOVE TO — every folder as a button: the touch and keyboard way to do what a carried tile does (with dragToFolder) */
     const dests = DRAG ? ['', ...files.folders()].filter((f) => f !== e.folder) : [];
     if (dests.length) {
@@ -498,21 +499,8 @@ export function buildGallery(panel, opts) {
   }
   const scrollIn = () => { try { context.scrollIntoView({ block: 'nearest' }); } catch (_) {} };
 
-  /* long-press (touch/pen) or right-click opens a menu; the click that follows a long-press is swallowed */
-  function wireLongPress(target, open) {
-    let timer = 0, x = 0, y = 0, suppressUntil = 0;
-    const clear = () => { if (timer) clearTimeout(timer); timer = 0; };
-    target.addEventListener('pointerdown', (ev) => {
-      if (ev.button !== 0 || (ev.pointerType !== 'touch' && ev.pointerType !== 'pen')) return;
-      x = ev.clientX; y = ev.clientY; clear();
-      timer = setTimeout(() => { timer = 0; suppressUntil = Date.now() + 1000; try { navigator.vibrate && navigator.vibrate(12); } catch (_) {} open(); }, LONG_MS);
-    }, { passive: true });
-    target.addEventListener('pointermove', (ev) => { if (Math.hypot(ev.clientX - x, ev.clientY - y) > 10) clear(); }, { passive: true });
-    target.addEventListener('pointerup', clear, { passive: true });
-    target.addEventListener('pointercancel', clear, { passive: true });
-    target.addEventListener('contextmenu', (ev) => { clear(); ev.preventDefault(); suppressUntil = Date.now() + 500; open(); });
-    target.addEventListener('click', (ev) => { if (Date.now() >= suppressUntil) return; suppressUntil = 0; ev.preventDefault(); ev.stopImmediatePropagation(); }, true);
-  }
+  /* long-press (touch/pen) or right-click opens a menu; the click that follows a long-press is swallowed: the kit's onContext (1.5.6-alpha.4) */
+  const wireLongPress = (target, open) => onContext(target, () => open());
 
   /* inline rename — the latch that makes Escape genuinely reversible */
   function renameInline(label, initial, commit) {

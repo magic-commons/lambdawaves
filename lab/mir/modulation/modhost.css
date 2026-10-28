@@ -716,14 +716,10 @@ body[data-card="solid"] .mir-modwindow, body[data-card="solid"] #modwin.mir-modw
   transform: rotate(45deg); transform-origin: 50% 50%; }                                              /* 20b */
 
 
+/* 21 · the three sheets are menu panes since 1.5.6-alpha.4 (`.glass[data-mir-surface="menu"]`): the skin draws them, the floor holds them */
 #modwin.mir-modwindow .m2pick,
 #modwin.mir-modwindow .m2ppick.glass,
-#modwin.mir-modwindow .m2deadpick.glass {
-  background-color: var(--surface-fill, var(--m2-face-tint-97));
-  background-image: none;
-  border: var(--surface-edge-width, var(--glass-border)) solid var(--pane-edge, var(--surface-edge, var(--glass-border-color)));
-  box-shadow: var(--surface-shadow, var(--glass-shadow));
-  color: var(--fg); }                                                                                 /* 21 */
+#modwin.mir-modwindow .m2deadpick.glass { color: var(--fg); }                                        /* 21 */
 #modwin.mir-modwindow .m2pick .m2pickb,
 #modwin.mir-modwindow .m2ppick .m2pickb,
 #modwin.mir-modwindow .m2deadpick .m2pickb {
@@ -2290,20 +2286,7 @@ body.mod-arming :is(.sw, .seg, .trig, .k:not([data-param]), .fd:not([data-param]
 .fd.has-ring.ring-focus { overflow: visible; }
 .fd.has-ring.ring-focus > :is(.fd-fill, .m2fdrange, .m2fdrangedot) { clip-path: inset(0 round var(--r-sm)); }
 
-/* THE POP-OVER — a held press or the right button; one menu, two doors */
-.mod-pop { position: fixed; z-index: calc(var(--z-banner) + 4); min-width: 210px; max-width: 280px;
-  display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3); border-radius: var(--r-md);
-  box-shadow: var(--surface-shadow, var(--glass-shadow)); }   /* the material is the house .glass (window.js builds it .mod-pop.glass) */
-.mod-poph { display: flex; align-items: baseline; gap: var(--sp-2); }
-.mod-poph > b { font-size: var(--fs-small); letter-spacing: var(--label-tracking, var(--tr-wide)); color: var(--fg); font-weight: var(--w-med); }
-.mod-poph > span { font-size: var(--fs-micro); letter-spacing: var(--label-tracking, var(--tr-wider)); color: var(--acc2); }
-.mod-poprts { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
-.mod-poprts > .grp-lbl { flex: 1 0 100%; }
-.mod-mchip { flex: 0 0 auto; max-width: 74px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  padding: 2px 6px; border-radius: var(--r-pill); border: 0; cursor: pointer; font: inherit; font-size: var(--fs-micro);
-  color: var(--acc2); background: var(--acc2-soft); }
-/* CHOSEN (INTENT): the ON face and its rim, the label in the accent — accent B, the route's */
-.mod-mchip.on { background: var(--state-on, var(--glass-raise)); box-shadow: var(--state-on-rim, var(--neu-flat)); font-weight: var(--w-bold); }
+/* THE POP-OVER is the kit's knob menu since 1.5.6-alpha.4 (shell/menubar.js knobMenu, its ROUTES › part): no sheet of its own */
 
 /* PATT ON THE ENV FACE (1.5.0-alpha.12, BASINS pattern.css): Full — a fourth seat after ↑ FIT ↓ (↑ and ↓ give up 8 px
    each, BASINS' 36 · 44 · 36 · 44); Compact — beside OUT / TRIG IN, a third of the row (zoom and FIT stay absent by law);
