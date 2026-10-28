@@ -298,15 +298,17 @@ body.no-transport-bar .mir-transport, body.no-transport-bar .dev[data-id="transp
 .mir-transport :is(.mir-lamp, .mir-meter-bar) { --lamp: var(--xport-led); }
 .mir-transport .mir-lamp:not([data-lit]) { background: var(--xport-led-off); }
 .mir-transport .tempo-knobs .mir-bank-grid { --cell-min: var(--xport-grid); }
-.mir-transport .mir-macro-knob { position: relative; }
-.mir-transport .mir-macro-knob .k-val { display: block; font-variant-numeric: tabular-nums; }
+.mir-transport .mir-macro-knob { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "l l l" "d d d" "g v n"; justify-items: center; align-items: center; }
+.mir-transport .mir-macro-knob > .k-lbl { grid-area: l; } .mir-transport .mir-macro-knob > .k-dial { grid-area: d; }
+.mir-transport .mir-macro-knob > .k-val { grid-area: v; }
 .mir-transport .mir-macro-knob > .mir-macro-lamp { position: absolute; top: 1px; left: 1px; }
-.mir-transport .mir-macro-knob .m2slotrow { display: flex; justify-content: center; align-items: center; height: 24px; }
-.mir-transport .mir-macro-knob :is(.m2grip, .m2numseat) { position: relative; display: grid; place-items: center; width: 22px; height: 24px; padding: 0; border: 0; background: transparent; color: var(--acc2); touch-action: none; }
-.mir-transport .mir-macro-knob .m2grip svg { width: 13px; height: 13px; pointer-events: none; }
+.mir-transport .mir-macro-knob :is(.m2slot, .m2slotrow) { display: contents; }
+.mir-transport .mir-macro-knob .m2grip { grid-area: g; } .mir-transport .mir-macro-knob .m2numseat { grid-area: n; }
+.mir-transport .mir-macro-knob :is(.m2grip, .m2numseat) { position: relative; display: grid; place-items: center; width: 18px; height: 20px; padding: 0; border: 0; background: transparent; color: var(--acc2); touch-action: none; }
+.mir-transport .mir-macro-knob .m2grip svg { width: 12px; height: 12px; pointer-events: none; }
 .mir-transport .mir-macro-knob .m2numseat { cursor: ns-resize; }
 .mir-transport .mir-macro-knob .m2num { font: var(--w-semi) var(--xport-macro-num) / 1 var(--font-num); color: var(--acc2); pointer-events: none; }
-.mir-transport .mir-macro-knob .m2depthring { position: absolute; left: 1px; top: 2px; width: 20px; height: 20px; overflow: visible; pointer-events: none; transform: rotate(-90deg); }
+.mir-transport .mir-macro-knob .m2depthring { position: absolute; left: 0; top: 1px; width: 18px; height: 18px; overflow: visible; pointer-events: none; transform: rotate(-90deg); }
 .mir-transport .mir-macro-knob :is(.m2depthtrack, .m2deptharc) { fill: none; stroke-width: var(--xport-depth-w); }
 .mir-transport .mir-macro-knob .m2depthtrack { stroke: var(--xport-section); }
 .mir-transport .mir-macro-knob .m2deptharc { stroke: var(--acc); stroke-linecap: round; }

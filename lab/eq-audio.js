@@ -5,10 +5,12 @@
  * the microphone is the device's MIC press (MIR's privacy law).  Not saved: a hand press each session. */
 import { el, sw, readout } from './mir/kit.js';
 const BAND = ['low', 'low', 'mid', 'mid', 'high', 'high', 'high'], span = (b) => `${BAND.indexOf(b) + 1}–${BAND.lastIndexOf(b) + 1}`;   // the words read the table
+/** the modulation window's first AUDIO device and its followers by key — the one read AUDIO IN and the bar's METERS share (022 C2) */
+export const audioDevice = (app) => { const M = app.state.modHost && app.state.modHost.model; if (!M) return null; const L = M.sourceList(), d = L.find((q) => q.kind === 'audio');
+  return d ? { d, outs: Object.fromEntries(L.filter((q) => q.kind === 'audioout' && q.parentId === d.id).map((q) => [q.key, q])) } : null; };
 export function createEqAudio(app, { eq, host, sync }) {
   let on = false, said = '';
-  const device = () => { const M = app.state.modHost && app.state.modHost.model; if (!M) return null; const L = M.sourceList(), d = L.find((q) => q.kind === 'audio');
-    return d ? { d, outs: Object.fromEntries(L.filter((q) => q.kind === 'audioout' && q.parentId === d.id).map((q) => [q.key, q])) } : null; };
+  const device = () => audioDevice(app);
   const ro = readout({ label: 'SOURCE', cls: 'wide', value: 'off' });
   function say(A = device()) { const live = app.state.audioCap && app.state.audioCap.live, t = !on ? 'off' : !A ? 'no AUDIO device' : live ? 'AUDIO · live' : 'AUDIO · press its MIC';
     if (t === said) return; said = t; ro.set(t); ro.setSub(on && !A ? 'add AUDIO in the MODULATION window, then press its MIC' : on ? `low n ${span('low')} · mid n ${span('mid')} · high n ${span('high')}` : ''); }

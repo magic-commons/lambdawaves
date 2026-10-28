@@ -101,31 +101,42 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 .csb-suggest .mm-ph { position: absolute; inset: 0 0 12px; display: grid; place-items: center; font: 400 15px/1 var(--font-math, serif); color: var(--fg); opacity: .75; pointer-events: none; }   /* 018 A3: no picture — the formula holds the square */
 .csb-suggest .mm-lbl { position: absolute; left: 0; right: 0; bottom: 3px; font: var(--w-bold) 10px/1 var(--font-math, serif); color: var(--fg); text-align: center; pointer-events: none; }
 .csb-suggest .csb-none { padding: 6px 10px; font-size: var(--fs-small); color: var(--ink-faint); }
-/* A3 · the favourites strip, under the macros and the clock, the width of the panel; a face is the original control */
-#transport[data-layout="csb"] .csb-favs { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-height: 36px; padding-top: 4px; border-top: 1px solid var(--glass-hairline); }
-#transport[data-layout="csb"] > .native-tempo > .csb-favs > * { order: 0; }
-#transport[data-layout="csb"] .csb-favs .k { width: 56px; flex: 0 0 auto; }   /* 022 H2: 56 px, so an eight-letter label (EXPOSURE) never needs the ellipsis; the strip wraps */
-#transport[data-layout="csb"] .csb-favs .k-lbl { display: block; font-size: var(--fs-micro); }
-#transport[data-layout="csb"] .csb-favs .segw { flex: 0 1 auto; max-width: 300px; }
+/* 022 C2 · THE SURFACE IS A SURFACE (lab/shell/transport.js): the expander is ONE WELL (the kit's `data-mir-surface="well"`, its fill `--xport-well`)
+   holding four kit sections on the 44-px grid (`--xport-grid`).  On the STAGE: TRANSPORT across the top, MACROS over FAVOURITES on the left and
+   METERS standing beside them; in a rack card (docked, FREE) the four stack.  Nothing scrolls inside it (017 R2).  The bar's own rules hide a
+   seat's word and float its value; the surface names every control and reads its value at rest, so its rules carry the bar's weight. */
+#transport[data-layout="csb"] > .native-tempo.csb-surface:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "tr tr" "mac met" "fav met"; gap: 6px; padding: 6px; background: var(--xport-well); }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo.csb-surface:not([hidden]) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "tr" "mac" "fav" "met"; }
+.csb-surface > .csb-sec-tr { grid-area: tr; } .csb-surface > .csb-sec-mac { grid-area: mac; } .csb-surface > .csb-sec-fav { grid-area: fav; } .csb-surface > .csb-sec-met { grid-area: met; }
+#transport[data-layout="csb"] .csb-surface :is(.k-lbl, .ro-lbl) { display: block; }
+#transport[data-layout="csb"] .csb-surface .k { width: 100%; }
+#transport[data-layout="csb"] .csb-surface .k-val { display: block; position: static; opacity: 1; transform: none; font-size: var(--fs-micro); }
 #transport[data-layout="csb"] .csb-favs .segw .k-lbl { display: none; }
-#transport[data-layout="csb"] .csb-favs-empty { font-size: var(--fs-micro); color: var(--ink-faint); }
-#transport[data-layout="csb"] .csb-favs .pal-invert { flex: 0 0 auto; width: 48px; height: 48px; }   /* iteration 014 D4: INVERT, a knob-sized face; ON turns its glyph over, as on the card */
-#transport[data-layout="csb"] .csb-favs .pal-invert svg { transition: transform var(--motion-ui) var(--ease-out); } #transport[data-layout="csb"] .csb-favs .pal-invert.on svg { transform: rotate(180deg); }
-/* the expander's first row (A8 tidy): ‹ › ⟳ as one group of round seats, REPEATS as the kit's readout (its word over its value), the formula on
-   the same line taking the rest, one alignment, a hairline under */
-#transport[data-layout="csb"] > .native-tempo > .csb-repeats { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 2px 6px; border-bottom: 1px solid var(--glass-hairline); }
-#transport[data-layout="csb"] > .native-tempo > .csb-repeats > * { order: 0; }
-#transport[data-layout="csb"] .csb-repeats > .csb-steps { display: inline-flex; gap: 2px; flex: 0 0 auto; }
-#transport[data-layout="csb"] .csb-repeats > .csb-steps > .tbtn { display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; color: var(--ink-key); font-size: 14px; }
-#transport[data-layout="csb"] .csb-repeats > .csb-steps > .tbtn > svg { width: 18px; height: 18px; }
-#transport[data-layout="csb"] .csb-repeats > .csb-steps > .tbtn:hover { color: var(--fg); background: var(--glass-raise); }
-#transport[data-layout="csb"] .csb-repeats > .ro.period { flex: 0 0 auto; width: auto; min-width: 130px; padding: 0; display: flex; flex-direction: column; align-items: flex-start; text-align: left; background: transparent; box-shadow: none; }
-#transport[data-layout="csb"] .csb-repeats > .ro.period .ro-lbl { display: block; font-size: var(--fs-micro); letter-spacing: var(--tr-wide); color: var(--ink-faint); }
-#transport[data-layout="csb"] .csb-repeats > .ro.period .ro-val { font-size: var(--fs-small); color: var(--fg); }
-#transport[data-layout="csb"] .csb-repeats > .ro.period .ro-sub { display: none; }
-#transport[data-layout="csb"] .csb-repeats > .fx { display: block; flex: 1 1 auto; min-width: 0; overflow: hidden; font-size: var(--fs-micro); text-align: right; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) > .native-tempo > .csb-repeats { flex-wrap: wrap; row-gap: 4px; }
-#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-repeats > .fx { flex-basis: 100%; text-align: left; }
+/* TRANSPORT: ⏮ ‹ › ⟳ as glyph chips, REPEATS (it takes what is left) and BPM as readouts, the beat lamp on BPM, the kit's clock tiles one 44-px
+   strip, the theorem under it; in a card REPEATS takes the first line */
+#transport[data-layout="csb"] .csb-steps { display: inline-flex; }
+#transport[data-layout="csb"] .csb-steps > .tbtn { display: inline-grid; place-items: center; width: 28px; min-width: 0; height: var(--xport-grid); padding: 0; border: 0; border-radius: var(--r-md); background: transparent; box-shadow: none; color: var(--ink-key); }
+#transport[data-layout="csb"] .csb-steps > .tbtn > svg { width: 18px; height: 18px; }
+#transport[data-layout="csb"] .csb-steps > .tbtn:hover { color: var(--fg); background: var(--state-hover, var(--glass-raise)); }
+#transport[data-layout="csb"] .csb-sec-tr .ro { position: relative; order: 0; flex: 0 0 auto; width: auto; min-width: 0; min-height: var(--xport-grid); justify-content: center; align-items: flex-start; padding: 0 4px; box-sizing: border-box; text-align: left; background: transparent; border: 0; box-shadow: none; }
+#transport[data-layout="csb"] .csb-sec-tr .ro.period { flex: 1 1 0; }
+#transport[data-layout="csb"] .csb-sec-tr .ro-val { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--fs-small); }
+#transport[data-layout="csb"] .csb-sec-tr .ro-sub { display: none; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-sec-tr .ro.period { order: -1; flex-basis: 100%; min-height: 0; }
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-sec-tr .trig:not(.tap) { flex-basis: calc(25% - 3px); }   /* a card: the clock tiles four a line */
+#transport[data-layout="csb"]:is(.docked, [data-place="free"]) .csb-surface .mir-bank-grid { --cell-min: 48px; }   /* a card: four slots a line, eight in two */
+#transport[data-layout="csb"] .csb-beat { position: absolute; top: 7px; right: -4px; }
+#transport[data-layout="csb"] .csb-sec-tr .trig { flex: 0 0 var(--xport-grid); width: var(--xport-grid); padding: 0 2px; }
+#transport[data-layout="csb"] .csb-sec-tr > .fx { display: block; min-width: 0; overflow: hidden; font-size: var(--fs-micro); white-space: nowrap; text-overflow: ellipsis; }
+/* MACROS and FAVOURITES: the kit's knob banks (eight slots; a segment takes four) */
+.csb-sec-mac .tempo-pane, .csb-favs { flex: 1 1 100%; min-width: 0; }
+#transport[data-layout="csb"] .csb-favs .pal-invert { width: var(--xport-grid); height: var(--xport-grid); }
+.csb-favs .pal-invert svg { transition: transform var(--motion-ui) var(--ease-out); } .csb-favs .pal-invert.on svg { transform: rotate(180deg); }
+/* METERS: LOW · MID · HIGH as LED bars and the beat equaliser's seven gains */
+.csb-sec-met > .mir-section-body { flex-wrap: nowrap; align-items: stretch; flex: 1 1 auto; }
+.csb-sec-met .mir-meter { min-height: 64px; }
+.csb-sec-met .mir-meter-bar { width: 8px; }
+.csb-sec-met .csb-eqm .mir-meter-bar { width: 4px; }
 /* docked into the rack as a card */
 #transport.docked { position: static; transform: none; width: auto; height: auto; flex-wrap: wrap; padding: 6px; gap: 6px; border: 0; box-shadow: none; background: transparent; }
 /* 0.6.6 G2 · THE TYPE BOX (lab/shell/transport.js): ASK swaps the centre for one line to Gemma; her answer echoes in the t readout's seat for 4 s */
@@ -135,17 +146,16 @@ html body.rack-hidden #transport[data-place="free"] { transform: none; opacity: 
 .ask-line::placeholder, .ask-note, #transport .ask-seat > .tbtn.ask-ok, #transport .tbtn.ask { width: auto; min-width: 0; padding: 0 6px; border-radius: var(--r-pill); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--fs-small); }
 
 /* ── 021 G6 · λWAVES' VALUES OVER THE KIT'S TRANSPORT (mir/shell/transport.css), once copies of the kit's rules in skin.css.  A value the kit reads
-   through a token is that token here; the rules below the tokens are λWAVES' own (MACROS | CLOCK side by side, four clock tiles, the open panel's
+   through a token is that token here; the rules below the tokens are λWAVES' own (the open panel's
    edge and corners, the pill re-asserted over lab.css' .tbtn, MOD's lit accent, the docked card's flat seats and lit play / MOD, the knobs' hidden
    values), which no kit token carries — kept verbatim, in their old order. ── */
 #transport { --xport-micro: 7px; }          /* BPM and the Hz reading: 7 px on the bar (the kit's 8) */
 #transport.docked { --xport-micro: 8px; }   /* … 8 in the rack card */
-#transport .native-tempo { order: 9; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.15fr); gap: 12px; width: 100%; }   /* 2026-09-10: MACROS | CLOCK, two tile rows high */
-.tempo-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 4px; }   /* 0.5.0 C4: eight tiles (LINKED and MOD ▶ retired), two rows of four */
+#transport .native-tempo { order: 9; width: 100%; }   /* 022 C2: its grid is THE SURFACE's (above) */
 #transport.mini.tempo-open { width:min(640px,calc(100vw - 24px));height:auto;min-height:46px;padding-bottom:8px; }
 #transport .tempo-expand { position:relative;flex:0 0 72px;width:72px;height:34px;padding:4px 15px 4px 7px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr;column-gap:4px;align-items:center;border:1px solid var(--glass-hairline);border-radius:8px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));color:var(--fg-soft);touch-action:none; }
 #transport .tempo-expand:hover,#transport .tempo-expand:focus-visible { border-color:color-mix(in srgb,var(--acc2) 60%,transparent);background:var(--glass-raise);outline:0; }
-#transport .native-tempo { padding:8px;border-top:1px solid var(--glass-hairline);border-radius:0 0 10px 10px;background:linear-gradient(180deg,var(--glass-well),transparent); }
+#transport .native-tempo { padding:8px;border-top:1px solid var(--glass-hairline);border-radius:0 0 10px 10px; }
 #transport.mini .tbtn.modb.on { color:var(--acc2); }
 #transport.docked .tbtn:not(.transport-home,.tempo-expand) { border:0;background:transparent;box-shadow:none;color:var(--ink-key); }
 #transport.docked .tbtn:not(.transport-home,.tempo-expand):hover { color:var(--fg);background:var(--state-hover,var(--glass-raise)); }

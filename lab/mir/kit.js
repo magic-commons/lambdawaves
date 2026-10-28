@@ -829,7 +829,7 @@ export function section({ title, parent, cls } = {}) {
   return { root, head, body, setTitle };
 }
 /** knobBank({ slots, page, onPage, items, onEmpty, onMove, parent, cellMin, label }) — an always-`slots` (8) grid of faces on a fit row: an item
- *  is a built face `{ id, root }` or a knob's options (made here, once per id); an empty slot is a faint "+" (a button when `onEmpty(i)`); more
+ *  is a built face `{ id, root, span }` (a wide one takes `span` slots) or a knob's options (made here, once per id); an empty slot is a faint "+" (a button when `onEmpty(i)`); more
  *  items than slots make pages, ‹ "n / N" › (`onPage(p)`); `onMove(id, to)` lets a slot be dragged by its grip among the others (the modulation
  *  window's reorder engine) or moved with ← →.  → { root, grid, set(items), page(p?), pages, sync() } */
 export function knobBank({ slots = 8, page = 0, onPage, items = [], onEmpty, onMove, parent, cellMin, label: name } = {}) {
@@ -845,7 +845,7 @@ export function knobBank({ slots = 8, page = 0, onPage, items = [], onEmpty, onM
     const s = el('div', 'mir-bank-slot' + (it ? ' filled' : ' empty'));
     if (!it) { const plus = el(onEmpty ? 'button' : 'span', 'mir-bank-plus', s); setGlyph(plus, 'plus', { size: 16 });
       if (onEmpty) { plus.type = 'button'; ariaLabel(plus, 'Add'); plus.addEventListener('click', () => onEmpty(i)); } return s; }
-    s.dataset.slot = keyOf(it, i); s.append(faceOf(it, i));
+    s.dataset.slot = keyOf(it, i); s.append(faceOf(it, i)); if (it.span > 1) s.style.gridColumn = 'span ' + it.span;
     if (onMove) { const g = el('button', 'mir-bank-grip', s), id = it.id; g.type = 'button'; gripDots(g, 12); ariaLabel(g, 'Move');
       wireReorder(g, s, { host: grid, selector: ':scope > .mir-bank-slot.filled', axis: 'grid', motion, slop: TAP.slop, commit: (to) => onMove(id, pg * slots + to), settle: () => api.sync() });
       g.addEventListener('keydown', (e) => { const d = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0; if (d) { e.preventDefault(); onMove(id, Math.max(0, i + d)); } }); }
@@ -855,9 +855,9 @@ export function knobBank({ slots = 8, page = 0, onPage, items = [], onEmpty, onM
     root, grid, get pages() { return Math.max(1, Math.ceil(list.length / slots)); },
     set(next) { list = next.slice(); const keep = new Set(list.map(keyOf)); for (const k of made.keys()) if (!keep.has(k)) made.delete(k); api.sync(); },
     page(p) { if (p === undefined) return pg; const q = Math.max(0, Math.min(api.pages - 1, p)); if (q !== pg) { pg = q; api.sync(); if (onPage) onPage(pg); } return pg; },
-    sync() { pg = Math.max(0, Math.min(api.pages - 1, pg)); const cells = [];
-      for (let s = 0; s < slots; s++) { const i = pg * slots + s; cells.push(slot(i < list.length ? list[i] : null, i)); }
-      grid.replaceChildren(...cells); nav.hidden = api.pages < 2; count.textContent = (pg + 1) + ' / ' + api.pages; prev.disabled = pg === 0; next.disabled = pg >= api.pages - 1; },
+    sync() { const shown = Math.max(0, Math.min(api.pages - 1, pg)); if (list.length) pg = shown; const cells = [];   // an empty bank keeps the page it was asked for
+      for (let s = 0, used = 0; s < slots; s++) { const i = shown * slots + s, it = i < list.length ? list[i] : null; if (it || used < slots) { cells.push(slot(it, i)); used += it && it.span > 1 ? it.span : 1; } }   // a wide face takes its span's slots
+      grid.replaceChildren(...cells); nav.hidden = api.pages < 2; count.textContent = (shown + 1) + ' / ' + api.pages; prev.disabled = shown === 0; next.disabled = shown >= api.pages - 1; },
   };
   api.sync();
   return api;

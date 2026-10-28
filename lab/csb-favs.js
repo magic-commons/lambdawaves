@@ -8,8 +8,10 @@
  *   · a segment the owners offer (`offer(id, control, { width })`; Josh's answer 4: SPECTRUM's HYDROGEN | STURMIAN, WAVE's POSITION | MOMENTUM and its
  *     OBSERVABLE): a seg made from the original's options whose press presses the original's button, so its owner's road (history, its status) runs.
  * ADD / REMOVE ride the kit's knob menu (setTimelineKnobRows: its foot) and an offered row's menu (`data-fav`, lab/context-menus.js).  The list is a
- * PREFERENCE (`lambdawaves.q0.csb` { v: 1, items }), never a project: every new project starts with it.  Faces are built when the expander opens. */
-import { el, knob, seg, sw, label } from './mir/kit.js';
+ * PREFERENCE (`lambdawaves.q0.csb` { v: 1, items, page }), never a project: every new project starts with it.  Faces are built when the expander opens.
+ * 022 C2: the strip is the kit's knob bank — eight slots on the surface's grid, its own page past eight (the `page` field, read with a default 0),
+ * a slot dragged by its grip (or ← →) to reorder. */
+import { knob, seg, sw, hint, knobBank } from './mir/kit.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { setTimelineKnobRows } from './mir/timeline/knobs.js';
 
@@ -18,11 +20,12 @@ const HALF_CARD = 150;   // a part wider than half a rack card is not offered (A
 
 export function createCsbFavs(app, { panel }) {
   const store = jsonStore(CSB_KEY);
-  const read = () => { const s = store.get(); return s && s.v === 1 && Array.isArray(s.items) ? s.items.filter((x) => typeof x === 'string') : []; };
-  let items = read();
+  const st = store.get(), ok = st && st.v === 1 && Array.isArray(st.items);
+  let items = ok ? st.items.filter((x) => typeof x === 'string') : [];
   const offers = new Map();                                            // id → { control, width }
-  const strip = el('div', 'csb-favs'); strip.setAttribute('aria-label', 'favourite controls');
-  if (panel) panel.appendChild(strip);
+  const move = (id, to) => { items = items.filter((x) => x !== id); items.splice(Math.min(to, items.length), 0, id); save(); };
+  const bank = knobBank({ slots: 8, page: ok && Number.isFinite(st.page) ? st.page : 0, parent: panel, label: 'favourite controls', onMove: move, onPage: () => save() });
+  const strip = bank.root; strip.classList.add('csb-favs');
   const faces = new Map();                                             // id → { root, destroy }
   let built = false;
 
@@ -70,15 +73,14 @@ export function createCsbFavs(app, { panel }) {
   function paint() {
     for (const [id, face] of faces) if (!isFav(id)) { face.destroy(); face.root.remove(); faces.delete(id); }
     for (const id of items) {
-      if (faces.has(id)) { strip.appendChild(faces.get(id).root); continue; }   // the list's order
+      if (faces.has(id)) continue;
       const face = offers.has(id) ? (offers.get(id).build ? offers.get(id).build(offers.get(id).control) : segFace(id)) : knobFace(id);
-      if (face) { faces.set(id, face); strip.appendChild(face.root); }
+      if (face) faces.set(id, face);
     }
-    strip.classList.toggle('empty', !faces.size);
-    if (!faces.size && !strip.querySelector('.csb-favs-empty')) label(el('div', 'csb-favs-empty', strip), 'Right-click a knob (hold on a touch screen) to add it here.');
-    else if (faces.size) { const e = strip.querySelector('.csb-favs-empty'); if (e) e.remove(); }
+    bank.set(items.filter((id) => faces.has(id)).map((id) => ({ id, root: faces.get(id).root, span: offers.has(id) && !offers.get(id).build ? 4 : 1 })));   // the list's order, eight a page; a segment takes four slots
+    strip.classList.toggle('empty', !faces.size); hint(strip, faces.size ? '' : 'Right-click a knob (hold on touch) to add it here');
   }
-  const save = () => { store.set({ v: 1, items }); if (built) paint(); };
+  const save = () => { store.set({ v: 1, items, page: bank.page() }); if (built) paint(); };
   function add(id) { if (isFav(id) || !eligible(id)) return false; items = items.concat(id); save(); return true; }
   function remove(id) { if (!isFav(id)) return false; items = items.filter((x) => x !== id); save(); return true; }
   const rowsFor = (id) => (isFav(id) ? [{ label: 'REMOVE FROM CONTROL SURFACE', run: () => remove(id) }] : eligible(id) ? [{ label: 'ADD TO CONTROL SURFACE', run: () => add(id) }] : []);

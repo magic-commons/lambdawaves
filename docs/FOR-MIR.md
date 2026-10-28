@@ -58,7 +58,7 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
   segs and `.wide` span two, `.full` the line, `data-knob="sm|lg"`) and `row(parent, { fit, cellMin, knob, cls })`; the tokens `--cell-min` 40 ·
   `--knob-min` 28 · `--knob` 34 · `--knob-max` 44 · `--row-gap` 4; the cells stretch (kit 6a8cd78, 022 F2); opt-in (a plain `.row` does not move); the starter's PICTURE and a gallery card.
 - **BUILT 1.5.6-alpha.7 · THE SURFACE PARTS** (022 C1, `kit.js`, `css/base.css`, `css/skin.css`, `shell/transport.js` + `.css`, `modwindow.js`,
-  tokens.json, docs/CONTROLS.md "A surface is a surface"; kit eef6443): `section({ title })` (`data-mir-surface="section"`, a hairline frame on a
+  tokens.json, docs/CONTROLS.md "A surface is a surface"; kit eef6443, a547da5): `section({ title })` (`data-mir-surface="section"`, a hairline frame on a
   `data-mir-surface="well"`; both inner surfaces the pane rules skip), `knobBank({ slots: 8, items, page, onPage, onEmpty, onMove })`, `meter({ bands,
   led, peak, labels })` (`set()` through the frame coalescer; the modulation window's `.m2meter` / `.m2audminleds` / live LED are it), `lamp({ on,
   colour })`; `createTransport({ macros: { face: 'knob', onAdd } })` → `macroRail({ face: 'knob' })` · `macroKnob`; `--xport-well` (on the body)

@@ -1,7 +1,7 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../tier.js'; import { el, knob, fader, readout, formula, hint, ariaLabel, chip } from '../mir/kit.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
+import { TIER } from '../tier.js'; import { el, knob, fader, readout, formula, hint, ariaLabel, chip, section, meter, lamp } from '../mir/kit.js'; import { audioDevice } from '../eq-audio.js'; import { setGlyph, glyphEl } from '../mir/glyph.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates, isPhone } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
@@ -82,6 +82,7 @@ export function createTransport(app) {
       openers: [{ id: 'timeline', label: 'TIMELINE', glyph: 'lanes', hint: 'the timeline window', toggle: () => { if (app.state.tl) app.state.tl.toggle(); }, isOpen: () => !!(app.state.tl && app.state.tl.isOpen()) }],
       clock: barClock, mod: barMod, model: app.state.modHost.model, setBpm: (b) => app.state.modHost.clock.setBpm(b), persist: () => saveSettings(),
       rack: () => app.sh.rk, door: 'none', powerWord: 'MOD', seatMenu: false, opener: false,
+      macros: { face: 'knob', onAdd: () => { if (app.state.modHost.model.addMacro(null) && app.state.modView) app.state.modView.rebuild(); app.hNote(); } },   // 022 C2: MACROS 1–8 as the kit's knob bank; an empty slot adds one
       freeWidth: () => (app.sh.rackCardWidth ? app.sh.rackCardWidth() : 262), freeHost: () => app.host.floats,   // A8: the FREE window is one rack card wide and wears the card's drawing
       /* iteration 014 A4 · THE SEATS: the dock chip cycles RACK → STAGE → FREE (Josh's answer 1: the STAGE at boot); a phone keeps rack and stage.
          The rack seat is λWAVES' TRANSPORT card at its remembered slot (rack-wiring.js), so the kit docks through it */
@@ -98,11 +99,26 @@ export function createTransport(app) {
     /* A8 · the door wears the modulation window's own icon (Josh: "a sine wave icon instead of the MIR 3x3 square logo"; 021 V2: the table's
        `modulation`, an SVG); the turning mark is the kit's unplaced logoButton now */
     const door = bar.el.door; ui.modExp = door; door.title = 'Open the modulation window'; setGlyph(door, 'modulation');
-    /* the expander's first row: ‹ › ⟳ as one group of round seats, then REPEATS (the kit's readout face) and its formula, one baseline (A8 tidy) */
-    if (bar.el.panel) { const rep = el('div', 'csb-repeats'), steps = el('span', 'csb-steps', rep); steps.append(sm, sp, jmp); rep.append(ui.periodRo.root, ui.periodFx.root); bar.el.panel.prepend(rep); }
-    /* A3 · THE EXPANDER'S FAVOURITES (lab/csb-favs.js): a strip under the macros; a knob's right-click / hold menu ADDs it, three segments are offered
+    /* 022 C2 · THE SURFACE IS A SURFACE: the expander is ONE WELL (the kit's `data-mir-surface="well"`) of four kit sections on the 44-px grid —
+       TRANSPORT (⏮ ‹ › ⟳ as glyph chips, REPEATS, BPM with the beat lamp, the kit's clock tiles as one strip, the theorem under it), MACROS (the kit's
+       knob bank), FAVOURITES (csb-favs' eight slots) and METERS (the AUDIO device's LOW · MID · HIGH and the beat equaliser's seven gains, painted per
+       frame while it is open, nothing while it is shut).  Nothing scrolls inside it (017 R2).  The heads are label()s; the sheet is csb.css. */
+    const P = bar.el.panel, PP = bar.parts.panel, sec = {}, mt = {};
+    if (P) {
+      P.dataset.mirSurface = 'well'; P.classList.add('csb-surface');
+      for (const [k, t] of [['tr', 'TRANSPORT'], ['mac', 'MACROS'], ['fav', 'FAVOURITES'], ['met', 'METERS']]) sec[k] = section({ title: t, parent: P, cls: 'csb-sec csb-sec-' + k });
+      const home = seat('home', 'csb-home'); chip(home, 'rewind', 'back to t = 0'); el('span', 'csb-steps', sec.tr.body).append(home, sm, sp, jmp);
+      mt.bpm = readout({ label: 'BPM', value: '—', cls: 'csb-bpm' }); mt.beat = lamp({ parent: mt.bpm.root, cls: 'mir-lamp csb-beat', title: 'the beat' });
+      sec.tr.body.append(ui.periodRo.root, mt.bpm.root);
+      const tiles = P.querySelector('.tempo-grid'); if (tiles) { sec.tr.body.append(...tiles.children); tiles.parentElement.remove(); }   // the kit's tiles, one strip
+      sec.tr.root.append(ui.periodFx.root);
+      if (PP.rail) sec.mac.body.append(PP.rail.root);
+      mt.lev = meter({ bands: ['low', 'mid', 'high'], labels: ['LOW', 'MID', 'HIGH'], led: true, peak: true, parent: sec.met.body });
+      mt.eq = meter({ bands: 7, labels: ['1', '2', '3', '4', '5', '6', '7'], cls: 'mir-meter vertical csb-eqm', parent: sec.met.body }); hint(mt.eq.root, 'the beat equaliser: n 1–7');
+    }
+    /* A3 · THE EXPANDER'S FAVOURITES (lab/csb-favs.js): eight slots under the macros; a knob's right-click / hold menu ADDs it, three segments are offered
        (Josh's answer 4: SPECTRUM's HYDROGEN | STURMIAN, WAVE's POSITION | MOMENTUM and its OBSERVABLE); the faces are made when the expander opens */
-    const favs = createCsbFavs(app, { panel: bar.el.panel }); app.sh.csb = favs;
+    const favs = createCsbFavs(app, { panel: sec.fav ? sec.fav.body : P }); app.sh.csb = favs;
     if (bar.parts.panel) bar.parts.panel.onToggle((v) => { if (v) favs.show(); });
     for (const [id, c] of [['spectrum.scale', ui.scaleSeg], ['wave.space', ui.spaceSeg], ['wave.view', ui.viewSeg]]) favs.offer(id, c, { width: 150 });
     /* iteration 014 D4 (Josh: "Let Invert also be a custom button that's a 'Knob' size for the CSB"): PALETTE's INVERT, offered as a knob-sized switch */
@@ -265,7 +281,7 @@ export function createTransport(app) {
     const stepDt = () => clock.window / 48;
     sm.addEventListener('click', () => { clock.step(-stepDt()); schedule(TIER.EVOLVE); });
     sp.addEventListener('click', () => { clock.step(stepDt()); schedule(TIER.EVOLVE); });
-    let troWall = 0, periodWall = 0;
+    let troWall = 0, periodWall = 0, railWall = 0;
     function update() {
       const on = clock.playing, now = performance.now();
       /* KEEP FRAMES (wave 45): on, the playhead follows every frame as it always did; off — the default — the bar is
@@ -274,6 +290,12 @@ export function createTransport(app) {
         if (!ui.scrub.dragging()) ui.scrub.set(((clock.t % clock.window) + clock.window) % clock.window / clock.window);
         if (!echoOn) tro.set(clockText(), on ? 'live' : '');
       } else if (!echoOn && (!on || now - troWall >= 200)) { troWall = now; tro.set(clockText(), on ? 'live' : ''); }
+      if (P && !P.hidden) {   // 022 C2 · THE SURFACE's readings, once a frame through the kit's coalescer, only while it is open
+        const H = app.state.modHost, T = H && H.model.transport, A = audioDevice(app), o = (k) => (A && A.outs[k] ? +A.outs[k].out || 0 : 0);
+        if (T) { mt.bpm.set(T.bpm.toFixed(1)); mt.beat.set(H.clock.isPlaying() && T.beats % 1 < 0.15); }
+        mt.lev.set([o('low'), o('mid'), o('high')]); if (app.state.eq) mt.eq.set(app.state.eq.gains);
+        if (PP.rail && now - railWall >= 200) { railWall = now; PP.rail.sync(); }
+      }
       if (ui.periodRo && (!on || keep.frames || now - periodWall >= 200)) { periodWall = now; const [v, sub, cls] = periodText(); ui.periodRo.set(v, cls); ui.periodRo.setSub(sub + flashSub()); paintPeriodFx(); }   // periodNow() is cached on the register's version; the scan itself runs off the frame (wave 45) or waits out a live gesture (wave 44).  WAVE 69: the formula rides the SAME cadence law — every frame with KEEP FRAMES on, 5 Hz without — so a moving number obeys the readout law the transport already owns rather than inventing a second one
     }
     setKeepFrames(keep.frames);                                // the shipped default: the bar disabled

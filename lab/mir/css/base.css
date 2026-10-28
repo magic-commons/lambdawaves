@@ -298,12 +298,13 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
 .mir-meter:not(.vertical) .mir-meter-bar { width: auto; height: 6px; min-height: 0; }
 .mir-meter:not(.vertical) .mir-meter-bar::after { top: 0; height: auto; width: calc(var(--signal) * 100%); }
 .mir-meter-lbl { font-size: var(--fs-micro); line-height: 1; letter-spacing: var(--label-tracking, var(--tr-wide)); color: var(--ink-faint); }
-.mir-bank { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mir-bank { display: flex; flex-direction: column; gap: 4px; width: 100%; min-width: 0; }
 .mir-bank-grid { --cell-min: 44px; }
 .mir-bank-slot { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 0; container-type: inline-size; }
 .mir-bank-slot > .k { width: 100%; min-width: 0; }
 .mir-bank-slot > .k > .k-dial { width: clamp(var(--knob-min, 28px), 62cqi, var(--knob-max, 44px)); height: auto; aspect-ratio: 1; box-sizing: border-box; }
 .mir-bank-slot > .k > .k-dial > .k-needle { height: 38%; }
+.mir-bank-slot > .k > .k-val { position: static; opacity: 1; transform: none; padding: 0; border-radius: 0; background: transparent; box-shadow: none; outline: 0; font-size: var(--fs-micro); color: var(--ink-key); }   /* a bank reads its values at rest */
 .mir-bank-slot.empty { justify-content: center; min-height: var(--touch); }
 .mir-bank-plus { display: grid; place-items: center; width: clamp(var(--knob-min, 28px), 62cqi, var(--knob-max, 44px)); aspect-ratio: 1; padding: 0; border: 1px dashed var(--glass-hairline); border-radius: 50%; background: transparent; color: var(--ink-faint); opacity: .55; }
 .mir-bank-plus > svg { width: 12px; height: 12px; }
