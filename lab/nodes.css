@@ -1,7 +1,7 @@
 /* lab/nodes.css — NODES (lab/nodes.js, 018 D3): the ground (a dotted plane that pans), the node cards (a title bar, a top in-port, a bottom
    out-port), the wires (one SVG layer under the cards), + and the window ↔ rack door in the ground's top corners.  Glass and ink from the skin. */
 .nodes-host { display: flex; flex-direction: column; gap: 6px; height: 100%; min-height: 0; }
-.nodes-ground { position: relative; overflow: hidden; touch-action: none; cursor: grab; border-radius: var(--r-md); box-shadow: var(--neu-inset);
+.nodes-ground { position: relative; overflow: hidden; touch-action: none; cursor: grab; border-radius: var(--r-md); box-shadow: var(--relief-well, var(--neu-inset));
   background: radial-gradient(circle, color-mix(in srgb, var(--ink-faint) 35%, transparent) 1px, transparent 1.5px) 0 0 / 22px 22px, var(--glass-well); }
 .nodes-host > .nodes-ground { flex: 1 1 auto; min-height: 0; }
 .dev .nodes-ground { height: min(70vh, 680px); }
@@ -10,7 +10,7 @@
 .nodes-wires { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
 .nodes-wires path { fill: none; stroke: var(--acc); stroke-width: 2; opacity: .75; }
 .nodes-card { position: absolute; width: 120px; box-sizing: border-box; padding: 0 8px 8px; cursor: default; border-radius: var(--r-md);
-  background: var(--glass-raise, var(--glass-tint)); border: 1px solid var(--glass-border); box-shadow: var(--neu-raise); }
+  background: var(--glass-raise, var(--glass-tint)); border: 1px solid var(--glass-border); box-shadow: var(--relief-raise, var(--neu-raise)); }
 .nodes-card[data-node="curves"] { width: 250px; }
 .nodes-card[data-type] { width: 236px; }
 .nodes-card[data-type="curves"] { width: 250px; }
@@ -75,7 +75,7 @@
 /* 020 X0 · the + menu is one list: a search line, a hairline with the class's icon between classes (no word), the empty graph's one line */
 .nodes-sep { display: flex; align-items: center; gap: 6px; padding: 6px 12px 2px; color: var(--fg-soft); }
 .nodes-sep::after { content: ''; flex: 1 1 auto; border-top: 1px solid var(--glass-hairline); }
-.nodes-find { margin: 2px 4px 4px; padding: 5px 8px; border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); color: var(--fg); box-shadow: var(--neu-inset); font: var(--fs-tiny) / 1.2 var(--font-ui); }
+.nodes-find { margin: 2px 4px 4px; padding: 5px 8px; border: 1px solid var(--glass-hairline); border-radius: var(--r-sm); background: var(--glass-well); color: var(--fg); box-shadow: var(--relief-well, var(--neu-inset)); font: var(--fs-tiny) / 1.2 var(--font-ui); }
 .nodes-empty { position: absolute; translate: -50% 0; z-index: 1; padding: 3px 8px; border-radius: var(--r-sm); background: var(--glass-well); white-space: nowrap; pointer-events: none; font: var(--fs-tiny) / 1 var(--font-ui); letter-spacing: var(--tr-wide); color: var(--ink-faint); opacity: .7; }
 .nodes-column .nodes-empty { position: static; translate: none; align-self: center; }
 .nodes-heavy { font-style: normal; font-size: .8em; color: var(--acc); }
