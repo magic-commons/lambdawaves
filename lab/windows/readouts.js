@@ -1,6 +1,6 @@
 /* lab/windows/readouts.js — the readout cards (0.5.2 R2b; moved verbatim out of lab/rack.js boot()) at THREE seats, so the rack keeps its order: createReadouts(app)
  * builds SHADOW · ORBIT · VORTEX · PLANE and returns the CALCULUS and ATOMS seats, which boot() calls where they stood (READERS, track, hydroReader stay there). */
-import { TIER } from '../rack.js';
+import { TIER } from '../tier.js';
 import { el, knob, sw, seg, trig, readout, group } from '../mir/kit.js';
 import { toLUT } from '../mir/palette.js';
 import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js'; import { BASIS, orbitalFromTable } from '../hydrogen.js'; import { gammaAbs2 } from '../equalizer.js'; import { RENDER_CAP } from '../state.js'; import { waitForPaint } from '../frame-settle.js';

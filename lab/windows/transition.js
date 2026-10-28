@@ -7,7 +7,7 @@
  * keeping its mix), TRANSITION · RABI Ω and the readout; the words A / B are the block's `aria-label`.  `ui.ab`, `app.hooks.ab`, `state.rabi` and
  * the project's `ab` record are unchanged.  The register's CLEAR (the menubar's row) stays this module's function, and the link's note sits under
  * the block.  The lab's status sink (`app.w.wState`) is SPECTRUM's status line now (windows/spectrum.js). */
-import { TIER } from '../rack.js';
+import { TIER } from '../tier.js';
 import { el, knob, sw, trig, readout, group } from '../mir/kit.js';
 import { N6, widen } from '../hydrogen.js';
 export function createTransition(app) {

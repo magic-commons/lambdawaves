@@ -7,7 +7,7 @@
  * after its declaration).  Its 29 shared lets are app.state's, read and written live (R0).  saveMod stays a function declaration: the
  * mod port is handed it before its line (U1).  TIER is rack.js' own export; the cycle is safe — it is read only inside createController,
  * long after both modules have run. */
-import { TIER } from '../rack.js';
+import { TIER } from '../tier.js';
 import { BASIS } from '../hydrogen.js';
 import { PRESET_BY_ID, PRESETS } from '../state.js';
 import { createFrameBudget } from '../frame-budget.js';

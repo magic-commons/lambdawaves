@@ -1,7 +1,7 @@
 /* lab/windows/spectrum.js — the SPECTRUM card (0.5.2 R2a; moved verbatim out of lab/rack.js boot()), created at the card's seat; the five appends stay
  * there.  §0's consts, schedule, page, the rack and the controller's names are handed over (backward); the windows, the gas and the layout made
  * later in boot() are read through their slots inside callbacks (forward).  It registers on app.w what a moved reader needs; boot() destructures the return. */
-import { TIER } from '../rack.js';
+import { TIER } from '../tier.js';
 import { el, knob, seg, sw, trig, readout, group, label, mathPlain, fader, stepper } from '../mir/kit.js'; import { fold } from '../fold.js';
 import { createEqualizer, EQ_PRESETS, EQ_SHELLS } from '../equalizer.js'; import { createEqAudio } from '../eq-audio.js'; import { createChord } from '../chord-audio.js';
 import { VIEW } from '../field.js';

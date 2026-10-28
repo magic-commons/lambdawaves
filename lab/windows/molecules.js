@@ -1,7 +1,7 @@
 /* lab/windows/molecules.js — MOLECULES, the molecular session, THE HEAD and the register (0.5.2 R2d; moved verbatim out of lab/rack.js boot()) at ONE seat,
  * where the LEGACY note stands.  Iteration 008 U: MO-REGISTRY is no longer a window — the register is built INTO the MOLECULES card (chemview's `slots`)
  * and a saved `orbitals` seat opens MOLECULES (settings.js RETIRED_WINDOWS); the fix round (F5) folded its second seat, which no longer made a device, into this one. */
-import { TIER } from '../rack.js'; import { el } from '../mir/kit.js';
+import { TIER } from '../tier.js'; import { el } from '../mir/kit.js';
 import { VIEW, VIEW_NAMES, STYLE } from '../field.js'; import { MOLECULE_BY_ID } from '../molecules.js'; import { isField } from '../mir/core/pointer.js'; import { getHamiltonian, HAMILTONIANS } from '../hamiltonian.js';
 import { createChem } from '../chemview.js'; import { createRegister } from '../registerview.js'; import { createMolecularSession } from '../molecular-session.js'; import { moleculeHead } from '../latex-state.js';
 export function createMolecules(app) {
