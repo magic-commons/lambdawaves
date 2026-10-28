@@ -83,7 +83,7 @@ export function createMapping(app, { kt }) {
   function install() {
     const M = app.sh.LW && app.sh.LW.mod; if (!M) return 0; let n = 0;
     const reg = (rows) => M.batch(() => { for (const r of rows) if (r.surface && !r.gesture && r.kind !== 'hold') { const toggle = r.kind === 'toggle' && r.get;
-      M.register(targetOf(r.id), { label: (r.short || r.label).toUpperCase(), group: 'action', map: toggle ? 'toggle' : 'trigger', get: () => (toggle ? +!!r.get() : 0), set: () => {},
+      M.register(targetOf(r.id), { label: (r.short || r.label).toUpperCase(), group: 'action', map: toggle ? 'toggle' : 'trigger', get: () => 0, set: () => {},   /* 021 D0: an act's base is 0, never its state (a film's resume signature counts every base; MOD and GOVERNOR moved it) */
         fire: (on) => (toggle ? A.fire(r.id, on) : A.run(r.id)) }); n++; } });
     reg(A.list()); A.onAdd(reg); return n;
   }

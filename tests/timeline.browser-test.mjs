@@ -1,6 +1,6 @@
 // 0.5.0 C7b · THE TIMELINE AND THE RENDER CARD ARE THE KIT'S (C7B-DESIGN §5.2): the kit's own proofs (TIMELINE.md, RENDER.md)
 // re-aimed at λWAVES, through real input where a hand is the claim (every press hit-tested by gatekit's tap).
-//   T1  WINDOW › TIMELINE opens it docked at the foot of the span; idle, open or closed, it books no frame
+//   T1  WINDOW › TOOLS › TIMELINE opens it docked at the foot of the span; idle, open or closed, it books no frame
 //   T2  THE play's edge: Space starts t AND the playhead, Space stops both; a tap on the ruler moves the beat, never t
 //   T3  a held YAW arc (500 ms) → TIMELINE CLIP → CREATE AUTOMATION CLIP; a paused seek previews the curve on obs.yaw
 //   T4  the stage mask: the window's panes and chips are masked, its gaps are not; a real drag moves the mask while paused; closed, none
@@ -34,7 +34,11 @@ try {
   /* ── T1 · WINDOW › TIMELINE (a real tap on the row), docked at the foot; no frame booked while it idles ── */
   const t1a = await ev(`await __w(800); const f0 = __LW.stats.frames; await __w(1200); const idleClosed = __LW.stats.frames - f0;
     __LW.layout.menu.open(); const bar = document.getElementById('menubar'), btn = [...bar.querySelectorAll('.mb-btn')].find((b) => b.dataset.menu === 'WINDOW'); btn.click(); await __w(200);
-    const it = [...btn.parentElement.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.trim() === 'TIMELINE'); if (it) it.id = 'tl-row';
+    /* 021 I3: TIMELINE lives in WINDOW › TOOLS (a kit submenu, opened beside its row) */
+    const tools = [...btn.parentElement.querySelectorAll('.mb-list > .mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.trim().startsWith('TOOLS'));
+    if (tools && tools.getAttribute('aria-expanded') !== 'true') { tools.click(); await __w(200); }
+    const sub = [...document.querySelectorAll('#menubar .mb-sub-list')].find((l) => l.mbRow === tools);
+    const it = sub && [...sub.querySelectorAll('.mb-item')].find((i) => i.querySelector('.mb-lbl').textContent.trim() === 'TIMELINE'); if (it) it.id = 'tl-row';
     return { idleClosed, row: !!it, open: __LW.timeline.isOpen() };`);
   const tapRow = await g.tap('#tl-row');
   const t1 = await ev(`await __w(700); await __LW.settle(); const tl = __LW.timeline, b = tl.root.getBoundingClientRect(), st = tl.presentation();

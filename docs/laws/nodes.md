@@ -1,0 +1,25 @@
+# NODES and CURVES
+
+The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
+
+## The laws of 021
+
+THE IDS (021 R2): a NODES id is `'n' + (++seq)` and never reused; runtime targets join the flash limiter with `flash`; `LW.mod.batch` rebuilds once; `unenroll` marks a route dormant, and a dormant route never wakes on another node. `nodes.*` is refused only in what LEAVES the device (R6, call 3): `persist.js asDevice(fn)` marks this device's own capture, so the SESSION keeps NODES routes and lanes, while a project file (FOLDERS, EXPORT, .mir/.png), a link and the unsaved mark refuse them; an older file's `nodes.*` bases are ignored on open.
+
+NODES' keys are `nodes.*` rows of the action registry with `when: ground focused` (021 I1; Tab stays the kit's; the add menu on Shift-A).
+
+## The standing paragraphs
+
+THE LAWS OF NODES (019, `research/iteration-019/NODES-DESIGN.md`, `N-BUILD.md`): the graph COMPILES (`lab/nodes-compile.js`) to the kit's one picture filter (`setChain`, kit alpha.33) — TABLE nodes (CURVES · LEVELS · POSTERIZE · THRESHOLD · INVERT · GAMMA · EXPOSURE · CONTRAST, `lab/node-types.js`) fold into ONE feComponentTransfer and MATRIX nodes (HUE · SATURATION · LUMA · TINT · TEMPERATURE) into ONE feColorMatrix while contiguous; a PRIMITIVE (`lab/node-prims.js`: BLUR · SHARPEN · CHROMATIC ABERRATION · BLOOM and DISPLACE marked HEAVY) is a real pass in graph order; a LAYER (`lab/node-layers.js`: FILM GRAIN · VIGNETTE · SCANLINES) is a div in `#nodeLayers` over the stage (z 8, under the atom labels, the stage text and the racks, pointer-events none, never in the occlusion mask). The order is the window's top → bottom. A NEUTRAL or BYPASSED (×) node emits nothing and keeps its values; CURVES alone writes the byte-identical 018 filter. ONE compile and ONE filter write per frame. THE COST IS ON THE CARD: · / ·· / ··· per class, HEAVY on BLOOM and DISPLACE, "N passes" at the graph's foot. Every number knob is a modulation target `nodes.<node>.<knob>` (root `nodes`, the runtime door). The graph is PREFERENCE `lambdawaves.q0.nodes` (the node list; 018's record opens), the reader's graphs PREFERENCE `lambdawaves.q0.nodePresets` beside the shipped FILM · POSTER · PRINT; the rack card is the chain as a column, the window the free graph. Screen only: a picture or a film does not carry the graph until RENDER bakes it. Run `tests/curves.browser-test.mjs`.
+
+NODES BEYOND (020 X, `research/iteration-020/NODES-FLESH-OUT.md`, `X-BUILD.md`): `lab/nodes.js` is the model, `lab/nodes-view.js` the one view (window and rack card), `lab/nodes-undo.js` its own 30-step ring, `lab/img/nodes-icons.svg` the glyphs. THE COLUMN IS THE CHAIN: a card's place is its order; FADE and MASK (every node but a LAYER; FADE folds free, a masked node is its own run of prim markup, cost ···) are what a branch is for, so the graph stays a column. A FLAG IS NOT A RECORD: VIEW HERE and SOLO are the session's; BYPASS (×) and BYPASS ALL (`off`) are the record's. THE KEYS ARE THE GROUND'S: NODES' keys fire only on the focused ground and never reach the kit's key table. A PREVIEW IS THE NODE'S OWN TRANSFER (`transfer()`, the compiler's fn / matrix), never a second render. THE DEFAULT GRAPH IS EMPTY and says so in one faint line; CURVES is removable, one at most. NODES opens FREE from the FINDER, WINDOW and the CSB; `nodes.*` bases are never the project's. Run `tests/curves.browser-test.mjs` and `node tools/x-probe.mjs x4` (the byte-identical CURVES proof).
+
+THE CURVES CARD (0.5.1 D10-24, `lab/rack.js` after the RENDER registration) is MIR's `createCurvesPanel({ parent, canvas: dom.canvas,
+project: false })` — no `history`, no `port`, no `mod` — over the stage canvas: MASTER · R · G · B through the kit's one SVG picture
+filter, so it grades the SCREEN only (`capture.js`' GPU readback, the film's `frame(i, ctx)` and THE LOCK never see a CSS filter) and
+the card says so in one line. It ships CLOSED on the right rack after RENDER, in the FINDER and WINDOW; neutral reads `filter: none` and costs
+nothing, a graded screen costs a compositor pass (WAVE DANCER: 15.0 → 12.2 presents/s on the headless rig; Josh's M5 report is the
+real figure). AMOUNT is not routed (a flash route outside D10-19's guard). The grade is PREFERENCE, its own record
+`lambdawaves.q0.curves` (FAMILIES; the model's `serialize()`, written 250 ms after a change, removed by FORGET), never a project, link
+or history row. A card that ships closed and that no layout lists is seated where an unlisted card stays (after RENDER), or `closed[]`
+saves in two orders. `tests/curves.browser-test.mjs` is its guard; `__LW.curves` is the model.
