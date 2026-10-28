@@ -55,6 +55,9 @@ E3 THE SHEET: the cramped-space Playwright sheet re-shot after all chains (1600,
 8. (C2) MACROS 1–8 always show eight slots (empty ones faint) and page to 9–16. Default: yes.
 9. (E2) The icons are the builder's plain SVGs; Gemini redraws on your word from the contact sheet. Default: builder's drawings ship.
 10. (all) Kit versions 1.5.6-alpha.4 … 8 on the clone road; the bundle carries them; you fetch into ~/Documents/MIR when you like (021 call 12).
+11. (P2) picker.fav is not built (the Picker has no favourites shelf); the bar's seat rows are not (seatMenu false). Default: as is.
+12. (P2) On touch a held title bar lifts the window (the rack's 400 ms gesture); its menu opens by right-click or the keys there. Default: as is.
+13. (P3) Under FROST light the popups and the hint tip read white-on-white (the skin's ink over λWAVES' white stage). Default: chain S fixes the ink (contrast ≥ 4.5:1 on every popup under every skin × theme).
 
 ## MERGE ORDER
 P → S → H → F → C → E (each on the merged tree; the recipe: `git merge --no-ff --no-commit it022-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → THE LOCK `--check --query gastab=0` → commit → CLOSED row → handoff line; the kit bundle carried forward after each chain that bumps it).
@@ -62,3 +65,5 @@ P → S → H → F → C → E (each on the merged tree; the recipe: `git merge
 ## CLOSED
 | chain | BASE | commit | note |
 |---|---|---|---|
+| P | 61b42e0 | c07f202 | P1–P3 (P-BUILD.md; kit 1.5.6-alpha.4: contextMenu · holdTap · onContext · knobMenu · --surface-menu-floor; lab/context-menus.js 12 surfaces; no native select; LOCK 843/0; molecule-demos red at BASE too (headless frames)) |
+| S | c07f202 | | |
