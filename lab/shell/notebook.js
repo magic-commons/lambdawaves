@@ -73,6 +73,9 @@ export function createNotebook(app) {
          (keyFor), so a rebind renames the row (ANTI-PATTERN 6). */
       const runAction = (id) => { const a = app.sh.ACTIONS.find((x) => x.id === id); if (a) a.run(1); };
       const keyFor = (id) => app.sh.kt.keyText(id);
+      /* 020 X0 (item 8) · a window pick: NODES opens as its FREE window (the MIR window, LW.nodes.open) unless the rack card is seated open */
+      const reveal = (id) => { const N = app.sh.LW && app.sh.LW.nodes, d = document.querySelector('.dev[data-id="nodes"]');
+        if (id === 'nodes' && N && (!d || d.classList.contains('closed'))) N.open(); else rk.reveal(id); saveSettings(); };
       const MENUS = {
         /* iteration 004 · FILE GOES THROUGH FOLDERS (BASINS shell.js FILE): NEW, OPEN and a recent project open FOLDERS first and let it ask
            "Save this first?" (SAVE & OPEN · OPEN WITHOUT SAVING, SAVE & NEW · NEW WITHOUT SAVING) — no window.confirm on these rows */
@@ -93,7 +96,7 @@ export function createNotebook(app) {
         WINDOW: () => { queueMicrotask(tagIcons); return [['FINDER…\t' + keyFor('windowPicker'), () => runAction('windowPicker'), null, 'search every window; SHIFT-click queues several; the ones this mode hides are greyed'], null, ['PICKER\t' + keyFor('menu'), () => runAction('menu')],['MODULATION\t' + keyFor('modulation'), () => layout.modulation.toggle()], ['FOLDERS\t' + keyFor('folders'), () => runAction('folders'), null, 'your projects and the DEMOS'], ['TIMELINE', () => runAction('timeline')], ['NOTEBOOK\t' + keyFor('notebook'), () => layout.notebook.toggle()], ['HIDE / SHOW the rack\t' + keyFor('rack'), () => layout.toggleRack()], ['DOCK / UNDOCK the control surface\t' + keyFor('dock'), () => layout.dockTransport()], ['HIDE the interface\t' + keyFor('hide'), () => runAction('hide')], ['SHOW / HIDE help\t' + keyFor('notes'), () => runAction('notes')], null, ['THEME · LIGHT', () => app.hooks.setTheme && app.hooks.setTheme('light')], ['THEME · DARK', () => app.hooks.setTheme && app.hooks.setTheme('dark')], ['THEME · SYSTEM', () => app.hooks.setTheme && app.hooks.setTheme('system')], null,
           /* iteration 012 M1: the FOLDERS card (`projects`) is not listed — FOLDERS above is the one door (O), and the card stays in + */
           /* 018 E6: a window row takes the FINDER's road (kit rk.reveal: an open window is scrolled to, never moved; a closed one opens at the top) */
-          ...[...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => { rk.reveal(d.dataset.id); saveSettings(); }, null, winHint(d)])]; },
+          ...[...document.querySelectorAll('.dev:not([hidden]):not([data-id="projects"])')].map((d) => [(d.classList.contains('closed') ? '⊕  ' : '↑  ') + d.querySelector('.dev-eyebrow').textContent, () => reveal(d.dataset.id), null, winHint(d)])]; },
         /* iteration 014 A1: the GUI menu left the menubar — MIR OPTIONS is the CONTROL SURFACE's gear, MIR ABOUT the second page of ABOUT */
         ABOUT: () => [['ABOUT λWAVES', () => layout.notebook.open('about')], ['KEYBOARD SHORTCUTS…\t' + keyFor('help'), () => layout.keymap.toggle()], ['SETTINGS…\t' + keyFor('settings'), () => layout.raise('settings')], ['PHOTOSENSITIVITY WARNING…', () => { if (app.hooks.warning) { app.hooks.warning.reset(); app.hooks.warning.show(); } }, null, 'show the photosensitivity notice now and on the next load (iteration 012 M1: out of SETTINGS)'], null, ['UPDATE APP', () => swClient.refresh(), null, 'check for a new build, rebuild the offline cache, and reload']],
       };
@@ -115,7 +118,7 @@ export function createNotebook(app) {
          a pick of an open window scrolls the rack to it (kit rk.reveal: no reorder), a closed one opens at the top and the rack scrolls up */
       const modeIcon = { atoms: 'atomic', chem: 'molecular' };
       layout.finder = createWindowPicker({ rack: rk, cls: 'lw-menu', icon: (id) => modeIcon[id] || null,
-        open: (id) => { rk.reveal(id); saveSettings(); },
+        open: reveal,
         can: (id) => { const d = document.querySelector('.dev[data-id="' + id + '"]'); return !d || !d.hidden ? true : id === 'chem' ? 'MOLECULES ONLY' : 'HYDROGEN ONLY'; } });
     }
     /* LEAN (the Aa button) and the KIND taxonomy (data-kind, ⧉ COPY, the boot folds): lab/window-chrome.js (N7 seam 9) */

@@ -113,7 +113,7 @@ export function createKeys(app) {
     /* the kit's windows λWAVES has are rows with NO chord (MIR ADOPTING-1.5 §11: their keys are Josh's to give; bind one in the keyboard) */
     { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
     { id: 'render', short: 'render', label: 'the RENDER card — film the stage', key: null, run: () => layout.raise('render') },   // iteration 012 M1: the kit's two cards λWAVES carries, as HISTORY
-    { id: 'curves', short: 'nodes', label: 'the NODES window — CURVES grades the screen', key: null, run: () => layout.raise('nodes') },   // 018 D3: the saved key id stays
+    { id: 'curves', short: 'nodes', label: 'the NODES window — CURVES grades the screen', key: null, run: () => (app.sh.LW && app.sh.LW.nodes ? app.sh.LW.nodes.open() : layout.raise('nodes')) },   // 018 D3: the saved key id stays; 020 X0: the FREE window
     { id: 'windowPicker', short: 'finder', label: 'FINDER — search every window by name; SHIFT-click queues several', key: null, run: () => { if (layout.finder) layout.finder.toggle(); } },   // iteration 014 A7 (no chord)
     { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
     { id: 'menu', short: 'picker', label: 'the Picker — open it, or back to the lab', key: 'KeyL', run: () => { if (app.state.picker) app.state.picker.toggle(); } },   // iteration 003; iteration 004: THE PICKER (the id stays 'menu': saved bindings)

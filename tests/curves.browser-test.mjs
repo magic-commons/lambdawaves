@@ -1,5 +1,6 @@
 // 0.5.1 D10-24 · THE CURVES CARD: the kit's curves panel over the stage canvas, SCREEN ONLY, shipped closed, its grade a PREFERENCE.
 // 018 D3: re-aimed at NODES (lab/nodes.js), the card that hosts it now; a saved layout's `curves` seat opens `nodes`.
+// 020 X0: the default graph is empty — CURVES is added (setHas) before the grade.
 //   1 shipped closed, in + and WINDOW, saying so in one line · 2 neutral reads `filter: none` · 3 a grade reaches the screen and NOT a picture
 //   4 the card is a painted surface in the frame mask, open and floated · 5 the grade is PREFERENCE: its own record, surviving a reload, untouched by a project open, absent from the project and the undo ring
 //   6 FORGET takes it away.
@@ -45,7 +46,9 @@ try {
   /* 3 · a grade reaches the screen, not a picture, and is no undo row */
   const before = await g.ev('await __LW.settle(); return { pic: await __pic(), rows: __LW.history.entries().length };');
   const shot0 = await g.snapHash();
-  await g.ev(`__LW.curves.preset('MASTER', 'S'); await __w(300); await __LW.settle(); return 1;`);
+  /* 020 X0: THE DEFAULT GRAPH IS EMPTY — a first run has no CURVES node: add one (the rack's door), then grade */
+  assert.deepEqual(await g.ev(`return __LW.nodes.nodes().map((q) => q.type);`), []);
+  await g.ev(`__LW.nodes.setHas(true); __LW.curves.preset('MASTER', 'S'); await __w(300); await __LW.settle(); return 1;`);
   const graded = await g.ev(`return { filter: __filter(), table: __LW.nodes.filter.describe().table, pic: await __pic(), rows: __LW.history.entries().length };`);
   const shot1 = await g.snapHash();
   assert.match(graded.filter, /^url\(/); assert.equal(graded.table, true);
