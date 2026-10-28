@@ -11,7 +11,8 @@
  * A NEUTRAL NODE COSTS NOTHING: a bypassed node, or one whose type says it is at home (`neutral`), emits nothing; a matrix run that
  * multiplies out to the identity is dropped.  A TABLE run is rebuilt only when one of its nodes moved (its key: ids and versions; the
  * tables are handed back BY IDENTITY otherwise, and the kit does not rewrite them).
- *   compile(list, TYPES, cache) → { runs, layers, passes }
+ *   compile(list, TYPES, cache, { upTo, solo, off }) → { runs, layers, passes }
+ *     upTo    VIEW HERE (020 X3): the chain up to and including this node id · solo  this node alone · off  BYPASS ALL: nothing
  *     list    [{ id, type, values, bypass, v }] in graph order (v: a version the owner bumps on every change of the node)
  *     TYPES   { type: { cls: 'table' | 'matrix' | 'prim' | 'layer', neutral?(values, node), fn?(values, node) → (y, ch) → y,
  *               luma?, matrix?(values) → 20 numbers, prim?(values, id) → [[tag, attrs, children?], …] } }
@@ -48,8 +49,9 @@ export function tableOf(fns, n = TABLE_N) {
   return out;
 }
 
-export function compile(list, TYPES, cache = new Map()) {
-  const runs = [], layers = [], keep = new Map();
+export function compile(list, TYPES, cache = new Map(), o = {}) {
+  const runs = [], layers = [], keep = new Map(), at = o.upTo ? list.findIndex((q) => q.id === o.upTo) : -1;
+  list = o.off ? [] : o.solo ? list.filter((q) => q.id === o.solo) : at >= 0 ? list.slice(0, at + 1) : list;
   let tab = null;                                                    // the TABLE run being folded: its nodes
   const close = () => {
     if (!tab) return;

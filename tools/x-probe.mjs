@@ -54,6 +54,15 @@ const SCENES = {
     const rows = await E(`await w(300); return $$('.nodes-pop:not([hidden]) .nodes-item').map((b) => b.textContent);`);
     return { named, folds, rows };
   },
+  x3: `N.open(); await w(600); N.win.place({ x: 480, y: 70, w: 620, h: 720 }); await w(300); for (const t of ['levels', 'posterize', 'hue', 'blur']) N.add(t); N.set('n1', 'gamma', 1.6); N.set('n3', 'hue', 120); await w(500);
+    const css = () => getComputedStyle(document.getElementById('field')).filter, kids = () => document.getElementById(N.filter.id).children.length, foot = () => $('.nodes-passes').textContent;
+    const full = { kids: kids(), foot: foot() }; $('[data-node="n3"] .nodes-eye').click(); await w(200);
+    const view = { kids: kids(), foot: foot(), lit: $$('.nodes-eye[aria-pressed="true"]').length, past: $$('.nodes-card.past').map((c) => c.dataset.node) };
+    $('[data-node="n3"] .nodes-eye').click(); await w(200); const back = { kids: kids(), foot: foot() };
+    $('.nodes-ground').focus(); key('a', { ctrlKey: true }); key('Escape'); N.views[1]; $('[data-node="n2"] .nodes-solo').click(); await w(200); const solo = { kids: kids(), foot: foot(), past: $$('.nodes-card.past').length };
+    $('[data-node="n2"] .nodes-solo').click(); await w(100); $('.nodes-ground').focus(); key('\\\\'); await w(200); const off = { css: css(), foot: foot(), rec: JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')).off, flagsInRec: 'view' in JSON.parse(localStorage.getItem('lambdawaves.q0.nodes')) };
+    key('\\\\'); await w(100); $('[data-node="n3"] .nodes-eye').click(); await w(300); N.views[1].place(); await w(200);
+    return { full, view, back, solo, off, after: { css: css().slice(0, 20), foot: foot() } };`,
 };
 try {
   if (!(await g.waitFor('window.__LW?.ready', 400, 100)).ok) throw new Error('the lab never came up: ' + JSON.stringify(await g.errors()));

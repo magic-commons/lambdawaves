@@ -53,7 +53,9 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
      compiles to the byte-identical filter 018 wrote.  One compile and one filter write per frame, whatever moved */
   const filter = pictureFilter(canvas), cache = new Map(), layers = createLayerHost(canvas.parentElement);
   let passes = 0, nodes = [];
-  const recompile = () => frame.coalesce('nodes.compile', () => { const c = compile(nodes, TYPES, cache); filter.setChain(c.runs).flush(); layers.set(c.layers);
+  const flags = { view: null, solo: null };                          // 020 X3 · A FLAG IS NOT A RECORD: VIEW HERE and SOLO die with the session
+  const how = () => ({ upTo: flags.view, solo: flags.solo, off: !!rec().off });
+  const recompile = () => frame.coalesce('nodes.compile', () => { const c = compile(nodes, TYPES, cache, how()); filter.setChain(c.runs).flush(); layers.set(c.layers);
     if (c.passes !== passes) { passes = c.passes; for (const v of views) v.foot(); } });
   const panel = createCurvesPanel({ port: { setTable() { const q = nodes.find((n) => n.type === 'curves'); if (q) { q.v++; for (const v of views) v.strip(q); } recompile(); } }, project: false, presets }), model = panel.model;
   const curveTables = () => Object.fromEntries(model.channels.map((ch) => [ch, isIdentity(model.points(ch)) || model.amount() === 0 ? null : Float32Array.from(model.table(ch))]));
@@ -124,7 +126,8 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     const q = fresh(type === 'curves' ? 'curves' : 'n' + k, type, o); nodes.push(q); enroll(q); changed(); return q.id;
   }
   /** remove(id | ids) · setBypass(id | ids, on): one step for the lot */
-  function remove(ids) { const Q = many(ids).map(byId).filter(Boolean); if (!Q.length) return false; undo.mark(); for (const q of Q) unenroll(q); nodes = nodes.filter((n) => !Q.includes(n)); changed(); return true; }
+  function remove(ids) { const Q = many(ids).map(byId).filter(Boolean); if (!Q.length) return false; undo.mark(); for (const q of Q) unenroll(q); nodes = nodes.filter((n) => !Q.includes(n));
+    for (const f of ['view', 'solo']) if (!byId(flags[f])) flags[f] = null; changed(); return true; }
   function setBypass(ids, on) { const Q = many(ids).map(byId).filter((q) => q && q.bypass !== !!on); if (!Q.length) return; undo.mark(); for (const q of Q) q.bypass = !!on; changed(); }
   /** duplicate(ids, at): each beside its original (new ids, the same values, 24 px down-right of `at[id]`); CURVES stays one */
   function duplicate(ids, at = {}) {
@@ -151,6 +154,10 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
     q.values = { ...q.values, ...homeOf(TYPES[q.type]) }; q.v++; changed(true); }
   function move(id, d) { const i = nodes.findIndex((q) => q.id === id), j = i + d; if (i < 0 || j < 0 || j >= nodes.length) return; undo.mark();
     const a = nodes[i], b = nodes[j]; [a.at, b.at] = [b.at, a.at]; nodes[i] = b; nodes[j] = a; changed(); }
+  /* 020 X3 · THE FLAGS: VIEW HERE (the chain up to this node; again = STAGE OUT) and SOLO (this node alone) are the view's; BYPASS ALL
+     (the graph off, `off: true`) is the record's, so a reload shows what the reader saw */
+  const flag = (f, id) => { flags[f] = id && flags[f] !== id && byId(id) ? id : null; changed(); };
+  function setOff(on) { if (!!rec().off === !!on) return; undo.mark(); put({ off: !!on }); changed(); }
   function tidy() { undo.mark(); for (const q of nodes) q.at = null; put({ at: {} }); changed(); }
   const graphOf = () => nodes.filter((q) => q.type !== 'curves').map(({ type, values, bypass }) => ({ type, values: { ...values }, bypass }));
   /** the cards moved (the window's ground): each node takes the place it shows, the list follows the graph's top → bottom (THE COLUMN IS THE CHAIN) */
@@ -191,7 +198,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   /* the views' one door to the model */
   let win = null;
   const M = { TYPES, SHIPPED, graphs, rec, put, ID, list: () => nodes, byId, has, add, remove, setBypass, duplicate, applyGraph, graphOf, moved, hand, curvesIn, passes: () => passes,
-    setFold, rename, reset, move, tidy,
+    setFold, rename, reset, move, tidy, flags, setView: (id) => flag('view', id), setSolo: (id) => flag('solo', id), setOff, off: () => !!rec().off,
     undo: () => undo.undo(), redo: () => undo.redo(),
     door: (kind) => { if (kind === 'win') { win.close(); raise('nodes'); } else { rk.close('nodes'); win.open(); } } };
 
@@ -209,6 +216,6 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   occlusion.register('nodes', () => (win.isOpen() ? [paintedRect(win.root)] : []));
   occlusion.watch(win.root, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
   users.watch(() => { for (const v of views) if (v.view) v.view.setPresets(); });
-  return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, setFold, rename, reset, move, tidy, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),
-    set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, compile: () => compile(nodes, TYPES, new Map()), open: () => win.open(), close: () => win.close() };
+  return { model, filter, win, views, has, setHas, add, remove, setBypass, duplicate, setFold, rename, reset, move, tidy, setView: M.setView, setSolo: M.setSolo, setOff, undo: M.undo, redo: M.redo, nodes: () => nodes.map(({ id, type, values, bypass }) => ({ id, type, values: { ...values }, bypass })),
+    set: (id, k, v) => { const q = byId(id); if (q) hand(q, k, v); }, passes: () => passes, compile: () => compile(nodes, TYPES, new Map(), how()), open: () => win.open(), close: () => win.close() };
 }

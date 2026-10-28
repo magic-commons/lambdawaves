@@ -49,6 +49,14 @@
 .nodes-strip { display: block; width: 100%; height: 10px; margin: -2px 0 6px; border-radius: 2px; box-shadow: 0 0 0 1px var(--glass-hairline); }
 .nodes-rename { flex: 1 1 auto; min-width: 0; height: 18px; padding: 0 4px; font: inherit; letter-spacing: inherit; }
 .nodes-pop { top: auto; min-width: 150px; z-index: 3; }
+/* 020 X3 · the flags: the eye (VIEW HERE) and SOLO lit in the accent; SOLO shows on a hover or while lit; a card past the view dims; graph off */
+:is(.nodes-eye, .nodes-solo) { display: grid; place-items: center; width: 18px; height: 18px; padding: 0; border: 0; background: transparent; box-shadow: none; color: var(--fg-soft); opacity: .55; cursor: pointer; }
+:is(.nodes-eye, .nodes-solo) svg { width: 14px; height: 14px; }
+:is(.nodes-eye, .nodes-solo, .nodes-tools button)[aria-pressed="true"] { color: var(--acc); opacity: 1; }
+.nodes-card:not(:hover) .nodes-solo:not([aria-pressed="true"]) { display: none; }
+.nodes-card.past { opacity: .4; }
+.nodes-passes > span + span::before { content: ' · '; }
+.nodes-off .nodes-wires { opacity: .3; }
 .nodes-box { display: none; position: absolute; z-index: 1; pointer-events: none; border: 1px dashed var(--acc); background: color-mix(in srgb, var(--acc) 8%, transparent); }
 .nodes-menu { position: absolute; left: 6px; top: 36px; z-index: 2; display: flex; flex-direction: column; min-width: 200px; max-height: calc(100% - 44px); overflow: auto; padding: 4px; border-radius: var(--r-md); background: var(--glass-raise, var(--glass-tint));
   border: 1px solid var(--glass-border); box-shadow: var(--neu-raise); }

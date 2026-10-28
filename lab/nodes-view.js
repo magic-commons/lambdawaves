@@ -14,6 +14,8 @@
  * on the title RENAMES it (Enter / Escape; empty = the type's name); every TABLE and MATRIX card draws a 128 × 10 strip — a grey ramp and a
  * hue ramp through the node's OWN transfer (nodes-compile.js transfer(): the compiler's fn / matrix), redrawn when its values move; the
  * right-click menus (a card's, the ground's) and TIDY (the cards back in one column, in list order).
+ * 020 X3 THE FLAGS: an eye on every bar (VIEW HERE: the stage shows the chain up to it, the foot says "viewing 3 of 6"; the lit eye again =
+ * STAGE OUT), SOLO (S, a second lit mark: this node alone), BYPASS ALL (the head's power, key \: the foot says "graph off").
  *   createView(parent, kind, M) → { view, widget(id, k), paint(q, k, v, shown), foot(), sync(), place() }   M: the model's door (nodes.js) */
 import { el, svgEl, label, ariaLabel, chip } from './mir/kit.js';
 import { nodeBody } from './node-types.js';
@@ -98,6 +100,8 @@ export function createView(parent, kind, M) {
     if (!W) n.name.addEventListener('dblclick', () => renameAt(q.id));
     n.c.addEventListener('contextmenu', (e) => { e.stopPropagation(); popup(e, cardRows(q)); });
     if (t.cls === 'table' || t.cls === 'matrix') { n.strip = el('canvas', 'nodes-strip'); n.strip.width = 128; n.strip.height = 10; n.c.insertBefore(n.strip, n.body); api.strip(q); }
+    const eye = el('button', 'nodes-eye', n.bar); eye.type = 'button'; chip(eye, 'eye', 'VIEW HERE'); eye.addEventListener('click', () => M.setView(q.id));
+    const so = el('button', 'nodes-solo', n.bar); so.type = 'button'; chip(so, 'solo', 'SOLO'); so.addEventListener('click', () => M.setSolo(q.id));
     const x = el('button', 'nodes-x', n.bar); x.type = 'button'; chip(x, 'close', 'BYPASS NODE'); x.addEventListener('click', () => M.setBypass(q.id, !q.bypass));
     const b = el('button', 'nodes-rm', n.bar); b.type = 'button'; chip(b, 'clear', 'REMOVE NODE'); b.addEventListener('click', () => M.remove(q.id));
     if (q.type === 'curves') n.view = M.curvesIn(n.body);
@@ -134,10 +138,10 @@ export function createView(parent, kind, M) {
   ground.addEventListener('pointerdown', (e) => { if (!pop.contains(e.target)) pop.hidden = true; }, true);
   const folded = () => M.list().length > 0 && M.list().every((q) => q.fold);
   const foldAll = () => M.setFold(M.list().map((q) => q.id), !folded());
-  const cardRows = (q) => [['BYPASS', () => M.setBypass(q.id, !q.bypass), q.bypass], [q.fold ? 'EXPAND' : 'COLLAPSE', () => M.setFold(q.id, !q.fold)],
+  const cardRows = (q) => [['VIEW HERE', () => M.setView(q.id), M.flags.view === q.id], ['SOLO', () => M.setSolo(q.id), M.flags.solo === q.id], ['BYPASS', () => M.setBypass(q.id, !q.bypass), q.bypass], [q.fold ? 'EXPAND' : 'COLLAPSE', () => M.setFold(q.id, !q.fold)],
     ['DUPLICATE', () => pick(M.duplicate(q.id, at()))], ['RENAME', () => renameAt(q.id)], ['RESET', () => M.reset(q.id)], null,
     ['MOVE UP', () => M.move(q.id, -1)], ['MOVE DOWN', () => M.move(q.id, 1)], null, ['REMOVE', () => M.remove(q.id)]];
-  const groundRows = () => [['ADD…', () => openMenu(true)], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'EXPAND ALL' : 'COLLAPSE ALL', foldAll]].filter((r) => r !== false);
+  const groundRows = () => [['ADD…', () => openMenu(true)], W && ['FIT', () => fit()], ['TIDY', () => M.tidy()], [folded() ? 'EXPAND ALL' : 'COLLAPSE ALL', foldAll], ['BYPASS ALL', () => M.setOff(!M.off()), M.off()]].filter((r) => r !== false);
   ground.addEventListener('contextmenu', (e) => popup(e, groundRows()));
   if (!W) ground.classList.add('nodes-column');
   else {
@@ -189,6 +193,8 @@ export function createView(parent, kind, M) {
       else if (c && /^[zZ]$/.test(k)) { if (e.shiftKey) M.redo(); else M.undo(); }
       else if (c && /^[yY]$/.test(k)) M.redo();
       else if (!c && /^[mM]$/.test(k) && ids.length) M.setBypass(ids, ids.some((id) => !M.byId(id).bypass));
+      else if (!c && /^[sS]$/.test(k) && ids.length) M.setSolo(ids[0]);
+      else if (k === '\\') M.setOff(!M.off());
       else if (!c && /^[hH]$/.test(k) && ids.length) M.setFold(ids, ids.some((id) => !M.byId(id).fold));
       else if (k === 'Tab' || (k === 'A' && e.shiftKey && !c)) openMenu(true);
       else if (k === 'Home') fit();
@@ -203,6 +209,7 @@ export function createView(parent, kind, M) {
   tool('nodes-add', 'plus', 'ADD NODE', () => openMenu(true));
   if (W) tool('nodes-fit', 'home', 'FIT — every card in view (Home)', () => fit());
   const foldB = tool('nodes-folds', 'compact', 'COLLAPSE ALL', () => foldAll());
+  const offB = tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph (\\)', () => M.setOff(!M.off()));
   const menu = el('div', 'nodes-menu', ground); menu.hidden = true;
   const sep = (cls) => { const s = el('div', 'nodes-sep', menu); if (cls) icon(s, cls); return s; };
   const item = (text, title, run, cls = 'nodes-item') => { const it = el('button', cls, menu); it.type = 'button'; label(el('span', '', it), text); it.title = title;
@@ -256,14 +263,21 @@ export function createView(parent, kind, M) {
         for (let y = 0; y < 10; y++) { const c = rows[y < 5 ? 0 : 1], o = (y * 128 + i) * 4; im.data[o] = c[0] * 255; im.data[o + 1] = c[1] * 255; im.data[o + 2] = c[2] * 255; im.data[o + 3] = 255; } }
       g.putImageData(im, 0, 0); }); },
     /** the graph's foot: what the graph costs — filter primitives + layers */
-    foot() { const p = M.passes(); if (p === 1) label(foot, '1 pass'); else label(foot, '{n} passes', { n: p }); },
+    foot() { const p = M.passes(), L = M.list(), i = L.findIndex((q) => q.id === M.flags.view); foot.replaceChildren();
+      if (p === 1) label(el('span', '', foot), '1 pass'); else label(el('span', '', foot), '{n} passes', { n: p });
+      if (i >= 0) label(el('span', '', foot), 'viewing {i} of {n}', { i: i + 1, n: L.length });
+      if (M.flags.solo) label(el('span', '', foot), 'solo');
+      if (M.off()) label(el('span', '', foot), 'graph off'); },
     /** the cards follow the list: a new node gets its card, a removed one loses it */
     sync(rebuild) {
       const L = M.list();
       for (const id of Object.keys(cards)) if (id !== 'in' && id !== 'out' && (rebuild || !M.byId(id))) { sel.delete(id); ro.unobserve(cards[id].c); if (cards[id].view) cards[id].view.destroy(); cards[id].c.remove(); delete cards[id]; }
       for (const q of L) { if (!cards[q.id]) make(q); const n = cards[q.id]; n.c.classList.toggle('off', q.bypass); n.bar.querySelector('.nodes-x').setAttribute('aria-pressed', String(q.bypass));
-        n.c.classList.toggle('fold', q.fold); n.bar.querySelector('.nodes-chev').setAttribute('aria-expanded', String(!q.fold));
+        n.c.classList.toggle('fold', q.fold); n.bar.querySelector('.nodes-eye').setAttribute('aria-pressed', String(M.flags.view === q.id));
+        n.bar.querySelector('.nodes-solo').setAttribute('aria-pressed', String(M.flags.solo === q.id));
+        n.c.classList.toggle('past', !!(M.flags.solo ? M.flags.solo !== q.id : M.flags.view && L.findIndex((p) => p.id === M.flags.view) < L.indexOf(q))); n.bar.querySelector('.nodes-chev').setAttribute('aria-expanded', String(!q.fold));
         if (q.name) { label(n.name, ''); n.name.textContent = q.name; } else label(n.name, T[q.type].label); }
+      offB.setAttribute('aria-pressed', String(M.off())); ground.classList.toggle('nodes-off', M.off());
       chip(foldB, folded() ? 'expand' : 'compact', folded() ? 'EXPAND ALL' : 'COLLAPSE ALL');
       paintSel(); api.place();
     },
