@@ -41,6 +41,9 @@ R7 THE WORDS ARE LIVE: INFORMATIONAL's stage texts (name, formula, subtitle) lag
 8. (D1) 'Behind' assumes the sphere is seen from above; flipping it is one sign in depthOf. Default: as built.
 9. (D3) Only the modulation window's chip rail moved; the buttons inside (ADD MACRO / ADD DEVICE, TAP · SYNC · HOLD) are one more kit line on your word. Default: as built.
 10. (D1) The plane square and the camera film stay solid where they lie behind the view. Default: solid.
+11. (B3) While playing, the pause glyph in the accent colour? Default: as built (the ink).
+12. (B1) The pills show ≈ 250 ms in, before the windows finish sliding. Default: as built.
+13. (B4) The vertical card is 6 px taller for its gaps. Default: as built.
 
 ## MERGE ORDER
 D → B → R; each merged with the recipe (`git merge --no-ff --no-commit`, `--ours lab/sw.js`, `pwa.test --write`, rack-deps, new-project, mir-manifest, `./test.sh node`, THE LOCK 843/987) and recorded below.
@@ -49,4 +52,5 @@ D → B → R; each merged with the recipe (`git merge --no-ff --no-commit`, `--
 | chain | base | commit | note |
 |---|---|---|---|
 | D | 7335da8f | 9915e18e | kit 1.5.6-alpha.9 (kit-1.5.5 @ 3ce9bc2, bundle carried to .tmp/it021/kit.bundle): D1 rings and CLIP's plane dashed behind the view · D2 KEYBOARD tabs wear glyphs (icons.js mapping) · D3 modulation chip rail on the trig motion · D4 one notch = 1 BPM on the CSB, TIMELINE and modulation tempo fields · D5 no door: T=/t= is the app's periodFx (transport.js:32–34, :114, :255–259; csb.css:130, :143); test.sh node EXIT 0, LOCK 843/0 and 987/0 |
-| B | 9915e18e | | |
+| B | 9915e18e | 2ab15fa2 | kit 1.5.6-alpha.10 (kit-1.5.5 @ 0272f11, bundle carried): B1 rack.showPills() on EXPAND ALL (≈ 1.26 s) · B2 periodFx gone (expanded panel 392 → 354 px) · B3 no rim/glow on the lit play, the chip motion, the preset chip whole (--touch 34 px in the bar), bar height 92 · B4 the card/FREE bar a 7-column grid with air (206 → 212 px); test.sh node EXIT 0, LOCK 843/0 and 987/0 |
+| R | 2ab15fa2 | | |
