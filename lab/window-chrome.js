@@ -17,7 +17,7 @@ export function installWindowChrome({ KIND, layout, present }) {
     if (on) leanSet.add(d.dataset.id); else leanSet.delete(d.dataset.id); try { localStorage.setItem(LEAN_KEY, JSON.stringify([...leanSet])); } catch (e) { /* private mode: the choice lasts the session */ }
     present(); };
   for (const d of document.querySelectorAll('.dev')) {
-    if (!d.querySelector('.dev-body .note, .dev-body .ro:not(.lw-status)')) continue;   // 0.5.4 P4: INFORMATIONAL's STATUS is not a note to hide — no Aa there
+    if (d.dataset.id === 'informational' || !d.querySelector('.dev-body .note, .dev-body .ro:not(.lw-status)')) continue;   // 0.5.4 P4 · 012 R1: INFORMATIONAL's one Aa is its STATUS (022 E0: H1's note there lives in its ⓘ, no LEAN Aa)
     const util = d.querySelector('.dev-util'); if (!util) continue;
     const b = el('button', 'dev-lean', null, 'Aa'); b.type = 'button'; b.title = 'Hide or show this window’s notes and readouts';
     b.setAttribute('aria-label', 'hide or show notes and readouts'); b.setAttribute('aria-pressed', 'false'); util.insertBefore(b, util.firstChild);

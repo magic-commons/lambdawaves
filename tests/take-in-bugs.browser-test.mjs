@@ -87,13 +87,15 @@ try {
   assert.ok(tags.ms !== null && tags.ms <= 300, JSON.stringify(tags));
   console.log(`PASS with METERS closed and STATUS TAGS on, switching Stark on shows "${tags.text}" in ${tags.ms.toFixed(0)} ms`);
 
-  /* ── 4 · WIGNER stands down under MOLECULES ── */
+  /* ── 4 · WIGNER stands down under MOLECULES — 022 E0: since 021 R5 (ONE MODE, shell/settings.js MODE.wigner = 'hydrogen') it is HIDDEN under
+     MOLECULES (never closed or moved) and draws nothing; its stand-down sentence is still the one written while a molecule holds the field ── */
   const wig = await g.ev(`__LW.layout.raise('wigner'); await __LW.chem.solve('H2O'); __LW.chem.setOn(true); await __LW.settle();
-    const st = () => document.querySelector('.dev[data-id="wigner"] .dev-stat').textContent;
-    let s = ''; for (let i = 0; i < 40; i++) { await __LW.settle(); s = st(); if (/hydrogenic register only/.test(s)) break; await __w(50); }
-    __LW.chem.setOn(false); await __LW.settle(); return { status: s, errs: __e.slice() };`);
-  assert.match(wig.status, /hydrogenic register only/); assert.deepEqual(wig.errs, []);
-  console.log(`PASS under MOLECULES WIGNER says "${wig.status}" instead of computing hydrogenic physics`);
+    const dev = () => document.querySelector('.dev[data-id="wigner"]'), st = () => dev().querySelector('.dev-stat').textContent;
+    let s = ''; for (let i = 0; i < 40; i++) { await __LW.settle(); s = st(); if (dev().hidden && /hydrogenic register only/.test(s)) break; await __w(50); }
+    const hidden = dev().hidden, closed = dev().classList.contains('closed');
+    __LW.chem.setOn(false); await __LW.settle(); return { hidden, closed, back: !dev().hidden, status: s, errs: __e.slice() };`);
+  assert.equal(wig.hidden, true); assert.equal(wig.closed, false); assert.equal(wig.back, true); assert.deepEqual(wig.errs, []);
+  console.log(`PASS under MOLECULES WIGNER is hidden (not closed) and computes nothing ("${wig.status}"); HYDROGEN brings it back`);
 } catch (e) {
   failed = true; console.error(e);
 } finally {

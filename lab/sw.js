@@ -434,7 +434,7 @@ const PRECACHE = [
   ['./well.js',                                                     '82f249acd7df'],
   ['./wigner.js',                                                   '668d13ce809c'],
   ['./wignerview.js',                                               '3206550637de'],
-  ['./window-chrome.js',                                            '04914c416d34'],
+  ['./window-chrome.js',                                            '9755dd32f533'],
   ['./windows/equalizer.js',                                        '026da0904807'],
   ['./windows/film.js',                                             '8d569f7c1bd9'],
   ['./windows/folders.js',                                          '6827d41317a0'],
