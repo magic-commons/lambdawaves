@@ -1,7 +1,7 @@
 /* lab/windows/settings-card.js — the SETTINGS card (0.5.2 R2c; moved verbatim out of lab/rack.js boot()) at TWO seats: INTERFACE · THEME · SURFACE and the
  * stage hooks (app.hooks, read live) under THEME and SURFACE's header; boot() calls createFieldQuality() where FIELD QUALITY stood. */
 import { TIER } from '../rack.js';
-import { el, knob, sw, seg, readout, group } from '../mir/kit.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
+import { el, knob, sw, seg, readout, group, label } from '../mir/kit.js'; import { rgbToHex, hexToRgb } from '../mir/palette.js'; import { createInformational } from '../informational.js'; import { askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createSettingsCard(app) {
   const { ui, device, mat } = app, { schedule } = app.loop, { quality, saveSettings } = app.sh,
     { domain, fieldRate, setGovernor, setKeepFrames, setPerfMode, modHand, look, applyAccent, paintMarks, field, mod, MOD } = app.ctl;
@@ -145,6 +145,28 @@ export function createSettingsCard(app) {
       { id: '120', label: '120 Hz', title: 'Update the modulation 120 times a second' }],
       onChange: (v) => { mod.setCadence(+v); } });
     ui.cadSeg.root.title = 'Limit modulation updates per second'; r5b.appendChild(ui.cadSeg.root);
+    /* PLAYBACK (020 L2, Josh's EXPERIMENTAL pair after ASIO4ALL's latency pane): CLOCK WALL | LOCKED, the CADENCE a locked play steps at (its ms
+       is the pane's Buffer Offset) and the LATENCY from a knob to the picture (ASIO's In).  A PREFERENCE (shell/settings.js `playLock`/`playHz`). */
+    const rpb = el('div', 'row tight lw-playback', gq);
+    const lockMs = () => fieldRate.hz ? 1000 / fieldRate.hz : fieldRate.refreshMs();
+    const paintLock = () => { const ms = lockMs(), hz = 1000 / ms, kl = ui.cadenceSeg.root.querySelector('.k-lbl');
+      if (kl) label(kl, 'CADENCE · {ms} ms', { ms: ms.toFixed(1) });   // the step's ms on the seg's own line (ASIO's Buffer Offset), shown under LEAN too
+      ui.latencyRo.set(fieldRate.lock ? ms.toFixed(1) + ' ms' : 'display', fieldRate.lock ? 'live' : '');
+      ui.latencyRo.setSub(fieldRate.lock ? (fieldRate.hz ? '' : 'DISPLAY · ') + hz.toFixed(0) + ' Hz · ' + ms.toFixed(1) + ' ms a step' : 'each present takes the time that passed'); };
+    ui.clockSeg = seg({ label: 'CLOCK', value: fieldRate.lock ? 'locked' : 'wall', options: [
+      { id: 'wall', label: 'WALL', title: 'Time follows the wall clock: smooth on screen, a late frame jumps ahead' },
+      { id: 'locked', label: 'LOCKED', title: 'Every frame steps time by exactly one cadence step, and the render scale holds: for a screen recording' }],
+      onChange: (v) => { fieldRate.lock = v === 'locked'; paintLock(); saveSettings(); } });
+    rpb.appendChild(ui.clockSeg.root);
+    ui.cadenceSeg = seg({ label: 'CADENCE', value: String(fieldRate.hz || 'display'), options: [
+      { id: '30', label: '30 Hz', title: '33.3 ms a step' }, { id: '60', label: '60 Hz', title: '16.7 ms a step' },
+      { id: '120', label: '120 Hz', title: '8.3 ms a step' }, { id: 'display', label: 'DISPLAY', title: 'One step a display refresh' }],
+      onChange: (v) => { fieldRate.hz = v === 'display' ? 0 : +v; paintLock(); saveSettings(); } });
+    ui.cadenceSeg.root.title = 'How often a LOCKED play presents a frame'; rpb.appendChild(ui.cadenceSeg.root);
+    ui.latencyRo = readout({ label: 'LATENCY', value: 'display', sub: '' }); rpb.appendChild(ui.latencyRo.root);
+    ui.latencyRo.root.title = 'From a knob to the picture';
+    ui.showPlayback = () => { ui.clockSeg.set(fieldRate.lock ? 'locked' : 'wall'); ui.cadenceSeg.set(String(fieldRate.hz || 'display')); paintLock(); };
+    paintLock();
     ui.scaleRo = readout({ label: 'RENDER SCALE', value: '100%', sub: 'canvas pixels per CSS pixel × DPR' });
     r5b.appendChild(ui.scaleRo.root);
     /* iteration 008 W (Josh: "Remove dithering row from wave and move it to quality in settings"): DITHER is this display's, a PREFERENCE
@@ -170,6 +192,7 @@ export function createSettingsCard(app) {
     const r7 = el('div', 'row tight', gq);
     ui.keepSw = sw({ label: 'KEEP FRAMES', value: false, title: 'Update the playhead every frame', onChange: (v) => { setKeepFrames(v); saveSettings(); } }); r7.appendChild(ui.keepSw.root);
     el('div', 'note', gq).innerHTML = '<b>Performance.</b> AUTO SCALE lowers canvas resolution when frames exceed the budget. GOVERNOR can also pause expensive readers and retries them periodically. PERFORMANCE 120 Hz updates the visible CPU readers every fourth frame while the field presents every frame; FULL updates them every frame. DITHER (ordered 8×8) breaks up 8-bit colour bands on this display; STRENGTH 1 is ±½ output level. KEEP FRAMES updates the playhead every frame and may cost performance.';
+    el('div', 'note', gq).innerHTML = '<b>Playback.</b> WALL follows the wall clock. LOCKED steps time by exactly one CADENCE step per frame and holds the render scale, so a recording never sees a skipped or doubled step; a slow frame slows time instead. LATENCY is the time from a knob to the picture.';
   }
   return { createFieldQuality };
 }

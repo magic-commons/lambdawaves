@@ -400,7 +400,7 @@ export async function boot(dom) {
     /* PLAYBACK LOCK (020 L1 · A LOCKED CLOCK STEPS, A WALL CLOCK FLOWS): while it plays, the loop presents only on a 1/hz tick (DISPLAY: every
        rAF) and the clock advances exactly rate/hz per present.  A rAF between ticks, or one whose GPU is still behind (the PACE cap), carries
        its ask whole and leaves t alone — a missed vsync slows time, never skips it (the due time re-anchors, it never catches up). */
-    const lockHz = fieldRate.lock ? (fieldRate.hz || 1000 / frameBudget.milliseconds('120')) : 0;
+    const lockHz = fieldRate.lock ? (fieldRate.hz || 1000 / fieldRate.refreshMs()) : 0;
     clock.hz = lockHz;
     if (field.pinJitter) field.pinJitter(lockHz > 0);
     let lockWait = false;
@@ -625,12 +625,13 @@ export async function boot(dom) {
       rendered: rs.rendered, populated: rs.populated, masked: rs.masked, truncated: rs.truncated, covered: rs.coveredFraction,
       res: field.ok ? field.resolution : 0, half: domain.half, steps: mat.steps, encodeMs: stats.lastEncodeMs,
       fps: stats.fps, reconPerSec: stats.reconPerSec, stepsPerSec: stats.stepsPerSec, scheduled: stats.scheduled, lastTier: stats.lastTier, tiers: stats.tiers,
-      status: statusLine(), profile: perf.profile, perfMode: perf.mode, unit: getHamiltonian().unit };
+      status: statusLine(), profile: perf.profile, perfMode: perf.mode, unit: getHamiltonian().unit, lock: fieldRate.lock ? lockWord() : '' };
   }
   /** the METERS line for the governor: its state, the median it judged, the grid it runs, and what it parked */
+  const lockWord = () => 'LOCKED ' + (fieldRate.hz ? fieldRate.hz + ' Hz' : 'DISPLAY');   // 020 L2: METERS and the governor say PLAYBACK LOCK
   function paintGovernor() {
     if (!ui.govRo) return;
-    const st = !gov.on ? 'OFF' : gov.drop ? 'GRID −' + gov.drop : 'nominal';
+    const st = (fieldRate.lock ? lockWord() + ' · ' : '') + (!gov.on ? 'OFF' : gov.drop ? 'GRID −' + gov.drop : 'nominal');
     ui.govRo.set(`${st} · ${gov.median ? gov.median.toFixed(1) : '—'} ms · ${field.ok ? field.resolution : 0}³`, !gov.on ? '' : gov.drop ? 'warn' : 'ok');
     const parked = [...gov.parked.entries()].map(([n, p]) => n + ' ' + p.cost.toFixed(0) + ' ms');
     ui.govRo.setSub((parked.length ? 'parked: ' + parked.join(' · ') : 'all readers active') + ' · budget ' + (perfBudgetMs() * 4 / 3).toFixed(0) + ' ms · scale ' + (100 * quality.scale * (quality.auto ? quality.autoScale : 1)).toFixed(0) + '%');

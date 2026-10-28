@@ -31,7 +31,7 @@ export function createSettings(app) {
          preference change (a theme flip, a window closed) rebuilt the object without them, so ABOUT reopened at
          470 × 670.  Carried like the others; an absent value stays absent (JSON drops undefined). */
       settingsStore.write({ nativeLayout:useCompactDefaults?1:S0.nativeLayout, nbW: S0.nbW, nbH: S0.nbH, abW: S0.abW, abH: S0.abH, layouts: S0.layouts, warned: S0.warned, audioDevice: S0.audioDevice, captions: !document.body.classList.contains('no-captions'),   // iteration 007: INFORMATIONAL's six keys left for their own record, lambdawaves.q0.info (shell/stage-words.js)
-        auto: app.sh.quality.auto, governor: app.ctl.gov.on, keepFrames: app.ctl.keep.frames, perfMode: app.ctl.perf.mode,
+        auto: app.sh.quality.auto, governor: app.ctl.gov.on, keepFrames: app.ctl.keep.frames, perfMode: app.ctl.perf.mode, playLock: app.ctl.fieldRate.lock || undefined, playHz: app.ctl.fieldRate.hz || undefined,   // 020 L2: PLAYBACK LOCK, written only when not WALL · DISPLAY
         /* WAVE 51 · THE CAMERA'S FEEL IS A PREFERENCE, not a project's (wave 50 built FRICTION / SPIN / AUTO-ROTATE and
            none of the three survived a reload).  FRICTION is how the instrument FEELS in the hand (SPIN left at 018 B4) and it
            belongs beside FROST and GOVERNOR.  AUTO-ROTATE is deliberately NOT here: a lab that starts turning by itself
@@ -90,7 +90,8 @@ export function createSettings(app) {
     if (s.auto === false) { app.sh.quality.auto = false; if (ui.autoSw) ui.autoSw.set(false); }
     if (s.governor === false) app.ctl.setGovernor(false);                 // wave 45: the governor held off
     if (s.keepFrames === true) app.ctl.setKeepFrames(true);              // wave 45: the playhead follows every frame (off by default)
-    app.ctl.setPerfMode(s.perfMode === 'full' ? 'full' : '120');         // an absent key takes the official 120 Hz profile; an explicit FULL choice survives
+    app.ctl.setPerfMode(s.perfMode === 'full' ? 'full' : '120');
+    app.ctl.fieldRate.lock = s.playLock === true; app.ctl.fieldRate.hz = [30, 60, 120].includes(s.playHz) ? s.playHz : 0; if (ui.showPlayback) ui.showPlayback();   // 020 L2: absent = WALL · DISPLAY         // an absent key takes the official 120 Hz profile; an explicit FULL choice survives
     if (typeof s.friction === 'number') app.host.camera.setFriction(s.friction);   // wave 51: the camera's feel comes back … but AUTO-ROTATE never does (see saveSettings); 018 B4: SPIN left, an old `spin` is read by nothing
     if (typeof s.dragGain === 'number') app.host.camera.setDragGain(s.dragGain);   // wave 58: DRAG GAIN and FLING ride beside them
     if (typeof s.fling === 'number') app.host.camera.setFling(s.fling);
