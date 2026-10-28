@@ -637,12 +637,14 @@ export const transportDock = (R) => dockOf(R);
  *    doorIcon    an svg string or a url: the app's own glyph, a CSS mask in the ink (1.5.0-alpha.25)
  *    onSwitch    in a work bar the door switches to the modulation workspace (BASINS): window/workspaces.js `show('upper')`
  *    macros      false leaves the macro rail out of the tempo panel (default true when there is a `mod`)
+ *    seats       'thin' draws the app's own nodes small while the bar is not docked: the scrub a thin line, a 30-px knob, the
+ *                readouts stacked without labels (transport.css THIN SEATS; λWAVES' bar; 1.5.5).  Default '': the nodes as the kit draws them
  *    openers, rack, keys, store, key, opener, onRefused, onInterface, host, root, id — as in docs/TRANSPORT.md
  *  The api's mountIn(host | null) moves the one bar into a work lane and back (docs/TRANSPORT.md "The one bar that moves"). */
 export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = globalThis.document && document.body, root = null, id = 'transport',
   clock = null, mod = null, model = MOD, setBpm = null, persist = null, openers = [], rack = null, keys = null, store = null,
   key = 'mir.transport', opener = true, onRefused = null, onInterface = null, bar: barKind = 'float', door: doorMark = 'palette', doorIcon = null,
-  onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true, places = null, onDock = null, freeWidth = null, freeHost = null } = {}) {
+  onSwitch = null, macros = true, powerWord = '', seatMenu: seatMenuOn = true, places = null, onDock = null, freeWidth = null, freeHost = null, seats = '' } = {}) {
   const doc = host.ownerDocument, view = doc.defaultView, body = doc.body;
   const life = new AbortController(), on = { signal: life.signal }, signal = life.signal;
   const S = store || localSeatStore(key);
@@ -655,6 +657,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   for (const c of ['mir-transport', 'glass', 'mini']) bar.classList.add(c);
   if (opener) bar.dataset.opener = ''; else delete bar.dataset.opener;
   setAttr(bar, 'data-layout', layout && typeof layout.name === 'string' && layout.name ? layout.name : null);   // the layout's own drawing (transport.css)
+  setAttr(bar, 'data-seats', seats || null);   // 'thin': the app's nodes drawn small off the dock (transport.css THIN SEATS, 1.5.5)
   bar.setAttribute('role', 'toolbar'); ariaLabel(bar, 'Transport');
 
   /* ── the parts the layout names, built once each ── */
@@ -691,7 +694,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
   function pillPart() { if (!pillP) pillP = tempoPill({ tempo, panel: layoutNames(layout).includes('panel') ? panelPart() : null, work: () => placement === 'work', typed: layoutNames(layout).includes('expand'), signal }); return pillP; }
   /* 'expand' (1.5.0-alpha.31, λWAVES 018 E2 · E6): the expander's own button — it opens and shuts the tempo panel, so the pill only types; its
      chevron points down while shut and turns up while open (transport.css) */
-  function expandPart() { const p = barButton({ cls: 'tr-expand', glyph: 'chevronDown', label: 'the expander', title: 'the expander', run: () => panelPart().toggle(), signal });
+  function expandPart() { const p = barButton({ cls: 'tr-expand', glyph: 'chevronDown', label: 'the expander', title: 'the expander', run: () => panelPart().toggle(), signal });   // tr[the expander]: the transport bar's expander: the panel under the bar with the macros, the clock and the app's own rows
     p.sync = () => { const o = !!panel && panel.isOpen(); setAttr(p.root, 'aria-expanded', String(o)); p.root.classList.toggle('on', o); }; p.sync(); return p; }
   const place = (list, parent) => {
     for (const item of list) {
@@ -957,7 +960,7 @@ export function createTransport({ layout = BASINS_LAYOUT, nodes = {}, host = glo
       if (bar.parentElement !== stageHost) stageHost.appendChild(bar);
       if (freeWin) freeWin.destroy();
       for (const n of made) n.remove();
-      if (!made.includes(bar)) { bar.removeAttribute('data-bar'); bar.textContent = ''; bar.classList.remove('mir-transport', 'mini', 'docked', 'tempo-open'); for (const a of ['data-home', 'data-form', 'data-tempo-direction', 'data-layout']) bar.removeAttribute(a); delete bar.dataset.opener; }
+      if (!made.includes(bar)) { bar.removeAttribute('data-bar'); bar.textContent = ''; bar.classList.remove('mir-transport', 'mini', 'docked', 'tempo-open'); for (const a of ['data-home', 'data-form', 'data-tempo-direction', 'data-layout', 'data-seats']) bar.removeAttribute(a); delete bar.dataset.opener; }
     },
   };
 }

@@ -15,7 +15,7 @@ Laws (standing, Josh's):
 - `lab/mir/**` may be edited ONLY under the trickle-down rule: bump `lab/mir/version.js` (see `lab/mir/version.js`; +1 per kit change, the integrator reconciles; never 1.6), one line per kit change at
   the TOP of `docs/FOR-MIR.md` under the `## FROM λWAVES, FOR THE KIT` heading (what, file, why), keep the kit's laws (words through `label()`/`t()` + the
   English pack; parts by class and `data-*`; `.glass` takes the look store); re-hash with `python3 -I tools/mir-manifest.py` (its sha is pinned in
-  `tests/mir-manifest.test.mjs`). `lab/fonts/**` stays untouched.
+  `tests/mir-manifest.test.mjs`; the tool was retired at 021 K4 — the kit is 1.5.5 and `lab/mir` is written by `adopt.mjs` alone, CLAUDE.md:6). `lab/fonts/**` stays untouched.
 - Josh's dial: "Keep the builds tight and don't bloat the code with random verification/gate codes. Just build the features since we are not even
   1.0.0 release yet." Fix, simplify, don't add. Diagnostics live in `tools/`, not `lab/`.
 - `lab/rack.js`'s `app` literal is never extended; `node tools/rack-deps.mjs --classes --no-write` stays green (HINGE ≤ 25; spectrum.js is AT 25).

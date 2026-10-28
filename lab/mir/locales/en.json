@@ -148,6 +148,7 @@
   "CONTRAST": "CONTRAST",
   "CONTRAST — about mid-grey; double-tap for 1": "CONTRAST — about mid-grey; double-tap for 1",
   "CONTROL": "CONTROL",
+  "CONTROL SURFACE": "CONTROL SURFACE",
   "CONTROLS": "CONTROLS",
   "COPIED": "COPIED",
   "COPY": "COPY",
@@ -271,6 +272,7 @@
   "Devices: Minimized. Tap for Full": "Devices: Minimized. Tap for Full",
   "Disable backdrop filtering": "Disable backdrop filtering",
   "Disconnect the source from this macro": "Disconnect the source from this macro",
+  "Dock the bar into the rack": "Dock the bar into the rack",
   "Dock the transport into the rack": "Dock the transport into the rack",
   "Download image — capture first": "Download image — capture first",
   "Download image — {name}, {size}": "Download image — {name}, {size}",
@@ -385,7 +387,6 @@
   "FREE": "FREE",
   "FRICTION": "FRICTION",
   "FRICTION — how fast a released view slows; at 0 it never stops": "FRICTION — how fast a released view slows; at 0 it never stops",
-  "FROST": "FROST",
   "FULL": "FULL",
   "FULL SCREEN": "FULL SCREEN",
   "Fades only: nothing travels": "Fades only: nothing travels",
@@ -396,6 +397,7 @@
   "Fit each selected audio clip’s remaining audio into its length (varispeed)": "Fit each selected audio clip’s remaining audio into its length (varispeed)",
   "Fit the full envelope in the graph": "Fit the full envelope in the graph",
   "Flat control faces: hairlines and accents only": "Flat control faces: hairlines and accents only",
+  "Float the bar in its own window": "Float the bar in its own window",
   "Folder picture set from {name}": "Folder picture set from {name}",
   "Folder removed — {n} projects moved to {:ROOT}": {
    "one": "Folder removed — {n} project moved to {:ROOT}",
@@ -465,7 +467,6 @@
   "ISO": "ISO",
   "Image format": "Image format",
   "Imported — {name}": "Imported — {name}",
-  "In the most recently saved layout": "In the most recently saved layout",
   "Include {what} in the next save": "Include {what} in the next save",
   "Information": "Information",
   "Input dB at 0% output; upper boundary reaches 100%.": "Input dB at 0% output; upper boundary reaches 100%.",
@@ -498,7 +499,6 @@
   "LOAD LAYOUT": "LOAD LAYOUT",
   "LOCATE CLIPS": "LOCATE CLIPS",
   "LONGER than {limit}: keep this page open and visible (the screen is held awake), or shorten it; a failed render keeps its completed frames to recover": "LONGER than {limit}: keep this page open and visible (the screen is held awake), or shorten it; a failed render keeps its completed frames to recover",
-  "LOOK": "LOOK",
   "LOW": "LOW",
   "LOWER": "LOWER",
   "LW Title": "LW Title",
@@ -520,7 +520,6 @@
   "MAX": "MAX",
   "MENU BAR": "MENU BAR",
   "MENUS": "MENUS",
-  "METRO": "METRO",
   "MID": "MID",
   "MIN": "MIN",
   "MIR ABOUT": "MIR ABOUT",
@@ -699,6 +698,7 @@
   "Projects": "Projects",
   "Pull curve start; keep right edge fixed": "Pull curve start; keep right edge fixed",
   "Pull the clip start": "Pull the clip start",
+  "Put the bar on the stage": "Put the bar on the stage",
   "Put {name} on corner {c}": "Put {name} on corner {c}",
   "QUALITY": "QUALITY",
   "Quantise output to discrete levels": "Quantise output to discrete levels",
@@ -849,7 +849,6 @@
   "SPIN — the auto-rotate speed": "SPIN — the auto-rotate speed",
   "SPRING": "SPRING",
   "SPRING — the pad returns to centre when you let go": "SPRING — the pad returns to centre when you let go",
-  "SPRITES": "SPRITES",
   "SQR": "SQR",
   "STARTER": "STARTER",
   "STATUS TAGS": "STATUS TAGS",
@@ -1292,7 +1291,6 @@
   "opal": "opal",
   "open {path} in your notes tab": "open {path} in your notes tab",
   "opened {name}": "opened {name}",
-  "page": "page",
   "page 0 — the greeting, shown when the project opens": "page 0 — the greeting, shown when the project opens",
   "pages": "pages",
   "patch copied — {:PASTE} onto any {kind}": "patch copied — {:PASTE} onto any {kind}",
@@ -1626,7 +1624,6 @@
   "LAP": "a demo LFO's name: it moves the camera one lap round per bar (the user can rename it)",
   "LINK": "a switch that joins the controls' light to the panes' light (link = tie together, not a web link)",
   "LIVE": "the microphone is open and being listened to right now",
-  "LOOK": "the tab of the look options (theme, accent, text, quality, material, controls, motion)",
   "MOD off": "MOD: modulation as a whole, switched on or off by its power button",
   "MOD on": "MOD: modulation as a whole, switched on or off by its power button",
   "MULTI-SAW": "waveform names (saw up, saw down, sine, triangle, square, sample-and-hold, a slow random drift); most languages keep these as written",
@@ -2156,6 +2153,9 @@
   "CONTROL": [
    "mir/panels/camera-rig.js"
   ],
+  "CONTROL SURFACE": [
+   "mir/shell/transport.js"
+  ],
   "CONTROLS": [
    "mir/shell/gui.js"
   ],
@@ -2538,6 +2538,9 @@
   "Disconnect the source from this macro": [
    "mir/modulation/window.js"
   ],
+  "Dock the bar into the rack": [
+   "mir/shell/transport.js"
+  ],
   "Dock the transport into the rack": [
    "mir/shell/transport.js"
   ],
@@ -2884,9 +2887,6 @@
   "FRICTION — how fast a released view slows; at 0 it never stops": [
    "mir/panels/camera-rig.js"
   ],
-  "FROST": [
-   "mir/shell/gui.js"
-  ],
   "FULL": [
    "mir/shell/gui.js"
   ],
@@ -2916,6 +2916,9 @@
   ],
   "Flat control faces: hairlines and accents only": [
    "mir/shell/gui.js"
+  ],
+  "Float the bar in its own window": [
+   "mir/shell/transport.js"
   ],
   "Folder picture set from {name}": [
    "mir/folders/gallery.js"
@@ -3120,9 +3123,6 @@
   "Imported — {name}": [
    "mir/folders/folders.js"
   ],
-  "In the most recently saved layout": [
-   "mir/shell/rack.js"
-  ],
   "Include {what} in the next save": [
    "mir/folders/gallery.js"
   ],
@@ -3216,9 +3216,6 @@
   "LONGER than {limit}: keep this page open and visible (the screen is held awake), or shorten it; a failed render keeps its completed frames to recover": [
    "mir/render/plan.js"
   ],
-  "LOOK": [
-   "mir/shell/gui.js"
-  ],
   "LOW": [
    "mir/modulation/modwindow/modwindow.js",
    "mir/modulation/window.js"
@@ -3281,9 +3278,6 @@
    "mir/shell/gui.js"
   ],
   "MENUS": [
-   "mir/shell/gui.js"
-  ],
-  "METRO": [
    "mir/shell/gui.js"
   ],
   "MID": [
@@ -3840,6 +3834,9 @@
   "Pull the clip start": [
    "mir/timeline/view.js"
   ],
+  "Put the bar on the stage": [
+   "mir/shell/transport.js"
+  ],
   "Put {name} on corner {c}": [
    "mir/panels/xy.js"
   ],
@@ -4309,9 +4306,6 @@
   ],
   "SPRING — the pad returns to centre when you let go": [
    "mir/panels/xy.js"
-  ],
-  "SPRITES": [
-   "mir/shell/gui.js"
   ],
   "SQR": [
    "mir/modulation/modwindow/modwindow.js",
@@ -5027,8 +5021,7 @@
    "mir/panels/xy.js"
   ],
   "WINDOWS": [
-   "mir/shell/gui.js",
-   "mir/shell/window-picker.js"
+   "mir/shell/gui.js"
   ],
   "WORK BARS · BOTTOM": [
    "mir/modulation/window.js"
@@ -5580,7 +5573,6 @@
    "mir/shell/themes.js"
   ],
   "name::FROST": [
-   "mir/shell/gui.js",
    "mir/shell/themes.js"
   ],
   "name::GRAPHITE": [
@@ -5715,9 +5707,6 @@
   ],
   "opened {name}": [
    "mir/notes/face.js"
-  ],
-  "page": [
-   "mir/shell/gui.js"
   ],
   "page 0 — the greeting, shown when the project opens": [
    "mir/shell/notebook.js"

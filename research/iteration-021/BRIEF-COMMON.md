@@ -12,10 +12,10 @@ THE MACHINE: the night run c8 is rendering the VOLUME's five looks in one Firefo
 
 Laws (standing, Josh's):
 - NO push, NO deploy, NO tag, NO release. Commit locally on your branch only; the integrator merges.
-- `lab/mir/**` may be edited ONLY under the trickle-down rule: bump `lab/mir/version.js` (see `lab/mir/version.js`; +1 per kit change, the integrator reconciles; never 1.6), one line per kit change at
-  the TOP of `docs/FOR-MIR.md` under the `## FROM λWAVES, FOR THE KIT` heading (what, file, why), keep the kit's laws (words through `label()`/`t()` + the
-  English pack; parts by class and `data-*`; `.glass` takes the look store); re-hash with `python3 -I tools/mir-manifest.py` (its sha is pinned in
-  `tests/mir-manifest.test.mjs`). `lab/fonts/**` stays untouched.
+- THE KIT SENTENCE (CLAUDE.md:6, since chain K): THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS: lab/mir is written by adopt.mjs alone; a λWAVES need becomes an additive door numbered 1.5.6-alpha.N with its FOR-MIR line; a removal waits for a line; `node <MIR>/tools/adopt.mjs . --check` says in step. A door is built in a MIR worktree on the kit's
+  own laws (words through `label()`/`t()` + the English pack; parts by class and `data-*`; `.glass` takes the look store), versioned
+  `1.5.6-alpha.N`, then adopted (`MIR-MANIFEST.json` + its pin in `tests/mir-manifest.test.mjs`); `tools/mir-manifest.py` is retired (021 K4).
+  `lab/fonts/**` stays untouched.
 - Josh's dial: "Keep the builds tight and don't bloat the code with random verification/gate codes. Just build the features since we are not even
   1.0.0 release yet." Fix, simplify, don't add. Diagnostics live in `tools/`, not `lab/`.
 - `lab/rack.js`'s `app` literal is never extended; `node tools/rack-deps.mjs --classes --no-write` stays green (HINGE ≤ 25; spectrum.js is AT 25).

@@ -11,22 +11,15 @@ const root = fileURLToPath(new URL('..', import.meta.url));
    file AND rewrites the manifest ("1.4.4", 2026-10-05, a release MIR never cut) passed them.  Each accepted MIR version
    pins the sha-256 of the manifest's own bytes: a forged version fails here, in every checkout and every CI, and a real
    adoption is a visible TWO-file edit — MIR-MANIFEST.json (written by MIR's tools/adopt.mjs) and its row below. */
-const ACCEPTED = { '1.5.0-alpha.33': '11744ffdf4a7728a73a8a48c3b16bfcd743ef5b024ea6e3aeec0e15fa54b4f32',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
-  '1.5.0-alpha.32': '9335213f58e6831d317c7eef847754a59c8f33742b61c09d701c7275e70799fc',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
-  '1.5.0-alpha.31': '022329e4c3bacccd07b3d73ac97ccabfbc35f7bfc63a02f4724b55e7ca90672f',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
-  '1.5.0-alpha.30': 'f604777c7dfee943ed22b85cfd71a270f98eb2bf9a5378888ab1af9c6530f674',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
-  '1.5.0-alpha.29': '692cb9ff15444fbfa01b339d1763bbb9d3b3733c8ce06d8b240ceaceef7342a7',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
-  '1.5.0-alpha.28': 'ad97ad710895ac169027e1b83fc07bb33996c3a7d2c68c9bcc5e8ae6f273ba00',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
-  '1.5.0-alpha.27': '9d3fac82792c9655b8a59c45209a0995c4189f191f41907eaf29266a93e7bcdd',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
-  '1.5.0-alpha.26': '060ddb35892a192b6788d730fe467091182a693573dbe0d6916f64196a7fdb14',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
-  '1.5.0-alpha.25': '646392f348b26a2676b74bba7e15914ca49a4fd3b31100abc75d3923ac90b34e',   // iteration 014: the trickle-down rule (λWAVES edits the kit; docs/FOR-MIR.md)
+const ACCEPTED = {
+  /* 021 K4 · KIT DAY: MIR 1.5.5, the first shipped 1.5 — the λWAVES lift (alpha.25–33 built here under the retired trickle-down rule,
+     folded home and cut as kit commit a7fba3995839, tag v1.5.5), adopted by MIR's tools/adopt.mjs.  From here the kit sentence (CLAUDE.md:6):
+     lab/mir is written by adopt.mjs alone, a λWAVES need is an additive door 1.5.6-alpha.N, and each adoption pins its row here. */
+  '1.5.5': 'f7c96a12a28cc07cf5c4e981e5f79903e9e8f62fe7aaaaec0f35004a4538ebb7',
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
-  /* 0.5.0 C0 · R5-G1: λWAVES is PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
-     tools/adopt.mjs; re-adopt once when brief 8 lands (PLAN §1). */
-  '1.5.0-alpha.24': '3f969725fe44715bb96a42fc56d668defc9b9cfceeb4219d146ecd24cad35351',
-  /* iteration 014 (Josh 2026-10-22: "lift") · the kit is edited in place under the trickle-down rule (docs/FOR-MIR.md's top section):
-     A6 THE SCROLL PILL made 1.5.0-alpha.25; the manifest's file rows re-hashed for the six files it touched, `commit` still alpha.24's */
-  '1.5.0-alpha.25': '646392f348b26a2676b74bba7e15914ca49a4fd3b31100abc75d3923ac90b34e' };
+  /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
+     tools/adopt.mjs */
+  '1.5.0-alpha.24': '3f969725fe44715bb96a42fc56d668defc9b9cfceeb4219d146ecd24cad35351' };
 const manifestBytes = readFileSync(path.join(root, 'MIR-MANIFEST.json'));
 const manifest = JSON.parse(manifestBytes.toString('utf8'));
 assert.equal(manifest.kit, 'MIR');
@@ -38,6 +31,8 @@ const manifestSha = createHash('sha256').update(manifestBytes).digest('hex');
 assert.ok(Object.hasOwn(ACCEPTED, manifest.version), 'MIR-MANIFEST.json names MIR ' + manifest.version + ', which is not an accepted adoption (accepted: ' + Object.keys(ACCEPTED).join(', ') + '). A real adoption is a two-file edit: the manifest MIR\'s tools/adopt.mjs writes, and its sha-256 pinned in ACCEPTED in tests/mir-manifest.test.mjs.');
 assert.equal(manifestSha, ACCEPTED[manifest.version], 'MIR-MANIFEST.json for MIR ' + manifest.version + ' has sha-256 ' + manifestSha + ', not the pinned ' + ACCEPTED[manifest.version] + '. The manifest was edited without re-adoption; a real adoption is a two-file edit: the manifest MIR\'s tools/adopt.mjs writes, and its pin in ACCEPTED.');
 assert.ok(manifest.files && typeof manifest.files === 'object' && !Array.isArray(manifest.files));
+/* 021 K4: the kit has one version — the adopted tokens.json names the same kit the manifest does (MIR tests/version.node.mjs holds it at home) */
+assert.equal(JSON.parse(readFileSync(path.join(root, 'lab/mir/tokens.json'), 'utf8')).kit, manifest.version, 'lab/mir/tokens.json "kit" is not the adopted MIR version');
 
 function inventory(relative) {
   return readdirSync(path.join(root, relative), { withFileTypes: true }).flatMap(entry => {

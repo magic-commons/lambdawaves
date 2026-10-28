@@ -3,7 +3,7 @@
 MIR owns generic instrument behavior. Before changing modulation controls, read
 `lab/mir/modulation/modwindow/host-contract.md` and the upstream
 `/home/joshua-hosain/Documents/MIR/PROMPT.md`. Update MIR first, adopt it, then
-adapt λWAVES' side of the seam (`lab/mod-port.js`, `lab/shell/modulation.js`). THE KIT MOVES HERE since iteration 014 (Josh 10-22: "lift"): `lab/mir/**` IS edited in λWAVES under the trickle-down rule — every kit change bumps `lab/mir/version.js` (1.5.0-alpha.25 now; never 1.6), writes one line at the top of `docs/FOR-MIR.md` under `## FROM λWAVES, FOR THE KIT`, keeps the kit's laws (words through `label()`/`t()`, parts by class and `data-*`), and re-hashes `MIR-MANIFEST.json` with its sha pinned in `tests/mir-manifest.test.mjs` (the scratch `manifest.py` of iteration 014); kit day copies back to `~/Documents/MIR` and BASINS adopts. `lab/fonts/**` stays untouched.
+adapt λWAVES' side of the seam (`lab/mod-port.js`, `lab/shell/modulation.js`). THE KIT IS 1.5.5 AND THE APP ONLY ADDS DOORS: lab/mir is written by adopt.mjs alone; a λWAVES need becomes an additive door numbered 1.5.6-alpha.N with its FOR-MIR line; a removal waits for a line; `node <MIR>/tools/adopt.mjs . --check` says in step. (021 K; the door is made in a MIR worktree and adopted — `MIR-MANIFEST.json` plus its pin in `tests/mir-manifest.test.mjs`, the two-file edit; open asks wait in `docs/FOR-MIR.md` § FOR 1.5.6.) `lab/fonts/**` stays untouched.
 The modulation port is `lab/mod-port.js` (the object `createModulation(port)`
 takes, key for key with MIR 1.5); THE play is `onePlay` in `lab/clock.js`, and
 the modulation follows every edge of it, armed or not (the MOD power is a route bypass), holding the kit's
@@ -474,9 +474,9 @@ bind.js `localStore`), never in the settings blob. `lab/modwindow.js` and
 `lab/audio.js` are gone; the kit's `audio-capture.js` is the capture.
 (0.5.0 C4)
 
-MIR 1.5.0-alpha.24 is adopted and pinned (0.5.0 C0): its manifest sha-256 is
-in `tests/mir-manifest.test.mjs` `ACCEPTED`; re-adopt only with the 1.5
-worktree's `adopt.mjs`, then `--check`. `index.html` declares `@layer app,
+MIR 1.5.5 is adopted and pinned (021 K4): its manifest sha-256 is
+in `tests/mir-manifest.test.mjs` `ACCEPTED`; re-adopt only under the kit
+sentence (line 6), then `--check`. `index.html` declares `@layer app,
 mir;` then `mir/mir.css`; `lab.css` and `skin.css` stay UNLAYERED and beat
 every kit layer. An `app.*` layer ranks below the kit for a normal declaration,
 so keep a λWAVES look with an unlayered rule, and narrow an app rule the layers
