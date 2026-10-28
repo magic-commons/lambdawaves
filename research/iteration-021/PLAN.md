@@ -66,6 +66,7 @@ D1 `docs/laws/*.md` by subject (the stage words, the register and systems, the f
 9. (D1) CLAUDE.md becomes two pages + `docs/laws/`. Default: yes.
 10. (022) The front-end rows handed on: the icon drawings (Gemini via `agy`), the CSB as a control surface (TRANSPORT · MACROS 1–8 knob bank · FAVOURITES 8 slots · METERS), the menus' look, the cramped-space sheet as baseline, H holding the words, the disabled seg's hint. Default: 022's list.
 11. (K/G) Serena and the "thermonuclear" skill: not attached / not found; the chains run on native search, dependency-cruiser and knip (cached). Default: proceed without.
+12. (K) The kit commits and the tag v1.5.5 live in a clone and a bundle (the isolated builder could not write ~/Documents/MIR). Run: git -C ~/Documents/MIR fetch <λW>/.tmp/it021/kit-1.5.5.bundle kit-1.5.5:kit-1.5.5 'refs/tags/v1.5.5:refs/tags/v1.5.5' — then merging kit-1.5.5 into your branches is yours. Default: you run it when you like; later 1.5.6 doors are built on the clone road (a builder clones the bundle, commits the door there as 1.5.6-alpha.N, adopts back with adopt.mjs, pins the sha).
 
 ## MERGE ORDER
 K → G → R → I → V → D (each on the merged tree; the recipe: `git merge --no-ff --no-commit it021-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → commit → CLOSED row → handoff line). After K the kit law is "1.5.6-alpha.N, additive doors only"; every later chain's kit edit follows it.
@@ -73,4 +74,5 @@ K → G → R → I → V → D (each on the merged tree; the recipe: `git merge
 ## CLOSED
 | chain | BASE | commit | note |
 |---|---|---|---|
-| K | aaf54b6 | | |
+| K | 5fefda2 | b0f6441 | K1–K4 (K-BUILD.md; MIR 1.5.5 cut in a clone — kit commits dd3e8c7/0feba5e/a7fba39 + tag v1.5.5, bundle .tmp/it021/kit-1.5.5.bundle, Josh fetches into ~/Documents/MIR; adopt --check in step; node suite green; LOCK 843/0 · 987/0; bar byte-identical) |
+| G | b0f6441 | | |
