@@ -14,7 +14,7 @@ export function createEqAudio(app, { eq, host, sync }) {
     if (t === said) return; said = t; ro.set(t); ro.setSub(on && !A ? 'add AUDIO in the MODULATION window, then press its MIC' : on ? `low n ${span('low')} · mid n ${span('mid')} · high n ${span('high')}` : ''); }
   const s = sw({ label: 'AUDIO IN', value: false, title: 'The faders follow the first AUDIO device',
     onChange: (v) => { on = v; sync(); say(); } });
-  el('div', 'row tight eq-audio', host).append(s.root, ro.root);
+  el('div', 'row tight fit eq-audio', host).append(s.root, ro.root);
   eq.audioTick = () => {
     if (!on) return; const A = device(); say(A); if (!A) return;
     let moved = false;

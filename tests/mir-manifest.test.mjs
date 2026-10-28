@@ -30,9 +30,9 @@ const ACCEPTED = {
   /* 022 S1 · MIR 1.5.6-alpha.5 on the clone road (kit 3e6f5cc): RELIEF IS TIGHT (a 1–2 px raise, a grey dark highlight, the shine a hairline,
      SHINE SOFT 0–6, the light lift ≤ 45 %) and THE MENU'S INK (--surface-menu-tint, --surface-menu-edge; the floor on the menubar lists and the hint) */
   '1.5.6-alpha.5': 'b208cdbf993e49fe208d768f7931bdc20d4bf5071de1a9e6031dab7333fe6592',
-  /* 022 F1 · MIR 1.5.6-alpha.6 on the clone road (kit 19c89e3): THE FIT ROW (.row.fit, row(parent, { fit, cellMin, knob, cls })) and its tokens
+  /* 022 F1 · MIR 1.5.6-alpha.6 on the clone road (kit 19c89e3, 6a8cd78): THE FIT ROW (.row.fit, row(parent, { fit, cellMin, knob, cls })) and its tokens
      --cell-min --knob-min --knob --knob-max --row-gap */
-  '1.5.6-alpha.6': '65acd0c6dc54e13501e7c053214a0e3ebc22a19370e1732f094c6fb65c0a5bd1',
+  '1.5.6-alpha.6': 'f0189191f314c0429f942704403e4c07d1299c1370f3c426f93a688fcb83e4cc',   // 022 F2 re-pin (kit 6a8cd78: the cells stretch, a stretched switch centres its words)
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */

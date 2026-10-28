@@ -118,7 +118,7 @@ export function createOrbitals(host, api) {
     const set = mos.length > 1 && mos.every((m) => m.label === mos[0].label && m.member);   // one degenerate level: its name once, then its members
     return name + ' · ' + (set ? `${forms(mos[0].label).latex} ` + mos.map((m) => `(${m.member})`).join(' + ') : mos.length > 4 ? mos.length + ' orbitals' : mos.map((m) => forms(m).latex).join(' + '));
   }
-  const mrow = el('div', 'row tight reg-morph', host);
+  const mrow = el('div', 'row tight fit reg-morph', host);
   /* A ↔ B (register-morph.js, one for both panes): its own target OMORPH; a store marks the register, a MORPH change repaints */
   const M = createMorph({ bar, row: mrow, id: OMORPH, key: 'k', lanes: 'dials', knobTitle: 'Where the register plays on the path A → B', hand, status,
     rows: () => rowsEl, valid: (k) => !!sol && k >= 0 && k < sol.nAO, snapshot: () => { const S = new Map(); for (const [k, c] of sel) if (c.amp > 0) S.set(k, { re: c.amp * Math.cos(c.phase), im: c.amp * Math.sin(c.phase) }); return S; },

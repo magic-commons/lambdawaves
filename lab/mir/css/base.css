@@ -272,12 +272,12 @@ button:is([data-gly="north"], [data-gly="popOut"], [data-gly="dock"]) > svg { wi
   align-items: start; justify-content: stretch; }
 .row.fit[data-knob="sm"] { --knob-max: var(--knob, 34px); }                    /* the face at most the plain knob's */
 .row.fit[data-knob="lg"] { --knob-min: var(--knob, 34px); }                    /* the face at least the plain knob's */
-.row.fit > .k { width: auto; min-width: 0; container-type: inline-size; }
+.row.fit > .k { width: auto; min-width: 0; justify-self: stretch; container-type: inline-size; }   /* stretch: a size container never takes its width from its content */
 .row.fit > .k > .k-dial { width: clamp(var(--knob-min, 28px), 62cqi, var(--knob-max, 44px)); height: auto; aspect-ratio: 1; box-sizing: border-box; }
 .row.fit > .k > .k-dial > .k-needle { height: 38%; }
 .row.fit > .k.k-mod > .k-dial::after { height: 47%; background: linear-gradient(to top, transparent 68%, var(--acc) 68%); }
-.row.fit > :is(.sw, .trig, .ro, .segw, .seg, select.sel) { width: auto; min-width: 0; max-width: 100%; box-sizing: border-box; }
-.row.fit > :is(.sw, .trig) { overflow: hidden; }
+.row.fit > :is(.sw, .trig, .ro, .segw, .seg, select.sel) { width: auto; min-width: 0; max-width: 100%; box-sizing: border-box; justify-self: stretch; }
+.row.fit > :is(.sw, .trig) { overflow: hidden; justify-content: center; }
 .row.fit > :is(.seg, .segw, .wide) { grid-column: span 2; }
 .row.fit > .full { grid-column: 1 / -1; }
 /* DISABLED is one rule, in skin.css §6: one fade (--state-disabled), no relief, no pointer.  W-STURMIAN: a control that

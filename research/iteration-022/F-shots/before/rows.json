@@ -1,6 +1,7 @@
 [
  {
   "name": "settings",
+  "cut": [],
   "height": 598,
   "width": 280,
   "body": 276,
@@ -51,6 +52,7 @@
  },
  {
   "name": "settings-q",
+  "cut": [],
   "height": 897,
   "width": 280,
   "body": 276,
@@ -110,6 +112,7 @@
  },
  {
   "name": "palette",
+  "cut": [],
   "height": 341,
   "width": 280,
   "body": 276,
@@ -132,8 +135,8 @@
    {
     "cls": "mir-ramp-verbs",
     "n": 3,
-    "lines": 2,
-    "wrapped": 2,
+    "lines": 1,
+    "wrapped": 0,
     "h": 59,
     "w": 252,
     "face": "34–34 in 62–62"
@@ -142,6 +145,7 @@
  },
  {
   "name": "wave",
+  "cut": [],
   "height": 462,
   "width": 280,
   "body": 276,
@@ -164,7 +168,50 @@
   ]
  },
  {
+  "name": "wave-esp",
+  "cut": [],
+  "height": 663,
+  "width": 280,
+  "body": 276,
+  "box": [
+   1310,
+   10,
+   1590,
+   673
+  ],
+  "rows": [
+   {
+    "cls": "row.tight.wave-row",
+    "n": 6,
+    "lines": 2,
+    "wrapped": 3,
+    "h": 103,
+    "w": 252,
+    "face": "34–34 in 79–79"
+   },
+   {
+    "cls": "row.tight.wave-row",
+    "n": 4,
+    "lines": 2,
+    "wrapped": 0,
+    "h": 96,
+    "w": 252,
+    "face": "34–34 in 71–71"
+   },
+   {
+    "cls": "row.tight.wave-row",
+    "n": 3,
+    "lines": 1,
+    "wrapped": 0,
+    "h": 48,
+    "w": 252,
+    "face": "34–34 in 68–68"
+   }
+  ]
+ },
+ {
   "name": "camera",
+  "cut": [],
   "height": 715,
   "width": 280,
   "body": 276,
@@ -233,6 +280,7 @@
  },
  {
   "name": "clip",
+  "cut": [],
   "height": 292,
   "width": 280,
   "body": 276,
@@ -256,6 +304,7 @@
  },
  {
   "name": "spectrum",
+  "cut": [],
   "height": 1479,
   "width": 274,
   "body": 270,
@@ -315,6 +364,7 @@
  },
  {
   "name": "gas",
+  "cut": [],
   "height": 1400,
   "width": 274,
   "body": 270,
@@ -374,6 +424,7 @@
  },
  {
   "name": "informational",
+  "cut": [],
   "height": 888,
   "width": 280,
   "body": 276,
@@ -432,8 +483,8 @@
    {
     "cls": "row.tight.info-seat",
     "n": 3,
-    "lines": 2,
-    "wrapped": 1,
+    "lines": 1,
+    "wrapped": 0,
     "h": 60,
     "w": 252,
     "face": "34–34 in 62–62"
@@ -469,6 +520,7 @@
  },
  {
   "name": "field",
+  "cut": [],
   "height": 681,
   "width": 280,
   "body": 276,
@@ -519,6 +571,7 @@
  },
  {
   "name": "equalizer",
+  "cut": [],
   "height": 326,
   "width": 280,
   "body": 276,
@@ -542,6 +595,7 @@
  },
  {
   "name": "molecules",
+  "cut": [],
   "height": 798,
   "width": 280,
   "body": 276,
@@ -582,8 +636,8 @@
    {
     "cls": "row.tight.reg-morph",
     "n": 3,
-    "lines": 2,
-    "wrapped": 2,
+    "lines": 1,
+    "wrapped": 0,
     "h": 65,
     "w": 262,
     "face": "34–34 in 62–62"
@@ -601,6 +655,7 @@
  },
  {
   "name": "nodes",
+  "cut": [],
   "height": 640,
   "width": 440,
   "body": 438,
@@ -624,6 +679,7 @@
  },
  {
   "name": "csb",
+  "cut": [],
   "height": 568,
   "width": 262,
   "body": 262,

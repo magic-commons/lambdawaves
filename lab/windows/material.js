@@ -163,7 +163,7 @@ export function createMaterial(app) {
     el('div', 'note', gd).innerHTML = '<b>Draw style.</b> KNEE bends how a ray’s opacity saturates: 0.6 is the plain exponential, higher a soft shoulder that lets dense cores show through (the default 3 keeps a dense core slightly see-through), lower a hard knee. ISO sets the SOLID, SHELL, SIGNED and SHELL ± surface and the octave BANDS are anchored on; GRAIN is how many DUST grains there are. ESP spans ±RANGE through a signed log, and beyond it the colour holds; LIVE solves φ again while the density moves, at most once a second — off, once per molecule, basis and VIEW.';   // iteration 008 W: DITHER left for SETTINGS › QUALITY · iteration 008 G: GRAIN joined DUST, KNEE moved to the ray
 
     const gs = group(wClip.body, 'observer only');
-    const r3 = el('div', 'row', gs);
+    const r3 = el('div', 'row fit', gs);   // 022 F2: ON · CLIP | SLAB · POS · THICK, one fit row
     /* wave 106: these two keep their handles for the same reason POS and THICK now do — an undo has to
        be able to MOVE a control, and a control nothing holds cannot be moved. */
     /* iteration 008 W (Josh: "Rename 'Volume' in the clip window to 'Full' or 'OFF/ON' with a light indicator"): VOLUME | CLIP | SLAB is an ON
@@ -205,7 +205,7 @@ export function createMaterial(app) {
     const palOn = (v, keepView) => { mat.paletteOn = v; applyAccent(); if (v && !keepView) { mat.view = VIEW.phase; ui.viewSeg.set('phase'); } styleSync(); schedule(TIER.PRESENT); };   // keepView: a restore's own VIEW stands (016 P6 made a palette ON at an undo common enough to show it)
     const palSay = (t) => { if (app.state.stageText) app.state.stageText.say('style', t); };   // iteration 007: a hand's PALETTE on, off or preset (INFORMATIONAL › STYLE · PALETTE); a restore, a link or an undo say nothing
     const palSw = sw({ label: 'PALETTE', value: false, onChange: (v) => { palOn(v); palSay('PALETTE · ' + (v ? 'ON' : 'OFF')); } });
-    const rowOn = el('div', 'row tight palette-enable', gp); rowOn.appendChild(palSw.root).dataset.keyAction = 'palette';
+    const rowOn = el('div', 'row tight fit palette-enable', gp); rowOn.appendChild(palSw.root).dataset.keyAction = 'palette';
     const ang = (u) => ((2 * u - 1) * Math.PI).toFixed(3) + ' rad';   // the ONE function that prints a stop's angle (the reader, the float, the stops' aria-valuetext)
     /* iteration 013 S2 (Josh: "Remove the text that says 'the built in' for HSV and 'Re/Im Legible'"): the kit's words lose their parenthetical
        where the app shows them (the stepper's name, the list's rows, the toast) — HSV WHEEL, BIPOLAR; the kit's PRESETS are untouched */
@@ -318,7 +318,8 @@ export function createMaterial(app) {
       /* 020 S3 (Josh: "Make two rows if needed for that super crammed top row"): PAN HOME · HOME on the kit's row, LOCK · FLIP · AUTO-ROTATE on a second
          one under it (also .cam-verbs, so skin.css and a reader of the verbs see both) */
       const v0 = q('.cam-verbs'), v = v0 ? el('div', 'cam-row cam-verbs cam-switches') : more; if (v0) v0.after(v);
-      for (const n of [ui.camLockSw.root, kitRoot('flip'), kitRoot('autoRotate')]) if (n) v.appendChild(n); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
+      for (const n of [ui.camLockSw.root, kitRoot('flip'), kitRoot('autoRotate')]) if (n) v.appendChild(n); fold(q('.cam-mode') || R, more, { what: 'pan and hand' });
+      for (const r of R.querySelectorAll('.cam-verbs, .cam-handrow')) r.classList.add('row', 'fit'); }   // 022 F2: the two verb rows (020 S3) and the hand's dials are fit rows; the sphere's column and the PAN pad are not
     /* iteration 012 R3 (Josh 10-20: "Remove text that says 'control' and 'direction' in camera … Increase the size of the 3D thingy while moving Zoom
        and FOV under 'YAW' and 'PITCH' … Rename 'Hand' to 'Controls'"): the kit's two labels leave its DOM, ZOOM · FOV join the sphere's knob column
        under YAW · PITCH (the view row empties and goes), and skin.css draws the sphere bigger; the panel's own file is untouched */

@@ -17,7 +17,7 @@
 .nodes-card.off { opacity: .5; }
 .nodes-card.off .nodes-body { pointer-events: none; }
 .nodes-mark { font-style: normal; letter-spacing: 0; color: var(--fg-soft); }
-.nodes-knobs { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 4px; }
+.nodes-knobs { --cell-min: 56px; }   /* 022 F2: a card's knobs are a fit row (`.row.fit`); 56-px cells keep OUT WHITE whole */
 .nodes-title { display: flex; align-items: center; gap: 6px; height: 26px; margin: 0 -8px 6px; padding: 0 8px; cursor: move; user-select: none;
   font: var(--w-bold) var(--fs-micro) / 1 var(--font-ui); letter-spacing: var(--tr-wider, .12em); color: var(--acc); border-bottom: 1px solid var(--glass-hairline); }
 .nodes-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

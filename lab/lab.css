@@ -464,7 +464,6 @@ body.window-info-off .dev:not([data-id="chem"], [data-id="informational"]) .dev-
 .reg-bar .trig.on { color: var(--acc); }
 .reg-morph { align-items: center; }
 .reg-morph:not(:where(.row.tight)) { justify-content: space-between; }
-.reg-morph .k { flex: 0 0 auto; }
 .reg-drive { align-items: center; }
 .reg-drive .sel { flex: 1 1 0; min-width: 0; }
 .reg-drive .trig { flex: 0 0 auto; padding: 0 8px; }
@@ -713,8 +712,6 @@ body.mod-arming .mir-select, body.mod-arming .k:not([data-param]) { opacity: .45
    where the dial's box (label · 34 px dial · value line) stood 5 px taller than the seg's and lifted the dial 11 px above the RHF | LDA cells.
    The dial is OFFSET onto the cells' centre and its label back onto METHOD's label line — relative offsets, so no box in the card changes
    size (a margin that did set the register's ResizeObservers looping in tests/register.browser-test.mjs) */
-.mol-mrow > .k { position: relative; top: 11px; }
-.mol-mrow > .k > .k-lbl { position: relative; top: -6px; }
 /* 0.7.4 C2 · THE SHELF (chemview.js): the page as tiles under the picker, as many as fit (two a row on a phone); a tile wears ATOMS' cell (.pk-c), the current one lit */
 .mol-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 4px; margin: 2px 0 6px; --nc: var(--acc); }
 .mol-shelf[hidden] { display: none; }
@@ -816,7 +813,6 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .dev[data-id="spectrum"] .sp-ham > .lw-field-head { margin: 2px 0; }
 .dev[data-id="spectrum"] .sp-ham > .lw-field-head > .lw-fold { min-height: 30px; height: 30px; }
 .dev[data-id="spectrum"] .sp-ham-body > .row { margin: 4px 0; gap: 6px; flex-wrap: nowrap; justify-content: center; align-items: flex-start; }
-.dev[data-id="spectrum"] .sp-ham-body .row > .k { flex: 0 0 52px; width: 52px; }   /* over skin.css' .native-clean .row > .k (64 px) */
 .dev[data-id="spectrum"] .sp-ham-body .k-lbl { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 /* THE KNOB-SIZED SEG (`.sp-vseg`, 015 S1; one rule for every window since 017 R4 — SPECTRUM, EMISSION's RANGE): its options in a column, a
    knob's width, and its top on the dials' line — an unlabelled one keeps the label's line empty (a knob's `.k-lbl` is one micro line + 2 px) */
@@ -827,14 +823,10 @@ body.phone .mol-shelf { grid-template-columns: repeat(2, 1fr); }
 .dev .sp-vseg .seg-b { min-height: 17px; min-width: 0; padding: 0 4px; font-size: var(--fs-micro); }
 /* 017 R4 (Josh's refs/hamiltonian-misaligned.png): HYDROGEN's two rows share ONE column rhythm — three 56-px columns, 6-px gaps, centred
    as a block, so Z · μ/mₑ · the mass seg and SCALE · λ SCALE stand in the same columns on the same dial line */
-.dev[data-id="spectrum"] .sp-ham-body > :is(.sp-ham-h, .sp-ham-s) { display: grid; grid-template-columns: repeat(3, 56px); justify-content: center; column-gap: 6px; }
-.dev[data-id="spectrum"] .sp-ham-body > :is(.sp-ham-h, .sp-ham-s) > :is(.k, .sp-vseg) { width: 56px; }
 /* the note row (017 W3): its words, then OPEN at the row's end on their centre line */
 .dev[data-id="spectrum"] .sp-ham-n:not([hidden]) { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
 .dev[data-id="spectrum"] .sp-ham-n > .trig { flex: 0 0 auto; margin-left: auto; min-height: 26px; font-size: var(--fs-micro); }
 .dev[data-id="spectrum"] .sp-ham-body > .sp-ham-b { gap: 4px; }   /* the widest row: three knobs, the seg and the trigs in a 280-px body */
-.dev[data-id="spectrum"] .sp-ham-body .sp-ham-b > .k { flex: 0 0 46px; width: 46px; }
-.dev[data-id="spectrum"] .sp-ham-b .sp-vseg { flex-basis: 52px; width: 52px; }
 .dev[data-id="spectrum"] .sp-ham-trigs { display: flex; flex-direction: column; gap: 4px; flex: 1 1 64px; max-width: 84px; min-width: 0; padding-top: 4px; }
 .dev[data-id="spectrum"] .sp-ham-trigs > .trig { min-height: 26px; min-width: 0; padding: 0 6px; font-size: var(--fs-micro); }
 

@@ -32,7 +32,7 @@ export function createInformational(app) {
   P.subscribe((st, changed) => { for (const k of changed) if (ctl[k] && ctl[k].get() !== st[k]) ctl[k].set(st[k]); });
   /* the names other roads press: verbs.js `switch formula|labels`, the notebook's command list */
   ui.molFormulaSw = ctl.molFormula.widget; ui.atomLabelsSw = ctl.atomLabels.widget;
-  const row = (parent, keys, cls = '') => { const r = el('div', 'row tight' + (cls ? ' ' + cls : ''), parent); for (const k of keys) r.appendChild(ctl[k].root); return r; };
+  const row = (parent, keys, cls = '') => { const r = el('div', 'row tight fit' + (cls ? ' ' + cls : ''), parent);   /* 022 F2 (call 7): every hand grid a fit row */ for (const k of keys) r.appendChild(ctl[k].root); return r; };
   /* iteration 012 R1 (Josh 10-20): the headings THE WORDS and ANNOUNCE · CURSOR · MARKS are hidden — the rows say what they are */
   const words = group(w.body, 'THE WORDS'); words.querySelector(':scope > .grp-lbl')?.remove();
   row(words, ['molFormula', 'molFormulaSize'], 'info-words');

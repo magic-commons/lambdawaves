@@ -89,7 +89,7 @@ export function createStates(host, api) {
     onChange: (p) => { presetSel.set(null); if (p && preset(p) && api.announce) api.announce(p); } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
   bar.appendChild(presetSel.root); presetSel.button.title = 'Rule-based presets, for every molecule';
   const brightBtn = el('button', 'trig on', bar); brightBtn.type = 'button'; brightBtn.textContent = 'BRIGHT'; brightBtn.title = 'Bright valence states only, or every state';
-  const mrow = el('div', 'row tight reg-morph', host);
+  const mrow = el('div', 'row tight fit reg-morph', host);
   /* A ↔ B (register-morph.js, one for both panes): its own target `reg.morph`; a store asks the worker for its states' vectors */
   const M = createMorph({ bar, row: mrow, id: 'reg.morph', key: 'key', lanes: 'lanes', hand, status, rows: () => rowsEl,
     knobTitle: 'Where the register plays on the path A → B',
@@ -123,7 +123,7 @@ export function createStates(host, api) {
   const tuneBtn = el('button', 'trig', dr); tuneBtn.type = 'button'; tuneBtn.textContent = 'ω → LANE'; tuneBtn.title = 'Tune to the selected lane: its ω and axis';
   tuneBtn.addEventListener('click', () => tune());
   const envSeg = seg({ label: 'ENVELOPE', value: 'cw', options: [{ id: 'cw', label: 'CW' }, { id: 'pulse', label: 'PULSE' }], onChange: (v) => setDriveParam('envelope', v) });
-  const dk = el('div', 'row tight reg-drive', host);
+  const dk = el('div', 'row tight fit reg-drive', host);
   const wK = knob({ label: '<m>ω</m>', aria: 'drive frequency', min: 0.05, max: 3, value: drive.omega, log: true, unit: ' Eh', fmt: (v) => v.toFixed(4),
     title: 'Carrier frequency (Eh); a stick is resonance', onInput: (v) => { if (hand('reg.w', v)) return; setDriveParam('omega', v); } });
   const eK = knob({ label: '<m>E₀</m>', aria: 'drive amplitude', min: 1e-4, max: 0.2, value: drive.e0, log: true, unit: ' a.u.', fmt: (v) => v.toExponential(2),

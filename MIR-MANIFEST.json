@@ -2,7 +2,7 @@
   "kit": "MIR",
   "version": "1.5.6-alpha.6",
   "line": "1.5",
-  "commit": "19c89e39063e",
+  "commit": "6a8cd78f0c09",
   "files": {
     "lab/fonts/LWTitle-title.woff2": "8069abf19624158c",
     "lab/fonts/Roboto-OFL.txt": "061402327a96aadb",
@@ -67,7 +67,7 @@
     "lab/mir/core/session.js": "c850860f969d9bbc",
     "lab/mir/core/wakelock.js": "460826e7310ca0c3",
     "lab/mir/core/zip.js": "14a6b76c144c67d1",
-    "lab/mir/css/base.css": "a0cf785db7fad6d7",
+    "lab/mir/css/base.css": "2ac193e9bf5c588b",
     "lab/mir/css/skin.css": "99a2f24c771e23f5",
     "lab/mir/css/tokens.css": "8835e37154af8927",
     "lab/mir/folders/files.js": "81edd3d3fc39d750",

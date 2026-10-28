@@ -56,7 +56,7 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - **BUILT 1.5.6-alpha.6 · THE FIT ROW** (022 F1, `css/base.css`, `css/tokens.css`, `kit.js`, tokens.json, docs/CONTROLS.md "A row fits"; kit
   19c89e3): `.row.fit` (auto-fit cells of `--cell-min`, the knob face `clamp(--knob-min, 62cqi, --knob-max)`, switches and triggers stretch,
   segs and `.wide` span two, `.full` the line, `data-knob="sm|lg"`) and `row(parent, { fit, cellMin, knob, cls })`; the tokens `--cell-min` 40 ·
-  `--knob-min` 28 · `--knob` 34 · `--knob-max` 44 · `--row-gap` 4; opt-in (a plain `.row` does not move); the starter's PICTURE and a gallery card.
+  `--knob-min` 28 · `--knob` 34 · `--knob-max` 44 · `--row-gap` 4; the cells stretch (kit 6a8cd78, 022 F2); opt-in (a plain `.row` does not move); the starter's PICTURE and a gallery card.
 - **FROST in LIGHT writes white ink on every pane** (022 S, not built): the recipe's White Text holds in LIGHT, so over a light stage FROST's
   windows read 1.05 : 1 (the kit's own themes.browser label table says the same); the popups are fixed (above), the panes wait for a ruling
   (TEXT AUTO in LIGHT, or a darker veil).

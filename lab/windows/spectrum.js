@@ -36,7 +36,7 @@ export function createSpectrumCard(app) {
      every `ui.*` name, id and saved key is the one it was. */
   const hamGroup = group(wSpec.body, ''), hamHead = el('div', 'row tight lw-field-head', hamGroup), hamBody = el('div', 'sp-ham-body', hamGroup);
   hamGroup.classList.add('sp-ham'); label(el('div', 'grp-lbl', hamHead), 'HAMILTONIAN'); fold(hamHead, hamBody, { what: 'the Hamiltonian', key: 'ham' });
-  const hamRows = { hydrogen: el('div', 'row tight sp-ham-h', null), scale: el('div', 'row tight sp-ham-s', null), box: el('div', 'row tight sp-ham-b', null), atom: el('div', 'row tight sp-ham-a', null), note: el('div', 'sp-cap sp-ham-n', null) };
+  const hamRows = { hydrogen: el('div', 'row tight fit sp-ham-h', null), scale: el('div', 'row tight fit sp-ham-s', null), box: el('div', 'row tight fit sp-ham-b', null), atom: el('div', 'row tight fit sp-ham-a', null), note: el('div', 'sp-cap sp-ham-n', null) };
   /** the rows the system in force shows (the stepper's id: an operator, or 'molecules') */
   /* iteration 016 W7 (Josh, call 10: "make the section dynamic by mode as WAVE's knobs are"): a turn of ‹ SYSTEM › re-lays the group once — the rows
      written only when the set shown changes (the stepper and the operator's listener both ask), and the body's height glides old → new in 160 ms

@@ -9,11 +9,15 @@ settings-q    rows  5 · controls  12 · wrapped  1 · height 897 · width 280 �
     row.tight.lw-playback              n 2 · lines 2 · wrapped 0 · h 127 · w 252
     row.tight.lw-dither                n 2 · lines 2 · wrapped 1 · h 115 · w 252 · face 34–34 in 64–64
     row                                n 2 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 64–64
-palette       rows  2 · controls   6 · wrapped  2 · height 341 · width 280 · body 276
+palette       rows  2 · controls   6 · wrapped  0 · height 341 · width 280 · body 276
     row.tight.palette-enable           n 3 · lines 1 · wrapped 0 · h 44 · w 252
-    mir-ramp-verbs                     n 3 · lines 2 · wrapped 2 · h 59 · w 252 · face 34–34 in 62–62
+    mir-ramp-verbs                     n 3 · lines 1 · wrapped 0 · h 59 · w 252 · face 34–34 in 62–62
 wave          rows  1 · controls   6 · wrapped  3 · height 462 · width 280 · body 276
     row.tight.wave-row                 n 6 · lines 2 · wrapped 3 · h 103 · w 252 · face 34–34 in 79–79
+wave-esp      rows  3 · controls  13 · wrapped  3 · height 663 · width 280 · body 276
+    row.tight.wave-row                 n 6 · lines 2 · wrapped 3 · h 103 · w 252 · face 34–34 in 79–79
+    row.tight.wave-row                 n 4 · lines 2 · wrapped 0 · h 96 · w 252 · face 34–34 in 71–71
+    row.tight.wave-row                 n 3 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 68–68
 camera        rows  6 · controls  16 · wrapped  0 · height 715 · width 280 · body 276
     cam-row.cam-verbs                  n 2 · lines 1 · wrapped 0 · h 40 · w 252
     cam-row.cam-verbs.cam-switches     n 3 · lines 1 · wrapped 0 · h 44 · w 252
@@ -35,13 +39,13 @@ gas           rows  5 · controls  16 · wrapped  0 · height 1400 · width 274 
     row.tight                          n 2 · lines 1 · wrapped 0 · h 48 · w 246 · face 34–34 in 64–64
     row.tight.sp-ham-b                 n 4 · lines 1 · wrapped 0 · h 60 · w 246 · face 34–34 in 46–46
     sp-ham-trigs                       n 2 · lines 2 · wrapped 0 · h 60 · w 40
-informational rows  9 · controls  30 · wrapped  9 · height 888 · width 280 · body 276
+informational rows  9 · controls  30 · wrapped  8 · height 888 · width 280 · body 276
     row.tight.info-words               n 2 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 62–62
     row.tight.info-words               n 3 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 62–62
     row.tight.info-words               n 2 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 62–62
     row.tight.info-words               n 3 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 62–62
     row.tight.info-words               n 4 · lines 2 · wrapped 2 · h 94 · w 252
-    row.tight.info-seat                n 3 · lines 2 · wrapped 1 · h 60 · w 252 · face 34–34 in 62–62
+    row.tight.info-seat                n 3 · lines 1 · wrapped 0 · h 60 · w 252 · face 34–34 in 62–62
     row.tight.info-grid                n 8 · lines 4 · wrapped 6 · h 198 · w 252 · face 34–34 in 62–62
     row.tight.info-col                 n 2 · lines 2 · wrapped 0 · h 94 · w 122
     row.tight.info-col                 n 3 · lines 3 · wrapped 0 · h 144 · w 122
@@ -52,11 +56,11 @@ field         rows  4 · controls  18 · wrapped  4 · height 681 · width 280 �
     row.tight                          n 4 · lines 2 · wrapped 0 · h 100 · w 252 · face 34–34 in 64–64
 equalizer     rows  1 · controls   7 · wrapped  0 · height 326 · width 280 · body 276
     eq-faders                          n 7 · lines 7 · wrapped 0 · h 152 · w 88
-molecules     rows  5 · controls  14 · wrapped  2 · height 798 · width 280 · body 276
+molecules     rows  5 · controls  14 · wrapped  0 · height 798 · width 280 · body 276
     row.tight.mol-top                  n 2 · lines 1 · wrapped 0 · h 46 · w 262
     row.tight.sp-head                  n 4 · lines 1 · wrapped 0 · h 44 · w 262
     row.tight.reg-bar                  n 2 · lines 1 · wrapped 0 · h 44 · w 262
-    row.tight.reg-morph                n 3 · lines 2 · wrapped 2 · h 65 · w 262 · face 34–34 in 62–62
+    row.tight.reg-morph                n 3 · lines 1 · wrapped 0 · h 65 · w 262 · face 34–34 in 62–62
     row.tight.mol-mrow                 n 3 · lines 1 · wrapped 0 · h 46 · w 262 · face 0–0 in 0–0
 nodes         rows  1 · controls   5 · wrapped  2 · height 640 · width 440 · body 438
     nodes-body.nodes-knobs             n 5 · lines 2 · wrapped 2 · h 131 · w 220 · face 34–34 in 62–62

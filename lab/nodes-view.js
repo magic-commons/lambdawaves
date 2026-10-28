@@ -108,9 +108,9 @@ export function createView(parent, kind, M) {
     const x = el('button', 'nodes-x', n.bar); x.type = 'button'; chip(x, 'close', 'BYPASS NODE'); x.addEventListener('click', () => M.setBypass(q.id, !q.bypass));
     const b = el('button', 'nodes-rm', n.bar); b.type = 'button'; chip(b, 'clear', 'REMOVE NODE'); b.addEventListener('click', () => M.remove(q.id));
     if (q.type === 'curves') n.view = M.curvesIn(n.body);
-    else { n.body.classList.add('nodes-knobs'); n.ctl = nodeBody(n.body, q, t, { idOf: (k) => M.ID(q, k), hand: (k, v) => M.hand(q, k, v) }); }
+    else { n.body.classList.add('nodes-knobs', 'row', 'fit'); n.ctl = nodeBody(n.body, q, t, { idOf: (k) => M.ID(q, k), hand: (k, v) => M.hand(q, k, v) }); }
     if (t.cls !== 'layer') {                                          // the foot fold: FADE · MASK · SOFT
-      const f = el('div', 'nodes-foot', n.c), tg = el('button', 'nodes-foot-t', f), fb = el('div', 'nodes-knobs', f); tg.type = 'button'; label(tg, 'FADE · MASK'); fb.hidden = true;
+      const f = el('div', 'nodes-foot', n.c), tg = el('button', 'nodes-foot-t', f), fb = el('div', 'nodes-knobs row fit', f); tg.type = 'button'; label(tg, 'FADE · MASK'); fb.hidden = true;
       tg.setAttribute('aria-expanded', 'false'); tg.addEventListener('click', () => { fb.hidden = !fb.hidden; tg.setAttribute('aria-expanded', String(!fb.hidden)); });
       n.foot = tg; n.fctl = nodeBody(fb, q, { knobs: FOOT }, { idOf: (k) => M.ID(q, k), hand: (k, v) => M.hand(q, k, v) });
     }

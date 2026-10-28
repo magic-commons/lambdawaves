@@ -1,0 +1,69 @@
+settings      rows  4 · controls   9 · wrapped  0 · height 598 · width 280 · body 276
+    row.tight.settings-status-grid     n 2 · lines 1 · wrapped 0 · h 44 · w 252
+    row.tight                          n 3 · lines 3 · wrapped 0 · h 195 · w 252
+    row.tight.fit                      n 2 · lines 1 · wrapped 0 · h 55 · w 252 · face 34–34 in 60–60
+    row.tight                          n 2 · lines 2 · wrapped 0 · h 112 · w 252
+settings-q    rows  5 · controls  12 · wrapped  0 · height 842 · width 280 · body 276
+    row                                n 2 · lines 2 · wrapped 0 · h 114 · w 252
+    row.tight                          n 4 · lines 3 · wrapped 0 · h 179 · w 252
+    row.tight.lw-playback              n 2 · lines 2 · wrapped 0 · h 127 · w 252
+    row.tight.fit                      n 2 · lines 1 · wrapped 0 · h 60 · w 252 · face 34–34 in 60–60
+    row.fit.lw-domain                  n 2 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 81–81
+palette       rows  2 · controls   6 · wrapped  0 · height 341 · width 280 · body 276
+    row.tight.fit                      n 3 · lines 1 · wrapped 0 · h 44 · w 252
+    mir-ramp-verbs                     n 3 · lines 1 · wrapped 0 · h 59 · w 252 · face 34–34 in 62–62
+wave          rows  1 · controls   6 · wrapped  3 · height 458 · width 280 · body 276
+    row.tight.wave-row                 n 6 · lines 2 · wrapped 3 · h 99 · w 252 · face 34–34 in 81–81
+wave-esp      rows  3 · controls  13 · wrapped  3 · height 652 · width 280 · body 276
+    row.tight.wave-row                 n 6 · lines 2 · wrapped 3 · h 99 · w 252 · face 34–34 in 81–81
+    row.tight.wave-row                 n 4 · lines 2 · wrapped 0 · h 88 · w 252 · face 29–29 in 47–47
+    row.tight.wave-row                 n 3 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 60–60
+camera        rows  6 · controls  16 · wrapped  0 · height 715 · width 280 · body 276
+    cam-row.cam-verbs.row              n 2 · lines 1 · wrapped 0 · h 40 · w 252
+    cam-row.cam-verbs.cam-switches     n 3 · lines 1 · wrapped 0 · h 44 · w 252
+    cam-row.cam-mode                   n 2 · lines 1 · wrapped 0 · h 46 · w 252
+    mir-camsphere-side                 n 4 · lines 4 · wrapped 0 · h 199 · w 62 · face 34–34 in 62–62
+    mir-xy-side                        n 2 · lines 2 · wrapped 0 · h 100 · w 62 · face 34–34 in 62–62
+    cam-row.cam-handrow.row            n 3 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 81–81
+clip          rows  1 · controls   4 · wrapped  0 · height 290 · width 280 · body 276
+    row.fit                            n 4 · lines 1 · wrapped 0 · h 46 · w 252 · face 29–29 in 47–47
+spectrum      rows  5 · controls  15 · wrapped  0 · height 1479 · width 274 · body 270
+    row.tight.sp-head                  n 4 · lines 1 · wrapped 0 · h 44 · w 246
+    row.tight.native-ab                n 4 · lines 1 · wrapped 0 · h 44 · w 246
+    row.tight                          n 2 · lines 1 · wrapped 0 · h 48 · w 246 · face 34–34 in 62–62
+    row.tight.fit                      n 3 · lines 1 · wrapped 0 · h 77 · w 246 · face 34–34 in 79–79
+    row.tight.fit                      n 2 · lines 1 · wrapped 0 · h 58 · w 246 · face 34–34 in 79–79
+gas           rows  5 · controls  16 · wrapped  0 · height 1400 · width 274 · body 270
+    row.tight.sp-head                  n 4 · lines 1 · wrapped 0 · h 44 · w 246
+    row.tight.native-ab                n 4 · lines 1 · wrapped 0 · h 44 · w 246
+    row.tight                          n 2 · lines 1 · wrapped 0 · h 48 · w 246 · face 34–34 in 62–62
+    row.tight.fit                      n 4 · lines 1 · wrapped 0 · h 60 · w 246 · face 29–29 in 46–46
+    sp-ham-trigs                       n 2 · lines 2 · wrapped 0 · h 60 · w 46
+informational rows  9 · controls  30 · wrapped  8 · height 872 · width 280 · body 276
+    row.tight.fit                      n 2 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 81–81
+    row.tight.fit                      n 3 · lines 1 · wrapped 0 · h 44 · w 252 · face 29–29 in 47–47
+    row.tight.fit                      n 2 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 81–81
+    row.tight.fit                      n 3 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 60–60
+    row.tight.fit                      n 4 · lines 2 · wrapped 2 · h 92 · w 252
+    row.tight.fit                      n 3 · lines 1 · wrapped 0 · h 60 · w 252 · face 34–34 in 60–60
+    row.tight.fit                      n 8 · lines 4 · wrapped 6 · h 192 · w 252 · face 34–34 in 60–60
+    row.tight.fit                      n 2 · lines 2 · wrapped 0 · h 92 · w 122
+    row.tight.fit                      n 3 · lines 3 · wrapped 0 · h 140 · w 122
+field         rows  4 · controls  18 · wrapped  3 · height 600 · width 280 · body 276
+    row.tight.fit                      n 4 · lines 2 · wrapped 0 · h 92 · w 252 · face 29–29 in 47–47
+    row.tight.fit                      n 6 · lines 2 · wrapped 3 · h 99 · w 252 · face 34–34 in 81–81
+    row.tight.fit                      n 4 · lines 1 · wrapped 0 · h 48 · w 252 · face 34–34 in 60–60
+    row.tight.fit                      n 4 · lines 2 · wrapped 0 · h 92 · w 252 · face 29–29 in 47–47
+equalizer     rows  1 · controls   7 · wrapped  0 · height 326 · width 280 · body 276
+    eq-faders                          n 7 · lines 7 · wrapped 0 · h 152 · w 88
+molecules     rows  5 · controls  14 · wrapped  0 · height 794 · width 280 · body 276
+    row.tight.mol-top                  n 2 · lines 1 · wrapped 0 · h 46 · w 262
+    row.tight.sp-head                  n 4 · lines 1 · wrapped 0 · h 44 · w 262
+    row.tight.reg-bar                  n 2 · lines 1 · wrapped 0 · h 44 · w 262
+    row.tight.fit                      n 3 · lines 1 · wrapped 0 · h 61 · w 262 · face 31–31 in 49–49
+    row.tight.fit                      n 3 · lines 1 · wrapped 0 · h 46 · w 262 · face 0–0 in 0–0
+nodes         rows  1 · controls   5 · wrapped  2 · height 640 · width 440 · body 438
+    nodes-body.nodes-knobs.row         n 5 · lines 2 · wrapped 2 · h 133 · w 220 · face 34–34 in 71–71
+csb           rows  1 · controls   7 · wrapped  3 · height 568 · width 262 · body 262
+    tempo-grid                         n 7 · lines 2 · wrapped 3 · h 92 · w 230
+errors []

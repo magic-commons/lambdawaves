@@ -299,7 +299,6 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 .native-clean .ro-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
 .native-clean .ro-sub { height: 2.6em; overflow: hidden; line-height: 1.3; }
 .native-clean .ro.lw-status .ro-val { white-space: normal; }   /* 0.5.4 P4's seat: INFORMATIONAL's STATUS is the kit's WIDE readout, two lines (base.css Final II) — the nowrap above would cut it mid-number */
-.native-clean .row > .k { flex: 0 0 64px; }
 .native-info { display: inline-flex; vertical-align: middle; position: relative; height: 28px; align-items: center; }
 .native-info-button { width: 28px; height: 28px; padding: 0; border: 1px solid transparent; border-radius: 50%; background: none; color: var(--dim); cursor: pointer; font: italic var(--w-bold) 12px Georgia, 'Times New Roman', serif; }
 .native-info-button:hover, .native-info-button:focus-visible, .native-info-button[aria-expanded="true"] { color: var(--acc); border-color: var(--glass-hairline); background: var(--glass-raise); outline: none; }
@@ -309,12 +308,10 @@ body.disconnected:not(.phone) #rackL > .dev { pointer-events: none; }
 /* 022 P3 · A POPUP WEARS THE SKIN: the hint tip and the ⓘ panel take the kit's popover material (card style's fill, the menu floor's tint,
    --surface-shadow-menu); the hard .98 / .99 gradients and their eight important-flags are gone */
 .native-clean[data-id="observer"] .segw { flex: 1 1 100%; }
-.native-clean[data-id="observer"] .row > .k { flex: 1 1 60px; }
 .native-clean[data-id="observer"] .row { margin: 4px 0; }
 .native-clean[data-id="settings"] .settings-section { margin-bottom: 18px; }
 .native-clean[data-id="settings"] .segw { flex: 1 1 100%; }
 .native-clean[data-id="settings"] .sw { flex: 1 1 110px; }
-.native-clean[data-id="camera"] .row > .k { flex: 0 0 68px; }
 .plane-model { display: block; width: 100%; height: 150px; touch-action: none; cursor: grab; }
 .plane-model:active { cursor: grabbing; }
 .plane-model:focus-visible { outline: 1px solid var(--acc); outline-offset: -2px; }
@@ -348,7 +345,6 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean[data-id="observer"] .wave-row-0 > .segw > .seg, .lw-dither > .segw > .seg { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .native-clean[data-id="observer"] .wave-row-1 > .segw > .seg { grid-template-columns:repeat(4,minmax(0,1fr)); }   /* iteration 008 W: the four observables on one line */
 .lw-dither > .segw { flex:1 1 150px;width:auto; }   /* iteration 008 W: wave-row-6's DITHER row, now under SETTINGS › QUALITY */
-.lw-dither > .k { flex:0 0 64px; }
 .native-clean[data-id="observer"] .wave-row { margin: 0 0 10px; }
 .native-clean[data-id="observer"] .wave-row-2 { margin-bottom:14px; }
 .native-clean[data-id="observer"] .seg button { min-height:32px; padding:0 4px; }
@@ -366,13 +362,7 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 .native-clean .k:hover .k-val, .native-clean .k:focus-within .k-val, .native-clean .k.drag .k-val, .native-clean .k[data-live] .k-val { transform:translate(-50%,0); }
 .native-clean[data-id="observer"] .wave-row { margin-bottom:8px; }
 .native-clean[data-id="observer"] .wave-row-2 { margin-bottom:18px; }
-.native-clean[data-id="clip"] .grp > .row { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center; }
-.native-clean[data-id="clip"] .grp > .row > .segw { grid-column:1/-1;width:100%; }
 .native-clean[data-id="clip"] .grp > .row > .segw .seg { justify-content:center; }
-/* iteration 008 W: CLIP's ON switch (its lamp) and the kind CLIP | SLAB share the first line; the kind keeps its seat while off (hidden, never moved) */
-.native-clean[data-id="clip"] .grp > .row > .clip-on, .native-clean[data-id="clip"] .grp > .row > .clip-on + .segw { grid-column:auto; }
-/* iteration 012 R3: ON · CLIP | SLAB · POS · THICK on ONE row; the kind stays shown while off, dimmed */
-.native-clean[data-id="clip"] .grp > .row:has(> .clip-on) { grid-template-columns:auto minmax(0,1fr) 48px 48px;gap:6px;align-items:center; }
 .native-clean[data-id="clip"] .grp > .row > .clip-on + .segw.clip-kind-off { opacity:.5; }
 .native-clean[data-id="clip"] .grp > .row > .clip-on + .segw .seg { display:flex;flex-wrap:nowrap; }
 .native-clean[data-id="clip"] .grp > .row > .clip-on + .segw .seg-b { flex:1 1 0;min-width:0;padding:0 4px; }
@@ -383,10 +373,8 @@ body.disconnected:not(.phone) .dev.tab-hot > .dev-head { background: color-mix(i
 #transport.mini .native-play-row { gap:2px; }
 #transport { box-sizing:border-box;max-width:100%;overflow:hidden; }
 #transport .native-play-row { min-width:0;width:100%;overflow:hidden; }
-.native-clean .native-rotors { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));justify-items:center;row-gap:14px; }
 .native-clean .native-ab { display:grid;grid-template-columns:repeat(2,minmax(0,1fr) 44px) 22px;align-items:center; }
 .plane-model { object-fit:contain; background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset));border-radius:8px; }
-.native-clean[data-id="camera"] .camera-motion { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center;row-gap:12px; }
 
 /* Shared control relief: native redesign uses the same kit as PULSE and the other instruments. */
 .dev:not(.mir-modwindow) .seg { padding:3px;gap:2px;border:1px solid var(--glass-hairline);border-radius:9px;background:var(--glass-well);box-shadow:var(--relief-well, var(--neu-inset)); }
@@ -815,24 +803,13 @@ body.ui-hidden #lwHome, body.menu-open #lwHome { display: none; }
  * a knob column of 56 px for each SIZE and PAD, the headings the kit's group labels, the fold its own line.  A switch fills its cell. */
 .lw-info-card .grp { margin: 0 0 6px; gap: 0; }
 .lw-info-card .grp > .row { display: grid; gap: 6px 8px; align-items: center; justify-items: stretch; margin: 4px 0; }
-.lw-info-card .info-words { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 56px; }
-.lw-info-card .info-words > .sw { grid-column: 1 / 3; }
 .lw-info-card .info-bar > .sw { grid-column: auto; } .lw-info-card .info-bar > .info-side { width: 100%; min-width: 0; }   /* 018 B7: ESP BAR · SIDE · PAD */
-.lw-info-card .info-seat { grid-template-columns: minmax(0, 1fr) 56px 30px; }   /* iteration 013 N1: POSITION · PAD · the fold's chevron, one row */
 .lw-info-card .info-seat > .lw-fold { width: 30px; min-width: 0; height: 26px; min-height: 26px; padding: 0; }
-.lw-info-card .row > .k { justify-self: center; }
-.lw-info-card .info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .lw-info-card .info-grid > .sw, .lw-info-card .info-words > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
 .lw-info-card .info-grid > .sw .sw-lbl, .lw-info-card .info-words > .sw .sw-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lw-info-card .info-seat > .segw .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.lw-info-card .info-size { grid-template-columns: minmax(0, 1fr) 56px; }
-.lw-info-card .info-size > .k { grid-column: 2; }
 /* iteration 012 R1: BALL AND STICK's switch shortened to one column, OPACITY and SIZE beside it; CURSOR and MARKS two columns of switches side by side */
-.lw-info-card .info-ball { grid-template-columns: minmax(0, 1fr) 56px 56px; }
-.lw-info-card .info-ball > .sw { grid-column: 1; }
-.lw-info-card .info-words.info-bonds { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lw-info-card .info-words.info-bonds > .sw { grid-column: auto; }   /* iteration 014 D6: BONDS · ORDER AROMATIC IONIC H-BOND, two by two under BALL AND STICK */
 .lw-info-card .info-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 8px; align-items: start; }
-.lw-info-card .info-col { grid-template-columns: minmax(0, 1fr); }
 .lw-info-card .info-col > .sw { width: 100%; min-width: 0; justify-content: flex-start; }
 
 /* ═══ iteration 012 B1 · THE BLUR, PUT BACK (Josh 2026-10-20: "I was trying to fix a bug; why would it get rid of all the blurs if
@@ -878,9 +855,6 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 .native-clean[data-id="camera"] .mir-camsphere .cs-svg { width: calc(100% + 128px); max-width: none; margin: 0 -64px; clip-path: inset(0 64px round var(--r-md)); }
 .native-clean[data-id="camera"] .mir-camsphere-side { position: relative; z-index: 1; row-gap: var(--sp-1); }
 /* 018 B3 · 020 S3: the verbs in TWO rows — PAN HOME · HOME, then LOCK · FLIP · AUTO-ROTATE (.cam-switches); each row shares its width evenly */
-.native-clean[data-id="camera"] .cam-verbs { display: flex; flex-wrap: nowrap; gap: 6px; align-items: center; }
-.native-clean[data-id="camera"] .cam-verbs > .trig { width: auto; flex: 1 1 0; min-width: 0; padding-inline: 6px; white-space: nowrap; }
-.native-clean[data-id="camera"] .cam-verbs > .sw { flex: 1 1 auto; min-width: 0; padding: 0 4px; justify-content: center; letter-spacing: .04em; white-space: nowrap; }
 /* PALETTE: ADD is the kit's plus, REVERSE (iteration 015 P2) the table's two counter-pointing arrows — 021 V2: SVG glyphs (material.js), no masks */
 .native-clean[data-id="palette"] :is(.pal-add, .pal-rev) > svg { width: 18px; height: 18px; }
 .native-clean[data-id="palette"] .pal-add, .native-clean[data-id="palette"] .pal-rev { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; padding: 0 8px; }
@@ -899,3 +873,40 @@ body .mir-timeline .tl-transport :is(.tbtn, .mod-exp, .mod-exp > svg) { all: rev
 @media (pointer: coarse) { .mir-pick.pal-pick .mir-pick-i { min-height: 34px; } }
 /* iteration 018 A8 (Josh: "Make the grid much more faint"): the CURVES quarter grid and diagonal at ≈ 12 % of ink-faint (the kit: 45 %) */
 body .mir-curves { --curves-grid: color-mix(in srgb, var(--ink-faint) 12%, transparent); }
+
+/* ═══ 022 F2 · A ROW FITS (MIR 1.5.6-alpha.6 `.row.fit`; research/iteration-022/F-BUILD.md) ═══════════════════════════════════════════
+ * The control rows of SETTINGS, PALETTE, WAVE, CAMERA, CLIP, SPECTRUM's Hamiltonian (and GAS), MOLECULES, INFORMATIONAL, FIELD, EQUALIZER and
+ * the NODES cards are the kit's fit row: auto-fit cells of --cell-min, a knob's face scaled to its cell.  λWAVES caps the face at the plain
+ * knob's 34 px, so a fit row never adds height; a row whose labels are long, or whose columns mean something, sets its own --cell-min, so
+ * every label stays whole (022 H2).  A switch or a seg that needs more than one cell spans them here.  The exceptions keep their own grids:
+ * CURVES, the camera's sphere column and PAN pad, SPECTRUM's lanes and their vertical phase/rate stacks, the molecule shelf, the ramp,
+ * the EQ faders, NODES' plane and the CONTROL SURFACE. */
+:root { --knob-max: 34px; }
+.native-clean .row.fit, .lw-info-card .grp > .row.fit, .mir-camera .row.fit, .dev[data-id="spectrum"] .sp-ham-body > .row.fit { gap: var(--row-gap, 4px) 4px; }
+.mir-camera .row.fit { margin: 0; grid-template-columns: repeat(auto-fit, minmax(min(var(--cell-min, 40px), 100%), 1fr)); }   /* over the panel's 72-px verbs */
+.row.fit > .lw-fold { justify-self: end; width: 30px; }
+.dev .row.fit > .sp-vseg { grid-column: auto; width: 100%; max-width: 58px; justify-self: center; min-width: 0; }
+.row.fit > .wide { grid-column: span 2; }
+/* WAVE: 6 × 40 + 5 × 4 = 260 > the card's 252, so the six material dials stay three over three (72-px cells, every label whole) */
+.native-clean[data-id="observer"] .wave-row-2 { --cell-min: 72px; }
+.native-clean[data-id="observer"] .wave-row-7 > .sw, .native-clean[data-id="observer"] .wave-row-8 > .sw { grid-column: span 2; }
+.native-clean[data-id="observer"] .wave-row-7 > .segw { grid-column: 1 / -1; }   /* ESP stays three lines: its seven controls need 11 cells, five a line */
+/* SETTINGS: the stage's seat beside STAGE · GAMMA; DITHER's seg and STRENGTH on one line; DOMAIN AUTO beside WIDTH */
+.native-clean[data-id="settings"] .lw-stage-row > .stage-seat { grid-column: span 2; justify-self: center; }
+.native-clean[data-id="settings"] .lw-dither { --cell-min: 56px; }
+.native-clean[data-id="settings"] .lw-dither > .segw { grid-column: span 3; width: auto; }
+.native-clean[data-id="settings"] .lw-domain > .sw { grid-column: span 2; }
+/* CAMERA: AUTO-ROTATE needs two cells */
+.native-clean[data-id="camera"] .cam-switches > .sw:last-child { grid-column: span 2; }
+/* SPECTRUM: HYDROGEN's two rows keep ONE column rhythm (017 R4) — three columns for both, filled or not */
+.dev[data-id="spectrum"] .sp-ham-body > :is(.sp-ham-h, .sp-ham-s) { --cell-min: 64px; grid-template-columns: repeat(auto-fill, minmax(var(--cell-min), 1fr)); }
+/* INFORMATIONAL (call 7): a switch takes two cells, a knob one, the fold's chevron its 30 px */
+.lw-info-card .row.fit > .sw { grid-column: span 2; }
+/* FIELD: the rotors keep their columns (a wheel over its rate); INTER-SHELL takes two cells, NO FIELD and CAT the line */
+.native-clean[data-id="staticfield"] .native-rotors { --cell-min: 72px; }
+.native-clean[data-id="staticfield"] .row.fit > .sw, .native-clean[data-id="staticfield"] .row.fit > .trig { grid-column: span 2; }
+.native-clean[data-id="staticfield"] .row.fit > .trig:last-of-type { grid-column: 1 / -1; }
+/* EQUALIZER: SOUND beside LEVELS | BEATS, AUDIO IN beside its readout */
+.dev[data-id="equalizer"] .row.fit > .sw { grid-column: span 2; }
+/* MOLECULES: MORPH and FLOW beside A ↔ B; the method's seg, VALENCE and the chevron */
+.dev .reg-morph.fit > .sw, .dev .mol-mrow.fit > .sw { grid-column: span 2; }
