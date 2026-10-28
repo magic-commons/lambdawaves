@@ -78,6 +78,9 @@ Later rows (not this chain): a true DAG (MIX of branches, reroute dots, `setChai
 14. (T2) EXPAND ALL unfolds every folded open window, SPECTRUM under a molecule too. Default: every window.
 15. (T2) The right group is two rows of five with the empty tenth seat at the end. Default: as is.
 16. (T1) PLAY's ON glow ring at the chips' strength. Default: as is.
+17. (L2) CADENCE DISPLAY on a panel the field cannot keep up with slows time (120 Hz panel at 81 presents/s = 0.67×). Default: keep (that is what LOCKED means); alternative: step by the measured present rate.
+18. (L) LOCKED while RECORD is armed (call 5's alternative) is not built. Default: not built.
+19. (L3) A heavy molecule under LOCKED 60 was not measured; the ring decision waits for it. Default: wait.
 
 ## MERGE ORDER
 S → T → L → X (each on the merged tree; the recipe: `git merge --no-ff --no-commit it020-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → commit → CLOSED row → handoff line).
@@ -87,4 +90,5 @@ S → T → L → X (each on the merged tree; the recipe: `git merge --no-ff --n
 |---|---|---|---|
 | S | d9210a2 | 0fc2e3e | S1–S5 (S-BUILD.md; no kit edit; node suite 246 PASS; hide-reveal/stage-text/routed-knob/camera-shift green; LOCK 843/0; MAP ONLY lag was BALL AND STICK's 2-D canvas ignoring it + Firefox inFlight cap 2 under heavy frames) |
 | T | c7bd626 | 1125c89 | T1–T3 (T-BUILD.md; no kit edit; node suite green; window-switching/hide-reveal/keyboard-window/menubar/stage-text green; bar 674 px both modes, right group two rows of five) |
-| L | 1125c89 | | |
+| L | 861a5ef | 2b1ef74 | L1–L3 (L-BUILD.md; no kit edit; node suite green; new-project/history/field-law/start green; LOCK 843/0; headed Firefox: WALL Δt CV 0.39 → LOCKED 60 CV 0, 0 reallocations; facade +nodes) |
+| X | 2b1ef74 | | |
