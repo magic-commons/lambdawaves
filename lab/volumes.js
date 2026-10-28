@@ -13,18 +13,18 @@
  * kept only after its bytes hash to the catalogue's sha-256; a thumbnail has no hash in format v1 and is kept as served.
  *   shelf()                       the published volumes; [] when none is (no volumes.json): "no volumes are published yet"
  *   index(volId)                  the catalogue (from this device when installed, else the network), checked against the shelf's indexSha256
- *   status(volId)                 'absent' | 'partial n/N' | 'installed'   (statusOf: the same as { state, n, N, bytes, total })
+ *   status(volId)                 'absent' | 'partial n/N' | 'installed'   (installStatus: the same as { state, n, N, bytes, total })
  *   install(volId, { onProgress, signal })   every file into 'lw-vol-<id>': six at a time, resumable (a file already kept is skipped),
  *                                 cancellable (an AbortSignal); asks persist() once, on the first install press (library.js persistOnce);
  *                                 and the ladder's four basis records its rungs read (sw.js DATA) into lw-data-v1 when not there yet
  *                                 (iteration 005 A), so an installed volume opens offline at every rung
  *   installFile(volId, file, { onProgress, signal })   THE FILE ROAD (iteration 005 S): a volume's one .lwv (lab/volumes-format.js THE
  *                                 ARCHIVE), opened from this device's disk — every file's sha-256 checked, stored under EXACTLY the keys the
- *                                 fetch road uses (so statusOf · file · picture · remove see no difference), one at a time, resumable, and
+ *                                 fetch road uses (so installStatus · file · picture · remove see no difference), one at a time, resumable, and
  *                                 refused with a sentence when its volume is not on the shelf or the device has too little room
  *   installMolecule(volId, molId, { onProgress, signal })   iteration 008 V · ONE MOLECULE kept in place (MOLECULES' download glyph and its
  *                                 ring): its .lwm (sha-256 checked) and picture under EXACTLY the keys the whole install uses, the catalogue
- *                                 and the shelf entry beside them (so it reads offline), and the ladder's basis records — statusOf then says
+ *                                 and the shelf entry beside them (so it reads offline), and the ladder's basis records — installStatus then says
  *                                 partial; only a fetchable volume (an archive volume is its file's)
  *   kept(volId)                   the ids of the molecules whose every file is on this device (a Set; empty when none is)
  *   watch(fn)                     fn({ volume, what: 'install' | 'file' | 'molecule' | 'remove', id }) after anything here changed a volume's
@@ -121,7 +121,7 @@ const filesOf = (v, m) => [{ url: inVolume(v, m.file), sha: m.sha256, bytes: m.b
   ...(m.thumb ? [{ url: inVolume(v, m.thumb), sha: null, bytes: 0, type: 'image/webp', lwm: false }] : [])];
 
 /* ── THE STATUS ── molecules whose every file is kept; bytes are the .lwm bytes (the pictures are a few kB each) */
-export async function statusOf(volId) {
+export async function installStatus(volId) {
   const v = await volume(volId), c = await store(volId);
   let idx = null; try { idx = await index(volId); } catch (_) { idx = null; }
   const N = idx ? idx.molecules.length : (v.count || 0), total = idx ? idx.molecules.reduce((s, m) => s + (m.bytes || 0), 0) : (v.bytes || 0);
@@ -132,7 +132,7 @@ export async function statusOf(volId) {
   return { state: n === 0 ? 'absent' : n < N ? 'partial' : 'installed', n, N, bytes, total };
 }
 export async function status(volId) {
-  const s = await statusOf(volId);
+  const s = await installStatus(volId);
   return s.state === 'partial' ? `partial ${s.n}/${s.N}` : s.state;
 }
 
@@ -250,7 +250,7 @@ export async function remove(volId) {
   changed(volId, 'remove'); return ok;
 }
 
-/* ── iteration 008 V · ONE MOLECULE IN PLACE ── the fetch road's own keys, so the whole install, statusOf, file, picture and remove see no
+/* ── iteration 008 V · ONE MOLECULE IN PLACE ── the fetch road's own keys, so the whole install, installStatus, file, picture and remove see no
    difference; the catalogue and the shelf entry are kept beside it (the first molecule makes the cache), and the ladder's basis records */
 export async function kept(volId) {
   const c = await store(volId), out = new Set();

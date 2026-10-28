@@ -95,7 +95,7 @@
 
 import {
   AU_FS, VIEW_NAMES, viewCarriesGlobalPhase, wavePeriod, seamError, planPeriodRecording,
-  maxPictureSize, fitPicture, slug, stamp, uniqueName, captureName,
+  maxPictureSize, fitPicture, slug, stamp, uniqueFileName, captureName,
   readback, configureCopy, captionOver, handOver,
 } from './capture.js';
 import { createRecorder } from './mir/render/recorder.js';
@@ -776,7 +776,7 @@ export function createFilm(LW, opts = {}) {
   function nameFor(name) {
     const L = last; if (!L || !name) return name;
     const ext = (/\.(\w+)$/.exec(name) || [])[1] || 'mp4', part = (/-(\d{3})\.zip$/.exec(name) || [])[1];
-    const base = uniqueName(captureName({ kind: L.kind, label: L.label, w: L.w, h: L.h, fps: L.fps, frames: L.frames, T: L.T, ext }), taken);
+    const base = uniqueFileName(captureName({ kind: L.kind, label: L.label, w: L.w, h: L.h, fps: L.fps, frames: L.frames, T: L.T, ext }), taken);
     return /recovered/.test(name) ? base.replace('.' + ext, '-recovered.' + ext) : part && part !== '001' ? base.replace(/\.zip$/, '-part' + part + '.zip') : base;
   }
   /** a film's own copy in the kit's store, removed — a verify's runs, or a failed film's leftovers (the card lists the rest) */
@@ -833,7 +833,7 @@ export function createFilm(LW, opts = {}) {
       if (!result && opts.discardFailed !== false) await discard({ token: J.token });
       const files = result ? result.files : [], bytes = files.reduce((n, x) => n + (x.bytes || 0), 0);
       const ext = format === 'mp4' ? 'mp4' : 'zip';
-      const name = files.length ? uniqueName(captureName({ kind: J.kind, label: J.label, w: size.w, h: size.h, fps, frames: delivered, T: sched.mode === 'loop' ? sched.L : 0, ext }), taken) : null;
+      const name = files.length ? uniqueFileName(captureName({ kind: J.kind, label: J.label, w: size.w, h: size.h, fps, frames: delivered, T: sched.mode === 'loop' ? sched.L : 0, ext }), taken) : null;
       const man = manifest({ stamp: stamp(new Date()), schedule: sched,
         picture: { w: size.w, h: size.h, sizeFromMachine: !!size.sizeFromMachine, clipped: !!size.clipped, format: J.base ? J.base.format : null, gamut: J.base ? J.base.gamut : null, resolution: J.base ? J.base.resolution : null, half: J.base ? J.base.half : null, container: format === 'mp4' ? 'mp4 (the kit\'s WebCodecs encoder and muxer)' : 'png frames in the kit\'s stored ZIP parts', jitterSeed: JITTER_SEED },
         state: { label: J.label, observable: J.observable, digest: (LW.stateDigest ? (() => { try { return LW.stateDigest(); } catch (_) { return null; } })() : null), version: LW.version || null },

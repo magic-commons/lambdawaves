@@ -642,7 +642,7 @@ function rigFor(lab, route = true) {
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 {
   const needed = ['AU_FS', 'VIEW_NAMES', 'viewCarriesGlobalPhase', 'wavePeriod', 'seamError', 'planPeriodRecording',
-    'maxPictureSize', 'fitPicture', 'slug', 'stamp', 'uniqueName', 'captureName', 'readback', 'configureCopy', 'captionOver'];
+    'maxPictureSize', 'fitPicture', 'slug', 'stamp', 'uniqueFileName', 'captureName', 'readback', 'configureCopy', 'captionOver'];
   const missing = needed.filter((n) => CAP[n] === undefined);
   const mine = exactSchedule({ mode: 'loop', T: D12.T, t0: 3.25, fps: 30, frames: 180 });
   const theirs = CAP.loopSchedule({ T: D12.T, N: 180, t0: 3.25 });

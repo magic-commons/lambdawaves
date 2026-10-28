@@ -19,7 +19,7 @@ import {
   AU_FS, ENDPOINT, WEBGPU_DEFAULT_MAX_TEXTURE_2D, WEBGPU_DEFAULT_MAX_BUFFER,
   alignedBytesPerRow, planBands, maxPictureSize, fitPicture,
   loopSchedule, planFrames, seamError, endpointProof, planPeriodRecording, wavePeriod, viewCarriesGlobalPhase, VIEW_NAMES,
-  slug, stamp, captureName, uniqueName,
+  slug, stamp, captureName, uniqueFileName,
   toRGBA, compositeOver,
   crc32, adler32, zlibStored, pngFilter, buildPNG, encodePNG,
 } from '../lab/capture.js';
@@ -197,7 +197,7 @@ function decodePNG(buf) {
   const n2 = captureName({ kind: 'still', label: 'Rydberg packet n = 4…6', w: 3840, h: 2160, ext: 'png', date });
   const bad = /[\\/:*?"<>|\x00-\x1f]/;
   const many = new Set(); const names = [];
-  for (let i = 0; i < 200; i++) names.push(uniqueName(captureName({ kind: 'loop', label: 'x', w: 8, h: 8, ext: 'png', date }), many));
+  for (let i = 0; i < 200; i++) names.push(uniqueFileName(captureName({ kind: 'loop', label: 'x', w: 8, h: 8, ext: 'png', date }), many));
   const allDistinct = new Set(names).size === 200;
   const allSane = names.every((n) => !bad.test(n) && n.length < 120 && /\.png$/.test(n) && n === n.toLowerCase());
   judge('FILENAMES ARE SANE AND COLLISION-FREE: every fact of the capture is in the name (kind, state, size, fps, frame count, period, UTC stamp), nothing in it is illegal on any filesystem (no colon, no slash, no control byte), and 200 captures made in the SAME SECOND with the SAME parameters come back as 200 distinct names with the suffix before the extension',

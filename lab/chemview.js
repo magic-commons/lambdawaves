@@ -125,7 +125,7 @@ export function createChem(host, api) {
      first), ‹ VOL. I · AMIDE ›, so a page is a shelf (≤ 252 rows today) and never the whole 2,809; a one-atom entry is an atom (the Picker's
      ATOMIC deck) and is on no page.  The MOLECULE stepper's name carries the molecule's small picture (t/<id>.webp, read only for the molecule
      chosen; a shelf tile's when it scrolls into view) and the option its formula; a molecule not on this device wears the kit's download glyph
-     in the picture's seat, and a press keeps THAT molecule (volumes.js installMolecule: the fetch road's own keys, statusOf then partial) with
+     in the picture's seat, and a press keeps THAT molecule (volumes.js installMolecule: the fetch road's own keys, installStatus then partial) with
      the kit's ring round the glyph.  A pick opens the molecule (from this device, else the network) through openVolume, unchanged.  INSTALLED
      has left the card: the whole volume is the Picker's, a section's records too (keep() stays a verb).  The pages are read when the hand comes
      near the pickers, never at boot, and again when volumes.js says a volume changed (the Picker's INSTALL / REMOVE); the page is never saved. */
@@ -331,7 +331,7 @@ export function createChem(host, api) {
     const r = await V.installMolecule(k.volume, k.id, { onProgress: (p) => { ringTo(p.ratio); } });
     if (r.ok) { ringTo(1); await new Promise((f) => setTimeout(f, 240)); }   // the full ring a beat before the picture takes the seat
     vKept.set(k.volume, await V.kept(k.volume).catch(() => vKept.get(k.volume) || new Set()));
-    const st = r.ok ? await V.statusOf(k.volume).catch(() => null) : null;
+    const st = r.ok ? await V.installStatus(k.volume).catch(() => null) : null;
     dlBusy = false; dlB.disabled = false; ringTo(null); header();
     status(r.ok ? `${name} is on this device` + (st ? ` — ${volLabelOf(v)}: ${st.n.toLocaleString('en')} of ${st.N.toLocaleString('en')} molecules here (${st.state})` : '') : `${name} was not kept: ${r.why || 'cancelled'}`, r.ok ? 'ok' : 'warn');
     return { ...r, status: st };
@@ -376,7 +376,7 @@ export function createChem(host, api) {
   async function readHolds() {
     const next = new Map(), s = await V.shelf().catch(() => ({ volumes: [] }));
     for (const v of s.volumes) {
-      const st = await V.statusOf(v.id).catch(() => null), idx = st && st.state === 'installed' ? await V.index(v.id).catch(() => null) : null;
+      const st = await V.installStatus(v.id).catch(() => null), idx = st && st.state === 'installed' ? await V.index(v.id).catch(() => null) : null;
       for (const m of (idx && idx.molecules) || []) if (PRESET_BY_ID.has(m.id) && !next.has(m.id)) next.set(m.id, { volume: v.id, numeral: v.numeral, id: m.id, rungs: Object.keys(m.rungs || {}) });
     }
     holds = next; paintBasis(); return holds;
