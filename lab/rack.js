@@ -13,7 +13,7 @@ import { firstRunMaterial, firstRunQuality } from './first-run.js';   // W125: t
  * presentation clock is the display rate.  Observer controls never touch the register (§14).
  */
 import { DEFAULT_PALETTE } from './palette-app.js';   // Jet Black: the app's palette row, appended to the kit's catalogue before anything reads it (KIT BRIEF J)
-import { BASIS, domainFor } from './hydrogen.js'; import { L_LETTERS } from './names.js';
+import { BASIS, domainFor } from './hydrogen.js';
 import { Register, PRESET_BY_ID, RENDER_CAP } from './state.js';
 import { Clock, onePlay } from './clock.js';
 import { createWindowActivity } from './mir/window-activity.js';
@@ -21,11 +21,12 @@ import { VIEW, VIEW_NAMES, STYLE, quatFromYawPitch, waveView, KNEE_DEFAULT } fro
 import { el, device as kitDevice } from './mir/kit.js';
 import { createSpectrumCard } from './windows/spectrum.js';   // 0.5.2 R2a: the SPECTRUM card, out of boot()
 import { createGas } from './windows/gas.js'; import { createEqualizerCard } from './windows/equalizer.js';   // 021 G2 (THE HINGE): the BOX rows and the EQUALIZER window, out of spectrum.js
+import { createFolders } from './windows/folders.js';   // 021 G3: the FOLDERS card, out of boot()
 import { createReadouts } from './windows/readouts.js'; import { createKeplerSurface } from './windows/kepler.js';   // 0.5.2 R2b: the readout cards and THE BOW + KEPLER, out of boot()
 import { createFilmCard } from './film-card.js';   // 0.5.0 C7b: the film's UI is the kit's RENDER card
 import { createSkeleton, centroid } from './skeleton.js'; import { moleculeCharge } from './molecules.js';   // iteration 014 B: the atoms BALLS · STICKS · ESP draw (field.setAtoms) and the molecule's charge   // 0.7.0 V2: THE SKELETON, the molecule's beads, bonds and dipole on #skeleton
 import { createMolecules } from './windows/molecules.js'; import { createStageWords } from './shell/stage-words.js'; import { createModSeam } from './shell/modulation.js'; import { createInk } from './shell/ink.js';   // 0.5.2 R2d (chemview, registerview, the molecular session, the info layer and the modulation window left with them)
-import { calculusMarkdown, beadOf, covariance } from './calculus.js';
+import { beadOf, covariance } from './calculus.js';
 import { createMaterial } from './windows/material.js'; import { createSettingsCard } from './windows/settings-card.js'; import { createFilmApi } from './windows/film.js';   // 0.5.2 R2c: WAVE · CLIP · PALETTE · CAMERA, the SETTINGS card and THE FILM, out of boot()
 import { getHamiltonian, getZ } from './hamiltonian.js';
 import { createTransition } from './windows/transition.js';   // 018 C1: A ↔ B · TRANSITION, SPECTRUM's block (the STATE card retired)
@@ -697,7 +698,7 @@ export async function boot(dom) {
 
   // SPECTRUM
   const { wSpec, wState, spectrum, toggleFullscreen, normalizeNow, copyLatex, switchHamiltonian, setSturmian, applySturmian, paintSturmRo, sturmEigen, occupiedEigen,
-    periodEnergies, selectEigen, setElement, fillValence } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
+    periodEnergies, selectEigen, setElement, fillValence, spectrumDigest } = createSpectrumCard(app);   // 0.5.2 R2a: lab/windows/spectrum.js
 
   // GAS — the BOX rows of SPECTRUM's Hamiltonian group (021 G2: lab/windows/gas.js)
   createGas(app);
@@ -718,7 +719,7 @@ export async function boot(dom) {
 
   // SHADOW
   const { wSh, shadowView, shadowFoot, wOrb, orbit, kepler, wVor, vortex, particles, flowTracers, wSlice, slice, createCalcMetersLadder,
-    createAtomsWignerRadiation } = createReadouts(app);   // 0.5.2 R2b: lab/windows/readouts.js, three seats
+    createAtomsWignerRadiation, vortexDigest, shadowDigest } = createReadouts(app);   // 0.5.2 R2b: lab/windows/readouts.js, three seats
 
   /* ── LEGACY WINDOWS (2026-10, Josh): all five are gone — QCD, H₂⁺ and HELIUM in 0.5.0 D9, H₂ and ELECTROSTATICS in D9b
      (R5-L1; ATOMS came back in 0.4.0 S3).  An older file that used one opens on its shim in restore and says so in one line. */
@@ -732,7 +733,7 @@ export async function boot(dom) {
   const { stageTextTick, initStageText } = createStageWords(app);   // 0.5.2 R2d: lab/shell/stage-words.js
 
   // CALCULUS — the stats, derived live, with their laws and residuals
-  const { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen, wSep } = createCalcMetersLadder();   // 0.5.2 R2b: readouts' second seat
+  const { wCalc, calculus, wMet, meters, wLad, ladder, wLat, lattice, wBlo, bloch, wCen, wSep, metersDigest, calculusDigest } = createCalcMetersLadder();   // 0.5.2 R2b: readouts' second seat
 
   /* ── WAVE 52 · W-MODWINDOW: THE MODULATION RACK ────────────────────────────────────────────────
    * The model is lab/mir — vendored, headless, 53 gates green before a single pixel of this existed.
@@ -761,7 +762,7 @@ export async function boot(dom) {
 
   // ATOMS — the periodic table as one central field (Xα(2/3) + the Latter tail, solved live); it ships CLOSED.  0.4.0 S3 (R-A2):
   // no longer LEGACY — the periodic table of SPECTRUM's ATOM operator, with its own row in + and WINDOW
-  const { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, wEm, emissionView, WIG_OK, RAD_OK } = createAtomsWignerRadiation();   // 0.5.2 R2b: readouts' third seat
+  const { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, wEm, emissionView, WIG_OK, RAD_OK, atomsDigest, wignerDigest, radiationDigest } = createAtomsWignerRadiation();   // 0.5.2 R2b: readouts' third seat
   const skeleton = createSkeleton(document.getElementById('skeleton'), (line) => { if (ui.bondSay) ui.bondSay(line); });   // iteration 014 D6: the BONDS' road, said in INFORMATIONAL's status   // 0.7.0 V2: its switch is MOLECULES' (ui.skeletonSw, a PREFERENCE)
   Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wVor, kepler: wOrb,
     slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, emission: wEm, calculus: wCalc, skeleton: wChem, lattice: wLat, bloch: wBlo, central: wCen, separable: wSep });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
@@ -869,15 +870,8 @@ export async function boot(dom) {
      `__LW.curves` is its model, `__LW.nodes` the graph. */
   { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod });
     LW.curves = N.model; LW.nodes = N; }
-  /* iteration 004 · THE FOLDERS CARD (BASINS' rackSave, save-window.js:380): the kit's mountGallery, a second live view of FOLDERS' one library,
-     8 a page — closed at the top of the LEFT rack, in + and WINDOW.  Built here, as BASINS builds it (a saved layout opens a card by its
-     class alone, shell/rack-wiring.js, so a first-open build would leave it empty); painted again when it opens.  The id `projects` is
-     permanent (a WORKSPACE layout row, Gemma's window list); a layout that does not list it leaves it where it is seated here */
-  const wFolders = device({ id: 'projects', eyebrow: 'FOLDERS', status: 'PROJECTS' });
-  const foldersView = layout.projects ? layout.projects.folders.mountGallery(wFolders.body, { pageSize: 8 }) : null;
-  (rackL || rack).prepend(wFolders.root);
-  rk.register({ id: 'projects', el: wFolders, side: 'left', closed: true, title: 'FOLDERS', glyph: 'folder', hint: 'your projects and the DEMOS',
-    onOpen: () => { if (foldersView) { layout.projects.demosFirst(foldersView); foldersView.paint(); } } });   // iteration 012 M1: the demos when ROOT holds nothing of the reader's
+  // FOLDERS — the FOLDERS card (`projects`), the kit's mountGallery (021 G3: lab/windows/folders.js)
+  createFolders(app);
 
   /* ── go ───────────────────────────────────────────────────────────────── */
   LW.bootView = VIEW_NAMES[mat.view]; LW.bootVortex = vortex.on; LW.bootOrder = layout.orderAll(); LW.bootClosed = layout.closed();   // the shipped defaults, recorded before a URL preset's visuals apply
@@ -891,17 +885,8 @@ export async function boot(dom) {
      pane exists to prevent, and wave 56's shareable links made it likelier rather than rarer.  The transport
      is now started at the FOOT of boot, after the notice has been shown, and only when it has been accepted
      (or was accepted by this browser before).  See `armAutoplay` below. */
-  Object.assign(DIGESTS, {
-    meters: () => 'density period\t' + (() => { const P = app.hooks.period ? app.hooks.period() : null; return P && P.exact && P.T ? P.T.toFixed(6) + ' a.u. (exact)' : P && P.T ? '≈ ' + P.T.toFixed(3) + ' a.u. (no exact period)' : '—'; })() + '\nframe profile (ms, EMA)\n' + Object.entries(perf.profile).map(([k, v]) => k + '\t' + (+v).toFixed(3)).join('\n') + '\nframes\t' + stats.frames + '\nreconstructs\t' + stats.reconstructs + '\npresents\t' + stats.presents,
-    calculus: () => ({ md: calculus && calculus.last ? calculusMarkdown(calculus.last) : '' }),   // 0.4.0 S3: ⧉ copies THE PROSE FIGURE (calculus.js), which pastes into the notebook and renders
-    vortex: () => vortex.last && vortex.last.points ? 'nodal points (x, y, z)\n' + vortex.last.points.map((p) => [p.x, p.y, p.z].map((v) => (+v).toFixed(5)).join('\t')).join('\n') : '',
-    spectrum: () => { const c = reg.at(clock.t), H = getHamiltonian(); return 'label\tE\t|c|²\targ c\n' + reg.populated().map((a) => H.labelOf(BASIS[a]) + '\t' + H.energy(a).toFixed(6) + '\t' + (c.re[a] ** 2 + c.im[a] ** 2).toFixed(6) + '\t' + Math.atan2(c.im[a], c.re[a]).toFixed(5)).join('\n')
-      + (sturm.P ? (() => { const e = sturmEigen(); return '\n\nSTURMIAN λ = ' + sturm.lambda.toFixed(4) + ' · Z = ' + getZ() + ' · ⟨c|S|c⟩ = ' + e.norm.toFixed(6) + ' · ⟨H⟩ = ' + e.energy.toFixed(6) + '\neigenvalue\tpopulation\t(l, m)\n' + e.E.map((E, k) => E.toFixed(6) + '\t' + e.pop[k].toFixed(6) + '\t' + L_LETTERS[e.l[k]] + (e.m[k] >= 0 ? '+' : '-') + Math.abs(e.m[k])).join('\n'); })() : ''); },
-    atoms: () => atomsView.digest(),
-    wigner: () => wignerView.table(),
-    radiation: () => radiationView.table(),
-    shadow: () => { const c = reg.at(clock.t); return 'label\tq\tp\n' + reg.populated().map((a) => getHamiltonian().labelOf(BASIS[a]) + '\t' + (c.re[a] * Math.SQRT2).toFixed(6) + '\t' + (c.im[a] * Math.SQRT2).toFixed(6)).join('\n'); },
-  });
+  Object.assign(DIGESTS, { meters: metersDigest, calculus: calculusDigest, vortex: vortexDigest, spectrum: spectrumDigest, atoms: atomsDigest, wigner: wignerDigest,
+    radiation: radiationDigest, shadow: shadowDigest });   // 021 G3: each window's own ⧉ digest, returned from its install, in the table's old order
   layout.moveToRack('spectrum', 'L'); spectrum.openPicker(true);
   // First-visit furniture. Existing saved visibility and layouts are restored below.
   // 2026-10 (Josh): MOLECULES (with its register since iteration 008 U) opens on the LEFT rack under SPECTRUM.  No `devopen` fires here, so neither

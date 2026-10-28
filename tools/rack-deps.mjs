@@ -911,6 +911,7 @@ export const PLANNED = {
   links: { title: '§25 the links', row: 'R3a', file: 'lab/shell/links.js' },
   history: { title: '§25 THE TRUE HISTORY + its card', row: 'R3a', file: 'lab/shell/history.js' },
   facade: { title: '§26 the facade (the literal, whole)', row: 'R5', file: 'lab/shell/facade.js' },
+  folders: { title: 'the FOLDERS card (`projects`)', row: 'it021 G3', file: 'lab/windows/folders.js' },
 };
 /* [anchor, module, offset]: the anchor is a regex over one line; the piece starts `offset` lines from the line it matches */
 export const PLANNED_CUT = [
@@ -953,6 +954,8 @@ export const PLANNED_CUT = [
   [/^ {2}\/\* 0\.3\.1 · S3 THE TRUE HISTORY/, 'history'],                              // §25 the history
   [/^ {2}\/\* ── the diagnostics surface/, 'facade'],                                 // §26
   [/^ {2}\/\* ── 0\.5\.0 C7b · THE RENDER CARD/, 'boot'],                              // §27–§30
+  [/^ {2}\/\/ FOLDERS — the FOLDERS card/, 'folders'],                               // the seat (021 G3: lab/windows/folders.js)
+  [/^ {2}\/\* ── go ──/, 'boot'],                                                    // §30 go
 ];
 export const HINGE = 25;
 /* the context's own bags: counted by their members elsewhere (the ui registry, the hook bag), never as a crossing name */
