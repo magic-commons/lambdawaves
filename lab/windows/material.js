@@ -81,7 +81,6 @@ export function createMaterial(app) {
        CSS filter.  ROTATE follows because it rotates the stops the LUT is made of */
     const bar = el('div', 'lw-espbar', app.dom.stage); bar.hidden = true; bar.setAttribute('aria-hidden', 'true');
     const barRamp = el('i', 'lw-espbar-ramp', bar), barNums = [0, 1, 2, 3, 4].map(() => el('span', 'lw-espbar-n', bar));
-    el('span', 'lw-espbar-u', bar).textContent = 'φ · a.u.';
     let barTimer = 0, barKey = '', palLut = null, lutN = 0;
     const RAMP = ESP_RAMP.map(hexToRgb), K3 = 1 / Math.sqrt(3);
     const hueRot = (c, h) => { if (!h) return c; const a = h * 2 * Math.PI, ca = Math.cos(a), sa = Math.sin(a), d = (c[0] + c[1] + c[2]) / 3 * (1 - ca);
@@ -99,12 +98,14 @@ export function createMaterial(app) {
     /* iteration 018 B7 · THE BAR'S SEAT is INFORMATIONAL's (ESP BAR · SIDE · PAD in `lambdawaves.q0.info`): the free stage the formula's block reads (racks
        and a floating transport out), PAD a share of it from the SIDE's edge, centred along it; TOP and BOTTOM lie the bar down (data-side, lab.css).
        THE STAGE TEXT WINS: a bar that would cross the formula block steps clear of it, vertically — a TOP bar under it, a BOTTOM bar over it, a side
-       bar away from it */
+       bar away from it.  023 R6 (Josh: "If the ESP strip is either left or right, it shouldn't readjust whenever CSB … is open"): a LEFT or RIGHT bar is
+       seated from the stage's edges and the racks only (`free(false)`), so the CSB opening, expanding, docking or folding moves it by 0 px; its unit
+       (φ · a.u.) is ESP BAR's hint, not a caption on the strip */
     const IP = infoPrefs();
     const barSeat = () => {
       const st = app.state.stageText, sb = app.dom.stage.getBoundingClientRect(), side = IP.get('espBarSide'), pad = IP.get('espBarPad'), horiz = side === 'top' || side === 'bottom';
       if (bar.dataset.side !== side) { bar.dataset.side = side; barNums.forEach((n, i) => { n.style.top = horiz ? '' : i * 25 + '%'; n.style.left = horiz ? 100 - i * 25 + '%' : ''; }); paintBar(); }
-      const F = st ? st.free() : { L: 16, R: sb.width - 16, T: 16, B: sb.height - 16 }, w = bar.offsetWidth, h = bar.offsetHeight, b = st && st.blockRect(), G = 12;
+      const F = st ? st.free(horiz) : { L: 16, R: sb.width - 16, T: 16, B: sb.height - 16 }, w = bar.offsetWidth, h = bar.offsetHeight, b = st && st.blockRect(), G = 12;
       const x = horiz ? (F.L + F.R - w) / 2 : side === 'left' ? F.L + pad * (F.R - F.L) : F.R - pad * (F.R - F.L) - w;
       let y = horiz ? (side === 'top' ? F.T + pad * (F.B - F.T) : F.B - pad * (F.B - F.T) - h) : (F.T + F.B - h) / 2;
       if (b && x < b.right + G && x + w > b.left - G && y < b.bottom + G && y + h > b.top - G) y = side === 'top' || (side !== 'bottom' && b.top + b.bottom < 2 * y + h) ? b.bottom + G : b.top - G - h;
