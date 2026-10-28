@@ -69,7 +69,7 @@ export async function createController(app) {
 
   const keep = { frames: false };
   const domain = { auto: true, half: 7 };
-  const fieldRate = { capMs: 0 };
+  const fieldRate = { capMs: 0, lock: false, hz: 0 };   // 020 L1 PLAYBACK LOCK: lock → the clock steps rate/hz per present (hz 0 = DISPLAY, every rAF); a PREFERENCE (shell/settings.js)
   /* PERFORMANCE: 'full' updates every CPU window every frame; '120' updates them every 4th frame (≈30 Hz at 120 Hz)
      while the FIELD still presents every frame — the picture never waits for a readout.  The profile is an EMA of
      the milliseconds each stage costs per frame, so the mode is chosen on numbers, not on faith. */

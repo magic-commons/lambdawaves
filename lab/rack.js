@@ -228,7 +228,7 @@ export async function boot(dom) {
   window.addEventListener('pageshow', () => setPageHidden(document.visibilityState === 'hidden', 'pageshow'));
 
   /* ── the router ───────────────────────────────────────────────────────── */
-  let pending = TIER.NONE, rafId = 0, lastWall = 0, lastReconMs = -1e9; app.state.dragging = false; let inLoop = false;
+  let pending = TIER.NONE, rafId = 0, lastWall = 0, lastReconMs = -1e9, lockDue = 0; app.state.dragging = false; let inLoop = false;
   /* OPTIMIZATION 2026-09-24 · LA1: the WHOLE loop's own ms, from entry (before the occlusion burst and the modulation
      pump, which perf.ring's tFrame0 leaves out), 60 deep, beside perf.ring — LW.perf.loopMedian reads it.  Both rings
      are written to the slot the frame's head captured (the tail used to write the NEXT slot, so the getter read the
@@ -397,7 +397,22 @@ export async function boot(dom) {
       }
     }
     let tier = pending; pending = TIER.NONE;
-    const dt = clock.advance(now);                                   // PHYSICS clock (exact)
+    /* PLAYBACK LOCK (020 L1 · A LOCKED CLOCK STEPS, A WALL CLOCK FLOWS): while it plays, the loop presents only on a 1/hz tick (DISPLAY: every
+       rAF) and the clock advances exactly rate/hz per present.  A rAF between ticks, or one whose GPU is still behind (the PACE cap), carries
+       its ask whole and leaves t alone — a missed vsync slows time, never skips it (the due time re-anchors, it never catches up). */
+    const lockHz = fieldRate.lock ? (fieldRate.hz || 1000 / frameBudget.milliseconds('120')) : 0;
+    clock.hz = lockHz;
+    if (field.pinJitter) field.pinJitter(lockHz > 0);
+    let lockWait = false;
+    if (lockHz && clock.playing) {
+      if (field.ok && field.inFlight >= field.inFlightCap) lockWait = true;
+      else if (fieldRate.hz) {
+        const stepMs = 1000 / fieldRate.hz;
+        if (!(lockDue > 0) || nowMs - lockDue > stepMs) lockDue = nowMs;
+        if (nowMs >= lockDue - Math.min(2, stepMs / 4)) lockDue += stepMs; else lockWait = true;
+      }
+    }
+    const dt = lockWait ? 0 : clock.advance(now);                    // PHYSICS clock (exact; LOCKED: rate/hz)
     if (page.firstDt === null) { page.firstDt = dt; page.firstWall = Math.max(0, now - lastWall); if (dt > 0.5 * clock.rate) page.jumped++; }   // wave 54: the first frame after a resume, kept so the gate can read it rather than infer it
     if (dt !== 0) { tier = Math.max(tier, TIER.EVOLVE); stats.evolves++; winSteps++; }
     if (camLevel.from && camLevelStep(nowMs)) tier = Math.max(tier, TIER.PRESENT);   // wave 54: FREE → TURNTABLE levels the roll, it never snaps
@@ -422,6 +437,7 @@ export async function boot(dom) {
        draws what it drew.  The ask is carried WHOLE to the next rAF (a REBUILD or RECONSTRUCT is never dropped: LA8's
        discipline); the clocks and the CPU readers run as on any frame.  Only this rAF road: an export calls field.frame
        itself, and no rAF runs while one does (render-exact H9). */
+    if (lockWait && tier >= TIER.PRESENT) { if (tier > pending) pending = tier; tier = TIER.NONE; }   // PLAYBACK LOCK: the ask waits for the tick
     const held = tier >= TIER.PRESENT && field.ok && field.inFlight >= field.inFlightCap;   // 020 S2: four where completion is prompt; Firefox two, only behind a backlog (field.js HEAVY_MS)
     if (held) { if (tier > pending) pending = tier; tier = TIER.NONE; stats.skipped++; }
     if (tier >= TIER.REBUILD) applyRebuild();
@@ -451,7 +467,8 @@ export async function boot(dom) {
       autoQ.lastMs = nowMs;
     }
     const slot = perf.counts.frames % 60; perf.ring[slot] = 0; loopRing[slot] = 0;   // filled at the tail with this frame's own main-thread cost — the SAME slot (LA1)
-    const d = controlStep(autoQ, nowMs, quality.autoScale, quality.minScale, perfBudgetMs(), quality.auto, gov.on && clock.playing && effectiveRes() > RES_LADDER[0]);
+    /* PLAYBACK LOCK holds AUTO SCALE and the grid rung (020 L1): no decision, the scale in force kept, the window restarted on release */
+    const d = clock.hz ? (autoQ.presented = 0, null) : controlStep(autoQ, nowMs, quality.autoScale, quality.minScale, perfBudgetMs(), quality.auto, gov.on && clock.playing && effectiveRes() > RES_LADDER[0]);
     if (d) {                                                         // THE ONE CONTROLLER has judged (its law at autoQ)
       if (d.rung || !clock.playing || d.scale >= quality.autoScale) autoQ.m0 = 0;
       else if (!autoQ.m0) { autoQ.m0 = d.median; autoQ.s0 = quality.autoScale; }   // a descent begins: the scale² test reads from here

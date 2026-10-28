@@ -1555,6 +1555,7 @@ export async function createField(canvas, opts = {}) {
   let half = 7, space = 0, generation = 0, refGeneration = -1, refValid = false;
   const stats = { reconstructs: 0, presents: 0, chromeWrites: 0, lastEncodeMs: 0, lastReconstructWall: 0, resolution: 0, modesRendered: 0, generation: 0, molDispatches: 0, molAO: 0, molMs: 0, espRuns: 0, espMs: 0 };
   let dprCap = 2;                       // the device-pixel ceiling: 2 on a desktop, dropped at the phone breakpoint (wave 51)
+  let jitterPin = -1;                   // 020 L1: ≥ 0 while PLAYBACK LOCK holds the march's seed (presents % 97 of the first locked present)
   let stepCap = Infinity;               // a runtime presentation budget; the saved/project ray-step choice remains mat.steps
   /* PACE (P1, 2026-09-25) · frames submitted whose onSubmittedWorkDone has not resolved — counted only where completion is
      PROMPT (`paced`, measured at boot below: Safari and Chromium answer a drained queue in a few ms, Firefox on a ~100 ms
@@ -1761,7 +1762,7 @@ export async function createField(canvas, opts = {}) {
     v[4] = B.right[0]; v[5] = B.right[1]; v[6] = B.right[2]; v[7] = tanH * aspect;
     v[8] = B.up[0]; v[9] = B.up[1]; v[10] = B.up[2]; v[11] = tanH;
     v[12] = B.fwd[0]; v[13] = B.fwd[1]; v[14] = B.fwd[2]; v[15] = Math.min(mat.steps || 160, stepCap);
-    v[16] = mat.view | 0; v[17] = mat.exposure; v[18] = mat.softness; v[19] = (stats.presents % 97) / 97;
+    v[16] = mat.view | 0; v[17] = mat.exposure; v[18] = mat.softness; v[19] = (jitterPin >= 0 ? jitterPin : stats.presents % 97) / 97;   // 020 L1: PLAYBACK LOCK pins the march's seed
     v[20] = mat.slice ? mat.slice.mode | 0 : 0; v[21] = mat.slice ? mat.slice.axis | 0 : 2; v[22] = mat.slice ? mat.slice.pos : 0; v[23] = mat.slice ? mat.slice.thick : 0.03;
     v[24] = mat.hueShift || 0; v[25] = mat.invert ? 1 : 0; v[26] = mat.paletteOn ? 1 : 0; v[27] = mat.dither || 0;   // wave 54: the DITHER amplitude in LSB (p0.w keeps the ray-march jitter seed)
     v[28] = mat.style | 0; v[29] = mat.iso === undefined ? 0.06 : mat.iso; v[30] = mat.grain === undefined ? 0.35 : mat.grain; v[31] = kneeQ(mat.knee);   // iteration 008 G: THE KNEE's q, 0 at 0.6
@@ -2447,6 +2448,7 @@ export async function createField(canvas, opts = {}) {
       writeOcc(); return true;
     },
     setDprCap(n) { dprCap = Math.max(0.5, Math.min(4, +n || 2)); return dprCap; },
+    pinJitter(on) { if (!on) jitterPin = -1; else if (jitterPin < 0) jitterPin = stats.presents % 97; },   // 020 L1: rack.js, once a loop
     setStepCap(n) { stepCap = Number.isFinite(n) ? Math.max(16, Math.min(1024, +n)) : Infinity; return stepCap; },
     /* The CSS size is read from a ResizeObserver, not from clientWidth on every frame: the frame loop writes
        body attributes before it presents, so a per-frame clientWidth read forced a synchronous layout. */

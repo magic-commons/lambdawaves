@@ -6,6 +6,8 @@
  * and a single wall interval is capped (MAX_WALL_STEP) so a background tab cannot lurch.
  * Scrub and step set/advance t directly.  Wall scheduling (which frame runs when) lives in
  * the scheduler in rack.js — the renderer never owns physical time (§12, §25).
+ * THE LOCKED CLOCK (020 L1): `hz` > 0 is PLAYBACK LOCK — advance() steps exactly rate/hz per call and ignores the wall interval
+ * (rack.js calls it once per present, on its 1/hz tick); hz = 0 is the wall clock above, byte for byte.  A missed frame slows time.
  * THE HORIZON, T_MAX (0.5.4 P7b · R9: declared; nothing clamps, refuses or branches on it): t is one f64, so at t = T_MAX·dt a step t += dt is
  * no longer dt and from 2·T_MAX·dt on it is lost — dt is `rate` × the wall interval advance() took (≤ MAX_WALL_STEP) or step(dt)'s own.
  */
@@ -21,6 +23,7 @@ export class Clock {
     this._wall = null;       // last wall time we accounted for (seconds)
     this.steps = 0;          // physics steps taken (diagnostics)
     this.lastDt = 0;
+    this.hz = 0;             // 020 L1: 0 = WALL (the wall interval × rate), > 0 = LOCKED (rate/hz per advance)
     this.onEdge = null;      // THE ONE PLAY's ear (onePlay, below): told of every play and pause edge, from whichever road
   }
   play(nowSec) { if (!this.playing) { this.playing = true; this._wall = nowSec; if (this.onEdge) this.onEdge(true); } }
@@ -29,6 +32,7 @@ export class Clock {
   /** advance by the wall interval since the last advance (0 when paused) → dt in a.u. */
   advance(nowSec) {
     if (!this.playing) return 0;
+    if (this.hz > 0) { this._wall = nowSec; const dt = this.rate / this.hz; this.t += dt; this.steps++; this.lastDt = dt; return dt; }   // LOCKED: one step, whatever the wall did
     if (this._wall === null) { this._wall = nowSec; return 0; }
     let dw = nowSec - this._wall;
     if (dw < 0) dw = 0;
