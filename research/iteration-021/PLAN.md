@@ -78,6 +78,9 @@ D1 `docs/laws/*.md` by subject (the stage words, the register and systems, the f
 21. (I2) The 195 action.<id> targets sit under one ACTIONS group in the modulation picker. Default: one group, folded.
 22. (I2) MIDI CC as a modulation SOURCE (a knob driving a dial) is not built: the kit has no 'midi' source kind yet (FOR 1.5.6). Default: next kit door.
 
+## JOSH'S ANSWERS (2026-10-28)
+"defaults for all" — calls 1–22 at their defaults (the kit commits fetch into ~/Documents/MIR when he likes, call 12).
+
 ## MERGE ORDER
 K → G → R → I → V → D (each on the merged tree; the recipe: `git merge --no-ff --no-commit it021-<chain>` → `git checkout --ours lab/sw.js` → `node tests/pwa.test.mjs --write` → `node tools/rack-deps.mjs --classes --no-write` → `node tools/new-project.mjs --check` → `node tests/mir-manifest.test.mjs` → `./test.sh node` → commit → CLOSED row → handoff line). After K the kit law is "1.5.6-alpha.N, additive doors only"; every later chain's kit edit follows it.
 
