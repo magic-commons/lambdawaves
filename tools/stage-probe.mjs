@@ -7,6 +7,9 @@
 // seat  — the words' rect and the ESP bar's rect with the racks shown, hidden, peeking (S5: the same pixels).
 import { open } from './gate/gatekit.mjs';
 import * as drv from './gate/drv.mjs';
+import { writeFileSync } from 'node:fs';
+/* a picture: the driver's composite, the PNG to /tmp/s-shot-<name>.png and the crop box printed (S-BUILD's pictures are cut from it) */
+const shot = async (name, box) => { writeFileSync(`/tmp/s-shot-${name}.png`, Buffer.from(await g.snap(), 'base64')); console.log('shot'.padEnd(14), name, JSON.stringify(box || null)); };
 
 const mode = process.argv[2] || 'info';
 const g = await open(`https://127.0.0.1:${process.env.LW_PORT}/lab/?preset=1s%2B2pz`, { width: 1500, height: 1000, script: 120000 });
@@ -80,6 +83,13 @@ try {
       const c = document.getElementById('skeleton'), ink = () => { const x = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < x.length; i += 4) if (x[i]) n++; return n; };
       const before = ink(); __LW.mat.espBare = true; __LW.schedule(2); await __w(300); const bare = ink(); __LW.mat.espBare = false; __LW.schedule(2); await __w(300);
       return { before, bare, back: ink() };`));
+  } else if (mode === 'camera') {   // S3: the CAMERA card's verbs, every button and switch whole (no text past its box) at the rack's width
+    const r = await g.ev(`const card = document.querySelector('.dev[data-id="camera"]'); card.classList.remove('closed'); if (card.classList.contains('folded')) card.querySelector('.dev-fold').click();
+      card.scrollIntoView({ block: 'start' }); await __w(600);
+      const rows = [...card.querySelectorAll('.cam-verbs')].map((v) => [...v.children].map((c) => { const b = c.getBoundingClientRect(), p = v.getBoundingClientRect();
+        return { t: c.textContent.trim(), w: Math.round(b.width), clipped: c.scrollWidth > c.clientWidth + 1 || b.right > p.right + 0.5 || b.left < p.left - 0.5 }; }));
+      const b = card.getBoundingClientRect(); return { rows, card: [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(Math.min(b.height, 420))] };`);
+    out('camera', r.rows); await shot('camera', r.card);
   } else if (mode === 'seat') {
     await g.ev(`await __mol(); return 1;`);
     const seat = `const b = [...__LW.stageText.layer.root.querySelectorAll('.mir-info-block')].pop(), e = document.querySelector('.lw-esp-bar, .esp-bar');

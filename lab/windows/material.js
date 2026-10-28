@@ -314,7 +314,10 @@ export function createMaterial(app) {
          kit's (the port answers `flip`, iteration 014 C2's parity, a session's switch, never saved), and AUTO-ROTATE leave their rows for the verbs:
          PAN HOME · HOME · LOCK · FLIP · AUTO-ROTATE */
       const kitRoot = (id) => { const e = camView.controls.find((c) => c.vids[0] === id); return e && e.c.root; };
-      const v = q('.cam-verbs') || more; for (const n of [ui.camLockSw.root, kitRoot('flip'), kitRoot('autoRotate')]) if (n) v.appendChild(n); v.dataset.n = String(v.children.length); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
+      /* 020 S3 (Josh: "Make two rows if needed for that super crammed top row"): PAN HOME · HOME on the kit's row, LOCK · FLIP · AUTO-ROTATE on a second
+         one under it (also .cam-verbs, so skin.css and a reader of the verbs see both) */
+      const v0 = q('.cam-verbs'), v = v0 ? el('div', 'cam-row cam-verbs cam-switches') : more; if (v0) v0.after(v);
+      for (const n of [ui.camLockSw.root, kitRoot('flip'), kitRoot('autoRotate')]) if (n) v.appendChild(n); fold(q('.cam-mode') || R, more, { what: 'pan and hand' }); }
     /* iteration 012 R3 (Josh 10-20: "Remove text that says 'control' and 'direction' in camera … Increase the size of the 3D thingy while moving Zoom
        and FOV under 'YAW' and 'PITCH' … Rename 'Hand' to 'Controls'"): the kit's two labels leave its DOM, ZOOM · FOV join the sphere's knob column
        under YAW · PITCH (the view row empties and goes), and skin.css draws the sphere bigger; the panel's own file is untouched */
