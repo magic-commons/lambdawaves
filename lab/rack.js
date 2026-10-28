@@ -39,7 +39,7 @@ import { createMotionPref } from './motion-pref.js';   // N7 seam 1: the reduced
 import { createController } from './shell/controller.js';   // 0.5.2 R1: ONE CONTROLLER · FIELD · THE MATHS WORKERS · ONE ROAD, out of boot()
 import { createSwClient } from './sw-client.js';        // N7 seam 5: the install layer's interface half, out of boot()
 import { createBadges } from './badges.js';             // N7 seam 6: the badges and the canvas's sentence, out of boot()
-import { createTransport } from './shell/transport.js'; import { createRackWiring } from './shell/rack-wiring.js'; import { createNotebook } from './shell/notebook.js'; import { createKeys } from './shell/keys.js';   // 0.5.2 R3b (createRack, createMenubar, installWindowChrome left with them)
+import { createActions } from './actions.js'; import { createTransport } from './shell/transport.js'; import { createRackWiring } from './shell/rack-wiring.js'; import { createNotebook } from './shell/notebook.js'; import { createKeys } from './shell/keys.js';   // 0.5.2 R3b (createRack, createMenubar, installWindowChrome left with them)
 import { createMirGui } from './mir-gui.js';   // iteration 003: MIR OPTIONS and MIR ABOUT, the kit's createGui over the look store
 import { readLink } from './statelink.js';   // wave 56: every state of this lab is a LINK
 
@@ -803,6 +803,7 @@ export async function boot(dom) {
   }
 
   /* ── transport strip (§25): lab/shell/transport.js (0.5.2 R3b), created here — λWAVES' own bar ── */
+  createActions(app);   // 021 I1: THE ACTION REGISTRY (lab/actions.js, app.sh.ACTIONS) — before the bar, whose seats read it
   const { transport, togglePlay, setModArm, barLock } = createTransport(app);
 
   /* ── badges (§41) ─────────────────────────────────────────────────────── */
@@ -889,10 +890,11 @@ export async function boot(dom) {
      and the rack card `nodes`, seated where CURVES was (after RENDER, closed; a saved layout's `curves` seat opens `nodes`: settings.js RETIRED_WINDOWS).
      The grade is still the kit's curves panel over the stage canvas (the SCREEN only, never a picture or a film), PREFERENCE `lambdawaves.q0.curves`;
      `__LW.curves` is its model, `__LW.nodes` the graph. */
-  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod });
+  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod, onWin: () => app.sh.ACTIONS.notify('nodes') });
     LW.curves = N.model; LW.nodes = N; }
   // FOLDERS — the FOLDERS card (`projects`), the kit's mountGallery (021 G3: lab/windows/folders.js)
   createFolders(app);
+  app.sh.ACTIONS.sync();   // 021 I1: the windows registered since the keys (RENDER, NODES, FOLDERS) get their open · close · fold rows
 
   /* ── go ───────────────────────────────────────────────────────────────── */
   LW.bootView = VIEW_NAMES[mat.view]; LW.bootVortex = vortex.on; LW.bootOrder = layout.orderAll(); LW.bootClosed = layout.closed();   // the shipped defaults, recorded before a URL preset's visuals apply

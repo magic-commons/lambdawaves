@@ -29,6 +29,7 @@ export function createVortex(host, overlay, api) {
   const cRo = readout({ label: 'EVENT CENSUS', value: '—', cls: 'wide', sub: '' }); r2.appendChild(cRo.root);
   const r3 = el('div', 'row tight', host);
   const jump = trig({ label: 'JUMP TO EVENT', title: 'Jump to the next event', onFire: () => { if (census && census.count && api.scrubTo) { const t = api.clock.t, Td = census.Td; const fires = [...new Set(census.points.filter((p) => p.admissible).map((p) => +p.t0.toFixed(6)))].sort((a, b) => a - b); let best = null; for (const f of fires) { let cand = f + Td * Math.floor((t - f) / Td + 1e-9) + Td; if (cand - t < 1e-6) cand += Td; if (best === null || cand < best) best = cand; } if (best !== null) api.scrubTo(best); } } }); r3.appendChild(jump.root);
+  jump.root.dataset.keyAction = 'vortex.jump';   // 021 I1: the action presses it
   el('div', 'note', host).innerHTML = '<b>The flow.</b> Roots of P(w) locate the nodal lines on sampled coaxial circles — where the current v = j/ρ is singular, and which the PARTICLES below never cross. A double root is a nodal event, named from exact derivatives: a regular line, a birth or death of a loop, or a saddle where two lines exchange partners. The three-mode test finds their beat phases directly.';
   const cv = overlay; const g = cv.getContext('2d');
   let dirty = true, last = null, census = null, lastKey = '', lastCensusVersion = -1, lastObs = '';

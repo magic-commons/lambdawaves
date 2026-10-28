@@ -459,7 +459,7 @@ export function createChem(host, api) {
   const kapKnob = knob({ label: '<m>κ</m>', min: 1e-4, max: 1e-2, value: 1e-3, log: true, title: 'The δ-kick strength; linear response wants the smallest κ the trace can carry',
     fmt: (v) => v.toExponential(1), onInput: (v) => { if (api.modHand && api.modHand('chem.kick', v)) return; kappa = v; } });   // iteration 007 (MIR check B2): routed, the hand moves the base
   r2.appendChild(kapKnob.root);
-  const kickT = trig({ label: 'KICK', title: 'exp(−iκ q̂) on the converged density, then field-free propagation', onFire: () => { kick(); } }); r2.appendChild(kickT.root);
+  const kickT = trig({ label: 'KICK', title: 'exp(−iκ q̂) on the converged density, then field-free propagation', onFire: () => { kick(); } }); r2.appendChild(kickT.root); kickT.root.dataset.keyAction = 'chem.kick';   // 021 I1: the action presses it
   /* iteration 008 U · Δρ, the VIEW that left the seg: the induced density against the reference stored at the kick, over whatever VIEW the card draws */
   const deltaSw = sw({ label: 'Δρ', value: false, title: 'The induced density against the reference stored at the kick — ΔD is formed in double precision and shown as a signed field, so a weak kick is not lost in the texture format', onChange: (v) => { setDelta(v); } });
   r2.appendChild(deltaSw.root);

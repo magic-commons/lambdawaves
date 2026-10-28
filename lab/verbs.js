@@ -4,7 +4,7 @@
  * { own } (it announced itself), { fade } (THE FADE, said when no row of the list announced itself) or a string: the sentence it was refused with. */
 import { PRESET_BY_ID } from './state.js'; import { MOLECULE_BY_ID } from './molecules.js'; import { VIEW_NAMES, waveView } from './field.js'; import { BASIS } from './hydrogen.js';
 import { orbitalName } from './names.js'; import { mdText, stateLatex, stemOf, BASIS_LABEL } from './latex-state.js'; import { statusOf } from './status.js';
-import { aliasOf, FLASH_HZ } from './flash-law.js'; import { EQ_PRESETS } from './equalizer.js'; import { getHamiltonian } from './hamiltonian.js'; import { isField } from './mir/core/pointer.js';
+import { aliasOf, FLASH_HZ } from './flash-law.js'; import { EQ_PRESETS } from './equalizer.js'; import { getHamiltonian } from './hamiltonian.js';
 import { LAT } from './lattice.js'; import { BL } from './bloch.js'; import { PRESETS as LATTICES } from './lattice-model.js';
 /** an orbital by number (1…nAO) or by any of its names (HOMO, LUMO−1, 1b1) → its number; 0 for none (0.5.1 D8, from the notebook's link runner) */
 const orbitalOf = (s, w) => { if (!s) return 0; if (/^\d+$/.test(w)) return +w >= 1 && +w <= s.nAO ? +w : 0;
@@ -63,13 +63,12 @@ export const VERBS = [
       flip({ locate: ui.vorOn && { get: () => app.w.vortex.on, root: ui.vorOn }, particles: ui.pOn, formula: ui.molFormulaSw, labels: ui.atomLabelsSw }[a.id], a.on); } },
   { id: 'say', args: { md: 'string' }, doc: 'write one short markdown paragraph on the stage ($…$ maths allowed), held until Escape or the next say',
     run(app, a) { const T = app.state.stageText; if (sayBye) sayBye(); if (!T || !T.announce(a.md, 0)) return 'not shown: STAGE FORMULA is off';
-      const life = new AbortController(), bye = sayBye = () => { life.abort(); if (sayBye === bye) sayBye = null; T.dismiss(a.md); };
-      addEventListener('keydown', (e) => { if (e.key === 'Escape' && !isField(e.target, true)) bye(); }, { signal: life.signal }); return { own: true }; } },
+      let drop = null; const bye = sayBye = () => { if (drop) drop(); if (sayBye === bye) sayBye = null; T.dismiss(a.md); };
+      drop = app.sh.ACTIONS.escape.push(bye); return { own: true }; } },   // 021 I1: a layer of THE ESCAPE STACK (lab/actions.js)
   { id: 'notebook', args: { md: 'string' }, doc: "append a markdown block to this project's notebook (opening it to read)",
     run(app, a) { const N = app.sh.layout.notebook, was = N.isOpen; N.text = N.text.trim() ? N.text.replace(/\s*$/, '\n\n') + a.md : a.md;
       if (!was) N.open('notes'); if (!was || N.mode === 'view') N.setMode('view'); } },
-  { id: 'new', args: {}, doc: 'open a new empty project (asking first when this one has unsaved changes)',
-    async run(app) { if (!(await app.sh.layout.projects.requestFresh())) return 'NEW did not open: the unsaved project was kept, or the empty project could not be fetched'; } },
+  { id: 'new', args: {}, doc: 'open a new empty project (FOLDERS asks first when this one has unsaved changes)', run: () => {} },   // 021 I1: ONE ROAD TO NEW — the action `new` (lab/actions.js) runs
 ];
 const BY_ID = new Map(VERBS.map((v) => [v.id, v]));
 /** '' when `args` fits the row, else the sentence: never guessed */
@@ -95,7 +94,7 @@ export function createVerbs(app) {
     const keep = () => { if (!H) return; const was = H.holding; H.hold(row); if (was) H.release(); };
     let fade = '', own = false; keep();
     try {
-      for (const v of todo) { keep(); let r; try { r = await BY_ID.get(v.verb).run(app, v.args || {}); } catch (e) { r = String((e && e.message) || e); }
+      for (const v of todo) { keep(); let r; try { r = await app.sh.ACTIONS.run(v.verb, v.args || {}); } catch (e) { r = String((e && e.message) || e); }   // 021 I1: a verb is the action of its id
         if (typeof r === 'string') refused.push({ verb: v.verb, why: r }); else { ran.push(v); own = own || !!(r && r.own); fade = fade || (r && r.fade) || ''; } }
     } finally { if (H) H.release(); }
     if (fade && !own && app.state.stageText) app.state.stageText.say('preset', fade);   // iteration 007: THE FADE is the `preset` kind (INFORMATIONAL › PRESETS); `say` is its own ask, written while STAGE FORMULA is on
@@ -117,5 +116,5 @@ export function createVerbs(app) {
       camera: Object.fromEntries(['yaw', 'pitch', 'zoom', 'fov', 'autoRotate'].map((k) => { const v = P.get(k); return [k, typeof v === 'number' ? +v.toFixed(3) : v]; })),
       windows: app.sh.rk.windows().filter((w) => w.open).map((w) => w.id), view: cs ? cs.view : VIEW_NAMES[mat.view], ...(LAT && app.sh.rk.windows().some((w) => w.id === 'lattice' && w.open) ? { lattice: [LAT.label, ...LAT.ro.map(ro)].join(' · ') } : {}), ...(BL && app.sh.rk.windows().some((w) => w.id === 'bloch' && w.open) ? { bloch: [BL.label, ...BL.ro.map(ro)].join(' · ') } : {}), notebook: app.sh.layout.notebook.text.slice(-600) };
   }
-  return { run, inventory, table: VERBS };
+  return { run, inventory, table: VERBS, byId: (id) => BY_ID.get(id) || null };
 }

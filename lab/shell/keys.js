@@ -1,138 +1,31 @@
-/* lab/shell/keys.js — §20–§23 (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): keyState, the ACTIONS rows on MIR's ONE KEY TABLE (lab/key-table.js), the
- * KEYBOARD window and THE TIMELINE (the kit's; THE FOCUS LAW's scoped rows), toggleUI and THE TAB ORDER.  createKeys(app) runs at its seat; keyState, ACTIONS
+/* lab/shell/keys.js — §20–§23 (0.5.2 R3b): THE KEY TABLE'S FEED (021 I1: the rows are lab/actions.js's registry) on MIR's ONE KEY TABLE (lab/key-table.js), the
+ * KEYBOARD window and THE TIMELINE (the kit's; THE FOCUS LAW's scoped rows), toggleUI and THE TAB ORDER.  createKeys(app) runs at its seat; keyState
  * and kt are registered on app.sh (KEPLER, SPECTRUM, the menubar); the history's historyApi is read there at use. */
-import { TIER } from '../tier.js'; import { VIEW, VIEW_NAMES, WAVE_VIEWS, STYLE, drawStyle } from '../field.js'; import { CAM } from '../camera-law.js'; import { STAGE_BINDINGS } from '../stage-gestures.js';
-import { createKeyTable } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
-import { infoActions } from '../mir/info/layer.js'; import { paintedRect } from '../occlusion.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout } from '../mir/kit.js';
+import { TIER } from '../tier.js';
+import { createKeyTable, keysOf } from '../key-table.js'; import { createKeyboardWindow } from '../mir/keyboard/keyboard.js'; import { installTimeline } from '../mir/timeline/bind.js';
+import { paintedRect } from '../occlusion.js'; import { mirGui } from '../mir-gui.js'; import { ASK_ENABLED } from '../ask.js'; import { readout } from '../mir/kit.js';
 export function createKeys(app) {
-  const { dom, ui, reg, clock, appPlay, obs, mat, settingsStore } = app, { schedule } = app.loop, { floats, panBy, queueKeyOrbit, rack, rackL, resetView, setDist, setFov } = app.host;
-  const { barLock, devById, layout, readSettings, rk, setModArm, togglePlay, transport } = app.sh, { particles, shadowView, toggleFullscreen, wState } = app.w;
-  const { domain, occlusion, touchState } = app.ctl;
-  /**
-   * KEYS.  Transport on the arrows and space; the camera on WASD/QE with shift for a fine step; the ROTATION AXIS
-   * on X/Y/Z, so [ and ] turn the STATE about the chosen axis (and with shift, the Runge–Lenz rotation about it).
-   * The axis keys never move the camera and the camera keys never touch ψ — the badge on each window says which.
-   */
-  const keyState = { axis: 'z', which: 'both' };
-  function keyHelp() { return `axis ${keyState.axis.toUpperCase()} · rotor ${keyState.which}`; }
-  /* ── KEYS: a rebindable action table.  `fine` is shift for the stepping actions; actions that declare `shift`
-     require it (so TAB and Shift+TAB are two actions).  Overrides live in localStorage.
-     0.5.0 A9 · THE ROWS THE KIT'S createKeys READS (mir/shell/keys.js): an id is the kit's where the kit has a twin and `was`
-     names the old one (a binding saved under it still loads, lab/keys.js); `group` and `short` are the keyboard window's;
-     `ctrl: true` is the kit's `Mod` (Ctrl, or ⌘ on a Mac) and `ctrl: 'Ctrl'` its `Ctrl`, the Control key alone (⌘⇧Q logs a
-     Mac out); `inFields` runs from a text field; a control a row drives carries `data-key-action` (the kit's hints() target). ── */
+  const { dom, ui, clock, appPlay, mat, settingsStore } = app, { schedule } = app.loop, { floats, rack, rackL } = app.host;
+  const { devById, layout, readSettings, rk, setModArm } = app.sh, { wState } = app.w, { occlusion } = app.ctl;
+  /* ── KEYS · 021 I1: the rows are THE ACTION REGISTRY's (lab/actions.js); this module is the key table's feed — every row the registry may bind
+     (not a verb's argument form) on MIR's ONE KEY TABLE (lab/key-table.js): the one listener, the save, the binding law.  A key runs the action
+     with { fine } (Shift is the fine step); THE ONE WRAPPER (keyEdit) names the history row for every surface that runs it, a key or not. ── */
+  const A = app.sh.ACTIONS, { keyState } = A;
   const stageHasFocus = () => document.activeElement === dom.canvas;
-  const setAxis = (a) => { keyState.axis = a; wState.setStatus(keyHelp(), 'live'); };
-  const setWhich = (w) => { keyState.which = w; wState.setStatus(keyHelp(), 'live'); };
-  const dolly = (direction, fine) => setDist(direction < 0 ? obs.dist / (1 + 0.1 * fine) : obs.dist * (1 + 0.1 * fine));
-  const pov = (direction, fine) => setFov(2 * Math.atan(Math.tan(obs.fov / 2) * (direction < 0 ? 1 / (1 + 0.1 * fine) : 1 + 0.1 * fine)));
-  /* Preserve the apparent size at the origin: distance × tan(FOV/2) is invariant.
-     When either camera limit is reached, stop the coupled move at that limit. */
-  function dollyZoom(direction, fine) {
-    const invariant = obs.dist * Math.tan(obs.fov / 2);
-    let dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], direction < 0 ? obs.dist / (1 + 0.1 * fine) : obs.dist * (1 + 0.1 * fine)));
-    let fov = 2 * Math.atan(invariant / dist);
-    fov = Math.max(CAM.FOV[0], Math.min(CAM.FOV[1], fov));
-    dist = Math.max(CAM.DIST[0], Math.min(CAM.DIST[1], invariant / Math.tan(fov / 2)));
-    const actual = setDist(dist);
-    if (Math.abs(actual - dist) < 1e-9) setFov(2 * Math.atan(invariant / actual));
-  }
-  const KG = { T: 'TRANSPORT', C: 'CAMERA', S: 'STATE', P: 'PROJECT' };   // the keyboard window's groups; a row without one is WINDOWS & DISPLAY
-  const ACTIONS = [
-    { id: 'transport.play', was: 'play', group: KG.T, short: 'play', label: 'play / pause', key: 'Space', run: () => togglePlay() },
-    { id: 'fullscreen', short: 'fullscreen', label: 'full screen (the browser) / back', key: 'KeyF', run: () => toggleFullscreen() },
-    { id: 'notebook', short: 'notebook', label: 'notebook (and its ABOUT face)', key: 'KeyJ', run: () => layout.notebook.toggle() },
-    /* wave 106: the button's own title says "t → 0  (home)", so the key must BE the button — it was
-       clearing neither the shadow trail nor the playhead, so the same advertised act did two different
-       things depending on which surface you used. */
-    { id: 'home', group: KG.T, short: 'zero', label: 'time to zero', key: 'Home', run: () => appPlay.seek(0) },   // 021 R3: THE ONE SEEK
-    { id: 'stepBack', group: KG.T, short: 'step back', label: 'step time back (shift: fine)', key: 'ArrowLeft', run: (f) => { clock.step(-transport.stepDt() * f); schedule(TIER.EVOLVE); } },
-    { id: 'stepFwd', group: KG.T, short: 'step fwd', label: 'step time forward (shift: fine)', key: 'ArrowRight', run: (f) => { clock.step(transport.stepDt() * f); schedule(TIER.EVOLVE); } },
-    ...(ASK_ENABLED ? [{ id: 'ask', group: KG.T, short: 'ask Gemma', label: 'ask Gemma — the transport strip becomes the type box', key: 'Slash', shift: false, inFields: false, run: () => transport.openAsk() }] : []),   // 0.6.6 G2; iteration 011 Q6: the row only under ASK_ENABLED (lab/ask.js) — off, a saved `ask` chord is kept, inert (createKeyTable's `keep`)
-    { id: 'zoomIn', group: KG.C, short: 'zoom in', label: 'camera closer', key: 'ArrowUp', run: (f) => { setDist(obs.dist / (1 + 0.12 * f)); } },
-    { id: 'zoomOut', group: KG.C, short: 'zoom out', label: 'camera farther', key: 'ArrowDown', run: (f) => { setDist(obs.dist * (1 + 0.12 * f)); } },
-    { id: 'yawL', group: KG.C, short: 'yaw left', label: 'camera yaw left', key: 'KeyA', run: (f) => queueKeyOrbit(-0.12 * f, 0, 'yawL'), up: () => queueKeyOrbit(0, 0, 'yawL') },
-    { id: 'yawR', group: KG.C, short: 'yaw right', label: 'camera yaw right', key: 'KeyD', run: (f) => queueKeyOrbit(0.12 * f, 0, 'yawR'), up: () => queueKeyOrbit(0, 0, 'yawR') },
-    { id: 'pitchUp', group: KG.C, short: 'pitch up', label: 'camera pitch up', key: 'KeyW', run: (f) => queueKeyOrbit(0, 0.12 * f, 'pitchUp'), up: () => queueKeyOrbit(0, 0, 'pitchUp') },
-    { id: 'pitchDn', group: KG.C, short: 'pitch down', label: 'camera pitch down', key: 'KeyS', run: (f) => queueKeyOrbit(0, -0.12 * f, 'pitchDn'), up: () => queueKeyOrbit(0, 0, 'pitchDn') },   // R-K1: S stays WASD's (the kit's S is FOLDERS)
-    { id: 'dollyIn', group: KG.C, short: 'dolly in', label: 'dolly in', key: 'KeyQ', shift: false, run: (f) => dolly(-1, f) },
-    { id: 'dollyOut', group: KG.C, short: 'dolly out', label: 'dolly out', key: 'KeyE', shift: false, run: (f) => dolly(1, f) },
-    { id: 'povIn', group: KG.C, short: 'POV tighter', label: 'POV tighter (field of view)', key: 'KeyQ', shift: true, run: () => pov(-1, 1) },
-    { id: 'povOut', group: KG.C, short: 'POV wider', label: 'POV wider (field of view)', key: 'KeyE', shift: true, run: () => pov(1, 1) },
-    { id: 'dollyZoomIn', group: KG.C, short: 'dolly zoom in', label: 'dolly zoom in (size held)', key: 'KeyQ', ctrl: 'Ctrl', shift: true, run: () => dollyZoom(-1, 1) },
-    { id: 'dollyZoomOut', group: KG.C, short: 'dolly zoom out', label: 'dolly zoom out (size held)', key: 'KeyE', ctrl: 'Ctrl', shift: true, run: () => dollyZoom(1, 1) },
-    { id: 'camReset', group: KG.C, short: 'cam reset', label: 'reset the camera', key: 'KeyR', run: () => resetView() },
-    { id: 'panLeft', group: KG.C, short: 'pan left', label: 'slide the picture left (the molecule stays the pivot)', key: 'ArrowLeft', alt: true, run: (f) => panBy(-STAGE_BINDINGS.nudge * f, 0) },   // 0.4.0 S2: the lens shift, the bindings' nudge (0.05) of the half-frame a press
-    { id: 'panRight', group: KG.C, short: 'pan right', label: 'slide the picture right', key: 'ArrowRight', alt: true, run: (f) => panBy(STAGE_BINDINGS.nudge * f, 0) },
-    { id: 'panUp', group: KG.C, short: 'pan up', label: 'slide the picture up', key: 'ArrowUp', alt: true, run: (f) => panBy(0, STAGE_BINDINGS.nudge * f) },
-    { id: 'panDown', group: KG.C, short: 'pan down', label: 'slide the picture down', key: 'ArrowDown', alt: true, run: (f) => panBy(0, -STAGE_BINDINGS.nudge * f) },
-    { id: 'axisX', group: KG.S, short: 'axis X', label: 'rotation axis x', key: 'KeyX', run: () => setAxis('x') },
-    { id: 'axisY', group: KG.S, short: 'axis Y', label: 'rotation axis y', key: 'KeyY', run: () => setAxis('y') },
-    { id: 'axisZ', group: KG.S, short: 'axis Z', label: 'rotation axis z', key: 'KeyZ', run: () => setAxis('z') },
-    { id: 'rotorBoth', group: KG.S, short: 'rotor both', label: 'rotor: both (spatial rotation)', key: 'Digit1', run: () => setWhich('both') },
-    { id: 'rotorPlus', group: KG.S, short: 'rotor +', label: 'rotor: plus alone', key: 'Digit2', run: () => setWhich('+') },
-    { id: 'rotorMinus', group: KG.S, short: 'rotor −', label: 'rotor: minus alone', key: 'Digit3', run: () => setWhich('−') },
-    { id: 'rotorK', group: KG.S, short: 'rotor K', label: 'rotor: Runge–Lenz K', key: 'Digit4', run: () => setWhich('K') },
-    { id: 'turnNeg', group: KG.S, short: 'turn −', label: 'turn ψ about the axis, −', key: 'BracketLeft', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: -0.12 * f, t: clock.t }); touchState(); } },
-    { id: 'turnPos', group: KG.S, short: 'turn +', label: 'turn ψ about the axis, +', key: 'BracketRight', run: (f) => { reg.rotor({ which: keyState.which, axis: keyState.axis, angle: 0.12 * f, t: clock.t }); touchState(); } },
-    { id: 'slap', group: KG.S, short: 'impulse', label: 'impulse ψ ↦ e^{ik·x}ψ along the axis X · Y · Z picks (k = 0.2, Shift finer); METERS says what it did', key: 'KeyK', run: (f) => { if (app.hooks.slap) app.hooks.slap(0.2 * f, keyState.axis); } },
-    { id: 'style', short: 'style', label: 'cycle the draw style', key: 'KeyC', run: () => { const order = ['cloud', 'solid', 'signed', 'dust', 'bands']; const nx = order[(order.indexOf(drawStyle(mat.style)) + 1) % 5];   /* iteration 008 G: GRAIN joined DUST */ mat.style = STYLE[nx]; ui.styleSeg.set(nx); schedule(TIER.PRESENT); } },
-    { id: 'view', short: 'view', label: 'cycle the observable', key: 'KeyV', run: () => { const order = WAVE_VIEWS; const nx = order[(order.indexOf(VIEW_NAMES[mat.view]) + 1) % order.length]; mat.view = VIEW[nx]; ui.viewSeg.set(nx); schedule(TIER.PRESENT); } },
-    { id: 'palette', short: 'palette', label: 'toggle the phase palette', key: 'KeyP', run: () => { if (app.state.palette) app.state.palette.setOn(!app.state.palette.on); } },
-    /* iteration 012 M1 (the key-table audit): the mode under the title and R1's BALL AND STICK are rows of their own, with no chord (Josh's to give) */
-    { id: 'mode', short: 'mode', label: 'switch the mode: HYDROGEN | MOLECULES', key: null, run: () => { const c = app.state.chem; if (c) c.setOn(!c.on); } },
-    { id: 'ballStick', short: 'ball and stick', label: 'the molecule’s nuclei and bonds on the stage, on / off', key: null, run: () => { if (ui.skeletonSw) ui.skeletonSw.root.click(); } },
-    { id: 'hide', was: 'hideUI', short: 'hide UI', label: 'hide / show the interface (the frame and the axes with it)', key: 'KeyH', run: () => toggleUI() },
-    { id: 'nextWindow', short: 'next win', label: 'next window to the top of the rack (from the stage)', key: 'Tab', shift: false, stage: true, run: () => cycleWindow(1) },
-    { id: 'prevWindow', short: 'prev win', label: 'previous window to the top of the rack (from the stage)', key: 'Tab', shift: true, stage: true, run: () => cycleWindow(-1) },
-    { id: 'reseed', group: KG.S, short: 'reseed', label: 'reset the particles', key: 'KeyR', ctrl: true, run: () => { particles.setOn(true); particles.seed(160, reg, clock.t, domain.half); schedule(TIER.PRESENT); } },
-    { id: 'help', was: 'keysheet', short: 'keys', label: 'the keyboard — edit bindings', key: 'Slash', shift: true, run: () => layout.keymap.toggle() },
-    (({ id, run, up }) => ({ id, short: 'hold text', label: 'hold the stage text still (while I is held)', key: 'KeyI', shift: false, run, up }))(infoActions(() => app.state.stageText && app.state.stageText.layer)[0]),   // 0.5.1 D1: the kit's hold-still row
-    { id: 'notes', short: 'notes', label: 'show / hide window help', key: 'KeyN', run: () => { const on = document.body.classList.contains('window-info-off'); if (ui.setWindowInfo) ui.setWindowInfo(on); if (ui.windowInfoSw) ui.windowInfoSw.set(on); } },
-    { id: 'rack', short: 'rack', label: 'hide / show the rack', key: 'KeyB', run: () => layout.toggleRack() },
-    { id: 'dock', short: 'dock', label: 'dock / undock the control surface', key: 'KeyT', run: () => layout.dockTransport() },
-    { id: 'csb.search', group: 'CONTROL SURFACE', short: 'search', label: 'search the molecules (the CONTROL SURFACE\'s pill)', key: 'KeyK', ctrl: true, run: () => { const s = app.sh.transport && app.sh.transport.search; if (s) s.open(); } },   // iteration 014 A8 (Josh: a key for the search: yes)
-    /* WAVE 65 · the arm and the loop clock's lock.  Both are REBINDABLE and both appear in the keyboard
-       editor, which is the visible seat neither could have inside the ported window: its timing bar is
-       the artifact's and is not ours to grow (docs/ui/STYLE-LOCK.md, THE PORTED-WINDOW EXCEPTION). */
-    /* R-K1 · the MOD arm is Ctrl+Space (the real Control: ⌘Space is Spotlight); A5+A6 seam: its run() follows the one clock's POWER. */
-    { id: 'modArm', group: KG.T, short: 'mod arm', label: 'MOD — the modulation’s power: routes on or bypassed (time runs on; space plays the one clock)', key: 'Space', ctrl: 'Ctrl', run: () => setModArm(!app.state.modArm) },
-    { id: 'modulation', was: 'modWin', label: 'the modulation window — open it, or close it again', key: 'KeyM', run: () => layout.modulation.toggle() },
-    { id: 'modBar', group: KG.T, short: 'bar lock', label: 'lock the tempo to the state: one bar = one recurrence of the density', key: 'KeyG', run: () => barLock() },
-    { id: 'undo', group: KG.P, short: 'undo', label: 'undo the last edit', key: 'KeyZ', ctrl: true, shift: false, run: () => app.sh.historyApi.undo() },
-    { id: 'redo', group: KG.P, short: 'redo', label: 'redo it (Ctrl+Y too)', key: 'KeyZ', ctrl: true, shift: true, run: () => app.sh.historyApi.redo() },
-    { id: 'redoY', group: KG.P, short: 'redo', label: 'redo (Ctrl+Y)', key: 'KeyY', ctrl: true, shift: false, run: () => app.sh.historyApi.redo() },
-    { id: 'historyUndo', group: KG.P, label: 'return from the last history jump', key: 'KeyZ', ctrl: true, alt: true, shift: false, run: () => app.sh.historyApi.historyUndo() },
-    { id: 'settings', inFields: true, label: 'settings', key: 'Comma', ctrl: true, shift: false, run: () => layout.raise('settings') },
-    { id: 'save', group: KG.P, short: 'save', inFields: true, label: 'save the open project (asks for a name when none is open)', key: 'KeyS', ctrl: true, shift: false,
-      run: () => { if (layout.projects && layout.projects.current) layout.projects.save(); else layout.projects.show({ name: true }); } },
-    { id: 'saveAs', group: KG.P, short: 'save as', inFields: true, label: 'save the project under a new name', key: 'KeyS', ctrl: true, shift: true,
-      run: () => layout.projects.show({ name: true }) },
-    { id: 'folders', group: KG.P, short: 'folders', label: 'the projects — save, open, folders, recent (FOLDERS)', key: 'KeyO',
-      run: () => layout.projects.toggle() },   // iteration 004: shown over the front page (it is put away first), shut when it is seen
-    /* the kit's windows λWAVES has are rows with NO chord (MIR ADOPTING-1.5 §11: their keys are Josh's to give; bind one in the keyboard) */
-    { id: 'history', group: KG.P, short: 'history', label: 'the undo history window', key: null, run: () => layout.raise('history') },
-    { id: 'render', short: 'render', label: 'the RENDER card — film the stage', key: null, run: () => layout.raise('render') },   // iteration 012 M1: the kit's two cards λWAVES carries, as HISTORY
-    { id: 'curves', short: 'nodes', label: 'the NODES window — CURVES grades the screen', key: null, run: () => (app.sh.LW && app.sh.LW.nodes ? app.sh.LW.nodes.open() : layout.raise('nodes')) },   // 018 D3: the saved key id stays; 020 X0: the FREE window
-    { id: 'windowPicker', short: 'finder', label: 'FINDER — search every window by name; SHIFT-click queues several', key: null, run: () => { if (layout.finder) layout.finder.toggle(); } },   // iteration 014 A7 (no chord)
-    { id: 'keyboard', short: 'keyboard', label: 'the keyboard window (? opens it too, as help)', key: null, run: () => layout.keymap.toggle() },
-    { id: 'menu', short: 'picker', label: 'the Picker — open it, or back to the lab', key: 'KeyL', run: () => { if (app.state.picker) app.state.picker.toggle(); } },   // iteration 003; iteration 004: THE PICKER (the id stays 'menu': saved bindings)
-    { id: 'timeline', short: 'timeline', label: 'the timeline window — open it, or close it again', key: null, run: () => { if (app.state.tl) app.state.tl.toggle(); } },   // 0.5.0 C7b
-    { id: 'gui', short: 'mir options', label: 'MIR OPTIONS — the interface’s look (BASINS’ GUI menu)', key: null, run: () => { const g = mirGui(); if (g) g.toggle(); } },   // iteration 003: lab/mir-gui.js
-    { id: 'guiAbout', short: 'mir about', label: 'MIR ABOUT — what MIR is', key: null, run: () => { const g = mirGui(); if (g) g.toggle('about'); } },
-  ];
-  /* THE DISPATCHER (the saved chords, the one keydown listener, whose key a press is): lab/keys.js (wave 130 seam 10) */
-  /* S4 · A KEY'S EDIT IS A ROW OF ITS OWN, named for its action: C / V / P changed the edit scope and armed nothing, so the row came
-     at the next commit under whatever name was standing (probes/S3-verify/edges*.mjs).  An edit still pending under another name
-     commits first; a held key repeats under one name and stays one row; a key that changed nothing drops its name like any gesture. */
-  const TRAVELS = new Set(['undo', 'redo', 'redoY', 'historyUndo', 'timeline.undo', 'timeline.redo']);
+  /* S4 · A KEY'S EDIT IS A ROW OF ITS OWN, named for its action: an edit still pending under another name commits first; a held key repeats under one
+     name and stays one row; a key that changed nothing drops its name like any gesture.  An undo is not an edit (`undo: 'travel'`), nor a NODES key. */
   const keyEdit = (a, run) => {
-    if (!app.state.history || app.state.history.holding || TRAVELS.has(a.id)) return run();   // an undo is not an edit: noting its name lent it to the next unnamed edit
+    if (!app.state.history || app.state.history.holding || a.undo === 'travel' || a.undo === 'none' || /^timeline\.(undo|redo)$/.test(a.id)) return run();
     const name = a.label + ' · ' + kt.keyText(a.id);
     if (app.state.history.pendingLabel !== name) app.state.history.flush();
     run(); app.state.history.note(name);
   };
-  const kt = createKeyTable({ rows: ACTIONS, stageHasFocus, edit: keyEdit, keep: ASK_ENABLED ? [] : ['ask'] });   // 0.5.0 C3: the one listener, the save, the binding law (lab/key-table.js)
+  const feed = (r) => ({ ...r, run: (f) => A.run(r.id, { fine: f, shift: f !== 1 }), up: r.up && (() => r.up()) });
+  A.sync();
+  const kt = createKeyTable({ rows: A.list().filter((r) => r.bind !== false).map(feed), stageHasFocus, keep: ASK_ENABLED ? [] : ['ask'] });   // 0.5.0 C3: the one listener, the save, the binding law
+  A.setEdit(keyEdit);
+  A.onAdd((rows) => kt.table.add(rows.filter((r) => r.bind !== false).map((r) => { const x = feed(r); return { id: x.id, label: x.label, group: x.group, short: x.short, keys: keysOf(x),
+    repeat: true, overControls: true, when: x.when, run: (e) => x.run(e && e.shiftKey ? 0.25 : 1), up: x.up }; })));   // a row the registry learns later (a window registered after boot)
   /* ── 0.5.0 C3 · THE KEYBOARD WINDOW is the kit's createKeyboardWindow (keymap.js left): the drawn board, the platform switch, RECORD /
      RESET, the search and the list, the steal on a second press, Escape's three steps, the drag — on the float layer (UI space for the
      scene guard), its move telling the occlusion (CLAUDE.md).  Its paint is λWAVES' charcoal-blue skin (lab.css §KEYBOARD, R5-S3).  Its
@@ -145,16 +38,17 @@ export function createKeys(app) {
       persist: { read() { try { return JSON.parse(localStorage.getItem(KB_AT)); } catch (_) { return null; } },
         write(st) { try { if (st.x !== null) localStorage.setItem(KB_AT, JSON.stringify({ x: st.x, y: st.y })); } catch (_) {} } } });
     for (const n of [kb.win.root, kb.win.rail && kb.win.rail.el]) occlusion.watch(n, { attributes: true, attributeFilter: ['hidden'] });   // its `hidden` lands when the exit ends: the paused mask lets go then
+    let esc = null;   // 021 I1: the window is a layer of THE ESCAPE STACK while it is open (lab/actions.js)
     layout.keymap = {
-      open() { if (!kb.isOpen()) { back = document.activeElement; kb.open(); } const k = kb.root.querySelector('.km-key[tabindex="0"]'); (k && k.offsetParent ? k : kb.root.querySelector('.km-action-row') || kb.root).focus({ preventScroll: true }); return true; },
+      open() { if (!kb.isOpen()) { back = document.activeElement; kb.open(); if (esc) esc(); esc = A.escape.push(() => kb.close(), { alive: () => kb.isOpen() }); } const k = kb.root.querySelector('.km-key[tabindex="0"]'); (k && k.offsetParent ? k : kb.root.querySelector('.km-action-row') || kb.root).focus({ preventScroll: true }); return true; },
       close() { kb.close(); return false; },
       toggle() { return kb.isOpen() ? layout.keymap.close() : layout.keymap.open(); },
       get isOpen() { return kb.isOpen(); },
     };
     layout.keysheet = layout.keymap;   // the '?' LIST sheet of wave 53 is gone; the window is the one bindings surface
-    /* Escape: inside the window the kit's three steps (a recording, the search, the window); from anywhere else it still closes the window
-       (wave 106), and from the stage it hands the keyboard back to the interface (wave 57).  The menubar and the + / ☆ lists are the kit's. */
-    window.addEventListener('keydown', (e) => { if (e.code !== 'Escape' || e.defaultPrevented) return; if (kb.isOpen()) { e.preventDefault(); kb.close(); } else if (stageHasFocus()) dom.canvas.blur(); });
+    /* Escape: inside the window the kit's three steps (a recording, the search, the window); from anywhere else THE ESCAPE STACK closes the topmost
+       layer (the window among them, wave 106), and with none open the stage hands the keyboard back to the interface (wave 57) */
+    window.addEventListener('keydown', (e) => { if (e.code === 'Escape' && !e.defaultPrevented && stageHasFocus()) dom.canvas.blur(); });
     kt.table.hints(document); kt.table.onChange(() => kt.table.hints(document));   // every [data-key-action] says its live chord (aria-keyshortcuts)
   }
   /* ── 0.5.0 C7b · THE TIMELINE is the kit's installTimeline (TIMELINE.md) on λWAVES' ONE modulation host: its `mod` is this seam (bind.js
@@ -245,7 +139,7 @@ export function createKeys(app) {
     dev.classList.add('tab-hot'); setTimeout(() => dev.classList.remove('tab-hot'), 600);
   }
   app.hooks.keys = {
-    actions: ACTIONS,
+    get actions() { return A.list(); },   // 021 I1: the registry's rows (chords: table.chords(id))
     bind: kt.bind, conflicts: kt.conflicts, reset: kt.reset,   // 0.5.0 C3: λWAVES' binding law over the kit's table (lab/key-table.js)
     /* optimization N4: capture(id) and the dispatcher's capture branch served only the SETTINGS KEYS chips that 5f6421e
        deleted; the keyboard editor records its chords itself.  `capturing` stays readable (the legacy gate reads it). */
@@ -256,6 +150,6 @@ export function createKeys(app) {
     resetTabs() { tabOrder = null; tabIdx = 0; return true; },
     toggleUI, cycleWindow, table: kt.table,
   };
-  app.sh.keyState = keyState; app.sh.ACTIONS = ACTIONS; app.sh.kt = kt; app.sh.stageHasFocus = stageHasFocus;
+  app.sh.keyState = keyState; app.sh.kt = kt; app.sh.stageHasFocus = stageHasFocus;
   return { stageHasFocus, keyState };
 }

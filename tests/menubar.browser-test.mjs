@@ -74,9 +74,9 @@ try {
   /* ── 3 · RESET KEYS restores a rebound key and forgets the override ── */
   /* Digit9, a free key: L is the main menu's since iteration 003 (and 5 the timeline's zoom-selection), and an overlap binds only on an explicit steal */
   const keys = await g.ev(`const b = __LW.keys.bind('transport.play', { key: 'Digit9' });
-    const rebound = __LW.keys.actions.find((a) => a.id === 'transport.play').key, stored = localStorage.getItem('lambdawaves.q0.keys');
+    const rebound = __LW.keys.table.chords('transport.play')[0], stored = localStorage.getItem('lambdawaves.q0.keys');
     const r = await __row('EDIT', 'RESET the key bindings');
-    return { ok: b.ok, rebound, stored: !!stored && /transport\.play/.test(stored), r, after: __LW.keys.actions.find((a) => a.id === 'transport.play').key, storedAfter: localStorage.getItem('lambdawaves.q0.keys'), errors: __e.slice() };`);
+    return { ok: b.ok, rebound, stored: !!stored && /transport\.play/.test(stored), r, after: __LW.keys.table.chords('transport.play')[0], storedAfter: localStorage.getItem('lambdawaves.q0.keys'), errors: __e.slice() };`);
   assert.equal(keys.ok, true); assert.equal(keys.rebound, 'Digit9'); assert.equal(keys.stored, true);
   assert.equal(keys.r.found, true); assert.equal(keys.r.closed, true);
   assert.equal(keys.after, 'Space'); assert.equal(keys.storedAfter, null); assert.deepEqual(keys.errors, []);

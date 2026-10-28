@@ -23,6 +23,8 @@ import { el, svgEl, label, ariaLabel, chip } from './mir/kit.js';
 import { nodeBody, FOOT } from './node-types.js';
 import { transfer, ownRun } from './nodes-compile.js';
 import { frame } from './mir/core/frame.js';
+/** keysAt(el) — the acts of the graph whose ground `el` is (the `nodes.*` rows run them while it has the focus), or null */
+const GROUNDS = new WeakMap(); export const keysAt = (n) => (n && GROUNDS.get(n)) || null;
 
 const AT = { in: [65, 16] };                                         // STAGE IN's first-run place; the nodes stack under it, STAGE OUT under the last
 const SPAN = 250;                                                    // the column's width, centred in a view that has no pan of its own yet
@@ -188,28 +190,16 @@ export function createView(parent, kind, M) {
     ground.addEventListener('pointerup', up); ground.addEventListener('pointercancel', up);
     ground.addEventListener('wheel', (e) => { if (!(e.ctrlKey || e.metaKey)) return; e.preventDefault();
       zoomAt(z * Math.exp(-e.deltaY * (e.deltaMode ? 16 : 1) * 0.002), local(e)); keep(); }, { passive: false });
-    /* THE KEYS ARE THE GROUND'S */
-    ground.addEventListener('keydown', (e) => {
-      if (e.target !== ground) return;
-      e.stopPropagation();
-      const k = e.key, c = e.ctrlKey || e.metaKey, ids = [...sel], L = M.list();
-      const nudge = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[k];
-      if (nudge && ids.length) { for (const id of ids) { const n = cards[id].c, p = xy(n), s = e.shiftKey ? 10 : 1; n.style.left = p[0] + nudge[0] * s + 'px'; n.style.top = p[1] + nudge[1] * s + 'px'; } moved(true); }
-      else if (k === 'Delete' || k === 'Backspace') { M.remove(ids); sel.clear(); }
-      else if (c && /^[dD]$/.test(k)) pick(M.duplicate(ids, at()));
-      else if (c && /^[aA]$/.test(k)) pick(L.map((q) => q.id));
-      else if (c && /^[zZ]$/.test(k)) { if (e.shiftKey) M.redo(); else M.undo(); }
-      else if (c && /^[yY]$/.test(k)) M.redo();
-      else if (!c && /^[mM]$/.test(k) && ids.length) M.setBypass(ids, ids.some((id) => !M.byId(id).bypass));
-      else if (!c && /^[sS]$/.test(k) && ids.length) M.setSolo(ids[0]);
-      else if (k === '\\') M.setOff(!M.off());
-      else if (!c && /^[hH]$/.test(k) && ids.length) M.setFold(ids, ids.some((id) => !M.byId(id).fold));
-      else if (k === 'Tab' || (k === 'A' && e.shiftKey && !c)) openMenu(true);
-      else if (k === 'Home') fit();
-      else if (k === 'Escape') { if (!menu.hidden || !pop.hidden) menu.hidden = pop.hidden = true; else pick([]); }
-      else return;
-      e.preventDefault();
-    });
+    /* THE KEYS ARE THE GROUND'S — 021 I1: rows of THE ACTION REGISTRY (`nodes.*`, lab/actions.js), live while this ground has the focus (THE FOCUS
+       LAW): chords by place (AZERTY, Dvorak), rebindable, on the board; Tab is the kit's again, the add menu is Shift+A.  These are their acts. */
+    GROUNDS.set(ground, {
+      nudge(dx, dy, a) { const ids = [...sel]; if (!ids.length) return; const s = a && a.shift ? 10 : 1;
+        for (const id of ids) { const n = cards[id].c, p = xy(n); n.style.left = p[0] + dx * s + 'px'; n.style.top = p[1] + dy * s + 'px'; } moved(true); },
+      remove() { M.remove([...sel]); sel.clear(); }, duplicate() { pick(M.duplicate([...sel], at())); }, all() { pick(M.list().map((q) => q.id)); },
+      undo: () => M.undo(), redo: () => M.redo(), off: () => M.setOff(!M.off()), add: () => openMenu(true), fit: () => fit(),
+      bypass() { const ids = [...sel]; if (ids.length) M.setBypass(ids, ids.some((id) => !M.byId(id).bypass)); }, solo() { const ids = [...sel]; if (ids.length) M.setSolo(ids[0]); },
+      fold() { const ids = [...sel]; if (ids.length) M.setFold(ids, ids.some((id) => !M.byId(id).fold)); },
+      escape() { if (!menu.hidden || !pop.hidden) menu.hidden = pop.hidden = true; else pick([]); } });
   }
 
   /* + : ONE list — the search line, the classes split by an icon divider, then the GRAPHS; the view's other door: the window ↔ the rack card */

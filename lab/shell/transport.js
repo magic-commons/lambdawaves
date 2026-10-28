@@ -1,7 +1,7 @@
 /* lab/shell/transport.js — §12 THE TRANSPORT STRIP (0.5.2 R3b; moved verbatim out of lab/rack.js boot()): λWAVES' own bar, THE PLAY's toggle, THE POWER
  * (setModArm stays a function declaration: the strip calls it before its line, U1) and the loop clock's lock.  createTransport(app) runs at §12's seat;
  * transport, togglePlay, setModArm and barLock are registered on app.sh for KEYS and SETTINGS, and boot() destructures them for the loop and the facade. */
-import { TIER } from '../tier.js'; import { el, knob, fader, readout, formula, hint, ariaLabel } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar } from '../mir/shell/transport.js'; import { mirGui } from '../mir-gui.js'; import { INFO_ROWS, infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
+import { TIER } from '../tier.js'; import { el, knob, fader, readout, formula, hint, ariaLabel } from '../mir/kit.js'; import { barTempo } from '../mir/modulation/host.js'; import { createTransport as createBar } from '../mir/shell/transport.js'; import { infoPrefs } from './stage-words.js'; import { createCsbSearch } from '../csb-search.js'; import { createCsbFavs } from '../csb-favs.js';
 import { getHamiltonian, getZ } from '../hamiltonian.js'; import { densityPeriod, densityPeriodExact, fmtPeriod, hydrogenShellPeriod, hydrogenShellBase } from '../period.js'; import { BASIS } from '../hydrogen.js'; import { aliasOf, FLASH_HZ } from '../flash-law.js'; import { createAsk, askUrlOf, ASK_ENABLED } from '../ask.js';
 export function createTransport(app) {
   const { dom, ui, reg, clock, appPlay, sturm, rates, isPhone } = app, { schedule } = app.loop, { saveSettings } = app.sh, { occupiedEigen, periodEnergies, shadowView } = app.w;
@@ -60,34 +60,17 @@ export function createTransport(app) {
       { group: 'csb-mid', items: ['app:chooser', { group: 'csb-row csb-lib', items: ['app:modes', 'app:folders'] }] },
       { group: 'csb-side csb-right csb-ico', items: ['app:search', 'app:finder', 'app:fav', 'app:rack', 'app:folds', 'app:nodes', 'app:info', 'app:theme', 'app:gear'] },
       'panel'], { name: 'csb', title: 'CONTROL SURFACE' });
-    const ico = (cls, icon, word, run, action = '') => { const b = el('button', 'tbtn csb-ico-b ' + cls); b.type = 'button'; if (icon) b.style.setProperty('--ico', `url(img/icons/${icon}.svg)`);
-      b.setAttribute('aria-label', word); b.title = word; if (action) b.dataset.keyAction = action; b.addEventListener('click', run); return b; };
-    const gear = ico('csb-gear', 'cog-solid', 'MIR OPTIONS — the interface’s look', () => mirGui().open('options'));
-    const folders = ico('csb-folders', 'folders', 'FOLDERS — save, open, recent', () => app.sh.layout.projects.toggle(), 'folders');
-    const finder = ico('csb-finder', 'window-plus', 'FINDER — search every window', () => { if (app.sh.layout.finder) app.sh.layout.finder.toggle(); }, 'windowPicker');
-    const theme = ico('csb-theme', '', 'LIGHT | DARK', () => { if (app.hooks.setTheme) app.hooks.setTheme(document.body.dataset.theme === 'light' ? 'dark' : 'light'); });   // call 11: the theme only (lab.css swaps sun ↔ moon on body[data-theme])
-    /* E3 · INFORMATIONAL: one press turns every INFORMATIONAL switch off and remembers which were on; the next press puts that set back (the rows'
-       own defaults when nothing is remembered, e.g. after a reload) */
-    const IP = infoPrefs(), infoKeys = INFO_ROWS.filter((r) => r.type === 'bool').map((r) => r.key); let infoKept = null;
-    const info = ico('csb-info', 'info-circle', 'INFORMATIONAL — every stage word on or off', () => {
-      const lit = infoKeys.filter((k) => IP.get(k));
-      if (lit.length) { infoKept = lit; IP.set(Object.fromEntries(infoKeys.map((k) => [k, false]))); }
-      else IP.set(Object.fromEntries(infoKeys.map((k) => [k, infoKept ? infoKept.includes(k) : !!INFO_ROWS.find((r) => r.key === k).default]))); });
-    const infoLit = () => { const on = infoKeys.some((k) => IP.get(k)); info.classList.toggle('on', on); info.setAttribute('aria-pressed', String(on)); };
-    IP.subscribe(infoLit); infoLit();
-    /* 020 T2 · FOLDS (Josh: "a toggle to 'expand all/minimize' all windows"): one press folds every open window of both racks, or — when any of
-       them is folded — opens them all; the docked CONTROL SURFACE is never folded by its own button.  Its word says which, read at the hover. */
-    const foldable = () => (app.sh.rk ? app.sh.rk.windows().filter((w) => w.open && w.built && w.id !== 'transport') : []);
-    const foldsWord = () => { const w = foldable().some((x) => x.folded) ? 'EXPAND ALL — open every folded window' : 'MINIMIZE ALL — fold every open window'; hint(folds, w); ariaLabel(folds, w); };
-    const folds = ico('csb-folds', 'folds', 'MINIMIZE ALL — fold every open window', () => { const ws = foldable(), fold = !ws.some((w) => w.folded); for (const w of ws) app.sh.rk.fold(w.id, fold); foldsWord(); });
-    folds.addEventListener('pointerenter', foldsWord); folds.addEventListener('focus', foldsWord);
-    /* 020 T2 · NODES (Josh: "Open Node's window"): opens the NODES window, lit while it is open; a second press closes it.  The graph is built after the
-       bar (rack.js), so the light finds the window when it exists and follows it however it opens or closes (its ×, the FINDER, a key) */
-    const graph = () => app.sh.LW && app.sh.LW.nodes;
-    const nodes = ico('csb-nodes', 'nodes', 'NODES — the picture’s node graph', () => { const N = graph(); if (!N) return; if (N.win.isOpen()) N.close(); else N.open(); nodesLit(); });
-    const nodesLit = () => { const N = graph(), on = !!(N && N.win.isOpen()); nodes.classList.toggle('on', on); nodes.setAttribute('aria-pressed', String(on)); };
-    const watchNodes = (tries = 0) => { const N = graph(); if (!N) { if (tries < 120) setTimeout(watchNodes, 250, tries + 1); return; } new MutationObserver(nodesLit).observe(N.win.root, { attributes: true, attributeFilter: ['hidden', 'class'] }); nodesLit(); requestAnimationFrame(foldsWord); };   // the racks are laid by now: FOLDS' word too
-    nodesLit(); watchNodes();
+    /* 021 I1 · THE SEATS READ THE REGISTRY (lab/actions.js): `seat(id)` takes its word (`word()` where it changes, else the label), its icon, its
+       light (a toggle's get()) and its key hint (data-key-action) from the action, and a press runs the action — FOLDS, NODES, INFORMATIONAL, THEME
+       and ⚙ are actions of their own; a seat repaints when its action says its state moved (notify) and on the hand's hover */
+    const A = app.sh.ACTIONS, seats = new Map();
+    const seat = (id, cls) => { const a = A.get(id), b = el('button', 'tbtn csb-ico-b ' + cls); b.type = 'button'; b.dataset.keyAction = id; if (a.icon) b.style.setProperty('--ico', `url(img/icons/${a.icon}.svg)`);
+      const paint = () => { const w = a.word ? a.word() : a.label; hint(b, w); ariaLabel(b, w); if (a.kind === 'toggle' && a.lit !== false) { let on = false; try { on = !!a.get(); } catch (_) { /* its owner is made later */ } b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); } };
+      b.addEventListener('click', () => { A.run(id); paint(); }); b.addEventListener('pointerenter', paint); b.addEventListener('focus', paint); seats.set(id, paint); paint(); return b; };
+    A.onState((id) => { const p = seats.get(id); if (p) p(); });
+    const gear = seat('gui', 'csb-gear'), folders = seat('folders', 'csb-folders'), finder = seat('windowPicker', 'csb-finder'), theme = seat('theme', 'csb-theme');   // call 11: THEME the theme only (lab.css swaps sun ↔ moon)
+    const info = seat('info.all', 'csb-info'), folds = seat('folds', 'csb-folds'), nodes = seat('nodes', 'csb-nodes');   // E3 · 020 T2: INFORMATIONAL, FOLDS, NODES (lit while its window is open)
+    infoPrefs().subscribe(() => A.notify('info.all')); requestAnimationFrame(() => A.notify('folds'));
     const chooser = document.querySelector('.dev[data-id="chem"] .mol-pick');
     const byId = (id) => document.getElementById(id);
     const search = createCsbSearch(app, { bar: () => T });   // A2 · THE MINIATURE PICKER (lab/csb-search.js)
