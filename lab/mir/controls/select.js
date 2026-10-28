@@ -6,9 +6,9 @@
  * an outside press, Escape, a resize or the page losing focus.  Rows are real 44 px touch seats; an item marked `coming`
  * is shown and never chosen; the keys are the listbox's (arrows, Home, End, Enter, a typed letter, Escape).
  *   listPane({ anchor, items, value, onPick, onClose, label, cls, signal }) → { root, close(), items }   one pane for the stepper and the select
- *   select({ label, aria, items, value, onChange, placeholder, cls, disabled }) → { root, button, get, set(id), setItems(list, id), open(), close(), isOpen, setDisabled(on), destroy() }
+ *   select({ label, aria, items, value, onChange, placeholder, cls, disabled, repick }) → { root, button, get, set(id), setItems(list, id), open(), close(), isOpen, setDisabled(on), destroy() }
  * items: [{ id, label, vars?, coming?, pic?, title? }] — the same record the stepper takes (`pic` a picture at the row's left, loaded lazily;
- * `title` its hint; 1.5.6-alpha.4).  Words go through label() and so translate.
+ * `title` its hint; `repick: true` — a press on the chosen row still calls onChange; 1.5.6-alpha.4).  Words go through label() and so translate.
  * No pollers, no timers: the pane is placed once from one rect read, and idle costs nothing. */
 import { el, label, ariaLabel } from '../kit.js';
 import { setGlyph } from '../glyph.js';
@@ -119,7 +119,7 @@ export function select(o = {}) {
   const close = (refocus) => { if (pane) pane.close(refocus); };
   const openIt = () => {
     if (pane || btn.disabled) return;
-    pane = listPane({ anchor: btn, items, value: v, label: o.aria || o.label, onPick: (id) => choose(id), onClose: () => { pane = null; btn.setAttribute('aria-expanded', 'false'); } });
+    pane = listPane({ anchor: btn, items, value: v, label: o.aria || o.label, onPick: (id) => (id === v && o.repick ? o.onChange && o.onChange(v) : choose(id)), onClose: () => { pane = null; btn.setAttribute('aria-expanded', 'false'); } });
     btn.setAttribute('aria-expanded', 'true');
   };
   btn.addEventListener('click', () => (pane ? close(false) : openIt()));

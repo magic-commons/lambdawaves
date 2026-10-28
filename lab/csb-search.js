@@ -13,7 +13,7 @@ export function createCsbSearch(app, { bar }) {
   const pill = el('div', 'lw-menu glass csb-pill', document.body); pill.hidden = true;
   const input = el('input', 'csb-search-in', pill); input.type = 'search'; input.placeholder = 'search the molecules'; input.spellcheck = false; input.autocomplete = 'off';
   input.setAttribute('aria-label', 'search the molecules'); input.setAttribute('aria-autocomplete', 'list');
-  const pane = el('div', 'lw-menu glass csb-suggest', document.body); pane.hidden = true; pane.setAttribute('role', 'listbox'); pane.setAttribute('aria-label', 'molecules');
+  const pane = el('div', 'lw-menu glass csb-suggest', document.body); pane.hidden = true; pane.dataset.mirSurface = 'menu';   // 022 P3 pane.setAttribute('role', 'listbox'); pane.setAttribute('aria-label', 'molecules');
   let tiles = [], at = -1, seq = 0;
 
   const closeTiles = () => { pane.hidden = true; pane.textContent = ''; tiles = []; at = -1; };

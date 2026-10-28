@@ -194,10 +194,10 @@ try {
     q.on('error', rej); q.end(body ? JSON.stringify(body) : undefined); });
   /* the hand's pick, under the browser's own rule: a <select> fires `change` only when its VALUE changes (Firefox's driver fires it on
      every <option> click, so its element road cannot stand in for a hand here) — the page turned to the molecule's section first */
-  const choose = (id) => g.ev(`const s = document.querySelector('#transport .mol-pick select.sel');
-    for (const sec of ['DIATOMICS', 'HYDRIDES', 'ORGANIC', 'BIO', 'LATTICE', 'HEAVY']) { if ([...s.options].some((o) => o.value === '${id}')) break; __LW.chem.section(sec); }
-    if (s.value === '${id}') return false;
-    s.value = '${id}'; s.dispatchEvent(new Event('input', { bubbles: true })); s.dispatchEvent(new Event('change', { bubbles: true })); return true;`);
+  const choose = (id) => g.ev(`window.__molRows = () => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const p = document.querySelector('.mir-pick'); const rows = p ? [...p.querySelectorAll('.mir-pick-i')].map((r) => ({ value: r.dataset.id, textContent: r.textContent, head: r.dataset.id[0] === '#', disabled: r.classList.contains('coming'), title: r.title, dataset: { help: r.title }, on: r.classList.contains('on') })) : []; if (p) b.click(); return rows; }; window.__molPick = (id) => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const r = document.querySelector('.mir-pick .mir-pick-i[data-id="' + id + '"]'); if (r) r.click(); else b.click(); return !!r; };    // 022 P3: the kit's select — a press on the row, as a hand does
+    for (const sec of ['DIATOMICS', 'HYDRIDES', 'ORGANIC', 'BIO', 'LATTICE', 'HEAVY']) { if (__molRows().some((o) => o.value === '${id}')) break; __LW.chem.section(sec); }
+    if ((__molRows().find((o) => o.on) || {}).value === '${id}') return false;
+    return __molPick('${id}');`);
   const r11a = await g.ev(`__LW.chem.setOn(true);
     const h = ((await (await fetch('./library.json')).json()).rows.find((r) => r.id === 'C60') || {}).hash;
     if ('caches' in window) await (await caches.open('lw-data-v1')).delete(new URL('./library/' + h + '.json', location.href).href);
@@ -206,8 +206,8 @@ try {
   const pick1 = await choose('C60');
   const r11b = await g.ev(`${HELP}
     await wait(() => /record is not open/.test(__LW.chem.state().status));
-    const s = document.querySelector('#transport .mol-pick select.sel');
-    const out = { preset: __LW.chem.preset(), value: s.value, sol: !!__LW.chem.solution(), status: __LW.chem.state().status };
+    window.__molRows = () => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const p = document.querySelector('.mir-pick'); const rows = p ? [...p.querySelectorAll('.mir-pick-i')].map((r) => ({ value: r.dataset.id, textContent: r.textContent, head: r.dataset.id[0] === '#', disabled: r.classList.contains('coming'), title: r.title, dataset: { help: r.title }, on: r.classList.contains('on') })) : []; if (p) b.click(); return rows; }; window.__molPick = (id) => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const r = document.querySelector('.mir-pick .mir-pick-i[data-id="' + id + '"]'); if (r) r.click(); else b.click(); return !!r; }; 
+    const out = { preset: __LW.chem.preset(), value: (__molRows().find((o) => o.on) || {}).value || '', sol: !!__LW.chem.solution(), status: __LW.chem.state().status };
     window.fetch = __f0; return out;`);
   const pick2 = await choose('C60');
   const r11c = await g.ev(`${HELP} const ok = await wait(() => { const s = __LW.chem.solution(); return s && /^C60\\|/.test(s.key); }, ${pick2 ? 600 : 1}); return { ok: !!ok, preset: __LW.chem.preset() };`);
@@ -277,7 +277,7 @@ try {
   /* ── R13 · THE EIGHT ORBITAL PRESETS (0.5.3 M10), one table: on water each takes its levels or refuses with its sentence; on C₆₀
          every one stays inside the record's columns (0.6.1 F1: the 180 occupied + the LUMO set, so OCCUPIED works there too) ─────────────────────────────── */
   const r13 = await g.ev(`${HELP}
-    __LW.register.setMode('orbital'); const opts = [...document.querySelector('.dev[data-id="chem"] .reg-bar select.sel').options].map((o) => o.value).filter(Boolean);
+    __LW.register.setMode('orbital'); const opts = (() => { const b = document.querySelector('.dev[data-id="chem"] .reg-bar .mir-sel-b'); b.click(); const r = [...document.querySelectorAll('.mir-pick .mir-pick-i')].map((x) => x.dataset.id); b.click(); return r; })();   // 022 P3: the kit's select's rows
     const run = () => Object.fromEntries(opts.map((p) => { const ok = __LW.orbitals.preset(p), st = __LW.orbitals.state();
       return [p, ok ? st.selection.map((q) => q.k + ':' + q.amp.toFixed(4) + (q.phase ? '@' + q.phase.toFixed(4) : '')).join(' ') : 'refused · ' + st.status]; }));
     await __LW.chem.solve('H2O'); await wait(() => __LW.orbitals.solution() && __LW.orbitals.solution().nAO === 7); const water = run();

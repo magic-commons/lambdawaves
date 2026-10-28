@@ -198,7 +198,7 @@ export function createView(parent, kind, M) {
   if (W) tool('nodes-fit', 'home', 'FIT — every card in view (Home)', () => fit());
   const foldB = tool('nodes-folds', 'compact', 'COLLAPSE ALL', () => foldAll());
   const offB = tool('nodes-off', 'power', 'BYPASS ALL — the picture without the graph (\\)', () => M.setOff(!M.off()));
-  const menu = el('div', 'nodes-menu', ground); menu.hidden = true;
+  const menu = el('div', 'nodes-menu glass', ground); menu.hidden = true; menu.dataset.mirSurface = 'menu';   // 022 P3: a menu pane, the skin's
   const sep = (cls) => { const s = el('div', 'nodes-sep', menu); if (cls) icon(s, cls); return s; };
   const item = (text, title, run, cls = 'nodes-item') => { const it = el('button', cls, menu); it.type = 'button'; label(el('span', '', it), text); it.title = title;
     it.addEventListener('click', () => { menu.hidden = true; run(); }); return it; };

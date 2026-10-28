@@ -24,7 +24,7 @@
  * a `refusal()` dance and a push ORDER in the frame loop; the refusal survives only as the sentence the interface
  * shows, and it asks the session for its reason rather than polling CHEMISTRY's state thirty times a second.
  */
-import { el, knob, sw, readout, graphHover, themeInk, accentRGB, chip } from './mir/kit.js';
+import { el, knob, sw, readout, graphHover, themeInk, accentRGB, chip } from './mir/kit.js'; import { select as listSelect } from './mir/controls/select.js';
 import { paintStroke, fillButton, levelLine, footLine } from './paint-stroke.js'; import { createMorph } from './register-morph.js'; import { fold } from './fold.js';
 import { createFlow } from './molecular-flow.js';
 import { forms, frontierName, ionisation, orbitalName } from './names.js';
@@ -109,14 +109,15 @@ export function createOrbitals(host, api) {
     'INVERT': [() => { const ks = []; for (let k = 0; k < sol.nAO; k++) if (carried(k) && !sel.has(k)) ks.push(k); return ks.length ? ks : null; }, 'the register holds every orbital: its inverse is empty'],
   };
   const bar = el('div', 'row tight reg-bar', host);
-  const presetSel = el('select', 'sel', bar); presetSel.setAttribute('aria-label', 'register preset');
-  presetSel.title = 'HOMO, LUMO: one orbital. HOMO + LUMO: the frozen-orbital beat. FRONTIER FOUR: HOMO−1 to LUMO+1, four orbitals. HOMO SET, LUMO SET: the whole degenerate level. '
+  /* 022 P3: the kit's select (its list the menu pane, never the platform's); a pick runs the preset and the list goes back to PRESET… */
+  const presetSel = listSelect({ aria: 'register preset', placeholder: 'PRESET…', cls: 'sel', items: Object.keys(ORB_PRESETS).map((p) => ({ id: p, label: p })), value: null,
+    onChange: (p) => { presetSel.set(null); if (p && preset(p) && api.announce) api.announce(presetMd(p)); } });   // a HAND's preset is announced on the stage (0.4.0 S3 · F2)
+  bar.appendChild(presetSel.root);
+  presetSel.button.title = 'HOMO, LUMO: one orbital. HOMO + LUMO: the frozen-orbital beat. FRONTIER FOUR: HOMO−1 to LUMO+1, four orbitals. HOMO SET, LUMO SET: the whole degenerate level. '
     + 'WINDING: a degenerate orbital pair a quarter turn apart — a phase that winds around the ring under a stationary density. OCCUPIED: every valence orbital, equal phase. '
     + 'ALL ODD, ALL EVEN: every other ladder line from the first valence line. BELOW HOMO, ABOVE LUMO, VIRTUAL: the spans they name. DEGENERATE: every degenerate level. INVERT: every orbital the register does not hold';
-  { const o = el('option', '', presetSel, 'PRESET…'); o.value = ''; for (const p of Object.keys(ORB_PRESETS)) { const q = el('option', '', presetSel, p); q.value = p; } }
   /* a HAND's preset is announced on the stage (0.4.0 S3 · F2) by its rule and the orbitals the names give it —
      `WINDING · $1e_{1g}$ (a) + (b)`, `HOMO + LUMO · $1b_{1}$ + $4a_{1}$`; preset() itself (an API, a restore) says nothing */
-  presetSel.addEventListener('change', () => { const p = presetSel.value; presetSel.value = ''; if (p && preset(p) && api.announce) api.announce(presetMd(p)); });
   function presetMd(name) {
     const mos = keys().map(moOf);
     if (!mos.length || !mos.every((m) => m && m.label)) return name;

@@ -28,7 +28,7 @@ try {
     await expander(); await wait(700); await row('expander shut');
     await mode('molecules'); await wait(2500); await row('MOLECULES');
     await g.ev(`__LW.clock.t = 1234.5; return 1;`); await wait(400); await row('MOLECULES · t = 1234.5');
-    await g.ev(`const o = document.querySelector('#transport .mol-pick select')?.selectedOptions[0]; if (o) o.textContent = '2-ACETOXYBENZOIC ACID · VOL. I · 6-31+G*'; return 1;`); await wait(300); await row('MOLECULES · a long name');
+    await g.ev(`const o = document.querySelector('#transport .mol-pick .mir-sel-t'); if (o) o.textContent = '2-ACETOXYBENZOIC ACID · VOL. I · 6-31+G*'; return 1;`);   // 022 P3: the kit's select await wait(300); await row('MOLECULES · a long name');
     await expander(); await wait(700); await row('MOLECULES · expander');
     if (seat === 0) writeFileSync(OUT, Buffer.from(await g.snap(), 'base64'));
     await expander(); await wait(500);

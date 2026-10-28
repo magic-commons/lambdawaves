@@ -61,6 +61,8 @@ const validVolume = (v) => v && SAFE.test(v.id) && typeof v.numeral === 'string'
 const validMolecule = (m) => m && SAFE.test(m.id) && typeof m.file === 'string' && RELATIVE.test(m.file) && (m.thumb == null || (typeof m.thumb === 'string' && RELATIVE.test(m.thumb)));
 const indexUrl = (v) => new URL(v.index || v.id + '/index.json', VOLUME_BASE).href;
 const inVolume = (v, rel) => new URL(rel, indexUrl(v)).href;   // the catalogue's paths are relative to its own folder
+/** pictureUrl(v, m) — a molecule's picture on the network, synchronously (022 P3: the MOLECULES list's rows; a miss is the row's onerror) */
+export const pictureUrl = (v, m) => inVolume(v, m.thumb || 't/' + m.id + '.webp');
 
 /* ── THE SHELF ── the network's, else (offline) the entries the installed volumes keep */
 let shelfMemo = null;

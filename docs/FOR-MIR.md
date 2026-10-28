@@ -46,7 +46,7 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - **BUILT 1.5.6-alpha.4 · `--surface-menu-floor`** (022 P1, `css/skin.css`, tokens.json): TINTED .94 · REFRACTIVE .72 · SOLID 1 under every menu pane.
 - **BUILT 1.5.6-alpha.4 · the kit's popups on the menu surface** (022 P1): PATTERN's cap menu is a contextMenu; FOLDERS' context box a menu
   pane (no well) with `itemRows(e)`; `.m2pick` / `.m2ppick` / `.m2deadpick` and the transport's seat menu carry `data-mir-surface="menu"`.
-- **BUILT 1.5.6-alpha.4 · a list row's picture** (022 P3, `controls/select.js`): `listPane` / `select()` items take `pic` (lazy) and `title`.
+- **BUILT 1.5.6-alpha.4 · a list row's picture** (022 P3, `controls/select.js`; kit 0d98cc8): `listPane` / `select()` items take `pic` (lazy) and `title`; `select({ repick })`.
 - **A `'midi'` modulation SOURCE kind** (021 I2; not built): midi.js hands every CC as 0…1 (`sources()`, `source(key, v)`), but the model
   (`modulation/mod.js`) knows lfo · env · audio only; a `kind: 'midi'` source beside audio (its rack face, its serialisation) would let a
   learned knob drive any dial as an LFO does. λWAVES routes notes and CCs to ACTIONS today, not to dials.

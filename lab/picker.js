@@ -196,7 +196,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
   const SHAPES = { '●': 'balls', '⊸': 'sticks' };   // 021 V2: the table's `balls` and `sticks` (lab/icons.js)
   const glyph = (host, g) => { host.textContent = ''; if (SHAPES[g]) host.innerHTML = glyphSvg(SHAPES[g], 'gly'); else host.textContent = g; return host; };
   const lookOf = () => { const l = lookFor(false); return l !== 'density' ? l : null; };   // a volume tile's style (V.picture), a molecule's look
-  const drop = el('div', 'mm-lookdrop lw-menu', root); drop.hidden = true; drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');
+  const drop = el('div', 'mm-lookdrop lw-menu glass', root); drop.hidden = true; drop.dataset.mirSurface = 'menu';   // 022 P3: a menu pane drop.setAttribute('role', 'radiogroup'); drop.setAttribute('aria-label', 'picture style');
   const lookTiles = LOOKS.map(([id, glyph_, word], i) => { const b = el('button', 'mm-lk', drop); b.type = 'button'; b.dataset.look = id; b.setAttribute('role', 'radio'); b.style.setProperty('--i', String(i));
     b.style.gridRow = i < 3 ? '1' : '2'; b.style.gridColumn = (i < 3 ? 2 + 2 * i : 1 + 2 * (i - 3)) + ' / span 2';   // L1: the bricks, each row centred
     glyph(el('b', 'mm-lk-g', b), glyph_); b.addEventListener('click', () => { if (b.getAttribute('aria-disabled') === 'true') return; setLook(id); closeDrop(true); }); return b; });
@@ -630,7 +630,7 @@ export function createPicker(app, { open: openAtBoot = true } = {}) {
     const isomersIn = (m) => (m.isomers || []).map((id) => byId.get(id)).filter(Boolean);
     /* THE ISOMER DECK: over the volume's deck, the molecule and its isomers (the catalogue's order); a press opens one, ×, Escape or a press on
        the ground puts it away */
-    const isoEl = el('div', 'mm-isos', view); isoEl.hidden = true; isoEl.setAttribute('role', 'dialog');
+    const isoEl = el('div', 'mm-isos glass', view); isoEl.hidden = true; isoEl.dataset.mirSurface = 'menu';   // 022 P3: a menu pane isoEl.setAttribute('role', 'dialog');
     const isoHead = el('div', 'mm-isohead', isoEl), isoGrid = el('div', 'mm-isogrid', isoEl);
     const closeIsomers = () => { if (isoEl.hidden) return; isoEl.hidden = true; const f = vdeck.tiles.find((x) => x.dataset.iso === isoEl.dataset.of); if (f) f.focus({ preventScroll: true }); };
     isoEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeIsomers(); } });

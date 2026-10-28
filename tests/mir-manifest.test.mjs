@@ -24,9 +24,9 @@ const ACCEPTED = {
   /* 021 V1 · MIR 1.5.6-alpha.3 on the clone road (kit 67dcbfc + 7da3c09): registerGlyphs, windowGlyphs, glyph on createWindow / device / trig, windows() hidden,
      the tall-window clamp, fitFree places again, .k-lbl's ellipsis */
   '1.5.6-alpha.3': '17b45f4a38478e05b69998e209ed8d0a2eabc0bd6ed187b92b382e8fbe2b2bc7',
-  /* 022 P1 · MIR 1.5.6-alpha.4 on the clone road (kit 4654cb8): contextMenu, holdTap / onContext (TAP.hold · TAP.slop), ONE KNOB MENU, --surface-menu-floor,
+  /* 022 P1 · MIR 1.5.6-alpha.4 on the clone road (kit 4654cb8, 0d98cc8): contextMenu, holdTap / onContext (TAP.hold · TAP.slop), ONE KNOB MENU, --surface-menu-floor,
      the kit's popups on the menu surface, a list row's picture */
-  '1.5.6-alpha.4': '24566a2e7de8b03954742d60af4f73a581a348d9f48836187ecdbe19a8c53c0f',
+  '1.5.6-alpha.4': '2e2ddd2a07c4c6a4eed431c2d5e914a7ea35ff8c8ca550c1ffedd132b6393f39',   // 022 P3 re-pin (kit 0d98cc8: select's repick, a list row's picture)
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */

@@ -34,7 +34,8 @@ try {
     window.__ws = () => { const o = JSON.parse(localStorage.getItem('lambdawaves.q0.settings') || '{}'); for (const k of ['closed', 'nbW', 'nbH', 'abW', 'abH', 'modwin', 'layouts', 'phoneTr', 'phoneRack']) delete o[k]; return JSON.stringify(o); };
     window.__calls = async () => (await __LW.chem.workerStat()).solverCalls;
     window.__sec = ${JSON.stringify(SEC)};   /* 0.4.0 S4b: the dropdown holds one section — turn to the row's page first */
-    window.__opt = (id) => { if (__sec[id]) __LW.chem.section(__sec[id]); return [...document.querySelectorAll('#transport .mol-pick option')].find((o) => o.value === id); };
+    window.__molRows = () => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const p = document.querySelector('.mir-pick'); const rows = p ? [...p.querySelectorAll('.mir-pick-i')].map((r) => ({ value: r.dataset.id, textContent: r.textContent, head: r.dataset.id[0] === '#', disabled: r.classList.contains('coming'), title: r.title, dataset: { help: r.title }, on: r.classList.contains('on') })) : []; if (p) b.click(); return rows; }; window.__molPick = (id) => { const b = document.querySelector('#transport .mol-pick .mir-sel-b'); b.click(); const r = document.querySelector('.mir-pick .mir-pick-i[data-id="' + id + '"]'); if (r) r.click(); else b.click(); return !!r; }; 
+    window.__opt = (id) => { if (__sec[id]) __LW.chem.section(__sec[id]); return __molRows().find((o) => o.value === id); };   // 022 P3: the kit's select's rows
     window.__real = window.fetch;
     window.__offline = (on) => { window.fetch = on ? (u, o) => (/\\/library\\//.test(String(u && u.url || u)) ? Promise.reject(new TypeError('NetworkError: the gate is offline')) : __real(u, o)) : __real; };
     for (const k of await caches.keys()) if (k === 'lw-data-v1') await caches.delete(k);
@@ -43,7 +44,7 @@ try {
 
   /* 1 · DOWNLOAD, never DISABLED */
   const one = await g.ev(`const rows = await __LW.chem.records(), o = __opt('lysine');
-    return { rows: rows.map((r) => [r.id, r.installed, r.recordOnly]), text: o.textContent, disabled: o.disabled, group: o.parentElement.label, store: (await caches.keys()).includes('lw-data-v1') && (await (await caches.open('lw-data-v1')).keys()).some((q) => q.url.includes('/library/')), errs: __e.slice() };`);   // 017 R2: the boot's demo cover (projects.js keepData, a DATA file) may land after the setup's delete — the law is that LOOKING keeps no record
+    return { rows: rows.map((r) => [r.id, r.installed, r.recordOnly]), text: o.textContent, disabled: o.disabled, group: (() => { let g = null; for (const r of __molRows()) { if (r.head) g = r.textContent; if (r.value === 'lysine') return g; } return null; })(),   /* 022 P3: the kit list's group row */ store: (await caches.keys()).includes('lw-data-v1') && (await (await caches.open('lw-data-v1')).keys()).some((q) => q.url.includes('/library/')), errs: __e.slice() };`);   // 017 R2: the boot's demo cover (projects.js keepData, a DATA file) may land after the setup's delete — the law is that LOOKING keeps no record
   assert.ok(one.rows.length === CAT.rows.length && one.rows.every((r) => r[1] === false), 'nothing is installed at first: ' + JSON.stringify(one));
   assert.deepEqual(['C6H6', 'lysine', 'C60'].map((id) => one.rows.find((r) => r[0] === id)), [['C6H6', false, false], ['lysine', false, true], ['C60', false, true]], JSON.stringify(one));   // C60: S4c's frontier record
   assert.equal(one.text, 'C₆H₁₄N₂O₂ · 64 AO · record · DOWNLOAD'); assert.equal(one.disabled, false);
@@ -88,8 +89,8 @@ try {
   pass(`cached = fresh: benzene live in Firefox (${two.liveCalls} solver calls) then installed (${two.inst.bytes} B, persisted ${two.inst.persisted}) and opened from its node-made record in ${two.ms.toFixed(0)} ms with 0 solver calls — |ΔE| ${two.dE.toExponential(1)}, |Δε| ${two.dEps.toExponential(1)}, |ΔD| ${two.dD.toExponential(1)}, ${two.clusters} degenerate projectors ${two.proj.toExponential(1)}, |ΔC| ${two.dC.toExponential(1)} with every sign kept, every name the same, 315 sticks |Δω| ${two.dOmega.toExponential(1)} |Δf| ${two.dF.toExponential(1)}; status "${two.status}"`);
 
   /* 3 · INSTALL BY A PRESS: lysine downloads, opens with 0 solver calls; a basis change and a KICK are refused with a sentence */
-  const three = await g.ev(`const c0 = await __calls(); const sel = document.querySelector('#transport .mol-pick select');
-    __opt('lysine'); sel.value = 'lysine'; sel.dispatchEvent(new Event('change'));   // S4b: turn to BIO first — the dropdown holds one section
+  const three = await g.ev(`const c0 = await __calls();
+    __opt('lysine'); __molPick('lysine');   // S4b: turn to BIO first — the list holds one section; 022 P3: a press on its row
     let st = __LW.chem.state(); for (let i = 0; i < 300 && !(st.nAO === 64 && st.roots); i++) { await __w(100); st = __LW.chem.state(); }
     await __w(200); st = __LW.chem.state();
     const c1 = await __calls(), label = __opt('lysine').textContent, statusOpen = st.status;
@@ -145,11 +146,11 @@ try {
   pass(`EVICT → NOT INSTALLED: lysine removed; offline, the project restored everything else (palette ${five.pal}) and MOLECULES says "${five.status.slice(0, 120)}…"; the row says DOWNLOAD again, enabled; no page error`);
   /* 6 · THE SECTIONS: the page turner, the header, INSTALLED for a whole section, and the three sizing entries opened, timed */
   const six = await g.ev(`await __w(4000); __offline(false);
-    const card = document.querySelector('.dev[data-id="chem"]'), sel = document.querySelector('#transport .mol-pick select');
+    const card = document.querySelector('.dev[data-id="chem"]'), sel = null;
     const dia = __LW.chem.section('DIATOMICS');
     const prev = card.querySelector('.mol-section .mir-step-b[data-step="-1"]'), next = card.querySelector('.mol-section .mir-step-b[data-step="1"]');   // 0.5.3 M8: the kit's stepper, PALETTE's look
     next.click(); const turned = __LW.chem.section().name; prev.click(); const back = __LW.chem.section().name;
-    const before = __LW.chem.section('LATTICE'), opts = [...sel.options].map((o) => o.value), c0 = await __calls();
+    const before = __LW.chem.section('LATTICE'), opts = __molRows().filter((o) => !o.head).map((o) => o.value), c0 = await __calls();
     const kept = await __LW.chem.keep(true), on = __LW.chem.section('LATTICE');
     const removed = await __LW.chem.keep(false), off = __LW.chem.section('LATTICE'), c1 = await __calls();
     const timed = [];
