@@ -422,7 +422,7 @@ export async function boot(dom) {
        draws what it drew.  The ask is carried WHOLE to the next rAF (a REBUILD or RECONSTRUCT is never dropped: LA8's
        discipline); the clocks and the CPU readers run as on any frame.  Only this rAF road: an export calls field.frame
        itself, and no rAF runs while one does (render-exact H9). */
-    const held = tier >= TIER.PRESENT && field.ok && field.paced && field.inFlight > 3;
+    const held = tier >= TIER.PRESENT && field.ok && field.inFlight >= field.inFlightCap;   // 020 S2: four where completion is prompt; Firefox two, only behind a backlog (field.js HEAVY_MS)
     if (held) { if (tier > pending) pending = tier; tier = TIER.NONE; stats.skipped++; }
     if (tier >= TIER.REBUILD) applyRebuild();
     let modes = null;
@@ -506,8 +506,8 @@ export async function boot(dom) {
          its transparent canvas explicitly before bowFrame() paints the next arrow. */
       if (app.state.bow) kepler.clear(); else kepler.suspend();
     }
-    const mol = app.state.chem.on, skOn = !!(ui.skeletonSw && ui.skeletonSw.get() && mol), dpOn = !!(ui.dipoleSw && ui.dipoleSw.get() && mol), elOn = !!(ui.ellipsoidSw && ui.ellipsoidSw.get()) && !mol && !sturm.P && app.state.space !== 'p', bdOn = (!!(ui.beadSw && ui.beadSw.get()) && (mol || !sturm.P)) || elOn;   // 0.8.2 P3: THE BEAD shares the canvas, drawn after the skeleton, with SKELETON off too; 0.8.3 B3: THE ELLIPSOID rides it (position space, a register)
-    if (skOn || dpOn || bdOn) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(skOn || dpOn ? app.state.chem.atomsNow() : null, dpOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : Object.assign(beadOf(reg, clock.t, app.state.space === 'p'), { ell: elOn ? covariance(reg, clock.t) : null }), ui.skeletonSize ? ui.skeletonSize.get() : 1.6, ui.skeletonOpacity ? ui.skeletonOpacity.get() : 1, skOn, ui.bondsOf ? ui.bondsOf() : null)); } else skeleton.clear();   /* iteration 012 R1: DIPOLE is its own switch (the arrow alone when BALL AND STICK is off) */   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
+    const mol = app.state.chem.on, skOn = !!(ui.skeletonSw && ui.skeletonSw.get() && mol) && !(mat.espBare && mat.style === STYLE.esp), dpOn = !!(ui.dipoleSw && ui.dipoleSw.get() && mol), elOn = !!(ui.ellipsoidSw && ui.ellipsoidSw.get()) && !mol && !sturm.P && app.state.space !== 'p', bdOn = (!!(ui.beadSw && ui.beadSw.get()) && (mol || !sturm.P)) || elOn;   // 0.8.2 P3: THE BEAD shares the canvas, drawn after the skeleton, with SKELETON off too; 0.8.3 B3: THE ELLIPSOID rides it (position space, a register)
+    if (skOn || dpOn || bdOn) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(skOn || dpOn ? app.state.chem.atomsNow() : null, dpOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : Object.assign(beadOf(reg, clock.t, app.state.space === 'p'), { ell: elOn ? covariance(reg, clock.t) : null }), ui.skeletonSize ? ui.skeletonSize.get() : 1.6, ui.skeletonOpacity ? ui.skeletonOpacity.get() : 1, skOn, ui.bondsOf ? ui.bondsOf() : null)); } else skeleton.clear();   /* 020 S2: MAP ONLY hides BALL AND STICK too — a map-only stage shows the map */   /* iteration 012 R1: DIPOLE is its own switch (the arrow alone when BALL AND STICK is off) */   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
 
     kepler.bowFrame();
     app.state.chem.setActive(canPresent(wChem));

@@ -1560,6 +1560,9 @@ export async function createField(canvas, opts = {}) {
      PROMPT (`paced`, measured at boot below: Safari and Chromium answer a drained queue in a few ms, Firefox on a ~100 ms
      poll, AUDIT-A FA5), so the loop may wait for the GPU instead of queueing frames it cannot finish (WEBKIT-FPS-RESEARCH §1.3). */
   let inFlight = 0, paced = false, queueMs = 0;   // queueMs (P3): the last landed frame's submit → done, the backlog the device report reads
+  /* 020 S2 · FIREFOX'S CAP: never `paced` (its completion is a ~100 ms poll), so its count is coarse — it is held at TWO in flight only while the
+     last landed frame waited longer than HEAVY_MS (a backlog the poll cannot explain), and is free otherwise (S-BUILD.md: the cap at 64³ never binds) */
+  const HEAVY_MS = 250;
   const landed = () => { inFlight--; };
   let cssW = canvas.clientWidth || 1, cssH = canvas.clientHeight || 1;   // the CSS box, kept current by the observer below
   if (typeof ResizeObserver === 'function') new ResizeObserver((entries) => {
@@ -1997,7 +2000,7 @@ export async function createField(canvas, opts = {}) {
     encodeEsp(enc, mat);                                          // iteration 014 B3: φ, after the volume it reads and before the present that reads it
     if (w > 0 && h > 0) { encodeRender(enc, ctx.getCurrentTexture().createView(), obs, mat, w, h); stats.presents++; }
     device.queue.submit([enc.finish()]); espDone();
-    if (paced) { inFlight++; const ts = performance.now(); device.queue.onSubmittedWorkDone().then(() => { inFlight--; queueMs = performance.now() - ts; }, landed); }
+    { inFlight++; const ts = performance.now(); device.queue.onSubmittedWorkDone().then(() => { inFlight--; queueMs = performance.now() - ts; }, landed); }
     stats.lastEncodeMs = performance.now() - t0;
   }
 
@@ -2344,7 +2347,8 @@ export async function createField(canvas, opts = {}) {
     generation: { get: () => generation, enumerable: true }, refValid: { get: () => refValid, enumerable: true },
     dprCap: { get: () => dprCap, enumerable: true },      // LIVE getters: Object.assign below would freeze these at their boot values
     stepCap: { get: () => stepCap, enumerable: true },
-    paced: { get: () => paced, enumerable: true }, inFlight: { get: () => inFlight, enumerable: true }, queueMs: { get: () => queueMs, enumerable: true },   // PACE (P1, P3): read-only
+    paced: { get: () => paced, enumerable: true }, inFlight: { get: () => inFlight, enumerable: true }, queueMs: { get: () => queueMs, enumerable: true },
+    inFlightCap: { get: () => (paced ? 4 : queueMs > HEAVY_MS ? 2 : Infinity), enumerable: true },   // PACE (P1, P3): read-only
     /* …and so would it freeze THESE, which is exactly how `moleculeInfo` first came back null from a live molecule */
     molecular: { get: () => !!molSpec, enumerable: true }, equalizer: { get: () => eqTable, enumerable: true },   // 0.6.0 B2: the badge reads the live table
     /* a CHEAP, allocation-free read of "is the volume a complex orbital right now" — `moleculeInfo` builds an

@@ -58,16 +58,28 @@ try {
       out('RACK ' + word, { ...(await g.ev(`return await __wp;`)), body: await g.ev(`return document.body.className;`) });
     }
   } else if (mode === 'queue') {
-    await g.ev(`await __mol(); return 1;`);
-    out('paced', await g.ev(`const f = __LW.field; return { paced: f.paced, inFlight: f.inFlight, queueMs: f.queueMs };`));
-    out('queue', await g.ev(`const f = __LW.field, a = []; for (let i = 0; i < 40; i++) { a.push([f.inFlight, Math.round(f.queueMs || 0)]); await __w(100); } return a;`));
-    for (let k = 0; k < 4; k++) out('MAP ONLY ' + k, await g.ev(`const f = __LW.field, n0 = __LW.stats ? __LW.stats.presents : 0, t0 = performance.now(), want = !__LW.mat.espBare;
-      const w = document.querySelector('.dev[data-id="observer"]'); w.classList.remove('closed', 'folded');
-      const sw = [...w.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === 'MAP ONLY'); sw.querySelector('button').click();
-      /* the next frame that the GPU finished after the press: onSubmittedWorkDone of a fresh submit closes the queue */
-      await __w(16); await f.device.queue.onSubmittedWorkDone(); const done = performance.now() - t0;
-      const fps = []; let n = 0, ts = performance.now(); await new Promise((r) => { const t = () => { n++; if (performance.now() - ts < 2000) requestAnimationFrame(t); else r(); }; requestAnimationFrame(t); });
-      return { bare: __LW.mat.espBare === want, queueDrainMs: Math.round(done), inFlight: f.inFlight, queueMs: Math.round(f.queueMs || 0), rafPerS: n / 2, skeleton: !!document.querySelector('#skeleton, canvas.skeleton') };`));
+    /* the backlog in ms: a fresh onSubmittedWorkDone's wait (Firefox answers on its ~100 ms poll, so ≈100 is an empty queue); the fps the
+       field presented; and MAP ONLY → its frame done, while playing (the field presents every frame) */
+    const N = process.argv[3] || '64';
+    await g.ev(`await __mol(); __LW.quality.res = ${N}; __LW.quality.steps = ${process.argv[4] || 160}; __LW.quality.auto = false; __LW.quality.scale = ${process.argv[5] || 1}; __LW.schedule(4); await __w(2500); return 1;`);
+    const res = await g.ev(`const f = __LW.field; return { paced: f.paced, res: f.resolution, canvas: [f.canvas ? f.canvas.width : 0] };`);
+    out('field', res);
+    for (const play of [false, true]) {
+      out(play ? 'PLAYING' : 'IDLE', await g.ev(`const f = __LW.field, q = f.device.queue; if (__LW.clock.playing !== ${play}) __LW.togglePlay(); await __w(1500);
+        const wait = async () => { const t = performance.now(); await q.onSubmittedWorkDone(); return Math.round(performance.now() - t); };
+        const p0 = f.stats.presents, t0 = performance.now(), backlog = []; for (let i = 0; i < 10; i++) { backlog.push(await wait()); await __w(50); }
+        const fps = +((f.stats.presents - p0) / ((performance.now() - t0) / 1000)).toFixed(1);
+        const w = document.querySelector('.dev[data-id="observer"]'); w.classList.remove('closed', 'folded');
+        const sw = [...w.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent.trim() === 'MAP ONLY');
+        const lat = []; for (let k = 0; k < 4; k++) { const t = performance.now(); sw.click(); await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          await q.onSubmittedWorkDone(); lat.push(Math.round(performance.now() - t)); await __w(400); }
+        return { fps, backlogMs: backlog, mapOnlyMs: lat, inFlight: f.inFlight, cap: f.inFlightCap, queueMs: Math.round(f.queueMs), skipped: __LW.stats.skipped, w: f.canvas ? f.canvas.width : 0, encodeMs: +f.stats.lastEncodeMs.toFixed(2), espMs: f.stats.espMs, espRuns: f.stats.espRuns };`));
+    }
+  } else if (mode === 'sticks') {   // MAP ONLY and BALL AND STICK's 2-D canvas: its inked pixels before, under MAP ONLY, after
+    out('skeleton', await g.ev(`await __mol(); __LW.stageText.prefs.set({ skeleton: true }); await __w(1200);
+      const c = document.getElementById('skeleton'), ink = () => { const x = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < x.length; i += 4) if (x[i]) n++; return n; };
+      const before = ink(); __LW.mat.espBare = true; __LW.schedule(2); await __w(300); const bare = ink(); __LW.mat.espBare = false; __LW.schedule(2); await __w(300);
+      return { before, bare, back: ink() };`));
   } else if (mode === 'seat') {
     await g.ev(`await __mol(); return 1;`);
     const seat = `const b = [...__LW.stageText.layer.root.querySelectorAll('.mir-info-block')].pop(), e = document.querySelector('.lw-esp-bar, .esp-bar');
