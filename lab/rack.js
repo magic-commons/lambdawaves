@@ -192,6 +192,7 @@ export async function boot(dom) {
       cancelWarm();                                             // the idle reader and its delay
       if (app.state.modHost) app.state.modHost.clock.setHidden(true);                 // the modulation clock stops (and releases any hold)
       if (app.state.audioCap && app.state.audioCap.setHidden) app.state.audioCap.setHidden(true);  // wave 105: the capture reports to the SAME authority — it owns no listener of its own
+      if (app.state.chord) app.state.chord.suspend('page');                          // 021 G5: and so does THE CHORD
     } else {
       page.resumes++; page.hiddenMs += performance.now() - page.hiddenAt;
       const now = performance.now();
@@ -211,6 +212,7 @@ export async function boot(dom) {
       if (maths.ok) maths.resume(); if (scan.ok) scan.resume(); if (cards.ok) cards.resume();
       if (app.state.modHost) app.state.modHost.clock.setHidden(false);                // mir/modulation/host.js re-anchors itself: prevWall = null + reanchorTransport
       if (app.state.audioCap && app.state.audioCap.setHidden) app.state.audioCap.setHidden(false); // wave 105: …and the follower spends one frame re-learning the spectrum rather than firing a phantom onset
+      if (app.state.chord) app.state.chord.resume('page');
       warmArm(60);
       schedule(TIER.PRESENT);
     }
@@ -669,7 +671,7 @@ export async function boot(dom) {
   app.host.camTravel = camTravel; app.host.orbitBy = orbitBy; app.host.queueKeyOrbit = queueKeyOrbit; app.host.setDist = setDist; app.host.setFov = setFov; app.host.resetView = resetView; app.host.zoomAt = zoomAt; app.host.cameraPort = cameraPort;
 
   function filmHold(on) {
-    if (app.state.chord) app.state.chord[on ? 'suspend' : 'resume']();   // 0.6.4 S2: a film stays silent
+    if (app.state.chord) app.state.chord[on ? 'suspend' : 'resume']('film');   // 0.6.4 S2: a film stays silent
     if (on) {
       filmBefore = { state: reg.serialize(clock.t), version: reg.version, mat: structuredClone(mat), obs: { ...obs }, rot: { ...rotRate } };
       app.state.exportLocked = true; if (rafId) cancelAnimationFrame(rafId); rafId = 0; stats.scheduled = false;

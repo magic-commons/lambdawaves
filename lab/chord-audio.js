@@ -1,13 +1,14 @@
 /* lab/chord-audio.js — THE CHORD (0.6.4 S2, PLAN §F-7 ★): the register sounds.  A sine bank through one master gain at −18 dBFS: LEVELS voices each
  * populated shell n at |E_n|·RATE/2π Hz (gain its population), BEATS each populated pair m < n at |E_m − E_n|·RATE/2π (gain Σ|c_a||c_b|), both FOLDED
  * into [220, 440) Hz by ×2^k, equal notes merged, gains summing to 1.  The context is made on the first hand press of SOUND (the autoplay law) and runs
- * only while THE play runs, SOUND is on, the page is shown, no film records and the reader has not asked for reduced motion.  retune() is keyed on
+ * only while THE play runs, SOUND is on, nothing holds it — `suspend(why)` / `resume(why)`: rack.js' ONE AUTHORITY says 'page' (hidden, frozen or
+ * paged out), filmHold says 'film' (021 G5: it owns no visibilitychange listener of its own) — and the reader has not asked for reduced motion.  retune() is keyed on
  * the register's version, RATE and the mode, and touches the bank only when the notes moved (30 ms ramps); it is never a per-frame rebuild. */
 import { BASIS, energy } from './hydrogen.js';
 const fold = (f) => { const k = Math.ceil(Math.log2(220 / f)); return { f: f * 2 ** k, k }; };
 export function createChord({ reg, clock, motion, onPlay }) {
-  let ctx = null, master = null, on = false, mode = 'levels', held = false, was = false, key = '', sig = '', err = '';
-  const voices = [], table = [], live = () => on && clock.playing && !held && !document.hidden && !motion.reduced;
+  let ctx = null, master = null, on = false, mode = 'levels', was = false, key = '', sig = '', err = '';
+  const voices = [], table = [], holds = new Set(), live = () => on && clock.playing && !holds.size && !motion.reduced;
   function gate() {
     was = live(); if (!ctx) return; master.gain.setTargetAtTime(was ? 0.126 : 0, ctx.currentTime, 0.01);
     if (was && ctx.state !== 'running') ctx.resume(); else if (!was) setTimeout(() => { if (ctx && !live() && ctx.state === 'running') ctx.suspend(); }, 60);
@@ -36,8 +37,8 @@ export function createChord({ reg, clock, motion, onPlay }) {
     if (on && !ctx && !err) try { ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination); sig = ''; } catch (e) { err = 'no audio device'; ctx = null; }
     retune(); gate();
   }
-  document.addEventListener('visibilitychange', gate); if (onPlay) onPlay(gate);
-  return { set, retune, suspend() { held = true; gate(); }, resume() { held = false; gate(); }, dispose() { if (ctx) ctx.close(); ctx = null; voices.length = 0; key = sig = ''; },
+  if (onPlay) onPlay(gate);
+  return { set, retune, suspend(why = 'film') { holds.add(why); gate(); }, resume(why = 'film') { holds.delete(why); gate(); }, dispose() { if (ctx) ctx.close(); ctx = null; voices.length = 0; key = sig = ''; },
     get playing() { return !!ctx && ctx.state === 'running' && live(); }, get voices() { return table.map((v) => ({ ...v })); },
     get caption() { return err || (motion.reduced ? 'muted: reduced motion · ' : '') + (table.length ? `folded ×2^k · ${table.length} note${table.length > 1 ? 's' : ''} · ${table.map((v) => v.f.toFixed(1)).join(' · ')} Hz` : 'no populated level'); } };
 }

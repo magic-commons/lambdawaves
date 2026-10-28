@@ -415,11 +415,12 @@ export function createStates(host, api) {
   }
   async function songFile(file) {
     if (!file) return;
+    let A = null;   // 021 G5: the decoding context is closed in `finally`, so a file that will not decode does not leave one open
     try {
-      const A = new (window.AudioContext || window.webkitAudioContext)(), b = await A.decodeAudioData(await file.arrayBuffer()), x = new Float32Array(b.length); A.close();
+      A = new (window.AudioContext || window.webkitAudioContext)(); const b = await A.decodeAudioData(await file.arrayBuffer()), x = new Float32Array(b.length);
       for (let c = 0; c < b.numberOfChannels; c++) { const d = b.getChannelData(c); for (let i = 0; i < x.length; i++) x[i] += d[i] / b.numberOfChannels; }   // the mono mix
       Object.assign(song, { samples: x, sr: b.sampleRate, ship: true, meta: { hash: null, name: file.name, e0: song.e0, rateAtDrop: api.rate ? api.rate() : 1 } }); setSong(true);
-    } catch (e) { status(`SONG: ${file.name} would not decode — ${e && e.message || e}`, 'warn'); }
+    } catch (e) { status(`SONG: ${file.name} would not decode — ${e && e.message || e}`, 'warn'); } finally { if (A) Promise.resolve().then(() => A.close()).catch(() => {}); }
   }
   function setSong(v) { song.on = !!v && !!song.samples; song.seq++; song.busy = song.ready = false; song.last = null; songSw.set(song.on); if (v && !song.on) status('SONG: ' + (song.meta ? 'track missing · drop it again' : 'FILE or drop an audio file first'), 'warn'); refreshSong(); api.repaint(); return song.on; }
   function setSongE0(v) { song.e0 = Math.min(1e-2, Math.max(1e-4, +v || 3e-3)); if (song.meta) song.meta.e0 = song.e0; if (song.on && song.ready) Promise.resolve(api.solve({ op: 'h.drive.set', e0: song.e0 }, () => null, (r) => r)).catch(() => {}); refreshSong(); }
