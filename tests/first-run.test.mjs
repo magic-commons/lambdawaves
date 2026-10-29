@@ -9,9 +9,10 @@
  * into the look store (a source read, because rack.js needs a DOM). */
 import { readFileSync, readdirSync } from 'node:fs';
 import { firstRunMaterial, FIRST_RUN_MATERIAL, firstRunQuality, deviceQuality, GRID_PAIRING, QUALITY_CEILING } from '../lab/first-run.js';
-import { liftLook, LOOK_ROWS, BLOB_LOOK } from '../lab/look.js';
+import { liftLook, LOOK_ROWS, BLOB_LOOK, LOOK_VERSION, frostText } from '../lab/look.js';
 import { appSource } from './helpers/app-source.mjs';   // 0.5.2: the app's source — rack.js and the modules it dissolves into
-import { repair } from '../lab/mir/core/prefs.js';
+import { repair, createPrefs } from '../lab/mir/core/prefs.js';
+import { THEMES } from '../lab/mir/shell/themes.js';
 import { lookSchema } from '../lab/mir/shell/gui.js';
 /** what a boot wears (0.5.0 C2): an older blob lifted (liftLook), repaired by the kit's own LOOK_SCHEMA rows, over the device's
  *  first-run material as their defaults — rack.js' LOOK_DEFAULTS into createLook */
@@ -158,6 +159,19 @@ const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
       keeps: !!(P.obs && P.modulation && P.layout && Array.isArray(P.layout.cards) && P.ui && P.ui.stage && d.notebook && d.data.experiment) }; });
   judge('A BUNDLED DEMO CARRIES NO LOOK (W129, 0.3.1 · S2): no theme, card style, frost policy, disconnected cards or accent in ui, no camera feel (the camera block, layout.cam\'s friction / spin / auto-rotate / drag gain / fling), no field chrome in mat (frame / axis / frameMode / axisMode / cornerSide / invert / axisInk) — the device\'s stored choices stand; the physics, modulation, layout, pose, stage and notebook stay',
     demos.length > 0 && looks.every((r) => !r.ui.length && !r.camera && !r.camFeel.length && !r.chrome.length && r.keeps), looks);
+}
+{
+  /* 027 D5 · A SAVED LOOK KEEPS ITS NAME: a `mir.gui` record saved under FROST before 022 E1 (TEXT LIGHT, the white ink; the fixture) reads
+     FROST through the look store's road (createLook: the kit's createPrefs, version LOOK_VERSION, migrate frostText), not CUSTOM — once:
+     a TEXT LIGHT chosen after the migration is the reader's and stays */
+  const mem = (raw) => { const m = new Map([['mir.gui', raw]]); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k) }; };
+  const open = (S) => createPrefs({ key: 'mir.gui', schema: lookSchema(), presets: THEMES.map((t) => ({ id: t.id, values: t.values })), storage: S, doc: null, version: LOOK_VERSION, migrate: frostText });
+  const old = readFileSync(new URL('./fixtures/look-frost-022.mir.gui.json', import.meta.url), 'utf8'), S = mem(old);
+  const before = createPrefs({ key: 'mir.gui', schema: lookSchema(), presets: THEMES.map((t) => ({ id: t.id, values: t.values })), storage: mem(old), doc: null }).preset();
+  const P = open(S), after = { preset: P.preset(), text: P.get('text'), theme: P.get('theme'), v: JSON.parse(S.getItem('mir.gui')).prefsV };
+  P.set('text', 'light'); const again = open(S), kept = { preset: again.preset(), text: again.get('text') };
+  judge('A SAVED LOOK KEEPS ITS NAME (027 D5): FROST saved with its old TEXT LIGHT read CUSTOM; the look store migrates it once to FROST (TEXT AUTO), and a TEXT LIGHT chosen afterwards stays',
+    before === 'custom' && eq(after, { preset: 'frost', text: 'theme', theme: 'dark', v: LOOK_VERSION }) && eq(kept, { preset: 'custom', text: 'light' }), { before, after, kept });
 }
 console.log((FAILED ? 'RED ' : 'GREEN ') + 'first-run.test — ' + FAILED + ' failing of ' + TOTAL);
 process.exit(FAILED ? 1 : 0);

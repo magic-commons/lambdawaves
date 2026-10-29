@@ -595,7 +595,7 @@ export function createFilm(LW, opts = {}) {
   const gpuOk = () => { const f = field(); return !!(f && f.ok); };
   let job = null, cfgUsage = null, token = 0, lastMs = null;   // lastMs: this device's own milliseconds a frame, once a film has run
   let card = null, last = null;   // 0.5.0 C7b: the RENDER card's recorder options (`recorder(o)`) · the last film's frame log and names
-  const road = opts.road || {};    // the rack's own: pending() → { caption, spin, yaw0 }, step(dt) (the rotor rates), rotating(), plan(o)
+  const road = opts.road || {};    // the rack's own: pending() → { caption, spin, yaw0 }, caption() (027 D2: the frame's words), step(dt) (the rotor rates), rotating(), plan(o)
   const bake = opts.bake || null;  // 025 B: lab/film-bake.js — the graph, the overlays and the words over the frame (none in the node proof)
 
   function limits() { const f = field(); return maxPictureSize(f && f.ok ? f.device.limits : null, opts.canvasCap || 32767); }
@@ -776,7 +776,7 @@ export function createFilm(LW, opts = {}) {
     }
     J.rate = LW.clock.rate;
     const rgba = bake ? await bake.apply(J, shot.rgba, w, h, i, t) : shot.rgba;   // 025 B: the screen over the field
-    if (J.caption) captionOver(rgba, w, h, J.caption);
+    if (J.caption) captionOver(rgba, w, h, (J.words && J.words()) || J.caption);   // 027 D2: A FILM'S WORDS ARE THE FRAME'S — the road's caption read after this frame's modulation step
     J.log.push({ k: i, t, off: pc ? pc.s.off(at - pc.k0) : J.drive ? t : J.sched.off(i), digest: digest(rgba), retries: tries - 1, ...(Number.isFinite(ctx.beat) ? { beat: ctx.beat } : {}), ...(pc ? { period: true } : {}) });
     return { rgba, width: w, height: h };
   }
@@ -813,7 +813,7 @@ export function createFilm(LW, opts = {}) {
     const tl = spec.timeline ? arrangement(fps) : { periods: null, on: () => false };
     return { token: A.token || 'lw-' + (++token) + '-' + Math.round(now()), sched, N, fps, pinned: () => true, host: true, card: true,
       drive: !!spec.modulation || tl.on('transport.rate'), format: spec.format, size: { w: spec.width, h: spec.height }, kind: s && s.mode === 'span' ? 'frames' : 'clip',
-      label: p.label || stateLabel(), observable: p.observable || null, caption: p.caption || '', periods: tl.periods, nodes: p.nodes !== false, chrome: p.chrome === 'off' ? 'off' : 'labels',
+      label: p.label || stateLabel(), observable: p.observable || null, caption: p.caption || '', words: road.caption || null, periods: tl.periods, nodes: p.nodes !== false, chrome: p.chrome === 'off' ? 'off' : 'labels',
       poseAt: p.spin && !tl.on('observer.yaw') ? (k) => ({ yaw: p.yaw0 + p.spin * (k / fps) }) : null,   // R4: AUTO-ROTATE rides as the pose path unless a yaw clip is in the take
       beforeFrame: road.step ? ({ dt }) => road.step(dt) : null, retries: DEFAULTS.retries, log: [], contended: 0, aborted: null,
       driven: sched.at(0), rate: 0, prev: null, base: null, drained: null,
@@ -883,7 +883,7 @@ export function createFilm(LW, opts = {}) {
       }
       const size = P.size || sizeFor(o);
       const J = job = { token: 'lw-' + (++token) + '-' + Math.round(now()), sched, N, fps, pinned, drive, host: drive, format, size, kind: o.kind || P.kind || sched.mode,
-        label: o.label || stateLabel(), observable: P.observable || null, caption: o.caption || '', poseAt: o.poseAt || null, beforeFrame: o.beforeFrame || null,
+        label: o.label || stateLabel(), observable: P.observable || null, caption: o.caption || '', words: o.words || null, poseAt: o.poseAt || null, beforeFrame: o.beforeFrame || null,
         nodes: o.nodes !== false, chrome: o.chrome === 'off' ? 'off' : 'labels',
         retries: o.retries === undefined ? DEFAULTS.retries : o.retries, log: [], contended: 0, aborted: null, driven: sched.at(0), rate: 0, prev: null, base: null, drained: null,
         pins: { jitter: pinned('jitter') ? 'presents pinned to ' + JITTER_SEED + ' before every frame' : 'NOT PINNED (unpin)', fieldclock: 'bypassed: field.frame is called directly with modes every frame' } };
@@ -944,7 +944,7 @@ export function createFilm(LW, opts = {}) {
       const N = Math.max(1, Math.round(fps * o.seconds));
       const sched = exactSchedule({ mode: 'loop', T: (N / fps) * LW.clock.rate, t0: LW.clock.t, fps, frames: N });
       const spin = lab.spin || 0, yaw0 = lab.yaw0 || 0;
-      return render({ schedule: sched, kind: 'clip', format: 'mp4', camera: 'still', caption: lab.caption || '', modulation: o.drive ? 'drive' : 'freeze',
+      return render({ schedule: sched, kind: 'clip', format: 'mp4', camera: 'still', caption: lab.caption || '', words: road.caption, modulation: o.drive ? 'drive' : 'freeze',
         beforeFrame: step, poseAt: spin ? (k) => ({ yaw: yaw0 + spin * (k / fps) }) : null, onProgress: o.onProgress });
     }
     if (kind === 'period') {
@@ -952,7 +952,7 @@ export function createFilm(LW, opts = {}) {
       if (!P || !P.ok) return refuse({ plan: P, message: P ? P.message : 'no plan' });                 // the refusal IS the answer
       if (P.kind === 'stationary') return refuse({ plan: P, stationary: true, message: P.message });
       const sched = exactSchedule({ mode: 'loop', T: P.T, t0: P.schedule.t0, fps: P.fps, frames: P.N });
-      return render({ schedule: sched, kind: P.kind === 'exact' ? 'loop' : 'near', format: 'mp4', camera: 'still', caption: lab.caption || '', onProgress: o.onProgress });
+      return render({ schedule: sched, kind: P.kind === 'exact' ? 'loop' : 'near', format: 'mp4', camera: 'still', caption: lab.caption || '', words: road.caption, onProgress: o.onProgress });
     }
     const seconds = Math.max(30, o.seconds), driven = !!o.drive;
     const settings = { fps, seconds, t0: 0, scale: o.scale, camera: 'still', modulation: driven ? 'drive' : 'freeze', format: 'png', kind: 'frames', ...(o.options || {}) };

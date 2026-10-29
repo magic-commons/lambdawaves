@@ -59,6 +59,15 @@ export function liftLook(s = {}, help = null) {
   return p;
 }
 
+/** frostText(blob) → the blob a look saved before 022 E1 becomes (027 D5 · A SAVED LOOK KEEPS ITS NAME): FROST's own options with the TEXT
+ *  it then said (LIGHT, the white ink) are FROST's options today (TEXT AUTO, the kit's alpha.8), so the store matches FROST, not CUSTOM.
+ *  The kit's migratePrefs runs it once (LOOK_VERSION), so a TEXT LIGHT chosen after it stays the reader's. */
+export const LOOK_VERSION = 2;
+export function frostText(b) {
+  const F = THEMES.find((x) => x.id === 'frost').values;
+  return b && b.text === 'light' && Object.entries(F).every(([k, v]) => k === 'text' || b[k] === v) ? { ...b, text: F.text } : b;
+}
+
 /** createLook({ settings, defaults, mat, wheelStops, getModView, onTheme }) — the store applied at once (the first
  *  paint wears it), after the lift.  onTheme(theme, choice) runs once per resolved change (SYSTEM following the OS included). */
 export function createLook({ settings, defaults, mat, wheelStops, getModView, onTheme }) {
@@ -77,7 +86,7 @@ export function createLook({ settings, defaults, mat, wheelStops, getModView, on
      one tone the COLOUR_KEYS; LIGHT · DARK · SYSTEM, the hints and HELP stay the reader's own (shell/themes.js). */
   const first = homeOf(schema), pick = (keys) => Object.fromEntries(keys.map((k) => [k, first[k]]));
   const LAMBDAWAVES = { id: 'lambdawaves', name: 'λWAVES', values: pick(THEME_KEYS), tones: [{ id: 'lambdawaves', name: 'λWAVES', values: pick(COLOUR_KEYS) }] };
-  const prefs = createPrefs({ key: LOOK_KEY, schema, presets: [LAMBDAWAVES, ...THEMES], context: ctx });
+  const prefs = createPrefs({ key: LOOK_KEY, schema, presets: [LAMBDAWAVES, ...THEMES], context: ctx, version: LOOK_VERSION, migrate: frostText });
   const blob = settings.read(), held = BLOB_LOOK.filter((k) => k in blob);
   let help = null; try { help = localStorage.getItem(HELP_KEY); localStorage.removeItem(HELP_KEY); } catch (_) {}
   if (held.length || help) prefs.set(liftLook(blob, help));

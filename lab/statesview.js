@@ -188,10 +188,13 @@ export function createStates(host, api) {
       if (seq !== ladderSeq || forSol !== sol || !r || r.error || !r.omega) { if (seq === ladderSeq && forSol === sol) { ladderRefused = (r && r.refused) || null; armed = 0; if (ladderRefused) fillB.root.title = ladderRefused + ' — ORBITAL plays its orbitals'; status(ladderRefused || 'the state ladder needs the chemistry worker', 'warn'); } return; }   // 0.4.0 S4a: a record without its CIS ladder says so
       ladder = r; ladder.basis = q.basis;   // the pitch's tag: a line, and so its Hz, is the basis's
       model = createStatesModel({ n: r.n, nocc: r.nocc, C: sol.C, D0: sol.D, rMO: r.rMO });
-      if (wanted) { applyRecord(wanted, true); wanted = null; }   // a parked record's ON is the one switch's (load), already armed by its refusal
-      request(keys().filter((k) => k !== GROUND));
-      touch(); rebuild(); paint(); refresh(); publishPopulations();
-      if (armed) { const hand = armed === 2; armed = 0; claim(true, hand); }   // THE ONE RE-ARM SEAT: a parked record's ON, a refused ON, a re-solve under ON
+      const fill = () => {   // 027 D1: the landing is the solve's derived fill (a parked record's lanes join the row and the clean mark it stood on)
+        if (wanted) { applyRecord(wanted, true); wanted = null; }   // a parked record's ON is the one switch's (load), already armed by its refusal
+        request(keys().filter((k) => k !== GROUND));
+        touch(); rebuild(); paint(); refresh(); publishPopulations();
+        if (armed) { const hand = armed === 2; armed = 0; claim(true, hand); }   // THE ONE RE-ARM SEAT: a parked record's ON, a refused ON, a re-solve under ON
+      };
+      if (api.derived) api.derived(fill); else fill();
     }).catch(() => { if (seq === ladderSeq) status('the state ladder failed to arrive', 'warn'); });
   }
   function request(ks) {
