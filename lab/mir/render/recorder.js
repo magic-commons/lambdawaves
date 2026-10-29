@@ -65,6 +65,7 @@
  * rec.cancel() · rec.running() · rec.state() · rec.discard(result)
  * rec.recoveries() → [{ store, files, frames, spec }]      rec.recover(job, { onProgress }) → resume a checkpointed run
  * rec.encoderPath(options) → the path preflight would take       rec.selfTest(options) → render/selftest.js
+ * rec.audioPath() → the audio rung this browser takes (encoder.js decideAudioPath, asked once)   estimate().audio → { clips, samples, rate } | null
  * rec.dumpLines() (also registered with core/describe.js)         rec.destroy() */
 import { registerDumpLines } from '../core/describe.js';
 import { StoredZip } from '../core/zip.js';
@@ -141,11 +142,21 @@ export function createRecorder(options = {}) {
     const size = sizeOf(resolution, opts.size);
     return { plan: p, size, bitrate: pickHighBitrate(size.w, size.h, p.fps), range, rangeKind, motion, format, fullDurationS };
   }
+  /** the film's audio before the tap (1.5.6-alpha.15): the KEEP clips that sound in the range, or null (AUDIO off, the timeline off, none) */
+  function audioOf(opts, p) {
+    const isTl = TIMELINE_MOTIONS.includes(p.motion);
+    if (opts.audio === false || !(isTl || opts.timeline !== false) || !host || !o.editor?.model) return null;
+    const bpm = opts.bpm ?? host.model.transport.bpm;
+    let mp = null; try { mp = mixPlan({ model: o.editor.model, startBeat: p.plan.startFrame / p.plan.fps * bpm / 60, bpm, frames: p.plan.frames, fps: p.plan.fps }); } catch (_) { return null; }
+    return mp.clips.length ? { clips: [...new Set(mp.clips.map((c) => c.name))], samples: mp.frames, rate: mp.rate } : null;
+  }
   function estimate(opts = {}) {
     const p = plan(opts), c = calib.read();
     const est = estimateFilm({ frames: p.plan.frames, fps: p.plan.fps, width: p.size.w, height: p.size.h, format: p.format, bitrate: p.bitrate, msPerFrame: c && c.capMs > 0 ? c.capMs : 0 });
-    return { ...p, est, learned: !!(c && c.capMs > 0), warning: ceilingWarning(est.renderMs, o.ceilingMs || RUN_CEILING_MS) };
+    return { ...p, est, learned: !!(c && c.capMs > 0), warning: ceilingWarning(est.renderMs, o.ceilingMs || RUN_CEILING_MS), audio: audioOf(opts, p) };
   }
+  let audioPathMemo = null;
+  const audioPath = () => (audioPathMemo ||= decideAudioPath(48000, 2));
   const encoderPath = async (opts = {}) => { const p = plan(opts); return decideEncoderPath(p.size.w, p.size.h, p.plan.fps, p.bitrate); };
 
   /* ── the project signature: what must be the same for a resume to be the same render ── */
@@ -216,8 +227,9 @@ export function createRecorder(options = {}) {
       const bitrate = resume ? spec0.bitrate : p.bitrate;
       const range = resume ? spec0.range || null : p.range, rangeKind = resume ? spec0.rangeKind || null : p.rangeKind;
       const audioOn = resume ? spec0.audio !== false : opts.audio !== false;
+      /* THE REFUSAL is for a LIVE source only (the AUDIO device's microphone); a dropped file is on the film (1.5.6-alpha.15) */
       if (modulation && host && host.model.sourceList().some((s) => s.kind === 'audio' && s.on !== false))
-        throw new Error('Live audio cannot be replayed deterministically. Choose modulation OFF or disable the audio sources.');
+        throw new Error('A live microphone cannot be replayed exactly. Switch the AUDIO device off, or drop the sound on the TIMELINE as a file (a file is on the film, aligned).');
       const resumeFrames = resume ? resume.store.manifest.checkpoint?.samples?.length || resume.store.manifest.checkpoint?.frames || 0 : 0;
       if (resumeFrames >= frames) throw new Error('All frames are complete. Recover the finished recording instead.');
       check();
@@ -372,7 +384,7 @@ export function createRecorder(options = {}) {
   function run(opts = {}) { return start(opts, null, newId()); }
 
   const rec = {
-    run, recover, plan, estimate, encoderPath,
+    run, recover, plan, estimate, encoderPath, audioPath,
     cancel() { if (live) live.cancel(); },
     running: () => state.running,
     state: () => ({ ...state }),

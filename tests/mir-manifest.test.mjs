@@ -52,6 +52,8 @@ const ACCEPTED = {
   '1.5.6-alpha.13': 'a0d21aaa63bee654f8cdb359a679892c7f30776df0a7d77e128835ab52541222',
   /* 025 A3 · MIR 1.5.6-alpha.14 on the clone road: THE AUDIO ENCODE (AAC → Opus ladder, the priming measured, store.saveAudio, run({ audio }), PNG audio.wav) */
   '1.5.6-alpha.14': 'f612c7c9eda4ff9a19362cf69ae9b74683335862ccc77f4cf57f7ae6c677dc71',
+  /* 025 A4 · MIR 1.5.6-alpha.15 on the clone road: THE AUDIO ROW (the render panel's AUDIO ON · OFF, the estimate names the clips and the codec, the live-microphone refusal said so) */
+  '1.5.6-alpha.15': 'b0571eea857a7ef633cc7b9a204802a32cabd46352dd9b54e079f7f114d2a83f',
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */

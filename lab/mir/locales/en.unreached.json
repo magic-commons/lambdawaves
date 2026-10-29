@@ -265,67 +265,67 @@
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 84,
+  "line": 85,
   "why": "fragment",
   "text": "TIMELINE · "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 84,
+  "line": 85,
   "why": "fragment",
   "text": " needs the TIMELINE window — open it first"
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 283,
+  "line": 295,
   "why": "fragment",
   "text": ", not "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 390,
+  "line": 402,
   "why": "fragment",
   "text": " frames · "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 390,
+  "line": 402,
   "why": "fragment",
   "text": " of video · projected "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 390,
+  "line": 402,
   "why": "fragment",
   "text": " to render"
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 391,
+  "line": 403,
   "why": "fragment",
   "text": " held before the file exists"
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 402,
+  "line": 414,
   "why": "fragment",
   "text": " · runs "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 402,
+  "line": 414,
   "why": "fragment",
   "text": " · cancelled "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 402,
+  "line": 414,
   "why": "fragment",
   "text": " · errors "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 403,
+  "line": 415,
   "why": "fragment",
   "text": "            last error: "
  },

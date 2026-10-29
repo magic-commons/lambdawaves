@@ -1076,6 +1076,7 @@
   "VIVID": "VIVID",
   "WALL": "WALL",
   "WAV": "WAV",
+  "WAV 48 k": "WAV 48 k",
   "WAVE": "WAVE",
   "WHEEL": "WHEEL",
   "WHITE": "WHITE",
@@ -1148,6 +1149,8 @@
   "an envelope has fixed stages — drag a stage to zero instead": "an envelope has fixed stages — drag a stage to zero instead",
   "asking for the microphone…": "asking for the microphone…",
   "audio input is closed — press {:AUDIO IN}": "audio input is closed — press {:AUDIO IN}",
+  "audio {clips} · {codec}": "audio {clips} · {codec}",
+  "audio {codec} {rate} k · {seconds} s · {clips}": "audio {codec} {rate} k · {seconds} s · {clips}",
   "aurora": "aurora",
   "automation::FRAME": "FRAME",
   "balmer": "balmer",
@@ -1264,6 +1267,7 @@
   "neon": "neon",
   "next": "next",
   "no": "no",
+  "no audio encoder here: choose PNG frames for a WAV": "no audio encoder here: choose PNG frames for a WAV",
   "no microphone was found on this device": "no microphone was found on this device",
   "no notes yet — name one above and {:SAVE AS}": "no notes yet — name one above and {:SAVE AS}",
   "no presets yet — type a name and press {:SAVE}": "no presets yet — type a name and press {:SAVE}",
@@ -4988,6 +4992,9 @@
   "WAV": [
    "mir/render/recorder.js"
   ],
+  "WAV 48 k": [
+   "mir/render/panel.js"
+  ],
   "WAVE": [
    "mir/modulation/modwindow/modwindow.js"
   ],
@@ -5198,6 +5205,12 @@
   ],
   "audio input is closed — press {:AUDIO IN}": [
    "mir/modulation/window.js"
+  ],
+  "audio {clips} · {codec}": [
+   "mir/render/panel.js"
+  ],
+  "audio {codec} {rate} k · {seconds} s · {clips}": [
+   "mir/render/panel.js"
   ],
   "aurora": [
    "mir/palette.js"
@@ -5618,6 +5631,9 @@
   ],
   "no": [
    "mir/shell/notebook.js"
+  ],
+  "no audio encoder here: choose PNG frames for a WAV": [
+   "mir/render/panel.js"
   ],
   "no microphone was found on this device": [
    "mir/modulation/audio-capture.js"
