@@ -241,19 +241,19 @@
  },
  {
   "file": "mir/render/encoder.js",
-  "line": 36,
+  "line": 38,
   "why": "fragment",
   "text": "every avc1 rung refused "
  },
  {
   "file": "mir/render/encoder.js",
-  "line": 137,
+  "line": 139,
   "why": "fragment",
   "text": " sps, "
  },
  {
   "file": "mir/render/encoder.js",
-  "line": 140,
+  "line": 142,
   "why": "fragment",
   "text": " sps, "
  },
@@ -265,67 +265,67 @@
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 78,
+  "line": 84,
   "why": "fragment",
   "text": "TIMELINE · "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 78,
+  "line": 84,
   "why": "fragment",
   "text": " needs the TIMELINE window — open it first"
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 261,
+  "line": 283,
   "why": "fragment",
   "text": ", not "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 364,
+  "line": 390,
   "why": "fragment",
   "text": " frames · "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 364,
+  "line": 390,
   "why": "fragment",
   "text": " of video · projected "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 364,
+  "line": 390,
   "why": "fragment",
   "text": " to render"
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 365,
+  "line": 391,
   "why": "fragment",
   "text": " held before the file exists"
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 376,
+  "line": 402,
   "why": "fragment",
   "text": " · runs "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 376,
+  "line": 402,
   "why": "fragment",
   "text": " · cancelled "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 376,
+  "line": 402,
   "why": "fragment",
   "text": " · errors "
  },
  {
   "file": "mir/render/recorder.js",
-  "line": 377,
+  "line": 403,
   "why": "fragment",
   "text": "            last error: "
  },

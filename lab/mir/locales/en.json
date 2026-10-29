@@ -38,6 +38,7 @@
   "A file the app needs did not load.": "A file the app needs did not load.",
   "A film is rendering — wait for it, or CANCEL it in RENDER, before moving the picture.": "A film is rendering — wait for it, or CANCEL it in RENDER, before moving the picture.",
   "A soft light follows the pointer over lit surfaces (never on touch)": "A soft light follows the pointer over lit surfaces (never on touch)",
+  "AAC": "AAC",
   "ABOUT": "ABOUT",
   "ACCENT": "ACCENT",
   "ACCENT BRIGHTNESS": "ACCENT BRIGHTNESS",
@@ -640,6 +641,7 @@
   "Opened — {name}": "Opened — {name}",
   "Opening \"{name}\" replaces what is on screen, which may be unsaved.": "Opening \"{name}\" replaces what is on screen, which may be unsaved.",
   "Opening \"{name}\" replaces what is on screen.": "Opening \"{name}\" replaces what is on screen.",
+  "Opus": "Opus",
   "Orbit with a level horizon": "Orbit with a level horizon",
   "Orient the plane. Shift or a second finger gives finer motion; a double-tap or Home resets.": "Orient the plane. Shift or a second finger gives finer motion; a double-tap or Home resets.",
   "Output maximum": "Output maximum",
@@ -1073,6 +1075,7 @@
   "VIEW DETAILS": "VIEW DETAILS",
   "VIVID": "VIVID",
   "WALL": "WALL",
+  "WAV": "WAV",
   "WAVE": "WAVE",
   "WHEEL": "WHEEL",
   "WHITE": "WHITE",
@@ -1802,6 +1805,9 @@
   ],
   "A soft light follows the pointer over lit surfaces (never on touch)": [
    "mir/shell/gui.js"
+  ],
+  "AAC": [
+   "mir/render/encoder.js"
   ],
   "ABOUT": [
    "mir/shell/about.js"
@@ -3645,6 +3651,9 @@
   "Opening \"{name}\" replaces what is on screen.": [
    "mir/folders/gallery.js"
   ],
+  "Opus": [
+   "mir/render/encoder.js"
+  ],
   "Orbit with a level horizon": [
    "mir/panels/camera-rig.js"
   ],
@@ -4975,6 +4984,9 @@
   "WALL": [
    "mir/modulation/window.js",
    "mir/shell/transport.js"
+  ],
+  "WAV": [
+   "mir/render/recorder.js"
   ],
   "WAVE": [
    "mir/modulation/modwindow/modwindow.js"

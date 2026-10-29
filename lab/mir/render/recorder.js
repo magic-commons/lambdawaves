@@ -52,6 +52,11 @@
  *   resolution   '1080p' | '1440p' | '2160p' | 'current'   or  size: { w, h } (even, ≥ 16)
  *   modulation   true (ON · FROM FIRST SPACE) | false (OFF · FREEZE THIS LOOK)
  *   timeline     true (ON · FROM BEAT ZERO) | false (OFF · BYPASS AUTOMATION); a timeline motion always plays it
+ *   audio        true (default) | false — THE AUDIO IS ON THE FILM (1.5.6-alpha.14, λWAVES 025 A3): the timeline's KEEP AUDIO clips
+ *                in the range are mixed offline from frame zero (render/audio-mix.js) and encoded before the first frame
+ *                (encoder.js encodeAudio: AAC, else Opus) into the MP4's second trak, or written as audio.wav beside PNG frames;
+ *                no clip in the range (or the timeline off) = no audio, the old file.  result.audio = { codec, label, sampleRate,
+ *                samples, packets, clips, durationS, priming } | null
  *   previewS     render only this many seconds (the panel's 3 s preview)
  *   motionOptions   handed to the app motion as ctx.options (stored in the manifest, so it must be JSON)
  *   onProgress(p)   { phase, frame, frames, renderedFrames, elapsedMs, queuedBytes, writtenBytes, seek, seekTotal }
@@ -64,7 +69,8 @@
 import { registerDumpLines } from '../core/describe.js';
 import { StoredZip } from '../core/zip.js';
 import { createRecordClock } from './clock.js';
-import { WcSink, decideEncoderPath, verifyEncoder, pngBytes } from './encoder.js';
+import { WcSink, decideEncoderPath, verifyEncoder, pngBytes, decideAudioPath, encodeAudio } from './encoder.js';
+import { mixPlan, mixdown, wavBytes } from './audio-mix.js';
 import { RenderStore, DEFAULT_DIR } from './store.js';
 import { recordingPlan, timelinePlan, pickHighBitrate, estimateFilm, ceilingWarning, RECORD_SIZES, RECORD_RESOLUTIONS, RECORD_FORMATS, MAX_FRAMES, RUN_CEILING_MS, fmtMs, fmtBytes, fmtClock } from './plan.js';
 import { renderSelfTest, selfTestLines } from './selftest.js';
@@ -209,6 +215,7 @@ export function createRecorder(options = {}) {
       const { fps, startFrame } = fp;
       const bitrate = resume ? spec0.bitrate : p.bitrate;
       const range = resume ? spec0.range || null : p.range, rangeKind = resume ? spec0.rangeKind || null : p.rangeKind;
+      const audioOn = resume ? spec0.audio !== false : opts.audio !== false;
       if (modulation && host && host.model.sourceList().some((s) => s.kind === 'audio' && s.on !== false))
         throw new Error('Live audio cannot be replayed deterministically. Choose modulation OFF or disable the audio sources.');
       const resumeFrames = resume ? resume.store.manifest.checkpoint?.samples?.length || resume.store.manifest.checkpoint?.frames || 0 : 0;
@@ -224,7 +231,7 @@ export function createRecorder(options = {}) {
       /* the manifest's spec (BASINS' field names, so a job BASINS left on disk resumes here).  A resume keeps its original. */
       const spec = resume ? spec0 : { width: w, height: h, fps, frames, durationS: frames / fps, offsetS: startFrame / fps, rendererVersion: 1, signature: snap.signature,
         frozenValues: snap.values, planDurationS: p.fullDurationS, motion: isTimeline ? 'timeline' : motionId, modulation, timeline: timelineOn, format,
-        range: range || undefined, rangeKind: rangeKind || undefined, motionOptions: opts.motionOptions, motionSpec: prepared?.spec, bitrate,
+        range: range || undefined, rangeKind: rangeKind || undefined, audio: audioOn, motionOptions: opts.motionOptions, motionSpec: prepared?.spec, bitrate,
         rack: snap.rack, arrangement: snap.arrangement, app: o.describe ? o.describe() : undefined };
       run.spec = spec;
       for (const type of ['pointerdown', 'click', 'wheel', 'keydown']) if (o.guard !== false && doc) doc.addEventListener(type, guard, { capture: true, passive: false });
@@ -249,9 +256,24 @@ export function createRecorder(options = {}) {
         if (!store && w * h * 4 * frames > PNG_MEMORY_MAX) throw new Error('This PNG recording needs temporary file storage. Use HTTPS or shorten the recording.');
       }
       state.path = path || { kind: 'png-zip', why: 'lossless PNG frames' };
+      /* THE AUDIO IS ON THE FILM: the KEEP clips of the range mixed offline with frame zero as sample zero (the beat the frames
+         read), encoded once before the first frame and kept beside the video (a resume keeps the stored audio; PNG re-mixes) */
+      let mixed = null, audio = resume && format === 'mp4' ? resume.store.manifest.audio || null : null;
+      if ((!resume || format === 'png') && audioOn && timelineOn && host && o.editor?.model) {
+        const bpm = host.model.transport.bpm;
+        const mp = mixPlan({ model: o.editor.model, startBeat: startFrame / fps * bpm / 60, bpm, frames, fps });
+        if (mp.clips.length) { check(); progress('audio', 0, frames); mixed = await mixdown(mp); check(); }
+      }
+      if (mixed && format === 'mp4') {
+        const ap = await decideAudioPath(mixed.rate, mixed.channels.length);
+        if (ap.kind !== 'audio') throw new Error('This browser cannot encode the film’s audio (' + ap.why + '). Turn AUDIO off, or choose PNG frames (the audio is a WAV beside them).');
+        audio = await encodeAudio(mixed, ap, check); check();
+        if (store) await store.saveAudio(audio);
+      }
       progress('prepare', 0, frames, { width: w, height: h, diskBacked: !!store });
       if (path) sink = new WcSink(w, h, fps, path.codec, { bitrate: path.bitrate, asBlob: true, store, resume: resume?.store.manifest.checkpoint, maxQueueSize: 1,
         maxBytes: store ? Infinity : MP4_ESTIMATE_MAX, colorSpace: o.colorSpace, name: app + '-render.mp4', handler: o.handler });
+      if (sink && audio && !store) sink.audio = audio;
       canvas = doc.createElement('canvas'); canvas.width = w; canvas.height = h;
       const ctx2d = o.colorSpace === 'display-p3' ? canvas.getContext('2d', { colorSpace: 'display-p3', willReadFrequently: true }) : canvas.getContext('2d', { willReadFrequently: true });
       if (!ctx2d) throw new Error('Could not create a frame canvas');
@@ -306,12 +328,16 @@ export function createRecorder(options = {}) {
         const out = await sink.finish(); check();
         files.push({ name: store ? out.name : app + '-' + (isTimeline ? 'timeline' : motionId) + '-' + w + 'x' + h + '-' + fps + 'fps.mp4', blob: out.blob, bytes: out.blob.size, firstFrame: 0, lastFrame: frames - 1 });
       } else {
+        if (mixed) zip.add('audio.wav', wavBytes(mixed.channels, mixed.rate));
         await storePart(zip, partNo, partStart, frames - 1);
         await store?.finishParts();
       }
       const wallMs = performance.now() - wallStart;
       const result = { files, width: w, height: h, fps, frames, motion: motionId, modulation, timeline: timelineOn, range: range || null, rangeKind, durationS: frames / fps,
-        offsetS: startFrame / fps, format, bitrate: sink ? sink.bitrate : null, diskBacked: !!store, wallMs, id: runId };
+        offsetS: startFrame / fps, format, bitrate: sink ? sink.bitrate : null, diskBacked: !!store, wallMs, id: runId,
+        audio: audio ? { codec: audio.codec, label: audio.label, sampleRate: audio.sampleRate, samples: audio.frames, packets: audio.samples.length, clips: audio.clips || [],
+          durationS: audio.frames / audio.sampleRate, priming: audio.priming }
+          : mixed ? { codec: 'wav', label: 'WAV', sampleRate: mixed.rate, samples: mixed.frames, packets: 0, clips: mixed.clips, durationS: mixed.frames / mixed.rate, priming: 0 } : null };
       if (frames > 1) calib.write({ capMs: Math.round(wallMs / Math.max(1, frames - resumeFrames) * 10) / 10, at: Date.now() });
       state.last = { ...result, files: files.map(({ name, bytes }) => ({ name, bytes })), bytes: files.reduce((n, f) => n + f.bytes, 0) };
       done = true;

@@ -50,6 +50,8 @@ const ACCEPTED = {
   '1.5.6-alpha.12': '0ba21c6108c34fdd540251567ec7c128c6dba7670a9c8552fc49df2eacf2df20',
   /* 025 A2 · MIR 1.5.6-alpha.13 on the clone road: THE MIXDOWN (render/audio-mix.js: mixPlan, mixdown at 48 kHz offline, wavBytes) */
   '1.5.6-alpha.13': 'a0d21aaa63bee654f8cdb359a679892c7f30776df0a7d77e128835ab52541222',
+  /* 025 A3 · MIR 1.5.6-alpha.14 on the clone road: THE AUDIO ENCODE (AAC → Opus ladder, the priming measured, store.saveAudio, run({ audio }), PNG audio.wav) */
+  '1.5.6-alpha.14': 'f612c7c9eda4ff9a19362cf69ae9b74683335862ccc77f4cf57f7ae6c677dc71',
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */
