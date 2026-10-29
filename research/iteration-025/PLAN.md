@@ -50,6 +50,4 @@ A → B → C; each merged with the recipe (`git merge --no-ff --no-commit`, `--
 | chain | base | commit | note |
 |---|---|---|---|
 | A | e027c0f2 | 2fda4dc7 | kit 1.5.6-alpha.16 (kit-1.5.5 @ 7b94cbc, bundle carried to .tmp/it021/kit.bundle): A1 a second trak (mp4a/esds or Opus/dOps, elst + sgpd/sbgp roll, integer stts; one-track output byte-identical) · A2 offline mixdown of the KEEP clips by audioPlacement, N = frames·48000/fps · A3 AudioEncoder AAC→Opus ladder, priming measured by impulse, WAV beside PNG frames · A4 the AUDIO row, the result/manifest carry audio, the refusal for a LIVE source only · A5 the self-test's alignment stage: clicks at beats 0·1·2 → samples 0·24000·48000, Δ 0 in Firefox, Chromium and ffmpeg · A6 ● REC a FOR-MIR line (over budget); test.sh node EXIT 0; LOCK 843/0 (one re-run on the momentum flake) and 987/0 |
-| B | | | |
-| C | | | |
 | B | 2fda4dc7 | | |
