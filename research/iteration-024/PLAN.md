@@ -40,4 +40,4 @@ S alone; merged with the recipe (`git merge --no-ff --no-commit`, `--ours lab/sw
 ## CLOSED
 | chain | base | commit | note |
 |---|---|---|---|
-| S | 60327c03 | | |
+| S | 1a03a4ad | | |
