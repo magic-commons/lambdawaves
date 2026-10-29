@@ -1,0 +1,1695 @@
+{
+ "lambdawaves": "project",
+ "version": 1,
+ "path": "CONDUCT/MOL 1 H2O ESP",
+ "folder": "CONDUCT",
+ "name": "MOL 1 H2O ESP",
+ "saved": "2026-10-29T08:03:17.677Z",
+ "opened": "2026-10-29T08:03:17.677Z",
+ "data": {
+  "experiment": {
+   "format": "lambdawaves/qwave-0/state",
+   "system": "hydrogen",
+   "basis": "n<=6 complex Y_lm, Condon-Shortley",
+   "units": "atomic",
+   "t": 0,
+   "preset": null,
+   "modes": [],
+   "field": {
+    "Bz": 0,
+    "Fz": 0
+   },
+   "status": "HYDROGEN",
+   "rate": 4,
+   "window": 6.283185307179586,
+   "damping": 0
+  },
+  "presentation": {
+   "obs": {
+    "yaw": 0.65,
+    "pitch": 0.32000000000000006,
+    "dist": 1.6,
+    "fov": 0.9,
+    "mode": "free",
+    "quat": [
+     0.3602113090590237,
+     0.26010499794883746,
+     0.5244636400495047,
+     0.7263133573975104
+    ],
+    "shift": [
+     0,
+     0
+    ]
+   },
+   "mat": {
+    "view": 1,
+    "exposure": 1.2,
+    "softness": 1,
+    "steps": 160,
+    "slice": {
+     "mode": 0,
+     "axis": 2,
+     "pos": 0,
+     "thick": 0.03
+    },
+    "hueShift": 0,
+    "paletteOn": true,
+    "style": 11,
+    "iso": 0.03,
+    "grain": 0.35,
+    "knee": 3,
+    "boost": {
+     "k": [
+      0,
+      0,
+      0
+     ],
+     "on": false
+    },
+    "gamma": 1,
+    "finish": "lit",
+    "bow": {
+     "gain": 1,
+     "curve": 1,
+     "limit": 3
+    }
+   },
+   "quality": {
+    "res": 64,
+    "steps": 160,
+    "scale": 1,
+    "auto": true,
+    "autoScale": 1,
+    "minScale": 0.35
+   },
+   "domain": {
+    "auto": true,
+    "half": 7.4309006215206646
+   },
+   "shadow": "phasors",
+   "paletteId": "bipolar",
+   "space": "x",
+   "palette": {
+    "on": true,
+    "selected": 0,
+    "stops": [
+     {
+      "at": 0,
+      "rgb": [
+       0.16862745098039217,
+       0.4980392156862745,
+       1
+      ]
+     },
+     {
+      "at": 0.25,
+      "rgb": [
+       0.9490196078431372,
+       0.9490196078431372,
+       0.9490196078431372
+      ]
+     },
+     {
+      "at": 0.5,
+      "rgb": [
+       1,
+       0.5411764705882353,
+       0.1607843137254902
+      ]
+     },
+     {
+      "at": 0.75,
+      "rgb": [
+       0.06666666666666667,
+       0.0784313725490196,
+       0.09019607843137255
+      ]
+     }
+    ]
+   },
+   "hamiltonian": {
+    "id": "hydrogen",
+    "Z": 1,
+    "atomZ": 10,
+    "well": 10,
+    "gasBasis": "reg"
+   },
+   "wigner": {
+    "zmax": 8,
+    "pmax": 2
+   },
+   "readers": {
+    "spectrum": {
+     "selected": -1,
+     "dials": false
+    },
+    "slice": {
+     "mode": "space",
+     "half": 8,
+     "gain": 1.6,
+     "rotor": {
+      "qL": [
+       1,
+       0,
+       0,
+       0
+      ],
+      "qR": [
+       1,
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "kepler": {
+     "shell": 3
+    }
+   },
+   "instruments": {
+    "chem": {
+     "preset": "H2O",
+     "basis": "sto-3g",
+     "view": "esp",
+     "orbital": 5,
+     "axis": "y",
+     "kappa": 0.001,
+     "speed": 10,
+     "dt": 0.01,
+     "integrator": "mmut",
+     "tda": false,
+     "core": false,
+     "valence": false,
+     "on": true
+    },
+    "orbitals": {
+     "on": false,
+     "selection": [],
+     "morph": 0
+    },
+    "states": {
+     "on": false,
+     "view": "change",
+     "ref": "ground",
+     "flow": false,
+     "morph": 0,
+     "morphOn": false,
+     "A": null,
+     "B": null,
+     "drive": {
+      "pol": "x",
+      "omega": 0.4,
+      "e0": 0.01,
+      "envelope": "cw",
+      "duration": 400,
+      "phase": 0
+     },
+     "lanes": [
+      {
+       "key": -1,
+       "omega": 0,
+       "amp": 1,
+       "phase": 0,
+       "mute": false,
+       "solo": false
+      }
+     ]
+    },
+    "register": {
+     "mode": "orbital"
+    },
+    "qcd": {
+     "kind": "charm",
+     "potential": "cornell",
+     "params": {
+      "alphaS": 0.39,
+      "sigma": 0.18,
+      "C": 0.733
+     }
+    },
+    "ladder": {
+     "nbar": 30,
+     "sigma": 2,
+     "d": 0,
+     "teeth": 8
+    },
+    "particles": {
+     "count": 160,
+     "trail": 24
+    }
+   },
+   "rates": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "rotationRates": {
+    "z": 0,
+    "kz": 0,
+    "def": 0
+   },
+   "sturmian": {
+    "on": false,
+    "lambda": 1
+   },
+   "modulation": {
+    "seq": {
+     "macro": 2,
+     "source": 2,
+     "route": 0
+    },
+    "transport": {
+     "bpm": 120
+    },
+    "macros": [
+     {
+      "id": "m1",
+      "name": "LFO",
+      "named": 1,
+      "value": 0,
+      "masterDepth": 1,
+      "sourceId": "s1"
+     },
+     {
+      "id": "m2",
+      "name": "AUDIO",
+      "named": 1,
+      "value": 0,
+      "masterDepth": 1,
+      "sourceId": "s2:level"
+     }
+    ],
+    "sources": [
+     {
+      "id": "s1",
+      "kind": "lfo",
+      "bank": "A",
+      "on": 1,
+      "label": "",
+      "shapeMode": "curve",
+      "wave": "sine",
+      "points": [
+       {
+        "t": 0,
+        "v": 0,
+        "tension": 0.2750049581538431
+       },
+       {
+        "t": 0.25,
+        "v": 0.5,
+        "tension": -0.2750049581538431
+       },
+       {
+        "t": 0.5,
+        "v": 1,
+        "tension": 0.2750049581538431
+       },
+       {
+        "t": 0.75,
+        "v": 0.5,
+        "tension": -0.2750049581538431
+       },
+       {
+        "t": 1,
+        "v": 0,
+        "tension": 0
+       }
+      ],
+      "sync": 0,
+      "mult": 2,
+      "triplet": 0,
+      "dotted": 0,
+      "ratePos": 0.39,
+      "phaseOff": 0,
+      "smooth": 0,
+      "steps": 0,
+      "trig": 0,
+      "mode": "off",
+      "anchor": 0,
+      "rseed": 139573449,
+      "a": 0.01,
+      "hold": 0,
+      "d": 0.3,
+      "s": 0.5,
+      "r": 0.6,
+      "ta": 0,
+      "td": 0,
+      "tr": 0,
+      "invert": 0,
+      "timeScale": 4,
+      "gateMode": "oneshot",
+      "minimized": 0,
+      "banks": {
+       "A": {
+        "shapeMode": "curve",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot"
+       },
+       "B": {
+        "shapeMode": "curve",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot"
+       }
+      }
+     },
+     {
+      "id": "s2",
+      "kind": "audio",
+      "bank": "A",
+      "on": 1,
+      "label": "",
+      "shapeMode": "wave",
+      "wave": "sine",
+      "sync": 0,
+      "mult": 2,
+      "triplet": 0,
+      "dotted": 0,
+      "ratePos": 0.39,
+      "phaseOff": 0,
+      "smooth": 0,
+      "steps": 0,
+      "trig": 0,
+      "mode": "off",
+      "anchor": 0,
+      "rseed": 89240592,
+      "a": 0.01,
+      "hold": 0,
+      "d": 0.3,
+      "s": 0.5,
+      "r": 0.6,
+      "ta": 0,
+      "td": 0,
+      "tr": 0,
+      "invert": 0,
+      "timeScale": 4,
+      "gateMode": "oneshot",
+      "minimized": 0,
+      "banks": {
+       "A": {
+        "shapeMode": "wave",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot",
+        "audio": {
+         "gateEnabled": true,
+         "source": "mic",
+         "gainDb": 0,
+         "thresholdDb": -55,
+         "hysteresisDb": 3,
+         "holdMs": 83,
+         "fluxFloor": 0.02,
+         "levelMix": {
+          "level": 1,
+          "low": 1,
+          "mid": 1,
+          "high": 1
+         },
+         "outs": {
+          "level": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 10,
+           "releaseMs": 120,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "low": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 15,
+           "releaseMs": 180,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "mid": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 10,
+           "releaseMs": 120,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "high": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 5,
+           "releaseMs": 60,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "hit": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 0,
+           "releaseMs": 0,
+           "holdMs": 0,
+           "mode": "trigger"
+          },
+          "beat": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 0,
+           "releaseMs": 0,
+           "holdMs": 0,
+           "mode": "follow"
+          }
+         }
+        }
+       },
+       "B": {
+        "shapeMode": "wave",
+        "wave": "sine",
+        "points": [
+         {
+          "t": 0,
+          "v": 0,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.25,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 0.5,
+          "v": 1,
+          "tension": 0.2750049581538431
+         },
+         {
+          "t": 0.75,
+          "v": 0.5,
+          "tension": -0.2750049581538431
+         },
+         {
+          "t": 1,
+          "v": 0,
+          "tension": 0
+         }
+        ],
+        "sync": false,
+        "mult": 2,
+        "triplet": false,
+        "dotted": false,
+        "ratePos": 0.39,
+        "phaseOff": 0,
+        "smooth": 0,
+        "steps": 0,
+        "trig": false,
+        "mode": "off",
+        "anchor": false,
+        "a": 0.01,
+        "hold": 0,
+        "d": 0.3,
+        "s": 0.5,
+        "r": 0.6,
+        "ta": 0,
+        "td": 0,
+        "tr": 0,
+        "invert": false,
+        "timeScale": 4,
+        "gateMode": "oneshot",
+        "audio": {
+         "gateEnabled": true,
+         "source": "mic",
+         "gainDb": 0,
+         "thresholdDb": -55,
+         "hysteresisDb": 3,
+         "holdMs": 83,
+         "fluxFloor": 0.02,
+         "levelMix": {
+          "level": 1,
+          "low": 1,
+          "mid": 1,
+          "high": 1
+         },
+         "outs": {
+          "level": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 10,
+           "releaseMs": 120,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "low": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 15,
+           "releaseMs": 180,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "mid": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 10,
+           "releaseMs": 120,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "high": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 5,
+           "releaseMs": 60,
+           "holdMs": 0,
+           "mode": "follow"
+          },
+          "hit": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 0,
+           "releaseMs": 0,
+           "holdMs": 0,
+           "mode": "trigger"
+          },
+          "beat": {
+           "floorDb": -60,
+           "ceilingDb": -6,
+           "attackMs": 0,
+           "releaseMs": 0,
+           "holdMs": 0,
+           "mode": "follow"
+          }
+         }
+        }
+       }
+      },
+      "audio": {
+       "gateEnabled": true,
+       "source": "mic",
+       "gainDb": 0,
+       "thresholdDb": -55,
+       "hysteresisDb": 3,
+       "holdMs": 83,
+       "fluxFloor": 0.02,
+       "levelMix": {
+        "level": 1,
+        "low": 1,
+        "mid": 1,
+        "high": 1
+       },
+       "outs": {
+        "level": {
+         "floorDb": -60,
+         "ceilingDb": -6,
+         "attackMs": 10,
+         "releaseMs": 120,
+         "holdMs": 0,
+         "mode": "follow"
+        },
+        "low": {
+         "floorDb": -60,
+         "ceilingDb": -6,
+         "attackMs": 15,
+         "releaseMs": 180,
+         "holdMs": 0,
+         "mode": "follow"
+        },
+        "mid": {
+         "floorDb": -60,
+         "ceilingDb": -6,
+         "attackMs": 10,
+         "releaseMs": 120,
+         "holdMs": 0,
+         "mode": "follow"
+        },
+        "high": {
+         "floorDb": -60,
+         "ceilingDb": -6,
+         "attackMs": 5,
+         "releaseMs": 60,
+         "holdMs": 0,
+         "mode": "follow"
+        },
+        "hit": {
+         "floorDb": -60,
+         "ceilingDb": -6,
+         "attackMs": 0,
+         "releaseMs": 0,
+         "holdMs": 0,
+         "mode": "trigger"
+        },
+        "beat": {
+         "floorDb": -60,
+         "ceilingDb": -6,
+         "attackMs": 0,
+         "releaseMs": 0,
+         "holdMs": 0,
+         "mode": "follow"
+        }
+       }
+      }
+     }
+    ],
+    "routes": [],
+    "v": 108
+   },
+   "ui": {
+    "stage": {
+     "mix": 1,
+     "custom": [
+      0,
+      0,
+      0
+     ],
+     "follow": true
+    }
+   },
+   "layout": {
+    "v": 3,
+    "at": 1793260997674,
+    "cards": [
+     {
+      "id": "projects",
+      "side": "L",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "transport",
+      "side": "L",
+      "folded": false,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "informational",
+      "side": "L",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "spectrum",
+      "side": "L",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "chem",
+      "side": "L",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null,
+      "more": false,
+      "core": false
+     },
+     {
+      "id": "render",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "nodes",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "equalizer",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "staticfield",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "shadow",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "orbit",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "vortex",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "slice",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "calculus",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "meters",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "ladder",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "lattice",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "bloch",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "central",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "separable",
+      "side": "R",
+      "folded": true,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "atoms",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "wigner",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "radiation",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "emission",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "history",
+      "side": "R",
+      "folded": false,
+      "closed": true,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "settings",
+      "side": "R",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "palette",
+      "side": "R",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "observer",
+      "side": "R",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "camera",
+      "side": "R",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     },
+     {
+      "id": "clip",
+      "side": "R",
+      "folded": true,
+      "closed": false,
+      "off": false,
+      "float": null
+     }
+    ],
+    "docked": false,
+    "rackHidden": false,
+    "nb": null
+   },
+   "modwin": {
+    "x": 259,
+    "y": 174,
+    "lane": "bottom",
+    "ribbon": false,
+    "modes": {},
+    "audioMini": {},
+    "open": false,
+    "folder": {},
+    "macroSide": "left",
+    "macroMin": false,
+    "compactMode": "F",
+    "selectedMacro": "m1",
+    "selectedSource": null,
+    "audioBands": {},
+    "audioRoutes": {},
+    "dock": null,
+    "chipSide": "auto"
+   },
+   "camera": {
+    "autoRotate": false
+   },
+   "overlays": {
+    "vortex": {
+     "on": false,
+     "overlay": false
+    },
+    "kepler": false,
+    "particles": {
+     "on": false,
+     "count": 0
+    },
+    "dials": false
+   },
+   "ab": {
+    "a": null,
+    "b": null,
+    "omega": 0.05,
+    "on": false
+   },
+   "notebook": null,
+   "timeline": {
+    "v": 1,
+    "seq": 8,
+    "meter": 4,
+    "lanes": [
+     {
+      "id": "lane1",
+      "name": "half turn"
+     },
+     {
+      "id": "lane4",
+      "name": "a style per bar"
+     },
+     {
+      "id": "lane7",
+      "name": "LANE 3"
+     },
+     {
+      "id": "lane8",
+      "name": "LANE 4"
+     }
+    ],
+    "curves": [
+     {
+      "id": "curve2",
+      "targetId": "observer.yaw",
+      "name": "half turn",
+      "color": "#a7adb8",
+      "length": 16,
+      "min": 0,
+      "max": 1,
+      "points": [
+       {
+        "t": 0,
+        "v": 0.10345071300973198,
+        "tension": 0
+       },
+       {
+        "t": 1,
+        "v": 0.48542257643028075,
+        "tension": 0
+       }
+      ]
+     },
+     {
+      "id": "curve5",
+      "targetId": "material.style",
+      "name": "a style per bar",
+      "color": "#a7adb8",
+      "length": 16,
+      "min": 0,
+      "max": 1,
+      "points": [
+       {
+        "t": 0,
+        "v": 1,
+        "tension": 0,
+        "segment": "hold"
+       },
+       {
+        "t": 0.25,
+        "v": 0.8181818181818182,
+        "tension": 0,
+        "segment": "hold"
+       },
+       {
+        "t": 0.5,
+        "v": 0.9090909090909091,
+        "tension": 0,
+        "segment": "hold"
+       },
+       {
+        "t": 0.75,
+        "v": 0.7272727272727273,
+        "tension": 0,
+        "segment": "hold"
+       },
+       {
+        "t": 1,
+        "v": 0.7272727272727273,
+        "tension": 0
+       }
+      ]
+     }
+    ],
+    "clips": [
+     {
+      "id": "clip3",
+      "curveId": "curve2",
+      "laneId": "lane1",
+      "start": 0,
+      "duration": 16,
+      "offset": 0,
+      "scale": 1,
+      "mute": false,
+      "followSourceEnd": false
+     },
+     {
+      "id": "clip6",
+      "curveId": "curve5",
+      "laneId": "lane4",
+      "start": 0,
+      "duration": 16,
+      "offset": 0,
+      "scale": 1,
+      "mute": false,
+      "followSourceEnd": false
+     }
+    ],
+    "active": {
+     "start": 0,
+     "end": 16
+    }
+   },
+   "modulationBases": {
+    "observer.yaw": 0.65,
+    "observer.pitch": 0.32000000000000006,
+    "observer.dist": 1.6,
+    "observer.fov": 0.9,
+    "observer.panx": 0,
+    "observer.pany": 0,
+    "material.stage": 1,
+    "material.gamma": 1,
+    "material.exposure": 1.2,
+    "material.softness": 1,
+    "material.hue": 0,
+    "material.iso": 0.03,
+    "material.grain": 0.35,
+    "material.knee": 3,
+    "transport.rate": 4,
+    "material.slice.pos": 0,
+    "material.slice.thick": 0.03,
+    "state.rot.z": 0,
+    "state.stark.kz": 0,
+    "state.defect.l2": 0,
+    "shell.rate.n1": 1,
+    "shell.rate.n2": 1,
+    "shell.rate.n3": 1,
+    "shell.rate.n4": 1,
+    "shell.rate.n5": 1,
+    "shell.rate.n6": 1,
+    "shell.rate.n7": 1,
+    "chem.kick": 0.001,
+    "chem.speed": 10,
+    "chem.orbital": 5,
+    "reg.morph": 0,
+    "reg.omorph": 0,
+    "reg.e0": 0.01,
+    "reg.w": 0.4,
+    "reg.amp1": 1,
+    "reg.amp2": 0,
+    "reg.amp3": 0,
+    "reg.amp4": 0,
+    "reg.amp5": 0,
+    "reg.amp6": 0,
+    "reg.amp7": 0,
+    "reg.amp8": 0,
+    "reg.ph1": 0,
+    "reg.ph2": 0,
+    "reg.ph3": 0,
+    "reg.ph4": 0,
+    "reg.ph5": 0,
+    "reg.ph6": 0,
+    "reg.ph7": 0,
+    "reg.ph8": 0,
+    "material.style": 11,
+    "material.view": 1,
+    "palette.index": 5,
+    "state.rabi": 0.05,
+    "action.transport.play": 0,
+    "action.notebook": 0,
+    "action.home": 0,
+    "action.stepback": 0,
+    "action.stepfwd": 0,
+    "action.zoomin": 0,
+    "action.zoomout": 0,
+    "action.dollyin": 0,
+    "action.dollyout": 0,
+    "action.povin": 0,
+    "action.povout": 0,
+    "action.dollyzoomin": 0,
+    "action.dollyzoomout": 0,
+    "action.camreset": 0,
+    "action.panleft": 0,
+    "action.panright": 0,
+    "action.panup": 0,
+    "action.pandown": 0,
+    "action.camera.panhome": 0,
+    "action.camera.lock": 0,
+    "action.camera.flip": 0,
+    "action.camera.autorotate": 0,
+    "action.axisx": 0,
+    "action.axisy": 0,
+    "action.axisz": 0,
+    "action.rotorboth": 0,
+    "action.rotorplus": 0,
+    "action.rotorminus": 0,
+    "action.rotork": 0,
+    "action.turnneg": 0,
+    "action.turnpos": 0,
+    "action.slap": 0,
+    "action.reseed": 0,
+    "action.state.normalize": 0,
+    "action.state.clear": 0,
+    "action.preset.next": 0,
+    "action.preset.prev": 0,
+    "action.style": 0,
+    "action.view": 0,
+    "action.palette": 0,
+    "action.mode": 0,
+    "action.ballstick": 0,
+    "action.hide": 0,
+    "action.help": 0,
+    "action.notes": 0,
+    "action.rack": 0,
+    "action.dock": 0,
+    "action.modulation": 0,
+    "action.settings": 0,
+    "action.history": 0,
+    "action.render": 0,
+    "action.render.open": 0,
+    "action.render.timeline": 0,
+    "action.render.frames": 0,
+    "action.nodes": 0,
+    "action.windowpicker": 0,
+    "action.menu": 0,
+    "action.timeline": 0,
+    "action.gui": 0,
+    "action.guiabout": 0,
+    "action.about": 0,
+    "action.csb.search": 0,
+    "action.modarm": 0,
+    "action.modbar": 0,
+    "action.csb.expand": 0,
+    "action.csb.rate.up": 0,
+    "action.csb.rate.down": 0,
+    "action.csb.tempo.up": 0,
+    "action.csb.tempo.down": 0,
+    "action.folds": 0,
+    "action.theme": 0,
+    "action.info.all": 0,
+    "action.save": 0,
+    "action.saveas": 0,
+    "action.folders": 0,
+    "action.open": 0,
+    "action.new": 0,
+    "action.quick.save": 0,
+    "action.quick.load": 0,
+    "action.copy.name": 0,
+    "action.copy.formula": 0,
+    "action.knob.reset": 0,
+    "action.knob.copy": 0,
+    "action.knob.paste": 0,
+    "action.knob.fine": 0,
+    "action.knob.copyid": 0,
+    "action.knob.route": 0,
+    "action.control.reset": 0,
+    "action.control.learn": 0,
+    "action.picker.open": 0,
+    "action.picker.isomers": 0,
+    "action.picker.keep": 0,
+    "action.picker.look": 0,
+    "action.esp.side": 0,
+    "action.notebook.copy": 0,
+    "action.spectrum.solo": 0,
+    "action.film.picture": 0,
+    "action.film.record": 0,
+    "action.invert": 0,
+    "action.view.captions": 0,
+    "action.view.formula": 0,
+    "action.view.labels": 0,
+    "action.view.badges": 0,
+    "action.view.hints": 0,
+    "action.settings.playlock": 0,
+    "action.settings.autoscale": 0,
+    "action.settings.governor": 0,
+    "action.settings.frame": 0,
+    "action.settings.axis": 0,
+    "action.settings.audio": 0,
+    "action.settings.keepframes": 0,
+    "action.settings.domainauto": 0,
+    "action.chem.on": 0,
+    "action.chem.vibrate": 0,
+    "action.chem.breathe": 0,
+    "action.chem.kick": 0,
+    "action.ab.storea": 0,
+    "action.ab.storeb": 0,
+    "action.eq.sound": 0,
+    "action.gas.launch": 0,
+    "action.gas.bounce": 0,
+    "action.vortex.jump": 0,
+    "action.particles": 0,
+    "action.ab.on": 0,
+    "action.vortex.locate": 0,
+    "action.window.informational.open": 0,
+    "action.window.informational.close": 0,
+    "action.window.informational.fold": 0,
+    "action.window.informational.float": 0,
+    "action.window.informational.side": 0,
+    "action.window.informational.reset": 0,
+    "action.window.informational.solo": 0,
+    "action.window.spectrum.open": 0,
+    "action.window.spectrum.close": 0,
+    "action.window.spectrum.fold": 0,
+    "action.window.spectrum.float": 0,
+    "action.window.spectrum.side": 0,
+    "action.window.spectrum.reset": 0,
+    "action.window.spectrum.solo": 0,
+    "action.window.equalizer.open": 0,
+    "action.window.equalizer.close": 0,
+    "action.window.equalizer.fold": 0,
+    "action.window.equalizer.float": 0,
+    "action.window.equalizer.side": 0,
+    "action.window.equalizer.reset": 0,
+    "action.window.equalizer.solo": 0,
+    "action.window.staticfield.open": 0,
+    "action.window.staticfield.close": 0,
+    "action.window.staticfield.fold": 0,
+    "action.window.staticfield.float": 0,
+    "action.window.staticfield.side": 0,
+    "action.window.staticfield.reset": 0,
+    "action.window.staticfield.solo": 0,
+    "action.window.palette.open": 0,
+    "action.window.palette.close": 0,
+    "action.window.palette.fold": 0,
+    "action.window.palette.float": 0,
+    "action.window.palette.side": 0,
+    "action.window.palette.reset": 0,
+    "action.window.palette.solo": 0,
+    "action.window.observer.open": 0,
+    "action.window.observer.close": 0,
+    "action.window.observer.fold": 0,
+    "action.window.observer.float": 0,
+    "action.window.observer.side": 0,
+    "action.window.observer.reset": 0,
+    "action.window.observer.solo": 0,
+    "action.window.camera.open": 0,
+    "action.window.camera.close": 0,
+    "action.window.camera.fold": 0,
+    "action.window.camera.float": 0,
+    "action.window.camera.side": 0,
+    "action.window.camera.reset": 0,
+    "action.window.camera.solo": 0,
+    "action.window.clip.open": 0,
+    "action.window.clip.close": 0,
+    "action.window.clip.fold": 0,
+    "action.window.clip.float": 0,
+    "action.window.clip.side": 0,
+    "action.window.clip.reset": 0,
+    "action.window.clip.solo": 0,
+    "action.window.settings.open": 0,
+    "action.window.settings.close": 0,
+    "action.window.settings.fold": 0,
+    "action.window.settings.float": 0,
+    "action.window.settings.side": 0,
+    "action.window.settings.reset": 0,
+    "action.window.settings.solo": 0,
+    "action.window.shadow.open": 0,
+    "action.window.shadow.close": 0,
+    "action.window.shadow.fold": 0,
+    "action.window.shadow.float": 0,
+    "action.window.shadow.side": 0,
+    "action.window.shadow.reset": 0,
+    "action.window.shadow.solo": 0,
+    "action.window.orbit.open": 0,
+    "action.window.orbit.close": 0,
+    "action.window.orbit.fold": 0,
+    "action.window.orbit.float": 0,
+    "action.window.orbit.side": 0,
+    "action.window.orbit.reset": 0,
+    "action.window.orbit.solo": 0,
+    "action.window.vortex.open": 0,
+    "action.window.vortex.close": 0,
+    "action.window.vortex.fold": 0,
+    "action.window.vortex.float": 0,
+    "action.window.vortex.side": 0,
+    "action.window.vortex.reset": 0,
+    "action.window.vortex.solo": 0,
+    "action.window.slice.open": 0,
+    "action.window.slice.close": 0,
+    "action.window.slice.fold": 0,
+    "action.window.slice.float": 0,
+    "action.window.slice.side": 0,
+    "action.window.slice.reset": 0,
+    "action.window.slice.solo": 0,
+    "action.window.chem.open": 0,
+    "action.window.chem.close": 0,
+    "action.window.chem.fold": 0,
+    "action.window.chem.float": 0,
+    "action.window.chem.side": 0,
+    "action.window.chem.reset": 0,
+    "action.window.chem.solo": 0,
+    "action.window.calculus.open": 0,
+    "action.window.calculus.close": 0,
+    "action.window.calculus.fold": 0,
+    "action.window.calculus.float": 0,
+    "action.window.calculus.side": 0,
+    "action.window.calculus.reset": 0,
+    "action.window.calculus.solo": 0,
+    "action.window.meters.open": 0,
+    "action.window.meters.close": 0,
+    "action.window.meters.fold": 0,
+    "action.window.meters.float": 0,
+    "action.window.meters.side": 0,
+    "action.window.meters.reset": 0,
+    "action.window.meters.solo": 0,
+    "action.window.ladder.open": 0,
+    "action.window.ladder.close": 0,
+    "action.window.ladder.fold": 0,
+    "action.window.ladder.float": 0,
+    "action.window.ladder.side": 0,
+    "action.window.ladder.reset": 0,
+    "action.window.ladder.solo": 0,
+    "action.window.lattice.open": 0,
+    "action.window.lattice.close": 0,
+    "action.window.lattice.fold": 0,
+    "action.window.lattice.float": 0,
+    "action.window.lattice.side": 0,
+    "action.window.lattice.reset": 0,
+    "action.window.lattice.solo": 0,
+    "action.window.bloch.open": 0,
+    "action.window.bloch.close": 0,
+    "action.window.bloch.fold": 0,
+    "action.window.bloch.float": 0,
+    "action.window.bloch.side": 0,
+    "action.window.bloch.reset": 0,
+    "action.window.bloch.solo": 0,
+    "action.window.central.open": 0,
+    "action.window.central.close": 0,
+    "action.window.central.fold": 0,
+    "action.window.central.float": 0,
+    "action.window.central.side": 0,
+    "action.window.central.reset": 0,
+    "action.window.central.solo": 0,
+    "action.window.separable.open": 0,
+    "action.window.separable.close": 0,
+    "action.window.separable.fold": 0,
+    "action.window.separable.float": 0,
+    "action.window.separable.side": 0,
+    "action.window.separable.reset": 0,
+    "action.window.separable.solo": 0,
+    "action.window.atoms.open": 0,
+    "action.window.atoms.close": 0,
+    "action.window.atoms.fold": 0,
+    "action.window.atoms.float": 0,
+    "action.window.atoms.side": 0,
+    "action.window.atoms.reset": 0,
+    "action.window.atoms.solo": 0,
+    "action.window.wigner.open": 0,
+    "action.window.wigner.close": 0,
+    "action.window.wigner.fold": 0,
+    "action.window.wigner.float": 0,
+    "action.window.wigner.side": 0,
+    "action.window.wigner.reset": 0,
+    "action.window.wigner.solo": 0,
+    "action.window.radiation.open": 0,
+    "action.window.radiation.close": 0,
+    "action.window.radiation.fold": 0,
+    "action.window.radiation.float": 0,
+    "action.window.radiation.side": 0,
+    "action.window.radiation.reset": 0,
+    "action.window.radiation.solo": 0,
+    "action.window.emission.open": 0,
+    "action.window.emission.close": 0,
+    "action.window.emission.fold": 0,
+    "action.window.emission.float": 0,
+    "action.window.emission.side": 0,
+    "action.window.emission.reset": 0,
+    "action.window.emission.solo": 0,
+    "action.window.transport.open": 0,
+    "action.window.transport.close": 0,
+    "action.window.transport.fold": 0,
+    "action.window.transport.float": 0,
+    "action.window.transport.side": 0,
+    "action.window.transport.reset": 0,
+    "action.window.transport.solo": 0,
+    "action.window.history.open": 0,
+    "action.window.history.close": 0,
+    "action.window.history.fold": 0,
+    "action.window.history.float": 0,
+    "action.window.history.side": 0,
+    "action.window.history.reset": 0,
+    "action.window.history.solo": 0,
+    "action.window.render.open": 0,
+    "action.window.render.close": 0,
+    "action.window.render.fold": 0,
+    "action.window.render.float": 0,
+    "action.window.render.side": 0,
+    "action.window.render.reset": 0,
+    "action.window.render.solo": 0,
+    "action.window.nodes.open": 0,
+    "action.window.nodes.close": 0,
+    "action.window.nodes.fold": 0,
+    "action.window.nodes.float": 0,
+    "action.window.nodes.side": 0,
+    "action.window.nodes.reset": 0,
+    "action.window.nodes.solo": 0,
+    "action.window.projects.open": 0,
+    "action.window.projects.close": 0,
+    "action.window.projects.fold": 0,
+    "action.window.projects.float": 0,
+    "action.window.projects.side": 0,
+    "action.window.projects.reset": 0,
+    "action.window.projects.solo": 0
+   }
+  }
+ },
+ "notebook": {
+  "title": "MOL 1 H2O ESP",
+  "subtitle": "",
+  "text": ""
+ }
+}
