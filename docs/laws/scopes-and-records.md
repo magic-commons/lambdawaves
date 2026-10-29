@@ -16,7 +16,8 @@ FOLDERS IS THE PROJECTS HOME (iteration 004, BASINS-shaped, `lab/projects.js`): 
 `tests/fixtures/retired-demos/`; Josh's new demos will be made on the timeline and the molecules). A reader's entry seeded from WAVE DANCER is
 refreshed AND renamed in place (`seed()` renames a seeded entry once it carries its starter's revision — the kit's refresh keeps a name); an entry
 seeded from a deleted demo stays the reader's, opens from their store (the DEMOS press finds it by seedId) and is never re-seeded
-(`tests/molecule-demos.browser-test.mjs`, re-aimed). The DEMOS wear their covers (a 4:3 middle of
+(`tests/molecule-demos.browser-test.mjs`, re-aimed). ITERATION 026 adds three conducted demos after it — STAR LOOP, BENZENE π, WATER ESP
+(`docs/conductor/`) — and `demos/` is a sw.js DATA root (never precached; the boot's seed stores each demo in FOLDERS once per browser). The DEMOS wear their covers (a 4:3 middle of
 `lab/demos/covers`, refreshed in place once by the starters' `·cover` revision; only a starter being added or refreshed fetches one),
 folder cards the kit's `folder` glyph, RESTORE THE DEMOS in the foot, the toolbar SAVE · PROJECT · DUPLICATE · NEW, ⓘ the RENDER card's
 SUBJECT, a save also its modulation preset in CAPS (a rack with routes). Its doors: O, WINDOW › FOLDERS, the notebook's ▤, FILE (NEW,
