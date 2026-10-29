@@ -56,7 +56,7 @@ export const FOOT = [{ k: 'fade', label: 'FADE', min: 0, max: 1, home: 1, hint: 
   { k: 'mask', label: 'MASK', home: 'none', options: ['none', 'lights', 'darks', 'mids', 'centre', 'edges'].map((id) => ({ id, label: id.toUpperCase() })) },
   { k: 'soft', label: 'SOFT', min: 0, max: 1, home: 0.5, hint: 'the mask\'s edge: 0 hard, 1 a long ramp' }];
 /** homeOf(T) → a new node's values.  A type with no `neutral` of its own is neutral with every knob at home (the compiler reads `neutral`) */
-export const homeOf = (T) => Object.fromEntries((T.cls && T.cls !== 'layer' ? [...T.knobs, ...FOOT] : T.knobs).map((K) => [K.k, Array.isArray(K.home) ? K.home.slice() : K.home]));
+export const homeOf = (T) => Object.fromEntries((T.cls && T.cls !== 'layer' && T.cls !== 'shader' ? [...T.knobs, ...FOOT] : T.knobs).map((K) => [K.k, Array.isArray(K.home) ? K.home.slice() : K.home]));
 for (const T of [...Object.values(TABLE_TYPES), ...Object.values(MATRIX_TYPES)]) if (!T.neutral) T.neutral = (v) => T.knobs.every((K) => v[K.k] === K.home);
 
 /** THE NODE FACTORY: the knob list of type T as MIR controls in `parent` */

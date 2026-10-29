@@ -40,18 +40,19 @@ const PAINT = {
   scanlines: (s, v) => { const p = Math.max(2, Math.round(v.pitch)); s.backgroundImage = `repeating-linear-gradient(to bottom, #000 0 ${p / 2}px, #fff ${p / 2}px ${p}px)`; s.mixBlendMode = 'multiply'; },
 };
 
-export function createLayerHost(stage) {
+export function createLayerHost(stage, gpu = null) {   // 024 S2: a `gpu` layer (a SHADER node) is the canvas of `gpu`, lab/node-shader.js
   let host = null; const divs = new Map();
   return {
     set(layers) {
       if (!host && !layers.length) return;
       if (!host) { host = document.createElement('div'); host.id = 'nodeLayers'; host.setAttribute('aria-hidden', 'true'); const sk = stage.querySelector('#skeleton'); stage.insertBefore(host, sk ? sk.nextSibling : stage.firstChild); }
       const live = new Set(layers.map((l) => l.id));
-      for (const [id, d] of divs) if (!live.has(id)) { d.remove(); divs.delete(id); }
+      for (const [id, d] of divs) if (!live.has(id)) { d.remove(); if (gpu) gpu.drop(d); divs.delete(id); }
       layers.forEach((l, i) => {
         let d = divs.get(l.id);
-        if (!d || d.dataset.type !== l.type) { if (d) d.remove(); d = document.createElement('div'); d.className = 'node-layer'; d.dataset.type = l.type; divs.set(l.id, d); }
+        if (!d || d.dataset.type !== l.type) { if (d) { d.remove(); if (gpu) gpu.drop(d); } d = l.gpu && gpu ? gpu.make(l) : document.createElement('div'); d.className = 'node-layer'; d.dataset.type = l.type; divs.set(l.id, d); }
         if (host.children[i] !== d) host.insertBefore(d, host.children[i] || null);   // graph order: a later layer over an earlier one (moved only when it is not there)
+        if (l.gpu) { if (gpu) gpu.paint(d, l); return; }
         const s = d.style, { amount, ...look } = l.values, key = JSON.stringify(look);
         if (s.opacity !== String(amount)) s.opacity = String(amount);    // a modulated AMOUNT writes one number
         if (d.dataset.key !== key) { d.dataset.key = key; PAINT[l.type](s, l.values); }

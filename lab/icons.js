@@ -127,6 +127,12 @@ export const ICONS = {
     '<circle cx="6" cy="8" r="1"/><circle cx="11" cy="10.5" r="1"/><circle cx="3" cy="12" r="1"/><circle cx="8" cy="13.5" r="1"/><circle cx="13.5" cy="13.5" r="1"/></g>',
   nodeVignette: n16('<rect x="1.5" y="3" width="13" height="10" rx="1"/><ellipse cx="8" cy="8" rx="4" ry="2.8"/>'),
   nodeScanlines: n16('<path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/>'),
+  /* 024 S: the SHADER class (a scatter of dots piling into a fold) and DECOHERE (a line, decohering into the scatter) */
+  nodeShader: '<g transform="scale(1.5)" fill="currentColor"><circle cx="2" cy="13.5" r=".8"/><circle cx="4.5" cy="11.2" r=".8"/><circle cx="6.6" cy="9.4" r=".8"/>' +
+    '<circle cx="8.4" cy="8" r=".8"/><circle cx="10" cy="7" r=".8"/><circle cx="11.4" cy="6.3" r=".8"/><circle cx="12.7" cy="5.8" r=".8"/><circle cx="14" cy="5.5" r=".8"/>' +
+    '<circle cx="3" cy="4" r=".8"/><circle cx="7" cy="3" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="8" cy="13.5" r=".8"/></g>',
+  nodeDecohere: n16('<path d="M1.5 3.5h13"/>') + '<g transform="scale(1.5)" fill="currentColor"><circle cx="2.5" cy="7" r=".8"/><circle cx="6" cy="8" r=".8"/>' +
+    '<circle cx="9.5" cy="7.5" r=".8"/><circle cx="13.5" cy="8.5" r=".8"/><circle cx="4" cy="11" r=".8"/><circle cx="8" cy="12.5" r=".8"/><circle cx="12" cy="13.5" r=".8"/><circle cx="14.5" cy="11.5" r=".8"/></g>',
 };
 /** a NODES type's glyph name ('grain' → 'nodeGrain') */
 export const nodeGlyph = (type) => 'node' + type[0].toUpperCase() + type.slice(1);

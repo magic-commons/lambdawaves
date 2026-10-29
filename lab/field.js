@@ -1395,7 +1395,7 @@ export async function createField(canvas, opts = {}) {
   const cssP3 = !!(window.CSS && CSS.supports && CSS.supports('color', 'color(display-p3 1 0 0)'));
   const displayP3 = !!(window.matchMedia && matchMedia('(color-gamut: p3)').matches);
   const GAMUT_WHY = 'Display P3 is unavailable on this canvas';
-  let lastLUT = null, palSpan = 255;   // palSpan (iteration 015 W2): the palette's first and last stop as LUT indices, first · 512 + last — ESP reads the palette between them
+  let lastLUT = null, palSpan = 255, palN = 0;   // palSpan (iteration 015 W2): the palette's first and last stop as LUT indices, first · 512 + last — ESP reads the palette between them
   /** the palette reaches the GPU through the gamut, so the field and the interface can never disagree */
   function uploadPalette() {
     if (!lastLUT) return;
@@ -1999,10 +1999,27 @@ export async function createField(canvas, opts = {}) {
     }
     const w = canvas.width, h = canvas.height;
     encodeEsp(enc, mat);                                          // iteration 014 B3: φ, after the volume it reads and before the present that reads it
-    if (w > 0 && h > 0) { encodeRender(enc, ctx.getCurrentTexture().createView(), obs, mat, w, h); stats.presents++; }
+    let tapped = false;
+    if (w > 0 && h > 0) { const cur = ctx.getCurrentTexture(); encodeRender(enc, cur.createView(), obs, mat, w, h); stats.presents++; if (tapFn) tapped = tapCopy(enc, cur, w, h); }
     device.queue.submit([enc.finish()]); espDone();
+    if (tapped) tapFn(tapTex, w, h);
     { inFlight++; const ts = performance.now(); device.queue.onSubmittedWorkDone().then(() => { inFlight--; queueMs = performance.now() - ts; }, landed); }
     stats.lastEncodeMs = performance.now() - t0;
+  }
+
+  /* ── THE TAP (024 S1): `tap(fn | null)` — while set, the canvas carries COPY_SRC and frame() copies the presented texture into one kept
+     texture (same format, TEXTURE_BINDING) in the SAME submit, then calls fn(texture, w, h).  A reader on the device (lab/node-shader.js)
+     draws from it; no WGSL, no pixel and no readback changes (readPixels renders its own texture).  Null clears it and frees the copy. */
+  let tapFn = null, tapTex = null;
+  const canvasUsage = () => GPUTextureUsage.RENDER_ATTACHMENT | (tapFn ? GPUTextureUsage.COPY_SRC : 0);
+  function tapCopy(enc, cur, w, h) {
+    if (!tapTex || tapTex.width !== w || tapTex.height !== h) { if (tapTex) tapTex.destroy(); tapTex = device.createTexture({ size: [w, h], format, usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST }); }
+    enc.copyTextureToTexture({ texture: cur }, { texture: tapTex }, [w, h]); return true;
+  }
+  function tap(fn) {
+    const f = typeof fn === 'function' ? fn : null, flip = !!f !== !!tapFn; tapFn = f;
+    if (flip) ctx.configure({ device, format, alphaMode: 'opaque', usage: canvasUsage(), ...(gamut !== 'srgb' && { colorSpace: 'display-p3' }) });
+    if (!f && tapTex) { tapTex.destroy(); tapTex = null; }
   }
 
   /* ── readbacks (tests and diagnostics; never on the frame path) ───────── */
@@ -2361,7 +2378,7 @@ export async function createField(canvas, opts = {}) {
     moleculeTiers: { get: () => ({ granted: device.limits.maxComputeWorkgroupStorageSize, caps: MOL_CAPS, wg: molWg, orbitalFrom: MOL_ORB_FROM }), enumerable: true } });
   Object.assign(out, {
     ok: !b.lost, device, adapter, format, stats,
-    frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, errorField, lineColors, linePixels,
+    frame, tap, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, errorField, lineColors, linePixels,
     setResolution, setMolecule, setMoleculeMatrix, reconstructMolecule, moleculeThroughput,
     /** iteration 014 B: the atoms BALLS · STICKS · ESP draw ([{ Z, x, y, z }] in bohr, or null) and the molecule's charge; a volume's φ grid
      *  ({ n, half, data: Float32Array(n³) }, cell centres, x fastest — volumes-format.js espGrid) or null for the Poisson pass; φ's state */
@@ -2400,8 +2417,10 @@ export async function createField(canvas, opts = {}) {
     /** 0.6.0 B1: the equalizer's table (lab/equalizer.js `table()`), or null: FLAT, the locked kernel.  Position hydrogen only;
      *  read on the next reconstruct, which the caller asks for. */
     setEqualizer(t) { eqTable = t && t.gamma ? t : null; },
+    /** 024 S3: the palette as set (the 256×RGBA LUT, its span first · 512 + last, a count of sets) — a SHADER node's PALETTE reads it */
+    paletteLUT() { return { lut: lastLUT, span: palSpan, n: palN }; },
     /** upload a 256×RGBA phase palette (Float32Array(1024), values 0..1) — an OBSERVER product: ψ is untouched */
-    setPalette(lut, span) { lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); if (span) palSpan = Math.round(span[0] * 256) * 512 + Math.min(255, Math.round(span[1] * 256)); uploadPalette(); },
+    setPalette(lut, span) { palN++; lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); if (span) palSpan = Math.round(span[0] * 256) * 512 + Math.min(255, Math.round(span[1] * 256)); uploadPalette(); },
     /* ── THE GAMUT (wave 54) ────────────────────────────────────────────────────────────────────────────────
      * `support` is measured, never assumed: `canvas` is the WebIDL getter probe above, `css` asks the engine
      * whether it parses color(display-p3 …), and `display` is the media query — with the caveat that Firefox
@@ -2416,7 +2435,7 @@ export async function createField(canvas, opts = {}) {
       if (want !== 'srgb' && !(canvasP3 && cssP3)) return gamut;          // never a state where the DOM is P3 and the canvas is not
       if (want === gamut) return gamut;
       gamut = want;
-      try { ctx.configure(want === 'srgb' ? { device, format, alphaMode: 'opaque' } : { device, format, alphaMode: 'opaque', colorSpace: 'display-p3' }); } catch (_) { gamut = 'srgb'; ctx.configure({ device, format, alphaMode: 'opaque' }); }
+      try { ctx.configure(want === 'srgb' ? { device, format, alphaMode: 'opaque', usage: canvasUsage() } : { device, format, alphaMode: 'opaque', usage: canvasUsage(), colorSpace: 'display-p3' }); } catch (_) { gamut = 'srgb'; ctx.configure({ device, format, alphaMode: 'opaque', usage: canvasUsage() }); }
       uploadPalette();
       return gamut;
     },

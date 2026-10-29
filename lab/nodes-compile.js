@@ -6,6 +6,7 @@
  *   MATRIX     a 4 × 5 colour matrix; contiguous MATRIX nodes fold into ONE feColorMatrix (multiplied in graph order)
  *   PRIMITIVE  its own SVG primitives, in graph order: a primitive between two folds starts a new fold
  *   LAYER      not a filter primitive at all: a layer over the stage (lab/node-layers.js), listed in graph order
+ *   SHADER     (024 S) a GPU pass over the field's picture in its own canvas (lab/node-shader.js): a LAYER for order (no FADE, no MASK), `gpu`
  * THE ORDER LAW: a TABLE after a MATRIX (or a MATRIX after a TABLE) starts a new run — they do not commute.  A `luma` TABLE node (THRESHOLD)
  * reads luminance: the compiler puts the Rec. 709 luma matrix before it (folded into a MATRIX run that ends just there).
  * A NEUTRAL NODE COSTS NOTHING: a bypassed node, or one whose type says it is at home (`neutral`), emits nothing; a matrix run that
@@ -58,8 +59,10 @@ export function tableOf(fns, n = TABLE_N) {
 
 const S = (a) => Array.from(a, (x) => +(+x).toFixed(4)).join(' ');
 const smooth = (e0, e1, x) => { const t = clamp01((x - e0) / (e1 - e0)); return t * t * (3 - 2 * t); };
-export const fadeOf = (q, T) => (T.cls === 'layer' || !Number.isFinite(+q.values.fade) ? 1 : clamp01(+q.values.fade));
-const maskOf = (q, T) => (T.cls === 'layer' ? 'none' : q.values.mask || 'none');
+/** over(T): a LAYER or a SHADER — over the stage, in `layers`, without FADE or MASK */
+export const over = (T) => T.cls === 'layer' || T.cls === 'shader';
+export const fadeOf = (q, T) => (over(T) || !Number.isFinite(+q.values.fade) ? 1 : clamp01(+q.values.fade));
+const maskOf = (q, T) => (over(T) ? 'none' : q.values.mask || 'none');
 /** ownRun(q, T): the node is a run of its own — masked, or a faded PRIMITIVE or luma TABLE (whose fade is a composite, not a fold) */
 export const ownRun = (q, T) => maskOf(q, T) !== 'none' || (fadeOf(q, T) < 1 && (T.cls === 'prim' || !!T.luma));
 /** weight(kind, x, soft) → 0..1: where a mask lets the node through — x the luma (lights · darks · mids) or the distance from the centre */
@@ -106,11 +109,11 @@ export function compile(list, TYPES, cache = new Map(), o = {}) {
     const T = TYPES[q.type];
     if (!T || q.bypass || (T.neutral && T.neutral(q.values, q)) || fadeOf(q, T) === 0) continue;
     const a = fadeOf(q, T);
-    if (T.cls !== 'layer' && ownRun(q, T)) { close(); const k = 'o' + q.id + ':' + q.v; keep.set(k, cache.get(k) || { prim: own(q, T) }); runs.push(keep.get(k)); }
+    if (!over(T) && ownRun(q, T)) { close(); const k = 'o' + q.id + ':' + q.v; keep.set(k, cache.get(k) || { prim: own(q, T) }); runs.push(keep.get(k)); }
     else if (T.cls === 'table') { if (T.luma) matrix(LUMA); (tab || (tab = [])).push(q); }
     else if (T.cls === 'matrix') { const m = T.matrix(q.values); matrix(a < 1 ? m.map((x, i) => a * x + (1 - a) * IDENTITY[i]) : m); }
     else if (T.cls === 'prim') { close(); runs.push({ prim: T.prim(q.values, q.id) }); }
-    else if (T.cls === 'layer') layers.push({ id: q.id, type: q.type, values: q.values });
+    else if (over(T)) layers.push({ id: q.id, type: q.type, values: q.values, ...(T.cls === 'shader' && { gpu: true }) });
   }
   close();
   cache.clear(); for (const [k, t] of keep) cache.set(k, t);

@@ -891,7 +891,7 @@ export async function boot(dom) {
      and the rack card `nodes`, seated where CURVES was (after RENDER, closed; a saved layout's `curves` seat opens `nodes`: settings.js RETIRED_WINDOWS).
      The grade is still the kit's curves panel over the stage canvas (the SCREEN only, never a picture or a film), PREFERENCE `lambdawaves.q0.curves`;
      `__LW.curves` is its model, `__LW.nodes` the graph. */
-  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod, onWin: () => app.sh.ACTIONS.notify('nodes') });
+  { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod, field, mat, present: () => schedule(TIER.PRESENT), onWin: () => app.sh.ACTIONS.notify('nodes') });   // 024 S2: field · mat · present for a SHADER node
     LW.curves = N.model; LW.nodes = N; }
   // FOLDERS — the FOLDERS card (`projects`), the kit's mountGallery (021 G3: lab/windows/folders.js)
   createFolders(app);
