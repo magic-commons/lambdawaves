@@ -673,6 +673,7 @@
   "PRESET NAME": "PRESET NAME",
   "PRESET — a curve to start from": "PRESET — a curve to start from",
   "PRESETS": "PRESETS",
+  "PREVIEW": "PREVIEW",
   "PREVIEW FIRST 3 SECONDS": "PREVIEW FIRST 3 SECONDS",
   "PREVIOUS BAR": "PREVIOUS BAR",
   "PROJECT": "PROJECT",
@@ -692,6 +693,7 @@
   "Point value": "Point value",
   "Preset name — type one, then tap {:SAVE}": "Preset name — type one, then tap {:SAVE}",
   "Preview ready": "Preview ready",
+  "Preview the first 3 seconds": "Preview the first 3 seconds",
   "Previous page": "Previous page",
   "Previous preset": "Previous preset",
   "Previous project page": "Previous project page",
@@ -756,6 +758,7 @@
   "Ramp preset": "Ramp preset",
   "Ramp strip — click to add a stop": "Ramp strip — click to add a stop",
   "Recording cancelled": "Recording cancelled",
+  "Recording range": "Recording range",
   "Rectangle-select clips or points": "Rectangle-select clips or points",
   "Redo": "Redo",
   "Reload the chosen preset": "Reload the chosen preset",
@@ -1076,7 +1079,6 @@
   "VIVID": "VIVID",
   "WALL": "WALL",
   "WAV": "WAV",
-  "WAV 48 k": "WAV 48 k",
   "WAVE": "WAVE",
   "WHEEL": "WHEEL",
   "WHITE": "WHITE",
@@ -3757,6 +3759,9 @@
   "PRESETS": [
    "mir/modulation/modwindow/modwindow.js"
   ],
+  "PREVIEW": [
+   "mir/render/panel.js"
+  ],
   "PREVIEW FIRST 3 SECONDS": [
    "mir/render/panel.js"
   ],
@@ -3812,6 +3817,9 @@
    "mir/modulation/modwindow/modwindow.js"
   ],
   "Preview ready": [
+   "mir/render/panel.js"
+  ],
+  "Preview the first 3 seconds": [
    "mir/render/panel.js"
   ],
   "Previous page": [
@@ -4012,6 +4020,9 @@
   ],
   "Recording cancelled": [
    "mir/keyboard/keyboard.js"
+  ],
+  "Recording range": [
+   "mir/render/panel.js"
   ],
   "Rectangle-select clips or points": [
    "mir/timeline/shortcuts.js"
@@ -4991,9 +5002,6 @@
   ],
   "WAV": [
    "mir/render/recorder.js"
-  ],
-  "WAV 48 k": [
-   "mir/render/panel.js"
   ],
   "WAVE": [
    "mir/modulation/modwindow/modwindow.js"

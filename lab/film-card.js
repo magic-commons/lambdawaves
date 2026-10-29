@@ -13,7 +13,7 @@ import { createRenderCard } from './mir/render/panel.js';
 import { fmtBytes } from './mir/render/plan.js';
 import { VIEW_NAMES } from './field.js';
 import { registerClipKind } from './mir/timeline/kinds.js';
-import { el, label, trig, svgNode, select } from './mir/kit.js';
+import { el, label, trig, svgNode, sw } from './mir/kit.js';
 import { handOver } from './capture.js';
 import { fold } from './fold.js';
 
@@ -35,6 +35,8 @@ function subjectOf(here) {
     json: (e) => ({ name: (e ? e.name : 'this-view').replace(/[\\/:*?"<>|]+/g, ' ') + '.facts.json', body: { name: e ? e.name : 'THIS VIEW', ...Object.fromEntries(facts(e)) } }) };
 }
 const ls = { get: (k) => { try { return localStorage.getItem(PREFIX + k); } catch (_) { return null; } }, set: (k, v) => { try { localStorage.setItem(PREFIX + k, v); } catch (_) { /* refused */ } } };
+/* the placed ONE PERIOD (an unmuted `lw-period` clip), if any */
+const periodOf = (ed) => { const d = ed && ed.model && ed.model.state(); return d ? d.clips.find((c) => !c.mute && (d.curves.find((x) => x.id === c.curveId) || {}).kind === 'lw-period') || null : null; };
 registerClipKind('lw-period', { drives: false, value: () => null, validate: (c) => Number.isFinite(c.t0) && c.T > 0 && c.seconds > 0,
   duration: (c, bpm) => c.seconds * bpm / 60, paint: (svg, c, clip, { geometry, height }) => svgNode('rect', { class: 'tl-pattern-group', x: 0, y: 0, width: geometry.width, height }, svg) });
 
@@ -60,7 +62,12 @@ export function createFilmCard(o) {
       return res;
     });
   };
-  made = createRenderCard({ id: 'render', recorder, loadingMark: false, prefix: PREFIX, defaults: { fps: 30, motion: 'still' }, say,
+  /* 025 C3 · THE EVEN ROWS (MIR 1.5.6-alpha.17 `even`): RANGE · FORMAT, SIZE · FPS · AUDIO, LENGTH · START AT, the switches, the estimate,
+     RENDER · PREVIEW · CANCEL — each one row; PERIOD is λWAVES' RANGE: TIMELINE · ACTIVE over the placed ONE PERIOD (placed now if there is none) */
+  const onPeriod = () => { const ed = o.editor(), P = periodOf(ed), a = ed && ed.activeRange ? ed.activeRange() : null; return !!(P && a && a.start === P.start && a.end === P.start + P.duration); };
+  const period = { id: 'period', label: 'PERIOD', title: 'ONE PERIOD — TIMELINE · ACTIVE over the placed ONE PERIOD (placed now when there is none), the modulation OFF', motion: 'timeline-active', is: onPeriod,
+    pick() { const ed = o.editor(), P = periodOf(ed); if (!P) return place(); ed.setActiveRange({ start: P.start, end: P.start + P.duration }); set(C.modSelect, 'off'); set(C.motion, 'timeline-active'); return P.id; } };
+  made = createRenderCard({ id: 'render', recorder, loadingMark: false, prefix: PREFIX, defaults: { fps: 30, motion: 'still' }, say, even: true, ranges: [period],
     ...(o.files ? { files: o.files } : {}), ...(o.gallery && o.here ? { gallery: o.gallery, subject: subjectOf(o.here) } : {}),
     save: (blob, name) => handOver(blob, film.nameFor(name)),
     picture: { formats: SCALES.map((s) => ({ id: s, label: '×' + s })), format: () => scale, setFormat: (v) => { scale = v; ls.set('scale', v); },
@@ -72,12 +79,10 @@ export function createFilmCard(o) {
       s.append(trig({ label: 'PLAN', cls: 'sv-act sv-wide', onFire: () => plan() }).root, trig({ label: 'PLACE ONE PERIOD', cls: 'sv-act sv-wide', onFire: () => place() }).root);
     } });
   const { card, view } = made, C = view.controls, set = (f, v) => { f.value = v; f.dispatchEvent(new Event('change')); };
-  const lwRow = (key, text, aria, items, value, after) => {
-    const r = el('div', 'sr-row'); label(el('span', 'sr-label', r), text); after.closest('.sr-row').after(r);
-    const c = select({ aria, items, value, onChange: (v) => ls.set(key, v) }); c.root.classList.add('sr-sel'); c.root.dataset.field = key; r.appendChild(c.root); return c;
-  };
-  C.nodesSelect = lwRow('nodes', 'nodes', 'Recording NODES graph', [{ id: 'on', label: 'ON · THE SCREEN’S GRAPH' }, { id: 'off', label: 'OFF · THE FIELD ALONE' }], nodesOn() ? 'on' : 'off', C.audioSelect);
-  C.chromeSelect = lwRow('chrome', 'chrome', 'Recording stage words', [{ id: 'labels', label: 'LABELS · ATOMS AND ESP BAR' }, { id: 'off', label: 'OFF · THE PICTURE ALONE' }], chrome(), C.nodesSelect.root);
+  /* NODES and CHROME: λWAVES' switches in the kit's switch seat, beside MODULATION · TIMELINE (stored as before: on|off, labels|off) */
+  const lwSw = (key, text, tip, on, [yes, no]) => { const s = sw({ label: text, title: tip, lamp: false, value: on, onChange: (v) => ls.set(key, v ? yes : no) }); s.root.dataset.field = key; C.switches.appendChild(s.root); return s; };
+  C.nodesSw = lwSw('nodes', 'NODES', 'ON · the screen’s NODES graph baked into each frame · OFF · the field alone', nodesOn(), ['on', 'off']);
+  C.chromeSw = lwSw('chrome', 'CHROME', 'ON · the ATOM LABELS and the ESP BAR on the frame · OFF · the picture alone', chrome() === 'labels', ['labels', 'off']);
   /* 017 R4 (call 14) · THE SELF-TEST'S PRINTOUT IS A FOLD, not a scroller in a rack window: its last six lines show, and the fold above them opens
      the earlier ones (the card grows; only the rack scrolls).  The kit writes the whole printout into `C.lines`; the split is the app's. */
   if (C.lines) {
@@ -92,7 +97,6 @@ export function createFilmCard(o) {
   /* 025 C1 · THE RANGE FROM WHAT YOU HAVE (FILE › RENDER…, EXPORT FRAMES…, the TIMELINE's door): a timeline selection → SELECTION; the TIMELINE
      open with clips → ACTIVE (over every clip when no range is marked); a placed ONE PERIOD → PERIOD (the ACTIVE range over it, the modulation
      OFF, as PLACE ONE PERIOD leaves it); else STILL.  `format` 'png' is EXPORT FRAMES…; `range: 'timeline'` (the door) is SELECTION, else ACTIVE */
-  const periodOf = (ed) => { const d = ed && ed.model && ed.model.state(); return d ? d.clips.find((c) => !c.mute && (d.curves.find((x) => x.id === c.curveId) || {}).kind === 'lw-period') || null : null; };
   function preset({ format, range } = {}) {
     const ed = o.editor(), r = ed && ed.range ? ed.range() : null, sel = !!(r && r.end > r.start), d = ed && ed.model ? ed.model.state() : null;
     const end = d ? Math.max(0, ...d.clips.map((c) => c.start + c.duration)) : 0, P = periodOf(ed), open = !!(o.isOpen && o.isOpen());
