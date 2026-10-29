@@ -45,7 +45,7 @@ import { motionPolicy, motionToken } from '../core/motion.js';
 import { drag } from '../core/pointer.js';
 import { setVar, setAttr, rect } from '../core/perf.js';
 import { leader, comb, toPath } from './leader.js';
-import { createBody, createRunner, resolveRests, PHYS } from './bodies.js';
+import { createBody, createRunner, resolveRests, snap, PHYS } from './bodies.js';
 import { chooseSeat } from './seats.js';
 import { renderNotebook } from '../shell/notebook-render.js';
 import { loadRenderer } from '../shell/notebook.js';
@@ -674,7 +674,7 @@ export function createInfoLayer({ stage, host = stage.parentElement, subject = n
   win.addEventListener('scroll', () => { stageBox = null; }, { ...on, capture: true });
   /* a face that arrives late (KaTeX's, or the real serif one day) changes every size: measure again, then glide */
   if (doc.fonts) doc.fonts.addEventListener('loadingdone', () => { for (const it of items) if (it.measured) queueMeasure(it, false); }, { signal: life.signal });
-  let userFrozen = false;
+  let userFrozen = false, landing = false;
   function applyFreeze() {
     const f = userFrozen || held;
     if (f === frozen) return;
@@ -751,14 +751,18 @@ export function createInfoLayer({ stage, host = stage.parentElement, subject = n
     freeze(v) { userFrozen = !!v; applyFreeze(); },
     /** hold(on) — hold-still, as the key does while it is held (infoActions) */
     hold(v) { if (!!v !== held) hold(!!v); },
-    /** viewChanged() — the picture moved: anchors and subject are read again and the labels follow on the spring */
-    viewChanged() {
+    /** viewChanged() — the picture moved: anchors and subject are read again and the labels follow on the spring.
+     *  viewChanged({ land: true }) (1.5.6-alpha.11, λWAVES 023 R7) — the app re-seated the layer (its furniture or its seat changed, not the
+     *  picture): every body lands on its rest at once, held or not, with no flight */
+    viewChanged({ land = false } = {}) {
       if (destroyed) return;
+      if (land) landing = true;
       if (pendingView) return; pendingView = true;
       frame.read(() => {
         pendingView = false; if (destroyed) return;
         readStage(); computeRests();
-        if (frozen || motionPolicy() !== 'full') { if (!frozen) for (const b of bodies()) { b.x = b.rx; b.y = b.ry; } frame.write(paint); }
+        if (landing) { landing = false; runner.stop(); snap(bodies()); frame.write(paint); }
+        else if (frozen || motionPolicy() !== 'full') { if (!frozen) for (const b of bodies()) { b.x = b.rx; b.y = b.ry; } frame.write(paint); }
         else { kick(); frame.write(paint); }
       });
     },

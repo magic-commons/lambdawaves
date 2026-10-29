@@ -47,7 +47,7 @@ export function reworkNative({ ui, mat, repaint }) {
   ui.axisModeSeg=enumControl(ui.axisSw,'AXES',['box','corner','off'],()=>mat.axis===false?'off':mat.axisMode||'box',v=>{mat.axis=v!=='off';if(v!=='off')mat.axisMode=v;ui.axisSw.set(mat.axis);repaint();ui.saveNative();});
   // A binary, deliberately stubborn switch: an unsupported canvas cannot claim P3.
   const gamut=ui.gamutSeg;
-  const p3=sw({label:'DISPLAY P3',value:gamut.get()==='p3',title:gamut.button('p3').title,
+  const p3=sw({label:'P3',value:gamut.get()==='p3',title:gamut.button('p3').title,
     onChange:on=>{const target=gamut.button(on?'p3':'srgb');if(!target.disabled)target.click();p3.set(gamut.get()==='p3');}});
   gamut.root.replaceWith(p3.root);
   const setGamut=gamut.set;gamut.set=v=>{setGamut(v);p3.set(v==='p3');};
@@ -59,7 +59,7 @@ export function reworkNative({ ui, mat, repaint }) {
   const viewport=el('div','settings-viewport',settings),pages={};
   for(const id of ['display','quality']){pages[id]=el('div','settings-page',viewport);pages[id].hidden=id!=='display';}
   function row(page, names, cls=''){const r=el('div','row tight'+(cls?' '+cls:''),pages[page]);for(const name of names)if(ui[name]?.root)r.appendChild(ui[name].root);}
-  row('display',['capSw','audioSw']);ui.capSw.root.parentElement.classList.add('settings-status-grid');if(ui.askUrl)row('display',['askUrl']);row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK'],'fit lw-stage-row');row('display',['gamutToggle','p3Seg']);
+  row('display',['capSw','audioSw']);ui.capSw.root.parentElement.classList.add('settings-status-grid');if(ui.askUrl)row('display',['askUrl']);row('display',['frameModeSeg','axisModeSeg','axisInkSeg']);row('display',['stageSeat','stageK','gammaK'],'fit lw-stage-row');row('display',['gamutToggle','p3Seg'],'fit lw-gamut');
   const quality=ui.gridSeg.root.closest('.grp');if(quality)pages.quality.appendChild(quality);
   const actions=el('div','row tight settings-actions',pages.display);
   for(const g of oldGroups)for(const b of g.querySelectorAll(':scope > .row > .trig'))actions.appendChild(b);if(!actions.children.length)actions.remove();   // iteration 012 M1: WARNING left for ABOUT

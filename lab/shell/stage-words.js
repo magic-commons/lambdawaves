@@ -44,7 +44,7 @@ export const INFO_ROWS = Object.freeze([
   { key: 'infoPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'seat', label: 'PAD', fmt: pct, hint: 'Formula margin' },
   /* iteration 018 B7 (Josh: "Include ESP's bar with a padding setting and a toggle that just cycles between right (where it is now), left, top, and bottom.
      Stage text and formula is on top of the bar … Stage text takes priority"): the bar is painted by WAVE (material.js) and seated by these three */
-  { key: 'espBar', type: 'bool', default: true, group: 'bar', label: 'ESP BAR', hint: 'ESP colour bar, five values in a.u.' },
+  { key: 'espBar', type: 'bool', default: true, group: 'bar', label: 'ESP BAR', hint: 'ESP colour bar: φ, five values in a.u.' },
   { key: 'espBarSide', type: 'enum', values: ['right', 'left', 'top', 'bottom'], default: 'right', group: 'bar', label: 'SIDE', options: [{ id: 'right', label: 'RIGHT' }, { id: 'left', label: 'LEFT' }, { id: 'top', label: 'TOP' }, { id: 'bottom', label: 'BOTTOM' }], hint: 'ESP bar side: RIGHT → LEFT → TOP → BOTTOM' },
   { key: 'espBarPad', type: 'number', min: 0, max: 0.4, step: 0.01, default: 0, group: 'bar', label: 'PAD', fmt: pct, hint: 'ESP bar margin' },
   ...KINDS.filter((k) => k.hint).map((k) => ({ key: k.key, type: 'bool', default: false, group: 'announce', label: k.label, hint: k.hint })),
@@ -185,9 +185,11 @@ export function createStageWords(app) {
     /* 022 E1 · H HOLDS THE WORDS (020 S-BUILD Q3): with the whole interface out (`ui-hidden`) the racks and the bar are not drawn and the stage widens,
        so the words and the ESP bar keep the furniture's resting boxes AND the stage box they were last placed against — the picture under them
        may widen, the words do not move; H again places them on the live furniture */
+    /* 023 R6: the bar's box apart (`tr`), so a side ESP strip can be seated from the stage edge and its own rack only (`free(false)`) */
     let kept = null;
     const rest = () => { if (kept && document.body.classList.contains('ui-hidden')) return kept;
-      return (kept = { rs: [...racks(), app.sh.layout.docked ? null : document.getElementById('transport')].map(resting).filter(Boolean), sb: dom.stage.getBoundingClientRect() }); };
+      const tr = app.sh.layout.docked ? null : resting(document.getElementById('transport')), rs = racks().map(resting).filter(Boolean);
+      return (kept = { rs: tr ? [...rs, tr] : rs, racks: rs, sb: dom.stage.getBoundingClientRect() }); };
     function freeOf(rs, sb) {                                          // the kit's free() rule (info/layer.js), in stage px
       const m = INFO.margin, vw = innerWidth; let L = m, R = sb.width - m, T = m, B = sb.height - m;
       for (const r of rs) {
@@ -222,9 +224,13 @@ export function createStageWords(app) {
     /* the racks move sides or the interface goes (body classes), the transport docks or goes to the top: only THOSE (020 S5: a hide or a peek is not one)
        re-place the block — the play edge's frost-hold and the tablet's motion class are not a reason to read layout — and once more
        400 ms on, when the slide or the pill's dodge (a class first, then its arrival) has landed */
+    /* 023 R7 · THE WORDS ARE LIVE (Josh: "sticky … as if it's trying to figure out where the window is"): a re-seat LANDS (the kit's
+       viewChanged({ land: true }), 1.5.6-alpha.11) — at once, and even while the pointer's hold below keeps them from swaying; the spring's
+       ~1 s glide is the picture's, not the seat's — and the racks' furniture is WHICH racks hold an open window (racks()): a window opened,
+       closed, floated or docked back changes the free stage, so the key carries it and the racks are watched for it */
     let settle = 0;
-    const place = (again = true) => { stats.places++; layer.viewChanged(); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
-    const rackKey = () => ['rack-l', 'ui-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('');
+    const place = (again = true) => { stats.places++; layer.viewChanged({ land: true }); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
+    const rackKey = () => ['rack-l', 'ui-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('') + racks().map((r) => r.id).join();
     /* iteration 013 N2 (Josh: "When 'cursor' settings are off, the text should stay fixed and not sway"): the kit's layer parts its bodies from a
        moving pointer (mir/info/bodies.js, 260 px of reach) whatever follow and parallax say, so with PARALLAX and DRIFT off the layer is held by
        its own freeze while the pointer is within that reach of the block, and let go as it leaves (a rest that moved meanwhile is reached then);
@@ -238,7 +244,9 @@ export function createStageWords(app) {
     }, { passive: true });
     addEventListener('blur', () => still(false)); addEventListener('pointerout', (e) => { if (!e.relatedTarget) still(false); });
     let racksAt = rackKey();
-    new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    const furniture = new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); });
+    furniture.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    for (const r of [app.host.rackL, rack]) if (r) furniture.observe(r, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'hidden'] });
     { const n = document.getElementById('transport'); if (n) new MutationObserver(() => place()).observe(n, { attributes: true, attributeFilter: ['class'] }); }
 
     const labels = el('div', '', dom.stage); labels.id = 'atomLabels'; labels.setAttribute('aria-hidden', 'true'); labels.hidden = true;
@@ -311,8 +319,9 @@ export function createStageWords(app) {
       setScale(s) { layer.root.style.setProperty('--lw-stage-size', String(s)); stats.places++; layer.setPane(false); },
       /** the pop-ups' SIZE (× 15 px), apart from the formula's since iteration 007 */
       setPopScale(s) { pop.style.setProperty('--lw-pop-size', String(s)); },
-      /** the free stage (stage px { L, R, T, B, m }) and the formula block's rect in stage px or null: where the ESP bar may sit and what it yields to (018 B7) */
-      free: () => { const { rs, sb } = rest(), F = freeOf(rs, sb), now = dom.stage.getBoundingClientRect(), dx = sb.left - now.left, dy = sb.top - now.top;   // in today's stage px
+      /** the free stage (stage px { L, R, T, B, m }) and the formula block's rect in stage px or null: where the ESP bar may sit and what it yields to (018 B7);
+       *  free(false) leaves the bar out — the racks and the stage's edges only (023 R6: a LEFT or RIGHT strip never moves with the CSB) */
+      free: (bar = true) => { const k = rest(), sb = k.sb, F = freeOf(bar ? k.rs : k.racks, sb), now = dom.stage.getBoundingClientRect(), dx = sb.left - now.left, dy = sb.top - now.top;   // in today's stage px
         return { ...F, L: F.L + dx, R: F.R + dx, T: F.T + dy, B: F.B + dy }; },
       blockRect() { if (!on || !block) return null; const r = block.el.getBoundingClientRect(), sb = dom.stage.getBoundingClientRect();
         return r.width ? { left: r.left - sb.left, right: r.right - sb.left, top: r.top - sb.top, bottom: r.bottom - sb.top } : null; },

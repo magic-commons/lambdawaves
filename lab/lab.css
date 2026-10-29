@@ -870,11 +870,9 @@ body.lw-notice .mir-info.lw-stage, body.lw-notice #atomLabels, body.lw-notice #t
 .lw-espbar[hidden] { display: none; }
 .lw-espbar-ramp { position: absolute; left: 0; top: 0; bottom: 0; width: 12px; border-radius: 3px; box-shadow: 0 0 0 1px hsl(0 0% 50% / .35); }
 .lw-espbar-n { position: absolute; left: 18px; transform: translateY(-50%); white-space: nowrap; }
-.lw-espbar-u { position: absolute; left: 0; bottom: -18px; white-space: nowrap; opacity: .75; font-weight: 500; }
 .lw-espbar:is([data-side="top"], [data-side="bottom"]) { width: min(46vw, 320px); height: 30px; }
 .lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-ramp { bottom: auto; width: auto; right: 0; height: 12px; }
 .lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-n { top: 20px; transform: translateX(-50%); }
-.lw-espbar:is([data-side="top"], [data-side="bottom"]) .lw-espbar-u { left: calc(100% + 10px); top: 0; bottom: auto; }
 /* iteration 016 W8 · THE ACCENT B DOT (Josh's call 14): a rack window whose controls carry a modulation route (mod-port.js `routeDots`, `.lw-routed`)
    wears a 6 px ACCENT B dot; a greyed routed knob (016 V1) is thus still told of.  Since 017 R1 it sits INSIDE the title bar at the eyebrow's end
    (016 seated it just past the card's edge, where the scroll pill now floats — "strange diamonds under the pills"): the eyebrow's own padding

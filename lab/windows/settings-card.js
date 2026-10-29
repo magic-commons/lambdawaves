@@ -91,7 +91,7 @@ export function createSettingsCard(app) {
     const rg = el('div', 'row tight', gt);
     ui.gamutSeg = seg({ label: 'GAMUT', value: 'srgb', options: [
       { id: 'srgb', label: 'sRGB', title: 'Use the sRGB colour space' },
-      { id: 'p3', label: 'DISPLAY-P3', title: gamutOK ? 'The wider space, for the canvas and every accent' : gamutSup.reason }],
+      { id: 'p3', label: 'P3', title: gamutOK ? 'The wider space, for the canvas and every accent' : gamutSup.reason }],
       onChange: (v) => setGamut(v) });
     rg.appendChild(ui.gamutSeg.root);
     ui.p3Seg = seg({ label: 'IN P3', value: 'convert', options: [

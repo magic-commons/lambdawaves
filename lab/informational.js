@@ -36,7 +36,7 @@ export function createInformational(app) {
   /* iteration 012 R1 (Josh 10-20): the headings THE WORDS and ANNOUNCE · CURSOR · MARKS are hidden — the rows say what they are */
   const words = group(w.body, 'THE WORDS'); words.querySelector(':scope > .grp-lbl')?.remove();
   row(words, ['molFormula', 'molFormulaSize'], 'info-words');
-  row(words, ['molName', 'molSubtitle', 'listCap'], 'info-words info-bar');   // iteration 011 Q1: THE LIST CAP beside NAME — both say what the formula writes; 018 B9: SUBTITLE between
+  row(words, ['molName', 'molSubtitle', 'listCap'], 'info-words info-name');   // iteration 011 Q1: THE LIST CAP beside NAME — both say what the formula writes; 018 B9: SUBTITLE between
   row(words, ['atomLabels', 'atomLabelsSize'], 'info-words');
   row(words, ['skeleton', 'skeletonOpacity', 'skeletonSize'], 'info-words info-ball');   // iteration 011 Q1: its own row; 012 R1: BALL AND STICK, shorter, OPACITY between it and SIZE
   row(words, ['bondOrder', 'bondAromatic', 'bondIonic', 'bondHydrogen'], 'info-words info-bonds');   // iteration 014 D6: BALL AND STICK's BONDS, one row under it
@@ -62,6 +62,7 @@ export function createInformational(app) {
      N1 (Josh: "Shorten the buttons for position move pad knob to fit the expand window button so it's on the same row"): the chevron is the
      seat row's last cell, after POSITION and PAD — one row less */
   fold(seat, [announce, cols], { what: 'announcements, cursor and marks', open: !isPhone() });
+  seat.appendChild(ctl.infoPad.root);   // 023 R2: PAD in the knob column (over ESP BAR's PAD), the chevron in the button column (over the SIDE glyph)
   /* 0.5.4 P4 · STATUS (PLAN R8, Q12): lab/status.js' line for what owns the field — MOLECULES' kept one (per VIEW; its molecule-level line beneath), else the
      operator's — written by app.hooks.status on a landing, a VIEW or FLOW change, an owner or operator change, NEVER in a frame.  A tap: the MODEL sheet, its words. */
   /* iteration 011 Q1 (Josh 10-19: "a button that hides the extra status thingy"): the STATUS switch above it shows or hides the readout's row — the record's
