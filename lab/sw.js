@@ -33,7 +33,7 @@
 const PRECACHE = [
   ['./ab-patch.json',                                               '5dd0e71d78bf'],
   ['./absorb.js',                                                   '3b0857195bfa'],
-  ['./actions.js',                                                  'fad05827d082'],
+  ['./actions.js',                                                  'e51d24fc4da9'],
   ['./angular-nodes.js',                                            '945796c72ba8'],
   ['./ask.js',                                                      '6e716ccee7ea'],
   ['./atoms.js',                                                    'e132af19a5c8'],
@@ -401,7 +401,7 @@ const PRECACHE = [
   ['./shell/facade.js',                                             '9941b6cfefba'],
   ['./shell/history.js',                                            'b166d1dd1c91'],
   ['./shell/ink.js',                                                '0c1ee4622c6f'],
-  ['./shell/keys.js',                                               'd08bd3959587'],
+  ['./shell/keys.js',                                               '8c6525cc4b78'],
   ['./shell/links.js',                                              '8e3bc790dcd4'],
   ['./shell/modulation.js',                                         '74e5ed51e04f'],
   ['./shell/notebook.js',                                           '101538ba8521'],
