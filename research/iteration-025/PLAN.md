@@ -49,6 +49,6 @@ A → B → C; each merged with the recipe (`git merge --no-ff --no-commit`, `--
 ## CLOSED
 | chain | base | commit | note |
 |---|---|---|---|
-| A | | | |
+| A | e027c0f2 | | |
 | B | | | |
 | C | | | |
