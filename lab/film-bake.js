@@ -85,7 +85,7 @@ export function createBake(app) {
     /* 1b · THE LAYERS, in graph order, over the stage canvases */
     for (const l of c.layers) {
       if (!l.gpu) { paintLayer(g, l, w, h, k, i); continue; }
-      const s = N.shaders && await N.shaders.bake(l.values);
+      const s = N.shaders && await N.shaders.bake(l.values, i, l);   // 027 N4: a STATEFUL node steps once a frame, from black at frame 0
       if (!s || s.w !== w || s.h !== h) continue;
       const d = s.rgba; for (let p = 0; p < d.length; p += 4) { const a = d[p + 3]; if (a && a < 255) { d[p] = d[p] * 255 / a; d[p + 1] = d[p + 1] * 255 / a; d[p + 2] = d[p + 2] * 255 / a; } }
       const tmp = canvas(w, h); tmp.getContext('2d').putImageData(new ImageData(d, w, h), 0, 0);

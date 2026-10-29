@@ -133,6 +133,10 @@ export const ICONS = {
     '<circle cx="3" cy="4" r=".8"/><circle cx="7" cy="3" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="8" cy="13.5" r=".8"/></g>',
   nodeDecohere: n16('<path d="M1.5 3.5h13"/>') + '<g transform="scale(1.5)" fill="currentColor"><circle cx="2.5" cy="7" r=".8"/><circle cx="6" cy="8" r=".8"/>' +
     '<circle cx="9.5" cy="7.5" r=".8"/><circle cx="13.5" cy="8.5" r=".8"/><circle cx="4" cy="11" r=".8"/><circle cx="8" cy="12.5" r=".8"/><circle cx="12" cy="13.5" r=".8"/><circle cx="14.5" cy="11.5" r=".8"/></g>',
+  /* 027 N: FEEDBACK (a loop arrow trailing a tail) · REFRACT (a wave line over a lens arc) · FLOW (three streamlines) */
+  nodeFeedback: n16('<path d="M12.5 6.5A4 4 0 1 1 9.5 3"/><path d="M8 1.2 9.8 3 8 4.8"/><path d="M5.6 9.4 1.5 13.5" stroke-dasharray="1.6 1.7"/>'),
+  nodeRefract: n16('<path d="M1.5 4.5Q3.75 2.5 6 4.5T10.5 4.5T15 4.5"/><path d="M2 13Q8 7 14 13"/>'),
+  nodeFlow: n16('<path d="M1.5 4C5 2 9 6 14.5 4M1.5 8C5 6 9 10 14.5 8M1.5 12C5 10 9 14 14.5 12"/>'),
 };
 /** a NODES type's glyph name ('grain' → 'nodeGrain') */
 export const nodeGlyph = (type) => 'node' + type[0].toUpperCase() + type.slice(1);
