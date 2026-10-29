@@ -32,6 +32,8 @@ target; two lanes on one target never overlap. The conductor refuses the later o
 | `look.view` | `density phase real imag` or 0…3; a MOLECULES view by name | — | the observable |
 | `look.exposure` `softness` `iso` `grain` `knee` `gamma` `hue` `stage` | the knob's unit | — | the material targets (`material.*`; `stage` is the stage mix) |
 | `look.invert` | bool | — | INVERT |
+| `look.ground` | `[r, g, b]` 0…1 | — | the stage colour (`mat.stageCustom`) with STAGE at `look.stage` or 100 %: a film's own ground, not the theme's |
+| `look.frame`, `look.axis` | bool | — | the field's FRAME and AXIS lines (a PREFERENCE, set live; a music video wants them off) |
 | `look.slice` | `{ mode 0 off · 1 clip · 2 slab, axis 0 x · 1 y · 2 z, pos −1…1, thick 0.01…0.4 }` | — | CLIP |
 | `camera` | `{ yaw, pitch, dist (or zoom), fov, panx, pany (or pan: [x, y]), mode, autoRotate }` | `autoRotate false` | the pose (radians; dist 1.2…8; fov 0.25…1.2); a film refuses a moving camera, so AUTO-ROTATE is off unless asked |
 | `overlays.particles` | `{ on, count 20…600, trail 0…120 }` or bool | — | PARTICLES |
@@ -40,7 +42,7 @@ target; two lanes on one target never overlap. The conductor refuses the later o
 | `lanes` | see below | `[]` | automation lanes |
 | `triggers` | `[{ action, at: [beats] }]` | `[]` | an `action.<id>` pulse (0 → 1 for ⅛ beat → 0) at each beat: `preset.next`, `style`, `view`, `invert`, `reseed`, `chem.vibrate`, … |
 | `audio` | `{ file, offset, keep, bands }` | `keep true` | an audio-reactive arrangement, below |
-| `render` | `{ fps, size, format, nodes, chrome, range, audio }` | `{ 30, "1080p", "mp4", "on", "labels", [0, bars·meter], on when a KEEP clip exists }` | the RENDER card's fields; fps 24 · 30 · 48 · 60; size `current` · `1080p` · `1440p` · `2160p`; format `mp4` \| `png`; `range` [startBeat, endBeat] is TIMELINE · ACTIVE |
+| `render` | `{ fps, size, format, nodes, chrome, range, audio, caption }` | `{ 30, "1080p", "mp4", "on", "labels", [0, bars·meter], on when a KEEP clip exists }` | the RENDER card's fields; fps 24 · 30 · 48 · 60; size `current` · `1080p` · `1440p` · `2160p`; format `mp4` \| `png`; `range` [startBeat, endBeat] is TIMELINE · ACTIVE |
 
 ### A lane
 `{ "target": id, "points": [[beat, value, tension?], …], "shape": "linear" | "smooth" | "step", "span": [s, e], "repeat": N, "norm": false, "name": "…" }`
