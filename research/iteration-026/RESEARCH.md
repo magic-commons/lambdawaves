@@ -1,0 +1,35 @@
+# 026 RESEARCH — THE CONTROL SURFACES (Claude Sos, 2026-10-29; read from the DATABASE map and the tree at 98f71dc8)
+
+What a Claude can already drive in λWAVES without a pointer, where it lives, and the gaps the CONDUCTOR closes. file:line are at 98f71dc8.
+
+## 1. The project is the arrangement (lab/projects.js, lab/demos/wave-dancer.lambdawaves.json, tools/new-project.mjs)
+- A `.lambdawaves.json` = `{ lambdawaves:'project', version:1, path, name, notebook, data:{ experiment, presentation } }`. `experiment`: system, basis, `modes[]` (`{id:'h:n:l:m', re, im, muted, solo}`), preset, rate, window, damping. `presentation`: obs (yaw pitch dist fov mode quat shift), mat (view style exposure softness iso grain knee gamma hueShift paletteOn finish bow slice), domain, paletteId, palette{on, stops}, hamiltonian, instruments{chem{preset basis view orbital method on …}, states, particles}, rates, rotationRates, modulation{macros sources routes transport{bpm} v}, **timeline** (the kit's doc, `presentation.timeline`, absent in WAVE DANCER — it predates the timeline), overlays, ab{a,b,omega,on}, ui.stage, modulationBases.
+- Doors: `__LW.projects.importText(text) → path`, `.open(path)`, `.save(path)`, `.exportText(path) → text`, `.demo(file)`; `tools/new-project.mjs` builds the empty project in node from the same modules rack.js boots from (precedent for a node-side writer).
+- NOT in the project: the NODES graph (a device record `curves`, lab/nodes.js:97 — THE DEFAULT GRAPH IS EMPTY), PREFERENCE keys (theme, glass, frame, axes). A film that wants a graph sets it live.
+
+## 2. The timeline document (lab/mir/timeline/model.js, project.js)
+- `{ v:1, lanes:[{id,name}] (≤32), curves:[{id, targetId, name, color, length (beats), min, max, points:[{t:0..1 of length, v:0..1, tension}], kind?}], clips:[{id, curveId, laneId, start, duration, offset, scale, mute, followSourceEnd}], active:{start,end}|null, meter, seq }`.
+- A curve's `v` is NORMALISED over the target's own range through the registry's map (`registry.toNorm(id, value)` → 0..1; maps: linear · log · wrap · bipolar · integer · trigger · toggle, registry.js:107). `min/max` are the curve's depth window (0..1).
+- Doors: `model.create({targetId, name, value, start, duration, laneId, source})`, `updateCurve(id, {points, length, min, max, name})`, `updateClip`, `addLane()`, `restore(doc)`, `serialize()`. `__LW.timeline` = installTimeline's result: `model`, `editor`, `controller`, `audio` (installAudioDrop: `add(file, { laneId, start, choice:{targetId, keep}, band })` — `choice` skips the popup), `open()`.
+- The recorder reads the arrangement by beat (`host.js:274 automation.value(id, beat)`); the RANGE is `active` (TIMELINE · ACTIVE) or a selection.
+
+## 3. The targets (lab/shell/modulation.js:28–160, lab/mapping.js, lab/nodes.js:100)
+- observer.yaw (wrap 0–2π) · pitch (bipolar ±1.52) · dist (log 1.2–8) · fov (0.25–1.2) · panx · pany; material.stage (0–1) · gamma (0.5–2.4) · exposure (log 0.08–12) · softness (0.3–2.2) · hue (wrap 0–1) · iso (log 0.002–0.9) · grain (log 0.02–1) · knee (log 0.02–8) · slice.pos (±1) · slice.thick (log 0.01–0.4); transport.rate (log 0.1–3000 a.u./s); state.rot.z · stark.kz · defect.l2 (bipolar rad/s) · state.rabi (log 0.005–1); shell.rate.n1…n7 (log 0.25–4 ×); chem.kick (log 1e-4–1e-2) · chem.speed (1–50) · chem.orbital (integer 1…ao); reg.morph · e0 · w · amp1…8 · ph1…8 (STATES' lanes, molecules); `nodes.<node>.<knob>` for every number knob of a placed node; `action.<id>` for every surface action (trigger: fires on the rising edge through 0.5 with hysteresis, registry.js:108–112; toggle follows the level): preset.next/prev, style, view, palette, mode, invert, reseed, chem.on/vibrate/breathe, nodes, render.* …
+- GAPS (absolute, not "next"): the STYLE (`mat.style` 0…11: cloud solid grain signed bands dust glass additive glassSigned balls sticks esp), the VIEW (density phase real imag diff), the PALETTE (33 ids, lab/mir/palette.js PRESETS order) are not targets — a score cannot say "bar 7 is GLASS". 026 A1 adds `material.style`, `material.view`, `palette.index` as integer targets (app-side, lab/shell/modulation.js; no kit door).
+- FLASH GUARD holds exposure · gamma · stage · knee to 3/s on a modulator; a style flip per bar is not held.
+
+## 4. The audio clip (lab/mir/timeline/audio-kind.js, audio-analysis.js, audio-playback.js, audio-drop.js)
+- `audioClipFromFile(file, { bpm, keep, band, store })` → `{ source: { kind:'audio', assetId (content hash), seconds, bpm, band (level|low|mid|high), keep, envelope (base64 Uint8 @ 100 Hz), length (beats), color }, duration }`; the bytes live in the asset store (IndexedDB, per browser); the envelope rides in the project, so the modulation replays with no file; KEEP plays and bounces the audio (025: mixed offline, muxed as Opus-in-MP4 on Linux).
+- One band per clip: four bands on four targets = four clips of one asset. The clip's `offset` (source beats) is where the song starts at beat 0: `offset = seconds · bpm / 60`.
+- The live FILE/MIC/DEVICE source of the modulation window is NOT a render road (the recorder refuses a LIVE source).
+
+## 5. The bounce (lab/render-exact.js, lab/film-card.js, lab/mir/render/*, tools/perf/film-obey.mjs)
+- The card's fields are DOM selects (`__LW.render.view.controls`: motion/recFormat/recSize/recFps/recDuration/recOffset/modSelect/timelineSelect/audioSelect; NODES/CHROME in localStorage `lambdawaves.q0.render.*`), RENDER = `controls.renderBtn.click()`; the result = `__LW.captureUI.exact.last` (`res.files[0].blob`, `audit`, `baked`, `plan`). FPS ∈ {24,30,48,60}; SIZE current · 1080p · 1440p · 2160p; MAX_FRAMES 216000.
+- `tools/perf/film-obey.mjs` is the scripted precedent (gatekit `open()` on the gate's headless Firefox; `g.ev` runs async page code). The film leaves by `handOver` (a download) — a script reads the blob itself.
+- ffmpeg 7.0.2 static at `~/bin/ffmpeg` (drawtext, libx264, concat). No numpy on the box.
+
+## 6. Time
+- The ruler is beats; the physics' t rides THE TIME LAW. A bar at BPM b and meter m = m·60/b s; 16 bars of 4/4 at 140 BPM = 64 beats = 27.43 s = 822.9 frames at 30 fps (the plan rounds; the film is one piece, so no join inside the music video). Machinedrum's STAR is 140 BPM (Beatport/Tunebat for the original and the A$AP Ferg remix); the IMANU remix's tempo is unlisted — measured from the file when it lands (`tools/conduct-bpm.mjs`, energy-flux autocorrelation 60–200 BPM, octave check).
+
+## 7. Stitching
+- `ffmpeg -f concat` over films re-encoded to one size/fps (libx264 crf 16 yuv420p, audio AAC or silence), a lower-third `drawtext` per segment for the educational film (the STAGE FORMULA/NAME are OUT of a frame by 025's call 4; the title is put on by the stitch, from the score's `title`).
