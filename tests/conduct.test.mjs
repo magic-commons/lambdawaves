@@ -1,8 +1,8 @@
-/* tests/conduct.test.mjs — 026 A5: THE CONDUCTOR's pure half (lab/conduct.js) against the kit's own timeline model and registry:
+/* tests/conduct.test.mjs — 026 A5: THE CONDUCTOR's pure half (tools/conduct-score.js) against the kit's own timeline model and registry:
  * points in a target's unit → a normalised curve, a step that HOLDS, a repeat that is N clips of one curve, a wrapped yaw across its seam,
  * trigger pulses, one clip per target at a beat (an audio band refuses a lane on its target), the schema's refusals, the mode index. */
 import assert from 'node:assert/strict';
-import { readScore, laneCurve, pulses, timelineDoc, modeIndex, modeOf, indexOf, PULSE } from '../lab/conduct.js';
+import { readScore, laneCurve, pulses, timelineDoc, modeIndex, modeOf, indexOf, PULSE } from '../tools/conduct-score.js';
 import { createTimelineModel } from '../lab/mir/timeline/model.js';
 import { createRegistry } from '../lab/mir/modulation/registry.js';
 import { BASIS_INDEX } from '../lab/hydrogen.js';

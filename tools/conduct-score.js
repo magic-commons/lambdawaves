@@ -1,4 +1,5 @@
-/* lab/conduct.js — THE CONDUCTOR (026 A2): a SCORE (docs/conductor/SCORE.md — one JSON in bars, beats and the targets' own units) applied
+/* tools/conduct-score.js — THE CONDUCTOR (026 A2), a PAGE module fetched on demand (device-report.js' road: the lab reaches it by import() and never
+ * precaches it — lab/ had 14.9 KB left under the PWA's 8 MiB ceiling and this is 26 KB, and only a driver ever loads it): a SCORE (docs/conductor/SCORE.md — one JSON in bars, beats and the targets' own units) applied
  * through the app's live doors into a project, in the plan's order: base · system · molecule · look · camera · overlays · nodes · tempo ·
  * lanes · triggers · audio · active · save.  `__LW.conduct.apply(score)` (lab/shell/facade.js) → the report: what was applied, every refusal
  * by name (an unknown target, a molecule that would not solve, a lane on a target an audio band already covers) and every value clamped.
@@ -8,8 +9,8 @@
  * validates it whole; the audio bands are then added on the film-obey road (audioClipFromFile → the editor's addClip; the app's timeline
  * installs no audio drop).  The NODES graph is set live and stays out of the saved project (lab/nodes.js: a device record).
  * DOM-free at its top: the pure half (readScore, laneCurve, pulses, timelineDoc, modeIndex) runs in node (tests/conduct.test.mjs). */
-import { STYLE_NAMES, WAVE_VIEWS } from './field.js';
-import { PRESETS as PALETTES } from './mir/palette.js';
+import { STYLE_NAMES, WAVE_VIEWS } from '../lab/field.js';
+import { PRESETS as PALETTES } from '../lab/mir/palette.js';
 
 export const SCORE_KEYS = ['conduct', 'name', 'title', 'notes', 'tempo', 'bars', 'base', 'system', 'molecule', 'look', 'camera', 'overlays', 'nodes', 'audio', 'lanes', 'triggers', 'render'];
 export const METERS = [1, 2, 3, 4, 5, 6, 7, 8, 12];
@@ -256,7 +257,7 @@ export async function apply(LW, input) {
   if (bandSpec.length) await step('audio', async () => {
     const r = await fetch(String(A.file)); if (!r.ok) return 'audio ' + A.file + ': HTTP ' + r.status;
     const blob = await r.blob(), file = new File([blob], String(A.file).split('/').pop(), { type: blob.type || 'audio/mpeg' });
-    const { audioClipFromFile } = await import('./mir/timeline/audio-analysis.js'), [r0, r1] = S.render.range, off = num(A.offset) ? Math.max(0, A.offset) * S.tempo.bpm / 60 : 0;
+    const { audioClipFromFile } = await import('../lab/mir/timeline/audio-analysis.js'), [r0, r1] = S.render.range, off = num(A.offset) ? Math.max(0, A.offset) * S.tempo.bpm / 60 : 0;
     tl.open(); await wait(400);
     try {
       for (const [i, o] of bandSpec.entries()) {

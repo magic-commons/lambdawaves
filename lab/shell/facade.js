@@ -279,7 +279,7 @@ export function createFacade(app) {
     session: dom.start ? dom.start.session : null,   // 0.5.0 C6b: THE SESSION (main.js createSession over the one part): read(), armed(), flush()
     get timeline() { return app.state.tl; },   // 0.5.0 C7b: the kit's TIMELINE (installTimeline's result: model, editor, controller, open/close), for the timeline suite
     get render() { return app.state.filmCard; },   // 0.5.0 C7b: the RENDER card ({ card, view, recorder, plan, place }; view.state() is the kit's harness read)
-    conduct: { apply: (score) => import('../conduct.js').then((m) => m.apply(app.sh.LW, score)) },   // 026 A2: THE CONDUCTOR — a SCORE applied through the live doors (lab/conduct.js)
+    conduct: { apply: (score) => import('../../tools/conduct-score.js').then((m) => m.apply(app.sh.LW, score)) },   // 026 A2: THE CONDUCTOR — a SCORE through the live doors (on demand, never precached)
     verbs,   // 0.6.6 G1: THE VERB TABLE + THE INVENTORY (lab/verbs.js): run(list, { who }), inventory(), table
   };
 }
