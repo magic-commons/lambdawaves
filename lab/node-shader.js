@@ -15,7 +15,10 @@
  *              is a ray from straight above, bent by Snell through the surface's slope (read across SCALE px) and carried DEPTH px down; the
  *              same one/one splat and TONE as DECOHERE, so where the bent rays cross the light piles up: the folds ARE the caustics.  FRINGE
  *              gives each channel its own lens (dispersion).  LENS 0 is neutral.
- * A STATEFUL node (FEEDBACK) starts from black when it is placed, when a hand moves one of its knobs (`restart(id)`, lab/nodes.js) and at a
+ *   FLOW       (027 N3) COUNT points, born at places hashed from seed 13, each step moved SPEED px along the picture's gradient (SOURCE LUMA, or
+ *              HUE: the hue's gradient — under a PHASE view the phase's, the current's direction); each step's segment laid one/one as a
+ *              WIDTH-px quad into trails kept × DECAY; TONE as DECOHERE's.  A point lives 20 – 120 steps, then is born again.  GAIN 0 is neutral.
+ * A STATEFUL node (FEEDBACK, FLOW) starts from black when it is placed, when a hand moves one of its knobs (`restart(id)`, lab/nodes.js) and at a
  * film's frame 0; a modulator's write steps on with the new value (it asks for a present, never draws a step of its own).
  * The stage canvas's CSS filter (the chain's grade) is mirrored onto each SHADER canvas, so the column's colour nodes dress it too.
  * 025 B1 · THE FILM BAKES IT: `bake(values, i, l)` runs the same passes from the last tap (the film's own frame, at the film's size) into an rgba8unorm
@@ -53,6 +56,15 @@ export const SHADER_TYPES = {
       { k: 'gain', label: 'GAIN', min: 0.1, max: 8, home: 1, log: true, hint: 'the exposure of the light on the floor' },
       { k: 'colour', label: 'COLOUR', home: 'picture', options: opt('ink', 'picture', 'palette') },
       { k: 'ground', label: 'GROUND', home: 'black', options: opt('black', 'stage') }] },
+  flow: { cls: 'shader', label: 'FLOW', hint: 'points ride the picture\'s gradient, leaving trails', stateful: true, neutral: (v) => v.gain === 0,
+    knobs: [{ k: 'count', label: 'COUNT', min: 256, max: 65536, step: 1, home: 8192, log: true, hint: 'how many points, seeded from 13' },
+      { k: 'speed', label: 'SPEED', min: 0, max: 16, home: 2, unit: ' px', hint: 'how far a point moves a frame' },
+      { k: 'decay', label: 'DECAY', min: 0, max: 0.995, home: 0.94, hint: 'how long a trail stays: 0 = the points alone' },
+      { k: 'width', label: 'WIDTH', min: 0.5, max: 6, home: 1, unit: ' px', hint: 'a trail\'s width' },
+      { k: 'gain', label: 'GAIN', min: 0, max: 4, home: 1.5, hint: 'the exposure of the trails' },
+      { k: 'source', label: 'SOURCE', home: 'luma', options: opt('luma', 'hue') },
+      { k: 'colour', label: 'COLOUR', home: 'picture', options: opt('ink', 'picture', 'palette') },
+      { k: 'ground', label: 'GROUND', home: 'stage', options: opt('black', 'stage') }] },
 };
 
 /* the uniforms (24 f32): size · grid (gw, step) · amount freq spread fringe · gain phase src colour · nch samples ground hue · pal (a, b) · invert palOn ·
@@ -167,6 +179,65 @@ const FBSHOW = COMMON + FULL + /* wgsl */ `
   let q = vec2i(fc.xy); return vec4f(mix(textureLoad(tap, q, 0).rgb, textureLoad(acc, q, 0).rgb, u.x3), 1.0);
 }
 `;
+/* FLOW: ADV moves each point one step along the gradient (a compute pass, the last positions → the new), FADE writes DECAY × the last trails,
+   TRAIL lays one quad a point from where it was to where it is (one/one); TONE as DECOHERE's.  A point is (x, y, life, moved): born (or reborn
+   when its life runs out or it leaves the frame) at a place and a life hashed from its index, the step and 13 */
+const HASH = /* wgsl */ `fn hash(x: u32) -> u32 { let v = x * 747796405u + 2891336453u; let w = ((v >> ((v >> 28u) + 4u)) ^ v) * 277803737u; return (w >> 22u) ^ w; }
+fn rnd(x: u32) -> f32 { return f32(hash(x)) * 2.3283064e-10; }
+`;
+const ADV = COMMON + HASH + /* wgsl */ `
+@group(0) @binding(1) var tap: texture_2d<f32>;
+@group(0) @binding(2) var<storage, read> pin: array<vec4f>;
+@group(0) @binding(3) var<storage, read_write> pout: array<vec4f>;
+fn at(q: vec2i) -> vec3f { return textureLoad(tap, clamp(q, vec2i(0), vec2i(u.size) - 1), 0).rgb; }
+fn lum(c: vec3f) -> f32 { return dot(c, vec3f(0.2126, 0.7152, 0.0722)); }
+fn hue(c: vec3f) -> vec2f { let a = 1.7320508 * (c.g - c.b); let b = 2.0 * c.r - c.g - c.b; return vec2f(atan2(a, b) / 6.2831853, 0.5 * length(vec2f(a, b))); }   // turns, chroma
+fn turn(a: f32, b: f32) -> f32 { return fract(a - b + 0.5) - 0.5; }
+fn gradient(p: vec2f) -> vec2f {                                     // per px: LUMA's, or HUE's (under a PHASE view, the phase's) — wrapped, and only where there is colour
+  let q = vec2i(p); let dx = vec2i(2, 0); let dy = vec2i(0, 2);
+  if (u.src > 0.5) { return vec2f(turn(hue(at(q + dx)).x, hue(at(q - dx)).x), turn(hue(at(q + dy)).x, hue(at(q - dy)).x)) * 0.25 * min(1.0, 4.0 * hue(at(q)).y); }
+  return vec2f(lum(at(q + dx)) - lum(at(q - dx)), lum(at(q + dy)) - lum(at(q - dy))) * 0.25;
+}
+@compute @workgroup_size(64) fn adv(@builtin(global_invocation_id) id: vec3u) {
+  let i = id.x; if (i >= u32(u.grid.x)) { return; }
+  let P = pin[i];
+  if (P.z <= 0.0) {                                                    // born: a hashed place and a life of 20 – 120 steps
+    let s = hash((i * 2654435761u) ^ hash(u32(u.phase) * 40503u + 13u));
+    pout[i] = vec4f(rnd(s) * u.size.x, rnd(s ^ 0x9e3779b9u) * u.size.y, 20.0 + 100.0 * rnd(s ^ 0x51ed27u), 0.0); return;
+  }
+  let g = gradient(P.xy); let v = g / (length(g) + 0.004) * u.amount;  // SPEED px along the gradient; a flat place holds a point still
+  let y = P.xy + v; var life = P.z - 1.0;
+  if (any(y < vec2f(0.0)) || any(y >= u.size)) { life = 0.0; }
+  let alive = life > 0.0;
+  pout[i] = vec4f(select(P.xy, y, alive), life, select(0.0, length(v) / max(u.amount, 0.001), alive));
+}
+`;
+const FADE = COMMON + FULL + /* wgsl */ `
+@group(0) @binding(1) var prev: texture_2d<f32>;
+@fragment fn fs(@builtin(position) fc: vec4f) -> @location(0) vec4f { return vec4f(textureLoad(prev, vec2i(fc.xy), 0).rgb * u.x2, 0.0); }
+`;
+const TRAIL = COMMON + /* wgsl */ `
+@group(0) @binding(1) var tap: texture_2d<f32>;
+@group(0) @binding(2) var<storage, read> pa: array<vec4f>;
+@group(0) @binding(3) var<storage, read> pb: array<vec4f>;
+struct VO { @builtin(position) pos: vec4f, @location(0) col: vec4f };
+@vertex fn vs(@builtin(vertex_index) vi: u32, @builtin(instance_index) ii: u32) -> VO {
+  var o: VO; o.pos = vec4f(2.0, 2.0, 0.0, 1.0); o.col = vec4f(0.0);
+  let a = pa[ii].xy; let b = pb[ii];
+  let d = b.xy - a; let n = length(d);
+  if (b.w <= 0.0 || n < 0.001) { return o; }
+  var K = array<u32, 6>(0u, 1u, 2u, 2u, 1u, 3u); let k = K[vi];   // the quad a → b, WIDTH across
+  let side = vec2f(-d.y, d.x) / n * (0.5 * u.freq);
+  let p = select(a, b.xy, k >= 2u) + select(-side, side, (k & 1u) == 1u);
+  let c = textureLoad(tap, clamp(vec2i(b.xy), vec2i(0), vec2i(u.size) - 1), 0).rgb; let m = max(c.r, max(c.g, c.b));
+  var col = vec3f(1.0);
+  if (u.colour > 0.5 && u.colour < 1.5) { col = c / max(m, 0.001) * min(1.0, 4.0 * m); }   // PICTURE: the colour where the point is
+  o.col = vec4f(col * (0.06 * b.w), 0.0);
+  o.pos = vec4f(p.x / u.size.x * 2.0 - 1.0, 1.0 - p.y / u.size.y * 2.0, 0.0, 1.0);
+  return o;
+}
+@fragment fn fs(i: VO) -> @location(0) vec4f { return i.col; }
+`;
 const ADD = { srcFactor: 'one', dstFactor: 'one', operation: 'add' };
 /* the passes: a WGSL module, its entry points, the target (f16 = an rgba16float state, else the canvas or the film's rgba8unorm), additive or not */
 const PASSES = {
@@ -174,6 +245,8 @@ const PASSES = {
   tone: { code: TONE, vs: 'vt', fs: 'ft' },
   fbstep: { code: FBSTEP, vs: 'vt', fs: 'fs', f16: true },
   fbshow: { code: FBSHOW, vs: 'vt', fs: 'fs' },
+  fade: { code: FADE, vs: 'vt', fs: 'fs', f16: true },
+  trail: { code: TRAIL, vs: 'vs', fs: 'fs', add: true, f16: true },
 };
 const COL = { ink: 0, picture: 1, palette: 2 };
 
@@ -206,7 +279,9 @@ export function createShaderHost({ device, canvas: stage, palette = null, tap = 
     return [Math.floor(q.span / 512) / 256, (q.span % 512) / 256, q.hue || 0, q.invert ? 1 : 0, 1];
   }
   /** a record's state, freed (a size change, a COUNT change, a drop) */
-  function free(r) { for (const k of ['acc', 'A', 'B']) if (r[k]) { r[k].destroy(); r[k] = null; } }
+  function free(r) { for (const k of ['acc', 'A', 'B', 'PA', 'PB']) if (r[k]) { r[k].destroy(); r[k] = null; } }
+  let adv = null;
+  const advance = () => adv || (adv = device.createComputePipeline({ layout: 'auto', compute: { module: device.createShaderModule({ code: ADV }), entryPoint: 'adv' } }));
   /** draw(r, target, step): one picture of node r from the kept tap — onto its canvas, or into the film's `target`; a STATEFUL node advances
    *  its state when `step` (a present, a film frame), else re-does the last step with the values it has now */
   function draw(r, target = null, step = false) {
@@ -228,6 +303,23 @@ export function createShaderHost({ device, canvas: stage, palette = null, tap = 
       const st = pipe('fbstep'), sh = pipe('fbshow', out);
       pass(r.B.createView(), st, group(st, { buffer: r.ub }, tex.createView(), r.A.createView(), L.lin), 3);
       pass(view(), sh, group(sh, { buffer: r.ub }, tex.createView(), r.B.createView()), 3);
+    } else if (r.type === 'flow') {
+      const N = Math.max(1, Math.round(v.count));
+      if (r.N !== N) { free(r); r.N = N; r.fresh = true; }
+      if (!r.A) { r.A = tex16(w, h); r.B = tex16(w, h); const pb = () => device.createBuffer({ size: N * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST }); r.PA = pb(); r.PB = pb(); }
+      if (step) { [r.A, r.B] = [r.B, r.A]; [r.PA, r.PB] = [r.PB, r.PA]; }
+      if (r.fresh) { enc.clearBuffer(r.PA); pass(r.A.createView()); r.n = 0; r.fresh = false; }   // from black: every point unborn
+      if (step) r.n++;
+      const [a, b, hue, inv, on] = v.colour === 'palette' ? pal() : [0, 1, 0, 0, 0];
+      uni = [w, h, N, 0, v.speed * k, Math.max(0.5, v.width * k), 0, 0, v.gain, r.n, v.source === 'hue' ? 1 : 0, COL[v.colour] || 0, 1, 1, v.ground === 'stage' ? 1 : 0, hue,
+        a, b, inv, on, 3, 0, v.decay, 0];
+      device.queue.writeBuffer(r.ub, 0, new Float32Array(uni));
+      const ad = advance(), fa = pipe('fade'), tr = pipe('trail'), tn = pipe('tone', out), c = enc.beginComputePass();
+      c.setPipeline(ad); c.setBindGroup(0, group(ad, { buffer: r.ub }, tex.createView(), { buffer: r.PA }, { buffer: r.PB })); c.dispatchWorkgroups(Math.ceil(N / 64)); c.end();
+      const s = enc.beginRenderPass({ colorAttachments: [{ view: r.B.createView(), loadOp: 'clear', clearValue: [0, 0, 0, 0], storeOp: 'store' }] });
+      s.setPipeline(fa); s.setBindGroup(0, group(fa, { buffer: r.ub }, r.A.createView())); s.draw(3);   // the trails, × DECAY
+      s.setPipeline(tr); s.setBindGroup(0, group(tr, { buffer: r.ub }, tex.createView(), { buffer: r.PA }, { buffer: r.PB })); s.draw(6, N); s.end();   // this step's segments
+      pass(view(), tn, group(tn, { buffer: r.ub }, r.B.createView(), L.lut.createView(), L.smp), 3);
     } else {                                                              // DECOHERE · REFRACT: SPLAT, then TONE
       if (!r.acc) r.acc = tex16(w, h);
       const R = r.type === 'refract';
