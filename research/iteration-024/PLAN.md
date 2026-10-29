@@ -40,4 +40,4 @@ S alone; merged with the recipe (`git merge --no-ff --no-commit`, `--ours lab/sw
 ## CLOSED
 | chain | base | commit | note |
 |---|---|---|---|
-| S | 1a03a4ad | | |
+| S | 1a03a4ad | 3dd72588 | S1 field.tap (the presented texture copied in frame()'s submit) · S2 lab/node-shader.js 171 lines: point-list splat one/one into rgba16float + tone pass on the field's device, the SHADER class (···· HEAVY) in the + menu, GROUND BLACK·STAGE · S3 field.paletteLUT(): COLOUR PALETTE reads the WAVE palette with ROTATE and INVERT, FRINGE as three palette picks · S4 14 shots in S-shots/, presents/s 29.9→30.7 hydrogen, 30.1→30.0 benzene (rig capped at 30) · S5 THE SHADER NODE in docs/laws/nodes.md; LOCK 843/0 and 987/0; kit unchanged alpha.11 |
