@@ -1,0 +1,191 @@
+{
+ "score": "research/iteration-026/scores/test-2bar.score.json",
+ "apply": {
+  "ok": true,
+  "applied": [
+   "base",
+   "system.preset",
+   "system.rate",
+   "look.palette",
+   "look.paletteOn",
+   "look.style",
+   "look.view",
+   "look.exposure",
+   "look.softness",
+   "camera.autoRotate",
+   "camera.yaw",
+   "camera.pitch",
+   "camera.dist",
+   "camera.fov",
+   "tempo",
+   "lanes[0] observer.yaw",
+   "lanes[1] material.exposure",
+   "lanes[2] material.style",
+   "save"
+  ],
+  "refused": [],
+  "clamps": [],
+  "notes": [],
+  "keep": false,
+  "path": "CONDUCT/TEST 2BAR",
+  "name": "TEST 2BAR",
+  "bpm": 120,
+  "meter": 4,
+  "bars": 2,
+  "beats": 8,
+  "seconds": 4,
+  "range": [
+   0,
+   8
+  ],
+  "render": {
+   "fps": 30,
+   "size": "1080p",
+   "format": "mp4",
+   "nodes": "on",
+   "chrome": "labels",
+   "range": [
+    0,
+    8
+   ]
+  },
+  "lanes": 4,
+  "clips": 6
+ },
+ "render": {
+  "fps": 30,
+  "size": "1080p",
+  "format": "mp4",
+  "nodes": "on",
+  "chrome": "labels",
+  "range": [
+   0,
+   8
+  ]
+ },
+ "ok": true,
+ "lies": [],
+ "rows": [
+  {
+   "setting": "SIZE",
+   "asked": "1080p 1920×1080",
+   "witness": "result 1920×1080 · frames 1920×1080 · file 1920×1080",
+   "ok": true
+  },
+  {
+   "setting": "FPS",
+   "asked": 30,
+   "witness": "result 30 · file 30",
+   "ok": true
+  },
+  {
+   "setting": "FRAMES",
+   "asked": 120,
+   "witness": "result 120 · λWAVES drew 120 · file 120",
+   "ok": true
+  },
+  {
+   "setting": "DURATION",
+   "asked": "4 s",
+   "witness": "result 4 s · file 4 s",
+   "ok": true
+  },
+  {
+   "setting": "RANGE",
+   "asked": "ACTIVE beats 0 → 8",
+   "witness": "first beat 0 · last beat + 1 frame 7.999999999999991",
+   "ok": true
+  },
+  {
+   "setting": "FORMAT",
+   "asked": "mp4",
+   "witness": "file mp4 · 1 file(s)",
+   "ok": true
+  },
+  {
+   "setting": "MODULATION",
+   "asked": "ON",
+   "witness": "result ON",
+   "ok": true
+  },
+  {
+   "setting": "TIMELINE",
+   "asked": "ON",
+   "witness": "result ON",
+   "ok": true
+  },
+  {
+   "setting": "AUDIO",
+   "asked": "OFF · no clip in the range",
+   "witness": "silent · 1 trak",
+   "ok": true
+  },
+  {
+   "setting": "NODES",
+   "asked": "ON",
+   "witness": "frames ON · an empty graph",
+   "ok": true
+  },
+  {
+   "setting": "CHROME",
+   "asked": "LABELS",
+   "witness": "frames LABELS · ",
+   "ok": true
+  }
+ ],
+ "fileFacts": {
+  "kind": "mp4",
+  "w": 1920,
+  "h": 1080,
+  "fps": 30,
+  "frames": 120,
+  "durationS": 4,
+  "tracks": 1,
+  "audioS": null,
+  "audioCodec": null
+ },
+ "baked": [
+  {
+   "id": "formula",
+   "state": "OUT",
+   "why": "the STAGE FORMULA, NAME and SUBTITLE are KaTeX DOM (call 4)"
+  }
+ ],
+ "result": {
+  "files": [
+   {
+    "name": "lambdawaves-render.mp4",
+    "bytes": 1457614,
+    "firstFrame": 0,
+    "lastFrame": 119,
+    "blob": true,
+    "size": 1457614,
+    "type": "video/mp4"
+   }
+  ],
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "frames": 120,
+  "motion": "timeline-active",
+  "modulation": true,
+  "timeline": true,
+  "range": {
+   "start": 0,
+   "end": 8
+  },
+  "rangeKind": "active",
+  "durationS": 4,
+  "offsetS": 0,
+  "format": "mp4",
+  "bitrate": 40000000,
+  "diskBacked": true,
+  "wallMs": 28210.78,
+  "id": "render-mvt7a5fx-rhz5u",
+  "audio": null
+ },
+ "seconds": 29.969,
+ "files": [
+  "/home/joshua-hosain/Documents/LAMBDAWAVES/.claude/worktrees/agent-a693769830ecc31d6/research/iteration-026/A-shots/TEST-2BAR.mp4"
+ ]
+}

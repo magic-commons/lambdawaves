@@ -1,6 +1,6 @@
 /* lab/shell/modulation.js — THE MODULATION SEAM (0.5.2 R2d; moved verbatim out of lab/rack.js boot()): the ONE `defs` route table and mod.install, the pill's
  * seat and dodge, and the kit's modulation window (app.state.modHost / modView, read live by every module).  createModSeam(app) runs where the seam stood. */
-import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS } from '../field.js';
+import { TIER } from '../tier.js'; import { knob } from '../mir/kit.js'; import { CAM, clampShift } from '../camera-law.js'; import { createModulation } from '../mir/modulation/window.js'; import { registerWindow } from '../mir/window/window.js'; import { BASIS } from '../hydrogen.js'; import { EPS_POP } from '../state.js'; import { dockSpan } from '../mir-gui.js'; import { OMORPH } from '../orbitalsview.js'; import { MOL_LIMITS, STYLE, STYLE_NAMES, VIEW, WAVE_VIEWS, waveView, drawStyle } from '../field.js'; import { PRESETS as PALETTES } from '../mir/palette.js';
 export function createModSeam(app) {
   const { ui, hNote, clock, obs, mat, settingsStore, reg, rates, dom } = app, { schedule, page } = app.loop, { orbitBy, cameraPort } = app.host, { readSettings, saveSettings } = app.sh,
     { mod, modHand, setKnob, ROT_LIMIT, rotRate, setRotationRate, occlusion, applyAccent, api } = app.ctl;
@@ -159,6 +159,23 @@ export function createModSeam(app) {
         knob: () => (app.state.states ? app.state.states.knobs.ph(i) : null), hint: `STATES lane ${i + 1} phase`,
         get: () => (app.state.states ? app.state.states.slotPhase(i) : 0), set: (v) => { if (app.state.states) app.state.states.setSlotPhase(i, v); } })),
 
+      /* 026 A1 · THE ABSOLUTE LOOK: STYLE, VIEW and PALETTE as integer targets (a lane can say "bar 7 is SHELL on PHOSPHOR").  Each writes on
+         its seg's own road (the seg's set, no stage word) and stands down where a press could not land: a MOLECULES-only STYLE's button is
+         hidden while MOLECULES is off, a muted VIEW's is disabled.  PALETTE is PALETTE's select, in the kit's PRESETS order; a value equal
+         to the live one writes nothing (a project's base never re-selects over its own stops). */
+      { id: 'material.style', label: 'STYLE', map: 'integer', min: 0, max: STYLE_NAMES.length - 1, step: 1, group: 'material', knob: () => null,
+        hint: 'WAVE STYLE by number: 0 CLOUD … 11 ESP',
+        get: () => mat.style | 0,
+        set: (v) => { const s = drawStyle(STYLE_NAMES[v | 0]), b = ui.styleSeg && ui.styleSeg.button(s); if (!b || b.hidden || mat.style === STYLE[s]) return; mat.style = STYLE[s]; ui.styleSeg.set(s); schedule(TIER.PRESENT); } },
+      { id: 'material.view', label: 'VIEW', map: 'integer', min: 0, max: WAVE_VIEWS.length - 1, step: 1, group: 'material', knob: () => null,
+        hint: 'the observable by number: 0 ρ · 1 phase · 2 Re · 3 Im',
+        get: () => WAVE_VIEWS.indexOf(waveView(mat.view) || 'density'),
+        set: (v) => { const w = WAVE_VIEWS[v | 0], b = ui.viewSeg && ui.viewSeg.button(w); if (!b || b.hidden || b.disabled || mat.view === VIEW[w]) return; mat.view = VIEW[w]; ui.viewSeg.set(w); schedule(TIER.PRESENT); } },
+      { id: 'palette.index', label: 'PALETTE', map: 'integer', min: 0, max: PALETTES.length - 1, step: 1, group: 'material', knob: () => null,
+        hint: 'the palette by number, in the PALETTE menu order',
+        get: () => { const P = app.state.palette, i = P ? PALETTES.findIndex((q) => q.id === P.id) : -1; return i >= 0 ? i : NaN; },
+        set: (v) => { const P = app.state.palette, q = PALETTES[v | 0]; if (P && q && P.id !== q.id) P.select(q.id); } },
+
       { id: 'state.rabi', label: 'Ω RABI', map: 'log', min: 0.005, max: 1, def: 0.05, group: 'state', knob: () => ui.abOmega,
         hint: 'Set the A–B transition rate',
         get: () => app.hooks.ab.omega,
@@ -168,7 +185,7 @@ export function createModSeam(app) {
        CHEMISTRY's targets are `chem.kick`, `chem.speed` and `chem.orbital` (iteration 007 O), and an id's root is what a saved route is addressed by — so it
        names the instrument, not the nearest existing group.  0.5.0 C1: `observer.yaw` / `observer.pitch` carry the CAMERA panel's
        sphere arcs, so they are drop targets now, like every observer.* dial. */
-    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell', 'nodes', 'action']);   // 021 I2: `action.<id>`, the registry's acts (lab/mapping.js)   // 019 N2: NODES' knobs, `nodes.<node>.<knob>` (lab/nodes.js, the runtime door)
+    app.state.modHost = mod.install(defs, ['observer', 'material', 'state', 'transport', 'field', 'chem', 'reg', 'shell', 'nodes', 'action', 'palette']);   // 021 I2: `action.<id>`, the registry's acts (lab/mapping.js)   // 026 A1: `palette.index`   // 019 N2: NODES' knobs, `nodes.<node>.<knob>` (lab/nodes.js, the runtime door)
     app.state.restampParams = mod.stamp;
     /* iteration 007 O (ADR-0001) · chem.orbital's RANGE IS THE MOLECULE'S: every landing re-registers it by id (the kit keeps the base and
        the routes; a lane's 0..1 curve spans the new molecule), hands the base the landing's orbital (the HOMO, or the index a file named),

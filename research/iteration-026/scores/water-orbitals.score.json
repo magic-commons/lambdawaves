@@ -1,0 +1,15 @@
+{
+  "conduct": 1,
+  "name": "WATER ORBITALS",
+  "notes": "SCORE.md example 2: H2O in STO-3G, one orbital every half bar (1 → 7, back to the HOMO), signed shell on TWILIGHT, one camera turn.",
+  "tempo": { "bpm": 120, "meter": 4 },
+  "bars": 4,
+  "molecule": { "id": "H2O", "basis": "sto-3g", "view": "orbital", "orbital": 1 },
+  "look": { "palette": "twilight", "paletteOn": true, "style": "glassSigned", "exposure": 1.4 },
+  "camera": { "yaw": 0.8, "pitch": 0.3, "dist": 2.6, "fov": 0.9 },
+  "lanes": [
+    { "target": "chem.orbital", "shape": "step", "points": [[0, 1], [2, 2], [4, 3], [6, 4], [8, 5], [10, 6], [12, 7], [14, 5]] },
+    { "target": "observer.yaw", "points": [[0, 0.8], [16, 7.083]] }
+  ],
+  "render": { "fps": 30, "size": "1080p" }
+}

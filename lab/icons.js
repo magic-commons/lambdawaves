@@ -45,7 +45,7 @@ export const ICONS = {
     p('M15.6 20l-1.9-13.2a1 1 0 0 1 .8-1.1l2.9-.5a1 1 0 0 1 1.1.8L20.5 20'),     // the spine ticks gone: they were blobs at 14–16 px
   mass: p('M12 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z') + p('M7 8.5h10a1.5 1.5 0 0 1 1.45 1.1l2.3 9a1.5 1.5 0 0 1-1.45 1.9H4.7a1.5 1.5 0 0 1-1.45-1.9l2.3-9A1.5 1.5 0 0 1 7 8.5z'),
   modulation: p('M3 12C6 4 9 4 12 12S18 20 21 12'),                             // the sine: the modulation window and its door
-  molecule: c(6, 7, 2.6) + c(18, 7, 2.6) + c(12, 17, 3) + p('M7.4 9.2l3.1 5.2') + p('M16.6 9.2l-3.1 5.2'),   // three atoms, two bonds: five rings filled in at 14 px
+  molecule: p('M12 3l7.79 4.5v9L12 21l-7.79-4.5v-9Z') + p('M12.83 7.18l2.93 1.69M15.76 15.13l-2.93 1.69M7.41 13.7v-3.4'),   // 026 A0 · THE HEX RING: a benzene ring, three inner double bonds (Kekulé) — unlike NODES' three nodes at 14 px
   moon: p('M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.6 6.6 0 0 0 10.7 10.7Z'),
   sun: c(12, 12, 4) + p('M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4'),
   nodes: c(5, 7, 2.5) + c(12, 17, 2.5) + c(19, 7, 2.5) + p('M6.4 9.1l4.2 5.8M13.4 14.9l4.2-5.8'),
