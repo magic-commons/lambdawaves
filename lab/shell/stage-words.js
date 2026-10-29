@@ -274,8 +274,16 @@ export function createStageWords(app) {
         sp.style.display = ''; sp.style.transform = `translate(${q[0].toFixed(1)}px, ${q[1].toFixed(1)}px) translate(-50%, -50%)`;
       }
     }
+    /** 025 B3 · THE WORDS ON THE FILM: the ATOM LABELS by the same law (`toScreen` over the box the film's picture was drawn for, W × H in stage px)
+     *  → { px, family, items: [{ text, x, y }] }, or null when the labels are off or no molecule is named */
+    function labelsAt(id, W, H, obs, half) {
+      if (!id || !labelsOn) return null;
+      const S = toScreen(obs, half, W, H), items = [];
+      for (const a of app.state.chem.atomsNow()) { const q = S.at(a.x, a.y, a.z); if (q) items.push({ text: ELEMENT[a.Z] || '?', x: q[0], y: q[1] }); }
+      return { px: Math.round(14 * labelScale), family: getComputedStyle(labels).fontFamily, items };
+    }
     const api = app.state.stageText = {
-      layer, stats, atomLabels,
+      layer, stats, atomLabels, labelsAt,
       /** the formula's markdown ('' for none); the DOM moves only if the string did */
       setFormula(md) { formula = md || ''; if (banner === null) show(); },
       /** THE FADE: `md` in the formula's seat for `ttl` (0: until dismiss(md) — the molecule's head, D2), then its exit and the
