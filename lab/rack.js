@@ -885,7 +885,7 @@ export async function boot(dom) {
   window.__LW = LW; app.sh.LW = LW;
   /* ── 0.5.0 C7b · THE RENDER CARD (lab/film-card.js): MIR's createRenderCard over the film's host recorder, built once LW exists (the film
      reads it) and registered closed on the right rack (R2), in + and WINDOW; its saves are the hand-over fix (capture.js handOver) ── */
-  app.state.filmCard = createFilmCard({ film: app.state.capApi.exact, capture: app.state.capApi.capture, editor: () => app.state.tl && app.state.tl.editor, open: () => app.state.tl && app.state.tl.open(), armed: () => app.state.modArm,
+  app.state.filmCard = createFilmCard({ film: app.state.capApi.exact, capture: app.state.capApi.capture, editor: () => app.state.tl && app.state.tl.editor, open: () => app.state.tl && app.state.tl.open(), isOpen: () => !!(app.state.tl && app.state.tl.isOpen()), armed: () => app.state.modArm,
     digest: () => reg.digest(), key: () => [reg.version, mat.view, obs.yaw, obs.pitch, obs.dist, obs.fov, obs.shift.join(), clock.t].join('|'),
     /* iteration 004: FILES (FOLDERS' project zip) and the SUBJECT — THIS VIEW, or the project FOLDERS' ⓘ pointed at */
     files: layout.projects ? layout.projects.folders.zip : null, gallery: layout.projects ? layout.projects.inspected : null,

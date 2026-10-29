@@ -8,7 +8,7 @@
  * ITERATION 004 (the MIR 1.5 gaps): FILES — SAVE AS ZIP… · OPEN ZIP…, FOLDERS' project zip (`files`, its api.zip), which no button reached —
  * and the SUBJECT (BASINS' renderSubject): THIS VIEW, or the project FOLDERS' ⓘ pointed at (`gallery`, projects.js `inspected`), as the
  * system, the observable and, for a saved one, its folder, date and size; COPY copies them, JSON downloads them.
- *   createFilmCard({ film, capture, editor, open, armed, digest, key, files?, gallery?, here? }) → { card, view, recorder, plan, place } */
+ *   createFilmCard({ film, capture, editor, open, isOpen, armed, digest, key, files?, gallery?, here? }) → { card, view, recorder, plan, place, preset } */
 import { createRenderCard } from './mir/render/panel.js';
 import { fmtBytes } from './mir/render/plan.js';
 import { VIEW_NAMES } from './field.js';
@@ -89,6 +89,20 @@ export function createFilmCard(o) {
       mine = true; C.lines.textContent = all.slice(cut).join('\n'); queueMicrotask(() => { mine = false; });
     }).observe(C.lines, { childList: true, characterData: true, subtree: true });
   }
+  /* 025 C1 · THE RANGE FROM WHAT YOU HAVE (FILE › RENDER…, EXPORT FRAMES…, the TIMELINE's door): a timeline selection → SELECTION; the TIMELINE
+     open with clips → ACTIVE (over every clip when no range is marked); a placed ONE PERIOD → PERIOD (the ACTIVE range over it, the modulation
+     OFF, as PLACE ONE PERIOD leaves it); else STILL.  `format` 'png' is EXPORT FRAMES…; `range: 'timeline'` (the door) is SELECTION, else ACTIVE */
+  const periodOf = (ed) => { const d = ed && ed.model && ed.model.state(); return d ? d.clips.find((c) => !c.mute && (d.curves.find((x) => x.id === c.curveId) || {}).kind === 'lw-period') || null : null; };
+  function preset({ format, range } = {}) {
+    const ed = o.editor(), r = ed && ed.range ? ed.range() : null, sel = !!(r && r.end > r.start), d = ed && ed.model ? ed.model.state() : null;
+    const end = d ? Math.max(0, ...d.clips.map((c) => c.start + c.duration)) : 0, P = periodOf(ed), open = !!(o.isOpen && o.isOpen());
+    const kind = range === 'timeline' ? (sel ? 'selection' : 'active') : sel ? 'selection' : open && end > 0 ? 'active' : P ? 'period' : 'still';
+    if (kind === 'active' && ed && !(ed.activeRange && ed.activeRange()) && end > 0) ed.setActiveRange({ start: 0, end });
+    if (kind === 'period') { ed.setActiveRange({ start: P.start, end: P.start + P.duration }); set(C.modSelect, 'off'); }
+    set(C.motion, { still: 'still', selection: 'timeline-selection' }[kind] || 'timeline-active');
+    if (format) set(C.recFormat, format);
+    return kind;
+  }
   /** THE LOOP PLAN at the card's FPS and LENGTH (capture.js planLoop: a refused or STATIONARY plan says its sentence) */
   function plan() {
     let P; try { P = o.capture.planLoop({ fps: Number(C.recFps.value), seconds: Number(C.recDuration.value) }); } catch (e) { P = { ok: false, label: 'ERROR', message: String((e && e.message) || e) }; }
@@ -106,5 +120,5 @@ export function createFilmCard(o) {
     ed.setActiveRange({ start: c.start, end: c.start + c.duration }); set(C.motion, 'timeline-active'); set(C.modSelect, 'off'); if (o.open) o.open();
     return id;
   }
-  return { card, view, recorder, plan, place };
+  return { card, view, recorder, plan, place, preset };
 }

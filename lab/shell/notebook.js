@@ -87,9 +87,10 @@ export function createNotebook(app) {
           item('save', 'SAVE' + (layout.projects.current ? '  ' + layout.projects.current : '…'), { icon: 'save' }), item('saveAs', 'SAVE AS…'), null,
           item('import', 'IMPORT…', { icon: 'upload' }),
           sub('EXPORT', () => [sub('PROJECT', () => [item('export.json', '.json'), item('export.mir', '.mir'), item('export.png', '.png — the picture carrying the project')]),
-            item('export.picture', 'PICTURE'), item('render', 'FILM…'),
+            item('export.picture', 'PICTURE'),
             sub('SHAPE', () => SHAPE_EXPORTS.filter((s) => s.kind === 'shape').map((s) => item('export.' + s.fmt, s.fmt.toUpperCase(), { hint: s.tip }))),
             sub('GRID', () => SHAPE_EXPORTS.filter((s) => s.kind === 'grid').map((s) => item('export.' + s.fmt, s.fmt.toUpperCase(), { hint: s.tip })))], 'download'),
+          item('render.open', 'RENDER…', { icon: 'film' }), item('render.frames', 'EXPORT FRAMES…'),   // 025 C1: the film's rows after EXPORT (the card's FILM… row moved here)
           null, sub('QUICK', () => [item('quick.save', 'SAVE the experiment'), item('quick.load', 'LOAD the last quick save')])],
         EDIT: () => [item('undo', 'UNDO', { dis: () => !H().canUndo, icon: 'undo' }), item('redo', 'REDO', { dis: () => !H().canRedo, icon: 'redo' }),
           item('historyUndo', 'HISTORY UNDO', { dis: () => !H().canHistoryUndo, hint: 'back to the timeline before the last jump' }), item('history', 'UNDO HISTORY…'), null,

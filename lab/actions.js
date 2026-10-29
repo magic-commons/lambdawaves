@@ -47,6 +47,7 @@ export function createActions(app) {
   const winOf = (id) => (S().rk ? S().rk.windows().find((x) => x.id === id) : null) || {};
   const foldable = () => (S().rk ? S().rk.windows().filter((w) => w.open && w.built && !w.hidden && w.id !== 'transport') : []);   // 021 V3: a mode-hidden or LEGACY card is not FOLDS' (kit windows() `hidden`)
   /** reveal(id) — a window by the FINDER's road (kit rk.reveal: an open one scrolled to, a closed one opened at the top); NODES as its FREE window */
+  const filmOpen = (a) => { const F = app.state.filmCard; if (!F) return false; reveal('render'); if (winOf('render').floating) L().raiseFloat('render'); else L().popOut('render'); return F.preset(a); };
   const reveal = (id) => { const N = nodes(), d = document.querySelector('.dev[data-id="' + id + '"]'); if (id === 'nodes' && N && (!d || d.classList.contains('closed'))) N.open(); else S().rk.reveal(id); S().saveSettings(); };
   const theme = (a) => { const T = app.hooks.setTheme; if (!T) return; if (a && a.id) T(a.id); else T(document.body.dataset.theme === 'light' ? 'dark' : 'light'); };
   const T = 'TRANSPORT', C = 'CAMERA', ST = 'STATE', WD = 'WINDOWS & DISPLAY', CS = 'CONTROL SURFACE', PJ = 'PROJECT', V = 'VIEW', SE = 'SETTINGS', CA = 'CARDS', N = 'NODES';
@@ -108,6 +109,9 @@ export function createActions(app) {
     { id: 'settings', icon: 'settings', inFields: true, label: 'settings', keys: ['Mod+Comma'], exact: true, run: () => L().raise('settings'), surface: true },
     { id: 'history', icon: 'history', group: PJ, short: 'history', label: 'the undo history window', run: () => L().raise('history'), surface: true },
     { id: 'render', icon: 'film', short: 'render', label: 'the RENDER card — film the stage', run: () => L().raise('render'), surface: true },
+    /* 025 C1 · FILE › RENDER… and EXPORT FRAMES…: the RENDER card off the rack and in front, its RANGE preset from what you have (film-card.js preset) */
+    { id: 'render.open', icon: 'film', group: PJ, short: 'render…', label: 'RENDER… — the RENDER card in front, its range from what you have (a selection, the timeline, ONE PERIOD, else STILL)', hint: 'RENDER… the film', run: () => filmOpen(), surface: true },   // no chord (call 7): Mod+Alt+R is Firefox's READER VIEW, Mod+Alt+E an AltGr €
+    { id: 'render.frames', group: PJ, short: 'export frames', label: 'EXPORT FRAMES… — the RENDER card with PNG FRAMES, its range from what you have', hint: 'EXPORT FRAMES… (PNG)', run: () => filmOpen({ format: 'png' }), surface: true },
     { id: 'nodes', was: 'curves', short: 'nodes', label: 'NODES — the picture’s node graph (CURVES grades the screen)', hint: 'NODES — the picture’s node graph', kind: 'toggle', icon: 'nodes', get: () => !!(nodes() && nodes().win.isOpen()), surface: true,   // 018 D3: the saved key id `curves` is read (was); 020 X0: the FREE window
       run: () => { const N = nodes(); if (!N) return L().raise('nodes'); if (N.win.isOpen()) N.close(); else N.open(); } },
     { id: 'windowPicker', short: 'finder', label: 'FINDER — search every window by name; SHIFT-click queues several', hint: 'FINDER — search every window', icon: 'windowPlus', run: () => { if (L().finder) L().finder.toggle(); }, surface: true },
