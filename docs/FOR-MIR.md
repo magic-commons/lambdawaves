@@ -71,6 +71,8 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 - **BUILT 1.5.6-alpha.8 · FROST is TEXT AUTO** (022 E1 · call 14, `shell/themes.js`, `shell/gui.js` home TEXT AUTO): white in dark as before, black in
   light (the kit's tile table: FROST light 8.06–8.11 : 1, was 1.05); a look stored with FROST's old TEXT LIGHT reads CUSTOM until FROST is picked again.
   λWAVES keeps FROST dark's white ladder through its own AUTO map (`lab/look.js` HOME_MAPS.text).
+- **BUILT 1.5.6-alpha.11 · THE WORDS LAND** (023 R7, `info/layer.js`; kit c18957a, the clone road): `viewChanged({ land: true })` — an app's re-seat
+  (its furniture or its seat changed, not the picture) lands every body on its rest at once, held or not; `viewChanged()` is the spring as before.
 - **A `'midi'` modulation SOURCE kind** (021 I2; not built): midi.js hands every CC as 0…1 (`sources()`, `source(key, v)`), but the model
   (`modulation/mod.js`) knows lfo · env · audio only; a `kind: 'midi'` source beside audio (its rack face, its serialisation) would let a
   learned knob drive any dial as an LFO does. λWAVES routes notes and CCs to ACTIONS today, not to dials.

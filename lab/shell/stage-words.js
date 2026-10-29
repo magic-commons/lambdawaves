@@ -224,9 +224,13 @@ export function createStageWords(app) {
     /* the racks move sides or the interface goes (body classes), the transport docks or goes to the top: only THOSE (020 S5: a hide or a peek is not one)
        re-place the block — the play edge's frost-hold and the tablet's motion class are not a reason to read layout — and once more
        400 ms on, when the slide or the pill's dodge (a class first, then its arrival) has landed */
+    /* 023 R7 · THE WORDS ARE LIVE (Josh: "sticky … as if it's trying to figure out where the window is"): a re-seat LANDS (the kit's
+       viewChanged({ land: true }), 1.5.6-alpha.11) — at once, and even while the pointer's hold below keeps them from swaying; the spring's
+       ~1 s glide is the picture's, not the seat's — and the racks' furniture is WHICH racks hold an open window (racks()): a window opened,
+       closed, floated or docked back changes the free stage, so the key carries it and the racks are watched for it */
     let settle = 0;
-    const place = (again = true) => { stats.places++; layer.viewChanged(); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
-    const rackKey = () => ['rack-l', 'ui-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('');
+    const place = (again = true) => { stats.places++; layer.viewChanged({ land: true }); clearTimeout(settle); if (again) settle = setTimeout(place, 400, false); };
+    const rackKey = () => ['rack-l', 'ui-hidden', 'phone'].map((c) => +document.body.classList.contains(c)).join('') + racks().map((r) => r.id).join();
     /* iteration 013 N2 (Josh: "When 'cursor' settings are off, the text should stay fixed and not sway"): the kit's layer parts its bodies from a
        moving pointer (mir/info/bodies.js, 260 px of reach) whatever follow and parallax say, so with PARALLAX and DRIFT off the layer is held by
        its own freeze while the pointer is within that reach of the block, and let go as it leaves (a rest that moved meanwhile is reached then);
@@ -240,7 +244,9 @@ export function createStageWords(app) {
     }, { passive: true });
     addEventListener('blur', () => still(false)); addEventListener('pointerout', (e) => { if (!e.relatedTarget) still(false); });
     let racksAt = rackKey();
-    new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    const furniture = new MutationObserver(() => { const k = rackKey(); if (k === racksAt) return; racksAt = k; place(); });
+    furniture.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    for (const r of [app.host.rackL, rack]) if (r) furniture.observe(r, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'hidden'] });
     { const n = document.getElementById('transport'); if (n) new MutationObserver(() => place()).observe(n, { attributes: true, attributeFilter: ['class'] }); }
 
     const labels = el('div', '', dom.stage); labels.id = 'atomLabels'; labels.setAttribute('aria-hidden', 'true'); labels.hidden = true;
