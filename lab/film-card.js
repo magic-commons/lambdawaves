@@ -47,6 +47,19 @@ export function createFilmCard(o) {
      ESP BAR on the frame · OFF), λWAVES' own rows under AUDIO; read at the take (render-exact.js describe → the job) */
   const nodesOn = () => ls.get('nodes') !== 'off', chrome = () => (ls.get('chrome') === 'off' ? 'off' : 'labels');
   const recorder = film.recorder({ nodes: nodesOn, chrome, editor: o.editor, signature: o.digest, selfTestStages: [{ name: 'λWAVES frame determinism', run: () => film.verify({ frames: 6, width: 160 }).then((v) => { if (!v.ok) throw new Error(v.message || v.error); return v.message; }) }] });
+  /* 025 B4 · EVERY SETTING IS A WITNESS: each run's options, the kit's plan at the tap and the stage's CSS box, audited against the kit's result, the
+     frame log and the FILE when it lands (render-exact.js audit · fileFacts) — `film.last.audit`; a row that lies is said */
+  const run0 = recorder.run;
+  recorder.run = (opts) => {
+    const asked = { ...opts, nodes: nodesOn(), chrome: chrome() }, current = { w: cv.clientWidth || cv.width, h: cv.clientHeight || cv.height };
+    let plan = null; try { plan = recorder.estimate(opts); } catch (_) { /* the run says why */ }
+    return run0(opts).then(async (res) => {
+      const file = await film.fileFacts(res).catch(() => null), A = film.audit({ asked, plan, res, last: film.last, file, current });
+      if (film.last) film.last.audit = A;
+      if (!A.ok) say('RENDER DISOBEYED: ' + A.lies.join(' · '), true);
+      return res;
+    });
+  };
   made = createRenderCard({ id: 'render', recorder, loadingMark: false, prefix: PREFIX, defaults: { fps: 30, motion: 'still' }, say,
     ...(o.files ? { files: o.files } : {}), ...(o.gallery && o.here ? { gallery: o.gallery, subject: subjectOf(o.here) } : {}),
     save: (blob, name) => handOver(blob, film.nameFor(name)),

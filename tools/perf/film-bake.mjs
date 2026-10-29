@@ -58,6 +58,7 @@ try {
   }
   if (STEPS.includes('shot')) {
     fs.mkdirSync(DIR, { recursive: true });
+    await g.ev(`__LW.schedule(__LW.TIER.PRESENT); await new Promise((r) => setTimeout(r, 500)); await __LW.settle(); return 1;`);   // a paused stage after a film waits for a present (seen at 2fda4dc7 too)
     const b64 = await g.snap();
     fs.writeFileSync(DIR + '/.stage.png', Buffer.from(b64, 'base64'));
     const r = await g.ev(`const F = __LW.captureUI.exact, cv = __LW.field.canvas, W = cv.clientWidth & ~1;

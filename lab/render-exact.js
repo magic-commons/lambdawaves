@@ -100,7 +100,8 @@ import {
   readback, configureCopy, captionOver, handOver,
 } from './capture.js';
 import { createRecorder } from './mir/render/recorder.js';
-import { RECORD_FPS, estimateFilm, ceilingWarning, fmtMs, fmtBytes } from './mir/render/plan.js';
+import { RECORD_FPS, RECORD_SIZES, estimateFilm, ceilingWarning, fmtMs, fmtBytes } from './mir/render/plan.js';
+import { mp4Parse } from './mir/render/mp4.js';
 
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
    PART 1 — THE LAWS.  Nothing below touches the DOM, WebGPU or a clock; all of it is proved in node.
@@ -489,6 +490,62 @@ export function manifest(o = {}) {
   };
 }
 
+/* ── THE OBEDIENCE AUDIT (025 B4) ──────────────────────────────────────────────────────────────────────────────
+ * EVERY SETTING IS A WITNESS: each row of the RENDER card, what was asked, what the kit's result says, what λWAVES' frames saw and what the
+ * FILE holds, side by side.  `audit({ asked, plan, res, last, file, current })` is pure: asked = the card's run options (+ nodes, chrome),
+ * plan = the kit's plan at the tap (rec.plan), res = the kit's result, last = film.last (the frame log), file = fileFacts(res), current =
+ * the stage's CSS box (CURRENT is the stage at DPR 1, even).  → { ok, rows: [{ setting, asked, witness, ok }], lies: [setting] } */
+const even = (n) => Math.max(16, Math.round(n) & ~1);
+export function audit({ asked = {}, plan = null, res = null, last = null, file = null, current = null } = {}) {
+  const rows = [], row = (setting, a, witness, ok) => rows.push({ setting, asked: a, witness, ok: !!ok });
+  const P = plan && plan.plan, fps = Number(asked.fps), tl = /^timeline-/.test(asked.motion || ''), n = res ? res.frames : 0, L = last || {};
+  const want = asked.size ? asked.size : RECORD_SIZES[asked.resolution] ? { w: RECORD_SIZES[asked.resolution][0], h: RECORD_SIZES[asked.resolution][1] } : current ? { w: even(current.w), h: even(current.h) } : null;
+  const sz = (o) => (o ? o.w + '×' + o.h : '—');
+  row('SIZE', (asked.size ? 'PREVIEW ' : asked.resolution || '') + ' ' + sz(want), 'result ' + sz(res && { w: res.width, h: res.height }) + ' · frames ' + sz(L.w && L) + ' · file ' + sz(file),
+    want && res && res.width === want.w && res.height === want.h && L.w === want.w && L.h === want.h && (!file || (file.w === want.w && file.h === want.h)) && want.w % 2 === 0 && want.h % 2 === 0);
+  row('FPS', fps, 'result ' + (res && res.fps) + (file && file.fps ? ' · file ' + file.fps : ''), res && res.fps === fps && L.fps === fps && (!file || !file.fps || Math.abs(file.fps - fps) < 1e-9));
+  const frames = P ? P.frames : tl ? null : Math.max(1, Math.round(asked.durationS * fps));
+  row('FRAMES', frames, 'result ' + n + ' · λWAVES drew ' + (L.frames || 0) + (file && file.frames != null ? ' · file ' + file.frames : ''), n === frames && L.frames === n && (!file || file.frames == null || file.frames === n));
+  row('DURATION', frames / fps + ' s', 'result ' + (res && res.durationS) + ' s' + (file && file.durationS != null ? ' · file ' + file.durationS + ' s' : ''), res && Math.abs(res.durationS - n / fps) < 1e-9 && (!file || file.durationS == null || Math.abs(file.durationS - n / fps) < 0.5 / fps));
+  if (!tl) { const sf = Math.round((asked.offsetS || 0) * fps); row('START AT', (asked.offsetS || 0) + ' s → frame ' + sf, 'result ' + (res && res.offsetS) + ' s', res && Math.abs(res.offsetS - sf / fps) < 1e-9); }
+  else {
+    const r = plan && plan.range, bpf = P ? P.bpm / 60 / fps : 0, beats = (L.log || []).map((x) => x.beat).filter(Number.isFinite), b0 = beats[0], b1 = beats[beats.length - 1];
+    const period = (L.log || []).length && L.log.every((x) => x.period);
+    row('RANGE', asked.motion.replace('timeline-', '').toUpperCase() + (r ? ' beats ' + r.start + ' → ' + r.end : ''), (period ? 'ONE PERIOD\'s own schedule · ' : '') + 'first beat ' + b0 + ' · last beat + 1 frame ' + (b1 + bpf),
+      r && beats.length === n && Math.abs(b0 - r.start) <= bpf / 2 + 1e-9 && Math.abs(b1 + bpf - r.end) <= bpf / 2 + 1e-9);
+  }
+  row('FORMAT', asked.format, 'file ' + (file ? file.kind : '—') + (res ? ' · ' + res.files.length + ' file(s)' : ''), file && file.kind === asked.format);
+  row('MODULATION', asked.modulation ? 'ON' : 'OFF', 'result ' + (res && res.modulation ? 'ON' : 'OFF'), res && !!res.modulation === !!asked.modulation);
+  row('TIMELINE', asked.timeline ? 'ON' : 'OFF', 'result ' + (res && res.timeline ? 'ON' : 'OFF'), res && !!res.timeline === !!asked.timeline);
+  const au = res && res.audio, N = Math.round(n * 48000 / fps), plannedAudio = !!(plan && plan.audio);
+  row('AUDIO', (asked.audio === false ? 'OFF' : 'ON') + (plannedAudio ? ' · ' + plan.audio.clips.join(', ') : ' · no clip in the range'),
+    au ? au.label + ' ' + au.sampleRate + ' · ' + au.samples + ' samples (want ' + N + ')' + (file && file.audioS != null ? ' · file ' + file.audioS + ' s' : '') : 'silent' + (file && file.tracks ? ' · ' + file.tracks + ' trak' : ''),
+    asked.audio === false || !plannedAudio ? !au && (!file || !file.tracks || file.tracks === 1) : !!au && au.samples === N && (!file || file.audioS == null || Math.abs(file.audioS - n / fps) < 1 / 48000 + 1e-9));
+  row('NODES', asked.nodes === false ? 'OFF' : 'ON', 'frames ' + (L.nodes === false ? 'OFF' : 'ON') + ' · ' + ((L.baked || []).find((x) => x.id === 'nodes') || { why: 'an empty graph' }).why, (asked.nodes !== false) === (L.nodes !== false));
+  row('CHROME', asked.chrome === 'off' ? 'OFF' : 'LABELS', 'frames ' + (L.chrome === 'off' ? 'OFF' : 'LABELS') + ' · ' + (L.baked || []).filter((x) => /atomLabels|espBar/.test(x.id)).map((x) => x.id + ' ' + x.state).join(' · '), (asked.chrome === 'off') === (L.chrome === 'off'));
+  return { ok: rows.every((r) => r.ok), rows, lies: rows.filter((r) => !r.ok).map((r) => r.setting) };
+}
+/** what the FILE holds (025 B4): an MP4's moov read by the kit's parser (the size from its avc1 entry, the fps from the video stts, the frames,
+ *  the audio trak's edit) — or, for PNG frames, the first frame's IHDR and the parts' frame ranges.  Reads only the boxes it needs. */
+export async function fileFacts(res) {
+  const f = res && res.files && res.files[0]; if (!f || !f.blob) return null;
+  const at = async (a, b) => new Uint8Array(await f.blob.slice(a, b).arrayBuffer());
+  if (res.format === 'png') {
+    const head = await at(0, Math.min(f.blob.size, 1 << 20)); let w = null, h = null;
+    for (let i = 0; i + 24 < head.length; i++) if (head[i] === 0x89 && head[i + 1] === 0x50 && head[i + 2] === 0x4e && head[i + 3] === 0x47) { const d = new DataView(head.buffer, i + 16, 8); w = d.getUint32(0); h = d.getUint32(4); break; }
+    return { kind: 'png', w, h, frames: res.files.reduce((s, x) => s + (Number.isFinite(x.lastFrame) ? x.lastFrame - x.firstFrame + 1 : 0), 0), durationS: null };
+  }
+  let p = 0, moov = null;
+  while (p + 16 <= f.blob.size) { const b = await at(p, p + 16), d = new DataView(b.buffer); let size = d.getUint32(0); const type = String.fromCharCode(...b.subarray(4, 8));
+    if (size === 1) size = Number(d.getBigUint64(8)); if (size < 8) break; if (type === 'moov') { moov = await at(p, p + size); break; } p += size; }
+  if (!moov) return { kind: 'mp4', w: null, h: null };
+  const m = mp4Parse(moov), v = (m.tracks || []).find((t) => t.handler === 'vide'), a = (m.tracks || []).find((t) => t.handler === 'soun');
+  let w = null, h = null; for (let i = 4; i + 40 < moov.length; i++) if (moov[i] === 0x61 && moov[i + 1] === 0x76 && moov[i + 2] === 0x63 && moov[i + 3] === 0x31) { const d = new DataView(moov.buffer, i + 4 + 24, 4); w = d.getUint16(0); h = d.getUint16(2); break; }
+  const delta = v && v.stts && v.stts[0] ? v.stts[0][1] : 0;
+  return { kind: 'mp4', w, h, fps: delta ? v.timescale / delta : null, frames: v ? v.sampleCount : null, durationS: v ? v.mediaDuration / v.timescale : null, tracks: (m.tracks || []).length,
+    audioS: a && a.edits && a.edits[0] && m.movie ? a.edits[0].segment / m.movie.timescale : null, audioCodec: a ? a.entry : null };
+}
+
 /* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
    PART 2 — THE FILM: MIR's recorder, with λWAVES' frame.  Needs a browser (or the fake lab the proof injects).
    ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
@@ -667,7 +724,9 @@ export function createFilm(LW, opts = {}) {
   function witnesses(J, wit, t, w, h) {
     const f = field(), pinned = J.pinned, fail = [];
     if (pinned('jitter') && wit.presents !== JITTER_SEED + 1) fail.push('jitter: presents read ' + wit.presents + ', not ' + (JITTER_SEED + 1) + ' — another frame presented during ours');
-    if (pinned('fieldclock') && wit.generation !== 1) fail.push('fieldclock: the field generation advanced ' + wit.generation + ' times, not once');
+    /* 025 B4: a MOLECULE owns the field through its own kernel, which computes only when its volume is dirty — a still volume advances none */
+    const kernel = !!(LW.chem && LW.chem.on), gens = kernel ? [0, 1] : [1];
+    if (pinned('fieldclock') && !gens.includes(wit.generation)) fail.push('fieldclock: the field generation advanced ' + wit.generation + ' times, not ' + (kernel ? 'once at most (a molecule\'s kernel)' : 'once'));
     if (pinned('autoscale') && (wit.canvasW !== w || wit.canvasH !== h)) fail.push('autoscale: the canvas was ' + wit.canvasW + '×' + wit.canvasH + ' at readback, not ' + w + '×' + h);
     const res = f && f.ok ? f.resolution : J.base.resolution;
     if (pinned('governor') && res !== J.base.resolution) fail.push('governor: the field grid moved from ' + J.base.resolution + '³ to ' + res + '³ mid-film');
@@ -772,7 +831,7 @@ export function createFilm(LW, opts = {}) {
       signature: C.signature, selfTestStages: C.selfTestStages,
       storage: opts.storage, calib: C.calib || opts.calib, wake: opts.wake, guard: opts.guard, hidden: opts.hidden, pauseWhileHidden: opts.pauseWhileHidden,
       colorSpace: f && f.ok && f.gamut && f.gamut !== 'srgb' ? 'display-p3' : undefined,
-      currentSize: () => ({ w: canvas ? canvas.width : 16, h: canvas ? canvas.height : 16 }),
+      currentSize: () => ({ w: canvas ? canvas.clientWidth || canvas.width : 16, h: canvas ? canvas.clientHeight || canvas.height : 16 }),   // 025 B4: CURRENT is the stage at DPR 1, not its backing store (AUTO SCALE × DPR)
     }));
   }
   /** recorder({ editor: () => tl.editor, signature, selfTestStages, calib }) → the card's recorder: the host recorder, handed the
@@ -931,7 +990,7 @@ export function createFilm(LW, opts = {}) {
     return true;
   }
 
-  return { plan, render, take, verify, hazards, save, discard, limits, sizeFor, frame, recorder, nameFor, get names() { return taken; }, canvas,
+  return { plan, render, take, verify, hazards, save, discard, limits, sizeFor, frame, recorder, nameFor, audit, fileFacts, get names() { return taken; }, canvas,
     get running() { return busy(); }, get last() { return last; },
     laws: { exactSchedule, endpointLaw, arithmeticLaw, planExact, foldOrigin, estimate, digest, manifest, offsetOf, ulpsBetween, HAZARDS } };
 }
