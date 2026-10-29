@@ -25,7 +25,7 @@ them into the kit's re-laid rows). Rack `app` literal untouched; `rack-deps --cl
 - **B3 THE WORDS** (621d62f8) — `stage-words.js labelsAt(id, W, H, obs, half)`: the ATOM LABELS by the same `toScreen` law over the film's box
   (font 14 × SIZE px × k, white under `difference`); the ESP BAR: its stage box, ramp stops (its own gradient), numbers (font, colour, shadow)
   mapped onto the frame. STAGE FORMULA / NAME / SUBTITLE stay OUT (call 4), said in the readings.
-- **B4 THE OBEDIENCE AUDIT** (this commit) — `render-exact.js audit()` (pure) + `fileFacts()` (the MP4's moov via the kit's `mp4Parse`: avc1
+- **B4 THE OBEDIENCE AUDIT** (c7ecc448) — `render-exact.js audit()` (pure) + `fileFacts()` (the MP4's moov via the kit's `mp4Parse`: avc1
   size, stts fps, sample count, the audio trak's edit; PNG: IHDR + the parts' frame ranges); `film-card.js` wraps the recorder's `run`: options,
   the kit's plan at the tap and the stage box → `film.last.audit`; a lying row is said ("RENDER DISOBEYED: …"). FIXED: (1) CURRENT was the canvas
   backing store (CSS × DPR × AUTO SCALE) — now the stage's CSS box at DPR 1, even; (2) a MOLECULE film ABORTED on frame 0 (`fieldclock: advanced
@@ -53,7 +53,10 @@ them into the kit's re-laid rows). Rack `app` literal untouched; `rack-deps --cl
   (B2's particles differ in place by design: the stage seeds from Math.random, the film from 13).
 
 ## Tests
-render-exact.test GREEN 40/40 (re-aimed: `overlays` is λWAVES' hazard now) · film-handover · curves · film-probe · THE LOCK — see the foot.
+render-exact.test GREEN 40/40 (re-aimed: `overlays` is λWAVES' hazard now) · film-handover GREEN · curves GREEN · film-probe (picture, loop, video,
+frames, verify: all ok, 0 page errors) · `./test.sh node` EXIT 0 · pwa --write · new-project --check in step · mir-manifest PASS · rack-deps HOLDS.
+THE LOCK (gate 9691/5691): 843 values · 0 moved · unrepeatable none; s4a fixture 987 values · 0 moved — no flake, no re-run.
+Tools: `tools/perf/film-bake.mjs` (determinism + shots), `tools/perf/film-obey.mjs` (the audit walk).
 
 ## The law sentence (docs/laws/film.md, and nodes.md's "Screen only" line)
 THE FILM IS THE SCREEN (025 B): `lab/film-bake.js` lays over each film frame, at the film's scale and as a function of the frame alone, the NODES
