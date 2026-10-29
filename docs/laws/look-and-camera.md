@@ -28,3 +28,5 @@ registers none (its `mod` has no `add`). The phase palette is MIR's
 `createRampPanel` (`DEFAULT_PALETTE` in `lab/palette-app.js`).
 `tools/camera-routes.mjs` proves the saved routes after a camera change.
 (0.5.0 C1)
+
+A SAVED LOOK KEEPS ITS NAME (027 D5): the look store runs the kit's one-time migration (version 2, `frostText`): a FROST saved before 023 with the old TEXT LIGHT reads FROST; a TEXT LIGHT chosen afterwards is kept; `mir.gui` carries `prefsV: 2` (fixture tests/fixtures/look-frost-022.mir.gui.json).

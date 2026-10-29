@@ -65,3 +65,5 @@ its scope tables, and `tools/settings-probe.mjs` is their gate). The camera's
 port is `createCameraLaw(...).port`, the object MIR's CAMERA panel takes. The
 stage's bindings are `STAGE_BINDINGS` in `lab/stage-gestures.js`; a binding
 change is a row edit there. (0.5.0 A1/A8)
+
+A DEMO OPENS CLEAN (027 D1): FOLDERS takes its clean mark at the restore, before the chem worker answers; a solve's derived fill (`derived` in lab/windows/molecules.js: the orbital, the register's selection, the STATES ladder's parked lane record, the first potential's view) joins the history row AND re-takes the clean mark it stood on, so a project clean when its solve lands is clean after it. No key list. `tests/molecule-demos.browser-test.mjs` says "opens CLEAN" for every bundled demo.

@@ -47,3 +47,5 @@ KEYBOARD window's paint is λWAVES' own in `lab/keymap.css` (021 G6; the window 
 gear), guarded by `mir-controls`. Josh's seven glass rulings are read from
 `research/release-0.5.0/C0-GLASS-RULINGS.md`; the defaults applied there are
 five the kit's, two λWAVES' (the disconnected head's fill and lift, lab.css §G).
+
+THE SIBLINGS (027 S1–S3, the clone road of 022): NEBULA-REDUX (nebula-1.5 @ 737a8df, 0 callers changed) and BUBBLDYNE (opus/lorentz-foam @ 627bcbe, a FINDER opener added) run on 1.5.6-alpha.17 in bundles under `.tmp/it027/` of the integrator's worktree with their fetch lines in `research/iteration-027/*-ADOPT.md`; AUTOMATA's row follows. The kit itself is unchanged at 1.5.6-alpha.17.

@@ -121,3 +121,11 @@ waits for a line. Newest first; an item leaves this list when an adopted MIR rel
 
 ## From iteration 013
 - **The info layer pushes its bodies from the pointer whatever `follow` and `parallax` say** (`mir/info/layer.js` env passes `pointer` unless frozen; `bodies.js` parts within 260 px): a `push: false` option / `setPush(v)` (or `follow: false` dropping the pointer force) would let λWAVES drop its proximity freeze in `lab/shell/stage-words.js` (iteration 013 N2).
+
+## 027 (2026-10-29)
+- `createApp({ finder })` / `createRack({ chrome: true, finder: true })`: an app built on createApp or with chrome:true gets the FINDER and its + (NEBULA S1, BUBBLDYNE S2, BASINS 022 each hand-built the opener).
+- `createWindowPicker`: an `onToggle` / shown-change event, so an opener can show its state without a window listener (S2).
+- `adopt.mjs`: name the kit stylesheets that are new since the app's manifest (S2, repeating BASINS' ask).
+- `shell/midi.js`: a `resume()` door (start with no prompt when a saved map exists and access is granted) and the amended privacy law; λWAVES' `resumeMidi` (lab/mapping.js) is the draft (D4).
+- prefs/themes: retired values a theme can carry for `matchPreset` (FROST's `text: 'light'`), so an old saved look keeps its preset name without an app-side migration (D5).
+- `folders/gallery.js`: a seam to re-take the clean mark once a restore has settled (an async solve's derived writes), instead of the app's `derived(fill)` (D1).
