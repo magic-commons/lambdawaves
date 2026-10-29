@@ -36,7 +36,7 @@ const PRECACHE = [
   ['./actions.js',                                                  'e51d24fc4da9'],
   ['./angular-nodes.js',                                            '945796c72ba8'],
   ['./ask.js',                                                      '6e716ccee7ea'],
-  ['./atoms.js',                                                    'e132af19a5c8'],
+  ['./atoms.js',                                                    '7b019a29f60c'],
   ['./atomsview.js',                                                '1c5e2acd905f'],
   ['./badges.js',                                                   '450bf312f687'],
   ['./bessel.js',                                                   '0689408ac984'],

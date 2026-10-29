@@ -351,7 +351,7 @@ class Anderson {
     const A = [];                                        // the DIIS system: B c = 0 with Σc = 1, by a Lagrange multiplier
     for (let i = 0; i < m; i++) { const row = new Float64Array(m + 2); for (let j = 0; j < m; j++) row[j] = B[i][j] * (i === j ? 1 + 1e-9 : 1); row[m] = 1; row[m + 1] = 0; A.push(row); }
     { const row = new Float64Array(m + 2); for (let j = 0; j < m; j++) row[j] = 1; row[m] = 0; row[m + 1] = 1; A.push(row); }
-    const c = gauss(A, m + 1);
+    const c = eliminate(A, m + 1);
     const out = new Float64Array(n);
     if (!c) { for (let k = 0; k < n; k++) out[k] = Vin[k] + this.beta * F[k]; return out; }             // ill-conditioned: linear mix
     for (let i = 0; i < m; i++) for (let k = 0; k < n; k++) out[k] += c[i] * (this.V[i][k] + this.beta * this.F[i][k]);
@@ -360,7 +360,7 @@ class Anderson {
   }
 }
 /** Gaussian elimination with partial pivoting on the augmented rows; null if singular */
-function gauss(A, N) {
+function eliminate(A, N) {
   for (let i = 0; i < N; i++) {
     let p = i; for (let k = i + 1; k < N; k++) if (Math.abs(A[k][i]) > Math.abs(A[p][i])) p = k;
     if (Math.abs(A[p][i]) < 1e-300) return null;
