@@ -1,0 +1,130 @@
+{
+ "conduct": 1,
+ "name": "MOL 5 CO2 KICK",
+ "title": "CO\u2082 \u00b7 a kicked density, real-time TDHF \u00b7 glass, signed, additive",
+ "tempo": {
+  "bpm": 120,
+  "meter": 4
+ },
+ "bars": 4,
+ "base": null,
+ "system": null,
+ "molecule": {
+  "id": "CO2",
+  "basis": "sto-3g",
+  "view": "density",
+  "method": "rhf"
+ },
+ "look": {
+  "palette": "ember",
+  "paletteOn": true,
+  "style": "glass",
+  "view": "density",
+  "exposure": 1.2,
+  "softness": 1.0,
+  "iso": 0.03,
+  "grain": 0.35,
+  "knee": 3,
+  "gamma": 1,
+  "stage": 0.06,
+  "hue": 0,
+  "frame": false,
+  "axis": false
+ },
+ "camera": {
+  "yaw": 0.65,
+  "pitch": 0.32,
+  "dist": 1.3,
+  "fov": 0.9
+ },
+ "overlays": {
+  "particles": {
+   "on": false
+  }
+ },
+ "nodes": [
+  {
+   "type": "vignette",
+   "knobs": {
+    "amount": 0.25
+   }
+  }
+ ],
+ "audio": null,
+ "lanes": [
+  {
+   "target": "observer.yaw",
+   "points": [
+    [
+     0,
+     0.65
+    ],
+    [
+     16,
+     3.05
+    ]
+   ],
+   "shape": "linear",
+   "name": "half turn"
+  },
+  {
+   "target": "material.style",
+   "points": [
+    [
+     0,
+     6
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     8,
+     3
+    ],
+    [
+     12,
+     7
+    ]
+   ],
+   "shape": "step",
+   "name": "a style per bar"
+  },
+  {
+   "target": "chem.kick",
+   "points": [
+    [
+     0,
+     0.01
+    ],
+    [
+     16,
+     0.01
+    ]
+   ],
+   "name": "the kick"
+  },
+  {
+   "target": "chem.speed",
+   "points": [
+    [
+     0,
+     40
+    ],
+    [
+     16,
+     40
+    ]
+   ],
+   "name": "the speed"
+  }
+ ],
+ "triggers": [],
+ "render": {
+  "fps": 30,
+  "size": "1080p",
+  "nodes": "on",
+  "chrome": "labels",
+  "caption": false
+ }
+}

@@ -26,15 +26,10 @@
   "grain": 0.35,
   "knee": 3,
   "gamma": 1,
-  "stage": 1,
+  "stage": 0.06,
   "hue": 0,
   "frame": false,
-  "axis": false,
-  "ground": [
-   0,
-   0,
-   0
-  ]
+  "axis": false
  },
  "camera": {
   "yaw": 0.65,
