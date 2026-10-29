@@ -1999,10 +1999,27 @@ export async function createField(canvas, opts = {}) {
     }
     const w = canvas.width, h = canvas.height;
     encodeEsp(enc, mat);                                          // iteration 014 B3: φ, after the volume it reads and before the present that reads it
-    if (w > 0 && h > 0) { encodeRender(enc, ctx.getCurrentTexture().createView(), obs, mat, w, h); stats.presents++; }
+    let tapped = false;
+    if (w > 0 && h > 0) { const cur = ctx.getCurrentTexture(); encodeRender(enc, cur.createView(), obs, mat, w, h); stats.presents++; if (tapFn) tapped = tapCopy(enc, cur, w, h); }
     device.queue.submit([enc.finish()]); espDone();
+    if (tapped) tapFn(tapTex, w, h);
     { inFlight++; const ts = performance.now(); device.queue.onSubmittedWorkDone().then(() => { inFlight--; queueMs = performance.now() - ts; }, landed); }
     stats.lastEncodeMs = performance.now() - t0;
+  }
+
+  /* ── THE TAP (024 S1): `tap(fn | null)` — while set, the canvas carries COPY_SRC and frame() copies the presented texture into one kept
+     texture (same format, TEXTURE_BINDING) in the SAME submit, then calls fn(texture, w, h).  A reader on the device (lab/node-shader.js)
+     draws from it; no WGSL, no pixel and no readback changes (readPixels renders its own texture).  Null clears it and frees the copy. */
+  let tapFn = null, tapTex = null;
+  const canvasUsage = () => GPUTextureUsage.RENDER_ATTACHMENT | (tapFn ? GPUTextureUsage.COPY_SRC : 0);
+  function tapCopy(enc, cur, w, h) {
+    if (!tapTex || tapTex.width !== w || tapTex.height !== h) { if (tapTex) tapTex.destroy(); tapTex = device.createTexture({ size: [w, h], format, usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST }); }
+    enc.copyTextureToTexture({ texture: cur }, { texture: tapTex }, [w, h]); return true;
+  }
+  function tap(fn) {
+    const f = typeof fn === 'function' ? fn : null, flip = !!f !== !!tapFn; tapFn = f;
+    if (flip) ctx.configure({ device, format, alphaMode: 'opaque', usage: canvasUsage(), ...(gamut !== 'srgb' && { colorSpace: 'display-p3' }) });
+    if (!f && tapTex) { tapTex.destroy(); tapTex = null; }
   }
 
   /* ── readbacks (tests and diagnostics; never on the frame path) ───────── */
@@ -2361,7 +2378,7 @@ export async function createField(canvas, opts = {}) {
     moleculeTiers: { get: () => ({ granted: device.limits.maxComputeWorkgroupStorageSize, caps: MOL_CAPS, wg: molWg, orbitalFrom: MOL_ORB_FROM }), enumerable: true } });
   Object.assign(out, {
     ok: !b.lost, device, adapter, format, stats,
-    frame, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, errorField, lineColors, linePixels,
+    frame, tap, throughput, readPixels, sampleVoxel, fieldDigest, readStats, readGrid, errorField, lineColors, linePixels,
     setResolution, setMolecule, setMoleculeMatrix, reconstructMolecule, moleculeThroughput,
     /** iteration 014 B: the atoms BALLS · STICKS · ESP draw ([{ Z, x, y, z }] in bohr, or null) and the molecule's charge; a volume's φ grid
      *  ({ n, half, data: Float32Array(n³) }, cell centres, x fastest — volumes-format.js espGrid) or null for the Poisson pass; φ's state */
@@ -2416,7 +2433,7 @@ export async function createField(canvas, opts = {}) {
       if (want !== 'srgb' && !(canvasP3 && cssP3)) return gamut;          // never a state where the DOM is P3 and the canvas is not
       if (want === gamut) return gamut;
       gamut = want;
-      try { ctx.configure(want === 'srgb' ? { device, format, alphaMode: 'opaque' } : { device, format, alphaMode: 'opaque', colorSpace: 'display-p3' }); } catch (_) { gamut = 'srgb'; ctx.configure({ device, format, alphaMode: 'opaque' }); }
+      try { ctx.configure(want === 'srgb' ? { device, format, alphaMode: 'opaque', usage: canvasUsage() } : { device, format, alphaMode: 'opaque', usage: canvasUsage(), colorSpace: 'display-p3' }); } catch (_) { gamut = 'srgb'; ctx.configure({ device, format, alphaMode: 'opaque', usage: canvasUsage() }); }
       uploadPalette();
       return gamut;
     },
