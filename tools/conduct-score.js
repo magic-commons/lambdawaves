@@ -284,6 +284,9 @@ export async function apply(LW, input) {
   /* the modulation armed (the arrangement drives), the clock at the range's start, then SAVE as CONDUCT/<name> */
   if (!LW.mod.armed) LW.mod.arm(true);
   LW.mod.host.targets.sync();
+  /* 026 B found: the armed arrangement writes its beat-0 values a moment after the arm (a view lane, a states lane) — a save before that
+     write leaves a project that opens DIRTY.  So: settle, let the host's first pump land, settle again, then save what the arrangement made. */
+  await LW.settle(); await new Promise((r) => setTimeout(r, 1500)); await LW.settle();
   rep.path = 'CONDUCT/' + score.name;
   await step('save', () => (P.save(rep.path) ? true : 'the project was not saved'));
   Object.assign(rep, { ok: true, name: score.name, bpm: S.tempo.bpm, meter: S.tempo.meter, bars: S.bars, beats: total, seconds: total * 60 / S.tempo.bpm, range: S.render.range, render: S.render,
