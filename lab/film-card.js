@@ -78,7 +78,7 @@ export function createFilmCard(o) {
   /* 025 C3 · THE EVEN ROWS (MIR 1.5.6-alpha.17 `even`): RANGE · FORMAT, SIZE · FPS · AUDIO, LENGTH · START AT, the switches, the estimate,
      RENDER · PREVIEW · CANCEL — each one row; PERIOD is λWAVES' RANGE: TIMELINE · ACTIVE over the placed ONE PERIOD (placed now if there is none) */
   const onPeriod = () => { const ed = o.editor(), P = periodOf(ed), a = ed && ed.activeRange ? ed.activeRange() : null; return !!(P && a && a.start === P.start && a.end === P.start + P.duration); };
-  const period = { id: 'period', label: 'PERIOD', title: 'ONE PERIOD — TIMELINE · ACTIVE over the placed ONE PERIOD (placed now when there is none), the modulation OFF', motion: 'timeline-active', is: onPeriod,
+  const period = { id: 'period', label: 'PERIOD', title: 'ONE PERIOD — ACTIVE over it (placed if none), MOD OFF', motion: 'timeline-active', is: onPeriod,
     pick() { const ed = o.editor(), P = periodOf(ed); if (!P) return place(); ed.setActiveRange({ start: P.start, end: P.start + P.duration }); set(C.modSelect, 'off'); set(C.motion, 'timeline-active'); return P.id; } };
   made = createRenderCard({ id: 'render', recorder, loadingMark: false, prefix: PREFIX, defaults: { fps: 30, motion: 'still' }, say, even: true, ranges: [period],
     ...(o.files ? { files: o.files } : {}), ...(o.gallery && o.here ? { gallery: o.gallery, subject: subjectOf(o.here) } : {}),
