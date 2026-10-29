@@ -915,8 +915,10 @@ export function createChem(host, api) {
   function onEsp(r) {                                                     // the pump's consumer: the reply { N, half, phi, min, max, ms } becomes the card
     if (!r || !r.phi || view !== 'esp' || !sol) return false;
     const cap = 4 * Math.abs(r.min) || 1, data = r.max > cap ? Float32Array.from(r.phi, (v) => (v > cap ? cap : v)) : r.phi;   // the nuclei's Z/r peaks are tens of a.u.: shown clipped at +4|min| so the lone pairs read; the numbers are not
-    esp = { card: { N: r.N, half: r.half, data }, N: r.N, min: r.min, max: r.max, cap: r.max > cap ? cap : null, ms: r.ms, of: sol };
-    pushMatrix(); refresh(); tell(); return true;
+    const first = !esp || esp.of !== sol;   // 027 D1: this solve's first potential moves the view (espOn) — the solve's derived fill; the rest are frames
+    const fill = () => { esp = { card: { N: r.N, half: r.half, data }, N: r.N, min: r.min, max: r.max, cap: r.max > cap ? cap : null, ms: r.ms, of: sol }; pushMatrix(); refresh(); tell(); };
+    if (first && api.derived) api.derived(fill); else fill();
+    return true;
   }
   let scripted = false;                       // chem.run(n) is propagating: the tdhf model's products, whichever road asked
   const model = () => (running || scripted ? 'tdhf' : 'ground');

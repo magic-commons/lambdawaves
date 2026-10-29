@@ -11,6 +11,7 @@
 //   3 · those entries still open from the reader's store (the DEMOS press finds them by seedId): WATER with MOLECULES on its HOMO,
 //       HELIUM as SPECTRUM's ATOM at Z = 2; RESTORE THE DEMOS has nothing to put back.
 //   4 · STAR LOOP (026) opens with its whole timeline and no error, though its track is not bundled.
+//   5 · every bundled demo opens CLEAN (027 D1): not dirty 600 ms after its press, nor after its solve lands.
 // The old files ride as tests/fixtures/retired-demos/ (as they shipped at 033424d).  Screenshots: SHOTS=<dir>.
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
@@ -102,6 +103,14 @@ try {
     return { ok, status: P.status, current: P.current, lanes: __LW.timeline.model.state().lanes.length, clips: __LW.timeline.model.state().clips.length, errs: __e.slice() };`);
   assert.deepEqual(star, { ok: true, status: 'opened demo DEMOS/STAR LOOP', current: 'DEMOS/STAR LOOP', lanes: 27, clips: 41, errs: [] }, JSON.stringify(star));
   console.log('PASS STAR LOOP opens from DEMOS with its timeline (27 lanes, 41 clips) and no error, its track not bundled');
+  /* ── 5 · A DEMO OPENS CLEAN (027 D1): the unsaved mark reads clean after the open AND after its solve lands (the STATES ladder's parked
+         lanes, the first potential's view are the solve's derived fill: they join the clean mark the open took) ── */
+  for (const [f, n] of [['wave-dancer', 'WAVE DANCER PROTOTYPE'], ...NEW026]) {
+    const c = await g.ev(`const P = __LW.projects, ok = await P.demo(${JSON.stringify(f)}); await __w(600); const early = P.dirty; await __w(2600); await __LW.settle();
+      return { ok, current: P.current, early, late: P.dirty, errs: __e.slice() };`);
+    assert.deepEqual(c, { ok: true, current: 'DEMOS/' + n, early: false, late: false, errs: [] }, JSON.stringify(c));
+    console.log(`PASS ${n} opens CLEAN (600 ms and 3.2 s after its press)`);
+  }
 } catch (e) {
   failed = true; console.error(e);
 } finally {

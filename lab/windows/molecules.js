@@ -91,6 +91,12 @@ export function createMolecules(app) {
   /* SKELETON · BEAD · ELLIPSOID (0.7.0 V2 · 0.8.2 P3 · 0.8.3 B3) are INFORMATIONAL's MARKS since iteration 007 (lab/informational.js builds them):
      MOLECULES no longer reaches into that card's body.  The stage words are spoken through ONE verb, stageText.say(kind, text) (shell/stage-words.js) */
   const say = (kind, t, o) => !!app.state.stageText && app.state.stageText.say(kind, t, o);
+  /* 027 D1 · A DEMO OPENS CLEAN: a solve's derived fill (the orbital, the register's selection, the STATES ladder and a parked lane
+     record, the first potential's view) joins the history row that asked for it (S4) AND the clean mark it stood on: a project clean
+     when its solve lands is clean after it — the open's mark is taken at the restore, before the worker answers */
+  const derived = (fill) => { const P = app.sh.layout && app.sh.layout.projects, d = P ? P.folders.dirty() : null;
+    if (app.state.history) app.state.history.absorb(fill); else fill();
+    if (d && d.known && !d.dirty) P.markClean(); };
   app.state.chem = createChem(wChem.body, { say, active: () => canPresent(wChem), loading: cardLoading(wChem, 'chem'), moreOpen: FIRST_RUN.more, modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): a hand on a ROUTED dial moves its base   // 0.4.0 S0: the MORE fold; folded on every first run since iteration 001
     solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance, plane: () => app.w.slice,
     modBase: (id, v) => { const H = app.state.modHost; if (H && H.registry.has(id)) H.registry.setBase(id, v); },   // iteration 007 O: an UNROUTED hand on the ORBITAL is its base at once (syncBases runs only while the modulation clock does)   // iteration 005 P2: THE CONTINUITY RECORD samples PLANE's own geometry
@@ -104,7 +110,7 @@ export function createMolecules(app) {
     /* the card does not touch the field: it hands `ground` and `tdhf` products to the session, which decides which
        model is playing and which observable the field shows.  See molecular-session.js. */
     session: app.state.molSession,
-    derived: (fill) => (app.state.history ? app.state.history.absorb(fill) : fill()),   // S4 · a solve's derived defaults join the row that asked for it
+    derived,   // S4 · a solve's derived defaults join the row that asked for it (and 027 D1: the clean mark)
     now: () => clock.t, clock, fps: () => app.ctl.stats.fps,   // 0.7.0 V1 VIBRATE: the flash law reads RATE and the fps; BREATHE sets RATE (the knob's road) and plays
     breathe(r) { ui.rateKnob.set(r); if (!app.ctl.modHand('transport.rate', r)) clock.setRate(r); clock.play(performance.now() / 1000); schedule(TIER.EVOLVE); } });
   /* 0.5.1 D2 · THE MOLECULE'S HEAD (R6-G): a HAND pick shows its head (latex-state.js moleculeHead: every number the record's stem or
@@ -140,7 +146,7 @@ export function createMolecules(app) {
   app.state.register = createRegister(C.slots.register, { bar: C.slots.top, one, stroked: () => { C.setView('registry', true); },   // a hand that painted the ladder picked VIEW MIX
     active: () => canPresent(wChem), modHand: (id, v) => app.ctl.modHand(id, v),   // iteration 007 (MIR check B2): the STATES dials' hand law
     stamp: () => { if (app.state.restampParams) requestAnimationFrame(app.state.restampParams); },   // a lane built after boot becomes a drop target for a macro
-    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance,   // the STATES mode asks the chem worker for its canonical ladder and vectors
+    solve: (msg, fallback, pluck) => solveChem(msg, fallback, pluck), balance, derived,   // the STATES mode asks the chem worker for its canonical ladder and vectors
     repaint(rebuild) { schedule(rebuild ? TIER.REBUILD : TIER.PRESENT); },
     status(t, cls) { wChem.setStatus(t, cls); },
     announce: (md) => say('preset', md), pop: (t) => say('registry', t),   // a HAND's preset only (orbitalsview / statesview presetSel); the orbital a hand added (orbitalsview)
