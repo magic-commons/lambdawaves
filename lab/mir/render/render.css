@@ -143,6 +143,31 @@
 .mir-render[data-seat="card"] :is(.sr-fps-row, .sr-clock-row) .seg { display: grid; width: 100%; box-sizing: border-box; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .mir-render[data-seat="card"] .sr-clock-row .seg { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .mir-render[data-seat="card"] :is(.sr-fps-row, .sr-clock-row) .seg-b { min-width: 0; padding: 0 2px; }
+/* THE EVEN ROWS (1.5.6-alpha.17, λWAVES 025 C3; `even`): A ROW IS EVEN — twelve columns, so the thirds (SIZE · FPS · AUDIO, LENGTH · START AT,
+   RENDER · PREVIEW · CANCEL) keep their places row to row and FORMAT sits over the last third; a cell is its word over its control; the
+   switches share their row evenly, however many the app seats beside MODULATION · TIMELINE */
+.mir-render .sr-even { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; align-items: end; }
+.mir-render .sr-even[hidden] { display: none; }
+.mir-render .sr-cell { grid-column: span 4; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mir-render .sr-even-range > .sr-cell:first-child { grid-column: span 8; }
+.mir-render .sr-cell > .sr-label { flex: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mir-render .sr-cell > :is(.sr-sel, .segw, .sw) { flex: none; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
+.mir-render .sr-cell .seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); width: 100%; box-sizing: border-box; }
+.mir-render .sr-cell .seg-b { min-width: 0; padding: 0 2px; }
+.mir-render .sr-cell > .mir-num.sr-record-time { width: 100%; flex: none; }
+.mir-render .sr-cell .mir-sel-b { min-width: 0; gap: 2px; padding: 0 4px 0 8px; }   /* a third holds CURRENT and its caret */
+.mir-render .sr-even .sw { justify-content: center; min-width: 0; padding: 0 4px; overflow: hidden; }
+.mir-render .sr-even-shape .sw { min-height: var(--render-touch-h); }   /* AUDIO stands as tall as SIZE and FPS beside it */
+.mir-render .sr-even-switches { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+.mir-render .sr-even-switches > * { grid-column: auto; width: auto; min-width: 0; }
+.mir-render .sr-even-range .seg-b { min-height: var(--render-row-h); }   /* two lines of choices in the height of one 44-px row and a half */
+.mir-render .sr-even-range > .sr-cell:first-child .seg { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* RANGE two by two */
+.mir-render .sr-even-range > .sr-cell:last-child .seg { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); }               /* FORMAT one over the other, as tall */
+.mir-render .sr-even-acts > .trig { grid-column: span 4; width: auto; min-width: 0; padding: 0 4px; }
+.mir-render .sr-even-acts > .sv-primary.trig { min-height: var(--render-touch-h); border-color: var(--render-primary-rim); }
+.mir-render .sr-even-acts > .sv-primary.trig:disabled { background: var(--glass-well); border-color: var(--glass-hairline); opacity: var(--render-disabled); }
+.mir-render .sr-even ~ .sr-prog { min-height: 0; }
+.mir-render .sr-even ~ .sr-prog:has(.sr-value:empty) { display: none; }   /* even: the progress line shows only while it has words (CANCEL is on the buttons' row) */
 
 /* ── the check ── */
 .mir-render .sr-lines { margin: 0; max-height: var(--render-lines-h); overflow: auto; font: var(--w-med) var(--fs-micro)/1.5 var(--font-mono); color: var(--fg-soft); white-space: pre-wrap; }

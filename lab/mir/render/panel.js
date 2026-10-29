@@ -41,11 +41,20 @@
  *   files      { save(), open() } (FOLDERS' api.zip): SAVE AS ZIP… and OPEN ZIP… in a FILES section; renderPanel takes FOLDERS'
  *              own by default (`files: false` leaves them out); a card is handed them (createRenderCard({ files: folders.zip }))
  *   loadingMark   createRenderCard only: the card's waiting mark (kit.device; false: none, as BASINS' card had)
+ *   even       THE EVEN ROWS (1.5.6-alpha.17, λWAVES 025 C3; opt-in, a card or a window without it is as it was): the film's rows laid
+ *              as A ROW IS EVEN — RANGE (a segment: STILL · ACTIVE · SELECTION, the app's motions, then `ranges`) · FORMAT (MP4 · PNG) on
+ *              one row; SIZE · FPS · AUDIO on one; LENGTH · START AT on one (STILL only); MODULATION · TIMELINE and the app's switches
+ *              (the seat `controls.switches`: an app appends its own kit `sw` there) on one; the estimate on one line (the whole
+ *              sentence its hint); RENDER · PREVIEW · CANCEL on one.  The long words go to the hints, so no word is cut and the card
+ *              is shorter, never taller.  Every control is the same FIELD (value · disabled · 'change'), the stored keys the same.
+ *   ranges     with `even`: [{ id, label, title?, motion, is() → bool, pick() }] the app's own RANGE choices, each an alias of a
+ *              motion (λWAVES' PERIOD = TIMELINE · ACTIVE over ONE PERIOD): pressed, pick() sets it up (the motion is then
+ *              `motion`); lit while that motion is chosen and is() says so
  * view.state() → { motion, motions: [[id, label]], format, size, fps, estimate, status, progress, running,
  *                  plan: { frames, startFrame, fps, range } | null (null while the rows refuse), held: { w, h, bytes } | null,
  *                  done: { name, bytes } | null (the finished film's first file, until DISCARD) }
  * Every row is a kit control (never a native select or number input: call 19, 2026-10-07), hit-testable; touch targets are 44 px. */
-import { el, label, hint, trig, seg, select, number, device } from '../kit.js';
+import { el, label, hint, trig, seg, sw, select, number, device } from '../kit.js';
 import { glyphEl, setGlyph } from '../glyph.js';
 import { t } from '../core/i18n.js';
 import { RECORD_FPS, fmtBytes, fmtMs, fmtClock } from './plan.js';
@@ -150,7 +159,13 @@ export function createRenderView(parent, o = {}) {
 
   /* ── the FILM: one deterministic pipeline for stationary recordings, timeline ranges and the app's own motions ── */
   const film = section('sr-record sr-film', 'DETERMINISTIC RENDER');
-  label(el('div', 'sv-note', film), 'Exact video time, fixed resolution, complete frames. The active project supplies the colours and rack.');
+  /* THE EVEN ROWS (1.5.6-alpha.17, λWAVES 025 C3; `even`): four grid rows made first, so every control below finds its cell; the notes
+     become hints (the section's title, MODULATION's and TIMELINE's), so their lines leave the card */
+  const E = !!o.even, ranges = E && Array.isArray(o.ranges) ? o.ranges : [];
+  const grid = E ? Object.fromEntries(['range', 'shape', 'clock', 'switches'].map((k) => [k, el('div', 'sr-even sr-even-' + k, film)])) : null;
+  const cell = (at, text, tip) => { const c = el('div', 'sr-cell', at); if (text) { const l = label(el('span', 'sr-label', c), text); if (tip) hint(l, tip); } return c; };
+  if (E) hint(film.querySelector('.sr-title'), 'Exact video time, fixed resolution, complete frames. The active project supplies the colours and rack.');
+  else label(el('div', 'sv-note', film), 'Exact video time, fixed resolution, complete frames. The active project supplies the colours and rack.');
   /* THE KIT'S OWN CONTROLS, never a native <select> or type=number (Josh, 2026-10-07, call 19; docs/CONTROLS.md): each choice
      is the kit's SELECT in the native one's seat (one row: BASINS' rows, whose long words a segment would wrap onto two to
      four lines), FPS — four short modes, all visible — a SEGMENT on its one row; a number is the NUMBER FIELD.  Each one's
@@ -163,38 +178,64 @@ export function createRenderView(parent, o = {}) {
     Object.defineProperty(root, 'disabled', { get: () => off, set: (on) => { off = !!on; disable(off); }, configurable: true });
     return root;
   };
-  const choice = (key, text, aria, choices, current, kind = 'select') => {
-    const line = row(film, text, aria), items = choices.map(([id, name]) => ({ id, label: name })), value = choices.some(([id]) => id === current) ? current : choices[0][0];
+  /* `at` (the even rows): the control's cell in that grid row, its word above it; a 'switch' (even) is ON = the first choice, OFF = the second,
+     lit when ON (no lamp: four share a row), its short word on it and the long words in its hint (MOD is MODULATION, as the bar says it); a choice's third entry is its hint (the long word a short label stands for) */
+  const choice = (key, text, aria, choices, current, kind = 'select', at = null) => {
+    const line = E && at === grid.switches ? at : at ? cell(at, kind === 'switch' ? null : text, aria) : row(film, text, aria), items = choices.map(([id, name, tip]) => ({ id, label: name, ...(tip ? { title: tip } : {}) })), value = choices.some(([id]) => id === current) ? current : choices[0][0];
+    if (kind === 'switch') {
+      const [on, off] = [choices[0][0], choices[1][0]], s = sw({ label: text, title: aria, lamp: false, value: value === on, onChange: () => s.root.dispatchEvent(new Event('change')) });
+      line.appendChild(s.root);
+      return asField(s.root, key, () => (s.get() ? on : off), (v) => s.set(v === on), (dis) => s.root.toggleAttribute('disabled', dis));
+    }
     const changed = () => ctl.root.dispatchEvent(new Event('change'));
     const ctl = kind === 'segment' ? seg({ aria, options: items, value, onChange: changed }) : select({ aria, items, value, onChange: changed });
-    if (kind === 'segment') line.classList.add('sr-' + key + '-row');   // the rack card lays a segment's row out (render.css .sr-fps-row)
+    if (kind === 'segment' && !at) line.classList.add('sr-' + key + '-row');   // the rack card lays a segment's row out (render.css .sr-fps-row)
     ctl.root.classList.add('sr-sel'); line.appendChild(ctl.root);
     return asField(ctl.root, key, () => ctl.get(), (v) => ctl.set(v),
       (on) => { if (ctl.setDisabled) ctl.setDisabled(on); else for (const b of ctl.root.querySelectorAll('button')) b.disabled = on; });
   };
-  const num = (key, text, aria, val, min, max, step, unit) => {
-    const line = row(film, text, aria), v = Number.parseFloat(val);
+  const num = (key, text, aria, val, min, max, step, unit, at = null) => {
+    const line = at ? cell(at, text, aria) : row(film, text, aria), v = Number.parseFloat(val);   // even: the unit is in the hint, never beside the field
     const n = number({ aria, min, max, step, snap: false, fmt: (x) => String(+x.toFixed(3)), value: Number.isFinite(v) ? v : min, onChange: () => n.root.dispatchEvent(new Event('change')) });   // snap: false — a written 0.25 s stays 0.25 (the input's value never rounded to its step)
-    n.root.classList.add('sr-record-time'); line.appendChild(n.root); label(el('span', 'sr-unit', line), unit);
+    n.root.classList.add('sr-record-time'); line.appendChild(n.root); if (!at) label(el('span', 'sr-unit', line), unit);
     let raw = String(val);                                   // the value as it was written ("0.250"), while the number is still that
     return asField(n.root, key, () => (Number.parseFloat(raw) === n.get() ? raw : String(n.get())), (s) => { const x = Number.parseFloat(s); if (Number.isFinite(x)) { raw = s; n.set(x); } }, (on) => n.setDisabled(on));
   };
   const motionChoices = Object.entries(rec.motions()).map(([id, m]) => [id, m.label]);
-  const motion = choice('motion', 'motion', 'Recording motion', motionChoices, get('motion', (o.defaults && o.defaults.motion) || 'still'));
+  let motion, rangeSeg = null, shownRange = () => null;
+  if (E) {
+    /* RANGE: the motions by their short words (the long one is the hint), then the app's `ranges`; the field's value is always a motion */
+    const SHORT = { still: 'STILL', 'timeline-active': 'ACTIVE', 'timeline-selection': 'SELECTION' }, alias = (v) => ranges.find((r) => r.id === v) || null;
+    const real = (v) => (alias(v) ? alias(v).motion : v), stored = real(get('motion', (o.defaults && o.defaults.motion) || 'still'));
+    let cur = motionChoices.some(([id]) => id === stored) ? stored : motionChoices[0][0];
+    shownRange = () => { const r = ranges.find((x) => x.motion === cur && x.is && x.is()); return r ? r.id : cur; };
+    const at = cell(grid.range, 'range', 'Recording range');
+    rangeSeg = seg({ aria: 'Recording range', value: cur, options: [...motionChoices.map(([id, name]) => ({ id, label: SHORT[id] || name, title: name })), ...ranges.map((r) => ({ id: r.id, label: r.label, ...(r.title ? { title: r.title } : {}) }))],
+      onChange: (v) => { if (alias(v)) alias(v).pick(); else cur = v; rangeSeg.set(shownRange()); rangeSeg.root.dispatchEvent(new Event('change')); } });
+    rangeSeg.root.classList.add('sr-sel'); at.appendChild(rangeSeg.root);
+    motion = asField(rangeSeg.root, 'motion', () => cur, (v) => { const m = real(v); if (motionChoices.some(([id]) => id === m)) cur = m; rangeSeg.set(shownRange()); },
+      (on) => { for (const x of rangeSeg.root.querySelectorAll('button')) x.disabled = on; });
+  } else motion = choice('motion', 'motion', 'Recording motion', motionChoices, get('motion', (o.defaults && o.defaults.motion) || 'still'));
   const isTimeline = () => motion.value === 'timeline-active' || motion.value === 'timeline-selection';
-  const recFormat = choice('format', 'format', 'Recording format', [['mp4', 'MP4 · HIGH BITRATE'], ['png', 'PNG FRAMES · LOSSLESS']], get('format', 'mp4'));
-  const sizes = [['1080p', '1920 × 1080'], ['1440p', '2560 × 1440'], ['2160p', '3840 × 2160']];
-  if (rec.hasCurrentSize()) sizes.push(['current', 'CURRENT DEVICE WINDOW']);
-  const recSize = choice('size', 'size', 'Recording resolution', sizes, get('size', '1080p'));
-  const recFps = choice('fps', 'fps', 'Recording frame rate', RECORD_FPS.map((v) => [String(v), v + ' FPS']), get('fps', String((o.defaults && o.defaults.fps) || 30)), 'segment');
-  const recDuration = num('duration', 'length', 'Recording duration in seconds', get('duration', '60'), 0.1, 3600, 0.1, 'SECONDS');
-  const recOffset = num('offset', 'start at', 'Recording start offset in seconds', get('offset', '0'), 0, 3600, 0.1, 'SECONDS');
-  const modSelect = choice('modulation', 'modulation', 'Recording modulation', [['off', 'OFF · FREEZE THIS LOOK'], ['on', 'ON · FROM FIRST SPACE']], get('modulation', 'off'));
-  const timelineSelect = choice('timeline', 'timeline', 'Recording Timeline automation', [['on', 'ON · FROM BEAT ZERO'], ['off', 'OFF · BYPASS AUTOMATION']], get('timeline', 'on'));
+  const recFormat = E ? choice('format', 'format', 'Recording format', [['mp4', 'MP4', 'MP4 · HIGH BITRATE'], ['png', 'PNG', 'PNG FRAMES · LOSSLESS']], get('format', 'mp4'), 'segment', grid.range)
+    : choice('format', 'format', 'Recording format', [['mp4', 'MP4 · HIGH BITRATE'], ['png', 'PNG FRAMES · LOSSLESS']], get('format', 'mp4'));
+  const sizes = E ? [['1080p', '1080p', '1920 × 1080'], ['1440p', '1440p', '2560 × 1440'], ['2160p', '2160p', '3840 × 2160']] : [['1080p', '1920 × 1080'], ['1440p', '2560 × 1440'], ['2160p', '3840 × 2160']];
+  if (rec.hasCurrentSize()) sizes.push(E ? ['current', 'SCREEN', 'CURRENT DEVICE WINDOW — the screen’s own size'] : ['current', 'CURRENT DEVICE WINDOW']);
+  const recSize = choice('size', 'size', 'Recording resolution', sizes, get('size', '1080p'), 'select', E ? grid.shape : null);
+  const recFps = E ? choice('fps', 'fps', 'Recording frame rate', RECORD_FPS.map((v) => [String(v), String(v), v + ' FPS']), get('fps', String((o.defaults && o.defaults.fps) || 30)), 'select', grid.shape)
+    : choice('fps', 'fps', 'Recording frame rate', RECORD_FPS.map((v) => [String(v), v + ' FPS']), get('fps', String((o.defaults && o.defaults.fps) || 30)), 'segment');
   /* THE AUDIO ROW (1.5.6-alpha.15, λWAVES 025 A4): ON puts the timeline's KEEP AUDIO clips of the range on the film (the MP4's second
-     trak, or a WAV beside PNG frames), mixed offline at the frames' own beats; OFF, or no clip in the range, is the silent film */
-  const audioSelect = choice('audio', 'audio', 'Recording audio', [['on', 'ON · THE TIMELINE’S AUDIO'], ['off', 'OFF · SILENT FILM']], get('audio', 'on'));
-  label(el('div', 'sv-note', film), 'Modulation ON replays the rack from its first Space edge. Timeline ON replays clips from beat zero. Both skip to “start at”. With both OFF, the current look is frozen. Escape cancels.');
+     trak, or a WAV beside PNG frames), mixed offline at the frames' own beats; OFF, or no clip in the range, is the silent film.  Even: a
+     switch, the SIZE · FPS row's third cell (made here, before LENGTH) */
+  const audioE = E ? choice('audio', 'AUDIO', 'ON · the TIMELINE’s audio clips on the film, mixed at the frames’ own beats · OFF · a silent film', [['on', 'ON'], ['off', 'OFF']], get('audio', 'on'), 'switch', grid.shape) : null;
+  const recDuration = num('duration', 'length', E ? 'Recording duration in seconds (STILL)' : 'Recording duration in seconds', get('duration', '60'), 0.1, 3600, 0.1, 'SECONDS', E ? grid.clock : null);
+  const recOffset = num('offset', 'start at', E ? 'Recording start offset in seconds (STILL)' : 'Recording start offset in seconds', get('offset', '0'), 0, 3600, 0.1, 'SECONDS', E ? grid.clock : null);
+  const modSelect = E ? choice('modulation', 'MOD', 'MODULATION ON · replays the rack from its first Space edge · OFF · freezes this look (with TIMELINE OFF too). Both skip to START AT. Escape cancels.', [['on', 'ON'], ['off', 'OFF']], get('modulation', 'off'), 'switch', grid.switches)
+    : choice('modulation', 'modulation', 'Recording modulation', [['off', 'OFF · FREEZE THIS LOOK'], ['on', 'ON · FROM FIRST SPACE']], get('modulation', 'off'));
+  const timelineSelect = E ? choice('timeline', 'TIMELINE', 'ON · replays the clips from beat zero · OFF · bypasses the automation (a TIMELINE range always plays it)', [['on', 'ON'], ['off', 'OFF']], get('timeline', 'on'), 'switch', grid.switches)
+    : choice('timeline', 'timeline', 'Recording Timeline automation', [['on', 'ON · FROM BEAT ZERO'], ['off', 'OFF · BYPASS AUTOMATION']], get('timeline', 'on'));
+  const audioSelect = audioE || choice('audio', 'audio', 'Recording audio', [['on', 'ON · THE TIMELINE’S AUDIO'], ['off', 'OFF · SILENT FILM']], get('audio', 'on'));
+  if (!E) label(el('div', 'sv-note', film), 'Modulation ON replays the rack from its first Space edge. Timeline ON replays clips from beat zero. Both skip to “start at”. With both OFF, the current look is frozen. Escape cancels.');
   /* the app's motions: their rows are seated under MOTION, or under the panel row a row names (BASINS: SPEED under LENGTH); one
      holder per motion and seat, shown only while that motion is chosen */
   const seats = { motion, format: recFormat, size: recSize, fps: recFps, length: recDuration, start: recOffset, modulation: modSelect, timeline: timelineSelect, audio: audioSelect };
@@ -205,7 +246,7 @@ export function createRenderView(parent, o = {}) {
       const seat = seats[at] ? at : 'motion';
       if (!holders.has(seat)) {
         const h = el('div', 'sr-motion-ui'); h.dataset.motion = id; if (seat !== 'motion') h.dataset.seat = seat;
-        let after = seats[seat].closest('.sr-row');
+        let after = seats[seat].closest(E ? '.sr-even' : '.sr-row');   // even: under the grid row that holds the seat
         while (after.nextElementSibling && after.nextElementSibling.classList.contains('sr-motion-ui')) after = after.nextElementSibling;
         after.after(h); holders.set(seat, h);
       }
@@ -217,21 +258,22 @@ export function createRenderView(parent, o = {}) {
     motionUis[id] = { holders, ui };
   }
   const estimate = el('div', 'sv-note sr-record-estimate', film);
-  const renderBtn = trig({ label: 'RENDER', cls: 'sv-act sv-wide sv-primary', onFire: () => startFilm(false) }); film.appendChild(renderBtn.root);
-  const previewBtn = trig({ label: 'PREVIEW FIRST 3 SECONDS', cls: 'sv-act sv-wide', onFire: () => startFilm(true) }); film.appendChild(previewBtn.root);
+  const acts = E ? el('div', 'sr-even sr-even-acts', film) : film;   // even: RENDER · PREVIEW · CANCEL on one row
+  const renderBtn = trig({ label: 'RENDER', cls: 'sv-act sv-wide sv-primary', onFire: () => startFilm(false) }); acts.appendChild(renderBtn.root);
+  const previewBtn = trig({ label: E ? 'PREVIEW' : 'PREVIEW FIRST 3 SECONDS', title: E ? 'Preview the first 3 seconds' : '', cls: 'sv-act sv-wide', onFire: () => startFilm(true) }); acts.appendChild(previewBtn.root);
   /* THE HAND (1.5.0-alpha.19): the progress row is always there (CANCEL disabled while nothing runs), and the status
      sentence sits BELOW the buttons, so a render starting, ending or being cancelled moves no button */
   const progRow = el('div', 'sr-row sr-prog', film);
   const prog = el('span', 'sr-value', progRow);
   const cancel = trig({ label: 'CANCEL', cls: 'sv-act sv-danger', onFire: () => rec.cancel() });
-  cancel.root.dataset.renderCancel = ''; cancel.root.disabled = true; progRow.appendChild(cancel.root);
+  cancel.root.dataset.renderCancel = ''; cancel.root.disabled = true; (E ? acts : progRow).appendChild(cancel.root);
   const renderStatus = el('div', 'sv-note sr-record-status', film);
   const doneRow = el('div', 'sr-record-files sr-done', film); doneRow.hidden = true;
   const videoPreview = el('video', 'sr-video-preview', doneRow); videoPreview.controls = true; videoPreview.playsInline = true; videoPreview.hidden = true;
   const doneFiles = el('div', 'sr-record-files', doneRow);
   const doneNote = el('div', 'sv-note', doneRow);
   const recoveryRow = el('div', 'sr-record-files', film);
-  let starting = false, videoUrl = null, pathStamp = 0, ready = null, result = null, audioCodec = '';
+  let starting = false, videoUrl = null, pathStamp = 0, ready = null, result = null, audioCodec = '', estFull = '';
 
   const runOptions = (preview) => {
     const opts = { motion: motion.value, fps: Number(recFps.value), durationS: Number(recDuration.value), offsetS: Number(recOffset.value),
@@ -247,20 +289,26 @@ export function createRenderView(parent, o = {}) {
   function paintEstimate() {
     for (const [id, m] of Object.entries(motionUis)) for (const h of m.holders.values()) h.hidden = motion.value !== id;
     recDuration.parentElement.hidden = recOffset.parentElement.hidden = isTimeline();
+    if (E) { grid.clock.hidden = isTimeline(); rangeSeg.set(shownRange()); }
     ready = null;
     try {
       const e = rec.estimate(runOptions(false));
       const ui = motionUis[motion.value] && motionUis[motion.value].ui;
       if (ui && ui.paint) ui.paint(e);                 // a paint that throws refuses the run: its sentence is the estimate row
       ready = e;
-      estimate.textContent = e.size.w + ' × ' + e.size.h + ' · ' + e.plan.frames.toLocaleString() + ' ' + t('frames') + ' · ' + fmtClock(e.plan.durationS) +
+      const codec = e.audio ? (e.format === 'png' ? 'WAV 48 k' : audioCodec || '…') : '';
+      /* even: one line — the size, frames, seconds, the file's size and the audio's codec; the whole sentence is its hint */
+      const short = e.size.w + ' × ' + e.size.h + ' · ' + e.plan.frames.toLocaleString() + ' ' + t('frames') + ' · ' + fmtClock(e.plan.durationS) +
+        (e.format === 'mp4' ? ' · ≈ ' + fmtBytes(e.est.bytes) : ' · PNG') + (codec ? ' · ' + codec : '');
+      estFull = e.size.w + ' × ' + e.size.h + ' · ' + e.plan.frames.toLocaleString() + ' ' + t('frames') + ' · ' + fmtClock(e.plan.durationS) +
         (ui && ui.text ? ' · ' + ui.text(e) : '') +
         (e.range ? ' · ' + t('beats {from} → {to} at {bpm} BPM', { from: +e.range.start.toFixed(3), to: +e.range.end.toFixed(3), bpm: +e.plan.bpm.toFixed(2) }) : '') +
         (e.format === 'mp4' ? ' · ' + t('{mbps} Mbps target · ≈ {size}', { mbps: Math.round(e.bitrate / 1e6), size: fmtBytes(e.est.bytes) }) : ' · ' + t('numbered lossless PNG frames')) +
-        (e.audio ? ' · ' + t('audio {clips} · {codec}', { clips: e.audio.clips.join(', '), codec: e.format === 'png' ? 'WAV 48 k' : audioCodec || '…' }) : '') +
+        (e.audio ? ' · ' + t('audio {clips} · {codec}', { clips: e.audio.clips.join(', '), codec }) : '') +
         ' · ' + t('≈ {time} to render', { time: fmtMs(e.est.renderMs) }) + (e.learned ? ' ' + t('(learned from the last render)') : '') + e.warning;
+      estimate.textContent = E ? short + (e.warning ? ' · ⚠' : '') : estFull; if (E) estimate.title = estFull;
       estimate.classList.toggle('is-over-limit', !!e.warning);
-    } catch (e) { estimate.textContent = String(e.message || e); }
+    } catch (e) { estimate.textContent = estFull = String(e.message || e); if (E) estimate.title = estFull; }
     const busy = rec.running() || starting;
     /* a timeline motion with no range keeps RENDER pressable: the press explains itself with a toast */
     renderBtn.root.disabled = previewBtn.root.disabled = busy || (!ready && !isTimeline());
@@ -388,12 +436,12 @@ export function createRenderView(parent, o = {}) {
   const paint = () => { paintSubject(); paintPicture(); if (!rec.running() && !starting) paintEstimate(); void paintPath(); void paintRecoveries(); };
   paint();
   const state = () => ({ motion: motion.value, motions: motionChoices.map(([id, name]) => [id, t(name)]), format: recFormat.value, size: recSize.value, fps: recFps.value,
-    estimate: estimate.textContent, status: renderStatus.textContent, progress: prog.textContent, running: rec.running(),
+    estimate: estFull || estimate.textContent, status: renderStatus.textContent, progress: prog.textContent, running: rec.running(),
     plan: ready ? { frames: ready.plan.frames, startFrame: ready.plan.startFrame, fps: ready.plan.fps, range: ready.range || null } : null,
     held: held ? { w: held.w, h: held.h, bytes: held.bytes } : null,
     done: result && result.files && result.files[0] ? { name: result.files[0].name, bytes: result.files[0].bytes } : null });
   return { root: wrap, paint, state,
-    controls: { motion, recFormat, recSize, recFps, recDuration, recOffset, modSelect, timelineSelect, audioSelect, renderBtn: renderBtn.root, previewBtn: previewBtn.root, cancel: cancel.root, runCheck: runCheck.root, lines, estimate, renderStatus, doneRow, doneFiles, recoveryRow },
+    controls: { motion, recFormat, recSize, recFps, recDuration, recOffset, modSelect, timelineSelect, audioSelect, switches: E ? grid.switches : null, renderBtn: renderBtn.root, previewBtn: previewBtn.root, cancel: cancel.root, runCheck: runCheck.root, lines, estimate, renderStatus, doneRow, doneFiles, recoveryRow },
     destroy() { life.abort(); offRange(); releasePreview(); wrap.remove(); } };
 }
 

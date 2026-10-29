@@ -56,6 +56,8 @@ const ACCEPTED = {
   '1.5.6-alpha.15': 'b0571eea857a7ef633cc7b9a204802a32cabd46352dd9b54e079f7f114d2a83f',
   /* 025 A5 · MIR 1.5.6-alpha.16 on the clone road: THE ALIGNMENT PROOF (selftest audioAlignment: clicks at beats 0·1·2 within one sample of their frames) */
   '1.5.6-alpha.16': '3908370e824e5a44eb68691c11f6460c907ea50e905d544bb9f1a7a2112f8800',
+  /* 025 C3 · MIR 1.5.6-alpha.17 on the clone road: THE EVEN ROWS (the render panel's `even` · `ranges` · `controls.switches`) */
+  '1.5.6-alpha.17': 'd4bc54b78ed65730c29f527040f077525e3b440745ee384740b33fb5b4027009',
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */
