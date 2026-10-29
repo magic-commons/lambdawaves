@@ -79,6 +79,7 @@ A law a gate enforces is cited by its gate, not restated: THE LOCK (the field's 
 - the modulation port and window, the clock, curves, the flash guard → `modulation-and-timeline.md`
 - RENDER, the recorder, the time law → `film.md`
 - NODES, CURVES, the ids, THE SHADER NODE (`lab/node-shader.js`, DECOHERE on `field.tap`) → `nodes.md`
+- THE CONDUCTOR (a film from a SCORE: `docs/conductor/SCORE.md`, `tools/conduct.mjs`, `tools/conduct-score.js` never precached; the skill `lambdawaves-conductor`) → `film.md`
 - the deleted and retired windows → `legacy.md` (and `docs/LEGACY-WINDOWS.md`)
 - the 016 board, the 017 bug hunt, the 018 wide list, the 020 and 021 laws as lists → `iterations.md`
 

@@ -38,3 +38,5 @@ THE BUG HUNT (iteration 017, Claude Sos + four Opus chains, 2026-10-26; `researc
 THE LAWS OF 024 (Josh's ADVANCED NODE / SHADER TEST of 2026-10-28, `research/iteration-024/PLAN.md`, `RESEARCH.md`, `S-BUILD.md`): THE SHADER NODE (nodes.md) — NODES' fifth class, a splat on the field's tap; DECOHERE its one node.
 
 THE LAWS OF 025 (Josh's VIDEO EXPORT of 2026-10-28, `research/iteration-025/PLAN.md`, `RESEARCH.md`, `A/B/C-BUILD.md`): THE BOUNCE, THE AUDIO IS ON THE FILM, THE FILM IS THE SCREEN, THE BOUNCE IS ONE PRESS AWAY (film.md); THE DOORS OF 025 (kit.md); SCREEN ONLY NO MORE (nodes.md).
+
+THE LAWS OF 026 (Josh's AGI / TIMELINE / MODULATION MACRO TEST of 2026-10-29, `research/iteration-026/PLAN.md`, `RESEARCH.md`, `A-BUILD.md`, `scores/`): THE CONDUCTOR, THE SCORE THINKS IN BARS, ONE CLIP COVERS A TARGET AT A BEAT, THE ABSOLUTE TARGETS, THE ICON SAYS WHAT IT IS (film.md); the skill `lambdawaves-conductor`; STAR LOOP (16 bars at 133.33 BPM from the drop of IMANU's STAR remix, four passes) and the molecule showcase were conducted, not recorded.
