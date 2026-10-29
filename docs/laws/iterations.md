@@ -4,6 +4,8 @@ The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their
 
 ## The laws of 022
 
+THE LAWS OF 023 (Josh's quick requests of 2026-10-28, `research/iteration-023/PLAN.md`, `D/B/R-BUILD.md`, his shots in `josh-shots/`; three Opus chains one at a time): A ROW IS EVEN (shell.md), THE BAR IS QUIET (control-surface.md), THE WORDS ARE LIVE (stage-words.md), THE DOORS OF 023 (kit.md, alpha.9–11).
+
 THE LAWS OF 022 (`research/iteration-022/PLAN.md`, `P/S/H/F/C/E-BUILD.md`), each seated in its subject file: ONE MENU DOOR, A HINT IS ONE LINE, A LABEL IS NEVER WIDER THAN ITS CONTROL, A ROW FITS, THE SURFACE IS A SURFACE, AVAILABILITY IS ONE LAW (shell.md); A POPUP WEARS THE SKIN, RELIEF IS TIGHT, THE MENU'S INK, THE ICON TABLE IS λWAVES' OWN (kit.md); H holds the stage words (stage-words.md); the switch wears the busy mark (chemistry.md).
 
 ## The laws of 021
