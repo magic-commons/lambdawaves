@@ -19,6 +19,7 @@
  *     size, fps, codec and bitrate).  A browser that accepts the configuration and cannot take a frame fails here, in seconds.
  *   pngBytes(rgba, w, h, canvas, ctx, colorSpace?) → Promise<Uint8Array>   one lossless frame (alpha forced opaque)
  *   1.5.6-alpha.14 · THE AUDIO SINK: decideAudioPath · verifyAudioEncoder · encodeAudio · muxAudio · peakIndex · AUDIO_LADDER (below);
+ *     decodeFirstChannel({ samples, description }, path) (alpha.16: the self-test's ear) decodes packets with this browser's AudioDecoder;
  *     `sink.audio = encodeAudio(…)` puts the film's audio in the in-memory file (the store keeps it on disk: store.saveAudio). */
 import { mp4Parts, mp4Build, avcCParse, avcCBuild, collectParamSets } from './mp4.js';
 import { codecCandidates, pickHighBitrate } from './plan.js';
@@ -297,7 +298,7 @@ async function encodePcm(channels, n, tail, path, check = () => {}) {
 }
 
 /** encoded packets → the decoded first channel (the decoder this browser ships, configured as a player would be) */
-async function decodeFirstChannel(enc, path, check = () => {}) {
+export async function decodeFirstChannel(enc, path, check = () => {}) {
   if (typeof AudioDecoder !== 'function') throw new Error('Audio decoding is unavailable here, so the audio cannot be proven. Turn AUDIO off.');
   const parts = [];
   let error = null, total = 0;

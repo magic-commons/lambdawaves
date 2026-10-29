@@ -241,19 +241,19 @@
  },
  {
   "file": "mir/render/encoder.js",
-  "line": 38,
+  "line": 39,
   "why": "fragment",
   "text": "every avc1 rung refused "
  },
  {
   "file": "mir/render/encoder.js",
-  "line": 139,
+  "line": 140,
   "why": "fragment",
   "text": " sps, "
  },
  {
   "file": "mir/render/encoder.js",
-  "line": 142,
+  "line": 143,
   "why": "fragment",
   "text": " sps, "
  },
@@ -331,97 +331,115 @@
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 50,
+  "line": 58,
   "why": "fragment",
   "text": " fps, "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 50,
+  "line": 58,
   "why": "fragment",
   "text": " Mpx, dpr "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 63,
+  "line": 71,
   "why": "fragment",
   "text": " MB, "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 63,
+  "line": 71,
   "why": "fragment",
   "text": " distinct tones over "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 63,
+  "line": 71,
   "why": "fragment",
   "text": " samples, "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 71,
+  "line": 79,
   "why": "fragment",
   "text": " MB, header valid"
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 83,
+  "line": 91,
   "why": "fragment",
   "text": " · share files "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 83,
+  "line": 91,
   "why": "fragment",
   "text": " · route this device would take: "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 85,
+  "line": 93,
   "why": "fragment",
   "text": "VideoEncoder ladder at "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 111,
+  "line": 119,
   "why": "fragment",
   "text": " kB, "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 111,
+  "line": 119,
   "why": "fragment",
   "text": " samples, "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 111,
+  "line": 119,
   "why": "fragment",
   "text": ", header valid, decoded"
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 121,
+  "line": 130,
   "why": "fragment",
   "text": " bytes, not 65536"
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 122,
+  "line": 131,
   "why": "fragment",
   "text": "origin-private file system: wrote and read back "
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 122,
+  "line": 131,
   "why": "fragment",
   "text": ", checkpoints and recovery available"
  },
  {
   "file": "mir/render/selftest.js",
-  "line": 140,
+  "line": 194,
+  "why": "fragment",
+  "text": " k · elst "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 194,
+  "why": "fragment",
+  "text": " · roll "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 195,
+  "why": "fragment",
+  "text": " · beats "
+ },
+ {
+  "file": "mir/render/selftest.js",
+  "line": 204,
   "why": "fragment",
   "text": "  FIRST FAILURE: "
  },
