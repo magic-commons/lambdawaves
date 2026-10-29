@@ -17,7 +17,10 @@
  *     B-frame-reordered stream, and refuses timestamps that are not a permutation of the input.
  *   verifyEncoder(w, h, fps, path, check?) — encode two frames and DECODE them before the run (60 s timeout; memoised by
  *     size, fps, codec and bitrate).  A browser that accepts the configuration and cannot take a frame fails here, in seconds.
- *   pngBytes(rgba, w, h, canvas, ctx, colorSpace?) → Promise<Uint8Array>   one lossless frame (alpha forced opaque) */
+ *   pngBytes(rgba, w, h, canvas, ctx, colorSpace?) → Promise<Uint8Array>   one lossless frame (alpha forced opaque)
+ *   1.5.6-alpha.14 · THE AUDIO SINK: decideAudioPath · verifyAudioEncoder · encodeAudio · muxAudio · peakIndex · AUDIO_LADDER (below);
+ *     decodeFirstChannel({ samples, description }, path) (alpha.16: the self-test's ear) decodes packets with this browser's AudioDecoder;
+ *     `sink.audio = encodeAudio(…)` puts the film's audio in the in-memory file (the store keeps it on disk: store.saveAudio). */
 import { mp4Parts, mp4Build, avcCParse, avcCBuild, collectParamSets } from './mp4.js';
 import { codecCandidates, pickHighBitrate } from './plan.js';
 
@@ -159,7 +162,7 @@ export class WcSink {
       this.samples.length = 0;
       return { ...file, mime: 'video/mp4', ext: 'mp4', samples: this.added, keyFrames, bitrate: this.bitrate };
     }
-    const o = { width: this.w, height: this.h, fps: this.fps, description: info.description, samples: this.samples, handler: this.handler };
+    const o = { width: this.w, height: this.h, fps: this.fps, description: info.description, samples: this.samples, handler: this.handler, audio: muxAudio(this.audio) };
     const parts = this.asBlob ? mp4Parts(o) : null;
     const bytes = this.asBlob ? null : mp4Build(o);
     const samples = this.samples.length, keyFrames = this.samples.filter((s) => s.key).length;
@@ -226,3 +229,134 @@ export async function pngBytes(rgba, w, h, canvas, ctx, colorSpace) {
   if (!blob || blob.type !== 'image/png') throw new Error('this browser could not encode a PNG frame');
   return new Uint8Array(await blob.arrayBuffer());
 }
+
+/* ══ THE AUDIO SINK (1.5.6-alpha.14, λWAVES 025 A3) ══════════════════════════
+ *
+ * The mixdown (render/audio-mix.js) is encoded once, before the first frame, from the same PCM the WAV would hold:
+ *   decideAudioPath(sampleRate?, channels?) → { kind: 'audio', codec, label, bitrate, sampleRate, channels, ladder, why } | { kind: 'none', why }
+ *     AudioEncoder.isConfigSupported down the ladder — AAC-LC 256 k, then Opus 192 k, both 48 kHz stereo — asked, never assumed
+ *     (AAC is absent in Firefox and in every browser on Linux, so a Linux film carries Opus-in-MP4; RESEARCH 025 §2).
+ *   verifyAudioEncoder(path, check?) → priming    the preflight: an impulse at sample 24000 of one second is ENCODED and DECODED,
+ *     and the onset's index − 24000 is the codec's delay on this machine (memoised by codec, rate and channels, as verifyEncoder
+ *     is).  WebCodecs states no priming (a first chunk is stamped 0), so it is measured: AAC 1024–2112 by encoder.
+ *   encodeAudio(mix, path, check?) → { codec, label, sampleRate, channels, description, samples: [{ data, dur }], priming, frames,
+ *     bitrate, packetsOk }  the film's audio: AudioData timestamps are integer µs from the SAMPLE INDEX (never float seconds),
+ *     each packet's `dur` an integer sample count; a tail of silence (two packets) lets the encoder's last packets cover every valid
+ *     sample past its delay, and a file whose packets do not cover priming + N is refused.  `priming` is the OpusHead pre-skip
+ *     when the encoder hands one (bytes 10–11), else the measured delay.  Back-pressure as the video's (the queue ≤ 8).
+ * The muxer takes the result verbatim as `mp4Parts({ audio })`; the store keeps it beside the video (store.saveAudio). */
+export const AUDIO_LADDER = Object.freeze([{ codec: 'mp4a.40.2', label: 'AAC', bitrate: 256000 }, { codec: 'opus', label: 'Opus', bitrate: 192000 }]);
+const audioConfig = (p, sampleRate, numberOfChannels) => ({ codec: p.codec, sampleRate, numberOfChannels, bitrate: p.bitrate });
+const bytesOfView = (d) => (d instanceof Uint8Array ? d.slice() : ArrayBuffer.isView(d) ? new Uint8Array(d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength)) : new Uint8Array(d.slice(0)));
+const nextDequeue = (coder) => new Promise((r) => {
+  const timer = setTimeout(r, 4);
+  try { coder.addEventListener('dequeue', () => { clearTimeout(timer); r(); }, { once: true }); } catch (_) { /* the timer poll carries it */ }
+});
+
+export async function decideAudioPath(sampleRate = 48000, channels = 2, env = globalThis) {
+  if (typeof env.AudioEncoder !== 'function' || typeof env.AudioData !== 'function') return { kind: 'none', why: 'no AudioEncoder in this browser' };
+  const ladder = [];
+  for (const rung of AUDIO_LADDER) {
+    let ok = false;
+    try { const r = await env.AudioEncoder.isConfigSupported(audioConfig(rung, sampleRate, channels)); ok = !!(r && r.supported); } catch (_) { /* the next rung */ }
+    ladder.push(rung.label + (ok ? ' yes' : ' no'));
+    if (ok) return { kind: 'audio', ...rung, sampleRate, channels, ladder: ladder.join(' · '), why: 'AudioEncoder.isConfigSupported(' + rung.codec + ', ' + sampleRate + ' Hz)' };
+  }
+  return { kind: 'none', why: 'every audio rung refused (' + ladder.join(' · ') + ')' };
+}
+
+/** PCM (planar Float32, `n` valid samples, then `tail` samples of silence) → encoded packets and the decoder's description */
+async function encodePcm(channels, n, tail, path, check = () => {}) {
+  const sr = path.sampleRate, ch = channels.length, pkt = path.codec === 'opus' ? Math.round(sr / 50) : 1024;
+  const samples = [];
+  let description = null, error = null;
+  const enc = new AudioEncoder({
+    output: (chunk, meta) => {
+      const d = meta && meta.decoderConfig && meta.decoderConfig.description;
+      if (d && !description) description = bytesOfView(d);
+      const data = new Uint8Array(chunk.byteLength); chunk.copyTo(data);
+      samples.push({ data, ts: chunk.timestamp, dur: chunk.duration ? Math.round(chunk.duration * sr / 1e6) : pkt });
+    },
+    error: (e) => { error = e; },
+  });
+  try {
+    enc.configure(audioConfig(path, sr, ch));
+    const B = 4800, total = n + tail;
+    for (let s = 0; s < total; s += B) {
+      if (error) throw error; check();
+      const m = Math.min(B, total - s), buf = new Float32Array(m * ch);
+      if (s < n) for (let c = 0; c < ch; c++) buf.set(channels[c].subarray(s, Math.min(n, s + m)), c * m);
+      const data = new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: m, numberOfChannels: ch, timestamp: Math.round(s * 1e6 / sr), data: buf });
+      try { enc.encode(data); } finally { data.close(); }
+      while (enc.encodeQueueSize > 8) { await nextDequeue(enc); if (error) throw error; }
+    }
+    await enc.flush();
+    if (error) throw error;
+  } finally { try { enc.close(); } catch (_) { /* gone */ } }
+  if (!samples.length) throw new Error('The audio encoder returned nothing. Turn AUDIO off, or choose PNG frames (the audio is a WAV beside them).');
+  return { samples, description, pkt };
+}
+
+/** encoded packets → the decoded first channel (the decoder this browser ships, configured as a player would be) */
+export async function decodeFirstChannel(enc, path, check = () => {}) {
+  if (typeof AudioDecoder !== 'function') throw new Error('Audio decoding is unavailable here, so the audio cannot be proven. Turn AUDIO off.');
+  const parts = [];
+  let error = null, total = 0;
+  const dec = new AudioDecoder({
+    output: (a) => { const x = new Float32Array(a.numberOfFrames); a.copyTo(x, { planeIndex: 0, format: 'f32-planar' }); parts.push(x); total += x.length; a.close(); },
+    error: (e) => { error = e; },
+  });
+  try {
+    const cfg = { codec: path.codec, sampleRate: path.sampleRate, numberOfChannels: path.channels };
+    if (enc.description) cfg.description = enc.description;
+    dec.configure(cfg);
+    let at = 0;
+    for (const s of enc.samples) {
+      check();
+      dec.decode(new EncodedAudioChunk({ type: 'key', timestamp: Math.round(at * 1e6 / path.sampleRate), duration: Math.round(s.dur * 1e6 / path.sampleRate), data: s.data }));
+      at += s.dur;
+    }
+    await dec.flush();
+    if (error) throw error;
+  } finally { try { dec.close(); } catch (_) { /* gone */ } }
+  const out = new Float32Array(total);
+  let p = 0; for (const x of parts) { out.set(x, p); p += x.length; }
+  return out;
+}
+/** the index of the loudest sample in [from, to) — an onset of a click the decoder hands back */
+export function peakIndex(x, from = 0, to = x.length) {
+  let best = -1, at = -1;
+  for (let i = Math.max(0, from); i < Math.min(to, x.length); i++) { const v = Math.abs(x[i]); if (v > best) { best = v; at = i; } }
+  return at;
+}
+
+const primings = new Map();
+export async function verifyAudioEncoder(path, check = () => {}) {
+  const key = [path.codec, path.sampleRate, path.channels, path.bitrate].join(':');
+  if (primings.has(key)) return primings.get(key);
+  const n = path.sampleRate, at = n / 2, pcm = Array.from({ length: path.channels }, () => new Float32Array(n));
+  for (const c of pcm) c[at] = 0.8;
+  const enc = await encodePcm(pcm, n, 4096, path, check);
+  if (enc.samples.length < 2) throw new Error('The audio preflight returned fewer than two packets. Turn AUDIO off.');
+  const decoded = await decodeFirstChannel(enc, path, check);
+  const priming = peakIndex(decoded) - at;
+  if (!(decoded.length >= n) || !(priming >= 0 && priming < 8192)) throw new Error('The audio preflight could not find its impulse (' + priming + '). Turn AUDIO off.');
+  const r = { priming, head: opusPreSkip(enc.description), packets: enc.samples.length };
+  primings.set(key, r);
+  return r;
+}
+const opusPreSkip = (d) => (d && d.length >= 19 && String.fromCharCode(...d.subarray(0, 8)) === 'OpusHead' ? d[10] | (d[11] << 8) : null);
+
+export async function encodeAudio(mix, path, check = () => {}) {
+  const proof = await verifyAudioEncoder(path, check);
+  const enc = await encodePcm(mix.channels, mix.frames, 2 * (path.codec === 'opus' ? 960 : 1024), path, check);
+  const head = opusPreSkip(enc.description);
+  const priming = path.codec === 'opus' && head != null ? head : proof.priming;
+  const covered = enc.samples.reduce((n, s) => n + s.dur, 0);
+  if (covered < priming + mix.frames) throw new Error('The audio encoder returned ' + covered + ' samples, fewer than its delay and the film (' + (priming + mix.frames) + '). Turn AUDIO off.');
+  return { codec: path.codec, label: path.label, sampleRate: path.sampleRate, channels: path.channels, description: enc.description, samples: enc.samples,
+    priming, primingMeasured: proof.priming, frames: mix.frames, bitrate: path.bitrate, clips: mix.clips || [] };
+}
+
+/** the film's audio as the muxer (or the store's manifest) takes it */
+export const muxAudio = (a) => (a ? { codec: a.codec, sampleRate: a.sampleRate, channels: a.channels, description: a.description, samples: a.samples, priming: a.priming, frames: a.frames } : undefined);

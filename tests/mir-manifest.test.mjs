@@ -46,6 +46,16 @@ const ACCEPTED = {
   '1.5.6-alpha.10': '16b410f1039f9795ee18f2365aca0aa109743bc9e5c22241efda442dade055c8',
   /* 023 R7 · MIR 1.5.6-alpha.11 on the clone road (kit c18957a): THE WORDS LAND (viewChanged({ land: true }) — the stage words' re-seat lands at once) */
   '1.5.6-alpha.11': 'fe6f4b26077f40194675d7d6d0920d13a3f966507826d8b747c33b88b785c6ea',
+  /* 025 A1 · MIR 1.5.6-alpha.12 on the clone road (kit 6b3c933): THE AUDIO TRACK IN THE MUXER (mp4Parts({ audio }): mp4a+esds or Opus+dOps, elst + roll, interleaved chunks) */
+  '1.5.6-alpha.12': '0ba21c6108c34fdd540251567ec7c128c6dba7670a9c8552fc49df2eacf2df20',
+  /* 025 A2 · MIR 1.5.6-alpha.13 on the clone road: THE MIXDOWN (render/audio-mix.js: mixPlan, mixdown at 48 kHz offline, wavBytes) */
+  '1.5.6-alpha.13': 'a0d21aaa63bee654f8cdb359a679892c7f30776df0a7d77e128835ab52541222',
+  /* 025 A3 · MIR 1.5.6-alpha.14 on the clone road: THE AUDIO ENCODE (AAC → Opus ladder, the priming measured, store.saveAudio, run({ audio }), PNG audio.wav) */
+  '1.5.6-alpha.14': 'f612c7c9eda4ff9a19362cf69ae9b74683335862ccc77f4cf57f7ae6c677dc71',
+  /* 025 A4 · MIR 1.5.6-alpha.15 on the clone road: THE AUDIO ROW (the render panel's AUDIO ON · OFF, the estimate names the clips and the codec, the live-microphone refusal said so) */
+  '1.5.6-alpha.15': 'b0571eea857a7ef633cc7b9a204802a32cabd46352dd9b54e079f7f114d2a83f',
+  /* 025 A5 · MIR 1.5.6-alpha.16 on the clone road: THE ALIGNMENT PROOF (selftest audioAlignment: clicks at beats 0·1·2 within one sample of their frames) */
+  '1.5.6-alpha.16': '3908370e824e5a44eb68691c11f6460c907ea50e905d544bb9f1a7a2112f8800',
   '1.4.3': 'a4c3b90102d02dcec420fe97a10dbac2a15d93d88ed5bb5f28977ff29f3d2d23',
   /* 0.5.0 C0 · R5-G1: λWAVES was PINNED to MIR 1.5.0-alpha.24 (kit commit 1b7ae99b9905, line 1.5), adopted by the 1.5 worktree's own
      tools/adopt.mjs */

@@ -16,7 +16,11 @@
  *   store.savePart(name, blob, frames) → a PNG ZIP part, committed with a checkpoint
  *   store.finishParts() · finalize(name, { handler? }) → the MP4 of the completed frames, then the payload parts are removed
  *   store.resume() · interrupt() · discard()
- *   await RenderStore.recoveries({ dir?, storage? }) → [{ store, files, frames, spec }], newest first */
+ *   await RenderStore.recoveries({ dir?, storage? }) → [{ store, files, frames, spec }], newest first
+ *   store.saveAudio(audio) (1.5.6-alpha.14, λWAVES 025 A3) → the film's encoded audio (encoder.js encodeAudio) written once, before the
+ *     first frame, to `audio.bin` beside the payload, its table in the manifest (`audio`): a checkpoint carries it, a RESUME keeps it,
+ *     and finalize() muxes it as the second trak, its chunks interleaved with the video's in the muxer's `.layout` order; a
+ *     recovered prefix keeps the audio of its own frames (the edit list cut to them). */
 import { mp4Parts } from './mp4.js';
 
 const MAX_PENDING = 8 * 1024 * 1024;
@@ -103,6 +107,15 @@ export class RenderStore {
     await this.saveManifest();
     return { name, blob: await h.getFile(), bytes: blob.size };
   }
+  async saveAudio(a) {
+    const h = await this.dir.getFileHandle('audio.bin', { create: true });
+    const w = await this.writer_(h, 'audio.bin');
+    try { for (const smp of a.samples) await w.write(smp.data); await w.close(); }
+    catch (e) { await w.abort().catch(() => {}); throw e; }
+    this.manifest.audio = { codec: a.codec, label: a.label, sampleRate: a.sampleRate, channels: a.channels, description: a.description ? Array.from(a.description) : null,
+      priming: a.priming, frames: a.frames, bitrate: a.bitrate, clips: a.clips || [], samples: a.samples.map((smp) => ({ size: smp.data.length, dur: smp.dur })) };
+    await this.saveManifest();
+  }
   async finishParts() { this.manifest.state = 'ready'; await this.saveManifest(); }
   async resume() {
     if (this.manifest.state === 'ready') throw new Error('This recording is already complete');
@@ -142,18 +155,27 @@ export class RenderStore {
     const info = this.manifest.checkpoint;
     if (!info?.samples?.length) throw new Error('No completed frames to recover');
     const samples = info.samples.map((s) => ({ ...s, data: { size: s.size } }));
-    const headers = mp4Parts({ ...info, description: Uint8Array.from(info.description), samples, largeFile: true, headersOnly: true, handler: o.handler });
+    const audio = await this.audio_(samples.length, info.fps);
+    const headers = mp4Parts({ ...info, description: Uint8Array.from(info.description), samples, largeFile: true, headersOnly: true, handler: o.handler, audio });
     const h = await this.dir.getFileHandle(name, { create: true });
     const w = await this.writer_(h, name);
     try {
       for (const b of headers) await w.write(b);
       let left = info.bytes;
-      for (const part of this.manifest.parts || ['payload.bin']) {
-        const file = await (await this.dir.getFileHandle(part)).getFile();
-        for (let p = 0; p < file.size && left > 0; p += BLOCK) {
-          const n = Math.min(BLOCK, file.size - p, left);
-          await w.write(new Uint8Array(await file.slice(p, p + n).arrayBuffer())); left -= n;
+      /* the payload parts, read in order: `take(n)` writes the next n bytes of video samples */
+      const parts = (this.manifest.parts || ['payload.bin']).slice();
+      let file = null, p = 0;
+      const take = async (want) => {
+        while (want > 0 && left > 0) {
+          if (!file || p >= file.size) { if (!parts.length) break; file = await (await this.dir.getFileHandle(parts.shift())).getFile(); p = 0; continue; }
+          const n = Math.min(BLOCK, file.size - p, left, want);
+          await w.write(new Uint8Array(await file.slice(p, p + n).arrayBuffer())); p += n; left -= n; want -= n;
         }
+      };
+      if (!audio) await take(Infinity);
+      else for (const c of headers.layout) {
+        if (c.track === 'video') { let n = 0; for (let k = c.first; k < c.first + c.count; k++) n += samples[k].data.size; await take(n); }
+        else for (let k = c.first; k < c.first + c.count; k++) await w.write(audio.samples[k].data);
       }
       if (left) throw new Error('Temporary recording is incomplete');
       await w.close();
@@ -161,8 +183,20 @@ export class RenderStore {
     this.manifest.state = 'ready'; this.manifest.files = [name]; await this.saveManifest();
     /* the final output is committed before the temporary sample payloads are removed */
     for (const part of this.manifest.parts || ['payload.bin']) await this.dir.removeEntry(part).catch(() => {});
+    if (audio) await this.dir.removeEntry('audio.bin').catch(() => {});
     const file = await h.getFile();
     return { name, blob: file, bytes: file.size, frames: samples.length };
+  }
+  /** the stored audio, back as the muxer takes it, cut to `frames` video frames (a recovered prefix keeps its own audio) */
+  async audio_(frames, fps) {
+    const a = this.manifest.audio;
+    if (!a || !a.samples?.length) return undefined;
+    const bytes = new Uint8Array(await (await (await this.dir.getFileHandle('audio.bin')).getFile()).arrayBuffer());
+    let at = 0;
+    const samples = a.samples.map((smp) => { const data = bytes.subarray(at, at + smp.size); at += smp.size; return { data, dur: smp.dur }; });
+    if (at !== bytes.length) throw new Error('Temporary recording is incomplete');
+    return { codec: a.codec, sampleRate: a.sampleRate, channels: a.channels, description: a.description ? Uint8Array.from(a.description) : null, samples,
+      priming: a.priming, frames: Math.min(a.frames, Math.round(frames * a.sampleRate / fps)) };
   }
   async discard() {
     await this.queue;

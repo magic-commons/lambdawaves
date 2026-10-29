@@ -19,10 +19,18 @@
  *                            reported with the memory limits the run would fall back to
  *   9  the screen holds      whether a wake lock can be asked for
  *   10 the projected cost    `projection` (a sentence the panel computed from the plan), so the cost of the film as configured
- *                            is visible before the tap */
+ *                            is visible before the tap
+ *   7b THE ALIGNMENT PROOF   (1.5.6-alpha.16, λWAVES 025 A5) `audioAlignment()`: a synthetic click clip (clicks at beats 0 · 1 · 2,
+ *                            120 BPM) is mixed, encoded and muxed with 2 s of 30 fps video through the kit's own path (mixPlan →
+ *                            mixdown → encodeAudio → WcSink + the muxer), the MP4 is parsed, its audio trak's packets are decoded
+ *                            where the index says and the edit list's media_time dropped, as a player does; each click's sample
+ *                            index must be its beat's frame index × 48000 / 30 within one sample, and audible sample 0 the
+ *                            video's frame 0.  One line: the codec, the edit list, the priming, each click's Δ in samples. */
 import { codecCandidates, pickHighBitrate, fmtBytes } from './plan.js';
-import { WcSink, decideEncoderPath, verifyEncoder } from './encoder.js';
+import { WcSink, decideEncoderPath, verifyEncoder, decideAudioPath, encodeAudio, decodeFirstChannel, peakIndex } from './encoder.js';
 import { RenderStore } from './store.js';
+import { mp4Parse } from './mp4.js';
+import { mixPlan, mixdown, mixFrames, wavBytes } from './audio-mix.js';
 
 const MAGIC = {
   png: (b) => b.length > 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47,
@@ -111,6 +119,7 @@ export async function renderSelfTest(o = {}) {
       return (out.bytes.length / 1e3).toFixed(0) + ' kB, ' + out.samples + ' samples, ' + path.codec + ', header valid, decoded';
     } catch (e) { try { sink.abort(); } catch (_) { /* gone */ } throw e; }
   });
+  await stage('the audio is on the film, aligned (clicks at beats 0 · 1 · 2, 120 BPM, 2 s at 30 fps)', async () => (await audioAlignment()).line);
   await stage('temporary file storage (the render store)', async () => {
     const id = 'selftest-' + Date.now().toString(36);
     const store = await RenderStore.create(id, { format: 'png', width: w, height: h, frames: 1 }, 1e6, { dir: o.dir, storage: o.storage });
@@ -131,6 +140,61 @@ export async function renderSelfTest(o = {}) {
   const passed = stages.filter((s) => s.ok).length;
   return { at: new Date().toISOString(), env, stages, passed, total: stages.length, ok: passed === stages.length, totalMs: performance.now() - t00,
     firstFailure: (stages.find((s) => !s.ok) || {}).name || null };
+}
+
+/** THE ALIGNMENT PROOF: clicks at `beats` through the kit's own path into an MP4, read back as a player reads it.  Throws a
+ *  sentence when a click is more than one sample from its beat's frame; resolves { line, codec, mediaTime, deltas, samples }. */
+export async function audioAlignment({ fps = 30, bpm = 120, seconds = 2, beats = [0, 1, 2], width = 128, height = 72 } = {}) {
+  const rate = 48000, frames = seconds * fps, spb = 60 / bpm;
+  const click = new Float32Array(rate * (seconds + 1));
+  for (const b of beats) click[Math.round(b * spb * rate)] = 0.9;
+  const wav = wavBytes([click], rate);
+  const model = { state: () => ({ curves: [{ id: 'click', kind: 'audio', keep: true, assetId: 'c'.repeat(32), seconds: seconds + 1, bpm, name: 'CLICK' }],
+    clips: [{ id: 'k', curveId: 'click', start: 0, duration: (seconds + 1) / spb, offset: 0, scale: 1, mute: false }] }) };
+  const mixed = await mixdown(mixPlan({ model, startBeat: 0, bpm, frames, fps }), { bytes: async () => wav });
+  if (!mixed || mixed.frames !== mixFrames(frames, fps)) throw new Error('the mixdown is not ' + mixFrames(frames, fps) + ' samples');
+  const ap = await decideAudioPath(rate, 2);
+  if (ap.kind !== 'audio') throw new Error(ap.why);
+  const audio = await encodeAudio(mixed, ap);
+  const vp = await decideEncoderPath(width, height, fps, pickHighBitrate(width, height, fps));
+  if (vp.kind !== 'webcodecs') throw new Error('no video encoder here: ' + vp.why);
+  const sink = new WcSink(width, height, fps, vp.codec, { bitrate: vp.bitrate });
+  let bytes;
+  try {
+    const px = new Uint8ClampedArray(width * height * 4).fill(255);
+    for (let i = 0; i < frames; i++) await sink.add(px, i);
+    sink.audio = audio;
+    bytes = (await sink.finish()).bytes;
+  } catch (e) { try { sink.abort(); } catch (_) { /* gone */ } throw e; }
+  const p = mp4Parse(bytes), v = (p.tracks || []).find((x) => x.handler === 'vide'), a = (p.tracks || []).find((x) => x.handler === 'soun');
+  if (!p.ok || !v || !a) throw new Error('the file does not parse as two traks');
+  /* the audio trak's packets, where stsc + stco + stsz say, with stts' durations */
+  const durs = a.stts.flatMap(([n, d]) => Array(n).fill(d)), packets = [];
+  let k = 0;
+  a.offsets.forEach((off, c) => {
+    let n = 0; for (const [first, count] of a.stsc) if (first <= c + 1) n = count;
+    for (let j = 0; j < n; j++, k++) { packets.push({ data: bytes.subarray(off, off + a.sizes[k]), dur: durs[k] }); off += a.sizes[k]; }
+  });
+  const decoded = await decodeFirstChannel({ samples: packets, description: audio.description }, ap);
+  /* A PLAYER decodes every packet and drops the edit list's media_time.  This browser's AudioDecoder may drop part of the delay
+     itself (Chromium's Opus decoder applies the OpusHead pre-skip; an AAC decoder drops nothing): what it dropped is the codec's
+     delay less what the impulse still shows, so the decoded index d is media sample d + stripped. */
+  const M = a.edits[0].mediaTime, head = ap.codec === 'opus' && audio.description && audio.description.length >= 19 ? audio.description[10] | (audio.description[11] << 8) : null;
+  const stripped = head != null ? head - audio.primingMeasured : 0, delay = head != null ? head : audio.primingMeasured;
+  if (M !== delay || M - stripped < 0) throw new Error('MISALIGNED: the edit list starts at ' + M + ', the codec\'s delay is ' + delay);
+  const audible = decoded.subarray(M - stripped), deltas = [], want = [];
+  for (const b of beats) {
+    const f = Math.round(b * spb * fps), s = f * rate / fps;
+    want.push(f + '→' + s);
+    deltas.push(peakIndex(audible, s - 2400, s + 2400) - s);
+  }
+  /* frame 0 is presented at movie time 0: the video's edit list starts at frame 0's composition time (0, or the B-frame shift its
+     ctts carries — Firefox's encoder reorders) */
+  const videoZero = (v.edits ? v.edits[0].mediaTime : 0) === (p.cttsOffsets ? p.cttsOffsets[0] : 0), sameLength = a.edits[0].segment === v.duration && a.timescale === rate;
+  const line = audio.label + ' ' + rate / 1000 + ' k · elst ' + M + (head != null ? ' = OpusHead pre-skip' : ' = the measured delay') + (stripped ? ' (this decoder drops ' + stripped + ' itself)' : '') + ' · roll ' + a.roll.distance +
+    (videoZero ? ' · audible sample 0 = frame 0' : ' · FRAME 0 IS NOT AT 0') + ' · beats ' + beats.join(' · ') + ' → frame→sample ' + want.join(' · ') + ' · Δ ' + deltas.join(' · ') + ' samples' + (sameLength ? ' · lengths equal' : ' · LENGTHS DIFFER');
+  if (!videoZero || !sameLength || deltas.some((d) => !(Math.abs(d) <= 1))) throw new Error('MISALIGNED: ' + line);
+  return { line, codec: ap.codec, mediaTime: M, deltas, samples: mixed.frames, bytes };
 }
 
 /** the self-test as text: what the panel prints and what the dump carries */

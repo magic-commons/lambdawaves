@@ -27,7 +27,7 @@
  *   motionUi   { [motionId]: (host, tools) → { options() → motionOptions, paint(estimate), text(estimate) → string } } the app's rows
  *                for its own motion (BASINS: ZOOM's route and speed), shown only while that motion is chosen.  tools:
  *                  row(text, tip, at?)   a row; `at` seats it under one of the panel's own rows ('motion' — the default — 'format',
- *                                        'size', 'fps', 'length', 'start', 'modulation', 'timeline'): BASINS' SPEED sits under LENGTH
+ *                                        'size', 'fps', 'length', 'start', 'modulation', 'timeline', 'audio'): BASINS' SPEED sits under LENGTH
  *                  fields { length, size, fps }   the panel's own inputs (SPEED → LENGTH reads and writes them; a write is followed
  *                                        by a 'change' event the caller dispatches)
  *                  change()   repaint the estimate        el, label, prefix
@@ -191,10 +191,13 @@ export function createRenderView(parent, o = {}) {
   const recOffset = num('offset', 'start at', 'Recording start offset in seconds', get('offset', '0'), 0, 3600, 0.1, 'SECONDS');
   const modSelect = choice('modulation', 'modulation', 'Recording modulation', [['off', 'OFF · FREEZE THIS LOOK'], ['on', 'ON · FROM FIRST SPACE']], get('modulation', 'off'));
   const timelineSelect = choice('timeline', 'timeline', 'Recording Timeline automation', [['on', 'ON · FROM BEAT ZERO'], ['off', 'OFF · BYPASS AUTOMATION']], get('timeline', 'on'));
+  /* THE AUDIO ROW (1.5.6-alpha.15, λWAVES 025 A4): ON puts the timeline's KEEP AUDIO clips of the range on the film (the MP4's second
+     trak, or a WAV beside PNG frames), mixed offline at the frames' own beats; OFF, or no clip in the range, is the silent film */
+  const audioSelect = choice('audio', 'audio', 'Recording audio', [['on', 'ON · THE TIMELINE’S AUDIO'], ['off', 'OFF · SILENT FILM']], get('audio', 'on'));
   label(el('div', 'sv-note', film), 'Modulation ON replays the rack from its first Space edge. Timeline ON replays clips from beat zero. Both skip to “start at”. With both OFF, the current look is frozen. Escape cancels.');
   /* the app's motions: their rows are seated under MOTION, or under the panel row a row names (BASINS: SPEED under LENGTH); one
      holder per motion and seat, shown only while that motion is chosen */
-  const seats = { motion, format: recFormat, size: recSize, fps: recFps, length: recDuration, start: recOffset, modulation: modSelect, timeline: timelineSelect };
+  const seats = { motion, format: recFormat, size: recSize, fps: recFps, length: recDuration, start: recOffset, modulation: modSelect, timeline: timelineSelect, audio: audioSelect };
   const motionUis = {};
   for (const [id, build] of Object.entries(o.motionUi || {})) {
     const holders = new Map();
@@ -228,11 +231,12 @@ export function createRenderView(parent, o = {}) {
   const doneFiles = el('div', 'sr-record-files', doneRow);
   const doneNote = el('div', 'sv-note', doneRow);
   const recoveryRow = el('div', 'sr-record-files', film);
-  let starting = false, videoUrl = null, pathStamp = 0, ready = null, result = null;
+  let starting = false, videoUrl = null, pathStamp = 0, ready = null, result = null, audioCodec = '';
 
   const runOptions = (preview) => {
     const opts = { motion: motion.value, fps: Number(recFps.value), durationS: Number(recDuration.value), offsetS: Number(recOffset.value),
-      format: preview ? 'mp4' : recFormat.value, resolution: recSize.value, modulation: modSelect.value === 'on', timeline: isTimeline() || timelineSelect.value === 'on' };
+      format: preview ? 'mp4' : recFormat.value, resolution: recSize.value, modulation: modSelect.value === 'on', timeline: isTimeline() || timelineSelect.value === 'on',
+      audio: audioSelect.value === 'on' };
     if (motionUis[motion.value]) opts.motionOptions = motionUis[motion.value].ui.options();
     if (preview) {
       opts.previewS = 3;
@@ -253,18 +257,25 @@ export function createRenderView(parent, o = {}) {
         (ui && ui.text ? ' · ' + ui.text(e) : '') +
         (e.range ? ' · ' + t('beats {from} → {to} at {bpm} BPM', { from: +e.range.start.toFixed(3), to: +e.range.end.toFixed(3), bpm: +e.plan.bpm.toFixed(2) }) : '') +
         (e.format === 'mp4' ? ' · ' + t('{mbps} Mbps target · ≈ {size}', { mbps: Math.round(e.bitrate / 1e6), size: fmtBytes(e.est.bytes) }) : ' · ' + t('numbered lossless PNG frames')) +
+        (e.audio ? ' · ' + t('audio {clips} · {codec}', { clips: e.audio.clips.join(', '), codec: e.format === 'png' ? 'WAV 48 k' : audioCodec || '…' }) : '') +
         ' · ' + t('≈ {time} to render', { time: fmtMs(e.est.renderMs) }) + (e.learned ? ' ' + t('(learned from the last render)') : '') + e.warning;
       estimate.classList.toggle('is-over-limit', !!e.warning);
     } catch (e) { estimate.textContent = String(e.message || e); }
     const busy = rec.running() || starting;
     /* a timeline motion with no range keeps RENDER pressable: the press explains itself with a toast */
     renderBtn.root.disabled = previewBtn.root.disabled = busy || (!ready && !isTimeline());
-    for (const x of [motion, recFormat, recSize, recFps, recDuration, recOffset, modSelect, timelineSelect]) x.disabled = busy;
+    for (const x of [motion, recFormat, recSize, recFps, recDuration, recOffset, modSelect, timelineSelect, audioSelect]) x.disabled = busy;
     timelineSelect.disabled = busy || isTimeline();   // a timeline render always plays the arrangement
   }
   async function paintPath() {
     const stamp = ++pathStamp;
     if (!ready || recFormat.value !== 'mp4' || rec.running() || starting) return;
+    if (ready.audio && !audioCodec && rec.audioPath) {
+      /* the codec the AUDIO row names: the rung this browser takes, asked once */
+      const ap = await rec.audioPath().catch(() => null);
+      audioCodec = ap && ap.kind === 'audio' ? ap.label + ' 48 k' : t('no audio encoder here: choose PNG frames for a WAV');
+      if (stamp === pathStamp && !rec.running() && !starting) paintEstimate();
+    }
     try {
       const path = await rec.encoderPath(runOptions(false));
       if (stamp !== pathStamp || rec.running() || starting) return;
@@ -272,7 +283,7 @@ export function createRenderView(parent, o = {}) {
       else renderStatus.textContent = '';
     } catch (e) { if (stamp === pathStamp) renderStatus.textContent = String(e.message || e); }
   }
-  for (const [input, key] of [[motion, 'motion'], [recFormat, 'format'], [recSize, 'size'], [recFps, 'fps'], [recDuration, 'duration'], [recOffset, 'offset'], [modSelect, 'modulation'], [timelineSelect, 'timeline']]) {
+  for (const [input, key] of [[motion, 'motion'], [recFormat, 'format'], [recSize, 'size'], [recFps, 'fps'], [recDuration, 'duration'], [recOffset, 'offset'], [modSelect, 'modulation'], [timelineSelect, 'timeline'], [audioSelect, 'audio']]) {
     input.addEventListener('change', () => {
       set(key, input.value); paintEstimate(); void paintPath();
       if (input === motion && isTimeline() && !ready) { const why = estimate.textContent; say(why, true); }
@@ -297,6 +308,7 @@ export function createRenderView(parent, o = {}) {
     } }); doneFiles.appendChild(discard.root);
     if (preview && res.format === 'mp4') { videoUrl = URL.createObjectURL(res.files[0].blob); videoPreview.src = videoUrl; videoPreview.hidden = false; }
     doneNote.textContent = t('Complete · {frames} frames · {time} render time', { frames: res.frames, time: fmtMs(res.wallMs) }) + (res.diskBacked ? ' · ' + t('stored on disk') : '') +
+      (res.audio ? ' · ' + t('audio {codec} {rate} k · {seconds} s · {clips}', { codec: res.audio.label, rate: res.audio.sampleRate / 1000, seconds: res.audio.durationS.toFixed(2), clips: res.audio.clips.join(', ') }) : '') +
       (prefersVideoDownload() ? ' · ' + t('Download, then share from Files.') : '');
   }
   async function paintRecoveries() {
@@ -381,7 +393,7 @@ export function createRenderView(parent, o = {}) {
     held: held ? { w: held.w, h: held.h, bytes: held.bytes } : null,
     done: result && result.files && result.files[0] ? { name: result.files[0].name, bytes: result.files[0].bytes } : null });
   return { root: wrap, paint, state,
-    controls: { motion, recFormat, recSize, recFps, recDuration, recOffset, modSelect, timelineSelect, renderBtn: renderBtn.root, previewBtn: previewBtn.root, cancel: cancel.root, runCheck: runCheck.root, lines, estimate, renderStatus, doneRow, doneFiles, recoveryRow },
+    controls: { motion, recFormat, recSize, recFps, recDuration, recOffset, modSelect, timelineSelect, audioSelect, renderBtn: renderBtn.root, previewBtn: previewBtn.root, cancel: cancel.root, runCheck: runCheck.root, lines, estimate, renderStatus, doneRow, doneFiles, recoveryRow },
     destroy() { life.abort(); offRange(); releasePreview(); wrap.remove(); } };
 }
 
