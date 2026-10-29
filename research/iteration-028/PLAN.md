@@ -47,3 +47,4 @@ Written at the end of REVIEW.md by the synthesis agent (the calls the fleet coul
 ## CLOSED
 | row | base | commit | note |
 |---|---|---|---|
+| R4 (senior pass) | d4c92ba6 | 76c8ac3e | THE DOUBLES re-measured (bondsOf · uniqueName · statusOf settled by 021 G4; cholesky · tableFor left with reasons; atoms.js gauss → eliminate, 6902a92c) and THE UN-EXPORT SWEEP (107 export keywords off 44 files, nothing deleted; knip 126 → 14 deliberate; test.sh node EXIT 0 · rack-deps HOLDS · 0 cycles). Note research/senior-pass/R4-BUILD.md. Opus builder part A (paused on the usage alarm), Yan part B. |
