@@ -1,0 +1,13 @@
+{
+  "conduct": 1,
+  "name": "KICK BAR",
+  "notes": "SCORE.md example 3: one audio-reactive bar at 140 BPM — the track's level on EXPOSURE, its lows pulling the camera in (a depth window 3.0 → 2.2), the file KEPT on the film. media/click-140.wav is a click bed (first kick at 5 s); put your own track in media/.",
+  "tempo": { "bpm": 140, "meter": 4 },
+  "bars": 1,
+  "system": { "preset": "1s+2pz", "rate": 40 },
+  "look": { "palette": "phosphor", "paletteOn": true, "style": "cloud", "view": "phase", "exposure": 1.2 },
+  "camera": { "yaw": 0.6, "pitch": 0.4, "dist": 3.0 },
+  "audio": { "file": "media/click-140.wav", "offset": 5.0, "keep": true,
+             "bands": { "level": "material.exposure", "low": { "target": "observer.dist", "min": 3.0, "max": 2.2 } } },
+  "render": { "fps": 30, "size": "1080p" }
+}

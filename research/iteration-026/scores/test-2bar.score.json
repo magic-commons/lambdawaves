@@ -1,0 +1,18 @@
+{
+  "conduct": 1,
+  "name": "TEST 2BAR",
+  "title": "2-bar hydrogen test",
+  "notes": "026 A5's proof: bar 1 CLOUD, bar 2 SHELL (a step), exposure breathing every half bar (a repeat), the camera half a turn round (a yaw lane).",
+  "tempo": { "bpm": 120, "meter": 4 },
+  "bars": 2,
+  "base": null,
+  "system": { "preset": "1s+2pz", "rate": 40 },
+  "look": { "palette": "phosphor", "paletteOn": true, "style": "cloud", "view": "phase", "exposure": 1.2, "softness": 1.0 },
+  "camera": { "yaw": 0.6, "pitch": 0.4, "dist": 3.2, "fov": 0.9 },
+  "lanes": [
+    { "target": "observer.yaw", "points": [[0, 0.6], [8, 3.74]] },
+    { "target": "material.exposure", "repeat": 2, "shape": "smooth", "points": [[0, 0.8], [1, 3], [2, 0.8]] },
+    { "target": "material.style", "shape": "step", "points": [[0, "cloud"], [4, "glass"]] }
+  ],
+  "render": { "fps": 30, "size": "1080p", "nodes": "on", "chrome": "labels" }
+}
