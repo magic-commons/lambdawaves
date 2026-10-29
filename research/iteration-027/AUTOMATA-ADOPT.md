@@ -25,10 +25,14 @@ BASE: AUTOMATA `build-b` @ `60fe0b2` (v0.1.0-alpha.4, MIR 1.5.0-alpha.24, `~/Doc
   line; `b4` — re-run once alone on a quiet GPU before it is called the adopt's.
 - `npm run test:gpu` not run (no shader, engine or default-picture byte moved by the adopt).
 
-## Shots
-None: the builder's shot script (`.tmp/scripts/shots.mjs`: boot, THE FINDER by real presses, RECOVER, the rack after a pick; copied to the integrator's
-`.tmp/it027/scripts/shots.mjs` aimed at 9699) was not run before the usage cliff. The next session runs it once with a server on 9699 and files three
-JPEGs under `research/iteration-027/S3-shots/`.
+## Shots (`research/iteration-027/S3-shots/`, JPEG 1000 px; Yan 09:04, the builder's `shots.mjs` on 9699/5699, headless Firefox)
+- Boots clean: kit `1.5.6-alpha.17` read from `mir/version.js`; 0 page errors, 0 GPU errors; five windows closed at boot (TAKE · MORPH · WEDGE · FIELDS · LAYER).
+- `shell.jpg` the rack and the bar with the + · `finder.jpg` THE FINDER open by a real press on + (hit true): 17 rows — COLOR · ENGINE · FIELDS · GRAY–SCOTT ·
+  HAND · LAYER · METERS · MIDI · MORPH · OBSERVE · OUTPUT · RENDER · SETTINGS · SPACE · TAKE · TUNER · WEDGE, 420 px wide; a second press on + closes it
+  (shown false) · `rack.jpg` after the pick attempt.
+- ONE LOOK: the probe's real press on TAKE's row did not land — `elementFromPoint` at the row's centre (697, 659) returned another element (hit false), so
+  TAKE did not open and THE FINDER stayed shown. Either the row's centre is under the picker's own scroller/mask in this viewport or the row is not the hit
+  target (a child is): the same probe on NEBULA/BUBBLDYNE's clones (S1/S2) would tell whether it is the kit's picker or AUTOMATA's seat.
 
 ## FOR-MIR
 - Repeats S1/S2: `createRack({ chrome: true, finder: true })` / `createApp({ finder })` — AUTOMATA is the third app to hand-build the FINDER opener.
