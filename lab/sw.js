@@ -362,7 +362,7 @@ const PRECACHE = [
   ['./new-project.lambdawaves.json',                                '8f752deb0e08'],
   ['./node-layers.js',                                              'd223872ad8a9'],
   ['./node-prims.js',                                               '97deaf2434b4'],
-  ['./node-shader.js',                                              '013862beab4c'],
+  ['./node-shader.js',                                              'cd9c05d9db7d'],
   ['./node-types.js',                                               '3c6873fd9734'],
   ['./nodes-compile.js',                                            'fb88659ebcc0'],
   ['./nodes-undo.js',                                               'cfe471461333'],

@@ -11,6 +11,10 @@
  *   FEEDBACK   (027 N1) the loop: acc = max(GAIN·picture, DECAY·acc′), acc′ the last acc moved by DRIFT (up), ANGLE (about the centre) and
  *              SCALE (a zoom) — a LIGHTEN, so the ground stays the ground and never washes out; shown as mix(picture, acc, MIX).  A ping-pong
  *              pair of rgba16float textures; it STEPS once per present.
+ *   REFRACT    (027 N2) the pool floor: the picture's luminance × LENS is a water surface; each grid point (SAMPLES a cell, jittered as DECOHERE's)
+ *              is a ray from straight above, bent by Snell through the surface's slope (read across SCALE px) and carried DEPTH px down; the
+ *              same one/one splat and TONE as DECOHERE, so where the bent rays cross the light piles up: the folds ARE the caustics.  FRINGE
+ *              gives each channel its own lens (dispersion).  LENS 0 is neutral.
  * A STATEFUL node (FEEDBACK) starts from black when it is placed, when a hand moves one of its knobs (`restart(id)`, lab/nodes.js) and at a
  * film's frame 0; a modulator's write steps on with the new value (it asks for a present, never draws a step of its own).
  * The stage canvas's CSS filter (the chain's grade) is mirrored onto each SHADER canvas, so the column's colour nodes dress it too.
@@ -40,6 +44,15 @@ export const SHADER_TYPES = {
       { k: 'scale', label: 'SCALE', min: 0.9, max: 1.1, home: 1, hint: 'the trail\'s zoom a frame: above 1 it grows' },
       { k: 'gain', label: 'GAIN', min: 0, max: 2, home: 1, hint: 'the fresh picture\'s weight in the loop' },
       { k: 'mix', label: 'MIX', min: 0, max: 1, home: 1, hint: 'the loop over the picture: 0 = the picture alone' }] },
+  refract: { cls: 'shader', label: 'REFRACT', hint: 'the pool floor: the light bent by the picture as a surface', heavy: true, neutral: (v) => v.lens === 0,
+    knobs: [{ k: 'lens', label: 'LENS', min: 0, max: 60, home: 20, unit: ' px', hint: 'the surface\'s height: the luminance × LENS' },
+      { k: 'scale', label: 'SCALE', min: 1, max: 32, home: 3, log: true, unit: ' px', hint: 'the slope read across so many px: broad or fine lenses' },
+      { k: 'samples', label: 'SAMPLES', min: 1, max: 32, step: 1, home: 6, hint: 'points per cell: few = grain, many = smooth (the cost)' },
+      { k: 'depth', label: 'DEPTH', min: 0, max: 400, home: 120, unit: ' px', hint: 'how far below the surface the floor lies' },
+      { k: 'fringe', label: 'FRINGE', min: 0, max: 1, home: 0.2, hint: 'a lens per channel: dispersion, as a prism' },
+      { k: 'gain', label: 'GAIN', min: 0.1, max: 8, home: 1, log: true, hint: 'the exposure of the light on the floor' },
+      { k: 'colour', label: 'COLOUR', home: 'picture', options: opt('ink', 'picture', 'palette') },
+      { k: 'ground', label: 'GROUND', home: 'black', options: opt('black', 'stage') }] },
 };
 
 /* the uniforms (24 f32): size · grid (gw, step) · amount freq spread fringe · gain phase src colour · nch samples ground hue · pal (a, b) · invert palOn ·
@@ -67,6 +80,16 @@ fn fbm(p: vec2f) -> f32 { return (noise(p) + 0.5 * noise(p * 2.03 + 17.0) + 0.25
 fn field(p: vec2f, o: vec2f) -> vec2f { return vec2f(fbm(p + o), fbm(p + o + vec2f(31.4, 17.9))); }
 fn lum(c: vec3f) -> f32 { return dot(c, vec3f(0.2126, 0.7152, 0.0722)); }
 fn at(q: vec2i) -> vec3f { return textureLoad(tap, clamp(q, vec2i(0), vec2i(u.size) - 1), 0).rgb; }
+fn L(q: vec2i) -> f32 { return lum(at(q)); }
+// REFRACT: the surface h = LENS·luminance, its slope read across SCALE px (a Sobel), the ray from straight above bent by Snell (air → water,
+// n = 1.33) and carried DEPTH px down to the floor — where the bent rays cross, the light piles up: the caustics
+fn bend(q: vec2i, k: f32) -> vec2f {
+  let s = max(1, i32(u.freq)); let a = vec2i(s, 0); let b = vec2i(0, s);
+  let ne = L(q + a - b); let nw = L(q - a - b); let se = L(q + a + b); let sw = L(q - a + b);
+  let g = vec2f(ne + 2.0 * L(q + a) + se - nw - 2.0 * L(q - a) - sw, sw + 2.0 * L(q + b) + se - nw - 2.0 * L(q - b) - ne) / (8.0 * f32(s));
+  let r = refract(vec3f(0.0, 0.0, -1.0), normalize(vec3f(-g * u.x1 * k, 1.0)), 0.75188);
+  return r.xy / max(-r.z, 0.05) * u.amount;
+}
 @vertex fn vs(@builtin(vertex_index) vi: u32, @builtin(instance_index) ii: u32) -> VO {
   var o: VO; o.pos = vec4f(2.0, 2.0, 0.0, 1.0); o.col = vec4f(0.0);
   let gw = u32(u.grid.x); let st = u.grid.y; let nch = u32(u.nch); let ch = ii % nch; let s = ii / nch;
@@ -79,14 +102,17 @@ fn at(q: vec2i) -> vec3f { return textureLoad(tap, clamp(q, vec2i(0), vec2i(u.si
     v = clamp(length(g) * 3.0, 0.0, 1.0);
   }
   if (v < 0.02) { return o; }                                          // a dark point lands nowhere
-  let k = 1.0 + 0.6 * u.fringe * (f32(ch) - 1.0) * f32(nch > 1u);  // FRINGE: R · G · B pushed 1 ∓ 0.6·FRINGE as far
+  let k = 1.0 + 0.6 * u.fringe * (f32(ch) - 1.0) * f32(nch > 1u);  // FRINGE: R · G · B pushed 1 ∓ 0.6·FRINGE as far (REFRACT: a lens each)
+  var y = p;
+  if (u.mode > 0.5) { y = p + bend(q, k); } else {
   let ph = 6.2831853 * u.phase; let o0 = vec2f(cos(ph), sin(ph)) * 2.5;   // PHASE walks a circle in the field: 1 is 0 again
   let pn = p * u.freq;
   // the copies are ONE family of fields, t ∈ [−½, ½] along it (SPREAD: how far it reaches); each point draws its own t in its copy's stratum —
   // a Monte-Carlo sample of the family's density: few SAMPLES = grain, many = the smooth sheet with its bright envelopes (the caustics)
   let t = (f32(s) + rnd(seed ^ 0x51ed27u)) / u.samples - 0.5;
   let d = field(pn, o0 + vec2f(1.0, 0.6) * (t * u.spread * 4.0));
-  let y = p + d * u.amount * k;
+  y = p + d * u.amount * k;
+  }
   var col = vec3f(v);
   if (u.colour > 0.5 && u.colour < 1.5) { col = c / max(max(c.r, max(c.g, c.b)), 0.001) * v; }   // PICTURE carries its hue
   if (nch > 1u) { col = col * vec3f(f32(ch == 0u), f32(ch == 1u), f32(ch == 2u)); }
@@ -202,12 +228,13 @@ export function createShaderHost({ device, canvas: stage, palette = null, tap = 
       const st = pipe('fbstep'), sh = pipe('fbshow', out);
       pass(r.B.createView(), st, group(st, { buffer: r.ub }, tex.createView(), r.A.createView(), L.lin), 3);
       pass(view(), sh, group(sh, { buffer: r.ub }, tex.createView(), r.B.createView()), 3);
-    } else {
+    } else {                                                              // DECOHERE · REFRACT: SPLAT, then TONE
       if (!r.acc) r.acc = tex16(w, h);
+      const R = r.type === 'refract';
       const px = w * h, st = px < 1e6 ? 1 : px > 4e6 ? 3 : 2, gw = Math.ceil(w / st), gh = Math.ceil(h / st);
       const S = Math.max(1, Math.round(v.samples)), nch = v.fringe > 0 ? 3 : 1, [a, b, hue, inv, on] = v.colour === 'palette' ? pal() : [0, 1, 0, 0, 0];
-      uni = [w, h, gw, st, v.amount * k, 2 / (v.scale * k), v.spread, v.fringe, v.gain, v.phase, v.source === 'edges' ? 1 : 0,
-        COL[v.colour] || 0, nch, S, v.ground === 'stage' ? 1 : 0, hue, a, b, inv, on, 0, 0, 0, 0];
+      uni = [w, h, gw, st, R ? v.depth * k : v.amount * k, R ? Math.max(1, v.scale * k) : 2 / (v.scale * k), R ? 0 : v.spread, v.fringe, v.gain, R ? 0 : v.phase,
+        v.source === 'edges' ? 1 : 0, COL[v.colour] || 0, nch, S, v.ground === 'stage' ? 1 : 0, hue, a, b, inv, on, R ? 1 : 0, R ? v.lens * k : 0, 0, 0];
       device.queue.writeBuffer(r.ub, 0, new Float32Array(uni));
       const sp = pipe('splat'), tn = pipe('tone', out);
       pass(r.acc.createView(), sp, group(sp, { buffer: r.ub }, tex.createView()), gw * gh, S * nch);   // SPLAT: a point per cell per copy (per channel with FRINGE)
