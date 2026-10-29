@@ -79,7 +79,8 @@
  *   and H9 an interloping rack frame (the rack's own lock while a film owns the page; the jitter, generation and size
  *   witnesses all see one).
  *   THE KIT'S — H6 the modulation clock (its record clock, or no host at all), H10 the device pixel ratio (an explicit
- *   even size), H11 path-dependent 2-D overlays (a film carries none), H12 the PNG container (its encoder; λWAVES'
+ *   even size), H11 the overlays (λWAVES' since 025 B: lab/film-bake.js lays the graph, the pure overlays and the words over the frame, and
+ *   names the rest OUT), H12 the PNG container (its encoder; λWAVES'
  *   digest is over the frame's RGBA, which is ours) and H13 the gamut (declared to it as colorSpace).
  *
  * ── WHAT THE RACK CALLS ──────────────────────────────────────────────────────────────────────────────────────
@@ -449,7 +450,7 @@ export const HAZARDS = Object.freeze([
   hz('modealias', 'app', 'LW.modesAt(t) returns a module-level array of module-level records rewritten in place, so anything that calls modesAt between our call and field.frame\'s consumption rewrites our modes', 'rack.js modesAt / modeRecs', 'modesAt is evaluated inline in the draw, with nothing between', 'covered by the jitter witness — an interloper that could rewrite the modes had to present to do it'),
   hz('interloper', 'app', 'any schedule() from anywhere arms a rAF that resizes the canvas, presents with an unpinned seed and advances the modulation on wall time', 'rack.js schedule / loop', 'the rack\'s own hold while a film owns the page (exportLocked: no rAF is armed), and a drain before frame 0', 'the jitter, generation and size witnesses all fire; the frame is rendered again, and one that will not settle aborts the film by name'),
   hz('dpr', 'kit', 'field.resize multiplies by window.devicePixelRatio, so a film sized by scale inherits the machine\'s DPR', 'field.js resize', 'the kit\'s recorder takes an explicit even size; a scale-sized film records the resolved size and flags sizeFromMachine', 'the manifest carries the resolved size'),
-  hz('overlays', 'kit', 'particles.js integrates an RK4 trajectory from its own lastT to t (and teleports when |dt| > 4, which every loop\'s wrap gap is) on the 2-D #particles layer', 'rack.js loop; particles.js advance', 'a film carries no 2-D overlay layer: the kit composites none (KIT BRIEF 6 is that road); a picture labels the overlays it upscales', 'the picture names its upscaled layers'),
+  hz('overlays', 'app', 'what the screen lays over the field — the NODES chain and its layers, the 2-D overlays (#particles integrates RK4 from its own lastT, seeded by Math.random), the ATOM LABELS and the ESP BAR — is not in the GPU readback', 'rack.js loop; particles.js advance; nodes.js; stage-words.js', '025 B: lab/film-bake.js lays each one that is a function of (t, camera, seed) over the frame at the film\'s scale — the graph compiled at k, the grain hashed from the frame index, PARTICLES reseeded at frame 0 from seed 13 — and names the rest OUT (FLOW, the impulse vector, the KaTeX words); NODES OFF and CHROME OFF leave them off', 'the bake readings (IN or OUT, each with why) ride in the manifest and the frame digest is over the baked picture'),
   hz('deflate', 'kit', 'a PNG container\'s compression is unspecified and changes between browser builds: the PIXELS are exact and the CONTAINER is not', 'mir/render/encoder.js pngBytes', 'the kit encodes every frame; λWAVES\' digest is over the frame\'s RGBA as read off the GPU, which is ours', 'the frame log carries every digest'),
   hz('gamut', 'kit', 'field.js configures the context display-p3 on a wide-gamut screen; the same shader output then means different colour', 'field.js / capture.js configureCopy', 'a display-p3 canvas is declared to the kit\'s recorder (colorSpace), which tags its frames', 'the manifest records the gamut and the swapchain format'),
 ]);
@@ -538,6 +539,7 @@ export function createFilm(LW, opts = {}) {
   let job = null, cfgUsage = null, token = 0, lastMs = null;   // lastMs: this device's own milliseconds a frame, once a film has run
   let card = null, last = null;   // 0.5.0 C7b: the RENDER card's recorder options (`recorder(o)`) · the last film's frame log and names
   const road = opts.road || {};    // the rack's own: pending() → { caption, spin, yaw0 }, step(dt) (the rotor rates), rotating(), plan(o)
+  const bake = opts.bake || null;  // 025 B: lab/film-bake.js — the graph, the overlays and the words over the frame (none in the node proof)
 
   function limits() { const f = field(); return maxPictureSize(f && f.ok ? f.device.limits : null, opts.canvasCap || 32767); }
   function stateLabel() {
@@ -596,6 +598,8 @@ export function createFilm(LW, opts = {}) {
         case 'interloper': { const s = !!(LW.stats && LW.stats.scheduled); return { state: s ? 'live' : 'off', blocking: false, value: s, note: s ? 'a rack frame is scheduled; a film drains it and the per-frame witnesses catch any that arrive anyway' : 'no rack frame is scheduled' }; }
         case 'gamut': return { state: (f && f.ok && f.gamut && f.gamut !== 'srgb') ? 'live' : 'off', blocking: false, value: f && f.ok ? f.gamut : null, note: (f && f.ok && f.gamut && f.gamut !== 'srgb') ? 'THIS CANVAS IS ' + f.gamut + ': the film is declared display-p3 to the kit\'s encoder' : 'the canvas is sRGB' };
         case 'fieldclock': return { state: 'live', blocking: false, value: LW.fieldRate ? LW.fieldRate.capMs : null, note: 'the field clock caps reconstructs; a film bypasses the tier router entirely' };
+        case 'overlays': { if (!bake) return { state: 'kit', blocking: false, value: null, note: 'no bake: the frame is the field alone' };
+          const r = bake.readings(); return { state: r.length ? 'live' : 'off', blocking: false, value: r, note: r.length ? r.map((x) => x.id + ' ' + x.state).join(' · ') : 'nothing lies over the field' }; }
         case 'modealias': return { state: 'live', blocking: false, value: null, note: 'the mode list is a reused buffer; a film evaluates modesAt inline in the draw' };
         default: return { state: 'kit', blocking: false, value: null, note: 'the kit\'s: ' + ((HAZARDS.find((h) => h.id === id) || {}).pin || '') };
       }
@@ -653,7 +657,8 @@ export function createFilm(LW, opts = {}) {
     if (opts.hold) { try { await opts.hold(false); } catch (_) { /* the host's own restore */ } }
     if (LW.schedule && LW.TIER) LW.schedule(LW.TIER.PRESENT);   // the screen goes back to showing the lab
     const one = J.periods && J.log.length && J.log.every((f) => f.period) ? J.periods[0] : null;   // a film of one period clip is a LOOP
-    last = { log: J.log, kind: one ? 'loop' : J.kind, label: J.label, w: J.size.w, h: J.size.h, fps: J.fps, frames: J.log.length, T: one ? one.s.L : J.sched.mode === 'loop' ? J.sched.L : 0 };
+    last = { log: J.log, kind: one ? 'loop' : J.kind, label: J.label, w: J.size.w, h: J.size.h, fps: J.fps, frames: J.log.length, T: one ? one.s.L : J.sched.mode === 'loop' ? J.sched.L : 0,
+      nodes: J.nodes !== false, chrome: J.chrome || 'labels', baked: J.bake ? J.bake.reads : [] };
     if (J.card) job = null;   // the card's job is the recorder's run's: it ends here
   }
   const check = () => { if (!opts.grab && !gpuOk()) throw new Error('THE GRAPHICS DEVICE IS GONE: the FIELD is not up, so no frame can be read'); };
@@ -711,9 +716,10 @@ export function createFilm(LW, opts = {}) {
       }
     }
     J.rate = LW.clock.rate;
-    if (J.caption) captionOver(shot.rgba, w, h, J.caption);
-    J.log.push({ k: i, t, off: pc ? pc.s.off(at - pc.k0) : J.drive ? t : J.sched.off(i), digest: digest(shot.rgba), retries: tries - 1, ...(pc ? { period: true } : {}) });
-    return { rgba: shot.rgba, width: w, height: h };
+    const rgba = bake ? await bake.apply(J, shot.rgba, w, h, i, t) : shot.rgba;   // 025 B: the screen over the field
+    if (J.caption) captionOver(rgba, w, h, J.caption);
+    J.log.push({ k: i, t, off: pc ? pc.s.off(at - pc.k0) : J.drive ? t : J.sched.off(i), digest: digest(rgba), retries: tries - 1, ...(Number.isFinite(ctx.beat) ? { beat: ctx.beat } : {}), ...(pc ? { period: true } : {}) });
+    return { rgba, width: w, height: h };
   }
 
   /* ── THE CARD'S ROAD (0.5.0 C7b) ─────────────────────────────────────────────────────────────────────────────────────────
@@ -725,7 +731,8 @@ export function createFilm(LW, opts = {}) {
     const J = job;
     if (!J) { const r = road.pending ? road.pending() : {};
       return { token: 'lw-' + (++token) + '-' + Math.round(now()), pending: { t0: LW.clock.t, rate: LW.clock.rate, label: stateLabel(),
-        observable: LW.mat ? VIEW_NAMES[LW.mat.view | 0] : 'density', caption: r.caption || '', spin: r.spin || 0, yaw0: r.yaw0 || 0 } }; }
+        observable: LW.mat ? VIEW_NAMES[LW.mat.view | 0] : 'density', caption: r.caption || '', spin: r.spin || 0, yaw0: r.yaw0 || 0,
+        nodes: !(card && card.nodes && card.nodes() === false), chrome: card && card.chrome ? card.chrome() : 'labels' } }; }
     return { token: J.token, film: manifest({ schedule: J.sched, picture: { w: J.size.w, h: J.size.h, sizeFromMachine: !!J.size.sizeFromMachine, format: J.format, jitterSeed: JITTER_SEED },
       state: { label: J.label, observable: J.observable, version: LW.version || null } }) };
   }
@@ -747,7 +754,7 @@ export function createFilm(LW, opts = {}) {
     const tl = spec.timeline ? arrangement(fps) : { periods: null, on: () => false };
     return { token: A.token || 'lw-' + (++token) + '-' + Math.round(now()), sched, N, fps, pinned: () => true, host: true, card: true,
       drive: !!spec.modulation || tl.on('transport.rate'), format: spec.format, size: { w: spec.width, h: spec.height }, kind: s && s.mode === 'span' ? 'frames' : 'clip',
-      label: p.label || stateLabel(), observable: p.observable || null, caption: p.caption || '', periods: tl.periods,
+      label: p.label || stateLabel(), observable: p.observable || null, caption: p.caption || '', periods: tl.periods, nodes: p.nodes !== false, chrome: p.chrome === 'off' ? 'off' : 'labels',
       poseAt: p.spin && !tl.on('observer.yaw') ? (k) => ({ yaw: p.yaw0 + p.spin * (k / fps) }) : null,   // R4: AUTO-ROTATE rides as the pose path unless a yaw clip is in the take
       beforeFrame: road.step ? ({ dt }) => road.step(dt) : null, retries: DEFAULTS.retries, log: [], contended: 0, aborted: null,
       driven: sched.at(0), rate: 0, prev: null, base: null, drained: null,
@@ -818,6 +825,7 @@ export function createFilm(LW, opts = {}) {
       const size = P.size || sizeFor(o);
       const J = job = { token: 'lw-' + (++token) + '-' + Math.round(now()), sched, N, fps, pinned, drive, host: drive, format, size, kind: o.kind || P.kind || sched.mode,
         label: o.label || stateLabel(), observable: P.observable || null, caption: o.caption || '', poseAt: o.poseAt || null, beforeFrame: o.beforeFrame || null,
+        nodes: o.nodes !== false, chrome: o.chrome === 'off' ? 'off' : 'labels',
         retries: o.retries === undefined ? DEFAULTS.retries : o.retries, log: [], contended: 0, aborted: null, driven: sched.at(0), rate: 0, prev: null, base: null, drained: null,
         pins: { jitter: pinned('jitter') ? 'presents pinned to ' + JITTER_SEED + ' before every frame' : 'NOT PINNED (unpin)', fieldclock: 'bypassed: field.frame is called directly with modes every frame' } };
       const wall0 = now();
@@ -838,7 +846,7 @@ export function createFilm(LW, opts = {}) {
       const ext = format === 'mp4' ? 'mp4' : 'zip';
       const name = files.length ? uniqueFileName(captureName({ kind: J.kind, label: J.label, w: size.w, h: size.h, fps, frames: delivered, T: sched.mode === 'loop' ? sched.L : 0, ext }), taken) : null;
       const man = manifest({ stamp: stamp(new Date()), schedule: sched,
-        picture: { w: size.w, h: size.h, sizeFromMachine: !!size.sizeFromMachine, clipped: !!size.clipped, format: J.base ? J.base.format : null, gamut: J.base ? J.base.gamut : null, resolution: J.base ? J.base.resolution : null, half: J.base ? J.base.half : null, container: format === 'mp4' ? 'mp4 (the kit\'s WebCodecs encoder and muxer)' : 'png frames in the kit\'s stored ZIP parts', jitterSeed: JITTER_SEED },
+        picture: { w: size.w, h: size.h, sizeFromMachine: !!size.sizeFromMachine, clipped: !!size.clipped, format: J.base ? J.base.format : null, gamut: J.base ? J.base.gamut : null, resolution: J.base ? J.base.resolution : null, half: J.base ? J.base.half : null, container: format === 'mp4' ? 'mp4 (the kit\'s WebCodecs encoder and muxer)' : 'png frames in the kit\'s stored ZIP parts', jitterSeed: JITTER_SEED, nodes: J.nodes, chrome: J.chrome, baked: J.bake ? J.bake.reads : [] },
         state: { label: J.label, observable: J.observable, digest: (LW.stateDigest ? (() => { try { return LW.stateDigest(); } catch (_) { return null; } })() : null), version: LW.version || null },
         pins: J.pins, witnesses: { contended: J.contended, aborted: aborted ? aborted.why : null, drained: J.drained }, frames: J.log,
         ffmpeg: format === 'png' ? 'ffmpeg -framerate ' + fps + ' -i frame_%06d.png -c:v libx264 -pix_fmt yuv420p -crf 18 ' + slug(J.label) + '.mp4' : null });

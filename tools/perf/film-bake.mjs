@@ -1,0 +1,47 @@
+/* tools/perf/film-bake.mjs (025 B) — THE FILM IS THE SCREEN, measured: the film's own determinism (`__LW.captureUI.exact.verify`: one short schedule
+ * rendered twice through the kit's recorder, digest against digest) with the graph EMPTY and with CURVES + FILM GRAIN + DECOHERE, and a frame of a
+ * baked film beside the stage's screenshot at the same t (B-shots).
+ *   LW_PORT=9691 GD_PORT=5691 node tools/perf/film-bake.mjs [steps: empty,graph,shot] [out-dir for the shots]
+ */
+import { open } from '../gate/gatekit.mjs';
+import fs from 'node:fs';
+const PORT = process.env.LW_PORT || '9691';
+const STEPS = (process.argv[2] || 'empty,graph').split(',');
+const DIR = process.argv[3] || 'research/iteration-025/B-shots';
+const PRESET = process.env.PRESET || '1s%2B2pz';
+const g = await open(`https://127.0.0.1:${PORT}/lab/?preset=${PRESET}&sw=0`, { width: 1280, height: 800, script: 900000,
+  prefs: { 'privacy.reduceTimerPrecision': false, 'dom.storageManager.prompt.testing': true, 'dom.storageManager.prompt.testing.allow': true } });
+const out = {};
+try {
+  await g.waitFor('window.__LW && __LW.ready', 3000, 20);
+  await g.ev(`try { if (__LW.warning && __LW.warning.dismiss) __LW.warning.dismiss(); } catch (_) {}
+    __LW.pause(); __LW.scrub(0.5); await __LW.settle(); await __LW.settle(); return 1;`);
+  const verify = `const v = await __LW.captureUI.exact.verify({ frames: 6, width: 320 }); const L = __LW.captureUI.exact.last;
+    return { ok: v.ok, message: v.message, digests: v.digests, mismatches: v.mismatches, baked: L && L.baked };`;
+  if (STEPS.includes('empty')) { out.empty = await g.ev(`__LW.nodes.setOff(false); for (const n of __LW.nodes.nodes()) __LW.nodes.remove(n.id); await __LW.settle(); ${verify}`); console.log('empty', JSON.stringify(out.empty)); }
+  if (STEPS.includes('graph') || STEPS.includes('shot')) {
+    out.graph0 = await g.ev(`__LW.nodes.setHas(true); __LW.curves.preset('MASTER', 'S'); __LW.nodes.add('grain'); __LW.nodes.add('decohere');
+      await new Promise((r) => setTimeout(r, 400)); await __LW.settle(); return __LW.nodes.nodes().map((n) => n.type + (n.bypass ? '×' : ''));`);
+    console.log('graph', JSON.stringify(out.graph0));
+  }
+  if (STEPS.includes('graph')) {
+    out.graphA = await g.ev(verify); console.log('graphA', JSON.stringify(out.graphA));
+    out.graphB = await g.ev(verify); console.log('graphB', JSON.stringify(out.graphB));
+    out.sameAcross = JSON.stringify(out.graphA.digests) === JSON.stringify(out.graphB.digests);
+    console.log('two verify calls (four runs) agree:', out.sameAcross);
+  }
+  if (STEPS.includes('shot')) {
+    fs.mkdirSync(DIR, { recursive: true });
+    const b64 = await g.snap();
+    fs.writeFileSync(DIR + '/.stage.png', Buffer.from(b64, 'base64'));
+    const r = await g.ev(`const F = __LW.captureUI.exact, cv = __LW.field.canvas, W = cv.clientWidth & ~1;
+      const s = F.laws.exactSchedule({ mode: 'loop', T: 1, t0: __LW.clock.t, fps: 30, frames: 1 });
+      const r = await F.render({ schedule: s, width: W, format: 'png' }).done; if (!r.ok) return { E: r.error || r.message };
+      const z = await import('/lab/mir/core/zip.js'), m = z.readStoredZip(new Uint8Array(await r.files[0].blob.arrayBuffer()));
+      const png = [...m.keys()].find((n) => /\\.png$/.test(n)), bm = await createImageBitmap(new Blob([m.get(png)], { type: 'image/png' }));
+      const c = document.createElement('canvas'); c.width = bm.width; c.height = bm.height; c.getContext('2d').drawImage(bm, 0, 0);
+      await F.discard(r); return { w: bm.width, h: bm.height, t: r.manifest.frames[0].t, digest: r.manifest.frames[0].digest, jpg: c.toDataURL('image/jpeg', 0.82).split(',')[1], baked: r.manifest.picture.baked };`);
+    if (r.E) console.log('shot', r.E);
+    else { fs.writeFileSync(DIR + '/.film.jpg', Buffer.from(r.jpg, 'base64')); delete r.jpg; console.log('shot', JSON.stringify(r)); }
+  }
+} finally { await g.close(); }

@@ -9,7 +9,10 @@
  *              three channel densities take three palette picks, ⅙ · ½ · ⅚).  GROUND BLACK replaces the picture; STAGE lets it show.
  *              AMOUNT 0 is neutral: no canvas, no tap.  The grid pitch is automatic: 1 px under 1 Mpx, 2, 3 above 4 Mpx.
  * The stage canvas's CSS filter (the chain's grade) is mirrored onto each SHADER canvas, so the column's colour nodes dress it too.
- *   createShaderHost({ device, canvas, palette, tap, present }) → { make(l), paint(el, l), drop(el) }
+ * 025 B1 · THE FILM BAKES IT: `bake(values)` runs the same two passes from the last tap (the film's own frame, at the film's size) into an rgba8unorm
+ * texture and reads it back — premultiplied rgba.  The splat's jitter is a hash of the cell, the copy and PHASE only (nothing per present), so the
+ * stage and the film draw the same points; PHASE is the value the record clock's modulation wrote for that frame.
+ *   createShaderHost({ device, canvas, palette, tap, present }) → { make(l), paint(el, l), drop(el), bake(values) → Promise<{ rgba, w, h } | null> }
  *     palette() → { lut: Float32Array(256·4) | null, span, n (a count of sets), on, invert, hue } · tap: field.tap · present: ask the field for one frame */
 const opt = (...a) => a.map((id) => ({ id, label: id.toUpperCase() }));
 export const SHADER_TYPES = {
@@ -125,14 +128,14 @@ export function createShaderHost({ device, canvas: stage, palette = null, tap = 
       device.queue.writeTexture({ texture: p.lut }, p.lutBytes, { bytesPerRow: 1024 }, [256, 1]); }
     return [Math.floor(q.span / 512) / 256, (q.span % 512) / 256, q.hue || 0, q.invert ? 1 : 0, 1];
   }
-  function draw(r) {
+  function draw(r, target = null) {
     if (!last) return;
-    const { tex, w, h } = last, v = r.values, p = pipes();
-    if (r.el.width !== w || r.el.height !== h) { r.el.width = w; r.el.height = h; }
+    const { tex, w, h } = last, v = r.values, p = pipes(), tone = target ? p.bake : p.tone;
+    if (r.el && (r.el.width !== w || r.el.height !== h)) { r.el.width = w; r.el.height = h; }
     if (!r.acc || r.acc.width !== w || r.acc.height !== h) { if (r.acc) r.acc.destroy(); r.tg = null;
       r.acc = device.createTexture({ size: [w, h], format: 'rgba16float', usage: U.RENDER_ATTACHMENT | U.TEXTURE_BINDING }); }
     if (r.tex !== tex) { r.tex = tex; r.sg = device.createBindGroup({ layout: p.splat.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: r.ub } }, { binding: 1, resource: tex.createView() }] }); }
-    if (!r.tg) r.tg = device.createBindGroup({ layout: p.tone.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: r.ub } },
+    if (!r.tg) r.tg = device.createBindGroup({ layout: tone.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: r.ub } },
       { binding: 1, resource: r.acc.createView() }, { binding: 2, resource: p.lut.createView() }, { binding: 3, resource: p.smp }] });
     const px = w * h, step = px < 1e6 ? 1 : px > 4e6 ? 3 : 2, gw = Math.ceil(w / step), gh = Math.ceil(h / step);
     const k = w / Math.max(1, stage.clientWidth || w);                   // AMOUNT and SCALE are CSS px: the look holds when the governor scales the stage
@@ -142,8 +145,25 @@ export function createShaderHost({ device, canvas: stage, palette = null, tap = 
     const enc = device.createCommandEncoder(), pass = (view, pipe, bg, n, m) => { const s = enc.beginRenderPass({ colorAttachments: [{ view, loadOp: 'clear', clearValue: [0, 0, 0, 0], storeOp: 'store' }] });
       s.setPipeline(pipe); s.setBindGroup(0, bg); s.draw(n, m); s.end(); };
     pass(r.acc.createView(), p.splat, r.sg, gw * gh, S * nch);          // SPLAT: a point per cell per copy (per channel with FRINGE)
-    pass(r.ctx.getCurrentTexture().createView(), p.tone, r.tg, 3, 1);    // TONE: one triangle over the canvas
+    pass(target ? target.createView() : r.ctx.getCurrentTexture().createView(), tone, r.tg, 3, 1);    // TONE: one triangle over the canvas
     device.queue.submit([enc.finish()]);
+  }
+  let B = null;                                                        // the film's own record: its uniforms, accumulator and target
+  async function bake(values) {
+    if (!last || !device) return null;
+    const { w, h } = last, p = pipes();
+    if (!p.bake) p.bake = device.createRenderPipeline({ layout: 'auto', vertex: { module: device.createShaderModule({ code: TONE }), entryPoint: 'vt' },
+      fragment: { module: device.createShaderModule({ code: TONE }), entryPoint: 'ft', targets: [{ format: 'rgba8unorm' }] } });
+    if (!B) B = { el: null, ub: device.createBuffer({ size: 80, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }) };
+    if (!B.out || B.out.width !== w || B.out.height !== h) { if (B.out) B.out.destroy(); B.out = device.createTexture({ size: [w, h], format: 'rgba8unorm', usage: U.RENDER_ATTACHMENT | U.COPY_SRC }); }
+    B.values = values; draw(B, B.out);
+    const bpr = Math.ceil(w * 4 / 256) * 256, buf = device.createBuffer({ size: bpr * h, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ }), enc = device.createCommandEncoder();
+    enc.copyTextureToBuffer({ texture: B.out }, { buffer: buf, bytesPerRow: bpr, rowsPerImage: h }, [w, h, 1]); device.queue.submit([enc.finish()]);
+    await buf.mapAsync(GPUMapMode.READ);
+    const src = new Uint8Array(buf.getMappedRange()), rgba = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++) rgba.set(src.subarray(y * bpr, y * bpr + w * 4), y * w * 4);
+    buf.unmap(); buf.destroy();
+    return { rgba, w, h };
   }
   const onTap = (tex, w, h) => { last = { tex, w, h }; for (const r of recs.values()) draw(r); };
   return {
@@ -162,6 +182,7 @@ export function createShaderHost({ device, canvas: stage, palette = null, tap = 
       const r = recs.get(el); if (!r) return;
       r.values = l.values; const key = JSON.stringify(l.values); if (key !== r.key) { r.key = key; draw(r); }
     },
+    bake,
     drop(el) {
       const r = recs.get(el); if (!r) return;
       recs.delete(el); if (r.acc) r.acc.destroy(); r.ub.destroy(); r.ctx.unconfigure();

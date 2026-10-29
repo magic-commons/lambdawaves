@@ -615,13 +615,13 @@ function rigFor(lab, route = true) {
     { format: m.format, frames: m.frames.length, endpoint: m.schedule.endpoint, container: m.picture.container, ffmpeg: m.ffmpeg.slice(0, 50) });
 
   const H = film.hazards();
-  const KIT = ['modulation', 'dpr', 'overlays', 'deflate', 'gamut'];
+  const KIT = ['modulation', 'dpr', 'deflate', 'gamut'];   // 025 B: the overlays are λWAVES' (lab/film-bake.js lays them over the frame)
   const tested = ['jitter', 'governor', 'autoscale', 'fieldclock', 'camera', 'modulation', 'interloper'];
-  judge('EVERY HAZARD IN THE REGISTER IS THE SAME LIST THE FRAME PINS, THE REPORT SHOWS AND THIS FILE TESTS, AND EACH SAYS WHOSE IT IS NOW: twelve found (H7, H₂\'s impure field, left with its window in 0.5.0 D9b); H1–H5, H8–H9 are λWAVES\' (the jitter seed 13, the governor and AUTO SCALE named among them), the modulation clock, the DPR, the overlays, the container and the gamut are the KIT\'S; seven have a test above that goes RED when the pin is removed',
+  judge('EVERY HAZARD IN THE REGISTER IS THE SAME LIST THE FRAME PINS, THE REPORT SHOWS AND THIS FILE TESTS, AND EACH SAYS WHOSE IT IS NOW: twelve found (H7, H₂\'s impure field, left with its window in 0.5.0 D9b); H1–H5, H8–H9 are λWAVES\' (the jitter seed 13, the governor and AUTO SCALE named among them), the overlays λWAVES\' since 025 B (film-bake.js); the modulation clock, the DPR, the container and the gamut are the KIT\'S; seven have a test above that goes RED when the pin is removed',
     HAZARDS.length === 12 && HAZARD_IDS.length === 12
     && HAZARDS.every((h) => h.id && h.what && h.where && h.pin && h.witness && (h.owner === 'app' || h.owner === 'kit'))
     && HAZARDS.filter((h) => h.owner === 'kit').map((h) => h.id).join() === KIT.join()
-    && ['jitter', 'governor', 'autoscale'].every((id) => HAZARDS.find((h) => h.id === id).owner === 'app')
+    && ['jitter', 'governor', 'autoscale', 'overlays'].every((id) => HAZARDS.find((h) => h.id === id).owner === 'app')
     && tested.every((id) => HAZARD_IDS.includes(id))
     && H.readings.length === 12 && H.readings.every((x) => typeof x.note === 'string' && x.state),
     { app: HAZARDS.filter((h) => h.owner === 'app').map((h) => h.id), kit: HAZARDS.filter((h) => h.owner === 'kit').map((h) => h.id), blockingNow: H.blocking });
