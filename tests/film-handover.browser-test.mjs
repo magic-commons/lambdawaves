@@ -8,6 +8,7 @@
 //      card's own film leaves the store on a REAL tap on DISCARD RENDER
 //   3  TAKE A PICTURE from a script (no activation) → 1 download, 0 shares
 //   4  REAL taps on CAPTURE IMAGE then DOWNLOAD IMAGE (the save inside the second tap) → 1 share, 0 downloads
+//   0  (027 D3) a 2-s STILL film with the clock paused and VORTEX raised gives the stage back: its screenshot hash before = after
 // Start tools/gate/server.py first; LW_PORT and GD_PORT must be unused/owned ports.
 import assert from 'node:assert/strict';
 import { open } from '../tools/gate/gatekit.mjs';
@@ -48,6 +49,24 @@ try {
     return { userActivation: !!navigator.userActivation, open: !document.querySelector('.dev[data-id="render"]').classList.contains('closed') };`);
   assert.equal(setup.userActivation, true, 'this Firefox has no navigator.userActivation');
   assert.equal(setup.open, true, 'the RENDER card did not open');
+
+  /* ── 0 · A FILM GIVES THE STAGE BACK (027 D3): the clock paused, VORTEX raised (LOCATE · OVERLAY, PARTICLES seeded), a 2-s STILL film →
+         the stage after it is the stage before it, by the driver's screenshot, with no present forced (DUST: a style that reads no jitter
+         seed, which the film's put-back honestly moves) ── */
+  await ev(`__LW.layout.raise('vortex'); await new Promise((r) => setTimeout(r, 300));
+    const w = document.querySelector('.dev[data-id="vortex"]'); w.classList.remove('closed', 'folded');
+    const sw = (n) => [...w.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === n);
+    for (const n of ['LOCATE', 'OVERLAY']) { const e = sw(n); if (e) (e.querySelector('button') || e).click(); }
+    __LW.particles.setOn(true); __LW.particles.seed(120, __LW.reg, __LW.clock.t, __LW.domain.half); __LW.setStyle('dust');
+    await new Promise((r) => setTimeout(r, 800)); await __LW.settle(); await __LW.settle(); return 1;`);
+  const stage0 = await g.snapHash();
+  const t0 = await ev(`const p = __LW.field.stats.presents, r = await __LW.captureUI.exact.take('clip', { fps: 30, seconds: 2, scale: 1 }).done;
+    await new Promise((r) => setTimeout(r, 600)); return { ok: r.ok, frames: r.frames || null, after: __LW.field.stats.presents - p, playing: __LW.clock.playing, vortex: !!__LW.vortex.last, errs: __e.slice() };`);
+  const stage1 = await g.snapHash();
+  assert.equal(t0.ok, true, 'the 2-s STILL film failed: ' + JSON.stringify(t0)); assert.deepEqual(t0.errs, []);
+  assert.equal(stage1, stage0, 'the stage after the film is not the stage before it: ' + JSON.stringify(t0));
+  await ev(`__LW.setStyle('cloud'); __LW.particles.setOn(false); __LW.layout.raise('render'); await new Promise((r) => setTimeout(r, 500)); return 1;`);
+  pass(`a 2-s STILL film with the clock paused and VORTEX raised gives the stage back: snapHash ${stage0} before and after (${t0.after} presents: the film's 60 and the put-back's one)`);
 
   /* ── 1 · a real RENDER tap, then a real SAVE tap: the card's save is inside the second tap → the share sheet; the facade downloads ── */
   assert.equal((await mark('fh-render', `() => __LW.render.view.controls.renderBtn`)).ok, 1);
