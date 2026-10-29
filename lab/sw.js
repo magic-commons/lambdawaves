@@ -403,7 +403,7 @@ const PRECACHE = [
   ['./shell/ink.js',                                                '0c1ee4622c6f'],
   ['./shell/keys.js',                                               '8c6525cc4b78'],
   ['./shell/links.js',                                              '8e3bc790dcd4'],
-  ['./shell/modulation.js',                                         '74e5ed51e04f'],
+  ['./shell/modulation.js',                                         'f339ffabcefb'],
   ['./shell/notebook.js',                                           '101538ba8521'],
   ['./shell/persist.js',                                            'ac98489f892b'],
   ['./shell/rack-wiring.js',                                        'e469da3bca24'],
