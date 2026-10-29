@@ -8,11 +8,11 @@
  * Every effect honours prefers-reduced-motion: animate() does nothing under it, the pointer frame never fires, the CSS has its own block.
  * A plain module: no app, no state outside the elements it is handed. */
 export const RM = matchMedia('(prefers-reduced-motion: reduce)');
-export const FINE = matchMedia('(hover: hover) and (pointer: fine)');
-export const EASE = 'cubic-bezier(.22,.7,.25,1)';
-export const T = { response: 170, enter: 280, leave: 200, titleLeave: 220, titleSwap: 120, reorder: 340 };
+const FINE = matchMedia('(hover: hover) and (pointer: fine)');
+const EASE = 'cubic-bezier(.22,.7,.25,1)';
+const T = { response: 170, enter: 280, leave: 200, titleLeave: 220, titleSwap: 120, reorder: 340 };
 export const clamp = (v, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, v));
-export const calm = () => RM.matches || document.hidden;
+const calm = () => RM.matches || document.hidden;
 
 /* ── R0 · one cancellable native animation per element; null (and nothing happens) when motion is off.
    A lone keyframe is an ENTRANCE: it is the FROM (offset 0) and the element eases to its own style.  Web Animations reads a lone keyframe

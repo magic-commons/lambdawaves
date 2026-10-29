@@ -127,7 +127,7 @@ export function stats(reg, t, h = 1e-3) {
  * every $…$ under KaTeX's throwOnError.  Pure: the stats() record in, markdown out. */
 const UNIT_TEX = { hartree: 'E_h', 'ħω': '\\hbar\\omega', 'a₀': 'a_0', '√(ħ/mω)': '\\sqrt{\\hbar/m\\omega}', GeV: '\\mathrm{GeV}', 'GeV⁻¹': '\\mathrm{GeV}^{-1}', 'ħ': '\\hbar', 'ħ²': '\\hbar^{2}' };
 /** a number in TeX: fixed to `d` places, or ×10ⁿ below 1e-3 (a residual reads as its order) */
-export function texNum(x, d = 6) {
+function texNum(x, d = 6) {
   if (!Number.isFinite(x)) return '\\text{—}';
   if (x === 0) return '0';
   if (Math.abs(x) >= 1e-3 && Math.abs(x) < 1e6) return x.toFixed(d);

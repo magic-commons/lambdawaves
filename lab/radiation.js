@@ -50,16 +50,16 @@ const omegaOf = (A, B) => { const H = getHamiltonian(); return H.energy(A.index)
 export const ALPHA = 7.2973525693e-3;              // CODATA 2018 fine-structure constant (1/α = 137.035999084)
 export const C_AU = 1 / ALPHA;                     // the speed of light in atomic units
 export const AU_S = AU_TIME_AS * 1e-18;            // the atomic unit of time in seconds (hydrogen.js's constant)
-export const M_P_OVER_M_E = 1836.15267343;         // CODATA 2018
+const M_P_OVER_M_E = 1836.15267343;         // CODATA 2018
 export const MU_H = 1 / (1 + 1 / M_P_OVER_M_E);    // μ/m_e for ¹H = 0.999455679…
-export const FIELD_AU_VM = 5.14220675e11;          // 1 a.u. of E (and, Gaussian, of B) in V/m
-export const FIELD_AU_T = 1715.2553;               // the same unit read as a magnetic field, in tesla
+const FIELD_AU_VM = 5.14220675e11;          // 1 a.u. of E (and, Gaussian, of B) in V/m
+const FIELD_AU_T = 1715.2553;               // the same unit read as a magnetic field, in tesla
 
 /* ── resolving a BASIS label ────────────────────────────────────────────────────────────────────────────── */
 const BY_NAME = new Map();
 for (const s of BASIS) { BY_NAME.set(s.id, s.index); BY_NAME.set(s.label, s.index); BY_NAME.set(atomForms(s).ascii, s.index); }
 /** a BASIS index, id "h:n:l:m", label "2p₀", plain "2p0", or the state object itself → the BASIS entry */
-export function stateFor(x) {
+function stateFor(x) {
   if (typeof x === 'number') return BASIS[x];
   if (x && typeof x === 'object' && Number.isInteger(x.index)) return BASIS[x.index];
   const i = BY_NAME.get(String(x));

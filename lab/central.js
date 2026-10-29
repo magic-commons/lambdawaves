@@ -40,7 +40,7 @@ const tabs = new Map(), S_ = () => S || (S = solveCentral(cur.preset, cur.params
  *  the defaults, as SEPARABLE's, LATTICE's and BLOCH's loads read it (iteration 010 X4: a null threw inside restore() and rolled the whole open back) */
 export function configure(rec) { rec = rec || {}; const preset = DEFAULTS[rec.preset] ? rec.preset : 'confined', next = { preset, params: { ...DEFAULTS[preset], ...rec.params } }; if (JSON.stringify(next) === JSON.stringify(cur)) return false; cur = next; S = null; tabs.clear(); return true; }
 /** a solve the worker answered becomes the Hamiltonian's data */
-export function install(res) { cur = { preset: res.preset, params: res.params }; S = res; tabs.clear(); }
+function install(res) { cur = { preset: res.preset, params: res.params }; S = res; tabs.clear(); }
 export const save = () => (JSON.stringify(cur) === JSON.stringify({ preset: 'confined', params: DEFAULTS.confined }) ? undefined : { preset: cur.preset, params: { ...cur.params } });
 const tableFor = (s) => { let T = tabs.get(s.id); if (!T) tabs.set(s.id, T = cornellTable(s.n, s.l, s.m, S_())); return T; }, psiAt = (re, im, x, y, z, ids) => cornellPsiAt(re, im, x, y, z, ids, tableFor, S_());
 const domainFor = (nmax) => { let r = 0; for (let n = 1; n <= nmax; n++) for (let l = 0; l < n; l++) if (bnd(n, l)) r = Math.max(r, S.r99[rowOf(n, l)]); return Math.max(r * 1.15, 2); };

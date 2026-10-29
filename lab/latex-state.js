@@ -29,7 +29,7 @@ const PHASE_FLOOR = 0.005;         // rad: below this the factor is 1 to the pri
 const PI_TOL = 1e-3, PI_QMAX = 12; // φ/π within PI_TOL of p/q, q ≤ PI_QMAX, is written as a multiple of π
 
 /** the notebook's name for a label: n l m for hydrogen and the atom, the operator's own label (LaTeX-safe) otherwise */
-export function latexName(s, H) {
+function latexName(s, H) {
   if (!H || H.id === 'hydrogen' || H.id === 'atom' || typeof H.labelOf !== 'function') return atomForms(s).latex;
   const safe = String(H.labelOf(s)).trim()
     .replace(/\s*([₊₋])(\d+)/g, (_, sg, d) => `_{${sg === '₊' ? '+' : '-'}${d}}`)

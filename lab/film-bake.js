@@ -19,7 +19,7 @@ import { createParticles } from './particles.js';
 import { createSkeleton } from './skeleton.js';
 
 /** a seeded generator (the stage seeds PARTICLES from Math.random; a film from this, seed 13) */
-export const seeded = (seed) => { let s = seed >>> 0; return () => (s = hash32(s + 0x9e3779b9)) / 4294967296; };
+const seeded = (seed) => { let s = seed >>> 0; return () => (s = hash32(s + 0x9e3779b9)) / 4294967296; };
 const live = (cv) => !!(cv && cv.width > 1 && cv.height > 1);   // an owner releases its canvas to 1 × 1 while it draws nothing
 
 export function createBake(app) {

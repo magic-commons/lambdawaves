@@ -35,7 +35,7 @@ function aiSeries(x) {
   return AI0 * f + AIP0 * g;
 }
 /** log Ai(x) for x > 0 large: -ζ - log(2√π) - ¼ log x + log Σ(-1)^k u_k ζ^{-k}, optimally truncated */
-export function logAiryAiPos(x) {
+function logAiryAiPos(x) {
   const zeta = (2 / 3) * Math.pow(x, 1.5);
   let s = 1, term = 1, last = 1;
   for (let k = 1; k < 40; k++) {
@@ -79,8 +79,8 @@ export function envelopeI(alpha, beta) {
   return Math.sqrt(TWO_PI) / c * Math.exp(ex) * airyAi(z);
 }
 /** the exact series of the maximiser (integers) and of the height (rationals), print Theorems A.2 and A.3 */
-export const ALPHA_STAR_C = [-3, 54, -4860, 769824, -169746192, 47259985248, -15778134664704, 6120926902333440];
-export const HEIGHT_D = [1, -3, 279 / 2, -29331 / 2, 19280619 / 8, -21368014569 / 40, 11848476936159 / 80, -27510190036247097 / 560];
+const ALPHA_STAR_C = [-3, 54, -4860, 769824, -169746192, 47259985248, -15778134664704, 6120926902333440];
+const HEIGHT_D = [1, -3, 279 / 2, -29331 / 2, 19280619 / 8, -21368014569 / 40, 11848476936159 / 80, -27510190036247097 / 560];
 /** Σ a_k β^{p(k)} with optimal truncation: stop before the first term that grows; returns { value, k, next } */
 function optimalSeries(coeffs, beta, power) {
   let v = 0, last = Infinity, k = 0, next = 0;
@@ -583,7 +583,7 @@ export function threeModes(re, im, ids) {
  */
 
 /** Wigner small-d, d^j_{m'm}(β) (Varshalovich 4.3.1); j may be half-integer, j ± m are always integers */
-export function wignerSmalld(j, mp_, m, beta) {
+function wignerSmalld(j, mp_, m, beta) {
   const c = Math.cos(beta / 2), s = Math.sin(beta / 2), F = (x) => factorial(Math.round(x));
   let sum = 0;
   const kmin = Math.max(0, Math.round(m - mp_)), kmax = Math.min(Math.round(j + m), Math.round(j - mp_));
@@ -604,7 +604,7 @@ export function wignerD(j, alpha, beta, gamma) {
   return { n: N, re, im };
 }
 /** D^j for a rotation by `angle` about a Cartesian axis ('x' | 'y' | 'z') */
-export function wignerAxis(j, axis, angle) {
+function wignerAxis(j, axis, angle) {
   if (axis === 'z') return wignerD(j, angle, 0, 0);
   if (axis === 'y') return wignerD(j, 0, angle, 0);
   return wignerD(j, -PI / 2, angle, PI / 2);                       // R_x(θ) = R_z(−π/2) R_y(θ) R_z(π/2)
@@ -671,7 +671,7 @@ export function clockAutocorr(pops, nbar, A, B, M) {
   return { re, im, abs: Math.hypot(re, im) };
 }
 /** the quartic envelope (1/√2π)∫e^{−u²/2 + iαu + iγu⁴}du, complex — Simpson, the Gaussian cutting the tail at u = 8 */
-export function quarticEnvelopeC(alpha, gamma, R = 8, N = 20000) {
+function quarticEnvelopeC(alpha, gamma, R = 8, N = 20000) {
   const h = 2 * R / N; let sr = 0, si = 0;
   for (let i = 0; i <= N; i++) {
     const u = -R + i * h, w = (i === 0 || i === N) ? 1 : (i % 2 ? 4 : 2);

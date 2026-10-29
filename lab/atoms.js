@@ -162,7 +162,7 @@ export const EXCHANGE_MODEL = 'Xα(2/3) + Latter tail';
 /** what every relativistic number's model string ends with: the ZORA kinetic operator and MacDonald–Vosko's exchange factor (009 MV; the exchange model stays EXCHANGE_MODEL) */
 export const RELATIVITY_SHORT = 'ZORA · MV', RELATIVITY = ' · scalar ' + RELATIVITY_SHORT;
 /** the model string that travels with every number: α and the tail, always named (Sol's model-identity rule) */
-export function modelName(alpha, latter, sic, zora) {
+function modelName(alpha, latter, sic, zora) {
   if (sic) return 'Hartree, self-interaction-free' + (latter ? ' + Latter tail' : '');
   const a = alpha === 2 / 3 ? '2/3' : alpha === 1 ? '1' : (+alpha.toFixed(4)).toString();
   return (alpha ? `Xα(${a})` : 'Hartree (no exchange)') + (latter ? ' + Latter tail' : ', no tail') + (zora ? RELATIVITY : '');
@@ -561,7 +561,7 @@ export function atomEnergyOf(Z, n, l, opts) {
   return s.eps;
 }
 /** the total energy of atom Z (hartree) */
-export const atomTotalEnergy = (Z, opts) => solveAtom(Z, opts).E;
+const atomTotalEnergy = (Z, opts) => solveAtom(Z, opts).E;
 /** every shell of one l in the FROZEN converged field, fine mesh + the coarse one's Richardson partner — one
  *  solveL per channel (the matrix gives them all at once), cached on the solved atom.  n ≤ 7 comes for free. */
 function frozenChannel(S, l, k) {
@@ -622,7 +622,7 @@ export function quantumDefect(Z, n, l, opts = {}) {
   if (eps >= 0) return NaN;
   return n - 1 / Math.sqrt(-2 * eps);
 }
-export const effectiveN = (Z, n, l, opts) => 1 / Math.sqrt(-2 * atomEnergyOf(Z, n, l, opts));
+const effectiveN = (Z, n, l, opts) => 1 / Math.sqrt(-2 * atomEnergyOf(Z, n, l, opts));
 
 /* ══ the radial table the GPU consumes (space 6) ════════════════════════════════════════════════════════════ */
 /** the (mesh, orbital) pair atomRadial reads: found once per (Z, n, l) for the default options — solveAtom's cache key is a

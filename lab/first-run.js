@@ -44,7 +44,7 @@ export function firstRunMaterial(mobile) { return mobile ? FIRST_RUN_MATERIAL.mo
  * a phone 64³, and a grid brought down takes that grid's pairing — and never carries AUTO SCALE: that switch is the
  * device's (the settings key), so a file written on a desktop cannot turn it off on an iPad. */
 export const GRID_PAIRING = Object.freeze({ 64: Object.freeze({ steps: 110, scale: 0.75 }), 96: Object.freeze({ steps: 160, scale: 1 }), 128: Object.freeze({ steps: 240, scale: 1 }) });
-export const FIRST_RUN_QUALITY = Object.freeze({
+const FIRST_RUN_QUALITY = Object.freeze({
   desktop: Object.freeze({ res: 64, steps: 160, scale: 1 }),
   tablet: Object.freeze({ res: 64, steps: 110, scale: 0.75 }),
 });

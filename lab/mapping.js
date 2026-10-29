@@ -9,9 +9,9 @@ import { el, label, trig } from './mir/kit.js'; import { createMidi, midiSupport
 import { displayChord } from './mir/shell/keys.js'; import { t } from './mir/core/i18n.js';
 import { ORDER } from './key-table.js';
 
-export const MIDI_KEY = 'lambdawaves.q0.midi';
+const MIDI_KEY = 'lambdawaves.q0.midi';
 /** targetOf(id) — the modulation target an action answers as: `action.` + its id, each segment lower-case alphanumeric (the registry's grammar) */
-export const targetOf = (id) => 'action.' + id.toLowerCase().split('.').map((s) => s.replace(/[^a-z0-9]/g, '').replace(/^(\d)/, 'n$1') || 'x').join('.');
+const targetOf = (id) => 'action.' + id.toLowerCase().split('.').map((s) => s.replace(/[^a-z0-9]/g, '').replace(/^(\d)/, 'n$1') || 'x').join('.');
 const midiText = (k) => { const [kind, ch, n] = k.split(':'); return (kind === 'cc' ? 'CC ' : 'NOTE ') + ch + '·' + n; };
 
 /** resumeMidi(midi, say) → true when live (027 D4 · A MAPPED CONTROLLER IS LIVE AT LAUNCH): a saved map is the consent its LEARN asked for, so

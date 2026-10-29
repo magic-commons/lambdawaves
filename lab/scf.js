@@ -16,7 +16,7 @@ import { eigSym } from './h2ci.js';
 import { loewdin } from './density.js';
 
 /** Gaussian elimination with partial pivoting, A x = b, A row-major n × n; returns x */
-export function solveLinear(Ain, bin, n) {
+function solveLinear(Ain, bin, n) {
   const A = Float64Array.from(Ain), b = Float64Array.from(bin);
   let scale = 0; for (const v of A) scale = Math.max(scale, Math.abs(v)); scale = scale || 1;
   for (let c = 0; c < n; c++) {
@@ -114,7 +114,7 @@ export function rhf(basis, { nElectrons, diis = 8, damping = 0, maxIter = 200, t
 }
 
 /** the exchange matrix K[D]_ij = Σ_kl D_kl (il|kj) — fockReal(D) is h + J[D] − ½K[D], left as it was so every closed shell keeps its bits */
-export function exchange({ eri, n }, D) {
+function exchange({ eri, n }, D) {
   const K = new Float64Array(n * n);
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { let f = 0; for (let k = 0; k < n; k++) for (let l = 0; l < n; l++) f += D[k * n + l] * eri[((i * n + l) * n + k) * n + j]; K[i * n + j] = f; }
   return K;
@@ -170,7 +170,7 @@ export function uhf(basis, { nAlpha, nBeta, diis = 8, maxIter = 200, tol = 1e-10
  *  VWN5 correlation (Vosko, Wilk & Nusair, Can. J. Phys. 58, 1200 (1980), the Ceperley–Alder fit; PySCF's 'vwn' = libxc LDA_C_VWN, not VWN3/RPA), x = √r_s:
  *  A = 0.0310907, b = 3.72744, c = 12.9352, x₀ = −0.10498, Q = √(4c − b²), X(x) = x² + bx + c; v_c = ε_c − (x/6) dε_c/dx. */
 const VA = 0.0310907, VB = 3.72744, VC = 12.9352, V0 = -0.10498, VQ = Math.sqrt(4 * VC - VB * VB), VX0 = V0 * V0 + VB * V0 + VC;
-export function slaterVwn(rho) {
+function slaterVwn(rho) {
   const ex = -0.75 * Math.cbrt(3 * rho / Math.PI), x = Math.sqrt(Math.cbrt(3 / (4 * Math.PI * rho))), X = x * x + VB * x + VC, t = 2 * x + VB, at = Math.atan(VQ / t), q = t * t + VQ * VQ;
   const ec = VA * (Math.log(x * x / X) + 2 * VB / VQ * at - VB * V0 / VX0 * (Math.log((x - V0) ** 2 / X) + 2 * (VB + 2 * V0) / VQ * at));
   const de = VA * (2 / x - t / X - 4 * VB / q - VB * V0 / VX0 * (2 / (x - V0) - t / X - 4 * (VB + 2 * V0) / q));

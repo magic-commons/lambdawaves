@@ -29,7 +29,7 @@
 import { BASIS } from './hydrogen.js';
 import { createSturmian, sturmianRecord } from './sturmian.js';
 
-export const N = BASIS.length;                                      // 140: the register's width, every label in a block
+const N = BASIS.length;                                      // 140: the register's width, every label in a block
 /** THE SCALE's λ range (iteration 010 X2): the floor is 1/7, the hydrogen limit of n = 7 (a label n₀ is exact at λ = Z/n₀), so every
  *  shell of the register can be met by the knob; the ceiling 3 and the default 1 unchanged.  At 008–009 the floor was 0.25 (n = 4).
  *  `clampLambda` is the one clamp — the knob, the setter and a project's restore — so an older λ (always in [0.25, 3]) opens as it was. */

@@ -1,8 +1,8 @@
 
 
-export const INV_SQRT2 = 1 / Math.SQRT2;
-export const BIVECTOR_PLANES = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
-export const E0 = [1, 0, 0, 0], E1 = [0, 1, 0, 0], E2 = [0, 0, 1, 0], E3 = [0, 0, 0, 1];
+const INV_SQRT2 = 1 / Math.SQRT2;
+const BIVECTOR_PLANES = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]];
+const E0 = [1, 0, 0, 0], E1 = [0, 1, 0, 0], E2 = [0, 0, 1, 0], E3 = [0, 0, 0, 1];
 
 export function qmul(a, b) {
   return [a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3],
@@ -11,10 +11,10 @@ export function qmul(a, b) {
     a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0]];
 }
 export const qconj = (a) => [a[0], -a[1], -a[2], -a[3]];
-export const qdot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
-export const qnorm = (a) => Math.sqrt(qdot(a, a));
+const qdot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+const qnorm = (a) => Math.sqrt(qdot(a, a));
 export function qnormalize(a) { const n = qnorm(a); return n === 0 ? [1, 0, 0, 0] : a.map((x) => x / n); }
-export const qneg = (a) => a.map((x) => -x);
+const qneg = (a) => a.map((x) => -x);
 /** exp of a pure quaternion (a 3-vector): the rotor turning by |v| about v̂ */
 export function expPure(v) {
   const t = Math.hypot(v[0], v[1], v[2]);
@@ -47,7 +47,7 @@ export function visibleFrame(qL, qR) {
   return { f1: qmul(qmul(qconj(qL), E2), qR), f2: qmul(qmul(qconj(qL), E3), qR) };
 }
 /** the two INVISIBLE rows — the depth frame; g₁ gives every sample a signed distance from the visible plane */
-export function depthFrame(qL, qR) {
+function depthFrame(qL, qR) {
   return { g1: qmul(qmul(qconj(qL), E0), qR), g2: qmul(qmul(qconj(qL), E1), qR) };
 }
 /** the point of Gr⁺(2,4) ≅ S²×S² the rotor pair is looking at (unit vectors; the Grassmann point is these /√2) */
@@ -75,7 +75,7 @@ export function slerp(a, b, t) {
   return a.map((x, i) => x * w1 + bb[i] * w2);
 }
 /** the geodesic between two rotor pairs: two slerps, one per sphere */
-export function tourSegment(from, to) { return { from, to }; }
+function tourSegment(from, to) { return { from, to }; }
 export function tourSegmentAt(seg, t) {
   return canonicaliseRotors(slerp(seg.from.qL, seg.to.qL, t), slerp(seg.from.qR, seg.to.qR, t));
 }

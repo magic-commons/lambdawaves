@@ -169,7 +169,7 @@ export function selfTest(group) {
 
 /* ── THE FRAME AND THE FRAMEWORK CHECK ────────────────────────────────────────────────────────────────────────── */
 const P = (a) => [a.x, a.y, a.z];
-export function chargeCentre(atoms) { const s = [0, 0, 0]; let Z = 0; for (const a of atoms) { s[0] += a.Z * a.x; s[1] += a.Z * a.y; s[2] += a.Z * a.z; Z += a.Z; } return [s[0] / Z, s[1] / Z, s[2] / Z]; }
+function chargeCentre(atoms) { const s = [0, 0, 0]; let Z = 0; for (const a of atoms) { s[0] += a.Z * a.x; s[1] += a.Z * a.y; s[2] += a.Z * a.z; Z += a.Z; } return [s[0] / Z, s[1] / Z, s[2] / Z]; }
 /** an axis spec → a lab vector: [x, y, z], or { atom: k } (from the centre of nuclear charge toward atom k) */
 const axisOf = (spec, atoms, c) => (Array.isArray(spec) ? spec : (() => { const a = P(atoms[spec.atom]); return [a[0] - c[0], a[1] - c[1], a[2] - c[2]]; })());
 /** the symmetry frame's axes in lab coordinates, the columns of F (lab = F · sym) */
@@ -241,7 +241,7 @@ export function symmetryDefects({ atoms, shells, D, group, frame }) {
 /* ── THE CORE ─────────────────────────────────────────────────────────────────────────────────────────────────
  * Frozen-core electrons per element: He for Li–Ne, Ne for Na–Ar, Ar for K–Ca, Ar for Sc–Zn (3d is valence), Ar + 3d¹⁰
  * for Ga–Kr.  coreCount(atoms) is the number of core ORBITALS (doubly occupied), what the ladder folds. */
-export const coreElectrons = (Z) => (Z <= 2 ? 0 : Z <= 10 ? 2 : Z <= 18 ? 10 : Z <= 30 ? 18 : Z <= 36 ? 28 : 36);
+const coreElectrons = (Z) => (Z <= 2 ? 0 : Z <= 10 ? 2 : Z <= 18 ? 10 : Z <= 30 ? 18 : Z <= 36 ? 28 : 36);
 export const coreCount = (atoms) => atoms.reduce((s, a) => s + coreElectrons(a.Z), 0) / 2;
 
 /* ── THE FRONTIER, BY LEVEL ───────────────────────────────────────────────────────────────────────────────── */
@@ -249,10 +249,10 @@ export const coreCount = (atoms) => atoms.reduce((s, a) => s + coreElectrons(a.Z
 export const frontierName = (d) => (d === 0 ? 'HOMO' : d === 1 ? 'LUMO' : d < 0 ? 'HOMO−' + (-d) : 'LUMO+' + (d - 1));
 
 /* ── THE LABELLING ──────────────────────────────────────────────────────────────────────────────────────────── */
-export const ENERGY_TOL = 2e-10;     // Eh: a level (PROBE: widest true degeneracy 3.3e-13, narrowest real gap 1.6e-7)
-export const RESIDUAL_TOL = 1e-6;    // a multiplicity this far from an integer is not one irrep
-export const GEOM_TOL = 1e-6;        // bohr: the default framework tolerance; a record may state a looser one
-export const APPROX_RESIDUAL_TOL = 0.05;   // when the framework is symmetric only to its stated geomTol (furan, pyridine)
+const ENERGY_TOL = 2e-10;     // Eh: a level (PROBE: widest true degeneracy 3.3e-13, narrowest real gap 1.6e-7)
+const RESIDUAL_TOL = 1e-6;    // a multiplicity this far from an integer is not one irrep
+const GEOM_TOL = 1e-6;        // bohr: the default framework tolerance; a record may state a looser one
+const APPROX_RESIDUAL_TOL = 0.05;   // when the framework is symmetric only to its stated geomTol (furan, pyridine)
 const ANG = [0.7, 1.9, 2.9], ANG_CHECK = 0.3;
 const LIN = ['σ', 'π', 'δ'];
 /** (n_σ, n_π, n_δ) from χ at the three angles: χ(φ) = n_σ + 2 n_π cos φ + 2 n_δ cos 2φ */
@@ -381,7 +381,7 @@ const GREEK = { σ: ['\\sigma', 's', 'sigma'], π: ['\\pi', 'p', 'pi'], δ: ['\\
 const SAY = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
 const sayNum = (k) => SAY[k] ?? String(k);
 /** a counted label ('3σg', '1e1g', "2a1'", '5σ⁻') split for writing: { count, body, sub, mark } */
-export function parts(label) {
+function parts(label) {
   const m = /^(\d+)([a-zσπδφ])([0-9]*[gu]?)(['′″⁻+]*)$/.exec(String(label).replace(/''/g, '″').replace(/'/g, '′'));
   if (!m) return { count: '', body: String(label), sub: '', mark: '' };
   return { count: m[1], body: m[2], sub: m[3], mark: m[4] };

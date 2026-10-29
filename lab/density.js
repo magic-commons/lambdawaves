@@ -30,7 +30,7 @@ export function cmul(A, B) {
   return C;
 }
 export function cadj(A) { const n = A.n, C = cmat(n); for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { C.re[j * n + i] = A.re[i * n + j]; C.im[j * n + i] = -A.im[i * n + j]; } return C; }
-export const ctrace = (A) => { let re = 0, im = 0; for (let i = 0; i < A.n; i++) { re += A.re[i * A.n + i]; im += A.im[i * A.n + i]; } return { re, im }; };
+const ctrace = (A) => { let re = 0, im = 0; for (let i = 0; i < A.n; i++) { re += A.re[i * A.n + i]; im += A.im[i * A.n + i]; } return { re, im }; };
 /** X A X for real symmetric X (the Löwdin transforms) */
 export function sandwich(X, A) {
   const n = A.n, T = cmat(n), C = cmat(n);
@@ -139,17 +139,17 @@ export function unitaryOf(Ft, dt) {
   U.re.set(R.re); U.im.set(R.im); return U;
 }
 /** U P U† */
-export const similarity = (U, P) => cmul(cmul(U, P), cadj(U));
+const similarity = (U, P) => cmul(cmul(U, P), cadj(U));
 
 /** one Magnus-2 predictor–corrector step; fock(P, t) → F̃ (Löwdin frame, Hermitian) */
-export function magnus2({ P, t, dt, fock }) {
+function magnus2({ P, t, dt, fock }) {
   const F0 = fock(P, t), U0 = unitaryOf(F0, dt), Pstar = similarity(U0, P);
   const F1 = fock(Pstar, t + dt), Fbar = cmat(P.n);
   for (let k = 0; k < P.n * P.n; k++) { Fbar.re[k] = 0.5 * (F0.re[k] + F1.re[k]); Fbar.im[k] = 0.5 * (F0.im[k] + F1.im[k]); }
   return { P: similarity(unitaryOf(Fbar, dt), P), F0, F1, Fbar };
 }
 /** one MMUT step from P(t−Δt) through F̃(t) to P(t+Δt) */
-export const mmut = ({ Pprev, Fnow, dt }) => similarity(unitaryOf(Fnow, 2 * dt), Pprev);
+const mmut = ({ Pprev, Fnow, dt }) => similarity(unitaryOf(Fnow, 2 * dt), Pprev);
 
 /* ── diagnostics (report, never repair silently) ────────────────────────────────────────────────────────────────── */
 /** max |Q² − Q| with Q = P/f — zero for an idempotent single determinant */
@@ -160,7 +160,7 @@ export function idempotencyDefect(P, f = 2) {
   return d;
 }
 /** McWeeny purification f(3Q² − 2Q³), Q = P/f — an explicitly labelled REPAIR; the caller must say it was used */
-export function purify(P, f = 2) {
+function purify(P, f = 2) {
   const n = P.n, Q = cmat(n); for (let k = 0; k < n * n; k++) { Q.re[k] = P.re[k] / f; Q.im[k] = P.im[k] / f; }
   const Q2 = cmul(Q, Q), Q3 = cmul(Q2, Q), R = cmat(n);
   for (let k = 0; k < n * n; k++) { R.re[k] = f * (3 * Q2.re[k] - 2 * Q3.re[k]); R.im[k] = f * (3 * Q2.im[k] - 2 * Q3.im[k]); }

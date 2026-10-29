@@ -5,7 +5,7 @@ import { BASIS, legendreP } from './hydrogen.js';
 import { cameraKey, toScreen } from './field.js';
 import { readout, seg, sw } from './mir/kit.js';
 
-export function angularNodes(l, m, { real = true } = {}) {
+function angularNodes(l, m, { real = true } = {}) {
   const am = Math.abs(m), P = (th) => legendreP(l, am, Math.cos(th)), N = 720, latitudes = [];
   for (let i = 0; i + 1 < N; i++) {
     let a = Math.PI * (i + 0.5) / N, b = Math.PI * (i + 1.5) / N, fa = P(a); if (fa * P(b) >= 0) continue;
@@ -14,7 +14,7 @@ export function angularNodes(l, m, { real = true } = {}) {
   return { latitudes, meridians: real ? Array.from({ length: am }, (_, k) => (k + 0.5) * Math.PI / am) : [], poles: !real && am > 0 };
 }
 /** latitudes and meridians as 96-segment circles on the sphere of radius R, the poles as dots; the far side (depth > the centre's) dimmed */
-export function drawAngularNodes(g, S, R, nodes, { ink = '255,190,90', width = 1.6 } = {}) {
+function drawAngularNodes(g, S, R, nodes, { ink = '255,190,90', width = 1.6 } = {}) {
   const c0 = S.at(0, 0, 0); if (!c0) return; const zc = c0[2], K = 96; g.lineWidth = width;
   const curve = (f) => { let p = null; for (let k = 0; k <= K; k++) { const q = S.at(...f(2 * Math.PI * k / K)); if (p && q) { g.strokeStyle = `rgba(${ink},${(p[2] + q[2]) / 2 > zc ? 0.22 : 0.9})`; g.beginPath(); g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]); g.stroke(); } p = q; } };
   for (const th of nodes.latitudes) curve((u) => [R * Math.sin(th) * Math.cos(u), R * Math.sin(th) * Math.sin(u), R * Math.cos(th)]); for (const ph of nodes.meridians) curve((u) => [R * Math.sin(u) * Math.cos(ph), R * Math.sin(u) * Math.sin(ph), R * Math.cos(u)]);

@@ -34,7 +34,7 @@ import { BASIS } from './hydrogen.js';
 import { GROUND, AU_TIME_AS, createStatesModel, presetLanes, beatsOf, softCapLevels, PRESETS } from './molecular-register.js';
 
 const TAU = 2 * Math.PI;
-export const LANE_CAP = 8;                         // eight modulation slots (reg.amp1…8, reg.ph1…8): S₀ + seven states
+const LANE_CAP = 8;                         // eight modulation slots (reg.amp1…8, reg.ph1…8): S₀ + seven states
 const BRIGHT_F = 0.02, CORE_W = 3;                 // the BRIGHT filter: oscillator strength worth a lane, below the core-excitation window
 const LAW = 'TD-CIS · frozen nuclei · TDA ladder, not the RPA one a TDHF run rings at';
 const AXIS_N = [1, 2, 3];                          // the rack's n-colours for x, y, z — CHEMISTRY's own choice

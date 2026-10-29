@@ -50,7 +50,7 @@ export function guardRoutes(defs, opts) {
 /** routeGuard(opts) → { wrap(def, step, route?) } — ONE limiter for the whole registry (021 R2): the install defs' four luminance routes
  *  and every runtime target that declares a `flash` step (LW.mod.register, NODES' knobs) are guarded by the same instance, so a strobe
  *  is held whichever door registered its target.  `step` is the change, in the map's own space, that moves the picture 10 %. */
-export function routeGuard({ driven, now, say, read, onAdvance }) {
+function routeGuard({ driven, now, say, read, onAdvance }) {
   const ranges = {}, lastWrite = new Map();   // a HELD def → the modulation-second its last write came
   const guard = createFlashGuard({ now, ranges,
     onTrip: (t) => say(`FLASH GUARD · ${t.route} ${t.hz.toFixed(1)} Hz held to ${WCAG.maxHz}/s`), onRelease: () => say('') });

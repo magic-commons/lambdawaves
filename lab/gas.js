@@ -14,7 +14,7 @@
  * spreads as σ√(1 + (t/2σ²)²), and a small one spreads fast.  That is physics; the oscillator's coherent state is
  * the one packet that does not.
  */
-export const LMAX = 15, NRMAX = 16;
+const LMAX = 15, NRMAX = 16;
 
 /** j_l(x) by Miller's downward recurrence normalised on j₀ — stable for every l here */
 export function sphj(l, x) {

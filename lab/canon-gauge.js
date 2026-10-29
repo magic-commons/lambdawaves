@@ -52,7 +52,7 @@ export function dipoleFamily(rMO, n, nocc, nvir, tol = 1e-3) {
 }
 
 /** max |V Vᵀ − 1|, the precondition of canonicalRotation. */
-export function orthonormalityDefect(V, d, g) {
+function orthonormalityDefect(V, d, g) {
   let e = 0;
   for (let k = 0; k < g; k++) for (let l = 0; l < g; l++) {
     let s = 0;
@@ -69,7 +69,7 @@ export function orthonormalityDefect(V, d, g) {
  * residual norm it was accepted with.  Throws only if the families cannot supply g independent directions, which
  * cannot happen when a coordinate family is present.
  */
-export function canonicalRotation(V, d, g, families) {
+function canonicalRotation(V, d, g, families) {
   const W = new Float64Array(g * g), pivots = [], c = new Float64Array(g), r = new Float64Array(g);
   let found = 0;
   for (let fam = 0; fam < families.length && found < g; fam++) {
@@ -110,7 +110,7 @@ export function canonicalRotation(V, d, g, families) {
 }
 
 /** U[j·d + p] = Σ_k W[j·g + k] V[k·d + p]. */
-export function applyRotation(W, V, d, g) {
+function applyRotation(W, V, d, g) {
   const U = new Float64Array(g * d);
   for (let j = 0; j < g; j++) for (let k = 0; k < g; k++) {
     const w = W[j * g + k];
@@ -130,7 +130,7 @@ export function canonicaliseCluster(V, d, g, families) {
  * The sign rule for a single (non-degenerate) state or orbital: the g = 1 case of the same rule.  Returns +1 or −1,
  * the factor that makes the first functional value above its threshold positive.
  */
-export function canonicalSign(v, d, families) {
+function canonicalSign(v, d, families) {
   const { W } = canonicalRotation(v, d, 1, families);
   return W[0] >= 0 ? 1 : -1;
 }

@@ -32,7 +32,7 @@ export function energies(R) {
 export const EXACT_REFERENCE = [
   { R: 1, E: -0.45179 }, { R: 2, E: -0.60263 }, { R: 3, E: -0.57756 }, { R: 4, E: -0.54608 },
 ];
-export const EXACT_RE = 2.00, EXACT_DE_EV = 2.79;
+const EXACT_RE = 2.00, EXACT_DE_EV = 2.79;
 /** the LCAO equilibrium: minimise E_g(R) by golden section on [1, 5] */
 export function equilibrium() {
   let a = 1, b = 5; const gr = (Math.sqrt(5) - 1) / 2;
@@ -80,4 +80,4 @@ export function psiAt(state, R, t, x, y, z) {
   const fa = phi(-R / 2), fb = phi(R / 2);
   return { re: ao.a[0] * fa + ao.b[0] * fb, im: ao.a[1] * fa + ao.b[1] * fb };
 }
-export const domainFor = (R) => R / 2 + 6;
+const domainFor = (R) => R / 2 + 6;

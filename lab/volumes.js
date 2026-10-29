@@ -37,9 +37,8 @@
 import { persistOnce, storageInfo, keepData } from './library.js';
 import { BASIS_FILES } from './rhf-molecule.js';
 import { parseLwv, lwvIndexLength } from './volumes-format.js';
-export { storageInfo };
-export const VOLUME_BASE = new URL('./volumes/', import.meta.url).href;
-export const cacheOf = (volId) => 'lw-vol-' + volId;
+const VOLUME_BASE = new URL('./volumes/', import.meta.url).href;
+const cacheOf = (volId) => 'lw-vol-' + volId;
 const SHELF_URL = VOLUME_BASE + 'volumes.json';
 const SAFE = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,95}$/;   // an id goes into a URL: no slash, no dot-dot
 const RELATIVE = /^(?!\/)(?!.*\.\.)[A-Za-z0-9._+/-]{1,200}$/;   // a path inside the volume (m/<id>.lwm, t/<id>.webp, vol-1/index.json)
@@ -133,7 +132,7 @@ export async function installStatus(volId) {
   for (const m of idx.molecules) { const fs = filesOf(v, m); if (keys.has(fs[0].url)) bytes += m.bytes || 0; if (fs.every((f) => keys.has(f.url))) n++; }
   return { state: n === 0 ? 'absent' : n < N ? 'partial' : 'installed', n, N, bytes, total };
 }
-export async function status(volId) {
+async function status(volId) {
   const s = await installStatus(volId);
   return s.state === 'partial' ? `partial ${s.n}/${s.N}` : s.state;
 }
@@ -200,7 +199,7 @@ export function install(volId, { onProgress = null, signal = null } = {}) {
   running.set(volId, job);
   return job;
 }
-export const installing = (volId) => running.has(volId);
+const installing = (volId) => running.has(volId);
 
 /* ── THE FILE ROAD ── a volume's .lwv from this device's disk: File.slice per entry, one at a time (one disk read), every sha-256 checked */
 const volLabel = (v) => 'VOL. ' + (v.numeral || v.id);

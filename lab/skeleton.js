@@ -29,7 +29,7 @@ const CHI = [0, 2.20, 0, 0.98, 1.57, 2.04, 2.55, 3.04, 3.44, 3.98, 0, 0.93, 1.31
 const ACCEPTOR = (Z) => Z === 3 || Z === 4 || Z === 5 || Z === 11 || Z === 12 || Z === 13 || (Z >= 19 && Z <= 31);
 const DONOR = { 7: 3, 8: 2, 15: 3, 16: 2 }, METAL = (Z) => Z === 3 || Z === 11 || Z === 12 || Z === 19 || Z === 20;   // METAL: the alkali and alkaline-earth atoms an ionic bond reads at Δχ ≥ 1
 const PM = ANGSTROM / 100;   // bohr per pm
-export function bondsOf(atoms, { rec = null, charges = null } = {}) {
+function bondsOf(atoms, { rec = null, charges = null } = {}) {
   const n = atoms.length, d = (i, j) => Math.hypot(atoms[i].x - atoms[j].x, atoms[i].y - atoms[j].y, atoms[i].z - atoms[j].z);
   const recB = Array.isArray(rec) && rec.length && rec.every((b) => Array.isArray(b) && b[0] < n && b[1] < n) ? rec : null;
   const bonds = [];

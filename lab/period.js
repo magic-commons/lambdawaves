@@ -91,7 +91,7 @@ export function hydrogenShellPeriod(shells, Z = 1) {
   let g = 0; for (let i = 0; i < S.length; i++) for (let j = i + 1; j < S.length; j++) g = gcdInt(g, Math.round(L / (S[i] * S[i]) - L / (S[j] * S[j])));
   return 2 * Math.PI * B / g / (Z * Z);
 }
-export const AU_FS = 0.02418884326;
+const AU_FS = 0.02418884326;
 export function fmtPeriod(T) {
   if (!T || !Number.isFinite(T)) return '—';
   const fs = T * AU_FS;

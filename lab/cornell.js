@@ -15,7 +15,7 @@ import { BASIS, ylmNorm, legendreDerivCoeffs } from './hydrogen.js';
 import { rowOfNr } from './atoms.js';
 
 /** the standard potential models, all in GeV / GeV⁻¹ (moved from qcd.js, 0.5.0 D9) */
-export const POTENTIALS = {
+const POTENTIALS = {
   cornell: { label: 'Cornell  −4α_s/3r + σr + V₀', f: (r, p) => -4 * p.alphaS / (3 * r) + p.sigma * r + (p.V0 || 0) },
   linear: { label: 'linear  σr + V₀  (the Airy limit)', f: (r, p) => p.sigma * r + (p.V0 || 0) },
   coulomb: { label: 'Coulomb  −4α_s/3r', f: (r, p) => -4 * p.alphaS / (3 * r) + (p.V0 || 0) },

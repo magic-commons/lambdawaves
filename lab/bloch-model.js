@@ -7,7 +7,7 @@ export const DEFAULTS = { preset: 'flop', w0: 1, T1: 0, T2: 0, ...PRESETS.flop, 
 export const pulse = (P) => (P.preset === 'flop' && P.O > 0 ? Math.PI / P.O : Infinity);   // FLOP: a π-pulse, Ω on for π/Ω and then off
 export const init = (P) => [Math.cos(P.th / 2), 0, Math.sin(P.th / 2) * Math.cos(P.ph), Math.sin(P.th / 2) * Math.sin(P.ph)];   // [Re a, Im a, Re b, Im b] = ψ′(0) = ψ(0)
 export function step(s, P, t, dt) { const O = t < pulse(P) ? P.O : 0; return su2(s, O * dt / 2, -P.b * O * dt ** 3 / 24, -(P.d + P.b * (t + dt / 2)) * dt / 2); }
-export function su2([ar, ai, br, bi], nx, ny, nz) {   // e^{−i n·σ} = cos|n| − i sin|n| n̂·σ on [Re a, Im a, Re b, Im b]: the one 2 × 2 exponential
+function su2([ar, ai, br, bi], nx, ny, nz) {   // e^{−i n·σ} = cos|n| − i sin|n| n̂·σ on [Re a, Im a, Re b, Im b]: the one 2 × 2 exponential
   const m = Math.hypot(nx, ny, nz), c = Math.cos(m), q = m ? Math.sin(m) / m : 0;
   const ur = nz * ar + nx * br + ny * bi, ui = nz * ai + nx * bi - ny * br, vr = nx * ar - ny * ai - nz * br, vi = nx * ai + ny * ar - nz * bi;
   return [c * ar + q * ui, c * ai - q * ur, c * br + q * vi, c * bi - q * vr];
@@ -29,11 +29,11 @@ export function closed(P, t) {   // β = 0: the Bloch vector by Rodrigues about 
   const f = phase(P, t), c = Math.cos(f), q = Math.sin(f); return [c * r[0] - q * r[1], q * r[0] + c * r[1], r[2]];
 }
 export const lzP = (P) => 1 - Math.exp(-Math.PI * P.O ** 2 / (2 * Math.abs(P.b)));   // the Landau–Zener flip, swept from −∞ to +∞
-export const span = (P) => Math.min(2000, Math.max(2 * Math.PI, P.b ? -2 * P.d / P.b : 0));   // the re-solve's run: the sweep to resonance and as far past it (≤ 2000), else one turn
+const span = (P) => Math.min(2000, Math.max(2 * Math.PI, P.b ? -2 * P.d / P.b : 0));   // the re-solve's run: the sweep to resonance and as far past it (≤ 2000), else one turn
 export function halve(P) { const T = span(P), D = P.T1 || P.T2, a = D ? runR(P, T).r : run(P, T).s, b = D ? runR(P, T, DT / 2).r : run(P, T, DT / 2).s; return { T, d: Math.hypot(...a.map((x, i) => x - b[i])) }; }
 /* 0.9.3 D1 T₁ · T₂: the state ρ = ½(1 + r·σ) under amplitude damping to |↓⟩ (r_z = −1) and dephasing, 1/T₂ = 1/(2T₁) + γ_φ — the Bloch equations in the same turning frame,
  * ṙ = 2h′ × r − (r_x/T₂, r_y/T₂, (r_z + 1)/T₁), 2h′ = (Ω, 0, −(δ + βt)), one RK4 step at a time (1/T = 0 at T = 0); the pure case stays on the spinor road above. */
-export function bloch(r, P, t, dt) {
+function bloch(r, P, t, dt) {
   const O = t < pulse(P) ? P.O : 0, a = P.T1 ? 1 / P.T1 : 0, c = P.T2 ? 1 / P.T2 : 0, add = (u, k, s) => u.map((x, i) => x + s * k[i]);
   const f = (u, [x, y, z]) => { const w = -(P.d + P.b * u); return [-w * y - c * x, w * x - O * z - c * y, O * y - a * (z + 1)]; };
   const k1 = f(t, r), k2 = f(t + dt / 2, add(r, k1, dt / 2)), k3 = f(t + dt / 2, add(r, k2, dt / 2)), k4 = f(t + dt, add(r, k3, dt)); return add(r, k1.map((x, i) => x + 2 * k2[i] + 2 * k3[i] + k4[i]), dt / 6);
@@ -52,7 +52,7 @@ export const BELL = { phip: [h, 0, 0, h], phim: [h, 0, 0, -h], psip: [0, h, h, 0
 const onA = (f) => (s) => { const p = f(s[0], s[1], s[4], s[5]), q = f(s[2], s[3], s[6], s[7]); return [p[0], p[1], q[0], q[1], p[2], p[3], q[2], q[3]]; }, perm = (k) => (s) => k.map((i) => s[i]);
 export const GATES = { hA: onA((a, b, c, d) => [(a + c) * h, (b + d) * h, (a - c) * h, (b - d) * h]), xA: onA((a, b, c, d) => [c, d, a, b]), zA: onA((a, b, c, d) => [a, b, -c, -d]), sA: onA((a, b, c, d) => [a, b, -d, c]),
   cnot: perm([0, 1, 2, 3, 6, 7, 4, 5]), swap: perm([0, 1, 4, 5, 2, 3, 6, 7]) };
-export const applyTape = (s, tape = []) => tape.reduce((v, g) => GATES[g](v), s); DEFAULTS.tape = [];
+const applyTape = (s, tape = []) => tape.reduce((v, g) => GATES[g](v), s); DEFAULTS.tape = [];
 export function pair(id, th, ph, tape = []) { return onA((...v) => su2(v, -th / 2 * Math.sin(ph), th / 2 * Math.cos(ph), 0))(applyTape(BELL[id].flatMap((x) => [x, 0]), tape)); }   // the tape, THEN U_A ⊗ 1
 export const corr = (s, a, b) => { let e = 0; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) e += M(a)[i >> 1][j >> 1] * M(b)[i & 1][j & 1] * (s[2 * i] * s[2 * j] + s[2 * i + 1] * s[2 * j + 1]); return e; };   // ⟨(a·σ) ⊗ (b·σ)⟩, a and b in the x–z plane
 export function bell(s, id, tape = []) {   // the axes signed to the preset's state after the tape, before the knobs

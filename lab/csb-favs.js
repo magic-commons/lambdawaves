@@ -15,7 +15,7 @@ import { knob, seg, sw, hint, knobBank } from './mir/kit.js';
 import { jsonStore } from './mir/core/prefs.js';
 import { setTimelineKnobRows } from './mir/timeline/knobs.js';
 
-export const CSB_KEY = 'lambdawaves.q0.csb';
+const CSB_KEY = 'lambdawaves.q0.csb';
 const HALF_CARD = 150;   // a part wider than half a rack card is not offered (A-PLAN A3)
 
 export function createCsbFavs(app, { panel }) {

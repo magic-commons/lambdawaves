@@ -10,7 +10,7 @@
  * singlet and triplet 1s2p → 1s2s, sodium's D₁ and D₂) are ONE picture, listed together.
  * THE COLOUR of a wavelength is the CIE 1931 2° observer (Wyman, Sloan & Shirley 2013's multi-lobe fit) taken to sRGB, clipped and normalised,
  * dimmed toward the ends of the eye's range; outside 380–750 nm it is no colour (the strip draws grey). */
-export const L_LETTER = 'spdfghik';
+const L_LETTER = 'spdfghik';
 export const SERIES = Object.freeze([
   Object.freeze({ id: 'lyman', label: 'LYMAN', short: 'Ly', lower: 1 }), Object.freeze({ id: 'balmer', label: 'BALMER', short: 'H', lower: 2 }),
   Object.freeze({ id: 'paschen', label: 'PASCHEN', short: 'Pa', lower: 3 }), Object.freeze({ id: 'brackett', label: 'BRACKETT', short: 'Br', lower: 4 }),

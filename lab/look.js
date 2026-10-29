@@ -19,12 +19,12 @@ import { createAccent } from './mir/shell/accent.js';
 import { rgbToHex } from './mir/palette.js';
 export { CARD_GROUND } from './mir/shell/accent.js';   // the card the notebook's λ is corrected against (__LW.ink.ground)
 
-export const LOOK_KEY = 'mir.gui';
+const LOOK_KEY = 'mir.gui';
 /** the LOOK_SCHEMA rows the store holds: every one (MIR OPTIONS reaches them all; iteration 003) */
 export const LOOK_ROWS = Object.freeze(lookSchema().map((r) => r.key));
 /** λWAVES' home for the rows SETTINGS never had: the value at which each writes nothing, so the page looks as it did before
  *  MIR OPTIONS (FULL tier, no benchmark; the kit's own faces, shadows, corners, veil and ink; no pointer glow or parallax) */
-export const LOOK_HOME = Object.freeze({ veil: 10, saturation: 1, corners: 14, faces: 'solid', text: 'theme', edge: true, shadow: 1,
+const LOOK_HOME = Object.freeze({ veil: 10, saturation: 1, corners: 14, faces: 'solid', text: 'theme', edge: true, shadow: 1,
   glow: false, parallax: false, quality: 'full' });
 /** the kit maps that write at λWAVES' home, homed: AUTO ink is the theme's own ladder (a SOLID pane keeps the kit's), SATURATION
  *  at 100 % is no filter at any blur, the CAST is drawn only off LIGHT_HOME (the kit sheet's own words), DEFAULT spacing is the
@@ -40,7 +40,7 @@ const HOME_MAPS = {
 };
 /** what the look left the settings blob with; HELP had its own key */
 export const BLOB_LOOK = Object.freeze(['theme', 'card', 'cardSet', 'frost', 'disc', 'blur', 'accent', 'badges', 'controlHints', 'hint']);
-export const HELP_KEY = 'lw-window-info';
+const HELP_KEY = 'lw-window-info';
 
 /** liftLook(blob, help) → the `mir.gui` patch an older blob (and HELP's 'on' | 'off') becomes, by the laws rack.js read them by:
  *  an unknown theme was DARK; a card counts only when this browser SAID it (cardSet, wave 51); a legacy frost `true` is ALWAYS

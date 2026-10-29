@@ -18,7 +18,7 @@ import { PRESET_BY_ID } from './state.js';
 import { createUserPresets } from './user-presets.js';
 
 /** iteration 015 S4 · THE READER'S PRESETS: SPECTRUM's PREFERENCE record (settings-store.js FAMILIES), rows `{ name, data: { labels } }` */
-export const USER_PRESETS_KEY = 'lambdawaves.q0.presets';
+const USER_PRESETS_KEY = 'lambdawaves.q0.presets';
 
 /* THE LADDER IS A CANVAS, AND A CANVAS HAS NO THEME (wave 44).  Every rule here was written in
    rgba(255,255,255,…) — right on the dark theme, WHITE ON WHITE on the light one, where "E = 0", the footer and

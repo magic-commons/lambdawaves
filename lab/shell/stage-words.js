@@ -9,8 +9,8 @@ import { createPrefs } from '../mir/core/prefs.js'; import { createSettingsStore
    THE KINDS: every announcement says what it is, and the stage writes it only while that kind's switch is on.  `fade` is THE FADE (the formula's seat,
    2.4 s), `pop` the short line on the other side (iteration 001), `head` THE HEAD (held until Escape or a press).  Josh 10-18: "default to formula and
    atoms on.  Everything else off."  A HAND speaks; a restore, an undo, a project or link open never does (each emitter's own law, unchanged). */
-export const INFO_KEY = 'lambdawaves.q0.info';
-export const KINDS = Object.freeze([
+const INFO_KEY = 'lambdawaves.q0.info';
+const KINDS = Object.freeze([
   { id: 'preset', key: 'sayPreset', seat: 'fade', label: 'PRESETS', hint: 'Name a hand-picked preset' },
   { id: 'head', key: 'sayHead', seat: 'head', label: 'MOLECULE HEAD', hint: 'Show the picked molecule\'s head' },
   /* iteration 012 R1 (Josh 10-20: "Merge the function 'Orbital Dial' and 'Registry Adds'"): ONE switch, ORBITALS, speaks for both kinds — the orbital kind
@@ -74,12 +74,12 @@ export const INFO_ROWS = Object.freeze([
   { key: 'status', type: 'bool', default: false, group: 'status', label: 'STATUS', hint: 'STATUS under the formula' },
 ]);
 /** the six keys the settings blob held (0.5.3 M9, iteration 001): read once into the record, never written again */
-export const BLOB_INFO = Object.freeze(['molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'infoPos', 'infoPad']);
+const BLOB_INFO = Object.freeze(['molFormula', 'molFormulaSize', 'atomLabels', 'atomLabelsSize', 'infoPos', 'infoPad']);
 /** …and the three MARKS it held until the fix round (C6), each written only while on: read once into the record, whenever they are found */
 const BLOB_MARKS = Object.freeze(['skeleton', 'bead', 'ellipsoid']);
 /** liftInfo(blob) → the record's patch, by the laws shell/settings.js read them by: nothing said is ON at 100 %; an absent atomLabels /
  *  atomLabelsSize takes the stored molFormula / molFormulaSize (a 0.4–0.5.2 profile with STAGE TEXT off keeps its labels off); TOP at PAD 0 (018 B8; 12 % before) */
-export function liftInfo(s = {}) {
+function liftInfo(s = {}) {
   if (!BLOB_INFO.some((k) => s[k] !== undefined)) return {};
   const num = (v) => (v === undefined || v === null ? NaN : +v), clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const molFormula = s.molFormula !== undefined ? s.molFormula !== false : s.atomLabels !== false, atomLabels = s.atomLabels !== undefined ? s.atomLabels !== false : molFormula;
@@ -114,7 +114,7 @@ export function infoPrefs() {
 /** has this profile met INFORMATIONAL (a record, or a blob that held atomLabels)?  Read at infoPrefs()'s first call */
 export const infoKnown = () => (infoPrefs(), infoSeen);
 /** THE LIST CAP's count line (iteration 011 Q1): `140 levels · 7 shells` — the populated labels and the distinct n among them */
-export function capLine(ids) {
+function capLine(ids) {
   const k = ids.length, s = new Set(ids.map((a) => BASIS[a].n)).size;
   return `${k} level${k === 1 ? '' : 's'} · ${s} shell${s === 1 ? '' : 's'}`;
 }

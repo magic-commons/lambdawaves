@@ -107,7 +107,7 @@ function volumeRows() {
 }
 const plain = (s) => String(s || '').replace(/<\/?m>/g, '').replace(/[_{}\\]/g, '').toLowerCase();
 /** suggest(query, n) → [{ id, name, formula, vol, pic }] — at most n molecules for a typed query: prefix matches (name, formula, id) first */
-export async function suggest(query, n = 6) {
+async function suggest(query, n = 6) {
   const q = plain(query).trim(); if (!q) return [];
   const cat = CHEM_PRESETS.filter((p) => !p.disabled && !atomZ(p.formula)).map((p) => ({ id: p.id, name: p.name, formula: p.formula, vol: null, pic: './img/menu/' + p.id + '.webp' }));
   const rows = cat.concat((await volumeRows()).map((r) => ({ id: r.id, name: r.name, formula: r.formula, vol: r.vol, m: r.m, v: r.v })));

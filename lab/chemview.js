@@ -40,9 +40,9 @@ import * as V from './volumes.js'; import { parseLwm, rungRecord, espOf, espGrid
 export const CHEM_PRESETS = [...MOLECULES, ...RECORD_ONLY].map((m) => ({ ...m, label: m.formula }));
 const PRESET_BY_ID = new Map(CHEM_PRESETS.map((p) => [p.id, p]));
 /** the preset's atoms in bohr, as the worker and lab/rhf-molecule.js want them */
-export const chemAtoms = moleculeAtoms;
+const chemAtoms = moleculeAtoms;
 /** the preset's formal charge — 0 for every neutral, ±1 for the four ions */
-export const chemCharge = moleculeCharge;
+const chemCharge = moleculeCharge;
 
 const AXES = ['x', 'y', 'z'], AXIS_N = { x: 2, y: 5, z: 6 };
 const W_MAX = 1.6, CORE_LO = 19, CORE_HI = 21;              // answer 11: the valence plot, and the core inset's own window

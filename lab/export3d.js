@@ -24,7 +24,7 @@ export const EXPORTS = Object.freeze([
   { fmt: 'npz', kind: 'grid', mime: 'application/zip', row: 'EXPORT GRID · NPZ', tip: "ψ on the grid for NumPy (.npz + meta.json)" },
   { fmt: 'cube', kind: 'grid', mime: 'chemical/x-cube', row: 'EXPORT GRID · CUBE', tip: 'The density as a Gaussian cube (bohr)' },
 ]);
-export const NO_FIELD = 'needs the FIELD (WebGPU)';
+const NO_FIELD = 'needs the FIELD (WebGPU)';
 
 /* ── THE GRID ─────────────────────────────────────────────────────────────────────────────────────────────── */
 let F16 = null;
@@ -236,7 +236,7 @@ export function stl(mesh, { header = 'lambdawaves' } = {}) {
 }
 
 /** one .npy (format 1.0): the magic, the header dict padded with spaces to a 64-byte boundary, the raw little-endian data */
-export function npy(descr, shape, data) {
+function npy(descr, shape, data) {
   let head = `{'descr': '${descr}', 'fortran_order': False, 'shape': (${shape.join(', ')}${shape.length === 1 ? ',' : ''}), }`;
   head += ' '.repeat((64 - ((10 + head.length + 1) % 64)) % 64) + '\n';
   const out = new Uint8Array(10 + head.length + data.byteLength);

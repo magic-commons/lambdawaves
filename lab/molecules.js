@@ -527,7 +527,7 @@ export const MOLECULE_BY_ID = new Map([...MOLECULES, ...RECORD_ONLY].map((m) => 
  * a heavy atom.  It is offered where every atom is in the record AND the molecule stays near the benzene cap — MEASURED
  * on this engine (research/molecular-waves-2026-09-18/basis/engine-631.json): C₂H₄ at 46 AOs is 2.3 s, C₂H₆ at 50 is
  * 3.7 s.  Nineteen library molecules agree with PySCF cart=True on the same decimals to 3e-12 (tests/fixtures/oracles/). */
-export const BASIS_631 = { elements: [1, 6, 7, 8, 9], maxAO: 46 };
+const BASIS_631 = { elements: [1, 6, 7, 8, 9], maxAO: 46 };
 export function basis631(id) {
   const m = MOLECULE_BY_ID.get(id); if (!m) return { ok: false, nAO: 0, why: 'no such molecule' };
   const atoms = moleculeAtoms(id), missing = atoms.find((a) => !BASIS_631.elements.includes(a.Z));

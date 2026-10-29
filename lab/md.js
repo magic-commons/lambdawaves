@@ -105,7 +105,7 @@ export function etable(imax, jmax, a, b, Ax, Bx) {
 }
 
 /* ── Hermite Coulomb auxiliaries R^n_{tuv}(ζ, R) ──────────────────────────────────────────────────────────────── */
-export function rtable(Lmax, zeta, Rx, Ry, Rz) {
+function rtable(Lmax, zeta, Rx, Ry, Rz) {
   const t2 = zeta * (Rx * Rx + Ry * Ry + Rz * Rz), F = boysTable(Lmax, t2);
   const N = Lmax + 1, R = new Float64Array(N * N * N * N), at = (n, t, u, v) => ((n * N + t) * N + u) * N + v;
   let f = 1;
@@ -137,7 +137,7 @@ export const ELEMENT = ['X', 'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne
   'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr'];
 const df = (n) => { let r = 1; for (let k = n; k > 0; k -= 2) r *= k; return r; };   // (n)!!, (−1)!! = 1
 /** N_lmn(α) = (2α/π)^{3/4} [ (4α)^{l+m+n} / ((2l−1)!!(2m−1)!!(2n−1)!!) ]^{1/2} */
-export const primNorm = (al, l, m, n) =>
+const primNorm = (al, l, m, n) =>
   Math.pow(2 * al / Math.PI, 0.75) * Math.sqrt(Math.pow(4 * al, l + m + n) / (df(2 * l - 1) * df(2 * m - 1) * df(2 * n - 1)));
 /** ⟨g_lmn(α)|g_lmn(β)⟩ on one centre — closed form, used only for the contracted normalisation */
 function primOverlapSame(a, b, l, m, n) {

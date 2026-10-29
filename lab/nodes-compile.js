@@ -35,7 +35,7 @@ const W = [0.2126, 0.7152, 0.0722];
 export const LUMA = Object.freeze([...W, 0, 0, ...W, 0, 0, ...W, 0, 0, 0, 0, 0, 1, 0]);
 
 /** mul(B, A) → the 4 × 5 matrix of B after A (each a 5 × 5 with the row 0 0 0 0 1 left out) */
-export function mul(B, A) {
+function mul(B, A) {
   const o = new Array(20);
   for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) {
     let s = c === 4 ? B[r * 5 + 4] : 0;
@@ -44,10 +44,10 @@ export function mul(B, A) {
   }
   return o;
 }
-export const isIdentity = (m) => m.every((x, i) => Math.abs(x - IDENTITY[i]) < 1e-9);
+const isIdentity = (m) => m.every((x, i) => Math.abs(x - IDENTITY[i]) < 1e-9);
 
 /** tableOf(fns, n) → { r, g, b }: y = i / (n − 1) through every function in order, clamped after each */
-export function tableOf(fns, n = TABLE_N) {
+function tableOf(fns, n = TABLE_N) {
   const out = {};
   for (const [k, ch] of [['r', 'R'], ['g', 'G'], ['b', 'B']]) {
     const a = new Float32Array(n);
@@ -61,12 +61,12 @@ const S = (a) => Array.from(a, (x) => +(+x).toFixed(4)).join(' ');
 const smooth = (e0, e1, x) => { const t = clamp01((x - e0) / (e1 - e0)); return t * t * (3 - 2 * t); };
 /** over(T): a LAYER or a SHADER — over the stage, in `layers`, without FADE or MASK */
 export const over = (T) => T.cls === 'layer' || T.cls === 'shader';
-export const fadeOf = (q, T) => (over(T) || !Number.isFinite(+q.values.fade) ? 1 : clamp01(+q.values.fade));
+const fadeOf = (q, T) => (over(T) || !Number.isFinite(+q.values.fade) ? 1 : clamp01(+q.values.fade));
 const maskOf = (q, T) => (over(T) ? 'none' : q.values.mask || 'none');
 /** ownRun(q, T): the node is a run of its own — masked, or a faded PRIMITIVE or luma TABLE (whose fade is a composite, not a fold) */
 export const ownRun = (q, T) => maskOf(q, T) !== 'none' || (fadeOf(q, T) < 1 && (T.cls === 'prim' || !!T.luma));
 /** weight(kind, x, soft) → 0..1: where a mask lets the node through — x the luma (lights · darks · mids) or the distance from the centre */
-export function weight(kind, x, soft = 0.5) {
+function weight(kind, x, soft = 0.5) {
   const h = 0.02 + 0.48 * soft, L = smooth(0.5 - h, 0.5 + h, x), C = 1 - smooth(0.6 - h, 0.6 + h, x);
   return kind === 'lights' ? L : kind === 'darks' ? 1 - L : kind === 'mids' ? 1 - smooth(0.25 - h / 2, 0.25 + h / 2, Math.abs(x - 0.5)) : kind === 'centre' ? C : 1 - C;
 }

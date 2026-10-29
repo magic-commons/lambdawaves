@@ -21,7 +21,7 @@ export const atomsKey = (atoms) => sha256Hex(JSON.stringify(atoms.map((a) => [a.
 
 /* ── the record ── a big array is { $f64 | $i32: base64 } (little-endian, exact); everything else is plain JSON */
 const TYPED = { $f64: Float64Array, $i32: Int32Array, $f32: Float32Array };
-export function arr(v) {
+function arr(v) {
   for (const k in TYPED) if (v && typeof v[k] === 'string') {
     const s = atob(v[k]), u = new Uint8Array(s.length);
     for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
@@ -163,7 +163,7 @@ export async function keepData(url, res = null) {
 
 /** what lw-data-v1 holds (iteration 011 Q4, the Picker's LIBRARY): the records keepSection / fetchRecord kept (library/<sha-256>.json) and the
     DATA files keepData kept (pictures, covers, ladder bases) — { records: { n, bytes }, data: { n, bytes } }.  A read: never creates the store. */
-export async function keptSummary() {
+async function keptSummary() {
   const out = { records: { n: 0, bytes: 0 }, data: { n: 0, bytes: 0 } }, c = await store();
   if (!c) return out;
   for (const req of await c.keys().catch(() => [])) {

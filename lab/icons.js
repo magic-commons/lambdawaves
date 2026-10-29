@@ -21,7 +21,7 @@ const oval = (cx, cy, rx, ry, t) => '<ellipse ' + S + ' cx="' + cx + '" cy="' + 
 /* NODES' 16-unit drawings, through the kit's precedent (glyph.js `edit`, `select`, `scrub`) */
 const n16 = (inner) => '<g transform="scale(1.5)" fill="none" stroke="currentColor" stroke-width="1.267" stroke-linecap="round" stroke-linejoin="round">' + inner + '</g>';
 
-export const ICONS = {
+const ICONS = {
   /* ── the Picker, the bar, FOLDERS (lab/img/icons/ until 021, each redrawn at 1.9) ── */
   arrowLeft: p('M15.5 4.5 8 12l7.5 7.5'),                                       // was 3.5 wide
   arrowRight: p('M8.5 4.5 16 12l-7.5 7.5'),

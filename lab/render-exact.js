@@ -496,7 +496,7 @@ export function manifest(o = {}) {
  * plan = the kit's plan at the tap (rec.plan), res = the kit's result, last = film.last (the frame log), file = fileFacts(res), current =
  * the stage's CSS box (CURRENT is the stage at DPR 1, even).  → { ok, rows: [{ setting, asked, witness, ok }], lies: [setting] } */
 const even = (n) => Math.max(16, Math.round(n) & ~1);
-export function audit({ asked = {}, plan = null, res = null, last = null, file = null, current = null } = {}) {
+function audit({ asked = {}, plan = null, res = null, last = null, file = null, current = null } = {}) {
   const rows = [], row = (setting, a, witness, ok) => rows.push({ setting, asked: a, witness, ok: !!ok });
   const P = plan && plan.plan, fps = Number(asked.fps), tl = /^timeline-/.test(asked.motion || ''), n = res ? res.frames : 0, L = last || {};
   const want = asked.size ? asked.size : RECORD_SIZES[asked.resolution] ? { w: RECORD_SIZES[asked.resolution][0], h: RECORD_SIZES[asked.resolution][1] } : current ? { w: even(current.w), h: even(current.h) } : null;
@@ -527,7 +527,7 @@ export function audit({ asked = {}, plan = null, res = null, last = null, file =
 }
 /** what the FILE holds (025 B4): an MP4's moov read by the kit's parser (the size from its avc1 entry, the fps from the video stts, the frames,
  *  the audio trak's edit) — or, for PNG frames, the first frame's IHDR and the parts' frame ranges.  Reads only the boxes it needs. */
-export async function fileFacts(res) {
+async function fileFacts(res) {
   const f = res && res.files && res.files[0]; if (!f || !f.blob) return null;
   const at = async (a, b) => new Uint8Array(await f.blob.slice(a, b).arrayBuffer());
   if (res.format === 'png') {

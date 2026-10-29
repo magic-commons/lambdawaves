@@ -54,7 +54,7 @@ import { eigSymQL } from './linalg.js';
 export const HARTREE_EV = EV;
 /* ── J′ = (aa|bb) and K′ = (ab|ab) over 1s STOs at ζ = 1 (Sugiura 1927, with E₁) — moved here from h2.js when the H₂ card
    left in 0.5.0 D9b; tests/h2ci.test.mjs keeps their anchors (E₁'s tables, J′ by quadrature, Heitler–London 1927) ── */
-export const EULER_GAMMA = 0.5772156649015329;
+const EULER_GAMMA = 0.5772156649015329;
 /** the exponential integral E₁(x) = ∫_x^∞ e^{−t}/t dt for x > 0 (series below 1, continued fraction above) */
 export function expint1(x) {
   if (x <= 0) throw new Error('E1 needs x > 0');
@@ -64,7 +64,7 @@ export function expint1(x) {
   for (let i = 1; i < 200; i++) { const an = -i * i; b += 2; d = 1 / (an * d + b); c = b + an / c; const del = c * d; h *= del; if (Math.abs(del - 1) < 1e-16) break; }
   return h * Math.exp(-x);
 }
-export const Ei = (x) => -expint1(-x);                            // Ei(−R) = −E₁(R)
+const Ei = (x) => -expint1(-x);                            // Ei(−R) = −E₁(R)
 export const coulombJ2 = (R) => 1 / R - Math.exp(-2 * R) * (1 / R + 11 / 8 + 3 * R / 4 + R * R / 6);
 export function exchangeK2(R) {
   const S = overlapS(R), Sp = Math.exp(R) * (1 - R + R * R / 3);

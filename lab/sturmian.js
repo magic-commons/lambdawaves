@@ -83,7 +83,7 @@ export function sturmianOverlap(n1, n2, l) {
 }
 /** labels: BASIS entries, BASIS indices, ids "h:n:l:m", or plain {n, l, m}; undefined → all 140 of n ≤ 7 (THE SCALE's register: the
  *  register grew to n = 7 at iteration 008 A7 and the scale followed it at iteration 009 N7) */
-export function resolveLabels(labels) {
+function resolveLabels(labels) {
   if (!labels) return BASIS.slice();
   return labels.map((x) => typeof x === 'number' ? BASIS[x] : typeof x === 'string' ? BASIS[BASIS_INDEX.get(x)] : x);
 }
@@ -194,7 +194,7 @@ export function symmetricEigen(Ain, n) {
   return { values, vectors };
 }
 /** the lower Cholesky factor L of a symmetric positive-definite S (S = LLᵀ), or null if a pivot is not positive */
-export function cholesky(S, n) {
+function cholesky(S, n) {
   const L = new Float64Array(n * n);
   for (let i = 0; i < n; i++) {
     for (let j = 0; j <= i; j++) {
