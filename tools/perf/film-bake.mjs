@@ -1,7 +1,7 @@
 /* tools/perf/film-bake.mjs (025 B) — THE FILM IS THE SCREEN, measured: the film's own determinism (`__LW.captureUI.exact.verify`: one short schedule
  * rendered twice through the kit's recorder, digest against digest) with the graph EMPTY and with CURVES + FILM GRAIN + DECOHERE, and a frame of a
- * baked film beside the stage's screenshot at the same t (B-shots).
- *   LW_PORT=9691 GD_PORT=5691 node tools/perf/film-bake.mjs [steps: empty,graph,shot] [out-dir for the shots]
+ * baked film beside the stage's screenshot at the same t (B-shots); `overlays` (B2: VORTEX + PARTICLES) and `words` (B3: H₂O under ESP).
+ *   LW_PORT=9691 GD_PORT=5691 node tools/perf/film-bake.mjs [steps: empty,graph,nodes,overlays,words,shot] [out-dir for the shots]
  */
 import { open } from '../gate/gatekit.mjs';
 import fs from 'node:fs';
@@ -19,7 +19,7 @@ try {
   const verify = `const v = await __LW.captureUI.exact.verify({ frames: 6, width: 320 }); const L = __LW.captureUI.exact.last;
     return { ok: v.ok, message: v.message, digests: v.digests, mismatches: v.mismatches, baked: L && L.baked };`;
   if (STEPS.includes('empty')) { out.empty = await g.ev(`__LW.nodes.setOff(false); for (const n of __LW.nodes.nodes()) __LW.nodes.remove(n.id); await __LW.settle(); ${verify}`); console.log('empty', JSON.stringify(out.empty)); }
-  if (STEPS.includes('graph') || STEPS.includes('shot')) {
+  if (STEPS.includes('graph') || STEPS.includes('nodes')) {
     out.graph0 = await g.ev(`__LW.nodes.setHas(true); __LW.curves.preset('MASTER', 'S'); __LW.nodes.add('grain'); __LW.nodes.add('decohere');
       await new Promise((r) => setTimeout(r, 400)); await __LW.settle(); return __LW.nodes.nodes().map((n) => n.type + (n.bypass ? '×' : ''));`);
     console.log('graph', JSON.stringify(out.graph0));
@@ -29,6 +29,32 @@ try {
     out.graphB = await g.ev(verify); console.log('graphB', JSON.stringify(out.graphB));
     out.sameAcross = JSON.stringify(out.graphA.digests) === JSON.stringify(out.graphB.digests);
     console.log('two verify calls (four runs) agree:', out.sameAcross);
+  }
+  /* B2 · the overlays: VORTEX raised, PARTICLES on and seeded, VORTEX's LOCATE + OVERLAY pressed */
+  if (STEPS.includes('overlays')) {
+    out.overlays0 = await g.ev(`__LW.layout.raise('vortex'); await new Promise((r) => setTimeout(r, 300));
+      const w = document.querySelector('.dev[data-id="vortex"]'); w.classList.remove('closed', 'folded');
+      const sw = (n) => [...w.querySelectorAll('.sw')].find((e) => (e.querySelector('.sw-lbl') || {}).textContent === n);
+      for (const n of ['LOCATE', 'OVERLAY']) { const e = sw(n); if (e) (e.querySelector('button') || e).click(); }
+      __LW.particles.setOn(true); __LW.particles.seed(120, __LW.reg, __LW.clock.t, __LW.domain.half); __LW.schedule(__LW.TIER.PRESENT);
+      await new Promise((r) => setTimeout(r, 800)); await __LW.settle();
+      return { particles: __LW.particles.on, vortex: !!__LW.vortex.last, cv: ['vortex', 'particles'].map((id) => document.getElementById(id).width), theme: document.body.dataset.theme };`);
+    fs.writeFileSync('.tmp/ov0.png', Buffer.from(await g.snap(), 'base64'));
+    console.log('overlays', JSON.stringify(out.overlays0));
+    out.overlaysA = await g.ev(verify); out.overlaysB = await g.ev(verify);
+    fs.writeFileSync('.tmp/ov1.png', Buffer.from(await g.snap(), 'base64'));
+    out.overlays1 = await g.ev(`const a = __LW.field.stats.presents; __LW.schedule(__LW.TIER.PRESENT); await new Promise((r) => setTimeout(r, 500)); return { dpr: window.devicePixelRatio, cv: [__LW.field.canvas.width, __LW.field.canvas.height], presents: [a, __LW.field.stats.presents], sched: __LW.stats.scheduled, e: (window.__e || []).slice(-3).map(String), fault: __LW.stats.fault || null, lf: __LW.stats.loopFault || null };`);
+    console.log('after the films', JSON.stringify(out.overlays1));
+    console.log('overlaysA', JSON.stringify(out.overlaysA)); console.log('overlays two calls agree:', JSON.stringify(out.overlaysA.digests) === JSON.stringify(out.overlaysB.digests));
+  }
+  /* B3 · the words: MOLECULES on (H₂O), STYLE ESP — the ATOM LABELS and the ESP BAR */
+  if (STEPS.includes('words')) {
+    out.words0 = await g.ev(`const L = __LW, nap = (ms) => new Promise((r) => setTimeout(r, ms));
+      L.chem.setOn(true); for (let i = 0; i < 80 && !(L.chem.on && L.chem.row()); i++) await nap(100); L.setStyle('esp'); await nap(900); await L.settle();
+      return { on: L.chem.on, labels: !document.getElementById('atomLabels').hidden, bar: !!document.querySelector('.lw-espbar:not([hidden])') };`);
+    console.log('words', JSON.stringify(out.words0));
+    out.wordsA = await g.ev(verify); out.wordsB = await g.ev(verify);
+    console.log('wordsA', JSON.stringify(out.wordsA)); console.log('words two calls agree:', JSON.stringify(out.wordsA.digests) === JSON.stringify(out.wordsB.digests));
   }
   if (STEPS.includes('shot')) {
     fs.mkdirSync(DIR, { recursive: true });

@@ -31,8 +31,9 @@ export function createBake(app) {
   function atSize(cv, W, H, dpr, fn) {
     const own = (k, v) => Object.defineProperty(cv, k, { value: v, configurable: true });
     own('clientWidth', W); own('clientHeight', H);
-    let ratio = false; try { Object.defineProperty(window, 'devicePixelRatio', { value: dpr, configurable: true }); ratio = true; } catch (_) { /* the screen's ratio stands: drawImage scales */ }
-    try { fn(); } finally { delete cv.clientWidth; delete cv.clientHeight; if (ratio) delete window.devicePixelRatio; }
+    const was = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');   // Firefox: the window's own; Chromium: its prototype's
+    let ratio = false; try { Object.defineProperty(window, 'devicePixelRatio', { value: dpr, configurable: true, writable: true }); ratio = true; } catch (_) { /* the screen's ratio stands: drawImage scales */ }
+    try { fn(); } finally { delete cv.clientWidth; delete cv.clientHeight; if (ratio) { if (was) Object.defineProperty(window, 'devicePixelRatio', was); else delete window.devicePixelRatio; } }
   }
   /** what lies over the field on this stage now, each IN or OUT with why (HAZARD `overlays`' witness) */
   function readings(o = {}) {
@@ -74,8 +75,8 @@ export function createBake(app) {
     }
     for (const id of ['vortex', 'kepler']) if (want(id)) {
       const cv = $(id), W = app.w[id], dpr = Math.min(2, k);
-      atSize(cv, w / dpr, h / dpr, dpr, () => (id === 'vortex' ? W.update(reg, t, obs, half, false) : W.update(reg, t, obs, half)));
-      g.drawImage(cv, 0, 0, w, h); W.suspend();                          // the stage's own canvas: the loop redraws it at the stage's size after the film
+      const draw = () => (id === 'vortex' ? W.update(reg, t, obs, half, false) : W.update(reg, t, obs, half));
+      atSize(cv, w / dpr, h / dpr, dpr, draw); g.drawImage(cv, 0, 0, w, h); draw();   // the stage's own canvas, drawn again at the stage's size
     }
     if (want('skeleton')) {
       const a = lw.skeletonArgs(t);
