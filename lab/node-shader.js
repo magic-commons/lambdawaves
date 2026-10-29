@@ -10,7 +10,7 @@
  *              AMOUNT 0 is neutral: no canvas, no tap.  The grid pitch is automatic: 1 px under 1 Mpx, 2, 3 above 4 Mpx.
  * The stage canvas's CSS filter (the chain's grade) is mirrored onto each SHADER canvas, so the column's colour nodes dress it too.
  *   createShaderHost({ device, canvas, palette, tap, present }) → { make(l), paint(el, l), drop(el) }
- *     palette() → { lut: Float32Array(256·4) | null, span, on, invert, hue } · tap: field.tap · present: ask the field for one frame */
+ *     palette() → { lut: Float32Array(256·4) | null, span, n (a count of sets), on, invert, hue } · tap: field.tap · present: ask the field for one frame */
 const opt = (...a) => a.map((id) => ({ id, label: id.toUpperCase() }));
 export const SHADER_TYPES = {
   decohere: { cls: 'shader', label: 'DECOHERE', hint: 'the lines decohere into caustics — a splat through noise', heavy: true, neutral: (v) => v.amount === 0,
@@ -92,8 +92,9 @@ fn pal(x: f32) -> vec3f {
   let t = 1.0 - exp(-5.0 * u.gain * r);
   var c = t;
   if (u.colour > 1.5 && u.palOn > 0.5) {
-    if (u.nch > 1.5) { c = (pal(mix(t.r, 0.1667, u.fringe)) * t.r + pal(mix(t.g, 0.5, u.fringe)) * t.g + pal(mix(t.b, 0.8333, u.fringe)) * t.b) * (0.3333 + 0.6667 * u.fringe); }
-    else { c = pal(t.r) * t.r; }
+    let e = min(vec3f(1.0), 4.0 * t);                                  // the ground is black; a quarter of the way up is the palette's own colour
+    if (u.nch > 1.5) { c = (pal(mix(t.r, 0.1667, u.fringe)) * e.r + pal(mix(t.g, 0.5, u.fringe)) * e.g + pal(mix(t.b, 0.8333, u.fringe)) * e.b) * (0.3333 + 0.6667 * u.fringe); }
+    else { c = pal(t.r) * e.r; }
   }
   c = min(c, vec3f(1.0));
   return vec4f(c, select(1.0, max(c.r, max(c.g, c.b)), u.ground > 0.5));   // premultiplied: BLACK is opaque, STAGE lets the picture through
@@ -120,7 +121,7 @@ export function createShaderHost({ device, canvas: stage, palette = null, tap = 
   function pal(p) {
     const q = palette && palette();
     if (!q || !q.lut || !q.on) return [0, 1, 0, 0, 0];
-    if (p.lutOf !== q.lut) { p.lutOf = q.lut; for (let i = 0; i < 1024; i++) p.lutBytes[i] = Math.max(0, Math.min(255, Math.round(q.lut[i] * 255)));
+    if (p.lutOf !== q.n) { p.lutOf = q.n; for (let i = 0; i < 1024; i++) p.lutBytes[i] = Math.max(0, Math.min(255, Math.round(q.lut[i] * 255)));
       device.queue.writeTexture({ texture: p.lut }, p.lutBytes, { bytesPerRow: 1024 }, [256, 1]); }
     return [Math.floor(q.span / 512) / 256, (q.span % 512) / 256, q.hue || 0, q.invert ? 1 : 0, 1];
   }

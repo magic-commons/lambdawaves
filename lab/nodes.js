@@ -55,7 +55,8 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   /* 019 N1 · THE COMPILER: CURVES hands its tables to the graph (a `port`), not to the filter: it is a TABLE node like any other, and alone it
      compiles to the byte-identical filter 018 wrote.  One compile and one filter write per frame, whatever moved */
   /* 024 S2 · THE SHADER HOST: SHADER nodes draw on the field's device from its tap — set while one lives, cleared when none does */
-  const gpu = field && field.ok ? createShaderHost({ device: field.device, canvas, tap: field.tap, present }) : null;
+  const gpu = field && field.ok ? createShaderHost({ device: field.device, canvas, tap: field.tap, present,
+    palette: () => ({ ...field.paletteLUT(), on: !!mat.paletteOn, invert: !!mat.invert, hue: mat.hueShift || 0 }) }) : null;   // S3: the WAVE palette, as the ESP bar reads it
   const filter = pictureFilter(canvas), cache = new Map(), layers = createLayerHost(canvas.parentElement, gpu);
   let passes = 0, nodes = [];
   const flags = { view: null, solo: null };                          // 020 X3 · A FLAG IS NOT A RECORD: VIEW HERE and SOLO die with the session

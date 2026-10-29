@@ -1395,7 +1395,7 @@ export async function createField(canvas, opts = {}) {
   const cssP3 = !!(window.CSS && CSS.supports && CSS.supports('color', 'color(display-p3 1 0 0)'));
   const displayP3 = !!(window.matchMedia && matchMedia('(color-gamut: p3)').matches);
   const GAMUT_WHY = 'Display P3 is unavailable on this canvas';
-  let lastLUT = null, palSpan = 255;   // palSpan (iteration 015 W2): the palette's first and last stop as LUT indices, first · 512 + last — ESP reads the palette between them
+  let lastLUT = null, palSpan = 255, palN = 0;   // palSpan (iteration 015 W2): the palette's first and last stop as LUT indices, first · 512 + last — ESP reads the palette between them
   /** the palette reaches the GPU through the gamut, so the field and the interface can never disagree */
   function uploadPalette() {
     if (!lastLUT) return;
@@ -2417,8 +2417,10 @@ export async function createField(canvas, opts = {}) {
     /** 0.6.0 B1: the equalizer's table (lab/equalizer.js `table()`), or null: FLAT, the locked kernel.  Position hydrogen only;
      *  read on the next reconstruct, which the caller asks for. */
     setEqualizer(t) { eqTable = t && t.gamma ? t : null; },
+    /** 024 S3: the palette as set (the 256×RGBA LUT, its span first · 512 + last, a count of sets) — a SHADER node's PALETTE reads it */
+    paletteLUT() { return { lut: lastLUT, span: palSpan, n: palN }; },
     /** upload a 256×RGBA phase palette (Float32Array(1024), values 0..1) — an OBSERVER product: ψ is untouched */
-    setPalette(lut, span) { lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); if (span) palSpan = Math.round(span[0] * 256) * 512 + Math.min(255, Math.round(span[1] * 256)); uploadPalette(); },
+    setPalette(lut, span) { palN++; lastLUT = lut instanceof Float32Array ? lut : new Float32Array(lut); if (span) palSpan = Math.round(span[0] * 256) * 512 + Math.min(255, Math.round(span[1] * 256)); uploadPalette(); },
     /* ── THE GAMUT (wave 54) ────────────────────────────────────────────────────────────────────────────────
      * `support` is measured, never assumed: `canvas` is the WebIDL getter probe above, `css` asks the engine
      * whether it parses color(display-p3 …), and `display` is the media query — with the caveat that Firefox
