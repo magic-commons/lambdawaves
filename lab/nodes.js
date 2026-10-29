@@ -116,7 +116,8 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   const unenroll = (q) => { if (mod && mod.unregister) for (const K of knobsOf(q)) mod.unregister(ID(q, K.k)); };   // its routes go dormant (the id is never reused)
   function setValue(q, k, v, from) {
     if (q.values[k] === v) return;
-    q.values[k] = v; q.v++; recompile();
+    q.values[k] = v; q.v++; if (from === 'hand' && gpu) gpu.restart(q.id);   // 027 N1: a hand on a STATEFUL shader starts it from black
+    recompile();
     const shown = from === 'mod' && routed(ID(q, k));
     for (const view of views) { view.paint(q, k, v, shown); view.strip(q); }
     if (from === 'hand') saveList();
@@ -165,7 +166,7 @@ export function createNodes({ device, rk, raise, host, canvas, curvesStore, occl
   function setFold(ids, on) { const Q = many(ids).map(byId).filter((q) => q && q.fold !== !!on); if (!Q.length) return; undo.mark(); for (const q of Q) q.fold = !!on; changed(); }
   function rename(id, name) { const q = byId(id); name = String(name || '').trim().slice(0, 40) || null; if (!q || q.name === name) return; undo.mark(); batch(() => { unenroll(q); q.name = name; enroll(q); }); changed(); }
   function reset(id) { const q = byId(id); if (!q) return; undo.mark(); if (q.type === 'curves') for (const ch of model.channels) model.preset(ch, 'LINEAR');
-    q.values = { ...q.values, ...homeOf(TYPES[q.type]) }; q.v++; changed(true); }
+    q.values = { ...q.values, ...homeOf(TYPES[q.type]) }; q.v++; if (gpu) gpu.restart(q.id); changed(true); }
   function move(id, d) { const i = nodes.findIndex((q) => q.id === id), j = i + d; if (i < 0 || j < 0 || j >= nodes.length) return; undo.mark();
     const a = nodes[i], b = nodes[j]; [a.at, b.at] = [b.at, a.at]; nodes[i] = b; nodes[j] = a; changed(); }
   /* 020 X3 · THE FLAGS: VIEW HERE (the chain up to this node; again = STAGE OUT) and SOLO (this node alone) are the view's; BYPASS ALL
