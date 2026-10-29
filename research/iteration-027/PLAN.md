@@ -38,3 +38,4 @@ D alone; the recipe (`git merge --no-ff --no-commit`, `--ours lab/sw.js`, `pwa.t
 ## CLOSED
 | chain | base | commit | note |
 |---|---|---|---|
+| S1 | 1fb3b831 | 7934ecb9 | NEBULA-REDUX 1.5.0-alpha.24 → 1.5.6-alpha.17 in a clone (mir-1.5.6-adopt @ 40e653b on 737a8df): adopt +4/69 updated/0 removed, --check in step; 0 callers changed (no removed door used; NEBULA builds its rack with chrome:false, windows open from the WINDOW menu); npm test 68/68; browser shell 18/18 · modwindow 3/3 · notebook 2/2 · seams 4/4 · cv 6/6; folders 11/12 (3a SAVE AS thumbnail 1515 chars, red at 737a8df too) · w1neb 3/4 (NEB-06 = FOR-MIR 17, red before); headless boot clean, 3 shots. FOR-MIR: a `createApp({ finder })` door. Bundle carried to .tmp/it027/nebula-1.5.6-adopt.bundle (9.3 MB, verified); fetch: `git -C ~/Documents/NEBULA-REDUX fetch ~/Documents/LAMBDAWAVES/.claude/worktrees/optimization-2026-09-24/.tmp/it027/nebula-1.5.6-adopt.bundle mir-1.5.6-adopt:mir-1.5.6-adopt`. |
