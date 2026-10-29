@@ -2,6 +2,14 @@
 
 The paragraphs below were moved verbatim from CLAUDE.md at 021 D2 and keep their iteration tags; where an older line names a file, a seat or an id a later iteration retired, the later law wins, and the laws of 021 stand first.
 
+## The laws of 025
+
+THE BOUNCE (Josh 10-28, `research/iteration-025/PLAN.md`): a render is a DAW's bounce — the arrangement rendered at its own clock, sample- and frame-exact, never a recording of the screen. THE AUDIO IS ON THE FILM (025 A, MIR 1.5.6-alpha.12–16, `A-BUILD.md`): the KEEP clips in the range are mixed offline by the same placement the live path uses (`timeline/audio-playback.js audioPlacement`, N = frames · 48000 / fps) and muxed as a second trak (`render/mp4.js`: mp4a/esds or Opus/dOps, `elst` + `sgpd/sbgp` roll for the encoder's priming measured by an impulse, integer `stts`; a WAV beside PNG frames); frame 0 and audible sample 0 are the play edge, and RUN SELF-TEST's alignment stage proves it (clicks at beats → samples, Δ 0). The recorder refuses only a LIVE audio source. ● REC is a FOR-MIR line.
+
+THE FILM IS THE SCREEN (025 B, `B-BUILD.md`): `lab/film-bake.js` lays over each film frame, at the film's scale and as a function of the frame alone, the NODES graph (compiled at k, the grain hashed from the frame index, a SHADER node baked from the film's own tap), the overlays that are functions of (t, camera, seed) — PARTICLES reseeded from 13 at frame 0 — and the words (ATOM LABELS, ESP BAR), and names the rest OUT (FLOW's tracers, KEPLER's held impulse, the KaTeX texts, the bead's trail before frame 0); the digest is over the baked picture; NODES OFF · CHROME OFF give 024's field; EVERY SETTING IS A WITNESS (`render-exact.js audit`, `film.last.audit`, "RENDER DISOBEYED" when a row fails). CURRENT size is the stage at DPR 1, even.
+
+THE BOUNCE IS ONE PRESS AWAY (025 C, MIR 1.5.6-alpha.17, `C-BUILD.md`): FILE › RENDER… / EXPORT FRAMES… and the TIMELINE's film chip open the RENDER card in front with its RANGE taken from what you have (a selection, the open timeline, ONE PERIOD, else STILL); the card's rows are even (the panel's `even`, `ranges`, `controls.switches` seats holding PERIOD and NODES · CHROME), and a landed render says one line read back from the file: frames · seconds · size · fps · codec. No chord until Josh names one.
+
 ## The standing paragraphs
 
 THE FILM (0.5.0 C7, C7b) is MIR's `createRecorder` handed λWAVES' `frame(i, ctx)` (`lab/render-exact.js` `createFilm`), and its UI
