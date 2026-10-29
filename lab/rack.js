@@ -547,8 +547,8 @@ export async function boot(dom) {
          its transparent canvas explicitly before bowFrame() paints the next arrow. */
       if (app.state.bow) kepler.clear(); else kepler.suspend();
     }
-    const mol = app.state.chem.on, skOn = !!(ui.skeletonSw && ui.skeletonSw.get() && mol) && !(mat.espBare && mat.style === STYLE.esp), dpOn = !!(ui.dipoleSw && ui.dipoleSw.get() && mol), elOn = !!(ui.ellipsoidSw && ui.ellipsoidSw.get()) && !mol && !sturm.P && app.state.space !== 'p', bdOn = (!!(ui.beadSw && ui.beadSw.get()) && (mol || !sturm.P)) || elOn;   // 0.8.2 P3: THE BEAD shares the canvas, drawn after the skeleton, with SKELETON off too; 0.8.3 B3: THE ELLIPSOID rides it (position space, a register)
-    if (skOn || dpOn || bdOn) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(skOn || dpOn ? app.state.chem.atomsNow() : null, dpOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : Object.assign(beadOf(reg, clock.t, app.state.space === 'p'), { ell: elOn ? covariance(reg, clock.t) : null }), ui.skeletonSize ? ui.skeletonSize.get() : 1.6, ui.skeletonOpacity ? ui.skeletonOpacity.get() : 1, skOn, ui.bondsOf ? ui.bondsOf() : null)); } else skeleton.clear();   /* 020 S2: MAP ONLY hides BALL AND STICK too — a map-only stage shows the map */   /* iteration 012 R1: DIPOLE is its own switch (the arrow alone when BALL AND STICK is off) */   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
+    const sk = skeletonArgs(clock.t);   // 025 B2: the args are one function of t, so a film draws THE SKELETON's frame as the stage does (lab/film-bake.js)
+    if (sk) { if (may('skeleton')) tick('skeleton', () => skeleton.draw(...sk)); } else skeleton.clear();   /* 020 S2: MAP ONLY hides BALL AND STICK too — a map-only stage shows the map */   /* iteration 012 R1: DIPOLE is its own switch (the arrow alone when BALL AND STICK is off) */   // 0.7.0 V2: a yielding reader keeps its bitmap; off, one clear and then nothing
 
     kepler.bowFrame();
     app.state.chem.setActive(canPresent(wChem));
@@ -786,6 +786,11 @@ export async function boot(dom) {
   // no longer LEGACY — the periodic table of SPECTRUM's ATOM operator, with its own row in + and WINDOW
   const { wAtoms, atomsView, wWig, wignerView, wRad, radiationView, wEm, emissionView, WIG_OK, RAD_OK, atomsDigest, wignerDigest, radiationDigest } = createAtomsWignerRadiation();   // 0.5.2 R2b: readouts' third seat
   const skeleton = createSkeleton(document.getElementById('skeleton'), (line) => { if (ui.bondSay) ui.bondSay(line); });   // iteration 014 D6: the BONDS' road, said in INFORMATIONAL's status   // 0.7.0 V2: its switch is MOLECULES' (ui.skeletonSw, a PREFERENCE)
+  /* THE SKELETON's draw args at t, or null when nothing of it is on — the loop's and the film's (025 B2) */
+  const skeletonArgs = (t) => {
+    const mol = app.state.chem.on, skOn = !!(ui.skeletonSw && ui.skeletonSw.get() && mol) && !(mat.espBare && mat.style === STYLE.esp), dpOn = !!(ui.dipoleSw && ui.dipoleSw.get() && mol), elOn = !!(ui.ellipsoidSw && ui.ellipsoidSw.get()) && !mol && !sturm.P && app.state.space !== 'p', bdOn = (!!(ui.beadSw && ui.beadSw.get()) && (mol || !sturm.P)) || elOn;
+    return skOn || dpOn || bdOn ? [skOn || dpOn ? app.state.chem.atomsNow() : null, dpOn ? app.state.chem.dipoleNow() : null, obs, domain.half, !bdOn ? null : mol ? centroid(app.state.chem.atomsNow(), app.state.chem.dipoleNow(), app.state.chem.preset()) : Object.assign(beadOf(reg, t, app.state.space === 'p'), { ell: elOn ? covariance(reg, t) : null }), ui.skeletonSize ? ui.skeletonSize.get() : 1.6, ui.skeletonOpacity ? ui.skeletonOpacity.get() : 1, skOn, ui.bondsOf ? ui.bondsOf() : null] : null;
+  };
   Object.assign(READERS, { spectrum: wSpec, shadow: wSh, orbit: wOrb, vortex: wVor, particles: wVor, kepler: wOrb,
     slice: wSlice, atoms: wAtoms, wigner: wWig, radiation: wRad, emission: wEm, calculus: wCalc, skeleton: wChem, lattice: wLat, bloch: wBlo, central: wCen, separable: wSep });   // the windows the READER LAW may park (never MOLECULE — it steps nuclei — nor METERS, which shows the governor)
   for (const w of [...Object.values(READERS), wVor, wMet, wLad]) windowActivity.track(w);
@@ -892,7 +897,7 @@ export async function boot(dom) {
      The grade is still the kit's curves panel over the stage canvas (the SCREEN only, never a picture or a film), PREFERENCE `lambdawaves.q0.curves`;
      `__LW.curves` is its model, `__LW.nodes` the graph. */
   { const N = createNodes({ device, rk, raise: (id) => layout.raise(id), host: floats, canvas: dom.canvas, curvesStore, occlusion, after: app.state.filmCard.card.root, mod: LW.mod, field, mat, present: () => schedule(TIER.PRESENT), onWin: () => app.sh.ACTIONS.notify('nodes') });   // 024 S2: field · mat · present for a SHADER node
-    LW.curves = N.model; LW.nodes = N; }
+    LW.curves = N.model; LW.nodes = N; LW.skeletonArgs = skeletonArgs; }
   // FOLDERS — the FOLDERS card (`projects`), the kit's mountGallery (021 G3: lab/windows/folders.js)
   createFolders(app);
   createContextMenus(app);   // 022 P2: every right-click / hold is the kit's contextMenu over action ids (lab/context-menus.js)

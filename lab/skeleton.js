@@ -78,8 +78,8 @@ export function centroid(atoms, mu, id) { if (!mu || !atoms.length) return null;
 export function createSkeleton(cv, say = null) {   // say(line): the BONDS' road, told when it changes (INFORMATIONAL's status)
   const g = cv.getContext('2d'); let key = '', atomsKey = '', bonds = [], found = null, said = '', theme = null, ink = '', acc = '', drawn = false, trail = [], trailKey = null, trailT = -Infinity;   // THE BEAD's trail (0.8.2 P3): 64 points over its last period
   function clear() { key = ''; if (!drawn) return; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height); drawn = false; }
-  function draw(atoms, dipole, obs, half, bead = null, size = 1, opacity = 1, sticks = true, bo = null) {   // bo: { order, aromatic, ionic, hbond, charges, rec } (iteration 014 D6) or null
-    const W = cv.clientWidth, H = cv.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1), th = document.body.dataset.theme || 'dark'; atoms = atoms || [];
+  function draw(atoms, dipole, obs, half, bead = null, size = 1, opacity = 1, sticks = true, bo = null, box = null) {   // bo: { order, aromatic, ionic, hbond, charges, rec } (iteration 014 D6) or null; box: { W, H, dpr } a film's own size (025 B2)
+    const W = box ? box.W : cv.clientWidth, H = box ? box.H : cv.clientHeight, dpr = box ? box.dpr : Math.min(2, window.devicePixelRatio || 1), th = document.body.dataset.theme || 'dark'; atoms = atoms || [];
     if ((!atoms.length && !bead) || W < 1 || H < 1) return clear();
     if (!bead || bead.key !== trailKey || bead.t < trailT) { trail = []; trailKey = bead && bead.key; trailT = -Infinity; }   // a new state, or the clock run back: the trail starts again
     if (bead && bead.t - trailT >= bead.T / 64) { trail.push(bead.r); trailT = bead.t; if (trail.length > 64) trail.shift(); }
